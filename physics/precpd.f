@@ -6,10 +6,6 @@
       module zhaocarr_precpd
       contains
 
-!! \brief Brief description of the subroutine
-!!
-!! \section arg_table_zhaocarr_precpd_init  Argument Table
-!!
       subroutine zhaocarr_precpd_init ()
       end subroutine zhaocarr_precpd_init
 
@@ -702,10 +698,7 @@
       end subroutine zhaocarr_precpd_run
 !> @}
 
-!! \section arg_table_zhaocarr_precpd_finalize  Argument Table
-!!
       subroutine zhaocarr_precpd_finalize
       end subroutine zhaocarr_precpd_finalize
-
 
       end module zhaocarr_precpd

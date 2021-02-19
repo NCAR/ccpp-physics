@@ -75,7 +75,7 @@
   standard_name = air_temperature_updated_by_physics
   long_name = temperature updated by physics
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -84,7 +84,7 @@
   standard_name = tracer_concentration_updated_by_physics
   long_name = tracer concentration updated by physics
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension,number_of_tracers)
+  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers)
   type = real
   kind = kind_phys
   intent = in
@@ -93,7 +93,7 @@
   standard_name = air_temperature_save
   long_name = air temperature before entering a physics scheme
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -102,7 +102,7 @@
   standard_name = water_vapor_specific_humidity_save
   long_name = water vapor specific humidity before entering a physics scheme
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -111,7 +111,7 @@
   standard_name = tracer_concentration_save
   long_name = tracer concentration before entering a physics scheme
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension,number_of_tracers)
+  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers)
   type = real
   kind = kind_phys
   intent = inout
@@ -335,7 +335,7 @@
   standard_name = lwe_thickness_of_convective_precipitation_amount_on_dynamics_timestep
   long_name = convective rain at this time step
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -344,7 +344,7 @@
   standard_name = lwe_thickness_of_explicit_precipitation_amount
   long_name = explicit rainfall amount on physics timestep
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -353,7 +353,7 @@
   standard_name = random_number_array
   long_name = random number array (0-1)
   units = none
-  dimensions = (horizontal_dimension,array_dimension_of_random_number)
+  dimensions = (horizontal_loop_extent,array_dimension_of_random_number)
   type = real
   kind = kind_phys
   intent = in
@@ -362,7 +362,7 @@
   standard_name = latitude
   long_name = latitude
   units = radian
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -371,7 +371,7 @@
   standard_name = longitude
   long_name = longitude
   units = radian
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -380,7 +380,7 @@
   standard_name = air_temperature_updated_by_physics
   long_name = temperature updated by physics
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -389,7 +389,7 @@
   standard_name = tracer_concentration_updated_by_physics
   long_name = tracer concentration updated by physics
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension,number_of_tracers)
+  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers)
   type = real
   kind = kind_phys
   intent = in
@@ -398,7 +398,7 @@
   standard_name = air_pressure
   long_name = layer mean pressure
   units = Pa
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -407,7 +407,7 @@
   standard_name = air_pressure_at_interface
   long_name = pressure at layer interface
   units = Pa
-  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
   type = real
   kind = kind_phys
   intent = in
@@ -416,7 +416,7 @@
   standard_name = geopotential_at_interface
   long_name = geopotential at model layer interfaces
   units = m2 s-2
-  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
   type = real
   kind = kind_phys
   intent = in
@@ -425,7 +425,7 @@
   standard_name = surface_skin_temperature
   long_name = surface skin temperature
   units = K
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -434,7 +434,7 @@
   standard_name = lwe_thickness_of_ice_amount_on_dynamics_timestep
   long_name = ice fall at this time step
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -443,7 +443,7 @@
   standard_name = lwe_thickness_of_snow_amount_on_dynamics_timestep
   long_name = snow fall at this time step
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -452,7 +452,7 @@
   standard_name = lwe_thickness_of_graupel_amount_on_dynamics_timestep
   long_name = graupel fall at this time step
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -461,7 +461,7 @@
   standard_name = air_temperature_save
   long_name = air temperature before entering a physics scheme
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -470,7 +470,7 @@
   standard_name = water_vapor_specific_humidity_save
   long_name = water vapor specific humidity before entering a physics scheme
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -479,7 +479,7 @@
   standard_name = lwe_thickness_of_explicit_rain_amount
   long_name = explicit rain on physics timestep
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -488,7 +488,7 @@
   standard_name = lwe_thickness_of_ice_amount
   long_name = ice fall on physics timestep
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -497,7 +497,7 @@
   standard_name = lwe_thickness_of_snow_amount
   long_name = snow fall on physics timestep
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -506,7 +506,7 @@
   standard_name = lwe_thickness_of_graupel_amount
   long_name = graupel fall on physics timestep
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -515,7 +515,7 @@
   standard_name = air_pressure_difference_between_midlayers
   long_name = air pressure difference between midlayers
   units = Pa
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -524,7 +524,7 @@
   standard_name = lwe_thickness_of_precipitation_amount_on_dynamics_timestep
   long_name = total rain at this time step
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -533,7 +533,7 @@
   standard_name = dominant_rain_type
   long_name = dominant rain type
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -542,7 +542,7 @@
   standard_name = dominant_freezing_rain_type
   long_name = dominant freezing rain type
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -551,7 +551,7 @@
   standard_name = dominant_sleet_type
   long_name = dominant sleet type
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -560,7 +560,7 @@
   standard_name = dominant_snow_type
   long_name = dominant snow type
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -569,7 +569,7 @@
   standard_name = nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep
   long_name = total precipitation amount in each time step
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -578,7 +578,7 @@
   standard_name = flag_for_precipitation_type
   long_name = snow/rain flag for precipitation
   units = flag
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -587,7 +587,7 @@
   standard_name = ratio_of_snowfall_to_rainfall
   long_name = snow ratio: ratio of snow to total precipitation
   units = frac
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -596,7 +596,7 @@
   standard_name = cumulative_lwe_thickness_of_convective_precipitation_amount
   long_name = cumulative convective precipitation
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -605,7 +605,7 @@
   standard_name = accumulated_lwe_thickness_of_precipitation_amount
   long_name = accumulated total precipitation
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -614,7 +614,7 @@
   standard_name = accumulated_lwe_thickness_of_ice_amount
   long_name = accumulated ice precipitation
   units = kg m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -623,7 +623,7 @@
   standard_name = accumulated_lwe_thickness_of_snow_amount
   long_name = accumulated snow precipitation
   units = kg m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -632,7 +632,7 @@
   standard_name = accumulated_lwe_thickness_of_graupel_amount
   long_name = accumulated graupel precipitation
   units = kg m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -641,7 +641,7 @@
   standard_name = cumulative_lwe_thickness_of_convective_precipitation_amount_in_bucket
   long_name = cumulative convective precipitation in bucket
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -650,7 +650,7 @@
   standard_name = accumulated_lwe_thickness_of_precipitation_amount_in_bucket
   long_name = accumulated total precipitation in bucket
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -659,7 +659,7 @@
   standard_name = accumulated_lwe_thickness_of_ice_amount_in_bucket
   long_name = accumulated ice precipitation in bucket
   units = kg m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -668,7 +668,7 @@
   standard_name = accumulated_lwe_thickness_of_snow_amount_in_bucket
   long_name = accumulated snow precipitation in bucket
   units = kg m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -677,7 +677,7 @@
   standard_name = accumulated_lwe_thickness_of_graupel_amount_in_bucket
   long_name = accumulated graupel precipitation in bucket
   units = kg m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -686,7 +686,7 @@
   standard_name = cumulative_change_in_temperature_due_to_microphysics
   long_name = cumulative change in temperature due to microphysics
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -695,7 +695,7 @@
   standard_name = cumulative_change_in_water_vapor_specific_humidity_due_to_microphysics
   long_name = cumulative change in water vapor specific humidity due to microphysics
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -704,7 +704,7 @@
   standard_name = lwe_thickness_of_precipitation_amount_for_coupling
   long_name = total rain precipitation
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -713,7 +713,7 @@
   standard_name = lwe_thickness_of_convective_precipitation_amount_for_coupling
   long_name = total convective precipitation
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -722,7 +722,7 @@
   standard_name = lwe_thickness_of_snow_amount_for_coupling
   long_name = total snow precipitation
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -731,7 +731,7 @@
   standard_name = column_precipitable_water
   long_name = precipitable water
   units = kg m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -756,7 +756,7 @@
   standard_name = tendency_of_air_temperature_due_to_radiative_heating_on_physics_time_step
   long_name = temp. change due to radiative heating per time step
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -765,7 +765,7 @@
   standard_name = tendency_of_air_temperature_due_to_radiative_heating_assuming_clear_sky
   long_name = clear sky radiative (shortwave + longwave) heating rate at current time
   units = K s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -774,7 +774,7 @@
   standard_name = tendency_of_lwe_thickness_of_precipitation_amount_for_coupling
   long_name = change in rain_cpl (coupling_type)
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -783,7 +783,7 @@
   standard_name = tendency_of_lwe_thickness_of_snow_amount_for_coupling
   long_name = change in show_cpl (coupling_type)
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -816,7 +816,7 @@
   standard_name = lwe_thickness_of_convective_precipitation_amount_from_previous_timestep
   long_name = convective_precipitation_amount from previous timestep
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -825,7 +825,7 @@
   standard_name = lwe_thickness_of_explicit_rainfall_amount_from_previous_timestep
   long_name = explicit rainfall from previous timestep
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -834,7 +834,7 @@
   standard_name = lwe_thickness_of_ice_amount_from_previous_timestep
   long_name = ice amount from previous timestep
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -843,7 +843,7 @@
   standard_name = lwe_thickness_of_snow_amount_from_previous_timestep
   long_name = snow amount from previous timestep
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -852,7 +852,7 @@
   standard_name = lwe_thickness_of_graupel_amount_from_previous_timestep
   long_name = graupel amount from previous timestep
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -861,7 +861,7 @@
   standard_name = convective_precipitation_rate_from_previous_timestep
   long_name = convective precipitation rate from previous timestep
   units = mm s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -870,7 +870,7 @@
   standard_name = explicit_rainfall_rate_from_previous_timestep
   long_name = explicit rainfall rate previous timestep
   units = mm s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -879,7 +879,7 @@
   standard_name = ice_precipitation_rate_from_previous_timestep
   long_name = ice precipitation rate from previous timestep
   units = mm s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -888,7 +888,7 @@
   standard_name = snow_precipitation_rate_from_previous_timestep
   long_name = snow precipitation rate from previous timestep
   units = mm s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -897,7 +897,7 @@
   standard_name = graupel_precipitation_rate_from_previous_timestep
   long_name = graupel precipitation rate from previous timestep
   units = mm s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout

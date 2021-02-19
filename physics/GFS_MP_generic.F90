@@ -6,12 +6,8 @@
       module GFS_MP_generic_pre
       contains
 
-
-!! \section arg_table_GFS_MP_generic_pre_init Argument Table
-!!
-      subroutine GFS_MP_generic_pre_init
+      subroutine GFS_MP_generic_pre_init()
       end subroutine GFS_MP_generic_pre_init
-
 
 !> \section arg_table_GFS_MP_generic_pre_run Argument Table
 !! \htmlinclude GFS_MP_generic_pre_run.html
@@ -64,9 +60,7 @@
 
       end subroutine GFS_MP_generic_pre_run
 
-!> \section arg_table_GFS_MP_generic_pre_finalize Argument Table
-!!
-      subroutine GFS_MP_generic_pre_finalize
+      subroutine GFS_MP_generic_pre_finalize()
       end subroutine GFS_MP_generic_pre_finalize
 
       end module GFS_MP_generic_pre
@@ -77,9 +71,7 @@
       module GFS_MP_generic_post
       contains
 
-!! \section arg_table_GFS_MP_generic_post_init Argument Table
-!!
-      subroutine GFS_MP_generic_post_init
+      subroutine GFS_MP_generic_post_init()
       end subroutine GFS_MP_generic_post_init
 
 !>\defgroup gfs_calpreciptype GFS Precipitation Type Diagnostics Module
@@ -405,11 +397,10 @@
         dtdtr(1:im,:) = dtdtr(1:im,:) + dtdtc(1:im,:)*dtf
       endif
 
-    end subroutine GFS_MP_generic_post_run
+      end subroutine GFS_MP_generic_post_run
 !> @}
 
-!> \section arg_table_GFS_MP_generic_post_finalize Argument Table
-!!
-      subroutine GFS_MP_generic_post_finalize
+      subroutine GFS_MP_generic_post_finalize()
       end subroutine GFS_MP_generic_post_finalize
+
       end module GFS_MP_generic_post

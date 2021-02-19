@@ -7,20 +7,14 @@
 
       contains
 
-! \brief Brief description of the subroutine
-!
-!> \section arg_table_m_micro_pre_init Argument Table
-!!
       subroutine m_micro_pre_init()
       end subroutine m_micro_pre_init
 
 ! \brief Brief description of the subroutine
 !!
-#if 0
 !! \section arg_table_m_micro_pre_run Argument Table
 !! \htmlinclude m_micro_pre_run.html
 !!
-#endif
       subroutine m_micro_pre_run (im, levs, do_shoc, skip_macro, fprcp, mg3_as_mg2, gq0_ice, gq0_water, gq0_rain,  &
         gq0_snow, gq0_graupel, gq0_rain_nc, gq0_snow_nc, gq0_graupel_nc, cld_shoc, cnvc, cnvw, tcr, tcrf, gt0,     &
         qrn, qsnw, qgl, ncpr, ncps, ncgl, cld_frc_MG, clw_water, clw_ice, clcn, errmsg, errflg )
@@ -143,10 +137,6 @@
 
       end subroutine m_micro_pre_run
 
-! \brief Brief description of the subroutine
-!
-!> \section arg_table_m_micro_pre_finalize Argument Table
-!!
       subroutine m_micro_pre_finalize ()
       end subroutine m_micro_pre_finalize
 
@@ -160,10 +150,6 @@
 
       contains
 
-! \brief Brief description of the subroutine
-!
-!> \section arg_table_m_micro_post_init Argument Table
-!!
       subroutine m_micro_post_init()
       end subroutine m_micro_post_init
 
@@ -285,10 +271,6 @@
 
       end subroutine m_micro_post_run
 
-! \brief Brief description of the subroutine
-!
-!> \section arg_table_m_micro_post_finalize Argument Table
-!!
       subroutine m_micro_post_finalize()
       end subroutine m_micro_post_finalize
 

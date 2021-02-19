@@ -1,9 +1,8 @@
 module rrtmgp_sw_cloud_optics
   use machine,                  only: kind_phys
   use mo_rte_kind,              only: wl
-  use mo_gas_optics_rrtmgp,     only: ty_gas_optics_rrtmgp
   use mo_cloud_optics,          only: ty_cloud_optics
-  use physparam,                only: isubcsw, iovrsw
+  use mo_gas_optics_rrtmgp,     only: ty_gas_optics_rrtmgp
   use mo_optical_props,         only: ty_optical_props_2str
   use mo_rrtmg_sw_cloud_optics, only: rrtmg_sw_cloud_optics   
   use rrtmgp_aux,               only: check_error_msg
@@ -19,17 +18,22 @@ module rrtmgp_sw_cloud_optics
        a0s = 0.0,     & !
        a1s = 1.5        !  
   real(kind_phys),dimension(:),allocatable :: b0r,b0s,b1s,c0r,c0s
+  real(kind_phys) :: &
+       radliq_lwr,         & ! Liquid particle size lower bound for LUT interpolation   
+       radliq_upr,         & ! Liquid particle size upper bound for LUT interpolation
+       radice_lwr,         & ! Ice particle size upper bound for LUT interpolation  
+       radice_upr            ! Ice particle size lower bound for LUT interpolation
 
 contains
-  ! #########################################################################################
+  ! ######################################################################################
   ! SUBROUTINE sw_cloud_optics_init
-  ! #########################################################################################
+  ! ######################################################################################
 !! \section arg_table_rrtmgp_sw_cloud_optics_init
 !! \htmlinclude rrtmgp_lw_cloud_optics.html
 !!
-  subroutine rrtmgp_sw_cloud_optics_init(doG_cldoptics, doGP_cldoptics_PADE, doGP_cldoptics_LUT, &
-       nrghice, rrtmgp_root_dir, rrtmgp_sw_file_clouds, mpicomm, mpirank, mpiroot, sw_cloud_props,&
-       errmsg, errflg)
+  subroutine rrtmgp_sw_cloud_optics_init(doG_cldoptics, doGP_cldoptics_PADE,             &
+       doGP_cldoptics_LUT, nrghice, rrtmgp_root_dir, rrtmgp_sw_file_clouds, mpicomm,     &
+       mpirank, mpiroot, sw_cloud_props, errmsg, errflg)
 
     ! Inputs
     logical, intent(in) :: &
@@ -54,13 +58,13 @@ contains
     integer,          intent(out) :: &
          errflg                ! CCPP error code
     
-    ! Variables that will be passed to cloud_optics%load()
+    ! Local variables that will be passed to cloud_optics%load()
     real(kind_phys) :: &
-         radliq_lwr,          & ! Liquid particle size lower bound for LUT interpolation   
-         radliq_upr,          & ! Liquid particle size upper bound for LUT interpolation
+         !radliq_lwr,          & ! Liquid particle size lower bound for LUT interpolation   
+         !radliq_upr,          & ! Liquid particle size upper bound for LUT interpolation
          radliq_fac,          & ! Factor for calculating LUT interpolation indices for liquid   
-         radice_lwr,          & ! Ice particle size upper bound for LUT interpolation  
-         radice_upr,          & ! Ice particle size lower bound for LUT interpolation
+         !radice_lwr,          & ! Ice particle size upper bound for LUT interpolation  
+         !radice_upr,          & ! Ice particle size lower bound for LUT interpolation
          radice_fac             ! Factor for calculating LUT interpolation indices for ice  
     real(kind_phys), dimension(:,:), allocatable :: &
          lut_extliq,          & ! LUT shortwave liquid extinction coefficient  
@@ -287,10 +291,10 @@ contains
 !! \section arg_table_rrtmgp_sw_cloud_optics_run
 !! \htmlinclude rrtmgp_sw_cloud_optics.html
 !!
-  subroutine rrtmgp_sw_cloud_optics_run(doSWrad, doG_cldoptics, doGP_cldoptics_PADE,        &
-       doGP_cldoptics_LUT, nCol, nLev, nDay, idxday, nrghice, cld_frac, cld_lwp, cld_reliq, &
-       cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain, precip_frac,           &
-       sw_cloud_props, sw_gas_props, sw_optical_props_cloudsByBand,                         &
+  subroutine rrtmgp_sw_cloud_optics_run(doSWrad, doG_cldoptics, icliq_sw, icice_sw,         &
+       doGP_cldoptics_PADE, doGP_cldoptics_LUT, nCol, nLev, nDay, idxday, nrghice, cld_frac,&
+       cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain,    &
+       precip_frac, sw_cloud_props, sw_gas_props, sw_optical_props_cloudsByBand,            &
        sw_optical_props_precipByBand, cldtausw, errmsg, errflg)
     
     ! Inputs
@@ -303,7 +307,9 @@ contains
          nCol,                & ! Number of horizontal gridpoints
          nLev,                & ! Number of vertical levels
          nday,                & ! Number of daylit points.
-         nrghice                ! Number of ice-roughness categories
+         nrghice,             & ! Number of ice-roughness categories
+         icliq_sw,            & ! Choice of treatment of liquid cloud optical properties (RRTMG legacy)
+         icice_sw               ! Choice of treatment of ice cloud optical properties (RRTMG legacy) 
     integer,intent(in),dimension(ncol) :: &
          idxday                 ! Indices for daylit points.
     real(kind_phys), dimension(ncol,nLev),intent(in) :: &
@@ -417,7 +423,7 @@ contains
                   cld_iwp(idxday(1:nday),:), cld_reice(idxday(1:nday),:),           &
                   cld_rwp(idxday(1:nday),:), cld_rerain(idxday(1:nday),:),          &
                   cld_swp(idxday(1:nday),:), cld_resnow(idxday(1:nday),:),          &
-                  cld_frac(idxday(1:nday),:),                                       &
+                  cld_frac(idxday(1:nday),:), icliq_sw, icice_sw,                   &
                   tau_cld,    ssa_cld,    asy_cld,                                  &
                   tau_precip, ssa_precip, asy_precip)
           

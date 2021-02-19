@@ -282,7 +282,7 @@ contains
 !! \htmlinclude rrtmgp_lw_gas_optics_run.html
 !!
   subroutine rrtmgp_lw_gas_optics_run(doLWrad, nCol, nLev, lw_gas_props, p_lay, p_lev, t_lay,&
-       t_lev, skt, gas_concentrations, lw_optical_props_clrsky, sources,  errmsg, errflg)
+       t_lev, tsfg, gas_concentrations, lw_optical_props_clrsky, sources,  errmsg, errflg)
 
     ! Inputs
     logical, intent(in) :: &
@@ -299,7 +299,7 @@ contains
          p_lev,                & ! Pressure @ model layer-interfaces (hPa)
          t_lev                   ! Temperature @ model levels
     real(kind_phys), dimension(ncol), intent(in) :: &
-         skt                     ! Surface(skin) temperature (K)
+         tsfg                    ! Surface ground temperature (K)
     type(ty_gas_concs),intent(in) :: &
          gas_concentrations      ! RRTMGP DDT: trace gas concentrations (vmr)
 
@@ -328,7 +328,7 @@ contains
          p_lay,                   & ! IN  - Pressure @ layer-centers (Pa)
          p_lev,                   & ! IN  - Pressure @ layer-interfaces (Pa)
          t_lay,                   & ! IN  - Temperature @ layer-centers (K)
-         skt,                     & ! IN  - Skin-temperature (K)
+         tsfg,                    & ! IN  - Skin-temperature (K)
          gas_concentrations,      & ! IN  - RRTMGP DDT: trace gas volumne mixing-ratios
          lw_optical_props_clrsky, & ! OUT - RRTMGP DDT: longwave optical properties
          sources,                 & ! OUT - RRTMGP DDT: source functions

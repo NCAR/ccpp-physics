@@ -11,13 +11,9 @@
 
       contains
 
-!! \section arg_table_sfc_ocean_init  Argument Table
-!!
       subroutine sfc_ocean_init()
       end subroutine sfc_ocean_init
 
-!! \section arg_table_sfc_ocean_finalize  Argument Table
-!!
       subroutine sfc_ocean_finalize()
       end subroutine sfc_ocean_finalize
 

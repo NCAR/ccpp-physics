@@ -6,7 +6,7 @@
 !!!!!               lw-rrtm3 radiation package description             !!!!!
 !!!!!  ==============================================================  !!!!!
 !                                                                          !
-!   this package includes ncep's modifications of the rrtm-lw radiation    !
+!   this package includes ncep's modifications of the rrtmg-lw radiation   !
 !   code from aer inc.                                                     !
 !                                                                          !
 !    the lw-rrtm3 package includes these parts:                            !
@@ -39,7 +39,7 @@
 !          inputs:                                                         !
 !           (plyr,plvl,tlyr,tlvl,qlyr,olyr,gasvmr,                         !
 !            clouds,icseed,aerosols,sfemis,sfgtmp,                         !
-!            dzlyr,delpin,de_lgth,                                         !
+!            dzlyr,delpin,de_lgth,alpha,                                   !
 !            npts, nlay, nlp1, lprnt,                                      !
 !          outputs:                                                        !
 !            hlwc,topflx,sfcflx,cldtau,                                    !
@@ -93,17 +93,38 @@
 !                                                                          !
 !==========================================================================!
 !                                                                          !
-!    the original aer's program declarations:                              !
+!    the original aer program declarations:                                !
 !                                                                          !
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!                                                                          |
-!  Copyright 2002-2007, Atmospheric & Environmental Research, Inc. (AER).  |
-!  This software may be used, copied, or redistributed as long as it is    |
-!  not sold and this copyright notice is reproduced on each copy made.     |
-!  This model is provided as is without any express or implied warranties. |
-!                       (http://www.rtweb.aer.com/)                        |
-!                                                                          |
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!                                                                              !
+! Copyright (c) 2002-2020, Atmospheric & Environmental Research, Inc. (AER)    !
+! All rights reserved.                                                         !
+!                                                                              !
+! Redistribution and use in source and binary forms, with or without           !
+! modification, are permitted provided that the following conditions are met:  !
+!  * Redistributions of source code must retain the above copyright            !
+!    notice, this list of conditions and the following disclaimer.             !
+!  * Redistributions in binary form must reproduce the above copyright         !
+!    notice, this list of conditions and the following disclaimer in the       !
+!    documentation and/or other materials provided with the distribution.      !
+!  * Neither the name of Atmospheric & Environmental Research, Inc., nor       !
+!    the names of its contributors may be used to endorse or promote products  !
+!    derived from this software without specific prior written permission.     !
+!                                                                              !
+! THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"  !
+! AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE    !
+! IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   !
+! ARE DISCLAIMED. IN NO EVENT SHALL ATMOSPHERIC & ENVIRONMENTAL RESEARCH, INC.,!
+! BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR       !
+! CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF         !
+! SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS     !
+! INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN      !
+! CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)      !
+! ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF       !
+! THE POSSIBILITY OF SUCH DAMAGE.                                              !
+!                        (http://www.rtweb.aer.com/)                           !
+!                                                                              !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !                                                                          !
 ! ************************************************************************ !
 !                                                                          !
@@ -136,8 +157,14 @@
 ! ************************************************************************ !
 !                                                                          !
 !    references:                                                           !
-!    (rrtm_lw/rrtmg_lw):                                                   !
-!      clough, s.A., m.w. shephard, e.j. mlawer, j.s. delamere,            !
+!    (rrtmg_lw/rrtm_lw):                                                   !
+!      iacono, m.j., j.s. delamere, e.j. mlawer, m.w. shepard,             !
+!      s.a. clough, and w.d collins, radiative forcing by long-lived       !
+!      greenhouse gases: calculations with the aer radiative transfer      !
+!      models, j, geophys. res., 113, d13103, doi:10.1029/2008jd009944,    !
+!      2008.                                                               !
+!                                                                          !
+!      clough, s.a., m.w. shephard, e.j. mlawer, j.s. delamere,            !
 !      m.j. iacono, k. cady-pereira, s. boukabara, and p.d. brown:         !
 !      atmospheric radiative transfer modeling: a summary of the aer       !
 !      codes, j. quant. spectrosc. radiat. transfer, 91, 233-244, 2005.    !
@@ -234,21 +261,32 @@
 !       jun 2018,  h-m lin/y-t hou   -- added new option of cloud overlap  !
 !                     method 'de-correlation-length' for mcica application !
 !                                                                          !
+! ************************************************************************ !
+!                                                                          !
+!    additional aer revision history:                                      !
+!       jul 2020,  m.j. iacono   -- added new mcica cloud overlap options  !
+!                     exponential and exponential-random. each method can  !
+!                     use either a constant or a latitude-varying and      !
+!                     day-of-year varying decorrelation length selected    !
+!                     with parameter "idcor".                              !
+!                                                                          !
 !!!!!  ==============================================================  !!!!!
 !!!!!                         end descriptions                         !!!!!
 !!!!!  ==============================================================  !!!!!
 
 !> This module contains the CCPP-compliant NCEP's modifications of the 
-!! rrtm-lw radiation code from aer inc.
+!! rrtmg-lw radiation code from aer inc.
       module rrtmg_lw 
 !
       use physparam,        only : ilwrate, ilwrgas, ilwcliq, ilwcice,  &
-     &                             isubclw, icldflg, iovrlw,  ivflip,   &
-     &                             kind_phys
+     &                             isubclw, icldflg, iovr,  ivflip
       use physcons,         only : con_g, con_cp, con_avgd, con_amd,    &
      &                             con_amw, con_amo3
       use mersenne_twister, only : random_setseed, random_number,       &
      &                             random_stat
+!mz
+      use machine,          only : kind_phys,                           &
+     &                             im => kind_io4, rb => kind_phys
 
       use module_radlw_parameters
 !
@@ -360,7 +398,7 @@
 !! \brief This module includes NCEP's modifications of the RRTMG-LW radiation
 !! code from AER.
 !!
-!! The RRTM-LW package includes three files:
+!! The RRTMG-LW package includes three files:
 !! - radlw_param.f, which contains:
 !!  - module_radlw_parameters: band parameters set up
 !! - radlw_datatb.f, which contains modules:
@@ -389,7 +427,7 @@
      &       gasvmr_ch4, gasvmr_o2, gasvmr_co, gasvmr_cfc11,            &
      &       gasvmr_cfc12, gasvmr_cfc22, gasvmr_ccl4,                   &
      &       icseed,aeraod,aerssa,sfemis,sfgtmp,                        &
-     &       dzlyr,delpin,de_lgth,                                      &
+     &       dzlyr,delpin,de_lgth,alpha,                                &
      &       npts, nlay, nlp1, lprnt, cld_cf, lslwr,                    &
      &       hlwc,topflx,sfcflx,cldtau,                                 &   !  ---  outputs
      &       HLW0,HLWB,FLXPRF,                                          &   !  ---  optional
@@ -444,6 +482,7 @@
 !     dzlyr(npts,nlay) : layer thickness (km)                           !
 !     delpin(npts,nlay): layer pressure thickness (mb)                  !
 !     de_lgth(npts)    : cloud decorrelation length (km)                !
+!     alpha(npts,nlay) : EXP/ER cloud overlap decorrelation parameter   !
 !     npts           : total number of horizontal points                !
 !     nlay, nlp1     : total number of vertical layers, levels          !
 !     lprnt          : cntl flag for diagnostic print out               !
@@ -487,11 +526,13 @@
 !           =0: no sub-col cld treatment, use grid-mean cld quantities  !
 !           =1: mcica sub-col, prescribed seeds to get random numbers   !
 !           =2: mcica sub-col, providing array icseed for random numbers!
-!   iovrlw  - cloud overlapping control flag                            !
+!   iovr  - cloud overlapping control flag                              !
 !           =0: random overlapping clouds                               !
 !           =1: maximum/random overlapping clouds                       !
 !           =2: maximum overlap cloud (used for isubclw>0 only)         !
 !           =3: decorrelation-length overlap (for isubclw>0 only)       !
+!           =4: exponential cloud overlap (AER)                         !
+!           =5: exponential-random cloud overlap (AER)                  !
 !   ivflip  - control flag for vertical index direction                 !
 !           =0: vertical index from toa to surface                      !
 !           =1: vertical index from surface to toa                      !
@@ -589,9 +630,35 @@
 
       real (kind=kind_phys), dimension(npts), intent(in) :: sfemis,     &
      &       sfgtmp, de_lgth
+      real (kind=kind_phys), dimension(npts,nlay), intent(in) :: alpha
 
       real (kind=kind_phys), dimension(npts,nlay,nbands),intent(in)::   &
      &       aeraod, aerssa
+
+!mz* HWRF -- OUTPUT from mcica_subcol_lw
+      real(kind=kind_phys),dimension(ngptlw,npts,nlay)  :: cldfmcl     ! Cloud fraction
+                                                      !    Dimensions: (ngptlw,ncol,nlay)
+      real(kind=kind_phys),dimension(ngptlw,npts,nlay)  :: ciwpmcl     ! In-cloud ice water path (g/m2)
+                                                      !    Dimensions: (ngptlw,ncol,nlay)
+      real(kind=kind_phys),dimension(ngptlw,npts,nlay)  :: clwpmcl     ! In-cloud liquid water path (g/m2)
+                                                      !    Dimensions: (ngptlw,ncol,nlay)
+      real(kind=kind_phys),dimension(ngptlw,npts,nlay)  :: cswpmcl     ! In-cloud snow   water path (g/m2)
+                                                      !    Dimensions: (ngptlw,ncol,nlay)
+      real(kind=kind_phys),dimension(npts,nlay) :: relqmcl   ! Cloud water drop  effective radius (microns)
+                                                      !    Dimensions: (ncol,nlay)
+      real(kind=kind_phys),dimension(npts,nlay) :: reicmcl   ! Cloud ice  effective size (microns)
+                                                      !    Dimensions: (ncol,nlay)
+      real(kind=kind_phys),dimension(npts,nlay) :: resnmcl   ! Snow effective size (microns)
+                                                      !    Dimensions: (ncol,nlay)
+      real(kind=kind_phys),dimension(ngptlw,npts,nlay) :: taucmcl     ! In-cloud optical depth
+                                                      !    Dimensions: (ngptlw,ncol,nlay)
+!      real(kind=kind_phys),dimension(npts,nlay,nbands) :: tauaer      ! Aerosol optical  depth
+!                                                      !    Dimensions: (ncol,nlay,nbndlw)
+!mz* output from cldprmc
+      integer :: ncbands        ! number of cloud  spectral bands
+      real(kind=kind_phys),dimension(ngptlw,nlay) :: taucmc     ! cloud optical depth [mcica]        
+                                                      !    Dimensions: (ngptlw,nlayers)    
+!mz
 
 !  ---  outputs:
       real (kind=kind_phys), dimension(npts,nlay), intent(inout) :: hlwc
@@ -614,6 +681,11 @@
       logical, intent(in) :: lslwr
 
 !  ---  locals:
+! mz* - Add height of each layer for exponential-random cloud overlap
+! This will be derived below from the dzlyr in each layer
+      real (kind=kind_phys), dimension( npts,nlay )  ::   hgt
+      real (kind=kind_phys) :: dzsum
+
       real (kind=kind_phys), dimension(0:nlp1) :: cldfrc
 
       real (kind=kind_phys), dimension(0:nlay) :: totuflux, totdflux,   &
@@ -627,12 +699,37 @@
      &       selffac, selffrac, forfac, forfrac, minorfrac, scaleminor, &
      &       scaleminorn2, temcol, dz
 
+!mz*
+      real(kind=rb),dimension(0:nlay,nbands) :: planklay,planklev 
+      real(kind=rb),dimension(0:nlay) :: pz 
+
+!      real(kind=rb) :: plankbnd(nbndlw)
       real (kind=kind_phys), dimension(nbands,0:nlay) :: pklev, pklay
 
       real (kind=kind_phys), dimension(nlay,nbands) :: htrb
       real (kind=kind_phys), dimension(nbands,nlay) :: taucld, tauaer
-      real (kind=kind_phys), dimension(ngptlw,nlay) :: fracs, tautot,   &
-     &       cldfmc
+      real (kind=kind_phys), dimension(nbands,npts,nlay) :: taucld3
+      real (kind=kind_phys), dimension(ngptlw,nlay) :: fracs, tautot
+      real (kind=kind_phys), dimension(nlay,ngptlw) :: fracs_r
+!mz rtrnmc_mcica
+      real (kind=kind_phys), dimension(nlay,ngptlw) :: taut 
+!mz* Atmosphere/clouds - cldprop
+      real(kind=kind_phys), dimension(ngptlw,nlay) :: cldfmc,    &
+     &                                                cldfmc_save  ! cloud fraction [mcica]
+                                                                   !    Dimensions: (ngptlw,nlay)
+      real(kind=kind_phys), dimension(ngptlw,nlay) :: ciwpmc       ! in-cloud ice water path [mcica]
+                                                                   !    Dimensions: (ngptlw,nlay)
+      real(kind=kind_phys), dimension(ngptlw,nlay) :: clwpmc       ! in-cloud liquid water path [mcica]
+                                                                   !    Dimensions: (ngptlw,nlay)
+      real(kind=kind_phys), dimension(ngptlw,nlay) :: cswpmc       ! in-cloud snow path [mcica]
+                                                                   !    Dimensions: (ngptlw,nlay)
+      real(kind=kind_phys), dimension(nlay) :: relqmc              ! liquid particle effective radius (microns)
+                                                                   !    Dimensions: (nlay)
+      real(kind=kind_phys), dimension(nlay) :: reicmc              ! ice particle effective size (microns)
+                                                                   !    Dimensions: (nlay)
+      real(kind=kind_phys), dimension(nlay) :: resnmc              ! snow effective size (microns)
+                                                                   !    Dimensions: (nlay)
+
 
       real (kind=kind_phys), dimension(nbands) :: semiss, secdiff
 
@@ -650,11 +747,19 @@
 
       real (kind=kind_phys) :: tem0, tem1, tem2, pwvcm, summol, stemp,  &
      &                         delgth
+      real (kind=kind_phys), dimension(nlay) :: alph
 
       integer, dimension(npts) :: ipseed
       integer, dimension(nlay) :: jp, jt, jt1, indself, indfor, indminor
       integer                  :: laytrop, iplon, i, j, k, k1
+      ! mz* added local arrays for RRTMG
+      integer                  :: irng, permuteseed,ig
+      integer                  :: inflglw, iceflglw, liqflglw
       logical :: lcf1
+      integer :: istart              ! beginning band of calculation
+      integer :: iend                ! ending band of calculation
+      integer :: iout                ! output option flag (inactive)
+
 
 !
 !===> ... begin here
@@ -662,6 +767,17 @@
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+
+!mz*
+! For passing in cloud physical properties; cloud optics parameterized
+! in RRTMG:
+      inflglw = 2
+      iceflglw = 3
+      liqflglw = 1
+      istart = 1
+      iend = 16
+      iout = 0
+
 !
       if (.not. lslwr) return
 
@@ -732,7 +848,44 @@
         endif
 
         stemp = sfgtmp(iplon)          ! surface ground temp
-        if (iovrlw == 3) delgth= de_lgth(iplon)    ! clouds decorr-length
+        if (iovr == 3) delgth= de_lgth(iplon)    ! clouds decorr-length
+
+! mz*: HWRF
+        if (iovr == 4 ) then
+
+!Add layer height needed for exponential (icld=4) and
+! exponential-random (icld=5) overlap options  
+
+         !iplon = 1
+         irng = 0
+         permuteseed = 150
+
+!mz* Derive height 
+         dzsum =0.0
+         do k = 1,nlay
+         hgt(iplon,k)= dzsum+0.5*dzlyr(iplon,k)*1000.   !km->m
+         dzsum =  dzsum+ dzlyr(iplon,k)*1000.   
+         enddo
+
+! Zero out cloud optical properties here; not used when passing physical properties
+! to radiation and taucld is calculated in radiation 
+            do k = 1, nlay 
+               do j = 1, nbands
+                  taucld3(j,iplon,k) = 0.0
+               enddo
+            enddo
+
+          call mcica_subcol_lw(1, iplon, nlay, iovr, permuteseed,       &
+     &                 irng, plyr, hgt,                                 &
+     &                 cld_cf, cld_iwp, cld_lwp,cld_swp,                &
+     &                 cld_ref_ice, cld_ref_liq,                        &
+     &                 cld_ref_snow, taucld3,                           &
+     &                 cldfmcl,                                         &  !--output
+     &                 ciwpmcl, clwpmcl, cswpmcl, reicmcl, relqmcl,     &
+     &                 resnmcl, taucmcl)     
+
+       endif
+!mz* end
 
 !> -# Prepare atmospheric profile for use in rrtm.
 !           the vertical index of internal array is from surface to top
@@ -756,6 +909,7 @@
             tavel(k)= tlyr(iplon,k1)
             tz(k)   = tlvl(iplon,k1)
             dz(k)   = dzlyr(iplon,k1)
+            if (iovr == 4 .or. iovr == 5) alph(k) = alpha(iplon,k) ! alpha decorrelation
 
 !> -# Set absorber amount for h2o, co2, and o3.
 
@@ -833,6 +987,23 @@
               cda3(k)  = cld_swp(iplon,k1)
               cda4(k)  = cld_ref_snow(iplon,k1)
             enddo
+            ! HWRF RRMTG
+            if (iovr == 4) then   !mz  HWRF 
+               do k = 1, nlay
+                  k1 = nlp1 - k
+               do ig = 1, ngptlw
+                   cldfmc(ig,k) = cldfmcl(ig,iplon,k1)
+                   taucmc(ig,k) = taucmcl(ig,iplon,k1)
+                   ciwpmc(ig,k) = ciwpmcl(ig,iplon,k1)
+                   clwpmc(ig,k) = clwpmcl(ig,iplon,k1)
+              !mz     cswpmc(ig,k) = cswpmcl(ig,iplon,k1)
+                   cswpmc(ig,k) = 0.0
+               enddo
+                   reicmc(k) = reicmcl(iplon,k1)
+                   relqmc(k) = relqmcl(iplon,k1)
+                   resnmc(k) = resnmcl(iplon,k1)
+               enddo
+            endif
           else                       ! use diagnostic cloud method
             do k = 1, nlay
               k1 = nlp1 - k
@@ -868,6 +1039,7 @@
             tavel(k)= tlyr(iplon,k)
             tz(k)   = tlvl(iplon,k+1)
             dz(k)   = dzlyr(iplon,k)
+            if (iovr == 4 .or. iovr == 5) alph(k) = alpha(iplon,k) ! alpha decorrelation
 
 !  --- ...  set absorber amount
 !test use
@@ -939,6 +1111,24 @@
               cda3(k)  = cld_swp(iplon,k)
               cda4(k)  = cld_ref_snow(iplon,k)
             enddo
+            if (iovr == 4) then
+!mz* Move incoming GCM cloud arrays to RRTMG cloud arrays.
+!For GCM input, incoming reicmcl is defined based on selected 
+!ice parameterization (inflglw)
+            do k = 1, nlay
+            do ig = 1, ngptlw
+               cldfmc(ig,k) = cldfmcl(ig,iplon,k)
+               taucmc(ig,k) = taucmcl(ig,iplon,k)
+               ciwpmc(ig,k) = ciwpmcl(ig,iplon,k)
+               clwpmc(ig,k) = clwpmcl(ig,iplon,k)
+              !mz cswpmc(ig,k) = cswpmcl(ig,iplon,k)
+               cswpmc(ig,k) = 0.0
+            enddo
+               reicmc(k) = reicmcl(iplon,k)
+               relqmc(k) = relqmcl(iplon,k)
+               resnmc(k) = resnmcl(iplon,k)
+            enddo
+            endif
           else                       ! use diagnostic cloud method
             do k = 1, nlay
               cldfrc(k)= cld_cf(iplon,k)
@@ -1014,13 +1204,31 @@
 
         if ( lcf1 ) then
 
+          !mz* for HWRF, save cldfmc with mcica
+          if (iovr == 4) then
+               do k = 1, nlay
+               do ig = 1, ngptlw
+                  cldfmc_save(ig,k)=cldfmc (ig,k)
+               enddo
+               enddo
+          endif
+
           call cldprop                                                  &
 !  ---  inputs:
      &     ( cldfrc,clwp,relw,ciwp,reiw,cda1,cda2,cda3,cda4,            &
-     &       nlay, nlp1, ipseed(iplon), dz, delgth,                     &
+     &       nlay, nlp1, ipseed(iplon), dz, delgth, iovr, alph,         &
 !  ---  outputs:
      &       cldfmc, taucld                                             &
      &     )
+
+          if (iovr == 4) then
+          !mz for HWRF, still using mcica cldfmc
+               do k = 1, nlay
+               do ig = 1, ngptlw
+                  cldfmc(ig,k)=cldfmc_save(ig,k)
+               enddo
+               enddo
+          endif
 
 !  --- ...  save computed layer cloud optical depth for output
 !           rrtm band-7 is apprx 10mu channel (or use spectral mean of bands 6-8)
@@ -1039,6 +1247,16 @@
         else
           cldfmc = f_zero
           taucld = f_zero
+        endif
+
+!mz* HWRF: calculate taucmc with mcica
+        if (iovr == 4) then 
+          call cldprmc(nlay, inflglw, iceflglw, liqflglw,               &
+     &                 cldfmc, ciwpmc,                                  &
+     &                 clwpmc, cswpmc, reicmc, relqmc, resnmc,          &
+     &                 ncbands, taucmc, errmsg, errflg)
+          ! return immediately if cldprmc throws an error
+          if (errflg/=0) return
         endif
 
 !     if (lprnt) then
@@ -1125,7 +1343,7 @@
 
         if (isubclw <= 0) then
 
-          if (iovrlw <= 0) then
+          if (iovr <= 0) then
 
             call rtrn                                                   &
 !  ---  inputs:
@@ -1145,7 +1363,7 @@
      &       totuflux,totdflux,htr, totuclfl,totdclfl,htrcl, htrb       &
      &     )
 
-          endif   ! end if_iovrlw_block
+          endif   ! end if_iovr_block
 
         else
 
@@ -1296,11 +1514,12 @@
 !   icldflg - cloud scheme control flag                                 !
 !           =0: diagnostic scheme gives cloud tau, omiga, and g.        !
 !           =1: prognostic scheme gives cloud liq/ice path, etc.        !
-!   iovrlw  - clouds vertical overlapping control flag                  !
+!   iovr  - clouds vertical overlapping control flag                    !
 !           =0: random overlapping clouds                               !
 !           =1: maximum/random overlapping clouds                       !
 !           =2: maximum overlap cloud (isubcol>0 only)                  !
 !           =3: decorrelation-length overlap (for isubclw>0 only)       !
+!           =4: exponential overlap cloud
 !                                                                       !
 !  *******************************************************************  !
 !  original code description                                            !
@@ -1344,19 +1563,19 @@
 !
 !===> ... begin here
 !
-      if ( iovrlw<0 .or. iovrlw>3 ) then
+      if ( iovr<0 .or. iovr>4 ) then
         print *,'  *** Error in specification of cloud overlap flag',   &
-     &          ' IOVRLW=',iovrlw,' in RLWINIT !!'
+     &          ' IOVR=',iovr,' in RLWINIT !!'
         stop
-      elseif ( iovrlw>=2 .and. isubclw==0 ) then
+      elseif ( (iovr==2 .or. iovr==3) .and. isubclw==0 ) then
         if (me == 0) then
-          print *,'  *** IOVRLW=',iovrlw,' is not available for',       &
+          print *,'  *** IOVR=',iovr,' is not available for',           &
      &          ' ISUBCLW=0 setting!!'
           print *,'      The program uses maximum/random overlap',      &
      &          ' instead.'
         endif
 
-        iovrlw = 1
+        iovr = 1
       endif
 
       if (me == 0) then
@@ -1486,13 +1705,14 @@
 !!\param ipseed          permutation seed for generating random numbers (isubclw>0)
 !!\param dz              layer thickness (km) 
 !!\param de_lgth         layer cloud decorrelation length (km)  
+!!\param alpha           EXP/ER cloud overlap decorrelation parameter
 !!\param cldfmc          cloud fraction for each sub-column
 !!\param taucld          cloud optical depth for bands (non-mcica)
 !!\section gen_cldprop cldprop General Algorithm
 !> @{
       subroutine cldprop                                                &
      &     ( cfrac,cliqp,reliq,cicep,reice,cdat1,cdat2,cdat3,cdat4,     & !  ---  inputs
-     &       nlay, nlp1, ipseed, dz, de_lgth,                           &
+     &       nlay, nlp1, ipseed, dz, de_lgth, iovr, alpha,              &
      &       cldfmc, taucld                                             & !  ---  outputs
      &     )
 
@@ -1528,6 +1748,7 @@
 !                                                                       !
 !    dz     - real, layer thickness (km)                           nlay !
 !    de_lgth- real, layer cloud decorrelation length (km)             1 !
+!    alpha  - real, EXP/ER decorrelation parameter                 nlay !
 !    nlay  - integer, number of vertical layers                      1  !
 !    nlp1  - integer, number of vertical levels                      1  !
 !    ipseed- permutation seed for generating random numbers (isubclw>0) !
@@ -1592,12 +1813,13 @@
       use module_radlw_cldprlw
 
 !  ---  inputs:
-      integer, intent(in) :: nlay, nlp1, ipseed
+      integer, intent(in) :: nlay, nlp1, ipseed, iovr
 
       real (kind=kind_phys), dimension(0:nlp1), intent(in) :: cfrac
       real (kind=kind_phys), dimension(nlay),   intent(in) :: cliqp,    &
      &       reliq, cicep, reice, cdat1, cdat2, cdat3, cdat4, dz
       real (kind=kind_phys),                    intent(in) :: de_lgth
+      real (kind=kind_phys), dimension(nlay),   intent(in) :: alpha
 
 !  ---  outputs:
       real (kind=kind_phys), dimension(ngptlw,nlay),intent(out):: cldfmc
@@ -1770,9 +1992,11 @@
 
 !  --- ...  call sub-column cloud generator
 
+!mz*
+      if (iovr .ne. 4) then
         call mcica_subcol                                               &
 !  ---  inputs:
-     &     ( cldf, nlay, ipseed, dz, de_lgth,                           &
+     &     ( cldf, nlay, ipseed, dz, de_lgth, alpha,                    &
 !  ---  output:
      &       lcloudy                                                    &
      &     )
@@ -1786,6 +2010,7 @@
             endif
           enddo
         enddo
+      endif  !iovr
 
       endif   ! end if_isubclw_block
 
@@ -1802,11 +2027,12 @@
 !!\param ipseed      permute seed for random num generator
 !!\param dz          layer thickness
 !!\param de_lgth     layer cloud decorrelation length (km)
+!!\param alpha       EXP/ER cloud overlap decorrelation parameter
 !!\param lcloudy     sub-colum cloud profile flag array
 !!\section mcica_subcol_gen mcica_subcol General Algorithm
 !! @{
       subroutine mcica_subcol                                           &
-     &    ( cldf, nlay, ipseed, dz, de_lgth,                            & !  ---  inputs
+     &    ( cldf, nlay, ipseed, dz, de_lgth, alpha,                     & !  ---  inputs
      &      lcloudy                                                     & !  ---  outputs
      &    )
 
@@ -1821,12 +2047,13 @@
 !              for lw and sw, use values differ by the number of g-pts. !
 !   dz      - real, layer thickness (km)                           nlay !
 !   de_lgth - real, layer cloud decorrelation length (km)            1  !
+!    alpha  - real, EXP/ER decorrelation parameter                 nlay !
 !                                                                       !
 !  output variables:                                                    !
 !   lcloudy - logical, sub-colum cloud profile flag array    ngptlw*nlay!
 !                                                                       !
 !  other control flags from module variables:                           !
-!     iovrlw    : control flag for cloud overlapping method             !
+!     iovr    : control flag for cloud overlapping method               !
 !                 =0:random; =1:maximum/random: =2:maximum; =3:decorr   !
 !                                                                       !
 !  =====================    end of definitions    ====================  !
@@ -1838,6 +2065,7 @@
 
       real (kind=kind_phys), dimension(nlay), intent(in) :: cldf, dz
       real (kind=kind_phys),                  intent(in) :: de_lgth
+      real (kind=kind_phys), dimension(nlay), intent(in) :: alpha
 
 !  ---  outputs:
       logical, dimension(ngptlw,nlay), intent(out) :: lcloudy
@@ -1867,7 +2095,7 @@
 !!  - For max-random overlap, pick a random value at every level
 !!  - For maximum overlap, pick same random numebr at every level
 
-      select case ( iovrlw )
+      select case ( iovr )
 
         case( 0 )        ! random overlap, pick a random value at every level
 
@@ -1993,6 +2221,58 @@
             do n = 1, ngptlw
               if ( cdfun2(n,k) <= fac_lcf(k1) ) then
                 cdfunc(n,k) = cdfunc(n,k1)
+              endif
+            enddo
+          enddo
+
+        case( 4:5 )        ! exponential and exponential-random cloud overlap
+
+!  ---  Use previously derived decorrelation parameter, alpha, to specify
+!       the exponenential transition of cloud correlation in the vertical column.
+!
+!       For exponential cloud overlap, the correlation is applied across layers
+!       without regard to the configuration of clear and cloudy layers.
+
+!       For exponential-random cloud overlap, a new exponential transition is 
+!       performed within each group of adjacent cloudy layers and blocks of 
+!       cloudy layers with clear layers between them are correlated randomly. 
+!
+!       NOTE: The code below is identical for case (4) and (5) because the 
+!       distinction in the vertical correlation between EXP and ER is already 
+!       built into the specification of alpha (in subroutine get_alpha_exp). 
+
+!  ---  setup 2 sets of random numbers
+
+          call random_number ( rand2d, stat )
+
+          k1 = 0
+          do k = 1, nlay
+            do n = 1, ngptlw
+              k1 = k1 + 1
+              cdfunc(n,k) = rand2d(k1)
+            enddo
+          enddo
+
+          call random_number ( rand2d, stat )
+
+          k1 = 0
+          do k = 1, nlay
+            do n = 1, ngptlw
+              k1 = k1 + 1
+              cdfun2(n,k) = rand2d(k1)
+            enddo
+          enddo
+
+!  ---  then working upward from the surface:
+!       if a random number (from an independent set: cdfun2) is smaller than 
+!       alpha, then use the previous layer's number, otherwise use a new random
+!       number (keep the originally assigned one in cdfunc for that layer).
+
+          do k = 2, nlay
+            k1 = k - 1
+            do n = 1, ngptlw
+              if ( cdfun2(n,k) < alpha(k) ) then
+                   cdfunc(n,k) = cdfunc(n,k1)
               endif
             enddo
           enddo
@@ -6762,9 +7042,1930 @@
 !! @}
 !-----------------------------------
 
+!mz* exponential cloud overlapping subroutines
+!------------------------------------------------------------------
+! Public subroutines
+!------------------------------------------------------------------
+! mz* - Add height needed for exponential and exponential-random cloud overlap methods (icld=4 and 5, respectively)
+      subroutine mcica_subcol_lw(iplon, ncol, nlay, icld, permuteseed,  &
+     &                 irng, play, hgt,                                 &
+     &                 cldfrac, ciwp, clwp, cswp, rei, rel, res, tauc,  &
+     &                 cldfmcl,                                         &
+     &                 ciwpmcl, clwpmcl, cswpmcl, reicmcl, relqmcl,     &
+     &                 resnmcl, taucmcl)
 
+      use machine, only : im => kind_io4, rb => kind_phys
+! ----- Input -----
+! Control
+      integer(kind=im), intent(in) :: iplon           ! column/longitude index
+      integer(kind=im), intent(in) :: ncol            ! number of  columns
+      integer(kind=im), intent(in) :: nlay            ! number of model layers
+      integer(kind=im), intent(in) :: icld            ! clear/cloud, cloud overlap flag
+      integer(kind=im), intent(in) :: permuteseed     ! if the cloud generator is called multiple times, 
+                                                      ! permute the seed between each call.
+                                                      ! between calls for LW and SW, recommended
+                                                      ! permuteseed differes by 'ngpt'
+      integer(kind=im), intent(inout) :: irng         ! flag for random number generator
+                                                      !  0 = kissvec
+                                                      !  1 = Mersenne
+                                                      !  Twister
+
+! Atmosphere
+      real(kind=rb), intent(in) :: play(:,:)          ! layer pressures (mb) 
+                                                      !    Dimensions: (ncol,nlay)
+
+! mji - Add height
+      real(kind=rb), intent(in) :: hgt(:,:)           ! layer height (m)
+                                                      !    Dimensions: (ncol,nlay)
+
+! Atmosphere/clouds - cldprop
+      real(kind=rb), intent(in) :: cldfrac(:,:)       ! layer cloud fraction
+                                                      !    Dimensions: (ncol,nlay)
+      real(kind=rb), intent(in) :: tauc(:,:,:)        ! in-cloud optical depth
+                                                      !    Dimensions: (nbndlw,ncol,nlay)
+!      real(kind=rb), intent(in) :: ssac(:,:,:)       ! in-cloud single scattering albedo
+                                                      !    Dimensions: (nbndlw,ncol,nlay)
+!      real(kind=rb), intent(in) :: asmc(:,:,:)       ! in-cloud asymmetry parameter
+                                                      !    Dimensions: (nbndlw,ncol,nlay)
+      real(kind=rb), intent(in) :: ciwp(:,:)          ! in-cloud ice water path
+                                                      !    Dimensions: (ncol,nlay)
+      real(kind=rb), intent(in) :: clwp(:,:)          ! in-cloud liquid water path
+                                                      !    Dimensions: (ncol,nlay)
+      real(kind=rb), intent(in) :: cswp(:,:)          ! in-cloud snow path
+                                                      !    Dimensions: (ncol,nlay)
+      real(kind=rb), intent(in) :: rei(:,:)           ! cloud ice particle size
+                                                      !    Dimensions: (ncol,nlay)
+      real(kind=rb), intent(in) :: rel(:,:)           ! cloud liquid particle size
+                                                      !    Dimensions: (ncol,nlay)
+      real(kind=rb), intent(in) :: res(:,:)           ! snow particle size
+                                                      !    Dimensions: (ncol,nlay)
+
+! ----- Output -----                                                                                                          
+! Atmosphere/clouds - cldprmc [mcica]                                                                                                
+      real(kind=rb), intent(out) :: cldfmcl(:,:,:)    ! cloud fraction [mcica]
+                                                      !    Dimensions: (ngptlw,ncol,nlay)
+      real(kind=rb), intent(out) :: ciwpmcl(:,:,:)    ! in-cloud ice water path [mcica]
+                                                      !    Dimensions: (ngptlw,ncol,nlay)
+      real(kind=rb), intent(out) :: clwpmcl(:,:,:)    ! in-cloud liquid water path [mcica]
+                                                      !    Dimensions: (ngptlw,ncol,nlay)
+      real(kind=rb), intent(out) :: cswpmcl(:,:,:)    ! in-cloud snow path [mcica]
+                                                      !    Dimensions: (ngptlw,ncol,nlay)
+      real(kind=rb), intent(out) :: relqmcl(:,:)      ! liquid particle size (microns)
+                                                      !    Dimensions: (ncol,nlay)
+      real(kind=rb), intent(out) :: reicmcl(:,:)      ! ice partcle size (microns)
+                                                      !    Dimensions: (ncol,nlay)
+      real(kind=rb), intent(out) :: resnmcl(:,:)      ! snow partcle size (microns)
+                                                      !    Dimensions: (ncol,nlay)
+      real(kind=rb), intent(out) :: taucmcl(:,:,:)    ! in-cloud optical depth [mcica]
+!mz*
+                                                      !    Dimensions: (ngptlw,ncol,nlay)
+!      real(kind=rb), intent(out) :: ssacmcl(:,:,:)   ! in-cloud single scattering albedo [mcica]
+                                                      !    Dimensions: (ngptlw,ncol,nlay)
+!      real(kind=rb), intent(out) :: asmcmcl(:,:,:)   ! in-cloud asymmetry parameter [mcica]
+                                                      !    Dimensions: (ngptlw,ncol,nlay)
+! ----- Local -----
+
+! Stochastic cloud generator variables [mcica]
+      integer(kind=im), parameter :: nsubclw = ngptlw ! number of sub-columns (g-point intervals)
+      integer(kind=im) :: ilev                        ! loop index
+
+      real(kind=rb) :: pmid(ncol, nlay)               ! layer pressures (Pa)
+!      real(kind=rb) :: pdel(ncol, nlay)              ! layer pressure thickness (Pa)
+!      real(kind=rb) :: qi(ncol, nlay)                ! ice water (specific humidity)
+!      real(kind=rb) :: ql(ncol, nlay)                ! liq water (specific humidity)
+
+! Return if clear sky
+      if (icld.eq.0) return
+
+! NOTE: For GCM mode, permuteseed must be offset between LW and SW by at least the number of subcolumns
+
+
+! Pass particle sizes to new arrays, no subcolumns for these properties yet
+! Convert pressures from mb to Pa
+
+      reicmcl(:ncol,:nlay) = rei(:ncol,:nlay)
+      relqmcl(:ncol,:nlay) = rel(:ncol,:nlay)
+      resnmcl(:ncol,:nlay) = res(:ncol,:nlay)
+      pmid(:ncol,:nlay) = play(:ncol,:nlay)*1.e2_rb
+
+!  Generate the stochastic subcolumns of cloud optical properties for
+!  the longwave
+      call generate_stochastic_clouds (ncol, nlay, nsubclw, icld, irng, &
+     &                      pmid, hgt, cldfrac, clwp, ciwp, cswp, tauc, &
+     &                         cldfmcl, clwpmcl, ciwpmcl, cswpmcl,      &
+     &                         taucmcl, permuteseed)
+
+      end subroutine mcica_subcol_lw
+!-------------------------------------------------------------------------------------------------
+      subroutine generate_stochastic_clouds(ncol, nlay, nsubcol, icld,  &
+     &                    irng, pmid, hgt, cld, clwp, ciwp, cswp, tauc, &
+     &                             cld_stoch, clwp_stoch, ciwp_stoch,   &
+     &                              cswp_stoch, tauc_stoch, changeSeed)  
+!-------------------------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------------------------
+! Contact: Cecile Hannay (hannay@ucar.edu)
 !
-!........................................!
-      end module rrtmg_lw                !
-!========================================!
+! Original code: Based on Raisanen et al., QJRMS, 2004.
+!
+! Modifications:
+!   1) Generalized for use with RRTMG and added Mersenne Twister as the default
+!   random number generator, which can be changed to the optional kissvec random number generator
+!   with flag 'irng'. Some extra functionality has been commented or removed.
+!   Michael J. Iacono, AER, Inc., February 2007
+!   2) Activated exponential and exponential/random cloud overlap method
+!   Michael J. Iacono, AER, November 2017
+!
+! Given a profile of cloud fraction, cloud water and cloud ice, we produce a set of subcolumns.
+! Each layer within each subcolumn is homogeneous, with cloud fraction equal to zero or one
+! and uniform cloud liquid and cloud ice concentration.
+! The ensemble as a whole reproduces the probability function of cloud liquid and ice within each layer
+! and obeys an overlap assumption in the vertical.
+!
+! Overlap assumption:
+!  The cloud are consistent with 5 overlap assumptions: random, maximum, maximum-random, exponential and exponential random.
+!  The default option is maximum-random (option 2)
+!  The options are: 1=random overlap, 2=max/random, 3=maximum overlap, 4=exponential overlap, 5=exp/random 
+!  This is set with the variable "overlap"
+!  The exponential overlap uses also a length scale, Zo. (real,  parameter  :: Zo = 2500. )
+!
+! Seed:
+!  If the stochastic cloud generator is called several times during the same timestep,
+!  one should change the seed between the call to insure that the
+!  subcolumns are different.                                        
+!  This is done by changing the argument 'changeSeed'                                                                              
+!  For example, if one wants to create a set of columns for the
+!  shortwave and another set for the longwave ,
+!  use 'changeSeed = 1' for the first call and'changeSeed = 2' for the second call
 
+! PDF assumption:
+!  We can use arbitrary complicated PDFS.
+!  In the present version, we produce homogeneuous clouds (the simplest case).
+!  Future developments include using the PDF scheme of Ben Johnson.
+!
+! History file:
+!  Option to add diagnostics variables in the history file. (using FINCL in the namelist)
+!  nsubcol = number of subcolumns
+!  overlap = overlap type (1-3)
+!  Zo = length scale                                               
+!  CLOUD_S = mean of the subcolumn cloud fraction ('_S" means Stochastic)  
+!  CLDLIQ_S = mean of the subcolumn cloud water
+!  CLDICE_S = mean of the subcolumn cloud ice
+!
+! Note:
+!   Here: we force that the cloud condensate to be consistent with the cloud fraction
+!   i.e we only have cloud condensate when the cell is cloudy.
+!   In CAM: The cloud condensate and the cloud fraction are obtained from 2 different equations
+!   and the 2 quantities can be inconsistent (i.e. CAM can produce cloud fraction
+!   without cloud condensate or the opposite).
+!-----------------------------------------------------------------
+
+      use mcica_random_numbers
+! The Mersenne Twister random number engine
+      use MersenneTwister, only: randomNumberSequence,                  &
+     &                    new_RandomNumberSequence, getRandomReal
+      use machine ,only : im => kind_io4, rb => kind_phys
+
+      type(randomNumberSequence) :: randomNumbers
+
+! -- Arguments
+
+      integer(kind=im), intent(in) :: ncol            ! number of columns
+      integer(kind=im), intent(in) :: nlay            ! number of layers
+      integer(kind=im), intent(in) :: icld            ! clear/cloud, cloud overlap flag
+      integer(kind=im), intent(inout) :: irng         ! flag for random number generator
+                                                      !  0 = kissvec
+                                                      !  1 = Mersenne Twister
+      integer(kind=im), intent(in) :: nsubcol         ! number of sub-columns (g-point intervals)
+      integer(kind=im), optional, intent(in) :: changeSeed     ! allows permuting seed 
+
+! Column state (cloud fraction, cloud water, cloud ice) + variables needed to read physics state
+      real(kind=rb), intent(in) :: pmid(:,:)          ! layer pressure (Pa)
+                                                      !    Dimensions: (ncol,nlay)
+
+      real(kind=rb), intent(in) :: hgt(:,:)           ! layer height (m)
+                                                      !    Dimensions: (ncol,nlay)
+      real(kind=rb), intent(in) :: cld(:,:)           ! cloud fraction
+                                                      !    Dimensions: (ncol,nlay)
+      real(kind=rb), intent(in) :: clwp(:,:)          ! in-cloud liquid water path
+                                                      !    Dimensions: (ncol,nlay)
+      real(kind=rb), intent(in) :: ciwp(:,:)          ! in-cloud ice water path
+                                                      !    Dimensions: (ncol,nlay)
+      real(kind=rb), intent(in) :: cswp(:,:)          ! in-cloud snow path
+                                                      !    Dimensions: (ncol,nlay)
+      real(kind=rb), intent(in) :: tauc(:,:,:)        ! in-cloud optical depth
+                                                      !    Dimensions:(nbndlw,ncol,nlay)
+!      real(kind=rb), intent(in) :: ssac(:,:,:)       ! in-cloud single scattering albedo
+                                                      !    Dimensions: (nbndlw,ncol,nlay)
+                                                      !   inactive - for future expansion
+!      real(kind=rb), intent(in) :: asmc(:,:,:)       ! in-cloud asymmetry parameter
+                                                      !    Dimensions: (nbndlw,ncol,nlay)
+                                                      !   inactive - for future expansion
+
+      real(kind=rb), intent(out) :: cld_stoch(:,:,:)  ! subcolumn cloud fraction
+                                                      !    Dimensions: (ngptlw,ncol,nlay)
+      real(kind=rb), intent(out) :: clwp_stoch(:,:,:) ! subcolumn in-cloud liquid water path
+                                                      !    Dimensions: (ngptlw,ncol,nlay)
+      real(kind=rb), intent(out) :: ciwp_stoch(:,:,:) ! subcolumn in-cloud ice water path
+                                                      !    Dimensions: (ngptlw,ncol,nlay)
+      real(kind=rb), intent(out) :: cswp_stoch(:,:,:) ! subcolumn in-cloud snow path
+                                                      !    Dimensions: (ngptlw,ncol,nlay)
+      real(kind=rb), intent(out) :: tauc_stoch(:,:,:) ! subcolumn in-cloud optical depth
+                                                      !    Dimensions: (ngptlw,ncol,nlay)
+!      real(kind=rb), intent(out) :: ssac_stoch(:,:,:)! subcolumn in-cloud single scattering albedo
+                                                      !    Dimensions: (ngptlw,ncol,nlay)
+                                                      !   inactive - for future expansion
+!      real(kind=rb), intent(out) :: asmc_stoch(:,:,:)! subcolumn in-cloud asymmetry parameter
+                                                      !    Dimensions: (ngptlw,ncol,nlay)
+                                                      !   inactive - for future expansion
+
+! -- Local variables
+      real(kind=rb) :: cldf(ncol,nlay)                ! cloud fraction
+
+! Mean over the subcolumns (cloud fraction, cloud water , cloud ice) - inactive
+!      real(kind=rb) :: mean_cld_stoch(ncol, nlay)    ! cloud fraction
+!      real(kind=rb) :: mean_clwp_stoch(ncol, nlay)   ! cloud water
+!      real(kind=rb) :: mean_ciwp_stoch(ncol, nlay)   ! cloud ice
+!      real(kind=rb) :: mean_tauc_stoch(ncol, nlay)   ! cloud optical depth
+!      real(kind=rb) :: mean_ssac_stoch(ncol, nlay)   ! cloud single scattering albedo 
+!      real(kind=rb) :: mean_asmc_stoch(ncol, nlay)   ! cloud asymmetry parameter 
+
+! Set overlap
+      integer(kind=im) :: overlap                     ! 1 = random overlap, 2 = maximum-random,
+                                                      ! 3 = maximum overlap, 4 = exponential, 
+                                                      ! 5 = exponential-random
+      real(kind=rb), parameter  :: Zo = 2500._rb      ! length scale (m)
+      real(kind=rb), dimension(ncol,nlay) :: alpha    ! overlap parameter
+
+! Constants (min value for cloud fraction and cloud water and ice)
+      real(kind=rb), parameter :: cldmin = 1.0e-20_rb ! min cloud fraction
+!      real(kind=rb), parameter :: qmin   = 1.0e-10_rb   ! min cloud water and cloud ice (not used)
+
+! Variables related to random number and seed
+      real(kind=rb), dimension(nsubcol, ncol, nlay) :: CDF, CDF2      !random numbers
+      integer(kind=im), dimension(ncol) :: seed1, seed2, seed3, seed4 !seed to create random number (kissvec)
+      real(kind=rb), dimension(ncol) :: rand_num      ! random number (kissvec)
+      integer(kind=im) :: iseed                       ! seed to create random number (Mersenne Teister)
+      real(kind=rb) :: rand_num_mt                    ! random number (Mersenne Twister)
+
+! Flag to identify cloud fraction in subcolumns
+      logical,  dimension(nsubcol, ncol, nlay) :: iscloudy   ! flag that says whether a gridbox is cloudy
+
+! Indices
+      integer(kind=im) :: ilev, isubcol, i, n         ! indices
+
+!-------------------------------------------------------------------
+
+! Check that irng is in bounds; if not, set to default
+      if (irng .ne. 0) irng = 1
+
+! Pass input cloud overlap setting to local variable
+      overlap = icld
+
+! Ensure that cloud fractions are in bounds
+      do ilev = 1, nlay
+         do i = 1, ncol
+            cldf(i,ilev) = cld(i,ilev)
+            if (cldf(i,ilev) < cldmin) then
+               cldf(i,ilev) = 0._rb
+            endif
+         enddo
+      enddo
+
+! ----- Create seed  --------
+
+! Advance randum number generator by changeseed values
+      if (irng.eq.0) then 
+! For kissvec, create a seed that depends on the state of the columns. Maybe not the best way, but it works.
+! Must use pmid from bottom four layers.
+         do i=1,ncol
+            if (pmid(i,1).lt.pmid(i,2)) then
+               stop 'MCICA_SUBCOL: KISSVEC SEED GENERATOR REQUIRES PMID &
+     &               FROM BOTTOM FOUR LAYERS.'
+            endif
+            seed1(i) = (pmid(i,1) - int(pmid(i,1)))  * 1000000000_im
+            seed2(i) = (pmid(i,2) - int(pmid(i,2)))  * 1000000000_im
+            seed3(i) = (pmid(i,3) - int(pmid(i,3)))  * 1000000000_im
+            seed4(i) = (pmid(i,4) - int(pmid(i,4)))  * 1000000000_im
+          enddo
+         do i=1,changeSeed
+            call kissvec(seed1, seed2, seed3, seed4, rand_num)
+         enddo
+      elseif (irng.eq.1) then
+         randomNumbers = new_RandomNumberSequence(seed = changeSeed)
+      endif
+
+! ------ Apply overlap assumption --------
+
+! generate the random numbers
+
+      select case (overlap) 
+
+      case(1)
+! Random overlap
+! i) pick a random value at every level
+
+         if (irng.eq.0) then
+            do isubcol = 1,nsubcol
+               do ilev = 1,nlay
+                  call kissvec(seed1, seed2, seed3, seed4, rand_num)  ! we get different random number for each level
+                  CDF(isubcol,:,ilev) = rand_num
+               enddo    
+            enddo
+         elseif (irng.eq.1) then
+            do isubcol = 1, nsubcol
+               do i = 1, ncol
+                  do ilev = 1, nlay
+                     rand_num_mt = getRandomReal(randomNumbers)
+                     CDF(isubcol,i,ilev) = rand_num_mt
+                  enddo
+               enddo
+             enddo
+         endif
+
+      case(2)
+! Maximum-Random overlap 
+! i) pick a random number for top layer.
+! ii) walk down the column:
+!    - if the layer above is cloudy, we use the same random number than in the layer above
+!    - if the layer above is clear, we use a new random number
+
+         if (irng.eq.0) then
+            do isubcol = 1,nsubcol
+               do ilev = 1,nlay
+                  call kissvec(seed1, seed2, seed3, seed4, rand_num)
+                  CDF(isubcol,:,ilev) = rand_num
+               enddo
+            enddo
+         elseif (irng.eq.1) then
+            do isubcol = 1, nsubcol
+               do i = 1, ncol
+                  do ilev = 1, nlay
+                     rand_num_mt = getRandomReal(randomNumbers)
+                     CDF(isubcol,i,ilev) = rand_num_mt
+                  enddo
+               enddo
+             enddo
+         endif
+
+         do ilev = 2,nlay
+            do i = 1, ncol
+               do isubcol = 1, nsubcol
+                  if (CDF(isubcol, i, ilev-1) > 1._rb - cldf(i,ilev-1) )&
+     &             then
+                     CDF(isubcol,i,ilev) = CDF(isubcol,i,ilev-1)
+                  else
+                     CDF(isubcol,i,ilev) = CDF(isubcol,i,ilev) * (1._rb &
+     &               - cldf(i,ilev-1))
+                  endif
+               enddo
+            enddo
+         enddo
+
+      case(3)
+! Maximum overlap
+! i) pick the same random numebr at every level
+
+         if (irng.eq.0) then
+            do isubcol = 1,nsubcol
+               call kissvec(seed1, seed2, seed3, seed4, rand_num)
+               do ilev = 1,nlay
+                  CDF(isubcol,:,ilev) = rand_num
+               enddo
+            enddo
+         elseif (irng.eq.1) then
+            do isubcol = 1, nsubcol
+               do i = 1, ncol
+                  rand_num_mt = getRandomReal(randomNumbers)
+                  do ilev = 1, nlay
+                     CDF(isubcol,i,ilev) = rand_num_mt
+                  enddo
+               enddo
+             enddo
+         endif
+
+! mji - Activate exponential cloud overlap option
+         case(4)
+            ! Exponential overlap: weighting between maximum and random overlap increases with the distance.
+            ! The random numbers for exponential overlap verify:
+            ! j=1   RAN(j)=RND1
+            ! j>1   if RND1 < alpha(j,j-1) => RAN(j) = RAN(j-1)
+            !                                 RAN(j) = RND2
+            ! alpha is obtained from the equation
+            ! alpha = exp(-(Z(j)-Z(j-1))/Zo) where Zo is a characteristic length scale
+
+            ! compute alpha
+            do i = 1, ncol
+               alpha(i, 1) = 0._rb
+               do ilev = 2,nlay
+                  alpha(i, ilev) = exp( -( hgt (i, ilev) -              &
+     &                  hgt (i, ilev-1)) / Zo)
+               enddo
+            enddo
+
+            ! generate 2 streams of random numbers
+            if (irng.eq.0) then
+               do isubcol = 1,nsubcol
+                  do ilev = 1,nlay
+                     call kissvec(seed1, seed2, seed3, seed4, rand_num)
+                     CDF(isubcol, :, ilev) = rand_num
+                     call kissvec(seed1, seed2, seed3, seed4, rand_num)
+                     CDF2(isubcol, :, ilev) = rand_num
+                  enddo
+               enddo
+            elseif (irng.eq.1) then
+               do isubcol = 1, nsubcol
+                  do i = 1, ncol
+                     do ilev = 1, nlay
+                        rand_num_mt = getRandomReal(randomNumbers)
+                        CDF(isubcol,i,ilev) = rand_num_mt
+                        rand_num_mt = getRandomReal(randomNumbers)
+                        CDF2(isubcol,i,ilev) = rand_num_mt
+                     enddo
+                  enddo
+               enddo
+            endif
+
+            ! generate random numbers
+            do ilev = 2,nlay
+               where (CDF2(:, :, ilev) < spread(alpha (:,ilev),         &
+     &               dim=1,nCopies=nsubcol) )
+                  CDF(:,:,ilev) = CDF(:,:,ilev-1)
+               end where
+            end do
+
+! Activate exponential-random cloud overlap option
+         case(5)
+            ! Exponential-random overlap:
+!mz*            call wrf_error_fatal("Cloud Overlap case 5: ER has not yet  &
+!                            been implemented. Stopping...")
+
+      end select
+
+! -- generate subcolumns for homogeneous clouds ----- 
+      do ilev = 1,nlay 
+         iscloudy(:,:,ilev) = (CDF(:,:,ilev) >= 1._rb -                 &
+     &        spread(cldf(:,ilev), dim=1, nCopies=nsubcol) ) 
+      enddo
+
+! where the subcolumn is cloudy, the subcolumn cloud fraction is 1;
+! where the subcolumn is not cloudy, the subcolumn cloud fraction is 0;
+! where there is a cloud, define the subcolumn cloud properties,
+! otherwise set these to zero
+
+      do ilev = 1,nlay
+         do i = 1, ncol
+            do isubcol = 1, nsubcol
+               if (iscloudy(isubcol,i,ilev) ) then
+                  cld_stoch(isubcol,i,ilev) = 1._rb
+                  clwp_stoch(isubcol,i,ilev) = clwp(i,ilev)
+                  ciwp_stoch(isubcol,i,ilev) = ciwp(i,ilev)
+!mz  
+!                  cswp_stoch(isubcol,i,ilev) = cswp(i,ilev)
+                   cswp_stoch(isubcol,i,ilev) = 0._rb
+                  n = ngb(isubcol)
+                  tauc_stoch(isubcol,i,ilev) = tauc(n,i,ilev)
+!                  ssac_stoch(isubcol,i,ilev) = ssac(n,i,ilev)
+!                  asmc_stoch(isubcol,i,ilev) = asmc(n,i,ilev)
+               else
+                  cld_stoch(isubcol,i,ilev) = 0._rb
+                  clwp_stoch(isubcol,i,ilev) = 0._rb
+                  ciwp_stoch(isubcol,i,ilev) = 0._rb
+                  cswp_stoch(isubcol,i,ilev) = 0._rb
+                  tauc_stoch(isubcol,i,ilev) = 0._rb
+!                  ssac_stoch(isubcol,i,ilev) = 1._rb
+!                  asmc_stoch(isubcol,i,ilev) = 1._rb
+               endif
+            enddo
+         enddo
+      enddo
+
+! -- compute the means of the subcolumns ---
+!      mean_cld_stoch(:,:) = 0._rb
+!      mean_clwp_stoch(:,:) = 0._rb
+!      mean_ciwp_stoch(:,:) = 0._rb
+!      mean_tauc_stoch(:,:) = 0._rb
+!      mean_ssac_stoch(:,:) = 0._rb
+!      mean_asmc_stoch(:,:) = 0._rb
+!      do i = 1, nsubcol
+!         mean_cld_stoch(:,:) =  cld_stoch(i,:,:) + mean_cld_stoch(:,:) 
+!         mean_clwp_stoch(:,:) =  clwp_stoch( i,:,:) + mean_clwp_stoch(:,:)
+!         mean_ciwp_stoch(:,:) =  ciwp_stoch( i,:,:) + mean_ciwp_stoch(:,:)
+!         mean_tauc_stoch(:,:) =  tauc_stoch( i,:,:) + mean_tauc_stoch(:,:)
+!         mean_ssac_stoch(:,:) =  ssac_stoch( i,:,:) + mean_ssac_stoch(:,:)
+!         mean_asmc_stoch(:,:) =  asmc_stoch( i,:,:) + mean_asmc_stoch(:,:)
+!      end do 
+!      mean_cld_stoch(:,:) = mean_cld_stoch(:,:) / nsubcol
+!      mean_clwp_stoch(:,:) = mean_clwp_stoch(:,:) / nsubcol
+!      mean_ciwp_stoch(:,:) = mean_ciwp_stoch(:,:) / nsubcol
+!      mean_tauc_stoch(:,:) = mean_tauc_stoch(:,:) / nsubcol
+!      mean_ssac_stoch(:,:) = mean_ssac_stoch(:,:) / nsubcol
+!      mean_asmc_stoch(:,:) = mean_asmc_stoch(:,:) / nsubcol
+
+      end subroutine generate_stochastic_clouds
+
+!------------------------------------------------------------------
+! Private subroutines
+!------------------------------------------------------------------  
+
+!----------------------------------------------------------------- 
+      subroutine kissvec(seed1,seed2,seed3,seed4,ran_arr) 
+!----------------------------------------------------------------
+
+! public domain code
+! made available from http://www.fortran.com/
+! downloaded by pjr on 03/16/04 for NCAR CAM
+! converted to vector form, functions inlined by pjr,mvr on 05/10/2004
+
+! The  KISS (Keep It Simple Stupid) random number generator. Combines:
+! (1) The congruential generator x(n)=69069*x(n-1)+1327217885, period 2^32.
+! (2) A 3-shift shift-register generator, period 2^32-1,
+! (3) Two 16-bit multiply-with-carry generators, period 597273182964842497>2^59  
+!  Overall period>2^123;                                                                                                             
+      real(kind=rb), dimension(:), intent(inout)  :: ran_arr
+      integer(kind=im), dimension(:), intent(inout) :: seed1,seed2,seed3&
+     &                                                 ,seed4
+      integer(kind=im) :: i,sz,kiss
+      integer(kind=im) :: m, k, n
+
+! inline function  
+      m(k, n) = ieor (k, ishft (k, n) )
+
+      sz = size(ran_arr)
+      do i = 1, sz 
+         seed1(i) = 69069_im * seed1(i) + 1327217885_im
+         seed2(i) = m (m (m (seed2(i), 13_im), - 17_im), 5_im)
+         seed3(i) = 18000_im * iand (seed3(i), 65535_im) +              &
+     &              ishft (seed3(i), - 16_im)
+         seed4(i) = 30903_im * iand (seed4(i), 65535_im) +              &
+     &              ishft (seed4(i), - 16_im)
+         kiss = seed1(i) + seed2(i) + ishft (seed3(i), 16_im) + seed4(i)
+         ran_arr(i) = kiss*2.328306e-10_rb + 0.5_rb
+      end do 
+
+      end subroutine kissvec
+!
+      subroutine rtrnmc_mcica(nlayers, istart, iend, iout, pz, semiss,  &
+     &       ncbands,  cldfmc, taucmc, planklay, planklev,              &!plankbnd,    &
+     &       pwvcm, fracs, taut,                                        &
+     &                   totuflux, totdflux,  htr,                      &
+     &                   totuclfl, totdclfl,  htrc )
+!---------------------------------------------------------------
+!
+!  Original version:   E. J. Mlawer, et al. RRTM_V3.0
+!  Revision for GCMs:  Michael J. Iacono; October, 2002
+!  Revision for F90:  Michael J. Iacono; June, 2006
+!
+!  This program calculates the upward fluxes, downward fluxes, and
+!  heating rates for an arbitrary clear or cloudy atmosphere.  The input
+!  to this program is the atmospheric profile, all Planck function
+!  information, and the cloud fraction by layer.  A variable diffusivity 
+!  angle (SECDIFF) is used for the angle integration.  Bands 2-3 and 5-9 
+!  use a value for SECDIFF that varies from 1.50 to 1.80 as a function of 
+!  the column water vapor, and other bands use a value of 1.66.  The Gaussian 
+!  weight appropriate to this angle (WTDIFF=0.5) is applied here.  Note that 
+!  use of the emissivity angle for the flux integration can cause errors of 
+!  1 to 4 W/m2 within cloudy layers.  
+!  Clouds are treated with the McICA stochastic approach and maximum-random               
+!  cloud overlap.                                                                         
+!***************************************************************************              
+                                                                                          
+! ------- Declarations -------                                                            
+                                                                                          
+! ----- Input -----                                                                       
+      integer(kind=im), intent(in) :: nlayers         ! total number of layers            
+      integer(kind=im), intent(in) :: istart          ! beginning band of calculation     
+      integer(kind=im), intent(in) :: iend            ! ending band of calculation        
+      integer(kind=im), intent(in) :: iout            ! output option flag                
+                                                                                          
+! Atmosphere                                                                              
+      real(kind=rb), intent(in) :: pz(0:)             ! level (interface) pressures (hPa, mb)
+                                                      !    Dimensions: (0:nlayers)        
+      real(kind=rb), intent(in) :: pwvcm              ! precipitable water vapor (cm)     
+      real(kind=rb), intent(in) :: semiss(:)          ! lw surface emissivity             
+                                                      !    Dimensions: (nbndlw)           
+!mz
+      real(kind=rb), intent(in) :: planklay(0:,:)      !                                   
+                                                      !    Dimensions: (nlayers,nbndlw)   
+      real(kind=rb), intent(in) :: planklev(0:,:)     !                                   
+                                                      !    Dimensions: (0:nlayers,nbndlw) 
+!      real(kind=rb), intent(in) :: plankbnd(:)        !                                   
+                                                      !    Dimensions: (nbndlw)           
+      real(kind=rb), intent(in) :: fracs(:,:)         !                                   
+                                                      !    Dimensions: (nlayers,ngptw)    
+      real(kind=rb), intent(in) :: taut(:,:)          ! gaseous + aerosol optical depths  
+                                                      !    Dimensions: (nlayers,ngptlw)   
+                                                                                          
+! Clouds                                                                                  
+      integer(kind=im), intent(in) :: ncbands         ! number of cloud spectral bands    
+      real(kind=rb), intent(in) :: cldfmc(:,:)        ! layer cloud fraction [mcica]      
+                                                      !    Dimensions: (ngptlw,nlayers)   
+      real(kind=rb), intent(in) :: taucmc(:,:)        ! layer cloud optical depth [mcica] 
+                                                      !    Dimensions: (ngptlw,nlayers)   
+                                                                                          
+! ----- Output -----                                                                      
+      real(kind=rb), intent(out) :: totuflux(0:)      ! upward longwave flux (w/m2)       
+                                                      !    Dimensions: (0:nlayers)        
+      real(kind=rb), intent(out) :: totdflux(0:)      ! downward longwave flux (w/m2)     
+                                                      !    Dimensions: (0:nlayers)        
+!mz* real(kind=rb), intent(out) :: fnet(0:)          ! net longwave flux (w/m2)          
+                                                      !    Dimensions: (0:nlayers)        
+         real(kind=rb), intent(out) :: htr(:)
+!mz      real(kind=rb), intent(out) :: htr(0:)           ! longwave heating rate (k/day)     
+                                                      !    Dimensions: (0:nlayers)        
+      real(kind=rb), intent(out) :: totuclfl(0:)      ! clear sky upward longwave flux (w/m2)
+                                                      !    Dimensions: (0:nlayers)        
+      real(kind=rb), intent(out) :: totdclfl(0:)      ! clear sky downward longwave flux (w/m2)
+                                                      !    Dimensions: (0:nlayers)        
+!mz*real(kind=rb), intent(out) :: fnetc(0:)         ! clear sky net longwave flux (w/m2)
+                                                      !    Dimensions: (0:nlayers)        
+       real(kind=rb), intent(out) :: htrc(:) 
+!      real(kind=rb), intent(out) :: htrc(0:)          ! clear sky longwave heating rate (k/day)
+                                                      !    Dimensions: (0:nlayers)        
+                                                                                          
+! ----- Local -----                                                                       
+! Declarations for radiative transfer                                                     
+      real (kind=kind_phys), dimension(0:nlayers) :: fnet, fnetc
+      real(kind=rb) :: abscld(nlayers,ngptlw)                                             
+      real(kind=rb) :: atot(nlayers)                                                      
+      real(kind=rb) :: atrans(nlayers)                                                    
+      real(kind=rb) :: bbugas(nlayers)                                                    
+      real(kind=rb) :: bbutot(nlayers)                                                    
+      real(kind=rb) :: clrurad(0:nlayers)                                                 
+      real(kind=rb) :: clrdrad(0:nlayers)                                                 
+      real(kind=rb) :: efclfrac(nlayers,ngptlw)                                           
+      real(kind=rb) :: uflux(0:nlayers)                                                   
+      real(kind=rb) :: dflux(0:nlayers)                                                   
+      real(kind=rb) :: urad(0:nlayers)                                                    
+      real(kind=rb) :: drad(0:nlayers)                                                    
+      real(kind=rb) :: uclfl(0:nlayers)                                                   
+      real(kind=rb) :: dclfl(0:nlayers)                                                   
+      real(kind=rb) :: odcld(nlayers,ngptlw)                                              
+                                                                                          
+                                                                                          
+      real(kind=rb) :: secdiff(nbands)                 ! secant of diffusivity angle      
+      real(kind=rb) :: transcld, radld, radclrd, plfrac, blay, dplankup,&
+     &                 dplankdn         
+      real(kind=rb) :: odepth, odtot, odepth_rec, odtot_rec, gassrc                       
+      real(kind=rb) :: tblind, tfactot, bbd, bbdtot, tfacgas, transc,   &
+     &                 tausfac             
+      real(kind=rb) :: rad0, reflect, radlu, radclru                                      
+                                                                                          
+      integer(kind=im) :: icldlyr(nlayers)                  ! flag for cloud in layer     
+      integer(kind=im) :: ibnd, ib, iband, lay, lev, l, ig  ! loop indices                
+      integer(kind=im) :: igc                               ! g-point interval counter    
+      integer(kind=im) :: iclddn                            ! flag for cloud in down path 
+      integer(kind=im) :: ittot, itgas, itr                 ! lookup table indices        
+!mz*
+      real (kind=kind_phys), parameter :: rec_6 = 0.166667
+      ! The cumulative sum of new g-points for each band
+      integer(kind=im) :: ngs(nbands)
+      ngs(:) = (/10,22,38,52,68,76,88,96,108,114,122,130,134,136,138,   &
+     &          140/)
+                                                                                          
+! ------- Definitions -------                                                             
+! input                                                                                   
+!    nlayers                      ! number of model layers                                
+!    ngptlw                       ! total number of g-point subintervals                  
+!    nbndlw                       ! number of longwave spectral bands                     
+!    ncbands                      ! number of spectral bands for clouds                   
+!    secdiff                      ! diffusivity angle                                     
+!    wtdiff                       ! weight for radiance to flux conversion                
+!    pavel                        ! layer pressures (mb)                                  
+!    pz                           ! level (interface) pressures (mb)                      
+!    tavel                        ! layer temperatures (k)                                
+!    tz                           ! level (interface) temperatures(mb)                    
+!    tbound                       ! surface temperature (k)                               
+!    cldfrac                      ! layer cloud fraction                                  
+!    taucloud                     ! layer cloud optical depth                             
+!    itr                          ! integer look-up table index                           
+!    icldlyr                      ! flag for cloudy layers                                
+!    iclddn                       ! flag for cloud in column at any layer                 
+!    semiss                       ! surface emissivities for each band                    
+!    reflect                      ! surface reflectance                                   
+!    bpade                        ! 1/(pade constant)                                     
+!    tau_tbl                      ! clear sky optical depth look-up table                 
+!    exp_tbl                      ! exponential look-up table for transmittance           
+!    tfn_tbl                      ! tau transition function look-up table                 
+                                                                                          
+! local                                                                                   
+!    atrans                       ! gaseous absorptivity                                  
+!    abscld                       ! cloud absorptivity                                    
+!    atot                         ! combined gaseous and cloud absorptivity               
+!    odclr                        ! clear sky (gaseous) optical depth                     
+!    odcld                        ! cloud optical depth                                   
+!    odtot                        ! optical depth of gas and cloud                        
+!    tfacgas                      ! gas-only pade factor, used for planck fn              
+!    tfactot                      ! gas and cloud pade factor, used for planck fn         
+!    bbdgas                       ! gas-only planck function for downward rt              
+!    bbugas                       ! gas-only planck function for upward rt                
+!    bbdtot                       ! gas and cloud planck function for downward rt         
+!    bbutot                       ! gas and cloud planck function for upward calc.        
+!    gassrc                       ! source radiance due to gas only                       
+!    efclfrac                     ! effective cloud fraction                              
+!    radlu                        ! spectrally summed upward radiance                     
+!    radclru                      ! spectrally summed clear sky upward radiance           
+!    urad                         ! upward radiance by layer                              
+!    clrurad                      ! clear sky upward radiance by layer                    
+!    radld                        ! spectrally summed downward radiance                   
+!    radclrd                      ! spectrally summed clear sky downward radiance         
+!    drad                         ! downward radiance by layer                            
+!    clrdrad                      ! clear sky downward radiance by layer                  
+                                                                                          
+                                                                                          
+! output                                                                                  
+!    totuflux                     ! upward longwave flux (w/m2)                           
+!    totdflux                     ! downward longwave flux (w/m2)                         
+!    fnet                         ! net longwave flux (w/m2)                              
+!    htr                          ! longwave heating rate (k/day)                         
+!    totuclfl                     ! clear sky upward longwave flux (w/m2)                 
+!    totdclfl                     ! clear sky downward longwave flux (w/m2)               
+!    fnetc                        ! clear sky net longwave flux (w/m2)                    
+!    htrc                         ! clear sky longwave heating rate (k/day)               
+                                                                                          
+                                                                                          
+!jm not thread safe      hvrrtc = '$Revision: 1.3 $'                                      
+                                                                                          
+      do ibnd = 1,nbands!mz*nbndlw                                                                  
+         if (ibnd.eq.1 .or. ibnd.eq.4 .or. ibnd.ge.10) then                               
+           secdiff(ibnd) = 1.66_rb                                                        
+         else                                                                             
+           secdiff(ibnd) = a0(ibnd) + a1(ibnd)*exp(a2(ibnd)*pwvcm)                        
+           if (secdiff(ibnd) .gt. 1.80_rb) secdiff(ibnd) = 1.80_rb                        
+           if (secdiff(ibnd) .lt. 1.50_rb) secdiff(ibnd) = 1.50_rb                        
+         endif                                                                            
+      enddo                                                                               
+                                                                                          
+      urad(0) = 0.0_rb                                                                    
+      drad(0) = 0.0_rb                                                                    
+      totuflux(0) = 0.0_rb                                                                
+      totdflux(0) = 0.0_rb                                                                
+      clrurad(0) = 0.0_rb                                                                 
+      clrdrad(0) = 0.0_rb                                                                 
+      totuclfl(0) = 0.0_rb                                                                
+      totdclfl(0) = 0.0_rb                                                                
+                                                                                          
+      do lay = 1, nlayers                                                                 
+         urad(lay) = 0.0_rb                                                               
+         drad(lay) = 0.0_rb                                                               
+         totuflux(lay) = 0.0_rb                                                           
+         totdflux(lay) = 0.0_rb                                                           
+         clrurad(lay) = 0.0_rb                                                            
+         clrdrad(lay) = 0.0_rb                                                            
+         totuclfl(lay) = 0.0_rb                                                           
+         totdclfl(lay) = 0.0_rb                                                           
+         icldlyr(lay) = 0                                                                 
+                                                                 
+! Change to band loop?                                                                    
+         do ig = 1, ngptlw                                                                
+            if (cldfmc(ig,lay) .eq. 1._rb) then                                           
+               ib = ngb(ig)                                                               
+               odcld(lay,ig) = secdiff(ib) * taucmc(ig,lay)                               
+               transcld = exp(-odcld(lay,ig))                                             
+               abscld(lay,ig) = 1._rb - transcld                                          
+               efclfrac(lay,ig) = abscld(lay,ig) * cldfmc(ig,lay)                         
+               icldlyr(lay) = 1                                                           
+            else                                                                          
+               odcld(lay,ig) = 0.0_rb                                                     
+               abscld(lay,ig) = 0.0_rb                                                    
+               efclfrac(lay,ig) = 0.0_rb                                                  
+            endif                                                                         
+         enddo                                                                            
+                                                                                          
+      enddo                                                                               
+                                                                                          
+      igc = 1                                                                             
+! Loop over frequency bands.                                                              
+      do iband = istart, iend                                                             
+                                                                                          
+! Reinitialize g-point counter for each band if output for each band is requested.        
+         if (iout.gt.0.and.iband.ge.2) igc = ngs(iband-1)+1                               
+                                                                                          
+! Loop over g-channels.                                                                   
+ 1000    continue                                                                         
+                                                                                          
+! Radiative transfer starts here.                                                         
+         radld = 0._rb                                                                    
+         radclrd = 0._rb                                                                  
+         iclddn = 0                                                                       
+                                                                                          
+! Downward radiative transfer loop.                                                       
+                                                                                          
+         do lev = nlayers, 1, -1                                                          
+               plfrac = fracs(lev,igc)                                                    
+               blay = planklay(lev,iband)                                                 
+               dplankup = planklev(lev,iband) - blay                                      
+               dplankdn = planklev(lev-1,iband) - blay                                    
+               odepth = secdiff(iband) * taut(lev,igc)                                    
+               if (odepth .lt. 0.0_rb) odepth = 0.0_rb              
+!  Cloudy layer                                                                  
+               if (icldlyr(lev).eq.1) then  
+                  iclddn = 1              
+                  odtot = odepth + odcld(lev,igc) 
+                  if (odtot .lt. 0.06_rb) then            
+                     atrans(lev) = odepth - 0.5_rb*odepth*odepth                          
+                     odepth_rec = rec_6*odepth
+                 gassrc = plfrac*(blay+dplankdn*odepth_rec)*atrans(lev)               
+                                                                                          
+                     atot(lev) =  odtot - 0.5_rb*odtot*odtot                              
+                     odtot_rec = rec_6*odtot                                              
+                     bbdtot =  plfrac * (blay+dplankdn*odtot_rec)                         
+                     bbd = plfrac*(blay+dplankdn*odepth_rec)                              
+                     radld = radld - radld * (atrans(lev) +             &
+     &                    efclfrac(lev,igc) * (1. - atrans(lev))) +     &
+     &                    gassrc + cldfmc(igc,lev) *                    &
+     &                    (bbdtot * atot(lev) - gassrc)                                    
+                     drad(lev-1) = drad(lev-1) + radld                                    
+                                                                                          
+                     bbugas(lev) =  plfrac * (blay+dplankup*odepth_rec)                   
+                     bbutot(lev) =  plfrac * (blay+dplankup*odtot_rec)                    
+                                                                                          
+                  elseif (odepth .le. 0.06_rb) then                                       
+                     atrans(lev) = odepth - 0.5_rb*odepth*odepth                          
+                     odepth_rec = rec_6*odepth                                            
+                 gassrc = plfrac*(blay+dplankdn*odepth_rec)*atrans(lev)               
+                                                                                          
+                     odtot = odepth + odcld(lev,igc)                                      
+                     tblind = odtot/(bpade+odtot)                                         
+                     ittot = tblint*tblind + 0.5_rb                                       
+                     tfactot = tfn_tbl(ittot)                                             
+                     bbdtot = plfrac * (blay + tfactot*dplankdn)                          
+                     bbd = plfrac*(blay+dplankdn*odepth_rec)                              
+                     atot(lev) = 1. - exp_tbl(ittot)                                      
+                                                                                          
+                     radld = radld - radld * (atrans(lev) +             &
+     &                   efclfrac(lev,igc) * (1._rb - atrans(lev))) +   &
+     &                   gassrc + cldfmc(igc,lev) *                     &
+     &                   (bbdtot * atot(lev) - gassrc)             
+                     drad(lev-1) = drad(lev-1) + radld                                    
+                                                                                          
+                     bbugas(lev) = plfrac * (blay + dplankup*odepth_rec)                  
+                     bbutot(lev) = plfrac * (blay + tfactot * dplankup)                   
+                                                                                          
+                  else                                                                    
+                                                                                          
+                     tblind = odepth/(bpade+odepth)                                       
+                     itgas = tblint*tblind+0.5_rb                                         
+                     odepth = tau_tbl(itgas)                                              
+                     atrans(lev) = 1._rb - exp_tbl(itgas)                                 
+                     tfacgas = tfn_tbl(itgas)                                             
+              gassrc = atrans(lev) * plfrac * (blay + tfacgas*dplankdn)            
+                                                                                          
+                     odtot = odepth + odcld(lev,igc)                                      
+                     tblind = odtot/(bpade+odtot)                                         
+                     ittot = tblint*tblind + 0.5_rb                                       
+                     tfactot = tfn_tbl(ittot)                                             
+                     bbdtot = plfrac * (blay + tfactot*dplankdn)                          
+                     bbd = plfrac*(blay+tfacgas*dplankdn)                                 
+                     atot(lev) = 1._rb - exp_tbl(ittot)                                   
+                                                                                          
+                  radld = radld - radld * (atrans(lev) +                &
+     &               efclfrac(lev,igc) * (1._rb - atrans(lev))) +       &
+     &               gassrc + cldfmc(igc,lev) *                         &
+     &               (bbdtot * atot(lev) - gassrc)                                         
+                  drad(lev-1) = drad(lev-1) + radld                                       
+                  bbugas(lev) = plfrac * (blay + tfacgas * dplankup)                      
+                  bbutot(lev) = plfrac * (blay + tfactot * dplankup)                      
+                  endif                                                                   
+!  Clear layer                                                                            
+               else                                                                       
+                  if (odepth .le. 0.06_rb) then                                           
+                     atrans(lev) = odepth-0.5_rb*odepth*odepth                            
+                     odepth = rec_6*odepth                                                
+                     bbd = plfrac*(blay+dplankdn*odepth)                                  
+                     bbugas(lev) = plfrac*(blay+dplankup*odepth)                          
+                  else                                                                    
+                     tblind = odepth/(bpade+odepth)                                       
+                     itr = tblint*tblind+0.5_rb                                           
+                     transc = exp_tbl(itr)                                                
+                     atrans(lev) = 1._rb-transc                                           
+                     tausfac = tfn_tbl(itr)                                               
+                     bbd = plfrac*(blay+tausfac*dplankdn)                                 
+                     bbugas(lev) = plfrac * (blay + tausfac * dplankup)                   
+                  endif                                                                   
+                  radld = radld + (bbd-radld)*atrans(lev)                                 
+                  drad(lev-1) = drad(lev-1) + radld                                       
+               endif                                                                      
+!  Set clear sky stream to total sky stream as long as layers                             
+!  remain clear.  Streams diverge when a cloud is reached (iclddn=1),                     
+!  and clear sky stream must be computed separately from that point.                      
+                  if (iclddn.eq.1) then                                                   
+                     radclrd = radclrd + (bbd-radclrd) * atrans(lev)                      
+                     clrdrad(lev-1) = clrdrad(lev-1) + radclrd                            
+                  else                                                                    
+                     radclrd = radld                                                      
+                     clrdrad(lev-1) = drad(lev-1)                                         
+                  endif                                                                   
+            enddo                                                                         
+                                                                                          
+! Spectral emissivity & reflectance                                                       
+!  Include the contribution of spectrally varying longwave emissivity                     
+!  and reflection from the surface to the upward radiative transfer.                      
+!  Note: Spectral and Lambertian reflection are identical for the                         
+!  diffusivity angle flux integration used here.                                          
+                                                                                          
+!mz*
+!         rad0 = fracs(1,igc) * plankbnd(iband)                                            
+          rad0 = semiss(iband) * fracs(1,igc) * planklay(0,iband)
+!mz
+!  Add in specular reflection of surface downward radiance.                               
+         reflect = 1._rb - semiss(iband)                                                  
+         radlu = rad0 + reflect * radld                                                   
+         radclru = rad0 + reflect * radclrd                                               
+                                                                                          
+                                                                                          
+! Upward radiative transfer loop.                                                         
+         urad(0) = urad(0) + radlu                                                        
+         clrurad(0) = clrurad(0) + radclru                                                
+                                                                                          
+         do lev = 1, nlayers                                                              
+!  Cloudy layer                                                                           
+            if (icldlyr(lev) .eq. 1) then 
+               gassrc = bbugas(lev) * atrans(lev)
+               radlu = radlu - radlu * (atrans(lev) +                   &
+     &             efclfrac(lev,igc) * (1._rb - atrans(lev))) +         &
+     &              gassrc + cldfmc(igc,lev) *                          &
+     &              (bbutot(lev) * atot(lev) - gassrc)                                     
+               urad(lev) = urad(lev) + radlu                                              
+!  Clear layer                                                                            
+            else                                                                          
+               radlu = radlu + (bbugas(lev)-radlu)*atrans(lev)                            
+               urad(lev) = urad(lev) + radlu                                              
+            endif                                                                         
+!  Set clear sky stream to total sky stream as long as all layers                         
+!  are clear (iclddn=0).  Streams must be calculated separately at                        
+!  all layers when a cloud is present (ICLDDN=1), because surface                         
+!  reflectance is different for each stream.                         
+               if (iclddn.eq.1) then                                                      
+                  radclru = radclru + (bbugas(lev)-radclru)*atrans(lev)                   
+                  clrurad(lev) = clrurad(lev) + radclru                                   
+               else                                                                       
+                  radclru = radlu                                                         
+                  clrurad(lev) = urad(lev)                                                
+               endif                                                                      
+         enddo                                                                            
+                                                                                          
+! Increment g-point counter                                                               
+         igc = igc + 1                                                                    
+! Return to continue radiative transfer for all g-channels in present band                
+         if (igc .le. ngs(iband)) go to 1000                                              
+                                                                                          
+! Process longwave output from band for total and clear streams.                          
+! Calculate upward, downward, and net flux.                                               
+         do lev = nlayers, 0, -1                                                          
+            uflux(lev) = urad(lev)*wtdiff                                                 
+            dflux(lev) = drad(lev)*wtdiff                                                 
+            urad(lev) = 0.0_rb                                                            
+            drad(lev) = 0.0_rb                                                            
+            totuflux(lev) = totuflux(lev) + uflux(lev) * delwave(iband)                   
+            totdflux(lev) = totdflux(lev) + dflux(lev) * delwave(iband)                   
+            uclfl(lev) = clrurad(lev)*wtdiff                                              
+            dclfl(lev) = clrdrad(lev)*wtdiff                                              
+            clrurad(lev) = 0.0_rb                                                         
+            clrdrad(lev) = 0.0_rb                                                         
+            totuclfl(lev) = totuclfl(lev) + uclfl(lev) * delwave(iband)                   
+            totdclfl(lev) = totdclfl(lev) + dclfl(lev) * delwave(iband)                   
+         enddo                                                                            
+                                                                                          
+! End spectral band loop                                                                  
+      enddo                                                                               
+                                                                                          
+! Calculate fluxes at surface                                                             
+      totuflux(0) = totuflux(0) * fluxfac                                                 
+      totdflux(0) = totdflux(0) * fluxfac                                                 
+      fnet(0) = totuflux(0) - totdflux(0)                                                 
+      totuclfl(0) = totuclfl(0) * fluxfac                                                 
+      totdclfl(0) = totdclfl(0) * fluxfac                                                 
+      fnetc(0) = totuclfl(0) - totdclfl(0)                                                
+                                                                                          
+! Calculate fluxes at model levels                                                        
+      do lev = 1, nlayers                                                                 
+         totuflux(lev) = totuflux(lev) * fluxfac                                          
+         totdflux(lev) = totdflux(lev) * fluxfac                                          
+         fnet(lev) = totuflux(lev) - totdflux(lev)                                        
+         totuclfl(lev) = totuclfl(lev) * fluxfac                                          
+         totdclfl(lev) = totdclfl(lev) * fluxfac                                          
+         fnetc(lev) = totuclfl(lev) - totdclfl(lev)                                       
+         l = lev - 1                                                                      
+                                                                          
+! Calculate heating rates at model layers                                                 
+         htr(l)=heatfac*(fnet(l)-fnet(lev))/(pz(l)-pz(lev))                               
+         htrc(l)=heatfac*(fnetc(l)-fnetc(lev))/(pz(l)-pz(lev))                            
+      enddo                                                                               
+                                                                                          
+! Set heating rate to zero in top layer                                                   
+      htr(nlayers) = 0.0_rb                                                               
+      htrc(nlayers) = 0.0_rb                                                              
+                                                                                          
+      end subroutine rtrnmc_mcica             
+
+! ------------------------------------------------------------------------------
+      subroutine cldprmc(nlayers, inflag, iceflag, liqflag, cldfmc,     &
+     &  ciwpmc, clwpmc, cswpmc, reicmc, relqmc, resnmc, ncbands, taucmc, errmsg, errflg)
+! ------------------------------------------------------------------------------
+
+! Purpose:  Compute the cloud optical depth(s) for each cloudy layer.
+
+! ------- Input -------
+
+      integer(kind=im), intent(in) :: nlayers         ! total number of layers
+      integer(kind=im), intent(in) :: inflag          ! see definitions
+      integer(kind=im), intent(in) :: iceflag         ! see definitions
+      integer(kind=im), intent(in) :: liqflag         ! see definitions
+
+      real(kind=rb), intent(in) :: cldfmc(:,:)        ! cloud fraction [mcica]
+                                                      !    Dimensions: (ngptlw,nlayers)
+      real(kind=rb), intent(in) :: ciwpmc(:,:)        ! cloud ice water path [mcica]
+                                                      !    Dimensions: (ngptlw,nlayers)
+      real(kind=rb), intent(in) :: clwpmc(:,:)        ! cloud liquid water path [mcica]
+                                                      !    Dimensions: (ngptlw,nlayers)
+      real(kind=rb), intent(in) :: cswpmc(:,:)        ! cloud snow path [mcica]
+                                                      !    Dimensions: (ngptlw,nlayers)
+      real(kind=rb), intent(in) :: relqmc(:)          ! liquid particle effective radius (microns)
+                                                      !    Dimensions: (nlayers)
+      real(kind=rb), intent(in) :: reicmc(:)          ! ice particle effective radius (microns)
+                                                      !    Dimensions: (nlayers)
+      real(kind=rb), intent(in) :: resnmc(:)          ! snow particle effective radius (microns)
+                                                      !    Dimensions: (nlayers)
+                                                      ! specific definition of reicmc depends on setting of iceflag:
+                                                      ! iceflag = 0: ice effective radius, r_ec, (Ebert and Curry, 1992),
+                                                      !              r_ec must be >= 10.0 microns
+                                                      ! iceflag = 1: ice effective radius, r_ec, (Ebert and Curry, 1992),
+                                                      !              r_ec range is limited to 13.0 to 130.0 microns
+                                                      ! iceflag = 2: ice effective radius, r_k, (Key, Streamer Ref. Manual, 1996)
+                                                      !              r_k range is limited to 5.0 to 131.0 microns
+                                                      ! iceflag = 3: generalized effective size, dge, (Fu, 1996),
+                                                      !              dge range is limited to 5.0 to 140.0 microns
+                                                      !              [dge = 1.0315 * r_ec]
+
+! ------- Output -------
+
+      integer(kind=im), intent(out)   :: ncbands      ! number of cloud spectral bands
+      real(kind=rb),    intent(inout) :: taucmc(:,:)  ! cloud optical depth [mcica]
+                                                      !    Dimensions: (ngptlw,nlayers)
+      character(len=*), intent(inout) :: errmsg
+      integer,          intent(inout) :: errflg
+
+! ------- Local -------
+
+      integer(kind=im) :: lay                         ! Layer index
+      integer(kind=im) :: ib                          ! spectral band index
+      integer(kind=im) :: ig                          ! g-point interval index
+      integer(kind=im) :: index                                                                                     
+      integer(kind=im) :: icb(nbands)                                                                               
+      real(kind=rb) , dimension(2) :: absice0
+      real(kind=rb) , dimension(2,5) :: absice1
+      real(kind=rb) , dimension(43,16) :: absice2
+      real(kind=rb) , dimension(46,16) :: absice3
+      real(kind=rb) :: absliq0
+      real(kind=rb) , dimension(58,16) :: absliq1
+                                                                                                                    
+      real(kind=rb) :: abscoice(ngptlw)               ! ice absorption coefficients                                 
+      real(kind=rb) :: abscoliq(ngptlw)               ! liquid absorption coefficients                              
+      real(kind=rb) :: abscosno(ngptlw)               ! snow absorption coefficients                                
+      real(kind=rb) :: cwp                            ! cloud water path                                            
+      real(kind=rb) :: radice                         ! cloud ice effective size (microns)                          
+      real(kind=rb) :: factor                         !                                                             
+      real(kind=rb) :: fint                           !                                                             
+      real(kind=rb) :: radliq                         ! cloud liquid droplet radius (microns)                       
+      real(kind=rb) :: radsno                         ! cloud snow effective size (microns)                         
+      real(kind=rb), parameter :: eps = 1.e-6_rb      ! epsilon                                                     
+      real(kind=rb), parameter :: cldmin = 1.e-20_rb  ! minimum value for cloud quantities                          
+                                                                                                                    
+! ------- Definitions -------                                                                                       
+                                                                                                                    
+!     Explanation of the method for each value of INFLAG.  Values of                                                
+!     0 or 1 for INFLAG do not distingish being liquid and ice clouds.                                              
+!     INFLAG = 2 does distinguish between liquid and ice clouds, and                                                
+!     requires further user input to specify the method to be used to                                               
+!     compute the aborption due to each.                                                                            
+!     INFLAG = 0:  For each cloudy layer, the cloud fraction and (gray)                                             
+!                  optical depth are input.                                                                         
+!     INFLAG = 1:  For each cloudy layer, the cloud fraction and cloud                                              
+!                  water path (g/m2) are input.  The (gray) cloud optical                                           
+!                  depth is computed as in CCM2.                                                                    
+!     INFLAG = 2:  For each cloudy layer, the cloud fraction, cloud                                                 
+!                  water path (g/m2), and cloud ice fraction are input.                                             
+!       ICEFLAG = 0:  The ice effective radius (microns) is input and the                                           
+!                     optical depths due to ice clouds are computed as in CCM3.                                     
+!       ICEFLAG = 1:  The ice effective radius (microns) is input and the                                           
+!                     optical depths due to ice clouds are computed as in                                           
+!                     Ebert and Curry, JGR, 97, 3831-3836 (1992).  The                                              
+!                     spectral regions in this work have been matched with                                          
+!                     the spectral bands in RRTM to as great an extent                                              
+!                     as possible:                                                                                  
+!                     E&C 1      IB = 5      RRTM bands 9-16                                                        
+!                     E&C 2      IB = 4      RRTM bands 6-8                                                         
+!                     E&C 3      IB = 3      RRTM bands 3-5                                                         
+!                     E&C 4      IB = 2      RRTM band 2                                                            
+!                     E&C 5      IB = 1      RRTM band 1                                                            
+!       ICEFLAG = 2:  The ice effective radius (microns) is input and the
+!                     optical properties due to ice clouds are computed from
+!                     the optical properties stored in the RT code,
+!                     STREAMER v3.0 (Reference: Key. J., Streamer 
+!                     User's Guide, Cooperative Institute for
+!                     Meteorological Satellite Studies, 2001, 96 pp.).
+!                     Valid range of values for re are between 5.0 and
+!                     131.0 micron.
+!       ICEFLAG = 3: The ice generalized effective size (dge) is input
+!                    and the optical properties, are calculated as in
+!                    Q. Fu, J. Climate, (1998). Q. Fu provided high resolution
+!                    tables which were appropriately averaged for the
+!                    bands in RRTM_LW.  Linear interpolation is used to
+!                    get the coefficients from the stored tables.
+!                    Valid range of values for dge are between 5.0 and
+!                    140.0 micron.
+!       LIQFLAG = 0:  The optical depths due to water clouds are computed as
+!                     in CCM3.
+!       LIQFLAG = 1:  The water droplet effective radius (microns) is input 
+!                     and the optical depths due to water clouds are computed 
+!                     as in Hu and Stamnes, J., Clim., 6, 728-742, (1993).
+!                     The values for absorption coefficients appropriate for
+!                     the spectral bands in RRTM have been obtained for a 
+!                     range of effective radii by an averaging procedure 
+!                     based on the work of J. Pinto (private communication).
+!                     Linear interpolation is used to get the absorption 
+!                     coefficients for the input effective radius.
+
+      data icb /1,2,3,3,3,4,4,4,5, 5, 5, 5, 5, 5, 5, 5/
+! Everything below is for INFLAG = 2.
+
+! ABSICEn(J,IB) are the parameters needed to compute the liquid water 
+! absorption coefficient in spectral region IB for ICEFLAG=n.  The units
+! of ABSICEn(1,IB) are m2/g and ABSICEn(2,IB) has units (microns (m2/g)).
+! For ICEFLAG = 0.
+
+      absice0(:)= (/0.005_rb,  1.0_rb/)
+
+! For ICEFLAG = 1.
+      absice1(1,:) = (/0.0036_rb, 0.0068_rb, 0.0003_rb, 0.0016_rb,      &
+     &                0.0020_rb/)
+      absice1(2,:) = (/1.136_rb , 0.600_rb , 1.338_rb , 1.166_rb ,      &
+     &                1.118_rb /)
+
+! For ICEFLAG = 2.  In each band, the absorption
+! coefficients are listed for a range of effective radii from 5.0
+! to 131.0 microns in increments of 3.0 microns.
+! Spherical Ice Particle Parameterization
+! absorption units (abs coef/iwc): [(m^-1)/(g m^-3)]
+      absice2(:,1) = (/ &
+! band 1
+       7.798999e-02_rb,6.340479e-02_rb,5.417973e-02_rb,4.766245e-02_rb,4.272663e-02_rb, &
+       3.880939e-02_rb,3.559544e-02_rb,3.289241e-02_rb,3.057511e-02_rb,2.855800e-02_rb, &
+       2.678022e-02_rb,2.519712e-02_rb,2.377505e-02_rb,2.248806e-02_rb,2.131578e-02_rb, &
+       2.024194e-02_rb,1.925337e-02_rb,1.833926e-02_rb,1.749067e-02_rb,1.670007e-02_rb, &
+       1.596113e-02_rb,1.526845e-02_rb,1.461739e-02_rb,1.400394e-02_rb,1.342462e-02_rb, &
+       1.287639e-02_rb,1.235656e-02_rb,1.186279e-02_rb,1.139297e-02_rb,1.094524e-02_rb, &
+       1.051794e-02_rb,1.010956e-02_rb,9.718755e-03_rb,9.344316e-03_rb,8.985139e-03_rb, &
+       8.640223e-03_rb,8.308656e-03_rb,7.989606e-03_rb,7.682312e-03_rb,7.386076e-03_rb, &
+       7.100255e-03_rb,6.824258e-03_rb,6.557540e-03_rb/)
+      absice2(:,2) = (/ &
+! band 2
+       2.784879e-02_rb,2.709863e-02_rb,2.619165e-02_rb,2.529230e-02_rb,2.443225e-02_rb, &
+       2.361575e-02_rb,2.284021e-02_rb,2.210150e-02_rb,2.139548e-02_rb,2.071840e-02_rb, &
+       2.006702e-02_rb,1.943856e-02_rb,1.883064e-02_rb,1.824120e-02_rb,1.766849e-02_rb, &
+       1.711099e-02_rb,1.656737e-02_rb,1.603647e-02_rb,1.551727e-02_rb,1.500886e-02_rb, &
+       1.451045e-02_rb,1.402132e-02_rb,1.354084e-02_rb,1.306842e-02_rb,1.260355e-02_rb, &
+       1.214575e-02_rb,1.169460e-02_rb,1.124971e-02_rb,1.081072e-02_rb,1.037731e-02_rb, &
+       9.949167e-03_rb,9.526021e-03_rb,9.107615e-03_rb,8.693714e-03_rb,8.284096e-03_rb, &
+       7.878558e-03_rb,7.476910e-03_rb,7.078974e-03_rb,6.684586e-03_rb,6.293589e-03_rb, &
+       5.905839e-03_rb,5.521200e-03_rb,5.139543e-03_rb/)
+      absice2(:,3) = (/ &
+! band 3
+       1.065397e-01_rb,8.005726e-02_rb,6.546428e-02_rb,5.589131e-02_rb,4.898681e-02_rb, &
+       4.369932e-02_rb,3.947901e-02_rb,3.600676e-02_rb,3.308299e-02_rb,3.057561e-02_rb, &
+       2.839325e-02_rb,2.647040e-02_rb,2.475872e-02_rb,2.322164e-02_rb,2.183091e-02_rb, &
+       2.056430e-02_rb,1.940407e-02_rb,1.833586e-02_rb,1.734787e-02_rb,1.643034e-02_rb, &
+       1.557512e-02_rb,1.477530e-02_rb,1.402501e-02_rb,1.331924e-02_rb,1.265364e-02_rb, &
+       1.202445e-02_rb,1.142838e-02_rb,1.086257e-02_rb,1.032445e-02_rb,9.811791e-03_rb, &
+       9.322587e-03_rb,8.855053e-03_rb,8.407591e-03_rb,7.978763e-03_rb,7.567273e-03_rb, &
+       7.171949e-03_rb,6.791728e-03_rb,6.425642e-03_rb,6.072809e-03_rb,5.732424e-03_rb, &
+       5.403748e-03_rb,5.086103e-03_rb,4.778865e-03_rb/)
+      absice2(:,4) = (/ &
+! band 4
+       1.804566e-01_rb,1.168987e-01_rb,8.680442e-02_rb,6.910060e-02_rb,5.738174e-02_rb, &
+       4.902332e-02_rb,4.274585e-02_rb,3.784923e-02_rb,3.391734e-02_rb,3.068690e-02_rb, &
+       2.798301e-02_rb,2.568480e-02_rb,2.370600e-02_rb,2.198337e-02_rb,2.046940e-02_rb, &   
+       1.912777e-02_rb,1.793016e-02_rb,1.685420e-02_rb,1.588193e-02_rb,1.499882e-02_rb, &   
+       1.419293e-02_rb,1.345440e-02_rb,1.277496e-02_rb,1.214769e-02_rb,1.156669e-02_rb, &   
+       1.102694e-02_rb,1.052412e-02_rb,1.005451e-02_rb,9.614854e-03_rb,9.202335e-03_rb, &   
+       8.814470e-03_rb,8.449077e-03_rb,8.104223e-03_rb,7.778195e-03_rb,7.469466e-03_rb, &   
+       7.176671e-03_rb,6.898588e-03_rb,6.634117e-03_rb,6.382264e-03_rb,6.142134e-03_rb, &   
+       5.912913e-03_rb,5.693862e-03_rb,5.484308e-03_rb/)                                    
+      absice2(:,5) = (/ &                                                                   
+! band 5                                                                                    
+       2.131806e-01_rb,1.311372e-01_rb,9.407171e-02_rb,7.299442e-02_rb,5.941273e-02_rb, &   
+       4.994043e-02_rb,4.296242e-02_rb,3.761113e-02_rb,3.337910e-02_rb,2.994978e-02_rb, &   
+       2.711556e-02_rb,2.473461e-02_rb,2.270681e-02_rb,2.095943e-02_rb,1.943839e-02_rb, &   
+       1.810267e-02_rb,1.692057e-02_rb,1.586719e-02_rb,1.492275e-02_rb,1.407132e-02_rb, &   
+       1.329989e-02_rb,1.259780e-02_rb,1.195618e-02_rb,1.136761e-02_rb,1.082583e-02_rb, &   
+       1.032552e-02_rb,9.862158e-03_rb,9.431827e-03_rb,9.031157e-03_rb,8.657217e-03_rb, &   
+       8.307449e-03_rb,7.979609e-03_rb,7.671724e-03_rb,7.382048e-03_rb,7.109032e-03_rb, &   
+       6.851298e-03_rb,6.607615e-03_rb,6.376881e-03_rb,6.158105e-03_rb,5.950394e-03_rb, &   
+       5.752942e-03_rb,5.565019e-03_rb,5.385963e-03_rb/)                                    
+      absice2(:,6) = (/ &                                                                   
+! band 6                                                                                    
+       1.546177e-01_rb,1.039251e-01_rb,7.910347e-02_rb,6.412429e-02_rb,5.399997e-02_rb, &   
+       4.664937e-02_rb,4.104237e-02_rb,3.660781e-02_rb,3.300218e-02_rb,3.000586e-02_rb, &   
+       2.747148e-02_rb,2.529633e-02_rb,2.340647e-02_rb,2.174723e-02_rb,2.027731e-02_rb, &   
+       1.896487e-02_rb,1.778492e-02_rb,1.671761e-02_rb,1.574692e-02_rb,1.485978e-02_rb, &   
+       1.404543e-02_rb,1.329489e-02_rb,1.260066e-02_rb,1.195636e-02_rb,1.135657e-02_rb, &   
+       1.079664e-02_rb,1.027257e-02_rb,9.780871e-03_rb,9.318505e-03_rb,8.882815e-03_rb, &   
+       8.471458e-03_rb,8.082364e-03_rb,7.713696e-03_rb,7.363817e-03_rb,7.031264e-03_rb, &   
+       6.714725e-03_rb,6.413021e-03_rb,6.125086e-03_rb,5.849958e-03_rb,5.586764e-03_rb, &   
+       5.334707e-03_rb,5.093066e-03_rb,4.861179e-03_rb/)                                    
+      absice2(:,7) = (/ &                                                                   
+! band 7                                                                                    
+       7.583404e-02_rb,6.181558e-02_rb,5.312027e-02_rb,4.696039e-02_rb,4.225986e-02_rb, &   
+       3.849735e-02_rb,3.538340e-02_rb,3.274182e-02_rb,3.045798e-02_rb,2.845343e-02_rb, &   
+       2.667231e-02_rb,2.507353e-02_rb,2.362606e-02_rb,2.230595e-02_rb,2.109435e-02_rb, &   
+       1.997617e-02_rb,1.893916e-02_rb,1.797328e-02_rb,1.707016e-02_rb,1.622279e-02_rb, &   
+       1.542523e-02_rb,1.467241e-02_rb,1.395997e-02_rb,1.328414e-02_rb,1.264164e-02_rb, &   
+       1.202958e-02_rb,1.144544e-02_rb,1.088697e-02_rb,1.035218e-02_rb,9.839297e-03_rb, &   
+       9.346733e-03_rb,8.873057e-03_rb,8.416980e-03_rb,7.977335e-03_rb,7.553066e-03_rb, &   
+       7.143210e-03_rb,6.746888e-03_rb,6.363297e-03_rb,5.991700e-03_rb,5.631422e-03_rb, &   
+       5.281840e-03_rb,4.942378e-03_rb,4.612505e-03_rb/)                                    
+      absice2(:,8) = (/ &                                                                   
+! band 8                                                                                    
+       9.022185e-02_rb,6.922700e-02_rb,5.710674e-02_rb,4.898377e-02_rb,4.305946e-02_rb, &   
+       3.849553e-02_rb,3.484183e-02_rb,3.183220e-02_rb,2.929794e-02_rb,2.712627e-02_rb, &   
+       2.523856e-02_rb,2.357810e-02_rb,2.210286e-02_rb,2.078089e-02_rb,1.958747e-02_rb, &   
+       1.850310e-02_rb,1.751218e-02_rb,1.660205e-02_rb,1.576232e-02_rb,1.498440e-02_rb, &   
+       1.426107e-02_rb,1.358624e-02_rb,1.295474e-02_rb,1.236212e-02_rb,1.180456e-02_rb, &   
+       1.127874e-02_rb,1.078175e-02_rb,1.031106e-02_rb,9.864433e-03_rb,9.439878e-03_rb, &   
+       9.035637e-03_rb,8.650140e-03_rb,8.281981e-03_rb,7.929895e-03_rb,7.592746e-03_rb, &   
+       7.269505e-03_rb,6.959238e-03_rb,6.661100e-03_rb,6.374317e-03_rb,6.098185e-03_rb, &   
+       5.832059e-03_rb,5.575347e-03_rb,5.327504e-03_rb/)                                    
+      absice2(:,9) = (/ &
+! band 9
+       1.294087e-01_rb,8.788217e-02_rb,6.728288e-02_rb,5.479720e-02_rb,4.635049e-02_rb, &
+       4.022253e-02_rb,3.555576e-02_rb,3.187259e-02_rb,2.888498e-02_rb,2.640843e-02_rb, &
+       2.431904e-02_rb,2.253038e-02_rb,2.098024e-02_rb,1.962267e-02_rb,1.842293e-02_rb, &
+       1.735426e-02_rb,1.639571e-02_rb,1.553060e-02_rb,1.474552e-02_rb,1.402953e-02_rb, &
+       1.337363e-02_rb,1.277033e-02_rb,1.221336e-02_rb,1.169741e-02_rb,1.121797e-02_rb, &
+       1.077117e-02_rb,1.035369e-02_rb,9.962643e-03_rb,9.595509e-03_rb,9.250088e-03_rb, &
+       8.924447e-03_rb,8.616876e-03_rb,8.325862e-03_rb,8.050057e-03_rb,7.788258e-03_rb, &
+       7.539388e-03_rb,7.302478e-03_rb,7.076656e-03_rb,6.861134e-03_rb,6.655197e-03_rb, &
+       6.458197e-03_rb,6.269543e-03_rb,6.088697e-03_rb/)
+      absice2(:,10) = (/ &
+! band 10
+       1.593628e-01_rb,1.014552e-01_rb,7.458955e-02_rb,5.903571e-02_rb,4.887582e-02_rb, &
+       4.171159e-02_rb,3.638480e-02_rb,3.226692e-02_rb,2.898717e-02_rb,2.631256e-02_rb, &
+       2.408925e-02_rb,2.221156e-02_rb,2.060448e-02_rb,1.921325e-02_rb,1.799699e-02_rb, &
+       1.692456e-02_rb,1.597177e-02_rb,1.511961e-02_rb,1.435289e-02_rb,1.365933e-02_rb, &
+       1.302890e-02_rb,1.245334e-02_rb,1.192576e-02_rb,1.144037e-02_rb,1.099230e-02_rb, &   
+       1.057739e-02_rb,1.019208e-02_rb,9.833302e-03_rb,9.498395e-03_rb,9.185047e-03_rb, &   
+       8.891237e-03_rb,8.615185e-03_rb,8.355325e-03_rb,8.110267e-03_rb,7.878778e-03_rb, &   
+       7.659759e-03_rb,7.452224e-03_rb,7.255291e-03_rb,7.068166e-03_rb,6.890130e-03_rb, &   
+       6.720536e-03_rb,6.558794e-03_rb,6.404371e-03_rb/)                                    
+      absice2(:,11) = (/ &                                                                  
+! band 11                                                                                   
+       1.656227e-01_rb,1.032129e-01_rb,7.487359e-02_rb,5.871431e-02_rb,4.828355e-02_rb, &   
+       4.099989e-02_rb,3.562924e-02_rb,3.150755e-02_rb,2.824593e-02_rb,2.560156e-02_rb, &   
+       2.341503e-02_rb,2.157740e-02_rb,2.001169e-02_rb,1.866199e-02_rb,1.748669e-02_rb, &   
+       1.645421e-02_rb,1.554015e-02_rb,1.472535e-02_rb,1.399457e-02_rb,1.333553e-02_rb, &   
+       1.273821e-02_rb,1.219440e-02_rb,1.169725e-02_rb,1.124104e-02_rb,1.082096e-02_rb, &   
+       1.043290e-02_rb,1.007336e-02_rb,9.739338e-03_rb,9.428223e-03_rb,9.137756e-03_rb, &   
+       8.865964e-03_rb,8.611115e-03_rb,8.371686e-03_rb,8.146330e-03_rb,7.933852e-03_rb, &   
+       7.733187e-03_rb,7.543386e-03_rb,7.363597e-03_rb,7.193056e-03_rb,7.031072e-03_rb, &   
+       6.877024e-03_rb,6.730348e-03_rb,6.590531e-03_rb/)                                    
+      absice2(:,12) = (/ &                                                                  
+! band 12                                                                                   
+       9.194591e-02_rb,6.446867e-02_rb,4.962034e-02_rb,4.042061e-02_rb,3.418456e-02_rb, &   
+       2.968856e-02_rb,2.629900e-02_rb,2.365572e-02_rb,2.153915e-02_rb,1.980791e-02_rb, &   
+       1.836689e-02_rb,1.714979e-02_rb,1.610900e-02_rb,1.520946e-02_rb,1.442476e-02_rb, &   
+       1.373468e-02_rb,1.312345e-02_rb,1.257858e-02_rb,1.209010e-02_rb,1.164990e-02_rb, &   
+       1.125136e-02_rb,1.088901e-02_rb,1.055827e-02_rb,1.025531e-02_rb,9.976896e-03_rb, &   
+       9.720255e-03_rb,9.483022e-03_rb,9.263160e-03_rb,9.058902e-03_rb,8.868710e-03_rb, &   
+       8.691240e-03_rb,8.525312e-03_rb,8.369886e-03_rb,8.224042e-03_rb,8.086961e-03_rb, &   
+       7.957917e-03_rb,7.836258e-03_rb,7.721400e-03_rb,7.612821e-03_rb,7.510045e-03_rb, &   
+       7.412648e-03_rb,7.320242e-03_rb,7.232476e-03_rb/)           
+      absice2(:,13) = (/ &
+! band 13                                                                                   
+       1.437021e-01_rb,8.872535e-02_rb,6.392420e-02_rb,4.991833e-02_rb,4.096790e-02_rb, &   
+       3.477881e-02_rb,3.025782e-02_rb,2.681909e-02_rb,2.412102e-02_rb,2.195132e-02_rb, &   
+       2.017124e-02_rb,1.868641e-02_rb,1.743044e-02_rb,1.635529e-02_rb,1.542540e-02_rb, &   
+       1.461388e-02_rb,1.390003e-02_rb,1.326766e-02_rb,1.270395e-02_rb,1.219860e-02_rb, &   
+       1.174326e-02_rb,1.133107e-02_rb,1.095637e-02_rb,1.061442e-02_rb,1.030126e-02_rb, &   
+       1.001352e-02_rb,9.748340e-03_rb,9.503256e-03_rb,9.276155e-03_rb,9.065205e-03_rb, &   
+       8.868808e-03_rb,8.685571e-03_rb,8.514268e-03_rb,8.353820e-03_rb,8.203272e-03_rb, &   
+       8.061776e-03_rb,7.928578e-03_rb,7.803001e-03_rb,7.684443e-03_rb,7.572358e-03_rb, &   
+       7.466258e-03_rb,7.365701e-03_rb,7.270286e-03_rb/)                                    
+      absice2(:,14) = (/ &                                                                  
+! band 14                                                                                   
+       1.288870e-01_rb,8.160295e-02_rb,5.964745e-02_rb,4.703790e-02_rb,3.888637e-02_rb, &   
+       3.320115e-02_rb,2.902017e-02_rb,2.582259e-02_rb,2.330224e-02_rb,2.126754e-02_rb, &   
+       1.959258e-02_rb,1.819130e-02_rb,1.700289e-02_rb,1.598320e-02_rb,1.509942e-02_rb, &   
+       1.432666e-02_rb,1.364572e-02_rb,1.304156e-02_rb,1.250220e-02_rb,1.201803e-02_rb, &   
+       1.158123e-02_rb,1.118537e-02_rb,1.082513e-02_rb,1.049605e-02_rb,1.019440e-02_rb, &   
+       9.916989e-03_rb,9.661116e-03_rb,9.424457e-03_rb,9.205005e-03_rb,9.001022e-03_rb, &   
+       8.810992e-03_rb,8.633588e-03_rb,8.467646e-03_rb,8.312137e-03_rb,8.166151e-03_rb, &   
+       8.028878e-03_rb,7.899597e-03_rb,7.777663e-03_rb,7.662498e-03_rb,7.553581e-03_rb, &   
+       7.450444e-03_rb,7.352662e-03_rb,7.259851e-03_rb/)                                    
+      absice2(:,15) = (/ &                                                                  
+! band 15                                                                                   
+       8.254229e-02_rb,5.808787e-02_rb,4.492166e-02_rb,3.675028e-02_rb,3.119623e-02_rb, &   
+       2.718045e-02_rb,2.414450e-02_rb,2.177073e-02_rb,1.986526e-02_rb,1.830306e-02_rb, &   
+       1.699991e-02_rb,1.589698e-02_rb,1.495199e-02_rb,1.413374e-02_rb,1.341870e-02_rb, &   
+       1.278883e-02_rb,1.223002e-02_rb,1.173114e-02_rb,1.128322e-02_rb,1.087900e-02_rb, &   
+       1.051254e-02_rb,1.017890e-02_rb,9.873991e-03_rb,9.594347e-03_rb,9.337044e-03_rb, &   
+       9.099589e-03_rb,8.879842e-03_rb,8.675960e-03_rb,8.486341e-03_rb,8.309594e-03_rb, &   
+       8.144500e-03_rb,7.989986e-03_rb,7.845109e-03_rb,7.709031e-03_rb,7.581007e-03_rb, &   
+       7.460376e-03_rb,7.346544e-03_rb,7.238978e-03_rb,7.137201e-03_rb,7.040780e-03_rb, &   
+       6.949325e-03_rb,6.862483e-03_rb,6.779931e-03_rb/)                                    
+      absice2(:,16) = (/ &                                                                  
+! band 16                                                                                   
+       1.382062e-01_rb,8.643227e-02_rb,6.282935e-02_rb,4.934783e-02_rb,4.063891e-02_rb, &   
+       3.455591e-02_rb,3.007059e-02_rb,2.662897e-02_rb,2.390631e-02_rb,2.169972e-02_rb, &   
+       1.987596e-02_rb,1.834393e-02_rb,1.703924e-02_rb,1.591513e-02_rb,1.493679e-02_rb, &   
+       1.407780e-02_rb,1.331775e-02_rb,1.264061e-02_rb,1.203364e-02_rb,1.148655e-02_rb, &   
+       1.099099e-02_rb,1.054006e-02_rb,1.012807e-02_rb,9.750215e-03_rb,9.402477e-03_rb, &   
+       9.081428e-03_rb,8.784143e-03_rb,8.508107e-03_rb,8.251146e-03_rb,8.011373e-03_rb, &   
+       7.787140e-03_rb,7.577002e-03_rb,7.379687e-03_rb,7.194071e-03_rb,7.019158e-03_rb, &   
+       6.854061e-03_rb,6.697986e-03_rb,6.550224e-03_rb,6.410138e-03_rb,6.277153e-03_rb, &   
+       6.150751e-03_rb,6.030462e-03_rb,5.915860e-03_rb/)                                    
+                                                                                           
+! ICEFLAG = 3; Fu parameterization. Particle size 5 - 140 micron in 
+! increments of 3 microns.
+! units = m2/g
+! Hexagonal Ice Particle Parameterization
+! absorption units (abs coef/iwc): [(m^-1)/(g m^-3)]
+      absice3(:,1) = (/ &
+! band 1
+       3.110649e-03_rb,4.666352e-02_rb,6.606447e-02_rb,6.531678e-02_rb,6.012598e-02_rb, &
+       5.437494e-02_rb,4.906411e-02_rb,4.441146e-02_rb,4.040585e-02_rb,3.697334e-02_rb, &
+       3.403027e-02_rb,3.149979e-02_rb,2.931596e-02_rb,2.742365e-02_rb,2.577721e-02_rb, &
+       2.433888e-02_rb,2.307732e-02_rb,2.196644e-02_rb,2.098437e-02_rb,2.011264e-02_rb, &
+       1.933561e-02_rb,1.863992e-02_rb,1.801407e-02_rb,1.744812e-02_rb,1.693346e-02_rb, &
+       1.646252e-02_rb,1.602866e-02_rb,1.562600e-02_rb,1.524933e-02_rb,1.489399e-02_rb, &
+       1.455580e-02_rb,1.423098e-02_rb,1.391612e-02_rb,1.360812e-02_rb,1.330413e-02_rb, &
+       1.300156e-02_rb,1.269801e-02_rb,1.239127e-02_rb,1.207928e-02_rb,1.176014e-02_rb, &
+       1.143204e-02_rb,1.109334e-02_rb,1.074243e-02_rb,1.037786e-02_rb,9.998198e-03_rb, &
+       9.602126e-03_rb/)
+      absice3(:,2) = (/ &
+! band 2
+       3.984966e-04_rb,1.681097e-02_rb,2.627680e-02_rb,2.767465e-02_rb,2.700722e-02_rb, &
+       2.579180e-02_rb,2.448677e-02_rb,2.323890e-02_rb,2.209096e-02_rb,2.104882e-02_rb, &
+       2.010547e-02_rb,1.925003e-02_rb,1.847128e-02_rb,1.775883e-02_rb,1.710358e-02_rb, &
+       1.649769e-02_rb,1.593449e-02_rb,1.540829e-02_rb,1.491429e-02_rb,1.444837e-02_rb, &
+       1.400704e-02_rb,1.358729e-02_rb,1.318654e-02_rb,1.280258e-02_rb,1.243346e-02_rb, &
+       1.207750e-02_rb,1.173325e-02_rb,1.139941e-02_rb,1.107487e-02_rb,1.075861e-02_rb, &
+       1.044975e-02_rb,1.014753e-02_rb,9.851229e-03_rb,9.560240e-03_rb,9.274003e-03_rb, &
+       8.992020e-03_rb,8.713845e-03_rb,8.439074e-03_rb,8.167346e-03_rb,7.898331e-03_rb, &
+       7.631734e-03_rb,7.367286e-03_rb,7.104742e-03_rb,6.843882e-03_rb,6.584504e-03_rb, &
+       6.326424e-03_rb/)
+      absice3(:,3) = (/ &
+! band 3
+       6.933163e-02_rb,8.540475e-02_rb,7.701816e-02_rb,6.771158e-02_rb,5.986953e-02_rb, &
+       5.348120e-02_rb,4.824962e-02_rb,4.390563e-02_rb,4.024411e-02_rb,3.711404e-02_rb, &
+       3.440426e-02_rb,3.203200e-02_rb,2.993478e-02_rb,2.806474e-02_rb,2.638464e-02_rb, &
+       2.486516e-02_rb,2.348288e-02_rb,2.221890e-02_rb,2.105780e-02_rb,1.998687e-02_rb, &
+       1.899552e-02_rb,1.807490e-02_rb,1.721750e-02_rb,1.641693e-02_rb,1.566773e-02_rb, &
+       1.496515e-02_rb,1.430509e-02_rb,1.368398e-02_rb,1.309865e-02_rb,1.254634e-02_rb, &
+       1.202456e-02_rb,1.153114e-02_rb,1.106409e-02_rb,1.062166e-02_rb,1.020224e-02_rb, &
+       9.804381e-03_rb,9.426771e-03_rb,9.068205e-03_rb,8.727578e-03_rb,8.403876e-03_rb, &
+       8.096160e-03_rb,7.803564e-03_rb,7.525281e-03_rb,7.260560e-03_rb,7.008697e-03_rb, &
+       6.769036e-03_rb/)
+      absice3(:,4) = (/ &
+! band 4
+       1.765735e-01_rb,1.382700e-01_rb,1.095129e-01_rb,8.987475e-02_rb,7.591185e-02_rb, &
+       6.554169e-02_rb,5.755500e-02_rb,5.122083e-02_rb,4.607610e-02_rb,4.181475e-02_rb, &
+       3.822697e-02_rb,3.516432e-02_rb,3.251897e-02_rb,3.021073e-02_rb,2.817876e-02_rb, &
+       2.637607e-02_rb,2.476582e-02_rb,2.331871e-02_rb,2.201113e-02_rb,2.082388e-02_rb, &
+       1.974115e-02_rb,1.874983e-02_rb,1.783894e-02_rb,1.699922e-02_rb,1.622280e-02_rb, &
+       1.550296e-02_rb,1.483390e-02_rb,1.421064e-02_rb,1.362880e-02_rb,1.308460e-02_rb, &
+       1.257468e-02_rb,1.209611e-02_rb,1.164628e-02_rb,1.122287e-02_rb,1.082381e-02_rb, &
+       1.044725e-02_rb,1.009154e-02_rb,9.755166e-03_rb,9.436783e-03_rb,9.135163e-03_rb, &
+       8.849193e-03_rb,8.577856e-03_rb,8.320225e-03_rb,8.075451e-03_rb,7.842755e-03_rb, &
+       7.621418e-03_rb/)
+      absice3(:,5) = (/ &
+! band 5
+       2.339673e-01_rb,1.692124e-01_rb,1.291656e-01_rb,1.033837e-01_rb,8.562949e-02_rb, &
+       7.273526e-02_rb,6.298262e-02_rb,5.537015e-02_rb,4.927787e-02_rb,4.430246e-02_rb, &
+       4.017061e-02_rb,3.669072e-02_rb,3.372455e-02_rb,3.116995e-02_rb,2.894977e-02_rb, &
+       2.700471e-02_rb,2.528842e-02_rb,2.376420e-02_rb,2.240256e-02_rb,2.117959e-02_rb, &
+       2.007567e-02_rb,1.907456e-02_rb,1.816271e-02_rb,1.732874e-02_rb,1.656300e-02_rb, &
+       1.585725e-02_rb,1.520445e-02_rb,1.459852e-02_rb,1.403419e-02_rb,1.350689e-02_rb, &
+       1.301260e-02_rb,1.254781e-02_rb,1.210941e-02_rb,1.169468e-02_rb,1.130118e-02_rb, &
+       1.092675e-02_rb,1.056945e-02_rb,1.022757e-02_rb,9.899560e-03_rb,9.584021e-03_rb, &
+       9.279705e-03_rb,8.985479e-03_rb,8.700322e-03_rb,8.423306e-03_rb,8.153590e-03_rb, &
+       7.890412e-03_rb/)                                                             
+      absice3(:,6) = (/ &                                                            
+! band 6                                                                             
+       1.145369e-01_rb,1.174566e-01_rb,9.917866e-02_rb,8.332990e-02_rb,7.104263e-02_rb, &
+       6.153370e-02_rb,5.405472e-02_rb,4.806281e-02_rb,4.317918e-02_rb,3.913795e-02_rb, &
+       3.574916e-02_rb,3.287437e-02_rb,3.041067e-02_rb,2.828017e-02_rb,2.642292e-02_rb, &
+       2.479206e-02_rb,2.335051e-02_rb,2.206851e-02_rb,2.092195e-02_rb,1.989108e-02_rb, &
+       1.895958e-02_rb,1.811385e-02_rb,1.734245e-02_rb,1.663573e-02_rb,1.598545e-02_rb, &
+       1.538456e-02_rb,1.482700e-02_rb,1.430750e-02_rb,1.382150e-02_rb,1.336499e-02_rb, &
+       1.293447e-02_rb,1.252685e-02_rb,1.213939e-02_rb,1.176968e-02_rb,1.141555e-02_rb, &
+       1.107508e-02_rb,1.074655e-02_rb,1.042839e-02_rb,1.011923e-02_rb,9.817799e-03_rb, &
+       9.522962e-03_rb,9.233688e-03_rb,8.949041e-03_rb,8.668171e-03_rb,8.390301e-03_rb, &
+       8.114723e-03_rb/)                                                             
+      absice3(:,7) = (/ &                                                            
+! band 7                                                                             
+       1.222345e-02_rb,5.344230e-02_rb,5.523465e-02_rb,5.128759e-02_rb,4.676925e-02_rb, &
+       4.266150e-02_rb,3.910561e-02_rb,3.605479e-02_rb,3.342843e-02_rb,3.115052e-02_rb, &
+       2.915776e-02_rb,2.739935e-02_rb,2.583499e-02_rb,2.443266e-02_rb,2.316681e-02_rb, &
+       2.201687e-02_rb,2.096619e-02_rb,2.000112e-02_rb,1.911044e-02_rb,1.828481e-02_rb, &
+       1.751641e-02_rb,1.679866e-02_rb,1.612598e-02_rb,1.549360e-02_rb,1.489742e-02_rb, &
+       1.433392e-02_rb,1.380002e-02_rb,1.329305e-02_rb,1.281068e-02_rb,1.235084e-02_rb, &
+       1.191172e-02_rb,1.149171e-02_rb,1.108936e-02_rb,1.070341e-02_rb,1.033271e-02_rb, &
+       9.976220e-03_rb,9.633021e-03_rb,9.302273e-03_rb,8.983216e-03_rb,8.675161e-03_rb, &
+       8.377478e-03_rb,8.089595e-03_rb,7.810986e-03_rb,7.541170e-03_rb,7.279706e-03_rb, &
+       7.026186e-03_rb/)                                                             
+      absice3(:,8) = (/ &                                                            
+! band 8                                                                             
+       6.711058e-02_rb,6.918198e-02_rb,6.127484e-02_rb,5.411944e-02_rb,4.836902e-02_rb, &
+       4.375293e-02_rb,3.998077e-02_rb,3.683587e-02_rb,3.416508e-02_rb,3.186003e-02_rb, &
+       2.984290e-02_rb,2.805671e-02_rb,2.645895e-02_rb,2.501733e-02_rb,2.370689e-02_rb, &
+       2.250808e-02_rb,2.140532e-02_rb,2.038609e-02_rb,1.944018e-02_rb,1.855918e-02_rb, &
+       1.773609e-02_rb,1.696504e-02_rb,1.624106e-02_rb,1.555990e-02_rb,1.491793e-02_rb, &
+       1.431197e-02_rb,1.373928e-02_rb,1.319743e-02_rb,1.268430e-02_rb,1.219799e-02_rb, &
+       1.173682e-02_rb,1.129925e-02_rb,1.088393e-02_rb,1.048961e-02_rb,1.011516e-02_rb, &
+       9.759543e-03_rb,9.421813e-03_rb,9.101089e-03_rb,8.796559e-03_rb,8.507464e-03_rb, &
+       8.233098e-03_rb,7.972798e-03_rb,7.725942e-03_rb,7.491940e-03_rb,7.270238e-03_rb, &
+       7.060305e-03_rb/)                                                             
+      absice3(:,9) = (/ &                                                            
+! band 9                                                                             
+       1.236780e-01_rb,9.222386e-02_rb,7.383997e-02_rb,6.204072e-02_rb,5.381029e-02_rb, &
+       4.770678e-02_rb,4.296928e-02_rb,3.916131e-02_rb,3.601540e-02_rb,3.335878e-02_rb, &
+       3.107493e-02_rb,2.908247e-02_rb,2.732282e-02_rb,2.575276e-02_rb,2.433968e-02_rb, &
+       2.305852e-02_rb,2.188966e-02_rb,2.081757e-02_rb,1.982974e-02_rb,1.891599e-02_rb, &
+       1.806794e-02_rb,1.727865e-02_rb,1.654227e-02_rb,1.585387e-02_rb,1.520924e-02_rb, &
+       1.460476e-02_rb,1.403730e-02_rb,1.350416e-02_rb,1.300293e-02_rb,1.253153e-02_rb, &
+       1.208808e-02_rb,1.167094e-02_rb,1.127862e-02_rb,1.090979e-02_rb,1.056323e-02_rb, &
+       1.023786e-02_rb,9.932665e-03_rb,9.646744e-03_rb,9.379250e-03_rb,9.129409e-03_rb, &
+       8.896500e-03_rb,8.679856e-03_rb,8.478852e-03_rb,8.292904e-03_rb,8.121463e-03_rb, &
+       7.964013e-03_rb/)                                                             
+      absice3(:,10) = (/ &                                                           
+! band 10                                                                            
+       1.655966e-01_rb,1.134205e-01_rb,8.714344e-02_rb,7.129241e-02_rb,6.063739e-02_rb, &
+       5.294203e-02_rb,4.709309e-02_rb,4.247476e-02_rb,3.871892e-02_rb,3.559206e-02_rb, &
+       3.293893e-02_rb,3.065226e-02_rb,2.865558e-02_rb,2.689288e-02_rb,2.532221e-02_rb, &
+       2.391150e-02_rb,2.263582e-02_rb,2.147549e-02_rb,2.041476e-02_rb,1.944089e-02_rb, &
+       1.854342e-02_rb,1.771371e-02_rb,1.694456e-02_rb,1.622989e-02_rb,1.556456e-02_rb, &
+       1.494415e-02_rb,1.436491e-02_rb,1.382354e-02_rb,1.331719e-02_rb,1.284339e-02_rb, &
+       1.239992e-02_rb,1.198486e-02_rb,1.159647e-02_rb,1.123323e-02_rb,1.089375e-02_rb, &
+       1.057679e-02_rb,1.028124e-02_rb,1.000607e-02_rb,9.750376e-03_rb,9.513303e-03_rb, &
+       9.294082e-03_rb,9.092003e-03_rb,8.906412e-03_rb,8.736702e-03_rb,8.582314e-03_rb, &
+       8.442725e-03_rb/)                                                             
+      absice3(:,11) = (/ &                                                           
+! band 11                                                                            
+       1.775615e-01_rb,1.180046e-01_rb,8.929607e-02_rb,7.233500e-02_rb,6.108333e-02_rb, &
+       5.303642e-02_rb,4.696927e-02_rb,4.221206e-02_rb,3.836768e-02_rb,3.518576e-02_rb, &
+       3.250063e-02_rb,3.019825e-02_rb,2.819758e-02_rb,2.643943e-02_rb,2.487953e-02_rb, &
+       2.348414e-02_rb,2.222705e-02_rb,2.108762e-02_rb,2.004936e-02_rb,1.909892e-02_rb, &
+       1.822539e-02_rb,1.741975e-02_rb,1.667449e-02_rb,1.598330e-02_rb,1.534084e-02_rb, &
+       1.474253e-02_rb,1.418446e-02_rb,1.366325e-02_rb,1.317597e-02_rb,1.272004e-02_rb, &
+       1.229321e-02_rb,1.189350e-02_rb,1.151915e-02_rb,1.116859e-02_rb,1.084042e-02_rb, &
+       1.053338e-02_rb,1.024636e-02_rb,9.978326e-03_rb,9.728357e-03_rb,9.495613e-03_rb, &
+       9.279327e-03_rb,9.078798e-03_rb,8.893383e-03_rb,8.722488e-03_rb,8.565568e-03_rb, &
+       8.422115e-03_rb/)                                                             
+      absice3(:,12) = (/ &                                                           
+! band 12                                                                            
+       9.465447e-02_rb,6.432047e-02_rb,5.060973e-02_rb,4.267283e-02_rb,3.741843e-02_rb, &
+       3.363096e-02_rb,3.073531e-02_rb,2.842405e-02_rb,2.651789e-02_rb,2.490518e-02_rb, &
+       2.351273e-02_rb,2.229056e-02_rb,2.120335e-02_rb,2.022541e-02_rb,1.933763e-02_rb, &
+       1.852546e-02_rb,1.777763e-02_rb,1.708528e-02_rb,1.644134e-02_rb,1.584009e-02_rb, &
+       1.527684e-02_rb,1.474774e-02_rb,1.424955e-02_rb,1.377957e-02_rb,1.333549e-02_rb, &
+       1.291534e-02_rb,1.251743e-02_rb,1.214029e-02_rb,1.178265e-02_rb,1.144337e-02_rb, &
+       1.112148e-02_rb,1.081609e-02_rb,1.052642e-02_rb,1.025178e-02_rb,9.991540e-03_rb, &
+       9.745130e-03_rb,9.512038e-03_rb,9.291797e-03_rb,9.083980e-03_rb,8.888195e-03_rb, &
+       8.704081e-03_rb,8.531306e-03_rb,8.369560e-03_rb,8.218558e-03_rb,8.078032e-03_rb, &
+       7.947730e-03_rb/)                                                             
+      absice3(:,13) = (/ &                                                           
+! band 13                                                                            
+       1.560311e-01_rb,9.961097e-02_rb,7.502949e-02_rb,6.115022e-02_rb,5.214952e-02_rb, &
+       4.578149e-02_rb,4.099731e-02_rb,3.724174e-02_rb,3.419343e-02_rb,3.165356e-02_rb, &
+       2.949251e-02_rb,2.762222e-02_rb,2.598073e-02_rb,2.452322e-02_rb,2.321642e-02_rb, &
+       2.203516e-02_rb,2.096002e-02_rb,1.997579e-02_rb,1.907036e-02_rb,1.823401e-02_rb, &
+       1.745879e-02_rb,1.673819e-02_rb,1.606678e-02_rb,1.544003e-02_rb,1.485411e-02_rb, &
+       1.430574e-02_rb,1.379215e-02_rb,1.331092e-02_rb,1.285996e-02_rb,1.243746e-02_rb, &
+       1.204183e-02_rb,1.167164e-02_rb,1.132567e-02_rb,1.100281e-02_rb,1.070207e-02_rb, &
+       1.042258e-02_rb,1.016352e-02_rb,9.924197e-03_rb,9.703953e-03_rb,9.502199e-03_rb, &
+       9.318400e-03_rb,9.152066e-03_rb,9.002749e-03_rb,8.870038e-03_rb,8.753555e-03_rb, &
+       8.652951e-03_rb/)                                                             
+      absice3(:,14) = (/ &                                                           
+! band 14                                                                            
+       1.559547e-01_rb,9.896700e-02_rb,7.441231e-02_rb,6.061469e-02_rb,5.168730e-02_rb, &
+       4.537821e-02_rb,4.064106e-02_rb,3.692367e-02_rb,3.390714e-02_rb,3.139438e-02_rb, &
+       2.925702e-02_rb,2.740783e-02_rb,2.578547e-02_rb,2.434552e-02_rb,2.305506e-02_rb, &
+       2.188910e-02_rb,2.082842e-02_rb,1.985789e-02_rb,1.896553e-02_rb,1.814165e-02_rb, &
+       1.737839e-02_rb,1.666927e-02_rb,1.600891e-02_rb,1.539279e-02_rb,1.481712e-02_rb, &
+       1.427865e-02_rb,1.377463e-02_rb,1.330266e-02_rb,1.286068e-02_rb,1.244689e-02_rb, &
+       1.205973e-02_rb,1.169780e-02_rb,1.135989e-02_rb,1.104492e-02_rb,1.075192e-02_rb, &
+       1.048004e-02_rb,1.022850e-02_rb,9.996611e-03_rb,9.783753e-03_rb,9.589361e-03_rb, &
+       9.412924e-03_rb,9.253977e-03_rb,9.112098e-03_rb,8.986903e-03_rb,8.878039e-03_rb, &
+       8.785184e-03_rb/)                                                             
+      absice3(:,15) = (/ &                                                           
+! band 15                                                                            
+       1.102926e-01_rb,7.176622e-02_rb,5.530316e-02_rb,4.606056e-02_rb,4.006116e-02_rb, &
+       3.579628e-02_rb,3.256909e-02_rb,3.001360e-02_rb,2.791920e-02_rb,2.615617e-02_rb, &
+       2.464023e-02_rb,2.331426e-02_rb,2.213817e-02_rb,2.108301e-02_rb,2.012733e-02_rb, &
+       1.925493e-02_rb,1.845331e-02_rb,1.771269e-02_rb,1.702531e-02_rb,1.638493e-02_rb, &
+       1.578648e-02_rb,1.522579e-02_rb,1.469940e-02_rb,1.420442e-02_rb,1.373841e-02_rb, &
+       1.329931e-02_rb,1.288535e-02_rb,1.249502e-02_rb,1.212700e-02_rb,1.178015e-02_rb, &
+       1.145348e-02_rb,1.114612e-02_rb,1.085730e-02_rb,1.058633e-02_rb,1.033263e-02_rb, &
+       1.009564e-02_rb,9.874895e-03_rb,9.669960e-03_rb,9.480449e-03_rb,9.306014e-03_rb, &
+       9.146339e-03_rb,9.001138e-03_rb,8.870154e-03_rb,8.753148e-03_rb,8.649907e-03_rb, &
+       8.560232e-03_rb/)                                                             
+      absice3(:,16) = (/ &
+! band 16                                                                            
+       1.688344e-01_rb,1.077072e-01_rb,7.994467e-02_rb,6.403862e-02_rb,5.369850e-02_rb, &
+       4.641582e-02_rb,4.099331e-02_rb,3.678724e-02_rb,3.342069e-02_rb,3.065831e-02_rb, &
+       2.834557e-02_rb,2.637680e-02_rb,2.467733e-02_rb,2.319286e-02_rb,2.188299e-02_rb, &
+       2.071701e-02_rb,1.967121e-02_rb,1.872692e-02_rb,1.786931e-02_rb,1.708641e-02_rb, &
+       1.636846e-02_rb,1.570743e-02_rb,1.509665e-02_rb,1.453052e-02_rb,1.400433e-02_rb, &
+       1.351407e-02_rb,1.305631e-02_rb,1.262810e-02_rb,1.222688e-02_rb,1.185044e-02_rb, &
+       1.149683e-02_rb,1.116436e-02_rb,1.085153e-02_rb,1.055701e-02_rb,1.027961e-02_rb, &
+       1.001831e-02_rb,9.772141e-03_rb,9.540280e-03_rb,9.321966e-03_rb,9.116517e-03_rb, &
+       8.923315e-03_rb,8.741803e-03_rb,8.571472e-03_rb,8.411860e-03_rb,8.262543e-03_rb, &
+       8.123136e-03_rb/)                       
+
+! For LIQFLAG = 0.                                                                   
+      absliq0 = 0.0903614_rb                                                         
+                                                                                     
+! For LIQFLAG = 1.  In each band, the absorption                                     
+! coefficients are listed for a range of effective radii from 2.5                    
+! to 59.5 microns in increments of 1.0 micron.                                       
+      absliq1(:, 1) = (/ &                                                           
+! band  1                                                                            
+       1.64047e-03_rb, 6.90533e-02_rb, 7.72017e-02_rb, 7.78054e-02_rb, 7.69523e-02_rb, &
+       7.58058e-02_rb, 7.46400e-02_rb, 7.35123e-02_rb, 7.24162e-02_rb, 7.13225e-02_rb, &
+       6.99145e-02_rb, 6.66409e-02_rb, 6.36582e-02_rb, 6.09425e-02_rb, 5.84593e-02_rb, &
+       5.61743e-02_rb, 5.40571e-02_rb, 5.20812e-02_rb, 5.02245e-02_rb, 4.84680e-02_rb, &
+       4.67959e-02_rb, 4.51944e-02_rb, 4.36516e-02_rb, 4.21570e-02_rb, 4.07015e-02_rb, &
+       3.92766e-02_rb, 3.78747e-02_rb, 3.64886e-02_rb, 3.53632e-02_rb, 3.41992e-02_rb, &
+       3.31016e-02_rb, 3.20643e-02_rb, 3.10817e-02_rb, 3.01490e-02_rb, 2.92620e-02_rb, &
+       2.84171e-02_rb, 2.76108e-02_rb, 2.68404e-02_rb, 2.61031e-02_rb, 2.53966e-02_rb, &
+       2.47189e-02_rb, 2.40678e-02_rb, 2.34418e-02_rb, 2.28392e-02_rb, 2.22586e-02_rb, &
+       2.16986e-02_rb, 2.11580e-02_rb, 2.06356e-02_rb, 2.01305e-02_rb, 1.96417e-02_rb, &
+       1.91682e-02_rb, 1.87094e-02_rb, 1.82643e-02_rb, 1.78324e-02_rb, 1.74129e-02_rb, &
+       1.70052e-02_rb, 1.66088e-02_rb, 1.62231e-02_rb/)                              
+      absliq1(:, 2) = (/ &                                                           
+! band  2                                                                            
+       2.19486e-01_rb, 1.80687e-01_rb, 1.59150e-01_rb, 1.44731e-01_rb, 1.33703e-01_rb, &
+       1.24355e-01_rb, 1.15756e-01_rb, 1.07318e-01_rb, 9.86119e-02_rb, 8.92739e-02_rb, &
+       8.34911e-02_rb, 7.70773e-02_rb, 7.15240e-02_rb, 6.66615e-02_rb, 6.23641e-02_rb, &
+       5.85359e-02_rb, 5.51020e-02_rb, 5.20032e-02_rb, 4.91916e-02_rb, 4.66283e-02_rb, &
+       4.42813e-02_rb, 4.21236e-02_rb, 4.01330e-02_rb, 3.82905e-02_rb, 3.65797e-02_rb, &
+       3.49869e-02_rb, 3.35002e-02_rb, 3.21090e-02_rb, 3.08957e-02_rb, 2.97601e-02_rb, &
+       2.86966e-02_rb, 2.76984e-02_rb, 2.67599e-02_rb, 2.58758e-02_rb, 2.50416e-02_rb, &
+       2.42532e-02_rb, 2.35070e-02_rb, 2.27997e-02_rb, 2.21284e-02_rb, 2.14904e-02_rb, &
+       2.08834e-02_rb, 2.03051e-02_rb, 1.97536e-02_rb, 1.92271e-02_rb, 1.87239e-02_rb, &
+       1.82425e-02_rb, 1.77816e-02_rb, 1.73399e-02_rb, 1.69162e-02_rb, 1.65094e-02_rb, &
+       1.61187e-02_rb, 1.57430e-02_rb, 1.53815e-02_rb, 1.50334e-02_rb, 1.46981e-02_rb, &
+       1.43748e-02_rb, 1.40628e-02_rb, 1.37617e-02_rb/)                              
+      absliq1(:, 3) = (/ &                                                           
+! band  3                                                                            
+       2.95174e-01_rb, 2.34765e-01_rb, 1.98038e-01_rb, 1.72114e-01_rb, 1.52083e-01_rb, &
+       1.35654e-01_rb, 1.21613e-01_rb, 1.09252e-01_rb, 9.81263e-02_rb, 8.79448e-02_rb, &
+       8.12566e-02_rb, 7.44563e-02_rb, 6.86374e-02_rb, 6.36042e-02_rb, 5.92094e-02_rb, &
+       5.53402e-02_rb, 5.19087e-02_rb, 4.88455e-02_rb, 4.60951e-02_rb, 4.36124e-02_rb, &
+       4.13607e-02_rb, 3.93096e-02_rb, 3.74338e-02_rb, 3.57119e-02_rb, 3.41261e-02_rb, &
+       3.26610e-02_rb, 3.13036e-02_rb, 3.00425e-02_rb, 2.88497e-02_rb, 2.78077e-02_rb, &
+       2.68317e-02_rb, 2.59158e-02_rb, 2.50545e-02_rb, 2.42430e-02_rb, 2.34772e-02_rb, &
+       2.27533e-02_rb, 2.20679e-02_rb, 2.14181e-02_rb, 2.08011e-02_rb, 2.02145e-02_rb, &
+       1.96561e-02_rb, 1.91239e-02_rb, 1.86161e-02_rb, 1.81311e-02_rb, 1.76673e-02_rb, &
+       1.72234e-02_rb, 1.67981e-02_rb, 1.63903e-02_rb, 1.59989e-02_rb, 1.56230e-02_rb, &
+       1.52615e-02_rb, 1.49138e-02_rb, 1.45791e-02_rb, 1.42565e-02_rb, 1.39455e-02_rb, &
+       1.36455e-02_rb, 1.33559e-02_rb, 1.30761e-02_rb/)                              
+      absliq1(:, 4) = (/ &                                                           
+! band  4                                                                            
+       3.00925e-01_rb, 2.36949e-01_rb, 1.96947e-01_rb, 1.68692e-01_rb, 1.47190e-01_rb, &
+       1.29986e-01_rb, 1.15719e-01_rb, 1.03568e-01_rb, 9.30028e-02_rb, 8.36658e-02_rb, &
+       7.71075e-02_rb, 7.07002e-02_rb, 6.52284e-02_rb, 6.05024e-02_rb, 5.63801e-02_rb, &
+       5.27534e-02_rb, 4.95384e-02_rb, 4.66690e-02_rb, 4.40925e-02_rb, 4.17664e-02_rb, &
+       3.96559e-02_rb, 3.77326e-02_rb, 3.59727e-02_rb, 3.43561e-02_rb, 3.28662e-02_rb, &
+       3.14885e-02_rb, 3.02110e-02_rb, 2.90231e-02_rb, 2.78948e-02_rb, 2.69109e-02_rb, &
+       2.59884e-02_rb, 2.51217e-02_rb, 2.43058e-02_rb, 2.35364e-02_rb, 2.28096e-02_rb, &
+       2.21218e-02_rb, 2.14700e-02_rb, 2.08515e-02_rb, 2.02636e-02_rb, 1.97041e-02_rb, &
+       1.91711e-02_rb, 1.86625e-02_rb, 1.81769e-02_rb, 1.77126e-02_rb, 1.72683e-02_rb, &
+       1.68426e-02_rb, 1.64344e-02_rb, 1.60427e-02_rb, 1.56664e-02_rb, 1.53046e-02_rb, &
+       1.49565e-02_rb, 1.46214e-02_rb, 1.42985e-02_rb, 1.39871e-02_rb, 1.36866e-02_rb, &
+       1.33965e-02_rb, 1.31162e-02_rb, 1.28453e-02_rb/)                              
+      absliq1(:, 5) = (/ &                                                           
+! band  5                                                                            
+       2.64691e-01_rb, 2.12018e-01_rb, 1.78009e-01_rb, 1.53539e-01_rb, 1.34721e-01_rb, &
+       1.19580e-01_rb, 1.06996e-01_rb, 9.62772e-02_rb, 8.69710e-02_rb, 7.87670e-02_rb, &
+       7.29272e-02_rb, 6.70920e-02_rb, 6.20977e-02_rb, 5.77732e-02_rb, 5.39910e-02_rb, &
+       5.06538e-02_rb, 4.76866e-02_rb, 4.50301e-02_rb, 4.26374e-02_rb, 4.04704e-02_rb, &
+       3.84981e-02_rb, 3.66948e-02_rb, 3.50394e-02_rb, 3.35141e-02_rb, 3.21038e-02_rb, &
+       3.07957e-02_rb, 2.95788e-02_rb, 2.84438e-02_rb, 2.73790e-02_rb, 2.64390e-02_rb, &
+       2.55565e-02_rb, 2.47263e-02_rb, 2.39437e-02_rb, 2.32047e-02_rb, 2.25056e-02_rb, &
+       2.18433e-02_rb, 2.12149e-02_rb, 2.06177e-02_rb, 2.00495e-02_rb, 1.95081e-02_rb, &
+       1.89917e-02_rb, 1.84984e-02_rb, 1.80269e-02_rb, 1.75755e-02_rb, 1.71431e-02_rb, &
+       1.67283e-02_rb, 1.63303e-02_rb, 1.59478e-02_rb, 1.55801e-02_rb, 1.52262e-02_rb, &
+       1.48853e-02_rb, 1.45568e-02_rb, 1.42400e-02_rb, 1.39342e-02_rb, 1.36388e-02_rb, &
+       1.33533e-02_rb, 1.30773e-02_rb, 1.28102e-02_rb/)                              
+      absliq1(:, 6) = (/ &                                                           
+! band  6                                                                            
+       8.81182e-02_rb, 1.06745e-01_rb, 9.79753e-02_rb, 8.99625e-02_rb, 8.35200e-02_rb, &
+       7.81899e-02_rb, 7.35939e-02_rb, 6.94696e-02_rb, 6.56266e-02_rb, 6.19148e-02_rb, &
+       5.83355e-02_rb, 5.49306e-02_rb, 5.19642e-02_rb, 4.93325e-02_rb, 4.69659e-02_rb, &
+       4.48148e-02_rb, 4.28431e-02_rb, 4.10231e-02_rb, 3.93332e-02_rb, 3.77563e-02_rb, &
+       3.62785e-02_rb, 3.48882e-02_rb, 3.35758e-02_rb, 3.23333e-02_rb, 3.11536e-02_rb, &
+       3.00310e-02_rb, 2.89601e-02_rb, 2.79365e-02_rb, 2.70502e-02_rb, 2.62618e-02_rb, &
+       2.55025e-02_rb, 2.47728e-02_rb, 2.40726e-02_rb, 2.34013e-02_rb, 2.27583e-02_rb, &
+       2.21422e-02_rb, 2.15522e-02_rb, 2.09869e-02_rb, 2.04453e-02_rb, 1.99260e-02_rb, &
+       1.94280e-02_rb, 1.89501e-02_rb, 1.84913e-02_rb, 1.80506e-02_rb, 1.76270e-02_rb, &
+       1.72196e-02_rb, 1.68276e-02_rb, 1.64500e-02_rb, 1.60863e-02_rb, 1.57357e-02_rb, &
+       1.53975e-02_rb, 1.50710e-02_rb, 1.47558e-02_rb, 1.44511e-02_rb, 1.41566e-02_rb, &
+       1.38717e-02_rb, 1.35960e-02_rb, 1.33290e-02_rb/)                              
+      absliq1(:, 7) = (/ &                                                           
+! band  7                                                                            
+       4.32174e-02_rb, 7.36078e-02_rb, 6.98340e-02_rb, 6.65231e-02_rb, 6.41948e-02_rb, &
+       6.23551e-02_rb, 6.06638e-02_rb, 5.88680e-02_rb, 5.67124e-02_rb, 5.38629e-02_rb, &
+       4.99579e-02_rb, 4.86289e-02_rb, 4.70120e-02_rb, 4.52854e-02_rb, 4.35466e-02_rb, &
+       4.18480e-02_rb, 4.02169e-02_rb, 3.86658e-02_rb, 3.71992e-02_rb, 3.58168e-02_rb, &
+       3.45155e-02_rb, 3.32912e-02_rb, 3.21390e-02_rb, 3.10538e-02_rb, 3.00307e-02_rb, &
+       2.90651e-02_rb, 2.81524e-02_rb, 2.72885e-02_rb, 2.62821e-02_rb, 2.55744e-02_rb, &
+       2.48799e-02_rb, 2.42029e-02_rb, 2.35460e-02_rb, 2.29108e-02_rb, 2.22981e-02_rb, &
+       2.17079e-02_rb, 2.11402e-02_rb, 2.05945e-02_rb, 2.00701e-02_rb, 1.95663e-02_rb, &
+       1.90824e-02_rb, 1.86174e-02_rb, 1.81706e-02_rb, 1.77411e-02_rb, 1.73281e-02_rb, &
+       1.69307e-02_rb, 1.65483e-02_rb, 1.61801e-02_rb, 1.58254e-02_rb, 1.54835e-02_rb, &
+       1.51538e-02_rb, 1.48358e-02_rb, 1.45288e-02_rb, 1.42322e-02_rb, 1.39457e-02_rb, &
+       1.36687e-02_rb, 1.34008e-02_rb, 1.31416e-02_rb/)                              
+      absliq1(:, 8) = (/ &                                                           
+! band  8                                                                            
+       1.41881e-01_rb, 7.15419e-02_rb, 6.30335e-02_rb, 6.11132e-02_rb, 6.01931e-02_rb, &
+       5.92420e-02_rb, 5.78968e-02_rb, 5.58876e-02_rb, 5.28923e-02_rb, 4.84462e-02_rb, &
+       4.60839e-02_rb, 4.56013e-02_rb, 4.45410e-02_rb, 4.31866e-02_rb, 4.17026e-02_rb, &
+       4.01850e-02_rb, 3.86892e-02_rb, 3.72461e-02_rb, 3.58722e-02_rb, 3.45749e-02_rb, &
+       3.33564e-02_rb, 3.22155e-02_rb, 3.11494e-02_rb, 3.01541e-02_rb, 2.92253e-02_rb, &
+       2.83584e-02_rb, 2.75488e-02_rb, 2.67925e-02_rb, 2.57692e-02_rb, 2.50704e-02_rb, &
+       2.43918e-02_rb, 2.37350e-02_rb, 2.31005e-02_rb, 2.24888e-02_rb, 2.18996e-02_rb, &
+       2.13325e-02_rb, 2.07870e-02_rb, 2.02623e-02_rb, 1.97577e-02_rb, 1.92724e-02_rb, &
+       1.88056e-02_rb, 1.83564e-02_rb, 1.79241e-02_rb, 1.75079e-02_rb, 1.71070e-02_rb, &
+       1.67207e-02_rb, 1.63482e-02_rb, 1.59890e-02_rb, 1.56424e-02_rb, 1.53077e-02_rb, &
+       1.49845e-02_rb, 1.46722e-02_rb, 1.43702e-02_rb, 1.40782e-02_rb, 1.37955e-02_rb, &
+       1.35219e-02_rb, 1.32569e-02_rb, 1.30000e-02_rb/)                              
+      absliq1(:, 9) = (/ &                                                           
+! band  9                                                                            
+       6.72726e-02_rb, 6.61013e-02_rb, 6.47866e-02_rb, 6.33780e-02_rb, 6.18985e-02_rb, &
+       6.03335e-02_rb, 5.86136e-02_rb, 5.65876e-02_rb, 5.39839e-02_rb, 5.03536e-02_rb, &
+       4.71608e-02_rb, 4.63630e-02_rb, 4.50313e-02_rb, 4.34526e-02_rb, 4.17876e-02_rb, &
+       4.01261e-02_rb, 3.85171e-02_rb, 3.69860e-02_rb, 3.55442e-02_rb, 3.41954e-02_rb, &
+       3.29384e-02_rb, 3.17693e-02_rb, 3.06832e-02_rb, 2.96745e-02_rb, 2.87374e-02_rb, &
+       2.78662e-02_rb, 2.70557e-02_rb, 2.63008e-02_rb, 2.52450e-02_rb, 2.45424e-02_rb, &
+       2.38656e-02_rb, 2.32144e-02_rb, 2.25885e-02_rb, 2.19873e-02_rb, 2.14099e-02_rb, &
+       2.08554e-02_rb, 2.03230e-02_rb, 1.98116e-02_rb, 1.93203e-02_rb, 1.88482e-02_rb, &
+       1.83944e-02_rb, 1.79578e-02_rb, 1.75378e-02_rb, 1.71335e-02_rb, 1.67440e-02_rb, &
+       1.63687e-02_rb, 1.60069e-02_rb, 1.56579e-02_rb, 1.53210e-02_rb, 1.49958e-02_rb, &
+       1.46815e-02_rb, 1.43778e-02_rb, 1.40841e-02_rb, 1.37999e-02_rb, 1.35249e-02_rb, &
+       1.32585e-02_rb, 1.30004e-02_rb, 1.27502e-02_rb/)                              
+      absliq1(:,10) = (/ &                                                           
+! band 10                                                                            
+       7.97040e-02_rb, 7.63844e-02_rb, 7.36499e-02_rb, 7.13525e-02_rb, 6.93043e-02_rb, &
+       6.72807e-02_rb, 6.50227e-02_rb, 6.22395e-02_rb, 5.86093e-02_rb, 5.37815e-02_rb, &
+       5.14682e-02_rb, 4.97214e-02_rb, 4.77392e-02_rb, 4.56961e-02_rb, 4.36858e-02_rb, &
+       4.17569e-02_rb, 3.99328e-02_rb, 3.82224e-02_rb, 3.66265e-02_rb, 3.51416e-02_rb, &
+       3.37617e-02_rb, 3.24798e-02_rb, 3.12887e-02_rb, 3.01812e-02_rb, 2.91505e-02_rb, &
+       2.81900e-02_rb, 2.72939e-02_rb, 2.64568e-02_rb, 2.54165e-02_rb, 2.46832e-02_rb, &
+       2.39783e-02_rb, 2.33017e-02_rb, 2.26531e-02_rb, 2.20314e-02_rb, 2.14359e-02_rb, &
+       2.08653e-02_rb, 2.03187e-02_rb, 1.97947e-02_rb, 1.92924e-02_rb, 1.88106e-02_rb, &
+       1.83483e-02_rb, 1.79043e-02_rb, 1.74778e-02_rb, 1.70678e-02_rb, 1.66735e-02_rb, &
+       1.62941e-02_rb, 1.59286e-02_rb, 1.55766e-02_rb, 1.52371e-02_rb, 1.49097e-02_rb, &
+       1.45937e-02_rb, 1.42885e-02_rb, 1.39936e-02_rb, 1.37085e-02_rb, 1.34327e-02_rb, &
+       1.31659e-02_rb, 1.29075e-02_rb, 1.26571e-02_rb/)                              
+      absliq1(:,11) = (/ &                                                           
+! band 11                                                                            
+       1.49438e-01_rb, 1.33535e-01_rb, 1.21542e-01_rb, 1.11743e-01_rb, 1.03263e-01_rb, &
+       9.55774e-02_rb, 8.83382e-02_rb, 8.12943e-02_rb, 7.42533e-02_rb, 6.70609e-02_rb, &
+       6.38761e-02_rb, 5.97788e-02_rb, 5.59841e-02_rb, 5.25318e-02_rb, 4.94132e-02_rb, &
+       4.66014e-02_rb, 4.40644e-02_rb, 4.17706e-02_rb, 3.96910e-02_rb, 3.77998e-02_rb, &
+       3.60742e-02_rb, 3.44947e-02_rb, 3.30442e-02_rb, 3.17079e-02_rb, 3.04730e-02_rb, &
+       2.93283e-02_rb, 2.82642e-02_rb, 2.72720e-02_rb, 2.61789e-02_rb, 2.53277e-02_rb, &
+       2.45237e-02_rb, 2.37635e-02_rb, 2.30438e-02_rb, 2.23615e-02_rb, 2.17140e-02_rb, &
+       2.10987e-02_rb, 2.05133e-02_rb, 1.99557e-02_rb, 1.94241e-02_rb, 1.89166e-02_rb, &
+       1.84317e-02_rb, 1.79679e-02_rb, 1.75238e-02_rb, 1.70983e-02_rb, 1.66901e-02_rb, &
+       1.62983e-02_rb, 1.59219e-02_rb, 1.55599e-02_rb, 1.52115e-02_rb, 1.48761e-02_rb, &
+       1.45528e-02_rb, 1.42411e-02_rb, 1.39402e-02_rb, 1.36497e-02_rb, 1.33690e-02_rb, &
+       1.30976e-02_rb, 1.28351e-02_rb, 1.25810e-02_rb/)                              
+      absliq1(:,12) = (/ &                                                           
+! band 12                                                                            
+       3.71985e-02_rb, 3.88586e-02_rb, 3.99070e-02_rb, 4.04351e-02_rb, 4.04610e-02_rb, &
+       3.99834e-02_rb, 3.89953e-02_rb, 3.74886e-02_rb, 3.54551e-02_rb, 3.28870e-02_rb, &
+       3.32576e-02_rb, 3.22444e-02_rb, 3.12384e-02_rb, 3.02584e-02_rb, 2.93146e-02_rb, &
+       2.84120e-02_rb, 2.75525e-02_rb, 2.67361e-02_rb, 2.59618e-02_rb, 2.52280e-02_rb, &
+       2.45327e-02_rb, 2.38736e-02_rb, 2.32487e-02_rb, 2.26558e-02_rb, 2.20929e-02_rb, &
+       2.15579e-02_rb, 2.10491e-02_rb, 2.05648e-02_rb, 1.99749e-02_rb, 1.95704e-02_rb, &
+       1.91731e-02_rb, 1.87839e-02_rb, 1.84032e-02_rb, 1.80315e-02_rb, 1.76689e-02_rb, &
+       1.73155e-02_rb, 1.69712e-02_rb, 1.66362e-02_rb, 1.63101e-02_rb, 1.59928e-02_rb, &
+       1.56842e-02_rb, 1.53840e-02_rb, 1.50920e-02_rb, 1.48080e-02_rb, 1.45318e-02_rb, &
+       1.42631e-02_rb, 1.40016e-02_rb, 1.37472e-02_rb, 1.34996e-02_rb, 1.32586e-02_rb, &
+       1.30239e-02_rb, 1.27954e-02_rb, 1.25728e-02_rb, 1.23559e-02_rb, 1.21445e-02_rb, &
+       1.19385e-02_rb, 1.17376e-02_rb, 1.15417e-02_rb/)                              
+
+      absliq1(:,13) = (/ &                                                           
+! band 13                                                                            
+       3.11868e-02_rb, 4.48357e-02_rb, 4.90224e-02_rb, 4.96406e-02_rb, 4.86806e-02_rb, &
+       4.69610e-02_rb, 4.48630e-02_rb, 4.25795e-02_rb, 4.02138e-02_rb, 3.78236e-02_rb, &
+       3.74266e-02_rb, 3.60384e-02_rb, 3.47074e-02_rb, 3.34434e-02_rb, 3.22499e-02_rb, &
+       3.11264e-02_rb, 3.00704e-02_rb, 2.90784e-02_rb, 2.81463e-02_rb, 2.72702e-02_rb, &
+       2.64460e-02_rb, 2.56698e-02_rb, 2.49381e-02_rb, 2.42475e-02_rb, 2.35948e-02_rb, &
+       2.29774e-02_rb, 2.23925e-02_rb, 2.18379e-02_rb, 2.11793e-02_rb, 2.07076e-02_rb, &
+       2.02470e-02_rb, 1.97981e-02_rb, 1.93613e-02_rb, 1.89367e-02_rb, 1.85243e-02_rb, &
+       1.81240e-02_rb, 1.77356e-02_rb, 1.73588e-02_rb, 1.69935e-02_rb, 1.66392e-02_rb, &
+       1.62956e-02_rb, 1.59624e-02_rb, 1.56393e-02_rb, 1.53259e-02_rb, 1.50219e-02_rb, &
+       1.47268e-02_rb, 1.44404e-02_rb, 1.41624e-02_rb, 1.38925e-02_rb, 1.36302e-02_rb, &
+       1.33755e-02_rb, 1.31278e-02_rb, 1.28871e-02_rb, 1.26530e-02_rb, 1.24253e-02_rb, &
+       1.22038e-02_rb, 1.19881e-02_rb, 1.17782e-02_rb/)                              
+      absliq1(:,14) = (/ &                                                           
+! band 14                                                                            
+       1.58988e-02_rb, 3.50652e-02_rb, 4.00851e-02_rb, 4.07270e-02_rb, 3.98101e-02_rb, &
+       3.83306e-02_rb, 3.66829e-02_rb, 3.50327e-02_rb, 3.34497e-02_rb, 3.19609e-02_rb, &
+       3.13712e-02_rb, 3.03348e-02_rb, 2.93415e-02_rb, 2.83973e-02_rb, 2.75037e-02_rb, &
+       2.66604e-02_rb, 2.58654e-02_rb, 2.51161e-02_rb, 2.44100e-02_rb, 2.37440e-02_rb, &
+       2.31154e-02_rb, 2.25215e-02_rb, 2.19599e-02_rb, 2.14282e-02_rb, 2.09242e-02_rb, &
+       2.04459e-02_rb, 1.99915e-02_rb, 1.95594e-02_rb, 1.90254e-02_rb, 1.86598e-02_rb, &
+       1.82996e-02_rb, 1.79455e-02_rb, 1.75983e-02_rb, 1.72584e-02_rb, 1.69260e-02_rb, &
+       1.66013e-02_rb, 1.62843e-02_rb, 1.59752e-02_rb, 1.56737e-02_rb, 1.53799e-02_rb, &
+       1.50936e-02_rb, 1.48146e-02_rb, 1.45429e-02_rb, 1.42782e-02_rb, 1.40203e-02_rb, &
+       1.37691e-02_rb, 1.35243e-02_rb, 1.32858e-02_rb, 1.30534e-02_rb, 1.28270e-02_rb, &
+       1.26062e-02_rb, 1.23909e-02_rb, 1.21810e-02_rb, 1.19763e-02_rb, 1.17766e-02_rb, &
+       1.15817e-02_rb, 1.13915e-02_rb, 1.12058e-02_rb/)                              
+      absliq1(:,15) = (/ &                                                           
+! band 15                                                                            
+       5.02079e-03_rb, 2.17615e-02_rb, 2.55449e-02_rb, 2.59484e-02_rb, 2.53650e-02_rb, &
+       2.45281e-02_rb, 2.36843e-02_rb, 2.29159e-02_rb, 2.22451e-02_rb, 2.16716e-02_rb, &
+       2.11451e-02_rb, 2.05817e-02_rb, 2.00454e-02_rb, 1.95372e-02_rb, 1.90567e-02_rb, &
+       1.86028e-02_rb, 1.81742e-02_rb, 1.77693e-02_rb, 1.73866e-02_rb, 1.70244e-02_rb, &
+       1.66815e-02_rb, 1.63563e-02_rb, 1.60477e-02_rb, 1.57544e-02_rb, 1.54755e-02_rb, &
+       1.52097e-02_rb, 1.49564e-02_rb, 1.47146e-02_rb, 1.43684e-02_rb, 1.41728e-02_rb, &
+       1.39762e-02_rb, 1.37797e-02_rb, 1.35838e-02_rb, 1.33891e-02_rb, 1.31961e-02_rb, &
+       1.30051e-02_rb, 1.28164e-02_rb, 1.26302e-02_rb, 1.24466e-02_rb, 1.22659e-02_rb, &
+       1.20881e-02_rb, 1.19131e-02_rb, 1.17412e-02_rb, 1.15723e-02_rb, 1.14063e-02_rb, &
+       1.12434e-02_rb, 1.10834e-02_rb, 1.09264e-02_rb, 1.07722e-02_rb, 1.06210e-02_rb, &
+       1.04725e-02_rb, 1.03269e-02_rb, 1.01839e-02_rb, 1.00436e-02_rb, 9.90593e-03_rb, &
+       9.77080e-03_rb, 9.63818e-03_rb, 9.50800e-03_rb/)                              
+      absliq1(:,16) = (/ &                                                           
+! band 16                                                                            
+       5.64971e-02_rb, 9.04736e-02_rb, 8.11726e-02_rb, 7.05450e-02_rb, 6.20052e-02_rb, &
+       5.54286e-02_rb, 5.03503e-02_rb, 4.63791e-02_rb, 4.32290e-02_rb, 4.06959e-02_rb, &
+       3.74690e-02_rb, 3.52964e-02_rb, 3.33799e-02_rb, 3.16774e-02_rb, 3.01550e-02_rb, &
+       2.87856e-02_rb, 2.75474e-02_rb, 2.64223e-02_rb, 2.53953e-02_rb, 2.44542e-02_rb, &
+       2.35885e-02_rb, 2.27894e-02_rb, 2.20494e-02_rb, 2.13622e-02_rb, 2.07222e-02_rb, &
+       2.01246e-02_rb, 1.95654e-02_rb, 1.90408e-02_rb, 1.84398e-02_rb, 1.80021e-02_rb, &
+       1.75816e-02_rb, 1.71775e-02_rb, 1.67889e-02_rb, 1.64152e-02_rb, 1.60554e-02_rb, &
+       1.57089e-02_rb, 1.53751e-02_rb, 1.50531e-02_rb, 1.47426e-02_rb, 1.44428e-02_rb, &
+       1.41532e-02_rb, 1.38734e-02_rb, 1.36028e-02_rb, 1.33410e-02_rb, 1.30875e-02_rb, &
+       1.28420e-02_rb, 1.26041e-02_rb, 1.23735e-02_rb, 1.21497e-02_rb, 1.19325e-02_rb, &
+       1.17216e-02_rb, 1.15168e-02_rb, 1.13177e-02_rb, 1.11241e-02_rb, 1.09358e-02_rb, &
+       1.07525e-02_rb, 1.05741e-02_rb, 1.04003e-02_rb/)                              
+
+!jm not thread safe      hvrclc = '$Revision: 1.8 $'
+
+      ncbands = 1
+
+! This initialization is done in rrtmg_lw_subcol.F90.
+!      do lay = 1, nlayers
+!         do ig = 1, ngptlw
+!            taucmc(ig,lay) = 0.0_rb
+!         enddo
+!      enddo
+
+! Main layer loop
+      do lay = 1, nlayers
+
+        do ig = 1, ngptlw
+          cwp = ciwpmc(ig,lay) + clwpmc(ig,lay) + cswpmc(ig,lay)
+          if (cldfmc(ig,lay) .ge. cldmin .and.                          &
+     &      (cwp .ge. cldmin .or. taucmc(ig,lay) .ge. cldmin)) then
+
+
+! Ice clouds and water clouds combined.
+            if (inflag .eq. 0) then
+! Cloud optical depth already defined in taucmc, return to main program
+               return
+
+            elseif(inflag .eq. 1) then
+                stop 'INFLAG = 1 OPTION NOT AVAILABLE WITH MCICA'
+!               cwp = ciwpmc(ig,lay) + clwpmc(ig,lay)
+!               taucmc(ig,lay) = abscld1 * cwp
+
+! Separate treatement of ice clouds and water clouds.
+            elseif(inflag .ge. 2) then
+               radice = reicmc(lay)
+
+! Calculation of absorption coefficients due to ice clouds.
+               if ((ciwpmc(ig,lay)+cswpmc(ig,lay)) .eq. 0.0_rb) then
+                  abscoice(ig) = 0.0_rb
+                  abscosno(ig) = 0.0_rb
+
+               elseif (iceflag .eq. 0) then
+                  if (radice .lt. 10.0_rb) stop 'ICE RADIUS TOO SMALL'
+                  abscoice(ig) = absice0(1) + absice0(2)/radice
+                  abscosno(ig) = 0.0_rb
+
+               elseif (iceflag .eq. 1) then
+                  if (radice .lt. 13.0_rb .or. radice .gt. 130._rb) stop&
+     &                'ICE RADIUS OUT OF BOUNDS'
+                  ncbands = 5
+                  ib = icb(ngb(ig))
+                  abscoice(ig) = absice1(1,ib) + absice1(2,ib)/radice
+                  abscosno(ig) = 0.0_rb
+
+! For iceflag=2 option, ice particle effective radius is limited to 5.0 to 131.0 microns
+
+               elseif (iceflag .eq. 2) then
+                  if (radice .lt. 5.0_rb .or. radice .gt. 131.0_rb) stop&
+     &                'ICE RADIUS OUT OF BOUNDS'
+                     ncbands = 16
+                     factor = (radice - 2._rb)/3._rb
+                     index = int(factor)
+                     if (index .eq. 43) index = 42
+                     fint = factor - float(index)
+                     ib = ngb(ig)
+                     abscoice(ig) =                                     &
+     &                   absice2(index,ib) + fint *                     &
+     &                   (absice2(index+1,ib) - (absice2(index,ib)))
+                     abscosno(ig) = 0.0_rb
+
+! For iceflag=3 option, ice particle generalized effective size is limited to 5.0 to 140.0 microns
+
+               elseif (iceflag .ge. 3) then
+                  if (radice .lt. 5.0_rb .or. radice .gt. 140.0_rb) then
+                         write(errmsg,'(a,i5,i5,f8.2,f8.2)' )           &
+     &         'ERROR: ICE GENERALIZED EFFECTIVE SIZE OUT OF BOUNDS'    &
+     &          ,ig, lay, ciwpmc(ig,lay), radice
+                         errflg = 1
+                         return
+                     end if                                                                      
+                     ncbands = 16                                                                
+                     factor = (radice - 2._rb)/3._rb                                             
+                     index = int(factor)                                                         
+                     if (index .eq. 46) index = 45                                               
+                     fint = factor - float(index)                                                
+                     ib = ngb(ig)                                                                
+                     abscoice(ig) =                                     &
+     &                   absice3(index,ib) + fint *                     &
+     &                   (absice3(index+1,ib) - (absice3(index,ib)))                             
+                     abscosno(ig) = 0.0_rb                                                       
+                                                                                                 
+               endif                                                                             
+                                                                                                 
+!..Incorporate additional effects due to snow.                                                   
+               if (cswpmc(ig,lay).gt.0.0_rb .and. iceflag .eq. 5) then                           
+                  radsno = resnmc(lay)                                                           
+                  if (radsno .lt. 5.0_rb .or. radsno .gt. 140.0_rb) then                         
+                         write(errmsg,'(a,i5,i5,f8.2,f8.2)' )           &
+     &         'ERROR: SNOW GENERALIZED EFFECTIVE SIZE OUT OF BOUNDS'   &                        
+     &         ,ig, lay, cswpmc(ig,lay), radsno                                                  
+                         errflg = 1
+                         return
+                     end if                                                                      
+                     ncbands = 16                                                                
+                     factor = (radsno - 2._rb)/3._rb                                             
+                     index = int(factor)                                                         
+                     if (index .eq. 46) index = 45                                               
+                     fint = factor - float(index)                                                
+                     ib = ngb(ig)                                                                
+                     abscosno(ig) =                                     &
+     &                   absice3(index,ib) + fint *                     &
+     &                  (absice3(index+1,ib) - (absice3(index,ib)))                             
+               endif                                                                             
+                                                                                                 
+                                                                                                 
+                                                                                                 
+! Calculation of absorption coefficients due to water clouds.                                    
+               if (clwpmc(ig,lay) .eq. 0.0_rb) then                                              
+                  abscoliq(ig) = 0.0_rb                                                          
+                                                                                                 
+               elseif (liqflag .eq. 0) then                                                      
+                   abscoliq(ig) = absliq0                                                        
+                                                                                                 
+               elseif (liqflag .eq. 1) then                                                      
+                  radliq = relqmc(lay)                        
+                  if (radliq .lt. 2.5_rb .or. radliq .gt. 60._rb) then
+                     write(errmsg,'(a,i5,i5,f8.2,f8.2)' )              &
+&                         'ERROR: LIQUID EFFECTIVE SIZE OUT OF BOUNDS' &
+&                         ,ig, lay, clwpmc(ig,lay), radliq
+                     errflg = 1
+                     return
+                  end if
+                  index = int(radliq - 1.5_rb)                                                   
+                  if (index .eq. 0) index = 1                                                    
+                  if (index .eq. 58) index = 57                                                  
+                  fint = radliq - 1.5_rb - float(index)                                          
+                  ib = ngb(ig)                                                                   
+                  abscoliq(ig) =                                        &
+     &                  absliq1(index,ib) + fint *                      &
+     &                  (absliq1(index+1,ib) - (absliq1(index,ib)))                              
+               endif                                                                             
+                                                                                                 
+               taucmc(ig,lay) = ciwpmc(ig,lay) * abscoice(ig) +         &
+     &                           clwpmc(ig,lay) * abscoliq(ig) +        &
+     &                           cswpmc(ig,lay) * abscosno(ig)                                    
+                                                                                                 
+            endif                                                                                
+         endif                                                                                   
+         enddo                                                                                   
+      enddo                                                                                      
+                                                                                                 
+      end subroutine cldprmc                                                                     
+                                                                    
+
+!........................................!$
+      end module rrtmg_lw                !$
+!========================================!$

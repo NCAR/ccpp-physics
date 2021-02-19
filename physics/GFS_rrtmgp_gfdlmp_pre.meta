@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = GFS_rrtmgp_gfdlmp_pre
   type = scheme
-  dependencies = rrtmgp_aux.F90
+  dependencies = rrtmgp_aux.F90, radiation_cloud_overlap.F90, rrtmgp_lw_cloud_optics.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -39,7 +39,7 @@
   type = integer  
   intent = in
   optional = F  
-[lsswr]
+[doSWrad]
   standard_name = flag_to_calc_sw
   long_name = logical flags for sw radiation calls
   units = flag
@@ -47,7 +47,7 @@
   type = logical
   intent = in
   optional = F
-[lslwr]
+[doLWrad]
   standard_name = flag_to_calc_lw
   long_name = logical flags for lw radiation calls
   units = flag
@@ -58,11 +58,43 @@
 [effr_in]
   standard_name = flag_for_cloud_effective_radii
   long_name = flag for cloud effective radii calculations in GFDL microphysics
-  units = 
+  units = flag
   dimensions = ()
   type = logical  
   intent = in
-  optional = F   
+  optional = F
+[doGP_cldoptics_PADE]
+  standard_name = flag_to_calc_lw_cld_optics_using_RRTMGP_PADE
+  long_name = logical flag to control cloud optics scheme.
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[doGP_cldoptics_LUT]
+  standard_name = flag_to_calc_lw_cld_optics_using_RRTMGP_LUT
+  long_name = logical flag to control cloud optics scheme.
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[do_mynnedmf]
+  standard_name = do_mynnedmf
+  long_name = flag to activate MYNN-EDMF
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[kdt]
+  standard_name = index_of_time_step
+  long_name = current forecast iteration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [i_cldliq]
   standard_name = index_for_liquid_cloud_condensate
   long_name = tracer index for cloud condensate (or liquid water)
@@ -115,7 +147,7 @@
   standard_name = effective_radius_of_stratiform_cloud_liquid_water_particle_in_um
   long_name = eff. radius of cloud liquid water particle in micrometer
   units = um
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -124,7 +156,7 @@
   standard_name = effective_radius_of_stratiform_cloud_ice_particle_in_um
   long_name = eff. radius of cloud ice water particle in micrometer
   units = um
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -133,7 +165,7 @@
   standard_name = effective_radius_of_stratiform_cloud_rain_particle_in_um
   long_name = effective radius of cloud rain particle in micrometers
   units = um
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -142,42 +174,16 @@
   standard_name = effective_radius_of_stratiform_cloud_snow_particle_in_um
   long_name = effective radius of cloud snow particle in micrometers
   units = um
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys  
   intent = in
-  optional = F   
-[yearlen]
-  standard_name = number_of_days_in_year
-  long_name = number of days in a year
-  units = days
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F  
-[julian]
-  standard_name = julian_day
-  long_name = julian day
-  units = days
-  dimensions = ()
-  type = real
-  kind = kind_phys  
-  intent = in
-  optional = F   
-[lat]
-  standard_name = latitude
-  long_name = latitude
-  units = radian
-  dimensions = (horizontal_dimension)
-  type = real
-  intent = in
-  kind = kind_phys 
   optional = F     
 [p_lev]
   standard_name = air_pressure_at_interface_for_RRTMGP_in_hPa
   long_name = air pressure at vertical interface for radiation calculation
   units = hPa
-  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
   type = real
   kind = kind_phys
   intent = in
@@ -186,7 +192,7 @@
   standard_name = air_pressure_at_layer_for_RRTMGP_in_hPa
   long_name = air pressure at vertical layer for radiation calculation
   units = hPa
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -195,7 +201,7 @@
   standard_name = virtual_temperature
   long_name = layer virtual temperature
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -204,20 +210,11 @@
   standard_name = chemical_tracers
   long_name = chemical tracers
   units = g g-1
-  dimensions = (horizontal_dimension,vertical_dimension,number_of_tracers)
+  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers)
   type = real
   kind = kind_phys
   intent = in
   optional = F  
-[con_pi]
-  standard_name = pi
-  long_name = ratio of a circle's circumference to its diameter
-  units = none
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F 
 [con_g]
   standard_name = gravitational_acceleration
   long_name = gravitational acceleration
@@ -236,141 +233,96 @@
   kind = kind_phys      
   intent = in
   optional = F   
-[con_epsq]
-  standard_name = minimum_value_of_specific_humidity
-  long_name = floor value for specific humidity
-  units = kg kg-1
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F       
-[de_lgth]
-  standard_name = cloud_decorrelation_length
-  long_name = cloud decorrelation length
-  units = km
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F  
 [cld_frac]
   standard_name = total_cloud_fraction
   long_name = layer total cloud fraction
   units = frac
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [cld_lwp]
   standard_name = cloud_liquid_water_path
   long_name = layer cloud liquid water path
   units = g m-2
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [cld_reliq]
   standard_name = mean_effective_radius_for_liquid_cloud
   long_name = mean effective radius for liquid cloud
-  units = micron
-  dimensions = (horizontal_dimension,vertical_dimension)
+  units = um
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [cld_iwp]
   standard_name = cloud_ice_water_path
   long_name = layer cloud ice water path
   units = g m-2
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [cld_reice]
   standard_name = mean_effective_radius_for_ice_cloud
   long_name = mean effective radius for ice cloud
-  units = micron
-  dimensions = (horizontal_dimension,vertical_dimension)
+  units = um
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [cld_swp]
   standard_name = cloud_snow_water_path
   long_name = layer cloud snow water path
   units = g m-2
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [cld_resnow]
   standard_name = mean_effective_radius_for_snow_flake
   long_name = mean effective radius for snow cloud
-  units = micron
-  dimensions = (horizontal_dimension,vertical_dimension)
+  units = um
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [cld_rwp]
   standard_name = cloud_rain_water_path
   long_name = layer cloud rain water path
   units = g m-2
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [cld_rerain]
   standard_name = mean_effective_radius_for_rain_drop
   long_name = mean effective radius for rain cloud
-  units = micron
-  dimensions = (horizontal_dimension,vertical_dimension)
+  units = um
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [precip_frac]
   standard_name = precipitation_fraction_by_layer
   long_name = precipitation fraction in each layer
   units = frac
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
-  optional = F   
-[cloud_overlap_param]
-  standard_name = cloud_overlap_param
-  long_name = cloud overlap parameter
-  units = km
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
-[precip_overlap_param]
-  standard_name = precip_overlap_param
-  long_name = precipitation overlap parameter
-  units = km
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F  
-[deltaZ]
-  standard_name = layer_thickness
-  long_name = layer_thickness
-  units = m
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F    
+  intent = inout
+  optional = F      
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

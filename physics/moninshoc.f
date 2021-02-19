@@ -31,7 +31,9 @@
      &                          prsi,del,prsl,prslk,phii,phil,delt,
      &                          dusfc,dvsfc,dtsfc,dqsfc,dkt,hpbl,
      &                          kinver,xkzm_m,xkzm_h,xkzm_s,xkzminv,
-     &                          grav, rd, cp, hvap, fv,
+     &                          grav,rd,cp,hvap,fv,ntoz,dt3dt_PBL,
+     &                          du3dt_PBL,dv3dt_PBL,dq3dt_PBL,do3dt_PBL,
+     &                          gen_tend,ldiag3d,qdiag3d,
      &                          errmsg,errflg)
 !
       use machine  , only : kind_phys
@@ -42,7 +44,7 @@
 !     arguments
 !
       integer,                                  intent(in) :: im,
-     &  km, ntrac, ntcw, ncnd, ntke
+     &  km, ntrac, ntcw, ncnd, ntke, ntoz
       integer, dimension(im),                   intent(in) ::  kinver
 
       real(kind=kind_phys),                     intent(in) :: delt,
@@ -59,6 +61,11 @@
       real(kind=kind_phys), dimension(im,km),   intent(inout) :: du, dv,
      &  tau
       real(kind=kind_phys), dimension(im,km,ntrac), intent(inout) :: rtg
+
+      real(kind=kind_phys), dimension(:,:),     intent(inout) :: 
+     &  du3dt_PBL, dv3dt_PBL, dt3dt_PBL, dq3dt_PBL, do3dt_PBL
+      logical,                                  intent(in) :: ldiag3d, 
+     &  qdiag3d, gen_tend
 
       integer, dimension(im),                   intent(out) :: kpbl
       real(kind=kind_phys), dimension(im),      intent(out) :: dusfc,
@@ -441,6 +448,22 @@
           dqsfc(i)   = dqsfc(i)   + del(i,k)*qtend
         enddo
       enddo
+      if(ldiag3d .and. .not. gen_tend) then
+        do  k = 1,km
+          do i = 1,im
+            ttend      = (a1(i,k)-t1(i,k))
+            dt3dt_PBL(i,k) = dt3dt_PBL(i,k) + ttend
+          enddo
+        enddo
+        if(qdiag3d) then
+          do  k = 1,km
+            do i = 1,im
+              qtend      = (a2(i,k)-q1(i,k,1))
+              dq3dt_PBL(i,k) = dq3dt_PBL(i,k) + qtend
+            enddo
+          enddo
+        endif
+      endif
       do i = 1,im
         dtsfc(i)   = dtsfc(i) * cont
         dqsfc(i)   = dqsfc(i) * conq
@@ -458,6 +481,16 @@
             enddo
           endif
         enddo
+        if(ldiag3d .and. ntoz>0 .and. qdiag3d .and. .not. gen_tend) then
+          kk = ntoz
+          is = (kk-1) * km
+          do k = 1, km
+            do i = 1, im
+              qtend = (a2(i,k+is)-q1(i,k,kk))
+              do3dt_PBL(i,k) = do3dt_PBL(i,k)+qtend
+            enddo
+          enddo
+        endif
       endif
 !
 !     compute tridiagonal matrix elements for momentum
@@ -503,6 +536,16 @@
           dvsfc(i) = dvsfc(i) + tem * vtend
         enddo
       enddo
+      if (ldiag3d .and. .not. gen_tend) then
+        do k = 1,km
+          do i = 1,im
+            utend    = (a1(i,k)-u1(i,k))
+            vtend    = (a2(i,k)-v1(i,k))
+            du3dt_PBL(i,k) = du3dt_PBL(i,k) + utend
+            dv3dt_PBL(i,k) = dv3dt_PBL(i,k) + vtend
+          enddo
+        enddo
+      endif
 !
       if (ntke > 0) then    ! solve tridiagonal problem for momentum and tke
 !

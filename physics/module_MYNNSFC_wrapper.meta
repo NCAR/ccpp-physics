@@ -5,6 +5,28 @@
 
 ########################################################################
 [ccpp-arg-table]
+  name = mynnsfc_wrapper_init
+  type = scheme
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+
+########################################################################
+[ccpp-arg-table]
   name = mynnsfc_wrapper_run
   type = scheme
 [im]
@@ -63,11 +85,19 @@
   type = integer
   intent = in
   optional = F
+[lsm_ruc]
+  standard_name = flag_for_ruc_land_surface_scheme
+  long_name = flag for RUC land surface model
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [sigmaf]
   standard_name = bounded_vegetation_area_fraction
   long_name = areal fractional cover of green vegetation bounded on the bottom
   units = frac
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -76,7 +106,7 @@
   standard_name = vegetation_type_classification
   long_name = vegetation type at each grid cell
   units = index
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
   optional = F
@@ -84,7 +114,7 @@
   standard_name = maximum_vegetation_area_fraction
   long_name = max fractnl cover of green veg
   units = frac
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -101,7 +131,7 @@
   standard_name = perturbation_of_momentum_roughness_length
   long_name = perturbation of momentum roughness length
   units = frac
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -110,7 +140,7 @@
   standard_name = perturbation_of_heat_to_momentum_roughness_length_ratio
   long_name = perturbation of heat to momentum roughness length ratio
   units = frac
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -144,7 +174,7 @@
   standard_name = cell_size
   long_name = size of the grid cell
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -153,7 +183,7 @@
   standard_name = x_wind
   long_name = x component of layer wind
   units = m s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -162,7 +192,7 @@
   standard_name = y_wind
   long_name = y component of layer wind
   units = m s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -171,7 +201,7 @@
   standard_name = air_temperature
   long_name = layer mean air temperature
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -180,7 +210,7 @@
   standard_name = water_vapor_specific_humidity
   long_name = water vapor specific humidity
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -189,7 +219,7 @@
   standard_name = cloud_condensed_water_mixing_ratio
   long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates)
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -198,7 +228,7 @@
   standard_name = air_pressure
   long_name = mean layer pressure
   units = Pa
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -207,7 +237,7 @@
   standard_name = geopotential_at_interface
   long_name = geopotential at model layer interfaces
   units = m2 s-2
-  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
   type = real
   kind = kind_phys
   intent = in
@@ -216,7 +246,7 @@
   standard_name = dimensionless_exner_function_at_model_layers
   long_name = Exner function at layers
   units = none
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -225,7 +255,7 @@
   standard_name = surface_air_pressure
   long_name = surface pressure
   units = Pa
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -234,7 +264,7 @@
   standard_name = atmosphere_boundary_layer_thickness
   long_name = PBL thickness
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -243,7 +273,7 @@
   standard_name = sea_land_ice_mask_real
   long_name = landmask: sea/land/ice=0/1/2
   units = flag
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -252,7 +282,7 @@
   standard_name = flag_nonzero_wet_surface_fraction
   long_name = flag indicating presence of some ocean or lake surface area fraction
   units = flag
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
   optional = F
@@ -260,7 +290,7 @@
   standard_name = flag_nonzero_land_surface_fraction
   long_name = flag indicating presence of some land surface area fraction
   units = flag
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
   optional = F
@@ -268,7 +298,7 @@
   standard_name = flag_nonzero_sea_ice_surface_fraction
   long_name = flag indicating presence of some sea ice surface area fraction
   units = flag
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
   optional = F
@@ -276,7 +306,7 @@
   standard_name = surface_skin_temperature_over_ocean_interstitial
   long_name = surface skin temperature over ocean (temporary use as interstitial)
   units = K
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -285,7 +315,7 @@
   standard_name = surface_skin_temperature_over_land_interstitial
   long_name = surface skin temperature over land  (temporary use as interstitial)
   units = K
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -294,7 +324,7 @@
   standard_name = surface_skin_temperature_over_ice_interstitial
   long_name = surface skin temperature over ice   (temporary use as interstitial)
   units = K
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -303,7 +333,7 @@
   standard_name = surface_skin_temperature_after_iteration_over_ocean
   long_name = surface skin temperature after iteration over ocean
   units = K
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -312,7 +342,7 @@
   standard_name = surface_skin_temperature_after_iteration_over_land
   long_name = surface skin temperature after iteration over land
   units = K
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -321,7 +351,7 @@
   standard_name = surface_skin_temperature_after_iteration_over_ice
   long_name = surface skin temperature after iteration over ice
   units = K
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -330,7 +360,7 @@
   standard_name = surface_specific_humidity_over_ocean
   long_name = surface air saturation specific humidity over ocean
   units = kg kg-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -339,7 +369,7 @@
   standard_name = surface_specific_humidity_over_land
   long_name = surface air saturation specific humidity over land
   units = kg kg-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -348,7 +378,7 @@
   standard_name = surface_specific_humidity_over_ice
   long_name = surface air saturation specific humidity over ice
   units = kg kg-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -357,7 +387,7 @@
   standard_name = surface_snow_thickness_water_equivalent_over_ocean
   long_name = water equivalent snow depth over ocean
   units = mm
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -366,7 +396,7 @@
   standard_name = surface_snow_thickness_water_equivalent_over_land
   long_name = water equivalent snow depth over land
   units = mm
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -375,7 +405,7 @@
   standard_name = surface_snow_thickness_water_equivalent_over_ice
   long_name = water equivalent snow depth over ice
   units = mm
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -384,7 +414,7 @@
   standard_name = surface_roughness_length_over_ocean_interstitial
   long_name = surface roughness length over ocean (temporary use as interstitial)
   units = cm
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -393,7 +423,7 @@
   standard_name = surface_roughness_length_over_land_interstitial
   long_name = surface roughness length over land  (temporary use as interstitial)
   units = cm
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -402,7 +432,7 @@
   standard_name = surface_roughness_length_over_ice_interstitial
   long_name = surface roughness length over ice   (temporary use as interstitial)
   units = cm
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -411,7 +441,7 @@
   standard_name = surface_friction_velocity_over_ocean
   long_name = surface friction velocity over ocean
   units = m s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -420,7 +450,7 @@
   standard_name = surface_friction_velocity_over_land
   long_name = surface friction velocity over land
   units = m s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -429,7 +459,7 @@
   standard_name = surface_friction_velocity_over_ice
   long_name = surface friction velocity over ice
   units = m s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -438,7 +468,7 @@
   standard_name = surface_drag_coefficient_for_momentum_in_air_over_ocean
   long_name = surface exchange coeff for momentum over ocean
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -447,7 +477,7 @@
   standard_name = surface_drag_coefficient_for_momentum_in_air_over_land
   long_name = surface exchange coeff for momentum over land
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -456,7 +486,7 @@
   standard_name = surface_drag_coefficient_for_momentum_in_air_over_ice
   long_name = surface exchange coeff for momentum over ice
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -465,7 +495,7 @@
   standard_name = surface_drag_coefficient_for_heat_and_moisture_in_air_over_ocean
   long_name = surface exchange coeff heat & moisture over ocean
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -474,7 +504,7 @@
   standard_name = surface_drag_coefficient_for_heat_and_moisture_in_air_over_land
   long_name = surface exchange coeff heat & moisture over land
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -483,7 +513,7 @@
   standard_name = surface_drag_coefficient_for_heat_and_moisture_in_air_over_ice
   long_name = surface exchange coeff heat & moisture over ice
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -492,7 +522,7 @@
   standard_name = bulk_richardson_number_at_lowest_model_level_over_ocean
   long_name = bulk Richardson number at the surface over ocean
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -501,7 +531,7 @@
   standard_name = bulk_richardson_number_at_lowest_model_level_over_land
   long_name = bulk Richardson number at the surface over land
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -510,7 +540,7 @@
   standard_name = bulk_richardson_number_at_lowest_model_level_over_ice
   long_name = bulk Richardson number at the surface over ice
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -519,7 +549,7 @@
   standard_name = surface_wind_stress_over_ocean
   long_name = surface wind stress over ocean
   units = m2 s-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -528,7 +558,7 @@
   standard_name = surface_wind_stress_over_land
   long_name = surface wind stress over land
   units = m2 s-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -537,7 +567,7 @@
   standard_name = surface_wind_stress_over_ice
   long_name = surface wind stress over ice
   units = m2 s-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -546,7 +576,7 @@
   standard_name = Monin_Obukhov_similarity_function_for_momentum_over_ocean
   long_name = Monin-Obukhov similarity function for momentum over ocean
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -555,7 +585,7 @@
   standard_name = Monin_Obukhov_similarity_function_for_momentum_over_land
   long_name = Monin-Obukhov similarity function for momentum over land
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -564,7 +594,7 @@
   standard_name = Monin_Obukhov_similarity_function_for_momentum_over_ice
   long_name = Monin-Obukhov similarity function for momentum over ice
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -573,7 +603,7 @@
   standard_name = Monin_Obukhov_similarity_function_for_heat_over_ocean
   long_name = Monin-Obukhov similarity function for heat over ocean
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -582,7 +612,7 @@
   standard_name = Monin_Obukhov_similarity_function_for_heat_over_land
   long_name = Monin-Obukhov similarity function for heat over land
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -591,7 +621,7 @@
   standard_name = Monin_Obukhov_similarity_function_for_heat_over_ice
   long_name = Monin-Obukhov similarity function for heat over ice
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -600,7 +630,7 @@
   standard_name = Monin_Obukhov_similarity_function_for_momentum_at_10m_over_ocean
   long_name = Monin-Obukhov similarity parameter for momentum at 10m over ocean
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -609,7 +639,7 @@
   standard_name = Monin_Obukhov_similarity_function_for_momentum_at_10m_over_land
   long_name = Monin-Obukhov similarity parameter for momentum at 10m over land
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -618,7 +648,7 @@
   standard_name = Monin_Obukhov_similarity_function_for_momentum_at_10m_over_ice
   long_name = Monin-Obukhov similarity parameter for momentum at 10m over ice
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -627,7 +657,7 @@
   standard_name = Monin_Obukhov_similarity_function_for_heat_at_2m_over_ocean
   long_name = Monin-Obukhov similarity parameter for heat at 2m over ocean
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -636,7 +666,7 @@
   standard_name = Monin_Obukhov_similarity_function_for_heat_at_2m_over_land
   long_name = Monin-Obukhov similarity parameter for heat at 2m over land
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -645,7 +675,7 @@
   standard_name = Monin_Obukhov_similarity_function_for_heat_at_2m_over_ice
   long_name = Monin-Obukhov similarity parameter for heat at 2m over ice
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -654,7 +684,7 @@
   standard_name = kinematic_surface_upward_sensible_heat_flux_over_ocean
   long_name = kinematic surface upward sensible heat flux over ocean
   units = K m s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -663,7 +693,7 @@
   standard_name = kinematic_surface_upward_sensible_heat_flux_over_land
   long_name = kinematic surface upward sensible heat flux over land
   units = K m s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -672,7 +702,7 @@
   standard_name = kinematic_surface_upward_sensible_heat_flux_over_ice
   long_name = kinematic surface upward sensible heat flux over ice
   units = K m s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -681,7 +711,7 @@
   standard_name = kinematic_surface_upward_latent_heat_flux_over_ocean
   long_name = kinematic surface upward latent heat flux over ocean
   units = kg kg-1 m s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -690,7 +720,7 @@
   standard_name = kinematic_surface_upward_latent_heat_flux_over_land
   long_name = kinematic surface upward latent heat flux over land
   units = kg kg-1 m s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -699,7 +729,7 @@
   standard_name = kinematic_surface_upward_latent_heat_flux_over_ice
   long_name = kinematic surface upward latent heat flux over ice
   units = kg kg-1 m s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -708,25 +738,34 @@
   standard_name = surface_specific_humidity
   long_name = surface air saturation specific humidity
   units = kg kg-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
-[qsfc_ruc]
-  standard_name = water_vapor_mixing_ratio_at_surface
-  long_name = water vapor mixing ratio at surface
+[qsfc_lnd_ruc]
+  standard_name = water_vapor_mixing_ratio_at_surface_over_land
+  long_name = water vapor mixing ratio at surface over land
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[qsfc_ice_ruc]
+  standard_name = water_vapor_mixing_ratio_at_surface_over_ice
+  long_name = water vapor mixing ratio at surface over ice
   units = kg kg-1
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = F
 [ustm]
   standard_name = surface_friction_velocity_drag
   long_name = friction velocity isolated for momentum only
   units = m s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -735,7 +774,7 @@
   standard_name = surface_stability_parameter
   long_name = monin obukhov surface stability parameter
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -744,7 +783,7 @@
   standard_name = theta_star
   long_name = temperature flux divided by ustar (temperature scale)
   units = K
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -753,7 +792,7 @@
   standard_name = reciprocal_of_obukhov_length
   long_name = one over obukhov length
   units = m-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -762,7 +801,7 @@
   standard_name = wind_speed_at_lowest_model_layer
   long_name = wind speed at lowest model level
   units = m s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -771,7 +810,7 @@
   standard_name = surface_drag_wind_speed_for_momentum_in_air
   long_name = momentum exchange coefficient
   units = m s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -780,7 +819,7 @@
   standard_name = kinematic_surface_upward_sensible_heat_flux
   long_name = kinematic surface upward sensible heat flux
   units = K m s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -789,7 +828,7 @@
   standard_name = kinematic_surface_upward_latent_heat_flux
   long_name = kinematic surface upward latent heat flux
   units = kg kg-1 m s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -798,7 +837,7 @@
   standard_name = surface_latent_heat
   long_name = latent heating at the surface (pos = up)
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -807,7 +846,7 @@
   standard_name = surface_exchange_coefficient_for_heat
   long_name = surface exchange coefficient for heat
   units = W m-2 K-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -816,7 +855,7 @@
   standard_name = surface_exchange_coefficient_for_moisture
   long_name = surface exchange coefficient for moisture
   units = kg m-2 s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -825,7 +864,7 @@
   standard_name = x_wind_at_10m
   long_name = 10 meter u wind speed
   units = m s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -834,7 +873,7 @@
   standard_name = y_wind_at_10m
   long_name = 10 meter v wind speed
   units = m s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -843,7 +882,7 @@
   standard_name = potential_temperature_at_2m
   long_name = 2 meter potential temperature
   units = K
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -852,7 +891,7 @@
   standard_name = temperature_at_2m
   long_name = 2 meter temperature
   units = K
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -861,7 +900,7 @@
   standard_name = specific_humidity_at_2m
   long_name = 2 meter specific humidity
   units = kg kg-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -870,7 +909,7 @@
   standard_name = surface_wind_enhancement_due_to_convection
   long_name = surface wind enhancement due to convection
   units = m s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -879,7 +918,7 @@
   standard_name = surface_exchange_coefficient_for_heat_at_2m
   long_name = exchange coefficient for heat at 2 meters
   units = m s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -888,7 +927,7 @@
   standard_name = surface_exchange_coefficient_for_moisture_at_2m
   long_name = exchange coefficient for moisture at 2 meters
   units = m s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout

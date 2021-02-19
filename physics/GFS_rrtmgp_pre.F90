@@ -143,10 +143,10 @@ contains
 !> \section arg_table_GFS_rrtmgp_pre_run
 !! \htmlinclude GFS_rrtmgp_pre_run.html
 !!
-  subroutine GFS_rrtmgp_pre_run(nCol, nLev, nGases, nTracers, i_o3, lsswr, lslwr, fhswr, &
-       fhlwr, xlat, xlon,  prsl, tgrs, prslk, prsi, qgrs, tsfc, active_gases_array,      &
-       con_eps, con_epsm1, con_fvirt, con_epsqs,                                         &
-       raddt, p_lay, t_lay, p_lev, t_lev, tsfg, tsfa, tv_lay, relhum, tracer,            &
+  subroutine GFS_rrtmgp_pre_run(nCol, nLev, nGases, nTracers, i_o3, lsswr, lslwr, fhswr,    &
+       fhlwr, xlat, xlon,  prsl, tgrs, prslk, prsi, qgrs, tsfc, active_gases_array, con_eps,&
+       con_epsm1, con_fvirt, con_epsqs, lw_gas_props,                                       &
+       raddt, p_lay, t_lay, p_lev, t_lev, tsfg, tsfa, qs_lay, q_lay, tv_lay, relhum, tracer,&
        gas_concentrations,  errmsg, errflg)
     
     ! Inputs   
@@ -181,36 +181,40 @@ contains
          prsi                 ! Pressure at model-interfaces (Pa)
     real(kind_phys), dimension(nCol,nLev,nTracers) :: & 
          qgrs                 ! Tracer concentrations (kg/kg)
+    type(ty_gas_optics_rrtmgp),intent(in) :: &
+         lw_gas_props            ! RRTMGP DDT:         
 
     ! Outputs
     character(len=*), intent(out) :: &
          errmsg               ! Error message
     integer, intent(out) :: &  
          errflg               ! Error flag    
-    real(kind_phys), intent(out) :: &
+    real(kind_phys), intent(inout) :: &
          raddt                ! Radiation time-step
-    real(kind_phys), dimension(ncol), intent(out) :: &
+    real(kind_phys), dimension(ncol), intent(inout) :: &
          tsfg,              & ! Ground temperature
          tsfa                 ! Skin temperature    
-    real(kind_phys), dimension(nCol,nLev), intent(out) :: &
+    real(kind_phys), dimension(nCol,nLev), intent(inout) :: &
          p_lay,             & ! Pressure at model-layer
          t_lay,             & ! Temperature at model layer
+         q_lay,             & ! Water-vapor mixing ratio (kg/kg)
          tv_lay,            & ! Virtual temperature at model-layers 
-         relhum               ! Relative-humidity at model-layers          
-    real(kind_phys), dimension(nCol,nLev+1), intent(out) :: &
+         relhum,            & ! Relative-humidity at model-layers   
+         qs_lay               ! Saturation vapor pressure at model-layers
+    real(kind_phys), dimension(nCol,nLev+1), intent(inout) :: &
          p_lev,             & ! Pressure at model-interface
          t_lev                ! Temperature at model-interface
-    real(kind_phys), dimension(nCol, nLev, nTracers),intent(out) :: &
+    real(kind_phys), dimension(nCol, nLev, nTracers),intent(inout) :: &
          tracer               ! Array containing trace gases
-    type(ty_gas_concs),intent(out) :: &
+    type(ty_gas_concs),intent(inout) :: &
          gas_concentrations   ! RRTMGP DDT: gas volumne mixing ratios
          
     ! Local variables
     integer :: i, j, iCol, iBand, iSFC, iTOA, iLay
     logical :: top_at_1
     real(kind_phys),dimension(nCol,nLev) :: vmr_o3, vmr_h2o
-    real(kind_phys) :: es, qs, tem1, tem2
-    real(kind_phys), dimension(nCol,nLev) :: o3_lay, q_lay
+    real(kind_phys) :: es, tem1, tem2
+    real(kind_phys), dimension(nCol,nLev) :: o3_lay, tem2da, tem2db
     real(kind_phys), dimension(nCol,nLev, NF_VGAS) :: gas_vmr
 
     ! Initialize CCPP error handling variables
@@ -248,14 +252,51 @@ contains
     ! Temperature at layer-center
     t_lay(1:NCOL,:) = tgrs(1:NCOL,:)
 
-    ! Temperature at layer-interfaces
+    ! Bound temperature at layer centers.
+    do iCol=1,NCOL
+       do iLay=1,nLev
+          if (t_lay(iCol,iLay) .le. lw_gas_props%get_temp_min()) then
+             t_lay = lw_gas_props%get_temp_min() + epsilon(lw_gas_props%get_temp_min())
+          endif
+       enddo
+    enddo
+
+    ! Temperature at layer-interfaces          
     if (top_at_1) then
+       tem2da(1:nCol,2:iSFC) = log(p_lay(1:nCol,2:iSFC))
+       tem2db(1:nCol,2:iSFC) = log(p_lev(1:nCol,2:iSFC)) 
+       do iCol = 1, nCol
+           tem2da(iCol,1)    = log(p_lay(iCol,1) )
+           tem2db(iCol,1)    = log(max(lw_gas_props%get_press_min(), p_lev(iCol,1)) )
+           tem2db(iCol,iSFC) = log(p_lev(iCol,iSFC) )    
+       enddo
+       !
        t_lev(1:NCOL,1)      = t_lay(1:NCOL,iTOA)
-       t_lev(1:NCOL,2:iSFC) = (t_lay(1:NCOL,2:iSFC)+t_lay(1:NCOL,1:iSFC-1))/2._kind_phys
+       do iLay = 2, iSFC
+          do iCol = 1, nCol
+            t_lev(iCol,iLay) = t_lay(iCol,iLay) + (t_lay(iCol,iLay-1) - t_lay(iCol,iLay))&
+                     * (tem2db(iCol,iLay)   - tem2da(iCol,iLay))                   &
+                     / (tem2da(iCol,iLay-1) - tem2da(iCol,iLay))
+           enddo
+        enddo
        t_lev(1:NCOL,iSFC+1) = tsfc(1:NCOL)
     else
+       tem2da(1:nCol,2:iTOA) = log(p_lay(1:nCol,2:iTOA))
+       tem2db(1:nCol,2:iTOA) = log(p_lev(1:nCol,2:iTOA))     
+       do iCol = 1, nCol
+           tem2da(iCol,1)    = log(p_lay(iCol,1))
+           tem2db(iCol,1)    = log(p_lev(iCol,1))    
+           tem2db(iCol,iTOA) = log(max(lw_gas_props%get_press_min(), p_lev(iCol,iTOA)) )
+       enddo    
+       !
        t_lev(1:NCOL,1)      = tsfc(1:NCOL)
-       t_lev(1:NCOL,2:iTOA) = (t_lay(1:NCOL,2:iTOA)+t_lay(1:NCOL,1:iTOA-1))/2._kind_phys
+       do iLay = 1, iTOA-1
+          do iCol = 1, nCol
+            t_lev(iCol,iLay+1) = t_lay(iCol,iLay) + (t_lay(iCol,iLay+1) - t_lay(iCol,iLay))&
+                     * (tem2db(iCol,iLay+1) - tem2da(iCol,iLay))                   &
+                     / (tem2da(iCol,iLay+1) - tem2da(iCol,iLay))
+           enddo
+        enddo
        t_lev(1:NCOL,iTOA+1) = t_lay(1:NCOL,iTOA)
     endif
 
@@ -265,8 +306,8 @@ contains
     do iCol=1,NCOL
        do iLay=1,nLev
           es                = min( p_lay(iCol,iLay),  fpvs( t_lay(iCol,iLay) ) )  ! fpvs and prsl in pa
-          qs                = max( con_epsqs, con_eps * es / (p_lay(iCol,iLay) + con_epsm1*es) )
-          relhum(iCol,iLay) = max( 0._kind_phys, min( 1._kind_phys, max(con_epsqs, q_lay(iCol,iLay))/qs ) )
+          qs_lay(iCol,iLay) = max( con_epsqs, con_eps * es / (p_lay(iCol,iLay) + con_epsm1*es) )
+          relhum(iCol,iLay) = max( 0._kind_phys, min( 1._kind_phys, max(con_epsqs, q_lay(iCol,iLay))/qs_lay(iCol,iLay) ) )
           tv_lay(iCol,iLay) = t_lay(iCol,iLay) * (1._kind_phys + con_fvirt*q_lay(iCol,iLay)) 
        enddo
     enddo
@@ -319,7 +360,7 @@ contains
     ! Setup surface ground temperature and ground/air skin temperature if required.
     ! #######################################################################################
     tsfg(1:NCOL) = tsfc(1:NCOL)
-    tsfa(1:NCOL) = tsfc(1:NCOL)
+    tsfa(1:NCOL) =  t_lay(1:NCOL,iSFC)!tsfc(1:NCOL)
 
   end subroutine GFS_rrtmgp_pre_run
   
