@@ -84,7 +84,7 @@
   standard_name = geopotential
   long_name = geopotential at model layer centers
   units = m2 s-2
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -93,7 +93,7 @@
   standard_name = air_temperature_updated_by_physics
   long_name = temperature updated by physics
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -102,7 +102,7 @@
   standard_name = radar_reflectivity_10cm
   long_name = instantaneous refl_10cm
   units = dBZ
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -111,7 +111,7 @@
   standard_name = maximum_reflectivity_at_1km_agl_over_maximum_hourly_time_interval
   long_name = maximum reflectivity at 1km agl over maximum hourly time interval
   units = dBZ
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -120,7 +120,7 @@
   standard_name = maximum_reflectivity_at_minus10c_over_maximum_hourly_time_interval
   long_name = maximum reflectivity at minus10c over maximum hourly time interval
   units = dBZ
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -129,7 +129,7 @@
   standard_name = x_wind_at_10m
   long_name = 10 meter u wind speed
   units = m s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -138,7 +138,7 @@
   standard_name = y_wind_at_10m
   long_name = 10 meter v wind speed
   units = m s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -147,7 +147,7 @@
   standard_name = maximum_u_wind_at_10m_over_maximum_hourly_time_interval
   long_name = maximum u wind at 10m over maximum hourly time interval
   units = m s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -156,7 +156,7 @@
   standard_name = maximum_v_wind_at_10m_over_maximum_hourly_time_interval
   long_name = maximum v wind at 10m over maximum hourly time interval
   units = m s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -165,7 +165,7 @@
   standard_name = maximum_wind_at_10m_over_maximum_hourly_time_interval
   long_name = maximum wind at 10m over maximum hourly time interval
   units = m s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -174,7 +174,7 @@
   standard_name = surface_air_pressure
   long_name = surface pressure
   units = Pa
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -183,7 +183,7 @@
   standard_name = temperature_at_2m
   long_name = 2 meter temperature
   units = K
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -192,7 +192,7 @@
   standard_name = specific_humidity_at_2m
   long_name = 2 meter specific humidity
   units = kg kg-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -201,7 +201,7 @@
   standard_name = maximum_temperature_at_2m_over_maximum_hourly_time_interval
   long_name = maximum temperature at 2m over maximum hourly time interval
   units = K
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -210,7 +210,7 @@
   standard_name = minimum_temperature_at_2m_over_maximum_hourly_time_interval
   long_name = minumum temperature at 2m over maximum hourly time interval
   units = K
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -219,7 +219,7 @@
   standard_name = maximum_relative_humidity_at_2m_over_maximum_hourly_time_interval
   long_name = maximum relative humidity at 2m over maximum hourly time interval
   units = %
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -228,7 +228,7 @@
   standard_name = minimum_relative_humidity_at_2m_over_maximum_hourly_time_interval
   long_name = minumum relative humidity at 2m over maximum hourly time interval
   units = %
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout

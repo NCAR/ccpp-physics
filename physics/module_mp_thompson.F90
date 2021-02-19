@@ -1,12 +1,6 @@
 !>\file module_mp_thompson.F90
 !! This file contains the entity of GSD Thompson MP scheme.
 
-! DH* 2020-06-05
-! Use the following preprocessor directive to roll back
-! to the WRFv3.8.1, used in RAPv5/HRRRv4 for more reasonable
-! representation of mesoscale storms and reflectivity values
-!#define WRF381
-
 !>\ingroup aathompson
 
 !! This module computes the moisture tendencies of water vapor,
@@ -463,13 +457,6 @@ MODULE module_mp_thompson
       if (.NOT. ALLOCATED(tcg_racg) ) then
          ALLOCATE(tcg_racg(ntb_g1,ntb_g,ntb_r1,ntb_r))
          micro_init = .TRUE.
-         if (mpirank==mpiroot) then
-#ifdef WRF381
-            write(0,*) "Using Thompson MP from WRFv3.8.1 (RAPv5/HRRRv4)"
-#else
-            write(0,*) "Using Thompson MP from WRFv4.0+"
-#endif
-         endif
       endif
 
       if (.NOT. ALLOCATED(tmr_racg)) ALLOCATE(tmr_racg(ntb_g1,ntb_g,ntb_r1,ntb_r))
@@ -1452,17 +1439,17 @@ MODULE module_mp_thompson
 
          IF (has_reqc.ne.0 .and. has_reqi.ne.0 .and. has_reqs.ne.0) THEN
           do k = kts, kte
-             re_qc1d(k) = 2.49E-6
-             re_qi1d(k) = 4.99E-6
-             re_qs1d(k) = 9.99E-6
+             re_qc1d(k) = 2.50E-6 ! 2.49E-6
+             re_qi1d(k) = 5.00E-6 ! 4.99E-6
+             re_qs1d(k) = 1.00E-5 ! 9.99E-6
           enddo
 !> - Call calc_effectrad()
           call calc_effectRad (t1d, p1d, qv1d, qc1d, nc1d, qi1d, ni1d, qs1d,  &
                       re_qc1d, re_qi1d, re_qs1d, kts, kte)
           do k = kts, kte
-             re_cloud(i,k,j) = MAX(2.49E-6, MIN(re_qc1d(k), 50.E-6))
-             re_ice(i,k,j)   = MAX(4.99E-6, MIN(re_qi1d(k), 125.E-6))
-             re_snow(i,k,j)  = MAX(9.99E-6, MIN(re_qs1d(k), 999.E-6))
+             re_cloud(i,k,j) = MAX(2.50E-6, MIN(re_qc1d(k), 50.E-6))  ! MAX(2.49E-6, MIN(re_qc1d(k), 50.E-6))
+             re_ice(i,k,j)   = MAX(5.00E-6, MIN(re_qi1d(k), 125.E-6)) ! MAX(4.99E-6, MIN(re_qi1d(k), 125.E-6))
+             re_snow(i,k,j)  = MAX(1.00E-5, MIN(re_qs1d(k), 999.E-6)) ! MAX(9.99E-6, MIN(re_qs1d(k), 999.E-6))
           enddo
          ENDIF
 
@@ -1797,6 +1784,7 @@ MODULE module_mp_thompson
          rho(k) = 0.622*pres(k)/(R*temp(k)*(qv(k)+0.622))
          nwfa(k) = MAX(11.1E6, MIN(9999.E6, nwfa1d(k)*rho(k)))
          nifa(k) = MAX(naIN1*0.01, MIN(9999.E6, nifa1d(k)*rho(k)))
+         mvd_r(k) = D0r
 
          if (qc1d(k) .gt. R1) then
             no_micro = .false.
@@ -2715,13 +2703,7 @@ MODULE module_mp_thompson
 !! supersat again.
          sump = pri_inu(k) + pri_ide(k) + prs_ide(k) &
               + prs_sde(k) + prg_gde(k) + pri_iha(k)
-! DH* 2020-06-02 I believe that the WRF381 version
-! is wrong, because the units do not match.
-#ifdef WRF381
-         rate_max = (qv(k)-qvsi(k))*odts*0.999
-#else
          rate_max = (qv(k)-qvsi(k))*rho(k)*odts*0.999
-#endif
          if ( (sump.gt. eps .and. sump.gt. rate_max) .or. &
               (sump.lt. -eps .and. sump.lt. rate_max) ) then
           ratio = rate_max/sump
@@ -3598,7 +3580,7 @@ MODULE module_mp_thompson
                                            *odzq*DT*onstep(1))
          enddo
 
-#ifdef WRF381
+#if 1
          if (rr(kts).gt.R1*10.) &
 #else
          if (rr(kts).gt.R1*1000.) &
@@ -3653,7 +3635,7 @@ MODULE module_mp_thompson
                                            *odzq*DT*onstep(2))
          enddo
 
-#ifdef WRF381
+#if 1
          if (ri(kts).gt.R1*10.) &
 #else
          if (ri(kts).gt.R1*1000.) &
@@ -3684,7 +3666,7 @@ MODULE module_mp_thompson
                                            *odzq*DT*onstep(3))
          enddo
 
-#ifdef WRF381
+#if 1
          if (rs(kts).gt.R1*10.) &
 #else
          if (rs(kts).gt.R1*1000.) &
@@ -3715,7 +3697,7 @@ MODULE module_mp_thompson
                                            *odzq*DT*onstep(4))
          enddo
 
-#ifdef WRF381
+#if 1
          if (rg(kts).gt.R1*10.) &
 #else
          if (rg(kts).gt.R1*1000.) &
@@ -3760,21 +3742,10 @@ MODULE module_mp_thompson
          qv1d(k) = MAX(1.E-10, qv1d(k) + qvten(k)*DT)
          qc1d(k) = qc1d(k) + qcten(k)*DT
          nc1d(k) = MAX(2./rho(k), MIN(nc1d(k) + ncten(k)*DT, Nt_c_max))
-! DH* 2020-06-05 I believe WRF381 is wrong in terms of units;
-! dividing by rho turns number concentration per volume into
-! number concentration per mass.
-#ifdef WRF381
          nwfa1d(k) = MAX(11.1E6/rho(k), MIN(9999.E6/rho(k),             &
                        (nwfa1d(k)+nwfaten(k)*DT)))
          nifa1d(k) = MAX(naIN1*0.01, MIN(9999.E6/rho(k),                &
                        (nifa1d(k)+nifaten(k)*DT)))
-#else
-         nwfa1d(k) = MAX(11.1E6, MIN(9999.E6,                           &
-                       (nwfa1d(k)+nwfaten(k)*DT)))
-         nifa1d(k) = MAX(naIN1*0.01, MIN(9999.E6,                       &
-                       (nifa1d(k)+nifaten(k)*DT)))
-#endif
-
          if (qc1d(k) .le. R1) then
            qc1d(k) = 0.0
            nc1d(k) = 0.0
@@ -5275,31 +5246,14 @@ MODULE module_mp_thompson
 ! are consistent with the WRFv3.8.1 settings, but inconsistent
 ! with the WRFv4+ settings. In order to apply the same bounds
 ! as before this change, use the WRF v3.8.1 settings throughout.
-#if 1
-!ifdef WRF381
-      re_qc1d(:) = 2.49E-6
-      re_qi1d(:) = 4.99E-6
-      re_qs1d(:) = 9.99E-6
-#else
-      re_qc1d(:) = 2.49E-6
-      re_qi1d(:) = 2.49E-6
-      re_qs1d(:) = 4.99E-6
-#endif
+      re_qc1d(:) = 2.50E-6 ! 2.49E-6
+      re_qi1d(:) = 5.00E-6 ! 4.99E-6
+      re_qs1d(:) = 1.00E-5 ! 9.99E-6
 
       do k = kts, kte
          rho(k) = 0.622*p1d(k)/(R*t1d(k)*(qv1d(k)+0.622))
          rc(k) = MAX(R1, qc1d(k)*rho(k))
-#ifdef WRF381
-         nc(k) = MAX(R2, MIN(nc1d(k)*rho(k), Nt_c_max))
-#else
-         ! DH* 2020-06-05 is using 2.0 instead of R2
-         ! a bug in the WRFv4.0+ version of Thompson?
-         ! For ni(k) a few lines below, it is still R2.
-         ! Note that R2 is defined as R2 = 1.E-6, and is
-         ! used in other parts of Thompson MP for ni/nr
-         ! calculations (but not for nc calculations)
          nc(k) = MAX(2., MIN(nc1d(k)*rho(k), Nt_c_max))
-#endif
          if (.NOT. is_aerosol_aware) nc(k) = Nt_c
          if (rc(k).gt.R1 .and. nc(k).gt.R2) has_qc = .true.
          ri(k) = MAX(R1, qi1d(k)*rho(k))
@@ -5328,12 +5282,7 @@ MODULE module_mp_thompson
       do k = kts, kte
          if (ri(k).le.R1 .or. ni(k).le.R2) CYCLE
          lami = (am_i*cig(2)*oig1*ni(k)/ri(k))**obmi
-#if 1
-!ifdef WRF381
          re_qi1d(k) = MAX(5.01E-6, MIN(SNGL(0.5D0 * DBLE(3.+mu_i)/lami), 125.E-6))
-#else
-         re_qi1d(k) = MAX(2.51E-6, MIN(SNGL(0.5D0 * DBLE(3.+mu_i)/lami), 125.E-6))
-#endif
       enddo
       endif
 
@@ -5373,12 +5322,7 @@ MODULE module_mp_thompson
      &        + sb(7)*tc0*tc0*cse(1) + sb(8)*tc0*cse(1)*cse(1) &
      &        + sb(9)*tc0*tc0*tc0 + sb(10)*cse(1)*cse(1)*cse(1)
          smoc = a_ * smo2**b_
-#if 1
-!ifdef WRF381
-         re_qs1d(k) = MAX(10.E-6, MIN(0.5*(smoc/smob), 999.E-6))
-#else
-         re_qs1d(k) = MAX(5.01E-6, MIN(0.5*(smoc/smob), 999.E-6))
-#endif
+         re_qs1d(k) = MAX(1.01E-5, MIN(0.5*(smoc/smob), 999.E-6))
       enddo
       endif
 

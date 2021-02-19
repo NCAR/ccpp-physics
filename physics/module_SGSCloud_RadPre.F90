@@ -49,6 +49,7 @@
            nlay, plyr, xlat, dz,de_lgth, &
            cldsa,mtopa,mbota,            &
            imp_physics, imp_physics_gfdl,&
+           iovr,                         &
            errmsg, errflg                )
 
 ! should be moved to inside the mynn:
@@ -81,6 +82,7 @@
       real(kind=kind_phys), dimension(im,nlay), intent(in)    :: plyr, dz      
       real(kind=kind_phys), dimension(im,5),    intent(inout) :: cldsa
       integer,              dimension(im,3),    intent(inout) :: mbota, mtopa
+      integer,                                  intent(in)    :: iovr
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
       ! Local variables
@@ -93,6 +95,9 @@
       real(kind=kind_phys), dimension(im)      :: rxlat
       real (kind=kind_phys):: Tc, iwc
       integer              :: i, k, id
+      ! DH* 20200723 - see comment at the end of this routine around 'gethml'
+      real(kind=kind_phys), dimension(im,nlay) :: alpha_dummy
+      ! *DH
 
       ! PARAMETERS FOR RANDALL AND XU (1996) CLOUD FRACTION
       REAL, PARAMETER  ::  coef_p = 0.25, coef_gamm = 0.49, coef_alph = 100.
@@ -123,7 +128,7 @@
 
               if (h2oliq > clwt) then
                 onemrh= max( 1.e-10, 1.0-rhgrid )
-                tem1  = min(max((onemrh*qsat)**0.49,0.0001),1.0)  !jhan                                                          
+                tem1  = min(max((onemrh*qsat)**0.49,0.0001),1.0)  !jhan
                 tem1  = 100.0 / tem1
                 value = max( min( tem1*(h2oliq-clwt), 50.0 ), 0.0 )
                 tem2  = sqrt( sqrt(rhgrid) )
@@ -287,32 +292,6 @@
         endif ! imfdeepcnv_gf
 
       endif ! timestep > 1
-
-!> - Compute SFC/low/middle/high cloud top pressure for each cloud domain for given latitude.
-
-      do i =1, im
-        rxlat(i) = abs( xlat(i) / con_pi )      ! if xlat in pi/2 -> -pi/2 range
-!       rxlat(i) = abs(0.5 - xlat(i)/con_pi)    ! if xlat in 0 -> pi range
-      enddo
-
-      do id = 1, 4
-        tem1 = ptopc(id,2) - ptopc(id,1)
-        do i =1, im
-          ptop1(i,id) = ptopc(id,1) + tem1*max( 0.0, 4.0*rxlat(i)-1.0 )
-        enddo
-      enddo
-
-      cldcnv = 0.
-
-!> - Recompute the diagnostic high, mid, low, total and bl cloud fraction
-      call gethml                                                       &
-!  ---  inputs:
-           ( plyr, ptop1, clouds1, cldcnv, dz, de_lgth, im, nlay,       &
-!  ---  outputs:
-             cldsa, mtopa, mbota)
-
-       !print*,"===Finished adding subgrid clouds to the resolved-scale clouds"
-       !print*,"qc_save:",qc_save(1,1)," qi_save:",qi_save(1,1)
 
       end subroutine sgscloud_radpre_run
 

@@ -117,7 +117,7 @@
   standard_name = surface_air_pressure
   long_name = surface pressure
   units = Pa
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -126,7 +126,7 @@
   standard_name = air_temperature_at_lowest_model_layer
   long_name = surface layer mean temperature
   units = K
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -135,7 +135,7 @@
   standard_name = water_vapor_specific_humidity_at_lowest_model_layer
   long_name = surface layer mean specific humidity
   units = kg kg-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -153,7 +153,7 @@
   standard_name = surface_longwave_emissivity_over_ice_interstitial
   long_name = surface lw emissivity in fraction over ice (temporary use as interstitial)
   units = frac
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -162,7 +162,7 @@
   standard_name = surface_downwelling_longwave_flux_absorbed_by_ground_over_ice
   long_name = total sky surface downward longwave flux absorbed by the ground over ice
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -171,7 +171,7 @@
   standard_name = surface_net_downwelling_shortwave_flux
   long_name = total sky sfc netsw flx into ground
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -180,7 +180,7 @@
   standard_name = surface_downwelling_shortwave_flux
   long_name = total sky sfc downward sw flux
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -189,7 +189,7 @@
   standard_name = flag_for_precipitation_type
   long_name = snow/rain flag for precipitation
   units = flag
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -198,7 +198,7 @@
   standard_name = surface_drag_coefficient_for_momentum_in_air_over_ice
   long_name = surface exchange coeff for momentum over ice
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -207,7 +207,7 @@
   standard_name = surface_drag_coefficient_for_heat_and_moisture_in_air_over_ice
   long_name = surface exchange coeff heat & moisture over ice
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -216,7 +216,7 @@
   standard_name = air_pressure_at_lowest_model_layer
   long_name = surface layer mean pressure
   units = Pa
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -225,7 +225,7 @@
   standard_name = ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer
   long_name = Exner function ratio bt midlayer and interface at 1st layer
   units = ratio
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -234,7 +234,7 @@
   standard_name = dimensionless_exner_function_at_lowest_model_interface
   long_name = dimensionless Exner function at the ground surface
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -243,7 +243,7 @@
   standard_name = dimensionless_exner_function_at_lowest_model_layer
   long_name = dimensionless Exner function at the lowest model layer
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -252,7 +252,7 @@
   standard_name = wind_speed_at_lowest_model_layer
   long_name = wind speed at lowest model level
   units = m s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -261,7 +261,7 @@
   standard_name = flag_for_iteration
   long_name = flag for iteration
   units = flag
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
   optional = F
@@ -285,7 +285,7 @@
   standard_name = sea_ice_thickness
   long_name = sea-ice thickness
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -294,7 +294,7 @@
   standard_name = sea_ice_concentration
   long_name = sea-ice concentration [0,1]
   units = frac
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -303,7 +303,7 @@
   standard_name = sea_ice_temperature_interstitial
   long_name = sea-ice surface temperature use as interstitial
   units = K
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -312,7 +312,7 @@
   standard_name = water_equivalent_accumulated_snow_depth_over_ice
   long_name = water equiv of acc snow depth over ice
   units = mm
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -321,7 +321,7 @@
   standard_name = surface_skin_temperature_over_ice_interstitial
   long_name = surface skin temperature over ice   (temporary use as interstitial)
   units = K
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -330,7 +330,7 @@
   standard_name = nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep_over_ice
   long_name = total precipitation amount in each time step over ice
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -339,7 +339,7 @@
   standard_name = internal_ice_temperature
   long_name = sea ice internal temperature
   units = K
-  dimensions = (horizontal_dimension,ice_vertical_dimension)
+  dimensions = (horizontal_loop_extent,ice_vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -348,7 +348,7 @@
   standard_name = surface_upward_potential_latent_heat_flux_over_ice
   long_name = surface upward potential latent heat flux over ice
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -357,7 +357,7 @@
   standard_name = surface_snow_thickness_water_equivalent_over_ice
   long_name = water equivalent snow depth over ice
   units = mm
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -366,7 +366,7 @@
   standard_name = surface_specific_humidity_over_ice
   long_name = surface air saturation specific humidity over ice
   units = kg kg-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -375,7 +375,7 @@
   standard_name = surface_snow_melt
   long_name = snow melt during timestep
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -384,7 +384,7 @@
   standard_name = upward_heat_flux_in_soil_over_ice
   long_name = soil heat flux over ice
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -393,7 +393,7 @@
   standard_name = surface_drag_wind_speed_for_momentum_in_air_over_ice
   long_name = momentum exchange coefficient over ice
   units = m s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -402,7 +402,7 @@
   standard_name = surface_drag_mass_flux_for_heat_and_moisture_in_air_over_ice
   long_name = thermal exchange coefficient over ice
   units = kg m-2 s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -411,7 +411,7 @@
   standard_name = kinematic_surface_upward_latent_heat_flux_over_ice
   long_name = kinematic surface upward latent heat flux over ice
   units = kg kg-1 m s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -420,7 +420,7 @@
   standard_name = kinematic_surface_upward_sensible_heat_flux_over_ice
   long_name = kinematic surface upward sensible heat flux over ice
   units = K m s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -437,7 +437,7 @@
   standard_name = flag_nonzero_sea_ice_surface_fraction
   long_name = flag indicating presence of some sea ice surface area fraction
   units = flag
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
   optional = F
@@ -445,7 +445,7 @@
   standard_name = sea_land_ice_mask_cice
   long_name = sea/land/ice mask cice (=0/1/2)
   units = flag
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
   optional = F
@@ -471,7 +471,7 @@
   standard_name = sea_area_fraction
   long_name = fraction of horizontal grid area occupied by ocean
   units = frac
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in

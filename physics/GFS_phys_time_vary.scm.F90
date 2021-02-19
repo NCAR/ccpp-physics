@@ -353,18 +353,18 @@
         !--- determine if diagnostics buckets need to be cleared
         sec_zero = nint(Model%fhzero*con_hr)
         if (sec_zero >= nint(max(Model%fhswr,Model%fhlwr))) then
-          if (mod(Model%kdt,Model%nszero) == 1) then
+          if (mod(Model%kdt,Model%nszero) == 0) then
               call Diag%rad_zero  (Model)
               call Diag%phys_zero (Model)
         !!!!  THIS IS THE POINT AT WHICH DIAG%ZHOUR NEEDS TO BE UPDATED
           endif
         else
-          if (mod(Model%kdt,Model%nszero) == 1) then
+          if (mod(Model%kdt,Model%nszero) == 0) then
               call Diag%phys_zero (Model)
         !!!!  THIS IS THE POINT AT WHICH DIAG%ZHOUR NEEDS TO BE UPDATED
           endif
           kdt_rad = nint(min(Model%fhswr,Model%fhlwr)/Model%dtp)
-          if (mod(Model%kdt, kdt_rad) == 1) then
+          if (mod(Model%kdt, kdt_rad) == 0) then
               call Diag%rad_zero  (Model)
         !!!!  THIS IS THE POINT AT WHICH DIAG%ZHOUR NEEDS TO BE UPDATED
           endif
@@ -389,6 +389,7 @@
                   endif
                 endif
               enddo
+              ! DH* 20201104: don't forget snocvr_ice for RUC LSM (see FV3GFS_io.F90)
           endif
         endif
 #endif

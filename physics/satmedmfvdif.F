@@ -62,7 +62,7 @@
      &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,                        &
      &     kinver,xkzm_m,xkzm_h,xkzm_s,                                 &
      &     dt3dt_PBL,du3dt_PBL,dv3dt_PBL,dq3dt_PBL,do3dt_PBL,           &
-     &     ldiag3d,qdiag3d,errmsg,errflg)
+     &     gen_tend,ldiag3d,qdiag3d,errmsg,errflg)
 !
       use machine  , only : kind_phys
       use funcphys , only : fpvs
@@ -74,7 +74,7 @@
       integer, intent(in)  :: kinver(im)
       integer, intent(out) :: kpbl(im)
 !
-      logical, intent(in)  :: ldiag3d, qdiag3d
+      logical, intent(in)  :: gen_tend, ldiag3d, qdiag3d
       real(kind=kind_phys), intent(inout), dimension(:,:) ::            &
      &  dt3dt_PBL,du3dt_PBL,dv3dt_PBL,dq3dt_PBL,do3dt_PBL
 !
@@ -1397,14 +1397,24 @@
             rtg(i,k,1) = rtg(i,k,1)+qtend
             dtsfc(i)   = dtsfc(i)+cont*del(i,k)*ttend
             dqsfc(i)   = dqsfc(i)+conq*del(i,k)*qtend
-            if(ldiag3d) then
-              dt3dt_PBL(i,k) = dt3dt_PBL(i,k) + ttend*delt
-              if(qdiag3d) then
-                dq3dt_PBL(i,k) = dq3dt_PBL(i,k) + qtend*delt
-              endif
-            endif
          enddo
       enddo
+      if (ldiag3d .and. .not. gen_tend) then
+        do  k = 1,km
+           do i = 1,im
+             ttend      = (f1(i,k)-t1(i,k))*rdt
+             dt3dt_PBL(i,k) = dt3dt_PBL(i,k) + ttend*delt
+           enddo
+        enddo
+        if (qdiag3d) then
+          do  k = 1,km
+             do i = 1,im
+               qtend      = (f2(i,k)-q1(i,k,1))*rdt
+               dq3dt_PBL(i,k) = dq3dt_PBL(i,k) + qtend*delt
+             enddo
+          enddo
+        endif
+      endif
 !
       if(ntrac1 >= 2) then
         do kk = 2, ntrac1
@@ -1503,12 +1513,18 @@
             dv(i,k)  = dv(i,k)+vtend
             dusfc(i) = dusfc(i)+conw*del(i,k)*utend
             dvsfc(i) = dvsfc(i)+conw*del(i,k)*vtend
-            if(ldiag3d) then
-              du3dt_PBL(i,k) = du3dt_PBL(i,k) + utend*delt
-              dv3dt_PBL(i,k) = dv3dt_PBL(i,k) + vtend*delt
-            endif
          enddo
       enddo
+      if (ldiag3d .and. .not. gen_tend) then
+        do k = 1,km
+           do i = 1,im
+             utend = (f1(i,k)-u1(i,k))*rdt
+             vtend = (f2(i,k)-v1(i,k))*rdt
+             du3dt_PBL(i,k) = du3dt_PBL(i,k) + utend*delt
+             dv3dt_PBL(i,k) = dv3dt_PBL(i,k) + vtend*delt
+           enddo
+        enddo
+      endif
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !> -# Save PBL height for diagnostic purpose

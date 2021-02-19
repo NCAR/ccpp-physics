@@ -1,3 +1,4 @@
+#define CCPP
 !>  \file sfc_noahmp_drv.f
 !!  This file contains the NoahMP land surface scheme driver.
 
@@ -24,14 +25,19 @@
 !! \section arg_table_noahmpdrv_init Argument Table
 !! \htmlinclude noahmpdrv_init.html
 !!
-      subroutine noahmpdrv_init(me, isot, ivegsrc, nlunit, errmsg,      &
-     &                          errflg)
+      subroutine noahmpdrv_init(me, isot, ivegsrc, nlunit, pores, resid,
+     &                          errmsg, errflg)
         
+        use machine,          only: kind_phys
         use set_soilveg_mod,  only: set_soilveg
+        use namelist_soilveg
         
         implicit none
       
         integer,              intent(in)  :: me, isot, ivegsrc, nlunit
+
+        real (kind=kind_phys), dimension(:), intent(out) :: pores, resid
+
         character(len=*),     intent(out) :: errmsg
         integer,              intent(out) :: errflg
 
@@ -39,8 +45,24 @@
         errmsg = ''
         errflg = 0
 
+        if (ivegsrc /= 1) then
+          errmsg = 'The NOAHMP LSM expects that the ivegsrc physics '//
+     &             'namelist parameter is 1. Exiting...'
+          errflg = 1
+          return
+        end if
+        if (isot /= 1) then
+          errmsg = 'The NOAHMP LSM expects that the isot physics '//
+     &             'namelist parameter is 1. Exiting...'
+          errflg = 1
+          return
+        end if
+
         !--- initialize soil vegetation
         call set_soilveg(me, isot, ivegsrc, nlunit)
+
+        pores (:) = maxsmc (:)
+        resid (:) = drysmc (:)
       
       end subroutine noahmpdrv_init
 

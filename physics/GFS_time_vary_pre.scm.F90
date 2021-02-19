@@ -122,44 +122,42 @@
         fhour = (sec + dtp)/con_hr
         kdt   = nint((sec + dtp)/dtp)
         
-        if(lsm == lsm_noahmp) then
-          !GJF* These calculations were originally in GFS_physics_driver.F90 for 
-          !     NoahMP. They were moved to this routine since they only depends 
-          !     on time (not space). Note that this code is included as-is from 
-          !     GFS_physics_driver.F90, but it may be simplified by using more 
-          !     NCEP W3 library calls (e.g., see W3DOXDAT, W3FS13 for Julian day 
-          !     of year and W3DIFDAT to determine the integer number of days in 
-          !     a given year). *GJF
-          ! Julian day calculation (fcst day of the year)
-          ! we need yearln and julian to
-          ! pass to noah mp sflx, idate is init, jdat is fcst;idate = jdat when kdt=1
-          ! jdat is changing
-          !
+        !GJF* These calculations were originally in GFS_physics_driver.F90 for 
+        !     NoahMP. They were moved to this routine since they only depends 
+        !     on time (not space). Note that this code is included as-is from 
+        !     GFS_physics_driver.F90, but it may be simplified by using more 
+        !     NCEP W3 library calls (e.g., see W3DOXDAT, W3FS13 for Julian day 
+        !     of year and W3DIFDAT to determine the integer number of days in 
+        !     a given year). *GJF
+        ! Julian day calculation (fcst day of the year)
+        ! we need yearln and julian to
+        ! pass to noah mp sflx, idate is init, jdat is fcst;idate = jdat when kdt=1
+        ! jdat is changing
+        !
 
-          jd1    = iw3jdn(jdat(1),jdat(2),jdat(3))
-          jd0    = iw3jdn(jdat(1),1,1)
-          fjd    = float(jdat(5))/24.0 + float(jdat(6))/1440.0
+        jd1    = iw3jdn(jdat(1),jdat(2),jdat(3))
+        jd0    = iw3jdn(jdat(1),1,1)
+        fjd    = float(jdat(5))/24.0 + float(jdat(6))/1440.0
 
-          julian = float(jd1-jd0) + fjd
-          
-          !
-          ! Year length
-          !
-          ! what if the integration goes from one year to another?
-          ! iyr or jyr ? from 365 to 366 or from 366 to 365
-          !
-          ! is this against model's noleap yr assumption?
-          if (mod(jdat(1),4) == 0) then
-            yearlen = 366
-            if (mod(jdat(1),100) == 0) then
-              yearlen = 365
-              if (mod(jdat(1),400) == 0) then
-                yearlen = 366
-              endif
+        julian = float(jd1-jd0) + fjd
+        
+        !
+        ! Year length
+        !
+        ! what if the integration goes from one year to another?
+        ! iyr or jyr ? from 365 to 366 or from 366 to 365
+        !
+        ! is this against model's noleap yr assumption?
+        if (mod(jdat(1),4) == 0) then
+          yearlen = 366
+          if (mod(jdat(1),100) == 0) then
+            yearlen = 365
+            if (mod(jdat(1),400) == 0) then
+              yearlen = 366
             endif
           endif
         endif
-        
+
         ipt    = 1
         lprnt  = .false.
         lssav  = .true.

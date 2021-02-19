@@ -5,7 +5,7 @@ module GFS_rrtmg_setup
    use physparam, only : isolar , ictmflg, ico2flg, ioznflg, iaerflg,&
 !  &             iaermdl, laswflg, lalwflg, lavoflg, icldflg,         &
    &             iaermdl,                            icldflg,         &
-   &             iovrsw , iovrlw , lcrick , lcnorm , lnoprec,         &
+   &             iovrRad=>iovr, lcrick , lcnorm , lnoprec,            &
    &             ialbflg, iemsflg, isubcsw, isubclw, ivflip , ipsd0,  &
    &             iswcliq,                                             &
    &             kind_phys
@@ -14,7 +14,7 @@ module GFS_rrtmg_setup
 
    implicit none
 
-   public GFS_rrtmg_setup_init, GFS_rrtmg_setup_run, GFS_rrtmg_setup_finalize
+   public GFS_rrtmg_setup_init, GFS_rrtmg_setup_timestep_init, GFS_rrtmg_setup_finalize
 
    private
 
@@ -43,13 +43,13 @@ module GFS_rrtmg_setup
 !! \section arg_table_GFS_rrtmg_setup_init Argument Table
 !! \htmlinclude GFS_rrtmg_setup_init.html
 !!
-   subroutine GFS_rrtmg_setup_init (                                    &
-          si, levr, ictm, isol, ico2, iaer, ialb, iems, ntcw,  num_p2d, &
-          num_p3d, npdf3d, ntoz, iovr_sw, iovr_lw, isubc_sw, isubc_lw,  &
-          icliq_sw, crick_proof, ccnorm,                                &
-          imp_physics,                                                  &
-          norad_precip, idate, iflip,                                   &
-          im, faerlw, faersw, aerodp,                                   & ! for consistency checks
+   subroutine GFS_rrtmg_setup_init (                          &
+          si, levr, ictm, isol, ico2, iaer, ialb, iems, ntcw, &
+          num_p3d, npdf3d, ntoz, iovr, isubc_sw, isubc_lw,    &
+          icliq_sw, crick_proof, ccnorm,                      &
+          imp_physics,                                        &
+          norad_precip, idate, iflip,                         &
+          im, faerlw, faersw, aerodp,                         & ! for consistency checks
           me, errmsg, errflg)
 ! =================   subprogram documentation block   ================ !
 !                                                                       !
@@ -131,11 +131,12 @@ module GFS_rrtmg_setup
 !                        Stamnes(1993) \cite hu_and_stamnes_1993 method !
 !                     =2:cloud optical property scheme based on Hu and  !
 !                        Stamnes(1993) -updated                         !
-!   iovr_sw/iovr_lw  : control flag for cloud overlap (sw/lw rad)       !
+!   iovr             : control flag for cloud overlap (sw/lw rad)       !
 !                     =0: random overlapping clouds                     !
 !                     =1: max/ran overlapping clouds                    !
 !                     =2: maximum overlap clouds       (mcica only)     !
 !                     =3: decorrelation-length overlap (mcica only)     !
+!                     =4: exponential overlap clouds
 !   isubc_sw/isubc_lw: sub-column cloud approx control flag (sw/lw rad) !
 !                     =0: with out sub-column cloud approximation       !
 !                     =1: mcica sub-col approx. prescribed random seed  !
@@ -173,12 +174,10 @@ module GFS_rrtmg_setup
       integer, intent(in) :: ialb
       integer, intent(in) :: iems
       integer, intent(in) :: ntcw
-      integer, intent(in) :: num_p2d
       integer, intent(in) :: num_p3d
       integer, intent(in) :: npdf3d
       integer, intent(in) :: ntoz
-      integer, intent(in) :: iovr_sw
-      integer, intent(in) :: iovr_lw
+      integer, intent(in) :: iovr
       integer, intent(in) :: isubc_sw
       integer, intent(in) :: isubc_lw
       integer, intent(in) :: icliq_sw
@@ -268,9 +267,10 @@ module GFS_rrtmg_setup
 
       iswcliq = icliq_sw                ! optical property for liquid clouds for sw
 
-      iovrsw = iovr_sw                  ! cloud overlapping control flag for sw
-      iovrlw = iovr_lw                  ! cloud overlapping control flag for lw
-
+      ! iovr comes from the model. In the RRTMG implementation this is stored in phyrparam.f,
+      ! it comes in from the host-model and is set here. 
+      ! In GP, iovr is passed directly into the routines.
+      iovrRAD = iovr
       lcrick  = crick_proof             ! control flag for eliminating CRICK 
       lcnorm  = ccnorm                  ! control flag for in-cld condensate 
       lnoprec = norad_precip            ! precip effect on radiation flag (ferrier microphysics)
@@ -293,8 +293,8 @@ module GFS_rrtmg_setup
         print *,' si =',si
         print *,' levr=',levr,' ictm=',ictm,' isol=',isol,' ico2=',ico2,&
      &          ' iaer=',iaer,' ialb=',ialb,' iems=',iems,' ntcw=',ntcw
-        print *,' np3d=',num_p3d,' ntoz=',ntoz,' iovr_sw=',iovr_sw,     &
-     &          ' iovr_lw=',iovr_lw,' isubc_sw=',isubc_sw,              &
+        print *,' np3d=',num_p3d,' ntoz=',ntoz,                         &
+     &          ' iovr=',iovr,' isubc_sw=',isubc_sw,                    &
      &          ' isubc_lw=',isubc_lw,' icliq_sw=',icliq_sw,            &
      &          ' iflip=',iflip,'  me=',me
         print *,' crick_proof=',crick_proof,                            &
@@ -303,7 +303,7 @@ module GFS_rrtmg_setup
 
       call radinit                                                      &
 !  ---  inputs:
-     &     ( si, levr, imp_physics,  me )
+     &     ( si, levr, imp_physics, me )
 !  ---  outputs:
 !          ( none )
 
@@ -319,10 +319,10 @@ module GFS_rrtmg_setup
 
    end subroutine GFS_rrtmg_setup_init
 
-!> \section arg_table_GFS_rrtmg_setup_run Argument Table
-!! \htmlinclude GFS_rrtmg_setup_run.html
+!> \section arg_table_GFS_rrtmg_setup_timestep_init Argument Table
+!! \htmlinclude GFS_rrtmg_setup_timestep_init.html
 !!
-   subroutine GFS_rrtmg_setup_run (                &
+   subroutine GFS_rrtmg_setup_timestep_init (      &
           idate, jdate, deltsw, deltim, lsswr, me, &
           slag, sdec, cdec, solcon, errmsg, errflg)
 
@@ -344,7 +344,7 @@ module GFS_rrtmg_setup
 
       ! Check initialization state
       if (.not.is_initialized) then
-         write(errmsg, fmt='((a))') 'GFS_rrtmg_setup_run called before GFS_rrtmg_setup_init'
+         write(errmsg, fmt='((a))') 'GFS_rrtmg_setup_timestep_init called before GFS_rrtmg_setup_init'
          errflg = 1
          return
       end if
@@ -356,7 +356,7 @@ module GFS_rrtmg_setup
       call radupdate(idate,jdate,deltsw,deltim,lsswr,me, &
                      slag,sdec,cdec,solcon)
 
-   end subroutine GFS_rrtmg_setup_run
+   end subroutine GFS_rrtmg_setup_timestep_init
 
 !> \section arg_table_GFS_rrtmg_setup_finalize Argument Table
 !! \htmlinclude GFS_rrtmg_setup_finalize.html
@@ -467,8 +467,7 @@ module GFS_rrtmg_setup
 !              =8 Thompson microphysics scheme                          !
 !              =6 WSM6 microphysics scheme                              !
 !              =10 MG microphysics scheme                               !
-!   iovrsw   : control flag for cloud overlap in sw radiation           !
-!   iovrlw   : control flag for cloud overlap in lw radiation           !
+!   iovr     : control flag for cloud overlap in radiation              !
 !              =0: random overlapping clouds                            !
 !              =1: max/ran overlapping clouds                           !
 !   isubcsw  : sub-column cloud approx control flag in sw radiation     !
@@ -523,12 +522,14 @@ module GFS_rrtmg_setup
 !> -# Set up control variables and external module variables in
 !!    module physparam
 #if 0
+      ! DH* WHAT IS THIS?
       ! GFS_radiation_driver.F90 may in the future initialize air/ground
       ! temperature differently; however, this is not used at the moment
       ! and as such we avoid the difficulty of dealing with exchanging
       ! itsfc between GFS_rrtmg_setup and a yet-to-be-created/-used
       ! interstitial routine (or GFS_radiation_driver.F90)
       itsfc  = iemsflg / 10             ! sfc air/ground temp control
+      ! *DH
 #endif
       loz1st = (ioznflg == 0)           ! first-time clim ozone data read flag
       month0 = 0
@@ -544,10 +545,8 @@ module GFS_rrtmg_setup
      &    ' ISOLar =',isolar, ' ICO2flg=',ico2flg,' IAERflg=',iaerflg,  &
      &    ' IALBflg=',ialbflg,' IEMSflg=',iemsflg,' ICLDflg=',icldflg,  &
      &    ' IMP_PHYSICS=',imp_physics,' IOZNflg=',ioznflg
-        print *,' IVFLIP=',ivflip,' IOVRSW=',iovrsw,' IOVRLW=',iovrlw,  &
+        print *,' IVFLIP=',ivflip,' IOVR=',iovrRad,                     &
      &    ' ISUBCSW=',isubcsw,' ISUBCLW=',isubclw
-!       write(0,*)' IVFLIP=',ivflip,' IOVRSW=',iovrsw,' IOVRLW=',iovrlw,&
-!    &    ' ISUBCSW=',isubcsw,' ISUBCLW=',isubclw
         print *,' LCRICK=',lcrick,' LCNORM=',lcnorm,' LNOPREC=',lnoprec
         print *,' LTP =',ltp,', add extra top layer =',lextop
 

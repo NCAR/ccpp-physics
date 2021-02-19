@@ -1,0 +1,311 @@
+[ccpp-table-properties]
+  name = unified_ugwp_post
+  type = scheme
+  dependencies = machine.F
+
+########################################################################
+[ccpp-arg-table]
+  name = unified_ugwp_post_run
+  type = scheme
+[ldiag_ugwp]
+  standard_name = diag_ugwp_flag
+  long_name = flag for CIRES UGWP Diagnostics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[dtf]
+  standard_name = time_step_for_dynamics
+  long_name = dynamics timestep
+  units = s
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[im]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal loop extent
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[levs]
+  standard_name = vertical_dimension
+  long_name = number of vertical levels
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[gw_dtdt]
+  standard_name = tendency_of_air_temperature_due_to_gravity_wave_drag
+  long_name = air temperature tendency due to UGWP
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[gw_dudt]
+  standard_name = tendency_of_x_wind_due_to_gravity_wave_drag
+  long_name = zonal wind tendency due to UGWP
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[gw_dvdt]
+  standard_name = tendency_of_y_wind_due_to_gravity_wave_drag
+  long_name = meridional wind tendency due to UGWP
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[tau_tofd]
+  standard_name = instantaneous_momentum_flux_due_to_turbulent_orographic_form_drag
+  long_name = momentum flux or stress due to TOFD
+  units = Pa
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[tau_mtb]
+  standard_name = instantaneous_momentum_flux_due_to_mountain_blocking_drag
+  long_name = momentum flux or stress due to mountain blocking drag
+  units = Pa
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[tau_ogw]
+  standard_name = instantaneous_momentum_flux_due_to_orographic_gravity_wave_drag
+  long_name = momentum flux or stress due to orographic gravity wave drag
+  units = Pa
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[tau_ngw]
+  standard_name = instantaneous_momentum_flux_due_to_nonstationary_gravity_wave
+  long_name = momentum flux or stress due to nonstationary gravity waves
+  units = Pa
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[zmtb]
+  standard_name = height_of_mountain_blocking
+  long_name = height of mountain blocking drag
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[zlwb]
+  standard_name = height_of_low_level_wave_breaking
+  long_name = height of low level wave breaking
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[zogw]
+  standard_name = height_of_launch_level_of_orographic_gravity_wave
+  long_name = height of launch level of orographic gravity wave
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[dudt_mtb]
+  standard_name = instantaneous_change_in_x_wind_due_to_mountain_blocking_drag
+  long_name = instantaneous change in x wind due to mountain blocking drag
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[dudt_ogw]
+  standard_name = tendency_of_x_wind_due_to_mesoscale_orographic_gravity_wave_drag
+  long_name = instantaneous change in x wind due to orographic gw drag
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[dudt_tms]
+  standard_name = tendency_of_x_wind_due_to_turbulent_orographic_form_drag
+  long_name = instantaneous change in x wind due to TOFD
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[tot_zmtb]
+  standard_name = time_integral_of_height_of_mountain_blocking
+  long_name = time integral of height of mountain blocking drag
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[tot_zlwb]
+  standard_name = time_integral_of_height_of_low_level_wave_breaking
+  long_name = time integral of height of drag due to low level wave breaking
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[tot_zogw]
+  standard_name = time_integral_of_height_of_launch_level_of_orographic_gravity_wave
+  long_name = time integral of height of launch level of orographic gravity wave
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[tot_tofd]
+  standard_name = time_integral_of_momentum_flux_due_to_turbulent_orographic_form_drag
+  long_name = time integral of momentum flux due to TOFD
+  units = Pa
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[tot_mtb]
+  standard_name = time_integral_of_momentum_flux_due_to_mountain_blocking_drag
+  long_name = time integral of momentum flux due to mountain blocking drag
+  units = Pa
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[tot_ogw]
+  standard_name = time_integral_of_momentum_flux_due_to_orographic_gravity_wave_drag
+  long_name = time integral of momentum flux due to orographic gravity wave drag
+  units = Pa
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[tot_ngw]
+  standard_name = time_integral_of_momentum_flux_due_to_nonstationary_gravity_wave
+  long_name = time integral of momentum flux due to nonstationary gravity waves
+  units = Pa
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[du3dt_mtb]
+  standard_name = time_integral_of_change_in_x_wind_due_to_mountain_blocking_drag
+  long_name = time integral of change in x wind due to mountain blocking drag
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[du3dt_ogw]
+  standard_name = time_integral_of_change_in_x_wind_due_to_orographic_gravity_wave_drag
+  long_name = time integral of change in x wind due to orographic gw drag
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[du3dt_tms]
+  standard_name = time_integral_of_change_in_x_wind_due_to_turbulent_orographic_form_drag
+  long_name = time integral of change in x wind due to TOFD
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[du3dt_ngw]
+  standard_name = time_integral_of_change_in_x_wind_due_to_nonstationary_gravity_wave
+  long_name = time integral of change in x wind due to NGW
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dv3dt_ngw]
+  standard_name = time_integral_of_change_in_y_wind_due_to_nonstationary_gravity_wave
+  long_name = time integral of change in y wind due to NGW
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dtdt]
+  standard_name = tendency_of_air_temperature_due_to_model_physics
+  long_name = air temperature tendency due to model physics
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dudt]
+  standard_name = tendency_of_x_wind_due_to_model_physics
+  long_name = zonal wind tendency due to model physics
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dvdt]
+  standard_name = tendency_of_y_wind_due_to_model_physics
+  long_name = meridional wind tendency due to model physics
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F

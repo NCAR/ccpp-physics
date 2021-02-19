@@ -9,7 +9,7 @@
 
       private
 
-      public GFS_time_vary_pre_init, GFS_time_vary_pre_run, GFS_time_vary_pre_finalize
+      public GFS_time_vary_pre_init, GFS_time_vary_pre_timestep_init, GFS_time_vary_pre_finalize
 
       logical :: is_initialized = .false.
 
@@ -62,12 +62,12 @@
       end subroutine GFS_time_vary_pre_finalize
 
 
-!> \section arg_table_GFS_time_vary_pre_run Argument Table
-!! \htmlinclude GFS_time_vary_pre_run.html
+!> \section arg_table_GFS_time_vary_pre_timestep_init Argument Table
+!! \htmlinclude GFS_time_vary_pre_timestep_init.html
 !!
-      subroutine GFS_time_vary_pre_run (jdat, idat, dtp, lkm, lsm, lsm_noahmp, nsswr,  &
-        nslwr, nhfrad, idate, debug, me, master, nscyc, sec, phour, zhour, fhour,      &
-        kdt, julian, yearlen, ipt, lprnt, lssav, lsswr, lslwr, solhr, errmsg, errflg)
+      subroutine GFS_time_vary_pre_timestep_init (jdat, idat, dtp, lkm, lsm, lsm_noahmp, nsswr,  &
+                  nslwr, nhfrad, idate, debug, me, master, nscyc, sec, phour, zhour, fhour,      &
+                  kdt, julian, yearlen, ipt, lprnt, lssav, lsswr, lslwr, solhr, errmsg, errflg)
 
         use machine,               only: kind_phys
 
@@ -104,8 +104,7 @@
 
         ! Check initialization status
         if (.not.is_initialized) then
-           write(errmsg,'(*(a))') "Logic error: GFS_time_vary_pre_run called &
-                                  &before GFS_time_vary_pre_init"
+           write(errmsg,'(*(a))') "Logic error: GFS_time_vary_pre_timestep_init called before GFS_time_vary_pre_init"
            errflg = 1
            return
         end if
@@ -121,41 +120,38 @@
         fhour = (sec + dtp)/con_hr
         kdt   = nint((sec + dtp)/dtp)
 
-        if(lsm == lsm_noahmp .or. lkm == 1) then
-!  flake need this too
-          !GJF* These calculations were originally in GFS_physics_driver.F90 for
-          !     NoahMP. They were moved to this routine since they only depend
-          !     on time (not space). Note that this code is included as-is from
-          !     GFS_physics_driver.F90, but it may be simplified by using more
-          !     NCEP W3 library calls (e.g., see W3DOXDAT, W3FS13 for Julian day
-          !     of year and W3DIFDAT to determine the integer number of days in
-          !     a given year). *GJF
-          ! Julian day calculation (fcst day of the year)
-          ! we need yearln and julian to
-          ! pass to noah mp sflx, idate is init, jdat is fcst;idate = jdat when kdt=1
-          ! jdat is changing
-          !
+        !GJF* These calculations were originally in GFS_physics_driver.F90 for
+        !     NoahMP. They were moved to this routine since they only depend
+        !     on time (not space). Note that this code is included as-is from
+        !     GFS_physics_driver.F90, but it may be simplified by using more
+        !     NCEP W3 library calls (e.g., see W3DOXDAT, W3FS13 for Julian day
+        !     of year and W3DIFDAT to determine the integer number of days in
+        !     a given year). *GJF
+        ! Julian day calculation (fcst day of the year)
+        ! we need yearln and julian to
+        ! pass to noah mp sflx, idate is init, jdat is fcst;idate = jdat when kdt=1
+        ! jdat is changing
+        !
 
-          jd1    = iw3jdn(jdat(1),jdat(2),jdat(3))
-          jd0    = iw3jdn(jdat(1),1,1)
-          fjd    = float(jdat(5))/24.0 + float(jdat(6))/1440.0
+        jd1    = iw3jdn(jdat(1),jdat(2),jdat(3))
+        jd0    = iw3jdn(jdat(1),1,1)
+        fjd    = float(jdat(5))/24.0 + float(jdat(6))/1440.0
 
-          julian = float(jd1-jd0) + fjd
+        julian = float(jd1-jd0) + fjd
 
-          !
-          ! Year length
-          !
-          ! what if the integration goes from one year to another?
-          ! iyr or jyr ? from 365 to 366 or from 366 to 365
-          !
-          ! is this against model's noleap yr assumption?
-          if (mod(jdat(1),4) == 0) then
-            yearlen = 366
-            if (mod(jdat(1),100) == 0) then
-              yearlen = 365
-              if (mod(jdat(1),400) == 0) then
-                yearlen = 366
-              endif
+        !
+        ! Year length
+        !
+        ! what if the integration goes from one year to another?
+        ! iyr or jyr ? from 365 to 366 or from 366 to 365
+        !
+        ! is this against model's noleap yr assumption?
+        if (mod(jdat(1),4) == 0) then
+          yearlen = 366
+          if (mod(jdat(1),100) == 0) then
+            yearlen = 365
+            if (mod(jdat(1),400) == 0) then
+              yearlen = 366
             endif
           endif
         endif
@@ -193,6 +189,6 @@
           print *,' solhr ', solhr
         endif
 
-      end subroutine GFS_time_vary_pre_run
+      end subroutine GFS_time_vary_pre_timestep_init
 
     end module GFS_time_vary_pre

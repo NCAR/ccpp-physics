@@ -27,7 +27,7 @@
   standard_name = cumulative_change_in_x_wind_due_to_PBL
   long_name = cumulative change in x wind due to PBL
   units = m s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -36,7 +36,7 @@
   standard_name = cumulative_change_in_x_wind_due_to_orographic_gravity_wave_drag
   long_name = cumulative change in x wind due to orographic gravity wave drag
   units = m s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -45,7 +45,7 @@
   standard_name = cumulative_change_in_x_wind_due_to_deep_convection
   long_name = cumulative change in x wind due to deep convection
   units = m s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -54,7 +54,7 @@
   standard_name = cumulative_change_in_x_wind_due_to_convective_gravity_wave_drag
   long_name = cumulative change in x wind due to convective gravity wave drag
   units = m s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -63,7 +63,7 @@
   standard_name = cumulative_change_in_x_wind_due_to_rayleigh_damping
   long_name = cumulative change in x wind due to Rayleigh damping
   units = m s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -72,7 +72,7 @@
   standard_name = cumulative_change_in_x_wind_due_to_shallow_convection
   long_name = cumulative change in x wind due to shallow convection
   units = m s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -81,7 +81,7 @@
   standard_name = cumulative_change_in_x_wind_due_to_physics
   long_name = cumulative change in x wind due to physics
   units = m s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -90,7 +90,7 @@
   standard_name = cumulative_change_in_y_wind_due_to_PBL
   long_name = cumulative change in y wind due to PBL
   units = m s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -99,7 +99,7 @@
   standard_name = cumulative_change_in_y_wind_due_to_orographic_gravity_wave_drag
   long_name = cumulative change in y wind due to orographic gravity wave drag
   units = m s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -108,7 +108,7 @@
   standard_name = cumulative_change_in_y_wind_due_to_deep_convection
   long_name = cumulative change in y wind due to deep convection
   units = m s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -117,7 +117,7 @@
   standard_name = cumulative_change_in_y_wind_due_to_convective_gravity_wave_drag
   long_name = cumulative change in y wind due to convective gravity wave drag
   units = m s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -126,7 +126,7 @@
   standard_name = cumulative_change_in_y_wind_due_to_rayleigh_damping
   long_name = cumulative change in y wind due to Rayleigh damping
   units = m s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -135,7 +135,7 @@
   standard_name = cumulative_change_in_y_wind_due_to_shallow_convection
   long_name = cumulative change in y wind due to shallow convection
   units = m s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -144,7 +144,7 @@
   standard_name = cumulative_change_in_y_wind_due_to_physics
   long_name = cumulative change in y wind due to physics
   units = m s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -153,7 +153,7 @@
   standard_name = cumulative_change_in_temperature_due_to_longwave_radiation
   long_name = cumulative change in temperature due to longwave radiation
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -162,7 +162,7 @@
   standard_name = cumulative_change_in_temperature_due_to_shortwave_radiation
   long_name = cumulative change in temperature due to shortwave radiation
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -171,7 +171,7 @@
   standard_name = cumulative_change_in_temperature_due_to_PBL
   long_name = cumulative change in temperature due to PBL
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -180,7 +180,7 @@
   standard_name = cumulative_change_in_temperature_due_to_deep_convection
   long_name = cumulative change in temperature due to deep convection
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -189,7 +189,7 @@
   standard_name = cumulative_change_in_temperature_due_to_shallow_convection
   long_name = cumulative change in temperature due to shallow convection
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -198,7 +198,7 @@
   standard_name = cumulative_change_in_temperature_due_to_microphysics
   long_name = cumulative change in temperature due to microphysics
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -207,7 +207,7 @@
   standard_name = cumulative_change_in_temperature_due_to_orographic_gravity_wave_drag
   long_name = cumulative change in temperature due to orographic gravity wave drag
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -216,7 +216,7 @@
   standard_name = cumulative_change_in_temperature_due_to_rayleigh_damping
   long_name = cumulative change in temperature due to Rayleigh damping
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -225,7 +225,7 @@
   standard_name = cumulative_change_in_temperature_due_to_convective_gravity_wave_drag
   long_name = cumulative change in temperature due to convective gravity wave drag
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -234,7 +234,7 @@
   standard_name = cumulative_change_in_temperature_due_to_physics
   long_name = cumulative change in temperature due to physics
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -243,7 +243,7 @@
   standard_name = cumulative_change_in_water_vapor_specific_humidity_due_to_PBL
   long_name = cumulative change in water vapor specific humidity due to PBL
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -252,7 +252,7 @@
   standard_name = cumulative_change_in_water_vapor_specific_humidity_due_to_deep_convection
   long_name = cumulative change in water vapor specific humidity due to deep convection
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -261,7 +261,7 @@
   standard_name = cumulative_change_in_water_vapor_specific_humidity_due_to_shallow_convection
   long_name = cumulative change in water vapor specific humidity due to shallow convection
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -270,7 +270,7 @@
   standard_name = cumulative_change_in_water_vapor_specific_humidity_due_to_microphysics
   long_name = cumulative change in water vapor specific humidity due to microphysics
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -279,7 +279,7 @@
   standard_name = cumulative_change_in_ozone_mixing_ratio_due_to_PBL
   long_name = cumulative change in ozone mixing ratio due to PBL
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -288,7 +288,7 @@
   standard_name = cumulative_change_in_ozone_concentration_due_to_production_and_loss_rate
   long_name = cumulative change in ozone concentration due to production and loss rate
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -297,7 +297,7 @@
   standard_name = cumulative_change_in_ozone_concentration_due_to_ozone_mixing_ratio
   long_name = cumulative change in ozone concentration due to ozone mixing ratio
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -306,7 +306,7 @@
   standard_name = cumulative_change_in_ozone_concentration_due_to_temperature
   long_name = cumulative change in ozone concentration due to temperature
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -315,7 +315,7 @@
   standard_name = cumulative_change_in_ozone_concentration_due_to_overhead_ozone_column
   long_name = cumulative change in ozone concentration due to overhead ozone column
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -324,7 +324,7 @@
   standard_name = cumulative_change_in_water_vapor_specific_humidity_due_to_physics
   long_name = cumulative change in water vapor specific humidity due to physics
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -333,7 +333,7 @@
   standard_name = cumulative_change_in_ozone_concentration_due_to_physics
   long_name = cumulative change in ozone concentration due to physics
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
