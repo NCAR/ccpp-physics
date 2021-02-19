@@ -2151,7 +2151,7 @@ SUBROUTINE nssl_2mom_driver(qv, qc, qr, qi, qs, qh, qhl, ccw, crw, cci, csw, chw
 !#ifdef CM1
 !           IF ( .true. ) THEN
 !#else
-           IF ( present( HAILNC ) ) THEN
+           IF ( present( HAILNCV ) ) THEN
 !#endif
              HAILNCV(ix,jy) = dtp*dn1(ix,1,1)*xfall(ix,1,lhl)*1000./xdn0(lr)
 !             HAILNC(ix,jy)  = HAILNC(ix,jy) + HAILNCV(ix,jy)

@@ -353,7 +353,7 @@ contains
 
          ! Convert mm output from microphysics to m expected by CCPP
          prcp    = max(0.0, delta_rain_mp/1000.0_kind_phys)
-         graupel = max(0.0, delta_graupel_mp/1000.0_kind_phys)
+         graupel = max(0.0, (delta_hail_mp + delta_graupel_mp)/1000.0_kind_phys)
          ice     = max(0.0, delta_ice_mp/1000.0_kind_phys)
          snow    = max(0.0, delta_snow_mp/1000.0_kind_phys)
          rain    = max(0.0, (delta_rain_mp - (delta_graupel_mp + delta_ice_mp + delta_snow_mp + delta_hail_mp))/1000.0_kind_phys)
