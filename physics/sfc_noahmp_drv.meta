@@ -171,18 +171,9 @@
   kind = kind_phys
   intent= in
   optional = F
-[sfcemis]
-  standard_name = surface_longwave_emissivity_over_land_interstitial
-  long_name = surface lw emissivity in fraction over land (temporary use as interstitial)
-  units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [dlwflx]
-  standard_name = surface_downwelling_longwave_flux_absorbed_by_ground_over_land
-  long_name = total sky surface downward longwave flux absorbed by the ground over land
+  standard_name = surface_downwelling_longwave_flux
+  long_name = surface downwelling longwave flux at current time
   units = W m-2
   dimensions = (horizontal_loop_extent)
   type = real
@@ -1017,6 +1008,51 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
+[albdvis]
+  standard_name = surface_albedo_direct_visible
+  long_name = direct surface albedo visible band
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[albdnir]
+  standard_name = surface_albedo_direct_NIR
+  long_name = direct surface albedo NIR band
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[albivis]
+  standard_name = surface_albedo_diffuse_visible
+  long_name = diffuse surface albedo visible band
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[albinir]
+  standard_name = surface_albedo_diffuse_NIR
+  long_name = diffuse surface albedo NIR band
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[emiss]
+  standard_name = surface_emissivity_lsm
+  long_name = surface emissivity from lsm
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
   optional = F
 [sncovr1]
   standard_name = surface_snow_area_fraction_over_land

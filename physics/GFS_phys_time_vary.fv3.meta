@@ -320,7 +320,7 @@
   standard_name = lower_latitude_index_of_absolute_momentum_flux_due_to_nonorographic_gravity_wave_drag_for_interpolation
   long_name = index1 for weight1 for tau NGWs
   units = none
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = integer
   intent = inout
   optional = F
@@ -328,7 +328,7 @@
   standard_name = upper_latitude_index_of_absolute_momentum_flux_due_to_nonorographic_gravity_wave_drag_for_interpolation
   long_name = index2 for weight2 for tau NGWs
   units = none
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = integer
   intent = inout
   optional = F
@@ -336,7 +336,7 @@
   standard_name = latitude_interpolation_weight_complement_for_absolute_momentum_flux_due_to_nonorographic_gravity_wave_drag
   long_name = interpolation weight1 for tau NGWs
   units = none
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   intent = inout
   kind = kind_phys
@@ -345,7 +345,7 @@
   standard_name = latitude_interpolation_weight_for_absolute_momentum_flux_due_to_nonorographic_gravity_wave_drag
   long_name = interpolation weight2 for tau NGWs
   units = none
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   intent = inout
   kind = kind_phys
@@ -507,7 +507,7 @@
   standard_name = vegetation_temperature
   long_name = vegetation temperature
   units = K
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -516,7 +516,7 @@
   standard_name = ground_temperature_for_noahmp
   long_name = ground temperature for noahmp
   units = K
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -525,7 +525,7 @@
   standard_name = canopy_air_temperature
   long_name = canopy air temperature
   units = K
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -534,7 +534,7 @@
   standard_name = canopy_intercepted_ice_mass
   long_name = canopy intercepted ice mass
   units = mm
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -543,7 +543,7 @@
   standard_name = canopy_intercepted_liquid_water
   long_name = canopy intercepted liquid water
   units = mm
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -552,7 +552,7 @@
   standard_name = canopy_air_vapor_pressure
   long_name = canopy air vapor pressure
   units = Pa
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -561,7 +561,7 @@
   standard_name = surface_drag_coefficient_for_momentum_for_noahmp
   long_name = surface drag coefficient for momentum for noahmp
   units = none
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -570,7 +570,7 @@
   standard_name = surface_drag_coefficient_for_heat_and_moisture_for_noahmp
   long_name = surface exchange coeff heat & moisture for noahmp
   units = none
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -579,7 +579,7 @@
   standard_name = area_fraction_of_wet_canopy
   long_name = area fraction of canopy that is wetted/snowed
   units = none
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -588,7 +588,7 @@
   standard_name = snow_mass_at_previous_time_step
   long_name = snow mass at previous time step
   units = mm
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -597,7 +597,7 @@
   standard_name = snow_albedo_at_previous_time_step
   long_name = snow albedo at previous time step
   units = frac
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -606,7 +606,7 @@
   standard_name = snow_precipitation_rate_at_surface
   long_name = snow precipitation rate at surface
   units = mm s-1
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -615,7 +615,7 @@
   standard_name = lake_water_storage
   long_name = lake water storage
   units = mm
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -624,7 +624,7 @@
   standard_name = nondimensional_snow_age
   long_name = non-dimensional snow age
   units = none
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -633,7 +633,7 @@
   standard_name = water_storage_in_aquifer
   long_name = water storage in aquifer
   units = mm
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -642,7 +642,7 @@
   standard_name = water_storage_in_aquifer_and_saturated_soil
   long_name = water storage in aquifer and saturated soil
   units = mm
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -651,7 +651,7 @@
   standard_name = water_table_depth
   long_name = water table depth
   units = m
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -660,7 +660,7 @@
   standard_name = leaf_area_index
   long_name = leaf area index
   units = none
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -669,7 +669,7 @@
   standard_name = stem_area_index
   long_name = stem area index
   units = none
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -678,7 +678,7 @@
   standard_name = leaf_mass
   long_name = leaf mass
   units = g m-2
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -687,7 +687,7 @@
   standard_name = stem_mass
   long_name = stem mass
   units = g m-2
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -696,7 +696,7 @@
   standard_name = fine_root_mass
   long_name = fine root mass
   units = g m-2
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -705,7 +705,7 @@
   standard_name = wood_mass
   long_name = wood mass including woody roots
   units = g m-2
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -714,7 +714,7 @@
   standard_name = slow_soil_pool_mass_content_of_carbon
   long_name = stable carbon in deep soil
   units = g m-2
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -723,7 +723,7 @@
   standard_name = fast_soil_pool_mass_content_of_carbon
   long_name = short-lived carbon in shallow soil
   units = g m-2
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -732,7 +732,7 @@
   standard_name = soil_water_content_between_soil_bottom_and_water_table
   long_name = soil water content between the bottom of the soil and the water table
   units = m3 m-3
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -741,7 +741,7 @@
   standard_name = water_table_recharge_when_deep
   long_name = recharge to or from the water table when deep
   units = m
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -750,7 +750,52 @@
   standard_name = water_table_recharge_when_shallow
   long_name = recharge to or from the water table when shallow
   units = m
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[albdvis]
+  standard_name = surface_albedo_direct_visible
+  long_name = direct surface albedo visible band
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[albdnir]
+  standard_name = surface_albedo_direct_NIR
+  long_name = direct surface albedo NIR band
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[albivis]
+  standard_name = surface_albedo_diffuse_visible
+  long_name = diffuse surface albedo visible band
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[albinir]
+  standard_name = surface_albedo_diffuse_NIR
+  long_name = diffuse surface albedo NIR band
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[emiss]
+  standard_name = surface_emissivity_lsm
+  long_name = surface emissivity from lsm
+  units = frac
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -759,7 +804,7 @@
   standard_name = number_of_snow_layers
   long_name = number of snow layers
   units = count
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -768,7 +813,7 @@
   standard_name = snow_layer_ice
   long_name = snow layer ice
   units = mm
-  dimensions = (horizontal_loop_extent, lower_bound_of_snow_vertical_dimension_for_land_surface_model:0)
+  dimensions = (horizontal_dimension, lower_bound_of_snow_vertical_dimension_for_land_surface_model:0)
   type = real
   kind = kind_phys
   intent = inout
@@ -777,7 +822,7 @@
   standard_name = snow_layer_liquid_water
   long_name = snow layer liquid water
   units = mm
-  dimensions = (horizontal_loop_extent, lower_bound_of_snow_vertical_dimension_for_land_surface_model:0)
+  dimensions = (horizontal_dimension, lower_bound_of_snow_vertical_dimension_for_land_surface_model:0)
   type = real
   kind = kind_phys
   intent = inout
@@ -786,7 +831,7 @@
   standard_name = snow_temperature
   long_name = snow_temperature
   units = K
-  dimensions = (horizontal_loop_extent, lower_bound_of_snow_vertical_dimension_for_land_surface_model:0)
+  dimensions = (horizontal_dimension, lower_bound_of_snow_vertical_dimension_for_land_surface_model:0)
   type = real
   kind = kind_phys
   intent = inout
@@ -795,7 +840,7 @@
   standard_name = equilibrium_soil_water_content
   long_name = equilibrium soil water content
   units = m3 m-3
-  dimensions = (horizontal_loop_extent,soil_vertical_dimension_for_land_surface_model)
+  dimensions = (horizontal_dimension,soil_vertical_dimension_for_land_surface_model)
   type = real
   kind = kind_phys
   intent = inout
@@ -804,7 +849,7 @@
   standard_name = layer_bottom_depth_from_snow_surface
   long_name = depth from the top of the snow surface at the bottom of the layer
   units = m
-  dimensions = (horizontal_loop_extent, lower_bound_of_snow_vertical_dimension_for_land_surface_model:soil_vertical_dimension_for_land_surface_model)
+  dimensions = (horizontal_dimension, lower_bound_of_snow_vertical_dimension_for_land_surface_model:soil_vertical_dimension_for_land_surface_model)
   type = real
   kind = kind_phys
   intent = inout
@@ -813,7 +858,7 @@
   standard_name = volume_fraction_of_unfrozen_soil_moisture
   long_name = liquid soil moisture
   units = frac
-  dimensions = (horizontal_loop_extent,soil_vertical_dimension)
+  dimensions = (horizontal_dimension,soil_vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -822,7 +867,7 @@
   standard_name = volume_fraction_of_soil_moisture
   long_name = total soil moisture
   units = frac
-  dimensions = (horizontal_loop_extent,soil_vertical_dimension)
+  dimensions = (horizontal_dimension,soil_vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -831,7 +876,7 @@
   standard_name = soil_temperature
   long_name = soil temperature
   units = K
-  dimensions = (horizontal_loop_extent,soil_vertical_dimension)
+  dimensions = (horizontal_dimension,soil_vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -840,7 +885,7 @@
   standard_name = surface_skin_temperature_over_land
   long_name = surface skin temperature over land
   units = K
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -849,7 +894,7 @@
   standard_name = surface_snow_thickness_water_equivalent
   long_name = water equivalent snow depth
   units = mm
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -858,7 +903,7 @@
   standard_name = canopy_water_amount
   long_name = canopy water amount
   units = kg m-2
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -867,7 +912,7 @@
   standard_name = deep_soil_temperature
   long_name = deep soil temperature
   units = K
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -876,7 +921,7 @@
   standard_name = soil_type_classification_real
   long_name = soil type for lsm
   units = index
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -1579,7 +1624,7 @@
   standard_name = volume_fraction_of_soil_moisture_for_land_surface_model
   long_name = volumetric fraction of soil moisture for lsm
   units = frac
-  dimensions = (horizontal_loop_extent,soil_vertical_dimension_for_land_surface_model)
+  dimensions = (horizontal_dimension,soil_vertical_dimension_for_land_surface_model)
   type = real
   kind = kind_phys
   intent = inout
@@ -1588,7 +1633,7 @@
   standard_name = volume_fraction_of_unfrozen_soil_moisture_for_land_surface_model
   long_name = volume fraction of unfrozen soil moisture for lsm
   units = frac
-  dimensions = (horizontal_loop_extent,soil_vertical_dimension_for_land_surface_model)
+  dimensions = (horizontal_dimension,soil_vertical_dimension_for_land_surface_model)
   type = real
   kind = kind_phys
   intent = inout
@@ -1597,7 +1642,7 @@
   standard_name = soil_temperature_for_land_surface_model
   long_name = soil temperature for land surface model
   units = K
-  dimensions = (horizontal_loop_extent,soil_vertical_dimension_for_land_surface_model)
+  dimensions = (horizontal_dimension,soil_vertical_dimension_for_land_surface_model)
   type = real
   kind = kind_phys
   intent = inout
@@ -1930,7 +1975,7 @@
   standard_name = lower_latitude_index_of_absolute_momentum_flux_due_to_nonorographic_gravity_wave_drag_for_interpolation
   long_name = index1 for weight1 for tau NGWs
   units = none
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = integer
   intent = in
   optional = F
@@ -1938,7 +1983,7 @@
   standard_name = upper_latitude_index_of_absolute_momentum_flux_due_to_nonorographic_gravity_wave_drag_for_interpolation
   long_name = index2 for weight2 for tau NGWs
   units = none
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = integer
   intent = in
   optional = F
@@ -1946,7 +1991,7 @@
   standard_name = latitude_interpolation_weight_complement_for_absolute_momentum_flux_due_to_nonorographic_gravity_wave_drag
   long_name = interpolation weight1 for tau NGWs
   units = none
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   intent = in
   kind = kind_phys
@@ -1955,7 +2000,7 @@
   standard_name = latitude_interpolation_weight_for_absolute_momentum_flux_due_to_nonorographic_gravity_wave_drag
   long_name = interpolation weight2 for tau NGWs
   units = none
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   intent = in
   kind = kind_phys
@@ -1964,7 +2009,7 @@
   standard_name = absolute_momentum_flux_due_to_nonorographic_gravity_wave_drag
   long_name = ngw_absolute_momentum_flux
   units = various
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout

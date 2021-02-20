@@ -75,10 +75,10 @@
               isot, ivegsrc, nlunit, sncovr, sncovr_ice, lsm, lsm_noahmp, lsm_ruc, min_seaice,     &
               fice, landfrac, vtype, weasd, lsoil, zs, dzs, lsnow_lsm_lbound, lsnow_lsm_ubound,    &
               tvxy, tgxy, tahxy, canicexy, canliqxy, eahxy, cmxy, chxy, fwetxy, sneqvoxy, alboldxy,&
-              qsnowxy, wslakexy, taussxy, waxy, wtxy, zwtxy, xlaixy, xsaixy, lfmassxy, stmassxy,   &
-              rtmassxy, woodxy, stblcpxy, fastcpxy, smcwtdxy, deeprechxy, rechxy, snowxy, snicexy, &
-              snliqxy, tsnoxy , smoiseq, zsnsoxy, slc, smc, stc, tsfcl, snowd, canopy, tg3, stype, &
-              con_t0c, nthrds, errmsg, errflg)
+              qsnowxy, wslakexy, albdvis, albdnir, albivis, albinir, emiss, taussxy, waxy, wtxy,   &
+              zwtxy, xlaixy, xsaixy, lfmassxy, stmassxy, rtmassxy, woodxy, stblcpxy, fastcpxy,     &
+              smcwtdxy, deeprechxy, rechxy, snowxy, snicexy, snliqxy, tsnoxy , smoiseq, zsnsoxy,   &
+              slc, smc, stc, tsfcl, snowd, canopy, tg3, stype, con_t0c, nthrds, errmsg, errflg)
 
          implicit none
 
@@ -125,6 +125,11 @@
          real(kind_phys),      intent(inout) :: alboldxy(:)
          real(kind_phys),      intent(inout) :: qsnowxy(:)
          real(kind_phys),      intent(inout) :: wslakexy(:)
+         real(kind_phys),      intent(inout) :: albdvis(:)
+         real(kind_phys),      intent(inout) :: albdnir(:)
+         real(kind_phys),      intent(inout) :: albivis(:)
+         real(kind_phys),      intent(inout) :: albinir(:)
+         real(kind_phys),      intent(inout) :: emiss(:)
          real(kind_phys),      intent(inout) :: taussxy(:)
          real(kind_phys),      intent(inout) :: waxy(:)
          real(kind_phys),      intent(inout) :: wtxy(:)
@@ -384,6 +389,11 @@
              alboldxy(:) = missing_value
              qsnowxy(:)  = missing_value
              wslakexy(:) = missing_value
+             albdvis(:)  = missing_value
+             albdnir(:)  = missing_value
+             albivis(:)  = missing_value
+             albinir(:)  = missing_value
+             emiss(:)    = missing_value
              taussxy(:)  = missing_value
              waxy(:)     = missing_value
              wtxy(:)     = missing_value
@@ -437,6 +447,11 @@
                  ! already set to 0.0
                  wslakexy(ix) = 0.0
                  taussxy(ix)  = 0.0
+                 albdvis(ix)  = 0.2
+                 albdnir(ix)  = 0.2
+                 albivis(ix)  = 0.2
+                 albinir(ix)  = 0.2
+                 emiss(ix)    = 0.95
 
 
                  waxy(ix)     = 4900.0
