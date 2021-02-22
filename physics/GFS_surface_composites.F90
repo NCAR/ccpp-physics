@@ -571,6 +571,7 @@ contains
             snowd(i)  = snowd_ice(i)
            !tprcp(i)  = cice(i)*tprcp_ice(i) + (one-cice(i))*tprcp_wat(i)
             qss(i)    = qss_ice(i)
+            tsfc(i)   = tsfc_ice(i)
             evap(i)   = evap_ice(i)
             hflx(i)   = hflx_ice(i)
             qss(i)    = qss_ice(i)
