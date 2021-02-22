@@ -1,7 +1,7 @@
 /**
 \page subpage_overview Overview of the Code
 
-The GFS physics parameterization suite is called by GMTB-SCM or FV3 after the explicit dynamical computations. The
+The GFS physics parameterization suite is called by CCPP-SCM or FV3 after the explicit dynamical computations. The
 physics computations are performed only in the vertical. The input information for the physics consists of the values
 of the gridbox mean prognostic variables (wind components \f$u/v\f$, temperature \f$T\f$, specific humidity \f$q\f$, cloud
 fraction \f$q_a\f$, water contents for cloud liquid \f$q_l\f$, cloud ice \f$q_i\f$, rain \f$q_r\f$, snow \f$q_s\f$, graupel 
