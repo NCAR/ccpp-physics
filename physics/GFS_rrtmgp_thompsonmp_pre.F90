@@ -147,11 +147,11 @@ contains
     ! Cloud particle sizes and number concentrations...
     
     ! First, prepare cloud mixing-ratios and number concentrations for Calc_Re
-    rho  = p_lay(1:nCol,1:nLev)/(con_rd*t_lay(1:nCol,1:nLev))    
-    orho = 1./rho    
     do iLay = 1, nLev
        do iCol = 1, nCol    
           qv_mp(iCol,iLay) = q_lay(iCol,iLay)/(1.-q_lay(iCol,iLay))
+          rho(iCol,iLay)  = 0.622*p_lay(1:nCol,1:nLev)/(con_rd*t_lay(1:nCol,1:nLev)*(qv_mp(iCol,iLay)+0.622))    
+          orho(iCol,iLay) = 1./rho(iCol,iLay)    
           qc_mp(iCol,iLay) = tracer(iCol,iLay,i_cldliq)    / (1.-q_lay(iCol,iLay))
           qi_mp(iCol,iLay) = tracer(iCol,iLay,i_cldice)    / (1.-q_lay(iCol,iLay))
           qs_mp(iCol,iLay) = tracer(iCol,iLay,i_cldsnow)   / (1.-q_lay(iCol,iLay))
@@ -169,7 +169,7 @@ contains
     do iLay = 1, nLev
        do iCol = 1, nCol  
           if (ltaerosol .and. qc_mp(iCol,iLay) > 1.e-12 .and. nc_mp(iCol,iLay) < 100.) then
-             nc_mp(iCol,iLay) = make_DropletNumber(qc_mp(iCol,iLay)*rho(iCol,iLay), nwfa(iCol,iLay)) * orho(iCol,iLay)
+             nc_mp(iCol,iLay) = make_DropletNumber(qc_mp(iCol,iLay)*rho(iCol,iLay), nwfa(iCol,iLay)*rho(iCol,iLay)) * orho(iCol,iLay)
           endif
           if (qi_mp(iCol,iLay) > 1.e-12 .and. ni_mp(iCol,iLay) < 100.) then
              ni_mp(iCol,iLay) = make_IceNumber(qi_mp(iCol,iLay)*rho(iCol,iLay), t_lay(iCol,iLay)) * orho(iCol,iLay)
