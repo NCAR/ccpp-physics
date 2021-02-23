@@ -260,7 +260,6 @@ contains
     !
     ! #######################################################################################
 #ifdef MPI
-    call mpi_barrier(mpicomm, mpierr)
     if (mpirank .eq. mpiroot) then
 #endif
        write (*,*) 'Reading RRTMGP longwave k-distribution data ... '
@@ -441,7 +440,6 @@ contains
     ! Initialize RRTMGP DDT's...
     !
     ! #######################################################################################
-!$omp critical (load_lw_gas_optics)
     gas_concentrations%gas_name(:) = active_gases_array(:)
     call check_error_msg('rrtmgp_lw_gas_optics_init',lw_gas_props%load(gas_concentrations,  &
          gas_namesLW, key_speciesLW, band2gptLW, band_limsLW, press_refLW, press_ref_tropLW,&
@@ -452,7 +450,6 @@ contains
          scaling_gas_lowerLW, scaling_gas_upperLW, scale_by_complement_lowerLW,             &
          scale_by_complement_upperLW, kminor_start_lowerLW, kminor_start_upperLW, totplnkLW,&
          planck_fracLW, rayl_lowerLW, rayl_upperLW, optimal_angle_fitLW))
-!$omp end critical (load_lw_gas_optics) 
 
     ! The minimum pressure allowed in GP RTE calculations. Used to bound uppermost layer
     ! temperature (GFS_rrtmgp_pre.F90)

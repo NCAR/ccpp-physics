@@ -207,7 +207,6 @@ contains
     !
     ! #######################################################################################
 #ifdef MPI
-    call mpi_barrier(mpicomm, mpierr)
     if (mpirank .eq. mpiroot) then
 #endif 
        if (doGP_cldoptics_LUT) then
@@ -356,30 +355,23 @@ contains
     !
     ! #######################################################################################
     if (doGP_cldoptics_LUT) then
-!$omp critical (load_sw_cloud_props_LUTs)
        call check_error_msg('sw_cloud_optics_init',sw_cloud_props%load(band_limsCLDSW,      &
             radliq_lwrSW, radliq_uprSW, radliq_facSW, radice_lwrSW, radice_uprSW,           &
             radice_facSW, lut_extliqSW, lut_ssaliqSW, lut_asyliqSW, lut_exticeSW,           &
             lut_ssaiceSW, lut_asyiceSW))
-!$omp end critical (load_sw_cloud_props_LUTs)
     endif
 
     if (doGP_cldoptics_PADE) then
-!$omp critical (load_sw_cloud_props_PADE_approx)
        call check_error_msg('sw_cloud_optics_init', sw_cloud_props%load(band_limsCLDSW,     &
             pade_extliqSW, pade_ssaliqSW, pade_asyliqSW, pade_exticeSW, pade_ssaiceSW,      &
             pade_asyiceSW, pade_sizereg_extliqSW, pade_sizereg_ssaliqSW,                    &
             pade_sizereg_asyliqSW, pade_sizereg_exticeSW, pade_sizereg_ssaiceSW,            &
             pade_sizereg_asyiceSW))
-!$omp end critical (load_sw_cloud_props_PADE_approx) 
     endif
 
-!$omp critical (load_sw_cloud_props_nrghice)
     call check_error_msg('sw_cloud_optics_init',sw_cloud_props%set_ice_roughness(nrghice_fromfileSW))
-!$omp end critical (load_sw_cloud_props_nrghice)
 
     ! Initialize coefficients for rain and snow(+groupel) cloud optics
-!$omp critical (load_sw_precip_props) 
     allocate(b0r(sw_cloud_props%get_nband()),b0s(sw_cloud_props%get_nband()), &
              b1s(sw_cloud_props%get_nband()),c0r(sw_cloud_props%get_nband()), &
              c0s(sw_cloud_props%get_nband()))
@@ -393,7 +385,6 @@ contains
             0.944, 0.894,   0.884,   0.883, 0.883, 0.883, 0.883/)
     c0s = (/0.970, 0.970,   0.970,   0.970, 0.970, 0.970, 0.970,    &
             0.970, 0.970,   0.970,   0.700, 0.700, 0.700, 0.700/)
-!$omp end critical (load_sw_precip_props)
 
   end subroutine rrtmgp_sw_cloud_optics_init
 

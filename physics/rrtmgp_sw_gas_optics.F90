@@ -265,7 +265,6 @@ contains
     !
     ! #######################################################################################
 #ifdef MPI
-    call mpi_barrier(mpicomm, mpierr)
     if (mpirank .eq. mpiroot) then
 #endif
        write (*,*) 'Reading RRTMGP shortwave k-distribution data ... '
@@ -455,7 +454,6 @@ contains
     ! Initialize RRTMGP DDT's...
     !
     ! #######################################################################################
-!$omp critical (load_sw_gas_optics)
     gas_concentrations%gas_name(:) = active_gases_array(:)
     call check_error_msg('sw_gas_optics_init',sw_gas_props%load(gas_concentrations,         &
          gas_namesSW, key_speciesSW, band2gptSW, band_limsSW, press_refSW, press_ref_tropSW,&
@@ -467,7 +465,6 @@ contains
          scale_by_complement_upperSW, kminor_start_lowerSW, kminor_start_upperSW,           &
          solar_quietSW, solar_facularSW, solar_sunspotSW, tsi_defaultSW, mg_defaultSW,      &
          sb_defaultSW, rayl_lowerSW, rayl_upperSW))
-!$omp end critical (load_sw_gas_optics)
 
   end subroutine rrtmgp_sw_gas_optics_init
 

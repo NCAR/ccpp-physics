@@ -29,7 +29,7 @@ contains
 !! \htmlinclude rrtmgp_lw_rte_run.html
 !!
   subroutine rrtmgp_lw_rte_run(doLWrad, doLWclrsky, use_LW_jacobian, doGP_lwscat, nCol,    &
-       nLev, p_lev, sfc_emiss_byband, sources, lw_optical_props_clrsky,      &
+       nLev, p_lev, sfc_emiss_byband, sources, lw_optical_props_clrsky,                    &
        lw_optical_props_clouds, lw_optical_props_aerosol, nGauss_angles, fluxlwUP_allsky,  &
        fluxlwDOWN_allsky, fluxlwUP_clrsky, fluxlwDOWN_clrsky, sfculw_jac, errmsg, errflg)
 

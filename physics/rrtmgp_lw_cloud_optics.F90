@@ -210,7 +210,6 @@ contains
     !
     ! #######################################################################################
 #ifdef MPI
-    call mpi_barrier(mpicomm, mpierr)
     if (mpirank .eq. mpiroot) then
 #endif
        ! Read in fields from file
@@ -359,27 +358,21 @@ contains
     !
     ! #######################################################################################
     if (doGP_cldoptics_LUT) then
-!$omp critical (load_lw_cloud_props_LUTs)
        call check_error_msg('lw_cloud_optics_init',lw_cloud_props%load(band_limsCLDLW,      &
             radliq_lwrLW, radliq_uprLW, radliq_facLW, radice_lwrLW, radice_uprLW,           &
             radice_facLW, lut_extliqLW, lut_ssaliqLW, lut_asyliqLW, lut_exticeLW,           &
             lut_ssaiceLW, lut_asyiceLW))
-!$omp end critical (load_lw_cloud_props_LUTs)  
     endif
  
     if (doGP_cldoptics_PADE) then
-!$omp critical (load_lw_cloud_props_PADE_approx)
        call check_error_msg('lw_cloud_optics_init', lw_cloud_props%load(band_limsCLDLW,     &
             pade_extliqLW, pade_ssaliqLW, pade_asyliqLW, pade_exticeLW, pade_ssaiceLW,      &
             pade_asyiceLW, pade_sizereg_extliqLW, pade_sizereg_ssaliqLW,                    &
             pade_sizereg_asyliqLW, pade_sizereg_exticeLW, pade_sizereg_ssaiceLW,            &
             pade_sizereg_asyiceLW))
-!$omp endcritical (load_lw_cloud_props_PADE_approx)
     endif
 
-!$omp critical (load_lw_cloud_props_nrghice)
     call check_error_msg('lw_cloud_optics_init',lw_cloud_props%set_ice_roughness(nrghice))
-!$omp end critical (load_lw_cloud_props_nrghice) 
  
   end subroutine rrtmgp_lw_cloud_optics_init
 

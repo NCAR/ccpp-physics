@@ -30,7 +30,7 @@ contains
   subroutine GFS_rrtmgp_sw_pre_run(me, nCol, nLev, lndp_type, n_var_lndp,lndp_var_list,     &  
        lndp_prt_list, doSWrad, solhr, lon, coslat, sinlat,  snowd, sncovr, snoalb, zorl,    &
        tsfg, tsfa, hprime, alvsf, alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc, lsmask,   &
-       sfc_wts, p_lay, tv_lay, relhum, p_lev, nday, idxday, coszen, coszdg,   &
+       sfc_wts, p_lay, tv_lay, relhum, p_lev, nday, idxday, coszen, coszdg,                 &
        sfc_alb_nir_dir, sfc_alb_nir_dif, sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, sfc_alb_dif, &
        errmsg, errflg)
     
