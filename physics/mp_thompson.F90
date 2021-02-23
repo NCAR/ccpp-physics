@@ -159,10 +159,6 @@ module mp_thompson
          ! Geopotential height in m2 s-2 to height in m
          hgt = phil/con_g
 
-         ! Density of air in kg m-3 and inverse density of air
-         rho = prsl/(con_rd*tgrs)
-         orho = 1.0/rho
-
          ! Prior to calling the functions: make_DropletNumber, make_IceNumber, make_RainNumber,
          ! the incoming mixing ratios should be converted to units of mass/num per cubic meter
          ! rather than per kg of air.  So, to pass back to the model state variables,
@@ -177,6 +173,10 @@ module mp_thompson
          qi_mp = qi/(1.0_kind_phys-spechum)
          qs_mp = qs/(1.0_kind_phys-spechum)
          qg_mp = qg/(1.0_kind_phys-spechum)
+
+         ! Density of air in kg m-3 and inverse density of air
+         rho = 0.622*prsl/(con_rd*tgrs*(qv_mp+0.622))
+         orho = 1.0/rho
 
          !> - Convert number concentrations from moist to dry
          ni_mp = ni/(1.0_kind_phys-spechum)
@@ -304,7 +304,7 @@ module mp_thompson
 
            ! If qc is in boundary conditions but nc is not, calculate nc from qc, rho and nwfa
            if (maxval(qc_mp)>0.0 .and. maxval(nc_mp)==0.0) then
-             nc_mp = make_DropletNumber(qc_mp*rho, nwfa) * orho
+             nc_mp = make_DropletNumber(qc_mp*rho, nwfa*rho) * orho
            end if
 
            ! If nc is in boundary conditions but qc is not, reset nc to zero
@@ -428,6 +428,7 @@ module mp_thompson
 
          ! Air density
          real(kind_phys) :: rho(1:ncol,1:nlev)              !< kg m-3
+         !rho = 0.622*prsl/(con_rd*tgrs*(qv_mp+0.622))
          ! Hydrometeors
          real(kind_phys) :: qv_mp(1:ncol,1:nlev)            !< kg kg-1 (dry mixing ratio)
          real(kind_phys) :: qc_mp(1:ncol,1:nlev)            !< kg kg-1 (dry mixing ratio)
@@ -510,7 +511,7 @@ module mp_thompson
          end if
 
          !> - Density of air in kg m-3
-         rho = prsl/(con_rd*tgrs)
+         rho = 0.622*prsl/(con_rd*tgrs*(qv_mp+0.622))
 
          !> - Convert omega in Pa s-1 to vertical velocity w in m s-1
          w = -omega/(rho*con_g)

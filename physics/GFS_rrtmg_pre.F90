@@ -288,8 +288,6 @@
           plyr(i,k1)    = prsl(i,k2)    * 0.01   ! pa to mb (hpa)
           tlyr(i,k1)    = tgrs(i,k2)
           prslk1(i,k1)  = prslk(i,k2)
-          rho(i,k1)     = plyr(i,k1)/(con_rd*tlyr(i,k1))
-          orho(i,k1)    = 1.0/rho(i,k1)
 
 !>  - Compute relative humidity.
           es  = min( prsl(i,k2),  fpvs( tgrs(i,k2) ) )  ! fpvs and prsl in pa
@@ -636,6 +634,8 @@
               do i=1,IM
                 qvs = qgrs(i,k,ntqv)
                 qv_mp (i,k) = qvs/(1.-qvs)
+                rho   (i,k) = 0.622*prsl(i,k)/(con_rd*tgrs(i,k)*(qv_mp(i,k)+0.622))
+                orho  (i,k) = 1.0/rho(i,k)
                 qc_mp (i,k) = tracer1(i,k,ntcw)/(1.-qvs)
                 qi_mp (i,k) = tracer1(i,k,ntiw)/(1.-qvs)
                 qs_mp (i,k) = tracer1(i,k,ntsw)/(1.-qvs)
@@ -649,6 +649,8 @@
               do i=1,IM
                 qvs = qgrs(i,k,ntqv)
                 qv_mp (i,k) = qvs/(1.-qvs)
+                rho   (i,k) = 0.622*prsl(i,k)/(con_rd*tgrs(i,k)*(qv_mp(i,k)+0.622))
+                orho  (i,k) = 1.0/rho(i,k)
                 qc_mp (i,k) = tracer1(i,k,ntcw)/(1.-qvs)
                 qi_mp (i,k) = tracer1(i,k,ntiw)/(1.-qvs)
                 qs_mp (i,k) = tracer1(i,k,ntsw)/(1.-qvs)
@@ -761,7 +763,7 @@
           do k=1,lm
             do i=1,im
               if (ltaerosol .and. qc_mp(i,k)>1.e-12 .and. nc_mp(i,k)<100.) then
-                nc_mp(i,k) = make_DropletNumber(qc_mp(i,k)*rho(i,k), nwfa(i,k)) * orho(i,k)
+                nc_mp(i,k) = make_DropletNumber(qc_mp(i,k)*rho(i,k), nwfa(i,k)*rho(i,k)) * orho(i,k)
               endif
               if (qi_mp(i,k)>1.e-12 .and. ni_mp(i,k)<100.) then
                 ni_mp(i,k) = make_IceNumber(qi_mp(i,k)*rho(i,k), tlyr(i,k)) * orho(i,k)
@@ -774,7 +776,7 @@
             !tgs: progclduni has different limits for ice radii (10.0-150.0) than
             !     calc_effectRad (4.99-125.0 for WRFv3.8.1; 2.49-125.0 for WRFv4+)
             !     it will raise the low limit from 5 to 10, but the high limit will remain 125.
-            call calc_effectRad (tlyr(i,:), plyr(i,:), qv_mp(i,:), qc_mp(i,:),   &
+            call calc_effectRad (tlyr(i,:), plyr(i,:)*100., qv_mp(i,:), qc_mp(i,:),   &
                                  nc_mp(i,:), qi_mp(i,:), ni_mp(i,:), qs_mp(i,:), &
                                  re_cloud(i,:), re_ice(i,:), re_snow(i,:), 1, lm )
           end do

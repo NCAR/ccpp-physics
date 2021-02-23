@@ -717,7 +717,7 @@
       ! local variables
       integer :: i,k,n,tracers
 
-      real(kind=kind_phys), dimension(im,levs) :: rho_dryair
+      real(kind=kind_phys), dimension(im,levs) :: rho_air
       real(kind=kind_phys), dimension(im,levs) :: qv_mp !< kg kg-1 (dry mixing ratio)
       real(kind=kind_phys), dimension(im,levs) :: qc_mp !< kg kg-1 (dry mixing ratio)
       real(kind=kind_phys), dimension(im,levs) :: qi_mp !< kg kg-1 (dry mixing ratio)
@@ -767,16 +767,16 @@
           if (imp_physics == imp_physics_thompson .and. (ntlnc>0 .or. ntinc>0)) then
             do k=1,levs
               do i=1,im
-                !> - Density of air in kg m-3
-                rho_dryair(i,k) = prsl(i,k) / (con_rd*save_tcp(i,k))
                 !> - Convert specific humidity to dry mixing ratio
                 qv_mp(i,k) = spechum(i,k) / (one-spechum(i,k))
+                !> - Density of air in kg m-3
+                rho_air(i,k) = 0.622*prsl(i,k) / (con_rd*save_tcp(i,k)*(qv_mp(i,k)+0.622))
                 if (ntlnc>0) then
                   !> - Convert moist mixing ratio to dry mixing ratio
                   qc_mp(i,k) = (clw(i,k,2)-save_qc(i,k)) / (one-spechum(i,k))
                   !> - Convert number concentration from moist to dry
                   nc_mp(i,k) = gq0(i,k,ntlnc) / (one-spechum(i,k))
-                  nc_mp(i,k) = max(zero, nc_mp(i,k) + make_DropletNumber(qc_mp(i,k) * rho_dryair(i,k), nwfa(i,k)) * (one/rho_dryair(i,k)))
+                  nc_mp(i,k) = max(zero, nc_mp(i,k) + make_DropletNumber(qc_mp(i,k) * rho_air(i,k), nwfa(i,k)*rho_air(i,k)) * (one/rho_air(i,k)))
                   !> - Convert number concentrations from dry to moist
                   gq0(i,k,ntlnc) = nc_mp(i,k) / (one+qv_mp(i,k))
                 endif
@@ -785,7 +785,7 @@
                   qi_mp(i,k) = (clw(i,k,1)-save_qi(i,k)) / (one-spechum(i,k))
                   !> - Convert number concentration from moist to dry
                   ni_mp(i,k) = gq0(i,k,ntinc) / (one-spechum(i,k)) 
-                  ni_mp(i,k) = max(zero, ni_mp(i,k) + make_IceNumber(qi_mp(i,k) * rho_dryair(i,k), save_tcp(i,k)) * (one/rho_dryair(i,k)))
+                  ni_mp(i,k) = max(zero, ni_mp(i,k) + make_IceNumber(qi_mp(i,k) * rho_air(i,k), save_tcp(i,k)) * (one/rho_air(i,k)))
                   !> - Convert number concentrations from dry to moist
                   gq0(i,k,ntinc) = ni_mp(i,k) / (one+qv_mp(i,k))
                 endif
