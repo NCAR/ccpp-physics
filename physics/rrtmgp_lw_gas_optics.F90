@@ -388,10 +388,6 @@ contains
          size(kminor_lowerLW),               MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
     call mpi_bcast(kminor_upperLW,                     &
          size(kminor_upperLW),               MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-    call mpi_bcast(rayl_lowerLW,                       &
-         size(rayl_lowerLW),                 MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-    call mpi_bcast(rayl_upperLW,                       &
-         size(rayl_upperLW),                 MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
     call mpi_bcast(kmajorLW,                           &
          size(kmajorLW),                     MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
     call mpi_bcast(planck_fracLW,                      &
