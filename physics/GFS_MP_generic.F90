@@ -111,7 +111,7 @@
       real(kind=kind_phys),                           intent(in)    :: dtf, frain, con_g
       real(kind=kind_phys), dimension(im),            intent(in)    :: rain1, xlat, xlon, tsfc
       real(kind=kind_phys), dimension(im),            intent(inout) :: ice, snow, graupel, rainc
-      real(kind=kind_phys), dimension(im),            intent(in)    :: rain0, ice0, snow0, graupel0
+      real(kind=kind_phys), dimension(:),             intent(in)    :: rain0, ice0, snow0, graupel0 ! conditionally allocated in GFS_typedefs (imp_physics == GFDL or Thompson)
       real(kind=kind_phys), dimension(im,nrcm),       intent(in)    :: rann
       real(kind=kind_phys), dimension(im,levs),       intent(in)    :: gt0, prsl, save_t, save_qv, del
       real(kind=kind_phys), dimension(im,levs+1),     intent(in)    :: prsi, phii
