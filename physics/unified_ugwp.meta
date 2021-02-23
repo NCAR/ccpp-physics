@@ -1,13 +1,10 @@
 [ccpp-table-properties]
   name = unified_ugwp
   type = scheme
-  dependencies = machine.F,cires_ugwp_module.F90,ugwp_driver_v0.F,cires_ugwp_triggers.F90
-  dependencies = cires_ugwp_initialize.F90,cires_ugwp_solvers.F90,cires_ugwp_utils.F90
-  dependencies = cires_orowam2017.f,cires_vert_lsatdis.F90,cires_vert_orodis.F90
-  dependencies = cires_vert_wmsdis.F90,cires_ugwp_module_v1.F90,cires_ugwp_triggers_v1.F90
-  dependencies = cires_ugwp_initialize_v1.F90,cires_ugwp_solv2_v1_mod.F90
-  dependencies = cires_ugwp_orolm97_v1.F90,cires_orowam2017.F90,cires_vert_orodis_v1.F90
-  dependencies = gwdps.f,drag_suite.F90
+
+  dependencies=cires_ugwp_triggers.F90,cires_ugwp_initialize.F90
+  dependencies=cires_orowam2017.f, cires_ugwp_module.F90,gwdps.f,machine.F,ugwp_driver_v0.F
+  dependencies=drag_suite.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -192,7 +189,7 @@
   intent = in
   optional = F
 [do_ugwp_v0]
-  standard_name = do_ugwp_v0
+  standard_name = flag_for_ugwp_version_0
   long_name = flag to activate ver 0 CIRES UGWP
   units = flag
   dimensions = ()
@@ -200,15 +197,23 @@
   intent = in
   optional = F
 [do_ugwp_v0_orog_only]
-  standard_name = do_ugwp_v0_orog_only
+  standard_name = flag_for_ugwp_version_0_orographic_gwd
   long_name = flag to activate ver 0 CIRES UGWP - orographic GWD only
   units = flag
   dimensions = ()
   type = logical
   intent = in
   optional = F
+[do_ugwp_v0_nst_only]
+  standard_name = flag_for_ugwp_version_0_nonorographic_gwd
+  long_name = flag to activate ver 0 CIRES UGWP - non-stationary GWD only
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [do_gsl_drag_ls_bl]
-  standard_name = do_gsl_drag_ls_bl
+  standard_name = flag_for_gsl_drag_suite_large_scale_orographic_and_blocking_drag
   long_name = flag to activate GSL drag suite - large-scale GWD and blocking
   units = flag
   dimensions = ()
@@ -216,7 +221,7 @@
   intent = in
   optional = F
 [do_gsl_drag_ss]
-  standard_name = do_gsl_drag_ss
+  standard_name = flag_for_gsl_drag_suite_small_scale_orographic_drag
   long_name = flag to activate GSL drag suite - small-scale GWD
   units = flag
   dimensions = ()
@@ -224,24 +229,8 @@
   intent = in
   optional = F
 [do_gsl_drag_tofd]
-  standard_name = do_gsl_drag_tofd
+  standard_name = flag_for_gsl_drag_suite_turbulent_orographic_form_drag
   long_name = flag to activate GSL drag suite - turb orog form drag
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[do_ugwp_v1]
-  standard_name = do_ugwp_v1
-  long_name = flag to activate ver 1 CIRES UGWP
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[do_ugwp_v1_orog_only]
-  standard_name = do_ugwp_v1_orog_only
-  long_name = flag to activate ver 1 CIRES UGWP - orographic GWD only
   units = flag
   dimensions = ()
   type = logical
@@ -270,16 +259,16 @@
   name = unified_ugwp_finalize
   type = scheme
 [do_ugwp_v0]
-  standard_name = do_ugwp_v0
+  standard_name = flag_for_ugwp_version_0
   long_name = flag to activate ver 0 CIRES UGWP
   units = flag
   dimensions = ()
   type = logical
   intent = in
   optional = F
-[do_ugwp_v1]
-  standard_name = do_ugwp_v1
-  long_name = flag to activate ver 1 CIRES UGWP
+[do_ugwp_v0_nst_only]
+  standard_name = flag_for_ugwp_version_0_nonorographic_gwd
+  long_name = flag to activate ver 0 CIRES UGWP - non-stationary GWD only
   units = flag
   dimensions = ()
   type = logical
@@ -523,80 +512,80 @@
   intent = in
   optional = F
 [dusfc_ls]
-  standard_name = integrated_x_momentum_flux_from_large_scale_gwd
+  standard_name = vertically_integrated_x_momentum_flux_due_to_mesoscale_orographic_gravity_wave_drag
   long_name = integrated x momentum flux from large scale gwd
-  units = Pa s
+  units = Pa
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
   optional = F
 [dvsfc_ls]
-  standard_name = integrated_y_momentum_flux_from_large_scale_gwd
+  standard_name = vertically_integrated_y_momentum_flux_due_to_mesoscale_orographic_gravity_wave_drag
   long_name = integrated y momentum flux from large scale gwd
-  units = Pa s
+  units = Pa
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
   optional = F
 [dusfc_bl]
-  standard_name = integrated_x_momentum_flux_from_blocking_drag
+  standard_name = vertically_integrated_x_momentum_flux_due_to_blocking_drag
   long_name = integrated x momentum flux from blocking drag
-  units = Pa s
+  units = Pa
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
   optional = F
 [dvsfc_bl]
-  standard_name = integrated_y_momentum_flux_from_blocking_drag
+  standard_name = vertically_integrated_y_momentum_flux_due_to_blocking_drag
   long_name = integrated y momentum flux from blocking drag
-  units = Pa s
+  units = Pa
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
   optional = F
 [dusfc_ss]
-  standard_name = integrated_x_momentum_flux_from_small_scale_gwd
+  standard_name = vertically_integrated_x_momentum_flux_due_to_small_scale_gravity_wave_drag
   long_name = integrated x momentum flux from small scale gwd
-  units = Pa s
+  units = Pa
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
   optional = F
 [dvsfc_ss]
-  standard_name = integrated_y_momentum_flux_from_small_scale_gwd
+  standard_name = vertically_integrated_y_momentum_flux_due_to_small_scale_gravity_wave_drag
   long_name = integrated y momentum flux from small scale gwd
-  units = Pa s
+  units = Pa
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
   optional = F
 [dusfc_fd]
-  standard_name = integrated_x_momentum_flux_from_form_drag
+  standard_name = vertically_integrated_x_momentum_flux_due_to_form_drag
   long_name = integrated x momentum flux from form drag
-  units = Pa s
+  units = Pa
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
   optional = F
 [dvsfc_fd]
-  standard_name = integrated_y_momentum_flux_from_form_drag
+  standard_name = vertically_integrated_y_momentum_flux_due_to_form_drag
   long_name = integrated y momentum flux from form drag
-  units = Pa s
+  units = Pa
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
   optional = F
 [dtaux2d_ls]
-  standard_name = x_momentum_tendency_from_large_scale_gwd
-  long_name = x momentum tendency from large scale gwd
+  standard_name = tendency_of_x_wind_due_to_mesoscale_orographic_gravity_wave_drag
+  long_name = instantaneous change in x wind due to orographic gw drag
   units = m s-2
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
@@ -604,8 +593,8 @@
   intent = out
   optional = F
 [dtauy2d_ls]
-  standard_name = y_momentum_tendency_from_large_scale_gwd
-  long_name = y momentum tendency from large scale gwd
+  standard_name = tendency_of_y_wind_due_to_mesoscale_orographic_gravity_wave_drag
+  long_name = instantaneous change in y wind due to orographic gw drag
   units = m s-2
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
@@ -613,7 +602,7 @@
   intent = out
   optional = F
 [dtaux2d_bl]
-  standard_name = x_momentum_tendency_from_blocking_drag
+  standard_name = tendency_of_x_momentum_due_to_blocking_drag
   long_name = x momentum tendency from blocking drag
   units = m s-2
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -622,7 +611,7 @@
   intent = out
   optional = F
 [dtauy2d_bl]
-  standard_name = y_momentum_tendency_from_blocking_drag
+  standard_name = tendency_of_y_momentum_due_to_blocking_drag
   long_name = y momentum tendency from blocking drag
   units = m s-2
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -631,7 +620,7 @@
   intent = out
   optional = F
 [dtaux2d_ss]
-  standard_name = x_momentum_tendency_from_small_scale_gwd
+  standard_name = tendency_of_x_momentum_due_to_small_scale_gravity_wave_drag
   long_name = x momentum tendency from small scale gwd
   units = m s-2
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -640,7 +629,7 @@
   intent = out
   optional = F
 [dtauy2d_ss]
-  standard_name = y_momentum_tendency_from_small_scale_gwd
+  standard_name = tendency_of_y_momentum_due_to_small_scale_gravity_wave_drag
   long_name = y momentum tendency from small scale gwd
   units = m s-2
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -649,7 +638,7 @@
   intent = out
   optional = F
 [dtaux2d_fd]
-  standard_name = x_momentum_tendency_from_form_drag
+  standard_name = tendency_of_x_momentum_due_to_form_drag
   long_name = x momentum tendency from form drag
   units = m s-2
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -658,7 +647,7 @@
   intent = out
   optional = F
 [dtauy2d_fd]
-  standard_name = y_momentum_tendency_from_form_drag
+  standard_name = tendency_of_y_momentum_due_to_form_drag
   long_name = y momentum tendency from form drag
   units = m s-2
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -888,7 +877,7 @@
   intent = out
   optional = F
 [gw_dudt]
-  standard_name = tendency_of_x_wind_due_to_ugwp
+  standard_name = tendency_of_x_wind_due_to_gravity_wave_drag
   long_name = zonal wind tendency due to UGWP
   units = m s-2
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -897,7 +886,7 @@
   intent = out
   optional = F
 [gw_dvdt]
-  standard_name = tendency_of_y_wind_due_to_ugwp
+  standard_name = tendency_of_y_wind_due_to_gravity_wave_drag
   long_name = meridional wind tendency due to UGWP
   units = m s-2
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -906,7 +895,7 @@
   intent = out
   optional = F
 [gw_dtdt]
-  standard_name = tendency_of_air_temperature_due_to_ugwp
+  standard_name = tendency_of_air_temperature_due_to_gravity_wave_drag
   long_name = air temperature tendency due to UGWP
   units = K s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -915,7 +904,7 @@
   intent = out
   optional = F
 [gw_kdis]
-  standard_name = eddy_mixing_due_to_ugwp
+  standard_name = atmosphere_momentum_diffusivity_due_to_gravity_wave_drag
   long_name = eddy mixing due to UGWP
   units = m2 s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -995,17 +984,8 @@
   kind = kind_phys
   intent = out
   optional = F
-[dudt_ogw]
-  standard_name = instantaneous_change_in_x_wind_due_to_orographic_gravity_wave_drag
-  long_name = instantaneous change in x wind due to orographic gw drag
-  units = m s-2
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
 [dudt_tms]
-  standard_name = instantaneous_change_in_x_wind_due_to_turbulent_orographic_form_drag
+  standard_name = tendency_of_x_wind_due_to_turbulent_orographic_form_drag
   long_name = instantaneous change in x wind due to TOFD
   units = m s-2
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -1278,7 +1258,7 @@
   intent = in
   optional = F
 [do_ugwp_v0]
-  standard_name = do_ugwp_v0
+  standard_name = flag_for_ugwp_version_0
   long_name = flag to activate ver 0 CIRES UGWP
   units = flag
   dimensions = ()
@@ -1286,15 +1266,23 @@
   intent = in
   optional = F
 [do_ugwp_v0_orog_only]
-  standard_name = do_ugwp_v0_orog_only
+  standard_name = flag_for_ugwp_version_0_orographic_gwd
   long_name = flag to activate ver 0 CIRES UGWP - orographic GWD only
   units = flag
   dimensions = ()
   type = logical
   intent = in
   optional = F
+[do_ugwp_v0_nst_only]
+  standard_name = flag_for_ugwp_version_0_nonorographic_gwd
+  long_name = flag to activate ver 0 CIRES UGWP - non-stationary GWD only
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [do_gsl_drag_ls_bl]
-  standard_name = do_gsl_drag_ls_bl
+  standard_name = flag_for_gsl_drag_suite_large_scale_orographic_and_blocking_drag
   long_name = flag to activate GSL drag suite - large-scale GWD and blocking
   units = flag
   dimensions = ()
@@ -1302,7 +1290,7 @@
   intent = in
   optional = F
 [do_gsl_drag_ss]
-  standard_name = do_gsl_drag_ss
+  standard_name = flag_for_gsl_drag_suite_small_scale_orographic_drag
   long_name = flag to activate GSL drag suite - small-scale GWD
   units = flag
   dimensions = ()
@@ -1310,24 +1298,8 @@
   intent = in
   optional = F
 [do_gsl_drag_tofd]
-  standard_name = do_gsl_drag_tofd
+  standard_name = flag_for_gsl_drag_suite_turbulent_orographic_form_drag
   long_name = flag to activate GSL drag suite - turb orog form drag
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[do_ugwp_v1]
-  standard_name = do_ugwp_v1
-  long_name = flag to activate ver 1 CIRES UGWP
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[do_ugwp_v1_orog_only]
-  standard_name = do_ugwp_v1_orog_only
-  long_name = flag to activate ver 1 CIRES UGWP - orographic GWD only
   units = flag
   dimensions = ()
   type = logical
