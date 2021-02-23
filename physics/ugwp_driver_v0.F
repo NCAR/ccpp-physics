@@ -1,267 +1,4 @@
 !
-       module sso_coorde
-!
-! specific to COORDE-2019 project OGW switches/sensitivity
-! to diagnose SSO effects pgwd=1 (OGW is on) =0 (off)
-!                         pgd4=4 (4 timse taub, control pgwd=1)
-!     
-       use machine,      only: kind_phys
-       real(kind=kind_phys),parameter :: pgwd  = 1.0_kind_phys
-       real(kind=kind_phys),parameter :: pgwd4 = 1.0_kind_phys
-       logical,             parameter :: debugprint = .false.
-       end module sso_coorde
-!
-!
-! Routine cires_ugwp_driver_v0 is replaced with cires_ugwp.F90/cires_ugwp_run in CCPP
-#if 0
-       subroutine cires_ugwp_driver_v0(me,  master,
-     &    im,  levs, nmtvr, dtp, kdt, imx, do_ugwp, do_tofd,
-     &    cdmbgwd,  xlat, xlatd, sinlat, coslat, spgrid,
-     &    ugrs, vgrs, tgrs, qgrs, prsi, prsl, prslk,
-     &    phii, phil, del, hprime, oc, oa4, clx, theta,
-     &    gamm, sigma, elvmax, sgh30, kpbl, 
-     &    dusfcg, dvsfcg, gw_dudt, gw_dvdt, gw_dtdt, gw_kdis,
-     &    tau_tofd, tau_mtb, tau_ogw, tau_ngw,
-     &    zmtb, zlwb, zogw, du3dt_mtb,du3dt_ogw, du3dt_tms,rdxzb,
-     &    rain, ntke, tke, lprnt, ipr)
-!-----------------------------------------------------------
-! Part 1 "old-revised" gfs-gwdps_v0 or "old" gwdps (if do_ugwp=.false.)
-! Part 2  non-stationary multi-wave GWs FV3GFS-v0
-! Part 3  Dissipative version of UGWP-tendency application
-!         (similar to WAM-2017)
-!----------------------------------------------------------- 
-       use machine,          only : kind_phys
-       use physcons,         only : con_cp, con_g, con_rd, con_rv, &
-                                    con_omega
-
-       use ugwp_wmsdis_init, only : tamp_mpa, ilaunch
-       use sso_coorde,       only : pgwd, pgwd4, debugprint
-       implicit none
-!input
-
-       integer, parameter :: kp = kind_phys
-
-       integer, intent(in) :: me,  master
-       integer, intent(in) :: im, levs, kdt, imx, nmtvr, ntke, ipr
-
-       real(kind=kind_phys), intent(in) :: dtp, cdmbgwd(4)
-       logical             :: do_ugwp, do_tofd, lprnt
-       integer, intent(in) :: kpbl(im)
-       real(kind=kind_phys), intent(in), dimension(im) :: xlat, xlatd
-     &,                            sgh30, sinlat, coslat, spgrid    ! spgrid = tile-area
-     &,                            rain
-
-       real(kind=kind_phys), intent(in), dimension(im,levs)   ::
-     &,        ugrs, vgrs, tgrs, qgrs, prsl, prslk, phil, del
-       real(kind=kind_phys), intent(in), dimension(im,levs+1) :: 
-     &         phii, prsi
-
-!      real(kind=kind_phys), intent(in) :: oro_stat(im,nmtvr)
-       real(kind=kind_phys), intent(in), dimension(im) :: hprime, oc
-     &,                        theta, gamm, sigma, elvmax
-       real(kind=kind_phys), intent(in), dimension(im,4) :: oa4, clx
-       real(kind=kind_phys), intent(in)                  :: tke(im,levs)
-!out
-       real(kind=kind_phys), dimension(im,levs) :: gw_dudt, gw_dvdt
-     &,                                            gw_dTdt, gw_kdis
-
-!-----locals	+ diagnostics output
-
-       real(kind=kind_phys), dimension(im,levs)   :: Pdvdt, Pdudt
-     &,                      Pdtdt, Pkdis, ed_dudt, ed_dvdt, ed_dTdt
-
-       real(kind=kind_phys), dimension(im)      :: dusfcg, dvsfcg
-
-       real(kind=kind_phys), dimension(im)      :: rdxzb, zmtb,
-     &    zlwb, zogw, tau_mtb, tau_ogw, tau_tofd,  tau_ngw, turb_fac
-       real(kind=kind_phys), dimension(im,levs) :: du3dt_mtb, du3dt_ogw
-     &,                                            du3dt_tms
-       real(kind=kind_phys), dimension(im)      :: tem
-
-! locals
-       real(kind=kind_phys) :: rfac, tx1
-       integer              :: i, j, k, ix
-!
-! define hprime, oc, oa4, clx, theta, sigma, gamm, elvmax
-!
-!      real(kind=kind_phys), dimension(im)     :: hprime,
-!    &       oc, theta, sigma, gamm, elvmax
-!      real(kind=kind_phys), dimension(im, 4)  :: clx, oa4
-!	
-! switches that activate impact of OGWs and NGWs along with eddy diffusion
-!
-       real(kind=kind_phys), parameter :: pogw=1.0_kp, pngw=1.0_kp
-     &,                                   pked=1.0_kp, zero=0.0_kp
-     &,                                   ompked=1.0_kp-pked
-!
-! switches for GW-effects: pogw=1 (OGWs)  pngw=1 (NGWs) pked=1 (eddy mixing)
-!
-       if (me == master .and. kdt < 2 .and. debugprint) then
-         print *
-         write(6,*) 'FV3GFS execute ugwp_driver_v0 '
-!        write(6,*) 'FV3GFS execute ugwp_driver_v0 nmtvr=', nmtvr
-         write(6,*) ' COORDE EXPER pogw = ' , pogw
-         write(6,*) ' COORDE EXPER pgwd = ' , pgwd
-         write(6,*) ' COORDE EXPER pgwd4 = ', pgwd4
-         print *
-       endif
-
-       do i=1,im
-         zlwb(i) = zero
-       enddo
-!
-! 1) ORO stationary GWs
-!    ------------------
-       
-       if (do_ugwp .and. nmtvr == 14) then   ! calling revised old GFS gravity wave drag
-         CALL GWDPS_V0(IM,    levs,  imx,   do_tofd,
-     &                 Pdvdt, Pdudt, Pdtdt, Pkdis,
-     &                 ugrs , vgrs, tgrs, qgrs,KPBL, prsi,del,prsl,
-     &                 prslk, phii, phil, DTP,KDT,
-     &                 sgh30, HPRIME, OC, OA4, CLX, THETA,
-     &                 SIGMA, GAMM,   ELVMAX,
-     &                 DUSFCg, DVSFCg, xlatd, sinlat, coslat, spgrid,
-     &                 cdmbgwd(1:2), me, master, rdxzb,
-     &                 con_g, con_omega,
-     &                 zmtb, zogw, tau_mtb, tau_ogw, tau_tofd,
-     &                 du3dt_mtb, du3dt_ogw, du3dt_tms)
-!
-         if (me == master .and. kdt < 2 .and. debugprint) then
-           print *
-           write(6,*) 'FV3GFS finished gwdps_v0 in ugwp_driver_v0 '
-           print *
-         endif  
-       else                                  ! calling old GFS gravity wave drag as is
-         do k=1,levs
-           do i=1,im
-             pdvdt(i,k) = zero
-             pdudt(i,k) = zero
-             pdtdt(i,k) = zero
-             pkdis(i,k) = zero
-           enddo
-         enddo
-         if (cdmbgwd(1) > zero.or. cdmbgwd(2) > zero) then
-           call gwdps(im, im, im, levs, Pdvdt, Pdudt, Pdtdt             &
-     &,               ugrs, vgrs, tgrs, qgrs                            &
-     &,               kpbl, prsi, del, prsl, prslk, phii, phil, dtp, kdt&
-     &,               hprime, oc, oa4, clx, theta, sigma, gamm          &
-     &,               elvmax, dusfcg, dvsfcg                            &
-     &,               con_g,  con_cp, con_rd, con_rv, imx               &
-     &,               nmtvr,  cdmbgwd(1:2), me, lprnt, ipr, rdxzb)
-         endif
-
-         tau_mtb   = zero  ; tau_ogw   = zero ;  tau_tofd = zero
-         du3dt_mtb = zero  ; du3dt_ogw = zero ;  du3dt_tms= zero
-       endif
-!
-       if (cdmbgwd(3) > zero) then
-! 2) non-stationary GWs with GEOS-5/MERRA GW-forcing
-!    ----------------------------------------------
-!--------	
-! GMAO GEOS-5/MERRA GW-forcing	lat-dep
-!--------
-         call slat_geos5_tamp(im, tamp_mpa, xlatd, tau_ngw)
-
-!        call slat_geos5(im, xlatd, tau_ngw)
-!
-         if (abs(1.0_kp-cdmbgwd(3)) > 1.0e-6_kp) then
-           if (cdmbgwd(4) > zero) then
-             do i=1,im
-               turb_fac(i) = zero
-               tem(i)      = zero
-             enddo
-             if (ntke > 0) then
-               do k=1,(levs+levs)/3
-                 do i=1,im
-                   turb_fac(i) = turb_fac(i) + del(i,k) * tke(i,k)
-                   tem(i)      = tem(i)      + del(i,k)
-                 enddo
-               enddo
-               do i=1,im
-                 turb_fac(i) = turb_fac(i) / tem(i)
-               enddo
-             endif
-             rfac = 86400000 / dtp
-             do i=1,im
-               tx1 = cdmbgwd(4)*min(10.0, max(turb_fac(i),rain(i)*rfac))
-               tau_ngw(i) = tau_ngw(i) * max(0.1_kp, min(5.0_kp, tx1))
-             enddo
-           endif
-           do i=1,im
-             tau_ngw(i) = tau_ngw(i) * cdmbgwd(3)
-           enddo
-         endif
-!
-         call fv3_ugwp_solv2_v0(im,   levs,  dtp,
-     &                          tgrs, ugrs,  vgrs,   qgrs, prsl, prsi,
-     &                          phil, xlatd, sinlat, coslat, 
-     &                          gw_dudt, gw_dvdt, gw_dTdt, gw_kdis,
-     &                          tau_ngw, me, master, kdt)
-
-         if (me == master .and. kdt < 2 .and. debugprint) then
-           print *
-           write(6,*)'FV3GFS finished fv3_ugwp_v0 in ugwp_driver_v0 '
-           write(6,*) ' non-stationary GWs with GMAO/MERRA GW-forcing '
-           print *
-         endif
-         do k=1,levs
-           do i=1,im
-             gw_dtdt(i,k) = pngw*gw_dtdt(i,k) + pogw*Pdtdt(i,k)
-             gw_dudt(i,k) = pngw*gw_dudt(i,k) + pogw*Pdudt(i,k)
-             gw_dvdt(i,k) = pngw*gw_dvdt(i,k) + pogw*Pdvdt(i,k)
-             gw_kdis(i,k) = pngw*gw_kdis(i,k) + pogw*Pkdis(i,k)
-           enddo
-         enddo
-       else
-         do k=1,levs
-           do i=1,im
-             gw_dtdt(i,k) = Pdtdt(i,k)
-             gw_dudt(i,k) = Pdudt(i,k)
-             gw_dvdt(i,k) = Pdvdt(i,k)
-             gw_kdis(i,k) = Pkdis(i,k)
-           enddo
-         enddo
-       endif
-
-       if (pogw == zero) then
-!        zmtb = 0.;  zogw =0.
-         tau_mtb   = zero  ; tau_ogw   = zero ;  tau_tofd = zero
-         du3dt_mtb = zero  ; du3dt_ogw = zero ;  du3dt_tms= zero
-       endif
-
-       return
-
-!=============================================================================
-! make "ugwp eddy-diffusion" update for gw_dtdt/gw_dudt/gw_dvdt by solving
-! vert diffusion equations & update "Statein%tgrs, Statein%ugrs, Statein%vgrs"
-!=============================================================================
-!
-! 3) application of "eddy"-diffusion to "smooth" UGWP-related tendencies
-!------------------------------------------------------------------------------
-       do k=1,levs
-         do i=1,im
-           ed_dudt(i,k) = zero ; ed_dvdt(i,k) = zero ; ed_dtdt(i,k) = zero
-         enddo
-       enddo
-
-       call edmix_ugwp_v0(im,   levs, dtp,
-     &                    tgrs, ugrs, vgrs, qgrs, del,
-     &                    prsl, prsi, phil, prslk,
-     &                    gw_dudt, gw_dvdt, gw_dTdt, gw_kdis,
-     &                    ed_dudt, ed_dvdt, ed_dTdt,
-     &                    me, master, kdt )
-
-      do k=1,levs
-        do i=1,im
-          gw_dtdt(i,k) = gw_dtdt(i,k)*ompked + ed_dtdt(i,k)*pked
-          gw_dvdt(i,k) = gw_dvdt(i,k)*ompked + ed_dvdt(i,k)*pked
-          gw_dudt(i,k) = gw_dudt(i,k)*ompked + ed_dudt(i,k)*pked
-        enddo
-      enddo
-
-      end subroutine cires_ugwp_driver_v0
-#endif
-!
 !=====================================================================
 !
 !ugwp-v0 subroutines: GWDPS_V0 and fv3_ugwp_solv2_v0	
@@ -301,12 +38,12 @@
 !---------------------------------------- 
 
       USE MACHINE ,      ONLY : kind_phys
-      use ugwp_common ,  only : rgrav,   grav,  cpd, rd, rv, rcpd, rcpd2
+      use ugwp_common_v0,only : rgrav,   grav,  cpd, rd, rv, rcpd, rcpd2
      &,                         pi,      rad_to_deg, deg_to_rad, pi2
      &,                         rdi,     gor,    grcp, gocp,  fv, gr2
      &,                         bnv2min, dw2min, velmin, arad
  
-      use ugwp_oro_init, only : rimin,  ric,     efmin,     efmax
+      use ugwpv0_oro_init, only : rimin,  ric,     efmin,     efmax
      &,                         hpmax,  hpmin,   sigfaci => sigfac
      &,                         dpmin,  minwnd,  hminmt,    hncrit
      &,                         RLOLEV, GMAX,    VELEPS,    FACTOP
@@ -315,11 +52,11 @@
      &,                         cdmb,   cleff,   fcrit_gfs, fcrit_mtb
      &,                         n_tofd, ze_tofd, ztop_tofd
 
-      use cires_ugwp_module, only : kxw,  max_kdis, max_axyz
-      use sso_coorde,        only : pgwd, pgwd4, debugprint
+      use cires_ugwpv0_module, only : kxw,  max_kdis, max_axyz
+      
 !----------------------------------------
       implicit none
-      integer, parameter :: kp = kind_phys
+      integer, parameter  :: kp = kind_phys
       character(len=8)    :: strsolver='PSS-1986'  ! current operational solver or  'WAM-2017'
       integer, intent(in) :: im, km, imx, kdt
       integer, intent(in) :: me, master
@@ -452,22 +189,9 @@
 !     sigmin = 2.*hpmin/dsmax      !dxres ! Moorthi - this will not reproduce
       sigmin = 2.*hpmin/dxres      !dxres
 
-!     if (kdt == 1) then
-!       print *, sgrmax, sgrmin , ' min-max sparea '
-!       print *, 'sigmin-hpmin-dsmax', sigmin, hpmin, dsmax
-!       print *, 'dxres/dsmax ', dxres, dsmax
-!       print *, ' shilmin gammin ', shilmin, gammin
-!     endif
+
 
       kxridge = float(IMX)/arad * cdmbgwd(2)
-
-      if (me == master .and. kdt == 1 .and. debugprint) then
-        print *, ' gwdps_v0 kxridge ', kxridge
-        print *, ' gwdps_v0 scale2 ', cdmbgwd(2)
-        print *, ' gwdps_v0 IMX ', imx
-        print *, ' gwdps_v0 GAM_MIN ', gammin
-        print *, ' gwdps_v0 SSO_MIN ', sso_min
-      endif
 
       do i=1,im
         idxzb(i)    = 0
@@ -543,9 +267,7 @@
         endif
       enddo
 
-      IF (npt == 0 .and. debugprint) then
-!         print *,  'oro-npt = 0 elvmax ', maxval(elvmaxd), hminmt
-!         print *,  'oro-npt = 0 hprime ', maxval(hprime), hpmin
+      IF (npt == 0) then
         RETURN      ! No gwd/mb calculation done
       endif
 
@@ -918,16 +640,16 @@
         kxridge   =  1.0 / sqrt(sparea(J))
         XLINV(I)  = XLINGFS    !or max(kxridge, inv_b2eff)  ! 6.28/Lx ..0.5*sigma(j)/heff = 1./Lridge  
         taulin(i) = 0.5*ROLL(I)*XLINV(I)*BNV*ULOW(I)*
-     &                 heff*heff*pgwd4
+     &                 heff*heff
 
         if ( FR > fcrit_gfs ) then
           TAUB(I)  = XLINV(I) * ROLL(I) * ULOW(I) * ULOW(I)
-     &             * ULOW(I)  * GFOBNV  * EFACT *pgwd4      ! nonlinear FLUX Tau0...XLINV(I)
+     &             * ULOW(I)  * GFOBNV  * EFACT       ! nonlinear FLUX Tau0...XLINV(I)
 !
         else
 !	 
           TAUB(I)  = XLINV(I) * ROLL(I) * ULOW(I) * ULOW(I)
-     &             * ULOW(I)  * GFOBNV  * EFACT *pgwd4  
+     &             * ULOW(I)  * GFOBNV  * EFACT  
 !     
 !         TAUB(I)  = taulin(i)                             !  linear flux for FR <= fcrit_gfs
 !   
@@ -1083,9 +805,8 @@
 ! ---------------------------
       IF( do_tofd ) then
         axtms(:,:) = 0.0 ; aytms(:,:) = 0.0
-        if ( kdt == 1 .and. me == 0 .and. debugprint) then
-          print *, 'VAY do_tofd  from surface to ', ztop_tofd
-        endif
+
+	
         DO I = 1,npt
           J = ipt(i)
           zpbl  =rgrav*phil( j, kpbl(j) )
@@ -1099,8 +820,8 @@
             vp1(k) = v1(j,k)
           enddo
 
-          call ugwp_tofd1d(km, sigflt, elvmaxd(j), zsurf, zpbl,
-     &             up1, vp1, zpm,  utofd1, vtofd1, epstofd1, krf_tofd1)
+          call ugwpv0_tofd1d(km, sigflt, elvmaxd(j), zsurf, zpbl,
+     &        up1, vp1, zpm,  utofd1, vtofd1, epstofd1, krf_tofd1)
 
           do k=1,km
             axtms(j,k) = utofd1(k)
@@ -1151,8 +872,8 @@
 ! OGW-s above blocking height
 !
             TAUD(I,K)  = TAUD(I,K) * DTFAC(I)
-            DTAUX      = TAUD(I,K) * XN(I) * pgwd
-            DTAUY      = TAUD(I,K) * YN(I) * pgwd
+            DTAUX      = TAUD(I,K) * XN(I)
+            DTAUY      = TAUD(I,K) * YN(I) 
 
             Pdvdt(j,k)   = DTAUY  +Pdvdt(j,k)
             Pdudt(j,k)   = DTAUX  +Pdudt(j,k)
@@ -1185,97 +906,11 @@
 
        RETURN
 
-
-!============ debug ------------------------------------------------
-       if (kdt <= 2 .and. me == 0 .and. debugprint) then
-        print *, 'vgw-oro done gwdps_v0 in ugwp-v0 step-proc ', kdt, me
-!
-        print *, maxval(pdudt)*86400.,  minval(pdudt)*86400, 'vgw_axoro'
-        print *, maxval(pdvdt)*86400.,  minval(pdvdt)*86400, 'vgw_ayoro'
-!       print *, maxval(kdis),  minval(kdis),  'vgw_kdispro m2/sec'
-        print *, maxval(pdTdt)*86400.,  minval(pdTdt)*86400,'vgw_epsoro'
-        print *, maxval(zmtb), ' z_mtb ',  maxval(tau_mtb), ' tau_mtb '
-        print *, maxval(zogw), ' z_ogw ',  maxval(tau_ogw), ' tau_ogw '
-!       print *, maxval(tau_tofd),  ' tau_tofd '
-!       print *, maxval(axtms)*86400.,  minval(axtms)*86400, 'vgw_axtms'
-!       print *,maxval(dudt_mtb)*86400.,minval(dudt_mtb)*86400,'vgw_axmtb'
-        if (maxval(abs(pdudt))*86400. > 100.) then
-
-          print *, maxval(u1),  minval(u1),  ' u1 gwdps-v0 '
-          print *, maxval(v1),  minval(v1),  ' v1 gwdps-v0 '
-          print *, maxval(t1),  minval(t1),  ' t1 gwdps-v0 '
-          print *, maxval(q1),  minval(q1),  ' q1 gwdps-v0 '
-          print *, maxval(del), minval(del), ' del gwdps-v0 '
-          print *, maxval(phil)*rgrav,minval(phil)*rgrav, 'zmet'
-          print *, maxval(phii)*rgrav,minval(phii)*rgrav, 'zmeti'
-          print *, maxval(prsi), minval(prsi), ' prsi '
-          print *, maxval(prsL), minval(prsL), ' prsL '
-          print *, maxval(RO), minval(RO), ' RO-dens '
-          print *, maxval(bnv2(1:npt,:)), minval(bnv2(1:npt,:)),' BNV2 '
-          print *, maxval(kpbl), minval(kpbl), ' kpbl '
-          print *, maxval(sgh30), maxval(hprime), maxval(elvmax),'oro-d'
-          print *
-          do i =1, npt
-            j= ipt(i)
-            print *,zogw(J)/hprime(j), zmtb(j)/hprime(j),
-     &              phil(j,1)/9.81, nint(hprime(j)/sigma(j))
-!
-!....................................................................
-!
-!   zogw/hp=5.9   zblk/hp=10.7    zm=11.1m   ridge/2=2,489m/9,000m
-!   from 5 to 20 km , we need to count for "ridges" > dx/4 ~ 15 km
-!   we must exclude blocking by small ridges
-!   VAY-kref < iblk           zogw-lev 15        block-level:  39
-!
-! velmin => 1.0, 0.01, 0.1 etc.....unification of wind limiters
-! MAX(SQRT(U1(J,K)*U1(J,K) + V1(J,K)*V1(J,K)), minwnd)
-! MAX(DW2,DW2MIN) * RDZ * RDZ
-! ULOW(I) = MAX(SQRT(UBAR(I)*UBAR(I) + VBAR(I)*VBAR(I)), 1.0)
-! TEM      = MAX(VELCO(I,K)*VELCO(I,K), 0.1)
-!              TEMV = 1.0 / max(VELCO(I,K), 0.01)
-!     &                   * max(VELCO(I,K),0.01) 
-!....................................................................
-          enddo
-          print *
-          stop
-        endif
-       endif
-
-!
-      RETURN
-!---------------------------------------------------------------
-! review of OLD-GFS code 2017/18 most substantial changes
-!  a) kref > idxzb if idxzb > KPBL "OK" clipped-hill for OGW
-!  b) tofd -sgh30                   "OK"
-!
-!  c) FR < Frc linear theory for taub-specification
-!
-!  d) solver of Palmer et al. (1987) => Linsat of McFarlane
-!
-!---------------------------------------------------------------
       end subroutine gwdps_v0
 
 
 
 !===============================================================================
-!    use fv3gfs-v0
-!    first beta version of ugwp for fv3gfs-128
-!    cires/swpc - jan 2018
-!    non-tested wam ugwp-solvers in fv3gfs: "lsatdis", "dspdis", "ado99dis"
-!    they reqiure extra-work to put them in with intializtion and namelists
-!          next will be lsatdis for both fv3wam & fv3gfs-128l implementations
-!    with (a) stochastic-deterministic propagation solvers for wave packets/spectra
-!         (b) gw-sources: oro/convection/dyn-instability (fronts/jets/pv-anomalies)
-!         (c) guidance from high-res runs for GW sources and res-aware tune-ups
-!23456
-!
-!      call gwdrag_wam(1,  im,   ix,  km,   ksrc, dtp,
-!     & xlat, gw_dudt, gw_dvdt,  taux,  tauy)
-!        call fv3_ugwp_wms17(kid1, im,  ix,  km,  ksrc_ifs, dtp,
-!     &  adt,adu,adv,prsl,prsi,phil,xlat, gw_dudt, gw_dvdt, gw_dtdt, gw_ked,
-!     &  taux,tauy,grav, amol_i, me, lstep_first )
-!
-!
 !23456==============================================================================
 
 !>\ingroup cires_ugwp_run
@@ -1297,21 +932,19 @@
 !
       use machine,          only : kind_phys
 
-      use ugwp_common ,     only : rgrav,      grav,  cpd,    rd,  rv
+      use ugwp_common_v0 ,  only : rgrav,      grav,  cpd,    rd,  rv
      &,                            omega2,     rcpd2,  pi,    pi2, fv
      &,                            rad_to_deg, deg_to_rad
      &,                            rdi,        gor,    grcp,   gocp
      &,                            bnv2min,    dw2min, velmin, gr2
 !
-      use ugwp_wmsdis_init, only : hpscale, rhp2,    bv2min,   gssec
+      use ugwpv0_wmsdis_init, only : hpscale, rhp2,    bv2min,   gssec
      &,                            v_kxw,   v_kxw2,  tamp_mpa, zfluxglob
      &,                            maxdudt, gw_eff,  dked_min
      &,                            nslope,  ilaunch, zmsi
      &,                            zci,     zdci,    zci4, zci3, zci2
      &,                            zaz_fct, zcosang, zsinang
-     &,                            nwav,    nazd,    zcimin, zcimax
-
-      use sso_coorde,       only : debugprint
+     &,                            nwav,    nazd,    zcimin, zcimax      
 !
       implicit none
 !23456
@@ -1426,26 +1059,7 @@
             phil(j,k)  = philg(j,k) * rgrav
           enddo
         enddo
-!-----------------------------------------------------------
-! also other options to alter tropical values
-! tamp = 100.e-3*1.e3 = 100 mpa
-! vay-2017   zfluxglob=> lat-dep here from geos-5/merra-2
-!-----------------------------------------------------------
-!        call slat_geos5_tamp(klon, tamp_mpa, xlatd, tau_ngw)
 
-
-!        phil = philg*rgrav
- 
-!        rcpd     = 1.0/(grav/cpd)     ! 1/[g/cp]
-!        grav2cpd = grav*grav/cpd      ! g*(g/cp)= g^2/cp
-
-        if (kdt ==1 .and. mpi_id == master .and. debugprint) then
-          print *,  maxval(tm1), minval(tm1), 'vgw: temp-res '
-          print *,  'ugwp-v0: zcimin=' , zcimin
-          print *,  'ugwp-v0: zcimax=' , zcimax 
-          print *
-        endif
-!
 !=================================================
        do iazi=1, nazd
          do jk=1,klev
@@ -1589,7 +1203,7 @@
           enddo
         enddo
 
-      endif  ! for slopes
+      endif           ! for slopes
 !
 ! normalize momentum flux at the src-level
 !       ------------------------------
@@ -1866,257 +1480,7 @@
        enddo
 !
 !--------------------------------------------------------------------------- 
-!
-       if (kdt == 1 .and. mpi_id == master .and. debugprint) then
-         print *, 'vgw done  '
-!
-         print *, maxval(pdudt)*86400,  minval(pdudt)*86400, 'vgw ax'
-         print *, maxval(pdvdt)*86400,  minval(pdvdt)*86400, 'vgw ay'
-         print *, maxval(dked)*1.,  minval(dked)*1,  'vgw keddy m2/sec'
-         print *, maxval(pdtdt)*86400,  minval(pdtdt)*86400,'vgw eps'
-!
-!        print *, ' ugwp -heating rates '
-       endif
-
        return
        end subroutine fv3_ugwp_solv2_v0
-!-------------------------------------------------------------------------------
-!
-! Part-3 of UGWP-V01 Dissipative (eddy) effects of UGWP it will be activated
-!           after tests of OGW (new revision) and NGW with MERRA-2 forcing.
-!
-!-------------------------------------------------------------------------------
-      subroutine edmix_ugwp_v0(im, levs,   dtp,
-     &                         t1, u1, v1, q1, del,
-     &                         prsl,  prsi, phil, prslk,
-     &                         pdudt, pdvdt, pdTdt, pkdis,
-     &                         ed_dudt, ed_dvdt, ed_dTdt,
-     &                         me, master, kdt )
-!
-      use machine,           only : kind_phys
-      use ugwp_common ,      only : rgrav, grav, cpd, rd, rdi, fv
-!    &,                             pi, rad_to_deg, deg_to_rad, pi2
-     &,                             bnv2min, velmin, arad
 
-      implicit none
-
-      integer, intent(in) :: me,  master, kdt
-      integer, intent(in) :: im, levs
-      real(kind=kind_phys), intent(in) :: dtp 
-      real(kind=kind_phys), intent(in), dimension(im,levs) :: 
-     &       u1,  v1, t1,   q1, del,  prsl, prslk, phil  
-!       
-      real(kind=kind_phys), intent(in),dimension(im,levs+1):: prsi
-      real(kind=kind_phys),dimension(im,levs) :: pdudt, pdvdt, pdTdt
-      real(kind=kind_phys),dimension(im,levs) :: pkdis
-!
-! out
-!
-      real(kind=kind_phys),dimension(im,levs) :: ed_dudt, ed_dvdt
-      real(kind=kind_phys),dimension(im,levs) :: ed_dTdt 
-!         
-! locals
-!
-       integer :: i, j, k
-!------------------------------------------------------------------------
-!      solving 1D-vertical eddy diffusion to "smooth" 
-!      GW-related tendencies:   du/dt, dv/dt, d(PT)/dt
-!      we need to use sum of molecular + eddy terms including turb-part
-!       of PBL extended to the model top, because "phys-tend" dx/dt 
-!       should be smoothed as "entire" fields therefore one should
-!       first estimate and collect "effective" diffusion and applied
-!       it to each part of tendency or "sum of tendencies + Xdyn"
-!       this "diffusive-way" is tested with UGWP-tendencies
-!       forced by various       wave sources. X' =dx/dt *dt
-!       d(X + X')/dt = K*diff(X + X') =>
-!
-!   wave1 dX'/dt = Kw * diff(X')... eddy part  "Kwave" on wave-part
-!   turb2 dX/dt  = Kturb * diff(X) ... resolved scale mixing "Kturb"  like PBL
-!       we may assume "zero-GW"-tendency at the top lid and "zero" flux
-!       or "vertical gradient" near the surface
-!
-!  1-st trial w/o PBL interactions: add dU, dV dT tendencies
-!  compute BV, SHR2, Ri => Kturb, Kturb + Kwave => Apply it to "X_Tend +X "
-!  ed_X = X_ed - X => final eddy tendencies
-!--------------------------------------------------------------------------- 
-!    rzs=30m              dk       = rzs*rzs*sqrt(shr2(i,k))
-!                  Ktemp     = dk/(1+5.*ri)**2  Kmom = Pr*Ktemp
-!
-      real(kind=kind_phys) :: Sw(levs), Sw1(levs), Fw(levs), Fw1(levs)
-      real(kind=kind_phys) :: Km(levs), Kpt(levs), Pt(levs), Ptmap(levs)
-      real(kind=kind_phys) :: rho(levs), rdp(levs), rdpm(levs-1)
-      real(kind=kind_phys),dimension(levs) :: ktur, vumol, up, vp, tp
-      real(kind=kind_phys),dimension(levs) :: bn2,  shr2, ksum
-      real(kind=kind_phys) ::  eps_shr, eps_bn2, eps_dis
-      real(kind=kind_phys) ::  rdz , uz, vz, ptz
-! -------------------------------------------------------------------------
-! Prw*Lsat2 =1, for GW-eddy diffusion Pr_wave = Kv/Kt
-!  Pr_wave ~1/Lsat2 = 1/Frcit2 = 2. => Lsat2 = 1./2 (Frc ~0.7)
-!  m*u'/N = u'/{c-U) = h'N/(c-U) = Lsat = Fcrit 
-! > PBL:  0.25 < prnum = 1.0 + 2.1*ri < 4
-!     monin-edmf parameter(rlam=30.0,vk=0.4,vk2=vk*vk) rlamun=150.0
-!
-      real(kind=kind_phys), parameter :: iPr_pt = 0.5, dw2min = 1.e-4
-      real(kind=kind_phys), parameter :: lturb = 30., sc2 = lturb*lturb 
-      real(kind=kind_phys), parameter :: ulturb=150.,sc2u=ulturb* ulturb
-      real(kind=kind_phys), parameter :: ric =0.25
-      real(kind=kind_phys), parameter :: rimin = -10., prmin = 0.25
-      real(kind=kind_phys), parameter :: prmax = 4.0
-      real(kind=kind_phys), parameter :: hps = 7000., h4 = 0.25/hps
-      real(kind=kind_phys), parameter :: kedmin  = 0.01, kedmax = 250.
-
-
-      real(kind=kind_phys) :: rdtp, rineg, kamp, zmet, zgrow
-      real(kind=kind_phys) ::  stab, stab_dt, dtstab, ritur
-      integer              ::  nstab
-      real(kind=kind_phys) ::  w1, w2, w3
-      rdtp  = 1./dtp
-       nstab = 1
-       stab_dt = 0.9999
-
-      do i =1, im
-
-        rdp(1:levs) = grav/del(i, 1:levs)
- 
-        up(1:levs) = u1(i,1:levs) +pdudt(i,1:levs)*dtp
-        vp(1:levs) = v1(i,1:levs) +pdvdt(i,1:levs)*dtp
-        tp(1:levs) = t1(i,1:levs) +pdTdt(i,1:levs)*dtp
-        Ptmap(1:levs) = (1.+fv*q1(i,1:levs))/prslk(i,1:levs)
-        rho(1:levs) = rdi*prsl(i, 1:levs)/tp(1:levs)
-        Pt(1:levs) = tp(1:levs)*Ptmap(1:levs)
-
-        do k=1, levs-1
-          rdpm(k) = grav/(prsl(i,k)-prsl(i,k+1))
-          rdz = .5*rdpm(k)*(rho(k)+rho(k+1))
-          uz = up(k+1)-up(k)
-          vz = vp(k+1)-vp(k)
-          ptz =2.*(pt(k+1)-pt(k))/(pt(k+1)+pt(k))
-          shr2(k) = rdz*rdz*(max(uz*uz+vz*vz, dw2min))
-          bn2(k) = grav*rdz*ptz  
-          zmet = phil(j,k)*rgrav
-          zgrow = exp(zmet*h4)
-          if ( bn2(k) < 0. ) then
-!
-! adjust PT-profile to bn2(k) = bnv2min	-- neutral atmosphere
-!  adapt "pdtdt = (Ptadj-Ptdyn)/Ptmap" 
-!
-!            print *,' UGWP-V0 unstab PT(z) via gwdTdt ', bn2(k), k
-
-             rineg = bn2(k)/shr2(k)
-             bn2(k) = max(bn2(k), bnv2min)
-             kamp = sqrt(shr2(k))*sc2u *zgrow
-             ktur(k) =kamp* (1+8.*(-rineg)/(1+1.746*sqrt(-rineg)))
-          endif
-          ritur = max(bn2(k)/shr2(k), rimin)
-          if (ritur > 0. ) then
-            kamp = sqrt(shr2(k))*sc2 *zgrow
-            w1 = 1./(1. + 5*ritur)
-            ktur(k)= kamp * w1 * w1
-          endif
-          vumol(k) = 2.e-5 *exp(zmet/hps)
-          ksum(k) =ktur(k)+Pkdis(i,k)+vumol(k)
-          ksum(k) = max(ksum(k), kedmin)
-          ksum(k) = min(ksum(k), kedmax)
-          stab = 2.*ksum(k)*rdz*rdz*dtp
-          if ( stab >= 1.0 ) then
-               stab_dt = max(stab_dt, stab)
-          endif 
-        enddo
-        nstab = max(1, nint(stab_dt)+1)
-        dtstab = dtp / float(nstab)
-        ksum(levs) = ksum(levs-1)
-        Fw(1:levs) =  pdudt(i, 1:levs)
-        Fw1(1:levs) = pdvdt(i, 1:levs)
-        Km(1:levs) = ksum(1:levs) * rho(1:levs)* rho(1:levs)
-
-        do j=1, nstab
-          call diff_1d_wtend(levs, dtstab, Fw, Fw1, Km,
-     &                       rdp, rdpm, Sw, Sw1)
-          Fw  = Sw
-          Fw1 = Sw1
-        enddo
-
-        ed_dudt(i,:) = Sw
-        ed_dvdt(i,:) = Sw1
-
-        Pt(1:levs) = t1(i,1:levs)*Ptmap(1:levs)
-        Kpt = Km*iPr_pt
-        Fw(1:levs) =  pdTdt(i, 1:levs)*Ptmap(1:levs)
-        do j=1, nstab
-          call diff_1d_ptend(levs, dtstab, Fw, Kpt, rdp, rdpm, Sw)
-          Fw  = Sw
-        enddo
-         ed_dtdt(i,1:levs) = Sw(1:levs)/Ptmap(1:levs)
-
-      enddo 
-
-      end subroutine edmix_ugwp_v0
-
-      subroutine diff_1d_wtend(levs, dt, F, F1, Km, rdp, rdpm, S, S1)
-      use machine,      only: kind_phys
-      implicit none
-      integer :: levs
-      real(kind=kind_phys) :: dt
-      real(kind=kind_phys) :: S(levs), S1(levs), F(levs), F1(levs)
-      real(kind=kind_phys) :: Km(levs),  rdp(levs), rdpm(levs-1)
-      integer              :: i, k
-      real(kind=kind_phys) ::      Kp1, ad, cd, bd
-!     real(kind=kind_phys) :: km1, Kp1, ad, cd, bd
-!      S(:) = 0.0 ; S1(:) = 0.0
-!         
-! explicit diffusion solver
-!
-      k = 1
-!     km1 = 0. ; ad =0.
-                 ad =0.
-      kp1 = .5*(Km(k)+Km(k+1))
-      cd = rdp(1)*rdpm(1)*kp1*dt
-      bd = 1. - cd - ad
-!     S(k) = cd*F(k+1) + ad *F(k-1) + bd *F(k)
-      S(K)  = F(k)
-      S1(K) = F1(k)
-      do k=2, levs-1
-        ad = cd
-        kp1 = .5*(Km(k)+Km(k+1))
-        cd = rdp(k)*rdpm(k)*kp1*dt
-        bd = 1.-(ad +cd)
-        S(k)  = cd*F(k+1)  + ad *F(k-1)  + bd *F(k)
-        S1(k) = cd*F1(k+1) + ad *F1(k-1) + bd *F1(k)
-      enddo
-      k     = levs
-      S(k)  = F(k)
-      S1(k) = F1(k)
-      end subroutine diff_1d_wtend
-
-      subroutine diff_1d_ptend(levs, dt, F, Km, rdp, rdpm, S)
-      use machine,      only: kind_phys
-      implicit none
-      integer :: levs
-      real(kind=kind_phys) :: dt
-      real(kind=kind_phys) :: S(levs),   S1(levs),  F(levs), F1(levs)
-      real(kind=kind_phys) :: Km(levs),  rdp(levs), rdpm(levs-1)
-      integer              :: i, k
-      real(kind=kind_phys) ::      Kp1, ad, cd, bd
-!     real(kind=kind_phys) :: km1, Kp1, ad, cd, bd
-!        
-! explicit "eddy" smoother for tendencies
-!           
-
-      k = 1
-!     km1 = 0. ; ad =0.
-                 ad =0.
-      kp1 = .5*(Km(k)+Km(k+1))
-      cd = rdp(1)*rdpm(1)*kp1*dt
-      bd = 1. -(cd +ad)
-!     S(k) = cd*F(k+1) + ad *F(k-1) + bd *F(k)
-      S(K) = F(k)
-      do k=2, levs-1
-        ad = cd
-        kp1 = .5*(Km(k)+Km(k+1))
-        cd = rdp(k)*rdpm(k)*kp1*dt
-        bd = 1.-(ad +cd)
-        S(k) = cd*F(k+1) + ad *F(k-1) + bd *F(k)
-      enddo
-      k = levs
-      S(k) = F(k)
-      end subroutine diff_1d_ptend
+      

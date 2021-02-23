@@ -41,7 +41,7 @@
   intent = in
   optional = F
 [gw_dtdt]
-  standard_name = tendency_of_air_temperature_due_to_ugwp
+  standard_name = tendency_of_air_temperature_due_to_gravity_wave_drag
   long_name = air temperature tendency due to UGWP
   units = K s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -50,7 +50,7 @@
   intent = in
   optional = F
 [gw_dudt]
-  standard_name = tendency_of_x_wind_due_to_ugwp
+  standard_name = tendency_of_x_wind_due_to_gravity_wave_drag
   long_name = zonal wind tendency due to UGWP
   units = m s-2
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -59,7 +59,7 @@
   intent = in
   optional = F
 [gw_dvdt]
-  standard_name = tendency_of_y_wind_due_to_ugwp
+  standard_name = tendency_of_y_wind_due_to_gravity_wave_drag
   long_name = meridional wind tendency due to UGWP
   units = m s-2
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -140,7 +140,7 @@
   intent = in
   optional = F
 [dudt_ogw]
-  standard_name = instantaneous_change_in_x_wind_due_to_orographic_gravity_wave_drag
+  standard_name = tendency_of_x_wind_due_to_mesoscale_orographic_gravity_wave_drag
   long_name = instantaneous change in x wind due to orographic gw drag
   units = m s-2
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -149,7 +149,7 @@
   intent = in
   optional = F
 [dudt_tms]
-  standard_name = instantaneous_change_in_x_wind_due_to_turbulent_orographic_form_drag
+  standard_name = tendency_of_x_wind_due_to_turbulent_orographic_form_drag
   long_name = instantaneous change in x wind due to TOFD
   units = m s-2
   dimensions = (horizontal_loop_extent,vertical_dimension)

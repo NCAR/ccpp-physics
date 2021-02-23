@@ -14,7 +14,7 @@ module GFS_rrtmg_setup
 
    implicit none
 
-   public GFS_rrtmg_setup_init, GFS_rrtmg_setup_run, GFS_rrtmg_setup_finalize
+   public GFS_rrtmg_setup_init, GFS_rrtmg_setup_timestep_init, GFS_rrtmg_setup_finalize
 
    private
 
@@ -43,13 +43,13 @@ module GFS_rrtmg_setup
 !! \section arg_table_GFS_rrtmg_setup_init Argument Table
 !! \htmlinclude GFS_rrtmg_setup_init.html
 !!
-   subroutine GFS_rrtmg_setup_init (                                    &
-          si, levr, ictm, isol, ico2, iaer, ialb, iems, ntcw,  num_p2d, &
-          num_p3d, npdf3d, ntoz, iovr, isubc_sw, isubc_lw,              &
-          icliq_sw, crick_proof, ccnorm,                                &
-          imp_physics,                                                  &
-          norad_precip, idate, iflip,                                   &
-          im, faerlw, faersw, aerodp,                                   & ! for consistency checks
+   subroutine GFS_rrtmg_setup_init (                          &
+          si, levr, ictm, isol, ico2, iaer, ialb, iems, ntcw, &
+          num_p3d, npdf3d, ntoz, iovr, isubc_sw, isubc_lw,    &
+          icliq_sw, crick_proof, ccnorm,                      &
+          imp_physics,                                        &
+          norad_precip, idate, iflip,                         &
+          im, faerlw, faersw, aerodp,                         & ! for consistency checks
           me, errmsg, errflg)
 ! =================   subprogram documentation block   ================ !
 !                                                                       !
@@ -174,7 +174,6 @@ module GFS_rrtmg_setup
       integer, intent(in) :: ialb
       integer, intent(in) :: iems
       integer, intent(in) :: ntcw
-      integer, intent(in) :: num_p2d
       integer, intent(in) :: num_p3d
       integer, intent(in) :: npdf3d
       integer, intent(in) :: ntoz
@@ -320,10 +319,10 @@ module GFS_rrtmg_setup
 
    end subroutine GFS_rrtmg_setup_init
 
-!> \section arg_table_GFS_rrtmg_setup_run Argument Table
-!! \htmlinclude GFS_rrtmg_setup_run.html
+!> \section arg_table_GFS_rrtmg_setup_timestep_init Argument Table
+!! \htmlinclude GFS_rrtmg_setup_timestep_init.html
 !!
-   subroutine GFS_rrtmg_setup_run (                &
+   subroutine GFS_rrtmg_setup_timestep_init (      &
           idate, jdate, deltsw, deltim, lsswr, me, &
           slag, sdec, cdec, solcon, errmsg, errflg)
 
@@ -345,7 +344,7 @@ module GFS_rrtmg_setup
 
       ! Check initialization state
       if (.not.is_initialized) then
-         write(errmsg, fmt='((a))') 'GFS_rrtmg_setup_run called before GFS_rrtmg_setup_init'
+         write(errmsg, fmt='((a))') 'GFS_rrtmg_setup_timestep_init called before GFS_rrtmg_setup_init'
          errflg = 1
          return
       end if
@@ -357,7 +356,7 @@ module GFS_rrtmg_setup
       call radupdate(idate,jdate,deltsw,deltim,lsswr,me, &
                      slag,sdec,cdec,solcon)
 
-   end subroutine GFS_rrtmg_setup_run
+   end subroutine GFS_rrtmg_setup_timestep_init
 
 !> \section arg_table_GFS_rrtmg_setup_finalize Argument Table
 !! \htmlinclude GFS_rrtmg_setup_finalize.html
@@ -523,12 +522,14 @@ module GFS_rrtmg_setup
 !> -# Set up control variables and external module variables in
 !!    module physparam
 #if 0
+      ! DH* WHAT IS THIS?
       ! GFS_radiation_driver.F90 may in the future initialize air/ground
       ! temperature differently; however, this is not used at the moment
       ! and as such we avoid the difficulty of dealing with exchanging
       ! itsfc between GFS_rrtmg_setup and a yet-to-be-created/-used
       ! interstitial routine (or GFS_radiation_driver.F90)
       itsfc  = iemsflg / 10             ! sfc air/ground temp control
+      ! *DH
 #endif
       loz1st = (ioznflg == 0)           ! first-time clim ozone data read flag
       month0 = 0
