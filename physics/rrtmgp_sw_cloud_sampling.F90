@@ -45,7 +45,7 @@ contains
   subroutine rrtmgp_sw_cloud_sampling_run(doSWrad, nCol, nDay, nLev, ipsdsw0, idxday, iovr, &
        iovr_max, iovr_maxrand, iovr_rand, iovr_dcorr, iovr_exp, iovr_exprand, isubc_sw,     &
        icseed_sw, cld_frac, precip_frac, cloud_overlap_param, precip_overlap_param,         &
-       sw_optical_props_cloudsByBand, sw_optical_props_precipByBand,          &
+       sw_optical_props_cloudsByBand, sw_optical_props_precipByBand,                        &
        sw_optical_props_clouds, sw_optical_props_precip, errmsg, errflg)
     
     ! Inputs
