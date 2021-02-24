@@ -25,15 +25,6 @@
   type = integer  
   intent = in
   optional = F  
-[active_gases_array]
-  standard_name = list_of_active_gases_used_by_RRTMGP
-  long_name = list of active gases used by RRTMGP
-  units = none
-  dimensions =  (number_of_active_gases_used_by_RRTMGP)
-  type = character
-  kind = len=*
-  intent = out
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -71,15 +62,7 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F  
-[nGases]
-  standard_name = number_of_active_gases_used_by_RRTMGP
-  long_name = number of gases available used by RRTMGP (Model%nGases)
-  units = count
-  dimensions =  ()
-  type = integer  
-  intent = in
-  optional = F  
+  optional = F
 [nTracers]
   standard_name = number_of_tracers
   long_name = number of tracers
@@ -202,15 +185,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[active_gases_array]
-  standard_name = list_of_active_gases_used_by_RRTMGP
-  long_name = list of active gases used by RRTMGP
-  units = none
-  dimensions =  (number_of_active_gases_used_by_RRTMGP)
-  type = character
-  kind = len=*
-  intent = in
-  optional = F
 [con_eps]
   standard_name = ratio_of_dry_air_to_water_vapor_gas_constants
   long_name = rd/rv
@@ -246,14 +220,24 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F     
-[lw_gas_props]
-  standard_name = coefficients_for_lw_gas_optics
-  long_name = DDT containing spectral information for RRTMGP LW radiation scheme
-  units = DDT
+  optional = F
+[minGPpres]
+  standard_name = minimum_pressure_in_RRTMGP
+  long_name = minimum pressure allowed in RRTMGP
+  units = Pa
   dimensions = ()
-  type = ty_gas_optics_rrtmgp
+  type = real
+  kind = kind_phys
   intent = in
+  optional = F
+[minGPtemp]
+  standard_name = minimum_temperature_in_RRTMGP
+  long_name = minimum temperature allowed in RRTMGP
+  units = K
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = out
   optional = F
 [raddt]
   standard_name = time_step_for_radiation
