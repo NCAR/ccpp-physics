@@ -2888,8 +2888,8 @@ MODULE module_mp_thompson
           niten(k) = -ni1d(k)*odts
          endif
          xni=MAX(0.,(ni1d(k) + niten(k)*dtsave)*rho(k))
-         if (xni.gt.499.E3) &
-                niten(k) = (499.E3-ni1d(k)*rho(k))*odts*orho
+         if (xni.gt.9999.E3) &
+                niten(k) = (9999.E3-ni1d(k)*rho(k))*odts*orho
 
 !>  - Rain tendency
          qrten(k) = qrten(k) + (prr_wau(k) + prr_rcw(k) &
