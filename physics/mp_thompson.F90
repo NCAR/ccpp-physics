@@ -142,14 +142,14 @@ module mp_thompson
          qv = spechum/(1.0_kind_phys-spechum)
 
          ! Ensure we have 1st guess ice number where mass non-zero but no number.
-         where(qi <= 0.0) ni=0.0
-         where(qi > 0 .and. ni <= 0.0) ni = make_IceNumber(qi*rho, tgrs) * orho
-         where(qi = 0.0 .and. ni > 0.0) ni=0.0
+         where(qi .LE. 0.0) ni=0.0
+         where(qi .GT. 0 .and. ni .LE. 0.0) ni = make_IceNumber(qi*rho, tgrs) * orho
+         where(qi .EQ. 0.0 .and. ni .GT. 0.0) ni=0.0
 
          ! Ensure we have 1st guess rain number where mass non-zero but no number.
-         where(qr <= 0.0) nr=0.0
-         where(qr > 0 .and. nr <= 0.0) nr = make_RainNumber(qr*rho, tgrs) * orho
-         where(qr = 0.0 .and. nr > 0.0) nr=0.0
+         where(qr .LE. 0.0) nr=0.0
+         where(qr .GT. 0 .and. nr .LE. 0.0) nr = make_RainNumber(qr*rho, tgrs) * orho
+         where(qr .EQ. 0.0 .and. nr .GT. 0.0) nr=0.0
 
 
          !..Check for existing aerosol data, both CCN and IN aerosols.  If missing
@@ -227,13 +227,13 @@ module mp_thompson
            endif
 
            ! Ensure we have 1st guess cloud droplet number where mass non-zero but no number.
-           where(qc <= 0.0) nc=0.0
-           where(qc > 0 .and. nc <= 0.0) nc = make_DropletNumber(qc*rho, nwfa*rho) * orho
-           where(qc = 0.0 .and. nc > 0.0) nc=0.0
+           where(qc .LE. 0.0) nc=0.0
+           where(qc .GT. 0 .and. nc .LE. 0.0) nc = make_DropletNumber(qc*rho, nwfa*rho) * orho
+           where(qc .EQ. 0.0 .and. nc .GT. 0.0) nc=0.0
 
            ! Ensure non-negative aerosol number concentrations.
-           where(nwfa <= 0.0) nwfa = 1.1E6
-           where(nifa <= 0.0) nifa = naIN1*0.01
+           where(nwfa .LE. 0.0) nwfa = 1.1E6
+           where(nifa .LE. 0.0) nifa = naIN1*0.01
 
          else
 

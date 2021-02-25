@@ -1264,7 +1264,6 @@ MODULE module_mp_thompson
                nwfa1d(k) = 11.1E6/rho(k)
                nifa1d(k) = naIN1*0.01/rho(k)
             enddo
-            nwfa1 = 11.1E6
          endif
 
 !> - Call mp_thompson()
@@ -3717,7 +3716,7 @@ MODULE module_mp_thompson
            elseif (nc1d(k)*rho(k).lt.100.) then
             nu_c = 15
            else
-            nu_c = NINT(1000.E6/(nc1d(k)*rho(k)) + 2
+            nu_c = NINT(1000.E6/(nc1d(k)*rho(k))) + 2
             nu_c = MAX(2, MIN(nu_c+NINT(rand2), 15))
            endif
            lamc = (am_r*ccg(2,nu_c)*ocg1(nu_c)*nc1d(k)/qc1d(k))**obmr
@@ -3941,7 +3940,7 @@ MODULE module_mp_thompson
           CLOSE(63)
           RETURN    ! ----- RETURN
  9234     CONTINUE
-          write(0,*) "Error writing //qr_acr_qg_file
+          write(0,*) "Error writing "//qr_acr_qg_file
           return
         ENDIF
       ENDIF
@@ -4237,7 +4236,7 @@ MODULE module_mp_thompson
       write_thompson_tables = .false.
 
       good = 0
-        INQUIRE(FILE=freeze_h2o_file",EXIST=lexist)
+        INQUIRE(FILE=freeze_h2o_file,EXIST=lexist)
 #ifdef MPI
         call MPI_BARRIER(mpi_communicator,ierr)
 #endif
