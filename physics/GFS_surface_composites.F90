@@ -448,7 +448,9 @@ contains
           txi   = cice(i) * wfrac        ! txi = ice fraction wrt whole cell
           txo   = max(zero, wfrac-txi)   ! txo = open water fraction
 
-          zorl(i)   = txl*zorl_lnd(i)   + txi*zorl_ice(i)   + txo*zorl_wat(i)
+!         zorl(i)   = txl*zorl_lnd(i)   + txi*zorl_ice(i)   + txo*zorl_wat(i)
+          zorl(i)   = txl*log(zorl_lnd(i)) + txi*log(zorl_ice(i)) + txo*log(zorl_wat(i))
+          zorl(i)   = exp(zorl(i))
           cd(i)     = txl*cd_lnd(i)     + txi*cd_ice(i)     + txo*cd_wat(i)
           cdq(i)    = txl*cdq_lnd(i)    + txi*cdq_ice(i)    + txo*cdq_wat(i)
           rb(i)     = txl*rb_lnd(i)     + txi*rb_ice(i)     + txo*rb_wat(i)
@@ -625,11 +627,13 @@ contains
                 stress(i) = txi * stress_ice(i) + txo * stress_wat(i)
                 qss(i)    = txi * qss_ice(i)    + txo * qss_wat(i)
                 ep1d(i)   = txi * ep1d_ice(i)   + txo * ep1d_wat(i)
-                zorl(i)   = txi * zorl_ice(i)   + txo * zorl_wat(i)
+                zorl(i)   = txi * log(zorl_ice(i)) + txo * log(zorl_wat(i))
+                zorl(i)   = exp(zorl(i))
                 snowd(i)  = txi * snowd_ice(i)
               endif
             elseif (wet(i)) then  ! return updated lake ice thickness & concentration to global array
-              zorl(i)  = cice(i)*zorl_ice(i) + (one-cice(i))*zorl_wat(i)
+              zorl(i)  = cice(i)*log(zorl_ice(i)) + (one-cice(i))*log(zorl_wat(i))
+              zorl(i)   = exp(zorl(i))
             endif
 !
             if (wet(i)) then
