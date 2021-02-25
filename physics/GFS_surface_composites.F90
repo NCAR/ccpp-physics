@@ -423,8 +423,8 @@ contains
          !tsurf(i)  = txl*tsurf_lnd(i)  + txi*tsurf_ice(i)  + txo*tsurf_wat(i) ! not used again! Moorthi
 
 ! BWG, 2021/02/25: cmm=cd*wind, chh=cdq*wind, so use composite cd, cdq
-          cmm(i)    = txl*cmm_lnd(i)    + txi*cmm_ice(i)    + txo*cmm_wat(i)
-          chh(i)    = txl*chh_lnd(i)    + txi*chh_ice(i)    + txo*chh_wat(i)
+          cmm(i)    =  cd(i)*wind  !txl*cmm_lnd(i)    + txi*cmm_ice(i)    + txo*cmm_wat(i)
+          chh(i)    = cdq(i)*wind  !txl*chh_lnd(i)    + txi*chh_ice(i)    + txo*chh_wat(i)
 
          !gflx(i)   = txl*gflx_lnd(i)   + txi*gflx_ice(i)   + txo*gflx_wat(i)
           ep1d(i)   = txl*ep1d_lnd(i)   + txi*ep1d_ice(i)   + txo*ep1d_wat(i)
