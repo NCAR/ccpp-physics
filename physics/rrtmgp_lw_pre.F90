@@ -5,6 +5,7 @@ module rrtmgp_lw_pre
        setemis                     ! Routine to compute surface-emissivity
   use mo_gas_optics_rrtmgp,  only: &
        ty_gas_optics_rrtmgp
+  use rrtmgp_lw_gas_optics, only: lw_gas_props
 
   implicit none
 
@@ -26,7 +27,7 @@ contains
 !!
   subroutine rrtmgp_lw_pre_run (doLWrad, nCol, xlon, xlat, slmsk, zorl, snowd, sncovr, &
        tsfg, tsfa, hprime, lw_gas_props, sfc_emiss_byband, emiss, semis, errmsg, errflg)
-    
+
     ! Inputs
     logical, intent(in) :: &
          doLWrad          ! Logical flag for longwave radiation call
@@ -69,7 +70,7 @@ contains
     ! #######################################################################################
     ! Call module_radiation_surface::setemis(),to setup surface emissivity for LW radiation.
     ! #######################################################################################
-    call setemis (xlon, xlat, slmsk, snowd, sncovr, zorl, tsfg, tsfa, hprime, emiss,nCol, semis)
+    call setemis (xlon, xlat, slmsk, snowd, sncovr, zorl, tsfg, tsfa, hprime, emiss, nCol, semis)
 
     ! Assign same emissivity to all bands
     do iBand=1,lw_gas_props%get_nband()

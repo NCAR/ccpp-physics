@@ -334,14 +334,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[sw_gas_props]
-  standard_name = coefficients_for_sw_gas_optics
-  long_name = DDT containing spectral information for RRTMGP SW radiation scheme
-  units = DDT
-  dimensions = ()
-  type = ty_gas_optics_rrtmgp
-  intent = in
-  optional = F
 [sfc_alb_nir_dir]
   standard_name = surface_albedo_nearIR_direct
   long_name = near-IR (direct) surface albedo (sfc_alb_nir_dir)
