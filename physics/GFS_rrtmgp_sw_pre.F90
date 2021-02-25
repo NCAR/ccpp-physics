@@ -31,7 +31,7 @@ contains
        lndp_prt_list, doSWrad, solhr, lon, coslat, sinlat,  snowd, sncovr, snoalb, zorl,    &
        tsfg, tsfa, hprime, alvsf, alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc, albdvis,  &
        albdnir, albivis, albinir, lsmask, sfc_wts, p_lay, tv_lay, relhum, p_lev,            &
-       sw_gas_props, nday, idxday, coszen, coszdg, sfc_alb_nir_dir, sfc_alb_nir_dif,        &
+       nday, idxday, coszen, coszdg, sfc_alb_nir_dir, sfc_alb_nir_dif,                      &
        sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, sfc_alb_dif, errmsg, errflg)
 
     ! Inputs   
