@@ -424,39 +424,39 @@
                  tgxy(ix)     = tsfcl(ix)
                  tahxy(ix)    = tsfcl(ix)
 
-                 if (snowd(ix) > 0.01 .and. tsfcl(ix) > con_t0c ) tvxy(ix)  = con_t0c
-                 if (snowd(ix) > 0.01 .and. tsfcl(ix) > con_t0c ) tgxy(ix)  = con_t0c
-                 if (snowd(ix) > 0.01 .and. tsfcl(ix) > con_t0c ) tahxy(ix) = con_t0c
+                 if (snowd(ix) > 0.01_kind_phys .and. tsfcl(ix) > con_t0c ) tvxy(ix)  = con_t0c
+                 if (snowd(ix) > 0.01_kind_phys .and. tsfcl(ix) > con_t0c ) tgxy(ix)  = con_t0c
+                 if (snowd(ix) > 0.01_kind_phys .and. tsfcl(ix) > con_t0c ) tahxy(ix) = con_t0c
 
-                 canicexy(ix) = 0.0
+                 canicexy(ix) = 0.0_kind_phys
                  canliqxy(ix) = canopy(ix)
 
-                 eahxy(ix)    = 2000.0
+                 eahxy(ix)    = 2000.0_kind_phys
 
 !                 eahxy = psfc*qv/(0.622+qv); qv is mixing ratio, converted from sepcific
 !                 humidity specific humidity /(1.0 - specific humidity)
 
-                 cmxy(ix)     = 0.0
-                 chxy(ix)     = 0.0
-                 fwetxy(ix)   = 0.0
+                 cmxy(ix)     = zero
+                 chxy(ix)     = zero
+                 fwetxy(ix)   = zero
                  sneqvoxy(ix) = weasd(ix)     ! mm
-                 alboldxy(ix) = 0.65
-                 qsnowxy(ix)  = 0.0
+                 alboldxy(ix) = 0.65_kind_phys
+                 qsnowxy(ix)  = zero
 
 !                 if (srflag(ix) > 0.001) qsnowxy(ix) = tprcp(ix)/dtp
                  ! already set to 0.0
-                 wslakexy(ix) = 0.0
-                 taussxy(ix)  = 0.0
-                 albdvis(ix)  = 0.2
-                 albdnir(ix)  = 0.2
-                 albivis(ix)  = 0.2
-                 albinir(ix)  = 0.2
-                 emiss(ix)    = 0.95
+                 wslakexy(ix) = zero
+                 taussxy(ix)  = zero
+                 albdvis(ix)  = 0.2_kind_phys
+                 albdnir(ix)  = 0.2_kind_phys
+                 albivis(ix)  = 0.2_kind_phys
+                 albinir(ix)  = 0.2_kind_phys
+                 emiss(ix)    = 0.95_kind_phys
 
 
-                 waxy(ix)     = 4900.0
+                 waxy(ix)     = 4900.0_kind_phys
                  wtxy(ix)     = waxy(ix)
-                 zwtxy(ix)    = (25.0 + 2.0) - waxy(ix) / 1000.0 /0.2
+                 zwtxy(ix)    = (25.0_kind_phys + 2.0_kind_phys) - waxy(ix) / 1000.0_kind_phys / 0.2_kind_phys
 
                  vegtyp       = vtype(ix)
                  if (vegtyp == 0) vegtyp = 7
@@ -464,81 +464,81 @@
 
                  if ((vegtyp == isbarren_table) .or. (vegtyp == isice_table) .or. (vegtyp == isurban_table) .or. (vegtyp == iswater_table)) then
 
-                   xlaixy(ix)   = 0.0
-                   xsaixy(ix)   = 0.0
+                   xlaixy(ix)   = zero
+                   xsaixy(ix)   = zero
 
-                   lfmassxy(ix) = 0.0
-                   stmassxy(ix) = 0.0
-                   rtmassxy(ix) = 0.0
+                   lfmassxy(ix) = zero
+                   stmassxy(ix) = zero
+                   rtmassxy(ix) = zero
 
-                   woodxy   (ix) = 0.0
-                   stblcpxy (ix) = 0.0
-                   fastcpxy (ix) = 0.0
+                   woodxy   (ix) = zero
+                   stblcpxy (ix) = zero
+                   fastcpxy (ix) = zero
 
                  else
 
-                   xlaixy(ix)   = max(laim_table(vegtyp, imn),0.05)
+                   xlaixy(ix)   = max(laim_table(vegtyp, imn),0.05_kind_phys)
 !                   xsaixy(ix)   = max(saim_table(vegtyp, imn),0.05)
-                   xsaixy(ix)   = max(xlaixy(ix)*0.1,0.05)
+                   xsaixy(ix)   = max(xlaixy(ix)*0.1_kind_phys,0.05_kind_phys)
 
-                   masslai      = 1000.0 / max(sla_table(vegtyp),1.0)
+                   masslai      = 1000.0_kind_phys / max(sla_table(vegtyp),one)
                    lfmassxy(ix) = xlaixy(ix)*masslai
-                   masssai      = 1000.0 / 3.0
+                   masssai      = 1000.0_kind_phys / 3.0_kind_phys
                    stmassxy(ix) = xsaixy(ix)* masssai
 
-                   rtmassxy(ix) = 500.0
+                   rtmassxy(ix) = 500.0_kind_phys
 
-                   woodxy(ix)   = 500.0
-                   stblcpxy(ix) = 1000.0
-                   fastcpxy(ix) = 1000.0
+                   woodxy(ix)   = 500.0_kind_phys
+                   stblcpxy(ix) = 1000.0_kind_phys
+                   fastcpxy(ix) = 1000.0_kind_phys
 
                  endif  ! non urban ...
 
                  if (vegtyp == isice_table) then
                    do is = 1,lsoil
-                     stc(ix,is) = min(stc(ix,is),min(tg3(ix),263.15))
-                     smc(ix,is) = 1
-                     slc(ix,is) = 0
+                     stc(ix,is) = min(stc(ix,is),min(tg3(ix),263.15_kind_phys))
+                     smc(ix,is) = one
+                     slc(ix,is) = zero
                    enddo
                  endif
 
-                 snd = snowd(ix)/1000.0  ! go to m from snwdph
+                 snd = snowd(ix)/1000.0_kind_phys  ! go to m from snwdph
 
-                 if (weasd(ix) /= 0.0 .and. snd == 0.0 ) then
+                 if (weasd(ix) /= zero .and. snd == zero ) then
                    snd = weasd(ix)/1000.0
                  endif
 
                  if (vegtyp == 15) then                      ! land ice in MODIS/IGBP
-                   if (weasd(ix) < 0.1) then
-                     weasd(ix) = 0.1
-                     snd       = 0.01
+                   if (weasd(ix) < 0.1_kind_phys) then
+                     weasd(ix) = 0.1_kind_phys
+                     snd       = 0.01_kind_phys
                    endif
                  endif
 
-                 if (snd < 0.025 ) then
-                   snowxy(ix)   = 0.0
-                   dzsno(-2:0)  = 0.0
-                 elseif (snd >= 0.025 .and. snd <= 0.05 ) then
-                   snowxy(ix)   = -1.0
+                 if (snd < 0.025_kind_phys ) then
+                   snowxy(ix)   = zero
+                   dzsno(-2:0)  = zero
+                 elseif (snd >= 0.025_kind_phys .and. snd <= 0.05_kind_phys ) then
+                   snowxy(ix)   = -1.0_kind_phys
                    dzsno(0)     = snd
-                 elseif (snd > 0.05 .and. snd <= 0.10 ) then
-                   snowxy(ix)   = -2.0
-                   dzsno(-1)    = 0.5*snd
-                   dzsno(0)     = 0.5*snd
-                 elseif (snd > 0.10 .and. snd <= 0.25 ) then
-                   snowxy(ix)   = -2.0
-                   dzsno(-1)    = 0.05
-                   dzsno(0)     = snd - 0.05
-                 elseif (snd > 0.25 .and. snd <= 0.45 ) then
-                   snowxy(ix)   = -3.0
-                   dzsno(-2)    = 0.05
-                   dzsno(-1)    = 0.5*(snd-0.05)
-                   dzsno(0)     = 0.5*(snd-0.05)
-                 elseif (snd > 0.45) then
-                   snowxy(ix)   = -3.0
-                   dzsno(-2)    = 0.05
-                   dzsno(-1)    = 0.20
-                   dzsno(0)     = snd - 0.05 - 0.20
+                 elseif (snd > 0.05_kind_phys .and. snd <= 0.10_kind_phys ) then
+                   snowxy(ix)   = -2.0_kind_phys
+                   dzsno(-1)    = 0.5_kind_phys*snd
+                   dzsno(0)     = 0.5_kind_phys*snd
+                 elseif (snd > 0.10_kind_phys .and. snd <= 0.25_kind_phys ) then
+                   snowxy(ix)   = -2.0_kind_phys
+                   dzsno(-1)    = 0.05_kind_phys
+                   dzsno(0)     = snd - 0.05_kind_phys
+                 elseif (snd > 0.25_kind_phys .and. snd <= 0.45_kind_phys ) then
+                   snowxy(ix)   = -3.0_kind_phys
+                   dzsno(-2)    = 0.05_kind_phys
+                   dzsno(-1)    = 0.5_kind_phys*(snd-0.05_kind_phys)
+                   dzsno(0)     = 0.5_kind_phys*(snd-0.05_kind_phys)
+                 elseif (snd > 0.45_kind_phys) then
+                   snowxy(ix)   = -3.0_kind_phys
+                   dzsno(-2)    = 0.05_kind_phys
+                   dzsno(-1)    = 0.20_kind_phys
+                   dzsno(0)     = snd - 0.05_kind_phys - 0.20_kind_phys
                  else
                    errmsg = 'Error in GFS_phys_time_vary.fv3.F90: Problem with the logic assigning snow layers in Noah MP initialization'
                    errflg = 1
@@ -548,17 +548,17 @@
 ! Now we have the snowxy field
 ! snice + snliq + tsno allocation and compute them from what we have
 
-                 tsnoxy(ix,:)  = 0.0
-                 snicexy(ix,:) = 0.0
-                 snliqxy(ix,:) = 0.0
-                 zsnsoxy(ix,:) = 0.0
+                 tsnoxy(ix,:)  = zero
+                 snicexy(ix,:) = zero
+                 snliqxy(ix,:) = zero
+                 zsnsoxy(ix,:) = zero
 
                  isnow = nint(snowxy(ix))+1 ! snowxy <=0.0, dzsno >= 0.0
 
                  do is = isnow,0
                    tsnoxy(ix,is)  = tgxy(ix)
-                   snliqxy(ix,is) = 0.0
-                   snicexy(ix,is) = 1.00 * dzsno(is) * weasd(ix)/snd
+                   snliqxy(ix,is) = zero
+                   snicexy(ix,is) = one * dzsno(is) * weasd(ix)/snd
                  enddo
 !
 !zsnsoxy, all negative ?
@@ -592,28 +592,28 @@
                  endif
 
                  if (vegtyp == isurban_table) then
-                   smcmax = 0.45
-                   smcwlt = 0.40
+                   smcmax = 0.45_kind_phys
+                   smcwlt = 0.40_kind_phys
                  endif
 
-                 if ((bexp > 0.0) .and. (smcmax > 0.0) .and. (-psisat > 0.0 )) then
+                 if ((bexp > zero) .and. (smcmax > zero) .and. (-psisat > zero)) then
                    do is = 1, lsoil
                      if ( is == 1 )then
-                       ddz = -zs(is+1) * 0.5
+                       ddz = -zs(is+1) * 0.5_kind_phys
                      elseif ( is < lsoil ) then
-                       ddz = ( zs(is-1) - zs(is+1) ) * 0.5
+                       ddz = ( zs(is-1) - zs(is+1) ) * 0.5_kind_phys
                      else
                        ddz = zs(is-1) - zs(is)
                      endif
-                     smoiseq(ix,is) = min(max(find_eq_smc(bexp, dwsat, dksat, ddz, smcmax),1.e-4),smcmax*0.99)
+                     smoiseq(ix,is) = min(max(find_eq_smc(bexp, dwsat, dksat, ddz, smcmax),1.e-4_kind_phys),smcmax*0.99_kind_phys)
                    enddo
                  else                                    ! bexp <= 0.0
                    smoiseq(ix,1:4) = smcmax
                  endif                                   ! end the bexp condition
 
                  smcwtdxy(ix)   = smcmax
-                 deeprechxy(ix) = 0.0
-                 rechxy(ix)     = 0.0
+                 deeprechxy(ix) = zero
+                 rechxy(ix)     = zero
 
                endif
 
