@@ -104,14 +104,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[lw_gas_props]
-  standard_name = coefficients_for_lw_gas_optics
-  long_name = DDT containing spectral information for RRTMGP LW radiation scheme
-  units = DDT
-  dimensions = ()
-  type = ty_gas_optics_rrtmgp
-  intent = in
-  optional = F
 [semis]
   standard_name = surface_longwave_emissivity
   long_name = surface lw emissivity in fraction

@@ -10,6 +10,7 @@ module GFS_rrtmgp_sw_pre
        cdfnor                      ! Routine to compute CDF (used to compute percentiles)
   use mo_gas_optics_rrtmgp,  only: &
        ty_gas_optics_rrtmgp
+  use rrtmgp_sw_gas_optics,    only: sw_gas_props
   public GFS_rrtmgp_sw_pre_run,GFS_rrtmgp_sw_pre_init,GFS_rrtmgp_sw_pre_finalize
   
 contains
@@ -29,7 +30,7 @@ contains
   subroutine GFS_rrtmgp_sw_pre_run(me, nCol, nLev, lndp_type, n_var_lndp,lndp_var_list,     &  
        lndp_prt_list, doSWrad, solhr, lon, coslat, sinlat,  snowd, sncovr, snoalb, zorl,    &
        tsfg, tsfa, hprime, alvsf, alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc, lsmask,   &
-       sfc_wts, p_lay, tv_lay, relhum, p_lev, sw_gas_props, nday, idxday, coszen, coszdg,   &
+       sfc_wts, p_lay, tv_lay, relhum, p_lev, nday, idxday, coszen, coszdg,                 &
        sfc_alb_nir_dir, sfc_alb_nir_dif, sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, sfc_alb_dif, &
        errmsg, errflg)
     
@@ -76,8 +77,6 @@ contains
          relhum               ! Layer relative-humidity
     real(kind_phys), dimension(nCol,nLev+1),intent(in) :: &
          p_lev                ! Pressure @ layer interfaces (Pa)
-    type(ty_gas_optics_rrtmgp),intent(in) :: &
-         sw_gas_props         ! RRTMGP DDT: spectral information for SW calculation
 
     ! Outputs
     integer, intent(out)   :: &
