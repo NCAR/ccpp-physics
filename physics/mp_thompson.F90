@@ -126,10 +126,6 @@ module mp_thompson
          ! Geopotential height in m2 s-2 to height in m
          hgt = phil/con_g
 
-         ! Density of air in kg m-3 and inverse density of air
-         rho = prsl/(con_rd*tgrs)
-         orho = 1.0/rho
-
          ! Ensure non-negative mass mixing ratios of all water variables
          where(spechum<0) spechum = 1.0E-10     ! COMMENT, gthompsn, spechum should *never* be identically zero.
          where(qc<0)      qc = 0.0
@@ -140,6 +136,10 @@ module mp_thompson
 
          ! Convert specific humidity to water vapor mixing ratio
          qv = spechum/(1.0_kind_phys-spechum)
+
+         ! Density of moist air in kg m-3 and inverse density of air
+         rho = 0.622*prsl/(con_rd*tgrs*(qv+0.622))
+         orho = 1.0/rho
 
          ! Ensure we have 1st guess ice number where mass non-zero but no number.
          where(qi .LE. 0.0) ni=0.0
