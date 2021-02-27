@@ -23,6 +23,15 @@
   type = integer
   intent = in
   optional = F
+[con_fvirt]
+  standard_name = ratio_of_vapor_to_dry_air_gas_constants_minus_one
+  long_name = rv/rd - 1 (rv = ideal gas constant for water vapor)
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [phii]
   standard_name = geopotential_at_interface
   long_name = interface geopotential
@@ -119,6 +128,15 @@
   units = count
   dimensions = ()
   type = integer
+  intent = in
+  optional = F
+[con_fvirt]
+  standard_name = ratio_of_vapor_to_dry_air_gas_constants_minus_one
+  long_name = rv/rd - 1 (rv = ideal gas constant for water vapor)
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
   intent = in
   optional = F
 [gt0]
