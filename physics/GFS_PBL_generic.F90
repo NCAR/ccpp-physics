@@ -308,7 +308,7 @@
 !!
       subroutine GFS_PBL_generic_post_run (im, levs, nvdiff, ntrac,                                                            &
         ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev,nqrimef,          &
-        trans_aero, ntchs, ntchm,                                                                                              &
+        trans_aero, ntchs, ntchm, kdt,                                                                                         &
         imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, imp_physics_zhao_carr, imp_physics_mg,          &
         imp_physics_fer_hires,                                                                                                 &
         ltaerosol, cplflx, cplchm, lssav, flag_for_pbl_generic_tend, ldiag3d, qdiag3d, lsidea, hybedmf, do_shoc, satmedmf,     &
@@ -316,7 +316,7 @@
         dqdt, dusfc_cpl, dvsfc_cpl, dtsfc_cpl,                                                                                 &
         dqsfc_cpl, dusfci_cpl, dvsfci_cpl, dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag, dqsfc_diag,             &
         dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag, dt3dt, du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD, dq3dt,        &
-        dq3dt_ozone, rd, cp, fvirt, hvap, t1, q1, prsl, hflx, ushfsfci, oceanfrac, flag_cice, dusfc_cice, dvsfc_cice,          &
+        dq3dt_ozone, rd, cp, fvirt, hvap, t1, q1, prsl, hflx, ushfsfci, oceanfrac, dusfc_cice, dvsfc_cice,                     &
         dtsfc_cice, dqsfc_cice, wet, dry, icy, wind, stress_wat, hflx_wat, evap_wat, ugrs1, vgrs1, dkt_cpl, dkt, hffac, hefac, &
         ugrs, vgrs, tgrs, qgrs, save_u, save_v, save_t, save_q, errmsg, errflg)
 
@@ -326,14 +326,13 @@
       implicit none
 
       integer, parameter  :: kp = kind_phys
-      integer, intent(in) :: im, levs, nvdiff, ntrac, ntchs, ntchm
+      integer, intent(in) :: im, levs, nvdiff, ntrac, ntchs, ntchm, kdt
       integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev, nqrimef
       logical, intent(in) :: trans_aero
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
       integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires
       logical, intent(in) :: ltaerosol, cplflx, cplchm, lssav, ldiag3d, qdiag3d, lsidea
       logical, intent(in) :: hybedmf, do_shoc, satmedmf, shinhong, do_ysu
-      logical, dimension(:), intent(in) :: flag_cice
 
       logical, intent(in) :: flag_for_pbl_generic_tend      
       real(kind=kind_phys), dimension(im, levs), intent(in) :: save_u, save_v, save_t
@@ -547,14 +546,14 @@
 
       if (cplflx) then
         do i=1,im
-          if (oceanfrac(i) > zero) then ! Ocean only, NO LAKES
+          if (oceanfrac(i) > zero) then      ! Ocean only, NO LAKES
             if ( .not. wet(i)) then ! no open water
-              if (flag_cice(i)) then !use results from CICE
+              if (kdt > 1) then              !use results from CICE
                 dusfci_cpl(i) = dusfc_cice(i)
                 dvsfci_cpl(i) = dvsfc_cice(i)
                 dtsfci_cpl(i) = dtsfc_cice(i)
                 dqsfci_cpl(i) = dqsfc_cice(i)
-              else !use PBL fluxes when CICE fluxes is unavailable
+              else                           !use PBL fluxes when CICE fluxes is unavailable
                 dusfci_cpl(i) = dusfc1(i)
                 dvsfci_cpl(i) = dvsfc1(i)
                 dtsfci_cpl(i) = dtsfc1(i)
