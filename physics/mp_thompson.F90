@@ -431,7 +431,7 @@ module mp_thompson
          end if
 
          !> - Density of air in kg m-3
-         rho = 0.622*prsl/(con_rd*tgrs*(qv_mp+0.622))
+         rho = 0.622*prsl/(con_rd*tgrs*(qv+0.622))
 
          !> - Convert omega in Pa s-1 to vertical velocity w in m s-1
          w = -omega/(rho*con_g)
