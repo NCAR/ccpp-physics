@@ -1261,8 +1261,8 @@ MODULE module_mp_thompson
          else
             do k = kts, kte
                nc1d(k) = Nt_c/rho(k)
-               nwfa1d(k) = 11.1E6/rho(k)
-               nifa1d(k) = naIN1*0.01/rho(k)
+               nwfa1d(k) = 11.1E6
+               nifa1d(k) = naIN1*0.01
             enddo
          endif
 
@@ -1785,8 +1785,8 @@ MODULE module_mp_thompson
          qv(k) = MAX(1.E-10, qv1d(k))
          pres(k) = p1d(k)
          rho(k) = 0.622*pres(k)/(R*temp(k)*(qv(k)+0.622))
-         nwfa(k) = MAX(11.1E6, MIN(9999.E6, nwfa1d(k)*rho(k)))
-         nifa(k) = MAX(naIN1*0.01, MIN(9999.E6, nifa1d(k)*rho(k)))
+         nwfa(k) = MAX(11.1E6*rho(k), MIN(9999.E6*rho(k), nwfa1d(k)*rho(k)))
+         nifa(k) = MAX(naIN1*0.01*rho(k), MIN(9999.E6*rho(k), nifa1d(k)*rho(k)))
          mvd_r(k) = D0r
          mvd_c(k) = D0c
 
@@ -2987,7 +2987,7 @@ MODULE module_mp_thompson
          ocp(k) = 1./(Cp*(1.+0.887*qv(k)))
          lvt2(k)=lvap(k)*lvap(k)*ocp(k)*oRv*otemp*otemp
 
-         nwfa(k) = MAX(11.1E6, (nwfa1d(k) + nwfaten(k)*DT)*rho(k))
+         nwfa(k) = MAX(11.1E6*rho(k), (nwfa1d(k) + nwfaten(k)*DT)*rho(k))
       enddo
 
       do k = kts, kte
