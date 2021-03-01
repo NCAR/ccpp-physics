@@ -1160,13 +1160,15 @@
 !    &,                                   HCRITS=2000.0_kp               & ! Critical Moist Static Energy for Shallow clouds
      &,                                   HCRITS=2500.0_kp               & ! Critical Moist Static Energy for Shallow clouds
      &,                                   pcrit_lcl=250.0_kp             & ! Critical pressure difference between boundary layer top
-                                                                          ! layer top and lifting condensation level (hPa)
-!    &,                                   hpert_fac=1.01_kp             !& ! Perturbation on hbl when ctei=.true.
-!    &,                                   hpert_fac=1.005_kp            !& ! Perturbation on hbl when ctei=.true.
+                                                                           ! layer top and lifting condensation level (hPa)
+!    &,                                   hpert_fac=1.01_kp              & ! Perturbation on hbl when ctei=.true.
+!    &,                                   hpert_fac=1.005_kp             & ! Perturbation on hbl when ctei=.true.
      &,                                   qudfac=quad_lam*half           &
      &,                                   shalfac=3.0_kp                 &
 !    &,                                   qudfac=quad_lam*pt25, shalfac=3.0_kp       !& !  Yogesh's
-     &,                                   c0ifac=0.07_kp                 &  ! following Han et al, 2016 MWR
+!    &,                                   c0ifac=0.07_kp                 & ! following Han et al, 2016 MWR
+!    &,                                   c0ifac=0.001_kp                & ! following Han et al, 2017 Weather and Forecasting
+     &,                                   c0ifac=0.0_kp                  &
      &,                                   dpnegcr  = 150.0_kp
 !    &,                                   dpnegcr  = 100.0_kp
 !    &,                                   dpnegcr  = 200.0_kp
@@ -1679,7 +1681,8 @@
       QLL(KD ) = ALHF * GAF(KD) * QIL(KD) + ONE
 !
       st1  = qil(kd)
-      st2  = c0i * st1 * exp(c0ifac*min(tol(kd)-t0c,zero))
+      st2  = c0i * st1
+      if (c0ifac > 1.0e-6_kp) st2  = st2 * exp(c0ifac*min(tol(kd)-t0c,zero))
       tem  = c0  * (one-st1)
       tem2 = st2*qi0 + tem*qw0
 !
@@ -1701,7 +1704,8 @@
          AKC(L) = one / AKT(L)
 !
          st1    = half * (qil(l)+qil(lp1))
-         st2    = c0i * st1 * exp(c0ifac*min(tol(lp1)-t0c,zero))
+         st2    = c0i * st1
+         if (c0ifac > 1.0e-6_kp) st2 = st2 * exp(c0ifac*min(tol(lp1)-t0c,zero))
          tem    = c0  * (one-st1)
          tem2   = st2*qi0 + tem*qw0
 !
