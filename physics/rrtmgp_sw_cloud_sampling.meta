@@ -7,14 +7,6 @@
 [ccpp-arg-table]
   name = rrtmgp_sw_cloud_sampling_init
   type = scheme
-[sw_gas_props]
-  standard_name = coefficients_for_sw_gas_optics
-  long_name = DDT containing spectral information for RRTMGP SW radiation scheme
-  units = DDT
-  dimensions = ()
-  type = ty_gas_optics_rrtmgp
-  intent = in
-  optional = F
 [ipsdsw0]
   standard_name = initial_permutation_seed_sw
   long_name = initial seed for McICA SW
@@ -199,14 +191,6 @@
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = in
-  optional = F  
-[sw_gas_props]
-  standard_name = coefficients_for_sw_gas_optics
-  long_name = DDT containing spectral information for RRTMGP SW radiation scheme
-  units = DDT
-  dimensions = ()
-  type = ty_gas_optics_rrtmgp
   intent = in
   optional = F
 [sw_optical_props_cloudsByBand]

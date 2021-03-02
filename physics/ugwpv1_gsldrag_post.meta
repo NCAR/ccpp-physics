@@ -1,12 +1,33 @@
 [ccpp-table-properties]
-  name = unified_ugwp_post
+  name = ugwpv1_gsldrag_post
   type = scheme
   dependencies = machine.F
 
 ########################################################################
 [ccpp-arg-table]
-  name = unified_ugwp_post_run
+  name = ugwpv1_gsldrag_post_init
   type = scheme
+
+########################################################################
+[ccpp-arg-table]
+  name = ugwpv1_gsldrag_post_run
+  type = scheme
+[im]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal loop extent
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[levs]
+  standard_name = vertical_dimension
+  long_name = number of vertical levels
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [ldiag_ugwp]
   standard_name = diag_ugwp_flag
   long_name = flag for CIRES UGWP Diagnostics
@@ -24,67 +45,51 @@
   kind = kind_phys
   intent = in
   optional = F
-[im]
-  standard_name = horizontal_loop_extent
-  long_name = horizontal loop extent
-  units = count
-  dimensions = ()
-  type = integer
+[dudt_gw]
+  standard_name = tendency_of_x_wind_due_to_gravity_wave_drag
+  long_name = zonal wind tendency due to all GWs
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
   intent = in
   optional = F
-[levs]
-  standard_name = vertical_dimension
-  long_name = number of vertical levels
-  units = count
-  dimensions = ()
-  type = integer
+[dvdt_gw]
+  standard_name = tendency_of_y_wind_due_to_gravity_wave_drag
+  long_name = meridional wind tendency due to all GWs
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
   intent = in
   optional = F
-[gw_dtdt]
+[dtdt_gw]
   standard_name = tendency_of_air_temperature_due_to_gravity_wave_drag
-  long_name = air temperature tendency due to UGWP
+  long_name = air temperature tendency due to all GWs
   units = K s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
-  optional = F
-[gw_dudt]
-  standard_name = tendency_of_x_wind_due_to_gravity_wave_drag
-  long_name = zonal wind tendency due to UGWP
-  units = m s-2
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[gw_dvdt]
-  standard_name = tendency_of_y_wind_due_to_gravity_wave_drag
-  long_name = meridional wind tendency due to UGWP
-  units = m s-2
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[tau_tofd]
-  standard_name = instantaneous_momentum_flux_due_to_turbulent_orographic_form_drag
-  long_name = momentum flux or stress due to TOFD
+  optional = F 
+[du_oblcol]
+  standard_name = vertically_integrated_x_momentum_flux_due_to_blocking_drag
+  long_name = integrated x momentum flux from blocking drag
   units = Pa
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
   optional = F
-[tau_mtb]
-  standard_name = instantaneous_momentum_flux_due_to_mountain_blocking_drag
-  long_name = momentum flux or stress due to mountain blocking drag
+[du_ofdcol]
+  standard_name = vertically_integrated_x_momentum_flux_due_to_form_drag
+  long_name = integrated x momentum flux from form drag
   units = Pa
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
-  optional = F
+  optional = F  
 [tau_ogw]
   standard_name = instantaneous_momentum_flux_due_to_orographic_gravity_wave_drag
   long_name = momentum flux or stress due to orographic gravity wave drag
@@ -103,9 +108,9 @@
   kind = kind_phys
   intent = in
   optional = F
-[zmtb]
+[zobl]
   standard_name = height_of_mountain_blocking
-  long_name = height of mountain blocking drag
+  long_name = height of mountain blocking drag_v1
   units = m
   dimensions = (horizontal_loop_extent)
   type = real
@@ -114,13 +119,12 @@
   optional = F
 [zlwb]
   standard_name = height_of_low_level_wave_breaking
-  long_name = height of low level wave breaking
+  long_name = height of low level wave breaking for OGWs
   units = m
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
-  optional = F
+  intent = in 
 [zogw]
   standard_name = height_of_launch_level_of_orographic_gravity_wave
   long_name = height of launch level of orographic gravity wave
@@ -130,9 +134,18 @@
   kind = kind_phys
   intent = in
   optional = F
-[dudt_mtb]
-  standard_name = instantaneous_change_in_x_wind_due_to_mountain_blocking_drag
-  long_name = instantaneous change in x wind due to mountain blocking drag
+[dudt_obl]
+  standard_name = tendency_of_x_momentum_due_to_blocking_drag
+  long_name = x momentum tendency from blocking drag
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[dudt_ofd]
+  standard_name = tendency_of_x_momentum_due_to_form_drag
+  long_name = x momentum tendency from form drag
   units = m s-2
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
@@ -141,22 +154,13 @@
   optional = F
 [dudt_ogw]
   standard_name = tendency_of_x_wind_due_to_mesoscale_orographic_gravity_wave_drag
-  long_name = instantaneous change in x wind due to orographic gw drag
+  long_name = x momentum tendency from meso scale ogw
   units = m s-2
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
-  optional = F
-[dudt_tms]
-  standard_name = tendency_of_x_wind_due_to_turbulent_orographic_form_drag
-  long_name = instantaneous change in x wind due to TOFD
-  units = m s-2
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
+  optional = F    
 [tot_zmtb]
   standard_name = time_integral_of_height_of_mountain_blocking
   long_name = time integral of height of mountain blocking drag
@@ -309,3 +313,9 @@
   type = integer
   intent = out
   optional = F
+
+########################################################################
+[ccpp-arg-table]
+  name = ugwpv1_gsldrag_post_finalize
+  type = scheme
+
