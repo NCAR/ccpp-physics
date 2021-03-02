@@ -841,15 +841,17 @@ SUBROUTINE mynnedmf_wrapper_run(        &
          enddo
        endif
        
-       do k=1,levs
-         do i=1,im
-           mflx_pbl(i,k) = rho(i,k)*edmf_w(i,k)
-           buop(i,k) = qbuoy(i,k)/delt
-           shrp(i,k) = qshear(i,k)/delt
-           diss(i,k) = qdiss(i,k)/delt
+       if (bl_mynn_output .ne. 0) then
+         do k=1,levs
+           do i=1,im
+             mflx_pbl(i,k) = rho(i,k)*edmf_w(i,k)
+             buop(i,k) = qbuoy(i,k)/delt
+             shrp(i,k) = qshear(i,k)/delt
+             diss(i,k) = qdiss(i,k)/delt
+           end do
          end do
-       end do
-       
+       end if
+
        if (lprnt) then
           print*
           print*,"===Finished with mynn_bl_driver; output:"
