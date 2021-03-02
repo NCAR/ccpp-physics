@@ -39,6 +39,14 @@
   type = integer
   intent = in
   optional = F
+[rtg_ozone_index]
+  standard_name = vertically_diffused_tracer_index_of_ozone
+  long_name = number of tracers
+  units = count
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
 [ntqv]
   standard_name = index_for_water_vapor
   long_name = tracer index for water vapor (specific humidity)
@@ -348,6 +356,14 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = F
+[flag_for_pbl_generic_tend]
+  standard_name = flag_for_generic_planetary_boundary_layer_tendency
+  long_name = true if GFS_PBL_generic should calculate tendencies
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
   optional = F
 [ldiag3d]
   standard_name = flag_diagnostics_3D

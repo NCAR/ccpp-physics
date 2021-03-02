@@ -161,12 +161,13 @@
 !! \htmlinclude GFS_suite_interstitial_2_run.html
 !!
 #endif
+
     subroutine GFS_suite_interstitial_2_run (im, levs, lssav, ldiag3d, lsidea, cplflx, flag_cice, shal_cnv, old_monin, mstrat,    &
       do_shoc, frac_grid, imfshalcnv, dtf, xcosz, adjsfcdsw, adjsfcdlw, cice, pgr, ulwsfc_cice, lwhd, htrsw, htrlw, xmu, ctei_rm, &
       work1, work2, prsi, tgrs, prsl, qgrs_water_vapor, qgrs_cloud_water, cp, hvap, prslk, suntim, adjsfculw, adjsfculw_lnd,      &
       adjsfculw_ice, adjsfculw_wat, dlwsfc, ulwsfc, psmean, dtend, dtidx, index_for_cause_longwave, index_for_cause_shortwave,    &
       index_for_cause_pbl, index_for_cause_dcnv, index_for_cause_scnv, index_for_cause_mp, index_for_temperature,                 &
-      ctei_rml, ctei_r, kinver, dry, icy, wet, frland, huge, use_GP_jacobian, skt, sktp1r, fluxlwUP, fluxlwUP_jac, errmsg, errflg)
+      ctei_rml, ctei_r, kinver, dry, icy, wet, frland, huge, use_LW_jacobian, errmsg, errflg)
 
       implicit none
 

@@ -65,7 +65,7 @@
      &   dusfc,dvsfc,dtsfc,dqsfc,hpbl,hgamt,hgamq,dkt,                  &
      &   kinver,xkzm_m,xkzm_h,xkzm_s,lprnt,ipr,                         &
      &   xkzminv,moninq_fac,hurr_pbl,islimsk,var_ric,                   &
-     &   coef_ric_l,coef_ric_s,ldiag3d,ntqv,ntoz,                       &
+     &   coef_ric_l,coef_ric_s,ldiag3d,ntqv,rtg_ozone_index,ntoz,       &
      &   dtend,dtidx,index_for_cause_pbl,index_for_x_wind,              &
      &   index_for_y_wind,index_for_temperature,                        &
      &   flag_for_pbl_generic_tend,errmsg,errflg)
@@ -84,7 +84,7 @@
 !
       logical, intent(in) :: lprnt, hurr_pbl, ldiag3d
       logical, intent(in) :: flag_for_pbl_generic_tend
-      integer, intent(in) :: ipr, islimsk(im)
+      integer, intent(in) :: ipr, islimsk(im), ntoz
       integer, intent(in) :: im, km, ntrac, ntcw, kinver(im)
       integer, intent(out) :: kpbl(im)
 
@@ -98,7 +98,7 @@
       real(kind=kind_phys), intent(inout) :: dtend(:,:,:)
       integer, intent(in) :: dtidx(:,:)
       integer, intent(in) :: index_for_x_wind, index_for_y_wind,        &
-     &         index_for_cause_pbl, index_for_temperature, ntqv, ntoz
+     & index_for_cause_pbl, index_for_temperature, ntqv, rtg_ozone_index
       real(kind=kind_phys), intent(in) ::                               &
      &                     u1(im,km),     v1(im,km),                    &
      &                     t1(im,km),     q1(im,km,ntrac),              &
@@ -1282,10 +1282,6 @@ c
 !     recover tendencies of heat and moisture
 !
 !>  After returning with the solution, the tendencies for temperature and moisture are recovered.
-      if(.not.flag_for_pbl_generic_tend) then
-        idtend1=dtidx(index_for_temperature,index_for_cause_pbl)
-        idtend2=dtidx(ntqv+100,index_for_cause_pbl)
-      endif
       do  k = 1,km
          do i = 1,im
             ttend      = (a1(i,k)-t1(i,k)) * rdt
@@ -1294,14 +1290,28 @@ c
             rtg(i,k,1) = rtg(i,k,1)+qtend
             dtsfc(i)   = dtsfc(i)+cont*del(i,k)*ttend
             dqsfc(i)   = dqsfc(i)+conq*del(i,k)*qtend
-            if(idtend1>1) then
-               dtend(i,k,idtend1) = dtend(i,k,idtend1) + ttend*delt
-            endif
-            if(idtend2>1) then
-               dtend(i,k,idtend2) = dtend(i,k,idtend2) + qtend*delt
-            endif
          enddo
       enddo
+      if(.not.flag_for_pbl_generic_tend) then
+        idtend1=dtidx(index_for_temperature,index_for_cause_pbl)
+        idtend2=dtidx(ntqv+100,index_for_cause_pbl)
+        if(idtend1>1) then
+           do  k = 1,km
+              do i = 1,im
+                 ttend      = (a1(i,k)-t1(i,k)) * rdt
+                 dtend(i,k,idtend1) = dtend(i,k,idtend1) + ttend*delt
+              enddo
+           enddo
+        endif
+        if(idtend2>1) then
+           do  k = 1,km
+              do i = 1,im
+                 qtend      = (a2(i,k)-q1(i,k,1))*rdt
+                 dtend(i,k,idtend2) = dtend(i,k,idtend2) + qtend*delt
+              enddo
+           enddo
+        endif
+      endif
       if(ntrac >= 2) then
         do kk = 2, ntrac
           is = (kk-1) * km
@@ -1312,17 +1322,19 @@ c
             enddo
           enddo
         enddo
-        if(.not.flag_for_pbl_generic_tend .and. ldiag3d) then
-          do kk = 2, ntrac
-            idtend1 = dtidx(100+kk,index_for_cause_pbl)
-            is = (kk-1) * km
-            do k = 1, km
-              do i = 1, im
-                qtend = (a2(i,k+is)-q1(i,k,kk))*rdt
-                dtend(i,k,idtend1) = dtend(i,k,idtend1)+qtend
-              enddo
-            enddo
-          enddo
+        if(.not.flag_for_pbl_generic_tend .and. ldiag3d .and.           &
+     &        rtg_ozone_index>0) then
+          idtend1 = dtidx(100+ntoz,index_for_cause_pbl)
+          if(idtend1>1) then
+             kk = rtg_ozone_index
+             is = (kk-1) * km
+             do k = 1, km
+               do i = 1, im
+                 qtend = (a2(i,k+is)-q1(i,k,kk))
+                 dtend(i,k,idtend1) = dtend(i,k,idtend1)+qtend
+               enddo
+             enddo
+          endif
         endif
       endif
 !
@@ -1423,10 +1435,6 @@ c
 !     recover tendencies of momentum
 !
 !>  Finally, the tendencies are recovered from the tridiagonal solutions.
-      if(.not.flag_for_pbl_generic_tend) then
-         idtend1 = dtidx(index_for_x_wind,index_for_cause_pbl)
-         idtend2 = dtidx(index_for_y_wind,index_for_cause_pbl)
-      endif
       do k = 1,km
          do i = 1,im
             utend = (a1(i,k)-u1(i,k))*rdt
@@ -1435,12 +1443,6 @@ c
             dv(i,k)  = dv(i,k)  + vtend
             dusfc(i) = dusfc(i) + conw*del(i,k)*utend
             dvsfc(i) = dvsfc(i) + conw*del(i,k)*vtend
-            if(idtend1>1) then
-               dtend(i,k,idtend1) = dtend(i,k,idtend1) + utend*delt
-            endif
-            if(idtend2>1) then
-               dtend(i,k,idtend2) = dtend(i,k,idtend2) + vtend*delt
-            endif
 !
 !  for dissipative heating for ecmwf model
 !
@@ -1453,6 +1455,27 @@ c
 !
          enddo
       enddo
+      if(.not.flag_for_pbl_generic_tend) then
+         idtend1 = dtidx(index_for_x_wind,index_for_cause_pbl)
+         if(idtend1>1) then
+            do k = 1,km
+               do i = 1,im
+                  utend = (a1(i,k)-u1(i,k))*rdt
+                  dtend(i,k,idtend1) = dtend(i,k,idtend1) + utend*delt
+               enddo
+            enddo
+         endif
+
+         idtend2 = dtidx(index_for_y_wind,index_for_cause_pbl)
+         if(idtend2>1) then
+            do k = 1,km
+               do i = 1,im
+                  vtend = (a2(i,k)-v1(i,k))*rdt
+                  dtend(i,k,idtend2) = dtend(i,k,idtend2) + vtend*delt
+               enddo
+            enddo
+         endif
+      endif
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !

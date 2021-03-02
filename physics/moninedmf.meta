@@ -554,6 +554,14 @@
   type = integer
   intent = in
   optional = F
+[rtg_ozone_index]
+  standard_name = vertically_diffused_tracer_index_of_ozone
+  long_name = number of tracers
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [ntoz]
   standard_name = index_for_ozone
   long_name = tracer index for ozone mixing ratio

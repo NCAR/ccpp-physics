@@ -79,27 +79,28 @@
 !! \section arg_table_GFS_PBL_generic_pre_run Argument Table
 !! \htmlinclude GFS_PBL_generic_pre_run.html
 !!
-      subroutine GFS_PBL_generic_pre_run (im, levs, nvdiff, ntrac,                       &
+      subroutine GFS_PBL_generic_pre_run (im, levs, nvdiff, ntrac, rtg_ozone_index,      &
         ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc,                 &
         ntwa, ntia, ntgl, ntoz, ntke, ntkev, nqrimef, trans_aero, ntchs, ntchm,          &
         imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,           &
         imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires, cplchm, ltaerosol, &
         hybedmf, do_shoc, satmedmf, qgrs, vdftra, save_u, save_v, save_t, save_q,        &
-        ldiag3d, qdiag3d, lssav, ugrs, vgrs, tgrs, errmsg, errflg)
-
+        flag_for_pbl_generic_tend, ldiag3d, qdiag3d, lssav, ugrs, vgrs, tgrs, errmsg, errflg)
+        
       use machine,                only : kind_phys
       use GFS_PBL_generic_common, only : set_aerosol_tracer_index
 
       implicit none
 
       integer, parameter  :: kp = kind_phys
+      integer, intent(out) :: rtg_ozone_index
       integer, intent(in) :: im, levs, nvdiff, ntrac
       integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc
       integer, intent(in) :: ntwa, ntia, ntgl, ntoz, ntke, ntkev, nqrimef,ntchs, ntchm
       logical, intent(in) :: trans_aero, ldiag3d, qdiag3d, lssav
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
       integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires
-      logical, intent(in) :: cplchm, ltaerosol, hybedmf, do_shoc, satmedmf
+      logical, intent(in) :: cplchm, ltaerosol, hybedmf, do_shoc, satmedmf, flag_for_pbl_generic_tend
 
       real(kind=kind_phys), dimension(im, levs, ntrac), intent(in) :: qgrs
       real(kind=kind_phys), dimension(im, levs), intent(in) :: ugrs, vgrs, tgrs
@@ -120,9 +121,11 @@
       errmsg = ''
       errflg = 0
 
+      rtg_ozone_index=-1
 !DH: dvdftra is only used if nvdiff != ntrac or (nvdiff == ntrac .and. )
       if (nvdiff == ntrac .and. (hybedmf .or. do_shoc .or. satmedmf)) then
         vdftra = qgrs
+        rtg_ozone_index = ntoz
       else
         if (imp_physics == imp_physics_wsm6) then
   ! WSM6
@@ -134,6 +137,7 @@
               vdftra(i,k,4) = qgrs(i,k,ntoz)
             enddo
           enddo
+          rtg_ozone_index = 4
 
   ! Ferrier-Aligo
         elseif (imp_physics == imp_physics_fer_hires) then
@@ -147,6 +151,7 @@
               vdftra(i,k,6) = qgrs(i,k,ntoz)
             enddo
           enddo
+          rtg_ozone_index = 6
         
         elseif (imp_physics == imp_physics_thompson) then
   ! Thompson
@@ -167,6 +172,7 @@
                 vdftra(i,k,12) = qgrs(i,k,ntia)
               enddo
             enddo
+            rtg_ozone_index = 10
           else
             do k=1,levs
               do i=1,im
@@ -181,6 +187,7 @@
                 vdftra(i,k,9) = qgrs(i,k,ntoz)
               enddo
             enddo
+            rtg_ozone_index = 9
           endif
   ! MG
         elseif (imp_physics == imp_physics_mg) then        ! MG3/2
@@ -201,6 +208,7 @@
                 vdftra(i,k,12) = qgrs(i,k,ntoz)
               enddo
             enddo
+            rtg_ozone_index = 12
           else                                             ! MG2
             do k=1,levs
               do i=1,im
@@ -216,6 +224,7 @@
                 vdftra(i,k,10) = qgrs(i,k,ntoz)
               enddo
             enddo
+            rtg_ozone_index = 10
           endif
         elseif (imp_physics == imp_physics_gfdl) then
   ! GFDL MP
@@ -230,6 +239,7 @@
               vdftra(i,k,7) = qgrs(i,k,ntoz)
             enddo
           enddo
+          rtg_ozone_index = 7
         elseif (imp_physics == imp_physics_zhao_carr) then
 ! Zhao/Carr/Sundqvist
           do k=1,levs
@@ -239,6 +249,7 @@
               vdftra(i,k,3) = qgrs(i,k,ntoz)
             enddo
           enddo
+          rtg_ozone_index = 3
         endif
 !
         if (trans_aero) then
@@ -270,7 +281,7 @@
 !
       endif
 
-      if(ldiag3d .and. lssav) then
+      if(ldiag3d .and. lssav .and. flag_for_pbl_generic_tend) then
         do k=1,levs
           do i=1,im
             save_t(i,k) = tgrs(i,k)
@@ -610,7 +621,7 @@
           dqsfc_diag (i) = dqsfc_diag(i) + dqsfci_diag(i) * dtf
         enddo
 
-        if (ldiag3d .and. flag_for_pbl_generic_tend .and. lssav) then
+        if (ldiag3d .and. flag_for_pbl_generic_tend) then
           if (lsidea) then
             idtend = dtidx(index_for_temperature, index_for_cause_pbl)
             if(idtend>1) then

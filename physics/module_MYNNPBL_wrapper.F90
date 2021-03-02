@@ -282,6 +282,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &        RQNWFABLTEN, RQNIFABLTEN,                                  &
      &        dqke,qWT,qSHEAR,qBUOY,qDISS,                               &
      &        pattern_spp_pbl
+      real(kind=kind_phys), allocatable :: oldzone(:,:)
 
 !MYNN-CHEM arrays
       real(kind=kind_phys), dimension(im,nchem) :: chem3d
@@ -494,7 +495,10 @@ SUBROUTINE mynnedmf_wrapper_run(        &
             enddo
           enddo
         endif
-
+       if(ldiag3d .and. dtidx(100+ntoz,index_for_cause_pbl)>1) then
+         allocate(oldzone(im,levs))
+         oldzone = ozone
+       endif
        if (lprnt)write(0,*)"prepping MYNN-EDMF variables..."
 
        do k=1,levs
@@ -719,7 +723,13 @@ SUBROUTINE mynnedmf_wrapper_run(        &
           call dtend_helper(index_for_x_wind,RUBLTEN)
           call dtend_helper(index_for_y_wind,RVBLTEN)
           call dtend_helper(index_for_temperature,RTHBLTEN,exner)
-          call dtend_helper(100+ntoz,dqdt_ozone)
+          if(ldiag3d) then
+            idtend = dtidx(100+ntoz,index_for_cause_pbl)
+            if(idtend>1) then
+              dtend(:,:,idtend) = dtend(:,:,idtend) + (ozone-oldzone)
+              deallocate(oldzone)
+            endif
+          endif
         endif accum_duvt3dt
         !Update T, U and V:
         !do k = 1, levs
