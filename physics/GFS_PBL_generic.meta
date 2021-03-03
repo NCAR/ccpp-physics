@@ -620,14 +620,6 @@
   type = integer
   intent = in
   optional = F
-[kdt]
-  standard_name = index_of_time_step
-  long_name = current number of time steps
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [imp_physics]
   standard_name = flag_for_microphysics_scheme
   long_name = choice of microphysics scheme
@@ -1200,6 +1192,14 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
+  intent = in
+  optional = F
+[kdt]
+  standard_name = index_of_time_step
+  long_name = current forecast iteration
+  units = index
+  dimensions = ()
+  type = integer
   intent = in
   optional = F
 [dusfc_cice]
