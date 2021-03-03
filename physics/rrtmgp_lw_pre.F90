@@ -25,8 +25,8 @@ contains
 !> \section arg_table_rrtmgp_lw_pre_run
 !! \htmlinclude rrtmgp_lw_pre_run.html
 !!
-  subroutine rrtmgp_lw_pre_run (doLWrad, nCol, xlon, xlat, slmsk, zorl, snowd, sncovr, &
-       tsfg, tsfa, hprime, sfc_emiss_byband, semis, errmsg, errflg)
+  subroutine rrtmgp_lw_pre_run (doLWrad, nCol, xlon, xlat, landfrac, zorl, snowd, sncovr, &
+       fice, tsfg, tsfa, hprime, sfc_emiss_byband, semis, errmsg, errflg)
     
     ! Inputs
     logical, intent(in) :: &
@@ -36,10 +36,11 @@ contains
     real(kind_phys), dimension(nCol), intent(in) :: &
          xlon,          & ! Longitude
          xlat,          & ! Latitude
-         slmsk,         & ! Land/sea/sea-ice mask
+         landfrac,      & ! Land fraction
          zorl,          & ! Surface roughness length (cm)
          snowd,         & ! water equivalent snow depth (mm)
          sncovr,        & ! Surface snow are fraction (1)
+         fice,          & ! Sea/Lake ice fraction (1)
          tsfg,          & ! Surface ground temperature for radiation (K)
          tsfa,          & ! Lowest model layer air temperature for radiation (K)
          hprime           ! Standard deviation of subgrid orography
@@ -66,7 +67,7 @@ contains
     ! #######################################################################################
     ! Call module_radiation_surface::setemis(),to setup surface emissivity for LW radiation.
     ! #######################################################################################
-    call setemis (xlon, xlat, slmsk, snowd, sncovr, zorl, tsfg, tsfa, hprime, nCol, semis)
+    call setemis (xlon, xlat, landfrac, snowd, sncovr, fice, zorl, tsfg, tsfa, hprime, nCol, semis)
 
     ! Assign same emissivity to all bands
     do iBand=1,lw_gas_props%get_nband()

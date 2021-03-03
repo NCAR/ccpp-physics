@@ -122,6 +122,7 @@
       integer, parameter, public :: JMXEMS = 180    !< number of latitude points in global emis-type map
       real (kind=kind_phys), parameter :: f_zero = 0.0
       real (kind=kind_phys), parameter :: f_one  = 1.0
+      real (kind=kind_phys), parameter :: epsln  = 1.0e-6
       real (kind=kind_phys), parameter :: rad2dg= 180.0 / con_pi
       integer, allocatable  ::  idxems(:,:)         !< global surface emissivity index array
       integer :: iemslw = 0                         !< global surface emissivity control flag set up in 'sfc_init'
@@ -659,7 +660,8 @@
 !!                  or -pi -> +pi ranges
 !!\param xlat      (IMAX), latitude  in radiance, default to pi/2 ->
 !!                  -pi/2 range, otherwise see in-line comment
-!!\param slmsk     (IMAX), sea(0),land(1),ice(2) mask on fcst model grid
+!!\param lanfrac   (IMAX), 
+!!!\parction of grid that is land
 !!\param snowf     (IMAX), snow depth water equivalent in mm
 !!\param sncovr    (IMAX), snow cover over land
 !!\param zorlf     (IMAX), surface roughness in cm
@@ -672,8 +674,8 @@
 !! @{
 !-----------------------------------
       subroutine setemis                                                &
-     &     ( xlon,xlat,slmsk,snowf,sncovr,zorlf,tsknf,tairf,hprif,      &  !  ---  inputs:
-     &       IMAX,                                                      &
+     &     ( xlon,xlat,landfrac,snowf,sncovr,fice,zorlf,tsknf,tairf,    &  !  ---  inputs:
+     &       hprif, IMAX,                                               &
      &       sfcemis                                                    &  !  ---  outputs:
      &     )
 
@@ -688,21 +690,23 @@
 !  ====================  defination of variables  ====================  !
 !                                                                       !
 !  inputs:                                                              !
-!     xlon  (IMAX)  - longitude in radiance, ok for both 0->2pi or      !
-!                     -pi -> +pi ranges                                 !
-!     xlat  (IMAX)  - latitude  in radiance, default to pi/2 -> -pi/2   !
-!                     range, otherwise see in-line comment              !
-!     slmsk (IMAX)  - sea(0),land(1),ice(2) mask on fcst model grid     !
-!     snowf (IMAX)  - snow depth water equivalent in mm                 !
-!     sncovr(IMAX)  - ialbflg=1: snow cover over land in fraction       !
-!     zorlf (IMAX)  - surface roughness in cm                           !
-!     tsknf (IMAX)  - ground surface temperature in k                   !
-!     tairf (IMAX)  - lowest model layer air temperature in k           !
-!     hprif (IMAX)  - topographic sdv in m                              !
-!     IMAX          - array horizontal dimension                        !
+!     xlon  (IMAX)    - longitude in radiance, ok for both 0->2pi or    !
+!                       -pi -> +pi ranges                               !
+!     xlat  (IMAX)    - latitude  in radiance, default to pi/2 -> -pi/2 !
+!                       range, otherwise see in-line comment            !
+!!    slmsk (IMAX)    - sea(0),land(1),ice(2) mask on fcst model grid   !
+!     landfrac (IMAX) - fraction of land on on fcst model grid          !
+!     snowf (IMAX)    - snow depth water equivalent in mm               !
+!     sncovr(IMAX)    - ialbflg=1: snow cover over land in fraction     !
+!     fice  (IMAX)    - sea/lake ice fraction                           !
+!     zorlf (IMAX)    - surface roughness in cm                         !
+!     tsknf (IMAX)    - ground surface temperature in k                 !
+!     tairf (IMAX)    - lowest model layer air temperature in k         !
+!     hprif (IMAX)    - topographic sdv in m                            !
+!     IMAX            - array horizontal dimension                      !
 !                                                                       !
 !  outputs:                                                             !
-!     sfcemis(IMAX) - surface emissivity                                !
+!     sfcemis(IMAX)   - surface emissivity                                !
 !                                                                       !
 !  -------------------------------------------------------------------  !
 !                                                                       !
@@ -722,7 +726,8 @@
       integer, intent(in) :: IMAX
 
       real (kind=kind_phys), dimension(:), intent(in) ::                &
-     &       xlon,xlat, slmsk, snowf,sncovr, zorlf, tsknf, tairf, hprif
+     &       xlon, xlat, landfrac, snowf, sncovr, fice, zorlf, tsknf,   &
+     &       tairf, hprif
 
 !  ---  outputs
       real (kind=kind_phys), dimension(:), intent(out) :: sfcemis
@@ -731,7 +736,7 @@
       integer :: i, i1, i2, j1, j2, idx
 
       real (kind=kind_phys) :: dltg, hdlt, tmp1, tmp2,                  &
-     &      asnow, argh, hrgh, fsno, fsno0, fsno1
+     &      asnow, argh, hrgh, fsno, fsno0, fracl, fraco, fraci
 
 !  ---  reference emiss value for diff surface emiss index
 !       1-open water, 2-grass/shrub land, 3-bare soil, tundra,
@@ -756,19 +761,25 @@
 
 !  --- ...  mapping input data onto model grid
 !           note: this is a simple mapping method, an upgrade is needed if
-!           the model grid is much corcer than the 1-deg data resolution
+!           the model grid is much coarser than the 1-deg data resolution
 
         lab_do_IMAX : do i = 1, IMAX
 
-          if ( nint(slmsk(i)) == 0 ) then          ! sea point
+          fracl = landfrac(i)
+          fraco = max(f_zero, f_one - fracl)
+          fraci = fraco * fice(i)
+          fraco = max(f_zero, fraco-fraci)
 
-            sfcemis(i) = emsref(1)
+          if (fracl < epsln) then                  ! no land
+            if ( abs(fraco-f_one) < epsln ) then     ! open water point
+              sfcemis(i) = emsref(1)
+            elseif ( abs(fraci-f_one) > epsln ) then ! complete sea/lake ice
+              sfcemis(i) = emsref(7)
+            else
+              sfcemis(i) = fraco*emsref(1) + fraci*emsref(7)
+            endif
 
-          else if ( nint(slmsk(i)) == 2 ) then     ! sea-ice
-
-            sfcemis(i) = emsref(7)
-
-          else                                     ! land
+          else                                     ! land or fractional grid
 
 !  ---  map grid in longitude direction
             i2 = 1
@@ -799,20 +810,25 @@
               endif
             enddo  lab_do_JMXEMS
 
-
             idx = max( 2, idxems(i2,j2) )
             if ( idx >= 7 ) idx = 2
-            sfcemis(i) = emsref(idx)
+
+            if (abs(fracl-f_one) < epsln) then
+              sfcemis(i) = emsref(idx)
+            else
+              sfcemis(i) = fracl*emsref(idx) + fraco*emsref(1)          &
+     &                                       + fraci*emsref(7)
+            endif
 
           endif   ! end if_slmsk_block
 
 !> -# Check for snow covered area.
 
-          if ( ialbflg==1 .and. nint(slmsk(i))==1 ) then ! input land area snow cover
+!         if ( ialbflg==1 .and. nint(slmsk(i))==1 ) then ! input land area snow cover
+          if ( sncovr(i) > f_zero ) then ! input land/ice area snow cover
 
             fsno0 = sncovr(i)
-            fsno1 = f_one - fsno0
-            sfcemis(i) = sfcemis(i)*fsno1 + emsref(8)*fsno0
+            sfcemis(i) = sfcemis(i)*(f_one - fsno0) + emsref(8)*fsno0
 
           else                                           ! compute snow cover from snow depth
             if ( snowf(i) > f_zero ) then
@@ -820,10 +836,12 @@
               argh  = min(0.50, max(.025, 0.01*zorlf(i)))
               hrgh  = min(f_one, max(0.20, 1.0577-1.1538e-3*hprif(i) ) )
               fsno0 = asnow / (argh + asnow) * hrgh
-              if (nint(slmsk(i)) == 0 .and. tsknf(i) > 271.2)           &
-     &                               fsno0=f_zero
-              fsno1 = f_one - fsno0
-              sfcemis(i) = sfcemis(i)*fsno1 + emsref(8)*fsno0
+
+!             if (nint(slmsk(i)) == 0 .and. tsknf(i) > 271.2)           &
+!    &                               fsno0=f_zero
+
+              if (abs(fraco-f_one) < epsln) fsno0 = f_zero         ! no snow over open water
+              sfcemis(i) = sfcemis(i)*(f_one - fsno0) + emsref(8)*fsno0
             endif
 
           endif                                          ! end if_ialbflg
