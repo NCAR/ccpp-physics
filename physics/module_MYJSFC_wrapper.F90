@@ -102,7 +102,7 @@
      &        phy_myj_a1u, phy_myj_a1t, phy_myj_a1q
       real(kind=kind_phys),dimension(im),intent(inout)   ::  &
      &        pblh, zorl, ustar, rib
-      real(kind=kind_phys),dimension(im),intent(out)     ::  &
+      real(kind=kind_phys),dimension(im),intent(inout)   ::  &
      &        cm, ch, stress, ffm, ffh, fm10, fh2
       real(kind=kind_phys), dimension(im), intent(inout) ::  &
      &        landfrac, lakefrac, oceanfrac, fice

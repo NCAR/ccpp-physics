@@ -175,7 +175,7 @@
       real(kind=kind_phys), intent(inout) :: qrn(1:im,1:levs)
       real(kind=kind_phys), intent(inout) :: qsnw(1:im,1:levs)
       real(kind=kind_phys), intent(inout) :: qgl(1:im,1:levs)
-      real(kind=kind_phys), intent(inout) :: gq0_ice(1:im,1:levs)
+      real(kind=kind_phys), intent(in   ) :: gq0_ice(1:im,1:levs)
       real(kind=kind_phys), intent(out  ) :: gq0_rain(1:im,1:levs)
       real(kind=kind_phys), intent(out  ) :: gq0_snow(1:im,1:levs)
       real(kind=kind_phys), intent(out  ) :: gq0_graupel(1:im,1:levs)

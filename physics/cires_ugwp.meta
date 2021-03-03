@@ -697,7 +697,7 @@
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [du3dt_ogw]
   standard_name = time_integral_of_change_in_x_wind_due_to_orographic_gravity_wave_drag
@@ -706,7 +706,7 @@
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [du3dt_tms]
   standard_name = time_integral_of_change_in_x_wind_due_to_turbulent_orographic_form_drag
@@ -715,7 +715,7 @@
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [dudt]
   standard_name = tendency_of_x_wind_due_to_model_physics

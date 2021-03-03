@@ -54,9 +54,9 @@ module mp_fer_hires
       logical,                        intent(in)    :: restart
       character(len=*),               intent(out)   :: errmsg
       integer,                        intent(out)   :: errflg
-      real(kind_phys),                intent(out), optional  :: f_ice(1:ncol,1:nlev)
-      real(kind_phys),                intent(out), optional  :: f_rain(1:ncol,1:nlev)
-      real(kind_phys),                intent(out), optional  :: f_rimef(1:ncol,1:nlev)
+      real(kind_phys),                intent(out)   :: f_ice(1:ncol,1:nlev)
+      real(kind_phys),                intent(out)   :: f_rain(1:ncol,1:nlev)
+      real(kind_phys),                intent(out)   :: f_rimef(1:ncol,1:nlev)
 
 
       ! Local variables

@@ -344,7 +344,8 @@ module lsm_ruc
 !  ---  in/out:
       integer, dimension(im), intent(inout) :: soiltyp, vegtype
       real (kind=kind_phys), dimension(lsoil_ruc), intent(in) :: zs
-      real (kind=kind_phys), dimension(im), intent(inout) :: srflag,     &
+      real (kind=kind_phys), dimension(im), intent(in)    :: srflag
+      real (kind=kind_phys), dimension(im), intent(inout) ::             &
      &       canopy, trans, smcwlt2, smcref2,                            & 
      ! for land
      &       weasd_lnd, snwdph_lnd, tskin_lnd,                           &

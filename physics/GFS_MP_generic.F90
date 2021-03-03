@@ -22,8 +22,8 @@
       real(kind=kind_phys), dimension(im, levs),        intent(in) :: gt0
       real(kind=kind_phys), dimension(im, levs, ntrac), intent(in) :: gq0
 
-      real(kind=kind_phys), dimension(im, levs),        intent(out) :: save_t, save_qv
-      real(kind=kind_phys), dimension(im, levs, ntrac), intent(out) :: save_q
+      real(kind=kind_phys), dimension(im, levs),        intent(inout) :: save_t, save_qv
+      real(kind=kind_phys), dimension(im, levs, ntrac), intent(inout) :: save_q
 
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg

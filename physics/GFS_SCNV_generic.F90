@@ -25,7 +25,7 @@
         logical, intent(in) :: ldiag3d, qdiag3d, flag_for_scnv_generic_tend
         real(kind=kind_phys), dimension(im,levs), intent(in) :: gu0, gv0, gt0, gq0_water_vapor
 
-        real(kind=kind_phys), dimension(im,levs), intent(out) :: save_u, save_v, save_t, save_qv
+        real(kind=kind_phys), dimension(im,levs), intent(inout) :: save_u, save_v, save_t, save_qv
         character(len=*),                 intent(out) :: errmsg
         integer,                          intent(out) :: errflg
 

@@ -144,8 +144,9 @@
             znt_ocn, znt_lnd, znt_ice, cdm_ocn, cdm_lnd, cdm_ice,               &
             stress_ocn, stress_lnd, stress_ice, rib_ocn, rib_lnd, rib_ice,      &
             fm_ocn, fm_lnd, fm_ice, fh_ocn, fh_lnd, fh_ice, fh2_ocn, fh2_lnd,   &
-            fh2_ice, ch_ocn, ch_lnd, ch_ice, fm10_ocn, fm10_lnd, fm10_ice,      &
-            qss_ocn, qss_lnd, qss_ice
+            fh2_ice, ch_ocn, ch_lnd, ch_ice, fm10_ocn, fm10_lnd, fm10_ice
+
+        real(kind=kind_phys), intent(out), dimension(im) :: qss_ocn, qss_lnd, qss_ice
 
         character(len=*), intent(out) :: errmsg
         integer,          intent(out) :: errflg

@@ -697,7 +697,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = F
 [snoalb]
   standard_name = upper_bound_on_max_albedo_over_deep_snow

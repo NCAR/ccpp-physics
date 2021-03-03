@@ -188,7 +188,7 @@ contains
     logical,                 intent(in)                         :: ldiag3d, lssav
 
     ! These arrays only allocated if ldiag_ugwp = .true.
-    real(kind=kind_phys),    intent(out), dimension(:,:) :: du3dt_mtb, du3dt_ogw, du3dt_tms
+    real(kind=kind_phys),    intent(inout), dimension(:,:) :: du3dt_mtb, du3dt_ogw, du3dt_tms
 
     real(kind=kind_phys),    intent(inout), dimension(im, levs):: dudt, dvdt, dtdt
 

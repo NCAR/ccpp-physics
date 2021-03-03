@@ -1,4 +1,4 @@
-u>  \file cs_conv.F90
+!>  \file cs_conv.F90
 !!  This file contains the Chikira-Sugiyama Convection scheme.
 
 module cs_conv_pre
