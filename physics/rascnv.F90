@@ -8,7 +8,7 @@
       implicit none
       public :: rascnv_init, rascnv_run, rascnv_finalize
       private
-      logical :: is_initialized = .False.
+      logical, save :: is_initialized = .False.
 !
       integer,               parameter :: kp = kind_phys
       integer,               parameter :: nrcmax=32 ! Maximum # of random clouds per 1200s
@@ -34,17 +34,20 @@
      &,                                   facmb  = 0.01_kp              & ! conversion factor from Pa to hPa (or mb)
      &,                                   cmb2pa = 100.0_kp               ! Conversion from hPa to Pa
 !
-      real(kind=kind_phys), parameter :: frac=0.5_kp,    crtmsf=0.0_kp  &
-     &,                                  rhfacs=0.75_kp, rhfacl=0.75_kp &
-     &,                                  face=5.0_kp,    delx=10000.0_kp&
-     &,                                  ddfac=face*delx*0.001_kp       &
-     &,                                  max_neg_bouy=0.15_kp           &
-!    &,                                  max_neg_bouy=pt25_kp           &
-     &,                                  testmb=0.1_kp, testmbi=one/testmb &
-     &,                                  dpd=0.5_kp, rknob=1.0_kp, eknob=1.0_kp
+!     real (kind=kind_phys), parameter :: frac=0.5_kp,    crtmsf=0.0_kp     &
+      real (kind=kind_phys), parameter :: frac=0.1_kp,    crtmsf=0.0_kp     &
+     &,                                   tfrac_max=0.15_kp                 &
+     &,                                   rhfacs=0.75_kp, rhfacl=0.75_kp    &
+     &,                                   face=5.0_kp,    delx=10000.0_kp   &
+     &,                                   ddfac=face*delx*0.001_kp          &
+     &,                                   max_neg_bouy=0.15_kp              &
+!    &,                                   max_neg_bouy=pt25_kp              &
+     &,                                   testmb=0.1_kp, testmbi=one/testmb &
+     &,                                   dpd=0.5_kp, rknob=1.0_kp, eknob=1.0_kp
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      logical, parameter :: do_aw=.true.,   cumfrc=.true.               &
+!     logical, parameter :: aw_scal=.false., cumfrc=.true.              &
+      logical, parameter :: aw_scal=.true., cumfrc=.true.               &
      &,                     updret=.false., vsmooth=.false.             &
      &,                     wrkfun=.false., crtfun=.true.               &
      &,                     calkbl=.true.,  botop=.true.,  revap=.true. &
@@ -67,24 +70,24 @@
 !
 !     For Tilting Angle Specification
 !
-      real(kind=kind_phys) REFP(6), REFR(6), TLAC(8), PLAC(8), TLBPL(7) &
-     &,                    drdp(5)
+      real(kind=kind_phys), save :: REFP(6), REFR(6), TLAC(8), PLAC(8), &
+                                    TLBPL(7), drdp(5)
 !
       DATA PLAC/100.0, 200.0, 300.0, 400.0, 500.0, 600.0, 700.0, 800.0/
       DATA TLAC/ 35.0,  25.0,  20.0,  17.5,  15.0,  12.5,  10.0,  7.5/
       DATA REFP/500.0, 300.0, 250.0, 200.0, 150.0, 100.0/
       DATA REFR/  1.0,   2.0,   3.0,   4.0,   6.0,   8.0/
 !
-      real(kind=kind_phys) AC(16), AD(16)
+      real(kind=kind_phys), save :: AC(16), AD(16)
 !
       integer, parameter :: nqrp=500001
-      real(kind=kind_phys)  C1XQRP, C2XQRP, TBQRP(NQRP), TBQRA(NQRP)    &
-     &,                     TBQRB(NQRP)
+      real(kind=kind_phys), save ::  C1XQRP, C2XQRP, TBQRP(NQRP),       &
+                                     TBQRA(NQRP), TBQRB(NQRP)
 !
       integer, parameter :: nvtp=10001
-      real(kind=kind_phys)  C1XVTP, C2XVTP, TBVTP(NVTP)
+      real(kind=kind_phys), save ::  C1XVTP, C2XVTP, TBVTP(NVTP)
 !
-      real(kind=kind_phys)  afc,  facdt,                                &
+      real(kind=kind_phys), save ::  afc, facdt,                        &
                             grav, cp, alhl, alhf, rgas, rkap, nu, pi,   &
                             t0c,  rv, cvap, cliq, csol, ttp, eps, epsm1,&
 !
@@ -118,12 +121,13 @@
                       con_g,    con_cp,    con_rd,  con_rv,   con_hvap, &
                       con_hfus, con_fvirt, con_t0c, con_cvap, con_cliq, &
                       con_csol, con_ttp,   con_eps, con_epsm1
+
       character(len=*),     intent(out) :: errmsg
       integer,              intent(out) :: errflg
 !
       real(kind=kind_phys), parameter ::  actp=1.7_kp, facm=1.00_kp
 !
-      real(kind=kind_phys) PH(15), A(15)
+      real(kind=kind_phys) :: PH(15), A(15)
 !
       DATA PH/150.0, 200.0, 250.0, 300.0, 350.0, 400.0, 450.0, 500.0    &
      &,       550.0, 600.0, 650.0, 700.0, 750.0, 800.0, 850.0/
@@ -134,8 +138,6 @@
 !
       real(kind=kind_phys) tem,  actop, tem1, tem2
       integer              i, l
-      logical first
-      data first/.true./
 !
 ! Initialize CCPP error handling variables
       errmsg = ''
@@ -170,6 +172,12 @@
 !
       AFC = -(1.01097e-4_kp*DT)*(3600.0_kp/DT)**0.57777778_kp
 !
+      if (fix_ncld_hr) then
+        facdt = delt_c / dt
+      else
+        facdt = one / 3600.0_kp
+      endif
+!
       grav = con_g     ; cp    = con_cp   ; alhl = con_hvap
       alhf = con_hfus  ; rgas  = con_rd
       nu   = con_FVirt ; t0c   = con_t0c
@@ -186,9 +194,9 @@
       picon    = half*pi*onebg  ; zfac    = 0.28888889e-4_kp * ONEBG
       testmboalhl = testmb/alhl
 !
-      rvi  = one/rv       ; facw=CVAP-CLIQ 
-      faci = CVAP-CSOL    ; hsub=alhl+alhf
-      tmix = TTP-20.0_kp  ; DEN=one/(TTP-TMIX)
+      rvi  = one / rv       ; facw = CVAP - CLIQ 
+      faci = CVAP - CSOL    ; hsub = alhl + alhf
+      tmix = TTP  - 20.0_kp ; DEN  = one / (TTP-TMIX)
 !
 
       if (me == 0) write(0,*) ' NO DOWNDRAFT FOR CLOUD TYPES'           &
@@ -286,7 +294,7 @@
 !! \section arg_table_rascnv_run Argument Table
 !! \htmlinclude rascnv_run.html
 !!
-      subroutine rascnv_run(IM,             k,     ntr,     dt,   dtf   &
+      subroutine rascnv_run(IM,     k,      ntr,   dt,   dtf            &
      &,                     ccwf,   area,   dxmin, dxinv                &
      &,                     psauras, prauras, wminras, dlqf, flipv      &
      &,                     me,     rannum, nrcm,  mp_phys, mp_phys_mg  &
@@ -329,10 +337,12 @@
      &,                                          psauras(2), prauras(2) &
      &,                                          wminras(2), dlqf(2)
 !
-      real(kind=kind_phys), dimension(im,k)   :: tin, qin,  uin, vin    &
-     &,                                          prsl, prslk, phil
       real(kind=kind_phys), dimension(im,k+1) :: prsi, prsik, phii
-      real(kind=kind_phys), dimension(im,k)   :: ud_mf, dd_mf, dt_mf    &
+
+      real(kind=kind_phys), dimension(im,k)   :: tin, qin,  uin, vin    &
+     &,                                          prsl, prslk, phil      &
+
+     &,                                          ud_mf, dd_mf, dt_mf    &
      &,                                          rhc, qlcn, qicn, w_upi &
      &,                                          cnv_mfd                &
      &,                                          cnv_dqldt, clcn        &
@@ -344,7 +354,7 @@
       real(kind=kind_phys)                       ccin(im,k,ntr+2)
       real(kind=kind_phys)                       trcmin(ntr+2)
 
-      real(kind=kind_phys) DT, dtf, qw0, qi0
+      real(kind=kind_phys) DT, dtf
 !
 !     Added for aerosol scavenging for GOCART
 !
@@ -380,13 +390,13 @@
      &,                    ntrc, ia,  ll,   km1, kp1,  ipt, lv, KBL, n  &
      &,                    KRMIN, KRMAX, KFMAX, kblmx, irnd,ib          &
      &,                    kblmn, ksfc, ncrnd
-      real(kind=kind_phys) sgcs(k,im)
+      real(kind=kind_phys) sgcs(k)
 !
 !  Scavenging related parameters
 !
       real                fscav_(ntr+2)  ! Fraction scavenged per km
 !
-      fscav_ = zero                        ! By default no scavenging
+      fscav_ = zero                      ! By default no scavenging
       if (ntr > 0) then
         do i=1,ntr
           fscav_(i) = fscav(i)
@@ -425,7 +435,7 @@
       endif
 !
 !!!!! initialization for microphysics ACheng
-      if(mp_phys == 10) then
+      if(mp_phys == mp_phys_mg) then
         do l=1,K
           do i=1,im
             QLCN(i,l)      = zero
@@ -482,11 +492,12 @@
         KFMAX = KRMAX
         kblmx = 1
         kblmn = 1
+        sgcs(k) = one
         DO L=1,KM1
           ll = l
           if (flipv) ll = kp1 -l ! Input variables are bottom to top!
           SGC = prsl(ipt,ll) * tem
-          sgcs(l,ipt) = sgc
+          sgcs(l) = sgc
           IF (SGC <= 0.050_kp) KRMIN = L
 !         IF (SGC <= 0.700_kp) KRMAX = L
 !         IF (SGC <= 0.800_kp) KRMAX = L
@@ -500,6 +511,7 @@
         ENDDO
         krmin = max(krmin,2)
 
+!     if (kdt == 1 .and. ipt == 1) write(0,*)' kblmn=',kblmn,kblmx
 !
         if (fix_ncld_hr) then
 !!!       NCRND = min(nrcmax, (KRMAX-KRMIN+1)) * (DTF/1200) + 0.50001
@@ -510,10 +522,8 @@
 !         NCRND = min(nrcmax, (KRMAX-KRMIN+1)) * (DTF/360) + 0.50001
 !    &                                         + 0.50001
 !         NCRND = min(nrcmax, (KRMAX-KRMIN+1)) * min(1.0,DTF/360) + 0.1
-          facdt = delt_c / dt
         else
           NCRND = min(nrcmax, (KRMAX-KRMIN+1))
-          facdt = one / 3600.0_kp
         endif
         NCRND   = min(nrcm,max(NCRND, 1))
 !
@@ -779,6 +789,7 @@
 !
           IB = IC(NC)    ! cloud top level index
           if (ib > kbl-1) cycle
+!
 
 !
 !****************************************************************************
@@ -858,12 +869,12 @@
           rainp = rain
 
           CALL CLOUD(K,  KP1, IB, ntrc, kblmx, kblmn                    &
-     &,              FRAC,  MAX_NEG_BOUY, vsmooth, do_aw                &
+     &,              FRAC,  MAX_NEG_BOUY, vsmooth, aw_scal              &
      &,              REVAP, WRKFUN, CALKBL, CRTFUN                      &
      &,              DT, KDT, TLA, DPD                                  &
      &,              ALFINT, rhfacl, rhfacs, area(ipt)                  &
      &,              ccwfac, CDRAG(ipt), trcfac                         &
-     &,              alfind, rhc_l, phi_l, phi_h, PRS, PRSM,sgcs(1,ipt) &
+     &,              alfind, rhc_l, phi_l, phi_h, PRS, PRSM,sgcs        &
      &,              TOI, QOI, UVI, QLI, QII, KBL, DDVEL(ipt)           &
      &,              TCU, QCU, RCU, PCU, FLX, FLXD, RAIN, WFNC, fscav_  &
      &,              trcmin, ntk-2, c0, wminras(1), c0i, wminras(2)     &
@@ -880,15 +891,15 @@
             ll  = kp1 - ib
             dt_mf(ipt,ll) = dt_mf(ipt,ll) + flx(ib)
 
-            if (mp_phys == 10) then !         Anning Cheng for microphysics 11/14/2015
+            if (mp_phys == mp_phys_mg) then !         Anning Cheng for microphysics 11/14/2015
 
               CNV_MFD(ipt,ll)   = CNV_MFD(ipt,ll)   + flx(ib)/dt
 
-!             CNV_DQLDT(ipt,ll) = CNV_DQLDT(ipt,ll)
-!    &                          + max(0.,(QLI(ib)+QII(ib)-qiid-qlid))/dt
+!!            CNV_DQLDT(ipt,ll) = CNV_DQLDT(ipt,ll)
+!!   &                          + max(0.,(QLI(ib)+QII(ib)-qiid-qlid))/dt
               CNV_DQLDT(ipt,ll) = CNV_DQLDT(ipt,ll) + flx(ib)*          &
      &                            max(0.,(QLI(ib)+QII(ib)-qiid-qlid))/dt
-!    &                                max(0.,(QLI(ib)+QII(ib)))/dt/3.
+!!   &                                max(0.,(QLI(ib)+QII(ib)))/dt/3.
               if(flx(ib)<0) write(*,*)"AAA666", flx(ib),QLI(ib),QII(ib) &
      &                                       ,ipt,ll
             endif
@@ -901,16 +912,17 @@
             enddo
             dt_mf(ipt,ib) = dt_mf(ipt,ib) + flx(ib)
 
-            if (mp_phys == 10) then !         Anning Cheng for microphysics 11/14/2015
+            if (mp_phys == mp_phys_mg) then !         Anning Cheng for microphysics 11/14/2015
               CNV_MFD(ipt,ib)   = CNV_MFD(ipt,ib)   + flx(ib)/dt
-!             CNV_DQLDT(ipt,ib) = CNV_DQLDT(ipt,ib)
-!    &                          + max(0.,(QLI(ib)+QII(ib)-qiid-qlid))/dt
+!!            CNV_DQLDT(ipt,ib) = CNV_DQLDT(ipt,ib)
+!!   &                          + max(0.,(QLI(ib)+QII(ib)-qiid-qlid))/dt
               CNV_DQLDT(ipt,ib) = CNV_DQLDT(ipt,ib) + flx(ib)*          &
      &                            max(zero,(QLI(ib)+QII(ib)-qiid-qlid))/dt
-!    &                                max(0.,(QLI(ib)+QII(ib)))/dt/3.
+!!   &                                max(0.,(QLI(ib)+QII(ib)))/dt/3.
               if(flx(ib)<0) write(*,*)"AAA666", flx(ib),QLI(ib),QII(ib) &
      &                                       ,ipt,ib
             endif
+
           endif
 ! 
 !
@@ -944,9 +956,9 @@
 !         clw(i) = max(clw(i), zero)
 !         cli(i) = max(cli(i), zero)
 
-          if (sgcs(l,ipt) < 0.93_kp .and. abs(tcu(l)) > one_m10) then
-!         if (sgcs(l,ipt) < 0.90_kp .and. tcu(l) .ne. zero) then
-!         if (sgcs(l,ipt) < 0.85_kp .and. tcu(l) .ne. zero) then
+          if (sgcs(l) < 0.93_kp .and. abs(tcu(l)) > one_m10) then
+!         if (sgcs(l) < 0.90_kp .and. tcu(l) .ne. zero) then
+!         if (sgcs(l) < 0.85_kp .and. tcu(l) .ne. zero) then
              kcnv(ipt) = 1
           endif
 !  New test for convective clouds ! added in 08/21/96
@@ -967,7 +979,7 @@
             vin(ipt,ll) = uvi(l,ntr+2)            ! V momentum
 
 !!        for 2M microphysics, always output these variables
-            if (mp_phys == 10) then
+            if (mp_phys == mp_phys_mg) then
               if (advcld) then
                 QLCN(ipt,ll)     = max(qli(l)-ccin(ipt,ll,2), zero)
                 QICN(ipt,ll)     = max(qii(l)-ccin(ipt,ll,1), zero)
@@ -1018,7 +1030,7 @@
             vin(ipt,l) = uvi(l,ntr+2)             ! V momentum
 
 !!        for 2M microphysics, always output these variables
-            if (mp_phys == 10) then
+            if (mp_phys == mp_phys_mg) then
               if (advcld) then
                 QLCN(ipt,l)     = max(qli(l)-ccin(ipt,l,2), zero)
                 QICN(ipt,l)     = max(qii(l)-ccin(ipt,l,1), zero)
@@ -1071,7 +1083,7 @@
       end subroutine rascnv_run
       SUBROUTINE CLOUD(                                                 &
      &                  K, KP1, KD, NTRC, KBLMX, kblmn                  &
-     &,                 FRACBL, MAX_NEG_BOUY, vsmooth, do_aw            &
+     &,                 FRACBL, MAX_NEG_BOUY, vsmooth, aw_scal          &
      &,                 REVAP, WRKFUN, CALKBL, CRTFUN                   &
      &,                 DT, KDT, TLA, DPD                               &
      &,                 ALFINT, RHFACL, RHFACS, area, ccwf, cd, trcfac  &
@@ -1145,15 +1157,18 @@
      &,                                   RHRAM=0.05_kp                  & ! PBL RELATIVE HUMIDITY RAMP
 !    &,                                   RHRAM=0.15_kp                 !& ! PBL RELATIVE HUMIDITY RAMP
      &,                                   HCRITD=4000.0_kp               & ! Critical Moist Static Energy for Deep clouds
-     &,                                   HCRITS=2000.0_kp               & ! Critical Moist Static Energy for Shallow clouds
+!    &,                                   HCRITS=2000.0_kp               & ! Critical Moist Static Energy for Shallow clouds
+     &,                                   HCRITS=2500.0_kp               & ! Critical Moist Static Energy for Shallow clouds
      &,                                   pcrit_lcl=250.0_kp             & ! Critical pressure difference between boundary layer top
-                                                                          ! layer top and lifting condensation level (hPa)
-!    &,                                   hpert_fac=1.01_kp             !& ! Perturbation on hbl when ctei=.true.
-!    &,                                   hpert_fac=1.005_kp            !& ! Perturbation on hbl when ctei=.true.
+                                                                           ! layer top and lifting condensation level (hPa)
+!    &,                                   hpert_fac=1.01_kp              & ! Perturbation on hbl when ctei=.true.
+!    &,                                   hpert_fac=1.005_kp             & ! Perturbation on hbl when ctei=.true.
      &,                                   qudfac=quad_lam*half           &
      &,                                   shalfac=3.0_kp                 &
 !    &,                                   qudfac=quad_lam*pt25, shalfac=3.0_kp       !& !  Yogesh's
-     &,                                   c0ifac=0.07_kp                 &  ! following Han et al, 2016 MWR
+!    &,                                   c0ifac=0.07_kp                 & ! following Han et al, 2016 MWR
+!    &,                                   c0ifac=0.001_kp                & ! following Han et al, 2017 Weather and Forecasting
+     &,                                   c0ifac=0.0_kp                  &
      &,                                   dpnegcr  = 150.0_kp
 !    &,                                   dpnegcr  = 100.0_kp
 !    &,                                   dpnegcr  = 200.0_kp
@@ -1172,7 +1187,7 @@
 
 !     LOGICAL REVAP, WRKFUN, CALKBL, CRTFUN, CALCUP, ctei
       LOGICAL REVAP, WRKFUN, CALKBL, CRTFUN, CALCUP
-      logical vsmooth, do_aw
+      logical vsmooth, aw_scal
       INTEGER K, KP1, KD, NTRC, kblmx, kblmn, ntk
 
 
@@ -1405,7 +1420,8 @@
            hmax = hol(kmax)
          elseif (kmax < k) then
            do l=kmax+1,k
-             if (abs(hol(kmax)-hol(l)) > half * hcrit) then
+!            if (abs(hol(kmax)-hol(l)) > half * hcrit) then
+             if (abs(hol(kmax)-hol(l)) >        hcrit) then
                kmxb = l - 1
                exit
              endif
@@ -1435,7 +1451,6 @@
              endif
            enddo
          endif
-       
 !
          klcl = kd1
          if (kmax > kd1) then
@@ -1446,7 +1461,6 @@
              endif
            enddo
          endif
-!        if (klcl == kd .or. klcl < ktem) return
 
 !        This is to handle mid-level convection from quasi-uniform h
 
@@ -1463,7 +1477,6 @@
          kbl = max(klcl,kd1)
          tem = min(50.0_kp,max(10.0_kp,(prl(kmaxp1)-prl(kd))*0.10_kp))
          if (prl(kmaxp1) - prl(ii) > tem .and. ii > kbl) kbl = ii
-
 
          if (kbl .ne. ii) then
            if (PRL(kmaxp1)-PRL(KBL) > bldmax) kbl = max(kbl,ii)
@@ -1494,7 +1507,6 @@
 !        endif
 !        if (kbl == kblmx .and. kmax >= km1) kbl = k - 1
 !!!
-
          KPBL = KBL
 
       ELSE
@@ -1504,12 +1516,10 @@
       KBL = min(kmax,MAX(KBL,KD+2))
       KB1 = KBL - 1
 !!
-
       if (PRL(Kmaxp1)-PRL(KBL) > bldmax .or. kb1 <= kd ) then
 !    &          .or. PRL(Kmaxp1)-PRL(KBL) < bldmin) then
         return
       endif
-!
 !
       PRIS     = ONE / (PRL(KP1)-PRL(KBL))
       PRISM    = ONE / (PRL(Kmaxp1)-PRL(KBL))
@@ -1606,7 +1616,7 @@
           ENDDO
         ENDDO
 !
-!       if (ntk > 0 .and. do_aw) then
+!       if (ntk > 0 .and. aw_scal) then
         if (ntk > 0) then
           if (rbl(ntk) > zero) then
             wcbase = min(two, max(wcbase, sqrt(twoo3*rbl(ntk))))
@@ -1671,7 +1681,8 @@
       QLL(KD ) = ALHF * GAF(KD) * QIL(KD) + ONE
 !
       st1  = qil(kd)
-      st2  = c0i * st1 * exp(c0ifac*min(tol(kd)-t0c,zero))
+      st2  = c0i * st1
+      if (c0ifac > 1.0e-6_kp) st2  = st2 * exp(c0ifac*min(tol(kd)-t0c,zero))
       tem  = c0  * (one-st1)
       tem2 = st2*qi0 + tem*qw0
 !
@@ -1693,7 +1704,8 @@
          AKC(L) = one / AKT(L)
 !
          st1    = half * (qil(l)+qil(lp1))
-         st2    = c0i * st1 * exp(c0ifac*min(tol(lp1)-t0c,zero))
+         st2    = c0i * st1
+         if (c0ifac > 1.0e-6_kp) st2 = st2 * exp(c0ifac*min(tol(lp1)-t0c,zero))
          tem    = c0  * (one-st1)
          tem2   = st2*qi0 + tem*qw0
 !
@@ -1710,6 +1722,7 @@
       qi00 = qi0
       ii = 0
   777 continue
+
 !
       ep_wfn = .false.
       RNN(KBL) = zero
@@ -1734,7 +1747,6 @@
       ALM = ALHF*QIL(KD) - LTL(KD) * VTF(KD)
 !
       HSU = HST(KD) + LTL(KD) * NU * (QOL(KD)-QST(KD))
-
 !
 !===> VERTICAL INTEGRALS NEEDED TO COMPUTE THE ENTRAINMENT PARAMETER
 !
@@ -1787,10 +1799,8 @@
             if (tem1 > almax) tem1 = -100.0_kp
             if (tem2 > almax) tem2 = -100.0_kp
             alm  = max(tem1,tem2)
-
           endif
         endif
-
 !
 !  CLIP CASE:
 !   NON-ENTRAINIG CLOUD DETRAINS IN LOWER HALF OF TOP LAYER.
@@ -1887,7 +1897,6 @@
         ETAI(L) = one / ETA(L)
       ENDDO
       ETAI(KBL) = one
-
 !
 !===>  CLOUD WORKFUNCTION
 !
@@ -2046,7 +2055,6 @@
       TEM = max(0.05_kp, MIN(CD*200.0_kp, MAX_NEG_BOUY))
       IF (.not. cnvflg    .and. WFN > ACR .and.                         &
      &    dpneg < dpnegcr .and. AKM <= TEM)     CALCUP = .TRUE.
-
 !
 !===>  IF NO SOUNDING MEETS THIRD CONDITION, RETURN
 !
@@ -2118,7 +2126,6 @@
         ENDDO
 
       ENDIF
-
 !
 !===> CALCULATE GAMMAS  i.e. TENDENCIES PER UNIT CLOUD BASE MASSFLUX
 !           Includes downdraft terms!
@@ -2145,7 +2152,6 @@
 
       GMS(KD) = (DS + st1 - tem1*det*alhl-tem*alhf) * PRI(KD)
       GMH(KD) = PRI(KD) * (HCC-ETA(KD)*HOS + DH)
-
 !
 !      TENDENCY FOR SUSPENDED ENVIRONMENTAL ICE AND/OR LIQUID WATER
 !
@@ -2185,7 +2191,6 @@
 
          GMH(L)   = DH * PRI(L)
          GMS(L)   = DS * PRI(L)
-
 !
          GHD(L)   = TEM5 * PRI(L)
          GSD(L)   = (TEM5 - ALHL * TEM6) * PRI(L)
@@ -2225,7 +2230,6 @@
       GMS(K) = GMS(K) + TEM2
       GHD(K) = GHD(K) + TEM1
       GSD(K) = GSD(K) + TEM2
-
 !
       avh    = avh + gmh(K)*(prs(KP1)-prs(K))
 !
@@ -2241,7 +2245,7 @@
 !
         avh = avh + tx1*(prs(l+1)-prs(l))
       ENDDO
-
+!
 !
 !***********************************************************************
 !***********************************************************************
@@ -2303,7 +2307,6 @@
 !        hbl = hbl * hpert_fac
 !        qbl = qbl * hpert_fac
 !     endif
-
 
 !***********************************************************************
 
@@ -2400,7 +2403,7 @@
 !         tx1 = one - amb * eta(kd) / (rho(kd)*wvl(kd))
 !         sigf(kd) =  max(zero, min(one, tx1 * tx1))
 !       endif
-        if (do_aw) then
+        if (aw_scal) then
           tx1 = (0.2_kp / max(alm, 1.0e-5_kp))
           tx2 = one - min(one, pi * tx1 * tx1 / area)
 
@@ -2426,6 +2429,9 @@
         else
           sigf(kd:k) = one
         endif
+
+        tx1 = max(1.0e-3_kp, abs(gms(kd) * onebcp * sigf(kd)))
+        amb = min(tx1*amb, tfrac_max*toi(kd)) / tx1
 !
         avt = zero
         avq = zero
@@ -2512,7 +2518,6 @@
 !     endif
 
 !
-!
         TX1 = zero
         TX2 = zero
 !
@@ -2576,7 +2581,6 @@
      &         TEM4    = POTEVAP * (one - EXP( tx4*TX1**0.57777778_kp ))
                ACTEVAP = MIN(TX1, TEM4*CLFRAC)
 
-
                if (tx1 < rainmin*dt) actevap = min(tx1, potevap)
 !
                tem4    = zero
@@ -2593,7 +2597,7 @@
 !
 
                ST1     = ST1 * ELOCP
-               TOI(L)  = TOI(L) - ST1 
+               TOI(L)  = TOI(L) - ST1
                TCU(L)  = TCU(L) - ST1
              ENDIF
            ENDIF
@@ -2606,7 +2610,6 @@
           ENDDO
           CUP = CUP + TX1 + DOF * AMB * sigf(kbl)
         ENDIF
-
 !
 !    Convective transport (mixing) of passive tracers
 !
@@ -2639,10 +2642,11 @@
                 HOD(L) = HB
               ENDIF
             ENDDO
-             
+
             DO L=KB1,KD,-1
               HCC = HCC + (ETA(L)-ETA(L+1))*HOL(L)
             ENDDO
+
 !
 !         Scavenging -- fscav   - fraction scavenged [km-1]
 !                       delz    - distance from the entrainment to detrainment layer [km]
@@ -2690,7 +2694,7 @@
                 RCU(L,N) = RCU(L,N) + ST1
                 st2 = zero
               endif
-              
+
             ENDDO
           ENDDO                             ! Tracer loop NTRC
         endif
@@ -3300,6 +3304,7 @@
 !                endif
                ELSE
                  ERRQ = TX2                               ! Further iteration !
+
 !              if (itr == itrmu .and. ERRQ > ERRMIN*10                  &
 !    &            .and. ntla == 1) ERRQ = 10.0 
                ENDIF
@@ -3462,8 +3467,6 @@
           VT(1)  = GMS(L-1) * QRPF(QRP(L-1))
           RNT    = ROR(L-1) * (WVL(L-1)+VT(1))*QRP(L-1)
 
-!
-
 !         TEM    = MAX(ALM, 2.5E-4) * MAX(ETA(L), 1.0)
           TEM    = MAX(ALM,ONE_M6) * MAX(ETA(L), ONE)
 !         TEM    = MAX(ALM, 1.0E-5) * MAX(ETA(L), 1.0)
@@ -3559,7 +3562,7 @@
                   TEM2 = TX8
                   ST1  = zero
                 ENDIF
-!
+
                 st2 = tx5
                 TEM = ROR(L)*WVL(L) - ROR(L-1)*WVL(L-1)
                 if (tem > zero) then
@@ -3620,6 +3623,7 @@
                 ENDIF
                 ERRH  = HOD(L) - TEM1
                 ERRQ  = ABS(ERRH/HOD(L))  + ABS(ERRE/MAX(ETD(L),ONE_M5))
+
                 DOF   = DDZ
                 VT(2) = QQQ
 !
@@ -3678,6 +3682,7 @@
 !                                              Compute Buoyancy
                 TEM1   = WA(3) + (HOD(L)-WA(1)-ALHL*(QOD(L)-WA(2)))     &
      &                         * onebcp
+
                 TEM1   = TEM1 * (one + NU*QOD(L))
                 ROR(L) = CMPOR * PRL(L) / TEM1
                 TEM1   = TEM1 * DOFW
@@ -3689,6 +3694,7 @@
                 TEM1   = WVL(L)
                 WVL(L) = VT(2) * (ETD(L-1)*WVL(L-1) - FACG              &
      &                   * (BUY(L-1)*QRT(L-1)+BUY(L)*QRB(L-1)))
+!
 !
                 if (wvl(l) < zero) then
 !                 WVL(L) = max(wvl(l), 0.1*tem1)
@@ -3709,7 +3715,9 @@
 
 !               IF (ITR >= MIN(ITRMIN,ITRMD/2)) THEN
                 IF (ITR >= MIN(ITRMND,ITRMD/2)) THEN
+
                   IF (ETD(L-1) == zero .AND. ERRQ > 0.2_kp) THEN
+
                     ROR(L) = BUD(KD)
                     ETD(L) = zero
                     WVL(L) = zero
@@ -3878,7 +3886,6 @@
                 if (tx5 > zero) idnm  = idnm + 1
               endif
             ENDIF
-
 ! 
 !     If downdraft properties are not obtainable, (i.e.solution does
 !      not converge) , no downdraft is assumed
@@ -4095,7 +4102,7 @@
       SUBROUTINE SETVTP
       implicit none
 
-      real(kind=kind_phys), parameter :: vtpexp=-0.3636_kp, one=1.0_kp
+      real(kind=kind_phys), parameter :: vtpexp=-0.3636_kp
       real(kind=kind_phys) xinc,x,xmax,xmin
       integer jx
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
