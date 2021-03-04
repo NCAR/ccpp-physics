@@ -180,9 +180,9 @@
      &       sfcnirbmd,sfcnirdfd,sfcvisbmd,sfcvisdfd,                   &
      &       im, levs, deltim, fhswr,                                   &
      &       dry, icy, wet,                                             &
-     &       minGPpres, use_LW_jacobian, sfculw, sfculw_jac, sfcdlw_jac,&
-     &       t_lay, tgrs, p_lay, p_lev, flux2D_lwUP, flux2D_lwDOWN,     &
-     &       t_lev,                                                     &
+     &       minGPpres, tsfc, use_LW_jacobian, sfculw, sfculw_jac,      &
+     &       sfcdlw_jac, t_lay, t_lev, p_lay, p_lev, flux2D_lwUP,       &
+     &       flux2D_lwDOWN,                                             &
 !    &       dry, icy, wet, lprnt, ipr,                                 &
 !  ---  input/output:
      &       dtdt,dtdtc,                                                &
@@ -221,7 +221,7 @@
 
       real(kind=kind_phys), dimension(im), intent(in) ::                &
      &      sinlat, coslat, xlon, coszen, tf, tsflw, sfcdlw,            &
-     &      sfcdsw, sfcnsw, sfculw
+     &      sfcdsw, sfcnsw, sfculw, tsfc
 
       real(kind=kind_phys), dimension(im), intent(in) ::                &
      &                         tsfc_lnd, tsfc_ice, tsfc_wat,            &
@@ -234,8 +234,7 @@
       real(kind=kind_phys), dimension(im,levs), intent(in) :: swh,  hlw &
      &     ,swhc, hlwc, p_lay, t_lay
       real(kind=kind_phys), dimension(im,levs+1), intent(in) :: p_lev,  &
-     &     flux2D_lwUP, flux2D_lwDOWN, sfculw_jac, sfcdlw_jac, t_lev,   &
-     &     tgrs
+     &     flux2D_lwUP, flux2D_lwDOWN, sfculw_jac, sfcdlw_jac, t_lev
 
 !  ---  input/output:
       real(kind=kind_phys), dimension(im,levs), intent(inout) :: dtdt   &
@@ -363,7 +362,7 @@
          !
          ! Compute temperatute at level interfaces.
          !
-         call cmp_tlev(im, levs, minGPpres, p_lay, tgrs, p_lev, tsflw,  &
+         call cmp_tlev(im, levs, minGPpres, p_lay, t_lay, p_lev, tsfc,  &
      &        t_lev2)
          !
          ! Adjust up/downward fluxes (at layer interfaces).
