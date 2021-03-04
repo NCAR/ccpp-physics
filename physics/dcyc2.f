@@ -180,7 +180,9 @@
      &       sfcnirbmd,sfcnirdfd,sfcvisbmd,sfcvisdfd,                   &
      &       im, levs, deltim, fhswr,                                   &
      &       dry, icy, wet,                                             &
-     &       use_LW_jacobian, sfculw, sfculw_jac,                       &
+     &       minGPpres, use_LW_jacobian, sfculw, sfculw_jac, sfcdlw_jac,&
+     &       t_lay, tgrs, p_lay, p_lev, flux2D_lwUP, flux2D_lwDOWN,     &
+     &       t_lev,                                                     &
 !    &       dry, icy, wet, lprnt, ipr,                                 &
 !  ---  input/output:
      &       dtdt,dtdtc,                                                &
@@ -194,7 +196,8 @@
 !
       use machine,         only : kind_phys
       use physcons,        only : con_pi, con_sbc
-
+      use mo_heating_rates,only : compute_heating_rate
+      use rrtmgp_aux,      only : cmp_tlev
       implicit none
 !
 !  ---  constant parameters:
@@ -214,11 +217,11 @@
       logical, dimension(im), intent(in) :: dry, icy, wet
       logical, intent(in) :: use_LW_jacobian
       real(kind=kind_phys),   intent(in) :: solhr, slag, cdec, sdec,    &
-     &                                      deltim, fhswr
+     &                                      deltim, fhswr, minGPpres
 
       real(kind=kind_phys), dimension(im), intent(in) ::                &
      &      sinlat, coslat, xlon, coszen, tf, tsflw, sfcdlw,            &
-     &      sfcdsw, sfcnsw, sfculw, sfculw_jac
+     &      sfcdsw, sfcnsw, sfculw
 
       real(kind=kind_phys), dimension(im), intent(in) ::                &
      &                         tsfc_lnd, tsfc_ice, tsfc_wat,            &
@@ -229,7 +232,10 @@
      &      sfcnirbmd, sfcnirdfd, sfcvisbmd, sfcvisdfd
 
       real(kind=kind_phys), dimension(im,levs), intent(in) :: swh,  hlw &
-     &,                                                       swhc, hlwc
+     &     ,swhc, hlwc, p_lay, t_lay
+      real(kind=kind_phys), dimension(im,levs+1), intent(in) :: p_lev,  &
+     &     flux2D_lwUP, flux2D_lwDOWN, sfculw_jac, sfcdlw_jac, t_lev,   &
+     &     tgrs
 
 !  ---  input/output:
       real(kind=kind_phys), dimension(im,levs), intent(inout) :: dtdt   &
@@ -251,6 +257,9 @@
       integer :: i, k, nstp, nstl, it, istsun(im)
       real(kind=kind_phys) :: cns,  coszn, tem1, tem2, anginc,          &
      &                        rstl, solang, dT
+      real(kind=kind_phys), dimension(im,levs) :: htrlw
+      real(kind=kind_phys), dimension(im,levs+1) :: flxlwup_adj,        &
+     &     flxlwdn_adj, t_lev2
 !
 !===> ...  begin here
 !
@@ -300,11 +309,7 @@
          tem2 = tem1 * tem1
          adjsfcdlw(i) = sfcdlw(i) * tem2 * tem2
 !> - LW time-step adjustment:
-         if (use_LW_Jacobian) then
-            ! F_adj = F_o + (dF/dT) * dT	
-            dT           = tf(i) - tsflw(i)
-            adjsfculw(i) = sfculw(i) + sfculw_jac(i) * dT
-         else
+         if (.not. use_LW_Jacobian) then
 !!  - adjust \a sfc downward LW flux to account for t changes in the lowest model layer.
 !! compute 4th power of the ratio of \c tf in the lowest model layer over the mean value \c tsflw.
            if (dry(i)) then
@@ -353,14 +358,47 @@
       enddo
 
 !>  - adjust SW heating rates with zenith angle change and
-!! add with LW heating to temperature tendency.
-
-      do k = 1, levs
-        do i = 1, im
-          dtdt(i,k)  = dtdt(i,k)  + swh(i,k)*xmu(i)  + hlw(i,k)
-          dtdtc(i,k) = dtdtc(i,k) + swhc(i,k)*xmu(i) + hlwc(i,k)
-        enddo
-      enddo
+!     add with LW heating to temperature tendency.
+      if (use_LW_jacobian) then
+         !
+         ! Compute temperatute at level interfaces.
+         !
+         call cmp_tlev(im, levs, minGPpres, p_lay, t_lay, p_lev, tsflw, &
+     &        t_lev2)
+         !
+         ! Adjust up/downward fluxes (at layer interfaces).
+         !
+         do k = 1, levs+1
+            do i = 1, im
+               dT = t_lev(i,k) - t_lev2(i,k)
+               flxlwup_adj(i,k) = flux2D_lwUP(i,k) +                    &
+     &              sfculw_jac(i,k)*dT
+               flxlwdn_adj(i,k) = flux2D_lwDOWN(i,k) +                  &
+     &              sfcdlw_jac(i,k)*dT
+            enddo
+         enddo
+         !
+         ! Compute new heating rate (within each layer).
+         !
+         errmsg = compute_heating_rate(flxlwup_adj, flxlwdn_adj,        &
+     &                                 p_lev, htrlw)
+         !
+         ! Add radiative heating rates to physics heating rate
+         !
+         do k = 1, levs
+            do i = 1, im
+               dtdt(i,k)  = dtdt(i,k)  + swh(i,k)*xmu(i)  + htrlw(i,k)
+               dtdtc(i,k) = dtdtc(i,k) + swhc(i,k)*xmu(i) + hlwc(i,k)
+            enddo
+         enddo
+      else
+         do k = 1, levs
+            do i = 1, im
+               dtdt(i,k)  = dtdt(i,k)  + swh(i,k)*xmu(i)  + hlw(i,k)
+               dtdtc(i,k) = dtdtc(i,k) + swhc(i,k)*xmu(i) + hlwc(i,k)
+            enddo
+         enddo
+      endif
 !
       return
 !...................................
