@@ -12,10 +12,10 @@
 !> \section arg_table_rrtmg_sw_pre_run Argument Table
 !! \htmlinclude rrtmg_sw_pre_run.html
 !!
-      subroutine rrtmg_sw_pre_run (im, lndp_type, n_var_lndp, lsswr, lndp_var_list, lndp_prt_list, tsfg, tsfa, coszen,     &
-        alb1d, slmsk, snowd, sncovr, snoalb, zorl, hprime, alvsf, alnsf, alvwf,&
-        alnwf, facsf, facwf, fice, tisfc, sfalb, nday, idxday, sfcalb1,        &
-        sfcalb2, sfcalb3, sfcalb4, errmsg, errflg)
+      subroutine rrtmg_sw_pre_run (im, lndp_type, n_var_lndp, lsswr, lndp_var_list, lndp_prt_list, tsfg, tsfa, coszen, &
+                                   alb1d, slmsk, snowd, sncovr, snoalb, zorl, hprime, alvsf, alnsf, alvwf,             &
+                                   alnwf, facsf, facwf, fice, tisfc, albdvis, albdnir, albivis, albinir,               &
+                                   sfalb, nday, idxday, sfcalb1, sfcalb2, sfcalb3, sfcalb4, errmsg, errflg)
 
       use machine,                   only: kind_phys
 
@@ -36,6 +36,8 @@
                                                              alvwf, alnwf,     &
                                                              facsf, facwf,     &
                                                              fice, tisfc
+      real(kind=kind_phys), dimension(:),   intent(in)    :: albdvis, albdnir, & 
+                                                             albivis, albinir
       real(kind=kind_phys), dimension(im),  intent(inout) :: sfalb
       integer,                              intent(out)   :: nday
       integer, dimension(im),               intent(out)   :: idxday
@@ -83,8 +85,9 @@
 
         call setalb (slmsk, snowd, sncovr, snoalb, zorl,  coszen, tsfg, tsfa,  &  !  ---  inputs
                      hprime, alvsf, alnsf, alvwf, alnwf, facsf, facwf, fice,   &
-                     tisfc, IM, alb1d, lndp_alb,                               &  !  mg, sfc-perts
-                     sfcalb)                                           !  ---  outputs
+                     tisfc, albdvis, albdnir, albivis, albinir,IM, alb1d,      &  !  mg, sfc-perts
+                     lndp_alb, sfcalb)                                            !  ---  outputs
+
 
 !> -# Approximate mean surface albedo from vis- and nir-  diffuse values.
         sfalb(:) = max(0.01, 0.5 * (sfcalb(:,2) + sfcalb(:,4)))

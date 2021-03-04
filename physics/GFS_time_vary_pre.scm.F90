@@ -1,4 +1,4 @@
-!> \file GFS_time_vary_pre.F90
+!> \file GFS_time_vary_pre.scm.F90
 !!  Contains code related to GFS physics suite setup (generic part of time_vary_step)
 
    module GFS_time_vary_pre
@@ -9,7 +9,7 @@
 
       private
 
-      public GFS_time_vary_pre_init, GFS_time_vary_pre_run, GFS_time_vary_pre_finalize
+      public GFS_time_vary_pre_init, GFS_time_vary_pre_timestep_init, GFS_time_vary_pre_finalize
 
       logical :: is_initialized = .false.
 
@@ -62,10 +62,10 @@
       end subroutine GFS_time_vary_pre_finalize
 
 
-!> \section arg_table_GFS_time_vary_pre_run Argument Table
-!! \htmlinclude GFS_time_vary_pre_run.html
+!> \section arg_table_GFS_time_vary_pre_timestep_init Argument Table
+!! \htmlinclude GFS_time_vary_pre_timestep_init.html
 !!
-      subroutine GFS_time_vary_pre_run (jdat, idat, dtp, lsm, lsm_noahmp, nsswr, &
+      subroutine GFS_time_vary_pre_timestep_init (jdat, idat, dtp, lsm, lsm_noahmp, nsswr, &
         nslwr, idate, debug, me, master, nscyc, sec, phour, zhour, fhour, kdt,   &
         julian, yearlen, ipt, lprnt, lssav, lsswr, lslwr, solhr, errmsg, errflg)
 
@@ -104,7 +104,7 @@
 
         ! Check initialization status
         if (.not.is_initialized) then
-           write(errmsg,'(*(a))') "Logic error: GFS_time_vary_pre_run called &
+           write(errmsg,'(*(a))') "Logic error: GFS_time_vary_pre_timestep_init called &
                                   &before GFS_time_vary_pre_init"
            errflg = 1
            return
@@ -185,6 +185,6 @@
           print *,' solhr ', solhr
         endif
 
-      end subroutine GFS_time_vary_pre_run
+      end subroutine GFS_time_vary_pre_timestep_init
 
     end module GFS_time_vary_pre
