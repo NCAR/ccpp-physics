@@ -21,7 +21,6 @@ module mp_thompson
       private
 
       logical :: is_initialized = .False.
-      logical :: convert_dry_rho = .False.
 
    contains
 
@@ -31,6 +30,7 @@ module mp_thompson
 !!
       subroutine mp_thompson_init(ncol, nlev, con_g, con_rd, restart,   &
                                   imp_physics, imp_physics_thompson,    &
+                                  convert_dry_rho,                      &
                                   spechum, qc, qr, qi, qs, qg, ni, nr,  &
                                   is_aerosol_aware, nc, nwfa2d, nifa2d, &
                                   nwfa, nifa, tgrs, prsl, phil, area,   &
@@ -48,6 +48,7 @@ module mp_thompson
          integer,                   intent(in   ) :: imp_physics
          integer,                   intent(in   ) :: imp_physics_thompson
          ! Hydrometeors
+         logical,                   intent(in   ) :: convert_dry_rho
          real(kind_phys),           intent(inout) :: spechum(:,:)
          real(kind_phys),           intent(inout) :: qc(:,:)
          real(kind_phys),           intent(inout) :: qr(:,:)
@@ -83,10 +84,11 @@ module mp_thompson
          integer,                   intent(  out) :: errflg
 
          !
-         real(kind_phys) :: qv(1:ncol,1:nlev)    ! kg kg-1 (water vapor mixing ratio)
-         real(kind_phys) :: hgt(1:ncol,1:nlev)   ! m
-         real(kind_phys) :: rho(1:ncol,1:nlev)   ! kg m-3
-         real(kind_phys) :: orho(1:ncol,1:nlev)  ! m3 kg-1
+         real(kind_phys) :: qv(1:ncol,1:nlev)       ! kg kg-1 (water vapor mixing ratio)
+         real(kind_phys) :: hgt(1:ncol,1:nlev)      ! m
+         real(kind_phys) :: rho(1:ncol,1:nlev)      ! kg m-3
+         real(kind_phys) :: orho(1:ncol,1:nlev)     ! m3 kg-1
+         real(kind_phys) :: nc_local(1:ncol,1:nlev) ! needed because nc is only allocated if is_aerosol_aware is true
          !
          real (kind=kind_phys) :: h_01, airmass, niIN3, niCCN3
          integer :: i, k
@@ -134,8 +136,27 @@ module mp_thompson
          where(qs<0)      qs = 0.0
          where(qg<0)      qg = 0.0
 
-         ! Convert specific humidity to water vapor mixing ratio
+         !> - Convert specific humidity to water vapor mixing ratio.
+         !> - Also, hydrometeor variables are mass or number mixing ratio
+         !> - either kg of species per kg of dry air, or per kg of (dry + vapor).
+
          qv = spechum/(1.0_kind_phys-spechum)
+
+         if (convert_dry_rho) then
+           qc = qc/(1.0_kind_phys-spechum)
+           qr = qr/(1.0_kind_phys-spechum)
+           qi = qi/(1.0_kind_phys-spechum)
+           qs = qs/(1.0_kind_phys-spechum)
+           qg = qg/(1.0_kind_phys-spechum)
+
+           ni = ni/(1.0_kind_phys-spechum)
+           nr = nr/(1.0_kind_phys-spechum)
+           if (is_aerosol_aware) then
+              nc = nc/(1.0_kind_phys-spechum)
+              nwfa = nwfa/(1.0_kind_phys-spechum)
+              nifa = nifa/(1.0_kind_phys-spechum)
+           end if
+         end if
 
          ! Density of moist air in kg m-3 and inverse density of air
          rho = 0.622*prsl/(con_rd*tgrs*(qv+0.622))
@@ -229,17 +250,20 @@ module mp_thompson
            ! Ensure we have 1st guess cloud droplet number where mass non-zero but no number.
            where(qc .LE. 0.0) nc=0.0
            where(qc .GT. 0 .and. nc .LE. 0.0) nc = make_DropletNumber(qc*rho, nwfa*rho) * orho
-           where(qc .EQ. 0.0 .and. nc .GT. 0.0) nc=0.0
+           where(qc .EQ. 0.0 .and. nc .GT. 0.0) nc = 0.0
 
            ! Ensure non-negative aerosol number concentrations.
            where(nwfa .LE. 0.0) nwfa = 1.1E6
            where(nifa .LE. 0.0) nifa = naIN1*0.01
 
+           ! Copy to local array for calculating cloud effective radii below
+           nc_local = nc
+
          else
 
            ! Constant droplet concentration for single moment cloud water as in
            ! module_mp_thompson.F90, only needed for effective radii calculation
-           nc = Nt_c/rho
+           nc_local = Nt_c/rho
 
          end if
 
@@ -247,8 +271,8 @@ module mp_thompson
          if (present(re_cloud) .and. present(re_ice) .and. present(re_snow)) then
            ! Effective radii [m] are now intent(out), bounds applied in calc_effectRad
            do i = 1, ncol
-             call calc_effectRad (tgrs(i,:), prsl(i,:), qv(i,:), qc(i,:),     &
-                                  nc(i,:), qi(i,:), ni(i,:), qs(i,:),         &
+             call calc_effectRad (tgrs(i,:), prsl(i,:), qv(i,:), qc(i,:),          &
+                                  nc_local(i,:), qi(i,:), ni(i,:), qs(i,:),        &
                                   re_cloud(i,:), re_ice(i,:), re_snow(i,:), 1, nlev)
              do k = 1, nlev
                re_cloud(i,k) = MAX(re_qc_min, MIN(re_cloud(i,k), re_qc_max))
@@ -271,6 +295,22 @@ module mp_thompson
            return
          end if
 
+         if (convert_dry_rho) then
+           !qc = qc/(1.0_kind_phys+qv)
+           !qr = qr/(1.0_kind_phys+qv)
+           !qi = qi/(1.0_kind_phys+qv)
+           !qs = qs/(1.0_kind_phys+qv)
+           !qg = qg/(1.0_kind_phys+qv)
+
+           ni = ni/(1.0_kind_phys+qv)
+           nr = nr/(1.0_kind_phys+qv)
+           if (is_aerosol_aware) then
+              nc = nc/(1.0_kind_phys+qv)
+              nwfa = nwfa/(1.0_kind_phys+qv)
+              nifa = nifa/(1.0_kind_phys+qv)
+           end if
+         end if
+
          is_initialized = .true.
 
       end subroutine mp_thompson_init
@@ -283,6 +323,7 @@ module mp_thompson
 !>\section gen_thompson_hrrr Thompson MP General Algorithm
 !>@{
       subroutine mp_thompson_run(ncol, nlev, con_g, con_rd,        &
+                              convert_dry_rho,                     &
                               spechum, qc, qr, qi, qs, qg, ni, nr, &
                               is_aerosol_aware, nc, nwfa, nifa,    &
                               nwfa2d, nifa2d,                      &
@@ -303,6 +344,7 @@ module mp_thompson
          real(kind_phys),           intent(in   ) :: con_g
          real(kind_phys),           intent(in   ) :: con_rd
          ! Hydrometeors
+         logical,                   intent(in   ) :: convert_dry_rho
          real(kind_phys),           intent(inout) :: spechum(1:ncol,1:nlev)
          real(kind_phys),           intent(inout) :: qc(1:ncol,1:nlev)
          real(kind_phys),           intent(inout) :: qr(1:ncol,1:nlev)

@@ -423,9 +423,7 @@ MODULE module_mp_thompson
 
 !..If SIONlib isn't used, write Thompson tables with master MPI task
 !.. after computing them in thompson_init
-#ifndef SION
       LOGICAL:: thompson_table_writer
-#endif
 
 !+---+
 !+---+-----------------------------------------------------------------+
@@ -767,7 +765,7 @@ MODULE module_mp_thompson
          precomputed_tables = .false.
          if (mpirank==mpiroot) write(0,*) "An error occurred reading Thompson tables from disk, recalculate"
       end if
-#else
+#endif
       ! Standard tables are only written by master MPI task;
       ! (physics init cannot be called by multiple threads,
       !  hence no need to test for a specific thread number)
@@ -776,7 +774,6 @@ MODULE module_mp_thompson
       else
          thompson_table_writer = .false.
       end if
-#endif
 
       precomputed_tables_1: if (.not.precomputed_tables) then
 
@@ -3847,7 +3844,7 @@ MODULE module_mp_thompson
 #ifndef SION
         if (thompson_table_writer) write_thompson_tables = .true.
 #endif
-        write(0,*) "ThompMP: computing qr_acr_qg"
+        if (thompson_table_writer) write(0,*) "ThompMP: computing qr_acr_qg"
         do n2 = 1, nbr
 !        vr(n2) = av_r*Dr(n2)**bv_r * DEXP(-fv_r*Dr(n2))
          vr(n2) = -0.1021 + 4.932E3*Dr(n2) - 0.9551E6*Dr(n2)*Dr(n2)     &
@@ -4029,7 +4026,7 @@ MODULE module_mp_thompson
 #ifndef SION
         if (thompson_table_writer) write_thompson_tables = .true.
 #endif
-        write(0,*) "ThompMP: computing qr_acr_qs"
+        if (thompson_table_writer) write(0,*) "ThompMP: computing qr_acr_qs"
         do n2 = 1, nbr
 !        vr(n2) = av_r*Dr(n2)**bv_r * DEXP(-fv_r*Dr(n2))
          vr(n2) = -0.1021 + 4.932E3*Dr(n2) - 0.9551E6*Dr(n2)*Dr(n2)     &
@@ -4284,7 +4281,7 @@ MODULE module_mp_thompson
 #ifndef SION
         if (thompson_table_writer) write_thompson_tables = .true.
 #endif
-        write(0,*) "ThompMP: computing freezeH2O"
+        if (thompson_table_writer) write(0,*) "ThompMP: computing freezeH2O"
 
         orho_w = 1./rho_w
 
