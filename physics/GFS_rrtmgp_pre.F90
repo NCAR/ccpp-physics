@@ -206,7 +206,7 @@ contains
     do iCol=1,NCOL
        do iLay=1,nLev
           if (t_lay(iCol,iLay) .le. minGPtemp) then
-             t_lay = minGPtemp + epsilon(minGPtemp)
+             t_lay(iCol,iLay) = minGPtemp + epsilon(minGPtemp)
           endif
        enddo
     enddo
