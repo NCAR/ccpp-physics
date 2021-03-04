@@ -363,7 +363,7 @@
          !
          ! Compute temperatute at level interfaces.
          !
-         call cmp_tlev(im, levs, minGPpres, p_lay, t_lay, p_lev, tsflw, &
+         call cmp_tlev(im, levs, minGPpres, p_lay, tgrs, p_lev, tsflw,  &
      &        t_lev2)
          !
          ! Adjust up/downward fluxes (at layer interfaces).

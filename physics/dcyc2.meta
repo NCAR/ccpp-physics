@@ -587,18 +587,18 @@
   intent = in
   optional = F
 [p_lay]
-  standard_name = air_pressure_at_layer_for_RRTMGP_in_hPa
-  long_name = air pressure at vertical layer for radiation calculation
-  units = hPa
+  standard_name = air_pressure
+  long_name = mean layer pressure
+  units = Pa
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [p_lev]
-  standard_name = air_pressure_at_interface_for_RRTMGP_in_hPa
-  long_name = air pressure level
-  units = hPa
+  standard_name = air_pressure_at_interface
+  long_name = air pressure at model layer interfaces
+  units = Pa
   dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
   type = real
   kind = kind_phys
