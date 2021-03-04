@@ -686,7 +686,8 @@
     subroutine GFS_suite_interstitial_4_run (im, levs, ltaerosol, cplchm, tracers_total, ntrac, ntcw, ntiw, ntclamt, &
       ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,  &
       imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, dtf, save_qc, save_qi, con_pi,                               &
-      gq0, clw, prsl, save_tcp, con_rd, nwfa, spechum, dqdti, errmsg, errflg)
+      gq0, clw, prsl, save_tcp, con_rd, nwfa, spechum, dqdti, dtidx, dtend, ntk, ntke, ldiag3d, &
+      index_for_cause_conv_trans, errmsg, errflg)
 
       use machine,               only: kind_phys
       use module_mp_thompson_make_number_concentrations, only: make_IceNumber, make_DropletNumber
@@ -706,6 +707,12 @@
       ! save_qi is not allocated for Zhao-Carr MP
       real(kind=kind_phys), dimension(:, :),    intent(in) :: save_qi
 
+      ! dtend and dtidx are only allocated if ldiag3d
+      logical, intent(in)                                     :: ldiag3d
+      real(kind=kind_phys), dimension(:,:,:),   intent(inout) :: dtend
+      integer,              dimension(:,:),     intent(in)    :: dtidx
+      integer,                                  intent(in)    :: index_for_cause_conv_trans,ntk,ntke
+
       real(kind=kind_phys), dimension(im,levs,ntrac), intent(inout) :: gq0
       real(kind=kind_phys), dimension(im,levs,nn),    intent(inout) :: clw
       real(kind=kind_phys), dimension(im,levs),       intent(in) :: prsl
@@ -722,7 +729,7 @@
       integer,          intent(out) :: errflg
 
       ! local variables
-      integer :: i,k,n,tracers
+      integer :: i,k,n,tracers,idtend
 
       real(kind=kind_phys), dimension(im,levs) :: rho_dryair
       real(kind=kind_phys), dimension(im,levs) :: qv_mp !< kg kg-1 (dry mixing ratio)
@@ -734,6 +741,28 @@
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+
+      if(ldiag3d) then
+         if(ntk>0 .and. ntk<=size(clw,3)) then
+            idtend=dtidx(100+ntke,index_for_cause_conv_trans)
+            if(idtend>1) then
+               dtend(:,:,idtend) = dtend(:,:,idtend) + clw(:,:,ntk)
+            endif
+         endif
+         if(ntclamt<=size(clw,3) .and. ntclamt>0) then
+            idtend=dtidx(100+ntclamt,index_for_cause_conv_trans)
+            if(idtend>1) then
+               dtend(:,:,idtend) = dtend(:,:,idtend) + clw(:,:,ntclamt)
+            endif
+         endif
+      endif
+
+      if(ldiag3d .and. ntk>0) then
+         idtend=dtidx(100+ntke,index_for_cause_conv_trans)
+         if(idtend>1) then
+            dtend(:,:,idtend) = dtend(:,:,idtend) + clw(:,:,ntk)
+         endif
+      endif
 
 !  --- update the tracers due to deep & shallow cumulus convective transport
 !           (except for suspended water and ice)

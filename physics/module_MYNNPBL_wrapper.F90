@@ -338,7 +338,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
          write(0,*)"flag_restart=",flag_restart
       endif
 
-      if(flag_for_pbl_generic_tend .and. ldiag3d) then
+      if(.not. flag_for_pbl_generic_tend .and. ldiag3d) then
         idtend = dtidx(ntke+100,index_for_cause_pbl)
         if(idtend>1) then
           allocate(save_qke_adv(im,levs))
@@ -916,6 +916,12 @@ SUBROUTINE mynnedmf_wrapper_run(        &
        endif
 
        if(allocated(save_qke_adv)) then
+         if(ldiag3d .and. .not. flag_for_pbl_generic_tend) then
+           idtend = dtidx(100+ntke,index_for_cause_pbl)
+           if(idtend>1) then
+             dtend(:,:,idtend) = dtend(:,:,idtend) + qke_adv-save_qke_adv
+           endif
+         endif
          deallocate(save_qke_adv)
        endif
 

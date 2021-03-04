@@ -1905,6 +1905,55 @@
   kind = kind_phys
   intent = inout
   optional = F
+[dtidx]
+  standard_name = dtend_outer_index
+  long_name = index in outer dimension of dtend of a tracer-cause pair
+  units = index
+  dimensions = (number_of_tracers_plus_one_hundred,number_of_possible_causes_of_tracer_changes)
+  type = integer
+  intent = in
+  optional = F
+[dtend]
+  standard_name = diagnostic_3d_tendencies
+  long_name = diagnostic 3d tendencies for tracers and other fields
+  units = various
+  dimensions = (horizontal_loop_extent,vertical_dimension,dtend_outer_index_max)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[ntk]
+  standard_name = index_for_turbulent_kinetic_energy_convective_transport_tracer
+  long_name = index for turbulent kinetic energy in the convectively transported tracer array
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntke]
+  standard_name = index_for_turbulent_kinetic_energy
+  long_name = tracer index for turbulent kinetic energy
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ldiag3d]
+  standard_name = flag_diagnostics_3D
+  long_name = flag for 3d diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[index_for_cause_conv_trans]
+  standard_name = index_for_cause_conv_trans
+  long_name = tracer changes caused by convective transport of tracers
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

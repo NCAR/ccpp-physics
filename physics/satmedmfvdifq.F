@@ -1459,12 +1459,23 @@ c
           do kk = 2, ntrac1
             is = (kk-1) * km
             idtend = dtidx(kk+100,index_for_cause_pbl)
-            do k = 1, km
-              do i = 1, im
-                qtend = (f2(i,k+is)-q1(i,k,kk))*rdt
-                dtend(i,k,idtend) = dtend(i,k,idtend)+qtend*delt
-              enddo
-            enddo
+            if(idtend>1) then
+              if(kk==ntke) then
+                do k = 1, km
+                  do i = 1, im
+                    qtend = (f1(i,k)-q1(i,k,kk))*rdt
+                    dtend(i,k,idtend) = dtend(i,k,idtend)+qtend*delt
+                  enddo
+                enddo
+              else
+                do k = 1, km
+                  do i = 1, im
+                    qtend = (f2(i,k+is)-q1(i,k,kk))*rdt
+                    dtend(i,k,idtend) = dtend(i,k,idtend)+qtend*delt
+                  enddo
+                enddo
+              endif
+            endif
           enddo
         endif
       endif

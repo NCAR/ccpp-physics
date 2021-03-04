@@ -296,6 +296,13 @@
               save_q(i,k,ntoz) = qgrs(i,k,ntoz)
             enddo
           enddo
+          if(ntke>0) then
+            do k=1,levs
+              do i=1,im
+                save_q(i,k,ntke) = qgrs(i,k,ntke)
+              enddo
+            enddo
+          endif
         endif
       endif
 
@@ -648,6 +655,10 @@
           idtend = dtidx(100+ntoz, index_for_cause_pbl)
           if(idtend>1) then
             dtend(1:im,1:levs,idtend) = dtend(1:im,1:levs,idtend) + qgrs(1:im,1:levs,ntoz) - save_q(1:im,1:levs,ntoz)
+          endif
+          idtend = dtidx(100+ntke, index_for_cause_pbl)
+          if(idtend>1) then
+            dtend(1:im,1:levs,idtend) = dtend(1:im,1:levs,idtend) + (qgrs(1:im,1:levs,ntke) - save_q(1:im,1:levs,ntke))
           endif
         endif
 
