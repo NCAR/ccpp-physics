@@ -237,7 +237,7 @@
   dimensions = ()
   type = real
   kind = kind_phys
-  intent = out
+  intent = in
   optional = F
 [raddt]
   standard_name = time_step_for_radiation
