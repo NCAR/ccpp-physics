@@ -707,6 +707,9 @@
              asnvb = asnvd
              asnnb = asnnd
            endif
+         else
+           asnvb = asnvd
+           asnnb = asnnd
          endif
 
 !>    - Calculate direct sea surface albedo, use fanglin's zenith angle

@@ -104,14 +104,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[lw_gas_props]
-  standard_name = coefficients_for_lw_gas_optics
-  long_name = DDT containing spectral information for RRTMGP LW radiation scheme
-  units = DDT
-  dimensions = ()
-  type = ty_gas_optics_rrtmgp
-  intent = in
-  optional = F
 [emiss]
   standard_name = surface_emissivity_lsm
   long_name = surface emissivity from lsm
@@ -121,20 +113,20 @@
   kind = kind_phys
   intent = in
   optional = F
-[sfc_emiss_byband]
-  standard_name = surface_emissivity_in_each_RRTMGP_LW_band
-  long_name = surface emissivity in each RRTMGP LW band
-  units = none
-  dimensions = (number_of_lw_bands_rrtmgp,horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
 [semis]
   standard_name = surface_longwave_emissivity
   long_name = surface lw emissivity in fraction
   units = frac
   dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[sfc_emiss_byband]
+  standard_name = surface_emissivity_in_each_RRTMGP_LW_band
+  long_name = surface emissivity in each RRTMGP LW band
+  units = none
+  dimensions = (number_of_lw_bands_rrtmgp,horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out

@@ -12,11 +12,10 @@
 !> \section arg_table_rrtmg_sw_pre_run Argument Table
 !! \htmlinclude rrtmg_sw_pre_run.html
 !!
-      subroutine rrtmg_sw_pre_run (im, lndp_type, n_var_lndp, lsswr, lndp_var_list, lndp_prt_list, tsfg, tsfa, coszen,     &
-        alb1d, slmsk, snowd, sncovr, snoalb, zorl, hprime, alvsf, alnsf, alvwf,&
-        alnwf, facsf, facwf, fice, tisfc, albdvis, albdnir, albivis, albinir,  &
-        sfalb, nday, idxday, sfcalb1,                                          &
-        sfcalb2, sfcalb3, sfcalb4, errmsg, errflg)
+      subroutine rrtmg_sw_pre_run (im, lndp_type, n_var_lndp, lsswr, lndp_var_list, lndp_prt_list, tsfg, tsfa, coszen, &
+                                   alb1d, slmsk, snowd, sncovr, snoalb, zorl, hprime, alvsf, alnsf, alvwf,             &
+                                   alnwf, facsf, facwf, fice, tisfc, albdvis, albdnir, albivis, albinir,               &
+                                   sfalb, nday, idxday, sfcalb1, sfcalb2, sfcalb3, sfcalb4, errmsg, errflg)
 
       use machine,                   only: kind_phys
 

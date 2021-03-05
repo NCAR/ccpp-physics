@@ -141,7 +141,7 @@
   real(kind=kind_phys), parameter :: a4      = 35.86
   real(kind=kind_phys), parameter :: a23m4   = a2*(a3-a4)
       
-  real, parameter                 :: undefined       =  -1.e36   ! TODO change to smaller value
+  real, parameter                 :: undefined  =  9.99e20_kind_phys
 
   integer, parameter              :: nsoil   = 4   ! hardwired to Noah
   integer, parameter              :: nsnow   = 3   ! max. snow layers
@@ -657,7 +657,7 @@
       cloud_water_forcing   = -9999.0
       sw_radiation_forcing  = dswsfc(i)
       radiation_lw_forcing  = dlwflx(i)
-      precipitation_forcing = rhoh2o * tprcp(i) / delt !1000.0 * tprcp(i) / delt
+      precipitation_forcing = 1000.0 * tprcp(i) / delt 
       precip_convective     = rainc_mp(i)
       precip_non_convective = rainn_mp(i)
       precip_sh_convective  = 0.
@@ -681,8 +681,7 @@
       soil_liquid_vol              = slc(i,:)
       soil_moisture_vol            = smc(i,:)
       temperature_canopy_air       = tahxy(i)
-      vapor_pres_canopy_air        = (air_pressure_surface*spec_humidity_forcing)/(0.622+spec_humidity_forcing) 
-      ! TODO recalculated? set to eahxy
+      vapor_pres_canopy_air        = eahxy(i)
       canopy_wet_fraction          = fwetxy(i)
       canopy_liquid                = canliqxy(i)
       canopy_ice                   = canicexy(i)
@@ -690,19 +689,19 @@
       temperature_ground           = tgxy(i)
       spec_humidity_surface        = undefined  ! doesn't need inout; should be out
       snowfall                     = qsnowxy(i) ! doesn't need inout; should be out
-!      rainfall              ! doesn't need inout; should be out TODO
+      rainfall                     = -9999.0    ! doesn't need inout; should be out
       snow_levels                  = nint(snowxy(i))
       interface_depth              = zsnsoxy(i,:)
       snow_depth                   = snwdph(i) * 0.001         ! convert from mm to m
       snow_water_equiv             = weasd(i)
-          if (snow_water_equiv /= 0.0 .and. snow_depth == 0.0) then  !TODO this should be done elsewhere
+          if (snow_water_equiv /= 0.0 .and. snow_depth == 0.0) then
             snow_depth = 10.0 * snow_water_equiv /1000.0
           endif
       snow_level_ice               = snicexy(i,:)
       snow_level_liquid            = snliqxy(i,:)
       depth_water_table            = zwtxy(i)
       aquifer_water                = waxy(i)
-      saturated_water              = waxy(i)     ! why not wta !!! TODO
+      saturated_water              = wtxy(i)
       lake_water                   = wslakexy(i)
       leaf_carbon                  = lfmassxy(i)
       root_carbon                  = rtmassxy(i)
@@ -753,8 +752,8 @@
       if ( vegetation_category == isice_table )  then
 
         if (precipitation_forcing > 0.0) then
-          if (srflag(i) > 0.0) then                              ! TODO rain/snow flag, one condition is enough?
-            snowfall = srflag(i) * precipitation_forcing/10.0    ! still use rho water?
+          if (srflag(i) > 0.0) then
+            snowfall = srflag(i) * precipitation_forcing ! need snowfall for glacier snow age
           endif
         endif
 
@@ -926,7 +925,7 @@
       snicexy   (i,:) = snow_level_ice
       snliqxy   (i,:) = snow_level_liquid
       snwdph    (i)   = snow_depth * 1000.0       ! convert from mm to m
-      canopy    (i)   = canopy_ice + canopy_liquid  ! TODO check units
+      canopy    (i)   = canopy_ice + canopy_liquid
       canliqxy  (i)   = canopy_liquid
       canicexy  (i)   = canopy_ice
       zwtxy     (i)   = depth_water_table
@@ -947,8 +946,7 @@
 
       snowc     (i)   = snow_cover_fraction
       sncovr1   (i)   = snow_cover_fraction
-      ! TODO check this eqn shoud lthis be q2 not q1 why two con_cp
-      qsurf     (i)   = q1(i)  + evap(i) / (con_hvap / con_cp * density * con_cp * ch(i) * wind(i))     
+      qsurf     (i)   = q1(i)  + evap(i) / (con_hvap / con_cp * density * ch(i) * wind(i))     
       tskin     (i)   = temperature_radiative
       tsurf     (i)   = temperature_radiative
       tvxy      (i)   = temperature_leaf
