@@ -438,11 +438,13 @@ MODULE module_mp_thompson
 !! lookup tables in Thomspson scheme.
 !>\section gen_thompson_init thompson_init General Algorithm
 !> @{
-      SUBROUTINE thompson_init(mpicomm, mpirank, mpiroot,  &
+      SUBROUTINE thompson_init(is_aerosol_aware_in,       &
+                               mpicomm, mpirank, mpiroot, &
                                threads, errmsg, errflg)
 
       IMPLICIT NONE
 
+      LOGICAL, INTENT(IN) :: is_aerosol_aware_in
       INTEGER, INTENT(IN) :: mpicomm, mpirank, mpiroot
       INTEGER, INTENT(IN) :: threads
       CHARACTER(len=*), INTENT(INOUT) :: errmsg
@@ -457,6 +459,16 @@ MODULE module_mp_thompson
 #else
       LOGICAL, PARAMETER :: precomputed_tables = .FALSE.
 #endif
+
+! Set module variable is_aerosol_aware
+      is_aerosol_aware = is_aerosol_aware_in
+      if (mpirank==mpiroot) then
+         if (is_aerosol_aware) then
+            write (0,'(a)') 'Using aerosol-aware version of Thompson microphysics'
+        else
+            write (0,'(a)') 'Using non-aerosol-aware version of Thompson microphysics'
+        end if
+      end if
 
       micro_init = .FALSE.
 
@@ -5218,6 +5230,8 @@ MODULE module_mp_thompson
          lamc = (nc(k)*am_r*g_ratio(inu_c)/rc(k))**obmr
          re_qc1d(k) = SNGL(0.5D0 * DBLE(3.+inu_c)/lamc)
       enddo
+      else
+        re_qc1d(:) = 0.0D0
       endif
 
       if (has_qi) then
@@ -5226,6 +5240,8 @@ MODULE module_mp_thompson
          lami = (am_i*cig(2)*oig1*ni(k)/ri(k))**obmi
          re_qi1d(k) = SNGL(0.5D0 * DBLE(3.+mu_i)/lami)
       enddo
+      else
+        re_qi1d(:) = 0.0D0
       endif
 
       if (has_qs) then
@@ -5266,6 +5282,8 @@ MODULE module_mp_thompson
          smoc = a_ * smo2**b_
          re_qs1d(k) = 0.5*(smoc/smob)
       enddo
+      else
+        re_qs1d(:) = 0.0D0
       endif
 
       end subroutine calc_effectRad

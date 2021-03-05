@@ -115,8 +115,9 @@ module mp_thompson
          end if
 
          ! Call Thompson init
-         call thompson_init(mpicomm=mpicomm, mpirank=mpirank, mpiroot=mpiroot,    &
-                            threads=threads, errmsg=errmsg, errflg=errflg)
+         call thompson_init(is_aerosol_aware_in=is_aerosol_aware, mpicomm=mpicomm, &
+                            mpirank=mpirank, mpiroot=mpiroot, threads=threads,     &
+                            errmsg=errmsg, errflg=errflg)
          if (errflg /= 0) return
 
          ! For restart runs, the init is done here
@@ -276,8 +277,8 @@ module mp_thompson
                                   re_cloud(i,:), re_ice(i,:), re_snow(i,:), 1, nlev)
              do k = 1, nlev
                re_cloud(i,k) = MAX(re_qc_min, MIN(re_cloud(i,k), re_qc_max))
-               re_ice(i,k)   = MAX(re_qi_min, MIN(re_ice(i,k), re_qi_max))
-               re_snow(i,k)  = MAX(re_qs_min, MIN(re_snow(i,k), re_qs_max))
+               re_ice(i,k)   = MAX(re_qi_min, MIN(re_ice(i,k),   re_qi_max))
+               re_snow(i,k)  = MAX(re_qs_min, MIN(re_snow(i,k),  re_qs_max))
              end do
            end do
            !! Convert to micron: required for bit-for-bit identical restarts;

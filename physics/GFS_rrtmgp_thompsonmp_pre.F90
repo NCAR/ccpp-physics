@@ -8,8 +8,10 @@ module GFS_rrtmgp_thompsonmp_pre
   use rrtmgp_aux, only: &
        check_error_msg
   use module_mp_thompson, only: &
-       calc_effectRad, &
-       Nt_c
+       calc_effectRad, Nt_c,    &
+       re_qc_min, re_qc_max,    &
+       re_qi_min, re_qi_max,    &
+       re_qs_min, re_qs_max
   use module_mp_thompson_make_number_concentrations, only: &
        make_IceNumber,      &
        make_DropletNumber, &
@@ -179,6 +181,11 @@ contains
        call calc_effectRad (t_lay(iCol,:), p_lay(iCol,:), qv_mp(iCol,:), qc_mp(iCol,:),  &
                             nc_mp(iCol,:), qi_mp(iCol,:), ni_mp(iCol,:), qs_mp(iCol,:),  &
                             re_cloud(iCol,:), re_ice(iCol,:), re_snow(iCol,:), 1, nLev )
+       do iLay = 1, nLev
+          re_cloud(iCol,iLay) = MAX(re_qc_min, MIN(re_cloud(iCol,iLay), re_qc_max))
+          re_ice(iCol,iLay)   = MAX(re_qi_min, MIN(re_ice(iCol,iLay),   re_qi_max))
+          re_snow(iCol,iLay)  = MAX(re_qs_min, MIN(re_snow(iCol,iLay),  re_qs_max))
+       end do
     enddo
 
     ! Scale Thompson's effective radii from meter to micron
