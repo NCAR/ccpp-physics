@@ -15,10 +15,10 @@
       public :: dcyc2t3_init, dcyc2t3_run, dcyc2t3_finalize
 
       contains
-
+      
       subroutine dcyc2t3_init()
       end subroutine dcyc2t3_init
-
+      
       subroutine dcyc2t3_finalize()
       end subroutine dcyc2t3_finalize
 
@@ -180,8 +180,8 @@
      &       sfcnirbmd,sfcnirdfd,sfcvisbmd,sfcvisdfd,                   &
      &       im, levs, deltim, fhswr,                                   &
      &       dry, icy, wet,                                             &
-     &       minGPpres, tsfc, use_LW_jacobian, sfculw, sfculw_jac,      &
-     &       sfcdlw_jac, t_lay, t_lev, p_lay, p_lev, flux2D_lwUP,       &
+     &       minGPpres, tsfc, use_LW_jacobian, sfculw, fluxlwUP_jac,    &
+     &       fluxlwDOWN_jac, t_lay, t_lev, p_lay, p_lev, flux2D_lwUP,   &
      &       flux2D_lwDOWN,                                             &
 !    &       dry, icy, wet, lprnt, ipr,                                 &
 !  ---  input/output:
@@ -234,7 +234,8 @@
       real(kind=kind_phys), dimension(im,levs), intent(in) :: swh,  hlw &
      &     ,swhc, hlwc, p_lay, t_lay
       real(kind=kind_phys), dimension(im,levs+1), intent(in) :: p_lev,  &
-     &     flux2D_lwUP, flux2D_lwDOWN, sfculw_jac, sfcdlw_jac, t_lev
+     &     flux2D_lwUP, flux2D_lwDOWN, fluxlwUP_jac, fluxlwDOWN_jac,    &
+     &     t_lev
 
 !  ---  input/output:
       real(kind=kind_phys), dimension(im,levs), intent(inout) :: dtdt   &
@@ -364,16 +365,17 @@
          !
          call cmp_tlev(im, levs, minGPpres, p_lay, t_lay, p_lev, tsfc,  &
      &        t_lev2)
+
          !
          ! Adjust up/downward fluxes (at layer interfaces).
          !
          do k = 1, levs+1
             do i = 1, im
-               dT = t_lev(i,k) - t_lev2(i,k)
+               dT = t_lev2(i,k) - t_lev(i,k)
                flxlwup_adj(i,k) = flux2D_lwUP(i,k) +                    &
-     &              sfculw_jac(i,k)*dT
+     &              fluxlwUP_jac(i,k)*dT
                flxlwdn_adj(i,k) = flux2D_lwDOWN(i,k) +                  &
-     &              sfcdlw_jac(i,k)*dT
+     &              fluxlwDOWN_jac(i,k)*dT
             enddo
          enddo
          !
