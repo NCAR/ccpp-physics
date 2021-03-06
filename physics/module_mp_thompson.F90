@@ -5204,6 +5204,10 @@ MODULE module_mp_thompson
       has_qi = .false.
       has_qs = .false.
 
+      re_qc1d(:) = 0.0D0
+      re_qi1d(:) = 0.0D0
+      re_qs1d(:) = 0.0D0
+
       do k = kts, kte
          rho(k) = 0.622*p1d(k)/(R*t1d(k)*(qv1d(k)+0.622))
          rc(k) = MAX(R1, qc1d(k)*rho(k))
@@ -5230,8 +5234,6 @@ MODULE module_mp_thompson
          lamc = (nc(k)*am_r*g_ratio(inu_c)/rc(k))**obmr
          re_qc1d(k) = SNGL(0.5D0 * DBLE(3.+inu_c)/lamc)
       enddo
-      else
-        re_qc1d(:) = 0.0D0
       endif
 
       if (has_qi) then
@@ -5240,8 +5242,6 @@ MODULE module_mp_thompson
          lami = (am_i*cig(2)*oig1*ni(k)/ri(k))**obmi
          re_qi1d(k) = SNGL(0.5D0 * DBLE(3.+mu_i)/lami)
       enddo
-      else
-        re_qi1d(:) = 0.0D0
       endif
 
       if (has_qs) then
@@ -5282,8 +5282,6 @@ MODULE module_mp_thompson
          smoc = a_ * smo2**b_
          re_qs1d(k) = 0.5*(smoc/smob)
       enddo
-      else
-        re_qs1d(:) = 0.0D0
       endif
 
       end subroutine calc_effectRad
