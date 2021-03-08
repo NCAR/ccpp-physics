@@ -85,7 +85,7 @@ contains
     if (nDay .gt. 0) then
 
        ! Call module_radiation_aerosols::setaer(),to setup aerosols property profile
-       call setaer(p_lev, p_lay, p_lk, tv_lay, relhum, lsmask, tracer, aerfld, lon, lat, nCol, nLev, &
+       call setaer(p_lev/100., p_lay/100., p_lk, tv_lay, relhum, lsmask, tracer, aerfld, lon, lat, nCol, nLev, &
             nLev+1, .true., .true., aerosolssw2, aerosolslw, aerodp)
 
        ! Store aerosol optical properties

@@ -156,9 +156,9 @@ contains
           qc_mp(iCol,iLay) = tracer(iCol,iLay,i_cldliq)    / (1.-q_lay(iCol,iLay))
           qi_mp(iCol,iLay) = tracer(iCol,iLay,i_cldice)    / (1.-q_lay(iCol,iLay))
           qs_mp(iCol,iLay) = tracer(iCol,iLay,i_cldsnow)   / (1.-q_lay(iCol,iLay))
-          nc_mp(iCol,iLay) = tracer(iCol,iLay,i_cldliq_nc) / (1.-q_lay(iCol,iLay))
           ni_mp(iCol,iLay) = tracer(iCol,iLay,i_cldice_nc) / (1.-q_lay(iCol,iLay))
           if (ltaerosol) then
+             nc_mp(iCol,iLay) = tracer(iCol,iLay,i_cldliq_nc) / (1.-q_lay(iCol,iLay))
              nwfa(iCol,iLay)  = tracer(iCol,iLay,i_twa)
           else
              nc_mp(iCol,iLay) = nt_c*orho(iCol,iLay)
@@ -215,13 +215,13 @@ contains
        else
           if(      lmfshal) alpha0 = 100. ! Default (from GATE simulations)
           if(.not. lmfshal) alpha0 = 2000.
-		  ! Xu-Randall (1996) cloud-fraction 
+          ! Xu-Randall (1996) cloud-fraction 
           do iLay = 1, nLev
              do iCol = 1, nCol
                 cld_mr = cld_condensate(iCol,iLay,1) + cld_condensate(iCol,iLay,2) +  &
                          cld_condensate(iCol,iLay,4)
-			    cld_frac(iCol,iLay) = cld_frac_XuRandall(p_lay(iCol,iLay),            &
-			       qs_lay(iCol,iLay), relhum(iCol,iLay), cld_mr, alpha0) 
+                cld_frac(iCol,iLay) = cld_frac_XuRandall(p_lay(iCol,iLay),            &
+                         qs_lay(iCol,iLay), relhum(iCol,iLay), cld_mr, alpha0) 
              enddo
           enddo
        endif

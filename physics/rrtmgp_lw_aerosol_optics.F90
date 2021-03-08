@@ -81,7 +81,7 @@ contains
     if (.not. doLWrad) return
 
     ! Call module_radiation_aerosols::setaer(),to setup aerosols property profile
-    call setaer(p_lev, p_lay, p_lk, tv_lay, relhum, lsmask, tracer, aerfld, lon, lat, ncol, nLev, &
+    call setaer(p_lev/100., p_lay/100., p_lk, tv_lay, relhum, lsmask, tracer, aerfld, lon, lat, ncol, nLev, &
          nLev+1, .true., .true., aerosolssw, aerosolslw, aerodp)
 
     ! Allocate RRTMGP DDT: Aerosol optics [nCol,nlev,nBands]
