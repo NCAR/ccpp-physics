@@ -9,11 +9,14 @@
 ! \brief This subroutine is empty since there are no procedures that need to be done to initialize the GFS NSST code.
 !! This subroutine is empty since there are no procedures that need to be done to initialize the GFS NSST code.
 !!
+!! \section arg_table_sfc_nst_init  Argument Table
+!!
       subroutine sfc_nst_init
       end subroutine sfc_nst_init
 
 ! \brief This subroutine is empty since there are no procedures that need to be done to finalize the GFS NSST code.
 !! This subroutine is empty since there are no procedures that need to be done to finalize the GFS NSST code.
+!! \section arg_table_sfc_nst_finalize  Argument Table
 !!
       subroutine sfc_nst_finalize
       end subroutine sfc_nst_finalize
@@ -28,7 +31,7 @@
       subroutine sfc_nst_run                                            &
      &     ( im, hvap, cp, hfus, jcal, eps, epsm1, rvrdm1, rd, rhw0,    &  ! --- inputs:
      &       pi, sbc, ps, u1, v1, t1, q1, tref, cm, ch,                 &
-     &       prsl1, prslki, prsik1, prslk1, wet, xlon, sinlat,          &
+     &       prsl1, prslki, prsik1, prslk1, wet, lake, xlon, sinlat,    &
      &       stress,                                                    &
      &       sfcemis, dlwflx, sfcnsw, rain, timestep, kdt, solhr,xcosz, &
      &       wind, flag_iter, flag_guess, nstf_name1, nstf_name4,       &
@@ -47,7 +50,7 @@
 !    call sfc_nst                                                       !
 !       inputs:                                                         !
 !          ( im, ps, u1, v1, t1, q1, tref, cm, ch,                      !
-!            prsl1, prslki, wet, xlon, sinlat, stress,                  !
+!            prsl1, prslki, wet, lake, xlon, sinlat, stress,            !
 !            sfcemis, dlwflx, sfcnsw, rain, timestep, kdt,solhr,xcosz,  !
 !            wind,  flag_iter, flag_guess, nstf_name1, nstf_name4,      !
 !            nstf_name5, lprnt, ipr,                                    !
@@ -94,6 +97,7 @@
 !     prsik1   - real,                                             im   !
 !     prslk1   - real,                                             im   !
 !     wet      - logical, =T if any ocn/lake water (F otherwise)   im   !
+!     lake     - logical, =T if any lake otherwise ocn
 !     icy      - logical, =T if any ice                            im   !
 !     xlon     - real, longitude         (radians)                 im   !
 !     sinlat   - real, sin of latitude                             im   !
@@ -194,7 +198,8 @@
       real (kind=kind_phys), intent(in) :: timestep
       real (kind=kind_phys), intent(in) :: solhr
 
-      logical, dimension(im), intent(in) :: flag_iter, flag_guess, wet
+      logical, dimension(im), intent(in) :: flag_iter, flag_guess, wet, &
+     &                                      lake 
 !    &,      icy
       logical,                intent(in) :: lprnt
 
@@ -259,14 +264,14 @@ cc
 !
       do i = 1, im
 !       flag(i) = wet(i) .and. .not.icy(i) .and. flag_iter(i)
-        flag(i) = wet(i) .and. flag_iter(i)
+        flag(i) = wet(i) .and. flag_iter(i) .and. .not. lake(i)
       enddo
 !
 !  save nst-related prognostic fields for guess run
 !
       do i=1, im
 !       if(wet(i) .and. .not.icy(i) .and. flag_guess(i)) then
-        if(wet(i) .and. flag_guess(i)) then
+        if(wet(i) .and. flag_guess(i) .and. .not. lake(i)) then
           xt_old(i)      = xt(i)
           xs_old(i)      = xs(i)
           xu_old(i)      = xu(i)
@@ -582,7 +587,7 @@ cc
 ! restore nst-related prognostic fields for guess run
       do i=1, im
 !       if (wet(i) .and. .not.icy(i)) then
-        if (wet(i)) then
+        if (wet(i) .and. .not. lake(i)) then
           if (flag_guess(i)) then    ! when it is guess of
             xt(i)      = xt_old(i)
             xs(i)      = xs_old(i)
@@ -656,9 +661,13 @@ cc
 !! surface in the GFS physics suite. The other two are the Noah land
 !! surface model and the sice simplified ice model.
 !!
+!! \section arg_table_sfc_nst_init  Argument Table
+!!
       subroutine sfc_nst_pre_init
       end subroutine sfc_nst_pre_init
 
+!! \section arg_table_sfc_nst_finalize  Argument Table
+!!
       subroutine sfc_nst_pre_finalize
       end subroutine sfc_nst_pre_finalize
 
@@ -668,7 +677,7 @@ cc
 !> \section NSST_general_pre_algorithm General Algorithm
 !! @{
       subroutine sfc_nst_pre_run
-     &    (im, wet, tsfc_wat, tsurf_wat, tseal, xt, xz, dt_cool,
+     &    (im, wet, lake, tsfc_wat, tsurf_wat, tseal, xt, xz, dt_cool,
      &     z_c, tref, cplflx, oceanfrac, nthreads, errmsg, errflg)
 
       use machine , only : kind_phys
@@ -680,7 +689,7 @@ cc
 
 !  ---  inputs:
       integer, intent(in) :: im, nthreads
-      logical, dimension(im), intent(in) :: wet
+      logical, dimension(im), intent(in) :: wet, lake
       real (kind=kind_phys), dimension(im), intent(in) ::
      &      tsfc_wat, xt, xz, dt_cool, z_c, oceanfrac
       logical, intent(in) :: cplflx
@@ -707,7 +716,7 @@ cc
       errflg = 0
 
       do i=1,im
-        if (wet(i)) then
+        if (wet(i) .and. .not. lake(i)) then
 !          tem         = (oro(i)-oro_uf(i)) * rlapse
           ! DH* 20190927 simplyfing this code because tem is zero
           !tem          = zero
@@ -722,10 +731,11 @@ cc
 !   update tsfc & tref with T1 from OGCM & NSST Profile if coupled
 !
       if (cplflx) then
-        call get_dtzm_2d (xt,  xz, dt_cool,                             &
-     &                    z_c, wet, zero, omz1, im, 1, nthreads, dtzm)
+        call get_dtzm_2d (xt,  xz, dt_cool,
+     &                    z_c, wet, lake, zero, omz1, im, 1,
+     &                    nthreads, dtzm)
         do i=1,im
-          if (wet(i) .and. oceanfrac(i) > zero) then
+          if (wet(i) .and. oceanfrac(i) > zero .and. .not. lake(i)) then
 !           dnsst   = tsfc_wat(i) - tref(i)          !  retrive/get difference of Ts and Tf
             tref(i) = tsfc_wat(i) - dtzm(i)          !  update Tf with T1 and NSST T-Profile
 !           tsfc_wat(i) = max(271.2,tref(i) + dnsst) !  get Ts updated due to Tf update
@@ -755,10 +765,14 @@ cc
 ! \defgroup GFS_NSST_POST GFS Near-Surface Sea Temperature Post
 !! \brief Brief description of the parameterization
 !!
+!! \section arg_table_sfc_nst_post_init  Argument Table
+!!
       subroutine sfc_nst_post_init
       end subroutine sfc_nst_post_init
 
 ! \brief Brief description of the subroutine
+!!
+!! \section arg_table_sfc_nst_post_finalize  Argument Table
 !!
       subroutine sfc_nst_post_finalize
       end subroutine sfc_nst_post_finalize
@@ -773,7 +787,7 @@ cc
 ! \section NSST_detailed_post_algorithm Detailed Algorithm
 ! @{
       subroutine sfc_nst_post_run                                       &
-     &     ( im, rlapse, tgice, wet, icy, oro, oro_uf, nstf_name1,      &
+     &     ( im, rlapse, tgice, wet, lake,icy, oro, oro_uf, nstf_name1,      &
      &       nstf_name4, nstf_name5, xt, xz, dt_cool, z_c, tref, xlon,  &
      &       tsurf_wat, tsfc_wat, nthreads, dtzm, errmsg, errflg        &
      &     )
@@ -787,7 +801,7 @@ cc
 
 !  ---  inputs:
       integer, intent(in) :: im, nthreads
-      logical, dimension(im), intent(in) :: wet, icy
+      logical, dimension(im), intent(in) :: wet, icy, lake
       real (kind=kind_phys), intent(in) :: rlapse, tgice
       real (kind=kind_phys), dimension(im), intent(in) :: oro, oro_uf
       integer, intent(in) :: nstf_name1, nstf_name4, nstf_name5
@@ -828,12 +842,12 @@ cc
       if (nstf_name1 > 1) then
         zsea1 = 0.001_kp*real(nstf_name4)
         zsea2 = 0.001_kp*real(nstf_name5)
-        call get_dtzm_2d (xt, xz, dt_cool, z_c, wet, zsea1, zsea2,      &
+        call get_dtzm_2d (xt, xz, dt_cool, z_c, wet, lake, zsea1, zsea2,      &
      &                    im, 1, nthreads, dtzm)
         do i = 1, im
 !         if (wet(i) .and. .not.icy(i)) then
 !         if (wet(i) .and. (frac_grid .or. .not. icy(i))) then
-          if (wet(i)) then
+          if (wet(i) .and. .not. lake(i)) then
             tsfc_wat(i) = max(tgice, tref(i) + dtzm(i))
 !           tsfc_wat(i) = max(271.2, tref(i) + dtzm(i)) -  &
 !                           (oro(i)-oro_uf(i))*rlapse
