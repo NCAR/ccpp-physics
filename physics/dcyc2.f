@@ -389,17 +389,22 @@
          do k = 1, levs
             do i = 1, im
                dtdt(i,k)  = dtdt(i,k)  + swh(i,k)*xmu(i)  + htrlw(i,k)
-               dtdtc(i,k) = dtdtc(i,k) + swhc(i,k)*xmu(i) + hlwc(i,k)
             enddo
          enddo
       else
          do k = 1, levs
             do i = 1, im
                dtdt(i,k)  = dtdt(i,k)  + swh(i,k)*xmu(i)  + hlw(i,k)
-               dtdtc(i,k) = dtdtc(i,k) + swhc(i,k)*xmu(i) + hlwc(i,k)
             enddo
          enddo
       endif
+
+      ! Add clear-sky radiative heating rates to clear-sky physics heating rate 
+      do k = 1, levs
+         do i = 1, im
+            dtdtc(i,k) = dtdtc(i,k) + swhc(i,k)*xmu(i) + hlwc(i,k)
+         enddo
+      enddo
 !
       return
 !...................................
