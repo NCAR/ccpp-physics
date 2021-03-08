@@ -7,14 +7,6 @@
 [ccpp-arg-table]
   name = rrtmgp_lw_cloud_sampling_init
   type = scheme
-[lw_gas_props]
-  standard_name = coefficients_for_lw_gas_optics
-  long_name = DDT containing spectral information for RRTMGP LW radiation scheme
-  units = DDT
-  dimensions = ()
-  type = ty_gas_optics_rrtmgp
-  intent = in
-  optional = F
 [ipsdlw0]
   standard_name = initial_permutation_seed_lw
   long_name = initial seed for McICA LW
@@ -53,6 +45,14 @@
   type = logical
   intent = in
   optional = F
+[doGP_lwscat] 
+  standard_name = flag_to_include_longwave_scattering_in_cloud_optics
+  long_name = logical flag to control the addition of LW scattering in RRTMGP 
+  units = flag
+  dimensions = ()
+  type = logical  
+  intent = in
+  optional = F    
 [ncol]
   standard_name = horizontal_loop_extent
   long_name = horizontal dimension
@@ -184,21 +184,13 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F   
-[lw_gas_props]
-  standard_name = coefficients_for_lw_gas_optics
-  long_name = DDT containing spectral information for RRTMGP LW radiation scheme
-  units = DDT
-  dimensions = ()
-  type = ty_gas_optics_rrtmgp
-  intent = in
   optional = F
 [lw_optical_props_cloudsByBand]
   standard_name = longwave_optical_properties_for_cloudy_atmosphere_by_band
   long_name = Fortran DDT containing RRTMGP optical properties
   units = DDT
   dimensions = ()
-  type = ty_optical_props_1scl
+  type = ty_optical_props_2str
   intent = in
   optional = F
 [lw_optical_props_precipByBand]
@@ -206,7 +198,7 @@
   long_name = Fortran DDT containing RRTMGP optical properties
   units = DDT
   dimensions = ()
-  type = ty_optical_props_1scl
+  type = ty_optical_props_2str
   intent = in
   optional = F    
 [lw_optical_props_clouds]
@@ -214,7 +206,7 @@
   long_name = Fortran DDT containing RRTMGP optical properties
   units = DDT
   dimensions = ()
-  type = ty_optical_props_1scl
+  type = ty_optical_props_2str
   intent = out
   optional = F
 [lw_optical_props_precip]
@@ -222,7 +214,7 @@
   long_name = Fortran DDT containing RRTMGP optical properties
   units = DDT
   dimensions = ()
-  type = ty_optical_props_1scl
+  type = ty_optical_props_2str
   intent = out
   optional = F    
 [errmsg]

@@ -3,6 +3,8 @@ module rrtmgp_sw_aerosol_optics
   use mo_gas_optics_rrtmgp,      only: ty_gas_optics_rrtmgp
   use mo_optical_props,          only: ty_optical_props_2str
   use rrtmgp_aux,                only: check_error_msg
+  use rrtmgp_sw_gas_optics,      only: sw_gas_props
+  use rrtmgp_lw_gas_optics,      only: lw_gas_props
   use module_radiation_aerosols, only: &
        NF_AESW,                  & ! Number of optical-fields in SW output (3=tau+g+omega)
        NF_AELW,                  & ! Number of optical-fields in LW output (3=tau+g+omega)
@@ -30,7 +32,7 @@ contains
 !!
   subroutine rrtmgp_sw_aerosol_optics_run(doSWrad, nCol, nLev, nTracer, nTracerAer, nDay, &
        idxday, p_lev, p_lay, p_lk, tv_lay, relhum, lsmask, tracer, aerfld, lon, lat,      &
-       lw_gas_props, sw_gas_props, aerodp, sw_optical_props_aerosol, errmsg, errflg       )
+       aerodp, sw_optical_props_aerosol, errmsg, errflg       )
 
     ! Inputs
     logical, intent(in) :: &
@@ -58,10 +60,6 @@ contains
          aerfld                   ! aerosol input concentrations
     real(kind_phys), dimension(nCol,nLev+1),intent(in) :: &
          p_lev                    ! Pressure @ layer-interfaces (Pa)
-    type(ty_gas_optics_rrtmgp),intent(in) :: &
-         sw_gas_props             ! RRTMGP DDT: spectral information for SW calculation
-    type(ty_gas_optics_rrtmgp),intent(in) :: &
-         lw_gas_props             ! RRTMGP DDT: spectral information for LW calculation
 
     ! Outputs
     real(kind_phys), dimension(nCol,NSPC1), intent(inout) :: &

@@ -98,14 +98,6 @@
   type = integer
   intent = out
   optional = F
-[lw_cloud_props]
-  standard_name = coefficients_for_lw_cloud_optics
-  long_name = DDT containing spectral information for RRTMGP LW radiation scheme
-  units = DDT
-  dimensions = ()
-  type = ty_cloud_optics
-  intent = out
-  optional = F
 
 ########################################################################
 [ccpp-arg-table]
@@ -159,6 +151,14 @@
   type = logical
   intent = in
   optional = F   
+[doGP_lwscat] 
+  standard_name = flag_to_include_longwave_scattering_in_cloud_optics
+  long_name = logical flag to control the addition of LW scattering in RRTMGP 
+  units = flag
+  dimensions = ()
+  type = logical  
+  intent = in
+  optional = F    
 [ncol]
   standard_name = horizontal_loop_extent
   long_name = horizontal dimension
@@ -172,14 +172,6 @@
   long_name = number of vertical levels
   units = count
   dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[nrghice]
-  standard_name = number_of_rrtmgp_ice_roughness
-  long_name = number of ice-roughness categories in RRTMGP calculation
-  units = count
-  dimensions =  ()
   type = integer
   intent = in
   optional = F
@@ -273,21 +265,13 @@
   kind = kind_phys
   intent = in
   optional = F
-[lw_gas_props]
-  standard_name = coefficients_for_lw_gas_optics
-  long_name = DDT containing spectral information for RRTMGP LW radiation scheme
-  units = DDT
-  dimensions = ()
+[nbndsGPlw]
+  standard_name = number_of_lw_bands_rrtmgp
+  long_name = number of lw bands used in RRTMGP
+  units = count
+  dimensions =  ()
+  type = integer
   intent = in
-  type = ty_gas_optics_rrtmgp
-  optional = F
-[lw_cloud_props]
-  standard_name = coefficients_for_lw_cloud_optics
-  long_name = DDT containing spectral information for RRTMGP LW radiation scheme
-  units = DDT
-  dimensions = ()
-  intent = in
-  type = ty_cloud_optics
   optional = F
 [lon]
   standard_name = longitude
@@ -314,14 +298,14 @@
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [lw_optical_props_cloudsByBand]
   standard_name = longwave_optical_properties_for_cloudy_atmosphere_by_band
   long_name = Fortran DDT containing RRTMGP optical properties
   units = DDT
   dimensions = ()
-  type = ty_optical_props_1scl
+  type = ty_optical_props_2str
   intent = out
   optional = F
 [lw_optical_props_precipByBand]
@@ -329,7 +313,7 @@
   long_name = Fortran DDT containing RRTMGP optical properties
   units = DDT
   dimensions = ()
-  type = ty_optical_props_1scl
+  type = ty_optical_props_2str
   intent = out
   optional = F  
 [errmsg]

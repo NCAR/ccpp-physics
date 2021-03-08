@@ -5,6 +5,7 @@ module rrtmgp_sw_cloud_sampling
   use rrtmgp_sampling,          only: sampled_mask, draw_samples
   use mersenne_twister,         only: random_setseed, random_number, random_stat  
   use rrtmgp_aux,               only: check_error_msg
+  use rrtmgp_sw_gas_optics,     only: sw_gas_props
   use netcdf
 
   implicit none
@@ -16,10 +17,8 @@ contains
 !! \section arg_table_rrtmgp_sw_cloud_sampling_init
 !! \htmlinclude rrtmgp_sw_cloud_sampling.html
 !!
-  subroutine rrtmgp_sw_cloud_sampling_init(sw_gas_props, ipsdsw0, errmsg, errflg)
-    ! Inputs
-    type(ty_gas_optics_rrtmgp),intent(in) :: &
-         sw_gas_props ! RRTMGP DDT: K-distribution data
+  subroutine rrtmgp_sw_cloud_sampling_init(ipsdsw0, errmsg, errflg)
+
     ! Outputs
     integer, intent(out) :: &
          ipsdsw0      ! Initial permutation seed for McICA
@@ -46,7 +45,7 @@ contains
   subroutine rrtmgp_sw_cloud_sampling_run(doSWrad, nCol, nDay, nLev, ipsdsw0, idxday, iovr, &
        iovr_max, iovr_maxrand, iovr_rand, iovr_dcorr, iovr_exp, iovr_exprand, isubc_sw,     &
        icseed_sw, cld_frac, precip_frac, cloud_overlap_param, precip_overlap_param,         &
-       sw_gas_props, sw_optical_props_cloudsByBand, sw_optical_props_precipByBand,          &
+       sw_optical_props_cloudsByBand, sw_optical_props_precipByBand,                        &
        sw_optical_props_clouds, sw_optical_props_precip, errmsg, errflg)
     
     ! Inputs
@@ -78,8 +77,6 @@ contains
     real(kind_phys), dimension(ncol,nLev), intent(in)  :: &
          cloud_overlap_param,             & ! Cloud overlap parameter
          precip_overlap_param               ! Precipitation overlap parameter
-    type(ty_gas_optics_rrtmgp),intent(in) :: &
-         sw_gas_props                       ! RRTMGP DDT: K-distribution data
     type(ty_optical_props_2str),intent(in) :: &
          sw_optical_props_cloudsByBand,   & ! RRTMGP DDT: Shortwave optical properties in each band (clouds)
          sw_optical_props_precipByBand      ! RRTMGP DDT: Shortwave optical properties in each band (precipitation)    
@@ -181,7 +178,7 @@ contains
        ! Sampling. Map band optical depth to each g-point using McICA
        !
        call check_error_msg('rrtmgp_sw_cloud_sampling_run_draw_samples', & 
-            draw_samples(cldfracMCICA,                      &
+            draw_samples(cldfracMCICA, .true.,              &
                          sw_optical_props_cloudsByBand,     &
                          sw_optical_props_clouds))
          
@@ -239,7 +236,7 @@ contains
        ! Sampling. Map band optical depth to each g-point using McICA
        !
        call check_error_msg('rrtmgp_sw_precip_sampling_run_draw_samples', & 
-            draw_samples(precipfracSAMP,                    &
+            draw_samples(precipfracSAMP, .true.,            &
                          sw_optical_props_precipByBand,     &
                          sw_optical_props_precip))                  
          
