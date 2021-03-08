@@ -3011,10 +3011,10 @@
             endif
 
 !      ...  diffuse beam
-            if (abs(ze1r45) >= eps1) then
-              zden1 = zr4 / (ze1r45 * zrkg1)
+            if (ze1r45 >= f_zero) then
+              zden1   = zr4 / max(eps1, ze1r45*zrkg1)
             else
-              zden1 = f_zero
+              zden1   = zr4 / min(-eps1, ze1r45*zrkg1)
             endif
             zrefd(kp) = max(f_zero, min(f_one,                          &
      &                  zgam2*(zexp1 - zexm1)*zden1 ))
@@ -3246,10 +3246,10 @@
                 endif
 
 !      ...  diffuse beam
-                if (abs(ze1r45) >= eps1) then
-                  zden1 = zr4 / (ze1r45 * zrkg1)
+                if (ze1r45 >= f_zero) then
+                  zden1   = zr4 / max(eps1, ze1r45*zrkg1)
                 else
-                  zden1 = f_zero
+                  zden1   = zr4 / min(-eps1, ze1r45*zrkg1)
                 endif
                 zrefd(kp) = max(f_zero, min(f_one,                      &
      &                      zgam2*(zexp1 - zexm1)*zden1 ))
@@ -3808,10 +3808,10 @@
             endif
 
 !      ...  diffuse beam
-            if (abs(ze1r45) >= eps1) then
-              zden1 = zr4 / (ze1r45 * zrkg1)
+            if (ze1r45 >= f_zero) then
+              zden1   = zr4 / max(eps1, ze1r45*zrkg1)
             else
-              zden1 = f_zero
+              zden1   = zr4 / min(-eps1, ze1r45*zrkg1)
             endif
             zrefd(kp) = max(f_zero, min(f_one,                          &
      &                  zgam2*(zexp1 - zexm1)*zden1 ))
@@ -4030,10 +4030,10 @@
                 endif
 
 !      ...  diffuse beam
-                if (abs(ze1r45) >= eps1) then
-                  zden1 = zr4 / (ze1r45 * zrkg1)
+                if (ze1r45 >= f_zero) then
+                  zden1   = zr4 / max(eps1, ze1r45*zrkg1)
                 else
-                  zden1 = f_zero
+                  zden1   = zr4 / min(-eps1, ze1r45*zrkg1)
                 endif
                 zrefd(kp) = max(f_zero, min(f_one,                      &
      &                      zgam2*(zexp1 - zexm1)*zden1 ))
