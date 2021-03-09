@@ -166,9 +166,7 @@
          integer,              intent(out)   :: errflg
 
          ! Local variables
-         integer :: nb, nblks, nt
-         integer :: i, j, ix, iamin, iamax, jamin, jamax, vegtyp
-         logical :: non_uniform_blocks
+         integer :: i, j, ix, vegtyp, iamin, iamax, jamin, jamax
          real(kind_phys) :: rsnow
 
          !--- Noah MP
@@ -188,43 +186,13 @@
          iamax=-999
          jamin=999
          jamax=-999
-         nblks = size(Model%blksz)
 
-         ! Non-uniform blocks require special handling: instead
-         ! of nthrds elements of the Interstitial array, there are
-         ! nthrds+1 elements. The extra Interstitial(nthrds+1) is
-         ! allocated for the smaller block length of the last block,
-         ! while all other elements are allocated to the maximum
-         ! block length (which is the same for all blocks except
-         ! the last block).
-         if (minval(Model%blksz)==maxval(Model%blksz)) then
-             non_uniform_blocks = .false.
-         else
-             non_uniform_blocks = .true.
-         end if
-
-         ! Consistency check - number of threads passed in via the argument list
-         ! has to match the size of the Interstitial data type.
-         if (.not. non_uniform_blocks .and. nthrds/=size(Interstitial)) then
-             write(errmsg,'(*(a))') 'Logic error: nthrds does not match size of Interstitial variable'
-             errflg = 1
-             return
-         else if (non_uniform_blocks .and. nthrds+1/=size(Interstitial)) then
-             write(errmsg,'(*(a))') 'Logic error: nthrds+1 does not match size of Interstitial variable ' // &
-                                    '(including extra last element for shorter blocksizes)'
-             errflg = 1
-             return
-         end if
-
-!$OMP parallel num_threads(nthrds) default(none)              &
-!$OMP          private (nt,nb)                                &
+!$OMP parallel num_threads(nthrds) default(none)                                    &
 !$OMP          shared (me,master,ntoz,h2o_phys,im,nx,ny,idate)                      &
-!$OMP          shared (Model,Data,Interstitial,errmsg,errflg) &
-!$OMP          shared (xlat_d,xlon_d,imap,jmap)                       &
+!$OMP          shared (xlat_d,xlon_d,imap,jmap,errmsg,errflg)                       &
 !$OMP          shared (levozp,oz_coeff,oz_pres,ozpl)                                &
 !$OMP          shared (levh2o,h2o_coeff,h2o_pres,h2opl)                             &
-!$OMP          shared (iamin, iamax, jamin, jamax)            &
-!$OMP          shared (nblks,nthrds,non_uniform_blocks)
+!$OMP          shared (iamin, iamax, jamin, jamax)                                  &
 !$OMP          shared (iaerclm,ntrcaer,aer_nm,iflip,iccn)                           &
 !$OMP          shared (jindx1_o3,jindx2_o3,ddy_o3,jindx1_h,jindx2_h,ddy_h)          &
 !$OMP          shared (jindx1_aer,jindx2_aer,ddy_aer,iindx1_aer,iindx2_aer,ddx_aer) &
@@ -233,16 +201,10 @@
 !$OMP          shared (isot,ivegsrc,nlunit,sncovr,sncovr_ice,lsm,lsm_ruc)           &
 !$OMP          shared (min_seaice,fice,landfrac,vtype,weasd,snupx,salp_data)        &
 !$OMP          private (ix,i,j,rsnow,vegtyp)
+
 !$OMP sections
 
-
-#ifdef OPENMP
-         nt = omp_get_thread_num()+1
-#else
-         nt = 1
-#endif
-=======
-
+!$OMP section
 !> - Call read_o3data() to read ozone data
          call read_o3data (ntoz, me, master)
 
@@ -343,28 +305,20 @@
            call setindxh2o (im, xlat_d, jindx1_h, jindx2_h, ddy_h)
          endif
 
-!$OMP section
 !> - Call setindxaer() to initialize aerosols data
-         if (Model%iaerclm) then
-!$OMP single
-!!!!$OMP do schedule (dynamic,1)
-           do nb = 1, nblks
-             call setindxaer (Model%blksz(nb), Data(nb)%Grid%xlat_d, Data(nb)%Grid%jindx1_aer,           &
-                              Data(nb)%Grid%jindx2_aer, Data(nb)%Grid%ddy_aer, Data(nb)%Grid%xlon_d,     &
-                              Data(nb)%Grid%iindx1_aer, Data(nb)%Grid%iindx2_aer, Data(nb)%Grid%ddx_aer, &
-                              Model%me, Model%master)
-             iamin=min(minval(Data(nb)%Grid%iindx1_aer), iamin)
-             iamax=max(maxval(Data(nb)%Grid%iindx2_aer), iamax)
-             jamin=min(minval(Data(nb)%Grid%jindx1_aer), jamin)
-             jamax=max(maxval(Data(nb)%Grid%jindx2_aer), jamax)
-           enddo
-!!!!$OMP end do
-           call read_aerdataf (iamin, iamax, jamin, jamax, Model%me,Model%master,Model%iflip,            &
-                              Model%idate,errmsg,errflg)
-!$OMP end single
-         endif
-
 !$OMP section
+         if (iaerclm) then
+           call setindxaer (im, xlat_d, jindx1_aer,          &
+                            jindx2_aer, ddy_aer, xlon_d,     &
+                            iindx1_aer, iindx2_aer, ddx_aer, &
+                            me, master)
+           iamin=min(minval(iindx1_aer), iamin)
+           iamax=max(maxval(iindx2_aer), iamax)
+           jamin=min(minval(jindx1_aer), jamin)
+           jamax=max(maxval(jindx2_aer), jamax)
+         endif
+!$OMP section
+
 !> - Call setindxci() to initialize IN and CCN data
          if (iccn == 1) then
            call setindxci (im, xlat_d, jindx1_ci,      &
@@ -422,6 +376,10 @@
 !$OMP end sections
 
 !$OMP end parallel
+         if (iaerclm) then
+           call read_aerdataf (iamin, iamax, jamin, jamax, me,master,iflip,            &
+                              idate,errmsg,errflg)
+         endif
 
          if (lsm == lsm_noahmp) then
            if (all(tvxy < zero)) then
@@ -859,10 +817,10 @@
 
 !> - Call ciinterpol() to make IN and CCN data interpolation
          if (iccn == 1) then
-           call ciinterpol (me, im, idate, fhour,    &
-                            jindx1_ci, jindx2_ci,    &
-                            ddy_ci, iindx1_ci,       &
-                            iindx2_ci, ddx_ci,       &
+           call ciinterpol (me, im, idate, fhour,     &
+                            jindx1_ci, jindx2_ci,     &
+                            ddy_ci, iindx1_ci,        &
+                            iindx2_ci, ddx_ci,        &
                             levs, prsl, in_nm, ccn_nm)
          endif
 
@@ -956,215 +914,6 @@
          is_initialized = .false.
 
       end subroutine GFS_phys_time_vary_finalize
-
-
-!> \section arg_table_GFS_phys_time_vary_run Argument Table
-!! \htmlinclude GFS_phys_time_vary_run.html
-!!
-!>\section gen_GFS_phys_time_vary_run GFS_phys_time_vary_run General Algorithm
-!> @{
-      subroutine GFS_phys_time_vary_run (Data, Model, nthrds, first_time_step, errmsg, errflg)
-
-        use mersenne_twister,      only: random_setseed, random_number
-        use machine,               only: kind_phys
-        use GFS_typedefs,          only: GFS_control_type, GFS_data_type
-
-        implicit none
-
-        ! Interface variables
-        type(GFS_data_type),              intent(inout) :: Data(:)
-        type(GFS_control_type),           intent(inout) :: Model
-        integer,                          intent(in)    :: nthrds
-        logical,                          intent(in)    :: first_time_step
-        character(len=*),                 intent(out)   :: errmsg
-        integer,                          intent(out)   :: errflg
-
-        ! Local variables
-        real(kind=kind_phys), parameter :: con_hr  = 3600.0_kind_phys
-        real(kind=kind_phys), parameter :: con_99  =   99.0_kind_phys
-        real(kind=kind_phys), parameter :: con_100 =  100.0_kind_phys
-
-        integer :: i, j, k, iseed, iskip, ix, nb, nblks, kdt_rad, vegtyp
-        real(kind=kind_phys) :: sec_zero, rsnow
-        real(kind=kind_phys) :: wrk(1)
-        real(kind=kind_phys) :: rannie(Model%cny)
-        real(kind=kind_phys) :: rndval(Model%cnx*Model%cny*Model%nrcm)
-
-        ! Initialize CCPP error handling variables
-        errmsg = ''
-        errflg = 0
-
-        ! Check initialization status
-        if (.not.is_initialized) then
-           write(errmsg,'(*(a))') "Logic error: GFS_phys_time_vary_run called before GFS_phys_time_vary_init"
-           errflg = 1
-           return
-        end if
-
-        nblks = size(Model%blksz)
-
-        !--- switch for saving convective clouds - cnvc90.f
-        !--- aka Ken Campana/Yu-Tai Hou legacy
-        if ((mod(Model%kdt,Model%nsswr) == 0) .and. (Model%lsswr)) then
-          !--- initialize,accumulate,convert
-          Model%clstp = 1100 + min(Model%fhswr/con_hr,Model%fhour,con_99)
-        elseif (mod(Model%kdt,Model%nsswr) == 0) then
-          !--- accumulate,convert
-          Model%clstp = 0100 + min(Model%fhswr/con_hr,Model%fhour,con_99)
-        elseif (Model%lsswr) then
-          !--- initialize,accumulate
-          Model%clstp = 1100
-        else
-          !--- accumulate
-          Model%clstp = 0100
-        endif
-
-!$OMP parallel num_threads(nthrds) default(none)              &
-!$OMP          private (nb,iskip,ix,i,j,k)                    &
-!$OMP          shared (Model,Data,iseed,wrk,rannie,rndval)    &
-!$OMP          shared (nblks)
-
-        !--- random number needed for RAS and old SAS and when cal_pre=.true.
-        !    Model%imfdeepcnv < 0 when Model%ras = .true.
-        if ( (Model%imfdeepcnv <= 0 .or. Model%cal_pre) .and. Model%random_clds ) then
-!$OMP single
-          iseed = mod(con_100*sqrt(Model%fhour*con_hr),1.0d9) + Model%seed0
-          call random_setseed(iseed)
-          call random_number(wrk)
-          do i = 1,Model%cnx*Model%nrcm
-            iseed = iseed + nint(wrk(1)*1000.0) * i
-            call random_setseed(iseed)
-            call random_number(rannie)
-            rndval(1+(i-1)*Model%cny:i*Model%cny) = rannie(1:Model%cny)
-          enddo
-!$OMP end single
-
-          do k = 1,Model%nrcm
-            iskip = (k-1)*Model%cnx*Model%cny
-!$OMP do schedule (dynamic,1)
-            do nb=1,nblks
-              do ix=1,Model%blksz(nb)
-                j = Data(nb)%Tbd%jmap(ix)
-                i = Data(nb)%Tbd%imap(ix)
-                Data(nb)%Tbd%rann(ix,k) = rndval(i+Model%isc-1 + (j+Model%jsc-2)*Model%cnx + iskip)
-              enddo
-            enddo
-!$OMP end do
-          enddo
-        endif  ! imfdeepcnv, cal_re, random_clds
-
-!> - Call ozinterpol() to make ozone interpolation
-        if (Model%ntoz > 0) then
-!$OMP do schedule (dynamic,1)
-          do nb = 1, nblks
-            call ozinterpol (Model%me, Model%blksz(nb), Model%idate, Model%fhour, &
-                             Data(nb)%Grid%jindx1_o3, Data(nb)%Grid%jindx2_o3,    &
-                             Data(nb)%Tbd%ozpl, Data(nb)%Grid%ddy_o3)
-          enddo
-!$OMP end do
-        endif
-
-!> - Call h2ointerpol() to make stratospheric water vapor data interpolation
-        if (Model%h2o_phys) then
-!$OMP do schedule (dynamic,1)
-          do nb = 1, nblks
-            call h2ointerpol (Model%me, Model%blksz(nb), Model%idate, Model%fhour, &
-                              Data(nb)%Grid%jindx1_h, Data(nb)%Grid%jindx2_h,      &
-                              Data(nb)%Tbd%h2opl, Data(nb)%Grid%ddy_h)
-          enddo
-!$OMP end do
-        endif
-
-!> - Call aerinterpol() to make aerosol interpolation
-        if (Model%iaerclm) then
-!$OMP do schedule (dynamic,1)
-         do nb = 1, nblks
-           call aerinterpol (Model%me, Model%master, Model%blksz(nb),             &
-                             Model%idate, Model%fhour,                            &
-                             Data(nb)%Grid%jindx1_aer, Data(nb)%Grid%jindx2_aer,  &
-                             Data(nb)%Grid%ddy_aer,Data(nb)%Grid%iindx1_aer,      &
-                             Data(nb)%Grid%iindx2_aer,Data(nb)%Grid%ddx_aer,      &
-                             Model%levs,Data(nb)%Statein%prsl,                    &
-                             Data(nb)%Tbd%aer_nm)
-         enddo
-!$OMP end do
-        endif
-
-!> - Call ciinterpol() to make IN and CCN data interpolation
-        if (Model%iccn == 1) then
-!$OMP do schedule (dynamic,1)
-          do nb = 1, nblks
-            call ciinterpol (Model%me, Model%blksz(nb), Model%idate, Model%fhour, &
-                             Data(nb)%Grid%jindx1_ci, Data(nb)%Grid%jindx2_ci,    &
-                             Data(nb)%Grid%ddy_ci,Data(nb)%Grid%iindx1_ci,        &
-                             Data(nb)%Grid%iindx2_ci,Data(nb)%Grid%ddx_ci,        &
-                             Model%levs,Data(nb)%Statein%prsl,                    &
-                             Data(nb)%Tbd%in_nm, Data(nb)%Tbd%ccn_nm)
-          enddo
-!$OMP end do
-        endif
-
-!$OMP end parallel
-
-!> - Call gcycle() to repopulate specific time-varying surface properties for AMIP/forecast runs
-        if (Model%nscyc >  0) then
-          if (mod(Model%kdt,Model%nscyc) == 1) THEN
-            call gcycle (nblks, nthrds, Model, Data(:)%Grid, Data(:)%Sfcprop, Data(:)%Cldprop)
-          endif
-        endif
-
-        !--- determine if diagnostics buckets need to be cleared
-        sec_zero = nint(Model%fhzero*con_hr)
-        if (sec_zero >= nint(max(Model%fhswr,Model%fhlwr))) then
-          if (mod(Model%kdt,Model%nszero) == 1) then
-            do nb = 1,nblks
-              call Data(nb)%Intdiag%rad_zero  (Model)
-              call Data(nb)%Intdiag%phys_zero (Model)
-        !!!!  THIS IS THE POINT AT WHICH DIAG%ZHOUR NEEDS TO BE UPDATED
-            enddo
-          endif
-        else
-          if (mod(Model%kdt,Model%nszero) == 1) then
-            do nb = 1,nblks
-              call Data(nb)%Intdiag%phys_zero (Model)
-        !!!!  THIS IS THE POINT AT WHICH DIAG%ZHOUR NEEDS TO BE UPDATED
-            enddo
-          endif
-          kdt_rad = nint(min(Model%fhswr,Model%fhlwr)/Model%dtp)
-          if (mod(Model%kdt, kdt_rad) == 1) then
-            do nb = 1,nblks
-              call Data(nb)%Intdiag%rad_zero  (Model)
-        !!!!  THIS IS THE POINT AT WHICH DIAG%ZHOUR NEEDS TO BE UPDATED
-            enddo
-          endif
-        endif
-#if 0
-        !Calculate sncovr if it was read in but empty (from FV3/io/FV3GFS_io.F90/sfc_prop_restart_read)
-        if (first_time_step) then
-          if (nint(Data(1)%Sfcprop%sncovr(1)) == -9999) then
-            !--- compute sncovr from existing variables
-            !--- code taken directly from read_fix.f
-            do nb = 1, nblks
-              do ix = 1, Model%blksz(nb)
-                Data(nb)%Sfcprop%sncovr(ix) = 0.0
-                if (Data(nb)%Sfcprop%slmsk(ix) > 0.001) then
-                  vegtyp = Data(nb)%Sfcprop%vtype(ix)
-                  if (vegtyp == 0) vegtyp = 7
-                  rsnow  = 0.001*Data(nb)%Sfcprop%weasd(ix)/snupx(vegtyp)
-                  if (0.001*Data(nb)%Sfcprop%weasd(ix) < snupx(vegtyp)) then
-                    Data(nb)%Sfcprop%sncovr(ix) = 1.0 - (exp(-salp_data*rsnow) - rsnow*exp(-salp_data))
-                  else
-                    Data(nb)%Sfcprop%sncovr(ix) = 1.0
-                  endif
-                endif
-              enddo
-            enddo
-          endif
-        endif
-#endif
-
-      end subroutine GFS_phys_time_vary_run
-!> @}
 
    end module GFS_phys_time_vary
 !> @}
