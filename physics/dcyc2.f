@@ -254,7 +254,7 @@
       integer,          intent(out) :: errflg
 
 !  ---  locals:
-      integer :: i, k, nstp, nstl, it, istsun(im)
+      integer :: i, k, nstp, nstl, it, istsun(im),iSFC
       real(kind=kind_phys) :: cns,  coszn, tem1, tem2, anginc,          &
      &                        rstl, solang, dT
       real(kind=kind_phys), dimension(im,levs) :: htrlw
@@ -266,6 +266,13 @@
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+
+!     Vertical ordering?
+      if (p_lev(1,1) .lt.  p_lev(1, levs)) then 
+         iSFC = levs
+      else
+         iSFC = 1
+      endif
 
       tem1 = fhswr / deltim
       nstp = max(6, nint(tem1))
@@ -309,10 +316,14 @@
          tem2 = tem1 * tem1
          adjsfcdlw(i) = sfcdlw(i) * tem2 * tem2
 !> - LW time-step adjustment:
-         if (.not. use_LW_Jacobian) then
+         if (use_LW_Jacobian) then
+            ! F_adj = F_o + (dF/dT) * dT
+            dT           = tf(i) - tsflw(i)
+            adjsfculw(i) = sfculw(i) + fluxlwUP_jac(i,iSFC) * dT
+         else
 !!  - adjust \a sfc downward LW flux to account for t changes in the lowest model layer.
 !! compute 4th power of the ratio of \c tf in the lowest model layer over the mean value \c tsflw.
-           if (dry(i)) then
+            if (dry(i)) then
              tem2 = tsfc_lnd(i) * tsfc_lnd(i)
              adjsfculw_lnd(i) =  sfcemis_lnd(i) * con_sbc * tem2 * tem2
      &                        + (one - sfcemis_lnd(i)) * adjsfcdlw(i)
