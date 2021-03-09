@@ -324,8 +324,7 @@
          endif
 
          if (lsm == lsm_noahmp) then
-           if (all(tvxy < zero)) then
-
+           if (all(tvxy <= zero)) then
              allocate(dzsno (lsnow_lsm_lbound:lsnow_lsm_ubound))
              allocate(dzsnso(lsnow_lsm_lbound:lsoil)           )
              dzsno(:)    = missing_value
