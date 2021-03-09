@@ -177,7 +177,7 @@ module  cires_ugwpv1_module
     real(kind=kind_phys),    intent (in) :: con_pi, con_rerth
  
     character(len=64), intent (in) :: fn_nml2
-    character(len=64), parameter   :: fn_nml='input.nml'
+!    character(len=64), parameter   :: fn_nml='input.nml'
 
     character(len=*), intent(out) :: errmsg
     integer,          intent(out) :: errflg
@@ -194,15 +194,15 @@ module  cires_ugwpv1_module
     
 
 !
-    if (me == master) print *, trim (fn_nml), ' GW-namelist file '
-    inquire (file =trim (fn_nml) , exist = exists)
+    if (me == master) print *, trim (fn_nml2), ' GW-namelist file '
+    inquire (file =trim (fn_nml2) , exist = exists)
 !
     if (.not. exists) then
        if (me == master) &
-        write (6, *) 'separate ugwp :: namelist file: ', trim (fn_nml), ' does not exist'
+        write (6, *) 'separate ugwp :: namelist file: ', trim (fn_nml2), ' does not exist'
 	
     else
-        open (unit = nlunit, file = trim(fn_nml), action = 'read', status = 'old', iostat = ios)
+        open (unit = nlunit, file = trim(fn_nml2), action = 'read', status = 'old', iostat = ios)
     endif
     rewind (nlunit)
     read   (nlunit, nml = cires_ugwp_nml)
