@@ -1,7 +1,8 @@
 [ccpp-table-properties]
   name = GFS_phys_time_vary
   type = scheme
-  dependencies = aerclm_def.F,aerinterp.F90,h2o_def.f,h2ointerp.f90,iccn_def.F,iccninterp.F90,machine.F,mersenne_twister.f,namelist_soilveg.f,ozinterp.f90,ozne_def.f
+  dependencies = aerclm_def.F,aerinterp.F90,h2o_def.f,h2ointerp.f90,iccn_def.F,iccninterp.F90,machine.F,mersenne_twister.f
+  dependencies = namelist_soilveg.f,set_soilveg.f,ozinterp.f90,ozne_def.f,cires_tauamf_data.F90,noahmp_tables.f90
 
 ########################################################################
 [ccpp-arg-table]
@@ -307,6 +308,641 @@
   type = integer
   intent = inout
   optional = F
+[do_ugwp_v1]
+  standard_name = flag_for_ugwp_version_1
+  long_name = flag to activate ver 1 CIRES UGWP
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[jindx1_tau]
+  standard_name = lower_latitude_index_of_absolute_momentum_flux_due_to_nonorographic_gravity_wave_drag_for_interpolation
+  long_name = index1 for weight1 for tau NGWs
+  units = none
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = inout
+  optional = F
+[jindx2_tau]
+  standard_name = upper_latitude_index_of_absolute_momentum_flux_due_to_nonorographic_gravity_wave_drag_for_interpolation
+  long_name = index2 for weight2 for tau NGWs
+  units = none
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = inout
+  optional = F
+[ddy_j1tau]
+  standard_name = latitude_interpolation_weight_complement_for_absolute_momentum_flux_due_to_nonorographic_gravity_wave_drag
+  long_name = interpolation weight1 for tau NGWs
+  units = none
+  dimensions = (horizontal_dimension)
+  type = real
+  intent = inout
+  kind = kind_phys
+  optional = F
+[ddy_j2tau]
+  standard_name = latitude_interpolation_weight_for_absolute_momentum_flux_due_to_nonorographic_gravity_wave_drag
+  long_name = interpolation weight2 for tau NGWs
+  units = none
+  dimensions = (horizontal_dimension)
+  type = real
+  intent = inout
+  kind = kind_phys
+  optional = F
+[isot]
+  standard_name = soil_type_dataset_choice
+  long_name = soil type dataset choice
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ivegsrc]
+  standard_name = vegetation_type_dataset_choice
+  long_name = land use dataset choice
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[nlunit]
+  standard_name = iounit_namelist
+  long_name = fortran unit number for file opens
+  units = none
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[sncovr]
+  standard_name = surface_snow_area_fraction_over_land
+  long_name = surface snow area fraction
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[sncovr_ice]
+  standard_name = surface_snow_area_fraction_over_ice
+  long_name = surface snow area fraction over ice
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[lsm]
+  standard_name = flag_for_land_surface_scheme
+  long_name = flag for land surface model
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[lsm_noahmp]
+  standard_name = flag_for_noahmp_land_surface_scheme
+  long_name = flag for NOAH MP land surface model
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[lsm_ruc]
+  standard_name = flag_for_ruc_land_surface_scheme
+  long_name = flag for RUC land surface model
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[min_seaice]
+  standard_name = sea_ice_minimum
+  long_name = minimum sea ice value
+  units = frac
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[fice]
+  standard_name = sea_ice_concentration
+  long_name = ice fraction over open water
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[landfrac]
+  standard_name = land_area_fraction
+  long_name = fraction of horizontal grid area occupied by land
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[vtype]
+  standard_name = vegetation_type_classification_real
+  long_name = vegetation type for lsm
+  units = index
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[weasd]
+  standard_name = water_equivalent_accumulated_snow_depth
+  long_name = water equiv of acc snow depth over land and sea ice
+  units = mm
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[lsoil]
+  standard_name = soil_vertical_dimension
+  long_name = number of soil layers
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[zs]
+  standard_name = depth_of_soil_levels_for_land_surface_model
+  long_name = depth of soil levels for land surface model
+  units = m
+  dimensions = (soil_vertical_dimension_for_land_surface_model)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[dzs]
+  standard_name = thickness_of_soil_levels_for_land_surface_model
+  long_name = thickness of soil levels for land surface model
+  units = m
+  dimensions = (soil_vertical_dimension_for_land_surface_model)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[lsnow_lsm_lbound]
+  standard_name = lower_bound_of_snow_vertical_dimension_for_land_surface_model
+  long_name = lower bound of of snow-related arrays for land surface model
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[lsnow_lsm_ubound]
+  standard_name = upper_bound_of_snow_vertical_dimension_for_land_surface_model
+  long_name = upper bound of of snow-related arrays for land surface model
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[tvxy]
+  standard_name = vegetation_temperature
+  long_name = vegetation temperature
+  units = K
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[tgxy]
+  standard_name = ground_temperature_for_noahmp
+  long_name = ground temperature for noahmp
+  units = K
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[tahxy]
+  standard_name = canopy_air_temperature
+  long_name = canopy air temperature
+  units = K
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[canicexy]
+  standard_name = canopy_intercepted_ice_mass
+  long_name = canopy intercepted ice mass
+  units = mm
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[canliqxy]
+  standard_name = canopy_intercepted_liquid_water
+  long_name = canopy intercepted liquid water
+  units = mm
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[eahxy]
+  standard_name = canopy_air_vapor_pressure
+  long_name = canopy air vapor pressure
+  units = Pa
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[cmxy]
+  standard_name = surface_drag_coefficient_for_momentum_for_noahmp
+  long_name = surface drag coefficient for momentum for noahmp
+  units = none
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[chxy]
+  standard_name = surface_drag_coefficient_for_heat_and_moisture_for_noahmp
+  long_name = surface exchange coeff heat & moisture for noahmp
+  units = none
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[fwetxy]
+  standard_name = area_fraction_of_wet_canopy
+  long_name = area fraction of canopy that is wetted/snowed
+  units = none
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[sneqvoxy]
+  standard_name = snow_mass_at_previous_time_step
+  long_name = snow mass at previous time step
+  units = mm
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[alboldxy]
+  standard_name = snow_albedo_at_previous_time_step
+  long_name = snow albedo at previous time step
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[qsnowxy]
+  standard_name = snow_precipitation_rate_at_surface
+  long_name = snow precipitation rate at surface
+  units = mm s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[wslakexy]
+  standard_name = lake_water_storage
+  long_name = lake water storage
+  units = mm
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[taussxy]
+  standard_name = nondimensional_snow_age
+  long_name = non-dimensional snow age
+  units = none
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[waxy]
+  standard_name = water_storage_in_aquifer
+  long_name = water storage in aquifer
+  units = mm
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[wtxy]
+  standard_name = water_storage_in_aquifer_and_saturated_soil
+  long_name = water storage in aquifer and saturated soil
+  units = mm
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[zwtxy]
+  standard_name = water_table_depth
+  long_name = water table depth
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[xlaixy]
+  standard_name = leaf_area_index
+  long_name = leaf area index
+  units = none
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[xsaixy]
+  standard_name = stem_area_index
+  long_name = stem area index
+  units = none
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[lfmassxy]
+  standard_name = leaf_mass
+  long_name = leaf mass
+  units = g m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[stmassxy]
+  standard_name = stem_mass
+  long_name = stem mass
+  units = g m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[rtmassxy]
+  standard_name = fine_root_mass
+  long_name = fine root mass
+  units = g m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[woodxy]
+  standard_name = wood_mass
+  long_name = wood mass including woody roots
+  units = g m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[stblcpxy]
+  standard_name = slow_soil_pool_mass_content_of_carbon
+  long_name = stable carbon in deep soil
+  units = g m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[fastcpxy]
+  standard_name = fast_soil_pool_mass_content_of_carbon
+  long_name = short-lived carbon in shallow soil
+  units = g m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[smcwtdxy]
+  standard_name = soil_water_content_between_soil_bottom_and_water_table
+  long_name = soil water content between the bottom of the soil and the water table
+  units = m3 m-3
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[deeprechxy]
+  standard_name = water_table_recharge_when_deep
+  long_name = recharge to or from the water table when deep
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[rechxy]
+  standard_name = water_table_recharge_when_shallow
+  long_name = recharge to or from the water table when shallow
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[albdvis]
+  standard_name = surface_albedo_direct_visible
+  long_name = direct surface albedo visible band
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[albdnir]
+  standard_name = surface_albedo_direct_NIR
+  long_name = direct surface albedo NIR band
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[albivis]
+  standard_name = surface_albedo_diffuse_visible
+  long_name = diffuse surface albedo visible band
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[albinir]
+  standard_name = surface_albedo_diffuse_NIR
+  long_name = diffuse surface albedo NIR band
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[emiss]
+  standard_name = surface_emissivity_lsm
+  long_name = surface emissivity from lsm
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[snowxy]
+  standard_name = number_of_snow_layers
+  long_name = number of snow layers
+  units = count
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[snicexy]
+  standard_name = snow_layer_ice
+  long_name = snow layer ice
+  units = mm
+  dimensions = (horizontal_dimension,lower_bound_of_snow_vertical_dimension_for_land_surface_model:upper_bound_of_snow_vertical_dimension_for_land_surface_model)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[snliqxy]
+  standard_name = snow_layer_liquid_water
+  long_name = snow layer liquid water
+  units = mm
+  dimensions = (horizontal_dimension,lower_bound_of_snow_vertical_dimension_for_land_surface_model:upper_bound_of_snow_vertical_dimension_for_land_surface_model)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[tsnoxy]
+  standard_name = snow_temperature
+  long_name = snow_temperature
+  units = K
+  dimensions = (horizontal_dimension,lower_bound_of_snow_vertical_dimension_for_land_surface_model:upper_bound_of_snow_vertical_dimension_for_land_surface_model)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[smoiseq]
+  standard_name = equilibrium_soil_water_content
+  long_name = equilibrium soil water content
+  units = m3 m-3
+  dimensions = (horizontal_dimension,soil_vertical_dimension_for_land_surface_model)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[zsnsoxy]
+  standard_name = layer_bottom_depth_from_snow_surface
+  long_name = depth from the top of the snow surface at the bottom of the layer
+  units = m
+  dimensions = (horizontal_dimension,lower_bound_of_snow_vertical_dimension_for_land_surface_model:soil_vertical_dimension_for_land_surface_model)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[slc]
+  standard_name = volume_fraction_of_unfrozen_soil_moisture
+  long_name = liquid soil moisture
+  units = frac
+  dimensions = (horizontal_dimension,soil_vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[smc]
+  standard_name = volume_fraction_of_soil_moisture
+  long_name = total soil moisture
+  units = frac
+  dimensions = (horizontal_dimension,soil_vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[stc]
+  standard_name = soil_temperature
+  long_name = soil temperature
+  units = K
+  dimensions = (horizontal_dimension,soil_vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[tsfcl]
+  standard_name = surface_skin_temperature_over_land
+  long_name = surface skin temperature over land
+  units = K
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[snowd]
+  standard_name = surface_snow_thickness_water_equivalent
+  long_name = water equivalent snow depth
+  units = mm
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[canopy]
+  standard_name = canopy_water_amount
+  long_name = canopy water amount
+  units = kg m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[tg3]
+  standard_name = deep_soil_temperature
+  long_name = deep soil temperature
+  units = K
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[stype]
+  standard_name = soil_type_classification_real
+  long_name = soil type for lsm
+  units = index
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[con_t0c]
+  standard_name = temperature_at_zero_celsius
+  long_name = temperature at 0 degree Celsius
+  units = K
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[nthrds]
+  standard_name = omp_threads
+  long_name = number of OpenMP threads available for physics schemes
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -442,7 +1078,7 @@
 [nsswr]
   standard_name = number_of_timesteps_between_shortwave_radiation_calls
   long_name = number of timesteps between shortwave radiation calls
-  units = 
+  units =
   dimensions = ()
   type = integer
   intent = in
@@ -771,6 +1407,57 @@
   long_name = random number array (0-1)
   units = none
   dimensions = (horizontal_dimension,array_dimension_of_random_number)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[do_ugwp_v1]
+  standard_name = flag_for_ugwp_version_1
+  long_name = flag to activate ver 1 CIRES UGWP
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[jindx1_tau]
+  standard_name = lower_latitude_index_of_absolute_momentum_flux_due_to_nonorographic_gravity_wave_drag_for_interpolation
+  long_name = index1 for weight1 for tau NGWs
+  units = none
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = in
+  optional = F
+[jindx2_tau]
+  standard_name = upper_latitude_index_of_absolute_momentum_flux_due_to_nonorographic_gravity_wave_drag_for_interpolation
+  long_name = index2 for weight2 for tau NGWs
+  units = none
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = in
+  optional = F
+[ddy_j1tau]
+  standard_name = latitude_interpolation_weight_complement_for_absolute_momentum_flux_due_to_nonorographic_gravity_wave_drag
+  long_name = interpolation weight1 for tau NGWs
+  units = none
+  dimensions = (horizontal_dimension)
+  type = real
+  intent = in
+  kind = kind_phys
+  optional = F
+[ddy_j2tau]
+  standard_name = latitude_interpolation_weight_for_absolute_momentum_flux_due_to_nonorographic_gravity_wave_drag
+  long_name = interpolation weight2 for tau NGWs
+  units = none
+  dimensions = (horizontal_dimension)
+  type = real
+  intent = in
+  kind = kind_phys
+  optional = F
+[tau_amf]
+  standard_name = absolute_momentum_flux_due_to_nonorographic_gravity_wave_drag
+  long_name = ngw_absolute_momentum_flux
+  units = various
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
