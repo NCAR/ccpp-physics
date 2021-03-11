@@ -166,7 +166,8 @@ contains
        where(cld_reice .gt. radice_upr) cld_reice = radice_upr
     endif
     
-    ! Cloud-fraction
+    ! Cloud-fraction. For mynnedmf, cld_frac is adjusted for precipitation here, otherwise
+    ! it passes through this interface. It is adjusted prior in sgscloudradpre. 
     if (do_mynnedmf .and. kdt .gt. 1) then
        do iLay = 1, nLev
           do iCol = 1, nCol

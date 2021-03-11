@@ -185,7 +185,7 @@
      &       flux2D_lwDOWN,                                             &
 !    &       dry, icy, wet, lprnt, ipr,                                 &
 !  ---  input/output:
-     &       dtdt,dtdtc,                                                &
+     &       dtdt,dtdtc,htrlw,                                          &
 !  ---  outputs:
      &       adjsfcdsw,adjsfcnsw,adjsfcdlw,adjsfculw,                   &
      &       adjsfculw_lnd,adjsfculw_ice,adjsfculw_wat,xmu,xcosz,       &
@@ -239,7 +239,8 @@
 
 !  ---  input/output:
       real(kind=kind_phys), dimension(im,levs), intent(inout) :: dtdt   &
-     &,                                                          dtdtc
+     &,                                                          dtdtc, &
+     &                                                           htrlw
 
 !  ---  outputs:
       real(kind=kind_phys), dimension(im), intent(out) ::               &
@@ -257,7 +258,6 @@
       integer :: i, k, nstp, nstl, it, istsun(im),iSFC
       real(kind=kind_phys) :: cns,  coszn, tem1, tem2, anginc,          &
      &                        rstl, solang, dT
-      real(kind=kind_phys), dimension(im,levs) :: htrlw
       real(kind=kind_phys), dimension(im,levs+1) :: flxlwup_adj,        &
      &     flxlwdn_adj, t_lev2
 !

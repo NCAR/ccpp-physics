@@ -568,6 +568,15 @@
   kind = kind_phys
   intent = in
   optional = F
+[htrlw]
+  standard_name = updated_tendency_of_air_temperature_due_to_longwave_heating_on_physics_time_step
+  long_name = total sky longwave heating rate on physics time step
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
 [t_lev]
   standard_name = air_temperature_at_interface_for_RRTMGP
   long_name = air temperature  at vertical interface for radiation calculation

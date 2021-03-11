@@ -38,9 +38,9 @@ contains
   subroutine GFS_rrtmgp_thompsonmp_pre_run(nCol, nLev, nTracers, ncnd, doSWrad, doLWrad, &
        i_cldliq, i_cldice, i_cldrain, i_cldsnow, i_cldgrpl, i_cldtot, i_cldliq_nc,       &
        i_cldice_nc, i_twa, effr_in, p_lev, p_lay, tv_lay, t_lay, effrin_cldliq,          &
-       effrin_cldice, effrin_cldsnow, tracer, qs_lay, q_lay, relhum, cld_frac_mg, con_g, &
-       con_rd, uni_cld, lmfshal, lmfdeep2, ltaerosol, do_mynnedmf, imfdeepcnv,           &
-       imfdeepcnv_gf, doGP_cldoptics_PADE, doGP_cldoptics_LUT,                           &
+       effrin_cldice, effrin_cldsnow, tracer, qs_lay, q_lay, relhum, con_g, con_rd,      &
+       lmfshal, lmfdeep2, ltaerosol, do_mynnedmf, imfdeepcnv, imfdeepcnv_gf,             &
+       doGP_cldoptics_PADE, doGP_cldoptics_LUT,                                          &
        cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp,   &
        cld_rerain, precip_frac, errmsg, errflg)
     
@@ -65,7 +65,6 @@ contains
     	 doSWrad,           & ! Call SW radiation?
     	 doLWrad,           & ! Call LW radiation
     	 effr_in,           & ! Use cloud effective radii provided by model?
-         uni_cld,           & ! Use provided cloud-fraction?
          lmfshal,           & ! Flag for mass-flux shallow convection scheme used by Xu-Randall
          lmfdeep2,          & ! Flag for some scale-aware mass-flux convection scheme active
          ltaerosol,         & ! Flag for aerosol option
@@ -82,8 +81,7 @@ contains
          qs_lay,            & ! Saturation vapor pressure (Pa)
          q_lay,             & ! water-vapor mixing ratio (kg/kg)
          relhum,            & ! Relative humidity
-         p_lay,             & ! Pressure at model-layers (Pa)
-         cld_frac_mg          ! Cloud-fraction from MG scheme. WTF?????
+         p_lay                ! Pressure at model-layers (Pa)
     real(kind_phys), dimension(nCol,nLev+1), intent(in) :: &         
          p_lev                ! Pressure at model-level interfaces (Pa)
     real(kind_phys), dimension(nCol, nLev, nTracers),intent(in) :: &
@@ -207,24 +205,19 @@ contains
     cld_resnow(1:nCol,1:nLev)     = effrin_cldsnow(1:nCol,1:nLev)
     cld_rerain(1:nCol,1:nLev)     = rerain_def
     
-    ! Compute cloud-fraction. Else, use value provided
-    if(.not. do_mynnedmf .or. imfdeepcnv .ne. imfdeepcnv_gf ) then ! MYNN PBL or GF conv   	
-       ! Cloud-fraction
-       if (uni_cld) then
-          cld_frac(1:nCol,1:nLev) = cld_frac_mg(1:nCol,1:nLev)    
-       else
-          if(      lmfshal) alpha0 = 100. ! Default (from GATE simulations)
-          if(.not. lmfshal) alpha0 = 2000.
-          ! Xu-Randall (1996) cloud-fraction 
-          do iLay = 1, nLev
-             do iCol = 1, nCol
-                cld_mr = cld_condensate(iCol,iLay,1) + cld_condensate(iCol,iLay,2) +  &
-                         cld_condensate(iCol,iLay,4)
-                cld_frac(iCol,iLay) = cld_frac_XuRandall(p_lay(iCol,iLay),            &
-                         qs_lay(iCol,iLay), relhum(iCol,iLay), cld_mr, alpha0) 
-             enddo
+    ! Compute cloud-fraction. Else, use cld_frac passes through un-touched. Handled in sgs_cloudpre.
+    if(.not. do_mynnedmf .or. imfdeepcnv .ne. imfdeepcnv_gf ) then ! MYNN PBL or GF conv
+       if(      lmfshal) alpha0 = 100. ! Default (from GATE simulations)
+       if(.not. lmfshal) alpha0 = 2000.
+       ! Xu-Randall (1996) cloud-fraction 
+       do iLay = 1, nLev
+          do iCol = 1, nCol
+             cld_mr = cld_condensate(iCol,iLay,1) + cld_condensate(iCol,iLay,2) +  &
+                      cld_condensate(iCol,iLay,4)
+             cld_frac(iCol,iLay) = cld_frac_XuRandall(p_lay(iCol,iLay),            &
+                                   qs_lay(iCol,iLay), relhum(iCol,iLay), cld_mr, alpha0) 
           enddo
-       endif
+       enddo
     endif
     
     ! Precipitation fraction (Hack. For now use cloud-fraction)
