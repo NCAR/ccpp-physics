@@ -2947,6 +2947,7 @@ CONTAINS
        khdz(k)  = rhoz(k)*dfh(k)
        kmdz(k)  = rhoz(k)*dfm(k)
     ENDDO
+    rhoz(kte+1)=rhoz(kte)
     khdz(kte+1)=rhoz(kte+1)*dfh(kte)
     kmdz(kte+1)=rhoz(kte+1)*dfm(kte)
 
