@@ -14,7 +14,8 @@ module GFS_rrtmgp_thompsonmp_pre
        make_IceNumber,      &
        make_DropletNumber, &
        make_RainNumber
-  use rrtmgp_lw_cloud_optics, only: radliq_lwr, radliq_upr, radice_lwr, radice_upr
+  use rrtmgp_lw_cloud_optics, only: radliq_lwr => radliq_lwrLW, radliq_upr => radliq_uprLW,&
+                                    radice_lwr => radice_lwrLW, radice_upr => radice_uprLW
   implicit none
   
   ! Parameters specific to THOMPSON MP scheme.
