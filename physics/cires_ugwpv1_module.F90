@@ -261,7 +261,7 @@ module  cires_ugwpv1_module
 !
 ! find ilaunch
 !
-   if (knob_ugwp_palaunch gt  900.e2) then
+   if (knob_ugwp_palaunch > 900.e2) then
      write(errmsg,'(a,e16.7)') 'cires_ugwpv1_init: unrealistic value of knob_ugwp_palaunch', knob_ugwp_palaunch
      errflg = 1
      return
