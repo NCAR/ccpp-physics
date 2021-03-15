@@ -2597,6 +2597,12 @@ contains
     ftid(ib) = 0.
     ftii(ib) = 0.
     if (ib.eq.1) fsun = 0.
+    frevd = 0.
+    frevi = 0.
+    fregd = 0.
+    fregi = 0.
+    bgap  = 0.
+    wgap  = 0.
   end do
 
   if(cosz <= 0) goto 100
@@ -3262,7 +3268,6 @@ contains
 
      frev(ib) = freveg 
      freg(ib) = frebar 
-
 ! flux absorbed by vegetation
 
      fab(ib) = 1. - fre(ib) - (1.-albgrd(ib))*ftd(ib) &
