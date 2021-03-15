@@ -73,20 +73,20 @@
          real(kind_phys), dimension(1:im,1:km), intent(in)    :: vgrs
          real(kind_phys), dimension(1:im,1:km), intent(in)    :: tgrs
          real(kind_phys), dimension(1:im,1:km), intent(in)    :: qgrs_wv
-         real(kind_phys), dimension(:,:), intent(in)    :: qgrs_cw
-         real(kind_phys), dimension(:,:), intent(in)    :: qgrs_rw
-         real(kind_phys), dimension(:,:), intent(in)    :: qgrs_sw
-         real(kind_phys), dimension(:,:), intent(in)    :: qgrs_iw
-         real(kind_phys), dimension(:,:), intent(in)    :: qgrs_gl
+         real(kind_phys), dimension(:,:),       intent(in)    :: qgrs_cw
+         real(kind_phys), dimension(:,:),       intent(in)    :: qgrs_rw
+         real(kind_phys), dimension(:,:),       intent(in)    :: qgrs_sw
+         real(kind_phys), dimension(:,:),       intent(in)    :: qgrs_iw
+         real(kind_phys), dimension(:,:),       intent(in)    :: qgrs_gl
          real(kind_phys), dimension(1:im,1:km), intent(inout) :: gu0
          real(kind_phys), dimension(1:im,1:km), intent(inout) :: gv0
          real(kind_phys), dimension(1:im,1:km), intent(inout) :: gt0
          real(kind_phys), dimension(1:im,1:km), intent(inout) :: gq0_wv
-         real(kind_phys), dimension(:,:), intent(inout) :: gq0_cw
-         real(kind_phys), dimension(:,:), intent(inout) :: gq0_rw
-         real(kind_phys), dimension(:,:), intent(inout) :: gq0_sw
-         real(kind_phys), dimension(:,:), intent(inout) :: gq0_iw
-         real(kind_phys), dimension(:,:), intent(inout) :: gq0_gl
+         real(kind_phys), dimension(:,:),       intent(inout) :: gq0_cw
+         real(kind_phys), dimension(:,:),       intent(inout) :: gq0_rw
+         real(kind_phys), dimension(:,:),       intent(inout) :: gq0_sw
+         real(kind_phys), dimension(:,:),       intent(inout) :: gq0_iw
+         real(kind_phys), dimension(:,:),       intent(inout) :: gq0_gl
          integer, intent(in) ::      ntcw
          integer, intent(in) ::      ntrw
          integer, intent(in) ::      ntsw

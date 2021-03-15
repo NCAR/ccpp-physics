@@ -183,7 +183,7 @@
       real(kind=kind_phys), dimension(im,lm+LTP) ::         &
                           htswc, htlwc, gcice, grain, grime, htsw0, htlw0, &
                           rhly, tvly,qstl, vvel, clw, ciw, prslk1, tem2da, &
-                          dzb, hzb, cldcov, deltaq, cnvc, cnvw,   &
+                          dzb, hzb, cldcov, deltaq, cnvc, cnvw,            &
                           effrl, effri, effrr, effrs, rho, orho, plyrpa
 
       ! for Thompson MP
@@ -937,35 +937,6 @@
         if (imp_physics == imp_physics_zhao_carr) then
           ccnd(1:IM,1:LMK,1) = ccnd(1:IM,1:LMK,1) + cnvw(1:IM,1:LMK)
         endif
-
-! perturb cld cover
-        !if (pert_clds) then
-        !   cldp1d(:) = 0.
-        !   do i=1,im
-        !      tmp_wt= -1*log( ( 2.0 / ( sppt_wts(i,38) ) ) - 1 )
-        !       call cdfnor(tmp_wt,cdfz)
-        !       cldp1d(i) = cdfz
-        !   enddo
-        !   do i = 1, IM
-        !      do k = 1, LM
-        !         ! compute beta distribution parameters
-        !         m = cldcov(i,k+kd)
-        !         if (m<0.99 .AND. m > 0.01) then
-        !            s = sppt_amp*m*(1.-m)
-        !            alpha0 = m*m*(1.-m)/(s*s)-m
-        !            beta0  = alpha0*(1.-m)/m
-        !    ! compute beta distribution value corresponding
-        !    ! to the given percentile albPpert to use as new albedo
-        !            call ppfbet(cldp1d(i),alpha0,beta0,iflag,cldtmp)
-        !            cldcov(i,k+kd) = cldtmp
-        !         else
-        !            cldcov(i,k+kd) = m
-        !         endif
-        !      enddo     ! end_do_i_loop
-        !   enddo     ! end_do_k_loop
-        !endif
-        !print*,'after cld perts',minval(cldcov),maxval(cldcov)
-
 
         if (imp_physics == imp_physics_zhao_carr .or. imp_physics == imp_physics_mg) then ! zhao/moorthi's prognostic cloud scheme
                                          ! or unified cloud and/or with MG microphysics

@@ -233,8 +233,8 @@
      &,                                                       swhc, hlwc
 
 !  ---  input/output:
-      real(kind=kind_phys), dimension(im,levs), intent(inout) :: dtdt   &
-     &,                                                          dtdtnp
+      real(kind=kind_phys), dimension(im,levs), intent(inout) :: dtdt 
+      real(kind=kind_phys), dimension(:,:),     intent(inout) :: dtdtnp
 
 !  ---  outputs:
       real(kind=kind_phys), dimension(im), intent(out) ::               &
