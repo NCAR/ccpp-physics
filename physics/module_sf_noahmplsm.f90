@@ -2583,6 +2583,10 @@ contains
   mpe = 1.e-06
   bgap = 0.
   wgap = 0.
+  frevd = 0.
+  frevi = 0.
+  fregd = 0.
+  fregi = 0.
 
 ! initialize output because solar radiation only done if cosz > 0
 
@@ -2597,12 +2601,6 @@ contains
     ftid(ib) = 0.
     ftii(ib) = 0.
     if (ib.eq.1) fsun = 0.
-    frevd = 0.
-    frevi = 0.
-    fregd = 0.
-    fregi = 0.
-    bgap  = 0.
-    wgap  = 0.
   end do
 
   if(cosz <= 0) goto 100
