@@ -339,7 +339,6 @@ contains
                +TEMI*DDY(j)*aer_pres(I1,J2,L,n1)+DDX(j)*TEMJ*aer_pres(I2,J1,L,n1))&
           +tx2*(TEMI*TEMJ*aer_pres(I1,J1,L,n2)+DDX(j)*DDY(J)*aer_pres(I2,J2,L,n2) &
                +TEMI*DDY(j)*aer_pres(I1,J2,L,n2)+DDX(j)*TEMJ*aer_pres(I2,J1,L,n2))
-                
         ENDDO
       ENDDO
 
