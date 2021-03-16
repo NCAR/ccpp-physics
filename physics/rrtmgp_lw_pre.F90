@@ -5,6 +5,7 @@ module rrtmgp_lw_pre
        setemis                     ! Routine to compute surface-emissivity
   use mo_gas_optics_rrtmgp,  only: &
        ty_gas_optics_rrtmgp
+  use rrtmgp_lw_gas_optics, only: lw_gas_props
 
   implicit none
 
@@ -25,8 +26,8 @@ contains
 !! \htmlinclude rrtmgp_lw_pre_run.html
 !!
   subroutine rrtmgp_lw_pre_run (doLWrad, nCol, xlon, xlat, slmsk, zorl, snowd, sncovr, &
-       tsfg, tsfa, hprime, lw_gas_props, sfc_emiss_byband, semis, errmsg, errflg)
-    
+       tsfg, tsfa, hprime, sfc_emiss_byband, emiss, semis, errmsg, errflg)
+
     ! Inputs
     logical, intent(in) :: &
          doLWrad          ! Logical flag for longwave radiation call
@@ -42,8 +43,8 @@ contains
          tsfg,          & ! Surface ground temperature for radiation (K)
          tsfa,          & ! Lowest model layer air temperature for radiation (K)
          hprime           ! Standard deviation of subgrid orography
-    type(ty_gas_optics_rrtmgp),intent(in) :: &
-         lw_gas_props     ! RRTMGP DDT: spectral information for LW calculation
+    real(kind_phys), dimension(:), intent(in) :: &
+         emiss            ! Surface emissivity from Noah MP
 
     ! Outputs 
     real(kind_phys), dimension(lw_gas_props%get_nband(),ncol), intent(out) :: &
@@ -67,7 +68,7 @@ contains
     ! #######################################################################################
     ! Call module_radiation_surface::setemis(),to setup surface emissivity for LW radiation.
     ! #######################################################################################
-    call setemis (xlon, xlat, slmsk, snowd, sncovr, zorl, tsfg, tsfa, hprime, nCol, semis)
+    call setemis (xlon, xlat, slmsk, snowd, sncovr, zorl, tsfg, tsfa, hprime, emiss, nCol, semis)
 
     ! Assign same emissivity to all bands
     do iBand=1,lw_gas_props%get_nband()
