@@ -191,16 +191,19 @@ module  cires_ugwpv1_module
     integer :: k
     integer :: ddd_ugwp,    curday_ugwp 
 !    integer :: version
-    
+
+    ! Initialize CCPP error handling variables
+    errmsg = ''
+    errflg = 0
 
 !
     if (me == master) print *, trim (fn_nml), ' GW-namelist file '
     inquire (file =trim (fn_nml) , exist = exists)
 !
     if (.not. exists) then
-       if (me == master) &
-        write (6, *) 'separate ugwp :: namelist file: ', trim (fn_nml), ' does not exist'
-	
+        write(errmsg,'(3a)') 'cires_ugwpv1_init: namelist file: ', trim (fn_nml), ' does not exist'
+        errflg = 1
+        return
     else
         open (unit = nlunit, file = trim(fn_nml), action = 'read', status = 'old', iostat = ios)
     endif
@@ -208,11 +211,6 @@ module  cires_ugwpv1_module
     read   (nlunit, nml = cires_ugwp_nml)
     close  (nlunit)
 !
-
-    ! Initialize CCPP error handling variables
-    errmsg = ''
-    errflg = 0
-
 
     strsolver= knob_ugwp_orosolv     
     
@@ -248,7 +246,7 @@ module  cires_ugwpv1_module
 !   allocate(fcor(latr), fcor2(latr)  )
 !
     allocate( kvg(levs+1),   ktg(levs+1)  )
-    allocate( krad(levs+1),  kion(levs+1) )        
+    allocate( krad(levs+1),  kion(levs+1) )
     allocate( zkm(levs),   pmb(levs) )
     
 !
@@ -263,7 +261,12 @@ module  cires_ugwpv1_module
 !
 ! find ilaunch
 !
-    
+   if (knob_ugwp_palaunch > 900.e2) then
+     write(errmsg,'(a,e16.7)') 'cires_ugwpv1_init: unrealistic value of knob_ugwp_palaunch', knob_ugwp_palaunch
+     errflg = 1
+     return
+   endif
+
    do k=levs, 1, -1
      if (pmb(k) .gt. knob_ugwp_palaunch ) exit
    enddo

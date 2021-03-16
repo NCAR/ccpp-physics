@@ -2583,6 +2583,10 @@ contains
   mpe = 1.e-06
   bgap = 0.
   wgap = 0.
+  frevd = 0.
+  frevi = 0.
+  fregd = 0.
+  fregi = 0.
 
 ! initialize output because solar radiation only done if cosz > 0
 
@@ -3262,7 +3266,6 @@ contains
 
      frev(ib) = freveg 
      freg(ib) = frebar 
-
 ! flux absorbed by vegetation
 
      fab(ib) = 1. - fre(ib) - (1.-albgrd(ib))*ftd(ib) &

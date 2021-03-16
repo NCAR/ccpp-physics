@@ -68,10 +68,13 @@
       use surface_perturbation,      only: cdfnor
 
       ! For Thompson MP
-      use module_mp_thompson,        only: calc_effectRad, Nt_c
-      use module_mp_thompson_make_number_concentrations, only:         &
-                                           make_IceNumber,             &
-                                           make_DropletNumber,         &
+      use module_mp_thompson,        only: calc_effectRad, Nt_c,     &
+                                           re_qc_min, re_qc_max,     &
+                                           re_qi_min, re_qi_max,     &
+                                           re_qs_min, re_qs_max
+      use module_mp_thompson_make_number_concentrations, only:       &
+                                           make_IceNumber,           &
+                                           make_DropletNumber,       &
                                            make_RainNumber
 
       implicit none
@@ -779,6 +782,11 @@
             call calc_effectRad (tlyr(i,:), plyr(i,:)*100., qv_mp(i,:), qc_mp(i,:),   &
                                  nc_mp(i,:), qi_mp(i,:), ni_mp(i,:), qs_mp(i,:), &
                                  re_cloud(i,:), re_ice(i,:), re_snow(i,:), 1, lm )
+            do k=1,lm
+              re_cloud(i,k) = MAX(re_qc_min, MIN(re_cloud(i,k), re_qc_max))
+              re_ice(i,k)   = MAX(re_qi_min, MIN(re_ice(i,k),   re_qi_max))
+              re_snow(i,k)  = MAX(re_qs_min, MIN(re_snow(i,k),  re_qs_max))
+            end do
           end do
           ! Scale Thompson's effective radii from meter to micron
           do k=1,lm
