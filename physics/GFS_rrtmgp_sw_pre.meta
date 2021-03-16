@@ -253,6 +253,42 @@
   kind = kind_phys
   intent = in
   optional = F
+[albdvis]
+  standard_name = surface_albedo_direct_visible
+  long_name = direct surface albedo visible band
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[albdnir]
+  standard_name = surface_albedo_direct_NIR
+  long_name = direct surface albedo NIR band
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[albivis]
+  standard_name = surface_albedo_diffuse_visible
+  long_name = diffuse surface albedo visible band
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[albinir]
+  standard_name = surface_albedo_diffuse_NIR
+  long_name = diffuse surface albedo NIR band
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [sfc_wts]
   standard_name = weights_for_stochastic_surface_physics_perturbation
   long_name = weights for stochastic surface physics perturbation
@@ -296,14 +332,6 @@
   dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
   type = real
   kind = kind_phys
-  intent = in
-  optional = F
-[sw_gas_props]
-  standard_name = coefficients_for_sw_gas_optics
-  long_name = DDT containing spectral information for RRTMGP SW radiation scheme
-  units = DDT
-  dimensions = ()
-  type = ty_gas_optics_rrtmgp
   intent = in
   optional = F
 [sfc_alb_nir_dir]
