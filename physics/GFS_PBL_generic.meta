@@ -1194,12 +1194,12 @@
   kind = kind_phys
   intent = in
   optional = F
-[flag_cice]
-  standard_name = flag_for_cice
-  long_name = flag for cice
-  units = flag
-  dimensions = (horizontal_loop_extent)
-  type = logical
+[kdt]
+  standard_name = index_of_time_step
+  long_name = current forecast iteration
+  units = index
+  dimensions = ()
+  type = integer
   intent = in
   optional = F
 [dusfc_cice]
