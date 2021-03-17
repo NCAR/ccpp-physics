@@ -2946,8 +2946,13 @@
           else                          ! for non-conservative scattering
             za1 = zgam1*zgam4 + zgam2*zgam3
             za2 = zgam1*zgam3 + zgam2*zgam4
-            zrk = sqrt ( (zgam1 - zgam2) * (zgam1 + zgam2) )
-            zrk2= 2.0 * zrk
+            zrk = (zgam1 - zgam2) * (zgam1 + zgam2)
+            if (zrk > eps1) then
+              zrk = sqrt(zrk)
+            else
+              zrk = f_zero
+            endif
+            zrk2= zrk + zrk
 
             zrp  = zrk * cosz
             zrp1 = f_one + zrp
@@ -2993,7 +2998,8 @@
             ze1r45 = zr4*zexp1 + zr5*zexm1
 
 !      ...  collimated beam
-            if (ze1r45>=-eps1 .and. ze1r45<=eps1) then
+!           if (ze1r45>=-eps1 .and. ze1r45<=eps1) then
+            if (abs(ze1r45) <= eps1) then
               zrefb(kp) = eps1
               ztrab(kp) = zexm2
             else
@@ -3005,7 +3011,11 @@
             endif
 
 !      ...  diffuse beam
-            zden1 = zr4 / (ze1r45 * zrkg1)
+            if (ze1r45 >= f_zero) then
+              zden1   = zr4 / max(eps1, ze1r45*zrkg1)
+            else
+              zden1   = zr4 / min(-eps1, ze1r45*zrkg1)
+            endif
             zrefd(kp) = max(f_zero, min(f_one,                          &
      &                  zgam2*(zexp1 - zexm1)*zden1 ))
             ztrad(kp) = max(f_zero, min(f_one, zrk2*zden1 ))
@@ -3171,8 +3181,13 @@
               else                          ! for non-conservative scattering
                 za1 = zgam1*zgam4 + zgam2*zgam3
                 za2 = zgam1*zgam3 + zgam2*zgam4
-                zrk = sqrt ( (zgam1 - zgam2) * (zgam1 + zgam2) )
-                zrk2= 2.0 * zrk
+                zrk = (zgam1 - zgam2) * (zgam1 + zgam2)
+                if (zrk > eps1) then
+                  zrk = sqrt(zrk)
+                else
+                  zrk = f_zero
+                endif
+                zrk2= zrk + zrk
 
                 zrp  = zrk * cosz
                 zrp1 = f_one + zrp
@@ -3218,7 +3233,8 @@
                 ze1r45 = zr4*zexp1 + zr5*zexm1
 
 !      ...  collimated beam
-                if ( ze1r45>=-eps1 .and. ze1r45<=eps1 ) then
+!               if ( ze1r45>=-eps1 .and. ze1r45<=eps1 ) then
+                if ( abs(ze1r45) <= eps1 ) then
                   zrefb(kp) = eps1
                   ztrab(kp) = zexm2
                 else
@@ -3230,7 +3246,11 @@
                 endif
 
 !      ...  diffuse beam
-                zden1 = zr4 / (ze1r45 * zrkg1)
+                if (ze1r45 >= f_zero) then
+                  zden1   = zr4 / max(eps1, ze1r45*zrkg1)
+                else
+                  zden1   = zr4 / min(-eps1, ze1r45*zrkg1)
+                endif
                 zrefd(kp) = max(f_zero, min(f_one,                      &
      &                      zgam2*(zexp1 - zexm1)*zden1 ))
                 ztrad(kp) = max(f_zero, min(f_one, zrk2*zden1 ))
@@ -3723,8 +3743,13 @@
           else                          ! for non-conservative scattering
             za1 = zgam1*zgam4 + zgam2*zgam3
             za2 = zgam1*zgam3 + zgam2*zgam4
-            zrk = sqrt ( (zgam1 - zgam2) * (zgam1 + zgam2) )
-            zrk2= 2.0 * zrk
+            zrk = (zgam1 - zgam2) * (zgam1 + zgam2)
+            if (zrk > eps1) then
+              zrk = sqrt(zrk)
+            else
+              zrk = f_zero
+            endif
+            zrk2= zrk + zrk
 
             zrp  = zrk * cosz
             zrp1 = f_one + zrp
@@ -3770,7 +3795,8 @@
             ze1r45 = zr4*zexp1 + zr5*zexm1
 
 !      ...  collimated beam
-            if (ze1r45>=-eps1 .and. ze1r45<=eps1) then
+!           if (ze1r45>=-eps1 .and. ze1r45<=eps1) then
+            if (abs(ze1r45) <= eps1) then
               zrefb(kp) = eps1
               ztrab(kp) = zexm2
             else
@@ -3782,7 +3808,11 @@
             endif
 
 !      ...  diffuse beam
-            zden1 = zr4 / (ze1r45 * zrkg1)
+            if (ze1r45 >= f_zero) then
+              zden1   = zr4 / max(eps1, ze1r45*zrkg1)
+            else
+              zden1   = zr4 / min(-eps1, ze1r45*zrkg1)
+            endif
             zrefd(kp) = max(f_zero, min(f_one,                          &
      &                  zgam2*(zexp1 - zexm1)*zden1 ))
             ztrad(kp) = max(f_zero, min(f_one, zrk2*zden1 ))
@@ -3935,8 +3965,13 @@
               else                          ! for non-conservative scattering
                 za1 = zgam1*zgam4 + zgam2*zgam3
                 za2 = zgam1*zgam3 + zgam2*zgam4
-                zrk = sqrt ( (zgam1 - zgam2) * (zgam1 + zgam2) )
-                zrk2= 2.0 * zrk
+                zrk = (zgam1 - zgam2) * (zgam1 + zgam2)
+                if (zrk > eps1) then
+                  zrk = sqrt(zrk)
+                else
+                  zrk = f_zero
+                endif
+                zrk2= zrk + zrk
 
                 zrp  = zrk * cosz
                 zrp1 = f_one + zrp
@@ -3982,7 +4017,8 @@
                 ze1r45 = zr4*zexp1 + zr5*zexm1
 
 !      ...  collimated beam
-                if ( ze1r45>=-eps1 .and. ze1r45<=eps1 ) then
+!               if ( ze1r45>=-eps1 .and. ze1r45<=eps1 ) then
+                if ( abs(ze1r45) <= eps1 ) then
                   zrefb(kp) = eps1
                   ztrab(kp) = zexm2
                 else
@@ -3994,7 +4030,11 @@
                 endif
 
 !      ...  diffuse beam
-                zden1 = zr4 / (ze1r45 * zrkg1)
+                if (ze1r45 >= f_zero) then
+                  zden1   = zr4 / max(eps1, ze1r45*zrkg1)
+                else
+                  zden1   = zr4 / min(-eps1, ze1r45*zrkg1)
+                endif
                 zrefd(kp) = max(f_zero, min(f_one,                      &
      &                      zgam2*(zexp1 - zexm1)*zden1 ))
                 ztrad(kp) = max(f_zero, min(f_one, zrk2*zden1 ))
