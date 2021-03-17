@@ -158,69 +158,6 @@
   kind = kind_phys
   intent = inout
   optional = F
-[zorl]
-  standard_name = surface_roughness_length
-  long_name = surface roughness length
-  units = cm
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[zorlo]
-  standard_name = surface_roughness_length_over_ocean
-  long_name = surface roughness length over ocean
-  units = cm
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[zorll]
-  standard_name = surface_roughness_length_over_land
-  long_name = surface roughness length over land
-  units = cm
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[zorli]
-  standard_name = surface_roughness_length_over_ice
-  long_name = surface roughness length over ice
-  units = cm
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[zorl_wat]
-  standard_name = surface_roughness_length_over_ocean_interstitial
-  long_name = surface roughness length over ocean (temporary use as interstitial)
-  units = cm
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[zorl_lnd]
-  standard_name = surface_roughness_length_over_land_interstitial
-  long_name = surface roughness length over land  (temporary use as interstitial)
-  units = cm
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[zorl_ice]
-  standard_name = surface_roughness_length_over_ice_interstitial
-  long_name = surface roughness length over ice   (temporary use as interstitial)
-  units = cm
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
 [snowd]
   standard_name = surface_snow_thickness_water_equivalent
   long_name = water equivalent snow depth
@@ -979,33 +916,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
-[zorl_wat]
-  standard_name = surface_roughness_length_over_ocean_interstitial
-  long_name = surface roughness length over ocean (temporary use as interstitial)
-  units = cm
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[zorl_lnd]
-  standard_name = surface_roughness_length_over_land_interstitial
-  long_name = surface roughness length over land  (temporary use as interstitial)
-  units = cm
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[zorl_ice]
-  standard_name = surface_roughness_length_over_ice_interstitial
-  long_name = surface roughness length over ice   (temporary use as interstitial)
-  units = cm
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
   optional = F
 [cd]
   standard_name = surface_drag_coefficient_for_momentum_in_air

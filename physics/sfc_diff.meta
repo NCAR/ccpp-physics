@@ -332,7 +332,7 @@
   intent = in
   optional = F
 [z0rl_wat]
-  standard_name = surface_roughness_length_over_ocean_interstitial
+  standard_name = surface_roughness_length_over_ocean
   long_name = surface roughness length over ocean (temporary use as interstitial)
   units = cm
   dimensions = (horizontal_loop_extent)
@@ -341,7 +341,7 @@
   intent = inout
   optional = F
 [z0rl_lnd]
-  standard_name = surface_roughness_length_over_land_interstitial
+  standard_name = surface_roughness_length_over_land
   long_name = surface roughness length over land  (temporary use as interstitial)
   units = cm
   dimensions = (horizontal_loop_extent)
@@ -350,7 +350,7 @@
   intent = inout
   optional = F
 [z0rl_ice]
-  standard_name = surface_roughness_length_over_ice_interstitial
+  standard_name = surface_roughness_length_over_ice
   long_name = surface roughness length over ice   (temporary use as interstitial)
   units = cm
   dimensions = (horizontal_loop_extent)
