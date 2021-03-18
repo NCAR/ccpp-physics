@@ -49,7 +49,7 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = GFS_time_vary_pre_run
+  name = GFS_time_vary_pre_timestep_init
   type = scheme
 [jdat]
   standard_name = forecast_date_and_time

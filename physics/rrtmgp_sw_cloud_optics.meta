@@ -98,15 +98,6 @@
   type = integer
   intent = out
   optional = F
-[sw_cloud_props]
-  standard_name = coefficients_for_sw_cloud_optics
-  long_name = DDT containing spectral information for RRTMGP SW radiation scheme
-  units = DDT
-  dimensions = ()
-  type = ty_cloud_optics
-  intent = out
-  optional = F
-
 ########################################################################
 [ccpp-arg-table]
   name = rrtmgp_sw_cloud_optics_run
@@ -175,14 +166,6 @@
   type = logical
   intent = in
   optional = F   
-[nrghice]
-  standard_name = number_of_rrtmgp_ice_roughness
-  long_name = number of ice-roughness categories in RRTMGP calculation
-  units = count
-  dimensions =  ()
-  type = integer
-  intent = in
-  optional = F
 [cld_frac]
   standard_name = total_cloud_fraction
   long_name = layer total cloud fraction
@@ -273,20 +256,12 @@
   kind = kind_phys
   intent = in
   optional = F   
-[sw_cloud_props]
-  standard_name = coefficients_for_sw_cloud_optics
-  long_name = DDT containing spectral information for cloudy RRTMGP SW radiation scheme
-  units = DDT
-  dimensions = ()
-  type = ty_cloud_optics
-  intent = in
-  optional = F
-[sw_gas_props]
-  standard_name = coefficients_for_sw_gas_optics
-  long_name = DDT containing spectral information for RRTMGP SW radiation scheme
-  units = DDT
-  dimensions = ()
-  type = ty_gas_optics_rrtmgp
+[nbndsGPsw]
+  standard_name = number_of_sw_bands_rrtmgp
+  long_name = number of sw bands used in RRTMGP
+  units = count
+  dimensions =  ()
+  type = integer
   intent = in
   optional = F
 [nday]
