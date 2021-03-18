@@ -92,7 +92,7 @@
          integer, intent(in) ::      ntsw
          integer, intent(in) ::      ntiw
          integer, intent(in) ::      ntgl
-         real(kind_phys), dimension(1:im,1:km), intent(inout)    :: dtdtnp
+         real(kind_phys), dimension(:,:),       intent(inout) :: dtdtnp
          real(kind_phys), dimension(1:im),      intent(in)    :: rain
          real(kind_phys), dimension(1:im),      intent(in)    :: rainc
          real(kind_phys), dimension(1:im),      intent(inout) :: tprcp
