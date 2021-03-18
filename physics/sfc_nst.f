@@ -9,14 +9,11 @@
 ! \brief This subroutine is empty since there are no procedures that need to be done to initialize the GFS NSST code.
 !! This subroutine is empty since there are no procedures that need to be done to initialize the GFS NSST code.
 !!
-!! \section arg_table_sfc_nst_init  Argument Table
-!!
       subroutine sfc_nst_init
       end subroutine sfc_nst_init
 
 ! \brief This subroutine is empty since there are no procedures that need to be done to finalize the GFS NSST code.
 !! This subroutine is empty since there are no procedures that need to be done to finalize the GFS NSST code.
-!! \section arg_table_sfc_nst_finalize  Argument Table
 !!
       subroutine sfc_nst_finalize
       end subroutine sfc_nst_finalize
@@ -661,13 +658,9 @@ cc
 !! surface in the GFS physics suite. The other two are the Noah land
 !! surface model and the sice simplified ice model.
 !!
-!! \section arg_table_sfc_nst_init  Argument Table
-!!
       subroutine sfc_nst_pre_init
       end subroutine sfc_nst_pre_init
 
-!! \section arg_table_sfc_nst_finalize  Argument Table
-!!
       subroutine sfc_nst_pre_finalize
       end subroutine sfc_nst_pre_finalize
 
