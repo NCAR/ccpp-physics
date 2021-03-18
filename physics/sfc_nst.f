@@ -787,7 +787,7 @@ cc
 ! \section NSST_detailed_post_algorithm Detailed Algorithm
 ! @{
       subroutine sfc_nst_post_run                                       &
-     &     ( im, rlapse, tgice, wet, lake,icy, oro, oro_uf, nstf_name1,      &
+     &     ( im, rlapse, tgice, wet, lake,icy, oro, oro_uf, nstf_name1, &
      &       nstf_name4, nstf_name5, xt, xz, dt_cool, z_c, tref, xlon,  &
      &       tsurf_wat, tsfc_wat, nthreads, dtzm, errmsg, errflg        &
      &     )
