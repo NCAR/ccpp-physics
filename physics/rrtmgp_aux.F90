@@ -28,7 +28,8 @@ contains
          t_lev
 
     ! Local
-    integer :: iCol,iLay, iSFC, iTOA, top_at_1
+    integer :: iCol,iLay, iSFC, iTOA
+    logical :: top_at_1
     real(kind_phys), dimension(nCol,nLev) :: tem2da, tem2db
 
     top_at_1 = (p_lev(1,1) .lt.  p_lev(1, nLev))
@@ -47,7 +48,7 @@ contains
            tem2da(iCol,1)    = log(p_lay(iCol,1) )
            tem2db(iCol,1)    = log(max(minP, p_lev(iCol,1)) )
            tem2db(iCol,iSFC) = log(p_lev(iCol,iSFC) )
-       enddo                                                                                                                                                                                                                
+       enddo
        t_lev(1:NCOL,1)      = t_lay(1:NCOL,iTOA)
        do iLay = 2, iSFC
           do iCol = 1, nCol
