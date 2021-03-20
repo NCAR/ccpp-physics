@@ -91,6 +91,7 @@
                                            imp_physics_zhao_carr_pdf,          &
                                            imp_physics_mg, imp_physics_wsm6,   &
                                            imp_physics_fer_hires,              &
+                                           imp_physics_nssl,                   &
                                            yearlen, icloud
 
       character(len=3), dimension(:), intent(in) :: lndp_var_list
@@ -933,8 +934,7 @@
         endif
 
 
-        if (imp_physics == imp_physics_zhao_carr .or. imp_physics == imp_physics_mg &
-            .or. imp_physics == imp_physics_nssl) then ! zhao/moorthi's prognostic cloud scheme
+        if (imp_physics == imp_physics_zhao_carr .or. imp_physics == imp_physics_mg) then ! zhao/moorthi's prognostic cloud scheme
                                          ! or unified cloud and/or with MG microphysics
 
           if (uni_cld .and. ncld >= 2) then
@@ -1001,6 +1001,17 @@
                          effri_inout(:,:), effrs_inout(:,:),               &
                          dzb, xlat_d, julian, yearlen,                     &
                          clouds,cldsa,mtopa,mbota, de_lgth, alpha)            !  --- outputs
+
+        elseif(imp_physics == imp_physics_nssl) then ! NSSL MP
+            call progcld6 (plyr,plvl,tlyr,qlyr,qstl,rhly,tracer1,   & !  --- inputs
+                         xlat,xlon,slmsk,dz,delp,                   &
+                         ntrac-1, ntcw-1,ntiw-1,ntrw-1,             &
+                         ntsw-1,ntgl-1,                             &
+                         im, lmk, lmp, uni_cld, lmfshal, lmfdeep2,  &
+                         cldcov(:,1:LMK), effrl_inout(:,:),         &
+                         effri_inout(:,:), effrs_inout(:,:),        &
+                         dzb, xlat_d, julian, yearlen,              &
+                         clouds, cldsa, mtopa, mbota, de_lgth, alpha) !  --- outputs
 
         elseif(imp_physics == imp_physics_thompson) then ! Thompson MP
 
