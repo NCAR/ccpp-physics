@@ -244,15 +244,6 @@
   kind = kind_phys
   intent = out
   optional = F
-[dtdtc]
-  standard_name = tendency_of_air_temperature_due_to_radiative_heating_assuming_clear_sky
-  long_name = clear sky radiative (shortwave + longwave) heating rate at current time
-  units = K s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
 [dqdt]
   standard_name = tendency_of_tracers_due_to_model_physics
   long_name = updated tendency of the tracers
