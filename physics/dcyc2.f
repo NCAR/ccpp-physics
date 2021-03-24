@@ -48,7 +48,7 @@
 !            im, levs, deltim, fhswr,                                   !
 !            dry, icy, wet                                              !
 !      input/output:                                                    !
-!            dtdt,dtdtc,                                                !
+!            dtdt,dtdtnp,                                               !
 !      outputs:                                                         !
 !            adjsfcdsw,adjsfcnsw,adjsfcdlw,adjsfculw,                   !
 !            adjsfculw_lnd,adjsfculw_ice,adjsfculw_wat,xmu,xcosz,       !
@@ -100,8 +100,7 @@
 !  input/output:                                                        !
 !     dtdt(im,levs)- real, model time step adjusted total radiation     !
 !                          heating rates ( k/s )                        !
-!     dtdtc(im,levs)- real, model time step adjusted clear sky radiation!
-!                          heating rates ( k/s )                        !
+!     dtdtnp(im,levs)- real, heating rate adjustment for SPPT           !
 !                                                                       !
 !  outputs:                                                             !
 !     adjsfcdsw(im)- real, time step adjusted sfc dn sw flux (w/m**2)   !
@@ -181,10 +180,11 @@
      &       im, levs, deltim, fhswr,                                   &
      &       dry, icy, wet,                                             &
      &       minGPpres, tsfc, use_LW_jacobian, sfculw, fluxlwUP_jac,    &
-     &       t_lay, t_lev, p_lay, p_lev, flux2D_lwUP, flux2D_lwDOWN,    &
+     &       t_lay, t_lev, p_lay, p_lev, flux2D_lwUP, flux2D_lwDOWN,    &  
+     &       pert_radtend, do_sppt,ca_global,                           &
 !    &       dry, icy, wet, lprnt, ipr,                                 &
 !  ---  input/output:
-     &       dtdt,dtdtc,htrlw,                                          &
+     &       dtdt,dtdtnp,htrlw,                                         &
 !  ---  outputs:
      &       adjsfcdsw,adjsfcnsw,adjsfcdlw,adjsfculw,                   &
      &       adjsfculw_lnd,adjsfculw_ice,adjsfculw_wat,xmu,xcosz,       &
@@ -214,7 +214,8 @@
 !     integer, intent(in) :: ipr
 !     logical lprnt
       logical, dimension(im), intent(in) :: dry, icy, wet
-      logical, intent(in) :: use_LW_jacobian
+      logical, intent(in) :: use_LW_jacobian, pert_radtend
+      logical, intent(in) :: do_sppt,ca_global
       real(kind=kind_phys),   intent(in) :: solhr, slag, cdec, sdec,    &
      &                                      deltim, fhswr, minGPpres
 
@@ -236,9 +237,9 @@
      &     flux2D_lwUP, flux2D_lwDOWN, fluxlwUP_jac, t_lev
 
 !  ---  input/output:
-      real(kind=kind_phys), dimension(im,levs), intent(inout) :: dtdt   &
-     &,                                                          dtdtc, &
+      real(kind=kind_phys), dimension(im,levs), intent(inout) :: dtdt,  &
      &                                                           htrlw
+      real(kind=kind_phys), dimension(:,:),     intent(inout) :: dtdtnp
 
 !  ---  outputs:
       real(kind=kind_phys), dimension(im), intent(out) ::               &
@@ -412,6 +413,23 @@
             dtdtc(i,k) = dtdtc(i,k) + swhc(i,k)*xmu(i) + hlwc(i,k)
          enddo
       enddo
+      if (do_sppt .or. ca_global) then
+         if (pert_radtend) then
+! clear sky
+           do k = 1, levs
+             do i = 1, im
+               dtdtnp(i,k) = dtdtnp(i,k) + swhc(i,k)*xmu(i) + hlwc(i,k)  
+             enddo
+           enddo
+         else
+! all sky
+           do k = 1, levs
+             do i = 1, im
+               dtdtnp(i,k) = dtdtnp(i,k) + swh(i,k)*xmu(i) + hlw(i,k)
+             enddo
+           enddo
+         endif
+      endif
 !
       return
 !...................................
