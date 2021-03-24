@@ -84,7 +84,7 @@ contains
          errmsg                         ! CCPP error message
     integer,          intent(out) :: &
          errflg                         ! CCPP error code
-    type(ty_optical_props_2str),intent(out) :: &
+    type(ty_optical_props_2str),intent(inout) :: &
          lw_optical_props_clouds,     & ! RRTMGP DDT: Shortwave optical properties by spectral point (clouds)
          lw_optical_props_precip        ! RRTMGP DDT: Shortwave optical properties by spectral point (precipitation)
 
@@ -106,12 +106,6 @@ contains
     ! ####################################################################################    
     ! First sample the clouds...
     ! ####################################################################################
-
-    ! Allocate space RRTMGP DDTs [nCol,nLev,nGpt]
-    call check_error_msg('rrtmgp_lw_cloud_sampling_run',&
-         lw_optical_props_clouds%alloc_2str(nCol, nLev, lw_gas_props))
-    lw_optical_props_clouds%tau(:,:,:) = 0._kind_phys
-    lw_optical_props_clouds%ssa(:,:,:) = 0._kind_phys
     
     ! Change random number seed value for each radiation invocation (isubc_lw =1 or 2).
     if(isubc_lw == 1) then      ! advance prescribed permutation seed
@@ -176,12 +170,6 @@ contains
     ! ####################################################################################
     ! Next sample the precipitation...
     ! ####################################################################################
-    
-    ! Allocate space RRTMGP DDTs [nCol,nLev,nGpt]
-    call check_error_msg('rrtmgp_lw_cloud_sampling_run',&
-         lw_optical_props_precip%alloc_2str(nCol, nLev, lw_gas_props))
-    lw_optical_props_precip%tau(:,:,:) = 0._kind_phys
-    lw_optical_props_precip%ssa(:,:,:) = 0._kind_phys
     
     ! Change random number seed value for each radiation invocation (isubc_lw =1 or 2).
     if(isubc_lw == 1) then      ! advance prescribed permutation seed

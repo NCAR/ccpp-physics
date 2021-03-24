@@ -559,15 +559,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[fluxlwDOWN_jac]
-  standard_name = RRTMGP_jacobian_of_lw_flux_downward
-  long_name = RRTMGP Jacobian downward longwave flux at profile
-  units = W m-2 K-1
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [htrlw]
   standard_name = updated_tendency_of_air_temperature_due_to_longwave_heating_on_physics_time_step
   long_name = total sky longwave heating rate on physics time step

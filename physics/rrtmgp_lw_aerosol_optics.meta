@@ -5,6 +5,36 @@
 
 ########################################################################
 [ccpp-arg-table]
+  name = rrtmgp_lw_aerosol_optics_init
+  type = scheme
+[lw_optical_props_aerosol]
+  standard_name = longwave_optical_properties_for_aerosols
+  long_name = Fortran DDT containing RRTMGP optical properties
+  units = DDT
+  dimensions = ()
+  type = ty_optical_props_1scl
+  intent = inout
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+
+########################################################################
+[ccpp-arg-table]
   name = rrtmgp_lw_aerosol_optics_run
   type = scheme
 [doLWrad]
@@ -152,7 +182,7 @@
   units = DDT
   dimensions = ()
   type = ty_optical_props_1scl
-  intent = out
+  intent = inout
   optional = F
 [errmsg]
   standard_name = ccpp_error_message

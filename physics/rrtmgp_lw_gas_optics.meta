@@ -34,6 +34,22 @@
   type = ty_gas_concs
   intent = inout
   optional = F
+[lw_optical_props_clrsky]
+  standard_name = longwave_optical_properties_for_clear_sky
+  long_name = Fortran DDT containing RRTMGP optical properties
+  units = DDT
+  dimensions = ()
+  type = ty_optical_props_1scl
+  intent = inout
+  optional = F
+[sources]
+  standard_name = longwave_source_function
+  long_name = Fortran DDT containing RRTMGP source functions
+  units = DDT
+  dimensions = ()
+  type = ty_source_func_lw
+  intent = inout
+  optional = F
 [mpirank]
   standard_name = mpi_rank
   long_name = current MPI rank
@@ -181,7 +197,7 @@
   units = DDT
   dimensions = ()
   type = ty_optical_props_1scl
-  intent = out
+  intent = inout
   optional = F
 [sources]
   standard_name = longwave_source_function
@@ -189,7 +205,7 @@
   units = DDT
   dimensions = ()
   type = ty_source_func_lw
-  intent = out
+  intent = inout
   optional = F
 [errmsg]
   standard_name = ccpp_error_message

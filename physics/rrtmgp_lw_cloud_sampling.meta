@@ -207,7 +207,7 @@
   units = DDT
   dimensions = ()
   type = ty_optical_props_2str
-  intent = out
+  intent = inout
   optional = F
 [lw_optical_props_precip]
   standard_name = longwave_optical_properties_for_precipitation
@@ -215,7 +215,7 @@
   units = DDT
   dimensions = ()
   type = ty_optical_props_2str
-  intent = out
+  intent = inout
   optional = F    
 [errmsg]
   standard_name = ccpp_error_message

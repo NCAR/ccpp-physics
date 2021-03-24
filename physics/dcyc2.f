@@ -181,8 +181,7 @@
      &       im, levs, deltim, fhswr,                                   &
      &       dry, icy, wet,                                             &
      &       minGPpres, tsfc, use_LW_jacobian, sfculw, fluxlwUP_jac,    &
-     &       fluxlwDOWN_jac, t_lay, t_lev, p_lay, p_lev, flux2D_lwUP,   &
-     &       flux2D_lwDOWN,                                             &
+     &       t_lay, t_lev, p_lay, p_lev, flux2D_lwUP, flux2D_lwDOWN,    &
 !    &       dry, icy, wet, lprnt, ipr,                                 &
 !  ---  input/output:
      &       dtdt,dtdtc,htrlw,                                          &
@@ -234,8 +233,7 @@
       real(kind=kind_phys), dimension(im,levs), intent(in) :: swh,  hlw &
      &     ,swhc, hlwc, p_lay, t_lay
       real(kind=kind_phys), dimension(im,levs+1), intent(in) :: p_lev,  &
-     &     flux2D_lwUP, flux2D_lwDOWN, fluxlwUP_jac, fluxlwDOWN_jac,    &
-     &     t_lev
+     &     flux2D_lwUP, flux2D_lwDOWN, fluxlwUP_jac, t_lev
 
 !  ---  input/output:
       real(kind=kind_phys), dimension(im,levs), intent(inout) :: dtdt   &
@@ -385,14 +383,12 @@
                dT = t_lev2(i,k) - t_lev(i,k)
                flxlwup_adj(i,k) = flux2D_lwUP(i,k) +                    &
      &              fluxlwUP_jac(i,k)*dT
-               flxlwdn_adj(i,k) = flux2D_lwDOWN(i,k) +                  &
-     &              fluxlwDOWN_jac(i,k)*dT
             enddo
          enddo
          !
          ! Compute new heating rate (within each layer).
          !
-         errmsg = compute_heating_rate(flxlwup_adj, flxlwdn_adj,        &
+         errmsg = compute_heating_rate(flxlwup_adj, flux2D_lwDOWN,      &
      &                                 p_lev, htrlw)
          !
          ! Add radiative heating rates to physics heating rate
