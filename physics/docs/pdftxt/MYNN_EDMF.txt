@@ -1,0 +1,76 @@
+/**
+\page MYNNEDMF MYNN-EDMF Boundary Layer and Shallow Cloud Scheme
+\section mynnedmf_descrip  Description
+
+The Mellor-Yamada-Nakanishi-Niino (Nakanishi and Niino 2009 \cite NAKANISHI_2009) eddy
+diffusivity-mass flux (EDMF) scheme was implemented into CCPP to introduce an alternative
+turbulent kinetic energy (TKE)-based planetary boundary layer (PBL) scheme which could 
+serve as a candidate PBL parameterization for future operational implementations of the Unified Forecast System.
+The MYNN-EDMF is currently employed in NOAA's operational Rapid Refresh (RAP; Benjamin et al.2016 \cite Benjamin_2016)
+and High-Resolution Rapid Refresh (HRRR) forecast systems.
+
+The original MYNN scheme was demonstrated to be an improvement over predecessor Mellor-Yamada-type 
+PBL schemes (e.g., Mellor and Yamada 1974,1982 \cite Mellor_1974 \cite Mellor_1982) when compared against large-eddy
+simulation (LES) of a convective PBL (Nakanishi and Niino 2004, 2009 \cite Nakanishi_2004 \cite NAKANISHI_2009), the
+prediction of advection fog (Nakanishi and Niino 2006 \cite Nakanishi_2006), and for the representation of coastal 
+barrier jets (Olson and Brown 2009 \cite olson_and_brown_2009). The MYNN scheme can be configured to function at either
+level 2.5 or 3.0 closure and includes a partial-condensation scheme (also known as a cloud PDF or a statistical-cloud
+scheme) to represent the effects of subgrid-scale(SGS) clouds on the buoyancy flux (Nakanishi and Niino 2004, 2006, and 2009
+\cite Nakanishi_2004 \cite Nakanishi_2006 \cite NAKANISHI_2009). The closure constants for the original MYNN scheme 
+were tuned to a database of LES as opposed to observational data.
+
+The MYNN-EDMF scheme has been extensively developed to improve upon the forecast skill of the original MYNN,
+largely driven by requirements to improve forecast skill in support of the NOAA's National Weather Service (NWS),
+the Federal Aviation Administration (FAA) and users within the renewable-energy industry.Specifically, fundamental
+changes were made to the formulation of the mixing lengths and representation of subgrid-scale(SGS) clouds, but new components have also
+been added to improve the representation of non-local mixing, the turbulence interaction with clouds, and the coupling to other 
+model components (i.e., radiation). A description of the changes to the MYNN scheme are available in Olson et al.(2019) 
+\cite olson_et_al_2019.
+
+
+\section intra_mynnpbl Intraphysics Communication
+- Cloud-Radiation Interaction
+
+\sa gsd_mynnrad_pre
+\sa gsd_mynnrad_post
+
+The SGS clouds produced by the MYNN-EDMF scheme are coupled to the longwave and shortwave radiation schemes
+if the namelist parameter \p icloud_bl is set to 1. In this case, the SGS cloud fraction, \p CLDFRA_BL, and the SGS
+cloud-mixing ratio, \b QC_BL, are added to the microphysics arrays within the radiation driver (mynnrad_pre_run()). 
+The following two steps are performed: 
+
+(1) the cloud fraction of the resolved-scale clouds are computed, using Xu and Randal (1996) \cite xu_and_randall_1996
+by default;
+
+(2) if the resolved-scale cloud liquid (\f$q_c\f$) or ice ( \f$q_i\f$), is less than \f$10^{-6}kg kg^{-1}\f$ and
+\f$10^{-8}kg kg^{-1}\f$, respectively, and there exists a nonzero SGS cloud fraction, then the SGS components are
+added to their respective resolved-scale components by a temperature weighting, according to linear approximation
+of Hobbs et al.(1974) \cite HOBBS_1974 :
+\f[
+ W_{ice}=1-min(1,max(0,(T-254)/15))
+ W_{h2o}=1-W_{ice}
+\f]
+
+Then we sort the SGS cloud water and liquid as :
+
+\f$q_c\f$=QC_BL*\f$W_{h2o}\f$*CLDFRA_BL
+
+\f$q_i\f$=QC_BL*\f$W_{ice}\f$*CLDFRA_BL
+
+This allows us to only use one 3-D array for both SGS cloud water and ice. The updated \f$q_{c}\f$,\f$q_{i}\f$, and
+\p CLDFRA are then used as input into the radiation schemes. After exiting the radiation schemes, the original 
+values of \f$q_c, q_i\f$  and \p CLDFRA are restored, so the SGS clouds do not impact the resolved-scale moisture budget.
+
+
+The MYNN-EDMF CCPP-compliant interface:
+\ref arg_table_mynnedmf_wrapper_run
+
+\section gen_mynnedmf_conv MYNN-EDMF Scheme  General Algorithm
+
+\image html  MYNN-EDMF_call_order.png "Figure 1.The order of subroutines within the MYNN-EDMF (Courtesy of J.B. Olson). The green rectangles within the main subroutine (mynn_bl_driver()) represent subroutine calls. The blue rectangles represent tasks coded within the main driver. A brief description is shown on the right " width=10cm
+
+
+\ref gen_mynn_bl_driver
+
+
+*/

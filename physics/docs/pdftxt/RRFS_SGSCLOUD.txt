@@ -1,0 +1,23 @@
+/**
+\page SGSCLOUD_page Subgrid-scale Cloud Pre-radiation Interstitial
+\section rrfs_sgscloud_descrip  Description
+
+This interstitial module adds the subgrid-scale cloud information to the resolved-scale (microphysics) clouds. This procedure is required when using microphysics schemes that only produce clouds in fully saturated grid cells, like the Thompson microphysics scheme, and when using boundary layer and convection schemes that produce subgrid-scale cloud information (mixing ratio and cloud fraction). This allows the subgrid-scale cloud information to be assembled into the rest of the cloud information prior to calling the radiation schemes.
+
+\section intra_rrfssgs Intraphysics Communication
+- sgscloud_radpre_run(): \ref arg_table_sgscloud_radpre_run 
+
+\section gen_rrfssgs SGSCLOUD Pre-radiation Interstitial General Algorithm
+
+The order of procedures is outlined below:
+\n 1) Back up the original qc and qi in "save arrays" qc_save and qi_save.
+\n 2) Partition the condensate from the convection scheme into liquid and ice.
+\n 3) Use Xu and Randall (1996) \cite xu_and_randall_1996 cloud fraction for the convection scheme subgrid clouds. Note that the MYNN-EDMF PBL scheme subgrid clouds input into this scheme are already partitioned into qc and qi and already have assigned cloud fractions.
+\n 4) Add the subgrid cloud mixing ratio and cloud fraction to the original (resolved-scale) qc, qi and cloud fraction coming from the microphysics scheme. Note this information is only added to grid cells when resolved-scale clouds are below a very small threshold value.
+\n 5) Recompute the diagnostic high, mid, low, total and boundary layer clouds to be consistent with the clouds seen by the radiation scheme.
+
+To provide a cloud fraction at t=0 (before the boundary layer or convection schemes are called), Xu and Randall (1996) \cite xu_and_randall_1996 cloud fraction is used. After the radiation schemes are called, module_SGSCloud_RadPost.F90 is called to restore the original qc and qi from qc_save and qi_save.
+
+
+
+*/
