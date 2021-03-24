@@ -20,14 +20,14 @@ contains
 !! \htmlinclude phys_tend_run.html
 !!
    subroutine phys_tend_run(ldiag3d, dtend, dtidx, ntracp100, &
-       index_for_cause_physics, index_for_cause_non_physics, &
+       index_of_process_physics, index_of_process_non_physics, &
        ncause, errmsg, errflg)
 
        ! Interface variables
        logical, intent(in) :: ldiag3d
        real(kind=kind_phys), optional, intent(inout) :: dtend(:,:,:)
-       integer, intent(in) :: dtidx(:,:), index_for_cause_physics, &
-            index_for_cause_non_physics, ntracp100, ncause
+       integer, intent(in) :: dtidx(:,:), index_of_process_physics, &
+            index_of_process_non_physics, ntracp100, ncause
        character(len=*), intent(out) :: errmsg
        integer, intent(out)          :: errflg
 
@@ -44,13 +44,13 @@ contains
 
        do itrac=2,ntracp100
           first=.true.
-          iphys = dtidx(itrac,index_for_cause_physics)
+          iphys = dtidx(itrac,index_of_process_physics)
           if(iphys<2) then
              cycle ! No physics tendency requested for this tracer
           endif
           do icause=1,ncause
-             if(icause==index_for_cause_physics .or. &
-                  icause==index_for_cause_non_physics) then
+             if(icause==index_of_process_physics .or. &
+                  icause==index_of_process_non_physics) then
                 cycle ! Don't sum up the sums.
              endif
              idtend = dtidx(itrac,icause)

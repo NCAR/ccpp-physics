@@ -65,8 +65,8 @@
      &     prsi,del,prsl,prslk,phii,phil,delt,                          &
      &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,                        &
      &     kinver,xkzm_m,xkzm_h,xkzm_s,dspfac,bl_upfr,bl_dnfr,          &
-     &     ntoz,ntqv,dtend,dtidx,index_for_temperature,index_for_x_wind,&
-     &     index_for_y_wind,index_for_cause_pbl,gen_tend,ldiag3d,       &
+     &     ntoz,ntqv,dtend,dtidx,index_of_temperature,index_of_x_wind,  &
+     &     index_of_y_wind,index_of_process_pbl,gen_tend,ldiag3d,       &
      &     errmsg,errflg)
 !
       use machine  , only : kind_phys
@@ -103,9 +103,8 @@
      &                     prsl(im,km),   prslk(im,km),                 &
      &                     phii(im,km+1), phil(im,km)
       real(kind=kind_phys), intent(inout), dimension(:,:,:) :: dtend
-      integer, intent(in) :: dtidx(:,:), index_for_temperature, index_f &
-     &                     or_x_wind, index_for_y_wind, index_for_cause &
-     &                     _pbl
+      integer, intent(in) :: dtidx(:,:), index_of_temperature,          &
+     &       index_of_x_wind, index_of_y_wind, index_of_process_pbl
       real(kind=kind_phys), intent(out) ::                              &
      &                     dusfc(im),     dvsfc(im),                    &
      &                     dtsfc(im),     dqsfc(im),                    &
@@ -1423,7 +1422,7 @@ c
          enddo
       enddo
       if(ldiag3d .and. .not. gen_tend) then
-        idtend=dtidx(index_for_temperature,index_for_cause_pbl)
+        idtend=dtidx(index_of_temperature,index_of_process_pbl)
         if(idtend>1) then
           do  k = 1,km
             do i = 1,im
@@ -1433,7 +1432,7 @@ c
           enddo
         endif
         ! Send tendencies just for QV; other tracers are below.
-        idtend=dtidx(100+ntqv,index_for_cause_pbl)
+        idtend=dtidx(100+ntqv,index_of_process_pbl)
         if(idtend>1) then
           do  k = 1,km
             do i = 1,im
@@ -1458,7 +1457,7 @@ c
           ! Send tendencies for all tracers that were selected.
           do kk = 2, ntrac1
             is = (kk-1) * km
-            idtend = dtidx(kk+100,index_for_cause_pbl)
+            idtend = dtidx(kk+100,index_of_process_pbl)
             if(idtend>1) then
               if(kk==ntke) then
                 do k = 1, km
@@ -1492,7 +1491,7 @@ c
           enddo
         enddo
         if(ldiag3d .and. .not. gen_tend) then
-          idtend=dtidx(index_for_temperature,index_for_cause_pbl)
+          idtend=dtidx(index_of_temperature,index_of_process_pbl)
           if(idtend>1) then
             do k = 1,km1
               do i = 1,im
@@ -1579,7 +1578,7 @@ c
          enddo
       enddo
       if(ldiag3d .and. .not. gen_tend) then
-        idtend=dtidx(index_for_x_wind,index_for_cause_pbl)
+        idtend=dtidx(index_of_x_wind,index_of_process_pbl)
         if(idtend>1) then
           do k = 1,km
             do i = 1,im
@@ -1589,7 +1588,7 @@ c
           enddo
         endif
 
-        idtend=dtidx(index_for_y_wind,index_for_cause_pbl)
+        idtend=dtidx(index_of_y_wind,index_of_process_pbl)
         if(idtend>1) then
           do k = 1,km
             do i = 1,im

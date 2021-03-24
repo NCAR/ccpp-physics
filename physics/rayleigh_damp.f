@@ -23,8 +23,8 @@
 !> @{
       subroutine rayleigh_damp_run (                                    &
      &  lsidea,IM,KM,A,B,C,U1,V1,DT,CP,LEVR,pgr,PRSL,PRSLRD0,ral_ts,    &
-     &  ldiag3d,dtend,dtidx,index_for_cause_rayleigh_damping,           &
-     &  index_for_temperature,index_for_x_wind,index_for_y_wind,        &
+     &  ldiag3d,dtend,dtidx,index_of_process_rayleigh_damping,          &
+     &  index_of_temperature,index_of_x_wind,index_of_y_wind,           &
      &  errmsg,errflg)
 !
 !   ********************************************************************
@@ -74,8 +74,8 @@
       real(kind=kind_phys),intent(inout) :: A(IM,KM), B(IM,KM), C(IM,KM)
       real(kind=kind_phys),optional, intent(inout) :: dtend(:,:,:)
       integer, intent(in)                :: dtidx(:,:),                  &
-     &  index_for_cause_rayleigh_damping, index_for_temperature,         &
-     &  index_for_x_wind, index_for_y_wind
+     &  index_of_process_rayleigh_damping, index_of_temperature,         &
+     &  index_of_x_wind, index_of_y_wind
       character(len=*),    intent(out)   :: errmsg
       integer,             intent(out)   :: errflg
 
@@ -87,10 +87,10 @@
       integer              i, k, uidx,vidx,tidx
 
       if(ldiag3d) then
-         uidx=dtidx(index_for_x_wind,index_for_cause_rayleigh_damping)
-         vidx=dtidx(index_for_y_wind,index_for_cause_rayleigh_damping)
-         tidx=dtidx(index_for_temperature,                              &
-     &              index_for_cause_rayleigh_damping)
+         uidx=dtidx(index_of_x_wind,index_of_process_rayleigh_damping)
+         vidx=dtidx(index_of_y_wind,index_of_process_rayleigh_damping)
+         tidx=dtidx(index_of_temperature,                               &
+     &              index_of_process_rayleigh_damping)
       else
          uidx=1
          vidx=1

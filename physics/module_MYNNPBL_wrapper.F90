@@ -83,10 +83,10 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  dqdt_cloud_droplet_num_conc, dqdt_ice_num_conc,    & ! <=== ntlnc, ntinc
      &  dqdt_water_aer_num_conc, dqdt_ice_aer_num_conc,    & ! <=== ntwa, ntia
      &  flag_for_pbl_generic_tend,                         &
-     &  dtend, dtidx, index_for_temperature,               &
-     &  index_for_x_wind, index_for_y_wind, ntke,          &
+     &  dtend, dtidx, index_of_temperature,               &
+     &  index_of_x_wind, index_of_y_wind, ntke,          &
      &  ntqv, ntcw, ntiw, ntoz, ntlnc, ntinc, ntwa, ntia,  &
-     &  index_for_cause_pbl, htrsw, htrlw, xmu,            &
+     &  index_of_process_pbl, htrsw, htrlw, xmu,            &
      &  grav_settling, bl_mynn_tkebudget, bl_mynn_tkeadvect, &
      &  bl_mynn_cloudpdf, bl_mynn_mixlength,               &
      &  bl_mynn_edmf, bl_mynn_edmf_mom, bl_mynn_edmf_tke,  &
@@ -213,8 +213,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 !TENDENCY DIAGNOSTICS
       real(kind=kind_phys), intent(inout), optional :: dtend(:,:,:)
       integer, intent(in) :: dtidx(:,:)
-      integer, intent(in) :: index_for_temperature, index_for_x_wind, &
-        index_for_y_wind, index_for_cause_pbl
+      integer, intent(in) :: index_of_temperature, index_of_x_wind, &
+        index_of_y_wind, index_of_process_pbl
       integer, intent(in) :: ntoz, ntqv, ntcw, ntiw, ntlnc, ntinc, ntwa, ntia, ntke
 
 !MISC CONFIGURATION OPTIONS
@@ -339,7 +339,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
       endif
 
       if(.not. flag_for_pbl_generic_tend .and. ldiag3d) then
-        idtend = dtidx(ntke+100,index_for_cause_pbl)
+        idtend = dtidx(ntke+100,index_of_process_pbl)
         if(idtend>1) then
           allocate(save_qke_adv(im,levs))
           save_qke_adv=qke_adv
@@ -495,7 +495,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
             enddo
           enddo
         endif
-       if(ldiag3d .and. dtidx(100+ntoz,index_for_cause_pbl)>1) then
+       if(ldiag3d .and. dtidx(100+ntoz,index_of_process_pbl)>1) then
          allocate(oldzone(im,levs))
          oldzone = ozone
        endif
@@ -720,11 +720,11 @@ SUBROUTINE mynnedmf_wrapper_run(        &
            enddo
         enddo
         accum_duvt3dt: if(ldiag3d .or. lsidea) then
-          call dtend_helper(index_for_x_wind,RUBLTEN)
-          call dtend_helper(index_for_y_wind,RVBLTEN)
-          call dtend_helper(index_for_temperature,RTHBLTEN,exner)
+          call dtend_helper(index_of_x_wind,RUBLTEN)
+          call dtend_helper(index_of_y_wind,RVBLTEN)
+          call dtend_helper(index_of_temperature,RTHBLTEN,exner)
           if(ldiag3d) then
-            idtend = dtidx(100+ntoz,index_for_cause_pbl)
+            idtend = dtidx(100+ntoz,index_of_process_pbl)
             if(idtend>1) then
               dtend(:,:,idtend) = dtend(:,:,idtend) + (ozone-oldzone)
               deallocate(oldzone)
@@ -917,7 +917,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 
        if(allocated(save_qke_adv)) then
          if(ldiag3d .and. .not. flag_for_pbl_generic_tend) then
-           idtend = dtidx(100+ntke,index_for_cause_pbl)
+           idtend = dtidx(100+ntke,index_of_process_pbl)
            if(idtend>1) then
              dtend(:,:,idtend) = dtend(:,:,idtend) + qke_adv-save_qke_adv
            endif
@@ -933,7 +933,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
       integer, intent(in) :: itracer
       integer :: idtend
       
-      idtend=dtidx(itracer,index_for_cause_pbl)
+      idtend=dtidx(itracer,index_of_process_pbl)
       if(idtend>1) then
         if(present(mult)) then
           dtend(:,:,idtend) = dtend(:,:,idtend) + field*dtf*mult

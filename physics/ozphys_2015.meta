@@ -141,20 +141,20 @@
   intent = in
   optional = F
 [dtend]
-  standard_name = diagnostic_3d_tendencies
-  long_name = diagnostic 3d tendencies for tracers and other fields
+  standard_name = cumulative_change_of_state_variables
+  long_name = diagnostic tendencies for state variables
   units = various
-  dimensions = (horizontal_loop_extent,vertical_dimension,dtend_outer_index_max)
+  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_cumulative_change_processes)
   type = real
   kind = kind_phys
   active = (flag_diagnostics_3D)
   intent = inout
   optional = F
 [dtidx]
-  standard_name = dtend_outer_index
-  long_name = index in outer dimension of dtend of a tracer-cause pair
+  standard_name = cumulative_change_of_state_variables_outer_index
+  long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
   units = index
-  dimensions = (number_of_tracers_plus_one_hundred,number_of_possible_causes_of_tracer_changes)
+  dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
   type = integer
   intent = in
   optional = F
@@ -166,33 +166,33 @@
   type = integer
   intent = in
   optional = F
-[index_for_cause_prod_loss]
-  standard_name = index_for_cause_prod_loss
-  long_name = tracer changes caused by ozone production and loss
+[index_of_process_prod_loss]
+  standard_name = index_of_production_and_loss_process_in_cumulative_change_index
+  long_name = index of production and loss effect in photochemistry process in second dimension of array cumulative change index
   units = index
   dimensions = ()
   type = integer
   intent = in
   optional = F
-[index_for_cause_ozmix]
-  standard_name = index_for_cause_ozmix
-  long_name = tracer changes caused by ozone mixing ratio
+[index_of_process_ozmix]
+  standard_name = index_of_ozone_mixing_ratio_process_in_cumulative_change_index
+  long_name = index of ozone mixing ratio effect in photochemistry process in second dimension of array cumulative change index
   units = index
   dimensions = ()
   type = integer
   intent = in
   optional = F
-[index_for_cause_temp]
-  standard_name = index_for_cause_temp
-  long_name = tracer changes caused by temperature
+[index_of_process_temp]
+  standard_name = index_of_temperature_process_in_cumulative_change_index
+  long_name = index of temperature effect in photochemistry process in second dimension of array cumulative change index
   units = index
   dimensions = ()
   type = integer
   intent = in
   optional = F
-[index_for_cause_overhead_ozone]
-  standard_name = index_for_cause_overhead_ozone
-  long_name = tracer changes caused by overhead ozone column
+[index_of_process_overhead_ozone]
+  standard_name = index_of_overhead_process_in_cumulative_change_index
+  long_name = index of overhead ozone effect in photochemistry process in second dimension of array cumulative change index
   units = index
   dimensions = ()
   type = integer

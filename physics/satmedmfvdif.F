@@ -61,8 +61,8 @@
      &     prsi,del,prsl,prslk,phii,phil,delt,                          &
      &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,                        &
      &     kinver,xkzm_m,xkzm_h,xkzm_s,                                 &
-     &     index_for_temperature,index_for_x_wind,index_for_y_wind,     &
-     &     index_for_cause_pbl,ntqv,ntoz,dtend,dtidx,                   &
+     &     index_of_temperature,index_of_x_wind,index_of_y_wind,        &
+     &     index_of_process_pbl,ntqv,ntoz,dtend,dtidx,                  &
      &     gen_tend,ldiag3d,errmsg,errflg)
 !
       use machine  , only : kind_phys
@@ -77,8 +77,8 @@
 !
       logical, intent(in)  :: gen_tend, ldiag3d
       real(kind=kind_phys), intent(inout), dimension(:,:,:) :: dtend
-      integer, intent(in) :: index_for_temperature,index_for_x_wind,    &
-     &  index_for_y_wind, ntqv, ntoz, dtidx(:,:), index_for_cause_pbl
+      integer, intent(in) :: index_of_temperature,index_of_x_wind,      &
+     &  index_of_y_wind, ntqv, ntoz, dtidx(:,:), index_of_process_pbl
 !
       real(kind=kind_phys), intent(in) :: grav,rd,cp,rv,hvap,hfus,fv,   &
      &                                    eps,epsm1
@@ -1403,11 +1403,11 @@
          enddo
       enddo
       if (ldiag3d .and. .not. gen_tend) then
-        idtend = dtidx(index_for_temperature,index_for_cause_pbl)
+        idtend = dtidx(index_of_temperature,index_of_process_pbl)
         if(idtend>1) then
           dtend(:,:,idtend) = dtend(:,:,idtend) + delt*rdt*(f1-t1)
         endif
-        idtend = dtidx(100+ntqv,index_for_cause_pbl)
+        idtend = dtidx(100+ntqv,index_of_process_pbl)
         if(idtend>1) then
           dtend(:,:,idtend) = dtend(:,:,idtend) +delt*rdt*(f2-q1(:,:,1))
         endif
@@ -1513,11 +1513,11 @@
          enddo
       enddo
       if (ldiag3d .and. .not. gen_tend) then
-        idtend=dtidx(index_for_x_wind,index_for_cause_pbl)
+        idtend=dtidx(index_of_x_wind,index_of_process_pbl)
         if(idtend>1) then
           dtend(:,:,idtend) = dtend(:,:,idtend) + delt*rdt*(f1-u1)
         endif
-        idtend=dtidx(index_for_y_wind,index_for_cause_pbl)
+        idtend=dtidx(index_of_y_wind,index_of_process_pbl)
         if(idtend>1) then
           dtend(:,:,idtend) = dtend(:,:,idtend) + delt*rdt*(f2-v1)
         endif

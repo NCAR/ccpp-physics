@@ -50,9 +50,9 @@
 !!\author June 2015 - Shrinivas Moorthi
       subroutine ozphys_2015_run (                                      &
      &     im, levs, ko3, dt, oz, tin, po3, prsl, prdout, pl_coeff,     &
-     &     delp, ldiag3d, dtend, dtidx, ntoz, index_for_cause_prod_loss,&
-     &     index_for_cause_ozmix, index_for_cause_temp,                 &
-     &     index_for_cause_overhead_ozone, con_g, me, errmsg, errflg)
+     &     delp, ldiag3d, dtend, dtidx, ntoz, index_of_process_prod_loss&
+     &     , index_of_process_ozmix, index_of_process_temp,             &
+     &     index_of_process_overhead_ozone, con_g, me, errmsg, errflg)
 !
 !
       use machine , only : kind_phys
@@ -68,8 +68,8 @@
       ! dtend may not be allocated and needs an assumed array size
       real(kind=kind_phys), intent(inout) :: dtend(:,:,:)
       integer, intent(in) :: dtidx(:,:), ntoz,                          &
-     &  index_for_cause_prod_loss, index_for_cause_ozmix,               &
-     &  index_for_cause_temp, index_for_cause_overhead_ozone
+     &  index_of_process_prod_loss, index_of_process_ozmix,               &
+     &  index_of_process_temp, index_of_process_overhead_ozone
       real(kind=kind_phys), intent(inout) :: oz(im,levs)
 
 
@@ -88,10 +88,10 @@
       errflg = 0
 
       if(ldiag3d) then
-         idtend(1) = dtidx(100+ntoz,index_for_cause_prod_loss)          ! was ozp1
-         idtend(2) = dtidx(100+ntoz,index_for_cause_ozmix)              ! was ozp2
-         idtend(3) = dtidx(100+ntoz,index_for_cause_temp)               ! was ozp3
-         idtend(4) = dtidx(100+ntoz,index_for_cause_overhead_ozone)     ! was ozp4
+         idtend(1) = dtidx(100+ntoz,index_of_process_prod_loss)          ! was ozp1
+         idtend(2) = dtidx(100+ntoz,index_of_process_ozmix)              ! was ozp2
+         idtend(3) = dtidx(100+ntoz,index_of_process_temp)               ! was ozp3
+         idtend(4) = dtidx(100+ntoz,index_of_process_overhead_ozone)     ! was ozp4
       else
          idtend=1
       endif

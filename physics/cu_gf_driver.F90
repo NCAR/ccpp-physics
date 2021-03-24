@@ -71,8 +71,8 @@ contains
                flag_for_scnv_generic_tend,flag_for_dcnv_generic_tend,           &
 ! fixme: delete               ! du3dt_SCNV,dv3dt_SCNV,dt3dt_SCNV,dq3dt_SCNV,                     &
                ! du3dt_DCNV,dv3dt_DCNV,dt3dt_DCNV,dq3dt_DCNV,                     &
-               dtend,dtidx,ntqv,ntiw,ntcw,index_for_temperature,index_for_x_wind,&
-               index_for_y_wind,index_for_cause_scnv,index_for_cause_dcnv,      &
+               dtend,dtidx,ntqv,ntiw,ntcw,index_of_temperature,index_of_x_wind,&
+               index_of_y_wind,index_of_process_scnv,index_of_process_dcnv,      &
                ldiag3d,qci_conv,errmsg,errflg)
 !-------------------------------------------------------------
       implicit none
@@ -101,8 +101,8 @@ contains
    ! dtend is only allocated if ldiag=.true.
    real(kind=kind_phys), optional, intent(inout)            :: dtend(:,:,:)
    integer, intent(in)                                      :: dtidx(:,:), &
-        index_for_x_wind, index_for_y_wind, index_for_temperature,         &
-        index_for_cause_scnv, index_for_cause_dcnv, ntqv, ntcw, ntiw
+        index_of_x_wind, index_of_y_wind, index_of_temperature,         &
+        index_of_process_scnv, index_of_process_dcnv, ntqv, ntcw, ntiw
    
    real(kind=kind_phys),  dimension( im , km ), intent(in )    :: forcet,forceqv_spechum,w,phil
    real(kind=kind_phys),  dimension( im , km ), intent(inout ) :: t,us,vs
@@ -207,15 +207,15 @@ contains
          cliw_deep_idx=1
          clcw_deep_idx=1
        else
-         cliw_deep_idx=dtidx(100+ntiw,index_for_cause_dcnv)
-         clcw_deep_idx=dtidx(100+ntcw,index_for_cause_dcnv)
+         cliw_deep_idx=dtidx(100+ntiw,index_of_process_dcnv)
+         clcw_deep_idx=dtidx(100+ntcw,index_of_process_dcnv)
        endif
        if(flag_for_scnv_generic_tend) then
          cliw_shal_idx=1
          clcw_shal_idx=1
        else
-         cliw_shal_idx=dtidx(100+ntiw,index_for_cause_scnv)
-         clcw_shal_idx=dtidx(100+ntcw,index_for_cause_scnv)
+         cliw_shal_idx=dtidx(100+ntiw,index_of_process_scnv)
+         clcw_shal_idx=dtidx(100+ntcw,index_of_process_scnv)
        endif
        if(cliw_deep_idx>1 .or. clcw_deep_idx>1 .or. &
             cliw_shal_idx>1 .or.  clcw_shal_idx>1) then
@@ -894,10 +894,10 @@ contains
 !
         if(ldiag3d) then
           if(ishallow_g3.eq.1 .and. .not.flag_for_scnv_generic_tend) then
-            uidx=dtidx(index_for_x_wind,index_for_cause_scnv)
-            vidx=dtidx(index_for_y_wind,index_for_cause_scnv)
-            tidx=dtidx(index_for_temperature,index_for_cause_scnv)
-            qidx=dtidx(100+ntqv,index_for_cause_scnv)
+            uidx=dtidx(index_of_x_wind,index_of_process_scnv)
+            vidx=dtidx(index_of_y_wind,index_of_process_scnv)
+            tidx=dtidx(index_of_temperature,index_of_process_scnv)
+            qidx=dtidx(100+ntqv,index_of_process_scnv)
             if(uidx>1) then
               do k=kts,ktf
                 dtend(:,k,uidx) = dtend(:,k,uidx) + cutens(:)*outus(:,k) * dt
@@ -924,9 +924,9 @@ contains
             endif
           endif
           if((ideep.eq.1. .or. imid_gf.eq.1) .and. .not.flag_for_dcnv_generic_tend) then
-            uidx=dtidx(index_for_x_wind,index_for_cause_dcnv)
-            vidx=dtidx(index_for_y_wind,index_for_cause_dcnv)
-            tidx=dtidx(index_for_temperature,index_for_cause_dcnv)
+            uidx=dtidx(index_of_x_wind,index_of_process_dcnv)
+            vidx=dtidx(index_of_y_wind,index_of_process_dcnv)
+            tidx=dtidx(index_of_temperature,index_of_process_dcnv)
             if(uidx>1) then
               do k=kts,ktf
                 dtend(:,k,uidx) = dtend(:,k,uidx) + (cuten*outu(:,k)+cutenm*outum(:,k)) * dt
@@ -943,7 +943,7 @@ contains
               enddo
             endif
 
-            qidx=dtidx(100+ntqv,index_for_cause_dcnv)
+            qidx=dtidx(100+ntqv,index_of_process_dcnv)
             if(qidx>1) then
               do k=kts,ktf
                 do i=its,itf

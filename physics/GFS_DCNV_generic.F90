@@ -18,13 +18,13 @@
     subroutine GFS_DCNV_generic_pre_run (im, levs, ldiag3d, qdiag3d, do_cnvgwd, cplchm,  &
                                          gu0, gv0, gt0, gq0, nsamftrac, ntqv,            &
                                          save_u, save_v, save_t, save_q, dqdti,          &
-                                         dtidx, index_for_cause_dcnv, errmsg, errflg)
+                                         dtidx, index_of_process_dcnv, errmsg, errflg)
 
       use machine, only: kind_phys
 
       implicit none
 
-      integer, intent(in) :: im, levs, nsamftrac, ntqv, index_for_cause_dcnv, dtidx(:,:)
+      integer, intent(in) :: im, levs, nsamftrac, ntqv, index_of_process_dcnv, dtidx(:,:)
       logical, intent(in) :: ldiag3d, qdiag3d, do_cnvgwd, cplchm
       real(kind=kind_phys), dimension(im,levs), intent(in)    :: gu0
       real(kind=kind_phys), dimension(im,levs), intent(in)    :: gv0
@@ -65,7 +65,7 @@
       if ((ldiag3d.and.qdiag3d) .or. cplchm) then
         if(nsamftrac>0) then
           do n=1,nsamftrac
-            if(n==ntqv .or. dtidx(n+100,index_for_cause_dcnv)) then
+            if(n==ntqv .or. dtidx(n+100,index_of_process_dcnv)) then
               save_q(:,:,n) = gq0(:,:,n)
             endif
           enddo
@@ -102,8 +102,8 @@
     subroutine GFS_DCNV_generic_post_run (im, levs, lssav, ldiag3d, ras, cscnv, &
       frain, rain1, dtf, cld1d, save_u, save_v, save_t, gu0, gv0, gt0,          &
       ud_mf, dd_mf, dt_mf, con_g, npdf3d, num_p3d, ncnvcld3d, nsamftrac,                 &
-      rainc, cldwrk, upd_mf, dwn_mf, det_mf, dtend, dtidx, index_for_cause_dcnv,         &
-      index_for_temperature, index_for_x_wind, index_for_y_wind, ntqv, gq0, save_q,      &
+      rainc, cldwrk, upd_mf, dwn_mf, det_mf, dtend, dtidx, index_of_process_dcnv,         &
+      index_of_temperature, index_of_x_wind, index_of_y_wind, ntqv, gq0, save_q,      &
       cnvw, cnvc, cnvw_phy_f3d, cnvc_phy_f3d, flag_for_dcnv_generic_tend, errmsg, errflg)
 
 
@@ -130,8 +130,8 @@
       real(kind=kind_phys), dimension(im,levs), intent(inout) :: cnvw, cnvc
 
       real(kind=kind_phys), dimension(:,:,:), intent(inout) :: dtend
-      integer, intent(in) :: dtidx(:,:), index_for_cause_dcnv, index_for_temperature, &
-           index_for_x_wind, index_for_y_wind, ntqv
+      integer, intent(in) :: dtidx(:,:), index_of_process_dcnv, index_of_temperature, &
+           index_of_x_wind, index_of_y_wind, ntqv
 
       ! The following arrays may not be allocated, depending on certain flags and microphysics schemes.
       ! Since Intel 15 crashes when passing unallocated arrays to arrays defined with explicit shape,
@@ -178,30 +178,30 @@
         enddo
 
         if (ldiag3d .and. flag_for_dcnv_generic_tend) then
-          idtend=dtidx(index_for_temperature,index_for_cause_dcnv)
+          idtend=dtidx(index_of_temperature,index_of_process_dcnv)
           if(idtend>1) then
             dtend(:,:,idtend) = dtend(:,:,idtend) + (gt0-save_t)*frain
           endif
 
-          idtend=dtidx(index_for_x_wind,index_for_cause_dcnv)
+          idtend=dtidx(index_of_x_wind,index_of_process_dcnv)
           if(idtend>1) then
             dtend(:,:,idtend) = dtend(:,:,idtend) + (gu0-save_u)*frain
           endif
 
-          idtend=dtidx(index_for_y_wind,index_for_cause_dcnv)
+          idtend=dtidx(index_of_y_wind,index_of_process_dcnv)
           if(idtend>1) then
             dtend(:,:,idtend) = dtend(:,:,idtend) + (gv0-save_v)*frain
           endif
 
           if(nsamftrac>0) then
             do n=1,nsamftrac
-              idtend=dtidx(100+n,index_for_cause_dcnv)
+              idtend=dtidx(100+n,index_of_process_dcnv)
               if(idtend>1) then
                 dtend(:,:,idtend) = dtend(:,:,idtend) + (gq0(:,:,n)-save_q(:,:,n))*frain
               endif
             enddo
           else
-            idtend=dtidx(100+ntqv,index_for_cause_dcnv)
+            idtend=dtidx(100+ntqv,index_of_process_dcnv)
             if(idtend>1) then
               dtend(:,:,idtend) = dtend(:,:,idtend) + (gq0(:,:,ntqv)-save_q(:,:,ntqv))*frain
             endif

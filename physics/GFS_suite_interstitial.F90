@@ -165,8 +165,8 @@
     subroutine GFS_suite_interstitial_2_run (im, levs, lssav, ldiag3d, lsidea, cplflx, flag_cice, shal_cnv, old_monin, mstrat,    &
       do_shoc, frac_grid, imfshalcnv, dtf, xcosz, adjsfcdsw, adjsfcdlw, cice, pgr, ulwsfc_cice, lwhd, htrsw, htrlw, xmu, ctei_rm, &
       work1, work2, prsi, tgrs, prsl, qgrs_water_vapor, qgrs_cloud_water, cp, hvap, prslk, suntim, adjsfculw, adjsfculw_lnd,      &
-      adjsfculw_ice, adjsfculw_wat, dlwsfc, ulwsfc, psmean, dtend, dtidx, index_for_cause_longwave, index_for_cause_shortwave,    &
-      index_for_cause_pbl, index_for_cause_dcnv, index_for_cause_scnv, index_for_cause_mp, index_for_temperature,                 &
+      adjsfculw_ice, adjsfculw_wat, dlwsfc, ulwsfc, psmean, dtend, dtidx, index_of_process_longwave, index_of_process_shortwave,    &
+      index_of_process_pbl, index_of_process_dcnv, index_of_process_scnv, index_of_process_mp, index_of_temperature,                 &
       ctei_rml, ctei_r, kinver, dry, icy, wet, frland, huge, use_LW_jacobian, errmsg, errflg)
 
       implicit none
@@ -192,9 +192,9 @@
       ! dtend is only allocated if ldiag3d is .true.
       real(kind=kind_phys), optional, intent(inout), dimension(:,:,:) :: dtend
       integer,              intent(in),    dimension(:,:) :: dtidx
-      integer, intent(in) :: index_for_cause_longwave, index_for_cause_shortwave, &
-           index_for_cause_pbl, index_for_cause_dcnv, index_for_cause_scnv,       &
-           index_for_cause_mp, index_for_temperature
+      integer, intent(in) :: index_of_process_longwave, index_of_process_shortwave, &
+           index_of_process_pbl, index_of_process_dcnv, index_of_process_scnv,       &
+           index_of_process_mp, index_of_temperature
 
       logical,              intent(in   ), dimension(im) :: dry, icy, wet
       real(kind=kind_phys), intent(in   ), dimension(im) :: frland
@@ -283,42 +283,42 @@
 
         if (ldiag3d) then
           if (lsidea) then
-            idtend = dtidx(index_for_temperature,index_for_cause_longwave)
+            idtend = dtidx(index_of_temperature,index_of_process_longwave)
             if(idtend>1) then
                dtend(:,:,idtend) = dtend(:,:,idtend) + lwhd(:,:,1)*dtf
             endif
 
-            idtend = dtidx(index_for_temperature,index_for_cause_shortwave)
+            idtend = dtidx(index_of_temperature,index_of_process_shortwave)
             if(idtend>1) then
                dtend(:,:,idtend) = dtend(:,:,idtend) + lwhd(:,:,2)*dtf
             endif
 
-            idtend = dtidx(index_for_temperature,index_for_cause_pbl)
+            idtend = dtidx(index_of_temperature,index_of_process_pbl)
             if(idtend>1) then
                dtend(:,:,idtend) = dtend(:,:,idtend) + lwhd(:,:,3)*dtf
             endif
 
-            idtend = dtidx(index_for_temperature,index_for_cause_dcnv)
+            idtend = dtidx(index_of_temperature,index_of_process_dcnv)
             if(idtend>1) then
                dtend(:,:,idtend) = dtend(:,:,idtend) + lwhd(:,:,4)*dtf
             endif
 
-            idtend = dtidx(index_for_temperature,index_for_cause_scnv)
+            idtend = dtidx(index_of_temperature,index_of_process_scnv)
             if(idtend>1) then
                dtend(:,:,idtend) = dtend(:,:,idtend) + lwhd(:,:,5)*dtf
             endif
 
-            idtend = dtidx(index_for_temperature,index_for_cause_mp)
+            idtend = dtidx(index_of_temperature,index_of_process_mp)
             if(idtend>1) then
                dtend(:,:,idtend) = dtend(:,:,idtend) + lwhd(:,:,6)*dtf
             endif
           else
-            idtend = dtidx(index_for_temperature,index_for_cause_longwave)
+            idtend = dtidx(index_of_temperature,index_of_process_longwave)
             if(idtend>1) then
                dtend(:,:,idtend) = dtend(:,:,idtend) + htrlw(:,:)*dtf
             endif
 
-            idtend = dtidx(index_for_temperature,index_for_cause_shortwave)
+            idtend = dtidx(index_of_temperature,index_of_process_shortwave)
             if(idtend>1) then
                do k=1,levs
                   do i=1,im
@@ -687,7 +687,7 @@
       ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,  &
       imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, dtf, save_qc, save_qi, con_pi,                               &
       gq0, clw, prsl, save_tcp, con_rd, nwfa, spechum, dqdti, dtidx, dtend, ntk, ntke, ldiag3d, &
-      index_for_cause_conv_trans, errmsg, errflg)
+      index_of_process_conv_trans, errmsg, errflg)
 
       use machine,               only: kind_phys
       use module_mp_thompson_make_number_concentrations, only: make_IceNumber, make_DropletNumber
@@ -711,7 +711,7 @@
       logical, intent(in)                                     :: ldiag3d
       real(kind=kind_phys), dimension(:,:,:),   intent(inout) :: dtend
       integer,              dimension(:,:),     intent(in)    :: dtidx
-      integer,                                  intent(in)    :: index_for_cause_conv_trans,ntk,ntke
+      integer,                                  intent(in)    :: index_of_process_conv_trans,ntk,ntke
 
       real(kind=kind_phys), dimension(im,levs,ntrac), intent(inout) :: gq0
       real(kind=kind_phys), dimension(im,levs,nn),    intent(inout) :: clw
@@ -744,13 +744,13 @@
 
       if(ldiag3d) then
          if(ntk>0 .and. ntk<=size(clw,3)) then
-            idtend=dtidx(100+ntke,index_for_cause_conv_trans)
+            idtend=dtidx(100+ntke,index_of_process_conv_trans)
             if(idtend>1) then
                dtend(:,:,idtend) = dtend(:,:,idtend) + clw(:,:,ntk)
             endif
          endif
          if(ntclamt<=size(clw,3) .and. ntclamt>0) then
-            idtend=dtidx(100+ntclamt,index_for_cause_conv_trans)
+            idtend=dtidx(100+ntclamt,index_of_process_conv_trans)
             if(idtend>1) then
                dtend(:,:,idtend) = dtend(:,:,idtend) + clw(:,:,ntclamt)
             endif
@@ -758,7 +758,7 @@
       endif
 
       if(ldiag3d .and. ntk>0) then
-         idtend=dtidx(100+ntke,index_for_cause_conv_trans)
+         idtend=dtidx(100+ntke,index_of_process_conv_trans)
          if(idtend>1) then
             dtend(:,:,idtend) = dtend(:,:,idtend) + clw(:,:,ntk)
          endif

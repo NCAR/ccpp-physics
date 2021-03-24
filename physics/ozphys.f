@@ -47,9 +47,9 @@
       subroutine ozphys_run (                                           &
      &  im, levs, ko3, dt, oz, tin, po3,                                &
      &  prsl, prdout, oz_coeff, delp, ldiag3d,                          &
-     &  ntoz, dtend, dtidx, index_for_cause_prod_loss,                  &
-     &  index_for_cause_ozmix, index_for_cause_temp,                    &
-     &  index_for_cause_overhead_ozone, con_g, me, errmsg, errflg)
+     &  ntoz, dtend, dtidx, index_of_process_prod_loss,                  &
+     &  index_of_process_ozmix, index_of_process_temp,                    &
+     &  index_of_process_overhead_ozone, con_g, me, errmsg, errflg)
 !
 !     this code assumes that both prsl and po3 are from bottom to top
 !     as are all other variables
@@ -64,8 +64,8 @@
       ! The dtend array may not be allocated and needs an assumed array size
       real(kind=kind_phys), intent(inout) :: dtend(:,:,:)
       integer, intent(in) :: dtidx(:,:), ntoz,                          &
-     &  index_for_cause_prod_loss, index_for_cause_ozmix,               &
-     &  index_for_cause_temp, index_for_cause_overhead_ozone
+     &  index_of_process_prod_loss, index_of_process_ozmix,               &
+     &  index_of_process_temp, index_of_process_overhead_ozone
       real(kind=kind_phys), intent(in) ::                               &
      &                     dt, po3(ko3), prdout(im,ko3,oz_coeff),       &
      &                     prsl(im,levs), tin(im,levs), delp(im,levs),  &
@@ -93,10 +93,10 @@
 
 
       if(ldiag3d) then
-         idtend(1) = dtidx(100+ntoz,index_for_cause_prod_loss)          ! was ozp1
-         idtend(2) = dtidx(100+ntoz,index_for_cause_ozmix)              ! was ozp2
-         idtend(3) = dtidx(100+ntoz,index_for_cause_temp)               ! was ozp3
-         idtend(4) = dtidx(100+ntoz,index_for_cause_overhead_ozone)     ! was ozp4
+         idtend(1) = dtidx(100+ntoz,index_of_process_prod_loss)          ! was ozp1
+         idtend(2) = dtidx(100+ntoz,index_of_process_ozmix)              ! was ozp2
+         idtend(3) = dtidx(100+ntoz,index_of_process_temp)               ! was ozp3
+         idtend(4) = dtidx(100+ntoz,index_of_process_overhead_ozone)     ! was ozp4
       else
          idtend=1
       endif

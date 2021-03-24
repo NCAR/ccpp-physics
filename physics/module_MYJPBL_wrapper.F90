@@ -41,8 +41,8 @@
      &  dkt,xkzm_m, xkzm_h,xkzm_s, gamt,gamq,       &
      &  con_cp,con_g,con_rd,                        &
      &  me, lprnt, gen_tend, ldiag3d, dtend, dtidx, &
-     &  index_for_temperature, index_for_x_wind,    &
-     &  index_for_y_wind, index_for_cause_pbl,      &
+     &  index_of_temperature, index_of_x_wind,    &
+     &  index_of_y_wind, index_of_process_pbl,      &
      &  ntqv, errmsg, errflg )
 
 !
@@ -80,8 +80,8 @@
 
       real(kind=kind_phys), intent(inout), optional :: dtend(:,:,:)
       integer, intent(in) :: dtidx(:,:)
-      integer, intent(in) :: index_for_temperature, index_for_x_wind, &
-     &                       index_for_y_wind, index_for_cause_pbl, ntqv
+      integer, intent(in) :: index_of_temperature, index_of_x_wind, &
+     &                       index_of_y_wind, index_of_process_pbl, ntqv
 
 !MYJ-1D
       integer,intent(in) :: im, levs
@@ -586,10 +586,10 @@
          end do
       end do
       if (ldiag3d .and. .not. gen_tend) then
-        uidx = dtidx(index_for_x_wind,index_for_cause_pbl)
-        vidx = dtidx(index_for_y_wind,index_for_cause_pbl)
-        tidx = dtidx(index_for_temperature,index_for_cause_pbl)
-        qidx = dtidx(ntqv+100,index_for_cause_pbl)
+        uidx = dtidx(index_of_x_wind,index_of_process_pbl)
+        vidx = dtidx(index_of_y_wind,index_of_process_pbl)
+        tidx = dtidx(index_of_temperature,index_of_process_pbl)
+        qidx = dtidx(ntqv+100,index_of_process_pbl)
         ! NOTE: The code that was here before was wrong. It replaced the
         ! cumulative value with the instantaneous value.
         do k=1,levs

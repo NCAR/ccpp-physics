@@ -66,8 +66,8 @@
      &   kinver,xkzm_m,xkzm_h,xkzm_s,lprnt,ipr,                         &
      &   xkzminv,moninq_fac,hurr_pbl,islimsk,var_ric,                   &
      &   coef_ric_l,coef_ric_s,ldiag3d,ntqv,rtg_ozone_index,ntoz,       &
-     &   dtend,dtidx,index_for_cause_pbl,index_for_x_wind,              &
-     &   index_for_y_wind,index_for_temperature,                        &
+     &   dtend,dtidx,index_of_process_pbl,index_of_x_wind,              &
+     &   index_of_y_wind,index_of_temperature,                          &
      &   flag_for_pbl_generic_tend,errmsg,errflg)
 !
       use machine  , only : kind_phys
@@ -97,8 +97,8 @@
       ! dtend is only allocated if ldiag3d or qdiag3d are true
       real(kind=kind_phys), intent(inout) :: dtend(:,:,:)
       integer, intent(in) :: dtidx(:,:)
-      integer, intent(in) :: index_for_x_wind, index_for_y_wind,        &
-     & index_for_cause_pbl, index_for_temperature, ntqv, rtg_ozone_index
+      integer, intent(in) :: index_of_x_wind, index_of_y_wind,          &
+     & index_of_process_pbl, index_of_temperature, ntqv, rtg_ozone_index
       real(kind=kind_phys), intent(in) ::                               &
      &                     u1(im,km),     v1(im,km),                    &
      &                     t1(im,km),     q1(im,km,ntrac),              &
@@ -1293,8 +1293,8 @@ c
          enddo
       enddo
       if(.not.flag_for_pbl_generic_tend) then
-        idtend1=dtidx(index_for_temperature,index_for_cause_pbl)
-        idtend2=dtidx(ntqv+100,index_for_cause_pbl)
+        idtend1=dtidx(index_of_temperature,index_of_process_pbl)
+        idtend2=dtidx(ntqv+100,index_of_process_pbl)
         if(idtend1>1) then
            do  k = 1,km
               do i = 1,im
@@ -1324,7 +1324,7 @@ c
         enddo
         if(.not.flag_for_pbl_generic_tend .and. ldiag3d .and.           &
      &        rtg_ozone_index>0) then
-          idtend1 = dtidx(100+ntoz,index_for_cause_pbl)
+          idtend1 = dtidx(100+ntoz,index_of_process_pbl)
           if(idtend1>1) then
              kk = rtg_ozone_index
              is = (kk-1) * km
@@ -1456,7 +1456,7 @@ c
          enddo
       enddo
       if(.not.flag_for_pbl_generic_tend) then
-         idtend1 = dtidx(index_for_x_wind,index_for_cause_pbl)
+         idtend1 = dtidx(index_of_x_wind,index_of_process_pbl)
          if(idtend1>1) then
             do k = 1,km
                do i = 1,im
@@ -1466,7 +1466,7 @@ c
             enddo
          endif
 
-         idtend2 = dtidx(index_for_y_wind,index_for_cause_pbl)
+         idtend2 = dtidx(index_of_y_wind,index_of_process_pbl)
          if(idtend2>1) then
             do k = 1,km
                do i = 1,im

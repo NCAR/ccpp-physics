@@ -16,13 +16,13 @@
 !!
       subroutine GFS_SCNV_generic_pre_run (im, levs, ldiag3d, qdiag3d, gu0, gv0, gt0, gq0, &
         save_u, save_v, save_t, save_q, ntqv, nsamftrac, flag_for_scnv_generic_tend,       &
-        dtidx, index_for_cause_scnv, errmsg, errflg)
+        dtidx, index_of_process_scnv, errmsg, errflg)
 
         use machine,               only: kind_phys
 
         implicit none
 
-        integer, intent(in) :: im, levs, ntqv, nsamftrac, index_for_cause_scnv, dtidx(:,:)
+        integer, intent(in) :: im, levs, ntqv, nsamftrac, index_of_process_scnv, dtidx(:,:)
         logical, intent(in) :: ldiag3d, qdiag3d, flag_for_scnv_generic_tend
         real(kind=kind_phys), dimension(im,levs), intent(in) :: gu0, gv0, gt0
         real(kind=kind_phys), intent(in) :: gq0(:,:,:)
@@ -48,7 +48,7 @@
           if (qdiag3d) then
             if(nsamftrac>0) then
               do n=1,nsamftrac
-                if(n==ntqv .or. dtidx(ntqv,index_for_cause_scnv)>1) then
+                if(n==ntqv .or. dtidx(ntqv,index_of_process_scnv)>1) then
                   save_q(:,:,n) = gq0(:,:,n)
                 endif
               enddo
@@ -80,8 +80,8 @@
         frain, gu0, gv0, gt0, gq0, save_u, save_v, save_t, save_q, dqdti, clw,   &
         shcnvcw, rain1, npdf3d, num_p3d, ncnvcld3d, cnvc, cnvw, nsamftrac,        &
         rainc, cnvprcp, cnvprcpb, cnvw_phy_f3d, cnvc_phy_f3d,                     &
-        dtend, dtidx, index_for_temperature, index_for_x_wind, index_for_y_wind,  &
-        index_for_cause_scnv, ntqv, flag_for_scnv_generic_tend,                   &
+        dtend, dtidx, index_of_temperature, index_of_x_wind, index_of_y_wind,  &
+        index_of_process_scnv, ntqv, flag_for_scnv_generic_tend,                   &
         imfshalcnv, imfshalcnv_sas, imfshalcnv_samf, errmsg, errflg)
 
       use machine,               only: kind_phys
@@ -99,7 +99,7 @@
       real(kind=kind_phys), dimension(:,:), intent(inout) :: dqdti
       real(kind=kind_phys), intent(inout), optional :: dtend(:,:,:)
       integer, intent(in) :: dtidx(:,:)
-      integer, intent(in) :: index_for_temperature, index_for_x_wind, index_for_y_wind, index_for_cause_scnv
+      integer, intent(in) :: index_of_temperature, index_of_x_wind, index_of_y_wind, index_of_process_scnv
       real(kind=kind_phys), dimension(im,levs,nn), intent(inout) :: clw
 
       ! Post code for SAS/SAMF
@@ -148,30 +148,30 @@
 
       if (lssav .and. flag_for_scnv_generic_tend) then
         if (ldiag3d) then
-          idtend = dtidx(index_for_temperature, index_for_cause_scnv)
+          idtend = dtidx(index_of_temperature, index_of_process_scnv)
           if(idtend>1) then
              dtend(:,:,idtend) = dtend(:,:,idtend) + (gt0 - save_t) * frain
           endif
 
-          idtend = dtidx(index_for_x_wind, index_for_cause_scnv)
+          idtend = dtidx(index_of_x_wind, index_of_process_scnv)
           if(idtend>1) then
              dtend(:,:,idtend) = dtend(:,:,idtend) + (gu0 - save_u) * frain
           endif
 
-          idtend = dtidx(index_for_y_wind, index_for_cause_scnv)
+          idtend = dtidx(index_of_y_wind, index_of_process_scnv)
           if(idtend>1) then
              dtend(:,:,idtend) = dtend(:,:,idtend) + (gv0 - save_v) * frain
           endif
 
           if(nsamftrac>0) then
             do n=1,nsamftrac
-              idtend = dtidx(100+n, index_for_cause_scnv)
+              idtend = dtidx(100+n, index_of_process_scnv)
               if(idtend>1) then
                 dtend(:,:,idtend) = dtend(:,:,idtend) + (gq0(:,:,n) - save_q(:,:,n)) * frain
               endif
             enddo
           else
-            idtend = dtidx(100+ntqv, index_for_cause_scnv)
+            idtend = dtidx(100+ntqv, index_of_process_scnv)
             if(idtend>1) then
               dtend(:,:,idtend) = dtend(:,:,idtend) + (gq0(:,:,ntqv) - save_q(:,:,ntqv)) * frain
             endif

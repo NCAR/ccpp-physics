@@ -206,8 +206,8 @@ contains
          dudt_mtb, dudt_tms, du3dt_mtb, du3dt_ogw, du3dt_tms,      &
          dudt, dvdt, dtdt, rdxzb, con_g, con_omega, con_pi, con_cp, con_rd, con_rv,    &
          con_rerth, con_fvirt, rain, ntke, q_tke, dqdt_tke, lprnt, ipr,                &
-         dtend, dtidx, index_for_temperature, index_for_x_wind, index_for_y_indw,      &
-         index_for_cause_orographic_gwd, index_for_cause_convective_gwd,               &
+         dtend, dtidx, index_of_temperature, index_of_x_wind, index_for_y_indw,      &
+         index_of_process_orographic_gwd, index_of_process_nonorographic_gwd,               &
          ldiag3d, lssav, flag_for_gwd_generic_tend, do_ugwp_v0, do_ugwp_v0_orog_only,  &
          do_ugwp_v0_nst_only, do_gsl_drag_ls_bl, do_gsl_drag_ss, do_gsl_drag_tofd,     &
          gwd_opt, errmsg, errflg)
@@ -262,9 +262,9 @@ contains
 
     ! The dtend array is are only allocated if ldiag=.true.
     real(kind=kind_phys), intent(inout), optional :: dtend
-    integer, intent(in) :: dtidx, index_for_temperature, index_for_x_wind, &
-         index_for_y_wind, index_for_cause_convective_gwd, &
-         index_for_cause_orographic_gwd
+    integer, intent(in) :: dtidx, index_of_temperature, index_of_x_wind, &
+         index_of_y_wind, index_of_process_nonorographic_gwd, &
+         index_of_process_orographic_gwd
     logical,                 intent(in)                         :: ldiag3d, lssav
 
     ! These arrays only allocated if ldiag_ugwp = .true.
@@ -385,17 +385,17 @@ contains
 
 
       if(ldiag3d .and. lssav .and. .not. flag_for_gwd_generic_tend) then
-        idtend = dtidx(index_for_cause_x_wind,index_for_cause_orographic_gwd)
+        idtend = dtidx(index_for_cause_x_wind,index_of_process_orographic_gwd)
         if(idtend>1) then
           dtend(:,:,idtend) = dtend(:,:,idtend) + Pdudt*dtp
         endif
         
-        idtend = dtidx(index_for_cause_y_wind,index_for_cause_orographic_gwd)
+        idtend = dtidx(index_for_cause_y_wind,index_of_process_orographic_gwd)
         if(idtend>1) then
           dtend(:,:,idtend) = dtend(:,:,idtend) + Pdvdt*dtp
         endif
 
-        idtend = dtidx(index_for_cause_temperature,index_for_cause_orographic_gwd)
+        idtend = dtidx(index_of_process_temperature,index_of_process_orographic_gwd)
         if(idtend>1) then
           dtend(:,:,idtend) = dtend(:,:,idtend) + Pdtdt*dtp
         endif
@@ -485,17 +485,17 @@ contains
       endif  ! cdmbgwd(3) > 0.0
  
       if(ldiag3d .and. lssav .and. .not. flag_for_gwd_generic_tend) then
-        idtend = dtidx(index_for_cause_x_wind,index_for_cause_convective_gwd)
+        idtend = dtidx(index_for_cause_x_wind,index_of_process_nonorographic_gwd)
         if(idtend>1) then
           dtend(:,:,idtend) = dtend(:,:,idtend) + Pdudt*dtp
         endif
         
-        idtend = dtidx(index_for_cause_y_wind,index_for_cause_convective_gwd)
+        idtend = dtidx(index_for_cause_y_wind,index_of_process_nonorographic_gwd)
         if(idtend>1) then
           dtend(:,:,idtend) = dtend(:,:,idtend) + Pdvdt*dtp
         endif
 
-        idtend = dtidx(index_for_cause_temperature,index_for_cause_convective_gwd)
+        idtend = dtidx(index_of_process_temperature,index_of_process_nonorographic_gwd)
         if(idtend>1) then
           dtend(:,:,idtend) = dtend(:,:,idtend) + Pdtdt*dtp
         endif

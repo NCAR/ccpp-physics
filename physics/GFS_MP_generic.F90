@@ -90,7 +90,7 @@
         totsnw, totgrp, cnvprcpb, totprcpb, toticeb, totsnwb, totgrpb, rain_cpl, rainc_cpl, snow_cpl, pwat, &
         do_sppt, ca_global, dtdtr, dtdtc, drain_cpl, dsnow_cpl, lsm, lsm_ruc, lsm_noahmp, raincprv, rainncprv, iceprv, snowprv,      &
         graupelprv, draincprv, drainncprv, diceprv, dsnowprv, dgraupelprv, dtp, &
-        dtend, dtidx, ncause, index_for_temperature, index_for_cause_mp,ldiag3d, qdiag3d, lssav, &
+        dtend, dtidx, ncause, index_of_temperature, index_of_process_mp,ldiag3d, qdiag3d, lssav, &
         errmsg, errflg)
 !
       use machine, only: kind_phys
@@ -100,7 +100,7 @@
       integer, intent(in) :: im, levs, kdt, nrcm, ncld, nncl, ntcw, ntrac
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_mg, imp_physics_fer_hires
       logical, intent(in) :: cal_pre, lssav, ldiag3d, qdiag3d, cplflx, cplchm
-      integer, intent(in) :: index_for_temperature,index_for_cause_mp,ncause
+      integer, intent(in) :: index_of_temperature,index_of_process_mp,ncause
 
       real(kind=kind_phys),                           intent(in)    :: dtf, frain, con_g
       real(kind=kind_phys), dimension(im),            intent(in)    :: rain1, xlat, xlon, tsfc
@@ -343,7 +343,7 @@
         enddo
 
         if_tendency_diagnostics: if (ldiag3d) then
-           idtend = dtidx(index_for_temperature,index_for_cause_mp)
+           idtend = dtidx(index_of_temperature,index_of_process_mp)
            if(idtend>1) then
               do k=1,levs
                  do i=1,im
@@ -353,7 +353,7 @@
            endif
            if_tracer_diagnostics: if (qdiag3d) then
               dtend_q: do itrac=1,ntrac
-                 idtend = dtidx(itrac+100,index_for_cause_mp)
+                 idtend = dtidx(itrac+100,index_of_process_mp)
                  if(idtend>1) then
                     do k=1,levs
                        do i=1,im

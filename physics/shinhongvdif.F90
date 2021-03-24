@@ -36,8 +36,8 @@
                   u10,v10,                                                     &
                   dx,lssav,ldiag3d,                                            &
                   flag_for_pbl_generic_tend,ntoz,ntqv,dtend,dtidx,             &
-                  index_for_cause_pbl,index_for_temperature,index_for_x_wind,  &
-                  index_for_y_wind,errmsg,errflg )
+                  index_of_process_pbl,index_of_temperature,index_of_x_wind,  &
+                  index_of_y_wind,errmsg,errflg )
 
    use machine , only : kind_phys
 !
@@ -163,8 +163,8 @@
 
    ! 3D diagnostic tendencies; dtend is only allocated if ldiag3d=.true.
    real(kind=kind_phys), intent(inout), optional :: dtend(:,:,:)
-   integer, intent(in) :: dtidx(:,:), index_for_cause_pbl, ntqv, &
-        index_for_x_wind, index_for_y_wind, index_for_temperature
+   integer, intent(in) :: dtidx(:,:), index_of_process_pbl, ntqv, &
+        index_of_x_wind, index_of_y_wind, index_of_temperature
 
    ! Index within dtend third dimension for tendency of interest:
    integer :: idtend
@@ -971,7 +971,7 @@
      enddo
    enddo
    if(lssav .and. ldiag3d .and. .not. flag_for_pbl_generic_tend) then
-     idtend = dtidx(index_for_temperature,index_for_cause_pbl)
+     idtend = dtidx(index_of_temperature,index_of_process_pbl)
      if(idtend>1) then
        dtend(:,:,idtend) = dtend(:,:,idtend) + dtstep*(f1-thx+300.)*rdt*pi2d
      endif
@@ -1101,7 +1101,7 @@
      enddo
    enddo
    if(lssav .and. ldiag3d .and. .not. flag_for_pbl_generic_tend) then
-     idtend = dtidx(ntqv+100,index_for_cause_pbl)
+     idtend = dtidx(ntqv+100,index_of_process_pbl)
      if(idtend>1) then
        dtend(:,:,idtend) = dtend(:,:,idtend) + dtstep*rdt*(f3(:,:,1)-qx(:,:,1))
      endif
@@ -1137,7 +1137,7 @@
      enddo
      if(lssav .and. ldiag3d .and. ntoz>0 .and.         &
   &               .not. flag_for_pbl_generic_tend) then
-       idtend=dtidx(ntoz+100,index_for_cause_pbl)
+       idtend=dtidx(ntoz+100,index_of_process_pbl)
        if(idtend>1) then
          dtend(:,:,idtend) = dtend(:,:,idtend) + qtend*(f3(:,:,ntoz)-qx(:,:,ntoz))
        endif
@@ -1234,11 +1234,11 @@
      enddo
    enddo
    if(lssav .and. ldiag3d .and. .not. flag_for_pbl_generic_tend) then
-     idtend=dtidx(index_for_x_wind,index_for_cause_pbl)
+     idtend=dtidx(index_of_x_wind,index_of_process_pbl)
      if(idtend>1) then
        dtend(:,:,idtend) = dtend(:,:,idtend) + dtstep*rdt*(f1-ux)
      endif
-     idtend=dtidx(index_for_y_wind,index_for_cause_pbl)
+     idtend=dtidx(index_of_y_wind,index_of_process_pbl)
      if(idtend>1) then
        dtend(:,:,idtend) = dtend(:,:,idtend) + dtstep*rdt*(f2-vx)
      endif

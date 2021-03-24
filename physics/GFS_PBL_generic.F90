@@ -331,8 +331,8 @@
         imp_physics_fer_hires,                                                                                                 &
         ltaerosol, cplflx, cplchm, lssav, flag_for_pbl_generic_tend, ldiag3d, lsidea, hybedmf, do_shoc, satmedmf,     &
         shinhong, do_ysu, dvdftra, dusfc1, dvsfc1, dtsfc1, dqsfc1, dtf, dudt, dvdt, dtdt, htrsw, htrlw, xmu,                   &
-        dqdt, dusfc_cpl, dvsfc_cpl, dtsfc_cpl, dtend, dtidx, index_for_temperature, index_for_x_wind, index_for_y_wind,        &
-        index_for_cause_pbl, dqsfc_cpl, dusfci_cpl, dvsfci_cpl, dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag,    &
+        dqdt, dusfc_cpl, dvsfc_cpl, dtsfc_cpl, dtend, dtidx, index_of_temperature, index_of_x_wind, index_of_y_wind,        &
+        index_of_process_pbl, dqsfc_cpl, dusfci_cpl, dvsfci_cpl, dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag,    &
         dqsfc_diag, dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag,                                                        &
         rd, cp, fvirt, hvap, t1, q1, prsl, hflx, ushfsfci, oceanfrac, flag_cice, dusfc_cice, dvsfc_cice,          &
         dtsfc_cice, dqsfc_cice, wet, dry, icy, wind, stress_wat, hflx_wat, evap_wat, ugrs1, vgrs1, dkt_cpl, dkt, hffac, hefac, &
@@ -381,7 +381,7 @@
         dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag, dqsfc_diag, dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag
       real(kind=kind_phys), intent(inout), optional :: dtend(:,:,:)
       integer, intent(in) :: dtidx(:,:)
-      integer, intent(in) :: index_for_temperature, index_for_x_wind, index_for_y_wind, index_for_cause_pbl
+      integer, intent(in) :: index_of_temperature, index_of_x_wind, index_of_y_wind, index_of_process_pbl
 
       logical, dimension(:),intent(in) :: wet, dry, icy
       real(kind=kind_phys), dimension(:), intent(out) ::  ushfsfci
@@ -630,33 +630,33 @@
 
         if (ldiag3d .and. flag_for_pbl_generic_tend) then
           if (lsidea) then
-            idtend = dtidx(index_for_temperature, index_for_cause_pbl)
+            idtend = dtidx(index_of_temperature, index_of_process_pbl)
             if(idtend>1) then
               dtend(1:im,1:levs,idtend) = dtend(1:im,1:levs,idtend) + dtdt(1:im,1:levs)*dtf
             endif
           else
-            idtend = dtidx(index_for_temperature, index_for_cause_pbl)
+            idtend = dtidx(index_of_temperature, index_of_process_pbl)
             if(idtend>1) then
               dtend(1:im,1:levs,idtend) = dtend(1:im,1:levs,idtend) + (tgrs(1:im,1:levs) - save_t(1:im,1:levs))
             endif
           endif
-          idtend = dtidx(index_for_x_wind, index_for_cause_pbl)
+          idtend = dtidx(index_of_x_wind, index_of_process_pbl)
           if(idtend>1) then
             dtend(1:im,1:levs,idtend) = dtend(1:im,1:levs,idtend) + (ugrs(1:im,1:levs) - save_u(1:im,1:levs))
           endif
-          idtend = dtidx(index_for_y_wind, index_for_cause_pbl)
+          idtend = dtidx(index_of_y_wind, index_of_process_pbl)
           if(idtend>1) then
             dtend(1:im,1:levs,idtend) = dtend(1:im,1:levs,idtend) + (vgrs(1:im,1:levs) - save_v(1:im,1:levs))
           endif
-          idtend = dtidx(100+ntqv, index_for_cause_pbl)
+          idtend = dtidx(100+ntqv, index_of_process_pbl)
           if(idtend>1) then
             dtend(1:im,1:levs,idtend) = dtend(1:im,1:levs,idtend) + qgrs(1:im,1:levs,ntqv) - save_q(1:im,1:levs,ntqv)
           endif
-          idtend = dtidx(100+ntoz, index_for_cause_pbl)
+          idtend = dtidx(100+ntoz, index_of_process_pbl)
           if(idtend>1) then
             dtend(1:im,1:levs,idtend) = dtend(1:im,1:levs,idtend) + qgrs(1:im,1:levs,ntoz) - save_q(1:im,1:levs,ntoz)
           endif
-          idtend = dtidx(100+ntke, index_for_cause_pbl)
+          idtend = dtidx(100+ntke, index_of_process_pbl)
           if(idtend>1) then
             dtend(1:im,1:levs,idtend) = dtend(1:im,1:levs,idtend) + (qgrs(1:im,1:levs,ntke) - save_q(1:im,1:levs,ntke))
           endif

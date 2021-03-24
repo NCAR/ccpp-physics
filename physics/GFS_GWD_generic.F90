@@ -20,8 +20,8 @@ contains
      &           oc, oa4, clx, theta,                                   &
      &           varss, ocss, oa4ss, clxss,                             &
      &           sigma, gamma, elvmax, lssav, ldiag3d,                  &
-     &           dtend, dtidx, index_for_temperature, index_for_x_wind, &
-     &           index_for_y_wind, index_for_cause_orographic_gwd,      &
+     &           dtend, dtidx, index_of_temperature, index_of_x_wind, &
+     &           index_of_y_wind, index_of_process_orographic_gwd,      &
      &           dudt, dvdt, dtdt, dtf,                                 &
      &           flag_for_gwd_generic_tend, errmsg, errflg)
 
@@ -40,8 +40,8 @@ contains
       real(kind=kind_phys), intent(in) :: dtdt(im,levs), dudt(im,levs), dvdt(im,levs)
       ! dtend only allocated only if ldiag3d is .true.
       real(kind=kind_phys), intent(inout) :: dtend(:,:,:)
-      integer, intent(in) :: dtidx(:,:), index_for_temperature,         &
-     &  index_for_x_wind, index_for_y_wind, index_for_cause_orographic_gwd
+      integer, intent(in) :: dtidx(:,:), index_of_temperature,         &
+     &  index_of_x_wind, index_of_y_wind, index_of_process_orographic_gwd
       real(kind=kind_phys), intent(in) :: dtf
 
       character(len=*), intent(out) :: errmsg
@@ -122,17 +122,17 @@ contains
       endif   ! end if_nmtvr
 
       if (lssav .and. ldiag3d .and. flag_for_gwd_generic_tend) then
-        idtend = dtidx(index_for_temperature, index_for_cause_orographic_gwd)
+        idtend = dtidx(index_of_temperature, index_of_process_orographic_gwd)
         if(idtend>1) then
           dtend(:,:,idtend) = dtend(:,:,idtend) - dtdt*dtf
         endif
 
-        idtend = dtidx(index_for_x_wind, index_for_cause_orographic_gwd)
+        idtend = dtidx(index_of_x_wind, index_of_process_orographic_gwd)
         if(idtend>1) then
           dtend(:,:,idtend) = dtend(:,:,idtend) - dudt*dtf
         endif
 
-        idtend = dtidx(index_for_y_wind, index_for_cause_orographic_gwd)
+        idtend = dtidx(index_of_y_wind, index_of_process_orographic_gwd)
         if(idtend>1) then
           dtend(:,:,idtend) = dtend(:,:,idtend) - dvdt*dtf
         endif
@@ -163,8 +163,8 @@ contains
 !!  \section detailed Detailed Algorithm
 !!  @{
       subroutine GFS_GWD_generic_post_run(lssav, ldiag3d, dtf, dusfcg, dvsfcg, dudt, dvdt, dtdt,          &
-      &  dugwd, dvgwd, flag_for_gwd_generic_tend, dtend, dtidx, index_for_temperature, index_for_x_wind,  &
-      &  index_for_y_wind, index_for_cause_orographic_gwd, errmsg, errflg)
+      &  dugwd, dvgwd, flag_for_gwd_generic_tend, dtend, dtidx, index_of_temperature, index_of_x_wind,  &
+      &  index_of_y_wind, index_of_process_orographic_gwd, errmsg, errflg)
 
       use machine, only : kind_phys
       implicit none
@@ -179,8 +179,8 @@ contains
 
       ! dtend only allocated only if ldiag3d is .true.
       real(kind=kind_phys), intent(inout) :: dtend(:,:,:)
-      integer, intent(in) :: dtidx(:,:), index_for_temperature,         &
-     &  index_for_x_wind, index_for_y_wind, index_for_cause_orographic_gwd
+      integer, intent(in) :: dtidx(:,:), index_of_temperature,         &
+     &  index_of_x_wind, index_of_y_wind, index_of_process_orographic_gwd
       
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -196,17 +196,17 @@ contains
         dvgwd(:) = dvgwd(:) + dvsfcg(:)*dtf
 
         if (ldiag3d .and. flag_for_gwd_generic_tend) then
-          idtend = dtidx(index_for_temperature, index_for_cause_orographic_gwd)
+          idtend = dtidx(index_of_temperature, index_of_process_orographic_gwd)
           if(idtend>1) then
             dtend(:,:,idtend) = dtend(:,:,idtend) + dtdt*dtf
           endif
 
-          idtend = dtidx(index_for_x_wind, index_for_cause_orographic_gwd)
+          idtend = dtidx(index_of_x_wind, index_of_process_orographic_gwd)
           if(idtend>1) then
             dtend(:,:,idtend) = dtend(:,:,idtend) + dudt*dtf
           endif
 
-          idtend = dtidx(index_for_y_wind, index_for_cause_orographic_gwd)
+          idtend = dtidx(index_of_y_wind, index_of_process_orographic_gwd)
           if(idtend>1) then
             dtend(:,:,idtend) = dtend(:,:,idtend) + dvdt*dtf
           endif

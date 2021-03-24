@@ -368,19 +368,19 @@
   intent = in
   optional = F
 [dtend]
-  standard_name = diagnostic_3d_tendencies
-  long_name = diagnostic 3d tendencies for tracers and other fields
+  standard_name = cumulative_change_of_state_variables
+  long_name = diagnostic tendencies for state variables
   units = various
-  dimensions = (horizontal_loop_extent,vertical_dimension,dtend_outer_index_max)
+  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_cumulative_change_processes)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [dtidx]
-  standard_name = dtend_outer_index
-  long_name = index in outer dimension of dtend of a tracer-cause pair
+  standard_name = cumulative_change_of_state_variables_outer_index
+  long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
   units = index
-  dimensions = (number_of_tracers_plus_one_hundred,number_of_possible_causes_of_tracer_changes)
+  dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
   type = integer
   intent = in
   optional = F
@@ -408,41 +408,41 @@
   type = integer
   intent = in
   optional = F
-[index_for_temperature]
-  standard_name = index_for_temperature
-  long_name = index in dtidx first dimension of temperature field
+[index_of_temperature]
+  standard_name = index_of_temperature_in_cumulative_change_index
+  long_name = index of temperature in first dimension of array cumulative change index
   units = index
   dimensions = ()
   type = integer
   intent = in
   optional = F
-[index_for_x_wind]
-  standard_name = index_for_x_wind
-  long_name = index in dtidx first dimension of x wind field
+[index_of_x_wind]
+  standard_name = index_of_x_wind_in_cumulative_change_index
+  long_name = index of x-wind in first dimension of array cumulative change index
   units = index
   dimensions = ()
   type = integer
   intent = in
   optional = F
-[index_for_y_wind]
-  standard_name = index_for_y_wind
-  long_name = index in dtidx first dimension of x wind field
+[index_of_y_wind]
+  standard_name = index_of_y_wind_in_cumulative_change_index
+  long_name = index of x-wind in first dimension of array cumulative change index
   units = index
   dimensions = ()
   type = integer
   intent = in
   optional = F
-[index_for_cause_scnv]
-  standard_name = index_for_cause_scnv
-  long_name = tracer changes caused by shallow convection scheme
+[index_of_process_scnv]
+  standard_name = index_of_shallow_convection_process_process_in_cumulative_change_index
+  long_name = index of shallow convection process in second dimension of array cumulative change index
   units = index
   dimensions = ()
   type = integer
   intent = in
   optional = F
-[index_for_cause_dcnv]
-  standard_name = index_for_cause_dcnv
-  long_name = tracer changes caused by deep convection scheme
+[index_of_process_dcnv]
+  standard_name = index_of_deep_convection_process_process_in_cumulative_change_index
+  long_name = index of deep convection process in second dimension of array cumulative change index
   units = index
   dimensions = ()
   type = integer
