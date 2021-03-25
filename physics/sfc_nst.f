@@ -793,7 +793,7 @@ cc
       real (kind=kind_phys), intent(in) :: rlapse, tgice
       real (kind=kind_phys), dimension(im), intent(in) :: oro, oro_uf
       integer, intent(in) :: nstf_name1, nstf_name4, nstf_name5
-      real (kind=kind_phys), dimension(im), intent(inout) :: xt, xz,       &
+      real (kind=kind_phys), dimension(im), intent(in) :: xt, xz,       &
      &      dt_cool, z_c, tref, xlon
 
 !  ---  input/outputs:
