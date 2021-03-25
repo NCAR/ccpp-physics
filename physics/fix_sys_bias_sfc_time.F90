@@ -47,7 +47,9 @@
       errmsg = ''
       errflg = 0
       
-      if (solhr < 3 .or. solhr > 15) return
+      !Darwin, Australia has a local time offset of UTC + 9.5 hours;
+      !If solhr (forecast UTC time) is outside of the Darwin local 6AM - 6PM, don't apply modified surface fluxes
+      if (solhr > 8.5 .and. solhr < 20.5) return
       
       do i=1, im
         rho = p1(i)/(con_rd*t1(i))
