@@ -1046,13 +1046,13 @@
   intent = out
   optional = F
 [emiss]
-  standard_name = surface_emissivity_lsm
-  long_name = surface emissivity from lsm
+  standard_name = surface_longwave_emissivity_over_land
+  long_name = surface lw emissivity in fraction over land
   units = frac
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [sncovr1]
   standard_name = surface_snow_area_fraction_over_land

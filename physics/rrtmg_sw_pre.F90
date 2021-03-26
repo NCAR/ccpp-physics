@@ -13,9 +13,10 @@
 !! \htmlinclude rrtmg_sw_pre_run.html
 !!
       subroutine rrtmg_sw_pre_run (im, lndp_type, n_var_lndp, lsswr, lndp_var_list, lndp_prt_list, tsfg, tsfa, coszen, &
-                                   alb1d, slmsk, snowd, sncovr, snoalb, zorl, hprime, alvsf, alnsf, alvwf,             &
-                                   alnwf, facsf, facwf, fice, tisfc, albdvis, albdnir, albivis, albinir,               &
-                                   sfalb, nday, idxday, sfcalb1, sfcalb2, sfcalb3, sfcalb4, errmsg, errflg)
+                                   lsm, lsm_noahmp, lsm_ruc, alb1d, slmsk, snowd, sncovr, sncovr_ice, snoalb, zorl,    &
+                                   hprime, alvsf, alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc,                      &
+                                   albdvis, albdnir, albivis, albinir, sfalb, alb_ice, alb_sno_ice, sfalb_lnd_bck,     &
+                                   nday, idxday, sfcalb1, sfcalb2, sfcalb3, sfcalb4, errmsg, errflg)
 
       use machine,                   only: kind_phys
 
@@ -24,6 +25,7 @@
       implicit none
 
       integer,                              intent(in)    :: im, lndp_type, n_var_lndp
+      integer,                              intent(in)    :: lsm, lsm_noahmp, lsm_ruc
       character(len=3)    , dimension(:),   intent(in)    :: lndp_var_list
       logical,                              intent(in)    :: lsswr
       real(kind=kind_phys), dimension(:),   intent(in)    :: lndp_prt_list
@@ -35,10 +37,14 @@
                                                              alvsf, alnsf,     &
                                                              alvwf, alnwf,     &
                                                              facsf, facwf,     &
+                                                             sncovr_ice,       &
                                                              fice, tisfc
       real(kind=kind_phys), dimension(:),   intent(in)    :: albdvis, albdnir, & 
                                                              albivis, albinir
       real(kind=kind_phys), dimension(im),  intent(inout) :: sfalb
+      real(kind=kind_phys), dimension(im),  intent(inout) :: alb_ice,          &
+                                                             alb_sno_ice,      &
+                                                             sfalb_lnd_bck
       integer,                              intent(out)   :: nday
       integer, dimension(im),               intent(out)   :: idxday
       real(kind=kind_phys), dimension(im),  intent(out)   :: sfcalb1, sfcalb2, &
@@ -83,10 +89,11 @@
 !>  - Call module_radiation_surface::setalb() to setup surface albedo.
 !!  for SW radiation.
 
-        call setalb (slmsk, snowd, sncovr, snoalb, zorl,  coszen, tsfg, tsfa,  &  !  ---  inputs
-                     hprime, alvsf, alnsf, alvwf, alnwf, facsf, facwf, fice,   &
-                     tisfc, albdvis, albdnir, albivis, albinir,IM, alb1d,      &  !  mg, sfc-perts
-                     lndp_alb, sfcalb)                                            !  ---  outputs
+        call setalb (slmsk, lsm, lsm_noahmp, lsm_ruc, snowd, sncovr, sncovr_ice, snoalb,    &
+                     zorl, coszen, tsfg, tsfa, hprime, alvsf, alnsf, alvwf, alnwf,          &
+                     facsf, facwf, fice, tisfc, albdvis, albdnir, albivis, albinir,         &
+                     IM, alb1d, lndp_alb,                                                   &  !  mg, sfc-perts
+                     sfcalb, alb_ice, alb_sno_ice, sfalb_lnd_bck )                             !  ---  outputs
 
 
 !> -# Approximate mean surface albedo from vis- and nir-  diffuse values.

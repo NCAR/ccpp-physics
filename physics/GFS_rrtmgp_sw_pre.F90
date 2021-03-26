@@ -27,18 +27,23 @@ contains
 !> \section arg_table_GFS_rrtmgp_sw_pre_run
 !! \htmlinclude GFS_rrtmgp_sw_pre.html
 !!
-  subroutine GFS_rrtmgp_sw_pre_run(me, nCol, nLev, lndp_type, n_var_lndp,lndp_var_list,     &  
-       lndp_prt_list, doSWrad, solhr, lon, coslat, sinlat,  snowd, sncovr, snoalb, zorl,    &
-       tsfg, tsfa, hprime, alvsf, alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc, albdvis,  &
+  subroutine GFS_rrtmgp_sw_pre_run(me, nCol, nLev, lndp_type, n_var_lndp, lndp_var_list,    &  
+       lndp_prt_list, lsm, lsm_noahmp, lsm_ruc, doSWrad, solhr, lon, coslat, sinlat,        &
+       snowd, sncovr, sncovr_ice, snoalb, zorl, tsfg, tsfa, hprime,                         &
+       alvsf, alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc, albdvis,                      &
        albdnir, albivis, albinir, lsmask, sfc_wts, p_lay, tv_lay, relhum, p_lev,            &
        nday, idxday, coszen, coszdg, sfc_alb_nir_dir, sfc_alb_nir_dif,                      &
-       sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, sfc_alb_dif, errmsg, errflg)
+       sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, sfc_alb_dif, alb_ice, alb_sno_ice,             &
+       sfalb_lnd_bck, errmsg, errflg)
 
     ! Inputs   
     integer, intent(in)    :: &
          me,                & ! Current MPI rank
          nCol,              & ! Number of horizontal grid points
          nLev,              & ! Number of vertical layers
+         lsm,               & ! LSM option
+         lsm_noahmp,        & ! option for Noah MP LSM
+         lsm_ruc,           & ! option for RUC LSM
          n_var_lndp,        &  ! Number of surface variables perturbed
          lndp_type             ! Type of land perturbations scheme used
     character(len=3), dimension(n_var_lndp), intent(in) ::  & 
@@ -55,7 +60,8 @@ contains
          coslat,            & ! Cosine(latitude)
          sinlat,            & ! Sine(latitude)
          snowd,             & ! Water equivalent snow depth (mm)
-         sncovr,            & ! Surface snow area fraction (frac)
+         sncovr,            & ! Surface snow area fraction over land (frac)
+         sncovr_ice,        & ! Surface snow area fraction over ice (frac)
          snoalb,            & ! Maximum snow albedo (frac)
          zorl,              & ! Surface roughness length (cm)
          tsfg,              & ! Surface ground temperature for radiation (K)
@@ -83,6 +89,10 @@ contains
          relhum               ! Layer relative-humidity
     real(kind_phys), dimension(nCol,nLev+1),intent(in) :: &
          p_lev                ! Pressure @ layer interfaces (Pa)
+    real(kind_phys), dimension(ncol), intent(inout) :: &
+         alb_ice,           & ! Albedo of snow-free ice
+         alb_sno_ice,       & ! Albedo of snow cover on ice
+         sfalb_lnd_bck        ! Albedo of snow-free land
 
     ! Outputs
     integer, intent(out)   :: &
@@ -137,9 +147,10 @@ contains
        ! ####################################################################################
        alb1d(:) = 0.
        lndp_alb = -999.
-       call setalb (lsmask, snowd, sncovr, snoalb, zorl, coszen, tsfg, tsfa, hprime, alvsf, &
-            alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc, albdvis, albdnir, albivis,      &
-            albinir, NCOL, alb1d, lndp_alb, sfcalb)
+       call setalb (lsmask, lsm, lsm_noahmp, lsm_ruc, snowd, sncovr, sncovr_ice, snoalb, zorl,  &
+                    coszen, tsfg, tsfa, hprime, alvsf, alnsf, alvwf, alnwf, facsf, facwf, fice, &
+                    tisfc, albdvis, albdnir, albivis, albinir, NCOL, alb1d, lndp_alb,           & !  mg, sfc-perts
+                    sfcalb, alb_ice, alb_sno_ice, sfalb_lnd_bck )                                 !  ---  outputs
        
        ! Approximate mean surface albedo from vis- and nir-  diffuse values.
        sfc_alb_dif(:) = max(0.01, 0.5 * (sfcalb(:,2) + sfcalb(:,4)))

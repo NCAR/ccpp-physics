@@ -25,26 +25,34 @@ contains
 !> \section arg_table_rrtmgp_lw_pre_run
 !! \htmlinclude rrtmgp_lw_pre_run.html
 !!
-  subroutine rrtmgp_lw_pre_run (doLWrad, nCol, xlon, xlat, slmsk, zorl, snowd, sncovr, &
-       tsfg, tsfa, hprime, sfc_emiss_byband, emiss, semis, errmsg, errflg)
+  subroutine rrtmgp_lw_pre_run ( kdt, lsm, lsm_noahmp, lsm_ruc, vtype, doLWrad, &
+       nCol, xlon, xlat, slmsk, zorl, snowd, sncovr, sncovr_ice,                &
+       tsfg, tsfa, hprime, sfc_emiss_byband, semis_land, semis_ice,             &
+       semisbase, semis, errmsg, errflg)
 
     ! Inputs
     logical, intent(in) :: &
          doLWrad          ! Logical flag for longwave radiation call
     integer, intent(in) :: &
          nCol             ! Number of horizontal grid points
+    integer, intent(in) :: kdt, lsm, lsm_noahmp, lsm_ruc
+
     real(kind_phys), dimension(nCol), intent(in) :: &
+         vtype,         & ! vegetation type
          xlon,          & ! Longitude
          xlat,          & ! Latitude
          slmsk,         & ! Land/sea/sea-ice mask
          zorl,          & ! Surface roughness length (cm)
          snowd,         & ! water equivalent snow depth (mm)
          sncovr,        & ! Surface snow are fraction (1)
+         sncovr_ice,    & ! Surface snow fraction over ice (1)
          tsfg,          & ! Surface ground temperature for radiation (K)
          tsfa,          & ! Lowest model layer air temperature for radiation (K)
          hprime           ! Standard deviation of subgrid orography
-    real(kind_phys), dimension(:), intent(in) :: &
-         emiss            ! Surface emissivity from Noah MP
+
+    real(kind_phys), dimension(nCol), intent(in) :: &
+         semis_land,    &  ! Surface emissivity over land
+         semis_ice         ! Surface emissivity over ice
 
     ! Outputs 
     real(kind_phys), dimension(lw_gas_props%get_nband(),ncol), intent(out) :: &
@@ -54,7 +62,7 @@ contains
     integer, intent(out) :: &  
          errflg           ! Error flag
     real(kind_phys), dimension(nCol), intent(out) :: &
-         semis
+         semisbase, semis
 
     ! Local variables
     integer :: iBand
@@ -68,7 +76,11 @@ contains
     ! #######################################################################################
     ! Call module_radiation_surface::setemis(),to setup surface emissivity for LW radiation.
     ! #######################################################################################
-    call setemis (xlon, xlat, slmsk, snowd, sncovr, zorl, tsfg, tsfa, hprime, emiss, nCol, semis)
+    call setemis ( kdt, lsm, lsm_noahmp, lsm_ruc, vtype, xlon, xlat, slmsk, &
+                      snowd, sncovr, sncovr_ice, zorl, tsfg, tsfa, hprime,  &
+                      semis_land, semis_ice, nCol,                          & !  ---  inputs
+                      semisbase, semis)                                       !  ---  outputs
+
 
     ! Assign same emissivity to all bands
     do iBand=1,lw_gas_props%get_nband()
