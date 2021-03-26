@@ -26,7 +26,7 @@ contains
 !! \htmlinclude rrtmgp_lw_pre_run.html
 !!
   subroutine rrtmgp_lw_pre_run ( kdt, lsm, lsm_noahmp, lsm_ruc, vtype, doLWrad, &
-       nCol, xlon, xlat, slmsk, zorl, snowd, sncovr, sncovr_ice,                &
+       nCol, xlon, xlat, slmsk, zorl, snowd, sncovr, sncovr_ice, fice,          &
        tsfg, tsfa, hprime, sfc_emiss_byband, semis_land, semis_ice,             &
        semisbase, semis, errmsg, errflg)
 
@@ -41,11 +41,12 @@ contains
          vtype,         & ! vegetation type
          xlon,          & ! Longitude
          xlat,          & ! Latitude
-         slmsk,         & ! Land/sea/sea-ice mask
+         landfrac,      & ! Land fraction
          zorl,          & ! Surface roughness length (cm)
          snowd,         & ! water equivalent snow depth (mm)
          sncovr,        & ! Surface snow are fraction (1)
          sncovr_ice,    & ! Surface snow fraction over ice (1)
+         fice,          & ! Fration of sea ice
          tsfg,          & ! Surface ground temperature for radiation (K)
          tsfa,          & ! Lowest model layer air temperature for radiation (K)
          hprime           ! Standard deviation of subgrid orography
@@ -76,10 +77,10 @@ contains
     ! #######################################################################################
     ! Call module_radiation_surface::setemis(),to setup surface emissivity for LW radiation.
     ! #######################################################################################
-    call setemis ( kdt, lsm, lsm_noahmp, lsm_ruc, vtype, xlon, xlat, slmsk, &
-                      snowd, sncovr, sncovr_ice, zorl, tsfg, tsfa, hprime,  &
-                      semis_land, semis_ice, nCol,                          & !  ---  inputs
-                      semisbase, semis)                                       !  ---  outputs
+    call setemis ( kdt, lsm, lsm_noahmp, lsm_ruc, vtype, xlon, xlat, slmsk,       &
+                      snowd, sncovr, sncovr_ice, fice, zorl, tsfg, tsfa, hprime,  &
+                      semis_land, semis_ice, nCol,                                & !  ---  inputs
+                      semisbase, semis)                                             !  ---  outputs
 
 
     ! Assign same emissivity to all bands
