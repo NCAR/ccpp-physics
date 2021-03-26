@@ -407,12 +407,6 @@
          enddo
       endif
 
-      ! Add clear-sky radiative heating rates to clear-sky physics heating rate 
-      do k = 1, levs
-         do i = 1, im
-            dtdtc(i,k) = dtdtc(i,k) + swhc(i,k)*xmu(i) + hlwc(i,k)
-         enddo
-      enddo
       if (do_sppt .or. ca_global) then
          if (pert_radtend) then
 ! clear sky

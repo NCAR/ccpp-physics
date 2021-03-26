@@ -21,25 +21,7 @@ contains
   ! #########################################################################################
   ! SUBROUTINE rrtmgp_lw_aerosol_optics_init()
   ! #########################################################################################
-!! \section arg_table_rrtmgp_lw_aerosol_optics_init
-!! \htmlinclude rrtmgp_lw_aerosol_optics.html
-!!
-  subroutine rrtmgp_lw_aerosol_optics_init(lw_optical_props_aerosol, errmsg, errflg)
-    ! Inputs
-    type(ty_optical_props_1scl),intent(inout) :: &
-         lw_optical_props_aerosol ! RRTMGP DDT: Longwave aerosol optical properties (tau) 
-    ! Outputs
-    integer, intent(out) :: &
-         errflg                   ! CCPP error flag
-    character(len=*), intent(out) :: &
-         errmsg                   ! CCPP error message  
-
-    ! Initialize CCPP error handling variables
-    errmsg = ''
-    errflg = 0
-
-    errmsg = lw_optical_props_aerosol%init(lw_gas_props%get_band_lims_wavenumber())
-
+  subroutine rrtmgp_lw_aerosol_optics_init()
   end subroutine rrtmgp_lw_aerosol_optics_init
 
   ! #########################################################################################
@@ -91,6 +73,7 @@ contains
          aerosolslw            !
     real(kind_phys), dimension(nCol, nLev, sw_gas_props%get_nband(), NF_AESW) :: &
          aerosolssw
+    integer :: iBand
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -104,6 +87,12 @@ contains
 
     ! Copy aerosol optical information to RRTMGP DDT
     lw_optical_props_aerosol%tau = aerosolslw(:,:,:,1) * (1. - aerosolslw(:,:,:,2))
+
+    lw_optical_props_aerosol%band_lims_wvn = lw_gas_props%get_band_lims_wavenumber()
+    do iBand=1,lw_gas_props%get_nband()
+       lw_optical_props_aerosol%band2gpt(1:2,iBand) = iBand
+       lw_optical_props_aerosol%gpt2band(iBand)     = iBand
+    end do
 
   end subroutine rrtmgp_lw_aerosol_optics_run
   

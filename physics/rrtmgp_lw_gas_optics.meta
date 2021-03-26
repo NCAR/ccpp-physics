@@ -1,8 +1,7 @@
 [ccpp-table-properties]
   name = rrtmgp_lw_gas_optics
   type = scheme
-  dependencies = machine.F,rte-rrtmgp/extensions/mo_compute_bc.F90,rte-rrtmgp/rte/mo_fluxes.F90,rte-rrtmgp/rte/kernels/mo_fluxes_broadband_kernels.F90
-  dependencies = rte-rrtmgp/rte/mo_rte_lw.F90,rte-rrtmgp/rte/mo_rte_sw.F90,rte-rrtmgp/rte/kernels/mo_rte_solver_kernels.F90,rrtmgp_aux.F90
+  dependencies = machine.F,rrtmgp_aux.F90,GFS_rrtmgp_pre.F90,rte-rrtmgp/rrtmgp/mo_gas_optics_rrtmgp.F90,rte-rrtmgp/rte/mo_rte_kind.F90,rte-rrtmgp/rrtmgp/mo_gas_concentrations.F90,rte-rrtmgp/rte/mo_optical_props.F90,rte-rrtmgp/rte/mo_source_functions.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -32,22 +31,6 @@
   units = DDT
   dimensions = ()
   type = ty_gas_concs
-  intent = inout
-  optional = F
-[lw_optical_props_clrsky]
-  standard_name = longwave_optical_properties_for_clear_sky
-  long_name = Fortran DDT containing RRTMGP optical properties
-  units = DDT
-  dimensions = ()
-  type = ty_optical_props_1scl
-  intent = inout
-  optional = F
-[sources]
-  standard_name = longwave_source_function
-  long_name = Fortran DDT containing RRTMGP source functions
-  units = DDT
-  dimensions = ()
-  type = ty_source_func_lw
   intent = inout
   optional = F
 [mpirank]

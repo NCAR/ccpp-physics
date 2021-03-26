@@ -1,12 +1,10 @@
 module rrtmgp_sw_gas_optics
   use machine,                only: kind_phys
-  use module_radiation_gases, only: NF_VGAS
   use mo_rte_kind,            only: wl
   use mo_gas_optics_rrtmgp,   only: ty_gas_optics_rrtmgp
   use mo_gas_concentrations,  only: ty_gas_concs
   use rrtmgp_aux,             only: check_error_msg
   use mo_optical_props,       only: ty_optical_props_2str
-  use mo_compute_bc,          only: compute_bc
   use GFS_rrtmgp_pre,         only: active_gases_array
   use netcdf
 #ifdef MPI

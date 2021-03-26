@@ -72,15 +72,9 @@ contains
 !!
   subroutine rrtmgp_lw_cloud_optics_init(nrghice, mpicomm, mpirank, mpiroot,             &
        doG_cldoptics, doGP_cldoptics_PADE, doGP_cldoptics_LUT, rrtmgp_root_dir,          &
-       rrtmgp_lw_file_clouds, lw_optical_props_clouds, lw_optical_props_precip,          &
-       lw_optical_props_cloudsByBand, lw_optical_props_precipByBand, errmsg, errflg)
+       rrtmgp_lw_file_clouds, errmsg, errflg)
 
     ! Inputs
-    type(ty_optical_props_2str),intent(inout) :: &
-         lw_optical_props_cloudsByBand, & ! RRTMGP DDT: Longwave optical properties in each band (clouds)
-         lw_optical_props_precipByBand, & ! RRTMGP DDT: Longwave optical properties in each band (precipitation)    
-         lw_optical_props_clouds,       & ! RRTMGP DDT: Shortwave optical properties by spectral point (clouds)
-         lw_optical_props_precip          ! RRTMGP DDT: Shortwave optical properties by spectral point (precipitation)
     logical, intent(in) :: &
          doG_cldoptics,                 & ! Use legacy RRTMG cloud-optics?
          doGP_cldoptics_PADE,           & ! Use RRTMGP cloud-optics: PADE approximation?
@@ -109,24 +103,6 @@ contains
     ! Initialize
     errmsg = ''
     errflg = 0
-
-    !
-    ! Initialize GP DDTs (use same spectral configuration as gas-optics) 
-    !
-    ! Cloud optics
-    !
-    call check_error_msg('lw_cloud_optics_init', lw_optical_props_cloudsByBand%init(&
-         lw_gas_props%get_band_lims_wavenumber()))
-    call check_error_msg('lw_cloud_optics_init', lw_optical_props_clouds%init(&
-         lw_gas_props%get_band_lims_wavenumber(), lw_gas_props%get_band_lims_gpoint()))
-    !
-    ! Precipitation optics
-    !
-    call check_error_msg('lw_precip_optics_init', lw_optical_props_precipByBand%init(&
-          lw_gas_props%get_band_lims_wavenumber()))
-    call check_error_msg('lw_precip_optics_init', lw_optical_props_precip%init(&
-          lw_gas_props%get_band_lims_wavenumber(), lw_gas_props%get_band_lims_gpoint()))
-
 
     ! If not using RRTMGP cloud optics, return.
     if (doG_cldoptics) return
@@ -467,6 +443,15 @@ contains
     tau_precip = 0._kind_phys
 
     if (.not. doLWrad) return
+
+    lw_optical_props_cloudsByBand%band_lims_wvn = lw_gas_props%get_band_lims_wavenumber()
+    lw_optical_props_precipByBand%band_lims_wvn = lw_gas_props%get_band_lims_wavenumber()
+    do iBand=1,lw_gas_props%get_nband()
+       lw_optical_props_cloudsByBand%band2gpt(1:2,iBand) = iBand
+       lw_optical_props_cloudsByBand%band2gpt(1:2,iBand) = iBand
+       lw_optical_props_precipByBand%gpt2band(iBand)     = iBand
+       lw_optical_props_precipByBand%gpt2band(iBand)     = iBand
+    end do
 
     ! Compute cloud-optics for RTE.
     if (doGP_cldoptics_PADE .or. doGP_cldoptics_LUT) then
