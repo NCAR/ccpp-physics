@@ -22,7 +22,7 @@
       use h2ointerp, only : read_h2odata, setindxh2o, h2ointerpol
 
       use aerclm_def, only : aerin, aer_pres, ntrcaer, ntrcaerm
-      use aerinterp,  only : read_aerdata, setindxaer, aerinterpol
+      use aerinterp,  only : read_aerdata, setindxaer, aerinterpol, read_aerdataf
 
       use iccn_def,   only : ciplin, ccnin, ci_pres
       use iccninterp, only : read_cidata, setindxci, ciinterpol
@@ -166,7 +166,7 @@
          integer,              intent(out)   :: errflg
 
          ! Local variables
-         integer :: i, j, ix, vegtyp
+         integer :: i, j, ix, vegtyp, iamin, iamax, jamin, jamax
          real(kind_phys) :: rsnow
 
          !--- Noah MP
@@ -182,12 +182,17 @@
          errflg = 0
 
          if (is_initialized) return
+         iamin=999
+         iamax=-999
+         jamin=999
+         jamax=-999
 
 !$OMP parallel num_threads(nthrds) default(none)                                    &
 !$OMP          shared (me,master,ntoz,h2o_phys,im,nx,ny,idate)                      &
 !$OMP          shared (xlat_d,xlon_d,imap,jmap,errmsg,errflg)                       &
 !$OMP          shared (levozp,oz_coeff,oz_pres,ozpl)                                &
 !$OMP          shared (levh2o,h2o_coeff,h2o_pres,h2opl)                             &
+!$OMP          shared (iamin, iamax, jamin, jamax)                                  &
 !$OMP          shared (iaerclm,ntrcaer,aer_nm,iflip,iccn)                           &
 !$OMP          shared (jindx1_o3,jindx2_o3,ddy_o3,jindx1_h,jindx2_h,ddy_h)          &
 !$OMP          shared (jindx1_aer,jindx2_aer,ddy_aer,iindx1_aer,iindx2_aer,ddx_aer) &
@@ -300,16 +305,20 @@
            call setindxh2o (im, xlat_d, jindx1_h, jindx2_h, ddy_h)
          endif
 
-!$OMP section
 !> - Call setindxaer() to initialize aerosols data
+!$OMP section
          if (iaerclm) then
            call setindxaer (im, xlat_d, jindx1_aer,          &
                             jindx2_aer, ddy_aer, xlon_d,     &
                             iindx1_aer, iindx2_aer, ddx_aer, &
                             me, master)
+           iamin=min(minval(iindx1_aer), iamin)
+           iamax=max(maxval(iindx2_aer), iamax)
+           jamin=min(minval(jindx1_aer), jamin)
+           jamax=max(maxval(jindx2_aer), jamax)
          endif
-
 !$OMP section
+
 !> - Call setindxci() to initialize IN and CCN data
          if (iccn == 1) then
            call setindxci (im, xlat_d, jindx1_ci,      &
@@ -367,6 +376,10 @@
 !$OMP end sections
 
 !$OMP end parallel
+         if (iaerclm) then
+           call read_aerdataf (iamin, iamax, jamin, jamax, me,master,iflip,            &
+                              idate,errmsg,errflg)
+         endif
 
          if (lsm == lsm_noahmp) then
            if (all(tvxy < zero)) then
@@ -804,10 +817,10 @@
 
 !> - Call ciinterpol() to make IN and CCN data interpolation
          if (iccn == 1) then
-           call ciinterpol (me, im, idate, fhour,    &
-                            jindx1_ci, jindx2_ci,    &
-                            ddy_ci, iindx1_ci,       &
-                            iindx2_ci, ddx_ci,       &
+           call ciinterpol (me, im, idate, fhour,     &
+                            jindx1_ci, jindx2_ci,     &
+                            ddy_ci, iindx1_ci,        &
+                            iindx2_ci, ddx_ci,        &
                             levs, prsl, in_nm, ccn_nm)
          endif
 
