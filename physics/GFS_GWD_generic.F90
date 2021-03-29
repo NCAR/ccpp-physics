@@ -20,7 +20,7 @@ contains
      &           oc, oa4, clx, theta,                                   &
      &           varss, ocss, oa4ss, clxss,                             &
      &           sigma, gamma, elvmax, lssav, ldiag3d,                  &
-     &           dtend, dtidx, index_of_temperature, index_of_x_wind, &
+     &           dtend, dtidx, index_of_temperature, index_of_x_wind,   &
      &           index_of_y_wind, index_of_process_orographic_gwd,      &
      &           dudt, dvdt, dtdt, dtf,                                 &
      &           flag_for_gwd_generic_tend, errmsg, errflg)
@@ -40,7 +40,7 @@ contains
       real(kind=kind_phys), intent(in) :: dtdt(im,levs), dudt(im,levs), dvdt(im,levs)
       ! dtend only allocated only if ldiag3d is .true.
       real(kind=kind_phys), intent(inout) :: dtend(:,:,:)
-      integer, intent(in) :: dtidx(:,:), index_of_temperature,         &
+      integer, intent(in) :: dtidx(:,:), index_of_temperature,          &
      &  index_of_x_wind, index_of_y_wind, index_of_process_orographic_gwd
       real(kind=kind_phys), intent(in) :: dtf
 
@@ -179,7 +179,7 @@ contains
 
       ! dtend only allocated only if ldiag3d is .true.
       real(kind=kind_phys), intent(inout) :: dtend(:,:,:)
-      integer, intent(in) :: dtidx(:,:), index_of_temperature,         &
+      integer, intent(in) :: dtidx(:,:), index_of_temperature,          &
      &  index_of_x_wind, index_of_y_wind, index_of_process_orographic_gwd
       
       character(len=*), intent(out) :: errmsg

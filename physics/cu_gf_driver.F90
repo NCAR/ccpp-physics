@@ -69,10 +69,8 @@ contains
                hbot,htop,kcnv,xland,hfx2,qfx2,cliw,clcw,                        &
                pbl,ud_mf,dd_mf,dt_mf,cnvw_moist,cnvc,imfshalcnv,                &
                flag_for_scnv_generic_tend,flag_for_dcnv_generic_tend,           &
-! fixme: delete               ! du3dt_SCNV,dv3dt_SCNV,dt3dt_SCNV,dq3dt_SCNV,                     &
-               ! du3dt_DCNV,dv3dt_DCNV,dt3dt_DCNV,dq3dt_DCNV,                     &
-               dtend,dtidx,ntqv,ntiw,ntcw,index_of_temperature,index_of_x_wind,&
-               index_of_y_wind,index_of_process_scnv,index_of_process_dcnv,      &
+               dtend,dtidx,ntqv,ntiw,ntcw,index_of_temperature,index_of_x_wind, &
+               index_of_y_wind,index_of_process_scnv,index_of_process_dcnv,     &
                ldiag3d,qci_conv,errmsg,errflg)
 !-------------------------------------------------------------
       implicit none

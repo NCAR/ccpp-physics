@@ -387,7 +387,7 @@
          integer,                    intent(out) :: errflg
 
          !--- local variables
-         integer :: impi, iomp, ierr, n, idtend, icause, itracer
+         integer :: impi, iomp, ierr, n, idtend, iprocess, itracer
          integer :: mpirank, mpisize, mpicomm
          integer :: omprank, ompsize
 
@@ -633,12 +633,12 @@
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%zmtnblck    ',    Diag%zmtnblck)
                      if (Model%ldiag3d) then
                        do itracer=2,Model%ntracp100
-                          do icause=1,Model%ncause
-                             idtend = Model%dtidx(itracer,icause)
+                          do iprocess=1,Model%nprocess
+                             idtend = Model%dtidx(itracer,iprocess)
                              if(idtend>1) then
                                 call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, &
                                      'dtend_'//Model%dtend_tracer_labels(itracer)//'_' &
-                                     //Model%dtend_cause_labels(icause), Diag%dtend(1,1,idtend))
+                                     //Model%dtend_cause_labels(iprocess), Diag%dtend(1,1,idtend))
                              endif
                           enddo
                        enddo

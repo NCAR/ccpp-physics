@@ -156,9 +156,8 @@ contains
          dudt_mtb,dudt_ogw, dudt_tms, du3dt_mtb, du3dt_ogw, du3dt_tms,                 &
          dudt, dvdt, dtdt, rdxzb, con_g, con_pi, con_cp, con_rd, con_rv, con_fvirt,    &
          con_omega, rain, ntke, q_tke, dqdt_tke, lprnt, ipr,                           &
-! FIXME: delete         ldu3dt_ogw, ldv3dt_ogw, ldt3dt_ogw, ldu3dt_cgw, ldv3dt_cgw, ldt3dt_cgw,       &
-         dtend, dtidx, index_of_x_wind, index_of_y_wind, index_of_temperature,      &
-         index_of_process_orographic_gwd, index_of_process_nonorographic_gwd,               &
+         dtend, dtidx, index_of_x_wind, index_of_y_wind, index_of_temperature,         &
+         index_of_process_orographic_gwd, index_of_process_nonorographic_gwd,          &
          ldiag3d, lssav, flag_for_gwd_generic_tend, errmsg, errflg)
 
     implicit none

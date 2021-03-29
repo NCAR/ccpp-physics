@@ -56,9 +56,17 @@
   type = integer
   intent = in
   optional = F
-[ncause]
+[nprocess]
   standard_name = number_of_cumulative_change_processes
   long_name = number of processes that cause changes in state variables
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[nprocess_summed]
+  standard_name = number_of_physics_causes_of_tracer_changes
+  long_name = number of causes in dtidx per tracer summed for total physics tendency
   units = count
   dimensions = ()
   type = integer

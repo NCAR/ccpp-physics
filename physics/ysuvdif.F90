@@ -35,7 +35,7 @@
                     dusfc,dvsfc,dtsfc,dqsfc,                                   &
                     dt,kpbl1d,u10,v10,lssav,ldiag3d,qdiag3d,                   &
                     flag_for_pbl_generic_tend,ntoz,ntqv,dtend,dtidx,           &
-                    index_of_temperature,index_of_x_wind,index_of_y_wind,   &
+                    index_of_temperature,index_of_x_wind,index_of_y_wind,      &
                     index_of_process_pbl,errmsg,errflg   )
 
    use machine , only : kind_phys
@@ -197,6 +197,7 @@
                dsdzu,dsdzv,wm3,dthx,dqx,wspd10,ross,tem1,dsig,tvcon,conpr,     &
                prfac,prfac2,phim8z,radsum,tmp1,templ,rvls,temps,ent_eff,    &
                rcldb,bruptmp,radflux
+   integer                 ::  idtend
 !
 !-------------------------------------------------------------------------------
 !

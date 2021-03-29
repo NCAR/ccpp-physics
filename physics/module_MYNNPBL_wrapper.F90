@@ -83,10 +83,10 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  dqdt_cloud_droplet_num_conc, dqdt_ice_num_conc,    & ! <=== ntlnc, ntinc
      &  dqdt_water_aer_num_conc, dqdt_ice_aer_num_conc,    & ! <=== ntwa, ntia
      &  flag_for_pbl_generic_tend,                         &
-     &  dtend, dtidx, index_of_temperature,               &
-     &  index_of_x_wind, index_of_y_wind, ntke,          &
+     &  dtend, dtidx, index_of_temperature,                &
+     &  index_of_x_wind, index_of_y_wind, ntke,            &
      &  ntqv, ntcw, ntiw, ntoz, ntlnc, ntinc, ntwa, ntia,  &
-     &  index_of_process_pbl, htrsw, htrlw, xmu,            &
+     &  index_of_process_pbl, htrsw, htrlw, xmu,           &
      &  grav_settling, bl_mynn_tkebudget, bl_mynn_tkeadvect, &
      &  bl_mynn_cloudpdf, bl_mynn_mixlength,               &
      &  bl_mynn_edmf, bl_mynn_edmf_mom, bl_mynn_edmf_tke,  &
@@ -282,7 +282,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &        RQNWFABLTEN, RQNIFABLTEN,                                  &
      &        dqke,qWT,qSHEAR,qBUOY,qDISS,                               &
      &        pattern_spp_pbl
-      real(kind=kind_phys), allocatable :: oldzone(:,:)
+      real(kind=kind_phys), allocatable :: old_ozone(:,:)
 
 !MYNN-CHEM arrays
       real(kind=kind_phys), dimension(im,nchem) :: chem3d
@@ -496,8 +496,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
           enddo
         endif
        if(ldiag3d .and. dtidx(100+ntoz,index_of_process_pbl)>1) then
-         allocate(oldzone(im,levs))
-         oldzone = ozone
+         allocate(old_ozone(im,levs))
+         old_ozone = ozone
        endif
        if (lprnt)write(0,*)"prepping MYNN-EDMF variables..."
 
@@ -726,8 +726,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
           if(ldiag3d) then
             idtend = dtidx(100+ntoz,index_of_process_pbl)
             if(idtend>1) then
-              dtend(:,:,idtend) = dtend(:,:,idtend) + (ozone-oldzone)
-              deallocate(oldzone)
+              dtend(:,:,idtend) = dtend(:,:,idtend) + (ozone-old_ozone)
+              deallocate(old_ozone)
             endif
           endif
         endif accum_duvt3dt

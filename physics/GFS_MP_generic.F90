@@ -49,7 +49,7 @@
               enddo
            enddo
         else if(do_aw) then
-           ! if qdiag3d, all q are save already
+           ! if qdiag3d, all q are saved already
            save_q(1:im,:,1) = gq0(1:im,:,1)
            do n=ntcw,ntcw+nncl-1
               save_q(1:im,:,n) = gq0(1:im,:,n)
@@ -90,7 +90,7 @@
         totsnw, totgrp, cnvprcpb, totprcpb, toticeb, totsnwb, totgrpb, rain_cpl, rainc_cpl, snow_cpl, pwat, &
         do_sppt, ca_global, dtdtr, dtdtc, drain_cpl, dsnow_cpl, lsm, lsm_ruc, lsm_noahmp, raincprv, rainncprv, iceprv, snowprv,      &
         graupelprv, draincprv, drainncprv, diceprv, dsnowprv, dgraupelprv, dtp, &
-        dtend, dtidx, ncause, index_of_temperature, index_of_process_mp,ldiag3d, qdiag3d, lssav, &
+        dtend, dtidx, index_of_temperature, index_of_process_mp,ldiag3d, qdiag3d, lssav, &
         errmsg, errflg)
 !
       use machine, only: kind_phys
@@ -100,7 +100,7 @@
       integer, intent(in) :: im, levs, kdt, nrcm, ncld, nncl, ntcw, ntrac
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_mg, imp_physics_fer_hires
       logical, intent(in) :: cal_pre, lssav, ldiag3d, qdiag3d, cplflx, cplchm
-      integer, intent(in) :: index_of_temperature,index_of_process_mp,ncause
+      integer, intent(in) :: index_of_temperature,index_of_process_mp
 
       real(kind=kind_phys),                           intent(in)    :: dtf, frain, con_g
       real(kind=kind_phys), dimension(im),            intent(in)    :: rain1, xlat, xlon, tsfc

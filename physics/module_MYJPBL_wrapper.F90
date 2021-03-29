@@ -41,7 +41,7 @@
      &  dkt,xkzm_m, xkzm_h,xkzm_s, gamt,gamq,       &
      &  con_cp,con_g,con_rd,                        &
      &  me, lprnt, gen_tend, ldiag3d, dtend, dtidx, &
-     &  index_of_temperature, index_of_x_wind,    &
+     &  index_of_temperature, index_of_x_wind,      &
      &  index_of_y_wind, index_of_process_pbl,      &
      &  ntqv, errmsg, errflg )
 
@@ -87,7 +87,7 @@
       integer,intent(in) :: im, levs
       integer,intent(in) :: kdt, me
       integer,intent(in) :: ntrac,ntke,ntcw,ntiw,ntrw,ntsw,ntgl
-      logical,intent(in) :: restart,do_myjsfc,lprnt,ldiag3d,qdiag3d,gen_tend
+      logical,intent(in) :: restart,do_myjsfc,lprnt,ldiag3d,gen_tend
       real(kind=kind_phys),intent(in) :: con_cp, con_g, con_rd
       real(kind=kind_phys),intent(in) :: dt_phs, xkzm_m, xkzm_h, xkzm_s
 
@@ -113,8 +113,6 @@
               phii, prsi
       real(kind=kind_phys),dimension(im,levs),intent(in) ::    &
      &        ugrs, vgrs, tgrs, prsl
-!      real(kind=kind_phys),dimension(im,levs),intent(inout) :: &
-!             dudt, dvdt, dtdt, dkt
       real(kind=kind_phys),dimension(im,levs),intent(inout) :: &
              dudt, dvdt, dtdt
       real(kind=kind_phys),dimension(im,levs-1),intent(out) :: &
@@ -598,7 +596,7 @@
            if(vidx>1) dtend(:,k,vidx)=dtend(:,k,vidx)+rvblten(:,k1)*dt_phs
            if(tidx>1) dtend(:,k,tidx)=dtend(:,k,tidx)+rthblten(:,k1)*exner(:,k1)*dt_phs
            if(qidx>1) dtend(:,k,qidx)=dtend(:,k,qidx)+rqvblten(:,k1)*dt_phs
-        end if
+        end do
       end if
 
       if (lprnt1) then

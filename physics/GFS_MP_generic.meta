@@ -869,14 +869,6 @@
   type = integer
   intent = in
   optional = F
-[ncause]
-  standard_name = number_of_cumulative_change_processes
-  long_name = number of processes that cause changes in state variables
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [index_of_temperature]
   standard_name = index_of_temperature_in_cumulative_change_index
   long_name = index of temperature in first dimension of array cumulative change index

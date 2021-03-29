@@ -1460,8 +1460,8 @@
       subroutine gwdc_post_run(                                         &
      &  im, levs, lssav, ldiag3d, dtf, dtp, con_cp,                     &
      &  tauctx, taucty, gwdcu, gwdcv,                                   &
-     &  dugwd, dvgwd, dtend, dtidx, index_of_x_wind, index_of_y_wind, &
-     &  index_of_process_nonorographic_gwd, gu0, gv0, gt0,                  &
+     &  dugwd, dvgwd, dtend, dtidx, index_of_x_wind, index_of_y_wind,   &
+     &  index_of_process_nonorographic_gwd, gu0, gv0, gt0,              &
      &  errmsg, errflg)
 
       use machine, only : kind_phys
@@ -1473,10 +1473,11 @@
       real(kind=kind_phys), intent(in) ::                               &
      &  tauctx(:), taucty(:), gwdcu(:,:), gwdcv(:,:)
 
-      real(kind=kind_phys), intent(inout) :: dugwd(:,:), dvgwd(:,:),    &
+      real(kind=kind_phys), intent(inout) :: dugwd(:), dvgwd(:),        &
      &  gu0(:,:), gv0(:,:), gt0(:,:)
       real(kind=kind_phys), intent(inout), optional :: dtend(:,:,:)
-      integer, intent(in) :: dtidx(:,:), index_of_process_nonorographic_gwd
+      integer, intent(in) :: dtidx(:,:), index_of_process_nonorographic_&
+     &                       gwd
       integer, intent(in) :: index_of_x_wind, index_of_y_wind
 
       character(len=*), intent(out) :: errmsg
@@ -1497,11 +1498,13 @@
       endif   ! end if_lssav
 
       if (ldiag3d) then
-         idtend = dtidx(index_of_x_wind,index_of_process_nonorographic_gwd)
+         idtend = dtidx(index_of_x_wind,index_of_process_nonorographic_g&
+     &                  wd)
          if(idtend>1) then
             dtend(:,:,idtend) = dtend(:,:,idtend) + gwdcu(:,:)  * dtf
          endif
-         idtend = dtidx(index_of_y_wind,index_of_process_nonorographic_gwd)
+         idtend = dtidx(index_of_y_wind,index_of_process_nonorographic_g&
+     &                  wd)
          if(idtend>1) then
             dtend(:,:,idtend) = dtend(:,:,idtend) + gwdcv(:,:)  * dtf
          endif
