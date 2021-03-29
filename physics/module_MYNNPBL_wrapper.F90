@@ -340,7 +340,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 
       if(.not. flag_for_pbl_generic_tend .and. ldiag3d) then
         idtend = dtidx(ntke+100,index_of_process_pbl)
-        if(idtend>1) then
+        if(idtend>=1) then
           allocate(save_qke_adv(im,levs))
           save_qke_adv=qke_adv
         endif
@@ -725,7 +725,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
           call dtend_helper(index_of_temperature,RTHBLTEN,exner)
           if(ldiag3d) then
             idtend = dtidx(100+ntoz,index_of_process_pbl)
-            if(idtend>1) then
+            if(idtend>=1) then
               dtend(:,:,idtend) = dtend(:,:,idtend) + (ozone-old_ozone)
               deallocate(old_ozone)
             endif
@@ -918,7 +918,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
        if(allocated(save_qke_adv)) then
          if(ldiag3d .and. .not. flag_for_pbl_generic_tend) then
            idtend = dtidx(100+ntke,index_of_process_pbl)
-           if(idtend>1) then
+           if(idtend>=1) then
              dtend(:,:,idtend) = dtend(:,:,idtend) + qke_adv-save_qke_adv
            endif
          endif
@@ -934,7 +934,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
       integer :: idtend
       
       idtend=dtidx(itracer,index_of_process_pbl)
-      if(idtend>1) then
+      if(idtend>=1) then
         if(present(mult)) then
           dtend(:,:,idtend) = dtend(:,:,idtend) + field*dtf*mult
         else

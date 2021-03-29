@@ -1423,7 +1423,7 @@ c
       enddo
       if(ldiag3d .and. .not. gen_tend) then
         idtend=dtidx(index_of_temperature,index_of_process_pbl)
-        if(idtend>1) then
+        if(idtend>=1) then
           do  k = 1,km
             do i = 1,im
               ttend      = (f1(i,k)-t1(i,k))*rdt
@@ -1433,7 +1433,7 @@ c
         endif
         ! Send tendencies just for QV; other tracers are below.
         idtend=dtidx(100+ntqv,index_of_process_pbl)
-        if(idtend>1) then
+        if(idtend>=1) then
           do  k = 1,km
             do i = 1,im
               qtend      = (f2(i,k)-q1(i,k,1))*rdt
@@ -1458,7 +1458,7 @@ c
           do kk = 2, ntrac1
             is = (kk-1) * km
             idtend = dtidx(kk+100,index_of_process_pbl)
-            if(idtend>1) then
+            if(idtend>=1) then
               if(kk==ntke) then
                 do k = 1, km
                   do i = 1, im
@@ -1492,7 +1492,7 @@ c
         enddo
         if(ldiag3d .and. .not. gen_tend) then
           idtend=dtidx(index_of_temperature,index_of_process_pbl)
-          if(idtend>1) then
+          if(idtend>=1) then
             do k = 1,km1
               do i = 1,im
                 ttend = diss(i,k) / cp
@@ -1579,7 +1579,7 @@ c
       enddo
       if(ldiag3d .and. .not. gen_tend) then
         idtend=dtidx(index_of_x_wind,index_of_process_pbl)
-        if(idtend>1) then
+        if(idtend>=1) then
           do k = 1,km
             do i = 1,im
               utend = (f1(i,k)-u1(i,k))*rdt
@@ -1589,7 +1589,7 @@ c
         endif
 
         idtend=dtidx(index_of_y_wind,index_of_process_pbl)
-        if(idtend>1) then
+        if(idtend>=1) then
           do k = 1,km
             do i = 1,im
               vtend = (f2(i,k)-v1(i,k))*rdt

@@ -972,7 +972,7 @@
    enddo
    if(lssav .and. ldiag3d .and. .not. flag_for_pbl_generic_tend) then
      idtend = dtidx(index_of_temperature,index_of_process_pbl)
-     if(idtend>1) then
+     if(idtend>=1) then
        dtend(:,:,idtend) = dtend(:,:,idtend) + dtstep*(f1-thx+300.)*rdt*pi2d
      endif
    endif
@@ -1102,7 +1102,7 @@
    enddo
    if(lssav .and. ldiag3d .and. .not. flag_for_pbl_generic_tend) then
      idtend = dtidx(ntqv+100,index_of_process_pbl)
-     if(idtend>1) then
+     if(idtend>=1) then
        dtend(:,:,idtend) = dtend(:,:,idtend) + dtstep*rdt*(f3(:,:,1)-qx(:,:,1))
      endif
    endif
@@ -1138,7 +1138,7 @@
      if(lssav .and. ldiag3d .and. ntoz>0 .and.         &
   &               .not. flag_for_pbl_generic_tend) then
        idtend=dtidx(ntoz+100,index_of_process_pbl)
-       if(idtend>1) then
+       if(idtend>=1) then
          dtend(:,:,idtend) = dtend(:,:,idtend) + qtend*(f3(:,:,ntoz)-qx(:,:,ntoz))
        endif
      endif
@@ -1235,11 +1235,11 @@
    enddo
    if(lssav .and. ldiag3d .and. .not. flag_for_pbl_generic_tend) then
      idtend=dtidx(index_of_x_wind,index_of_process_pbl)
-     if(idtend>1) then
+     if(idtend>=1) then
        dtend(:,:,idtend) = dtend(:,:,idtend) + dtstep*rdt*(f1-ux)
      endif
      idtend=dtidx(index_of_y_wind,index_of_process_pbl)
-     if(idtend>1) then
+     if(idtend>=1) then
        dtend(:,:,idtend) = dtend(:,:,idtend) + dtstep*rdt*(f2-vx)
      endif
    endif

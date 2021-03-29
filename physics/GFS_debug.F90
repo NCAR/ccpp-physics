@@ -635,7 +635,7 @@
                        do itracer=2,Model%ntracp100
                           do iprocess=1,Model%nprocess
                              idtend = Model%dtidx(itracer,iprocess)
-                             if(idtend>1) then
+                             if(idtend>=1) then
                                 call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, &
                                      'dtend_'//Model%dtend_tracer_labels(itracer)//'_' &
                                      //Model%dtend_cause_labels(iprocess), Diag%dtend(1,1,idtend))

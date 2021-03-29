@@ -123,17 +123,17 @@ contains
 
       if (lssav .and. ldiag3d .and. flag_for_gwd_generic_tend) then
         idtend = dtidx(index_of_temperature, index_of_process_orographic_gwd)
-        if(idtend>1) then
+        if(idtend>=1) then
           dtend(:,:,idtend) = dtend(:,:,idtend) - dtdt*dtf
         endif
 
         idtend = dtidx(index_of_x_wind, index_of_process_orographic_gwd)
-        if(idtend>1) then
+        if(idtend>=1) then
           dtend(:,:,idtend) = dtend(:,:,idtend) - dudt*dtf
         endif
 
         idtend = dtidx(index_of_y_wind, index_of_process_orographic_gwd)
-        if(idtend>1) then
+        if(idtend>=1) then
           dtend(:,:,idtend) = dtend(:,:,idtend) - dvdt*dtf
         endif
       endif
@@ -197,17 +197,17 @@ contains
 
         if (ldiag3d .and. flag_for_gwd_generic_tend) then
           idtend = dtidx(index_of_temperature, index_of_process_orographic_gwd)
-          if(idtend>1) then
+          if(idtend>=1) then
             dtend(:,:,idtend) = dtend(:,:,idtend) + dtdt*dtf
           endif
 
           idtend = dtidx(index_of_x_wind, index_of_process_orographic_gwd)
-          if(idtend>1) then
+          if(idtend>=1) then
             dtend(:,:,idtend) = dtend(:,:,idtend) + dudt*dtf
           endif
 
           idtend = dtidx(index_of_y_wind, index_of_process_orographic_gwd)
-          if(idtend>1) then
+          if(idtend>=1) then
             dtend(:,:,idtend) = dtend(:,:,idtend) + dvdt*dtf
           endif
         endif

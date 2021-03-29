@@ -92,9 +92,9 @@
          tidx=dtidx(index_of_temperature,                               &
      &              index_of_process_rayleigh_damping)
       else
-         uidx=1
-         vidx=1
-         tidx=1
+         uidx=0
+         vidx=0
+         tidx=0
       endif
 !
       ! Initialize CCPP error handling variables
@@ -133,13 +133,13 @@
           A(I,K)  = A(I,K) + deltaA
           B(I,K)  = B(I,K) + deltaB
           C(I,K)  = C(I,K) + deltaC
-          IF(vidx>1) THEN
+          IF(vidx>=1) THEN
             dtend(i,k,vidx) = dtend(i,k,vidx) + deltaA
           ENDIF
-          IF(uidx>1) THEN
+          IF(uidx>=1) THEN
             dtend(i,k,uidx) = dtend(i,k,uidx) + deltaB
           ENDIF
-          IF(tidx>1) THEN
+          IF(tidx>=1) THEN
             dtend(i,k,tidx) = dtend(i,k,tidx) + deltaC
           ENDIF
         ENDDO

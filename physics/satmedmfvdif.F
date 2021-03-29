@@ -1404,11 +1404,11 @@
       enddo
       if (ldiag3d .and. .not. gen_tend) then
         idtend = dtidx(index_of_temperature,index_of_process_pbl)
-        if(idtend>1) then
+        if(idtend>=1) then
           dtend(:,:,idtend) = dtend(:,:,idtend) + delt*rdt*(f1-t1)
         endif
         idtend = dtidx(100+ntqv,index_of_process_pbl)
-        if(idtend>1) then
+        if(idtend>=1) then
           dtend(:,:,idtend) = dtend(:,:,idtend) +delt*rdt*(f2-q1(:,:,1))
         endif
       endif
@@ -1514,11 +1514,11 @@
       enddo
       if (ldiag3d .and. .not. gen_tend) then
         idtend=dtidx(index_of_x_wind,index_of_process_pbl)
-        if(idtend>1) then
+        if(idtend>=1) then
           dtend(:,:,idtend) = dtend(:,:,idtend) + delt*rdt*(f1-u1)
         endif
         idtend=dtidx(index_of_y_wind,index_of_process_pbl)
-        if(idtend>1) then
+        if(idtend>=1) then
           dtend(:,:,idtend) = dtend(:,:,idtend) + delt*rdt*(f2-v1)
         endif
       endif

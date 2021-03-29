@@ -275,8 +275,8 @@ c
       km1   = km - 1
       kmpbl = km / 2
 
-      idtend1 = 1
-      idtend2 = 1
+      idtend1 = 0
+      idtend2 = 0
 
 !>  - Compute physical height of the layer centers and interfaces from the geopotential height (zi and zl)
       do k=1,km
@@ -1295,7 +1295,7 @@ c
       if(.not.flag_for_pbl_generic_tend) then
         idtend1=dtidx(index_of_temperature,index_of_process_pbl)
         idtend2=dtidx(ntqv+100,index_of_process_pbl)
-        if(idtend1>1) then
+        if(idtend1>=1) then
            do  k = 1,km
               do i = 1,im
                  ttend      = (a1(i,k)-t1(i,k)) * rdt
@@ -1303,7 +1303,7 @@ c
               enddo
            enddo
         endif
-        if(idtend2>1) then
+        if(idtend2>=1) then
            do  k = 1,km
               do i = 1,im
                  qtend      = (a2(i,k)-q1(i,k,1))*rdt
@@ -1325,7 +1325,7 @@ c
         if(.not.flag_for_pbl_generic_tend .and. ldiag3d .and.           &
      &        rtg_ozone_index>0) then
           idtend1 = dtidx(100+ntoz,index_of_process_pbl)
-          if(idtend1>1) then
+          if(idtend1>=1) then
              kk = rtg_ozone_index
              is = (kk-1) * km
              do k = 1, km
@@ -1457,7 +1457,7 @@ c
       enddo
       if(.not.flag_for_pbl_generic_tend) then
          idtend1 = dtidx(index_of_x_wind,index_of_process_pbl)
-         if(idtend1>1) then
+         if(idtend1>=1) then
             do k = 1,km
                do i = 1,im
                   utend = (a1(i,k)-u1(i,k))*rdt
@@ -1467,7 +1467,7 @@ c
          endif
 
          idtend2 = dtidx(index_of_y_wind,index_of_process_pbl)
-         if(idtend2>1) then
+         if(idtend2>=1) then
             do k = 1,km
                do i = 1,im
                   vtend = (a2(i,k)-v1(i,k))*rdt

@@ -48,9 +48,9 @@
   type = integer
   intent = in
   optional = F
-[index_of_process_non_physics]
-  standard_name = index_of_non_physics_process_in_cumulative_change_index
-  long_name = index of non-physics transport process in second dimension of array cumulative change index
+[index_of_process_photochem]
+  standard_name = index_of_photochemistry_process_in_cumulative_change_index
+  long_name = index of photochemistry process in second dimension of array cumulative change index
   units = index
   dimensions = ()
   type = integer
@@ -68,6 +68,22 @@
   standard_name = number_of_physics_causes_of_tracer_changes
   long_name = number of causes in dtidx per tracer summed for total physics tendency
   units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[is_photochem]
+  standard_name = flags_for_photochemistry_processes_to_sum
+  long_name = flags for photochemistry processes to sum as the total photochemistry process cumulative change
+  units = flag
+  dimensions = (number_of_cumulative_change_processes)
+  type = logical
+  intent = in
+  optional = F
+[ntoz]
+  standard_name = index_for_ozone
+  long_name = tracer index for ozone mixing ratio
+  units = index
   dimensions = ()
   type = integer
   intent = in

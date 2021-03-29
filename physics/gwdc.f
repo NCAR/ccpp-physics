@@ -1500,12 +1500,12 @@
       if (ldiag3d) then
          idtend = dtidx(index_of_x_wind,index_of_process_nonorographic_g&
      &                  wd)
-         if(idtend>1) then
+         if(idtend>=1) then
             dtend(:,:,idtend) = dtend(:,:,idtend) + gwdcu(:,:)  * dtf
          endif
          idtend = dtidx(index_of_y_wind,index_of_process_nonorographic_g&
      &                  wd)
-         if(idtend>1) then
+         if(idtend>=1) then
             dtend(:,:,idtend) = dtend(:,:,idtend) + gwdcv(:,:)  * dtf
          endif
       endif

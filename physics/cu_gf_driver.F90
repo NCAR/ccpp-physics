@@ -202,21 +202,21 @@ contains
 
      if(ldiag3d) then
        if(flag_for_dcnv_generic_tend) then
-         cliw_deep_idx=1
-         clcw_deep_idx=1
+         cliw_deep_idx=0
+         clcw_deep_idx=0
        else
          cliw_deep_idx=dtidx(100+ntiw,index_of_process_dcnv)
          clcw_deep_idx=dtidx(100+ntcw,index_of_process_dcnv)
        endif
        if(flag_for_scnv_generic_tend) then
-         cliw_shal_idx=1
-         clcw_shal_idx=1
+         cliw_shal_idx=0
+         clcw_shal_idx=0
        else
          cliw_shal_idx=dtidx(100+ntiw,index_of_process_scnv)
          clcw_shal_idx=dtidx(100+ntcw,index_of_process_scnv)
        endif
-       if(cliw_deep_idx>1 .or. clcw_deep_idx>1 .or. &
-            cliw_shal_idx>1 .or.  clcw_shal_idx>1) then
+       if(cliw_deep_idx>=1 .or. clcw_deep_idx>=1 .or. &
+            cliw_shal_idx>=1 .or.  clcw_shal_idx>=1) then
          allocate(clcw_save(im,km), cliw_save(im,km))
          clcw_save=clcw
          cliw_save=cliw
@@ -896,22 +896,22 @@ contains
             vidx=dtidx(index_of_y_wind,index_of_process_scnv)
             tidx=dtidx(index_of_temperature,index_of_process_scnv)
             qidx=dtidx(100+ntqv,index_of_process_scnv)
-            if(uidx>1) then
+            if(uidx>=1) then
               do k=kts,ktf
                 dtend(:,k,uidx) = dtend(:,k,uidx) + cutens(:)*outus(:,k) * dt
               enddo
             endif
-            if(vidx>1) then
+            if(vidx>=1) then
               do k=kts,ktf
                 dtend(:,k,vidx) = dtend(:,k,vidx) + cutens(:)*outvs(:,k) * dt
               enddo
             endif
-            if(tidx>1) then
+            if(tidx>=1) then
               do k=kts,ktf
                 dtend(:,k,tidx) = dtend(:,k,tidx) + cutens(:)*outts(:,k) * dt
               enddo
             endif
-            if(qidx>1) then
+            if(qidx>=1) then
               do k=kts,ktf
                 do i=its,itf
                   tem = cutens(i)*outqs(i,k)* dt
@@ -925,24 +925,24 @@ contains
             uidx=dtidx(index_of_x_wind,index_of_process_dcnv)
             vidx=dtidx(index_of_y_wind,index_of_process_dcnv)
             tidx=dtidx(index_of_temperature,index_of_process_dcnv)
-            if(uidx>1) then
+            if(uidx>=1) then
               do k=kts,ktf
                 dtend(:,k,uidx) = dtend(:,k,uidx) + (cuten*outu(:,k)+cutenm*outum(:,k)) * dt
               enddo
             endif
-            if(vidx>1) then
+            if(vidx>=1) then
               do k=kts,ktf
                 dtend(:,k,vidx) = dtend(:,k,vidx) + (cuten*outv(:,k)+cutenm*outvm(:,k)) * dt
               enddo
             endif
-            if(tidx>1) then
+            if(tidx>=1) then
               do k=kts,ktf
                 dtend(:,k,tidx) = dtend(:,k,tidx) + (cuten*outt(:,k)+cutenm*outtm(:,k)) * dt
               enddo
             endif
 
             qidx=dtidx(100+ntqv,index_of_process_dcnv)
-            if(qidx>1) then
+            if(qidx>=1) then
               do k=kts,ktf
                 do i=its,itf
                   tem = (cuten(i)*outq(i,k) + cutenm(i)*outqm(i,k))* dt
@@ -967,20 +967,20 @@ contains
                 if (clcw_save(i,k) .gt. -999.0) then
                   cliw_both = max(0.,cliw_save(i,k) + tem * tem1) - cliw_save(i,k)
                   clcw_both = max(0.,clcw_save(i,k) + tem) - clcw_save(i,k)
-                else if(cliw_idx>1) then
+                else if(cliw_idx>=1) then
                   cliw_both = max(0.,cliw_save(i,k) + tem) - cliw_save(i,k)
                   clcw_both = 0
                 endif
-                if(cliw_deep_idx>1) then
+                if(cliw_deep_idx>=1) then
                   dtend(i,k,cliw_deep_idx) = dtend(i,k,cliw_deep_idx) + abs(tem_deep)/weight_sum*cliw_both
                 endif
-                if(clcw_deep_idx>1) then
+                if(clcw_deep_idx>=1) then
                   dtend(i,k,clcw_deep_idx) = dtend(i,k,clcw_deep_idx) + abs(tem_deep)/weight_sum*clcw_both
                 endif
-                if(cliw_shal_idx>1) then
+                if(cliw_shal_idx>=1) then
                   dtend(i,k,cliw_shal_idx) = dtend(i,k,cliw_shal_idx) + abs(tem_shal)/weight_sum*cliw_both
                 endif
-                if(clcw_shal_idx>1) then
+                if(clcw_shal_idx>=1) then
                   dtend(i,k,clcw_shal_idx) = dtend(i,k,clcw_shal_idx) + abs(tem_shal)/weight_sum*clcw_both
                 endif
               enddo

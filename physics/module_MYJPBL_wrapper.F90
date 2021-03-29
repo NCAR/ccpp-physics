@@ -592,10 +592,10 @@
         ! cumulative value with the instantaneous value.
         do k=1,levs
            k1=levs+1-k
-           if(uidx>1) dtend(:,k,uidx)=dtend(:,k,uidx)+rublten(:,k1)*dt_phs
-           if(vidx>1) dtend(:,k,vidx)=dtend(:,k,vidx)+rvblten(:,k1)*dt_phs
-           if(tidx>1) dtend(:,k,tidx)=dtend(:,k,tidx)+rthblten(:,k1)*exner(:,k1)*dt_phs
-           if(qidx>1) dtend(:,k,qidx)=dtend(:,k,qidx)+rqvblten(:,k1)*dt_phs
+           if(uidx>=1) dtend(:,k,uidx)=dtend(:,k,uidx)+rublten(:,k1)*dt_phs
+           if(vidx>=1) dtend(:,k,vidx)=dtend(:,k,vidx)+rvblten(:,k1)*dt_phs
+           if(tidx>=1) dtend(:,k,tidx)=dtend(:,k,tidx)+rthblten(:,k1)*exner(:,k1)*dt_phs
+           if(qidx>=1) dtend(:,k,qidx)=dtend(:,k,qidx)+rqvblten(:,k1)*dt_phs
         end do
       end if
 

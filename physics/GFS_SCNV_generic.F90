@@ -48,7 +48,7 @@
           if (qdiag3d) then
             if(nsamftrac>0) then
               do n=1,nsamftrac
-                if(n==ntqv .or. dtidx(ntqv,index_of_process_scnv)>1) then
+                if(n==ntqv .or. dtidx(ntqv,index_of_process_scnv)>=1) then
                   save_q(:,:,n) = gq0(:,:,n)
                 endif
               enddo
@@ -149,30 +149,30 @@
       if (lssav .and. flag_for_scnv_generic_tend) then
         if (ldiag3d) then
           idtend = dtidx(index_of_temperature, index_of_process_scnv)
-          if(idtend>1) then
+          if(idtend>=1) then
              dtend(:,:,idtend) = dtend(:,:,idtend) + (gt0 - save_t) * frain
           endif
 
           idtend = dtidx(index_of_x_wind, index_of_process_scnv)
-          if(idtend>1) then
+          if(idtend>=1) then
              dtend(:,:,idtend) = dtend(:,:,idtend) + (gu0 - save_u) * frain
           endif
 
           idtend = dtidx(index_of_y_wind, index_of_process_scnv)
-          if(idtend>1) then
+          if(idtend>=1) then
              dtend(:,:,idtend) = dtend(:,:,idtend) + (gv0 - save_v) * frain
           endif
 
           if(nsamftrac>0) then
             do n=1,nsamftrac
               idtend = dtidx(100+n, index_of_process_scnv)
-              if(idtend>1) then
+              if(idtend>=1) then
                 dtend(:,:,idtend) = dtend(:,:,idtend) + (gq0(:,:,n) - save_q(:,:,n)) * frain
               endif
             enddo
           else
             idtend = dtidx(100+ntqv, index_of_process_scnv)
-            if(idtend>1) then
+            if(idtend>=1) then
               dtend(:,:,idtend) = dtend(:,:,idtend) + (gq0(:,:,ntqv) - save_q(:,:,ntqv)) * frain
             endif
           endif

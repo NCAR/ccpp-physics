@@ -344,7 +344,7 @@
 
         if_tendency_diagnostics: if (ldiag3d) then
            idtend = dtidx(index_of_temperature,index_of_process_mp)
-           if(idtend>1) then
+           if(idtend>=1) then
               do k=1,levs
                  do i=1,im
                     dtend(i,k,idtend) = dtend(i,k,idtend) + (gt0(i,k)-save_t(i,k)) * frain
@@ -354,7 +354,7 @@
            if_tracer_diagnostics: if (qdiag3d) then
               dtend_q: do itrac=1,ntrac
                  idtend = dtidx(itrac+100,index_of_process_mp)
-                 if(idtend>1) then
+                 if(idtend>=1) then
                     do k=1,levs
                        do i=1,im
                           dtend(i,k,idtend) = dtend(i,k,idtend) + (gq0(i,k,itrac)-save_q(i,k,itrac)) * frain

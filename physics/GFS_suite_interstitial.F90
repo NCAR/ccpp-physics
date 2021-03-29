@@ -284,42 +284,42 @@
         if (ldiag3d) then
           if (lsidea) then
             idtend = dtidx(index_of_temperature,index_of_process_longwave)
-            if(idtend>1) then
+            if(idtend>=1) then
                dtend(:,:,idtend) = dtend(:,:,idtend) + lwhd(:,:,1)*dtf
             endif
 
             idtend = dtidx(index_of_temperature,index_of_process_shortwave)
-            if(idtend>1) then
+            if(idtend>=1) then
                dtend(:,:,idtend) = dtend(:,:,idtend) + lwhd(:,:,2)*dtf
             endif
 
             idtend = dtidx(index_of_temperature,index_of_process_pbl)
-            if(idtend>1) then
+            if(idtend>=1) then
                dtend(:,:,idtend) = dtend(:,:,idtend) + lwhd(:,:,3)*dtf
             endif
 
             idtend = dtidx(index_of_temperature,index_of_process_dcnv)
-            if(idtend>1) then
+            if(idtend>=1) then
                dtend(:,:,idtend) = dtend(:,:,idtend) + lwhd(:,:,4)*dtf
             endif
 
             idtend = dtidx(index_of_temperature,index_of_process_scnv)
-            if(idtend>1) then
+            if(idtend>=1) then
                dtend(:,:,idtend) = dtend(:,:,idtend) + lwhd(:,:,5)*dtf
             endif
 
             idtend = dtidx(index_of_temperature,index_of_process_mp)
-            if(idtend>1) then
+            if(idtend>=1) then
                dtend(:,:,idtend) = dtend(:,:,idtend) + lwhd(:,:,6)*dtf
             endif
           else
             idtend = dtidx(index_of_temperature,index_of_process_longwave)
-            if(idtend>1) then
+            if(idtend>=1) then
                dtend(:,:,idtend) = dtend(:,:,idtend) + htrlw(:,:)*dtf
             endif
 
             idtend = dtidx(index_of_temperature,index_of_process_shortwave)
-            if(idtend>1) then
+            if(idtend>=1) then
                do k=1,levs
                   do i=1,im
                      dtend(i,k,idtend) = dtend(i,k,idtend) + htrsw(i,k)*dtf*xmu(i)
@@ -745,13 +745,13 @@
       if(ldiag3d) then
          if(ntk>0 .and. ntk<=size(clw,3)) then
             idtend=dtidx(100+ntke,index_of_process_conv_trans)
-            if(idtend>1) then
+            if(idtend>=1) then
                dtend(:,:,idtend) = dtend(:,:,idtend) + clw(:,:,ntk)
             endif
          endif
          if(ntclamt<=size(clw,3) .and. ntclamt>0) then
             idtend=dtidx(100+ntclamt,index_of_process_conv_trans)
-            if(idtend>1) then
+            if(idtend>=1) then
                dtend(:,:,idtend) = dtend(:,:,idtend) + clw(:,:,ntclamt)
             endif
          endif
@@ -759,7 +759,7 @@
 
       if(ldiag3d .and. ntk>0) then
          idtend=dtidx(100+ntke,index_of_process_conv_trans)
-         if(idtend>1) then
+         if(idtend>=1) then
             dtend(:,:,idtend) = dtend(:,:,idtend) + clw(:,:,ntk)
          endif
       endif

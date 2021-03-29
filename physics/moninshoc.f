@@ -453,11 +453,11 @@
       enddo
       if(ldiag3d .and. .not. gen_tend) then
         idtend = dtidx(index_of_temperature,index_of_process_pbl)
-        if(idtend>1) then
+        if(idtend>=1) then
           dtend(:,:,idtend) = dtend(:,:,idtend) + (a1-t1)
         endif
         idtend = dtidx(ntqv+100,index_of_process_pbl)
-        if(idtend>1) then
+        if(idtend>=1) then
           dtend(:,:,idtend) = dtend(:,:,idtend) + a2-q1(:,:,1)
         endif
       endif
@@ -480,7 +480,7 @@
         enddo
         if(ldiag3d .and. ntoz>0 .and. .not. gen_tend) then
           idtend=dtidx(100+ntoz,index_of_process_pbl)
-          if(idtend>0) then
+          if(idtend>=1) then
             kk = ntoz
             is = (kk-1) * km
             do k = 1, km
@@ -538,11 +538,11 @@
       enddo
       if (ldiag3d .and. .not. gen_tend) then
         idtend = dtidx(index_of_x_wind,index_of_process_pbl)
-        if(idtend>1) then
+        if(idtend>=1) then
           dtend(:,:,idtend) = dtend(:,:,idtend) + a1-u1
         endif
         idtend = dtidx(index_of_y_wind,index_of_process_pbl)
-        if(idtend>1) then
+        if(idtend>=1) then
           dtend(:,:,idtend) = dtend(:,:,idtend) + a1-v1
         endif
       endif
