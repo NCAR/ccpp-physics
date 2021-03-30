@@ -1858,6 +1858,15 @@
   kind = kind_phys
   intent = in
   optional = F
+[con_eps]
+  standard_name = ratio_of_dry_air_to_water_vapor_gas_constants
+  long_name = rd/rv
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [nwfa]
   standard_name = water_friendly_aerosol_number_concentration
   long_name = number concentration of water-friendly aerosols

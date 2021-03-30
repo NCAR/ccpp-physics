@@ -41,6 +41,15 @@
   kind = kind_phys
   intent = in
   optional = F
+[con_eps]
+  standard_name = ratio_of_dry_air_to_water_vapor_gas_constants
+  long_name = rd/rv
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [restart]
   standard_name = flag_for_restart
   long_name = flag for restart (warmstart) or coldstart
@@ -344,6 +353,15 @@
   standard_name = gas_constant_dry_air
   long_name = ideal gas constant for dry air
   units = J kg-1 K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[con_eps]
+  standard_name = ratio_of_dry_air_to_water_vapor_gas_constants
+  long_name = rd/rv
+  units = none
   dimensions = ()
   type = real
   kind = kind_phys

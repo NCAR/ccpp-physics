@@ -650,7 +650,7 @@
     subroutine GFS_suite_interstitial_4_run (im, levs, ltaerosol, cplchm, tracers_total, ntrac, ntcw, ntiw, ntclamt, &
       ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,  &
       imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, convert_dry_rho, dtf, save_qc, save_qi, con_pi,              &
-      gq0, clw, prsl, save_tcp, con_rd, nwfa, spechum, dqdti, errmsg, errflg)
+      gq0, clw, prsl, save_tcp, con_rd, con_eps, nwfa, spechum, dqdti, errmsg, errflg)
 
       use machine,               only: kind_phys
       use module_mp_thompson_make_number_concentrations, only: make_IceNumber, make_DropletNumber
@@ -673,7 +673,7 @@
       real(kind=kind_phys), dimension(im,levs,ntrac), intent(inout) :: gq0
       real(kind=kind_phys), dimension(im,levs,nn),    intent(inout) :: clw
       real(kind=kind_phys), dimension(im,levs),       intent(in) :: prsl
-      real(kind=kind_phys),                           intent(in) :: con_rd
+      real(kind=kind_phys),                           intent(in) :: con_rd, con_eps
       real(kind=kind_phys), dimension(:,:),           intent(in) :: nwfa, save_tcp
       real(kind=kind_phys), dimension(im,levs),       intent(in) :: spechum
 
@@ -742,7 +742,7 @@
                   !> - Convert specific humidity to dry mixing ratio
                   qv_mp(i,k) = spechum(i,k) / (one-spechum(i,k))
                   !> - Density of air in kg m-3 and inverse density
-                  rho = 0.622*prsl(i,k) / (con_rd*save_tcp(i,k)*(qv_mp(i,k)+0.622))
+                  rho = con_eps*prsl(i,k) / (con_rd*save_tcp(i,k)*(qv_mp(i,k)+con_eps))
                   orho = one/rho
                   if (ntlnc>0) then
                     !> - Convert moist mixing ratio to dry mixing ratio
@@ -768,7 +768,7 @@
               do k=1,levs
                 do i=1,im
                   !> - Density of air in kg m-3 and inverse density
-                  rho = 0.622*prsl(i,k) / (con_rd*save_tcp(i,k)*(spechum(i,k)+0.622))
+                  rho = con_eps*prsl(i,k) / (con_rd*save_tcp(i,k)*(spechum(i,k)+con_eps))
                   orho = one/rho
                   if (ntlnc>0) then
                     !> - Update cloud water mixing ratio

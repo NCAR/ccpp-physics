@@ -28,9 +28,9 @@ module mp_thompson
 !! \section arg_table_mp_thompson_init Argument Table
 !! \htmlinclude mp_thompson_init.html
 !!
-      subroutine mp_thompson_init(ncol, nlev, con_g, con_rd, restart,   &
-                                  imp_physics, imp_physics_thompson,    &
-                                  convert_dry_rho,                      &
+      subroutine mp_thompson_init(ncol, nlev, con_g, con_rd, con_eps,   &
+                                  restart, imp_physics,                 &
+                                  imp_physics_thompson, convert_dry_rho,&
                                   spechum, qc, qr, qi, qs, qg, ni, nr,  &
                                   is_aerosol_aware, nc, nwfa2d, nifa2d, &
                                   nwfa, nifa, tgrs, prsl, phil, area,   &
@@ -43,7 +43,7 @@ module mp_thompson
          ! Interface variables
          integer,                   intent(in   ) :: ncol
          integer,                   intent(in   ) :: nlev
-         real(kind_phys),           intent(in   ) :: con_g, con_rd
+         real(kind_phys),           intent(in   ) :: con_g, con_rd, con_eps
          logical,                   intent(in   ) :: restart
          integer,                   intent(in   ) :: imp_physics
          integer,                   intent(in   ) :: imp_physics_thompson
@@ -160,7 +160,7 @@ module mp_thompson
          end if
 
          ! Density of moist air in kg m-3 and inverse density of air
-         rho = 0.622*prsl/(con_rd*tgrs*(qv+0.622))
+         rho = con_eps*prsl/(con_rd*tgrs*(qv+con_eps))
          orho = 1.0/rho
 
          ! Ensure we have 1st guess ice number where mass non-zero but no number.
@@ -324,7 +324,7 @@ module mp_thompson
 !>\section gen_thompson_hrrr Thompson MP General Algorithm
 !>@{
       subroutine mp_thompson_run(ncol, nlev, con_g, con_rd,        &
-                              convert_dry_rho,                     &
+                              con_eps, convert_dry_rho,            &
                               spechum, qc, qr, qi, qs, qg, ni, nr, &
                               is_aerosol_aware, nc, nwfa, nifa,    &
                               nwfa2d, nifa2d,                      &
@@ -344,6 +344,7 @@ module mp_thompson
          integer,                   intent(in   ) :: nlev
          real(kind_phys),           intent(in   ) :: con_g
          real(kind_phys),           intent(in   ) :: con_rd
+         real(kind_phys),           intent(in   ) :: con_eps
          ! Hydrometeors
          logical,                   intent(in   ) :: convert_dry_rho
          real(kind_phys),           intent(inout) :: spechum(1:ncol,1:nlev)
@@ -474,7 +475,7 @@ module mp_thompson
          end if
 
          !> - Density of air in kg m-3
-         rho = 0.622*prsl/(con_rd*tgrs*(qv+0.622))
+         rho = con_eps*prsl/(con_rd*tgrs*(qv+con_eps))
 
          !> - Convert omega in Pa s-1 to vertical velocity w in m s-1
          w = -omega/(rho*con_g)

@@ -41,7 +41,7 @@ contains
        i_cldliq, i_cldice, i_cldrain, i_cldsnow, i_cldgrpl, i_cldtot, i_cldliq_nc,       &
        i_cldice_nc, i_twa, effr_in, p_lev, p_lay, tv_lay, t_lay, effrin_cldliq,          &
        effrin_cldice, effrin_cldsnow, tracer, qs_lay, q_lay, relhum, cld_frac_mg, con_g, &
-       con_rd, uni_cld, lmfshal, lmfdeep2, ltaerosol, do_mynnedmf, imfdeepcnv,           &
+       con_rd, con_eps, uni_cld, lmfshal, lmfdeep2, ltaerosol, do_mynnedmf, imfdeepcnv,  &
        imfdeepcnv_gf, doGP_cldoptics_PADE, doGP_cldoptics_LUT,                           &
        cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp,   &
        cld_rerain, precip_frac, errmsg, errflg)
@@ -76,7 +76,8 @@ contains
          doGP_cldoptics_PADE  !                            (PADE approximation)
     real(kind_phys), intent(in) :: &
          con_g,             & ! Physical constant: gravitational constant
-         con_rd               ! Physical constant: gas-constant for dry air
+         con_rd,            & ! Physical constant: gas-constant for dry air
+         con_eps              ! Physical constant: gas constant air / gas constant H2O
 
     real(kind_phys), dimension(nCol,nLev), intent(in) :: &
          tv_lay,            & ! Virtual temperature (K)
@@ -155,7 +156,7 @@ contains
     do iLay = 1, nLev
        do iCol = 1, nCol
           qv_mp(iCol,iLay) = q_lay(iCol,iLay)/(1.-q_lay(iCol,iLay))
-          rho = 0.622*p_lay(iCol,iLay)/(con_rd*t_lay(iCol,iLay)*(qv_mp(iCol,iLay)+0.622))
+          rho = con_eps*p_lay(iCol,iLay)/(con_rd*t_lay(iCol,iLay)*(qv_mp(iCol,iLay)+con_eps))
           orho = 1./rho
           qc_mp(iCol,iLay) = tracer(iCol,iLay,i_cldliq)    / (1.-q_lay(iCol,iLay))
           qi_mp(iCol,iLay) = tracer(iCol,iLay,i_cldice)    / (1.-q_lay(iCol,iLay))

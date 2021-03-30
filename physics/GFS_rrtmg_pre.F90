@@ -24,7 +24,7 @@
         imp_physics_zhao_carr_pdf, imp_physics_mg, imp_physics_wsm6,           &
         imp_physics_fer_hires, julian, yearlen, lndp_var_list, lsswr, lslwr,   &
         ltaerosol, lgfdlmprad, uni_cld, effr_in, do_mynnedmf, lmfshal,         &
-        lmfdeep2, fhswr, fhlwr, solhr, sup, eps, epsm1, fvirt,                 &
+        lmfdeep2, fhswr, fhlwr, solhr, sup, con_eps, epsm1, fvirt,             &
         rog, rocp, con_rd, xlat_d, xlat, xlon, coslat, sinlat, tsfc, slmsk,    &
         prsi, prsl, prslk, tgrs, sfc_wts, mg_cld, effrr_in, pert_clds,sppt_wts,&
         sppt_amp, cnvw_in, cnvc_in, qgrs, aer_nm, dx, icloud,                  & !inputs from here and above
@@ -103,7 +103,7 @@
                                           lmfshal, lmfdeep2, pert_clds
 
       real(kind=kind_phys), intent(in) :: fhswr, fhlwr, solhr, sup, julian, sppt_amp
-      real(kind=kind_phys), intent(in) :: eps, epsm1, fvirt, rog, rocp, con_rd
+      real(kind=kind_phys), intent(in) :: con_eps, epsm1, fvirt, rog, rocp, con_rd
 
       real(kind=kind_phys), dimension(:), intent(in) :: xlat_d, xlat, xlon,    &
                                                         coslat, sinlat, tsfc,  &
@@ -300,7 +300,7 @@
 
 !>  - Compute relative humidity.
           es  = min( prsl(i,k2),  fpvs( tgrs(i,k2) ) )  ! fpvs and prsl in pa
-          qs  = max( QMIN, eps * es / (prsl(i,k2) + epsm1*es) )
+          qs  = max( QMIN, con_eps * es / (prsl(i,k2) + epsm1*es) )
           rhly(i,k1) = max( 0.0, min( 1.0, max(QMIN, qgrs(i,k2,ntqv))/qs ) )
           qstl(i,k1) = qs
         enddo
@@ -643,7 +643,7 @@
               do i=1,IM
                 qvs = qgrs(i,k,ntqv)
                 qv_mp (i,k) = qvs/(1.-qvs)
-                rho   (i,k) = 0.622*prsl(i,k)/(con_rd*tgrs(i,k)*(qv_mp(i,k)+0.622))
+                rho   (i,k) = con_eps*prsl(i,k)/(con_rd*tgrs(i,k)*(qv_mp(i,k)+con_eps))
                 orho  (i,k) = 1.0/rho(i,k)
                 qc_mp (i,k) = tracer1(i,k,ntcw)/(1.-qvs)
                 qi_mp (i,k) = tracer1(i,k,ntiw)/(1.-qvs)
@@ -658,7 +658,7 @@
               do i=1,IM
                 qvs = qgrs(i,k,ntqv)
                 qv_mp (i,k) = qvs/(1.-qvs)
-                rho   (i,k) = 0.622*prsl(i,k)/(con_rd*tgrs(i,k)*(qv_mp(i,k)+0.622))
+                rho   (i,k) = con_eps*prsl(i,k)/(con_rd*tgrs(i,k)*(qv_mp(i,k)+con_eps))
                 orho  (i,k) = 1.0/rho(i,k)
                 qc_mp (i,k) = tracer1(i,k,ntcw)/(1.-qvs)
                 qi_mp (i,k) = tracer1(i,k,ntiw)/(1.-qvs)
