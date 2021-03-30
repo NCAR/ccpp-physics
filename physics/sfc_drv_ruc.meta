@@ -558,6 +558,15 @@
   kind = kind_phys
   intent = in
   optional = F
+[coszen]
+  standard_name = instantaneous_cosine_of_zenith_angle
+  long_name = cosine of zenith angle at current time
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [land]
   standard_name = flag_nonzero_land_surface_fraction
   long_name = flag indicating presence of some land surface area fraction
@@ -716,42 +725,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
-[albdvis]
-  standard_name = surface_albedo_direct_visible
-  long_name = direct surface albedo visible band
-  units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
-[albdnir]
-  standard_name = surface_albedo_direct_NIR
-  long_name = direct surface albedo NIR band
-  units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
-[albivis]
-  standard_name = surface_albedo_diffuse_visible
-  long_name = diffuse surface albedo visible band
-  units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
-[albinir]
-  standard_name = surface_albedo_diffuse_NIR
-  long_name = diffuse surface albedo NIR band
-  units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = out
   optional = F
 [isot]
   standard_name = soil_type_dataset_choice
@@ -1246,6 +1219,42 @@
   kind = kind_phys
   intent = inout
   optional = F
+[albdvis_lnd]
+  standard_name = surface_albedo_direct_visible_over_land
+  long_name = direct surface albedo visible band over land
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[albdnir_lnd]
+  standard_name = surface_albedo_direct_NIR_over_land
+  long_name = direct surface albedo NIR band over land
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[albivis_lnd]
+  standard_name = surface_albedo_diffuse_visible_over_land
+  long_name = diffuse surface albedo visible band over land
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[albinir_lnd]
+  standard_name = surface_albedo_diffuse_NIR_over_land
+  long_name = diffuse surface albedo NIR band over land
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
 [sfcqc_ice]
   standard_name = cloud_condensed_water_mixing_ratio_at_surface_over_ice
   long_name = moist cloud water mixing ratio at surface over ice
@@ -1371,6 +1380,42 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
+[albdvis_ice]
+  standard_name = surface_albedo_direct_visible_over_ice
+  long_name = direct surface albedo visible band over ice
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[albdnir_ice]
+  standard_name = surface_albedo_direct_NIR_over_ice
+  long_name = direct surface albedo NIR band over ice
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[albivis_ice]
+  standard_name = surface_albedo_diffuse_visible_over_ice
+  long_name = diffuse surface albedo visible band over ice
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[albinir_ice]
+  standard_name = surface_albedo_diffuse_NIR_over_ice
+  long_name = diffuse surface albedo NIR band over ice
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
   optional = F
 [rhosnf]
   standard_name = density_of_frozen_precipitation

@@ -17,6 +17,9 @@ module lsm_ruc
         public :: lsm_ruc_init, lsm_ruc_run, lsm_ruc_finalize
 
         real(kind=kind_phys), parameter :: zero = 0.0d0, one = 1.0d0, epsln = 1.0d-10
+        real(kind=kind_phys), dimension (2), parameter :: d = (/0.1,0.25/)
+
+        integer, parameter :: istwe = (/5*1,2,2,1,1,5*2,1,2,2,1,2,2/) ! for 20 IGBP classes
 
       contains
 
@@ -267,12 +270,11 @@ module lsm_ruc
      &       imp_physics, imp_physics_gfdl, imp_physics_thompson,       &
      &       do_mynnsfclay, lsoil_ruc, lsoil, rdlai, zs,                &
      &       t1, q1, qc, soiltyp, vegtype, sigmaf, laixy,               &
-     &       dlwflx, dswsfc, snet, tg3,                                 &
+     &       dlwflx, dswsfc, snet, tg3, coszen,                         &
      &       land, icy,  lake, alb_ice_snowfree, alb_ice_snow,          &
      &       rainnc, rainc, ice, snow, graupel,                         &
      &       prsl1, zf, wind, shdmin, shdmax,                           &
      &       srflag, sfalb_lnd_bck, snoalb,                             &
-     &       albdvis, albdnir,  albivis,  albinir,                      & !out
      &       isot, ivegsrc, fice, smcwlt2, smcref2,                     &
      ! --- constants
      &       con_cp, con_rd, con_rv, con_g, con_pi, con_hvap,           &
@@ -291,11 +293,13 @@ module lsm_ruc
      &       runof, runoff, srunoff, drain,                             &
      &       cm_lnd, ch_lnd, evbs, evcw, stm, wetness,                  &
      &       snowfallac_lnd,                                            &
+     &       albdvis_lnd, albdnir_lnd,  albivis_lnd,  albinir_lnd,      & 
      ! for ice
      &       sfcqc_ice, sfcqv_ice,                                      &
      &       tice, tsurf_ice, tsnow_ice, z0rl_ice,                      &
      &       qsurf_ice, gflux_ice, evap_ice, ep1d_ice, hflx_ice,        &
      &       cm_ice, ch_ice, snowfallac_ice,                            &
+     &       albdvis_ice, albdnir_ice,  albivis_ice,  albinir_ice,      &
      ! --- out
      &       rhosnf, sbsno,                                             &
      &       cmm_lnd, chh_lnd, cmm_ice, chh_ice,                        &
@@ -321,7 +325,7 @@ module lsm_ruc
 
       real (kind=kind_phys), dimension(im), intent(in) ::         &
      &       t1, sigmaf, laixy, dlwflx, dswsfc, snet, tg3,        &
-     &       prsl1, wind, shdmin, shdmax,                         &
+     &       coszen, prsl1, wind, shdmin, shdmax,                 &
      &       sfalb_lnd_bck, snoalb, zf, qc, q1,                   &
      ! for land
      &       cm_lnd, ch_lnd,                                      &
@@ -379,8 +383,10 @@ module lsm_ruc
      ! for ice
      &       sncovr1_ice, qsurf_ice, gflux_ice, evap_ice, ep1d_ice,      &
      &       cmm_ice, chh_ice, hflx_ice, snowfallac_ice
-      real (kind=kind_phys), dimension(im), intent(in   ) ::             &
-     &       albdvis, albdnir,  albivis,  albinir,                       &
+
+      real (kind=kind_phys), dimension(im), intent(  out) ::             &
+     &       albdvis_lnd, albdnir_lnd,  albivis_lnd,  albinir_lnd,       &
+     &       albdvis_ice, albdnir_ice,  albivis_ice,  albinir_ice
 
       logical,          intent(in)  :: flag_init, flag_restart
       character(len=*), intent(out) :: errmsg
@@ -388,7 +394,7 @@ module lsm_ruc
 
 !  ---  locals:
       real (kind=kind_phys), dimension(im) :: rho,                      &
-     &       q0, qs1,                                                   &
+     &       q0, qs1, albbcksol,                                        &
      &       tprcp_old, srflag_old, sr_old, canopy_old, wetness_old,    &
      ! for land
      &       weasd_lnd_old, snwdph_lnd_old, tskin_lnd_old,              &
@@ -458,8 +464,9 @@ module lsm_ruc
 
       ! local
       integer :: ims,ime, its,ite, jms,jme, jts,jte, kms,kme, kts,kte
-      integer :: l, k, i, j,  fractional_seaice
-
+      integer :: l, k, i, j,  fractional_seaice, ilst
+      integer, dimension (1:nlcat) :: istwe
+      real (kind=kind_phys) :: dm
       logical :: flag(im), flag_ice_uncoupled(im)
       logical :: rdlai2d, myj, frpcpn
       logical :: debug_print
@@ -841,18 +848,26 @@ module lsm_ruc
         else
           sfcems_lnd(i,j) = semis_lnd(i)
         endif
+
+        if(coszen(i) > 0. .and. sneqv_lnd(i) < 1.e-4) then
+        !-- solar zenith angle dependence when no snow
+          ilst=istwe(vegtype(i)) ! 1 or 2
+          dm = (1.+2.*d(ilst))/(1.+2.*d(ilst)*coszen(i,j))
+          albbcksol(i) = sfalb_lnd_bck(i)*dm
+        endif ! coszen > 0.
+
         snoalb1d_lnd(i,j) = snoalb(i)
-        albbck_lnd(i,j)   = sfalb_lnd_bck(i)
+        albbck_lnd(i,j)   = albbcksol(i) !sfalb_lnd_bck(i)
         ! alb_lnd takes into account snow on the ground
-        if (kdt == 1) then
-          if (dswsfc(i) > 0.) then
-            alb_lnd(i,j) = max(0.01, 1. - snet(i)/dswsfc(i))
-          else
-            alb_lnd(i,j) = albbck_lnd(i,j) * (1.-sncovr_lnd(i,j)) + snoalb(i) * sncovr_lnd(i,j)
-          endif
-        else
-          alb_lnd(i,j) = sfalb_lnd(i)
-        endif
+        !if (kdt == 1) then
+        !  if (dswsfc(i) > 0.) then
+        !    alb_lnd(i,j) = max(0.01, 1. - snet(i)/dswsfc(i))
+        !  else
+        !    alb_lnd(i,j) = albbck_lnd(i,j) * (1.-sncovr_lnd(i,j)) + snoalb(i) * sncovr_lnd(i,j)
+        !  endif
+        !else
+        alb_lnd(i,j) = albbck_lnd(i,j) * (1.-sncovr_lnd(i,j)) + snoalb(i) * sncovr_lnd(i,j) ! sfalb_lnd(i)
+        !endif
         solnet_lnd(i,j) = snet(i) !dswsfc(i)*(1.-alb_lnd(i,j)) !..net sw rad flx (dn-up) at sfc in w/m2
 
         cmc(i,j) = canopy(i)            !  [mm] 
@@ -902,7 +917,8 @@ module lsm_ruc
             sneqv_lnd(i,j) = 300. * snowh_lnd(i,j)
           endif
         endif
-        !  ---- ... outside sflx, roughness uses cm as unit
+
+        !-- z0rl is in [cm]
         z0_lnd(i,j)  = z0rl_lnd(i)/100.
         znt_lnd(i,j) = z0rl_lnd(i)/100.
 
@@ -1116,6 +1132,11 @@ module lsm_ruc
         semisbase(i) = semis_bck(i,j) 
         !-- sfalb_lnd has snow effect
         sfalb_lnd(i)    = alb_lnd(i,j)
+        !-- fill in albdvis_lnd, albdnir_lnd,  albivis_lnd,  albinir_lnd, 
+        albdvis_lnd(i) = sfalb_lnd(i)
+        albdnir_lnd(i) = sfalb_lnd(i)
+        albinir_lnd(i) = sfalb_lnd(i)
+        albinir_lnd(i) = sfalb_lnd(i)
 
         do k = 1, lsoil_ruc
           smois(i,k)  = smsoil(i,k,j)
@@ -1152,6 +1173,7 @@ module lsm_ruc
         qsfc_ice(i,j)   = sfcqv_ice(i)/(1.+sfcqv_ice(i))
         qsg_ice(i,j)    = rslf(prsl1(i),tsurf_ice(i))
         qcg_ice(i,j)    = sfcqc_ice(i)
+        semis_bck(i,j)   = 0.99
         if (kdt == 1) then
           sfcems_ice(i,j) = semisbase(i) * (1.-sncovr_ice(i,j)) + 0.99 * sncovr_ice(i,j)
         else
@@ -1265,6 +1287,11 @@ module lsm_ruc
         semis_ice(i) = sfcems_ice(i,j) 
         !-- sfalb_ice is with snow effect
         sfalb_ice(i) = alb_ice(i,j)
+        albdvis_ice(i) = sfalb_ice(i)
+        albdnir_ice(i) = sfalb_ice(i)
+        albinir_ice(i) = sfalb_ice(i)
+        albinir_ice(i) = sfalb_ice(i)
+
 
         do k = 1, lsoil_ruc
           tsice(i,k)  = stsice(i,k,j)
