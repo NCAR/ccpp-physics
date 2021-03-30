@@ -230,8 +230,8 @@ contains
 
     if ( do_ugwp_v1 ) then
        call cires_ugwpv1_init (me, master, nlunit, logunit, jdat, con_pi,      &
-                               con_rerth, fn_nml2, lonr, latr, levs, ak, bk,   &
-                               con_p0, dtp, errmsg, errflg)
+                               con_rerth, fn_nml2, input_nml_file, lonr, latr, &
+                               levs, ak, bk, con_p0, dtp, errmsg, errflg)
        if (errflg/=0) return
     end if
 

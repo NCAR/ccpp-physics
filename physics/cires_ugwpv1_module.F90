@@ -143,8 +143,8 @@ module  cires_ugwpv1_module
 !-----------------------------------------------------------------------------------
 
   subroutine cires_ugwpv1_init (me, master, nlunit, logunit, jdat_gfs, con_pi,  &
-              con_rerth, fn_nml2, lonr, latr, levs, ak, bk, pref, dtp,          &
-              errmsg, errflg)
+              con_rerth, fn_nml2, input_nml_file, lonr, latr, levs, ak, bk,     &
+              pref, dtp, errmsg, errflg)
 !
 !  input_nml_file ='input.nml'=fn_nml   ..... OLD_namelist and cdmvgwd(4) Corrected Bug Oct 4
 !
@@ -177,7 +177,7 @@ module  cires_ugwpv1_module
     real(kind=kind_phys),    intent (in) :: con_pi, con_rerth
  
     character(len=64), intent (in) :: fn_nml2
-!    character(len=64), parameter   :: fn_nml='input.nml'
+    character(len=*),  intent (in) :: input_nml_file(:)
 
     character(len=*), intent(out) :: errmsg
     integer,          intent(out) :: errflg
@@ -187,7 +187,7 @@ module  cires_ugwpv1_module
     integer :: ios
     logical :: exists
     
-    integer :: ncid,  iernc, vid, dimid, status         
+    integer :: ncid,  iernc, vid, dimid, status
     integer :: k
     integer :: ddd_ugwp,    curday_ugwp 
 !    integer :: version
@@ -196,7 +196,9 @@ module  cires_ugwpv1_module
     errmsg = ''
     errflg = 0
 
-!
+#ifdef INTERNAL_FILE_NML
+    read (input_nml_file, nml = cires_ugwp_nml)
+#else
     if (me == master) print *, trim (fn_nml2), ' GW-namelist file '
     inquire (file =trim (fn_nml2) , exist = exists)
 !
@@ -210,7 +212,7 @@ module  cires_ugwpv1_module
     rewind (nlunit)
     read   (nlunit, nml = cires_ugwp_nml)
     close  (nlunit)
-!
+#endif
 
     strsolver= knob_ugwp_orosolv     
     
