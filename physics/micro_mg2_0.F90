@@ -1792,7 +1792,7 @@ subroutine micro_mg_tend (                                       &
            nnucct(i,k)  = ratio * nnucct(i,k)
            npsacws(i,k) = ratio * npsacws(i,k)
            nsubc(i,k)   = ratio * nsubc(i,k)
-        end if
+        endif
 
         mnuccri(i,k) = zero
         nnuccri(i,k) = zero
@@ -1800,15 +1800,17 @@ subroutine micro_mg_tend (                                       &
         if (do_cldice) then
 
            ! freezing of rain to produce ice if mean rain size is smaller than Dcs
-           if (lamr(i,k) > qsmall .and. one/lamr(i,k) < Dcs) then
-              mnuccri(i,k) = mnuccr(i,k)
-              nnuccri(i,k) = nnuccr(i,k)
-              mnuccr(i,k)  = zero 
-              nnuccr(i,k)  = zero
-           end if
-        end if
+           if (lamr(i,k) > qsmall) then
+             if (one/lamr(i,k) < Dcs) then
+               mnuccri(i,k) = mnuccr(i,k)
+               nnuccri(i,k) = nnuccr(i,k)
+               mnuccr(i,k)  = zero 
+               nnuccr(i,k)  = zero
+             endif
+           endif
+        endif
 
-     end do
+     enddo
 
      do i=1,mgncol
 
