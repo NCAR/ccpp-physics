@@ -267,15 +267,14 @@ contains
 
 !=====ksrc
 
-     aum(km2:levs) = um(jl,km2:levs)
-     avm(km2:levs) = vm(jl,km2:levs)     
-     atm(km2:levs) = tm(jl,km2:levs)
-     aqm(km2:levs) = qm(jl,km2:levs)
-     azmet(km2:levs) =     zmet(jl,km2:levs)
-     aprsi(km2:levs+1) =     prsi(jl,km2:levs+1)
-     azmeti(km2:levs+1) =     zmeti(jl,km2:levs+1)
+     aum(1:levs)      = um(jl,1:levs)
+     avm(1:levs)      = vm(jl,1:levs)
+     atm(1:levs)      = tm(jl,1:levs)
+     aqm(1:levs)      = qm(jl,1:levs)
+     azmet(1:levs)    = zmet(jl,1:levs)
+     aprsi(1:levs+1)  = prsi(jl,1:levs+1)
+     azmeti(1:levs+1) = zmeti(jl,1:levs+1)
 
-       
      rho_src = aprsl(ksrc)*rdi/atm(ksrc)
          taub_ch = max(tau_ngw(jl), tau_min)
          taub_src = taub_ch            
@@ -288,8 +287,8 @@ contains
 !
        do jk = km2, levs
           dz_meti(jk) = azmeti(jk+1)-azmeti(jk)
-          dz_met(jk)  =  azmet(jk)-azmeti(jk-1)      
-       enddo                 
+          dz_met(jk)  =  azmet(jk)-azmeti(jk-1)
+       enddo
 !       ---------------------------------------------
 !   interface mean flow parameters launch -> levs+1
 !       ---------------------------------------------
