@@ -123,7 +123,7 @@ contains
       enddo
  
       return
-      end
+      end subroutine setindxh2o
 !
 !**********************************************************************
 !
@@ -201,6 +201,6 @@ contains
       enddo
 !
       return
-      end
+      end subroutine h2ointerpol
 
 end module h2ointerp
