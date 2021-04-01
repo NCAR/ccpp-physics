@@ -53,6 +53,10 @@
 !!                  perturbations to the graupel intercept parameter,
 !!                  the cloud water shape parameter, and the number
 !!                  concentration of nucleated aerosols.
+!! - Last modified: 12 Feb 2021  G. Thompson updated to align more closely
+!!                  with his WRF version, including bug fixes and designed
+!!                  changes.
+
 MODULE module_mp_thompson
 
       USE machine, only : kind_phys
@@ -120,8 +124,8 @@ MODULE module_mp_thompson
 !.. mixing ratio.  Also, when mu_g is non-zero, these become equiv
 !.. y-intercept for an exponential distrib and proper values are
 !.. computed based on same mixing ratio and total number concentration.
-      REAL, PARAMETER, PRIVATE:: gonv_min = 1.E4
-      REAL, PARAMETER, PRIVATE:: gonv_max = 3.E6
+      REAL, PARAMETER, PRIVATE:: gonv_min = 1.E2
+      REAL, PARAMETER, PRIVATE:: gonv_max = 1.E6
 
 !..Mass power law relations:  mass = am*D**bm
 !.. Snow from Field et al. (2005), others assume spherical form.
@@ -183,7 +187,7 @@ MODULE module_mp_thompson
       REAL, PRIVATE:: Sc3
 
 !..Homogeneous freezing temperature
-      REAL, PARAMETER, PRIVATE:: HGFR = 235.16     !< Homogeneous freezing temperature
+      REAL, PARAMETER, PRIVATE:: HGFR = 235.16
 
 !..Water vapor and air gas constants at constant pressure
       REAL, PARAMETER, PRIVATE:: Rv = 461.5
@@ -214,6 +218,15 @@ MODULE module_mp_thompson
       REAL, PARAMETER, PRIVATE:: D0g = 250.E-6
       REAL, PRIVATE:: D0i, xm0s, xm0g
 
+!..Min and max radiative effective radius of cloud water, cloud ice, and snow;
+!.. performed by subroutine calc_effectRad. On purpose, these should stay PUBLIC.
+      REAL, PARAMETER:: re_qc_min = 2.50E-6               ! 2.5 microns
+      REAL, PARAMETER:: re_qc_max = 50.0E-6               ! 50 microns
+      REAL, PARAMETER:: re_qi_min = 2.50E-6               ! 2.5 microns
+      REAL, PARAMETER:: re_qi_max = 125.0E-6              ! 125 microns
+      REAL, PARAMETER:: re_qs_min = 5.00E-6               ! 5 microns
+      REAL, PARAMETER:: re_qs_max = 999.0E-6              ! 999 microns (1 mm)
+
 !..Lookup table dimensions
       INTEGER, PARAMETER, PRIVATE:: nbins = 100
       INTEGER, PARAMETER, PRIVATE:: nbc = nbins
@@ -226,7 +239,7 @@ MODULE module_mp_thompson
       INTEGER, PARAMETER, PRIVATE:: ntb_r = 37
       INTEGER, PARAMETER, PRIVATE:: ntb_s = 28
       INTEGER, PARAMETER, PRIVATE:: ntb_g = 28
-      INTEGER, PARAMETER, PRIVATE:: ntb_g1 = 28
+      INTEGER, PARAMETER, PRIVATE:: ntb_g1 = 37
       INTEGER, PARAMETER, PRIVATE:: ntb_r1 = 37
       INTEGER, PARAMETER, PRIVATE:: ntb_i1 = 55
       INTEGER, PARAMETER, PRIVATE:: ntb_t = 9
@@ -299,10 +312,11 @@ MODULE module_mp_thompson
 
 !> Lookup tables for graupel y-intercept parameter (/m**4).
       REAL, DIMENSION(ntb_g1), PARAMETER, PRIVATE:: &
-      N0g_exp = (/1.e4,2.e4,3.e4,4.e4,5.e4,6.e4,7.e4,8.e4,9.e4, &
+      N0g_exp = (/1.e2,2.e2,3.e2,4.e2,5.e2,6.e2,7.e2,8.e2,9.e2, &
+                  1.e3,2.e3,3.e3,4.e3,5.e3,6.e3,7.e3,8.e3,9.e3, &
+                  1.e4,2.e4,3.e4,4.e4,5.e4,6.e4,7.e4,8.e4,9.e4, &
                   1.e5,2.e5,3.e5,4.e5,5.e5,6.e5,7.e5,8.e5,9.e5, &
-                  1.e6,2.e6,3.e6,4.e6,5.e6,6.e6,7.e6,8.e6,9.e6, &
-                  1.e7/)
+                  1.e6/)
 
 !> Lookup tables for ice number concentration (/m**3).
       REAL, DIMENSION(ntb_i1), PARAMETER, PRIVATE:: &
@@ -354,6 +368,15 @@ MODULE module_mp_thompson
 !.. and temperature array indices.  Variables beginning with t-p/c/m/n
 !.. represent lookup tables.  Save compile-time memory by making
 !.. allocatable (2009Jun12, J. Michalakes).
+
+!..To permit possible creation of new lookup tables as variables expand/change,
+!.. specify a name of external file(s) including version number for pre-computed
+!.. Thompson tables.
+      character(len=*), parameter :: thomp_table_file = 'thompson_tables_precomp_v2.sl'
+      character(len=*), parameter :: qr_acr_qg_file = 'qr_acr_qgV2.dat'
+      character(len=*), parameter :: qr_acr_qs_file = 'qr_acr_qsV2.dat'
+      character(len=*), parameter :: freeze_h2o_file = 'freezeH2O.dat'
+
       INTEGER, PARAMETER, PRIVATE:: R8SIZE = 8
       INTEGER, PARAMETER, PRIVATE:: R4SIZE = 4
       REAL (KIND=R8SIZE), ALLOCATABLE, DIMENSION(:,:,:,:)::             &
@@ -400,9 +423,7 @@ MODULE module_mp_thompson
 
 !..If SIONlib isn't used, write Thompson tables with master MPI task
 !.. after computing them in thompson_init
-#ifndef SION
       LOGICAL:: thompson_table_writer
-#endif
 
 !+---+
 !+---+-----------------------------------------------------------------+
@@ -417,24 +438,19 @@ MODULE module_mp_thompson
 !! lookup tables in Thomspson scheme.
 !>\section gen_thompson_init thompson_init General Algorithm
 !> @{
-      SUBROUTINE thompson_init(nwfa2d, nifa2d, nwfa, nifa, &
-                               mpicomm, mpirank, mpiroot,  &
+      SUBROUTINE thompson_init(is_aerosol_aware_in,       &
+                               mpicomm, mpirank, mpiroot, &
                                threads, errmsg, errflg)
 
       IMPLICIT NONE
 
-!..OPTIONAL variables that control application of aerosol-aware scheme
-
-      REAL, DIMENSION(:,:), OPTIONAL, INTENT(IN) :: nwfa, nifa
-      REAL, DIMENSION(:),   OPTIONAL, INTENT(IN) :: nwfa2d, nifa2d
+      LOGICAL, INTENT(IN) :: is_aerosol_aware_in
       INTEGER, INTENT(IN) :: mpicomm, mpirank, mpiroot
       INTEGER, INTENT(IN) :: threads
       CHARACTER(len=*), INTENT(INOUT) :: errmsg
       INTEGER,          INTENT(INOUT) :: errflg
 
-
       INTEGER:: i, j, k, l, m, n
-      REAL:: h_01, airmass, niIN3, niCCN3, max_test
       LOGICAL:: micro_init
       real :: stime, etime
 #ifdef SION
@@ -444,13 +460,17 @@ MODULE module_mp_thompson
       LOGICAL, PARAMETER :: precomputed_tables = .FALSE.
 #endif
 
-      is_aerosol_aware = .FALSE.
-      micro_init = .FALSE.
+! Set module variable is_aerosol_aware
+      is_aerosol_aware = is_aerosol_aware_in
+      if (mpirank==mpiroot) then
+         if (is_aerosol_aware) then
+            write (0,'(a)') 'Using aerosol-aware version of Thompson microphysics'
+        else
+            write (0,'(a)') 'Using non-aerosol-aware version of Thompson microphysics'
+        end if
+      end if
 
-      if (present(nwfa2d) .and. &
-          present(nifa2d) .and. &
-          present(nwfa)   .and. &
-          present(nifa)         ) is_aerosol_aware = .true.
+      micro_init = .FALSE.
 
 !> - Allocate space for lookup tables (J. Michalakes 2009Jun08).
 
@@ -748,7 +768,7 @@ MODULE module_mp_thompson
       mpi_communicator = mpicomm
 #ifdef SION
       call cpu_time(stime)
-      call readwrite_tables("read", mpicomm, mpirank, mpiroot, ierr)
+      call readwrite_tables(thomp_table_file, "read", mpicomm, mpirank, mpiroot, ierr)
       call cpu_time(etime)
       if (ierr==0) then
          precomputed_tables = .true.
@@ -757,7 +777,7 @@ MODULE module_mp_thompson
          precomputed_tables = .false.
          if (mpirank==mpiroot) write(0,*) "An error occurred reading Thompson tables from disk, recalculate"
       end if
-#else
+#endif
       ! Standard tables are only written by master MPI task;
       ! (physics init cannot be called by multiple threads,
       !  hence no need to test for a specific thread number)
@@ -766,7 +786,6 @@ MODULE module_mp_thompson
       else
          thompson_table_writer = .false.
       end if
-#endif
 
       precomputed_tables_1: if (.not.precomputed_tables) then
 
@@ -897,6 +916,10 @@ MODULE module_mp_thompson
       if (mpirank==mpiroot) write(0,*) '  creating rain evap table'
       call table_dropEvap
 
+!>  - Call qi_aut_qs() to create conversion of some ice mass into snow category
+      if (mpirank==mpiroot) write(0,*) '  creating ice converting to snow table'
+      call qi_aut_qs
+
       call cpu_time(etime)
       if (mpirank==mpiroot) print '("Calculating Thompson tables part 1 took ",f10.3," seconds.")', etime-stime
 
@@ -945,19 +968,12 @@ MODULE module_mp_thompson
       call cpu_time(etime)
       if (mpirank==mpiroot) print '("Computing freezing of water drops table took ",f10.3," seconds.")', etime-stime
 
-!>  - Call qi_aut_qs() to create conversion of some ice mass into snow category
-      if (mpirank==mpiroot) write(0,*) '  creating ice converting to snow table'
-      call cpu_time(stime)
-      call qi_aut_qs
-      call cpu_time(etime)
-      if (mpirank==mpiroot) print '("Computing ice converting to snow table took ",f10.3," seconds.")', etime-stime
-
       call cpu_time(etime)
       if (mpirank==mpiroot) print '("Calculating Thompson tables part 2 took ",f10.3," seconds.")', etime-stime
 
 #ifdef SION
       call cpu_time(stime)
-      call readwrite_tables("write", mpicomm, mpirank, mpiroot, ierr)
+      call readwrite_tables(thomp_table_file, "write", mpicomm, mpirank, mpiroot, ierr)
       if (ierr/=0) then
           write(0,*) "An error occurred writing Thompson tables to disk"
           stop 1
@@ -1019,7 +1035,7 @@ MODULE module_mp_thompson
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(INOUT):: &
                           nc, nwfa, nifa
       REAL, DIMENSION(ims:ime, jms:jme), OPTIONAL, INTENT(IN):: nwfa2d, nifa2d
-      REAL, DIMENSION(ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(OUT):: &
+      REAL, DIMENSION(ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(INOUT):: &
                           re_cloud, re_ice, re_snow
       INTEGER, INTENT(IN) :: rand_perturb_on, kme_stoch
       REAL, DIMENSION(ims:ime,kms:kme_stoch,jms:jme), INTENT(IN), OPTIONAL:: &
@@ -1059,7 +1075,6 @@ MODULE module_mp_thompson
       REAL, DIMENSION(its:ite, jts:jte):: pcp_ra, pcp_sn, pcp_gr, pcp_ic
       REAL:: dt, pptrain, pptsnow, pptgraul, pptice
       REAL:: qc_max, qr_max, qs_max, qi_max, qg_max, ni_max, nr_max
-      REAL:: nwfa1
       REAL:: rand1, rand2, rand3, min_rand
       INTEGER:: i, j, k, m
       INTEGER:: imax_qc,imax_qr,imax_qi,imax_qs,imax_qg,imax_ni,imax_nr
@@ -1195,8 +1210,8 @@ MODULE module_mp_thompson
 !                   5 gives both 1+4
 !                   6 gives both 2+4
 !                   7 gives all 1+2+4
-! For now (22Mar2018), standard deviation should be only 0.25 and cut-off at 1.5
-! in order to constrain the various perturbations from being too extreme.
+! For now (22Mar2018), standard deviation should be up to 0.75 and cut-off at 3.0
+! stddev in order to constrain the various perturbations from being too extreme.
 !+---+-----------------------------------------------------------------+
          rand1 = 0.0
          rand2 = 0.0
@@ -1206,7 +1221,7 @@ MODULE module_mp_thompson
             m = RSHIFT(ABS(rand_perturb_on),1)
             if (MOD(m,2) .ne. 0) rand2 = rand_pert(i,1,j)*2.
             m = RSHIFT(ABS(rand_perturb_on),2)
-            if (MOD(m,2) .ne. 0) rand3 = 0.1*(rand_pert(i,1,j)+ABS(min_rand))
+            if (MOD(m,2) .ne. 0) rand3 = 0.25*(rand_pert(i,1,j)+ABS(min_rand))
             m = RSHIFT(ABS(rand_perturb_on),3)
          endif
 !+---+-----------------------------------------------------------------+
@@ -1244,6 +1259,7 @@ MODULE module_mp_thompson
             qg1d(k) = qg(i,k,j)
             ni1d(k) = ni(i,k,j)
             nr1d(k) = nr(i,k,j)
+            rho(k) = 0.622*p1d(k)/(R*t1d(k)*(qv1d(k)+0.622))
          enddo
          if (is_aerosol_aware) then
             do k = kts, kte
@@ -1251,15 +1267,12 @@ MODULE module_mp_thompson
                nwfa1d(k) = nwfa(i,k,j)
                nifa1d(k) = nifa(i,k,j)
             enddo
-            nwfa1 = nwfa2d(i,j)
          else
             do k = kts, kte
-               rho(k) = 0.622*p1d(k)/(R*t1d(k)*(qv1d(k)+0.622))
                nc1d(k) = Nt_c/rho(k)
-               nwfa1d(k) = 11.1E6/rho(k)
-               nifa1d(k) = naIN1*0.01/rho(k)
+               nwfa1d(k) = 11.1E6
+               nifa1d(k) = naIN1*0.01
             enddo
-            nwfa1 = 11.1E6
          endif
 
 !> - Call mp_thompson()
@@ -1305,7 +1318,6 @@ MODULE module_mp_thompson
 !.. Changed 13 May 2013 to fake emissions in which nwfa2d is aerosol
 !.. number tendency (number per kg per second).
          if (is_aerosol_aware) then
-!-GT        nwfa1d(kts) = nwfa1
             nwfa1d(kts) = nwfa1d(kts) + nwfa2d(i,j)*dt_in
             nifa1d(kts) = nifa1d(kts) + nifa2d(i,j)*dt_in
 
@@ -1439,17 +1451,17 @@ MODULE module_mp_thompson
 
          IF (has_reqc.ne.0 .and. has_reqi.ne.0 .and. has_reqs.ne.0) THEN
           do k = kts, kte
-             re_qc1d(k) = 2.50E-6 ! 2.49E-6
-             re_qi1d(k) = 5.00E-6 ! 4.99E-6
-             re_qs1d(k) = 1.00E-5 ! 9.99E-6
+             re_qc1d(k) = re_qc_min
+             re_qi1d(k) = re_qi_min
+             re_qs1d(k) = re_qs_min
           enddo
 !> - Call calc_effectrad()
           call calc_effectRad (t1d, p1d, qv1d, qc1d, nc1d, qi1d, ni1d, qs1d,  &
                       re_qc1d, re_qi1d, re_qs1d, kts, kte)
           do k = kts, kte
-             re_cloud(i,k,j) = MAX(2.50E-6, MIN(re_qc1d(k), 50.E-6))  ! MAX(2.49E-6, MIN(re_qc1d(k), 50.E-6))
-             re_ice(i,k,j)   = MAX(5.00E-6, MIN(re_qi1d(k), 125.E-6)) ! MAX(4.99E-6, MIN(re_qi1d(k), 125.E-6))
-             re_snow(i,k,j)  = MAX(1.00E-5, MIN(re_qs1d(k), 999.E-6)) ! MAX(9.99E-6, MIN(re_qs1d(k), 999.E-6))
+             re_cloud(i,k,j) = MAX(re_qc_min, MIN(re_qc1d(k), re_qc_max))
+             re_ice(i,k,j)   = MAX(re_qi_min, MIN(re_qi1d(k), re_qi_max))
+             re_snow(i,k,j)  = MAX(re_qs_min, MIN(re_qs1d(k), re_qs_max))
           enddo
          ENDIF
 
@@ -1631,7 +1643,7 @@ MODULE module_mp_thompson
       REAL:: r_frac, g_frac
       REAL:: Ef_rw, Ef_sw, Ef_gw, Ef_rr
       REAL:: Ef_ra, Ef_sa, Ef_ga
-      REAL:: dtsave, odts, odt, odzq, hgt_agl
+      REAL:: dtsave, odts, odt, odzq, hgt_agl, SR
       REAL:: xslw1, ygra1, zans1, eva_factor
       INTEGER:: i, k, k2, n, nn, nstep, k_0, kbot, IT, iexfrq
       INTEGER, DIMENSION(5):: ksed1
@@ -1782,17 +1794,20 @@ MODULE module_mp_thompson
          qv(k) = MAX(1.E-10, qv1d(k))
          pres(k) = p1d(k)
          rho(k) = 0.622*pres(k)/(R*temp(k)*(qv(k)+0.622))
-         nwfa(k) = MAX(11.1E6, MIN(9999.E6, nwfa1d(k)*rho(k)))
-         nifa(k) = MAX(naIN1*0.01, MIN(9999.E6, nifa1d(k)*rho(k)))
+         nwfa(k) = MAX(11.1E6*rho(k), MIN(9999.E6*rho(k), nwfa1d(k)*rho(k)))
+         nifa(k) = MAX(naIN1*0.01*rho(k), MIN(9999.E6*rho(k), nifa1d(k)*rho(k)))
          mvd_r(k) = D0r
+         mvd_c(k) = D0c
 
          if (qc1d(k) .gt. R1) then
             no_micro = .false.
             rc(k) = qc1d(k)*rho(k)
             nc(k) = MAX(2., MIN(nc1d(k)*rho(k), Nt_c_max))
             L_qc(k) = .true.
-            if (rand2 .eq. 0.0) then
-             nu_c = MIN(15, NINT(1000.E6/nc(k)) + 2)
+            if (nc(k).gt.10000.E6) then
+             nu_c = 2
+            elseif (nc(k).lt.100.) then
+             nu_c = 15
             else
              nu_c = NINT(1000.E6/nc(k)) + 2
              nu_c = MAX(2, MIN(nu_c+NINT(rand2), 15))
@@ -1820,8 +1835,8 @@ MODULE module_mp_thompson
             ri(k) = qi1d(k)*rho(k)
             ni(k) = MAX(R2, ni1d(k)*rho(k))
             if (ni(k).le. R2) then
-               lami = cie(2)/25.E-6
-               ni(k) = MIN(499.D3, cig(1)*oig2*ri(k)/am_i*lami**bm_i)
+               lami = cie(2)/5.E-6
+               ni(k) = MIN(9999.D3, cig(1)*oig2*ri(k)/am_i*lami**bm_i)
             endif
             L_qi(k) = .true.
             lami = (am_i*cig(2)*oig1*ni(k)/ri(k))**obmi
@@ -1829,7 +1844,7 @@ MODULE module_mp_thompson
             xDi = (bm_i + mu_i + 1.) * ilami
             if (xDi.lt. 5.E-6) then
              lami = cie(2)/5.E-6
-             ni(k) = MIN(499.D3, cig(1)*oig2*ri(k)/am_i*lami**bm_i)
+             ni(k) = MIN(9999.D3, cig(1)*oig2*ri(k)/am_i*lami**bm_i)
             elseif (xDi.gt. 300.E-6) then
              lami = cie(2)/300.E-6
              ni(k) = cig(1)*oig2*ri(k)/am_i*lami**bm_i
@@ -2033,26 +2048,11 @@ MODULE module_mp_thompson
 !+---+-----------------------------------------------------------------+
 !> - Calculate y-intercept, slope values for graupel.
 !+---+-----------------------------------------------------------------+
-      N0_min = gonv_max
-      k_0 = kts
       do k = kte, kts, -1
-         if (temp(k).ge.270.65) k_0 = MAX(k_0, k)
-      enddo
-      do k = kte, kts, -1
-         if (k.gt.k_0 .and. L_qr(k) .and. mvd_r(k).gt.100.E-6) then
-            xslw1 = 4.01 + alog10(mvd_r(k))
-         else
-            xslw1 = 0.01
-         endif
-         ygra1 = 4.31 + alog10(max(5.E-5, rg(k)))
-         zans1 = (3.1 + (100./(300.*xslw1*ygra1/(10./xslw1+1.+0.25*ygra1)+30.+10.*ygra1))) + rand1
-         if (rand1 .ne. 0.0) then
-          zans1 = MAX(2., MIN(zans1, 7.))
-         endif
+         ygra1 = alog10(max(1.E-9, rg(k)))
+         zans1 = 3.0 + 2./7.*(ygra1+8.) + rand1
          N0_exp = 10.**(zans1)
          N0_exp = MAX(DBLE(gonv_min), MIN(N0_exp, DBLE(gonv_max)))
-         N0_min = MIN(N0_exp, N0_min)
-         N0_exp = N0_min
          lam_exp = (N0_exp*am_g*cgg(1)/rg(k))**oge1
          lamg = lam_exp * (cgg(3)*ogg2*ogg1)**obmg
          ilamg(k) = 1./lamg
@@ -2087,10 +2087,11 @@ MODULE module_mp_thompson
           pnr_rcr(k) = Ef_rr * 2.0*nr(k)*rr(k)
          endif
 
-         mvd_c(k) = D0c
          if (L_qc(k)) then
-          if (rand2 .eq. 0.0) then
-           nu_c = MIN(15, NINT(1000.E6/nc(k)) + 2)
+          if (nc(k).gt.10000.E6) then
+           nu_c = 2
+          elseif (nc(k).lt.100.) then
+           nu_c = 15
           else
            nu_c = NINT(1000.E6/nc(k)) + 2
            nu_c = MAX(2, MIN(nu_c+NINT(rand2), 15))
@@ -2098,6 +2099,7 @@ MODULE module_mp_thompson
           xDc = MAX(D0c*1.E6, ((rc(k)/(am_r*nc(k)))**obmr) * 1.E6)
           lamc = (nc(k)*am_r* ccg(2,nu_c) * ocg1(nu_c) / rc(k))**obmr
           mvd_c(k) = (3.0+nu_c+0.672) / lamc
+          mvd_c(k) = MAX(D0c, MIN(mvd_c(k), D0r))
          endif
 
 !>  - Autoconversion follows Berry & Reinhardt (1974) with characteristic
@@ -2113,7 +2115,7 @@ MODULE module_mp_thompson
           tau  = 3.72/(rc(k)*taud)
           prr_wau(k) = zeta/tau
           prr_wau(k) = MIN(DBLE(rc(k)*odts), prr_wau(k))
-          pnr_wau(k) = prr_wau(k) / (am_r*nu_c*D0r*D0r*D0r)              ! RAIN2M
+          pnr_wau(k) = prr_wau(k) / (am_r*nu_c*200.*D0r*D0r*D0r)            ! RAIN2M
           pnc_wau(k) = MIN(DBLE(nc(k)*odts), prr_wau(k)                 &
                      / (am_r*mvd_c(k)*mvd_c(k)*mvd_c(k)))                   ! Qc2M
          endif
@@ -2153,7 +2155,9 @@ MODULE module_mp_thompson
 !+---+-----------------------------------------------------------------+
       if (.not. iiwarm) then
       do k = kts, kte
-         vts_boost(k) = 1.5
+         vts_boost(k) = 1.0
+         xDs = 0.0
+         if (L_qs(k)) xDs = smoc(k) / smob(k)
 
 !>  - Temperature lookup table indexes.
          tempc = temp(k) - 273.15
@@ -2305,13 +2309,12 @@ MODULE module_mp_thompson
 
 !>  - Snow collecting cloud water.  In CE, assume Dc<<Ds and vtc=~0.
          if (L_qc(k) .and. mvd_c(k).gt. D0c) then
-          xDs = 0.0
-          if (L_qs(k)) xDs = smoc(k) / smob(k)
           if (xDs .gt. D0s) then
            idx = 1 + INT(nbs*DLOG(xDs/Ds(1))/DLOG(Ds(nbs)/Ds(1)))
            idx = MIN(idx, nbs)
            Ef_sw = t_Efsw(idx, INT(mvd_c(k)*1.E6))
            prs_scw(k) = rhof(k)*t1_qs_qc*Ef_sw*rc(k)*smoe(k)
+           prs_scw(k) = MIN(DBLE(rc(k)*odts), prs_scw(k))
            pnc_scw(k) = rhof(k)*t1_qs_qc*Ef_sw*nc(k)*smoe(k)                ! Qc2M
            pnc_scw(k) = MIN(DBLE(nc(k)*odts), pnc_scw(k))
           endif
@@ -2340,7 +2343,6 @@ MODULE module_mp_thompson
 
 !>  - Snow and graupel collecting aerosols, wet scavenging.
          if (rs(k) .gt. r_s(1)) then
-          xDs = smoc(k) / smob(k)
           Ef_sa = Eff_aero(xDs,0.04E-6,visco(k),rho(k),temp(k),'s')
           pna_sca(k) = rhof(k)*t1_qs_qc*Ef_sa*nwfa(k)*smoe(k)
           pna_sca(k) = MIN(DBLE(nwfa(k)*odts), pna_sca(k))
@@ -2387,6 +2389,7 @@ MODULE module_mp_thompson
                          + tnr_racs2(idx_s,idx_t,idx_r1,idx_r)          &
                          + tnr_sacr1(idx_s,idx_t,idx_r1,idx_r)          &
                          + tnr_sacr2(idx_s,idx_t,idx_r1,idx_r)
+            pnr_rcs(k) = MIN(DBLE(nr(k)*odts), pnr_rcs(k))
            else
             prs_rcs(k) = -tcs_racs1(idx_s,idx_t,idx_r1,idx_r)           &
                          - tms_sacr1(idx_s,idx_t,idx_r1,idx_r)          &
@@ -2394,10 +2397,7 @@ MODULE module_mp_thompson
                          + tcr_sacr2(idx_s,idx_t,idx_r1,idx_r)
             prs_rcs(k) = MAX(DBLE(-rs(k)*odts), prs_rcs(k))
             prr_rcs(k) = -prs_rcs(k)
-            pnr_rcs(k) = tnr_racs2(idx_s,idx_t,idx_r1,idx_r)            &   ! RAIN2M
-                         + tnr_sacr2(idx_s,idx_t,idx_r1,idx_r)
            endif
-           pnr_rcs(k) = MIN(DBLE(nr(k)*odts), pnr_rcs(k))
           endif
 
 !>  - Rain collecting graupel.  Cannot assume Wisner (1972) approximation
@@ -2422,17 +2422,59 @@ MODULE module_mp_thompson
           endif
          endif
 
+         if (temp(k).lt.T_0) then
+          rate_max = (qv(k)-qvsi(k))*rho(k)*odts*0.999
+
+!> - Deposition/sublimation of snow/graupel follows Srivastava & Coen (1992)
+          if (L_qs(k)) then
+           C_snow = C_sqrd + (tempc+1.5)*(C_cube-C_sqrd)/(-30.+1.5)
+           C_snow = MAX(C_sqrd, MIN(C_snow, C_cube))
+           prs_sde(k) = C_snow*t1_subl*diffu(k)*ssati(k)*rvs &
+                        * (t1_qs_sd*smo1(k) &
+                         + t2_qs_sd*rhof2(k)*vsc2(k)*smof(k))
+           if (prs_sde(k).lt. 0.) then
+            prs_sde(k) = MAX(DBLE(-rs(k)*odts), prs_sde(k), DBLE(rate_max))
+           else
+            prs_sde(k) = MIN(prs_sde(k), DBLE(rate_max))
+           endif
+          endif
+
+          if (L_qg(k) .and. ssati(k).lt. -eps) then
+           prg_gde(k) = C_cube*t1_subl*diffu(k)*ssati(k)*rvs &
+               * N0_g(k) * (t1_qg_sd*ilamg(k)**cge(10) &
+               + t2_qg_sd*vsc2(k)*rhof2(k)*ilamg(k)**cge(11))
+           if (prg_gde(k).lt. 0.) then
+            prg_gde(k) = MAX(DBLE(-rg(k)*odts), prg_gde(k), DBLE(rate_max))
+           else
+            prg_gde(k) = MIN(prg_gde(k), DBLE(rate_max))
+           endif
+          endif
+
+!> - A portion of rimed snow converts to graupel but some remains snow.
+!!  Interp from 15 to 95% as riming factor increases from 5.0 to 30.0
+!!  0.028 came from (.75-.15)/(30.-5.).  This remains ad-hoc and should
+!!  be revisited.
+          if (prs_scw(k).gt.5.0*prs_sde(k) .and. &
+                         prs_sde(k).gt.eps) then
+           r_frac = MIN(30.0D0, prs_scw(k)/prs_sde(k))
+           g_frac = MIN(0.75, 0.15 + (r_frac-5.)*.028)
+           vts_boost(k) = MIN(1.5, 1.1 + (r_frac-5.)*.016)
+           prg_scw(k) = g_frac*prs_scw(k)
+           prs_scw(k) = (1. - g_frac)*prs_scw(k)
+          endif
+
+         endif
+
 !+---+-----------------------------------------------------------------+
 !> - Next IF block handles only those processes below 0C.
 !+---+-----------------------------------------------------------------+
 
          if (temp(k).lt.T_0) then
 
-          vts_boost(k) = 1.0
           rate_max = (qv(k)-qvsi(k))*rho(k)*odts*0.999
 
 !+---+---------------- BEGIN NEW ICE NUCLEATION -----------------------+
-!> - Begin NEW ICE NUCLEATION: Freezing of supercooled water (rain or cloud) is influenced by dust
+!> - Freezing of supercooled water (rain or cloud) is influenced by dust
 !! but still using Bigg 1953 with a temperature adjustment of a few
 !! degrees depending on dust concentration.  A default value by way
 !! of idx_IN is 1.0 per Liter of air is used when dustyIce flag is
@@ -2475,7 +2517,6 @@ MODULE module_mp_thompson
            pnr_rfz(k) = MIN(DBLE(nr(k)*odts), pnr_rfz(k))
           elseif (rr(k).gt. R1 .and. temp(k).lt.HGFR) then
            pri_rfz(k) = rr(k)*odts
-           pnr_rfz(k) = nr(k)*odts                                         ! RAIN2M
            pni_rfz(k) = pnr_rfz(k)
           endif
 
@@ -2496,7 +2537,7 @@ MODULE module_mp_thompson
                                 .and. temp(k).lt.253.15) ) then
            if (dustyIce .AND. is_aerosol_aware) then
             xnc = iceDeMott(tempc,qv(k),qvs(k),qvsi(k),rho(k),nifa(k))
-            xnc = xnc*(1.0 + 3.*rand3)
+            xnc = xnc*(1.0 + 50.*rand3)
            else
             xnc = MIN(250.E3, TNO*EXP(ATO*(T_0-temp(k))))
            endif
@@ -2508,7 +2549,7 @@ MODULE module_mp_thompson
 
 !>  - Freezing of aqueous aerosols based on Koop et al (2001, Nature)
           xni = smo0(k)+ni(k) + (pni_rfz(k)+pni_wfz(k)+pni_inu(k))*dtsave
-          if (is_aerosol_aware .AND. homogIce .AND. (xni.le.500.E3)     &
+          if (is_aerosol_aware .AND. homogIce .AND. (xni.le.999.E3)     &
      &                .AND.(temp(k).lt.238).AND.(ssati(k).ge.0.4) ) then
             xnc = iceKoop(temp(k),qv(k),qvs(k),nwfa(k), dtsave)
             pni_iha(k) = xnc*odts
@@ -2551,32 +2592,6 @@ MODULE module_mp_thompson
             prs_iau(k) = MIN(DBLE(ri(k)*.99*odts), prs_iau(k))
             pni_iau(k) = tni_iaus(idx_i,idx_i1)*odts
             pni_iau(k) = MIN(DBLE(ni(k)*.95*odts), pni_iau(k))
-           endif
-          endif
-
-!>  - Deposition/sublimation of snow/graupel follows Srivastava & Coen
-!! (1992).
-          if (L_qs(k)) then
-           C_snow = C_sqrd + (tempc+1.5)*(C_cube-C_sqrd)/(-30.+1.5)
-           C_snow = MAX(C_sqrd, MIN(C_snow, C_cube))
-           prs_sde(k) = C_snow*t1_subl*diffu(k)*ssati(k)*rvs &
-                        * (t1_qs_sd*smo1(k) &
-                         + t2_qs_sd*rhof2(k)*vsc2(k)*smof(k))
-           if (prs_sde(k).lt. 0.) then
-            prs_sde(k) = MAX(DBLE(-rs(k)*odts), prs_sde(k), DBLE(rate_max))
-           else
-            prs_sde(k) = MIN(prs_sde(k), DBLE(rate_max))
-           endif
-          endif
-
-          if (L_qg(k) .and. ssati(k).lt. -eps) then
-           prg_gde(k) = C_cube*t1_subl*diffu(k)*ssati(k)*rvs &
-               * N0_g(k) * (t1_qg_sd*ilamg(k)**cge(10) &
-               + t2_qg_sd*vsc2(k)*rhof2(k)*ilamg(k)**cge(11))
-           if (prg_gde(k).lt. 0.) then
-            prg_gde(k) = MAX(DBLE(-rg(k)*odts), prg_gde(k), DBLE(rate_max))
-           else
-            prg_gde(k) = MIN(prg_gde(k), DBLE(rate_max))
            endif
           endif
 
@@ -2623,19 +2638,6 @@ MODULE module_mp_thompson
                           * pri_ihm(k)
           endif
 
-!>  - A portion of rimed snow converts to graupel but some remains snow.
-!! Interp from 15 to 95% as riming factor increases from 2.0 to 30.0
-!! 0.028 came from (.95-.15)/(30.-2.).  This remains ad-hoc and should
-!! be revisited.
-          if (prs_scw(k).gt.2.0*prs_sde(k) .and. &
-                         prs_sde(k).gt.eps) then
-           r_frac = MIN(30.0D0, prs_scw(k)/prs_sde(k))
-           g_frac = MIN(0.95, 0.15 + (r_frac-2.)*.028)
-           vts_boost(k) = MIN(1.5, 1.1 + (r_frac-2.)*.016)
-           prg_scw(k) = g_frac*prs_scw(k)
-           prs_scw(k) = (1. - g_frac)*prs_scw(k)
-          endif
-
          else
 
 !>  - Melt snow and graupel and enhance from collisions with liquid.
@@ -2643,12 +2645,13 @@ MODULE module_mp_thompson
           if (L_qs(k)) then
            prr_sml(k) = (tempc*tcond(k)-lvap0*diffu(k)*delQvs(k))       &
                       * (t1_qs_me*smo1(k) + t2_qs_me*rhof2(k)*vsc2(k)*smof(k))
-           prr_sml(k) = prr_sml(k) + 4218.*olfus*tempc &
-                                   * (prr_rcs(k)+prs_scw(k))
+           if (prr_sml(k) .gt. 0.) then
+              prr_sml(k) = prr_sml(k) + 4218.*olfus*tempc               &
+                                      * (prr_rcs(k)+prs_scw(k))
+           endif
            prr_sml(k) = MIN(DBLE(rs(k)*odts), MAX(0.D0, prr_sml(k)))
            pnr_sml(k) = smo0(k)/rs(k)*prr_sml(k) * 10.0**(-0.25*tempc)      ! RAIN2M
            pnr_sml(k) = MIN(DBLE(smo0(k)*odts), pnr_sml(k))
-!          if (tempc.gt.3.5 .or. rs(k).lt.0.005E-3) pnr_sml(k)=0.0
 
            if (ssati(k).lt. 0.) then
             prs_sde(k) = C_cube*t1_subl*diffu(k)*ssati(k)*rvs &
@@ -2667,7 +2670,6 @@ MODULE module_mp_thompson
            prr_gml(k) = MIN(DBLE(rg(k)*odts), MAX(0.D0, prr_gml(k)))
            pnr_gml(k) = N0_g(k)*cgg(2)*ilamg(k)**cge(2) / rg(k)         &   ! RAIN2M
                       * prr_gml(k) * 10.0**(-0.5*tempc)
-!          if (tempc.gt.7.5 .or. rg(k).lt.0.005E-3) pnr_gml(k)=0.0
 
            if (ssati(k).lt. 0.) then
             prg_gde(k) = C_cube*t1_subl*diffu(k)*ssati(k)*rvs &
@@ -2677,7 +2679,7 @@ MODULE module_mp_thompson
            endif
           endif
 
-!>  - This change will be required if users run adaptive time step that
+!> - This change will be required if users run adaptive time step that
 !! results in delta-t that is generally too long to allow cloud water
 !! collection by snow/graupel above melting temperature.
 !! Credit to Bjorn-Egil Nygaard for discovering.
@@ -2835,8 +2837,10 @@ MODULE module_mp_thompson
          xrc=MAX(R1, (qc1d(k) + qcten(k)*dtsave)*rho(k))
          xnc=MAX(2., (nc1d(k) + ncten(k)*dtsave)*rho(k))
          if (xrc .gt. R1) then
-          if (rand2 .eq. 0.0) then
-           nu_c = MIN(15, NINT(1000.E6/xnc) + 2)
+          if (xnc.gt.10000.E6) then
+           nu_c = 2
+          elseif (xnc.lt.100.) then
+           nu_c = 15
           else
            nu_c = NINT(1000.E6/xnc) + 2
            nu_c = MAX(2, MIN(nu_c+NINT(rand2), 15))
@@ -2881,7 +2885,7 @@ MODULE module_mp_thompson
            xDi = (bm_i + mu_i + 1.) * ilami
            if (xDi.lt. 5.E-6) then
             lami = cie(2)/5.E-6
-            xni = MIN(499.D3, cig(1)*oig2*xri/am_i*lami**bm_i)
+            xni = MIN(9999.D3, cig(1)*oig2*xri/am_i*lami**bm_i)
             niten(k) = (xni-ni1d(k)*rho(k))*odts*orho
            elseif (xDi.gt. 300.E-6) then
             lami = cie(2)/300.E-6
@@ -2892,8 +2896,8 @@ MODULE module_mp_thompson
           niten(k) = -ni1d(k)*odts
          endif
          xni=MAX(0.,(ni1d(k) + niten(k)*dtsave)*rho(k))
-         if (xni.gt.499.E3) &
-                niten(k) = (499.E3-ni1d(k)*rho(k))*odts*orho
+         if (xni.gt.9999.E3) &
+                niten(k) = (9999.E3-ni1d(k)*rho(k))*odts*orho
 
 !>  - Rain tendency
          qrten(k) = qrten(k) + (prr_wau(k) + prr_rcw(k) &
@@ -2905,7 +2909,7 @@ MODULE module_mp_thompson
 !>  - Rain number tendency
          nrten(k) = nrten(k) + (pnr_wau(k) + pnr_sml(k) + pnr_gml(k)    &
                       - (pnr_rfz(k) + pnr_rcr(k) + pnr_rcg(k)           &
-                      + pnr_rcs(k) + pnr_rci(k)) )                      &
+                      + pnr_rcs(k) + pnr_rci(k) + pni_rfz(k)) )         &
                       * orho
 
 !>  - Rain mass/number balance; keep median volume diameter between
@@ -2992,8 +2996,10 @@ MODULE module_mp_thompson
          ocp(k) = 1./(Cp*(1.+0.887*qv(k)))
          lvt2(k)=lvap(k)*lvap(k)*ocp(k)*oRv*otemp*otemp
 
-         nwfa(k) = MAX(11.1E6, (nwfa1d(k) + nwfaten(k)*DT)*rho(k))
+         nwfa(k) = MAX(11.1E6*rho(k), (nwfa1d(k) + nwfaten(k)*DT)*rho(k))
+      enddo
 
+      do k = kts, kte
          if ((qc1d(k) + qcten(k)*DT) .gt. R1) then
             rc(k) = (qc1d(k) + qcten(k)*DT)*rho(k)
             nc(k) = MAX(2., MIN((nc1d(k)+ncten(k)*DT)*rho(k), Nt_c_max))
@@ -3118,26 +3124,11 @@ MODULE module_mp_thompson
 !+---+-----------------------------------------------------------------+
 !> - Calculate y-intercept, slope values for graupel.
 !+---+-----------------------------------------------------------------+
-      N0_min = gonv_max
-      k_0 = kts
       do k = kte, kts, -1
-         if (temp(k).ge.270.65) k_0 = MAX(k_0, k)
-      enddo
-      do k = kte, kts, -1
-         if (k.gt.k_0 .and. L_qr(k) .and. mvd_r(k).gt.100.E-6) then
-            xslw1 = 4.01 + alog10(mvd_r(k))
-         else
-            xslw1 = 0.01
-         endif
-         ygra1 = 4.31 + alog10(max(5.E-5, rg(k)))
-         zans1 = (3.1 + (100./(300.*xslw1*ygra1/(10./xslw1+1.+0.25*ygra1)+30.+10.*ygra1))) + rand1
-         if (rand1 .ne. 0.0) then
-          zans1 = MAX(2., MIN(zans1, 7.))
-         endif
+         ygra1 = alog10(max(1.E-9, rg(k)))
+         zans1 = 3.0 + 2./7.*(ygra1+8.) + rand1
          N0_exp = 10.**(zans1)
          N0_exp = MAX(DBLE(gonv_min), MIN(N0_exp, DBLE(gonv_max)))
-         N0_min = MIN(N0_exp, N0_min)
-         N0_exp = N0_min
          lam_exp = (N0_exp*am_g*cgg(1)/rg(k))**oge1
          lamg = lam_exp * (cgg(3)*ogg2*ogg1)**obmg
          ilamg(k) = 1./lamg
@@ -3313,11 +3304,11 @@ MODULE module_mp_thompson
 
 !..TEST: G. Thompson  10 May 2013
 !>  - Reduce the rain evaporation in same places as melting graupel occurs.
-!Rationale: falling and simultaneous melting graupel in subsaturated
-!regions will not melt as fast because particle temperature stays
-!..at 0C.  Also not much shedding of the water from the graupel so
-!..likely that the water-coated graupel evaporating much slower than
-!..if the water was immediately shed off.
+!! Rationale: falling and simultaneous melting graupel in subsaturated
+!! regions will not melt as fast because particle temperature stays
+!! at 0C.  Also not much shedding of the water from the graupel so
+!! likely that the water-coated graupel evaporating much slower than
+!! if the water was immediately shed off.
           IF (prr_gml(k).gt.0.0) THEN
              eva_factor = MIN(1.0, 0.01+(0.99-0.01)*(tempc/20.0))
              prv_rev(k) = prv_rev(k)*eva_factor
@@ -3420,8 +3411,10 @@ MODULE module_mp_thompson
       do k = ksed1(5), kts, -1
          vtc = 0.
          if (rc(k) .gt. R1 .and. w1d(k) .lt. 1.E-1) then
-          if (rand2 .eq. 0.0) then
-           nu_c = MIN(15, NINT(1000.E6/nc(k)) + 2)
+          if (nc(k).gt.10000.E6) then
+           nu_c = 2
+          elseif (nc(k).lt.100.) then
+           nu_c = 15
           else
            nu_c = NINT(1000.E6/nc(k)) + 2
            nu_c = MAX(2, MIN(nu_c+NINT(rand2), 15))
@@ -3490,13 +3483,10 @@ MODULE module_mp_thompson
            t4_vts = Kap1*Mrat**mu_s*csg(7)*ils2**cse(7)
            vts = rhof(k)*av_s * (t1_vts+t2_vts)/(t3_vts+t4_vts)
            if (temp(k).gt. (T_0+0.1)) then
-            vtsk(k) = MAX(vts*vts_boost(k),                             &
-     &                vts*((vtrk(k)-vts*vts_boost(k))/(temp(k)-T_0))) !
-! DH* The version below is supposed to be a better formulation,
-! but gave worse results in RAPv5/HRRRv4 than the line above.
-                      ! this formulation for RAPv5/HRRRv4, reverted 20 Feb 2020
-     !       SR = rs(k)/(rs(k)+rr(k)) ! bug fix from G. Thompson, 10 May 2019
-     !       vtsk(k) = vts*SR + (1.-SR)*vtrk(k)
+!           vtsk(k) = MAX(vts*vts_boost(k),                             &
+!    &                vts*((vtrk(k)-vts*vts_boost(k))/(temp(k)-T_0)))
+            SR = rs(k)/(rs(k)+rr(k))
+            vtsk(k) = vts*SR + (1.-SR)*vtrk(k)
            else
             vtsk(k) = vts*vts_boost(k)
            endif
@@ -3547,10 +3537,6 @@ MODULE module_mp_thompson
 !>  - Sedimentation of mixing ratio is the integral of v(D)*m(D)*N(D)*dD,
 !! whereas neglect m(D) term for number concentration.  Therefore,
 !! cloud ice has proper differential sedimentation.
-!.. New in v3.0+ is computing separate for rain, ice, snow, and
-!.. graupel species thus making code faster with credit to J. Schmidt.
-!.. Bug fix, 2013Nov01 to tendencies using rho(k+1) correction thanks to
-!.. Eric Skyllingstad.
 !+---+-----------------------------------------------------------------+
 
       if (ANY(L_qr .eqv. .true.)) then
@@ -3580,11 +3566,7 @@ MODULE module_mp_thompson
                                            *odzq*DT*onstep(1))
          enddo
 
-#if 1
          if (rr(kts).gt.R1*10.) &
-#else
-         if (rr(kts).gt.R1*1000.) &
-#endif
          pptrain = pptrain + sed_r(kts)*DT*onstep(1)
       enddo
       endif
@@ -3635,11 +3617,7 @@ MODULE module_mp_thompson
                                            *odzq*DT*onstep(2))
          enddo
 
-#if 1
          if (ri(kts).gt.R1*10.) &
-#else
-         if (ri(kts).gt.R1*1000.) &
-#endif
          pptice = pptice + sed_i(kts)*DT*onstep(2)
       enddo
       endif
@@ -3666,11 +3644,7 @@ MODULE module_mp_thompson
                                            *odzq*DT*onstep(3))
          enddo
 
-#if 1
          if (rs(kts).gt.R1*10.) &
-#else
-         if (rs(kts).gt.R1*1000.) &
-#endif
          pptsnow = pptsnow + sed_s(kts)*DT*onstep(3)
       enddo
       endif
@@ -3697,11 +3671,7 @@ MODULE module_mp_thompson
                                            *odzq*DT*onstep(4))
          enddo
 
-#if 1
          if (rg(kts).gt.R1*10.) &
-#else
-         if (rg(kts).gt.R1*1000.) &
-#endif
          pptgraul = pptgraul + sed_g(kts)*DT*onstep(4)
       enddo
       endif
@@ -3742,19 +3712,21 @@ MODULE module_mp_thompson
          qv1d(k) = MAX(1.E-10, qv1d(k) + qvten(k)*DT)
          qc1d(k) = qc1d(k) + qcten(k)*DT
          nc1d(k) = MAX(2./rho(k), MIN(nc1d(k) + ncten(k)*DT, Nt_c_max))
-         nwfa1d(k) = MAX(11.1E6/rho(k), MIN(9999.E6/rho(k),             &
+         nwfa1d(k) = MAX(11.1E6, MIN(9999.E6,                           &
                        (nwfa1d(k)+nwfaten(k)*DT)))
-         nifa1d(k) = MAX(naIN1*0.01, MIN(9999.E6/rho(k),                &
+         nifa1d(k) = MAX(naIN1*0.01, MIN(9999.E6,                       &
                        (nifa1d(k)+nifaten(k)*DT)))
          if (qc1d(k) .le. R1) then
            qc1d(k) = 0.0
            nc1d(k) = 0.0
          else
-           if (rand2 .eq. 0.0) then
-             nu_c = MIN(15, NINT(1000.E6/(nc1d(k)*rho(k))) + 2)
+           if (nc1d(k)*rho(k).gt.10000.E6) then
+            nu_c = 2
+           elseif (nc1d(k)*rho(k).lt.100.) then
+            nu_c = 15
            else
-             nu_c = NINT(1000.E6/(nc1d(k)*rho(k))) + 2
-             nu_c = MAX(2, MIN(nu_c+NINT(rand2), 15))
+            nu_c = NINT(1000.E6/(nc1d(k)*rho(k))) + 2
+            nu_c = MAX(2, MIN(nu_c+NINT(rand2), 15))
            endif
            lamc = (am_r*ccg(2,nu_c)*ocg1(nu_c)*nc1d(k)/qc1d(k))**obmr
            xDc = (bm_r + nu_c + 1.) / lamc
@@ -3782,7 +3754,7 @@ MODULE module_mp_thompson
             lami = cie(2)/300.E-6
            endif
            ni1d(k) = MIN(cig(1)*oig2*qi1d(k)/am_i*lami**bm_i,           &
-                         499.D3/rho(k))
+                         9999.D3/rho(k))
          endif
          qr1d(k) = qr1d(k) + qrten(k)*DT
          nr1d(k) = MAX(R2/rho(k), nr1d(k) + nrten(k)*DT)
@@ -3837,13 +3809,12 @@ MODULE module_mp_thompson
 
 
       good = 0
-        INQUIRE(FILE="qr_acr_qg.dat",EXIST=lexist)
+        INQUIRE(FILE=qr_acr_qg_file, EXIST=lexist)
 #ifdef MPI
         call MPI_BARRIER(mpi_communicator,ierr)
 #endif
         IF ( lexist ) THEN
-          !write(0,*) "ThompMP: read qr_acr_qg.dat instead of computing"
-          OPEN(63,file="qr_acr_qg.dat",form="unformatted",err=1234)
+          OPEN(63,file=qr_acr_qg_file,form="unformatted",err=1234)
 !sms$serial begin
           READ(63,err=1234) tcg_racg
           READ(63,err=1234) tmr_racg
@@ -3858,13 +3829,13 @@ MODULE module_mp_thompson
             INQUIRE(63,opened=lopen)
             IF (lopen) THEN
               IF( force_read_thompson ) THEN
-                write(0,*) "Error reading qr_acr_qg.dat. Aborting because force_read_thompson is .true."
+                write(0,*) "Error reading "//qr_acr_qg_file//" Aborting because force_read_thompson is .true."
                 return
               ENDIF
               CLOSE(63)
             ELSE
               IF( force_read_thompson ) THEN
-                write(0,*) "Error opening qr_acr_qg.dat. Aborting because force_read_thompson is .true."
+                write(0,*) "Error opening "//qr_acr_qg_file//" Aborting because force_read_thompson is .true."
                 return
               ENDIF
             ENDIF
@@ -3876,7 +3847,7 @@ MODULE module_mp_thompson
           ENDIF
         ELSE
           IF( force_read_thompson ) THEN
-            write(0,*) "Non-existent qr_acr_qg.dat. Aborting because force_read_thompson is .true."
+            write(0,*) "Non-existent "//qr_acr_qg_file//" Aborting because force_read_thompson is .true."
             return
           ENDIF
         ENDIF
@@ -3885,7 +3856,7 @@ MODULE module_mp_thompson
 #ifndef SION
         if (thompson_table_writer) write_thompson_tables = .true.
 #endif
-        write(0,*) "ThompMP: computing qr_acr_qg"
+        if (thompson_table_writer) write(0,*) "ThompMP: computing qr_acr_qg"
         do n2 = 1, nbr
 !        vr(n2) = av_r*Dr(n2)**bv_r * DEXP(-fv_r*Dr(n2))
          vr(n2) = -0.1021 + 4.932E3*Dr(n2) - 0.9551E6*Dr(n2)*Dr(n2)     &
@@ -3959,7 +3930,7 @@ MODULE module_mp_thompson
             tcg_racg(i,j,k,m) = t1
             tmr_racg(i,j,k,m) = DMIN1(z1, r_r(m)*1.0d0)
             tcr_gacr(i,j,k,m) = t2
-            tmg_gacr(i,j,k,m) = z2
+            tmg_gacr(i,j,k,m) = DMIN1(z2, r_g(j)*1.0d0)
             tnr_racg(i,j,k,m) = y1
             tnr_gacr(i,j,k,m) = y2
          enddo
@@ -3967,8 +3938,8 @@ MODULE module_mp_thompson
         enddo
 
         IF ( write_thompson_tables ) THEN
-          write(0,*) "Writing qr_acr_qg.dat in Thompson MP init"
-          OPEN(63,file="qr_acr_qg.dat",form="unformatted",err=9234)
+          write(0,*) "Writing "//qr_acr_qg_file//" in Thompson MP init"
+          OPEN(63,file=qr_acr_qg_file,form="unformatted",err=9234)
           WRITE(63,err=9234) tcg_racg
           WRITE(63,err=9234) tmr_racg
           WRITE(63,err=9234) tcr_gacr
@@ -3978,7 +3949,7 @@ MODULE module_mp_thompson
           CLOSE(63)
           RETURN    ! ----- RETURN
  9234     CONTINUE
-          write(0,*) "Error writing qr_acr_qg.dat"
+          write(0,*) "Error writing "//qr_acr_qg_file
           return
         ENDIF
       ENDIF
@@ -4013,13 +3984,13 @@ MODULE module_mp_thompson
       write_thompson_tables = .false.
 
       good = 0
-        INQUIRE(FILE="qr_acr_qs.dat",EXIST=lexist)
+        INQUIRE(FILE=qr_acr_qs_file, EXIST=lexist)
 #ifdef MPI
         call MPI_BARRIER(mpi_communicator,ierr)
 #endif
         IF ( lexist ) THEN
-          !write(0,*) "ThompMP: read qr_acr_qs.dat instead of computing"
-          OPEN(63,file="qr_acr_qs.dat",form="unformatted",err=1234)
+          !write(0,*) "ThompMP: read "//qr_acr_qs_file//" instead of computing"
+          OPEN(63,file=qr_acr_qs_file,form="unformatted",err=1234)
 !sms$serial begin
           READ(63,err=1234)tcs_racs1
           READ(63,err=1234)tmr_racs1
@@ -4040,13 +4011,13 @@ MODULE module_mp_thompson
             INQUIRE(63,opened=lopen)
             IF (lopen) THEN
               IF( force_read_thompson ) THEN
-                write(0,*) "Error reading qr_acr_qs.dat. Aborting because force_read_thompson is .true."
+                write(0,*) "Error reading "//qr_acr_qs_file//" Aborting because force_read_thompson is .true."
                 return
               ENDIF
               CLOSE(63)
             ELSE
               IF( force_read_thompson ) THEN
-                write(0,*) "Error opening qr_acr_qs.dat. Aborting because force_read_thompson is .true."
+                write(0,*) "Error opening "//qr_acr_qs_file//" Aborting because force_read_thompson is .true."
                 return
               ENDIF
             ENDIF
@@ -4058,7 +4029,7 @@ MODULE module_mp_thompson
           ENDIF
         ELSE
           IF( force_read_thompson ) THEN
-            write(0,*) "Non-existent qr_acr_qs.dat. Aborting because force_read_thompson is .true."
+            write(0,*) "Non-existent "//qr_acr_qs_file//" Aborting because force_read_thompson is .true."
             return
           ENDIF
         ENDIF
@@ -4067,7 +4038,7 @@ MODULE module_mp_thompson
 #ifndef SION
         if (thompson_table_writer) write_thompson_tables = .true.
 #endif
-        write(0,*) "ThompMP: computing qr_acr_qs"
+        if (thompson_table_writer) write(0,*) "ThompMP: computing qr_acr_qs"
         do n2 = 1, nbr
 !        vr(n2) = av_r*Dr(n2)**bv_r * DEXP(-fv_r*Dr(n2))
          vr(n2) = -0.1021 + 4.932E3*Dr(n2) - 0.9551E6*Dr(n2)*Dr(n2)     &
@@ -4219,8 +4190,8 @@ MODULE module_mp_thompson
         enddo
 
         IF ( write_thompson_tables ) THEN
-          write(0,*) "Writing qr_acr_qs.dat in Thompson MP init"
-          OPEN(63,file="qr_acr_qs.dat",form="unformatted",err=9234)
+          write(0,*) "Writing "//qr_acr_qs_file//" in Thompson MP init"
+          OPEN(63,file=qr_acr_qs_file,form="unformatted",err=9234)
           WRITE(63,err=9234)tcs_racs1
           WRITE(63,err=9234)tmr_racs1
           WRITE(63,err=9234)tcs_racs2
@@ -4236,7 +4207,7 @@ MODULE module_mp_thompson
           CLOSE(63)
           RETURN    ! ----- RETURN
  9234     CONTINUE
-          write(0,*) "Error writing qr_acr_qs.dat"
+          write(0,*) "Error writing "//qr_acr_qs_file
         ENDIF
       ENDIF
 
@@ -4274,13 +4245,13 @@ MODULE module_mp_thompson
       write_thompson_tables = .false.
 
       good = 0
-        INQUIRE(FILE="freezeH2O.dat",EXIST=lexist)
+        INQUIRE(FILE=freeze_h2o_file,EXIST=lexist)
 #ifdef MPI
         call MPI_BARRIER(mpi_communicator,ierr)
 #endif
         IF ( lexist ) THEN
-          !write(0,*) "ThompMP: read freezeH2O.dat instead of computing"
-          OPEN(63,file="freezeH2O.dat",form="unformatted",err=1234)
+          !write(0,*) "ThompMP: read "//freeze_h2o_file//" instead of computing"
+          OPEN(63,file=freeze_h2o_file,form="unformatted",err=1234)
 !sms$serial begin
           READ(63,err=1234)tpi_qrfz
           READ(63,err=1234)tni_qrfz
@@ -4295,13 +4266,13 @@ MODULE module_mp_thompson
             INQUIRE(63,opened=lopen)
             IF (lopen) THEN
               IF( force_read_thompson ) THEN
-                write(0,*) "Error reading freezeH2O.dat. Aborting because force_read_thompson is .true."
+                write(0,*) "Error reading "//freeze_h2o_file//" Aborting because force_read_thompson is .true."
                 return
               ENDIF
               CLOSE(63)
             ELSE
               IF( force_read_thompson ) THEN
-                write(0,*) "Error opening freezeH2O.dat. Aborting because force_read_thompson is .true."
+                write(0,*) "Error opening "//freeze_h2o_file//" Aborting because force_read_thompson is .true."
                 return
               ENDIF
             ENDIF
@@ -4313,7 +4284,7 @@ MODULE module_mp_thompson
           ENDIF
         ELSE
           IF( force_read_thompson ) THEN
-            write(0,*) "Non-existent freezeH2O.dat. Aborting because force_read_thompson is .true."
+            write(0,*) "Non-existent "//freeze_h2o_file//" Aborting because force_read_thompson is .true."
             return
           ENDIF
         ENDIF
@@ -4322,7 +4293,7 @@ MODULE module_mp_thompson
 #ifndef SION
         if (thompson_table_writer) write_thompson_tables = .true.
 #endif
-        write(0,*) "ThompMP: computing freezeH2O"
+        if (thompson_table_writer) write(0,*) "ThompMP: computing freezeH2O"
 
         orho_w = 1./rho_w
 
@@ -4397,8 +4368,8 @@ MODULE module_mp_thompson
         enddo
 
         IF ( write_thompson_tables ) THEN
-          write(0,*) "Writing freezeH2O.dat in Thompson MP init"
-          OPEN(63,file="freezeH2O.dat",form="unformatted",err=9234)
+          write(0,*) "Writing "//freeze_h2o_file//" in Thompson MP init"
+          OPEN(63,file=freeze_h2o_file,form="unformatted",err=9234)
           WRITE(63,err=9234)tpi_qrfz
           WRITE(63,err=9234)tni_qrfz
           WRITE(63,err=9234)tpg_qrfz
@@ -4408,7 +4379,7 @@ MODULE module_mp_thompson
           CLOSE(63)
           RETURN    ! ----- RETURN
  9234     CONTINUE
-          write(0,*) "Error writing freezeH2O.dat"
+          write(0,*) "Error writing "//freeze_h2o_file
           return
         ENDIF
       ENDIF
@@ -5120,7 +5091,7 @@ MODULE module_mp_thompson
 !        mux = hx*p_alpha*n_in*rho
 !        xni = mux*((6700.*nifa)-200.)/((6700.*5.E5)-200.)
 !     elseif (satw.ge.0.985 .and. tempc.gt.HGFR-273.15) then
-         nifa_cc = nifa*RHO_NOT0*1.E-6/rho
+         nifa_cc = MAX(0.5, nifa*RHO_NOT0*1.E-6/rho)
 !        xni  = 3.*nifa_cc**(1.25)*exp((0.46*(-tempc))-11.6)              !  [DeMott, 2015]
          xni = (5.94e-5*(-tempc)**3.33)                                 & !  [DeMott, 2010]
                     * (nifa_cc**((-0.0264*(tempc))+0.0033))
@@ -5233,22 +5204,9 @@ MODULE module_mp_thompson
       has_qi = .false.
       has_qs = .false.
 
-! DH* 2020-06-08 Moved the initial values and bounds from
-! the calling routines into calc_effectRad (to prevent
-! multiple definitions that may be inconsistent). The
-! initial values and bounds from the calling routines were
-!
-!    re_cloud(i,k) = MAX(2.49, MIN(re_cloud(i,k)*1.e6, 50.))
-!    re_ice(i,k)   = MAX(4.99, MIN(re_ice(i,k)*1.e6, 125.))
-!    re_snow(i,k)  = MAX(9.99, MIN(re_snow(i,k)*1.e6, 999.))
-!
-! independent of the version of Thompson MP. These values
-! are consistent with the WRFv3.8.1 settings, but inconsistent
-! with the WRFv4+ settings. In order to apply the same bounds
-! as before this change, use the WRF v3.8.1 settings throughout.
-      re_qc1d(:) = 2.50E-6 ! 2.49E-6
-      re_qi1d(:) = 5.00E-6 ! 4.99E-6
-      re_qs1d(:) = 1.00E-5 ! 9.99E-6
+      re_qc1d(:) = 0.0D0
+      re_qi1d(:) = 0.0D0
+      re_qs1d(:) = 0.0D0
 
       do k = kts, kte
          rho(k) = 0.622*p1d(k)/(R*t1d(k)*(qv1d(k)+0.622))
@@ -5274,7 +5232,7 @@ MODULE module_mp_thompson
             inu_c = MIN(15, NINT(1000.E6/nc(k)) + 2)
          endif
          lamc = (nc(k)*am_r*g_ratio(inu_c)/rc(k))**obmr
-         re_qc1d(k) = MAX(2.51E-6, MIN(SNGL(0.5D0 * DBLE(3.+inu_c)/lamc), 50.E-6))
+         re_qc1d(k) = SNGL(0.5D0 * DBLE(3.+inu_c)/lamc)
       enddo
       endif
 
@@ -5282,7 +5240,7 @@ MODULE module_mp_thompson
       do k = kts, kte
          if (ri(k).le.R1 .or. ni(k).le.R2) CYCLE
          lami = (am_i*cig(2)*oig1*ni(k)/ri(k))**obmi
-         re_qi1d(k) = MAX(5.01E-6, MIN(SNGL(0.5D0 * DBLE(3.+mu_i)/lami), 125.E-6))
+         re_qi1d(k) = SNGL(0.5D0 * DBLE(3.+mu_i)/lami)
       enddo
       endif
 
@@ -5322,7 +5280,7 @@ MODULE module_mp_thompson
      &        + sb(7)*tc0*tc0*cse(1) + sb(8)*tc0*cse(1)*cse(1) &
      &        + sb(9)*tc0*tc0*tc0 + sb(10)*cse(1)*cse(1)*cse(1)
          smoc = a_ * smo2**b_
-         re_qs1d(k) = MAX(1.01E-5, MIN(0.5*(smoc/smob), 999.E-6))
+         re_qs1d(k) = 0.5*(smoc/smob)
       enddo
       endif
 
@@ -5441,8 +5399,15 @@ MODULE module_mp_thompson
 !+---+-----------------------------------------------------------------+
 !..Calculate y-intercept, slope, and useful moments for snow.
 !+---+-----------------------------------------------------------------+
+      do k = kts, kte
+         smo2(k) = 0.
+         smob(k) = 0.
+         smoc(k) = 0.
+         smoz(k) = 0.
+      enddo
       if (ANY(L_qs .eqv. .true.)) then
       do k = kts, kte
+         if (.not. L_qs(k)) CYCLE
          tc0 = MIN(-0.1, temp(k)-273.15)
          smob(k) = rs(k)*oams
 
@@ -5498,26 +5463,11 @@ MODULE module_mp_thompson
 !+---+-----------------------------------------------------------------+
 
       if (ANY(L_qg .eqv. .true.)) then
-      N0_min = gonv_max
-      k_0 = kts
       do k = kte, kts, -1
-         if (temp(k).ge.270.65) k_0 = MAX(k_0, k)
-      enddo
-      do k = kte, kts, -1
-         if (k.gt.k_0 .and. L_qr(k) .and. mvd_r(k).gt.100.E-6) then
-            xslw1 = 4.01 + alog10(mvd_r(k))
-         else
-            xslw1 = 0.01
-         endif
-         ygra1 = 4.31 + alog10(max(5.E-5, rg(k)))
-         zans1 = (3.1 + (100./(300.*xslw1*ygra1/(10./xslw1+1.+0.25*ygra1)+30.+10.*ygra1))) + rand1
-         if (rand1 .ne. 0.0) then
-          zans1 = MAX(2., MIN(zans1, 7.))
-         endif
+         ygra1 = alog10(max(1.E-9, rg(k)))
+         zans1 = 3.0 + 2./7.*(ygra1+8.) + rand1
          N0_exp = 10.**(zans1)
          N0_exp = MAX(DBLE(gonv_min), MIN(N0_exp, DBLE(gonv_max)))
-         N0_min = MIN(N0_exp, N0_min)
-         N0_exp = N0_min
          lam_exp = (N0_exp*am_g*cgg(1)/rg(k))**oge1
          lamg = lam_exp * (cgg(3)*ogg2*ogg1)**obmg
          ilamg(k) = 1./lamg
@@ -5666,7 +5616,7 @@ MODULE module_mp_thompson
 
 #ifdef SION
 !>\ingroup aathompson
-      subroutine readwrite_tables(mode, mpicomm, mpirank, mpiroot, ierr)
+      subroutine readwrite_tables(filename, mode, mpicomm, mpirank, mpiroot, ierr)
 
 #ifdef MPI
          use mpi
@@ -5676,6 +5626,7 @@ MODULE module_mp_thompson
          implicit none
 
          ! Interface variables
+         character(len=*), intent(in)  :: filename
          character(len=*), intent(in)  :: mode
          integer,          intent(in)  :: mpicomm
          integer,          intent(in)  :: mpirank
@@ -5702,7 +5653,6 @@ MODULE module_mp_thompson
          logical            :: exists
          integer*8          :: tables_size
          real*8             :: checksum
-         character(len=*), parameter :: filename = 'thompson_tables_precomp.sl'
 
          integer :: i
 
