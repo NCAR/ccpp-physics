@@ -113,6 +113,15 @@
   kind = kind_phys
   intent = in
   optional = F
+[con_eps]
+  standard_name = ratio_of_dry_air_to_water_vapor_gas_constants
+  long_name = rd/rv
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [dtp]
   standard_name = time_step_for_physics
   long_name = time step for physics
