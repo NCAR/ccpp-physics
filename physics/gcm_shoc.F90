@@ -24,7 +24,7 @@ end subroutine shoc_finalize
 !! \htmlinclude shoc_run.html
 !!
 subroutine shoc_run (nx, nzm, tcr, tcrf, con_cp, con_g, con_hvap, con_hfus, con_rv, con_rd,     &
-                     con_pi, con_fvirt, dtp, prsl, delp, phii, phil, u, v, omega, rhc,          &
+                     con_pi, con_fvirt, con_eps, dtp, prsl, delp, phii, phil, u, v, omega, rhc, &
                      supice, pcrit,  cefac, cesfac, tkef1, dis_opt, hflx, evap, prnum,          &
                      gt0, gq0, ntrac, ntqv, ntcw, ntiw, ntrw, ntsw, ntgl, ntlnc, ntinc,         &
                      cld_sgs, tke, tkh, wthv_sec, errmsg, errflg)
@@ -32,7 +32,8 @@ subroutine shoc_run (nx, nzm, tcr, tcrf, con_cp, con_g, con_hvap, con_hfus, con_
     implicit none
 
     integer, intent(in) :: nx, nzm, ntrac, ntqv, ntcw, ntiw, ntrw, ntsw, ntgl, ntlnc, ntinc
-    real(kind=kind_phys), intent(in) :: tcr, tcrf, con_cp, con_g, con_hvap, con_hfus, con_rv, con_rd, con_pi, con_fvirt, &
+    real(kind=kind_phys), intent(in) :: tcr, tcrf, con_cp, con_g, con_hvap, con_hfus, con_rv, &
+                                        con_rd, con_pi, con_fvirt, con_eps,                   &
                                         dtp, supice, pcrit, cefac, cesfac, tkef1, dis_opt
   !
     real(kind=kind_phys), intent(in), dimension(nx)       :: hflx, evap
@@ -118,7 +119,8 @@ subroutine shoc_run (nx, nzm, tcr, tcrf, con_cp, con_g, con_hvap, con_hfus, con_
                     rhc, supice, pcrit, cefac, cesfac, tkef1, dis_opt,                  &
                     cld_sgs, tke, hflx, evap, prnum, tkh, wthv_sec,                     &
                     ntlnc, ncpl, ncpi,                                                  &
-                    con_cp, con_g, con_hvap, con_hfus, con_rv, con_rd, con_pi, con_fvirt)
+                    con_cp, con_g, con_hvap, con_hfus, con_rv, con_rd, con_pi,          &
+                    con_fvirt, con_eps)
 
     if (ntiw < 0) then   ! this is valid only for Zhao-Carr scheme
       do k=1,nzm
@@ -166,13 +168,13 @@ end subroutine shoc_run
                        pcrit, cefac, cesfac, tkef1, dis_opt,            &
                        cld_sgs, tke, hflx, evap, prnum, tkh,            &
                        wthv_sec, ntlnc, ncpl, ncpi,                     &
-                       cp, ggr, lcond, lfus, rv, rgas, pi, epsv)
+                       cp, ggr, lcond, lfus, rv, rgas, pi, epsv, eps)
 
   use funcphys , only : fpvsl, fpvsi, fpvs    ! saturation vapor pressure for water & ice
 
   implicit none
 
-  real,    intent(in) :: cp, ggr, lcond, lfus, rv, rgas, pi, epsv
+  real,    intent(in) :: cp, ggr, lcond, lfus, rv, rgas, pi, epsv, eps
   integer, intent(in) :: ix      ! max number of points in the physics window in the x
   integer, intent(in) :: nx      ! Number of points in the physics window in the x
 
@@ -219,7 +221,7 @@ end subroutine shoc_run
   real, intent(in)    :: prnum  (nx,nzm)   ! turbulent Prandtl number
   real, intent(inout) :: wthv_sec (ix,nzm) ! Buoyancy flux, K*m/s
 
-  real, parameter :: zero=0.0_kp,  one=1.0_kp,  half=0.5_kp, two=2.0_kp, eps=0.622_kp,    &
+  real, parameter :: zero=0.0_kp,  one=1.0_kp,  half=0.5_kp, two=2.0_kp,                  &
                      three=3.0_kp, oneb3=one/three, twoby3=two/three, fourb3=twoby3+twoby3
   real, parameter :: sqrt2 = sqrt(two), twoby15 = two / 15.0_kp,                          &
                      nmin = 1.0_kp,    RI_cub = 6.4e-14_kp, RL_cub = 1.0e-15_kp,          &

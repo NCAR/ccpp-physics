@@ -143,8 +143,8 @@ module  cires_ugwpv1_module
 !-----------------------------------------------------------------------------------
 
   subroutine cires_ugwpv1_init (me, master, nlunit, logunit, jdat_gfs, con_pi,  &
-              con_rerth, fn_nml2, lonr, latr, levs, ak, bk, pref, dtp,          &
-              errmsg, errflg)
+              con_rerth, fn_nml2, input_nml_file, lonr, latr, levs, ak, bk,     &
+              pref, dtp, errmsg, errflg)
 !
 !  input_nml_file ='input.nml'=fn_nml   ..... OLD_namelist and cdmvgwd(4) Corrected Bug Oct 4
 !
@@ -177,7 +177,7 @@ module  cires_ugwpv1_module
     real(kind=kind_phys),    intent (in) :: con_pi, con_rerth
  
     character(len=64), intent (in) :: fn_nml2
-    character(len=64), parameter   :: fn_nml='input.nml'
+    character(len=*),  intent (in) :: input_nml_file(:)
 
     character(len=*), intent(out) :: errmsg
     integer,          intent(out) :: errflg
@@ -187,7 +187,7 @@ module  cires_ugwpv1_module
     integer :: ios
     logical :: exists
     
-    integer :: ncid,  iernc, vid, dimid, status         
+    integer :: ncid,  iernc, vid, dimid, status
     integer :: k
     integer :: ddd_ugwp,    curday_ugwp 
 !    integer :: version
@@ -196,21 +196,23 @@ module  cires_ugwpv1_module
     errmsg = ''
     errflg = 0
 
-!
-    if (me == master) print *, trim (fn_nml), ' GW-namelist file '
-    inquire (file =trim (fn_nml) , exist = exists)
+#ifdef INTERNAL_FILE_NML
+    read (input_nml_file, nml = cires_ugwp_nml)
+#else
+    if (me == master) print *, trim (fn_nml2), ' GW-namelist file '
+    inquire (file =trim (fn_nml2) , exist = exists)
 !
     if (.not. exists) then
-        write(errmsg,'(3a)') 'cires_ugwpv1_init: namelist file: ', trim (fn_nml), ' does not exist'
+        write(errmsg,'(3a)') 'cires_ugwpv1_init: namelist file: ', trim (fn_nml2), ' does not exist'
         errflg = 1
         return
     else
-        open (unit = nlunit, file = trim(fn_nml), action = 'read', status = 'old', iostat = ios)
+        open (unit = nlunit, file = trim(fn_nml2), action = 'read', status = 'old', iostat = ios)
     endif
     rewind (nlunit)
     read   (nlunit, nml = cires_ugwp_nml)
     close  (nlunit)
-!
+#endif
 
     strsolver= knob_ugwp_orosolv     
     
