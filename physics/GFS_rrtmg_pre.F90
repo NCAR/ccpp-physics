@@ -18,7 +18,7 @@
       ! in the CCPP version - they are defined in the interstitial_create routine
       subroutine GFS_rrtmg_pre_run (im, levs, lm, lmk, lmp, n_var_lndp,        &
         imfdeepcnv, imfdeepcnv_gf, me, ncnd, ntrac, num_p3d, npdf3d, ncnvcld3d,&
-        ntqv, ntcw,ntiw, ntlnc, ntinc, ntrw, ntsw, ntgl, ntwa, ntoz,           &
+        ntqv, ntcw,ntiw, ntlnc, ntinc, ntrw, ntsw, ntgl, nthl, ntwa, ntoz,           &
         ntclamt, nleffr, nieffr, nseffr, lndp_type, kdt, imp_physics,          &
         imp_physics_nssl2m, imp_physics_nssl2mccn,                             &
         imp_physics_thompson, imp_physics_gfdl, imp_physics_zhao_carr,         &
