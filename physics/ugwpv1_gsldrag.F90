@@ -160,7 +160,7 @@ contains
     if ( do_ugwp_v0_orog_only .or. do_ugwp_v0) then
        print *,  ' ccpp do_ugwp_v0 active ', do_ugwp_v0
        print *,  ' ccpp do_ugwp_v1_orog_only active ', do_ugwp_v0_orog_only
-        write(errmsg,'(*(a))') " the CIRES <ugwpv1_gsldrag> CCPP-suite does not &
+       write(errmsg,'(*(a))') " the CIRES <ugwpv1_gsldrag> CCPP-suite does not &
          support <ugwp_v0> schemes "
        errflg = 1
        return
@@ -171,7 +171,7 @@ contains
        print *,  '  do_ugwp_v1_w_gsldrag ', do_ugwp_v1_w_gsldrag
        print *,  '  do_ugwp_v1_orog_only ', do_ugwp_v1_orog_only
        print *,  '  do_gsl_drag_ls_bl ',do_gsl_drag_ls_bl
-        write(errmsg,'(*(a))') " the CIRES <ugwpv1_gsldrag> CCPP-suite intend to &
+       write(errmsg,'(*(a))') " the CIRES <ugwpv1_gsldrag> CCPP-suite intend to &
          support <ugwp_v1> with <gsldrag>  but  has Logic error"
        errflg = 1
        return
@@ -230,8 +230,9 @@ contains
 
     if ( do_ugwp_v1 ) then
        call cires_ugwpv1_init (me, master, nlunit, logunit, jdat, con_pi,      &
-                               con_rerth, fn_nml2, lonr, latr, levs, ak, bk,   &
-                               con_p0, dtp, errmsg, errflg)
+                               con_rerth, fn_nml2, input_nml_file, lonr, latr, &
+                               levs, ak, bk, con_p0, dtp, errmsg, errflg)
+       if (errflg/=0) return
     end if
 
     if (me == master) then

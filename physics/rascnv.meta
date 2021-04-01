@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = rascnv
   type = scheme
-  dependencies = 
+  dependencies = funcphys.f90,machine.F
 
 ########################################################################
 [ccpp-arg-table]
@@ -422,7 +422,7 @@
   standard_name = convective_transportable_tracers
   long_name = array to contain cloud water and other convective trans. tracers
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension,tracer_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers_for_convective_transport)
   type = real
   kind = kind_phys
   intent = inout

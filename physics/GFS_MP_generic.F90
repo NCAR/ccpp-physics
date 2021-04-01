@@ -121,9 +121,6 @@
       integer,         dimension(:,:), intent(in)    :: dtidx
 
       ! Stochastic physics / surface perturbations
-      logical, intent(in) :: do_sppt, ca_global
-      real(kind=kind_phys), dimension(im,levs), intent(inout) :: dtdtr
-      real(kind=kind_phys), dimension(im,levs), intent(in)    :: dtdtc
       real(kind=kind_phys), dimension(im),      intent(inout) :: drain_cpl
       real(kind=kind_phys), dimension(im),      intent(inout) :: dsnow_cpl
 
@@ -401,11 +398,6 @@
         pwat(i) = pwat(i) * onebg
       enddo
 
-      ! Stochastic physics / surface perturbations
-      if (do_sppt .or. ca_global) then
-!--- radiation heating rate
-        dtdtr(1:im,:) = dtdtr(1:im,:) + dtdtc(1:im,:)*dtf
-      endif
 
       end subroutine GFS_MP_generic_post_run
 !> @}

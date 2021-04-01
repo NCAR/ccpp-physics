@@ -8,6 +8,30 @@
 [ccpp-arg-table]
   name = rrtmgp_sw_gas_optics_init
   type = scheme
+[ncol]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal dimension
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[nLev]
+  standard_name = vertical_dimension
+  long_name = number of vertical levels
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[nThreads]
+  standard_name = omp_threads
+  long_name = number of OpenMP threads available to scheme
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [rrtmgp_root_dir]
   standard_name = directory_for_rte_rrtmgp_source_code
   long_name = directory for rte+rrtmgp source code
@@ -26,22 +50,13 @@
   intent = in
   optional = F
   kind = len=128
-[rrtmgp_nGases]
-  standard_name = number_of_active_gases_used_by_RRTMGP
-  long_name = number of gases available used by RRTMGP
-  units = count
-  dimensions =  ()
-  type = integer
-  intent = in
-  optional = F
-[active_gases_array]
-  standard_name = list_of_active_gases_used_by_RRTMGP
-  long_name = list of active gases used by RRTMGP
-  units = none
-  dimensions =  (number_of_active_gases_used_by_RRTMGP)
-  type = character
-  kind = len=*
-  intent = in
+[gas_concentrations]
+  standard_name = Gas_concentrations_for_RRTMGP_suite
+  long_name = DDT containing gas concentrations for RRTMGP radiation scheme
+  units = DDT
+  dimensions = ()
+  type = ty_gas_concs
+  intent = inout
   optional = F
 [mpirank]
   standard_name = mpi_rank
@@ -82,14 +97,6 @@
   units = flag
   dimensions = ()
   type = integer
-  intent = out
-  optional = F
-[sw_gas_props]
-  standard_name = coefficients_for_sw_gas_optics
-  long_name = DDT containing spectral information for RRTMGP SW radiation scheme
-  units = DDT
-  dimensions = ()
-  type = ty_gas_optics_rrtmgp
   intent = out
   optional = F
 
@@ -137,12 +144,12 @@
   type = integer
   intent = in
   optional = F
-[sw_gas_props]
-  standard_name = coefficients_for_sw_gas_optics
-  long_name = DDT containing spectral information for RRTMGP SW radiation scheme
-  units = DDT
-  dimensions = ()
-  type = ty_gas_optics_rrtmgp
+[ngptsGPsw]
+  standard_name = number_of_sw_spectral_points_rrtmgp
+  long_name = number of spectral points in RRTMGP SW calculation
+  units = count
+  dimensions =  ()
+  type = integer
   intent = in
   optional = F
 [p_lay]
@@ -205,23 +212,6 @@
   dimensions = ()
   type = real
   kind = kind_phys
-  intent = in
-  optional = F
-[rrtmgp_nGases]
-  standard_name = number_of_active_gases_used_by_RRTMGP
-  long_name = number of gases available used by RRTMGP
-  units = count
-  dimensions =  ()
-  type = integer
-  intent = in
-  optional = F
-[active_gases_array]
-  standard_name = list_of_active_gases_used_by_RRTMGP
-  long_name = list of active gases used by RRTMGP
-  units = none
-  dimensions =  (number_of_active_gases_used_by_RRTMGP)
-  type = character
-  kind = len=*
   intent = in
   optional = F
 [errmsg]

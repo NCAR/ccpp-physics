@@ -206,6 +206,15 @@
               dtend(:,:,idtend) = dtend(:,:,idtend) + (gq0(:,:,ntqv)-save_q(:,:,ntqv))*frain
             endif
           endif
+
+          ! convective mass fluxes
+          do k=1,levs
+            do i=1,im
+              upd_mf(i,k)  = upd_mf(i,k)  + ud_mf(i,k) * (con_g*frain)
+              dwn_mf(i,k)  = dwn_mf(i,k)  + dd_mf(i,k) * (con_g*frain)
+              det_mf(i,k)  = det_mf(i,k)  + dt_mf(i,k) * (con_g*frain)
+            enddo
+          enddo
         endif ! if (ldiag3d)
 
       endif ! if (lssav)
