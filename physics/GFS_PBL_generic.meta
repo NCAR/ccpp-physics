@@ -207,6 +207,46 @@
   type = integer
   intent = in
   optional = F
+[ntccn]
+  standard_name = index_for_cloud_condensation_nuclei_number_concentration
+  long_name = tracer index for cloud condensation nuclei number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[nthl]
+  standard_name = index_for_hail
+  long_name = tracer index for hail
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[nthnc]
+  standard_name = index_for_hail_number_concentration
+  long_name = tracer index for hail number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntgv]
+  standard_name = index_for_graupel_volume
+  long_name = tracer index for graupel particle volume
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[nthv]
+  standard_name = index_for_hail_volume
+  long_name = tracer index for hail particle volume
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [imp_physics]
   standard_name = control_for_microphysics_scheme
   long_name = choice of microphysics scheme
@@ -263,10 +303,34 @@
   type = integer
   intent = in
   optional = F
+[imp_physics_nssl2m]
+  standard_name = flag_for_nssl2m_microphysics_scheme
+  long_name = choice of NSSL 2-moment microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[imp_physics_nssl2mccn]
+  standard_name = flag_for_nssl2mccn_microphysics_scheme
+  long_name = choice of NSSL 2-moment microphysics scheme with CCN
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [ltaerosol]
   standard_name = flag_for_aerosol_physics
   long_name = flag for aerosol physics
   units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[nssl_hail_on]
+  standard_name = nssl_hail_on
+  long_name = hail activation flag in NSSL micro
+  units = none
   dimensions = ()
   type = logical
   intent = in
@@ -628,6 +692,46 @@
   type = integer
   intent = in
   optional = F
+[ntccn]
+  standard_name = index_for_cloud_condensation_nuclei_number_concentration
+  long_name = tracer index for cloud condensation nuclei number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[nthl]
+  standard_name = index_for_hail
+  long_name = tracer index for hail
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[nthnc]
+  standard_name = index_for_hail_number_concentration
+  long_name = tracer index for hail number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntgv]
+  standard_name = index_for_graupel_volume
+  long_name = tracer index for graupel particle volume
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[nthv]
+  standard_name = index_for_hail_volume
+  long_name = tracer index for hail particle volume
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [imp_physics]
   standard_name = control_for_microphysics_scheme
   long_name = choice of microphysics scheme
@@ -684,10 +788,34 @@
   type = integer
   intent = in
   optional = F
+[imp_physics_nssl2m]
+  standard_name = flag_for_nssl2m_microphysics_scheme
+  long_name = choice of NSSL 2-moment microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[imp_physics_nssl2mccn]
+  standard_name = flag_for_nssl2mccn_microphysics_scheme
+  long_name = choice of NSSL 2-moment microphysics scheme with CCN
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [ltaerosol]
   standard_name = flag_for_aerosol_physics
   long_name = flag for aerosol physics
   units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[nssl_hail_on]
+  standard_name = nssl_hail_on
+  long_name = hail activation flag in NSSL micro
+  units = none
   dimensions = ()
   type = logical
   intent = in

@@ -71,6 +71,22 @@
   type = integer
   intent = in
   optional = F
+[imp_physics_nssl2m]
+  standard_name = flag_for_nssl2m_microphysics_scheme
+  long_name = choice of NSSL 2-moment microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[imp_physics_nssl2mccn]
+  standard_name = flag_for_nssl2mccn_microphysics_scheme
+  long_name = choice of NSSL 2-moment microphysics scheme with CCN
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [con_g]
   standard_name = gravitational_acceleration
   long_name = gravitational acceleration
