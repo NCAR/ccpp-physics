@@ -188,7 +188,8 @@ REAL (KIND = kind_phys) ::   &
   lake_depth_max, T_bot_2_in, T_bot_2_out, dxlat,tb,tr,tt,temp,Kbar, DelK
 
 
-REAL (KIND = kind_phys) :: x, y
+REAL (KIND = kind_phys) :: x, y !temperarory variables used for Tbot and Tsfc
+                                !initilizations 
 
 INTEGER :: i,ipr,iter
 
@@ -242,6 +243,10 @@ CHARACTER(LEN=*), PARAMETER  :: FMT2 = "(1x,8(F12.4,1x))"
 !               endif
                T_sfc(i) = 0.1*tt + 0.9* tsurf(i)
            endif
+!
+!  Add empirical climatology of lake Tsfc and Tbot to the current Tsfc and Tbot
+! to make sure Tsfc and Tbot are warmer than Tair in Winter or colder than Tair
+! in Summer
 
            x = 0.03279*julian
            if(xlat(i) .ge. 0.0) then
