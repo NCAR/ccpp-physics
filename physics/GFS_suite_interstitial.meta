@@ -1040,6 +1040,22 @@
 [ccpp-arg-table]
   name = GFS_suite_interstitial_3_run
   type = scheme
+[otsptflag]
+  standard_name = flag_convective_tracer_transport_interstitial
+  long_name = flag for interstitial tracer transport
+  units = flag
+  dimensions = (number_of_tracers_plus_one)
+  type = logical
+  intent = in
+  optional = F
+[ntracp1]
+  standard_name = number_of_tracers_plus_one
+  long_name = number of tracers plus one
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [im]
   standard_name = horizontal_loop_extent
   long_name = horizontal loop extent
@@ -1254,6 +1270,22 @@
   dimensions = ()
   type = integer
   intent = in
+[imp_physics_nssl2m]
+  standard_name = flag_for_nssl2m_microphysics_scheme
+  long_name = choice of NSSL 2-moment microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[imp_physics_nssl2mccn]
+  standard_name = flag_for_nssl2mccn_microphysics_scheme
+  long_name = choice of NSSL 2-moment microphysics scheme with CCN
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [prsi]
   standard_name = air_pressure_at_interface
   long_name = air pressure at model layer interfaces
@@ -1604,6 +1636,14 @@
   dimensions = ()
   type = integer
   intent = in
+[ntccn]
+  standard_name = index_for_cloud_condensation_nuclei_number_concentration
+  long_name = tracer index for cloud condensation nuclei number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [imp_physics]
   standard_name = control_for_microphysics_scheme
   long_name = choice of microphysics scheme
@@ -1646,6 +1686,30 @@
   dimensions = ()
   type = logical
   intent = in
+[imp_physics_nssl2m]
+  standard_name = flag_for_nssl2m_microphysics_scheme
+  long_name = choice of NSSL 2-moment microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[imp_physics_nssl2mccn]
+  standard_name = flag_for_nssl2mccn_microphysics_scheme
+  long_name = choice of NSSL 2-moment microphysics scheme with CCN
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[nssl_invertccn]
+  standard_name = nssl_invertccn
+  long_name = flag to invert CCN in NSSL micro
+  units = none
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [dtf]
   standard_name = timestep_for_dynamics
   long_name = dynamics timestep
@@ -1808,6 +1872,22 @@
   dimensions = ()
   type = integer
   intent = in
+[otsptflag]
+  standard_name = flag_convective_tracer_transport_interstitial
+  long_name = flag for interstitial tracer transport
+  units = flag
+  dimensions = (number_of_tracers_plus_one)
+  type = logical
+  intent = in
+  optional = F
+[ntracp1]
+  standard_name = number_of_tracers_plus_one
+  long_name = number of tracers plus one
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

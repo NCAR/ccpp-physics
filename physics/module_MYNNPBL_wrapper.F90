@@ -108,6 +108,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  icloud_bl, do_mynnsfclay,                          &
      &  imp_physics, imp_physics_gfdl,                     &
      &  imp_physics_thompson, imp_physics_wsm6,            &
+     &  imp_physics_nssl2m, imp_physics_nssl2mccn,         &
      &  ltaerosol, lprnt, huge, errmsg, errflg  )
 
 ! should be moved to inside the mynn:
@@ -210,7 +211,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &       bl_mynn_output,                                &
      &       grav_settling,                                 &
      &       imp_physics, imp_physics_wsm6,                 &
-     &       imp_physics_thompson, imp_physics_gfdl
+     &       imp_physics_thompson, imp_physics_gfdl,        &
+     &       imp_physics_nssl2m, imp_physics_nssl2mccn
 
 !TENDENCY DIAGNOSTICS
       real(kind=kind_phys), intent(inout), optional :: dtend(:,:,:)
@@ -394,6 +396,33 @@ SUBROUTINE mynnedmf_wrapper_run(        &
               ozone(i,k) = qgrs_ozone(i,k)
               qnc(i,k)   = 0.
               qni(i,k)   = 0.
+              qnwfa(i,k) = 0.
+              qnifa(i,k) = 0.
+            enddo
+          enddo
+        elseif (imp_physics == imp_physics_nssl2m .or. imp_physics == imp_physics_nssl2mccn ) then
+  ! NSSL
+         FLAG_QI = .true.
+         FLAG_QNI= .true.
+         FLAG_QC = .true.
+         FLAG_QNC= .true.
+         FLAG_QNWFA= .false.
+         FLAG_QNIFA= .false.
+         p_qc = 2
+         p_qr = 0
+         p_qi = 2 
+         p_qs = 0 
+         p_qg = 0
+         p_qnc= 0 
+         p_qni= 0 
+         do k=1,levs
+            do i=1,im
+              sqv(i,k)  = qgrs_water_vapor(i,k)
+              sqc(i,k)    = qgrs_liquid_cloud(i,k)
+              sqi(i,k)    = qgrs_ice_cloud(i,k)
+              ozone(i,k) = qgrs_ozone(i,k)
+              qnc(i,k)   = qgrs_cloud_droplet_num_conc(i,k)
+              qni(i,k)   = qgrs_cloud_ice_num_conc(i,k)
               qnwfa(i,k) = 0.
               qnifa(i,k) = 0.
             enddo

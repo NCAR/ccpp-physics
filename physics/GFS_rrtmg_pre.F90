@@ -20,6 +20,7 @@
         imfdeepcnv, imfdeepcnv_gf, me, ncnd, ntrac, num_p3d, npdf3d, ncnvcld3d,&
         ntqv, ntcw,ntiw, ntlnc, ntinc, ntrw, ntsw, ntgl, ntwa, ntoz,           &
         ntclamt, nleffr, nieffr, nseffr, lndp_type, kdt, imp_physics,          &
+        imp_physics_nssl2m, imp_physics_nssl2mccn,                             &
         imp_physics_thompson, imp_physics_gfdl, imp_physics_zhao_carr,         &
         imp_physics_zhao_carr_pdf, imp_physics_mg, imp_physics_wsm6,           &
         imp_physics_fer_hires, julian, yearlen, lndp_var_list, lsswr, lslwr,   &
@@ -93,6 +94,7 @@
                                            imp_physics_zhao_carr,              &
                                            imp_physics_zhao_carr_pdf,          &
                                            imp_physics_mg, imp_physics_wsm6,   &
+                                    imp_physics_nssl2m, imp_physics_nssl2mccn, &
                                            imp_physics_fer_hires,              &
                                            yearlen, icloud
 
@@ -622,16 +624,21 @@
               ccnd(i,k,4) = tracer1(i,k,ntsw)                     ! snow water
             enddo
           enddo
-        elseif (ncnd == 5) then                         ! GFDL MP, Thompson, MG3, FA
+        elseif ( ncnd == 5 .or. ncnd == 6) then        ! GFDL MP, Thompson, MG3, NSSL
           do k=1,LMK
             do i=1,IM
               ccnd(i,k,1) = tracer1(i,k,ntcw)                     ! liquid water
               ccnd(i,k,2) = tracer1(i,k,ntiw)                     ! ice water
               ccnd(i,k,3) = tracer1(i,k,ntrw)                     ! rain water
+
               if (imp_physics == imp_physics_fer_hires ) then
                   ccnd(i,k,4) = 0.0
               else
+                IF ( ncnd == 5 ) THEN
                   ccnd(i,k,4) = tracer1(i,k,ntsw) + tracer1(i,k,ntgl) ! snow + graupel
+                ELSEIF ( ncnd == 6 ) THEN
+                  ccnd(i,k,4) = tracer1(i,k,ntsw) + tracer1(i,k,ntgl) + tracer1(i,k,nthl) ! snow + graupel + hail
+                ENDIF
               endif
             enddo
           enddo
@@ -757,7 +764,24 @@
               enddo
             enddo
           endif
-        elseif (imp_physics == imp_physics_thompson) then       !  Thompson MP
+
+        elseif (imp_physics == imp_physics_nssl2m .or. &
+                imp_physics == imp_physics_nssl2mccn ) then                          ! NSSL MP
+          cldcov = 0.0
+          if(effr_in) then
+           do k=1,lm
+             k1 = k + kd
+             do i=1,im
+               effrl(i,k1) = effrl_inout(i,k)! re_cloud (i,k)
+               effri(i,k1) = effri_inout(i,k)! re_ice (i,k)
+               effrr(i,k1) = 1000. ! rrain_def=1000.
+               effrs(i,k1) = effrs_inout(i,k) ! re_snow(i,k)
+             enddo
+           enddo
+          endif
+
+        elseif (imp_physics == imp_physics_thompson) then                     !  Thompson MP
+
           !
           ! Compute effective radii for QC, QI, QS with (GF, MYNN) or without (all others) sub-grid clouds
           !
@@ -1009,7 +1033,10 @@
                          dzb, xlat_d, julian, yearlen,                     &
                          clouds,cldsa,mtopa,mbota, de_lgth, alpha)            !  --- outputs
 
-        elseif(imp_physics == imp_physics_thompson) then                              ! Thompson MP
+        elseif(imp_physics == imp_physics_thompson      &
+             .or.  imp_physics == imp_physics_nssl2m          &
+             .or. imp_physics == imp_physics_nssl2mccn     &
+                        ) then                              ! Thompson MP
 
           if(do_mynnedmf .or. imfdeepcnv == imfdeepcnv_gf ) then ! MYNN PBL or GF conv
               !-- MYNN PBL or convective GF
@@ -1108,5 +1135,4 @@
       subroutine GFS_rrtmg_pre_finalize ()
       end subroutine GFS_rrtmg_pre_finalize
 
-!! @}
       end module GFS_rrtmg_pre
