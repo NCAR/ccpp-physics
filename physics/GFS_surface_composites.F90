@@ -613,7 +613,6 @@ contains
             tsfc(i)   = tsfc_ice(i)
             evap(i)   = evap_ice(i)
             hflx(i)   = hflx_ice(i)
-            qss(i)    = qss_ice(i)
             tisfc(i)  = tice(i)     ! over lake ice (and sea ice when uncoupled)
             tsfc(i)   = tsfc_ice(i) ! over lake (and ocean when uncoupled)
 !
