@@ -2103,8 +2103,8 @@ END SUBROUTINE nssl_2mom_init_aero
       iexy(lhl,lc) = iehlc ; iexy(lhl,lr)  = iehlr ;
       ENDIF
       
-      IF ( icefallfac /= 1.0 ) write(0,*) 'icefallfac = ',icefallfac
-      IF ( snowfallfac /= 1.0 ) write(0,*) 'snowfallfac = ',snowfallfac
+!      IF ( icefallfac /= 1.0 ) write(0,*) 'icefallfac = ',icefallfac
+!      IF ( snowfallfac /= 1.0 ) write(0,*) 'snowfallfac = ',snowfallfac
 
 
   RETURN
