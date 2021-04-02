@@ -513,6 +513,15 @@
   type = integer
   intent = in
   optional = F
+[dkudiagnostic]
+  standard_name = atmosphere_momentum_diffusivity
+  long_name = diffusivity for momentum
+  units = m2 s-1
+  dimensions = (horizontal_loop_extent,vertical_dimension_minus_one)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
 [var_ric]
   standard_name = flag_variable_bulk_richardson_number
   long_name = flag for calculating variable bulk richardson number for hurricane PBL
