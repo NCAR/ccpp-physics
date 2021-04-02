@@ -156,12 +156,11 @@
 
     subroutine GFS_suite_interstitial_2_finalize()
     end subroutine GFS_suite_interstitial_2_finalize
-#if 0
+
 !> \section arg_table_GFS_suite_interstitial_2_run Argument Table
 !! \htmlinclude GFS_suite_interstitial_2_run.html
 !!
-#endif
-    subroutine GFS_suite_interstitial_2_run (im, levs, lssav, ldiag3d, lsidea, cplflx, flag_cice, shal_cnv, old_monin, mstrat,    &
+    subroutine GFS_suite_interstitial_2_run (im, levs, lssav, ldiag3d, lsidea, flag_cice, shal_cnv, old_monin, mstrat,            &
       do_shoc, frac_grid, imfshalcnv, dtf, xcosz, adjsfcdsw, adjsfcdlw, cice, pgr, ulwsfc_cice, lwhd, htrsw, htrlw, xmu, ctei_rm, &
       work1, work2, prsi, tgrs, prsl, qgrs_water_vapor, qgrs_cloud_water, cp, hvap, prslk, suntim, adjsfculw, adjsfculw_lnd,      &
       adjsfculw_ice, adjsfculw_wat, dlwsfc, ulwsfc, psmean, dt3dt_lw, dt3dt_sw, dt3dt_pbl, dt3dt_dcnv, dt3dt_scnv, dt3dt_mp,      &
@@ -171,7 +170,7 @@
 
       ! interface variables
       integer,              intent(in   ) :: im, levs, imfshalcnv
-      logical,              intent(in   ) :: lssav, ldiag3d, lsidea, cplflx, shal_cnv
+      logical,              intent(in   ) :: lssav, ldiag3d, lsidea, shal_cnv
       logical,              intent(in   ) :: old_monin, mstrat, do_shoc, frac_grid, use_LW_jacobian
       real(kind=kind_phys), intent(in   ) :: dtf, cp, hvap
 
@@ -476,11 +475,9 @@
     subroutine GFS_suite_interstitial_3_finalize()
     end subroutine GFS_suite_interstitial_3_finalize
 
-#if 0
 !> \section arg_table_GFS_suite_interstitial_3_run Argument Table
 !! \htmlinclude GFS_suite_interstitial_3_run.html
 !!
-#endif
     subroutine GFS_suite_interstitial_3_run (im, levs, nn, cscnv,       &
                satmedmf, trans_trac, do_shoc, ltaerosol, ntrac, ntcw,   &
                ntiw, ntclamt, ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc,    &
@@ -514,7 +511,7 @@
       real(kind=kind_phys), dimension(im, levs),      intent(inout) :: rhc, save_qc
       ! save_qi is not allocated for Zhao-Carr MP
       real(kind=kind_phys), dimension(:, :),          intent(inout) :: save_qi
-      real(kind=kind_phys), dimension(:, :),          intent(inout) :: save_tcp ! ONLY ALLOCATE FOR THOMPSON! TODO
+      real(kind=kind_phys), dimension(:, :),          intent(inout) :: save_tcp
       real(kind=kind_phys), dimension(im, levs, nn),  intent(inout) :: clw
 
       character(len=*), intent(out) :: errmsg

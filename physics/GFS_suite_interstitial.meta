@@ -330,14 +330,6 @@
   type = logical
   intent = in
   optional = F
-[cplflx]
-  standard_name = flag_for_flux_coupling
-  long_name = flag controlling cplflx collection (default off)
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
 [flag_cice]
   standard_name = flag_for_cice
   long_name = flag for cice
