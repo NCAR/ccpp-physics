@@ -679,7 +679,7 @@ module mp_nsslg
             re_cloud = re_cloud_mp*1.0E6_kind_phys
             re_ice   = re_ice_mp*1.0E6_kind_phys
             re_snow  = re_snow_mp*1.0E6_kind_phys
-            re_rain  = 1.0E3_kind_phys
+!            re_rain  = 1.0E3_kind_phys
          end if
 
         IF ( ndebug > 1 ) write(0,*) 'mp_nsslg: end'
