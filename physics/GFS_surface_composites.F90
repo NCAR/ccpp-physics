@@ -13,6 +13,8 @@ module GFS_surface_composites_pre
 
    real(kind=kind_phys), parameter :: zero = 0.0_kind_phys, one = 1.0_kind_phys, epsln = 1.0e-10_kind_phys
 
+   real(kind=kind_phys), parameter :: huge      = 9.9692099683868690E36 ! NetCDF float FillValue
+
 contains
 
    subroutine GFS_surface_composites_pre_init ()
@@ -32,7 +34,9 @@ contains
                                  tsfc_lnd, tsfc_ice, tisfc, tice, tsurf, tsurf_wat, tsurf_lnd, tsurf_ice,                 &
                                  gflx_ice, tgice, islmsk, islmsk_cice, slmsk, semis_rad, semis_wat, semis_lnd, semis_ice, &
                                  qss, qss_wat, qss_lnd, qss_ice, hflx, hflx_wat, hflx_lnd, hflx_ice,                      &
-                                 min_lakeice, min_seaice, errmsg, errflg)
+                                 min_lakeice, min_seaice, &
+                                 zorlo, zorll, zorli, &
+                                 errmsg, errflg)
 
       implicit none
 
@@ -57,7 +61,9 @@ contains
       real(kind=kind_phys), dimension(im), intent(in   ) :: semis_rad
       real(kind=kind_phys), dimension(im), intent(inout) :: semis_wat, semis_lnd, semis_ice, slmsk
       real(kind=kind_phys),                intent(in   ) :: min_lakeice, min_seaice
-
+      !
+      real(kind=kind_phys), dimension(im), intent(inout) :: zorlo, zorll, zorli
+      !
       real(kind=kind_phys), parameter :: timin = 173.0_kind_phys  ! minimum temperature allowed for snow/ice
 
       ! CCPP error handling
@@ -183,6 +189,10 @@ contains
            semis_wat(i) = 0.984_kind_phys
              qss_wat(i) = qss(i)
             hflx_wat(i) = hflx(i)
+        ! DH*
+        else
+          zorlo(i) = huge
+        ! *DH
         endif
         if (dry(i)) then                   ! Land
           uustar_lnd(i) = uustar(i)
@@ -193,6 +203,10 @@ contains
            semis_lnd(i) = semis_rad(i)
              qss_lnd(i) = qss(i)
             hflx_lnd(i) = hflx(i)
+        ! DH*
+        else
+          zorll(i) = huge
+        ! *DH
         end if
         if (icy(i)) then                   ! Ice
           uustar_ice(i) = uustar(i)
@@ -205,7 +219,11 @@ contains
            semis_ice(i) = 0.95_kind_phys
              qss_ice(i) = qss(i)
             hflx_ice(i) = hflx(i)
-        endif
+        ! DH*
+        else
+          zorli(i) = huge
+        ! *DH
+        end if
         if (nint(slmsk(i)) /= 1) slmsk(i)  = islmsk(i)
       enddo
 
