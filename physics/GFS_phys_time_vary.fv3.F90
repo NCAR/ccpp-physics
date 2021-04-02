@@ -466,9 +466,6 @@
 
                  eahxy(ix)    = 2000.0_kind_phys
 
-!                 eahxy = psfc*qv/(0.622+qv); qv is mixing ratio, converted from sepcific
-!                 humidity specific humidity /(1.0 - specific humidity)
-
                  cmxy(ix)     = zero
                  chxy(ix)     = zero
                  fwetxy(ix)   = zero
