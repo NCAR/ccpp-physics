@@ -1450,7 +1450,8 @@
       subroutine GFS_checkland_run (me, master, blkno, im, kdt, iter, flag_iter, flag_guess, &
               flag_init, flag_restart, frac_grid, isot, ivegsrc, stype, vtype, slope,        &
               soiltyp, vegtype, slopetyp, dry, icy, wet, lake, ocean,                        &
-              oceanfrac, landfrac, lakefrac, slmsk, islmsk, errmsg, errflg )
+              oceanfrac, landfrac, lakefrac, slmsk, islmsk,                                  &
+              zorl, zorlo, zorll, zorli, fice, errmsg, errflg )
 
          use machine, only: kind_phys
 
@@ -1486,6 +1487,11 @@
          real(kind_phys),  intent(in   ) :: lakefrac(im)
          real(kind_phys),  intent(in   ) :: slmsk(im)
          integer,          intent(in   ) :: islmsk(im)
+         real(kind_phys),  intent(in   ) :: zorl(im)
+         real(kind_phys),  intent(in   ) :: zorlo(im)
+         real(kind_phys),  intent(in   ) :: zorll(im)
+         real(kind_phys),  intent(in   ) :: zorli(im)
+         real(kind_phys),  intent(in   ) :: fice(im)
          character(len=*), intent(  out) :: errmsg
          integer,          intent(  out) :: errflg
 
@@ -1508,6 +1514,7 @@
          write(0,'(a,i5)')   'YYY: ivegsrc      :', ivegsrc
 
          do i=1,im
+           !if (fice(i)>0.999) then
            !if (vegtype(i)==15) then
              write(0,'(a,2i5,1x,1x,l)') 'YYY: i, blk, flag_iter(i)  :', i, blkno, flag_iter(i)
              write(0,'(a,2i5,1x,1x,l)') 'YYY: i, blk, flag_guess(i) :', i, blkno, flag_guess(i)
@@ -1525,8 +1532,13 @@
              write(0,'(a,2i5,1x,e16.7)')'YYY: i, blk, oceanfrac(i)  :', i, blkno, oceanfrac(i)
              write(0,'(a,2i5,1x,e16.7)')'YYY: i, blk, landfrac(i)   :', i, blkno, landfrac(i)
              write(0,'(a,2i5,1x,e16.7)')'YYY: i, blk, lakefrac(i)   :', i, blkno, lakefrac(i)
+             write(0,'(a,2i5,1x,e16.7)')'YYY: i, blk, fice(i)       :', i, blkno, fice(i)
              write(0,'(a,2i5,1x,e16.7)')'YYY: i, blk, slmsk(i)      :', i, blkno, slmsk(i)
              write(0,'(a,2i5,1x,i5)')   'YYY: i, blk, islmsk(i)     :', i, blkno, islmsk(i)
+             write(0,'(a,2i5,1x,e16.7)')'YYY: i, blk, zorl(i)       :', i, blkno, zorl(i)
+             write(0,'(a,2i5,1x,e16.7)')'YYY: i, blk, zorlo(i)      :', i, blkno, zorlo(i)
+             write(0,'(a,2i5,1x,e16.7)')'YYY: i, blk, zorli(i)      :', i, blkno, zorli(i)
+             write(0,'(a,2i5,1x,e16.7)')'YYY: i, blk, zorll(i)      :', i, blkno, zorll(i)
            !end if
          end do
 
