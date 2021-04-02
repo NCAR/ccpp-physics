@@ -776,7 +776,7 @@
 !$OMP          shared(levs,prsl,iccn,jindx1_ci,jindx2_ci,ddy_ci,iindx1_ci,iindx2_ci)     &
 !$OMP          shared(ddx_ci,in_nm,ccn_nm,do_ugwp_v1,jindx1_tau,jindx2_tau,ddy_j1tau)    &
 !$OMP          shared(ddy_j2tau,tau_amf)                                                 &
-!$OMP          private(iseed,iskip,i,j,k,stime2,etime2)
+!$OMP          private(iseed,iskip,i,j,k)
 
 !$OMP sections
 
