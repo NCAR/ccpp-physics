@@ -152,7 +152,7 @@ module mp_nsslg
                               tgrs, prslk, prsl, phii, omega, dtp,           &
                               prcp, rain, graupel, ice, snow, sr,            &
                              refl_10cm, do_radar_ref, first_time_step,       &
-                             re_cloud, re_ice, re_snow,                      &
+                             re_cloud, re_ice, re_snow, re_rain,             &
                              imp_physics,                                    &
                              imp_physics_nssl2m, imp_physics_nssl2mccn,      &
                              nssl_hail_on, nssl_invertccn, ntccn, ntccna,    &
@@ -200,6 +200,7 @@ module mp_nsslg
          real(kind_phys), optional, intent(  out) :: re_cloud(1:ncol,1:nlev)
          real(kind_phys), optional, intent(  out) :: re_ice(1:ncol,1:nlev)
          real(kind_phys), optional, intent(  out) :: re_snow(1:ncol,1:nlev)
+         real(kind_phys), optional, intent(  out) :: re_rain(1:ncol,1:nlev)
          integer,                   intent(in)    :: imp_physics
          integer,                   intent(in)    :: imp_physics_nssl2m, imp_physics_nssl2mccn
          logical,                   intent(in)    :: nssl_hail_on, nssl_invertccn
@@ -678,6 +679,7 @@ module mp_nsslg
             re_cloud = re_cloud_mp*1.0E6_kind_phys
             re_ice   = re_ice_mp*1.0E6_kind_phys
             re_snow  = re_snow_mp*1.0E6_kind_phys
+            re_rain  = 1.0E3_kind_phys
          end if
 
         IF ( ndebug > 1 ) write(0,*) 'mp_nsslg: end'
