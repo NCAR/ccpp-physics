@@ -62,7 +62,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  dtsfc_diag,dqsfc_diag,          &
      &  dusfc_cice,dvsfc_cice,          &
      &  dtsfc_cice,dqsfc_cice,          &
-     &  hflx_ocn,qflx_ocn,stress_ocn,   &
+     &  hflx_wat,qflx_wat,stress_wat,   &
      &  oceanfrac,fice,wet,icy,dry,     &
      &  dusfci_cpl,dvsfci_cpl,          &
      &  dtsfci_cpl,dqsfci_cpl,          &
@@ -292,7 +292,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 
       real(kind=kind_phys), dimension(im), intent(in) ::                 &
      &        dusfc_cice,dvsfc_cice,dtsfc_cice,dqsfc_cice,               &
-     &        stress_ocn,hflx_ocn,qflx_ocn,                              &
+     &        stress_wat,hflx_wat,qflx_wat,                              &
      &        oceanfrac,fice
 
       logical, dimension(im), intent(in) ::                              &
@@ -560,14 +560,14 @@ SUBROUTINE mynnedmf_wrapper_run(        &
               dqsfci_cpl(i) = dqsfc_cice(i)
             elseif (icy(i) .or. dry(i)) then ! use stress_ocean for opw component at mixed point
               if (wspd(i) > zero) then
-                dusfci_cpl(i) = -1.*rho(i,1)*stress_ocn(i)*u(i,1)/wspd(i)   ! U-momentum flux
-                dvsfci_cpl(i) = -1.*rho(i,1)*stress_ocn(i)*v(i,1)/wspd(i)   ! V-momentum flux
+                dusfci_cpl(i) = -1.*rho(i,1)*stress_wat(i)*u(i,1)/wspd(i)   ! U-momentum flux
+                dvsfci_cpl(i) = -1.*rho(i,1)*stress_wat(i)*v(i,1)/wspd(i)   ! V-momentum flux
               else
                 dusfci_cpl(i) = zero
                 dvsfci_cpl(i) = zero
               endif
-              dtsfci_cpl(i) =  cp*rho(i,1)*hflx_ocn(i) ! sensible heat flux over open ocean
-              dqsfci_cpl(i) = XLV*rho(i,1)*qflx_ocn(i) ! latent heat flux over open ocean
+              dtsfci_cpl(i) =  cp*rho(i,1)*hflx_wat(i) ! sensible heat flux over open ocean
+              dqsfci_cpl(i) = XLV*rho(i,1)*qflx_wat(i) ! latent heat flux over open ocean
             else                                       ! use results from this scheme for 100% open ocean
               dusfci_cpl(i) = dusfci_diag(i)
               dvsfci_cpl(i) = dvsfci_diag(i)

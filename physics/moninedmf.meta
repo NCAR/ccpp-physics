@@ -532,8 +532,8 @@
   intent = in
   optional = F
 [coef_ric_s]
-  standard_name = coefficient_for_variable_bulk_richardson_number_over_ocean
-  long_name = coefficient for calculating variable bulk richardson number for hurricane PBL over ocean
+  standard_name = coefficient_for_variable_bulk_richardson_number_over_water
+  long_name = coefficient for calculating variable bulk richardson number for hurricane PBL over water
   units = none
   dimensions = ()
   type = real

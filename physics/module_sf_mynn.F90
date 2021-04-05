@@ -137,22 +137,22 @@ CONTAINS
      &        redrag,sfc_z0_type,                    & !intent(in)
               itimestep,iter,                        & !in
                     wet,       dry,       icy,       & !intent(in)
-              tskin_ocn, tskin_lnd, tskin_ice,       & !intent(in)
-              tsurf_ocn, tsurf_lnd, tsurf_ice,       & !intent(in)
-               qsfc_ocn,  qsfc_lnd,  qsfc_ice,       & !intent(in)
-              snowh_ocn, snowh_lnd, snowh_ice,       & !intent(in)
-                ZNT_ocn,   ZNT_lnd,   ZNT_ice,       & !intent(inout)
-                UST_ocn,   UST_lnd,   UST_ice,       & !intent(inout)
-                 cm_ocn,    cm_lnd,    cm_ice,       & !intent(inout)
-                 ch_ocn,    ch_lnd,    ch_ice,       & !intent(inout)
-                 rb_ocn,    rb_lnd,    rb_ice,       & !intent(inout)
-             stress_ocn,stress_lnd,stress_ice,       & !intent(inout)
-                 fm_ocn,    fm_lnd,    fm_ice,       & !intent(inout)
-                 fh_ocn,    fh_lnd,    fh_ice,       & !intent(inout)
-               fm10_ocn,  fm10_lnd,  fm10_ice,       & !intent(inout)
-                fh2_ocn,   fh2_lnd,   fh2_ice,       & !intent(inout)
-               HFLX_ocn,  HFLX_lnd,  HFLX_ice,       &
-               QFLX_ocn,  QFLX_lnd,  QFLX_ice,       &
+              tskin_wat, tskin_lnd, tskin_ice,       & !intent(in)
+              tsurf_wat, tsurf_lnd, tsurf_ice,       & !intent(in)
+               qsfc_wat,  qsfc_lnd,  qsfc_ice,       & !intent(in)
+              snowh_wat, snowh_lnd, snowh_ice,       & !intent(in)
+                ZNT_wat,   ZNT_lnd,   ZNT_ice,       & !intent(inout)
+                UST_wat,   UST_lnd,   UST_ice,       & !intent(inout)
+                 cm_wat,    cm_lnd,    cm_ice,       & !intent(inout)
+                 ch_wat,    ch_lnd,    ch_ice,       & !intent(inout)
+                 rb_wat,    rb_lnd,    rb_ice,       & !intent(inout)
+             stress_wat,stress_lnd,stress_ice,       & !intent(inout)
+                 fm_wat,    fm_lnd,    fm_ice,       & !intent(inout)
+                 fh_wat,    fh_lnd,    fh_ice,       & !intent(inout)
+               fm10_wat,  fm10_lnd,  fm10_ice,       & !intent(inout)
+                fh2_wat,   fh2_lnd,   fh2_ice,       & !intent(inout)
+               HFLX_wat,  HFLX_lnd,  HFLX_ice,       &
+               QFLX_wat,  QFLX_lnd,  QFLX_ice,       &
               CH,CHS,CHS2,CQS2,CPM,                  &
               ZNT,USTM,ZOL,MOL,RMOL,                 &
               PSIM,PSIH,                             &
@@ -332,25 +332,25 @@ CONTAINS
      &                          wet,       dry,       icy
 
       REAL, DIMENSION( ims:ime ), INTENT(IN)    ::                 &
-     &                    tskin_ocn, tskin_lnd, tskin_ice,         &
-     &                    tsurf_ocn, tsurf_lnd, tsurf_ice,         &
-     &                    snowh_ocn, snowh_lnd, snowh_ice,         &
+     &                    tskin_wat, tskin_lnd, tskin_ice,         &
+     &                    tsurf_wat, tsurf_lnd, tsurf_ice,         &
+     &                    snowh_wat, snowh_lnd, snowh_ice,         &
      &                    qsfc_ruc
 
       REAL, DIMENSION( ims:ime), INTENT(INOUT) ::                  &
-     &                      ZNT_ocn,   ZNT_lnd,   ZNT_ice,         &
-     &                      UST_ocn,   UST_lnd,   UST_ice,         &
-     &                       cm_ocn,    cm_lnd,    cm_ice,         &
-     &                       ch_ocn,    ch_lnd,    ch_ice,         &
-     &                       rb_ocn,    rb_lnd,    rb_ice,         &
-     &                   stress_ocn,stress_lnd,stress_ice,         &
-     &                       fm_ocn,    fm_lnd,    fm_ice,         &
-     &                       fh_ocn,    fh_lnd,    fh_ice,         &
-     &                     fm10_ocn,  fm10_lnd,  fm10_ice,         &
-     &                      fh2_ocn,   fh2_lnd,   fh2_ice,         &
-     &                     HFLX_ocn,  HFLX_lnd,  HFLX_ice,         &
-     &                     QFLX_ocn,  QFLX_lnd,  QFLX_ice,         &
-     &                     qsfc_ocn,  qsfc_lnd,  qsfc_ice
+     &                      ZNT_wat,   ZNT_lnd,   ZNT_ice,         &
+     &                      UST_wat,   UST_lnd,   UST_ice,         &
+     &                       cm_wat,    cm_lnd,    cm_ice,         &
+     &                       ch_wat,    ch_lnd,    ch_ice,         &
+     &                       rb_wat,    rb_lnd,    rb_ice,         &
+     &                   stress_wat,stress_lnd,stress_ice,         &
+     &                       fm_wat,    fm_lnd,    fm_ice,         &
+     &                       fh_wat,    fh_lnd,    fh_ice,         &
+     &                     fm10_wat,  fm10_lnd,  fm10_ice,         &
+     &                      fh2_wat,   fh2_lnd,   fh2_ice,         &
+     &                     HFLX_wat,  HFLX_lnd,  HFLX_ice,         &
+     &                     QFLX_wat,  QFLX_lnd,  QFLX_ice,         &
+     &                     qsfc_wat,  qsfc_lnd,  qsfc_ice
 
 !ADDITIONAL OUTPUT
 !JOE-begin
@@ -406,12 +406,12 @@ CONTAINS
       IF (itimestep==1 .AND. iter==1) THEN
          DO i=its,ite
             !Everything here is used before calculated
-            UST_OCN(i)=MAX(0.04*SQRT(U1D(i)*U1D(i) + V1D(i)*V1D(i)),0.001)
+            UST_WAT(i)=MAX(0.04*SQRT(U1D(i)*U1D(i) + V1D(i)*V1D(i)),0.001)
             UST_LND(i)=MAX(0.04*SQRT(U1D(i)*U1D(i) + V1D(i)*V1D(i)),0.001)
             UST_ICE(i)=MAX(0.04*SQRT(U1D(i)*U1D(i) + V1D(i)*V1D(i)),0.001)
             MOL(i)=0.0
             QSFC(i)=QV3D(i,kts)/(1.+QV3D(i,kts))
-            QSFC_OCN(i)=QSFC(i)
+            QSFC_WAT(i)=QSFC(i)
             QSFC_LND(i)=QSFC(i)
             QSFC_ICE(i)=QSFC(i)
             qstar(i)=0.0
@@ -440,22 +440,22 @@ CONTAINS
            redrag,sfc_z0_type,                                  &  !intent(in)
            itimestep,iter,                                      &
                   wet,          dry,          icy,              &  !intent(in)
-            tskin_ocn,    tskin_lnd,    tskin_ice,              &  !intent(in)
-            tsurf_ocn,    tsurf_lnd,    tsurf_ice,              &  !intent(in)
-             qsfc_ocn,     qsfc_lnd,     qsfc_ice,              &  !intent(in)
-            snowh_ocn,    snowh_lnd,    snowh_ice,              &  !intent(in)
-              ZNT_ocn,      ZNT_lnd,      ZNT_ice,              &  !intent(inout)
-              UST_ocn,      UST_lnd,      UST_ice,              &  !intent(inout)
-               cm_ocn,       cm_lnd,       cm_ice,              &  !intent(inout)
-               ch_ocn,       ch_lnd,       ch_ice,              &  !intent(inout)
-               rb_ocn,       rb_lnd,       rb_ice,              &  !intent(inout)
-           stress_ocn,   stress_lnd,   stress_ice,              &  !intent(inout)
-               fm_ocn,       fm_lnd,       fm_ice,              &  !intent(inout)
-               fh_ocn,       fh_lnd,       fh_ice,              &  !intent(inout)
-             fm10_ocn,     fm10_lnd,     fm10_ice,              &  !intent(inout)
-              fh2_ocn,      fh2_lnd,      fh2_ice,              &
-             HFLX_ocn,     HFLX_lnd,     HFLX_ice,              &
-             QFLX_ocn,     QFLX_lnd,     QFLX_ice,              &
+            tskin_wat,    tskin_lnd,    tskin_ice,              &  !intent(in)
+            tsurf_wat,    tsurf_lnd,    tsurf_ice,              &  !intent(in)
+             qsfc_wat,     qsfc_lnd,     qsfc_ice,              &  !intent(in)
+            snowh_wat,    snowh_lnd,    snowh_ice,              &  !intent(in)
+              ZNT_wat,      ZNT_lnd,      ZNT_ice,              &  !intent(inout)
+              UST_wat,      UST_lnd,      UST_ice,              &  !intent(inout)
+               cm_wat,       cm_lnd,       cm_ice,              &  !intent(inout)
+               ch_wat,       ch_lnd,       ch_ice,              &  !intent(inout)
+               rb_wat,       rb_lnd,       rb_ice,              &  !intent(inout)
+           stress_wat,   stress_lnd,   stress_ice,              &  !intent(inout)
+               fm_wat,       fm_lnd,       fm_ice,              &  !intent(inout)
+               fh_wat,       fh_lnd,       fh_ice,              &  !intent(inout)
+             fm10_wat,     fm10_lnd,     fm10_ice,              &  !intent(inout)
+              fh2_wat,      fh2_lnd,      fh2_ice,              &
+             HFLX_wat,     HFLX_lnd,     HFLX_ice,              &
+             QFLX_wat,     QFLX_lnd,     QFLX_ice,              &
            ch,CHS,CHS2,CQS2,CPM,                                &
            ZNT,USTM,ZOL,MOL,RMOL,                               &
            PSIM,PSIH,                                           &
@@ -487,22 +487,22 @@ CONTAINS
              redrag,sfc_z0_type,                                  &  !intent(in)
              itimestep,iter,                                      &
                     wet,          dry,          icy,              &  !intent(in)
-              tskin_ocn,    tskin_lnd,    tskin_ice,              &  !intent(in)
-              tsurf_ocn,    tsurf_lnd,    tsurf_ice,              &  !intent(in)
-               qsfc_ocn,     qsfc_lnd,     qsfc_ice,              &  !intent(in)
-              snowh_ocn,    snowh_lnd,    snowh_ice,              &  !intent(in)
-                ZNT_ocn,      ZNT_lnd,      ZNT_ice,              &  !intent(inout)
-                UST_ocn,      UST_lnd,      UST_ice,              &  !intent(inout)
-                 cm_ocn,       cm_lnd,       cm_ice,              &  !intent(inout)
-                 ch_ocn,       ch_lnd,       ch_ice,              &  !intent(inout)
-                 rb_ocn,       rb_lnd,       rb_ice,              &  !intent(inout)
-             stress_ocn,   stress_lnd,   stress_ice,              &  !intent(inout)
-               psix_ocn,     psix_lnd,     psix_ice,              &  !=fm, intent(inout)
-               psit_ocn,     psit_lnd,     psit_ice,              &  !=fh, intent(inout)
-             psix10_ocn,   psix10_lnd,   psix10_ice,              &  !=fm10, intent(inout)
-              psit2_ocn,    psit2_lnd,    psit2_ice,              &  !=fh2, intent(inout)
-               HFLX_ocn,     HFLX_lnd,     HFLX_ice,              &
-               QFLX_ocn,     QFLX_lnd,     QFLX_ice,              &
+              tskin_wat,    tskin_lnd,    tskin_ice,              &  !intent(in)
+              tsurf_wat,    tsurf_lnd,    tsurf_ice,              &  !intent(in)
+               qsfc_wat,     qsfc_lnd,     qsfc_ice,              &  !intent(in)
+              snowh_wat,    snowh_lnd,    snowh_ice,              &  !intent(in)
+                ZNT_wat,      ZNT_lnd,      ZNT_ice,              &  !intent(inout)
+                UST_wat,      UST_lnd,      UST_ice,              &  !intent(inout)
+                 cm_wat,       cm_lnd,       cm_ice,              &  !intent(inout)
+                 ch_wat,       ch_lnd,       ch_ice,              &  !intent(inout)
+                 rb_wat,       rb_lnd,       rb_ice,              &  !intent(inout)
+             stress_wat,   stress_lnd,   stress_ice,              &  !intent(inout)
+               psix_wat,     psix_lnd,     psix_ice,              &  !=fm, intent(inout)
+               psit_wat,     psit_lnd,     psit_ice,              &  !=fh, intent(inout)
+             psix10_wat,   psix10_lnd,   psix10_ice,              &  !=fm10, intent(inout)
+              psit2_wat,    psit2_lnd,    psit2_ice,              &  !=fh2, intent(inout)
+               HFLX_wat,     HFLX_lnd,     HFLX_ice,              &
+               QFLX_wat,     QFLX_lnd,     QFLX_ice,              &
              ch,CHS,CHS2,CQS2,CPM,                                &
              ZNT,USTM,ZOL,MOL,RMOL,                               &
              PSIM,PSIH,                                           &
@@ -583,24 +583,24 @@ CONTAINS
      &                          wet,       dry,       icy
 
       REAL,     DIMENSION( ims:ime ), INTENT(in)    ::             &
-     &                    tskin_ocn, tskin_lnd, tskin_ice,         &
-     &                    tsurf_ocn, tsurf_lnd, tsurf_ice,         &
-     &                    snowh_ocn, snowh_lnd, snowh_ice
+     &                    tskin_wat, tskin_lnd, tskin_ice,         &
+     &                    tsurf_wat, tsurf_lnd, tsurf_ice,         &
+     &                    snowh_wat, snowh_lnd, snowh_ice
 
       REAL,     DIMENSION( ims:ime ), INTENT(inout) ::             &
-     &                      ZNT_ocn,   ZNT_lnd,   ZNT_ice,         &
-     &                      UST_ocn,   UST_lnd,   UST_ice,         &
-     &                       cm_ocn,    cm_lnd,    cm_ice,         &
-     &                       ch_ocn,    ch_lnd,    ch_ice,         &
-     &                       rb_ocn,    rb_lnd,    rb_ice,         &
-     &                   stress_ocn,stress_lnd,stress_ice,         &
-     &                     psix_ocn,  psix_lnd,  psix_ice,         &
-     &                     psit_ocn,  psit_lnd,  psit_ice,         &
-     &                   psix10_ocn,psix10_lnd,psix10_ice,         &
-     &                    psit2_ocn, psit2_lnd, psit2_ice,         &
-     &                     HFLX_ocn,  HFLX_lnd,  HFLX_ice,         &
-     &                     QFLX_ocn,  QFLX_lnd,  QFLX_ice,         &
-     &                     qsfc_ocn,  qsfc_lnd,  qsfc_ice
+     &                      ZNT_wat,   ZNT_lnd,   ZNT_ice,         &
+     &                      UST_wat,   UST_lnd,   UST_ice,         &
+     &                       cm_wat,    cm_lnd,    cm_ice,         &
+     &                       ch_wat,    ch_lnd,    ch_ice,         &
+     &                       rb_wat,    rb_lnd,    rb_ice,         &
+     &                   stress_wat,stress_lnd,stress_ice,         &
+     &                     psix_wat,  psix_lnd,  psix_ice,         &
+     &                     psit_wat,  psit_lnd,  psit_ice,         &
+     &                   psix10_wat,psix10_lnd,psix10_ice,         &
+     &                    psit2_wat, psit2_lnd, psit2_ice,         &
+     &                     HFLX_wat,  HFLX_lnd,  HFLX_ice,         &
+     &                     QFLX_wat,  QFLX_lnd,  QFLX_ice,         &
+     &                     qsfc_wat,  qsfc_lnd,  qsfc_ice
 
       REAL,     DIMENSION( its:ite ), INTENT(IN)   ::     rstoch1D
 
@@ -632,27 +632,27 @@ CONTAINS
                PSFC, &    !press at surface (Pa/1000)
              QSFCMR, &    !qv at surface (mixing ratio, kg/kg)
               THCON, &    !conversion from temp to theta
-          zratio_lnd,   zratio_ice,   zratio_ocn, & !z0/zt
-             TSK_lnd,      TSK_ice,      TSK_ocn, & !absolute temperature
-            THSK_lnd,     THSK_ice,     THSK_ocn, & !theta
-           THVSK_lnd,    THVSK_ice,    THVSK_ocn, & !theta-v
-          GZ1OZ0_lnd,   GZ1OZ0_ice,   GZ1OZ0_ocn, & !LOG((ZA(I)+ZNT(i))/ZNT(i))
-          GZ1OZt_lnd,   GZ1OZt_ice,   GZ1OZt_ocn, & !LOG((ZA(I)+ZT(i))/ZT(i))
-          GZ2OZ0_lnd,   GZ2OZ0_ice,   GZ2OZ0_ocn, & !LOG((2.0+ZNT(I))/ZNT(I))
-          GZ2OZt_lnd,   GZ2OZt_ice,   GZ2OZt_ocn, & !LOG((2.0+ZT(I))/ZT(I))
-         GZ10OZ0_lnd,  GZ10OZ0_ice,  GZ10OZ0_ocn, & !LOG((10.+ZNT(I))/ZNT(I))
-         GZ10OZt_lnd,  GZ10OZt_ice,  GZ10OZt_ocn, & !LOG((10.+ZT(I))/ZT(I))
-        ZNTstoch_lnd, ZNTstoch_ice, ZNTstoch_ocn, &
-              ZT_lnd,       ZT_ice,       ZT_ocn, &
-              ZQ_lnd,       ZQ_ice,       ZQ_ocn, &
-            PSIQ_lnd,     PSIQ_ice,     PSIQ_ocn, &
-           PSIQ2_lnd,    PSIQ2_ice,    PSIQ2_ocn, &
-          QSFCMR_lnd,   QSFCMR_ice,   QSFCMR_ocn
+          zratio_lnd,   zratio_ice,   zratio_wat, & !z0/zt
+             TSK_lnd,      TSK_ice,      TSK_wat, & !absolute temperature
+            THSK_lnd,     THSK_ice,     THSK_wat, & !theta
+           THVSK_lnd,    THVSK_ice,    THVSK_wat, & !theta-v
+          GZ1OZ0_lnd,   GZ1OZ0_ice,   GZ1OZ0_wat, & !LOG((ZA(I)+ZNT(i))/ZNT(i))
+          GZ1OZt_lnd,   GZ1OZt_ice,   GZ1OZt_wat, & !LOG((ZA(I)+ZT(i))/ZT(i))
+          GZ2OZ0_lnd,   GZ2OZ0_ice,   GZ2OZ0_wat, & !LOG((2.0+ZNT(I))/ZNT(I))
+          GZ2OZt_lnd,   GZ2OZt_ice,   GZ2OZt_wat, & !LOG((2.0+ZT(I))/ZT(I))
+         GZ10OZ0_lnd,  GZ10OZ0_ice,  GZ10OZ0_wat, & !LOG((10.+ZNT(I))/ZNT(I))
+         GZ10OZt_lnd,  GZ10OZt_ice,  GZ10OZt_wat, & !LOG((10.+ZT(I))/ZT(I))
+        ZNTstoch_lnd, ZNTstoch_ice, ZNTstoch_wat, &
+              ZT_lnd,       ZT_ice,       ZT_wat, &
+              ZQ_lnd,       ZQ_ice,       ZQ_wat, &
+            PSIQ_lnd,     PSIQ_ice,     PSIQ_wat, &
+           PSIQ2_lnd,    PSIQ2_ice,    PSIQ2_wat, &
+          QSFCMR_lnd,   QSFCMR_ice,   QSFCMR_wat
 
       INTEGER ::  N,I,K,L,yesno
 
       REAL    ::  PL,E1,TABS
-      REAL    ::  WSPD_lnd, WSPD_ice, WSPD_ocn
+      REAL    ::  WSPD_lnd, WSPD_ice, WSPD_wat
       REAL    ::  DTHVDZ,DTHVM,VCONV,ZOL2,ZOL10,ZOLZA,ZOLZ0,ZOLZT
       REAL    ::  DTG,DTTHX,PSIQ,PSIQ2,PSIQ10,PSIT10
       REAL    ::  FLUXC,VSGD
@@ -676,9 +676,9 @@ CONTAINS
              " dz=",dz8w1d(i)," qflx=",qflx(i)," hflx=",hflx(i)," hpbl=",pblh(i)
            ENDIF
            IF (wet(i)) THEN
-             write(0,*)"wet=",wet(i)," pblh=",pblh(i)," tsk=", tskin_ocn(i),&
-             " tsurf=", tsurf_ocn(i)," qsfc=", qsfc_ocn(i)," znt=", znt_ocn(i),&
-             " ust=", ust_ocn(i)," snowh=", snowh_ocn(i),"psfcpa=",PSFCPA(i),  &
+             write(0,*)"wet=",wet(i)," pblh=",pblh(i)," tsk=", tskin_wat(i),&
+             " tsurf=", tsurf_wat(i)," qsfc=", qsfc_wat(i)," znt=", znt_wat(i),&
+             " ust=", ust_wat(i)," snowh=", snowh_wat(i),"psfcpa=",PSFCPA(i),  &
              " dz=",dz8w1d(i)," qflx=",qflx(i)," hflx=",hflx(i)," hpbl=",pblh(i)
            ENDIF
         ENDDO
@@ -690,7 +690,7 @@ CONTAINS
          ! DEFINE SKIN TEMPERATURES FOR LAND/WATER/ICE
          TSK_lnd(I) = 0.5 * (tsurf_lnd(i)+tskin_lnd(i))
          TSK_ice(I) = 0.5 * (tsurf_ice(i)+tskin_ice(i))
-         TSK_ocn(I) = 0.5 * (tsurf_ocn(i)+tskin_ocn(i))
+         TSK_wat(I) = 0.5 * (tsurf_wat(i)+tskin_wat(i))
          QVSH(I)=QV1D(I)/(1.+QV1D(I))        !CONVERT TO SPEC HUM (kg/kg)
          THCON(I)=(100000./PSFCPA(I))**ROVCP
       ENDDO
@@ -699,14 +699,14 @@ CONTAINS
          ! CONVERT SKIN TEMPERATURES TO POTENTIAL TEMPERATURE: 
          THSK_lnd(I) = TSK_lnd(I)*THCON(I)   !(K)
          THSK_ice(I) = TSK_ice(I)*THCON(I)   !(K)
-         THSK_ocn(I) = TSK_ocn(I)*THCON(I)   !(K)
+         THSK_wat(I) = TSK_wat(I)*THCON(I)   !(K)
       ENDDO
 
       DO I=its,ite
          ! CONVERT SKIN POTENTIAL TEMPERATURES TO VIRTUAL POTENTIAL TEMPERATURE:
          THVSK_lnd(I) = THSK_lnd(I)*(1.+EP1*QVSH(I))   !(K)
          THVSK_ice(I) = THSK_ice(I)*(1.+EP1*QVSH(I))   !(K)
-         THVSK_ocn(I) = THSK_ocn(I)*(1.+EP1*QVSH(I))   !(K)
+         THVSK_wat(I) = THSK_wat(I)*(1.+EP1*QVSH(I))   !(K)
       ENDDO
 
       DO I=its,ite
@@ -739,8 +739,8 @@ CONTAINS
           write(*,*)"=== derived quantities in mynn sfc layer, i:", i
           write(*,*)" land,      ice,      water"
           write(*,*)"dry=",dry(i)," icy=",icy(i)," wet=",wet(i)
-          write(*,*)"tsk=", tsk_lnd(i),tsk_ice(i),tsk_ocn(i)
-          write(*,*)"thvsk=", thvsk_lnd(i),thvsk_ice(i),thvsk_ocn(i)
+          write(*,*)"tsk=", tsk_lnd(i),tsk_ice(i),tsk_wat(i)
+          write(*,*)"thvsk=", thvsk_lnd(i),thvsk_ice(i),thvsk_wat(i)
           write(*,*)"THV1D=", THV1D(i)," TV1D=",TV1D(i)
           write(*,*)"RHO1D=", RHO1D(i)," GOVRTH=",GOVRTH(i)
         ENDDO
@@ -750,16 +750,16 @@ CONTAINS
 
          IF (ITIMESTEP == 1) THEN
             IF (wet(i)) THEN
-               IF (TSK_ocn(I) .LT. 273.15) THEN
+               IF (TSK_wat(I) .LT. 273.15) THEN
                   !SATURATION VAPOR PRESSURE WRT ICE (SVP1=.6112; 10*mb)
-                  E1=SVP1*EXP(4648*(1./273.15 - 1./TSK_ocn(I)) - &
-                    & 11.64*LOG(273.15/TSK_ocn(I)) + 0.02265*(273.15 - TSK_ocn(I)))
+                  E1=SVP1*EXP(4648*(1./273.15 - 1./TSK_wat(I)) - &
+                    & 11.64*LOG(273.15/TSK_wat(I)) + 0.02265*(273.15 - TSK_wat(I)))
                ELSE
                   !SATURATION VAPOR PRESSURE WRT WATER (Bolton 1980)
-                  E1=SVP1*EXP(SVP2*(TSK_ocn(I)-SVPT0)/(TSK_ocn(i)-SVP3))
+                  E1=SVP1*EXP(SVP2*(TSK_wat(I)-SVPT0)/(TSK_wat(i)-SVP3))
                ENDIF
-               QSFC_ocn(I)=EP2*E1/(PSFC(I)-ep_3*E1)             !specific humidity    
-               QSFCMR_ocn(I)=EP2*E1/(PSFC(I)-E1)                !mixing ratio 
+               QSFC_wat(I)=EP2*E1/(PSFC(I)-ep_3*E1)             !specific humidity    
+               QSFCMR_wat(I)=EP2*E1/(PSFC(I)-E1)                !mixing ratio 
             ENDIF
             IF (dry(i)) THEN
                TABS = 0.5*(TSK_lnd(I) + T1D(I))
@@ -791,7 +791,7 @@ CONTAINS
          ELSE
 
             ! Use what comes out of the LSM, NST, and CICE
-            IF (wet(i)) QSFCMR_ocn(I)=QSFC_ocn(I)/(1.-QSFC_ocn(I))
+            IF (wet(i)) QSFCMR_wat(I)=QSFC_wat(I)/(1.-QSFC_wat(I))
             IF (dry(i)) QSFCMR_lnd(I)=QSFC_lnd(I)/(1.-QSFC_lnd(I))
             IF (icy(i)) QSFCMR_ice(I)=QSFC_ice(I)/(1.-QSFC_ice(I))
 
@@ -818,7 +818,7 @@ CONTAINS
          DO I=its,ite
             if (wet(i)) then
                write(*,*)"==== q-bombs, i:",i," wet"
-               write(*,*)"QSFC_ocn=", QSFC_ocn(I)," QSFCMR_ocn=", QSFCMR_ocn(I)," QGH=",QGH(I)
+               write(*,*)"QSFC_wat=", QSFC_wat(I)," QSFCMR_wat=", QSFCMR_wat(I)," QGH=",QGH(I)
             endif
             if(dry(i)) then
                write(*,*)"==== q-bombs, i:",i," dry"
@@ -837,39 +837,39 @@ CONTAINS
          ! by every user, the bug manifests itself in the resulting wind speed WSPD(I)
          ! being -99.0 despite the assignments in lines 932 and 933. *DH
          WSPD(I)=SQRT(U1D(I)*U1D(I)+V1D(I)*V1D(I))
-         WSPD_ocn = -99.
+         WSPD_wat = -99.
          WSPD_ice = -99.
          WSPD_lnd = -99.
 
          IF (wet(i)) THEN
-            DTHVDZ=(THV1D(I)-THVSK_ocn(I))
+            DTHVDZ=(THV1D(I)-THVSK_wat(I))
             !--------------------------------------------------------
             ! Calculate the convective velocity scale (WSTAR) and 
             ! subgrid-scale velocity (VSGD) following Beljaars (1995, QJRMS) 
             ! and Mahrt and Sun (1995, MWR), respectively
             !-------------------------------------------------------
             fluxc = max(hfx(i)/RHO1D(i)/cp                    &
-            &    + ep1*THVSK_ocn(I)*qfx(i)/RHO1D(i),0.)
+            &    + ep1*THVSK_wat(I)*qfx(i)/RHO1D(i),0.)
             !WSTAR(I) = vconvc*(g/TSK(i)*pblh(i)*fluxc)**onethird
-            WSTAR(I) = vconvc*(g/TSK_ocn(i)*pblh(i)*fluxc)**onethird
+            WSTAR(I) = vconvc*(g/TSK_wat(i)*pblh(i)*fluxc)**onethird
             !--------------------------------------------------------
             ! Mahrt and Sun low-res correction - modified for water points (halved)
             ! (for 13 km ~ 0.18 m/s; for 3 km == 0 m/s)
             !--------------------------------------------------------
             VSGD = MIN( 0.25 * (max(dx(i)/5000.-1.,0.))**onethird , 0.5)
-            WSPD_ocn=SQRT(WSPD(I)*WSPD(I)+WSTAR(I)*WSTAR(I)+vsgd*vsgd)
-            WSPD_ocn=MAX(WSPD_ocn,wmin)
+            WSPD_wat=SQRT(WSPD(I)*WSPD(I)+WSTAR(I)*WSTAR(I)+vsgd*vsgd)
+            WSPD_wat=MAX(WSPD_wat,wmin)
             !--------------------------------------------------------
             ! CALCULATE THE BULK RICHARDSON NUMBER OF SURFACE LAYER, 
             ! ACCORDING TO AKB(1976), EQ(12). 
             !--------------------------------------------------------
-            rb_ocn(I)=GOVRTH(I)*ZA(I)*DTHVDZ/(WSPD_ocn*WSPD_ocn)
+            rb_wat(I)=GOVRTH(I)*ZA(I)*DTHVDZ/(WSPD_wat*WSPD_wat)
             IF (ITIMESTEP == 1) THEN
-              rb_ocn(I)=MAX(rb_ocn(I),-2.0)
-              rb_ocn(I)=MIN(rb_ocn(I), 2.0)
+              rb_wat(I)=MAX(rb_wat(I),-2.0)
+              rb_wat(I)=MIN(rb_wat(I), 2.0)
             ELSE
-              rb_ocn(I)=MAX(rb_ocn(I),-4.0)
-              rb_ocn(I)=MIN(rb_ocn(I), 4.0)
+              rb_wat(I)=MAX(rb_wat(I),-4.0)
+              rb_wat(I)=MIN(rb_wat(I), 4.0)
             ENDIF
          ENDIF ! end water point
 
@@ -948,7 +948,7 @@ CONTAINS
          ENDIF ! end ice point
 
          !NOW CONDENSE THE POSSIBLE WSPD VALUES BY TAKING THE MAXIMUM
-         WSPD(I) = MAX(WSPD_ice,WSPD_ocn)
+         WSPD(I) = MAX(WSPD_ice,WSPD_wat)
          WSPD(I) = MAX(WSPD_lnd,WSPD(I))
 
          IF (debug_code == 2) THEN
@@ -956,7 +956,7 @@ CONTAINS
             write(*,*)"ITIMESTEP=",ITIMESTEP
             write(*,*)"WSPD=", WSPD(I)," WSTAR=", WSTAR(I)," vsgd=",vsgd
             IF (icy(i))write(*,*)"rb_ice=", rb_ice(I)," DTHVDZ=",DTHVDZ
-            IF (wet(i))write(*,*)"rb_ocn=", rb_ocn(I)," DTHVDZ=",DTHVDZ
+            IF (wet(i))write(*,*)"rb_wat=", rb_wat(I)," DTHVDZ=",DTHVDZ
             IF (dry(i))write(*,*)"rb_lnd=", rb_lnd(I)," DTHVDZ=",DTHVDZ
          ENDIF
 
@@ -992,118 +992,118 @@ CONTAINS
           !--------------------------------------
           IF (debug_code == 2) THEN
             write(*,*)"=============Input to ZNT over water:"
-            write(*,*)"u*:",UST_ocn(i)," wspd=",WSPD(i)," visc=",visc," za=",ZA(I)
+            write(*,*)"u*:",UST_wat(i)," wspd=",WSPD(i)," visc=",visc," za=",ZA(I)
           ENDIF
           IF ( PRESENT(ISFTCFLX) ) THEN
              IF ( ISFTCFLX .EQ. 0 ) THEN
                 IF (COARE_OPT .EQ. 3.0) THEN
                    !COARE 3.0 (MISLEADING SUBROUTINE NAME)
-                   CALL charnock_1955(ZNT_ocn(i),UST_ocn(i),WSPD(i),visc,ZA(I))
+                   CALL charnock_1955(ZNT_wat(i),UST_wat(i),WSPD(i),visc,ZA(I))
                 ELSE
                    !COARE 3.5
-                   CALL edson_etal_2013(ZNT_ocn(i),UST_ocn(i),WSPD(i),visc,ZA(I))
+                   CALL edson_etal_2013(ZNT_wat(i),UST_wat(i),WSPD(i),visc,ZA(I))
                 ENDIF
              ELSEIF ( ISFTCFLX .EQ. 1 .OR. ISFTCFLX .EQ. 2 ) THEN
-                CALL davis_etal_2008(ZNT_ocn(i),UST_ocn(i))
+                CALL davis_etal_2008(ZNT_wat(i),UST_wat(i))
              ELSEIF ( ISFTCFLX .EQ. 3 ) THEN
-                CALL Taylor_Yelland_2001(ZNT_ocn(i),UST_ocn(i),WSPD(i))
+                CALL Taylor_Yelland_2001(ZNT_wat(i),UST_wat(i),WSPD(i))
              ELSEIF ( ISFTCFLX .EQ. 4 ) THEN
                 !GFS surface layer scheme
-                CALL GFS_z0_ocn(ZNT_ocn(i),UST_ocn(i),WSPD(i),ZA(I),sfc_z0_type,redrag)
+                CALL GFS_z0_wat(ZNT_wat(i),UST_wat(i),WSPD(i),ZA(I),sfc_z0_type,redrag)
              ENDIF
           ELSE
              !DEFAULT TO COARE 3.0/3.5
              IF (COARE_OPT .EQ. 3.0) THEN
                 !COARE 3.0
-                CALL charnock_1955(ZNT_ocn(i),UST_ocn(i),WSPD(i),visc,ZA(I))
+                CALL charnock_1955(ZNT_wat(i),UST_wat(i),WSPD(i),visc,ZA(I))
              ELSE
                 !COARE 3.5
-                CALL edson_etal_2013(ZNT_ocn(i),UST_ocn(i),WSPD(i),visc,ZA(I))
+                CALL edson_etal_2013(ZNT_wat(i),UST_wat(i),WSPD(i),visc,ZA(I))
              ENDIF
           ENDIF
        endif !-end wave model check
 
        ! add stochastic perturbation of ZNT
        if (spp_pbl==1) then
-          ZNTstoch_ocn(I)  = MAX(ZNT_ocn(I) + ZNT_ocn(I)*1.0*rstoch1D(i), 1e-6)
+          ZNTstoch_wat(I)  = MAX(ZNT_wat(I) + ZNT_wat(I)*1.0*rstoch1D(i), 1e-6)
        else
-          ZNTstoch_ocn(I)  = ZNT_ocn(I)
+          ZNTstoch_wat(I)  = ZNT_wat(I)
        endif
 
        IF (debug_code > 1) THEN
           write(*,*)"==========Output ZNT over water:"
-          write(*,*)"ZNT:",ZNTstoch_ocn(i)
+          write(*,*)"ZNT:",ZNTstoch_wat(i)
        ENDIF
 
        !COMPUTE ROUGHNESS REYNOLDS NUMBER (restar) USING NEW ZNT
        ! AHW: Garrattt formula: Calculate roughness Reynolds number
        !      Kinematic viscosity of air (linear approx to
        !      temp dependence at sea level)
-       restar=MAX(ust_ocn(i)*ZNTstoch_ocn(i)/visc, 0.1)
+       restar=MAX(ust_wat(i)*ZNTstoch_wat(i)/visc, 0.1)
 
        !--------------------------------------
        !CALCULATE z_t and z_q
        !--------------------------------------
        IF (debug_code > 1) THEN
           write(*,*)"=============Input to ZT over water:"
-          write(*,*)"u*:",UST_ocn(i)," restar=",restar," visc=",visc
+          write(*,*)"u*:",UST_wat(i)," restar=",restar," visc=",visc
        ENDIF
 
        IF ( PRESENT(ISFTCFLX) ) THEN
           IF ( ISFTCFLX .EQ. 0 ) THEN
              IF (COARE_OPT .EQ. 3.0) THEN
-                CALL fairall_etal_2003(ZT_ocn(i),ZQ_ocn(i),restar,UST_ocn(i),visc,&
+                CALL fairall_etal_2003(ZT_wat(i),ZQ_wat(i),restar,UST_wat(i),visc,&
                                        rstoch1D(i),spp_pbl)
              ELSE
                 !presumably, this will be published soon, but hasn't yet
-                CALL fairall_etal_2014(ZT_ocn(i),ZQ_ocn(i),restar,UST_ocn(i),visc,&
+                CALL fairall_etal_2014(ZT_wat(i),ZQ_wat(i),restar,UST_wat(i),visc,&
                                        rstoch1D(i),spp_pbl)
              ENDIF
           ELSEIF ( ISFTCFLX .EQ. 1 ) THEN
              IF (COARE_OPT .EQ. 3.0) THEN
-                CALL fairall_etal_2003(ZT_ocn(i),ZQ_ocn(i),restar,UST_ocn(i),visc,&
+                CALL fairall_etal_2003(ZT_wat(i),ZQ_wat(i),restar,UST_wat(i),visc,&
                                        rstoch1D(i),spp_pbl)
              ELSE
-                CALL fairall_etal_2014(ZT_ocn(i),ZQ_ocn(i),restar,UST_ocn(i),visc,&
+                CALL fairall_etal_2014(ZT_wat(i),ZQ_wat(i),restar,UST_wat(i),visc,&
                                        rstoch1D(i),spp_pbl)
              ENDIF
           ELSEIF ( ISFTCFLX .EQ. 2 ) THEN
-             CALL garratt_1992(ZT_ocn(i),ZQ_ocn(i),ZNTstoch_ocn(i),restar,2.0)
+             CALL garratt_1992(ZT_wat(i),ZQ_wat(i),ZNTstoch_wat(i),restar,2.0)
           ELSEIF ( ISFTCFLX .EQ. 3 ) THEN
              IF (COARE_OPT .EQ. 3.0) THEN
-                CALL fairall_etal_2003(ZT_ocn(i),ZQ_ocn(i),restar,UST_ocn(i),visc,&
+                CALL fairall_etal_2003(ZT_wat(i),ZQ_wat(i),restar,UST_wat(i),visc,&
                                        rstoch1D(i),spp_pbl)
              ELSE
-                CALL fairall_etal_2014(ZT_ocn(i),ZQ_ocn(i),restar,UST_ocn(i),visc,&
+                CALL fairall_etal_2014(ZT_wat(i),ZQ_wat(i),restar,UST_wat(i),visc,&
                                        rstoch1D(i),spp_pbl)
              ENDIF
           ELSEIF ( ISFTCFLX .EQ. 4 ) THEN
              !GFS zt formulation
-             CALL GFS_zt_ocn(ZT_ocn(i),ZNTstoch_ocn(i),restar,WSPD(i),ZA(i),sfc_z0_type)
-             ZQ_ocn(i)=ZT_ocn(i)
+             CALL GFS_zt_wat(ZT_wat(i),ZNTstoch_wat(i),restar,WSPD(i),ZA(i),sfc_z0_type)
+             ZQ_wat(i)=ZT_wat(i)
           ENDIF
        ELSE
           !DEFAULT TO COARE 3.0/3.5
           IF (COARE_OPT .EQ. 3.0) THEN
-             CALL fairall_etal_2003(ZT_ocn(i),ZQ_ocn(i),restar,UST_ocn(i),visc,&
+             CALL fairall_etal_2003(ZT_wat(i),ZQ_wat(i),restar,UST_wat(i),visc,&
                                     rstoch1D(i),spp_pbl)
           ELSE
-             CALL fairall_etal_2014(ZT_ocn(i),ZQ_ocn(i),restar,UST_ocn(i),visc,&
+             CALL fairall_etal_2014(ZT_wat(i),ZQ_wat(i),restar,UST_wat(i),visc,&
                                     rstoch1D(i),spp_pbl)
           ENDIF
        ENDIF
        IF (debug_code > 1) THEN
          write(*,*)"=============Output ZT & ZQ over water:"
-         write(*,*)"ZT:",ZT_ocn(i)," ZQ:",ZQ_ocn(i)
+         write(*,*)"ZT:",ZT_wat(i)," ZQ:",ZQ_wat(i)
        ENDIF
 
-       GZ1OZ0_ocn(I)= LOG((ZA(I)+ZNTstoch_ocn(I))/ZNTstoch_ocn(I))
-       GZ1OZt_ocn(I)= LOG((ZA(I)+ZNTstoch_ocn(i))/ZT_ocn(i))
-       GZ2OZ0_ocn(I)= LOG((2.0+ZNTstoch_ocn(I))/ZNTstoch_ocn(I))
-       GZ2OZt_ocn(I)= LOG((2.0+ZNTstoch_ocn(i))/ZT_ocn(i))
-       GZ10OZ0_ocn(I)=LOG((10.+ZNTstoch_ocn(I))/ZNTstoch_ocn(I))
-       GZ10OZt_ocn(I)=LOG((10.+ZNTstoch_ocn(i))/ZT_ocn(i))
-       zratio_ocn(i)=ZNTstoch_ocn(I)/ZT_ocn(I)   !need estimate for Li et al. 
+       GZ1OZ0_wat(I)= LOG((ZA(I)+ZNTstoch_wat(I))/ZNTstoch_wat(I))
+       GZ1OZt_wat(I)= LOG((ZA(I)+ZNTstoch_wat(i))/ZT_wat(i))
+       GZ2OZ0_wat(I)= LOG((2.0+ZNTstoch_wat(I))/ZNTstoch_wat(I))
+       GZ2OZt_wat(I)= LOG((2.0+ZNTstoch_wat(i))/ZT_wat(i))
+       GZ10OZ0_wat(I)=LOG((10.+ZNTstoch_wat(I))/ZNTstoch_wat(I))
+       GZ10OZt_wat(I)=LOG((10.+ZNTstoch_wat(i))/ZT_wat(i))
+       zratio_wat(i)=ZNTstoch_wat(I)/ZT_wat(I)   !need estimate for Li et al. 
 
     ENDIF !end water point
 
@@ -1197,7 +1197,7 @@ CONTAINS
     IF (dry(i)) THEN
        ZNT(i)=ZNTstoch_lnd(I)
     ELSEIF (wet(i)) THEN
-       ZNT(i)=ZNTstoch_ocn(I)
+       ZNT(i)=ZNTstoch_wat(I)
     ELSEIF (icy(i)) THEN
        ZNT(i)=ZNTstoch_ice(I)
     ENDIF
@@ -1208,43 +1208,43 @@ CONTAINS
     !--------------------------------------------------------------------
 
     IF (wet(i)) THEN
-       IF (rb_ocn(I) .GT. 0.0) THEN
+       IF (rb_wat(I) .GT. 0.0) THEN
 
           !COMPUTE z/L first guess:
-          CALL Li_etal_2010(ZOL(I),rb_ocn(I),ZA(I)/ZNTstoch_ocn(I),zratio_ocn(I))
-          !ZOL(I)=ZA(I)*KARMAN*G*MOL(I)/(TH1D(I)*MAX(UST_ocn(I)*UST_ocn(I),0.0001))
+          CALL Li_etal_2010(ZOL(I),rb_wat(I),ZA(I)/ZNTstoch_wat(I),zratio_wat(I))
+          !ZOL(I)=ZA(I)*KARMAN*G*MOL(I)/(TH1D(I)*MAX(UST_wat(I)*UST_wat(I),0.0001))
           ZOL(I)=MAX(ZOL(I),0.0)
           ZOL(I)=MIN(ZOL(I),20.)
 
           IF (debug_code >= 1) THEN
-            IF (ZNTstoch_ocn(i) < 1E-8 .OR. Zt_ocn(i) < 1E-10) THEN
+            IF (ZNTstoch_wat(i) < 1E-8 .OR. Zt_wat(i) < 1E-10) THEN
               write(0,*)"===(wet) capture bad input in mynn sfc layer, i=:",i
-              write(0,*)"rb=", rb_ocn(I)," ZNT=", ZNTstoch_ocn(i)," ZT=",Zt_ocn(i)
-              write(0,*)" tsk=", tskin_ocn(i)," prev z/L=",ZOL(I),&
-              " tsurf=", tsurf_ocn(i)," qsfc=", qsfc_ocn(i)," znt=", znt_ocn(i),&
-              " ust=", ust_ocn(i)," snowh=", snowh_ocn(i),"psfcpa=",PSFCPA(i),  &
+              write(0,*)"rb=", rb_wat(I)," ZNT=", ZNTstoch_wat(i)," ZT=",Zt_wat(i)
+              write(0,*)" tsk=", tskin_wat(i)," prev z/L=",ZOL(I),&
+              " tsurf=", tsurf_wat(i)," qsfc=", qsfc_wat(i)," znt=", znt_wat(i),&
+              " ust=", ust_wat(i)," snowh=", snowh_wat(i),"psfcpa=",PSFCPA(i),  &
               " dz=",dz8w1d(i)," qflx=",qflx(i)," hflx=",hflx(i)," hpbl=",pblh(i)
             ENDIF
           ENDIF
 
           !Use Pedros iterative function to find z/L
-          !zol(I)=zolri(rb_ocn(I),ZA(I),ZNTstoch_ocn(I),ZT_ocn(I),ZOL(I),psi_opt)
+          !zol(I)=zolri(rb_wat(I),ZA(I),ZNTstoch_wat(I),ZT_wat(I),ZOL(I),psi_opt)
           !Use brute-force method
-          zol(I)=zolrib(rb_ocn(I),ZA(I),ZNTstoch_ocn(I),zt_ocn(I),GZ1OZ0_ocn(I),GZ1OZt_ocn(I),ZOL(I),psi_opt)
+          zol(I)=zolrib(rb_wat(I),ZA(I),ZNTstoch_wat(I),zt_wat(I),GZ1OZ0_wat(I),GZ1OZt_wat(I),ZOL(I),psi_opt)
           ZOL(I)=MAX(ZOL(I),0.0)
           ZOL(I)=MIN(ZOL(I),20.)
 
-          zolzt = zol(I)*zt_ocn(I)/ZA(I)                ! zt/L
-          zolz0 = zol(I)*ZNTstoch_ocn(I)/ZA(I)          ! z0/L
-          zolza = zol(I)*(za(I)+ZNTstoch_ocn(I))/za(I)  ! (z+z0/L
-          zol10 = zol(I)*(10.+ZNTstoch_ocn(I))/za(I)    ! (10+z0)/L
-          zol2  = zol(I)*(2.+ZNTstoch_ocn(I))/za(I)     ! (2+z0)/L 
+          zolzt = zol(I)*zt_wat(I)/ZA(I)                ! zt/L
+          zolz0 = zol(I)*ZNTstoch_wat(I)/ZA(I)          ! z0/L
+          zolza = zol(I)*(za(I)+ZNTstoch_wat(I))/za(I)  ! (z+z0/L
+          zol10 = zol(I)*(10.+ZNTstoch_wat(I))/za(I)    ! (10+z0)/L
+          zol2  = zol(I)*(2.+ZNTstoch_wat(I))/za(I)     ! (2+z0)/L 
 
           !COMPUTE PSIM and PSIH
           !CALL PSI_Suselj_Sood_2010(PSIM(I),PSIH(I),ZOL(I))
           !CALL PSI_Beljaars_Holtslag_1991(PSIM(I),PSIH(I),ZOL(I))
           !CALL PSI_Businger_1971(PSIM(I),PSIH(I),ZOL(I))
-          !CALL PSI_DyerHicks(PSIM(I),PSIH(I),ZOL(I),ZT_ocn(I),ZNTstoch_ocn(I),ZA(I))
+          !CALL PSI_DyerHicks(PSIM(I),PSIH(I),ZOL(I),ZT_wat(I),ZNTstoch_wat(I),ZA(I))
           !CALL PSI_CB2005(PSIM(I),PSIH(I),zolza,zolz0)
           ! or use tables
           psim(I)=psim_stable(zolza,psi_opt)-psim_stable(zolz0,psi_opt)
@@ -1256,7 +1256,7 @@ CONTAINS
           ! 1.0 over Monin-Obukhov length
           RMOL(I)= ZOL(I)/ZA(I)
 
-       ELSEIF(rb_ocn(I) .EQ. 0.) THEN                  
+       ELSEIF(rb_wat(I) .EQ. 0.) THEN                  
           !=========================================================  
           !-----CLASS 3; FORCED CONVECTION/NEUTRAL:                                                
           !=========================================================
@@ -1270,46 +1270,46 @@ CONTAINS
           ZOL(I)  =0.
           RMOL(I) =0.
 
-       ELSEIF(rb_ocn(I) .LT. 0.)THEN
+       ELSEIF(rb_wat(I) .LT. 0.)THEN
           !==========================================================
           !-----CLASS 4; FREE CONVECTION:                                                  
           !==========================================================
 
           !COMPUTE z/L first guess:
-          CALL Li_etal_2010(ZOL(I),rb_ocn(I),ZA(I)/ZNTstoch_ocn(I),zratio_ocn(I))
-          !ZOL(I)=ZA(I)*KARMAN*G*MOL(I)/(TH1D(I)*MAX(UST_ocn(I)*UST_ocn(I),0.001))
+          CALL Li_etal_2010(ZOL(I),rb_wat(I),ZA(I)/ZNTstoch_wat(I),zratio_wat(I))
+          !ZOL(I)=ZA(I)*KARMAN*G*MOL(I)/(TH1D(I)*MAX(UST_wat(I)*UST_wat(I),0.001))
           ZOL(I)=MAX(ZOL(I),-20.0)
           ZOL(I)=MIN(ZOL(I),0.0)
 
           IF (debug_code >= 1) THEN
-            IF (ZNTstoch_ocn(i) < 1E-8 .OR. Zt_ocn(i) < 1E-10) THEN
+            IF (ZNTstoch_wat(i) < 1E-8 .OR. Zt_wat(i) < 1E-10) THEN
               write(0,*)"===(wet) capture bad input in mynn sfc layer, i=:",i
-              write(0,*)"rb=", rb_ocn(I)," ZNT=", ZNTstoch_ocn(i)," ZT=",Zt_ocn(i)
-              write(0,*)" tsk=", tskin_ocn(i)," wstar=",wstar(i)," prev z/L=",ZOL(I),&
-              " tsurf=", tsurf_ocn(i)," qsfc=", qsfc_ocn(i)," znt=", znt_ocn(i),&
-              " ust=", ust_ocn(i)," snowh=", snowh_ocn(i),"psfcpa=",PSFCPA(i),  &
+              write(0,*)"rb=", rb_wat(I)," ZNT=", ZNTstoch_wat(i)," ZT=",Zt_wat(i)
+              write(0,*)" tsk=", tskin_wat(i)," wstar=",wstar(i)," prev z/L=",ZOL(I),&
+              " tsurf=", tsurf_wat(i)," qsfc=", qsfc_wat(i)," znt=", znt_wat(i),&
+              " ust=", ust_wat(i)," snowh=", snowh_wat(i),"psfcpa=",PSFCPA(i),  &
               " dz=",dz8w1d(i)," qflx=",qflx(i)," hflx=",hflx(i)," hpbl=",pblh(i)
             ENDIF
           ENDIF
 
           !Use Pedros iterative function to find z/L
-          !zol(I)=zolri(rb_ocn(I),ZA(I),ZNTstoch_ocn(I),ZT_ocn(I),ZOL(I),psi_opt)
+          !zol(I)=zolri(rb_wat(I),ZA(I),ZNTstoch_wat(I),ZT_wat(I),ZOL(I),psi_opt)
           !Use brute-force method
-          zol(I)=zolrib(rb_ocn(I),ZA(I),ZNTstoch_ocn(I),zt_ocn(I),GZ1OZ0_ocn(I),GZ1OZt_ocn(I),ZOL(I),psi_opt)
+          zol(I)=zolrib(rb_wat(I),ZA(I),ZNTstoch_wat(I),zt_wat(I),GZ1OZ0_wat(I),GZ1OZt_wat(I),ZOL(I),psi_opt)
           ZOL(I)=MAX(ZOL(I),-20.0)
           ZOL(I)=MIN(ZOL(I),0.0)
 
-          zolzt = zol(I)*zt_ocn(I)/ZA(I)                 ! zt/L
-          zolz0 = zol(I)*ZNTstoch_ocn(I)/ZA(I)           ! z0/L
-          zolza = zol(I)*(za(I)+ZNTstoch_ocn(I))/za(I)   ! (z+z0/L
-          zol10 = zol(I)*(10.+ZNTstoch_ocn(I))/za(I)     ! (10+z0)/L
-          zol2  = zol(I)*(2.+ZNTstoch_ocn(I))/za(I)      ! (2+z0)/L
+          zolzt = zol(I)*zt_wat(I)/ZA(I)                 ! zt/L
+          zolz0 = zol(I)*ZNTstoch_wat(I)/ZA(I)           ! z0/L
+          zolza = zol(I)*(za(I)+ZNTstoch_wat(I))/za(I)   ! (z+z0/L
+          zol10 = zol(I)*(10.+ZNTstoch_wat(I))/za(I)     ! (10+z0)/L
+          zol2  = zol(I)*(2.+ZNTstoch_wat(I))/za(I)      ! (2+z0)/L
 
           !COMPUTE PSIM and PSIH
           !CALL PSI_Suselj_Sood_2010(PSIM(I),PSIH(I),ZOL(I))
-          !CALL PSI_Hogstrom_1996(PSIM(I),PSIH(I),ZOL(I), ZT_ocn(I), ZNTstoch_ocn(I), ZA(I))
+          !CALL PSI_Hogstrom_1996(PSIM(I),PSIH(I),ZOL(I), ZT_wat(I), ZNTstoch_wat(I), ZA(I))
           !CALL PSI_Businger_1971(PSIM(I),PSIH(I),ZOL(I))
-          !CALL PSI_DyerHicks(PSIM(I),PSIH(I),ZOL(I),ZT_ocn(I),ZNTstoch_ocn(I),ZA(I))
+          !CALL PSI_DyerHicks(PSIM(I),PSIH(I),ZOL(I),ZT_wat(I),ZNTstoch_wat(I),ZA(I))
           ! use tables
           psim(I)=psim_unstable(zolza,psi_opt)-psim_unstable(zolz0,psi_opt)
           psih(I)=psih_unstable(zolza,psi_opt)-psih_unstable(zolzt,psi_opt)
@@ -1320,23 +1320,23 @@ CONTAINS
           !---LIMIT PSIH AND PSIM IN THE CASE OF THIN LAYERS AND
           !---HIGH ROUGHNESS.  THIS PREVENTS DENOMINATOR IN FLUXES
           !---FROM GETTING TOO SMALL
-          PSIH(I)=MIN(PSIH(I),0.9*GZ1OZt_ocn(I))
-          PSIM(I)=MIN(PSIM(I),0.9*GZ1OZ0_ocn(I))
-          PSIH2(I)=MIN(PSIH2(I),0.9*GZ2OZt_ocn(I))
-          PSIM10(I)=MIN(PSIM10(I),0.9*GZ10OZ0_ocn(I))
-          PSIH10(I)=MIN(PSIH10(I),0.9*GZ10OZt_ocn(I))
+          PSIH(I)=MIN(PSIH(I),0.9*GZ1OZt_wat(I))
+          PSIM(I)=MIN(PSIM(I),0.9*GZ1OZ0_wat(I))
+          PSIH2(I)=MIN(PSIH2(I),0.9*GZ2OZt_wat(I))
+          PSIM10(I)=MIN(PSIM10(I),0.9*GZ10OZ0_wat(I))
+          PSIH10(I)=MIN(PSIH10(I),0.9*GZ10OZt_wat(I))
 
           RMOL(I) = ZOL(I)/ZA(I)  
 
        ENDIF
 
        ! CALCULATE THE RESISTANCE:
-       PSIX_ocn(I)  =MAX(GZ1OZ0_ocn(I)-PSIM(I)   , 1.0)    ! = fm
-       PSIX10_ocn(I)=MAX(GZ10OZ0_ocn(I)-PSIM10(I), 1.0)    ! = fm10
-       PSIT_ocn(I)  =MAX(GZ1OZt_ocn(I)-PSIH(I)   , 1.0)    ! = fh
-       PSIT2_ocn(I) =MAX(GZ2OZt_ocn(I)-PSIH2(I)  , 1.0)    ! = fh2
-       PSIQ_ocn(I)  =MAX(LOG((ZA(I)+ZQ_ocn(i))/ZQ_ocn(I))-PSIH(I) ,1.0)
-       PSIQ2_ocn(I) =MAX(LOG((2.0+ZQ_ocn(i))/ZQ_ocn(I))-PSIH2(I) ,1.0)
+       PSIX_wat(I)  =MAX(GZ1OZ0_wat(I)-PSIM(I)   , 1.0)    ! = fm
+       PSIX10_wat(I)=MAX(GZ10OZ0_wat(I)-PSIM10(I), 1.0)    ! = fm10
+       PSIT_wat(I)  =MAX(GZ1OZt_wat(I)-PSIH(I)   , 1.0)    ! = fh
+       PSIT2_wat(I) =MAX(GZ2OZt_wat(I)-PSIH2(I)  , 1.0)    ! = fh2
+       PSIQ_wat(I)  =MAX(LOG((ZA(I)+ZQ_wat(i))/ZQ_wat(I))-PSIH(I) ,1.0)
+       PSIQ2_wat(I) =MAX(LOG((2.0+ZQ_wat(i))/ZQ_wat(I))-PSIH2(I) ,1.0)
 
     ENDIF ! end water points
 
@@ -1608,18 +1608,18 @@ CONTAINS
 
     IF (wet(I)) THEN
        ! TO PREVENT OSCILLATIONS AVERAGE WITH OLD VALUE 
-       OLDUST = UST_ocn(I)
-       UST_ocn(I)=0.5*UST_ocn(I)+0.5*KARMAN*WSPD(I)/PSIX_ocn(I)
+       OLDUST = UST_wat(I)
+       UST_wat(I)=0.5*UST_wat(I)+0.5*KARMAN*WSPD(I)/PSIX_wat(I)
        !NON-AVERAGED: 
-       !UST_ocn(I)=KARMAN*WSPD(I)/PSIX_ocn(I)
-       stress_ocn(i)=ust_ocn(i)**2
+       !UST_wat(I)=KARMAN*WSPD(I)/PSIX_wat(I)
+       stress_wat(i)=ust_wat(i)**2
 
        ! Compute u* without vconv for use in HFX calc when isftcflx > 0           
        WSPDI(I)=MAX(SQRT(U1D(I)*U1D(I)+V1D(I)*V1D(I)), wmin)
-       USTM(I)=0.5*USTM(I)+0.5*KARMAN*WSPDI(I)/PSIX_ocn(I)
+       USTM(I)=0.5*USTM(I)+0.5*KARMAN*WSPDI(I)/PSIX_wat(I)
 
        ! for possible future changes in sea-ice fraction from 0 to >0:
-       if (.not. icy(i)) ust_ice(i)=ust_ocn(i)
+       if (.not. icy(i)) ust_ice(i)=ust_wat(i)
     ENDIF ! end water points
 
     IF (dry(I)) THEN
@@ -1654,7 +1654,7 @@ CONTAINS
        USTM(I)=UST_ice(I)
 
        ! for possible future changes in sea-ice fraction from 1 to <1:
-       if (.not. wet(i)) ust_ocn(i)=ust_ice(i)
+       if (.not. wet(i)) ust_wat(i)=ust_ice(i)
     ENDIF ! end ice points
 
     !----------------------------------------------------
@@ -1663,14 +1663,14 @@ CONTAINS
     !----------------------------------------------------
 
     IF (wet(I)) THEN
-       DTG=THV1D(I)-THVSK_ocn(I)
+       DTG=THV1D(I)-THVSK_wat(I)
        OLDTST=MOL(I)
-       MOL(I)=KARMAN*DTG/PSIT_ocn(I)/PRT
+       MOL(I)=KARMAN*DTG/PSIT_wat(I)/PRT
        !t_star(I) = -HFX(I)/(UST(I)*CPM(I)*RHO1D(I))
        !t_star(I) = MOL(I)
        !----------------------------------------------------
-       DQG=(QVSH(i)-qsfc_ocn(i))*1000.   !(kg/kg -> g/kg)
-       qstar(I)=KARMAN*DQG/PSIQ_ocn(I)/PRT
+       DQG=(QVSH(i)-qsfc_wat(i))*1000.   !(kg/kg -> g/kg)
+       qstar(I)=KARMAN*DQG/PSIQ_wat(I)/PRT
     ENDIF
 
     IF (dry(I)) THEN
@@ -1704,13 +1704,13 @@ CONTAINS
        IF(icy(i))write(*,*)"==== AT END OF MAIN LOOP, i=",i, "(ice)"
        write(*,*)"z/L:",ZOL(I)," wspd:",wspd(I)," Tstar:",MOL(I)
        IF(wet(i))write(*,*)"PSIM:",PSIM(I)," PSIH:",PSIH(I)," W*:",WSTAR(I),&
-                           " DTHV:",THV1D(I)-THVSK_ocn(I)
+                           " DTHV:",THV1D(I)-THVSK_wat(I)
        IF(dry(i))write(*,*)"PSIM:",PSIM(I)," PSIH:",PSIH(I)," W*:",WSTAR(I),&
                            " DTHV:",THV1D(I)-THVSK_lnd(I)
        IF(icy(i))write(*,*)"PSIM:",PSIM(I)," PSIH:",PSIH(I)," W*:",WSTAR(I),&
                            " DTHV:",THV1D(I)-THVSK_ice(i)
        write(*,*)"CPM:",CPM(I)," RHO1D:",RHO1D(I)," q*:",qstar(I)," T*:",MOL(I)
-       IF(wet(i))write(*,*)"U*:",UST_ocn(I)," Z0:",ZNTstoch_ocn(I)," Zt:",zt_ocn(I)
+       IF(wet(i))write(*,*)"U*:",UST_wat(I)," Z0:",ZNTstoch_wat(I)," Zt:",zt_wat(I)
        IF(dry(i))write(*,*)"U*:",UST_lnd(I)," Z0:",ZNTstoch_lnd(I)," Zt:",zt_lnd(I)
        IF(icy(i))write(*,*)"U*:",UST_ice(I)," Z0:",ZNTstoch_ice(I)," Zt:",zt_ice(I)
        write(*,*)"hfx:",HFX(I)," MAVAIL:",MAVAIL(I)," QVSH(I):",QVSH(I)
@@ -1735,8 +1735,8 @@ CONTAINS
        CH(I)   = 0.                                                             
        CHS2(i) = 0.                                                              
        CQS2(i) = 0.
-       ch_ocn(I)= 0.
-       cm_ocn(I)= 0.
+       ch_wat(I)= 0.
+       cm_wat(I)= 0.
        ch_lnd(I)= 0.
        cm_lnd(I)= 0.
        ch_ice(I)= 0.
@@ -1792,25 +1792,25 @@ CONTAINS
          ! CALCULATE THE EXCHANGE COEFFICIENTS FOR HEAT (FLHC)
          ! AND MOISTURE (FLQC)
          !------------------------------------------
-         FLQC(I)=RHO1D(I)*MAVAIL(I)*UST_ocn(I)*KARMAN/PSIQ_ocn(i)
-         FLHC(I)=RHO1D(I)*CPM(I)*UST_ocn(I)*KARMAN/PSIT_ocn(I)
+         FLQC(I)=RHO1D(I)*MAVAIL(I)*UST_wat(I)*KARMAN/PSIQ_wat(i)
+         FLHC(I)=RHO1D(I)*CPM(I)*UST_wat(I)*KARMAN/PSIT_wat(I)
 
          IF (compute_flux) THEN
             !----------------------------------
             ! COMPUTE SURFACE MOISTURE FLUX:
             !----------------------------------
-            !QFX(I)=FLQC(I)*(QSFCMR_ocn(I)-QV1D(I))
-            QFX(I)=FLQC(I)*(QSFC_ocn(I)-QV1D(I))
+            !QFX(I)=FLQC(I)*(QSFCMR_wat(I)-QV1D(I))
+            QFX(I)=FLQC(I)*(QSFC_wat(I)-QV1D(I))
             QFX(I)=MAX(QFX(I),-0.02)      !allows small neg QFX
             LH(I)=XLV*QFX(I)
             ! BWG, 2020-06-17: Mod next 2 lines for fractional
-            QFLX_ocn(i)=QFX(i)/RHO1D(i)
-            QFLX(i)=QFLX_ocn(i)
+            QFLX_wat(i)=QFX(i)/RHO1D(i)
+            QFLX(i)=QFLX_wat(i)
 
             !----------------------------------
             ! COMPUTE SURFACE HEAT FLUX:       
             !----------------------------------
-            HFX(I)=FLHC(I)*(THSK_ocn(I)-TH1D(I))
+            HFX(I)=FLHC(I)*(THSK_wat(I)-TH1D(I))
             IF ( PRESENT(ISFTCFLX) ) THEN
                IF ( ISFTCFLX.NE.0 ) THEN
                   ! AHW: add dissipative heating term
@@ -1818,20 +1818,20 @@ CONTAINS
                ENDIF
             ENDIF
             ! BWG, 2020-06-17: Mod next 2 lines for fractional
-            HFLX_ocn(I)=HFX(I)/(RHO1D(I)*cpm(I))
-            HFLX(I)=HFLX_ocn(I)
+            HFLX_wat(I)=HFX(I)/(RHO1D(I)*cpm(I))
+            HFLX(I)=HFLX_wat(I)
          ENDIF
 
          !TRANSFER COEFF FOR SOME LSMs:
          !CHS(I)=UST(I)*KARMAN/(ALOG(KARMAN*UST(I)*ZA(I) &
          !       /XKA+ZA(I)/ZL)-PSIH(I))
-         CHS(I)=UST_ocn(I)*KARMAN/PSIT_ocn(I)
+         CHS(I)=UST_wat(I)*KARMAN/PSIT_wat(I)
 
          !THESE ARE USED FOR 2-M DIAGNOSTICS ONLY
-         CQS2(I)=UST_ocn(I)*KARMAN/PSIQ2_ocn(i)
-         CHS2(I)=UST_ocn(I)*KARMAN/PSIT2_ocn(I)
+         CQS2(I)=UST_wat(I)*KARMAN/PSIQ2_wat(i)
+         CHS2(I)=UST_wat(I)*KARMAN/PSIT2_wat(I)
 
-         QSFC(I)=QSFC_ocn(I)
+         QSFC(I)=QSFC_wat(I)
 
       ELSEIF (icy(i)) THEN
 
@@ -1881,7 +1881,7 @@ CONTAINS
          write(*,*)"QFX=",QFX(I),"FLQC=",FLQC(I)
          if(icy(i))write(*,*)"ice, MAVAIL:",MAVAIL(I)," u*=",UST_ice(I)," psiq=",PSIQ_ice(i)
          if(dry(i))write(*,*)"lnd, MAVAIL:",MAVAIL(I)," u*=",UST_lnd(I)," psiq=",PSIQ_lnd(i)
-         if(wet(i))write(*,*)"ocn, MAVAIL:",MAVAIL(I)," u*=",UST_ocn(I)," psiq=",PSIQ_ocn(i)
+         if(wet(i))write(*,*)"ocn, MAVAIL:",MAVAIL(I)," u*=",UST_wat(I)," psiq=",PSIQ_wat(i)
       ENDIF
 
       ! The exchange coefficient for cloud water is assumed to be the
@@ -1892,8 +1892,8 @@ CONTAINS
       !--- COMPUTE EXCHANGE COEFFICIENTS FOR FV3
       !-----------------------------------------
       IF (wet(i)) THEN
-         ch_ocn(I)=(karman/psix_ocn(I))*(karman/psit_ocn(i))
-         cm_ocn(I)=(karman/psix_ocn(I))*(karman/psix_ocn(I))
+         ch_wat(I)=(karman/psix_wat(I))*(karman/psit_wat(i))
+         cm_wat(I)=(karman/psix_wat(I))*(karman/psix_wat(I))
       ENDIF
       IF (dry(i)) THEN
          ch_lnd(I)=(karman/psix_lnd(I))*(karman/psit_lnd(i))
@@ -1930,8 +1930,8 @@ IF (compute_diag) then
               U10(I)=U1D(I)*log(10./ZNTstoch_lnd(I))/log(ZA(I)/ZNTstoch_lnd(I))
               V10(I)=V1D(I)*log(10./ZNTstoch_lnd(I))/log(ZA(I)/ZNTstoch_lnd(I))
             ELSEIF (wet(i)) THEN
-              U10(I)=U1D(I)*log(10./ZNTstoch_ocn(I))/log(ZA(I)/ZNTstoch_ocn(I))
-              V10(I)=V1D(I)*log(10./ZNTstoch_ocn(I))/log(ZA(I)/ZNTstoch_ocn(I))
+              U10(I)=U1D(I)*log(10./ZNTstoch_wat(I))/log(ZA(I)/ZNTstoch_wat(I))
+              V10(I)=V1D(I)*log(10./ZNTstoch_wat(I))/log(ZA(I)/ZNTstoch_wat(I))
             ELSEIF (icy(i)) THEN
               U10(I)=U1D(I)*log(10./ZNTstoch_ice(I))/log(ZA(I)/ZNTstoch_ice(I))
               V10(I)=V1D(I)*log(10./ZNTstoch_ice(I))/log(ZA(I)/ZNTstoch_ice(I))
@@ -1946,8 +1946,8 @@ IF (compute_diag) then
             U10(I)=U1D(I)*log(10./ZNTstoch_lnd(I))/log(ZA(I)/ZNTstoch_lnd(I))
             V10(I)=V1D(I)*log(10./ZNTstoch_lnd(I))/log(ZA(I)/ZNTstoch_lnd(I))
          ELSEIF (wet(i)) THEN
-            U10(I)=U1D(I)*log(10./ZNTstoch_ocn(I))/log(ZA(I)/ZNTstoch_ocn(I))
-            V10(I)=V1D(I)*log(10./ZNTstoch_ocn(I))/log(ZA(I)/ZNTstoch_ocn(I))
+            U10(I)=U1D(I)*log(10./ZNTstoch_wat(I))/log(ZA(I)/ZNTstoch_wat(I))
+            V10(I)=V1D(I)*log(10./ZNTstoch_wat(I))/log(ZA(I)/ZNTstoch_wat(I))
          ELSEIF (icy(i)) THEN
             U10(I)=U1D(I)*log(10./ZNTstoch_ice(I))/log(ZA(I)/ZNTstoch_ice(I))
             V10(I)=V1D(I)*log(10./ZNTstoch_ice(I))/log(ZA(I)/ZNTstoch_ice(I))
@@ -1958,8 +1958,8 @@ IF (compute_diag) then
             U10(I)=U1D(I)*PSIX10_lnd(I)/PSIX_lnd(I)
             V10(I)=V1D(I)*PSIX10_lnd(I)/PSIX_lnd(I)
          ELSEIF (wet(i)) THEN
-            U10(I)=U1D(I)*PSIX10_ocn(I)/PSIX_ocn(I)
-            V10(I)=V1D(I)*PSIX10_ocn(I)/PSIX_ocn(I)
+            U10(I)=U1D(I)*PSIX10_wat(I)/PSIX_wat(I)
+            V10(I)=V1D(I)*PSIX10_wat(I)/PSIX_wat(I)
          ELSEIF (icy(i)) THEN
             U10(I)=U1D(I)*PSIX10_ice(I)/PSIX_ice(I)
             V10(I)=V1D(I)*PSIX10_ice(I)/PSIX_ice(I)
@@ -1985,18 +1985,18 @@ IF (compute_diag) then
          Q2(I)= MAX(Q2(I), MIN(QSFC_lnd(I), QV1D(I)))
          Q2(I)= MIN(Q2(I), 1.05*QV1D(I))
       ELSEIF (wet(i)) THEN
-         DTG=TH1D(I)-THSK_ocn(I)
-         TH2(I)=THSK_ocn(I)+DTG*PSIT2_ocn(I)/PSIT_ocn(I)
+         DTG=TH1D(I)-THSK_wat(I)
+         TH2(I)=THSK_wat(I)+DTG*PSIT2_wat(I)/PSIT_wat(I)
          !***  BE CERTAIN THAT THE 2-M THETA IS BRACKETED BY
          !***  THE VALUES AT THE SURFACE AND LOWEST MODEL LEVEL.
-         IF ((TH1D(I)>THSK_ocn(I) .AND. (TH2(I)<THSK_ocn(I) .OR. TH2(I)>TH1D(I))) .OR. &
-            (TH1D(I)<THSK_ocn(I) .AND. (TH2(I)>THSK_ocn(I) .OR. TH2(I)<TH1D(I)))) THEN
-            TH2(I)=THSK_ocn(I) + 2.*(TH1D(I)-THSK_ocn(I))/ZA(I)
+         IF ((TH1D(I)>THSK_wat(I) .AND. (TH2(I)<THSK_wat(I) .OR. TH2(I)>TH1D(I))) .OR. &
+            (TH1D(I)<THSK_wat(I) .AND. (TH2(I)>THSK_wat(I) .OR. TH2(I)<TH1D(I)))) THEN
+            TH2(I)=THSK_wat(I) + 2.*(TH1D(I)-THSK_wat(I))/ZA(I)
          ENDIF
          T2(I)=TH2(I)*(PSFCPA(I)/100000.)**ROVCP
 
-         Q2(I)=QSFC_ocn(I)+(QV1D(I)-QSFC_ocn(I))*PSIQ2_ocn(i)/PSIQ_ocn(i)
-         Q2(I)= MAX(Q2(I), MIN(QSFC_ocn(I), QV1D(I)))
+         Q2(I)=QSFC_wat(I)+(QV1D(I)-QSFC_wat(I))*PSIQ2_wat(i)/PSIQ_wat(i)
+         Q2(I)= MAX(Q2(I), MIN(QSFC_wat(I), QV1D(I)))
          Q2(I)= MIN(Q2(I), 1.05*QV1D(I))
       ELSEIF (icy(i)) THEN
          DTG=TH1D(I)-THSK_ice(I)
@@ -2035,9 +2035,9 @@ IF ( debug_code == 2) THEN
         ENDIF
       ENDIF
       IF (wet(i)) THEN
-         IF (UST_ocn(I) < 0.0 .OR. UST_ocn(I) > 4.0 )THEN
+         IF (UST_wat(I) < 0.0 .OR. UST_wat(I) > 4.0 )THEN
             print*,"SUSPICIOUS VALUES IN MYNN SFCLAYER",&
-            I,J, "UST_ocn: ",UST_ocn(I)
+            I,J, "UST_wat: ",UST_wat(I)
             yesno = 1
          ENDIF
       ENDIF
@@ -2081,15 +2081,15 @@ IF ( debug_code == 2) THEN
       IF (yesno == 1) THEN
         IF (wet(i)) THEN
            print*," OTHER INFO over water:"
-           print*,"z/L:",ZOL(I)," U*:",UST_ocn(I)," Tstar:",MOL(I)
+           print*,"z/L:",ZOL(I)," U*:",UST_wat(I)," Tstar:",MOL(I)
            print*,"PSIM:",PSIM(I)," PSIH:",PSIH(I)," W*:",WSTAR(I),&
-              " DTHV:",THV1D(I)-THVSK_ocn(I)
+              " DTHV:",THV1D(I)-THVSK_wat(I)
            print*,"CPM:",CPM(I)," RHO1D:",RHO1D(I)," L:",&
-              ZOL(I)/ZA(I)," DTH:",TH1D(I)-THSK_ocn(I)
-           print*," Z0:",ZNTstoch_ocn(I)," Zt:",ZT_ocn(I)," za:",za(I)
-           print*,"MAVAIL:",MAVAIL(I)," QSFC_ocn(I):",&
-              QSFC_ocn(I)," QVSH(I):",QVSH(I)
-           print*,"PSIX=",PSIX_ocn(I)," T1D(i):",T1D(i)
+              ZOL(I)/ZA(I)," DTH:",TH1D(I)-THSK_wat(I)
+           print*," Z0:",ZNTstoch_wat(I)," Zt:",ZT_wat(I)," za:",za(I)
+           print*,"MAVAIL:",MAVAIL(I)," QSFC_wat(I):",&
+              QSFC_wat(I)," QVSH(I):",QVSH(I)
+           print*,"PSIX=",PSIX_wat(I)," T1D(i):",T1D(i)
            write(*,*)"============================================="
         ENDIF
         IF (dry(i)) THEN
@@ -2565,27 +2565,27 @@ END SUBROUTINE SFCLAY1D_mynn
 
     END SUBROUTINE GFS_zt_lnd
 !--------------------------------------------------------------------
-    SUBROUTINE GFS_z0_ocn(z0rl_ocn,ustar_ocn,WSPD,z1,sfc_z0_type,redrag)
+    SUBROUTINE GFS_z0_wat(z0rl_wat,ustar_wat,WSPD,z1,sfc_z0_type,redrag)
 
-        REAL, INTENT(OUT)  :: z0rl_ocn
-        REAL, INTENT(INOUT):: ustar_ocn
+        REAL, INTENT(OUT)  :: z0rl_wat
+        REAL, INTENT(INOUT):: ustar_wat
         REAL, INTENT(IN)   :: wspd,z1
         LOGICAL, INTENT(IN):: redrag
         INTEGER, INTENT(IN):: sfc_z0_type
         REAL :: z0,z0max,wind10m
         REAL, PARAMETER    :: charnock = 0.014, z0s_max=.317e-2 
 
-!            z0           = 0.01 * z0rl_ocn
+!            z0           = 0.01 * z0rl_wat
 !Already converted to meters in the wrapper
-            z0           = z0rl_ocn
+            z0           = z0rl_wat
             z0max        = max(1.0e-6, min(z0,z1))
-            ustar_ocn    = sqrt(g * z0 / charnock)
+            ustar_wat    = sqrt(g * z0 / charnock)
             wind10m      = wspd*log(10./1e-4)/log(z1/1e-4)
             !wind10m      = sqrt(u10m(i)*u10m(i)+v10m(i)*v10m(i))
 !
             if (sfc_z0_type >= 0) then
               if (sfc_z0_type == 0) then
-                z0 = (charnock / g) * ustar_ocn * ustar_ocn
+                z0 = (charnock / g) * ustar_wat * ustar_wat
 
 ! mbek -- toga-coare flux algorithm
 !               z0 = (charnock / g) * ustar(i)*ustar(i) +  arnu/ustar(i)
@@ -2596,47 +2596,47 @@ END SUBROUTINE SFCLAY1D_mynn
 !               z0 = arnu / (ustar(i) * ff ** pp)
 
                 if (redrag) then
-                  !z0rl_ocn = 100.0 * max(min(z0, z0s_max), 1.e-7)
-                  z0rl_ocn = max(min(z0, z0s_max), 1.e-7)
+                  !z0rl_wat = 100.0 * max(min(z0, z0s_max), 1.e-7)
+                  z0rl_wat = max(min(z0, z0s_max), 1.e-7)
                 else
-                  !z0rl_ocn = 100.0 * max(min(z0,.1), 1.e-7)
-                  z0rl_ocn = max(min(z0,.1), 1.e-7)
+                  !z0rl_wat = 100.0 * max(min(z0,.1), 1.e-7)
+                  z0rl_wat = max(min(z0,.1), 1.e-7)
                 endif
 
               elseif (sfc_z0_type == 6) then   ! wang
                  call znot_m_v6(wind10m, z0)  ! wind, m/s, z0, m
-                 !z0rl_ocn = 100.0 * z0          ! cm
+                 !z0rl_wat = 100.0 * z0          ! cm
               elseif (sfc_z0_type == 7) then   ! wang
                  call znot_m_v7(wind10m, z0)  ! wind, m/s, z0, m
-                 !z0rl_ocn = 100.0 * z0          ! cm
+                 !z0rl_wat = 100.0 * z0          ! cm
               else
-                 z0rl_ocn = 1.0e-6
+                 z0rl_wat = 1.0e-6
               endif
 
             endif
 
-    END SUBROUTINE GFS_z0_ocn
+    END SUBROUTINE GFS_z0_wat
 !--------------------------------------------------------------------
-    SUBROUTINE GFS_zt_ocn(ztmax,z0rl_ocn,restar,WSPD,z1,sfc_z0_type)
+    SUBROUTINE GFS_zt_wat(ztmax,z0rl_wat,restar,WSPD,z1,sfc_z0_type)
 
         REAL, INTENT(OUT)  :: ztmax
-        REAL, INTENT(IN)   :: wspd,z1,z0rl_ocn,restar
+        REAL, INTENT(IN)   :: wspd,z1,z0rl_wat,restar
         INTEGER, INTENT(IN):: sfc_z0_type
-        REAL :: z0,z0max,wind10m,rat,ustar_ocn
+        REAL :: z0,z0max,wind10m,rat,ustar_wat
         REAL, PARAMETER    :: charnock = 0.014, z0s_max=.317e-2
 
-!            z0           = 0.01 * z0rl_ocn
+!            z0           = 0.01 * z0rl_wat
 !Already converted to meters in the wrapper
-            z0           = z0rl_ocn
+            z0           = z0rl_wat
             z0max        = max(1.0e-6, min(z0,z1))
-            ustar_ocn    = sqrt(g * z0 / charnock)
+            ustar_wat    = sqrt(g * z0 / charnock)
             wind10m      = wspd*log(10./1e-4)/log(z1/1e-4)
 
 !**  test xubin's new z0
 
 !           ztmax  = z0max
 
-!input            restar = max(ustar_ocn(i)*z0max*visi, 0.000001)
+!input            restar = max(ustar_wat(i)*z0max*visi, 0.000001)
 
 !           restar = log(restar)
 !           restar = min(restar,5.)
@@ -2657,7 +2657,7 @@ END SUBROUTINE SFCLAY1D_mynn
               stop
             endif
 
-    END SUBROUTINE GFS_zt_ocn
+    END SUBROUTINE GFS_zt_wat
 !--------------------------------------------------------------------
 !! add fitted z0,zt curves for hurricane application (used in HWRF/HMON)
 !! Weiguo Wang, 2019-0425
