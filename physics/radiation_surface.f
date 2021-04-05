@@ -331,12 +331,12 @@
 !-----------------------------------
       subroutine setalb                                                 &
      &     ( slmsk,lsm,lsm_noahmp,lsm_ruc,snowf,sncovr,sncovr_ice,      &
-     &       snoalb,zorlf,coszf,tsknf,tairf,hprif,landfrac,             & !  ---  inputs:
+     &       snoalb,zorlf,coszf,tsknf,tairf,hprif,landfrac,min_seaice,  & !  ---  inputs:
      &       alvsf,alnsf,alvwf,alnwf,facsf,facwf,fice,tisfc,            &
      &       lsmalbdvis, lsmalbdnir, lsmalbivis, lsmalbinir,            &
      &       icealbdvis, icealbdnir, icealbivis, icealbinir,            &
      &       IMAX, albPpert, pertalb,                                   & ! sfc-perts, mgehne
-     &       sfcalb, alb_ice, alb_sno_ice, sfalb_lnd_bck                & !  ---  outputs:
+     &       sfcalb                                                     & !  ---  outputs:
      &     )
 
 !  ===================================================================  !
@@ -409,29 +409,29 @@
      &       alvsf, alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc,     &
      &       lsmalbdvis, lsmalbdnir, lsmalbivis, lsmalbinir,            &
      &       icealbdvis, icealbdnir, icealbivis, icealbinir,            &
-     &       sncovr, sncovr_ice, snoalb, albPpert            ! sfc-perts, mgehne
-      real (kind=kind_phys),  intent(in) :: pertalb          ! sfc-perts, mgehne
+     &       sncovr, sncovr_ice, snoalb, albPpert           ! sfc-perts, mgehne
+      real (kind=kind_phys),  intent(in) :: pertalb         ! sfc-perts, mgehne
+      real (kind=kind_phys),  intent(in) :: min_seaice
 
 !  ---  outputs
-      real (kind=kind_phys), dimension(:), intent(inout) ::   alb_ice,  &
-     &                                                    alb_sno_ice,  &
-     &                                                    sfalb_lnd_bck
       real (kind=kind_phys), dimension(IMAX,NF_ALBD), intent(out) ::    &
      &       sfcalb
-!     real (kind=kind_phys), dimension(:,:), intent(out) :: sfcalb
 
 !  ---  locals:
       real (kind=kind_phys) :: asnvb, asnnb, asnvd, asnnd, asevb        &
      &,     asenb, asevd, asend, fsno,  fsea,  rfcs,  rfcw,  flnd       &
      &,     asnow, argh,  hrgh,  fsno0, fsno1, flnd0, fsea0, csnow      &
      &,     a1, a2, b1, b2, b3, ab1bm, ab2bm, m, s, alpha, beta, albtmp
+
       real (kind=kind_phys) :: asevb_wat,asenb_wat,asevd_wat,asend_wat, &
-                               asevb_ice,asenb_ice,asevd_ice,asend_ice
+     &                         asevb_ice,asenb_ice,asevd_ice,asend_ice
 
       real (kind=kind_phys) ffw, dtgd
+      real (kind=kind_phys) :: fracl, fraco, fraci
 
       integer :: i, k, kk, iflag
 
+      logical, dimension(imax) :: icy
 !
 !===> ...  begin here
 !
@@ -469,11 +469,6 @@
             asevd = 0.7 - 4.0*a1
             asend = 0.65 - 3.6875*a1
          endif
-         if(lsm == lsm_ruc) then
-           !-- output alb_ice for use in LSMs (diffused albedo adjusted
-           !   for T around freezing)
-           alb_ice(i) = max(0.6, 0.5 * (asend + asevd))
-         endif
 
 !>  - Calculate diffused snow albedo.
 
@@ -505,11 +500,6 @@
          else
             asnvb = asnvd
             asnnb = asnnd
-         endif
-         if(lsm == lsm_ruc) then
-           !-- alb_sno_ice (diffused and direct) for use in LSMs
-           alb_sno_ice(i) = min(0.98, 0.5 * (0.65 + b1
-     &                    + 0.5 * (asnvb+asnnb)))
          endif
 
 !>  - Calculate direct sea surface albedo.
@@ -544,11 +534,6 @@
          sfcalb(i,2) = (a2 + b2) * 0.96 *flnd + asend*fsea + asnnd*fsno
          sfcalb(i,3) = min(0.99, ab1bm) *flnd + asevb*fsea + asnvb*fsno
          sfcalb(i,4) = (a1 + b1) * 0.96 *flnd + asevd*fsea + asnvd*fsno
-         if(lsm == lsm_ruc) then
-           !-- alb_lnd (diffused and direct) for snow-free areas for use
-           !in LSMs
-           sfalb_lnd_bck(i) = 0.25*(ab1bm + alnwf(i) + ab2bm + alvwf(i))
-         endif
 
         enddo    ! end_do_i_loop
 
@@ -596,11 +581,6 @@
             asevd = 0.7 - 4.0*a1
             asend = 0.65 - 3.6875*a1
          endif
-         if(lsm == lsm_ruc) then
-           !-- output alb_ice for use in RUC LSM (diffused albedo adjusted
-           !   for T around freezing)
-           alb_ice(i) = max(0.6, 0.5 * (asend + asevd))
-         endif
 
 !>  - Calculate diffused snow albedo, land area use input max snow
 !!      albedo.
@@ -634,11 +614,6 @@
            else
              asnvb = asnvd
              asnnb = asnnd
-           endif
-           if(lsm == lsm_ruc) then
-             !-- alb_sno_ice (diffused and direct) for use in LSMs
-             alb_sno_ice(i) = min(0.98, 0.5 * (0.65 + b1
-     &                      + 0.5 * (asnvb+asnnb)))
            endif
          else
            asnvb = snoalb(i)
@@ -680,11 +655,6 @@
          sfcalb(i,3) = ab2bm   *flnd + asevb*fsea + asnvb*fsno
          sfcalb(i,4) = alvwf(i)*flnd + asevd*fsea + asnvd*fsno
 
-         if(lsm == lsm_ruc) then
-           !-- alb_lnd (diffused and direct) for snow-free areas for use in LSMs
-           sfalb_lnd_bck(i) = 0.25*(ab1bm + alnwf(i) + ab2bm + alvwf(i))
-         endif 
-
         enddo    ! end_do_i_loop
 
 !> -# use land model output for land area: Noah MP, RUC (land and ice).
@@ -693,33 +663,38 @@
 
           fracl = landfrac(i)
           fraco = max(f_zero, f_one - fracl)
-          fraci = fraco * fice(i)
-          ffw   = max(f_zero, f_one - fraci)
+          if(fice(i) < min_seaice) then
+            fraci = 0.
+          else
+            fraci = fraco * fice(i)
+          endif
           fraco = max(f_zero, fraco-fraci)
 
-          if ( fraco > f_zero ) then    
-          !-- open water fraction 
-            asevd_wat = 0.06
-            asend_wat = 0.06
+          icy(i) = .false.
+          if (fraci > f_zero) icy(i) = .true.
 
-            ! direct albedo CZA dependence
-            if (coszf(i) > 0.0001) then
-              if (tsknf(i) >= con_t0c) then
-                asevb_wat = max (asevd_wat, 0.026/(coszf(i)**1.7+0.065) &
-     &                      + 0.15 * (coszf(i)-0.1) * (coszf(i)-0.5)    &
-     &                      * (coszf(i)-f_one))
-                asenb_wat = asevb_wat
-              endif
-            else
-              asevb_wat = asevd_wat
-              asenb_wat = asevd_wat
+          !-- water albedo
+          asevd_wat = 0.06
+          asend_wat = 0.06
+          asevb_wat = asevd_wat
+          asenb_wat = asevd_wat
+
+          ! direct albedo CZA dependence over water
+          if (fraco > f_zero .and. coszf(i) > 0.0001) then
+            if (tsknf(i) >= con_t0c) then
+              asevb_wat = max (asevd_wat, 0.026/(coszf(i)**1.7 + 0.065) &
+     &                    + 0.15 * (coszf(i)-0.1) * (coszf(i)-0.5)      &
+     &                    * (coszf(i)-f_one))
+              asenb_wat = asevb_wat
             endif
+          endif
 
-          elseif (fraci > min_seaice) then  ! full or fractional ice
-          !-- tgs: this part of the code needs the input from the ice
-          !        model. Otherwise it uses the backup albedo computation 
-          !        from ialbflg = 1.
-            if(lsm == lsm_ruc) then    
+          !-- ice albedo
+          !tgs: this part of the code needs the input from the ice
+          !     model. Otherwise it uses the backup albedo computation 
+          !     from ialbflg = 1.
+          if (icy(i)) then
+            if(lsm == lsm_ruc ) then    
             !-- use ice albedo from the RUC ice model
               asevd_ice = icealbivis(i)
               asend_ice = icealbinir(i)
@@ -744,7 +719,7 @@
               asevb_ice = asevd_ice
               asenb_ice = asend_ice
   
-              if (fsno0 > epsln) then                                  ! fractional snow
+              if (fsno0 > f_zero) then 
               ! Snow on ice
                 dtgd = max(f_zero, min(5.0, (con_ttp-tisfc(i)) ))
                 b1   = 0.03 * dtgd
@@ -760,18 +735,25 @@
                   asnnb = asnnd
                 endif
   
-                ! composite ice albedo and  snow albedos
+                ! composite ice albedo and snow albedos
                 asevd_ice = asevd_ice * (1. - fsno0) + asnvd * fsno0
                 asend_ice = asend_ice * (1. - fsno0) + asnnd * fsno0
                 asevb_ice = asevb_ice * (1. - fsno0) + asnvb * fsno0
                 asenb_ice = asenb_ice * (1. - fsno0) + asnnb * fsno0
               endif ! snow
-            endif ! ice model
+            endif ! lsm
+          else
+          ! icy = false
+            asevd_ice = 0.70
+            asend_ice = 0.65
+            asevb_ice = 0.70
+            asenb_ice = 0.65
+          endif ! icy
  
-          endif ! water or ice
-
           !-- Composite mean surface albedo from land, open water and
           !-- ice fractions
+          print*,'i,asenb_wat,asenb_ice',i,asenb_wat,asenb_ice
+          print*,'lsmalbdnir(i)=',i,lsmalbdnir(i)
           sfcalb(i,1) = min(0.99,max(0.01,lsmalbdnir(i)))*fracl         &
      &                  + asenb_wat*fraco + asenb_ice*fraci
           sfcalb(i,2) = min(0.99,max(0.01,lsmalbinir(i)))*fracl         &
@@ -801,17 +783,6 @@
             call ppfbet(albPpert(i),alpha,beta,iflag,albtmp)
             sfcalb(i,kk) = albtmp
           enddo
-            if(lsm == lsm_ruc) then
-              ! perturb mean surface albedo
-              m = sfalb_lnd_bck(i)
-              s = pertalb*m*(1.-m)
-              alpha = m*m*(1.-m)/(s*s)-m
-              beta  = alpha*(1.-m)/m
-              ! compute beta distribution value corresponding
-              ! to the given percentile albPpert to use as new albedo
-              call ppfbet(albPpert(i),alpha,beta,iflag,albtmp)
-              sfalb_lnd_bck(i) = albtmp
-            endif
         enddo     ! end_do_i_loop
       endif
 
@@ -844,7 +815,7 @@
 !! @{
 !-----------------------------------
       subroutine setemis                                                &
-     &     ( kdt,lsm,lsm_noahmp,lsm_ruc,vtype,                          &  !  ---  inputs:
+     &     ( kdt,lsm,lsm_noahmp,lsm_ruc,vtype,landfrac,min_seaice,      &  !  ---  inputs:
      &       xlon,xlat,slmsk,snowf,sncovr,sncovr_ice,fice,              &
      &       zorlf,tsknf,tairf,hprif,                                   &
      &       semis_lnd,semis_ice,IMAX,                                  &
@@ -903,6 +874,8 @@
       integer, intent(in) :: IMAX
       integer, intent(in) :: kdt, lsm, lsm_noahmp, lsm_ruc
       real (kind=kind_phys), dimension(:), intent(in) :: vtype
+      real (kind=kind_phys), dimension(:), intent(in) :: landfrac
+      real (kind=kind_phys), intent(in) :: min_seaice
 
       real (kind=kind_phys), dimension(:), intent(in) ::                &
      &       xlon,xlat, slmsk, snowf,sncovr, sncovr_ice, fice,          &
@@ -920,6 +893,7 @@
      &      asnow, argh, hrgh, fsno, fsno0, fracl, fraco, fraci
 
       real (kind=kind_phys) :: sfcemis_land, sfcemis_ice
+      logical, dimension(imax) :: icy
 
 !  ---  reference emiss value for diff surface emiss index
 !       1-open water, 2-grass/shrub land, 3-bare soil, tundra,
@@ -950,8 +924,15 @@
 
           fracl = landfrac(i)
           fraco = max(f_zero, f_one - fracl)
-          fraci = fraco * fice(i)
+          if(fice(i) < min_seaice) then
+            fraci = 0.
+          else
+            fraci = fraco * fice(i)
+          endif
           fraco = max(f_zero, fraco-fraci)
+
+          icy(i) = .false.
+          if (fice(i) > min_seaice) icy(i) = .true.
 
           if (fracl < epsln) then                  ! no land
             if ( abs(fraco-f_one) < epsln ) then     ! open water point
@@ -1034,82 +1015,48 @@
 
       elseif ( iemslw == 2 ) then   ! sfc emiss updated in land model: Noah MP or RUC
 
-         do i = 1, IMAX
+        do i = 1, IMAX
 
           fracl = landfrac(i)
           fraco = max(f_zero, f_one - fracl)
-          fraci = fraco * fice(i)
+          if(fice(i) < min_seaice) then
+            fraci = 0.
+          else
+            fraci = fraco * fice(i)
+          endif
+
           fraco = max(f_zero, fraco-fraci)
 
-          if (fracl < epsln) then                    ! no land
-            if ( abs(fraco-f_one) < epsln ) then     
-            !-- open water point
-              sfcemis(i) = emsref(1)
-            elseif (fraci > epsln) then              
-            !-- full or fractional ice
-              if (lsm == lsm_noahmp) then
-              !-- ice emissivity from the table
-                sfcemis_ice = emsref(7)
-                if ( snowf(i) > f_zero ) then
-                  asnow = 0.02*snowf(i)
-                  argh  = min(0.50, max(.025,0.01*zorlf(i)))
-                  hrgh  = min(f_one,max(0.20,1.0577-1.1538e-3*hprif(i)))
-                  fsno0 = asnow / (argh + asnow) * hrgh
-                  sfcemis(i) = sfcemis_ice*(f_one-fsno0)+emsref(8)*fsno0
-                endif
-              elseif (lsm == lsm_ruc) then
-              !-- ruc lsm has a sea-ice component
-                if (kdt == 1 ) then
-                  sfcemis_ice = emsref(7) * (1.-sncovr_ice(i))
-     &                        + emsref(8) * sncovr_ice(i)
-                else
-                  sfcemis_ice = semis_ice(i) ! emissivity for ice with snow effect
-                endif
-                sfcemis(i) = sfcemis_ice
-              endif ! lsm check
+          icy(i) = .false.
+          if (fice(i) > min_seaice) icy(i) = .true.
 
-              if ( abs(fraci-f_one) > epsln ) then 
-              !-- fractional sea ice
-                sfcemis(i) = fraco*emsref(1) + fraci*sfcemis(i)
+          !-- ice albedo
+          sfcemis_ice = emsref(7)
+
+          if ( icy(i) ) then 
+          !-- complete or fractional ice
+            if (lsm == lsm_noahmp) then
+              if ( snowf(i) > f_zero ) then
+                asnow = 0.02*snowf(i)
+                argh  = min(0.50, max(.025,0.01*zorlf(i)))
+                hrgh  = min(f_one,max(0.20,1.0577-1.1538e-3*hprif(i)))
+                fsno0 = asnow / (argh + asnow) * hrgh
+                sfcemis_ice = sfcemis_ice*(f_one-fsno0)+emsref(8)*fsno0
               endif
+            elseif (lsm == lsm_ruc) then
+              sfcemis_ice = semis_ice(i) ! output from lsm (with snow effect)
+            endif ! lsm check
+          endif ! icy
 
-          else                                     ! land or fractional grid
+          !-- land emissivity 
+          !-- from Noah MP or RUC lsms
+            sfcemis_land = semis_lnd(i) ! albedo with snow effect from LSM
 
-            if (lsm == lsm_noahmp .or. lsm == lsm_ruc) then
-            !-- Noah MP or RUC LSM
-              if (lsm == lsm_noahmp) then
-                sfcemis_land = semis_lnd(i)! with snow effect
-                sfcemi_ice   = emsref(7)
-              else
-              ! ruc lsm
-              if (kdt == 1 ) then
-                ivgtyp = int( vtype(i)+0.5 )
-                semisbase(i) = lemitbl(ivgtyp)
-                sfcemis_land = semisbase(i)*(1.-sncovr(i))
-     &                       + emsref(8)*sncovr(i)
-                sfcemis_ice  = emsref(8)*(1.-sncovr_ice(i))
-     &                       + emsref(8)*sncovr_ice(i)
-              else
-                sfcemis_land = semis_lnd(i) ! with snow effect
-                sfcemis_ice  = semis_ice(i) ! with snow effect
-              endif ! ruc
+          !-- Composite emissivity from land, water and ice fractions.
+          sfcemis(i) = fracl*sfcemis_land + fraco*emsref(1)             &
+     &                                    + fraci*sfcemis_ice
 
-              if (abs(fracl-f_one) < epsln) then
-              !-- land only
-                sfcemis(i) = sfcemis_land  ! with snow effect
-              else
-              !-- land is a fraction
-                sfcemis(i) = fracl*sfcemis_land + fraco*emsref(1) &
-     &                                          + fraci*sfcemis_ice
-                endif
-              endif
-            else
-              write(0,'(*(a))')'This LSM is not supported with iemslw=2'
-            endif
-
-          endif ! fractional land
-
-         enddo
+         enddo  ! i
 
 
       endif   ! end if_iemslw_block

@@ -27,7 +27,8 @@ contains
 !!
   subroutine rrtmgp_lw_pre_run ( kdt, lsm, lsm_noahmp, lsm_ruc, vtype, doLWrad, &
        nCol, xlon, xlat, slmsk, zorl, snowd, sncovr, sncovr_ice, fice,          &
-       tsfg, tsfa, hprime, sfc_emiss_byband, semis_land, semis_ice,             &
+       tsfg, tsfa, hprime, landfrac, min_seaice,                                &
+       sfc_emiss_byband, semis_land, semis_ice,                                 &
        semisbase, semis, errmsg, errflg)
 
     ! Inputs
@@ -41,6 +42,7 @@ contains
          vtype,         & ! vegetation type
          xlon,          & ! Longitude
          xlat,          & ! Latitude
+         slmsk,         & ! Surface mask: 0-water, 1-land, 2-ice
          landfrac,      & ! Land fraction
          zorl,          & ! Surface roughness length (cm)
          snowd,         & ! water equivalent snow depth (mm)
@@ -62,7 +64,7 @@ contains
          errmsg           ! Error message
     integer, intent(out) :: &  
          errflg           ! Error flag
-    real(kind_phys), dimension(nCol), intent(out) :: &
+    real(kind_phys), dimension(nCol), intent(inout) :: &
          semisbase, semis
 
     ! Local variables
@@ -77,9 +79,9 @@ contains
     ! #######################################################################################
     ! Call module_radiation_surface::setemis(),to setup surface emissivity for LW radiation.
     ! #######################################################################################
-    call setemis ( kdt, lsm, lsm_noahmp, lsm_ruc, vtype, xlon, xlat, slmsk,       &
-                      snowd, sncovr, sncovr_ice, fice, zorl, tsfg, tsfa, hprime,  &
-                      semis_land, semis_ice, nCol,                                & !  ---  inputs
+    call setemis ( kdt, lsm, lsm_noahmp, lsm_ruc, vtype, landfrac, min_seaice,    &
+                      xlon, xlat, slmsk, snowd, sncovr, sncovr_ice, fice, zorl,   &
+                      tsfg, tsfa, hprime, semis_land, semis_ice, nCol,            & !  ---  inputs
                       semisbase, semis)                                             !  ---  outputs
 
 

@@ -17,9 +17,11 @@ module lsm_ruc
         public :: lsm_ruc_init, lsm_ruc_run, lsm_ruc_finalize
 
         real(kind=kind_phys), parameter :: zero = 0.0d0, one = 1.0d0, epsln = 1.0d-10
-        real(kind=kind_phys), dimension (2), parameter :: d = (/0.1,0.25/)
+        real(kind=kind_phys), dimension (2), parameter, private :: d = (/0.1,0.25/)
+        integer, dimension(20), parameter, private:: &
+        istwe = (/1,1,1,1,1,2,2,1,1,2,2,2,2,2,1,2,2,1,2,2/) ! IGBP 20 classes
 
-        integer, parameter :: istwe = (/5*1,2,2,1,1,5*2,1,2,2,1,2,2/) ! for 20 IGBP classes
+
 
       contains
 
@@ -28,13 +30,19 @@ module lsm_ruc
 !! \section arg_table_lsm_ruc_init Argument Table
 !! \htmlinclude lsm_ruc_init.html
 !!
-      subroutine lsm_ruc_init (me, master, isot, ivegsrc, nlunit,        &
-                               flag_restart, flag_init,                  &
-                               im, lsoil_ruc, lsoil, kice, nlev,         & ! in
-                               lsm_ruc, lsm, slmsk, stype, vtype,        & ! in 
-                               tsfc_lnd, tsfc_wat,                       & ! in
-                               tg3, smc, slc, stc,                       & ! in
-                               zs, sh2o, smfrkeep, tslb, smois, wetness, & ! out
+      subroutine lsm_ruc_init (me, master, isot, ivegsrc, nlunit,               &
+                               flag_restart, flag_init,                         &
+                               im, lsoil_ruc, lsoil, kice, nlev,                & ! in
+                               lsm_ruc, lsm, slmsk, stype, vtype,               & ! in 
+                               tsfc_lnd, tsfc_wat,                              & ! in
+                               tg3, smc, slc, stc, fice, min_seaice,            & ! in
+                               sncovr_lnd, sncovr_ice, snoalb,                  & ! in
+                               facsf, facwf, alvsf, alvwf, alnsf, alnwf,        & ! in
+                               sfalb_lnd_bck,                                   & ! out
+                               albdvis_lnd,albdnir_lnd,albivis_lnd,albinir_lnd, & ! out
+                               albdvis_ice,albdnir_ice,albivis_ice,albinir_ice, & ! out
+                               semisbase, semis_lnd, semis_ice,                 & ! out
+                               zs, sh2o, smfrkeep, tslb, smois, wetness,        & ! out
                                tsice, pores, resid, errmsg, errflg)
 
       implicit none
@@ -56,18 +64,36 @@ module lsm_ruc
       real (kind=kind_phys), dimension(im), intent(in) :: tsfc_lnd
       real (kind=kind_phys), dimension(im), intent(in) :: tsfc_wat
       real (kind=kind_phys), dimension(im), intent(in) :: tg3
+      real (kind=kind_phys), dimension(im), intent(in) :: sncovr_lnd
+      real (kind=kind_phys), dimension(im), intent(in) :: sncovr_ice
+      real (kind=kind_phys), dimension(im), intent(in) :: snoalb
+      real (kind=kind_phys), dimension(im), intent(in) :: fice
+      real (kind=kind_phys), dimension(im), intent(in) :: facsf
+      real (kind=kind_phys), dimension(im), intent(in) :: facwf
+      real (kind=kind_phys), dimension(im), intent(in) :: alvsf
+      real (kind=kind_phys), dimension(im), intent(in) :: alvwf
+      real (kind=kind_phys), dimension(im), intent(in) :: alnsf
+      real (kind=kind_phys), dimension(im), intent(in) :: alnwf
 
       real (kind=kind_phys), dimension(im,lsoil), intent(in) :: smc,slc,stc
-
+      real (kind=kind_phys), intent(in) :: min_seaice
 !  ---  in/out:
       real (kind=kind_phys), dimension(im), intent(inout) :: wetness
 
-!  ---  out
-      real (kind=kind_phys), dimension(:),            intent(out) :: zs
+!  ---  inout
       real (kind=kind_phys), dimension(im,lsoil_ruc), intent(inout) :: sh2o, smfrkeep
       real (kind=kind_phys), dimension(im,lsoil_ruc), intent(inout) :: tslb, smois
-      real (kind=kind_phys), dimension(im,kice),      intent(out) :: tsice
+      real (kind=kind_phys), dimension(im),           intent(inout) :: semis_lnd
+      real (kind=kind_phys), dimension(im),           intent(inout) :: semis_ice
+      real (kind=kind_phys), dimension(im),           intent(inout) ::             &
+                             albdvis_lnd, albdnir_lnd,  albivis_lnd,  albinir_lnd, &
+                             albdvis_ice, albdnir_ice,  albivis_ice,  albinir_ice
 
+!  ---  out
+      real (kind=kind_phys), dimension(:),            intent(out) :: zs
+      real (kind=kind_phys), dimension(im),           intent(out) :: sfalb_lnd_bck
+      real (kind=kind_phys), dimension(im,kice),      intent(out) :: tsice
+      real (kind=kind_phys), dimension(im),           intent(out) :: semisbase
       real (kind=kind_phys), dimension(:), intent(out) :: pores, resid
 
       character(len=*),     intent(out) :: errmsg
@@ -75,6 +101,7 @@ module lsm_ruc
 
 ! --- local
       real (kind=kind_phys), dimension(lsoil_ruc) :: dzs
+      real (kind=kind_phys) :: alb_lnd, alb_ice
       integer  :: ipr, i, k
       logical  :: debug_print
       integer, dimension(im) :: soiltyp, vegtype
@@ -144,6 +171,30 @@ module lsm_ruc
           if (soiltyp(i)  < 1) soiltyp(i)  = 14
           if (vegtype(i)  < 1) vegtype(i)  = 17
         endif
+        !-- initialize background and actual emissivity
+        semisbase(i) = lemitbl(vegtype(i)) ! no snow effect
+        sfalb_lnd_bck(i) = 0.25*(alnsf(i) + alnwf(i) + alvsf(i) + alvwf(i))  &
+                           * min(1., facsf(i)+facwf(i))
+
+        write(0,*)'sfalb_lnd_bck(i)=',i,sfalb_lnd_bck(i)
+        !-- land
+        semis_lnd(i) = semisbase(i) * (1.-sncovr_lnd(i))  &
+                     + 0.99 * sncovr_lnd(i)
+        alb_lnd = sfalb_lnd_bck(i) * (1. - sncovr_lnd(i)) &
+                + snoalb(i) * sncovr_lnd(i) 
+        albdvis_lnd(i) = alb_lnd
+        albdnir_lnd(i) = alb_lnd
+        albivis_lnd(i) = alb_lnd
+        albinir_lnd(i) = alb_lnd
+        !-- ice
+        semis_ice(i) = 0.97 * (1. - sncovr_ice(i)) + 0.99 * sncovr_ice(i)
+        alb_ice = 0.55 * (1. - sncovr_ice(i)) + 0.75 * sncovr_ice(i)
+        albdvis_ice(i) = alb_ice 
+        albdnir_ice(i) = alb_ice
+        albivis_ice(i) = alb_ice
+        albinir_ice(i) = alb_ice
+
+        write(0,*)'albinir_lnd(i),albinir_ice(i)',i,alb_lnd,albinir_lnd(i),alb_ice,albinir_ice(i)
       enddo
 
         call init_soil_depth_3 ( zs , dzs , lsoil_ruc )
@@ -270,8 +321,7 @@ module lsm_ruc
      &       imp_physics, imp_physics_gfdl, imp_physics_thompson,       &
      &       do_mynnsfclay, lsoil_ruc, lsoil, rdlai, zs,                &
      &       t1, q1, qc, soiltyp, vegtype, sigmaf, laixy,               &
-     &       dlwflx, dswsfc, snet, tg3, coszen,                         &
-     &       land, icy,  lake, alb_ice_snowfree, alb_ice_snow,          &
+     &       dlwflx, dswsfc, snet, tg3, coszen, land, icy, lake,        &
      &       rainnc, rainc, ice, snow, graupel,                         &
      &       prsl1, zf, wind, shdmin, shdmax,                           &
      &       srflag, sfalb_lnd_bck, snoalb,                             &
@@ -362,8 +412,6 @@ module lsm_ruc
      &       sfcqc_ice, sfcqv_ice, fice, tice
 
 !  ---  in
-      real (kind=kind_phys), dimension(im), intent(in) ::                &
-             alb_ice_snowfree, alb_ice_snow
       real (kind=kind_phys), dimension(im), intent(in) ::                &
      &       rainnc, rainc, ice, snow, graupel
 !  ---  in/out:
@@ -465,7 +513,6 @@ module lsm_ruc
       ! local
       integer :: ims,ime, its,ite, jms,jme, jts,jte, kms,kme, kts,kte
       integer :: l, k, i, j,  fractional_seaice, ilst
-      integer, dimension (1:nlcat) :: istwe
       real (kind=kind_phys) :: dm
       logical :: flag(im), flag_ice_uncoupled(im)
       logical :: rdlai2d, myj, frpcpn
@@ -849,10 +896,10 @@ module lsm_ruc
           sfcems_lnd(i,j) = semis_lnd(i)
         endif
 
-        if(coszen(i) > 0. .and. sneqv_lnd(i) < 1.e-4) then
+        if(coszen(i) > 0. .and. weasd_lnd(i) < 1.e-4) then
         !-- solar zenith angle dependence when no snow
           ilst=istwe(vegtype(i)) ! 1 or 2
-          dm = (1.+2.*d(ilst))/(1.+2.*d(ilst)*coszen(i,j))
+          dm = (1.+2.*d(ilst))/(1.+2.*d(ilst)*coszen(i))
           albbcksol(i) = sfalb_lnd_bck(i)*dm
         endif ! coszen > 0.
 
@@ -1157,8 +1204,8 @@ module lsm_ruc
 
         sncovr_ice(i,j)   = sncovr1_ice(i)
         !-- alb_ice* is computed in setalb called from rrtmg_sw_pre.
-        snoalb1d_ice(i,j) = alb_ice_snow(i) !0.75 is RAP value for max snow alb on ice
-        albbck_ice(i,j)   = alb_ice_snowfree(i) !0.55 is RAP value for ice alb
+        snoalb1d_ice(i,j) = 0.75 !alb_ice_snow(i) !0.75 is RAP value for max snow alb on ice
+        albbck_ice(i,j)   = 0.55 !alb_ice_snowfree(i) !0.55 is RAP value for ice alb
         if (kdt == 1) then
           if (dswsfc(i) > 0.) then
             alb_ice(i,j) = max(0.01, 1. - snet(i)/dswsfc(i))
