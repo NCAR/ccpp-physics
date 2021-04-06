@@ -90,24 +90,24 @@
       integer, intent(in) :: im, ivegsrc
       integer, intent(in) :: sfc_z0_type ! option for calculating surface roughness length over ocean
 
-      integer, dimension(im), intent(in) :: vegtype
+      integer, dimension(:), intent(in) :: vegtype
 
       logical, intent(in) :: redrag ! reduced drag coeff. flag for high wind over sea (j.han)
-      logical, dimension(im), intent(in) :: flag_iter, wet, dry, icy
+      logical, dimension(:), intent(in) :: flag_iter, wet, dry, icy
 
-      real(kind=kind_phys), dimension(im), intent(in)    :: u10m,v10m
+      real(kind=kind_phys), dimension(:), intent(in)    :: u10m,v10m
       real(kind=kind_phys), intent(in) :: rvrdm1, eps, epsm1, grav
-      real(kind=kind_phys), dimension(im), intent(in)    ::             &
+      real(kind=kind_phys), dimension(:), intent(in)    ::              &
      &                    ps,t1,q1,z1,prsl1,prslki,prsik1,prslk1,       &
      &                    wind,sigmaf,shdmax,                           &
      &                    z0pert,ztpert ! mg, sfc-perts
-      real(kind=kind_phys), dimension(im), intent(in)    ::             &
+      real(kind=kind_phys), dimension(:), intent(in)    ::              &
      &                    tskin_wat, tskin_lnd, tskin_ice,              &
      &                    tsurf_wat, tsurf_lnd, tsurf_ice,              &
      &                   snwdph_wat,snwdph_lnd,snwdph_ice
 
-      real(kind=kind_phys), dimension(im), intent(in)    :: z0rl_wav
-      real(kind=kind_phys), dimension(im), intent(inout) ::             &
+      real(kind=kind_phys), dimension(:), intent(in)    :: z0rl_wav
+      real(kind=kind_phys), dimension(:), intent(inout) ::              &
      &                     z0rl_wat,  z0rl_lnd,  z0rl_ice,              &
      &                    ustar_wat, ustar_lnd, ustar_ice,              &
      &                       cm_wat,    cm_lnd,    cm_ice,              &

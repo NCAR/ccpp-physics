@@ -701,60 +701,60 @@
 
       logical, intent(in) :: lprnt, lsswr
 
-      real (kind=kind_phys), dimension(npts,nlp1), intent(in) ::        &
+      real (kind=kind_phys), dimension(:,:), intent(in) ::              &
      &       plvl, tlvl
-      real (kind=kind_phys), dimension(npts,nlay), intent(in) ::        &
+      real (kind=kind_phys), dimension(:,:), intent(in) ::              &
      &       plyr, tlyr, qlyr, olyr, dzlyr, delpin
 
-      real (kind=kind_phys),dimension(npts),intent(in):: sfcalb_nir_dir 
-      real (kind=kind_phys),dimension(npts),intent(in):: sfcalb_nir_dif 
-      real (kind=kind_phys),dimension(npts),intent(in):: sfcalb_uvis_dir
-      real (kind=kind_phys),dimension(npts),intent(in):: sfcalb_uvis_dif
+      real (kind=kind_phys),dimension(:),intent(in):: sfcalb_nir_dir 
+      real (kind=kind_phys),dimension(:),intent(in):: sfcalb_nir_dif 
+      real (kind=kind_phys),dimension(:),intent(in):: sfcalb_uvis_dir
+      real (kind=kind_phys),dimension(:),intent(in):: sfcalb_uvis_dif
 
-      real(kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_co2
-      real(kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_n2o
-      real(kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_ch4
-      real(kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_o2
-      real(kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_co
-      real(kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_cfc11
-      real(kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_cfc12
-      real(kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_cfc22
-      real(kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_ccl4
+      real(kind=kind_phys),dimension(:,:),intent(in)::gasvmr_co2
+      real(kind=kind_phys),dimension(:,:),intent(in)::gasvmr_n2o
+      real(kind=kind_phys),dimension(:,:),intent(in)::gasvmr_ch4
+      real(kind=kind_phys),dimension(:,:),intent(in)::gasvmr_o2
+      real(kind=kind_phys),dimension(:,:),intent(in)::gasvmr_co
+      real(kind=kind_phys),dimension(:,:),intent(in)::gasvmr_cfc11
+      real(kind=kind_phys),dimension(:,:),intent(in)::gasvmr_cfc12
+      real(kind=kind_phys),dimension(:,:),intent(in)::gasvmr_cfc22
+      real(kind=kind_phys),dimension(:,:),intent(in)::gasvmr_ccl4
 
-      real (kind=kind_phys), dimension(npts,nlay),intent(in):: cld_cf
-      real (kind=kind_phys), dimension(npts,nlay),intent(in),optional:: &
+      real (kind=kind_phys), dimension(:,:),intent(in):: cld_cf
+      real (kind=kind_phys), dimension(:,:),intent(in),optional::       &
      &       cld_lwp, cld_ref_liq,  cld_iwp, cld_ref_ice,               &
      &       cld_rwp, cld_ref_rain, cld_swp, cld_ref_snow,              &
      &       cld_od, cld_ssa, cld_asy
 
-      real(kind=kind_phys),dimension(npts,nlay,nbdsw),intent(in)::aeraod
-      real(kind=kind_phys),dimension(npts,nlay,nbdsw),intent(in)::aerssa
-      real(kind=kind_phys),dimension(npts,nlay,nbdsw),intent(in)::aerasy
+      real(kind=kind_phys),dimension(:,:,:),intent(in)::aeraod
+      real(kind=kind_phys),dimension(:,:,:),intent(in)::aerssa
+      real(kind=kind_phys),dimension(:,:,:),intent(in)::aerasy
 
       real (kind=kind_phys), intent(in) :: cosz(npts), solcon,          &
      &       de_lgth(npts)
       real (kind=kind_phys), dimension(npts,nlay), intent(in) :: alpha
 
 !  ---  outputs:
-      real (kind=kind_phys), dimension(npts,nlay), intent(inout) :: hswc
-      real (kind=kind_phys), dimension(npts,nlay), intent(inout) ::     &
+      real (kind=kind_phys), dimension(:,:), intent(inout) :: hswc
+      real (kind=kind_phys), dimension(:,:), intent(inout) ::           &
      &       cldtau
 
-      type (topfsw_type),    dimension(npts), intent(inout) :: topflx
-      type (sfcfsw_type),    dimension(npts), intent(inout) :: sfcflx
+      type (topfsw_type),    dimension(:), intent(inout) :: topflx
+      type (sfcfsw_type),    dimension(:), intent(inout) :: sfcflx
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
 !! ---  optional outputs:
-      real (kind=kind_phys), dimension(npts,nlay,nbdsw), optional,      &
+      real (kind=kind_phys), dimension(:,:,:), optional,                &
      &       intent(inout) :: hswb
 
-      real (kind=kind_phys), dimension(npts,nlay),       optional,      &
+      real (kind=kind_phys), dimension(:,:),       optional,            &
      &       intent(inout) :: hsw0
-      type (profsw_type),    dimension(npts,nlp1),       optional,      &
+      type (profsw_type),    dimension(:,:),       optional,            &
      &       intent(inout) :: flxprf
-      type (cmpfsw_type),    dimension(npts),            optional,      &
+      type (cmpfsw_type),    dimension(:),            optional,         &
      &       intent(inout) :: fdncmp
 
 !  ---  locals:

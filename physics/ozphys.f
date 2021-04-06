@@ -63,8 +63,8 @@
       real(kind=kind_phys), intent(inout) ::                            &
      &                     ozp1(:,:), ozp2(:,:), ozp3(:,:), ozp4(:,:)
       real(kind=kind_phys), intent(in) ::                               &
-     &                     dt, po3(ko3), prdout(im,ko3,oz_coeff),       &
-     &                     prsl(im,levs), tin(im,levs), delp(im,levs),  &
+     &                     dt, po3(:), prdout(:,:,:),                   &
+     &                     prsl(:,:), tin(:,:), delp(:,:),              &
      &                     con_g
       real :: gravi
       logical, intent(in) :: ldiag3d, qdiag3d

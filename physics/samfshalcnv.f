@@ -53,22 +53,22 @@
       implicit none
 !
       integer, intent(in)  :: im, km, itc, ntc, ntk, ntr, ncloud
-      integer, intent(in)  :: islimsk(im)
+      integer, intent(in)  :: islimsk(:)
       real(kind=kind_phys), intent(in) :: cliq, cp, cvap,               &
      &   eps, epsm1, fv, grav, hvap, rd, rv, t0c
       real(kind=kind_phys), intent(in) ::  delt
-      real(kind=kind_phys), intent(in) :: psp(im), delp(im,km),         &
-     &   prslp(im,km), garea(im), hpbl(im), dot(im,km), phil(im,km)
+      real(kind=kind_phys), intent(in) :: psp(:), delp(:,:),            &
+     &   prslp(:,:), garea(:), hpbl(:), dot(:,:), phil(:,:)
 !
       real(kind=kind_phys), dimension(:), intent(in) :: fscav
-      integer, intent(inout)  :: kcnv(im)
+      integer, intent(inout)  :: kcnv(:)
       ! DH* TODO - check dimensions of qtr, ntr+2 correct?  *DH
-      real(kind=kind_phys), intent(inout) ::   qtr(im,km,ntr+2),        &
-     &   q1(im,km), t1(im,km), u1(im,km), v1(im,km)
+      real(kind=kind_phys), intent(inout) ::   qtr(:,:,:),              &
+     &   q1(:,:), t1(:,:), u1(:,:), v1(:,:)
 !
-      integer, intent(out) :: kbot(im), ktop(im)
-      real(kind=kind_phys), intent(out) :: rn(im),                      &
-     &   cnvw(im,km), cnvc(im,km), ud_mf(im,km), dt_mf(im,km)
+      integer, intent(out) :: kbot(:), ktop(:)
+      real(kind=kind_phys), intent(out) :: rn(:),                       &
+     &   cnvw(:,:), cnvc(:,:), ud_mf(:,:), dt_mf(:,:)
 !
       real(kind=kind_phys), intent(in) :: clam,    c0s,     c1,         &
      &                     asolfac, pgcon

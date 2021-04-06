@@ -613,26 +613,26 @@
 
       logical,  intent(in) :: lprnt
 
-      real (kind=kind_phys), dimension(npts,nlp1), intent(in) :: plvl,  &
+      real (kind=kind_phys), dimension(:,:), intent(in) :: plvl,        &
      &       tlvl
-      real (kind=kind_phys), dimension(npts,nlay), intent(in) :: plyr,  &
+      real (kind=kind_phys), dimension(:,:), intent(in) :: plyr,        &
      &       tlyr, qlyr, olyr, dzlyr, delpin
 
-      real (kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_co2,&
+      real (kind=kind_phys),dimension(:,:),intent(in)::gasvmr_co2,      &
      &     gasvmr_n2o, gasvmr_ch4, gasvmr_o2, gasvmr_co, gasvmr_cfc11,  &
      &     gasvmr_cfc12, gasvmr_cfc22, gasvmr_ccl4
 
-      real (kind=kind_phys), dimension(npts,nlay),intent(in):: cld_cf
-      real (kind=kind_phys), dimension(npts,nlay),intent(in),optional:: &
+      real (kind=kind_phys), dimension(:,:),intent(in):: cld_cf
+      real (kind=kind_phys), dimension(:,:),intent(in),optional::       &
      &       cld_lwp, cld_ref_liq,  cld_iwp, cld_ref_ice,               &
      &       cld_rwp, cld_ref_rain, cld_swp, cld_ref_snow,              &
      &       cld_od
 
-      real (kind=kind_phys), dimension(npts), intent(in) :: sfemis,     &
+      real (kind=kind_phys), dimension(:), intent(in) :: sfemis,        &
      &       sfgtmp, de_lgth
       real (kind=kind_phys), dimension(npts,nlay), intent(in) :: alpha
 
-      real (kind=kind_phys), dimension(npts,nlay,nbands),intent(in)::   &
+      real (kind=kind_phys), dimension(:,:,:),intent(in)::              &
      &       aeraod, aerssa
 
 !mz* HWRF -- OUTPUT from mcica_subcol_lw
@@ -661,22 +661,22 @@
 !mz
 
 !  ---  outputs:
-      real (kind=kind_phys), dimension(npts,nlay), intent(inout) :: hlwc
-      real (kind=kind_phys), dimension(npts,nlay), intent(inout) ::     &
+      real (kind=kind_phys), dimension(:,:), intent(inout) :: hlwc
+      real (kind=kind_phys), dimension(:,:), intent(inout) ::           &
      &       cldtau
 
-      type (topflw_type),    dimension(npts), intent(inout) :: topflx
-      type (sfcflw_type),    dimension(npts), intent(inout) :: sfcflx
+      type (topflw_type),    dimension(:), intent(inout) :: topflx
+      type (sfcflw_type),    dimension(:), intent(inout) :: sfcflx
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
 !! ---  optional outputs:
-      real (kind=kind_phys), dimension(npts,nlay,nbands),optional,      &
+      real (kind=kind_phys), dimension(:,:,:),optional,                 &
      &       intent(inout) :: hlwb
-      real (kind=kind_phys), dimension(npts,nlay),       optional,      &
+      real (kind=kind_phys), dimension(:,:),       optional,            &
      &       intent(inout) :: hlw0
-      type (proflw_type),    dimension(npts,nlp1),       optional,      &
+      type (proflw_type),    dimension(:,:),       optional,            &
      &       intent(inout) :: flxprf
       logical, intent(in) :: lslwr
 

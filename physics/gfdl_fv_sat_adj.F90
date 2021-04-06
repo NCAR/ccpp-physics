@@ -128,8 +128,8 @@ subroutine fv_sat_adj_init(do_sat_adj, kmp, nwat, ngas, rilist, cpilist, &
     integer,          intent(in   ) :: kmp
     integer,          intent(in   ) :: nwat
     integer,          intent(in   ) :: ngas
-    real(kind_dyn),   intent(in   ) :: rilist(0:ngas)
-    real(kind_dyn),   intent(in   ) :: cpilist(0:ngas)
+    real(kind_dyn),   intent(in   ) :: rilist(:)
+    real(kind_dyn),   intent(in   ) :: cpilist(:)
     integer,          intent(in   ) :: mpirank
     integer,          intent(in   ) :: mpiroot
     character(len=*), intent(  out) :: errmsg

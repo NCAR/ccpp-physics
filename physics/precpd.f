@@ -98,13 +98,13 @@
 ! Interface variables
       integer, intent(in) :: im, km, jpr
       real (kind=kind_phys), intent(in) :: dt
-      real (kind=kind_phys), intent(in) :: del(im,km), prsl(im,km)
-      real (kind=kind_phys), intent(inout) :: q(im,km), t(im,km),       &
-     &                                        cwm(im,km)
-      real (kind=kind_phys), intent(out) :: rn(im), sr(im), rainp(im,km)
-      real (kind=kind_phys), intent(in) :: u00k(im,km)
-      real (kind=kind_phys), intent(in) :: psautco(2), prautco(2),      &
-     &                                     evpco, wminco(2), wk1(im)
+      real (kind=kind_phys), intent(in) :: del(:,:), prsl(:,:)
+      real (kind=kind_phys), intent(inout) :: q(:,:), t(:,:),           &
+     &                                        cwm(:,:)
+      real (kind=kind_phys), intent(out) :: rn(:), sr(:), rainp(:,:)
+      real (kind=kind_phys), intent(in) :: u00k(:,:)
+      real (kind=kind_phys), intent(in) :: psautco(:), prautco(:),      &
+     &                                     evpco, wminco(:), wk1(:)
       logical, intent(in) :: lprnt
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg

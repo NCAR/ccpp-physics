@@ -33,7 +33,7 @@ contains
          doLWrad          ! Logical flag for longwave radiation call
     integer, intent(in) :: &
          nCol             ! Number of horizontal grid points
-    real(kind_phys), dimension(nCol), intent(in) :: &
+    real(kind_phys), dimension(:), intent(in) :: &
          xlon,          & ! Longitude
          xlat,          & ! Latitude
          slmsk,         & ! Land/sea/sea-ice mask
@@ -47,13 +47,13 @@ contains
          emiss            ! Surface emissivity from Noah MP
 
     ! Outputs 
-    real(kind_phys), dimension(lw_gas_props%get_nband(),ncol), intent(out) :: &
+    real(kind_phys), dimension(:,:), intent(out) :: &
          sfc_emiss_byband ! Surface emissivity in each band
     character(len=*), intent(out) :: &
          errmsg           ! Error message
     integer, intent(out) :: &  
          errflg           ! Error flag
-    real(kind_phys), dimension(nCol), intent(out) :: &
+    real(kind_phys), dimension(:), intent(out) :: &
          semis
 
     ! Local variables
