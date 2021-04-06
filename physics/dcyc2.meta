@@ -370,15 +370,6 @@
   kind = kind_phys
   intent = in
   optional = F    
-[dtdt]
-  standard_name = tendency_of_air_temperature_due_to_model_physics
-  long_name = total radiative heating rate at current time
-  units = K s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
 [pert_radtend]
   standard_name = flag_for_stochastic_radiative_heating_perturbations
   long_name = flag for stochastic radiative heating perturbations
@@ -402,6 +393,15 @@
   dimensions = ()
   type = logical
   intent = in
+  optional = F
+[dtdt]
+  standard_name = tendency_of_air_temperature_due_to_model_physics
+  long_name = total radiative heating rate at current time
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
   optional = F
 [dtdtnp]
   standard_name = tendency_of_air_temperature_to_withold_from_sppt
