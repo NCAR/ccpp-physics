@@ -378,7 +378,7 @@
                 xxfh(i), ztmax(i), z0max(i), tstrc(i),   &
                 pspc(i), pkmax(i), wetc(i), slwdc(i), z1_cm(i), icoef_sf, iwavecpl, lcurr_sf, charn(i), msang(i), &
                 scurx(i), scury(i), pert_Cd, ens_random_seed, ens_Cdamp, upc(i), vpc(i), t1(i), q1(i), &
-                dt, wind10(i), xxfh2(i), ntsflg, sfenth, tzot(i), errmsg, &
+                dt, wind10(i), xxfh2(i), ntsflg, sfenth, tzot(i), ep2, errmsg, &
                 errflg)
                 if (errflg /= 0) return
 
@@ -527,7 +527,7 @@
                 xxfh(i), ztmax(i), z0max(i), tstrc(i),   &
                 pspc(i), pkmax(i), wetc(i), slwdc(i), z1_cm(i), icoef_sf, iwavecpl, lcurr_sf, charn(i), msang(i), &
                 scurx(i), scury(i), pert_Cd, ens_random_seed, ens_Cdamp, upc(i), vpc(i), t1(i), q1(i), &
-                dt, wind10(i), xxfh2(i), ntsflg, sfenth, tzot(i), errmsg, &
+                dt, wind10(i), xxfh2(i), ntsflg, sfenth, tzot(i), ep2, errmsg, &
                 errflg)
                 if (errflg /= 0) return
 
@@ -634,7 +634,7 @@
                 xxfh(i), znt_ocn(i), mznt(i), tstrc(i),   &
                 pspc(i), pkmax(i), wetc(i), slwdc(i), z1_cm(i), icoef_sf, iwavecpl, lcurr_sf, charn(i), msang(i), &
                 scurx(i), scury(i), pert_Cd, ens_random_seed, ens_Cdamp, upc(i), vpc(i), t1(i), q1(i), &
-                dt, wind10(i), xxfh2(i), ntsflg, sfenth, tzot(i), errmsg, &
+                dt, wind10(i), xxfh2(i), ntsflg, sfenth, tzot(i), ep2, errmsg, &
                 errflg)
                 if (errflg /= 0) return
 
@@ -757,7 +757,7 @@
                          icoef_sf,iwavecpl,lcurr_sf,alpha,gamma,xcur,ycur,     &
                          pert_Cd, ens_random_seed, ens_Cdamp,                  &
                          upc,vpc,tpc,rpc,dt,wind10,xxfh2,ntsflg,sfenth,        &
-                         tzot, errmsg, errflg)
+                         tzot, ep2, errmsg, errflg)
 
 !------------------------------------------------------------------------
 !
@@ -819,6 +819,8 @@
       real(kind=kind_phys), intent ( in), dimension (ims :ime ) :: vpc
       real(kind=kind_phys), intent ( in), dimension (ims :ime ) :: tpc
       real(kind=kind_phys), intent ( in), dimension (ims :ime ) :: rpc
+
+      real(kind=kind_phys), intent ( in) :: ep2
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -1208,7 +1210,7 @@
           if(psps1 .EQ. 0.0)then
            psps1 = .1
           endif
-        rstso(i) = 0.622*estso(i)/psps1
+        rstso(i) = ep2*estso(i)/psps1
         vrts (i) = 1. + boycon*ecof(i)*rstso(i)
       enddo
 
@@ -1736,7 +1738,7 @@
              if(psps2 .EQ. 0.0)then
                psps2 = .1
              endif
-          rstsop(i) = 0.622*estsop(i)/psps2
+          rstsop(i) = ep2*estsop(i)/psps2
           rdiff (i) = amin1(0.0,(rkmaxp(i) - rstsop(i)))
 
             foft(i) = tss(i) + delsrad(i)*(slwa(i) - aap(i)*tsp(i)**4 - &

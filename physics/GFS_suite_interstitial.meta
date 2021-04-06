@@ -244,15 +244,6 @@
   kind = kind_phys
   intent = out
   optional = F
-[dtdtc]
-  standard_name = tendency_of_air_temperature_due_to_radiative_heating_assuming_clear_sky
-  long_name = clear sky radiative (shortwave + longwave) heating rate at current time
-  units = K s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
 [dqdt]
   standard_name = tendency_of_tracers_due_to_model_physics
   long_name = updated tendency of the tracers
@@ -1778,6 +1769,14 @@
   type = integer
   intent = in
   optional = F
+[convert_dry_rho]
+  standard_name = flag_for_converting_hydrometeors_from_moist_to_dry_air
+  long_name = flag for converting hydrometeors from moist to dry air
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [dtf]
   standard_name = time_step_for_dynamics
   long_name = dynamics timestep
@@ -1854,6 +1853,15 @@
   standard_name = gas_constant_dry_air
   long_name = ideal gas constant for dry air
   units = J kg-1 K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[con_eps]
+  standard_name = ratio_of_dry_air_to_water_vapor_gas_constants
+  long_name = rd/rv
+  units = none
   dimensions = ()
   type = real
   kind = kind_phys

@@ -728,40 +728,6 @@
   kind = kind_phys
   intent = inout
   optional = F
-[do_sppt]
-  standard_name = flag_for_stochastic_physics_perturbations
-  long_name = flag for stochastic physics perturbations
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[ca_global]
-  standard_name = flag_for_global_cellular_automata
-  long_name = switch for global ca
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[dtdtr]
-  standard_name = tendency_of_air_temperature_due_to_radiative_heating_on_physics_time_step
-  long_name = temp. change due to radiative heating per time step
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[dtdtc]
-  standard_name = tendency_of_air_temperature_due_to_radiative_heating_assuming_clear_sky
-  long_name = clear sky radiative (shortwave + longwave) heating rate at current time
-  units = K s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [drain_cpl]
   standard_name = tendency_of_lwe_thickness_of_precipitation_amount_for_coupling
   long_name = change in rain_cpl (coupling_type)
