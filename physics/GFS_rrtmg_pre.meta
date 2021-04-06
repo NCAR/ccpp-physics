@@ -279,7 +279,8 @@
   units = flag
   dimensions = ()
   type = integer
-  intent = in-  optional = F
+  intent = in
+  optional = F
 [imp_physics_thompson]
   standard_name = identifier_for_thompson_microphysics_scheme
   long_name = choice of Thompson microphysics scheme
