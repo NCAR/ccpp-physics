@@ -370,11 +370,11 @@ module mp_thompson
          real(kind_phys),           intent(in   ) :: omega(:,:)
          real(kind_phys),           intent(in   ) :: dtp
          ! Precip/rain/snow/graupel fall amounts and fraction of frozen precip
-         real(kind_phys),           intent(  out) :: prcp(:)
-         real(kind_phys),           intent(  out) :: rain(:)
-         real(kind_phys),           intent(  out) :: graupel(:)
-         real(kind_phys),           intent(  out) :: ice(:)
-         real(kind_phys),           intent(  out) :: snow(:)
+         real(kind_phys),           intent(inout) :: prcp(:)
+         real(kind_phys),           intent(inout) :: rain(:)
+         real(kind_phys),           intent(inout) :: graupel(:)
+         real(kind_phys),           intent(inout) :: ice(:)
+         real(kind_phys),           intent(inout) :: snow(:)
          real(kind_phys),           intent(  out) :: sr(:)
          ! Radar reflectivity
          real(kind_phys),           intent(  out) :: refl_10cm(:,:)
@@ -610,11 +610,11 @@ module mp_thompson
 
          !> - Convert rainfall deltas from mm to m (on physics timestep); add to inout variables
          ! "rain" in Thompson MP refers to precipitation (total of liquid rainfall+snow+graupel+ice)
-         prcp    = max(0.0, delta_rain_mp/1000.0_kind_phys)
-         graupel = max(0.0, delta_graupel_mp/1000.0_kind_phys)
-         ice     = max(0.0, delta_ice_mp/1000.0_kind_phys)
-         snow    = max(0.0, delta_snow_mp/1000.0_kind_phys)
-         rain    = max(0.0, (delta_rain_mp - (delta_graupel_mp + delta_ice_mp + delta_snow_mp))/1000.0_kind_phys)
+         prcp    = max(0.0, prcp    + delta_rain_mp/1000.0_kind_phys)
+         graupel = max(0.0, graupel + delta_graupel_mp/1000.0_kind_phys)
+         ice     = max(0.0, ice     + delta_ice_mp/1000.0_kind_phys)
+         snow    = max(0.0, snow    + delta_snow_mp/1000.0_kind_phys)
+         rain    = max(0.0, rain    + (delta_rain_mp - (delta_graupel_mp + delta_ice_mp + delta_snow_mp))/1000.0_kind_phys)
 
       end subroutine mp_thompson_run
 !>@}
