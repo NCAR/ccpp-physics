@@ -109,7 +109,7 @@ contains
    integer, dimension (:), intent(out) :: hbot,htop,kcnv
    integer, dimension (:), intent(in)  :: xland
    real(kind=kind_phys),    dimension (:), intent(in) :: pbl
-   integer, dimension (:) :: tropics
+   integer, dimension (im) :: tropics
 !  ruc variable
    real(kind=kind_phys), dimension (:),   intent(in)  :: hfx2,qfx2,psuri
    real(kind=kind_phys), dimension (:,:), intent(out) :: ud_mf,dd_mf,dt_mf
@@ -119,7 +119,7 @@ contains
    real(kind=kind_phys), dimension (:,:), intent(in) :: qv2di_spechum
    real(kind=kind_phys), dimension (:,:), intent(inout) :: qv_spechum
    ! Local water vapor mixing ratios and cloud water mixing ratios
-   real(kind=kind_phys), dimension (:,:) :: qv2di, qv, forceqv, cnvw
+   real(kind=kind_phys), dimension (im,km) :: qv2di, qv, forceqv, cnvw
    !
    real(kind=kind_phys), dimension(:),intent(in) :: garea
    real(kind=kind_phys), intent(in   ) :: dt 

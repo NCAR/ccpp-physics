@@ -92,11 +92,11 @@
 !!    - If a "guess" run, restore the land-related prognostic fields.
 !                                                                       !
 !-----------------------------------
-  subroutine noahmpdrv_run                                          &
+  subroutine noahmpdrv_run                                       &
 !...................................
 !  ---  inputs:
-    ( im, km, itime, ps, u1, v1, t1, q1, soiltyp, vegtype,       &
-      sigmaf, dlwflx, dswsfc, snet, delt, tg3, cm, ch,           &
+    ( im, km, lsnowl, itime, ps, u1, v1, t1, q1, soiltyp,        &
+      vegtype, sigmaf, dlwflx, dswsfc, snet, delt, tg3, cm, ch,  &
       prsl1, prslki, zf, dry, wind, slopetyp,                    &
       shdmin, shdmax, snoalb, sfalb, flag_iter, flag_guess,      &
       idveg, iopt_crs, iopt_btr, iopt_run, iopt_sfc, iopt_frz,   &
@@ -155,7 +155,7 @@
 
   integer                                , intent(in)    :: im         ! horiz dimension and num of used pts
   integer                                , intent(in)    :: km         ! vertical soil layer dimension
-  integer,                               , intent(in)    :: lsnowl     ! lower bound for snow level arrays
+  integer                                , intent(in)    :: lsnowl     ! lower bound for snow level arrays
   integer                                , intent(in)    :: itime      ! NOT USED
   real(kind=kind_phys), dimension(:)     , intent(in)    :: ps         ! surface pressure [Pa]
   real(kind=kind_phys), dimension(:)     , intent(in)    :: u1         ! u-component of wind [m/s]
@@ -196,8 +196,8 @@
   integer                                , intent(in)    :: iopt_snf   ! option for partitioning  precipitation into rainfall & snowfall
   integer                                , intent(in)    :: iopt_tbot  ! option for lower boundary condition of soil temperature
   integer                                , intent(in)    :: iopt_stc   ! option for snow/soil temperature time scheme (only layer 1)
-  real(kind=kind_phys), dimension(;)     , intent(in)    :: xlatin     ! latitude
-  real(kind=kind_phys), dimension(;)     , intent(in)    :: xcoszin    ! cosine of zenith angle
+  real(kind=kind_phys), dimension(:)     , intent(in)    :: xlatin     ! latitude
+  real(kind=kind_phys), dimension(:)     , intent(in)    :: xcoszin    ! cosine of zenith angle
   integer                                , intent(in)    :: iyrlen     ! year length [days]
   real(kind=kind_phys)                   , intent(in)    :: julian     ! julian day of year
   real(kind=kind_phys), dimension(:)     , intent(in)    :: rainn_mp   ! microphysics non-convective precipitation [mm]

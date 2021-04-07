@@ -21,9 +21,9 @@ contains
 !!  
   subroutine GFS_rrtmgp_cloud_overlap_pre_run(nCol, nLev, yearlen, doSWrad, doLWrad,     &
        julian, lat, p_lev, p_lay, tv_lay, con_pi, con_g, con_rd, con_epsq, dcorr_con,    &
-       idcor, iovr, iovr_dcorr, iovr_exprand, iovr_exp, idcor_con, idcor_hogan,          &
+       idcor, iovr, iovr_dcorr, iovr_exp, iovr_exprand, idcor_con, idcor_hogan,          &
        idcor_oreopoulos, cld_frac,                                                       &
-       cloud_overlap_param, precip_overlap_param, de_lgth, deltaZc, errmsg, errflg)
+       de_lgth, cloud_overlap_param, precip_overlap_param, deltaZc, errmsg, errflg)
     implicit none
     
     ! Inputs   

@@ -298,7 +298,7 @@
       integer, intent(in) :: im, km, imx, kdt, ipr, me
       integer, intent(in) :: KPBL(:) ! Index for the PBL top layer!
       real(kind=kind_phys), intent(in) ::                               &
-     &                     deltim, G, CP, RD, RV, cdmbgwd(4)
+     &                     deltim, G, CP, RD, RV, cdmbgwd(:)
       real(kind=kind_phys), intent(inout) ::                            &
      &                     A(:,:), B(:,:), C(:,:)
       real(kind=kind_phys), intent(in) ::                               &
@@ -307,7 +307,7 @@
      &                     PRSL(:,:), PRSLK(:,:),  PHIL(:,:),           &
      &                     PHII(:,:)
       real(kind=kind_phys), intent(in) ::                               &
-     &                     OC(:), OA4(:,:), CLX4(:,;), HPRIME(:)
+     &                     OC(:), OA4(:,:), CLX4(:,:), HPRIME(:)
       real(kind=kind_phys), intent(inout) :: ELVMAX(:)
       real(kind=kind_phys), intent(in) ::                               &
      &                     THETA(:), SIGMA(:), GAMMA(:)

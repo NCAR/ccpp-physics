@@ -32,9 +32,9 @@ contains
        lslwr, effr_in, uni_cld, lmfshal, lat, lsmask, p_lev, p_lay, t_lay, relhum,       &
        tv_lay, effrin_cldliq, effrin_cldice, effrin_cldrain, effrin_cldsnow,             &
        shoc_sgs_cldfrac, cncvw, tracer,                                                  &
-       con_eps, con_epsq, con_epsqs, con_epsm1, con_g, con_ttp, con_rd, con_pi,          &
+       con_ttp, con_epsq, con_epsqs, con_eps, con_epsm1, con_g, con_rd, con_pi,          &
        cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp,   &
-       cld_rerain, de_lgth, deltaZ, cloud_overlap_param, errmsg, errflg)
+       cld_rerain, deltaZ, de_lgth, cloud_overlap_param, errmsg, errflg)
     implicit none
 
     ! Inputs   

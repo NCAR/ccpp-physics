@@ -79,7 +79,7 @@ contains
          con_rd,            & ! Physical constant: gas-constant for dry air
          con_eps              ! Physical constant: gas constant air / gas constant H2O
 
-    real(kind_phys), dimension(nCol,nLev), intent(in) :: &
+    real(kind_phys), dimension(:,:), intent(in) :: &
          tv_lay,            & ! Virtual temperature (K)
          t_lay,             & ! Temperature (K)
          qs_lay,            & ! Saturation vapor pressure (Pa)
@@ -87,13 +87,13 @@ contains
          relhum,            & ! Relative humidity
          p_lay,             & ! Pressure at model-layers (Pa)
          cld_frac_mg          ! Cloud-fraction from MG scheme. WTF?????
-    real(kind_phys), dimension(nCol,nLev+1), intent(in) :: &
+    real(kind_phys), dimension(:,:), intent(in) :: &
          p_lev                ! Pressure at model-level interfaces (Pa)
-    real(kind_phys), dimension(nCol, nLev, nTracers),intent(in) :: &
+    real(kind_phys), dimension(:,:,:),intent(in) :: &
          tracer               ! Cloud condensate amount in layer by type ()
 
     ! In/Outs
-    real(kind_phys), dimension(nCol,nLev), intent(inout) :: &
+    real(kind_phys), dimension(:,:), intent(inout) :: &
          cld_frac,          & ! Total cloud fraction
          cld_lwp,           & ! Cloud liquid water path
          cld_reliq,         & ! Cloud liquid effective radius

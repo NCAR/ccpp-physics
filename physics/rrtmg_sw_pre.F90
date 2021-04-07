@@ -47,7 +47,7 @@
       integer,                              intent(out)   :: errflg
       ! Local variables
       integer :: i
-      real(kind=kind_phys), dimension(:,:) :: sfcalb
+      real(kind=kind_phys), dimension(im,NF_ALBD) :: sfcalb
 
       real(kind=kind_phys) :: lndp_alb
 

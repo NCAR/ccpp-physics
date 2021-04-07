@@ -325,40 +325,40 @@
 !
       Implicit none
 !
-      LOGICAL FLIPV
-!
 !      input
+!
+      logical, intent(in) :: flipv
 !
       integer, intent(in) :: im, k, ntr, me, nrcm, ntk, kdt             &
      &,                      mp_phys, mp_phys_mg
-      integer, dimension(im) :: kbot, ktop, kcnv, kpbl
+      integer, dimension(:), intent(out)   :: kbot, ktop
+      integer, dimension(:), intent(inout) :: kcnv
+      integer, dimension(:), intent(in)    :: kpbl
 !
-      real(kind=kind_phys), intent(in)        :: dxmin, dxinv, ccwf(2)  &
-     &,                                          psauras(2), prauras(2) &
-     &,                                          wminras(2), dlqf(2)
+      real(kind=kind_phys), intent(in)        :: dxmin, dxinv, ccwf(:)  &
+     &,                                          psauras(:), prauras(:) &
+     &,                                          wminras(:), dlqf(:)
 !
-      real(kind=kind_phys), dimension(im,k+1) :: prsi, prsik, phii
+      real(kind=kind_phys), dimension(:,:), intent(in) :: prsi, prsik, phii
 
-      real(kind=kind_phys), dimension(im,k)   :: tin, qin,  uin, vin    &
-     &,                                          prsl, prslk, phil      &
-
-     &,                                          ud_mf, dd_mf, dt_mf    &
-     &,                                          rhc, qlcn, qicn, w_upi &
-     &,                                          cnv_mfd                &
-     &,                                          cnv_dqldt, clcn        &
-     &,                                          cnv_fice, cnv_ndrop    &
-     &,                                          cnv_nice, cf_upi
-      real(kind=kind_phys), dimension(im)     :: area,  cdrag           &
-     &,                                          rainc, ddvel
-      real(kind=kind_phys), dimension(im,nrcm):: rannum
-      real(kind=kind_phys)                       ccin(im,k,ntr+2)
-      real(kind=kind_phys)                       trcmin(ntr+2)
-
-      real(kind=kind_phys) DT, dtf
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: tin, qin,  uin, vin
+      real(kind=kind_phys), dimension(:,:), intent(in) :: prsl, prslk, phil      &
+     &,                                                   rhc
+      real(kind=kind_phys), dimension(:,:), intent(out) :: ud_mf, dd_mf, dt_mf
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: qlcn, qicn, w_upi   &
+     &,                                                   cnv_mfd                &
+     &,                                                   cnv_dqldt, clcn        &
+     &,                                                   cnv_fice, cnv_ndrop    &
+     &,                                                   cnv_nice, cf_upi
+      real(kind=kind_phys), dimension(:)  , intent(in) :: area,  cdrag
+      real(kind=kind_phys), dimension(:)  , intent(out) :: rainc, ddvel
+      real(kind=kind_phys), dimension(:,:), intent(in) :: rannum
+      real(kind=kind_phys), intent(inout) :: ccin(:,:,:)
+      real(kind=kind_phys), intent(in)  :: dt, dtf
 !
 !     Added for aerosol scavenging for GOCART
 !
-      real(kind=kind_phys), intent(in)  :: fscav(ntr)
+      real(kind=kind_phys), intent(in)  :: fscav(:)
 
 !    &,                                   ctei_r(im), ctei_rm
       character(len=*),     intent(out) :: errmsg
@@ -366,6 +366,7 @@
 !
 !     locals
 !
+      real(kind=kind_phys)                 :: trcmin(ntr+2)
       real(kind=kind_phys), dimension(k)   :: toi,    qoi, tcu, qcu     &
      &,                                       pcu,    clw, cli, qii, qli&
      &,                                       phi_l,  prsm,psjm         &

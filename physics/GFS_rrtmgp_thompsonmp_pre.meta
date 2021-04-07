@@ -197,56 +197,16 @@
   type = real
   kind = kind_phys  
   intent = inout
-  optional = F  
-[cld_frac_mg]
-  standard_name = cloud_fraction_for_MG
-  long_name = cloud fraction used by Morrison-Gettelman MP
-  units = frac
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  optional = F
+[tracer]
+  standard_name = chemical_tracers
+  long_name = chemical tracers
+  units = g g-1
+  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers)
   type = real
   kind = kind_phys
   intent = in
-  optional = F   
-[do_mynnedmf]
-  standard_name = do_mynnedmf
-  long_name = flag to activate MYNN-EDMF
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[imfdeepcnv]
-  standard_name = flag_for_mass_flux_deep_convection_scheme
-  long_name = flag for mass-flux deep convection scheme
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[imfdeepcnv_gf]
-  standard_name = flag_for_gf_deep_convection_scheme
-  long_name = flag for Grell-Freitas deep convection scheme
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[doGP_cldoptics_PADE]
-  standard_name = flag_to_calc_lw_cld_optics_using_RRTMGP_PADE
-  long_name = logical flag to control cloud optics scheme.
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F 
-[doGP_cldoptics_LUT]
-  standard_name = flag_to_calc_lw_cld_optics_using_RRTMGP_LUT
-  long_name = logical flag to control cloud optics scheme.
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F      
+  optional = F  
 [qs_lay]
   standard_name = saturation_vapor_pressure
   long_name = saturation vapor pressure
@@ -264,7 +224,7 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F  
+  optional = F
 [relhum]
   standard_name = relative_humidity
   long_name = layer relative humidity
@@ -274,15 +234,15 @@
   kind = kind_phys
   intent = in
   optional = F
-[tracer]
-  standard_name = chemical_tracers
-  long_name = chemical tracers
-  units = g g-1
-  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers)
+[cld_frac_mg]
+  standard_name = cloud_fraction_for_MG
+  long_name = cloud fraction used by Morrison-Gettelman MP
+  units = frac
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
-  optional = F  
+  optional = F
 [con_g]
   standard_name = gravitational_acceleration
   long_name = gravitational acceleration
@@ -337,6 +297,46 @@
 [ltaerosol]
   standard_name = flag_for_aerosol_physics
   long_name = flag for aerosol physics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[do_mynnedmf]
+  standard_name = do_mynnedmf
+  long_name = flag to activate MYNN-EDMF
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[imfdeepcnv]
+  standard_name = flag_for_mass_flux_deep_convection_scheme
+  long_name = flag for mass-flux deep convection scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[imfdeepcnv_gf]
+  standard_name = flag_for_gf_deep_convection_scheme
+  long_name = flag for Grell-Freitas deep convection scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[doGP_cldoptics_PADE]
+  standard_name = flag_to_calc_lw_cld_optics_using_RRTMGP_PADE
+  long_name = logical flag to control cloud optics scheme.
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F 
+[doGP_cldoptics_LUT]
+  standard_name = flag_to_calc_lw_cld_optics_using_RRTMGP_LUT
+  long_name = logical flag to control cloud optics scheme.
   units = flag
   dimensions = ()
   type = logical

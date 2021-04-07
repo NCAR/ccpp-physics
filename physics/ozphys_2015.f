@@ -62,6 +62,7 @@
       real(kind=kind_phys),intent(in) :: con_g
       real :: gravi
       integer, intent(in) :: im, levs, ko3, pl_coeff,me
+      logical, intent(in) :: ldiag3d, qdiag3d
       real(kind=kind_phys), intent(in) :: po3(:),                       &
      &                                    prsl(:,:), tin(:,:),          &
      &                                    delp(:,:),                    &
@@ -76,7 +77,7 @@
       integer,          intent(out) :: errflg
 
       integer k,kmax,kmin,l,i,j
-      logical              ldiag3d, flg(im), qdiag3d
+      logical flg(im)
       real(kind=kind_phys) pmax, pmin, tem, temp
       real(kind=kind_phys) wk1(im), wk2(im), wk3(im),prod(im,pl_coeff), &
      &                     ozib(im), colo3(im,levs+1), coloz(im,levs+1),&

@@ -374,10 +374,10 @@
               ztmax(i) = ztmax(i)*100.0   !convert from m to cm
               z0max(i) = z0max(i)*100.0   !convert from m to cm
 
-              call mflux2 (fxh(i), fxe(i), fxmx(i), fxmy(i), cdm_lnd(i), rib_lnd(i), &
+              call mflux2 (fxh(i), fxe(i), fxmx(i), fxmy(i), cdm_lnd(i:i), rib_lnd(i:i), &
                 xxfh(i), ztmax(i), z0max(i), tstrc(i),   &
                 pspc(i), pkmax(i), wetc(i), slwdc(i), z1_cm(i), icoef_sf, iwavecpl, lcurr_sf, charn(i), msang(i), &
-                scurx(i), scury(i), pert_Cd, ens_random_seed, ens_Cdamp, upc(i), vpc(i), t1(i), q1(i), &
+                scurx(i), scury(i), pert_Cd, ens_random_seed, ens_Cdamp, upc(i), vpc(i), t1(i:i), q1(i:i), &
                 dt, wind10(i), xxfh2(i), ntsflg, sfenth, tzot(i), ep2, errmsg, &
                 errflg)
                 if (errflg /= 0) return
@@ -523,10 +523,10 @@
               ztmax(i) = ztmax(i)*100.0 !m to cm
               z0max(i) = z0max(i)*100.0 !m to cm
 
-              call mflux2 (fxh(i), fxe(i), fxmx(i), fxmy(i), cdm_ice(i), rib_ice(i), &
+              call mflux2 (fxh(i), fxe(i), fxmx(i), fxmy(i), cdm_ice(i:i), rib_ice(i:i), &
                 xxfh(i), ztmax(i), z0max(i), tstrc(i),   &
                 pspc(i), pkmax(i), wetc(i), slwdc(i), z1_cm(i), icoef_sf, iwavecpl, lcurr_sf, charn(i), msang(i), &
-                scurx(i), scury(i), pert_Cd, ens_random_seed, ens_Cdamp, upc(i), vpc(i), t1(i), q1(i), &
+                scurx(i), scury(i), pert_Cd, ens_random_seed, ens_Cdamp, upc(i), vpc(i), t1(i:i), q1(i:i), &
                 dt, wind10(i), xxfh2(i), ntsflg, sfenth, tzot(i), ep2, errmsg, &
                 errflg)
                 if (errflg /= 0) return
@@ -630,10 +630,10 @@
               !GJF: mflux2 expects negative roughness length for ocean points
               znt_ocn(i) = -znt_ocn(i)
 
-              call mflux2 (fxh(i), fxe(i), fxmx(i), fxmy(i), cdm_ocn(i), rib_ocn(i), &
-                xxfh(i), znt_ocn(i), mznt(i), tstrc(i),   &
+              call mflux2 (fxh(i), fxe(i), fxmx(i), fxmy(i), cdm_ocn(i:i), rib_ocn(i:i), &
+                xxfh(i), znt_ocn(i:i), mznt(i), tstrc(i),   &
                 pspc(i), pkmax(i), wetc(i), slwdc(i), z1_cm(i), icoef_sf, iwavecpl, lcurr_sf, charn(i), msang(i), &
-                scurx(i), scury(i), pert_Cd, ens_random_seed, ens_Cdamp, upc(i), vpc(i), t1(i), q1(i), &
+                scurx(i), scury(i), pert_Cd, ens_random_seed, ens_Cdamp, upc(i), vpc(i), t1(i:i), q1(i:i), &
                 dt, wind10(i), xxfh2(i), ntsflg, sfenth, tzot(i), ep2, errmsg, &
                 errflg)
                 if (errflg /= 0) return

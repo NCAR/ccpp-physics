@@ -256,7 +256,7 @@ subroutine fv_sat_adj_run(mdt, zvir, is, ie, isd, ied, kmp, km, kmdelz, js, je, 
     logical,             intent(in)    :: hydrostatic
     logical,             intent(in)    :: fast_mp_consv
     real(kind=kind_dyn), intent(inout) :: te0_2d(:,:)
-    real(kind=kind_dyn), intent(  out) :: te0(:,:,;)
+    real(kind=kind_dyn), intent(  out) :: te0(:,:,:)
     ! If multi-gases physics are not used, ngas is one and qvi identical to qv
     integer,             intent(in)    :: ngas
     real(kind=kind_dyn), intent(inout) :: qvi(:,:,:,:)
@@ -268,8 +268,8 @@ subroutine fv_sat_adj_run(mdt, zvir, is, ie, isd, ied, kmp, km, kmdelz, js, je, 
     real(kind=kind_dyn), intent(inout) :: qg(:,:,:)
     real(kind=kind_dyn), intent(in)    :: hs(:,:)
     real(kind=kind_dyn), intent(in)    :: peln(:,:,:)
-    ! For hydrostatic build, kmdelz=1, otherwise kmdelz=km (see fv_arrays.F90)
-    real(kind=kind_dyn), intent(in)    :: delz(:,:)
+    ! For hydrostatic build, delz's third dimension is 1:kmdelz=1:1, otherwise 1:km (see fv_arrays.F90)
+    real(kind=kind_dyn), intent(in)    :: delz(:,:,:)
     real(kind=kind_dyn), intent(in)    :: delp(:,:,:)
     real(kind=kind_dyn), intent(inout) :: pt(:,:,:)
     real(kind=kind_dyn), intent(inout) :: pkz(:,:,:)
@@ -333,18 +333,19 @@ subroutine fv_sat_adj_run(mdt, zvir, is, ie, isd, ied, kmp, km, kmdelz, js, je, 
        else
           kdelz = k
        end if
-       call fv_sat_adj_work(abs(mdt), zvir, is, ie, js, je, ng, hydrostatic, fast_mp_consv, &
-                            te0(isd,jsd,k),                                                 &
+       call fv_sat_adj_work(abs(mdt), zvir, is, ie, js, je, ng, hydrostatic, fast_mp_consv,       &
+                            te0(isd:ied,jsd:jed,k),                                               &
 #ifdef MULTI_GASES
-                            qvi(isd,jsd,k,1:ngas),                                          &
+                            qvi(isd:ied,jsd:jed,k,1:ngas),                                        &
 #else
-                            qv(isd,jsd,k),                                                  &
+                            qv(isd:ied,jsd:jed,k),                                                &
 #endif
-                            ql(isd,jsd,k), qi(isd,jsd,k),                                   &
-                            qr(isd,jsd,k), qs(isd,jsd,k), qg(isd,jsd,k),                    &
-                            hs, dpln, delz(is:,js:,kdelz), pt(isd,jsd,k), delp(isd,jsd,k),&
-                            q_con(isd:,jsd:,k), cappa(isd:,jsd:,k), area, dtdt(is,js,k),    &
-                            out_dt, last_step, do_qa, qa(isd,jsd,k))
+                            ql(isd:ied,jsd:jed,k), qi(isd:ied,jsd:jed,k),                         &
+                            qr(isd:ied,jsd:jed,k), qs(isd:ied,jsd:jed,k), qg(isd:ied,jsd:jed,k),  &
+                            hs, dpln, delz(is:ie,js:je,kdelz), pt(isd:ied,jsd:jed,k),             &
+                            delp(isd:ied,jsd:jed,k), q_con(isd:ied,jsd:jed,k),                    &
+                            cappa(isd:ied,jsd:jed,k), area, dtdt(is:ie,js:je,k),                  &
+                            out_dt, last_step, do_qa, qa(isd:ied,jsd:jed,k))
        if ( .not. hydrostatic  ) then
           do j=js,je
              do i=is,ie

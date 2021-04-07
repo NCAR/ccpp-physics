@@ -1326,7 +1326,7 @@
 !
 !---- find the mixing length
 !
-     call mixlen(lmh,uxk,vxk,txk,thxk,qx(i,kts,1),qx(i,kts,ntcw)               &
+     call mixlen(lmh,uxk,vxk,txk,thxk,qx(i,kts:kte,1),qx(i,kts:kte,ntcw)       &
                      ,q2xk,zqk,ust(i),corf,epshol(i)                           &
                      ,s2,gh,rig,el                                             &
                      ,hpbl(i),kpbl(i),lmxl,ct(i)                               &

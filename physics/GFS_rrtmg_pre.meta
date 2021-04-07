@@ -395,32 +395,6 @@
   type = logical
   intent = in
   optional = F
-[sppt_wts]
-  standard_name = weights_for_stochastic_sppt_perturbation
-  long_name = weights for stochastic sppt perturbation
-  units = none
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[sppt_amp]
-  standard_name = total_ampltiude_of_sppt_perturbation
-  long_name = toal ampltidue of stochastic sppt perturbation
-  units = none
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[pert_clds]
-  standard_name = flag_for_stochastic_cloud_fraction_perturbations
-  long_name = flag for stochastic cloud fraction physics perturbations
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
 [do_mynnedmf]
   standard_name = do_mynnedmf
   long_name = flag to activate MYNN-EDMF
@@ -657,6 +631,32 @@
   long_name = effective radius of cloud rain particle in micrometers
   units = um
   dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[pert_clds]
+  standard_name = flag_for_stochastic_cloud_fraction_perturbations
+  long_name = flag for stochastic cloud fraction physics perturbations
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[sppt_wts]
+  standard_name = weights_for_stochastic_sppt_perturbation
+  long_name = weights for stochastic sppt perturbation
+  units = none
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[sppt_amp]
+  standard_name = total_ampltiude_of_sppt_perturbation
+  long_name = toal ampltidue of stochastic sppt perturbation
+  units = none
+  dimensions = ()
   type = real
   kind = kind_phys
   intent = in

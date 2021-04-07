@@ -27,7 +27,7 @@ contains
 !> \section arg_table_GFS_rrtmgp_sw_pre_run
 !! \htmlinclude GFS_rrtmgp_sw_pre.html
 !!
-  subroutine GFS_rrtmgp_sw_pre_run(me, nCol, nLev, lndp_type, n_var_lndp,lndp_var_list,     &  
+  subroutine GFS_rrtmgp_sw_pre_run(me, nCol, nLev, n_var_lndp, lndp_type, lndp_var_list,    &
        lndp_prt_list, doSWrad, solhr, lon, coslat, sinlat,  snowd, sncovr, snoalb, zorl,    &
        tsfg, tsfa, hprime, alvsf, alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc, albdvis,  &
        albdnir, albivis, albinir, lsmask, sfc_wts, p_lay, tv_lay, relhum, p_lev,            &

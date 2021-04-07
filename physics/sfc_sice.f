@@ -41,16 +41,16 @@
 !!
 !>  @{
       subroutine sfc_sice_run                                           &
-          ( im, kice, sbc, hvap, tgice, cp, eps, epsm1, rvrdm1, grav,  & !  ---  inputs:
-            t0c, rd, ps, t1, q1, delt,                                 &
-            sfcemis, dlwflx, sfcnsw, sfcdsw, srflag,                   &
-            cm, ch, prsl1, prslki, prsik1, prslk1, wind,               &
-            flag_iter, lprnt, ipr,                                     &
-            hice, fice, tice, weasd, tskin, tprcp, tiice, ep,          & !  ---  input/outputs:
-            snwdph, qsurf, snowmt, gflux, cmm, chh, evap, hflx,        & !  
-            frac_grid, icy, islmsk_cice,                               &
-            min_lakeice, min_seaice, oceanfrac,                        &
-            errmsg, errflg )
+     &    ( im, kice, sbc, hvap, tgice, cp, eps, epsm1, rvrdm1, grav,   & !  ---  inputs:
+     &      t0c, rd, ps, t1, q1, delt,                                  &
+     &      sfcemis, dlwflx, sfcnsw, sfcdsw, srflag,                    &
+     &      cm, ch, prsl1, prslki, prsik1, prslk1, wind,                &
+     &      flag_iter, lprnt, ipr,                                      &
+     &      hice, fice, tice, weasd, tskin, tprcp, tiice, ep,           & !  ---  input/outputs:
+     &      snwdph, qsurf, snowmt, gflux, cmm, chh, evap, hflx,         & !  
+     &      frac_grid, icy, islmsk_cice,                                &
+     &      min_lakeice, min_seaice, oceanfrac,                         &
+     &      errmsg, errflg )
 
 ! ===================================================================== !
 !  description:                                                         !

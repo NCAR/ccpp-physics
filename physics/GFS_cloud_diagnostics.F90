@@ -80,9 +80,9 @@ contains
     ! Local variables
     integer i,id,iCol,iLay,icld
     real(kind_phys) :: tem1
-    real(kind_phys),dimension(:,:) :: ptop1
-    real(kind_phys),dimension(:) :: rlat
-    real(kind_phys),dimension(:,:) :: cldcnv
+    real(kind_phys),dimension(nCol,NK_CLDS+1) :: ptop1
+    real(kind_phys),dimension(nCol) :: rlat
+    real(kind_phys),dimension(nCol,nLev) :: cldcnv
 	
     if (.not. (lsswr .or. lslwr)) return
     

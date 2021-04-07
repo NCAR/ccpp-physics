@@ -26,8 +26,8 @@
         ltaerosol, lgfdlmprad, uni_cld, effr_in, do_mynnedmf, lmfshal,         &
         lmfdeep2, fhswr, fhlwr, solhr, sup, con_eps, epsm1, fvirt,             &
         rog, rocp, con_rd, xlat_d, xlat, xlon, coslat, sinlat, tsfc, slmsk,    &
-        prsi, prsl, prslk, tgrs, sfc_wts, mg_cld, effrr_in, pert_clds,sppt_wts,&
-        sppt_amp, cnvw_in, cnvc_in, qgrs, aer_nm, dx, icloud,                  & !inputs from here and above
+        prsi, prsl, prslk, tgrs, sfc_wts, mg_cld, effrr_in, pert_clds,         &
+        sppt_wts, sppt_amp, cnvw_in, cnvc_in, qgrs, aer_nm, dx, icloud,        & !inputs from here and above
         coszen, coszdg, effrl_inout, effri_inout, effrs_inout,                 &
         clouds1, clouds2, clouds3, clouds4, clouds5,                           & !in/out from here and above
         kd, kt, kb, mtopa, mbota, raddt, tsfg, tsfa, de_lgth, alb1d, delp, dz, & !output from here and below
@@ -128,7 +128,7 @@
 
       integer,                              intent(out) :: kd, kt, kb
 
-      integer, dimension(im,3),             intent(out) :: mbota, mtopa
+      integer, dimension(:,:),              intent(out) :: mbota, mtopa
 
       real(kind=kind_phys),                 intent(out) :: raddt
 
@@ -140,9 +140,7 @@
                                                            plyr, tlyr, &
                                                            qlyr, olyr
 
-      real(kind=kind_phys), dimension(:,;), intent(out) :: plvl, tlvl
-
-
+      real(kind=kind_phys), dimension(:,:), intent(out) :: plvl, tlvl
 
       real(kind=kind_phys), dimension(:,:), intent(out) :: gasvmr_co2, &
                                                            gasvmr_n2o, &

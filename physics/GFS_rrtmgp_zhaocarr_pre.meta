@@ -122,15 +122,15 @@
   kind = kind_phys
   intent = in
   optional = F
-[tv_lay]
-  standard_name = virtual_temperature
-  long_name = layer virtual temperature
+[t_lay]
+  standard_name = air_temperature_at_layer_for_RRTMGP
+  long_name = air temperature at vertical layer for radiation calculation
   units = K
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
-  optional = F  
+  optional = F
 [relhum]
   standard_name = relative_humidity
   long_name = layer relative humidity
@@ -140,15 +140,15 @@
   kind = kind_phys
   intent = in
   optional = F
-[t_lay]
-  standard_name = air_temperature_at_layer_for_RRTMGP
-  long_name = air temperature at vertical layer for radiation calculation
+[tv_lay]
+  standard_name = virtual_temperature
+  long_name = layer virtual temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
-  optional = F    
+  optional = F  
 [effrin_cldliq]
   standard_name = effective_radius_of_stratiform_cloud_liquid_water_particle_in_um
   long_name = eff. radius of cloud liquid water particle in micrometer
@@ -365,15 +365,6 @@
   kind = kind_phys
   intent = out
   optional = F    
-[cloud_overlap_param]
-  standard_name = cloud_overlap_param
-  long_name = cloud overlap parameter
-  units = km
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
 [deltaZ]
   standard_name = layer_thickness
   long_name = layer_thickness
@@ -388,6 +379,15 @@
   long_name = cloud decorrelation length
   units = km
   dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[cloud_overlap_param]
+  standard_name = cloud_overlap_param
+  long_name = cloud overlap parameter
+  units = km
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out

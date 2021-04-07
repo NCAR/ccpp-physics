@@ -83,40 +83,40 @@
 !
       logical, intent(in) :: lprnt, hurr_pbl, lssav, ldiag3d, qdiag3d
       logical, intent(in) :: flag_for_pbl_generic_tend
-      integer, intent(in) :: ipr, islimsk(im)
-      integer, intent(in) :: im, km, ntrac, ntcw, kinver(im), ntoz
-      integer, intent(out) :: kpbl(im)
+      integer, intent(in) :: ipr, islimsk(:)
+      integer, intent(in) :: im, km, ntrac, ntcw, kinver(:), ntoz
+      integer, intent(out) :: kpbl(:)
 
 !
       real(kind=kind_phys), intent(in) :: delt, xkzm_m, xkzm_h, xkzm_s
       real(kind=kind_phys), intent(in) :: xkzminv, moninq_fac, var_ric, &
      &                     coef_ric_l, coef_ric_s
-      real(kind=kind_phys), intent(inout) :: dv(im,km),     du(im,km),  &
-     &                     tau(im,km),    rtg(im,km,ntrac)
+      real(kind=kind_phys), intent(inout) :: dv(:,:),     du(:,:),      &
+     &                     tau(:,:),    rtg(:,:,:)
       ! Only allocated if ldiag3d or qdiag3d are true
       real(kind=kind_phys), intent(inout), dimension(:,:) ::            &
      &   du3dt_PBL,dv3dt_PBL,dt3dt_PBL,dq3dt_PBL,do3dt_PBL
       real(kind=kind_phys), intent(in) ::                               &
-     &                     u1(im,km),     v1(im,km),                    &
-     &                     t1(im,km),     q1(im,km,ntrac),              &
-     &                     swh(im,km),    hlw(im,km),                   &
-     &                     xmu(im),       psk(im),                      &
-     &                     rbsoil(im),    zorl(im),                     &
-     &                     u10m(im),      v10m(im),                     &
-     &                     fm(im),        fh(im),                       &
-     &                     tsea(im),                                    &
-     &                     heat(im),      evap(im),                     &
-     &                     stress(im),    spd1(im)
+     &                     u1(:,:),     v1(:,:),                        &
+     &                     t1(:,:),     q1(:,:,:),                      &
+     &                     swh(:,:),    hlw(:,:),                       &
+     &                     xmu(:),       psk(:),                        &
+     &                     rbsoil(:),    zorl(:),                       &
+     &                     u10m(:),      v10m(:),                       &
+     &                     fm(:),        fh(:),                         &
+     &                     tsea(:),                                     &
+     &                     heat(:),      evap(:),                       &
+     &                     stress(:),    spd1(:)
       real(kind=kind_phys), intent(in) ::                               &
-     &                     prsi(im,km+1), del(im,km),                   &
-     &                     prsl(im,km),   prslk(im,km),                 &
-     &                     phii(im,km+1), phil(im,km)
+     &                     prsi(:,:), del(:,:),                         &
+     &                     prsl(:,:), prslk(:,:),                       &
+     &                     phii(:,:), phil(:,:)
       real(kind=kind_phys), intent(out) ::                              &
-     &                     dusfc(im),     dvsfc(im),                    &
-     &                     dtsfc(im),     dqsfc(im),                    &
-     &                     hpbl(im),      dkt(im,km-1)
+     &                     dusfc(:),     dvsfc(:),                      &
+     &                     dtsfc(:),     dqsfc(:),                      &
+     &                     hpbl(:),      dkt(:,:)
       real(kind=kind_phys), intent(inout) ::                            &
-     &                     hgamt(im),     hgamq(im)
+     &                     hgamt(:),     hgamq(:)
 !
       logical, intent(in) :: dspheat
 !          flag for tke dissipative heating

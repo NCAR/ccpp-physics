@@ -15,6 +15,10 @@ module gmtb_scm_sfc_flux_spec
   CONTAINS
 !*******************************************************************************************
 
+!!
+!! \section arg_table_gmtb_scm_sfc_flux_spec_init Argument Table
+!! \htmlinclude gmtb_scm_sfc_flux_spec_init.html
+!!
   subroutine gmtb_scm_sfc_flux_spec_init(lheatstrg, errmsg, errflg)
     
     logical, intent(in) :: lheatstrg

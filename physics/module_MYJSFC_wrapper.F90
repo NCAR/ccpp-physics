@@ -121,7 +121,7 @@
 
 
 !MYJ-3D
-      real(kind=kind_phys),dimension(::),intent(in) ::       &
+      real(kind=kind_phys),dimension(:,:),intent(in) ::      &
               phii, prsi
       real(kind=kind_phys),dimension(:,:),intent(in) ::      &
      &        ugrs, vgrs, tgrs, prsl

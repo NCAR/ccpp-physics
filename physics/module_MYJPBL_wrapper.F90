@@ -90,7 +90,7 @@
      &     prsik_1, prslk_1, prslki, slmsk, garea,           &
            snowd, evap, hflx, cm, ch, wind, hprime1
       real(kind=kind_phys),dimension(:),intent(inout) ::     &
-     &     pblh, zorl, ustar, tsfc, qsfc
+     &     zorl, ustar, tsfc, qsfc
       real(kind=kind_phys),dimension(:),intent(inout)   ::   &
      &        phy_myj_qsfc, phy_myj_thz0, phy_myj_qz0,       &
      &        phy_myj_uz0, phy_myj_vz0, phy_myj_z0base,      &
@@ -98,7 +98,7 @@
      &        phy_myj_chkqlm, phy_myj_elflx,                 &
      &        phy_myj_a1u, phy_myj_a1t, phy_myj_a1q
       real(kind=kind_phys),dimension(:),intent(out) ::       &
-     &     dusfc,dvsfc,dtsfc,dqsfc,gamt,gamq
+     &     pblh,dusfc,dvsfc,dtsfc,dqsfc,gamt,gamq
       integer,dimension(:),intent(out) :: kpbl
       integer,dimension(:),intent(in) ::  kinver
 
