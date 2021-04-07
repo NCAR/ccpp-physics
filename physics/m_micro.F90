@@ -38,7 +38,7 @@ subroutine m_micro_init(imp_physics, imp_physics_mg, fprcp, gravit, rair, rh2o, 
                                         mg_do_graupel, mg_nccons, mg_nicons, mg_ngcons, &
                                         mg_do_ice_gmao, mg_do_liq_liu
     real(kind=kind_phys), intent(in) :: gravit, rair, rh2o, cpair, eps, tmelt, latvap, latice
-    real(kind=kind_phys), intent(in) :: mg_dcs, mg_qcvar, mg_ts_auto_ice(2), mg_rhmini, &
+    real(kind=kind_phys), intent(in) :: mg_dcs, mg_qcvar, mg_ts_auto_ice(:), mg_rhmini, &
                                         mg_berg_eff_factor, mg_ncnst, mg_ninst, mg_ngnst
     character(len=16),    intent(in) :: mg_precip_frac_method
     character(len=*),     intent(out) :: errmsg
@@ -175,13 +175,12 @@ end subroutine m_micro_init
        integer, parameter :: ncolmicro = 1
        integer,intent(in) :: im, lm, kdt, fprcp, pdfflag, iccn
        logical,intent(in) :: flipv, skip_macro
-       real (kind=kind_phys), intent(in):: dt_i, alf_fac, qc_min(2)
+       real (kind=kind_phys), intent(in):: dt_i, alf_fac, qc_min(:)
 
-       real (kind=kind_phys), dimension(:,:),intent(in)  ::           &
+       real (kind=kind_phys), dimension(:,:),intent(in)  ::             &
      &                prsl_i,u_i,v_i,phil,   omega_i, QLLS_i,QILS_i,    &
      &                                       lwheat_i,swheat_i
-       real (kind=kind_phys), dimension(:,:),intent(in):: prsi_i,   &
-     &                                                        phii
+       real (kind=kind_phys), dimension(:,:),intent(in):: prsi_i, phii
 ! GJF* These variables are conditionally allocated depending on whether the
 !     Morrison-Gettelman microphysics is used, so they must be declared 
 !     using assumed shape.
@@ -190,11 +189,11 @@ end subroutine m_micro_init
      &       CNV_MFD_i,               cf_upi, CNV_FICE_i, CNV_NDROP_i,  &
      &       CNV_NICE_i,  w_upi
 ! *GJF
-       real (kind=kind_phys), dimension(:,:),intent(in)  ::           &
+       real (kind=kind_phys), dimension(:,:),intent(in)  ::             &
      &       rhc_i, naai_i, npccn_i
-       real (kind=kind_phys), dimension(:,:,:),intent(in) ::    &
+       real (kind=kind_phys), dimension(:,:,:),intent(in) ::            &
      &       aerfld_i
-       real (kind=kind_phys),dimension(:),intent(in):: TAUGWX,         &
+       real (kind=kind_phys),dimension(:),intent(in):: TAUGWX,          &
      &       TAUGWY, TAUOROX, TAUOROY, FRLAND,ZPBL,xlat,xlon
 !    &       TAUGWY, TAUX, TAUY, TAUOROX, TAUOROY,ps_i,FRLAND,ZPBL
 !    &       CNVPRCP

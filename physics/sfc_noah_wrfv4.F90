@@ -94,7 +94,8 @@
 !!
 !> \section general_noah_wrfv4_drv NOAH LSM WRFv4 General Algorithm
 !>  @{
-      subroutine sfc_noah_wrfv4_run (im, isice, flag_lsm, flag_lsm_glacier, srflag, isurban, rdlai,    &
+      subroutine sfc_noah_wrfv4_run (                                   &
+        im, isice, flag_lsm, flag_lsm_glacier, srflag, isurban, rdlai,  &
         ua_phys, usemonalb, aoasis, fasdas, dt, zlvl,                   &
         nsoil, sthick, lwdn, soldn, solnet, sfcprs, prcp, sfctmp, q1k,  &
         th1, qs1, dqsdt2, vegtyp, soiltyp, slopetyp, shdfac, shmin,     &
@@ -118,20 +119,20 @@
       
       real(kind=kind_phys),                intent(in) :: dt, cp, rd, sigma, cph2o, cpice, lsubf
 
-      integer, dimension(im),              intent(in) :: vegtyp, soiltyp, slopetyp
-      logical, dimension(im),              intent(in) :: flag_lsm, flag_lsm_glacier
-      real(kind=kind_phys), dimension(im), intent(in) :: srflag, zlvl, lwdn, soldn, solnet, &
+      integer, dimension(:),               intent(in) :: vegtyp, soiltyp, slopetyp
+      logical, dimension(:),               intent(in) :: flag_lsm, flag_lsm_glacier
+      real(kind=kind_phys), dimension(:),  intent(in) :: srflag, zlvl, lwdn, soldn, solnet, &
                                                          sfcprs, prcp, sfctmp, q1k, th1, qs1, &
                                                          dqsdt2, shmin, shmax, snoalb, tbot
-      real(kind=kind_phys), dimension(nsoil), intent(in) :: sthick
+      real(kind=kind_phys), dimension(:),  intent(in) :: sthick
 
-      real(kind=kind_phys), dimension(im), intent(inout) :: shdfac, albbrd, z0brd, z0k, emissi, &
+      real(kind=kind_phys), dimension(:),  intent(inout) :: shdfac, albbrd, z0brd, z0k, emissi, &
                                                             cmc, t1, snowhk, sneqv, chk, flx1, &
                                                             flx2, flx3, ribb, snotime
-      real(kind=kind_phys), dimension(im,nsoil), intent(inout) :: stc, smc, swc
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: stc, smc, swc
       
       !variables that are intent(out) in module_sf_noahlsm, but are inout here due to being set within an IF statement
-      real(kind=kind_phys), dimension(im), intent(inout) :: embrd, sheat, eta, ec, &
+      real(kind=kind_phys), dimension(:),  intent(inout) :: embrd, sheat, eta, ec, &
                                                             edir, ett, esnow, etp, ssoil, sncovr, &
                                                             runoff1, runoff2, soilm, qsurf, smcwlt, &
                                                             smcref, smcmax

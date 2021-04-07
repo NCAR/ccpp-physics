@@ -165,7 +165,7 @@ module GFS_rrtmg_setup
       implicit none
 
       ! interface variables
-      real (kind=kind_phys), intent(in) :: si(levr+1)
+      real (kind=kind_phys), intent(in) :: si(:)
       integer, intent(in) :: levr
       integer, intent(in) :: ictm
       integer, intent(in) :: isol

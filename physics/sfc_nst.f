@@ -787,20 +787,19 @@ cc
 
 !  ---  inputs:
       integer, intent(in) :: im, nthreads
-      logical, dimension(im), intent(in) :: wet, icy
+      logical, dimension(:), intent(in) :: wet, icy
       real (kind=kind_phys), intent(in) :: rlapse, tgice
-      real (kind=kind_phys), dimension(im), intent(in) :: oro, oro_uf
+      real (kind=kind_phys), dimension(:), intent(in) :: oro, oro_uf
       integer, intent(in) :: nstf_name1, nstf_name4, nstf_name5
-      real (kind=kind_phys), dimension(im), intent(in) :: xt, xz,       &
+      real (kind=kind_phys), dimension(:), intent(in) :: xt, xz,        &
      &      dt_cool, z_c, tref, xlon
 
 !  ---  input/outputs:
-      real (kind=kind_phys), dimension(im), intent(inout) :: tsurf_wat, &
+      real (kind=kind_phys), dimension(:), intent(inout) :: tsurf_wat,  &
      &      tsfc_wat
 
 !  ---  outputs:
-      real (kind=kind_phys), dimension(size(xlon,1)), intent(out) ::    &
-     &      dtzm
+      real (kind=kind_phys), dimension(:), intent(out) :: dtzm
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg

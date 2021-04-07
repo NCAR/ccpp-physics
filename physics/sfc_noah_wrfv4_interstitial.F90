@@ -144,21 +144,21 @@
       ! Note that the version of NOAH LSM expected here is "generic" - there are no urban, fasdas, or
       ! or University of Arizona(?) additions.
       
-      integer,                             intent(in) :: im, nsoil, ialb, isice
-      logical,                             intent(in) :: restart, first_time_step
-      real(kind=kind_phys),                intent(in) :: dt, rhowater, rd, rvrdm1, eps, epsm1
+      integer,                              intent(in) :: im, nsoil, ialb, isice
+      logical,                              intent(in) :: restart, first_time_step
+      real(kind=kind_phys),                 intent(in) :: dt, rhowater, rd, rvrdm1, eps, epsm1
 
-      logical, dimension(im),              intent(in) :: flag_guess, flag_iter, land
-      real(kind=kind_phys), dimension(im), intent(in) :: sfcprs, tprcp, sfctmp, q1, prslki, wind, cm, ch, snwdph
-      real(kind=kind_phys), dimension(im), intent(in) :: weasd, tsfc, vtype
-      real(kind=kind_phys), dimension(im,nsoil), intent(in) :: smc, stc, slc
+      logical,              dimension(:),   intent(in) :: flag_guess, flag_iter, land
+      real(kind=kind_phys), dimension(:),   intent(in) :: sfcprs, tprcp, sfctmp, q1, prslki, wind, cm, ch, snwdph
+      real(kind=kind_phys), dimension(:),   intent(in) :: weasd, tsfc, vtype
+      real(kind=kind_phys), dimension(:,:), intent(in) :: smc, stc, slc
 
-      logical, dimension(im), intent(inout) :: flag_lsm, flag_lsm_glacier
-      real(kind=kind_phys), dimension(im), intent(inout) :: snoalb, prcp, q2k, rho1, qs1, th1, dqsdt2, canopy, cmc, snowhk, chk, cmm, chh
-      real(kind=kind_phys), dimension(im), intent(inout) :: weasd_save, snwdph_save, tsfc_save, canopy_save
-      real(kind=kind_phys), dimension(im,nsoil), intent(inout) :: smc_save, stc_save, slc_save
-      real(kind=kind_phys), dimension(im), intent(inout) :: ep, evap, hflx, gflux, drain, evbs, evcw, trans, sbsno, snowc, snohf
-      real(kind=kind_phys), dimension(nsoil), intent(inout) :: sthick
+      logical,              dimension(:),   intent(inout) :: flag_lsm, flag_lsm_glacier
+      real(kind=kind_phys), dimension(:),   intent(inout) :: snoalb, prcp, q2k, rho1, qs1, th1, dqsdt2, canopy, cmc, snowhk, chk, cmm, chh
+      real(kind=kind_phys), dimension(:),   intent(inout) :: weasd_save, snwdph_save, tsfc_save, canopy_save
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: smc_save, stc_save, slc_save
+      real(kind=kind_phys), dimension(:),   intent(inout) :: ep, evap, hflx, gflux, drain, evbs, evcw, trans, sbsno, snowc, snohf
+      real(kind=kind_phys), dimension(:),   intent(inout) :: sthick
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -688,17 +688,17 @@
       implicit none
       
       integer, intent(in) :: im, nsoil
-      logical, dimension(im), intent(in) :: land, flag_guess, flag_lsm
+      logical, dimension(:),  intent(in) :: land, flag_guess, flag_lsm
       real(kind=kind_phys),   intent(in) :: rhowater, cp, hvap
-      real(kind=kind_phys), dimension(im), intent(in) :: cmc, rho1, sheat, eta, &
+      real(kind=kind_phys), dimension(:),   intent(in) :: cmc, rho1, sheat, eta, &
         flx1, flx2, flx3, sncovr, runoff1, runoff2, soilm, snowhk
-      real(kind=kind_phys), dimension(im), intent(in) :: weasd_save, snwdph_save, tsfc_save, tsurf, canopy_save, smcmax
-      real(kind=kind_phys), dimension(im,nsoil), intent(in) :: smc_save, stc_save, slc_save
+      real(kind=kind_phys), dimension(:),   intent(in) :: weasd_save, snwdph_save, tsfc_save, tsurf, canopy_save, smcmax
+      real(kind=kind_phys), dimension(:,:), intent(in) :: smc_save, stc_save, slc_save
       
-      real(kind=kind_phys), dimension(im), intent(inout) :: canopy, shflx, lhflx, &
+      real(kind=kind_phys), dimension(:),   intent(inout) :: canopy, shflx, lhflx, &
         snohf, snowc, runoff, drain, stm, wet1
-      real(kind=kind_phys), dimension(im), intent(inout) :: weasd, snwdph, tsfc
-      real(kind=kind_phys), dimension(im, nsoil), intent(inout) :: smc, stc, slc
+      real(kind=kind_phys), dimension(:),   intent(inout) :: weasd, snwdph, tsfc
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: smc, stc, slc
       
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg

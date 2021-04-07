@@ -255,46 +255,46 @@ subroutine fv_sat_adj_run(mdt, zvir, is, ie, isd, ied, kmp, km, kmdelz, js, je, 
     integer,             intent(in)    :: ng
     logical,             intent(in)    :: hydrostatic
     logical,             intent(in)    :: fast_mp_consv
-    real(kind=kind_dyn), intent(inout) :: te0_2d(is:ie, js:je)
-    real(kind=kind_dyn), intent(  out) :: te0(isd:ied, jsd:jed, 1:km)
+    real(kind=kind_dyn), intent(inout) :: te0_2d(:,:)
+    real(kind=kind_dyn), intent(  out) :: te0(:,:,;)
     ! If multi-gases physics are not used, ngas is one and qvi identical to qv
     integer,             intent(in)    :: ngas
-    real(kind=kind_dyn), intent(inout) :: qvi(isd:ied, jsd:jed, 1:km, 1:ngas)
-    real(kind=kind_dyn), intent(inout) :: qv(isd:ied, jsd:jed, 1:km)
-    real(kind=kind_dyn), intent(inout) :: ql(isd:ied, jsd:jed, 1:km)
-    real(kind=kind_dyn), intent(inout) :: qi(isd:ied, jsd:jed, 1:km)
-    real(kind=kind_dyn), intent(inout) :: qr(isd:ied, jsd:jed, 1:km)
-    real(kind=kind_dyn), intent(inout) :: qs(isd:ied, jsd:jed, 1:km)
-    real(kind=kind_dyn), intent(inout) :: qg(isd:ied, jsd:jed, 1:km)
-    real(kind=kind_dyn), intent(in)    :: hs(isd:ied, jsd:jed)
-    real(kind=kind_dyn), intent(in)    :: peln(is:ie, 1:km+1, js:je)
+    real(kind=kind_dyn), intent(inout) :: qvi(:,:,:,:)
+    real(kind=kind_dyn), intent(inout) :: qv(:,:,:)
+    real(kind=kind_dyn), intent(inout) :: ql(:,:,:)
+    real(kind=kind_dyn), intent(inout) :: qi(:,:,:)
+    real(kind=kind_dyn), intent(inout) :: qr(:,:,:)
+    real(kind=kind_dyn), intent(inout) :: qs(:,:,:)
+    real(kind=kind_dyn), intent(inout) :: qg(:,:,:)
+    real(kind=kind_dyn), intent(in)    :: hs(:,:)
+    real(kind=kind_dyn), intent(in)    :: peln(:,:,:)
     ! For hydrostatic build, kmdelz=1, otherwise kmdelz=km (see fv_arrays.F90)
-    real(kind=kind_dyn), intent(in)    :: delz(is:ie, js:je, 1:kmdelz)
-    real(kind=kind_dyn), intent(in)    :: delp(isd:ied, jsd:jed, 1:km)
-    real(kind=kind_dyn), intent(inout) :: pt(isd:ied, jsd:jed, 1:km)
-    real(kind=kind_dyn), intent(inout) :: pkz(is:ie, js:je, 1:km)
+    real(kind=kind_dyn), intent(in)    :: delz(:,:)
+    real(kind=kind_dyn), intent(in)    :: delp(:,:,:)
+    real(kind=kind_dyn), intent(inout) :: pt(:,:,:)
+    real(kind=kind_dyn), intent(inout) :: pkz(:,:,:)
 #ifdef USE_COND
-    real(kind=kind_dyn), intent(inout) :: q_con(isd:ied, jsd:jed, 1:km)
+    real(kind=kind_dyn), intent(inout) :: q_con(:,:,:)
 #else
-    real(kind=kind_dyn), intent(inout) :: q_con(isd:isd, jsd:jsd, 1)
+    real(kind=kind_dyn), intent(inout) :: q_con(:,:,:)
 #endif
     real(kind=kind_dyn), intent(in)    :: akap
 #ifdef MOIST_CAPPA
-    real(kind=kind_dyn), intent(inout) :: cappa(isd:ied, jsd:jed, 1:km)
+    real(kind=kind_dyn), intent(inout) :: cappa(:,:,:)
 #else
-    real(kind=kind_dyn), intent(inout) :: cappa(isd:ied, jsd:jed, 1)
+    real(kind=kind_dyn), intent(inout) :: cappa(:,:,:)
 #endif
     ! DH* WARNING, allocation in fv_arrays.F90 is area(isd_2d:ied_2d, jsd_2d:jed_2d),
     ! where normally isd_2d = isd etc, but for memory optimization, these can be set
     ! to isd_2d=0, ied_2d=-1 etc. I don't believe this optimization is actually used,
     ! as it would break a whole lot of code (including the one below)!
     ! Assume thus that isd_2d = isd etc.
-    real(kind_grid),     intent(in)    :: area(isd:ied, jsd:jed)
-    real(kind=kind_dyn), intent(inout) :: dtdt(is:ie, js:je, 1:km)
+    real(kind_grid),     intent(in)    :: area(:,:)
+    real(kind=kind_dyn), intent(inout) :: dtdt(:,:,:)
     logical,             intent(in)    :: out_dt
     logical,             intent(in)    :: last_step
     logical,             intent(in)    :: do_qa
-    real(kind=kind_dyn), intent(  out) :: qa(isd:ied, jsd:jed, 1:km)
+    real(kind=kind_dyn), intent(  out) :: qa(:,:,:)
     integer,             intent(in)    :: nthreads
     character(len=*),    intent(  out) :: errmsg
     integer,             intent(  out) :: errflg

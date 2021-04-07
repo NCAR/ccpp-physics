@@ -41,7 +41,7 @@ contains
 !!  
   subroutine GFS_cloud_diagnostics_run(nCol, nLev, lsswr, lslwr, lat, de_lgth, p_lay,    &
        cld_frac, p_lev, deltaZ, cloud_overlap_param, precip_overlap_param, con_pi,       &
-       mbota, mtopa, cldsa, errmsg, errflg)
+       mtopa, mbota, cldsa, errmsg, errflg)
     implicit none
      
     ! Inputs 
@@ -59,7 +59,7 @@ contains
     real(kind_phys), dimension(:,:), intent(in) :: &
          p_lay,             & ! Pressure at model-layer
          cld_frac             ! Total cloud fraction
-    real(kind_phys), dimension(nCol,nLev+1), intent(in) :: &
+    real(kind_phys), dimension(:,:), intent(in) :: &
          p_lev                ! Pressure at model interfaces         
     real(kind_phys), dimension(:,:), intent(in) :: &
     	 deltaZ,              & ! Layer thickness (km)
@@ -80,7 +80,7 @@ contains
     ! Local variables
     integer i,id,iCol,iLay,icld
     real(kind_phys) :: tem1
-    real(kind_phys),dimension(nCol,NK_CLDS+1) :: ptop1
+    real(kind_phys),dimension(:,:) :: ptop1
     real(kind_phys),dimension(:) :: rlat
     real(kind_phys),dimension(:,:) :: cldcnv
 	
@@ -136,7 +136,7 @@ contains
     integer, intent(in) :: &
          nLev,        & ! Number of vertical-layers
          mpi_rank 
-    real(kind_phys), dimension(nLev+1), intent(in) :: &
+    real(kind_phys), dimension(:), intent(in) :: &
          sigmainit
     ! Outputs
     integer, intent(out) :: &

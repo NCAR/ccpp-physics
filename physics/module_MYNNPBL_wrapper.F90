@@ -289,38 +289,38 @@ SUBROUTINE mynnedmf_wrapper_run(        &
       REAL(kind=kind_phys), DIMENSION( ndvel ) :: vd1
 
 !MYNN-2D
-      real(kind=kind_phys), dimension(im), intent(in) ::                 &
+      real(kind=kind_phys), dimension(:), intent(in) ::                  &
      &        dx,zorl,slmsk,tsurf,qsfc,ps,                               &
      &        hflx,qflx,ust,wspd,rb,recmol
 
-      real(kind=kind_phys), dimension(im), intent(in) ::                 &
+      real(kind=kind_phys), dimension(:), intent(in) ::                  &
      &        dusfc_cice,dvsfc_cice,dtsfc_cice,dqsfc_cice,               &
      &        stress_ocn,hflx_ocn,qflx_ocn,                              &
      &        oceanfrac,fice
 
-      logical, dimension(im), intent(in) ::                              &
+      logical, dimension(:), intent(in) ::                               &
      &        wet, dry, icy
 
-      real(kind=kind_phys), dimension(im), intent(inout) ::              &
+      real(kind=kind_phys), dimension(:), intent(inout) ::               &
      &        pblh,dusfc_diag,dvsfc_diag,dtsfc_diag,dqsfc_diag
-      real(kind=kind_phys), dimension(im), intent(out) ::                &
+      real(kind=kind_phys), dimension(:), intent(out) ::                 &
      &        ch,dtsfc1,dqsfc1,dusfc1,dvsfc1,                            &
      &        dtsfci_diag,dqsfci_diag,dusfci_diag,dvsfci_diag,           &
      &        maxMF
-      integer, dimension(im), intent(inout) ::                           &
+      integer, dimension(:), intent(inout) ::                            &
      &        kpbl,nupdraft,ktop_plume
 
-      real(kind=kind_phys), dimension(:), intent(inout) ::              &
+      real(kind=kind_phys), dimension(:), intent(inout) ::               &
      &        dusfc_cpl,dvsfc_cpl,dtsfc_cpl,dqsfc_cpl
-      real(kind=kind_phys), dimension(:), intent(inout) ::              &
+      real(kind=kind_phys), dimension(:), intent(inout) ::               &
      &        dusfci_cpl,dvsfci_cpl,dtsfci_cpl,dqsfci_cpl
 
      !LOCAL
-      real, dimension(im) ::                                             &
+      real, dimension(:) ::                                              &
      &        WSTAR,DELTA,qcg,hfx,qfx,rmol,xland,                        &
      &        uoce,voce,vdfg,znt,ts
 
-      real, dimension(im) :: dusfci1,dvsfci1,dtsfci1,dqsfci1
+      real, dimension(:) :: dusfci1,dvsfci1,dtsfci1,dqsfci1
 
       ! Initialize CCPP error handling variables
       errmsg = ''

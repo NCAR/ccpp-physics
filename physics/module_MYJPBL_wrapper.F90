@@ -86,38 +86,38 @@
       real(kind=kind_phys),intent(in) :: dt_phs, xkzm_m, xkzm_h, xkzm_s
 
 !MYJ-2D
-      real(kind=kind_phys),dimension(im),intent(in) ::         &
-     &     prsik_1, prslk_1, prslki, slmsk, garea,             &
+      real(kind=kind_phys),dimension(:),intent(in) ::        &
+     &     prsik_1, prslk_1, prslki, slmsk, garea,           &
            snowd, evap, hflx, cm, ch, wind, hprime1
-      real(kind=kind_phys),dimension(im),intent(inout) ::      &
+      real(kind=kind_phys),dimension(:),intent(inout) ::     &
      &     pblh, zorl, ustar, tsfc, qsfc
-      real(kind=kind_phys),dimension(im),intent(inout)   ::    &
-     &        phy_myj_qsfc, phy_myj_thz0, phy_myj_qz0,         &
-     &        phy_myj_uz0, phy_myj_vz0, phy_myj_z0base,        &
-     &        phy_myj_akhs, phy_myj_akms,                      &
-     &        phy_myj_chkqlm, phy_myj_elflx,                   &
+      real(kind=kind_phys),dimension(:),intent(inout)   ::   &
+     &        phy_myj_qsfc, phy_myj_thz0, phy_myj_qz0,       &
+     &        phy_myj_uz0, phy_myj_vz0, phy_myj_z0base,      &
+     &        phy_myj_akhs, phy_myj_akms,                    &
+     &        phy_myj_chkqlm, phy_myj_elflx,                 &
      &        phy_myj_a1u, phy_myj_a1t, phy_myj_a1q
-      real(kind=kind_phys),dimension(im),intent(out) ::        &
+      real(kind=kind_phys),dimension(:),intent(out) ::       &
      &     dusfc,dvsfc,dtsfc,dqsfc,gamt,gamq
-      integer,dimension(im),intent(out) :: kpbl
-      integer,dimension(im),intent(in) ::  kinver
+      integer,dimension(:),intent(out) :: kpbl
+      integer,dimension(:),intent(in) ::  kinver
 
 !MYJ-3D
-      real(kind=kind_phys),dimension(im,levs+1),intent(in) ::  &
+      real(kind=kind_phys),dimension(:,:),intent(in) ::      &
               phii, prsi
-      real(kind=kind_phys),dimension(im,levs),intent(in) ::    &
+      real(kind=kind_phys),dimension(:,:),intent(in) ::      &
      &        ugrs, vgrs, tgrs, prsl
-!      real(kind=kind_phys),dimension(im,levs),intent(inout) :: &
+!      real(kind=kind_phys),dimension(:,:),intent(inout)   :: &
 !             dudt, dvdt, dtdt, dkt
-      real(kind=kind_phys),dimension(im,levs),intent(inout) :: &
+      real(kind=kind_phys),dimension(:,:),intent(inout)   :: &
              dudt, dvdt, dtdt
-      real(kind=kind_phys),dimension(im,levs-1),intent(out) :: &
+      real(kind=kind_phys),dimension(:,:),intent(out)     :: &
              dkt
-      real(kind=kind_phys),dimension(:,:),intent(inout)     :: &
+      real(kind=kind_phys),dimension(:,:),intent(inout)   :: &
              du3dt_PBL, dv3dt_PBL, dt3dt_PBL, dq3dt_PBL
 
 !MYJ-4D
-      real(kind=kind_phys),dimension(im,levs,ntrac),intent(inout) ::  &
+      real(kind=kind_phys),dimension(:,:,:),intent(inout) :: &
      &       qgrs,dqdt
 
 !LOCAL

@@ -58,7 +58,7 @@
       ! Interface variables
       integer, intent(in) :: im, levs, ko3, oz_coeff, me
       real(kind=kind_phys), intent(inout) ::                            &
-     &                     oz(im,levs)
+     &                     oz(:,:)
       ! These arrays may not be allocated and need assumed array sizes
       real(kind=kind_phys), intent(inout) ::                            &
      &                     ozp1(:,:), ozp2(:,:), ozp3(:,:), ozp4(:,:)

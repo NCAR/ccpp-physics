@@ -111,33 +111,33 @@
    logical,  intent(in   )   :: lssav, ldiag3d, qdiag3d,                       &
                                 flag_for_pbl_generic_tend
 ! 3D in
-   real(kind=kind_phys),     dimension(:,:)                                               , &
+   real(kind=kind_phys),     dimension(:,:)                                  , &
              intent(in   )   ::                                          phil, &
                                                                          pi2d, &
                                                                           p2d, &
                                                                            ux, &
                                                                            vx, &
                                                                            tx
-   real(kind=kind_phys),     dimension( im, km, ntrac )                                      , &
+   real(kind=kind_phys),     dimension(:,:,:)                                , &
              intent(in   )   ::                                            qx
 
-   real(kind=kind_phys),     dimension( :,: )                                           , &
+   real(kind=kind_phys),     dimension(:,:)                                  , &
              intent(in   )   ::                                          p2di, &
                                                                          phii
 ! 3D in&out
-   real(kind=kind_phys),     dimension(:,:)                                               , &
+   real(kind=kind_phys),     dimension(:,:)                                  , &
              intent(inout)   ::                                          utnp, &
                                                                          vtnp, &
                                                                          ttnp
-   real(kind=kind_phys),     dimension(:,:, : )                                       , &
+   real(kind=kind_phys),     dimension(:,:,:)                                , &
              intent(inout)   ::                                          qtnp
-   real(kind=kind_phys),     dimension(:,:)                                                  , &
+   real(kind=kind_phys),     dimension(:,:)                                  , &
              intent(inout)   :: du3dt_PBL, dv3dt_PBL, dt3dt_PBL, dq3dt_PBL, do3dt_PBL
 ! 2D in
-   integer,  dimension(:)                                                   , &
+   integer,  dimension(:)                                                    , &
              intent(in   )   ::                                      landmask
 
-   real(kind=kind_phys),     dimension(:)                                                   , &
+   real(kind=kind_phys),     dimension(:)                                    , &
              intent(in   )   ::                                          heat, &
                                                                          evap, &
                                                                            br, &
@@ -151,10 +151,10 @@
                                                                           v10, &
                                                                            dx
 ! 2D: out
-   integer,  dimension(:)                                                   , &
+   integer,  dimension(:)                                                    , &
              intent(out  )   ::                                        kpbl1d
 
-   real(kind=kind_phys),     dimension(:)                                                   , &
+   real(kind=kind_phys),     dimension(:)                                    , &
              intent(out  )   ::                                          hpbl, &
                                                                         dusfc, &
                                                                         dvsfc, &

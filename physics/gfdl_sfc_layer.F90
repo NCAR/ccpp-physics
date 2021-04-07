@@ -130,23 +130,23 @@
         logical,                intent(in) :: cplwav, cplwav2atm !GJF: this scheme has not been tested with these on
         logical,                intent(in) :: lcurr_sf           !GJF: this scheme has not been tested with this option turned on; the variables scurx and scury need to be input in order to use this
         logical,                intent(in) :: pert_Cd            !GJF: this scheme has not been tested with this option turned on; the variables ens_random_seed and ens_Cdamp need to be input in order to use this
-        logical, dimension(im), intent(in) :: flag_iter, wet, dry, icy
-        integer, dimension(im), intent(in) :: isltyp, vegtype
-        real(kind=kind_phys),                      intent(in) :: dt, sfenth
-        real(kind=kind_phys),                      intent(in) :: rd,grav,ep1,ep2
-        real(kind=kind_phys), dimension(im,nsoil), intent(in) :: smois
-        real(kind=kind_phys), dimension(im),       intent(in) :: psfc, prsl1,   &
+        logical, dimension(:),  intent(in) :: flag_iter, wet, dry, icy
+        integer, dimension(:),  intent(in) :: isltyp, vegtype
+        real(kind=kind_phys),                 intent(in) :: dt, sfenth
+        real(kind=kind_phys),                 intent(in) :: rd,grav,ep1,ep2
+        real(kind=kind_phys), dimension(:,:), intent(in) :: smois
+        real(kind=kind_phys), dimension(:),   intent(in) :: psfc, prsl1,        &
             q1, t1, u1, v1, wspd, u10, v10, gsw, glw, z1, shdmax, sigmaf, xlat, &
             xlon, tsurf_ocn, tsurf_lnd, tsurf_ice
 
-        real(kind=kind_phys), intent(inout), dimension(im) :: tskin_ocn,        &
+        real(kind=kind_phys), intent(inout), dimension(:) :: tskin_ocn,         &
             tskin_lnd, tskin_ice, ustar_ocn, ustar_lnd, ustar_ice,              &
             znt_ocn, znt_lnd, znt_ice, cdm_ocn, cdm_lnd, cdm_ice,               &
             stress_ocn, stress_lnd, stress_ice, rib_ocn, rib_lnd, rib_ice,      &
             fm_ocn, fm_lnd, fm_ice, fh_ocn, fh_lnd, fh_ice, fh2_ocn, fh2_lnd,   &
             fh2_ice, ch_ocn, ch_lnd, ch_ice, fm10_ocn, fm10_lnd, fm10_ice
 
-        real(kind=kind_phys), intent(out), dimension(im) :: qss_ocn, qss_lnd, qss_ice
+        real(kind=kind_phys), intent(out), dimension(:) :: qss_ocn, qss_lnd, qss_ice
 
         character(len=*), intent(out) :: errmsg
         integer,          intent(out) :: errflg

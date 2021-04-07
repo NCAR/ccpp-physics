@@ -30,10 +30,10 @@ contains
       implicit none
 
       integer, intent(in) :: im, levs, nmtvr
-      real(kind=kind_phys), intent(in) :: mntvar(im,nmtvr)
+      real(kind=kind_phys), intent(in) :: mntvar(:,:)
 
       real(kind=kind_phys), intent(out) ::                              &
-     &  oc(:), oa4(:,:), clx(:,:),                                   &
+     &  oc(:), oa4(:,:), clx(:,:),                                      &
      &  varss(:), ocss(:), oa4ss(:,:), clxss(:,:),                      &
      &  theta(:), sigma(:), gamma(:), elvmax(:)
 
