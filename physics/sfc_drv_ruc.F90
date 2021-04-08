@@ -176,7 +176,6 @@ module lsm_ruc
         sfalb_lnd_bck(i) = 0.25*(alnsf(i) + alnwf(i) + alvsf(i) + alvwf(i))  &
                            * min(1., facsf(i)+facwf(i))
 
-        write(0,*)'sfalb_lnd_bck(i)=',i,sfalb_lnd_bck(i)
         !-- land
         semis_lnd(i) = semisbase(i) * (1.-sncovr_lnd(i))  &
                      + 0.99 * sncovr_lnd(i)
@@ -194,8 +193,7 @@ module lsm_ruc
         albivis_ice(i) = alb_ice
         albinir_ice(i) = alb_ice
 
-        write(0,*)'albinir_lnd(i),albinir_ice(i)',i,alb_lnd,albinir_lnd(i),alb_ice,albinir_ice(i)
-      enddo
+      enddo ! i
 
         call init_soil_depth_3 ( zs , dzs , lsoil_ruc )
 
@@ -901,6 +899,8 @@ module lsm_ruc
           ilst=istwe(vegtype(i)) ! 1 or 2
           dm = (1.+2.*d(ilst))/(1.+2.*d(ilst)*coszen(i))
           albbcksol(i) = sfalb_lnd_bck(i)*dm
+        else
+          albbcksol(i) = sfalb_lnd_bck(i)
         endif ! coszen > 0.
 
         snoalb1d_lnd(i,j) = snoalb(i)

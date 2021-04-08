@@ -377,7 +377,6 @@
          !--- For Noah MP or RUC LSMs: initialize four components of albedo for
          !--- land and ice
          if (lsm == lsm_noahmp .or. lsm == lsm_ruc) then
-          if (all(albdvis_lnd < zero)) then
            if (me == master ) write(0,'(a)') 'GFS_phys_time_vary_init: initialize albedo for land and ice' 
              albdvis_lnd(:)  = missing_value
              albdnir_lnd(:)  = missing_value
@@ -392,7 +391,9 @@
                  albinir_lnd(ix)  = 0.2_kind_phys
                  emiss_lnd(ix)    = 0.95_kind_phys
              enddo
+          endif
 
+         if (lsm == lsm_ruc) then
              albdvis_ice(:)  = missing_value
              albdnir_ice(:)  = missing_value
              albivis_ice(:)  = missing_value
@@ -406,7 +407,6 @@
                  albinir_ice(ix)  = 0.6_kind_phys
                  emiss_ice(ix)    = 0.97_kind_phys
              enddo
-          endif
          endif
 
          if (lsm == lsm_noahmp) then

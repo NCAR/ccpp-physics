@@ -743,17 +743,15 @@
               endif ! snow
             endif ! lsm
           else
-          ! icy = false
+          ! icy = false, fill in values
             asevd_ice = 0.70
             asend_ice = 0.65
             asevb_ice = 0.70
             asenb_ice = 0.65
-          endif ! icy
+          endif ! end icy
  
           !-- Composite mean surface albedo from land, open water and
           !-- ice fractions
-          print*,'i,asenb_wat,asenb_ice',i,asenb_wat,asenb_ice
-          print*,'lsmalbdnir(i)=',i,lsmalbdnir(i)
           sfcalb(i,1) = min(0.99,max(0.01,lsmalbdnir(i)))*fracl         &
      &                  + asenb_wat*fraco + asenb_ice*fraci
           sfcalb(i,2) = min(0.99,max(0.01,lsmalbinir(i)))*fracl         &

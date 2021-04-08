@@ -718,7 +718,6 @@ CONTAINS
 
        !-- update background emissivity for land points, can have vegetation mosaic effect
        EMISBCK(I,J) = EMISSL(I,J)
-     ENDIF
 
     IF (debug_print ) THEN
       if(init) &
@@ -785,6 +784,7 @@ CONTAINS
          print *,'NROOT, meltfactor, iforest, ivgtyp, i,j ', nroot,meltfactor,iforest,ivgtyp(I,J),I,J
     ENDIF
 
+     ENDIF ! land
 !!*** SET ZERO-VALUE FOR SOME OUTPUT DIAGNOSTIC ARRAYS
 !    if(i.eq.397.and.j.eq.562) then
 !        print *,'RUC LSM - xland(i,j),xice(i,j),snow(i,j)',i,j,xland(i,j),xice(i,j),snow(i,j)
