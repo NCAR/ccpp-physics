@@ -426,7 +426,7 @@ module mp_nsslg
         ENDIF
         
         IF ( first_time_step ) THEN
-          itimestep = 2
+          itimestep = 0
           IF ( imp_physics == imp_physics_nssl2mccn ) THEN
             IF ( invertccn ) THEN
               cccn = 0
