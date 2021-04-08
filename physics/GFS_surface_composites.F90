@@ -138,6 +138,9 @@ contains
               if (cice(i) >= min_seaice) then
                 icy(i)   = .true.
                 tisfc(i) = max(timin, min(tisfc(i), tgice))
+#ifndef CICE6
+                if (cplflx) islmsk_cice(i) = 2
+#endif
               else
                 cice(i)        = zero
                 hice(i)        = zero
@@ -147,7 +150,11 @@ contains
               endif
               if (cice(i) < one) then
                 wet(i) = .true. ! some open ocean
+#ifdef CICE6
                 if (.not. cplflx .and. icy(i)) tsfco(i) = max(tisfc(i), tgice)
+#else
+                if (icy(i)) tsfco(i) = max(tisfc(i), tgice)
+#endif
               endif
             else
               if (cice(i) >= min_lakeice) then
