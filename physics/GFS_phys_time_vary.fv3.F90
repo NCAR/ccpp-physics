@@ -379,8 +379,11 @@
 
          if (errflg/=0) return
 
-         call read_aerdataf (iamin, iamax, jamin, jamax, me, master, iflip, &
-                             idate, errmsg, errflg)
+         if (iaerclm) then
+           call read_aerdataf (iamin, iamax, jamin, jamax, me, master, iflip, &
+                               idate, errmsg, errflg)
+           if (errflg/=0) return
+         end if
 
          if (lsm == lsm_noahmp) then
            if (all(tvxy < zero)) then
