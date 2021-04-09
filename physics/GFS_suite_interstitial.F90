@@ -14,22 +14,24 @@
 !> \section arg_table_GFS_suite_interstitial_rad_reset_run Argument Table
 !! \htmlinclude GFS_suite_interstitial_rad_reset_run.html
 !!
-    subroutine GFS_suite_interstitial_rad_reset_run (Interstitial, Model, errmsg, errflg)
+    subroutine GFS_suite_interstitial_rad_reset_run (Suite_Interstitial, Interstitial, Model, errmsg, errflg)
 
       use machine,      only: kind_phys
-      use GFS_typedefs, only: GFS_control_type, GFS_interstitial_type
+      use GFS_typedefs, only: GFS_control_type, GFS_suite_interstitial_type, GFS_interstitial_type
 
       implicit none
 
       ! interface variables
-      type(GFS_interstitial_type), intent(inout) :: Interstitial
-      type(GFS_control_type),      intent(in)    :: Model
-      character(len=*),            intent(out)   :: errmsg
-      integer,                     intent(out)   :: errflg
+      type(GFS_suite_interstitial_type), intent(inout) :: Suite_Interstitial
+      type(GFS_interstitial_type),       intent(inout) :: Interstitial
+      type(GFS_control_type),            intent(in)    :: Model
+      character(len=*),                  intent(out)   :: errmsg
+      integer,                           intent(out)   :: errflg
 
       errmsg = ''
       errflg = 0
 
+      call Suite_Interstitial%rad_reset(Model)
       call Interstitial%rad_reset(Model)
 
     end subroutine GFS_suite_interstitial_rad_reset_run
@@ -50,22 +52,24 @@
 !> \section arg_table_GFS_suite_interstitial_phys_reset_run Argument Table
 !! \htmlinclude GFS_suite_interstitial_phys_reset_run.html
 !!
-    subroutine GFS_suite_interstitial_phys_reset_run (Interstitial, Model, errmsg, errflg)
+    subroutine GFS_suite_interstitial_phys_reset_run (Suite_Interstitial, Interstitial, Model, errmsg, errflg)
 
       use machine,      only: kind_phys
-      use GFS_typedefs, only: GFS_control_type, GFS_interstitial_type
+      use GFS_typedefs, only: GFS_control_type, GFS_suite_interstitial_type, GFS_interstitial_type
 
       implicit none
 
       ! interface variables
-      type(GFS_interstitial_type), intent(inout) :: Interstitial
-      type(GFS_control_type),      intent(in)    :: Model
-      character(len=*),            intent(out)   :: errmsg
-      integer,                     intent(out)   :: errflg
+      type(GFS_suite_interstitial_type), intent(inout) :: Suite_Interstitial
+      type(GFS_interstitial_type),       intent(inout) :: Interstitial
+      type(GFS_control_type),            intent(in)    :: Model
+      character(len=*),                  intent(out)   :: errmsg
+      integer,                           intent(out)   :: errflg
 
       errmsg = ''
       errflg = 0
 
+      call Suite_Interstitial%phys_reset(Model)
       call Interstitial%phys_reset(Model)
 
     end subroutine GFS_suite_interstitial_phys_reset_run
@@ -159,7 +163,7 @@
 !> \section arg_table_GFS_suite_interstitial_2_run Argument Table
 !! \htmlinclude GFS_suite_interstitial_2_run.html
 !!
-    subroutine GFS_suite_interstitial_2_run (im, levs, lssav, ldiag3d, lsidea, cplflx, flag_cice, shal_cnv, old_monin, mstrat,    &
+    subroutine GFS_suite_interstitial_2_run (im, levs, lssav, ldiag3d, lsidea, flag_cice, shal_cnv, old_monin, mstrat,            &
       do_shoc, frac_grid, imfshalcnv, dtf, xcosz, adjsfcdsw, adjsfcdlw, cice, pgr, ulwsfc_cice, lwhd, htrsw, htrlw, xmu, ctei_rm, &
       work1, work2, prsi, tgrs, prsl, qgrs_water_vapor, qgrs_cloud_water, cp, hvap, prslk, suntim, adjsfculw, adjsfculw_lnd,      &
       adjsfculw_ice, adjsfculw_wat, dlwsfc, ulwsfc, psmean, dt3dt_lw, dt3dt_sw, dt3dt_pbl, dt3dt_dcnv, dt3dt_scnv, dt3dt_mp,      &
@@ -169,7 +173,7 @@
 
       ! interface variables
       integer,              intent(in   ) :: im, levs, imfshalcnv
-      logical,              intent(in   ) :: lssav, ldiag3d, lsidea, cplflx, shal_cnv
+      logical,              intent(in   ) :: lssav, ldiag3d, lsidea, shal_cnv
       logical,              intent(in   ) :: old_monin, mstrat, do_shoc, frac_grid, use_LW_jacobian
       real(kind=kind_phys), intent(in   ) :: dtf, cp, hvap
 
