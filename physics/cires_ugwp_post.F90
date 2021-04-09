@@ -6,8 +6,6 @@ module cires_ugwp_post
 
 contains
 
-!> \section arg_table_cires_ugwp_post_init Argument Table
-!!
     subroutine cires_ugwp_post_init ()
     end subroutine cires_ugwp_post_init
 
@@ -70,8 +68,6 @@ contains
 
       end subroutine cires_ugwp_post_run
 
-!> \section arg_table_cires_ugwp_post_finalize Argument Table
-!!
       subroutine cires_ugwp_post_finalize ()
       end subroutine cires_ugwp_post_finalize
 
