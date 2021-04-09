@@ -7,6 +7,14 @@
 [ccpp-arg-table]
   name = GFS_suite_interstitial_rad_reset_run
   type = scheme
+[Suite_Interstitial]
+  standard_name = GFS_suite_interstitial_type_instance
+  long_name = derived type GFS_suite interstitial_type in FV3
+  units = DDT
+  dimensions = ()
+  type = GFS_suite_interstitial_type
+  intent = inout
+  optional = F
 [Interstitial]
   standard_name = GFS_interstitial_type_instance
   long_name = derived type GFS_interstitial_type in FV3
@@ -51,6 +59,14 @@
 [ccpp-arg-table]
   name = GFS_suite_interstitial_phys_reset_run
   type = scheme
+[Suite_Interstitial]
+  standard_name = GFS_suite_interstitial_type_instance
+  long_name = derived type GFS_suite interstitial_type in FV3
+  units = DDT
+  dimensions = ()
+  type = GFS_suite_interstitial_type
+  intent = inout
+  optional = F
 [Interstitial]
   standard_name = GFS_interstitial_type_instance
   long_name = derived type GFS_interstitial_type in FV3

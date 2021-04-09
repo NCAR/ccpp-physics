@@ -45,6 +45,7 @@
       interface print_var
         module procedure print_logic_0d
         module procedure print_logic_1d
+        module procedure print_logic_2d
         module procedure print_int_0d
         module procedure print_int_1d
         module procedure print_int_2d
@@ -88,6 +89,29 @@
 #endif
 
       end subroutine print_logic_1d
+
+      subroutine print_logic_2d(mpirank, omprank, blkno, lat_d, lon_d, name, var)
+
+          integer, intent(in) :: mpirank, omprank, blkno
+          real(kind_phys), intent(in) :: lat_d(:), lon_d(:)
+          character(len=*), intent(in) :: name
+          logical, intent(in) :: var(:,:)
+
+          integer :: i, k
+
+#ifdef PRINT_SUM
+          write(0,'(2a,3i6,2i8)') 'XXX: ', trim(name), mpirank, omprank, blkno, size(var), count(var)
+#elif defined(PRINT_CHKSUM)
+          write(0,'(2a,3i6,2i8)') 'XXX: ', trim(name), mpirank, omprank, blkno, size(var), count(var)
+#else
+          do i=lbound(var,1),ubound(var,1)
+              do k=lbound(var,2),ubound(var,2)
+                  write(0,'(2a,3i6,2i6,2e16.7,1x,l)') 'XXX: ', trim(name), mpirank, omprank, blkno, i, k, lat_d(i), lon_d(i), var(i,k)
+              end do
+          end do
+#endif
+
+      end subroutine print_logic_2d
 
       subroutine print_int_0d(mpirank, omprank, blkno, lat_d, lon_d, name, var)
 
@@ -314,19 +338,20 @@
 !> \section arg_table_GFS_diagtoscreen_init Argument Table
 !! \htmlinclude GFS_diagtoscreen_init.html
 !!
-      subroutine GFS_diagtoscreen_init (Model, Data, Interstitial, errmsg, errflg)
+      subroutine GFS_diagtoscreen_init (Model, Data, Suite_Interstitial, Interstitial, errmsg, errflg)
 
          use GFS_typedefs,          only: GFS_control_type, GFS_data_type, &
-                                          GFS_interstitial_type
+                                          GFS_suite_interstitial_type, GFS_interstitial_type
 
          implicit none
 
          !--- interface variables
-         type(GFS_control_type),      intent(in)  :: Model
-         type(GFS_data_type),         intent(in)  :: Data(:)
-         type(GFS_interstitial_type), intent(in)  :: Interstitial(:)
-         character(len=*),            intent(out) :: errmsg
-         integer,                     intent(out) :: errflg
+         type(GFS_control_type),            intent(in)  :: Model
+         type(GFS_data_type),               intent(in)  :: Data(:)
+         type(GFS_suite_interstitial_type), intent(in)  :: Suite_Interstitial(:)
+         type(GFS_interstitial_type),       intent(in)  :: Interstitial(:)
+         character(len=*),                  intent(out) :: errmsg
+         integer,                           intent(out) :: errflg
 
          !--- local variables
          integer :: i
@@ -338,8 +363,8 @@
          do i=1,size(Data)
            call GFS_diagtoscreen_run (Model, Data(i)%Statein, Data(i)%Stateout, Data(i)%Sfcprop,    &
                                       Data(i)%Coupling, Data(i)%Grid, Data(i)%Tbd, Data(i)%Cldprop, &
-                                      Data(i)%Radtend, Data(i)%Intdiag, Interstitial(1),            &
-                                      size(Interstitial), i, errmsg, errflg)
+                                      Data(i)%Radtend, Data(i)%Intdiag, Suite_Interstitial(i),      &
+                                      Interstitial(1), size(Interstitial), i, errmsg, errflg)
          end do
 
       end subroutine GFS_diagtoscreen_init
@@ -350,9 +375,9 @@
 !> \section arg_table_GFS_diagtoscreen_run Argument Table
 !! \htmlinclude GFS_diagtoscreen_run.html
 !!
-      subroutine GFS_diagtoscreen_run (Model, Statein, Stateout, Sfcprop, Coupling,     &
-                                       Grid, Tbd, Cldprop, Radtend, Diag, Interstitial, &
-                                       nthreads, blkno, errmsg, errflg)
+      subroutine GFS_diagtoscreen_run (Model, Statein, Stateout, Sfcprop, Coupling,           &
+                                       Grid, Tbd, Cldprop, Radtend, Diag, Suite_Interstitial, &
+                                       Interstitial, nthreads, blkno, errmsg, errflg)
 
 #ifdef MPI
          use mpi
@@ -365,26 +390,28 @@
                                           GFS_coupling_type, GFS_grid_type,    &
                                           GFS_tbd_type, GFS_cldprop_type,      &
                                           GFS_radtend_type, GFS_diag_type,     &
+                                          GFS_suite_interstitial_type,         &
                                           GFS_interstitial_type
 
          implicit none
 
          !--- interface variables
-         type(GFS_control_type),   intent(in   ) :: Model
-         type(GFS_statein_type),   intent(in   ) :: Statein
-         type(GFS_stateout_type),  intent(in   ) :: Stateout
-         type(GFS_sfcprop_type),   intent(in   ) :: Sfcprop
-         type(GFS_coupling_type),  intent(in   ) :: Coupling
-         type(GFS_grid_type),      intent(in   ) :: Grid
-         type(GFS_tbd_type),       intent(in   ) :: Tbd
-         type(GFS_cldprop_type),   intent(in   ) :: Cldprop
-         type(GFS_radtend_type),   intent(in   ) :: Radtend
-         type(GFS_diag_type),      intent(in   ) :: Diag
-         type(GFS_interstitial_type), intent(in) :: Interstitial
-         integer,                  intent(in   ) :: nthreads
-         integer,                  intent(in   ) :: blkno
-         character(len=*),           intent(out) :: errmsg
-         integer,                    intent(out) :: errflg
+         type(GFS_control_type),            intent(in)  :: Model
+         type(GFS_statein_type),            intent(in)  :: Statein
+         type(GFS_stateout_type),           intent(in)  :: Stateout
+         type(GFS_sfcprop_type),            intent(in)  :: Sfcprop
+         type(GFS_coupling_type),           intent(in)  :: Coupling
+         type(GFS_grid_type),               intent(in)  :: Grid
+         type(GFS_tbd_type),                intent(in)  :: Tbd
+         type(GFS_cldprop_type),            intent(in)  :: Cldprop
+         type(GFS_radtend_type),            intent(in)  :: Radtend
+         type(GFS_diag_type),               intent(in)  :: Diag
+         type(GFS_suite_interstitial_type), intent(in)  :: Suite_Interstitial
+         type(GFS_interstitial_type),       intent(in)  :: Interstitial
+         integer,                           intent(in)  :: nthreads
+         integer,                           intent(in)  :: blkno
+         character(len=*),                  intent(out) :: errmsg
+         integer,                           intent(out) :: errflg
 
          !--- local variables
          integer :: impi, iomp, ierr, n
@@ -879,7 +906,7 @@
     end module GFS_diagtoscreen
 
 
-    module GFS_interstitialtoscreen
+    module GFS_suiteinterstitialtoscreen
 
       use print_var_chksum, only: print_var
 
@@ -887,23 +914,24 @@
 
       private
 
-      public GFS_interstitialtoscreen_init, GFS_interstitialtoscreen_run, GFS_interstitialtoscreen_finalize
+      public GFS_suiteinterstitialtoscreen_init, GFS_suiteinterstitialtoscreen_run, GFS_suiteinterstitialtoscreen_finalize
 
       contains
 
-      subroutine GFS_interstitialtoscreen_init (Model, Data, Interstitial, errmsg, errflg)
+      subroutine GFS_suiteinterstitialtoscreen_init (Model, Data, Suite_Interstitial, Interstitial, errmsg, errflg)
 
          use GFS_typedefs,          only: GFS_control_type, GFS_data_type, &
-                                          GFS_interstitial_type
+                                          GFS_suite_interstitial_type, GFS_interstitial_type
 
          implicit none
 
          !--- interface variables
-         type(GFS_control_type),      intent(in)  :: Model
-         type(GFS_data_type),         intent(in)  :: Data(:)
-         type(GFS_interstitial_type), intent(in)  :: Interstitial(:)
-         character(len=*),            intent(out) :: errmsg
-         integer,                     intent(out) :: errflg
+         type(GFS_control_type),            intent(in)  :: Model
+         type(GFS_data_type),               intent(in)  :: Data(:)
+         type(GFS_suite_interstitial_type), intent(in)  :: Suite_Interstitial(:)
+         type(GFS_interstitial_type),       intent(in)  :: Interstitial(:)
+         character(len=*),                  intent(out) :: errmsg
+         integer,                           intent(out) :: errflg
 
          !--- local variables
          integer :: i
@@ -914,23 +942,23 @@
 
 
          do i=1,size(Interstitial)
-           call GFS_interstitialtoscreen_run (Model, Data(1)%Statein, Data(1)%Stateout, Data(1)%Sfcprop,    &
+           call GFS_suiteinterstitialtoscreen_run (Model, Data(1)%Statein, Data(1)%Stateout, Data(1)%Sfcprop,    &
                                               Data(1)%Coupling, Data(1)%Grid, Data(1)%Tbd, Data(1)%Cldprop, &
-                                              Data(1)%Radtend, Data(1)%Intdiag, Interstitial(i),            &
-                                              size(Interstitial), -999, errmsg, errflg)
+                                              Data(1)%Radtend, Data(1)%Intdiag, Suite_Interstitial(1),      &
+                                              Interstitial(i), size(Interstitial), -999, errmsg, errflg)
          end do
 
-      end subroutine GFS_interstitialtoscreen_init
+      end subroutine GFS_suiteinterstitialtoscreen_init
 
-      subroutine GFS_interstitialtoscreen_finalize ()
-      end subroutine GFS_interstitialtoscreen_finalize
+      subroutine GFS_suiteinterstitialtoscreen_finalize ()
+      end subroutine GFS_suiteinterstitialtoscreen_finalize
 
-!> \section arg_table_GFS_interstitialtoscreen_run Argument Table
-!! \htmlinclude GFS_interstitialtoscreen_run.html
+!> \section arg_table_GFS_suiteinterstitialtoscreen_run Argument Table
+!! \htmlinclude GFS_suiteinterstitialtoscreen_run.html
 !!
-      subroutine GFS_interstitialtoscreen_run (Model, Statein, Stateout, Sfcprop, Coupling, &
-                                           Grid, Tbd, Cldprop, Radtend, Diag, Interstitial, &
-                                           nthreads, blkno, errmsg, errflg)
+      subroutine GFS_suiteinterstitialtoscreen_run (Model, Statein, Stateout, Sfcprop, Coupling,       &
+                                           Grid, Tbd, Cldprop, Radtend, Diag, Suite_Interstitial, &
+                                           Interstitial, nthreads, blkno, errmsg, errflg)
 
 #ifdef MPI
          use mpi
@@ -944,26 +972,28 @@
                                           GFS_coupling_type, GFS_grid_type,    &
                                           GFS_tbd_type, GFS_cldprop_type,      &
                                           GFS_radtend_type, GFS_diag_type,     &
+                                          GFS_suite_interstitial_type,         &
                                           GFS_interstitial_type
 
          implicit none
 
          !--- interface variables
-         type(GFS_control_type),   intent(in   ) :: Model
-         type(GFS_statein_type),   intent(in   ) :: Statein
-         type(GFS_stateout_type),  intent(in   ) :: Stateout
-         type(GFS_sfcprop_type),   intent(in   ) :: Sfcprop
-         type(GFS_coupling_type),  intent(in   ) :: Coupling
-         type(GFS_grid_type),      intent(in   ) :: Grid
-         type(GFS_tbd_type),       intent(in   ) :: Tbd
-         type(GFS_cldprop_type),   intent(in   ) :: Cldprop
-         type(GFS_radtend_type),   intent(in   ) :: Radtend
-         type(GFS_diag_type),      intent(in   ) :: Diag
-         type(GFS_interstitial_type), intent(in) :: Interstitial
-         integer,                  intent(in   ) :: nthreads
-         integer,                  intent(in   ) :: blkno
-         character(len=*),         intent(  out) :: errmsg
-         integer,                  intent(  out) :: errflg
+         type(GFS_control_type),            intent(in)  :: Model
+         type(GFS_statein_type),            intent(in)  :: Statein
+         type(GFS_stateout_type),           intent(in)  :: Stateout
+         type(GFS_sfcprop_type),            intent(in)  :: Sfcprop
+         type(GFS_coupling_type),           intent(in)  :: Coupling
+         type(GFS_grid_type),               intent(in)  :: Grid
+         type(GFS_tbd_type),                intent(in)  :: Tbd
+         type(GFS_cldprop_type),            intent(in)  :: Cldprop
+         type(GFS_radtend_type),            intent(in)  :: Radtend
+         type(GFS_diag_type),               intent(in)  :: Diag
+         type(GFS_suite_interstitial_type), intent(in)  :: Suite_Interstitial
+         type(GFS_interstitial_type),       intent(in)  :: Interstitial
+         integer,                           intent(in)  :: nthreads
+         integer,                           intent(in)  :: blkno
+         character(len=*),                  intent(out) :: errmsg
+         integer,                           intent(out) :: errflg
 
          !--- local variables
          integer :: impi, iomp, ierr
@@ -1003,331 +1033,534 @@
              do iomp=0,ompsize-1
                  if (mpirank==impi .and. omprank==iomp) then
                      ! Print static variables
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%ipr                 ', Interstitial%ipr                     )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%itc                 ', Interstitial%itc                     )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%latidxprnt          ', Interstitial%latidxprnt              )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%levi                ', Interstitial%levi                    )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%lmk                 ', Interstitial%lmk                     )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%lmp                 ', Interstitial%lmp                     )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%nbdlw               ', Interstitial%nbdlw                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%nbdsw               ', Interstitial%nbdsw                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%nf_aelw             ', Interstitial%nf_aelw                 )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%nf_aesw             ', Interstitial%nf_aesw                 )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%nsamftrac           ', Interstitial%nsamftrac               )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%nscav               ', Interstitial%nscav                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%nspc1               ', Interstitial%nspc1                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%ntiwx               ', Interstitial%ntiwx                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%nvdiff              ', Interstitial%nvdiff                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%phys_hydrostatic    ', Interstitial%phys_hydrostatic        )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%skip_macro          ', Interstitial%skip_macro              )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%trans_aero          ', Interstitial%trans_aero              )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%ipr                 ', Suite_Interstitial%ipr                     )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%itc                 ', Suite_Interstitial%itc                     )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%latidxprnt          ', Suite_Interstitial%latidxprnt              )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%levi                ', Suite_Interstitial%levi                    )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%lmk                 ', Suite_Interstitial%lmk                     )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%lmp                 ', Suite_Interstitial%lmp                     )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%nbdlw               ', Suite_Interstitial%nbdlw                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%nbdsw               ', Suite_Interstitial%nbdsw                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%nf_aelw             ', Suite_Interstitial%nf_aelw                 )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%nf_aesw             ', Suite_Interstitial%nf_aesw                 )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%nsamftrac           ', Suite_Interstitial%nsamftrac               )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%nscav               ', Suite_Interstitial%nscav                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%nspc1               ', Suite_Interstitial%nspc1                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%ntiwx               ', Suite_Interstitial%ntiwx                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%nvdiff              ', Suite_Interstitial%nvdiff                  )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%phys_hydrostatic    ', Suite_Interstitial%phys_hydrostatic        )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%skip_macro          ', Suite_Interstitial%skip_macro              )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%trans_aero          ', Suite_Interstitial%trans_aero              )
                      ! Print all other variables
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%adjsfculw_land      ', Interstitial%adjsfculw_land          )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%adjsfculw_ice       ', Interstitial%adjsfculw_ice           )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%adjsfculw_water     ', Interstitial%adjsfculw_water         )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%adjnirbmd           ', Interstitial%adjnirbmd               )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%adjnirbmu           ', Interstitial%adjnirbmu               )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%adjnirdfd           ', Interstitial%adjnirdfd               )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%adjnirdfu           ', Interstitial%adjnirdfu               )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%adjvisbmd           ', Interstitial%adjvisbmd               )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%adjvisbmu           ', Interstitial%adjvisbmu               )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%adjvisdfu           ', Interstitial%adjvisdfu               )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%adjvisdfd           ', Interstitial%adjvisdfd               )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%aerodp              ', Interstitial%aerodp                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%alb1d               ', Interstitial%alb1d                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%bexp1d              ', Interstitial%bexp1d                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%cd                  ', Interstitial%cd                      )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%cd_ice              ', Interstitial%cd_ice                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%cd_land             ', Interstitial%cd_land                 )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%cd_water            ', Interstitial%cd_water                )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%cdq                 ', Interstitial%cdq                     )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%cdq_ice             ', Interstitial%cdq_ice                 )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%cdq_land            ', Interstitial%cdq_land                )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%cdq_water           ', Interstitial%cdq_water               )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%chh_ice             ', Interstitial%chh_ice                 )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%chh_land            ', Interstitial%chh_land                )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%chh_water           ', Interstitial%chh_water               )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%cldf                ', Interstitial%cldf                    )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%cldsa               ', Interstitial%cldsa                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%cldtaulw            ', Interstitial%cldtaulw                )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%cldtausw            ', Interstitial%cldtausw                )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%cld1d               ', Interstitial%cld1d                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%clw                 ', Interstitial%clw                     )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%clx                 ', Interstitial%clx                     )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%clouds              ', Interstitial%clouds                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%cmm_ice             ', Interstitial%cmm_ice                 )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%cmm_land            ', Interstitial%cmm_land                )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%cmm_water           ', Interstitial%cmm_water               )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%cnvc                ', Interstitial%cnvc                    )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%cnvw                ', Interstitial%cnvw                    )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%ctei_r              ', Interstitial%ctei_r                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%ctei_rml            ', Interstitial%ctei_rml                )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%cumabs              ', Interstitial%cumabs                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dd_mf               ', Interstitial%dd_mf                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%de_lgth             ', Interstitial%de_lgth                 )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%del                 ', Interstitial%del                     )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%del_gz              ', Interstitial%del_gz                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%delr                ', Interstitial%delr                    )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dkt                 ', Interstitial%dkt                     )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dlength             ', Interstitial%dlength                 )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dqdt                ', Interstitial%dqdt                    )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dqsfc1              ', Interstitial%dqsfc1                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%drain               ', Interstitial%drain                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dtdt                ', Interstitial%dtdt                    )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dtsfc1              ', Interstitial%dtsfc1                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dtzm                ', Interstitial%dtzm                    )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dt_mf               ', Interstitial%dt_mf                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dudt                ', Interstitial%dudt                    )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dusfcg              ', Interstitial%dusfcg                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dusfc1              ', Interstitial%dusfc1                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dvdftra             ', Interstitial%dvdftra                 )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dvdt                ', Interstitial%dvdt                    )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dvsfcg              ', Interstitial%dvsfcg                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dvsfc1              ', Interstitial%dvsfc1                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dzlyr               ', Interstitial%dzlyr                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%elvmax              ', Interstitial%elvmax                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%ep1d                ', Interstitial%ep1d                    )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%ep1d_ice            ', Interstitial%ep1d_ice                )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%ep1d_land           ', Interstitial%ep1d_land               )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%ep1d_water          ', Interstitial%ep1d_water              )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%evapq               ', Interstitial%evapq                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%evap_ice            ', Interstitial%evap_ice                )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%evap_land           ', Interstitial%evap_land               )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%evap_water          ', Interstitial%evap_water              )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%evbs                ', Interstitial%evbs                    )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%evcw                ', Interstitial%evcw                    )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%faerlw              ', Interstitial%faerlw                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%faersw              ', Interstitial%faersw                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%ffhh_ice            ', Interstitial%ffhh_ice                )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%ffhh_land           ', Interstitial%ffhh_land               )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%ffhh_water          ', Interstitial%ffhh_water              )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%fh2                 ', Interstitial%fh2                     )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%fh2_ice             ', Interstitial%fh2_ice                 )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%fh2_land            ', Interstitial%fh2_land                )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%fh2_water           ', Interstitial%fh2_water               )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%flag_cice           ', Interstitial%flag_cice               )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%flag_guess          ', Interstitial%flag_guess              )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%flag_iter           ', Interstitial%flag_iter               )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%ffmm_ice            ', Interstitial%ffmm_ice                )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%ffmm_land           ', Interstitial%ffmm_land               )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%ffmm_water          ', Interstitial%ffmm_water              )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%fm10                ', Interstitial%fm10                    )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%fm10_ice            ', Interstitial%fm10_ice                )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%fm10_land           ', Interstitial%fm10_land               )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%fm10_water          ', Interstitial%fm10_water              )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%frain               ', Interstitial%frain                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%frland              ', Interstitial%frland                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%fscav               ', Interstitial%fscav                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%fswtr               ', Interstitial%fswtr                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%gabsbdlw            ', Interstitial%gabsbdlw                )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%gabsbdlw_ice        ', Interstitial%gabsbdlw_ice            )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%gabsbdlw_land       ', Interstitial%gabsbdlw_land           )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%gabsbdlw_water      ', Interstitial%gabsbdlw_water          )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%gamma               ', Interstitial%gamma                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%gamq                ', Interstitial%gamq                    )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%gamt                ', Interstitial%gamt                    )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%gasvmr              ', Interstitial%gasvmr                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%gflx                ', Interstitial%gflx                    )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%gflx_ice            ', Interstitial%gflx_ice                )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%gflx_land           ', Interstitial%gflx_land               )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%gflx_water          ', Interstitial%gflx_water              )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%gwdcu               ', Interstitial%gwdcu                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%gwdcv               ', Interstitial%gwdcv                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%hefac               ', Interstitial%hefac                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%hffac               ', Interstitial%hffac                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%hflxq               ', Interstitial%hflxq                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%hflx_ice            ', Interstitial%hflx_ice                )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%hflx_land           ', Interstitial%hflx_land               )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%hflx_water          ', Interstitial%hflx_water              )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%htlwc               ', Interstitial%htlwc                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%htlw0               ', Interstitial%htlw0                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%htswc               ', Interstitial%htswc                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%htsw0               ', Interstitial%htsw0                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dry                 ', Interstitial%dry                     )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%idxday              ', Interstitial%idxday                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%icy                 ', Interstitial%icy                     )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%lake                ', Interstitial%lake                    )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%ocean               ', Interstitial%ocean                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%islmsk              ', Interstitial%islmsk                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%islmsk_cice         ', Interstitial%islmsk_cice             )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%wet                 ', Interstitial%wet                     )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%kb                  ', Interstitial%kb                      )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%kbot                ', Interstitial%kbot                    )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%kcnv                ', Interstitial%kcnv                    )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%kd                  ', Interstitial%kd                      )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%kinver              ', Interstitial%kinver                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%kpbl                ', Interstitial%kpbl                    )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%kt                  ', Interstitial%kt                      )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%ktop                ', Interstitial%ktop                    )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%mbota               ', Interstitial%mbota                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%mtopa               ', Interstitial%mtopa                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%nday                ', Interstitial%nday                    )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%oa4                 ', Interstitial%oa4                     )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%oc                  ', Interstitial%oc                      )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%olyr                ', Interstitial%olyr                    )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%plvl                ', Interstitial%plvl                    )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%plyr                ', Interstitial%plyr                    )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%prcpmp              ', Interstitial%prcpmp                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%prnum               ', Interstitial%prnum                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%qlyr                ', Interstitial%qlyr                    )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%qss_ice             ', Interstitial%qss_ice                 )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%qss_land            ', Interstitial%qss_land                )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%qss_water           ', Interstitial%qss_water               )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%radar_reset         ', Interstitial%radar_reset             )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%raddt               ', Interstitial%raddt                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%raincd              ', Interstitial%raincd                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%raincs              ', Interstitial%raincs                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%rainmcadj           ', Interstitial%rainmcadj               )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%rainp               ', Interstitial%rainp                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%rb                  ', Interstitial%rb                      )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%rb_ice              ', Interstitial%rb_ice                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%rb_land             ', Interstitial%rb_land                 )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%rb_water            ', Interstitial%rb_water                )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%reset               ', Interstitial%reset                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%rhc                 ', Interstitial%rhc                     )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%runoff              ', Interstitial%runoff                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%save_q              ', Interstitial%save_q                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%save_t              ', Interstitial%save_t                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%save_tcp            ', Interstitial%save_tcp                )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%save_u              ', Interstitial%save_u                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%save_v              ', Interstitial%save_v                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%sbsno               ', Interstitial%sbsno                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%scmpsw%uvbfc        ', Interstitial%scmpsw%uvbfc            )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%scmpsw%uvbf0        ', Interstitial%scmpsw%uvbf0            )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%scmpsw%nirbm        ', Interstitial%scmpsw%nirbm            )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%scmpsw%nirdf        ', Interstitial%scmpsw%nirdf            )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%scmpsw%visbm        ', Interstitial%scmpsw%visbm            )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%scmpsw%visdf        ', Interstitial%scmpsw%visdf            )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%semis_ice           ', Interstitial%semis_ice               )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%semis_land          ', Interstitial%semis_land              )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%semis_water         ', Interstitial%semis_water             )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%sfcalb              ', Interstitial%sfcalb                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%sigma               ', Interstitial%sigma                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%sigmaf              ', Interstitial%sigmaf                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%sigmafrac           ', Interstitial%sigmafrac               )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%sigmatot            ', Interstitial%sigmatot                )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%slopetype           ', Interstitial%slopetype               )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%snowc               ', Interstitial%snowc                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%snowd_ice           ', Interstitial%snowd_ice               )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%snowd_land          ', Interstitial%snowd_land              )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%snowd_water         ', Interstitial%snowd_water             )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%snohf               ', Interstitial%snohf                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%snowmt              ', Interstitial%snowmt                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%soiltype            ', Interstitial%soiltype                )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%stress              ', Interstitial%stress                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%stress_ice          ', Interstitial%stress_ice              )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%stress_land         ', Interstitial%stress_land             )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%stress_water        ', Interstitial%stress_water            )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%theta               ', Interstitial%theta                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tice                ', Interstitial%tice                    )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tlvl                ', Interstitial%tlvl                    )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tlyr                ', Interstitial%tlyr                    )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tprcp_ice           ', Interstitial%tprcp_ice               )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tprcp_land          ', Interstitial%tprcp_land              )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tprcp_water         ', Interstitial%tprcp_water             )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%trans               ', Interstitial%trans                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tseal               ', Interstitial%tseal                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tsfa                ', Interstitial%tsfa                    )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tsfc_ice            ', Interstitial%tsfc_ice                )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tsfc_land           ', Interstitial%tsfc_land               )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tsfc_water          ', Interstitial%tsfc_water              )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tsfg                ', Interstitial%tsfg                    )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tsurf               ', Interstitial%tsurf                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tsurf_ice           ', Interstitial%tsurf_ice               )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tsurf_land          ', Interstitial%tsurf_land              )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tsurf_water         ', Interstitial%tsurf_water             )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%ud_mf               ', Interstitial%ud_mf                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%uustar_ice          ', Interstitial%uustar_ice              )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%uustar_land         ', Interstitial%uustar_land             )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%uustar_water        ', Interstitial%uustar_water            )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%vdftra              ', Interstitial%vdftra                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%vegf1d              ', Interstitial%vegf1d                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%vegtype             ', Interstitial%vegtype                 )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%wcbmax              ', Interstitial%wcbmax                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%weasd_ice           ', Interstitial%weasd_ice               )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%weasd_land          ', Interstitial%weasd_land              )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%weasd_water         ', Interstitial%weasd_water             )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%wind                ', Interstitial%wind                    )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%work1               ', Interstitial%work1                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%work2               ', Interstitial%work2                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%work3               ', Interstitial%work3                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%xcosz               ', Interstitial%xcosz                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%xlai1d              ', Interstitial%xlai1d                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%xmu                 ', Interstitial%xmu                     )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%z01d                ', Interstitial%z01d                    )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%zt1d                ', Interstitial%zt1d                    )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%adjsfculw_land      ', Suite_Interstitial%adjsfculw_land          )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%adjsfculw_ice       ', Suite_Interstitial%adjsfculw_ice           )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%adjsfculw_water     ', Suite_Interstitial%adjsfculw_water         )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%adjnirbmd           ', Suite_Interstitial%adjnirbmd               )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%adjnirbmu           ', Suite_Interstitial%adjnirbmu               )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%adjnirdfd           ', Suite_Interstitial%adjnirdfd               )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%adjnirdfu           ', Suite_Interstitial%adjnirdfu               )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%adjvisbmd           ', Suite_Interstitial%adjvisbmd               )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%adjvisbmu           ', Suite_Interstitial%adjvisbmu               )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%adjvisdfu           ', Suite_Interstitial%adjvisdfu               )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%adjvisdfd           ', Suite_Interstitial%adjvisdfd               )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%aerodp              ', Suite_Interstitial%aerodp                  )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%alb1d               ', Suite_Interstitial%alb1d                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%bexp1d              ', Suite_Interstitial%bexp1d                  )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%cd                  ', Suite_Interstitial%cd                      )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%cd_ice              ', Suite_Interstitial%cd_ice                  )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%cd_land             ', Suite_Interstitial%cd_land                 )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%cd_water            ', Suite_Interstitial%cd_water                )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%cdq                 ', Suite_Interstitial%cdq                     )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%cdq_ice             ', Suite_Interstitial%cdq_ice                 )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%cdq_land            ', Suite_Interstitial%cdq_land                )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%cdq_water           ', Suite_Interstitial%cdq_water               )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%chh_ice             ', Suite_Interstitial%chh_ice                 )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%chh_land            ', Suite_Interstitial%chh_land                )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%chh_water           ', Suite_Interstitial%chh_water               )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%cldf                ', Suite_Interstitial%cldf                    )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%cldsa               ', Suite_Interstitial%cldsa                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%cld1d               ', Suite_Interstitial%cld1d                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%clw                 ', Suite_Interstitial%clw                     )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%clx                 ', Suite_Interstitial%clx                     )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%clouds              ', Suite_Interstitial%clouds                  )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%cmm_ice             ', Suite_Interstitial%cmm_ice                 )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%cmm_land            ', Suite_Interstitial%cmm_land                )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%cmm_water           ', Suite_Interstitial%cmm_water               )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%cnvc                ', Suite_Interstitial%cnvc                    )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%cnvw                ', Suite_Interstitial%cnvw                    )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%ctei_r              ', Suite_Interstitial%ctei_r                  )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%ctei_rml            ', Suite_Interstitial%ctei_rml                )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%cumabs              ', Suite_Interstitial%cumabs                  )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%dd_mf               ', Suite_Interstitial%dd_mf                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%de_lgth             ', Suite_Interstitial%de_lgth                 )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%del                 ', Suite_Interstitial%del                     )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%del_gz              ', Suite_Interstitial%del_gz                  )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%delr                ', Suite_Interstitial%delr                    )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%dkt                 ', Suite_Interstitial%dkt                     )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%dlength             ', Suite_Interstitial%dlength                 )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%dqdt                ', Suite_Interstitial%dqdt                    )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%dqsfc1              ', Suite_Interstitial%dqsfc1                  )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%drain               ', Suite_Interstitial%drain                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%dtdt                ', Suite_Interstitial%dtdt                    )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%dtsfc1              ', Suite_Interstitial%dtsfc1                  )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%dtzm                ', Suite_Interstitial%dtzm                    )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%dt_mf               ', Suite_Interstitial%dt_mf                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%dudt                ', Suite_Interstitial%dudt                    )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%dusfcg              ', Suite_Interstitial%dusfcg                  )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%dusfc1              ', Suite_Interstitial%dusfc1                  )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%dvdftra             ', Suite_Interstitial%dvdftra                 )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%dvdt                ', Suite_Interstitial%dvdt                    )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%dvsfcg              ', Suite_Interstitial%dvsfcg                  )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%dvsfc1              ', Suite_Interstitial%dvsfc1                  )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%dzlyr               ', Suite_Interstitial%dzlyr                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%elvmax              ', Suite_Interstitial%elvmax                  )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%ep1d                ', Suite_Interstitial%ep1d                    )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%ep1d_ice            ', Suite_Interstitial%ep1d_ice                )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%ep1d_land           ', Suite_Interstitial%ep1d_land               )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%ep1d_water          ', Suite_Interstitial%ep1d_water              )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%evapq               ', Suite_Interstitial%evapq                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%evap_ice            ', Suite_Interstitial%evap_ice                )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%evap_land           ', Suite_Interstitial%evap_land               )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%evap_water          ', Suite_Interstitial%evap_water              )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%evbs                ', Suite_Interstitial%evbs                    )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%evcw                ', Suite_Interstitial%evcw                    )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%faerlw              ', Suite_Interstitial%faerlw                  )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%faersw              ', Suite_Interstitial%faersw                  )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%ffhh_ice            ', Suite_Interstitial%ffhh_ice                )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%ffhh_land           ', Suite_Interstitial%ffhh_land               )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%ffhh_water          ', Suite_Interstitial%ffhh_water              )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%fh2                 ', Suite_Interstitial%fh2                     )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%fh2_ice             ', Suite_Interstitial%fh2_ice                 )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%fh2_land            ', Suite_Interstitial%fh2_land                )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%fh2_water           ', Suite_Interstitial%fh2_water               )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%flag_cice           ', Suite_Interstitial%flag_cice               )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%flag_guess          ', Suite_Interstitial%flag_guess              )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%flag_iter           ', Suite_Interstitial%flag_iter               )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%ffmm_ice            ', Suite_Interstitial%ffmm_ice                )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%ffmm_land           ', Suite_Interstitial%ffmm_land               )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%ffmm_water          ', Suite_Interstitial%ffmm_water              )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%fm10                ', Suite_Interstitial%fm10                    )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%fm10_ice            ', Suite_Interstitial%fm10_ice                )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%fm10_land           ', Suite_Interstitial%fm10_land               )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%fm10_water          ', Suite_Interstitial%fm10_water              )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%frain               ', Suite_Interstitial%frain                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%frland              ', Suite_Interstitial%frland                  )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%fscav               ', Suite_Interstitial%fscav                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%fswtr               ', Suite_Interstitial%fswtr                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%gabsbdlw            ', Suite_Interstitial%gabsbdlw                )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%gabsbdlw_ice        ', Suite_Interstitial%gabsbdlw_ice            )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%gabsbdlw_land       ', Suite_Interstitial%gabsbdlw_land           )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%gabsbdlw_water      ', Suite_Interstitial%gabsbdlw_water          )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%gamma               ', Suite_Interstitial%gamma                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%gamq                ', Suite_Interstitial%gamq                    )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%gamt                ', Suite_Interstitial%gamt                    )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%gasvmr              ', Suite_Interstitial%gasvmr                  )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%gflx                ', Suite_Interstitial%gflx                    )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%gflx_ice            ', Suite_Interstitial%gflx_ice                )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%gflx_land           ', Suite_Interstitial%gflx_land               )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%gflx_water          ', Suite_Interstitial%gflx_water              )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%gwdcu               ', Suite_Interstitial%gwdcu                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%gwdcv               ', Suite_Interstitial%gwdcv                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%hefac               ', Suite_Interstitial%hefac                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%hffac               ', Suite_Interstitial%hffac                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%hflxq               ', Suite_Interstitial%hflxq                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%hflx_ice            ', Suite_Interstitial%hflx_ice                )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%hflx_land           ', Suite_Interstitial%hflx_land               )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%hflx_water          ', Suite_Interstitial%hflx_water              )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%htlwc               ', Suite_Interstitial%htlwc                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%htlw0               ', Suite_Interstitial%htlw0                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%htswc               ', Suite_Interstitial%htswc                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%htsw0               ', Suite_Interstitial%htsw0                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%dry                 ', Suite_Interstitial%dry                     )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%idxday              ', Suite_Interstitial%idxday                  )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%icy                 ', Suite_Interstitial%icy                     )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%lake                ', Suite_Interstitial%lake                    )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%ocean               ', Suite_Interstitial%ocean                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%islmsk              ', Suite_Interstitial%islmsk                  )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%islmsk_cice         ', Suite_Interstitial%islmsk_cice             )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%wet                 ', Suite_Interstitial%wet                     )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%kb                  ', Suite_Interstitial%kb                      )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%kbot                ', Suite_Interstitial%kbot                    )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%kcnv                ', Suite_Interstitial%kcnv                    )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%kd                  ', Suite_Interstitial%kd                      )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%kinver              ', Suite_Interstitial%kinver                  )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%kpbl                ', Suite_Interstitial%kpbl                    )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%kt                  ', Suite_Interstitial%kt                      )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%ktop                ', Suite_Interstitial%ktop                    )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%mbota               ', Suite_Interstitial%mbota                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%mtopa               ', Suite_Interstitial%mtopa                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%nday                ', Suite_Interstitial%nday                    )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%oa4                 ', Suite_Interstitial%oa4                     )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%oc                  ', Suite_Interstitial%oc                      )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%olyr                ', Suite_Interstitial%olyr                    )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%plvl                ', Suite_Interstitial%plvl                    )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%plyr                ', Suite_Interstitial%plyr                    )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%prcpmp              ', Suite_Interstitial%prcpmp                  )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%prnum               ', Suite_Interstitial%prnum                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%qlyr                ', Suite_Interstitial%qlyr                    )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%qss_ice             ', Suite_Interstitial%qss_ice                 )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%qss_land            ', Suite_Interstitial%qss_land                )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%qss_water           ', Suite_Interstitial%qss_water               )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%radar_reset         ', Suite_Interstitial%radar_reset             )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%raddt               ', Suite_Interstitial%raddt                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%raincd              ', Suite_Interstitial%raincd                  )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%raincs              ', Suite_Interstitial%raincs                  )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%rainmcadj           ', Suite_Interstitial%rainmcadj               )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%rainp               ', Suite_Interstitial%rainp                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%rb                  ', Suite_Interstitial%rb                      )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%rb_ice              ', Suite_Interstitial%rb_ice                  )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%rb_land             ', Suite_Interstitial%rb_land                 )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%rb_water            ', Suite_Interstitial%rb_water                )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%reset               ', Suite_Interstitial%reset                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%rhc                 ', Suite_Interstitial%rhc                     )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%runoff              ', Suite_Interstitial%runoff                  )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%save_q              ', Suite_Interstitial%save_q                  )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%save_t              ', Suite_Interstitial%save_t                  )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%save_tcp            ', Suite_Interstitial%save_tcp                )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%save_u              ', Suite_Interstitial%save_u                  )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%save_v              ', Suite_Interstitial%save_v                  )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%sbsno               ', Suite_Interstitial%sbsno                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%scmpsw%uvbfc        ', Suite_Interstitial%scmpsw%uvbfc            )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%scmpsw%uvbf0        ', Suite_Interstitial%scmpsw%uvbf0            )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%scmpsw%nirbm        ', Suite_Interstitial%scmpsw%nirbm            )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%scmpsw%nirdf        ', Suite_Interstitial%scmpsw%nirdf            )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%scmpsw%visbm        ', Suite_Interstitial%scmpsw%visbm            )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%scmpsw%visdf        ', Suite_Interstitial%scmpsw%visdf            )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%semis_ice           ', Suite_Interstitial%semis_ice               )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%semis_land          ', Suite_Interstitial%semis_land              )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%semis_water         ', Suite_Interstitial%semis_water             )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%sfcalb              ', Suite_Interstitial%sfcalb                  )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%sigma               ', Suite_Interstitial%sigma                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%sigmaf              ', Suite_Interstitial%sigmaf                  )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%sigmafrac           ', Suite_Interstitial%sigmafrac               )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%sigmatot            ', Suite_Interstitial%sigmatot                )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%slopetype           ', Suite_Interstitial%slopetype               )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%snowc               ', Suite_Interstitial%snowc                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%snowd_ice           ', Suite_Interstitial%snowd_ice               )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%snowd_land          ', Suite_Interstitial%snowd_land              )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%snowd_water         ', Suite_Interstitial%snowd_water             )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%snohf               ', Suite_Interstitial%snohf                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%snowmt              ', Suite_Interstitial%snowmt                  )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%soiltype            ', Suite_Interstitial%soiltype                )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%stress              ', Suite_Interstitial%stress                  )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%stress_ice          ', Suite_Interstitial%stress_ice              )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%stress_land         ', Suite_Interstitial%stress_land             )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%stress_water        ', Suite_Interstitial%stress_water            )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%theta               ', Suite_Interstitial%theta                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%tice                ', Suite_Interstitial%tice                    )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%tlvl                ', Suite_Interstitial%tlvl                    )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%tlyr                ', Suite_Interstitial%tlyr                    )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%tprcp_ice           ', Suite_Interstitial%tprcp_ice               )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%tprcp_land          ', Suite_Interstitial%tprcp_land              )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%tprcp_water         ', Suite_Interstitial%tprcp_water             )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%trans               ', Suite_Interstitial%trans                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%tseal               ', Suite_Interstitial%tseal                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%tsfa                ', Suite_Interstitial%tsfa                    )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%tsfc_ice            ', Suite_Interstitial%tsfc_ice                )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%tsfc_land           ', Suite_Interstitial%tsfc_land               )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%tsfc_water          ', Suite_Interstitial%tsfc_water              )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%tsfg                ', Suite_Interstitial%tsfg                    )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%tsurf               ', Suite_Interstitial%tsurf                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%tsurf_ice           ', Suite_Interstitial%tsurf_ice               )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%tsurf_land          ', Suite_Interstitial%tsurf_land              )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%tsurf_water         ', Suite_Interstitial%tsurf_water             )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%ud_mf               ', Suite_Interstitial%ud_mf                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%uustar_ice          ', Suite_Interstitial%uustar_ice              )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%uustar_land         ', Suite_Interstitial%uustar_land             )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%uustar_water        ', Suite_Interstitial%uustar_water            )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%vdftra              ', Suite_Interstitial%vdftra                  )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%vegf1d              ', Suite_Interstitial%vegf1d                  )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%vegtype             ', Suite_Interstitial%vegtype                 )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%wcbmax              ', Suite_Interstitial%wcbmax                  )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%weasd_ice           ', Suite_Interstitial%weasd_ice               )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%weasd_land          ', Suite_Interstitial%weasd_land              )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%weasd_water         ', Suite_Interstitial%weasd_water             )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%wind                ', Suite_Interstitial%wind                    )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%work1               ', Suite_Interstitial%work1                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%work2               ', Suite_Interstitial%work2                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%work3               ', Suite_Interstitial%work3                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%xcosz               ', Suite_Interstitial%xcosz                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%xlai1d              ', Suite_Interstitial%xlai1d                  )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%xmu                 ', Suite_Interstitial%xmu                     )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%z01d                ', Suite_Interstitial%z01d                    )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%zt1d                ', Suite_Interstitial%zt1d                    )
                      ! UGWP
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tau_mtb             ', Interstitial%tau_mtb                 )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tau_ogw             ', Interstitial%tau_ogw                 )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tau_tofd            ', Interstitial%tau_tofd                )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tau_ngw             ', Interstitial%tau_ngw                 )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tau_oss             ', Interstitial%tau_oss                 )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dudt_mtb            ', Interstitial%dudt_mtb                )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dudt_tms            ', Interstitial%dudt_tms                )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%zmtb                ', Interstitial%zmtb                    )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%zlwb                ', Interstitial%zlwb                    )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%zogw                ', Interstitial%zogw                    )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%zngw                ', Interstitial%zngw                    )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%tau_mtb             ', Suite_Interstitial%tau_mtb                 )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%tau_ogw             ', Suite_Interstitial%tau_ogw                 )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%tau_tofd            ', Suite_Interstitial%tau_tofd                )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%tau_ngw             ', Suite_Interstitial%tau_ngw                 )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%tau_oss             ', Suite_Interstitial%tau_oss                 )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%dudt_mtb            ', Suite_Interstitial%dudt_mtb                )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%dudt_tms            ', Suite_Interstitial%dudt_tms                )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%zmtb                ', Suite_Interstitial%zmtb                    )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%zlwb                ', Suite_Interstitial%zlwb                    )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%zogw                ', Suite_Interstitial%zogw                    )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%zngw                ', Suite_Interstitial%zngw                    )
                      ! UGWP v1
                      if (Model%do_ugwp_v1) then
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dudt_ngw            ', Interstitial%dudt_ngw                )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dvdt_ngw            ', Interstitial%dvdt_ngw                )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dtdt_ngw            ', Interstitial%dtdt_ngw                )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%kdis_ngw            ', Interstitial%kdis_ngw                )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%dudt_ngw            ', Suite_Interstitial%dudt_ngw                )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%dvdt_ngw            ', Suite_Interstitial%dvdt_ngw                )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%dtdt_ngw            ', Suite_Interstitial%dtdt_ngw                )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%kdis_ngw            ', Suite_Interstitial%kdis_ngw                )
                      end if
                      !-- GSD drag suite
                      if (Model%gwd_opt==3 .or. Model%gwd_opt==33 .or. &
                          Model%gwd_opt==2 .or. Model%gwd_opt==22) then
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%varss               ', Interstitial%varss                   )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%ocss                ', Interstitial%ocss                    )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%oa4ss               ', Interstitial%oa4ss                   )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%clxss               ', Interstitial%clxss                   )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%varss               ', Suite_Interstitial%varss                   )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%ocss                ', Suite_Interstitial%ocss                    )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%oa4ss               ', Suite_Interstitial%oa4ss                   )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%clxss               ', Suite_Interstitial%clxss                   )
                      end if
                      ! GFDL and Thompson MP
                      if (Model%imp_physics == Model%imp_physics_gfdl .or. Model%imp_physics == Model%imp_physics_thompson) then
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%graupelmp           ', Interstitial%graupelmp               )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%icemp               ', Interstitial%icemp                   )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%rainmp              ', Interstitial%rainmp                  )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%snowmp              ', Interstitial%snowmp                  )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%graupelmp           ', Suite_Interstitial%graupelmp               )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%icemp               ', Suite_Interstitial%icemp                   )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%rainmp              ', Suite_Interstitial%rainmp                  )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%snowmp              ', Suite_Interstitial%snowmp                  )
                      ! Ferrier-Aligo
                      else if (Model%imp_physics == Model%imp_physics_fer_hires) then
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%f_ice               ', Interstitial%f_ice                   )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%f_rain              ', Interstitial%f_rain                  )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%f_rimef             ', Interstitial%f_rimef                 )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%cwm                 ', Interstitial%cwm                     )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%f_ice               ', Suite_Interstitial%f_ice                   )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%f_rain              ', Suite_Interstitial%f_rain                  )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%f_rimef             ', Suite_Interstitial%f_rimef                 )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%cwm                 ', Suite_Interstitial%cwm                     )
                      ! Morrison-Gettelman
                      else if (Model%imp_physics == Model%imp_physics_mg) then
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%ncgl                ', Interstitial%ncgl                    )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%ncpr                ', Interstitial%ncpr                    )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%ncps                ', Interstitial%ncps                    )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%qgl                 ', Interstitial%qgl                     )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%qrn                 ', Interstitial%qrn                     )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%qsnw                ', Interstitial%qsnw                    )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%qlcn                ', Interstitial%qlcn                    )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%qicn                ', Interstitial%qicn                    )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%w_upi               ', Interstitial%w_upi                   )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%cf_upi              ', Interstitial%cf_upi                  )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%cnv_mfd             ', Interstitial%cnv_mfd                 )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%cnv_dqldt           ', Interstitial%cnv_dqldt               )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%clcn                ', Interstitial%clcn                    )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%cnv_fice            ', Interstitial%cnv_fice                )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%cnv_ndrop           ', Interstitial%cnv_ndrop               )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%cnv_nice            ', Interstitial%cnv_nice                )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%ncgl                     ', Suite_Interstitial%ncgl                             )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%ncpr                     ', Suite_Interstitial%ncpr                             )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%ncps                     ', Suite_Interstitial%ncps                             )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%qgl                      ', Suite_Interstitial%qgl                              )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%qrn                      ', Suite_Interstitial%qrn                              )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%qsnw                     ', Suite_Interstitial%qsnw                             )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%qlcn                     ', Suite_Interstitial%qlcn                             )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%qicn                     ', Suite_Interstitial%qicn                             )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%w_upi                    ', Suite_Interstitial%w_upi                            )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%cf_upi                   ', Suite_Interstitial%cf_upi                           )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%cnv_mfd                  ', Suite_Interstitial%cnv_mfd                          )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%cnv_dqldt                ', Suite_Interstitial%cnv_dqldt                        )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%clcn                     ', Suite_Interstitial%clcn                             )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%cnv_fice                 ', Suite_Interstitial%cnv_fice                         )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%cnv_ndrop                ', Suite_Interstitial%cnv_ndrop                        )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%cnv_nice                 ', Suite_Interstitial%cnv_nice                         )
                      end if
                      ! SHOC
                      if (Model%do_shoc) then
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%ncgl                ', Interstitial%ncgl                    )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%qrn                 ', Interstitial%qrn                     )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%qsnw                ', Interstitial%qsnw                    )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%qgl                 ', Interstitial%qgl                     )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%ncpi                ', Interstitial%ncpi                    )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%ncpl                ', Interstitial%ncpl                    )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%ncgl                     ', Suite_Interstitial%ncgl                             )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%qrn                      ', Suite_Interstitial%qrn                              )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%qsnw                     ', Suite_Interstitial%qsnw                             )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%qgl                      ', Suite_Interstitial%qgl                              )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%ncpi                     ', Suite_Interstitial%ncpi                             )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%ncpl                     ', Suite_Interstitial%ncpl                             )
                      end if
                      ! Noah MP
                      if (Model%lsm == Model%lsm_noahmp) then
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%t2mmp               ', Interstitial%t2mmp                   )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%q2mp                ', Interstitial%q2mp                    )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%t2mmp                        ', Suite_Interstitial%t2mmp                        )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%q2mp                         ', Suite_Interstitial%q2mp                         )
                      end if
+                     if (.not. Model%do_RRTMGP) then
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%alpha                        ', Suite_Interstitial%alpha                        )
+                     end if
+                     if (Model%lsm == Model%lsm_noah_wrfv4) then
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%canopy_save                  ', Suite_Interstitial%canopy_save                  )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%chk_land                     ', Suite_Interstitial%chk_land                     )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%cmc                          ', Suite_Interstitial%cmc                          )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%dqsdt2                       ', Suite_Interstitial%dqsdt2                       )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%drain_in_m_sm1               ', Suite_Interstitial%drain_in_m_sm1               )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%flag_lsm                     ', Suite_Interstitial%flag_lsm                     )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%flag_lsm_glacier             ', Suite_Interstitial%flag_lsm_glacier             )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%qs1                          ', Suite_Interstitial%qs1                          )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%qv1                          ', Suite_Interstitial%qv1                          )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%rho1                         ', Suite_Interstitial%rho1                         )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%runoff_in_m_sm1              ', Suite_Interstitial%runoff_in_m_sm1              )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%slc_save                     ', Suite_Interstitial%slc_save                     )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%smcmax                       ', Suite_Interstitial%smcmax                       )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%smc_save                     ', Suite_Interstitial%smc_save                     )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%snowd_land_save              ', Suite_Interstitial%snowd_land_save              )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%snow_depth                   ', Suite_Interstitial%snow_depth                   )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%snohf_snow                   ', Suite_Interstitial%snohf_snow                   )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%snohf_frzgra                 ', Suite_Interstitial%snohf_frzgra                 )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%snohf_snowmelt               ', Suite_Interstitial%snohf_snowmelt               )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%soilm_in_m                   ', Suite_Interstitial%soilm_in_m                   )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%stc_save                     ', Suite_Interstitial%stc_save                     )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%th1                          ', Suite_Interstitial%th1                          )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%tprcp_rate_land              ', Suite_Interstitial%tprcp_rate_land              )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%tsfc_land_save               ', Suite_Interstitial%tsfc_land_save               )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%weasd_land_save              ', Suite_Interstitial%weasd_land_save              )
+                     end if
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%mg3_as_mg2                   ', Suite_Interstitial%mg3_as_mg2                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%ncstrac                      ', Suite_Interstitial%ncstrac                      )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%nn                           ', Suite_Interstitial%nn                           )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%nncl                         ', Suite_Interstitial%nncl                         )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%ntk                          ', Suite_Interstitial%ntk                          )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%ntkev                        ', Suite_Interstitial%ntkev                        )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%otspt                        ', Suite_Interstitial%otspt                        )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%oz_coeffp5                   ', Suite_Interstitial%oz_coeffp5                   )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%tracers_start_index          ', Suite_Interstitial%tracers_start_index          )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%tracers_total                ', Suite_Interstitial%tracers_total                )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%tracers_water                ', Suite_Interstitial%tracers_water                )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%lndp_vgf                     ', Suite_Interstitial%lndp_vgf                     )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%scmpsw%uvbfc                 ', Suite_Interstitial%scmpsw%uvbfc                 )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%scmpsw%uvbf0                 ', Suite_Interstitial%scmpsw%uvbf0                 )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%scmpsw%nirbm                 ', Suite_Interstitial%scmpsw%nirbm                 )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%scmpsw%nirdf                 ', Suite_Interstitial%scmpsw%nirdf                 )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%scmpsw%visbm                 ', Suite_Interstitial%scmpsw%visbm                 )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%scmpsw%visdf                 ', Suite_Interstitial%scmpsw%visdf                 )
+                     if (Model%imp_physics == Model%imp_physics_fer_hires) then
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%qv_r                         ', Suite_Interstitial%qv_r                         )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%qc_r                         ', Suite_Interstitial%qc_r                         )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%qi_r                         ', Suite_Interstitial%qi_r                         )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%qr_r                         ', Suite_Interstitial%qr_r                         )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%qs_r                         ', Suite_Interstitial%qs_r                         )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Suite_Interstitial%qg_r                         ', Suite_Interstitial%qg_r                         )
+                     end if
+                 end if
+#ifdef OPENMP
+!$OMP BARRIER
+#endif
+             end do
+#ifdef MPI
+!             call MPI_BARRIER(mpicomm,ierr)
+#endif
+         end do
+
+#ifdef OPENMP
+!$OMP BARRIER
+#endif
+#ifdef MPI
+!         call MPI_BARRIER(mpicomm,ierr)
+#endif
+
+      end subroutine GFS_suiteinterstitialtoscreen_run
+
+    end module GFS_suiteinterstitialtoscreen
+
+    module GFS_interstitialtoscreen
+
+      use print_var_chksum, only: print_var
+
+      implicit none
+
+      private
+
+      public GFS_interstitialtoscreen_init, GFS_interstitialtoscreen_run, GFS_interstitialtoscreen_finalize
+
+      contains
+
+      subroutine GFS_interstitialtoscreen_init (Model, Data, Suite_Interstitial, Interstitial, errmsg, errflg)
+
+         use GFS_typedefs,          only: GFS_control_type, GFS_data_type, &
+                                          GFS_suite_interstitial_type, GFS_interstitial_type
+
+         implicit none
+
+         !--- interface variables
+         type(GFS_control_type),            intent(in)  :: Model
+         type(GFS_data_type),               intent(in)  :: Data(:)
+         type(GFS_suite_interstitial_type), intent(in)  :: Suite_Interstitial(:)
+         type(GFS_interstitial_type),       intent(in)  :: Interstitial(:)
+         character(len=*),                  intent(out) :: errmsg
+         integer,                           intent(out) :: errflg
+
+         !--- local variables
+         integer :: i
+
+         ! Initialize CCPP error handling variables
+         errmsg = ''
+         errflg = 0
+
+
+         do i=1,size(Interstitial)
+           call GFS_interstitialtoscreen_run (Model, Data(1)%Statein, Data(1)%Stateout, Data(1)%Sfcprop,    &
+                                              Data(1)%Coupling, Data(1)%Grid, Data(1)%Tbd, Data(1)%Cldprop, &
+                                              Data(1)%Radtend, Data(1)%Intdiag, Suite_Interstitial(1),      &
+                                              Interstitial(i), size(Interstitial), -999, errmsg, errflg)
+         end do
+
+      end subroutine GFS_interstitialtoscreen_init
+
+      subroutine GFS_interstitialtoscreen_finalize ()
+      end subroutine GFS_interstitialtoscreen_finalize
+
+!> \section arg_table_GFS_interstitialtoscreen_run Argument Table
+!! \htmlinclude GFS_interstitialtoscreen_run.html
+!!
+      subroutine GFS_interstitialtoscreen_run (Model, Statein, Stateout, Sfcprop, Coupling,       &
+                                           Grid, Tbd, Cldprop, Radtend, Diag, Suite_Interstitial, &
+                                           Interstitial, nthreads, blkno, errmsg, errflg)
+
+#ifdef MPI
+         use mpi
+#endif
+#ifdef OPENMP
+         use omp_lib
+#endif
+         use machine,               only: kind_phys
+         use GFS_typedefs,          only: GFS_control_type, GFS_statein_type,  &
+                                          GFS_stateout_type, GFS_sfcprop_type, &
+                                          GFS_coupling_type, GFS_grid_type,    &
+                                          GFS_tbd_type, GFS_cldprop_type,      &
+                                          GFS_radtend_type, GFS_diag_type,     &
+                                          GFS_suite_interstitial_type,         &
+                                          GFS_interstitial_type
+
+         implicit none
+
+         !--- interface variables
+         type(GFS_control_type),            intent(in)  :: Model
+         type(GFS_statein_type),            intent(in)  :: Statein
+         type(GFS_stateout_type),           intent(in)  :: Stateout
+         type(GFS_sfcprop_type),            intent(in)  :: Sfcprop
+         type(GFS_coupling_type),           intent(in)  :: Coupling
+         type(GFS_grid_type),               intent(in)  :: Grid
+         type(GFS_tbd_type),                intent(in)  :: Tbd
+         type(GFS_cldprop_type),            intent(in)  :: Cldprop
+         type(GFS_radtend_type),            intent(in)  :: Radtend
+         type(GFS_diag_type),               intent(in)  :: Diag
+         type(GFS_suite_interstitial_type), intent(in)  :: Suite_Interstitial
+         type(GFS_interstitial_type),       intent(in)  :: Interstitial
+         integer,                           intent(in)  :: nthreads
+         integer,                           intent(in)  :: blkno
+         character(len=*),                  intent(out) :: errmsg
+         integer,                           intent(out) :: errflg
+
+         !--- local variables
+         integer :: impi, iomp, ierr
+         integer :: mpirank, mpisize, mpicomm
+         integer :: omprank, ompsize
+         integer :: istart, iend, kstart, kend
+
+         ! Initialize CCPP error handling variables
+         errmsg = ''
+         errflg = 0
+
+#ifdef MPI
+         mpicomm = Model%communicator
+         mpirank = Model%me
+         call MPI_COMM_SIZE(mpicomm, mpisize, ierr)
+#else
+         mpirank = 0
+         mpisize = 1
+         mpicomm = 0
+#endif
+#ifdef OPENMP
+         omprank = OMP_GET_THREAD_NUM()
+         ompsize = nthreads
+#else
+         omprank = 0
+         ompsize = 1
+#endif
+
+#ifdef OPENMP
+!$OMP BARRIER
+#endif
+#ifdef MPI
+!         call MPI_BARRIER(mpicomm,ierr)
+#endif
+
+         do impi=0,mpisize-1
+             do iomp=0,ompsize-1
+                 if (mpirank==impi .and. omprank==iomp) then
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%cldtaulw            ', Interstitial%cldtaulw                )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%cldtausw            ', Interstitial%cldtausw                )
                      ! RRTMGP
                      if (Model%do_RRTMGP) then
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%aerosolslw          ', Interstitial%aerosolslw              )
@@ -1363,6 +1596,39 @@
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tv_lay              ', Interstitial%tv_lay                  )
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%cloud_overlap_param ', Interstitial%cloud_overlap_param     )
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%precip_overlap_param', Interstitial%precip_overlap_param    )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%minGPpres                    ', Interstitial%minGPpres                    )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%minGPtemp                    ', Interstitial%minGPtemp                    )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%ipsdlw0                      ', Interstitial%ipsdlw0                      )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%ipsdsw0                      ', Interstitial%ipsdsw0                      )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tracer                       ', Interstitial%tracer                       )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%fluxlwUP_jac                 ', Interstitial%fluxlwUP_jac                 )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%fluxlwDOWN_jac               ', Interstitial%fluxlwDOWN_jac               )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%sfc_emiss_byband             ', Interstitial%sfc_emiss_byband             )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%sec_diff_byband              ', Interstitial%sec_diff_byband              )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%sfc_alb_nir_dir              ', Interstitial%sfc_alb_nir_dir              )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%sfc_alb_nir_dif              ', Interstitial%sfc_alb_nir_dif              )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%sfc_alb_uvvis_dir            ', Interstitial%sfc_alb_uvvis_dir            )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%sfc_alb_uvvis_dif            ', Interstitial%sfc_alb_uvvis_dif            )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%toa_src_lw                   ', Interstitial%toa_src_lw                   )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%toa_src_sw                   ', Interstitial%toa_src_sw                   )
+                         !call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%active_gases_array           ', Interstitial%active_gases_array           )
+                         ! These DDTs do not have print routines
+                         !call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%flxprf_lw                    ', Interstitial%flxprf_lw                    )
+                         !call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%flxprf_sw                    ', Interstitial%flxprf_sw                    )
+                         !call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%lw_optical_props_cloudsByBand', Interstitial%lw_optical_props_cloudsByBand)
+                         !call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%lw_optical_props_clouds      ', Interstitial%lw_optical_props_clouds      )
+                         !call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%lw_optical_props_precipByBand', Interstitial%lw_optical_props_precipByBand)
+                         !call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%lw_optical_props_precip      ', Interstitial%lw_optical_props_precip      )
+                         !call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%lw_optical_props_clrsky      ', Interstitial%lw_optical_props_clrsky      )
+                         !call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%lw_optical_props_aerosol     ', Interstitial%lw_optical_props_aerosol     )
+                         !call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%sw_optical_props_cloudsByBand', Interstitial%sw_optical_props_cloudsByBand)
+                         !call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%sw_optical_props_clouds      ', Interstitial%sw_optical_props_clouds      )
+                         !call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%sw_optical_props_precipByBand', Interstitial%sw_optical_props_precipByBand)
+                         !call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%sw_optical_props_precip      ', Interstitial%sw_optical_props_precip      )
+                         !call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%sw_optical_props_clrsky      ', Interstitial%sw_optical_props_clrsky      )
+                         !call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%sw_optical_props_aerosol     ', Interstitial%sw_optical_props_aerosol     )
+                         !call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%gas_concentrations           ', Interstitial%gas_concentrations           )
+                         !call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%sources                      ', Interstitial%sources                      )
                      end if
                  end if
 #ifdef OPENMP
