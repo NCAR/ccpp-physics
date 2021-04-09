@@ -12,9 +12,6 @@ module get_prs_fv3
 
 contains
 
-
-!! \section arg_table_get_prs_fv3_init Argument Table
-!!
    subroutine get_prs_fv3_init()
    end subroutine get_prs_fv3_init
 
@@ -55,9 +52,6 @@ contains
 
    end subroutine get_prs_fv3_run
 
-
-!! \section arg_table_get_prs_fv3_finalize Argument Table
-!!
    subroutine get_prs_fv3_finalize()
    end subroutine get_prs_fv3_finalize
 
@@ -79,8 +73,6 @@ module get_phi_fv3
 
 contains
 
-!! \section arg_table_get_phi_fv3_init Argument Table
-!!
    subroutine get_phi_fv3_init()
    end subroutine get_phi_fv3_init
 
@@ -123,9 +115,6 @@ contains
 
    end subroutine get_phi_fv3_run
 
-
-!! \section arg_table_get_phi_fv3_finalize Argument Table
-!!
    subroutine get_phi_fv3_finalize()
    end subroutine get_phi_fv3_finalize
 
