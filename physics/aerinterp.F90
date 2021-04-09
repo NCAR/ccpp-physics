@@ -314,7 +314,7 @@ contains
       tx2 = 1.0 - tx1
       if (n2 > 12) n2 = n2 -12
 
-!
+#ifndef __GFORTRAN__
 !$OMP parallel num_threads(nthrds) default(none)             &
 !$OMP          shared(npts,ntrcaer,aerin,aer_pres,prsl)      &
 !$OMP          shared(ddx,ddy,jindx1,jindx2,iindx1,iindx2)   &
@@ -323,6 +323,7 @@ contains
 !$OMP          copyin(tx1,tx2) firstprivate(tx1,tx2)
 
 !$OMP do
+#endif
       DO L=1,levsaer
         DO J=1,npts
           J1  = JINDX1(J)
@@ -346,10 +347,12 @@ contains
                +TEMI*DDY(j)*aer_pres(I1,J2,L,n2)+DDX(j)*TEMJ*aer_pres(I2,J1,L,n2))
         ENDDO
       ENDDO
+#ifndef __GFORTRAN__
 !$OMP end do
 
 ! don't flip, input is the same direction as GFS  (bottom-up)
 !$OMP do
+#endif
       DO J=1,npts
         DO L=1,lev
            if(prsl(j,L).ge.aerpres(j,1)) then
@@ -378,9 +381,11 @@ contains
            endif
         ENDDO   !L-loop
       ENDDO     !J-loop
+#ifndef __GFORTRAN__
 !$OMP end do
 
 !$OMP end parallel
+#endif
 
       RETURN
       END SUBROUTINE aerinterpol
