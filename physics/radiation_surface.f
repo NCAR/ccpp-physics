@@ -330,8 +330,9 @@
 !! @{
 !-----------------------------------
       subroutine setalb                                                 &
-     &     ( slmsk,lsm,lsm_noahmp,lsm_ruc,snowf,sncovr,sncovr_ice,      &
-     &       snoalb,zorlf,coszf,tsknf,tairf,hprif,landfrac,min_seaice,  & !  ---  inputs:
+     &     ( slmsk,lsm,lsm_noahmp,lsm_ruc,snowf,                        & !  ---  inputs:
+     &       sncovr,sncovr_ice,snoalb,zorlf,coszf,                      &
+     &       tsknf,tairf,hprif,landfrac,frac_grid,min_seaice,           & 
      &       alvsf,alnsf,alvwf,alnwf,facsf,facwf,fice,tisfc,            &
      &       lsmalbdvis, lsmalbdnir, lsmalbivis, lsmalbinir,            &
      &       icealbdvis, icealbdnir, icealbivis, icealbinir,            &
@@ -403,6 +404,7 @@
 !  ---  inputs
       integer, intent(in) :: IMAX
       integer, intent(in) :: lsm, lsm_noahmp, lsm_ruc
+      logical, intent(in) :: frac_grid
 
       real (kind=kind_phys), dimension(:), intent(in) ::                &
      &       slmsk, snowf, zorlf, coszf, tsknf, tairf, hprif, landfrac, &
@@ -661,17 +663,38 @@
       elseif ( ialbflg == 2 ) then
         do i = 1, IMAX
 
-          fracl = landfrac(i)
-          fraco = max(f_zero, f_one - fracl)
-          if(fice(i) < min_seaice) then
-            fraci = 0.
+          if (.not. frac_grid) then
+          !-- non-fractional grid
+            if (slmsk(i) == 1) then
+              fracl     = f_one
+              fraci     = f_zero
+              fraco     = f_zero
+              icy(i)    = .false.
+            else
+              fracl     = f_zero
+              fraco     = f_one
+              if(fice(i) < min_seaice) then
+                fraci   = f_zero
+                icy(i)  = .false.
+              else
+                fraci   = fraco * fice(i) 
+                icy(i)  = .true.
+              endif
+              fraco = max(f_zero, fraco-fraci)
+            endif
           else
-            fraci = fraco * fice(i)
-          endif
-          fraco = max(f_zero, fraco-fraci)
-
-          icy(i) = .false.
-          if (fraci > f_zero) icy(i) = .true.
+          !-- fractional grid
+            fracl = landfrac(i)
+            fraco = max(f_zero, f_one - fracl)
+            if(fice(i) < min_seaice) then
+              fraci  = f_zero
+              icy(i) = .false.
+            else
+              fraci  = fraco * fice(i)
+              icy(i) = .true.
+            endif
+            fraco = max(f_zero, fraco-fraci)
+          endif! frac_grid
 
           !-- water albedo
           asevd_wat = 0.06
@@ -813,8 +836,8 @@
 !! @{
 !-----------------------------------
       subroutine setemis                                                &
-     &     ( kdt,lsm,lsm_noahmp,lsm_ruc,vtype,landfrac,min_seaice,      &  !  ---  inputs:
-     &       xlon,xlat,slmsk,snowf,sncovr,sncovr_ice,fice,              &
+     &     ( kdt,lsm,lsm_noahmp,lsm_ruc,vtype,landfrac,frac_grid,       &  !  ---  inputs:
+     &       min_seaice,xlon,xlat,slmsk,snowf,sncovr,sncovr_ice,fice,              &
      &       zorlf,tsknf,tairf,hprif,                                   &
      &       semis_lnd,semis_ice,IMAX,                                  &
      &       semisbase, sfcemis                                         &  !  ---  outputs:
@@ -871,6 +894,7 @@
 !  ---  inputs
       integer, intent(in) :: IMAX
       integer, intent(in) :: kdt, lsm, lsm_noahmp, lsm_ruc
+      logical, intent(in) :: frac_grid
       real (kind=kind_phys), dimension(:), intent(in) :: vtype
       real (kind=kind_phys), dimension(:), intent(in) :: landfrac
       real (kind=kind_phys), intent(in) :: min_seaice
@@ -920,24 +944,46 @@
 
         lab_do_IMAX : do i = 1, IMAX
 
-          fracl = landfrac(i)
-          fraco = max(f_zero, f_one - fracl)
-          if(fice(i) < min_seaice) then
-            fraci = 0.
+          if (.not. frac_grid) then
+          !-- non-fractional grid
+            if (slmsk(i) == 1) then
+              fracl     = f_one
+              fraci     = f_zero
+              fraco     = f_zero
+              icy(i)    = .false.
+            else
+              fracl     = f_zero
+              fraco     = f_one
+              if(fice(i) < min_seaice) then
+                fraci   = f_zero
+                icy(i)  = .false.
+              else
+                fraci   = fraco * fice(i)
+                icy(i)  = .true.
+              endif
+              fraco = max(f_zero, fraco-fraci)
+            endif
           else
-            fraci = fraco * fice(i)
-          endif
-          fraco = max(f_zero, fraco-fraci)
+          !-- fractional grid
+            fracl = landfrac(i)
+            fraco = max(f_zero, f_one - fracl)
+            if(fice(i) < min_seaice) then
+              fraci  = f_zero
+              icy(i) = .false.
+            else
+              fraci  = fraco * fice(i)
+              icy(i) = .true.
+            endif
+            fraco = max(f_zero, fraco-fraci)
+          endif! frac_grid
 
-          icy(i) = .false.
-          if (fice(i) > min_seaice) icy(i) = .true.
-
-          if (fracl < epsln) then                  ! no land
+          if (fracl < epsln) then                    ! no land
             if ( abs(fraco-f_one) < epsln ) then     ! open water point
               sfcemis(i) = emsref(1)
             elseif ( abs(fraci-f_one) > epsln ) then ! complete sea/lake ice
               sfcemis(i) = emsref(7)
             else
+            !-- fractional sea ice
               sfcemis(i) = fraco*emsref(1) + fraci*emsref(7)
             endif
 
@@ -1015,20 +1061,40 @@
 
         do i = 1, IMAX
 
-          fracl = landfrac(i)
-          fraco = max(f_zero, f_one - fracl)
-          if(fice(i) < min_seaice) then
-            fraci = 0.
+          if (.not. frac_grid) then
+          !-- non-fractional grid
+            if (slmsk(i) == 1) then
+              fracl     = f_one
+              fraci     = f_zero
+              fraco     = f_zero
+              icy(i)    = .false.
+            else
+              fracl     = f_zero
+              fraco     = f_one
+              if(fice(i) < min_seaice) then
+                fraci   = f_zero
+                icy(i)  = .false.
+              else
+                fraci   = fraco * fice(i)
+                icy(i)  = .true.
+              endif
+              fraco = max(f_zero, fraco-fraci)
+            endif
           else
-            fraci = fraco * fice(i)
-          endif
+          !-- fractional grid
+            fracl = landfrac(i)
+            fraco = max(f_zero, f_one - fracl)
+            if(fice(i) < min_seaice) then
+              fraci  = f_zero
+              icy(i) = .false.
+            else
+              fraci  = fraco * fice(i)
+              icy(i) = .true.
+            endif
+            fraco = max(f_zero, fraco-fraci)
+          endif! frac_grid
 
-          fraco = max(f_zero, fraco-fraci)
-
-          icy(i) = .false.
-          if (fice(i) > min_seaice) icy(i) = .true.
-
-          !-- ice albedo
+          !-- ice emissivity
           sfcemis_ice = emsref(7)
 
           if ( icy(i) ) then 
@@ -1048,7 +1114,7 @@
 
           !-- land emissivity 
           !-- from Noah MP or RUC lsms
-            sfcemis_land = semis_lnd(i) ! albedo with snow effect from LSM
+          sfcemis_land = semis_lnd(i) ! albedo with snow effect from LSM
 
           !-- Composite emissivity from land, water and ice fractions.
           sfcemis(i) = fracl*sfcemis_land + fraco*emsref(1)             &

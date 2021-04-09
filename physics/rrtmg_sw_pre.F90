@@ -14,8 +14,8 @@
 !!
       subroutine rrtmg_sw_pre_run (im, lndp_type, n_var_lndp, lsswr, lndp_var_list, lndp_prt_list, tsfg, tsfa, coszen, &
                                    lsm, lsm_noahmp, lsm_ruc, alb1d, slmsk, snowd, sncovr, sncovr_ice, snoalb, zorl,    &
-                                   hprime, landfrac, min_seaice, alvsf, alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc,&
-                                   albdvis_lnd, albdnir_lnd, albivis_lnd, albinir_lnd,                                 &
+                                   hprime, landfrac, frac_grid, min_seaice, alvsf, alnsf, alvwf, alnwf, facsf, facwf,  &
+                                   fice, tisfc, albdvis_lnd, albdnir_lnd, albivis_lnd, albinir_lnd,                    &
                                    albdvis_ice, albdnir_ice, albivis_ice, albinir_ice, sfalb,                          &
                                    nday, idxday, sfcalb1, sfcalb2, sfcalb3, sfcalb4, errmsg, errflg)
 
@@ -27,6 +27,7 @@
 
       integer,                              intent(in)    :: im, lndp_type, n_var_lndp
       integer,                              intent(in)    :: lsm, lsm_noahmp, lsm_ruc
+      logical,                              intent(in)    :: frac_grid
       character(len=3)    , dimension(:),   intent(in)    :: lndp_var_list
       logical,                              intent(in)    :: lsswr
       real(kind=kind_phys), dimension(:),   intent(in)    :: lndp_prt_list
@@ -92,7 +93,7 @@
 !!  for SW radiation.
 
         call setalb (slmsk, lsm, lsm_noahmp, lsm_ruc, snowd, sncovr, sncovr_ice, snoalb,    &
-                     zorl, coszen, tsfg, tsfa, hprime, landfrac, min_seaice,                &
+                     zorl, coszen, tsfg, tsfa, hprime, landfrac, frac_grid, min_seaice,     &
                      alvsf, alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc,                 &
                      albdvis_lnd, albdnir_lnd, albivis_lnd, albinir_lnd,                    &
                      albdvis_ice, albdnir_ice, albivis_ice, albinir_ice,                    &

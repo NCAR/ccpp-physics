@@ -29,8 +29,8 @@ contains
 !!
   subroutine GFS_rrtmgp_sw_pre_run(me, nCol, nLev, lndp_type, n_var_lndp, lndp_var_list,    &  
        lndp_prt_list, lsm, lsm_noahmp, lsm_ruc, doSWrad, solhr, lon, coslat, sinlat,        &
-       snowd, sncovr, sncovr_ice, snoalb, zorl, tsfg, tsfa, hprime, landfrac, min_seaice,   &
-       alvsf, alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc, albdvis_lnd,                  &
+       snowd, sncovr, sncovr_ice, snoalb, zorl, tsfg, tsfa, hprime, landfrac, frac_grid,    &
+       min_seaice, alvsf, alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc, albdvis_lnd,      &
        albdnir_lnd, albivis_lnd, albinir_lnd, albdvis_ice, albdnir_lnd, albivis_ice,        &
        albinir_ice, lsmask, sfc_wts, p_lay, tv_lay, relhum, p_lev,                          &
        nday, idxday, coszen, coszdg, sfc_alb_nir_dir, sfc_alb_nir_dif,                      &
@@ -51,11 +51,13 @@ contains
     real(kind_phys), dimension(n_var_lndp), intent(in) ::   &
          lndp_prt_list
     logical,intent(in) :: &
-         doSWrad            ! Call RRTMGP SW radiation?
+         doSWrad              ! Call RRTMGP SW radiation?
+    logical,intent(in) :: &
+         frac_grid            ! Logical flag for fractional grid
     real(kind_phys), intent(in) :: &
-         solhr                 ! Time in hours after 00z at the current timestep
+         solhr                ! Time in hours after 00z at the current timestep
     real(kind_phys), intent(in) :: &
-         min_seaice            ! Sea ice threashold
+         min_seaice           ! Sea ice threashold
     real(kind_phys), dimension(nCol), intent(in) :: &
          lsmask,            & ! Landmask: sea/land/ice=0/1/2
          lon,               & ! Longitude
@@ -151,7 +153,7 @@ contains
        alb1d(:) = 0.
        lndp_alb = -999.
        call setalb (lsmask, lsm, lsm_noahmp, lsm_ruc, snowd, sncovr, sncovr_ice, snoalb, zorl,  &
-                    coszen, tsfg, tsfa, hprime, landfrac, min_seaice,                           &
+                    coszen, tsfg, tsfa, hprime, landfrac, frac_grid, min_seaice,                &
                     alvsf, alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc,                      &
                     albdvis_lnd, albdnir_ldn, albivis_lnd, albinir_lnd,                         &
                     albdvis_ice, albdnir_ice, albivis_ice, albinir_ice, NCOL, alb1d, lndp_alb,  & !  mg, sfc-perts

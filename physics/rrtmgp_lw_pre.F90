@@ -27,13 +27,15 @@ contains
 !!
   subroutine rrtmgp_lw_pre_run ( kdt, lsm, lsm_noahmp, lsm_ruc, vtype, doLWrad, &
        nCol, xlon, xlat, slmsk, zorl, snowd, sncovr, sncovr_ice, fice,          &
-       tsfg, tsfa, hprime, landfrac, min_seaice,                                &
+       tsfg, tsfa, hprime, landfrac, frac_grid, min_seaice,                     &
        sfc_emiss_byband, semis_land, semis_ice,                                 &
        semisbase, semis, errmsg, errflg)
 
     ! Inputs
     logical, intent(in) :: &
          doLWrad          ! Logical flag for longwave radiation call
+    logical, intent(in) :: &
+         frac_grid        ! Logical flag for fractional grid
     integer, intent(in) :: &
          nCol             ! Number of horizontal grid points
     integer, intent(in) :: kdt, lsm, lsm_noahmp, lsm_ruc
@@ -79,10 +81,10 @@ contains
     ! #######################################################################################
     ! Call module_radiation_surface::setemis(),to setup surface emissivity for LW radiation.
     ! #######################################################################################
-    call setemis ( kdt, lsm, lsm_noahmp, lsm_ruc, vtype, landfrac, min_seaice,    &
-                      xlon, xlat, slmsk, snowd, sncovr, sncovr_ice, fice, zorl,   &
-                      tsfg, tsfa, hprime, semis_land, semis_ice, nCol,            & !  ---  inputs
-                      semisbase, semis)                                             !  ---  outputs
+    call setemis ( kdt, lsm, lsm_noahmp, lsm_ruc, vtype, landfrac, frac_grid, min_seaice, &
+                      xlon, xlat, slmsk, snowd, sncovr, sncovr_ice, fice, zorl,           &
+                      tsfg, tsfa, hprime, semis_land, semis_ice, nCol,                    & !  ---  inputs
+                      semisbase, semis)                                                     !  ---  outputs
 
 
     ! Assign same emissivity to all bands

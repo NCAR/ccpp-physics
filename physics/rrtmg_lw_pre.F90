@@ -14,7 +14,7 @@
 !!
       subroutine rrtmg_lw_pre_run (im, lslwr, kdt, lsm, lsm_noahmp, lsm_ruc, vtype,   &
         xlat, xlon, slmsk, snowd, sncovr, sncovr_ice, fice, zorl, hprime,             &
-        landfrac, min_seaice, tsfg, tsfa,                                             &
+        landfrac, frac_grid, min_seaice, tsfg, tsfa,                                  &
         semis_lnd, semis_ice, semisbase, semis, errmsg, errflg)
     
       use machine,                   only: kind_phys
@@ -24,10 +24,12 @@
       
       integer,                              intent(in)  :: im
       logical,                              intent(in)  :: lslwr
+
       integer, intent(in) :: kdt, lsm, lsm_noahmp, lsm_ruc
 
       real(kind=kind_phys), dimension(im),  intent(in)  :: xlat, xlon, vtype, slmsk,&
         snowd, sncovr, sncovr_ice, fice, zorl, hprime, landfrac, tsfg, tsfa
+      logical,                              intent(in)  :: frac_grid
       real(kind=kind_phys),                 intent(in)  :: min_seaice
       real(kind=kind_phys), dimension(:),   intent(in)  :: semis_lnd 
       real(kind=kind_phys), dimension(:),   intent(in)  :: semis_ice 
@@ -44,7 +46,7 @@
 !>  - Call module_radiation_surface::setemis(),to setup surface
 !! emissivity for LW radiation.
         call setemis (kdt, lsm, lsm_noahmp, lsm_ruc, vtype, landfrac,       &
-                      min_seaice, xlon, xlat, slmsk,                        &
+                      frac_grid, min_seaice, xlon, xlat, slmsk,             &
                       snowd, sncovr, sncovr_ice, fice, zorl, tsfg, tsfa,    &
                       hprime, semis_lnd, semis_ice, im,                     & !  ---  inputs
                       semisbase, semis)                                       !  ---  outputs
