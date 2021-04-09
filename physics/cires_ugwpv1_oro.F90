@@ -848,7 +848,6 @@ contains
    	     
        call oro_spectral_solver(im, km, npt, ipt, kref, kdt, me, master,      &
            dtp, dxres, taub, u1, v1, t1, xn, yn, bnv2, ro, prsi,prsl,         &
-           grav, omega1, rd,                                                  &
            del, sigma, hprime, gamma, theta, sinlat, xlatd, taup, taud, pkdis)  
 	      
       endif                    !  oro_linsat - linsatdis-solver for stationary OGWs
