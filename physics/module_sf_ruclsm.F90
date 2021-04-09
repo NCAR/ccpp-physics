@@ -2586,7 +2586,8 @@ endif
 ! evaporation, effects sparsely vegetated areas--> cooler during the day
 !        fc=max(qmin,ref*0.25)  ! 
 ! For now we'll go back to ref*0.5
-        fc=max(qmin,ref*0.5)
+! Replace 0.5 with 0.7 2021/03/15
+        fc=max(qmin,ref*0.7)
         fex_fc=1.
       if((soilmois(1)+qmin) > fc .or. (qvatm-qvg) > 0.) then
         soilres = 1.

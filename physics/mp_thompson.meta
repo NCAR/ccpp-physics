@@ -41,6 +41,15 @@
   kind = kind_phys
   intent = in
   optional = F
+[con_eps]
+  standard_name = ratio_of_dry_air_to_water_vapor_gas_constants
+  long_name = rd/rv
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [restart]
   standard_name = flag_for_restart
   long_name = flag for restart (warmstart) or coldstart
@@ -63,6 +72,14 @@
   units = flag
   dimensions = ()
   type = integer
+  intent = in
+  optional = F
+[convert_dry_rho]
+  standard_name = flag_for_converting_hydrometeors_from_moist_to_dry_air
+  long_name = flag for converting hydrometeors from moist to dry air
+  units = flag
+  dimensions = ()
+  type = logical
   intent = in
   optional = F
 [spechum]
@@ -339,6 +356,23 @@
   dimensions = ()
   type = real
   kind = kind_phys
+  intent = in
+  optional = F
+[con_eps]
+  standard_name = ratio_of_dry_air_to_water_vapor_gas_constants
+  long_name = rd/rv
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[convert_dry_rho]
+  standard_name = flag_for_converting_hydrometeors_from_moist_to_dry_air
+  long_name = flag for converting hydrometeors from moist to dry air
+  units = flag
+  dimensions = ()
+  type = logical
   intent = in
   optional = F
 [spechum]
