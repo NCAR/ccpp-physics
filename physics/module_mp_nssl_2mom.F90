@@ -1410,6 +1410,8 @@ END SUBROUTINE nssl_2mom_init_aero
         ENDIF
       ENDIF
       
+      IF ( iresetmoments == 0 ) iresetmoments = lhl
+      
 !      write(0,*) 'wrf_init: lhab,lhl = ',lhab,lhl
 
 !      IF ( ipelec > 0 ) idonic = .true.
