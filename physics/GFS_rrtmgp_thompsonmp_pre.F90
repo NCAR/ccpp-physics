@@ -206,7 +206,7 @@ contains
     cld_rerain(1:nCol,1:nLev)     = rerain_def
     
     ! Compute cloud-fraction. Else, use cld_frac passes through un-touched. Handled in sgs_cloudpre.
-    if(.not. do_mynnedmf .or. imfdeepcnv .ne. imfdeepcnv_gf ) then ! MYNN PBL or GF conv
+    if(.not. do_mynnedmf .and. imfdeepcnv .ne. imfdeepcnv_gf ) then ! MYNN PBL or GF conv
        if(      lmfshal) alpha0 = 100. ! Default (from GATE simulations)
        if(.not. lmfshal) alpha0 = 2000.
        ! Xu-Randall (1996) cloud-fraction 

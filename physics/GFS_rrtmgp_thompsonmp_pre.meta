@@ -290,10 +290,10 @@
   intent = in
   optional = F
 [tracer]
-  standard_name = chemical_tracers
-  long_name = chemical tracers
-  units = g g-1
-  dimensions = (horizontal_dimension,vertical_dimension,number_of_tracers)
+  standard_name = tracer_concentration
+  long_name = model layer mean tracer concentration
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers)
   type = real
   kind = kind_phys
   intent = in
