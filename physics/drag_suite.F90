@@ -7,6 +7,8 @@
 
       contains
 
+!> \section arg_table_drag_suite_init Argument Table
+!!
       subroutine drag_suite_init()
       end subroutine drag_suite_init
 
@@ -1309,7 +1311,8 @@ endif
    end subroutine drag_suite_run
 !-------------------------------------------------------------------
 !
-
+!> \section arg_table_drag_suite_finalize Argument Table
+!!
       subroutine drag_suite_finalize()
       end subroutine drag_suite_finalize
 

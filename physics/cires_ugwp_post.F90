@@ -1,11 +1,13 @@
 !>  \file cires_ugwp_post.F90
 !! This file contains
+
+!>\defgroup cires_ugwp_post_mod CIRES UGWP Scheme Post
 module cires_ugwp_post
 
 contains
 
-!>\defgroup cires_ugwp_post CIRES UGWP Scheme Post
-!! @{
+!> \section arg_table_cires_ugwp_post_init Argument Table
+!!
     subroutine cires_ugwp_post_init ()
     end subroutine cires_ugwp_post_init
 
@@ -68,8 +70,9 @@ contains
 
       end subroutine cires_ugwp_post_run
 
+!> \section arg_table_cires_ugwp_post_finalize Argument Table
+!!
       subroutine cires_ugwp_post_finalize ()
       end subroutine cires_ugwp_post_finalize
 
-!! @}
 end module cires_ugwp_post

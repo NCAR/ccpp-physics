@@ -1,4 +1,4 @@
-!> \file GFS_GWD_generic.f
+!> \file GFS_GWD_generic.F90
 !! This file contains the CCPP-compliant orographic gravity wave
 !! drag pre interstitial codes.
 

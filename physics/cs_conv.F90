@@ -4,9 +4,13 @@
 module cs_conv_pre
   contains
 
+!! \section arg_table_cs_conv_pre_init  Argument Table
+!!
   subroutine cs_conv_pre_init()
   end subroutine cs_conv_pre_init
 
+!! \section arg_table_cs_conv_pre_finalize  Argument Table
+!!
   subroutine cs_conv_pre_finalize()
   end subroutine cs_conv_pre_finalize
 
@@ -72,9 +76,13 @@ end module cs_conv_pre
 module cs_conv_post
   contains
 
+!! \section arg_table_cs_conv_post_init  Argument Table
+!!
   subroutine cs_conv_post_init()
   end subroutine cs_conv_post_init
 
+!! \section arg_table_cs_conv_post_finalize  Argument Table
+!!
   subroutine cs_conv_post_finalize()
   end subroutine cs_conv_post_finalize
 
@@ -208,9 +216,13 @@ module cs_conv
   
    contains
 
+!> \section arg_table_cs_conv_init Argument Table
+!!
    subroutine cs_conv_init()
    end subroutine cs_conv_init
 
+!> \section arg_table_cs_conv_finalize Argument Table
+!!
    subroutine cs_conv_finalize()
    end subroutine cs_conv_finalize
 
