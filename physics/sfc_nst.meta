@@ -114,6 +114,15 @@
   kind = kind_phys
   intent = in
   optional = F
+[tgice]
+  standard_name = freezing_point_temperature_of_seawater
+  long_name = freezing point temperature of seawater
+  units = K
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [ps]
   standard_name = surface_air_pressure
   long_name = surface pressure
@@ -671,6 +680,15 @@
   type = logical
   intent = in
   optional = F
+[tgice]
+  standard_name = freezing_point_temperature_of_seawater
+  long_name = freezing point temperature of seawater
+  units = K
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [tsfco]
   standard_name = sea_surface_temperature
   long_name = sea surface temperature
@@ -678,7 +696,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = F
 [tsurf_wat]
   standard_name = surface_skin_temperature_after_iteration_over_ocean
@@ -800,6 +818,14 @@
   standard_name = horizontal_loop_extent
   long_name = horizontal loop extent
   units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[kdt]
+  standard_name = index_of_time_step
+  long_name = current time step index
+  units = index
   dimensions = ()
   type = integer
   intent = in
