@@ -227,6 +227,9 @@ MODULE module_mp_thompson
       REAL, PARAMETER:: re_qs_min = 5.00E-6               ! 5 microns
       REAL, PARAMETER:: re_qs_max = 999.0E-6              ! 999 microns (1 mm)
 
+!..snow melting
+      REAL, PARAMETER, PRIVATE:: Tsmelt = 275.16
+
 !..Lookup table dimensions
       INTEGER, PARAMETER, PRIVATE:: nbins = 100
       INTEGER, PARAMETER, PRIVATE:: nbc = nbins
@@ -1000,7 +1003,7 @@ MODULE module_mp_thompson
       SUBROUTINE mp_gt_driver(qv, qc, qr, qi, qs, qg, ni, nr, nc,     &
                               nwfa, nifa, nwfa2d, nifa2d,             &
                               tt, th, pii,                            &
-                              p, w, dz, dt_in,                        &
+                              p, w, dz, deld, dt_in,                  &
                               RAINNC, RAINNCV,                        &
                               SNOWNC, SNOWNCV,                        &
                               ICENC, ICENCV,                          &
@@ -1014,7 +1017,7 @@ MODULE module_mp_thompson
                               has_reqc, has_reqi, has_reqs,           &
                               rand_perturb_on,                        &
                               kme_stoch,                              &
-                              rand_pert,                              &
+                              rand_pert, fcons, ffixneg,crtclw, srhci,&
                               ids,ide, jds,jde, kds,kde,              &  ! domain dims
                               ims,ime, jms,jme, kms,kme,              &  ! memory dims
                               its,ite, jts,jte, kts,kte,              &  ! tile dims
@@ -1047,7 +1050,7 @@ MODULE module_mp_thompson
                           rainprod, evapprod
 #endif
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(IN):: &
-                          p, w, dz
+                          p, w, dz, deld
       REAL, DIMENSION(ims:ime, jms:jme), INTENT(INOUT):: &
                           RAINNC, RAINNCV, SR
       REAL, DIMENSION(ims:ime, jms:jme), OPTIONAL, INTENT(INOUT)::      &
@@ -1061,12 +1064,14 @@ MODULE module_mp_thompson
       LOGICAL, OPTIONAL, INTENT(IN) :: first_time_step
       REAL, INTENT(IN):: dt_in
       LOGICAL, INTENT (IN) :: reset
+      LOGICAL, INTENT (IN) :: fcons, ffixneg 
+      REAL, INTENT(IN) :: crtclw, srhci
 
 !..Local variables
       REAL, DIMENSION(kts:kte):: &
                           qv1d, qc1d, qi1d, qr1d, qs1d, qg1d, ni1d,     &
                           nr1d, nc1d, nwfa1d, nifa1d,                   &
-                          t1d, p1d, w1d, dz1d, rho, dBZ
+                          t1d, p1d, w1d, dz1d, rho, dBZ, deld1d
       REAL, DIMENSION(kts:kte):: re_qc1d, re_qi1d, re_qs1d
 #if ( WRF_CHEM == 1 )
       REAL, DIMENSION(kts:kte):: &
@@ -1259,6 +1264,7 @@ MODULE module_mp_thompson
             qg1d(k) = qg(i,k,j)
             ni1d(k) = ni(i,k,j)
             nr1d(k) = nr(i,k,j)
+            deld1d(k) = deld(i,k,j)
             rho(k) = 0.622*p1d(k)/(R*t1d(k)*(qv1d(k)+0.622))
          enddo
          if (is_aerosol_aware) then
@@ -1275,6 +1281,11 @@ MODULE module_mp_thompson
             enddo
          endif
 
+         if(ffixneg) then
+           call neg_adj(kts, kte, t1d, deld1d, qv1d, qc1d, qr1d, qi1d, &
+                qs1d, qg1d)
+         endif
+
 !> - Call mp_thompson()
          call mp_thompson(qv1d, qc1d, qi1d, qr1d, qs1d, qg1d, ni1d,     &
                       nr1d, nc1d, nwfa1d, nifa1d, t1d, p1d, w1d, dz1d,  &
@@ -1283,6 +1294,7 @@ MODULE module_mp_thompson
                       rainprod1d, evapprod1d, &
 #endif
                       rand1, rand2, rand3, &
+                      fcons, ffixneg, crtclw, srhci, &
                       kts, kte, dt, i, j)
 
          pcp_ra(i,j) = pptrain
@@ -1409,16 +1421,18 @@ MODULE module_mp_thompson
              write(*,'(a,e16.7,a,3i8)') 'WARNING, negative ni ', ni1d(k),        &
                         ' at i,j,k=', i,j,k
             endif
-            if (qv1d(k) .lt. 0.0) then
-             write(*,'(a,e16.7,a,3i8)') 'WARNING, negative qv ', qv1d(k),        &
+            if(.not. ffixneg) then
+              if (qv1d(k) .lt. 0.0) then
+               write(*,'(a,e16.7,a,3i8)') 'WARNING, negative qv ', qv1d(k),        &
                         ' at i,j,k=', i,j,k
-             if (k.lt.kte-2 .and. k.gt.kts+1) then
-                write(*,*) '   below and above are: ', qv(i,k-1,j), qv(i,k+1,j)
-                qv(i,k,j) = MAX(1.E-7, 0.5*(qv(i,k-1,j) + qv(i,k+1,j)))
-             else
-                qv(i,k,j) = 1.E-7
-             endif
-            endif
+               if (k.lt.kte-2 .and. k.gt.kts+1) then
+                  write(*,*) '   below and above are: ', qv(i,k-1,j), qv(i,k+1,j)
+                  qv(i,k,j) = MAX(1.E-7, 0.5*(qv(i,k-1,j) + qv(i,k+1,j)))
+               else
+                  qv(i,k,j) = 1.E-7
+               endif
+              endif
+            endif 
          enddo
 
 !> - Call calc_refl10cm()
@@ -1550,6 +1564,7 @@ MODULE module_mp_thompson
                           rainprod, evapprod, &
 #endif
                           rand1, rand2, rand3, &
+                          fcons, ffixneg, crtclw, srhci, &
                           kts, kte, dt, ii, jj)
 #ifdef MPI
       use mpi
@@ -1565,6 +1580,8 @@ MODULE module_mp_thompson
       REAL, INTENT(INOUT):: pptrain, pptsnow, pptgraul, pptice
       REAL, INTENT(IN):: dt
       REAL, INTENT(IN):: rand1, rand2, rand3
+      LOGICAL, INTENT(IN):: fcons, ffixneg
+      REAL, INTENT(IN):: crtclw, srhci
 
 #if ( WRF_CHEM == 1 )
       REAL, DIMENSION(kts:kte), INTENT(INOUT):: &
@@ -1635,8 +1652,8 @@ MODULE module_mp_thompson
       REAL, DIMENSION(kts:kte):: vts_boost
       REAL:: Mrat, ils1, ils2, t1_vts, t2_vts, t3_vts, t4_vts, C_snow
       REAL:: a_, b_, loga_, A1, A2, tf
-      REAL:: tempc, tc0, r_mvd1, r_mvd2, xkrat
-      REAL:: xnc, xri, xni, xmi, oxmi, xrc, xrr, xnr
+      REAL:: tempc, tc0, r_mvd1, r_mvd2, xkrat, tempp, tmp1
+      REAL:: xnc, xri, xni, xmi, oxmi, xrc, xrr, xnr, xrs 
       REAL:: xsat, rate_max, sump, ratio
       REAL:: clap, fcd, dfcd
       REAL:: otemp, rvs, rvs_p, rvs_pp, gamsc, alphsc, t1_evap, t1_subl
@@ -2104,7 +2121,8 @@ MODULE module_mp_thompson
 
 !>  - Autoconversion follows Berry & Reinhardt (1974) with characteristic
 !! diameters correctly computed from gamma distrib of cloud droplets.
-         if (rc(k).gt. 0.01e-3) then
+!        if (rc(k).gt. 0.01e-3) then
+         if (rc(k).gt. crtclw) then
           Dc_g = ((ccg(3,nu_c)*ocg2(nu_c))**obmr / lamc) * 1.E6
           Dc_b = (xDc*xDc*xDc*Dc_g*Dc_g*Dc_g - xDc*xDc*xDc*xDc*xDc*xDc) &
                  **(1./6.)
@@ -2435,7 +2453,12 @@ MODULE module_mp_thompson
            if (prs_sde(k).lt. 0.) then
             prs_sde(k) = MAX(DBLE(-rs(k)*odts), prs_sde(k), DBLE(rate_max))
            else
-            prs_sde(k) = MIN(prs_sde(k), DBLE(rate_max))
+            if(fcons) then
+              tempp = (T_0-temp(k))/(lsub*ocp(k))*odts
+              prs_sde(k) = MIN(prs_sde(k), DBLE(rate_max),DBLE(tempp))
+            else
+              prs_sde(k) = MIN(prs_sde(k), DBLE(rate_max))
+            endif
            endif
           endif
 
@@ -2446,7 +2469,12 @@ MODULE module_mp_thompson
            if (prg_gde(k).lt. 0.) then
             prg_gde(k) = MAX(DBLE(-rg(k)*odts), prg_gde(k), DBLE(rate_max))
            else
-            prg_gde(k) = MIN(prg_gde(k), DBLE(rate_max))
+            if(fcons) then
+              tempp = (T_0-temp(k))/(lsub*ocp(k))*odts
+              prg_gde(k) = MIN(prg_gde(k), DBLE(rate_max),DBLE(tempp))
+            else
+             prg_gde(k) = MIN(prg_gde(k), DBLE(rate_max))
+            endif
            endif
           endif
 
@@ -2510,8 +2538,15 @@ MODULE module_mp_thompson
 
 !>  - Freezing of water drops into graupel/cloud ice (Bigg 1953).
           if (rr(k).gt. r_r(1)) then
-           prg_rfz(k) = tpg_qrfz(idx_r,idx_r1,idx_tc,idx_IN)*odts
-           pri_rfz(k) = tpi_qrfz(idx_r,idx_r1,idx_tc,idx_IN)*odts
+           if(fcons) then
+             lfus2 = lsub - lvap(k)
+             tempp = (T_0-temp(k))/(lfus2*ocp(k))
+             prg_rfz(k) = MIN(tpg_qrfz(idx_r,idx_r1,idx_tc,idx_IN),tempp)*odts
+             pri_rfz(k) = MIN(tpi_qrfz(idx_r,idx_r1,idx_tc,idx_IN),tempp)*odts
+           else 
+             prg_rfz(k) = tpg_qrfz(idx_r,idx_r1,idx_tc,idx_IN)*odts
+             pri_rfz(k) = tpi_qrfz(idx_r,idx_r1,idx_tc,idx_IN)*odts
+           endif 
            pni_rfz(k) = tni_qrfz(idx_r,idx_r1,idx_tc,idx_IN)*odts
            pnr_rfz(k) = tnr_qrfz(idx_r,idx_r1,idx_tc,idx_IN)*odts          ! RAIN2M
            pnr_rfz(k) = MIN(DBLE(nr(k)*odts), pnr_rfz(k))
@@ -2521,7 +2556,13 @@ MODULE module_mp_thompson
           endif
 
           if (rc(k).gt. r_c(1)) then
-           pri_wfz(k) = tpi_qcfz(idx_c,idx_n,idx_tc,idx_IN)*odts
+           if(fcons) then
+             lfus2 = lsub - lvap(k)
+             tempp = (T_0-temp(k))/(lfus2*ocp(k))
+             pri_wfz(k) = MIN(tpi_qcfz(idx_c,idx_n,idx_tc,idx_IN), tempp)*odts
+           else
+             pri_wfz(k) = tpi_qcfz(idx_c,idx_n,idx_tc,idx_IN)*odts
+           endif
            pri_wfz(k) = MIN(DBLE(rc(k)*odts), pri_wfz(k))
            pni_wfz(k) = tni_qcfz(idx_c,idx_n,idx_tc,idx_IN)*odts
            pni_wfz(k) = MIN(DBLE(nc(k)*odts), pri_wfz(k)/(2.*xm0i),     &
@@ -2533,7 +2574,8 @@ MODULE module_mp_thompson
 
 !>  - Deposition nucleation of dust/mineral from DeMott et al (2010)
 !! we may need to relax the temperature and ssati constraints.
-          if ( (ssati(k).ge. 0.25) .or. (ssatw(k).gt. eps &
+!         if ( (ssati(k).ge. 0.25) .or. (ssatw(k).gt. eps &
+          if ( (ssati(k).ge. srhci) .or. (ssatw(k).gt. eps &
                                 .and. temp(k).lt.253.15) ) then
            if (dustyIce .AND. is_aerosol_aware) then
             xnc = iceDeMott(tempc,qv(k),qvs(k),qvsi(k),rho(k),nifa(k))
@@ -2574,6 +2616,10 @@ MODULE module_mp_thompson
             pni_ide(k) = pri_ide(k)*oxmi
             pni_ide(k) = MAX(DBLE(-ni(k)*odts), pni_ide(k))
            else
+            if(fcons) then 
+               tempp = (T_0-temp(k))/(lsub*ocp(k))*odts
+               pri_ide(k) = MIN(pri_ide(k),DBLE(tempp)) 
+            endif 
             pri_ide(k) = MIN(pri_ide(k), DBLE(rate_max))
             prs_ide(k) = (1.0D0-tpi_ide(idx_i,idx_i1))*pri_ide(k)
             pri_ide(k) = tpi_ide(idx_i,idx_i1)*pri_ide(k)
@@ -3700,6 +3746,34 @@ MODULE module_mp_thompson
           qcten(k) = qcten(k) - xrc*odt
           ncten(k) = ncten(k) - xnc*odt
           tten(k) = tten(k) + lfus2*ocp(k)*xrc*odt*(1-IFDRY)
+         endif
+         if (fcons) then
+! The instant melting of snow is adopted from MG3 by Drs. H. Morrison and A. Gettelman
+           xrs = MAX(0.0, qs1d(k) + qsten(k)*DT)
+           tempp = t1d(k) + tten(k)*DT
+           if(tempp > Tsmelt) then
+             if(xrs > 0.0) then
+               tmp1 = -lfus*ocp(k)*xrs
+               if(tempp + tmp1 < Tsmelt) then
+                 tmp1 = (tempp- Tsmelt)*Cp*(1.+ 0.887*qv(k))/lfus
+                 tmp1 = tmp1/xrs
+                 tmp1 = max(0.0,tmp1)
+                 tmp1 = min(1.0,tmp1)
+               else
+                 tmp1 = 1.0
+              endif
+
+               tmp1 = xrs * tmp1
+               tmp1 = tmp1 * odt
+
+               qsten(k) = qsten(k) - tmp1
+               qrten(k) = qrten(k) + tmp1
+               nrten(k) = nrten(k) + smo0(k)/rs(k) * rho(k)*tmp1 *         &
+                           10.0**(-0.75*(tempp-T_0))
+               tten(k) = tten(k) - tmp1 * lfus *ocp(k)
+
+             endif
+           endif
          endif
       enddo
       endif
@@ -5908,6 +5982,129 @@ MODULE module_mp_thompson
 #endif
 
 !+---+-----------------------------------------------------------------+
+! =======================================================================
+! fix negative water species
+! this is designed for 6 - class micro - physics schemes
+! adapted from GFDL MP 
+! This routine is taken from GFDL MP. The rouine was orginally written by Linjiong Zhou
+! and modifed by Ruiyu Sun 
+! =======================================================================
+
+      subroutine neg_adj (ktop, kbot, pt, dp, qv, ql, qr, qi, qs, qg)
+    
+      implicit none
+    
+      integer, intent (in) :: ktop, kbot
+    
+      real, intent (in), dimension (ktop:kbot) :: dp
+    
+      real, intent (inout), dimension (ktop:kbot) :: pt, qv, ql, qr, qi, qs, qg
+    
+      real, dimension (ktop:kbot) :: lcpk, icpk
+    
+      real :: dq, cvm, tmp
+     
+      real :: lvapp, tempcc
+    
+      integer :: k
+    
+    ! -----------------------------------------------------------------------
+    ! define heat capacity and latent heat coefficient
+    ! -----------------------------------------------------------------------
+
+      do k = ktop, kbot
+        cvm = Cp*(1.+0.887*qv(k))
+        tempcc = pt (k)-273.16 
+        lvapp = lvap0 + (2106.0 - 4218.0)*tempcc
+        lcpk(k) = lvapp / cvm 
+        icpk(k) = (lsub - lvapp)/cvm !  consistant with what is used in this code   
+      enddo
+    
+      do k = ktop, kbot
+        
+        ! -----------------------------------------------------------------------
+        ! ice phase:
+        ! -----------------------------------------------------------------------
+        ! if cloud ice < 0, borrow from snow
+        if(qi (k) < 0. .or. qs (k) < 0. .or. qg (k) < 0.) then
+          tmp = qi(k) + qs(k) + qg(k)
+          if (tmp >0.0) then
+            if (qi (k) < 0.) then
+              qs (k) = qs (k) + qi (k)
+              qi (k) = 0.
+              if(qs (k) < 0.) then
+                qg(k) = qg(k) + qs(k)
+                qs(k) = 0.0
+              endif
+            endif
+            if(qs(k) < 0.) then
+              qg(k) = qg(k) + qs(k)
+              qs(k) = 0.0
+              if(qg(k) < 0.0) then
+                 qi(k) = qi(k) + qg(k)
+                 qg(k) = 0.0
+              endif
+            endif
+            if(qg(k) < 0.0) then
+              qs (k) = qs(k) + qg(k)
+              qg (k) = 0.
+              if(qs(k) < 0.) then
+                qi (k) = qi(k) + qs(k)
+                qs (k) = 0.
+              endif
+            endif
+          else
+            qr (k) = qr (k) + tmp
+            qi (k) = 0.0
+            qs (k) = 0.0
+            qg (k) = 0.0
+            pt (k) = pt (k) - tmp * icpk (k) ! heating
+          endif
+        endif
+        
+        ! -----------------------------------------------------------------------
+        ! liquid phase:
+        ! -----------------------------------------------------------------------
+        
+        ! if rain < 0, borrow from cloud water
+        if (qr (k) < 0.) then
+            ql (k) = ql (k) + qr (k)
+            qr (k) = 0.
+        endif
+        ! if cloud water < 0, borrow from water vapor
+        if (ql (k) < 0.) then
+            qv (k) = qv (k) + ql (k)
+            pt (k) = pt (k) - ql (k) * lcpk (k) ! heating
+            ql (k) = 0.
+        endif
+        
+      enddo
+    
+    ! -----------------------------------------------------------------------
+    ! fix water vapor; borrow from below
+    ! -----------------------------------------------------------------------
+    
+      do k = kbot, ktop +1, -1 
+        if (qv (k) < 0.) then
+            qv (k - 1) = qv (k - 1) + qv (k) * dp (k) / dp (k - 1)
+            qv (k) = 0.
+        endif
+      enddo
+    
+    ! -----------------------------------------------------------------------
+    ! bottom layer; borrow from above
+    ! -----------------------------------------------------------------------
+    
+      if (qv (ktop) < 0. .and. qv (ktop + 1) > 0.) then
+        dq = min (- qv (ktop) * dp (ktop), qv (ktop + 1) * dp (ktop + 1))
+        qv (ktop + 1) = qv (ktop + 1) - dq / dp (ktop + 1)
+        qv (ktop) = qv (ktop) + dq / dp (ktop)
+      endif
+    
+      end subroutine neg_adj
+
+!+---+-----------------------------------------------------------------+
 !+---+-----------------------------------------------------------------+
 END MODULE module_mp_thompson
+!+---+-----------------------------------------------------------------+
 !+---+-----------------------------------------------------------------+

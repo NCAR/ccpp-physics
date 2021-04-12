@@ -328,9 +328,10 @@ module mp_thompson
                               spechum, qc, qr, qi, qs, qg, ni, nr, &
                               is_aerosol_aware, nc, nwfa, nifa,    &
                               nwfa2d, nifa2d,                      &
-                              tgrs, prsl, phii, omega, dtp,        &
+                              tgrs, prsl, phii, omega, dtp, del,   &
                               prcp, rain, graupel, ice, snow, sr,  &
                               refl_10cm, reset, do_radar_ref,      &
+                              fcons, ffixneg, crtclw, srhci,       &
                               re_cloud, re_ice, re_snow,           &
                               mpicomm, mpirank, mpiroot,           &
                               errmsg, errflg)
@@ -368,6 +369,7 @@ module mp_thompson
          real(kind_phys),           intent(in   ) :: prsl(1:ncol,1:nlev)
          real(kind_phys),           intent(in   ) :: phii(1:ncol,1:nlev+1)
          real(kind_phys),           intent(in   ) :: omega(1:ncol,1:nlev)
+         real(kind_phys),           intent(in   ) :: del(1:ncol,1:nlev)
          real(kind_phys),           intent(in   ) :: dtp
          ! Precip/rain/snow/graupel fall amounts and fraction of frozen precip
          real(kind_phys),           intent(  out) :: prcp(1:ncol)
@@ -379,6 +381,10 @@ module mp_thompson
          ! Radar reflectivity
          real(kind_phys),           intent(  out) :: refl_10cm(1:ncol,1:nlev)
          logical,         optional, intent(in   ) :: do_radar_ref
+         logical,                   intent(in   ) :: fcons
+         logical,                   intent(in   ) :: ffixneg
+         real,                      intent(in   ) :: crtclw
+         real,                      intent(in   ) :: srhci
          ! Cloud effective radii
          real(kind_phys), optional, intent(  out) :: re_cloud(1:ncol,1:nlev)
          real(kind_phys), optional, intent(  out) :: re_ice(1:ncol,1:nlev)
@@ -400,6 +406,9 @@ module mp_thompson
          ! Vertical velocity and level width
          real(kind_phys) :: w(1:ncol,1:nlev)                !< m s-1
          real(kind_phys) :: dz(1:ncol,1:nlev)               !< m
+         real(kind_phys) :: dp0(1:ncol,1:nlev)   ! pascal
+         real(kind_phys) :: dp1(1:ncol,1:nlev)   ! pascal
+         real(kind_phys) :: omq(1:ncol,1:nlev)
          ! Rain/snow/graupel fall amounts
          real(kind_phys) :: rain_mp(1:ncol)                 ! mm, dummy, not used
          real(kind_phys) :: graupel_mp(1:ncol)              ! mm, dummy, not used
@@ -439,6 +448,12 @@ module mp_thompson
             return
          end if
 
+         dp1 = del! ! moist air mass * grav
+         dp0 = dp1
+         dp1 = dp1 * (1.0_kind_phys-spechum)
+
+         omq = dp0 / dp1
+
          if (is_aerosol_aware .and. .not. (present(nc)     .and. &
                                            present(nwfa)   .and. &
                                            present(nifa)   .and. &
@@ -456,21 +471,21 @@ module mp_thompson
          !> - Also, hydrometeor variables are mass or number mixing ratio
          !> - either kg of species per kg of dry air, or per kg of (dry + vapor).
 
-         qv = spechum/(1.0_kind_phys-spechum)
+         qv = spechum*omq
 
          if (convert_dry_rho) then
-           qc = qc/(1.0_kind_phys-spechum)
-           qr = qr/(1.0_kind_phys-spechum)
-           qi = qi/(1.0_kind_phys-spechum)
-           qs = qs/(1.0_kind_phys-spechum)
-           qg = qg/(1.0_kind_phys-spechum)
+           qc = qc*omq
+           qr = qr*omq
+           qi = qi*omq
+           qs = qs*omq
+           qg = qg*omq
 
-           ni = ni/(1.0_kind_phys-spechum)
-           nr = nr/(1.0_kind_phys-spechum)
+           ni = ni*omq
+           nr = nr*omq
            if (is_aerosol_aware) then
-              nc = nc/(1.0_kind_phys-spechum)
-              nwfa = nwfa/(1.0_kind_phys-spechum)
-              nifa = nifa/(1.0_kind_phys-spechum)
+              nc = nc*omq
+              nwfa = nwfa*omq
+              nifa = nifa*omq
            end if
          end if
 
@@ -549,7 +564,7 @@ module mp_thompson
          if (is_aerosol_aware) then
             call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
                               nc=nc, nwfa=nwfa, nifa=nifa, nwfa2d=nwfa2d, nifa2d=nifa2d,     &
-                              tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtp,                        &
+                              tt=tgrs, p=prsl, w=w, dz=dz, deld=dp1, dt_in=dtp,                        &
                               rainnc=rain_mp, rainncv=delta_rain_mp,                         &
                               snownc=snow_mp, snowncv=delta_snow_mp,                         &
                               icenc=ice_mp, icencv=delta_ice_mp,                             &
@@ -562,6 +577,7 @@ module mp_thompson
                               ! DH* 2020-06-05 not passing this optional argument, see
                               !       comment in module_mp_thompson.F90 / mp_gt_driver
                               !rand_pert=rand_pert,                                          &
+                              fcons=fcons, ffixneg=ffixneg, crtclw=crtclw, srhci=srhci,      &
                               ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
                               ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                               its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
@@ -569,7 +585,7 @@ module mp_thompson
 
          else
             call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
-                              tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtp,                        &
+                              tt=tgrs, p=prsl, w=w, dz=dz, deld=dp1, dt_in=dtp,              &
                               rainnc=rain_mp, rainncv=delta_rain_mp,                         &
                               snownc=snow_mp, snowncv=delta_snow_mp,                         &
                               icenc=ice_mp, icencv=delta_ice_mp,                             &
@@ -582,6 +598,7 @@ module mp_thompson
                               ! DH* 2020-06-05 not passing this optional argument, see
                               !       comment in module_mp_thompson.F90 / mp_gt_driver
                               !rand_pert=rand_pert,                                          &
+                              fcons=fcons, ffixneg=ffixneg, crtclw=crtclw, srhci=srhci,      &
                               ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
                               ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                               its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
@@ -590,21 +607,22 @@ module mp_thompson
          if (errflg/=0) return
 
          !> - Convert water vapor mixing ratio back to specific humidity
-         spechum = qv/(1.0_kind_phys+qv)
+         omq = dp1 / dp0
+         spechum = qv*omq
 
          if (convert_dry_rho) then
-           qc = qc/(1.0_kind_phys+qv)
-           qr = qr/(1.0_kind_phys+qv)
-           qi = qi/(1.0_kind_phys+qv)
-           qs = qs/(1.0_kind_phys+qv)
-           qg = qg/(1.0_kind_phys+qv)
+           qc = qc*omq
+           qr = qr*omq
+           qi = qi*omq
+           qs = qs*omq
+           qg = qg*omq
 
-           ni = ni/(1.0_kind_phys+qv)
-           nr = nr/(1.0_kind_phys+qv)
+           ni = ni*omq
+           nr = nr*omq
            if (is_aerosol_aware) then
-              nc = nc/(1.0_kind_phys+qv)
-              nwfa = nwfa/(1.0_kind_phys+qv)
-              nifa = nifa/(1.0_kind_phys+qv)
+              nc = nc*omq
+              nwfa = nwfa*omq
+              nifa = nifa*omq
            end if
          end if
 

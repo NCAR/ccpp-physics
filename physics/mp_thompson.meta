@@ -545,6 +545,15 @@
   kind = kind_phys
   intent = in
   optional = F
+[del]
+  standard_name = air_pressure_difference_between_midlayers
+  long_name = difference between mid-layer pressures
+  units = Pa
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [prcp]
   standard_name = lwe_thickness_of_explicit_precipitation_amount
   long_name = explicit precipitation (rain, ice, snow, graupel) on physics timestep
@@ -622,6 +631,40 @@
   units = flag
   dimensions = ()
   type = logical
+  intent = in
+  optional = F
+[fcons]
+  standard_name = flag_for_constraints
+  long_name = flag for constraints
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[ffixneg]
+  standard_name = flag_for_fixing_negative_traces
+  long_name = flag for fixing negative traces
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[crtclw]
+  standard_name = critical_value_for_cloud_water_to_rain
+  long_name = critical value for cloud water to rain
+  units = kg kg-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[srhci]
+  standard_name = critical_super_rh_for_ice_generation
+  long_name = critical super rh for ice generation
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
   intent = in
   optional = F
 [re_cloud]
