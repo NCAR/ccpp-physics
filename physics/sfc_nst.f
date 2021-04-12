@@ -27,8 +27,13 @@
 !> @{
       subroutine sfc_nst_run                                            &
      &     ( im, hvap, cp, hfus, jcal, eps, epsm1, rvrdm1, rd, rhw0,    &  ! --- inputs:
+<<<<<<< HEAD
      &       pi, sbc, ps, u1, v1, t1, q1, tref, cm, ch,                 &
      &       prsl1, prslki, prsik1, prslk1, wet, lake, xlon, sinlat,    &
+=======
+     &       pi, tgice, sbc, ps, u1, v1, t1, q1, tref, cm, ch,                 &
+     &       prsl1, prslki, prsik1, prslk1, wet, xlon, sinlat,          &
+>>>>>>> 990b9d0416e340e40e4b136561a85f63d46671e2
      &       stress,                                                    &
      &       sfcemis, dlwflx, sfcnsw, rain, timestep, kdt, solhr,xcosz, &
      &       wind, flag_iter, flag_guess, nstf_name1, nstf_name4,       &
@@ -187,7 +192,7 @@
       integer, intent(in) :: im, kdt, ipr, nstf_name1, nstf_name4,      &
      &       nstf_name5
       real (kind=kind_phys), intent(in) :: hvap, cp, hfus, jcal, eps,   &
-     &       epsm1, rvrdm1, rd, rhw0, sbc, pi
+     &       epsm1, rvrdm1, rd, rhw0, sbc, pi, tgice
       real (kind=kind_phys), dimension(im), intent(in) :: ps, u1, v1,   &
      &       t1, q1, tref, cm, ch, prsl1, prslki, prsik1, prslk1,       &
      &       xlon,xcosz,                                                &
@@ -555,7 +560,7 @@ cc
 !>  - Call get_dtzm_point() to computes \a dtz and \a tsurf.
           call get_dtzm_point(xt(i),xz(i),dt_cool(i),z_c(i),
      &                        zsea1,zsea2,dtz)
-          tsurf(i) = max(271.2_kp, tref(i) + dtz )
+          tsurf(i) = max(tgice, tref(i) + dtz )
 
 !     if (lprnt .and. i == ipr) print *,' tsurf=',tsurf(i),' tref=',
 !    &tref(i),' xz=',xz(i),' dt_cool=',dt_cool(i)
@@ -670,7 +675,11 @@ cc
 !> \section NSST_general_pre_algorithm General Algorithm
 !! @{
       subroutine sfc_nst_pre_run
+<<<<<<< HEAD
      &    (im, wet, lake, tsfc_wat, tsurf_wat, tseal, xt, xz, dt_cool,
+=======
+     &    (im,wet,tgice,tsfco,tsfc_wat,tsurf_wat,tseal,xt,xz,dt_cool,
+>>>>>>> 990b9d0416e340e40e4b136561a85f63d46671e2
      &     z_c, tref, cplflx, oceanfrac, nthreads, errmsg, errflg)
 
       use machine , only : kind_phys
@@ -682,9 +691,14 @@ cc
 
 !  ---  inputs:
       integer, intent(in) :: im, nthreads
+<<<<<<< HEAD
       logical, dimension(im), intent(in) :: wet, lake
+=======
+      logical, dimension(im), intent(in) :: wet
+      real (kind=kind_phys), intent(in) :: tgice
+>>>>>>> 990b9d0416e340e40e4b136561a85f63d46671e2
       real (kind=kind_phys), dimension(im), intent(in) ::
-     &      tsfc_wat, xt, xz, dt_cool, z_c, oceanfrac
+     &  tsfco, tsfc_wat, xt, xz, dt_cool, z_c, oceanfrac
       logical, intent(in) :: cplflx
 
 !  ---  input/outputs:
@@ -702,7 +716,7 @@ cc
      &                                   half = 0.5_kp,
      &                                   omz1 = 2.0_kp
       real(kind=kind_phys) :: tem1, tem2, dnsst
-      real(kind=kind_phys), dimension(im) :: dtzm
+      real(kind=kind_phys), dimension(im) :: dtzm,z_c_0
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -724,6 +738,7 @@ cc
 !   update tsfc & tref with T1 from OGCM & NSST Profile if coupled
 !
       if (cplflx) then
+<<<<<<< HEAD
         call get_dtzm_2d (xt,  xz, dt_cool,
      &                    z_c, wet, lake, zero, omz1, im, 1,
      &                    nthreads, dtzm)
@@ -732,6 +747,16 @@ cc
 !           dnsst   = tsfc_wat(i) - tref(i)          !  retrive/get difference of Ts and Tf
             tref(i) = tsfc_wat(i) - dtzm(i)          !  update Tf with T1 and NSST T-Profile
 !           tsfc_wat(i) = max(271.2,tref(i) + dnsst) !  get Ts updated due to Tf update
+=======
+        z_c_0 = 0.0
+        call get_dtzm_2d (xt,  xz, dt_cool,                             &
+     &                    z_c_0, wet, zero, omz1, im, 1, nthreads, dtzm)
+        do i=1,im
+          if (wet(i) .and. oceanfrac(i) > zero) then
+!           dnsst   = tsfc_wat(i) - tref(i)                 !  retrive/get difference of Ts and Tf
+            tref(i) = max(tgice, tsfco(i) - dtzm(i))        !  update Tf with T1 and NSST T-Profile
+!           tsfc_wat(i) = max(271.2,tref(i) + dnsst)        !  get Ts updated due to Tf update
+>>>>>>> 990b9d0416e340e40e4b136561a85f63d46671e2
 !           tseal(i)    = tsfc_wat(i)
             if (abs(xz(i)) > zero) then
               tem2 = one / xz(i)
@@ -776,7 +801,11 @@ cc
 ! \section NSST_detailed_post_algorithm Detailed Algorithm
 ! @{
       subroutine sfc_nst_post_run                                       &
+<<<<<<< HEAD
      &     ( im, rlapse, tgice, wet, lake,icy, oro, oro_uf, nstf_name1, &
+=======
+     &     ( im, kdt, rlapse, tgice, wet, icy, oro, oro_uf, nstf_name1, &
+>>>>>>> 990b9d0416e340e40e4b136561a85f63d46671e2
      &       nstf_name4, nstf_name5, xt, xz, dt_cool, z_c, tref, xlon,  &
      &       tsurf_wat, tsfc_wat, nthreads, dtzm, errmsg, errflg        &
      &     )
@@ -789,8 +818,13 @@ cc
       integer, parameter :: kp = kind_phys
 
 !  ---  inputs:
+<<<<<<< HEAD
       integer, intent(in) :: im, nthreads
       logical, dimension(im), intent(in) :: wet, icy, lake
+=======
+      integer, intent(in) :: im, kdt, nthreads
+      logical, dimension(im), intent(in) :: wet, icy
+>>>>>>> 990b9d0416e340e40e4b136561a85f63d46671e2
       real (kind=kind_phys), intent(in) :: rlapse, tgice
       real (kind=kind_phys), dimension(im), intent(in) :: oro, oro_uf
       integer, intent(in) :: nstf_name1, nstf_name4, nstf_name5
