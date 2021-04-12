@@ -39,6 +39,14 @@
   type = integer
   intent = in
   optional = F
+[rtg_ozone_index]
+  standard_name = vertically_diffused_tracer_index_of_ozone
+  long_name = number of tracers
+  units = count
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
 [ntqv]
   standard_name = index_for_water_vapor
   long_name = tracer index for water vapor (specific humidity)
@@ -348,6 +356,14 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = F
+[flag_for_pbl_generic_tend]
+  standard_name = flag_for_generic_planetary_boundary_layer_tendency
+  long_name = true if GFS_PBL_generic should calculate tendencies
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
   optional = F
 [ldiag3d]
   standard_name = flag_diagnostics_3D
@@ -724,14 +740,6 @@
   type = logical
   intent = in
   optional = F
-[qdiag3d]
-  standard_name = flag_tracer_diagnostics_3D
-  long_name = flag for 3d tracer diagnostic fields
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
 [lsidea]
   standard_name = flag_idealized_physics
   long_name = flag for idealized physics
@@ -814,6 +822,55 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
+  intent = in
+  optional = F
+[dtend]
+  standard_name = cumulative_change_of_state_variables
+  long_name = diagnostic tendencies for state variables
+  units = various
+  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_cumulative_change_processes)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dtidx]
+  standard_name = cumulative_change_of_state_variables_outer_index
+  long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
+  units = index
+  dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
+  type = integer
+  intent = in
+  optional = F
+[index_of_temperature]
+  standard_name = index_of_temperature_in_cumulative_change_index
+  long_name = index of temperature in first dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[index_of_x_wind]
+  standard_name = index_of_x_wind_in_cumulative_change_index
+  long_name = index of x-wind in first dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[index_of_y_wind]
+  standard_name = index_of_y_wind_in_cumulative_change_index
+  long_name = index of x-wind in first dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[index_of_process_pbl]
+  standard_name = index_of_subgrid_scale_vertical_mixing_process_in_cumulative_change_index
+  long_name = index of subgrid scale vertical mixing process in second dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
   intent = in
   optional = F
 [dqsfc1]
@@ -1037,69 +1094,6 @@
   long_name = instantaneous sfc latent heat flux multiplied by timestep
   units = W m-2
   dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[dt3dt]
-  standard_name = cumulative_change_in_temperature_due_to_PBL
-  long_name = cumulative change in temperature due to PBL
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[du3dt_PBL]
-  standard_name = cumulative_change_in_x_wind_due_to_PBL
-  long_name = cumulative change in x wind due to PBL
-  units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[du3dt_OGWD]
-  standard_name = cumulative_change_in_x_wind_due_to_orographic_gravity_wave_drag
-  long_name = cumulative change in x wind due to orographic gravity wave drag
-  units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[dv3dt_PBL]
-  standard_name = cumulative_change_in_y_wind_due_to_PBL
-  long_name = cumulative change in y wind due to PBL
-  units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[dv3dt_OGWD]
-  standard_name = cumulative_change_in_y_wind_due_to_orographic_gravity_wave_drag
-  long_name = cumulative change in y wind due to orographic gravity wave drag
-  units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[dq3dt]
-  standard_name = cumulative_change_in_water_vapor_specific_humidity_due_to_PBL
-  long_name = cumulative change in water vapor specific humidity due to PBL
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[dq3dt_ozone]
-  standard_name = cumulative_change_in_ozone_mixing_ratio_due_to_PBL
-  long_name = cumulative change in ozone mixing ratio due to PBL
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout

@@ -14,22 +14,24 @@
 !> \section arg_table_GFS_SCNV_generic_pre_run Argument Table
 !! \htmlinclude GFS_SCNV_generic_pre_run.html
 !!
-      subroutine GFS_SCNV_generic_pre_run (im, levs, ldiag3d, qdiag3d, gu0, gv0, gt0, gq0_water_vapor, &
-        save_u, save_v, save_t, save_qv, flag_for_scnv_generic_tend, errmsg, errflg)
+      subroutine GFS_SCNV_generic_pre_run (im, levs, ldiag3d, qdiag3d, gu0, gv0, gt0, gq0, &
+        save_u, save_v, save_t, save_q, ntqv, nsamftrac, flag_for_scnv_generic_tend,       &
+        dtidx, index_of_process_scnv, errmsg, errflg)
 
         use machine,               only: kind_phys
 
         implicit none
 
-        integer, intent(in) :: im, levs
+        integer, intent(in) :: im, levs, ntqv, nsamftrac, index_of_process_scnv, dtidx(:,:)
         logical, intent(in) :: ldiag3d, qdiag3d, flag_for_scnv_generic_tend
-        real(kind=kind_phys), dimension(im,levs), intent(in) :: gu0, gv0, gt0, gq0_water_vapor
-
-        real(kind=kind_phys), dimension(im,levs), intent(inout) :: save_u, save_v, save_t, save_qv
+        real(kind=kind_phys), dimension(im,levs), intent(in) :: gu0, gv0, gt0
+        real(kind=kind_phys), intent(in) :: gq0(:,:,:)
+        real(kind=kind_phys), intent(inout) :: save_q(:,:,:)
+        real(kind=kind_phys), dimension(im,levs), intent(inout) :: save_u, save_v, save_t
         character(len=*),                 intent(out) :: errmsg
         integer,                          intent(out) :: errflg
 
-        integer :: i, k
+        integer :: i, k, n
 
         ! Initialize CCPP error handling variables
         errmsg = ''
@@ -44,11 +46,15 @@
             enddo
           enddo
           if (qdiag3d) then
-             do k=1,levs
-                do i=1,im
-                   save_qv(i,k) = gq0_water_vapor(i,k)
-                enddo
-             enddo
+            if(nsamftrac>0) then
+              do n=1,nsamftrac
+                if(n==ntqv .or. dtidx(ntqv,index_of_process_scnv)>=1) then
+                  save_q(:,:,n) = gq0(:,:,n)
+                endif
+              enddo
+            else
+              save_q(:,:,ntqv) = gq0(:,:,ntqv)
+            endif
           endif
        endif
 
@@ -70,26 +76,30 @@
 !> \section arg_table_GFS_SCNV_generic_post_run Argument Table
 !! \htmlinclude GFS_SCNV_generic_post_run.html
 !!
-      subroutine GFS_SCNV_generic_post_run (im, levs, nn, lssav, ldiag3d, qdiag3d, cplchm, &
-        frain, gu0, gv0, gt0, gq0_water_vapor, save_u, save_v, save_t, save_qv, dqdti, du3dt, dv3dt, dt3dt, dq3dt, clw,   &
-        shcnvcw, rain1, npdf3d, num_p3d, ncnvcld3d, cnvc, cnvw,                   &
-        rainc, cnvprcp, cnvprcpb, cnvw_phy_f3d, cnvc_phy_f3d,                     &
-        flag_for_scnv_generic_tend,                                               &
+      subroutine GFS_SCNV_generic_post_run (im, levs, nn, lssav, ldiag3d, qdiag3d, &
+        cplchm, frain, gu0, gv0, gt0, gq0, save_u, save_v, save_t, save_q, dqdti,  &
+        clw, shcnvcw, rain1, npdf3d, num_p3d, ncnvcld3d, cnvc, cnvw, nsamftrac,    &
+        rainc, cnvprcp, cnvprcpb, cnvw_phy_f3d, cnvc_phy_f3d,                      &
+        dtend, dtidx, index_of_temperature, index_of_x_wind, index_of_y_wind,      &
+        index_of_process_scnv, ntqv, flag_for_scnv_generic_tend,                   &
         imfshalcnv, imfshalcnv_sas, imfshalcnv_samf, errmsg, errflg)
 
       use machine,               only: kind_phys
 
       implicit none
 
-      integer, intent(in) :: im, levs, nn
+      integer, intent(in) :: im, levs, nn, ntqv, nsamftrac
       logical, intent(in) :: lssav, ldiag3d, qdiag3d, cplchm, flag_for_scnv_generic_tend
       real(kind=kind_phys),                     intent(in) :: frain
-      real(kind=kind_phys), dimension(im,levs), intent(in) :: gu0, gv0, gt0, gq0_water_vapor
-      real(kind=kind_phys), dimension(im,levs), intent(in) :: save_u, save_v, save_t, save_qv
+      real(kind=kind_phys), dimension(im,levs), intent(in) :: gu0, gv0, gt0
+      real(kind=kind_phys), dimension(im,levs), intent(in) :: save_u, save_v, save_t
+      real(kind=kind_phys), dimension(:,:,:),   intent(in) :: save_q, gq0
 
-      ! dqdti, dt3dt, dq3dt, only allocated if ldiag3d == .true.
+      ! dtend only allocated if ldiag3d == .true.
       real(kind=kind_phys), dimension(:,:), intent(inout) :: dqdti
-      real(kind=kind_phys), dimension(:,:), intent(inout) :: du3dt, dv3dt, dt3dt, dq3dt
+      real(kind=kind_phys), intent(inout), optional :: dtend(:,:,:)
+      integer, intent(in) :: dtidx(:,:)
+      integer, intent(in) :: index_of_temperature, index_of_x_wind, index_of_y_wind, index_of_process_scnv
       real(kind=kind_phys), dimension(im,levs,nn), intent(inout) :: clw
 
       ! Post code for SAS/SAMF
@@ -108,7 +118,7 @@
       character(len=*),              intent(out) :: errmsg
       integer,                       intent(out) :: errflg
 
-      integer :: i, k
+      integer :: i, k, n, idtend
       real(kind=kind_phys) :: tem
 
       ! Initialize CCPP error handling variables
@@ -138,19 +148,33 @@
 
       if (lssav .and. flag_for_scnv_generic_tend) then
         if (ldiag3d) then
-          do k=1,levs
-            do i=1,im
-              du3dt(i,k) = du3dt(i,k) + (gu0(i,k) - save_u(i,k)) * frain
-              dv3dt(i,k) = dv3dt(i,k) + (gv0(i,k) - save_v(i,k)) * frain
-              dt3dt(i,k) = dt3dt(i,k) + (gt0(i,k) - save_t(i,k)) * frain
+          idtend = dtidx(index_of_temperature, index_of_process_scnv)
+          if(idtend>=1) then
+             dtend(:,:,idtend) = dtend(:,:,idtend) + (gt0 - save_t) * frain
+          endif
+
+          idtend = dtidx(index_of_x_wind, index_of_process_scnv)
+          if(idtend>=1) then
+             dtend(:,:,idtend) = dtend(:,:,idtend) + (gu0 - save_u) * frain
+          endif
+
+          idtend = dtidx(index_of_y_wind, index_of_process_scnv)
+          if(idtend>=1) then
+             dtend(:,:,idtend) = dtend(:,:,idtend) + (gv0 - save_v) * frain
+          endif
+
+          if(nsamftrac>0) then
+            do n=1,nsamftrac
+              idtend = dtidx(100+n, index_of_process_scnv)
+              if(idtend>=1) then
+                dtend(:,:,idtend) = dtend(:,:,idtend) + (gq0(:,:,n) - save_q(:,:,n)) * frain
+              endif
             enddo
-          enddo
-          if (qdiag3d) then
-             do k=1,levs
-                do i=1,im
-                   dq3dt(i,k) = dq3dt(i,k) + (gq0_water_vapor(i,k) - save_qv(i,k)) * frain
-                enddo
-             enddo
+          else
+            idtend = dtidx(100+ntqv, index_of_process_scnv)
+            if(idtend>=1) then
+              dtend(:,:,idtend) = dtend(:,:,idtend) + (gq0(:,:,ntqv) - save_q(:,:,ntqv)) * frain
+            endif
           endif
         endif
       endif
@@ -158,7 +182,7 @@
       if (cplchm) then
         do k=1,levs
           do i=1,im
-            tem  = (gq0_water_vapor(i,k)-save_qv(i,k)) * frain
+            tem  = (gq0(i,k,ntqv)-save_q(i,k,ntqv)) * frain
             dqdti(i,k) = dqdti(i,k) + tem
           enddo
         enddo

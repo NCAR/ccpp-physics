@@ -34,9 +34,10 @@
                   dusfc,dvsfc,dtsfc,dqsfc,                                     &
                   dt,kpbl1d,                                                   &
                   u10,v10,                                                     &
-                  dx,lssav,ldiag3d,qdiag3d,                                    &
-                  flag_for_pbl_generic_tend,ntoz,du3dt_PBL,dv3dt_PBL,          &
-                  dt3dt_PBL,dq3dt_PBL,do3dt_PBL,errmsg,errflg )
+                  dx,lssav,ldiag3d,                                            &
+                  flag_for_pbl_generic_tend,ntoz,ntqv,dtend,dtidx,             &
+                  index_of_process_pbl,index_of_temperature,index_of_x_wind,   &
+                  index_of_y_wind,errmsg,errflg )
 
    use machine , only : kind_phys
 !
@@ -108,8 +109,7 @@
 ! 1D in
    integer,  intent(in   )   ::     im,km,ntrac,ndiff,ntcw,ntiw,ntoz
    real(kind=kind_phys),     intent(in   )   ::     g,cp,rd,rv,ep1,ep2,xlv,dt
-   logical,  intent(in   )   :: lssav, ldiag3d, qdiag3d,                       &
-                                flag_for_pbl_generic_tend
+   logical,  intent(in   )   :: lssav, ldiag3d, flag_for_pbl_generic_tend
 ! 3D in
    real(kind=kind_phys),     dimension(im, km)                                               , &
              intent(in   )   ::                                          phil, &
@@ -131,8 +131,7 @@
                                                                          ttnp
    real(kind=kind_phys),     dimension(im, km, ntrac )                                       , &
              intent(inout)   ::                                          qtnp
-   real(kind=kind_phys),     dimension(:,:)                                                  , &
-             intent(inout)   :: du3dt_PBL, dv3dt_PBL, dt3dt_PBL, dq3dt_PBL, do3dt_PBL
+
 ! 2D in
    integer,  dimension(im)                                                   , &
              intent(in   )   ::                                      landmask
@@ -160,6 +159,14 @@
                                                                         dvsfc, &
                                                                         dtsfc, &
                                                                         dqsfc
+
+   ! 3D diagnostic tendencies; dtend is only allocated if ldiag3d=.true.
+   real(kind=kind_phys), intent(inout), optional :: dtend(:,:,:)
+   integer, intent(in) :: dtidx(:,:), index_of_process_pbl, ntqv, &
+        index_of_x_wind, index_of_y_wind, index_of_temperature
+
+   ! Index within dtend third dimension for tendency of interest:
+   integer :: idtend
 
 ! error messages
    character(len=*), intent(out)    ::                                 errmsg
@@ -963,12 +970,10 @@
      enddo
    enddo
    if(lssav .and. ldiag3d .and. .not. flag_for_pbl_generic_tend) then
-     do k = kte,kts,-1
-       do i = its,ite
-         ttend = (f1(i,k)-thx(i,k)+300.)*rdt*pi2d(i,k)
-         dt3dt_PBL(i,k) = dt3dt_PBL(i,k) + ttend*dtstep
-       enddo
-     enddo
+     idtend = dtidx(index_of_temperature,index_of_process_pbl)
+     if(idtend>=1) then
+       dtend(:,:,idtend) = dtend(:,:,idtend) + dtstep*(f1-thx+300.)*rdt*pi2d
+     endif
    endif
 !
 !     compute tridiagonal matrix elements for moisture, clouds, and gases
@@ -1094,13 +1099,11 @@
        tvflux_e(i,k) = tflux_e(i,k) + qflux_e(i,k)*ep1*thx(i,k)
      enddo
    enddo
-   if(lssav .and. ldiag3d .and. qdiag3d .and. .not. flag_for_pbl_generic_tend) then
-     do k = kte,kts,-1
-       do i = its,ite
-         qtend = (f3(i,k,1)-qx(i,k,1))*rdt
-         dq3dt_PBL(i,k) = dq3dt_PBL(i,k) + qtend*dtstep
-       enddo
-     enddo
+   if(lssav .and. ldiag3d .and. .not. flag_for_pbl_generic_tend) then
+     idtend = dtidx(ntqv+100,index_of_process_pbl)
+     if(idtend>=1) then
+       dtend(:,:,idtend) = dtend(:,:,idtend) + dtstep*rdt*(f3(:,:,1)-qx(:,:,1))
+     endif
    endif
 !   print*,"qtnp:",maxval(qtnp(:,:,1)),minval(qtnp(:,:,1))
 !
@@ -1131,15 +1134,12 @@
          enddo
        endif
      enddo
-     if(lssav .and. ldiag3d .and. ntoz>0 .and. qdiag3d .and.         &
+     if(lssav .and. ldiag3d .and. ntoz>0 .and.         &
   &               .not. flag_for_pbl_generic_tend) then
-       ic = ntoz
-       do k = kte,kts,-1
-         do i = its,ite
-           qtend = f3(i,k,ic)-qx(i,k,ic)
-           do3dt_PBL(i,k) = do3dt_PBL(i,k)+qtend
-         enddo
-       enddo
+       idtend=dtidx(ntoz+100,index_of_process_pbl)
+       if(idtend>=1) then
+         dtend(:,:,idtend) = dtend(:,:,idtend) + qtend*(f3(:,:,ntoz)-qx(:,:,ntoz))
+       endif
      endif
    endif
 !
@@ -1233,14 +1233,14 @@
      enddo
    enddo
    if(lssav .and. ldiag3d .and. .not. flag_for_pbl_generic_tend) then
-     do k = kte,kts,-1
-       do i = its,ite
-         utend = (f1(i,k)-ux(i,k))*rdt
-         vtend = (f2(i,k)-vx(i,k))*rdt
-         du3dt_PBL(i,k) = du3dt_PBL(i,k) + utend*dtstep
-         dv3dt_PBL(i,k) = dv3dt_PBL(i,k) + vtend*dtstep
-       enddo
-     enddo
+     idtend=dtidx(index_of_x_wind,index_of_process_pbl)
+     if(idtend>=1) then
+       dtend(:,:,idtend) = dtend(:,:,idtend) + dtstep*rdt*(f1-ux)
+     endif
+     idtend=dtidx(index_of_y_wind,index_of_process_pbl)
+     if(idtend>=1) then
+       dtend(:,:,idtend) = dtend(:,:,idtend) + dtstep*rdt*(f2-vx)
+     endif
    endif
 !
    do i = its,ite

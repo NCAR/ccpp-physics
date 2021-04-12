@@ -19,81 +19,82 @@ contains
 !> \section arg_table_phys_tend_run Argument Table
 !! \htmlinclude phys_tend_run.html
 !!
-   subroutine phys_tend_run(ldiag3d, qdiag3d,                &
-       du3dt_pbl, du3dt_orogwd, du3dt_deepcnv, du3dt_congwd,  &
-       du3dt_rdamp, du3dt_shalcnv, du3dt_phys,                &
-       dv3dt_pbl, dv3dt_orogwd, dv3dt_deepcnv, dv3dt_congwd,  &
-       dv3dt_rdamp, dv3dt_shalcnv, dv3dt_phys,                &
-       dt3dt_lw, dt3dt_sw, dt3dt_pbl, dt3dt_deepcnv,          &
-       dt3dt_shalcnv, dt3dt_mp, dt3dt_orogwd, dt3dt_rdamp,    &
-       dt3dt_congwd, dt3dt_phys,                              &
-       dq3dt_pbl, dq3dt_deepcnv, dq3dt_shalcnv, dq3dt_mp,     &
-       dq3dt_o3pbl, dq3dt_o3prodloss, dq3dt_o3mix,            &
-       dq3dt_o3tmp, dq3dt_o3column, dq3dt_phys, dq3dt_o3phys, &
-       errmsg, errflg)
+   subroutine phys_tend_run(ldiag3d, dtend, dtidx, ntracp100, &
+       index_of_process_physics, index_of_process_photochem,  &
+       nprocess, nprocess_summed, is_photochem, ntoz, errmsg, errflg)
 
        ! Interface variables
-       logical, intent(in) :: ldiag3d, qdiag3d
-       real(kind=kind_phys), intent(in   ) :: du3dt_pbl(:,:)
-       real(kind=kind_phys), intent(in   ) :: du3dt_orogwd(:,:)
-       real(kind=kind_phys), intent(in   ) :: du3dt_deepcnv(:,:)
-       real(kind=kind_phys), intent(in   ) :: du3dt_congwd(:,:)
-       real(kind=kind_phys), intent(in   ) :: du3dt_rdamp(:,:)
-       real(kind=kind_phys), intent(in   ) :: du3dt_shalcnv(:,:)
-       real(kind=kind_phys), intent(  out) :: du3dt_phys(:,:)
-       real(kind=kind_phys), intent(in   ) :: dv3dt_pbl(:,:)
-       real(kind=kind_phys), intent(in   ) :: dv3dt_orogwd(:,:)
-       real(kind=kind_phys), intent(in   ) :: dv3dt_deepcnv(:,:)
-       real(kind=kind_phys), intent(in   ) :: dv3dt_congwd(:,:)
-       real(kind=kind_phys), intent(in   ) :: dv3dt_rdamp(:,:)
-       real(kind=kind_phys), intent(in   ) :: dv3dt_shalcnv(:,:)
-       real(kind=kind_phys), intent(  out) :: dv3dt_phys(:,:)
-       real(kind=kind_phys), intent(in   ) :: dt3dt_lw(:,:)
-       real(kind=kind_phys), intent(in   ) :: dt3dt_sw(:,:)
-       real(kind=kind_phys), intent(in   ) :: dt3dt_pbl(:,:)
-       real(kind=kind_phys), intent(in   ) :: dt3dt_deepcnv(:,:)
-       real(kind=kind_phys), intent(in   ) :: dt3dt_shalcnv(:,:)
-       real(kind=kind_phys), intent(in   ) :: dt3dt_mp(:,:)
-       real(kind=kind_phys), intent(in   ) :: dt3dt_orogwd(:,:)
-       real(kind=kind_phys), intent(in   ) :: dt3dt_rdamp(:,:)
-       real(kind=kind_phys), intent(in   ) :: dt3dt_congwd(:,:)
-       real(kind=kind_phys), intent(  out) :: dt3dt_phys(:,:)
-       real(kind=kind_phys), intent(in   ) :: dq3dt_pbl(:,:)
-       real(kind=kind_phys), intent(in   ) :: dq3dt_deepcnv(:,:)
-       real(kind=kind_phys), intent(in   ) :: dq3dt_shalcnv(:,:)
-       real(kind=kind_phys), intent(in   ) :: dq3dt_mp(:,:)
-       real(kind=kind_phys), intent(in   ) :: dq3dt_o3pbl(:,:)
-       real(kind=kind_phys), intent(in   ) :: dq3dt_o3prodloss(:,:)
-       real(kind=kind_phys), intent(in   ) :: dq3dt_o3mix(:,:)
-       real(kind=kind_phys), intent(in   ) :: dq3dt_o3tmp(:,:)
-       real(kind=kind_phys), intent(in   ) :: dq3dt_o3column(:,:)
-       real(kind=kind_phys), intent(  out) :: dq3dt_phys(:,:)
-       real(kind=kind_phys), intent(  out) :: dq3dt_o3phys(:,:)
+       logical, intent(in) :: ldiag3d, is_photochem(:)
+       real(kind=kind_phys), optional, intent(inout) :: dtend(:,:,:)
+       integer, intent(in) :: dtidx(:,:), index_of_process_physics, ntoz, &
+         ntracp100, nprocess, nprocess_summed, index_of_process_photochem
        character(len=*), intent(out) :: errmsg
        integer, intent(out)          :: errflg
+
+       integer :: ichem, iphys, itrac
+       logical :: all_true(nprocess)
 
        ! Initialize CCPP error handling variables
        errmsg = ''
        errflg = 0
 
-       if (.not.ldiag3d .and. .not.qdiag3d) return
+       if(.not.ldiag3d) then
+          return
+       endif
 
-       du3dt_phys   = du3dt_pbl + du3dt_orogwd + du3dt_deepcnv + &
-                      du3dt_congwd + du3dt_rdamp + du3dt_shalcnv
+       all_true = .true.
 
-       dv3dt_phys   = dv3dt_pbl + dv3dt_orogwd + dv3dt_deepcnv + &
-                      dv3dt_congwd + dv3dt_rdamp + dv3dt_shalcnv
+       ! Total photochemical tendencies
+       itrac=ntoz+100
+       ichem = dtidx(itrac,index_of_process_photochem)
+       if(ichem>=1) then
+          call sum_it(ichem,itrac,is_photochem)
+       endif
 
-       dt3dt_phys   = dt3dt_lw + dt3dt_sw + dt3dt_pbl +          &
-                      dt3dt_deepcnv + dt3dt_shalcnv + dt3dt_mp + &
-                      dt3dt_orogwd + dt3dt_rdamp + dt3dt_congwd
 
-       dq3dt_phys   = dq3dt_pbl + dq3dt_deepcnv +                &
-                      dq3dt_shalcnv + dq3dt_mp
+       do itrac=2,ntracp100
+          ! Total physics tendencies
+          iphys = dtidx(itrac,index_of_process_physics)
+          if(iphys>=1) then
+             call sum_it(iphys,itrac,all_true)
+          endif
+       enddo
 
-       dq3dt_o3phys = dq3dt_o3pbl + dq3dt_o3prodloss             &
-                      + dq3dt_o3mix + dq3dt_o3tmp + dq3dt_o3column
+     contains
+       
+       subroutine sum_it(isum,itrac,sum_me)
+         implicit none
+         integer, intent(in) :: isum ! third index of dtend of summary process
+         integer, intent(in) :: itrac ! tracer or state variable being summed
+         logical, intent(in) :: sum_me(nprocess) ! false = skip this process
+         logical :: first
+         integer :: idtend, iprocess
 
+         first=.true.
+         do iprocess=1,nprocess
+            if(iprocess>nprocess_summed) then
+               exit ! Don't sum up the sums.
+            else if(.not.sum_me(iprocess)) then
+               cycle ! We were asked to skip this one.
+            endif
+            idtend = dtidx(itrac,iprocess)
+            if(idtend>=1) then
+               ! This tendency was calculated for this tracer, so
+               ! accumulate it into the total tendency.
+               if(first) then
+                  dtend(:,:,isum) = dtend(:,:,idtend)
+                  first=.false.
+               else
+                  dtend(:,:,isum) = dtend(:,:,isum) + dtend(:,:,idtend)
+               endif
+            endif
+         enddo
+         if(first) then
+            ! No tendencies were calculated, so sum is 0:
+            dtend(:,:,isum) = 0
+         endif
+       end subroutine sum_it
+       
    end subroutine phys_tend_run
 
 end module phys_tend

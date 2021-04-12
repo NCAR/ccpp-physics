@@ -162,7 +162,8 @@
     subroutine GFS_suite_interstitial_2_run (im, levs, lssav, ldiag3d, lsidea, cplflx, flag_cice, shal_cnv, old_monin, mstrat,    &
       do_shoc, frac_grid, imfshalcnv, dtf, xcosz, adjsfcdsw, adjsfcdlw, cice, pgr, ulwsfc_cice, lwhd, htrsw, htrlw, xmu, ctei_rm, &
       work1, work2, prsi, tgrs, prsl, qgrs_water_vapor, qgrs_cloud_water, cp, hvap, prslk, suntim, adjsfculw, adjsfculw_lnd,      &
-      adjsfculw_ice, adjsfculw_wat, dlwsfc, ulwsfc, psmean, dt3dt_lw, dt3dt_sw, dt3dt_pbl, dt3dt_dcnv, dt3dt_scnv, dt3dt_mp,      &
+      adjsfculw_ice, adjsfculw_wat, dlwsfc, ulwsfc, psmean, dtend, dtidx, index_of_process_longwave, index_of_process_shortwave,  &
+      index_of_process_pbl, index_of_process_dcnv, index_of_process_scnv, index_of_process_mp, index_of_temperature,              &
       ctei_rml, ctei_r, kinver, dry, icy, wet, frland, huge, use_LW_jacobian, errmsg, errflg)
 
       implicit none
@@ -185,8 +186,12 @@
       real(kind=kind_phys), intent(in   ), dimension(im) :: adjsfculw_lnd, adjsfculw_ice, adjsfculw_wat
       real(kind=kind_phys), intent(inout), dimension(im) :: adjsfculw
 
-      ! These arrays are only allocated if ldiag3d is .true.
-      real(kind=kind_phys), intent(inout), dimension(:,:) :: dt3dt_lw, dt3dt_sw, dt3dt_pbl, dt3dt_dcnv, dt3dt_scnv, dt3dt_mp
+      ! dtend is only allocated if ldiag3d is .true.
+      real(kind=kind_phys), optional, intent(inout), dimension(:,:,:) :: dtend
+      integer,              intent(in),    dimension(:,:) :: dtidx
+      integer, intent(in) :: index_of_process_longwave, index_of_process_shortwave, &
+           index_of_process_pbl, index_of_process_dcnv, index_of_process_scnv,       &
+           index_of_process_mp, index_of_temperature
 
       logical,              intent(in   ), dimension(im) :: dry, icy, wet
       real(kind=kind_phys), intent(in   ), dimension(im) :: frland
@@ -197,7 +202,7 @@
 
       ! local variables
       real(kind=kind_phys), parameter :: czmin   = 0.0001_kind_phys      ! cos(89.994)
-      integer :: i, k
+      integer :: i, k, idtend
       real(kind=kind_phys) :: tem1, tem2, tem, hocp
       logical, dimension(im) :: invrsn
       real(kind=kind_phys), dimension(im) :: tx1, tx2
@@ -275,23 +280,49 @@
 
         if (ldiag3d) then
           if (lsidea) then
-            do k=1,levs
-              do i=1,im
-                dt3dt_lw(i,k)   = dt3dt_lw(i,k)   + lwhd(i,k,1)*dtf
-                dt3dt_sw(i,k)   = dt3dt_sw(i,k)   + lwhd(i,k,2)*dtf
-                dt3dt_pbl(i,k)  = dt3dt_pbl(i,k)  + lwhd(i,k,3)*dtf
-                dt3dt_dcnv(i,k) = dt3dt_dcnv(i,k) + lwhd(i,k,4)*dtf
-                dt3dt_scnv(i,k) = dt3dt_scnv(i,k) + lwhd(i,k,5)*dtf
-                dt3dt_mp(i,k)   = dt3dt_mp(i,k)   + lwhd(i,k,6)*dtf
-              enddo
-            enddo
+            idtend = dtidx(index_of_temperature,index_of_process_longwave)
+            if(idtend>=1) then
+               dtend(:,:,idtend) = dtend(:,:,idtend) + lwhd(:,:,1)*dtf
+            endif
+
+            idtend = dtidx(index_of_temperature,index_of_process_shortwave)
+            if(idtend>=1) then
+               dtend(:,:,idtend) = dtend(:,:,idtend) + lwhd(:,:,2)*dtf
+            endif
+
+            idtend = dtidx(index_of_temperature,index_of_process_pbl)
+            if(idtend>=1) then
+               dtend(:,:,idtend) = dtend(:,:,idtend) + lwhd(:,:,3)*dtf
+            endif
+
+            idtend = dtidx(index_of_temperature,index_of_process_dcnv)
+            if(idtend>=1) then
+               dtend(:,:,idtend) = dtend(:,:,idtend) + lwhd(:,:,4)*dtf
+            endif
+
+            idtend = dtidx(index_of_temperature,index_of_process_scnv)
+            if(idtend>=1) then
+               dtend(:,:,idtend) = dtend(:,:,idtend) + lwhd(:,:,5)*dtf
+            endif
+
+            idtend = dtidx(index_of_temperature,index_of_process_mp)
+            if(idtend>=1) then
+               dtend(:,:,idtend) = dtend(:,:,idtend) + lwhd(:,:,6)*dtf
+            endif
           else
-            do k=1,levs
-              do i=1,im
-                dt3dt_lw(i,k) = dt3dt_lw(i,k) + htrlw(i,k)*dtf
-                dt3dt_sw(i,k) = dt3dt_sw(i,k) + htrsw(i,k)*dtf*xmu(i)
-              enddo
-            enddo
+            idtend = dtidx(index_of_temperature,index_of_process_longwave)
+            if(idtend>=1) then
+               dtend(:,:,idtend) = dtend(:,:,idtend) + htrlw(:,:)*dtf
+            endif
+
+            idtend = dtidx(index_of_temperature,index_of_process_shortwave)
+            if(idtend>=1) then
+               do k=1,levs
+                  do i=1,im
+                     dtend(i,k,idtend) = dtend(i,k,idtend) + htrsw(i,k)*dtf*xmu(i)
+                  enddo
+               enddo
+            endif
           endif
         endif
       endif    ! end if_lssav_block
@@ -649,8 +680,9 @@
 !!
     subroutine GFS_suite_interstitial_4_run (im, levs, ltaerosol, cplchm, tracers_total, ntrac, ntcw, ntiw, ntclamt, &
       ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,  &
-      imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, convert_dry_rho, dtf, save_qc, save_qi, con_pi,              &
-      gq0, clw, prsl, save_tcp, con_rd, con_eps, nwfa, spechum, dqdti, errmsg, errflg)
+      imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, convert_dry_rho, dtf, save_qc, save_qi, con_pi, dtidx, dtend,&
+      index_of_process_conv_trans, gq0, clw, prsl, save_tcp, con_rd, con_eps, nwfa, spechum, dqdti, ldiag3d,         &
+      ntk, ntke, errmsg, errflg)
 
       use machine,               only: kind_phys
       use module_mp_thompson_make_number_concentrations, only: make_IceNumber, make_DropletNumber
@@ -670,6 +702,12 @@
       ! save_qi is not allocated for Zhao-Carr MP
       real(kind=kind_phys), dimension(:, :),    intent(in) :: save_qi
 
+      ! dtend and dtidx are only allocated if ldiag3d
+      logical, intent(in)                                     :: ldiag3d
+      real(kind=kind_phys), dimension(:,:,:),   intent(inout) :: dtend
+      integer,              dimension(:,:),     intent(in)    :: dtidx
+      integer,                                  intent(in)    :: index_of_process_conv_trans,ntk,ntke
+
       real(kind=kind_phys), dimension(im,levs,ntrac), intent(inout) :: gq0
       real(kind=kind_phys), dimension(im,levs,nn),    intent(inout) :: clw
       real(kind=kind_phys), dimension(im,levs),       intent(in) :: prsl
@@ -686,7 +724,7 @@
       integer,          intent(out) :: errflg
 
       ! local variables
-      integer :: i,k,n,tracers
+      integer :: i,k,n,tracers,idtend
 
       real(kind=kind_phys) :: rho, orho
       real(kind=kind_phys), dimension(im,levs) :: qv_mp !< kg kg-1 (dry mixing ratio)
@@ -698,6 +736,28 @@
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+
+      if(ldiag3d) then
+         if(ntk>0 .and. ntk<=size(clw,3)) then
+            idtend=dtidx(100+ntke,index_of_process_conv_trans)
+            if(idtend>=1) then
+               dtend(:,:,idtend) = dtend(:,:,idtend) + clw(:,:,ntk)
+            endif
+         endif
+         if(ntclamt<=size(clw,3) .and. ntclamt>0) then
+            idtend=dtidx(100+ntclamt,index_of_process_conv_trans)
+            if(idtend>=1) then
+               dtend(:,:,idtend) = dtend(:,:,idtend) + clw(:,:,ntclamt)
+            endif
+         endif
+      endif
+
+      if(ldiag3d .and. ntk>0) then
+         idtend=dtidx(100+ntke,index_of_process_conv_trans)
+         if(idtend>=1) then
+            dtend(:,:,idtend) = dtend(:,:,idtend) + clw(:,:,ntk)
+         endif
+      endif
 
 !  --- update the tracers due to deep & shallow cumulus convective transport
 !           (except for suspended water and ice)
