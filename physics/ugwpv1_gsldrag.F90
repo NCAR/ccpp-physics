@@ -318,7 +318,7 @@ contains
           dudt_oss, dvdt_oss, du_osscol, dv_osscol,                                     &
           dudt_ofd, dvdt_ofd, du_ofdcol, dv_ofdcol,                                     &
           dudt_ngw, dvdt_ngw, dtdt_ngw, kdis_ngw, dudt_gw, dvdt_gw, dtdt_gw, kdis_gw,   &
-      tau_ogw, tau_ngw,  tau_oss,                                                   &
+          tau_ogw, tau_ngw,  tau_oss,                                                   &
           zogw,  zlwb,  zobl,  zngw,   dusfcg, dvsfcg,  dudt, dvdt, dtdt, rdxzb,        &
           dtend, dtidx, index_of_x_wind, index_of_y_wind, index_of_temperature,         &
           index_of_process_orographic_gwd, index_of_process_nonorographic_gwd,          &
@@ -432,8 +432,8 @@ contains
 
     ! dtend is only allocated if ldiag=.true.
     real(kind=kind_phys), optional, intent(inout)            :: dtend(:,:,:)
-    integer, intent(in)                                      :: dtidx(:,:), &
-         index_of_x_wind, index_of_y_wind, index_of_temperature,         &
+    integer, intent(in)                                      :: dtidx(:,:),   &
+         index_of_x_wind, index_of_y_wind, index_of_temperature,              &
          index_of_process_orographic_gwd, index_of_process_nonorographic_gwd
 
     real(kind=kind_phys),    intent(out), dimension(im)      :: rdxzb     ! for stoch phys. mtb-level

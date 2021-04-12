@@ -36,7 +36,7 @@
                   u10,v10,                                                     &
                   dx,lssav,ldiag3d,                                            &
                   flag_for_pbl_generic_tend,ntoz,ntqv,dtend,dtidx,             &
-                  index_of_process_pbl,index_of_temperature,index_of_x_wind,  &
+                  index_of_process_pbl,index_of_temperature,index_of_x_wind,   &
                   index_of_y_wind,errmsg,errflg )
 
    use machine , only : kind_phys
@@ -109,8 +109,7 @@
 ! 1D in
    integer,  intent(in   )   ::     im,km,ntrac,ndiff,ntcw,ntiw,ntoz
    real(kind=kind_phys),     intent(in   )   ::     g,cp,rd,rv,ep1,ep2,xlv,dt
-   logical,  intent(in   )   :: lssav, ldiag3d,                                &
-                                flag_for_pbl_generic_tend
+   logical,  intent(in   )   :: lssav, ldiag3d, flag_for_pbl_generic_tend
 ! 3D in
    real(kind=kind_phys),     dimension(im, km)                                               , &
              intent(in   )   ::                                          phil, &

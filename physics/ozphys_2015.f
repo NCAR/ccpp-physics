@@ -68,7 +68,7 @@
       ! dtend may not be allocated and needs an assumed array size
       real(kind=kind_phys), intent(inout) :: dtend(:,:,:)
       integer, intent(in) :: dtidx(:,:), ntoz,                          &
-     &  index_of_process_prod_loss, index_of_process_ozmix,               &
+     &  index_of_process_prod_loss, index_of_process_ozmix,             &
      &  index_of_process_temp, index_of_process_overhead_ozone
       real(kind=kind_phys), intent(inout) :: oz(im,levs)
 
