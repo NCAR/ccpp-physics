@@ -3,7 +3,7 @@
 
 
 !>\defgroup mod_sfcsub GFS sfcsub Module
-!!\ingroup LSMs
+!!\ingroup Noah_LSM
 !> @{
 !! This module contains grib code for each parameter-used in subroutines sfccycle()
 !! and setrmsk().

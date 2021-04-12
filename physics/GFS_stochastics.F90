@@ -1,6 +1,8 @@
 !> \file GFS_stochastics.f90
 !! This file contains code previously in GFS_stochastics_driver.
 
+!>\defgroup gfs_stoch GFS Stochastics Physics Module
+!! This module
     module GFS_stochastics
 
       contains
@@ -12,9 +14,6 @@
       end subroutine GFS_stochastics_finalize
 
 
-!>\defgroup gfs_stoch GFS Stochastics Physics Module
-!! This module
-!> @{
 !> \section arg_table_GFS_stochastics_run Argument Table
 !! \htmlinclude GFS_stochastics_run.html
 !!
@@ -357,4 +356,3 @@
       end subroutine GFS_stochastics_run
 
     end module GFS_stochastics
-!> @}

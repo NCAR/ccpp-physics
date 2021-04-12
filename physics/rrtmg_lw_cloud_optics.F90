@@ -4,22 +4,22 @@ module mo_rrtmg_lw_cloud_optics
 
   implicit none
 
-  ! Parameter used for RRTMG cloud-optics
+  !< Parameter used for RRTMG cloud-optics
   integer,parameter :: &
        nBandsLW_RRTMG = 16
-  ! ipat is bands index for ebert & curry ice cloud (for iflagice=1)
+  !< ipat is bands index for ebert & curry ice cloud (for iflagice=1)
   integer,dimension(nBandsLW_RRTMG),parameter :: &
        ipat = (/ 1, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5 /)
   real(kind_phys), parameter :: &
-       absrain  = 0.33e-3, & ! Rain drop absorption coefficient \f$(m^{2}/g)\f$ .
-       abssnow0 = 1.5,     & ! Snow flake absorption coefficient (micron), fu coeff
-       abssnow1 = 2.34e-3    ! Snow flake absorption coefficient \f$(m^{2}/g)\f$, ncar coef
+       absrain  = 0.33e-3, & !< Rain drop absorption coefficient \f$(m^{2}/g)\f$ .
+       abssnow0 = 1.5,     & !< Snow flake absorption coefficient (micron), fu coeff
+       abssnow1 = 2.34e-3    !< Snow flake absorption coefficient \f$(m^{2}/g)\f$, ncar coef
 
-  ! Reset diffusivity angle for Bands 2-3 and 5-9 to vary (between 1.50
-  ! and 1.80) as a function of total column water vapor.  the function
-  ! has been defined to minimize flux and cooling rate errors in these bands
-  ! over a wide range of precipitable water values.
-  ! *NOTE* This is done in GFS_rrtmgp_lw_pre.F90:_run()
+  !< Reset diffusivity angle for Bands 2-3 and 5-9 to vary (between 1.50
+  !! and 1.80) as a function of total column water vapor.  the function
+  !! has been defined to minimize flux and cooling rate errors in these bands
+  !! over a wide range of precipitable water values.
+  !! *NOTE* This is done in GFS_rrtmgp_lw_pre.F90:_run()
   real (kind_phys), dimension(nbandsLW_RRTMG) :: &
        a0 = (/ 1.66,  1.55,   1.58,  1.66,  1.54,  1.454,  1.89,  1.33,    &
                1.668, 1.66,   1.66,  1.66,  1.66,  1.66,   1.66,  1.66 /), &
@@ -28,11 +28,11 @@ module mo_rrtmg_lw_cloud_optics
        a2 = (/ 0.00, -12.0, -11.7,   0.00, -0.72, -0.243,  0.19, -0.062,   &
                0.414,  0.00,  0.00,  0.00,  0.00,  0.00,   0.00,  0.00 /)
   real(kind_phys),parameter :: &
-       diffusivityLow   = 1.50, & ! Minimum diffusivity angle for bands 2-3 and 5-9
-       diffusivityHigh  = 1.80, & ! Maximum diffusivity angle for bands 2-3 and 5-9
-       diffusivityB1410 = 1.66    ! Diffusivity for bands 1, 4, and 10
+       diffusivityLow   = 1.50, & !< Minimum diffusivity angle for bands 2-3 and 5-9
+       diffusivityHigh  = 1.80, & !< Maximum diffusivity angle for bands 2-3 and 5-9
+       diffusivityB1410 = 1.66    !< Diffusivity for bands 1, 4, and 10
 
-  ! RRTMG LW cloud property coefficients
+  !< RRTMG LW cloud property coefficients
   real(kind_phys) , dimension(58,nBandsLW_RRTMG),parameter :: &
        absliq1 = reshape(source=(/ &
        1.64047e-03, 6.90533e-02, 7.72017e-02, 7.78054e-02, 7.69523e-02, & !1
@@ -557,26 +557,26 @@ contains
        ilwcice, tau_cld, tau_precip)
     ! Inputs
     integer,intent(in) :: &
-         nBandsLW,     & ! Number of spectral bands
-         ncol,         & ! Number of horizontal gridpoints
-         nlay,         & ! Number of vertical layers
+         nBandsLW,     & !< Number of spectral bands
+         ncol,         & !< Number of horizontal gridpoints
+         nlay,         & !< Number of vertical layers
          ilwcliq,      & !
          ilwcice
     real(kind_phys), dimension(ncol,nlay), intent(in) :: &
-         cld_frac,     & ! Cloud-fraction                         (1)
-         cld_lwp,      & ! Cloud liquid water path                (g/m2)
-         cld_ref_liq,  & ! Effective radius (liquid)              (micron)
-         cld_iwp,      & ! Cloud ice water path                   (g/m2)
-         cld_ref_ice,  & ! Effective radius (ice)                 (micron)
-         cld_rwp,      & ! Cloud rain water path                  (g/m2)
-         cld_ref_rain, & ! Effective radius (rain-drop)           (micron)
-         cld_swp,      & ! Cloud snow-water path                  (g/m2)
-         cld_ref_snow    ! Effective radius (snow-flake)          (micron)
+         cld_frac,     & !< Cloud-fraction                         (1)
+         cld_lwp,      & !< Cloud liquid water path                (g/m2)
+         cld_ref_liq,  & !< Effective radius (liquid)              (micron)
+         cld_iwp,      & !< Cloud ice water path                   (g/m2)
+         cld_ref_ice,  & !< Effective radius (ice)                 (micron)
+         cld_rwp,      & !< Cloud rain water path                  (g/m2)
+         cld_ref_rain, & !< Effective radius (rain-drop)           (micron)
+         cld_swp,      & !< Cloud snow-water path                  (g/m2)
+         cld_ref_snow    !< Effective radius (snow-flake)          (micron)
 
      ! Outputs
      real(kind_phys),dimension(ncol,nlay,nBandsLW),intent(out) :: &
-          tau_cld,     & ! Cloud optical-depth                    (1)     
-          tau_precip     ! Precipitation optical-depth            (1)
+          tau_cld,     & !< Cloud optical-depth                    (1)     
+          tau_precip     !< Precipitation optical-depth            (1)
 	
      ! Local variables
      integer :: ij,ik,ib,index,ia
