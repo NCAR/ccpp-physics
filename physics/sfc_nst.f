@@ -734,7 +734,7 @@ cc
         do i=1,im
           if (wet(i) .and. oceanfrac(i) > zero .and. .not. lake(i)) then
 !           dnsst   = tsfc_wat(i) - tref(i)          !  retrive/get difference of Ts and Tf
-            tref(i) = tsfc_wat(i) - dtzm(i)          !  update Tf with T1 and NSST T-Profile
+             tref(i) = max(tgice, tsfco(i) - dtzm(i))  !  update Tf with T1 and NSST T-Profile                                       
 !           tsfc_wat(i) = max(271.2,tref(i) + dnsst) !  get Ts updated due to Tf update
 !           tseal(i)    = tsfc_wat(i)
             if (abs(xz(i)) > zero) then
