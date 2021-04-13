@@ -27,7 +27,7 @@
 !> @{
       subroutine sfc_nst_run                                            &
      &     ( im, hvap, cp, hfus, jcal, eps, epsm1, rvrdm1, rd, rhw0,    &  ! --- inputs:
-     &       pi, tgice, sbc, ps, u1, v1, t1, q1, tref, cm, ch,          &
+     &       sbc, pi,tgice, ps, u1, v1, t1, q1, tref, cm, ch,           &
      &       prsl1, prslki, prsik1, prslk1, wet, lake, xlon, sinlat,    &
      &       stress,                                                    &
      &       sfcemis, dlwflx, sfcnsw, rain, timestep, kdt, solhr,xcosz, &
@@ -555,6 +555,7 @@ cc
 !>  - Call get_dtzm_point() to computes \a dtz and \a tsurf.
           call get_dtzm_point(xt(i),xz(i),dt_cool(i),z_c(i),
      &                        zsea1,zsea2,dtz)
+!          tsurf(i) = max(271.2_kp, tref(i) + dtz )
           tsurf(i) = max(tgice, tref(i) + dtz )
 
 !     if (lprnt .and. i == ipr) print *,' tsurf=',tsurf(i),' tref=',
@@ -670,8 +671,9 @@ cc
 !> \section NSST_general_pre_algorithm General Algorithm
 !! @{
       subroutine sfc_nst_pre_run
-     &    (im, wet, tgice, lake, tsfco, tsfc_wat, tsurf_wat, tseal, xt, xz, dt_cool,
-     &     z_c, tref, cplflx, oceanfrac, nthreads, errmsg, errflg)
+     &    (im, wet, lake, tgice, tsfco, tsfc_wat, tsurf_wat,
+     &     tseal, xt, xz, dt_cool, z_c, tref, cplflx,
+     &     oceanfrac, nthreads, errmsg, errflg)
 
       use machine , only : kind_phys
       use module_nst_water_prop, only: get_dtzm_2d
@@ -685,7 +687,8 @@ cc
       logical, dimension(im), intent(in) :: wet, lake
       real (kind=kind_phys), intent(in) :: tgice
       real (kind=kind_phys), dimension(im), intent(in) ::
-     &  tsfco, tsfc_wat, xt, xz, dt_cool, z_c, oceanfrac
+     &      tsfc_wat, xt, xz, dt_cool, z_c, oceanfrac,
+     &      tsfco
       logical, intent(in) :: cplflx
 
 !  ---  input/outputs:
@@ -703,7 +706,7 @@ cc
      &                                   half = 0.5_kp,
      &                                   omz1 = 2.0_kp
       real(kind=kind_phys) :: tem1, tem2, dnsst
-      real(kind=kind_phys), dimension(im) :: dtzm,z_c_0
+      real(kind=kind_phys), dimension(im) :: dtzm
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -725,15 +728,13 @@ cc
 !   update tsfc & tref with T1 from OGCM & NSST Profile if coupled
 !
       if (cplflx) then
-        z_c_0 = 0.0
         call get_dtzm_2d (xt,  xz, dt_cool,
      &                    z_c, wet, lake, zero, omz1, im, 1,
      &                    nthreads, dtzm)
         do i=1,im
           if (wet(i) .and. oceanfrac(i) > zero .and. .not. lake(i)) then
 !           dnsst   = tsfc_wat(i) - tref(i)          !  retrive/get difference of Ts and Tf
-!            tref(i) = tsfc_wat(i) - dtzm(i)          !  update Tf with T1 and NSST T-Profile
-            tref(i) = max(tgice, tsfco(i) - dtzm(i))  !  update Tf with T1 and NSST T-Profile               
+            tref(i) = tsfc_wat(i) - dtzm(i)          !  update Tf with T1 and NSST T-Profile
 !           tsfc_wat(i) = max(271.2,tref(i) + dnsst) !  get Ts updated due to Tf update
 !           tseal(i)    = tsfc_wat(i)
             if (abs(xz(i)) > zero) then
@@ -778,10 +779,11 @@ cc
 !
 ! \section NSST_detailed_post_algorithm Detailed Algorithm
 ! @{
-      subroutine sfc_nst_post_run                                             &
-     &     ( im, kdt, rlapse, tgice, wet, lake, icy, oro, oro_uf, nstf_name1, &
-     &       nstf_name4, nstf_name5, xt, xz, dt_cool, z_c, tref, xlon,        &
-     &       tsurf_wat, tsfc_wat, nthreads, dtzm, errmsg, errflg              &
+      subroutine sfc_nst_post_run                                       &
+     &     ( im, kdt, rlapse, tgice, wet, lake,icy, oro, oro_uf,        &
+     &       nstf_name1,                                                &
+     &       nstf_name4, nstf_name5, xt, xz, dt_cool, z_c, tref, xlon,  &
+     &       tsurf_wat, tsfc_wat, nthreads, dtzm, errmsg, errflg        &
      &     )
 
       use machine , only : kind_phys
