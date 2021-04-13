@@ -27,7 +27,7 @@
 !> @{
       subroutine sfc_nst_run                                            &
      &     ( im, hvap, cp, hfus, jcal, eps, epsm1, rvrdm1, rd, rhw0,    &  ! --- inputs:
-     &       sbc, pi,tgice, ps, u1, v1, t1, q1, tref, cm, ch,           &
+     &       pi, tgice, sbc, ps, u1, v1, t1, q1, tref, cm, ch,          &  
      &       prsl1, prslki, prsik1, prslk1, wet, lake, xlon, sinlat,    &
      &       stress,                                                    &
      &       sfcemis, dlwflx, sfcnsw, rain, timestep, kdt, solhr,xcosz, &
@@ -555,7 +555,6 @@ cc
 !>  - Call get_dtzm_point() to computes \a dtz and \a tsurf.
           call get_dtzm_point(xt(i),xz(i),dt_cool(i),z_c(i),
      &                        zsea1,zsea2,dtz)
-!          tsurf(i) = max(271.2_kp, tref(i) + dtz )
           tsurf(i) = max(tgice, tref(i) + dtz )
 
 !     if (lprnt .and. i == ipr) print *,' tsurf=',tsurf(i),' tref=',
@@ -706,7 +705,7 @@ cc
      &                                   half = 0.5_kp,
      &                                   omz1 = 2.0_kp
       real(kind=kind_phys) :: tem1, tem2, dnsst
-      real(kind=kind_phys), dimension(im) :: dtzm
+      real(kind=kind_phys), dimension(im) :: dtzm, z_c_0
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -728,6 +727,7 @@ cc
 !   update tsfc & tref with T1 from OGCM & NSST Profile if coupled
 !
       if (cplflx) then
+        z_c_0 = 0.0
         call get_dtzm_2d (xt,  xz, dt_cool,
      &                    z_c, wet, lake, zero, omz1, im, 1,
      &                    nthreads, dtzm)
