@@ -6014,7 +6014,7 @@ MODULE module_mp_thompson
 
       do k = ktop, kbot
         cvm = Cp*(1.+0.887*qv(k))
-        tempcc = pt (k)-273.16 
+        tempcc = pt (k)- T_0
         lvapp = lvap0 + (2106.0 - 4218.0)*tempcc
         lcpk(k) = lvapp / cvm 
         icpk(k) = (lsub - lvapp)/cvm !  consistant with what is used in this code   
