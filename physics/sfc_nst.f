@@ -27,8 +27,8 @@
 !> @{
       subroutine sfc_nst_run                                            &
      &     ( im, hvap, cp, hfus, jcal, eps, epsm1, rvrdm1, rd, rhw0,    &  ! --- inputs:
-     &       pi, tgice, sbc, ps, u1, v1, t1, q1, tref, cm, ch,                 &
-     &       prsl1, prslki, prsik1, prslk1, wet, xlon, sinlat,          &
+     &       sbc, pi,tgice, ps, u1, v1, t1, q1, tref, cm, ch,           &
+     &       prsl1, prslki, prsik1, prslk1, wet, lake, xlon, sinlat,    &
      &       stress,                                                    &
      &       sfcemis, dlwflx, sfcnsw, rain, timestep, kdt, solhr,xcosz, &
      &       wind, flag_iter, flag_guess, nstf_name1, nstf_name4,       &
@@ -47,7 +47,7 @@
 !    call sfc_nst                                                       !
 !       inputs:                                                         !
 !          ( im, ps, u1, v1, t1, q1, tref, cm, ch,                      !
-!            prsl1, prslki, wet, xlon, sinlat, stress,                  !
+!            prsl1, prslki, wet, lake, xlon, sinlat, stress,            !
 !            sfcemis, dlwflx, sfcnsw, rain, timestep, kdt,solhr,xcosz,  !
 !            wind,  flag_iter, flag_guess, nstf_name1, nstf_name4,      !
 !            nstf_name5, lprnt, ipr,                                    !
@@ -94,6 +94,7 @@
 !     prsik1   - real,                                             im   !
 !     prslk1   - real,                                             im   !
 !     wet      - logical, =T if any ocn/lake water (F otherwise)   im   !
+!     lake     - logical, =T if any lake otherwise ocn
 !     icy      - logical, =T if any ice                            im   !
 !     xlon     - real, longitude         (radians)                 im   !
 !     sinlat   - real, sin of latitude                             im   !
@@ -194,7 +195,8 @@
       real (kind=kind_phys), intent(in) :: timestep
       real (kind=kind_phys), intent(in) :: solhr
 
-      logical, dimension(im), intent(in) :: flag_iter, flag_guess, wet
+      logical, dimension(im), intent(in) :: flag_iter, flag_guess, wet, &
+     &                                      lake 
 !    &,      icy
       logical,                intent(in) :: lprnt
 
@@ -259,14 +261,14 @@ cc
 !
       do i = 1, im
 !       flag(i) = wet(i) .and. .not.icy(i) .and. flag_iter(i)
-        flag(i) = wet(i) .and. flag_iter(i)
+        flag(i) = wet(i) .and. flag_iter(i) .and. .not. lake(i)
       enddo
 !
 !  save nst-related prognostic fields for guess run
 !
       do i=1, im
 !       if(wet(i) .and. .not.icy(i) .and. flag_guess(i)) then
-        if(wet(i) .and. flag_guess(i)) then
+        if(wet(i) .and. flag_guess(i) .and. .not. lake(i)) then
           xt_old(i)      = xt(i)
           xs_old(i)      = xs(i)
           xu_old(i)      = xu(i)
@@ -553,6 +555,7 @@ cc
 !>  - Call get_dtzm_point() to computes \a dtz and \a tsurf.
           call get_dtzm_point(xt(i),xz(i),dt_cool(i),z_c(i),
      &                        zsea1,zsea2,dtz)
+!          tsurf(i) = max(271.2_kp, tref(i) + dtz )
           tsurf(i) = max(tgice, tref(i) + dtz )
 
 !     if (lprnt .and. i == ipr) print *,' tsurf=',tsurf(i),' tref=',
@@ -582,7 +585,7 @@ cc
 ! restore nst-related prognostic fields for guess run
       do i=1, im
 !       if (wet(i) .and. .not.icy(i)) then
-        if (wet(i)) then
+        if (wet(i) .and. .not. lake(i)) then
           if (flag_guess(i)) then    ! when it is guess of
             xt(i)      = xt_old(i)
             xs(i)      = xs_old(i)
@@ -668,8 +671,9 @@ cc
 !> \section NSST_general_pre_algorithm General Algorithm
 !! @{
       subroutine sfc_nst_pre_run
-     &    (im,wet,tgice,tsfco,tsfc_wat,tsurf_wat,tseal,xt,xz,dt_cool,
-     &     z_c, tref, cplflx, oceanfrac, nthreads, errmsg, errflg)
+     &    (im, wet, lake, tgice, tsfco, tsfc_wat, tsurf_wat,
+     &     tseal, xt, xz, dt_cool, z_c, tref, cplflx,
+     &     oceanfrac, nthreads, errmsg, errflg)
 
       use machine , only : kind_phys
       use module_nst_water_prop, only: get_dtzm_2d
@@ -680,10 +684,11 @@ cc
 
 !  ---  inputs:
       integer, intent(in) :: im, nthreads
-      logical, dimension(im), intent(in) :: wet
+      logical, dimension(im), intent(in) :: wet, lake
       real (kind=kind_phys), intent(in) :: tgice
       real (kind=kind_phys), dimension(im), intent(in) ::
-     &  tsfco, tsfc_wat, xt, xz, dt_cool, z_c, oceanfrac
+     &      tsfc_wat, xt, xz, dt_cool, z_c, oceanfrac,
+     &      tsfco
       logical, intent(in) :: cplflx
 
 !  ---  input/outputs:
@@ -701,14 +706,14 @@ cc
      &                                   half = 0.5_kp,
      &                                   omz1 = 2.0_kp
       real(kind=kind_phys) :: tem1, tem2, dnsst
-      real(kind=kind_phys), dimension(im) :: dtzm,z_c_0
+      real(kind=kind_phys), dimension(im) :: dtzm
 
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
 
       do i=1,im
-        if (wet(i)) then
+        if (wet(i) .and. .not. lake(i)) then
 !          tem         = (oro(i)-oro_uf(i)) * rlapse
           ! DH* 20190927 simplyfing this code because tem is zero
           !tem          = zero
@@ -723,14 +728,14 @@ cc
 !   update tsfc & tref with T1 from OGCM & NSST Profile if coupled
 !
       if (cplflx) then
-        z_c_0 = 0.0
-        call get_dtzm_2d (xt,  xz, dt_cool,                             &
-     &                    z_c_0, wet, zero, omz1, im, 1, nthreads, dtzm)
+        call get_dtzm_2d (xt,  xz, dt_cool,
+     &                    z_c, wet, lake, zero, omz1, im, 1,
+     &                    nthreads, dtzm)
         do i=1,im
-          if (wet(i) .and. oceanfrac(i) > zero) then
-!           dnsst   = tsfc_wat(i) - tref(i)                 !  retrive/get difference of Ts and Tf
-            tref(i) = max(tgice, tsfco(i) - dtzm(i))        !  update Tf with T1 and NSST T-Profile
-!           tsfc_wat(i) = max(271.2,tref(i) + dnsst)        !  get Ts updated due to Tf update
+          if (wet(i) .and. oceanfrac(i) > zero .and. .not. lake(i)) then
+!           dnsst   = tsfc_wat(i) - tref(i)          !  retrive/get difference of Ts and Tf
+            tref(i) = tsfc_wat(i) - dtzm(i)          !  update Tf with T1 and NSST T-Profile
+!           tsfc_wat(i) = max(271.2,tref(i) + dnsst) !  get Ts updated due to Tf update
 !           tseal(i)    = tsfc_wat(i)
             if (abs(xz(i)) > zero) then
               tem2 = one / xz(i)
@@ -775,7 +780,8 @@ cc
 ! \section NSST_detailed_post_algorithm Detailed Algorithm
 ! @{
       subroutine sfc_nst_post_run                                       &
-     &     ( im, kdt, rlapse, tgice, wet, icy, oro, oro_uf, nstf_name1, &
+     &     ( im, kdt, rlapse, tgice, wet, lake,icy, oro, oro_uf,        &
+     &       nstf_name1,                                                &
      &       nstf_name4, nstf_name5, xt, xz, dt_cool, z_c, tref, xlon,  &
      &       tsurf_wat, tsfc_wat, nthreads, dtzm, errmsg, errflg        &
      &     )
@@ -789,7 +795,7 @@ cc
 
 !  ---  inputs:
       integer, intent(in) :: im, kdt, nthreads
-      logical, dimension(im), intent(in) :: wet, icy
+      logical, dimension(im), intent(in) :: wet, icy, lake
       real (kind=kind_phys), intent(in) :: rlapse, tgice
       real (kind=kind_phys), dimension(im), intent(in) :: oro, oro_uf
       integer, intent(in) :: nstf_name1, nstf_name4, nstf_name5
@@ -830,12 +836,12 @@ cc
       if (nstf_name1 > 1) then
         zsea1 = 0.001_kp*real(nstf_name4)
         zsea2 = 0.001_kp*real(nstf_name5)
-        call get_dtzm_2d (xt, xz, dt_cool, z_c, wet, zsea1, zsea2,      &
+        call get_dtzm_2d (xt, xz, dt_cool, z_c, wet, lake, zsea1, zsea2,      &
      &                    im, 1, nthreads, dtzm)
         do i = 1, im
 !         if (wet(i) .and. .not.icy(i)) then
 !         if (wet(i) .and. (frac_grid .or. .not. icy(i))) then
-          if (wet(i)) then
+          if (wet(i) .and. .not. lake(i)) then
             tsfc_wat(i) = max(tgice, tref(i) + dtzm(i))
 !           tsfc_wat(i) = max(271.2, tref(i) + dtzm(i)) -  &
 !                           (oro(i)-oro_uf(i))*rlapse

@@ -187,6 +187,10 @@ REAL (KIND = kind_phys) ::   &
 REAL (KIND = kind_phys) ::   &
   lake_depth_max, T_bot_2_in, T_bot_2_out, dxlat,tb,tr,tt,temp,Kbar, DelK
 
+
+REAL (KIND = kind_phys) :: x, y !temperarory variables used for Tbot and Tsfc
+                                !initilizations 
+
 INTEGER :: i,ipr,iter
 
 LOGICAL :: lflk_botsed_use
@@ -237,9 +241,23 @@ CHARACTER(LEN=*), PARAMETER  :: FMT2 = "(1x,8(F12.4,1x))"
 !               else
 !                  T_sfc(i) = tsurf(i)
 !               endif
-               T_sfc(i) = 0.2*tt + 0.8* tsurf(i)
+               T_sfc(i) = 0.1*tt + 0.9* tsurf(i)
            endif
+!
+!  Add empirical climatology of lake Tsfc and Tbot to the current Tsfc and Tbot
+! to make sure Tsfc and Tbot are warmer than Tair in Winter or colder than Tair
+! in Summer
 
+           x = 0.03279*julian
+           if(xlat(i) .ge. 0.0) then
+              y = 0.0034*x**5 -0.1241*x**4+1.6231*x**3-8.8666*x**2+17.206*x-4.2929                 
+              T_sfc(i) = T_sfc(i) + 0.3*y
+              tb = tb  + 0.05*y
+           else
+              y = 0.0034*x**5 -0.1241*x**4+1.6231*x**3-8.8666*x**2+17.206*x-4.2929
+              T_sfc(i) = T_sfc(i) - 0.3*y                                                                            
+              tb = tb - 0.05*y
+           endif
            T_bot(i)    = tb 
            T_B1(i)     = tb 
 
@@ -275,7 +293,7 @@ CHARACTER(LEN=*), PARAMETER  :: FMT2 = "(1x,8(F12.4,1x))"
 !     print*,'inside flake driver'
 !     print*,  julian,xlat(i),w_albedo(I),w_extinc(i),lakedepth(i),elev(i),tb,tt,tsurf(i),T_sfc(i)
 
-        endif  !lake fraction and depth
+        endif  !lake 
         endif  !flag
       enddo
  1001 format ( 'At icount=', i5, '  x = ', f5.2,5x, 'y = ', &
