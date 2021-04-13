@@ -65,7 +65,6 @@
 
       end module GFS_MP_generic_pre
 
-!>\defgroup gfs_calpreciptype GFS Precipitation Type Diagnostics Module
 !> This module contains the subroutine that calculates 
 !! precipitation type and its post, which provides precipitation forcing
 !! to LSM.
@@ -75,7 +74,8 @@
       subroutine GFS_MP_generic_post_init()
       end subroutine GFS_MP_generic_post_init
 
-!> \brief If dominant precip type is requested (i.e., Zhao-Carr MP scheme), 4 more algorithms in calpreciptype()
+!>\defgroup gfs_calpreciptype GFS Precipitation Type Diagnostics Module
+!! \brief If dominant precip type is requested (i.e., Zhao-Carr MP scheme), 4 more algorithms in calpreciptype()
 !! will be called.  the tallies are then summed in calwxt_dominant(). For GFDL cloud MP scheme, determine convective 
 !! rain/snow by surface temperature;  and determine explicit rain/snow by rain/snow coming out directly from MP.
 !! 
@@ -119,8 +119,7 @@
       real(kind=kind_phys), dimension(:,:),     intent(inout) :: dq3dt ! only if ldiag3d and qdiag3d
 
       ! Stochastic physics / surface perturbations
-      real(kind=kind_phys), dimension(im),      intent(inout) :: drain_cpl
-      real(kind=kind_phys), dimension(im),      intent(inout) :: dsnow_cpl
+      real(kind=kind_phys), dimension(:),       intent(inout) :: drain_cpl, dsnow_cpl
 
       ! Rainfall variables previous time step
       integer, intent(in) :: lsm, lsm_ruc, lsm_noahmp
