@@ -27,10 +27,12 @@ contains
 !> \section arg_table_GFS_rrtmgp_sw_pre_run
 !! \htmlinclude GFS_rrtmgp_sw_pre.html
 !!
-  subroutine GFS_rrtmgp_sw_pre_run(me, nCol, nLev, lndp_type, n_var_lndp,lndp_var_list,     &  
-       lndp_prt_list, doSWrad, solhr, lon, coslat, sinlat,  snowd, sncovr, snoalb, zorl,    &
-       tsfg, tsfa, hprime, alvsf, alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc, albdvis,  &
-       albdnir, albivis, albinir, lsmask, sfc_wts, p_lay, tv_lay, relhum, p_lev,            &
+  subroutine GFS_rrtmgp_sw_pre_run(me, nCol, nLev, lndp_type, n_var_lndp, lndp_var_list,    &  
+       lndp_prt_list, lsm, lsm_noahmp, lsm_ruc, doSWrad, solhr, lon, coslat, sinlat,        &
+       snowd, sncovr, sncovr_ice, snoalb, zorl, tsfg, tsfa, hprime, landfrac, frac_grid,    &
+       min_seaice, alvsf, alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc, albdvis_lnd,      &
+       albdnir_lnd, albivis_lnd, albinir_lnd, albdvis_ice, albdnir_lnd, albivis_ice,        &
+       albinir_ice, lsmask, sfc_wts, p_lay, tv_lay, relhum, p_lev,                          &
        nday, idxday, coszen, coszdg, sfc_alb_nir_dir, sfc_alb_nir_dif,                      &
        sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, sfc_alb_dif, errmsg, errflg)
 
@@ -39,6 +41,9 @@ contains
          me,                & ! Current MPI rank
          nCol,              & ! Number of horizontal grid points
          nLev,              & ! Number of vertical layers
+         lsm,               & ! LSM option
+         lsm_noahmp,        & ! option for Noah MP LSM
+         lsm_ruc,           & ! option for RUC LSM
          n_var_lndp,        &  ! Number of surface variables perturbed
          lndp_type             ! Type of land perturbations scheme used
     character(len=3), dimension(n_var_lndp), intent(in) ::  & 
@@ -46,21 +51,27 @@ contains
     real(kind_phys), dimension(n_var_lndp), intent(in) ::   &
          lndp_prt_list
     logical,intent(in) :: &
-         doSWrad            ! Call RRTMGP SW radiation?
+         doSWrad              ! Call RRTMGP SW radiation?
+    logical,intent(in) :: &
+         frac_grid            ! Logical flag for fractional grid
     real(kind_phys), intent(in) :: &
-         solhr                 ! Time in hours after 00z at the current timestep
+         solhr                ! Time in hours after 00z at the current timestep
+    real(kind_phys), intent(in) :: &
+         min_seaice           ! Sea ice threashold
     real(kind_phys), dimension(nCol), intent(in) :: &
          lsmask,            & ! Landmask: sea/land/ice=0/1/2
          lon,               & ! Longitude
          coslat,            & ! Cosine(latitude)
          sinlat,            & ! Sine(latitude)
          snowd,             & ! Water equivalent snow depth (mm)
-         sncovr,            & ! Surface snow area fraction (frac)
+         sncovr,            & ! Surface snow area fraction over land (frac)
+         sncovr_ice,        & ! Surface snow area fraction over ice (frac)
          snoalb,            & ! Maximum snow albedo (frac)
          zorl,              & ! Surface roughness length (cm)
          tsfg,              & ! Surface ground temperature for radiation (K)
          tsfa,              & ! Lowest model layer air temperature for radiation (K)         
          hprime,            & ! Standard deviation of subgrid orography (m)
+         landfrac,          & ! Fraction of land in the grid cell (frac)
          alvsf,             & ! Mean vis albedo with strong cosz dependency (frac)
          alnsf,             & ! Mean nir albedo with strong cosz dependency (frac)
          alvwf,             & ! Mean vis albedo with weak cosz dependency (frac)
@@ -70,10 +81,14 @@ contains
          fice,              & ! Ice fraction over open water (frac)
          tisfc                ! Sea ice surface skin temperature (K)
     real(kind_phys), dimension(:), intent(in) :: &
-         albdvis,           & ! surface albedo from lsm (direct,vis) (frac)
-         albdnir,           & ! surface albedo from lsm (direct,nir) (frac)
-         albivis,           & ! surface albedo from lsm (diffuse,vis) (frac)
-         albinir              ! surface albedo from lsm (diffuse,nir) (frac)
+         albdvis_lnd,       & ! surface albedo from lsm (direct,vis) (frac)
+         albdnir_lnd,       & ! surface albedo from lsm (direct,nir) (frac)
+         albivis_lnd,       & ! surface albedo from lsm (diffuse,vis) (frac)
+         albinir_lnd,       & ! surface albedo from lsm (diffuse,nir) (frac)
+         albdvis_ice,       & ! surface albedo from ice model (direct,vis) (frac)
+         albdnir_ice,       & ! surface albedo from ice model (direct,nir) (frac)
+         albivis_ice,       & ! surface albedo from ice model (diffuse,vis) (frac)
+         albinir_ice          ! surface albedo from ice model (diffuse,nir) (frac)
 
     real(kind_phys), dimension(nCol,n_var_lndp), intent(in) :: &
          sfc_wts              ! Weights for stochastic surface physics perturbation ()    
@@ -137,9 +152,12 @@ contains
        ! ####################################################################################
        alb1d(:) = 0.
        lndp_alb = -999.
-       call setalb (lsmask, snowd, sncovr, snoalb, zorl, coszen, tsfg, tsfa, hprime, alvsf, &
-            alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc, albdvis, albdnir, albivis,      &
-            albinir, NCOL, alb1d, lndp_alb, sfcalb)
+       call setalb (lsmask, lsm, lsm_noahmp, lsm_ruc, snowd, sncovr, sncovr_ice, snoalb, zorl,  &
+                    coszen, tsfg, tsfa, hprime, landfrac, frac_grid, min_seaice,                &
+                    alvsf, alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc,                      &
+                    albdvis_lnd, albdnir_ldn, albivis_lnd, albinir_lnd,                         &
+                    albdvis_ice, albdnir_ice, albivis_ice, albinir_ice, NCOL, alb1d, lndp_alb,  & !  mg, sfc-perts
+                    sfcalb )                                                                      !  ---  outputs
        
        ! Approximate mean surface albedo from vis- and nir-  diffuse values.
        sfc_alb_dif(:) = max(0.01, 0.5 * (sfcalb(:,2) + sfcalb(:,4)))

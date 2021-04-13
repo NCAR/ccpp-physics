@@ -4,6 +4,7 @@
 module GFS_surface_composites_pre
 
    use machine, only: kind_phys
+   use physparam, only : iemsflg
 
    implicit none
 
@@ -24,22 +25,24 @@ contains
 !> \section arg_table_GFS_surface_composites_pre_run Argument Table
 !! \htmlinclude GFS_surface_composites_pre_run.html
 !!
-   subroutine GFS_surface_composites_pre_run (im, lkm, frac_grid, flag_cice, cplflx, cplwav2atm,                          &
-                                 landfrac, lakefrac, lakedepth, oceanfrac, frland,                                        &
+   subroutine GFS_surface_composites_pre_run (im, flag_init, lkm, lsm, lsm_noahmp, lsm_ruc, frac_grid,                    &
+                                 flag_cice, cplflx, cplwav2atm, landfrac, lakefrac, lakedepth, oceanfrac, frland,         &
                                  dry, icy, lake, ocean, wet, hice, cice, zorl, zorlo, zorll, zorli, zorl_wat,             &
                                  zorl_lnd, zorl_ice, snowd, snowd_wat, snowd_lnd, snowd_ice, tprcp, tprcp_wat,            &
                                  tprcp_lnd, tprcp_ice, uustar, uustar_wat, uustar_lnd, uustar_ice,                        &
                                  weasd, weasd_wat, weasd_lnd, weasd_ice, ep1d_ice, tsfc, tsfco, tsfcl, tsfc_wat,          &
                                  tsfc_lnd, tsfc_ice, tisfc, tice, tsurf, tsurf_wat, tsurf_lnd, tsurf_ice,                 &
                                  gflx_ice, tgice, islmsk, islmsk_cice, slmsk, semis_rad, semis_wat, semis_lnd, semis_ice, &
-                                 qss, qss_wat, qss_lnd, qss_ice, hflx, hflx_wat, hflx_lnd, hflx_ice,                      &
+                                 emis_lnd, emis_ice, qss, qss_wat, qss_lnd, qss_ice, hflx, hflx_wat, hflx_lnd, hflx_ice,  &
                                  min_lakeice, min_seaice, errmsg, errflg)
 
       implicit none
 
       ! Interface variables
       integer,                             intent(in   ) :: im, lkm
+      integer,                             intent(in   ) :: lsm, lsm_noahmp, lsm_ruc
       logical,                             intent(in   ) :: frac_grid, cplflx, cplwav2atm
+      logical,                             intent(in   ) :: flag_init
       logical, dimension(im),              intent(inout) :: flag_cice
       logical,              dimension(im), intent(inout) :: dry, icy, lake, ocean, wet
       real(kind=kind_phys), dimension(im), intent(in   ) :: landfrac, lakefrac, lakedepth, oceanfrac
@@ -57,6 +60,7 @@ contains
       integer,              dimension(im), intent(inout) :: islmsk, islmsk_cice
       real(kind=kind_phys), dimension(im), intent(in   ) :: semis_rad
       real(kind=kind_phys), dimension(im), intent(inout) :: semis_wat, semis_lnd, semis_ice, slmsk
+      real(kind=kind_phys), dimension(im), intent(inout) :: emis_lnd, emis_ice
       real(kind=kind_phys),                intent(in   ) :: min_lakeice, min_seaice
 
       real(kind=kind_phys), parameter :: timin = 173.0_kind_phys  ! minimum temperature allowed for snow/ice
@@ -195,7 +199,15 @@ contains
 !          snowd_wat(i) = snowd(i)
            weasd_wat(i) = zero
            snowd_wat(i) = zero
-           semis_wat(i) = 0.984_kind_phys
+           !-- reference emiss value for surface emissivity in setemis
+           !   1-open water, 2-grass/shrub land, 3-bare soil, tundra,
+           !   4-sandy desert, 5-rocky desert, 6-forest, 7-ice, 8-snow
+           !data  emsref / 0.97, 0.95, 0.94, 0.90, 0.93, 0.96, 0.96, 0.99 /
+           if(iemsflg == 2) then
+             semis_wat(i) = 0.97_kind_phys ! consistent with setemis
+           else
+             semis_wat(i) = 0.984_kind_phys
+           endif
              qss_wat(i) = qss(i)
             hflx_wat(i) = hflx(i)
         endif
@@ -207,6 +219,10 @@ contains
            tsurf_lnd(i) = tsfcl(i)
            snowd_lnd(i) = snowd(i)
            semis_lnd(i) = semis_rad(i)
+         if ( iemsflg == 2 .and. .not. flag_init ) then
+         !-- use land emissivity from the LSM
+           semis_lnd(i) = emis_lnd(i)
+         endif
              qss_lnd(i) = qss(i)
             hflx_lnd(i) = hflx(i)
         end if
@@ -220,6 +236,10 @@ contains
             ep1d_ice(i) = zero
             gflx_ice(i) = zero
            semis_ice(i) = 0.95_kind_phys
+           if ( iemsflg == 2 .and. .not. flag_init .and. lsm == lsm_ruc) then
+           !-- use emis_ice from RUC LSM with snow effect
+             semis_ice(i) = emis_ice(i)
+           endif
              qss_ice(i) = qss(i)
             hflx_ice(i) = hflx(i)
         endif
@@ -335,7 +355,7 @@ module GFS_surface_composites_post
 
    public GFS_surface_composites_post_init, GFS_surface_composites_post_finalize, GFS_surface_composites_post_run
 
-   real(kind=kind_phys), parameter :: zero = 0.0_kind_phys, one = 1.0_kind_phys
+   real(kind=kind_phys), parameter :: zero = 0.0_kind_phys, one = 1.0_kind_phys, qmin = 1.0e-8_kind_phys
 
 contains
 
@@ -351,7 +371,8 @@ contains
 !!
 #endif
    subroutine GFS_surface_composites_post_run (                                                                                   &
-      im, kice, km, cplflx, cplwav2atm, frac_grid, flag_cice, islmsk, dry, wet, icy, landfrac, lakefrac, oceanfrac,               &
+      im, kice, km, cplflx, cplwav2atm, frac_grid, flag_cice, islmsk, dry, wet, icy, wind, t1, q1, prsl1,                         &
+      rd, rvrdm1, landfrac, lakefrac, oceanfrac,                                                                                  &
       zorl, zorlo, zorll, zorli, zorl_wat, zorl_lnd, zorl_ice,                                                                    &
       cd, cd_wat, cd_lnd, cd_ice, cdq, cdq_wat, cdq_lnd, cdq_ice, rb, rb_wat, rb_lnd, rb_ice, stress, stress_wat, stress_lnd,     &
       stress_ice, ffmm, ffmm_wat, ffmm_lnd, ffmm_ice, ffhh, ffhh_wat, ffhh_lnd, ffhh_ice, uustar, uustar_wat, uustar_lnd,         &
@@ -367,7 +388,7 @@ contains
       logical,                              intent(in) :: cplflx, frac_grid, cplwav2atm
       logical, dimension(im),               intent(in) :: flag_cice, dry, wet, icy
       integer, dimension(im),               intent(in) :: islmsk
-      real(kind=kind_phys), dimension(im),  intent(in) :: landfrac, lakefrac, oceanfrac,                                        &
+      real(kind=kind_phys), dimension(im),  intent(in) :: wind, t1, q1, prsl1, landfrac, lakefrac, oceanfrac,                   &
         zorl_wat, zorl_lnd, zorl_ice, cd_wat, cd_lnd, cd_ice, cdq_wat, cdq_lnd, cdq_ice, rb_wat, rb_lnd, rb_ice, stress_wat,    &
         stress_lnd, stress_ice, ffmm_wat, ffmm_lnd, ffmm_ice, ffhh_wat, ffhh_lnd, ffhh_ice, uustar_wat, uustar_lnd, uustar_ice, &
         fm10_wat, fm10_lnd, fm10_ice, fh2_wat, fh2_lnd, fh2_ice, tsurf_wat, tsurf_lnd, tsurf_ice, cmm_wat, cmm_lnd, cmm_ice,    &
@@ -381,6 +402,7 @@ contains
       real(kind=kind_phys), dimension(im),  intent(in   ) :: tice ! interstitial sea ice temperature
       real(kind=kind_phys), dimension(im),  intent(inout) :: hice, cice
       real(kind=kind_phys),                 intent(in   ) :: min_seaice
+      real(kind=kind_phys),                 intent(in   ) :: rd, rvrdm1
 
       real(kind=kind_phys), dimension(im, kice),  intent(in   ) :: tiice
       real(kind=kind_phys), dimension(im, km),    intent(inout) :: stc
@@ -390,7 +412,7 @@ contains
 
       ! Local variables
       integer :: i, k
-      real(kind=kind_phys) :: txl, txi, txo, wfrac
+      real(kind=kind_phys) :: txl, txi, txo, wfrac, q0, rho
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -408,20 +430,26 @@ contains
           txi   = cice(i) * wfrac        ! txi = ice fraction wrt whole cell
           txo   = max(zero, wfrac-txi)   ! txo = open water fraction
 
-          zorl(i)   = txl*zorl_lnd(i)   + txi*zorl_ice(i)   + txo*zorl_wat(i)
-          cd(i)     = txl*cd_lnd(i)     + txi*cd_ice(i)     + txo*cd_wat(i)
-          cdq(i)    = txl*cdq_lnd(i)    + txi*cdq_ice(i)    + txo*cdq_wat(i)
-          rb(i)     = txl*rb_lnd(i)     + txi*rb_ice(i)     + txo*rb_wat(i)
-          stress(i) = txl*stress_lnd(i) + txi*stress_ice(i) + txo*stress_wat(i)
-          ffmm(i)   = txl*ffmm_lnd(i)   + txi*ffmm_ice(i)   + txo*ffmm_wat(i)
-          ffhh(i)   = txl*ffhh_lnd(i)   + txi*ffhh_ice(i)   + txo*ffhh_wat(i)
-          uustar(i) = txl*uustar_lnd(i) + txi*uustar_ice(i) + txo*uustar_wat(i)
-          fm10(i)   = txl*fm10_lnd(i)   + txi*fm10_ice(i)   + txo*fm10_wat(i)
-          fh2(i)    = txl*fh2_lnd(i)    + txi*fh2_ice(i)    + txo*fh2_wat(i)
+! BWG          zorl(i)   = txl*zorl_lnd(i)   + txi*zorl_ice(i)   + txo*zorl_wat(i)
+! BWG          cd(i)     = txl*cd_lnd(i)     + txi*cd_ice(i)     + txo*cd_wat(i)
+! BWG          cdq(i)    = txl*cdq_lnd(i)    + txi*cdq_ice(i)    + txo*cdq_wat(i)
+! BWG          rb(i)     = txl*rb_lnd(i)     + txi*rb_ice(i)     + txo*rb_wat(i)
+! BWG          stress(i) = txl*stress_lnd(i) + txi*stress_ice(i) + txo*stress_wat(i)
+! BWG          ffmm(i)   = txl*ffmm_lnd(i)   + txi*ffmm_ice(i)   + txo*ffmm_wat(i)
+! BWG          ffhh(i)   = txl*ffhh_lnd(i)   + txi*ffhh_ice(i)   + txo*ffhh_wat(i)
+! BWG          uustar(i) = txl*uustar_lnd(i) + txi*uustar_ice(i) + txo*uustar_wat(i)
+! BWG          fm10(i)   = txl*fm10_lnd(i)   + txi*fm10_ice(i)   + txo*fm10_wat(i)
+! BWG          fh2(i)    = txl*fh2_lnd(i)    + txi*fh2_ice(i)    + txo*fh2_wat(i)
+
          !tsurf(i)  = txl*tsurf_lnd(i)  + txi*tice(i)       + txo*tsurf_wat(i)
          !tsurf(i)  = txl*tsurf_lnd(i)  + txi*tsurf_ice(i)  + txo*tsurf_wat(i) ! not used again! Moorthi
-          cmm(i)    = txl*cmm_lnd(i)    + txi*cmm_ice(i)    + txo*cmm_wat(i)
-          chh(i)    = txl*chh_lnd(i)    + txi*chh_ice(i)    + txo*chh_wat(i)
+
+! BWG, 2021/02/25: cmm=cd*wind, chh=cdq*wind, so use composite cd, cdq
+          q0       = max( q1(i), qmin )
+          rho      = prsl1(i) / (rd*t1(i)*(one + rvrdm1*q0))
+          cmm(i)    =      cd(i)*wind(i)  !txl*cmm_lnd(i)    + txi*cmm_ice(i)    + txo*cmm_wat(i)
+          chh(i)    = rho*cdq(i)*wind(i)  !txl*chh_lnd(i)    + txi*chh_ice(i)    + txo*chh_wat(i)
+
          !gflx(i)   = txl*gflx_lnd(i)   + txi*gflx_ice(i)   + txo*gflx_wat(i)
           ep1d(i)   = txl*ep1d_lnd(i)   + txi*ep1d_ice(i)   + txo*ep1d_wat(i)
          !weasd(i)  = txl*weasd_lnd(i)  + txi*weasd_ice(i)  + txo*weasd_wat(i)
@@ -441,6 +469,8 @@ contains
             qss(i)  = txl*qss_lnd(i)    + txi*qss_ice(i)    + txo*qss_wat(i)
             gflx(i) = txl*gflx_lnd(i)   + txi*gflx_ice(i)   + txo*gflx_wat(i)
           endif
+          
+! BWG, 2021/02/25: Need to change composite skin temperature base on ULW (Fanglin)
           tsfc(i)   = txl*tsfc_lnd(i)   + txi*tice(i)       + txo*tsfc_wat(i)
 
           zorll(i) = zorl_lnd(i)
