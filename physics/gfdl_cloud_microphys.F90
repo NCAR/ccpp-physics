@@ -113,7 +113,7 @@ contains
 !! \htmlinclude gfdl_cloud_microphys_run.html
 !!
    subroutine gfdl_cloud_microphys_run(                                       &
-      levs, im, con_g, con_fvirt, con_rd, frland, garea, islmsk,              &
+      levs, im, con_g, con_fvirt, con_rd, con_eps, frland, garea, islmsk,     &
       gq0, gq0_ntcw, gq0_ntrw, gq0_ntiw, gq0_ntsw, gq0_ntgl, gq0_ntclamt,     &
       gt0, gu0, gv0, vvl, prsl, phii, del,                                    &
       rain0, ice0, snow0, graupel0, prcp0, sr,                                &
@@ -134,7 +134,7 @@ contains
 
       ! interface variables
       integer,              intent(in   ) :: levs, im
-      real(kind=kind_phys), intent(in   ) :: con_g, con_fvirt, con_rd
+      real(kind=kind_phys), intent(in   ) :: con_g, con_fvirt, con_rd, con_eps
       real(kind=kind_phys), intent(in   ), dimension(1:im)          :: frland, garea
       integer,              intent(in   ), dimension(1:im)          :: islmsk
       real(kind=kind_phys), intent(inout), dimension(1:im,1:levs)   :: gq0, gq0_ntcw, gq0_ntrw, gq0_ntiw, &
@@ -295,7 +295,7 @@ contains
          allocate(den(1:im,1:levs))
          do k=1,levs
             do i=1,im
-               den(i,k)=0.622*prsl(i,k)/(con_rd*gt0(i,k)*(gq0(i,k)+0.622))
+               den(i,k)=con_eps*prsl(i,k)/(con_rd*gt0(i,k)*(gq0(i,k)+con_eps))
             enddo
          enddo
          call cloud_diagnosis (1, im, 1, levs, den(1:im,1:levs), &
