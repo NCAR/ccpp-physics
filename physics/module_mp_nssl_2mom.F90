@@ -2702,9 +2702,9 @@ SUBROUTINE nssl_2mom_driver(qv, qc, qr, qi, qs, qh, qhl, ccw, crw, cci, csw, chw
 
 ! #ifndef CM1
 ! for real cases when hydrometeor mixing ratios have been initialized without concentrations
-       IF ( itimestep == 1 .and. ipconc > 0 ) THEN
+!       IF ( itimestep == 1 .and. ipconc > 0 ) THEN
          call calcnfromq(nx,ny,nz,an,na,nor,nor,dn1)
-       ENDIF
+!       ENDIF
 ! #endif
 
       IF ( present(cu_used) .and.         &
@@ -4515,6 +4515,7 @@ END SUBROUTINE nssl_2mom_driver
       real, parameter :: zsfac = 1./(pi*xdns*xn0s)
       real, parameter :: g0 = (6.0)*(5.0)*(4.0)/((3.0)*(2.0)*(1.0))
       real, parameter :: xims=900.*0.523599*(2.*50.e-6)**3    ! mks   (100 micron diam solid sphere approx)
+      real, parameter :: cwmas09 = 1000.*0.523599*(2.*9.e-6)**3 ! mass of 9-micron radius droplet
 
       real xv,xdn
       integer :: ndbz, nmwgt, nnwgt, nwlessthanz
@@ -4548,23 +4549,41 @@ END SUBROUTINE nssl_2mom_driver
    !  Cloud droplets
          
          IF ( lnc > 1 ) THEN
-           IF ( an(ix,jy,kz,lnc) <= 0.1*cxmin .and. an(ix,jy,kz,lc) > qxmin(lc) ) THEN
-             an(ix,jy,kz,lnc) = qccn
+           IF ( an(ix,jy,kz,lnc) <= cxmin .and. an(ix,jy,kz,lc) > qxmin(lc) ) THEN
+             
+             an(ix,jy,kz,lnc) = Min(qccn, an(ix,jy,kz,lc)/cwmas09 )*dn(ix,kz)
+             
+             IF ( lccn > 1 .and. lccna < 1 ) THEN
+                an(ix,jy,kz,lccn) = an(ix,jy,kz,lccn) - an(ix,jy,kz,lnc)
+             ENDIF
+             IF ( lccna > 1 ) THEN
+                an(ix,jy,kz,lccna) = an(ix,jy,kz,lccna) + an(ix,jy,kz,lnc)
+             ENDIF
+
+           ELSEIF ( an(ix,jy,kz,lc) <= qxmin(lc) ) THEN
+             
+             an(ix,jy,kz,lnc) = 0.0
+             an(ix,jy,kz,lc) = 0.0
+           
            ENDIF
          ENDIF
 
    !  Cloud ice
          
          IF ( lni > 1 ) THEN
-           IF ( an(ix,jy,kz,lni) <= 0.1*cxmin .and. an(ix,jy,kz,li) > qxmin(li) ) THEN
-             an(ix,jy,kz,lni) = an(ix,jy,kz,li)/xims
+           IF ( an(ix,jy,kz,lni) <= cxmin .and. an(ix,jy,kz,li) > qxmin(li) ) THEN
+             an(ix,jy,kz,lni) = dn(ix,kz)*an(ix,jy,kz,li)/xims
+           
+           ELSEIF ( an(ix,jy,kz,li) <= qxmin(li) ) THEN
+             an(ix,jy,kz,lni) = 0.0
+             an(ix,jy,kz,li) = 0.0
            ENDIF
          ENDIF
 
    !  rain
          
          IF ( lnr > 1 ) THEN
-           IF ( an(ix,jy,kz,lnr) <= 0.1*cxmin .and. an(ix,jy,kz,lr) > qxmin(lr) ) THEN
+           IF ( an(ix,jy,kz,lnr) <= cxmin .and. an(ix,jy,kz,lr) > qxmin(lr) ) THEN
 
              q = an(ix,jy,kz,lr)
              
@@ -4576,12 +4595,15 @@ END SUBROUTINE nssl_2mom_driver
 
              an(ix,jy,kz,lnr) = nrx ! *dninv ! convert to number mixing ratio
              
+           ELSEIF ( an(ix,jy,kz,lr) <= qxmin(lr) ) THEN
+             an(ix,jy,kz,lnr) = 0.0
+             an(ix,jy,kz,lr) = 0.0
            ENDIF
          ENDIF
 
   ! snow
          IF ( lns > 1 ) THEN
-           IF ( an(ix,jy,kz,lns) <= 0.1*cxmin .and. an(ix,jy,kz,ls) > qxmin(ls) ) THEN
+           IF ( an(ix,jy,kz,lns) <= cxmin .and. an(ix,jy,kz,ls) > qxmin(ls) ) THEN
 
              q = an(ix,jy,kz,ls)
              
@@ -4593,13 +4615,16 @@ END SUBROUTINE nssl_2mom_driver
 
              an(ix,jy,kz,lns) = nrx ! *dninv ! convert to number mixing ratio
              
+           ELSEIF ( an(ix,jy,kz,ls) <= qxmin(ls) ) THEN
+             an(ix,jy,kz,lns) = 0.0
+             an(ix,jy,kz,ls) = 0.0
            ENDIF
          ENDIF
          
     ! graupel
 
          IF ( lnh > 1 ) THEN
-           IF ( an(ix,jy,kz,lnh) <= 0.1*cxmin .and. an(ix,jy,kz,lh) > qxmin(lh) ) THEN
+           IF ( an(ix,jy,kz,lnh) < cxmin .and. an(ix,jy,kz,lh) > qxmin(lh) ) THEN
              IF ( lvh > 1 ) THEN
                IF ( an(ix,jy,kz,lvh) <= 0.0 ) THEN
                  an(ix,jy,kz,lvh) = an(ix,jy,kz,lh)/xdnh
@@ -4614,15 +4639,25 @@ END SUBROUTINE nssl_2mom_driver
              
              nrx =  n1*g1h/g0   ! number concentration for different shape parameter
 
-             an(ix,jy,kz,lnh) = nrx ! *dninv ! convert to number mixing ratio
+             IF ( nrx > cxmin ) THEN
+               an(ix,jy,kz,lnh) = nrx ! *dninv ! convert to number mixing ratio
+             ELSE
+               an(ix,jy,kz,lh) = 0.0
+               an(ix,jy,kz,lnh) = 0.0
+               an(ix,jy,kz,lvh) = 0.0
+             ENDIF
 
+           ELSEIF ( an(ix,jy,kz,lh) <= qxmin(lh) ) THEN
+           
+              an(ix,jy,kz,lh) = 0.0
+           
            ENDIF
          ENDIF
 
     ! hail
 
          IF ( lnhl > 1 .and. lhl > 1 ) THEN
-           IF ( an(ix,jy,kz,lnhl) <= 0.1*cxmin .and. an(ix,jy,kz,lhl) > qxmin(lhl) ) THEN
+           IF ( an(ix,jy,kz,lnhl) <= cxmin .and. an(ix,jy,kz,lhl) > qxmin(lhl) ) THEN
              IF ( lvhl > 1 ) THEN
                IF ( an(ix,jy,kz,lvhl) <= 0.0 ) THEN
                  an(ix,jy,kz,lvhl) = an(ix,jy,kz,lhl)/xdnhl
@@ -4639,6 +4674,10 @@ END SUBROUTINE nssl_2mom_driver
 
              an(ix,jy,kz,lnhl) = nrx ! *dninv ! convert to number mixing ratio
 
+           ELSEIF ( an(ix,jy,kz,lhl) <= qxmin(lhl) ) THEN
+           
+              an(ix,jy,kz,lhl) = 0.0
+           
            ENDIF
          ENDIF
  
