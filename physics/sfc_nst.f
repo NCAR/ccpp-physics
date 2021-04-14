@@ -28,7 +28,7 @@
       subroutine sfc_nst_run                                            &
      &     ( im, hvap, cp, hfus, jcal, eps, epsm1, rvrdm1, rd, rhw0,    &  ! --- inputs:
      &       pi, tgice, sbc, ps, u1, v1, t1, q1, tref, cm, ch,          &  
-     &       prsl1, prslki, prsik1, prslk1, wet, lake, xlon, sinlat,    &
+     &       prsl1, prslki, prsik1, prslk1, wet,use_flake, xlon, sinlat,&
      &       stress,                                                    &
      &       sfcemis, dlwflx, sfcnsw, rain, timestep, kdt, solhr,xcosz, &
      &       wind, flag_iter, flag_guess, nstf_name1, nstf_name4,       &
@@ -47,7 +47,7 @@
 !    call sfc_nst                                                       !
 !       inputs:                                                         !
 !          ( im, ps, u1, v1, t1, q1, tref, cm, ch,                      !
-!            prsl1, prslki, wet, lake, xlon, sinlat, stress,            !
+!            prsl1, prslki, wet, use_flake, xlon, sinlat, stress,       !
 !            sfcemis, dlwflx, sfcnsw, rain, timestep, kdt,solhr,xcosz,  !
 !            wind,  flag_iter, flag_guess, nstf_name1, nstf_name4,      !
 !            nstf_name5, lprnt, ipr,                                    !
@@ -94,7 +94,7 @@
 !     prsik1   - real,                                             im   !
 !     prslk1   - real,                                             im   !
 !     wet      - logical, =T if any ocn/lake water (F otherwise)   im   !
-!     lake     - logical, =T if any lake otherwise ocn
+!     use_flake     - logical, =T if any lake otherwise ocn
 !     icy      - logical, =T if any ice                            im   !
 !     xlon     - real, longitude         (radians)                 im   !
 !     sinlat   - real, sin of latitude                             im   !
@@ -196,7 +196,7 @@
       real (kind=kind_phys), intent(in) :: solhr
 
       logical, dimension(im), intent(in) :: flag_iter, flag_guess, wet, &
-     &                                      lake 
+     &                                      use_flake 
 !    &,      icy
       logical,                intent(in) :: lprnt
 
@@ -261,14 +261,14 @@ cc
 !
       do i = 1, im
 !       flag(i) = wet(i) .and. .not.icy(i) .and. flag_iter(i)
-        flag(i) = wet(i) .and. flag_iter(i) .and. .not. lake(i)
+        flag(i) = wet(i) .and. flag_iter(i) .and. .not. use_flake(i)
       enddo
 !
 !  save nst-related prognostic fields for guess run
 !
       do i=1, im
 !       if(wet(i) .and. .not.icy(i) .and. flag_guess(i)) then
-        if(wet(i) .and. flag_guess(i) .and. .not. lake(i)) then
+        if(wet(i) .and. flag_guess(i) .and. .not. use_flake(i)) then
           xt_old(i)      = xt(i)
           xs_old(i)      = xs(i)
           xu_old(i)      = xu(i)
@@ -584,7 +584,7 @@ cc
 ! restore nst-related prognostic fields for guess run
       do i=1, im
 !       if (wet(i) .and. .not.icy(i)) then
-        if (wet(i) .and. .not. lake(i)) then
+        if (wet(i) .and. .not. use_flake(i)) then
           if (flag_guess(i)) then    ! when it is guess of
             xt(i)      = xt_old(i)
             xs(i)      = xs_old(i)
@@ -670,7 +670,7 @@ cc
 !> \section NSST_general_pre_algorithm General Algorithm
 !! @{
       subroutine sfc_nst_pre_run
-     &    (im, wet, lake, tgice, tsfco, tsfc_wat, tsurf_wat,
+     &    (im, wet, use_flake, tgice, tsfco, tsfc_wat, tsurf_wat,
      &     tseal, xt, xz, dt_cool, z_c, tref, cplflx,
      &     oceanfrac, nthreads, errmsg, errflg)
 
@@ -683,7 +683,7 @@ cc
 
 !  ---  inputs:
       integer, intent(in) :: im, nthreads
-      logical, dimension(im), intent(in) :: wet, lake
+      logical, dimension(im), intent(in) :: wet, use_flake
       real (kind=kind_phys), intent(in) :: tgice
       real (kind=kind_phys), dimension(im), intent(in) ::
      &      tsfc_wat, xt, xz, dt_cool, z_c, oceanfrac,
@@ -712,7 +712,7 @@ cc
       errflg = 0
 
       do i=1,im
-        if (wet(i) .and. .not. lake(i)) then
+        if (wet(i) .and. .not. use_flake(i)) then
 !          tem         = (oro(i)-oro_uf(i)) * rlapse
           ! DH* 20190927 simplyfing this code because tem is zero
           !tem          = zero
@@ -729,10 +729,10 @@ cc
       if (cplflx) then
         z_c_0 = 0.0
         call get_dtzm_2d (xt,  xz, dt_cool,
-     &                    z_c, wet, lake, zero, omz1, im, 1,
+     &                    z_c, wet, use_flake, zero, omz1, im, 1,
      &                    nthreads, dtzm)
         do i=1,im
-          if (wet(i) .and. oceanfrac(i) > zero .and. .not. lake(i)) then
+         if (wet(i).and.oceanfrac(i)>zero.and..not.use_flake(i)) then
 !           dnsst   = tsfc_wat(i) - tref(i)          !  retrive/get difference of Ts and Tf
              tref(i) = max(tgice, tsfco(i) - dtzm(i))  !  update Tf with T1 and NSST T-Profile                                       
 !           tsfc_wat(i) = max(271.2,tref(i) + dnsst) !  get Ts updated due to Tf update
@@ -780,7 +780,7 @@ cc
 ! \section NSST_detailed_post_algorithm Detailed Algorithm
 ! @{
       subroutine sfc_nst_post_run                                       &
-     &     ( im, kdt, rlapse, tgice, wet, lake,icy, oro, oro_uf,        &
+     &     ( im, kdt, rlapse, tgice, wet, use_flake,icy, oro, oro_uf,   &
      &       nstf_name1,                                                &
      &       nstf_name4, nstf_name5, xt, xz, dt_cool, z_c, tref, xlon,  &
      &       tsurf_wat, tsfc_wat, nthreads, dtzm, errmsg, errflg        &
@@ -795,7 +795,7 @@ cc
 
 !  ---  inputs:
       integer, intent(in) :: im, kdt, nthreads
-      logical, dimension(im), intent(in) :: wet, icy, lake
+      logical, dimension(im), intent(in) :: wet, icy, use_flake
       real (kind=kind_phys), intent(in) :: rlapse, tgice
       real (kind=kind_phys), dimension(im), intent(in) :: oro, oro_uf
       integer, intent(in) :: nstf_name1, nstf_name4, nstf_name5
@@ -836,12 +836,12 @@ cc
       if (nstf_name1 > 1) then
         zsea1 = 0.001_kp*real(nstf_name4)
         zsea2 = 0.001_kp*real(nstf_name5)
-        call get_dtzm_2d (xt, xz, dt_cool, z_c, wet, lake, zsea1, zsea2,      &
-     &                    im, 1, nthreads, dtzm)
+        call get_dtzm_2d (xt, xz, dt_cool, z_c, wet, use_flake,         &
+     &                    zsea1, zsea2, im, 1, nthreads, dtzm)
         do i = 1, im
 !         if (wet(i) .and. .not.icy(i)) then
 !         if (wet(i) .and. (frac_grid .or. .not. icy(i))) then
-          if (wet(i) .and. .not. lake(i)) then
+          if (wet(i) .and. .not. use_flake(i)) then
             tsfc_wat(i) = max(tgice, tref(i) + dtzm(i))
 !           tsfc_wat(i) = max(271.2, tref(i) + dtzm(i)) -  &
 !                           (oro(i)-oro_uf(i))*rlapse

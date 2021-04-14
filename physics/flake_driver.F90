@@ -51,7 +51,7 @@
 ! ---- Inputs
             im, ps, t1, q1, wind,                            &
             dlwflx, dswsfc, weasd, lakedepth,                &
-            lake, xlat, delt, zlvl, elev,                    &
+            use_flake, xlat, delt, zlvl, elev,                    &
             wet, flag_iter, yearlen, julian, imon,           &
 ! ---- in/outs
             snwdph, hice, tsurf, fice, T_sfc, hflx, evap,    &
@@ -95,7 +95,7 @@ IMPLICIT NONE
 
       real (kind=kind_phys),  intent(in) :: julian
 
-      logical, dimension(im), intent(in) :: flag_iter, wet, lake
+      logical, dimension(im), intent(in) :: flag_iter, wet, use_flake
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -216,7 +216,7 @@ CHARACTER(LEN=*), PARAMETER  :: FMT2 = "(1x,8(F12.4,1x))"
 
       do i = 1, im
         if (flag(i)) then
-          if( lake(i) ) then
+          if( use_flake(i) ) then
            T_ice(i)    = 273.15
            T_snow(i)   = 273.15
            fetch(i)    = 2.0E+03
@@ -250,11 +250,11 @@ CHARACTER(LEN=*), PARAMETER  :: FMT2 = "(1x,8(F12.4,1x))"
 
            x = 0.03279*julian
            if(xlat(i) .ge. 0.0) then
-              y = 0.0034*x**5 -0.1241*x**4+1.6231*x**3-8.8666*x**2+17.206*x-4.2929                 
+              y = ((((0.0034*x-0.1241)*x+1.6231)*x-8.8666)*x+17.206)*x-4.2929
               T_sfc(i) = T_sfc(i) + 0.3*y
               tb = tb  + 0.05*y
            else
-              y = 0.0034*x**5 -0.1241*x**4+1.6231*x**3-8.8666*x**2+17.206*x-4.2929
+              y = ((((0.0034*x-0.1241)*x+1.6231)*x-8.8666)*x+17.206)*x-4.2929
               T_sfc(i) = T_sfc(i) - 0.3*y                                                                            
               tb = tb - 0.05*y
            endif
@@ -306,7 +306,7 @@ CHARACTER(LEN=*), PARAMETER  :: FMT2 = "(1x,8(F12.4,1x))"
 !  call lake interface
        do i=1,im
           if (flag(i)) then
-            if( lake(i) ) then
+            if( use_flake(i) ) then
               dMsnowdt_in = weasd(i)/delt
               I_atm_in    = dswsfc(i)
               Q_atm_lw_in = dlwflx(i)
