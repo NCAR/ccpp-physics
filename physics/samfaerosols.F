@@ -92,7 +92,7 @@ c     -- set work arrays
 
       do k = 1, km
         do i = 1, im
-          xmbp(i,k) = g * xmb(i) / delp(i,k)
+          if (cnvflg(i)) xmbp(i,k) = g * xmb(i) / delp(i,k)
         enddo
       enddo
 
@@ -493,7 +493,7 @@ c     -- set work arrays
 
       do k = 1, km
         do i = 1, im
-          xmbp(i,k) = g * xmb(i) / delp(i,k)
+          if (cnvflg(i)) xmbp(i,k) = g * xmb(i) / delp(i,k)
         enddo
       enddo
 
