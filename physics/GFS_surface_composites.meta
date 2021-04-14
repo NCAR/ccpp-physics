@@ -116,7 +116,7 @@
   type = logical
   intent = inout
   optional = F
-[lake]
+[use_flake]
   standard_name = flag_nonzero_lake_surface_fraction
   long_name = flag indicating presence of some lake surface area fraction
   units = flag

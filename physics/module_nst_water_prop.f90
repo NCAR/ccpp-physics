@@ -657,7 +657,7 @@ end subroutine solar_time_from_julian
  end subroutine get_dtzm_point
 
 !>\ingroup waterprop
- subroutine get_dtzm_2d(xt,xz,dt_cool,zc,wet,lake,z1,z2,nx,ny,nth,dtm)
+ subroutine get_dtzm_2d(xt,xz,dt_cool,zc,wet,use_flake,z1,z2,nx,ny,nth,dtm)
 !subroutine get_dtzm_2d(xt,xz,dt_cool,zc,wet,icy,z1,z2,nx,ny,dtm)
 ! ===================================================================== !
 !                                                                       !
@@ -682,7 +682,7 @@ end subroutine solar_time_from_julian
 !     dt_cool - real, sub-layer cooling amount                       1  !
 !     zc      - sub-layer cooling thickness                          1  !
 !     wet     - logical, flag for wet point (ocean or lake)          1  !
-!     lake    - logical, flag for lake point only                    1  !
+!     use_flake    - logical, flag for lake point only                  1  !
 !     icy     - logical, flag for ice point (ocean or lake)          1  !
 !     nx      - integer, dimension in x-direction (zonal)            1  !
 !     ny      - integer, dimension in y-direction (meridional)       1  !
@@ -698,7 +698,7 @@ end subroutine solar_time_from_julian
 
   integer, intent(in) :: nx,ny, nth
   real (kind=kind_phys), dimension(nx,ny), intent(in)  :: xt,xz,dt_cool,zc
-  logical, dimension(nx,ny), intent(in)  :: wet, lake
+  logical, dimension(nx,ny), intent(in)  :: wet, use_flake
 ! logical, dimension(nx,ny), intent(in)  :: wet,icy
   real (kind=kind_phys), intent(in)  :: z1,z2
   real (kind=kind_phys), dimension(nx,ny), intent(out) :: dtm
@@ -714,7 +714,7 @@ end subroutine solar_time_from_julian
 
       dtm(i,j) = zero      ! initialize dtm
 
-      if ( wet(i,j) .and. .not. lake(i,j)) then
+      if ( wet(i,j) .and. .not. use_flake(i,j)) then
 !
 !       get the mean warming in the range of z=z1 to z=z2
 !

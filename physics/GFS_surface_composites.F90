@@ -26,7 +26,7 @@ contains
 !!
    subroutine GFS_surface_composites_pre_run (im, lkm, frac_grid, flag_cice, cplflx, cplwav2atm,                          &
                                  landfrac, lakefrac, lakedepth, oceanfrac, frland,                                        &
-                                 dry, icy, lake, ocean, wet, hice, cice, zorl, zorlo, zorll, zorli, zorl_wat,             &
+                                 dry, icy, use_flake, ocean, wet, hice, cice, zorl, zorlo, zorll, zorli, zorl_wat,             &
                                  zorl_lnd, zorl_ice, snowd, snowd_wat, snowd_lnd, snowd_ice, tprcp, tprcp_wat,            &
                                  tprcp_lnd, tprcp_ice, uustar, uustar_wat, uustar_lnd, uustar_ice,                        &
                                  weasd, weasd_wat, weasd_lnd, weasd_ice, ep1d_ice, tsfc, tsfco, tsfcl, tsfc_wat,          &
@@ -41,7 +41,7 @@ contains
       integer,                             intent(in   ) :: im, lkm
       logical,                             intent(in   ) :: frac_grid, cplflx, cplwav2atm
       logical, dimension(im),              intent(inout) :: flag_cice
-      logical,              dimension(im), intent(inout) :: dry, icy, lake, ocean, wet
+      logical,              dimension(im), intent(inout) :: dry, icy,use_flake, ocean, wet
       real(kind=kind_phys), dimension(im), intent(in   ) :: landfrac, lakefrac, lakedepth, oceanfrac
       real(kind=kind_phys), dimension(im), intent(inout) :: cice, hice
       real(kind=kind_phys), dimension(im), intent(  out) :: frland
@@ -230,12 +230,12 @@ contains
       do i = 1, im
         if(lkm == 1) then
            if(lakefrac(i) >= 0.15 .and. lakedepth(i) > one) then
-              lake(i) = .true.
+              use_flake(i) = .true.
            else
-              lake(i) = .false.
+              use_flake(i) = .false.
            endif
         else
-           lake(i) = .false.
+           use_flake(i) = .false.
         endif
       enddo
 
