@@ -1,41 +1,11 @@
 !===============================
 ! cu-cires ugwp-scheme
-!    initialization of selected 
-!  init gw-solvers (1,2,3,4)
+!  initialization of ugwp_common_v0
+!  init gw-solvers (1,2) .. no UFS-funds for (3,4) tests
 !  init gw-source specifications
 !  init gw-background dissipation
-!==============================
-!
-! Part-0   specifications of common constants, limiters and "criiical" values
- 
-
-!   module oro_state
-    
-!   integer, parameter :: kind_phys=8 
-!   integer, parameter :: nvaroro=14   
-!   real (kind=kind_phys), allocatable :: oro_stat(:, :)
-!   contains
-
-!   subroutine fill_oro_stat(nx, oc, oa4, clx4, theta, gamm, sigma, elvmax, hprime)
-     
-!    real  (kind=kind_phys),dimension(nx) :: oc, theta, gamm, sigma, elvmax, hprime  
-!    real(kind=kind_phys),dimension(nx,4) :: oa4, clx4
-!    integer :: i
-!    do i=1, nx
-!      oro_stat(i,1)    = hprime(i)
-!      oro_stat(i,2)    =  oc(i)
-!      oro_stat(i,3:6)  = oa4(i,1:4)
-!      oro_stat(i,7:10) = clx4(i,1:4)
-!      oro_stat(i,11)   = theta(i)
-!      oro_stat(i,12)   = gamm(i)
-!      oro_stat(i,13)   = sigma(i)
-!      oro_stat(i,14)   = elvmax(i)
-!    enddo   
-!   end   subroutine fill_oro_stat
-
-!   end module oro_state
-    
-    module ugwp_common
+!===============================    
+    module ugwp_common_v0
 !
      use machine,  only: kind_phys
      use physcons, only : pi => con_pi, grav => con_g, rd => con_rd,   &
@@ -45,7 +15,7 @@
 
       real(kind=kind_phys), parameter ::  grcp = grav/cpd, rgrav = 1.0d0/grav, &
                           rdi  = 1.0d0/rd,                                     &
-                          gor  = grav/rd,  gr2   = grav*gor, gocp = grav/cpd,    &
+                          gor  = grav/rd,  gr2   = grav*gor, gocp = grav/cpd,  &
                           rcpd = 1./cpd,   rcpd2 = 0.5*rcpd,                   &
                           pi2  = pi + pi,  omega1 = pi2/86400.0,               &
                           omega2 = omega1+omega1,                              &
@@ -53,7 +23,7 @@
                           dw2min=1.0, bnv2min=1.e-6, velmin=sqrt(dw2min)
 
 
-     end module ugwp_common
+     end module ugwp_common_v0
 !
 !
 !===================================================
@@ -61,7 +31,7 @@
 !Part-1 init =>   wave dissipation + RFriction
 !
 !===================================================
-     subroutine init_global_gwdis(levs, zkm, pmb, kvg, ktg, krad, kion)
+     subroutine init_global_gwdis_v0(levs, zkm, pmb, kvg, ktg, krad, kion)
      implicit none
 
      integer                              :: levs
@@ -111,51 +81,20 @@
       kvg(k)  =  kvg(k-1)
       ktg(k)  =  ktg(k-1)
 !                                                          
-     end subroutine init_global_gwdis
-!
-!
-     subroutine  rf_damp_init(levs, pa_rf, tau_rf, dtp, pmb, rfdis, rfdist, levs_rf)
-     implicit none
+     end subroutine init_global_gwdis_v0
 
-     integer         ::   levs
-     real            ::   pa_rf, tau_rf
-     real            ::   dtp
-
-     real            ::   pmb(levs)
-     real            ::   rfdis(levs),  rfdist(levs)
-     integer         ::   levs_rf
- 
-     real            ::   krf, krfz
-     integer         ::   k
-!
-     rfdis(1:levs)  = 1.0
-     rfdist(1:levs) = 0.0
-     levs_rf = levs
-     if (tau_rf <= 0.0 .or. pa_rf == 0.0) return
- 
-      krf = 1.0/(tau_rf*86400.0)
-
-      do k=levs, 1, -1
-        if(pmb(k) < pa_rf ) then               ! applied only on constant pressure surfaces fixed pmb in "Pa"
-         krfz = krf*log(pa_rf/pmb(k))
-         rfdis(k)  =  1.0/(1.+krfz*dtp)
-         rfdist(k) =  (rfdis(k) -1.0)/dtp      ! du/dtp
-         levs_rf = k
-        endif
-      enddo
-
-     end subroutine  rf_damp_init
+     
 ! ========================================================================
 ! Part 2 - sources
 !      wave  sources
 ! ========================================================================
 !
-!    ugwp_oro_init
+!    ugwpv0_oro_init
 !
 !=========================================================================
-     module ugwp_oro_init
+     module ugwpv0_oro_init
 
-     use ugwp_common, only : bnv2min, grav, grcp, fv, grav, cpd, grcp, pi
+     use ugwp_common_v0, only : bnv2min, grav, grcp, fv, grav, cpd, grcp, pi
 
      implicit none
 !  
@@ -230,7 +169,7 @@
 
       contains
 !
-      subroutine init_oro_gws(nwaves, nazdir, nstoch, effac, &
+      subroutine init_oro_gws_v0(nwaves, nazdir, nstoch, effac, &
                               lonr, kxw, cdmbgwd )
 !
 !
@@ -270,195 +209,10 @@
 !....................................................................
 !
 !      print *, ' init_oro_gws 2-1cdmb',  cdmbgwd(2), cdmbgwd(1)
-      end subroutine init_oro_gws
+      end subroutine init_oro_gws_v0
 !
 
-    end module ugwp_oro_init
-! =========================================================================
-!
-!    ugwp_conv_init
-!
-!=========================================================================
-    module ugwp_conv_init
-
-     implicit none
-      real    ::  eff_con                   ! scale factors for conv GWs
-      integer ::  nwcon                     ! number of waves
-      integer ::  nazcon                    ! number of azimuths
-      integer ::  nstcon                    ! flag for stochastic choice of launch level above Conv-cloud
-      real    ::  con_dlength
-      real    ::  con_cldf
-
-      real, parameter    :: cmin  =  5  !2.5
-      real, parameter    :: cmax  = 95. !82.5
-      real, parameter    :: cmid  = 22.5
-      real, parameter    :: cwid  = cmid
-      real, parameter    :: bns   = 2.e-2, bns2 = bns*bns, bns4=bns2*bns2
-      real, parameter    :: mstar = 6.28e-3/2.  !  2km
-      real               :: dc
-
-      real, allocatable  :: ch_conv(:),  spf_conv(:)
-      real, allocatable  :: xaz_conv(:), yaz_conv(:)
-     contains
-!
-     subroutine init_conv_gws(nwaves, nazdir, nstoch, effac, &
-                              lonr, kxw, cgwf)
-     use ugwp_common,  only : pi2, arad
-     implicit none
- 
-      integer :: nwaves, nazdir, nstoch
-      integer :: lonr
-      real    :: cgwf(2)
-      real    :: kxw,  effac
-      real    :: work1 = 0.5
-      real    :: chk, tn4, snorm
-      integer :: k
-
-      nwcon    = nwaves
-      nazcon   = nazdir
-      nstcon   = nstoch
-      eff_con  = effac
-
-      con_dlength = pi2*arad/float(lonr)
-      con_cldf    = cgwf(1) * work1 + cgwf(2) *(1.-work1)
-!
-! allocate & define spectra in "selected direction": "dc" "ch(nwaves)"
-!
-       if (.not. allocated(ch_conv))  allocate (ch_conv(nwaves))
-       if (.not. allocated(spf_conv)) allocate (spf_conv(nwaves))
-       if (.not. allocated(xaz_conv)) allocate (xaz_conv(nazdir))
-       if (.not. allocated(yaz_conv)) allocate (yaz_conv(nazdir))
-
-      dc = (cmax-cmin)/float(nwaves-1)
-!
-! we may use different spectral "shapes"
-! for example FVS-93 "Desabeius"
-!  E(s=1, t=3,m, w, k) ~ m^s/(m*^4 + m^4) ~ m^-3 saturated tail
-!
-      do k = 1,nwaves
-         chk         = cmin + (k-1)*dc
-         tn4         = (mstar*chk)**4
-         ch_conv(k)  =  chk
-         spf_conv(k) =  bns4*chk/(bns4+tn4)
-      enddo
-
-      snorm = sum(spf_conv)
-      spf_conv = spf_conv/snorm*1.5
- 
-      call init_nazdir(nazdir,  xaz_conv,  yaz_conv)
-     end subroutine init_conv_gws
-
-
-    end module ugwp_conv_init
-!=========================================================================
-!
-!    ugwp_fjet_init
-!
-!=========================================================================
-
-   module ugwp_fjet_init
-      implicit none
-      real    ::  eff_fj                     ! scale factors for conv GWs
-      integer ::  nwfj                       ! number of waves
-      integer ::  nazfj                      ! number of azimuths
-      integer ::  nstfj                      ! flag for stochastic choice of launch level above Conv-cloud
-!
-      real, parameter    ::  fjet_trig=0.    ! if ( abs(frgf) > fjet_trig ) launch GW-packet
-
-      
-      real, parameter    :: cmin =  2.5
-      real, parameter    :: cmax = 67.5
-      real               :: dc
-      real, allocatable  :: ch_fjet(:) , spf_fjet(:)
-      real, allocatable  :: xaz_fjet(:), yaz_fjet(:)
-     contains
-     subroutine init_fjet_gws(nwaves, nazdir, nstoch, effac, lonr, kxw)
-     use ugwp_common,  only : pi2, arad
-     implicit none
-
-      integer :: nwaves, nazdir, nstoch
-      integer :: lonr
-      real    :: kxw,  effac , chk
- 
-      integer :: k
-
-      nwfj   =  nwaves
-      nazfj  =  nazdir
-      nstfj  =  nstoch
-      eff_fj =  effac
-
-       if (.not. allocated(ch_fjet))  allocate (ch_fjet(nwaves))
-       if (.not. allocated(spf_fjet)) allocate (spf_fjet(nwaves))
-       if (.not. allocated(xaz_fjet)) allocate (xaz_fjet(nazdir))
-       if (.not. allocated(yaz_fjet)) allocate (yaz_fjet(nazdir))
- 
-      dc = (cmax-cmin)/float(nwaves-1)
-      do k = 1,nwaves
-         chk         = cmin + (k-1)*dc
-         ch_fjet(k)  =  chk
-         spf_fjet(k) =  1.0
-      enddo
-      call init_nazdir(nazdir,  xaz_fjet,  yaz_fjet)
-
-     end subroutine init_fjet_gws
-
-    end module ugwp_fjet_init
-!
-!=========================================================================
-!
-!
-     module ugwp_okw_init
-!=========================================================================
-     implicit none
-
-      real    ::  eff_okw                     ! scale factors for conv GWs
-      integer ::  nwokw                       ! number of waves
-      integer ::  nazokw                      ! number of azimuths
-      integer ::  nstokw                      ! flag for stochastic choice of launch level above Conv-cloud
-!
-      real, parameter    ::  okw_trig=0.      ! if ( abs(okwp) > okw_trig ) launch GW-packet
-
-      real, parameter    :: cmin =  2.5
-      real, parameter    :: cmax = 67.5
-      real               :: dc
-      real, allocatable  :: ch_okwp(:),   spf_okwp(:)
-      real, allocatable  :: xaz_okwp(:),  yaz_okwp(:)
-
-     contains
-!
-     subroutine init_okw_gws(nwaves, nazdir, nstoch, effac, lonr, kxw)
-
-     use ugwp_common,  only : pi2, arad
-     implicit none
-
-      integer :: nwaves, nazdir, nstoch
-      integer :: lonr
-      real    :: kxw,  effac , chk
- 
-      integer :: k
-
-      nwokw   =  nwaves
-      nazokw  =  nazdir
-      nstokw  =  nstoch
-      eff_okw =  effac
-
-       if (.not. allocated(ch_okwp))  allocate (ch_okwp(nwaves))
-       if (.not. allocated(spf_okwp)) allocate (spf_okwp(nwaves))
-       if (.not. allocated(xaz_okwp)) allocate (xaz_okwp(nazdir))
-       if (.not. allocated(yaz_okwp)) allocate (yaz_okwp(nazdir))
-      dc = (cmax-cmin)/float(nwaves-1)
-      do k = 1,nwaves
-         chk =  cmin + (k-1)*dc
-         ch_okwp(k) = chk
-         spf_okwp(k) = 1.
-      enddo
-
-      call init_nazdir(nazdir,  xaz_okwp,  yaz_okwp)
-
-     end subroutine init_okw_gws
- 
-     end module ugwp_okw_init
-
+    end module ugwpv0_oro_init
 !=============================== end of GW  sources
 !
 !  init specific  gw-solvers (1,2,3,4)
@@ -468,7 +222,7 @@
 !  Part -3  init  wave solvers
 !===============================
 
-  module ugwp_lsatdis_init
+  module ugwpv0_lsatdis_init
      implicit none
 
       integer  :: nwav, nazd
@@ -478,7 +232,7 @@
 !
      contains
 
-     subroutine initsolv_lsatdis(me, master,  nwaves, nazdir, nstoch, effac, do_physb, kxw)
+     subroutine initsolv_lsatdis_v0(me, master,  nwaves, nazdir, nstoch, effac, do_physb, kxw)
 
      implicit none
 !
@@ -508,14 +262,14 @@
        eff  = effac
      endif
 !
-     end subroutine initsolv_lsatdis
+     end subroutine initsolv_lsatdis_v0
 !
-  end module ugwp_lsatdis_init
+  end module ugwpv0_lsatdis_init
 !
 !
-  module ugwp_wmsdis_init
+  module ugwpv0_wmsdis_init
  
-    use ugwp_common, only :   pi, pi2
+    use ugwp_common_v0, only :   pi, pi2
     implicit none
 
       real,     parameter   :: maxdudt = 250.e-5
@@ -539,8 +293,6 @@
       real, parameter       :: zfluxglob= 3.75e-3
 
       real ,     parameter  :: nslope=1        ! the GW sprctral slope at small-m
-!     integer, parameter    :: klaunch=55      ! 32 - ~ 1km ;55 - 5.5 km ; 52 4.7km ; 60-7km index for selecting launch level
-!     integer, parameter    :: ilaunch=klaunch
  
       integer  , parameter  :: iazidim=4       ! number of azimuths
       integer  , parameter  :: incdim=25       ! number of discrete cx - spectral elements in launch spectrum
@@ -563,11 +315,8 @@
       real, allocatable   :: zcosang(:), zsinang(:)
       contains
 !============================================================================
-     subroutine initsolv_wmsdis(me, master,  nwaves, nazdir, nstoch, effac, do_physb, kxw)
+     subroutine initsolv_wmsdis_v0(me, master,  nwaves, nazdir, nstoch, effac, do_physb, kxw)
  
-!        call initsolv_wmsdis(me, master, knob_ugwp_wvspec(2), knob_ugwp_azdir(2), &
-!         knob_ugwp_stoch(2), knob_ugwp_effac(2), do_physb_gwsrcs, kxw)
-!
      implicit none
 !
 !input -control for solvers:
@@ -680,25 +429,7 @@
 
            print *
          endif
- 
 
-     end subroutine initsolv_wmsdis
+     end subroutine initsolv_wmsdis_v0
 !
-! make a list of  all-initilized parameters needed for "gw_solver_wmsdis"
-!
-
-  end module ugwp_wmsdis_init
-!=========================================================================
-!
-! work TODO for 2-extra WAM-solvers:
-!           DSPDIS (Hines)+ADODIS (Alexander-Dunkerton-Ortland)
-!
-!========================================================================= 
-     subroutine init_dspdis
-     implicit none
-     end subroutine init_dspdis
-
-     subroutine init_adodis
-     implicit none
-     end subroutine init_adodis
-     
+  end module ugwpv0_wmsdis_init

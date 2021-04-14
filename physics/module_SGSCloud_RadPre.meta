@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = sgscloud_radpre
   type = scheme
-  dependencies = funcphys.f90,iounitdef.f,machine.F,module_bfmicrophysics.f,physcons.F90,radcons.f90,radiation_clouds.f
+  dependencies = funcphys.f90,iounitdef.f,machine.F,module_bfmicrophysics.f,physcons.F90,radcons.f90,radiation_clouds.f,module_mp_thompson.F90
 
 ########################################################################
 [ccpp-arg-table]

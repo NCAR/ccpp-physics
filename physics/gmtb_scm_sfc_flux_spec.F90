@@ -15,7 +15,18 @@ module gmtb_scm_sfc_flux_spec
   CONTAINS
 !*******************************************************************************************
 
-  subroutine gmtb_scm_sfc_flux_spec_init()
+  subroutine gmtb_scm_sfc_flux_spec_init(lheatstrg, errmsg, errflg)
+    
+    logical, intent(in) :: lheatstrg
+    
+    character(len=*), intent(out) :: errmsg
+    integer,          intent(out) :: errflg
+    
+    if (lheatstrg) then
+      errmsg = 'Using specified surface fluxes is not compatible with canopy heat storage (lheatstrg) being true. Stopping.'
+      errflg = 1
+      return
+    end if
   end subroutine gmtb_scm_sfc_flux_spec_init
 
   subroutine gmtb_scm_sfc_flux_spec_finalize()
@@ -38,16 +49,17 @@ module gmtb_scm_sfc_flux_spec
 !!  -# Calculate the surface drag coefficient for heat and moisture.
 !!  -# Calculate the u and v wind at 10m.
   subroutine gmtb_scm_sfc_flux_spec_run (u1, v1, z1, t1, q1, p1, roughness_length, spec_sh_flux, spec_lh_flux, &
-    exner_inverse, T_surf, cp, grav, hvap, rd, fvirt, vonKarman, sh_flux, lh_flux, u_star, sfc_stress, cm, ch, &
+    exner_inverse, T_surf, cp, grav, hvap, rd, fvirt, vonKarman, sh_flux, lh_flux, sh_flux_chs, lh_flux_chs, u_star, sfc_stress, cm, ch, &
     fm, fh, rb, u10m, v10m, wind1, qss, t2m, q2m, errmsg, errflg)
 
     use machine,             only: kind_phys
-
+    
     real(kind=kind_phys), intent(in) :: u1(:), v1(:), z1(:), t1(:), q1(:), p1(:), roughness_length(:), &
       spec_sh_flux(:), spec_lh_flux(:), exner_inverse(:), T_surf(:)
     real(kind=kind_phys), intent(in) :: cp, grav, hvap, rd, fvirt, vonKarman
     real(kind=kind_phys), intent(out) :: sh_flux(:), lh_flux(:), u_star(:), sfc_stress(:), &
-      cm(:), ch(:), fm(:), fh(:), rb(:), u10m(:), v10m(:), wind1(:), qss(:), t2m(:), q2m(:)
+      cm(:), ch(:), fm(:), fh(:), rb(:), u10m(:), v10m(:), wind1(:), qss(:), t2m(:), q2m(:), &
+      sh_flux_chs(:), lh_flux_chs(:)
 
     character(len=*), intent(out) :: errmsg
     integer,          intent(out) :: errflg
@@ -60,12 +72,14 @@ module gmtb_scm_sfc_flux_spec
     ! Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0
-
+  
 !     !--- set control properties (including namelist read)
   !calculate u_star from wind profiles (need roughness length, and wind and height at lowest model level)
   do i=1, size(z1)
     sh_flux(i) = spec_sh_flux(i)
     lh_flux(i) = spec_lh_flux(i)
+    sh_flux_chs(i) = sh_flux(i)
+    lh_flux_chs(i) = lh_flux(i)
 
     roughness_length_m = 0.01*roughness_length(i)
 

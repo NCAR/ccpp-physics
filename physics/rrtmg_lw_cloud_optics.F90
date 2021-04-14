@@ -1,6 +1,5 @@
 module mo_rrtmg_lw_cloud_optics
   use machine,          only: kind_phys
-  use physparam,        only: ilwcliq, ilwcice, iovrlw
   use mersenne_twister, only: random_setseed, random_number, random_stat
 
   implicit none
@@ -554,13 +553,15 @@ contains
   ! subroutine rrtmg_lw_cloud_optics
   ! #######################################################################################
   subroutine rrtmg_lw_cloud_optics(ncol, nlay, nBandsLW, cld_lwp, cld_ref_liq, cld_iwp,  &
-       cld_ref_ice, cld_rwp, cld_ref_rain, cld_swp, cld_ref_snow, cld_frac, tau_cld,     &
-       tau_precip)
+       cld_ref_ice, cld_rwp, cld_ref_rain, cld_swp, cld_ref_snow, cld_frac, ilwcliq,     &
+       ilwcice, tau_cld, tau_precip)
     ! Inputs
     integer,intent(in) :: &
          nBandsLW,     & ! Number of spectral bands
          ncol,         & ! Number of horizontal gridpoints
-         nlay            ! Number of vertical layers
+         nlay,         & ! Number of vertical layers
+         ilwcliq,      & !
+         ilwcice
     real(kind_phys), dimension(ncol,nlay), intent(in) :: &
          cld_frac,     & ! Cloud-fraction                         (1)
          cld_lwp,      & ! Cloud liquid water path                (g/m2)

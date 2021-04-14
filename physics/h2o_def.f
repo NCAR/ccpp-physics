@@ -4,6 +4,11 @@
 !>\ingroup mod_GFS_phys_time_vary
 !! This module defines arrays in H2O scheme.
       module h2o_def
+
+!> \section arg_table_h2o_def
+!! \htmlinclude h2o_def.html
+!!
+
       use machine , only : kind_phys
       implicit none
 

@@ -5,12 +5,35 @@
 
           USE module_sf_mynn
 
+          !Global variables:
+          INTEGER, PARAMETER :: psi_opt = 0   !0: MYNN
+                                              !1: GFS
+
       contains
 
-      subroutine mynnsfc_wrapper_init ()
+!! \section arg_table_mynnsfc_wrapper_init Argument Table
+!! \htmlinclude mynnsfc_wrapper_init.html
 
-          ! initialize tables for psih and psim (stable and unstable)
-          CALL PSI_INIT
+!!
+      subroutine mynnsfc_wrapper_init(errmsg, errflg)
+
+         character(len=*), intent(out) :: errmsg
+         integer, intent(out) :: errflg
+
+         ! Initialize CCPP error handling variables
+         errmsg = ''
+         errflg = 0
+
+         ! initialize tables for psih and psim (stable and unstable)
+         CALL PSI_INIT(psi_opt,errmsg,errflg)
+
+         IF (debug_code >= 1) THEN
+           print*,"CHECK INITIALIZATION OF PSI:"
+           print*,"psim_stab(0-1):",psim_stab(0),psim_stab(1)
+           print*,"psih_stab(0-1):",psih_stab(0),psih_stab(1)
+           print*,"psim_unstab(0-1):",psim_unstab(0),psim_unstab(1)
+           print*,"psih_unstab(0-1):",psih_unstab(0),psih_unstab(1)
+         ENDIF
 
       end subroutine mynnsfc_wrapper_init
 
@@ -26,7 +49,7 @@
 SUBROUTINE mynnsfc_wrapper_run(            &
      &  im,levs,                           &
      &  itimestep,iter,                    &
-     &  flag_init,flag_restart,lsm,        &
+     &  flag_init,flag_restart,lsm,lsm_ruc,&
      &  sigmaf,vegtype,shdmax,ivegsrc,     &  !intent(in)
      &  z0pert,ztpert,                     &  !intent(in)
      &  redrag,sfc_z0_type,                &  !intent(in)
@@ -50,7 +73,8 @@ SUBROUTINE mynnsfc_wrapper_run(            &
      &     fh2_ocn,   fh2_lnd,   fh2_ice,  &  !intent(inout)
      &    hflx_ocn,  hflx_lnd,  hflx_ice,  &
      &    qflx_ocn,  qflx_lnd,  qflx_ice,  &
-     &  QSFC, qsfc_ruc, USTM, ZOL, MOL,    &
+     &  QSFC, qsfc_lnd_ruc, qsfc_ice_ruc,  &
+     &  USTM, ZOL, MOL,                    &
      &  RMOL, WSPD, ch, HFLX, QFLX, LH,    &
      &  FLHC, FLQC,                        &
      &  U10, V10, TH2, T2, Q2,             &
@@ -100,10 +124,10 @@ SUBROUTINE mynnsfc_wrapper_run(            &
   integer, intent(out) :: errflg
 
 !MISC CONFIGURATION OPTIONS
-      INTEGER, PARAMETER ::                                 &
-     &       spp_pbl  = 0,                                  &
-     &       isftcflx = 0,                                  &
-     &       iz0tlnd  = 0,                                  &
+      INTEGER, PARAMETER ::       &
+     &       spp_pbl  = 0,        &
+     &       isftcflx = 0,        & !control: 0
+     &       iz0tlnd  = 0,        & !control: 0
      &       isfflx   = 1
 
       integer, intent(in) :: ivegsrc
@@ -118,7 +142,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
 !MYNN-1D
       REAL    :: delt
       INTEGER :: im, levs
-      INTEGER :: iter, k, i, itimestep, lsm
+      INTEGER :: iter, k, i, itimestep, lsm, lsm_ruc
       LOGICAL :: flag_init,flag_restart,lprnt
       INTEGER :: IDS,IDE,JDS,JDE,KDS,KDE,                   &
      &            IMS,IME,JMS,JME,KMS,KME,                  &
@@ -156,19 +180,20 @@ SUBROUTINE mynnsfc_wrapper_run(            &
      &                     qsfc_ocn,  qsfc_lnd,  qsfc_ice
 
 !MYNN-2D
-      real(kind=kind_phys), dimension(im), intent(in)    :: &
-     &        dx, pblh, slmsk, ps
+      real(kind=kind_phys), dimension(:), intent(in)    ::  &
+     &        dx, pblh, slmsk, ps,                          &
+     &        qsfc_lnd_ruc, qsfc_ice_ruc
 
       real(kind=kind_phys), dimension(im), intent(inout) :: &
-     &        ustm, hflx, qflx, wspd, qsfc, qsfc_ruc,       &
+     &        ustm, hflx, qflx, wspd, qsfc,                 &
      &        FLHC, FLQC, U10, V10, TH2, T2, Q2,            &
      &        CHS2, CQS2, rmol, zol, mol, ch,               &
      &        lh, wstar
      !LOCAL
       real, dimension(im) ::                                &
-     &        hfx, znt, ts, psim, psih,                     &
+     &        hfx, znt, psim, psih,                         &
      &        chs, ck, cd, mavail, xland, GZ1OZ0,           &
-     &        cpm, qgh, qfx
+     &        cpm, qgh, qfx, qsfc_ruc
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -199,14 +224,11 @@ SUBROUTINE mynnsfc_wrapper_run(            &
             xland(i)=2.0
           endif
           qgh(i)=0.0
+          mavail(i)=1.0
           !snowh(i)=snowd(i)*800. !mm -> m
           !znt_lnd(i)=znt_lnd(i)*0.01  !cm -> m
           !znt_ocn(i)=znt_ocn(i)*0.01  !cm -> m
           !znt_ice(i)=znt_ice(i)*0.01  !cm -> m
-          ! DH* do the following line only if wet(i)?
-          ts(i)=tskin_ocn(i)/exner(i,1)  !theta
-          ! *DH
-          mavail(i)=1.0  !????
           cpm(i)=cp
       enddo
 
@@ -214,6 +236,13 @@ SUBROUTINE mynnsfc_wrapper_run(            &
       where (dry) znt_lnd=znt_lnd*0.01
       where (wet) znt_ocn=znt_ocn*0.01
       where (icy) znt_ice=znt_ice*0.01
+
+      ! qsfc ruc
+      qsfc_ruc = 0.0
+      if (lsm==lsm_ruc) then
+        where (dry) qsfc_ruc = qsfc_lnd_ruc
+        where (icy) qsfc_ruc = qsfc_ice_ruc
+      end if
 
 !      if (lprnt) then
 !          write(0,*)"CALLING SFCLAY_mynn; input:"
@@ -251,7 +280,8 @@ SUBROUTINE mynnsfc_wrapper_run(            &
              CP=cp,G=g,ROVCP=rcp,R=r_d,XLV=xlv,                               &
              SVP1=svp1,SVP2=svp2,SVP3=svp3,SVPT0=svpt0,                       &
              EP1=ep_1,EP2=ep_2,KARMAN=karman,                                 &
-             ISFFLX=isfflx,isftcflx=isftcflx,LSM=lsm,iz0tlnd=iz0tlnd,         &
+             ISFFLX=isfflx,isftcflx=isftcflx,LSM=lsm,                         &
+             iz0tlnd=iz0tlnd,psi_opt=psi_opt,                                 &
     &        sigmaf=sigmaf,vegtype=vegtype,shdmax=shdmax,ivegsrc=ivegsrc,     & !intent(in)
     &        z0pert=z0pert,ztpert=ztpert,                                     & !intent(in)
     &        redrag=redrag,sfc_z0_type=sfc_z0_type,                           & !intent(in)

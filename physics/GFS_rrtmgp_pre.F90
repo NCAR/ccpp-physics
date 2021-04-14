@@ -8,7 +8,6 @@ module GFS_rrtmgp_pre
        getgases,                 & ! Routine to setup trace gases
        getozn                      ! Routine to setup ozone
   ! RRTMGP types
-  use mo_gas_optics_rrtmgp,  only: ty_gas_optics_rrtmgp
   use mo_gas_concentrations, only: ty_gas_concs
   use rrtmgp_aux,            only: check_error_msg
 
@@ -19,22 +18,11 @@ module GFS_rrtmgp_pre
        amdw  = amd/amw,            & ! Molecular weight of dry air / water vapor
        amdo3 = amd/amo3              ! Molecular weight of dry air / ozone
 
-  ! Some common trace gas on/off flags. 
-  ! This allows for control over which trace gases are used in RRTMGP radiation scheme via
-  ! namelist.
-  logical :: &
-       isActive_h2o   = .false., & !
-       isActive_co2   = .false., & !
-       isActive_o3    = .false., & !
-       isActive_n2o   = .false., & !
-       isActive_ch4   = .false., & !
-       isActive_o2    = .false., & !
-       isActive_ccl4  = .false., & !
-       isActive_cfc11 = .false., & !
-       isActive_cfc12 = .false., & !
-       isActive_cfc22 = .false.    !
+  ! Save trace gas indices.
   integer :: iStr_h2o, iStr_co2, iStr_o3, iStr_n2o, iStr_ch4, iStr_o2, iStr_ccl4, &
        iStr_cfc11, iStr_cfc12, iStr_cfc22 
+    character(len=32),dimension(:),allocatable :: &
+         active_gases_array 
 
   public GFS_rrtmgp_pre_run,GFS_rrtmgp_pre_init,GFS_rrtmgp_pre_finalize  
 contains
@@ -45,19 +33,17 @@ contains
 !! \section arg_table_GFS_rrtmgp_pre_init
 !! \htmlinclude GFS_rrtmgp_pre_init.html
 !!
-  subroutine GFS_rrtmgp_pre_init(nGases, active_gases, active_gases_array, errmsg, errflg)
+  subroutine GFS_rrtmgp_pre_init(nGases, active_gases, errmsg, errflg)
     ! Inputs
-	integer, intent(in) :: &
-	     nGases     ! Number of active gases in RRTMGP
-	character(len=*), intent(in) :: &
-	     active_gases ! List of active gases from namelist.     
+    integer, intent(in) :: &
+         nGases       ! Number of active gases in RRTMGP
+    character(len=*), intent(in) :: &
+         active_gases ! List of active gases from namelist.     
     ! Outputs
-    character(len=*),dimension(nGases), intent(out) :: &
-         active_gases_array  ! Character array containing trace gases to include in RRTMGP
     character(len=*), intent(out) :: &
-         errmsg     ! Error message
+         errmsg             ! Error message
     integer, intent(out) :: &  
-         errflg     ! Error flag
+         errflg             ! Error flag
 
     ! Local variables
     character(len=1) :: tempstr
@@ -87,52 +73,19 @@ contains
     gasIndices(nGases,2)=len(trim(active_gases))
     
     ! Now extract the gas names
+    allocate(active_gases_array(nGases))
     do ij=1,nGases
        active_gases_array(ij) = active_gases(gasIndices(ij,1):gasIndices(ij,2))
-    enddo
-
-    ! Which gases are active? (This is purely for flexibility)
-    do ij=1,nGases
-       if(trim(active_gases_array(ij)) .eq. 'h2o')   then
-          isActive_h2o   = .true. 
-          istr_h2o       = ij
-       endif
-       if(trim(active_gases_array(ij)) .eq. 'co2')   then
-          isActive_co2   = .true.
-          istr_co2       = ij
-       endif
-       if(trim(active_gases_array(ij)) .eq. 'o3')    then
-          isActive_o3    = .true.
-          istr_o3        = ij
-       endif
-       if(trim(active_gases_array(ij)) .eq. 'n2o')   then
-          isActive_n2o   = .true.
-          istr_n2o       = ij
-       endif
-       if(trim(active_gases_array(ij)) .eq. 'ch4')   then
-          isActive_ch4   = .true.
-          istr_ch4       = ij
-       endif
-       if(trim(active_gases_array(ij)) .eq. 'o2')    then
-          isActive_o2    = .true.
-          istr_o2        = ij
-       endif
-       if(trim(active_gases_array(ij)) .eq. 'ccl4')  then
-          isActive_ccl4  = .true.
-          istr_ccl4      = ij
-       endif
-       if(trim(active_gases_array(ij)) .eq. 'cfc11') then
-          isActive_cfc11 = .true.
-          istr_cfc11     = ij
-       endif
-       if(trim(active_gases_array(ij)) .eq. 'cfc12') then
-          isActive_cfc12 = .true.
-          istr_cfc12     = ij
-       endif
-       if(trim(active_gases_array(ij)) .eq. 'cfc22') then
-          isActive_cfc22 = .true.       
-          istr_cfc22     = ij
-       endif
+       if(trim(active_gases_array(ij)) .eq. 'h2o')   istr_h2o       = ij
+       if(trim(active_gases_array(ij)) .eq. 'co2')   istr_co2       = ij
+       if(trim(active_gases_array(ij)) .eq. 'o3')    istr_o3        = ij
+       if(trim(active_gases_array(ij)) .eq. 'n2o')   istr_n2o       = ij
+       if(trim(active_gases_array(ij)) .eq. 'ch4')   istr_ch4       = ij
+       if(trim(active_gases_array(ij)) .eq. 'o2')    istr_o2        = ij
+       if(trim(active_gases_array(ij)) .eq. 'ccl4')  istr_ccl4      = ij
+       if(trim(active_gases_array(ij)) .eq. 'cfc11') istr_cfc11     = ij
+       if(trim(active_gases_array(ij)) .eq. 'cfc12') istr_cfc12     = ij
+       if(trim(active_gases_array(ij)) .eq. 'cfc22') istr_cfc22     = ij
     enddo
 
   end subroutine GFS_rrtmgp_pre_init
@@ -143,25 +96,23 @@ contains
 !> \section arg_table_GFS_rrtmgp_pre_run
 !! \htmlinclude GFS_rrtmgp_pre_run.html
 !!
-  subroutine GFS_rrtmgp_pre_run(nCol, nLev, nGases, nTracers, i_o3, lsswr, lslwr, fhswr, &
-       fhlwr, xlat, xlon,  prsl, tgrs, prslk, prsi, qgrs, tsfc, active_gases_array,      &
-       con_eps, con_epsm1, con_fvirt, con_epsqs,                                         &
-       raddt, p_lay, t_lay, p_lev, t_lev, tsfg, tsfa, tv_lay, relhum, tracer,            &
-       gas_concentrations,  errmsg, errflg)
+  subroutine GFS_rrtmgp_pre_run(nCol, nLev, nTracers, i_o3, lsswr, lslwr, fhswr, fhlwr,     &
+       xlat, xlon,  prsl, tgrs, prslk, prsi, qgrs, tsfc, con_eps, con_epsm1, con_fvirt,     &
+       con_epsqs, minGPpres, minGPtemp, raddt, p_lay, t_lay, p_lev, t_lev, tsfg, tsfa,      & 
+       qs_lay, q_lay, tv_lay, relhum, tracer, gas_concentrations, errmsg, errflg)
     
     ! Inputs   
     integer, intent(in)    :: &
          nCol,              & ! Number of horizontal grid points
          nLev,              & ! Number of vertical layers
-         nGases,            & ! Number of active gases in RRTMGP.
          nTracers,          & ! Number of tracers from model. 
          i_o3                 ! Index into tracer array for ozone
     logical, intent(in) :: &
     	 lsswr,             & ! Call SW radiation?
     	 lslwr                ! Call LW radiation
-    character(len=*),dimension(nGases), intent(in) :: &
-         active_gases_array   ! Character array containing trace gases to include in RRTMGP
     real(kind_phys), intent(in) :: &
+         minGPtemp,         & ! Minimum temperature allowed in RRTMGP.
+         minGPpres,         & ! Minimum pressure allowed in RRTMGP.
          fhswr,             & ! Frequency of SW radiation call.
          fhlwr                ! Frequency of LW radiation call.
     real(kind_phys), intent(in) :: &
@@ -187,31 +138,34 @@ contains
          errmsg               ! Error message
     integer, intent(out) :: &  
          errflg               ! Error flag    
-    real(kind_phys), intent(out) :: &
+    real(kind_phys), intent(inout) :: &
          raddt                ! Radiation time-step
-    real(kind_phys), dimension(ncol), intent(out) :: &
+    real(kind_phys), dimension(ncol), intent(inout) :: &
          tsfg,              & ! Ground temperature
          tsfa                 ! Skin temperature    
-    real(kind_phys), dimension(nCol,nLev), intent(out) :: &
+    real(kind_phys), dimension(nCol,nLev), intent(inout) :: &
          p_lay,             & ! Pressure at model-layer
          t_lay,             & ! Temperature at model layer
+         q_lay,             & ! Water-vapor mixing ratio (kg/kg)
          tv_lay,            & ! Virtual temperature at model-layers 
-         relhum               ! Relative-humidity at model-layers          
-    real(kind_phys), dimension(nCol,nLev+1), intent(out) :: &
+         relhum,            & ! Relative-humidity at model-layers   
+         qs_lay               ! Saturation vapor pressure at model-layers
+    real(kind_phys), dimension(nCol,nLev+1), intent(inout) :: &
          p_lev,             & ! Pressure at model-interface
          t_lev                ! Temperature at model-interface
-    real(kind_phys), dimension(nCol, nLev, nTracers),intent(out) :: &
+    real(kind_phys), dimension(nCol, nLev, nTracers),intent(inout) :: &
          tracer               ! Array containing trace gases
-    type(ty_gas_concs),intent(out) :: &
+    type(ty_gas_concs),intent(inout) :: &
          gas_concentrations   ! RRTMGP DDT: gas volumne mixing ratios
          
     ! Local variables
     integer :: i, j, iCol, iBand, iSFC, iTOA, iLay
     logical :: top_at_1
     real(kind_phys),dimension(nCol,nLev) :: vmr_o3, vmr_h2o
-    real(kind_phys) :: es, qs, tem1, tem2
-    real(kind_phys), dimension(nCol,nLev) :: o3_lay, q_lay
+    real(kind_phys) :: es, tem1, tem2
+    real(kind_phys), dimension(nCol,nLev) :: o3_lay, tem2da, tem2db
     real(kind_phys), dimension(nCol,nLev, NF_VGAS) :: gas_vmr
+    character(len=32), dimension(gas_concentrations%get_num_gases()) :: active_gases
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -248,14 +202,51 @@ contains
     ! Temperature at layer-center
     t_lay(1:NCOL,:) = tgrs(1:NCOL,:)
 
-    ! Temperature at layer-interfaces
+    ! Bound temperature at layer centers.
+    do iCol=1,NCOL
+       do iLay=1,nLev
+          if (t_lay(iCol,iLay) .le. minGPtemp) then
+             t_lay = minGPtemp + epsilon(minGPtemp)
+          endif
+       enddo
+    enddo
+
+    ! Temperature at layer-interfaces          
     if (top_at_1) then
+       tem2da(1:nCol,2:iSFC) = log(p_lay(1:nCol,2:iSFC))
+       tem2db(1:nCol,2:iSFC) = log(p_lev(1:nCol,2:iSFC)) 
+       do iCol = 1, nCol
+           tem2da(iCol,1)    = log(p_lay(iCol,1) )
+           tem2db(iCol,1)    = log(max(minGPpres, p_lev(iCol,1)) )
+           tem2db(iCol,iSFC) = log(p_lev(iCol,iSFC) )    
+       enddo
+       !
        t_lev(1:NCOL,1)      = t_lay(1:NCOL,iTOA)
-       t_lev(1:NCOL,2:iSFC) = (t_lay(1:NCOL,2:iSFC)+t_lay(1:NCOL,1:iSFC-1))/2._kind_phys
+       do iLay = 2, iSFC
+          do iCol = 1, nCol
+            t_lev(iCol,iLay) = t_lay(iCol,iLay) + (t_lay(iCol,iLay-1) - t_lay(iCol,iLay))&
+                     * (tem2db(iCol,iLay)   - tem2da(iCol,iLay))                   &
+                     / (tem2da(iCol,iLay-1) - tem2da(iCol,iLay))
+           enddo
+        enddo
        t_lev(1:NCOL,iSFC+1) = tsfc(1:NCOL)
     else
+       tem2da(1:nCol,2:iTOA) = log(p_lay(1:nCol,2:iTOA))
+       tem2db(1:nCol,2:iTOA) = log(p_lev(1:nCol,2:iTOA))     
+       do iCol = 1, nCol
+           tem2da(iCol,1)    = log(p_lay(iCol,1))
+           tem2db(iCol,1)    = log(p_lev(iCol,1))    
+           tem2db(iCol,iTOA) = log(max(minGPpres, p_lev(iCol,iTOA)) )
+       enddo    
+       !
        t_lev(1:NCOL,1)      = tsfc(1:NCOL)
-       t_lev(1:NCOL,2:iTOA) = (t_lay(1:NCOL,2:iTOA)+t_lay(1:NCOL,1:iTOA-1))/2._kind_phys
+       do iLay = 1, iTOA-1
+          do iCol = 1, nCol
+            t_lev(iCol,iLay+1) = t_lay(iCol,iLay) + (t_lay(iCol,iLay+1) - t_lay(iCol,iLay))&
+                     * (tem2db(iCol,iLay+1) - tem2da(iCol,iLay))                   &
+                     / (tem2da(iCol,iLay+1) - tem2da(iCol,iLay))
+           enddo
+        enddo
        t_lev(1:NCOL,iTOA+1) = t_lay(1:NCOL,iTOA)
     endif
 
@@ -265,8 +256,8 @@ contains
     do iCol=1,NCOL
        do iLay=1,nLev
           es                = min( p_lay(iCol,iLay),  fpvs( t_lay(iCol,iLay) ) )  ! fpvs and prsl in pa
-          qs                = max( con_epsqs, con_eps * es / (p_lay(iCol,iLay) + con_epsm1*es) )
-          relhum(iCol,iLay) = max( 0._kind_phys, min( 1._kind_phys, max(con_epsqs, q_lay(iCol,iLay))/qs ) )
+          qs_lay(iCol,iLay) = max( con_epsqs, con_eps * es / (p_lay(iCol,iLay) + con_epsm1*es) )
+          relhum(iCol,iLay) = max( 0._kind_phys, min( 1._kind_phys, max(con_epsqs, q_lay(iCol,iLay))/qs_lay(iCol,iLay) ) )
           tv_lay(iCol,iLay) = t_lay(iCol,iLay) * (1._kind_phys + con_fvirt*q_lay(iCol,iLay)) 
        enddo
     enddo
@@ -301,14 +292,14 @@ contains
     vmr_h2o = merge((q_lay/(1-q_lay))*amdw, 0., q_lay  .ne. 1.)
     vmr_o3  = merge(o3_lay*amdo3,           0., o3_lay .gt. 0.)
     
-    ! Initialize and opulate RRTMGP DDT w/ gas-concentrations
-    call check_error_msg('sw_gas_optics_init',gas_concentrations%init(active_gases_array))
-    call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr(active_gases_array(iStr_o2),  gas_vmr(:,:,4)))
-    call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr(active_gases_array(iStr_co2), gas_vmr(:,:,1)))
-    call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr(active_gases_array(iStr_ch4), gas_vmr(:,:,3)))
-    call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr(active_gases_array(iStr_n2o), gas_vmr(:,:,2)))
-    call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr(active_gases_array(iStr_h2o), vmr_h2o))
-    call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr(active_gases_array(iStr_o3),  vmr_o3))
+    ! Populate RRTMGP DDT w/ gas-concentrations
+    gas_concentrations%gas_name(:)                = active_gases_array(:)
+    gas_concentrations%concs(istr_o2)%conc(:,:)   = gas_vmr(:,:,4)
+    gas_concentrations%concs(istr_co2)%conc(:,:)  = gas_vmr(:,:,1)
+    gas_concentrations%concs(istr_ch4)%conc(:,:)  = gas_vmr(:,:,3)
+    gas_concentrations%concs(istr_n2o)%conc(:,:)  = gas_vmr(:,:,2)
+    gas_concentrations%concs(istr_h2o)%conc(:,:)  = vmr_h2o(:,:)
+    gas_concentrations%concs(istr_o3)%conc(:,:)   = vmr_o3(:,:)
 
     ! #######################################################################################
     ! Radiation time step (output) (Is this really needed?) (Used by some diagnostics)
@@ -319,7 +310,7 @@ contains
     ! Setup surface ground temperature and ground/air skin temperature if required.
     ! #######################################################################################
     tsfg(1:NCOL) = tsfc(1:NCOL)
-    tsfa(1:NCOL) = tsfc(1:NCOL)
+    tsfa(1:NCOL) = t_lay(1:NCOL,iSFC)
 
   end subroutine GFS_rrtmgp_pre_run
   

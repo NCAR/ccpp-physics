@@ -5,6 +5,28 @@
 
 ########################################################################
 [ccpp-arg-table]
+  name = mynnsfc_wrapper_init
+  type = scheme
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+
+########################################################################
+[ccpp-arg-table]
   name = mynnsfc_wrapper_run
   type = scheme
 [im]
@@ -58,6 +80,14 @@
 [lsm]
   standard_name = flag_for_land_surface_scheme
   long_name = flag for land surface model
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[lsm_ruc]
+  standard_name = flag_for_ruc_land_surface_scheme
+  long_name = flag for RUC land surface model
   units = flag
   dimensions = ()
   type = integer
@@ -713,14 +743,23 @@
   kind = kind_phys
   intent = inout
   optional = F
-[qsfc_ruc]
-  standard_name = water_vapor_mixing_ratio_at_surface
-  long_name = water vapor mixing ratio at surface
+[qsfc_lnd_ruc]
+  standard_name = water_vapor_mixing_ratio_at_surface_over_land
+  long_name = water vapor mixing ratio at surface over land
   units = kg kg-1
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
+  optional = F
+[qsfc_ice_ruc]
+  standard_name = water_vapor_mixing_ratio_at_surface_over_ice
+  long_name = water vapor mixing ratio at surface over ice
+  units = kg kg-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
   optional = F
 [ustm]
   standard_name = surface_friction_velocity_drag

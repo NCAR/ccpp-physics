@@ -27,7 +27,7 @@ contains
   subroutine GFS_rrtmgp_lw_post_run (nCol, nLev, lslwr, do_lw_clrsky_hr, save_diag, fhlwr, &
        p_lev, t_lay, tsfa, fluxlwUP_allsky, fluxlwDOWN_allsky, fluxlwUP_clrsky,            &
        fluxlwDOWN_clrsky, raddt, aerodp, cldsa, mtopa, mbota, cld_frac, cldtaulw, fluxr,   &
-       sfcdlw, sfcflw, tsflw, htrlw, topflw, flxprf_lw, htrlwc, errmsg, errflg)
+       sfcdlw, sfculw, sfcflw, tsflw, htrlw, topflw, flxprf_lw, htrlwc, errmsg, errflg)
 
     ! Inputs                    
     integer, intent(in) :: &
@@ -65,12 +65,13 @@ contains
     real(kind=kind_phys), dimension(:,:), intent(inout) :: fluxr
     
     ! Outputs (mandatory)
-	real(kind_phys), dimension(nCol), intent(out) :: &
-	     sfcdlw,            & ! Total sky sfc downward lw flux (W/m2)
-	     tsflw                ! surface air temp during lw calculation (K)
-	type(sfcflw_type), dimension(nCol), intent(out) :: &
-	     sfcflw               ! LW radiation fluxes at sfc    
-    real(kind_phys), dimension(nCol,nLev), intent(out) :: &
+    real(kind_phys), dimension(nCol), intent(inout) :: &
+         sfcdlw,            & ! Total sky sfc downward lw flux (W/m2)
+         sfculw,            & ! Total sky sfc upward lw flux (W/m2)
+         tsflw                ! surface air temp during lw calculation (K)
+    type(sfcflw_type), dimension(nCol), intent(inout) :: &
+         sfcflw               ! LW radiation fluxes at sfc    
+    real(kind_phys), dimension(nCol,nLev), intent(inout) :: &
          htrlw                ! LW all-sky heating rate
     type(topflw_type), dimension(nCol), intent(out) :: &
          topflw               ! lw_fluxes_top_atmosphere
@@ -80,13 +81,13 @@ contains
          errflg
                   
     ! Outputs (optional)
-    type(proflw_type), dimension(nCol, nLev+1), optional, intent(out) :: &
+    type(proflw_type), dimension(nCol, nLev+1), optional, intent(inout) :: &
          flxprf_lw            ! 2D radiative fluxes, components:
                               ! upfxc - total sky upward flux (W/m2)
                               ! dnfxc - total sky dnward flux (W/m2)
                               ! upfx0 - clear sky upward flux (W/m2)
                               ! dnfx0 - clear sky dnward flux (W/m2)
-    real(kind_phys),dimension(nCol, nLev),intent(out),optional  :: &
+    real(kind_phys),dimension(nCol, nLev),intent(inout),optional  :: &
          htrlwc               ! Longwave clear-sky heating-rate (K/sec)
          
     ! Local variables
@@ -160,6 +161,7 @@ contains
 
     ! Radiation fluxes for other physics processes
     sfcdlw(:) = sfcflw(:)%dnfxc
+    sfculw(:) = sfcflw(:)%upfxc
 
     ! #######################################################################################
     ! Save LW diagnostics

@@ -1,90 +1,92 @@
-!>\file GFS_rad_time_vary.F90
+!>\file GFS_rad_time_vary.scm.F90
 !!  Contains code related to GFS physics suite setup (radiation part of time_vary_step)
-      module GFS_rad_time_vary
+   module GFS_rad_time_vary
 
       implicit none
 
       private
 
-      public GFS_rad_time_vary_init, GFS_rad_time_vary_run, GFS_rad_time_vary_finalize
+      public GFS_rad_time_vary_timestep_init
 
       contains
 
-!>\defgroup GFS_rad_time_vary GFS RRTMG Update
-!!\ingroup RRTMG
-!! @{
-      subroutine GFS_rad_time_vary_init
-      end subroutine GFS_rad_time_vary_init
-
-!> \section arg_table_GFS_rad_time_vary_run Argument Table
-!! \htmlinclude GFS_rad_time_vary_run.html
+!>\defgroup mod_GFS_rad_time_vary GFS Radiation Time Update
+!> @{
+!> \section arg_table_GFS_rad_time_vary_timestep_init Argument Table
+!! \htmlinclude GFS_rad_time_vary_timestep_init.html
 !!
-      subroutine GFS_rad_time_vary_run (Model, Statein, Tbd, errmsg, errflg)
+      subroutine GFS_rad_time_vary_timestep_init (                                     &
+              lslwr, lsswr, isubc_lw, isubc_sw, icsdsw, icsdlw, cnx, cny, isc, jsc,    &
+              imap, jmap, sec, kdt, imp_physics, imp_physics_zhao_carr, ps_2delt,      &
+              ps_1delt, t_2delt, t_1delt, qv_2delt, qv_1delt, t, qv, ps, errmsg, errflg)
 
-      use physparam,                 only: ipsd0, ipsdlim, iaerflg
-      use mersenne_twister,          only: random_setseed, random_index, random_stat
-      use machine,                   only: kind_phys
-      use GFS_typedefs,              only: GFS_statein_type,   &
-                                           GFS_control_type,   &
-                                           GFS_grid_type,      &
-                                           GFS_tbd_type
-      use radcons,                   only: qmin, con_100
+         use physparam,                 only: ipsd0, ipsdlim, iaerflg
+         use mersenne_twister,          only: random_setseed, random_index, random_stat
+         use machine,                   only: kind_phys
+         use radcons,                   only: qmin, con_100
 
-      implicit none
+         implicit none
 
-      type(GFS_control_type), intent(inout) :: Model
-      type(GFS_statein_type), intent(in)    :: Statein
-      type(GFS_tbd_type),     intent(inout) :: Tbd
-      character(len=*),       intent(out) :: errmsg
-      integer,                intent(out) :: errflg
+         ! Interface variables
+         integer,                intent(in)    :: isubc_lw, isubc_sw, cnx, cny, isc, jsc, kdt
+         integer,                intent(in)    :: imp_physics, imp_physics_zhao_carr
+         logical,                intent(in)    :: lslwr, lsswr
+         integer,                intent(inout) :: icsdsw(:), icsdlw(:)
+         integer,                intent(in)    :: imap(:), jmap(:)
+         real(kind_phys),        intent(in)    :: sec
+         real(kind_phys),        intent(inout) :: ps_2delt(:)
+         real(kind_phys),        intent(inout) :: ps_1delt(:)
+         real(kind_phys),        intent(inout) :: t_2delt(:,:)
+         real(kind_phys),        intent(inout) :: t_1delt(:,:)
+         real(kind_phys),        intent(inout) :: qv_2delt(:,:)
+         real(kind_phys),        intent(inout) :: qv_1delt(:,:)
+         real(kind_phys),        intent(in)    :: t(:,:), qv(:,:), ps(:)
+         character(len=*),       intent(out)   :: errmsg
+         integer,                intent(out)   :: errflg
 
-      !--- local variables
-      type (random_stat) :: stat
-      integer :: ix, nb, j, i, nblks, ipseed
-      integer :: numrdm(Model%cnx*Model%cny*2)
+         ! Local variables
+         type (random_stat) :: stat
+         integer :: ix, j, i, ipseed
+         integer :: numrdm(cnx*cny*2)
 
-      ! Initialize CCPP error handling variables
-      errmsg = ''
-      errflg = 0
+         ! Initialize CCPP error handling variables
+         errmsg = ''
+         errflg = 0
 
-      nb = 1
+         if (lsswr .or. lslwr) then
 
-      if (Model%lsswr .or. Model%lslwr) then
+           !--- call to GFS_radupdate_timestep_init is now in GFS_rrtmg_setup_timestep_init
 
-        !--- call to GFS_radupdate_run is now in GFS_rrtmg_setup_run
+           !--- set up random seed index in a reproducible way for entire cubed-sphere face (lat-lon grid)
+           if ((isubc_lw==2) .or. (isubc_sw==2)) then
+             ipseed = mod(nint(con_100*sqrt(sec)), ipsdlim) + 1 + ipsd0
+             call random_setseed (ipseed, stat)
+             call random_index (ipsdlim, numrdm, stat)
 
-        !--- set up random seed index in a reproducible way for entire cubed-sphere face (lat-lon grid)
-        if ((Model%isubc_lw==2) .or. (Model%isubc_sw==2)) then
-          ipseed = mod(nint(con_100*sqrt(Model%sec)), ipsdlim) + 1 + ipsd0
-          call random_setseed (ipseed, stat)
-          call random_index (ipsdlim, numrdm, stat)
+             do ix=1,size(jmap)
+               j = jmap(ix)
+               i = imap(ix)
+               !--- for testing purposes, replace numrdm with '100'
+               icsdsw(ix) = numrdm(i+isc-1 + (j+jsc-2)*cnx)
+               icsdlw(ix) = numrdm(i+isc-1 + (j+jsc-2)*cnx + cnx*cny)
+             enddo
 
-          !--- set the random seeds for each column in a reproducible way
-          do ix=1,Model%blksz(nb)
-             j = Tbd%jmap(ix)
-             i = Tbd%imap(ix)
-             !--- for testing purposes, replace numrdm with '100'
-             Tbd%icsdsw(ix) = numrdm(i+Model%isc-1 + (j+Model%jsc-2)*Model%cnx)
-             Tbd%icsdlw(ix) = numrdm(i+Model%isc-1 + (j+Model%jsc-2)*Model%cnx + Model%cnx*Model%cny)
-          enddo
-        endif  ! isubc_lw and isubc_sw
+           endif  ! isubc_lw and isubc_sw
 
-        if (Model%imp_physics == 99) then
-          if (Model%kdt == 1) then
-            Tbd%phy_f3d(:,:,1) = Statein%tgrs
-            Tbd%phy_f3d(:,:,2) = max(qmin,Statein%qgrs(:,:,1))
-            Tbd%phy_f3d(:,:,3) = Statein%tgrs
-            Tbd%phy_f3d(:,:,4) = max(qmin,Statein%qgrs(:,:,1))
-            Tbd%phy_f2d(:,1)   = Statein%prsi(:,1)
-            Tbd%phy_f2d(:,2)   = Statein%prsi(:,1)
-          endif
-        endif
+           if (imp_physics == imp_physics_zhao_carr) then
+             if (kdt == 1) then
+               t_2delt  = t
+               t_1delt  = t
+               qv_2delt = max(qmin,qv)
+               qv_1delt = max(qmin,qv)
+               ps_2delt = ps
+               ps_1delt = ps
+             endif
+           endif
 
-      endif
+         endif
 
-  end subroutine GFS_rad_time_vary_run
+      end subroutine GFS_rad_time_vary_timestep_init
+!> @}
 
-  subroutine GFS_rad_time_vary_finalize()
-  end subroutine GFS_rad_time_vary_finalize
-!! @}
-  end module GFS_rad_time_vary
+   end module GFS_rad_time_vary

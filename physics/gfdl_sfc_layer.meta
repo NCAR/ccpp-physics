@@ -783,6 +783,8 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
+  intent = inout
+  optional = F
 [qss_lnd]
   standard_name = surface_specific_humidity_over_land
   long_name = surface air saturation specific humidity over land
@@ -790,6 +792,8 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
+  intent = inout
+  optional = F
 [qss_ice]
   standard_name = surface_specific_humidity_over_ice
   long_name = surface air saturation specific humidity over ice
@@ -797,6 +801,8 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
+  intent = inout
+  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

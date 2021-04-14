@@ -216,7 +216,7 @@
   intent = in
   optional = F  
 [sthick]
-  standard_name = soil_layer_thickness
+  standard_name = thickness_of_soil_levels_for_land_surface_model
   long_name = soil layer thickness
   units = m
   dimensions = (soil_vertical_dimension)

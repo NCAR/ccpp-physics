@@ -98,15 +98,6 @@
   type = integer
   intent = out
   optional = F
-[sw_cloud_props]
-  standard_name = coefficients_for_sw_cloud_optics
-  long_name = DDT containing spectral information for RRTMGP SW radiation scheme
-  units = DDT
-  dimensions = ()
-  type = ty_cloud_optics
-  intent = out
-  optional = F
-
 ########################################################################
 [ccpp-arg-table]
   name = rrtmgp_sw_cloud_optics_run
@@ -143,6 +134,22 @@
   type = logical
   intent = in
   optional = F  
+[icliq_sw]
+  standard_name = flag_for_optical_property_for_liquid_clouds_for_shortwave_radiation
+  long_name = sw optical property for liquid clouds
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[icice_sw]
+  standard_name = flag_for_optical_property_for_ice_clouds_for_shortwave_radiation
+  long_name = sw optical property for ice clouds
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [doGP_cldoptics_PADE]
   standard_name = flag_to_calc_lw_cld_optics_using_RRTMGP_PADE
   long_name = logical flag to control cloud optics scheme.
@@ -159,14 +166,6 @@
   type = logical
   intent = in
   optional = F   
-[nrghice]
-  standard_name = number_of_rrtmgp_ice_roughness
-  long_name = number of ice-roughness categories in RRTMGP calculation
-  units = count
-  dimensions =  ()
-  type = integer
-  intent = in
-  optional = F
 [cld_frac]
   standard_name = total_cloud_fraction
   long_name = layer total cloud fraction
@@ -257,20 +256,12 @@
   kind = kind_phys
   intent = in
   optional = F   
-[sw_cloud_props]
-  standard_name = coefficients_for_sw_cloud_optics
-  long_name = DDT containing spectral information for cloudy RRTMGP SW radiation scheme
-  units = DDT
-  dimensions = ()
-  type = ty_cloud_optics
-  intent = in
-  optional = F
-[sw_gas_props]
-  standard_name = coefficients_for_sw_gas_optics
-  long_name = DDT containing spectral information for RRTMGP SW radiation scheme
-  units = DDT
-  dimensions = ()
-  type = ty_gas_optics_rrtmgp
+[nbndsGPsw]
+  standard_name = number_of_sw_bands_rrtmgp
+  long_name = number of sw bands used in RRTMGP
+  units = count
+  dimensions =  ()
+  type = integer
   intent = in
   optional = F
 [nday]

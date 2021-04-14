@@ -16,15 +16,16 @@
 !!
     subroutine GFS_suite_interstitial_rad_reset_run (Interstitial, Model, errmsg, errflg)
 
-      use GFS_typedefs, only: GFS_control_type,GFS_interstitial_type
+      use machine,      only: kind_phys
+      use GFS_typedefs, only: GFS_control_type, GFS_interstitial_type
 
       implicit none
 
       ! interface variables
       type(GFS_interstitial_type), intent(inout) :: Interstitial
       type(GFS_control_type),      intent(in)    :: Model
-      character(len=*), intent(out) :: errmsg
-      integer, intent(out) :: errflg
+      character(len=*),            intent(out)   :: errmsg
+      integer,                     intent(out)   :: errflg
 
       errmsg = ''
       errflg = 0
@@ -51,6 +52,7 @@
 !!
     subroutine GFS_suite_interstitial_phys_reset_run (Interstitial, Model, errmsg, errflg)
 
+      use machine,      only: kind_phys
       use GFS_typedefs, only: GFS_control_type, GFS_interstitial_type
 
       implicit none
@@ -58,8 +60,8 @@
       ! interface variables
       type(GFS_interstitial_type), intent(inout) :: Interstitial
       type(GFS_control_type),      intent(in)    :: Model
-      character(len=*), intent(out) :: errmsg
-      integer, intent(out) :: errflg
+      character(len=*),            intent(out)   :: errmsg
+      integer,                     intent(out)   :: errflg
 
       errmsg = ''
       errflg = 0
@@ -85,7 +87,7 @@
 !! \htmlinclude GFS_suite_interstitial_1_run.html
 !!
     subroutine GFS_suite_interstitial_1_run (im, levs, ntrac, dtf, dtp, slmsk, area, dxmin, dxinv, pgr, &
-      islmsk, work1, work2, psurf, dudt, dvdt, dtdt, dtdtc, dqdt, errmsg, errflg)
+      islmsk, work1, work2, psurf, dudt, dvdt, dtdt, dqdt, errmsg, errflg)
 
       use machine,               only: kind_phys
 
@@ -98,7 +100,7 @@
 
       integer,              intent(out), dimension(im) :: islmsk
       real(kind=kind_phys), intent(out), dimension(im) :: work1, work2, psurf
-      real(kind=kind_phys), intent(out), dimension(im,levs) :: dudt, dvdt, dtdt, dtdtc
+      real(kind=kind_phys), intent(out), dimension(im,levs) :: dudt, dvdt, dtdt
       real(kind=kind_phys), intent(out), dimension(im,levs,ntrac) ::  dqdt
       real(kind=kind_phys), parameter   :: zero = 0.0_kind_phys, one = 1.0_kind_phys
       character(len=*),     intent(out) :: errmsg
@@ -125,7 +127,6 @@
           dudt(i,k)  = zero
           dvdt(i,k)  = zero
           dtdt(i,k)  = zero
-          dtdtc(i,k) = zero
         enddo
       enddo
       do n=1,ntrac
@@ -154,23 +155,22 @@
 
     subroutine GFS_suite_interstitial_2_finalize()
     end subroutine GFS_suite_interstitial_2_finalize
-#if 0
+
 !> \section arg_table_GFS_suite_interstitial_2_run Argument Table
 !! \htmlinclude GFS_suite_interstitial_2_run.html
 !!
-#endif
     subroutine GFS_suite_interstitial_2_run (im, levs, lssav, ldiag3d, lsidea, cplflx, flag_cice, shal_cnv, old_monin, mstrat,    &
       do_shoc, frac_grid, imfshalcnv, dtf, xcosz, adjsfcdsw, adjsfcdlw, cice, pgr, ulwsfc_cice, lwhd, htrsw, htrlw, xmu, ctei_rm, &
       work1, work2, prsi, tgrs, prsl, qgrs_water_vapor, qgrs_cloud_water, cp, hvap, prslk, suntim, adjsfculw, adjsfculw_lnd,      &
       adjsfculw_ice, adjsfculw_wat, dlwsfc, ulwsfc, psmean, dt3dt_lw, dt3dt_sw, dt3dt_pbl, dt3dt_dcnv, dt3dt_scnv, dt3dt_mp,      &
-      ctei_rml, ctei_r, kinver, dry, icy, wet, frland, huge, use_GP_jacobian, skt, sktp1r, fluxlwUP, fluxlwUP_jac, errmsg, errflg)
+      ctei_rml, ctei_r, kinver, dry, icy, wet, frland, huge, use_LW_jacobian, errmsg, errflg)
 
       implicit none
 
       ! interface variables
       integer,              intent(in   ) :: im, levs, imfshalcnv
       logical,              intent(in   ) :: lssav, ldiag3d, lsidea, cplflx, shal_cnv
-      logical,              intent(in   ) :: old_monin, mstrat, do_shoc, frac_grid
+      logical,              intent(in   ) :: old_monin, mstrat, do_shoc, frac_grid, use_LW_jacobian
       real(kind=kind_phys), intent(in   ) :: dtf, cp, hvap
 
       logical,              intent(in   ), dimension(im) :: flag_cice
@@ -183,18 +183,7 @@
       integer,              intent(inout), dimension(im) :: kinver
       real(kind=kind_phys), intent(inout), dimension(im) :: suntim, dlwsfc, ulwsfc, psmean, ctei_rml, ctei_r
       real(kind=kind_phys), intent(in   ), dimension(im) :: adjsfculw_lnd, adjsfculw_ice, adjsfculw_wat
-      real(kind=kind_phys), intent(  out), dimension(im) :: adjsfculw
-      
-      ! RRTMGP	
-      logical,              intent(in   ) :: &
-           use_GP_jacobian   ! Use RRTMGP LW Jacobian of upwelling to adjust the surface flux?
-      real(kind=kind_phys), intent(in   ), dimension(im) :: &
-           skt               ! Skin temperature
-      real(kind=kind_phys), intent(inout), dimension(im) :: &
-           sktp1r            ! Skin temperature at previous timestep
-      real(kind=kind_phys), intent(in   ), dimension(im,levs+1), optional :: &
-           fluxlwUP,       & ! Upwelling LW flux (W/m2)
-           fluxlwUP_jac      ! Jacobian of upwelling LW flux (W/m2/K)
+      real(kind=kind_phys), intent(inout), dimension(im) :: adjsfculw
 
       ! These arrays are only allocated if ldiag3d is .true.
       real(kind=kind_phys), intent(inout), dimension(:,:) :: dt3dt_lw, dt3dt_sw, dt3dt_pbl, dt3dt_dcnv, dt3dt_scnv, dt3dt_mp
@@ -211,7 +200,7 @@
       integer :: i, k
       real(kind=kind_phys) :: tem1, tem2, tem, hocp
       logical, dimension(im) :: invrsn
-      real(kind=kind_phys), dimension(im) :: tx1, tx2, dT
+      real(kind=kind_phys), dimension(im) :: tx1, tx2
 
       real(kind=kind_phys), parameter :: zero = 0.0_kind_phys, one = 1.0_kind_phys
       real(kind=kind_phys), parameter :: qmin = 1.0e-10_kind_phys, epsln=1.0e-10_kind_phys
@@ -238,60 +227,44 @@
         enddo
 
 !  --- ...  sfc lw fluxes used by atmospheric model are saved for output
-
-!  --- ... when using RRTMGP w/ use_GP_jacobian, these adjustment factors are pre-computed
-!  --- ... and provided as inputs in this routine.
-        
-        if (use_GP_jacobian) then
-           ! Compute adjustment to the surface flux using Jacobian.
-          if(linit_mod) then
-            dT(:)        = (skt(:) - sktp1r(:)) 
-            adjsfculw(:) = fluxlwUP(:,1) + fluxlwUP_jac(:,1)  * dT(:)
-          else
-            adjsfculw(:) = 0.
-            linit_mod    = .true.
-          endif
-  
-          ! Store surface temperature for next iteration
-          sktp1r(:) = skt(:)       
-        else
-          if (frac_grid) then
-            do i=1,im
+        if (.not. use_LW_jacobian) then
+        if (frac_grid) then
+           do i=1,im
               tem = (one - frland(i)) * cice(i) ! tem = ice fraction wrt whole cell
               if (flag_cice(i)) then
-                adjsfculw(i) = adjsfculw_lnd(i) * frland(i)               &
-                             + ulwsfc_cice(i)   * tem                     &
-                             + adjsfculw_wat(i) * (one - frland(i) - tem)
+                 adjsfculw(i) = adjsfculw_lnd(i) * frland(i)               &
+                              + ulwsfc_cice(i)   * tem                     &
+                              + adjsfculw_wat(i) * (one - frland(i) - tem)
               else
-                adjsfculw(i) = adjsfculw_lnd(i) * frland(i)               &
-                             + adjsfculw_ice(i) * tem                     &
-                             + adjsfculw_wat(i) * (one - frland(i) - tem)
+                 adjsfculw(i) = adjsfculw_lnd(i) * frland(i)               &
+                              + adjsfculw_ice(i) * tem                     &
+                              + adjsfculw_wat(i) * (one - frland(i) - tem)
               endif
-            enddo
-          else
-            do i=1,im
+           enddo
+        else
+           do i=1,im
               if (dry(i)) then                     ! all land
-                adjsfculw(i) = adjsfculw_lnd(i)
+                 adjsfculw(i) = adjsfculw_lnd(i)
               elseif (icy(i)) then                 ! ice (and water)
-                tem = one - cice(i)
-                if (flag_cice(i)) then
-                  if (wet(i) .and. adjsfculw_wat(i) /= huge) then
-                    adjsfculw(i) = ulwsfc_cice(i)*cice(i) + adjsfculw_wat(i)*tem
-                  else
-                    adjsfculw(i) = ulwsfc_cice(i)
-                  endif
-                else
-                  if (wet(i) .and. adjsfculw_wat(i) /= huge) then
-                    adjsfculw(i) = adjsfculw_ice(i)*cice(i) + adjsfculw_wat(i)*tem
-                  else
-                    adjsfculw(i) = adjsfculw_ice(i)
-                  endif
-                endif
+                 tem = one - cice(i)
+                 if (flag_cice(i)) then
+                    if (wet(i) .and. adjsfculw_wat(i) /= huge) then
+                       adjsfculw(i) = ulwsfc_cice(i)*cice(i) + adjsfculw_wat(i)*tem
+                    else
+                       adjsfculw(i) = ulwsfc_cice(i)
+                    endif
+                 else
+                    if (wet(i) .and. adjsfculw_wat(i) /= huge) then
+                       adjsfculw(i) = adjsfculw_ice(i)*cice(i) + adjsfculw_wat(i)*tem
+                    else
+                       adjsfculw(i) = adjsfculw_ice(i)
+                    endif
+                 endif
               else                                 ! all water
-                adjsfculw(i) = adjsfculw_wat(i)
+                 adjsfculw(i) = adjsfculw_wat(i)
               endif
-            enddo
-          endif
+           enddo
+        endif
         endif
 
         do i=1,im
@@ -501,11 +474,9 @@
     subroutine GFS_suite_interstitial_3_finalize()
     end subroutine GFS_suite_interstitial_3_finalize
 
-#if 0
 !> \section arg_table_GFS_suite_interstitial_3_run Argument Table
 !! \htmlinclude GFS_suite_interstitial_3_run.html
 !!
-#endif
     subroutine GFS_suite_interstitial_3_run (im, levs, nn, cscnv,       &
                satmedmf, trans_trac, do_shoc, ltaerosol, ntrac, ntcw,   &
                ntiw, ntclamt, ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc,    &
@@ -539,7 +510,7 @@
       real(kind=kind_phys), dimension(im, levs),      intent(inout) :: rhc, save_qc
       ! save_qi is not allocated for Zhao-Carr MP
       real(kind=kind_phys), dimension(:, :),          intent(inout) :: save_qi
-      real(kind=kind_phys), dimension(:, :),          intent(inout) :: save_tcp ! ONLY ALLOCATE FOR THOMPSON! TODO
+      real(kind=kind_phys), dimension(:, :),          intent(inout) :: save_tcp
       real(kind=kind_phys), dimension(im, levs, nn),  intent(inout) :: clw
 
       character(len=*), intent(out) :: errmsg
@@ -678,8 +649,8 @@
 !!
     subroutine GFS_suite_interstitial_4_run (im, levs, ltaerosol, cplchm, tracers_total, ntrac, ntcw, ntiw, ntclamt, &
       ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,  &
-      imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, dtf, save_qc, save_qi, con_pi,                               &
-      gq0, clw, prsl, save_tcp, con_rd, nwfa, spechum, dqdti, errmsg, errflg)
+      imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, convert_dry_rho, dtf, save_qc, save_qi, con_pi,              &
+      gq0, clw, prsl, save_tcp, con_rd, con_eps, nwfa, spechum, dqdti, errmsg, errflg)
 
       use machine,               only: kind_phys
       use module_mp_thompson_make_number_concentrations, only: make_IceNumber, make_DropletNumber
@@ -692,7 +663,7 @@
         ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,           &
         imp_physics_zhao_carr, imp_physics_zhao_carr_pdf
 
-      logical,                                  intent(in) :: ltaerosol, cplchm
+      logical,                                  intent(in) :: ltaerosol, cplchm, convert_dry_rho
 
       real(kind=kind_phys),                     intent(in) :: con_pi, dtf
       real(kind=kind_phys), dimension(im,levs), intent(in) :: save_qc
@@ -702,7 +673,7 @@
       real(kind=kind_phys), dimension(im,levs,ntrac), intent(inout) :: gq0
       real(kind=kind_phys), dimension(im,levs,nn),    intent(inout) :: clw
       real(kind=kind_phys), dimension(im,levs),       intent(in) :: prsl
-      real(kind=kind_phys),                           intent(in) :: con_rd
+      real(kind=kind_phys),                           intent(in) :: con_rd, con_eps
       real(kind=kind_phys), dimension(:,:),           intent(in) :: nwfa, save_tcp
       real(kind=kind_phys), dimension(im,levs),       intent(in) :: spechum
 
@@ -717,7 +688,7 @@
       ! local variables
       integer :: i,k,n,tracers
 
-      real(kind=kind_phys), dimension(im,levs) :: rho_dryair
+      real(kind=kind_phys) :: rho, orho
       real(kind=kind_phys), dimension(im,levs) :: qv_mp !< kg kg-1 (dry mixing ratio)
       real(kind=kind_phys), dimension(im,levs) :: qc_mp !< kg kg-1 (dry mixing ratio)
       real(kind=kind_phys), dimension(im,levs) :: qi_mp !< kg kg-1 (dry mixing ratio)
@@ -765,32 +736,55 @@
           enddo
 
           if (imp_physics == imp_physics_thompson .and. (ntlnc>0 .or. ntinc>0)) then
-            do k=1,levs
-              do i=1,im
-                !> - Density of air in kg m-3
-                rho_dryair(i,k) = prsl(i,k) / (con_rd*save_tcp(i,k))
-                !> - Convert specific humidity to dry mixing ratio
-                qv_mp(i,k) = spechum(i,k) / (one-spechum(i,k))
-                if (ntlnc>0) then
-                  !> - Convert moist mixing ratio to dry mixing ratio
-                  qc_mp(i,k) = (clw(i,k,2)-save_qc(i,k)) / (one-spechum(i,k))
-                  !> - Convert number concentration from moist to dry
-                  nc_mp(i,k) = gq0(i,k,ntlnc) / (one-spechum(i,k))
-                  nc_mp(i,k) = max(zero, nc_mp(i,k) + make_DropletNumber(qc_mp(i,k) * rho_dryair(i,k), nwfa(i,k)) * (one/rho_dryair(i,k)))
-                  !> - Convert number concentrations from dry to moist
-                  gq0(i,k,ntlnc) = nc_mp(i,k) / (one+qv_mp(i,k))
-                endif
-                if (ntinc>0) then
-                  !> - Convert moist mixing ratio to dry mixing ratio
-                  qi_mp(i,k) = (clw(i,k,1)-save_qi(i,k)) / (one-spechum(i,k))
-                  !> - Convert number concentration from moist to dry
-                  ni_mp(i,k) = gq0(i,k,ntinc) / (one-spechum(i,k)) 
-                  ni_mp(i,k) = max(zero, ni_mp(i,k) + make_IceNumber(qi_mp(i,k) * rho_dryair(i,k), save_tcp(i,k)) * (one/rho_dryair(i,k)))
-                  !> - Convert number concentrations from dry to moist
-                  gq0(i,k,ntinc) = ni_mp(i,k) / (one+qv_mp(i,k))
-                endif
+            if_convert_dry_rho: if (convert_dry_rho) then
+              do k=1,levs
+                do i=1,im
+                  !> - Convert specific humidity to dry mixing ratio
+                  qv_mp(i,k) = spechum(i,k) / (one-spechum(i,k))
+                  !> - Density of air in kg m-3 and inverse density
+                  rho = con_eps*prsl(i,k) / (con_rd*save_tcp(i,k)*(qv_mp(i,k)+con_eps))
+                  orho = one/rho
+                  if (ntlnc>0) then
+                    !> - Convert moist mixing ratio to dry mixing ratio
+                    qc_mp(i,k) = (clw(i,k,2)-save_qc(i,k)) / (one-spechum(i,k))
+                    !> - Convert number concentration from moist to dry
+                    nc_mp(i,k) = gq0(i,k,ntlnc) / (one-spechum(i,k))
+                    nc_mp(i,k) = max(zero, nc_mp(i,k) + make_DropletNumber(qc_mp(i,k) * rho, nwfa(i,k)*rho) * orho)
+                    !> - Convert number concentrations from dry to moist
+                    gq0(i,k,ntlnc) = nc_mp(i,k) / (one+qv_mp(i,k))
+                  endif
+                  if (ntinc>0) then
+                    !> - Convert moist mixing ratio to dry mixing ratio
+                    qi_mp(i,k) = (clw(i,k,1)-save_qi(i,k)) / (one-spechum(i,k))
+                    !> - Convert number concentration from moist to dry
+                    ni_mp(i,k) = gq0(i,k,ntinc) / (one-spechum(i,k)) 
+                    ni_mp(i,k) = max(zero, ni_mp(i,k) + make_IceNumber(qi_mp(i,k) * rho, save_tcp(i,k)) * orho)
+                    !> - Convert number concentrations from dry to moist
+                    gq0(i,k,ntinc) = ni_mp(i,k) / (one+qv_mp(i,k))
+                  endif
+                enddo
               enddo
-            enddo
+            else
+              do k=1,levs
+                do i=1,im
+                  !> - Density of air in kg m-3 and inverse density
+                  rho = con_eps*prsl(i,k) / (con_rd*save_tcp(i,k)*(spechum(i,k)+con_eps))
+                  orho = one/rho
+                  if (ntlnc>0) then
+                    !> - Update cloud water mixing ratio
+                    qc_mp(i,k) = (clw(i,k,2)-save_qc(i,k))
+                    !> - Update cloud water number concentration
+                    gq0(i,k,ntlnc) = max(zero, gq0(i,k,ntlnc) + make_DropletNumber(qc_mp(i,k) * rho, nwfa(i,k)*rho) * orho)
+                  endif
+                  if (ntinc>0) then
+                    !> - Update cloud ice mixing ratio
+                    qi_mp(i,k) = (clw(i,k,1)-save_qi(i,k))
+                    !> - Update cloud ice number concentration
+                    gq0(i,k,ntinc) = max(zero, gq0(i,k,ntinc) + make_IceNumber(qi_mp(i,k) * rho, save_tcp(i,k)) * orho)
+                  endif
+                enddo
+              enddo
+            end if if_convert_dry_rho
           endif
 
         else

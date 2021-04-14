@@ -542,16 +542,19 @@ end subroutine m_micro_init
      &                            NCPI(I,K), qc_min)
              if (rnw(i,k) <= qc_min(1)) then
                ncpr(i,k) = zero
+               rnw(i,k)  = zero
              elseif (ncpr(i,k) <= nmin) then ! make sure NL > 0 if Q >0
                ncpr(i,k) = max(rnw(i,k) / (fourb3 * PI *RL_cub*997.0_kp), nmin)
              endif
              if (snw(i,k) <= qc_min(2)) then
                ncps(i,k) = zero
+               snw(i,k)  = zero
              elseif (ncps(i,k) <= nmin) then
                ncps(i,k) = max(snw(i,k) / (fourb3 * PI *RL_cub*500.0_kp), nmin)
              endif
              if (qgl(i,k) <= qc_min(2)) then
                ncgl(i,k) = zero
+               qgl(i,k)  = zero
              elseif (ncgl(i,k) <= nmin) then
                ncgl(i,k) = max(qgl(i,k) / (fourb3 * PI *RL_cub*500.0_kp), nmin)
              endif
@@ -1696,16 +1699,19 @@ end subroutine m_micro_init
             QI_TOT(I,K) = QILS(I,K) + QICN(I,K)
             if (rnw(i,k) <= qc_min(1)) then
               ncpr(i,k) = zero
+              rnw(i,k)  = zero
             elseif (ncpr(i,k) <= nmin) then ! make sure NL > 0 if Q >0
               ncpr(i,k) = max(rnw(i,k) / (fourb3 * PI *RL_cub*997.0_kp), nmin)
             endif
             if (snw(i,k) <= qc_min(2)) then
               ncps(i,k) = zero
+              snw(i,k)  = zero
             elseif (ncps(i,k) <= nmin) then
               ncps(i,k) = max(snw(i,k) / (fourb3 * PI *RL_cub*500.0_kp), nmin)
             endif
             if (qgl(i,k) <= qc_min(2)) then
               ncgl(i,k) = zero
+              qgl(i,k)  = zero
             elseif (ncgl(i,k) <= nmin) then
               ncgl(i,k) = max(qgl(i,k) / (fourb3 * PI *RL_cub*500.0_kp), nmin)
             endif
@@ -1736,16 +1742,19 @@ end subroutine m_micro_init
 !
             if (rnw(i,k) <= qc_min(1)) then
               ncpr(i,k) = zero
+              rnw(i,k)  = zero
             elseif (ncpr(i,k) <= nmin) then ! make sure NL > 0 if Q >0
               ncpr(i,k) = max(rnw(i,k) / (fourb3 * PI *RL_cub*997.0_kp), nmin)
             endif
             if (snw(i,k) <= qc_min(2)) then
               ncps(i,k) = zero
+              snw(i,k)  = zero
             elseif (ncps(i,k) <= nmin) then
               ncps(i,k) = max(snw(i,k) / (fourb3 * PI *RL_cub*500.0_kp), nmin)
             endif
             if (qgl(i,k) <= qc_min(2)) then
               ncgl(i,k) = zero
+              qgl(i,k)  = zero
             elseif (ncgl(i,k) <= nmin) then
               ncgl(i,k) = max(qgl(i,k) / (fourb3 * PI *RL_cub*500.0_kp), nmin)
             endif

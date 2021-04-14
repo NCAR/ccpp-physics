@@ -77,9 +77,6 @@ The GSD_v1 physics suite uses the parameterizations in the following order:
       <scheme>sfc_nst</scheme>
       <scheme>sfc_nst_post</scheme>
       <scheme>lsm_ruc</scheme>
-      <scheme>lsm_ruc_sfc_sice_pre</scheme>
-      <scheme>sfc_sice</scheme>
-      <scheme>lsm_ruc_sfc_sice_post</scheme>
       <scheme>GFS_surface_loop_control_part2</scheme>
     </subcycle>
     <!-- End of surface iteration loop -->

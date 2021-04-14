@@ -105,7 +105,7 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
+  optional = F  
 [tf]
   standard_name = air_temperature_at_lowest_model_layer
   long_name = air temperature at lowest model layer
@@ -172,6 +172,15 @@
 [sfcdlw]
   standard_name = surface_downwelling_longwave_flux_on_radiation_time_step
   long_name = total sky surface downwelling longwave flux on radiation time step
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[sfculw]
+  standard_name = surface_upwelling_longwave_flux_on_radiation_time_step
+  long_name = total sky sfc upward lw flux
   units = W m-2
   dimensions = (horizontal_loop_extent)
   type = real
@@ -353,9 +362,33 @@
   kind = kind_phys
   intent = inout
   optional = F
-[dtdtc]
-  standard_name = tendency_of_air_temperature_due_to_radiative_heating_assuming_clear_sky
-  long_name = clear sky radiative (shortwave + longwave) heating rate at current time
+[pert_radtend]
+  standard_name = flag_for_stochastic_radiative_heating_perturbations
+  long_name = flag for stochastic radiative heating perturbations
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[do_sppt]
+  standard_name = flag_for_stochastic_physics_perturbations
+  long_name = flag for stochastic physics perturbations
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[ca_global]
+  standard_name = flag_for_global_cellular_automata
+  long_name = switch for global ca
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[dtdtnp]
+  standard_name = tendency_of_air_temperature_to_withold_from_sppt
+  long_name = temp. change from physics that should not be perturbed by sppt
   units = K s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
@@ -410,6 +443,15 @@
 [adjsfculw_wat]
   standard_name = surface_upwelling_longwave_flux_over_ocean_interstitial
   long_name = surface upwelling longwave flux at current time over ocean (temporary use as interstitial)
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[adjsfculw]
+  standard_name = surface_upwelling_longwave_flux
+  long_name = surface upwelling longwave flux at current time
   units = W m-2
   dimensions = (horizontal_loop_extent)
   type = real
@@ -506,6 +548,23 @@
   kind = kind_phys
   intent = out
   optional = F
+[use_LW_jacobian]
+  standard_name = flag_to_calc_RRTMGP_LW_jacobian
+  long_name = logical flag to control RRTMGP LW calculation
+  units = flag
+  dimensions = ()
+  type = logical  
+  intent = in
+  optional = F  
+[sfculw_jac]
+  standard_name = RRTMGP_jacobian_of_lw_flux_upward_at_surface
+  long_name = RRTMGP Jacobian upward longwave flux at surface
+  units = W m-2 K-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F    
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

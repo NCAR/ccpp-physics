@@ -293,55 +293,6 @@
 
       endif ! timestep > 1
 
-!> - Compute SFC/low/middle/high cloud top pressure for each cloud domain for given latitude.
-
-      do i =1, im
-        rxlat(i) = abs( xlat(i) / con_pi )      ! if xlat in pi/2 -> -pi/2 range
-!       rxlat(i) = abs(0.5 - xlat(i)/con_pi)    ! if xlat in 0 -> pi range
-      enddo
-
-      do id = 1, 4
-        tem1 = ptopc(id,2) - ptopc(id,1)
-        do i =1, im
-          ptop1(i,id) = ptopc(id,1) + tem1*max( 0.0, 4.0*rxlat(i)-1.0 )
-        enddo
-      enddo
-
-      cldcnv = 0.
-
-! DH* 20200723
-! iovr == 4 or 5 requires alpha, which is computed in GFS_rrmtg_pre,
-! which comes after SGSCloud_RadPre. Computing alpha here requires
-! a lot more input variables and computations (dzlay etc.), and
-! recomputing it in GFS_rrmtg_pre is a waste of time. Workaround:
-! pass a dummy array initialized to zero to gethml for other values of iovr.
-      if ( iovr == 4 .or. iovr == 5 ) then
-        errmsg = 'Logic error in sgscloud_radpre: iovr==4 or 5 not implemented'
-        errflg = 1
-        return
-      end if
-!! Call subroutine get_alpha_exp to define alpha parameter for EXP and ER cloud overlap options
-!      if ( iovr == 4 .or. iovr == 5 ) then 
-!        call get_alpha_exp                                              &
-!!  ---  inputs:
-!             (im, nlay, dzlay, iovr, latdeg, julian, yearlen, clouds1,  &
-!!  ---  outputs:
-!              alpha                                                     &
-!            )
-!      endif
-      alpha_dummy = 0.0
-! *DH 2020723
-
-!> - Recompute the diagnostic high, mid, low, total and bl cloud fraction
-      call gethml                                                       &
-!  ---  inputs:
-           ( plyr, ptop1, clouds1, cldcnv, dz, de_lgth, alpha_dummy,    &
-!  ---  outputs:
-             im, nlay, cldsa, mtopa, mbota)
-
-       !print*,"===Finished adding subgrid clouds to the resolved-scale clouds"
-       !print*,"qc_save:",qc_save(1,1)," qi_save:",qi_save(1,1)
-
       end subroutine sgscloud_radpre_run
 
       end module sgscloud_radpre

@@ -1,7 +1,8 @@
 [ccpp-table-properties]
   name = GFS_rrtmg_setup
   type = scheme
-  dependencies = iounitdef.f,module_bfmicrophysics.f,physparam.f,radcons.f90,radiation_aerosols.f,radiation_astronomy.f,radiation_clouds.f,radiation_gases.f,radiation_surface.f,radlw_main.F90,radlw_param.f,radsw_main.F90,radsw_param.f
+  dependencies = iounitdef.f,module_bfmicrophysics.f,physparam.f,radcons.f90,radiation_aerosols.f,radiation_astronomy.f,radiation_clouds.f,
+  dependencies = module_mp_thompson.F90,radiation_gases.f,radiation_surface.f,radlw_main.F90,radlw_param.f,radsw_main.F90,radsw_param.f,
 
 ########################################################################
 [ccpp-arg-table]
@@ -80,14 +81,6 @@
   type = integer
   intent = in
   optional = F
-[num_p2d]
-  standard_name = array_dimension_of_2d_arrays_for_microphysics
-  long_name = number of 2D arrays needed for microphysics
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [num_p3d]
   standard_name = array_dimension_of_3d_arrays_for_microphysics
   long_name = number of 3D arrays needed for microphysics
@@ -112,17 +105,9 @@
   type = integer
   intent = in
   optional = F
-[iovr_sw]
-  standard_name = flag_for_cloud_overlap_method_for_shortwave_radiation
-  long_name = sw: max-random overlap clouds
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[iovr_lw]
-  standard_name = flag_for_cloud_overlap_method_for_longwave_radiation
-  long_name = lw: max-random overlap clouds
+[iovr]
+  standard_name = flag_for_cloud_overlap_method_for_radiation
+  long_name = max-random overlap clouds
   units = flag
   dimensions = ()
   type = integer
@@ -263,7 +248,7 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = GFS_rrtmg_setup_run
+  name = GFS_rrtmg_setup_timestep_init
   type = scheme
 [idate]
   standard_name = date_and_time_at_model_initialization

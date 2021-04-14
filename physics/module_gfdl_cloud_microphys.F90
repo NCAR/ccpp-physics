@@ -47,6 +47,9 @@ module gfdl_cloud_microphys_mod
 
    public gfdl_cloud_microphys_mod_driver, gfdl_cloud_microphys_mod_init, &
           gfdl_cloud_microphys_mod_end, cloud_diagnosis
+!   public wqs1, wqs2, qs_blend, wqsat_moist, wqsat2_moist
+!   public qsmith_init, qsmith, es2_table1d, es3_table1d, esw_table1d
+!   public setup_con, wet_bulb
 
    real :: missing_value = - 1.e10
 
@@ -116,7 +119,18 @@ module gfdl_cloud_microphys_mod
 
    real, parameter :: sfcrho = 1.2                         !< surface air density
    real, parameter :: rhor = 1.e3                          !< density of rain water, lin83
+    ! intercept parameters
 
+   real, parameter :: rnzr = 8.0e6 ! lin83
+   real, parameter :: rnzs = 3.0e6 ! lin83
+   real, parameter :: rnzg = 4.0e6 ! rh84
+   real, parameter :: rnzh = 4.0e4 ! lin83 --- lmh 29 sep 17
+
+    ! density parameters
+
+   real, parameter :: rhoh = 0.917e3 ! lin83 --- lmh 29 sep 17
+
+   public rhor, rhos, rhog, rhoh, rnzr, rnzs, rnzg, rnzh
    real :: cracs, csacr, cgacr, cgacs, csacw, craci, csaci, cgacw, cgaci, cracw !< constants for accretions
    real :: acco (3, 4)                                     !< constants for accretions
    real :: cssub (5), cgsub (5), crevp (5), cgfr (2), csmlt (5), cgmlt (5)
@@ -283,6 +297,7 @@ module gfdl_cloud_microphys_mod
    logical :: use_ppm = .false.                            !< use ppm fall scheme
    logical :: mono_prof = .true.                           !< perform terminal fall with mono ppm scheme
    logical :: mp_print = .false.                           !< cloud microphysics debugging printout
+   logical :: do_hail = .false.                            !< use hail parameters instead of graupel
 
    ! real :: global_area = - 1.
 
@@ -316,7 +331,7 @@ module gfdl_cloud_microphys_mod
        rad_snow, rad_graupel, rad_rain, cld_min, use_ppm, mono_prof,         &
        do_sedi_heat, sedi_transport, do_sedi_w, de_ice, icloud_f, irain_f,   &
        mp_print, reiflag, rewmin, rewmax, reimin, reimax, rermin, rermax,    &
-       resmin, resmax, regmin, regmax, tintqs
+       resmin, resmax, regmin, regmax, tintqs, do_hail
 
    public                                                                    &
        mp_time, t_min, t_sub, tau_r2g, tau_smlt, tau_g2r, dw_land, dw_ocean, &
@@ -330,7 +345,7 @@ module gfdl_cloud_microphys_mod
        rad_snow, rad_graupel, rad_rain, cld_min, use_ppm, mono_prof,         &
        do_sedi_heat, sedi_transport, do_sedi_w, de_ice, icloud_f, irain_f,   &
        mp_print, reiflag, rewmin, rewmax, reimin, reimax, rermin, rermax,    &
-       resmin, resmax, regmin, regmax, tintqs 
+       resmin, resmax, regmin, regmax, tintqs, do_hail 
 
 contains
 
@@ -1796,9 +1811,11 @@ subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
                 !! threshold from wsm6 scheme, Hong et al. (2004) \cite hong_et_al_2004,
                 !! eq (13) : qi0_crt ~0.8e-4.
                 ! -----------------------------------------------------------------------
-
-                qim = qi0_crt / den (k)
-
+                if (qi0_crt < 0.) then
+                    qim = - qi0_crt
+                else
+                    qim = qi0_crt / den (k)
+                endif
                 ! -----------------------------------------------------------------------
                 ! assuming linear subgrid vertical distribution of cloud ice
                 ! the mismatch computation following lin et al. 1994, mwr
@@ -3280,8 +3297,10 @@ subroutine fall_speed (ktop, kbot, den, qs, qi, qg, ql, tk, vts, vti, vtg)
 
     real, parameter :: vcons = 6.6280504
     real, parameter :: vcong = 87.2382675
+    real, parameter :: vconh = vcong * sqrt (rhoh / rhog)
     real, parameter :: norms = 942477796.076938
     real, parameter :: normg = 5026548245.74367
+    real, parameter :: normh = pi * rhoh * rnzh
 
     real, dimension (ktop:kbot) :: qden, tc, rhof
 
@@ -3346,10 +3365,19 @@ subroutine fall_speed (ktop, kbot, den, qs, qi, qg, ql, tk, vts, vti, vtg)
     ! -----------------------------------------------------------------------
     !> - graupel:
     ! -----------------------------------------------------------------------
-
     if (const_vg) then
         vtg (:) = vg_fac ! 2.
     else
+        if (do_hail) then
+            do k = ktop, kbot
+                if (qg (k) < thg) then
+                    vtg (k) = vf_min
+                else
+                    vtg (k) = vg_fac * vconh * rhof (k) * sqrt (sqrt (sqrt (qg (k) * den (k) / normh)))
+                    vtg (k) = min (vg_max, max (vf_min, vtg (k)))
+                endif
+            enddo
+        else
         do k = ktop, kbot
             if (qg (k) < thg) then
                 vtg (k) = vf_min
@@ -3358,6 +3386,7 @@ subroutine fall_speed (ktop, kbot, den, qs, qi, qg, ql, tk, vts, vti, vtg)
                 vtg (k) = min (vg_max, max (vf_min, vtg (k)))
             endif
         enddo
+    endif
     endif
 
 end subroutine fall_speed
@@ -3382,9 +3411,9 @@ subroutine setupm
 
     ! intercept parameters
 
-    real, parameter :: rnzr = 8.0e6 ! lin83
-    real, parameter :: rnzs = 3.0e6 ! lin83
-    real, parameter :: rnzg = 4.0e6 ! rh84
+!    real, parameter :: rnzr = 8.0e6 ! lin83
+!    real, parameter :: rnzs = 3.0e6 ! lin83
+!    real, parameter :: rnzg = 4.0e6 ! rh84
 
     ! density parameters
 
@@ -3427,8 +3456,13 @@ subroutine setupm
 
     cracs = pisq * rnzr * rnzs * rhos
     csacr = pisq * rnzr * rnzs * rhor
-    cgacr = pisq * rnzr * rnzg * rhor
-    cgacs = pisq * rnzg * rnzs * rhos
+    if (do_hail) then
+        cgacr = pisq * rnzr * rnzh * rhor
+        cgacs = pisq * rnzh * rnzs * rhos
+    else
+        cgacr = pisq * rnzr * rnzg * rhor
+        cgacs = pisq * rnzg * rnzs * rhos
+    endif
     cgacs = cgacs * c_pgacs
 
     ! act: 1 - 2:racs (s - r) ; 3 - 4:sacr (r - s) ;
@@ -3436,7 +3470,11 @@ subroutine setupm
 
     act (1) = pie * rnzs * rhos
     act (2) = pie * rnzr * rhor
-    act (6) = pie * rnzg * rhog
+    if (do_hail) then
+        act (6) = pie * rnzh * rhoh
+    else
+        act (6) = pie * rnzg * rhog
+    endif
     act (3) = act (2)
     act (4) = act (1)
     act (5) = act (2)
@@ -3457,7 +3495,11 @@ subroutine setupm
     craci = pie * rnzr * alin * gam380 / (4. * act (2) ** 0.95)
     csaci = csacw * c_psaci
 
-    cgacw = pie * rnzg * gam350 * gcon / (4. * act (6) ** 0.875)
+    if (do_hail) then
+        cgacw = pie * rnzh * gam350 * gcon / (4. * act (6) ** 0.875)
+    else
+        cgacw = pie * rnzg * gam350 * gcon / (4. * act (6) ** 0.875)
+    endif
     ! cgaci = cgacw * 0.1
 
     ! sjl, may 28, 2012
@@ -3470,7 +3512,11 @@ subroutine setupm
     ! subl and revp: five constants for three separate processes
 
     cssub (1) = 2. * pie * vdifu * tcond * rvgas * rnzs
-    cgsub (1) = 2. * pie * vdifu * tcond * rvgas * rnzg
+    if (do_hail) then
+        cgsub (1) = 2. * pie * vdifu * tcond * rvgas * rnzh
+    else
+        cgsub (1) = 2. * pie * vdifu * tcond * rvgas * rnzg
+    endif
     crevp (1) = 2. * pie * vdifu * tcond * rvgas * rnzr
     cssub (2) = 0.78 / sqrt (act (1))
     cgsub (2) = 0.78 / sqrt (act (6))
@@ -3498,8 +3544,13 @@ subroutine setupm
 
     ! gmlt: five constants
 
-    cgmlt (1) = 2. * pie * tcond * rnzg / hltf
-    cgmlt (2) = 2. * pie * vdifu * rnzg * hltc / hltf
+    if (do_hail) then
+        cgmlt (1) = 2. * pie * tcond * rnzh / hltf
+        cgmlt (2) = 2. * pie * vdifu * rnzh * hltc / hltf
+    else
+        cgmlt (1) = 2. * pie * tcond * rnzg / hltf
+        cgmlt (2) = 2. * pie * vdifu * rnzg * hltc / hltf
+    endif
     cgmlt (3) = cgsub (2)
     cgmlt (4) = cgsub (3)
     cgmlt (5) = ch2o / hltf

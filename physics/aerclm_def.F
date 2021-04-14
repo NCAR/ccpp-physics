@@ -2,8 +2,8 @@
       use machine , only : kind_phys
       implicit none
      
-      integer, parameter   :: levsaer=50, ntrcaerm=15, timeaer=12
-      integer              :: latsaer, lonsaer, ntrcaer
+      integer, parameter   :: levsaer=72, ntrcaerm=15, timeaer=12
+      integer              :: latsaer, lonsaer, ntrcaer, levsw
 
       character*10         :: specname(ntrcaerm)
       real (kind=kind_phys):: aer_time(13)

@@ -72,7 +72,7 @@ set(TYPEDEFS $ENV{CCPP_TYPEDEFS})
 if(TYPEDEFS)
   message(STATUS "Got CCPP TYPEDEFS from environment variable: ${TYPEDEFS}")
 else(TYPEDEFS)
-  include(./CCPP_TYPEDEFS.cmake)
+  include(${CMAKE_CURRENT_BINARY_DIR}/CCPP_TYPEDEFS.cmake)
   message(STATUS "Got CCPP TYPEDEFS from cmakefile include file: ${TYPEDEFS}")
 endif(TYPEDEFS)
 
@@ -88,7 +88,7 @@ set(SCHEMES $ENV{CCPP_SCHEMES})
 if(SCHEMES)
   message(STATUS "Got CCPP SCHEMES from environment variable: ${SCHEMES}")
 else(SCHEMES)
-  include(./CCPP_SCHEMES.cmake)
+  include(${CMAKE_CURRENT_BINARY_DIR}/CCPP_SCHEMES.cmake)
   message(STATUS "Got CCPP SCHEMES from cmakefile include file: ${SCHEMES}")
 endif(SCHEMES)
 
@@ -97,7 +97,7 @@ set(CAPS $ENV{CCPP_CAPS})
 if(CAPS)
   message(STATUS "Got CCPP CAPS from environment variable: ${CAPS}")
 else(CAPS)
-  include(./CCPP_CAPS.cmake)
+  include(${CMAKE_CURRENT_BINARY_DIR}/CCPP_CAPS.cmake)
   message(STATUS "Got CCPP CAPS from cmakefile include file: ${CAPS}")
 endif(CAPS)
 
@@ -180,7 +180,7 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
       string(REPLACE "-xCORE-AVX2" "-xCORE-AVX-I"
              CMAKE_Fortran_FLAGS_LOPT1
              "${CMAKE_Fortran_FLAGS_LOPT1}")
-      string(REPLACE "-axSSE4.2,AVX,CORE-AVX2,CORE-AVX512" "-axSSE4.2,AVX,CORE-AVX-I"
+      string(REPLACE "-axSSE4.2,CORE-AVX2" "-axSSE4.2,CORE-AVX-I"
              CMAKE_Fortran_FLAGS_LOPT1
              "${CMAKE_Fortran_FLAGS_LOPT1}")
       SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/physics/radiation_aerosols.f

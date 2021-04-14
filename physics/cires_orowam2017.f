@@ -4,7 +4,7 @@
      &   sinlat, xlatd, taup, taud, pkdis)
 ! 
       USE MACHINE ,      ONLY : kind_phys
-      use ugwp_common ,  only : grav,  omega2
+      use ugwp_common_v0 ,  only : grav,  omega2
 !      
       implicit none
 
@@ -121,7 +121,7 @@
            taub_kx(1:nw) = tau_kx(1:nw) * taub(i)
            wkdis(:,:)    = kedmin
 
-           call oro_meanflow(levs, nzi, u1(j,:), v1(j,:), t1(j,:),
+           call oro_meanflow_v0(levs, nzi, u1(j,:), v1(j,:), t1(j,:),
      &                       prsi(j,:), prsL(j,:), del(j,:), rho(i,:),
      &                       bn2(i,:), uzi, rhoi,ktur, kalp,dzi,
      &                       xn(i), yn(i))
@@ -275,10 +275,10 @@
 ! define mean flow  and dissipation for OGW-kx spectrum
 !
 !-------------------------------------------------------------      
-      subroutine oro_meanflow(nz, nzi, u1, v1, t1, pint, pmid,
+      subroutine oro_meanflow_v0(nz, nzi, u1, v1, t1, pint, pmid,
      &           delp, rho, bn2, uzi, rhoi, ktur, kalp, dzi, xn, yn)
 
-      use ugwp_common ,  only : grav, rgrav, rdi,  velmin, dw2min
+      use ugwp_common_v0 ,  only : grav, rgrav, rdi,  velmin, dw2min
       implicit none
 
       integer :: nz, nzi
@@ -336,4 +336,51 @@
       rhoi(k) = rhoi(k-1)*.5
       dzi(k)  =  dzi(k-1)
 
-      end subroutine oro_meanflow
+      end subroutine oro_meanflow_v0
+      
+      subroutine ugwpv0_tofd1d(levs, sigflt, elvmax, zsurf, 
+     &   zpbl, u, v,  zmid, utofd, vtofd, epstofd, krf_tofd)
+       use machine ,      only : kind_phys 
+       use ugwp_common_v0  , only :  rcpd2         
+       use ugwpv0_oro_init, only : n_tofd, const_tofd, ze_tofd
+       use ugwpv0_oro_init, only : a12_tofd, ztop_tofd
+!       
+      implicit none
+      integer ::  levs
+      real(kind_phys), dimension(levs)  ::   u, v, zmid
+      real(kind_phys)     ::  sigflt, elvmax, zpbl, zsurf
+      real(kind_phys), dimension(levs)  ::  utofd, vtofd
+      real(kind_phys), dimension(levs)  ::  epstofd, krf_tofd
+!
+! locals
+!
+      integer :: i, k
+      real(kind_phys) :: sghmax = 5.
+      real(kind_phys) :: sgh2, ekin, zdec, rzdec, umag, zmet
+      real(kind_phys) ::  zarg, ztexp, krf
+!     
+      utofd =0.0   ; vtofd = 0.0
+      epstofd =0.0 ; krf_tofd =0.0    
+!         
+       zdec = max(n_tofd*sigflt, zpbl)          ! ntimes*sgh_turb or Zpbl
+       zdec = min(ze_tofd, zdec)                ! cannot exceed 18 km
+       rzdec = 1.0/zdec
+       sgh2 = max(sigflt*sigflt, sghmax*sghmax) ! 25 meters dz-of the first layer
+       
+      do k=1, levs  
+         zmet = zmid(k)-zsurf   
+      if (zmet > ztop_tofd) cycle
+         ekin = u(k)*u(k) + v(k)*v(k)
+         umag = sqrt(ekin)
+         zarg = zmet*rzdec
+         ztexp = exp(-zarg*sqrt(zarg))
+         krf   = const_tofd* a12_tofd *sgh2* zmet ** (-1.2) *ztexp
+
+         utofd(k)    = -krf*u(k)
+         vtofd(k)    = -krf*v(k)
+         epstofd(k)  = rcpd2*krf*ekin  ! more accurate heat/mom form using "implicit tend-solver"
+                                       ! to update momentum and temp-re; epstofd(k) can be skipped
+         krf_tofd(k) = krf
+      enddo
+!                
+      end subroutine ugwpv0_tofd1d
