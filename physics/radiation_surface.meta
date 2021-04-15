@@ -1,0 +1,15 @@
+[ccpp-table-properties]
+  name = module_radiation_surface
+  type = module
+  dependencies = 
+
+########################################################################
+[ccpp-arg-table]
+  name = module_radiation_surface
+  type = module
+[nf_albd]
+  standard_name = number_of_components_for_surface_albedo
+  long_name = number of IR/VIS/UV compinents for surface albedo
+  units = none
+  dimensions = ()
+  type = integer

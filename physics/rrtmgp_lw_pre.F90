@@ -25,49 +25,21 @@ contains
 !> \section arg_table_rrtmgp_lw_pre_run
 !! \htmlinclude rrtmgp_lw_pre_run.html
 !!
-  subroutine rrtmgp_lw_pre_run ( kdt, lsm, lsm_noahmp, lsm_ruc, vtype, doLWrad, &
-       nCol, xlon, xlat, slmsk, zorl, snowd, sncovr, sncovr_ice, fice,          &
-       tsfg, tsfa, hprime, landfrac, frac_grid, min_seaice,                     &
-       sfc_emiss_byband, semis_land, semis_ice,                                 &
-       semisbase, semis, errmsg, errflg)
+  subroutine rrtmgp_lw_pre_run (doLWrad, semis, sfc_emiss_byband, errmsg, errflg)
 
     ! Inputs
     logical, intent(in) :: &
-         doLWrad          ! Logical flag for longwave radiation call
-    logical, intent(in) :: &
-         frac_grid        ! Logical flag for fractional grid
-    integer, intent(in) :: &
-         nCol             ! Number of horizontal grid points
-    integer, intent(in) :: kdt, lsm, lsm_noahmp, lsm_ruc
+         doLWrad
+    real(kind_phys), dimension(:), intent(in) :: &
+         semis
 
-    real(kind_phys), dimension(nCol), intent(in) :: &
-         vtype,         & ! vegetation type
-         xlon,          & ! Longitude
-         xlat,          & ! Latitude
-         slmsk,         & ! Surface mask: 0-water, 1-land, 2-ice
-         landfrac,      & ! Land fraction
-         zorl,          & ! Surface roughness length (cm)
-         snowd,         & ! water equivalent snow depth (mm)
-         sncovr,        & ! Surface snow are fraction (1)
-         sncovr_ice,    & ! Surface snow fraction over ice (1)
-         fice,          & ! Fration of sea ice
-         tsfg,          & ! Surface ground temperature for radiation (K)
-         tsfa,          & ! Lowest model layer air temperature for radiation (K)
-         hprime           ! Standard deviation of subgrid orography
-
-    real(kind_phys), dimension(nCol), intent(in) :: &
-         semis_land,    &  ! Surface emissivity over land
-         semis_ice         ! Surface emissivity over ice
-
-    ! Outputs 
-    real(kind_phys), dimension(lw_gas_props%get_nband(),ncol), intent(out) :: &
+    ! Outputs
+    real(kind_phys), dimension(:,:), intent(inout) :: &
          sfc_emiss_byband ! Surface emissivity in each band
     character(len=*), intent(out) :: &
          errmsg           ! Error message
     integer, intent(out) :: &  
          errflg           ! Error flag
-    real(kind_phys), dimension(nCol), intent(inout) :: &
-         semisbase, semis
 
     ! Local variables
     integer :: iBand
@@ -75,17 +47,8 @@ contains
     ! Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0
-    
+
     if (.not. doLWrad) return
-
-    ! #######################################################################################
-    ! Call module_radiation_surface::setemis(),to setup surface emissivity for LW radiation.
-    ! #######################################################################################
-    call setemis ( kdt, lsm, lsm_noahmp, lsm_ruc, vtype, landfrac, frac_grid, min_seaice, &
-                      xlon, xlat, slmsk, snowd, sncovr, sncovr_ice, fice, zorl,           &
-                      tsfg, tsfa, hprime, semis_land, semis_ice, nCol,                    & !  ---  inputs
-                      semisbase, semis)                                                     !  ---  outputs
-
 
     ! Assign same emissivity to all bands
     do iBand=1,lw_gas_props%get_nband()

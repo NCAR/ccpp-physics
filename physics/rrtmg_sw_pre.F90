@@ -12,53 +12,22 @@
 !> \section arg_table_rrtmg_sw_pre_run Argument Table
 !! \htmlinclude rrtmg_sw_pre_run.html
 !!
-      subroutine rrtmg_sw_pre_run (im, lndp_type, n_var_lndp, lsswr, lndp_var_list, lndp_prt_list, tsfg, tsfa, coszen, &
-                                   lsm, lsm_noahmp, lsm_ruc, alb1d, slmsk, snowd, sncovr, sncovr_ice, snoalb, zorl,    &
-                                   hprime, landfrac, frac_grid, min_seaice, alvsf, alnsf, alvwf, alnwf, facsf, facwf,  &
-                                   fice, tisfc, albdvis_lnd, albdnir_lnd, albivis_lnd, albinir_lnd,                    &
-                                   albdvis_ice, albdnir_ice, albivis_ice, albinir_ice, sfalb,                          &
-                                   nday, idxday, sfcalb1, sfcalb2, sfcalb3, sfcalb4, errmsg, errflg)
+      subroutine rrtmg_sw_pre_run (im, lsswr, coszen, nday, idxday, errmsg, errflg)
 
       use machine,                   only: kind_phys
 
-      use module_radiation_surface,  only: NF_ALBD, setalb
-
       implicit none
 
-      integer,                              intent(in)    :: im, lndp_type, n_var_lndp
-      integer,                              intent(in)    :: lsm, lsm_noahmp, lsm_ruc
-      logical,                              intent(in)    :: frac_grid
-      character(len=3)    , dimension(:),   intent(in)    :: lndp_var_list
+      integer,                              intent(in)    :: im
       logical,                              intent(in)    :: lsswr
-      real(kind=kind_phys), dimension(:),   intent(in)    :: lndp_prt_list
-      real(kind=kind_phys), dimension(im),  intent(in)    :: tsfg, tsfa, coszen
-      real(kind=kind_phys), dimension(im),  intent(in)    :: alb1d, landfrac
-      real(kind=kind_phys), dimension(im),  intent(in)    :: slmsk, snowd,     &
-                                                             sncovr, snoalb,   &
-                                                             zorl, hprime,     &
-                                                             alvsf, alnsf,     &
-                                                             alvwf, alnwf,     &
-                                                             facsf, facwf,     &
-                                                             sncovr_ice,       &
-                                                             fice, tisfc
-      real(kind=kind_phys), dimension(:),   intent(in)    :: albdvis_lnd, albdnir_lnd, & 
-                                                             albivis_lnd, albinir_lnd
-      real(kind=kind_phys), dimension(:),   intent(in)    :: albdvis_ice, albdnir_ice, & 
-                                                             albivis_ice, albinir_ice
-      real(kind=kind_phys), intent(in)                    :: min_seaice
-
-      real(kind=kind_phys), dimension(im),  intent(inout) :: sfalb
+      real(kind=kind_phys), dimension(im),  intent(in)    :: coszen
       integer,                              intent(out)   :: nday
-      integer, dimension(im),               intent(out)   :: idxday
-      real(kind=kind_phys), dimension(im),  intent(out)   :: sfcalb1, sfcalb2, &
-                                                             sfcalb3, sfcalb4
+      integer, dimension(:),                intent(out)   :: idxday
       character(len=*),                     intent(out)   :: errmsg
       integer,                              intent(out)   :: errflg
+
       ! Local variables
       integer :: i
-      real(kind=kind_phys), dimension(im,NF_ALBD) :: sfcalb
-
-      real(kind=kind_phys) :: lndp_alb
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -66,9 +35,9 @@
 
 !  --- ...  start radiation calculations
 !           remember to set heating rate unit to k/sec!
+
 !> -# Start SW radiation calculations
       if (lsswr) then
-
 !>  - Check for daytime points for SW radiation.
         nday = 0
         idxday = 0
@@ -78,43 +47,10 @@
             idxday(nday) = i
           endif
         enddo
-
-! set albedo pert, if requested.
-        lndp_alb = -999.
-        if (lndp_type==1) then
-          do i =1,n_var_lndp
-            if (lndp_var_list(i) == 'alb') then
-                lndp_alb = lndp_prt_list(i)
-            endif
-          enddo
-        endif
-
-!>  - Call module_radiation_surface::setalb() to setup surface albedo.
-!!  for SW radiation.
-
-        call setalb (slmsk, lsm, lsm_noahmp, lsm_ruc, snowd, sncovr, sncovr_ice, snoalb,    &
-                     zorl, coszen, tsfg, tsfa, hprime, landfrac, frac_grid, min_seaice,     &
-                     alvsf, alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc,                 &
-                     albdvis_lnd, albdnir_lnd, albivis_lnd, albinir_lnd,                    &
-                     albdvis_ice, albdnir_ice, albivis_ice, albinir_ice,                    &
-                     IM, alb1d, lndp_alb,                                                   &  !  mg, sfc-perts
-                     sfcalb )                                                               !  ---  outputs
-
-
-!> -# Approximate mean surface albedo from vis- and nir-  diffuse values.
-        sfalb(:) = max(0.01, 0.5 * (sfcalb(:,2) + sfcalb(:,4)))
       else
         nday   = 0
         idxday = 0
-        sfcalb = 0.0
       endif
-
-      do i = 1, im
-        sfcalb1(i) = sfcalb(i,1)
-        sfcalb2(i) = sfcalb(i,2)
-        sfcalb3(i) = sfcalb(i,3)
-        sfcalb4(i) = sfcalb(i,4)
-      enddo
 
       end subroutine rrtmg_sw_pre_run
 

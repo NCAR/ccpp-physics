@@ -1052,7 +1052,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
   optional = F
 [sncovr1]
   standard_name = surface_snow_area_fraction_over_land

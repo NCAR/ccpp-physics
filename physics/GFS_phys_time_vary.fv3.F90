@@ -378,6 +378,7 @@
              sncovr_ice(:) = sncovr(:)
            endif
          endif
+
 !$OMP end sections
 
 !$OMP end parallel

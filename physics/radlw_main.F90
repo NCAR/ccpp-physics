@@ -1250,7 +1250,7 @@
         endif
 
 !mz* HWRF: calculate taucmc with mcica
-        if (iovr == 4) then 
+        if (iovr == 4) then
           call cldprmc(nlay, inflglw, iceflglw, liqflglw,               &
      &                 cldfmc, ciwpmc,                                  &
      &                 clwpmc, cswpmc, reicmc, relqmc, resnmc,          &
@@ -8854,25 +8854,25 @@
                   abscosno(ig) = 0.0_rb
 
                elseif (iceflag .eq. 0) then
-                  if (radice .lt. 10.0_rb) stop 'ICE RADIUS TOO SMALL'
-                  abscoice(ig) = absice0(1) + absice0(2)/radice
+!                  if (radice .lt. 10.0_rb) stop 'ICE RADIUS TOO SMALL'
+                  abscoice(ig) = absice0(1) + absice0(2)/max(radice,10.0_rb)
                   abscosno(ig) = 0.0_rb
 
                elseif (iceflag .eq. 1) then
-                  if (radice .lt. 13.0_rb .or. radice .gt. 130._rb) stop&
-     &                'ICE RADIUS OUT OF BOUNDS'
+!                  if (radice .lt. 13.0_rb .or. radice .gt. 130._rb) stop&
+!     &                'ICE RADIUS OUT OF BOUNDS'
                   ncbands = 5
                   ib = icb(ngb(ig))
-                  abscoice(ig) = absice1(1,ib) + absice1(2,ib)/radice
+                  abscoice(ig) = absice1(1,ib) + absice1(2,ib)/min(max(radice,13.0_rb),130._rb)
                   abscosno(ig) = 0.0_rb
 
 ! For iceflag=2 option, ice particle effective radius is limited to 5.0 to 131.0 microns
 
                elseif (iceflag .eq. 2) then
-                  if (radice .lt. 5.0_rb .or. radice .gt. 131.0_rb) stop&
-     &                'ICE RADIUS OUT OF BOUNDS'
+!                  if (radice .lt. 5.0_rb .or. radice .gt. 131.0_rb) stop&
+!     &                'ICE RADIUS OUT OF BOUNDS'
                      ncbands = 16
-                     factor = (radice - 2._rb)/3._rb
+                     factor = (min(max(radice,5.0_rb),131._rb) - 2._rb)/3._rb
                      index = int(factor)
                      if (index .eq. 43) index = 42
                      fint = factor - float(index)
@@ -8885,15 +8885,15 @@
 ! For iceflag=3 option, ice particle generalized effective size is limited to 5.0 to 140.0 microns
 
                elseif (iceflag .ge. 3) then
-                  if (radice .lt. 5.0_rb .or. radice .gt. 140.0_rb) then
-                         write(errmsg,'(a,i5,i5,f8.2,f8.2)' )           &
-     &         'ERROR: ICE GENERALIZED EFFECTIVE SIZE OUT OF BOUNDS'    &
-     &          ,ig, lay, ciwpmc(ig,lay), radice
-                         errflg = 1
-                         return
-                     end if                                                                      
+!                  if (radice .lt. 5.0_rb .or. radice .gt. 140.0_rb) then
+!                         write(errmsg,'(a,i5,i5,f8.2,f8.2)' )           &
+!     &         'ERROR: ICE GENERALIZED EFFECTIVE SIZE OUT OF BOUNDS'    &
+!     &          ,ig, lay, ciwpmc(ig,lay), radice
+!                         errflg = 1
+!                         return
+!                     end if                                                                      
                      ncbands = 16                                                                
-                     factor = (radice - 2._rb)/3._rb                                             
+                     factor = (min(max(radice,5.0_rb),140._rb) - 2._rb)/3._rb                    
                      index = int(factor)                                                         
                      if (index .eq. 46) index = 45                                               
                      fint = factor - float(index)                                                
@@ -8908,15 +8908,15 @@
 !..Incorporate additional effects due to snow.                                                   
                if (cswpmc(ig,lay).gt.0.0_rb .and. iceflag .eq. 5) then                           
                   radsno = resnmc(lay)                                                           
-                  if (radsno .lt. 5.0_rb .or. radsno .gt. 140.0_rb) then                         
-                         write(errmsg,'(a,i5,i5,f8.2,f8.2)' )           &
-     &         'ERROR: SNOW GENERALIZED EFFECTIVE SIZE OUT OF BOUNDS'   &                        
-     &         ,ig, lay, cswpmc(ig,lay), radsno                                                  
-                         errflg = 1
-                         return
-                     end if                                                                      
+!                  if (radsno .lt. 5.0_rb .or. radsno .gt. 140.0_rb) then                         
+!                         write(errmsg,'(a,i5,i5,f8.2,f8.2)' )           &
+!     &         'ERROR: SNOW GENERALIZED EFFECTIVE SIZE OUT OF BOUNDS'   &                        
+!     &         ,ig, lay, cswpmc(ig,lay), radsno                                                  
+!                         errflg = 1
+!                         return
+!                     end if                                                                      
                      ncbands = 16                                                                
-                     factor = (radsno - 2._rb)/3._rb                                             
+                     factor = (min(max(radsno,5.0_rb),140.0_rb) - 2._rb)/3._rb                   
                      index = int(factor)                                                         
                      if (index .eq. 46) index = 45                                               
                      fint = factor - float(index)                                                
@@ -8937,14 +8937,14 @@
                                                                                                  
                elseif (liqflag .eq. 1) then                                                      
                   radliq = relqmc(lay)                        
-                  if (radliq .lt. 2.5_rb .or. radliq .gt. 60._rb) then
-                     write(errmsg,'(a,i5,i5,f8.2,f8.2)' )              &
-&                         'ERROR: LIQUID EFFECTIVE SIZE OUT OF BOUNDS' &
-&                         ,ig, lay, clwpmc(ig,lay), radliq
-                     errflg = 1
-                     return
-                  end if
-                  index = int(radliq - 1.5_rb)                                                   
+!                  if (radliq .lt. 2.5_rb .or. radliq .gt. 60._rb) then
+!                     write(errmsg,'(a,i5,i5,f8.2,f8.2)' )              &
+!&                         'ERROR: LIQUID EFFECTIVE SIZE OUT OF BOUNDS' &
+!&                         ,ig, lay, clwpmc(ig,lay), radliq
+!                     errflg = 1
+!                     return
+!                  end if
+                  index = int(min(max(radliq,2.5_rb),60._rb) - 1.5_rb)                           
                   if (index .eq. 0) index = 1                                                    
                   if (index .eq. 58) index = 57                                                  
                   fint = radliq - 1.5_rb - float(index)                                          

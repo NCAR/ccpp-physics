@@ -372,8 +372,7 @@ contains
 #endif
    subroutine GFS_surface_composites_post_run (                                                                                   &
       im, kice, km, cplflx, cplwav2atm, frac_grid, flag_cice, islmsk, dry, wet, icy, wind, t1, q1, prsl1,                         &
-      rd, rvrdm1, landfrac, lakefrac, oceanfrac,                                                                                  &
-      zorl, zorlo, zorll, zorli, zorl_wat, zorl_lnd, zorl_ice,                                                                    &
+      rd, rvrdm1, landfrac, lakefrac, oceanfrac, zorl, zorlo, zorll, zorli, zorl_wat, zorl_lnd, zorl_ice,                         &
       cd, cd_wat, cd_lnd, cd_ice, cdq, cdq_wat, cdq_lnd, cdq_ice, rb, rb_wat, rb_lnd, rb_ice, stress, stress_wat, stress_lnd,     &
       stress_ice, ffmm, ffmm_wat, ffmm_lnd, ffmm_ice, ffhh, ffhh_wat, ffhh_lnd, ffhh_ice, uustar, uustar_wat, uustar_lnd,         &
       uustar_ice, fm10, fm10_wat, fm10_lnd, fm10_ice, fh2, fh2_wat, fh2_lnd, fh2_ice, tsurf, tsurf_wat, tsurf_lnd, tsurf_ice,     &
@@ -445,10 +444,10 @@ contains
          !tsurf(i)  = txl*tsurf_lnd(i)  + txi*tsurf_ice(i)  + txo*tsurf_wat(i) ! not used again! Moorthi
 
 ! BWG, 2021/02/25: cmm=cd*wind, chh=cdq*wind, so use composite cd, cdq
-          q0       = max( q1(i), qmin )
-          rho      = prsl1(i) / (rd*t1(i)*(one + rvrdm1*q0))
-          cmm(i)    =      cd(i)*wind(i)  !txl*cmm_lnd(i)    + txi*cmm_ice(i)    + txo*cmm_wat(i)
-          chh(i)    = rho*cdq(i)*wind(i)  !txl*chh_lnd(i)    + txi*chh_ice(i)    + txo*chh_wat(i)
+         q0       = max( q1(i), qmin )
+         rho      = prsl1(i) / (rd*t1(i)*(one + rvrdm1*q0))
+         cmm(i)    =      cd(i)*wind(i)  !txl*cmm_lnd(i)    + txi*cmm_ice(i)    + txo*cmm_wat(i)
+         chh(i)    = rho*cdq(i)*wind(i)  !txl*chh_lnd(i)    + txi*chh_ice(i)    + txo*chh_wat(i)
 
          !gflx(i)   = txl*gflx_lnd(i)   + txi*gflx_ice(i)   + txo*gflx_wat(i)
           ep1d(i)   = txl*ep1d_lnd(i)   + txi*ep1d_ice(i)   + txo*ep1d_wat(i)
