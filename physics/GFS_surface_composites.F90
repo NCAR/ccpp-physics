@@ -27,7 +27,7 @@ contains
 !! \htmlinclude GFS_surface_composites_pre_run.html
 !!
    subroutine GFS_surface_composites_pre_run (im, lkm, frac_grid, flag_cice, cplflx, cplwav2atm,                          &
-                                 landfrac, lakefrac, lakedepth, oceanfrac, frland, dry, icy, use_flake, ocean, wet,            &
+                                 landfrac, lakefrac, lakedepth, oceanfrac, frland, dry, icy, use_flake, ocean, wet,       &
                                  hice, cice, snowd, snowd_wat, snowd_lnd, snowd_ice, tprcp, tprcp_wat,                    &
                                  tprcp_lnd, tprcp_ice, uustar, uustar_wat, uustar_lnd, uustar_ice,                        &
                                  weasd, weasd_wat, weasd_lnd, weasd_ice, ep1d_ice, tsfc, tsfco, tsfcl, tsfc_wat,          &
