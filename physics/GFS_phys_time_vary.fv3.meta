@@ -1792,8 +1792,8 @@
   intent = inout
   optional = F
 [zorlo]
-  standard_name = surface_roughness_length_over_ocean
-  long_name = surface roughness length over ocean
+  standard_name = surface_roughness_length_over_water
+  long_name = surface roughness length over water
   units = cm
   dimensions = (horizontal_dimension)
   type = real
