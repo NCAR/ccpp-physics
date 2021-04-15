@@ -728,9 +728,8 @@ cc
 !
       if (cplflx) then
         z_c_0 = 0.0
-        call get_dtzm_2d (xt,  xz, dt_cool,
-     &                    z_c, wet, use_flake, zero, omz1, im, 1,
-     &                    nthreads, dtzm)
+        call get_dtzm_2d (xt,  xz, dt_cool, z_c,  wet,                  &
+     &                    zero, omz1, im, 1, nthreads, dtzm)
         do i=1,im
          if (wet(i).and.oceanfrac(i)>zero.and..not.use_flake(i)) then
 !           dnsst   = tsfc_wat(i) - tref(i)          !  retrive/get difference of Ts and Tf
@@ -836,7 +835,7 @@ cc
       if (nstf_name1 > 1) then
         zsea1 = 0.001_kp*real(nstf_name4)
         zsea2 = 0.001_kp*real(nstf_name5)
-        call get_dtzm_2d (xt, xz, dt_cool, z_c, wet, use_flake,         &
+        call get_dtzm_2d (xt, xz, dt_cool, z_c, wet,                    &
      &                    zsea1, zsea2, im, 1, nthreads, dtzm)
         do i = 1, im
 !         if (wet(i) .and. .not.icy(i)) then
