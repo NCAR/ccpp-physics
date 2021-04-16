@@ -728,7 +728,7 @@ cc
 !
       if (cplflx) then
         z_c_0 = 0.0
-        call get_dtzm_2d (xt,  xz, dt_cool, z_c,  wet,                  &
+        call get_dtzm_2d (xt,  xz, dt_cool, z_c_0,  wet,                &
      &                    zero, omz1, im, 1, nthreads, dtzm)
         do i=1,im
          if (wet(i).and.oceanfrac(i)>zero.and..not.use_flake(i)) then
