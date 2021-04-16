@@ -525,8 +525,8 @@
   intent = in
   optional = F
 [betas]
-  standard_name = downdraft_fraction_reaching_surface_over_ocean_deep_convection
-  long_name = downdraft fraction reaching surface over ocean for deep conv.
+  standard_name = downdraft_fraction_reaching_surface_over_water_deep_convection
+  long_name = downdraft fraction reaching surface over water for deep conv.
   units = frac
   dimensions = ()
   type = real

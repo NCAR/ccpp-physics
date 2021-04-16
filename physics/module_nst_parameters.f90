@@ -6,6 +6,8 @@
 !! \ingroup gfs_nst_main
 !! This module contains constants and parameters used in GFS
 !! near surface sea temperature scheme.
+!! history:
+!!  20210305: X.Li, reduce z_w_max from 30 m to 20 m
 module module_nst_parameters
   use machine, only :  kind_phys &
        ,kind_rad ! for astronomy (date) calculations
@@ -42,7 +44,7 @@ module module_nst_parameters
        ,eps_z_w=0.01            &          !< criteria to finish iterations for z_w
        ,eps_conv=0.01           &          !< criteria to finish iterations for d_conv
        ,eps_sfs=0.01            &          !< criteria to finish iterations for d_sfs
-       ,z_w_max=30.0            &          !< max warm layer thickness
+       ,z_w_max=20.0            &          !< max warm layer thickness
        ,z_w_min=0.2             &          !< min warm layer thickness
        ,z_w_ini=0.2             &          !< initial warm layer thickness in dtl_onset
        ,z_c_max=0.01            &          !< maximum of sub-layer thickness (m)
