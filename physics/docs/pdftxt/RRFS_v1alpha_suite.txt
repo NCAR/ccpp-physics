@@ -24,7 +24,7 @@ The RRFS_v1alpha physics suite uses the parameterizations in the following order
 \code
 <?xml version="1.0" encoding="UTF-8"?>
 
-<suite name="FV3_RRFS_v1alpha" lib="ccppphys" ver="1">
+<suite name="FV3_RRFS_v1alpha" version="1">
   <!-- <init></init> -->
   <group name="time_vary">
     <subcycle loop="1">

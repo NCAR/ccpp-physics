@@ -26,7 +26,7 @@ The GFS_v15p2 physics suite uses the parameterizations in the following order:
 \code
 <?xml version="1.0" encoding="UTF-8"?>
 
-<suite name="FV3_GFS_v15p2" lib="ccppphys" ver="1">
+<suite name="FV3_GFS_v15p2" version="1">
   <!-- <init></init> -->
   <group name="fast_physics">
     <subcycle loop="1">
