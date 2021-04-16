@@ -62,9 +62,9 @@
      &   psk,rbsoil,zorl,u10m,v10m,fm,fh,                               &
      &   tsea,heat,evap,stress,spd1,kpbl,                               &
      &   prsi,del,prsl,prslk,phii,phil,delt,dspheat,                    &
-     &   dusfc,dvsfc,dtsfc,dqsfc,hpbl,hgamt,hgamq,dkt,                  &
+     &   dusfc,dvsfc,dtsfc,dqsfc,hpbl,hgamt,hgamq,dkt,dku,              &
      &   kinver,xkzm_m,xkzm_h,xkzm_s,lprnt,ipr,                         &
-     &   xkzminv,moninq_fac,hurr_pbl,islimsk,dkudiagnostic,var_ric,     &
+     &   xkzminv,moninq_fac,hurr_pbl,islimsk,var_ric,                   &
      &   coef_ric_l,coef_ric_s,lssav,ldiag3d,qdiag3d,ntoz,              &
      &   du3dt_PBL,dv3dt_PBL,dt3dt_PBL,dq3dt_PBL,do3dt_PBL,             &
      &   flag_for_pbl_generic_tend,errmsg,errflg)
@@ -114,7 +114,9 @@
       real(kind=kind_phys), intent(out) ::                              &
      &                     dusfc(im),     dvsfc(im),                    &
      &                     dtsfc(im),     dqsfc(im),                    &
-     &                     hpbl(im),      dkt(im,km-1)
+     &                     hpbl(im)
+      real(kind=kind_phys), intent(out) ::                              &
+     &                     dkt(im,km-1), dku(im,km-1)
       real(kind=kind_phys), intent(inout) ::                            &
      &                     hgamt(im),     hgamq(im)
 !
@@ -148,13 +150,13 @@
      &                     zd(im),      zdd(im),      thlvx1(im)
 !
       real(kind=kind_phys) rdzt(im,km-1),dktx(im,km-1),                 &
-     &                     zi(im,km+1),  zl(im,km),    xkzo(im,km-1),   &
-     &                     dku(im,km-1), xkzmo(im,km-1),                &
+     &                     zi(im,km+1),  zl(im,km),                     &
+     &                     xkzo(im,km-1), xkzmo(im,km-1),               &
      &                     cku(im,km-1), ckt(im,km-1),                  &
      &                     ti(im,km-1),  shr2(im,km-1),                 &
      &                     al(im,km-1),  ad(im,km),                     &
      &                     au(im,km-1),  a1(im,km),                     &
-     &                     a2(im,km*ntrac), dkudiagnostic(im,km-1)
+     &                     a2(im,km*ntrac)
 !
       real(kind=kind_phys) tcko(im,km),  qcko(im,km,ntrac),             &
      &                     ucko(im,km),  vcko(im,km),  xmf(im,km)
@@ -1400,12 +1402,6 @@ c
              a2(i,k+1) = v1(i,k+1)
           endif
 !
-        enddo
-      enddo
-
-      do k = 1,km1
-        do i=1,im
-           dkudiagnostic(i,k) = dku(i,k)
         enddo
       enddo
 
