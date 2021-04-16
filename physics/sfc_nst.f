@@ -27,9 +27,9 @@
 !> @{
       subroutine sfc_nst_run                                            &
      &     ( im, hvap, cp, hfus, jcal, eps, epsm1, rvrdm1, rd, rhw0,    &  ! --- inputs:
-     &       pi, tgice, sbc, ps, u1, v1, t1, q1, tref, cm, ch,          &  
-     &       prsl1, prslki, prsik1, prslk1, wet,use_flake, xlon, sinlat,&
-     &       stress,                                                    &
+     &       pi, tgice, sbc, ps, u1, v1, t1, q1, tref, cm, ch,          &
+     &       prsl1, prslki, prsik1, prslk1, wet, use_flake, xlon,       &
+     &       sinlat, stress,                                            &
      &       sfcemis, dlwflx, sfcnsw, rain, timestep, kdt, solhr,xcosz, &
      &       wind, flag_iter, flag_guess, nstf_name1, nstf_name4,       &
      &       nstf_name5, lprnt, ipr,                                    &
@@ -705,7 +705,7 @@ cc
      &                                   half = 0.5_kp,
      &                                   omz1 = 2.0_kp
       real(kind=kind_phys) :: tem1, tem2, dnsst
-      real(kind=kind_phys), dimension(im) :: dtzm, z_c_0
+      real(kind=kind_phys), dimension(im) :: dtzm,z_c_0
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -728,13 +728,13 @@ cc
 !
       if (cplflx) then
         z_c_0 = 0.0
-        call get_dtzm_2d (xt,  xz, dt_cool, z_c_0,  wet,                &
-     &                    zero, omz1, im, 1, nthreads, dtzm)
+        call get_dtzm_2d (xt,  xz, dt_cool,                             &
+     &                    z_c_0, wet, zero, omz1, im, 1, nthreads, dtzm)
         do i=1,im
-         if (wet(i).and.oceanfrac(i)>zero.and..not.use_flake(i)) then
-!           dnsst   = tsfc_wat(i) - tref(i)          !  retrive/get difference of Ts and Tf
-             tref(i) = max(tgice, tsfco(i) - dtzm(i))  !  update Tf with T1 and NSST T-Profile                                       
-!           tsfc_wat(i) = max(271.2,tref(i) + dnsst) !  get Ts updated due to Tf update
+         if (wet(i) .and. oceanfrac(i)>zero .and. .not.use_flake(i)) then
+!           dnsst   = tsfc_wat(i) - tref(i)                 !  retrive/get difference of Ts and Tf
+            tref(i) = max(tgice, tsfco(i) - dtzm(i))        !  update Tf with T1 and NSST T-Profile
+!           tsfc_wat(i) = max(271.2,tref(i) + dnsst)        !  get Ts updated due to Tf update
 !           tseal(i)    = tsfc_wat(i)
             if (abs(xz(i)) > zero) then
               tem2 = one / xz(i)
@@ -779,7 +779,7 @@ cc
 ! \section NSST_detailed_post_algorithm Detailed Algorithm
 ! @{
       subroutine sfc_nst_post_run                                       &
-     &     ( im, kdt, rlapse, tgice, wet, use_flake,icy, oro, oro_uf,   &
+     &     ( im, kdt, rlapse, tgice, wet, use_flake, icy, oro, oro_uf,  &
      &       nstf_name1,                                                &
      &       nstf_name4, nstf_name5, xt, xz, dt_cool, z_c, tref, xlon,  &
      &       tsurf_wat, tsfc_wat, nthreads, dtzm, errmsg, errflg        &
@@ -835,8 +835,8 @@ cc
       if (nstf_name1 > 1) then
         zsea1 = 0.001_kp*real(nstf_name4)
         zsea2 = 0.001_kp*real(nstf_name5)
-        call get_dtzm_2d (xt, xz, dt_cool, z_c, wet,                    &
-     &                    zsea1, zsea2, im, 1, nthreads, dtzm)
+        call get_dtzm_2d (xt, xz, dt_cool, z_c, wet, zsea1, zsea2,      &
+     &                    im, 1, nthreads, dtzm)
         do i = 1, im
 !         if (wet(i) .and. .not.icy(i)) then
 !         if (wet(i) .and. (frac_grid .or. .not. icy(i))) then

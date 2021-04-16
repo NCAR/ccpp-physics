@@ -51,7 +51,7 @@
 ! ---- Inputs
             im, ps, t1, q1, wind,                            &
             dlwflx, dswsfc, weasd, lakedepth,                &
-            use_flake, xlat, delt, zlvl, elev,                    &
+            use_flake, xlat, delt, zlvl, elev,               &
             wet, flag_iter, yearlen, julian, imon,           &
 ! ---- in/outs
             snwdph, hice, tsurf, fice, T_sfc, hflx, evap,    &
@@ -409,4 +409,3 @@ END SUBROUTINE flake_driver_run
 
 !---------------------------------
       end module flake_driver
-       
