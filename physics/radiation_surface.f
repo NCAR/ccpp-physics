@@ -647,14 +647,14 @@
  
           !-- Composite mean surface albedo from land, open water and
           !-- ice fractions
-          sfcalb(i,1) = min(0.99,max(0.01,lsmalbdnir(i)))*fracl(i)      &
-     &                  + asenb_wat*fraco(i) + asenb_ice*fraci(i)
-          sfcalb(i,2) = min(0.99,max(0.01,lsmalbinir(i)))*fracl(i)      &
+          sfcalb(i,1) = min(0.99,max(0.01,lsmalbdnir(i)))*fracl(i)      & ! direct beam NIR
+     &                  + asenb_wat*fraco(i) + asenb_ice*fraci(i) 
+          sfcalb(i,2) = min(0.99,max(0.01,lsmalbinir(i)))*fracl(i)      & ! diffuse NIR
      &                  + asend_wat*fraco(i) + asend_ice*fraci(i)
-          sfcalb(i,3) = min(0.99,max(0.01,lsmalbdvis(i)))*fracl(i)      &
-     &                  + asevb_wat*fraco(i) + asenb_ice*fraci(i)
-          sfcalb(i,4) = min(0.99,max(0.01,lsmalbivis(i)))*fracl(i)      &
-     &                  + asevd_wat*fraco(i) + asend_ice*fraci(i)
+          sfcalb(i,3) = min(0.99,max(0.01,lsmalbdvis(i)))*fracl(i)      & ! direct beam visible
+     &                  + asevb_wat*fraco(i) + asevb_ice*fraci(i)
+          sfcalb(i,4) = min(0.99,max(0.01,lsmalbivis(i)))*fracl(i)      & ! diffuse visible
+     &                  + asevd_wat*fraco(i) + asevd_ice*fraci(i)
 
         enddo    ! end_do_i_loop
 
