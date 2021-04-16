@@ -731,7 +731,7 @@ cc
         call get_dtzm_2d (xt,  xz, dt_cool,                             &
      &                    z_c_0, wet, zero, omz1, im, 1, nthreads, dtzm)
         do i=1,im
-         if (wet(i) .and. oceanfrac(i)>zero .and. .not.use_flake(i)) then
+         if (wet(i) .and. oceanfrac(i)>zero .and..not.use_flake(i)) then
 !           dnsst   = tsfc_wat(i) - tref(i)                 !  retrive/get difference of Ts and Tf
             tref(i) = max(tgice, tsfco(i) - dtzm(i))        !  update Tf with T1 and NSST T-Profile
 !           tsfc_wat(i) = max(271.2,tref(i) + dnsst)        !  get Ts updated due to Tf update
