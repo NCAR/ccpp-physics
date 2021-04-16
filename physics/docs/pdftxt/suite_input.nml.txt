@@ -269,14 +269,14 @@ show some variables in the namelist that must match the SDF.
                                                       </ul>
                                                       <td>0
 <tr><td>bl_mynn_edmf_part    <td>mynnedmf_wrapper     <td>flag to partitioning the MF and ED areas      <td>0  
-<tr><td>bl_mynn_edmf_tkeadvect  <td>mynnedmf_wrapper  <td>activate computation of TKE advection (not yet in use for FV3) \n 
+<tr><td>bl_mynn_tkeadvect  <td>mynnedmf_wrapper  <td>activate computation of TKE advection (not yet in use for FV3) \n 
                                                       <ul>
                                                       <li> false: deactivate TKE advection  
                                                       <li> true: activate TKE advection 
                                                       </ul>  
                                                       <td>.false. 
-<tr><td>bl_mynn_edmf_tkebudget  <td>mynnedmf_wrapper  <td>flag to activate TKE budget                  <td>0
-<tr><td>bl_mynn_edmf_cloudpdf   <td>mynnedmf_wrapper  <td>flag to determine which cloud PDF to use \n 
+<tr><td>bl_mynn_tkebudget  <td>mynnedmf_wrapper  <td>flag to activate TKE budget                  <td>0
+<tr><td>bl_mynn_cloudpdf   <td>mynnedmf_wrapper  <td>flag to determine which cloud PDF to use \n 
                                                       <ul>
                                                       <li> 0: use Sommeria-Deardorff subgrid cloud PDF 
                                                       <li> 1: use Kuwano-Yoshida subgrid cloud PDF 
