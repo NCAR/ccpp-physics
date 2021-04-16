@@ -63,6 +63,24 @@
   type = logical
   intent = in
   optional = F
+[con_fvirt]
+  standard_name = ratio_of_vapor_to_dry_air_gas_constants_minus_one
+  long_name = rv/rd - 1 (rv = ideal gas constant for water vapor)
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[con_rd]
+  standard_name = gas_constant_dry_air
+  long_name = ideal gas constant for dry air
+  units = J kg-1 K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [im]
   standard_name = horizontal_loop_extent
   long_name = horizontal loop extent
@@ -146,11 +164,47 @@
   kind = kind_phys
   intent = inout
   optional = F
+[t1]
+  standard_name = air_temperature_at_lowest_model_layer
+  long_name = mean temperature at lowest model layer
+  units = K
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[q1]
+  standard_name = water_vapor_specific_humidity_at_lowest_model_layer
+  long_name = water vapor specific humidity at lowest model layer
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[prsl1]
+  standard_name = air_pressure_at_lowest_model_layer
+  long_name = mean pressure at lowest model layer
+  units = Pa
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [tsfc_lnd]
   standard_name = surface_skin_temperature
   long_name = surface skin temperature
   units = K
   dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[tsfc_ice]
+  standard_name = surface_skin_temperature_over_ice_interstitial
+  long_name = surface skin temperature over ice   (temporary use as interstitial)
+  units = K
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -298,6 +352,24 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
+[sfcqv_lnd]
+  standard_name = water_vapor_mixing_ratio_at_surface_over_land
+  long_name = water vapor mixing ratio at surface over land
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[sfcqv_ice]
+  standard_name = water_vapor_mixing_ratio_at_surface_over_ice
+  long_name = water vapor mixing ratio at surface over ice
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
   optional = F
 [sfalb_lnd_bck]
   standard_name =surface_snow_free_albedo_over_land
