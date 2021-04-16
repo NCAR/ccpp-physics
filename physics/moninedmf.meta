@@ -428,6 +428,15 @@
   kind = kind_phys
   intent = out
   optional = F
+[dku]
+  standard_name = atmosphere_momentum_diffusivity
+  long_name = diffusivity for momentum
+  units = m2 s-1
+  dimensions = (horizontal_loop_extent,vertical_dimension_minus_one)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
 [kinver]
   standard_name = index_of_highest_temperature_inversion
   long_name = index of highest temperature inversion
@@ -512,15 +521,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
-  optional = F
-[dkudiagnostic]
-  standard_name = atmosphere_momentum_diffusivity
-  long_name = diffusivity for momentum
-  units = m2 s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension_minus_one)
-  type = real
-  kind = kind_phys
-  intent = out
   optional = F
 [var_ric]
   standard_name = flag_variable_bulk_richardson_number

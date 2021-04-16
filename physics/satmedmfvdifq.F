@@ -63,9 +63,8 @@
      &     snwdph_lnd,psk,rbsoil,zorl,u10m,v10m,fm,fh,                  &
      &     tsea,heat,evap,stress,spd1,kpbl,                             &
      &     prsi,del,prsl,prslk,phii,phil,delt,                          &
-     &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,                        &
+     &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,dkt,dku,                &
      &     kinver,xkzm_m,xkzm_h,xkzm_s,dspfac,bl_upfr,bl_dnfr,          &
-     &     dkudiagnostic,                                               &
      &     ntoz,du3dt,dv3dt,dt3dt,dq3dt,do3dt,gen_tend,ldiag3d,qdiag3d, &
      &     errmsg,errflg)
 !
@@ -110,6 +109,8 @@
      &                     dusfc(im),     dvsfc(im),                    &
      &                     dtsfc(im),     dqsfc(im),                    &
      &                     hpbl(im)
+      real(kind=kind_phys), intent(out) ::                              &
+     &                     dkt(im,km-1), dku(im,km-1)
 !
       logical, intent(in)  :: dspheat
       character(len=*), intent(out) :: errmsg
@@ -131,9 +132,7 @@
      &                     qlx(im,km),  thetae(im,km),thlx(im,km),
      &                     slx(im,km),  svx(im,km),   qtx(im,km),
      &                     tvx(im,km),  pix(im,km),   radx(im,km-1),
-     &                     dku(im,km-1),dkt(im,km-1), dkq(im,km-1),
-     &                     cku(im,km-1),ckt(im,km-1),
-     &                     dkudiagnostic(im,km-1)
+     &                     dkq(im,km-1),cku(im,km-1), ckt(im,km-1)
 !
       real(kind=kind_phys) plyr(im,km), rhly(im,km),  cfly(im,km),
      &                     qstl(im,km)
@@ -1541,11 +1540,6 @@ c
         enddo
       enddo
 
-      do k = 1,km1
-        do i=1,im
-           dkudiagnostic(i,k) = dku(i,k)
-        enddo
-      enddo
 c
 !> - Call tridi2() to solve tridiagonal problem for momentum
 c
