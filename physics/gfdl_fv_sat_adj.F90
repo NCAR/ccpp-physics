@@ -128,8 +128,8 @@ subroutine fv_sat_adj_init(do_sat_adj, kmp, nwat, ngas, rilist, cpilist, &
     integer,          intent(in   ) :: kmp
     integer,          intent(in   ) :: nwat
     integer,          intent(in   ) :: ngas
-    real(kind_dyn),   intent(in   ) :: rilist(:)
-    real(kind_dyn),   intent(in   ) :: cpilist(:)
+    real(kind_dyn),   intent(in   ) :: rilist(0:ngas)
+    real(kind_dyn),   intent(in   ) :: cpilist(0:ngas)
     integer,          intent(in   ) :: mpirank
     integer,          intent(in   ) :: mpiroot
     character(len=*), intent(  out) :: errmsg
@@ -255,46 +255,46 @@ subroutine fv_sat_adj_run(mdt, zvir, is, ie, isd, ied, kmp, km, kmdelz, js, je, 
     integer,             intent(in)    :: ng
     logical,             intent(in)    :: hydrostatic
     logical,             intent(in)    :: fast_mp_consv
-    real(kind=kind_dyn), intent(inout) :: te0_2d(:,:)
-    real(kind=kind_dyn), intent(  out) :: te0(:,:,:)
+    real(kind=kind_dyn), intent(inout) :: te0_2d(is:ie, js:je)
+    real(kind=kind_dyn), intent(  out) :: te0(isd:ied, jsd:jed, 1:km)
     ! If multi-gases physics are not used, ngas is one and qvi identical to qv
     integer,             intent(in)    :: ngas
-    real(kind=kind_dyn), intent(inout) :: qvi(:,:,:,:)
-    real(kind=kind_dyn), intent(inout) :: qv(:,:,:)
-    real(kind=kind_dyn), intent(inout) :: ql(:,:,:)
-    real(kind=kind_dyn), intent(inout) :: qi(:,:,:)
-    real(kind=kind_dyn), intent(inout) :: qr(:,:,:)
-    real(kind=kind_dyn), intent(inout) :: qs(:,:,:)
-    real(kind=kind_dyn), intent(inout) :: qg(:,:,:)
-    real(kind=kind_dyn), intent(in)    :: hs(:,:)
-    real(kind=kind_dyn), intent(in)    :: peln(:,:,:)
-    ! For hydrostatic build, delz's third dimension is 1:kmdelz=1:1, otherwise 1:km (see fv_arrays.F90)
-    real(kind=kind_dyn), intent(in)    :: delz(:,:,:)
-    real(kind=kind_dyn), intent(in)    :: delp(:,:,:)
-    real(kind=kind_dyn), intent(inout) :: pt(:,:,:)
-    real(kind=kind_dyn), intent(inout) :: pkz(:,:,:)
+    real(kind=kind_dyn), intent(inout) :: qvi(isd:ied, jsd:jed, 1:km, 1:ngas)
+    real(kind=kind_dyn), intent(inout) :: qv(isd:ied, jsd:jed, 1:km)
+    real(kind=kind_dyn), intent(inout) :: ql(isd:ied, jsd:jed, 1:km)
+    real(kind=kind_dyn), intent(inout) :: qi(isd:ied, jsd:jed, 1:km)
+    real(kind=kind_dyn), intent(inout) :: qr(isd:ied, jsd:jed, 1:km)
+    real(kind=kind_dyn), intent(inout) :: qs(isd:ied, jsd:jed, 1:km)
+    real(kind=kind_dyn), intent(inout) :: qg(isd:ied, jsd:jed, 1:km)
+    real(kind=kind_dyn), intent(in)    :: hs(isd:ied, jsd:jed)
+    real(kind=kind_dyn), intent(in)    :: peln(is:ie, 1:km+1, js:je)
+    ! For hydrostatic build, kmdelz=1, otherwise kmdelz=km (see fv_arrays.F90)
+    real(kind=kind_dyn), intent(in)    :: delz(is:ie, js:je, 1:kmdelz)
+    real(kind=kind_dyn), intent(in)    :: delp(isd:ied, jsd:jed, 1:km)
+    real(kind=kind_dyn), intent(inout) :: pt(isd:ied, jsd:jed, 1:km)
+    real(kind=kind_dyn), intent(inout) :: pkz(is:ie, js:je, 1:km)
 #ifdef USE_COND
-    real(kind=kind_dyn), intent(inout) :: q_con(:,:,:)
+    real(kind=kind_dyn), intent(inout) :: q_con(isd:ied, jsd:jed, 1:km)
 #else
-    real(kind=kind_dyn), intent(inout) :: q_con(:,:,:)
+    real(kind=kind_dyn), intent(inout) :: q_con(isd:isd, jsd:jsd, 1)
 #endif
     real(kind=kind_dyn), intent(in)    :: akap
 #ifdef MOIST_CAPPA
-    real(kind=kind_dyn), intent(inout) :: cappa(:,:,:)
+    real(kind=kind_dyn), intent(inout) :: cappa(isd:ied, jsd:jed, 1:km)
 #else
-    real(kind=kind_dyn), intent(inout) :: cappa(:,:,:)
+    real(kind=kind_dyn), intent(inout) :: cappa(isd:ied, jsd:jed, 1)
 #endif
     ! DH* WARNING, allocation in fv_arrays.F90 is area(isd_2d:ied_2d, jsd_2d:jed_2d),
     ! where normally isd_2d = isd etc, but for memory optimization, these can be set
     ! to isd_2d=0, ied_2d=-1 etc. I don't believe this optimization is actually used,
     ! as it would break a whole lot of code (including the one below)!
     ! Assume thus that isd_2d = isd etc.
-    real(kind_grid),     intent(in)    :: area(:,:)
-    real(kind=kind_dyn), intent(inout) :: dtdt(:,:,:)
+    real(kind_grid),     intent(in)    :: area(isd:ied, jsd:jed)
+    real(kind=kind_dyn), intent(inout) :: dtdt(is:ie, js:je, 1:km)
     logical,             intent(in)    :: out_dt
     logical,             intent(in)    :: last_step
     logical,             intent(in)    :: do_qa
-    real(kind=kind_dyn), intent(  out) :: qa(:,:,:)
+    real(kind=kind_dyn), intent(  out) :: qa(isd:ied, jsd:jed, 1:km)
     integer,             intent(in)    :: nthreads
     character(len=*),    intent(  out) :: errmsg
     integer,             intent(  out) :: errflg
@@ -333,19 +333,18 @@ subroutine fv_sat_adj_run(mdt, zvir, is, ie, isd, ied, kmp, km, kmdelz, js, je, 
        else
           kdelz = k
        end if
-       call fv_sat_adj_work(abs(mdt), zvir, is, ie, js, je, ng, hydrostatic, fast_mp_consv,       &
-                            te0(isd:ied,jsd:jed,k),                                               &
+       call fv_sat_adj_work(abs(mdt), zvir, is, ie, js, je, ng, hydrostatic, fast_mp_consv, &
+                            te0(isd,jsd,k),                                                 &
 #ifdef MULTI_GASES
-                            qvi(isd:ied,jsd:jed,k,1:ngas),                                        &
+                            qvi(isd,jsd,k,1:ngas),                                          &
 #else
-                            qv(isd:ied,jsd:jed,k),                                                &
+                            qv(isd,jsd,k),                                                  &
 #endif
-                            ql(isd:ied,jsd:jed,k), qi(isd:ied,jsd:jed,k),                         &
-                            qr(isd:ied,jsd:jed,k), qs(isd:ied,jsd:jed,k), qg(isd:ied,jsd:jed,k),  &
-                            hs, dpln, delz(is:ie,js:je,kdelz), pt(isd:ied,jsd:jed,k),             &
-                            delp(isd:ied,jsd:jed,k), q_con(isd:ied,jsd:jed,k),                    &
-                            cappa(isd:ied,jsd:jed,k), area, dtdt(is:ie,js:je,k),                  &
-                            out_dt, last_step, do_qa, qa(isd:ied,jsd:jed,k))
+                            ql(isd,jsd,k), qi(isd,jsd,k),                                   &
+                            qr(isd,jsd,k), qs(isd,jsd,k), qg(isd,jsd,k),                    &
+                            hs, dpln, delz(is:,js:,kdelz), pt(isd,jsd,k), delp(isd,jsd,k),&
+                            q_con(isd:,jsd:,k), cappa(isd:,jsd:,k), area, dtdt(is,js,k),    &
+                            out_dt, last_step, do_qa, qa(isd,jsd,k))
        if ( .not. hydrostatic  ) then
           do j=js,je
              do i=is,ie

@@ -105,19 +105,19 @@
   kind = kind_phys
   intent = in
   optional = F
-[sbc]
-  standard_name = stefan_boltzmann_constant
-  long_name = Stefan-Boltzmann constant
-  units = W m-2 K-4
+[tgice]
+  standard_name = freezing_point_temperature_of_seawater
+  long_name = freezing point temperature of seawater
+  units = K
   dimensions = ()
   type = real
   kind = kind_phys
   intent = in
   optional = F
-[tgice]
-  standard_name = freezing_point_temperature_of_seawater
-  long_name = freezing point temperature of seawater
-  units = K
+[sbc]
+  standard_name = stefan_boltzmann_constant
+  long_name = Stefan-Boltzmann constant
+  units = W m-2 K-4
   dimensions = ()
   type = real
   kind = kind_phys
