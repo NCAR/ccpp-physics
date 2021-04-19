@@ -445,6 +445,116 @@
       if ( ialbflg == 1 ) then
 
         do i = 1, IMAX
+#if 0
+          !-- water albedo
+          asevd_wat = 0.06
+          asend_wat = 0.06
+          asevb_wat = asevd_wat
+          asenb_wat = asevd_wat
+
+          ! direct albedo CZA dependence over water
+          if (fraco(i) > f_zero .and. coszf(i) > 0.0001) then
+            if (tsknf(i) >= con_t0c) then
+              asevb_wat = max (asevd_wat, 0.026/(coszf(i)**1.7 + 0.065) &
+     &                    + 0.15 * (coszf(i)-0.1) * (coszf(i)-0.5)      &
+     &                    * (coszf(i)-f_one))
+              asenb_wat = asevb_wat
+            endif
+
+          if (icy(i)) then
+          !-- Computation of ice albedo
+            asnow = 0.02*snowf(i)
+            argh  = min(0.50, max(.025, 0.01*zorlf(i)))
+            hrgh  = min(f_one,max(0.20,1.0577-1.1538e-3*hprif(i)))
+            fsno0 = asnow / (argh + asnow) * hrgh
+            ! diffused
+            if (tsknf(i) < 271.1) then
+              asevd_ice = 0.70
+              asend_ice = 0.65
+            else
+              a1 = (tsknf(i) - 271.1)**2
+              asevd_ice = 0.7 - 4.0*a1
+              asend_ice = 0.65 - 3.6875*a1
+            endif
+            ! direct
+            asevb_ice = asevd_ice
+            asenb_ice = asend_ice
+
+            if (fsno0 > f_zero) then
+            ! Snow on ice
+              dtgd = max(f_zero, min(5.0, (con_ttp-tisfc(i)) ))
+              b1   = 0.03 * dtgd
+              asnvd = (asevd_ice + b1) ! diffused snow albedo
+              asnnd = (asend_ice + b1)
+              if (coszf(i) > 0.0001 .and. coszf(i) < 0.5) then ! direct snow albedo
+                csnow = 0.5 * (3.0 / (f_one+4.0*coszf(i)) - f_one)
+                asnvb = min( 0.98, asnvd+(f_one-asnvd)*csnow )
+                asnnb = min( 0.98, asnnd+(f_one-asnnd)*csnow )
+              else
+                asnvb = asnvd
+                asnnb = asnnd
+              endif
+
+              ! composite ice and snow albedos
+              asevd_ice = asevd_ice * (1. - fsno0) + asnvd * fsno0
+              asend_ice = asend_ice * (1. - fsno0) + asnnd * fsno0
+              asevb_ice = asevb_ice * (1. - fsno0) + asnvb * fsno0
+              asenb_ice = asenb_ice * (1. - fsno0) + asnnb * fsno0
+            endif ! snow
+          else
+          ! icy = false, fill in values
+            asevd_ice = 0.70
+            asend_ice = 0.65
+            asevb_ice = 0.70
+            asenb_ice = 0.65
+          endif ! end icy
+
+          if (fracl(i) > f_zero) then
+!>  - Calculate snow cover input directly for land model, no
+!!      conversion needed.
+
+            fsno0 = sncovr(i) ! snow fraction on land
+
+            fsno1 = f_one - fsno0 
+            flnd0 = min(f_one, facsf(i)+facwf(i))
+            flnd  = flnd0 * fsno1 ! snow-free fraction
+            fsno  = f_one - flnd  ! snow-covered fraction
+
+            !>  - use Fanglin's zenith angle treatment.
+            if (coszf(i) > 0.0001) then
+              rfcs = 1.775/(1.0+1.55*coszf(i))
+            else
+            !- no sun
+              rfcs  = f_one
+            endif
+            !- zenith dependence is applied only to direct beam albedo
+            ab1bm = min(0.99, alnsf(i)*rfcs)
+            ab2bm = min(0.99, alvsf(i)*rfcs)
+
+            alndnb = ab1bm   *flnd + snoalb(i) * fsno
+            alndnd = alnwf(i)*flnd + snoalb(i) * fsno
+            alndvb = ab2bm   *flnd + snoalb(i) * fsno
+            alndvd = alvwf(i)*flnd + snoalb(i) * fsno
+          else
+          !-- fill in values of land albedo
+            alndnb = 0.
+            alndnd = 0.
+            alndvb = 0.
+            alndvd = 0.
+          endif ! end land
+
+          !-- Composite mean surface albedo from land, open water and
+          !-- ice fractions
+          sfcalb(i,1) = min(0.99,max(0.01,alndnb))*fracl(i) & ! direct beam NIR
+     &                  + asenb_wat*fraco(i) + asenb_ice*fraci(i)
+          sfcalb(i,2) = min(0.99,max(0.01,alndnd))*fracl(i) & ! diffuse NIR
+     &                  + asend_wat*fraco(i) + asend_ice*fraci(i)
+          sfcalb(i,3) = min(0.99,max(0.01,alndvb))*fracl & ! direct beam visible
+     &                  + asevb_wat*fraco(i) + asevb_ice*fraci(i)
+          sfcalb(i,4) = min(0.99,max(0.01,alndvd))*fracl & ! diffuse visible
+     &                  + asevd_wat*fraco(i) + asevd_ice*fraci(i)
+
+#else
 
 !>  - Calculate snow cover input directly for land model, no
 !!      conversion needed.
@@ -558,6 +668,7 @@
          sfcalb(i,2) = alnwf(i)*flnd + asend*fsea + asnnd*fsno
          sfcalb(i,3) = ab2bm   *flnd + asevb*fsea + asnvb*fsno
          sfcalb(i,4) = alvwf(i)*flnd + asevd*fsea + asnvd*fsno
+#endif
 
         enddo    ! end_do_i_loop
 
@@ -644,14 +755,14 @@
  
           !-- Composite mean surface albedo from land, open water and
           !-- ice fractions
-          sfcalb(i,1) = min(0.99,max(0.01,lsmalbdnir(i)))*fracl(i)      &
+          sfcalb(i,1) = min(0.99,max(0.01,lsmalbdnir(i)))*fracl(i)      & ! direct beam NIR
      &                  + asenb_wat*fraco(i) + asenb_ice*fraci(i)
-          sfcalb(i,2) = min(0.99,max(0.01,lsmalbinir(i)))*fracl(i)      &
+          sfcalb(i,2) = min(0.99,max(0.01,lsmalbinir(i)))*fracl(i)      & ! diffuse NIR
      &                  + asend_wat*fraco(i) + asend_ice*fraci(i)
-          sfcalb(i,3) = min(0.99,max(0.01,lsmalbdvis(i)))*fracl(i)      &
-     &                  + asevb_wat*fraco(i) + asenb_ice*fraci(i)
-          sfcalb(i,4) = min(0.99,max(0.01,lsmalbivis(i)))*fracl(i)      &
-     &                  + asevd_wat*fraco(i) + asend_ice*fraci(i)
+          sfcalb(i,3) = min(0.99,max(0.01,lsmalbdvis(i)))*fracl(i)      & ! direct beam visible
+     &                  + asevb_wat*fraco(i) + asevb_ice*fraci(i)
+          sfcalb(i,4) = min(0.99,max(0.01,lsmalbivis(i)))*fracl(i)      & ! diffuse visible
+     &                  + asevd_wat*fraco(i) + asevd_ice*fraci(i)
 
         enddo    ! end_do_i_loop
 
@@ -727,7 +838,7 @@
 !     xlat  (IMAX)  - latitude  in radiance, default to pi/2 -> -pi/2   !
 !                     range, otherwise see in-line comment              !
 !     slmsk (IMAX)  - sea(0),land(1),ice(2) mask on fcst model grid     !
-!     landfrac  (IMAX) - fraction of land on on fcst model grid         !
+!     landfrac (IMAX) - fraction of land on on fcst model grid          !
 !     snowf (IMAX)  - snow depth water equivalent in mm                 !
 !     sncovr(IMAX)  - ialbflg=1: snow cover over land in fraction       !
 !     sncovr_ice(IMAX) - snow cover over ice in fraction                !
