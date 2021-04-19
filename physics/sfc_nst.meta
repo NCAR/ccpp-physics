@@ -239,6 +239,14 @@
   type = logical
   intent = in
   optional = F
+[use_flake]
+  standard_name = flag_nonzero_lake_surface_fraction
+  long_name = flag indicating presence of some lake surface area fraction
+  units = flag
+  dimensions = (horizontal_loop_extent)
+  type = logical
+  intent = in
+  optional = F
 [xlon]
   standard_name = longitude
   long_name = longitude
@@ -680,6 +688,14 @@
   type = logical
   intent = in
   optional = F
+[use_flake]
+  standard_name = flag_nonzero_lake_surface_fraction
+  long_name = flag indicating presence of some lake surface area fraction
+  units = flag
+  dimensions = (horizontal_loop_extent)
+  type = logical
+  intent = in
+  optional = F
 [tgice]
   standard_name = freezing_point_temperature_of_seawater
   long_name = freezing point temperature of seawater
@@ -860,6 +876,14 @@
 [wet]
   standard_name = flag_nonzero_wet_surface_fraction
   long_name = flag indicating presence of some ocean or lake surface area fraction
+  units = flag
+  dimensions = (horizontal_loop_extent)
+  type = logical
+  intent = in
+  optional = F
+[use_flake]
+  standard_name = flag_nonzero_lake_surface_fraction
+  long_name = flag indicating presence of some lake surface area fraction
   units = flag
   dimensions = (horizontal_loop_extent)
   type = logical
