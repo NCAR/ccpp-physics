@@ -51,7 +51,7 @@
 ! ---- Inputs
             im, ps, t1, q1, wind,                            &
             dlwflx, dswsfc, weasd, lakedepth,                &
-            lake, xlat, delt, zlvl, elev,                    &
+            use_flake, xlat, delt, zlvl, elev,               &
             wet, flag_iter, yearlen, julian, imon,           &
 ! ---- in/outs
             snwdph, hice, tsurf, fice, T_sfc, hflx, evap,    &
@@ -95,7 +95,7 @@ IMPLICIT NONE
 
       real (kind=kind_phys),  intent(in) :: julian
 
-      logical, dimension(im), intent(in) :: flag_iter, wet, lake
+      logical, dimension(im), intent(in) :: flag_iter, wet, use_flake
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -187,6 +187,10 @@ REAL (KIND = kind_phys) ::   &
 REAL (KIND = kind_phys) ::   &
   lake_depth_max, T_bot_2_in, T_bot_2_out, dxlat,tb,tr,tt,temp,Kbar, DelK
 
+
+REAL (KIND = kind_phys) :: x, y !temperarory variables used for Tbot and Tsfc
+                                !initilizations 
+
 INTEGER :: i,ipr,iter
 
 LOGICAL :: lflk_botsed_use
@@ -212,7 +216,7 @@ CHARACTER(LEN=*), PARAMETER  :: FMT2 = "(1x,8(F12.4,1x))"
 
       do i = 1, im
         if (flag(i)) then
-          if( lake(i) ) then
+          if( use_flake(i) ) then
            T_ice(i)    = 273.15
            T_snow(i)   = 273.15
            fetch(i)    = 2.0E+03
@@ -237,9 +241,23 @@ CHARACTER(LEN=*), PARAMETER  :: FMT2 = "(1x,8(F12.4,1x))"
 !               else
 !                  T_sfc(i) = tsurf(i)
 !               endif
-               T_sfc(i) = 0.2*tt + 0.8* tsurf(i)
+               T_sfc(i) = 0.1*tt + 0.9* tsurf(i)
            endif
+!
+!  Add empirical climatology of lake Tsfc and Tbot to the current Tsfc and Tbot
+! to make sure Tsfc and Tbot are warmer than Tair in Winter or colder than Tair
+! in Summer
 
+           x = 0.03279*julian
+           if(xlat(i) .ge. 0.0) then
+              y = ((((0.0034*x-0.1241)*x+1.6231)*x-8.8666)*x+17.206)*x-4.2929
+              T_sfc(i) = T_sfc(i) + 0.3*y
+              tb = tb  + 0.05*y
+           else
+              y = ((((0.0034*x-0.1241)*x+1.6231)*x-8.8666)*x+17.206)*x-4.2929
+              T_sfc(i) = T_sfc(i) - 0.3*y                                                                            
+              tb = tb - 0.05*y
+           endif
            T_bot(i)    = tb 
            T_B1(i)     = tb 
 
@@ -275,7 +293,7 @@ CHARACTER(LEN=*), PARAMETER  :: FMT2 = "(1x,8(F12.4,1x))"
 !     print*,'inside flake driver'
 !     print*,  julian,xlat(i),w_albedo(I),w_extinc(i),lakedepth(i),elev(i),tb,tt,tsurf(i),T_sfc(i)
 
-        endif  !lake fraction and depth
+        endif  !lake 
         endif  !flag
       enddo
  1001 format ( 'At icount=', i5, '  x = ', f5.2,5x, 'y = ', &
@@ -288,7 +306,7 @@ CHARACTER(LEN=*), PARAMETER  :: FMT2 = "(1x,8(F12.4,1x))"
 !  call lake interface
        do i=1,im
           if (flag(i)) then
-            if( lake(i) ) then
+            if( use_flake(i) ) then
               dMsnowdt_in = weasd(i)/delt
               I_atm_in    = dswsfc(i)
               Q_atm_lw_in = dlwflx(i)
