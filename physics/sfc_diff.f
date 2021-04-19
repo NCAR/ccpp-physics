@@ -11,6 +11,7 @@
       implicit none
 
       public :: sfc_diff_init, sfc_diff_run, sfc_diff_finalize
+      public :: stability
 
       private
 
@@ -70,20 +71,19 @@
      &                    wet,dry,icy,                                  &  !intent(in)
      &                    tskin_wat, tskin_lnd, tskin_ice,              &  !intent(in)
      &                    tsurf_wat, tsurf_lnd, tsurf_ice,              &  !intent(in)
-     &                   snwdph_wat,snwdph_lnd,snwdph_ice,              &  !intent(in)
-     &                     landfrac,      cice,                         &  !intent(in) -- for use with frac_grid
-     &                       islmsk, frac_grid,                         &  !intent(in) -- for use with frac_grid
-     &                     z0rl_wat,  z0rl_lnd,  z0rl_ice,              &  !intent(inout)
-     &                     z0rl_wav,  z0rl_cmp,                         &  !intent(inout)
-     &         ustar_wat, ustar_lnd, ustar_ice, ustar_cmp,              &  !intent(inout)
-     &            cm_wat,    cm_lnd,    cm_ice,    cm_cmp,              &  !intent(inout)
-     &            ch_wat,    ch_lnd,    ch_ice,    ch_cmp,              &  !intent(inout)
-     &            rb_wat,    rb_lnd,    rb_ice,    rb_cmp,              &  !intent(inout)
-     &        stress_wat,stress_lnd,stress_ice,stress_cmp,              &  !intent(inout)
-     &            fm_wat,    fm_lnd,    fm_ice,    fm_cmp,              &  !intent(inout)
-     &            fh_wat,    fh_lnd,    fh_ice,    fh_cmp,              &  !intent(inout)
-     &          fm10_wat,  fm10_lnd,  fm10_ice,  fm10_cmp,              &  !intent(inout)
-     &           fh2_wat,   fh2_lnd,   fh2_ice,   fh2_cmp,              &  !intent(inout)
+     &                    snwdph_wat,snwdph_lnd,snwdph_ice,             &  !intent(in)
+     &                    z0rl_wat,  z0rl_lnd,  z0rl_ice,               &  !intent(inout)
+     &                    z0rl_wav,                                     &  !intent(inout)
+     &                    ustar_wat, ustar_lnd, ustar_ice,              &  !intent(inout)
+     &                       cm_wat,    cm_lnd,    cm_ice,              &  !intent(inout)
+     &                       ch_wat,    ch_lnd,    ch_ice,              &  !intent(inout)
+     &                       rb_wat,    rb_lnd,    rb_ice,              &  !intent(inout)
+     &                   stress_wat,stress_lnd,stress_ice,              &  !intent(inout)
+     &                       fm_wat,    fm_lnd,    fm_ice,              &  !intent(inout)
+     &                       fh_wat,    fh_lnd,    fh_ice,              &  !intent(inout)
+     &                     fm10_wat,  fm10_lnd,  fm10_ice,              &  !intent(inout)
+     &                      fh2_wat,   fh2_lnd,   fh2_ice,              &  !intent(inout)
+     &                    ztmax_wat, ztmax_lnd, ztmax_ice,              &  !intent(inout)
      &                    errmsg, errflg)                                  !intent(out)
 !
       implicit none
@@ -109,25 +109,20 @@
      &                   snwdph_wat,snwdph_lnd,snwdph_ice
 
       real(kind=kind_phys), dimension(im), intent(in)    :: z0rl_wav
-      
-      real(kind=kind_phys), dimension(im), intent(in)    ::             &
-     &                     landfrac,     cice
-     
-      integer, dimension(im), intent(in) :: islmsk  ! For compositing
-      
-      logical, intent(in) :: frac_grid              ! For compositing
-      
+
       real(kind=kind_phys), dimension(im), intent(inout) ::             &
-     &                     z0rl_wat,  z0rl_lnd,  z0rl_ice,  z0rl_cmp,   &
-     &                    ustar_wat, ustar_lnd, ustar_ice, ustar_cmp,   &
-     &                       cm_wat,    cm_lnd,    cm_ice,    cm_cmp,   &
-     &                       ch_wat,    ch_lnd,    ch_ice,    ch_cmp,   &
-     &                       rb_wat,    rb_lnd,    rb_ice,    rb_cmp,   &
-     &                   stress_wat,stress_lnd,stress_ice,stress_cmp,   &
-     &                       fm_wat,    fm_lnd,    fm_ice,    fm_cmp,   &
-     &                       fh_wat,    fh_lnd,    fh_ice,    fh_cmp,   &
-     &                     fm10_wat,  fm10_lnd,  fm10_ice,  fm10_cmp,   &
-     &                      fh2_wat,   fh2_lnd,   fh2_ice,   fh2_cmp
+     &                     z0rl_wat,  z0rl_lnd,  z0rl_ice,              &
+     &                    ustar_wat, ustar_lnd, ustar_ice,              &
+     &                       cm_wat,    cm_lnd,    cm_ice,              &
+     &                       ch_wat,    ch_lnd,    ch_ice,              &
+     &                       rb_wat,    rb_lnd,    rb_ice,              &
+     &                   stress_wat,stress_lnd,stress_ice,              &
+     &                       fm_wat,    fm_lnd,    fm_ice,              &
+     &                       fh_wat,    fh_lnd,    fh_ice,              &
+     &                     fm10_wat,  fm10_lnd,  fm10_ice,              &
+     &                      fh2_wat,   fh2_lnd,   fh2_ice,              &
+     &                    ztmax_wat, ztmax_lnd, ztmax_ice
+!
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 !
@@ -137,15 +132,8 @@
 !
       real(kind=kind_phys) :: rat,   thv1, restar, wind10m,
      &                        czilc, tem1, tem2, virtfac
-
+!
       real(kind=kind_phys) :: tvs, z0, z0max
-      
-      real(kind=kind_phys), dimension(im) ::                            &
-     &                     ztmax_wat, ztmax_lnd, ztmax_ice
-
-      real(kind=kind_phys) :: txl, txi, txo, wfrac ! For fractional
-      real(kind=kind_phys) :: snwdph_cmp, ztmax_cmp! For fractional
-      real(kind=kind_phys) :: tskin_cmp, tsurf_cmp ! For fractional
 !
       real(kind=kind_phys), parameter ::
      &        one=1.0_kp, zero=0.0_kp, half=0.5_kp, qmin=1.0e-8_kp
@@ -183,12 +171,12 @@
 
       do i=1,im
         if(flag_iter(i)) then
-          
-          ! BWG: Need to initialize ztmax arrays
+
+          ! Need to initialize ztmax arrays
           ztmax_lnd(i) = 1. ! log(1) = 0
           ztmax_ice(i) = 1. ! log(1) = 0
           ztmax_wat(i) = 1. ! log(1) = 0
-          
+
           virtfac = one + rvrdm1 * max(q1(i),qmin)
           thv1    = t1(i) * prslki(i) * virtfac
 
@@ -394,99 +382,6 @@
 !
         endif                ! end of if(flagiter) loop
       enddo
-
-      ! BWG, 2021/02/23: For fractional grid, get composite values
-      if (frac_grid) then ! If fractional grid is on...
-        do i=1,im ! Loop over horizontal
-          if(flag_iter(i)) then
-            virtfac = one + rvrdm1 * max(q1(i),qmin)
-#ifdef GSD_SURFACE_FLUXES_BUGFIX
-            thv1    = t1(i) / prslk1(i) * virtfac  ! Theta-v at lowest level
-#else
-            thv1    = t1(i) * prslki(i) * virtfac  ! Theta-v at lowest level
-#endif  
-
-            ! Three-way composites (fields from sfc_diff)
-            txl   = landfrac(i)            ! land fraction
-            wfrac = one - txl              ! ocean fraction
-            txi   = cice(i) * wfrac        ! txi = ice fraction wrt whole cell
-            txo   = max(zero, wfrac-txi)   ! txo = open water fraction
-
-            ! Composite inputs to "stability" function
-            snwdph_cmp = txl*snwdph_lnd(i)  + txi*snwdph_ice(i)
-             tsurf_cmp = (txl * ch_lnd(i) * tsurf_lnd(i)                &
-     &                 +  txi * ch_ice(i) * tsurf_ice(i)                &
-     &                 +  txo * ch_wat(i) * tsurf_wat(i))               &
-     &         / (txl * ch_lnd(i) +  txi * ch_ice(i) +  txo * ch_wat(i))
-             tskin_cmp = (txl * ch_lnd(i) * tskin_lnd(i)                &
-     &                 +  txi * ch_ice(i) * tskin_ice(i)                &
-     &                 +  txo * ch_wat(i) * tskin_wat(i))               &
-     &         / (txl * ch_lnd(i) +  txi * ch_ice(i) +  txo * ch_wat(i))
-#ifdef GSD_SURFACE_FLUXES_BUGFIX
-            tvs  = half * (tsurf_cmp+tskin_cmp)/prsik1(i)
-     &                   * virtfac
-#else
-            tvs  = half * (tsurf_cmp+tskin_cmp) * virtfac
-#endif
-            z0rl_cmp(i) = txl*log(z0rl_lnd(i)) + txi*log(z0rl_ice(i))   &
-     &                  + txo*log(z0rl_wat(i))
-            z0rl_cmp(i) = exp(z0rl_cmp(i))
-            z0max = 0.01_kp * z0rl_cmp(i)
-
-            ztmax_cmp = txl*log(ztmax_lnd(i))+txi*log(ztmax_ice(i))     &
-     &                + txo*log(ztmax_wat(i))
-            ztmax_cmp = exp(ztmax_cmp)
-!
-            call stability
-!  ---  inputs:
-     &       (z1(i), snwdph_cmp, thv1, wind(i),
-     &        z0max, ztmax_cmp, tvs, grav,
-!  ---  outputs:
-     &        rb_cmp(i), fm_cmp(i), fh_cmp(i), fm10_cmp(i), fh2_cmp(i),
-     &        cm_cmp(i), ch_cmp(i), stress_cmp(i), ustar_cmp(i))
-
-          endif   ! end of if(flagiter) loop
-        enddo ! End of loop over horizontal
-      else  ! If frac_grid is false
-        do i=1,im ! Loop over horizontal
-          if(flag_iter(i)) then
-            if (islmsk(i) == 1) then ! Land
-                z0rl_cmp(i) =   z0rl_lnd(i)
-               ustar_cmp(i) =  ustar_lnd(i)
-                  cm_cmp(i) =     cm_lnd(i)
-                  ch_cmp(i) =     ch_lnd(i)
-                  rb_cmp(i) =     rb_lnd(i)
-              stress_cmp(i) = stress_lnd(i)
-                  fm_cmp(i) =     fm_lnd(i)
-                  fh_cmp(i) =     fh_lnd(i)
-                fm10_cmp(i) =   fm10_lnd(i)
-                 fh2_cmp(i) =    fh2_lnd(i)
-            elseif (islmsk(i) == 0) then ! Open water 
-                z0rl_cmp(i) =   z0rl_wat(i)
-               ustar_cmp(i) =  ustar_wat(i)
-                  cm_cmp(i) =     cm_wat(i)
-                  ch_cmp(i) =     ch_wat(i)
-                  rb_cmp(i) =     rb_wat(i)
-              stress_cmp(i) = stress_wat(i)
-                  fm_cmp(i) =     fm_wat(i)
-                  fh_cmp(i) =     fh_wat(i)
-                fm10_cmp(i) =   fm10_wat(i)
-                 fh2_cmp(i) =    fh2_wat(i)
-            else ! if (islmsk(i) == 2) ! Ice
-                z0rl_cmp(i) =   z0rl_ice(i)
-               ustar_cmp(i) =  ustar_ice(i)
-                  cm_cmp(i) =     cm_ice(i)
-                  ch_cmp(i) =     ch_ice(i)
-                  rb_cmp(i) =     rb_ice(i)
-              stress_cmp(i) = stress_ice(i)
-                  fm_cmp(i) =     fm_ice(i)
-                  fh_cmp(i) =     fh_ice(i)
-                fm10_cmp(i) =   fm10_ice(i)
-                 fh2_cmp(i) =    fh2_ice(i)
-            endif
-          endif  ! end of if(flagiter) loop
-        enddo ! End of loop over horizontal
-      endif ! End of getting composite values for fractional grid
 
       return
       end subroutine sfc_diff_run

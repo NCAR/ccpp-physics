@@ -26,7 +26,7 @@
 !!
       subroutine GFS_surface_generic_pre_run (im, levs, vfrac, islmsk, isot, ivegsrc, stype, vtype, slope, &
                           prsik_1, prslk_1, tsfc, phil, con_g,                                             &
-                          sigmaf, soiltyp, vegtype, slopetyp, work3, tsurf, zlvl,                          &
+                          sigmaf, soiltyp, vegtype, slopetyp, work3, zlvl,                                 &
                           drain_cpl, dsnow_cpl, rain_cpl, snow_cpl, lndp_type, n_var_lndp, sfc_wts,        &
                           lndp_var_list, lndp_prt_list,                                                    &
                           z01d, zt1d, bexp1d, xlai1d, vegf1d, lndp_vgf, sfc_wts_inv,                       &
@@ -48,7 +48,7 @@
         real(kind=kind_phys), dimension(im), intent(inout) :: tsfc
         real(kind=kind_phys), dimension(im,levs), intent(in) :: phil
 
-        real(kind=kind_phys), dimension(im), intent(inout) :: sigmaf, work3, tsurf, zlvl
+        real(kind=kind_phys), dimension(im), intent(inout) :: sigmaf, work3, zlvl
 
         ! Stochastic physics / surface perturbations
         real(kind=kind_phys), dimension(im),          intent(out) :: drain_cpl
@@ -160,7 +160,6 @@
 
           work3(i)   = prsik_1(i) / prslk_1(i)
 
-          !tsurf(i) = tsfc(i)
           zlvl(i)    = phil(i,1) * onebg
           smcwlt2(i) = zero
           smcref2(i) = zero

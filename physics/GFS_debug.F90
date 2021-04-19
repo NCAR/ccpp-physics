@@ -1231,7 +1231,6 @@
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tsfc_land           ', Interstitial%tsfc_land               )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tsfc_ocean          ', Interstitial%tsfc_ocean              )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tsfg                ', Interstitial%tsfg                    )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tsurf               ', Interstitial%tsurf                   )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tsurf_ice           ', Interstitial%tsurf_ice               )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tsurf_land          ', Interstitial%tsurf_land              )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tsurf_ocean         ', Interstitial%tsurf_ocean             )
@@ -1258,6 +1257,9 @@
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%zorl_land           ', Interstitial%zorl_land               )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%zorl_ocean          ', Interstitial%zorl_ocean              )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%zt1d                ', Interstitial%zt1d                    )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%ztmax_ice           ', Interstitial%ztmax_ice               )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%ztmax_land          ', Interstitial%ztmax_land              )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%ztmax_water         ', Interstitial%ztmax_water             )
                      ! UGWP
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tau_mtb             ', Interstitial%tau_mtb                 )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tau_ogw             ', Interstitial%tau_ogw                 )

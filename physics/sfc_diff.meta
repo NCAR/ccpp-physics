@@ -331,40 +331,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[landfrac] 
-  standard_name = land_area_fraction
-  long_name = fraction of horizontal grid area occupied by land
-  units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[cice]
-  standard_name = sea_ice_concentration
-  long_name = ice fraction over open water
-  units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[islmsk]
-  standard_name = sea_land_ice_mask
-  long_name = sea/land/ice mask (=0/1/2)
-  units = flag
-  dimensions = (horizontal_loop_extent)
-  type = integer
-  intent = in
-  optional = F
-[frac_grid]
-  standard_name = flag_for_fractional_grid
-  long_name = flag for fractional grid
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
 [z0rl_wat]
   standard_name = surface_roughness_length_over_ocean_interstitial
   long_name = surface roughness length over ocean (temporary use as interstitial)
@@ -401,15 +367,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[z0rl_cmp]
-  standard_name = surface_roughness_length
-  long_name = surface roughness length
-  units = cm
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
 [ustar_wat]
   standard_name = surface_friction_velocity_over_ocean
   long_name = surface friction velocity over ocean
@@ -431,15 +388,6 @@
 [ustar_ice]
   standard_name = surface_friction_velocity_over_ice
   long_name = surface friction velocity over ice
-  units = m s-1
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[ustar_cmp]
-  standard_name = surface_friction_velocity
-  long_name = boundary layer parameter
   units = m s-1
   dimensions = (horizontal_loop_extent)
   type = real
@@ -473,15 +421,6 @@
   kind = kind_phys
   intent = inout
   optional = F
-[cm_cmp]
-  standard_name = surface_drag_coefficient_for_momentum_in_air
-  long_name = surface exchange coeff for momentum
-  units = none
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
 [ch_wat]
   standard_name = surface_drag_coefficient_for_heat_and_moisture_in_air_over_ocean
   long_name = surface exchange coeff heat & moisture over ocean
@@ -503,15 +442,6 @@
 [ch_ice]
   standard_name = surface_drag_coefficient_for_heat_and_moisture_in_air_over_ice
   long_name = surface exchange coeff heat & moisture over ice
-  units = none
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[ch_cmp]
-  standard_name = surface_drag_coefficient_for_heat_and_moisture_in_air
-  long_name = surface exchange coeff heat & moisture
   units = none
   dimensions = (horizontal_loop_extent)
   type = real
@@ -545,15 +475,6 @@
   kind = kind_phys
   intent = inout
   optional = F
-[rb_cmp]
-  standard_name = bulk_richardson_number_at_lowest_model_level
-  long_name = bulk Richardson number at the surface
-  units = none
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
 [stress_wat]
   standard_name = surface_wind_stress_over_ocean
   long_name = surface wind stress over ocean
@@ -575,15 +496,6 @@
 [stress_ice]
   standard_name = surface_wind_stress_over_ice
   long_name = surface wind stress over ice
-  units = m2 s-2
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[stress_cmp]
-  standard_name = surface_wind_stress
-  long_name = surface wind stress
   units = m2 s-2
   dimensions = (horizontal_loop_extent)
   type = real
@@ -617,15 +529,6 @@
   kind = kind_phys
   intent = inout
   optional = F
-[fm_cmp]
-  standard_name = Monin_Obukhov_similarity_function_for_momentum
-  long_name = Monin-Obukhov similarity function for momentum
-  units = none
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
 [fh_wat]
   standard_name = Monin_Obukhov_similarity_function_for_heat_over_ocean
   long_name = Monin-Obukhov similarity function for heat over ocean
@@ -647,15 +550,6 @@
 [fh_ice]
   standard_name = Monin_Obukhov_similarity_function_for_heat_over_ice
   long_name = Monin-Obukhov similarity function for heat over ice
-  units = none
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[fh_cmp]
-  standard_name = Monin_Obukhov_similarity_function_for_heat
-  long_name = Monin-Obukhov similarity function for heat
   units = none
   dimensions = (horizontal_loop_extent)
   type = real
@@ -689,15 +583,6 @@
   kind = kind_phys
   intent = inout
   optional = F
-[fm10_cmp]
-  standard_name = Monin_Obukhov_similarity_function_for_momentum_at_10m
-  long_name = Monin-Obukhov similarity parameter for momentum at 10m
-  units = none
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
 [fh2_wat]
   standard_name = Monin_Obukhov_similarity_function_for_heat_at_2m_over_ocean
   long_name = Monin-Obukhov similarity parameter for heat at 2m over ocean
@@ -725,10 +610,28 @@
   kind = kind_phys
   intent = inout
   optional = F
-[fh2_cmp]
-  standard_name = Monin_Obukhov_similarity_function_for_heat_at_2m
-  long_name = Monin-Obukhov similarity parameter for heat at 2m
-  units = none
+[ztmax_wat]
+  standard_name = ztmax_whatever_that_is_over_water
+  long_name = zxtmax whatever that is over water
+  units = ???
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[ztmax_lnd]
+  standard_name = ztmax_whatever_that_is_over_land
+  long_name = zxtmax whatever that is over land
+  units = ???
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[ztmax_ice]
+  standard_name = ztmax_whatever_that_is_over_ice
+  long_name = zxtmax whatever that is over ice
+  units = ???
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys

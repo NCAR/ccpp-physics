@@ -478,15 +478,6 @@
   kind = kind_phys
   intent = out
   optional = F
-[tsurf]
-  standard_name = surface_skin_temperature_after_iteration
-  long_name = surface skin temperature after iteration
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
 [tsurf_wat]
   standard_name = surface_skin_temperature_after_iteration_over_ocean
   long_name = surface skin temperature after iteration over ocean
@@ -1435,15 +1426,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[tsurf]
-  standard_name = surface_skin_temperature_after_iteration
-  long_name = surface skin temperature after iteration
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
 [tsurf_wat]
   standard_name = surface_skin_temperature_after_iteration_over_ocean
   long_name = surface skin temperature after iteration over ocean
@@ -1946,6 +1928,60 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
+[grav]
+  standard_name = gravitational_acceleration
+  long_name = gravitational acceleration
+  units = m s-2
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[prslki]
+  standard_name = ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer
+  long_name = Exner function ratio bt midlayer and interface at 1st layer
+  units = ratio
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[z1]
+  standard_name = height_above_ground_at_lowest_model_layer
+  long_name = height above ground at 1st model layer
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[ztmax_wat]
+  standard_name = ztmax_whatever_that_is_over_water
+  long_name = zxtmax whatever that is over water
+  units = ???
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[ztmax_lnd]
+  standard_name = ztmax_whatever_that_is_over_land
+  long_name = zxtmax whatever that is over land
+  units = ???
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[ztmax_ice]
+  standard_name = ztmax_whatever_that_is_over_ice
+  long_name = zxtmax whatever that is over ice
+  units = ???
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
   optional = F
 [errmsg]
   standard_name = ccpp_error_message
