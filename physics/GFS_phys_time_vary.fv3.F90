@@ -477,7 +477,7 @@
 !$OMP          shared(im,lsoil,con_t0c,landfrac,tsfcl,tvxy,tgxy,tahxy)  &
 !$OMP          shared(snowd,canicexy,canliqxy,canopy,eahxy,cmxy,chxy)   &
 !$OMP          shared(fwetxy,sneqvoxy,weasd,alboldxy,qsnowxy,wslakexy)  &
-!$OMP          shared(taussxy,albdvis,albdnir,albivis,albinir,emiss)    &
+!$OMP          shared(taussxy)                                          &
 !$OMP          shared(waxy,wtxy,zwtxy,imn,vtype,xlaixy,xsaixy,lfmassxy) &
 !$OMP          shared(stmassxy,rtmassxy,woodxy,stblcpxy,fastcpxy)       &
 !$OMP          shared(isbarren_table,isice_table,isurban_table)         &
