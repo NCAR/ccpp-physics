@@ -1,3 +1,7 @@
+! DH*
+!# ! commented out ! define ORIG_ALB_EMS_OPTION_ONE
+! *DH
+
 !>  \file radiation_surface.f
 !!  This file contains routines that set up surface albedo for SW
 !!  radiation and surface emissivity for LW radiation.
@@ -434,6 +438,8 @@
       real (kind=kind_phys) :: asevb_wat,asenb_wat,asevd_wat,asend_wat, &
      &                         asevb_ice,asenb_ice,asevd_ice,asend_ice
 
+      real (kind=kind_phys) :: alndnb, alndnd, alndvb, alndvd
+
       real (kind=kind_phys) ffw, dtgd
 
       integer :: i, k, kk, iflag
@@ -445,7 +451,8 @@
       if ( ialbflg == 1 ) then
 
         do i = 1, IMAX
-#if 0
+
+#ifndef ORIG_ALB_EMS_OPTION_ONE
           !-- water albedo
           asevd_wat = 0.06
           asend_wat = 0.06
@@ -460,6 +467,7 @@
      &                    * (coszf(i)-f_one))
               asenb_wat = asevb_wat
             endif
+          endif
 
           if (icy(i)) then
           !-- Computation of ice albedo
@@ -545,13 +553,13 @@
 
           !-- Composite mean surface albedo from land, open water and
           !-- ice fractions
-          sfcalb(i,1) = min(0.99,max(0.01,alndnb))*fracl(i) & ! direct beam NIR
+          sfcalb(i,1) = min(0.99,max(0.01,alndnb))*fracl(i)             & ! direct beam NIR
      &                  + asenb_wat*fraco(i) + asenb_ice*fraci(i)
-          sfcalb(i,2) = min(0.99,max(0.01,alndnd))*fracl(i) & ! diffuse NIR
+          sfcalb(i,2) = min(0.99,max(0.01,alndnd))*fracl(i)             & ! diffuse NIR
      &                  + asend_wat*fraco(i) + asend_ice*fraci(i)
-          sfcalb(i,3) = min(0.99,max(0.01,alndvb))*fracl & ! direct beam visible
+          sfcalb(i,3) = min(0.99,max(0.01,alndvb))*fracl(i)             & ! direct beam visible
      &                  + asevb_wat*fraco(i) + asevb_ice*fraci(i)
-          sfcalb(i,4) = min(0.99,max(0.01,alndvd))*fracl & ! diffuse visible
+          sfcalb(i,4) = min(0.99,max(0.01,alndvd))*fracl(i)             & ! diffuse visible
      &                  + asevd_wat*fraco(i) + asevd_ice*fraci(i)
 
 #else
@@ -895,7 +903,7 @@
 
       real (kind=kind_phys) :: dltg, hdlt, tmp1, tmp2,                  &
      &      asnow, argh, hrgh, fsno
-#if 1
+#ifdef ORIG_ALB_EMS_OPTION_ONE
       real (kind=kind_phys) :: fsno0, fsno1
 #endif
       real (kind=kind_phys) :: sfcemis_land, sfcemis_ice
@@ -922,7 +930,7 @@
 
         lab_do_IMAX : do i = 1, IMAX
 
-#if 0
+#ifndef ORIG_ALB_EMS_OPTION_ONE
           if (fracl(i) < epsln) then                    ! no land
             if ( abs(fraco(i)-f_one) < epsln ) then     ! open water point
               sfcemis(i) = emsref(1)
@@ -974,7 +982,7 @@
 
             idx = max( 2, idxems(i2,j2) )
             if ( idx >= 7 ) idx = 2
-#if 0
+#ifndef ORIG_ALB_EMS_OPTION_ONE
             if (abs(fracl(i)-f_one) < epsln) then
               sfcemis(i) = emsref(idx)
             else
@@ -990,7 +998,7 @@
 
 !> - Check for snow covered area.
 
-#if 0
+#ifndef ORIG_ALB_EMS_OPTION_ONE
           if ( sncovr(i) > f_zero ) then ! input land/ice area snow cover
 
             fsno = sncovr(i)
