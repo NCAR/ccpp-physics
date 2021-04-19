@@ -480,15 +480,6 @@
   kind = kind_phys
   intent = out
   optional = T
-[re_rain]
-  standard_name = effective_radius_of_stratiform_cloud_rain_particle_in_um
-  long_name = effective radius of cloud rain particle in micrometers
-  units = um
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
 [imp_physics]
   standard_name = flag_for_microphysics_scheme
   long_name = choice of microphysics scheme

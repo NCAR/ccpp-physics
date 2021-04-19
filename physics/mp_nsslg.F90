@@ -95,7 +95,6 @@ module mp_nsslg
          kme = nlev
          kte = nlev
 
-         is_initialized = .true.
 
          nssl_params(:) = 0.0
          nssl_params(1)  = nssl_cccn
@@ -137,6 +136,8 @@ module mp_nsslg
 !           write(0,*) 'done nssl_2mom_init ccn'
          ENDIF
 
+         is_initialized = .true.
+
     end subroutine mp_nsslg_init
 
 !>\ingroup aansslg
@@ -152,7 +153,7 @@ module mp_nsslg
                               tgrs, prslk, prsl, phii, omega, dtp,           &
                               prcp, rain, graupel, ice, snow, sr,            &
                              refl_10cm, do_radar_ref, first_time_step,       &
-                             re_cloud, re_ice, re_snow, re_rain,             &
+                             re_cloud, re_ice, re_snow,                      &
                              imp_physics,                                    &
                              imp_physics_nssl2m, imp_physics_nssl2mccn,      &
                              nssl_hail_on, nssl_invertccn, ntccn, ntccna,    &
@@ -194,13 +195,13 @@ module mp_nsslg
          real(kind_phys),           intent(  out) :: snow(1:ncol)
          real(kind_phys),           intent(  out) :: sr(1:ncol)
          ! Radar reflectivity
-         real(kind_phys),           intent(  out) :: refl_10cm(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout) :: refl_10cm(1:ncol,1:nlev)
          logical,                   intent(in   ) :: do_radar_ref, first_time_step
          ! Cloud effective radii
-         real(kind_phys), optional, intent(  out) :: re_cloud(1:ncol,1:nlev)
-         real(kind_phys), optional, intent(  out) :: re_ice(1:ncol,1:nlev)
-         real(kind_phys), optional, intent(  out) :: re_snow(1:ncol,1:nlev)
-         real(kind_phys), optional, intent(  out) :: re_rain(1:ncol,1:nlev)
+         real(kind_phys), optional, intent(inout) :: re_cloud(1:ncol,1:nlev)
+         real(kind_phys), optional, intent(inout) :: re_ice(1:ncol,1:nlev)
+         real(kind_phys), optional, intent(inout) :: re_snow(1:ncol,1:nlev)
+!         real(kind_phys), optional, intent(  out) :: re_rain(1:ncol,1:nlev)
          integer,                   intent(in)    :: imp_physics
          integer,                   intent(in)    :: imp_physics_nssl2m, imp_physics_nssl2mccn
          logical,                   intent(in)    :: nssl_hail_on, nssl_invertccn
