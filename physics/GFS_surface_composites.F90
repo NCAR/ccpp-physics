@@ -438,12 +438,6 @@ contains
           txi   = cice(i) * wfrac        ! txi = ice fraction wrt whole cell
           txo   = max(zero, wfrac-txi)   ! txo = open water fraction
 
-! BWG, 2021/02/25: cmm=cd*wind, chh=cdq*wind, so use composite cd, cdq
-          q0       = max( q1(i), qmin )
-          rho      = prsl1(i) / (rd*t1(i)*(one + rvrdm1*q0))
-          cmm(i)    =      cd(i)*wind(i)  !txl*cmm_lnd(i)    + txi*cmm_ice(i)    + txo*cmm_wat(i)
-          chh(i)    = rho*cdq(i)*wind(i)  !txl*chh_lnd(i)    + txi*chh_ice(i)    + txo*chh_wat(i)
-
          !gflx(i)   = txl*gflx_lnd(i)   + txi*gflx_ice(i)   + txo*gflx_wat(i)
           ep1d(i)   = txl*ep1d_lnd(i)   + txi*ep1d_ice(i)   + txo*ep1d_wat(i)
          !weasd(i)  = txl*weasd_lnd(i)  + txi*weasd_ice(i)  + txo*weasd_wat(i)
@@ -498,6 +492,12 @@ contains
           call stability(z1(i), snowd(i), thv1, wind(i), z0max, ztmax, tvs, grav, & ! inputs
                          rb(i), ffmm(i), ffhh(i), fm10(i), fh2(i), cd(i), cdq(i), & ! outputs
                          stress(i), uustar(i))
+
+          ! BWG, 2021/02/25: cmm=cd*wind, chh=cdq*wind, so use composite cd, cdq
+          q0       = max( q1(i), qmin )
+          rho      = prsl1(i) / (rd*t1(i)*(one + rvrdm1*q0))
+          cmm(i)    =      cd(i)*wind(i)  !txl*cmm_lnd(i)    + txi*cmm_ice(i)    + txo*cmm_wat(i)
+          chh(i)    = rho*cdq(i)*wind(i)  !txl*chh_lnd(i)    + txi*chh_ice(i)    + txo*chh_wat(i)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
