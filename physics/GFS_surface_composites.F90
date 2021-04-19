@@ -464,8 +464,6 @@ contains
 !         layer parameterization being used - to be extended in the future            !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-! BWG, 2021/02/25: Need to change composite skin temperature base on ULW (Fanglin)
-          !tsfc(i)   = txl*tsfc_lnd(i)   + txi*tice(i)       + txo*tsfc_wat(i)
           tsfc(i)   = ( txl * cdq_lnd(i) * tsfc_lnd(i)                          &
                       + txi * cdq_ice(i) * tice(i)                              & ! DH* Ben had tsurf_ice(i), but GFS_surface_composites_post_run uses tice instead
                       + txo * cdq_wat(i) * tsfc_wat(i))                         &
@@ -475,15 +473,15 @@ contains
                       + txo * cdq_wat(i) * tsurf_wat(i))                        &
                       / (txl * cdq_lnd(i) + txi * cdq_ice(i) + txo * cdq_wat(i) )
 
-          virtfac = one + rvrdm1 * max(q1(i),qmin)
+          q0 = max( q1(i), qmin )
+          virtfac = one + rvrdm1 * q0
 #ifdef GSD_SURFACE_FLUXES_BUGFIX
           thv1 = t1(i) / prslk1(i) * virtfac  ! Theta-v at lowest level
           tvs  = half * (tsfc(i)+tsurf)/prsik1(i) * virtfac
-
 #else
           thv1 = t1(i) * prslki(i) * virtfac  ! Theta-v at lowest level
           tvs  = half * (tsfc(i)+tsurf) * virtfac
-#endif  
+#endif
 
           zorl(i) = exp(txl*log(zorll(i)) + txi*log(zorli(i)) + txo*log(zorlo(i)))
           z0max   = 0.01_kind_phys * zorl(i)
@@ -494,7 +492,6 @@ contains
                          stress(i), uustar(i))
 
           ! BWG, 2021/02/25: cmm=cd*wind, chh=cdq*wind, so use composite cd, cdq
-          q0       = max( q1(i), qmin )
           rho      = prsl1(i) / (rd*t1(i)*(one + rvrdm1*q0))
           cmm(i)    =      cd(i)*wind(i)  !txl*cmm_lnd(i)    + txi*cmm_ice(i)    + txo*cmm_wat(i)
           chh(i)    = rho*cdq(i)*wind(i)  !txl*chh_lnd(i)    + txi*chh_ice(i)    + txo*chh_wat(i)
