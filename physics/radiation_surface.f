@@ -1,6 +1,3 @@
-! DH*
-! TODO - UPDATE "DOCUMENTATION" / argument descriptions for individual routines
-! *DH
 !>  \file radiation_surface.f
 !!  This file contains routines that set up surface albedo for SW
 !!  radiation and surface emissivity for LW radiation.
@@ -468,12 +465,12 @@
            endif
          endif
 
-         fsno1 = f_one - fsno0 ! snow-free fraction (land or ice), 1-sea
+         fsno1 = f_one - fsno0                 ! snow-free fraction (land or ice), 1-sea
          flnd0 = min(f_one, facsf(i)+facwf(i)) ! 1-land, 0-sea/ice
-         fsea0 = max(f_zero, f_one-flnd0)! ! 1-sea/ice, 0-land
-         fsno  = fsno0 ! snow cover, >0 - land/ice
-         fsea  = fsea0 * fsno1 ! 1-sea/ice, 0-land
-         flnd  = flnd0 * fsno1 ! <=1-land,0-sea/ice
+         fsea0 = max(f_zero, f_one-flnd0)      ! 1-sea/ice, 0-land
+         fsno  = fsno0                         ! snow cover, >0 - land/ice
+         fsea  = fsea0 * fsno1                 ! 1-sea/ice, 0-land
+         flnd  = flnd0 * fsno1                 ! <=1-land,0-sea/ice
 
 !>  - Calculate diffused sea surface albedo.
 
@@ -694,8 +691,7 @@
 !!                  or -pi -> +pi ranges
 !!\param xlat      (IMAX), latitude  in radiance, default to pi/2 ->
 !!                  -pi/2 range, otherwise see in-line comment
-!!\param lanfrac   (IMAX), 
-!!!\parction of grid that is land
+!!\param landfrac  (IMAX), fraction of grid that is land
 !!\param snowf     (IMAX), snow depth water equivalent in mm
 !!\param sncovr    (IMAX), snow cover over land
 !!\param zorlf     (IMAX), surface roughness in cm
@@ -731,7 +727,7 @@
 !     xlat  (IMAX)  - latitude  in radiance, default to pi/2 -> -pi/2   !
 !                     range, otherwise see in-line comment              !
 !     slmsk (IMAX)  - sea(0),land(1),ice(2) mask on fcst model grid     !
-!     landfrac (IMAX) - fraction of land on on fcst model grid          !
+!     landfrac  (IMAX) - fraction of land on on fcst model grid         !
 !     snowf (IMAX)  - snow depth water equivalent in mm                 !
 !     sncovr(IMAX)  - ialbflg=1: snow cover over land in fraction       !
 !     sncovr_ice(IMAX) - snow cover over ice in fraction                !
@@ -788,7 +784,9 @@
 
       real (kind=kind_phys) :: dltg, hdlt, tmp1, tmp2,                  &
      &      asnow, argh, hrgh, fsno
-
+#if 1
+      real (kind=kind_phys) :: fsno0, fsno1
+#endif
       real (kind=kind_phys) :: sfcemis_land, sfcemis_ice
 
 !  ---  reference emiss value for diff surface emiss index
@@ -813,6 +811,7 @@
 
         lab_do_IMAX : do i = 1, IMAX
 
+#if 0
           if (fracl(i) < epsln) then                    ! no land
             if ( abs(fraco(i)-f_one) < epsln ) then     ! open water point
               sfcemis(i) = emsref(1)
@@ -822,7 +821,15 @@
             !-- fractional sea ice
               sfcemis(i) = fraco(i)*emsref(1) + fraci(i)*emsref(7)
             endif
+#else
+          if ( nint(slmsk(i)) == 0 ) then          ! sea point
 
+            sfcemis(i) = emsref(1)
+
+          else if ( nint(slmsk(i)) == 2 ) then     ! sea-ice
+
+            sfcemis(i) = emsref(7)
+#endif
           else                                     ! land or fractional grid
 
 !  ---  map grid in longitude direction
@@ -856,7 +863,7 @@
 
             idx = max( 2, idxems(i2,j2) )
             if ( idx >= 7 ) idx = 2
-
+#if 0
             if (abs(fracl(i)-f_one) < epsln) then
               sfcemis(i) = emsref(idx)
             else
@@ -864,11 +871,15 @@
      &                                       + fraci(i)*emsref(7)
             endif
             semisbase(i) = sfcemis(i)
+#else
+            sfcemis(i) = emsref(idx)
+#endif
 
           endif   ! end if_slmsk_block
 
-!> -# Check for snow covered area.
+!> - Check for snow covered area.
 
+#if 0
           if ( sncovr(i) > f_zero ) then ! input land/ice area snow cover
 
             fsno = sncovr(i)
@@ -886,6 +897,27 @@
             endif
 
           endif                                          ! end if_ialbflg
+#else
+          if ( ialbflg==1 .and. nint(slmsk(i))==1 ) then ! input land area snow cover
+
+            fsno0 = sncovr(i)
+            fsno1 = f_one - fsno0
+            sfcemis(i) = sfcemis(i)*fsno1 + emsref(8)*fsno0
+
+          else                                           ! compute snow cover from snow depth
+            if ( snowf(i) > f_zero ) then
+              asnow = 0.02*snowf(i)
+              argh  = min(0.50, max(.025, 0.01*zorlf(i)))
+              hrgh  = min(f_one, max(0.20, 1.0577-1.1538e-3*hprif(i) ) )
+              fsno0 = asnow / (argh + asnow) * hrgh
+              if (nint(slmsk(i)) == 0 .and. tsknf(i) > 271.2)           &
+     &                               fsno0=f_zero
+              fsno1 = f_one - fsno0
+              sfcemis(i) = sfcemis(i)*fsno1 + emsref(8)*fsno0
+            endif
+
+          endif                                          ! end if_ialbflg
+#endif
 
         enddo  lab_do_IMAX
 
