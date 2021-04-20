@@ -24,7 +24,7 @@
   intent = in
   optional = F   
 [doSWrad]
-  standard_name = flag_to_calc_sw
+  standard_name = flag_for_calling_shortwave_radiation
   long_name = logical flags for sw radiation calls
   units = flag
   dimensions = ()
@@ -32,7 +32,7 @@
   intent = in
   optional = F
 [doLWrad]
-  standard_name = flag_to_calc_lw
+  standard_name = flag_for_calling_longwave_radiation
   long_name = logical flags for lw radiation calls
   units = flag
   dimensions = ()
@@ -40,7 +40,7 @@
   intent = in
   optional = F    
 [yearlen]
-  standard_name = number_of_days_in_year
+  standard_name = number_of_days_in_current_year
   long_name = number of days in a year
   units = days
   dimensions = ()
@@ -48,7 +48,7 @@
   intent = in
   optional = F  
 [julian]
-  standard_name = julian_day
+  standard_name = forecast_julian_day
   long_name = julian day
   units = days
   dimensions = ()
@@ -57,8 +57,8 @@
   intent = in
   optional = F   
 [lat]
-  standard_name = latitude
-  long_name = latitude
+  standard_name = latitude_in_radians
+  long_name = latitude_in_radians
   units = radian
   dimensions = (horizontal_loop_extent)
   type = real
@@ -202,7 +202,7 @@
   kind = kind_phys
   optional = F
 [cld_frac]
-  standard_name = total_cloud_fraction
+  standard_name = cloud_area_fracton
   long_name = layer total cloud fraction
   units = frac
   dimensions = (horizontal_loop_extent,vertical_dimension)

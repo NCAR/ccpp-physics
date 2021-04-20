@@ -16,7 +16,7 @@
   intent = in
   optional = F
 [isot]
-  standard_name = soil_type_dataset_choice
+  standard_name = control_for_soil_type_dataset
   long_name = soil type dataset choice
   units = index
   dimensions = ()
@@ -24,7 +24,7 @@
   intent = in
   optional = F
 [ivegsrc]
-  standard_name = vegetation_type_dataset_choice
+  standard_name = control_for_vegetation_dataset
   long_name = land use dataset choice
   units = index
   dimensions = ()
@@ -32,7 +32,7 @@
   intent = in
   optional = F
 [nlunit]
-  standard_name = iounit_namelist
+  standard_name = iounit_of_namelist
   long_name = fortran unit number for file opens
   units = none
   dimensions = ()
@@ -108,7 +108,7 @@
   intent = in
   optional = F
 [km]
-  standard_name = soil_vertical_dimension
+  standard_name = vertical_dimension_of_soil
   long_name = soil vertical layer dimension
   units = count
   dimensions = ()
@@ -197,7 +197,7 @@
   intent = in
   optional = F
 [q1]
-  standard_name = water_vapor_specific_humidity_at_lowest_model_layer
+  standard_name = specific_humidity_at_lowest_model_layer
   long_name = 1st model layer specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent)
@@ -240,7 +240,7 @@
   intent = in
   optional = F
 [dlwflx]
-  standard_name = surface_downwelling_longwave_flux_absorbed_by_ground_over_land
+  standard_name = surface_downwelling_longwave_flux_absorbed_by_surface_over_land
   long_name = total sky surface downward longwave flux absorbed by the ground over land
   units = W m-2
   dimensions = (horizontal_loop_extent)
@@ -267,7 +267,7 @@
   intent = in
   optional = F
 [delt]
-  standard_name = time_step_for_dynamics
+  standard_name = timestep_for_dynamics
   long_name = dynamics time step
   units = s
   dimensions = ()
@@ -330,7 +330,7 @@
   intent = in
   optional = F
 [land]
-  standard_name = flag_nonzero_land_surface_fraction
+  standard_name = flag_for_nonzero_land_surface_fraction
   long_name = flag indicating presence of some land surface area fraction
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -355,7 +355,7 @@
   intent = in
   optional = F
 [shdmin]
-  standard_name = minimum_vegetation_area_fraction
+  standard_name = min_vegetation_area_fraction
   long_name = min fractional coverage of green veg
   units = frac
   dimensions = (horizontal_loop_extent)
@@ -364,7 +364,7 @@
   intent = in
   optional = F
 [shdmax]
-  standard_name = maximum_vegetation_area_fraction
+  standard_name = max_vegetation_area_fraction
   long_name = max fractnl cover of green veg (not used)
   units = frac
   dimensions = (horizontal_loop_extent)
@@ -373,7 +373,7 @@
   intent = in
   optional = F
 [snoalb]
-  standard_name = upper_bound_on_max_albedo_over_deep_snow
+  standard_name = upper_bound_of_max_albedo_assuming_deep_snow
   long_name = upper bound on max albedo over deep snow
   units = frac
   dimensions = (horizontal_loop_extent)
@@ -382,7 +382,7 @@
   intent = in
   optional = F
 [sfalb]
-  standard_name = surface_diffused_shortwave_albedo
+  standard_name = surface_albedo_for_diffused_shortwave_on_radiation_timestep
   long_name = mean surface diffused shortwave albedo
   units = frac
   dimensions = (horizontal_loop_extent)
@@ -407,7 +407,7 @@
   intent = in
   optional = F
 [lheatstrg]
-  standard_name = flag_for_canopy_heat_storage
+  standard_name = flag_for_canopy_heat_storage_in_land_surface_scheme
   long_name = flag for canopy heat storage parameterization
   units = flag
   dimensions = ()
@@ -415,7 +415,7 @@
   intent = in
   optional = F
 [isot]
-  standard_name = soil_type_dataset_choice
+  standard_name = control_for_soil_type_dataset
   long_name = soil type dataset choice
   units = index
   dimensions = ()
@@ -423,7 +423,7 @@
   intent = in
   optional = F
 [ivegsrc]
-  standard_name = vegetation_type_dataset_choice
+  standard_name = control_for_vegetation_dataset
   long_name = land use dataset choice
   units = index
   dimensions = ()
@@ -467,7 +467,7 @@
   intent = in
   optional = F
 [weasd]
-  standard_name = water_equivalent_accumulated_snow_depth_over_land
+  standard_name = lwe_thickness_of_surface_snow_amount_over_land
   long_name = water equiv of acc snow depth over land
   units = mm
   dimensions = (horizontal_loop_extent)
@@ -476,7 +476,7 @@
   intent = inout
   optional = F
 [snwdph]
-  standard_name = surface_snow_thickness_water_equivalent_over_land
+  standard_name = lwe_surface_snow_over_land
   long_name = water equivalent snow depth over land
   units = mm
   dimensions = (horizontal_loop_extent)
@@ -503,7 +503,7 @@
   intent = inout
   optional = F
 [srflag]
-  standard_name = flag_for_precipitation_type
+  standard_name = precipitation_type
   long_name = flag for snow or rain precipitation
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -512,10 +512,10 @@
   intent = inout
   optional = F
 [smc]
-  standard_name = volume_fraction_of_soil_moisture
+  standard_name = volume_fraction_of_condensed_water_in_soil
   long_name = volumetric fraction of soil moisture
   units = frac
-  dimensions = (horizontal_loop_extent,soil_vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension_of_soil)
   type = real
   kind = kind_phys
   intent = inout
@@ -524,16 +524,16 @@
   standard_name = soil_temperature
   long_name = soil temperature
   units = K
-  dimensions = (horizontal_loop_extent,soil_vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension_of_soil)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [slc]
-  standard_name = volume_fraction_of_unfrozen_soil_moisture
+  standard_name = volume_fraction_of_unfrozen_water_in_soil
   long_name = volume fraction of unfrozen soil moisture
   units = frac
-  dimensions = (horizontal_loop_extent,soil_vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension_of_soil)
   type = real
   kind = kind_phys
   intent = inout
@@ -638,7 +638,7 @@
   intent = inout
   optional = F
 [runoff]
-  standard_name = surface_runoff_flux
+  standard_name = cumulative_surface_runoff_amount_flux
   long_name = surface runoff flux
   units = kg m-2 s-1
   dimensions = (horizontal_loop_extent)
@@ -665,7 +665,7 @@
   intent = inout
   optional = F
 [evbs]
-  standard_name = soil_upward_latent_heat_flux
+  standard_name = upward_latent_heat_flux_in_soil
   long_name = soil upward latent heat flux
   units = W m-2
   dimensions = (horizontal_loop_extent)
@@ -674,7 +674,7 @@
   intent = inout
   optional = F
 [evcw]
-  standard_name = canopy_upward_latent_heat_flux
+  standard_name = upward_latent_heat_flux_in_canopy
   long_name = canopy upward latent heat flux
   units = W m-2
   dimensions = (horizontal_loop_extent)
@@ -683,7 +683,7 @@
   intent = inout
   optional = F
 [sbsno]
-  standard_name = snow_deposition_sublimation_upward_latent_heat_flux
+  standard_name = surface_upward_latent_heat_flux_due_to_snow_deposition_sublimation
   long_name = latent heat flux from snow depo/subl
   units = W m-2
   dimensions = (horizontal_loop_extent)

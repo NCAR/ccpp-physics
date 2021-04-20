@@ -26,7 +26,7 @@
   intent = in
   optional = F
 [lm]
-  standard_name = number_of_vertical_layers_for_radiation_calculations
+  standard_name = vertical_dimension_for_radiation
   long_name = number of vertical layers for radiation calculation
   units = count
   dimensions = ()
@@ -50,7 +50,7 @@
   intent = in
   optional = F
 [n_var_lndp]
-  standard_name = number_of_land_surface_variables_perturbed
+  standard_name = number_of_perturbed_land_surface_variables
   long_name = number of land surface variables perturbed
   units = count
   dimensions = ()
@@ -58,7 +58,7 @@
   intent = in
   optional = F
 [imfdeepcnv]
-  standard_name = flag_for_mass_flux_deep_convection_scheme
+  standard_name = control_for_deep_convection_scheme
   long_name = flag for mass-flux deep convection scheme
   units = flag
   dimensions = ()
@@ -66,7 +66,7 @@
   intent = in
   optional = F
 [imfdeepcnv_gf]
-  standard_name = flag_for_gf_deep_convection_scheme
+  standard_name = identifier_for_grell_freitas_deep_convection
   long_name = flag for Grell-Freitas deep convection scheme
   units = flag
   dimensions = ()
@@ -82,7 +82,7 @@
   intent = in
   optional = F
 [ncnd]
-  standard_name = number_of_cloud_condensate_types
+  standard_name = number_of_condensate_species
   long_name = number of cloud condensate types
   units = count
   dimensions = ()
@@ -98,7 +98,7 @@
   intent = in
   optional = F
 [num_p3d]
-  standard_name = array_dimension_of_3d_arrays_for_microphysics
+  standard_name = number_of_microphysics_varaibles_in_xyz_dimensioned_restart_array
   long_name = number of 3D arrays needed for microphysics
   units = count
   dimensions = ()
@@ -106,7 +106,7 @@
   intent = in
   optional = F
 [npdf3d]
-  standard_name = number_of_3d_arrays_associated_with_pdf_based_clouds
+  standard_name = number_of_pdf_based_variables_in_xyz_dimensioned_restart_array
   long_name = number of 3d arrays associated with pdf based clouds/mp
   units = count
   dimensions = ()
@@ -114,7 +114,7 @@
   intent = in
   optional = F
 [ncnvcld3d]
-  standard_name = number_of_convective_3d_cloud_fields
+  standard_name = number_of_convective_cloud_variables_in_xyz_dimensioned_restart_array
   long_name = number of convective 3d clouds fields
   units = count
   dimensions = ()
@@ -122,7 +122,7 @@
   intent = in
   optional = F
 [ntqv]
-  standard_name = index_for_water_vapor
+  standard_name = index_of_specific_humidity_in_tracer_concentration_array
   long_name = tracer index for water vapor (specific humidity)
   units = index
   dimensions = ()
@@ -130,7 +130,7 @@
   intent = in
   optional = F
 [ntcw]
-  standard_name = index_for_liquid_cloud_condensate
+  standard_name = index_of_cloud_liquid_water_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for cloud condensate (or liquid water)
   units = index
   dimensions = ()
@@ -138,7 +138,7 @@
   intent = in
   optional = F
 [ntiw]
-  standard_name = index_for_ice_cloud_condensate
+  standard_name = index_of_cloud_ice_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for  ice water
   units = index
   dimensions = ()
@@ -146,7 +146,7 @@
   intent = in
   optional = F
 [ntlnc]
-  standard_name = index_for_liquid_cloud_number_concentration
+  standard_name = index_of_mass_number_concentration_of_cloud_droplets_in_tracer_concentration_array
   long_name = tracer index for liquid number concentration
   units = index
   dimensions = ()
@@ -154,7 +154,7 @@
   intent = in
   optional = F
 [ntinc]
-  standard_name = index_for_ice_cloud_number_concentration
+  standard_name = index_of_mass_number_concentration_of_cloud_ice_in_tracer_concentration_array
   long_name = tracer index for ice    number concentration
   units = index
   dimensions = ()
@@ -170,7 +170,7 @@
   intent = in
   optional = F
 [ntrw]
-  standard_name = index_for_rain_water
+  standard_name = index_of_rain_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for rain water
   units = index
   dimensions = ()
@@ -178,7 +178,7 @@
   intent = in
   optional = F
 [ntsw]
-  standard_name = index_for_snow_water
+  standard_name = index_of_snow_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for snow water
   units = index
   dimensions = ()
@@ -186,7 +186,7 @@
   intent = in
   optional = F
 [ntgl]
-  standard_name = index_for_graupel
+  standard_name = index_of_graupel_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for graupel
   units = index
   dimensions = ()
@@ -194,7 +194,7 @@
   intent = in
   optional = F
 [ntwa]
-  standard_name = index_for_water_friendly_aerosols
+  standard_name = index_of_mass_number_concentration_of_hygroscopic_aerosols_in_tracer_concentration_array
   long_name = tracer index for water friendly aerosol
   units = index
   dimensions = ()
@@ -202,7 +202,7 @@
   intent = in
   optional = F
 [ntoz]
-  standard_name = index_for_ozone
+  standard_name = index_of_ozone_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for ozone mixing ratio
   units = index
   dimensions = ()
@@ -210,7 +210,7 @@
   intent = in
   optional = F
 [ntclamt]
-  standard_name = index_for_cloud_amount
+  standard_name = index_of_cloud_area_fraction_in_atmosphere_layer_in_tracer_concentration_array
   long_name = tracer index for cloud amount integer
   units = index
   dimensions = ()
@@ -218,7 +218,7 @@
   intent = in
   optional = F
 [nleffr]
-  standard_name = index_for_cloud_liquid_water_effective_radius
+  standard_name = index_of_cloud_liquid_water_effective_radius_in_xyz_dimensioned_restart_array
   long_name = the index of cloud liquid water effective radius in phy_f3d
   units = index
   dimensions = ()
@@ -226,7 +226,7 @@
   intent = in
   optional = F
 [nieffr]
-  standard_name = index_for_ice_effective_radius
+  standard_name = index_of_cloud_ice_effective_radius_in_xyz_dimensioned_restart_array
   long_name = the index of ice effective radius in phy_f3d
   units = index
   dimensions = ()
@@ -234,7 +234,7 @@
   intent = in
   optional = F
 [nseffr]
-  standard_name = index_for_snow_effective_radius
+  standard_name = index_of_snow_effective_radius_in_xyz_dimensioned_restart_array
   long_name = the index of snow effective radius in phy_f3d
   units = index
   dimensions = ()
@@ -242,7 +242,7 @@
   intent = in
   optional = F
 [lndp_type]
-  standard_name = index_for_stochastic_land_surface_perturbation_type
+  standard_name = control_for_stochastic_land_surface_perturbation
   long_name = index for stochastic land surface perturbations type
   units = index
   dimensions = ()
@@ -258,7 +258,7 @@
   intent = in
   optional = F
 [imp_physics]
-  standard_name = flag_for_microphysics_scheme
+  standard_name = control_for_microphysics_scheme
   long_name = choice of microphysics scheme
   units = flag
   dimensions = ()
@@ -266,7 +266,7 @@
   intent = in
   optional = F
 [imp_physics_thompson]
-  standard_name = flag_for_thompson_microphysics_scheme
+  standard_name = identifier_for_thompson_microphysics_scheme
   long_name = choice of Thompson microphysics scheme
   units = flag
   dimensions = ()
@@ -274,7 +274,7 @@
   intent = in
   optional = F
 [imp_physics_gfdl]
-  standard_name = flag_for_gfdl_microphysics_scheme
+  standard_name = identifier_for_gfdl_microphysics_scheme
   long_name = choice of GFDL microphysics scheme
   units = flag
   dimensions = ()
@@ -282,7 +282,7 @@
   intent = in
   optional = F
 [imp_physics_zhao_carr]
-  standard_name = flag_for_zhao_carr_microphysics_scheme
+  standard_name = identifier_for_zhao_carr_microphysics_scheme
   long_name = choice of Zhao-Carr microphysics scheme
   units = flag
   dimensions = ()
@@ -290,7 +290,7 @@
   intent = in
   optional = F
 [imp_physics_zhao_carr_pdf]
-  standard_name = flag_for_zhao_carr_pdf_microphysics_scheme
+  standard_name = identifier_for_zhao_carr_pdf_microphysics_scheme
   long_name = choice of Zhao-Carr microphysics scheme with PDF clouds
   units = flag
   dimensions = ()
@@ -298,7 +298,7 @@
   intent = in
   optional = F
 [imp_physics_mg]
-  standard_name = flag_for_morrison_gettelman_microphysics_scheme
+  standard_name = identifier_for_morrison_gettelman_microphysics_scheme
   long_name = choice of Morrison-Gettelman microphysics scheme
   units = flag
   dimensions = ()
@@ -306,7 +306,7 @@
   intent = in
   optional = F
 [imp_physics_wsm6]
-  standard_name = flag_for_wsm6_microphysics_scheme
+  standard_name = identifier_for_wsm6_microphysics_scheme
   long_name = choice of WSM6 microphysics scheme
   units = flag
   dimensions = ()
@@ -314,7 +314,7 @@
   intent = in
   optional = F
 [imp_physics_fer_hires]
-  standard_name = flag_for_fer_hires_microphysics_scheme
+  standard_name = identifier_for_fer_hires_microphysics_scheme
   long_name = choice of Ferrier-Aligo microphysics scheme
   units = flag
   dimensions = ()
@@ -322,7 +322,7 @@
   intent = in
   optional = F
 [julian]
-  standard_name = julian_day
+  standard_name = forecast_julian_day
   long_name = julian day
   units = days
   dimensions = ()
@@ -331,7 +331,7 @@
   intent = in
   optional = F
 [yearlen]
-  standard_name = number_of_days_in_year
+  standard_name = number_of_days_in_current_year
   long_name = number of days in a year
   units = days
   dimensions = ()
@@ -339,16 +339,16 @@
   intent = in
   optional = F
 [lndp_var_list]
-  standard_name = variables_to_be_perturbed_for_landperts
+  standard_name = land_surface_perturbation_variables
   long_name = variables to be perturbed for landperts
   units = none
-  dimensions =  (number_of_land_surface_variables_perturbed) 
+  dimensions =  (number_of_perturbed_land_surface_variables) 
   type = character
   kind = len=3
   intent = in
   optional = F
 [lsswr]
-  standard_name = flag_to_calc_sw
+  standard_name = flag_for_calling_shortwave_radiation
   long_name = logical flags for sw radiation calls
   units = flag
   dimensions = ()
@@ -356,7 +356,7 @@
   intent = in
   optional = F
 [lslwr]
-  standard_name = flag_to_calc_lw
+  standard_name = flag_for_calling_longwave_radiation
   long_name = logical flags for lw radiation calls
   units = flag
   dimensions = ()
@@ -372,7 +372,7 @@
   intent = in
   optional = F
 [lgfdlmprad]
-  standard_name = flag_for_GFDL_microphysics_radiation_interaction
+  standard_name = flag_for_gfdl_microphysics_radiation_interaction
   long_name = flag for GFDL microphysics-radiation interaction
   units = flag
   dimensions = ()
@@ -380,7 +380,7 @@
   intent = in
   optional = F
 [uni_cld]
-  standard_name = flag_for_uni_cld
+  standard_name = flag_for_shoc_cloud_area_fraction_for_radiation
   long_name = flag for uni_cld
   units = flag
   dimensions = ()
@@ -396,7 +396,7 @@
   intent = in
   optional = F
 [sppt_wts]
-  standard_name = weights_for_stochastic_sppt_perturbation
+  standard_name = sppt_weights_from_coupled_process
   long_name = weights for stochastic sppt perturbation
   units = none
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -422,7 +422,7 @@
   intent = in
   optional = F
 [do_mynnedmf]
-  standard_name = do_mynnedmf
+  standard_name = flag_for_mellor_yamada_nakanishi_niino_pbl_scheme
   long_name = flag to activate MYNN-EDMF
   units = flag
   dimensions = ()
@@ -430,7 +430,7 @@
   intent = in
   optional = F
 [lmfshal]
-  standard_name = flag_for_lmfshal
+  standard_name = flag_for_cloud_area_fraction_option_for_radiation
   long_name = flag for lmfshal
   units = flag
   dimensions = ()
@@ -446,7 +446,7 @@
   intent = in
   optional = F
 [fhswr]
-  standard_name = frequency_for_shortwave_radiation
+  standard_name = period_of_shortwave_radiation_calls
   long_name = frequency for shortwave radiation
   units = s
   dimensions = ()
@@ -455,7 +455,7 @@
   intent = in
   optional = F
 [fhlwr]
-  standard_name = frequency_for_longwave_radiation
+  standard_name = period_of_longwave_radiation_calls
   long_name = frequency for longwave radiation
   units = s
   dimensions = ()
@@ -464,7 +464,7 @@
   intent = in
   optional = F
 [solhr]
-  standard_name = forecast_hour_of_the_day
+  standard_name = forecast_utc_hour
   long_name = time in hours after 00z at the current timestep
   units = h
   dimensions = ()
@@ -473,7 +473,7 @@
   intent = in
   optional = F
 [sup]
-  standard_name = ice_supersaturation_threshold
+  standard_name = tunable_parameter_for_ice_supersaturation
   long_name = ice supersaturation parameter for PDF clouds
   units = none
   dimensions = ()
@@ -536,8 +536,8 @@
   intent = in
   optional = F
 [xlat_d]
-  standard_name = latitude_in_degree
-  long_name = latitude in degree north
+  standard_name = latitude_in_radians_in_degree
+  long_name = latitude_in_radians in degree north
   units = degree_north
   dimensions = (horizontal_loop_extent)
   type = real
@@ -545,8 +545,8 @@
   intent = in
   optional = F
 [xlat]
-  standard_name = latitude
-  long_name = latitude
+  standard_name = latitude_in_radians
+  long_name = latitude_in_radians
   units = radian
   dimensions = (horizontal_loop_extent)
   type = real
@@ -554,8 +554,8 @@
   intent = in
   optional = F
 [xlon]
-  standard_name = longitude
-  long_name = longitude
+  standard_name = longitude_in_radians
+  long_name = longitude_in_radians
   units = radian
   dimensions = (horizontal_loop_extent)
   type = real
@@ -590,7 +590,7 @@
   intent = in
   optional = F
 [slmsk]
-  standard_name = sea_land_ice_mask_real
+  standard_name = area_type
   long_name = landmask: sea/land/ice=0/1/2
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -635,7 +635,7 @@
   intent = in
   optional = F
 [sfc_wts]
-  standard_name = weights_for_stochastic_surface_physics_perturbation
+  standard_name = surface_stochastic_weights_from_coupled_process
   long_name = weights for stochastic surface physics perturbation
   units = none
   dimensions = (horizontal_loop_extent,number_of_surface_perturbations)
@@ -653,7 +653,7 @@
   intent = in
   optional = F
 [effrr_in]
-  standard_name = effective_radius_of_stratiform_cloud_rain_particle_in_um
+  standard_name = effective_radius_of_stratiform_cloud_rain_particle
   long_name = effective radius of cloud rain particle in micrometers
   units = um
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -662,7 +662,7 @@
   intent = in
   optional = F
 [cnvw_in]
-  standard_name = convective_cloud_water_mixing_ratio_in_phy_f3d
+  standard_name = convective_cloud_water_mixing_ratio_in_xyz_dimensioned_restart_array
   long_name = convective cloud water mixing ratio in the phy_f3d array
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -671,7 +671,7 @@
   intent = in
   optional = F
 [cnvc_in]
-  standard_name = convective_cloud_cover_in_phy_f3d
+  standard_name = convective_cloud_area_fraction_in_xyz_dimensioned_restart_array
   long_name = convective cloud cover in the phy_f3d array
   units = frac
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -689,7 +689,7 @@
   intent = in
   optional = F
 [aer_nm]
-  standard_name = aerosol_number_concentration_from_gocart_aerosol_climatology
+  standard_name = mass_number_concentration_of_aerosol_from_gocart_climatology
   long_name = GOCART aerosol climatology number concentration
   units = kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension,number_of_aerosol_tracers_MG)
@@ -698,7 +698,7 @@
   intent = in
   optional = F
 [dx]
-  standard_name = cell_size
+  standard_name = characteristic_grid_lengthscale
   long_name = relative dx for the grid cell
   units = m
   dimensions = (horizontal_loop_extent)
@@ -715,7 +715,7 @@
   intent = in
   optional = F
 [coszen]
-  standard_name = cosine_of_zenith_angle
+  standard_name = cosine_of_solar_zenith_angle_for_daytime_points_on_radiation_timestep
   long_name = mean cos of zenith angle over rad call period
   units = none
   dimensions = (horizontal_loop_extent)
@@ -724,7 +724,7 @@
   intent = inout
   optional = F
 [coszdg]
-  standard_name = daytime_mean_cosz_over_rad_call_period
+  standard_name = cosine_of_solar_zenith_angle_on_radiation_timestep
   long_name = daytime mean cosz over rad call period
   units = none
   dimensions = (horizontal_loop_extent)
@@ -733,7 +733,7 @@
   intent = inout
   optional = F
 [effrl_inout]
-  standard_name = effective_radius_of_stratiform_cloud_liquid_water_particle_in_um
+  standard_name = effective_radius_of_stratiform_cloud_liquid_water_particle
   long_name = eff. radius of cloud liquid water particle in micrometer
   units = um
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -742,7 +742,7 @@
   intent = inout
   optional = F
 [effri_inout]
-  standard_name = effective_radius_of_stratiform_cloud_ice_particle_in_um
+  standard_name = effective_radius_of_stratiform_cloud_ice_particle
   long_name = eff. radius of cloud ice water particle in micrometer
   units = um
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -751,7 +751,7 @@
   intent = inout
   optional = F
 [effrs_inout]
-  standard_name = effective_radius_of_stratiform_cloud_snow_particle_in_um
+  standard_name = effective_radius_of_stratiform_cloud_snow_particle
   long_name = effective radius of cloud snow particle in micrometers
   units = um
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -760,7 +760,7 @@
   intent = inout
   optional = F
 [clouds1]
-  standard_name = total_cloud_fraction
+  standard_name = cloud_area_fracton
   long_name = layer total cloud fraction
   units = frac
   dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
@@ -778,7 +778,7 @@
   intent = inout
   optional = F
 [clouds3]
-  standard_name = mean_effective_radius_for_liquid_cloud
+  standard_name = effective_radius_of_cloud_liquid_water_particles_in_um
   long_name = mean effective radius for liquid cloud
   units = um
   dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
@@ -796,7 +796,7 @@
   intent = inout
   optional = F
 [clouds5]
-  standard_name = mean_effective_radius_for_ice_cloud
+  standard_name = effective_radius_of_ice_liquid_water_particles_in_um
   long_name = mean effective radius for ice cloud
   units = um
   dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
@@ -845,7 +845,7 @@
   intent = out
   optional = F
 [raddt]
-  standard_name = time_step_for_radiation
+  standard_name = timestep_for_radiation
   long_name = radiation time step
   units = s
   dimensions = ()
@@ -881,7 +881,7 @@
   intent = out
   optional = F
 [alb1d]
-  standard_name = surface_albedo_perturbation
+  standard_name = perturbation_of_surface_albedo
   long_name = surface albedo perturbation
   units = frac
   dimensions = (horizontal_loop_extent)
@@ -890,7 +890,7 @@
   intent = out
   optional = F
 [delp]
-  standard_name = layer_pressure_thickness_for_radiation
+  standard_name = layer_pressure_thickness
   long_name = layer pressure thickness on radiation levels
   units = hPa
   dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
@@ -908,7 +908,7 @@
   intent = out
   optional = F
 [plvl]
-  standard_name = air_pressure_at_interface_for_radiation_in_hPa
+  standard_name = air_pressure_at_interface_in_hPa
   long_name = air pressure at vertical interface for radiation calculation
   units = hPa
   dimensions = (horizontal_loop_extent,adjusted_vertical_level_dimension_for_radiation)
@@ -917,7 +917,7 @@
   intent = out
   optional = F
 [plyr]
-  standard_name = air_pressure_at_layer_for_radiation_in_hPa
+  standard_name = air_pressure_in_hPa
   long_name = air pressure at vertical layer for radiation calculation
   units = hPa
   dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
@@ -944,7 +944,7 @@
   intent = out
   optional = F
 [qlyr]
-  standard_name = water_vapor_specific_humidity_at_layer_for_radiation
+  standard_name = specific_humidity_at_layer_for_radiation
   long_name = water vapor specific humidity at vertical layer for radiation calculation
   units = kg kg-1
   dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
@@ -953,7 +953,7 @@
   intent = out
   optional = F
 [olyr]
-  standard_name = ozone_concentration_at_layer_for_radiation
+  standard_name = ozone_concentration
   long_name = ozone concentration
   units = kg kg-1
   dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
@@ -1070,7 +1070,7 @@
   intent = out
   optional = F
 [clouds7]
-  standard_name = mean_effective_radius_for_rain_drop
+  standard_name = effective_radius_of_cloud_rain_particles_in_um
   long_name = mean effective radius for rain drop
   units = um
   dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
@@ -1088,7 +1088,7 @@
   intent = out
   optional = F
 [clouds9]
-  standard_name = mean_effective_radius_for_snow_flake
+  standard_name = effective_radius_of_cloud_snow_particles_in_um
   long_name = mean effective radius for snow flake
   units = um
   dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
@@ -1097,7 +1097,7 @@
   intent = out
   optional = F
 [cldsa]
-  standard_name = cloud_area_fraction_for_radiation
+  standard_name = cloud_area_fraction_in_atmosphere_layer
   long_name = fraction of clouds for low, middle,high, total and BL
   units = frac
   dimensions = (horizontal_loop_extent,5)

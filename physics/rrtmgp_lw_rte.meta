@@ -9,7 +9,7 @@
   name = rrtmgp_lw_rte_run
   type = scheme
 [doLWrad]
-  standard_name = flag_to_calc_lw
+  standard_name = flag_for_calling_longwave_radiation
   long_name = logical flags for lw radiation calls
   units = flag
   dimensions = ()
@@ -17,7 +17,7 @@
   intent = in
   optional = F
 [doLWclrsky]
-  standard_name = flag_for_output_of_longwave_heating_rate
+  standard_name = flag_for_output_of_tendency_of_air_temperature_due_to_longwave_heating_on_radiation_timestep_assuming_clear_sky
   long_name = flag to output lw heating rate (Radtend%lwhc)
   units = flag
   dimensions = ()
@@ -25,7 +25,7 @@
   intent = in
   optional = F  
 [use_LW_jacobian]
-  standard_name = flag_to_calc_RRTMGP_LW_jacobian
+  standard_name = flag_for_rrtmgp_longwave_jacobian
   long_name = logical flag to control RRTMGP LW calculation
   units = flag
   dimensions = ()
@@ -57,7 +57,7 @@
   intent = in
   optional = F
 [nGauss_angles]
-  standard_name = number_of_angles_used_in_gaussian_quadrature
+  standard_name = number_of_gaussian_quadrature_angles_for_radiation
   long_name = Number of angles used in Gaussian quadrature
   units = count
   dimensions =  ()
@@ -77,7 +77,7 @@
   standard_name = surface_emissivity_in_each_RRTMGP_LW_band
   long_name = surface emissivity in each RRTMGP LW band
   units = none
-  dimensions = (number_of_lw_bands_rrtmgp,horizontal_loop_extent)
+  dimensions = (number_of_longwave_bands,horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -124,7 +124,7 @@
   intent = inout
   optional = F
 [fluxlwDOWN_allsky]
-  standard_name = RRTMGP_lw_flux_profile_downward_allsky
+  standard_name = RRTMGP_longwave_flux_downward_allsky
   long_name = RRTMGP downward longwave all-sky flux profile
   units = W m-2
   dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)

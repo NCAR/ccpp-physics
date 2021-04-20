@@ -9,7 +9,7 @@
   name = rrtmgp_sw_rte_run
   type = scheme
 [doSWrad]
-  standard_name = flag_to_calc_sw
+  standard_name = flag_for_calling_shortwave_radiation
   long_name = flag to calculate SW irradiances
   units = flag
   dimensions = ()
@@ -17,7 +17,7 @@
   intent = in
   optional = F
 [doSWclrsky]
-  standard_name = flag_for_output_of_shortwave_heating_rate
+  standard_name = flag_for_output_of_tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_timestep_assuming_clear_sky
   long_name = flag to output sw heating rate (Radtend%swhc)
   units = flag
   dimensions = ()
@@ -41,7 +41,7 @@
   intent = in
   optional = F
 [nday]
-  standard_name = daytime_points_dimension
+  standard_name = number_of_daytime_points
   long_name = daytime points dimension
   units = count
   dimensions = ()
@@ -57,7 +57,7 @@
   intent = in
   optional = F
 [coszen]
-  standard_name = cosine_of_zenith_angle
+  standard_name = cosine_of_solar_zenith_angle_for_daytime_points_on_radiation_timestep
   long_name = mean cos of zenith angle over rad call period
   units = none
   dimensions = (horizontal_loop_extent)
@@ -120,7 +120,7 @@
   standard_name = surface_albedo_nearIR_direct
   long_name = near-IR (direct) surface albedo (sfc_alb_nir_dir)
   units = none
-  dimensions = (number_of_sw_bands_rrtmgp,horizontal_loop_extent)
+  dimensions = (number_of_shortwave_bands,horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -129,7 +129,7 @@
   standard_name = surface_albedo_nearIR_diffuse
   long_name = near-IR (diffuse) surface albedo (sfc_alb_nir_dif) 
   units = none
-  dimensions = (number_of_sw_bands_rrtmgp,horizontal_loop_extent)
+  dimensions = (number_of_shortwave_bands,horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -138,7 +138,7 @@
   standard_name =  surface_albedo_uvvis_dir
   long_name = UVVIS (direct) surface albedo (sfc_alb_uvvis_dir)
   units = none
-  dimensions = (number_of_sw_bands_rrtmgp,horizontal_loop_extent)
+  dimensions = (number_of_shortwave_bands,horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -147,7 +147,7 @@
   standard_name =  surface_albedo_uvvis_dif
   long_name = UVVIS (diffuse) surface albedo (sfc_alb_uvvis_dif)
   units = none
-  dimensions = (number_of_sw_bands_rrtmgp,horizontal_loop_extent)
+  dimensions = (number_of_shortwave_bands,horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -156,7 +156,7 @@
   standard_name = toa_incident_sw_flux_by_spectral_point
   long_name = TOA shortwave incident flux at each spectral points
   units = W m-2
-  dimensions = (horizontal_loop_extent,number_of_sw_spectral_points_rrtmgp)
+  dimensions = (horizontal_loop_extent,number_of_shortwave_spectral_points)
   type = real
   kind = kind_phys
   intent = in

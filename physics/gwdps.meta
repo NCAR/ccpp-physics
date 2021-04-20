@@ -78,7 +78,7 @@
   intent = in
   optional = F
 [q1]
-  standard_name = water_vapor_specific_humidity
+  standard_name = specific_humidity
   long_name = mid-layer specific humidity of water vapor
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -149,7 +149,7 @@
   intent = in
   optional = F
 [deltim]
-  standard_name = time_step_for_physics
+  standard_name = timestep_for_physics
   long_name = physics time step
   units = s
   dimensions = ()
@@ -238,7 +238,7 @@
   intent = inout
   optional = F
 [dusfc]
-  standard_name = instantaneous_x_stress_due_to_gravity_wave_drag
+  standard_name = x_stress_due_to_gravity_wave_drag
   long_name = zonal surface stress due to orographic gravity wave drag
   units = Pa
   dimensions = (horizontal_loop_extent)
@@ -247,7 +247,7 @@
   intent = out
   optional = F
 [dvsfc]
-  standard_name = instantaneous_y_stress_due_to_gravity_wave_drag
+  standard_name = y_stress_due_to_gravity_wave_drag
   long_name = meridional surface stress due to orographic gravity wave drag
   units = Pa
   dimensions = (horizontal_loop_extent)
@@ -308,7 +308,7 @@
   intent = in
   optional = F
 [cdmbgwd]
-  standard_name = multiplication_factors_for_mountain_blocking_and_orographic_gravity_wave_drag
+  standard_name = multiplicative_tunable_parameters_for_mountain_blocking_and_orographic_gravity_wave_drag
   long_name = multiplic. factors for (1) mountain blocking drag coeff. and (2) ref. level orographic gravity wave drag
   units = none
   dimensions = (4)

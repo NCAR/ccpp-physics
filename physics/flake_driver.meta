@@ -78,7 +78,7 @@
   intent = in
   optional = F
 [q1]
-  standard_name = water_vapor_specific_humidity_at_lowest_model_layer
+  standard_name = specific_humidity_at_lowest_model_layer
   long_name = water vapor specific humidity at lowest model layer
   units = kg kg-1
   dimensions = (horizontal_loop_extent)
@@ -96,7 +96,7 @@
   intent = in
   optional = F
 [dlwflx]
-  standard_name = surface_downwelling_longwave_flux_absorbed_by_ground_over_ocean
+  standard_name = surface_downwelling_longwave_flux_absorbed_by_surface_over_ocean
   long_name = total sky surface downward longwave flux absorbed by the ground over ocean
   units = W m-2
   dimensions = (horizontal_loop_extent)
@@ -114,7 +114,7 @@
   intent = in
   optional = F
 [weasd]
-  standard_name = water_equivalent_accumulated_snow_depth_over_ocean
+  standard_name = lwe_thickness_of_surface_snow_amount_over_ocean
   long_name = water equiv of acc snow depth over ocean
   units = mm
   dimensions = (horizontal_loop_extent)
@@ -132,7 +132,7 @@
   intent = in
   optional = F
 [lake]
-  standard_name = flag_nonzero_lake_surface_fraction
+  standard_name = flag_for_nonzero_lake_surface_fraction
   long_name = flag indicating presence of some lake surface area fraction
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -140,8 +140,8 @@
   intent = in
   optional = F
 [xlat]
-  standard_name = latitude
-  long_name = latitude
+  standard_name = latitude_in_radians
+  long_name = latitude_in_radians
   units = radian
   dimensions = (horizontal_loop_extent)
   type = real
@@ -149,7 +149,7 @@
   intent = in
   optional = F
 [delt]
-  standard_name = time_step_for_dynamics
+  standard_name = timestep_for_dynamics
   long_name = dynamics time step
   units = s
   dimensions = ()
@@ -167,8 +167,8 @@
   intent = in
   optional = F
 [elev]
-  standard_name = orography
-  long_name = orography
+  standard_name = height_above_mean_sea_level
+  long_name = height_above_mean_sea_level
   units = m
   dimensions = (horizontal_loop_extent)
   type = real
@@ -176,7 +176,7 @@
   intent = in
   optional = F
 [wet]
-  standard_name = flag_nonzero_wet_surface_fraction
+  standard_name = flag_for_nonzero_wet_surface_fraction
   long_name = flag indicating presence of some ocean or lake surface area fraction
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -192,7 +192,7 @@
   intent = in
   optional = F
 [yearlen]
-  standard_name = number_of_days_in_year
+  standard_name = number_of_days_in_current_year
   long_name = number of days in a year
   units = days
   dimensions = ()
@@ -200,7 +200,7 @@
   intent = in
   optional = F
 [julian]
-  standard_name = julian_day
+  standard_name = forecast_julian_day
   long_name = julian day
   units = days
   dimensions = ()
@@ -217,7 +217,7 @@
   intent = in
   optional = F
 [snwdph]
-  standard_name = surface_snow_thickness_water_equivalent_over_ocean
+  standard_name = lwe_surface_snow_over_ocean
   long_name = water equivalent snow depth over ocean
   units = mm
   dimensions = (horizontal_loop_extent)
@@ -244,7 +244,7 @@
   intent = in
   optional = F
 [fice]
-  standard_name = sea_ice_concentration
+  standard_name = sea_ice_area_fraction_in_sea_water
   long_name = ice fraction over open water
   units = frac
   dimensions = (horizontal_loop_extent)

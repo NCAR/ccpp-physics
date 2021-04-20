@@ -16,7 +16,7 @@
   intent = in
   optional = F
 [lslwr]
-  standard_name = flag_to_calc_lw
+  standard_name = flag_for_calling_longwave_radiation
   long_name = logical flags for lw radiation calls
   units = flag
   dimensions = ()
@@ -24,8 +24,8 @@
   intent = in
   optional = F
 [xlat]
-  standard_name = latitude
-  long_name = latitude
+  standard_name = latitude_in_radians
+  long_name = latitude_in_radians
   units = radian
   dimensions = (horizontal_loop_extent)
   type = real
@@ -33,8 +33,8 @@
   intent = in
   optional = F
 [xlon]
-  standard_name = longitude
-  long_name = longitude
+  standard_name = longitude_in_radians
+  long_name = longitude_in_radians
   units = radian
   dimensions = (horizontal_loop_extent)
   type = real
@@ -42,7 +42,7 @@
   intent = in
   optional = F
 [slmsk]
-  standard_name = sea_land_ice_mask_real
+  standard_name = area_type
   long_name = landmask: sea/land/ice=0/1/2
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -51,7 +51,7 @@
   intent = in
   optional = F
 [snowd]
-  standard_name = surface_snow_thickness_water_equivalent
+  standard_name = lwe_surface_snow
   long_name = water equivalent snow depth
   units = mm
   dimensions = (horizontal_loop_extent)

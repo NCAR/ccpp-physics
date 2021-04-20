@@ -16,7 +16,7 @@
   intent = in
   optional = F
 [cgwf]
-  standard_name = multiplication_factors_for_convective_gravity_wave_drag
+  standard_name = tunable_parameters_for_convective_gravity_wave_drag
   long_name = multiplication factors for convective gravity wave drag
   units = none
   dimensions = (2)
@@ -25,7 +25,7 @@
   intent = in
   optional = F
 [dx]
-  standard_name = cell_size
+  standard_name = characteristic_grid_lengthscale
   long_name = grid size in zonal direction
   units = m
   dimensions = (horizontal_loop_extent)
@@ -94,7 +94,7 @@
   intent = in
   optional = F
 [dtp]
-  standard_name = time_step_for_physics
+  standard_name = timestep_for_physics
   long_name = physics time step
   units = s
   dimensions = ()
@@ -103,7 +103,7 @@
   intent = in
   optional = F
 [gt0]
-  standard_name = air_temperature_updated_by_physics
+  standard_name = air_temperature_of_new_state
   long_name = updated air temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -213,8 +213,8 @@
   intent = in
   optional = F
 [lat]
-  standard_name = latitude_index_in_debug_printouts
-  long_name = latitude index in debug printouts
+  standard_name = latitude_in_radians_index_in_debug_printouts
+  long_name = latitude_in_radians index in debug printouts
   units = index
   dimensions = ()
   type = integer
@@ -248,7 +248,7 @@
   intent = in
   optional = F
 [q1]
-  standard_name = water_vapor_specific_humidity
+  standard_name = specific_humidity
   long_name = mid-layer specific humidity of water vapor
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -257,7 +257,7 @@
   intent = in
   optional = F
 [deltim]
-  standard_name = time_step_for_physics
+  standard_name = timestep_for_physics
   long_name = physics time step
   units = s
   dimensions = ()
@@ -318,7 +318,7 @@
   intent = in
   optional = F
 [kcnv]
-  standard_name = flag_deep_convection
+  standard_name = flag_for_occurrence_of_deep_convection_in_column
   long_name = flag indicating whether convection occurs in column (0 or 1)
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -432,7 +432,7 @@
   intent = out
   optional = F
 [tauctx]
-  standard_name = instantaneous_x_stress_due_to_gravity_wave_drag
+  standard_name = x_stress_due_to_gravity_wave_drag
   long_name = zonal stress at cloud top due to convective gravity wave drag
   units = Pa
   dimensions = (horizontal_loop_extent)
@@ -441,7 +441,7 @@
   intent = out
   optional = F
 [taucty]
-  standard_name = instantaneous_y_stress_due_to_gravity_wave_drag
+  standard_name = y_stress_due_to_gravity_wave_drag
   long_name = meridional stress at cloud top due to convective gravity wave drag
   units = Pa
   dimensions = (horizontal_loop_extent)
@@ -494,7 +494,7 @@
   intent = in
   optional = F
 [lssav]
-  standard_name = flag_diagnostics
+  standard_name = flag_for_diagnostics
   long_name = flag for calculating diagnostic fields
   units = flag
   dimensions = ()
@@ -502,7 +502,7 @@
   intent = in
   optional = F
 [ldiag3d]
-  standard_name = flag_diagnostics_3D
+  standard_name = flag_for_xyz_dimensioned_diagnostics
   long_name = flag for calculating 3-D diagnostic fields
   units = flag
   dimensions = ()
@@ -510,7 +510,7 @@
   intent = in
   optional = F
 [dtf]
-  standard_name = time_step_for_dynamics
+  standard_name = timestep_for_dynamics
   long_name = dynamics time step
   units = s
   dimensions = ()
@@ -519,7 +519,7 @@
   intent = in
   optional = F
 [dtp]
-  standard_name = time_step_for_physics
+  standard_name = timestep_for_physics
   long_name = physics time step
   units = s
   dimensions = ()
@@ -537,7 +537,7 @@
   intent = in
   optional = F
 [tauctx]
-  standard_name = instantaneous_x_stress_due_to_gravity_wave_drag
+  standard_name = x_stress_due_to_gravity_wave_drag
   long_name = zonal stress at cloud top due to convective gravity wave drag
   units = Pa
   dimensions = (horizontal_loop_extent)
@@ -546,7 +546,7 @@
   intent = in
   optional = F
 [taucty]
-  standard_name = instantaneous_y_stress_due_to_gravity_wave_drag
+  standard_name = y_stress_due_to_gravity_wave_drag
   long_name = meridional stress at cloud top due to convective gravity wave drag
   units = Pa
   dimensions = (horizontal_loop_extent)
@@ -609,7 +609,7 @@
   intent = inout
   optional = F
 [gu0]
-  standard_name = x_wind_updated_by_physics
+  standard_name = x_wind_of_new_state
   long_name = updated zonal wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -618,7 +618,7 @@
   intent = inout
   optional = F
 [gv0]
-  standard_name = y_wind_updated_by_physics
+  standard_name = y_wind_of_new_state
   long_name = updated meridional wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -627,7 +627,7 @@
   intent = inout
   optional = F
 [gt0]
-  standard_name = air_temperature_updated_by_physics
+  standard_name = air_temperature_of_new_state
   long_name = updated air temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_dimension)

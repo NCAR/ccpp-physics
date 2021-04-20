@@ -8,7 +8,7 @@
   name = GFS_rad_time_vary_timestep_init
   type = scheme
 [lslwr]
-  standard_name = flag_to_calc_lw
+  standard_name = flag_for_calling_longwave_radiation
   long_name = logical flags for lw radiation calls
   units = flag
   dimensions = ()
@@ -16,7 +16,7 @@
   intent = in
   optional = F
 [lsswr]
-  standard_name = flag_to_calc_sw
+  standard_name = flag_for_calling_shortwave_radiation
   long_name = logical flags for sw radiation calls
   units = flag
   dimensions = ()
@@ -40,7 +40,7 @@
   intent = in
   optional = F
 [icsdsw]
-  standard_name = seed_random_numbers_sw
+  standard_name = random_number_seed_for_mcica_shortwave
   long_name = random seeds for sub-column cloud generators sw
   units = none
   dimensions = (horizontal_dimension)
@@ -48,7 +48,7 @@
   intent = inout
   optional = F
 [icsdlw]
-  standard_name = seed_random_numbers_lw
+  standard_name = random_number_seed_for_mcica_longwave
   long_name = random seeds for sub-column cloud generators lw
   units = none
   dimensions = (horizontal_dimension)
@@ -56,7 +56,7 @@
   intent = inout
   optional = F
 [cnx]
-  standard_name = number_of_points_in_x_direction_for_this_cubed_sphere_face
+  standard_name = number_of_x_points_for_current_cubed_sphere_tile
   long_name = number of points in x direction for this cubed sphere face
   units = count
   dimensions = ()
@@ -64,7 +64,7 @@
   intent = in
   optional = F
 [cny]
-  standard_name = number_of_points_in_y_direction_for_this_cubed_sphere_face
+  standard_name = number_of_y_points_for_current_cubed_sphere_tile
   long_name = number of points in y direction for this cubed sphere face
   units = count
   dimensions = ()
@@ -72,7 +72,7 @@
   intent = in
   optional = F
 [isc]
-  standard_name = starting_x_index_for_this_MPI_rank
+  standard_name = starting_x_index_for_current_mpi_rank
   long_name = starting index in the x direction for this MPI rank
   units = count
   dimensions = ()
@@ -80,7 +80,7 @@
   intent = in
   optional = F
 [jsc]
-  standard_name = starting_y_index_for_this_MPI_rank
+  standard_name = starting_y_index_for_current_mpi_rank
   long_name = starting index in the y direction for this MPI rank
   units = count
   dimensions = ()
@@ -104,7 +104,7 @@
   intent = in
   optional = F
 [sec]
-  standard_name = seconds_elapsed_since_model_initialization
+  standard_name = forecast_time_in_seconds
   long_name = seconds elapsed since model initialization
   units = s
   dimensions = ()
@@ -121,7 +121,7 @@
   intent = in
   optional = F
 [imp_physics]
-  standard_name = flag_for_microphysics_scheme
+  standard_name = control_for_microphysics_scheme
   long_name = choice of microphysics scheme
   units = flag
   dimensions = ()
@@ -129,7 +129,7 @@
   intent = in
   optional = F
 [imp_physics_zhao_carr]
-  standard_name = flag_for_zhao_carr_microphysics_scheme
+  standard_name = identifier_for_zhao_carr_microphysics_scheme
   long_name = choice of Zhao-Carr microphysics scheme
   units = flag
   dimensions = ()
@@ -173,7 +173,7 @@
   intent = inout
   optional = F
 [qv_2delt]
-  standard_name = water_vapor_specific_humidity_two_timesteps_back
+  standard_name = specific_humidity_two_timesteps_back
   long_name = water vapor specific humidity two timesteps back
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
@@ -182,7 +182,7 @@
   intent = inout
   optional = F
 [qv_1delt]
-  standard_name = water_vapor_specific_humidity_at_previous_timestep
+  standard_name = specific_humidity_at_previous_timestep
   long_name = water vapor specific humidity at previous timestep
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
@@ -200,7 +200,7 @@
   intent = in
   optional = F
 [qv]
-  standard_name = water_vapor_specific_humidity
+  standard_name = specific_humidity
   long_name = water vapor specific humidity
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)

@@ -9,7 +9,7 @@
   name = GFS_rrtmgp_pre_init
   type = scheme
 [active_gases]
-  standard_name = active_gases_used_by_RRTMGP
+  standard_name = radiatively_active_gases
   long_name = active gases used by RRTMGP
   units = none
   dimensions =  ()
@@ -18,7 +18,7 @@
   intent = in
   optional = F  
 [nGases]
-  standard_name = number_of_active_gases_used_by_RRTMGP
+  standard_name = number_of_radiatively_active_gases
   long_name = number of gases available used by RRTMGP (Model%nGases)
   units = count
   dimensions =  ()
@@ -72,7 +72,7 @@
   intent = in
   optional = F
 [lsswr]
-  standard_name = flag_to_calc_sw
+  standard_name = flag_for_calling_shortwave_radiation
   long_name = logical flags for sw radiation calls
   units = flag
   dimensions = ()
@@ -80,7 +80,7 @@
   intent = in
   optional = F
 [lslwr]
-  standard_name = flag_to_calc_lw
+  standard_name = flag_for_calling_longwave_radiation
   long_name = logical flags for lw radiation calls
   units = flag
   dimensions = ()
@@ -88,7 +88,7 @@
   intent = in
   optional = F  
 [i_o3]
-  standard_name = index_for_ozone
+  standard_name = index_of_ozone_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for ozone mixing ratio
   units = index
   dimensions = ()
@@ -96,7 +96,7 @@
   intent = in
   optional = F 
 [fhswr]
-  standard_name = frequency_for_shortwave_radiation
+  standard_name = period_of_shortwave_radiation_calls
   long_name = frequency for shortwave radiation
   units = s
   dimensions = ()
@@ -105,7 +105,7 @@
   intent = in
   optional = F 
 [fhlwr]
-  standard_name = frequency_for_longwave_radiation
+  standard_name = period_of_longwave_radiation_calls
   long_name = frequency for longwave radiation
   units = s
   dimensions = ()
@@ -114,8 +114,8 @@
   intent = in
   optional = F 
 [xlat]
-  standard_name = latitude
-  long_name = latitude
+  standard_name = latitude_in_radians
+  long_name = latitude_in_radians
   units = radian
   dimensions = (horizontal_loop_extent)
   type = real
@@ -123,8 +123,8 @@
   intent = in
   optional = F   
 [xlon]
-  standard_name = longitude
-  long_name = longitude
+  standard_name = longitude_in_radians
+  long_name = longitude_in_radians
   units = radian
   dimensions = (horizontal_loop_extent)
   type = real
@@ -240,7 +240,7 @@
   intent = out
   optional = F
 [raddt]
-  standard_name = time_step_for_radiation
+  standard_name = timestep_for_radiation
   long_name = radiation time step
   units = s
   dimensions = ()

@@ -8,7 +8,7 @@
   name = satmedmfvdif_init
   type = scheme
 [isatmedmf]
-  standard_name = choice_of_scale_aware_TKE_moist_EDMF_PBL
+  standard_name = control_for_scale_aware_tke_moist_edmf_pbl_scheme
   long_name = choice of scale-aware TKE moist EDMF PBL scheme
   units = none
   dimensions = ()
@@ -16,7 +16,7 @@
   intent = in
   optional = F
 [isatmedmf_vdif]
-  standard_name = choice_of_original_scale_aware_TKE_moist_EDMF_PBL
+  standard_name = identifier_for_2018_scale_aware_tke_moist_edmf_pbl
   long_name = choice of original scale-aware TKE moist EDMF PBL scheme
   units = none
   dimensions = ()
@@ -70,7 +70,7 @@
   intent = in
   optional = F
 [ntcw]
-  standard_name = index_for_liquid_cloud_condensate
+  standard_name = index_of_cloud_liquid_water_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for cloud condensate (or liquid water)
   units = index
   dimensions = ()
@@ -78,7 +78,7 @@
   intent = in
   optional = F
 [ntiw]
-  standard_name = index_for_ice_cloud_condensate_vertical_diffusion_tracer
+  standard_name = index_of_cloud_ice_mixing_ratio_in_tracer_concentration_array_vertical_diffusion_tracer
   long_name = tracer index for ice water in the vertically diffused tracer array
   units = index
   dimensions = ()
@@ -86,7 +86,7 @@
   intent = in
   optional = F
 [ntke]
-  standard_name = index_for_turbulent_kinetic_energy_vertical_diffusion_tracer
+  standard_name = index_of_turbulent_kinetic_energy_in_tracer_concentration_array_vertical_diffusion_tracer
   long_name = index for turbulent kinetic energy in the vertically diffused tracer array
   units = index
   dimensions = ()
@@ -247,7 +247,7 @@
   intent = in
   optional = F
 [swh]
-  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step
+  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_timestep
   long_name = total sky shortwave heating rate
   units = K s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -256,7 +256,7 @@
   intent = in
   optional = F
 [hlw]
-  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step
+  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_timestep
   long_name = total sky longwave heating rate
   units = K s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -328,7 +328,7 @@
   intent = in
   optional = F
 [fm]
-  standard_name = Monin_Obukhov_similarity_function_for_momentum
+  standard_name = monin_obukhov_similarity_function_for_momentum
   long_name = Monin-Obukhov similarity function for momentum
   units = none
   dimensions = (horizontal_loop_extent)
@@ -337,7 +337,7 @@
   intent = in
   optional = F
 [fh]
-  standard_name = Monin_Obukhov_similarity_function_for_heat
+  standard_name = monin_obukhov_similarity_function_for_heat
   long_name = Monin-Obukhov similarity function for heat
   units = none
   dimensions = (horizontal_loop_extent)
@@ -453,7 +453,7 @@
   intent = in
   optional = F
 [delt]
-  standard_name = time_step_for_physics
+  standard_name = timestep_for_physics
   long_name = time step for physics
   units = s
   dimensions = ()
@@ -523,7 +523,7 @@
   intent = in
   optional = F
 [xkzm_m]
-  standard_name = atmosphere_momentum_diffusivity_background
+  standard_name = atmosphere_momentum_diffusivity_due_to_background
   long_name = background value of momentum diffusivity
   units = m2 s-1
   dimensions = ()
@@ -532,7 +532,7 @@
   intent = in
   optional = F
 [xkzm_h]
-  standard_name = atmosphere_heat_diffusivity_background
+  standard_name = atmosphere_heat_diffusivity_due_to_background
   long_name = background value of heat diffusivity
   units = m2 s-1
   dimensions = ()
@@ -541,7 +541,7 @@
   intent = in
   optional = F
 [xkzm_s]
-  standard_name = diffusivity_background_sigma_level
+  standard_name = sigma_pressure_level_at_upper_extent_of_background_diffusion
   long_name = sigma level threshold for background diffusivity
   units = none
   dimensions = ()
@@ -595,7 +595,7 @@
   intent = inout
   optional = F
 [gen_tend]
-  standard_name = flag_for_generic_planetary_boundary_layer_tendency
+  standard_name = flag_for_generic_tendency_due_to_plantary_boundary_layer
   long_name = true if GFS_PBL_generic should calculate tendencies
   units = flag
   dimensions = ()
@@ -603,7 +603,7 @@
   intent = in
   optional = F
 [ldiag3d]
-  standard_name = flag_diagnostics_3D
+  standard_name = flag_for_xyz_dimensioned_diagnostics
   long_name = flag for 3d diagnostic fields
   units = flag
   dimensions = ()
@@ -611,7 +611,7 @@
   intent = in
   optional = F
 [qdiag3d]
-  standard_name = flag_tracer_diagnostics_3D
+  standard_name = flag_for_tracer_xyz_dimensioned_diagnostics
   long_name = flag for 3d tracer diagnostic fields
   units = flag
   dimensions = ()

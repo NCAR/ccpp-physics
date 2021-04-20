@@ -27,7 +27,7 @@
   intent = in
   optional = F
 [nlunit]
-  standard_name = iounit_namelist
+  standard_name = iounit_of_namelist
   long_name = fortran unit number for opening namelist file
   units = none
   dimensions = ()
@@ -35,16 +35,16 @@
   intent = in
   optional = F
 [input_nml_file]
-  standard_name = namelist_filename_for_internal_file_reads
+  standard_name = filename_of_namelist_for_internal_file_reads
   long_name = character string to store full namelist contents
   units = none
-  dimensions = (number_of_lines_of_namelist_filename_for_internal_file_reads)
+  dimensions = (number_of_lines_in_internal_namelist)
   type = character
   kind = len=*
   intent = in
   optional = F
 [logunit]
-  standard_name = iounit_log
+  standard_name = iounit_of_log
   long_name = fortran unit number for writing logfile
   units = none
   dimensions = ()
@@ -52,7 +52,7 @@
   intent = in
   optional = F
 [fn_nml2]
-  standard_name = namelist_filename
+  standard_name = filename_of_namelist
   long_name = namelist filename for ugwp
   units = none
   dimensions = ()
@@ -61,7 +61,7 @@
   intent = in
   optional = F
 [jdat]
-  standard_name = forecast_date_and_time
+  standard_name = date_and_time_of_forecast_in_United_States_order
   long_name = current forecast date and time
   units = none
   dimensions = (8)
@@ -91,25 +91,25 @@
   intent = in
   optional = F
 [ak]
-  standard_name = a_parameter_of_the_hybrid_coordinate
+  standard_name = sigma_pressure_hybrid_coordinate_a_coefficient
   long_name = a parameter for sigma pressure level calculations
   units = Pa
-  dimensions = (number_of_vertical_layers_for_radiation_calculations_plus_one)
+  dimensions = (vertical_dimension_for_radiation_plus_one)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [bk]
-  standard_name = b_parameter_of_the_hybrid_coordinate
+  standard_name = sigma_pressure_hybrid_coordinate_b_coefficient
   long_name = b parameter for sigma pressure level calculations
   units = none
-  dimensions = (number_of_vertical_layers_for_radiation_calculations_plus_one)
+  dimensions = (vertical_dimension_for_radiation_plus_one)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [dtp]
-  standard_name = time_step_for_physics
+  standard_name = timestep_for_physics
   long_name = physics timestep
   units = s
   dimensions = ()
@@ -118,7 +118,7 @@
   intent = in
   optional = F
 [cdmbgwd]
-  standard_name = multiplication_factors_for_mountain_blocking_and_orographic_gravity_wave_drag
+  standard_name = multiplicative_tunable_parameters_for_mountain_blocking_and_orographic_gravity_wave_drag
   long_name = multiplication factors for cdmb and gwd
   units = none
   dimensions = (4)
@@ -127,7 +127,7 @@
   intent = in
   optional = F
 [cgwf]
-  standard_name = multiplication_factors_for_convective_gravity_wave_drag
+  standard_name = tunable_parameters_for_convective_gravity_wave_drag
   long_name = multiplication factor for convective GWD
   units = none
   dimensions = (2)
@@ -154,7 +154,7 @@
   intent = in
   optional = F
 [pa_rf_in]
-  standard_name = pressure_cutoff_for_rayleigh_damping
+  standard_name = air_pressure_at_bottom_extent_of_rayleigh_damping
   long_name = pressure level from which Rayleigh Damping is applied
   units = Pa
   dimensions = ()
@@ -163,7 +163,7 @@
   intent = in
   optional = F
 [tau_rf_in]
-  standard_name = time_scale_for_rayleigh_damping
+  standard_name = timescale_for_rayleigh_damping
   long_name = time scale for Rayleigh damping in days
   units = d
   dimensions = ()
@@ -181,7 +181,7 @@
   intent = in
   optional = F
 [do_ugwp]
-  standard_name = do_ugwp
+  standard_name = flag_for_unified_gravity_wave_physics_gravity_wave_drag_scheme
   long_name = flag to activate CIRES UGWP
   units = flag
   dimensions = ()
@@ -337,7 +337,7 @@
   intent = in
   optional = F
 [dtp]
-  standard_name = time_step_for_physics
+  standard_name = timestep_for_physics
   long_name = physics timestep
   units = s
   dimensions = ()
@@ -369,8 +369,8 @@
   intent = in
   optional = F
 [oro]
-  standard_name = orography
-  long_name = orography
+  standard_name = height_above_mean_sea_level
+  long_name = height_above_mean_sea_level
   units = m
   dimensions = (horizontal_loop_extent)
   type = real
@@ -378,7 +378,7 @@
   intent = in
   optional = F
 [oro_uf]
-  standard_name = orography_unfiltered
+  standard_name = height_above_mean_sea_level_unfiltered
   long_name = unfiltered orography
   units = m
   dimensions = (horizontal_loop_extent)
@@ -503,7 +503,7 @@
   intent = in
   optional = F
 [dx]
-  standard_name = cell_size
+  standard_name = characteristic_grid_lengthscale
   long_name = size of the grid cell
   units = m
   dimensions = (horizontal_loop_extent)
@@ -674,7 +674,7 @@
   intent = in
   optional = F
 [slmsk]
-  standard_name = sea_land_ice_mask_real
+  standard_name = area_type
   long_name = landmask: sea/land/ice=0/1/2
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -683,7 +683,7 @@
   intent = in
   optional = F
 [do_tofd]
-  standard_name = turb_oro_form_drag_flag
+  standard_name = flag_for_turbulent_orographic_form_drag_in_unified_gravity_wave_physics_gravitiy_wave_drag_scheme
   long_name = flag for turbulent orographic form drag
   units = flag
   dimensions = ()
@@ -691,7 +691,7 @@
   intent = in
   optional = F
 [ldiag_ugwp]
-  standard_name = diag_ugwp_flag
+  standard_name = flag_for_unified_gravity_wave_physics_diagnostics
   long_name = flag for CIRES UGWP Diagnostics
   units = flag
   dimensions = ()
@@ -699,7 +699,7 @@
   intent = in
   optional = F
 [cdmbgwd]
-  standard_name = multiplication_factors_for_mountain_blocking_and_orographic_gravity_wave_drag
+  standard_name = multiplicative_tunable_parameters_for_mountain_blocking_and_orographic_gravity_wave_drag
   long_name = multiplication factors for cdmb and gwd
   units = none
   dimensions = (4)
@@ -708,13 +708,13 @@
   intent = in
   optional = F
 [jdat]
-  standard_name = forecast_date_and_time
+  standard_name = date_and_time_of_forecast_in_United_States_order
   long_name = current forecast date and time
   units = none
   dimensions = (8)
   type = integer
 [xlat]
-  standard_name = latitude
+  standard_name = latitude_in_radians
   long_name = grid latitude
   units = radian
   dimensions = (horizontal_loop_extent)
@@ -723,8 +723,8 @@
   intent = in
   optional = F
 [xlat_d]
-  standard_name = latitude_in_degree
-  long_name = latitude in degree north
+  standard_name = latitude_in_radians_in_degree
+  long_name = latitude_in_radians in degree north
   units = degree_north
   dimensions = (horizontal_loop_extent)
   type = real
@@ -786,7 +786,7 @@
   intent = in
   optional = F
 [q1]
-  standard_name = water_vapor_specific_humidity
+  standard_name = specific_humidity
   long_name = mid-layer specific humidity of water vapor
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -857,7 +857,7 @@
   intent = in
   optional = F
 [dusfcg]
-  standard_name = instantaneous_x_stress_due_to_gravity_wave_drag
+  standard_name = x_stress_due_to_gravity_wave_drag
   long_name = zonal surface stress due to orographic gravity wave drag
   units = Pa
   dimensions = (horizontal_loop_extent)
@@ -866,7 +866,7 @@
   intent = out
   optional = F
 [dvsfcg]
-  standard_name = instantaneous_y_stress_due_to_gravity_wave_drag
+  standard_name = y_stress_due_to_gravity_wave_drag
   long_name = meridional surface stress due to orographic gravity wave drag
   units = Pa
   dimensions = (horizontal_loop_extent)
@@ -1138,7 +1138,7 @@
   intent = in
   optional = F
 [ntke]
-  standard_name = index_for_turbulent_kinetic_energy
+  standard_name = index_of_turbulent_kinetic_energy_in_tracer_concentration_array
   long_name = tracer index for turbulent kinetic energy
   units = index
   dimensions = ()
@@ -1234,7 +1234,7 @@
   intent = inout
   optional = F
 [ldiag3d]
-  standard_name = flag_diagnostics_3D
+  standard_name = flag_for_xyz_dimensioned_diagnostics
   long_name = flag for 3d diagnostic fields
   units = flag
   dimensions = ()
@@ -1242,7 +1242,7 @@
   intent = in
   optional = F
 [lssav]
-  standard_name = flag_diagnostics
+  standard_name = flag_for_diagnostics
   long_name = logical flag for storing diagnostics
   units = flag
   dimensions = ()
@@ -1250,7 +1250,7 @@
   intent = in
   optional = F
 [flag_for_gwd_generic_tend]
-  standard_name = flag_for_generic_gravity_wave_drag_tendency
+  standard_name = flag_for_generic_tendency_due_to_gravity_wave_drag
   long_name = true if GFS_GWD_generic should calculate tendencies
   units = flag
   dimensions = ()
@@ -1306,7 +1306,7 @@
   intent = in
   optional = F
 [gwd_opt]
-  standard_name = gwd_opt
+  standard_name = control_for_drag_suite_gravity_wave_drag
   long_name = flag to choose gwd scheme
   units = flag
   dimensions = ()

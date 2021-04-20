@@ -24,7 +24,7 @@
   intent = in
   optional = F
 [dt]
-  standard_name = time_step_for_physics
+  standard_name = timestep_for_physics
   long_name = physics time step
   units = s
   dimensions = ()
@@ -33,7 +33,7 @@
   intent = in
   optional = F
 [dtf]
-  standard_name = time_step_for_dynamics
+  standard_name = timestep_for_dynamics
   long_name = dynamics time step
   units = s
   dimensions = ()
@@ -60,7 +60,7 @@
   intent = in
   optional = F
 [q]
-  standard_name = water_vapor_specific_humidity_updated_by_physics
+  standard_name = specific_humidity_updated_by_physics
   long_name = water vapor specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -87,7 +87,7 @@
   intent = in
   optional = F
 [cwm]
-  standard_name = cloud_condensed_water_mixing_ratio_updated_by_physics
+  standard_name = cloud_liquid_water_mixing_ratio_of_new_state
   long_name = moist cloud condensed water mixing ratio
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -96,7 +96,7 @@
   intent = out
   optional = F
 [t]
-  standard_name = air_temperature_updated_by_physics
+  standard_name = air_temperature_of_new_state
   long_name = layer mean air temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -114,7 +114,7 @@
   intent = inout
   optional = F
 [qp]
-  standard_name = water_vapor_specific_humidity_two_timesteps_back
+  standard_name = specific_humidity_two_timesteps_back
   long_name = water vapor specific humidity two timesteps back
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -141,7 +141,7 @@
   intent = inout
   optional = F
 [qp1]
-  standard_name = water_vapor_specific_humidity_at_previous_timestep
+  standard_name = specific_humidity_at_previous_timestep
   long_name = water vapor specific humidity at previous timestep
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)

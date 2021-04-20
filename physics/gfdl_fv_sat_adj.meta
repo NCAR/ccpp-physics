@@ -283,7 +283,7 @@
   intent = inout
   optional = F
 [qv]
-  standard_name = water_vapor_specific_humidity_at_Lagrangian_surface
+  standard_name = specific_humidity_at_Lagrangian_surface
   long_name = water vapor specific humidity updated by fast physics at Lagrangian surface
   units = kg kg-1
   dimensions = (starting_x_direction_index_domain:ending_x_direction_index_domain,starting_y_direction_index_domain:ending_y_direction_index_domain,1:vertical_dimension_for_fast_physics)
@@ -469,7 +469,7 @@
   intent = out
   optional = F
 [nthreads]
-  standard_name = omp_threads_for_fast_physics
+  standard_name = number_of_openmp_threads_for_fast_physics
   long_name = number of OpenMP threads available for fast physics schemes
   units = count
   dimensions = ()

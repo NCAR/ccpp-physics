@@ -24,7 +24,7 @@
   intent = in
   optional = F
 [reset]
-  standard_name = flag_reset_maximum_hourly_fields
+  standard_name = flag_for_reset_maximum_hourly_fields
   long_name = flag for resetting maximum hourly fields
   units = flag
   dimensions = ()
@@ -40,7 +40,7 @@
   intent = in
   optional = F
 [imp_physics]
-  standard_name = flag_for_microphysics_scheme
+  standard_name = control_for_microphysics_scheme
   long_name = choice of microphysics scheme
   units = flag
   dimensions = ()
@@ -48,7 +48,7 @@
   intent = in
   optional = F
 [imp_physics_gfdl]
-  standard_name = flag_for_gfdl_microphysics_scheme
+  standard_name = identifier_for_gfdl_microphysics_scheme
   long_name = choice of GFDL microphysics scheme
   units = flag
   dimensions = ()
@@ -56,7 +56,7 @@
   intent = in
   optional = F
 [imp_physics_thompson]
-  standard_name = flag_for_thompson_microphysics_scheme
+  standard_name = identifier_for_thompson_microphysics_scheme
   long_name = choice of Thompson microphysics scheme
   units = flag
   dimensions = ()
@@ -64,7 +64,7 @@
   intent = in
   optional = F
 [imp_physics_fer_hires]
-  standard_name = flag_for_fer_hires_microphysics_scheme
+  standard_name = identifier_for_fer_hires_microphysics_scheme
   long_name = choice of Ferrier-Aligo microphysics scheme
   units = flag
   dimensions = ()
@@ -90,7 +90,7 @@
   intent = in
   optional = F
 [gt0]
-  standard_name = air_temperature_updated_by_physics
+  standard_name = air_temperature_of_new_state
   long_name = temperature updated by physics
   units = K
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -180,7 +180,7 @@
   intent = in
   optional = F
 [t2m]
-  standard_name = temperature_at_2m
+  standard_name = air_temperature_at_2m
   long_name = 2 meter temperature
   units = K
   dimensions = (horizontal_loop_extent)

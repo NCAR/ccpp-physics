@@ -8,7 +8,7 @@
   name = cires_ugwp_post_run
   type = scheme
 [ldiag_ugwp]
-  standard_name = diag_ugwp_flag
+  standard_name = flag_for_unified_gravity_wave_physics_diagnostics
   long_name = flag for CIRES UGWP Diagnostics
   units = flag
   dimensions = ()
@@ -16,7 +16,7 @@
   intent = in
   optional = F
 [dtf]
-  standard_name = time_step_for_dynamics
+  standard_name = timestep_for_dynamics
   long_name = dynamics timestep
   units = s
   dimensions = ()

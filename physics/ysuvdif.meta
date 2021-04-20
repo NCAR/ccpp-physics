@@ -123,7 +123,7 @@
   intent = inout
   optional = F
 [swh]
-  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step
+  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_timestep
   long_name = total sky shortwave heating rate
   units = K s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -132,7 +132,7 @@
   intent = in
   optional = F
 [hlw]
-  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step
+  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_timestep
   long_name = total sky longwave heating rate
   units = K s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -166,7 +166,7 @@
   intent = in
   optional = F
 [ntcw]
-  standard_name = index_for_liquid_cloud_condensate
+  standard_name = index_of_cloud_liquid_water_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for cloud condensate (or liquid water)
   units = index
   dimensions = ()
@@ -174,7 +174,7 @@
   intent = in
   optional = F
 [ntiw]
-  standard_name = index_for_ice_cloud_condensate
+  standard_name = index_of_cloud_ice_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for ice water
   units = index
   dimensions = ()
@@ -236,7 +236,7 @@
   intent = out
   optional = F
 [psim]
-  standard_name = Monin_Obukhov_similarity_function_for_momentum
+  standard_name = monin_obukhov_similarity_function_for_momentum
   long_name = Monin-Obukhov similarity function for momentum
   units = none
   dimensions = (horizontal_loop_extent)
@@ -245,7 +245,7 @@
   intent = in
   optional = F
 [psih]
-  standard_name = Monin_Obukhov_similarity_function_for_heat
+  standard_name = monin_obukhov_similarity_function_for_heat
   long_name = Monin-Obukhov similarity function for heat
   units = none
   dimensions = (horizontal_loop_extent)
@@ -397,7 +397,7 @@
   intent = out
   optional = F
 [dt]
-  standard_name = time_step_for_physics
+  standard_name = timestep_for_physics
   long_name = time step for physics
   units = s
   dimensions = ()
@@ -432,35 +432,35 @@
   intent = in
   optional = F
 [lssav]
-  standard_name = flag_diagnostics
+  standard_name = flag_for_diagnostics
   long_name = logical flag for storing diagnostics
   units = flag
   dimensions = ()
   type = logical
   intent = in
 [ldiag3d]
-  standard_name = flag_diagnostics_3D
+  standard_name = flag_for_xyz_dimensioned_diagnostics
   long_name = flag for 3d diagnostic fields
   units = flag
   dimensions = ()
   type = logical
   intent = in
 [qdiag3d]
-  standard_name = flag_tracer_diagnostics_3D
+  standard_name = flag_for_tracer_xyz_dimensioned_diagnostics
   long_name = flag for 3d tracer diagnostic fields
   units = flag
   dimensions = ()
   type = logical
   intent = in
 [flag_for_pbl_generic_tend]
-  standard_name = flag_for_generic_planetary_boundary_layer_tendency
+  standard_name = flag_for_generic_tendency_due_to_plantary_boundary_layer
   long_name = true if GFS_PBL_generic should calculate tendencies
   units = flag
   dimensions = ()
   type = logical
   intent = in
 [ntoz]
-  standard_name = index_for_ozone
+  standard_name = index_of_ozone_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for ozone mixing ratio
   units = index
   dimensions = ()

@@ -58,7 +58,7 @@
   intent = inout
   optional = F
 [qv]
-  standard_name = water_vapor_specific_humidity
+  standard_name = specific_humidity
   long_name = water vapor specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -85,7 +85,7 @@
   intent = in
   optional = F
 [qr]
-  standard_name = rain_water_mixing_ratio
+  standard_name = rain_mixing_ratio
   long_name = moist (dry+vapor, no condensates) mixing ratio of rain water
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -94,7 +94,7 @@
   intent = inout
   optional = F
 [qs]
-  standard_name = snow_water_mixing_ratio
+  standard_name = snow_mixing_ratio
   long_name = moist (dry+vapor, no condensates) mixing ratio of snow water
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -121,7 +121,7 @@
   intent = inout
   optional = F
 [imfdeepcnv]
-  standard_name = flag_for_mass_flux_deep_convection_scheme
+  standard_name = control_for_deep_convection_scheme
   long_name = flag for mass-flux deep convection scheme
   units = flag
   dimensions = ()
@@ -129,7 +129,7 @@
   intent = in
   optional = F
 [imfdeepcnv_gf]
-  standard_name = flag_for_gf_deep_convection_scheme
+  standard_name = identifier_for_grell_freitas_deep_convection
   long_name = flag for Grell-Freitas deep convection scheme
   units = flag
   dimensions = ()
@@ -164,7 +164,7 @@
   intent = in
   optional = F
 [QI_BL]
-  standard_name = subgrid_cloud_ice_mixing_ratio_pbl
+  standard_name = subgrid_scale_cloud_ice_mixing_ratio
   long_name = subgrid cloud ice mixing ratio from PBL scheme
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -173,7 +173,7 @@
   intent = in
   optional = F
 [CLDFRA_BL]
-  standard_name = subgrid_cloud_fraction_pbl
+  standard_name = subgrid_scale_cloud_area_fraction_in_atmosphere_layer
   long_name = subgrid cloud fraction from PBL scheme
   units = frac
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -182,7 +182,7 @@
   intent = in
   optional = F
 [delp]
-  standard_name = layer_pressure_thickness_for_radiation
+  standard_name = layer_pressure_thickness
   long_name = layer pressure thickness on radiation levels
   units = hPa
   dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
@@ -191,7 +191,7 @@
   intent = in
   optional = F
 [clouds1]
-  standard_name = total_cloud_fraction
+  standard_name = cloud_area_fracton
   long_name = layer total cloud fraction
   units = frac
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -209,7 +209,7 @@
   intent = inout
   optional = F
 [clouds3]
-  standard_name = mean_effective_radius_for_liquid_cloud
+  standard_name = effective_radius_of_cloud_liquid_water_particles_in_um
   long_name = mean effective radius for liquid cloud
   units = um
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -227,7 +227,7 @@
   intent = inout
   optional = F
 [clouds5]
-  standard_name = mean_effective_radius_for_ice_cloud
+  standard_name = effective_radius_of_ice_liquid_water_particles_in_um
   long_name = mean effective radius for ice cloud
   units = um
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -236,7 +236,7 @@
   intent = inout
   optional = F
 [slmsk]
-  standard_name = sea_land_ice_mask_real
+  standard_name = area_type
   long_name = landmask: sea/land/ice=0/1/2
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -253,7 +253,7 @@
   intent = in
   optional = F
 [plyr]
-  standard_name = air_pressure_at_layer_for_radiation_in_hPa
+  standard_name = air_pressure_in_hPa
   long_name = air pressure at vertical layer for radiation calculation
   units = hPa
   dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
@@ -262,7 +262,7 @@
   intent = in 
   optional = F
 [xlat]
-  standard_name = latitude
+  standard_name = latitude_in_radians
   long_name = grid latitude
   units = radian
   dimensions = (horizontal_loop_extent)
@@ -289,7 +289,7 @@
   intent = in
   optional = F
 [cldsa]
-  standard_name = cloud_area_fraction_for_radiation
+  standard_name = cloud_area_fraction_in_atmosphere_layer
   long_name = fraction of clouds for low, middle,high, total and BL
   units = frac
   dimensions = (horizontal_loop_extent,5)
@@ -314,7 +314,7 @@
   intent = inout
   optional = F
 [do_mynnedmf]
-  standard_name = do_mynnedmf
+  standard_name = flag_for_mellor_yamada_nakanishi_niino_pbl_scheme
   long_name = flag to activate MYNN-EDMF
   units = flag
   dimensions = ()
@@ -322,7 +322,7 @@
   intent = in
   optional = F
 [imp_physics]
-  standard_name = flag_for_microphysics_scheme
+  standard_name = control_for_microphysics_scheme
   long_name = choice of microphysics scheme
   units = flag
   dimensions = ()
@@ -330,7 +330,7 @@
   intent = in
   optional = F
 [imp_physics_gfdl]
-  standard_name = flag_for_gfdl_microphysics_scheme
+  standard_name = identifier_for_gfdl_microphysics_scheme
   long_name = choice of GFDL microphysics scheme
   units = flag
   dimensions = ()

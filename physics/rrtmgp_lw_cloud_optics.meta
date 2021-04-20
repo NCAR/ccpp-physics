@@ -8,7 +8,7 @@
   name = rrtmgp_lw_cloud_optics_init
   type = scheme
 [doG_cldoptics]
-  standard_name = flag_to_calc_lw_cld_optics_using_RRTMG
+  standard_name = flag_for_using_rrtmg_cloud_optics
   long_name = logical flag to control cloud optics scheme.
   units = flag
   dimensions = ()
@@ -16,7 +16,7 @@
   intent = in
   optional = F  
 [doGP_cldoptics_PADE]
-  standard_name = flag_to_calc_lw_cld_optics_using_RRTMGP_PADE
+  standard_name = flag_for_using_rrtmg_cloud_opticsP_PADE
   long_name = logical flag to control cloud optics scheme.
   units = flag
   dimensions = ()
@@ -24,7 +24,7 @@
   intent = in
   optional = F 
 [doGP_cldoptics_LUT]
-  standard_name = flag_to_calc_lw_cld_optics_using_RRTMGP_LUT
+  standard_name = flag_for_using_rrtmg_cloud_opticsP_LUT
   long_name = logical flag to control cloud optics scheme.
   units = flag
   dimensions = ()
@@ -32,7 +32,7 @@
   intent = in
   optional = F      
 [nrghice]
-  standard_name = number_of_rrtmgp_ice_roughness
+  standard_name = number_of_ice_roughness_categories
   long_name = number of ice-roughness categories in RRTMGP calculation
   units = count
   dimensions =  ()
@@ -49,7 +49,7 @@
   optional = F
   kind = len=128
 [rrtmgp_lw_file_clouds]
-  standard_name = rrtmgp_coeff_lw_cloud_optics 
+  standard_name = filename_of_rrtmgp_longwave_cloud_optics_coefficients 
   long_name = file containing coefficients for RRTMGP LW cloud optics
   units = none
   dimensions =  ()
@@ -74,7 +74,7 @@
   intent = in
   optional = F
 [mpicomm]
-  standard_name = mpi_comm
+  standard_name = mpi_communicator
   long_name = MPI communicator
   units = index
   dimensions = ()
@@ -104,7 +104,7 @@
   name = rrtmgp_lw_cloud_optics_run
   type = scheme
 [doLWrad]
-  standard_name = flag_to_calc_lw
+  standard_name = flag_for_calling_longwave_radiation
   long_name = logical flags for lw radiation calls
   units = flag
   dimensions = ()
@@ -112,7 +112,7 @@
   intent = in
   optional = F
 [doG_cldoptics]
-  standard_name = flag_to_calc_lw_cld_optics_using_RRTMG
+  standard_name = flag_for_using_rrtmg_cloud_optics
   long_name = logical flag to control cloud optics scheme.
   units = flag
   dimensions = ()
@@ -136,7 +136,7 @@
   intent = in
   optional = F
 [doGP_cldoptics_PADE]
-  standard_name = flag_to_calc_lw_cld_optics_using_RRTMGP_PADE
+  standard_name = flag_for_using_rrtmg_cloud_opticsP_PADE
   long_name = logical flag to control cloud optics scheme.
   units = flag
   dimensions = ()
@@ -144,7 +144,7 @@
   intent = in
   optional = F 
 [doGP_cldoptics_LUT]
-  standard_name = flag_to_calc_lw_cld_optics_using_RRTMGP_LUT
+  standard_name = flag_for_using_rrtmg_cloud_opticsP_LUT
   long_name = logical flag to control cloud optics scheme.
   units = flag
   dimensions = ()
@@ -176,7 +176,7 @@
   intent = in
   optional = F
 [cld_frac]
-  standard_name = total_cloud_fraction
+  standard_name = cloud_area_fracton
   long_name = layer total cloud fraction
   units = frac
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -192,7 +192,7 @@
   intent = in
   kind = kind_phys
 [cld_reliq]
-  standard_name = mean_effective_radius_for_liquid_cloud
+  standard_name = effective_radius_of_cloud_liquid_water_particles_in_um
   long_name = mean effective radius for liquid cloud
   units = um
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -208,7 +208,7 @@
   intent = in
   kind = kind_phys
 [cld_reice]
-  standard_name = mean_effective_radius_for_ice_cloud
+  standard_name = effective_radius_of_ice_liquid_water_particles_in_um
   long_name = mean effective radius for ice cloud
   units = um
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -224,7 +224,7 @@
   intent = in
   kind = kind_phys
 [cld_resnow]
-  standard_name = mean_effective_radius_for_snow_flake
+  standard_name = effective_radius_of_cloud_snow_particles_in_um
   long_name = mean effective radius for snow flake
   units = um
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -240,7 +240,7 @@
   intent = in
   kind = kind_phys
 [cld_rerain]
-  standard_name = mean_effective_radius_for_rain_drop
+  standard_name = effective_radius_of_cloud_rain_particles_in_um
   long_name = mean effective radius for rain drop
   units = um
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -266,7 +266,7 @@
   intent = in
   optional = F
 [nbndsGPlw]
-  standard_name = number_of_lw_bands_rrtmgp
+  standard_name = number_of_longwave_bands
   long_name = number of lw bands used in RRTMGP
   units = count
   dimensions =  ()
@@ -274,8 +274,8 @@
   intent = in
   optional = F
 [lon]
-  standard_name = longitude
-  long_name = longitude
+  standard_name = longitude_in_radians
+  long_name = longitude_in_radians
   units = radian
   dimensions = (horizontal_loop_extent)
   type = real
@@ -283,8 +283,8 @@
   intent = in
   optional = F
 [lat]
-  standard_name = latitude
-  long_name = latitude
+  standard_name = latitude_in_radians
+  long_name = latitude_in_radians
   units = radian
   dimensions = (horizontal_loop_extent)
   type = real

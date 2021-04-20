@@ -38,7 +38,7 @@
   name = rrtmgp_sw_cloud_sampling_run
   type = scheme
 [doSWrad]
-  standard_name = flag_to_calc_sw
+  standard_name = flag_for_calling_shortwave_radiation
   long_name = logical flags for sw radiation calls
   units = flag
   dimensions = ()
@@ -54,7 +54,7 @@
   intent = in
   optional = F
 [nday]
-  standard_name = daytime_points_dimension
+  standard_name = number_of_daytime_points
   long_name = daytime points dimension
   units = count
   dimensions = ()
@@ -150,7 +150,7 @@
   intent = in
   optional = F
 [icseed_sw]
-  standard_name = seed_random_numbers_sw
+  standard_name = random_number_seed_for_mcica_shortwave
   long_name = seed for random number generation for shortwave radiation
   units = none
   dimensions = (horizontal_loop_extent)
@@ -158,7 +158,7 @@
   intent = in
   optional = F
 [cld_frac]
-  standard_name = total_cloud_fraction
+  standard_name = cloud_area_fracton
   long_name = layer total cloud fraction
   units = frac
   dimensions = (horizontal_loop_extent,vertical_dimension)

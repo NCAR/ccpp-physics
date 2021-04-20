@@ -46,7 +46,7 @@
   name = cu_ntiedtke_run
   type = scheme
 [pu]
-  standard_name = x_wind_updated_by_physics
+  standard_name = x_wind_of_new_state
   long_name = updated x-direction wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -55,7 +55,7 @@
   intent = inout
   optional = F
 [pv]
-  standard_name = y_wind_updated_by_physics
+  standard_name = y_wind_of_new_state
   long_name = updated y-direction wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -64,7 +64,7 @@
   intent = inout
   optional = F
 [pt]
-  standard_name = air_temperature_updated_by_physics
+  standard_name = air_temperature_of_new_state
   long_name = updated temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -73,7 +73,7 @@
   intent = inout
   optional = F
 [pqv]
-  standard_name = water_vapor_specific_humidity_updated_by_physics
+  standard_name = specific_humidity_updated_by_physics
   long_name = water vapor specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -91,7 +91,7 @@
   intent = in
   optional = F
 [qvdi]
-  standard_name = water_vapor_specific_humidity
+  standard_name = specific_humidity
   long_name = water vapor specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -100,7 +100,7 @@
   intent = in
   optional = F
 [pqvf]
-  standard_name = moisture_tendency_due_to_dynamics
+  standard_name = tendendy_of_specific_humidity_due_to_nonphysics
   long_name = moisture tendency due to dynamics only
   units = kg kg-1 s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -109,7 +109,7 @@
   intent = in
   optional = F
 [ptf]
-  standard_name = temperature_tendency_due_to_dynamics
+  standard_name = tendency_of_air_temperature_due_to_nonphysics
   long_name = temperature tendency due to dynamics only
   units = K s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -223,7 +223,7 @@
   intent = in
   optional = F
 [dt]
-  standard_name = time_step_for_physics
+  standard_name = timestep_for_physics
   long_name = physics time step
   units = s
   dimensions = ()
@@ -232,7 +232,7 @@
   intent = in
   optional = F
 [dx]
-  standard_name = cell_size
+  standard_name = characteristic_grid_lengthscale
   long_name = size of the grid cell
   units = m
   dimensions = (horizontal_loop_extent)
@@ -257,7 +257,7 @@
   intent = out
   optional = F
 [kcnv]
-  standard_name = flag_deep_convection
+  standard_name = flag_for_occurrence_of_deep_convection_in_column
   long_name = deep convection: 0=no, 1=yes
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -282,7 +282,7 @@
   intent = out
   optional = F
 [dd_mf]
-  standard_name = instantaneous_atmosphere_downdraft_convective_mass_flux
+  standard_name = atmosphere_downdraft_convective_mass_flux_integrated_over_physics_timestep
   long_name = (downdraft mass flux) * delt
   units = kg m-2
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -291,7 +291,7 @@
   intent = out
   optional = F
 [dt_mf]
-  standard_name = instantaneous_atmosphere_detrainment_convective_mass_flux
+  standard_name = atmosphere_detrainment_convective_mass_flux
   long_name = (detrainment mass flux) * delt
   units = kg m-2
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -309,7 +309,7 @@
   intent = out
   optional = F
 [cnvc]
-  standard_name = convective_cloud_cover
+  standard_name = convective_cloud_area_fraction
   long_name = convective cloud cover
   units = frac
   dimensions = (horizontal_loop_extent,vertical_dimension)

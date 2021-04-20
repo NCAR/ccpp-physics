@@ -24,7 +24,7 @@
   intent = in
   optional = F
 [dt]
-  standard_name = time_step_for_physics
+  standard_name = timestep_for_physics
   long_name = physics time step
   units = s
   dimensions = ()
@@ -51,7 +51,7 @@
   intent = in
   optional = F
 [q]
-  standard_name = water_vapor_specific_humidity_updated_by_physics
+  standard_name = specific_humidity_updated_by_physics
   long_name = water vapor specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -60,7 +60,7 @@
   intent = inout
   optional = F
 [cwm]
-  standard_name = cloud_condensed_water_mixing_ratio_updated_by_physics
+  standard_name = cloud_liquid_water_mixing_ratio_of_new_state
   long_name = moist cloud condensed water mixing ratio
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -69,7 +69,7 @@
   intent = inout
   optional = F
 [t]
-  standard_name = air_temperature_updated_by_physics
+  standard_name = air_temperature_of_new_state
   long_name = layer mean air temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -114,7 +114,7 @@
   intent = in
   optional = F
 [psautco]
-  standard_name = coefficient_from_cloud_ice_to_snow
+  standard_name = autoconversion_to_snow_coefficient
   long_name = conversion coefficient from cloud ice to snow
   units = none
   dimensions = (2)
@@ -123,7 +123,7 @@
   intent = in
   optional = F
 [prautco]
-  standard_name = coefficient_from_cloud_water_to_rain
+  standard_name = autoconversion_to_rain_coefficient
   long_name = conversion coefficient from cloud water to rain
   units = none
   dimensions = (2)
@@ -132,7 +132,7 @@
   intent = in
   optional = F
 [evpco]
-  standard_name = coefficient_for_evaporation_of_rainfall
+  standard_name = precipitation_evaporation_coefficient
   long_name = coefficient for evaporation of rainfall
   units = none
   dimensions = ()
@@ -141,7 +141,7 @@
   intent = in
   optional = F
 [wminco]
-  standard_name = cloud_condensed_water_conversion_threshold
+  standard_name = cloud_condensate_autoconversion_threshold_coefficient
   long_name = conversion coefficient from cloud liquid and ice to precipitation
   units = none
   dimensions = (2)

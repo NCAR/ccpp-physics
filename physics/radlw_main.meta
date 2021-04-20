@@ -8,7 +8,7 @@
   name = rrtmg_lw_run
   type = scheme
 [plyr]
-  standard_name = air_pressure_at_layer_for_radiation_in_hPa
+  standard_name = air_pressure_in_hPa
   long_name = air pressure layer
   units = hPa
   dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
@@ -17,7 +17,7 @@
   intent = in
   optional = F
 [plvl]
-  standard_name = air_pressure_at_interface_for_radiation_in_hPa
+  standard_name = air_pressure_at_interface_in_hPa
   long_name = air pressure level
   units = hPa
   dimensions = (horizontal_loop_extent,adjusted_vertical_level_dimension_for_radiation)
@@ -44,7 +44,7 @@
   intent = in
   optional = F
 [qlyr]
-  standard_name = water_vapor_specific_humidity_at_layer_for_radiation
+  standard_name = specific_humidity_at_layer_for_radiation
   long_name = specific humidity layer
   units = kg kg-1
   dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
@@ -53,7 +53,7 @@
   intent = in
   optional = F
 [olyr]
-  standard_name = ozone_concentration_at_layer_for_radiation
+  standard_name = ozone_concentration
   long_name = ozone concentration layer
   units = kg kg-1
   dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
@@ -143,7 +143,7 @@
   intent = in
   optional = F
 [icseed]
-  standard_name = seed_random_numbers_lw
+  standard_name = random_number_seed_for_mcica_longwave
   long_name = seed for random number generation for longwave radiation
   units = none
   dimensions = (horizontal_loop_extent)
@@ -196,7 +196,7 @@
   intent = in
   optional = F
 [delpin]
-  standard_name = layer_pressure_thickness_for_radiation
+  standard_name = layer_pressure_thickness
   long_name = layer pressure thickness
   units = hPa
   dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
@@ -255,7 +255,7 @@
   intent = in
   optional = F
 [cld_cf]
-  standard_name = total_cloud_fraction
+  standard_name = cloud_area_fracton
   long_name = total cloud fraction
   units = frac
   dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
@@ -264,7 +264,7 @@
   intent = in
   optional = F
 [lslwr]
-  standard_name = flag_to_calc_lw
+  standard_name = flag_for_calling_longwave_radiation
   long_name = flag to calculate LW irradiances
   units = flag
   dimensions = ()
@@ -272,7 +272,7 @@
   intent = in
   optional = F
 [hlwc]
-  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step_and_radiation_levels
+  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_timestep_and_radiation_levels
   long_name = longwave total sky heating rate
   units = K s-1
   dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
@@ -281,7 +281,7 @@
   intent = inout
   optional = F
 [topflx]
-  standard_name = lw_fluxes_top_atmosphere
+  standard_name = toa_lw_fluxes_assuming_total_and_clear_sky_on_radiation_timestep
   long_name = longwave total sky fluxes at the top of the atm
   units = W m-2
   dimensions = (horizontal_loop_extent)
@@ -289,7 +289,7 @@
   intent = inout
   optional = F
 [sfcflx]
-  standard_name = lw_fluxes_sfc
+  standard_name = surface_lw_fluxes_assuming_total_and_clear_sky_on_radiation_timestep
   long_name = longwave total sky fluxes at the Earth surface
   units = W m-2
   dimensions = (horizontal_loop_extent)
@@ -297,7 +297,7 @@
   intent = inout
   optional = F
 [cldtau]
-  standard_name = cloud_optical_depth_layers_at_10mu_band
+  standard_name = atmosphere_optical_thickness_due_to_cloud_at_10mu_band
   long_name = approx 10mu band layer cloud optical depth
   units = none
   dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
@@ -306,7 +306,7 @@
   intent = inout
   optional = F
 [hlw0]
-  standard_name = tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_time_step_and_radiation_levels
+  standard_name = tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_timestep_and_radiation_levels
   long_name = longwave clear sky heating rate
   units = K s-1
   dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
@@ -324,7 +324,7 @@
   intent = in
   optional = T
 [cld_ref_liq]
-  standard_name = mean_effective_radius_for_liquid_cloud
+  standard_name = effective_radius_of_cloud_liquid_water_particles_in_um
   long_name = mean effective radius for liquid cloud
   units = um
   dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
@@ -342,7 +342,7 @@
   intent = in
   optional = T
 [cld_ref_ice]
-  standard_name = mean_effective_radius_for_ice_cloud
+  standard_name = effective_radius_of_ice_liquid_water_particles_in_um
   long_name = mean effective radius for ice cloud
   units = um
   dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
@@ -360,7 +360,7 @@
   intent = in
   optional = T
 [cld_ref_rain]
-  standard_name = mean_effective_radius_for_rain_drop
+  standard_name = effective_radius_of_cloud_rain_particles_in_um
   long_name = mean effective radius for rain drop
   units = um
   dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
@@ -378,7 +378,7 @@
   intent = in
   optional = T
 [cld_ref_snow]
-  standard_name = mean_effective_radius_for_snow_flake
+  standard_name = effective_radius_of_cloud_snow_particles_in_um
   long_name = mean effective radius for snow flake
   units = um
   dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)

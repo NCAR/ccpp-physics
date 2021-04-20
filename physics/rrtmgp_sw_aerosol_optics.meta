@@ -8,7 +8,7 @@
   name = rrtmgp_sw_aerosol_optics_run
   type = scheme
 [doSWrad]
-  standard_name = flag_to_calc_sw
+  standard_name = flag_for_calling_shortwave_radiation
   long_name = logical flags for sw radiation calls
   units = flag
   dimensions = ()
@@ -48,7 +48,7 @@
   intent = in
   optional = F
 [nday]
-  standard_name = daytime_points_dimension
+  standard_name = number_of_daytime_points
   long_name = daytime points dimension
   units = count
   dimensions = ()
@@ -109,7 +109,7 @@
   intent = in
   optional = F
 [lsmask]
-  standard_name = sea_land_ice_mask_real
+  standard_name = area_type
   long_name = landmask: sea/land/ice=0/1/2
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -127,7 +127,7 @@
   intent = in
   optional = F
 [aerfld]
-  standard_name = aerosol_number_concentration_from_gocart_aerosol_climatology
+  standard_name = mass_number_concentration_of_aerosol_from_gocart_climatology
   long_name = GOCART aerosol climatology number concentration
   units = kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension,number_of_aerosol_tracers_MG)
@@ -136,8 +136,8 @@
   intent = in
   optional = F
 [lon]
-  standard_name = longitude
-  long_name = longitude
+  standard_name = longitude_in_radians
+  long_name = longitude_in_radians
   units = radian
   dimensions = (horizontal_loop_extent)
   type = real
@@ -145,8 +145,8 @@
   intent = in
   optional = F
 [lat]
-  standard_name = latitude
-  long_name = latitude
+  standard_name = latitude_in_radians
+  long_name = latitude_in_radians
   units = radian
   dimensions = (horizontal_loop_extent)
   type = real

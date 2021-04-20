@@ -32,7 +32,7 @@
   intent = in
   optional = F
 [mntvar]
-  standard_name = statistical_measures_of_subgrid_orography
+  standard_name = statistical_measures_of_subgrid_orography_collection_array
   long_name = array of statistical measures of subgrid orography
   units = various
   dimensions = (horizontal_loop_extent,number_of_statistical_measures_of_subgrid_orography)
@@ -140,7 +140,7 @@
   intent = out
   optional = F
 [lssav]
-  standard_name = flag_diagnostics
+  standard_name = flag_for_diagnostics
   long_name = logical flag for storing diagnostics
   units = flag
   dimensions = ()
@@ -148,7 +148,7 @@
   intent = in
   optional = F
 [ldiag3d]
-  standard_name = flag_diagnostics_3D
+  standard_name = flag_for_xyz_dimensioned_diagnostics
   long_name = flag for 3d diagnostic fields
   units = flag
   dimensions = ()
@@ -210,7 +210,7 @@
   intent = inout
   optional = F
 [dtf]
-  standard_name = time_step_for_dynamics
+  standard_name = timestep_for_dynamics
   long_name = dynamics timestep
   units = s
   dimensions = ()
@@ -219,7 +219,7 @@
   intent = in
   optional = F
 [flag_for_gwd_generic_tend]
-  standard_name = flag_for_generic_gravity_wave_drag_tendency
+  standard_name = flag_for_generic_tendency_due_to_gravity_wave_drag
   long_name = true if GFS_GWD_generic should calculate tendencies
   units = flag
   dimensions = ()
@@ -255,7 +255,7 @@
   name = GFS_GWD_generic_post_run
   type = scheme
 [lssav]
-  standard_name = flag_diagnostics
+  standard_name = flag_for_diagnostics
   long_name = flag for calculating diagnostic fields
   units = flag
   dimensions = ()
@@ -263,7 +263,7 @@
   intent = in
   optional = F
 [ldiag3d]
-  standard_name = flag_diagnostics_3D
+  standard_name = flag_for_xyz_dimensioned_diagnostics
   long_name = flag for calculating 3-D diagnostic fields
   units = flag
   dimensions = ()
@@ -271,7 +271,7 @@
   intent = in
   optional = F
 [dtf]
-  standard_name = time_step_for_dynamics
+  standard_name = timestep_for_dynamics
   long_name = dynamics time step
   units = s
   dimensions = ()
@@ -280,7 +280,7 @@
   intent = in
   optional = F
 [dusfcg]
-  standard_name = instantaneous_x_stress_due_to_gravity_wave_drag
+  standard_name = x_stress_due_to_gravity_wave_drag
   long_name = zonal surface stress due to orographic gravity wave drag
   units = Pa
   dimensions = (horizontal_loop_extent)
@@ -289,7 +289,7 @@
   intent = in
   optional = F
 [dvsfcg]
-  standard_name = instantaneous_y_stress_due_to_gravity_wave_drag
+  standard_name = y_stress_due_to_gravity_wave_drag
   long_name = meridional surface stress due to orographic gravity wave drag
   units = Pa
   dimensions = (horizontal_loop_extent)
@@ -370,7 +370,7 @@
   intent = inout
   optional = F
 [flag_for_gwd_generic_tend]
-  standard_name = flag_for_generic_gravity_wave_drag_tendency
+  standard_name = flag_for_generic_tendency_due_to_gravity_wave_drag
   long_name = true if GFS_GWD_generic should calculate tendencies
   units = flag
   dimensions = ()

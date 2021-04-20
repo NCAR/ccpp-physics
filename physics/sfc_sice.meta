@@ -16,7 +16,7 @@
   intent = in
   optional = F
 [kice]
-  standard_name = ice_vertical_dimension
+  standard_name = vertical_dimension_of_sea_ice
   long_name = vertical loop extent for ice levels, start at 1
   units = count
   dimensions = ()
@@ -132,7 +132,7 @@
   intent = in
   optional = F
 [q1]
-  standard_name = water_vapor_specific_humidity_at_lowest_model_layer
+  standard_name = specific_humidity_at_lowest_model_layer
   long_name = surface layer mean specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent)
@@ -141,7 +141,7 @@
   intent = in
   optional = F
 [delt]
-  standard_name = time_step_for_dynamics
+  standard_name = timestep_for_dynamics
   long_name = time step
   units = s
   dimensions = ()
@@ -159,7 +159,7 @@
   intent = in
   optional = F
 [dlwflx]
-  standard_name = surface_downwelling_longwave_flux_absorbed_by_ground_over_ice
+  standard_name = surface_downwelling_longwave_flux_absorbed_by_surface_over_ice
   long_name = total sky surface downward longwave flux absorbed by the ground over ice
   units = W m-2
   dimensions = (horizontal_loop_extent)
@@ -186,7 +186,7 @@
   intent = in
   optional = F
 [srflag]
-  standard_name = flag_for_precipitation_type
+  standard_name = precipitation_type
   long_name = snow/rain flag for precipitation
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -291,7 +291,7 @@
   intent = inout
   optional = F
 [fice]
-  standard_name = sea_ice_concentration
+  standard_name = sea_ice_area_fraction_in_sea_water
   long_name = sea-ice concentration [0,1]
   units = frac
   dimensions = (horizontal_loop_extent)
@@ -309,7 +309,7 @@
   intent = inout
   optional = F
 [weasd]
-  standard_name = water_equivalent_accumulated_snow_depth_over_ice
+  standard_name = lwe_thickness_of_surface_snow_amount_over_ice
   long_name = water equiv of acc snow depth over ice
   units = mm
   dimensions = (horizontal_loop_extent)
@@ -336,10 +336,10 @@
   intent = inout
   optional = F
 [tiice]
-  standard_name = internal_ice_temperature
+  standard_name = temperature_in_ice_layer
   long_name = sea ice internal temperature
   units = K
-  dimensions = (horizontal_loop_extent,ice_vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension_of_sea_ice)
   type = real
   kind = kind_phys
   intent = inout
@@ -354,7 +354,7 @@
   intent = inout
   optional = F
 [snwdph]
-  standard_name = surface_snow_thickness_water_equivalent_over_ice
+  standard_name = lwe_surface_snow_over_ice
   long_name = water equivalent snow depth over ice
   units = mm
   dimensions = (horizontal_loop_extent)
@@ -426,7 +426,7 @@
   intent = inout
   optional = F
 [frac_grid]
-  standard_name = flag_for_fractional_grid
+  standard_name = flag_for_fractional_landmask
   long_name = flag for fractional grid
   units = flag
   dimensions = ()
@@ -434,7 +434,7 @@
   intent = in
   optional = F
 [icy]
-  standard_name = flag_nonzero_sea_ice_surface_fraction
+  standard_name = flag_for_nonzero_sea_ice_surface_fraction
   long_name = flag indicating presence of some sea ice surface area fraction
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -450,7 +450,7 @@
   intent = in
   optional = F
 [min_lakeice]
-  standard_name = lake_ice_minimum
+  standard_name = min_lake_ice_area_fraction
   long_name = minimum lake ice value
   units = frac
   dimensions = ()
@@ -459,7 +459,7 @@
   intent = in
   optional = F
 [min_seaice]
-  standard_name = sea_ice_minimum
+  standard_name = min_sea_ice_area_fraction
   long_name = minimum sea ice value
   units = frac
   dimensions = ()

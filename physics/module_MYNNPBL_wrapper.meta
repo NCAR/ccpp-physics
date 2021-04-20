@@ -8,7 +8,7 @@
   name = mynnedmf_wrapper_init
   type = scheme
 [lheatstrg]
-  standard_name = flag_for_canopy_heat_storage
+  standard_name = flag_for_canopy_heat_storage_in_land_surface_scheme
   long_name = flag for canopy heat storage parameterization
   units = flag
   dimensions = ()
@@ -70,7 +70,7 @@
   intent = in
   optional = F
 [lssav]
-  standard_name = flag_diagnostics
+  standard_name = flag_for_diagnostics
   long_name = logical flag for storing diagnostics
   units = flag
   dimensions = ()
@@ -78,7 +78,7 @@
   intent = in
   optional = F
 [ldiag3d]
-  standard_name = flag_diagnostics_3D
+  standard_name = flag_for_xyz_dimensioned_diagnostics
   long_name = flag for 3d diagnostic fields
   units = flag
   dimensions = ()
@@ -86,7 +86,7 @@
   intent = in
   optional = F
 [qdiag3d]
-  standard_name = flag_tracer_diagnostics_3D
+  standard_name = flag_for_tracer_xyz_dimensioned_diagnostics
   long_name = flag for 3d tracer diagnostic fields
   units = flag
   dimensions = ()
@@ -94,7 +94,7 @@
   intent = in
   optional = F
 [lsidea]
-  standard_name = flag_idealized_physics
+  standard_name = flag_for_integrated_dynamics_through_earths_atmosphere
   long_name = flag for idealized physics
   units = flag
   dimensions = ()
@@ -102,7 +102,7 @@
   intent = in
   optional = F
 [cplflx]
-  standard_name = flag_for_flux_coupling
+  standard_name = flag_for_surface_flux_coupling
   long_name = flag controlling cplflx collection (default off)
   units = flag
   dimensions = ()
@@ -110,7 +110,7 @@
   intent = in
   optional = F
 [delt]
-  standard_name = time_step_for_physics
+  standard_name = timestep_for_physics
   long_name = time step for physics
   units = s
   dimensions = ()
@@ -119,7 +119,7 @@
   intent = in
   optional = F
 [dtf]
-  standard_name = time_step_for_dynamics
+  standard_name = timestep_for_dynamics
   long_name = dynamics timestep
   units = s
   dimensions = ()
@@ -128,7 +128,7 @@
   intent = in
   optional = F
 [dx]
-  standard_name = cell_size
+  standard_name = characteristic_grid_lengthscale
   long_name = size of the grid cell
   units = m
   dimensions = (horizontal_loop_extent)
@@ -191,7 +191,7 @@
   intent = in
   optional = F
 [qgrs_water_vapor]
-  standard_name = water_vapor_specific_humidity
+  standard_name = specific_humidity
   long_name = water vapor specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -218,7 +218,7 @@
   intent = in
   optional = F
 [qgrs_cloud_droplet_num_conc]
-  standard_name = cloud_droplet_number_concentration
+  standard_name = mass_number_concentration_of_cloud_droplets
   long_name = number concentration of cloud droplets (liquid)
   units = kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -227,7 +227,7 @@
   intent = in
   optional = F
 [qgrs_cloud_ice_num_conc]
-  standard_name = ice_number_concentration
+  standard_name = mass_number_concentration_of_cloud_ice
   long_name = number concentration of ice
   units = kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -245,7 +245,7 @@
   intent = in
   optional = F
 [qgrs_water_aer_num_conc]
-  standard_name = water_friendly_aerosol_number_concentration
+  standard_name = mass_number_concentration_of_hygroscopic_aerosols
   long_name = number concentration of water-friendly aerosols
   units = kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -254,7 +254,7 @@
   intent = in
   optional = F
 [qgrs_ice_aer_num_conc]
-  standard_name = ice_friendly_aerosol_number_concentration
+  standard_name = mass_number_concentration_of_nonhygroscopic_ice_nucleating_aerosols
   long_name = number concentration of ice-friendly aerosols
   units = kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -281,7 +281,7 @@
   intent = in
   optional = F
 [slmsk]
-  standard_name = sea_land_ice_mask_real
+  standard_name = area_type
   long_name = landmask: sea/land/ice=0/1/2
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -479,7 +479,7 @@
   intent = inout
   optional = F
 [dusfc_cice]
-  standard_name = surface_x_momentum_flux_for_coupling
+  standard_name = surface_x_momentum_flux_from_coupled_process
   long_name = sfc x momentum flux for coupling
   units = Pa
   dimensions = (horizontal_loop_extent)
@@ -488,7 +488,7 @@
   intent = in
   optional = F
 [dvsfc_cice]
-  standard_name = surface_y_momentum_flux_for_coupling
+  standard_name = surface_y_momentum_flux_from_coupled_process
   long_name = sfc y momentum flux for coupling
   units = Pa
   dimensions = (horizontal_loop_extent)
@@ -497,7 +497,7 @@
   intent = in
   optional = F
 [dtsfc_cice]
-  standard_name = surface_upward_sensible_heat_flux_for_coupling
+  standard_name = surface_upward_sensible_heat_flux_from_coupled_process
   long_name = sfc sensible heat flux for coupling
   units = W m-2
   dimensions = (horizontal_loop_extent)
@@ -506,7 +506,7 @@
   intent = in
   optional = F
 [dqsfc_cice]
-  standard_name = surface_upward_latent_heat_flux_for_coupling
+  standard_name = surface_upward_latent_heat_flux_from_coupled_process
   long_name = sfc latent heat flux for coupling
   units = W m-2
   dimensions = (horizontal_loop_extent)
@@ -551,7 +551,7 @@
   intent = in
   optional = F
 [fice]
-  standard_name = sea_ice_concentration
+  standard_name = sea_ice_area_fraction_in_sea_water
   long_name = ice fraction over open water
   units = frac
   dimensions = (horizontal_loop_extent)
@@ -560,7 +560,7 @@
   intent = in
   optional = F
 [wet]
-  standard_name = flag_nonzero_wet_surface_fraction
+  standard_name = flag_for_nonzero_wet_surface_fraction
   long_name = flag indicating presence of some ocean or lake surface area fraction
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -568,7 +568,7 @@
   intent = in
   optional = F
 [icy]
-  standard_name = flag_nonzero_sea_ice_surface_fraction
+  standard_name = flag_for_nonzero_sea_ice_surface_fraction
   long_name = flag indicating presence of some sea ice surface area fraction
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -576,7 +576,7 @@
   intent = in
   optional = F
 [dry]
-  standard_name = flag_nonzero_land_surface_fraction
+  standard_name = flag_for_nonzero_land_surface_fraction
   long_name = flag indicating presence of some land surface area fraction
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -665,7 +665,7 @@
   intent = in
   optional = F
 [qke]
-  standard_name = tke_at_mass_points
+  standard_name = nonadvected_turbulent_kinetic_energy_multiplied_by_2
   long_name = 2 x tke at mass points
   units = m2 s-2
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -683,7 +683,7 @@
   intent = inout
   optional = F
 [tsq]
-  standard_name = t_prime_squared
+  standard_name = variance_of_air_temperature
   long_name = temperature fluctuation squared
   units = K2
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -692,7 +692,7 @@
   intent = out
   optional = F
 [qsq]
-  standard_name = q_prime_squared
+  standard_name = variance_of_specific_humidity
   long_name = water vapor fluctuation squared
   units = kg2 kg-2
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -701,7 +701,7 @@
   intent = out
   optional = F
 [cov]
-  standard_name = t_prime_q_prime
+  standard_name = covariance_of_air_temperature_and_specific_humidity
   long_name = covariance of temperature and moisture
   units = K kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -710,7 +710,7 @@
   intent = out
   optional = F
 [el_pbl]
-  standard_name = mixing_length
+  standard_name = turbulent_mixing_length
   long_name = mixing length in meters
   units = m
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -772,7 +772,7 @@
   intent = inout
   optional = F
 [QI_BL]
-  standard_name = subgrid_cloud_ice_mixing_ratio_pbl
+  standard_name = subgrid_scale_cloud_ice_mixing_ratio
   long_name = subgrid cloud ice mixing ratio from PBL scheme
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -781,7 +781,7 @@
   intent = inout
   optional = F
 [CLDFRA_BL]
-  standard_name = subgrid_cloud_fraction_pbl
+  standard_name = subgrid_scale_cloud_area_fraction_in_atmosphere_layer
   long_name = subgrid cloud fraction from PBL scheme
   units = frac
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -941,7 +941,7 @@
   intent = inout
   optional = F
 [dqdt_liquid_cloud]
-  standard_name = tendency_of_liquid_cloud_water_mixing_ratio_due_to_model_physics
+  standard_name = tendency_of_cloud_liquid_water_mixing_ratio_due_to_model_physics
   long_name = cloud condensed water mixing ratio tendency due to model physics
   units = kg kg-1 s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -950,7 +950,7 @@
   intent = inout
   optional = F
 [dqdt_ice_cloud]
-  standard_name = tendency_of_ice_cloud_water_mixing_ratio_due_to_model_physics
+  standard_name = tendency_of_cloud_ice_mixing_ratio_due_to_model_physics
   long_name = cloud condensed water mixing ratio tendency due to model physics
   units = kg kg-1 s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -968,7 +968,7 @@
   intent = inout
   optional = F
 [dqdt_cloud_droplet_num_conc]
-  standard_name = tendency_of_cloud_droplet_number_concentration_due_to_model_physics
+  standard_name = tendency_of_mass_number_concentration_of_cloud_liquid_water_particles_in_air_due_to_model_physics
   long_name = number conc. of cloud droplets (liquid) tendency due to model physics
   units = kg-1 s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -977,7 +977,7 @@
   intent = inout
   optional = F
 [dqdt_ice_num_conc]
-  standard_name = tendency_of_ice_number_concentration_due_to_model_physics
+  standard_name = tendency_of_mass_number_concentration_of_ice_crystals_in_air_due_to_model_physics
   long_name = number conc. of ice tendency due to model physics
   units = kg-1 s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -995,7 +995,7 @@
   intent = inout
   optional = F
 [dqdt_ice_aer_num_conc]
-  standard_name = tendency_of_ice_friendly_aerosol_number_concentration_due_to_model_physics
+  standard_name = tendency_of_ice_friendly_aerosol_mass_number_concentration_due_to_model_physics
   long_name = number conc. of ice-friendly aerosols tendency due to model physics
   units = kg-1 s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -1004,7 +1004,7 @@
   intent = inout
   optional = F
 [flag_for_pbl_generic_tend]
-  standard_name = flag_for_generic_planetary_boundary_layer_tendency
+  standard_name = flag_for_generic_tendency_due_to_plantary_boundary_layer
   long_name = true if GFS_PBL_generic should calculate tendencies
   units = flag
   dimensions = ()
@@ -1075,7 +1075,7 @@
   intent = inout
   optional = F
 [htrsw]
-  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step
+  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_timestep
   long_name = total sky sw heating rate
   units = K s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -1084,7 +1084,7 @@
   intent = in
   optional = F
 [htrlw]
-  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step
+  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_timestep
   long_name = total sky lw heating rate
   units = K s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -1102,7 +1102,7 @@
   intent = in
   optional = F
 [grav_settling]
-  standard_name = grav_settling
+  standard_name = control_for_gravitational_settling_of_cloud_droplets
   long_name = flag to activate gravitational setting of fog
   units = flag
   dimensions = ()
@@ -1110,7 +1110,7 @@
   intent = in
   optional = F
 [bl_mynn_tkebudget]
-  standard_name = tke_budget
+  standard_name = control_for_tke_budget_output
   long_name = flag for activating TKE budget
   units = flag
   dimensions = ()
@@ -1118,7 +1118,7 @@
   intent = in
   optional = F
 [bl_mynn_tkeadvect]
-  standard_name = tke_advect
+  standard_name = flag_for_tke_advection
   long_name = flag for activating TKE advect
   units = flag
   dimensions = ()
@@ -1126,7 +1126,7 @@
   intent = in
   optional = F
 [bl_mynn_cloudpdf]
-  standard_name = cloudpdf
+  standard_name = control_for_cloud_pdf_in_mellor_yamada_nakanishi_niino_pbl_scheme
   long_name = flag to determine which cloud PDF to use
   units = flag
   dimensions = ()
@@ -1134,7 +1134,7 @@
   intent = in
   optional = F
 [bl_mynn_mixlength]
-  standard_name = mixing_length_flag
+  standard_name = control_for_mixing_length_in_mellor_yamada_nakanishi_niino_pbl_scheme
   long_name = flag to determine which mixing length form to use
   units = flag
   dimensions = ()
@@ -1142,7 +1142,7 @@
   intent = in
   optional = F
 [bl_mynn_edmf]
-  standard_name = edmf_flag
+  standard_name = control_for_edmf_in_mellor_yamada_nakanishi_niino_pbl_scheme
   long_name = flag to activate the mass-flux scheme
   units = flag
   dimensions = ()
@@ -1150,7 +1150,7 @@
   intent = in
   optional = F
 [bl_mynn_edmf_mom]
-  standard_name = edmf_momentum_transport_flag
+  standard_name = control_for_edmf_momentum_transport_in_mellor_yamada_nakanishi_niino_pbl_scheme
   long_name = flag to activate the transport of momentum
   units = flag
   dimensions = ()
@@ -1158,7 +1158,7 @@
   intent = in
   optional = F
 [bl_mynn_edmf_tke]
-  standard_name = edmf_tke_transport_flag
+  standard_name = control_for_edmf_tke_transport_in_mellor_yamada_nakanishi_niino_pbl_scheme
   long_name = flag to activate the transport of TKE
   units = flag
   dimensions = ()
@@ -1166,7 +1166,7 @@
   intent = in
   optional = F
 [bl_mynn_edmf_part]
-  standard_name = edmf_partition_flag
+  standard_name = control_for_edmf_partitioning_in_mellor_yamada_nakanishi_niino_pbl_scheme
   long_name = flag to partitioning of the MF and ED areas
   units = flag
   dimensions = ()
@@ -1174,7 +1174,7 @@
   intent = in
   optional = F
 [bl_mynn_cloudmix]
-  standard_name = cloud_specie_mix_flag
+  standard_name = control_for_cloud_species_mixing_in_mellor_yamada_nakanishi_niino_pbl_scheme
   long_name = flag to activate mixing of cloud species
   units = flag
   dimensions = ()
@@ -1182,7 +1182,7 @@
   intent = in
   optional = F
 [bl_mynn_mixqt]
-  standard_name = mix_total_water_flag
+  standard_name = control_for_total_water_mixing_in_mellor_yamada_nakanishi_niino_pbl_scheme
   long_name = flag to mix total water or individual species
   units = flag
   dimensions = ()
@@ -1190,7 +1190,7 @@
   intent = in
   optional = F
 [bl_mynn_output]
-  standard_name = mynn_output_flag
+  standard_name = control_for_additional_diagnostics_in_mellor_yamada_nakanishi_niino_pbl_scheme
   long_name = flag initialize and output extra 3D variables
   units = flag
   dimensions = ()
@@ -1198,7 +1198,7 @@
   intent = in
   optional = F
 [icloud_bl]
-  standard_name = couple_sgs_clouds_to_radiation_flag
+  standard_name = control_for_sgs_cloud_radiation_coupling_in_mellor_yamamda_nakanishi_niino_pbl_scheme
   long_name = flag for coupling sgs clouds to radiation
   units = flag
   dimensions = ()
@@ -1206,7 +1206,7 @@
   intent = in
   optional = F
 [do_mynnsfclay]
-  standard_name = do_mynnsfclay
+  standard_name = flag_for_mellor_yamada_nakanishi_niino_surface_layer_scheme
   long_name = flag to activate MYNN surface layer
   units = flag
   dimensions = ()
@@ -1214,7 +1214,7 @@
   intent = in
   optional = F
 [imp_physics]
-  standard_name = flag_for_microphysics_scheme
+  standard_name = control_for_microphysics_scheme
   long_name = choice of microphysics scheme
   units = flag
   dimensions = ()
@@ -1222,7 +1222,7 @@
   intent = in
   optional = F
 [imp_physics_gfdl]
-  standard_name = flag_for_gfdl_microphysics_scheme
+  standard_name = identifier_for_gfdl_microphysics_scheme
   long_name = choice of GFDL microphysics scheme
   units = flag
   dimensions = ()
@@ -1230,7 +1230,7 @@
   intent = in
   optional = F
 [imp_physics_thompson]
-  standard_name = flag_for_thompson_microphysics_scheme
+  standard_name = identifier_for_thompson_microphysics_scheme
   long_name = choice of Thompson microphysics scheme
   units = flag
   dimensions = ()
@@ -1238,7 +1238,7 @@
   intent = in
   optional = F
 [imp_physics_wsm6]
-  standard_name = flag_for_wsm6_microphysics_scheme
+  standard_name = identifier_for_wsm6_microphysics_scheme
   long_name = choice of WSM6 microphysics scheme
   units = flag
   dimensions = ()

@@ -78,7 +78,7 @@
   intent = in
   optional = F
 [q1]
-  standard_name = water_vapor_specific_humidity
+  standard_name = specific_humidity
   long_name = mid-layer specific humidity of water vapor
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -149,7 +149,7 @@
   intent = in
   optional = F
 [deltim]
-  standard_name = time_step_for_physics
+  standard_name = timestep_for_physics
   long_name = physics time step
   units = s
   dimensions = ()
@@ -346,7 +346,7 @@
   intent = out
   optional = F
 [dusfc]
-  standard_name = instantaneous_x_stress_due_to_gravity_wave_drag
+  standard_name = x_stress_due_to_gravity_wave_drag
   long_name = zonal surface stress due to orographic gravity wave drag
   units = Pa
   dimensions = (horizontal_loop_extent)
@@ -355,7 +355,7 @@
   intent = out
   optional = F
 [dvsfc]
-  standard_name = instantaneous_y_stress_due_to_gravity_wave_drag
+  standard_name = y_stress_due_to_gravity_wave_drag
   long_name = meridional surface stress due to orographic gravity wave drag
   units = Pa
   dimensions = (horizontal_loop_extent)
@@ -436,7 +436,7 @@
   intent = out
   optional = F
 [slmsk]
-  standard_name = sea_land_ice_mask_real
+  standard_name = area_type
   long_name = landmask: sea/land/ice=0/1/2
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -525,7 +525,7 @@
   intent = in
   optional = F
 [cdmbgwd]
-  standard_name = multiplication_factors_for_mountain_blocking_and_orographic_gravity_wave_drag
+  standard_name = multiplicative_tunable_parameters_for_mountain_blocking_and_orographic_gravity_wave_drag
   long_name = multiplic. factors for (1) mountain blocking drag coeff. and (2) ref. level orographic gravity wave drag
   units = none
   dimensions = (2)
@@ -575,7 +575,7 @@
   intent = out
   optional = F
 [dx]
-  standard_name = cell_size
+  standard_name = characteristic_grid_lengthscale
   long_name = size of the grid cell
   units = m
   dimensions = (horizontal_loop_extent)
@@ -584,7 +584,7 @@
   intent = in
   optional = F
 [gwd_opt]
-  standard_name = gwd_opt
+  standard_name = control_for_drag_suite_gravity_wave_drag
   long_name = flag to choose gwd scheme
   units = flag
   dimensions = ()

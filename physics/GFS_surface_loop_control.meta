@@ -110,7 +110,7 @@
   intent = inout
   optional = F
 [dry]
-  standard_name = flag_nonzero_land_surface_fraction
+  standard_name = flag_for_nonzero_land_surface_fraction
   long_name = flag indicating presence of some land surface area fraction
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -118,7 +118,7 @@
   intent = in
   optional = F
 [wet]
-  standard_name = flag_nonzero_wet_surface_fraction
+  standard_name = flag_for_nonzero_wet_surface_fraction
   long_name = flag indicating presence of some ocean or lake surface area fraction
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -126,7 +126,7 @@
   intent = in
   optional = F
 [icy]
-  standard_name = flag_nonzero_sea_ice_surface_fraction
+  standard_name = flag_for_nonzero_sea_ice_surface_fraction
   long_name = flag indicating presence of some sea ice surface area fraction
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -134,7 +134,7 @@
   intent = in
   optional = F
 [nstf_name1]
-  standard_name = flag_for_nsstm_run
+  standard_name = control_for_nsstm
   long_name = NSSTM flag: off/uncoupled/coupled=0/1/2
   units = flag
   dimensions = ()

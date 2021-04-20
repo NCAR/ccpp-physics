@@ -25,7 +25,7 @@
   intent = in
   optional = F
 [nThreads]
-  standard_name = omp_threads
+  standard_name = number_of_openmp_threads
   long_name = number of OpenMP threads available to scheme
   units = count
   dimensions = ()
@@ -42,7 +42,7 @@
   optional = F
   kind = len=128
 [rrtmgp_sw_file_gas]
-  standard_name = rrtmgp_kdistribution_sw
+  standard_name = filename_of_rrtmgp_shortwave_k_distribution
   long_name = file containing RRTMGP SW k-distribution
   units = none
   dimensions =  ()
@@ -75,7 +75,7 @@
   intent = in
   optional = F
 [mpicomm]
-  standard_name = mpi_comm
+  standard_name = mpi_communicator
   long_name = MPI communicator
   units = index
   dimensions = ()
@@ -105,7 +105,7 @@
   name = rrtmgp_sw_gas_optics_run
   type = scheme
 [doSWrad]
-  standard_name = flag_to_calc_sw
+  standard_name = flag_for_calling_shortwave_radiation
   long_name = flag to calculate SW irradiances
   units = flag
   dimensions = ()
@@ -129,7 +129,7 @@
   intent = in
   optional = F
 [nday]
-  standard_name = daytime_points_dimension
+  standard_name = number_of_daytime_points
   long_name = daytime points dimension
   units = count
   dimensions = ()
@@ -145,7 +145,7 @@
   intent = in
   optional = F
 [ngptsGPsw]
-  standard_name = number_of_sw_spectral_points_rrtmgp
+  standard_name = number_of_shortwave_spectral_points
   long_name = number of spectral points in RRTMGP SW calculation
   units = count
   dimensions =  ()
@@ -192,7 +192,7 @@
   standard_name = toa_incident_sw_flux_by_spectral_point
   long_name = TOA shortwave incident flux at each spectral points
   units = W m-2
-  dimensions = (horizontal_loop_extent,number_of_sw_spectral_points_rrtmgp)
+  dimensions = (horizontal_loop_extent,number_of_shortwave_spectral_points)
   type = real
   kind = kind_phys
   intent = out

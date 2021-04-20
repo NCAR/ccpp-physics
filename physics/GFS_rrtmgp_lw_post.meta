@@ -24,7 +24,7 @@
   intent = in
   optional = F   
 [lslwr]
-  standard_name = flag_to_calc_lw
+  standard_name = flag_for_calling_longwave_radiation
   long_name = logical flags for lw radiation calls
   units = flag
   dimensions = ()
@@ -32,7 +32,7 @@
   intent = in
   optional = F   
 [do_lw_clrsky_hr]
-  standard_name = flag_for_output_of_longwave_heating_rate
+  standard_name = flag_for_output_of_tendency_of_air_temperature_due_to_longwave_heating_on_radiation_timestep_assuming_clear_sky
   long_name = flag to output lw heating rate
   units = flag
   dimensions = ()
@@ -40,7 +40,7 @@
   intent = in
   optional = F   
 [save_diag]
-  standard_name = flag_diagnostics
+  standard_name = flag_for_diagnostics
   long_name = logical flag for storing diagnostics
   units = flag
   dimensions = ()
@@ -48,7 +48,7 @@
   intent = in
   optional = F 
 [fhlwr]
-  standard_name = frequency_for_longwave_radiation
+  standard_name = period_of_longwave_radiation_calls
   long_name = frequency for longwave radiation
   units = s
   dimensions = ()
@@ -93,7 +93,7 @@
   intent = in
   optional = F
 [fluxlwDOWN_allsky]
-  standard_name = RRTMGP_lw_flux_profile_downward_allsky
+  standard_name = RRTMGP_longwave_flux_downward_allsky
   long_name = RRTMGP downward longwave all-sky flux profile
   units = W m-2
   dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
@@ -120,7 +120,7 @@
   intent = in
   optional = F
 [raddt]
-  standard_name = time_step_for_radiation
+  standard_name = timestep_for_radiation
   long_name = radiation time step
   units = s
   dimensions = ()
@@ -138,7 +138,7 @@
   intent = in
   optional = F
 [cldsa]
-  standard_name = cloud_area_fraction_for_radiation
+  standard_name = cloud_area_fraction_in_atmosphere_layer
   long_name = fraction of clouds for low, middle, high, total and BL
   units = frac
   dimensions = (horizontal_loop_extent,5)
@@ -163,7 +163,7 @@
   intent = in
   optional = F
 [cld_frac]
-  standard_name = total_cloud_fraction
+  standard_name = cloud_area_fracton
   long_name = layer total cloud fraction
   units = frac
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -181,16 +181,16 @@
   intent = in
   optional = F
 [fluxr]
-  standard_name = cumulative_radiation_diagnostic
+  standard_name = diagnostics_for_shortwave_and_longwave_radiation
   long_name = time-accumulated 2D radiation-related diagnostic fields
   units = various
-  dimensions = (horizontal_loop_extent,number_of_radiation_diagnostic_variables)
+  dimensions = (horizontal_loop_extent,number_of_diagnostics_variables_for_radiation)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [sfcdlw]
-  standard_name = surface_downwelling_longwave_flux_on_radiation_time_step
+  standard_name = surface_downwelling_longwave_flux_on_radiation_timestep
   long_name = total sky sfc downward lw flux
   units = W m-2
   dimensions = (horizontal_loop_extent)
@@ -208,7 +208,7 @@
   intent = inout
   optional = F
 [sfcflw]
-  standard_name = lw_fluxes_sfc
+  standard_name = surface_lw_fluxes_assuming_total_and_clear_sky_on_radiation_timestep
   long_name = lw radiation fluxes at sfc
   units = W m-2
   dimensions = (horizontal_loop_extent)
@@ -216,7 +216,7 @@
   intent = inout  
   optional = F
 [tsflw]
-  standard_name = surface_midlayer_air_temperature_in_longwave_radiation
+  standard_name = air_temperature_at_surface_adjacent_layer_on_radiation_timestep
   long_name = surface air temp during lw calculation
   units = K
   dimensions = (horizontal_loop_extent)
@@ -225,7 +225,7 @@
   intent = inout  
   optional = F  
 [htrlw]
-  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step
+  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_timestep
   long_name = total sky lw heating rate
   units = K s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -234,7 +234,7 @@
   intent = inout  
   optional = F
 [topflw]
-  standard_name = lw_fluxes_top_atmosphere
+  standard_name = toa_lw_fluxes_assuming_total_and_clear_sky_on_radiation_timestep
   long_name = lw radiation fluxes at top
   units = W m-2
   dimensions = (horizontal_loop_extent)
@@ -250,7 +250,7 @@
   intent = inout
   optional = T
 [htrlwc]
-  standard_name = tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_time_step
+  standard_name = tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_timestep
   long_name = longwave clear sky heating rate
   units = K s-1
   dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)

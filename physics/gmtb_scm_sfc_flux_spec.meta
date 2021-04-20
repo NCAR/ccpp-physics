@@ -8,7 +8,7 @@
   name = gmtb_scm_sfc_flux_spec_init
   type = scheme
 [lheatstrg]
-  standard_name = flag_for_canopy_heat_storage
+  standard_name = flag_for_canopy_heat_storage_in_land_surface_scheme
   long_name = flag for canopy heat storage parameterization
   units = flag
   dimensions = ()
@@ -74,7 +74,7 @@
   intent = in
   optional = F
 [q1]
-  standard_name = water_vapor_specific_humidity_at_lowest_model_layer
+  standard_name = specific_humidity_at_lowest_model_layer
   long_name = 1st model layer specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent)
@@ -263,7 +263,7 @@
   intent = out
   optional = F
 [fm]
-  standard_name = Monin_Obukhov_similarity_function_for_momentum
+  standard_name = monin_obukhov_similarity_function_for_momentum
   long_name = Monin-Obukhov similarity function for momentum
   units = none
   dimensions = (horizontal_loop_extent)
@@ -272,7 +272,7 @@
   intent = out
   optional = F
 [fh]
-  standard_name = Monin_Obukhov_similarity_function_for_heat
+  standard_name = monin_obukhov_similarity_function_for_heat
   long_name = Monin-Obukhov similarity function for heat
   units = none
   dimensions = (horizontal_loop_extent)
@@ -326,7 +326,7 @@
   intent = out
   optional = F
 [t2m]
-  standard_name = temperature_at_2m
+  standard_name = air_temperature_at_2m
   long_name = 2 meter temperature
   units = K
   dimensions = (horizontal_loop_extent)

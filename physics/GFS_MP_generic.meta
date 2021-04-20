@@ -24,7 +24,7 @@
   intent = in
   optional = F
 [ldiag3d]
-  standard_name = flag_diagnostics_3D
+  standard_name = flag_for_xyz_dimensioned_diagnostics
   long_name = logical flag for 3D diagnostics
   units = flag
   dimensions = ()
@@ -32,7 +32,7 @@
   intent = in
   optional = F
 [qdiag3d]
-  standard_name = flag_tracer_diagnostics_3D
+  standard_name = flag_for_tracer_xyz_dimensioned_diagnostics
   long_name = logical flag for 3D tracer diagnostics
   units = flag
   dimensions = ()
@@ -40,7 +40,7 @@
   intent = in
   optional = F
 [do_aw]
-  standard_name = flag_for_Arakawa_Wu_adjustment
+  standard_name = flag_for_arakawa_wu_adjustment
   long_name = flag for Arakawa Wu scale-aware adjustment
   units = flag
   dimensions = ()
@@ -48,7 +48,7 @@
   intent = in
   optional = F
 [ntcw]
-  standard_name = index_for_liquid_cloud_condensate
+  standard_name = index_of_cloud_liquid_water_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for cloud condensate (or liquid water)
   units = index
   dimensions = ()
@@ -72,7 +72,7 @@
   intent = in
   optional = F
 [gt0]
-  standard_name = air_temperature_updated_by_physics
+  standard_name = air_temperature_of_new_state
   long_name = temperature updated by physics
   units = K
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -81,7 +81,7 @@
   intent = in
   optional = F
 [gq0]
-  standard_name = tracer_concentration_updated_by_physics
+  standard_name = tracer_concentration_of_new_state
   long_name = tracer concentration updated by physics
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers)
@@ -99,7 +99,7 @@
   intent = inout
   optional = F
 [save_qv]
-  standard_name = water_vapor_specific_humidity_save
+  standard_name = specific_humidity_save
   long_name = water vapor specific humidity before entering a physics scheme
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -169,7 +169,7 @@
   intent = in
   optional = F
 [nrcm]
-  standard_name = array_dimension_of_random_number
+  standard_name = number_of_random_numbers
   long_name = second dimension of random number stream for RAS
   units = count
   dimensions = ()
@@ -193,7 +193,7 @@
   intent = in
   optional = F
 [ntcw]
-  standard_name = index_for_liquid_cloud_condensate
+  standard_name = index_of_cloud_liquid_water_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for cloud condensate (or liquid water)
   units = index
   dimensions = ()
@@ -209,7 +209,7 @@
   intent = in
   optional = F
 [imp_physics]
-  standard_name = flag_for_microphysics_scheme
+  standard_name = control_for_microphysics_scheme
   long_name = choice of microphysics scheme
   units = flag
   dimensions = ()
@@ -217,7 +217,7 @@
   intent = in
   optional = F
 [imp_physics_gfdl]
-  standard_name = flag_for_gfdl_microphysics_scheme
+  standard_name = identifier_for_gfdl_microphysics_scheme
   long_name = choice of GFDL microphysics scheme
   units = flag
   dimensions = ()
@@ -225,7 +225,7 @@
   intent = in
   optional = F
 [imp_physics_thompson]
-  standard_name = flag_for_thompson_microphysics_scheme
+  standard_name = identifier_for_thompson_microphysics_scheme
   long_name = choice of Thompson microphysics scheme
   units = flag
   dimensions = ()
@@ -233,7 +233,7 @@
   intent = in
   optional = F
 [imp_physics_mg]
-  standard_name = flag_for_morrison_gettelman_microphysics_scheme
+  standard_name = identifier_for_morrison_gettelman_microphysics_scheme
   long_name = choice of Morrison-Gettelman microphysics scheme
   units = flag
   dimensions = ()
@@ -241,7 +241,7 @@
   intent = in
   optional = F
 [imp_physics_fer_hires]
-  standard_name = flag_for_fer_hires_microphysics_scheme
+  standard_name = identifier_for_fer_hires_microphysics_scheme
   long_name = choice of Ferrier-Aligo microphysics scheme
   units = flag
   dimensions = ()
@@ -249,7 +249,7 @@
   intent = in
   optional = F
 [cal_pre]
-  standard_name = flag_for_precipitation_type_algorithm
+  standard_name = precipitation_type_algorithm
   long_name = flag controls precip type algorithm
   units = flag
   dimensions = ()
@@ -257,7 +257,7 @@
   intent = in
   optional = F
 [lssav]
-  standard_name = flag_diagnostics
+  standard_name = flag_for_diagnostics
   long_name = logical flag for storing diagnostics
   units = flag
   dimensions = ()
@@ -265,7 +265,7 @@
   intent = in
   optional = F
 [ldiag3d]
-  standard_name = flag_diagnostics_3D
+  standard_name = flag_for_xyz_dimensioned_diagnostics
   long_name = flag for 3d diagnostic fields
   units = flag
   dimensions = ()
@@ -273,7 +273,7 @@
   intent = in
   optional = F
 [qdiag3d]
-  standard_name = flag_tracer_diagnostics_3D
+  standard_name = flag_for_tracer_xyz_dimensioned_diagnostics
   long_name = logical flag for 3D tracer diagnostics
   units = flag
   dimensions = ()
@@ -281,7 +281,7 @@
   intent = in
   optional = F
 [cplflx]
-  standard_name = flag_for_flux_coupling
+  standard_name = flag_for_surface_flux_coupling
   long_name = flag controlling cplflx collection (default off)
   units = flag
   dimensions = ()
@@ -306,7 +306,7 @@
   intent = in
   optional = F
 [dtf]
-  standard_name = time_step_for_dynamics
+  standard_name = timestep_for_dynamics
   long_name = dynamics timestep
   units = s
   dimensions = ()
@@ -342,17 +342,17 @@
   intent = in
   optional = F
 [rann]
-  standard_name = random_number_array
+  standard_name = random_number
   long_name = random number array (0-1)
   units = none
-  dimensions = (horizontal_loop_extent,array_dimension_of_random_number)
+  dimensions = (horizontal_loop_extent,number_of_random_numbers)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [xlat]
-  standard_name = latitude
-  long_name = latitude
+  standard_name = latitude_in_radians
+  long_name = latitude_in_radians
   units = radian
   dimensions = (horizontal_loop_extent)
   type = real
@@ -360,8 +360,8 @@
   intent = in
   optional = F
 [xlon]
-  standard_name = longitude
-  long_name = longitude
+  standard_name = longitude_in_radians
+  long_name = longitude_in_radians
   units = radian
   dimensions = (horizontal_loop_extent)
   type = real
@@ -369,7 +369,7 @@
   intent = in
   optional = F
 [gt0]
-  standard_name = air_temperature_updated_by_physics
+  standard_name = air_temperature_of_new_state
   long_name = temperature updated by physics
   units = K
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -378,7 +378,7 @@
   intent = in
   optional = F
 [gq0]
-  standard_name = tracer_concentration_updated_by_physics
+  standard_name = tracer_concentration_of_new_state
   long_name = tracer concentration updated by physics
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers)
@@ -459,7 +459,7 @@
   intent = in
   optional = F
 [save_qv]
-  standard_name = water_vapor_specific_humidity_save
+  standard_name = specific_humidity_save
   long_name = water vapor specific humidity before entering a physics scheme
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -567,7 +567,7 @@
   intent = inout
   optional = F
 [srflag]
-  standard_name = flag_for_precipitation_type
+  standard_name = precipitation_type
   long_name = snow/rain flag for precipitation
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -693,7 +693,7 @@
   intent = inout
   optional = F
 [rain_cpl]
-  standard_name = lwe_thickness_of_precipitation_amount_for_coupling
+  standard_name = cumulative_lwe_thickness_of_precipitation_amount_for_coupling
   long_name = total rain precipitation
   units = m
   dimensions = (horizontal_loop_extent)
@@ -702,7 +702,7 @@
   intent = inout
   optional = F
 [rainc_cpl]
-  standard_name = lwe_thickness_of_convective_precipitation_amount_for_coupling
+  standard_name = cumulative_lwe_thickness_of_convective_precipitation_amount_for_coupling
   long_name = total convective precipitation
   units = m
   dimensions = (horizontal_loop_extent)
@@ -711,7 +711,7 @@
   intent = inout
   optional = F
 [snow_cpl]
-  standard_name = lwe_thickness_of_snow_amount_for_coupling
+  standard_name = cumulative_lwe_thickness_of_snow_amount_for_coupling
   long_name = total snow precipitation
   units = m
   dimensions = (horizontal_loop_extent)
@@ -729,7 +729,7 @@
   intent = inout
   optional = F
 [drain_cpl]
-  standard_name = tendency_of_lwe_thickness_of_precipitation_amount_for_coupling
+  standard_name = lwe_thickness_of_rain_amount_on_dynamics_timestep_for_coupling
   long_name = change in rain_cpl (coupling_type)
   units = m
   dimensions = (horizontal_loop_extent)
@@ -738,7 +738,7 @@
   intent = inout
   optional = F
 [dsnow_cpl]
-  standard_name = tendency_of_lwe_thickness_of_snow_amount_for_coupling
+  standard_name = lwe_thickness_of_snowfall_amount_on_dynamics_timestep_for_coupling
   long_name = change in show_cpl (coupling_type)
   units = m
   dimensions = (horizontal_loop_extent)
@@ -747,7 +747,7 @@
   intent = inout
   optional = F
 [lsm]
-  standard_name = flag_for_land_surface_scheme
+  standard_name = control_for_land_surface_scheme
   long_name = flag for land surface model
   units = flag
   dimensions = ()
@@ -755,7 +755,7 @@
   intent = in
   optional = F
 [lsm_ruc]
-  standard_name = flag_for_ruc_land_surface_scheme
+  standard_name = identifier_for_ruc_land_surface_scheme
   long_name = flag for RUC land surface model
   units = flag
   dimensions = ()
@@ -763,7 +763,7 @@
   intent = in
   optional = F
 [lsm_noahmp]
-  standard_name = flag_for_noahmp_land_surface_scheme
+  standard_name = identifier_for_noahmp_land_surface_scheme
   long_name = flag for NOAH MP land surface model
   units = flag
   dimensions = ()
@@ -771,7 +771,7 @@
   intent = in
   optional = F
 [raincprv]
-  standard_name = lwe_thickness_of_convective_precipitation_amount_from_previous_timestep
+  standard_name = lwe_thickness_of_convective_precipitation_amount_on_previous_timestep
   long_name = convective_precipitation_amount from previous timestep
   units = m
   dimensions = (horizontal_loop_extent)
@@ -780,7 +780,7 @@
   intent = inout
   optional = F
 [rainncprv]
-  standard_name = lwe_thickness_of_explicit_rainfall_amount_from_previous_timestep
+  standard_name = lwe_thickness_of_explicit_precipitation_amount_on_previous_timestep
   long_name = explicit rainfall from previous timestep
   units = m
   dimensions = (horizontal_loop_extent)
@@ -789,7 +789,7 @@
   intent = inout
   optional = F
 [iceprv]
-  standard_name = lwe_thickness_of_ice_amount_from_previous_timestep
+  standard_name = lwe_thickness_of_ice_precipitation_amount_on_previous_timestep
   long_name = ice amount from previous timestep
   units = m
   dimensions = (horizontal_loop_extent)
@@ -798,7 +798,7 @@
   intent = inout
   optional = F
 [snowprv]
-  standard_name = lwe_thickness_of_snow_amount_from_previous_timestep
+  standard_name = lwe_thickness_of_snowfall_amount_on_previous_timestep
   long_name = snow amount from previous timestep
   units = m
   dimensions = (horizontal_loop_extent)
@@ -807,7 +807,7 @@
   intent = inout
   optional = F
 [graupelprv]
-  standard_name = lwe_thickness_of_graupel_amount_from_previous_timestep
+  standard_name = lwe_thickness_of_graupel_amount_on_previous_timestep
   long_name = graupel amount from previous timestep
   units = m
   dimensions = (horizontal_loop_extent)
@@ -816,7 +816,7 @@
   intent = inout
   optional = F
 [draincprv]
-  standard_name = convective_precipitation_rate_from_previous_timestep
+  standard_name = convective_precipitation_rate_on_previous_timestep
   long_name = convective precipitation rate from previous timestep
   units = mm s-1
   dimensions = (horizontal_loop_extent)
@@ -825,7 +825,7 @@
   intent = inout
   optional = F
 [drainncprv]
-  standard_name = explicit_rainfall_rate_from_previous_timestep
+  standard_name = explicit_precipitation_rate_on_previous_timestep
   long_name = explicit rainfall rate previous timestep
   units = mm s-1
   dimensions = (horizontal_loop_extent)
@@ -834,7 +834,7 @@
   intent = inout
   optional = F
 [diceprv]
-  standard_name = ice_precipitation_rate_from_previous_timestep
+  standard_name = ice_precipitation_rate_on_previous_timestep
   long_name = ice precipitation rate from previous timestep
   units = mm s-1
   dimensions = (horizontal_loop_extent)
@@ -843,7 +843,7 @@
   intent = inout
   optional = F
 [dsnowprv]
-  standard_name = snow_precipitation_rate_from_previous_timestep
+  standard_name = snowfall_rate_on_previous_timestep
   long_name = snow precipitation rate from previous timestep
   units = mm s-1
   dimensions = (horizontal_loop_extent)
@@ -852,7 +852,7 @@
   intent = inout
   optional = F
 [dgraupelprv]
-  standard_name = graupel_precipitation_rate_from_previous_timestep
+  standard_name = graupel_precipitation_rate_on_previous_timestep
   long_name = graupel precipitation rate from previous timestep
   units = mm s-1
   dimensions = (horizontal_loop_extent)
@@ -861,7 +861,7 @@
   intent = inout
   optional = F
 [dtp]
-  standard_name = time_step_for_physics
+  standard_name = timestep_for_physics
   long_name = physics timestep
   units = s
   dimensions = ()

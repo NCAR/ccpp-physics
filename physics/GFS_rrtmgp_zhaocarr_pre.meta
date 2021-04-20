@@ -32,7 +32,7 @@
   intent = in
   optional = F
 [ncnd]
-  standard_name = number_of_cloud_condensate_types
+  standard_name = number_of_condensate_species
   long_name = number of cloud condensate types
   units = count
   dimensions = ()
@@ -40,7 +40,7 @@
   intent = in
   optional = F  
 [lsswr]
-  standard_name = flag_to_calc_sw
+  standard_name = flag_for_calling_shortwave_radiation
   long_name = logical flags for sw radiation calls
   units = flag
   dimensions = ()
@@ -48,7 +48,7 @@
   intent = in
   optional = F
 [lslwr]
-  standard_name = flag_to_calc_lw
+  standard_name = flag_for_calling_longwave_radiation
   long_name = logical flags for lw radiation calls
   units = flag
   dimensions = ()
@@ -64,7 +64,7 @@
   intent = in
   optional = F 
 [uni_cld]
-  standard_name = flag_for_uni_cld
+  standard_name = flag_for_shoc_cloud_area_fraction_for_radiation
   long_name = flag for uni_cld
   units = flag
   dimensions = ()
@@ -72,7 +72,7 @@
   intent = in
   optional = F
 [lmfshal]
-  standard_name = flag_for_lmfshal
+  standard_name = flag_for_cloud_area_fraction_option_for_radiation
   long_name = flag for lmfshal
   units = flag
   dimensions = ()
@@ -80,7 +80,7 @@
   intent = in
   optional = F   
 [i_cldliq]
-  standard_name = index_for_liquid_cloud_condensate
+  standard_name = index_of_cloud_liquid_water_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for cloud condensate (or liquid water)
   units = index
   dimensions = ()
@@ -88,8 +88,8 @@
   intent = in
   optional = F         
 [lat]
-  standard_name = latitude
-  long_name = latitude
+  standard_name = latitude_in_radians
+  long_name = latitude_in_radians
   units = radian
   dimensions = (horizontal_loop_extent)
   type = real
@@ -141,7 +141,7 @@
   intent = in
   optional = F    
 [effrin_cldliq]
-  standard_name = effective_radius_of_stratiform_cloud_liquid_water_particle_in_um
+  standard_name = effective_radius_of_stratiform_cloud_liquid_water_particle
   long_name = eff. radius of cloud liquid water particle in micrometer
   units = um
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -150,7 +150,7 @@
   intent = in
   optional = F   
 [effrin_cldice]
-  standard_name = effective_radius_of_stratiform_cloud_ice_particle_in_um
+  standard_name = effective_radius_of_stratiform_cloud_ice_particle
   long_name = eff. radius of cloud ice water particle in micrometer
   units = um
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -159,7 +159,7 @@
   intent = in
   optional = F   
 [effrin_cldrain]
-  standard_name = effective_radius_of_stratiform_cloud_rain_particle_in_um
+  standard_name = effective_radius_of_stratiform_cloud_rain_particle
   long_name = effective radius of cloud rain particle in micrometers
   units = um
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -168,7 +168,7 @@
   intent = in
   optional = F   
 [effrin_cldsnow]
-  standard_name = effective_radius_of_stratiform_cloud_snow_particle_in_um
+  standard_name = effective_radius_of_stratiform_cloud_snow_particle
   long_name = effective radius of cloud snow particle in micrometers
   units = um
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -186,7 +186,7 @@
   intent = in
   optional = F  
 [cncvw]
-  standard_name = convective_cloud_water_mixing_ratio_in_phy_f3d
+  standard_name = convective_cloud_water_mixing_ratio_in_xyz_dimensioned_restart_array
   long_name = convective cloud water mixing ratio in the phy_f3d array
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -204,7 +204,7 @@
   intent = in
   optional = F  
 [lsmask]
-  standard_name = sea_land_ice_mask_real
+  standard_name = area_type
   long_name = landmask: sea/land/ice=0/1/2
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -285,7 +285,7 @@
   intent = in
   optional = F
 [cld_frac]
-  standard_name = total_cloud_fraction
+  standard_name = cloud_area_fracton
   long_name = layer total cloud fraction
   units = frac
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -303,7 +303,7 @@
   intent = out
   optional = F
 [cld_reliq]
-  standard_name = mean_effective_radius_for_liquid_cloud
+  standard_name = effective_radius_of_cloud_liquid_water_particles_in_um
   long_name = mean effective radius for liquid cloud
   units = um
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -321,7 +321,7 @@
   intent = out
   optional = F
 [cld_reice]
-  standard_name = mean_effective_radius_for_ice_cloud
+  standard_name = effective_radius_of_ice_liquid_water_particles_in_um
   long_name = mean effective radius for ice cloud
   units = um
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -339,7 +339,7 @@
   intent = out
   optional = F
 [cld_resnow]
-  standard_name = mean_effective_radius_for_snow_flake
+  standard_name = effective_radius_of_cloud_snow_particles_in_um
   long_name = mean effective radius for snow cloud
   units = um
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -357,7 +357,7 @@
   intent = out
   optional = F
 [cld_rerain]
-  standard_name = mean_effective_radius_for_rain_drop
+  standard_name = effective_radius_of_cloud_rain_particles_in_um
   long_name = mean effective radius for rain cloud
   units = um
   dimensions = (horizontal_loop_extent,vertical_dimension)

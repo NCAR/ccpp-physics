@@ -27,7 +27,7 @@
   standard_name = GFS_interstitial_type_instance_all_threads
   long_name = instance of derived type GFS_interstitial_type
   units = DDT
-  dimensions = (omp_threads)
+  dimensions = (number_of_openmp_threads)
   type = GFS_interstitial_type
   intent = in
   optional = F
@@ -142,7 +142,7 @@
   intent = in
   optional = F
 [nthreads]
-  standard_name = omp_threads
+  standard_name = number_of_openmp_threads
   long_name = number of OpenMP threads or fast physics schemes
   units = count
   dimensions = ()
@@ -205,7 +205,7 @@
   standard_name = GFS_interstitial_type_instance_all_threads
   long_name = instance of derived type GFS_interstitial_type
   units = DDT
-  dimensions = (omp_threads)
+  dimensions = (number_of_openmp_threads)
   type = GFS_interstitial_type
   intent = in
   optional = F
@@ -320,7 +320,7 @@
   intent = in
   optional = F
 [nthreads]
-  standard_name = omp_threads
+  standard_name = number_of_openmp_threads
   long_name = number of OpenMP threads or fast physics schemes
   units = count
   dimensions = ()
@@ -488,7 +488,7 @@
   intent = in
   optional = F
 [frac_grid]
-  standard_name = flag_for_fractional_grid
+  standard_name = flag_for_fractional_landmask
   long_name = flag for fractional grid
   units = flag
   dimensions = ()
@@ -496,7 +496,7 @@
   intent = in
   optional = F
 [isot]
-  standard_name = soil_type_dataset_choice
+  standard_name = control_for_soil_type_dataset
   long_name = soil type dataset choice
   units = index
   dimensions = ()
@@ -504,7 +504,7 @@
   intent = in
   optional = F
 [ivegsrc]
-  standard_name = vegetation_type_dataset_choice
+  standard_name = control_for_vegetation_dataset
   long_name = land use dataset choice
   units = index
   dimensions = ()
@@ -563,7 +563,7 @@
   intent = in
   optional = F
 [dry]
-  standard_name = flag_nonzero_land_surface_fraction
+  standard_name = flag_for_nonzero_land_surface_fraction
   long_name = flag indicating some land surface area fraction
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -571,7 +571,7 @@
   intent = in
   optional = F
 [icy]
-  standard_name = flag_nonzero_sea_ice_surface_fraction
+  standard_name = flag_for_nonzero_sea_ice_surface_fraction
   long_name = flag indicating some sea ice surface area fraction
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -579,7 +579,7 @@
   intent = in
   optional = F
 [wet]
-  standard_name = flag_nonzero_wet_surface_fraction
+  standard_name = flag_for_nonzero_wet_surface_fraction
   long_name = flag indicating some ocean or lake surface area fraction
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -587,7 +587,7 @@
   intent = in
   optional = F
 [lake]
-  standard_name = flag_nonzero_lake_surface_fraction
+  standard_name = flag_for_nonzero_lake_surface_fraction
   long_name = flag indicating some lake surface area fraction
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -595,7 +595,7 @@
   intent = in
   optional = F
 [ocean]
-  standard_name = flag_nonzero_ocean_surface_fraction
+  standard_name = flag_for_nonzero_ocean_surface_fraction
   long_name = flag indicating some ocean surface area fraction
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -630,7 +630,7 @@
   intent = in
   optional = F
 [slmsk]
-  standard_name = sea_land_ice_mask_real
+  standard_name = area_type
   long_name = landmask: sea/land/ice=0/1/2
   units = flag
   dimensions = (horizontal_loop_extent)

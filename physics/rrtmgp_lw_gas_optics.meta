@@ -18,7 +18,7 @@
   optional = F
   kind = len=128
 [rrtmgp_lw_file_gas]
-  standard_name = rrtmgp_kdistribution_lw
+  standard_name = filename_of_rrtmgp_longwave_k_distribution
   long_name = file containing RRTMGP LW k-distribution
   units = none
   dimensions =  ()
@@ -51,7 +51,7 @@
   intent = in
   optional = F
 [mpicomm]
-  standard_name = mpi_comm
+  standard_name = mpi_communicator
   long_name = MPI communicator
   units = index
   dimensions = ()
@@ -99,7 +99,7 @@
   name = rrtmgp_lw_gas_optics_run
   type = scheme
 [doLWrad]
-  standard_name = flag_to_calc_lw
+  standard_name = flag_for_calling_longwave_radiation
   long_name = flag to calculate LW irradiances
   units = flag
   dimensions = ()

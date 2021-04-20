@@ -8,7 +8,7 @@
   name = rayleigh_damp_run
   type = scheme
 [lsidea]
-  standard_name = flag_idealized_physics
+  standard_name = flag_for_integrated_dynamics_through_earths_atmosphere
   long_name = flag for idealized physics
   units = flag
   dimensions = ()
@@ -77,7 +77,7 @@
   intent = in
   optional = F
 [dt]
-  standard_name = time_step_for_physics
+  standard_name = timestep_for_physics
   long_name = physics time step
   units = s
   dimensions = ()
@@ -95,7 +95,7 @@
   intent = in
   optional = F
 [levr]
-  standard_name = number_of_vertical_layers_for_radiation_calculations
+  standard_name = vertical_dimension_for_radiation
   long_name = number of vertical layers for radiation calculations
   units = count
   dimensions = ()
@@ -121,7 +121,7 @@
   intent = in
   optional = F
 [prslrd0]
-  standard_name = pressure_cutoff_for_rayleigh_damping
+  standard_name = air_pressure_at_bottom_extent_of_rayleigh_damping
   long_name = pressure level above which to apply Rayleigh damping
   units = Pa
   dimensions = ()
@@ -130,7 +130,7 @@
   intent = in
   optional = F
 [ral_ts]
-  standard_name = time_scale_for_rayleigh_damping
+  standard_name = timescale_for_rayleigh_damping
   long_name = time scale for Rayleigh damping
   units = d
   dimensions = ()
@@ -139,7 +139,7 @@
   intent = in
   optional = F
 [ldiag3d]
-  standard_name = flag_diagnostics_3D
+  standard_name = flag_for_xyz_dimensioned_diagnostics
   long_name = flag for calculating 3-D diagnostic fields
   units = flag
   dimensions = ()

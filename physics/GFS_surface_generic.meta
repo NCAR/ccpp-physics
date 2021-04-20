@@ -41,7 +41,7 @@
   intent = in
   optional = F
 [isot]
-  standard_name = soil_type_dataset_choice
+  standard_name = control_for_soil_type_dataset
   long_name = soil type dataset choice
   units = index
   dimensions = ()
@@ -49,7 +49,7 @@
   intent = in
   optional = F
 [ivegsrc]
-  standard_name = vegetation_type_dataset_choice
+  standard_name = control_for_vegetation_dataset
   long_name = land use dataset choice
   units = index
   dimensions = ()
@@ -189,7 +189,7 @@
   intent = inout
   optional = F
 [drain_cpl]
-  standard_name = tendency_of_lwe_thickness_of_precipitation_amount_for_coupling
+  standard_name = lwe_thickness_of_rain_amount_on_dynamics_timestep_for_coupling
   long_name = change in rain_cpl (coupling_type)
   units = m
   dimensions = (horizontal_loop_extent)
@@ -198,7 +198,7 @@
   intent = out
   optional = F
 [dsnow_cpl]
-  standard_name = tendency_of_lwe_thickness_of_snow_amount_for_coupling
+  standard_name = lwe_thickness_of_snowfall_amount_on_dynamics_timestep_for_coupling
   long_name = change in show_cpl (coupling_type)
   units = m
   dimensions = (horizontal_loop_extent)
@@ -207,7 +207,7 @@
   intent = out
   optional = F
 [rain_cpl]
-  standard_name = lwe_thickness_of_precipitation_amount_for_coupling
+  standard_name = cumulative_lwe_thickness_of_precipitation_amount_for_coupling
   long_name = total rain precipitation
   units = m
   dimensions = (horizontal_loop_extent)
@@ -216,7 +216,7 @@
   intent = in
   optional = F
 [snow_cpl]
-  standard_name = lwe_thickness_of_snow_amount_for_coupling
+  standard_name = cumulative_lwe_thickness_of_snow_amount_for_coupling
   long_name = total snow precipitation
   units = m
   dimensions = (horizontal_loop_extent)
@@ -225,7 +225,7 @@
   intent = in
   optional = F
 [lndp_type]
-  standard_name = index_for_stochastic_land_surface_perturbation_type
+  standard_name = control_for_stochastic_land_surface_perturbation
   long_name = index for stochastic land surface perturbations type
   units = index
   dimensions = ()
@@ -233,7 +233,7 @@
   intent = in
   optional = F
 [n_var_lndp]
-  standard_name = number_of_land_surface_variables_perturbed
+  standard_name = number_of_perturbed_land_surface_variables
   long_name = number of land surface variables perturbed
   units = count
   dimensions = ()
@@ -241,37 +241,37 @@
   intent = in
   optional = F
 [sfc_wts]
-  standard_name = weights_for_stochastic_surface_physics_perturbation
+  standard_name = surface_stochastic_weights_from_coupled_process
   long_name = weights for stochastic surface physics perturbation
   units = none
-  dimensions = (horizontal_loop_extent,number_of_land_surface_variables_perturbed)
+  dimensions = (horizontal_loop_extent,number_of_perturbed_land_surface_variables)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [sfc_wts_inv]
-  standard_name = weights_for_stochastic_surface_physics_perturbation_flipped
+  standard_name = surface_stochastic_weights_from_coupled_process_flipped
   long_name = weights for stochastic surface physics perturbation, flipped
   units = none
-  dimensions = (horizontal_loop_extent,number_of_land_surface_variables_perturbed)
+  dimensions = (horizontal_loop_extent,number_of_perturbed_land_surface_variables)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [lndp_prt_list]
-  standard_name = magnitude_of_perturbations_for_landperts
+  standard_name = land_surface_perturbation_magnitudes
   long_name = magnitude of perturbations for landperts
   units = variable
-  dimensions = (number_of_land_surface_variables_perturbed) 
+  dimensions = (number_of_perturbed_land_surface_variables) 
   type = real
   kind = kind_phys
   intent = in 
   optional = F
 [lndp_var_list]
-  standard_name = variables_to_be_perturbed_for_landperts
+  standard_name = land_surface_perturbation_variables
   long_name = variables to be perturbed for landperts
   units = none
-  dimensions =  (number_of_land_surface_variables_perturbed) 
+  dimensions =  (number_of_perturbed_land_surface_variables) 
   type = character
   kind = len=3
   intent = in 
@@ -331,7 +331,7 @@
   intent = out
   optional = F
 [cplflx]
-  standard_name = flag_for_flux_coupling
+  standard_name = flag_for_surface_flux_coupling
   long_name = flag controlling cplflx collection (default off)
   units = flag
   dimensions = ()
@@ -355,7 +355,7 @@
   intent = out
   optional = F
 [slimskin_cpl]
-  standard_name = sea_land_ice_mask_in
+  standard_name = area_type_from_coupled_process
   long_name = sea/land/ice mask input (=0/1/2)
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -382,7 +382,7 @@
   intent = in
   optional = F
 [fice]
-  standard_name = sea_ice_concentration
+  standard_name = sea_ice_area_fraction_in_sea_water
   long_name = sea-ice concentration [0,1]
   units = frac
   dimensions = (horizontal_loop_extent)
@@ -427,7 +427,7 @@
   intent = in
   optional = F
 [cnvwind]
-  standard_name = surface_wind_enhancement_due_to_convection
+  standard_name = enhancement_to_wind_speed_at_surface_adjacent_layer_due_to_convection
   long_name = surface wind enhancement due to convection
   units = m s-1
   dimensions = (horizontal_loop_extent)
@@ -490,7 +490,7 @@
   intent = in
   optional = F
 [cplflx]
-  standard_name = flag_for_flux_coupling
+  standard_name = flag_for_surface_flux_coupling
   long_name = flag controlling cplflx collection (default off)
   units = flag
   dimensions = ()
@@ -498,7 +498,7 @@
   intent = in
   optional = F
 [cplwav]
-  standard_name = flag_for_wave_coupling
+  standard_name = flag_for_ocean_wave_coupling
   long_name = flag controlling cplwav collection (default off)
   units = flag
   dimensions = ()
@@ -506,7 +506,7 @@
   intent = in
   optional = F
 [lssav]
-  standard_name = flag_diagnostics
+  standard_name = flag_for_diagnostics
   long_name = logical flag for storing diagnostics
   units = flag
   dimensions = ()
@@ -514,7 +514,7 @@
   intent = in
   optional = F
 [icy]
-  standard_name = flag_nonzero_sea_ice_surface_fraction
+  standard_name = flag_for_nonzero_sea_ice_surface_fraction
   long_name = flag indicating presence of some sea ice surface area fraction
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -522,7 +522,7 @@
   intent = in
   optional = F
 [wet]
-  standard_name = flag_nonzero_wet_surface_fraction
+  standard_name = flag_for_nonzero_wet_surface_fraction
   long_name = flag indicating presence of some ocean or lake surface area fraction
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -530,7 +530,7 @@
   intent = in
   optional = F
 [dtf]
-  standard_name = time_step_for_dynamics
+  standard_name = timestep_for_dynamics
   long_name = dynamics timestep
   units = s
   dimensions = ()
@@ -566,7 +566,7 @@
   intent = in
   optional = F
 [qgrs_1]
-  standard_name = water_vapor_specific_humidity_at_lowest_model_layer
+  standard_name = specific_humidity_at_lowest_model_layer
   long_name = specific humidity at lowest model layer
   units = kg kg-1
   dimensions = (horizontal_loop_extent)
@@ -656,7 +656,7 @@
   intent = in
   optional = F
 [adjsfculw_wat]
-  standard_name = surface_upwelling_longwave_flux_over_ocean_interstitial
+  standard_name = surface_upwelling_longwave_flux_over_ocean
   long_name = surface upwelling longwave flux at current time over ocean (temporary use as interstitial)
   units = W m-2
   dimensions = (horizontal_loop_extent)
@@ -701,7 +701,7 @@
   intent = in
   optional = F
 [t2m]
-  standard_name = temperature_at_2m
+  standard_name = air_temperature_at_2m
   long_name = 2 meter temperature
   units = K
   dimensions = (horizontal_loop_extent)
@@ -773,7 +773,7 @@
   intent = in
   optional = F
 [evbs]
-  standard_name = soil_upward_latent_heat_flux
+  standard_name = upward_latent_heat_flux_in_soil
   long_name = soil upward latent heat flux
   units = W m-2
   dimensions = (horizontal_loop_extent)
@@ -782,7 +782,7 @@
   intent = in
   optional = F
 [evcw]
-  standard_name = canopy_upward_latent_heat_flux
+  standard_name = upward_latent_heat_flux_in_canopy
   long_name = canopy upward latent heat flux
   units = W m-2
   dimensions = (horizontal_loop_extent)
@@ -800,7 +800,7 @@
   intent = in
   optional = F
 [sbsno]
-  standard_name = snow_deposition_sublimation_upward_latent_heat_flux
+  standard_name = surface_upward_latent_heat_flux_due_to_snow_deposition_sublimation
   long_name = latent heat flux from snow depo/subl
   units = W m-2
   dimensions = (horizontal_loop_extent)
@@ -854,7 +854,7 @@
   intent = inout
   optional = F
 [q1]
-  standard_name = water_vapor_specific_humidity_at_lowest_model_layer_for_diag
+  standard_name = specific_humidity_at_lowest_model_layer_for_diag
   long_name = layer 1 specific humidity for diag
   units = kg kg-1
   dimensions = (horizontal_loop_extent)
@@ -953,7 +953,7 @@
   intent = inout
   optional = F
 [dnirbm_cpl]
-  standard_name = cumulative_surface_downwelling_direct_near_infrared_shortwave_flux_for_coupling_multiplied_by_timestep
+  standard_name = cumulative_surface_downwelling_direct_nir_shortwave_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative sfc nir beam downward sw flux multiplied by timestep
   units = W m-2 s
   dimensions = (horizontal_loop_extent)
@@ -962,7 +962,7 @@
   intent = inout
   optional = F
 [dnirdf_cpl]
-  standard_name = cumulative_surface_downwelling_diffuse_near_infrared_shortwave_flux_for_coupling_multiplied_by_timestep
+  standard_name = cumulative_surface_downwelling_diffuse_nir_shortwave_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative sfc nir diff downward sw flux multiplied by timestep
   units = W m-2 s
   dimensions = (horizontal_loop_extent)
@@ -971,7 +971,7 @@
   intent = inout
   optional = F
 [dvisbm_cpl]
-  standard_name = cumulative_surface_downwelling_direct_ultraviolet_and_visible_shortwave_flux_for_coupling_multiplied_by_timestep
+  standard_name = cumulative_surface_downwelling_direct_uv_and_vis_shortwave_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative sfc uv+vis beam dnwd sw flux multiplied by timestep
   units = W m-2 s
   dimensions = (horizontal_loop_extent)
@@ -980,7 +980,7 @@
   intent = inout
   optional = F
 [dvisdf_cpl]
-  standard_name = cumulative_surface_downwelling_diffuse_ultraviolet_and_visible_shortwave_flux_for_coupling_multiplied_by_timestep
+  standard_name = cumulative_surface_downwelling_diffuse_uv_and_vis_shortwave_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative sfc uv+vis diff dnwd sw flux multiplied by timestep
   units = W m-2 s
   dimensions = (horizontal_loop_extent)
@@ -998,7 +998,7 @@
   intent = inout
   optional = F
 [nlwsfc_cpl]
-  standard_name = cumulative_surface_net_downward_longwave_flux_for_coupling_multiplied_by_timestep
+  standard_name = cumulative_surface_net_downwelling_longwave_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative net downward lw flux multiplied by timestep
   units = W m-2 s
   dimensions = (horizontal_loop_extent)
@@ -1106,7 +1106,7 @@
   intent = inout
   optional = F
 [nswsfc_cpl]
-  standard_name = cumulative_surface_net_downward_shortwave_flux_for_coupling_multiplied_by_timestep
+  standard_name = cumulative_surface_net_downwelling_shortwave_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative net downward sw flux multiplied by timestep
   units = W m-2 s
   dimensions = (horizontal_loop_extent)
@@ -1115,7 +1115,7 @@
   intent = inout
   optional = F
 [nnirbm_cpl]
-  standard_name = cumulative_surface_net_downward_direct_near_infrared_shortwave_flux_for_coupling_multiplied_by_timestep
+  standard_name = cumulative_surface_net_downwelling_direct_nir_shortwave_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative net nir beam downward sw flux multiplied by timestep
   units = W m-2 s
   dimensions = (horizontal_loop_extent)
@@ -1124,7 +1124,7 @@
   intent = inout
   optional = F
 [nnirdf_cpl]
-  standard_name = cumulative_surface_net_downward_diffuse_near_infrared_shortwave_flux_for_coupling_multiplied_by_timestep
+  standard_name = cumulative_surface_net_downwellling_diffuse_nir_shortwave_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative net nir diff downward sw flux multiplied by timestep
   units = W m-2 s
   dimensions = (horizontal_loop_extent)
@@ -1133,7 +1133,7 @@
   intent = inout
   optional = F
 [nvisbm_cpl]
-  standard_name = cumulative_surface_net_downward_direct_ultraviolet_and_visible_shortwave_flux_for_coupling_multiplied_by_timestep
+  standard_name = cumulative_surface_net_downwelling_direct_uv_and_vis_shortwave_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative net uv+vis beam downward sw rad flux multiplied by timestep
   units = W m-2 s
   dimensions = (horizontal_loop_extent)
@@ -1142,7 +1142,7 @@
   intent = inout
   optional = F
 [nvisdf_cpl]
-  standard_name = cumulative_surface_net_downward_diffuse_ultraviolet_and_visible_shortwave_flux_for_coupling_multiplied_by_timestep
+  standard_name = cumulative_surface_net_downwelling_diffuse_uv_and_vis_shortwave_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative net uv+vis diff downward sw rad flux multiplied by timestep
   units = W m-2 s
   dimensions = (horizontal_loop_extent)
@@ -1160,7 +1160,7 @@
   intent = inout
   optional = F
 [evbsa]
-  standard_name = cumulative_soil_upward_latent_heat_flux_multiplied_by_timestep
+  standard_name = cumulative_upward_latent_heat_flux_in_soil_multiplied_by_timestep
   long_name = cumulative soil upward latent heat flux multiplied by timestep
   units = W m-2 s
   dimensions = (horizontal_loop_extent)
@@ -1232,7 +1232,7 @@
   intent = inout
   optional = F
 [srunoff]
-  standard_name = surface_runoff
+  standard_name = cumulative_surface_runoff_amount
   long_name = surface water runoff (from lsm)
   units = kg m-2
   dimensions = (horizontal_loop_extent)
@@ -1241,7 +1241,7 @@
   intent = inout
   optional = F
 [runof]
-  standard_name = surface_runoff_flux
+  standard_name = cumulative_surface_runoff_amount_flux
   long_name = surface runoff flux
   units = kg m-2 s-1
   dimensions = (horizontal_loop_extent)
@@ -1259,7 +1259,7 @@
   intent = in
   optional = F
 [lheatstrg]
-  standard_name = flag_for_canopy_heat_storage
+  standard_name = flag_for_canopy_heat_storage_in_land_surface_scheme
   long_name = flag for canopy heat storage parameterization
   units = flag
   dimensions = ()
@@ -1267,7 +1267,7 @@
   intent = in
   optional = F
 [z0fac]
-  standard_name = surface_roughness_fraction_factor
+  standard_name = multiplicative_tuning_parameter_for_reduced_surface_heat_fluxes_due_to_canopy_heat_storage
   long_name = surface roughness fraction factor for canopy heat storage parameterization
   units = none
   dimensions = ()
@@ -1276,7 +1276,7 @@
   intent = in
   optional = F
 [e0fac]
-  standard_name = latent_heat_flux_fraction_factor_relative_to_sensible_heat_flux
+  standard_name = multiplicative_tuning_parameter_for_reduced_latent_heat_flux_due_to_canopy_heat_storage
   long_name = latent heat flux fraction factor relative to sensible heat flux for canopy heat storage parameterization
   units = none
   dimensions = ()

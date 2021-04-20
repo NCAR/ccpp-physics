@@ -16,7 +16,7 @@
   intent = in
   optional = F
 [t]
-  standard_name = air_temperature_updated_by_physics
+  standard_name = air_temperature_of_new_state
   long_name = temperature updated by physics
   units = K
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -25,7 +25,7 @@
   intent = in
   optional = F
 [q]
-  standard_name = water_vapor_specific_humidity_updated_by_physics
+  standard_name = specific_humidity_updated_by_physics
   long_name = water vapor specific humidity updated by physics
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -34,7 +34,7 @@
   intent = in
   optional = F
 [prevst]
-  standard_name = temperature_from_previous_timestep
+  standard_name = air_temperature_on_previous_timestep
   long_name = temperature from previous time step
   units = K
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -43,7 +43,7 @@
   intent = out
   optional = F
 [prevsq]
-  standard_name = moisture_from_previous_timestep
+  standard_name = specific_humidity_on_previous_timestep
   long_name = moisture from previous time step
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -52,7 +52,7 @@
   intent = out
   optional = F
 [cactiv]
-  standard_name = conv_activity_counter
+  standard_name = counter_for_GF
   long_name = convective activity memory
   units = none
   dimensions = (horizontal_loop_extent)
@@ -60,7 +60,7 @@
   intent = in
   optional = F
 [conv_act]
-  standard_name = gf_memory_counter
+  standard_name = consecutive_calls_for_GF
   long_name = Memory counter for GF
   units = none
   dimensions = (horizontal_loop_extent)

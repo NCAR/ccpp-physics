@@ -70,7 +70,7 @@
   intent = in
   optional = F
 [q1]
-  standard_name = water_vapor_specific_humidity_at_lowest_model_layer
+  standard_name = specific_humidity_at_lowest_model_layer
   long_name = surface layer mean specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent)
@@ -124,7 +124,7 @@
   intent = in
   optional = F
 [wet]
-  standard_name = flag_nonzero_wet_surface_fraction
+  standard_name = flag_for_nonzero_wet_surface_fraction
   long_name = flag indicating presence of some ocean or lake surface area fraction
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -132,7 +132,7 @@
   intent = in
   optional = F
 [lake]
-  standard_name = flag_nonzero_lake_surface_fraction
+  standard_name = flag_for_nonzero_lake_surface_fraction
   long_name = flag indicating presence of some lake surface area fraction
   units = flag
   dimensions = (horizontal_loop_extent)

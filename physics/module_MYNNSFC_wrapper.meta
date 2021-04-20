@@ -78,7 +78,7 @@
   intent = in
   optional = F
 [lsm]
-  standard_name = flag_for_land_surface_scheme
+  standard_name = control_for_land_surface_scheme
   long_name = flag for land surface model
   units = flag
   dimensions = ()
@@ -86,7 +86,7 @@
   intent = in
   optional = F
 [lsm_ruc]
-  standard_name = flag_for_ruc_land_surface_scheme
+  standard_name = identifier_for_ruc_land_surface_scheme
   long_name = flag for RUC land surface model
   units = flag
   dimensions = ()
@@ -111,7 +111,7 @@
   intent = in
   optional = F
 [shdmax]
-  standard_name = maximum_vegetation_area_fraction
+  standard_name = max_vegetation_area_fraction
   long_name = max fractnl cover of green veg
   units = frac
   dimensions = (horizontal_loop_extent)
@@ -120,7 +120,7 @@
   intent = in
   optional = F
 [ivegsrc]
-  standard_name = vegetation_type_dataset_choice
+  standard_name = control_for_vegetation_dataset
   long_name = land use dataset choice
   units = index
   dimensions = ()
@@ -146,7 +146,7 @@
   intent = in
   optional = F
 [redrag]
-  standard_name = flag_for_reduced_drag_coefficient_over_sea
+  standard_name = flag_for_limited_surface_roughness_length_over_ocean
   long_name = flag for reduced drag coefficient over sea
   units = flag
   dimensions = ()
@@ -154,7 +154,7 @@
   intent = in
   optional = F
 [sfc_z0_type]
-  standard_name = flag_for_surface_roughness_option_over_ocean
+  standard_name = control_for_surface_roughness_length_over_ocean
   long_name = surface roughness options over ocean
   units = flag
   dimensions = ()
@@ -162,7 +162,7 @@
   intent = in
   optional = F
 [delt]
-  standard_name = time_step_for_physics
+  standard_name = timestep_for_physics
   long_name = time step for physics
   units = s
   dimensions = ()
@@ -171,7 +171,7 @@
   intent = in
   optional = F
 [dx]
-  standard_name = cell_size
+  standard_name = characteristic_grid_lengthscale
   long_name = size of the grid cell
   units = m
   dimensions = (horizontal_loop_extent)
@@ -207,7 +207,7 @@
   intent = in
   optional = F
 [qvsh]
-  standard_name = water_vapor_specific_humidity
+  standard_name = specific_humidity
   long_name = water vapor specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -270,7 +270,7 @@
   intent = in
   optional = F
 [slmsk]
-  standard_name = sea_land_ice_mask_real
+  standard_name = area_type
   long_name = landmask: sea/land/ice=0/1/2
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -279,7 +279,7 @@
   intent = in
   optional = F
 [wet]
-  standard_name = flag_nonzero_wet_surface_fraction
+  standard_name = flag_for_nonzero_wet_surface_fraction
   long_name = flag indicating presence of some ocean or lake surface area fraction
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -287,7 +287,7 @@
   intent = in
   optional = F
 [dry]
-  standard_name = flag_nonzero_land_surface_fraction
+  standard_name = flag_for_nonzero_land_surface_fraction
   long_name = flag indicating presence of some land surface area fraction
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -295,7 +295,7 @@
   intent = in
   optional = F
 [icy]
-  standard_name = flag_nonzero_sea_ice_surface_fraction
+  standard_name = flag_for_nonzero_sea_ice_surface_fraction
   long_name = flag indicating presence of some sea ice surface area fraction
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -384,7 +384,7 @@
   intent = inout
   optional = F
 [snowh_ocn]
-  standard_name = surface_snow_thickness_water_equivalent_over_ocean
+  standard_name = lwe_surface_snow_over_ocean
   long_name = water equivalent snow depth over ocean
   units = mm
   dimensions = (horizontal_loop_extent)
@@ -393,7 +393,7 @@
   intent = in
   optional = F
 [snowh_lnd]
-  standard_name = surface_snow_thickness_water_equivalent_over_land
+  standard_name = lwe_surface_snow_over_land
   long_name = water equivalent snow depth over land
   units = mm
   dimensions = (horizontal_loop_extent)
@@ -402,7 +402,7 @@
   intent = in
   optional = F
 [snowh_ice]
-  standard_name = surface_snow_thickness_water_equivalent_over_ice
+  standard_name = lwe_surface_snow_over_ice
   long_name = water equivalent snow depth over ice
   units = mm
   dimensions = (horizontal_loop_extent)
@@ -573,7 +573,7 @@
   intent = inout
   optional = F
 [fm_ocn]
-  standard_name = Monin_Obukhov_similarity_function_for_momentum_over_ocean
+  standard_name = monin_obukhov_similarity_function_for_momentum_over_ocean
   long_name = Monin-Obukhov similarity function for momentum over ocean
   units = none
   dimensions = (horizontal_loop_extent)
@@ -582,7 +582,7 @@
   intent = inout
   optional = F
 [fm_lnd]
-  standard_name = Monin_Obukhov_similarity_function_for_momentum_over_land
+  standard_name = monin_obukhov_similarity_function_for_momentum_over_land
   long_name = Monin-Obukhov similarity function for momentum over land
   units = none
   dimensions = (horizontal_loop_extent)
@@ -591,7 +591,7 @@
   intent = inout
   optional = F
 [fm_ice]
-  standard_name = Monin_Obukhov_similarity_function_for_momentum_over_ice
+  standard_name = monin_obukhov_similarity_function_for_momentum_over_ice
   long_name = Monin-Obukhov similarity function for momentum over ice
   units = none
   dimensions = (horizontal_loop_extent)
@@ -600,7 +600,7 @@
   intent = inout
   optional = F
 [fh_ocn]
-  standard_name = Monin_Obukhov_similarity_function_for_heat_over_ocean
+  standard_name = monin_obukhov_similarity_function_for_heat_over_ocean
   long_name = Monin-Obukhov similarity function for heat over ocean
   units = none
   dimensions = (horizontal_loop_extent)
@@ -609,7 +609,7 @@
   intent = inout
   optional = F
 [fh_lnd]
-  standard_name = Monin_Obukhov_similarity_function_for_heat_over_land
+  standard_name = monin_obukhov_similarity_function_for_heat_over_land
   long_name = Monin-Obukhov similarity function for heat over land
   units = none
   dimensions = (horizontal_loop_extent)
@@ -618,7 +618,7 @@
   intent = inout
   optional = F
 [fh_ice]
-  standard_name = Monin_Obukhov_similarity_function_for_heat_over_ice
+  standard_name = monin_obukhov_similarity_function_for_heat_over_ice
   long_name = Monin-Obukhov similarity function for heat over ice
   units = none
   dimensions = (horizontal_loop_extent)
@@ -627,7 +627,7 @@
   intent = inout
   optional = F
 [fm10_ocn]
-  standard_name = Monin_Obukhov_similarity_function_for_momentum_at_10m_over_ocean
+  standard_name = monin_obukhov_similarity_function_for_momentum_at_10m_over_ocean
   long_name = Monin-Obukhov similarity parameter for momentum at 10m over ocean
   units = none
   dimensions = (horizontal_loop_extent)
@@ -636,7 +636,7 @@
   intent = inout
   optional = F
 [fm10_lnd]
-  standard_name = Monin_Obukhov_similarity_function_for_momentum_at_10m_over_land
+  standard_name = monin_obukhov_similarity_function_for_momentum_at_10m_over_land
   long_name = Monin-Obukhov similarity parameter for momentum at 10m over land
   units = none
   dimensions = (horizontal_loop_extent)
@@ -645,7 +645,7 @@
   intent = inout
   optional = F
 [fm10_ice]
-  standard_name = Monin_Obukhov_similarity_function_for_momentum_at_10m_over_ice
+  standard_name = monin_obukhov_similarity_function_for_momentum_at_10m_over_ice
   long_name = Monin-Obukhov similarity parameter for momentum at 10m over ice
   units = none
   dimensions = (horizontal_loop_extent)
@@ -654,7 +654,7 @@
   intent = inout
   optional = F
 [fh2_ocn]
-  standard_name = Monin_Obukhov_similarity_function_for_heat_at_2m_over_ocean
+  standard_name = monin_obukhov_similarity_function_for_heat_at_2m_over_ocean
   long_name = Monin-Obukhov similarity parameter for heat at 2m over ocean
   units = none
   dimensions = (horizontal_loop_extent)
@@ -663,7 +663,7 @@
   intent = inout
   optional = F
 [fh2_lnd]
-  standard_name = Monin_Obukhov_similarity_function_for_heat_at_2m_over_land
+  standard_name = monin_obukhov_similarity_function_for_heat_at_2m_over_land
   long_name = Monin-Obukhov similarity parameter for heat at 2m over land
   units = none
   dimensions = (horizontal_loop_extent)
@@ -672,7 +672,7 @@
   intent = inout
   optional = F
 [fh2_ice]
-  standard_name = Monin_Obukhov_similarity_function_for_heat_at_2m_over_ice
+  standard_name = monin_obukhov_similarity_function_for_heat_at_2m_over_ice
   long_name = Monin-Obukhov similarity parameter for heat at 2m over ice
   units = none
   dimensions = (horizontal_loop_extent)
@@ -762,7 +762,7 @@
   intent = in
   optional = F
 [ustm]
-  standard_name = surface_friction_velocity_drag
+  standard_name = surface_friction_velocity_for_momentum
   long_name = friction velocity isolated for momentum only
   units = m s-1
   dimensions = (horizontal_loop_extent)
@@ -771,7 +771,7 @@
   intent = inout
   optional = F
 [zol]
-  standard_name = surface_stability_parameter
+  standard_name = ratio_of_height_to_monin_obukhov_length
   long_name = monin obukhov surface stability parameter
   units = none
   dimensions = (horizontal_loop_extent)
@@ -780,7 +780,7 @@
   intent = inout
   optional = F
 [mol]
-  standard_name = theta_star
+  standard_name = surface_temperature_scale
   long_name = temperature flux divided by ustar (temperature scale)
   units = K
   dimensions = (horizontal_loop_extent)
@@ -834,7 +834,7 @@
   intent = inout
   optional = F
 [lh]
-  standard_name = surface_latent_heat
+  standard_name = surface_upward_latent_heat_flux
   long_name = latent heating at the surface (pos = up)
   units = W m-2
   dimensions = (horizontal_loop_extent)
@@ -879,7 +879,7 @@
   intent = inout
   optional = F
 [th2]
-  standard_name = potential_temperature_at_2m
+  standard_name = air_potential_temperature_at_2m
   long_name = 2 meter potential temperature
   units = K
   dimensions = (horizontal_loop_extent)
@@ -888,7 +888,7 @@
   intent = inout
   optional = F
 [t2]
-  standard_name = temperature_at_2m
+  standard_name = air_temperature_at_2m
   long_name = 2 meter temperature
   units = K
   dimensions = (horizontal_loop_extent)
@@ -906,7 +906,7 @@
   intent = inout
   optional = F
 [wstar]
-  standard_name = surface_wind_enhancement_due_to_convection
+  standard_name = enhancement_to_wind_speed_at_surface_adjacent_layer_due_to_convection
   long_name = surface wind enhancement due to convection
   units = m s-1
   dimensions = (horizontal_loop_extent)

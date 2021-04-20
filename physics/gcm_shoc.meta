@@ -33,7 +33,7 @@
   intent = in
   optional = F
 [tcrf]
-  standard_name = cloud_phase_transition_denominator
+  standard_name = reciprocal_of_cloud_phase_transition_temperature_range
   long_name = denominator in cloud phase transition = 1/(tcr-tf)
   units = K-1
   dimensions = ()
@@ -123,7 +123,7 @@
   intent = in
   optional = F
 [dtp]
-  standard_name = time_step_for_physics
+  standard_name = timestep_for_physics
   long_name = time step for physics
   units = s
   dimensions = ()
@@ -168,7 +168,7 @@
   intent = in
   optional = F
 [u]
-  standard_name = x_wind_updated_by_physics
+  standard_name = x_wind_of_new_state
   long_name = zonal wind updated by physics
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -177,7 +177,7 @@
   intent = in
   optional = F
 [v]
-  standard_name = y_wind_updated_by_physics
+  standard_name = y_wind_of_new_state
   long_name = meridional wind updated by physics
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -204,7 +204,7 @@
   intent = in
   optional = F
 [supice]
-  standard_name = ice_supersaturation_threshold
+  standard_name = tunable_parameter_for_ice_supersaturation
   long_name = ice supersaturation parameter for PDF clouds
   units = none
   dimensions = ()
@@ -213,7 +213,7 @@
   intent = in
   optional = F
 [pcrit]
-  standard_name = shoc_tke_dissipatation_pressure_threshold
+  standard_name = pressure_threshold_for_increased_tke_dissipation
   long_name = pressure below which extra TKE diss. is applied in SHOC
   units = Pa
   dimensions = ()
@@ -222,7 +222,7 @@
   intent = in
   optional = F
 [cefac]
-  standard_name = shoc_tke_dissipation_tunable_parameter
+  standard_name = multiplicative_tunable_parameter_for_tke_dissipation
   long_name = mult. tuning parameter for TKE diss. in SHOC
   units = none
   dimensions = ()
@@ -231,7 +231,7 @@
   intent = in
   optional = F
 [cesfac]
-  standard_name = shoc_tke_dissipation_tunable_parameter_near_surface
+  standard_name = multiplicative_tunable_parameter_for_tke_dissipation_near_surface
   long_name = mult. tuning parameter for TKE diss. at surface in SHOC
   units = none
   dimensions = ()
@@ -240,7 +240,7 @@
   intent = in
   optional = F
 [tkef1]
-  standard_name = shoc_implicit_TKE_integration_uncentering_term
+  standard_name = uncentering_coefficient_for_implicit_tke_integration
   long_name = uncentering term for TKE integration in SHOC
   units = none
   dimensions = ()
@@ -249,7 +249,7 @@
   intent = in
   optional = F
 [dis_opt]
-  standard_name = shoc_flag_for_optional_surface_TKE_dissipation
+  standard_name = control_for_tke_dissipation_method
   long_name = flag for alt. TKE diss. near surface in SHOC (>0 = ON)
   units = none
   dimensions = ()
@@ -285,7 +285,7 @@
   intent = in
   optional = F
 [gt0]
-  standard_name = air_temperature_updated_by_physics
+  standard_name = air_temperature_of_new_state
   long_name = temperature updated by physics
   units = K
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -294,7 +294,7 @@
   intent = inout
   optional = F
 [gq0]
-  standard_name = tracer_concentration_updated_by_physics
+  standard_name = tracer_concentration_of_new_state
   long_name = tracer concentration updated by physics
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers)
@@ -311,7 +311,7 @@
   intent = in
   optional = F
 [ntqv]
-  standard_name = index_for_water_vapor
+  standard_name = index_of_specific_humidity_in_tracer_concentration_array
   long_name = tracer index for water vapor (specific humidity)
   units = index
   dimensions = ()
@@ -319,7 +319,7 @@
   intent = in
   optional = F
 [ntcw]
-  standard_name = index_for_liquid_cloud_condensate
+  standard_name = index_of_cloud_liquid_water_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for cloud condensate (or liquid water)
   units = index
   dimensions = ()
@@ -327,7 +327,7 @@
   intent = in
   optional = F
 [ntiw]
-  standard_name = index_for_ice_cloud_condensate
+  standard_name = index_of_cloud_ice_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for  ice water
   units = index
   dimensions = ()
@@ -335,7 +335,7 @@
   intent = in
   optional = F
 [ntrw]
-  standard_name = index_for_rain_water
+  standard_name = index_of_rain_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for rain water
   units = index
   dimensions = ()
@@ -343,7 +343,7 @@
   intent = in
   optional = F
 [ntsw]
-  standard_name = index_for_snow_water
+  standard_name = index_of_snow_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for snow water
   units = index
   dimensions = ()
@@ -351,7 +351,7 @@
   intent = in
   optional = F
 [ntgl]
-  standard_name = index_for_graupel
+  standard_name = index_of_graupel_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for graupel
   units = index
   dimensions = ()
@@ -359,7 +359,7 @@
   intent = in
   optional = F
 [ntlnc]
-  standard_name = index_for_liquid_cloud_number_concentration
+  standard_name = index_of_mass_number_concentration_of_cloud_droplets_in_tracer_concentration_array
   long_name = tracer index for liquid number concentration
   units = index
   dimensions = ()
@@ -367,7 +367,7 @@
   intent = in
   optional = F
 [ntinc]
-  standard_name = index_for_ice_cloud_number_concentration
+  standard_name = index_of_mass_number_concentration_of_cloud_ice_in_tracer_concentration_array
   long_name = tracer index for ice    number concentration
   units = index
   dimensions = ()
@@ -402,7 +402,7 @@
   intent = inout
   optional = F
 [wthv_sec]
-  standard_name = kinematic_buoyancy_flux_from_shoc
+  standard_name = kinematic_buoyancy_flux
   long_name = upward kinematic buoyancy flux from the SHOC scheme
   units = K m s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
