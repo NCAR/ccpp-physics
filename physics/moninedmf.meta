@@ -420,7 +420,7 @@
   intent = inout
   optional = F
 [dkt]
-  standard_name = atmosphere_heat_diffusivity_from_gfspbl
+  standard_name = atmosphere_heat_diffusivity
   long_name = diffusivity for heat
   units = m2 s-1
   dimensions = (horizontal_loop_extent,vertical_dimension_minus_one)
@@ -429,7 +429,7 @@
   intent = out
   optional = F
 [dku]
-  standard_name = atmosphere_momentum_diffusivity_from_gfspbl
+  standard_name = atmosphere_momentum_diffusivity
   long_name = diffusivity for momentum
   units = m2 s-1
   dimensions = (horizontal_loop_extent,vertical_dimension_minus_one)
