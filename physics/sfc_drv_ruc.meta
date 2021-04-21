@@ -164,15 +164,6 @@
   kind = kind_phys
   intent = inout
   optional = F
-[t1]
-  standard_name = air_temperature_at_lowest_model_layer
-  long_name = mean temperature at lowest model layer
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [q1]
   standard_name = water_vapor_specific_humidity_at_lowest_model_layer
   long_name = water vapor specific humidity at lowest model layer

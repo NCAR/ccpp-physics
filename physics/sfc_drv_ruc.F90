@@ -34,7 +34,7 @@ module lsm_ruc
                                flag_restart, flag_init, con_fvirt, con_rd,      &
                                im, lsoil_ruc, lsoil, kice, nlev,                & ! in
                                lsm_ruc, lsm, slmsk, stype, vtype,               & ! in 
-                               t1, q1, prsl1, tsfc_lnd, tsfc_ice, tsfc_wat,     & ! in
+                               q1, prsl1, tsfc_lnd, tsfc_ice, tsfc_wat,         & ! in
                                tg3, smc, slc, stc, fice, min_seaice,            & ! in
                                sncovr_lnd, sncovr_ice, snoalb,                  & ! in
                                facsf, facwf, alvsf, alvwf, alnsf, alnwf,        & ! in
@@ -64,7 +64,6 @@ module lsm_ruc
       real (kind=kind_phys), dimension(im), intent(in) :: slmsk
       real (kind=kind_phys), dimension(im), intent(in) :: stype
       real (kind=kind_phys), dimension(im), intent(in) :: vtype
-      real (kind=kind_phys), dimension(im), intent(in) :: t1
       real (kind=kind_phys), dimension(im), intent(in) :: q1
       real (kind=kind_phys), dimension(im), intent(in) :: prsl1
       real (kind=kind_phys), dimension(im), intent(in) :: tsfc_lnd
@@ -110,7 +109,7 @@ module lsm_ruc
 ! --- local
       real (kind=kind_phys), dimension(lsoil_ruc) :: dzs
       real (kind=kind_phys) :: alb_lnd, alb_ice
-      real (kind=kind_phys) :: q0, qs1, rho
+      real (kind=kind_phys) :: q0, qs1
       integer  :: ipr, i, k
       logical  :: debug_print
       integer, dimension(im) :: soiltyp, vegtype
@@ -185,33 +184,32 @@ module lsm_ruc
         sfalb_lnd_bck(i) = 0.25*(alnsf(i) + alnwf(i) + alvsf(i) + alvwf(i))  &
                            * min(1., facsf(i)+facwf(i))
 
-        !-- land
-        semis_lnd(i) = semisbase(i) * (1.-sncovr_lnd(i))  &
-                     + 0.99 * sncovr_lnd(i)
-        alb_lnd = sfalb_lnd_bck(i) * (1. - sncovr_lnd(i)) &
-                + snoalb(i) * sncovr_lnd(i) 
-        albdvis_lnd(i) = alb_lnd
-        albdnir_lnd(i) = alb_lnd
-        albivis_lnd(i) = alb_lnd
-        albinir_lnd(i) = alb_lnd
-        !-- ice
-        semis_ice(i) = 0.97 * (1. - sncovr_ice(i)) + 0.99 * sncovr_ice(i)
-        alb_ice = 0.55 * (1. - sncovr_ice(i)) + 0.75 * sncovr_ice(i)
-        albdvis_ice(i) = alb_ice 
-        albdnir_ice(i) = alb_ice
-        albivis_ice(i) = alb_ice
-        albinir_ice(i) = alb_ice
-
         if (.not.flag_restart) then
+          !-- land
+          semis_lnd(i) = semisbase(i) * (1.-sncovr_lnd(i))  &
+                       + 0.99 * sncovr_lnd(i)
+          alb_lnd = sfalb_lnd_bck(i) * (1. - sncovr_lnd(i)) &
+                  + snoalb(i) * sncovr_lnd(i) 
+          albdvis_lnd(i) = alb_lnd
+          albdnir_lnd(i) = alb_lnd
+          albivis_lnd(i) = alb_lnd
+          albinir_lnd(i) = alb_lnd
+          !-- ice
+          semis_ice(i) = 0.97 * (1. - sncovr_ice(i)) + 0.99 * sncovr_ice(i)
+          alb_ice = 0.55 * (1. - sncovr_ice(i)) + 0.75 * sncovr_ice(i)
+          albdvis_ice(i) = alb_ice 
+          albdnir_ice(i) = alb_ice
+          albivis_ice(i) = alb_ice
+          albinir_ice(i) = alb_ice
+
           !-- initialize QV mixing ratio at the surface from atm. 1st level
           q0  = max(q1(i)/(1.-q1(i)), 1.e-8)   ! q1=specific humidity at level 1 (kg/kg)
-          rho = prsl1(i) / (con_rd*t1(i)*(1.0+con_fvirt*q0))
           qs1 = rslf(prsl1(i),tsfc_lnd(i))  !* qs1=sat. mixing ratio at level 1 (kg/kg)
           q0  = min(qs1, q0)
           sfcqv_lnd(i) = q0
           qs1 = rslf(prsl1(i),tsfc_ice(i))
           sfcqv_ice(i) = qs1
-        endif
+        endif ! .not. restart
 
       enddo ! i
 
