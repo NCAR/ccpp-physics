@@ -461,12 +461,10 @@
 
           ! direct albedo CZA dependence over water
           if (fraco(i) > f_zero .and. coszf(i) > 0.0001) then
-            if (tsknf(i) >= con_t0c) then
-              asevb_wat = max (asevd_wat, 0.026/(coszf(i)**1.7 + 0.065) &
-     &                    + 0.15 * (coszf(i)-0.1) * (coszf(i)-0.5)      &
-     &                    * (coszf(i)-f_one))
-              asenb_wat = asevb_wat
-            endif
+            asevb_wat = max (asevd_wat, 0.026/(coszf(i)**1.7 + 0.065)   &
+     &                  + 0.15 * (coszf(i)-0.1) * (coszf(i)-0.5)        &
+     &                  * (coszf(i)-f_one))
+            asenb_wat = asevb_wat
           endif
 
           if (icy(i)) then
@@ -474,15 +472,16 @@
             asnow = 0.02*snowf(i)
             argh  = min(0.50, max(.025, 0.01*zorlf(i)))
             hrgh  = min(f_one,max(0.20,1.0577-1.1538e-3*hprif(i)))
-            fsno0 = asnow / (argh + asnow) * hrgh
+            fsno0 = asnow / (argh + asnow) * hrgh ! snow fraction on ice
             ! diffused
-            if (tsknf(i) < 271.1) then
-              asevd_ice = 0.70
-              asend_ice = 0.65
-            else
+            if (tsknf(i) > 271.1 .and. tsknf(i) < 271.5) then
+            !tgs: looks like albedo reduction from puddles on ice
               a1 = (tsknf(i) - 271.1)**2
               asevd_ice = 0.7 - 4.0*a1
               asend_ice = 0.65 - 3.6875*a1
+            else
+              asevd_ice = 0.70
+              asend_ice = 0.65
             endif
             ! direct
             asevb_ice = asevd_ice
@@ -518,7 +517,7 @@
           endif ! end icy
 
           if (fracl(i) > f_zero) then
-!>  - Calculate snow cover input directly for land model, no
+!>  - Use snow cover input directly for land model, no
 !!      conversion needed.
 
             fsno0 = sncovr(i) ! snow fraction on land
@@ -544,7 +543,7 @@
             alndvb = ab2bm   *flnd + snoalb(i) * fsno
             alndvd = alvwf(i)*flnd + snoalb(i) * fsno
           else
-          !-- fill in values of land albedo
+          !-- fill in values for land albedo
             alndnb = 0.
             alndnd = 0.
             alndvb = 0.
@@ -692,12 +691,10 @@
 
           ! direct albedo CZA dependence over water
           if (fraco(i) > f_zero .and. coszf(i) > 0.0001) then
-            if (tsknf(i) >= con_t0c) then
-              asevb_wat = max (asevd_wat, 0.026/(coszf(i)**1.7 + 0.065) &
-     &                    + 0.15 * (coszf(i)-0.1) * (coszf(i)-0.5)      &
-     &                    * (coszf(i)-f_one))
-              asenb_wat = asevb_wat
-            endif
+            asevb_wat = max (asevd_wat, 0.026/(coszf(i)**1.7 + 0.065)   &
+     &                  + 0.15 * (coszf(i)-0.1) * (coszf(i)-0.5)        &
+     &                  * (coszf(i)-f_one))
+            asenb_wat = asevb_wat
           endif
 
           !-- ice albedo
@@ -718,13 +715,14 @@
               hrgh  = min(f_one,max(0.20,1.0577-1.1538e-3*hprif(i)))
               fsno0 = asnow / (argh + asnow) * hrgh
               ! diffused
-              if (tsknf(i) < 271.1) then
-                asevd_ice = 0.70
-                asend_ice = 0.65
-              else
+              if (tsknf(i) > 271.1 .and. tsknf(i) < 271.5) then
+              !tgs: looks like albedo reduction from puddles on ice
                 a1 = (tsknf(i) - 271.1)**2
                 asevd_ice = 0.7 - 4.0*a1
                 asend_ice = 0.65 - 3.6875*a1
+              else
+                asevd_ice = 0.70
+                asend_ice = 0.65
               endif
               ! direct
               asevb_ice = asevd_ice
@@ -746,13 +744,13 @@
                   asnnb = asnnd
                 endif
   
-                ! composite ice albedo and snow albedos
+                ! composite ice and snow albedos
                 asevd_ice = asevd_ice * (1. - fsno0) + asnvd * fsno0
                 asend_ice = asend_ice * (1. - fsno0) + asnnd * fsno0
                 asevb_ice = asevb_ice * (1. - fsno0) + asnvb * fsno0
                 asenb_ice = asenb_ice * (1. - fsno0) + asnnb * fsno0
               endif ! snow
-            endif ! lsm
+            endif ! ice option from LSM or otherwise
           else
           ! icy = false, fill in values
             asevd_ice = 0.70
