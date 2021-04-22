@@ -288,10 +288,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 !MYNN-2D
       real(kind=kind_phys), dimension(im), intent(in) ::                 &
      &        dx,zorl,slmsk,tsurf,qsfc,ps,                               &
-     &        hflx,qflx,ust,wspd,rb
-
-      real(kind=kind_phys), dimension(:), intent(in) ::                  &
-     &        dusfc_cice,dvsfc_cice,dtsfc_cice,dqsfc_cice,recmol
+     &        hflx,qflx,ust,wspd,rb,recmol
 
       real(kind=kind_phys), dimension(im), intent(in) ::                 &
      &        dusfc_cice,dvsfc_cice,dtsfc_cice,dqsfc_cice,               &
