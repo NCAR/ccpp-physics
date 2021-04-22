@@ -26,3 +26,4 @@
   dimensions = (vertical_dimension_of_ozone_forcing_data)
   type = real
   kind = kind_phys
+  active = (index_for_ozone>0)
