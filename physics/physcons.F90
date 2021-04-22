@@ -138,7 +138,7 @@
   real(kind=kind_phys),parameter:: rhosnow    = 100._kind_phys                     !< density of snow (kg/m^3)
   real(kind=kind_phys),parameter:: rhoair     = 1.28_kind_phys                     !< density of air near surface (kg/m^3)
 
-! Decorrelation length constant (km) for iovrlw/iovrsw = 4 or 5 and idcor = 0
+! Decorrelation length constant (km) for iovr = 4 or 5 and idcor = 0
   real(kind=kind_phys),parameter:: decorr_con = 2.50_kind_phys
 
 !........................................!

@@ -62,7 +62,7 @@
      &   psk,rbsoil,zorl,u10m,v10m,fm,fh,                               &
      &   tsea,heat,evap,stress,spd1,kpbl,                               &
      &   prsi,del,prsl,prslk,phii,phil,delt,dspheat,                    &
-     &   dusfc,dvsfc,dtsfc,dqsfc,hpbl,hgamt,hgamq,dkt,                  &
+     &   dusfc,dvsfc,dtsfc,dqsfc,hpbl,hgamt,hgamq,dkt,dku,              &
      &   kinver,xkzm_m,xkzm_h,xkzm_s,lprnt,ipr,                         &
      &   xkzminv,moninq_fac,hurr_pbl,islimsk,var_ric,                   &
      &   coef_ric_l,coef_ric_s,lssav,ldiag3d,qdiag3d,ntoz,              &
@@ -114,7 +114,9 @@
       real(kind=kind_phys), intent(out) ::                              &
      &                     dusfc(im),     dvsfc(im),                    &
      &                     dtsfc(im),     dqsfc(im),                    &
-     &                     hpbl(im),      dkt(im,km-1)
+     &                     hpbl(im)
+      real(kind=kind_phys), intent(out) ::                              &
+     &                     dkt(im,km-1), dku(im,km-1)
       real(kind=kind_phys), intent(inout) ::                            &
      &                     hgamt(im),     hgamq(im)
 !
@@ -148,8 +150,8 @@
      &                     zd(im),      zdd(im),      thlvx1(im)
 !
       real(kind=kind_phys) rdzt(im,km-1),dktx(im,km-1),                 &
-     &                     zi(im,km+1),  zl(im,km),    xkzo(im,km-1),   &
-     &                     dku(im,km-1), xkzmo(im,km-1),                &
+     &                     zi(im,km+1),  zl(im,km),                     &
+     &                     xkzo(im,km-1), xkzmo(im,km-1),               &
      &                     cku(im,km-1), ckt(im,km-1),                  &
      &                     ti(im,km-1),  shr2(im,km-1),                 &
      &                     al(im,km-1),  ad(im,km),                     &
@@ -1402,6 +1404,7 @@ c
 !
         enddo
       enddo
+
 !
 !     solve tridiagonal problem for momentum
 !

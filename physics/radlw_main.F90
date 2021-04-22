@@ -279,8 +279,7 @@
       module rrtmg_lw 
 !
       use physparam,        only : ilwrate, ilwrgas, ilwcliq, ilwcice,  &
-     &                             isubclw, icldflg, iovrlw,  ivflip,   &
-     &                             kind_phys
+     &                             isubclw, icldflg, iovr,  ivflip
       use physcons,         only : con_g, con_cp, con_avgd, con_amd,    &
      &                             con_amw, con_amo3
       use mersenne_twister, only : random_setseed, random_number,       &
@@ -527,7 +526,7 @@
 !           =0: no sub-col cld treatment, use grid-mean cld quantities  !
 !           =1: mcica sub-col, prescribed seeds to get random numbers   !
 !           =2: mcica sub-col, providing array icseed for random numbers!
-!   iovrlw  - cloud overlapping control flag                            !
+!   iovr  - cloud overlapping control flag                              !
 !           =0: random overlapping clouds                               !
 !           =1: maximum/random overlapping clouds                       !
 !           =2: maximum overlap cloud (used for isubclw>0 only)         !
@@ -849,10 +848,10 @@
         endif
 
         stemp = sfgtmp(iplon)          ! surface ground temp
-        if (iovrlw == 3) delgth= de_lgth(iplon)    ! clouds decorr-length
+        if (iovr == 3) delgth= de_lgth(iplon)    ! clouds decorr-length
 
 ! mz*: HWRF
-        if (iovrlw == 4 ) then
+        if (iovr == 4 ) then
 
 !Add layer height needed for exponential (icld=4) and
 ! exponential-random (icld=5) overlap options  
@@ -876,7 +875,7 @@
                enddo
             enddo
 
-          call mcica_subcol_lw(1, iplon, nlay, iovrlw, permuteseed,     &
+          call mcica_subcol_lw(1, iplon, nlay, iovr, permuteseed,       &
      &                 irng, plyr, hgt,                                 &
      &                 cld_cf, cld_iwp, cld_lwp,cld_swp,                &
      &                 cld_ref_ice, cld_ref_liq,                        &
@@ -910,7 +909,7 @@
             tavel(k)= tlyr(iplon,k1)
             tz(k)   = tlvl(iplon,k1)
             dz(k)   = dzlyr(iplon,k1)
-            if (iovrlw == 4 .or. iovrlw == 5) alph(k) = alpha(iplon,k) ! alpha decorrelation
+            if (iovr == 4 .or. iovr == 5) alph(k) = alpha(iplon,k) ! alpha decorrelation
 
 !> -# Set absorber amount for h2o, co2, and o3.
 
@@ -989,7 +988,7 @@
               cda4(k)  = cld_ref_snow(iplon,k1)
             enddo
             ! HWRF RRMTG
-            if (iovrlw == 4) then   !mz  HWRF 
+            if (iovr == 4) then   !mz  HWRF 
                do k = 1, nlay
                   k1 = nlp1 - k
                do ig = 1, ngptlw
@@ -1040,7 +1039,7 @@
             tavel(k)= tlyr(iplon,k)
             tz(k)   = tlvl(iplon,k+1)
             dz(k)   = dzlyr(iplon,k)
-            if (iovrlw == 4 .or. iovrlw == 5) alph(k) = alpha(iplon,k) ! alpha decorrelation
+            if (iovr == 4 .or. iovr == 5) alph(k) = alpha(iplon,k) ! alpha decorrelation
 
 !  --- ...  set absorber amount
 !test use
@@ -1112,7 +1111,7 @@
               cda3(k)  = cld_swp(iplon,k)
               cda4(k)  = cld_ref_snow(iplon,k)
             enddo
-            if (iovrlw == 4) then
+            if (iovr == 4) then
 !mz* Move incoming GCM cloud arrays to RRTMG cloud arrays.
 !For GCM input, incoming reicmcl is defined based on selected 
 !ice parameterization (inflglw)
@@ -1206,7 +1205,7 @@
         if ( lcf1 ) then
 
           !mz* for HWRF, save cldfmc with mcica
-          if (iovrlw == 4) then
+          if (iovr == 4) then
                do k = 1, nlay
                do ig = 1, ngptlw
                   cldfmc_save(ig,k)=cldfmc (ig,k)
@@ -1217,12 +1216,12 @@
           call cldprop                                                  &
 !  ---  inputs:
      &     ( cldfrc,clwp,relw,ciwp,reiw,cda1,cda2,cda3,cda4,            &
-     &       nlay, nlp1, ipseed(iplon), dz, delgth, iovrlw, alph,       &
+     &       nlay, nlp1, ipseed(iplon), dz, delgth, iovr, alph,         &
 !  ---  outputs:
      &       cldfmc, taucld                                             &
      &     )
 
-          if (iovrlw == 4) then
+          if (iovr == 4) then
           !mz for HWRF, still using mcica cldfmc
                do k = 1, nlay
                do ig = 1, ngptlw
@@ -1251,7 +1250,7 @@
         endif
 
 !mz* HWRF: calculate taucmc with mcica
-        if (iovrlw == 4) then 
+        if (iovr == 4) then
           call cldprmc(nlay, inflglw, iceflglw, liqflglw,               &
      &                 cldfmc, ciwpmc,                                  &
      &                 clwpmc, cswpmc, reicmc, relqmc, resnmc,          &
@@ -1344,7 +1343,7 @@
 
         if (isubclw <= 0) then
 
-          if (iovrlw <= 0) then
+          if (iovr <= 0) then
 
             call rtrn                                                   &
 !  ---  inputs:
@@ -1364,7 +1363,7 @@
      &       totuflux,totdflux,htr, totuclfl,totdclfl,htrcl, htrb       &
      &     )
 
-          endif   ! end if_iovrlw_block
+          endif   ! end if_iovr_block
 
         else
 
@@ -1515,7 +1514,7 @@
 !   icldflg - cloud scheme control flag                                 !
 !           =0: diagnostic scheme gives cloud tau, omiga, and g.        !
 !           =1: prognostic scheme gives cloud liq/ice path, etc.        !
-!   iovrlw  - clouds vertical overlapping control flag                  !
+!   iovr  - clouds vertical overlapping control flag                    !
 !           =0: random overlapping clouds                               !
 !           =1: maximum/random overlapping clouds                       !
 !           =2: maximum overlap cloud (isubcol>0 only)                  !
@@ -1564,19 +1563,19 @@
 !
 !===> ... begin here
 !
-      if ( iovrlw<0 .or. iovrlw>4 ) then
+      if ( iovr<0 .or. iovr>4 ) then
         print *,'  *** Error in specification of cloud overlap flag',   &
-     &          ' IOVRLW=',iovrlw,' in RLWINIT !!'
+     &          ' IOVR=',iovr,' in RLWINIT !!'
         stop
-      elseif ( (iovrlw==2 .or. iovrlw==3) .and. isubclw==0 ) then
+      elseif ( (iovr==2 .or. iovr==3) .and. isubclw==0 ) then
         if (me == 0) then
-          print *,'  *** IOVRLW=',iovrlw,' is not available for',       &
+          print *,'  *** IOVR=',iovr,' is not available for',           &
      &          ' ISUBCLW=0 setting!!'
           print *,'      The program uses maximum/random overlap',      &
      &          ' instead.'
         endif
 
-        iovrlw = 1
+        iovr = 1
       endif
 
       if (me == 0) then
@@ -1713,7 +1712,7 @@
 !> @{
       subroutine cldprop                                                &
      &     ( cfrac,cliqp,reliq,cicep,reice,cdat1,cdat2,cdat3,cdat4,     & !  ---  inputs
-     &       nlay, nlp1, ipseed, dz, de_lgth, iovrlw, alpha,            &
+     &       nlay, nlp1, ipseed, dz, de_lgth, iovr, alpha,              &
      &       cldfmc, taucld                                             & !  ---  outputs
      &     )
 
@@ -1814,7 +1813,7 @@
       use module_radlw_cldprlw
 
 !  ---  inputs:
-      integer, intent(in) :: nlay, nlp1, ipseed, iovrlw
+      integer, intent(in) :: nlay, nlp1, ipseed, iovr
 
       real (kind=kind_phys), dimension(0:nlp1), intent(in) :: cfrac
       real (kind=kind_phys), dimension(nlay),   intent(in) :: cliqp,    &
@@ -1994,7 +1993,7 @@
 !  --- ...  call sub-column cloud generator
 
 !mz*
-      if (iovrlw .ne. 4) then
+      if (iovr .ne. 4) then
         call mcica_subcol                                               &
 !  ---  inputs:
      &     ( cldf, nlay, ipseed, dz, de_lgth, alpha,                    &
@@ -2011,7 +2010,7 @@
             endif
           enddo
         enddo
-      endif  !iovrlw
+      endif  !iovr
 
       endif   ! end if_isubclw_block
 
@@ -2054,7 +2053,7 @@
 !   lcloudy - logical, sub-colum cloud profile flag array    ngptlw*nlay!
 !                                                                       !
 !  other control flags from module variables:                           !
-!     iovrlw    : control flag for cloud overlapping method             !
+!     iovr    : control flag for cloud overlapping method               !
 !                 =0:random; =1:maximum/random: =2:maximum; =3:decorr   !
 !                                                                       !
 !  =====================    end of definitions    ====================  !
@@ -2096,7 +2095,7 @@
 !!  - For max-random overlap, pick a random value at every level
 !!  - For maximum overlap, pick same random numebr at every level
 
-      select case ( iovrlw )
+      select case ( iovr )
 
         case( 0 )        ! random overlap, pick a random value at every level
 
@@ -8855,25 +8854,25 @@
                   abscosno(ig) = 0.0_rb
 
                elseif (iceflag .eq. 0) then
-                  if (radice .lt. 10.0_rb) stop 'ICE RADIUS TOO SMALL'
-                  abscoice(ig) = absice0(1) + absice0(2)/radice
+!                  if (radice .lt. 10.0_rb) stop 'ICE RADIUS TOO SMALL'
+                  abscoice(ig) = absice0(1) + absice0(2)/max(radice,10.0_rb)
                   abscosno(ig) = 0.0_rb
 
                elseif (iceflag .eq. 1) then
-                  if (radice .lt. 13.0_rb .or. radice .gt. 130._rb) stop&
-     &                'ICE RADIUS OUT OF BOUNDS'
+!                  if (radice .lt. 13.0_rb .or. radice .gt. 130._rb) stop&
+!     &                'ICE RADIUS OUT OF BOUNDS'
                   ncbands = 5
                   ib = icb(ngb(ig))
-                  abscoice(ig) = absice1(1,ib) + absice1(2,ib)/radice
+                  abscoice(ig) = absice1(1,ib) + absice1(2,ib)/min(max(radice,13.0_rb),130._rb)
                   abscosno(ig) = 0.0_rb
 
 ! For iceflag=2 option, ice particle effective radius is limited to 5.0 to 131.0 microns
 
                elseif (iceflag .eq. 2) then
-                  if (radice .lt. 5.0_rb .or. radice .gt. 131.0_rb) stop&
-     &                'ICE RADIUS OUT OF BOUNDS'
+!                  if (radice .lt. 5.0_rb .or. radice .gt. 131.0_rb) stop&
+!     &                'ICE RADIUS OUT OF BOUNDS'
                      ncbands = 16
-                     factor = (radice - 2._rb)/3._rb
+                     factor = (min(max(radice,5.0_rb),131._rb) - 2._rb)/3._rb
                      index = int(factor)
                      if (index .eq. 43) index = 42
                      fint = factor - float(index)
@@ -8886,15 +8885,15 @@
 ! For iceflag=3 option, ice particle generalized effective size is limited to 5.0 to 140.0 microns
 
                elseif (iceflag .ge. 3) then
-                  if (radice .lt. 5.0_rb .or. radice .gt. 140.0_rb) then
-                         write(errmsg,'(a,i5,i5,f8.2,f8.2)' )           &
-     &         'ERROR: ICE GENERALIZED EFFECTIVE SIZE OUT OF BOUNDS'    &
-     &          ,ig, lay, ciwpmc(ig,lay), radice
-                         errflg = 1
-                         return
-                     end if                                                                      
+!                  if (radice .lt. 5.0_rb .or. radice .gt. 140.0_rb) then
+!                         write(errmsg,'(a,i5,i5,f8.2,f8.2)' )           &
+!     &         'ERROR: ICE GENERALIZED EFFECTIVE SIZE OUT OF BOUNDS'    &
+!     &          ,ig, lay, ciwpmc(ig,lay), radice
+!                         errflg = 1
+!                         return
+!                     end if                                                                      
                      ncbands = 16                                                                
-                     factor = (radice - 2._rb)/3._rb                                             
+                     factor = (min(max(radice,5.0_rb),140._rb) - 2._rb)/3._rb                    
                      index = int(factor)                                                         
                      if (index .eq. 46) index = 45                                               
                      fint = factor - float(index)                                                
@@ -8909,15 +8908,15 @@
 !..Incorporate additional effects due to snow.                                                   
                if (cswpmc(ig,lay).gt.0.0_rb .and. iceflag .eq. 5) then                           
                   radsno = resnmc(lay)                                                           
-                  if (radsno .lt. 5.0_rb .or. radsno .gt. 140.0_rb) then                         
-                         write(errmsg,'(a,i5,i5,f8.2,f8.2)' )           &
-     &         'ERROR: SNOW GENERALIZED EFFECTIVE SIZE OUT OF BOUNDS'   &                        
-     &         ,ig, lay, cswpmc(ig,lay), radsno                                                  
-                         errflg = 1
-                         return
-                     end if                                                                      
+!                  if (radsno .lt. 5.0_rb .or. radsno .gt. 140.0_rb) then                         
+!                         write(errmsg,'(a,i5,i5,f8.2,f8.2)' )           &
+!     &         'ERROR: SNOW GENERALIZED EFFECTIVE SIZE OUT OF BOUNDS'   &                        
+!     &         ,ig, lay, cswpmc(ig,lay), radsno                                                  
+!                         errflg = 1
+!                         return
+!                     end if                                                                      
                      ncbands = 16                                                                
-                     factor = (radsno - 2._rb)/3._rb                                             
+                     factor = (min(max(radsno,5.0_rb),140.0_rb) - 2._rb)/3._rb                   
                      index = int(factor)                                                         
                      if (index .eq. 46) index = 45                                               
                      fint = factor - float(index)                                                
@@ -8938,14 +8937,14 @@
                                                                                                  
                elseif (liqflag .eq. 1) then                                                      
                   radliq = relqmc(lay)                        
-                  if (radliq .lt. 2.5_rb .or. radliq .gt. 60._rb) then
-                     write(errmsg,'(a,i5,i5,f8.2,f8.2)' )              &
-&                         'ERROR: LIQUID EFFECTIVE SIZE OUT OF BOUNDS' &
-&                         ,ig, lay, clwpmc(ig,lay), radliq
-                     errflg = 1
-                     return
-                  end if
-                  index = int(radliq - 1.5_rb)                                                   
+!                  if (radliq .lt. 2.5_rb .or. radliq .gt. 60._rb) then
+!                     write(errmsg,'(a,i5,i5,f8.2,f8.2)' )              &
+!&                         'ERROR: LIQUID EFFECTIVE SIZE OUT OF BOUNDS' &
+!&                         ,ig, lay, clwpmc(ig,lay), radliq
+!                     errflg = 1
+!                     return
+!                  end if
+                  index = int(min(max(radliq,2.5_rb),60._rb) - 1.5_rb)                           
                   if (index .eq. 0) index = 1                                                    
                   if (index .eq. 58) index = 57                                                  
                   fint = radliq - 1.5_rb - float(index)                                          

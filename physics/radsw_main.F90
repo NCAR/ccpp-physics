@@ -305,7 +305,7 @@
       module rrtmg_sw 
 !
       use physparam,        only : iswrate, iswrgas, iswcliq, iswcice,  &
-     &                             isubcsw, icldflg, iovrsw,  ivflip,   &
+     &                             isubcsw, icldflg, iovr,  ivflip,     &
      &                             iswmode
       use physcons,         only : con_g, con_cp, con_avgd, con_amd,    &
      &                             con_amw, con_amo3
@@ -630,7 +630,7 @@
 !           =0: no sub-col cld treatment, use grid-mean cld quantities  !
 !           =1: mcica sub-col, prescribed seeds to get random numbers   !
 !           =2: mcica sub-col, providing array icseed for random numbers!
-!   iovrsw  - cloud overlapping control flag                            !
+!   iovr    - cloud overlapping control flag                            !
 !           =0: random overlapping clouds                               !
 !           =1: maximum/random overlapping clouds                       !
 !           =2: maximum overlap cloud                                   !
@@ -972,7 +972,7 @@
         cosz1  = cosz(j1)
         sntz1  = f_one / cosz(j1)
         ssolar = s0fac * cosz(j1)
-        if (iovrsw == 3) delgth = de_lgth(j1) ! clouds decorr-length
+        if (iovr == 3) delgth = de_lgth(j1) ! clouds decorr-length
 
 !> -# Prepare surface albedo: bm,df - dir,dif; 1,2 - nir,uvv.
         albbm(1) = sfcalb_nir_dir(j1)
@@ -982,7 +982,7 @@
 
 
 ! mz*: HWRF
-        if (iovrsw == 4 ) then
+        if (iovr == 4 ) then
 
 
 !Add layer height needed for exponential (icld=4) and
@@ -993,7 +993,7 @@
          permuteseed = 1
 
 !mz* Derive height of each layer mid-point from layer thickness.
-! Needed for exponential (iovrsw=4) and exponential-random overlap
+! Needed for exponential (iovr=4) and exponential-random overlap
 ! option (iovr=5)only.
          dzsum =0.0
          do k = 1,nlay
@@ -1012,7 +1012,7 @@
                enddo
             enddo
 
-          call mcica_subcol_sw (1, 1, nlay, iovrsw, permuteseed,                      &
+          call mcica_subcol_sw (1, 1, nlay, iovr, permuteseed,                        &
      &                 irng, plyr(j1:j1,:), hgt(j1:j1,:),                             &
      &                 cld_cf(j1:j1,:), cld_iwp(j1:j1,:), cld_lwp(j1:j1,:),           &
      &                 cld_swp(j1:j1,:), cld_ref_ice(j1:j1,:), cld_ref_liq(j1:j1,:),  &
@@ -1040,7 +1040,7 @@
             tavel(k) = tlyr(j1,kk)
             delp (k) = delpin(j1,kk)
             dz   (k) = dzlyr (j1,kk)
-            if (iovrsw == 4 .or. iovrsw == 5) alph(k) = alpha(j1,k) ! alpha decorrelation
+            if (iovr == 4 .or. iovr == 5) alph(k) = alpha(j1,k) ! alpha decorrelation
 
 !> -# Set absorber and gas column amount, convert from volume mixing
 !!    ratio to molec/cm2 based on coldry (scaled to 1.0e-20)
@@ -1111,7 +1111,7 @@
               cdat3(k) = cld_swp(j1,kk)       ! cloud snow path
               cdat4(k) = cld_ref_snow(j1,kk)  ! snow partical effctive radius
             enddo
-            if (iovrsw == 4) then !mz* HWRF
+            if (iovr == 4) then !mz* HWRF
                do k = 1, nlay
                   kk = nlp1 - k
                do ig = 1, ngptsw
@@ -1153,7 +1153,7 @@
             tavel(k) = tlyr(j1,k)
             delp (k) = delpin(j1,k)
             dz   (k) = dzlyr (j1,k)
-            if (iovrsw == 4 .or. iovrsw == 5) alph(k) = alpha(j1,k)   ! alpha decorrelation
+            if (iovr == 4 .or. iovr == 5) alph(k) = alpha(j1,k)   ! alpha decorrelation
 
 !  --- ...  set absorber amount
 !test use
@@ -1226,7 +1226,7 @@
               cdat3(k) = cld_swp(j1,k)       ! cloud snow path
               cdat4(k) = cld_ref_snow(j1,k)  ! snow partical effctive radius
             enddo
-            if (iovrsw == 4) then     !mz* HWRF
+            if (iovr == 4) then     !mz* HWRF
 !mz* Move incoming GCM cloud arrays to RRTMG cloud arrays.
 !For GCM input, incoming reicmcl is defined based on selected 
 !ice parameterization (inflglw)
@@ -1269,11 +1269,11 @@
 
         zcf0   = f_one
         zcf1   = f_one
-        if (iovrsw == 0) then                    ! random overlapping
+        if (iovr == 0) then                    ! random overlapping
           do k = 1, nlay
             zcf0 = zcf0 * (f_one - cfrac(k))
           enddo
-        else if (iovrsw == 1 .or. iovrsw == 4) then ! max/ran/exp overlapping
+        else if (iovr == 1 .or. iovr == 4) then ! max/ran/exp overlapping
           do k = 1, nlay
             if (cfrac(k) > ftiny) then                ! cloudy layer
               zcf1 = min ( zcf1, f_one-cfrac(k) )
@@ -1283,7 +1283,7 @@
             endif
           enddo
           zcf0 = zcf0 * zcf1
-        else if (iovrsw >= 2 .and. iovrsw /= 4) then
+        else if (iovr >= 2 .and. iovr /= 4) then
           do k = 1, nlay
             zcf0 = min ( zcf0, f_one-cfrac(k) )  ! used only as clear/cloudy indicator
           enddo
@@ -1299,7 +1299,7 @@
         if (zcf1 > f_zero) then     ! cloudy sky column
 
           !mz* for HWRF, save cldfmc with mcica
-          if (iovrsw == 4) then
+          if (iovr == 4) then
                do k = 1, nlay
                do ig = 1, ngptsw
                   cldfmc_save(k,ig)=cldfmc (k,ig)
@@ -1315,7 +1315,7 @@
      &       taucw, ssacw, asycw, cldfrc, cldfmc                        &
      &     )
 
-          if (iovrsw == 4) then                                                  
+          if (iovr == 4) then                                                  
           !mz for HWRF, still using mcica cldfmc                                  
                do k = 1, nlay                                                     
                do ig = 1, ngptsw                                                  
@@ -1612,7 +1612,7 @@
 !   icldflg - cloud scheme control flag                                 !
 !           =0: diagnostic scheme gives cloud tau, omiga, and g.        !
 !           =1: prognostic scheme gives cloud liq/ice path, etc.        !
-!   iovrsw  - clouds vertical overlapping control flag                  !
+!   iovr    - clouds vertical overlapping control flag                  !
 !           =0: random overlapping clouds                               !
 !           =1: maximum/random overlapping clouds                       !
 !           =2: maximum overlap cloud                                   !
@@ -1648,9 +1648,9 @@
 !
 !===> ... begin here
 !
-      if ( iovrsw<0 .or. iovrsw>4 ) then
+      if ( iovr<0 .or. iovr>4 ) then
         print *,'  *** Error in specification of cloud overlap flag',   &
-     &          ' IOVRSW=',iovrsw,' in RSWINIT !!'
+     &          ' IOVR=',iovr,' in RSWINIT !!'
         stop
       endif
 
@@ -1697,15 +1697,15 @@
         stop
       endif
 
-      if ( isubcsw==0 .and. iovrsw>2 ) then
+      if ( isubcsw==0 .and. iovr>2 ) then
         if (me == 0) then
-          print *,'  *** IOVRSW=',iovrsw,' is not available for',       &
+          print *,'  *** IOVR=',iovr,' is not available for',           &
      &            ' ISUBCSW=0 setting!!'
           print *,'      The program will use maximum/random overlap',  &
      &            ' instead.'
         endif
 
-        iovrsw = 1
+        iovr = 1
       endif
 
 !> -# Setup constant factors for heating rate
@@ -2116,7 +2116,7 @@
 !> -# if physparam::isubcsw > 0, call mcica_subcol() to distribute
 !!    cloud properties to each g-point.
 
-      if ( isubcsw > 0 .and. iovrsw /= 4 ) then      ! mcica sub-col clouds approx
+      if ( isubcsw > 0 .and. iovr /= 4 ) then      ! mcica sub-col clouds approx
 
         cldf(:) = cfrac(:)
         where (cldf(:) < ftiny)
@@ -2189,7 +2189,7 @@
 !   lcloudy - logical, sub-colum cloud profile flag array    nlay*ngptsw!
 !                                                                       !
 !  other control flags from module variables:                           !
-!     iovrsw    : control flag for cloud overlapping method             !
+!     iovr      : control flag for cloud overlapping method             !
 !                 =0: random                                            !
 !                 =1: maximum/random overlapping clouds                 !
 !                 =2: maximum overlap cloud                             !
@@ -2233,7 +2233,7 @@
 
 !> -# Sub-column set up according to overlapping assumption.
 
-      select case ( iovrsw )
+      select case ( iovr )
 
         case( 0 )        ! random overlap, pick a random value at every level
 
@@ -2946,8 +2946,13 @@
           else                          ! for non-conservative scattering
             za1 = zgam1*zgam4 + zgam2*zgam3
             za2 = zgam1*zgam3 + zgam2*zgam4
-            zrk = sqrt ( (zgam1 - zgam2) * (zgam1 + zgam2) )
-            zrk2= 2.0 * zrk
+            zrk = (zgam1 - zgam2) * (zgam1 + zgam2)
+            if (zrk > eps1) then
+              zrk = sqrt(zrk)
+            else
+              zrk = f_zero
+            endif
+            zrk2= zrk + zrk
 
             zrp  = zrk * cosz
             zrp1 = f_one + zrp
@@ -2993,7 +2998,8 @@
             ze1r45 = zr4*zexp1 + zr5*zexm1
 
 !      ...  collimated beam
-            if (ze1r45>=-eps1 .and. ze1r45<=eps1) then
+!           if (ze1r45>=-eps1 .and. ze1r45<=eps1) then
+            if (abs(ze1r45) <= eps1) then
               zrefb(kp) = eps1
               ztrab(kp) = zexm2
             else
@@ -3005,7 +3011,11 @@
             endif
 
 !      ...  diffuse beam
-            zden1 = zr4 / (ze1r45 * zrkg1)
+            if (ze1r45 >= f_zero) then
+              zden1   = zr4 / max(eps1, ze1r45*zrkg1)
+            else
+              zden1   = zr4 / min(-eps1, ze1r45*zrkg1)
+            endif
             zrefd(kp) = max(f_zero, min(f_one,                          &
      &                  zgam2*(zexp1 - zexm1)*zden1 ))
             ztrad(kp) = max(f_zero, min(f_one, zrk2*zden1 ))
@@ -3171,8 +3181,13 @@
               else                          ! for non-conservative scattering
                 za1 = zgam1*zgam4 + zgam2*zgam3
                 za2 = zgam1*zgam3 + zgam2*zgam4
-                zrk = sqrt ( (zgam1 - zgam2) * (zgam1 + zgam2) )
-                zrk2= 2.0 * zrk
+                zrk = (zgam1 - zgam2) * (zgam1 + zgam2)
+                if (zrk > eps1) then
+                  zrk = sqrt(zrk)
+                else
+                  zrk = f_zero
+                endif
+                zrk2= zrk + zrk
 
                 zrp  = zrk * cosz
                 zrp1 = f_one + zrp
@@ -3218,7 +3233,8 @@
                 ze1r45 = zr4*zexp1 + zr5*zexm1
 
 !      ...  collimated beam
-                if ( ze1r45>=-eps1 .and. ze1r45<=eps1 ) then
+!               if ( ze1r45>=-eps1 .and. ze1r45<=eps1 ) then
+                if ( abs(ze1r45) <= eps1 ) then
                   zrefb(kp) = eps1
                   ztrab(kp) = zexm2
                 else
@@ -3230,7 +3246,11 @@
                 endif
 
 !      ...  diffuse beam
-                zden1 = zr4 / (ze1r45 * zrkg1)
+                if (ze1r45 >= f_zero) then
+                  zden1   = zr4 / max(eps1, ze1r45*zrkg1)
+                else
+                  zden1   = zr4 / min(-eps1, ze1r45*zrkg1)
+                endif
                 zrefd(kp) = max(f_zero, min(f_one,                      &
      &                      zgam2*(zexp1 - zexm1)*zden1 ))
                 ztrad(kp) = max(f_zero, min(f_one, zrk2*zden1 ))
@@ -3723,8 +3743,13 @@
           else                          ! for non-conservative scattering
             za1 = zgam1*zgam4 + zgam2*zgam3
             za2 = zgam1*zgam3 + zgam2*zgam4
-            zrk = sqrt ( (zgam1 - zgam2) * (zgam1 + zgam2) )
-            zrk2= 2.0 * zrk
+            zrk = (zgam1 - zgam2) * (zgam1 + zgam2)
+            if (zrk > eps1) then
+              zrk = sqrt(zrk)
+            else
+              zrk = f_zero
+            endif
+            zrk2= zrk + zrk
 
             zrp  = zrk * cosz
             zrp1 = f_one + zrp
@@ -3770,7 +3795,8 @@
             ze1r45 = zr4*zexp1 + zr5*zexm1
 
 !      ...  collimated beam
-            if (ze1r45>=-eps1 .and. ze1r45<=eps1) then
+!           if (ze1r45>=-eps1 .and. ze1r45<=eps1) then
+            if (abs(ze1r45) <= eps1) then
               zrefb(kp) = eps1
               ztrab(kp) = zexm2
             else
@@ -3782,7 +3808,11 @@
             endif
 
 !      ...  diffuse beam
-            zden1 = zr4 / (ze1r45 * zrkg1)
+            if (ze1r45 >= f_zero) then
+              zden1   = zr4 / max(eps1, ze1r45*zrkg1)
+            else
+              zden1   = zr4 / min(-eps1, ze1r45*zrkg1)
+            endif
             zrefd(kp) = max(f_zero, min(f_one,                          &
      &                  zgam2*(zexp1 - zexm1)*zden1 ))
             ztrad(kp) = max(f_zero, min(f_one, zrk2*zden1 ))
@@ -3935,8 +3965,13 @@
               else                          ! for non-conservative scattering
                 za1 = zgam1*zgam4 + zgam2*zgam3
                 za2 = zgam1*zgam3 + zgam2*zgam4
-                zrk = sqrt ( (zgam1 - zgam2) * (zgam1 + zgam2) )
-                zrk2= 2.0 * zrk
+                zrk = (zgam1 - zgam2) * (zgam1 + zgam2)
+                if (zrk > eps1) then
+                  zrk = sqrt(zrk)
+                else
+                  zrk = f_zero
+                endif
+                zrk2= zrk + zrk
 
                 zrp  = zrk * cosz
                 zrp1 = f_one + zrp
@@ -3982,7 +4017,8 @@
                 ze1r45 = zr4*zexp1 + zr5*zexm1
 
 !      ...  collimated beam
-                if ( ze1r45>=-eps1 .and. ze1r45<=eps1 ) then
+!               if ( ze1r45>=-eps1 .and. ze1r45<=eps1 ) then
+                if ( abs(ze1r45) <= eps1 ) then
                   zrefb(kp) = eps1
                   ztrab(kp) = zexm2
                 else
@@ -3994,7 +4030,11 @@
                 endif
 
 !      ...  diffuse beam
-                zden1 = zr4 / (ze1r45 * zrkg1)
+                if (ze1r45 >= f_zero) then
+                  zden1   = zr4 / max(eps1, ze1r45*zrkg1)
+                else
+                  zden1   = zr4 / min(-eps1, ze1r45*zrkg1)
+                endif
                 zrefd(kp) = max(f_zero, min(f_one,                      &
      &                      zgam2*(zexp1 - zexm1)*zden1 ))
                 ztrad(kp) = max(f_zero, min(f_one, zrk2*zden1 ))

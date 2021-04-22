@@ -11,7 +11,7 @@ module aerinterp
 
     private
 
-    public :: read_aerdata, setindxaer, aerinterpol
+    public :: read_aerdata, setindxaer, aerinterpol, read_aerdataf
 
 contains
 
@@ -32,11 +32,6 @@ contains
       logical      :: file_exist
 
       integer, allocatable  :: invardims(:)
-      real(kind=kind_io4),allocatable,dimension(:,:,:) :: buff
-      real(kind=kind_io4),allocatable,dimension(:,:,:,:):: buffx
-      real(kind=kind_io4),allocatable,dimension(:,:)   :: pres_tmp
-      real(kind=kind_io8),allocatable,dimension(:)     :: aer_lati
-      real(kind=kind_io8),allocatable,dimension(:)     :: aer_loni
 !
 !! ===================================================================
       if (me == master) then
@@ -48,15 +43,23 @@ contains
       endif
 !
 !! ===================================================================
+!! check if all necessary files exist
+!! ===================================================================
+      do imon = 1, timeaer
+         write(mn,'(i2.2)') imon
+         fname=trim("aeroclim.m"//mn//".nc")
+         inquire (file = fname, exist = file_exist)
+         if (.not. file_exist) then
+            errmsg = 'Error in read_aerdata: file ' // trim(fname) // ' not found'
+            errflg = 1
+            return
+         endif
+      enddo
+!
+!! ===================================================================
 !! fetch dim spec and lat/lon from m01 data set
 !! ===================================================================
       fname=trim("aeroclim.m"//'01'//".nc")
-      inquire (file = fname, exist = file_exist)
-      if (.not. file_exist) then
-         errmsg = 'Error in read_aerdata: file ' // trim(fname) // ' not found'
-         errflg = 1
-         return
-      endif
       call nf_open(fname , nf90_NOWRITE, ncid)
 
       vname =  trim(specname(1))
@@ -72,51 +75,59 @@ contains
 ! specify latsaer, lonsaer, hmx
       lonsaer = dim1
       latsaer = dim2
-      hmx = int(dim1/2)       ! to swap long from W-E to E-W
+      levsw = dim3
 
       if(me==master) then
          print *, 'MERRA2 dim: ',dim1, dim2, dim3
       endif
 
 ! allocate arrays
-      if (.not. allocated(aer_loni)) then
-        allocate (aer_loni(lonsaer))
-        allocate (aer_lati(latsaer))
-      endif
 
       if (.not. allocated(aer_lat)) then
         allocate(aer_lat(latsaer))
         allocate(aer_lon(lonsaer))
-        allocate(aerin(lonsaer,latsaer,levsaer,ntrcaerm,timeaer))
-        allocate(aer_pres(lonsaer,latsaer,levsaer,timeaer))
       endif
 
 ! construct lat/lon array
       call nf_inq_varid(ncid, 'lat', varid)
-      call nf_get_var(ncid, varid, aer_lati)
+      call nf_get_var(ncid, varid, aer_lat)
       call nf_inq_varid(ncid, 'lon', varid)
-      call nf_get_var(ncid, varid, aer_loni)
-
-      do i = 1, hmx     ! flip from (-180,180) to (0,360)
-        if(aer_loni(i)<0.)  aer_loni(i)=aer_loni(i)+360.
-        aer_lon(i+hmx) = aer_loni(i)
-        aer_lon(i)     = aer_loni(i+hmx)
-      enddo
-
-      do i = 1, latsaer
-        aer_lat(i)     = aer_lati(i)
-      enddo
-
+      call nf_get_var(ncid, varid, aer_lon)
       call nf_close(ncid)
+      END SUBROUTINE read_aerdata
+!
+!**********************************************************************
+      SUBROUTINE read_aerdataf (iamin, iamax, jamin, jamax,           &
+                 me, master, iflip, idate, errmsg, errflg)
+      use machine, only: kind_phys, kind_io4, kind_io8
+      use aerclm_def
+      use netcdf
+
+!--- in/out
+      integer, intent(in) :: me, master, iflip, idate(4)
+      integer, intent(in) :: iamin, iamax, jamin, jamax
+      character(len=*), intent(inout) :: errmsg
+      integer, intent(inout) :: errflg
+
+!--- locals
+      integer      :: ncid, varid
+      integer      :: i, j, k, n, ii, imon, klev
+      character    :: fname*50, mn*2, vname*10
+      logical      :: file_exist
+      integer, allocatable  :: invardims(:)
+      real(kind=kind_io4),allocatable,dimension(:,:,:) :: buff
+      real(kind=kind_io4),allocatable,dimension(:,:,:,:):: buffx
+      real(kind=kind_io4),allocatable,dimension(:,:)   :: pres_tmp
+!
+      if (.not. allocated(aerin)) then
+        allocate(aerin(iamin:iamax,jamin:jamax,levsaer,ntrcaerm,timeaer))
+        allocate(aer_pres(iamin:iamax,jamin:jamax,levsaer,timeaer))
+      endif
 
 ! allocate local working arrays
-      if (.not. allocated(buff)) then
-        allocate (buff(lonsaer, latsaer, dim3))
-        allocate (pres_tmp(lonsaer,dim3))
-      endif
-      if (.not. allocated(buffx)) then
-        allocate (buffx(lonsaer, latsaer, dim3,1))
-      endif
+      allocate (buff(lonsaer, latsaer, levsw))
+      allocate (pres_tmp(lonsaer, levsw))
+      allocate (buffx(lonsaer, latsaer, levsw, 1))
 
 !! ===================================================================
 !! loop thru m01 - m12 for aer/pres array
@@ -124,24 +135,17 @@ contains
       do imon = 1, timeaer
        write(mn,'(i2.2)') imon
        fname=trim("aeroclim.m"//mn//".nc")
-       inquire (file = fname, exist = file_exist)
-       if (.not. file_exist) then
-         errmsg = 'Error in read_aerdata: file ' // trim(fname) // ' not found'
-         errflg = 1
-         return
-       endif
-
        call nf_open(fname , nf90_NOWRITE, ncid)
 
 ! ====> construct 3-d pressure array (Pa)
        call nf_inq_varid(ncid, "DELP", varid)
        call nf_get_var(ncid, varid, buff)
 
-       do j = 1, latsaer
-        do i = 1, lonsaer
+       do j = jamin, jamax
+        do i = iamin, iamax
 ! constract pres_tmp (top-down), note input is top-down
          pres_tmp(i,1) = 0.
-         do k=2, dim3
+         do k=2, levsw
           pres_tmp(i,k) = pres_tmp(i,k-1)+buff(i,j,k)
          enddo    !k-loop
         enddo     !i-loop (lon)
@@ -151,11 +155,10 @@ contains
          if ( iflip == 0 )  then             ! data from toa to sfc
            klev = k
          else                                ! data from sfc to top
-           klev = ( dim3 - k ) + 1
+           klev = ( levsw - k ) + 1
          endif
-         do i = 1, hmx
-         aer_pres(i+hmx,j,k,imon)= 1.d0*pres_tmp(i,klev)
-         aer_pres(i,j,k,imon)    = 1.d0*pres_tmp(i+hmx,klev)
+         do i = iamin, iamax
+         aer_pres(i,j,k,imon)    = 1.d0*pres_tmp(i,klev)
          enddo     !i-loop (lon)
         enddo     !k-loop (lev)
        enddo     !j-loop (lat)
@@ -168,22 +171,18 @@ contains
          call nf_inq_varid(ncid, vname, varid)
          call nf_get_var(ncid, varid, buffx)
 
-         do j = 1, latsaer
+         do j = jamin, jamax
          do k = 1, levsaer
 ! input is from toa to sfc
           if ( iflip == 0 )  then             ! data from toa to sfc
             klev = k
           else                                ! data from sfc to top
-            klev = ( dim3 - k ) + 1
+            klev = ( levsw - k ) + 1
           endif
-          do i = 1, hmx
-          aerin(i+hmx,j,k,ii,imon) = 1.d0*buffx(i,j,klev,1)
-          if(aerin(i+hmx,j,k,ii,imon)<0.or.aerin(i+hmx,j,k,ii,imon)>1.)  then
-            aerin(i+hmx,j,k,ii,imon) = 0.
-          end if
-          aerin(i,j,k,ii,imon) = 1.d0*buffx(i+hmx,j,klev,1)
+          do i = iamin, iamax
+          aerin(i,j,k,ii,imon) = 1.d0*buffx(i,j,klev,1)
           if(aerin(i,j,k,ii,imon)<0.or.aerin(i,j,k,ii,imon)>1.)  then
-            aerin(i,j,k,ii,imon) = 0.
+            aerin(i,j,k,ii,imon) = 1.e-15
           end if
           enddo    !i-loop (lon)
          enddo     !k-loop (lev)
@@ -195,13 +194,9 @@ contains
        call nf_close(ncid)
       enddo      !imon-loop
 !---
-      deallocate (aer_loni, aer_lati)
       deallocate (buff, pres_tmp)
       deallocate (buffx)
-
-      END SUBROUTINE read_aerdata
-!
-!**********************************************************************
+      END SUBROUTINE read_aerdataf
 !
       SUBROUTINE setindxaer(npts,dlat,jindx1,jindx2,ddy,dlon,           &
                  iindx1,iindx2,ddx,me,master)
@@ -261,7 +256,7 @@ contains
 !**********************************************************************
 !**********************************************************************
 !
-      SUBROUTINE aerinterpol(me,master,npts,IDATE,FHOUR,jindx1,jindx2, &
+      SUBROUTINE aerinterpol(me,master,nthrds,npts,IDATE,FHOUR,jindx1,jindx2, &
                  ddy,iindx1,iindx2,ddx,lev,prsl,aerout)
 !
       USE MACHINE,  ONLY : kind_phys
@@ -272,7 +267,7 @@ contains
 !
 
       integer  JINDX1(npts), JINDX2(npts),iINDX1(npts),iINDX2(npts)
-      integer  me,idate(4), master
+      integer  me,idate(4), master, nthrds
       integer  IDAT(8),JDAT(8)
 !
       real(kind=kind_phys) DDY(npts), ddx(npts),ttt
@@ -319,7 +314,16 @@ contains
       tx2 = 1.0 - tx1
       if (n2 > 12) n2 = n2 -12
 
-!
+#ifndef __GFORTRAN__
+!$OMP parallel num_threads(nthrds) default(none)             &
+!$OMP          shared(npts,ntrcaer,aerin,aer_pres,prsl)      &
+!$OMP          shared(ddx,ddy,jindx1,jindx2,iindx1,iindx2)   &
+!$OMP          shared(aerpm,aerpres,aerout,n1,n2,lev,nthrds) &
+!$OMP          private(l,j,k,ii,i1,i2,j1,j2,temj,temi)       &
+!$OMP          copyin(tx1,tx2) firstprivate(tx1,tx2)
+
+!$OMP do
+#endif
       DO L=1,levsaer
         DO J=1,npts
           J1  = JINDX1(J)
@@ -341,11 +345,14 @@ contains
                +TEMI*DDY(j)*aer_pres(I1,J2,L,n1)+DDX(j)*TEMJ*aer_pres(I2,J1,L,n1))&
           +tx2*(TEMI*TEMJ*aer_pres(I1,J1,L,n2)+DDX(j)*DDY(J)*aer_pres(I2,J2,L,n2) &
                +TEMI*DDY(j)*aer_pres(I1,J2,L,n2)+DDX(j)*TEMJ*aer_pres(I2,J1,L,n2))
-
         ENDDO
       ENDDO
+#ifndef __GFORTRAN__
+!$OMP end do
 
 ! don't flip, input is the same direction as GFS  (bottom-up)
+!$OMP do
+#endif
       DO J=1,npts
         DO L=1,lev
            if(prsl(j,L).ge.aerpres(j,1)) then
@@ -369,12 +376,17 @@ contains
              tx1 = temi/(aerpres(j,i1) - aerpres(j,i2))
              tx2 = temj/(aerpres(j,i1) - aerpres(j,i2))
              DO ii = 1, ntrcaer
-           aerout(j,L,ii)= aerpm(j,i1,ii)*tx1 + aerpm(j,i2,ii)*tx2
+               aerout(j,L,ii)= aerpm(j,i1,ii)*tx1 + aerpm(j,i2,ii)*tx2
              ENDDO
            endif
         ENDDO   !L-loop
       ENDDO     !J-loop
-!
+#ifndef __GFORTRAN__
+!$OMP end do
+
+!$OMP end parallel
+#endif
+
       RETURN
       END SUBROUTINE aerinterpol
 

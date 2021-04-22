@@ -103,12 +103,12 @@
         lsm_noah, lsm_noahmp, lsm_ruc, lsm_noah_wrfv4, icoef_sf, cplwav,        &
         cplwav2atm, lcurr_sf, pert_Cd, ntsflg, sfenth, z1, shdmax, ivegsrc,     &
         vegtype, sigmaf, dt, wet, dry, icy, isltyp, rd, grav, ep1, ep2, smois,  &
-        psfc, prsl1, q1, t1, u1, v1, wspd, u10, v10, gsw, glw, tsurf_ocn,       &
-        tsurf_lnd, tsurf_ice, tskin_ocn, tskin_lnd, tskin_ice, ustar_ocn,       &
-        ustar_lnd, ustar_ice, znt_ocn, znt_lnd, znt_ice, cdm_ocn, cdm_lnd,      &
-        cdm_ice, stress_ocn, stress_lnd, stress_ice, rib_ocn, rib_lnd, rib_ice, &
-        fm_ocn, fm_lnd, fm_ice, fh_ocn, fh_lnd, fh_ice, fh2_ocn, fh2_lnd,       &
-        fh2_ice, ch_ocn, ch_lnd, ch_ice, fm10_ocn, fm10_lnd, fm10_ice, qss_ocn, &
+        psfc, prsl1, q1, t1, u1, v1, wspd, u10, v10, gsw, glw, tsurf_wat,       &
+        tsurf_lnd, tsurf_ice, tskin_wat, tskin_lnd, tskin_ice, ustar_wat,       &
+        ustar_lnd, ustar_ice, znt_wat, znt_lnd, znt_ice, cdm_wat, cdm_lnd,      &
+        cdm_ice, stress_wat, stress_lnd, stress_ice, rib_wat, rib_lnd, rib_ice, &
+        fm_wat, fm_lnd, fm_ice, fh_wat, fh_lnd, fh_ice, fh2_wat, fh2_lnd,       &
+        fh2_ice, ch_wat, ch_lnd, ch_ice, fm10_wat, fm10_lnd, fm10_ice, qss_wat, &
         qss_lnd, qss_ice, errmsg, errflg)
 
         use funcphys, only: fpvs
@@ -137,15 +137,15 @@
         real(kind=kind_phys), dimension(im,nsoil), intent(in) :: smois
         real(kind=kind_phys), dimension(im),       intent(in) :: psfc, prsl1,   &
             q1, t1, u1, v1, wspd, u10, v10, gsw, glw, z1, shdmax, sigmaf, xlat, &
-            xlon, tsurf_ocn, tsurf_lnd, tsurf_ice
+            xlon, tsurf_wat, tsurf_lnd, tsurf_ice
 
-        real(kind=kind_phys), intent(inout), dimension(im) :: tskin_ocn,        &
-            tskin_lnd, tskin_ice, ustar_ocn, ustar_lnd, ustar_ice,              &
-            znt_ocn, znt_lnd, znt_ice, cdm_ocn, cdm_lnd, cdm_ice,               &
-            stress_ocn, stress_lnd, stress_ice, rib_ocn, rib_lnd, rib_ice,      &
-            fm_ocn, fm_lnd, fm_ice, fh_ocn, fh_lnd, fh_ice, fh2_ocn, fh2_lnd,   &
-            fh2_ice, ch_ocn, ch_lnd, ch_ice, fm10_ocn, fm10_lnd, fm10_ice,      &
-            qss_ocn, qss_lnd, qss_ice
+        real(kind=kind_phys), intent(inout), dimension(im) :: tskin_wat,        &
+            tskin_lnd, tskin_ice, ustar_wat, ustar_lnd, ustar_ice,              &
+            znt_wat, znt_lnd, znt_ice, cdm_wat, cdm_lnd, cdm_ice,               &
+            stress_wat, stress_lnd, stress_ice, rib_wat, rib_lnd, rib_ice,      &
+            fm_wat, fm_lnd, fm_ice, fh_wat, fh_lnd, fh_ice, fh2_wat, fh2_lnd,   &
+            fh2_ice, ch_wat, ch_lnd, ch_ice, fm10_wat, fm10_lnd, fm10_ice,      &
+            qss_wat, qss_lnd, qss_ice
 
         character(len=*), intent(out) :: errmsg
         integer,          intent(out) :: errflg
@@ -377,7 +377,7 @@
                 xxfh(i), ztmax(i), z0max(i), tstrc(i),   &
                 pspc(i), pkmax(i), wetc(i), slwdc(i), z1_cm(i), icoef_sf, iwavecpl, lcurr_sf, charn(i), msang(i), &
                 scurx(i), scury(i), pert_Cd, ens_random_seed, ens_Cdamp, upc(i), vpc(i), t1(i), q1(i), &
-                dt, wind10(i), xxfh2(i), ntsflg, sfenth, tzot(i), errmsg, &
+                dt, wind10(i), xxfh2(i), ntsflg, sfenth, tzot(i), ep2, errmsg, &
                 errflg)
                 if (errflg /= 0) return
 
@@ -526,7 +526,7 @@
                 xxfh(i), ztmax(i), z0max(i), tstrc(i),   &
                 pspc(i), pkmax(i), wetc(i), slwdc(i), z1_cm(i), icoef_sf, iwavecpl, lcurr_sf, charn(i), msang(i), &
                 scurx(i), scury(i), pert_Cd, ens_random_seed, ens_Cdamp, upc(i), vpc(i), t1(i), q1(i), &
-                dt, wind10(i), xxfh2(i), ntsflg, sfenth, tzot(i), errmsg, &
+                dt, wind10(i), xxfh2(i), ntsflg, sfenth, tzot(i), ep2, errmsg, &
                 errflg)
                 if (errflg /= 0) return
 
@@ -613,40 +613,40 @@
               wetc(i) = 1.0
 
               !GJF: the lower boundary temperature passed in to MFLUX2 either follows GFS:
-              tstrc(i) = 0.5*(tskin_ocn(i) + tsurf_ocn(i)) !averaging tskin_ocn and tsurf_ocn as in GFS surface layer breaks ntsflg functionality
+              tstrc(i) = 0.5*(tskin_wat(i) + tsurf_wat(i)) !averaging tskin_wat and tsurf_wat as in GFS surface layer breaks ntsflg functionality
               !GJF: or WRF module_sf_gfdl.F:
-              !tstrc(i) = tskin_ocn(i)
+              !tstrc(i) = tskin_wat(i)
 
               ! DH* 20201009: these bounds on ocean roughness lengths are from Chunxi Zhang's module_sf_sfclayrev.f90 (in cm)
-              znt_ocn(i)=min(2.85e-1,max(znt_ocn(i),1.27e-5))
+              znt_wat(i)=min(2.85e-1,max(znt_wat(i),1.27e-5))
 
               !GJF: from WRF's module_sf_gfdl.F
               if (wind10(i) <= 1.0e-10 .or. wind10(i) > 150.0) then
-                 wind10(i)=wspd(i)*alog(10.0/(0.01*znt_ocn(i)))/alog(z1(i)/(0.01*znt_ocn(i)))
+                 wind10(i)=wspd(i)*alog(10.0/(0.01*znt_wat(i)))/alog(z1(i)/(0.01*znt_wat(i)))
               end if
               wind10(i)=wind10(i)*100.0   !! m/s to cm/s
 
               !GJF: mflux2 expects negative roughness length for ocean points
-              znt_ocn(i) = -znt_ocn(i)
+              znt_wat(i) = -znt_wat(i)
 
-              call mflux2 (fxh(i), fxe(i), fxmx(i), fxmy(i), cdm_ocn(i), rib_ocn(i), &
-                xxfh(i), znt_ocn(i), mznt(i), tstrc(i),   &
+              call mflux2 (fxh(i), fxe(i), fxmx(i), fxmy(i), cdm_wat(i), rib_wat(i), &
+                xxfh(i), znt_wat(i), mznt(i), tstrc(i),   &
                 pspc(i), pkmax(i), wetc(i), slwdc(i), z1_cm(i), icoef_sf, iwavecpl, lcurr_sf, charn(i), msang(i), &
                 scurx(i), scury(i), pert_Cd, ens_random_seed, ens_Cdamp, upc(i), vpc(i), t1(i), q1(i), &
-                dt, wind10(i), xxfh2(i), ntsflg, sfenth, tzot(i), errmsg, &
+                dt, wind10(i), xxfh2(i), ntsflg, sfenth, tzot(i), ep2, errmsg, &
                 errflg)
                 if (errflg /= 0) return
 
               !GJF: this is broken when tstrc is set to an average of two variables
               if (ntsflg==1) then
-                tskin_ocn(i) = tstrc(i)      ! gopal's doing
+                tskin_wat(i) = tstrc(i)      ! gopal's doing
               end if
 
-              znt_ocn(i)= abs(znt_ocn(i))
+              znt_wat(i)= abs(znt_wat(i))
               mznt(i)= abs(mznt(i))
 
               !GJF: these bounds on ocean roughness lengths are from Chunxi Zhang's module_sf_sfclayrev.f90 (in cm)
-              znt_ocn(i)=min(2.85e-1,max(znt_ocn(i),1.27e-5))
+              znt_wat(i)=min(2.85e-1,max(znt_wat(i),1.27e-5))
 
               if (diag_wind10m) then
                 u10_ocn(i) = u1(i)*(0.01*wind10(i)/wspd(i))
@@ -654,67 +654,67 @@
               end if
 
               !GJF: these variables are not needed in a GFS-based suite, but are found in WRF's module_sf_gfdl.F and kept in comments for legacy
-              !gz1oz0(i) = alog(zkmax(i)/znt_ocn(i))
+              !gz1oz0(i) = alog(zkmax(i)/znt_wat(i))
               !taux(i) = fxmx(i)/10.    ! gopal's doing for Ocean coupling
               !tauy(i) = fxmy(i)/10.    ! gopal's doing for Ocean coupling
 
-              cdm_ocn(i) = max(cdm_ocn(i), cd_low_limit)
-              cdm_ocn(i) = min(cdm_ocn(i), cd_high_limit)
-              fm_ocn(i) = karman/sqrt(cdm_ocn(i))
+              cdm_wat(i) = max(cdm_wat(i), cd_low_limit)
+              cdm_wat(i) = min(cdm_wat(i), cd_high_limit)
+              fm_wat(i) = karman/sqrt(cdm_wat(i))
 
-              !1) try fh_ocn from MFLUX2
-              fh_ocn(i) = karman*xxfh(i)
+              !1) try fh_wat from MFLUX2
+              fh_wat(i) = karman*xxfh(i)
 
-              !2) calc ch_ocn from fm_ocn and fh_ocn
-              ch_ocn(i)  = karman*karman/(fm_ocn(i) * fh_ocn(i))
+              !2) calc ch_wat from fm_wat and fh_wat
+              ch_wat(i)  = karman*karman/(fm_wat(i) * fh_wat(i))
 
               !3) check if ch_lnd is out of bounds (if so, recalculate fh_lnd from bounded value)
               ch_bound_excursion = .false.
-              if (ch_ocn(i) < ch_low_limit) then
+              if (ch_wat(i) < ch_low_limit) then
                 ch_bound_excursion = .true.
-                ch_ocn(i) = ch_low_limit
-              else if (ch_ocn(i) > ch_high_limit) then
+                ch_wat(i) = ch_low_limit
+              else if (ch_wat(i) > ch_high_limit) then
                 ch_bound_excursion = .true.
-                ch_ocn(i) = ch_high_limit
+                ch_wat(i) = ch_high_limit
               end if
 
-              fh2_ocn(i) = karman*xxfh2(i)
+              fh2_wat(i) = karman*xxfh2(i)
 
               if (ch_bound_excursion) then
                 fh2_fh_ratio = min(xxfh2(i)/xxfh(i), 1.0)
-                fh_ocn(i) = karman*karman/(fm_ocn(i)*ch_ocn(i))
-                fh2_ocn(i) = fh2_fh_ratio*fh_ocn(i)
+                fh_wat(i) = karman*karman/(fm_wat(i)*ch_wat(i))
+                fh2_wat(i) = fh2_fh_ratio*fh_wat(i)
               end if
 
               !Other CCPP schemes (PBL) ask for fm/fh instead of psim/psih
-              !psim_ocn(i)=gz1oz0(i)-fm_ocn(i)
-              !psih_ocn(i)=gz1oz0(i)-fh_ocn(i)
+              !psim_ocn(i)=gz1oz0(i)-fm_wat(i)
+              !psih_ocn(i)=gz1oz0(i)-fh_wat(i)
 
-              ustar_ocn(i) = 0.01*sqrt(cdm_ocn(i)*   &
+              ustar_wat(i) = 0.01*sqrt(cdm_wat(i)*   &
                          (upc(i)*upc(i) + vpc(i)*vpc(i)))
               !GJF: from Chunxi Zhang's module_sf_sfclayrev.f90 (I'm not sure it's necessary.)
-              ustar_ocn(i) = amax1(ustar_ocn(i),0.001)
+              ustar_wat(i) = amax1(ustar_wat(i),0.001)
 
-              stress_ocn(i) = cdm_ocn(i)*wspd(i)*wspd(i)
+              stress_wat(i) = cdm_wat(i)*wspd(i)*wspd(i)
 
               !GJF: from WRF's module_sf_gfdl.F
               !!! convert cd, ch to values at 10m, for output
-              cd10 = cdm_ocn(i)
+              cd10 = cdm_wat(i)
               if ( wind10(i) .ge. 0.1 ) then
-                cd10=cdm_ocn(i)* (wspd(i)/(0.01*wind10(i)) )**2
+                cd10=cdm_wat(i)* (wspd(i)/(0.01*wind10(i)) )**2
                 !tmp9=0.01*abs(tzot(i))
-                !ch_out(i)=ch_ocn(i)*(wspd(i)/(0.01*wind10(i)) ) * &
+                !ch_out(i)=ch_wat(i)*(wspd(i)/(0.01*wind10(i)) ) * &
                !           (alog(zkmax(i)/tmp9)/alog(10.0/tmp9))
               end if
-              fm10_ocn(i) = karman/sqrt(cd10)
+              fm10_wat(i) = karman/sqrt(cd10)
 
               !GJF: conductances aren't used in other CCPP schemes
-              !chs_ocn(i)=ch_ocn(i)*wspd (i) !conductance
-              !chs2_ocn(i)=ustar_ocn(i)*karman/fh2_ocn(i) !2m conductance
+              !chs_ocn(i)=ch_wat(i)*wspd (i) !conductance
+              !chs2_ocn(i)=ustar_wat(i)*karman/fh2_wat(i) !2m conductance
 
               if (diag_qss) then
-                esat = fpvs(tskin_ocn(i))
-                qss_ocn(i) = ep2*esat/(psfc(i)-esat)
+                esat = fpvs(tskin_wat(i))
+                qss_wat(i) = ep2*esat/(psfc(i)-esat)
               end if
             end if !wet
 
@@ -756,7 +756,7 @@
                          icoef_sf,iwavecpl,lcurr_sf,alpha,gamma,xcur,ycur,     &
                          pert_Cd, ens_random_seed, ens_Cdamp,                  &
                          upc,vpc,tpc,rpc,dt,wind10,xxfh2,ntsflg,sfenth,        &
-                         tzot, errmsg, errflg)
+                         tzot, ep2, errmsg, errflg)
 
 !------------------------------------------------------------------------
 !
@@ -818,6 +818,8 @@
       real(kind=kind_phys), intent ( in), dimension (ims :ime ) :: vpc
       real(kind=kind_phys), intent ( in), dimension (ims :ime ) :: tpc
       real(kind=kind_phys), intent ( in), dimension (ims :ime ) :: rpc
+
+      real(kind=kind_phys), intent ( in) :: ep2
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -1207,7 +1209,7 @@
           if(psps1 .EQ. 0.0)then
            psps1 = .1
           endif
-        rstso(i) = 0.622*estso(i)/psps1
+        rstso(i) = ep2*estso(i)/psps1
         vrts (i) = 1. + boycon*ecof(i)*rstso(i)
       enddo
 
@@ -1735,7 +1737,7 @@
              if(psps2 .EQ. 0.0)then
                psps2 = .1
              endif
-          rstsop(i) = 0.622*estsop(i)/psps2
+          rstsop(i) = ep2*estsop(i)/psps2
           rdiff (i) = amin1(0.0,(rkmaxp(i) - rstsop(i)))
 
             foft(i) = tss(i) + delsrad(i)*(slwa(i) - aap(i)*tsp(i)**4 - &

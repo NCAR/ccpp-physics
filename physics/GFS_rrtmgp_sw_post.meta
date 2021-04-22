@@ -145,14 +145,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[sw_gas_props]
-  standard_name = coefficients_for_sw_gas_optics
-  long_name = DDT containing spectral information for RRTMGP SW radiation scheme
-  units = DDT
-  dimensions = ()
-  type = ty_gas_optics_rrtmgp
-  intent = in
-  optional = F
 [fluxswUP_allsky]
   standard_name = RRTMGP_sw_flux_profile_upward_allsky
   long_name = RRTMGP upward shortwave all-sky flux profile
@@ -266,7 +258,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [nirdfdi]
   standard_name = surface_downwelling_diffuse_near_infrared_shortwave_flux_on_radiation_time_step
@@ -275,7 +267,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [visbmdi]
   standard_name = surface_downwelling_direct_ultraviolet_and_visible_shortwave_flux_on_radiation_time_step
@@ -284,7 +276,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [visdfdi]
   standard_name = surface_downwelling_diffuse_ultraviolet_and_visible_shortwave_flux_on_radiation_time_step
@@ -293,7 +285,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [nirbmui]
   standard_name = surface_upwelling_direct_near_infrared_shortwave_flux_on_radiation_time_step
@@ -302,7 +294,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [nirdfui]
   standard_name = surface_upwelling_diffuse_near_infrared_shortwave_flux_on_radiation_time_step
@@ -311,7 +303,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [visbmui]
   standard_name = surface_upwelling_direct_ultraviolet_and_visible_shortwave_flux_on_radiation_time_step
@@ -320,7 +312,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [visdfui]
   standard_name = surface_upwelling_diffuse_ultraviolet_and_visible_shortwave_flux_on_radiation_time_step
@@ -329,7 +321,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F  
 [sfcnsw]
   standard_name = surface_net_downwelling_shortwave_flux_on_radiation_time_step
@@ -338,7 +330,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [sfcdsw]
   standard_name = surface_downwelling_shortwave_flux_on_radiation_time_step
@@ -347,7 +339,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [htrsw]
   standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step
@@ -356,7 +348,7 @@
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [sfcfsw]
   standard_name = sw_fluxes_sfc
@@ -364,7 +356,7 @@
   units = W m-2
   dimensions = (horizontal_loop_extent)
   type = sfcfsw_type
-  intent = out
+  intent = inout
   optional = F
 [topfsw]
   standard_name = sw_fluxes_top_atmosphere
@@ -372,7 +364,7 @@
   units = W m-2
   dimensions = (horizontal_loop_extent)
   type = topfsw_type
-  intent = out
+  intent = inout
   optional = F  
 [htrswc]
   standard_name = tendency_of_air_temperature_due_to_shortwave_heating_assuming_clear_sky_on_radiation_time_step
@@ -381,7 +373,7 @@
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = T
 [flxprf_sw]
   standard_name = RRTMGP_sw_fluxes
@@ -389,7 +381,7 @@
   units = W m-2
   dimensions = (horizontal_loop_extent,adjusted_vertical_level_dimension_plus_one)
   type = profsw_type
-  intent = out
+  intent = inout
   optional = T
 [scmpsw]
   standard_name = components_of_surface_downward_shortwave_fluxes
@@ -397,7 +389,7 @@
   units = W m-2
   dimensions = (horizontal_loop_extent)
   type = cmpfsw_type
-  intent = in
+  intent = inout
   optional = T
 [errmsg]
   standard_name = ccpp_error_message

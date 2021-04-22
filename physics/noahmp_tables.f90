@@ -11,19 +11,15 @@ module noahmp_tables
 
     implicit none
 
-    integer :: i
     integer, private, parameter :: mvt   = 30 ! use 30 instead of 27
     integer, private, parameter :: mband = 2
     integer, private, parameter :: msc   = 8
     integer, private, parameter :: max_soiltyp = 30
-    integer, private, parameter :: slcats = 30
-    real :: slope_table(9)                     !slope factor for soil drainage
-
-! crops
-
     integer, private, parameter :: ncrop = 5
     integer, private, parameter :: nstage = 8
 
+    integer :: i
+    integer, private, parameter :: slcats = 30
 
 ! mptable.tbl vegetation parameters
 
@@ -31,7 +27,12 @@ module noahmp_tables
     integer :: iswater_table   = 17
     integer :: isbarren_table  = 16
     integer :: isice_table     = 15
-    integer :: eblforest_table = 2
+    integer :: iscrop_table    = 12
+    integer :: eblforest_table =  2
+    integer :: natural_table   = 14
+    integer :: low_density_residential_table   = 31
+    integer :: high_density_residential_table  = 32
+    integer :: high_intensity_industrial_table = 33
 
 !
     real :: ch2op_table(mvt)       !maximum intercepted h2o per unit lai+sai (mm)
@@ -88,11 +89,19 @@ module noahmp_tables
      &                               0.00, 0.00, 0.00, 0.00, 0.00, 0.00 /
 
     real :: mfsno_table(mvt)       !snowmelt curve parameter ()
-      data  ( mfsno_table(i),i=1,mvt) /  2.50, 2.50, 2.50, 2.50, 2.50, 2.50, &
-     &                               2.50, 2.50, 2.50, 2.50, 2.50, 2.50,     &
-     &                               2.50, 2.50, 2.50, 2.50, 2.50, 2.50,     &
-     &                               2.50, 2.50, 0.00, 0.00, 0.00, 0.00,     &
+      data  ( mfsno_table(i),i=1,mvt) /  1.00, 1.00, 1.00, 1.00, 1.00, 2.00, &
+     &                               2.00, 2.00, 2.00, 2.00, 3.00, 3.00,     &
+     &                               4.00, 4.00, 2.50, 3.00, 3.00, 3.50,     &
+     &                               3.50, 3.50, 0.00, 0.00, 0.00, 0.00,     &
      &                               0.00, 0.00, 0.00, 0.00, 0.00, 0.00 /
+
+    real :: scffac_table(mvt)      !snow cover factor (m)
+      data (scffac_table(i),i=1,mvt) / 0.005, 0.005, 0.005, 0.005, 0.005,    &
+     &                               0.008, 0.008, 0.010, 0.010, 0.010,      &
+     &                               0.010, 0.007, 0.021, 0.013, 0.015,      &
+     &                               0.008, 0.015, 0.015, 0.015, 0.015,      &
+     &                               0.000, 0.000, 0.000, 0.000, 0.000,      &
+     &                               0.000, 0.000, 0.000, 0.000, 0.000 /
 
 !
 
@@ -501,10 +510,10 @@ module noahmp_tables
 
 !
     real :: cwpvt_table(mvt)       !empirical canopy wind parameter
-      data ( cwpvt_table (i),i=1,mvt) / 0.18, 0.18, 0.18, 0.18, 0.18, 0.18,  &
-     &                            0.18, 0.18, 0.18, 0.18, 0.18, 0.18,        &
-     &                            0.18, 0.18, 0.18, 0.18, 0.18, 0.18,        &
-     &                            0.18, 0.18, 0.00, 0.00, 0.00, 0.00,        &
+      data ( cwpvt_table (i),i=1,mvt) / 0.18, 0.67, 0.18, 0.67, 0.29, 1.00,  &
+     &                            2.00, 1.30, 1.00, 5.00, 1.17, 1.67,        &
+     &                            1.67, 1.67, 0.18, 0.18, 0.18, 0.67,        &
+     &                            1.00, 0.18, 0.00, 0.00, 0.00, 0.00,        &
      &                            0.00, 0.00, 0.00, 0.00, 0.00, 0.00 /
 
 
@@ -635,15 +644,15 @@ module noahmp_tables
 
     real :: bexp_table(max_soiltyp)   
 
-      data (bexp_table(i), i=1,slcats) /2.79,  4.26, 4.74, 5.33, 5.33,  5.25,&
+      data (bexp_table(i), i=1,slcats) /2.79,  4.26, 4.74, 5.33, 3.86,  5.25,&
      &    6.77,  8.72,  8.17, 10.73,  10.39, 11.55,                          &
      &    5.25,  0.0,  2.79, 4.26,  11.55,  2.79,                            &
      &    2.79,  0.00,  0.00, 0.00,  0.00,  0.00,                            &
      &    0.00,  0.00,  0.00, 0.00,  0.00,  0.00 /
 
     real :: smcdry_table(max_soiltyp)  
-       data (smcdry_table(i), i=1,slcats) /0.010, 0.028, 0.047, 0.084, 0.084,&
-     &   0.066,  0.067, 0.120, 0.103, 0.100, 0.126, 0.138,                   &
+       data (smcdry_table(i), i=1,slcats) /0.010, 0.028, 0.047, 0.084, 0.061,&
+     &   0.066,  0.069, 0.120, 0.103, 0.100, 0.126, 0.138,                   &
      &   0.066, 0.0, 0.006, 0.028, 0.030, 0.006,                             &
      &   0.010, 0.000, 0.000, 0.000, 0.000, 0.000,                           &
      &   0.000, 0.000, 0.000, 0.000, 0.000, 0.000 / 
@@ -658,7 +667,7 @@ module noahmp_tables
 
     real :: smcmax_table(max_soiltyp)
 
-       data (smcmax_table(i), i=1,slcats) /0.339, 0.421, 0.434, 0.476, 0.476,&
+       data (smcmax_table(i), i=1,slcats) /0.339, 0.421, 0.434, 0.476, 0.484,&
      &   0.439, 0.404, 0.464, 0.465, 0.406, 0.468, 0.468,                    &
      &   0.439, 1.000, 0.200, 0.421, 0.468, 0.200,                           &
      &   0.339, 0.339, 0.000, 0.000, 0.000, 0.000,                           &
@@ -666,15 +675,15 @@ module noahmp_tables
 
     real :: smcref_table(max_soiltyp)  
 
-      data (smcref_table(i), i=1,slcats) /0.236, 0.383, 0.383, 0.360, 0.383, &
-     &   0.329,  0.314, 0.387, 0.382, 0.338, 0.404, 0.412,                   &
+      data (smcref_table(i), i=1,slcats) /0.192, 0.283, 0.312, 0.360, 0.347, &
+     &   0.329,  0.315, 0.387, 0.382, 0.338, 0.404, 0.412,                   &
      &   0.329, 0.000, 0.170, 0.283, 0.454, 0.170,                           &
-     &   0.236, 0.000, 0.000, 0.000, 0.000, 0.000,                           &
+     &   0.192, 0.000, 0.000, 0.000, 0.000, 0.000,                           &
      &   0.000, 0.000, 0.000, 0.000, 0.000, 0.000 /
 
     real :: psisat_table(max_soiltyp) 
      
-      data (psisat_table(i), i=1,slcats) /0.069, 0.036, 0.141, 0.759, 0.759, &
+      data (psisat_table(i), i=1,slcats) /0.069, 0.036, 0.141, 0.759, 0.955, &
      &   0.355, 0.135, 0.617, 0.263, 0.098, 0.324, 0.468,                    &
      &   0.355, 0.00, 0.069, 0.036, 0.468, 0.069,                            &
      &   0.069, 0.00, 0.00, 0.00, 0.00, 0.00,                                &
@@ -683,7 +692,7 @@ module noahmp_tables
     real :: dksat_table(max_soiltyp) 
 
        data (dksat_table(i), i=1,slcats) /4.66e-5, 1.41e-5, 5.23e-6, 2.81e-6, &
-     &   2.81e-6, 3.38e-6, 4.45e-6, 2.03e-6, 2.45e-6,7.22e-6,                &
+     &   2.18e-6, 3.38e-6, 4.45e-6, 2.03e-6, 2.45e-6,7.22e-6,                &
      &   1.34e-6, 9.74e-7, 3.38e-6, 0.00, 1.41e-4,                           &
      &   1.41e-5, 9.74e-7, 1.41e-4, 4.66e-5,0.0,                             &
      &   0.00, 0.00, 0.00, 0.00, 0.00,                                       &
@@ -691,18 +700,18 @@ module noahmp_tables
 
     real :: dwsat_table(max_soiltyp)
 
-       data (dwsat_table(i), i=1,slcats)  /0.608e-6, 0.514e-5, 0.805e-5,     &
-     &   0.239e-4, 0.239e-4,0.143e-4, 0.99e-5, 0.237e-4, 0.113e-4, 0.187e-4, &
-     &   0.964e-5, 0.112e-4,0.143e-4,0.00, 0.136e-3, 0.514e-5,               &
-     &   0.112e-4, 0.136e-3, 0.608e-6, 0.00, 0.00,                           &
-     &   0.00, 0.00, 0.00, 0.00,                                             &
+       data (dwsat_table(i), i=1,slcats)  /  2.65e-5, 5.14e-6, 8.05e-6, &
+     &   2.39e-5, 1.66e-5, 1.43e-5, 1.01e-5, 2.35e-5, 1.13e-5, 1.87e-5, &
+     &   9.64e-6, 1.12e-5, 1.43e-5, 0.00,    1.36e-4, 5.14e-6,          &
+     &   1.12e-5, 1.36e-4, 2.65e-5, 0.00,    0.00,                      &
+     &   0.00, 0.00, 0.00, 0.00,                                        &
      &   0.00, 0.00, 0.00, 0.00, 0.00 /
 
     real :: smcwlt_table(max_soiltyp)   
 
-       data (smcwlt_table(i), i=1,slcats) /0.010, 0.028, 0.047, 0.084, 0.084,&
-     &   0.066, 0.067, 0.120, 0.103, 0.100, 0.126, 0.138,                    &
-     &   0.066, 0.00, 0.006, 0.028, 0.03, 0.006,                             &
+       data (smcwlt_table(i), i=1,slcats) /0.010, 0.028, 0.047, 0.084, 0.061,&
+     &   0.066, 0.069, 0.120, 0.103, 0.100, 0.126, 0.138,                    &
+     &   0.066, 0.000, 0.006, 0.028, 0.030, 0.006,                           &
      &   0.010, 0.000, 0.000, 0.000, 0.000, 0.000,                           &
      &   0.000, 0.000, 0.000, 0.000, 0.000, 0.000 /
 
@@ -717,6 +726,7 @@ module noahmp_tables
 
 ! genparm.tbl parameters
 
+    real :: slope_table(9)                     !slope factor for soil drainage
      data (slope_table(i), i=1,9) /0.1, 0.6, 1.0, 0.35, 0.55, 0.8,     &
      &     0.63, 0.0, 0.0 /
     
@@ -725,7 +735,7 @@ module noahmp_tables
     real :: refkdt_table = 3.0         !parameter in the surface runoff parameterization
     real :: frzk_table  =0.15          !frozen ground parameter
     real :: zbot_table  =  -8.0        !depth [m] of lower boundary soil temperature
-    real :: czil_table = 0.075         !parameter used in the calculation of the roughness length for heat
+    real :: czil_table = 0.1           !parameter used in the calculation of the roughness length for heat
 
 ! mptable.tbl radiation parameters
 
@@ -763,10 +773,26 @@ module noahmp_tables
     real :: o2_table     = 0.209     !o2 partial pressure
     real :: timean_table = 10.5      !gridcell mean topgraphic index (global mean)
     real :: fsatmx_table = 0.38      !maximum surface saturated fraction (global mean)
-    real :: z0sno_table = 0.002     !snow surface roughness length (m) (0.002)
-    real :: ssi_table = 0.03         !liquid water holding capacity for snowpack (m3/m3) (0.03)
-    real :: swemx_table = 1.00       !new snow mass to fully cover old snow (mm)
-    real :: rsurf_snow_table = 50.0   !surface resistance for snow(s/m)
+
+    real :: z0sno_table         = 0.002 !snow surface roughness length (m) (0.002)
+    real :: ssi_table           = 0.03  !liquid water holding capacity for snowpack (m3/m3) (0.03)
+    real :: snow_ret_fac_table  = 5.e-5 !snowpack water release timescale factor (1/s)
+    real :: swemx_table         = 1.00  !new snow mass to fully cover old snow (mm)
+
+    real :: tau0_table          = 1.e6  !tau0 from yang97 eqn. 10a
+    real :: grain_growth_table  = 5000. !growth from vapor diffusion yang97 eqn. 10b
+    real :: extra_growth_table  = 10.   !extra growth near freezing yang97 eqn. 10c
+    real :: dirt_soot_table     = 0.3   !dirt and soot term yang97 eqn. 10d
+    real :: bats_cosz_table     = 2.0   !zenith angle snow albedo adjustment; b in yang97 eqn. 15
+    real :: bats_vis_new_table  = 0.95  !new snow visible albedo
+    real :: bats_nir_new_table  = 0.65  !new snow nir albedo
+    real :: bats_vis_age_table  = 0.2   !age factor for diffuse visible snow albedo yang97 eqn. 17
+    real :: bats_nir_age_table  = 0.5   !age factor for diffuse nir snow albedo yang97 eqn. 18
+    real :: bats_vis_dir_table  = 0.4   !cosz factor for direct visible snow albedo yang97 eqn. 15
+    real :: bats_nir_dir_table  = 0.4   !cosz factor for direct nir snow albedo yang97 eqn. 16
+    real :: rsurf_snow_table    = 50.0  !surface resistance for snow(s/m)
+    real :: rsurf_exp_table     = 5.0   !exponent in the shape parameter for soil resistance option 1
+    real :: snow_emis_table     = 0.95  !surface emissivity
 
 
 ! Noah mp crops
@@ -960,5 +986,61 @@ module noahmp_tables
     real :: bio2lai_table(ncrop)        ! leaf are per living leaf biomass [m^2/kg]
     data (bio2lai_table(i),i=1,5) /0.035,0.015,0.015,0.015,0.015/
 
+! mptable.tbl optional parameters
+
+ !------------------------------------------------------------------------------
+ ! Saxton and Rawls 2006 Pedo-transfer function coefficients
+ !------------------------------------------------------------------------------
+
+    real ::  sr2006_theta_1500t_a =   -0.024   ! sand coefficient
+    real ::  sr2006_theta_1500t_b =    0.487   ! clay coefficient
+    real ::  sr2006_theta_1500t_c =    0.006   ! orgm coefficient
+    real ::  sr2006_theta_1500t_d =    0.005   ! sand*orgm coefficient
+    real ::  sr2006_theta_1500t_e =   -0.013   ! clay*orgm coefficient
+    real ::  sr2006_theta_1500t_f =    0.068   ! sand*clay coefficient
+    real ::  sr2006_theta_1500t_g =    0.031   ! constant adjustment
+
+    real ::  sr2006_theta_1500_a  =    0.14    ! theta_1500t coefficient
+    real ::  sr2006_theta_1500_b  =   -0.02    ! constant adjustment
+
+    real ::  sr2006_theta_33t_a   =   -0.251   ! sand coefficient
+    real ::  sr2006_theta_33t_b   =    0.195   ! clay coefficient
+    real ::  sr2006_theta_33t_c   =    0.011   ! orgm coefficient
+    real ::  sr2006_theta_33t_d   =    0.006   ! sand*orgm coefficient
+    real ::  sr2006_theta_33t_e   =   -0.027   ! clay*orgm coefficient
+    real ::  sr2006_theta_33t_f   =    0.452   ! sand*clay coefficient
+    real ::  sr2006_theta_33t_g   =    0.299   ! constant adjustment
+
+    real ::  sr2006_theta_33_a    =    1.283   ! theta_33t*theta_33t coefficient
+    real ::  sr2006_theta_33_b    =   -0.374   ! theta_33t coefficient
+    real ::  sr2006_theta_33_c    =   -0.015   ! constant adjustment
+
+    real ::  sr2006_theta_s33t_a  =    0.278   ! sand coefficient
+    real ::  sr2006_theta_s33t_b  =    0.034   ! clay coefficient
+    real ::  sr2006_theta_s33t_c  =    0.022   ! orgm coefficient
+    real ::  sr2006_theta_s33t_d  =   -0.018   ! sand*orgm coefficient
+    real ::  sr2006_theta_s33t_e  =   -0.027   ! clay*orgm coefficient
+    real ::  sr2006_theta_s33t_f  =   -0.584   ! sand*clay coefficient
+    real ::  sr2006_theta_s33t_g  =    0.078   ! constant adjustment
+
+    real ::  sr2006_theta_s33_a   =    0.636   ! theta_s33t coefficient
+    real ::  sr2006_theta_s33_b   =   -0.107   ! constant adjustment
+
+    real ::  sr2006_psi_et_a      =  -21.67    ! sand coefficient
+    real ::  sr2006_psi_et_b      =  -27.93    ! clay coefficient
+    real ::  sr2006_psi_et_c      =  -81.97    ! theta_s33 coefficient
+    real ::  sr2006_psi_et_d      =   71.12    ! sand*theta_s33 coefficient
+    real ::  sr2006_psi_et_e      =    8.29    ! clay*theta_s33 coefficient
+    real ::  sr2006_psi_et_f      =   14.05    ! sand*clay coefficient
+    real ::  sr2006_psi_et_g      =   27.16    ! constant adjustment
+
+    real ::  sr2006_psi_e_a       =    0.02    ! psi_et*psi_et coefficient
+    real ::  sr2006_psi_e_b       =   -0.113   ! psi_et coefficient
+    real ::  sr2006_psi_e_c       =   -0.7     ! constant adjustment
+
+    real ::  sr2006_smcmax_a      =   -0.097   ! sand adjustment
+    real ::  sr2006_smcmax_b      =    0.043   ! constant adjustment
+
+ 
 end module noahmp_tables
 

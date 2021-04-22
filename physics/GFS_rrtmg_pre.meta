@@ -3,7 +3,7 @@
   type = scheme
   dependencies = funcphys.f90,iounitdef.f,machine.F,module_bfmicrophysics.f,module_mp_radar.F90,module_mp_thompson.F90
   dependencies = module_mp_thompson_make_number_concentrations.F90,physcons.F90,physparam.f,radcons.f90,radiation_aerosols.f
-  dependencies = radiation_astronomy.f,radiation_clouds.f,radiation_gases.f,radlw_param.f,radsw_param.f,surface_perturbation.F90
+  dependencies = radiation_astronomy.f,radiation_clouds.f,radiation_gases.f,radlw_param.f,radsw_param.f,surface_perturbation.F90,radiation_cloud_overlap.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -395,6 +395,32 @@
   type = logical
   intent = in
   optional = F
+[sppt_wts]
+  standard_name = weights_for_stochastic_sppt_perturbation
+  long_name = weights for stochastic sppt perturbation
+  units = none
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[sppt_amp]
+  standard_name = total_ampltiude_of_sppt_perturbation
+  long_name = toal ampltidue of stochastic sppt perturbation
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[pert_clds]
+  standard_name = flag_for_stochastic_cloud_fraction_perturbations
+  long_name = flag for stochastic cloud fraction physics perturbations
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [do_mynnedmf]
   standard_name = do_mynnedmf
   long_name = flag to activate MYNN-EDMF
@@ -455,7 +481,7 @@
   kind = kind_phys
   intent = in
   optional = F
-[eps]
+[con_eps]
   standard_name = ratio_of_dry_air_to_water_vapor_gas_constants
   long_name = rd/rv
   units = none

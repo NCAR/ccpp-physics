@@ -506,7 +506,14 @@ CONTAINS
            soilice(k)=0.
            soiliqw(k)=0.
         enddo
-     endif ! init=.true., iter=1
+     else ! .not. init==true.
+       DO J=jts,jte
+         DO i=its,ite
+           SFCRUNOFF(i,j) = 0.
+           UDRUNOFF(i,j) = 0.
+         ENDDO
+       ENDDO
+     endif ! init==.true.
 
 !-----------------------------------------------------------------
 
@@ -2579,7 +2586,8 @@ endif
 ! evaporation, effects sparsely vegetated areas--> cooler during the day
 !        fc=max(qmin,ref*0.25)  ! 
 ! For now we'll go back to ref*0.5
-        fc=max(qmin,ref*0.5)
+! Replace 0.5 with 0.7 2021/03/15
+        fc=max(qmin,ref*0.7)
         fex_fc=1.
       if((soilmois(1)+qmin) > fc .or. (qvatm-qvg) > 0.) then
         soilres = 1.
@@ -6197,7 +6205,13 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 !--- Next 3 lines are for Johansen thermal conduct.
            gamd=(1.-ws)*2700.
            kdry=(0.135*gamd+64.7)/(2700.-0.947*gamd)
-           kas=kqwrtz**qwrtz*kzero**(1.-qwrtz)
+           !kas=kqwrtz**qwrtz*kzero**(1.-qwrtz)
+           !-- one more option from Christa's paper
+           if(qwrtz > 0.2) then
+             kas=kqwrtz**qwrtz*kzero**(1.-qwrtz)
+           else
+             kas=kqwrtz**qwrtz*3.**(1.-qwrtz)
+           endif
 
          DO K=1,NZS1
            tn=tav(k) - 273.15
@@ -6256,13 +6270,13 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
         if((ws-a).lt.0.12)then
            diffu(K)=0.
         else
-           H=max(0.,(soilmoism(K)-a)/(max(1.e-8,(dqm-a))))
+           H=max(0.,(soilmoism(K)+qmin-a)/(max(1.e-8,(dqm-a))))
            facd=1.
         if(a.ne.0.)facd=1.-a/max(1.e-8,soilmoism(K))
           ame=max(1.e-8,dqm-riw*soilicem(K))
 !--- DIFFU is diffusional conductivity of soil water
           diffu(K)=-BCLH*KSAT*PSIS/ame*                             &
-                  (dqm/ame)**3.                                     &
+                  (ws/ame)**3.                                     &
                   *H**(BCLH+2.)*facd
          endif
 
@@ -6288,7 +6302,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
             fach=1.
           if(soilice(k).ne.0.)                                     &
              fach=1.-riw*soilice(k)/max(1.e-8,soilmois(k))
-         am=max(1.e-8,dqm-riw*soilice(k))
+         am=max(1.e-8,ws-riw*soilice(k))
 !--- HYDRO is hydraulic conductivity of soil water
           hydro(K)=min(KSAT,KSAT/am*                                        & 
                   (soiliqw(K)/am)                                  &
@@ -6512,7 +6526,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 
    REAL    ::  F1,T1,T2,RN
    INTEGER ::  I,I1
-     
+
        I=(TN-1.7315E2)/.05+1
        T1=173.1+FLOAT(I)*.05
        F1=T1+D1*TT(I)-D2
@@ -6523,7 +6537,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
        T1=173.1+FLOAT(I)*.05
        F1=T1+D1*TT(I)-D2
        RN=F1/(.05+D1*(TT(I+1)-TT(I)))
-       I=I-INT(RN)                      
+       I=I-INT(RN)
        IF(I.GT.5000.OR.I.LT.1) GOTO 1
        IF(I1.NE.I) GOTO 10
        TS=T1-.05*RN
@@ -7022,8 +7036,8 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 !> This subroutine computes liquid and forezen soil moisture from the
 !! total soil moisture, and also computes soil moisture availability in
 !! the top soil layer.
-  SUBROUTINE RUCLSMINIT( debug_print, landmask,                    &
-                     nzs, isltyp, ivgtyp, xice, mavail,            &
+  SUBROUTINE RUCLSMINIT( debug_print, slmsk,                       &
+                     nzs, isltyp, ivgtyp, mavail,                  &
                      sh2o, smfr3d, tslb, smois,                    &
                      ims,ime, jms,jme, kms,kme,                    &
                      its,ite, jts,jte, kts,kte                     )
@@ -7035,35 +7049,32 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 #endif
    IMPLICIT NONE
    LOGICAL,  INTENT(IN   )   ::  debug_print
-
+   REAL, DIMENSION( ims:ime),  INTENT(IN   )   :: slmsk
 
    INTEGER,  INTENT(IN   )   ::     &
                                     ims,ime, jms,jme, kms,kme,  &
                                     its,ite, jts,jte, kts,kte,  &
                                     nzs
 
-   REAL, DIMENSION( ims:ime, 1:nzs, jms:jme )                    , &
-            INTENT(IN)    ::                                 TSLB, &
-                                                            SMOIS
+   REAL, DIMENSION( ims:ime, 1:nzs, jms:jme )                 , &
+            INTENT(IN)    ::                              TSLB, &
+                                                         SMOIS
 
-   REAL, DIMENSION( ims:ime, jms:jme )                           , &
-            INTENT(IN)    ::                             LANDMASK
+   INTEGER, DIMENSION( ims:ime, jms:jme )                      , &
+            INTENT(INOUT)    ::                   ISLTYP,IVGTYP
 
-   INTEGER, DIMENSION( ims:ime, jms:jme )                        , &
-            INTENT(INOUT)    ::                     ISLTYP,IVGTYP
+   REAL, DIMENSION( ims:ime, 1:nzs, jms:jme )                  , &
+            INTENT(OUT)    ::                            SMFR3D, &
+                                                         SH2O
 
-   REAL, DIMENSION( ims:ime, 1:nzs, jms:jme )                    , &
-            INTENT(INOUT)    ::                            SMFR3D, &
-                                                             SH2O
+   REAL, DIMENSION( ims:ime, jms:jme )                         , &
+            INTENT(OUT)    ::                            MAVAIL
 
-   REAL, DIMENSION( ims:ime, jms:jme )                           , &
-            INTENT(INOUT)    ::                       XICE,MAVAIL
+   !-- local
+   REAL, DIMENSION ( 1:nzs ) :: SOILIQW
 
-   REAL, DIMENSION ( 1:nzs )  ::                           SOILIQW
-
-!
-  INTEGER ::  I,J,L,itf,jtf
-  REAL    ::  RIW,XLMELT,TLN,DQM,REF,PSIS,QMIN,BCLH
+   INTEGER ::  I,J,L,itf,jtf
+   REAL    ::  RIW,XLMELT,TLN,DQM,REF,PSIS,QMIN,BCLH
 
    INTEGER                   :: errflag
 
@@ -7077,9 +7088,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
    errflag = 0
    DO j = jts,jtf
      DO i = its,itf
-       ! land-only version
-       IF ( LANDMASK( i,j ) .NE. 1 ) CYCLE
-       !
+
        IF ( ISLTYP( i,j ) .LT. 0 ) THEN
          errflag = 1
          print *, &
@@ -7096,65 +7105,60 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
    DO J=jts,jtf
      DO I=its,itf
 
-       ! land-only version
-       IF ( LANDMASK( i,j ) .NE. 1 ) CYCLE
+       ! in Zobler classification isltyp=0 for water. Statsgo classification
+       ! has isltyp=14 for water
+       if (isltyp(i,j) == 0) isltyp(i,j)=14
+     
+       if(slmsk(i) == 1. ) then
+       !-- land
+       !-- Computate volumetric content of ice in soil
+       !-- and initialize MAVAIL
+         DQM    = MAXSMC   (ISLTYP(I,J)) - &
+                  DRYSMC   (ISLTYP(I,J))
+         REF    = REFSMC   (ISLTYP(I,J))
+         PSIS   = - SATPSI (ISLTYP(I,J))
+         QMIN   = DRYSMC   (ISLTYP(I,J))
+         BCLH   = BB       (ISLTYP(I,J))
 
-!--- Computation of volumetric content of ice in soil
-!--- and initialize MAVAIL
-       if(ISLTYP(I,J) > 0) then
-             DQM    = MAXSMC   (ISLTYP(I,J)) - &
-                      DRYSMC   (ISLTYP(I,J))
-             REF    = REFSMC   (ISLTYP(I,J))
-             PSIS   = - SATPSI (ISLTYP(I,J))
-             QMIN   = DRYSMC   (ISLTYP(I,J))
-             BCLH   = BB       (ISLTYP(I,J))
-       endif
+         mavail(i,j) = max(0.00001,min(1.,(smois(i,1,j)-qmin)/(ref-qmin)))
 
+         DO L=1,NZS
+           !-- for land points initialize soil ice
+           tln=log(TSLB(i,l,j)/273.15)
+          
+           if(tln.lt.0.) then
+             soiliqw(l)=(dqm+qmin)*(XLMELT*                        &
+            (tslb(i,l,j)-273.15)/tslb(i,l,j)/9.81/psis)             &
+            **(-1./bclh)
+            !**(-1./bclh)-qmin
+            soiliqw(l)=max(0.,soiliqw(l))
+            soiliqw(l)=min(soiliqw(l),smois(i,l,j))
+            sh2o(i,l,j)=soiliqw(l)
+            smfr3d(i,l,j)=(smois(i,l,j)-soiliqw(l))/RIW
+         
+           else
+             smfr3d(i,l,j)=0.
+             sh2o(i,l,j)=smois(i,l,j)
+           endif
+         ENDDO
 
-! in Zobler classification isltyp=0 for water. Statsgo classification
-! has isltyp=14 for water
-   if (isltyp(i,j) == 0) isltyp(i,j)=14
-
-    IF(xice(i,j).gt.0.) THEN
-!-- for ice
+       elseif( slmsk(i) == 2.) then
+       !-- ice
+         mavail(i,j) = 1.
          DO L=1,NZS
            smfr3d(i,l,j)=1.
            sh2o(i,l,j)=0.
-           mavail(i,j) = 1.
-         ENDDO
-    ELSE
-       if(isltyp(i,j).ne.14 ) then
-!-- land
-           mavail(i,j) = max(0.00001,min(1.,(smois(i,1,j)-qmin)/(ref-qmin)))
-         DO L=1,NZS
-!-- for land points initialize soil ice
-         tln=log(TSLB(i,l,j)/273.15)
-          
-          if(tln.lt.0.) then
-           soiliqw(l)=(dqm+qmin)*(XLMELT*                        &
-         (tslb(i,l,j)-273.15)/tslb(i,l,j)/9.81/psis)             &
-          **(-1./bclh)
-!          **(-1./bclh)-qmin
-           soiliqw(l)=max(0.,soiliqw(l))
-           soiliqw(l)=min(soiliqw(l),smois(i,l,j))
-           sh2o(i,l,j)=soiliqw(l)
-           smfr3d(i,l,j)=(smois(i,l,j)-soiliqw(l))/RIW
-         
-          else
-           smfr3d(i,l,j)=0.
-           sh2o(i,l,j)=smois(i,l,j)
-          endif
          ENDDO
     
        else
-!-- for water  ISLTYP=14
+       !-- water  ISLTYP=14
+         mavail(i,j) = 1.
          DO L=1,NZS
            smfr3d(i,l,j)=0.
            sh2o(i,l,j)=1.
-           mavail(i,j) = 1.
          ENDDO
-       endif
-    ENDIF
+
+       endif ! land
 
     ENDDO
    ENDDO

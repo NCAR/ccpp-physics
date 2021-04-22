@@ -88,7 +88,7 @@
              intent(inout)   ::                                utnp,vtnp,ttnp
    real(kind=kind_phys),     dimension( im,km,ntrac )                             , &
              intent(inout)   ::                                          qtnp
-   real(kind=kind_phys),     dimension(im,km)                                     , &
+   real(kind=kind_phys),     dimension(:,:)                                       , &
              intent(inout)   :: du3dt_PBL, dv3dt_PBL, dt3dt_PBL, dq3dt_PBL, do3dt_PBL
 !
 !---------------------------------------------------------------------------------

@@ -188,31 +188,6 @@
   kind = kind_phys
   intent = inout
   optional = F
-[do_sppt]
-  standard_name = flag_for_stochastic_physics_perturbations
-  long_name = flag for stochastic physics perturbations
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[ca_global]
-  standard_name = flag_for_global_cellular_automata
-  long_name = switch for global ca
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[dtdtr]
-  standard_name = tendency_of_air_temperature_due_to_radiative_heating_on_physics_time_step
-  long_name = temp. change due to radiative heating per time step
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
 [drain_cpl]
   standard_name = tendency_of_lwe_thickness_of_precipitation_amount_for_coupling
   long_name = change in rain_cpl (coupling_type)
@@ -274,8 +249,17 @@
   kind = kind_phys
   intent = in
   optional = F
+[sfc_wts_inv]
+  standard_name = weights_for_stochastic_surface_physics_perturbation_flipped
+  long_name = weights for stochastic surface physics perturbation, flipped
+  units = none
+  dimensions = (horizontal_loop_extent,number_of_land_surface_variables_perturbed)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
 [lndp_prt_list]
-  standard_name =magnitude_of_perturbations_for_landperts
+  standard_name = magnitude_of_perturbations_for_landperts
   long_name = magnitude of perturbations for landperts
   units = variable
   dimensions = (number_of_land_surface_variables_perturbed) 
@@ -672,8 +656,8 @@
   intent = in
   optional = F
 [adjsfculw_wat]
-  standard_name = surface_upwelling_longwave_flux_over_ocean_interstitial
-  long_name = surface upwelling longwave flux at current time over ocean (temporary use as interstitial)
+  standard_name = surface_upwelling_longwave_flux_over_water_interstitial
+  long_name = surface upwelling longwave flux at current time over water (temporary use as interstitial)
   units = W m-2
   dimensions = (horizontal_loop_extent)
   type = real
@@ -762,8 +746,8 @@
   intent = in
   optional = F
 [tsfc_wat]
-  standard_name = surface_skin_temperature_over_ocean_interstitial
-  long_name = surface skin temperature over ocean (temporary use as interstitial)
+  standard_name = surface_skin_temperature_over_water_interstitial
+  long_name = surface skin temperature over water (temporary use as interstitial)
   units = K
   dimensions = (horizontal_loop_extent)
   type = real

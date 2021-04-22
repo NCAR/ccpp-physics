@@ -216,7 +216,7 @@
   intent = in
   optional = F  
 [sthick]
-  standard_name = soil_layer_thickness
+  standard_name = thickness_of_soil_levels_for_land_surface_model
   long_name = soil layer thickness
   units = m
   dimensions = (soil_vertical_dimension)
@@ -402,7 +402,7 @@
   intent = inout
   optional = F
 [z0k]
-  standard_name = surface_roughness_length_over_land_interstitial
+  standard_name = surface_roughness_length_over_land
   long_name = surface roughness length over land  (temporary use as interstitial)
   units = m
   dimensions = (horizontal_loop_extent)

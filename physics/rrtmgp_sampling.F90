@@ -36,9 +36,10 @@ contains
   !   McICA-sampled cloud optical properties
   !
   ! -------------------------------------------------------------------------------------------------
-  function draw_samples(cloud_mask,clouds,clouds_sampled) result(error_msg)
+  function draw_samples(cloud_mask,do_twostream,clouds,clouds_sampled) result(error_msg)
 	! Inputs
     logical, dimension(:,:,:),      intent(in   ) :: cloud_mask     ! Dimensions ncol,nlay,ngpt
+    logical,                        intent(in   ) :: do_twostream   ! Do two-stream?
     class(ty_optical_props_arry),   intent(in   ) :: clouds         ! Defined by band
  
  	! Outputs
@@ -66,8 +67,10 @@ contains
     type is (ty_optical_props_2str)
       select type(clouds_sampled)
       type is (ty_optical_props_2str)
-        call apply_cloud_mask(ncol,nlay,nbnd,ngpt,clouds_sampled%get_band_lims_gpoint(),cloud_mask,clouds%ssa,clouds_sampled%ssa)
-        call apply_cloud_mask(ncol,nlay,nbnd,ngpt,clouds_sampled%get_band_lims_gpoint(),cloud_mask,clouds%g,  clouds_sampled%g  )
+         if (do_twostream) then
+            call apply_cloud_mask(ncol,nlay,nbnd,ngpt,clouds_sampled%get_band_lims_gpoint(),cloud_mask,clouds%ssa,clouds_sampled%ssa)
+            call apply_cloud_mask(ncol,nlay,nbnd,ngpt,clouds_sampled%get_band_lims_gpoint(),cloud_mask,clouds%g,  clouds_sampled%g  )
+         endif
       class default
           error_msg = "draw_samples: by-band and sampled cloud properties need to be the same variable type"
       end select

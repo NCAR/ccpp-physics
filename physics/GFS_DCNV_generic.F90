@@ -169,10 +169,10 @@
               dt3dt(i,k) = dt3dt(i,k) + (gt0(i,k)-save_t(i,k)) * frain
               du3dt(i,k) = du3dt(i,k) + (gu0(i,k)-save_u(i,k)) * frain
               dv3dt(i,k) = dv3dt(i,k) + (gv0(i,k)-save_v(i,k)) * frain
-
-!             upd_mf(i,k)  = upd_mf(i,k)  + ud_mf(i,k) * (con_g*frain)
-!             dwn_mf(i,k)  = dwn_mf(i,k)  + dd_mf(i,k) * (con_g*frain)
-!             det_mf(i,k)  = det_mf(i,k)  + dt_mf(i,k) * (con_g*frain)
+              ! convective mass fluxes
+              upd_mf(i,k)  = upd_mf(i,k)  + ud_mf(i,k) * (con_g*frain)
+              dwn_mf(i,k)  = dwn_mf(i,k)  + dd_mf(i,k) * (con_g*frain)
+              det_mf(i,k)  = det_mf(i,k)  + dt_mf(i,k) * (con_g*frain)
             enddo
           enddo
           if(qdiag3d) then

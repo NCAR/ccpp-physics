@@ -244,15 +244,6 @@
   kind = kind_phys
   intent = out
   optional = F
-[dtdtc]
-  standard_name = tendency_of_air_temperature_due_to_radiative_heating_assuming_clear_sky
-  long_name = clear sky radiative (shortwave + longwave) heating rate at current time
-  units = K s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
 [dqdt]
   standard_name = tendency_of_tracers_due_to_model_physics
   long_name = updated tendency of the tracers
@@ -325,14 +316,6 @@
 [lsidea]
   standard_name = flag_idealized_physics
   long_name = flag for idealized physics
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[cplflx]
-  standard_name = flag_for_flux_coupling
-  long_name = flag controlling cplflx collection (default off)
   units = flag
   dimensions = ()
   type = logical
@@ -601,6 +584,14 @@
   kind = kind_phys
   intent = inout
   optional = F
+[use_LW_jacobian]
+  standard_name = flag_to_calc_RRTMGP_LW_jacobian
+  long_name = logical flag to control RRTMGP LW calculation
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [adjsfculw]
   standard_name = surface_upwelling_longwave_flux
   long_name = surface upwelling longwave flux at current time
@@ -608,7 +599,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [adjsfculw_lnd]
   standard_name = surface_upwelling_longwave_flux_over_land_interstitial
@@ -629,14 +620,14 @@
   intent = in
   optional = F
 [adjsfculw_wat]
-  standard_name = surface_upwelling_longwave_flux_over_ocean_interstitial
-  long_name = surface upwelling longwave flux at current time over ocean (temporary use as interstitial)
+  standard_name = surface_upwelling_longwave_flux_over_water_interstitial
+  long_name = surface upwelling longwave flux at current time over water (temporary use as interstitial)
   units = W m-2
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
-  optional = F
+  optional = F 
 [dlwsfc]
   standard_name = cumulative_surface_downwelling_longwave_flux_multiplied_by_timestep
   long_name = cumulative surface downwelling LW flux multiplied by timestep
@@ -785,51 +776,7 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
-[use_GP_jacobian]
-  standard_name = flag_to_calc_RRTMGP_LW_jacobian
-  long_name = logical flag to control RRTMGP LW calculation
-  units = flag
-  dimensions = ()
-  type = logical  
-  intent = in
-  optional = F  
-[skt]
-  standard_name = air_temperature_at_lowest_model_layer
-  long_name = air temperature at lowest model layer
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[sktp1r]
-  standard_name = surface_skin_temperature_at_previous_time_step
-  long_name = surface skin temperature at previous time step
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys  
-  intent = in
-  optional = F  
-[fluxlwUP]
-  standard_name = RRTMGP_lw_flux_profile_upward_allsky
-  long_name = RRTMGP upward longwave all-sky flux profile
-  units = W m-2
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = T   
-[fluxlwUP_jac]
-  standard_name = RRTMGP_jacobian_of_lw_flux_profile_upward
-  long_name = RRTMGP Jacobian upward longwave flux profile
-  units = W m-2 K-1
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = T   
+  optional = F 
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -1814,6 +1761,14 @@
   type = integer
   intent = in
   optional = F
+[convert_dry_rho]
+  standard_name = flag_for_converting_hydrometeors_from_moist_to_dry_air
+  long_name = flag for converting hydrometeors from moist to dry air
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [dtf]
   standard_name = time_step_for_dynamics
   long_name = dynamics timestep
@@ -1890,6 +1845,15 @@
   standard_name = gas_constant_dry_air
   long_name = ideal gas constant for dry air
   units = J kg-1 K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[con_eps]
+  standard_name = ratio_of_dry_air_to_water_vapor_gas_constants
+  long_name = rd/rv
+  units = none
   dimensions = ()
   type = real
   kind = kind_phys

@@ -9,7 +9,7 @@ module rrtmgp_sw_rte
   use mo_fluxes_byband,        only: ty_fluxes_byband
   use module_radsw_parameters, only: cmpfsw_type
   use rrtmgp_aux,              only: check_error_msg
-
+  use rrtmgp_sw_gas_optics,    only: sw_gas_props
   implicit none
 
   public rrtmgp_sw_rte_init, rrtmgp_sw_rte_run, rrtmgp_sw_rte_finalize
@@ -29,10 +29,10 @@ contains
 !! \htmlinclude rrtmgp_sw_rte.html
 !!
   subroutine rrtmgp_sw_rte_run(doSWrad, doSWclrsky, nCol, nLev, nDay, idxday, coszen, p_lay, &
-       t_lay, p_lev, sw_gas_props, sw_optical_props_clrsky, sfc_alb_nir_dir, sfc_alb_nir_dif,&
+       t_lay, p_lev, sw_optical_props_clrsky, sfc_alb_nir_dir, sfc_alb_nir_dif,              &
        sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, toa_src_sw, sw_optical_props_clouds,            &
-       sw_optical_props_aerosol, rrtmgp_nGases, active_gases_array, scmpsw, fluxswUP_allsky, &
-       fluxswDOWN_allsky, fluxswUP_clrsky, fluxswDOWN_clrsky, errmsg, errflg)
+       sw_optical_props_aerosol, scmpsw, fluxswUP_allsky, fluxswDOWN_allsky, fluxswUP_clrsky,&
+       fluxswDOWN_clrsky, errmsg, errflg)
 
     ! Inputs
     logical, intent(in) :: &
@@ -51,8 +51,6 @@ contains
          t_lay                      ! Temperature (K)
     real(kind_phys), dimension(ncol,NLev+1), intent(in) :: &
          p_lev                      ! Pressure @ model layer-interfaces (Pa)
-    type(ty_gas_optics_rrtmgp),intent(in) :: &
-         sw_gas_props               ! RRTMGP DDT: SW spectral information
     type(ty_optical_props_2str),intent(inout) :: &
          sw_optical_props_clrsky    ! RRTMGP DDT: shortwave clear-sky radiative properties 
    type(ty_optical_props_2str),intent(in) :: &
@@ -65,10 +63,6 @@ contains
          sfc_alb_uvvis_dif          ! Surface albedo (diffuse)
     real(kind_phys), dimension(ncol,sw_gas_props%get_ngpt()), intent(in) :: &
          toa_src_sw                 ! TOA incident spectral flux (W/m2)
-    integer, intent(in) :: &
-         rrtmgp_nGases              ! Number of trace gases active in RRTMGP
-    character(len=*),dimension(rrtmgp_nGases), intent(in) :: &
-         active_gases_array         ! Character array containing trace gases to include in RRTMGP
 
     ! Outputs
     character(len=*), intent(out) :: &

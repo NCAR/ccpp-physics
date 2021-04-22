@@ -287,11 +287,11 @@
           q0        = min(qs1, q0)
 
           if (fice(i) < cimin) then
-            print *,'warning: ice fraction is low:', fice(i)
+!           print *,'warning: ice fraction is low:', fice(i)
             fice(i) = cimin
             tice(i) = tgice
             tskin(i)= tgice
-            print *,'fix ice fraction: reset it to:', fice(i)
+!           print *,'fix ice fraction: reset it to:', fice(i)
           endif
           ffw(i)    = one - fice(i)
 
@@ -362,9 +362,9 @@
           snowd(i) = min( snowd(i), hsmax )
 
           if (snowd(i) > (2.0_kind_phys*hice(i))) then
-            print *, 'warning: too much snow :',snowd(i)
+!           print *, 'warning: too much snow :',snowd(i)
             snowd(i) = hice(i) + hice(i)
-            print *,'fix: decrease snow depth to:',snowd(i)
+!           print *,'fix: decrease snow depth to:',snowd(i)
           endif
         endif
       enddo

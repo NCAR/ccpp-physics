@@ -6,6 +6,7 @@ module GFS_rrtmgp_sw_post
   use mo_fluxes_byband,          only: ty_fluxes_byband
   use mo_heating_rates,          only: compute_heating_rate
   use rrtmgp_aux,                only: check_error_msg
+  use rrtmgp_sw_gas_optics,      only: sw_gas_props
   implicit none
   
   public GFS_rrtmgp_sw_post_init,GFS_rrtmgp_sw_post_run,GFS_rrtmgp_sw_post_finalize
@@ -26,7 +27,7 @@ contains
 !!
   subroutine GFS_rrtmgp_sw_post_run (nCol, nLev, nDay, idxday, lsswr, do_sw_clrsky_hr,      &
        save_diag, fhswr,  coszen, coszdg, t_lay, p_lev, sfc_alb_nir_dir, sfc_alb_nir_dif,   &
-       sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, sw_gas_props, fluxswUP_allsky,                 &
+       sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, fluxswUP_allsky,                               &
        fluxswDOWN_allsky, fluxswUP_clrsky, fluxswDOWN_clrsky, raddt, aerodp, cldsa, mbota,  &
        mtopa, cld_frac, cldtausw, fluxr,                                                    &
        nirbmdi, nirdfdi, visbmdi, visdfdi, nirbmui, nirdfui, visbmui, visdfui, sfcnsw,      &
@@ -43,8 +44,6 @@ contains
     	 lsswr,             & ! Call SW radiation?
     	 do_sw_clrsky_hr,   & ! Output clear-sky SW heating-rate?         
     	 save_diag            ! Output radiation diagnostics?
-    type(ty_gas_optics_rrtmgp),intent(in) :: &
-         sw_gas_props         ! DDT containing SW spectral information
     real(kind_phys), intent(in) :: &
          fhswr                ! Frequency for SW radiation
     real(kind_phys), dimension(nCol), intent(in) :: &
@@ -77,7 +76,7 @@ contains
          cldtausw             ! approx .55mu band layer cloud optical depth
     
     ! Inputs (optional)     
-    type(cmpfsw_type), dimension(nCol), intent(in), optional :: &
+    type(cmpfsw_type), dimension(nCol), intent(inout), optional :: &
          scmpsw           ! 2D surface fluxes, components:
                           ! uvbfc - total sky downward uv-b flux at  (W/m2)
                           ! uvbf0 - clear sky downward uv-b flux at  (W/m2)
@@ -89,7 +88,7 @@ contains
     real(kind=kind_phys), dimension(:,:), intent(inout) :: fluxr
     
     ! Outputs (mandatory)
-    real(kind_phys), dimension(nCol), intent(out) :: &
+    real(kind_phys), dimension(nCol), intent(inout) :: &
          nirbmdi,           & ! sfc nir beam sw downward flux    (W/m2)
          nirdfdi,           & ! sfc nir diff sw downward flux    (W/m2)
          visbmdi,           & ! sfc uv+vis beam sw downward flux (W/m2)
@@ -100,11 +99,11 @@ contains
          visdfui,           & ! sfc uv+vis diff sw upward flux   (W/m2)    
          sfcnsw,            & ! total sky sfc netsw flx into ground
          sfcdsw               !
-    real(kind_phys), dimension(nCol,nLev), intent(out) :: &
+    real(kind_phys), dimension(nCol,nLev), intent(inout) :: &
          htrsw                ! SW all-sky heating rate
-    type(sfcfsw_type), dimension(nCol), intent(out) :: &
+    type(sfcfsw_type), dimension(nCol), intent(inout) :: &
          sfcfsw               ! sw radiation fluxes at sfc
-    type(topfsw_type), dimension(nCol), intent(out) :: &
+    type(topfsw_type), dimension(nCol), intent(inout) :: &
          topfsw               ! sw_fluxes_top_atmosphere
     character(len=*), intent(out) :: &
          errmsg
@@ -112,13 +111,13 @@ contains
          errflg
 
     ! Outputs (optional)
-    type(profsw_type), dimension(nCol, nLev), intent(out), optional :: &
+    type(profsw_type), dimension(nCol, nLev), intent(inout), optional :: &
          flxprf_sw        ! 2D radiative fluxes, components:
                           ! upfxc - total sky upward flux            (W/m2)
                           ! dnfxc - total sky dnward flux            (W/m2)
                           ! upfx0 - clear sky upward flux            (W/m2)
                           ! dnfx0 - clear sky dnward flux            (W/m2)
-    real(kind_phys),dimension(nCol, nLev),intent(out),optional :: &
+    real(kind_phys),dimension(nCol, nLev),intent(inout),optional :: &
          htrswc           ! Clear-sky heating rate (K/s)
 	
     ! Local variables

@@ -39,6 +39,22 @@
   type = integer
   intent = in
   optional = F
+[pores]
+  standard_name = maximum_soil_moisture_content_for_land_surface_model
+  long_name = maximum soil moisture for a given soil type for land surface model
+  units = m
+  dimensions = (30)
+  type = real
+  intent = out
+  kind = kind_phys
+[resid]
+  standard_name = minimum_soil_moisture_content_for_land_surface_model
+  long_name = minimum soil moisture for a given soil type for land surface model
+  units = m
+  dimensions = (30)
+  type = real
+  intent = out
+  kind = kind_phys
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -155,18 +171,9 @@
   kind = kind_phys
   intent= in
   optional = F
-[sfcemis]
-  standard_name = surface_longwave_emissivity_over_land_interstitial
-  long_name = surface lw emissivity in fraction over land (temporary use as interstitial)
-  units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [dlwflx]
-  standard_name = surface_downwelling_longwave_flux_absorbed_by_ground_over_land
-  long_name = total sky surface downward longwave flux absorbed by the ground over land
+  standard_name = surface_downwelling_longwave_flux
+  long_name = surface downwelling longwave flux at current time
   units = W m-2
   dimensions = (horizontal_loop_extent)
   type = real
@@ -688,7 +695,7 @@
   intent = inout
   optional = F
 [zorl]
-  standard_name = surface_roughness_length_over_land_interstitial
+  standard_name = surface_roughness_length_over_land
   long_name = surface roughness length over land  (temporary use as interstitial)
   units = cm
   dimensions = (horizontal_loop_extent)
@@ -853,7 +860,7 @@
   standard_name = snow_temperature
   long_name = snow_temperature
   units = K
-  dimensions = (horizontal_loop_extent, -2:0)
+  dimensions = (horizontal_loop_extent,lower_bound_of_snow_vertical_dimension_for_land_surface_model:upper_bound_of_snow_vertical_dimension_for_land_surface_model)
   type = real
   kind = kind_phys
   intent = inout
@@ -862,7 +869,7 @@
   standard_name = layer_bottom_depth_from_snow_surface
   long_name = depth from the top of the snow surface at the bottom of the layer
   units = m
-  dimensions = (horizontal_loop_extent, -2:4)
+  dimensions = (horizontal_loop_extent,lower_bound_of_snow_vertical_dimension_for_land_surface_model:soil_vertical_dimension_for_land_surface_model)
   type = real
   kind = kind_phys
   intent = inout
@@ -871,7 +878,7 @@
   standard_name = snow_layer_ice
   long_name = snow_layer_ice
   units = mm
-  dimensions = (horizontal_loop_extent, -2:0)
+  dimensions = (horizontal_loop_extent,lower_bound_of_snow_vertical_dimension_for_land_surface_model:upper_bound_of_snow_vertical_dimension_for_land_surface_model)
   type = real
   kind = kind_phys
   intent = inout
@@ -880,7 +887,7 @@
   standard_name = snow_layer_liquid_water
   long_name = snow layer liquid water
   units = mm
-  dimensions = (horizontal_loop_extent, -2:0)
+  dimensions = (horizontal_loop_extent,lower_bound_of_snow_vertical_dimension_for_land_surface_model:upper_bound_of_snow_vertical_dimension_for_land_surface_model)
   type = real
   kind = kind_phys
   intent = inout
@@ -1001,6 +1008,51 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
+[albdvis]
+  standard_name = surface_albedo_direct_visible
+  long_name = direct surface albedo visible band
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[albdnir]
+  standard_name = surface_albedo_direct_NIR
+  long_name = direct surface albedo NIR band
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[albivis]
+  standard_name = surface_albedo_diffuse_visible
+  long_name = diffuse surface albedo visible band
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[albinir]
+  standard_name = surface_albedo_diffuse_NIR
+  long_name = diffuse surface albedo NIR band
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[emiss]
+  standard_name = surface_emissivity_lsm
+  long_name = surface emissivity from lsm
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
   optional = F
 [sncovr1]
   standard_name = surface_snow_area_fraction_over_land
