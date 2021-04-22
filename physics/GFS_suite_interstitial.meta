@@ -321,14 +321,6 @@
   type = logical
   intent = in
   optional = F
-[cplflx]
-  standard_name = flag_for_flux_coupling
-  long_name = flag controlling cplflx collection (default off)
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
 [flag_cice]
   standard_name = flag_for_cice
   long_name = flag for cice
@@ -628,8 +620,8 @@
   intent = in
   optional = F
 [adjsfculw_wat]
-  standard_name = surface_upwelling_longwave_flux_over_ocean_interstitial
-  long_name = surface upwelling longwave flux at current time over ocean (temporary use as interstitial)
+  standard_name = surface_upwelling_longwave_flux_over_water_interstitial
+  long_name = surface upwelling longwave flux at current time over water (temporary use as interstitial)
   units = W m-2
   dimensions = (horizontal_loop_extent)
   type = real

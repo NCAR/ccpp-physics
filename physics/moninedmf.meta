@@ -428,6 +428,15 @@
   kind = kind_phys
   intent = out
   optional = F
+[dku]
+  standard_name = atmosphere_momentum_diffusivity
+  long_name = diffusivity for momentum
+  units = m2 s-1
+  dimensions = (horizontal_loop_extent,vertical_dimension_minus_one)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
 [kinver]
   standard_name = index_of_highest_temperature_inversion
   long_name = index of highest temperature inversion
@@ -532,12 +541,14 @@
   intent = in
   optional = F
 [coef_ric_s]
-  standard_name = coefficient_for_variable_bulk_richardson_number_over_ocean
-  long_name = coefficient for calculating variable bulk richardson number for hurricane PBL over ocean
+  standard_name = coefficient_for_variable_bulk_richardson_number_over_water
+  long_name = coefficient for calculating variable bulk richardson number for hurricane PBL over water
   units = none
   dimensions = ()
   type = real
   kind = kind_phys
+  intent = in
+  optional = F
 [lssav]
   standard_name = flag_diagnostics
   long_name = logical flag for storing diagnostics

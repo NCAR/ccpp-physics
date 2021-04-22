@@ -57,22 +57,22 @@ SUBROUTINE mynnsfc_wrapper_run(            &
      &  u, v, t3d, qvsh, qc, prsl, phii,   &
      &  exner, ps, PBLH, slmsk,            &
      &         wet,       dry,       icy,  &  !intent(in)
-     &   tskin_ocn, tskin_lnd, tskin_ice,  &  !intent(in)
-     &   tsurf_ocn, tsurf_lnd, tsurf_ice,  &  !intent(in)
-     &    qsfc_ocn,  qsfc_lnd,  qsfc_ice,  &  !intent(in)
-     &   snowh_ocn, snowh_lnd, snowh_ice,  &  !intent(in)
-     &     znt_ocn,   znt_lnd,   znt_ice,  &  !intent(inout)
-     &     ust_ocn,   ust_lnd,   ust_ice,  &  !intent(inout)
-     &      cm_ocn,    cm_lnd,    cm_ice,  &  !intent(inout)
-     &      ch_ocn,    ch_lnd,    ch_ice,  &  !intent(inout)
-     &      rb_ocn,    rb_lnd,    rb_ice,  &  !intent(inout)
-     &  stress_ocn,stress_lnd,stress_ice,  &  !intent(inout)
-     &      fm_ocn,    fm_lnd,    fm_ice,  &  !intent(inout)
-     &      fh_ocn,    fh_lnd,    fh_ice,  &  !intent(inout)
-     &    fm10_ocn,  fm10_lnd,  fm10_ice,  &  !intent(inout)
-     &     fh2_ocn,   fh2_lnd,   fh2_ice,  &  !intent(inout)
-     &    hflx_ocn,  hflx_lnd,  hflx_ice,  &
-     &    qflx_ocn,  qflx_lnd,  qflx_ice,  &
+     &   tskin_wat, tskin_lnd, tskin_ice,  &  !intent(in)
+     &   tsurf_wat, tsurf_lnd, tsurf_ice,  &  !intent(in)
+     &    qsfc_wat,  qsfc_lnd,  qsfc_ice,  &  !intent(in)
+     &   snowh_wat, snowh_lnd, snowh_ice,  &  !intent(in)
+     &     znt_wat,   znt_lnd,   znt_ice,  &  !intent(inout)
+     &     ust_wat,   ust_lnd,   ust_ice,  &  !intent(inout)
+     &      cm_wat,    cm_lnd,    cm_ice,  &  !intent(inout)
+     &      ch_wat,    ch_lnd,    ch_ice,  &  !intent(inout)
+     &      rb_wat,    rb_lnd,    rb_ice,  &  !intent(inout)
+     &  stress_wat,stress_lnd,stress_ice,  &  !intent(inout)
+     &      fm_wat,    fm_lnd,    fm_ice,  &  !intent(inout)
+     &      fh_wat,    fh_lnd,    fh_ice,  &  !intent(inout)
+     &    fm10_wat,  fm10_lnd,  fm10_ice,  &  !intent(inout)
+     &     fh2_wat,   fh2_lnd,   fh2_ice,  &  !intent(inout)
+     &    hflx_wat,  hflx_lnd,  hflx_ice,  &
+     &    qflx_wat,  qflx_lnd,  qflx_ice,  &
      &  QSFC, qsfc_lnd_ruc, qsfc_ice_ruc,  &
      &  USTM, ZOL, MOL,                    &
      &  RMOL, WSPD, ch, HFLX, QFLX, LH,    &
@@ -160,24 +160,24 @@ SUBROUTINE mynnsfc_wrapper_run(            &
       logical, dimension(im), intent(in) :: wet, dry, icy
 
       real(kind=kind_phys), dimension(im), intent(in)    :: &
-     &                    tskin_ocn, tskin_lnd, tskin_ice,  &
-     &                    tsurf_ocn, tsurf_lnd, tsurf_ice,  &
-     &                    snowh_ocn, snowh_lnd, snowh_ice
+     &                    tskin_wat, tskin_lnd, tskin_ice,  &
+     &                    tsurf_wat, tsurf_lnd, tsurf_ice,  &
+     &                    snowh_wat, snowh_lnd, snowh_ice
 
       real(kind=kind_phys), dimension(im), intent(inout) :: &
-     &                      znt_ocn,   znt_lnd,   znt_ice,  &
-     &                      ust_ocn,   ust_lnd,   ust_ice,  &
-     &                       cm_ocn,    cm_lnd,    cm_ice,  &
-     &                       ch_ocn,    ch_lnd,    ch_ice,  &
-     &                       rb_ocn,    rb_lnd,    rb_ice,  &
-     &                   stress_ocn,stress_lnd,stress_ice,  &
-     &                       fm_ocn,    fm_lnd,    fm_ice,  &
-     &                       fh_ocn,    fh_lnd,    fh_ice,  &
-     &                     fm10_ocn,  fm10_lnd,  fm10_ice,  &
-     &                      fh2_ocn,   fh2_lnd,   fh2_ice,  &
-     &                     hflx_ocn,  hflx_lnd,  hflx_ice,  &
-     &                     qflx_ocn,  qflx_lnd,  qflx_ice,  &
-     &                     qsfc_ocn,  qsfc_lnd,  qsfc_ice
+     &                      znt_wat,   znt_lnd,   znt_ice,  &
+     &                      ust_wat,   ust_lnd,   ust_ice,  &
+     &                       cm_wat,    cm_lnd,    cm_ice,  &
+     &                       ch_wat,    ch_lnd,    ch_ice,  &
+     &                       rb_wat,    rb_lnd,    rb_ice,  &
+     &                   stress_wat,stress_lnd,stress_ice,  &
+     &                       fm_wat,    fm_lnd,    fm_ice,  &
+     &                       fh_wat,    fh_lnd,    fh_ice,  &
+     &                     fm10_wat,  fm10_lnd,  fm10_ice,  &
+     &                      fh2_wat,   fh2_lnd,   fh2_ice,  &
+     &                     hflx_wat,  hflx_lnd,  hflx_ice,  &
+     &                     qflx_wat,  qflx_lnd,  qflx_ice,  &
+     &                     qsfc_wat,  qsfc_lnd,  qsfc_ice
 
 !MYNN-2D
       real(kind=kind_phys), dimension(:), intent(in)    ::  &
@@ -227,14 +227,14 @@ SUBROUTINE mynnsfc_wrapper_run(            &
           mavail(i)=1.0
           !snowh(i)=snowd(i)*800. !mm -> m
           !znt_lnd(i)=znt_lnd(i)*0.01  !cm -> m
-          !znt_ocn(i)=znt_ocn(i)*0.01  !cm -> m
+          !znt_wat(i)=znt_wat(i)*0.01  !cm -> m
           !znt_ice(i)=znt_ice(i)*0.01  !cm -> m
           cpm(i)=cp
       enddo
 
       ! cm -> m
       where (dry) znt_lnd=znt_lnd*0.01
-      where (wet) znt_ocn=znt_ocn*0.01
+      where (wet) znt_wat=znt_wat*0.01
       where (icy) znt_ice=znt_ice*0.01
 
       ! qsfc ruc
@@ -255,15 +255,15 @@ SUBROUTINE mynnsfc_wrapper_run(            &
 !          write(0,*)"dz:",dz(1,1)," qsfc=",qsfc(1)," rmol:",rmol(1)
 !          write(0,*)"         land      water    ice"
 !          write(0,*)dry(1),wet(1),icy(1)
-!          write(0,*)"ust:",ust_lnd(1),ust_ocn(1),ust_ice(1)
-!          write(0,*)"Tsk:",tskin_lnd(1),tskin_ocn(1),tskin_ice(1)
-!          write(0,*)"Tsurf:",tsurf_lnd(1),tsurf_ocn(1),tsurf_ice(1)
-!          write(0,*)"Qsfc:",qsfc_lnd(1),qsfc_ocn(1),qsfc_ice(1)
-!          write(0,*)"sno:",snowh_lnd(1),snowh_ocn(1),snowh_ice(1)
-!          write(0,*)"znt:",znt_lnd(1),znt_ocn(1),znt_ice(1)
+!          write(0,*)"ust:",ust_lnd(1),ust_wat(1),ust_ice(1)
+!          write(0,*)"Tsk:",tskin_lnd(1),tskin_wat(1),tskin_ice(1)
+!          write(0,*)"Tsurf:",tsurf_lnd(1),tsurf_wat(1),tsurf_ice(1)
+!          write(0,*)"Qsfc:",qsfc_lnd(1),qsfc_wat(1),qsfc_ice(1)
+!          write(0,*)"sno:",snowh_lnd(1),snowh_wat(1),snowh_ice(1)
+!          write(0,*)"znt:",znt_lnd(1),znt_wat(1),znt_ice(1)
 !          !write(0,*)"HFX:",hfx(1)," qfx",qfx(1)
 !          write(0,*)"qsfc:",qsfc(1)," ps:",ps(1)
-!          write(0,*)"wspd:",wspd(1),"rb=",rb_ocn(1)
+!          write(0,*)"wspd:",wspd(1),"rb=",rb_wat(1)
 !          write(0,*)"delt=",delt," im=",im," levs=",levs
 !          write(0,*)"flag_init=",flag_init 
 !          write(0,*)"flag_restart=",flag_restart 
@@ -287,22 +287,22 @@ SUBROUTINE mynnsfc_wrapper_run(            &
     &        redrag=redrag,sfc_z0_type=sfc_z0_type,                           & !intent(in)
              itimestep=itimestep,iter=iter,                                   &
                          wet=wet,              dry=dry,              icy=icy, &  !intent(in)
-             tskin_ocn=tskin_ocn,  tskin_lnd=tskin_lnd,  tskin_ice=tskin_ice, &  !intent(in)
-             tsurf_ocn=tsurf_ocn,  tsurf_lnd=tsurf_lnd,  tsurf_ice=tsurf_ice, &  !intent(in)
-               qsfc_ocn=qsfc_ocn,    qsfc_lnd=qsfc_lnd,    qsfc_ice=qsfc_ice, &  !intent(in)
-             snowh_ocn=snowh_ocn,  snowh_lnd=snowh_lnd,  snowh_ice=snowh_ice, &  !intent(in)
-                 znt_ocn=znt_ocn,      znt_lnd=znt_lnd,      znt_ice=znt_ice, &  !intent(inout)
-                 ust_ocn=ust_ocn,      ust_lnd=ust_lnd,      ust_ice=ust_ice, &  !intent(inout)
-                   cm_ocn=cm_ocn,        cm_lnd=cm_lnd,        cm_ice=cm_ice, &  !intent(inout)
-                   ch_ocn=ch_ocn,        ch_lnd=ch_lnd,        ch_ice=ch_ice, &  !intent(inout)
-                   rb_ocn=rb_ocn,        rb_lnd=rb_lnd,        rb_ice=rb_ice, &  !intent(inout)
-           stress_ocn=stress_ocn,stress_lnd=stress_lnd,stress_ice=stress_ice, &  !intent(inout)
-                   fm_ocn=fm_ocn,        fm_lnd=fm_lnd,        fm_ice=fm_ice, &  !intent(inout)
-                   fh_ocn=fh_ocn,        fh_lnd=fh_lnd,        fh_ice=fh_ice, &  !intent(inout)
-               fm10_ocn=fm10_ocn,    fm10_lnd=fm10_lnd,    fm10_ice=fm10_ice, &  !intent(inout)
-                 fh2_ocn=fh2_ocn,      fh2_lnd=fh2_lnd,      fh2_ice=fh2_ice, &  !intent(inout)
-               hflx_ocn=hflx_ocn,    hflx_lnd=hflx_lnd,    hflx_ice=hflx_ice, &
-               qflx_ocn=qflx_ocn,    qflx_lnd=qflx_lnd,    qflx_ice=qflx_ice, &
+             tskin_wat=tskin_wat,  tskin_lnd=tskin_lnd,  tskin_ice=tskin_ice, &  !intent(in)
+             tsurf_wat=tsurf_wat,  tsurf_lnd=tsurf_lnd,  tsurf_ice=tsurf_ice, &  !intent(in)
+               qsfc_wat=qsfc_wat,    qsfc_lnd=qsfc_lnd,    qsfc_ice=qsfc_ice, &  !intent(in)
+             snowh_wat=snowh_wat,  snowh_lnd=snowh_lnd,  snowh_ice=snowh_ice, &  !intent(in)
+                 znt_wat=znt_wat,      znt_lnd=znt_lnd,      znt_ice=znt_ice, &  !intent(inout)
+                 ust_wat=ust_wat,      ust_lnd=ust_lnd,      ust_ice=ust_ice, &  !intent(inout)
+                   cm_wat=cm_wat,        cm_lnd=cm_lnd,        cm_ice=cm_ice, &  !intent(inout)
+                   ch_wat=ch_wat,        ch_lnd=ch_lnd,        ch_ice=ch_ice, &  !intent(inout)
+                   rb_wat=rb_wat,        rb_lnd=rb_lnd,        rb_ice=rb_ice, &  !intent(inout)
+           stress_wat=stress_wat,stress_lnd=stress_lnd,stress_ice=stress_ice, &  !intent(inout)
+                   fm_wat=fm_wat,        fm_lnd=fm_lnd,        fm_ice=fm_ice, &  !intent(inout)
+                   fh_wat=fh_wat,        fh_lnd=fh_lnd,        fh_ice=fh_ice, &  !intent(inout)
+               fm10_wat=fm10_wat,    fm10_lnd=fm10_lnd,    fm10_ice=fm10_ice, &  !intent(inout)
+                 fh2_wat=fh2_wat,      fh2_lnd=fh2_lnd,      fh2_ice=fh2_ice, &  !intent(inout)
+               hflx_wat=hflx_wat,    hflx_lnd=hflx_lnd,    hflx_ice=hflx_ice, &
+               qflx_wat=qflx_wat,    qflx_lnd=qflx_lnd,    qflx_ice=qflx_ice, &
              ch=ch,CHS=chs,CHS2=chs2,CQS2=cqs2,CPM=cpm,                       &
              ZNT=znt,USTM=ustm,ZOL=zol,MOL=mol,RMOL=rmol,                     &
              psim=psim,psih=psih,                                             &
@@ -330,13 +330,13 @@ SUBROUTINE mynnsfc_wrapper_run(            &
         !   !evap(i)=QFX(i)   !or /rho ??
         !   ! DH* note - this could be automated (CCPP knows how to convert m to cm)
         !   znt_lnd(i)=znt_lnd(i)*100.   !m -> cm
-        !   znt_ocn(i)=znt_ocn(i)*100.
+        !   znt_wat(i)=znt_wat(i)*100.
         !   znt_ice(i)=znt_ice(i)*100.
         !enddo
 
         ! m -> cm
         where (dry) znt_lnd=znt_lnd*100.
-        where (wet) znt_ocn=znt_ocn*100.
+        where (wet) znt_wat=znt_wat*100.
         where (icy) znt_ice=znt_ice*100.
 
 !      if (lprnt) then
@@ -344,17 +344,17 @@ SUBROUTINE mynnsfc_wrapper_run(            &
 !         write(0,*)"finished with mynn_surface layer; output:"
 !         write(0,*)"         land      water    ice"
 !         write(0,*)dry(1),wet(1),icy(1)
-!         write(0,*)"ust:",ust_lnd(1),ust_ocn(1),ust_ice(1)
-!         write(0,*)"Tsk:",tskin_lnd(1),tskin_ocn(1),tskin_ice(1)
-!         write(0,*)"Tsurf:",tsurf_lnd(1),tsurf_ocn(1),tsurf_ice(1)
-!         write(0,*)"Qsfc:",qsfc_lnd(1),qsfc_ocn(1),qsfc_ice(1)
-!         write(0,*)"sno:",snowh_lnd(1),snowh_ocn(1),snowh_ice(1)
-!         write(0,*)"znt (cm):",znt_lnd(1),znt_ocn(1),znt_ice(1)
-!         write(0,*)"cm:",cm_lnd(1),cm_ocn(1),cm_ice(1)
-!         write(0,*)"ch:",ch_lnd(1),ch_ocn(1),ch_ice(1)
-!         write(0,*)"fm:",fm_lnd(1),fm_ocn(1),fm_ice(1)
-!         write(0,*)"fh:",fh_lnd(1),fh_ocn(1),fh_ice(1) 
-!         write(0,*)"rb:",rb_lnd(1),rb_ocn(1),rb_ice(1)
+!         write(0,*)"ust:",ust_lnd(1),ust_wat(1),ust_ice(1)
+!         write(0,*)"Tsk:",tskin_lnd(1),tskin_wat(1),tskin_ice(1)
+!         write(0,*)"Tsurf:",tsurf_lnd(1),tsurf_wat(1),tsurf_ice(1)
+!         write(0,*)"Qsfc:",qsfc_lnd(1),qsfc_wat(1),qsfc_ice(1)
+!         write(0,*)"sno:",snowh_lnd(1),snowh_wat(1),snowh_ice(1)
+!         write(0,*)"znt (cm):",znt_lnd(1),znt_wat(1),znt_ice(1)
+!         write(0,*)"cm:",cm_lnd(1),cm_wat(1),cm_ice(1)
+!         write(0,*)"ch:",ch_lnd(1),ch_wat(1),ch_ice(1)
+!         write(0,*)"fm:",fm_lnd(1),fm_wat(1),fm_ice(1)
+!         write(0,*)"fh:",fh_lnd(1),fh_wat(1),fh_ice(1) 
+!         write(0,*)"rb:",rb_lnd(1),rb_wat(1),rb_ice(1)
 !         write(0,*)"xland=",xland(1)," wstar:",wstar(1)
 !         write(0,*)"HFX:",hfx(1)," qfx:",qfx(1)
 !         write(0,*)"HFLX:",hflx(1)," evap:",evap(1)
