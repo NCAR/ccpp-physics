@@ -547,45 +547,85 @@ module mp_thompson
 
          !> - Call mp_gt_driver() with or without aerosols
          if (is_aerosol_aware) then
-            call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
-                              nc=nc, nwfa=nwfa, nifa=nifa, nwfa2d=nwfa2d, nifa2d=nifa2d,     &
-                              tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtp,                        &
-                              rainnc=rain_mp, rainncv=delta_rain_mp,                         &
-                              snownc=snow_mp, snowncv=delta_snow_mp,                         &
-                              icenc=ice_mp, icencv=delta_ice_mp,                             &
-                              graupelnc=graupel_mp, graupelncv=delta_graupel_mp, sr=sr,      &
-                              refl_10cm=refl_10cm,                                           &
-                              diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
-                              re_cloud=re_cloud, re_ice=re_ice, re_snow=re_snow,             &
-                              has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
-                              rand_perturb_on=rand_perturb_on, kme_stoch=kme_stoch,          &
-                              ! DH* 2020-06-05 not passing this optional argument, see
-                              !       comment in module_mp_thompson.F90 / mp_gt_driver
-                              !rand_pert=rand_pert,                                          &
-                              ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
-                              ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
-                              its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
-                              errmsg=errmsg, errflg=errflg, reset=reset)
-
+            if (do_effective_radii) then
+               call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
+                                 nc=nc, nwfa=nwfa, nifa=nifa, nwfa2d=nwfa2d, nifa2d=nifa2d,     &
+                                 tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtp,                        &
+                                 rainnc=rain_mp, rainncv=delta_rain_mp,                         &
+                                 snownc=snow_mp, snowncv=delta_snow_mp,                         &
+                                 icenc=ice_mp, icencv=delta_ice_mp,                             &
+                                 graupelnc=graupel_mp, graupelncv=delta_graupel_mp, sr=sr,      &
+                                 refl_10cm=refl_10cm,                                           &
+                                 diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
+                                 re_cloud=re_cloud, re_ice=re_ice, re_snow=re_snow,             &
+                                 has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
+                                 rand_perturb_on=rand_perturb_on, kme_stoch=kme_stoch,          &
+                                 ! DH* 2020-06-05 not passing this optional argument, see
+                                 !       comment in module_mp_thompson.F90 / mp_gt_driver
+                                 !rand_pert=rand_pert,                                          &
+                                 ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
+                                 ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
+                                 its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
+                                 errmsg=errmsg, errflg=errflg, reset=reset)
+            else
+               call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
+                                 nc=nc, nwfa=nwfa, nifa=nifa, nwfa2d=nwfa2d, nifa2d=nifa2d,     &
+                                 tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtp,                        &
+                                 rainnc=rain_mp, rainncv=delta_rain_mp,                         &
+                                 snownc=snow_mp, snowncv=delta_snow_mp,                         &
+                                 icenc=ice_mp, icencv=delta_ice_mp,                             &
+                                 graupelnc=graupel_mp, graupelncv=delta_graupel_mp, sr=sr,      &
+                                 refl_10cm=refl_10cm,                                           &
+                                 diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
+                                 has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
+                                 rand_perturb_on=rand_perturb_on, kme_stoch=kme_stoch,          &
+                                 ! DH* 2020-06-05 not passing this optional argument, see
+                                 !       comment in module_mp_thompson.F90 / mp_gt_driver
+                                 !rand_pert=rand_pert,                                          &
+                                 ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
+                                 ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
+                                 its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
+                                 errmsg=errmsg, errflg=errflg, reset=reset)
+            end if
          else
-            call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
-                              tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtp,                        &
-                              rainnc=rain_mp, rainncv=delta_rain_mp,                         &
-                              snownc=snow_mp, snowncv=delta_snow_mp,                         &
-                              icenc=ice_mp, icencv=delta_ice_mp,                             &
-                              graupelnc=graupel_mp, graupelncv=delta_graupel_mp, sr=sr,      &
-                              refl_10cm=refl_10cm,                                           &
-                              diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
-                              re_cloud=re_cloud, re_ice=re_ice, re_snow=re_snow,             &
-                              has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
-                              rand_perturb_on=rand_perturb_on, kme_stoch=kme_stoch,          &
-                              ! DH* 2020-06-05 not passing this optional argument, see
-                              !       comment in module_mp_thompson.F90 / mp_gt_driver
-                              !rand_pert=rand_pert,                                          &
-                              ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
-                              ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
-                              its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
-                              errmsg=errmsg, errflg=errflg, reset=reset)
+            if (do_effective_radii) then
+               call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
+                                 tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtp,                        &
+                                 rainnc=rain_mp, rainncv=delta_rain_mp,                         &
+                                 snownc=snow_mp, snowncv=delta_snow_mp,                         &
+                                 icenc=ice_mp, icencv=delta_ice_mp,                             &
+                                 graupelnc=graupel_mp, graupelncv=delta_graupel_mp, sr=sr,      &
+                                 refl_10cm=refl_10cm,                                           &
+                                 diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
+                                 re_cloud=re_cloud, re_ice=re_ice, re_snow=re_snow,             &
+                                 has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
+                                 rand_perturb_on=rand_perturb_on, kme_stoch=kme_stoch,          &
+                                 ! DH* 2020-06-05 not passing this optional argument, see
+                                 !       comment in module_mp_thompson.F90 / mp_gt_driver
+                                 !rand_pert=rand_pert,                                          &
+                                 ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
+                                 ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
+                                 its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
+                                 errmsg=errmsg, errflg=errflg, reset=reset)
+            else
+               call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
+                                 tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtp,                        &
+                                 rainnc=rain_mp, rainncv=delta_rain_mp,                         &
+                                 snownc=snow_mp, snowncv=delta_snow_mp,                         &
+                                 icenc=ice_mp, icencv=delta_ice_mp,                             &
+                                 graupelnc=graupel_mp, graupelncv=delta_graupel_mp, sr=sr,      &
+                                 refl_10cm=refl_10cm,                                           &
+                                 diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
+                                 has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
+                                 rand_perturb_on=rand_perturb_on, kme_stoch=kme_stoch,          &
+                                 ! DH* 2020-06-05 not passing this optional argument, see
+                                 !       comment in module_mp_thompson.F90 / mp_gt_driver
+                                 !rand_pert=rand_pert,                                          &
+                                 ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
+                                 ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
+                                 its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
+                                 errmsg=errmsg, errflg=errflg, reset=reset)
+            end if
          end if
          if (errflg/=0) return
 
