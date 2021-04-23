@@ -71,14 +71,6 @@
   type = logical
   intent = in
   optional = F
-[lmfdeep2]
-  standard_name = flag_for_scale_aware_mass_flux_convection
-  long_name = flag for some scale-aware mass-flux convection scheme active
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
 [ltaerosol]
   standard_name = flag_for_aerosol_physics
   long_name = flag for aerosol physics
