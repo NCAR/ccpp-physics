@@ -114,6 +114,7 @@ contains
             sources,                         & ! IN  - source function
             sfc_emiss_byband,                & ! IN  - surface emissivity in each LW band
             flux_clrsky,                     & ! OUT - Fluxes
+            n_gauss_angles = nGauss_angles,  & ! IN  - Number of angles in Gaussian quadrature
             lw_Ds = lw_Ds))
 
        ! Store fluxes
