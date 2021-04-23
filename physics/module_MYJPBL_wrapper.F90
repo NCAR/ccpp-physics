@@ -111,7 +111,7 @@
 !             dudt, dvdt, dtdt, dkt
       real(kind=kind_phys),dimension(im,levs),intent(inout) :: &
              dudt, dvdt, dtdt
-      real(kind=kind_phys),dimension(im,levs-1),intent(out) :: &
+      real(kind=kind_phys),dimension(im,levs),intent(out)   :: &
              dkt
       real(kind=kind_phys),dimension(:,:),intent(inout)     :: &
              du3dt_PBL, dv3dt_PBL, dt3dt_PBL, dq3dt_PBL

@@ -538,8 +538,7 @@
           tem  = prsl(i,1) / (rd*t1(i)*(one+fvirt*max(q1(i), qmin)))
           ushfsfci(i) = -cp * tem * hflx(i) ! upward sensible heat flux
         enddo
-        ! dkt_cpl has dimensions (1:im,1:levs), but dkt has (1:im,1:levs-1)
-        dkt_cpl(1:im,1:levs-1) = dkt(1:im,1:levs-1)
+        dkt_cpl(1:im,1:levs) = dkt(1:im,1:levs)
       endif
 
 

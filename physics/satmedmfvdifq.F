@@ -110,7 +110,7 @@
      &                     dtsfc(im),     dqsfc(im),                    &
      &                     hpbl(im)
       real(kind=kind_phys), intent(out) ::                              &
-     &                     dkt(im,km-1), dku(im,km-1)
+     &                     dkt(im,km), dku(im,km)
 !
       logical, intent(in)  :: dspheat
       character(len=*), intent(out) :: errmsg
