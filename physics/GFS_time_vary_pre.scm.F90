@@ -111,7 +111,7 @@
         end if
 
         !--- jdat is being updated directly inside of the time integration
-        !--- loop of gmtb_scm.F90
+        !--- loop of scm.F90
         !--- update calendars and triggers
         rinc(1:5)   = 0
         call w3difdat(jdat,idat,4,rinc)

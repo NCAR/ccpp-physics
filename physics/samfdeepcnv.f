@@ -87,8 +87,8 @@
       real(kind=kind_phys), dimension(:), intent(in) :: fscav
       logical, intent(in)  :: hwrf_samfdeep
       real(kind=kind_phys), intent(in) :: nthresh
-      real(kind=kind_phys), intent(in) :: ca_deep(im)
-      real(kind=kind_phys), intent(out) :: rainevap(im)
+      real(kind=kind_phys), dimension(:), intent(in)  :: ca_deep
+      real(kind=kind_phys), dimension(:), intent(out) :: rainevap
       logical, intent(in)  :: do_ca,ca_closure,ca_entr,ca_trigger
 
       integer, intent(inout)  :: kcnv(im)
