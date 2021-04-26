@@ -476,8 +476,8 @@ contains
 
           q0 = max( q1(i), qmin )
           virtfac = one + rvrdm1 * q0
-          tv1 = t1(i) * virtfac
 
+          tv1 = t1(i) * virtfac ! Virtual temperature in middle of lowest layer
           if(thsfc_loc) then ! Use local potential temperature
             thv1 = t1(i) * prslki(i) * virtfac  ! Theta-v at lowest level
             tvs  = half * (tsfc(i)+tsurf) * virtfac
