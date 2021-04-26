@@ -908,6 +908,14 @@
   type = logical
   intent = in
   optional = F
+[thsfc_loc]
+  standard_name = flag_for_reference_pressure_theta
+  long_name = flag for reference pressure in theta calculation
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [islmsk]
   standard_name = sea_land_ice_mask
   long_name = sea/land/ice mask (=0/1/2)
