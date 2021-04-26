@@ -531,6 +531,24 @@
   kind = kind_phys
   intent = out
   optional = F
+[dkt]
+  standard_name = atmosphere_heat_diffusivity
+  long_name = diffusivity for heat
+  units = m2 s-1
+  dimensions = (horizontal_loop_extent,vertical_dimension_minus_one)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[dku]
+  standard_name = atmosphere_momentum_diffusivity
+  long_name = diffusivity for momentum
+  units = m2 s-1
+  dimensions = (horizontal_loop_extent,vertical_dimension_minus_one)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
 [kinver]
   standard_name = index_of_highest_temperature_inversion
   long_name = index of highest temperature inversion
