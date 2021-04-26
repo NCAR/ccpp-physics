@@ -382,7 +382,7 @@ contains
       ep1d_lnd, ep1d_ice, weasd, weasd_wat, weasd_lnd, weasd_ice, snowd, snowd_wat, snowd_lnd, snowd_ice, tprcp, tprcp_wat,       &
       tprcp_lnd, tprcp_ice, evap, evap_wat, evap_lnd, evap_ice, hflx, hflx_wat, hflx_lnd, hflx_ice, qss, qss_wat, qss_lnd,        &
       qss_ice, tsfc, tsfco, tsfcl, tsfc_wat, tsfc_lnd, tsfc_ice, tisfc, tice, hice, cice, min_seaice, tiice, stc,                 &
-      grav, prslki, z1, ztmax_wat, ztmax_lnd, ztmax_ice, errmsg, errflg)
+      grav, prsik1, prslk1, prslki, z1, ztmax_wat, ztmax_lnd, ztmax_ice, errmsg, errflg)
 
       implicit none
 
@@ -412,7 +412,8 @@ contains
       ! Additional data needed for calling "stability"
       logical,                            intent(in   ) :: thsfc_loc
       real(kind=kind_phys),               intent(in   ) :: grav
-      real(kind=kind_phys), dimension(:), intent(in   ) :: prslki, z1, ztmax_wat, ztmax_lnd, ztmax_ice
+      real(kind=kind_phys), dimension(:), intent(in   ) :: prsik1, prslk1, prslki, z1
+      real(kind=kind_phys), dimension(:), intent(in   ) :: ztmax_wat, ztmax_lnd, ztmax_ice
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
