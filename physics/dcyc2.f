@@ -194,8 +194,7 @@
      &     )
 !
       use machine,         only : kind_phys
-      use physcons,        only : con_pi, con_sbc
-      use mo_heating_rates,only : compute_heating_rate
+      use physcons,        only : con_pi, con_sbc, con_cp, con_g
       use rrtmgp_aux,      only : cmp_tlev
       implicit none
 !
@@ -389,8 +388,13 @@
          !
          ! Compute new heating rate (within each layer).
          !
-         errmsg = compute_heating_rate(flxlwup_adj, flux2D_lwDOWN,      &
-     &                                 p_lev, htrlw)
+         do k = 1, levs
+            htrlw(1:im,k) =                                             &
+     &           (flxlwup_adj(1:im,k+1)  - flxlwup_adj(1:im,k) -        &
+     &           flux2D_lwDOWN(1:im,k+1) + flux2D_lwDOWN(1:im,k)) *     &
+     &           con_g / (con_cp * (p_lev(1:im,k+1) - p_lev(1:im,k)))
+         enddo
+
          !
          ! Add radiative heating rates to physics heating rate
          !
