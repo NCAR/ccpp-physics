@@ -5,14 +5,46 @@
 
 !> This module contains the CCPP-compliant zhao_carr_gscond scheme.
       module zhaocarr_gscond
-      contains
+
+        implicit none
+        public :: zhaocarr_gscond_init, zhaocarr_gscond_run,            &
+     &            zhaocarr_gscond_finalize
+        private
+        logical :: is_initialized = .False.
+      contains      
 
 
 ! \brief Brief description of the subroutine
 !
 !> \section arg_table_gscond_init  Argument Table
 !!
-       subroutine zhaocarr_gscond_init
+       subroutine zhaocarr_gscond_init (imp_physics,                    &
+     &                                 imp_physics_zhao_carr,           &
+     &                                  errmsg, errflg)
+        implicit none
+
+        ! Interface variables
+         integer,              intent(in   ) :: imp_physics
+         integer,              intent(in   ) :: imp_physics_zhao_carr
+         ! CCPP error handling
+         character(len=*),          intent(  out) :: errmsg
+         integer,                   intent(  out) :: errflg
+
+         ! Initialize the CCPP error handling variables
+         errmsg = ''
+         errflg = 0
+
+         if (is_initialized) return
+
+         ! Consistency checks
+         if (imp_physics/=imp_physics_zhao_carr) then
+            write(errmsg,'(*(a))') "Logic error: namelist choice of     &
+     &                  microphysics is different from Zhao-Carr MP"
+            errflg = 1
+            return
+         end if
+
+         is_initialized = .true.
        end subroutine zhaocarr_gscond_init
 
 ! \brief Brief description of the subroutine
