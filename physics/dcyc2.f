@@ -15,10 +15,10 @@
       public :: dcyc2t3_init, dcyc2t3_run, dcyc2t3_finalize
 
       contains
-      
+
       subroutine dcyc2t3_init()
       end subroutine dcyc2t3_init
-      
+
       subroutine dcyc2t3_finalize()
       end subroutine dcyc2t3_finalize
 
@@ -322,7 +322,7 @@
          else
 !!  - adjust \a sfc downward LW flux to account for t changes in the lowest model layer.
 !! compute 4th power of the ratio of \c tf in the lowest model layer over the mean value \c tsflw.
-            if (dry(i)) then
+           if (dry(i)) then
              tem2 = tsfc_lnd(i) * tsfc_lnd(i)
              adjsfculw_lnd(i) =  sfcemis_lnd(i) * con_sbc * tem2 * tem2
      &                        + (one - sfcemis_lnd(i)) * adjsfcdlw(i)

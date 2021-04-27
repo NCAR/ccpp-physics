@@ -108,14 +108,23 @@ contains
     ! Call RTE solver
     if (doLWclrsky) then
        call check_error_msg('rrtmgp_lw_rte_run_opt_angle',lw_gas_props%compute_optimal_angles(lw_optical_props_clrsky,lw_Ds))
-       call check_error_msg('rrtmgp_lw_rte_run',rte_lw(           &
-            lw_optical_props_clrsky,         & ! IN  - optical-properties
-            top_at_1,                        & ! IN  - veritcal ordering flag
-            sources,                         & ! IN  - source function
-            sfc_emiss_byband,                & ! IN  - surface emissivity in each LW band
-            flux_clrsky,                     & ! OUT - Fluxes
-            n_gauss_angles = nGauss_angles,  & ! IN  - Number of angles in Gaussian quadrature
-            lw_Ds = lw_Ds))
+       if (nGauss_angles .gt. 1) then
+          call check_error_msg('rrtmgp_lw_rte_run',rte_lw(           &
+               lw_optical_props_clrsky,         & ! IN  - optical-properties
+               top_at_1,                        & ! IN  - veritcal ordering flag
+               sources,                         & ! IN  - source function
+               sfc_emiss_byband,                & ! IN  - surface emissivity in each LW band
+               flux_clrsky,                     & ! OUT - Fluxes
+               n_gauss_angles = nGauss_angles))   ! IN  - Number of angles in Gaussian quadrature
+       else
+          call check_error_msg('rrtmgp_lw_rte_run',rte_lw(           &
+               lw_optical_props_clrsky,         & ! IN  - optical-properties
+               top_at_1,                        & ! IN  - veritcal ordering flag
+               sources,                         & ! IN  - source function
+               sfc_emiss_byband,                & ! IN  - surface emissivity in each LW band
+               flux_clrsky,                     & ! OUT - Fluxes
+               lw_Ds = lw_Ds))
+       endif
 
        ! Store fluxes
        fluxlwUP_clrsky   = sum(flux_clrsky%bnd_flux_up,dim=3)
