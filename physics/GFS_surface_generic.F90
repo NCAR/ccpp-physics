@@ -209,7 +209,7 @@
 !> \section arg_table_GFS_surface_generic_post_run Argument Table
 !! \htmlinclude GFS_surface_generic_post_run.html
 !!
-      subroutine GFS_surface_generic_post_run (im, cplflx, cplwav, lssav, icy, wet, dtf, ep1d, gflx, tgrs_1, qgrs_1, ugrs_1, vgrs_1,&
+      subroutine GFS_surface_generic_post_run (im, cplflx, cplgocart, cplwav, lssav, icy, wet, dtf, ep1d, gflx, tgrs_1, qgrs_1, ugrs_1, vgrs_1,&
         adjsfcdlw, adjsfcdsw, adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd, adjsfculw, adjsfculw_wat, adjnirbmu, adjnirdfu,           &
         adjvisbmu, adjvisdfu,t2m, q2m, u10m, v10m, tsfc, tsfc_wat, pgr, xcosz, evbs, evcw, trans, sbsno, snowc, snohf,              &
         epi, gfluxi, t1, q1, u1, v1, dlwsfci_cpl, dswsfci_cpl, dlwsfc_cpl, dswsfc_cpl, dnirbmi_cpl, dnirdfi_cpl, dvisbmi_cpl,       &
@@ -221,7 +221,7 @@
         implicit none
 
         integer,                                intent(in) :: im
-        logical,                                intent(in) :: cplflx, cplwav, lssav
+        logical,                                intent(in) :: cplflx, cplgocart, cplwav, lssav
         logical, dimension(im),                 intent(in) :: icy, wet
         real(kind=kind_phys),                   intent(in) :: dtf
 
@@ -274,7 +274,7 @@
           v1(i)     = vgrs_1(i)
         enddo
 
-        if (cplflx .or. cplwav) then
+        if (cplflx .or. cplgocart .or. cplwav) then
           do i=1,im
             u10mi_cpl(i) = u10m(i)
             v10mi_cpl(i) = v10m(i)
