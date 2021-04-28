@@ -381,10 +381,14 @@ c
         enddo
       enddo
 !>  - Initialize diffusion coefficients to 0 and calculate the total radiative heating rate (dku, dkt, radx)
-      do k = 1,km1
+      do k = 1,km
         do i = 1,im
           dku(i,k)  = 0.
           dkt(i,k)  = 0.
+        enddo
+      enddo
+      do k = 1,km1
+        do i = 1,im
           dktx(i,k) = 0.
           cku(i,k)  = 0.
           ckt(i,k)  = 0.

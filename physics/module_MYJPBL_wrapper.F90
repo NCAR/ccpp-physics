@@ -157,7 +157,6 @@
      &        ,rho,qfc1,gdx,xkzm_hx,xkzm_mx,tx1, tx2
 !      real(kind=kind_phys), dimension(im,levs,ntrac) ::    &
 !     &        qgrs_myj
-      real(kind=kind_phys),dimension(im,levs) :: dkt2
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -553,12 +552,12 @@
 !         end do
       end do
 
-      dkt2=0.
+      dkt=0.
       do k=1,levs
          k1=levs-k+1
          do i=1,im
-!            dkt2(i,k)=max(xcofh(i,k1),xkzo(i,k))
-           dkt2(i,k)=xcofh(i,k1)
+!            dkt(i,k)=max(xcofh(i,k1),xkzo(i,k))
+           dkt(i,k)=xcofh(i,k1)
          end do
       end do
       if(ntke.gt.0)then
@@ -662,7 +661,7 @@
                    q2(i,k)
              end do
              do k=1,levs
-                print*,'xcofh,el_myj,dkt2=',k,xcofh(i,k),el_myj(i,k),dkt2(i,k)
+                print*,'xcofh,el_myj,dkt=',k,xcofh(i,k),el_myj(i,k),dkt(i,k)
              end do
          end if
 
@@ -804,9 +803,6 @@
 !          print*,"===Finished with myj_bl_driver; output:"
 !          print*
 !       endif
-
-      ! External dkt has dimensions (1:im,1:levs-1)
-      dkt(1:im,1:levs-1) = dkt2(1:im,1:levs-1)
 
   END SUBROUTINE myjpbl_wrapper_run
 

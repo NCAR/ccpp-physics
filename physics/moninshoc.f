@@ -70,7 +70,7 @@
       real(kind=kind_phys), dimension(:),      intent(out) :: dusfc,
      &  dvsfc, dtsfc, dqsfc, hpbl
       real(kind=kind_phys), dimension(:,:),   intent(out) :: prnum
-      real(kind=kind_phys), dimension(:,:), intent(out) :: dkt
+      real(kind=kind_phys), dimension(:,:),   intent(out) :: dkt
 
       character(len=*),                         intent(out) :: errmsg
       integer,                                  intent(out) :: errflg
@@ -119,6 +119,9 @@
 ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+!
+! Set intent(out) variables
+      dkt = zero
 !
 !-----------------------------------------------------------------------
 !
