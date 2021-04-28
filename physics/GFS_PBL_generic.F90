@@ -533,16 +533,6 @@
 
       endif ! nvdiff == ntrac
 
-      if (cplchm) then
-        do i = 1, im
-          tem  = prsl(i,1) / (rd*t1(i)*(one+fvirt*max(q1(i), qmin)))
-          ushfsfci(i) = -cp * tem * hflx(i) ! upward sensible heat flux
-        enddo
-        ! dkt_cpl has dimensions (1:im,1:levs), but dkt has (1:im,1:levs-1)
-        dkt_cpl(1:im,1:levs-1) = dkt(1:im,1:levs-1)
-      endif
-
-
 !  --- ...  coupling insertion
 
       if (cplflx) then
@@ -593,6 +583,26 @@
           endif ! Ocean only, NO LAKES
         enddo
       endif
+
+      if (cplchm) then
+        if (cplflx) then
+          do i = 1, im
+            if (oceanfrac(i) > zero) then
+              ushfsfci(i) = dtsfci_cpl(i)
+            else
+              rho = prsl(i,1) / (rd*t1(i)*(one+fvirt*max(q1(i), qmin)))
+              ushfsfci(i) = cp * rho * hflx(i)
+            end if
+          end do
+        else
+          do i = 1, im
+            rho = prsl(i,1) / (rd*t1(i)*(one+fvirt*max(q1(i), qmin)))
+            ushfsfci(i) = cp * rho * hflx(i)
+          end do
+        end if
+        ! dkt_cpl has dimensions (1:im,1:levs), but dkt has (1:im,1:levs-1)
+        dkt_cpl(1:im,1:levs-1) = dkt(1:im,1:levs-1)
+      end if
 
 !-------------------------------------------------------lssav if loop ----------
       if (lssav) then
