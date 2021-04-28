@@ -495,16 +495,21 @@ contains
 !===============================================================
 ! ORO-diag
 
-      dudt_ogw(:,:)  = 0. ; dvdt_ogw(:,:)=0. ; dudt_obl(:,:)=0. ; dvdt_obl(:,:)=0.
-      dudt_oss(:,:)  = 0. ; dvdt_oss(:,:)=0. ; dudt_ofd(:,:)=0. ; dvdt_ofd(:,:)=0.
+       if (do_ugwp_v1 .or. gwd_opt==33 .or. gwd_opt==22) then
+         dudt_ogw(:,:)= 0.; dvdt_ogw(:,:)=0.; dudt_obl(:,:)=0.; dvdt_obl(:,:)=0.
+         dudt_oss(:,:)= 0.; dvdt_oss(:,:)=0.; dudt_ofd(:,:)=0.; dvdt_ofd(:,:)=0.
+         du_ogwcol(:)=0. ; dv_ogwcol(:)=0. ; du_oblcol(:)=0. ; dv_oblcol(:)=0.
+         du_osscol(:)=0. ; dv_osscol(:)=0. ;du_ofdcol(:)=0.  ; dv_ofdcol(:)=0.
+       else
+         dudt_ogw(:,:)  = 0.
+       end if
 
-      dusfcg (:)  = 0.  ;  dvsfcg(:) =0.
-
-      du_ogwcol(:)=0. ; dv_ogwcol(:)=0. ; du_oblcol(:)=0. ; dv_oblcol(:)=0.
-      du_osscol(:)=0. ; dv_osscol(:)=0. ;du_ofdcol(:)=0.  ; dv_ofdcol(:)=0.
+       dusfcg (:)  = 0.  ;  dvsfcg(:) =0.
 
 !
-       dudt_ngw(:,:)=0. ; dvdt_ngw(:,:)=0. ; dtdt_ngw(:,:)=0. ; kdis_ngw(:,:)=0.
+       if (do_ugwp_v1) then
+         dudt_ngw(:,:)=0.; dvdt_ngw(:,:)=0.; dtdt_ngw(:,:)=0.; kdis_ngw(:,:)=0.
+       end if
 
 ! ngw+ogw - diag
 
@@ -702,16 +707,23 @@ contains
 !
 ! get total sso-OGW + NGW
 !
-     dudt_gw =  Pdudt +dudt_ngw
-     dvdt_gw =  Pdvdt +dvdt_ngw
-     dtdt_gw =  Pdtdt +dtdt_ngw
-     kdis_gw =  Pkdis +kdis_ngw
+     if (do_ugwp_v1) then
+        dudt_gw =  Pdudt + dudt_ngw
+        dvdt_gw =  Pdvdt + dvdt_ngw
+        dtdt_gw =  Pdtdt + dtdt_ngw
+        kdis_gw =  Pkdis + kdis_ngw
+     else
+        dudt_gw =  Pdudt
+        dvdt_gw =  Pdvdt
+        dtdt_gw =  Pdtdt
+        kdis_gw =  Pkdis
+     end if
 !
 ! accumulate "tendencies" as in the GFS-ipd (pbl + ugwp + zero-RF)
 !
-     dudt  = dudt  + dudt_ngw
-     dvdt  = dvdt  + dvdt_ngw
-     dtdt  = dtdt  + dtdt_ngw
+     dudt  = dudt  + dudt_gw
+     dvdt  = dvdt  + dvdt_gw
+     dtdt  = dtdt  + dtdt_gw
 
     end subroutine ugwpv1_gsldrag_run
 !! @}

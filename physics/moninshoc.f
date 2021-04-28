@@ -66,11 +66,11 @@
       logical,                                  intent(in) :: ldiag3d, 
      &  qdiag3d, gen_tend
 
-      integer, dimension(:),                   intent(out) :: kpbl
-      real(kind=kind_phys), dimension(:),      intent(out) :: dusfc,
+      integer, dimension(:),                    intent(out) :: kpbl
+      real(kind=kind_phys), dimension(:),       intent(out) :: dusfc,
      &  dvsfc, dtsfc, dqsfc, hpbl
-      real(kind=kind_phys), dimension(:,:),   intent(out) :: prnum
-      real(kind=kind_phys), dimension(:,:),   intent(out) :: dkt
+      real(kind=kind_phys), dimension(:,:),     intent(out) :: prnum
+      real(kind=kind_phys), dimension(:,:),     intent(out) :: dkt
 
       character(len=*),                         intent(out) :: errmsg
       integer,                                  intent(out) :: errflg

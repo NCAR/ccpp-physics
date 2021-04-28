@@ -1,5 +1,7 @@
 !> \file GFS_rrtmg_setup.f90
 !! This file contains
+
+!> \defgroup GFS_rrtmg_setup_mod GFS RRTMG Scheme Setup
 module GFS_rrtmg_setup
 
    use physparam, only : isolar , ictmflg, ico2flg, ioznflg, iaerflg,&
@@ -38,9 +40,7 @@ module GFS_rrtmg_setup
 
    contains
 
-!> \defgroup GFS_rrtmg_setup GFS RRTMG Scheme Setup
-!! @{
-!! \section arg_table_GFS_rrtmg_setup_init Argument Table
+!> \section arg_table_GFS_rrtmg_setup_init Argument Table
 !! \htmlinclude GFS_rrtmg_setup_init.html
 !!
    subroutine GFS_rrtmg_setup_init (                          &
@@ -817,5 +817,4 @@ module GFS_rrtmg_setup
       end subroutine radupdate
 !-----------------------------------
 
-!! @}
 end module GFS_rrtmg_setup

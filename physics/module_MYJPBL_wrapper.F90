@@ -107,7 +107,7 @@
               phii, prsi
       real(kind=kind_phys),dimension(:,:),intent(in) ::      &
      &        ugrs, vgrs, tgrs, prsl
-!      real(kind=kind_phys),dimension(:,:),intent(inout)   :: &
+!      real(kind=kind_phys),dimension(:,:),intent(inout)  :: &
 !             dudt, dvdt, dtdt, dkt
       real(kind=kind_phys),dimension(:,:),intent(inout)   :: &
              dudt, dvdt, dtdt

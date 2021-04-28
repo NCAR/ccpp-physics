@@ -1,0 +1,52 @@
+/**
+\page SFC_MYNNSFL MYNN Surface Layer Scheme
+\section mynnsfclayer_descrip  Description
+
+The surface layer scheme controls the degree of coupling between the model surface and the atmosphere.
+Traditionally, surface layer schemes have been developed to be paired with certain PBL schemes, but this 
+pairing is too narrow-scoped, since the surface layer physics should be equally as integrated with the 
+land-surface model (LSM), modern gravity wave drag suites, and wave models. The expansion of model complexity,
+such as the inclusion of subgrid-scale landuse variations, vertically distributed sources of drag [i.e., wind 
+farm drag (Fitch et al. 2012 \cite fitch_et_al_2012 ), small-scale gravity wave drag (Steeneveld et al. 2008 \cite steeneveld_et_al_2008) and topographic form 
+drag (Beljaars et al. 2004) \cite beljaars_et_al_2004 ], requires that surface layer scheme be developed within a broader context so 
+assumptions made across all model components are physically consistent.
+
+The MYNN surface layer scheme was originally developed for the Mellor-Yamada-Nakanishi-Niino (MYNN)-Eddy Diffusivity-Mass
+Flux (EDMF) scheme (Nakanishi and Niino 2009 \cite NAKANISHI_2009, Olson et al. 2019 \cite olson_et_al_2019) and has been used in NOAA's operational
+Rapid Refresh (RAP; Benjamin et al. 2016 \cite Benjamin_2016 ) and High-Resolution Rapid Refresh (HRRR) forecast systems since 2014. During this time, the scheme has undergone significant development in tandem with other components of the
+forecast systems. More recently, several new features have been added in order to accommodate different 
+capabilities in the Common Community Physics Package (CCPP) (Heinzeller et al. 2019). This updated version of the 
+surface layer scheme is a candidate to be used in the Rapid Refresh Forecast System (RRFS), which is a component of
+NOAA's Unified Forecast System, and a successor to the RAP/HRRR forecast systems.
+
+The surface layer schemes in CCPP only compute transfer coefficients and pass them to other modules that 
+compute the surface fluxes and 2-m and 10-m diagnostics. Therefore, switches were added to bypass the calculation
+of surface fluxes and diagnostics for typical use, but kept as an option to used in idealized model configurations.
+
+The surface layer physics represented by the scheme utilizes traditional Monin-Obukhov stability theory (MOST)
+(Monin and Obukhov 1954 \cite monin_and_obukhov_1954 ), which is not novel, but still represents a respectable performance benchmark. This scheme
+is built in a modular sense, which allows for flexible testing of a variety of different subcomponents within
+the MOST-type bulk-flux algorithm. The specific subcomponents that exploit this modular design include the
+specification of the surface roughness lengths, the scalar roughness lengths, and the flux-profile relationships
+(a.k.a. stability functions). The configuration options for testing different forms of these subcomponents will
+be discussed below.
+
+\section intra_mynnsfc Intraphysics Communication
+
+The surface-layer scheme is call directly after the radiation and prior to the surface modules (land-surface, sea-ice, and sea-surface temperature 
+models). The surface layer scheme and the surface modules collectively calculate the necessary input for the boundary-layer schemes (beyond the 
+basic state variables): u*, z/L, surface heat and moisture fluxes.
+
+\ref arg_table_mynnsfc_wrapper_run
+
+\section gen_mynnsfclay MYNN Surface Layer Scheme General Algorithm
+
+\image html  MYNN-SFCLAY_call_order.png "Figure 1.The order of operations within the MYNN surface layer scheme (Courtesy of J.B. Olson)." width=10cm
+
+Within the MYNN surface layer scheme, there is a dependency check for the first timestep. If true, several arrays are initialized at every
+i point. This is done because (1) some variables are calculated in schemes called after the surface layer call and (2) some variables are used within
+iterative processes and may not be specified until later in the surface layer scheme. The main order of operations and hightlight relevant subroutines
+in sfclay1d_mynn().
+
+
+*/

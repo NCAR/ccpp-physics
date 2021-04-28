@@ -1,3 +1,5 @@
+!>\file ugwp_driver_v0.F
+
 !
 !=====================================================================
 !
@@ -792,7 +794,6 @@
        
         call oro_wam_2017(im, km, npt, ipt, kref, kdt, me, master,
      &       dtp, dxres, taub, u1, v1, t1, xn, yn, bnv2, ro, prsi,prsL,
-     &       con_g, con_omega,
      &       del, sigma, hprime, gamma, theta,
      &       sinlat, xlatd, taup, taud, pkdis)
      

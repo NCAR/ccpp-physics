@@ -2,6 +2,7 @@
 !!  This file contains the entire Relaxed Arakawa-Schubert convection
 !!  parameteriztion
 
+!>\defgroup rascnv_schm Relaxed Arakawa-Schubert Convection Scheme
       module rascnv
 
       USE machine , ONLY : kind_phys
@@ -103,6 +104,7 @@
 ! CCPP entry points for gfdl cloud microphysics
 ! -----------------------------------------------------------------------
 
+!>\ingroup rascnv_schm
 !>\brief The subroutine initializes rascnv
 !!
 !> \section arg_table_rascnv_init Argument Table
@@ -291,6 +293,7 @@
 !!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+!>\ingroup rascnv_schm
 !! \section arg_table_rascnv_run Argument Table
 !! \htmlinclude rascnv_run.html
 !!
@@ -1079,6 +1082,8 @@
 !
       RETURN
       end subroutine rascnv_run
+
+!>\ingroup rascnv_schm
       SUBROUTINE CLOUD(                                                 &
      &                  K, KP1, KD, NTRC, KBLMX, kblmn                  &
      &,                 FRACBL, MAX_NEG_BOUY, vsmooth, aw_scal          &
@@ -2705,6 +2710,7 @@
       RETURN
       end subroutine cloud
 
+!>\ingroup rascnv_schm
       SUBROUTINE DDRFT(                                                 &
      &                  K,   KP1, KD                                    &
      &,                 TLA, ALFIND, wcbase                             &
@@ -3981,6 +3987,7 @@
       RETURN
       end subroutine ddrft
 
+!>\ingroup rascnv_schm
       SUBROUTINE QSATCN(TT,P,Q,DQDT)
 !
       USE FUNCPHYS , ONLY : fpvs
@@ -4012,6 +4019,7 @@
       return
       end subroutine qsatcn
 
+!>\ingroup rascnv_schm
       SUBROUTINE ANGRAD(PRES, ALM,  AL2, TLA)
       implicit none
 
@@ -4062,6 +4070,7 @@
       RETURN
       end subroutine angrad
 
+!>\ingroup rascnv_schm
       SUBROUTINE SETQRP
       implicit none
 
@@ -4086,6 +4095,7 @@
       RETURN
       end subroutine setqrp
 
+!>\ingroup rascnv_schm
       SUBROUTINE QRABF(QRP,QRAF,QRBF)
       implicit none
 !
@@ -4102,6 +4112,7 @@
       RETURN
       end subroutine qrabf
 
+!>\ingroup rascnv_schm
       SUBROUTINE SETVTP
       implicit none
 
@@ -4122,6 +4133,7 @@
       RETURN
       end subroutine setvtp
 !
+!>\ingroup rascnv_schm
       real(kind=kind_phys) FUNCTION QRPF(QRP)
 !
       implicit none
@@ -4138,6 +4150,7 @@
       RETURN
       end function qrpf
 
+!>\ingroup rascnv_schm
       real(kind=kind_phys) FUNCTION VTPF(ROR)
 !
       implicit none
@@ -4152,6 +4165,7 @@
       RETURN
       end function vtpf
 
+!>\ingroup rascnv_schm
       real(kind=kind_phys) FUNCTION CLF(PRATE)
 !
       implicit none

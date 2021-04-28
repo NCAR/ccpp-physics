@@ -112,16 +112,15 @@
 
       real(kind=kind_phys), dimension(:),      intent(in   ) :: sr
       real(kind=kind_phys), dimension(:),      intent(inout) :: rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp,  &
-                                                                 srflag, cnvprcp, totprcp, totice, totsnw, totgrp, cnvprcpb, &
-                                                                 totprcpb, toticeb, totsnwb, totgrpb, rain_cpl, rainc_cpl,   &
-                                                                 snow_cpl, pwat
+                                                                srflag, cnvprcp, totprcp, totice, totsnw, totgrp, cnvprcpb, &
+                                                                totprcpb, toticeb, totsnwb, totgrpb, pwat
+      real(kind=kind_phys), dimension(:),      intent(inout) :: rain_cpl, rainc_cpl, snow_cpl
 
       real(kind=kind_phys), dimension(:,:),    intent(inout) :: dt3dt ! only if ldiag3d
       real(kind=kind_phys), dimension(:,:),    intent(inout) :: dq3dt ! only if ldiag3d and qdiag3d
 
       ! Stochastic physics / surface perturbations
-      real(kind=kind_phys), dimension(:),      intent(inout) :: drain_cpl
-      real(kind=kind_phys), dimension(:),      intent(inout) :: dsnow_cpl
+      real(kind=kind_phys), dimension(:),      intent(inout) :: drain_cpl, dsnow_cpl
 
       ! Rainfall variables previous time step
       integer, intent(in) :: lsm, lsm_ruc, lsm_noahmp
@@ -136,7 +135,7 @@
       real(kind=kind_phys), dimension(:),      intent(inout) :: dsnowprv
       real(kind=kind_phys), dimension(:),      intent(inout) :: dgraupelprv
 
-      real(kind=kind_phys),                    intent(in)    :: dtp
+      real(kind=kind_phys),                    intent(in)    :: dt
 
       ! CCPP error handling
       character(len=*), intent(out) :: errmsg

@@ -1,6 +1,7 @@
 !> \file GFS_surface_generic.F90
 !!  Contains code related to all GFS surface schemes.
 
+!>\defgroup mod_GFS_surface_generic_pre GFS Surface Generic Pre module
       module GFS_surface_generic_pre
 
       use machine, only: kind_phys

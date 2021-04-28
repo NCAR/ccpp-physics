@@ -1,5 +1,5 @@
-!>\file rrtmg_sw_post
-!! This file contains
+!>\file rrtmg_sw_post.F90
+!! This file contains GFS RRTMG scheme post.
       module rrtmg_sw_post
       contains
 

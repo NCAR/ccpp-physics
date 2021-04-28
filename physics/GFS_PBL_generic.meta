@@ -1327,9 +1327,9 @@
   optional = F
 [dkt]
   standard_name = atmosphere_heat_diffusivity
-  long_name = diffusivity for heat
+  long_name = atmospheric heat diffusivity
   units = m2 s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension_minus_one)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
