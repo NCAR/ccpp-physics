@@ -1954,6 +1954,15 @@
   kind = kind_phys
   intent = inout
   optional = F
+[landfrac]
+  standard_name = land_area_fraction
+  long_name = fraction of horizontal grid area occupied by land
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [slmsk]
   standard_name = sea_land_ice_mask_real
   long_name = landmask: sea/land/ice=0/1/2

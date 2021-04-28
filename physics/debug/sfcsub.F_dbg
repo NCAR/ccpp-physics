@@ -787,19 +787,18 @@
       num_threads = nthrds
 !
       lprnt = .false.
-!     do i=1,len
+      do i=1,len
 !       if (ifp .eq. 0 .and. rla(i) .gt. 80.0) print *,' rla=',rla(i)
 !    *,' rlo=',rlo(i)
-!       tem1 = abs(rla(i) + 66.35)
-!       tem2 = abs(rlo(i) - 109.01)
-!       if(tem1 < 0.10 .and. tem2 < 0.10) then
-!         lprnt = .true.
-!         iprnt = i
-!         print *,' lprnt=',lprnt,' iprnt=',iprnt
-!         print *,' rla(i)=',rla(i),' rlo(i)=',rlo(i)
-!       endif
-!     enddo
-
+        tem1 = abs(rla(i) + 66.35)
+        tem2 = abs(rlo(i) - 109.01)
+        if(tem1 < 0.10 .and. tem2 < 0.10) then
+          lprnt = .true.
+          iprnt = i
+          print *,' lprnt=',lprnt,' iprnt=',iprnt
+          print *,' rla(i)=',rla(i),' rlo(i)=',rlo(i)
+        endif
+      enddo
       if (ialb == 1) then
         kpdabs = kpdabs_1
         kpdalb = kpdalb_1
@@ -1149,8 +1148,7 @@
      &           deltsfc, lanom
      &,          imsk, jmsk, slmskh, rla, rlo, gausm, blnmsk, bltmsk,me
      &,          lprnt,iprnt,fnalbc2,ialb,tile_num_ch,i_index,j_index)
-
-!     if(lprnt) print *,'tsfclm=',tsfclm(iprnt),' tsfcl2=',tsfcl2(iprnt)
+      if(lprnt) print *,'tsfclm=',tsfclm(iprnt),' tsfcl2=',tsfcl2(iprnt)
 !
 !  scale surface roughness and albedo to model required units
 !
@@ -1225,8 +1223,8 @@
 !
       call setlsi(slmskw,aisclm,len,aicice,sliclm)
 
-!     if(lprnt) print *,' aisclm=',aisclm(iprnt),' sliclm='
-!    *,sliclm(iprnt),' slmskw=',slmskw(iprnt)
+      if(lprnt) print *,' aisclm=',aisclm(iprnt),' sliclm='
+     *,sliclm(iprnt),' slmskw=',slmskw(iprnt)
 !
 !     write(6,*) 'sliclm'
 !     znnt=1.
@@ -1475,8 +1473,7 @@
      &,          irtvmn,irtvmx,irtslp,irtabs, 
      &           imsk, jmsk, slmskh, rla, rlo, gausm, blnmsk, bltmsk
      &,          me, lanom)
-
-!     if(lprnt) print *,' tsfanl=',tsfanl(iprnt)
+      if(lprnt) print *,' tsfanl=',tsfanl(iprnt)
 !
 !  scale zor and alb to match forecast model units
 !
@@ -1570,8 +1567,8 @@
           aisanl(i) = acnanl(i)
         enddo
       endif
-!     if(lprnt) print *,' aisanl1=',aisanl(iprnt),' glacir='
-!    &,glacir(iprnt),' slmskw=',slmskw(iprnt)
+      if(lprnt) print *,' aisanl1=',aisanl(iprnt),' glacir='
+     &,glacir(iprnt),' slmskw=',slmskw(iprnt)
 !
       call qcsice(aisanl,glacir,amxice,aicice,aicsea,sllnd,slmskw,
      &            rla,rlo,len,me)
@@ -1579,8 +1576,8 @@
 !  set ocean/land/sea-ice mask
 !
       call setlsi(slmskw,aisanl,len,aicice,slianl)
-!     if(lprnt) print *,' aisanl=',aisanl(iprnt),' slianl='
-!    *,slianl(iprnt),' slmskw=',slmskw(iprnt)
+      if(lprnt) print *,' aisanl=',aisanl(iprnt),' slianl='
+     *,slianl(iprnt),' slmskw=',slmskw(iprnt)
 !
 !
       do k=1,lsoil
@@ -2011,8 +2008,8 @@
 !
 !...   update annual cycle in the sst guess..
 !
-!     if(lprnt) print *,'tsfclm=',tsfclm(iprnt),' tsfcl2=',tsfcl2(iprnt)
-!    *,' tsffcs=',tsffcs(iprnt),' slianl=',slianl(iprnt)
+      if(lprnt) print *,'tsfclm=',tsfclm(iprnt),' tsfcl2=',tsfcl2(iprnt)
+     *,' tsffcs=',tsffcs(iprnt),' slianl=',slianl(iprnt)
 
       do i=1,len
         if (sicanl(i) >= min_ice(i)) then
@@ -2045,15 +2042,14 @@
         write(6,*) '   merging'
         write(6,*) '=============='
       endif
-!     if(lprnt) print *,' tsffcs=',tsffcs(iprnt)
+      if(lprnt) print *,' tsffcs=',tsffcs(iprnt)
 !
       percrit = critp3
 !
 !  merge analysis and forecast.  note tg3, ais are not merged
 !
-!     if(lprnt) print *,' stcfcsbefmer=',stcfcs(iprnt,:)
-!     if(lprnt) print *,' stcanlbefmer=',stcanl(iprnt,:)
-
+      if(lprnt) print *,' stcfcsbefmer=',stcfcs(iprnt,:)
+      if(lprnt) print *,' stcanlbefmer=',stcanl(iprnt,:)
       call merge(len,lsoil,iy,im,id,ih,fh,deltsfc,
      &           slmskl,slmskw,sihfcs,sicfcs,
      &           vmnfcs,vmxfcs,slpfcs,absfcs, 
@@ -2080,10 +2076,10 @@
 
       call setzro(snoanl,epssno,len)
 
-!     if(lprnt) print *,' tanlm=',tsfanl(iprnt),' tfcsm=',tsffcs(iprnt)
-!     if(lprnt) print *,' sliam=',slianl(iprnt),' slifm=',slifcs(iprnt)
-!     if(lprnt) print *,' stcfcsmer=',stcfcs(iprnt,:)
-!     if(lprnt) print *,' stcanlmer=',stcanl(iprnt,:)
+      if(lprnt) print *,' tanlm=',tsfanl(iprnt),' tfcsm=',tsffcs(iprnt)
+      if(lprnt) print *,' sliam=',slianl(iprnt),' slifm=',slifcs(iprnt)
+      if(lprnt) print *,' stcfcsmer=',stcfcs(iprnt,:)
+      if(lprnt) print *,' stcanlmer=',stcanl(iprnt,:)
 
 !
 !  new ice/melted ice
@@ -2098,9 +2094,9 @@
      &            tsfomn,tsfimx,albimn,zorimx,tgice,
      &            rla,rlo,me)
 
-!     if(lprnt) print *,'tsfanl=',tsfanl(iprnt),' tsffcs=',tsffcs(iprnt)
-!     if(lprnt) print *,' slian=',slianl(iprnt),' slifn=',slifcs(iprnt)
-!     if(lprnt) print *,' stcan=',stcanl(iprnt,:)
+      if(lprnt) print *,'tsfanl=',tsfanl(iprnt),' tsffcs=',tsffcs(iprnt)
+      if(lprnt) print *,' slian=',slianl(iprnt),' slifn=',slifcs(iprnt)
+      if(lprnt) print *,' stcan=',stcanl(iprnt,:)
 !
 !  set tsfc to tsnow over snow
 !
@@ -2202,7 +2198,7 @@
 !
 !  foreward correction to tg3 and tsf at the last stage
 !
-!     if(lprnt) print *,' tsfbc=',tsfanl(iprnt)
+      if(lprnt) print *,' tsfbc=',tsfanl(iprnt)
       if (use_ufo) then
 !
 ! The tiled version of the substrate temperature is properly
@@ -2219,7 +2215,7 @@
         ztsfc = 0.
         call tsfcor(tsfanl,orog,slmskw,ztsfc,len,rlapse)
       endif
-!     if(lprnt) print *,' tsfaf=',tsfanl(iprnt)
+      if(lprnt) print *,' tsfaf=',tsfanl(iprnt)
 !
 !  check the final merged product
 !
@@ -2390,8 +2386,8 @@
           endif
         enddo
       enddo
-!     if(lprnt) print *,' stcfcs=',stcfcs(iprnt,:),'slifcs=',           &
-!    & slifcs(iprnt)
+      if(lprnt) print *,' stcfcs=',stcfcs(iprnt,:),'slifcs=',           &
+     & slifcs(iprnt)
       do j = 1,4
         do i = 1,len
           albfcs(i,j) = albanl(i,j)
@@ -2423,8 +2419,8 @@
               sicfcs(i) = sicanl(i)
               sihfcs(i) = sihnew
             endif
-!     if (lprnt .and. i == iprnt) write(0,*)' sicanl=',sicanl(i),       &
-!    &' sicfcs=',sicfcs(i),' siccanl=',sicanl(i),' sihfcs=',sihfcs(i)
+      if (lprnt .and. i == iprnt) write(0,*)' sicanl=',sicanl(i),       &
+     &' sicfcs=',sicfcs(i),' siccanl=',sicanl(i),' sihfcs=',sihfcs(i)
           else
             tsffcs(i) = tsfanl(i)
             sihfcs(i) = 0.0_kind_io8
@@ -2534,8 +2530,8 @@
          enddo
        end if
 !
-!     if(lprnt) print *,' tsffcsf=',tsffcs(iprnt)
-!     if(lprnt) print *,' stcfcsend=',stcfcs(iprnt,:)
+      if(lprnt) print *,' tsffcsf=',tsffcs(iprnt)
+      if(lprnt) print *,' stcfcsend=',stcfcs(iprnt,:)
       return
       end subroutine sfccycle 
 

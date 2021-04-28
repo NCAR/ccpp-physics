@@ -705,7 +705,7 @@
             lakefrac, min_seaice, min_lakeice, smc, slc, stc, smois, sh2o, tslb, tiice, tg3, tref,  &
             tsfc, tsfco, tisfc, hice, fice, facsf, facwf, alvsf, alvwf, alnsf, alnwf, zorli, zorll, &
             zorlo, weasd, slope, snoalb, canopy, vfrac, vtype, stype, shdmin, shdmax, snowd,        &
-            cv, cvb, cvt, oro, oro_uf, xlat_d, xlon_d, slmsk,                                       &
+            cv, cvb, cvt, oro, oro_uf, xlat_d, xlon_d, slmsk, landfrac,                             &
             do_ugwp_v1, jindx1_tau, jindx2_tau, ddy_j1tau, ddy_j2tau, tau_amf, errmsg, errflg)
 
          implicit none
@@ -742,7 +742,7 @@
          character(len=*),     intent(in)    :: input_nml_file(:)
          logical,              intent(in)    :: use_ufo, nst_anl, frac_grid
          real(kind_phys),      intent(in)    :: fhcyc, phour, lakefrac(:), min_seaice, min_lakeice,  &
-                                                xlat_d(:), xlon_d(:)
+                                                xlat_d(:), xlon_d(:), landfrac(:)
          real(kind_phys),      intent(inout) :: smc(:,:), slc(:,:), stc(:,:), smois(:,:), sh2o(:,:), &
                                       tslb(:,:), tiice(:,:), tg3(:), tref(:),                        &
                                       tsfc(:), tsfco(:), tisfc(:), hice(:), fice(:),                 &
@@ -881,7 +881,7 @@
            if (mod(kdt,nscyc) == 1) THEN
              call gcycle (me, nthrds, nx, ny, isc, jsc, nsst, tile_num, nlunit,       &
                  input_nml_file, lsoil, lsoil_lsm, kice, idate, ialb, isot, ivegsrc,  &
-                 use_ufo, nst_anl, fhcyc, phour, lakefrac, min_seaice, min_lakeice,   &
+                 use_ufo, nst_anl, fhcyc, phour, landfrac, lakefrac, min_seaice, min_lakeice,   &
                  frac_grid, smc, slc, stc, smois, sh2o, tslb, tiice, tg3, tref, tsfc, &
                  tsfco, tisfc, hice, fice, facsf, facwf, alvsf, alvwf, alnsf, alnwf,  &
                  zorli, zorll, zorlo, weasd, slope, snoalb, canopy, vfrac, vtype,     &

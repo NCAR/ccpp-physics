@@ -49,6 +49,7 @@
      &       snwdph, qsurf, snowmt, gflux, cmm, chh, evap, hflx,        &
      &       islmsk_cice,                                               &
 !    &       islmsk_cice, min_lakeice, min_seaice, oceanfrac,           &
+     &       xlon_d, xlat_d,                                            &
      &       errmsg, errflg
      &     )
 
@@ -159,6 +160,7 @@
       real (kind=kind_phys), dimension(im), intent(in) :: ps,           &
      &       t1, q1, sfcemis, dlwflx, sfcnsw, sfcdsw, srflag, cm, ch,   &
      &       prsl1, prslki, prsik1, prslk1, wind
+     &,      xlon_d,  xlat_d
 !    &       prsl1, prslki, prsik1, prslk1, wind, oceanfrac
 
 !     integer, dimension(im), intent(in) :: islimsk
@@ -207,6 +209,8 @@
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+
+      if (lprnt) write(0,*)' in sfc_sice tiice=',tiice(ipr,:)
 !
 !> - Set flag for sea-ice.
 
@@ -236,6 +240,7 @@
           endif
         enddo
       enddo
+      if (lprnt) write(0,*)' stsice=',stsice(ipr,:),' flag=',flag(ipr)
 
 !  --- ...  initialize variables. all units are supposedly m.k.s. unless specifie
 !           psurf is in pascals, wind is wind speed, theta1 is adiabatic surface
@@ -369,8 +374,9 @@
           endif
 
           if (stsice(i,1) < timin) then
-            print *,'warning: layer 1 ice temp is too low:',stsice(i,1)
+           write(0,*)'warning: layer 1 ice temp is too low:',stsice(i,1)
      &,             ' i=',i,' me=',me
+     &,' xlon_d=',xlon_d(i),' xlat_d=',xlat_d(i)
             stsice(i,1) = timin
             print *,'fix layer 1 ice temp: reset it to:',stsice(i,1)
           endif
@@ -591,6 +597,8 @@
           stsice(i,1) = min(stsice(i,1)-t0c, tfi0)     ! degc
           stsice(i,2) = min(stsice(i,2)-t0c, tfi0)     ! degc
 
+      if (lprnt .and. i == ipr) write(0,*)' in ice3stsice=',stsice(i,:),&
+     &' snowd=',snowd(i)
           ip = i0 * sneti(i)         ! ip +v (in winton ip=-i0*sneti as sol -v)
           if (snowd(i) > zero) then
             tsf = zero
@@ -630,6 +638,9 @@
           stsice(i,1) = -(sqrt(b1*b1-4.0_kind_phys*a1*c1) + b1)/(a1+a1)
           tice(i) = (k12*stsice(i,1) - ai) / (k12 + bi)
 
+      if (lprnt .and. i == ipr) write(0,*)' ice3stsice1=',stsice(i,1),  &
+     &' hice=',hice(i),' sneti=',sneti(i),' abc=',a1,b1,c1,' k12=',k12
+
 !>  - If the surface temperature is greater than the freezing temperature
 !! of snow (when there is snow over) or sea ice (when there is none), the
 !! surface temperature is fixed at the melting temperature of snow or sea
@@ -664,6 +675,7 @@
           h1 = 0.5_kind_phys * hice(i)
           h2 = 0.5_kind_phys * hice(i)
 
+      if (lprnt .and. i == ipr) write(0,*)' hi2ice=',h1,h2,hice(i)
 !>  - Calculate the top layer thickness.
 
           if (tmelt <= snowd(i)*dsli) then
@@ -672,7 +684,7 @@
           else
             snowmt(i) = snowd(i)
             h1 = max(zero, h1 - (tmelt - snowd(i)*dsli)                 &
-     &         / (di * (ci - li/stsice(i,1)) * (tfi - stsice(i,1))))
+     &             / (di * (ci - li/stsice(i,1)) * (tfi - stsice(i,1))))
             snowd(i) = zero
           endif
 
@@ -687,12 +699,15 @@
           else
             h2 = h2 - bmelt / (dili + dici*(tfi - stsice(i,2)))
           endif
-          h2 = max(h2, zero)
+          h2 = max(h2,zero)
 
 !>  - If ice remains, even up 2 layers, else, pass negative energy back in snow.
 !! Calculate the new upper layer temperature (see \a eq.(38)).
 
           hice(i) = h1 + h2
+
+      if (lprnt .and. i == ipr)                                         &
+     &  write(0,*)' h12=',h1,h2,' hice=',hice(ipr)
 
           if (hice(i) > zero) then
             if (h1 > 0.5_kind_phys*hice(i)) then
@@ -706,8 +721,12 @@
               endif
             else
               f1 = (h1+h1) / hice(i)
+      if (lprnt .and. i == ipr) write(0,*)' stsb=',stsice(i,1),' f1=',  &
+     &f1,' sts2=',stsice(i,2),' litfifac=',li*tfi/(ci*stsice(i,1))
               stsice(i,1) = f1 * (stsice(i,1) + li*tfi/(ci*stsice(i,1)))&
      &                    + (one - f1)*stsice(i,2)
+      if (lprnt .and. i == ipr) write(0,*)' stsa=',stsice(i,1),' tfi=', &
+     &tfi,'li=',li,' ci=',ci,' tice=',tice(i)
               stsice(i,1) = (stsice(i,1) - sqrt(stsice(i,1)*stsice(i,1) &
      &                    - 4.0_kind_phys*tfi*li/ci)) * 0.5_kind_phys
             endif
@@ -735,6 +754,7 @@
         endif   ! end if_flag_block
       enddo   ! end do_i_loop
 
+      if (lprnt) write(0,*)' ice3endstsice=',stsice(ipr,:)
       return
 !...................................
       end subroutine ice3lay

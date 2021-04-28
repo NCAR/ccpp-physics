@@ -28,13 +28,13 @@ contains
     use machine,      only: kind_phys, kind_io8
     implicit none
 
-    integer,              intent(in)    :: me, nthrds, nx, ny, isc, jsc, nsst,    &
+    integer,              intent(in)    :: me, nthrds, nx, ny, isc, jsc, nsst, &
                                            tile_num, nlunit, lsoil, lsoil_lsm, kice
     integer,              intent(in)    :: idate(:), ialb, isot, ivegsrc
     character(len=*),     intent(in)    :: input_nml_file(:)
     logical,              intent(in)    :: use_ufo, nst_anl, frac_grid
-    real(kind=kind_phys), intent(in)    :: fhcyc, phour, landfrac(:), lakefrac(:),&
-                                           min_seaice, min_lakeice,               &
+    real(kind=kind_phys), intent(in)    :: fhcyc, phour, landfrac(:), lakefrac(:), &
+                                           min_seaice, min_lakeice,             &
                                            xlat_d(:), xlon_d(:)
     real(kind=kind_phys), intent(inout) :: smc(:,:),   &
                                            slc(:,:),   &
@@ -81,6 +81,7 @@ contains
 !     Local variables
 !     ---------------
     real(kind=kind_phys) ::                  &
+!       SLMASK (nx*ny),                      &
         slmskl (nx*ny),                      &
         slmskw (nx*ny),                      &
         TSFFCS (nx*ny),                      &
@@ -121,37 +122,25 @@ contains
       end if
 !
       do ix=1,npts
-        if (landfrac(ix) > -1.0e-6_kind_phys) then
-          slmskl(ix) = ceiling(landfrac(ix))
-          slmskw(ix) = floor(landfrac(ix)+1.0e-6_kind_phys)
-        endif
-
-!       IF (slmsk(ix) < 0.1_kind_phys .OR. slmsk(ix) > 1.5_kind_phys) THEN
-!         slmskl(ix) = 0.0_kind_phys
-!         slmskw(ix) = 0.0_kind_phys
-!         if (frac_grid) then
-!           slmskw(ix) = floor(landfrac(ix))
-!         endif
-!       ELSE
-!         slmskl(ix) = 1.0_kind_phys
-!         slmskw(ix) = 1.0_kind_phys
-!       ENDIF
-
         if (lakefrac(ix) > 0.0_kind_phys) then
           min_ice(ix) = min_lakeice
         else
           min_ice(ix) = min_seaice
         endif
-
-        zorfcs(ix) = zorll (ix)
-        if (nint(slmskl(ix)) /= 1 ) then
-          if (fice(ix) >= min_ice(ix)) then
-            zorfcs(ix) = zorli(ix)
-          else
-            zorfcs(ix) = zorlo(ix)
+        ZORFCS(ix) = zorll (ix)
+        IF (slmsk(ix) < 0.1_kind_phys .OR. slmsk(ix) > 1.5_kind_phys) THEN
+          slmskl(ix) = 0.0_kind_phys
+          slmskw(ix) = 0.0_kind_phys
+          if (frac_grid) then
+            slmskw(ix) = floor(landfrac(ix))
           endif
+        ELSE
+          slmskl(ix) = 1.0_kind_phys
+          slmskw(ix) = 1.0_kind_phys
+        ENDIF
+        if (nint(slmskl(ix)) == 1 .and. nint(slmskw(ix)) == 0) then
+          ZORFCS(ix) = zorlo  (ix)
         endif
-
         IF (fice(ix) >= min_ice(ix)) THEN
           AISFCS(ix) = 1.0_kind_phys
         ELSE
@@ -223,7 +212,7 @@ contains
             zorlo(ix) = ZORFCS(ix)
           endif
         else
-          if (nint(slmskw(ix))  == 0 .and. nint(slmskl(ix)) /= 1) then
+          if (nint(slmskw(ix))  == 0) then
              if (fice(ix) >= min_ice(ix)) then
               zorli(ix) = ZORFCS(ix)
             else
@@ -252,8 +241,13 @@ contains
             sh2o(ix,ls)  = SLCFC1(ll)
           endif
           if (ls <= kice) tiice(ix,ls) = STCFC1(ll)
+
+      if (me == 517 .and. ll == 851) write(0,*)' tiice_gcyc=',tiice(ix,ls)&
+     &,' STCFC1=',STCFc1(ll),' ix=',ix,' ll=',ll
+
         enddo
       enddo
+!     if (me == 517 .and. ll == 851) write(0,*)' tiic3_gcyc=',tiice(19,:)
 !
 !     if (Model%me .eq. 0) print*,'executed gcycle during hour=',fhour
 !
