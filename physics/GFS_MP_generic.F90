@@ -135,7 +135,7 @@
       real(kind=kind_phys), dimension(:),      intent(inout) :: dsnowprv
       real(kind=kind_phys), dimension(:),      intent(inout) :: dgraupelprv
 
-      real(kind=kind_phys),                    intent(in)    :: dt
+      real(kind=kind_phys),                    intent(in)    :: dtp
 
       ! CCPP error handling
       character(len=*), intent(out) :: errmsg
