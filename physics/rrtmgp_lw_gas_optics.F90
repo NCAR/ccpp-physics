@@ -497,12 +497,6 @@ contains
     errflg = 0
 
     if (.not. doLWrad) return
-    !print*,'lw_optical_props_clrsky%gpt2band:      ',lw_optical_props_clrsky%gpt2band
-    !print*,'lw_optical_props_clrsky%band_lims_wvn: ',lw_optical_props_clrsky%band_lims_wvn
-    !print*,'lw_optical_props_clrsky%gpt2band:      ',lw_optical_props_clrsky%gpt2band
-    !print*,'sources%gpt2band:                      ',sources%gpt2band
-    !print*,'sources%band_lims_wvn:                 ',sources%band_lims_wvn
-    !print*,'sources%gpt2band:                      ',sources%gpt2band
 
     ! Copy spectral information into GP DDTs.
     lw_optical_props_clrsky%band2gpt      = lw_gas_props%get_band_lims_gpoint()
