@@ -373,7 +373,7 @@ contains
 !! \htmlinclude GFS_surface_composites_post_run.html
 !!
    subroutine GFS_surface_composites_post_run (                                                                                   &
-      im, kice, km, cplflx, cplwav2atm, frac_grid, flag_cice, islmsk, dry, wet, icy, wind, t1, q1, prsl1,                         &
+      im, kice, km, cplflx, cplwav2atm, frac_grid, flag_cice, thsfc_loc, islmsk, dry, wet, icy, wind, t1, q1, prsl1,              &
       rd, rvrdm1, landfrac, lakefrac, oceanfrac, zorl, zorlo, zorll, zorli,                                                       &
       cd, cd_wat, cd_lnd, cd_ice, cdq, cdq_wat, cdq_lnd, cdq_ice, rb, rb_wat, rb_lnd, rb_ice, stress, stress_wat, stress_lnd,     &
       stress_ice, ffmm, ffmm_wat, ffmm_lnd, ffmm_ice, ffhh, ffhh_wat, ffhh_lnd, ffhh_ice, uustar, uustar_wat, uustar_lnd,         &
@@ -382,7 +382,7 @@ contains
       ep1d_lnd, ep1d_ice, weasd, weasd_wat, weasd_lnd, weasd_ice, snowd, snowd_wat, snowd_lnd, snowd_ice, tprcp, tprcp_wat,       &
       tprcp_lnd, tprcp_ice, evap, evap_wat, evap_lnd, evap_ice, hflx, hflx_wat, hflx_lnd, hflx_ice, qss, qss_wat, qss_lnd,        &
       qss_ice, tsfc, tsfco, tsfcl, tsfc_wat, tsfc_lnd, tsfc_ice, tisfc, tice, hice, cice, min_seaice, tiice, stc,                 &
-      grav, prslki, z1, ztmax_wat, ztmax_lnd, ztmax_ice, errmsg, errflg)
+      grav, prsik1, prslk1, prslki, z1, ztmax_wat, ztmax_lnd, ztmax_ice, errmsg, errflg)
 
       implicit none
 
@@ -410,8 +410,10 @@ contains
       real(kind=kind_phys), dimension(im, km),    intent(inout) :: stc
 
       ! Additional data needed for calling "stability"
+      logical,                            intent(in   ) :: thsfc_loc
       real(kind=kind_phys),               intent(in   ) :: grav
-      real(kind=kind_phys), dimension(:), intent(in   ) :: prslki, z1, ztmax_wat, ztmax_lnd, ztmax_ice
+      real(kind=kind_phys), dimension(:), intent(in   ) :: prsik1, prslk1, prslki, z1
+      real(kind=kind_phys), dimension(:), intent(in   ) :: ztmax_wat, ztmax_lnd, ztmax_ice
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -420,7 +422,7 @@ contains
       integer :: i, k
       real(kind=kind_phys) :: txl, txi, txo, wfrac, q0, rho
       ! For calling "stability"
-      real(kind=kind_phys) :: tsurf, virtfac, thv1, tvs, z0max, ztmax
+      real(kind=kind_phys) :: tsurf, virtfac, tv1, thv1, tvs, z0max, ztmax
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -475,24 +477,60 @@ contains
 
           q0 = max( q1(i), qmin )
           virtfac = one + rvrdm1 * q0
-#ifdef GSD_SURFACE_FLUXES_BUGFIX
-          thv1 = t1(i) / prslk1(i) * virtfac  ! Theta-v at lowest level
-          tvs  = half * (tsfc(i)+tsurf)/prsik1(i) * virtfac
-#else
-          thv1 = t1(i) * prslki(i) * virtfac  ! Theta-v at lowest level
-          tvs  = half * (tsfc(i)+tsurf) * virtfac
-#endif
+
+          tv1 = t1(i) * virtfac ! Virtual temperature in middle of lowest layer
+          if(thsfc_loc) then ! Use local potential temperature
+            thv1 = t1(i) * prslki(i) * virtfac  ! Theta-v at lowest level
+            tvs  = half * (tsfc(i)+tsurf) * virtfac
+          else ! Use potential temperature referenced to 1000 hPa
+            thv1 = t1(i) / prslk1(i) * virtfac  ! Theta-v at lowest level
+            tvs  = half * (tsfc(i)+tsurf)/prsik1(i) * virtfac
+          endif
 
           zorl(i) = exp(txl*log(zorll(i)) + txi*log(zorli(i)) + txo*log(zorlo(i)))
           z0max   = 0.01_kind_phys * zorl(i)
           ztmax   = exp(txl*log(ztmax_lnd(i)) + txi*log(ztmax_ice(i)) + txo*log(ztmax_wat(i)))
 
-          call stability(z1(i), snowd(i), thv1, wind(i), z0max, ztmax, tvs, grav, & ! inputs
-                         rb(i), ffmm(i), ffhh(i), fm10(i), fh2(i), cd(i), cdq(i), & ! outputs
-                         stress(i), uustar(i))
+          ! Only actually need to call "stability" if multiple surface types exist...
+          if(txl .eq. one) then ! 100% land
+            rb(i)     = rb_lnd(i)
+            ffmm(i)   = ffmm_lnd(i)
+            ffhh(i)   = ffhh_lnd(i)
+            fm10(i)   = fm10_lnd(i)
+            fh2(i)    = fh2_lnd(i)
+            cd(i)     = cd_lnd(i)
+            cdq(i)    = cdq_lnd(i)
+            stress(i) = stress_lnd(i)
+            uustar(i) = uustar_lnd(i)
+          elseif(txo .eq. one) then ! 100% open water
+            rb(i)     = rb_wat(i)
+            ffmm(i)   = ffmm_wat(i)
+            ffhh(i)   = ffhh_wat(i)
+            fm10(i)   = fm10_wat(i)
+            fh2(i)    = fh2_wat(i)
+            cd(i)     = cd_wat(i)
+            cdq(i)    = cdq_wat(i)
+            stress(i) = stress_wat(i)
+            uustar(i) = uustar_wat(i)
+          elseif(txi .eq. one) then ! 100% ice
+            rb(i)     = rb_ice(i)
+            ffmm(i)   = ffmm_ice(i)
+            ffhh(i)   = ffhh_ice(i)
+            fm10(i)   = fm10_ice(i)
+            fh2(i)    = fh2_ice(i)
+            cd(i)     = cd_ice(i)
+            cdq(i)    = cdq_ice(i)
+            stress(i) = stress_ice(i)
+            uustar(i) = uustar_ice(i)
+          else ! Mix of multiple surface types (land, water, and/or ice)
+            call stability(z1(i), snowd(i), thv1, wind(i), z0max, ztmax, tvs, grav, & ! inputs
+                           tv1, thsfc_loc,                                          & ! inputs
+                           rb(i), ffmm(i), ffhh(i), fm10(i), fh2(i), cd(i), cdq(i), & ! outputs
+                           stress(i), uustar(i))
+          endif ! Checking to see if point is one or multiple surface types
 
           ! BWG, 2021/02/25: cmm=cd*wind, chh=cdq*wind, so use composite cd, cdq
-          rho      = prsl1(i) / (rd*t1(i)*(one + rvrdm1*q0))
+          rho       = prsl1(i) / (rd*tv1)
           cmm(i)    =      cd(i)*wind(i)  !txl*cmm_lnd(i)    + txi*cmm_ice(i)    + txo*cmm_wat(i)
           chh(i)    = rho*cdq(i)*wind(i)  !txl*chh_lnd(i)    + txi*chh_ice(i)    + txo*chh_wat(i)
 
