@@ -16,10 +16,10 @@ module scm_sfc_flux_spec
 !*******************************************************************************************
 
 !!
-!! \section arg_table_gmtb_scm_sfc_flux_spec_init Argument Table
-!! \htmlinclude gmtb_scm_sfc_flux_spec_init.html
+!! \section arg_table_scm_sfc_flux_spec_init Argument Table
+!! \htmlinclude scm_sfc_flux_spec_init.html
 !!
-  subroutine gmtb_scm_sfc_flux_spec_init(lheatstrg, errmsg, errflg)
+  subroutine scm_sfc_flux_spec_init(lheatstrg, errmsg, errflg)
     
     logical, intent(in) :: lheatstrg
     
