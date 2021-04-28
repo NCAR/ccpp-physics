@@ -1,6 +1,8 @@
 !> \file GFS_stochastics.f90
 !! This file contains code previously in GFS_stochastics_driver.
 
+!>\defgroup gfs_stoch GFS Stochastics Physics Module
+!! This module
     module GFS_stochastics
 
       contains
@@ -12,9 +14,6 @@
       end subroutine GFS_stochastics_finalize
 
 
-!>\defgroup gfs_stoch GFS Stochastics Physics Module
-!! This module
-!> @{
 !> \section arg_table_GFS_stochastics_run Argument Table
 !! \htmlinclude GFS_stochastics_run.html
 !!
@@ -109,7 +108,7 @@
          real(kind_phys), dimension(:),         intent(in)    :: dsnow_cpl
          real(kind_phys), dimension(1:km),      intent(in)    :: si
          real(kind_phys), dimension(1:km),      intent(inout) :: vfact_ca
-         real(kind_phys), dimension(1:im),      intent(in)    :: ca1
+         real(kind_phys), dimension(:),         intent(in)    :: ca1
          character(len=*),                      intent(out)   :: errmsg
          integer,                               intent(out)   :: errflg
 
@@ -357,4 +356,3 @@
       end subroutine GFS_stochastics_run
 
     end module GFS_stochastics
-!> @}

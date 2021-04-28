@@ -1,6 +1,7 @@
 !> \file GFS_surface_generic.F90
 !!  Contains code related to all GFS surface schemes.
 
+!>\defgroup mod_GFS_surface_generic_pre GFS Surface Generic Pre module
       module GFS_surface_generic_pre
 
       use machine, only: kind_phys
@@ -51,15 +52,15 @@
         real(kind=kind_phys), dimension(im), intent(inout) :: sigmaf, work3, tsurf, zlvl
 
         ! Stochastic physics / surface perturbations
-        real(kind=kind_phys), dimension(im),          intent(out) :: drain_cpl
-        real(kind=kind_phys), dimension(im),          intent(out) :: dsnow_cpl
-        real(kind=kind_phys), dimension(im),          intent(in)  :: rain_cpl
-        real(kind=kind_phys), dimension(im),          intent(in)  :: snow_cpl
+        real(kind=kind_phys), dimension(:),           intent(out) :: drain_cpl
+        real(kind=kind_phys), dimension(:),           intent(out) :: dsnow_cpl
+        real(kind=kind_phys), dimension(:),           intent(in)  :: rain_cpl
+        real(kind=kind_phys), dimension(:),           intent(in)  :: snow_cpl
         integer, intent(in) :: lndp_type
         integer, intent(in) :: n_var_lndp
         character(len=3), dimension(n_var_lndp),      intent(in)  :: lndp_var_list
         real(kind=kind_phys), dimension(n_var_lndp),  intent(in)  :: lndp_prt_list
-        real(kind=kind_phys), dimension(im,n_var_lndp), intent(in)  :: sfc_wts
+        real(kind=kind_phys), dimension(:,:),         intent(in)  :: sfc_wts
         real(kind=kind_phys), dimension(im),          intent(out) :: z01d
         real(kind=kind_phys), dimension(im),          intent(out) :: zt1d
         real(kind=kind_phys), dimension(im),          intent(out) :: bexp1d
@@ -69,7 +70,7 @@
         real(kind=kind_phys), dimension(im,n_var_lndp), intent(inout)  :: sfc_wts_inv
 
         logical, intent(in) :: cplflx
-        real(kind=kind_phys), dimension(im), intent(in) :: slimskin_cpl
+        real(kind=kind_phys), dimension(:), intent(in) :: slimskin_cpl
         logical, dimension(im), intent(inout) :: flag_cice
         integer, dimension(im), intent(out) :: islmsk_cice
         real(kind=kind_phys), dimension(im), intent(in) :: &
@@ -229,11 +230,13 @@
           adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd, adjsfculw, adjsfculw_wat, adjnirbmu, adjnirdfu, adjvisbmu, adjvisdfu,    &
           t2m, q2m, u10m, v10m, tsfc, tsfc_wat, pgr, xcosz, evbs, evcw, trans, sbsno, snowc, snohf
 
-        real(kind=kind_phys), dimension(im),  intent(inout) :: epi, gfluxi, t1, q1, u1, v1, dlwsfci_cpl, dswsfci_cpl, dlwsfc_cpl, &
-          dswsfc_cpl, dnirbmi_cpl, dnirdfi_cpl, dvisbmi_cpl, dvisdfi_cpl, dnirbm_cpl, dnirdf_cpl, dvisbm_cpl, dvisdf_cpl, &
-          nlwsfci_cpl, nlwsfc_cpl, t2mi_cpl, q2mi_cpl, u10mi_cpl, v10mi_cpl, tsfci_cpl, psurfi_cpl, nnirbmi_cpl, nnirdfi_cpl, &
-          nvisbmi_cpl, nvisdfi_cpl, nswsfci_cpl, nswsfc_cpl, nnirbm_cpl, nnirdf_cpl, nvisbm_cpl, nvisdf_cpl, gflux, evbsa, &
+        real(kind=kind_phys), dimension(im),  intent(inout) :: epi, gfluxi, t1, q1, u1, v1, gflux, evbsa, &
           evcwa, transa, sbsnoa, snowca, snohfa, ep
+
+        real(kind=kind_phys), dimension(:),   intent(inout) :: dlwsfci_cpl, dswsfci_cpl, dlwsfc_cpl, &
+                    dswsfc_cpl, dnirbmi_cpl, dnirdfi_cpl, dvisbmi_cpl, dvisdfi_cpl, dnirbm_cpl, dnirdf_cpl, dvisbm_cpl, dvisdf_cpl, &
+                    nlwsfci_cpl, nlwsfc_cpl, t2mi_cpl, q2mi_cpl, u10mi_cpl, v10mi_cpl, tsfci_cpl, psurfi_cpl, nnirbmi_cpl, nnirdfi_cpl, &
+                    nvisbmi_cpl, nvisdfi_cpl, nswsfci_cpl, nswsfc_cpl, nnirbm_cpl, nnirdf_cpl, nvisbm_cpl, nvisdf_cpl
 
         real(kind=kind_phys), dimension(im), intent(inout) :: runoff, srunoff
         real(kind=kind_phys), dimension(im), intent(in)    :: drain, runof

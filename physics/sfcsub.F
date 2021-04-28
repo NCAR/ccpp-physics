@@ -3,7 +3,7 @@
 
 
 !>\defgroup mod_sfcsub GFS sfcsub Module
-!!\ingroup LSMs
+!!\ingroup mod_GFS_phys_time_vary 
 !> @{
 !! This module contains grib code for each parameter-used in subroutines sfccycle()
 !! and setrmsk().
@@ -2684,8 +2684,8 @@
       close(lugb)
       call baopenr(lugb,fngrib,iret)
       if (iret .ne. 0) then
-        write(6,*) ' error in opening file ',trim(fngrib)
-        print *,'error in opening file ',trim(fngrib)
+        write(6,*) ' FATAL ERROR: in opening file ',trim(fngrib)
+        print *,'FATAL ERROR: in opening file ',trim(fngrib)
         call abort
       endif
       if (me .eq. 0) write(6,*) ' file ',trim(fngrib),
@@ -2712,8 +2712,8 @@
       kpds0(4)=-1
       kpds0(18)=-1
       if(iret.ne.0) then
-        write(6,*) ' error in getgbh. iret: ', iret
-        if (iret == 99) write(6,*) ' field not found.'
+        write(6,*) ' FATAL ERROR: in getgbh. iret: ', iret
+        if (iret == 99) write(6,*) ' Field not found.'
         call abort
       endif
 !
@@ -2731,13 +2731,13 @@
         data8 = real(data4, kind=kind_io8)
         deallocate(data4)
       else
-        write(0,*)' Invalid w3kindreal --- aborting'
+        write(0,*)' FATAL ERROR: Invalid w3kindreal'
         call abort
       endif
 !
       if(jret == 0) then
         if(ndata.eq.0) then
-          write(6,*) ' error in getgb'
+          write(6,*) ' FATAL ERROR: in getgb'
           write(6,*) ' kpds=',kpds
           write(6,*) ' kgds=',kgds
           call abort
@@ -2753,7 +2753,7 @@
       else
         if (me ==. 0) write(6,*) 'idim,jdim=',idim,jdim
      &,                ' gaus=',gaus,' blno=',blno,' blto=',blto
-        write(6,*) ' error in getgb : jret=',jret
+        write(6,*) ' FATAL ERROR in getgb : jret=',jret
         write(6,*) ' kpds(13)=',kpds(13),' kpds(15)=',kpds(15)
         call abort
       endif
@@ -2828,18 +2828,18 @@
         return
 !
       elseif(kgds(1).eq.1) then                  !  mercator projection
-        write(6,*) 'mercator grid'
-        write(6,*) 'cannot process'
+        write(6,*) 'FATAL ERROR: cannot process'
+        write(6,*) 'mercator grid.'
         call abort
 !
       elseif(kgds(1).eq.2) then                  !  gnomonic projection
-        write(6,*) 'gnomonic grid'
-        write(6,*) 'error!! gnomonic projection not coded'
+        write(6,*) 'FATAL ERROR: cannot process'
+        write(6,*) 'gnomonic grid.'
         call abort
 !
       elseif(kgds(1).eq.3) then                  !  lambert conformal
-        write(6,*) 'lambert conformal'
-        write(6,*) 'cannot process'
+        write(6,*) 'FATAL ERROR: cannot process'
+        write(6,*) 'lambert conformal grid.'
         call abort
       elseif(kgds(1).eq.4) then                  !  gaussian grid
 !
@@ -2881,33 +2881,33 @@
         return
 !
       elseif(kgds(1).eq.5) then                  !  polar strereographic
-        write(6,*) 'polar stereographic grid'
-        write(6,*) 'cannot process'
+        write(6,*) 'FATAL ERROR: cannot process'
+        write(6,*) 'polar stereographic grid.'
         call abort
         return
 !
       elseif(kgds(1).eq.13) then                 !  oblique lambert conformal
-        write(6,*) 'oblique lambert conformal grid'
-        write(6,*) 'cannot process'
+        write(6,*) 'FATAL ERROR: cannot process'
+        write(6,*) 'oblique lambert conformal grid.'
         call abort
 !
       elseif(kgds(1).eq.50) then                 !  spherical coefficient
-        write(6,*) 'spherical coefficient'
-        write(6,*) 'cannot process'
+        write(6,*) 'FATAL ERROR: cannot process'
+        write(6,*) 'spherical coefficient grid.'
         call abort
         return
 !
       elseif(kgds(1).eq.90) then                 !  space view perspective
 !                                                  (orthographic grid)
-        write(6,*) 'space view perspective grid'
-        write(6,*) 'cannot process'
+        write(6,*) 'FATAL ERROR: cannot process'
+        write(6,*) 'space view perspective grid.'
         call abort
         return
 !
       else                                       !  unknown projection.  abort.
-        write(6,*) 'error!! unknown map projection'
+        write(6,*) 'FATAL ERROR: Unknown map projection.'
         write(6,*) 'kgds(1)=',kgds(1)
-        print *,'error!! unknown map projection'
+        print *,'FATAL ERROR: Unknown map projection.'
         print *,'kgds(1)=',kgds(1)
         call abort
       endif
@@ -3428,9 +3428,11 @@
             i2 = iindx2(i)
             if(wrk(i) .eq. 0.0) then
               if(.not.lmask) then
-                if (num_threads == 1)
-     &            write(6,*) ' la2ga called with lmask=.true. but bad',
-     &                     ' rslmsk or slmask given'
+                if (num_threads == 1) then
+                  write(6,*) ' FATAL ERROR: la2ga called'
+                  write(6,*) ' with lmask=true. But bad rslmsk'
+                  write(6,*) ' or slmask given.'
+                endif
                 call abort
               endif
               ifill(it) = ifill(it) + 1
@@ -3478,7 +3480,8 @@
               enddo
 !
               if (num_threads == 1) then
-                write(6,*) ' error!!! no filling value found in la2ga'
+                write(6,*) ' FATAL ERROR: no filling value'
+                write(6,*) ' found in routine la2ga.'
 !               write(6,*) ' i ix jx slmask(i) rslmsk ',
 !    &                       i,ix,jx,slmask(i),rslmsk(ix,jx)
               endif
@@ -3707,7 +3710,7 @@
      &,             outlat, outlon, me)
         irttsf = iret
         if(iret == 1) then
-          write(6,*) 't surface analysis read error'
+          write(6,*) 'FATAL ERROR: t surface analysis read error.'
           call abort
         elseif(iret == -1) then
           if (me == 0) then
@@ -3733,11 +3736,13 @@
      &,             imsk, jmsk, slmskh, gaus,blno, blto
      &,             outlat, outlon, me)
         if(iret == 1) then
-          write(6,*) 't surface at ft=0 analysis read error'
+          write(6,*) 'FATAL ERROR: t surface at ft=0 analysis'
+          write(6,*) 'read error.'
           call abort
         elseif(iret == -1) then
           if (me == 0) then
-            write(6,*) 'could not find t surface analysis at ft=0'
+            write(6,*) 'FATAL ERROR: Could not find t surface'
+            write(6,*) 'analysis at ft=0.'
           endif
           call abort
         else
@@ -3760,7 +3765,7 @@
      &,              outlat, outlon, me)
           irtalb = iret
           if(iret == 1) then
-            write(6,*) 'albedo analysis read error'
+            write(6,*) 'FATAL ERROR: albedo analysis read error.'
             call abort
           elseif(iret == -1) then
             if (me == 0) then
@@ -3791,7 +3796,7 @@
      &,              outlat, outlon, me)
           irtalf = iret
           if(iret == 1) then
-            write(6,*) 'albedo analysis read error'
+            write(6,*) 'FATAL ERROR: albedo analysis read error.'
             call abort
           elseif(iret == -1) then
             if (me == 0) then
@@ -3822,7 +3827,7 @@
      &,            outlat, outlon, me)
         irtwet=iret
         if(iret.eq.1) then
-          write(6,*) 'bucket wetness analysis read error'
+          write(6,*) 'FATAL ERROR: bucket wetness analysis read error.'
           call abort
         elseif(iret.eq.-1) then
           if (me .eq. 0) then
@@ -3844,7 +3849,8 @@
      &,            outlat, outlon, me)
         irtsmc=iret
         if(iret.eq.1) then
-          write(6,*) 'layer soil wetness analysis read error'
+          write(6,*) 'FATAL ERROR: layer soil wetness analysis'
+          write(6,*) 'read error.'
           call abort
         elseif(iret.eq.-1) then
           if (me .eq. 0) then
@@ -3879,8 +3885,8 @@
 !cggg the grib parameter id number.
         call baopenr(lugb,fnsnoa,iret)
         if (iret .ne. 0) then
-          write(6,*) ' error in opening file ',trim(fnsnoa)
-          print *,'error in opening file ',trim(fnsnoa)
+          write(6,*) 'FATAL ERROR: in opening file ',trim(fnsnoa)
+          print *,'FATAL ERROR: in opening file ',trim(fnsnoa)
           call abort
         endif
         lugi=0
@@ -3892,8 +3898,9 @@
      &              lskip,kpds,kgds,iret)
         close(lugb)
         if (iret .ne. 0) then
-          write(6,*) ' error reading header of file: ',trim(fnsnoa)
-          print *,'error reading header of file: ',trim(fnsnoa)
+          write(6,*) ' FATAL ERROR: reading header'
+          write(6,*) ' of file: ',trim(fnsnoa)
+          print *,'FATAL ERROR: reading header of file: ',trim(fnsnoa)
           call abort
         endif
         if (kgds(1) == 4) then  ! gaussian data is depth
@@ -3912,7 +3919,7 @@
 !cggg snow mods end
         irtscv=iret
         if(iret.eq.1) then
-          write(6,*) 'snow depth analysis read error'
+          write(6,*) 'FATAL ERROR: snow depth analysis read error.'
           call abort
         elseif(iret.eq.-1) then
           if (me .eq. 0) then
@@ -3934,7 +3941,7 @@
      &,            outlat, outlon, me)
         irtsno=iret
         if(iret.eq.1) then
-          write(6,*) 'snow cover analysis read error'
+          write(6,*) 'FATAL ERROR: snow cover analysis read error.'
           call abort
         elseif(iret.eq.-1) then
           if (me .eq. 0) then
@@ -3963,7 +3970,8 @@
      &,            outlat, outlon, me)
         irtacn=iret
         if(iret.eq.1) then
-          write(6,*) 'ice concentration analysis read error'
+          write(6,*) 'FATAL ERROR: ice concentration'
+          write(6,*) 'analysis read error.'
           call abort
         elseif(iret.eq.-1) then
           if (me .eq. 0) then
@@ -3982,7 +3990,7 @@
      &,            outlat, outlon, me)
         irtais=iret
         if(iret.eq.1) then
-          write(6,*) 'ice mask analysis read error'
+          write(6,*) 'FATAL ERROR: ice mask analysis read error.'
           call abort
         elseif(iret.eq.-1) then
           if (me .eq. 0) then
@@ -4010,7 +4018,7 @@
      &,            outlat, outlon, me)
         irtzor=iret
         if(iret.eq.1) then
-          write(6,*) 'roughness analysis read error'
+          write(6,*) 'FATAL ERROR: roughness analysis read error.'
           call abort
         elseif(iret.eq.-1) then
           if (me .eq. 0) then
@@ -4039,7 +4047,7 @@
      &,            outlat, outlon, me)
         irttg3=iret
         if(iret.eq.1) then
-          write(6,*) 'deep soil tmp analysis read error'
+          write(6,*) 'FATAL ERROR: deep soil tmp analysis read error.'
           call abort
         elseif(iret.eq.-1) then
           if (me .eq. 0) then
@@ -4062,7 +4070,7 @@
      &,            outlat, outlon, me)
         irtstc=iret
         if(iret.eq.1) then
-          write(6,*) 'layer soil tmp analysis read error'
+          write(6,*) 'FATAL ERROR: layer soil tmp analysis read error.'
           call abort
         elseif(iret.eq.-1) then
           if (me .eq. 0) then
@@ -4091,7 +4099,8 @@
      &,            outlat, outlon, me)
         irtveg=iret
         if(iret.eq.1) then
-          write(6,*) 'vegetation cover analysis read error'
+          write(6,*) 'FATAL ERROR: vegetation cover analysis'
+          write(6,*) 'read error.'
           call abort
         elseif(iret.eq.-1) then
           if (me .eq. 0) then
@@ -4120,7 +4129,8 @@
      &,            outlat, outlon, me)
         irtvet=iret
         if(iret.eq.1) then
-          write(6,*) 'vegetation type analysis read error'
+          write(6,*) 'FATAL ERROR: vegetation type analysis'
+          write(6,*) 'read error.'
           call abort
         elseif(iret.eq.-1) then
           if (me .eq. 0) then
@@ -4149,7 +4159,7 @@
      &,            outlat, outlon, me)
         irtsot=iret
         if(iret.eq.1) then
-          write(6,*) 'soil type analysis read error'
+          write(6,*) 'FATAL ERROR: soil type analysis read error.'
           call abort
         elseif(iret.eq.-1) then
           if (me .eq. 0) then
@@ -4180,7 +4190,7 @@
      &,            outlat, outlon, me)
         irtvmn=iret
         if(iret.eq.1) then
-          write(6,*) 'shdmin analysis read error'
+          write(6,*) 'FATAL ERROR: shdmin analysis read error.'
           call abort
         elseif(iret.eq.-1) then
           if (me .eq. 0) then
@@ -4210,7 +4220,7 @@
      &,            outlat, outlon, me)
         irtvmx=iret
         if(iret.eq.1) then
-          write(6,*) 'shdmax analysis read error'
+          write(6,*) 'FATAL ERROR: shdmax analysis read error.'
           call abort
         elseif(iret.eq.-1) then
           if (me .eq. 0) then
@@ -4240,7 +4250,7 @@
      &,            outlat, outlon, me)
         irtslp=iret
         if(iret.eq.1) then
-          write(6,*) 'slope type analysis read error'
+          write(6,*) 'FATAL ERROR: slope type analysis read error.'
           call abort
         elseif(iret.eq.-1) then
           if (me .eq. 0) then
@@ -4270,7 +4280,7 @@
      &,            outlat, outlon, me)
         irtabs=iret
         if(iret.eq.1) then
-          write(6,*) 'snoalb analysis read error'
+          write(6,*) 'FATAL ERROR: snoalb analysis read error.'
           call abort
         elseif(iret.eq.-1) then
           if (me .eq. 0) then
@@ -4451,7 +4461,8 @@
           endif
         enddo
       else
-        write(6,*) ' illegal operator in rof01.  op=',op
+        write(6,*) ' FATAL ERROR: illegal operator'
+        write(6,*) ' in rof01.  op=',op
         call abort
       endif
 !
@@ -4507,7 +4518,8 @@
           endif
         enddo
       else
-        write(6,*) ' illegal operator in rof01.  op=',op
+        write(6,*) ' FATAL ERROR: illegal operator'
+        write(6,*) ' in rof01_len.  op=',op
         call abort
       endif
 !
@@ -5071,7 +5083,7 @@
       do i=1,len
         if(slifcs(i).ne.slianl(i)) then
           if(slifcs(i).eq.1..or.slianl(i).eq.1.) then
-            print *,'inconsistency in slifcs or slianl'
+            print *,'FATAL ERROR: inconsistency in slifcs or slianl.'
             print 910,rla(i),rlo(i),slifcs(i),slianl(i),
      &                tsffcs(i),tsfanl(i)
   910       format(2x,'at lat=',f5.1,' lon=',f5.1,' slifcs=',f4.1,
@@ -5203,7 +5215,8 @@
       kount1 = 0
       do i=1,len
         if(ais(i).ne.aicice.and.ais(i).ne.aicsea) then
-          print *,'sea ice mask not ',aicice,' or ',aicsea
+          print *,'FATAL ERROR: sea ice'
+          print *,'mask not ',aicice,' or ',aicsea
           print *,'ais(i),aicice,aicsea,rla(i),rlo(i,=',
      &             ais(i),aicice,aicsea,rla(i),rlo(i)
           call abort
@@ -6109,6 +6122,8 @@
          rltout(j) = rnlat + (j-1) * dlat
         enddo
       else                           ! grib file on some other grid
+        write(6,*) ' FATAL ERROR: Mask data on'
+        write(6,*) ' unsupported grid.'
         call abort
       endif
       dlon = 360.0 / imax
@@ -7069,7 +7084,7 @@ cjfe
                go to 10
             endif
           enddo
-          print *,'wrong rjday',rjday
+          print *,'FATAL ERROR: wrong rjday',rjday
           call abort
    10     continue
           wei1m = (dayhf(mon2)-rjday)/(dayhf(mon2)-dayhf(mon1))
@@ -7148,7 +7163,7 @@ cjfe
             go to 20
          endif
       enddo
-      print *,'wrong rjday',rjday
+      print *,'FATAL ERROR: wrong rjday',rjday
       call abort
    20 continue
       wei1m = (dayhf(mon2)-rjday)/(dayhf(mon2)-dayhf(mon1))
@@ -7172,7 +7187,7 @@ cjfe
           go to 30
         endif
       enddo
-      print *,'wrong rjday',rjday
+      print *,'FATAL ERROR: wrong rjday',rjday
       call abort
    30 continue
       wei1s = (dayhf(sea2)-rjday)/(dayhf(sea2)-dayhf(sea1))
@@ -7196,7 +7211,7 @@ cjfe
           go to 31
         endif
       enddo
-      print *,'wrong rjday',rjday
+      print *,'FATAL ERROR: wrong rjday',rjday
       call abort
    31 continue
       wei1y = (dayhf(hyr2)-rjday)/(dayhf(hyr2)-dayhf(hyr1))
@@ -7284,9 +7299,11 @@ cjfe
           if (me .eq. 0) write(6,*) 'climatological vegetation',
      &                              ' type read in.'
         elseif(index(fnsmcc,'soilmgldas') /= 0) then ! new soil moisture climo
-          if (me .eq. 0) write(6,*) 'fatal error: must choose'
-          if (me .eq. 0) write(6,*) 'climatological veg type when'
-          if (me .eq. 0) write(6,*) 'using new gldas soil moisture.'
+          if (me .eq. 0) then
+            write(6,*) 'FATAL ERROR: must choose'
+            write(6,*) 'climatological veg type when'
+            write(6,*) 'using new gldas soil moisture.'
+          endif
           call abort
         endif
 !
@@ -7499,7 +7516,8 @@ cjfe
               deallocate(slmask_noice)
             endif
           else
-            write(6,*) 'climatological soil wetness file not given'
+            write(6,*) 'FATAL ERROR: climatological soil wetness'
+            write(6,*) 'file not given.'
             call abort
           endif
 !
@@ -7532,7 +7550,8 @@ cjfe
      &,                 imsk, jmsk, slmskh, gaus,blno, blto
      &,                 outlat, outlon, me)
           else
-            write(6,*) 'climatological ice cover file not given'
+            write(6,*) 'FATAL ERROR: climatological ice cover'
+            write(6,*) 'file not given.'
             call abort
           endif
 !
@@ -7768,7 +7787,8 @@ cjfe
               deallocate(slmask_noice)
             endif
           else
-            write(6,*) 'climatological soil wetness file not given'
+            write(6,*) 'FATAL ERROR: climatological soil wetness'
+            write(6,*) 'file not given.'
             call abort
           endif
 !
@@ -7786,7 +7806,8 @@ cjfe
      &,                 imsk, jmsk, slmskh, gaus,blno, blto
      &,                 outlat, outlon, me)
           else
-            write(6,*) 'climatological ice cover file not given'
+            write(6,*) 'FATAL ERROR: climatological ice cover'
+            write(6,*) 'file not given.'
             call abort
           endif
 !
@@ -7853,7 +7874,10 @@ cjfe
 ! set to point at the proper vegetation type file.
       if (fnzorc(1:3) == 'sib') then
         if (fnvetc(1:4) == '   ') then
-          if (me==0) write(6,*) "must choose sib veg type climo file"
+          if (me==0) then
+            write(6,*) "FATAL ERROR: must choose sib"
+            write(6,*) "vegetation type climo file."
+          endif
           call abort
         endif
         zorclm = 0.0
@@ -7865,7 +7889,10 @@ cjfe
         enddo
       elseif(fnzorc(1:4) == 'igbp') then
         if (fnvetc(1:4) == '   ') then
-          if (me == 0) write(6,*) "must choose igbp veg type climo file"
+          if (me == 0) then
+            write(6,*) "FATAL ERROR: must choose igbp"
+            write(6,*) "vegetation type climo file."
+          endif
           call abort
         endif
         zorclm = 0.0
@@ -8107,8 +8134,8 @@ cjfe
         case(256:257)
           error=nf90_inq_varid(ncid, 'vegetation_greenness', id_var)
         case default
-          print*,'fatal error in fixrdc_tile of sfcsub.F.'
-          print*,'unknown variable.'
+          print*,'FATAL ERROR in fixrdc_tile of sfcsub.F.'
+          print*,'Unknown variable.'
           call abort
       end select
       if (error /= nf90_noerr) call netcdf_err(error)
@@ -8181,7 +8208,7 @@ cjfe
       character(len=256) :: errmsg
 
       errmsg = nf90_strerror(error)
-      print*,'fatal error in sfcsub.F: ', trim(errmsg)
+      print*,'FATAL ERROR in sfcsub.F: ', trim(errmsg)
       call abort
 
       end subroutine netcdf_err
@@ -8239,8 +8266,8 @@ cjfe
       close(lugb)
       call baopenr(lugb,fngrib,iret)
       if (iret .ne. 0) then
-        write(6,*) ' error in opening file ',trim(fngrib)
-        print *,'error in opening file ',trim(fngrib)
+        write(6,*) ' FATAL ERROR: in opening file ',trim(fngrib)
+        print *,'FATAL ERROR: in opening file ',trim(fngrib)
         call abort
       endif
       if (me .eq. 0) write(6,*) ' file ',trim(fngrib),
@@ -8267,8 +8294,8 @@ cjfe
       kpds0(4)  = -1
       kpds0(18) = -1
       if(iret.ne.0) then
-        write(6,*) ' error in getgbh. iret: ', iret
-        if (iret==99) write(6,*) ' field not found.'
+        write(6,*) ' FATAL ERROR: in getgbh. iret: ', iret
+        if (iret==99) write(6,*) ' Field not found.'
         call abort
       endif
 !
@@ -8294,7 +8321,7 @@ cjfe
      &              (kpds(i),i=8,11)
       if(jret.eq.0) then
         if(ndata.eq.0) then
-          write(6,*) ' error in getgb'
+          write(6,*) ' FATAL ERROR: in getgb'
           write(6,*) ' kpds=',kpds
           write(6,*) ' kgds=',kgds
           call abort
@@ -8311,7 +8338,7 @@ cjfe
         enddo
         if (me .eq. 0) write(6,*) 'imax,jmax,ijmax=',imax,jmax,ijmax
       else
-        write(6,*) ' error in getgb - jret=', jret
+        write(6,*) ' FATAL ERROR: in getgb - jret=', jret
         call abort
       endif
 !
@@ -8470,8 +8497,8 @@ cjfe
       close(lugb)
       call baopenr(lugb,fngrib,iret)
       if (iret .ne. 0) then
-        write(6,*) ' error in opening file ',trim(fngrib)
-        print *,'error in opening file ',trim(fngrib)
+        write(6,*) ' FATAL ERROR: in opening file ',trim(fngrib)
+        print *,'FATAL ERROR in opening file ',trim(fngrib)
         call abort
       endif
       if (me .eq. 0) write(6,*) ' file ',trim(fngrib),
@@ -8497,8 +8524,8 @@ cjfe
       kpds0(4)=-1
       kpds0(18)=-1
       if(iret.ne.0) then
-        write(6,*) ' error in getgbh. iret: ', iret
-        if(iret==99) write(6,*) ' field not found.'
+        write(6,*) ' FATAL ERROR: in getgbh. iret: ', iret
+        if(iret==99) write(6,*) ' Field not found.'
         call abort
       endif
 !
@@ -8541,7 +8568,7 @@ cjfe
      &              (kpds(i),i=8,11)
       if(jret.eq.0) then
         if(ndata.eq.0) then
-          write(6,*) ' error in getgb'
+          write(6,*) ' FATAL ERROR: in getgb'
           write(6,*) ' kpds=',kpds
           write(6,*) ' kgds=',kgds
           call abort

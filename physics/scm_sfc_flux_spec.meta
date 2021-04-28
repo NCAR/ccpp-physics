@@ -1,11 +1,11 @@
 [ccpp-table-properties]
-  name = gmtb_scm_sfc_flux_spec
+  name = scm_sfc_flux_spec
   type = scheme
   dependencies = machine.F
 
 ########################################################################
 [ccpp-arg-table]
-  name = gmtb_scm_sfc_flux_spec_init
+  name = scm_sfc_flux_spec_init
   type = scheme
 [lheatstrg]
   standard_name = flag_for_canopy_heat_storage
@@ -35,7 +35,7 @@
 
 #################################
 [ccpp-arg-table]
-  name = gmtb_scm_sfc_flux_spec_run
+  name = scm_sfc_flux_spec_run
   type = scheme
 [u1]
   standard_name = x_wind_at_lowest_model_layer

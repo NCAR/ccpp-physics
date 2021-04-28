@@ -1,0 +1,27 @@
+/**
+\page NoahMP GFS NoahMP Land Surface Model
+\section des_noahmp  Description
+
+This implementation of the NoahMP Land Surface Model (LSM) is adapted from the version implemented in WRF v3.7 with additions by NOAA EMC staff to work with the UFS Atmosphere model. Authoritative documentation of the NoahMP scheme can be accessed at the following links:
+
+[University of Texas at Austin NoahMP Documentation](http://www.jsg.utexas.edu/noah-mp "University of Texas at Austin NoahMP Documentation")
+
+[NCAR Research Application Laboratory NoahMP Documentation](https://ral.ucar.edu/solutions/products/noah-multiparameterization-land-surface-model-noah-mp-lsm "NCAR RAL NoahMP Documentation")
+
+A primary reference for the NoahMP LSM is Niu et al. (2011) \cite niu_et_al_2011.
+
+The CCPP interface to the NoahMP LSM is a driving software layer on top of the actual NoahMP LSM. During the run sequence, code organization is as follows:
++ \ref noahmpdrv_run() calls
+ + \ref transfer_mp_parameters()
+ + \ref noahmp_options()
+ + \ref noahmp_options_glacier() and noahmp_glacier() if over the ice vegetation type (glacier)
+ + \ref noahmp_sflx() if over other vegetation types
+ + \ref penman()
+ 
+Note that noahmp_glacer() and noahmp_sflx() are the actual NoahMP codes.
+ 
+\section intra_noahmp Intraphysics Communication
+ +  GFS NoahMP LSM Driver (\ref arg_table_noahmpdrv_run)
+\section gen_al_noahmp General Algorithm of Driver
++ \ref general_noahmpdrv
+*/
