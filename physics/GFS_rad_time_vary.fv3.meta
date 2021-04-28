@@ -23,22 +23,6 @@
   type = logical
   intent = in
   optional = F
-[do_RRTMGP]
-  standard_name = flag_for_rrtmgp_radiation_scheme
-  long_name = flag for RRTMGP scheme
-  units = flag
-  dimensions =  ()
-  type = logical
-  intent = in
-  optional = F
-[use_LW_jacobian]
-  standard_name = flag_to_calc_RRTMGP_LW_jacobian
-  long_name = logical flag to control RRTMGP LW calculation
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
 [isubc_lw]
   standard_name = flag_for_lw_clouds_sub_grid_approximation
   long_name = flag for lw clouds sub-grid approximation

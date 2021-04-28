@@ -16,10 +16,9 @@
 !! \htmlinclude GFS_rad_time_vary_timestep_init.html
 !!
       subroutine GFS_rad_time_vary_timestep_init (                                     &
-              lslwr, lsswr, do_RRTMGP, use_LW_jacobian, isubc_lw, isubc_sw, icsdsw,    &
-              icsdlw, cnx, cny, isc, jsc, imap, jmap, sec, kdt, imp_physics,           &
-              imp_physics_zhao_carr, ps_2delt, ps_1delt, t_2delt, t_1delt, qv_2delt,   &
-              qv_1delt, t, qv, ps, errmsg, errflg)
+              lslwr, lsswr, isubc_lw, isubc_sw, icsdsw, icsdlw, cnx, cny, isc, jsc,    &
+              imap, jmap, sec, kdt, imp_physics, imp_physics_zhao_carr, ps_2delt,      &
+              ps_1delt, t_2delt, t_1delt, qv_2delt, qv_1delt, t, qv, ps, errmsg, errflg)
 
          use physparam,                 only: ipsd0, ipsdlim, iaerflg
          use mersenne_twister,          only: random_setseed, random_index, random_stat
@@ -31,7 +30,7 @@
          ! Interface variables
          integer,                intent(in)    :: isubc_lw, isubc_sw, cnx, cny, isc, jsc, kdt
          integer,                intent(in)    :: imp_physics, imp_physics_zhao_carr
-         logical,                intent(in)    :: lslwr, lsswr, do_RRTMGP, use_LW_jacobian
+         logical,                intent(in)    :: lslwr, lsswr
          integer,                intent(inout) :: icsdsw(:), icsdlw(:)
          integer,                intent(in)    :: imap(:), jmap(:)
          real(kind_phys),        intent(in)    :: sec
@@ -74,7 +73,7 @@
 
            endif  ! isubc_lw and isubc_sw
 
-           if (imp_physics == imp_physics_zhao_carr .or. (do_RRTMGP .and. use_LW_jacobian)) then
+           if (imp_physics == imp_physics_zhao_carr) then
              if (kdt == 1) then
                t_2delt  = t
                t_1delt  = t
