@@ -491,13 +491,46 @@ contains
           z0max   = 0.01_kind_phys * zorl(i)
           ztmax   = exp(txl*log(ztmax_lnd(i)) + txi*log(ztmax_ice(i)) + txo*log(ztmax_wat(i)))
 
-          call stability(z1(i), snowd(i), thv1, wind(i), z0max, ztmax, tvs, grav, & ! inputs
-                         tv1, thsfc_loc,                                          & ! inputs
-                         rb(i), ffmm(i), ffhh(i), fm10(i), fh2(i), cd(i), cdq(i), & ! outputs
-                         stress(i), uustar(i))
+          ! Only actually need to call "stability" if multiple surface types exist...
+          if(txl .eq. one) then ! 100% land
+            rb(i)     = rb_lnd(i)
+            ffmm(i)   = ffmm_lnd(i)
+            ffhh(i)   = ffhh_lnd(i)
+            fm10(i)   = fm10_lnd(i)
+            fh2(i)    = fh2_lnd(i)
+            cd(i)     = cd_lnd(i)
+            cdq(i)    = cdq_lnd(i)
+            stress(i) = stress_lnd(i)
+            uustar(i) = uustar_lnd(i)
+          elseif(txo .eq. one) then ! 100% open water
+            rb(i)     = rb_wat(i)
+            ffmm(i)   = ffmm_wat(i)
+            ffhh(i)   = ffhh_wat(i)
+            fm10(i)   = fm10_wat(i)
+            fh2(i)    = fh2_wat(i)
+            cd(i)     = cd_wat(i)
+            cdq(i)    = cdq_wat(i)
+            stress(i) = stress_wat(i)
+            uustar(i) = uustar_wat(i)
+          elseif(txi .eq. one) then ! 100% ice
+            rb(i)     = rb_ice(i)
+            ffmm(i)   = ffmm_ice(i)
+            ffhh(i)   = ffhh_ice(i)
+            fm10(i)   = fm10_ice(i)
+            fh2(i)    = fh2_ice(i)
+            cd(i)     = cd_ice(i)
+            cdq(i)    = cdq_ice(i)
+            stress(i) = stress_ice(i)
+            uustar(i) = uustar_ice(i)
+          else ! Mix of multiple surface types (land, water, and/or ice)
+            call stability(z1(i), snowd(i), thv1, wind(i), z0max, ztmax, tvs, grav, & ! inputs
+                           tv1, thsfc_loc,                                          & ! inputs
+                           rb(i), ffmm(i), ffhh(i), fm10(i), fh2(i), cd(i), cdq(i), & ! outputs
+                           stress(i), uustar(i))
+          endif ! Checking to see if point is one or multiple surface types
 
           ! BWG, 2021/02/25: cmm=cd*wind, chh=cdq*wind, so use composite cd, cdq
-          rho      = prsl1(i) / (rd*t1(i)*virtfac)
+          rho       = prsl1(i) / (rd*tv1)
           cmm(i)    =      cd(i)*wind(i)  !txl*cmm_lnd(i)    + txi*cmm_ice(i)    + txo*cmm_wat(i)
           chh(i)    = rho*cdq(i)*wind(i)  !txl*chh_lnd(i)    + txi*chh_ice(i)    + txo*chh_wat(i)
 
