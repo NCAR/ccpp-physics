@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = rrtmgp_lw_cloud_optics
   type = scheme
-  dependencies = machine.F,rrtmg_lw_cloud_optics.F90,rrtmgp_aux.F90
+  dependencies = machine.F,rrtmg_lw_cloud_optics.F90,radiation_tools.F90
 
 ########################################################################
 [ccpp-arg-table]

@@ -2,7 +2,7 @@ module rrtmgp_lw_aerosol_optics
   use machine,                   only: kind_phys
   use mo_gas_optics_rrtmgp,      only: ty_gas_optics_rrtmgp
   use mo_optical_props,          only: ty_optical_props_1scl
-  use rrtmgp_aux,                only: check_error_msg
+  use radiation_tools,                only: check_error_msg
   use rrtmgp_sw_gas_optics,      only: sw_gas_props
   use rrtmgp_lw_gas_optics,      only: lw_gas_props
   use module_radiation_aerosols, only: &

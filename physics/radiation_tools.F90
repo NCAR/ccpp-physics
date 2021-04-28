@@ -1,4 +1,4 @@
-module rrtmgp_aux
+module radiation_tools
   use machine, only: &
        kind_phys                   ! Working type
   implicit none
@@ -94,7 +94,4 @@ contains
     end if
   end subroutine check_error_msg  
 
-
-
-
-end module rrtmgp_aux
+end module radiation_tools

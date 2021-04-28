@@ -9,7 +9,7 @@ module GFS_rrtmgp_pre
        getozn                      ! Routine to setup ozone
   ! RRTMGP types
   use mo_gas_concentrations, only: ty_gas_concs
-  use rrtmgp_aux,            only: check_error_msg,cmp_tlev
+  use radiation_tools,            only: check_error_msg,cmp_tlev
 
   real(kind_phys), parameter :: &
        amd   = 28.9644_kind_phys,  & ! Molecular weight of dry-air     (g/mol)

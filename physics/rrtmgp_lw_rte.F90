@@ -9,7 +9,7 @@ module rrtmgp_lw_rte
   use mo_rte_lw,              only: rte_lw
   use mo_fluxes_byband,       only: ty_fluxes_byband
   use mo_source_functions,    only: ty_source_func_lw
-  use rrtmgp_aux,             only: check_error_msg
+  use radiation_tools,             only: check_error_msg
   use rrtmgp_lw_gas_optics,   only: lw_gas_props
   implicit none
 

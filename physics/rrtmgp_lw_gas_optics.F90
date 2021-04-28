@@ -5,7 +5,7 @@ module rrtmgp_lw_gas_optics
   use mo_gas_concentrations, only: ty_gas_concs  
   use mo_source_functions,   only: ty_source_func_lw
   use mo_optical_props,      only: ty_optical_props_1scl
-  use rrtmgp_aux,            only: check_error_msg
+  use radiation_tools,            only: check_error_msg
   use GFS_rrtmgp_pre,        only: active_gases_array
   use netcdf
 #ifdef MPI

@@ -3,7 +3,7 @@ module rrtmgp_sw_gas_optics
   use mo_rte_kind,            only: wl
   use mo_gas_optics_rrtmgp,   only: ty_gas_optics_rrtmgp
   use mo_gas_concentrations,  only: ty_gas_concs
-  use rrtmgp_aux,             only: check_error_msg
+  use radiation_tools,             only: check_error_msg
   use mo_optical_props,       only: ty_optical_props_2str
   use GFS_rrtmgp_pre,         only: active_gases_array
   use netcdf

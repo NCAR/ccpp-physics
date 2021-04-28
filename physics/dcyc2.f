@@ -195,7 +195,7 @@
 !
       use machine,         only : kind_phys
       use physcons,        only : con_pi, con_sbc, con_cp, con_g
-      use rrtmgp_aux,      only : cmp_tlev
+      use radiation_tools,      only : cmp_tlev
       implicit none
 !
 !  ---  constant parameters:

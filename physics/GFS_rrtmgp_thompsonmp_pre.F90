@@ -5,7 +5,7 @@
 module GFS_rrtmgp_thompsonmp_pre
   use machine, only: &
        kind_phys
-  use rrtmgp_aux, only: &
+  use radiation_tools, only: &
        check_error_msg
   use module_mp_thompson, only: &
        calc_effectRad, Nt_c,    &

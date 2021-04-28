@@ -5,7 +5,7 @@ module rrtmgp_lw_cloud_optics
   use mo_optical_props,         only: ty_optical_props_1scl, ty_optical_props_2str
   use mo_rrtmg_lw_cloud_optics, only: rrtmg_lw_cloud_optics   
   use rrtmgp_lw_gas_optics,     only: lw_gas_props
-  use rrtmgp_aux,               only: check_error_msg
+  use radiation_tools,               only: check_error_msg
   use netcdf
 #ifdef MPI
   use mpi
