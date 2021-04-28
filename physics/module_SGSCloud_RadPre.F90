@@ -6,6 +6,7 @@
 !!       scale) qc, qi and cloud fraction coming from the microphysics scheme.
 !!    4) Recompute the diagnostic high, mid, low, total and bl clouds to be consistent with radiation
 
+!> \defgroup sgsrad_group GSD sgscloud_radpre_run Module
       module sgscloud_radpre
 
       contains
@@ -16,9 +17,7 @@
       subroutine sgscloud_radpre_finalize ()
       end subroutine sgscloud_radpre_finalize
 
-!> \defgroup sgsrad_group GSD sgscloud_radpre_run Module
-!> \ingroup sgscloud_radpre
-!! This interstitial code adds the subgrid clouds to the resolved-scale clouds 
+!> This interstitial code adds the subgrid clouds to the resolved-scale clouds 
 !! if there is no resolved-scale clouds in that particular grid box. It can also 
 !! specify a cloud fraction for resolved-scale clouds, using Xu-Randall (1996),
 !! if desired.

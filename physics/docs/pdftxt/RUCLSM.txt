@@ -1,0 +1,100 @@
+/**
+\page RUCLSM RUC Land Surface Model
+\section ruclsm_descrip Description
+
+The land surface model (LSM) was originally developed as part of the NOAA Rapid Update Cycle (RUC) model development effort; with ongoing modifications, it is now used as an option for the WRF community model. The RUC model and its WRF-based NOAA successor, the Rapid Refresh (RAP) and High-Resolution Rapid Refresh (HRRR), are hourly updated and have an emphasis on short-range, near-surface forecasts including aviation-impact variables and pre-convective environment. Therefore, coupling to this LSM (hereafter the RUC LSM) has been critical to provide more accurate lower boundary conditions. 
+
+The RUC LSM became operational at the NOAA/National Centers for Environmental Prediction (NCEP) first, as part of the RUC from 1998–2012, and then 
+as part of the RAP from 2012 through the present and as part of HRRR from 2014 through the present. The simple treatments of basic land surface 
+processes in the RUC LSM (Smirnova et al. 2016 \cite Smirnova_2016 ) have proven to be physically robust and capable of realistically representing 
+the evolution of soil moisture, soil temperature, and snow in cycled models. Extension of the RAP domain to encompass all of North America and 
+adjacent high-latitude ocean areas necessitated further development of the RUC LSM for application in the tundra permafrost regions and over Arctic 
+sea ice (Smirnova et al. 2000 \cite Smirnova_2000). Other modifications include refinements in the snow model and a more accurate specification of 
+albedo, roughness length, and other surface properties. These recent modifications in the RUC LSM are described and evaluated in 
+Smirnova et al. 2016 \cite Smirnova_2016 .
+
+The parameterizations in the RUC LSM describe complicated atmosphere–land surface interactions in an intentionally simplified fashion to avoid 
+excessive sensitivity to multiple uncertain surface parameters. Nevertheless, the RUC LSM, when coupled with the hourly-assimilating atmospheric model, 
+demonstrated over years of ongoing cycling (Benjamin et al. 2004a,b \cite Benjamin_2004a \cite Benjamin_2004b ; Berbery et al. 1999 \cite Berbery_1999) 
+that it can produce a realistic evolution of hydrologic and time-varying soil fields (i.e., soil moisture and temperature) that cannot be directly 
+observed over large areas, as well as the evolution of snow  cover on the ground surface. This result is possible only if the soil–vegetation–snow 
+component of the coupled model, constrained only by atmospheric boundary conditions and the specification of surface characteristics, has sufficient 
+skill to avoid long-term drift.
+
+International projects for intercomparison of land surface and snow parameterization schemes were essential in providing the testing environment and 
+afforded an excellent opportunity to evaluate the RUC LSM with different land use and soil types and within a variety of climates. The RUC LSM was 
+included in phase 2(d) of the Project for the Intercomparison of Land Surface Prediction Schemes [PILPS-2(d)], in which tested models performed 
+18-yr simulations of the land surface state for the Valdai site in Russia (Schlosser et al. 1997 \cite Schlosser_1997 ; Slater et al. 2001 \cite Slater_2001 ; 
+Luo et al. 2003 \cite Luo_2003 ). The RUC LSM was also tested during the Snow Models Intercomparison Project (SnowMIP, SnowMIP2, ESM-SnowMIP), 
+with emphasis on snow parameterizations for both grassland and forest locations in different parts of the world 
+(Etchevers et al. 2002, 2004 \cite Etchevers_2002 \cite Etchevers_2004; Essery et al. 2009 \cite Essery_2009 ; Rutter et al. 2009 \cite Rutter_2009 , 
+Krinner et al. 2018 \cite Krinner_2018 ). The analysis of RUC LSM performance over 10 reference sites in ESM-SnowMIP rated it on the 5th place 
+among the 26 participating models.
+
+In global application, RUC LSM is implemented in the Global Systems Division (GSD) physics suite for testing in the NOAA Next-Generation Global
+Prediction System (NGGPS)- FV3-GSD suite. To specify surface characteristics, RUC LSM uses the Land Data Sets provided by NCEP for Global
+Modeling Systems (see Figure 2 in \ref GFS_NOAH )
+
+## RUC LSM characteristics that differ from NOAH LSM:
+\image html ruc_lsm_veg_soil.png "Figure 1. RUC LSM Vegetation and Soil Model (Courtesy of T.G. Smirnova) " width=10cm
+- \b Implicit \b solution of energy and moisture budgets in the layer spanning the ground surface
+- \b 9 \b soil \b levels with high vertical resolution near surface
+RUC LSM has more levels in oil than \ref GFS_NOAH model with higher resolution near the interface with the atmosphere
+- \b Prognostic \b soil moisture variable (\f$\theta-\theta_r\f$)
+The prognostic variables for soil moisture is volumetric soil moisture content minus residual value of soil moisture which is tied
+to soil particles and does not participate in moisture transport.
+- \b Frozen \b soil \b physics algorithm
+RUC LSM has a different approach to take into account freezing and thawing processes in soil.
+- Treatment of \b mixed \b phase \b precipitation
+It accounts for mixed phase precipitation provided by \ref THOMPSON used in RAP and HRRR.
+- Simple treatment of \b sea \c ice which solves heat diffusion in sea ice and allows evolving snow cover on top of sea ice
+- sub-grid-scale \b heterogeneity of surface parameters in RUC LSM
+With the certain level of confidence in the skill of the model, the next requirement is to provide land static fields and surface 
+parameters with the best possible accuracy. RAP and HRRR use the same datasets as \ref GFS_NOAH. But instead of specifying surface
+parameters for the dominant soil and land-use category in the grid box, RUC LSM takes into account the sub-grid scale heterogeneity
+in the computation of such parameters as roughness length, emissivity, soil porosity, soil heat capacity and others. The difference in
+roughness between the mosaic and dominant category presented on figure 2 is positive from contribution of the forests, which helped to 
+reduce high biases of surface wind speeds in these regions. Roughness lenghth has also seasonal variability in the cropland regions,
+which again helped to improve the wind forecasts during the warm season.
+\image html  ruc_lsm_heterogeneity.png "Figure 2:  sub-grid scale heterogeneity of surface parameters in RUC LSM (Courtesy of T.G. Smirnova)" width=10cm
+
+- New: simple irrigation in the cropland area
+- New: water/snow intercepted by canopy as function of vegetation fraction and leaf area index (LAI)
+
+## RUC snow model characteristics:
+Snow forms additional two layers on top of soil in RUC LSM
+- \b 2-layer \b snow model: when SWE < 1.6 cm - snow layer is combined with top soil layer
+- Fractional snow cover (SWE < 3 cm):
+- weighted average of snow-covered and snow-free areas to compute snow paramters (roughness, albedo)
+- New: "mosaic" approach for patchy snow
+  - Seperate treatment of energy and moisture budgets for snow-covered and snow-free portions of the grid cell
+  - Aggregate solutions at the end of time step
+  - Reduced cold bias for areas with thin snow
+\image html ruc_lsm_mosaic.png "Figure 3: recent development: mosaic approach for patchy snow (Courtesy of T.G. Smirnova) " width=10cm
+- Iterative snow melting algorithm
+- Density of snow on the ground - a function of compaction parameter and snow depth and temperature
+- Snow albedo - a function of temperature and snow fraction
+- Snow interception by canopy - a function of vegetation fraction and LAI
+- Density of falling snow/graupel/ice precipitation  
+  - The density of falling snow/graupel/ice is computed inside RUC LSM using empirical temperature-dependent equations;
+  - Averaged density of frozen precipitation is defined from weighted contribution of each hydrometeor species:
+\f[
+ \rho_{fr}=\rho_{sn}*\alpha_{sn}+\rho_{gr}*\alpha_{gr}+\rho_{ice}*\alpha_{ice}
+\f]
+- The depth of new snow is defined from its liquid equivalent and \f$\rho_{fr}\f$
+\image html ruc_lsm_frozen_precip.png "Figure 4: HRRR 23-h forecasts of snow accumulation, valid 08 UTC, 29 Dec 2015 (Courtesy of T.G. Smirnova)" width=10cm
+
+snow accumulation with variable density is provided as an additional product in the model guidance. Figure 4 shows one example of this product
+from the 23-h HRRR forecast for snowstorm on 29 Dec 2015. This product is in the middle panel. The panel on the left uses traditional 10:1 ratio,
+and the right panel is oberved snow accumulation. We can see that the new product in the middle here has a better, further north location of maximum
+snow accumulation, and high ammounts of snow in the product with 10:1 ratio are trimmed in central and southern Iowa where both observed and model 
+precipitation had a high content of sleet. There is even larger improvement in the Chicago area, where observed and model precipitation were almost 
+totally sleet. 
+
+\section intra_ruclsm Intraphysics Communication
+\ref arg_table_lsm_ruc_run
+
+\section gen_ruclsm General Algorithm
+\ref gen_lsmruc
+
+*/

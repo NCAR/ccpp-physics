@@ -103,7 +103,7 @@
       real(kind=kind_phys),                           intent(in)    :: dtf, frain, con_g
       real(kind=kind_phys), dimension(im),            intent(in)    :: rain1, xlat, xlon, tsfc
       real(kind=kind_phys), dimension(im),            intent(inout) :: ice, snow, graupel, rainc
-      real(kind=kind_phys), dimension(im),            intent(in)    :: rain0, ice0, snow0, graupel0
+      real(kind=kind_phys), dimension(:),             intent(in)    :: rain0, ice0, snow0, graupel0 ! conditionally allocated in GFS_typedefs (imp_physics == GFDL or Thompson)
       real(kind=kind_phys), dimension(im,nrcm),       intent(in)    :: rann
       real(kind=kind_phys), dimension(im,levs),       intent(in)    :: gt0, prsl, save_t, save_qv, del
       real(kind=kind_phys), dimension(im,levs+1),     intent(in)    :: prsi, phii
@@ -112,28 +112,27 @@
       real(kind=kind_phys), dimension(im),      intent(in   ) :: sr
       real(kind=kind_phys), dimension(im),      intent(inout) :: rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp,  &
                                                                  srflag, cnvprcp, totprcp, totice, totsnw, totgrp, cnvprcpb, &
-                                                                 totprcpb, toticeb, totsnwb, totgrpb, rain_cpl, rainc_cpl,   &
-                                                                 snow_cpl, pwat
+                                                                 totprcpb, toticeb, totsnwb, totgrpb, pwat
+      real(kind=kind_phys), dimension(:),       intent(inout) :: rain_cpl, rainc_cpl, snow_cpl
 
       real(kind=kind_phys), dimension(:,:),     intent(inout) :: dt3dt ! only if ldiag3d
       real(kind=kind_phys), dimension(:,:),     intent(inout) :: dq3dt ! only if ldiag3d and qdiag3d
 
       ! Stochastic physics / surface perturbations
-      real(kind=kind_phys), dimension(im),      intent(inout) :: drain_cpl
-      real(kind=kind_phys), dimension(im),      intent(inout) :: dsnow_cpl
+      real(kind=kind_phys), dimension(:),       intent(inout) :: drain_cpl, dsnow_cpl
 
       ! Rainfall variables previous time step
       integer, intent(in) :: lsm, lsm_ruc, lsm_noahmp
-      real(kind=kind_phys), dimension(im),      intent(inout) :: raincprv
-      real(kind=kind_phys), dimension(im),      intent(inout) :: rainncprv
-      real(kind=kind_phys), dimension(im),      intent(inout) :: iceprv
-      real(kind=kind_phys), dimension(im),      intent(inout) :: snowprv
-      real(kind=kind_phys), dimension(im),      intent(inout) :: graupelprv
-      real(kind=kind_phys), dimension(im),      intent(inout) :: draincprv
-      real(kind=kind_phys), dimension(im),      intent(inout) :: drainncprv
-      real(kind=kind_phys), dimension(im),      intent(inout) :: diceprv
-      real(kind=kind_phys), dimension(im),      intent(inout) :: dsnowprv
-      real(kind=kind_phys), dimension(im),      intent(inout) :: dgraupelprv
+      real(kind=kind_phys), dimension(:),       intent(inout) :: raincprv
+      real(kind=kind_phys), dimension(:),       intent(inout) :: rainncprv
+      real(kind=kind_phys), dimension(:),       intent(inout) :: iceprv
+      real(kind=kind_phys), dimension(:),       intent(inout) :: snowprv
+      real(kind=kind_phys), dimension(:),       intent(inout) :: graupelprv
+      real(kind=kind_phys), dimension(:),       intent(inout) :: draincprv
+      real(kind=kind_phys), dimension(:),       intent(inout) :: drainncprv
+      real(kind=kind_phys), dimension(:),       intent(inout) :: diceprv
+      real(kind=kind_phys), dimension(:),       intent(inout) :: dsnowprv
+      real(kind=kind_phys), dimension(:),       intent(inout) :: dgraupelprv
 
       real(kind=kind_phys),                     intent(in)    :: dtp
 

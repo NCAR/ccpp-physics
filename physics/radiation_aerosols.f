@@ -127,7 +127,6 @@
 
 !> \ingroup rad
 !! \defgroup module_radiation_aerosols module_radiation_aerosols
-!> @{
 !!  This module contains climatological atmospheric aerosol schemes for
 !!  radiation computations.
 !!
@@ -766,8 +765,6 @@
 !> This subroutine defines the one wavenumber solar fluxes based on toa
 !! solar spectral distribution, and define the one wavenumber IR fluxes
 !! based on black-body emission distribution at a predefined temperature.
-!>\section gel_set_spec General Algorithm
-!--------------------------------
       subroutine set_spectrum
 !................................
 !  ---  inputs:   (module constants)
@@ -915,7 +912,6 @@
 !!
 !!\section gen_clim_aerinit General Algorithm
 !!@{
-!-----------------------------------
       subroutine clim_aerinit                                           &
      &     ( solfwv, eirfwv, me                                         &          ! ---  inputs
      &     )                                                           !  ---  outputs
@@ -4527,4 +4523,3 @@
 !..........................................!
       end module module_radiation_aerosols !
 !==========================================!
-!> @}
