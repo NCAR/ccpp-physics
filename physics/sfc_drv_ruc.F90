@@ -16,7 +16,7 @@ module lsm_ruc
 
         public :: lsm_ruc_init, lsm_ruc_run, lsm_ruc_finalize
 
-        real(kind=kind_phys), parameter :: zero = 0.0d0, one = 1.0d0, epsln = 1.0d-10
+        real(kind=kind_phys), parameter :: zero = 0.0_kind_phys, one = 1.0_kind_phys, epsln = 1.0e-10_kind_phys
         real(kind=kind_phys), dimension (2), parameter, private :: d = (/0.1,0.25/)
         integer, dimension(20), parameter, private:: &
         istwe = (/1,1,1,1,1,2,2,1,1,2,2,2,2,2,1,2,2,1,2,2/) ! IGBP 20 classes
@@ -342,6 +342,7 @@ module lsm_ruc
      &       prsl1, zf, wind, shdmin, shdmax,                           &
      &       srflag, sfalb_lnd_bck, snoalb,                             &
      &       isot, ivegsrc, fice, smcwlt2, smcref2,                     &
+     &       min_lakeice, min_seaice, oceanfrac,                        &
      ! --- constants
      &       con_cp, con_rd, con_rv, con_g, con_pi, con_hvap,           &
      &       con_fvirt,                                                 &
@@ -379,8 +380,6 @@ module lsm_ruc
 !  ---  constant parameters:
       real(kind=kind_phys), parameter :: rhoh2o  = 1000.0
       real(kind=kind_phys), parameter :: stbolt  = 5.670400e-8
-      real(kind=kind_phys), parameter :: cimin   = 0.15  !--- in GFS
-      !real(kind=kind_phys), parameter :: cimin   = 0.02 !--- minimum ice concentration, 0.15 in GFS
       real(kind=kind_phys), parameter :: con_tice = 271.2
 
 !  ---  input:
@@ -396,11 +395,11 @@ module lsm_ruc
      ! for land
      &       cm_lnd, ch_lnd,                                      &
      ! for water
-     &       ch_wat, tskin_wat,                                   &
+     &       ch_wat, tskin_wat, oceanfrac,                        &
      ! for ice
      &       cm_ice, ch_ice
 
-      real (kind=kind_phys),  intent(in) :: delt
+      real (kind=kind_phys),  intent(in) :: delt, min_seaice, min_lakeice
       real (kind=kind_phys),  intent(in) :: con_cp, con_rv, con_g,       &
                                             con_pi, con_rd,              &
                                             con_hvap, con_fvirt
@@ -476,6 +475,8 @@ module lsm_ruc
 
       real (kind=kind_phys), dimension(im,lsoil_ruc,1) :: smsoil,       &
            slsoil, stsoil, smfrsoil, keepfrsoil, stsice
+      real (kind=kind_phys), dimension(im,lsoil_ruc,1) :: smice,        &
+           slice, stice, smfrice, keepfrice
 
       real (kind=kind_phys), dimension(im,lsoil_ruc) :: smois_old,      &
      &       tsice_old, tslb_old, sh2o_old,                             &
@@ -529,8 +530,8 @@ module lsm_ruc
       ! local
       integer :: ims,ime, its,ite, jms,jme, jts,jte, kms,kme, kts,kte
       integer :: l, k, i, j,  fractional_seaice, ilst
-      real (kind=kind_phys) :: dm
-      logical :: flag(im), flag_ice_uncoupled(im)
+      real (kind=kind_phys) :: dm, cimin
+      logical :: flag(im), flag_ice(im), flag_ice_uncoupled(im)
       logical :: rdlai2d, myj, frpcpn
       logical :: debug_print
 !
@@ -545,9 +546,22 @@ module lsm_ruc
       chklowq = 1.
 
       do i  = 1, im ! i - horizontal loop
+        flag_ice(i) = .false.
+        if (icy(i) .and. .not. flag_cice(i)) then
+        ! - uncoupled ice model
+          if (oceanfrac(i) > zero) then
+            cimin = min_seaice
+          else
+            cimin = min_lakeice
+          endif
+          if (fice(i) >= cimin) then
+          ! - ice fraction is above the threshold for ice
+            flag_ice(i) = .true.
+          endif
+        endif
         ! - Set flag for ice points for uncoupled model (islmsk(i) == 4 when coupled to CICE)
         ! - Exclude ice on the lakes if the lake model is turned on.
-        flag_ice_uncoupled(i) = (icy(i) .and. .not. flag_cice(i) .and. .not.  lake(i))
+        flag_ice_uncoupled(i) = (flag_ice(i) .and. .not.  lake(i))
         !> - Set flag for land and ice points.
         !- 10may19 - ice points are turned off.
         flag(i) = land(i) .or. flag_ice_uncoupled(i)
@@ -1254,10 +1268,10 @@ module lsm_ruc
         tsnav_ice(i,j) = 0.5*(soilt_ice(i,j) + soilt1_ice(i,j)) - 273.15
         do k = 1, lsoil_ruc
           stsice  (i,k,j) = tsice(i,k)
-          smsoil  (i,k,j) = 1.
-          slsoil  (i,k,j) = 0.
-          smfrsoil(i,k,j) = 1.
-          keepfrsoil(i,k,j) = 1.
+          smice   (i,k,j) = 1.
+          slice   (i,k,j) = 0.
+          smfrice (i,k,j) = 1.
+          keepfrice(i,k,j) = 1.
         enddo
 
         wet_ice(i,j) = 1.
@@ -1319,13 +1333,13 @@ module lsm_ruc
 !  ---  constants
      &          con_cp, con_rv, con_rd, con_g, con_pi, con_hvap, stbolt,     &
 !  ---  input/outputs:
-     &          smsoil(i,:,j), slsoil(i,:,j), soilm(i,j), smmax(i,j),        &
+     &          smice(i,:,j), slice(i,:,j), soilm(i,j), smmax(i,j),          &
      &          stsice(i,:,j), soilt_ice(i,j),                               &
      &          hfx_ice(i,j), qfx_ice(i,j), lh_ice(i,j),                     &
      &          infiltr(i,j), runoff1(i,j), runoff2(i,j), acrunoff(i,j),     &
      &          sfcexc(i,j), acceta(i,j), ssoil_ice(i,j),                    &
-     &          snfallac_ice(i,j), acsn(i,j), snomlt_ice(i,j),                 &
-     &          smfrsoil(i,:,j),keepfrsoil(i,:,j), .false.,                  &
+     &          snfallac_ice(i,j), acsn(i,j), snomlt_ice(i,j),               &
+     &          smfrice(i,:,j),keepfrice(i,:,j), .false.,                    &
      &          shdmin1d(i,j), shdmax1d(i,j), rdlai2d,                       &
      &          ims,ime, jms,jme, kms,kme,                                   &
      &          its,ite, jts,jte, kts,kte                                    )
@@ -1360,7 +1374,7 @@ module lsm_ruc
 
         do k = 1, lsoil_ruc
           tsice(i,k)  = stsice(i,k,j)
-          if(.not. frac_grid) then
+          if(.not. frac_grid .or. .not. land(i)) then
             smois(i,k)  = 1.
             sh2o(i,k)   = 0.
             tslb(i,k)   = stsice(i,k,j)
