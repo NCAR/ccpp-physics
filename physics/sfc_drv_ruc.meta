@@ -164,15 +164,6 @@
   kind = kind_phys
   intent = inout
   optional = F
-[t1]
-  standard_name = air_temperature_at_lowest_model_layer
-  long_name = mean temperature at lowest model layer
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [q1]
   standard_name = water_vapor_specific_humidity_at_lowest_model_layer
   long_name = water vapor specific humidity at lowest model layer
@@ -201,8 +192,8 @@
   intent = inout
   optional = F
 [tsfc_ice]
-  standard_name = surface_skin_temperature_over_ice_interstitial
-  long_name = surface skin temperature over ice   (temporary use as interstitial)
+  standard_name = sea_ice_temperature
+  long_name = sea ice surface skin temperature
   units = K
   dimensions = (horizontal_loop_extent)
   type = real
@@ -1029,6 +1020,33 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
+[min_lakeice]
+  standard_name = lake_ice_minimum
+  long_name = minimum lake ice value
+  units = frac
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[min_seaice]
+  standard_name = sea_ice_minimum
+  long_name = minimum sea ice value
+  units = frac
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[oceanfrac]
+  standard_name = sea_area_fraction
+  long_name = fraction of horizontal grid area occupied by ocean
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
   optional = F
 [con_cp]
   standard_name = specific_heat_of_dry_air_at_constant_pressure
