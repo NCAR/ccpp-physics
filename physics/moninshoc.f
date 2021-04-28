@@ -71,7 +71,7 @@
       real(kind=kind_phys), dimension(im),      intent(out) :: dusfc,
      &  dvsfc, dtsfc, dqsfc, hpbl
       real(kind=kind_phys), dimension(im,km),   intent(out) :: prnum
-      real(kind=kind_phys), dimension(im,km-1), intent(out) :: dkt
+      real(kind=kind_phys), dimension(im,km),   intent(out) :: dkt
 
       character(len=*),                         intent(out) :: errmsg
       integer,                                  intent(out) :: errflg

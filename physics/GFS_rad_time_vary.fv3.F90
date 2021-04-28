@@ -1,4 +1,4 @@
-!>\file GFS_rad_time_vary.F90
+!>\file GFS_rad_time_vary.fv3.F90
 !!  Contains code related to GFS physics suite setup (radiation part of time_vary_step)
    module GFS_rad_time_vary
 

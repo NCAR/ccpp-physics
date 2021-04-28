@@ -204,7 +204,7 @@
       real(kind=kind_phys), dimension(im,lm+LTP,NF_VGAS)       :: gasvmr
       real(kind=kind_phys), dimension(im,lm+LTP,NBDSW,NF_AESW) :: faersw
       real(kind=kind_phys), dimension(im,lm+LTP,NBDLW,NF_AELW) :: faerlw
-      
+
       ! for stochastic cloud perturbations
       real(kind=kind_phys), dimension(im) :: cldp1d
       real (kind=kind_phys) :: alpha0,beta0,m,s,cldtmp,tmp_wt,cdfz
@@ -352,7 +352,7 @@
           if ( plvl(i,lla) <= prsmin ) plvl(i,lla) = 2.0*prsmin
           plyr(i,lyb)   = 0.5 * plvl(i,lla)
           tlyr(i,lyb)   = tlyr(i,lya)
-          prslk1(i,lyb) = (plyr(i,lyb)*0.001) ** rocp ! plyr in Pa
+          prslk1(i,lyb) = (plyr(i,lyb)*0.001) ** rocp ! plyr in hPa
           rhly(i,lyb)   = rhly(i,lya)
           qstl(i,lyb)   = qstl(i,lya)
         enddo
@@ -638,12 +638,12 @@
             enddo
           enddo
           ! for Thompson MP - prepare variables for calc_effr
-          if (imp_physics == imp_physics_thompson .and. ltaerosol) then
+          if_thompson: if (imp_physics == imp_physics_thompson .and. ltaerosol) then
             do k=1,LMK
               do i=1,IM
-                qvs = qgrs(i,k,ntqv)
+                qvs = qlyr(i,k)
                 qv_mp (i,k) = qvs/(1.-qvs)
-                rho   (i,k) = con_eps*prsl(i,k)/(con_rd*tgrs(i,k)*(qv_mp(i,k)+con_eps))
+                rho   (i,k) = con_eps*plyr(i,k)*100./(con_rd*tlyr(i,k)*(qv_mp(i,k)+con_eps))
                 orho  (i,k) = 1.0/rho(i,k)
                 qc_mp (i,k) = tracer1(i,k,ntcw)/(1.-qvs)
                 qi_mp (i,k) = tracer1(i,k,ntiw)/(1.-qvs)
@@ -656,9 +656,9 @@
           elseif (imp_physics == imp_physics_thompson) then
             do k=1,LMK
               do i=1,IM
-                qvs = qgrs(i,k,ntqv)
+                qvs = qlyr(i,k)
                 qv_mp (i,k) = qvs/(1.-qvs)
-                rho   (i,k) = con_eps*prsl(i,k)/(con_rd*tgrs(i,k)*(qv_mp(i,k)+con_eps))
+                rho   (i,k) = con_eps*plyr(i,k)*100./(con_rd*tlyr(i,k)*(qv_mp(i,k)+con_eps))
                 orho  (i,k) = 1.0/rho(i,k)
                 qc_mp (i,k) = tracer1(i,k,ntcw)/(1.-qvs)
                 qi_mp (i,k) = tracer1(i,k,ntiw)/(1.-qvs)
@@ -667,7 +667,7 @@
                 ni_mp (i,k) = tracer1(i,k,ntinc)/(1.-qvs)
               enddo
             enddo
-          endif
+          endif if_thompson
         endif
         do n=1,ncndl
           do k=1,LMK
@@ -903,8 +903,8 @@
 
           do i =1, im
             do k =1, lmk
-               qc_save(i,k) = ccnd(i,k,1)  
-               qi_save(i,k) = ccnd(i,k,2) 
+               qc_save(i,k) = ccnd(i,k,1)
+               qi_save(i,k) = ccnd(i,k,2)
                qs_save(i,k) = ccnd(i,k,4)
             enddo
           enddo

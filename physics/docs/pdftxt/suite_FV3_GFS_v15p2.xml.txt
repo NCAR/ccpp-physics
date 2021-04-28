@@ -1,10 +1,10 @@
 /**
-\page suite_FV3_GFS_v15p2_xml suite_FV3_GFS_v15p2.xml
+\page FV3_GFS_v15p2_sdf GFS_v15p2 Suite Definition File
 
 \code
 <?xml version="1.0" encoding="UTF-8"?>
 
-<suite name="FV3_GFS_v15p2" lib="ccppphys" ver="4">
+<suite name="FV3_GFS_v15p2" lib="ccppphys" ver="5">
   <!-- <init></init> -->
   <group name="fast_physics">
     <subcycle loop="1">
@@ -72,9 +72,9 @@
       <scheme>GFS_suite_stateout_update</scheme>
       <scheme>ozphys_2015</scheme>
       <scheme>h2ophys</scheme>
-      <scheme>GFS_DCNV_generic_pre</scheme>
       <scheme>get_phi_fv3</scheme>
       <scheme>GFS_suite_interstitial_3</scheme>
+      <scheme>GFS_DCNV_generic_pre</scheme>
       <scheme>samfdeepcnv</scheme>
       <scheme>GFS_DCNV_generic_post</scheme>
       <scheme>GFS_SCNV_generic_pre</scheme>
@@ -91,10 +91,12 @@
   <group name="stochastics">
     <subcycle loop="1">
       <scheme>GFS_stochastics</scheme>
+      <scheme>phys_tend</scheme>
     </subcycle>
   </group>
   <!-- <finalize></finalize> -->
 </suite>
+
 \endcode
 
 */
