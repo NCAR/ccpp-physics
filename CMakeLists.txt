@@ -108,109 +108,91 @@ set(SCHEMES_SFX_PREC "")
 # Create a duplicate of the SCHEMES list for handling floating point precision flags
 set(SCHEMES2 ${SCHEMES})
 
+# Schemes and caps from the CCPP code generator use full paths with symlinks
+# resolved, we need to do the same here for the below logic to work
+get_filename_component(FULL_PATH_TO_CMAKELISTS CMakeLists.txt REALPATH BASE_DIR ${LOCAL_CURRENT_SOURCE_DIR})
+get_filename_component(LOCAL_CURRENT_SOURCE_DIR ${FULL_PATH_TO_CMAKELISTS} DIRECTORY)
+
 # List of files that need to be compiled without OpenMP
-set(SCHEMES_OPENMP_OFF ${CMAKE_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rrtmgp/mo_gas_optics.F90
-                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rrtmgp/mo_rrtmgp_constants.F90
-                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rrtmgp/mo_rrtmgp_util_reorder.F90
-                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rrtmgp/mo_gas_concentrations.F90
-                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rrtmgp/kernels-openacc/mo_gas_optics_kernels.F90
-                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rrtmgp/mo_rrtmgp_util_string.F90
-                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rrtmgp/kernels/mo_gas_optics_kernels.F90
-                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rrtmgp/kernels/mo_rrtmgp_util_reorder_kernels.F90
-                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rrtmgp/mo_gas_optics_rrtmgp.F90
-                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/tests/mo_testing_io.F90
-                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/tests/clear_sky_regression.F90
-                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/extensions/mo_rrtmgp_clr_all_sky.F90
-                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/extensions/mo_fluxes_byband_kernels.F90
-                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/extensions/mo_fluxes_byband.F90
-                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/extensions/solar_variability/mo_solar_variability.F90
-                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/extensions/mo_heating_rates.F90
-                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/extensions/mo_fluxes_bygpoint.F90
-                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/extensions/mo_compute_bc.F90
-                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/extensions/cloud_optics/mo_cloud_sampling.F90
-                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/extensions/cloud_optics/mo_cloud_optics.F90
-                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/examples/mo_load_coefficients.F90
-                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/examples/rfmip-clear-sky/rrtmgp_rfmip_sw.F90
-                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/examples/rfmip-clear-sky/mo_rfmip_io.F90
-                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/examples/rfmip-clear-sky/rrtmgp_rfmip_lw.F90
-                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/examples/mo_simple_netcdf.F90
-                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/examples/all-sky/rrtmgp_allsky.F90
-                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/examples/all-sky/mo_load_cloud_coefficients.F90
-                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/examples/all-sky/mo_garand_atmos_io.F90
-                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rte/mo_rte_config.F90
-                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rte/mo_source_functions.F90
-                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rte/mo_rte_sw.F90
-                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rte/mo_fluxes.F90
-                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rte/mo_rte_lw.F90
-                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rte/kernels-openacc/mo_rte_solver_kernels.F90
-                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rte/kernels-openacc/mo_optical_props_kernels.F90
-                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rte/mo_rte_util_array.F90
-                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rte/kernels/mo_rte_solver_kernels.F90
-                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rte/kernels/mo_optical_props_kernels.F90
-                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rte/kernels/mo_fluxes_broadband_kernels.F90
-                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rte/mo_rte_kind.F90
-                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rte/mo_optical_props.F90)
+set(SCHEMES_OPENMP_OFF ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rrtmgp/mo_gas_optics.F90
+                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rrtmgp/mo_rrtmgp_constants.F90
+                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rrtmgp/mo_rrtmgp_util_reorder.F90
+                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rrtmgp/mo_gas_concentrations.F90
+                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rrtmgp/kernels-openacc/mo_gas_optics_kernels.F90
+                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rrtmgp/mo_rrtmgp_util_string.F90
+                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rrtmgp/kernels/mo_gas_optics_kernels.F90
+                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rrtmgp/kernels/mo_rrtmgp_util_reorder_kernels.F90
+                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rrtmgp/mo_gas_optics_rrtmgp.F90
+                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/tests/mo_testing_io.F90
+                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/tests/clear_sky_regression.F90
+                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/extensions/mo_rrtmgp_clr_all_sky.F90
+                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/extensions/mo_fluxes_byband_kernels.F90
+                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/extensions/mo_fluxes_byband.F90
+                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/extensions/solar_variability/mo_solar_variability.F90
+                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/extensions/mo_heating_rates.F90
+                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/extensions/mo_fluxes_bygpoint.F90
+                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/extensions/mo_compute_bc.F90
+                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/extensions/cloud_optics/mo_cloud_sampling.F90
+                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/extensions/cloud_optics/mo_cloud_optics.F90
+                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/examples/mo_load_coefficients.F90
+                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/examples/rfmip-clear-sky/rrtmgp_rfmip_sw.F90
+                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/examples/rfmip-clear-sky/mo_rfmip_io.F90
+                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/examples/rfmip-clear-sky/rrtmgp_rfmip_lw.F90
+                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/examples/mo_simple_netcdf.F90
+                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/examples/all-sky/rrtmgp_allsky.F90
+                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/examples/all-sky/mo_load_cloud_coefficients.F90
+                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/examples/all-sky/mo_garand_atmos_io.F90
+                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rte/mo_rte_config.F90
+                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rte/mo_source_functions.F90
+                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rte/mo_rte_sw.F90
+                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rte/mo_fluxes.F90
+                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rte/mo_rte_lw.F90
+                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rte/kernels-openacc/mo_rte_solver_kernels.F90
+                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rte/kernels-openacc/mo_optical_props_kernels.F90
+                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rte/mo_rte_util_array.F90
+                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rte/kernels/mo_rte_solver_kernels.F90
+                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rte/kernels/mo_optical_props_kernels.F90
+                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rte/kernels/mo_fluxes_broadband_kernels.F90
+                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rte/mo_rte_kind.F90
+                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rte/mo_optical_props.F90)
 
 #------------------------------------------------------------------------------
 if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
 
   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -ffree-line-length-none")
 
-  #SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/physics/module_bfmicrophysics.f
-  #                            ${CMAKE_CURRENT_SOURCE_DIR}/physics/sflx.f
-  #                            ${CMAKE_CURRENT_SOURCE_DIR}/physics/sfc_diff.f
-  #                            ${CMAKE_CURRENT_SOURCE_DIR}/physics/sfc_diag.f
-  #                            PROPERTIES COMPILE_FLAGS "-fdefault-real-8")
-  #SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/physics/module_nst_model.f90
-  #                            ${CMAKE_CURRENT_SOURCE_DIR}/physics/calpreciptype.f90
-  #                            PROPERTIES COMPILE_FLAGS "-fdefault-real-8")
-  #SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/physics/mersenne_twister.f
-  #                            PROPERTIES COMPILE_FLAGS "-fdefault-real-8 -fno-range-check")
-  #SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/physics/module_nst_water_prop.f90
-  #                            PROPERTIES COMPILE_FLAGS "-fdefault-real-8")
-  #SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/physics/aer_cloud.F
-  #                            ${CMAKE_CURRENT_SOURCE_DIR}/physics/wv_saturation.F
-  #                            ${CMAKE_CURRENT_SOURCE_DIR}/physics/cldwat2m_micro.F
-  #                            ${CMAKE_CURRENT_SOURCE_DIR}/physics/surface_perturbation.F90
-  #                            PROPERTIES COMPILE_FLAGS "-fdefault-real-8 -fdefault-double-8")
-  #SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/physics/module_mp_thompson_make_number_concentrations.F90
-  #                            PROPERTIES COMPILE_FLAGS "-fdefault-real-8 -fdefault-double-8")
-  #SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/physics/module_SF_JSFC.F90
-  #                            ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_BL_MYJPBL.F90
-  #                            PROPERTIES COMPILE_FLAGS "-fdefault-real-8 -fdefault-double-8")
-
-  SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/physics/module_bfmicrophysics.f
-                              ${CMAKE_CURRENT_SOURCE_DIR}/physics/sflx.f
-                              ${CMAKE_CURRENT_SOURCE_DIR}/physics/sfc_diff.f
-                              ${CMAKE_CURRENT_SOURCE_DIR}/physics/sfc_diag.f
-                              ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_nst_model.f90
-                              ${CMAKE_CURRENT_SOURCE_DIR}/physics/calpreciptype.f90
-                              ${CMAKE_CURRENT_SOURCE_DIR}/physics/mersenne_twister.f
-                              ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_nst_water_prop.f90
-                              ${CMAKE_CURRENT_SOURCE_DIR}/physics/aer_cloud.F
-                              ${CMAKE_CURRENT_SOURCE_DIR}/physics/wv_saturation.F
-                              ${CMAKE_CURRENT_SOURCE_DIR}/physics/cldwat2m_micro.F
-                              ${CMAKE_CURRENT_SOURCE_DIR}/physics/surface_perturbation.F90
-                              ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_mp_thompson_make_number_concentrations.F90
-                              ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_SF_JSFC.F90
-                              ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_BL_MYJPBL.F90
+  SET_SOURCE_FILES_PROPERTIES(${LOCAL_CURRENT_SOURCE_DIR}/physics/module_bfmicrophysics.f
+                              ${LOCAL_CURRENT_SOURCE_DIR}/physics/sflx.f
+                              ${LOCAL_CURRENT_SOURCE_DIR}/physics/sfc_diff.f
+                              ${LOCAL_CURRENT_SOURCE_DIR}/physics/sfc_diag.f
+                              ${LOCAL_CURRENT_SOURCE_DIR}/physics/module_nst_model.f90
+                              ${LOCAL_CURRENT_SOURCE_DIR}/physics/calpreciptype.f90
+                              ${LOCAL_CURRENT_SOURCE_DIR}/physics/mersenne_twister.f
+                              ${LOCAL_CURRENT_SOURCE_DIR}/physics/module_nst_water_prop.f90
+                              ${LOCAL_CURRENT_SOURCE_DIR}/physics/aer_cloud.F
+                              ${LOCAL_CURRENT_SOURCE_DIR}/physics/wv_saturation.F
+                              ${LOCAL_CURRENT_SOURCE_DIR}/physics/cldwat2m_micro.F
+                              ${LOCAL_CURRENT_SOURCE_DIR}/physics/surface_perturbation.F90
+                              ${LOCAL_CURRENT_SOURCE_DIR}/physics/module_mp_thompson_make_number_concentrations.F90
+                              ${LOCAL_CURRENT_SOURCE_DIR}/physics/module_SF_JSFC.F90
+                              ${LOCAL_CURRENT_SOURCE_DIR}/physics/module_BL_MYJPBL.F90
                               PROPERTIES COMPILE_FLAGS "-fdefault-real-8 -fdefault-double-8 ${OpenMP_Fortran_FLAGS}")
 
   if (PROJECT STREQUAL "CCPP-FV3")
     # Set 32-bit floating point precision flags for certain files
     # that are executed in the dynamics (fast physics part)
     if (DYN32)
-      if (${CMAKE_CURRENT_SOURCE_DIR}/physics/gfdl_fv_sat_adj.F90 IN_LIST SCHEMES)
+      if (${LOCAL_CURRENT_SOURCE_DIR}/physics/gfdl_fv_sat_adj.F90 IN_LIST SCHEMES)
       # Reduce floating point precision from 64-bit to 32-bit, if necessary
       set(CMAKE_Fortran_FLAGS_PREC32 ${CMAKE_Fortran_FLAGS_DEFAULT_PREC})
       string(REPLACE "-fdefault-real-8" ""
              CMAKE_Fortran_FLAGS_PREC32 "${CMAKE_Fortran_FLAGS_PREC32}")
       string(REPLACE "-fdefault-double-8" ""
              CMAKE_Fortran_FLAGS_PREC32 "${CMAKE_Fortran_FLAGS_PREC32}")
-      SET_PROPERTY(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/physics/gfdl_fv_sat_adj.F90
+      SET_PROPERTY(SOURCE ${LOCAL_CURRENT_SOURCE_DIR}/physics/gfdl_fv_sat_adj.F90
                    APPEND_STRING PROPERTY COMPILE_FLAGS " ${CMAKE_Fortran_FLAGS_PREC32} ${OpenMP_Fortran_FLAGS} ")
       # Add all of the above files to the list of schemes with special floating point precision flags
-      list(APPEND SCHEMES_SFX_PREC ${CMAKE_CURRENT_SOURCE_DIR}/physics/gfdl_fv_sat_adj.F90)
+      list(APPEND SCHEMES_SFX_PREC ${LOCAL_CURRENT_SOURCE_DIR}/physics/gfdl_fv_sat_adj.F90)
       endif()
     endif()
 
@@ -241,14 +223,14 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
   # Adjust settings for bit-for-bit reproducibility of NEMSfv3gfs
   if (PROJECT STREQUAL "CCPP-FV3")
 
-    if (${CMAKE_CURRENT_SOURCE_DIR}/physics/module_sf_mynn.F90 IN_LIST SCHEMES)
+    if (${LOCAL_CURRENT_SOURCE_DIR}/physics/module_sf_mynn.F90 IN_LIST SCHEMES)
       # Reduce optimization for module_sf_mynn.F90 (to avoid an apparent compiler bug with Intel 18 on Hera)
-      SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/physics/module_sf_mynn.F90
+      SET_SOURCE_FILES_PROPERTIES(${LOCAL_CURRENT_SOURCE_DIR}/physics/module_sf_mynn.F90
                                   PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_OPT} -O1")
-      list(APPEND SCHEMES_SFX_OPT ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_sf_mynn.F90)
+      list(APPEND SCHEMES_SFX_OPT ${LOCAL_CURRENT_SOURCE_DIR}/physics/module_sf_mynn.F90)
     endif()
 
-    if (${CMAKE_CURRENT_SOURCE_DIR}/physics/radiation_aerosols.f IN_LIST SCHEMES)
+    if (${LOCAL_CURRENT_SOURCE_DIR}/physics/radiation_aerosols.f IN_LIST SCHEMES)
       # Replace -xHost or -xCORE-AVX2 with -xCORE-AVX-I for certain files
       set(CMAKE_Fortran_FLAGS_LOPT1 ${CMAKE_Fortran_FLAGS_OPT})
       string(REPLACE "-xHOST" "-xCORE-AVX-I"
@@ -260,10 +242,10 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
       string(REPLACE "-axSSE4.2,CORE-AVX2" "-axSSE4.2,CORE-AVX-I"
              CMAKE_Fortran_FLAGS_LOPT1
              "${CMAKE_Fortran_FLAGS_LOPT1}")
-      SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/physics/radiation_aerosols.f
+      SET_SOURCE_FILES_PROPERTIES(${LOCAL_CURRENT_SOURCE_DIR}/physics/radiation_aerosols.f
                                   PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_LOPT1}")
       # Add all of the above files to the list of schemes with special compiler flags
-      list(APPEND SCHEMES_SFX_OPT ${CMAKE_CURRENT_SOURCE_DIR}/physics/radiation_aerosols.f)
+      list(APPEND SCHEMES_SFX_OPT ${LOCAL_CURRENT_SOURCE_DIR}/physics/radiation_aerosols.f)
     endif()
 
     # Remove files with special compiler flags from list of files with standard compiler flags
@@ -277,15 +259,15 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
     # Set 32-bit floating point precision flags for certain files
     # that are executed in the dynamics (fast physics part)
     if (DYN32)
-      if (${CMAKE_CURRENT_SOURCE_DIR}/physics/gfdl_fv_sat_adj.F90 IN_LIST SCHEMES)
+      if (${LOCAL_CURRENT_SOURCE_DIR}/physics/gfdl_fv_sat_adj.F90 IN_LIST SCHEMES)
         # Reduce floating point precision from 64-bit to 32-bit, if necessary
         set(CMAKE_Fortran_FLAGS_PREC32 ${CMAKE_Fortran_FLAGS_DEFAULT_PREC})
         string(REPLACE "-real-size 64" "-real-size 32"
                CMAKE_Fortran_FLAGS_PREC32 "${CMAKE_Fortran_FLAGS_PREC32}")
-        SET_PROPERTY(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/physics/gfdl_fv_sat_adj.F90
+        SET_PROPERTY(SOURCE ${LOCAL_CURRENT_SOURCE_DIR}/physics/gfdl_fv_sat_adj.F90
                      APPEND_STRING PROPERTY COMPILE_FLAGS " ${CMAKE_Fortran_FLAGS_PREC32} ${OpenMP_Fortran_FLAGS} ")
         # Add all of the above files to the list of schemes with special floating point precision flags
-        list(APPEND SCHEMES_SFX_PREC ${CMAKE_CURRENT_SOURCE_DIR}/physics/gfdl_fv_sat_adj.F90)
+        list(APPEND SCHEMES_SFX_PREC ${LOCAL_CURRENT_SOURCE_DIR}/physics/gfdl_fv_sat_adj.F90)
       endif()
     endif()
 
@@ -309,27 +291,27 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
                  APPEND_STRING PROPERTY COMPILE_FLAGS " ${CMAKE_Fortran_FLAGS_DEFAULT_PREC} ${OpenMP_Fortran_FLAGS} ")
 
   else (PROJECT STREQUAL "CCPP-FV3")
-    SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/physics/module_bfmicrophysics.f
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/sflx.f
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/sfc_diff.f
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/sfc_diag.f
+    SET_SOURCE_FILES_PROPERTIES(${LOCAL_CURRENT_SOURCE_DIR}/physics/module_bfmicrophysics.f
+                                ${LOCAL_CURRENT_SOURCE_DIR}/physics/sflx.f
+                                ${LOCAL_CURRENT_SOURCE_DIR}/physics/sfc_diff.f
+                                ${LOCAL_CURRENT_SOURCE_DIR}/physics/sfc_diag.f
                                 PROPERTIES COMPILE_FLAGS "-r8 ${OpenMP_Fortran_FLAGS} ")
-    SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/physics/module_nst_model.f90
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/calpreciptype.f90
+    SET_SOURCE_FILES_PROPERTIES(${LOCAL_CURRENT_SOURCE_DIR}/physics/module_nst_model.f90
+                                ${LOCAL_CURRENT_SOURCE_DIR}/physics/calpreciptype.f90
                                 PROPERTIES COMPILE_FLAGS "-r8 -free ${OpenMP_Fortran_FLAGS} ")
-    SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/physics/mersenne_twister.f
+    SET_SOURCE_FILES_PROPERTIES(${LOCAL_CURRENT_SOURCE_DIR}/physics/mersenne_twister.f
                                 PROPERTIES COMPILE_FLAGS "-r8 -ftz ${OpenMP_Fortran_FLAGS} ")
-    SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/physics/module_nst_water_prop.f90
+    SET_SOURCE_FILES_PROPERTIES(${LOCAL_CURRENT_SOURCE_DIR}/physics/module_nst_water_prop.f90
                                 PROPERTIES COMPILE_FLAGS "-extend-source 132 -r8 -free ${OpenMP_Fortran_FLAGS} ")
-    SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/physics/aer_cloud.F
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/wv_saturation.F
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/cldwat2m_micro.F
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/surface_perturbation.F90
+    SET_SOURCE_FILES_PROPERTIES(${LOCAL_CURRENT_SOURCE_DIR}/physics/aer_cloud.F
+                                ${LOCAL_CURRENT_SOURCE_DIR}/physics/wv_saturation.F
+                                ${LOCAL_CURRENT_SOURCE_DIR}/physics/cldwat2m_micro.F
+                                ${LOCAL_CURRENT_SOURCE_DIR}/physics/surface_perturbation.F90
                                 PROPERTIES COMPILE_FLAGS "-r8 ${OpenMP_Fortran_FLAGS} ")
-    SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/physics/module_mp_thompson_make_number_concentrations.F90
+    SET_SOURCE_FILES_PROPERTIES(${LOCAL_CURRENT_SOURCE_DIR}/physics/module_mp_thompson_make_number_concentrations.F90
                                 PROPERTIES COMPILE_FLAGS "-r8 ${OpenMP_Fortran_FLAGS} ")
-    SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/physics/module_SF_JSFC.F90
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_BL_MYJPBL.F90
+    SET_SOURCE_FILES_PROPERTIES(${LOCAL_CURRENT_SOURCE_DIR}/physics/module_SF_JSFC.F90
+                                ${LOCAL_CURRENT_SOURCE_DIR}/physics/module_BL_MYJPBL.F90
                                 PROPERTIES COMPILE_FLAGS "-r8 ${OpenMP_Fortran_FLAGS} ")
   endif (PROJECT STREQUAL "CCPP-FV3")
 
