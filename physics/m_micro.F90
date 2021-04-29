@@ -442,7 +442,7 @@ end subroutine m_micro_init
            END DO
          END DO
          DO K=0, LM
-           ll = lm-k
+           ll = lm-k+1
            DO I = 1,IM
              PLE(i,k)   = prsi_i(i,ll) * 0.01_kp      ! interface pressure in hPa
              zet(i,k+1) = phii(i,ll) * onebg
