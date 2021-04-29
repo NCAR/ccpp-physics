@@ -5,7 +5,7 @@
 module GFS_rrtmgp_thompsonmp_pre
   use machine, only: &
        kind_phys
-  use rrtmgp_aux, only: &
+  use radiation_tools, only: &
        check_error_msg
   use module_mp_thompson, only: &
        calc_effectRad, Nt_c,    &
@@ -40,9 +40,9 @@ contains
   subroutine GFS_rrtmgp_thompsonmp_pre_run(nCol, nLev, nTracers, ncnd, doSWrad, doLWrad, &
        i_cldliq, i_cldice, i_cldrain, i_cldsnow, i_cldgrpl, i_cldtot, i_cldliq_nc,       &
        i_cldice_nc, i_twa, effr_in, p_lev, p_lay, tv_lay, t_lay, effrin_cldliq,          &
-       effrin_cldice, effrin_cldsnow, tracer, qs_lay, q_lay, relhum, cld_frac_mg, con_g, &
-       con_rd, con_eps, uni_cld, lmfshal, lmfdeep2, ltaerosol, do_mynnedmf, imfdeepcnv,  &
-       imfdeepcnv_gf, doGP_cldoptics_PADE, doGP_cldoptics_LUT,                           &
+       effrin_cldice, effrin_cldsnow, tracer, qs_lay, q_lay, relhum, con_g, con_rd,      &
+       con_eps, lmfshal, ltaerosol, do_mynnedmf, imfdeepcnv, imfdeepcnv_gf,              &
+       doGP_cldoptics_PADE, doGP_cldoptics_LUT,                                          &
        cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp,   &
        cld_rerain, precip_frac, errmsg, errflg)
 
@@ -67,9 +67,7 @@ contains
          doSWrad,           & ! Call SW radiation?
          doLWrad,           & ! Call LW radiation
          effr_in,           & ! Use cloud effective radii provided by model?
-         uni_cld,           & ! Use provided cloud-fraction?
          lmfshal,           & ! Flag for mass-flux shallow convection scheme used by Xu-Randall
-         lmfdeep2,          & ! Flag for some scale-aware mass-flux convection scheme active
          ltaerosol,         & ! Flag for aerosol option
          do_mynnedmf,       & ! Flag to activate MYNN-EDMF
          doGP_cldoptics_LUT,& ! Flag to do GP cloud-optics (LUTs)
@@ -85,8 +83,7 @@ contains
          qs_lay,            & ! Saturation vapor pressure (Pa)
          q_lay,             & ! water-vapor mixing ratio (kg/kg)
          relhum,            & ! Relative humidity
-         p_lay,             & ! Pressure at model-layers (Pa)
-         cld_frac_mg          ! Cloud-fraction from MG scheme. WTF?????
+         p_lay                ! Pressure at model-layers (Pa)
     real(kind_phys), dimension(:,:), intent(in) :: &
          p_lev                ! Pressure at model-level interfaces (Pa)
     real(kind_phys), dimension(:,:,:),intent(in) :: &
@@ -161,9 +158,9 @@ contains
           qc_mp(iCol,iLay) = tracer(iCol,iLay,i_cldliq)    / (1.-q_lay(iCol,iLay))
           qi_mp(iCol,iLay) = tracer(iCol,iLay,i_cldice)    / (1.-q_lay(iCol,iLay))
           qs_mp(iCol,iLay) = tracer(iCol,iLay,i_cldsnow)   / (1.-q_lay(iCol,iLay))
-          nc_mp(iCol,iLay) = tracer(iCol,iLay,i_cldliq_nc) / (1.-q_lay(iCol,iLay))
           ni_mp(iCol,iLay) = tracer(iCol,iLay,i_cldice_nc) / (1.-q_lay(iCol,iLay))
           if (ltaerosol) then
+             nc_mp(iCol,iLay) = tracer(iCol,iLay,i_cldliq_nc) / (1.-q_lay(iCol,iLay))
              nwfa(iCol,iLay)  = tracer(iCol,iLay,i_twa)
              if (qc_mp(iCol,iLay) > 1.e-12 .and. nc_mp(iCol,iLay) < 100.) then
                nc_mp(iCol,iLay) = make_DropletNumber(qc_mp(iCol,iLay)*rho, nwfa(iCol,iLay)*rho) * orho
@@ -187,48 +184,55 @@ contains
           re_cloud(iCol,iLay) = MAX(re_qc_min, MIN(re_cloud(iCol,iLay), re_qc_max))
           re_ice(iCol,iLay)   = MAX(re_qi_min, MIN(re_ice(iCol,iLay),   re_qi_max))
           re_snow(iCol,iLay)  = MAX(re_qs_min, MIN(re_snow(iCol,iLay),  re_qs_max))
-       end do
+       enddo
     enddo
 
     ! Scale Thompson's effective radii from meter to micron
-    effrin_cldliq(1:nCol,1:nLev)  = re_cloud(1:nCol,1:nLev)*1.e6
-    effrin_cldice(1:nCol,1:nLev)  = re_ice(1:nCol,1:nLev)*1.e6
-    effrin_cldsnow(1:nCol,1:nLev) = re_snow(1:nCol,1:nLev)*1.e6
+    do iLay = 1, nLev
+       do iCol = 1, nCol
+          effrin_cldliq(iCol,iLay)  = re_cloud(iCol,iLay)*1.e6
+          effrin_cldice(iCol,iLay)  = re_ice(iCol,iLay)*1.e6
+          effrin_cldsnow(iCol,iLay) = re_snow(iCol,iLay)*1.e6
+       enddo
+    enddo
 
     ! Bound effective radii for RRTMGP, LUT's for cloud-optics go from
     !   2.5 - 21.5 microns for liquid clouds,
     !   10  - 180  microns for ice-clouds
     if (doGP_cldoptics_PADE .or. doGP_cldoptics_LUT) then
-       where(effrin_cldliq .lt. radliq_lwr) effrin_cldliq = radliq_lwr
-       where(effrin_cldliq .gt. radliq_upr) effrin_cldliq = radliq_upr
-       where(effrin_cldice .lt. radice_lwr) effrin_cldice = radice_lwr
-       where(effrin_cldice .gt. radice_upr) effrin_cldice = radice_upr
+       do iLay = 1, nLev
+          do iCol = 1, nCol
+             if (effrin_cldliq(iCol,iLay) .lt. radliq_lwr) effrin_cldliq(iCol,iLay) = radliq_lwr
+             if (effrin_cldliq(iCol,iLay) .gt. radliq_upr) effrin_cldliq(iCol,iLay) = radliq_upr
+             if (effrin_cldice(iCol,iLay) .lt. radice_lwr) effrin_cldice(iCol,iLay) = radice_lwr
+             if (effrin_cldice(iCol,iLay) .gt. radice_upr) effrin_cldice(iCol,iLay) = radice_upr
+          enddo
+       enddo
     endif
 
     ! Update global effective radii arrays.
-    cld_reliq(1:nCol,1:nLev)      = effrin_cldliq(1:nCol,1:nLev)
-    cld_reice(1:nCol,1:nLev)      = effrin_cldice(1:nCol,1:nLev)
-    cld_resnow(1:nCol,1:nLev)     = effrin_cldsnow(1:nCol,1:nLev)
-    cld_rerain(1:nCol,1:nLev)     = rerain_def
-
+    do iLay = 1, nLev
+       do iCol = 1, nCol
+          cld_reliq(iCol,iLay)      = effrin_cldliq(iCol,iLay)
+          cld_reice(iCol,iLay)      = effrin_cldice(iCol,iLay)
+          cld_resnow(iCol,iLay)     = effrin_cldsnow(iCol,iLay)
+          cld_rerain(iCol,iLay)     = rerain_def
+       enddo
+    enddo
     ! Compute cloud-fraction. Else, use value provided
-    if(.not. do_mynnedmf .or. imfdeepcnv .ne. imfdeepcnv_gf ) then ! MYNN PBL or GF conv
+    if(.not. do_mynnedmf .and. imfdeepcnv .ne. imfdeepcnv_gf ) then ! MYNN PBL or GF conv
        ! Cloud-fraction
-       if (uni_cld) then
-          cld_frac(1:nCol,1:nLev) = cld_frac_mg(1:nCol,1:nLev)
-       else
-          if(      lmfshal) alpha0 = 100. ! Default (from GATE simulations)
-          if(.not. lmfshal) alpha0 = 2000.
-          ! Xu-Randall (1996) cloud-fraction
-          do iLay = 1, nLev
-             do iCol = 1, nCol
-                cld_mr = cld_condensate(iCol,iLay,1) + cld_condensate(iCol,iLay,2) +  &
-                         cld_condensate(iCol,iLay,4)
-                cld_frac(iCol,iLay) = cld_frac_XuRandall(p_lay(iCol,iLay),            &
-                   qs_lay(iCol,iLay), relhum(iCol,iLay), cld_mr, alpha0)
-             enddo
+       if(      lmfshal) alpha0 = 100. ! Default (from GATE simulations)
+       if(.not. lmfshal) alpha0 = 2000.
+       ! Xu-Randall (1996) cloud-fraction
+       do iLay = 1, nLev
+          do iCol = 1, nCol
+             cld_mr = cld_condensate(iCol,iLay,1) + cld_condensate(iCol,iLay,2) +  &
+                  cld_condensate(iCol,iLay,4)
+             cld_frac(iCol,iLay) = cld_frac_XuRandall(p_lay(iCol,iLay),            &
+                  qs_lay(iCol,iLay), relhum(iCol,iLay), cld_mr, alpha0)
           enddo
-       endif
+       enddo
     endif
 
     ! Precipitation fraction (Hack. For now use cloud-fraction)

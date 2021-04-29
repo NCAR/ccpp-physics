@@ -592,6 +592,15 @@
   type = logical
   intent = in
   optional = F
+[htrlwu]
+  standard_name = updated_tendency_of_air_temperature_due_to_longwave_heating_on_physics_time_step
+  long_name = total sky longwave heating rate on physics time step
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [adjsfculw]
   standard_name = surface_upwelling_longwave_flux
   long_name = surface upwelling longwave flux at current time

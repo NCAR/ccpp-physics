@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = GFS_rrtmgp_cloud_overlap_pre
   type = scheme
-  dependencies = rrtmgp_aux.F90, radiation_cloud_overlap.F90
+  dependencies = radiation_tools.F90, radiation_cloud_overlap.F90
 
 ########################################################################
 [ccpp-arg-table]
