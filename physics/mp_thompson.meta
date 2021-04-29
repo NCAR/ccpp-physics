@@ -545,6 +545,22 @@
   kind = kind_phys
   intent = in
   optional = F
+[istep]
+  standard_name = ccpp_loop_counter
+  long_name = loop counter for subcycling loops in CCPP
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[nsteps]
+  standard_name = ccpp_loop_extent
+  long_name = loop extent for subcycling loops in CCPP
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [prcp]
   standard_name = lwe_thickness_of_explicit_precipitation_amount
   long_name = explicit precipitation (rain, ice, snow, graupel) on physics timestep

@@ -90,6 +90,14 @@
   kind = kind_phys
   intent = in
   optional = F
+[nsteps]
+  standard_name = ccpp_loop_extent
+  long_name = number of subcycle calls
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [ttendlim]
   standard_name = limit_for_temperature_tendency_for_microphysics
   long_name = temperature tendency limiter per physics time step
