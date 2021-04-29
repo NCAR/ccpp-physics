@@ -118,24 +118,13 @@ contains
         TSFFCS = tref
       else
         TSFFCS = tsfco
-      end if
+      endif
 !
       do ix=1,npts
         if (landfrac(ix) > -1.0e-6_kind_phys) then
           slmskl(ix) = ceiling(landfrac(ix))
           slmskw(ix) = floor(landfrac(ix)+1.0e-6_kind_phys)
         endif
-
-!       IF (slmsk(ix) < 0.1_kind_phys .OR. slmsk(ix) > 1.5_kind_phys) THEN
-!         slmskl(ix) = 0.0_kind_phys
-!         slmskw(ix) = 0.0_kind_phys
-!         if (frac_grid) then
-!           slmskw(ix) = floor(landfrac(ix))
-!         endif
-!       ELSE
-!         slmskl(ix) = 1.0_kind_phys
-!         slmskw(ix) = 1.0_kind_phys
-!       ENDIF
 
         if (lakefrac(ix) > 0.0_kind_phys) then
           min_ice(ix) = min_lakeice
@@ -210,7 +199,6 @@ contains
       if ( nsst > 0 ) then
         tref = TSFFCS
       else
-!       tsfc  = TSFFCS
         tsfco = TSFFCS
       endif
 !
@@ -251,7 +239,7 @@ contains
             tslb(ix,ls)  = STCFC1(ll)
             sh2o(ix,ls)  = SLCFC1(ll)
           endif
-          if (ls <= kice) tiice(ix,ls) = STCFC1(ll)
+!         if (ls <= kice) tiice(ix,ls) = STCFC1(ll)
         enddo
       enddo
 !

@@ -20,10 +20,10 @@
      &,       kpdvmn,kpdvmx,kpdslp,kpdabs
      &,       kpdsnd, kpdabs_0, kpdabs_1, kpdalb(4)
       parameter(kpdtsf=11,  kpdwet=86, kpdsno=65,  kpdzor=83,
-!    1          kpdalb=84,  kpdais=91, kpdtg3=11,  kpdplr=224,
-     1          kpdais=91,  kpdtg3=11, kpdplr=224,
-     2          kpdgla=238, kpdmxi=91, kpdscv=238, kpdsmc=144,
-     3          kpdoro=8,   kpdmsk=81, kpdstc=11,  kpdacn=91, kpdveg=87,
+!    &          kpdalb=84,  kpdais=91, kpdtg3=11,  kpdplr=224,
+     &          kpdais=91,  kpdtg3=11, kpdplr=224,
+     &          kpdgla=238, kpdmxi=91, kpdscv=238, kpdsmc=144,
+     &          kpdoro=8,   kpdmsk=81, kpdstc=11,  kpdacn=91, kpdveg=87,
 !cbosu  max snow albedo uses a grib id number of 159, not 255.
      &          kpdvmn=255, kpdvmx=255,kpdslp=236, kpdabs_0=255,    
      &          kpdvet=225, kpdsot=224,kpdabs_1=159,
@@ -401,8 +401,6 @@
 !     parameter(snwmin=25.,snwmax=100.)
       parameter(snwmin=5.0,snwmax=100.)
 !     real (kind=kind_io8), parameter :: ten=10.0, one=1.0, zero=0.0
-      real (kind=kind_io8), parameter :: crit_lnd=1.0e-6,               &
-     &                                   crit_wat=1.0e-6
 !
 !  coefficients of blending forecast and interpolated clim
 !  (or analyzed) fields over sea or land(l) (not for clouds)
@@ -517,7 +515,7 @@
 ! in this program).
 !
       real (kind=kind_io8) f10m  (len)
-      real (kind=kind_io8) fsmcl(25),fsmcs(25),fstcl(25),fstcs(25)
+      real (kind=kind_io8) fsmcl(25), fsmcs(25), fstcl(25), fstcs(25)
       real (kind=kind_io8) fcsmcl(25),fcsmcs(25),fcstcl(25),fcstcs(25)
 
 !clu [+1l] add swratio (soil moisture liquid-to-total ratio)
@@ -865,14 +863,14 @@
         endif
 
         if (ivegsrc == 2) then   ! sib
-          veg_type_landice=13
+          veg_type_landice = 13
         else
-          veg_type_landice=15
+          veg_type_landice = 15
         endif
         if (isot == 0) then
-          soil_type_landice=9
+          soil_type_landice = 9
         else
-          soil_type_landice=16
+          soil_type_landice = 16
         endif
 !
         deltf = deltsfc / 24.0
@@ -1057,32 +1055,6 @@
         allocate (tsfcl0(len))
         allocate (glacir(len))
         allocate (amxice(len))
-!
-!       do i=1,len
-!         if (landfrac(i) > crit_lnd) then
-!           slmskl(i) = one
-!           slmskw(i) = one
-!           if (one-landfrac(i) > crit_wat) then
-!             slmskw(i) = zero
-!             if (sicfcs(i) > min_ice(i)) then
-!               slmskw(i) = 2.0_kind_io8
-!             endif
-!           endif
-!         else
-!           slmskl(i) = zero
-!           slmskw(i) = zero
-!           if (sicfcs(i) > min_ice(i)) then
-!             slmskl(i) = 2.0_kind_io8
-!             slmskw(i) = 2.0_kind_io8
-!           endif
-!         endif
-!     if (i == 1) write(0,*)' landfrac=',landfrac(i),' slmskl=',        &
-!     if (i == 1) write(0,*)' slmskl=', slmskl(i),' slmskw=',           &
-!    &                        slmskw(i),' sicfcs=',sicfcs(i)
-!       enddo
-
-!     write(1000+me,*)' slmskl=',slmskl
-!     write(1000+me,*)' slmskw=',slmskw
 !
 !  read glacier
 !
@@ -1579,6 +1551,7 @@
 !  set ocean/land/sea-ice mask
 !
       call setlsi(slmskw,aisanl,len,aicice,slianl)
+
 !     if(lprnt) print *,' aisanl=',aisanl(iprnt),' slianl='
 !    *,slianl(iprnt),' slmskw=',slmskw(iprnt)
 !
@@ -2423,13 +2396,11 @@
               sicfcs(i) = sicanl(i)
               sihfcs(i) = sihnew
             endif
-!     if (lprnt .and. i == iprnt) write(0,*)' sicanl=',sicanl(i),       &
-!    &' sicfcs=',sicfcs(i),' siccanl=',sicanl(i),' sihfcs=',sihfcs(i)
           else
             tsffcs(i) = tsfanl(i)
-            sihfcs(i) = 0.0_kind_io8
-            sicfcs(i) = 0.0_kind_io8
-            slifcs(i) = 0.0_kind_io8
+            sihfcs(i) = zero
+            sicfcs(i) = zero
+            slifcs(i) = zero
             sitfcs(i) = tsffcs(i)
           endif
         endif
@@ -2532,7 +2503,7 @@
              tsffcs(i) = min(tsffcs(i),273.15)
            endif
          enddo
-       end if
+       endif
 !
 !     if(lprnt) print *,' tsffcsf=',tsffcs(iprnt)
 !     if(lprnt) print *,' stcfcsend=',stcfcs(iprnt,:)
@@ -5938,7 +5909,7 @@
       real (kind=kind_io8) albomx
       real (kind=kind_io8) albclm(len,4), slmask(len)
       do i=1,len
-        if(slmask(i).eq.0) then
+        if(slmask(i) == 0) then
           albclm(i,1) = albomx
           albclm(i,2) = albomx
           albclm(i,3) = albomx
