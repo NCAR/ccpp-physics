@@ -122,7 +122,7 @@ contains
 !
       do ix=1,npts
         if (landfrac(ix) > -1.0e-6_kind_phys) then
-          slmskl(ix) = ceiling(landfrac(ix))
+          slmskl(ix) = ceiling(landfrac(ix)-1.0e-6_kind_phys)
           slmskw(ix) = floor(landfrac(ix)+1.0e-6_kind_phys)
         endif
 
