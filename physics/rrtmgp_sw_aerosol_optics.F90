@@ -2,7 +2,7 @@ module rrtmgp_sw_aerosol_optics
   use machine,                   only: kind_phys
   use mo_gas_optics_rrtmgp,      only: ty_gas_optics_rrtmgp
   use mo_optical_props,          only: ty_optical_props_2str
-  use rrtmgp_aux,                only: check_error_msg
+  use radiation_tools,                only: check_error_msg
   use rrtmgp_sw_gas_optics,      only: sw_gas_props
   use rrtmgp_lw_gas_optics,      only: lw_gas_props
   use module_radiation_aerosols, only: &
@@ -85,7 +85,7 @@ contains
     if (nDay .gt. 0) then
 
        ! Call module_radiation_aerosols::setaer(),to setup aerosols property profile
-       call setaer(p_lev, p_lay, p_lk, tv_lay, relhum, lsmask, tracer, aerfld, lon, lat, nCol, nLev, &
+       call setaer(p_lev/100., p_lay/100., p_lk, tv_lay, relhum, lsmask, tracer, aerfld, lon, lat, nCol, nLev, &
             nLev+1, .true., .true., aerosolssw2, aerosolslw, aerodp)
 
        ! Store aerosol optical properties

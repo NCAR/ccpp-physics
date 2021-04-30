@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = GFS_rrtmgp_thompsonmp_pre
   type = scheme
-  dependencies = rrtmgp_aux.F90, module_mp_thompson_make_number_concentrations.F90, module_mp_thompson.F90, rrtmgp_lw_cloud_optics.F90
+  dependencies = radiation_tools.F90, module_mp_thompson_make_number_concentrations.F90, module_mp_thompson.F90, rrtmgp_lw_cloud_optics.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -63,25 +63,9 @@
   type = logical  
   intent = in
   optional = F   
-[uni_cld]
-  standard_name = flag_for_uni_cld
-  long_name = flag for uni_cld
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
 [lmfshal]
   standard_name = flag_for_lmfshal
   long_name = flag for lmfshal
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[lmfdeep2]
-  standard_name = flag_for_scale_aware_mass_flux_convection
-  long_name = flag for some scale-aware mass-flux convection scheme active
   units = flag
   dimensions = ()
   type = logical
@@ -194,15 +178,6 @@
   kind = kind_phys  
   intent = inout
   optional = F  
-[cld_frac_mg]
-  standard_name = cloud_fraction_for_MG
-  long_name = cloud fraction used by Morrison-Gettelman MP
-  units = frac
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F   
 [do_mynnedmf]
   standard_name = do_mynnedmf
   long_name = flag to activate MYNN-EDMF
@@ -307,9 +282,9 @@
   intent = in
   optional = F
 [tracer]
-  standard_name = chemical_tracers
-  long_name = chemical tracers
-  units = g g-1
+  standard_name = tracer_concentration
+  long_name = model layer mean tracer concentration
+  units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers)
   type = real
   kind = kind_phys
