@@ -353,6 +353,15 @@
   type = logical
   intent = in
   optional = F
+[minGPpres]
+  standard_name = minimum_pressure_in_RRTMGP
+  long_name = minimum pressure allowed in RRTMGP
+  units = Pa
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [use_LW_jacobian]
   standard_name = flag_to_calc_RRTMGP_LW_jacobian
   long_name = logical flag to control RRTMGP LW calculation
@@ -360,7 +369,7 @@
   dimensions = ()
   type = logical  
   intent = in
-  optional = F  
+  optional = F
 [sfculw]
   standard_name = surface_upwelling_longwave_flux_on_radiation_time_step
   long_name = total sky sfc upward lw flux
@@ -370,15 +379,69 @@
   kind = kind_phys
   intent = in
   optional = F
-[sfculw_jac]
-  standard_name = RRTMGP_jacobian_of_lw_flux_upward_at_surface
-  long_name = RRTMGP Jacobian upward longwave flux at surface
+[fluxlwUP_jac]
+  standard_name = RRTMGP_jacobian_of_lw_flux_upward
+  long_name = RRTMGP Jacobian upward longwave flux profile
   units = W m-2 K-1
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
   type = real
   kind = kind_phys
   intent = in
-  optional = F    
+  optional = F
+[t_lay]
+  standard_name = air_temperature_updated_by_physics
+  long_name = model layer mean temperature updated by physics
+  units = K
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[t_lev]
+  standard_name = air_temperature_at_interface_for_RRTMGP
+  long_name = air temperature  at vertical interface for radiation calculation
+  units = K
+  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[p_lay]
+  standard_name = air_pressure
+  long_name = mean layer pressure
+  units = Pa
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[p_lev]
+  standard_name = air_pressure_at_interface
+  long_name = air pressure at model layer interfaces
+  units = Pa
+  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[flux2D_lwUP]
+  standard_name = RRTMGP_lw_flux_profile_upward_allsky
+  long_name = RRTMGP upward longwave all-sky flux profile
+  units = W m-2
+  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[flux2D_lwDOWN]
+  standard_name = RRTMGP_lw_flux_profile_downward_allsky
+  long_name = RRTMGP downward longwave all-sky flux profile
+  units = W m-2
+  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [pert_radtend]
   standard_name = flag_for_stochastic_radiative_heating_perturbations
   long_name = flag for stochastic radiative heating perturbations
@@ -415,6 +478,15 @@
 [dtdtnp]
   standard_name = tendency_of_air_temperature_to_withold_from_sppt
   long_name = temp. change from physics that should not be perturbed by sppt
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[htrlw]
+  standard_name = updated_tendency_of_air_temperature_due_to_longwave_heating_on_physics_time_step
+  long_name = total sky longwave heating rate on physics time step
   units = K s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
@@ -573,95 +645,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
-[minGPpres]
-  standard_name = minimum_pressure_in_RRTMGP
-  long_name = minimum pressure allowed in RRTMGP
-  units = Pa
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[use_LW_jacobian]
-  standard_name = flag_to_calc_RRTMGP_LW_jacobian
-  long_name = logical flag to control RRTMGP LW calculation
-  units = flag
-  dimensions = ()
-  type = logical  
-  intent = in
-  optional = F
-[fluxlwUP_jac]
-  standard_name = RRTMGP_jacobian_of_lw_flux_upward
-  long_name = RRTMGP Jacobian upward longwave flux profile
-  units = W m-2 K-1
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[htrlw]
-  standard_name = updated_tendency_of_air_temperature_due_to_longwave_heating_on_physics_time_step
-  long_name = total sky longwave heating rate on physics time step
-  units = K s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
-[t_lev]
-  standard_name = air_temperature_at_interface_for_RRTMGP
-  long_name = air temperature  at vertical interface for radiation calculation
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[t_lay]
-  standard_name = air_temperature_updated_by_physics
-  long_name = model layer mean temperature updated by physics
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[p_lay]
-  standard_name = air_pressure
-  long_name = mean layer pressure
-  units = Pa
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[p_lev]
-  standard_name = air_pressure_at_interface
-  long_name = air pressure at model layer interfaces
-  units = Pa
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[flux2D_lwUP]
-  standard_name = RRTMGP_lw_flux_profile_upward_allsky
-  long_name = RRTMGP upward longwave all-sky flux profile
-  units = W m-2
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[flux2D_lwDOWN]
-  standard_name = RRTMGP_lw_flux_profile_downward_allsky
-  long_name = RRTMGP downward longwave all-sky flux profile
-  units = W m-2
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
-  type = real
-  kind = kind_phys
-  intent = in
   optional = F
 [errmsg]
   standard_name = ccpp_error_message

@@ -172,14 +172,14 @@
       subroutine dcyc2t3_run                                            &
 !  ---  inputs:
      &     ( solhr,slag,sdec,cdec,sinlat,coslat,                        &
-     &       xlon,coszen,tsfc_lnd,tsfc_ice,tsfc_wat,tf,tsflw,           &
+     &       xlon,coszen,tsfc_lnd,tsfc_ice,tsfc_wat,tf,tsflw,tsfc,      &
      &       sfcemis_lnd, sfcemis_ice, sfcemis_wat,                     &
      &       sfcdsw,sfcnsw,sfcdlw,swh,swhc,hlw,hlwc,                    &
      &       sfcnirbmu,sfcnirdfu,sfcvisbmu,sfcvisdfu,                   &
      &       sfcnirbmd,sfcnirdfd,sfcvisbmd,sfcvisdfd,                   &
      &       im, levs, deltim, fhswr,                                   &
      &       dry, icy, wet,                                             &
-     &       minGPpres, tsfc, use_LW_jacobian, sfculw, fluxlwUP_jac,    &
+     &       minGPpres, use_LW_jacobian, sfculw, fluxlwUP_jac,          &
      &       t_lay, t_lev, p_lay, p_lev, flux2D_lwUP, flux2D_lwDOWN,    &
      &       pert_radtend, do_sppt,ca_global,                           &
 !    &       dry, icy, wet, lprnt, ipr,                                 &
