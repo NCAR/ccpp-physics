@@ -18,7 +18,7 @@
       use h2ointerp, only : read_h2odata, setindxh2o, h2ointerpol
 
       use aerclm_def, only : aerin, aer_pres, ntrcaer, ntrcaerm
-      use aerinterp,  only : read_aerdata, setindxaer, aerinterpol
+      use aerinterp,  only : read_aerdata, setindxaer, aerinterpol, read_aerdataf
 
       use iccn_def,   only : ciplin, ccnin, ci_pres
       use iccninterp, only : read_cidata, setindxci, ciinterpol
@@ -160,7 +160,7 @@
          integer,              intent(out)   :: errflg
 
          ! Local variables
-         integer :: i, j, ix, vegtyp
+         integer :: i, j, ix, vegtyp, iamin, iamax, jamin, jamax
          real(kind_phys) :: rsnow
 
          !--- Noah MP
@@ -176,7 +176,11 @@
          errflg = 0
 
          if (is_initialized) return
-         
+         iamin=999
+         iamax=-999
+         jamin=999
+         jamax=-999
+
 !> - Call read_o3data() to read ozone data 
          call read_o3data (ntoz, me, master)
 
@@ -270,6 +274,10 @@
                             jindx2_aer, ddy_aer, xlon_d,     &
                             iindx1_aer, iindx2_aer, ddx_aer, &
                             me, master)
+           iamin=min(minval(iindx1_aer), iamin)
+           iamax=max(maxval(iindx2_aer), iamax)
+           jamin=min(minval(jindx1_aer), jamin)
+           jamax=max(maxval(jindx2_aer), jamax)
          endif
 
 !> - Call setindxci() to initialize IN and CCN data
@@ -322,6 +330,14 @@
              sncovr_ice(:) = sncovr(:)
            endif
          endif
+         
+         if (errflg/=0) return
+
+         if (iaerclm) then
+           call read_aerdataf (iamin, iamax, jamin, jamax, me, master, iflip, &
+                               idate, errmsg, errflg)
+           if (errflg/=0) return
+         end if
 
          if (lsm == lsm_noahmp) then
            if (all(tvxy <= zero)) then
@@ -371,16 +387,20 @@
              tsnoxy (:,:)  = missing_value
              smoiseq(:,:)  = missing_value
              zsnsoxy(:,:)  = missing_value
-
+             
+             imn          = idate(2)
+             
              do ix=1,im
                if (landfrac(ix) >= drythresh) then
                  tvxy(ix)     = tsfcl(ix)
                  tgxy(ix)     = tsfcl(ix)
                  tahxy(ix)    = tsfcl(ix)
 
-                 if (snowd(ix) > 0.01_kind_phys .and. tsfcl(ix) > con_t0c ) tvxy(ix)  = con_t0c
-                 if (snowd(ix) > 0.01_kind_phys .and. tsfcl(ix) > con_t0c ) tgxy(ix)  = con_t0c
-                 if (snowd(ix) > 0.01_kind_phys .and. tsfcl(ix) > con_t0c ) tahxy(ix) = con_t0c
+                 if (snowd(ix) > 0.01_kind_phys .and. tsfcl(ix) > con_t0c ) then
+                   tvxy(ix)  = con_t0c
+                   tgxy(ix)  = con_t0c
+                   tahxy(ix) = con_t0c
+                 end if
 
                  canicexy(ix) = 0.0_kind_phys
                  canliqxy(ix) = canopy(ix)
@@ -404,14 +424,12 @@
                  albinir(ix)  = 0.2_kind_phys
                  emiss(ix)    = 0.95_kind_phys
 
-
                  waxy(ix)     = 4900.0_kind_phys
                  wtxy(ix)     = waxy(ix)
                  zwtxy(ix)    = (25.0_kind_phys + 2.0_kind_phys) - waxy(ix) / 1000.0_kind_phys / 0.2_kind_phys
 
                  vegtyp       = vtype(ix)
                  if (vegtyp == 0) vegtyp = 7
-                 imn          = idate(2)
 
                  if ((vegtyp == isbarren_table) .or. (vegtyp == isice_table) .or. (vegtyp == isurban_table) .or. (vegtyp == iswater_table)) then
 
@@ -491,9 +509,8 @@
                    dzsno(-1)    = 0.20_kind_phys
                    dzsno(0)     = snd - 0.05_kind_phys - 0.20_kind_phys
                  else
-                   errmsg = 'Error in GFS_phys_time_vary.fv3.F90: Problem with the logic assigning snow layers in Noah MP initialization'
+                   errmsg = 'Error in GFS_phys_time_vary.scm.F90: Problem with the logic assigning snow layers in Noah MP initialization'
                    errflg = 1
-                   return
                  endif
 
 ! Now we have the snowxy field
@@ -570,6 +587,8 @@
 
              enddo ! ix
 
+             if (errflg/=0) return
+
              deallocate(dzsno)
              deallocate(dzsnso)
 
@@ -619,7 +638,7 @@
             jindx1_aer, jindx2_aer, ddy_aer, iindx1_aer, iindx2_aer, ddx_aer, aer_nm,               &
             jindx1_ci, jindx2_ci, ddy_ci, iindx1_ci, iindx2_ci, ddx_ci, in_nm, ccn_nm,              &
             imap, jmap, prsl, seed0, rann, do_ugwp_v1, jindx1_tau, jindx2_tau, ddy_j1tau, ddy_j2tau,&
-            tau_amf, errmsg, errflg)
+            tau_amf, nthrds, errmsg, errflg)
 
          implicit none
 
@@ -648,6 +667,7 @@
          integer,              intent(in)    :: jindx1_tau(:), jindx2_tau(:)
          real(kind_phys),      intent(in)    :: ddy_j1tau(:), ddy_j2tau(:)
          real(kind_phys),      intent(inout) :: tau_amf(:)
+         integer,              intent(in)    :: nthrds
          character(len=*),     intent(out)   :: errmsg
          integer,              intent(out)   :: errflg
 
@@ -724,21 +744,12 @@
                              h2opl, ddy_h)
          endif
 
-!> - Call aerinterpol() to make aerosol interpolation
-         if (iaerclm) then
-           call aerinterpol (me, master, im, idate, fhour, &
-                             jindx1_aer, jindx2_aer,       &
-                             ddy_aer, iindx1_aer,          &
-                             iindx2_aer, ddx_aer,          &
-                             levs, prsl, aer_nm)
-         endif
-
 !> - Call ciinterpol() to make IN and CCN data interpolation
          if (iccn == 1) then
-           call ciinterpol (me, im, idate, fhour,    &
-                            jindx1_ci, jindx2_ci,    &
-                            ddy_ci, iindx1_ci,       &
-                            iindx2_ci, ddx_ci,       &
+           call ciinterpol (me, im, idate, fhour,     &
+                            jindx1_ci, jindx2_ci,     &
+                            ddy_ci, iindx1_ci,        &
+                            iindx2_ci, ddx_ci,        &
                             levs, prsl, in_nm, ccn_nm)
          endif
 
@@ -747,6 +758,17 @@
            call tau_amf_interp(me, master, im, idate, fhour, &
                                jindx1_tau, jindx2_tau,       &
                                ddy_j1tau, ddy_j2tau, tau_amf)
+         endif
+         
+!> - Call aerinterpol() to make aerosol interpolation
+         if (iaerclm) then
+           ! aerinterpol is using threading inside, don't
+           ! move into OpenMP parallel section above
+           call aerinterpol (me, master, nthrds, im, idate, &
+                              fhour, jindx1_aer, jindx2_aer,&
+                             ddy_aer, iindx1_aer,           &
+                             iindx2_aer, ddx_aer,           &
+                             levs, prsl, aer_nm)
          endif
          
 !       Not needed for SCM:

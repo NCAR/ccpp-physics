@@ -144,7 +144,7 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = F
 [tsfc_lnd]
   standard_name = surface_skin_temperature
@@ -153,7 +153,7 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = F
 [tsfc_wat]
   standard_name = sea_surface_temperature
@@ -162,7 +162,7 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = F
 [tg3]
   standard_name = deep_soil_temperature
@@ -731,7 +731,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
   optional = F
 [smcwlt2]
   standard_name = volume_fraction_of_condensed_water_in_soil_at_wilting_point
@@ -893,7 +893,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
   optional = F
 [weasd_ice]
   standard_name = water_equivalent_accumulated_snow_depth_over_ice
@@ -992,7 +992,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [tsurf_lnd]
   standard_name = surface_skin_temperature_after_iteration_over_land
@@ -1055,7 +1055,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [evap_lnd]
   standard_name = kinematic_surface_upward_latent_heat_flux_over_land
@@ -1064,7 +1064,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [hflx_lnd]
   standard_name = kinematic_surface_upward_sensible_heat_flux_over_land
@@ -1073,7 +1073,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [runof]
   standard_name = surface_runoff_flux
@@ -1082,7 +1082,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [runoff]
   standard_name = total_runoff
@@ -1109,7 +1109,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [cm_lnd]
   standard_name = surface_drag_coefficient_for_momentum_in_air_over_land
@@ -1136,7 +1136,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [evcw]
   standard_name = canopy_upward_latent_heat_flux
@@ -1145,7 +1145,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [stm]
   standard_name = soil_moisture_content
@@ -1244,7 +1244,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [evap_ice]
   standard_name = kinematic_surface_upward_latent_heat_flux_over_ice
@@ -1253,7 +1253,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [ep1d_ice]
   standard_name = surface_upward_potential_latent_heat_flux_over_ice
@@ -1271,7 +1271,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [cm_ice]
   standard_name = surface_drag_coefficient_for_momentum_in_air_over_ice
@@ -1307,7 +1307,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [sbsno]
   standard_name = snow_deposition_sublimation_upward_latent_heat_flux
@@ -1316,7 +1316,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [cmm_lnd]
   standard_name = surface_drag_wind_speed_for_momentum_in_air_over_land
@@ -1325,7 +1325,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [chh_lnd]
   standard_name = surface_drag_mass_flux_for_heat_and_moisture_in_air_over_land
@@ -1334,7 +1334,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [cmm_ice]
   standard_name = surface_drag_wind_speed_for_momentum_in_air_over_ice
@@ -1343,7 +1343,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [chh_ice]
   standard_name = surface_drag_mass_flux_for_heat_and_moisture_in_air_over_ice
@@ -1352,7 +1352,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [flag_iter]
   standard_name = flag_for_iteration

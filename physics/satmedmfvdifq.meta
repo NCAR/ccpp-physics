@@ -678,7 +678,7 @@
   units = flag
   dimensions = ()
   type = logical
-  intent = inout
+  intent = in
   optional = F
 [qdiag3d]
   standard_name = flag_tracer_diagnostics_3D
@@ -686,7 +686,7 @@
   units = flag
   dimensions = ()
   type = logical
-  intent = inout
+  intent = in
   optional = F
 [errmsg]
   standard_name = ccpp_error_message

@@ -39,62 +39,6 @@
   type = integer  
   intent = in
   optional = F  
-[doSWrad]
-  standard_name = flag_to_calc_sw
-  long_name = logical flags for sw radiation calls
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[doLWrad]
-  standard_name = flag_to_calc_lw
-  long_name = logical flags for lw radiation calls
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F    
-[effr_in]
-  standard_name = flag_for_cloud_effective_radii
-  long_name = flag for cloud effective radii calculations in GFDL microphysics
-  units = flag
-  dimensions = ()
-  type = logical  
-  intent = in
-  optional = F
-[doGP_cldoptics_PADE]
-  standard_name = flag_to_calc_lw_cld_optics_using_RRTMGP_PADE
-  long_name = logical flag to control cloud optics scheme.
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[doGP_cldoptics_LUT]
-  standard_name = flag_to_calc_lw_cld_optics_using_RRTMGP_LUT
-  long_name = logical flag to control cloud optics scheme.
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[do_mynnedmf]
-  standard_name = do_mynnedmf
-  long_name = flag to activate MYNN-EDMF
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[kdt]
-  standard_name = index_of_time_step
-  long_name = current forecast iteration
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [i_cldliq]
   standard_name = index_for_liquid_cloud_condensate
   long_name = tracer index for cloud condensate (or liquid water)
@@ -143,6 +87,73 @@
   type = integer  
   intent = in
   optional = F 
+[doSWrad]
+  standard_name = flag_to_calc_sw
+  long_name = logical flags for sw radiation calls
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[doLWrad]
+  standard_name = flag_to_calc_lw
+  long_name = logical flags for lw radiation calls
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F    
+[effr_in]
+  standard_name = flag_for_cloud_effective_radii
+  long_name = flag for cloud effective radii calculations in GFDL microphysics
+  units = flag
+  dimensions = ()
+  type = logical  
+  intent = in
+  optional = F
+[kdt]
+  standard_name = index_of_time_step
+  long_name = current forecast iteration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[do_mynnedmf]
+  standard_name = do_mynnedmf
+  long_name = flag to activate MYNN-EDMF
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[p_lev]
+  standard_name = air_pressure_at_interface_for_RRTMGP_in_hPa
+  long_name = air pressure at vertical interface for radiation calculation
+  units = hPa
+  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[p_lay]
+  standard_name = air_pressure_at_layer_for_RRTMGP_in_hPa
+  long_name = air pressure at vertical layer for radiation calculation
+  units = hPa
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[tv_lay]
+  standard_name = virtual_temperature
+  long_name = layer virtual temperature
+  units = K
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F    
 [effrin_cldliq]
   standard_name = effective_radius_of_stratiform_cloud_liquid_water_particle_in_um
   long_name = eff. radius of cloud liquid water particle in micrometer
@@ -178,34 +189,7 @@
   type = real
   kind = kind_phys  
   intent = in
-  optional = F     
-[p_lev]
-  standard_name = air_pressure_at_interface_for_RRTMGP_in_hPa
-  long_name = air pressure at vertical interface for radiation calculation
-  units = hPa
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[p_lay]
-  standard_name = air_pressure_at_layer_for_RRTMGP_in_hPa
-  long_name = air pressure at vertical layer for radiation calculation
-  units = hPa
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[tv_lay]
-  standard_name = virtual_temperature
-  long_name = layer virtual temperature
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F    
+  optional = F   
 [tracer]
   standard_name = chemical_tracers
   long_name = chemical tracers
@@ -233,6 +217,22 @@
   kind = kind_phys      
   intent = in
   optional = F   
+[doGP_cldoptics_PADE]
+  standard_name = flag_to_calc_lw_cld_optics_using_RRTMGP_PADE
+  long_name = logical flag to control cloud optics scheme.
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[doGP_cldoptics_LUT]
+  standard_name = flag_to_calc_lw_cld_optics_using_RRTMGP_LUT
+  long_name = logical flag to control cloud optics scheme.
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [cld_frac]
   standard_name = total_cloud_fraction
   long_name = layer total cloud fraction

@@ -27,7 +27,7 @@ contains
 !> \section arg_table_GFS_rrtmgp_sw_pre_run
 !! \htmlinclude GFS_rrtmgp_sw_pre.html
 !!
-  subroutine GFS_rrtmgp_sw_pre_run(me, nCol, nLev, lndp_type, n_var_lndp,lndp_var_list,     &  
+  subroutine GFS_rrtmgp_sw_pre_run(me, nCol, nLev, n_var_lndp, lndp_type, lndp_var_list,    &
        lndp_prt_list, doSWrad, solhr, lon, coslat, sinlat,  snowd, sncovr, snoalb, zorl,    &
        tsfg, tsfa, hprime, alvsf, alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc, albdvis,  &
        albdnir, albivis, albinir, lsmask, sfc_wts, p_lay, tv_lay, relhum, p_lev,            &
@@ -41,15 +41,15 @@ contains
          nLev,              & ! Number of vertical layers
          n_var_lndp,        &  ! Number of surface variables perturbed
          lndp_type             ! Type of land perturbations scheme used
-    character(len=3), dimension(n_var_lndp), intent(in) ::  & 
+    character(len=3), dimension(:), intent(in) ::  & 
          lndp_var_list
-    real(kind_phys), dimension(n_var_lndp), intent(in) ::   &
+    real(kind_phys), dimension(:), intent(in) ::   &
          lndp_prt_list
     logical,intent(in) :: &
          doSWrad            ! Call RRTMGP SW radiation?
     real(kind_phys), intent(in) :: &
          solhr                 ! Time in hours after 00z at the current timestep
-    real(kind_phys), dimension(nCol), intent(in) :: &
+    real(kind_phys), dimension(:), intent(in) :: &
          lsmask,            & ! Landmask: sea/land/ice=0/1/2
          lon,               & ! Longitude
          coslat,            & ! Cosine(latitude)
@@ -75,25 +75,25 @@ contains
          albivis,           & ! surface albedo from lsm (diffuse,vis) (frac)
          albinir              ! surface albedo from lsm (diffuse,nir) (frac)
 
-    real(kind_phys), dimension(nCol,n_var_lndp), intent(in) :: &
+    real(kind_phys), dimension(:,:), intent(in) :: &
          sfc_wts              ! Weights for stochastic surface physics perturbation ()    
-    real(kind_phys), dimension(nCol,nLev),intent(in) :: &
+    real(kind_phys), dimension(:,:),intent(in) :: &
          p_lay,             & ! Layer pressure
          tv_lay,            & ! Layer virtual-temperature
          relhum               ! Layer relative-humidity
-    real(kind_phys), dimension(nCol,nLev+1),intent(in) :: &
+    real(kind_phys), dimension(:,:),intent(in) :: &
          p_lev                ! Pressure @ layer interfaces (Pa)
 
     ! Outputs
     integer, intent(out)   :: &
          nday                 ! Number of daylit points
-    integer, dimension(ncol), intent(out) :: &
+    integer, dimension(:), intent(out) :: &
          idxday               ! Indices for daylit points
-    real(kind_phys), dimension(ncol), intent(inout) :: &
+    real(kind_phys), dimension(:), intent(inout) :: &
          coszen,            & ! Cosine of SZA
          coszdg,            & ! Cosine of SZA, daytime
          sfc_alb_dif          ! Mean surface diffused (nIR+uvvis) sw albedo
-    real(kind_phys), dimension(sw_gas_props%get_nband(),ncol), intent(out) :: &
+    real(kind_phys), dimension(:,:), intent(out) :: &
          sfc_alb_nir_dir,   & ! Surface albedo (direct) 
          sfc_alb_nir_dif,   & ! Surface albedo (diffuse)
          sfc_alb_uvvis_dir, & ! Surface albedo (direct)

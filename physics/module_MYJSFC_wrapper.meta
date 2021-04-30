@@ -208,7 +208,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = F
 [phy_myj_qsfc]
   standard_name = surface_specific_humidity_for_MYJ_schemes
@@ -397,7 +397,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [ffm]
   standard_name = Monin_Obukhov_similarity_function_for_momentum
@@ -748,7 +748,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [con_cp]
   standard_name = specific_heat_of_dry_air_at_constant_pressure

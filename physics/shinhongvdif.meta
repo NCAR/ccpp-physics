@@ -86,18 +86,18 @@
   kind = kind_phys
   intent = in
   optional = F
-[vtnp]
-  standard_name = tendency_of_y_wind_due_to_model_physics
-  long_name = updated tendency of the y wind
+[utnp]
+  standard_name = tendency_of_x_wind_due_to_model_physics
+  long_name = updated tendency of the x wind
   units = m s-2
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
-[utnp]
-  standard_name = tendency_of_x_wind_due_to_model_physics
-  long_name = updated tendency of the x wind
+[vtnp]
+  standard_name = tendency_of_y_wind_due_to_model_physics
+  long_name = updated tendency of the y wind
   units = m s-2
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real

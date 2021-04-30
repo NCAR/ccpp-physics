@@ -78,29 +78,28 @@
       implicit none
 !
       integer, intent(in)  :: im, km, itc, ntc, ntk, ntr, ncloud
-      integer, intent(in)  :: islimsk(im)
+      integer, intent(in)  :: islimsk(:)
       real(kind=kind_phys), intent(in) :: cliq, cp, cvap, eps, epsm1,   &
      &   fv, grav, hvap, rd, rv, t0c
       real(kind=kind_phys), intent(in) ::  delt
-      real(kind=kind_phys), intent(in) :: psp(im), delp(im,km),         &
-     &   prslp(im,km),  garea(im), dot(im,km), phil(im,km)
+      real(kind=kind_phys), intent(in) :: psp(:), delp(:,:),            &
+     &   prslp(:,:),  garea(:), dot(:,:), phil(:,:)
       real(kind=kind_phys), dimension(:), intent(in) :: fscav
       logical, intent(in)  :: hwrf_samfdeep
       real(kind=kind_phys), intent(in) :: nthresh
-      real(kind=kind_phys), dimension(:), intent(in)  :: ca_deep
-      real(kind=kind_phys), dimension(:), intent(out) :: rainevap
+      real(kind=kind_phys), intent(in) :: ca_deep(:)
+      real(kind=kind_phys), intent(out) :: rainevap(:)
       logical, intent(in)  :: do_ca,ca_closure,ca_entr,ca_trigger
 
-      integer, intent(inout)  :: kcnv(im)
-      ! DH* TODO - check dimensions of qtr, ntr+2 correct?  *DH
-      real(kind=kind_phys), intent(inout) ::   qtr(im,km,ntr+2),        &
-     &   q1(im,km), t1(im,km),   u1(im,km), v1(im,km),                  &
-     &   cnvw(im,km),  cnvc(im,km)
+      integer, intent(inout)  :: kcnv(:)
+      real(kind=kind_phys), intent(inout) ::   qtr(:,:,:),              &
+     &   q1(:,:), t1(:,:),   u1(:,:), v1(:,:),                          &
+     &   cnvw(:,:),  cnvc(:,:)
 
-      integer, intent(out) :: kbot(im), ktop(im)
-      real(kind=kind_phys), intent(out) :: cldwrk(im),                  &
-     &   rn(im),                                                        &
-     &   ud_mf(im,km),dd_mf(im,km), dt_mf(im,km)
+      integer, intent(out) :: kbot(:), ktop(:)
+      real(kind=kind_phys), intent(out) :: cldwrk(:),                   &
+     &   rn(:),                                                         &
+     &   ud_mf(:,:),dd_mf(:,:), dt_mf(:,:)
       
       ! GJF* These variables are conditionally allocated depending on whether the
       !     Morrison-Gettelman microphysics is used, so they must be declared 
@@ -109,7 +108,7 @@
      &   qlcn, qicn, w_upi, cnv_mfd, cnv_dqldt, clcn                    &
      &,  cnv_fice, cnv_ndrop, cnv_nice, cf_upi
       ! *GJF
-      integer :: mp_phys, mp_phys_mg
+      integer, intent(in) :: mp_phys, mp_phys_mg
 
       real(kind=kind_phys), intent(in) :: clam,  c0s,  c1,              &
      &                     betal,   betas,   asolfac,                   &

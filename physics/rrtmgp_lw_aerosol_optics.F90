@@ -42,24 +42,24 @@ contains
          nLev,                  & ! Number of vertical layers
          nTracer,               & ! Number of tracers
          nTracerAer               ! Number of aerosol tracers
-    real(kind_phys), dimension(nCol), intent(in) :: &
+    real(kind_phys), dimension(:), intent(in) :: &
          lon,                   & ! Longitude
          lat,                   & ! Latitude
          lsmask                   ! Land/sea/sea-ice mask
-    real(kind_phys), dimension(nCol,Nlev),intent(in) :: &
+    real(kind_phys), dimension(:,:),intent(in) :: &
          p_lay,                 & ! Pressure @ layer-centers (Pa)
          tv_lay,                & ! Virtual-temperature @ layer-centers (K)
          relhum,                & ! Relative-humidity @ layer-centers
          p_lk                     ! Exner function @ layer-centers (1)
-    real(kind_phys), dimension(nCol, nLev, nTracer),intent(in) :: &
+    real(kind_phys), dimension(:,:, :),intent(in) :: &
          tracer                   ! trace gas concentrations
-    real(kind_phys), dimension(nCol, nLev, nTracerAer),intent(in) :: &
+    real(kind_phys), dimension(:,:, :),intent(in) :: &
          aerfld                   ! aerosol input concentrations
-    real(kind_phys), dimension(nCol,nLev+1),intent(in) :: &
+    real(kind_phys), dimension(:,:),intent(in) :: &
          p_lev                    ! Pressure @ layer-interfaces (Pa)
 
     ! Outputs
-    real(kind_phys), dimension(nCol,NSPC1), intent(inout) :: &
+    real(kind_phys), dimension(:,:), intent(inout) :: &
          aerodp                   ! Vertical integrated optical depth for various aerosol species 
     type(ty_optical_props_1scl),intent(inout) :: &
          lw_optical_props_aerosol ! RRTMGP DDT: Longwave aerosol optical properties (tau)

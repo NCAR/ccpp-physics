@@ -172,15 +172,15 @@
       subroutine dcyc2t3_run                                            &
 !  ---  inputs:
      &     ( solhr,slag,sdec,cdec,sinlat,coslat,                        &
-     &       xlon,coszen,tsfc_lnd,tsfc_ice,tsfc_wat,tf,tsflw,           &
+     &       xlon,coszen,tsfc_lnd,tsfc_ice,tsfc_wat,tf,tsflw,tsfc,      &
      &       sfcemis_lnd, sfcemis_ice, sfcemis_wat,                     &
      &       sfcdsw,sfcnsw,sfcdlw,swh,swhc,hlw,hlwc,                    &
      &       sfcnirbmu,sfcnirdfu,sfcvisbmu,sfcvisdfu,                   &
      &       sfcnirbmd,sfcnirdfd,sfcvisbmd,sfcvisdfd,                   &
      &       im, levs, deltim, fhswr,                                   &
      &       dry, icy, wet,                                             &
-     &       minGPpres, tsfc, use_LW_jacobian, sfculw, fluxlwUP_jac,    &
-     &       t_lay, t_lev, p_lay, p_lev, flux2D_lwUP, flux2D_lwDOWN,    &  
+     &       minGPpres, use_LW_jacobian, sfculw, fluxlwUP_jac,          &
+     &       t_lay, t_lev, p_lay, p_lev, flux2D_lwUP, flux2D_lwDOWN,    &
      &       pert_radtend, do_sppt,ca_global,                           &
 !    &       dry, icy, wet, lprnt, ipr,                                 &
 !  ---  input/output:
@@ -212,41 +212,41 @@
 
 !     integer, intent(in) :: ipr
 !     logical lprnt
-      logical, dimension(im), intent(in) :: dry, icy, wet
+      logical, dimension(:), intent(in) :: dry, icy, wet
       logical, intent(in) :: use_LW_jacobian, pert_radtend
       logical, intent(in) :: do_sppt,ca_global
       real(kind=kind_phys),   intent(in) :: solhr, slag, cdec, sdec,    &
      &                                      deltim, fhswr, minGPpres
 
-      real(kind=kind_phys), dimension(im), intent(in) ::                &
+      real(kind=kind_phys), dimension(:), intent(in) ::                 &
      &      sinlat, coslat, xlon, coszen, tf, tsflw, sfcdlw,            &
      &      sfcdsw, sfcnsw, sfculw, tsfc
 
-      real(kind=kind_phys), dimension(im), intent(in) ::                &
+      real(kind=kind_phys), dimension(:), intent(in) ::                 &
      &                         tsfc_lnd, tsfc_ice, tsfc_wat,            &
      &                         sfcemis_lnd, sfcemis_ice, sfcemis_wat
 
-      real(kind=kind_phys), dimension(im), intent(in) ::                &
+      real(kind=kind_phys), dimension(:), intent(in) ::                 &
      &      sfcnirbmu, sfcnirdfu, sfcvisbmu, sfcvisdfu,                 &
      &      sfcnirbmd, sfcnirdfd, sfcvisbmd, sfcvisdfd
 
-      real(kind=kind_phys), dimension(im,levs), intent(in) :: swh,  hlw &
-     &     ,swhc, hlwc, p_lay, t_lay
-      real(kind=kind_phys), dimension(im,levs+1), intent(in) :: p_lev,  &
+      real(kind=kind_phys), dimension(:,:), intent(in) :: swh, hlw,     &
+     &                                     swhc, hlwc, p_lay, t_lay
+
+      real(kind=kind_phys), dimension(:,:), intent(in) :: p_lev,        &
      &     flux2D_lwUP, flux2D_lwDOWN, fluxlwUP_jac, t_lev
 
 !  ---  input/output:
-      real(kind=kind_phys), dimension(im,levs), intent(inout) :: dtdt,  &
-     &                                                           htrlw
-      real(kind=kind_phys), dimension(:,:),     intent(inout) :: dtdtnp
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: dtdt, htrlw
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: dtdtnp
 
 !  ---  outputs:
-      real(kind=kind_phys), dimension(im), intent(out) ::               &
+      real(kind=kind_phys), dimension(:), intent(out) ::                &
      &      adjsfcdsw, adjsfcnsw, adjsfcdlw, adjsfculw, xmu, xcosz,     &
      &      adjnirbmu, adjnirdfu, adjvisbmu, adjvisdfu,                 &
      &      adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd
 
-      real(kind=kind_phys), dimension(im), intent(out) ::               &
+      real(kind=kind_phys), dimension(:), intent(out) ::                &
      &      adjsfculw_lnd, adjsfculw_ice, adjsfculw_wat
 
       character(len=*), intent(out) :: errmsg

@@ -33,10 +33,10 @@
 !
       integer, intent(in) :: im
       real(kind=kind_phys), intent(in) :: grav,cp,eps,epsm1
-      real(kind=kind_phys), dimension(im), intent(in) ::                &
+      real(kind=kind_phys), dimension(:), intent(in) ::                 &
      &                       ps, u1, v1, t1, q1, tskin,                 &
      &                       qsurf, prslki, evap, fm, fh, fm10, fh2
-      real(kind=kind_phys), dimension(im), intent(out) ::               &
+      real(kind=kind_phys), dimension(:), intent(out) ::                &
      &                       f10m, u10m, v10m, t2m, q2m
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
