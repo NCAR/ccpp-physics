@@ -3,7 +3,7 @@
 ! ########################################################################################
 module GFS_rrtmgp_cloud_overlap_pre
   use machine,      only: kind_phys
-  use rrtmgp_aux,   only: check_error_msg
+  use radiation_tools,   only: check_error_msg
   use module_radiation_cloud_overlap, only: cmp_dcorr_lgth, get_alpha_exp  
 
   public GFS_rrtmgp_cloud_overlap_pre_init, GFS_rrtmgp_cloud_overlap_pre_run, GFS_rrtmgp_cloud_overlap_pre_finalize

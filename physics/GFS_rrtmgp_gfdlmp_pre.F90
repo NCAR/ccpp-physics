@@ -4,7 +4,7 @@
 ! ########################################################################################
 module GFS_rrtmgp_gfdlmp_pre
   use machine,      only: kind_phys
-  use rrtmgp_aux,   only: check_error_msg
+  use radiation_tools,   only: check_error_msg
   use module_radiation_cloud_overlap, only: cmp_dcorr_lgth, get_alpha_exp  
   use rrtmgp_lw_cloud_optics, only: radliq_lwr => radliq_lwrLW, radliq_upr => radliq_uprLW,&
                                     radice_lwr => radice_lwrLW, radice_upr => radice_uprLW
@@ -166,7 +166,8 @@ contains
        where(cld_reice .gt. radice_upr) cld_reice = radice_upr
     endif
     
-    ! Cloud-fraction
+    ! Cloud-fraction. For mynnedmf, cld_frac is adjusted for precipitation here, otherwise
+    ! it passes through this interface. It is adjusted prior in sgscloudradpre. 
     if (do_mynnedmf .and. kdt .gt. 1) then
        do iLay = 1, nLev
           do iCol = 1, nCol
