@@ -81,21 +81,21 @@ IMPLICIT NONE
       integer, intent(in) :: im, imon,yearlen
 !      integer, dimension(im), intent(in) :: islmsk
 
-      real (kind=kind_phys), dimension(im), intent(in) :: ps, wind,     &
+      real (kind=kind_phys), dimension(:), intent(in) :: ps, wind,     &
      &           t1, q1, dlwflx, dswsfc, zlvl, elev
 
       real (kind=kind_phys),  intent(in) :: delt
 
-      real (kind=kind_phys), dimension(im), intent(in) ::               &
+      real (kind=kind_phys), dimension(:), intent(in) ::               &
      &           xlat, weasd, lakedepth
 
-      real (kind=kind_phys),dimension(im),intent(inout) ::              &
+      real (kind=kind_phys),dimension(:),intent(inout) ::              &
      &           snwdph, hice, tsurf, t_sfc, hflx, evap, fice, ustar, qsfc,   &
      &           ch, cm, chh, cmm           
 
       real (kind=kind_phys),  intent(in) :: julian
 
-      logical, dimension(im), intent(in) :: flag_iter, wet, use_flake
+      logical, dimension(:), intent(in) :: flag_iter, wet, use_flake
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg

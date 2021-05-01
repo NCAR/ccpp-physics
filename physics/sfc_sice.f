@@ -14,9 +14,6 @@
 
 !>\defgroup gfs_sice_main GFS Three-layer Thermodynomics Sea-Ice Scheme Module
 !!  \brief  This is three-layer thermodynomics sea-ice model based on Winton (2000) \cite winton_2000.
-!! \section arg_table_sfc_sice_run Argument Table
-!! \htmlinclude sfc_sice_run.html
-!!
 !>  \section general_sice_run GFS Sea Ice Driver General Algorithm
 !!The model has four prognostic variables: the snow layer thickness \f$h_s\f$, the ice layer thickness
 !! \f$h_i\f$, the upper and lower ice layer temperatures located at the midpoints of the layers
@@ -38,6 +35,10 @@
 !! the water line to ice, and 3) to equalize the thickness of the two
 !! ice layers.
 !>  \section detailed_sice_run GFS Sea Ice Driver Detailed Algorithm
+!!
+!! \section arg_table_sfc_sice_run Argument Table
+!! \htmlinclude sfc_sice_run.html
+!!
 !>  @{
       subroutine sfc_sice_run                                           &
      &     ( im, kice, sbc, hvap, tgice, cp, eps, epsm1, rvrdm1, grav,  & !  ---  inputs:
@@ -156,13 +157,13 @@
       real (kind=kind_phys), intent(in) :: sbc, hvap, tgice, cp, eps,   &
      &       epsm1, grav, rvrdm1, t0c, rd
 
-      real (kind=kind_phys), dimension(im), intent(in) :: ps,           &
+      real (kind=kind_phys), dimension(:), intent(in) :: ps,            &
      &       t1, q1, sfcemis, dlwflx, sfcnsw, sfcdsw, srflag, cm, ch,   &
      &       prsl1, prslki, prsik1, prslk1, wind
 !    &       prsl1, prslki, prsik1, prslk1, wind, oceanfrac
 
 !     integer, dimension(im), intent(in) :: islimsk
-      integer, dimension(im), intent(in) :: islmsk_cice
+      integer, dimension(:), intent(in)  :: islmsk_cice
       real (kind=kind_phys), intent(in)  :: delt
 !     real (kind=kind_phys), intent(in)  :: delt, min_seaice,           &
 !    &                                            min_lakeice
@@ -170,13 +171,13 @@
       logical, dimension(im), intent(in) :: flag_iter
 
 !  ---  input/outputs:
-      real (kind=kind_phys), dimension(im), intent(inout) :: hice,      &
+      real (kind=kind_phys), dimension(:), intent(inout) :: hice,       &
      &       fice, tice, weasd, tskin, tprcp, ep
 
-      real (kind=kind_phys), dimension(im,kice), intent(inout) :: tiice
+      real (kind=kind_phys), dimension(:,:), intent(inout) :: tiice
 
 !  ---  outputs:
-      real (kind=kind_phys), dimension(im), intent(inout) :: snwdph,    &
+      real (kind=kind_phys), dimension(:), intent(inout) :: snwdph,     &
      &       qsurf, snowmt, gflux, cmm, chh, evap, hflx
 
       character(len=*), intent(out) :: errmsg

@@ -188,26 +188,26 @@
      &       nstf_name5
       real (kind=kind_phys), intent(in) :: hvap, cp, hfus, jcal, eps,   &
      &       epsm1, rvrdm1, rd, rhw0, sbc, pi, tgice
-      real (kind=kind_phys), dimension(im), intent(in) :: ps, u1, v1,   &
+      real (kind=kind_phys), dimension(:), intent(in) :: ps, u1, v1,    &
      &       t1, q1, tref, cm, ch, prsl1, prslki, prsik1, prslk1,       &
      &       xlon,xcosz,                                                &
      &       sinlat, stress, sfcemis, dlwflx, sfcnsw, rain, wind
       real (kind=kind_phys), intent(in) :: timestep
       real (kind=kind_phys), intent(in) :: solhr
 
-      logical, dimension(im), intent(in) :: flag_iter, flag_guess, wet, &
-     &                                      use_flake 
+      logical, dimension(:), intent(in) :: flag_iter, flag_guess, wet,  &
+     &                                     use_flake 
 !    &,      icy
       logical,                intent(in) :: lprnt
 
 !  ---  input/outputs:
 ! control variables of dtl system (5+2) and sl (2) and coefficients for d(tz)/d(ts) calculation
-      real (kind=kind_phys), dimension(im), intent(inout) :: tskin,     &
+      real (kind=kind_phys), dimension(:), intent(inout) :: tskin,      &
      &      tsurf, xt, xs, xu, xv, xz, zm, xtts, xzts, dt_cool,         &
      &      z_c, c_0, c_d, w_0, w_d, d_conv, ifd, qrain
 
 !  ---  outputs:
-      real (kind=kind_phys), dimension(im), intent(inout) ::            &
+      real (kind=kind_phys), dimension(:), intent(inout) ::             &
      &       qsurf, gflux, cmm, chh, evap, hflx, ep
 
       character(len=*), intent(out) :: errmsg
@@ -683,14 +683,14 @@ cc
 
 !  ---  inputs:
       integer, intent(in) :: im, nthreads
-      logical, dimension(im), intent(in) :: wet, use_flake
+      logical, dimension(:), intent(in) :: wet, use_flake
       real (kind=kind_phys), intent(in) :: tgice
-      real (kind=kind_phys), dimension(im), intent(in) ::
+      real (kind=kind_phys), dimension(:), intent(in) ::
      &      tsfco, xt, xz, dt_cool, z_c, oceanfrac
       logical, intent(in) :: cplflx
 
 !  ---  input/outputs:
-      real (kind=kind_phys), dimension(im), intent(inout) ::
+      real (kind=kind_phys), dimension(:), intent(inout) ::
      &    tsurf_wat, tseal, tref
 
 !  ---  outputs:
@@ -792,20 +792,19 @@ cc
 
 !  ---  inputs:
       integer, intent(in) :: im, kdt, nthreads
-      logical, dimension(im), intent(in) :: wet, icy, use_flake
+      logical, dimension(:), intent(in) :: wet, icy, use_flake
       real (kind=kind_phys), intent(in) :: rlapse, tgice
-      real (kind=kind_phys), dimension(im), intent(in) :: oro, oro_uf
+      real (kind=kind_phys), dimension(:), intent(in) :: oro, oro_uf
       integer, intent(in) :: nstf_name1, nstf_name4, nstf_name5
-      real (kind=kind_phys), dimension(im), intent(in) :: xt, xz,       &
+      real (kind=kind_phys), dimension(:), intent(in) :: xt, xz,        &
      &      dt_cool, z_c, tref, xlon
 
 !  ---  input/outputs:
-      real (kind=kind_phys), dimension(im), intent(inout) :: tsurf_wat, &
+      real (kind=kind_phys), dimension(:), intent(inout) :: tsurf_wat,  &
      &      tsfc_wat
 
 !  ---  outputs:
-      real (kind=kind_phys), dimension(size(xlon,1)), intent(out) ::    &
-     &      dtzm
+      real (kind=kind_phys), dimension(:), intent(out) :: dtzm
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg

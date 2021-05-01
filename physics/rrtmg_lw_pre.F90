@@ -22,10 +22,10 @@
       
       integer,                              intent(in)  :: im
       logical,                              intent(in)  :: lslwr
-      real(kind=kind_phys), dimension(im),  intent(in)  :: xlat, xlon, landfrac,  &
+      real(kind=kind_phys), dimension(:),   intent(in)  :: xlat, xlon, landfrac,  &
         snowd, sncovr, fice, zorl, hprime, tsfg, tsfa, emiss
 
-      real(kind=kind_phys), dimension(im),  intent(out) :: semis
+      real(kind=kind_phys), dimension(:),   intent(out) :: semis
       character(len=*),                     intent(out) :: errmsg
       integer,                              intent(out) :: errflg
 

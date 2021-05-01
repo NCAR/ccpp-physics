@@ -15,6 +15,10 @@ module scm_sfc_flux_spec
   CONTAINS
 !*******************************************************************************************
 
+!!
+!! \section arg_table_scm_sfc_flux_spec_init Argument Table
+!! \htmlinclude scm_sfc_flux_spec_init.html
+!!
   subroutine scm_sfc_flux_spec_init(lheatstrg, errmsg, errflg)
     
     logical, intent(in) :: lheatstrg

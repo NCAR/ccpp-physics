@@ -75,42 +75,42 @@
 !
 !----------------------------------------------------------------------
       integer, intent(in)  :: im, km, ntrac, ntcw, ntiw, ntke, ntoz
-      integer, intent(in)  :: kinver(im)
-      integer, intent(in)  :: islimsk(im)
-      integer, intent(out) :: kpbl(im)
+      integer, intent(in)  :: kinver(:)
+      integer, intent(in)  :: islimsk(:)
+      integer, intent(out) :: kpbl(:)
       logical, intent(in)  :: gen_tend,ldiag3d,qdiag3d
 !
       real(kind=kind_phys), intent(in) :: grav,rd,cp,rv,hvap,hfus,fv,   &
      &                                    eps,epsm1
       real(kind=kind_phys), intent(in) :: delt, xkzm_m, xkzm_h, xkzm_s
       real(kind=kind_phys), intent(in) :: dspfac, bl_upfr, bl_dnfr
-      real(kind=kind_phys), intent(inout) :: dv(im,km),     du(im,km),  &
-     &                     tdt(im,km),    rtg(im,km,ntrac)
+      real(kind=kind_phys), intent(inout) :: dv(:,:),     du(:,:),      &
+     &                     tdt(:,:),    rtg(:,:,:)
       real(kind=kind_phys), intent(in) ::                               &
-     &                     u1(im,km),     v1(im,km),                    &
-     &                     t1(im,km),     q1(im,km,ntrac),              &
-     &                     swh(im,km),    hlw(im,km),                   &
-     &                     xmu(im),       garea(im),                    &
-     &                     snwdph_lnd(im),                              &
-     &                     psk(im),       rbsoil(im),                   &
-     &                     zorl(im),      tsea(im),                     &
-     &                     u10m(im),      v10m(im),                     &
-     &                     fm(im),        fh(im),                       &
-     &                     evap(im),      heat(im),                     &
-     &                     stress(im),    spd1(im),                     &
-     &                     prsi(im,km+1), del(im,km),                   &
-     &                     prsl(im,km),   prslk(im,km),                 &
-     &                     phii(im,km+1), phil(im,km)
+     &                     u1(:,:),     v1(:,:),                        &
+     &                     t1(:,:),     q1(:,:,:),                      &
+     &                     swh(:,:),    hlw(:,:),                       &
+     &                     xmu(:),       garea(:),                      &
+     &                     snwdph_lnd(:),                               &
+     &                     psk(:),       rbsoil(:),                     &
+     &                     zorl(:),      tsea(:),                       &
+     &                     u10m(:),      v10m(:),                       &
+     &                     fm(:),        fh(:),                         &
+     &                     evap(:),      heat(:),                       &
+     &                     stress(:),    spd1(:),                       &
+     &                     prsi(:,:), del(:,:),                         &
+     &                     prsl(:,:),   prslk(:,:),                     &
+     &                     phii(:,:), phil(:,:)
       real(kind=kind_phys), intent(inout), dimension(:,:) ::            &
      &                     du3dt(:,:),    dv3dt(:,:),                   &
      &                     dt3dt(:,:),    dq3dt(:,:),                   &
      &                     do3dt(:,:)
       real(kind=kind_phys), intent(out) ::                              &
-     &                     dusfc(im),     dvsfc(im),                    &
-     &                     dtsfc(im),     dqsfc(im),                    &
-     &                     hpbl(im)
+     &                     dusfc(:),      dvsfc(:),                     &
+     &                     dtsfc(:),      dqsfc(:),                     &
+     &                     hpbl(:)
       real(kind=kind_phys), intent(out) ::                              &
-     &                     dkt(im,km), dku(im,km)
+     &                     dkt(:,:), dku(:,:)
 !
       logical, intent(in)  :: dspheat
       character(len=*), intent(out) :: errmsg
@@ -497,10 +497,14 @@
 !
 !>  - Initialize diffusion coefficients to 0 and calculate the total 
 !! radiative heating rate (dku, dkt, radx)
-      do k=1,km1
+      do k=1,km
         do i=1,im
           dku(i,k)  = 0.
           dkt(i,k)  = 0.
+        enddo
+      enddo
+      do k=1,km1
+        do i=1,im
           dkq(i,k)  = 0.
           cku(i,k)  = 0.
           ckt(i,k)  = 0.

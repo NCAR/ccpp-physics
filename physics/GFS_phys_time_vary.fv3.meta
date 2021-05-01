@@ -1672,7 +1672,6 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  active = (flag_for_nsstm_run > 0)
   intent = inout
   optional = F
 [tsfc]

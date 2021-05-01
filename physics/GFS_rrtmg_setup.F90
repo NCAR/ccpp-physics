@@ -165,7 +165,7 @@ module GFS_rrtmg_setup
       implicit none
 
       ! interface variables
-      real (kind=kind_phys), intent(in) :: si(levr+1)
+      real (kind=kind_phys), intent(in) :: si(:)
       integer, intent(in) :: levr
       integer, intent(in) :: ictm
       integer, intent(in) :: isol
@@ -185,7 +185,7 @@ module GFS_rrtmg_setup
       logical, intent(in) :: ccnorm
       integer, intent(in) :: imp_physics
       logical, intent(in) :: norad_precip
-      integer, intent(in) :: idate(4)
+      integer, intent(in) :: idate(:)
       integer, intent(in) :: iflip
       ! For consistency checks
       integer, intent(in)         :: im

@@ -249,24 +249,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[sfc_wts_inv]
-  standard_name = weights_for_stochastic_surface_physics_perturbation_flipped
-  long_name = weights for stochastic surface physics perturbation, flipped
-  units = none
-  dimensions = (horizontal_loop_extent,number_of_land_surface_variables_perturbed)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[lndp_prt_list]
-  standard_name = magnitude_of_perturbations_for_landperts
-  long_name = magnitude of perturbations for landperts
-  units = variable
-  dimensions = (number_of_land_surface_variables_perturbed) 
-  type = real
-  kind = kind_phys
-  intent = in 
-  optional = F
 [lndp_var_list]
   standard_name = variables_to_be_perturbed_for_landperts
   long_name = variables to be perturbed for landperts
@@ -274,6 +256,15 @@
   dimensions =  (number_of_land_surface_variables_perturbed) 
   type = character
   kind = len=3
+  intent = in 
+  optional = F
+[lndp_prt_list]
+  standard_name =magnitude_of_perturbations_for_landperts
+  long_name = magnitude of perturbations for landperts
+  units = variable
+  dimensions = (number_of_land_surface_variables_perturbed) 
+  type = real
+  kind = kind_phys
   intent = in 
   optional = F
 [z01d]
@@ -329,6 +320,15 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = F
+[sfc_wts_inv]
+  standard_name = weights_for_stochastic_surface_physics_perturbation_flipped
+  long_name = weights for stochastic surface physics perturbation, flipped
+  units = none
+  dimensions = (horizontal_loop_extent,number_of_land_surface_variables_perturbed)
+  type = real
+  kind = kind_phys
+  intent = inout
   optional = F
 [cplflx]
   standard_name = flag_for_flux_coupling
@@ -1293,18 +1293,18 @@
   kind = kind_phys
   intent = out
   optional = F
-[hefac]
-  standard_name = surface_upward_latent_heat_flux_reduction_factor
-  long_name = surface upward latent heat flux reduction factor from canopy heat storage
+[hffac]
+  standard_name = surface_upward_sensible_heat_flux_reduction_factor
+  long_name = surface upward sensible heat flux reduction factor from canopy heat storage
   units = none
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
   optional = F
-[hffac]
-  standard_name = surface_upward_sensible_heat_flux_reduction_factor
-  long_name = surface upward sensible heat flux reduction factor from canopy heat storage
+[hefac]
+  standard_name = surface_upward_latent_heat_flux_reduction_factor
+  long_name = surface upward latent heat flux reduction factor from canopy heat storage
   units = none
   dimensions = (horizontal_loop_extent)
   type = real

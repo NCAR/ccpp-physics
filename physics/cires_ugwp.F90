@@ -55,7 +55,7 @@ contains
     integer,              intent (in) :: latr
     real(kind=kind_phys), intent (in) :: ak(:), bk(:)
     real(kind=kind_phys), intent (in) :: dtp
-    real(kind=kind_phys), intent (in) :: cdmbgwd(4), cgwf(2) ! "scaling" controls for "old" GFS-GW schemes
+    real(kind=kind_phys), intent (in) :: cdmbgwd(:), cgwf(:) ! "scaling" controls for "old" GFS-GW schemes
     real(kind=kind_phys), intent (in) :: pa_rf_in, tau_rf_in
     real(kind=kind_phys), intent (in) :: con_p0
     logical,              intent (in) :: do_ugwp
@@ -162,24 +162,24 @@ contains
 
     ! interface variables
     integer,                 intent(in) :: me, master, im, levs, ntrac, kdt, lonr, nmtvr
-    integer,                 intent(in), dimension(im)       :: kpbl
-    real(kind=kind_phys),    intent(in), dimension(im)       :: oro, oro_uf, hprime, oc, theta, sigma, gamma
+    integer,                 intent(in), dimension(:)       :: kpbl
+    real(kind=kind_phys),    intent(in), dimension(:)       :: oro, oro_uf, hprime, oc, theta, sigma, gamma
     logical,                 intent(in)                      :: flag_for_gwd_generic_tend
     ! elvmax is intent(in) for CIRES UGWP, but intent(inout) for GFS GWDPS
-    real(kind=kind_phys),    intent(inout), dimension(im)    :: elvmax
-    real(kind=kind_phys),    intent(in), dimension(im, 4)    :: clx, oa4
-    real(kind=kind_phys),    intent(in), dimension(im)       :: xlat, xlat_d, sinlat, coslat, area
-    real(kind=kind_phys),    intent(in), dimension(im, levs) :: del, ugrs, vgrs, tgrs, prsl, prslk, phil
-    real(kind=kind_phys),    intent(in), dimension(im, levs+1) :: prsi, phii
-    real(kind=kind_phys),    intent(in), dimension(im, levs, ntrac):: qgrs
-    real(kind=kind_phys),    intent(in) :: dtp, cdmbgwd(4)
+    real(kind=kind_phys),    intent(inout), dimension(:)    :: elvmax
+    real(kind=kind_phys),    intent(in), dimension(:, :)    :: clx, oa4
+    real(kind=kind_phys),    intent(in), dimension(:)       :: xlat, xlat_d, sinlat, coslat, area
+    real(kind=kind_phys),    intent(in), dimension(:, :) :: del, ugrs, vgrs, tgrs, prsl, prslk, phil
+    real(kind=kind_phys),    intent(in), dimension(:, :) :: prsi, phii
+    real(kind=kind_phys),    intent(in), dimension(:,:,:):: qgrs
+    real(kind=kind_phys),    intent(in) :: dtp, cdmbgwd(:)
     logical,                 intent(in) :: do_ugwp, do_tofd, ldiag_ugwp
 
-    real(kind=kind_phys),    intent(out), dimension(im)      :: dusfcg, dvsfcg
-    real(kind=kind_phys),    intent(out), dimension(im)      :: zmtb, zlwb, zogw, rdxzb
-    real(kind=kind_phys),    intent(out), dimension(im)      :: tau_mtb, tau_ogw, tau_tofd, tau_ngw
-    real(kind=kind_phys),    intent(out), dimension(im, levs):: gw_dudt, gw_dvdt, gw_dtdt, gw_kdis
-    real(kind=kind_phys),    intent(out), dimension(im, levs):: dudt_mtb, dudt_ogw, dudt_tms
+    real(kind=kind_phys),    intent(out), dimension(:)      :: dusfcg, dvsfcg
+    real(kind=kind_phys),    intent(out), dimension(:)      :: zmtb, zlwb, zogw, rdxzb
+    real(kind=kind_phys),    intent(out), dimension(:)      :: tau_mtb, tau_ogw, tau_tofd, tau_ngw
+    real(kind=kind_phys),    intent(out), dimension(:, :):: gw_dudt, gw_dvdt, gw_dtdt, gw_kdis
+    real(kind=kind_phys),    intent(out), dimension(:, :):: dudt_mtb, dudt_ogw, dudt_tms
 
     ! These arrays are only allocated if ldiag=.true.
     real(kind=kind_phys),    intent(inout), dimension(:,:)      :: ldu3dt_ogw, ldv3dt_ogw, ldt3dt_ogw
@@ -187,13 +187,13 @@ contains
     logical,                 intent(in)                         :: ldiag3d, lssav
 
     ! These arrays only allocated if ldiag_ugwp = .true.
-    real(kind=kind_phys),    intent(out), dimension(:,:) :: du3dt_mtb, du3dt_ogw, du3dt_tms
+    real(kind=kind_phys),    intent(inout), dimension(:,:) :: du3dt_mtb, du3dt_ogw, du3dt_tms
 
-    real(kind=kind_phys),    intent(inout), dimension(im, levs):: dudt, dvdt, dtdt
+    real(kind=kind_phys),    intent(inout), dimension(:, :):: dudt, dvdt, dtdt
 
     real(kind=kind_phys),    intent(in) :: con_g, con_pi, con_cp, con_rd, con_rv, con_fvirt, con_omega
 
-    real(kind=kind_phys),    intent(in), dimension(im) :: rain
+    real(kind=kind_phys),    intent(in), dimension(:) :: rain
 
     integer,                 intent(in) :: ntke
     real(kind=kind_phys),    intent(in), dimension(:,:) :: q_tke, dqdt_tke
