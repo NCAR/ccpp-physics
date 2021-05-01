@@ -807,8 +807,13 @@
                      if (Model%cplchm) then
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Coupling%rainc_cpl', Coupling%rainc_cpl)
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Coupling%ushfsfci ', Coupling%ushfsfci )
-                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Coupling%dkt      ', Coupling%dkt      )
-                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Coupling%dqdti    ', Coupling%dqdti    )
+                        if (Model%cplgocart) then
+                           call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Coupling%pfi_lsan', Coupling%pfi_lsan )
+                           call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Coupling%pfl_lsan', Coupling%pfl_lsan )
+                        else
+                           call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Coupling%dkt     ', Coupling%dkt      )
+                           call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Coupling%dqdti   ', Coupling%dqdti    )
+                        endif
                      end if
                      if (Model%do_sppt) then
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Coupling%sppt_wts', Coupling%sppt_wts)
