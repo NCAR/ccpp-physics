@@ -73,8 +73,8 @@
 
         implicit none
         
-        integer,                          intent(in)    :: idate(4)
-        integer,                          intent(in)    :: jdat(1:8), idat(1:8)
+        integer,                          intent(in)    :: idate(:)
+        integer,                          intent(in)    :: jdat(:), idat(:)
         integer,                          intent(in)    :: lsm, lsm_noahmp,      &
                                                            nsswr, nslwr, me,     &
                                                            master, nscyc

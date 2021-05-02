@@ -9,7 +9,7 @@ module GFS_rrtmgp_pre
        getozn                      ! Routine to setup ozone
   ! RRTMGP types
   use mo_gas_concentrations, only: ty_gas_concs
-  use rrtmgp_aux,            only: check_error_msg
+  use radiation_tools,            only: check_error_msg,cmp_tlev
 
   real(kind_phys), parameter :: &
        amd   = 28.9644_kind_phys,  & ! Molecular weight of dry-air     (g/mol)
@@ -163,7 +163,7 @@ contains
     logical :: top_at_1
     real(kind_phys),dimension(nCol,nLev) :: vmr_o3, vmr_h2o
     real(kind_phys) :: es, tem1, tem2
-    real(kind_phys), dimension(nCol,nLev) :: o3_lay, tem2da, tem2db
+    real(kind_phys), dimension(nCol,nLev) :: o3_lay
     real(kind_phys), dimension(nCol,nLev, NF_VGAS) :: gas_vmr
     character(len=32), dimension(gas_concentrations%get_num_gases()) :: active_gases
 
@@ -206,49 +206,13 @@ contains
     do iCol=1,NCOL
        do iLay=1,nLev
           if (t_lay(iCol,iLay) .le. minGPtemp) then
-             t_lay = minGPtemp + epsilon(minGPtemp)
+             t_lay(iCol,iLay) = minGPtemp + epsilon(minGPtemp)
           endif
        enddo
     enddo
 
     ! Temperature at layer-interfaces          
-    if (top_at_1) then
-       tem2da(1:nCol,2:iSFC) = log(p_lay(1:nCol,2:iSFC))
-       tem2db(1:nCol,2:iSFC) = log(p_lev(1:nCol,2:iSFC)) 
-       do iCol = 1, nCol
-           tem2da(iCol,1)    = log(p_lay(iCol,1) )
-           tem2db(iCol,1)    = log(max(minGPpres, p_lev(iCol,1)) )
-           tem2db(iCol,iSFC) = log(p_lev(iCol,iSFC) )    
-       enddo
-       !
-       t_lev(1:NCOL,1)      = t_lay(1:NCOL,iTOA)
-       do iLay = 2, iSFC
-          do iCol = 1, nCol
-            t_lev(iCol,iLay) = t_lay(iCol,iLay) + (t_lay(iCol,iLay-1) - t_lay(iCol,iLay))&
-                     * (tem2db(iCol,iLay)   - tem2da(iCol,iLay))                   &
-                     / (tem2da(iCol,iLay-1) - tem2da(iCol,iLay))
-           enddo
-        enddo
-       t_lev(1:NCOL,iSFC+1) = tsfc(1:NCOL)
-    else
-       tem2da(1:nCol,2:iTOA) = log(p_lay(1:nCol,2:iTOA))
-       tem2db(1:nCol,2:iTOA) = log(p_lev(1:nCol,2:iTOA))     
-       do iCol = 1, nCol
-           tem2da(iCol,1)    = log(p_lay(iCol,1))
-           tem2db(iCol,1)    = log(p_lev(iCol,1))    
-           tem2db(iCol,iTOA) = log(max(minGPpres, p_lev(iCol,iTOA)) )
-       enddo    
-       !
-       t_lev(1:NCOL,1)      = tsfc(1:NCOL)
-       do iLay = 1, iTOA-1
-          do iCol = 1, nCol
-            t_lev(iCol,iLay+1) = t_lay(iCol,iLay) + (t_lay(iCol,iLay+1) - t_lay(iCol,iLay))&
-                     * (tem2db(iCol,iLay+1) - tem2da(iCol,iLay))                   &
-                     / (tem2da(iCol,iLay+1) - tem2da(iCol,iLay))
-           enddo
-        enddo
-       t_lev(1:NCOL,iTOA+1) = t_lay(1:NCOL,iTOA)
-    endif
+    call cmp_tlev(nCol,nLev,minGPpres,p_lay,t_lay,p_lev,tsfc,t_lev)
 
     ! Compute a bunch of thermodynamic fields needed by the cloud microphysics schemes. 
     ! Relative humidity, saturation mixing-ratio, vapor mixing-ratio, virtual temperature, 
@@ -319,5 +283,4 @@ contains
   ! #########################################################################################
   subroutine GFS_rrtmgp_pre_finalize ()
   end subroutine GFS_rrtmgp_pre_finalize
-
 end module GFS_rrtmgp_pre

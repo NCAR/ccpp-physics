@@ -130,41 +130,33 @@ SUBROUTINE mynnsfc_wrapper_run(            &
      &       iz0tlnd  = 0,        & !control: 0
      &       isfflx   = 1
 
+      integer, intent(in) :: im, levs
+      integer, intent(in) :: iter, itimestep, lsm, lsm_ruc
+      logical, intent(in) :: flag_init,flag_restart,lprnt
       integer, intent(in) :: ivegsrc
       integer, intent(in) :: sfc_z0_type ! option for calculating surface roughness length over ocean
       logical, intent(in) :: redrag ! reduced drag coeff. flag for high wind over sea (j.han)
+      real(kind=kind_phys), intent(in) :: delt
 
 !Input data
-      integer, dimension(im), intent(in) :: vegtype
-      real(kind=kind_phys), dimension(im), intent(in)    ::       &
+      integer, dimension(:), intent(in) :: vegtype
+      real(kind=kind_phys), dimension(:), intent(in)    ::  &
      &                    sigmaf,shdmax,z0pert,ztpert
 
-!MYNN-1D
-      REAL    :: delt
-      INTEGER :: im, levs
-      INTEGER :: iter, k, i, itimestep, lsm, lsm_ruc
-      LOGICAL :: flag_init,flag_restart,lprnt
-      INTEGER :: IDS,IDE,JDS,JDE,KDS,KDE,                   &
-     &            IMS,IME,JMS,JME,KMS,KME,                  &
-     &            ITS,ITE,JTS,JTE,KTS,KTE
-
-      real(kind=kind_phys), dimension(im,levs+1),           &
+      real(kind=kind_phys), dimension(:,:),                 &
      &      intent(in)  ::                  phii
-      real(kind=kind_phys), dimension(im,levs),             &
+      real(kind=kind_phys), dimension(:,:),                 &
      &      intent(in)  ::         exner, PRSL,             &
      &                     u, v, t3d, qvsh, qc
 
-      real(kind=kind_phys), dimension(im,levs) ::           &
-     &        pattern_spp_pbl, dz, th, qv
+      logical, dimension(:), intent(in) :: wet, dry, icy
 
-      logical, dimension(im), intent(in) :: wet, dry, icy
-
-      real(kind=kind_phys), dimension(im), intent(in)    :: &
+      real(kind=kind_phys), dimension(:), intent(in)    ::  &
      &                    tskin_wat, tskin_lnd, tskin_ice,  &
      &                    tsurf_wat, tsurf_lnd, tsurf_ice,  &
      &                    snowh_wat, snowh_lnd, snowh_ice
 
-      real(kind=kind_phys), dimension(im), intent(inout) :: &
+      real(kind=kind_phys), dimension(:), intent(inout) ::  &
      &                      znt_wat,   znt_lnd,   znt_ice,  &
      &                      ust_wat,   ust_lnd,   ust_ice,  &
      &                       cm_wat,    cm_lnd,    cm_ice,  &
@@ -184,7 +176,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
      &        dx, pblh, slmsk, ps,                          &
      &        qsfc_lnd_ruc, qsfc_ice_ruc
 
-      real(kind=kind_phys), dimension(im), intent(inout) :: &
+      real(kind=kind_phys), dimension(:), intent(inout) ::  &
      &        ustm, hflx, qflx, wspd, qsfc,                 &
      &        FLHC, FLQC, U10, V10, TH2, T2, Q2,            &
      &        CHS2, CQS2, rmol, zol, mol, ch,               &
@@ -194,6 +186,15 @@ SUBROUTINE mynnsfc_wrapper_run(            &
      &        hfx, znt, psim, psih,                         &
      &        chs, ck, cd, mavail, xland, GZ1OZ0,           &
      &        cpm, qgh, qfx, qsfc_ruc
+
+     real(kind=kind_phys), dimension(im,levs) ::            &
+    &        pattern_spp_pbl, dz, th, qv
+
+!MYNN-1D
+      INTEGER :: k, i
+      INTEGER :: IDS,IDE,JDS,JDE,KDS,KDE,                   &
+     &            IMS,IME,JMS,JME,KMS,KME,                  &
+     &            ITS,ITE,JTS,JTE,KTS,KTE
 
       ! Initialize CCPP error handling variables
       errmsg = ''

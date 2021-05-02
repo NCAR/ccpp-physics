@@ -30,7 +30,7 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F 
+  optional = F
 [n_var_lndp]
   standard_name = number_of_land_surface_variables_perturbed
   long_name = number of land surface variables perturbed
@@ -38,13 +38,22 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F   
+  optional = F
 [lndp_type]
   standard_name = index_for_stochastic_land_surface_perturbation_type
   long_name = index for stochastic land surface perturbations type
   units = index
   dimensions = ()
   type = integer
+  intent = in
+  optional = F
+[lndp_var_list]
+  standard_name = variables_to_be_perturbed_for_landperts
+  long_name = variables to be perturbed for landperts
+  units = none
+  dimensions =  (number_of_land_surface_variables_perturbed)
+  type = character
+  kind = len=3
   intent = in
   optional = F
 [lndp_prt_list]
@@ -55,15 +64,6 @@
   type = real
   kind = kind_phys
   intent = in 
-  optional = F
-[lndp_var_list]
-  standard_name = variables_to_be_perturbed_for_landperts
-  long_name = variables to be perturbed for landperts
-  units = none
-  dimensions =  (number_of_land_surface_variables_perturbed)
-  type = character
-  kind = len=3
-  intent = in
   optional = F
 [doSWrad]
   standard_name = flag_to_calc_sw
@@ -104,15 +104,6 @@
   standard_name = sine_of_latitude
   long_name = sine of latitude
   units = none
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F  
-[lsmask]
-  standard_name = sea_land_ice_mask_real
-  long_name = landmask: sea/land/ice=0/1/2
-  units = flag
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
@@ -243,7 +234,7 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F    
+  optional = F
 [tisfc]
   standard_name = sea_ice_temperature
   long_name = sea ice surface skin temperature
@@ -289,11 +280,29 @@
   kind = kind_phys
   intent = in
   optional = F
+[lsmask]
+  standard_name = sea_land_ice_mask_real
+  long_name = landmask: sea/land/ice=0/1/2
+  units = flag
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [sfc_wts]
   standard_name = weights_for_stochastic_surface_physics_perturbation
   long_name = weights for stochastic surface physics perturbation
   units = none
   dimensions = (horizontal_loop_extent,number_of_surface_perturbations)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[p_lay]
+  standard_name = air_pressure_at_layer_for_RRTMGP_in_hPa
+  long_name = air pressure at vertical layer for radiation calculation
+  units = hPa
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -316,15 +325,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[p_lay]
-  standard_name = air_pressure_at_layer_for_RRTMGP_in_hPa
-  long_name = air pressure at vertical layer for radiation calculation
-  units = hPa
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [p_lev]
   standard_name = air_pressure_at_interface_for_RRTMGP_in_hPa
   long_name = air pressure at vertical interface for radiation calculation
@@ -333,6 +333,40 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = F
+[nday]
+  standard_name = daytime_points_dimension
+  long_name = daytime points dimension
+  units = count
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+[idxday]
+  standard_name = daytime_points
+  long_name = daytime points
+  units = index
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = out
+  optional = F
+[coszen]
+  standard_name = cosine_of_zenith_angle
+  long_name = mean cos of zenith angle over rad call period
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[coszdg]
+  standard_name = daytime_mean_cosz_over_rad_call_period
+  long_name = daytime mean cosz over rad call period
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
   optional = F
 [sfc_alb_nir_dir]
   standard_name = surface_albedo_nearIR_direct
@@ -370,40 +404,6 @@
   kind = kind_phys
   intent = out
   optional = F
-[nday]
-  standard_name = daytime_points_dimension
-  long_name = daytime points dimension
-  units = count
-  dimensions = ()
-  type = integer
-  intent = out
-  optional = F
-[idxday]
-  standard_name = daytime_points
-  long_name = daytime points
-  units = index
-  dimensions = (horizontal_loop_extent)
-  type = integer
-  intent = out
-  optional = F
-[coszen]
-  standard_name = cosine_of_zenith_angle
-  long_name = mean cos of zenith angle over rad call period
-  units = none
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[coszdg]
-  standard_name = daytime_mean_cosz_over_rad_call_period
-  long_name = daytime mean cosz over rad call period
-  units = none
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F    
 [sfc_alb_dif]
   standard_name = surface_diffused_shortwave_albedo
   long_name = mean surface diffused sw albedo

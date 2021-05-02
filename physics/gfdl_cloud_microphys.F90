@@ -136,29 +136,29 @@ contains
       ! interface variables
       integer,              intent(in   ) :: levs, im
       real(kind=kind_phys), intent(in   ) :: con_g, con_fvirt, con_rd, con_eps
-      real(kind=kind_phys), intent(in   ), dimension(1:im)          :: frland, garea
-      integer,              intent(in   ), dimension(1:im)          :: islmsk
-      real(kind=kind_phys), intent(inout), dimension(1:im,1:levs)   :: gq0, gq0_ntcw, gq0_ntrw, gq0_ntiw, &
+      real(kind=kind_phys), intent(in   ), dimension(:)     :: frland, garea
+      integer,              intent(in   ), dimension(:)     :: islmsk
+      real(kind=kind_phys), intent(inout), dimension(:,:)   :: gq0, gq0_ntcw, gq0_ntrw, gq0_ntiw, &
                                                                        gq0_ntsw, gq0_ntgl, gq0_ntclamt
-      real(kind=kind_phys), intent(inout), dimension(1:im,1:levs)   :: gt0, gu0, gv0
-      real(kind=kind_phys), intent(in   ), dimension(1:im,1:levs)   :: vvl, prsl, del
-      real(kind=kind_phys), intent(in   ), dimension(1:im,1:levs+1) :: phii
+      real(kind=kind_phys), intent(inout), dimension(:,:)   :: gt0, gu0, gv0
+      real(kind=kind_phys), intent(in   ), dimension(:,:)   :: vvl, prsl, del
+      real(kind=kind_phys), intent(in   ), dimension(:,:)   :: phii
 
       ! rain/snow/ice/graupel/precip amounts, fraction of frozen precip
-      real(kind_phys),      intent(out  ), dimension(1:im) :: rain0
-      real(kind_phys),      intent(out  ), dimension(1:im) :: snow0
-      real(kind_phys),      intent(out  ), dimension(1:im) :: ice0
-      real(kind_phys),      intent(out  ), dimension(1:im) :: graupel0
-      real(kind_phys),      intent(out  ), dimension(1:im) :: prcp0
-      real(kind_phys),      intent(out  ), dimension(1:im) :: sr
+      real(kind_phys),      intent(out  ), dimension(:) :: rain0
+      real(kind_phys),      intent(out  ), dimension(:) :: snow0
+      real(kind_phys),      intent(out  ), dimension(:) :: ice0
+      real(kind_phys),      intent(out  ), dimension(:) :: graupel0
+      real(kind_phys),      intent(out  ), dimension(:) :: prcp0
+      real(kind_phys),      intent(out  ), dimension(:) :: sr
 
       real(kind_phys),      intent(in) :: dtp ! physics time step
       logical, intent (in) :: hydrostatic, phys_hydrostatic
 
       logical, intent (in) :: lradar
-      real(kind=kind_phys), intent(inout), dimension(1:im,1:levs) :: refl_10cm
+      real(kind=kind_phys), intent(inout), dimension(:,:) :: refl_10cm
       logical, intent (in) :: reset, effr_in
-      real(kind=kind_phys), intent(inout), dimension(1:im,1:levs) :: rew, rei, rer, res, reg
+      real(kind=kind_phys), intent(inout), dimension(:,:) :: rew, rei, rer, res, reg
       logical, intent (in) :: cplgocart
       ! ice and liquid water 3d precipitation fluxes - only allocated if cplgocart is .true.
       real(kind=kind_phys), intent(inout), dimension(:,:) :: pfi_lsan, pfl_lsan
