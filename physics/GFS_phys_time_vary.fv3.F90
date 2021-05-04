@@ -312,10 +312,10 @@
                             jindx2_aer, ddy_aer, xlon_d,     &
                             iindx1_aer, iindx2_aer, ddx_aer, &
                             me, master)
-           iamin=min(minval(iindx1_aer), iamin)
-           iamax=max(maxval(iindx2_aer), iamax)
-           jamin=min(minval(jindx1_aer), jamin)
-           jamax=max(maxval(jindx2_aer), jamax)
+           iamin = min(minval(iindx1_aer), iamin)
+           iamax = max(maxval(iindx2_aer), iamax)
+           jamin = min(minval(jindx1_aer), jamin)
+           jamax = max(maxval(jindx2_aer), jamax)
          endif
 
 !$OMP section
@@ -870,7 +870,7 @@
            ! aerinterpol is using threading inside, don't
            ! move into OpenMP parallel section above
            call aerinterpol (me, master, nthrds, im, idate, &
-                              fhour, jindx1_aer, jindx2_aer,&
+                             fhour, jindx1_aer, jindx2_aer, &
                              ddy_aer, iindx1_aer,           &
                              iindx2_aer, ddx_aer,           &
                              levs, prsl, aer_nm)

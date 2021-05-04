@@ -98,7 +98,7 @@ contains
 !
 !**********************************************************************
       SUBROUTINE read_aerdataf (iamin, iamax, jamin, jamax,           &
-                 me, master, iflip, idate, errmsg, errflg)
+                                me, master, iflip, idate, errmsg, errflg)
       use machine, only: kind_phys, kind_io4, kind_io8
       use aerclm_def
       use netcdf
@@ -172,23 +172,23 @@ contains
          call nf_get_var(ncid, varid, buffx)
 
          do j = jamin, jamax
-         do k = 1, levsaer
+           do k = 1, levsaer
 ! input is from toa to sfc
-          if ( iflip == 0 )  then             ! data from toa to sfc
-            klev = k
-          else                                ! data from sfc to top
-            klev = ( levsw - k ) + 1
-          endif
-          do i = iamin, iamax
-          aerin(i,j,k,ii,imon) = 1.d0*buffx(i,j,klev,1)
-          if(aerin(i,j,k,ii,imon)<0.or.aerin(i,j,k,ii,imon)>1.)  then
-            aerin(i,j,k,ii,imon) = 1.e-15
-          end if
-          enddo    !i-loop (lon)
-         enddo     !k-loop (lev)
-         enddo     !j-loop (lat)
+             if ( iflip == 0 )  then             ! data from toa to sfc
+               klev = k
+             else                                ! data from sfc to top
+               klev = ( levsw - k ) + 1
+             endif
+             do i = iamin, iamax
+               aerin(i,j,k,ii,imon) = 1.d0*buffx(i,j,klev,1)
+               if(aerin(i,j,k,ii,imon) < 0 .or. aerin(i,j,k,ii,imon) > 1.)  then
+                 aerin(i,j,k,ii,imon) = 1.e-15
+               endif
+             enddo   !i-loop (lon)
+           enddo     !k-loop (lev)
+         enddo       !j-loop (lat)
 
-       ENDDO           ! ii-loop (ntracaerm)
+       ENDDO         ! ii-loop (ntracaerm)
 
 ! close the file
        call nf_close(ncid)
@@ -199,7 +199,7 @@ contains
       END SUBROUTINE read_aerdataf
 !
       SUBROUTINE setindxaer(npts,dlat,jindx1,jindx2,ddy,dlon,           &
-                 iindx1,iindx2,ddx,me,master)
+                            iindx1,iindx2,ddx,me,master)
 !
       USE MACHINE,  ONLY: kind_phys
       use aerclm_def, only: aer_lat, jaero=>latsaer,                    &
@@ -257,16 +257,17 @@ contains
 !**********************************************************************
 !
       SUBROUTINE aerinterpol(me,master,nthrds,npts,IDATE,FHOUR,jindx1,jindx2, &
-                 ddy,iindx1,iindx2,ddx,lev,prsl,aerout)
+                             ddy,iindx1,iindx2,ddx,lev,prsl,aerout)
 !
       USE MACHINE,  ONLY : kind_phys
       use aerclm_def
       implicit none
       integer   i1,i2, iday,j,j1,j2,l,npts,nc,n1,n2,lev,k,i,ii
-      real(kind=kind_phys) fhour,temj, tx1, tx2,temi
+      real(kind=kind_phys) fhour,temj, tx1, tx2,temi, &
+                           temij,temiy,temjx,ddxy
 !
 
-      integer  JINDX1(npts), JINDX2(npts),iINDX1(npts),iINDX2(npts)
+      integer  JINDX1(npts), JINDX2(npts), iINDX1(npts), iINDX2(npts)
       integer  me,idate(4), master, nthrds
       integer  IDAT(8),JDAT(8)
 !
@@ -279,16 +280,16 @@ contains
       real(4) rinc4(5)
       integer w3kindreal,w3kindint
 !
-      IDAT=0
-      IDAT(1)=IDATE(4)
-      IDAT(2)=IDATE(2)
-      IDAT(3)=IDATE(3)
-      IDAT(5)=IDATE(1)
-      RINC=0.
-      RINC(2)=FHOUR
+      IDAT = 0
+      IDAT(1) = IDATE(4)
+      IDAT(2) = IDATE(2)
+      IDAT(3) = IDATE(3)
+      IDAT(5) = IDATE(1)
+      RINC = 0.
+      RINC(2) = FHOUR
       call w3kind(w3kindreal,w3kindint)
-      if(w3kindreal==4) then
-        rinc4=rinc
+      if(w3kindreal == 4) then
+        rinc4 = rinc
         CALL W3MOVDAT(RINC4,IDAT,JDAT)
       else
         CALL W3MOVDAT(RINC,IDAT,JDAT)
@@ -299,11 +300,11 @@ contains
       jday = 0
       call w3doxdat(jdat,jdow,jdoy,jday)
       rjday = jdoy + jdat(5) / 24.
-      IF (RJDAY .LT. aer_time(1)) RJDAY = RJDAY+365.
+      IF (RJDAY < aer_time(1)) RJDAY = RJDAY+365.
 !
       n2 = 13
       do j=2, 12
-       if (rjday .lt. aer_time(j)) then
+       if (rjday < aer_time(j)) then
           n2 = j
           exit
        endif
@@ -320,31 +321,36 @@ contains
 !$OMP          shared(ddx,ddy,jindx1,jindx2,iindx1,iindx2)   &
 !$OMP          shared(aerpm,aerpres,aerout,n1,n2,lev,nthrds) &
 !$OMP          private(l,j,k,ii,i1,i2,j1,j2,temj,temi)       &
+!$OMP          private(temij,temiy,temjx,ddxy)               &
 !$OMP          copyin(tx1,tx2) firstprivate(tx1,tx2)
 
 !$OMP do
 #endif
       DO L=1,levsaer
         DO J=1,npts
-          J1  = JINDX1(J)
-          J2  = JINDX2(J)
-          TEMJ = 1.0 - DDY(J)
-          I1  = IINDX1(J)
-          I2  = IINDX2(J)
-          TEMI = 1.0 - DDX(J)
+          J1    = JINDX1(J)
+          J2    = JINDX2(J)
+          TEMJ  = 1.0 - DDY(J)
+          I1    = IINDX1(J)
+          I2    = IINDX2(J)
+          TEMI  = 1.0 - DDX(J)
+          temij = TEMI*TEMJ
+          temiy = TEMI*DDY(j)
+          temjx = TEMJ*DDX(j)
+          ddxy  = DDX(j)*DDY(J)
           DO ii=1,ntrcaer
-           aerpm(j,L,ii) =                                                        &
-           tx1*(TEMI*TEMJ*aerin(I1,J1,L,ii,n1)+DDX(j)*DDY(J)*aerin(I2,J2,L,ii,n1)&
-               +TEMI*DDY(j)*aerin(I1,J2,L,ii,n1)+DDX(j)*TEMJ*aerin(I2,J1,L,ii,n1))&
-          +tx2*(TEMI*TEMJ*aerin(I1,J1,L,ii,n2)+DDX(j)*DDY(J)*aerin(I2,J2,L,ii,n2) &
-               +TEMI*DDY(j)*aerin(I1,J2,L,ii,n2)+DDX(j)*TEMJ*aerin(I2,J1,L,ii,n2))
+           aerpm(j,L,ii) =                                            &
+           tx1*(TEMIJ*aerin(I1,J1,L,ii,n1)+DDXY*aerin(I2,J2,L,ii,n1)  &
+               +TEMIY*aerin(I1,J2,L,ii,n1)+temjx*aerin(I2,J1,L,ii,n1))&
+          +tx2*(TEMIJ*aerin(I1,J1,L,ii,n2)+DDXY*aerin(I2,J2,L,ii,n2)  &
+               +TEMIY*aerin(I1,J2,L,ii,n2)+temjx*aerin(I2,J1,L,ii,n2))
           ENDDO
 
-          aerpres(j,L) =                                                         &
-           tx1*(TEMI*TEMJ*aer_pres(I1,J1,L,n1)+DDX(j)*DDY(J)*aer_pres(I2,J2,L,n1)&
-               +TEMI*DDY(j)*aer_pres(I1,J2,L,n1)+DDX(j)*TEMJ*aer_pres(I2,J1,L,n1))&
-          +tx2*(TEMI*TEMJ*aer_pres(I1,J1,L,n2)+DDX(j)*DDY(J)*aer_pres(I2,J2,L,n2) &
-               +TEMI*DDY(j)*aer_pres(I1,J2,L,n2)+DDX(j)*TEMJ*aer_pres(I2,J1,L,n2))
+          aerpres(j,L) =                                              &
+           tx1*(TEMIJ*aer_pres(I1,J1,L,n1)+DDXY*aer_pres(I2,J2,L,n1)  &
+               +TEMIY*aer_pres(I1,J2,L,n1)+temjx*aer_pres(I2,J1,L,n1))&
+          +tx2*(TEMIJ*aer_pres(I1,J1,L,n2)+DDXY*aer_pres(I2,J2,L,n2)  &
+               +TEMIY*aer_pres(I1,J2,L,n2)+temjx*aer_pres(I2,J1,L,n2))
         ENDDO
       ENDDO
 #ifndef __GFORTRAN__
@@ -355,28 +361,27 @@ contains
 #endif
       DO J=1,npts
         DO L=1,lev
-           if(prsl(j,L).ge.aerpres(j,1)) then
+           if(prsl(j,L) >= aerpres(j,1)) then
               DO ii=1, ntrcaer
-               aerout(j,L,ii)=aerpm(j,1,ii)        !! sfc level
+               aerout(j,L,ii) = aerpm(j,1,ii)        !! sfc level
               ENDDO
-           else if(prsl(j,L).le.aerpres(j,levsaer)) then
+           else if(prsl(j,L) <= aerpres(j,levsaer)) then
               DO ii=1, ntrcaer
-               aerout(j,L,ii)=aerpm(j,levsaer,ii)  !! toa top
+               aerout(j,L,ii) = aerpm(j,levsaer,ii)  !! toa top
               ENDDO
            else
              DO  k=1, levsaer-1      !! from sfc to toa
-              IF(prsl(j,L)<aerpres(j,k).and.prsl(j,L)>aerpres(j,k+1)) then
-                 i1=k
-                 i2=min(k+1,levsaer)
+              IF(prsl(j,L) < aerpres(j,k) .and. prsl(j,L)>aerpres(j,k+1)) then
+                 i1 = k
+                 i2 = min(k+1,levsaer)
                  exit
               ENDIF
              ENDDO
-             temi = prsl(j,L)-aerpres(j,i2)
-             temj = aerpres(j,i1) - prsl(j,L)
-             tx1 = temi/(aerpres(j,i1) - aerpres(j,i2))
-             tx2 = temj/(aerpres(j,i1) - aerpres(j,i2))
+             temi = 1.0 / (aerpres(j,i1) - aerpres(j,i2))
+             tx1  = (prsl(j,L) - aerpres(j,i2)) * temi
+             tx2  = (aerpres(j,i1) - prsl(j,L)) * temi
              DO ii = 1, ntrcaer
-               aerout(j,L,ii)= aerpm(j,i1,ii)*tx1 + aerpm(j,i2,ii)*tx2
+               aerout(j,L,ii) = aerpm(j,i1,ii)*tx1 + aerpm(j,i2,ii)*tx2
              ENDDO
            endif
         ENDDO   !L-loop
