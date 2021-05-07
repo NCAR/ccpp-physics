@@ -178,7 +178,8 @@
       real(kind=kind_phys), intent(in   ), dimension(im) :: xcosz, adjsfcdsw, adjsfcdlw, pgr, xmu, work1, work2
       real(kind=kind_phys), intent(in   ), dimension(:)  :: ulwsfc_cice
       real(kind=kind_phys), intent(in   ), dimension(im) :: cice
-      real(kind=kind_phys), intent(in   ), dimension(im, levs) :: htrsw, htrlw, htrlwu, tgrs, prsl, qgrs_water_vapor, qgrs_cloud_water, prslk
+      real(kind=kind_phys), intent(in   ), dimension(im, levs) :: htrsw, htrlw, tgrs, prsl, qgrs_water_vapor, qgrs_cloud_water, prslk
+      real(kind=kind_phys), intent(in   ), dimension(:,:) :: htrlwu
       real(kind=kind_phys), intent(in   ), dimension(im, levs+1) :: prsi
       real(kind=kind_phys), intent(in   ), dimension(im, levs, 6) :: lwhd
       integer,              intent(inout), dimension(im) :: kinver
