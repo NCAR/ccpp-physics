@@ -265,6 +265,14 @@
   type = logical
   intent = in
   optional = F
+[use_flake]
+  standard_name = flag_nonzero_lake_surface_fraction
+  long_name = flag indicating presence of some lake surface area fraction
+  units = flag
+  dimensions = (horizontal_loop_extent)
+  type = logical
+  intent = inout
+  optional = F
 [lprnt]
   standard_name = flag_print
   long_name = switch for printing sample column to stdout

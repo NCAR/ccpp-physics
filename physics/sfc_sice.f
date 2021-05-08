@@ -45,7 +45,7 @@
      &       t0c, rd, ps, t1, q1, delt,                                 &
      &       sfcemis, dlwflx, sfcnsw, sfcdsw, srflag,                   &
      &       cm, ch, prsl1, prslki, prsik1, prslk1, wind,               &
-     &       flag_iter, lprnt, ipr, me,                                 &
+     &       flag_iter, use_flake, lprnt, ipr, me,                      &
      &       hice, fice, tice, weasd, tskin, tprcp, tiice, ep,          & !  ---  input/outputs:
      &       snwdph, qsurf, snowmt, gflux, cmm, chh, evap, hflx,        &
      &       islmsk_cice,                                               &
@@ -60,7 +60,7 @@
 !                                                                       !
 !    call sfc_sice                                                      !
 !       inputs:                                                         !
-!          ( im, kice, ps, t1, q1, delt,                                !
+!          ( im, kice, ps, t1, q1, delt,                           !
 !            sfcemis, dlwflx, sfcnsw, sfcdsw, srflag,                   !
 !            cm, ch, prsl1, prslki, prsik1, prslk1, wind,               !
 !            flag_iter,                                                 !
@@ -111,6 +111,7 @@
 !     islimsk  - integer, sea/land/ice mask (=0/1/2)               im   !
 !     wind     - real,                                             im   !
 !     flag_iter- logical,                                          im   !
+!     use_flake- logical, true for lakes when when lkm > 0         im   !
 !                                                                       !
 !  input/outputs:                                                       !
 !     hice     - real, sea-ice thickness                           im   !
@@ -134,7 +135,7 @@
 !                                                                       !
 ! ===================================================================== !
 !
-      use machine, only : kind_phys
+      use machine,  only : kind_phys
       use funcphys, only : fpvs
 !
       implicit none
@@ -168,7 +169,7 @@
 !     real (kind=kind_phys), intent(in)  :: delt, min_seaice,           &
 !    &                                            min_lakeice
 
-      logical, dimension(im), intent(in) :: flag_iter
+      logical, dimension(im), intent(in) :: flag_iter, use_flake
 
 !  ---  input/outputs:
       real (kind=kind_phys), dimension(:), intent(inout) :: hice,       &
@@ -194,6 +195,7 @@
      &,                        hflxi, hflxw, q0, qs1, qssi, qssw
       real (kind=kind_phys) :: cpinv, hvapi, elocp, snetw
 !     real (kind=kind_phys) :: cpinv, hvapi, elocp, snetw, cimin
+      logical do_sice
 
       integer :: i, k
 
@@ -211,13 +213,18 @@
 !
 !> - Set flag for sea-ice.
 
+      do_sice = .false.
       do i = 1, im
-        flag(i) = (islmsk_cice(i) == 2) .and. flag_iter(i)
+!       flag(i) = islmsk_cice(i) == 2 .and. flag_iter(i)
+        flag(i) = islmsk_cice(i) == 2 .and. flag_iter(i)                &
+     &                                .and. .not. use_flake(i)
+        do_sice = do_sice .or. flag(i)
 !       if (flag_iter(i) .and. islmsk_cice(i) < 2) then
 !         hice(i) = zero
 !         fice(i) = zero
 !       endif
       enddo
+      if (.not. do_sice) return
 
       do i = 1, im
         if (flag(i)) then

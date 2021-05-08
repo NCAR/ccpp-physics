@@ -242,6 +242,7 @@
       real(kind=kind_phys) fw,q_warm
       real(kind=kind_phys) t12,alon,tsea,sstc,dta,dtz
       real(kind=kind_phys) zsea1,zsea2,soltim
+      logical do_nst
 
 !  external functions called: iw3jdn
       integer :: iw3jdn
@@ -251,6 +252,8 @@ cc
       errmsg = ''
       errflg = 0
 
+      if (nstf_name1 == 0) return ! No NSST model used
+
       cpinv = one/cp
       hvapi = one/hvap
       elocp = hvap/cp
@@ -259,10 +262,13 @@ cc
 !
 ! flag for open water and where the iteration is on
 !
+      do_nst = .false.
       do i = 1, im
 !       flag(i) = wet(i) .and. .not.icy(i) .and. flag_iter(i)
         flag(i) = wet(i) .and. flag_iter(i) .and. .not. use_flake(i)
+        do_nst  = do_nst .or. flag(i)
       enddo
+      if (.not. do_nst) return
 !
 !  save nst-related prognostic fields for guess run
 !
