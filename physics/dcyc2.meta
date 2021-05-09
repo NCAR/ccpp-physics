@@ -353,6 +353,24 @@
   type = logical
   intent = in
   optional = F
+[minGPtemp]
+  standard_name = minimum_temperature_in_RRTMGP
+  long_name = minimum temperature allowed in RRTMGP
+  units = K
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[maxGPtemp]
+  standard_name = maximum_temperature_in_RRTMGP
+  long_name = maximum temperature allowed in RRTMGP
+  units = K
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [minGPpres]
   standard_name = minimum_pressure_in_RRTMGP
   long_name = minimum pressure allowed in RRTMGP

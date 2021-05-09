@@ -92,6 +92,15 @@
   kind = kind_phys
   intent = out
   optional = F
+[maxGPtemp]
+  standard_name = maximum_temperature_in_RRTMGP
+  long_name = maximum temperature allowed in RRTMGP
+  units = K
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
 
 ########################################################################
 [ccpp-arg-table]

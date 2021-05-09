@@ -178,7 +178,7 @@
      &       sfcnirbmu,sfcnirdfu,sfcvisbmu,sfcvisdfu,                   &
      &       sfcnirbmd,sfcnirdfd,sfcvisbmd,sfcvisdfd,                   &
      &       im, levs, deltim, fhswr,                                   &
-     &       dry, icy, wet,                                             &
+     &       dry, icy, wet, minGPtemp, maxGPtemp,                       &
      &       minGPpres, use_LW_jacobian, sfculw, fluxlwUP_jac,          &
      &       t_lay, t_lev, p_lay, p_lev, flux2D_lwUP, flux2D_lwDOWN,    &
      &       pert_radtend, do_sppt,ca_global,                           &
@@ -216,7 +216,8 @@
       logical, intent(in) :: use_LW_jacobian, pert_radtend
       logical, intent(in) :: do_sppt,ca_global
       real(kind=kind_phys),   intent(in) :: solhr, slag, cdec, sdec,    &
-     &                                      deltim, fhswr, minGPpres
+     &                                      deltim, fhswr, minGPpres,   &
+     &                                      minGPtemp, maxGPtemp
 
       real(kind=kind_phys), dimension(:), intent(in) ::                 &
      &      sinlat, coslat, xlon, coszen, tf, tsflw, sfcdlw,            &
@@ -372,8 +373,8 @@
          !
          ! Compute temperatute at level interfaces.
          !
-         call cmp_tlev(im, levs, minGPpres, p_lay, t_lay, p_lev, tsfc,  &
-     &        t_lev2)
+         call cmp_tlev(im, levs, minGPpres, minGPtemp, maxGPtemp, p_lay,& 
+     &                  t_lay, p_lev, tsfc, t_lev2)
 
          !
          ! Adjust up/downward fluxes (at layer interfaces).
