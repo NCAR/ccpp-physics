@@ -671,7 +671,7 @@ module mp_nsslg
          graupel = max(0.0, delta_graupel_mp/1000.0_kind_phys)
          ice     = max(0.0, delta_ice_mp/1000.0_kind_phys)
          snow    = max(0.0, delta_snow_mp/1000.0_kind_phys)
-         rain    = max(0.0, delta_rain_mp - (delta_graupel_mp + delta_ice_mp + delta_snow_mp)/1000.0_kind_phys)
+         rain    = max(0.0, (delta_rain_mp - (delta_graupel_mp + delta_ice_mp + delta_snow_mp))/1000.0_kind_phys)
 
 !        write(0,*) 'mp_nsslg: done precip'
 
