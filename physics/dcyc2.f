@@ -380,9 +380,12 @@
          !
          do k = 1, levs+1
             do i = 1, im
-               dT = t_lev2(i,k) - t_lev(i,k)
-               flxlwup_adj(i,k) = flux2D_lwUP(i,k) +                    &
-     &              fluxlwUP_jac(i,k)*dT
+               flxlwup_adj(i,k) = flux2D_lwUP(i,k)
+               if (p_lev(i,k) .gt. 10000.) then
+                  dT = t_lev2(i,k) - t_lev(i,k)
+                  flxlwup_adj(i,k) = flux2D_lwUP(i,k) +                 &
+     &                 fluxlwUP_jac(i,k)*dT
+               endif
             enddo
          enddo
          !
