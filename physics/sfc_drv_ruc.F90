@@ -25,7 +25,8 @@ module lsm_ruc
 !! \section arg_table_lsm_ruc_init Argument Table
 !! \htmlinclude lsm_ruc_init.html
 !!
-      subroutine lsm_ruc_init (me, master, isot, ivegsrc, nlunit,        &
+      subroutine lsm_ruc_init (lsm, lsm_ruc,                             &
+                               me, master, isot, ivegsrc, nlunit,        &
                                flag_restart, flag_init,                  &
                                im, lsoil_ruc, lsoil, kice, nlev,         & ! in
                                lsm_ruc, lsm, slmsk, stype, vtype,        & ! in 
@@ -36,6 +37,8 @@ module lsm_ruc
 
       implicit none
 !  ---  in
+      integer,              intent(in)  :: lsm
+      integer,              intent(in)  :: lsm_ruc
       integer,              intent(in)  :: me, master, isot, ivegsrc, nlunit
       logical,              intent(in)  :: flag_restart
       logical,              intent(in)  :: flag_init
@@ -79,6 +82,14 @@ module lsm_ruc
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0 
+      
+      ! Consistency checks
+      if (lsm/=lsm_ruc) then
+        write(errmsg,'(*(a))') 'Logic error: namelist choice of ',
+     &       'LSM is different from RUC'
+        errflg = 1
+        return
+      end if
 
       ipr = 10
       debug_print = .false.

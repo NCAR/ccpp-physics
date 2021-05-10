@@ -7,6 +7,22 @@
 [ccpp-arg-table]
   name = lsm_ruc_init
   type = scheme
+[lsm]
+  standard_name = flag_for_land_surface_scheme
+  long_name = flag for land surface model
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[lsm_ruc]
+  standard_name = flag_for_ruc_land_surface_scheme
+  long_name = flag for RUC land surface model
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [me]
   standard_name = mpi_rank
   long_name = current MPI-rank
