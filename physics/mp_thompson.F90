@@ -469,7 +469,7 @@ module mp_thompson
          !> - Also, hydrometeor variables are mass or number mixing ratio
          !> - either kg of species per kg of dry air, or per kg of (dry + vapor).
 
-         ! DH* - do this only if istep == nsteps? Would be ok if it was
+         ! DH* - do this only if istep == 1? Would be ok if it was
          ! guaranteed that nothing else in the same subcycle construct
          ! was using these arrays - which is currently the case for
          ! mp_thompson_pre/post - but it is somewhat dangerous.
@@ -683,6 +683,11 @@ module mp_thompson
          ice     = ice     + max(0.0, delta_ice_mp/1000.0_kind_phys)
          snow    = snow    + max(0.0, delta_snow_mp/1000.0_kind_phys)
          rain    = rain    + max(0.0, (delta_rain_mp - (delta_graupel_mp + delta_ice_mp + delta_snow_mp))/1000.0_kind_phys)
+
+         ! Recompute sr at last subcycling step
+         if (nsteps>1 .and. istep == nsteps) then
+           sr = (snow + graupel + ice)/(rain+1.e-12)
+         end if
 
       end subroutine mp_thompson_run
 !>@}
