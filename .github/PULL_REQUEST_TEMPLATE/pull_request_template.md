@@ -2,10 +2,11 @@
 One or more paragraphs describing the problem, solution, and required changes.
 
 ## Tests Conducted: 
-Add any links to tests conducted. For example, "See ufs-community/ufs-weather-model/pull/<pr_number>"
+Explicitly state what tests were run on these changes, or if any are still pending (for README or other text-only changes, just put "None required". Make note of the compilers used, the platform/machine, and other relevant details as necessary. For more complicated changes, or those resulting in scientific changes, please be explicit!  
+**OR** Add any links to tests conducted. For example, "See ufs-community/ufs-weather-model/pull/<pr_number>"
 
 ## Dependencies:
-Add any links to parent PRs. For example:
+Add any links to parent PRs (e.g. SCM and/or UFS PRs) or submodules (e.g. rte-rrtmgp). For example:
 - NCAR/ccpp-framework/pull/<pr_number>
 - NOAA-EMC/fv3atm/pull/<pr_number>
 - ufs-community/ufs-weather-model/pull/<pr_number>
