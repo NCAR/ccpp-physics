@@ -7,6 +7,14 @@
 [ccpp-arg-table]
   name = hedmf_init
   type = scheme
+[hybedmf]
+  standard_name = flag_for_hedmf
+  long_name = flag for hybrid edmf pbl scheme (moninedmf)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [moninq_fac]
   standard_name = atmosphere_diffusivity_coefficient_factor
   long_name = multiplicative constant for atmospheric diffusivities

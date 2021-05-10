@@ -11,15 +11,25 @@
 !> \section arg_table_hedmf_init Argument Table
 !! \htmlinclude hedmf_init.html
 !!
-      subroutine hedmf_init (moninq_fac,errmsg,errflg)
+      subroutine hedmf_init (hybedmf,moninq_fac,errmsg,errflg)
          use machine, only : kind_phys
          implicit none
-         real(kind=kind_phys), intent(in ) :: moninq_fac
+
+         logical,              intent(in) :: hybedmf
+
+         real(kind=kind_phys), intent(in) :: moninq_fac
          character(len=*),     intent(out) :: errmsg
          integer,              intent(out) :: errflg
          ! Initialize CCPP error handling variables
          errmsg = ''
          errflg = 0
+
+         ! Consistency checks
+         if (.not. hybedmf) then
+            errflg = 1
+            write(errmsg,'(*(a))') 'Logic error: hybedmf = .false.'
+            return
+         end if
 
          if (moninq_fac == 0) then
              errflg = 1
