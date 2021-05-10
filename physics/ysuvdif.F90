@@ -11,7 +11,22 @@
       module ysuvdif
       contains
 
-      subroutine ysuvdif_init ()
+      subroutine ysuvdif_init (do_ysu,errmsg,errflg)
+
+        integer, intent(in) :: do_ysu
+        character(len=*), intent(out) :: errmsg
+        integer,          intent(out) :: errflg
+
+        ! Initialize CCPP error handling variables
+        errmsg = ''
+        errflg = 0
+
+        ! Consistency checks
+        if (.not. do_ysu) then
+          write(errmsg,fmt='(*(a))') 'Logic error: do_ysu = .false.'      
+          errflg = 1
+          return
+        end if
       end subroutine ysuvdif_init
 
       subroutine ysuvdif_finalize ()
