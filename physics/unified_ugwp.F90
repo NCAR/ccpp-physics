@@ -63,7 +63,7 @@ contains
                 fn_nml2, jdat, lonr, latr, levs, ak, bk, dtp, cdmbgwd, cgwf,   &
                 con_pi, con_rerth, pa_rf_in, tau_rf_in, con_p0, do_ugwp,       &
                 do_ugwp_v0, do_ugwp_v0_orog_only, do_ugwp_v0_nst_only,         &
-                do_gsl_drag_ls_bl, do_gsl_drag_ss, do_gsl_drag_tofd,           &
+                do_gsl_drag_ls_bl, do_gsl_drag_ss, do_gsl_drag_tofd, gwd_opt,  &
                 errmsg, errflg)
 
 !----  initialization of unified_ugwp
@@ -96,7 +96,8 @@ contains
     logical :: exists
     real    :: dxsg
     integer :: k
-
+    
+    integer,          intent(in)  :: gwd_opt
     character(len=*), intent(out) :: errmsg
     integer,          intent(out) :: errflg
 
@@ -104,6 +105,13 @@ contains
     errmsg = ''
     errflg = 0
 
+    ! Consistency checks
+    if (gwd_opt/=2 .or. gwd_opt/=22) then
+      write(errmsg,'(*(a))') "Logic error: namelist choice of gravity wave &
+        & drag is different from unified_ugwp scheme"
+      errflg = 1
+      return
+    end if
 
     ! Test to make sure that at most only one large-scale/blocking
     ! orographic drag scheme is chosen
