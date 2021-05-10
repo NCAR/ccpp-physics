@@ -23,10 +23,13 @@ contains
 !! \section arg_table_cu_gf_driver_init Argument Table
 !! \htmlinclude cu_gf_driver_init.html
 !!
-      subroutine cu_gf_driver_init(mpirank, mpiroot, errmsg, errflg)
+      subroutine cu_gf_driver_init(imfshalcnv, imfshalcnv_gf, imfdeepcnv, &
+                          imfdeepcnv_gf,mpirank, mpiroot, errmsg, errflg)
 
          implicit none
-
+         
+         integer,                   intent(in) :: imfshalcnv, imfshalcnv_gf
+         integer,                   intent(in) :: imfdeepcnv, imfdeepcnv_gf       
          integer,                   intent(in)    :: mpirank
          integer,                   intent(in)    :: mpiroot
          character(len=*),          intent(  out) :: errmsg
@@ -44,6 +47,20 @@ contains
          end if
          ! *DH temporary
 
+         ! Consistency checks
+         if (imfshalcnv/=imfshalcnv_gf) then
+           write(errmsg,'(*(a))') 'Logic error: namelist choice of',       &
+        &    ' shallow convection is different from Grell-Freitas scheme'
+           errflg = 1
+           return
+         end if
+
+         if (imfdeepcnv/=imfdeepcnv_gf) then
+           write(errmsg,'(*(a))') 'Logic error: namelist choice of',       &
+        &    ' deep convection is different from Grell-Freitas scheme'
+           errflg = 1
+           return
+         end if
       end subroutine cu_gf_driver_init
 
       subroutine cu_gf_driver_finalize()
