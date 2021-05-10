@@ -7,7 +7,24 @@
 
       contains
 
-      subroutine drag_suite_init()
+      subroutine drag_suite_init(gwd_opt, errmsg, errflg)
+
+      integer,          intent(in)  :: gwd_opt
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
+
+
+      ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
+
+      ! Consistency checks
+      if (gwd_opt/=3 .or. gwd_opt/=33) then
+        write(errmsg,'(*(a))') "Logic error: namelist choice of gravity wave &
+          & drag is different from drag_suite scheme"
+        errflg = 1
+        return
+      end if        
       end subroutine drag_suite_init
 
 ! \defgroup GFS_ogwd GFS Orographic Gravity Wave Drag
