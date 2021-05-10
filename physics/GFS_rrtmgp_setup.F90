@@ -40,13 +40,14 @@ contains
 !! \section arg_table_GFS_rrtmgp_setup_init
 !! \htmlinclude GFS_rrtmgp_setup_init.html
 !!
-  subroutine GFS_rrtmgp_setup_init(imp_physics, imp_physics_fer_hires, imp_physics_gfdl,    &
-       imp_physics_thompson, imp_physics_wsm6, imp_physics_zhao_carr,                       &
+  subroutine GFS_rrtmgp_setup_init(do_RRTMGP, imp_physics, imp_physics_fer_hires,           &
+       imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, imp_physics_zhao_carr,     &
        imp_physics_zhao_carr_pdf, imp_physics_mg,  si, levr, ictm, isol, ico2, iaer, ialb,  &
        iems, ntcw, num_p3d,  ntoz, iovr, isubc_sw, isubc_lw, icliq_sw, crick_proof, ccnorm, &
        norad_precip, idate, iflip, me, errmsg, errflg)
 
     ! Inputs
+    logical, intent(in) :: do_RRTMGP
     integer, intent(in) :: &
          imp_physics,               & ! Flag for MP scheme
          imp_physics_fer_hires,     & ! Flag for fer-hires scheme
@@ -75,7 +76,14 @@ contains
     errflg = 0
     
     if (is_initialized) return
-    
+
+    ! Consistency checks
+    if (.not. do_RRTMGP) then
+      write(errmsg,'(*(a))') "Logic error: do_RRTMGP should be set true"
+      errflg = 1
+      return
+    end if
+
     ! Set radiation parameters
     isolar  = isol                     ! solar constant control flag
     ictmflg = ictm                     ! data ic time/date control flag
