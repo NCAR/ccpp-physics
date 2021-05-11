@@ -266,7 +266,6 @@
       ! Scaling factor for downwelling LW Jacobian profile.
       real(kind=kind_phys), parameter ::                                &
      &     c0 = 0.2
-      logical :: init_lev
 !
 !===> ...  begin here
 !
@@ -398,7 +397,6 @@
             c1 = fluxlwUP_jac(i,iSFC)
             c2 = fluxlwUP_jac(i,iTOA) / c1
             c3 = t_lev2(i,iSFC) - t_lev(i,iSFC)
-            init_lev = .true.
             do k = 1, levs
                ! Only apply the Jacobian adjustment below plim_fluxAdj_upper
                if (p_lev(i,k) .gt. plim_fluxAdj_upper) then
@@ -417,7 +415,8 @@
                   ku = k
                ! Above, offset the heating rate by he same amount as in plim_fluxAdj_upper
                else
-                  htrlw(i,k) = hlw(i,k) + (htrlw(i,ku)-hlw(i,ku))
+                  htrlw(i,k) = hlw(i,k)+(p_lev(i,k)/plim_fluxAdj_upper)*&
+     &                                  (htrlw(i,ku)-hlw(i,ku))
                endif
 
                ! Add radiative heating rates to physics heating rate 
