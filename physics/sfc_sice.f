@@ -60,7 +60,7 @@
 !                                                                       !
 !    call sfc_sice                                                      !
 !       inputs:                                                         !
-!          ( im, kice, ps, t1, q1, delt,                           !
+!          ( im, kice, ps, t1, q1, delt,                                !
 !            sfcemis, dlwflx, sfcnsw, sfcdsw, srflag,                   !
 !            cm, ch, prsl1, prslki, prsik1, prslk1, wind,               !
 !            flag_iter,                                                 !
@@ -71,8 +71,8 @@
 !                                                                       !
 !  subprogram called:  ice3lay.                                         !
 !                                                                       !
-!>  program history log:                                                 
-!!-         2005  --  xingren wu created  from original progtm and added 
+!>  program history log:
+!!-         2005  --  xingren wu created  from original progtm and added
 !!                     two-layer ice model
 !!-         200x  -- sarah lu    added flag_iter
 !!-    oct  2006  -- h. wei      added cmm and chh to output

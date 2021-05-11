@@ -330,7 +330,7 @@ contains
 !$OMP          shared(ddx,ddy,jindx1,jindx2,iindx1,iindx2)   &
 !$OMP          shared(aerpm,aerpres,aerout,n1,n2,lev,nthrds) &
 !$OMP          shared(temij,temiy,temjx,ddxy)                &
-!$OMP          private(l,j,k,ii,i1,i2,j1,j2,tem)                 &
+!$OMP          private(l,j,k,ii,i1,i2,j1,j2,tem)             &
 !$OMP          copyin(tx1,tx2) firstprivate(tx1,tx2)
 
 !$OMP do
