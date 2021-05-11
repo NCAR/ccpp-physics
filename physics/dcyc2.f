@@ -254,11 +254,19 @@
       integer,          intent(out) :: errflg
 
 !  ---  locals:
-      integer :: i, k, nstp, nstl, it, istsun(im),iSFC
+      integer :: i, k, nstp, nstl, it, istsun(im),iSFC,iTOA
       real(kind=kind_phys) :: cns,  coszn, tem1, tem2, anginc,          &
      &                        rstl, solang, dT
       real(kind=kind_phys), dimension(im,levs+1) :: flxlwup_adj,        &
      &     flxlwdn_adj, t_lev2
+      real(kind=kind_phys) :: fluxlwnet_adj,fluxlwnet,c1,c2,c3,c4,c5,ku
+      ! Pressure limit for LW flux adjustment  
+      real(kind=kind_phys), parameter ::                                &
+     &     plim_fluxAdj_upper = 10000.
+      ! Scaling factor for downwelling LW Jacobian profile.
+      real(kind=kind_phys), parameter ::                                &
+     &     c0 = 0.2
+      logical :: init_lev
 !
 !===> ...  begin here
 !
@@ -268,9 +276,11 @@
 
 !     Vertical ordering?
       if (p_lev(1,1) .lt.  p_lev(1, levs)) then 
-         iSFC = levs
+         iSFC = levs + 1
+         iTOA = 1
       else
          iSFC = 1
+         iTOA = levs + 1
       endif
 
       tem1 = fhswr / deltim
@@ -376,34 +386,41 @@
          call cmp_tlev(im, levs, minGPpres, minGPtemp, maxGPtemp, p_lay,& 
      &                  t_lay, p_lev, tsfc, t_lev2)
 
+         ! Compute adjusted net LW flux foillowing Hogan and Bozzo 2015 (10.1002/2015MS000455)
+         ! Here we assume that the profile of the downwelling LW Jaconiam has the same shape
+         ! as the upwelling, but scaled and offset.
+         ! The scaling factor is 0.2
+         ! The profile of the downwelling Jacobian (J) is offset so that
+         !     J_dn_sfc / J_up_sfc = scaling_factor
+         !     J_dn_toa / J_up_sfc = 0
          !
-         ! Adjust up/downward fluxes (at layer interfaces).
-         !
-         do k = 1, levs+1
-            do i = 1, im
-               flxlwup_adj(i,k) = flux2D_lwUP(i,k)
-               if (p_lev(i,k) .gt. 10000.) then
-                  dT = t_lev2(i,k) - t_lev(i,k)
-                  flxlwup_adj(i,k) = flux2D_lwUP(i,k) +                 &
-     &                 fluxlwUP_jac(i,k)*dT
-               endif
-            enddo
-         enddo
-         !
-         ! Compute new heating rate (within each layer).
-         !
-         do k = 1, levs
-            htrlw(1:im,k) =                                             &
-     &           (flxlwup_adj(1:im,k+1)  - flxlwup_adj(1:im,k) -        &
-     &           flux2D_lwDOWN(1:im,k+1) + flux2D_lwDOWN(1:im,k)) *     &
-     &           con_g / (con_cp * (p_lev(1:im,k+1) - p_lev(1:im,k)))
-         enddo
+         do i = 1, im
+            c1 = fluxlwUP_jac(i,iSFC)
+            c2 = fluxlwUP_jac(i,iTOA) / c1
+            c3 = t_lev2(i,iSFC) - t_lev(i,iSFC)
+            init_lev = .true.
+            do k = 1, levs
+               ! Only apply the Jacobian adjustment below plim_fluxAdj_upper
+               if (p_lev(i,k) .gt. plim_fluxAdj_upper) then
+                  c4 = fluxlwUP_jac(i,k)/c1
+                  fluxlwnet = (flux2D_lwUP(i,k+1)   - flux2D_lwUP(i,k) -&
+     &                        flux2D_lwDOWN(i,k+1) + flux2D_lwDOWN(i,k))
+                  ! (Eq. 9)
+                  c5 = c0 * (c4 - c2) / (1 - c2)
+                  ! (Eq. 10)
+                  fluxlwnet_adj = fluxlwnet + c3*(c4-c5)
+                  ! Compute adjusted heating rate
+                  htrlw(i,k) = fluxlwnet_adj * con_g /                  &
+     &                         (con_cp * (p_lev(i,k+1) - p_lev(i,k)))
 
-         !
-         ! Add radiative heating rates to physics heating rate
-         !
-         do k = 1, levs
-            do i = 1, im
+                  ! Store vertical index for plim_fluxAdj_upper
+                  ku = k
+               ! Above, offset the heating rate by he same amount as in plim_fluxAdj_upper
+               else
+                  htrlw(i,k) = hlw(i,k) + (htrlw(i,ku)-hlw(i,ku))
+               endif
+
+               ! Add radiative heating rates to physics heating rate 
                dtdt(i,k)  = dtdt(i,k)  + swh(i,k)*xmu(i)  + htrlw(i,k)
             enddo
          enddo
