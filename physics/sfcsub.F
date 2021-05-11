@@ -25,7 +25,7 @@
      &          kpdgla=238, kpdmxi=91, kpdscv=238, kpdsmc=144,
      &          kpdoro=8,   kpdmsk=81, kpdstc=11,  kpdacn=91, kpdveg=87,
 !cbosu  max snow albedo uses a grib id number of 159, not 255.
-     &          kpdvmn=255, kpdvmx=255,kpdslp=236, kpdabs_0=255,    
+     &          kpdvmn=255, kpdvmx=255,kpdslp=236, kpdabs_0=255,
      &          kpdvet=225, kpdsot=224,kpdabs_1=159,
      &          kpdsnd=66 )
 !
@@ -54,11 +54,11 @@
       end module sfccyc_module
 
 !>\ingroup mod_GFS_phys_time_vary
-!! This subroutine reads or interpolates surface climatology data in analysis 
+!! This subroutine reads or interpolates surface climatology data in analysis
 !! and forecast mode.
 !!\param lugb   the unit number used in this subprogram
 !!\param len    number of points on which sfccyc operates
-!!\param lsoil  number of soil layers 
+!!\param lsoil  number of soil layers
 !!\param sig1t  sigma level 1 temperature for dead start. it should be on gaussian
 !!              grid. If not dead start, no need for dimension but set to zero as
 !!              in the example below.
@@ -317,7 +317,7 @@
       parameter(plrlmx=1000.,plrlmn=0.0,plromx=1000.0,plromn=0.0,
      &          plrsmx=1000.,plrsmn=0.0,plrimx=1000.,plrimn=0.0,
      &          plrjmx=1000.,plrjmn=0.0)
-!clu [-1l/+1l] relax tsfsmx 
+!clu [-1l/+1l] relax tsfsmx
       parameter(tsflmx=353.,tsflmn=173.0,tsfomx=313.0,tsfomn=271.2,
      &          tsfsmx=305.0,tsfsmn=173.0,tsfimx=271.2,tsfimn=173.0,
      &          tsfjmx=273.16,tsfjmn=173.0)
@@ -343,19 +343,19 @@
      &          vegjmx=0.0,vegjmn=0.0)
       parameter(vmnlmx=1.0,vmnlmn=0.0,vmnomx=0.0,vmnomn=0.0,
      &          vmnsmx=1.0,vmnsmn=0.0,vmnimx=0.0,vmnimn=0.0,
-     &          vmnjmx=0.0,vmnjmn=0.0)   
+     &          vmnjmx=0.0,vmnjmn=0.0)
       parameter(vmxlmx=1.0,vmxlmn=0.0,vmxomx=0.0,vmxomn=0.0,
      &          vmxsmx=1.0,vmxsmn=0.0,vmximx=0.0,vmximn=0.0,
-     &          vmxjmx=0.0,vmxjmn=0.0)  
+     &          vmxjmx=0.0,vmxjmn=0.0)
       parameter(slplmx=9.0,slplmn=1.0,slpomx=0.0,slpomn=0.0,
      &          slpsmx=9.0,slpsmn=1.0,slpimx=0.,slpimn=0.,
-     &          slpjmx=0.,slpjmn=0.) 
+     &          slpjmx=0.,slpjmn=0.)
 !  note: the range values for bare land and snow covered land
 !        (alblmx, alblmn, albsmx, albsmn) are set below
 !        based on whether the old or new radiation is selected
       parameter(absomx=0.0,absomn=0.0,
      &          absimx=0.0,absimn=0.0,
-     &          absjmx=0.0,absjmn=0.0)    
+     &          absjmx=0.0,absjmn=0.0)
 !  vegetation type
       parameter(vetlmx=20.,vetlmn=1.0,vetomx=0.0,vetomn=0.0,
      &          vetsmx=20.,vetsmn=1.0,vetimx=0.,vetimn=0.,
@@ -468,7 +468,7 @@
       character*500 fntsfc,fnwetc,fnsnoc,fnzorc,fnalbc,fnaisc           &
      &,             fnplrc,fntg3c,fnscvc,fnsmcc,fnstcc,fnacnc           &
      &,             fnvegc,fnvetc,fnsotc                                &
-     &,             fnvmnc,fnvmxc,fnslpc,fnabsc, fnalbc2 
+     &,             fnvmnc,fnvmxc,fnslpc,fnabsc, fnalbc2
       real (kind=kind_io8) tsfclm(len), wetclm(len),   snoclm(len)      &
      &,    zorclm(len), albclm(len,4), aisclm(len)                      &
      &,    tg3clm(len), acnclm(len),   cnpclm(len)                      &
@@ -484,7 +484,7 @@
       character*500 fntsfa,fnweta,fnsnoa,fnzora,fnalba,fnaisa           &
      &,             fnplra,fntg3a,fnscva,fnsmca,fnstca,fnacna           &
      &,             fnvega,fnveta,fnsota                                &
-     &,             fnvmna,fnvmxa,fnslpa,fnabsa       
+     &,             fnvmna,fnvmxa,fnslpa,fnabsa
 !
       real (kind=kind_io8) tsfanl(len), wetanl(len),   snoanl(len)      &
      &,    zoranl(len), albanl(len,4), aisanl(len)                      &
@@ -1397,13 +1397,13 @@
      &            cnpanl,smcanl,stcanl,slianl,scvanl,veganl,
      &            vetanl,sotanl,alfanl,
      &            sihanl,sicanl,
-     &            vmnanl,vmxanl,slpanl,absanl, 
+     &            vmnanl,vmxanl,slpanl,absanl,
      &            tsfclm,tsfcl2,wetclm,snoclm,zorclm,albclm,aisclm,
      &            tg3clm,cvclm ,cvbclm,cvtclm,
      &            cnpclm,smcclm,stcclm,sliclm,scvclm,vegclm,
      &            vetclm,sotclm,alfclm,
      &            sihclm,sicclm,
-     &            vmnclm,vmxclm,slpclm,absclm,      
+     &            vmnclm,vmxclm,slpclm,absclm,
      &            len,lsoil)
 !
 !  reverse scaling to match with grib analysis input
@@ -1436,15 +1436,15 @@
      &           tg3anl,cvanl ,cvbanl,cvtanl,
      &           smcanl,stcanl,slianl,scvanl,acnanl,veganl,
      &           vetanl,sotanl,alfanl,tsfan0,
-     &           vmnanl,vmxanl,slpanl,absanl,      
+     &           vmnanl,vmxanl,slpanl,absanl,
      &           kpdtsf,kpdwet,kpdsno,kpdsnd,kpdzor,kpdalb,kpdais,
      &           kpdtg3,kpdscv,kpdacn,kpdsmc,kpdstc,kpdveg,
      &           kpdvet,kpdsot,kpdalf,
-     &           kpdvmn,kpdvmx,kpdslp,kpdabs,      
+     &           kpdvmn,kpdvmx,kpdslp,kpdabs,
      &           irttsf,irtwet,irtsno,irtzor,irtalb,irtais,
      &           irttg3,irtscv,irtacn,irtsmc,irtstc,irtveg,
      &           irtvet,irtsot,irtalf
-     &,          irtvmn,irtvmx,irtslp,irtabs, 
+     &,          irtvmn,irtvmx,irtslp,irtabs,
      &           imsk, jmsk, slmskh, rla, rlo, gausm, blnmsk, bltmsk
      &,          me, lanom)
 
@@ -1781,7 +1781,7 @@
 !cwu [+1l] add ()anl for sih, sic
      &              sihanl,sicanl,
 !clu [+1l] add ()anl for vmn, vmx, slp, abs
-     &              vmnanl,vmxanl,slpanl,absanl,     
+     &              vmnanl,vmxanl,slpanl,absanl,
      &              len,lsoil)
         if (sig1t(1) /= 0.) then
           call usesgt(sig1t,slianl,tg3anl,len,lsoil,tsffcs,stcfcs,
@@ -2029,13 +2029,13 @@
 
       call merge(len,lsoil,iy,im,id,ih,fh,deltsfc,
      &           slmskl,slmskw,sihfcs,sicfcs,
-     &           vmnfcs,vmxfcs,slpfcs,absfcs, 
+     &           vmnfcs,vmxfcs,slpfcs,absfcs,
      &           tsffcs,wetfcs,snofcs,zorfcs,albfcs,aisfcs,
      &           cvfcs ,cvbfcs,cvtfcs,
      &           cnpfcs,smcfcs,stcfcs,slifcs,vegfcs,
      &           vetfcs,sotfcs,alffcs,
-     &           sihanl,sicanl,                
-     &           vmnanl,vmxanl,slpanl,absanl,       
+     &           sihanl,sicanl,
+     &           vmnanl,vmxanl,slpanl,absanl,
      &           tsfanl,tsfan2,wetanl,snoanl,zoranl,albanl,aisanl,
      &           cvanl ,cvbanl,cvtanl,
      &           cnpanl,smcanl,stcanl,slianl,veganl,
@@ -2048,7 +2048,7 @@
      &           cvmnl,cvmns,cvmxl,cvmxs,cslpl,cslps,cabsl,cabss, 
      &           irttsf,irtwet,irtsno,irtzor,irtalb,irtais,
      &           irttg3,irtscv,irtacn,irtsmc,irtstc,irtveg,
-     &           irtvmn,irtvmx,irtslp,irtabs,        
+     &           irtvmn,irtvmx,irtslp,irtabs,
      &           irtvet,irtsot,irtalf,landice,me)
 
       call setzro(snoanl,epssno,len)
@@ -2063,7 +2063,7 @@
 !
       call newice(slianl,slifcs,tsfanl,tsffcs,len,lsoil,
 !cwu [+1l] add sihnew, aislim, sihanl & sicanl
-     &            sihnew,aislim,sihanl,sicanl,      
+     &            sihnew,aislim,sihanl,sicanl,
      &            albanl,snoanl,zoranl,smcanl,stcanl,
      &            albomx,snoomx,zoromx,smcomx,smcimx,
 !cwu [-1l/+1l] change albimx to albimn - note albimx & albimn have been modified
@@ -3623,7 +3623,7 @@
      &     slianl(len),scvanl(len),veganl(len),                         &
      &     vetanl(len),sotanl(len),alfanl(len,2)                        &
      &,    sihanl(len),sicanl(len)                                      &
-     &,    vmnanl(len),vmxanl(len),slpanl(len),absanl(len)         
+     &,    vmnanl(len),vmxanl(len),slpanl(len),absanl(len)
       real (kind=kind_io8) tsfclm(len),tsfcl2(len),wetclm(len),         &
      &     snoclm(len),                                                 &
      &     zorclm(len),albclm(len,4),aisclm(len),                       &
@@ -3659,7 +3659,7 @@
         sicanl(i)   = sicclm(i)      !  sea ice concentration
 !clu [+4l] add vmn, vmx, slp, abs
         vmnanl(i)   = vmnclm(i)      !  min vegetation cover
-        vmxanl(i)   = vmxclm(i)      !  max vegetation cover 
+        vmxanl(i)   = vmxclm(i)      !  max vegetation cover
         slpanl(i)   = slpclm(i)      !  slope type
         absanl(i)   = absclm(i)      !  max snow albedo
       enddo
@@ -4373,7 +4373,7 @@
      &     slifcs(len),vegfcs(len),                                     &
      &     vetfcs(len),sotfcs(len),alffcs(len,2)                        &
      &,    sihfcs(len),sicfcs(len)                                      &
-     &,    vmnfcs(len),vmxfcs(len),slpfcs(len),absfcs(len)      
+     &,    vmnfcs(len),vmxfcs(len),slpfcs(len),absfcs(len)
       real (kind=kind_io8) tsfanl(len),wetanl(len),snoanl(len),         &
      &     zoranl(len),albanl(len,4),aisanl(len),                       &
      &     tg3anl(len),                                                 &
@@ -6294,7 +6294,7 @@
           do j = 1, jmax
             do i = 1, imax
               if (lbms(i,j)) then
-                rslmsk(i,j) = 1.  
+                rslmsk(i,j) = 1.
               end if
             enddo
           enddo
@@ -6309,7 +6309,7 @@
           do j = 1, jmax
             do i = 1, imax
               if (lbms(i,j)) then
-                rslmsk(i,j) = 1.  
+                rslmsk(i,j) = 1.
               end if
             enddo
           enddo
@@ -6324,7 +6324,7 @@
           do j = 1, jmax
             do i = 1, imax
               if (lbms(i,j)) then
-                rslmsk(i,j) = 1.  
+                rslmsk(i,j) = 1.
               end if
             enddo
           enddo
@@ -6339,7 +6339,7 @@
           do j = 1, jmax
             do i = 1, imax
               if (lbms(i,j)) then
-                rslmsk(i,j) = 1.  
+                rslmsk(i,j) = 1.
               end if
             enddo
           enddo
@@ -6517,9 +6517,9 @@
 !  veg type is zero over water, use this to get a bitmap.
         else
           do j = 1, jmax
-          do i = 1, imax
-            rslmsk(i,j) = data(i,j)
-          enddo
+            do i = 1, imax
+              rslmsk(i,j) = data(i,j)
+            enddo
           enddo
           crit=0.1
           call rof01(rslmsk,ijmax,'gt',crit)
@@ -6580,7 +6580,7 @@
           do j = 1, jmax
             do i = 1, imax
               if (lbms(i,j)) then
-                rslmsk(i,j) = 1.  
+                rslmsk(i,j) = 1.
               end if
             enddo
           enddo
@@ -8406,8 +8406,8 @@ cjfe
                          inttyp = 0
         if(kpds5.eq.225) inttyp = 1
         if(kpds5.eq.230) inttyp = 1
-        if(kpds5.eq.236) inttyp = 1  
-        if(kpds5.eq.224) inttyp = 1  
+        if(kpds5.eq.236) inttyp = 1
+        if(kpds5.eq.224) inttyp = 1
         if (me .eq. 0) then
         if(inttyp.eq.1) print *, ' nearest grid point used'
      &,   ' kpds5=',kpds5, ' lmask = ',lmask
@@ -8439,7 +8439,7 @@ cjfe
       integer nrepmx,nvalid,imo,iyr,idy,jret,ihr,nrept,lskip,lugi,      &
      &        lgrib,j,ndata,i,inttyp,jmax,imax,ijmax,ij,jday,len,iret,  &
      &        jmsk,imsk,ih,kpds5,lugb,iy,id,im,jh,jd,jdoy,jdow,jm,me,   &
-     &        monend,jy,iy4,kmami,iret2,jj,w3kindreal,w3kindint      
+     &        monend,jy,iy4,kmami,iret2,jj,w3kindreal,w3kindint
       real (kind=kind_io8) rnlat,rslat,wlon,elon,dlon,dlat,fh,blno,     &
      &                     rjday,blto
 !
