@@ -94,7 +94,7 @@
 !     prsik1   - real,                                             im   !
 !     prslk1   - real,                                             im   !
 !     wet      - logical, =T if any ocn/lake water (F otherwise)   im   !
-!     use_flake     - logical, =T if any lake otherwise ocn
+!     use_flake- logical, =T if flake model is used for lake       im   !
 !     icy      - logical, =T if any ice                            im   !
 !     xlon     - real, longitude         (radians)                 im   !
 !     sinlat   - real, sin of latitude                             im   !
@@ -676,7 +676,7 @@ cc
 !> \section NSST_general_pre_algorithm General Algorithm
 !! @{
       subroutine sfc_nst_pre_run
-     &    (im, wet, use_flake, tgice, tsfco, tsurf_wat,
+     &    (im, wet, tgice, tsfco, tsurf_wat,
      &     tseal, xt, xz, dt_cool, z_c, tref, cplflx,
      &     oceanfrac, nthreads, errmsg, errflg)
 
@@ -689,7 +689,7 @@ cc
 
 !  ---  inputs:
       integer, intent(in) :: im, nthreads
-      logical, dimension(:), intent(in) :: wet, use_flake
+      logical, dimension(:), intent(in) :: wet
       real (kind=kind_phys), intent(in) :: tgice
       real (kind=kind_phys), dimension(:), intent(in) ::
      &      tsfco, xt, xz, dt_cool, z_c, oceanfrac
@@ -717,7 +717,7 @@ cc
       errflg = 0
 
       do i=1,im
-        if (wet(i) .and. .not. use_flake(i)) then
+        if (wet(i) .and. oceanfrac(i) > 0.0) then
 !          tem         = (oro(i)-oro_uf(i)) * rlapse
           ! DH* 20190927 simplyfing this code because tem is zero
           !tem          = zero
@@ -735,7 +735,7 @@ cc
         call get_dtzm_2d (xt,  xz, dt_cool,                             &
      &                    z_c_0, wet, zero, omz1, im, 1, nthreads, dtzm)
         do i=1,im
-         if (wet(i) .and. oceanfrac(i)>zero .and..not.use_flake(i)) then
+         if (wet(i) .and. oceanfrac(i) > zero ) then
 !           dnsst   = tsfc_wat(i) - tref(i)                 !  retrive/get difference of Ts and Tf
             tref(i) = max(tgice, tsfco(i) - dtzm(i))        !  update Tf with T1 and NSST T-Profile
 !           tsfc_wat(i) = max(271.2,tref(i) + dnsst)        !  get Ts updated due to Tf update

@@ -266,12 +266,12 @@
   intent = in
   optional = F
 [use_flake]
-  standard_name = flag_nonzero_lake_surface_fraction
-  long_name = flag indicating presence of some lake surface area fraction
+  standard_name = flag_for_using_flake
+  long_name = flag indicating lake points using flake model
   units = flag
   dimensions = (horizontal_loop_extent)
   type = logical
-  intent = inout
+  intent = in
   optional = F
 [lprnt]
   standard_name = flag_print
@@ -441,7 +441,7 @@
   kind = kind_phys
   intent = inout
   optional = F
-[islmsk_cice]
+[islmsk]
   standard_name = sea_land_ice_mask_cice
   long_name = sea/land/ice mask cice (=0/1/2)
   units = flag

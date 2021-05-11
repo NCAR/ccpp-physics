@@ -48,8 +48,7 @@
      &       flag_iter, use_flake, lprnt, ipr, me,                      &
      &       hice, fice, tice, weasd, tskin, tprcp, tiice, ep,          & !  ---  input/outputs:
      &       snwdph, qsurf, snowmt, gflux, cmm, chh, evap, hflx,        &
-     &       islmsk_cice,                                               &
-!    &       islmsk_cice, min_lakeice, min_seaice, oceanfrac,           &
+     &       islmsk,                                                    &
      &       errmsg, errflg
      &     )
 
@@ -161,13 +160,9 @@
       real (kind=kind_phys), dimension(:), intent(in) :: ps,            &
      &       t1, q1, sfcemis, dlwflx, sfcnsw, sfcdsw, srflag, cm, ch,   &
      &       prsl1, prslki, prsik1, prslk1, wind
-!    &       prsl1, prslki, prsik1, prslk1, wind, oceanfrac
 
-!     integer, dimension(im), intent(in) :: islimsk
-      integer, dimension(:), intent(in)  :: islmsk_cice
+      integer, dimension(:), intent(in)  :: islmsk
       real (kind=kind_phys), intent(in)  :: delt
-!     real (kind=kind_phys), intent(in)  :: delt, min_seaice,           &
-!    &                                            min_lakeice
 
       logical, dimension(im), intent(in) :: flag_iter, use_flake
 
@@ -215,11 +210,10 @@
 
       do_sice = .false.
       do i = 1, im
-!       flag(i) = islmsk_cice(i) == 2 .and. flag_iter(i)
-        flag(i) = islmsk_cice(i) == 2 .and. flag_iter(i)                &
-     &                                .and. .not. use_flake(i)
+        flag(i) = islmsk(i) == 2 .and. flag_iter(i)                     &
+     &                           .and. .not. use_flake(i)
         do_sice = do_sice .or. flag(i)
-!       if (flag_iter(i) .and. islmsk_cice(i) < 2) then
+!       if (flag_iter(i) .and. islmsk(i) < 2) then
 !         hice(i) = zero
 !         fice(i) = zero
 !       endif
@@ -253,19 +247,11 @@
 
       do i = 1, im
         if (flag(i)) then
-!         if (oceanfrac(i) > zero) then
-!           cimin = min_seaice
-!         else
-!           cimin = min_lakeice
-!         endif
-!         psurf(i) = 1000.0 * ps(i)
-!         ps1(i)   = 1000.0 * prsl1(i)
 
 !         dlwflx has been given a negative sign for downward longwave
 !         sfcnsw is the net shortwave flux (direction: dn-up)
 
           q0        = max(q1(i), qmin)
-!         tsurf(i)  = tskin(i)
 #ifdef GSD_SURFACE_FLUXES_BUGFIX
           theta1(i) = t1(i) / prslk1(i) ! potential temperature in middle of lowest atm. layer
 #else

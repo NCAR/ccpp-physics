@@ -27,7 +27,7 @@ contains
 !! \htmlinclude GFS_surface_composites_pre_run.html
 !!
    subroutine GFS_surface_composites_pre_run (im, lkm, frac_grid, flag_cice, cplflx, cplwav2atm,                          &
-                                 landfrac, lakefrac, lakedepth, oceanfrac, frland, dry, icy, use_flake, ocean, wet,       &
+                                 landfrac, lakefrac, lakedepth, oceanfrac, frland, dry, icy, lake, use_flake, ocean, wet, &
                                  hice, cice, snowd, snowd_wat, snowd_lnd, snowd_ice, tprcp, tprcp_wat,                    &
                                  tprcp_lnd, tprcp_ice, uustar, uustar_wat, uustar_lnd, uustar_ice,                        &
                                  weasd, weasd_wat, weasd_lnd, weasd_ice, ep1d_ice, tsfc, tsfco, tsfcl, tsfc_wat,          &
@@ -42,7 +42,7 @@ contains
       integer,                             intent(in   ) :: im, lkm
       logical,                             intent(in   ) :: frac_grid, cplflx, cplwav2atm
       logical, dimension(:),              intent(inout)  :: flag_cice
-      logical,              dimension(:), intent(inout)  :: dry, icy, use_flake, ocean, wet
+      logical,              dimension(:), intent(inout)  :: dry, icy, lake, use_flake, ocean, wet
       real(kind=kind_phys), dimension(:), intent(in   )  :: landfrac, lakefrac, lakedepth, oceanfrac
       real(kind=kind_phys), dimension(:), intent(inout)  :: cice, hice
       real(kind=kind_phys), dimension(:), intent(  out)  :: frland
@@ -240,14 +240,16 @@ contains
 
 ! to prepare to separate lake from ocean under water category
       do i = 1, im
-        if(wet(i) .and. lkm == 1) then
-           if(lakefrac(i) >= 0.15 .and. lakedepth(i) > one) then
-              use_flake(i) = .true.
-           else
-              use_flake(i) = .false.
-           endif
+        if(wet(i) .and. lakefrac(i) > zero) then
+          lake(i) = .true.
+          if (lkm == 1 .and. lakefrac(i) >= 0.15 .and. lakedepth(i) > one) then
+            use_flake(i) = .true.
+          else
+            use_flake(i) = .false.
+          endif
         else
-           use_flake(i) = .false.
+          lake(i) = .false.
+          use_flake(i) = .false.
         endif
       enddo
 !
