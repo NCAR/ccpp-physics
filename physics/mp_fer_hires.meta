@@ -64,7 +64,7 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = T
+  optional = F
 [f_rain]
   standard_name = fraction_of_rain_water_cloud
   long_name = fraction of rain water cloud
@@ -73,7 +73,7 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = T
+  optional = F
 [f_rimef]
   standard_name = rime_factor
   long_name = rime factor
@@ -82,7 +82,7 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = T
+  optional = F
 [mpicomm]
   standard_name = mpi_comm
   long_name = MPI communicator
@@ -153,6 +153,7 @@
   type = integer
   intent = out
   optional = F
+
 ########################################################################
 [ccpp-arg-table]
   name = mp_fer_hires_run
@@ -298,18 +299,18 @@
   kind = kind_phys
   intent = inout
   optional = F
-[qi]
-  standard_name = ice_water_mixing_ratio_updated_by_physics
-  long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates) updated by physics
+[qr]
+  standard_name = rain_water_mixing_ratio_updated_by_physics
+  long_name = ratio of mass of rain water to mass of dry air plus vapor (without condensates) updated by physics
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
-[qr]
-  standard_name = rain_water_mixing_ratio_updated_by_physics
-  long_name = ratio of mass of rain water to mass of dry air plus vapor (without condensates) updated by physics
+[qi]
+  standard_name = ice_water_mixing_ratio_updated_by_physics
+  long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates) updated by physics
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real

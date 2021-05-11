@@ -163,7 +163,7 @@
       do_shoc, frac_grid, imfshalcnv, dtf, xcosz, adjsfcdsw, adjsfcdlw, cice, pgr, ulwsfc_cice, lwhd, htrsw, htrlw, xmu, ctei_rm, &
       work1, work2, prsi, tgrs, prsl, qgrs_water_vapor, qgrs_cloud_water, cp, hvap, prslk, suntim, adjsfculw, adjsfculw_lnd,      &
       adjsfculw_ice, adjsfculw_wat, dlwsfc, ulwsfc, psmean, dt3dt_lw, dt3dt_sw, dt3dt_pbl, dt3dt_dcnv, dt3dt_scnv, dt3dt_mp,      &
-      ctei_rml, ctei_r, kinver, dry, icy, wet, frland, huge, use_LW_jacobian, errmsg, errflg)
+      ctei_rml, ctei_r, kinver, dry, icy, wet, frland, huge, use_LW_jacobian, htrlwu, errmsg, errflg)
 
       implicit none
 
@@ -175,9 +175,10 @@
 
       logical,              intent(in   ), dimension(im) :: flag_cice
       real(kind=kind_phys), intent(in   ), dimension(2) :: ctei_rm
-      real(kind=kind_phys), intent(in   ), dimension(im) :: xcosz, adjsfcdsw, adjsfcdlw, pgr, xmu, ulwsfc_cice, work1, work2
+      real(kind=kind_phys), intent(in   ), dimension(im) :: xcosz, adjsfcdsw, adjsfcdlw, pgr, xmu, work1, work2
+      real(kind=kind_phys), intent(in   ), dimension(:)  :: ulwsfc_cice
       real(kind=kind_phys), intent(in   ), dimension(im) :: cice
-      real(kind=kind_phys), intent(in   ), dimension(im, levs) :: htrsw, htrlw, tgrs, prsl, qgrs_water_vapor, qgrs_cloud_water, prslk
+      real(kind=kind_phys), intent(in   ), dimension(im, levs) :: htrsw, htrlw, htrlwu, tgrs, prsl, qgrs_water_vapor, qgrs_cloud_water, prslk
       real(kind=kind_phys), intent(in   ), dimension(im, levs+1) :: prsi
       real(kind=kind_phys), intent(in   ), dimension(im, levs, 6) :: lwhd
       integer,              intent(inout), dimension(im) :: kinver
@@ -288,7 +289,11 @@
           else
             do k=1,levs
               do i=1,im
-                dt3dt_lw(i,k) = dt3dt_lw(i,k) + htrlw(i,k)*dtf
+                 if (use_LW_jacobian) then
+                    dt3dt_lw(i,k) = dt3dt_lw(i,k) + htrlwu(i,k)*dtf
+                 else
+                    dt3dt_lw(i,k) = dt3dt_lw(i,k) + htrlw(i,k)*dtf
+                 endif
                 dt3dt_sw(i,k) = dt3dt_sw(i,k) + htrsw(i,k)*dtf*xmu(i)
               enddo
             enddo

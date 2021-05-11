@@ -18,13 +18,12 @@ The csawmg physics suite uses the parameterizations in the following order:
  - \ref GFS_SAMFshal
  - \ref CPT_MG3
  - \ref mod_cs_conv_aw_adj
- - \ref GFS_CALPRECIPTYPE
 
 \section sdf_cpt_suite Suite Definition File 
 \code
 <?xml version="1.0" encoding="UTF-8"?>
 
-<suite name="SCM_csawmg" lib="ccppphys" ver="4">
+<suite name="SCM_csawmg" version="1">
   <!-- <init></init> -->
   <group name="time_vary">
     <subcycle loop="1">
@@ -87,9 +86,9 @@ The csawmg physics suite uses the parameterizations in the following order:
       <scheme>GFS_suite_stateout_update</scheme>
       <scheme>ozphys_2015</scheme>
       <scheme>h2ophys</scheme>
-      <scheme>GFS_DCNV_generic_pre</scheme>
       <scheme>get_phi_fv3</scheme>
       <scheme>GFS_suite_interstitial_3</scheme>
+      <scheme>GFS_DCNV_generic_pre</scheme>
       <scheme>cs_conv_pre</scheme>
       <scheme>cs_conv</scheme>
       <scheme>cs_conv_post</scheme>
@@ -106,6 +105,7 @@ The csawmg physics suite uses the parameterizations in the following order:
       <scheme>cs_conv_aw_adj</scheme>
       <scheme>GFS_MP_generic_post</scheme>
       <scheme>maximum_hourly_diagnostics</scheme>
+      <scheme>phys_tend</scheme>
     </subcycle>
   </group>
   <!-- <finalize></finalize> -->

@@ -120,7 +120,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = F
 [lakedepth]
   standard_name = lake_depth
@@ -131,7 +131,7 @@
   kind = kind_phys
   intent = in
   optional = F
-[lake]
+[use_flake]
   standard_name = flag_nonzero_lake_surface_fraction
   long_name = flag indicating presence of some lake surface area fraction
   units = flag
@@ -223,7 +223,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
   optional = F
 [hice]
   standard_name = sea_ice_thickness
@@ -241,7 +241,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
   optional = F
 [fice]
   standard_name = sea_ice_concentration

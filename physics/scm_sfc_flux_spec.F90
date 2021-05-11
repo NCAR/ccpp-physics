@@ -1,7 +1,7 @@
-!> \file gmtb_scm_sfc_flux_spec.F90
+!> \file scm_sfc_flux_spec.F90
 !!  Contains code to calculate parameters needed by the rest of the GFS physics suite given specified surface fluxes.
 
-module gmtb_scm_sfc_flux_spec
+module scm_sfc_flux_spec
 
   implicit none
 
@@ -10,12 +10,16 @@ module gmtb_scm_sfc_flux_spec
 !----------------
 ! Public entities
 !----------------
-  public  gmtb_scm_sfc_flux_spec_init, gmtb_scm_sfc_flux_spec_run, gmtb_scm_sfc_flux_spec_finalize
+  public  scm_sfc_flux_spec_init, scm_sfc_flux_spec_run, scm_sfc_flux_spec_finalize
 
   CONTAINS
 !*******************************************************************************************
 
-  subroutine gmtb_scm_sfc_flux_spec_init(lheatstrg, errmsg, errflg)
+!!
+!! \section arg_table_scm_sfc_flux_spec_init Argument Table
+!! \htmlinclude scm_sfc_flux_spec_init.html
+!!
+  subroutine scm_sfc_flux_spec_init(lheatstrg, errmsg, errflg)
     
     logical, intent(in) :: lheatstrg
     
@@ -27,16 +31,16 @@ module gmtb_scm_sfc_flux_spec
       errflg = 1
       return
     end if
-  end subroutine gmtb_scm_sfc_flux_spec_init
+  end subroutine scm_sfc_flux_spec_init
 
-  subroutine gmtb_scm_sfc_flux_spec_finalize()
-  end subroutine gmtb_scm_sfc_flux_spec_finalize
+  subroutine scm_sfc_flux_spec_finalize()
+  end subroutine scm_sfc_flux_spec_finalize
 
 !> \brief This routine calculates surface-related parameters given specified sensible and latent heat fluxes and a roughness length. Most of the calculation
 !! is "backing out" parameters that are calculated in sfc_dff.f from the known surface heat fluxes and roughness length.
 !!
-!! \section arg_table_gmtb_scm_sfc_flux_spec_run Argument Table
-!! \htmlinclude gmtb_scm_sfc_flux_spec_run.html
+!! \section arg_table_scm_sfc_flux_spec_run Argument Table
+!! \htmlinclude scm_sfc_flux_spec_run.html
 !!
 !! \section general_sfc_flux_spec General Algorithm
 !!  -# Compute friction velocity from the wind speed at the lowest model layer, the height about the ground, and the roughness length.
@@ -48,7 +52,7 @@ module gmtb_scm_sfc_flux_spec
 !!  -# Calculate the Monin-Obukhov similarity function for heat and moisture from the bulk Richardson number and diagnosed similarity function for momentum.
 !!  -# Calculate the surface drag coefficient for heat and moisture.
 !!  -# Calculate the u and v wind at 10m.
-  subroutine gmtb_scm_sfc_flux_spec_run (u1, v1, z1, t1, q1, p1, roughness_length, spec_sh_flux, spec_lh_flux, &
+  subroutine scm_sfc_flux_spec_run (u1, v1, z1, t1, q1, p1, roughness_length, spec_sh_flux, spec_lh_flux, &
     exner_inverse, T_surf, cp, grav, hvap, rd, fvirt, vonKarman, sh_flux, lh_flux, sh_flux_chs, lh_flux_chs, u_star, sfc_stress, cm, ch, &
     fm, fh, rb, u10m, v10m, wind1, qss, t2m, q2m, errmsg, errflg)
 
@@ -133,6 +137,6 @@ module gmtb_scm_sfc_flux_spec
     q2m(i) = 0.0
   end do
 
-  end subroutine gmtb_scm_sfc_flux_spec_run
+  end subroutine scm_sfc_flux_spec_run
 
-end module gmtb_scm_sfc_flux_spec
+end module scm_sfc_flux_spec

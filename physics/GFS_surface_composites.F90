@@ -27,42 +27,40 @@ contains
 !! \htmlinclude GFS_surface_composites_pre_run.html
 !!
    subroutine GFS_surface_composites_pre_run (im, lkm, frac_grid, flag_cice, cplflx, cplwav2atm,                          &
-                                 landfrac, lakefrac, lakedepth, oceanfrac, frland, dry, icy, lake, ocean, wet,            &
+                                 landfrac, lakefrac, lakedepth, oceanfrac, frland, dry, icy, use_flake, ocean, wet,       &
                                  hice, cice, snowd, snowd_wat, snowd_lnd, snowd_ice, tprcp, tprcp_wat,                    &
                                  tprcp_lnd, tprcp_ice, uustar, uustar_wat, uustar_lnd, uustar_ice,                        &
                                  weasd, weasd_wat, weasd_lnd, weasd_ice, ep1d_ice, tsfc, tsfco, tsfcl, tsfc_wat,          &
                                  tsfc_lnd, tsfc_ice, tisfc, tice, tsurf, tsurf_wat, tsurf_lnd, tsurf_ice,                 &
                                  gflx_ice, tgice, islmsk, islmsk_cice, slmsk, semis_rad, semis_wat, semis_lnd, semis_ice, &
                                  qss, qss_wat, qss_lnd, qss_ice, hflx, hflx_wat, hflx_lnd, hflx_ice,                      &
-                                 min_lakeice, min_seaice, &
-                                 zorlo, zorll, zorli, &
-                                 errmsg, errflg)
+                                 min_lakeice, min_seaice, zorlo, zorll, zorli, errmsg, errflg)
 
       implicit none
 
       ! Interface variables
       integer,                             intent(in   ) :: im, lkm
       logical,                             intent(in   ) :: frac_grid, cplflx, cplwav2atm
-      logical, dimension(im),              intent(inout) :: flag_cice
-      logical,              dimension(im), intent(inout) :: dry, icy, lake, ocean, wet
-      real(kind=kind_phys), dimension(im), intent(in   ) :: landfrac, lakefrac, lakedepth, oceanfrac
-      real(kind=kind_phys), dimension(im), intent(inout) :: cice, hice
-      real(kind=kind_phys), dimension(im), intent(  out) :: frland
-      real(kind=kind_phys), dimension(im), intent(in   ) :: snowd, tprcp, uustar, weasd, qss, hflx
+      logical, dimension(:),              intent(inout)  :: flag_cice
+      logical,              dimension(:), intent(inout)  :: dry, icy, use_flake, ocean, wet
+      real(kind=kind_phys), dimension(:), intent(in   )  :: landfrac, lakefrac, lakedepth, oceanfrac
+      real(kind=kind_phys), dimension(:), intent(inout)  :: cice, hice
+      real(kind=kind_phys), dimension(:), intent(  out)  :: frland
+      real(kind=kind_phys), dimension(:), intent(in   )  :: snowd, tprcp, uustar, weasd, qss, hflx
 
-      real(kind=kind_phys), dimension(im), intent(inout) :: tsfc, tsfco, tsfcl, tisfc, tsurf
-      real(kind=kind_phys), dimension(im), intent(inout) :: snowd_wat, snowd_lnd, snowd_ice, tprcp_wat, &
-        tprcp_lnd, tprcp_ice, tsfc_wat, tsfc_lnd, tsfc_ice, tsurf_wat,tsurf_lnd, tsurf_ice, &
-        uustar_wat, uustar_lnd, uustar_ice, weasd_wat, weasd_lnd, weasd_ice,                &
-        qss_wat, qss_lnd, qss_ice, hflx_wat, hflx_lnd, hflx_ice, ep1d_ice, gflx_ice
-      real(kind=kind_phys), dimension(im), intent(  out) :: tice
+      real(kind=kind_phys), dimension(:), intent(inout)  :: tsfc, tsfco, tsfcl, tisfc, tsurf
+      real(kind=kind_phys), dimension(:), intent(inout)  :: snowd_wat, snowd_lnd, snowd_ice, tprcp_wat, &
+                    tprcp_lnd, tprcp_ice, tsfc_wat, tsfc_lnd, tsfc_ice, tsurf_wat,tsurf_lnd, tsurf_ice, &
+                    uustar_wat, uustar_lnd, uustar_ice, weasd_wat, weasd_lnd, weasd_ice,                &
+                    qss_wat, qss_lnd, qss_ice, hflx_wat, hflx_lnd, hflx_ice, ep1d_ice, gflx_ice
+      real(kind=kind_phys), dimension(:), intent(  out)  :: tice
       real(kind=kind_phys),                intent(in   ) :: tgice
-      integer,              dimension(im), intent(inout) :: islmsk, islmsk_cice
-      real(kind=kind_phys), dimension(im), intent(in   ) :: semis_rad
-      real(kind=kind_phys), dimension(im), intent(inout) :: semis_wat, semis_lnd, semis_ice, slmsk
+      integer,              dimension(:), intent(inout)  :: islmsk, islmsk_cice
+      real(kind=kind_phys), dimension(:), intent(in   )  :: semis_rad
+      real(kind=kind_phys), dimension(:), intent(inout)  :: semis_wat, semis_lnd, semis_ice, slmsk
       real(kind=kind_phys),                intent(in   ) :: min_lakeice, min_seaice
       !
-      real(kind=kind_phys), dimension(im), intent(inout) :: zorlo, zorll, zorli
+      real(kind=kind_phys), dimension(:), intent(inout)  :: zorlo, zorll, zorli
       !
       real(kind=kind_phys), parameter :: timin = 173.0_kind_phys  ! minimum temperature allowed for snow/ice
 
@@ -236,14 +234,14 @@ contains
 
 ! to prepare to separate lake from ocean under water category
       do i = 1, im
-        if(lkm == 1) then
+        if(wet(i) .and. lkm == 1) then
            if(lakefrac(i) >= 0.15 .and. lakedepth(i) > one) then
-              lake(i) = .true.
+              use_flake(i) = .true.
            else
-              lake(i) = .false.
+              use_flake(i) = .false.
            endif
         else
-           lake(i) = .false.
+           use_flake(i) = .false.
         endif
       enddo
 
@@ -285,12 +283,12 @@ contains
       implicit none
 
       ! Interface variables
-      integer,                             intent(in   ) :: im
-      logical,              dimension(im), intent(in   ) :: dry, icy, wet
-      real(kind=kind_phys), dimension(im), intent(in   ) :: semis_wat, semis_lnd, semis_ice, adjsfcdlw, &
-                                                            adjsfcdsw, adjsfcnsw
-      real(kind=kind_phys), dimension(im), intent(inout) :: gabsbdlw_lnd, gabsbdlw_ice, gabsbdlw_wat
-      real(kind=kind_phys), dimension(im), intent(out)   :: adjsfcusw
+      integer,                            intent(in   ) :: im
+      logical,              dimension(:), intent(in   ) :: dry, icy, wet
+      real(kind=kind_phys), dimension(:), intent(in   ) :: semis_wat, semis_lnd, semis_ice, adjsfcdlw, &
+                                                           adjsfcdsw, adjsfcnsw
+      real(kind=kind_phys), dimension(:), intent(inout) :: gabsbdlw_lnd, gabsbdlw_ice, gabsbdlw_wat
+      real(kind=kind_phys), dimension(:), intent(out)   :: adjsfcusw
 
       ! CCPP error handling
       character(len=*), intent(out) :: errmsg
@@ -371,9 +369,9 @@ contains
 
       integer,                              intent(in) :: im, kice, km
       logical,                              intent(in) :: cplflx, frac_grid, cplwav2atm
-      logical, dimension(im),               intent(in) :: flag_cice, dry, wet, icy
-      integer, dimension(im),               intent(in) :: islmsk
-      real(kind=kind_phys), dimension(im),  intent(in) :: landfrac, lakefrac, oceanfrac,                                        &
+      logical, dimension(:),                intent(in) :: flag_cice, dry, wet, icy
+      integer, dimension(:),                intent(in) :: islmsk
+      real(kind=kind_phys), dimension(:),   intent(in) :: landfrac, lakefrac, oceanfrac,                                        &
         cd_wat, cd_lnd, cd_ice, cdq_wat, cdq_lnd, cdq_ice, rb_wat, rb_lnd, rb_ice, stress_wat,                                  &
         stress_lnd, stress_ice, ffmm_wat, ffmm_lnd, ffmm_ice, ffhh_wat, ffhh_lnd, ffhh_ice, uustar_wat, uustar_lnd, uustar_ice, &
         fm10_wat, fm10_lnd, fm10_ice, fh2_wat, fh2_lnd, fh2_ice, tsurf_wat, tsurf_lnd, tsurf_ice, cmm_wat, cmm_lnd, cmm_ice,    &
@@ -381,15 +379,15 @@ contains
         snowd_wat, snowd_lnd, snowd_ice,tprcp_wat, tprcp_lnd, tprcp_ice, evap_wat, evap_lnd, evap_ice, hflx_wat, hflx_lnd,      &
         hflx_ice, qss_wat, qss_lnd, qss_ice, tsfc_wat, tsfc_lnd, tsfc_ice
 
-      real(kind=kind_phys), dimension(im),  intent(inout) :: zorl, zorlo, zorll, zorli, cd, cdq, rb, stress, ffmm, ffhh, uustar, fm10, &
+      real(kind=kind_phys), dimension(:),   intent(inout) :: zorl, zorlo, zorll, zorli, cd, cdq, rb, stress, ffmm, ffhh, uustar, fm10, &
         fh2, tsurf, cmm, chh, gflx, ep1d, weasd, snowd, tprcp, evap, hflx, qss, tsfc, tsfco, tsfcl, tisfc
 
-      real(kind=kind_phys), dimension(im),  intent(in   ) :: tice ! interstitial sea ice temperature
-      real(kind=kind_phys), dimension(im),  intent(inout) :: hice, cice
+      real(kind=kind_phys), dimension(:),   intent(in   ) :: tice ! interstitial sea ice temperature
+      real(kind=kind_phys), dimension(:),   intent(inout) :: hice, cice
       real(kind=kind_phys),                 intent(in   ) :: min_seaice
 
-      real(kind=kind_phys), dimension(im, kice),  intent(in   ) :: tiice
-      real(kind=kind_phys), dimension(im, km),    intent(inout) :: stc
+      real(kind=kind_phys), dimension(:,:), intent(in   ) :: tiice
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: stc
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg

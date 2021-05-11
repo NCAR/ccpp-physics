@@ -45,33 +45,32 @@
 !
       integer,                                  intent(in) :: im,
      &  km, ntrac, ntcw, ncnd, ntke, ntoz
-      integer, dimension(im),                   intent(in) ::  kinver
-
+      integer, dimension(:),                   intent(in) ::  kinver
       real(kind=kind_phys),                     intent(in) :: delt,
      &  xkzm_m, xkzm_h, xkzm_s, xkzminv
       real(kind=kind_phys),                     intent(in) :: grav,
      &  rd, cp, hvap, fv
-      real(kind=kind_phys), dimension(im),      intent(in) :: psk,
+      real(kind=kind_phys), dimension(:),      intent(in) :: psk,
      &  rbsoil, zorl, u10m, v10m, fm, fh, tsea, heat, evap, stress, spd1
-      real(kind=kind_phys), dimension(im,km),   intent(in) :: u1, v1,
+      real(kind=kind_phys), dimension(:,:),   intent(in) :: u1, v1,
      &  t1, tkh, del, prsl, phil, prslk
-      real(kind=kind_phys), dimension(im,km+1), intent(in) :: prsi, phii
-      real(kind=kind_phys), dimension(im,km,ntrac), intent(in) :: q1
+      real(kind=kind_phys), dimension(:,:), intent(in) :: prsi, phii
+      real(kind=kind_phys), dimension(:,:,:), intent(in) :: q1
 
-      real(kind=kind_phys), dimension(im,km),   intent(inout) :: du, dv,
+      real(kind=kind_phys), dimension(:,:),   intent(inout) :: du, dv,
      &  tau
-      real(kind=kind_phys), dimension(im,km,ntrac), intent(inout) :: rtg
+      real(kind=kind_phys), dimension(:,:,:), intent(inout) :: rtg
 
       real(kind=kind_phys), dimension(:,:),     intent(inout) :: 
      &  du3dt_PBL, dv3dt_PBL, dt3dt_PBL, dq3dt_PBL, do3dt_PBL
       logical,                                  intent(in) :: ldiag3d, 
      &  qdiag3d, gen_tend
 
-      integer, dimension(im),                   intent(out) :: kpbl
-      real(kind=kind_phys), dimension(im),      intent(out) :: dusfc,
+      integer, dimension(:),                    intent(out) :: kpbl
+      real(kind=kind_phys), dimension(:),       intent(out) :: dusfc,
      &  dvsfc, dtsfc, dqsfc, hpbl
-      real(kind=kind_phys), dimension(im,km),   intent(out) :: prnum
-      real(kind=kind_phys), dimension(im,km-1), intent(out) :: dkt
+      real(kind=kind_phys), dimension(:,:),     intent(out) :: prnum
+      real(kind=kind_phys), dimension(:,:),     intent(out) :: dkt
 
       character(len=*),                         intent(out) :: errmsg
       integer,                                  intent(out) :: errflg
@@ -120,6 +119,9 @@
 ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+!
+! Set intent(out) variables
+      dkt = zero
 !
 !-----------------------------------------------------------------------
 !

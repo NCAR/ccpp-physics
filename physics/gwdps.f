@@ -296,23 +296,23 @@
 !
       ! Interface variables
       integer, intent(in) :: im, km, imx, kdt, ipr, me
-      integer, intent(in) :: KPBL(IM) ! Index for the PBL top layer!
+      integer, intent(in) :: KPBL(:) ! Index for the PBL top layer!
       real(kind=kind_phys), intent(in) ::                               &
-     &                     deltim, G, CP, RD, RV, cdmbgwd(4)
+     &                     deltim, G, CP, RD, RV, cdmbgwd(:)
       real(kind=kind_phys), intent(inout) ::                            &
-     &                     A(IM,KM), B(IM,KM), C(IM,KM)
+     &                     A(:,:), B(:,:), C(:,:)
       real(kind=kind_phys), intent(in) ::                               &
-     &                     U1(IM,KM),   V1(IM,KM),     T1(IM,KM),       &
-     &                     Q1(IM,KM),   PRSI(IM,KM+1), DEL(IM,KM),      &
-     &                     PRSL(IM,KM), PRSLK(IM,KM),  PHIL(IM,KM),     &
-     &                     PHII(IM,KM+1)
+     &                     U1(:,:),   V1(:,:),     T1(:,:),             &
+     &                     Q1(:,:),   PRSI(:,:),   DEL(:,:),            &
+     &                     PRSL(:,:), PRSLK(:,:),  PHIL(:,:),           &
+     &                     PHII(:,:)
       real(kind=kind_phys), intent(in) ::                               &
-     &                     OC(IM), OA4(IM,4), CLX4(IM,4), HPRIME(IM)
-      real(kind=kind_phys), intent(inout) :: ELVMAX(IM)
+     &                     OC(:), OA4(:,:), CLX4(:,:), HPRIME(:)
+      real(kind=kind_phys), intent(inout) :: ELVMAX(:)
       real(kind=kind_phys), intent(in) ::                               &
-     &                     THETA(IM), SIGMA(IM), GAMMA(IM)
-      real(kind=kind_phys), intent(out) :: DUSFC(IM), DVSFC(IM),        &
-     &                     RDXZB(IM)
+     &                     THETA(:), SIGMA(:), GAMMA(:)
+      real(kind=kind_phys), intent(out) :: DUSFC(:), DVSFC(:),          &
+     &                     RDXZB(:)
       integer, intent(in) :: nmtvr
       logical, intent(in) :: lprnt
       character(len=*), intent(out) :: errmsg

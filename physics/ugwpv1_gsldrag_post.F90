@@ -10,14 +10,9 @@ contains
     subroutine ugwpv1_gsldrag_post_init ()
     end subroutine ugwpv1_gsldrag_post_init
 
-!>@brief The subroutine initializes the unified UGWP
-
 !> \section arg_table_ugwpv1_gsldrag_post_run Argument Table
 !! \htmlinclude ugwpv1_gsldrag_post_run.html
 !!
-
-
-
      subroutine ugwpv1_gsldrag_post_run ( im, levs,                   &
          ldiag_ugwp, dtf,                                             &
          dudt_gw, dvdt_gw, dtdt_gw, du_ofdcol, du_oblcol, tau_ogw,    &
@@ -36,16 +31,16 @@ contains
         real(kind=kind_phys), intent(in) :: dtf
         logical,              intent(in) :: ldiag_ugwp      !< flag for CIRES UGWP Diagnostics
 
-        real(kind=kind_phys), intent(in),    dimension(im)   :: zobl, zlwb, zogw
-        real(kind=kind_phys), intent(in),    dimension(im)   :: du_ofdcol, tau_ogw, du_oblcol, tau_ngw
-        real(kind=kind_phys), intent(inout), dimension(im)   :: tot_mtb, tot_ogw, tot_tofd, tot_ngw
-        real(kind=kind_phys), intent(inout), dimension(im)   :: tot_zmtb, tot_zlwb, tot_zogw
+        real(kind=kind_phys), intent(in),    dimension(:)   :: zobl, zlwb, zogw
+        real(kind=kind_phys), intent(in),    dimension(:)   :: du_ofdcol, tau_ogw, du_oblcol, tau_ngw
+        real(kind=kind_phys), intent(inout), dimension(:)   :: tot_mtb, tot_ogw, tot_tofd, tot_ngw
+        real(kind=kind_phys), intent(inout), dimension(:)   :: tot_zmtb, tot_zlwb, tot_zogw
 	
-        real(kind=kind_phys), intent(in),    dimension(im,levs) :: dtdt_gw, dudt_gw, dvdt_gw
-        real(kind=kind_phys), intent(in),    dimension(im,levs) :: dudt_obl, dudt_ogw, dudt_ofd
-        real(kind=kind_phys), intent(inout), dimension(im,levs) :: du3dt_mtb, du3dt_ogw, du3dt_tms, du3dt_ngw, dv3dt_ngw
+        real(kind=kind_phys), intent(in),    dimension(:,:) :: dtdt_gw, dudt_gw, dvdt_gw
+        real(kind=kind_phys), intent(in),    dimension(:,:) :: dudt_obl, dudt_ogw, dudt_ofd
+        real(kind=kind_phys), intent(inout), dimension(:,:) :: du3dt_mtb, du3dt_ogw, du3dt_tms, du3dt_ngw, dv3dt_ngw
 	
-        real(kind=kind_phys), intent(inout), dimension(im,levs) :: dtdt, dudt, dvdt
+        real(kind=kind_phys), intent(inout), dimension(:,:) :: dtdt, dudt, dvdt
 
         character(len=*),        intent(out) :: errmsg
         integer,                 intent(out) :: errflg

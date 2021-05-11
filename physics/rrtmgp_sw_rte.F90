@@ -8,7 +8,7 @@ module rrtmgp_sw_rte
   use mo_gas_concentrations,   only: ty_gas_concs
   use mo_fluxes_byband,        only: ty_fluxes_byband
   use module_radsw_parameters, only: cmpfsw_type
-  use rrtmgp_aux,              only: check_error_msg
+  use radiation_tools,              only: check_error_msg
   use rrtmgp_sw_gas_optics,    only: sw_gas_props
   implicit none
 

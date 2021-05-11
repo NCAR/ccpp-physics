@@ -533,18 +533,18 @@
   optional = F
 [dkt]
   standard_name = atmosphere_heat_diffusivity
-  long_name = diffusivity for heat
+  long_name = atmospheric heat diffusivity
   units = m2 s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension_minus_one)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
   optional = F
 [dku]
   standard_name = atmosphere_momentum_diffusivity
-  long_name = diffusivity for momentum
+  long_name = atmospheric momentum diffusivity
   units = m2 s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension_minus_one)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -678,7 +678,7 @@
   units = flag
   dimensions = ()
   type = logical
-  intent = inout
+  intent = in
   optional = F
 [qdiag3d]
   standard_name = flag_tracer_diagnostics_3D
@@ -686,7 +686,7 @@
   units = flag
   dimensions = ()
   type = logical
-  intent = inout
+  intent = in
   optional = F
 [errmsg]
   standard_name = ccpp_error_message

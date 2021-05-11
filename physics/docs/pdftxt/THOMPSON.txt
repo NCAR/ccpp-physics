@@ -1,0 +1,85 @@
+/**
+\page THOMPSON Thompson Aerosol-Aware Microphysics Scheme
+\section thompson_descrp Description
+
+
+The RAP/HRRR microphysics implementation represents the most aggressive attempt to include explicit prediction of
+cloud and precipitation microphysical processes in the NCEP operational forecast model suite. The RAP and HRRR are
+important guidance to NWS aviation forecasts, and any microphysics improvements are aimed at least in part, to improve 
+that guidance. The scheme is particularly beneficial for aircraft icing forecasts.
+
+The scheme computes sources, sinks, and conversions for the mixing ratios of cloud water, rainwater, cloud ice, snow,
+and graupel. Number concentration for cloud ice (particles per cubic meter) is also forecast, based on statistical relationships
+of number concentration, density, and ice mass from recent observational studies. Since April 2014 (WRFv3.6), this is also the "aerosol-aware" scheme as described in
+Thompson and Eidhammer (2014) \cite Thompson_2014 .
+
+The microphysical processes accounted for are shown in the graphic below:
+\image html gsd_thompson.png "Figure 1: Complex Microphysics Model in the RAP" width=10cm
+
+Descriptions of these preocesses follow:
+- \b Deposition: Diffusional growth of ice particles under conditions of vapor supersaturation with respect to ice. 
+Growth is "aerosol-aware", meaning the number of ice-friendly nulei and ice crystals is estimated by the microphysics scheme. 
+Deposition of ice is estimated using the properties of these ice-friendly aerosols. Latent heat associated with the phase 
+change from vapor to ice is released to the atmosphere.
+
+- \b Sublimation: Diffusional shrinkage of ice particles under conditions of vapor subsaturation with respect to ice.
+The effect of aerosols on the sublimation process is estimated. Latent heat associated with the phase change from ice
+to vapor is removed from the atmosphere.
+
+- \b Riming: Rapid freezing of supercooled cloud-size drops as a result of collisions with frozen precipitation particles,
+or foreign objects with sub \f$0^{o}C\f$ surface temperatures, such as airplane wings. Latent heat of freezing is released
+to the atmosphere during the process.
+
+- \b Evaporation: Process by which liquid is transformed into the gaseous state. The evaporation process is "aerosol-aware"
+through estimation of aerosol impacts. Latent heat is removed from the atmosphere and stored in water vapor during this process.
+
+- \b Condensation: Process by which vapor is transformed into a liquid state. The impact of aerosols on condensation is estimated.
+latent heat is released into the atmosphere during this process.
+
+- \b Ice \b multiplication: Formation of small ice particles as a result of freezing of supercooled cloud or raindrops. Ice multiplication occurs only under very restrictive conditions, but can be a large source of ice particles when these conditions are met.
+
+- \b Aggregation/autoconversion \b of \b snow: Process through which frozen precipitation particles grow by collision and the assimilation of cloud particles or other precipitation particles. The autoconversion rate increases as ambient temperatures rise toward freezing.
+
+- \b Accretion/autoconversion \b of \b cloud \b liquid: Process through which some cloud drops grow to become raindrops by collision and the assimilation of cloud drops.
+
+- \b Supercooled \b water \b formation: Liquid cloud particles that remain in their liquid state despite being cooled below the freezing point of water.
+
+The scheme also assumes precipitation particle-size distributions for the three predicted precipitation types: rain, snow, and graupel.
+These size distributions are requied to emulate growth of precipitation by accretion of cloud-size particles, coalescence with other
+precipitation particles, and fall speeds of precipitation hydrometeors. The rainwater fall speed depends on the rainwater mixing ratio,
+with small values associated with fall speeds (and allowing the model to parameterize the behavior) of drizzle. The forecast precipitation 
+type is based on what prognostic precipitation type actually reaches the surface (Benjamin et al.(2016) \cite Benjamin_2016b )
+
+# Advantages of the Thompson Scheme and  Updating Cloud Fields
+Some of the more general advantages of the upgraded MP scheme implementation in the RAP on the model's cloud and precipitation 
+forecasts are listed below.
+
+- Includes five hydrometeor types and their interactions, plus a sixth forecast variable for cloud ice number concentration. Drizzle
+is parameterized through using low fall velocities when there are low rain mixing ratios.
+
+- Includes impact of types of aerosol on condensation of water/deposition of ice
+
+- Accounts for horizontal and vertical advection of hydrometeors
+
+- Allows for more accurate prediction of precipitation in the form of snow, because slow fall velocities give time for snow to 
+advect between grid columns
+
+- Includes cloud ice sedimentation, which positively influences RH and cloud forecasts
+
+- Because the scheme is a relatively complete mixed-phase scheme, it can account for the formation of supercooled water, a prerequisite 
+for the model to provide useful guidance for aircraft icing forecasts
+
+- Can account for cloud phase changes and provides a sound physical basis for diagnosing precipitation type reaching the ground
+
+
+
+\section intra_thompson Intraphysics Communication
+\ref arg_table_mp_thompson_run
+
+\section g_thompson  General Algorithm
+- \ref gen_thompson_init
+- \ref gen_thompson_hrrr
+- \ref gen_mpgtdriver
+- \ref gen_mp_thompson
+
+*/
