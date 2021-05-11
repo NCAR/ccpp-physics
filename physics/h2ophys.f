@@ -23,8 +23,8 @@
       errmsg = ''
       errflg = 0
 
-      if (.not.h2ophys) then
-        write (errmsg,'(*(a))') 'Logic error: h2ophys == .false.'
+      if (.not.h2o_phys) then
+        write (errmsg,'(*(a))') 'Logic error: h2o_phys == .false.'
         errflg = 1
         return
       endif      
