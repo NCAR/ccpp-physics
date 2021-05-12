@@ -31,7 +31,8 @@
          if (is_initialized) return
 
          ! Consistency checks
-         if (imp_physics/=imp_physics_zhao_carr) then
+         if (imp_physics/=imp_physics_zhao_carr .and.                   &
+     &       imp_physics/=imp_physics_zhao_carr_pdf) then
             write(errmsg,'(*(a))') "Logic error: namelist choice of     &
      &                  microphysics is different from Zhao-Carr MP"
             errflg = 1

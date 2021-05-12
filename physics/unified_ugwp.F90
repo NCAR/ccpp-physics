@@ -106,7 +106,7 @@ contains
     errflg = 0
 
     ! Consistency checks
-    if (gwd_opt/=2 .or. gwd_opt/=22) then
+    if (gwd_opt/=2 .and. gwd_opt/=22) then
       write(errmsg,'(*(a))') "Logic error: namelist choice of gravity wave &
         & drag is different from unified_ugwp scheme"
       errflg = 1

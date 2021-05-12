@@ -23,6 +23,14 @@
   type = integer
   intent = in
   optional = F
+[imp_physics_zhao_carr_pdf]
+  standard_name = flag_for_zhao_carr_pdf_microphysics_scheme
+  long_name = choice of Zhao-Carr microphysics scheme with PDF clouds
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

@@ -19,7 +19,7 @@
       errflg = 0
 
       ! Consistency checks
-      if (gwd_opt/=3 .or. gwd_opt/=33) then
+      if (gwd_opt/=3 .and. gwd_opt/=33) then
         write(errmsg,'(*(a))') "Logic error: namelist choice of gravity wave &
           & drag is different from drag_suite scheme"
         errflg = 1
