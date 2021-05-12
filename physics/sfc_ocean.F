@@ -99,13 +99,13 @@
       integer, intent(in) :: im
       real (kind=kind_phys), intent(in) :: rd, eps, epsm1, rvrdm1
 
-      real (kind=kind_phys), dimension(im), intent(in) :: ps,           &
+      real (kind=kind_phys), dimension(:), intent(in) :: ps,            &
      &      t1, q1, tskin, cm, ch, prsl1, prslki, wind
 
-      logical, dimension(im), intent(in) :: flag_iter, wet, use_flake
+      logical, dimension(:), intent(in) :: flag_iter, wet, use_flake
 
 !  ---  outputs:
-      real (kind=kind_phys), dimension(im), intent(inout) :: qsurf,     &
+      real (kind=kind_phys), dimension(:), intent(inout) :: qsurf,      &
      &       cmm, chh, gflux, evap, hflx, ep
 
       character(len=*), intent(out) :: errmsg

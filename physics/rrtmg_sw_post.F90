@@ -1,5 +1,5 @@
-!>\file rrtmg_sw_post
-!! This file contains
+!>\file rrtmg_sw_post.F90
+!! This file contains GFS RRTMG scheme post.
       module rrtmg_sw_post
       contains
 
@@ -24,22 +24,22 @@
       implicit none
 
       integer,                              intent(in)    :: im, levr, levs,   &
-                                                             ltp, nday, lm, kd   
+                                                             ltp, nday, lm, kd
       logical,                              intent(in)    :: lsswr, swhtr
-      real(kind=kind_phys), dimension(im),  intent(in)    :: sfcalb1, sfcalb2, &
+      real(kind=kind_phys), dimension(:),   intent(in)    :: sfcalb1, sfcalb2, &
                                                              sfcalb3, sfcalb4
-      real(kind=kind_phys), dimension(im, levr+LTP), intent(in) ::  htswc, htsw0
+      real(kind=kind_phys), dimension(:,:), intent(in)    :: htswc, htsw0
       
-      real(kind=kind_phys), dimension(im),  intent(inout) :: nirbmdi, nirdfdi, &
+      real(kind=kind_phys), dimension(:),   intent(inout) :: nirbmdi, nirdfdi, &
                                                              visbmdi, visdfdi, &
                                                              nirbmui, nirdfui, &
                                                              visbmui, visdfui, &
                                                              sfcdsw,  sfcnsw
-      real(kind=kind_phys), dimension(im,levs), intent(inout) :: htrsw, swhc
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: htrsw, swhc
 
-      type(cmpfsw_type), dimension(im),     intent(inout) :: scmpsw
-      type(sfcfsw_type), dimension(im),     intent(inout) :: sfcfsw
-      type(topfsw_type), dimension(im),     intent(inout) :: topfsw
+      type(cmpfsw_type), dimension(:),     intent(inout) :: scmpsw
+      type(sfcfsw_type), dimension(:),     intent(inout) :: sfcfsw
+      type(topfsw_type), dimension(:),     intent(inout) :: topfsw
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg

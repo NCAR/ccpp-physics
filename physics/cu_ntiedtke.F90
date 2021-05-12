@@ -154,16 +154,16 @@ contains
 ! in&out variables
       integer, intent(in)  ::  lq, km, ktrac
       real(kind=kind_phys),     intent(in ) :: dt
-      integer, dimension( lq ),   intent(in)  :: lmask
-      real(kind=kind_phys), dimension( lq ),     intent(in ) :: evap, hfx, dx
-      real(kind=kind_phys), dimension( lq , km ),     intent(inout) :: pu, pv, pt, pqv
-      real(kind=kind_phys), dimension( lq , km ),     intent(in )   :: tdi, qvdi, poz, prsl, pomg, pqvf, ptf
-      real(kind=kind_phys), dimension( lq , km+1 ),   intent(in )   :: pzz, prsi
-      real(kind=kind_phys), dimension( lq , km, ktrac ),    intent(inout ) ::  clw
+      integer, dimension( : ),   intent(in)  :: lmask
+      real(kind=kind_phys), dimension( : ),     intent(in ) :: evap, hfx, dx
+      real(kind=kind_phys), dimension( :, : ),     intent(inout) :: pu, pv, pt, pqv
+      real(kind=kind_phys), dimension( :, :),     intent(in )   :: tdi, qvdi, poz, prsl, pomg, pqvf, ptf
+      real(kind=kind_phys), dimension( :, : ),   intent(in )   :: pzz, prsi
+      real(kind=kind_phys), dimension( :, :, : ),    intent(inout ) ::  clw
 
-      integer, dimension( lq ),   intent(out)  :: kbot, ktop, kcnv
-      real(kind=kind_phys), dimension( lq ),   intent(out)  :: zprecc
-      real(kind=kind_phys), dimension (lq,km), intent(out)  :: ud_mf, dd_mf, dt_mf, cnvw, cnvc
+      integer, dimension( : ),   intent(out)  :: kbot, ktop, kcnv
+      real(kind=kind_phys), dimension( : ),   intent(out)  :: zprecc
+      real(kind=kind_phys), dimension (:, :), intent(out)  :: ud_mf, dd_mf, dt_mf, cnvw, cnvc
  
 ! error messages
       character(len=*), intent(out)    ::                                 errmsg

@@ -55,14 +55,14 @@ contains
          imp_physics_zhao_carr,     & ! Flag for zhao-carr scheme
          imp_physics_zhao_carr_pdf, & ! Flag for zhao-carr+PDF scheme
          imp_physics_mg               ! Flag for MG scheme
-    real(kind_phys), dimension(levr+1), intent(in) :: &
+    real(kind_phys), dimension(:), intent(in) :: &
          si
     integer, intent(in) :: levr, ictm, isol, ico2, iaer, & 
          ntcw, num_p3d, ntoz, iovr, isubc_sw, isubc_lw,  &
          icliq_sw, iflip, me 
     logical, intent(in) :: &
          crick_proof, ccnorm, norad_precip
-    integer, intent(in), dimension(4) :: &
+    integer, intent(in), dimension(:) :: &
          idate
 
     ! Outputs

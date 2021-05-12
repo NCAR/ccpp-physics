@@ -172,18 +172,19 @@
       subroutine dcyc2t3_run                                            &
 !  ---  inputs:
      &     ( solhr,slag,sdec,cdec,sinlat,coslat,                        &
-     &       xlon,coszen,tsfc_lnd,tsfc_ice,tsfc_wat,tf,tsflw,           &
+     &       xlon,coszen,tsfc_lnd,tsfc_ice,tsfc_wat,tf,tsflw,tsfc,      &
      &       sfcemis_lnd, sfcemis_ice, sfcemis_wat,                     &
      &       sfcdsw,sfcnsw,sfcdlw,swh,swhc,hlw,hlwc,                    &
      &       sfcnirbmu,sfcnirdfu,sfcvisbmu,sfcvisdfu,                   &
      &       sfcnirbmd,sfcnirdfd,sfcvisbmd,sfcvisdfd,                   &
      &       im, levs, deltim, fhswr,                                   &
      &       dry, icy, wet,                                             &
-     &       use_LW_jacobian, sfculw, sfculw_jac,                       &
+     &       minGPpres, use_LW_jacobian, sfculw, fluxlwUP_jac,          &
+     &       t_lay, t_lev, p_lay, p_lev, flux2D_lwUP, flux2D_lwDOWN,    &
      &       pert_radtend, do_sppt,ca_global,                           &
 !    &       dry, icy, wet, lprnt, ipr,                                 &
 !  ---  input/output:
-     &       dtdt,dtdtnp,                                               &
+     &       dtdt,dtdtnp,htrlw,                                         &
 !  ---  outputs:
      &       adjsfcdsw,adjsfcnsw,adjsfcdlw,adjsfculw,                   &
      &       adjsfculw_lnd,adjsfculw_ice,adjsfculw_wat,xmu,xcosz,       &
@@ -193,8 +194,8 @@
      &     )
 !
       use machine,         only : kind_phys
-      use physcons,        only : con_pi, con_sbc
-
+      use physcons,        only : con_pi, con_sbc, con_cp, con_g
+      use radiation_tools,      only : cmp_tlev
       implicit none
 !
 !  ---  constant parameters:
@@ -211,53 +212,65 @@
 
 !     integer, intent(in) :: ipr
 !     logical lprnt
-      logical, dimension(im), intent(in) :: dry, icy, wet
+      logical, dimension(:), intent(in) :: dry, icy, wet
       logical, intent(in) :: use_LW_jacobian, pert_radtend
       logical, intent(in) :: do_sppt,ca_global
       real(kind=kind_phys),   intent(in) :: solhr, slag, cdec, sdec,    &
-     &                                      deltim, fhswr
+     &                                      deltim, fhswr, minGPpres
 
-      real(kind=kind_phys), dimension(im), intent(in) ::                &
+      real(kind=kind_phys), dimension(:), intent(in) ::                 &
      &      sinlat, coslat, xlon, coszen, tf, tsflw, sfcdlw,            &
-     &      sfcdsw, sfcnsw, sfculw, sfculw_jac
+     &      sfcdsw, sfcnsw, sfculw, tsfc
 
-      real(kind=kind_phys), dimension(im), intent(in) ::                &
+      real(kind=kind_phys), dimension(:), intent(in) ::                 &
      &                         tsfc_lnd, tsfc_ice, tsfc_wat,            &
      &                         sfcemis_lnd, sfcemis_ice, sfcemis_wat
 
-      real(kind=kind_phys), dimension(im), intent(in) ::                &
+      real(kind=kind_phys), dimension(:), intent(in) ::                 &
      &      sfcnirbmu, sfcnirdfu, sfcvisbmu, sfcvisdfu,                 &
      &      sfcnirbmd, sfcnirdfd, sfcvisbmd, sfcvisdfd
 
-      real(kind=kind_phys), dimension(im,levs), intent(in) :: swh,  hlw &
-     &,                                                       swhc, hlwc
+      real(kind=kind_phys), dimension(:,:), intent(in) :: swh, hlw,     &
+     &                                     swhc, hlwc, p_lay, t_lay
+
+      real(kind=kind_phys), dimension(:,:), intent(in) :: p_lev,        &
+     &     flux2D_lwUP, flux2D_lwDOWN, fluxlwUP_jac, t_lev
 
 !  ---  input/output:
-      real(kind=kind_phys), dimension(im,levs), intent(inout) :: dtdt 
-      real(kind=kind_phys), dimension(:,:),     intent(inout) :: dtdtnp
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: dtdt, htrlw
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: dtdtnp
 
 !  ---  outputs:
-      real(kind=kind_phys), dimension(im), intent(out) ::               &
+      real(kind=kind_phys), dimension(:), intent(out) ::                &
      &      adjsfcdsw, adjsfcnsw, adjsfcdlw, adjsfculw, xmu, xcosz,     &
      &      adjnirbmu, adjnirdfu, adjvisbmu, adjvisdfu,                 &
      &      adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd
 
-      real(kind=kind_phys), dimension(im), intent(out) ::               &
+      real(kind=kind_phys), dimension(:), intent(out) ::                &
      &      adjsfculw_lnd, adjsfculw_ice, adjsfculw_wat
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
 !  ---  locals:
-      integer :: i, k, nstp, nstl, it, istsun(im)
+      integer :: i, k, nstp, nstl, it, istsun(im),iSFC
       real(kind=kind_phys) :: cns,  coszn, tem1, tem2, anginc,          &
      &                        rstl, solang, dT
+      real(kind=kind_phys), dimension(im,levs+1) :: flxlwup_adj,        &
+     &     flxlwdn_adj, t_lev2
 !
 !===> ...  begin here
 !
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+
+!     Vertical ordering?
+      if (p_lev(1,1) .lt.  p_lev(1, levs)) then 
+         iSFC = levs
+      else
+         iSFC = 1
+      endif
 
       tem1 = fhswr / deltim
       nstp = max(6, nint(tem1))
@@ -302,9 +315,9 @@
          adjsfcdlw(i) = sfcdlw(i) * tem2 * tem2
 !> - LW time-step adjustment:
          if (use_LW_Jacobian) then
-            ! F_adj = F_o + (dF/dT) * dT	
+            ! F_adj = F_o + (dF/dT) * dT
             dT           = tf(i) - tsflw(i)
-            adjsfculw(i) = sfculw(i) + sfculw_jac(i) * dT
+            adjsfculw(i) = sfculw(i) + fluxlwUP_jac(i,iSFC) * dT
          else
 !!  - adjust \a sfc downward LW flux to account for t changes in the lowest model layer.
 !! compute 4th power of the ratio of \c tf in the lowest model layer over the mean value \c tsflw.
@@ -354,13 +367,50 @@
       enddo
 
 !>  - adjust SW heating rates with zenith angle change and
-!! add with LW heating to temperature tendency.
+!     add with LW heating to temperature tendency.
+      if (use_LW_jacobian) then
+         !
+         ! Compute temperatute at level interfaces.
+         !
+         call cmp_tlev(im, levs, minGPpres, p_lay, t_lay, p_lev, tsfc,  &
+     &        t_lev2)
 
-      do k = 1, levs
-        do i = 1, im
-          dtdt(i,k)  = dtdt(i,k)  + swh(i,k)*xmu(i)  + hlw(i,k)
-        enddo
-      enddo
+         !
+         ! Adjust up/downward fluxes (at layer interfaces).
+         !
+         do k = 1, levs+1
+            do i = 1, im
+               dT = t_lev2(i,k) - t_lev(i,k)
+               flxlwup_adj(i,k) = flux2D_lwUP(i,k) +                    &
+     &              fluxlwUP_jac(i,k)*dT
+            enddo
+         enddo
+         !
+         ! Compute new heating rate (within each layer).
+         !
+         do k = 1, levs
+            htrlw(1:im,k) =                                             &
+     &           (flxlwup_adj(1:im,k+1)  - flxlwup_adj(1:im,k) -        &
+     &           flux2D_lwDOWN(1:im,k+1) + flux2D_lwDOWN(1:im,k)) *     &
+     &           con_g / (con_cp * (p_lev(1:im,k+1) - p_lev(1:im,k)))
+         enddo
+
+         !
+         ! Add radiative heating rates to physics heating rate
+         !
+         do k = 1, levs
+            do i = 1, im
+               dtdt(i,k)  = dtdt(i,k)  + swh(i,k)*xmu(i)  + htrlw(i,k)
+            enddo
+         enddo
+      else
+         do k = 1, levs
+            do i = 1, im
+               dtdt(i,k)  = dtdt(i,k)  + swh(i,k)*xmu(i)  + hlw(i,k)
+            enddo
+         enddo
+      endif
+
       if (do_sppt .or. ca_global) then
          if (pert_radtend) then
 ! clear sky

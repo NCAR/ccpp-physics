@@ -62,21 +62,22 @@
       real(kind=kind_phys),intent(in) :: con_g
       real :: gravi
       integer, intent(in) :: im, levs, ko3, pl_coeff,me
-      real(kind=kind_phys), intent(in) :: po3(ko3),                     &
-     &                                    prsl(im,levs), tin(im,levs),  &
-     &                                    delp(im,levs),                &
-     &                                    prdout(im,ko3,pl_coeff), dt
+      logical, intent(in) :: ldiag3d, qdiag3d
+      real(kind=kind_phys), intent(in) :: po3(:),                       &
+     &                                    prsl(:,:), tin(:,:),          &
+     &                                    delp(:,:),                    &
+     &                                    prdout(:,:,:), dt
       ! These arrays may not be allocated and need assumed array sizes
       real(kind=kind_phys), intent(inout) ::                            &
      &                  ozp1(:,:), ozp2(:,:), ozp3(:,:),ozp4(:,:)
-      real(kind=kind_phys), intent(inout) :: oz(im,levs)
+      real(kind=kind_phys), intent(inout) :: oz(:,:)
 
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
       integer k,kmax,kmin,l,i,j
-      logical              ldiag3d, flg(im), qdiag3d
+      logical flg(im)
       real(kind=kind_phys) pmax, pmin, tem, temp
       real(kind=kind_phys) wk1(im), wk2(im), wk3(im),prod(im,pl_coeff), &
      &                     ozib(im), colo3(im,levs+1), coloz(im,levs+1),&

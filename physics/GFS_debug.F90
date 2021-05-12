@@ -657,6 +657,8 @@
                      if(Model%lradar) then
                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%refl_10cm   ',  Diag%refl_10cm)
                      end if
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dkt         ',    Diag%dkt)
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dku         ',    Diag%dku)
                      ! CCPP/MYNNPBL only
                      if (Model%do_mynnedmf) then
                        if (Model%bl_mynn_output .ne. 0) then
@@ -1068,7 +1070,6 @@
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%del                 ', Interstitial%del                     )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%del_gz              ', Interstitial%del_gz                  )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%delr                ', Interstitial%delr                    )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dkt                 ', Interstitial%dkt                     )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dlength             ', Interstitial%dlength                 )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dqdt                ', Interstitial%dqdt                    )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dqsfc1              ', Interstitial%dqsfc1                  )
@@ -1544,5 +1545,4 @@
          end do
 
       end subroutine GFS_checkland_run
-
     end module GFS_checkland

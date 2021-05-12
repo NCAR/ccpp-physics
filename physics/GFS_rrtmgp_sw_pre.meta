@@ -1,9 +1,9 @@
 [ccpp-table-properties]
   name = GFS_rrtmgp_sw_pre
   type = scheme
-  dependencies = iounitdef.f,machine.F,physparam.f,radiation_astronomy.f
+  dependencies = machine.F,radiation_astronomy.f,rrtmgp_sw_gas_optics.F90,rte-rrtmgp/rrtmgp/mo_gas_optics_rrtmgp.F90,
 
-######################################################################## DH* TODO CHECK IF the dependencies are all required
+########################################################################
 [ccpp-arg-table]
   name = GFS_rrtmgp_sw_pre_run
   type = scheme

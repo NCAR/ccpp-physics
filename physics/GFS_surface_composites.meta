@@ -69,7 +69,7 @@
   units = flag
   dimensions = (horizontal_loop_extent)
   type = logical
-  intent = in
+  intent = inout
   optional = F
 [cplflx]
   standard_name = flag_for_flux_coupling
@@ -185,6 +185,33 @@
   standard_name = sea_ice_concentration
   long_name = ice fraction over open water
   units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[zorlo]
+  standard_name = surface_roughness_length_over_water
+  long_name = surface roughness length over water
+  units = cm
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[zorll]
+  standard_name = surface_roughness_length_over_land
+  long_name = surface roughness length over land
+  units = cm
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[zorli]
+  standard_name = surface_roughness_length_over_ice
+  long_name = surface roughness length over ice
+  units = cm
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
@@ -629,33 +656,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[zorlo]
-  standard_name = surface_roughness_length_over_water
-  long_name = surface roughness length over water
-  units = cm
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[zorll]
-  standard_name = surface_roughness_length_over_land
-  long_name = surface roughness length over land
-  units = cm
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[zorli]
-  standard_name = surface_roughness_length_over_ice
-  long_name = surface roughness length over ice
-  units = cm
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -1027,7 +1027,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = F
 [zorll]
   standard_name = surface_roughness_length_over_land
@@ -1036,7 +1036,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = F
 [zorli]
   standard_name = surface_roughness_length_over_ice
@@ -1045,7 +1045,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = F
 [cd]
   standard_name = surface_drag_coefficient_for_momentum_in_air
@@ -1863,7 +1863,7 @@
   dimensions = (horizontal_loop_extent,ice_vertical_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = F
 [stc]
   standard_name = soil_temperature

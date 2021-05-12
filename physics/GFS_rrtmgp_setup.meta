@@ -38,6 +38,8 @@
   units = flag
   dimensions = ()
   type = integer
+  intent = in
+  optional = F
 [imp_physics_wsm6]
   intent = in
   optional = F

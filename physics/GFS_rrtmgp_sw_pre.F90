@@ -35,7 +35,7 @@ contains
          doSWrad              ! Call RRTMGP SW radiation?
     real(kind_phys), intent(in) :: &
          solhr                ! Time in hours after 00z at the current timestep
-    real(kind_phys), dimension(nCol), intent(in) :: &
+    real(kind_phys), dimension(:), intent(in) :: &
          lon,               & ! Longitude
          coslat,            & ! Cosine(latitude)
          sinlat               ! Sine(latitude)
@@ -45,12 +45,12 @@ contains
     ! Outputs
     integer, intent(out)   :: &
          nday                 ! Number of daylit points
-    integer, dimension(ncol), intent(out) :: &
+    integer, dimension(:), intent(out) :: &
          idxday               ! Indices for daylit points
-    real(kind_phys), dimension(ncol), intent(inout) :: &
+    real(kind_phys), dimension(:), intent(inout) :: &
          coszen,            & ! Cosine of SZA
          coszdg               ! Cosine of SZA, daytime
-    real(kind_phys), dimension(sw_gas_props%get_nband(),ncol), intent(out) :: &
+    real(kind_phys), dimension(:,:), intent(out) :: &
          sfc_alb_nir_dir,   & ! Surface albedo (direct)
          sfc_alb_nir_dif,   & ! Surface albedo (diffuse)
          sfc_alb_uvvis_dir, & ! Surface albedo (direct)

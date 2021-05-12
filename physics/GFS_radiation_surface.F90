@@ -90,7 +90,7 @@
                                                            albivis_lnd, albinir_lnd
       real(kind=kind_phys), dimension(:),   intent(in)  :: albdvis_ice, albdnir_ice,    &
                                                            albivis_ice, albinir_ice
-      real(kind=kind_phys), dimension(im),  intent(out) :: semisbase, semis
+      real(kind=kind_phys), dimension(:),   intent(out) :: semisbase, semis
       real(kind=kind_phys), dimension(:,:), intent(out) :: sfcalb
       real(kind=kind_phys), dimension(:),   intent(out) :: sfc_alb_dif
       character(len=*),                     intent(out) :: errmsg

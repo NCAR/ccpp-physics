@@ -6,7 +6,7 @@ module GFS_rrtmgp_lw_post
   use mo_gas_optics_rrtmgp,      only: ty_gas_optics_rrtmgp
   use mo_fluxes_byband,          only: ty_fluxes_byband
   use mo_heating_rates,          only: compute_heating_rate
-  use rrtmgp_aux,                only: check_error_msg
+  use radiation_tools,                only: check_error_msg
   implicit none
   
   public GFS_rrtmgp_lw_post_init,GFS_rrtmgp_lw_post_run,GFS_rrtmgp_lw_post_finalize

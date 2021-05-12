@@ -1,25 +1,32 @@
 /**
 \mainpage Introduction 
 
-Welcome to the scientific documentation for the parameterizations and suites available in the Common 
-Community Physics Package (CCPP) v4.
+Welcome to the scientific documentation for the parameterizations available in the Common 
+Community Physics Package (CCPP) v5.0.0 and the suites that can be configured using them.
+
+\image html  mesocam.png " " width=10cm
 
 The CCPP-Physics is envisioned to contain parameterizations used in NOAA's Unified Forecast System (UFS) 
-applications for weather through seasonal prediction timescales, encompassing operational schemes as well as 
-developmental schemes under consideration for upcoming 
-operational implementations. This version contains all parameterizations of the current operational GFS,
-plus additional developmental schemes. There are four suites supported for use with the Single Column Model (SCM) 
-developed by the Development Testbed Center (GFS_v15p2, GFS_v16beta, GSD_v1, and csawmg), and four suites
-supported for use with the atmospheric component of the UFS (i.e., GFS_v15p2, GFS_v15p2_no_nsst, GFS_v16beta and 
-GFS_v16beta_no_nsst). The variants labelled as \a no_nsst are a simplification of GFS_v15p2 and GFS_v16beta suites
-. This simplification is needed when the UFS is initialized with files in GRIdded Binary Edition 2 (GRIB2) 
-format instead of files in NOAA Environmental Modeling System (NEMS) Input/Output (NEMSIO) format because the 
-fields necessary to predict (SST) are not available in the GRIB2 files.
+applications for weather through seasonal prediction timescales, encompassing the current operational GFS schemes as well as 
+developmental schemes under consideration for upcoming operational implementations. New in this release is 
+suite RRFS_v1alpha, which is being tested in the UFS Short-Range Weather Application for future use 
+in the convective-allowing Rapid Refresh Forecast System (RRFS), slated for operational implementation
+in 2023. Convection-allowing models allow us to begin to resolve the fine details within storm systems that are
+necessary for the accurate predition of high-impact events such as tornadoes, flash floods, and winter weather.
+Experience gained from the development of earlier operational and experimental convective-allowing models (CAMs),
+such as the High Resolution Rapid Refresh (HRRR) and HRRR Ensemble (HRRRE), the North American Mesoscale Forecast
+System (NAM) nests, the NSSL Experimental Warn-on-Forecast System for ensembles (NEWS-e), the NCAR experimental
+CAM ensemble, and GFDL's FV3-based CAM efforts, guide this process.
+
+The CCPP parameterizations are aggregated in suites by the host models. The CCPP Single Column Model (SCM), developed 
+by the Development Testbed Center, supports suites GFS_v15p2, GFS_v16beta, GSD_v1, csawmg, and RRFS_v1alpha, while the 
+UFS Short-Range Weather Application supports suites GFS_v15p2 and RRFS_v1alpha. The UFS Medium-Range Weather Application
+is not intended for use with CCPP v5.0.0.  
 
 In this website you will find documentation on various aspects of each 
 parameterization, including a high-level overview of its function, the input/output argument list, 
 and a description of the algorithm. 
-The latest CCPP public release is Version 4.0 (March 2020), and more details on it may be found on the
+More details about this and other CCPP releases may be found on the
 <a href="https://dtcenter.org/community-code/common-community-physics-package-ccpp"> CCPP website </a> hosted by
 the Developmental Testbed Center (DTC).
 

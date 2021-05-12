@@ -1,5 +1,7 @@
 !> \file GFS_rrtmg_setup.f90
 !! This file contains
+
+!> \defgroup GFS_rrtmg_setup_mod GFS RRTMG Scheme Setup
 module GFS_rrtmg_setup
 
    use physparam, only : isolar , ictmflg, ico2flg, ioznflg, iaerflg, &
@@ -37,9 +39,7 @@ module GFS_rrtmg_setup
 
    contains
 
-!> \defgroup GFS_rrtmg_setup GFS RRTMG Scheme Setup
-!! @{
-!! \section arg_table_GFS_rrtmg_setup_init Argument Table
+!> \section arg_table_GFS_rrtmg_setup_init Argument Table
 !! \htmlinclude GFS_rrtmg_setup_init.html
 !!
    subroutine GFS_rrtmg_setup_init (                          &
@@ -152,7 +152,7 @@ module GFS_rrtmg_setup
       implicit none
 
       ! interface variables
-      real (kind=kind_phys), intent(in) :: si(levr+1)
+      real (kind=kind_phys), intent(in) :: si(:)
       integer, intent(in) :: levr
       integer, intent(in) :: ictm
       integer, intent(in) :: isol
@@ -170,7 +170,7 @@ module GFS_rrtmg_setup
       logical, intent(in) :: ccnorm
       integer, intent(in) :: imp_physics
       logical, intent(in) :: norad_precip
-      integer, intent(in) :: idate(4)
+      integer, intent(in) :: idate(:)
       integer, intent(in) :: iflip
       ! For consistency checks
       integer, intent(in)         :: im
@@ -774,5 +774,4 @@ module GFS_rrtmg_setup
       end subroutine radupdate
 !-----------------------------------
 
-!! @}
 end module GFS_rrtmg_setup

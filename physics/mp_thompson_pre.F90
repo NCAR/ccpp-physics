@@ -28,8 +28,8 @@ module mp_thompson_pre
          ! Interface variables
          integer,                   intent(in   ) :: ncol
          integer,                   intent(in   ) :: nlev
-         real(kind_phys),           intent(in   ) :: tgrs(1:ncol,1:nlev)
-         real(kind_phys),           intent(  out) :: tgrs_save(1:ncol,1:nlev)
+         real(kind_phys),           intent(in   ) :: tgrs(:,:)
+         real(kind_phys),           intent(  out) :: tgrs_save(:,:)
 
          ! CCPP error handling
          character(len=*),          intent(  out) :: errmsg

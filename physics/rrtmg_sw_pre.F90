@@ -20,7 +20,7 @@
 
       integer,                              intent(in)    :: im
       logical,                              intent(in)    :: lsswr
-      real(kind=kind_phys), dimension(im),  intent(in)    :: coszen
+      real(kind=kind_phys), dimension(:),   intent(in)    :: coszen
       integer,                              intent(out)   :: nday
       integer, dimension(:),                intent(out)   :: idxday
       character(len=*),                     intent(out)   :: errmsg

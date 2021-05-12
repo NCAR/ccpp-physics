@@ -169,22 +169,22 @@
       integer, intent(in) :: im, levs, fprcp
       logical, intent(in) :: mg3_as_mg2
 
-      real(kind=kind_phys), intent(in   ) :: ncpr(1:im,1:levs)
-      real(kind=kind_phys), intent(in   ) :: ncps(1:im,1:levs)
-      real(kind=kind_phys), intent(in   ) :: ncgl(1:im,1:levs)
-      real(kind=kind_phys), intent(inout) :: qrn(1:im,1:levs)
-      real(kind=kind_phys), intent(inout) :: qsnw(1:im,1:levs)
-      real(kind=kind_phys), intent(inout) :: qgl(1:im,1:levs)
-      real(kind=kind_phys), intent(inout) :: gq0_ice(1:im,1:levs)
-      real(kind=kind_phys), intent(inout) :: gq0_rain(1:im,1:levs)
-      real(kind=kind_phys), intent(inout) :: gq0_snow(1:im,1:levs)
-      real(kind=kind_phys), intent(inout) :: gq0_graupel(1:im,1:levs)
-      real(kind=kind_phys), intent(inout) :: gq0_rain_nc(1:im,1:levs)
-      real(kind=kind_phys), intent(inout) :: gq0_snow_nc(1:im,1:levs)
-      real(kind=kind_phys), intent(inout) :: gq0_graupel_nc(1:im,1:levs)
-      real(kind=kind_phys), intent(  out) :: ice(1:im)
-      real(kind=kind_phys), intent(  out) :: snow(1:im)
-      real(kind=kind_phys), intent(  out) :: graupel(1:im)
+      real(kind=kind_phys), intent(in   ) :: ncpr(:,:)
+      real(kind=kind_phys), intent(in   ) :: ncps(:,:)
+      real(kind=kind_phys), intent(in   ) :: ncgl(:,:)
+      real(kind=kind_phys), intent(inout) :: qrn(:,:)
+      real(kind=kind_phys), intent(inout) :: qsnw(:,:)
+      real(kind=kind_phys), intent(inout) :: qgl(:,:)
+      real(kind=kind_phys), intent(in   ) :: gq0_ice(:,:)
+      real(kind=kind_phys), intent(out  ) :: gq0_rain(:,:)
+      real(kind=kind_phys), intent(out  ) :: gq0_snow(:,:)
+      real(kind=kind_phys), intent(out  ) :: gq0_graupel(:,:)
+      real(kind=kind_phys), intent(out  ) :: gq0_rain_nc(:,:)
+      real(kind=kind_phys), intent(out  ) :: gq0_snow_nc(:,:)
+      real(kind=kind_phys), intent(out  ) :: gq0_graupel_nc(:,:)
+      real(kind=kind_phys), intent(  out) :: ice(:)
+      real(kind=kind_phys), intent(  out) :: snow(:)
+      real(kind=kind_phys), intent(  out) :: graupel(:)
       real(kind=kind_phys), intent(in   ) :: dtp
 
       character(len=*), intent(out) :: errmsg
