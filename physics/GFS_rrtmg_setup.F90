@@ -212,7 +212,7 @@ module GFS_rrtmg_setup
       if (is_initialized) return
       
       if (do_RRTMGP) then
-        write(errmsg,'(*(a))') "Logic error: do_RRTMGP must be set .false."
+        write(errmsg,'(*(a))') "Logic error: do_RRTMGP must be set to .false."
         errflg = 1
         return
       end if

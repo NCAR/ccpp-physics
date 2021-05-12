@@ -79,7 +79,7 @@ contains
 
     ! Consistency checks
     if (.not. do_RRTMGP) then
-      write(errmsg,'(*(a))') "Logic error: do_RRTMGP must be set .true."
+      write(errmsg,'(*(a))') "Logic error: do_RRTMGP must be set to .true."
       errflg = 1
       return
     end if
