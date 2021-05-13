@@ -305,6 +305,24 @@
   kind = kind_phys
   intent = in
   optional = F
+[min_lakeice]
+  standard_name = lake_ice_minimum
+  long_name = minimum lake ice value
+  units = frac
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[lakefrac]
+  standard_name = lake_area_fraction
+  long_name = fraction of horizontal grid area occupied by lake
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [alvsf]
   standard_name = mean_vis_albedo_with_strong_cosz_dependency
   long_name = mean vis albedo with strong cosz dependency
