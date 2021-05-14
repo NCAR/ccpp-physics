@@ -13,7 +13,7 @@
 
       subroutine ysuvdif_init (do_ysu,errmsg,errflg)
 
-        integer, intent(in) :: do_ysu
+        logical,          intent(in) :: do_ysu
         character(len=*), intent(out) :: errmsg
         integer,          intent(out) :: errflg
 
