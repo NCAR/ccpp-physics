@@ -24,6 +24,7 @@
           write(errmsg,fmt='(*(a))') 'Logic error: do_myjsfc = .false.'
           errflg = 1
           return
+        end if
       end subroutine myjsfc_wrapper_init
 
       subroutine myjsfc_wrapper_finalize ()
