@@ -112,6 +112,9 @@
       ! Intialize intent(out) variables
       sfcalb = 0.0
 
+      ! Return immediately if neither shortwave nor longwave radiation are called
+      if (.not. lsswr .and. .not. lslwr) return
+
       do i=1,im
         if (lakefrac(i) > f_zero) then
           cimin = min_lakeice
@@ -119,9 +122,6 @@
           cimin = min_seaice
         endif
       enddo
-
-      ! Return immediately if neither shortwave nor longwave radiation are called
-      if (.not. lsswr .and. .not. lslwr) return
 
       ! Set up land/ice/ocean fractions for emissivity and albedo calculations
       if (.not. frac_grid) then
