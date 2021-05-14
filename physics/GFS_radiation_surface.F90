@@ -92,9 +92,9 @@
                                                            albivis_lnd, albinir_lnd
       real(kind=kind_phys), dimension(:),   intent(in)  :: albdvis_ice, albdnir_ice,    &
                                                            albivis_ice, albinir_ice
-      real(kind=kind_phys), dimension(:),   intent(out) :: semisbase, semis
-      real(kind=kind_phys), dimension(:,:), intent(out) :: sfcalb
-      real(kind=kind_phys), dimension(:),   intent(out) :: sfc_alb_dif
+      real(kind=kind_phys), dimension(:),   intent(inout) :: semisbase, semis
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: sfcalb
+      real(kind=kind_phys), dimension(:),   intent(inout) :: sfc_alb_dif
       character(len=*),                     intent(out) :: errmsg
       integer,                              intent(out) :: errflg
 
@@ -108,9 +108,6 @@
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
-
-      ! Intialize intent(out) variables
-      sfcalb = 0.0
 
       ! Return immediately if neither shortwave nor longwave radiation are called
       if (.not. lsswr .and. .not. lslwr) return
@@ -168,10 +165,6 @@
                       hprime, semis_lnd, semis_ice, im,            &
                       fracl, fraco, fraci, icy,                    & !  ---  inputs
                       semisbase, semis)                              !  ---  outputs
-      ! DH* required? or a bad idea? wasn't there beforehand, neither for RRTMG nor RRTMGP
-      else
-        semis = 0.0
-      ! *DH
       endif
 
       if (lsswr) then
@@ -198,10 +191,6 @@
 
 !> -# Approximate mean surface albedo from vis- and nir- diffuse values.
         sfc_alb_dif(:) = max(0.01, 0.5 * (sfcalb(:,2) + sfcalb(:,4)))
-      ! DH* needed? RRTMGP was doing this, RRTMG not
-      else
-        sfc_alb_dif(:) = 0.0
-      ! *DH
       endif
 
       end subroutine GFS_radiation_surface_run

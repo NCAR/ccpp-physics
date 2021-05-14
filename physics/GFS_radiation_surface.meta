@@ -483,7 +483,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [semis]
   standard_name = surface_longwave_emissivity
@@ -492,7 +492,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [sfcalb]
   standard_name = surface_albedo_components
@@ -501,7 +501,7 @@
   dimensions = (horizontal_loop_extent,number_of_components_for_surface_albedo)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [sfc_alb_dif]
   standard_name = surface_diffused_shortwave_albedo
@@ -510,7 +510,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [errmsg]
   standard_name = ccpp_error_message
