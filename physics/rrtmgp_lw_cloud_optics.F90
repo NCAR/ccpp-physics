@@ -5,7 +5,7 @@ module rrtmgp_lw_cloud_optics
   use mo_optical_props,         only: ty_optical_props_1scl, ty_optical_props_2str
   use mo_rrtmg_lw_cloud_optics, only: rrtmg_lw_cloud_optics   
   use rrtmgp_lw_gas_optics,     only: lw_gas_props
-  use rrtmgp_aux,               only: check_error_msg
+  use radiation_tools,               only: check_error_msg
   use netcdf
 #ifdef MPI
   use mpi
@@ -70,24 +70,24 @@ contains
 !! \section arg_table_rrtmgp_lw_cloud_optics_init
 !! \htmlinclude rrtmgp_lw_cloud_optics.html
 !!
-  subroutine rrtmgp_lw_cloud_optics_init(doG_cldoptics,        &
-       doGP_cldoptics_PADE, doGP_cldoptics_LUT, nrghice, rrtmgp_root_dir,                &
-       rrtmgp_lw_file_clouds, mpicomm, mpirank, mpiroot, errmsg, errflg)
+  subroutine rrtmgp_lw_cloud_optics_init(nrghice, mpicomm, mpirank, mpiroot,             &
+       doG_cldoptics, doGP_cldoptics_PADE, doGP_cldoptics_LUT, rrtmgp_root_dir,          &
+       rrtmgp_lw_file_clouds, errmsg, errflg)
 
     ! Inputs
     logical, intent(in) :: &
-         doG_cldoptics,       & ! Use legacy RRTMG cloud-optics?
-         doGP_cldoptics_PADE, & ! Use RRTMGP cloud-optics: PADE approximation?
-         doGP_cldoptics_LUT     ! Use RRTMGP cloud-optics: LUTs?
+         doG_cldoptics,                 & ! Use legacy RRTMG cloud-optics?
+         doGP_cldoptics_PADE,           & ! Use RRTMGP cloud-optics: PADE approximation?
+         doGP_cldoptics_LUT               ! Use RRTMGP cloud-optics: LUTs?
     integer, intent(inout) :: &
-         nrghice                ! Number of ice-roughness categories
-    integer, intent(in) :: &
-         mpicomm,             & ! MPI communicator
-         mpirank,             & ! Current MPI rank
-         mpiroot                ! Master MPI rank
+         nrghice                          ! Number of ice-roughness categories
+    integer, intent(in) :: & 
+         mpicomm,                       & ! MPI communicator
+         mpirank,                       & ! Current MPI rank
+         mpiroot                          ! Master MPI rank
     character(len=128),intent(in) :: &
-         rrtmgp_root_dir,     & ! RTE-RRTMGP root directory
-         rrtmgp_lw_file_clouds  ! RRTMGP file containing coefficients used to compute clouds optical properties
+         rrtmgp_root_dir,               & ! RTE-RRTMGP root directory
+         rrtmgp_lw_file_clouds            ! RRTMGP file containing coefficients used to compute clouds optical properties
 
     ! Outputs
     character(len=*), intent(out) :: &
@@ -422,7 +422,7 @@ contains
          errmsg                             ! CCPP error message
     integer, intent(out) :: &
          errflg                             ! CCPP error flag
-    type(ty_optical_props_2str),intent(out) :: &
+    type(ty_optical_props_2str),intent(inout) :: &
          lw_optical_props_cloudsByBand,   & ! RRTMGP DDT: Longwave optical properties in each band (clouds)
          lw_optical_props_precipByBand      ! RRTMGP DDT: Longwave optical properties in each band (precipitation)
     real(kind_phys), dimension(ncol,nLev), intent(inout) :: &
@@ -444,15 +444,18 @@ contains
 
     if (.not. doLWrad) return
 
+    lw_optical_props_cloudsByBand%band_lims_wvn = lw_gas_props%get_band_lims_wavenumber()
+    lw_optical_props_precipByBand%band_lims_wvn = lw_gas_props%get_band_lims_wavenumber()
+    do iBand=1,lw_gas_props%get_nband()
+       lw_optical_props_cloudsByBand%band2gpt(1:2,iBand) = iBand
+       lw_optical_props_cloudsByBand%band2gpt(1:2,iBand) = iBand
+       lw_optical_props_precipByBand%gpt2band(iBand)     = iBand
+       lw_optical_props_precipByBand%gpt2band(iBand)     = iBand
+    end do
+
     ! Compute cloud-optics for RTE.
     if (doGP_cldoptics_PADE .or. doGP_cldoptics_LUT) then
-       call check_error_msg('rrtmgp_lw_cloud_optics_run',lw_optical_props_cloudsByBand%alloc_2str(&
-            ncol, nLev, lw_cloud_props%get_band_lims_wavenumber()))
-       lw_optical_props_cloudsByBand%tau(:,:,:) = 0._kind_phys
-       call check_error_msg('rrtmgp_lw_cloud_optics_run',lw_optical_props_precipByBand%alloc_2str(&
-            ncol, nLev, lw_cloud_props%get_band_lims_wavenumber()))
-       lw_optical_props_precipByBand%tau(:,:,:) = 0._kind_phys
-
+       
        ! i) RRTMGP cloud-optics.
        call check_error_msg('rrtmgp_lw_cloud_optics_run',lw_cloud_props%cloud_optics(&
             cld_lwp,                       & ! IN  - Cloud liquid water path (g/m2)
@@ -482,12 +485,6 @@ contains
        enddo
     endif
     if (doG_cldoptics) then
-       call check_error_msg('rrtmgp_lw_cloud_optics_run',lw_optical_props_cloudsByBand%alloc_2str(&
-            ncol, nLev, lw_gas_props%get_band_lims_wavenumber()))
-       lw_optical_props_cloudsByBand%tau(:,:,:) = 0._kind_phys
-       call check_error_msg('rrtmgp_lw_cloud_optics_run',lw_optical_props_precipByBand%alloc_2str(&
-            ncol, nLev, lw_gas_props%get_band_lims_wavenumber()))
-       lw_optical_props_precipByBand%tau(:,:,:) = 0._kind_phys
        ! ii) RRTMG cloud-optics.
        if (any(cld_frac .gt. 0)) then
           call rrtmg_lw_cloud_optics(ncol, nLev, nbndsGPlw, cld_lwp, cld_reliq, cld_iwp,&

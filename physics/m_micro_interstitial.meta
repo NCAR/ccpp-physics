@@ -392,7 +392,7 @@
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = F
 [gq0_rain]
   standard_name = rain_water_mixing_ratio_updated_by_physics

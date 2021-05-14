@@ -4,7 +4,7 @@
 \code
 <?xml version="1.0" encoding="UTF-8"?>
 
-<suite name="FV3_GFS_v15p2_no_nsst" lib="ccppphys" ver="3">
+<suite name="FV3_GFS_v15p2_no_nsst" lib="ccppphys" ver="5">
   <!-- <init></init> -->
   <group name="fast_physics">
     <subcycle loop="1">

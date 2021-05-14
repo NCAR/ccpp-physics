@@ -234,9 +234,9 @@
      &       epsm1, rvrdm1
       real (kind=kind_phys), intent(in) :: pertvegf
 
-      integer, dimension(im), intent(in) :: soiltyp, vegtype, slopetyp
+      integer, dimension(:), intent(in) :: soiltyp, vegtype, slopetyp
 
-      real (kind=kind_phys), dimension(im), intent(in) :: ps,           &
+      real (kind=kind_phys), dimension(:), intent(in) :: ps,            &
      &       t1, q1, sigmaf, sfcemis, dlwflx, dswsfc, snet, tg3, cm,    &
      &       ch, prsl1, prslki, wind, shdmin, shdmax,                   &
      &       snoalb, sfalb, zf,                                         &
@@ -244,19 +244,19 @@
 
       real (kind=kind_phys),  intent(in) :: delt
 
-      logical, dimension(im), intent(in) :: flag_iter, flag_guess, land
+      logical, dimension(:), intent(in) :: flag_iter, flag_guess, land
 
       logical, intent(in) :: lheatstrg
 
 !  ---  in/out:
-      real (kind=kind_phys), dimension(im), intent(inout) :: weasd,     &
+      real (kind=kind_phys), dimension(:), intent(inout) :: weasd,      &
      &       snwdph, tskin, tprcp, srflag, canopy, trans, tsurf, zorl
 
-      real (kind=kind_phys), dimension(im,km), intent(inout) ::         &
+      real (kind=kind_phys), dimension(:,:), intent(inout) ::           &
      &       smc, stc, slc
 
 !  ---  output:
-      real (kind=kind_phys), dimension(im), intent(inout) :: sncovr1,   &
+      real (kind=kind_phys), dimension(:), intent(inout) :: sncovr1,    &
      &       qsurf, gflux, drain, evap, hflx, ep, runoff, cmm, chh,     &
      &       evbs, evcw, sbsno, snowc, stm, snohf, smcwlt2, smcref2,    &
      &       wet1

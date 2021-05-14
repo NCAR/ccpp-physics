@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = rrtmgp_lw_cloud_sampling
   type = scheme
-  dependencies = machine.F,mersenne_twister.f,physparam.f,rrtmgp_sampling.F90,rrtmgp_aux.F90
+  dependencies = machine.F,mersenne_twister.f,physparam.f,rrtmgp_sampling.F90,radiation_tools.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -207,7 +207,7 @@
   units = DDT
   dimensions = ()
   type = ty_optical_props_2str
-  intent = out
+  intent = inout
   optional = F
 [lw_optical_props_precip]
   standard_name = longwave_optical_properties_for_precipitation
@@ -215,7 +215,7 @@
   units = DDT
   dimensions = ()
   type = ty_optical_props_2str
-  intent = out
+  intent = inout
   optional = F    
 [errmsg]
   standard_name = ccpp_error_message

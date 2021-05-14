@@ -1,12 +1,10 @@
 module rrtmgp_sw_gas_optics
   use machine,                only: kind_phys
-  use module_radiation_gases, only: NF_VGAS
   use mo_rte_kind,            only: wl
   use mo_gas_optics_rrtmgp,   only: ty_gas_optics_rrtmgp
   use mo_gas_concentrations,  only: ty_gas_concs
-  use rrtmgp_aux,             only: check_error_msg
+  use radiation_tools,             only: check_error_msg
   use mo_optical_props,       only: ty_optical_props_2str
-  use mo_compute_bc,          only: compute_bc
   use GFS_rrtmgp_pre,         only: active_gases_array
   use netcdf
 #ifdef MPI
@@ -14,6 +12,10 @@ module rrtmgp_sw_gas_optics
 #endif
 
   implicit none
+  real(kind_phys),parameter :: &
+       tsi_default = 1360.85767381726, &
+       mg_default  = 0.1567652,        &
+       sb_default  = 902.7126
 
   ! RRTMGP k-distribution LUTs.
   type(ty_gas_optics_rrtmgp) :: sw_gas_props
@@ -301,11 +303,23 @@ contains
        status = nf90_inq_varid(ncid, 'absorption_coefficient_ref_T', varID)
        status = nf90_get_var(  ncid, varID, temp_ref_tSW) 
        status = nf90_inq_varid(ncid, 'tsi_default', varID)
-       status = nf90_get_var(  ncid, varID, tsi_defaultSW)
+       if (status .eq. 0) then
+          status = nf90_get_var(  ncid, varID, tsi_defaultSW)
+       else
+          tsi_defaultSW = tsi_default
+       endif
        status = nf90_inq_varid(ncid, 'mg_default', varID)
-       status =	nf90_get_var(  ncid, varID, mg_defaultSW)
+       if (status .eq. 0) then
+          status =	nf90_get_var(  ncid, varID, mg_defaultSW)
+       else
+          mg_defaultSW = mg_default
+       endif
        status = nf90_inq_varid(ncid, 'sb_default', varID)
-       status =	nf90_get_var(  ncid, varID, sb_defaultSW)
+       if (status .eq. 0) then
+          status =	nf90_get_var(  ncid, varID, sb_defaultSW)
+       else
+          sb_defaultSW = sb_default
+       endif
        status = nf90_inq_varid(ncid, 'press_ref_trop', varID)
        status = nf90_get_var(  ncid, varID, press_ref_tropSW)       
        status = nf90_inq_varid(ncid, 'kminor_lower', varID)

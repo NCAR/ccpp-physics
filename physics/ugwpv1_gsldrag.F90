@@ -84,15 +84,15 @@ contains
     integer,              intent (in) :: nlunit
     character(len=*),     intent (in) :: input_nml_file(:)
     integer,              intent (in) :: logunit
-    integer,              intent(in)  :: jdat(8)
+    integer,              intent (in) :: jdat(:)
     integer,              intent (in) :: lonr
     integer,              intent (in) :: levs
     integer,              intent (in) :: latr
-    real(kind=kind_phys), intent (in) :: ak(levs+1), bk(levs+1)
+    real(kind=kind_phys), intent (in) :: ak(:), bk(:)
     real(kind=kind_phys), intent (in) :: dtp
 
     real(kind=kind_phys), intent (in) :: con_p0, con_pi, con_rerth
-    real(kind=kind_phys), intent(in)  :: con_g,  con_cp, con_rd, con_rv, con_omega, con_fvirt
+    real(kind=kind_phys), intent (in) :: con_g, con_cp, con_rd, con_rv, con_omega, con_fvirt
     logical,              intent (in) :: do_ugwp
 
     logical,              intent (in) :: do_ugwp_v0, do_ugwp_v0_orog_only,  &
@@ -308,7 +308,6 @@ contains
           ldiag3d, lssav, flag_for_gwd_generic_tend, do_gsl_drag_ls_bl, do_gsl_drag_ss, &
           do_gsl_drag_tofd, do_ugwp_v1, do_ugwp_v1_orog_only, do_ugwp_v1_w_gsldrag,     &
           gwd_opt, do_tofd, ldiag_ugwp, cdmbgwd, jdat,                                  &
-!          con_g, con_omega, con_pi, con_cp, con_rd, con_rv, con_rerth, con_fvirt,       &
           nmtvr, hprime, oc, theta, sigma, gamma, elvmax, clx, oa4,                     &
           varss,oc1ss,oa4ss,ol4ss, dx,  xlat, xlat_d, sinlat, coslat, area,             &
           rain, br1, hpbl, kpbl, slmsk,                                                 &
@@ -318,10 +317,10 @@ contains
           dudt_oss, dvdt_oss, du_osscol, dv_osscol,                                     &
           dudt_ofd, dvdt_ofd, du_ofdcol, dv_ofdcol,                                     &
           dudt_ngw, dvdt_ngw, dtdt_ngw, kdis_ngw, dudt_gw, dvdt_gw, dtdt_gw, kdis_gw,   &
-      tau_ogw, tau_ngw,  tau_oss,                                                   &
+          tau_ogw, tau_ngw,  tau_oss,                                                   &
           zogw,  zlwb,  zobl,  zngw,   dusfcg, dvsfcg,  dudt, dvdt, dtdt, rdxzb,        &
           ldu3dt_ogw, ldv3dt_ogw, ldt3dt_ogw, ldu3dt_ngw, ldv3dt_ngw, ldt3dt_ngw,       &
-      lprnt, ipr, errmsg, errflg)
+          lprnt, ipr, errmsg, errflg)
 !
 !########################################################################
 !  Attention New Arrays and Names must be ADDED inside
@@ -364,20 +363,20 @@ contains
 
     integer,                 intent(in) :: me, master, im, levs, ntrac,lonr
     real(kind=kind_phys),    intent(in) :: dtp, fhzero
-    integer,                 intent(in) :: kdt, jdat(8)
+    integer,                 intent(in) :: kdt, jdat(:)
 
 ! SSO parameters and variables
     integer,                 intent(in) :: gwd_opt                         !gwd_opt  and nmtvr are "redundant" controls
     integer,                 intent(in) :: nmtvr
-    real(kind=kind_phys),    intent(in) :: cdmbgwd(4)                      ! for gsl_drag
+    real(kind=kind_phys),    intent(in) :: cdmbgwd(:)                      ! for gsl_drag
 
-    real(kind=kind_phys),    intent(in), dimension(im)       :: hprime, oc, theta, sigma, gamma
+    real(kind=kind_phys),    intent(in), dimension(:)       :: hprime, oc, theta, sigma, gamma
 
-    real(kind=kind_phys),    intent(in), dimension(im)       :: elvmax
-    real(kind=kind_phys),    intent(in), dimension(im, 4)    :: clx, oa4
+    real(kind=kind_phys),    intent(in), dimension(:)       :: elvmax
+    real(kind=kind_phys),    intent(in), dimension(:,:)     :: clx, oa4
 
-    real(kind=kind_phys),    intent(in), dimension(im)       :: varss,oc1ss,dx
-    real(kind=kind_phys),    intent(in), dimension(im, 4)    :: oa4ss,ol4ss
+    real(kind=kind_phys),    intent(in), dimension(:)       :: varss,oc1ss,dx
+    real(kind=kind_phys),    intent(in), dimension(:,:)     :: oa4ss,ol4ss
 
 !=====
 !ccpp-style passing constants, I prefer to take them out from the "call-subr" list
@@ -386,48 +385,48 @@ contains
 !                                           con_rv, con_rerth, con_fvirt
 ! grids
 
-    real(kind=kind_phys),    intent(in), dimension(im)         :: xlat, xlat_d, sinlat, coslat, area
+    real(kind=kind_phys),    intent(in), dimension(:)     :: xlat, xlat_d, sinlat, coslat, area
 
 ! State vars + PBL/slmsk +rain
 
-    real(kind=kind_phys),    intent(in), dimension(im, levs)   :: del, ugrs, vgrs, tgrs, prsl, prslk, phil
-    real(kind=kind_phys),    intent(in), dimension(im, levs+1) :: prsi, phii
-    real(kind=kind_phys),    intent(in), dimension(im, levs)   :: q1
-    integer,                 intent(in), dimension(im)         :: kpbl
+    real(kind=kind_phys),    intent(in), dimension(:,:)   :: del, ugrs, vgrs, tgrs, prsl, prslk, phil
+    real(kind=kind_phys),    intent(in), dimension(:,:)   :: prsi, phii
+    real(kind=kind_phys),    intent(in), dimension(:,:)   :: q1
+    integer,                 intent(in), dimension(:)     :: kpbl
 
-    real(kind=kind_phys),    intent(in), dimension(im) :: rain
-    real(kind=kind_phys),    intent(in), dimension(im) :: br1, hpbl,  slmsk
+    real(kind=kind_phys),    intent(in), dimension(:) :: rain
+    real(kind=kind_phys),    intent(in), dimension(:) :: br1, hpbl,  slmsk
 !
 ! moved to GFS_phys_time_vary
-!    real(kind=kind_phys),    intent(in), dimension(im) :: ddy_j1tau, ddy_j2tau
-!    integer,                 intent(in), dimension(im) :: jindx1_tau, jindx2_tau
-     real(kind=kind_phys),    intent(in), dimension(im) :: tau_amf
+!    real(kind=kind_phys),    intent(in), dimension(:) :: ddy_j1tau, ddy_j2tau
+!    integer,                 intent(in), dimension(:) :: jindx1_tau, jindx2_tau
+     real(kind=kind_phys),    intent(in), dimension(:) :: tau_amf
 
 !Output (optional):
 
-    real(kind=kind_phys), intent(out), dimension(im)  ::                  &
+    real(kind=kind_phys), intent(out), dimension(:)  ::                   &
                             du_ogwcol,  dv_ogwcol,  du_oblcol, dv_oblcol, &
                             du_osscol,  dv_osscol,  du_ofdcol, dv_ofdcol
 !
 ! we may add later but due to launch in the upper layes ~ mPa comparing to ORO Pa*(0.1)
 !                            du_ngwcol, dv_ngwcol
 
-    real(kind=kind_phys), intent(out), dimension(im)  :: dusfcg, dvsfcg
-    real(kind=kind_phys), intent(out), dimension(im)  :: tau_ogw, tau_ngw, tau_oss
+    real(kind=kind_phys), intent(out), dimension(:)  :: dusfcg, dvsfcg
+    real(kind=kind_phys), intent(out), dimension(:)  :: tau_ogw, tau_ngw, tau_oss
 
-    real(kind=kind_phys), intent(out) , dimension(im, levs) ::    &
+    real(kind=kind_phys), intent(out) , dimension(:,:) ::         &
                           dudt_ogw, dvdt_ogw, dudt_obl, dvdt_obl, &
                           dudt_oss, dvdt_oss, dudt_ofd, dvdt_ofd
 
-    real(kind=kind_phys), intent(out) , dimension(im, levs) :: dudt_ngw, dvdt_ngw, kdis_ngw
-    real(kind=kind_phys), intent(out) , dimension(im, levs) :: dudt_gw,  dvdt_gw,  kdis_gw
+    real(kind=kind_phys), intent(out) , dimension(:,:) :: dudt_ngw, dvdt_ngw, kdis_ngw
+    real(kind=kind_phys), intent(out) , dimension(:,:) :: dudt_gw,  dvdt_gw,  kdis_gw
 
-    real(kind=kind_phys), intent(out) , dimension(im, levs) :: dtdt_ngw, dtdt_gw
+    real(kind=kind_phys), intent(out) , dimension(:,:) :: dtdt_ngw, dtdt_gw
 
-    real(kind=kind_phys), intent(out) , dimension(im) ::  zogw,  zlwb,  zobl,  zngw
+    real(kind=kind_phys), intent(out) , dimension(:)   :: zogw, zlwb, zobl, zngw
 !
 !
-    real(kind=kind_phys), intent(inout), dimension(im, levs) :: dudt, dvdt, dtdt
+    real(kind=kind_phys), intent(inout), dimension(:,:) :: dudt, dvdt, dtdt
 
 !
 ! These arrays are only allocated if ldiag=.true.
@@ -439,7 +438,7 @@ contains
 
 
 
-    real(kind=kind_phys),    intent(out), dimension(im)      :: rdxzb     ! for stoch phys. mtb-level
+    real(kind=kind_phys),    intent(out), dimension(:)      :: rdxzb     ! for stoch phys. mtb-level
 
     character(len=*),        intent(out) :: errmsg
     integer,                 intent(out) :: errflg
@@ -496,16 +495,21 @@ contains
 !===============================================================
 ! ORO-diag
 
-      dudt_ogw(:,:)  = 0. ; dvdt_ogw(:,:)=0. ; dudt_obl(:,:)=0. ; dvdt_obl(:,:)=0.
-      dudt_oss(:,:)  = 0. ; dvdt_oss(:,:)=0. ; dudt_ofd(:,:)=0. ; dvdt_ofd(:,:)=0.
+       if (do_ugwp_v1 .or. gwd_opt==33 .or. gwd_opt==22) then
+         dudt_ogw(:,:)= 0.; dvdt_ogw(:,:)=0.; dudt_obl(:,:)=0.; dvdt_obl(:,:)=0.
+         dudt_oss(:,:)= 0.; dvdt_oss(:,:)=0.; dudt_ofd(:,:)=0.; dvdt_ofd(:,:)=0.
+         du_ogwcol(:)=0. ; dv_ogwcol(:)=0. ; du_oblcol(:)=0. ; dv_oblcol(:)=0.
+         du_osscol(:)=0. ; dv_osscol(:)=0. ;du_ofdcol(:)=0.  ; dv_ofdcol(:)=0.
+       else
+         dudt_ogw(:,:)  = 0.
+       end if
 
-      dusfcg (:)  = 0.  ;  dvsfcg(:) =0.
-
-      du_ogwcol(:)=0. ; dv_ogwcol(:)=0. ; du_oblcol(:)=0. ; dv_oblcol(:)=0.
-      du_osscol(:)=0. ; dv_osscol(:)=0. ;du_ofdcol(:)=0.  ; dv_ofdcol(:)=0.
+       dusfcg (:)  = 0.  ;  dvsfcg(:) =0.
 
 !
-       dudt_ngw(:,:)=0. ; dvdt_ngw(:,:)=0. ; dtdt_ngw(:,:)=0. ; kdis_ngw(:,:)=0.
+       if (do_ugwp_v1) then
+         dudt_ngw(:,:)=0.; dvdt_ngw(:,:)=0.; dtdt_ngw(:,:)=0.; kdis_ngw(:,:)=0.
+       end if
 
 ! ngw+ogw - diag
 
@@ -703,16 +707,23 @@ contains
 !
 ! get total sso-OGW + NGW
 !
-     dudt_gw =  Pdudt +dudt_ngw
-     dvdt_gw =  Pdvdt +dvdt_ngw
-     dtdt_gw =  Pdtdt +dtdt_ngw
-     kdis_gw =  Pkdis +kdis_ngw
+     if (do_ugwp_v1) then
+        dudt_gw =  Pdudt + dudt_ngw
+        dvdt_gw =  Pdvdt + dvdt_ngw
+        dtdt_gw =  Pdtdt + dtdt_ngw
+        kdis_gw =  Pkdis + kdis_ngw
+     else
+        dudt_gw =  Pdudt
+        dvdt_gw =  Pdvdt
+        dtdt_gw =  Pdtdt
+        kdis_gw =  Pkdis
+     end if
 !
 ! accumulate "tendencies" as in the GFS-ipd (pbl + ugwp + zero-RF)
 !
-     dudt  = dudt  + dudt_ngw
-     dvdt  = dvdt  + dvdt_ngw
-     dtdt  = dtdt  + dtdt_ngw
+     dudt  = dudt  + dudt_gw
+     dvdt  = dvdt  + dvdt_gw
+     dtdt  = dtdt  + dtdt_gw
 
     end subroutine ugwpv1_gsldrag_run
 !! @}
