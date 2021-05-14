@@ -14,12 +14,14 @@
 
       subroutine zhaocarr_precpd_init (imp_physics,                     &
      &                                 imp_physics_zhao_carr,           &
+     &                                 imp_physics_zhao_carr_pdf,       &
      &                                 errmsg, errflg)
         implicit none
 
         ! Interface variables
          integer,              intent(in   ) :: imp_physics
-         integer,              intent(in   ) :: imp_physics_zhao_carr
+         integer,              intent(in   ) :: imp_physics_zhao_carr,  &
+     &                                      imp_physics_zhao_carr_pdf
          ! CCPP error handling
          character(len=*),          intent(  out) :: errmsg
          integer,                   intent(  out) :: errflg
