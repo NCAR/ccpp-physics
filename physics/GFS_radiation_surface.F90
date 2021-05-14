@@ -42,8 +42,8 @@
       iemsflg= iems                     ! surface emissivity control flag
 
       if ( me == 0 ) then
-        print *,'  In GFS_radiation_surface_init, before calling sfc_init'
-        print *,' ialb=',ialb,' iems=',iems
+        print *,'In GFS_radiation_surface_init, before calling sfc_init'
+        print *,'ialb=',ialb,' iems=',iems
       end if
 
       ! Call surface initialization routine
@@ -60,7 +60,8 @@
         vtype, xlat, xlon, slmsk, lndp_type, n_var_lndp, sfc_alb_pert,  &
         lndp_var_list, lndp_prt_list, landfrac, snowd, sncovr,          &
         sncovr_ice, fice, zorl, hprime, tsfg, tsfa, tisfc, coszen,      &
-        min_seaice, alvsf, alnsf, alvwf, alnwf, facsf, facwf,           &
+        min_seaice, min_lakeice, lakefrac,                              &
+        alvsf, alnsf, alvwf, alnwf, facsf, facwf,                       &
         semis_lnd, semis_ice, snoalb,                                   &
         albdvis_lnd, albdnir_lnd, albivis_lnd, albinir_lnd,             &
         albdvis_ice, albdnir_ice, albivis_ice, albinir_ice,             &
@@ -75,11 +76,12 @@
       integer,              intent(in) :: im
       logical,              intent(in) :: frac_grid, lslwr, lsswr
       integer,              intent(in) :: lsm, lsm_noahmp, lsm_ruc, lndp_type, n_var_lndp
-      real(kind=kind_phys), intent(in) :: min_seaice
+      real(kind=kind_phys), intent(in) :: min_seaice, min_lakeice
 
       real(kind=kind_phys), dimension(:),   intent(in)  :: xlat, xlon, vtype, slmsk,    &
                                                            sfc_alb_pert, lndp_prt_list, &
-                                                           landfrac, snowd, sncovr,     &
+                                                           landfrac, lakefrac,         &
+                                                           snowd, sncovr,               &
                                                            sncovr_ice, fice, zorl,      &
                                                            hprime, tsfg, tsfa, tisfc,   &
                                                            coszen, alvsf, alnsf, alvwf, &
@@ -99,6 +101,7 @@
       ! Local variables
       integer                             :: i
       real(kind=kind_phys)                :: lndp_alb
+      real(kind=kind_phys)                :: cimin
       real(kind=kind_phys), dimension(im) :: fracl, fraci, fraco
       logical,              dimension(im) :: icy
 
@@ -108,6 +111,14 @@
 
       ! Intialize intent(out) variables
       sfcalb = 0.0
+
+      do i=1,im
+        if (lakefrac(i) > f_zero) then
+          cimin = min_lakeice
+        else
+          cimin = min_seaice
+        endif
+      enddo
 
       ! Return immediately if neither shortwave nor longwave radiation are called
       if (.not. lsswr .and. .not. lslwr) return
@@ -123,7 +134,7 @@
           else
             fracl(i) = f_zero
             fraco(i) = f_one
-            if(fice(i) < min_seaice) then
+            if(fice(i) < cimin) then
               fraci(i) = f_zero
               icy(i)   = .false.
             else
@@ -137,7 +148,7 @@
         do i=1,im
           fracl(i) = landfrac(i)
           fraco(i) = max(f_zero, f_one - fracl(i))
-          if(fice(i) < min_seaice) then
+          if(fice(i) < cimin) then
             fraci(i) = f_zero
             icy(i)   = .false.
           else
