@@ -980,6 +980,14 @@
   kind = kind_phys
   intent = in
   optional = F
+[flag_restart]
+  standard_name = flag_for_restart
+  long_name = flag for restart (warmstart) or coldstart
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [nthrds]
   standard_name = omp_threads
   long_name = number of OpenMP threads available for physics schemes
