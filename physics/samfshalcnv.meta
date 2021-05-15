@@ -313,8 +313,8 @@
   intent = in
   optional = F
 [ncloud]
-  standard_name = number_of_hydrometeors
-  long_name = number of hydrometeors
+  standard_name = number_of_tracers_for_cloud_condensate
+  long_name = number of tracers for cloud condensate
   units = count
   dimensions = ()
   type = integer
