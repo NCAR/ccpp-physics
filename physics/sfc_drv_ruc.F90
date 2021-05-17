@@ -98,7 +98,7 @@ module lsm_ruc
 
 !  ---  out
       real (kind=kind_phys), dimension(:),   intent(out) :: zs
-      real (kind=kind_phys), dimension(:),   intent(out) :: sfalb_lnd_bck
+      real (kind=kind_phys), dimension(:),   intent(inout) :: sfalb_lnd_bck
       real (kind=kind_phys), dimension(:,:), intent(out) :: tsice
       real (kind=kind_phys), dimension(:),   intent(out) :: semisbase
       real (kind=kind_phys), dimension(:),   intent(out) :: pores, resid
@@ -179,15 +179,15 @@ module lsm_ruc
           if (soiltyp(i)  < 1) soiltyp(i)  = 14
           if (vegtype(i)  < 1) vegtype(i)  = 17
         endif
-        !-- initialize background and actual emissivity
+        !-- initialize background emissivity
         semisbase(i) = lemitbl(vegtype(i)) ! no snow effect
-        sfalb_lnd_bck(i) = 0.25*(alnsf(i) + alnwf(i) + alvsf(i) + alvwf(i))  &
-                           * min(1., facsf(i)+facwf(i))
 
         if (.not.flag_restart) then
           !-- land
           semis_lnd(i) = semisbase(i) * (1.-sncovr_lnd(i))  &
                        + 0.99 * sncovr_lnd(i)
+          sfalb_lnd_bck(i) = 0.25*(alnsf(i) + alnwf(i) + alvsf(i) + alvwf(i))  &
+                             * min(1., facsf(i)+facwf(i))
           alb_lnd = sfalb_lnd_bck(i) * (1. - sncovr_lnd(i)) &
                   + snoalb(i) * sncovr_lnd(i) 
           albdvis_lnd(i) = alb_lnd
@@ -1610,7 +1610,7 @@ module lsm_ruc
 
       !! Check if RUC soil data (tslb, ...) is provided or not
       !if (minval(tslb)==maxval(tslb)) then
-      ! For restart runs, can assume that RUC soul data is provided
+      ! For restart runs, can assume that RUC soil data is provided
       if (.not.restart) then
 
         flag_sst = 0

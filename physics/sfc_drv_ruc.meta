@@ -369,7 +369,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [semisbase]
   standard_name = baseline_surface_longwave_emissivity
