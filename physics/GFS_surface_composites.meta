@@ -344,12 +344,12 @@
   units = K
   dimensions = (horizontal_loop_extent)
   type = real
-  kind = kind_phys                                                                                                                              
-  intent = inout                                                                                                                                
-  optional = F             
+  kind = kind_phys
+  intent = inout
+  optional = F
 [tsfc_wat]
-  standard_name = surface_skin_temperature_over_water_interstitial
-  long_name = surface skin temperature over water (temporary use as interstitial)
+  standard_name = surface_skin_temperature_over_water
+  long_name = surface skin temperature over water
   units = K
   dimensions = (horizontal_loop_extent)
   type = real
@@ -472,8 +472,8 @@
   intent = in
   optional = F
 [semis_wat]
-  standard_name = surface_longwave_emissivity_over_water_interstitial
-  long_name = surface lw emissivity in fraction over water (temporary use as interstitial)
+  standard_name = surface_longwave_emissivity_over_water
+  long_name = surface lw emissivity in fraction over water
   units = frac
   dimensions = (horizontal_loop_extent)
   type = real
@@ -481,8 +481,8 @@
   intent = inout
   optional = F
 [semis_lnd]
-  standard_name = surface_longwave_emissivity_over_land_interstitial
-  long_name = surface lw emissivity in fraction over land (temporary use as interstitial)
+  standard_name = surface_longwave_emissivity_over_land
+  long_name = surface lw emissivity in fraction over land
   units = frac
   dimensions = (horizontal_loop_extent)
   type = real
@@ -490,8 +490,8 @@
   intent = inout
   optional = F
 [semis_ice]
-  standard_name = surface_longwave_emissivity_over_ice_interstitial
-  long_name = surface lw emissivity in fraction over ice (temporary use as interstitial)
+  standard_name = surface_longwave_emissivity_over_ice
+  long_name = surface lw emissivity in fraction over ice
   units = frac
   dimensions = (horizontal_loop_extent)
   type = real
@@ -676,8 +676,8 @@
   intent = in
   optional = F
 [semis_wat]
-  standard_name = surface_longwave_emissivity_over_water_interstitial
-  long_name = surface lw emissivity in fraction over water (temporary use as interstitial)
+  standard_name = surface_longwave_emissivity_over_water
+  long_name = surface lw emissivity in fraction over water
   units = frac
   dimensions = (horizontal_loop_extent)
   type = real
@@ -685,8 +685,8 @@
   intent = in
   optional = F
 [semis_lnd]
-  standard_name = surface_longwave_emissivity_over_land_interstitial
-  long_name = surface lw emissivity in fraction over land (temporary use as interstitial)
+  standard_name = surface_longwave_emissivity_over_land
+  long_name = surface lw emissivity in fraction over land
   units = frac
   dimensions = (horizontal_loop_extent)
   type = real
@@ -694,8 +694,8 @@
   intent = in
   optional = F
 [semis_ice]
-  standard_name = surface_longwave_emissivity_over_ice_interstitial
-  long_name = surface lw emissivity in fraction over ice (temporary use as interstitial)
+  standard_name = surface_longwave_emissivity_over_ice
+  long_name = surface lw emissivity in fraction over ice
   units = frac
   dimensions = (horizontal_loop_extent)
   type = real
@@ -1701,8 +1701,8 @@
   intent = in
   optional = F
 [tsfc_wat]
-  standard_name = surface_skin_temperature_over_water_interstitial
-  long_name = surface skin temperature over water (temporary use as interstitial)
+  standard_name = surface_skin_temperature_over_water
+  long_name = surface skin temperature over water
   units = K
   dimensions = (horizontal_loop_extent)
   type = real
