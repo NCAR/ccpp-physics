@@ -1,7 +1,3 @@
-! DH*
-!# ! commented out ! define ORIG_ALB_EMS_OPTION_ONE
-! *DH
-
 !>  \file radiation_surface.f
 !!  This file contains routines that set up surface albedo for SW
 !!  radiation and surface emissivity for LW radiation.
@@ -452,7 +448,6 @@
 
         do i = 1, IMAX
 
-#ifndef ORIG_ALB_EMS_OPTION_ONE
           !-- water albedo
           asevd_wat = 0.06
           asend_wat = 0.06
@@ -560,122 +555,6 @@
      &                  + asevb_wat*fraco(i) + asevb_ice*fraci(i)
           sfcalb(i,4) = min(0.99,max(0.01,alndvd))*fracl(i)             & ! diffuse visible
      &                  + asevd_wat*fraco(i) + asevd_ice*fraci(i)
-
-#else
-
-!>  - Calculate snow cover input directly for land model, no
-!!      conversion needed.
-
-         fsno0 = sncovr(i) ! snow fraction on land
-
-         if (nint(slmsk(i))==0 .and. tsknf(i)>con_tice) fsno0 = f_zero
-
-         if (nint(slmsk(i)) == 2) then
-           if(lsm == lsm_ruc) then
-           !-- use RUC LSM's snow-cover fraction for ice
-             fsno0 = sncovr_ice(i) ! snow fraction on ice
-           else
-             asnow = 0.02*snowf(i)
-             argh  = min(0.50, max(.025, 0.01*zorlf(i)))
-             hrgh  = min(f_one, max(0.20, 1.0577-1.1538e-3*hprif(i) ) )
-             fsno0 = asnow / (argh + asnow) * hrgh
-           endif
-         endif
-
-         fsno1 = f_one - fsno0                 ! snow-free fraction (land or ice), 1-sea
-         flnd0 = min(f_one, facsf(i)+facwf(i)) ! 1-land, 0-sea/ice
-         fsea0 = max(f_zero, f_one-flnd0)      ! 1-sea/ice, 0-land
-         fsno  = fsno0                         ! snow cover, >0 - land/ice
-         fsea  = fsea0 * fsno1                 ! 1-sea/ice, 0-land
-         flnd  = flnd0 * fsno1                 ! <=1-land,0-sea/ice
-
-!>  - Calculate diffused sea surface albedo.
-
-         if (tsknf(i) >= 271.5) then
-            asevd = 0.06
-            asend = 0.06
-         elseif (tsknf(i) < 271.1) then
-            asevd = 0.70
-            asend = 0.65
-         else
-            a1 = (tsknf(i) - 271.1)**2
-            asevd = 0.7 - 4.0*a1
-            asend = 0.65 - 3.6875*a1
-         endif
-
-!>  - Calculate diffused snow albedo, land area use input max snow
-!!      albedo.
-
-         if (nint(slmsk(i)) == 2) then
-            ffw   = f_one - fice(i)
-            if (ffw < f_one) then
-               dtgd = max(f_zero, min(5.0, (con_ttp-tisfc(i)) ))
-               b1   = 0.03 * dtgd
-            else
-               b1 = f_zero
-            endif
-
-            b3   = 0.06 * ffw
-            asnvd = (0.70 + b1) * fice(i) + b3
-            asnnd = (0.60 + b1) * fice(i) + b3
-            asevd = 0.70        * fice(i) + b3
-            asend = 0.60        * fice(i) + b3
-         else
-            asnvd = snoalb(i)
-            asnnd = snoalb(i)
-         endif
-
-!>  - Calculate direct snow albedo.
-
-         if (nint(slmsk(i)) == 2) then
-           if (coszf(i) < 0.5) then
-              csnow = 0.5 * (3.0 / (f_one+4.0*coszf(i)) - f_one)
-              asnvb = min( 0.98, asnvd+(f_one-asnvd)*csnow )
-              asnnb = min( 0.98, asnnd+(f_one-asnnd)*csnow )
-           else
-             asnvb = asnvd
-             asnnb = asnnd
-           endif
-         else
-           asnvb = snoalb(i)
-           asnnb = snoalb(i)
-         endif
-
-!>  - Calculate direct sea surface albedo, use fanglin's zenith angle
-!!      treatment.
-
-         if (coszf(i) > 0.0001) then
-
-!           rfcs = 1.89 - 3.34*coszf(i) + 4.13*coszf(i)*coszf(i)        &
-!    &           - 2.02*coszf(i)*coszf(i)*coszf(i)
-            rfcs = 1.775/(1.0+1.55*coszf(i))
-
-            if (tsknf(i) >= con_t0c) then
-            !- sea
-              asevb = max(asevd, 0.026/(coszf(i)**1.7+0.065)            &
-     &              + 0.15 * (coszf(i)-0.1) * (coszf(i)-0.5)            &
-     &              * (coszf(i)-f_one))
-              asenb = asevb
-            else
-            !- ice
-              asevb = asevd
-              asenb = asend
-            endif
-         else
-         !- no sun
-            rfcs  = f_one
-            asevb = asevd
-            asenb = asend
-         endif
-
-         !- zenith dependence is applied only to direct beam albedo
-         ab1bm = min(0.99, alnsf(i)*rfcs)
-         ab2bm = min(0.99, alvsf(i)*rfcs)
-         sfcalb(i,1) = ab1bm   *flnd + asenb*fsea + asnnb*fsno
-         sfcalb(i,2) = alnwf(i)*flnd + asend*fsea + asnnd*fsno
-         sfcalb(i,3) = ab2bm   *flnd + asevb*fsea + asnvb*fsno
-         sfcalb(i,4) = alvwf(i)*flnd + asevd*fsea + asnvd*fsno
-#endif
 
         enddo    ! end_do_i_loop
 
@@ -901,9 +780,6 @@
 
       real (kind=kind_phys) :: dltg, hdlt, tmp1, tmp2,                  &
      &      asnow, argh, hrgh, fsno
-#ifdef ORIG_ALB_EMS_OPTION_ONE
-      real (kind=kind_phys) :: fsno0, fsno1
-#endif
       real (kind=kind_phys) :: sfcemis_land, sfcemis_ice
 
 !  ---  reference emiss value for diff surface emiss index
@@ -928,7 +804,6 @@
 
         lab_do_IMAX : do i = 1, IMAX
 
-#ifndef ORIG_ALB_EMS_OPTION_ONE
           if (fracl(i) < epsln) then                    ! no land
             if ( abs(fraco(i)-f_one) < epsln ) then     ! open water point
               sfcemis(i) = emsref(1)
@@ -938,15 +813,7 @@
             !-- fractional sea ice
               sfcemis(i) = fraco(i)*emsref(1) + fraci(i)*emsref(7)
             endif
-#else
-          if ( nint(slmsk(i)) == 0 ) then          ! sea point
 
-            sfcemis(i) = emsref(1)
-
-          else if ( nint(slmsk(i)) == 2 ) then     ! sea-ice
-
-            sfcemis(i) = emsref(7)
-#endif
           else                                     ! land or fractional grid
 
 !  ---  map grid in longitude direction
@@ -980,7 +847,6 @@
 
             idx = max( 2, idxems(i2,j2) )
             if ( idx >= 7 ) idx = 2
-#ifndef ORIG_ALB_EMS_OPTION_ONE
             if (abs(fracl(i)-f_one) < epsln) then
               sfcemis(i) = emsref(idx)
             else
@@ -988,15 +854,10 @@
      &                                       + fraci(i)*emsref(7)
             endif
             semisbase(i) = sfcemis(i)
-#else
-            sfcemis(i) = emsref(idx)
-#endif
 
           endif   ! end if_slmsk_block
 
 !> - Check for snow covered area.
-
-#ifndef ORIG_ALB_EMS_OPTION_ONE
           if ( sncovr(i) > f_zero ) then ! input land/ice area snow cover
 
             fsno = sncovr(i)
@@ -1014,27 +875,6 @@
             endif
 
           endif                                          ! end if_ialbflg
-#else
-          if ( ialbflg==1 .and. nint(slmsk(i))==1 ) then ! input land area snow cover
-
-            fsno0 = sncovr(i)
-            fsno1 = f_one - fsno0
-            sfcemis(i) = sfcemis(i)*fsno1 + emsref(8)*fsno0
-
-          else                                           ! compute snow cover from snow depth
-            if ( snowf(i) > f_zero ) then
-              asnow = 0.02*snowf(i)
-              argh  = min(0.50, max(.025, 0.01*zorlf(i)))
-              hrgh  = min(f_one, max(0.20, 1.0577-1.1538e-3*hprif(i) ) )
-              fsno0 = asnow / (argh + asnow) * hrgh
-              if (nint(slmsk(i)) == 0 .and. tsknf(i) > 271.2)           &
-     &                               fsno0=f_zero
-              fsno1 = f_one - fsno0
-              sfcemis(i) = sfcemis(i)*fsno1 + emsref(8)*fsno0
-            endif
-
-          endif                                          ! end if_ialbflg
-#endif
 
         enddo  lab_do_IMAX
 
