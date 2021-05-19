@@ -30,7 +30,8 @@ contains
                                              imp_physics_fer_hires,con_g, phil,                    &
                                              gt0, refl_10cm, refdmax, refdmax263k, u10m, v10m,     &
                                              u10max, v10max, spd10max, pgr, t2m, q2m, t02max,      &
-                                             t02min, rh02max, rh02min, errmsg, errflg)
+                                             t02min, rh02max, rh02min, dtp, rain, pratemax,        &
+                                             errmsg, errflg)
 
        ! Interface variables
        integer, intent(in) :: im, levs
@@ -54,6 +55,9 @@ contains
        real(kind_phys), intent(inout) :: t02min(:)
        real(kind_phys), intent(inout) :: rh02max(:)
        real(kind_phys), intent(inout) :: rh02min(:)
+       real(kind_phys), intent(in   ) :: dtp
+       real(kind_phys), intent(in   ) :: rain(im)
+       real(kind_phys), intent(inout) :: pratemax(im)
        character(len=*), intent(out)  :: errmsg
        integer, intent(out)           :: errflg
 
@@ -96,6 +100,7 @@ contains
              t02min(i)   = 999.
              rh02max(i)  = -999.
              rh02min(i)  = 999.
+             pratemax(i) = 0.
           enddo
        endif
        do i=1,im
@@ -119,6 +124,7 @@ contains
           rh02min(i) = min(rh02min(i),rh02)
           t02max(i)  = max(t02max(i),t2m(i))  !<--- hourly max 2m t
           t02min(i)  = min(t02min(i),t2m(i))  !<--- hourly min 2m t
+          pratemax(i) = max(pratemax(i),(3.6E6/dtp)*rain(i))
        enddo
 
    end subroutine maximum_hourly_diagnostics_run
