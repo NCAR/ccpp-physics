@@ -5,6 +5,44 @@
 
 ########################################################################
 [ccpp-arg-table]
+  name = samfdeepcnv_init
+  type = scheme
+[imfdeepcnv]
+  standard_name = flag_for_mass_flux_deep_convection_scheme
+  long_name = flag for mass-flux deep convection scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[imfdeepcnv_samf]
+  standard_name = flag_for_samf_deep_convection_scheme
+  long_name = flag for SAMF deep convection scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+
+########################################################################
+[ccpp-arg-table]
   name = samfdeepcnv_run
   type = scheme
 [im]

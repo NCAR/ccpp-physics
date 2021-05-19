@@ -25,7 +25,8 @@
 !! \section arg_table_noahmpdrv_init Argument Table
 !! \htmlinclude noahmpdrv_init.html
 !!
-      subroutine noahmpdrv_init(me, isot, ivegsrc, nlunit, pores, resid, &
+      subroutine noahmpdrv_init(lsm, lsm_noahmp, me, isot, ivegsrc, &
+                                nlunit, pores, resid,               &
                                 errmsg, errflg)
 
         use machine,          only: kind_phys
@@ -33,7 +34,8 @@
         use namelist_soilveg
 
         implicit none
-
+        integer,              intent(in) :: lsm
+        integer,              intent(in) :: lsm_noahmp    
         integer,              intent(in)  :: me, isot, ivegsrc, nlunit
 
         real (kind=kind_phys), dimension(:), intent(out) :: pores, resid
@@ -44,6 +46,14 @@
         ! Initialize CCPP error handling variables
         errmsg = ''
         errflg = 0
+
+        ! Consistency checks
+        if (lsm/=lsm_noahmp) then
+          write(errmsg,'(*(a))') 'Logic error: namelist choice of ',   &
+       &       'LSM is different from Noah'
+          errflg = 1
+          return
+        end if
 
         if (ivegsrc /= 1) then
           errmsg = 'The NOAHMP LSM expects that the ivegsrc physics '// &

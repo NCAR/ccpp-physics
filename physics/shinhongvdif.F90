@@ -11,7 +11,22 @@
       module shinhongvdif
       contains
 
-      subroutine shinhongvdif_init ()
+      subroutine shinhongvdif_init (shinhong,errmsg,errflg)
+
+      logical,              intent(in)  :: shinhong
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
+
+     ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
+
+    ! Consistency checks
+      if (.not. shinhong) then
+        write(errmsg,fmt='(*(a))') 'Logic error: shinhong = .false.'        
+        errflg = 1
+        return
+      end if
       end subroutine shinhongvdif_init
 
       subroutine shinhongvdif_finalize ()
