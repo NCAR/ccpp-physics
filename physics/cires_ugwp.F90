@@ -40,7 +40,7 @@ contains
 !
     subroutine cires_ugwp_init (me, master, nlunit, input_nml_file, logunit, &
                 fn_nml2, lonr, latr, levs, ak, bk, dtp, cdmbgwd, cgwf,       &
-                pa_rf_in, tau_rf_in, con_p0, do_ugwp, errmsg, errflg)
+                pa_rf_in, tau_rf_in, con_p0, gwd_opt,do_ugwp, errmsg, errflg)
 
 !----  initialization of cires_ugwp
     implicit none
@@ -58,6 +58,7 @@ contains
     real(kind=kind_phys), intent (in) :: cdmbgwd(:), cgwf(:) ! "scaling" controls for "old" GFS-GW schemes
     real(kind=kind_phys), intent (in) :: pa_rf_in, tau_rf_in
     real(kind=kind_phys), intent (in) :: con_p0
+    integer,              intent(in)  :: gwd_opt
     logical,              intent (in) :: do_ugwp
 
     character(len=*), intent (in) :: fn_nml2
@@ -76,6 +77,14 @@ contains
     errflg = 0
 
     if (is_initialized) return
+    
+    ! Consistency checks
+    if (gwd_opt/=1) then
+      write(errmsg,'(*(a))') "Logic error: namelist choice of gravity wave &
+      & drag is different from cires_ugwp scheme"
+      errflg = 1
+      return
+    end if  
 
     if (do_ugwp .or. cdmbgwd(3) > 0.0) then
       call cires_ugwpv0_mod_init (me, master, nlunit, input_nml_file, logunit, &
