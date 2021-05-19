@@ -26,7 +26,7 @@ contains
 !> \section arg_table_GFS_surface_composites_pre_run Argument Table
 !! \htmlinclude GFS_surface_composites_pre_run.html
 !!
-   subroutine GFS_surface_composites_pre_run (im, lkm, frac_grid, flag_cice, cplflx, cplwav2atm,                          &
+   subroutine GFS_surface_composites_pre_run (im, lkm, frac_grid, flag_cice, cplflx, cplice, cplwav2atm,                  &
                                  landfrac, lakefrac, lakedepth, oceanfrac, frland, dry, icy, use_flake, ocean, wet,       &
                                  hice, cice, snowd, snowd_wat, snowd_lnd, snowd_ice, tprcp, tprcp_wat,                    &
                                  tprcp_lnd, tprcp_ice, uustar, uustar_wat, uustar_lnd, uustar_ice,                        &
@@ -40,7 +40,7 @@ contains
 
       ! Interface variables
       integer,                             intent(in   ) :: im, lkm
-      logical,                             intent(in   ) :: frac_grid, cplflx, cplwav2atm
+      logical,                             intent(in   ) :: frac_grid, cplflx, cplice, cplwav2atm
       logical, dimension(:),              intent(inout)  :: flag_cice
       logical,              dimension(:), intent(inout)  :: dry, icy, use_flake, ocean, wet
       real(kind=kind_phys), dimension(:), intent(in   )  :: landfrac, lakefrac, lakedepth, oceanfrac
@@ -141,9 +141,7 @@ contains
               if (cice(i) >= min_seaice) then
                 icy(i)   = .true.
                 tisfc(i) = max(timin, min(tisfc(i), tgice))
-#ifndef CICE6
-                if (cplflx) islmsk_cice(i) = 2
-#endif
+                if (.not. cplice .and. cplflx) islmsk_cice(i) = 2
               else
                 cice(i)        = zero
                 hice(i)        = zero
@@ -153,11 +151,11 @@ contains
               endif
               if (cice(i) < one) then
                 wet(i) = .true. ! some open ocean
-#ifdef CICE6
-                if (.not. cplflx .and. icy(i)) tsfco(i) = max(tisfc(i), tgice)
-#else
-                if (icy(i)) tsfco(i) = max(tisfc(i), tgice)
-#endif
+                if (cplice) then
+                  if (.not. cplflx .and. icy(i)) tsfco(i) = max(tisfc(i), tgice)
+                else
+                  if (icy(i)) tsfco(i) = max(tisfc(i), tgice)
+                endif
               endif
             else
               if (cice(i) >= min_lakeice) then
