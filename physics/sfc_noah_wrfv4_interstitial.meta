@@ -339,15 +339,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[tsfc]
-  standard_name = surface_skin_temperature_over_land_interstitial
-  long_name = surface skin temperature over land  (temporary use as interstitial)
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [vtype]
   standard_name = vegetation_type_classification_real
   long_name = vegetation type for lsm
@@ -514,15 +505,6 @@
   standard_name = surface_snow_thickness_water_equivalent_over_land_save
   long_name = water equivalent snow depth over land before entering a physics scheme
   units = mm
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[tsfc_save]
-  standard_name = surface_skin_temperature_over_land_interstitial_save
-  long_name = surface skin temperature over land before entering a physics scheme (temporary use as interstitial)
-  units = K
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
@@ -893,15 +875,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[tsfc_save]
-  standard_name = surface_skin_temperature_over_land_interstitial_save
-  long_name = surface skin temperature over land before entering a physics scheme (temporary use as interstitial)
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [tsurf]
   standard_name = surface_skin_temperature_after_iteration_over_land
   long_name = surface skin temperature after iteration over land
@@ -1047,8 +1020,8 @@
   intent = inout
   optional = F
 [tsfc]
-  standard_name = surface_skin_temperature_over_land_interstitial
-  long_name = surface skin temperature over land  (temporary use as interstitial)
+  standard_name = surface_skin_temperature_over_land
+  long_name = surface skin temperature over land
   units = K
   dimensions = (horizontal_loop_extent)
   type = real

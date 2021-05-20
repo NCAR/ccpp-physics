@@ -125,9 +125,9 @@
       subroutine sfc_noah_wrfv4_pre_run (im, nsoil, ialb, isice, land,         &
         flag_guess, flag_iter, restart, first_time_step, flag_lsm,             &
         flag_lsm_glacier, dt, rhowater, rd, rvrdm1, eps, epsm1, sfcprs, tprcp, &
-        sfctmp, q1, prslki, wind, snwdph, cm, ch, weasd, tsfc, vtype, smc,     &
+        sfctmp, q1, prslki, wind, snwdph, cm, ch, weasd,  vtype, smc,          &
         stc, slc, snoalb, prcp, q2k, rho1, qs1, th1, dqsdt2, canopy, cmc,      &
-        snowhk, chk, cmm, chh, weasd_save, snwdph_save, tsfc_save, canopy_save,&
+        snowhk, chk, cmm, chh, weasd_save, snwdph_save, canopy_save,           &
         smc_save, stc_save, slc_save, ep, evap, hflx, gflux, drain, evbs, evcw,&
         trans, sbsno, snowc, snohf, sthick, errmsg, errflg)
 
@@ -150,12 +150,12 @@
 
       logical,              dimension(:),   intent(in) :: flag_guess, flag_iter, land
       real(kind=kind_phys), dimension(:),   intent(in) :: sfcprs, tprcp, sfctmp, q1, prslki, wind, cm, ch, snwdph
-      real(kind=kind_phys), dimension(:),   intent(in) :: weasd, tsfc, vtype
+      real(kind=kind_phys), dimension(:),   intent(in) :: weasd, vtype
       real(kind=kind_phys), dimension(:,:), intent(in) :: smc, stc, slc
 
       logical,              dimension(:),   intent(inout) :: flag_lsm, flag_lsm_glacier
       real(kind=kind_phys), dimension(:),   intent(inout) :: snoalb, prcp, q2k, rho1, qs1, th1, dqsdt2, canopy, cmc, snowhk, chk, cmm, chh
-      real(kind=kind_phys), dimension(:),   intent(inout) :: weasd_save, snwdph_save, tsfc_save, canopy_save
+      real(kind=kind_phys), dimension(:),   intent(inout) :: weasd_save, snwdph_save, canopy_save
       real(kind=kind_phys), dimension(:,:), intent(inout) :: smc_save, stc_save, slc_save
       real(kind=kind_phys), dimension(:),   intent(inout) :: ep, evap, hflx, gflux, drain, evbs, evcw, trans, sbsno, snowc, snohf
       real(kind=kind_phys), dimension(:),   intent(inout) :: sthick
@@ -187,7 +187,7 @@
         if (land(i) .and. flag_guess(i)) then
           weasd_save(i) = weasd(i)
           snwdph_save(i) = snwdph(i)
-          tsfc_save(i) = tsfc(i)
+!mz          tsfc_save(i) = tsfc(i)
           canopy_save(i) = canopy(i)
         
           do k=1,nsoil
@@ -678,7 +678,7 @@
 !!
       subroutine sfc_noah_wrfv4_post_run (im, nsoil, land, flag_guess, flag_lsm, &
         rhowater, cp, hvap, cmc, rho1, sheat, eta, flx1, flx2, flx3, sncovr, runoff1,&
-        runoff2, soilm, snowhk, weasd_save, snwdph_save, tsfc_save, tsurf,     &
+        runoff2, soilm, snowhk, weasd_save, snwdph_save, tsurf,                &
         canopy_save, smc_save, stc_save, slc_save, smcmax, canopy, shflx,      &
         lhflx, snohf, snowc, runoff, drain, stm, weasd, snwdph, tsfc, smc, stc,& 
         slc, wet1, errmsg, errflg)
@@ -692,7 +692,7 @@
       real(kind=kind_phys),   intent(in) :: rhowater, cp, hvap
       real(kind=kind_phys), dimension(:),   intent(in) :: cmc, rho1, sheat, eta, &
         flx1, flx2, flx3, sncovr, runoff1, runoff2, soilm, snowhk
-      real(kind=kind_phys), dimension(:),   intent(in) :: weasd_save, snwdph_save, tsfc_save, tsurf, canopy_save, smcmax
+      real(kind=kind_phys), dimension(:),   intent(in) :: weasd_save, snwdph_save,  tsurf, canopy_save, smcmax
       real(kind=kind_phys), dimension(:,:), intent(in) :: smc_save, stc_save, slc_save
       
       real(kind=kind_phys), dimension(:),   intent(inout) :: canopy, shflx, lhflx, &
@@ -738,7 +738,7 @@
           if (flag_guess(i)) then
             weasd(i) = weasd_save(i)
             snwdph(i) = snwdph_save(i)
-            tsfc(i) = tsfc_save(i)
+!mz            tsfc(i) = tsfc_save(i)
             canopy(i) = canopy_save(i)
             
             do k=1,nsoil

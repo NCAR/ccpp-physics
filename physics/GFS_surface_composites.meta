@@ -356,15 +356,6 @@
   kind = kind_phys
   intent = inout
   optional = F
-[tsfc_lnd]
-  standard_name = surface_skin_temperature_over_land_interstitial
-  long_name = surface skin temperature over land  (temporary use as interstitial)
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
 [tisfc]
   standard_name = sea_ice_temperature
   long_name = sea ice surface skin temperature
@@ -1703,15 +1694,6 @@
 [tsfc_wat]
   standard_name = surface_skin_temperature_over_water
   long_name = surface skin temperature over water
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[tsfc_lnd]
-  standard_name = surface_skin_temperature_over_land_interstitial
-  long_name = surface skin temperature over land  (temporary use as interstitial)
   units = K
   dimensions = (horizontal_loop_extent)
   type = real
