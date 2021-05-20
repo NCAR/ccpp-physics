@@ -12,7 +12,22 @@
 
       contains
 
-      subroutine h2ophys_init()
+      subroutine h2ophys_init(h2o_phys, errmsg, errflg)
+
+      implicit none
+      logical,          intent(in)  :: h2o_phys
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
+
+      ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
+
+      if (.not.h2o_phys) then
+        write (errmsg,'(*(a))') 'Logic error: h2o_phys == .false.'
+        errflg = 1
+        return
+      endif      
       end subroutine h2ophys_init
 
 !>\defgroup GFS_h2ophys GFS Water Vapor Photochemical Production and Loss Module
