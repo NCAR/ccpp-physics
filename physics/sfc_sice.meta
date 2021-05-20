@@ -150,8 +150,8 @@
   intent = in
   optional = F
 [sfcemis]
-  standard_name = surface_longwave_emissivity_over_ice_interstitial
-  long_name = surface lw emissivity in fraction over ice (temporary use as interstitial)
+  standard_name = surface_longwave_emissivity_over_ice
+  long_name = surface lw emissivity in fraction over ice
   units = frac
   dimensions = (horizontal_loop_extent)
   type = real
@@ -318,8 +318,8 @@
   intent = inout
   optional = F
 [tskin]
-  standard_name = surface_skin_temperature_over_ice_interstitial
-  long_name = surface skin temperature over ice   (temporary use as interstitial)
+  standard_name = surface_skin_temperature_over_ice
+  long_name = surface skin temperature over ice
   units = K
   dimensions = (horizontal_loop_extent)
   type = real

@@ -611,8 +611,8 @@
   intent = inout
   optional = F
 [adjsfculw_lnd]
-  standard_name = surface_upwelling_longwave_flux_over_land_interstitial
-  long_name = surface upwelling longwave flux at current time over land (temporary use as interstitial)
+  standard_name = surface_upwelling_longwave_flux_over_land
+  long_name = surface upwelling longwave flux at current time over land
   units = W m-2
   dimensions = (horizontal_loop_extent)
   type = real
@@ -620,8 +620,8 @@
   intent = in
   optional = F
 [adjsfculw_ice]
-  standard_name = surface_upwelling_longwave_flux_over_ice_interstitial
-  long_name = surface upwelling longwave flux at current time over ice (temporary use as interstitial)
+  standard_name = surface_upwelling_longwave_flux_over_ice
+  long_name = surface upwelling longwave flux at current time over ice
   units = W m-2
   dimensions = (horizontal_loop_extent)
   type = real
@@ -629,8 +629,8 @@
   intent = in
   optional = F
 [adjsfculw_wat]
-  standard_name = surface_upwelling_longwave_flux_over_water_interstitial
-  long_name = surface upwelling longwave flux at current time over water (temporary use as interstitial)
+  standard_name = surface_upwelling_longwave_flux_over_water
+  long_name = surface upwelling longwave flux at current time over water
   units = W m-2
   dimensions = (horizontal_loop_extent)
   type = real
