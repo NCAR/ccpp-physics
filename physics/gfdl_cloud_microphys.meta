@@ -486,9 +486,9 @@
   kind = kind_phys
   intent = inout
   optional = F
-[cplgocart]
-  standard_name = flag_for_gocart_coupling
-  long_name = flag controlling gocart collection (default off)
+[cplchm]
+  standard_name = flag_for_chemistry_coupling
+  long_name = flag controlling cplchm collection (default off)
   units = flag
   dimensions = ()
   type = logical

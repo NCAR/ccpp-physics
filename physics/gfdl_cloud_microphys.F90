@@ -119,7 +119,7 @@ contains
       rain0, ice0, snow0, graupel0, prcp0, sr,                                &
       dtp, hydrostatic, phys_hydrostatic, lradar, refl_10cm,                  &
       reset, effr_in, rew, rei, rer, res, reg,                                &
-      cplgocart, pfi_lsan, pfl_lsan, errmsg, errflg)
+      cplchm, pfi_lsan, pfl_lsan, errmsg, errflg)
 
       use machine, only: kind_phys
 
@@ -159,8 +159,8 @@ contains
       real(kind=kind_phys), intent(inout), dimension(:,:) :: refl_10cm
       logical, intent (in) :: reset, effr_in
       real(kind=kind_phys), intent(inout), dimension(:,:) :: rew, rei, rer, res, reg
-      logical, intent (in) :: cplgocart
-      ! ice and liquid water 3d precipitation fluxes - only allocated if cplgocart is .true.
+      logical, intent (in) :: cplchm
+      ! ice and liquid water 3d precipitation fluxes - only allocated if cplchm is .true.
       real(kind=kind_phys), intent(inout), dimension(:,:) :: pfi_lsan, pfl_lsan
 
       character(len=*), intent(out) :: errmsg
@@ -299,7 +299,7 @@ contains
       enddo
 
       ! output ice and liquid water 3d precipitation fluxes if requested
-      if (cplgocart) then
+      if (cplchm) then
         do k=1,levs
           kk = levs-k+1
           do i=1,im
