@@ -7,6 +7,14 @@
 [ccpp-arg-table]
   name = mynnsfc_wrapper_init
   type = scheme
+[do_mynnsfclay]
+  standard_name = do_mynnsfclay
+  long_name = flag to activate MYNN surface layer
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

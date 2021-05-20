@@ -8,7 +8,23 @@
 
       contains
 
-      subroutine myjsfc_wrapper_init ()
+      subroutine myjsfc_wrapper_init (do_myjsfc,    &
+      & errmsg,errflg)
+
+        logical,          intent(in)  :: do_myjsfc
+        character(len=*), intent(out) :: errmsg
+        integer,          intent(out) :: errflg
+
+      ! Initialize CCPP error handling variables
+        errmsg = ''
+        errflg = 0
+
+      ! Consistency checks
+        if (.not. do_myjsfc) then
+          write(errmsg,fmt='(*(a))') 'Logic error: do_myjsfc = .false.'
+          errflg = 1
+          return
+        end if
       end subroutine myjsfc_wrapper_init
 
       subroutine myjsfc_wrapper_finalize ()

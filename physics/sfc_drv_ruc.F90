@@ -79,6 +79,14 @@ module lsm_ruc
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0 
+      
+      ! Consistency checks
+      if (lsm/=lsm_ruc) then
+        write(errmsg,'(*(a))') 'Logic error: namelist choice of ',     &
+     &       'LSM is different from RUC'
+        errflg = 1
+        return
+      end if
 
       ipr = 10
       debug_print = .false.
