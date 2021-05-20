@@ -62,7 +62,7 @@
      &   psk,rbsoil,zorl,u10m,v10m,fm,fh,                               &
      &   tsea,heat,evap,stress,spd1,kpbl,                               &
      &   prsi,del,prsl,prslk,phii,phil,delt,dspheat,                    &
-     &   dusfc,dvsfc,dtsfc,dqsfc,hpbl,hgamt,hgamq,dkt,                  &
+     &   dusfc,dvsfc,dtsfc,dqsfc,hpbl,hgamt,hgamq,dkt,dku,              &
      &   kinver,xkzm_m,xkzm_h,xkzm_s,lprnt,ipr,                         &
      &   xkzminv,moninq_fac,hurr_pbl,islimsk,var_ric,                   &
      &   coef_ric_l,coef_ric_s,ldiag3d,ntqv,rtg_ozone_index,ntoz,       &
@@ -84,42 +84,44 @@
 !
       logical, intent(in) :: lprnt, hurr_pbl, ldiag3d
       logical, intent(in) :: flag_for_pbl_generic_tend
-      integer, intent(in) :: ipr, islimsk(im), ntoz
-      integer, intent(in) :: im, km, ntrac, ntcw, kinver(im)
-      integer, intent(out) :: kpbl(im)
+      integer, intent(in) :: ipr, islimsk(:)
+      integer, intent(in) :: im, km, ntrac, ntcw, kinver(:), ntoz
+      integer, intent(out) :: kpbl(:)
 
 !
       real(kind=kind_phys), intent(in) :: delt, xkzm_m, xkzm_h, xkzm_s
       real(kind=kind_phys), intent(in) :: xkzminv, moninq_fac, var_ric, &
      &                     coef_ric_l, coef_ric_s
-      real(kind=kind_phys), intent(inout) :: dv(im,km),     du(im,km),  &
-     &                     tau(im,km),    rtg(im,km,ntrac)
+      real(kind=kind_phys), intent(inout) :: dv(:,:),     du(:,:),      &
+     &                     tau(:,:),    rtg(:,:,:)
       ! dtend is only allocated if ldiag3d or qdiag3d are true
       real(kind=kind_phys), intent(inout) :: dtend(:,:,:)
       integer, intent(in) :: dtidx(:,:)
       integer, intent(in) :: index_of_x_wind, index_of_y_wind,          &
      & index_of_process_pbl, index_of_temperature, ntqv, rtg_ozone_index
       real(kind=kind_phys), intent(in) ::                               &
-     &                     u1(im,km),     v1(im,km),                    &
-     &                     t1(im,km),     q1(im,km,ntrac),              &
-     &                     swh(im,km),    hlw(im,km),                   &
-     &                     xmu(im),       psk(im),                      &
-     &                     rbsoil(im),    zorl(im),                     &
-     &                     u10m(im),      v10m(im),                     &
-     &                     fm(im),        fh(im),                       &
-     &                     tsea(im),                                    &
-     &                     heat(im),      evap(im),                     &
-     &                     stress(im),    spd1(im)
+     &                     u1(:,:),     v1(:,:),                        &
+     &                     t1(:,:),     q1(:,:,:),                      &
+     &                     swh(:,:),    hlw(:,:),                       &
+     &                     xmu(:),       psk(:),                        &
+     &                     rbsoil(:),    zorl(:),                       &
+     &                     u10m(:),      v10m(:),                       &
+     &                     fm(:),        fh(:),                         &
+     &                     tsea(:),                                     &
+     &                     heat(:),      evap(:),                       &
+     &                     stress(:),    spd1(:)
       real(kind=kind_phys), intent(in) ::                               &
-     &                     prsi(im,km+1), del(im,km),                   &
-     &                     prsl(im,km),   prslk(im,km),                 &
-     &                     phii(im,km+1), phil(im,km)
+     &                     prsi(:,:), del(:,:),                         &
+     &                     prsl(:,:), prslk(:,:),                       &
+     &                     phii(:,:), phil(:,:)
       real(kind=kind_phys), intent(out) ::                              &
-     &                     dusfc(im),     dvsfc(im),                    &
-     &                     dtsfc(im),     dqsfc(im),                    &
-     &                     hpbl(im),      dkt(im,km-1)
+     &                     dusfc(:),     dvsfc(:),                      &
+     &                     dtsfc(:),     dqsfc(:),                      &
+     &                     hpbl(:)
+      real(kind=kind_phys), intent(out) ::                              &
+     &                     dkt(:,:), dku(:,:)
       real(kind=kind_phys), intent(inout) ::                            &
-     &                     hgamt(im),     hgamq(im)
+     &                     hgamt(:),     hgamq(:)
 !
       logical, intent(in) :: dspheat
 !          flag for tke dissipative heating
@@ -151,8 +153,8 @@
      &                     zd(im),      zdd(im),      thlvx1(im)
 !
       real(kind=kind_phys) rdzt(im,km-1),dktx(im,km-1),                 &
-     &                     zi(im,km+1),  zl(im,km),    xkzo(im,km-1),   &
-     &                     dku(im,km-1), xkzmo(im,km-1),                &
+     &                     zi(im,km+1),  zl(im,km),                     &
+     &                     xkzo(im,km-1), xkzmo(im,km-1),               &
      &                     cku(im,km-1), ckt(im,km-1),                  &
      &                     ti(im,km-1),  shr2(im,km-1),                 &
      &                     al(im,km-1),  ad(im,km),                     &
@@ -388,10 +390,14 @@ c
         enddo
       enddo
 !>  - Initialize diffusion coefficients to 0 and calculate the total radiative heating rate (dku, dkt, radx)
-      do k = 1,km1
+      do k = 1,km
         do i = 1,im
           dku(i,k)  = 0.
           dkt(i,k)  = 0.
+        enddo
+      enddo
+      do k = 1,km1
+        do i = 1,im
           dktx(i,k) = 0.
           cku(i,k)  = 0.
           ckt(i,k)  = 0.
@@ -1427,6 +1433,7 @@ c
 !
         enddo
       enddo
+
 !
 !     solve tridiagonal problem for momentum
 !

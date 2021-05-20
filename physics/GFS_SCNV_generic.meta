@@ -82,7 +82,7 @@
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [save_v]
   standard_name = y_wind_save
@@ -91,7 +91,7 @@
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [save_t]
   standard_name = air_temperature_save
@@ -100,7 +100,7 @@
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [save_q]
   standard_name = tracer_concentration_save
@@ -211,17 +211,17 @@
   type = logical
   intent = in
   optional = F
-[qdiag3d]
-  standard_name = flag_tracer_diagnostics_3D
-  long_name = flag for 3d tracer diagnostic fields
+[ldiag3d]
+  standard_name = flag_diagnostics_3D
+  long_name = flag for 3d diagnostic fields
   units = flag
   dimensions = ()
   type = logical
   intent = in
   optional = F
-[ldiag3d]
-  standard_name = flag_diagnostics_3D
-  long_name = flag for 3d diagnostic fields
+[qdiag3d]
+  standard_name = flag_tracer_diagnostics_3D
+  long_name = flag for 3d tracer diagnostic fields
   units = flag
   dimensions = ()
   type = logical

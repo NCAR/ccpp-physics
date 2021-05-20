@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = rrtmgp_lw_rte
   type = scheme
-  dependencies = machine.F,rte-rrtmgp/rte/mo_rte_lw.F90,rte-rrtmgp/rte/mo_fluxes.F90,rte-rrtmgp/rte/kernels/mo_fluxes_broadband_kernels.F90,rrtmgp_aux.F90
+  dependencies = machine.F,rte-rrtmgp/rte/mo_rte_lw.F90,rte-rrtmgp/rte/mo_fluxes.F90,rte-rrtmgp/rte/kernels/mo_fluxes_broadband_kernels.F90,radiation_tools.F90
   dependencies = rte-rrtmgp/rte/kernels/mo_rte_solver_kernels.F90,rte-rrtmgp/extensions/mo_fluxes_byband.F90,rte-rrtmgp/extensions/mo_fluxes_byband_kernels.F90
 
 ########################################################################
@@ -150,11 +150,11 @@
   kind = kind_phys
   intent = inout
   optional = F
-[sfculw_jac]
-  standard_name = RRTMGP_jacobian_of_lw_flux_upward_at_surface
-  long_name = RRTMGP Jacobian upward longwave flux at surface
+[fluxlwUP_jac]
+  standard_name = RRTMGP_jacobian_of_lw_flux_upward
+  long_name = RRTMGP Jacobian upward longwave flux profile
   units = W m-2 K-1
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
   type = real
   kind = kind_phys
   intent = inout

@@ -54,9 +54,9 @@ module mp_fer_hires
       logical,                        intent(in)    :: restart
       character(len=*),               intent(out)   :: errmsg
       integer,                        intent(out)   :: errflg
-      real(kind_phys),                intent(out), optional  :: f_ice(1:ncol,1:nlev)
-      real(kind_phys),                intent(out), optional  :: f_rain(1:ncol,1:nlev)
-      real(kind_phys),                intent(out), optional  :: f_rimef(1:ncol,1:nlev)
+      real(kind_phys),                intent(out)   :: f_ice(:,:)
+      real(kind_phys),                intent(out)   :: f_rain(:,:)
+      real(kind_phys),                intent(out)   :: f_rimef(:,:)
 
 
       ! Local variables
@@ -152,27 +152,27 @@ module mp_fer_hires
       logical,           intent(in   ) :: spec_adv
       integer,           intent(in   ) :: mpirank
       integer,           intent(in   ) :: mpiroot
-      real(kind_phys),   intent(in   ) :: slmsk(1:ncol)
-      real(kind_phys),   intent(in   ) :: prsi(1:ncol,1:nlev+1)
-      real(kind_phys),   intent(in   ) :: p_phy(1:ncol,1:nlev)
+      real(kind_phys),   intent(in   ) :: slmsk(:)
+      real(kind_phys),   intent(in   ) :: prsi(:,:)
+      real(kind_phys),   intent(in   ) :: p_phy(:,:)
       real(kind_phys),   intent(in   ) :: epsq,r_d,p608,cp,g
-      real(kind_phys),   intent(inout) :: t(1:ncol,1:nlev)
-      real(kind_phys),   intent(inout) :: q(1:ncol,1:nlev)
-      real(kind_phys),   intent(inout) :: cwm(1:ncol,1:nlev)
-      real(kind_phys),   intent(inout) :: train(1:ncol,1:nlev)
-      real(kind_phys),   intent(out  ) :: sr(1:ncol)
-      real(kind_phys),   intent(inout) :: f_ice(1:ncol,1:nlev)
-      real(kind_phys),   intent(inout) :: f_rain(1:ncol,1:nlev)
-      real(kind_phys),   intent(inout) :: f_rimef(1:ncol,1:nlev)
-      real(kind_phys),   intent(inout) :: qc(1:ncol,1:nlev)
-      real(kind_phys),   intent(inout) :: qr(1:ncol,1:nlev)
-      real(kind_phys),   intent(inout) :: qi(1:ncol,1:nlev)
-      real(kind_phys),   intent(inout) :: qg(1:ncol,1:nlev) ! QRIMEF
+      real(kind_phys),   intent(inout) :: t(:,:)
+      real(kind_phys),   intent(inout) :: q(:,:)
+      real(kind_phys),   intent(inout) :: cwm(:,:)
+      real(kind_phys),   intent(inout) :: train(:,:)
+      real(kind_phys),   intent(out  ) :: sr(:)
+      real(kind_phys),   intent(out  ) :: f_ice(:,:)
+      real(kind_phys),   intent(out  ) :: f_rain(:,:) 
+      real(kind_phys),   intent(out  ) :: f_rimef(:,:)
+      real(kind_phys),   intent(inout) :: qc(:,:)
+      real(kind_phys),   intent(inout) :: qr(:,:)
+      real(kind_phys),   intent(inout) :: qi(:,:)
+      real(kind_phys),   intent(inout) :: qg(:,:) ! QRIMEF
 
-      real(kind_phys),   intent(inout) :: prec(1:ncol)
-      real(kind_phys),   intent(inout) :: refl_10cm(1:ncol,1:nlev)
+      real(kind_phys),   intent(inout) :: prec(:)
+      real(kind_phys),   intent(inout) :: refl_10cm(:,:)
       real(kind_phys),   intent(in   ) :: rhgrd
-      real(kind_phys),   intent(in   ) :: dx(1:ncol)
+      real(kind_phys),   intent(in   ) :: dx(:)
       character(len=*),     intent(out) :: errmsg
       integer,              intent(out) :: errflg
 !

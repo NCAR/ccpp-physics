@@ -24,10 +24,10 @@
 
         integer, intent(in) :: im, levs, ntqv, nsamftrac, index_of_process_scnv, dtidx(:,:)
         logical, intent(in) :: ldiag3d, qdiag3d, flag_for_scnv_generic_tend
-        real(kind=kind_phys), dimension(im,levs), intent(in) :: gu0, gv0, gt0
-        real(kind=kind_phys), intent(in) :: gq0(:,:,:)
-        real(kind=kind_phys), intent(inout) :: save_q(:,:,:)
-        real(kind=kind_phys), dimension(im,levs), intent(inout) :: save_u, save_v, save_t
+        real(kind=kind_phys), dimension(:,:),   intent(in) :: gu0, gv0, gt0
+        real(kind=kind_phys), dimension(:,:,:), intent(in) :: gq0
+        real(kind=kind_phys), dimension(:,:,:), intent(inout) :: save_q
+        real(kind=kind_phys), dimension(:,:),   intent(inout) :: save_u, save_v, save_t
         character(len=*),                 intent(out) :: errmsg
         integer,                          intent(out) :: errflg
 
@@ -91,23 +91,23 @@
       integer, intent(in) :: im, levs, nn, ntqv, nsamftrac
       logical, intent(in) :: lssav, ldiag3d, qdiag3d, cplchm, flag_for_scnv_generic_tend
       real(kind=kind_phys),                     intent(in) :: frain
-      real(kind=kind_phys), dimension(im,levs), intent(in) :: gu0, gv0, gt0
-      real(kind=kind_phys), dimension(im,levs), intent(in) :: save_u, save_v, save_t
+      real(kind=kind_phys), dimension(:,:), intent(in) :: gu0, gv0, gt0
+      real(kind=kind_phys), dimension(:,:), intent(in) :: save_u, save_v, save_t
       real(kind=kind_phys), dimension(:,:,:),   intent(in) :: save_q, gq0
 
       ! dtend only allocated if ldiag3d == .true.
       real(kind=kind_phys), dimension(:,:), intent(inout) :: dqdti
-      real(kind=kind_phys), intent(inout), optional :: dtend(:,:,:)
+      real(kind=kind_phys), intent(inout) :: dtend(:,:,:)
       integer, intent(in) :: dtidx(:,:)
       integer, intent(in) :: index_of_temperature, index_of_x_wind, index_of_y_wind, index_of_process_scnv
-      real(kind=kind_phys), dimension(im,levs,nn), intent(inout) :: clw
+      real(kind=kind_phys), dimension(:,:,:), intent(inout) :: clw
 
       ! Post code for SAS/SAMF
       integer, intent(in) :: npdf3d, num_p3d, ncnvcld3d
       logical, intent(in) :: shcnvcw
-      real(kind=kind_phys), dimension(im), intent(in) :: rain1
-      real(kind=kind_phys), dimension(im,levs), intent(in) :: cnvw, cnvc
-      real(kind=kind_phys), dimension(im), intent(inout) :: rainc, cnvprcp, cnvprcpb
+      real(kind=kind_phys), dimension(:), intent(in) :: rain1
+      real(kind=kind_phys), dimension(:, :), intent(in) :: cnvw, cnvc
+      real(kind=kind_phys), dimension(:), intent(inout) :: rainc, cnvprcp, cnvprcpb
       ! The following arrays may not be allocated, depending on certain flags and microphysics schemes.
       ! Since Intel 15 crashes when passing unallocated arrays to arrays defined with explicit shape,
       ! use assumed-shape arrays. Note that Intel 18 and GNU 6.2.0-8.1.0 tolerate explicit-shape arrays

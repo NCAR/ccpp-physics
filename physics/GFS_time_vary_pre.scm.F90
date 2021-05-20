@@ -73,8 +73,8 @@
 
         implicit none
         
-        integer,                          intent(in)    :: idate(4)
-        integer,                          intent(in)    :: jdat(1:8), idat(1:8)
+        integer,                          intent(in)    :: idate(:)
+        integer,                          intent(in)    :: jdat(:), idat(:)
         integer,                          intent(in)    :: lsm, lsm_noahmp,      &
                                                            nsswr, nslwr, me,     &
                                                            master, nscyc
@@ -111,7 +111,7 @@
         end if
 
         !--- jdat is being updated directly inside of the time integration
-        !--- loop of gmtb_scm.F90
+        !--- loop of scm.F90
         !--- update calendars and triggers
         rinc(1:5)   = 0
         call w3difdat(jdat,idat,4,rinc)

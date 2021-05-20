@@ -111,32 +111,31 @@
    real(kind=kind_phys),     intent(in   )   ::     g,cp,rd,rv,ep1,ep2,xlv,dt
    logical,  intent(in   )   :: lssav, ldiag3d, flag_for_pbl_generic_tend
 ! 3D in
-   real(kind=kind_phys),     dimension(im, km)                                               , &
+   real(kind=kind_phys),     dimension(:,:)                                  , &
              intent(in   )   ::                                          phil, &
                                                                          pi2d, &
                                                                           p2d, &
                                                                            ux, &
                                                                            vx, &
                                                                            tx
-   real(kind=kind_phys),     dimension( im, km, ntrac )                                      , &
+   real(kind=kind_phys),     dimension(:,:,:)                                , &
              intent(in   )   ::                                            qx
 
-   real(kind=kind_phys),     dimension( im, km+1 )                                           , &
+   real(kind=kind_phys),     dimension(:,:)                                  , &
              intent(in   )   ::                                          p2di, &
                                                                          phii
 ! 3D in&out
-   real(kind=kind_phys),     dimension(im, km)                                               , &
+   real(kind=kind_phys),     dimension(:,:)                                  , &
              intent(inout)   ::                                          utnp, &
                                                                          vtnp, &
                                                                          ttnp
-   real(kind=kind_phys),     dimension(im, km, ntrac )                                       , &
+   real(kind=kind_phys),     dimension(:,:,:)                                , &
              intent(inout)   ::                                          qtnp
-
 ! 2D in
-   integer,  dimension(im)                                                   , &
+   integer,  dimension(:)                                                    , &
              intent(in   )   ::                                      landmask
 
-   real(kind=kind_phys),     dimension(im)                                                   , &
+   real(kind=kind_phys),     dimension(:)                                    , &
              intent(in   )   ::                                          heat, &
                                                                          evap, &
                                                                            br, &
@@ -150,17 +149,16 @@
                                                                           v10, &
                                                                            dx
 ! 2D: out
-   integer,  dimension(im)                                                   , &
+   integer,  dimension(:)                                                    , &
              intent(out  )   ::                                        kpbl1d
 
-   real(kind=kind_phys),     dimension(im)                                                   , &
+   real(kind=kind_phys),     dimension(:)                                    , &
              intent(out  )   ::                                          hpbl, &
                                                                         dusfc, &
                                                                         dvsfc, &
                                                                         dtsfc, &
                                                                         dqsfc
 
-   ! 3D diagnostic tendencies; dtend is only allocated if ldiag3d=.true.
    real(kind=kind_phys), intent(inout), optional :: dtend(:,:,:)
    integer, intent(in) :: dtidx(:,:), index_of_process_pbl, ntqv, &
         index_of_x_wind, index_of_y_wind, index_of_temperature
@@ -1326,7 +1324,7 @@
 !
 !---- find the mixing length
 !
-     call mixlen(lmh,uxk,vxk,txk,thxk,qx(i,kts,1),qx(i,kts,ntcw)               &
+     call mixlen(lmh,uxk,vxk,txk,thxk,qx(i,kts:kte,1),qx(i,kts:kte,ntcw)       &
                      ,q2xk,zqk,ust(i),corf,epshol(i)                           &
                      ,s2,gh,rig,el                                             &
                      ,hpbl(i),kpbl(i),lmxl,ct(i)                               &
@@ -1477,13 +1475,13 @@
 !
    real(kind=kind_phys), dimension( its:ite, kts:kte )                                       , &
          intent(in   )  ::                                                 cm
-   real(kind=kind_phys), dimension( its:ite, kts:kte,nt )                                    , &
+   real(kind=kind_phys), dimension( its:ite, kts:kte,nt)                                    , &
          intent(in   )  ::                                                 r2
 !
    real(kind=kind_phys), dimension( its:ite, kts:kte )                                       , &
          intent(inout)  ::                                                 au, &
                                                                            cu
-   real(kind=kind_phys), dimension( its:ite, kts:kte,nt )                                    , &
+   real(kind=kind_phys), dimension( its:ite, kts:kte,nt)                                    , &
          intent(inout)  ::                                                 f2
 !
    real(kind=kind_phys)    :: fk
@@ -1624,7 +1622,7 @@
               qol2st,qol2un,qdzl,rdz,sq,srel,szq,tem,thm,vkrmz,rlambda,        &
               rlb,rln,f
    real(kind=kind_phys)    :: ckp
-   real(kind=kind_phys),     dimension( kts:kte )   ::                                     q1, &
+   real(kind=kind_phys),     dimension( kts:kte  )   ::                                     q1, &
                                                                           en2
    real(kind=kind_phys),     dimension( kts+1:kte ) ::                                    dth, &
                                                                           elm, &
@@ -1790,12 +1788,12 @@
 !
    logical,  intent(in   )   ::     pblflg
 !
-   real(kind=kind_phys),     dimension( kts:kte )                                            , &
+   real(kind=kind_phys),     dimension( : )                                            , &
              intent(in   )   ::                                           uxk, &
                                                                           vxk, &
                                                                          thxk, &
                                                                         thvxk
-   real(kind=kind_phys),     dimension( kts+1:kte )                                          , &
+   real(kind=kind_phys),     dimension( : )                                          , &
              intent(in   )   ::                                            s2, &
                                                                            ri, &
                                                                           akm, &
@@ -1806,10 +1804,10 @@
                                                                        vfxpbl, &
                                                                        qfxpbl
 !
-   real(kind=kind_phys),     dimension( kts:kte+1 )                                          , &
+   real(kind=kind_phys),     dimension( : )                                          , &
              intent(in   )   ::                                             z
 !
-   real(kind=kind_phys),     dimension( kts:kte )                                            , &
+   real(kind=kind_phys),     dimension( : )                                            , &
              intent(inout)   ::                                            q2
 !
 !  local vars
@@ -1897,16 +1895,16 @@
 !
    logical,  intent(in   )   ::     pblflg
 !
-   real(kind=kind_phys),     dimension( kts:kte )                                            , &
+   real(kind=kind_phys),     dimension( : )                                            , &
              intent(in   )   ::                                         hgame, &
                                                                         ptke1
-   real(kind=kind_phys),     dimension( kts+1:kte )                                          , &
+   real(kind=kind_phys),     dimension( : )                                          , &
              intent(in   )   ::                                            el, &
                                                                          akhk
-   real(kind=kind_phys),     dimension( kts:kte+1 )                                          , &
+   real(kind=kind_phys),     dimension( : )                                          , &
              intent(in   )   ::                                             z
 !
-   real(kind=kind_phys),     dimension( kts:kte )                                            , &
+   real(kind=kind_phys),     dimension( : )                                            , &
              intent(inout)   ::                                            q2
 !
 !  local vars

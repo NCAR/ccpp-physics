@@ -93,6 +93,14 @@
   type = integer
   intent = in
   optional = F
+[lsnowl]
+  standard_name = lower_bound_of_snow_vertical_dimension_for_land_surface_model
+  long_name = lower bound of of snow-related arrays for land surface model
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [itime]
   standard_name = index_of_time_step
   long_name = current forecast iteration
@@ -320,7 +328,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
   optional = F
 [flag_iter]
   standard_name = flag_for_iteration
@@ -695,7 +703,7 @@
   intent = inout
   optional = F
 [zorl]
-  standard_name = surface_roughness_length_over_land_interstitial
+  standard_name = surface_roughness_length_over_land
   long_name = surface roughness length over land  (temporary use as interstitial)
   units = cm
   dimensions = (horizontal_loop_extent)

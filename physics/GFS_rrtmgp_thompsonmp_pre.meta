@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = GFS_rrtmgp_thompsonmp_pre
   type = scheme
-  dependencies = rrtmgp_aux.F90, module_mp_thompson_make_number_concentrations.F90, module_mp_thompson.F90, rrtmgp_lw_cloud_optics.F90
+  dependencies = radiation_tools.F90, module_mp_thompson_make_number_concentrations.F90, module_mp_thompson.F90, rrtmgp_lw_cloud_optics.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -55,46 +55,6 @@
   type = logical
   intent = in
   optional = F  
-[effr_in]
-  standard_name = flag_for_cloud_effective_radii
-  long_name = flag for cloud effective radii calculations in GFDL microphysics
-  units = flag
-  dimensions = ()
-  type = logical  
-  intent = in
-  optional = F   
-[uni_cld]
-  standard_name = flag_for_uni_cld
-  long_name = flag for uni_cld
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[lmfshal]
-  standard_name = flag_for_lmfshal
-  long_name = flag for lmfshal
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[lmfdeep2]
-  standard_name = flag_for_scale_aware_mass_flux_convection
-  long_name = flag for some scale-aware mass-flux convection scheme active
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[ltaerosol]
-  standard_name = flag_for_aerosol_physics
-  long_name = flag for aerosol physics
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
 [i_cldliq]
   standard_name = index_for_liquid_cloud_condensate
   long_name = tracer index for cloud condensate (or liquid water)
@@ -167,6 +127,50 @@
   type = integer
   intent = in
   optional = F  
+[effr_in]
+  standard_name = flag_for_cloud_effective_radii
+  long_name = flag for cloud effective radii calculations in GFDL microphysics
+  units = flag
+  dimensions = ()
+  type = logical  
+  intent = in
+  optional = F   
+[p_lev]
+  standard_name = air_pressure_at_interface_for_RRTMGP_in_hPa
+  long_name = air pressure at vertical interface for radiation calculation
+  units = hPa
+  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[p_lay]
+  standard_name = air_pressure_at_layer_for_RRTMGP_in_hPa
+  long_name = air pressure at vertical layer for radiation calculation
+  units = hPa
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[tv_lay]
+  standard_name = virtual_temperature
+  long_name = layer virtual temperature
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F    
+[t_lay]
+  standard_name = air_temperature_at_layer_for_RRTMGP
+  long_name = air temperature at vertical layer for radiation calculation
+  units = K
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F  
 [effrin_cldliq]
   standard_name = effective_radius_of_stratiform_cloud_liquid_water_particle_in_um
   long_name = eff. radius of cloud liquid water particle in micrometer
@@ -193,16 +197,86 @@
   type = real
   kind = kind_phys  
   intent = inout
+  optional = F
+[tracer]
+  standard_name = chemical_tracers
+  long_name = chemical tracers
+  units = g g-1
+  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers)
+  type = real
+  kind = kind_phys
+  intent = in
   optional = F  
-[cld_frac_mg]
-  standard_name = cloud_fraction_for_MG
-  long_name = cloud fraction used by Morrison-Gettelman MP
+[qs_lay]
+  standard_name = saturation_vapor_pressure
+  long_name = saturation vapor pressure
+  units = Pa
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[q_lay]
+  standard_name = water_vapor_mixing_ratio
+  long_name = water vaport mixing ratio
+  units = kg/kg
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[relhum]
+  standard_name = relative_humidity
+  long_name = layer relative humidity
   units = frac
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
-  optional = F   
+  optional = F
+[con_g]
+  standard_name = gravitational_acceleration
+  long_name = gravitational acceleration
+  units = m s-2
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F 
+[con_rd]
+  standard_name = gas_constant_dry_air
+  long_name = ideal gas constant for dry air
+  units = J kg-1 K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[con_eps]
+  standard_name = ratio_of_dry_air_to_water_vapor_gas_constants
+  long_name = rd/rv
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F         
+[lmfshal]
+  standard_name = flag_for_lmfshal
+  long_name = flag for lmfshal
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[ltaerosol]
+  standard_name = flag_for_aerosol_physics
+  long_name = flag for aerosol physics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [do_mynnedmf]
   standard_name = do_mynnedmf
   long_name = flag to activate MYNN-EDMF
@@ -241,105 +315,6 @@
   units = flag
   dimensions = ()
   type = logical
-  intent = in
-  optional = F      
-[p_lev]
-  standard_name = air_pressure_at_interface_for_RRTMGP_in_hPa
-  long_name = air pressure at vertical interface for radiation calculation
-  units = hPa
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[p_lay]
-  standard_name = air_pressure_at_layer_for_RRTMGP_in_hPa
-  long_name = air pressure at vertical layer for radiation calculation
-  units = hPa
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[tv_lay]
-  standard_name = virtual_temperature
-  long_name = layer virtual temperature
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F    
-[t_lay]
-  standard_name = air_temperature_at_layer_for_RRTMGP
-  long_name = air temperature at vertical layer for radiation calculation
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F  
-[qs_lay]
-  standard_name = saturation_vapor_pressure
-  long_name = saturation vapor pressure
-  units = Pa
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[q_lay]
-  standard_name = water_vapor_mixing_ratio
-  long_name = water vaport mixing ratio
-  units = kg/kg
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F  
-[relhum]
-  standard_name = relative_humidity
-  long_name = layer relative humidity
-  units = frac
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[tracer]
-  standard_name = chemical_tracers
-  long_name = chemical tracers
-  units = g g-1
-  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F  
-[con_g]
-  standard_name = gravitational_acceleration
-  long_name = gravitational acceleration
-  units = m s-2
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F 
-[con_rd]
-  standard_name = gas_constant_dry_air
-  long_name = ideal gas constant for dry air
-  units = J kg-1 K-1
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[con_eps]
-  standard_name = ratio_of_dry_air_to_water_vapor_gas_constants
-  long_name = rd/rv
-  units = none
-  dimensions = ()
-  type = real
-  kind = kind_phys
   intent = in
   optional = F
 [cld_frac]

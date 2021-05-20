@@ -5,7 +5,7 @@
 
 In the CCPP-Physics v3.0 release, each parameterization is in its own modern Fortran module,
  which facilitates model development and
-code maintenance. While some individual parameterization can be invoked for the GMTB SCM, most users will assemble the 
+code maintenance. While some individual parameterization can be invoked for the CCPP SCM, most users will assemble the 
 parameterizations in suites. 
 
 - Radiation
@@ -32,11 +32,11 @@ parameterizations in suites.
 
 - Microphysics
  - \subpage GFDL_cloud
- - \subpage fast_sat_adj (not available for the GMTB SCM)
+ - \subpage fast_sat_adj (not available for the CCPP SCM)
  - \subpage CPT_MG3
  - \subpage GSD_THOMPSON
 
-- Stochastic (not available for the GMTB SCM)
+- Stochastic (not available for the CCPP SCM)
  - \subpage STOCHY_PHYS
  - \subpage surf_pert (only applicable to \ref GFS_NOAH )
 
