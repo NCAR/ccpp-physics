@@ -374,42 +374,6 @@
   kind = kind_phys
   intent = out
   optional = F
-[tsurf]
-  standard_name = surface_skin_temperature_after_iteration
-  long_name = surface skin temperature after iteration
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[tsurf_wat]
-  standard_name = surface_skin_temperature_after_iteration_over_water
-  long_name = surface skin temperature after iteration over water
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[tsurf_lnd]
-  standard_name = surface_skin_temperature_after_iteration_over_land
-  long_name = surface skin temperature after iteration over land
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[tsurf_ice]
-  standard_name = surface_skin_temperature_after_iteration_over_ice
-  long_name = surface skin temperature after iteration over ice
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
 [gflx_ice]
   standard_name = upward_heat_flux_in_soil_over_ice
   long_name = soil heat flux over ice
@@ -1254,42 +1218,6 @@
   standard_name = Monin_Obukhov_similarity_function_for_heat_at_2m_over_ice
   long_name = Monin-Obukhov similarity parameter for heat at 2m over ice
   units = none
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[tsurf]
-  standard_name = surface_skin_temperature_after_iteration
-  long_name = surface skin temperature after iteration
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[tsurf_wat]
-  standard_name = surface_skin_temperature_after_iteration_over_water
-  long_name = surface skin temperature after iteration over water
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[tsurf_lnd]
-  standard_name = surface_skin_temperature_after_iteration_over_land
-  long_name = surface skin temperature after iteration over land
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[tsurf_ice]
-  standard_name = surface_skin_temperature_after_iteration_over_ice
-  long_name = surface skin temperature after iteration over ice
-  units = K
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys

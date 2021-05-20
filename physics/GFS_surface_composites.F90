@@ -31,7 +31,7 @@ contains
                                  hice, cice, snowd, snowd_wat, snowd_lnd, snowd_ice, tprcp, tprcp_wat,                    &
                                  tprcp_lnd, tprcp_ice, uustar, uustar_wat, uustar_lnd, uustar_ice,                        &
                                  weasd, weasd_wat, weasd_lnd, weasd_ice, ep1d_ice, tsfc, tsfco, tsfcl,tsfci, tsfc_wat,    &
-                                 tisfc, tice, tsurf, tsurf_wat, tsurf_lnd, tsurf_ice,                           &
+                                 tisfc, tice,                                                                             &
                                  gflx_ice, tgice, islmsk, islmsk_cice, slmsk, semis_rad, semis_wat, semis_lnd, semis_ice, &
                                  qss, qss_wat, qss_lnd, qss_ice, hflx, hflx_wat, hflx_lnd, hflx_ice,                      &
                                  min_lakeice, min_seaice, zorlo, zorll, zorli, errmsg, errflg)
@@ -48,9 +48,9 @@ contains
       real(kind=kind_phys), dimension(:), intent(  out)  :: frland
       real(kind=kind_phys), dimension(:), intent(in   )  :: snowd, tprcp, uustar, weasd, qss, hflx
 
-      real(kind=kind_phys), dimension(:), intent(inout)  :: tsfc, tsfco, tsfcl, tsfci, tisfc, tsurf
+      real(kind=kind_phys), dimension(:), intent(inout)  :: tsfc, tsfco, tsfcl, tsfci, tisfc
       real(kind=kind_phys), dimension(:), intent(inout)  :: snowd_wat, snowd_lnd, snowd_ice, tprcp_wat, &
-                    tprcp_lnd, tprcp_ice, tsfc_wat, tsurf_wat,tsurf_lnd, tsurf_ice,           &
+                    tprcp_lnd, tprcp_ice, tsfc_wat,                                                     &
                     uustar_wat, uustar_lnd, uustar_ice, weasd_wat, weasd_lnd, weasd_ice,                &
                     qss_wat, qss_lnd, qss_ice, hflx_wat, hflx_lnd, hflx_ice, ep1d_ice, gflx_ice
       real(kind=kind_phys), dimension(:), intent(  out)  :: tice
@@ -179,7 +179,6 @@ contains
         if (wet(i)) then                   ! Water
           uustar_wat(i) = uustar(i)
             tsfc_wat(i) = tsfco(i)
-           tsurf_wat(i) = tsfco(i)
 !          weasd_wat(i) = weasd(i)
 !          snowd_wat(i) = snowd(i)
            weasd_wat(i) = zero
@@ -195,12 +194,10 @@ contains
         if (dry(i)) then                   ! Land
           uustar_lnd(i) = uustar(i)
            weasd_lnd(i) = weasd(i)
-!mz            tsfc_lnd(i) = tsfcl(i)
-           tsurf_lnd(i) = tsfcl(i)
            snowd_lnd(i) = snowd(i)
            semis_lnd(i) = semis_rad(i)
-             qss_lnd(i) = qss(i)
-            hflx_lnd(i) = hflx(i)
+           qss_lnd(i) = qss(i)
+           hflx_lnd(i) = hflx(i)
         ! DH*
         else
           zorll(i) = huge
@@ -209,9 +206,7 @@ contains
         if (icy(i)) then                   ! Ice
           uustar_ice(i) = uustar(i)
            weasd_ice(i) = weasd(i)
-!mz            tsfc_ice(i) = tisfc(i)
            tsfci(i) = tisfc(i)
-           tsurf_ice(i) = tisfc(i)
            snowd_ice(i) = snowd(i)
             ep1d_ice(i) = zero
             gflx_ice(i) = zero
@@ -353,7 +348,7 @@ contains
       zorl, zorlo, zorll, zorli,                                                                                                  &
       cd, cd_wat, cd_lnd, cd_ice, cdq, cdq_wat, cdq_lnd, cdq_ice, rb, rb_wat, rb_lnd, rb_ice, stress, stress_wat, stress_lnd,     &
       stress_ice, ffmm, ffmm_wat, ffmm_lnd, ffmm_ice, ffhh, ffhh_wat, ffhh_lnd, ffhh_ice, uustar, uustar_wat, uustar_lnd,         &
-      uustar_ice, fm10, fm10_wat, fm10_lnd, fm10_ice, fh2, fh2_wat, fh2_lnd, fh2_ice, tsurf, tsurf_wat, tsurf_lnd, tsurf_ice,     &
+      uustar_ice, fm10, fm10_wat, fm10_lnd, fm10_ice, fh2, fh2_wat, fh2_lnd, fh2_ice,                                             &
       cmm, cmm_wat, cmm_lnd, cmm_ice, chh, chh_wat, chh_lnd, chh_ice, gflx, gflx_wat, gflx_lnd, gflx_ice, ep1d, ep1d_wat,         &
       ep1d_lnd, ep1d_ice, weasd, weasd_wat, weasd_lnd, weasd_ice, snowd, snowd_wat, snowd_lnd, snowd_ice, tprcp, tprcp_wat,       &
       tprcp_lnd, tprcp_ice, evap, evap_wat, evap_lnd, evap_ice, hflx, hflx_wat, hflx_lnd, hflx_ice, qss, qss_wat, qss_lnd,        &
@@ -368,13 +363,13 @@ contains
       real(kind=kind_phys), dimension(:),   intent(in) :: landfrac, lakefrac, oceanfrac,                                        &
         cd_wat, cd_lnd, cd_ice, cdq_wat, cdq_lnd, cdq_ice, rb_wat, rb_lnd, rb_ice, stress_wat,                                  &
         stress_lnd, stress_ice, ffmm_wat, ffmm_lnd, ffmm_ice, ffhh_wat, ffhh_lnd, ffhh_ice, uustar_wat, uustar_lnd, uustar_ice, &
-        fm10_wat, fm10_lnd, fm10_ice, fh2_wat, fh2_lnd, fh2_ice, tsurf_wat, tsurf_lnd, tsurf_ice, cmm_wat, cmm_lnd, cmm_ice,    &
+        fm10_wat, fm10_lnd, fm10_ice, fh2_wat, fh2_lnd, fh2_ice, cmm_wat, cmm_lnd, cmm_ice,                                     &
         chh_wat, chh_lnd, chh_ice, gflx_wat, gflx_lnd, gflx_ice, ep1d_wat, ep1d_lnd, ep1d_ice, weasd_wat, weasd_lnd, weasd_ice, &
         snowd_wat, snowd_lnd, snowd_ice,tprcp_wat, tprcp_lnd, tprcp_ice, evap_wat, evap_lnd, evap_ice, hflx_wat, hflx_lnd,      &
         hflx_ice, qss_wat, qss_lnd, qss_ice, tsfc_wat
 
       real(kind=kind_phys), dimension(:),   intent(inout) :: zorl, zorlo, zorll, zorli, cd, cdq, rb, stress, ffmm, ffhh, uustar, fm10, &
-        fh2, tsurf, cmm, chh, gflx, ep1d, weasd, snowd, tprcp, evap, hflx, qss, tsfc, tsfco, tsfcl, tsfci, tisfc
+        fh2, cmm, chh, gflx, ep1d, weasd, snowd, tprcp, evap, hflx, qss, tsfc, tsfco, tsfcl, tsfci, tisfc
 
       real(kind=kind_phys), dimension(:),   intent(in   ) :: tice ! interstitial sea ice temperature
       real(kind=kind_phys), dimension(:),   intent(inout) :: hice, cice
@@ -416,8 +411,6 @@ contains
           uustar(i) = txl*uustar_lnd(i) + txi*uustar_ice(i) + txo*uustar_wat(i)
           fm10(i)   = txl*fm10_lnd(i)   + txi*fm10_ice(i)   + txo*fm10_wat(i)
           fh2(i)    = txl*fh2_lnd(i)    + txi*fh2_ice(i)    + txo*fh2_wat(i)
-         !tsurf(i)  = txl*tsurf_lnd(i)  + txi*tice(i)       + txo*tsurf_wat(i)
-         !tsurf(i)  = txl*tsurf_lnd(i)  + txi*tsurf_ice(i)  + txo*tsurf_wat(i) ! not used again! Moorthi
           cmm(i)    = txl*cmm_lnd(i)    + txi*cmm_ice(i)    + txo*cmm_wat(i)
           chh(i)    = txl*chh_lnd(i)    + txi*chh_ice(i)    + txo*chh_wat(i)
          !gflx(i)   = txl*gflx_lnd(i)   + txi*gflx_ice(i)   + txo*gflx_wat(i)
@@ -439,11 +432,9 @@ contains
             qss(i)  = txl*qss_lnd(i)    + txi*qss_ice(i)    + txo*qss_wat(i)
             gflx(i) = txl*gflx_lnd(i)   + txi*gflx_ice(i)   + txo*gflx_wat(i)
           endif
-!mz          tsfc(i)   = txl*tsfc_lnd(i)   + txi*tice(i)       + txo*tsfc_wat(i)
           tsfc(i)   = txl*tsfcl(i)   + txi*tice(i)       + txo*tsfc_wat(i)
 
           if (dry(i)) then
-!mz            tsfcl(i) = tsfc_lnd(i)       ! over land
           elseif (wet(i)) then
             tsfcl(i) = tsfc_wat(i)       ! over water
           else
@@ -454,7 +445,6 @@ contains
           elseif (icy(i)) then
             tsfco(i) = tice(i)           ! over lake or ocean ice when uncoupled
           else
-!mz            tsfco(i) = tsfc_lnd(i)       ! over land
             tsfco(i) = tsfcl(i)       ! over land
           endif
           if (icy(i)) then
@@ -462,7 +452,6 @@ contains
           elseif (wet(i)) then
             tisfc(i) = tsfc_wat(i)       ! over lake or ocean when uncoupled
           else
-!mz            tisfc(i) = tsfc_lnd(i)       ! over land
             tisfc(i) = tsfcl(i)       ! over land
           endif
                                                   ! for coupled model ocean will replace this
@@ -503,8 +492,6 @@ contains
             uustar(i) = uustar_lnd(i)
             fm10(i)   = fm10_lnd(i)
             fh2(i)    = fh2_lnd(i)
-           !tsurf(i)  = tsurf_lnd(i)
-!mz            tsfcl(i)  = tsfc_lnd(i) ! over land
             tsfc(i)   = tsfcl(i)
             tsfco(i)  = tsfc(i)
             tisfc(i)  = tsfc(i)
@@ -531,7 +518,6 @@ contains
             uustar(i) = uustar_wat(i)
             fm10(i)   = fm10_wat(i)
             fh2(i)    = fh2_wat(i)
-           !tsurf(i)  = tsurf_wat(i)
             tsfco(i)  = tsfc_wat(i) ! over lake (and ocean when uncoupled)
             tsfc(i)   = tsfco(i)
             tsfcl(i)  = tsfc(i)
@@ -559,7 +545,6 @@ contains
             fm10(i)   = fm10_ice(i)
             fh2(i)    = fh2_ice(i)
             stress(i) = stress_ice(i)
-           !tsurf(i)  = tsurf_ice(i)
             cmm(i)    = cmm_ice(i)
             chh(i)    = chh_ice(i)
             gflx(i)   = gflx_ice(i)
@@ -568,7 +553,6 @@ contains
             snowd(i)  = snowd_ice(i)
            !tprcp(i)  = cice(i)*tprcp_ice(i) + (one-cice(i))*tprcp_wat(i)
             qss(i)    = qss_ice(i)
-!mz            tsfc(i)   = tsfc_ice(i)
             tsfc(i)   = tsfci(i)
             evap(i)   = evap_ice(i)
             hflx(i)   = hflx_ice(i)
@@ -577,7 +561,6 @@ contains
             if (.not. flag_cice(i)) then
 !             tisfc(i) = tice(i) ! over lake ice (and sea ice when uncoupled)
               zorl(i)  = cice(i) * zorli(i)   + (one - cice(i)) * zorlo(i)
-!mz              tsfc(i)  = tsfc_ice(i) ! over lake (and ocean when uncoupled)
               tsfc(i)  = tsfci(i) ! over lake (and ocean when uncoupled)
               
             elseif (wet(i)) then
@@ -586,7 +569,6 @@ contains
                 txo = one - txi
                 evap(i)   = txi * evap_ice(i)   + txo * evap_wat(i)
                 hflx(i)   = txi * hflx_ice(i)   + txo * hflx_wat(i)
-!mz                tsfc(i)   = txi * tsfc_ice(i)   + txo * tsfc_wat(i)
                 tsfc(i)   = txi * tsfci(i)   + txo * tsfc_wat(i)
                 stress(i) = txi * stress_ice(i) + txo * stress_wat(i)
                 qss(i)    = txi * qss_ice(i)    + txo * qss_wat(i)

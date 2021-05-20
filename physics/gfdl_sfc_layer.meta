@@ -453,8 +453,8 @@
   intent = in
   optional = F
 [tsurf_wat]
-  standard_name = surface_skin_temperature_after_iteration_over_water
-  long_name = surface skin temperature after iteration over water
+  standard_name = surface_skin_temperature_over_water
+  long_name = surface skin temperature over water
   units = K
   dimensions = (horizontal_loop_extent)
   type = real
@@ -462,8 +462,8 @@
   intent = in
   optional = F
 [tsurf_lnd]
-  standard_name = surface_skin_temperature_after_iteration_over_land
-  long_name = surface skin temperature after iteration over land
+  standard_name = surface_skin_temperature_over_land
+  long_name = surface skin temperature over land
   units = K
   dimensions = (horizontal_loop_extent)
   type = real
@@ -471,8 +471,8 @@
   intent = in
   optional = F
 [tsurf_ice]
-  standard_name = surface_skin_temperature_after_iteration_over_ice
-  long_name = surface skin temperature after iteration over ice
+  standard_name = surface_skin_temperature_over_ice
+  long_name = surface skin temperature over ice
   units = K
   dimensions = (horizontal_loop_extent)
   type = real
