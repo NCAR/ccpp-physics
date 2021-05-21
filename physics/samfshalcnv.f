@@ -9,7 +9,23 @@
 
       contains
 
-      subroutine samfshalcnv_init()
+      subroutine samfshalcnv_init(imfshalcnv, imfshalcnv_samf,          &
+     &                            errmsg, errflg)
+
+      integer,                   intent(in) :: imfshalcnv
+      integer,                   intent(in) :: imfshalcnv_samf
+      
+      ! CCPP error handling
+      character(len=*),          intent(out) :: errmsg
+      integer,                   intent(out) :: errflg
+
+      ! Consistency checks
+      if (imfshalcnv/=imfshalcnv_samf) then
+        write(errmsg,'(*(a))') 'Logic error: namelist choice of',       &
+     &  ' shallow convection is different from SAMF'
+        errflg = 1
+        return
+      end if      
       end subroutine samfshalcnv_init
 
       subroutine samfshalcnv_finalize()
