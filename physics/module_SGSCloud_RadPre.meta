@@ -39,6 +39,14 @@
   type = logical
   intent = in
   optional = F
+[do_mynnedmf]
+  standard_name = do_mynnedmf
+  long_name = flag to activate MYNN-EDMF
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [qc]
   standard_name = cloud_condensed_water_mixing_ratio
   long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates)
@@ -312,14 +320,6 @@
   dimensions = (horizontal_loop_extent,3)
   type = integer
   intent = inout
-  optional = F
-[do_mynnedmf]
-  standard_name = do_mynnedmf
-  long_name = flag to activate MYNN-EDMF
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
   optional = F
 [imp_physics]
   standard_name = flag_for_microphysics_scheme

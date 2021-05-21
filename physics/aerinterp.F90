@@ -43,15 +43,23 @@ contains
       endif
 !
 !! ===================================================================
+!! check if all necessary files exist
+!! ===================================================================
+      do imon = 1, timeaer
+         write(mn,'(i2.2)') imon
+         fname=trim("aeroclim.m"//mn//".nc")
+         inquire (file = fname, exist = file_exist)
+         if (.not. file_exist) then
+            errmsg = 'Error in read_aerdata: file ' // trim(fname) // ' not found'
+            errflg = 1
+            return
+         endif
+      enddo
+!
+!! ===================================================================
 !! fetch dim spec and lat/lon from m01 data set
 !! ===================================================================
       fname=trim("aeroclim.m"//'01'//".nc")
-      inquire (file = fname, exist = file_exist)
-      if (.not. file_exist) then
-         errmsg = 'Error in read_aerdata: file ' // trim(fname) // ' not found'
-         errflg = 1
-         return
-      endif
       call nf_open(fname , nf90_NOWRITE, ncid)
 
       vname =  trim(specname(1))
@@ -117,13 +125,9 @@ contains
       endif
 
 ! allocate local working arrays
-      if (.not. allocated(buff)) then
-        allocate (buff(lonsaer, latsaer, levsw))
-        allocate (pres_tmp(lonsaer,levsw))
-      endif
-      if (.not. allocated(buffx)) then
-        allocate (buffx(lonsaer, latsaer, levsw,1))
-      endif
+      allocate (buff(lonsaer, latsaer, levsw))
+      allocate (pres_tmp(lonsaer, levsw))
+      allocate (buffx(lonsaer, latsaer, levsw, 1))
 
 !! ===================================================================
 !! loop thru m01 - m12 for aer/pres array
@@ -131,13 +135,6 @@ contains
       do imon = 1, timeaer
        write(mn,'(i2.2)') imon
        fname=trim("aeroclim.m"//mn//".nc")
-       inquire (file = fname, exist = file_exist)
-       if (.not. file_exist) then
-         errmsg = 'Error in read_aerdata: file ' // trim(fname) // ' not found'
-         errflg = 1
-         return
-       endif
-
        call nf_open(fname , nf90_NOWRITE, ncid)
 
 ! ====> construct 3-d pressure array (Pa)
@@ -259,7 +256,7 @@ contains
 !**********************************************************************
 !**********************************************************************
 !
-      SUBROUTINE aerinterpol(me,master,npts,IDATE,FHOUR,jindx1,jindx2, &
+      SUBROUTINE aerinterpol(me,master,nthrds,npts,IDATE,FHOUR,jindx1,jindx2, &
                  ddy,iindx1,iindx2,ddx,lev,prsl,aerout)
 !
       USE MACHINE,  ONLY : kind_phys
@@ -270,7 +267,7 @@ contains
 !
 
       integer  JINDX1(npts), JINDX2(npts),iINDX1(npts),iINDX2(npts)
-      integer  me,idate(4), master
+      integer  me,idate(4), master, nthrds
       integer  IDAT(8),JDAT(8)
 !
       real(kind=kind_phys) DDY(npts), ddx(npts),ttt
@@ -317,7 +314,16 @@ contains
       tx2 = 1.0 - tx1
       if (n2 > 12) n2 = n2 -12
 
-!
+#ifndef __GFORTRAN__
+!$OMP parallel num_threads(nthrds) default(none)             &
+!$OMP          shared(npts,ntrcaer,aerin,aer_pres,prsl)      &
+!$OMP          shared(ddx,ddy,jindx1,jindx2,iindx1,iindx2)   &
+!$OMP          shared(aerpm,aerpres,aerout,n1,n2,lev,nthrds) &
+!$OMP          private(l,j,k,ii,i1,i2,j1,j2,temj,temi)       &
+!$OMP          copyin(tx1,tx2) firstprivate(tx1,tx2)
+
+!$OMP do
+#endif
       DO L=1,levsaer
         DO J=1,npts
           J1  = JINDX1(J)
@@ -341,8 +347,12 @@ contains
                +TEMI*DDY(j)*aer_pres(I1,J2,L,n2)+DDX(j)*TEMJ*aer_pres(I2,J1,L,n2))
         ENDDO
       ENDDO
+#ifndef __GFORTRAN__
+!$OMP end do
 
 ! don't flip, input is the same direction as GFS  (bottom-up)
+!$OMP do
+#endif
       DO J=1,npts
         DO L=1,lev
            if(prsl(j,L).ge.aerpres(j,1)) then
@@ -371,7 +381,12 @@ contains
            endif
         ENDDO   !L-loop
       ENDDO     !J-loop
-!
+#ifndef __GFORTRAN__
+!$OMP end do
+
+!$OMP end parallel
+#endif
+
       RETURN
       END SUBROUTINE aerinterpol
 

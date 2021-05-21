@@ -16,23 +16,22 @@ The GSD_v1 physics suite uses the parameterizations in the following order:
  - \ref GFS_RRTMG
  - \ref GFS_SFCLYR
  - \ref GFS_NSST
- - \ref GSD_RUCLSM
- - \ref GSD_MYNNEDMF
+ - \ref RUCLSM
+ - \ref MYNNEDMF
  - \ref GFS_UGWP_v0
  - \ref GFS_RAYLEIGH
  - \ref GFS_OZPHYS
  - \ref GFS_H2OPHYS
- - \ref GSD_CU_GF
+ - \ref CU_GF
    - \ref cu_gf_deep_group
    - \ref cu_gf_sh_group
- - \ref GSD_THOMPSON
- - \ref GFS_CALPRECIPTYPE
+ - \ref THOMPSON
 
 \section sdf_gsdsuite Suite Definition File 
 \code
 <?xml version="1.0" encoding="UTF-8"?>
 
-<suite name="SCM_GSD_v1" lib="ccppphys" ver="4">
+<suite name="SCM_GSD_v1" version="1">
   <!-- <init></init> -->
   <group name="time_vary">
     <subcycle loop="1">
@@ -45,14 +44,14 @@ The GSD_v1 physics suite uses the parameterizations in the following order:
   <group name="radiation">
     <subcycle loop="1">
       <scheme>GFS_suite_interstitial_rad_reset</scheme>
+      <scheme>sgscloud_radpre</scheme>
       <scheme>GFS_rrtmg_pre</scheme>
       <scheme>rrtmg_sw_pre</scheme>
-      <scheme>mynnrad_pre</scheme>
       <scheme>rrtmg_sw</scheme>
       <scheme>rrtmg_sw_post</scheme>
       <scheme>rrtmg_lw_pre</scheme>
       <scheme>rrtmg_lw</scheme>
-      <scheme>mynnrad_post</scheme>
+      <scheme>sgscloud_radpost</scheme>
       <scheme>rrtmg_lw_post</scheme>
       <scheme>GFS_rrtmg_post</scheme>
     </subcycle>
@@ -77,6 +76,9 @@ The GSD_v1 physics suite uses the parameterizations in the following order:
       <scheme>sfc_nst</scheme>
       <scheme>sfc_nst_post</scheme>
       <scheme>lsm_ruc</scheme>
+      <scheme>lsm_ruc_sfc_sice_pre</scheme>
+      <scheme>sfc_sice</scheme>
+      <scheme>lsm_ruc_sfc_sice_post</scheme>
       <scheme>GFS_surface_loop_control_part2</scheme>
     </subcycle>
     <!-- End of surface iteration loop -->
@@ -94,9 +96,9 @@ The GSD_v1 physics suite uses the parameterizations in the following order:
       <scheme>GFS_suite_stateout_update</scheme>
       <scheme>ozphys_2015</scheme>
       <scheme>h2ophys</scheme>
-      <scheme>GFS_DCNV_generic_pre</scheme>
       <scheme>get_phi_fv3</scheme>
       <scheme>GFS_suite_interstitial_3</scheme>
+      <scheme>GFS_DCNV_generic_pre</scheme>
       <scheme>cu_gf_driver_pre</scheme>
       <scheme>cu_gf_driver</scheme>
       <scheme>GFS_DCNV_generic_post</scheme>
@@ -111,6 +113,7 @@ The GSD_v1 physics suite uses the parameterizations in the following order:
       <scheme>GFS_MP_generic_post</scheme>
       <scheme>cu_gf_driver_post</scheme>
       <scheme>maximum_hourly_diagnostics</scheme>
+      <scheme>phys_tend</scheme>
     </subcycle>
   </group>
   <!-- <finalize></finalize> -->

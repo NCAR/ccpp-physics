@@ -1,6 +1,7 @@
-!> \file GFS_time_vary_pre.F90
+!> \file GFS_time_vary_pre.fv3.F90
 !!  Contains code related to GFS physics suite setup (generic part of time_vary_step)
 
+!>\defgroup gfs_time_vary_pre_mod  GFS Time Vary Pre Module
    module GFS_time_vary_pre
 
       use funcphys, only: gfuncphys
@@ -73,8 +74,8 @@
 
         implicit none
 
-        integer,                          intent(in)    :: idate(4)
-        integer,                          intent(in)    :: jdat(1:8), idat(1:8)
+        integer,                          intent(in)    :: idate(:)
+        integer,                          intent(in)    :: jdat(:), idat(:)
         integer,                          intent(in)    :: lkm, lsm, lsm_noahmp, &
                                                            nsswr, nslwr, me,     &
                                                            master, nscyc, nhfrad

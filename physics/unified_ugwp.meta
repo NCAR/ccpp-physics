@@ -66,6 +66,8 @@
   units = none
   dimensions = (8)
   type = integer
+  intent = in
+  optional = F
 [lonr]
   standard_name = number_of_equatorial_longitude_points
   long_name = number of global points in x-dir (i) along the equator
@@ -352,6 +354,8 @@
   dimensions = ()
   type = real
   kind = kind_phys
+  intent = in
+  optional = F
 [kdt]
   standard_name = index_of_time_step
   long_name = current forecast iteration
@@ -713,6 +717,8 @@
   units = none
   dimensions = (8)
   type = integer
+  intent = in
+  optional = F
 [xlat]
   standard_name = latitude
   long_name = grid latitude

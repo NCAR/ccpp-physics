@@ -96,49 +96,50 @@ contains
    logical, intent(in   ) :: flag_for_scnv_generic_tend,flag_for_dcnv_generic_tend
    logical, intent(in   ) :: ldiag3d
 
-   ! dtend is only allocated if ldiag=.true.
    real(kind=kind_phys), optional, intent(inout)            :: dtend(:,:,:)
    integer, intent(in)                                      :: dtidx(:,:), &
-        index_of_x_wind, index_of_y_wind, index_of_temperature,         &
+        index_of_x_wind, index_of_y_wind, index_of_temperature,            &
         index_of_process_scnv, index_of_process_dcnv, ntqv, ntcw, ntiw
    
-   real(kind=kind_phys),  dimension( im , km ), intent(in )    :: forcet,forceqv_spechum,w,phil
-   real(kind=kind_phys),  dimension( im , km ), intent(inout ) :: t,us,vs
-   real(kind=kind_phys),  dimension( im , km ), intent(inout ) :: qci_conv
-   real(kind=kind_phys),  dimension( im )   :: rand_mom,rand_vmas
-   real(kind=kind_phys),  dimension( im,4 ) :: rand_clos
-   real(kind=kind_phys),  dimension( im , km, 11 ) :: gdc,gdc2
-   real(kind=kind_phys),  dimension( im , km ),     intent(out ) :: cnvw_moist,cnvc
-   real(kind=kind_phys),  dimension( im , km ), intent(inout ) :: cliw, clcw
+   real(kind=kind_phys),  dimension( : , : ), intent(in    ) :: forcet,forceqv_spechum,w,phil
+   real(kind=kind_phys),  dimension( : , : ), intent(inout ) :: t,us,vs
+   real(kind=kind_phys),  dimension( : , : ), intent(inout ) :: qci_conv
+   real(kind=kind_phys),  dimension( : , : ), intent(out   ) :: cnvw_moist,cnvc
+   real(kind=kind_phys),  dimension( : , : ), intent(inout ) :: cliw, clcw
 
    real(kind=kind_phys), allocatable :: clcw_save(:,:), cliw_save(:,:)
 
-   integer, dimension (im), intent(inout) :: hbot,htop,kcnv
-   integer,    dimension (im), intent(in) :: xland
-   real(kind=kind_phys),    dimension (im), intent(in) :: pbl
+   integer, dimension (:), intent(out) :: hbot,htop,kcnv
+   integer, dimension (:), intent(in)  :: xland
+   real(kind=kind_phys),    dimension (:), intent(in) :: pbl
    integer, dimension (im) :: tropics
 !  ruc variable
-   real(kind=kind_phys), dimension (im)  :: hfx2,qfx2,psuri
-   real(kind=kind_phys), dimension (im,km) :: ud_mf,dd_mf,dt_mf
-   real(kind=kind_phys), dimension (im), intent(inout) :: raincv,cld1d
-   real(kind=kind_phys), dimension (im,km) :: t2di,p2di
+   real(kind=kind_phys), dimension (:),   intent(in)  :: hfx2,qfx2,psuri
+   real(kind=kind_phys), dimension (:,:), intent(out) :: ud_mf,dd_mf,dt_mf
+   real(kind=kind_phys), dimension (:),   intent(out) :: raincv,cld1d
+   real(kind=kind_phys), dimension (:,:), intent(in)  :: t2di,p2di
    ! Specific humidity from FV3
-   real(kind=kind_phys), dimension (im,km), intent(in) :: qv2di_spechum
-   real(kind=kind_phys), dimension (im,km), intent(inout) :: qv_spechum
+   real(kind=kind_phys), dimension (:,:), intent(in) :: qv2di_spechum
+   real(kind=kind_phys), dimension (:,:), intent(inout) :: qv_spechum
    ! Local water vapor mixing ratios and cloud water mixing ratios
    real(kind=kind_phys), dimension (im,km) :: qv2di, qv, forceqv, cnvw
    !
-   real(kind=kind_phys), dimension( im ),intent(in) :: garea
+   real(kind=kind_phys), dimension(:),intent(in) :: garea
    real(kind=kind_phys), intent(in   ) :: dt 
 
    integer, intent(in   ) :: imfshalcnv
+   integer, dimension(:), intent(inout) :: cactiv
+
    character(len=*), intent(out) :: errmsg
    integer,          intent(out) :: errflg
-!  define locally for now.
-   integer, dimension(im),intent(inout) :: cactiv
+
+!  local variables
    integer, dimension(im) :: k22_shallow,kbcon_shallow,ktop_shallow
-   real(kind=kind_phys),    dimension(im) :: ht
-   real(kind=kind_phys),    dimension(im) :: dx
+   real(kind=kind_phys), dimension (im)    :: rand_mom,rand_vmas
+   real(kind=kind_phys), dimension (im,4)  :: rand_clos
+   real(kind=kind_phys), dimension (im,km,11) :: gdc,gdc2
+   real(kind=kind_phys), dimension (im)    :: ht
+   real(kind=kind_phys), dimension (im)    :: dx
    real(kind=kind_phys), dimension (im,km) :: outt,outq,outqc,phh,subm,cupclw,cupclws
    real(kind=kind_phys), dimension (im,km) :: dhdt,zu,zus,zd,phf,zum,zdm,outum,outvm
    real(kind=kind_phys), dimension (im,km) :: outts,outqs,outqcs,outu,outv,outus,outvs

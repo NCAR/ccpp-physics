@@ -27,9 +27,9 @@
       character(len=3)    , dimension(:),   intent(in)    :: lndp_var_list
       logical,                              intent(in)    :: lsswr
       real(kind=kind_phys), dimension(:),   intent(in)    :: lndp_prt_list
-      real(kind=kind_phys), dimension(im),  intent(in)    :: tsfg, tsfa, coszen
-      real(kind=kind_phys), dimension(im),  intent(in)    :: alb1d
-      real(kind=kind_phys), dimension(im),  intent(in)    :: slmsk, snowd,     &
+      real(kind=kind_phys), dimension(:),   intent(in)    :: tsfg, tsfa, coszen
+      real(kind=kind_phys), dimension(:),   intent(in)    :: alb1d
+      real(kind=kind_phys), dimension(:),   intent(in)    :: slmsk, snowd,     &
                                                              sncovr, snoalb,   &
                                                              zorl, hprime,     &
                                                              alvsf, alnsf,     &
@@ -38,10 +38,10 @@
                                                              fice, tisfc
       real(kind=kind_phys), dimension(:),   intent(in)    :: albdvis, albdnir, & 
                                                              albivis, albinir
-      real(kind=kind_phys), dimension(im),  intent(inout) :: sfalb
+      real(kind=kind_phys), dimension(:),   intent(inout) :: sfalb
       integer,                              intent(out)   :: nday
-      integer, dimension(im),               intent(out)   :: idxday
-      real(kind=kind_phys), dimension(im),  intent(out)   :: sfcalb1, sfcalb2, &
+      integer,              dimension(:),   intent(out)   :: idxday
+      real(kind=kind_phys), dimension(:),   intent(out)   :: sfcalb1, sfcalb2, &
                                                              sfcalb3, sfcalb4
       character(len=*),                     intent(out)   :: errmsg
       integer,                              intent(out)   :: errflg

@@ -405,7 +405,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = F
 [ch]
   standard_name = surface_drag_coefficient_for_heat_and_moisture_in_air
@@ -414,7 +414,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = F
 [wind]
   standard_name = wind_speed_at_lowest_model_layer
@@ -443,19 +443,19 @@
   kind = kind_phys
   intent = inout
   optional = F
-[hflx]
-  standard_name = kinematic_surface_upward_sensible_heat_flux_reduced_by_surface_roughness
-  long_name = kinematic surface upward sensible heat flux
-  units = K m s-1
+[evap]
+  standard_name = kinematic_surface_upward_latent_heat_flux_reduced_by_surface_roughness
+  long_name = kinematic surface upward latent heat flux
+  units = kg kg-1 m s-1
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
   optional = F
-[evap]
-  standard_name = kinematic_surface_upward_latent_heat_flux_reduced_by_surface_roughness
-  long_name = kinematic surface upward latent heat flux
-  units = kg kg-1 m s-1
+[hflx]
+  standard_name = kinematic_surface_upward_sensible_heat_flux_reduced_by_surface_roughness
+  long_name = kinematic surface upward sensible heat flux
+  units = K m s-1
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
@@ -535,9 +535,9 @@
   optional = F
 [dkt]
   standard_name = atmosphere_heat_diffusivity
-  long_name = diffusivity for heat
+  long_name = atmospheric heat diffusivity
   units = m2 s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension_minus_one)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -576,7 +576,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
   optional = F
 [gamq]
   standard_name = countergradient_mixing_term_for_water_vapor
@@ -585,7 +585,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
   optional = F
 [con_cp]
   standard_name = specific_heat_of_dry_air_at_constant_pressure

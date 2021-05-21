@@ -59,15 +59,14 @@
 !
       ! Interface variables
       integer, intent(in) :: im, levs, ko3, oz_coeff, me
-      real(kind=kind_phys), intent(inout) :: oz(im,levs)
-      ! The dtend array may not be allocated and needs an assumed array size
+      real(kind=kind_phys), intent(inout) :: oz(:,:)
       real(kind=kind_phys), intent(inout) :: dtend(:,:,:)
       integer, intent(in) :: dtidx(:,:), ntoz,                          &
      &  index_of_process_prod_loss, index_of_process_ozmix,             &
      &  index_of_process_temp, index_of_process_overhead_ozone
       real(kind=kind_phys), intent(in) ::                               &
-     &                     dt, po3(ko3), prdout(im,ko3,oz_coeff),       &
-     &                     prsl(im,levs), tin(im,levs), delp(im,levs),  &
+     &                     dt, po3(:), prdout(:,:,:),                   &
+     &                     prsl(:,:), tin(:,:), delp(:,:),              &
      &                     con_g
       real :: gravi
       logical, intent(in) :: ldiag3d

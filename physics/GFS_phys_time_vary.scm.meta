@@ -1462,6 +1462,14 @@
   kind = kind_phys
   intent = inout
   optional = F
+[nthrds]
+  standard_name = omp_threads
+  long_name = number of OpenMP threads available for physics schemes
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

@@ -69,9 +69,9 @@
       logical,intent(in)                 :: lsidea,ldiag3d
       integer,intent(in)                 :: im, km,levr
       real(kind=kind_phys),intent(in)    :: DT, CP, PRSLRD0, ral_ts
-      real(kind=kind_phys),intent(in)    :: pgr(im), PRSL(IM,KM)
-      real(kind=kind_phys),intent(in)    :: U1(IM,KM), V1(IM,KM)
-      real(kind=kind_phys),intent(inout) :: A(IM,KM), B(IM,KM), C(IM,KM)
+      real(kind=kind_phys),intent(in)    :: pgr(:), PRSL(:,:)
+      real(kind=kind_phys),intent(in)    :: U1(:,:), V1(:,:)
+      real(kind=kind_phys),intent(inout) :: A(:,:), B(:,:), C(:,:)
       real(kind=kind_phys),optional, intent(inout) :: dtend(:,:,:)
       integer, intent(in)                :: dtidx(:,:),                  &
      &  index_of_process_rayleigh_damping, index_of_temperature,         &

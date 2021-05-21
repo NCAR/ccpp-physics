@@ -4,7 +4,7 @@ module rrtmgp_sw_cloud_sampling
   use mo_optical_props,         only: ty_optical_props_2str
   use rrtmgp_sampling,          only: sampled_mask, draw_samples
   use mersenne_twister,         only: random_setseed, random_number, random_stat  
-  use rrtmgp_aux,               only: check_error_msg
+  use radiation_tools,               only: check_error_msg
   use rrtmgp_sw_gas_optics,     only: sw_gas_props
   use netcdf
 

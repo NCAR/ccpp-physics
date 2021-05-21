@@ -5,11 +5,6 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = ugwpv1_gsldrag_post_init
-  type = scheme
-
-########################################################################
-[ccpp-arg-table]
   name = ugwpv1_gsldrag_post_run
   type = scheme
 [im]
@@ -72,15 +67,6 @@
   kind = kind_phys
   intent = in
   optional = F 
-[du_oblcol]
-  standard_name = vertically_integrated_x_momentum_flux_due_to_blocking_drag
-  long_name = integrated x momentum flux from blocking drag
-  units = Pa
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [du_ofdcol]
   standard_name = vertically_integrated_x_momentum_flux_due_to_form_drag
   long_name = integrated x momentum flux from form drag
@@ -90,6 +76,15 @@
   kind = kind_phys
   intent = in
   optional = F  
+[du_oblcol]
+  standard_name = vertically_integrated_x_momentum_flux_due_to_blocking_drag
+  long_name = integrated x momentum flux from blocking drag
+  units = Pa
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [tau_ogw]
   standard_name = instantaneous_momentum_flux_due_to_orographic_gravity_wave_drag
   long_name = momentum flux or stress due to orographic gravity wave drag
@@ -313,9 +308,3 @@
   type = integer
   intent = out
   optional = F
-
-########################################################################
-[ccpp-arg-table]
-  name = ugwpv1_gsldrag_post_finalize
-  type = scheme
-

@@ -4,7 +4,7 @@ module rrtmgp_lw_cloud_sampling
   use mo_optical_props,         only: ty_optical_props_2str
   use rrtmgp_sampling,          only: sampled_mask, draw_samples
   use mersenne_twister,         only: random_setseed, random_number, random_stat  
-  use rrtmgp_aux,               only: check_error_msg
+  use radiation_tools,               only: check_error_msg
   use rrtmgp_lw_gas_optics,     only: lw_gas_props
   use netcdf
 
@@ -84,12 +84,12 @@ contains
          errmsg                         ! CCPP error message
     integer,          intent(out) :: &
          errflg                         ! CCPP error code
-    type(ty_optical_props_2str),intent(out) :: &
+    type(ty_optical_props_2str),intent(inout) :: &
          lw_optical_props_clouds,     & ! RRTMGP DDT: Shortwave optical properties by spectral point (clouds)
          lw_optical_props_precip        ! RRTMGP DDT: Shortwave optical properties by spectral point (precipitation)
 
     ! Local variables
-    integer :: iCol, iLay
+    integer :: iCol, iLay, iBand
     integer,dimension(ncol) :: ipseed_lw
     type(random_stat) :: rng_stat
     real(kind_phys), dimension(lw_gas_props%get_ngpt(),nLev,ncol) :: rng3D,rng3D2
@@ -106,12 +106,11 @@ contains
     ! ####################################################################################    
     ! First sample the clouds...
     ! ####################################################################################
-
-    ! Allocate space RRTMGP DDTs [nCol,nLev,nGpt]
-    call check_error_msg('rrtmgp_lw_cloud_sampling_run',&
-         lw_optical_props_clouds%alloc_2str(nCol, nLev, lw_gas_props))
-    lw_optical_props_clouds%tau(:,:,:) = 0._kind_phys
-    lw_optical_props_clouds%ssa(:,:,:) = 0._kind_phys
+    lw_optical_props_clouds%band2gpt      = lw_gas_props%get_band_lims_gpoint()
+    lw_optical_props_clouds%band_lims_wvn = lw_gas_props%get_band_lims_wavenumber()
+    do iBand=1,lw_gas_props%get_nband()
+       lw_optical_props_clouds%gpt2band(lw_optical_props_clouds%band2gpt(1,iBand):lw_optical_props_clouds%band2gpt(2,iBand)) = iBand
+    end do
     
     ! Change random number seed value for each radiation invocation (isubc_lw =1 or 2).
     if(isubc_lw == 1) then      ! advance prescribed permutation seed
@@ -176,13 +175,12 @@ contains
     ! ####################################################################################
     ! Next sample the precipitation...
     ! ####################################################################################
-    
-    ! Allocate space RRTMGP DDTs [nCol,nLev,nGpt]
-    call check_error_msg('rrtmgp_lw_cloud_sampling_run',&
-         lw_optical_props_precip%alloc_2str(nCol, nLev, lw_gas_props))
-    lw_optical_props_precip%tau(:,:,:) = 0._kind_phys
-    lw_optical_props_precip%ssa(:,:,:) = 0._kind_phys
-    
+    lw_optical_props_precip%band2gpt      = lw_gas_props%get_band_lims_gpoint()
+    lw_optical_props_precip%band_lims_wvn = lw_gas_props%get_band_lims_wavenumber()
+    do iBand=1,lw_gas_props%get_nband()
+       lw_optical_props_precip%gpt2band(lw_optical_props_precip%band2gpt(1,iBand):lw_optical_props_precip%band2gpt(2,iBand)) = iBand
+    end do    
+
     ! Change random number seed value for each radiation invocation (isubc_lw =1 or 2).
     if(isubc_lw == 1) then      ! advance prescribed permutation seed
        do iCol = 1, ncol
