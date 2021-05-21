@@ -150,7 +150,8 @@
      &                     phih(im),  phim(im),    prn(im,km-1),
      &                     rbdn(im),  rbup(im),    thermal(im),
      &                     ustar(im), wstar(im),   hpblx(im),
-     &                     ust3(im),  wst3(im),    rho_a(im),
+!    &                     ust3(im),  wst3(im),    rho_a(im),
+     &                     ust3(im),  wst3(im),
      &                     z0(im),    crb(im),
      &                     hgamt(im), hgamq(im),
      &                     wscale(im),vpert(im),
@@ -379,7 +380,7 @@
 !>  - Some output variables and logical flags are initialized
       do i = 1,im
          z0(i)    = 0.01 * zorl(i)
-         rho_a(i) = prsl(i,1) / (rd * t1(i,1))
+!        rho_a(i) = prsl(i,1) / (rd * t1(i,1))
          dusfc(i) = 0.
          dvsfc(i) = 0.
          dtsfc(i) = 0.
@@ -1479,14 +1480,14 @@ c
             qtend      = (f2(i,k)-q1(i,k,1))*rdt
             tdt(i,k)   = tdt(i,k)+ttend
             rtg(i,k,1) = rtg(i,k,1)+qtend
-!           dtsfc(i)   = dtsfc(i)+cont*del(i,k)*ttend
-!           dqsfc(i)   = dqsfc(i)+conq*del(i,k)*qtend
+            dtsfc(i)   = dtsfc(i)+cont*del(i,k)*ttend
+            dqsfc(i)   = dqsfc(i)+conq*del(i,k)*qtend
          enddo
       enddo
-      do i = 1,im
-        dtsfc(i) = rho_a(i) * cp * heat(i)
-        dqsfc(i) = rho_a(i) * hvap * evap(i)
-      enddo
+!     do i = 1,im
+!       dtsfc(i) = rho_a(i) * cp * heat(i)
+!       dqsfc(i) = rho_a(i) * hvap * evap(i)
+!     enddo
 !
       if(ldiag3d .and. .not. gen_tend) then
         do  k = 1,km
@@ -1618,14 +1619,14 @@ c
             vtend = (f2(i,k)-v1(i,k))*rdt
             du(i,k)  = du(i,k)+utend
             dv(i,k)  = dv(i,k)+vtend
-!           dusfc(i) = dusfc(i)+conw*del(i,k)*utend
-!           dvsfc(i) = dvsfc(i)+conw*del(i,k)*vtend
+            dusfc(i) = dusfc(i)+conw*del(i,k)*utend
+            dvsfc(i) = dvsfc(i)+conw*del(i,k)*vtend
          enddo
       enddo
-      do i = 1,im
-        dusfc(i) = -1.*rho_a(i)*stress(i)*u1(i,1)/spd1(i)
-        dvsfc(i) = -1.*rho_a(i)*stress(i)*v1(i,1)/spd1(i)
-      enddo
+!     do i = 1,im
+!       dusfc(i) = -1.*rho_a(i)*stress(i)*u1(i,1)/spd1(i)
+!       dvsfc(i) = -1.*rho_a(i)*stress(i)*v1(i,1)/spd1(i)
+!     enddo
 !
       if(ldiag3d .and. .not. gen_tend) then
         do k = 1,km
