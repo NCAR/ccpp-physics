@@ -317,7 +317,7 @@
         dqsfc_cpl, dusfci_cpl, dvsfci_cpl, dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag, dqsfc_diag,             &
         dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag, dt3dt, du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD, dq3dt,        &
         dq3dt_ozone, rd, cp, fvirt, hvap, t1, q1, prsl, hflx, ushfsfci, oceanfrac, kdt, dusfc_cice, dvsfc_cice,                &
-        dtsfc_cice, dqsfc_cice, wet, dry, icy, wind, stress_wat, hflx_wat, evap_wat, ugrs1, vgrs1, dkt_cpl, dkt, hffac, hefac, &
+        dtsfc_cice, dqsfc_cice, wet, dry, icy, wind, stress_wat, hflx_wat, evap_wat, ugrs1, vgrs1, dkt_cpl, dkt, hffac,        &
         ugrs, vgrs, tgrs, qgrs, save_u, save_v, save_t, save_q, errmsg, errflg)
 
       use machine,                only : kind_phys
@@ -370,7 +370,7 @@
       real(kind=kind_phys), dimension(:,:), intent(in)    :: dkt
 
       ! From canopy heat storage - reduction factors in latent/sensible heat flux due to surface roughness
-      real(kind=kind_phys), dimension(:), intent(in) :: hffac, hefac
+      real(kind=kind_phys), dimension(:), intent(in) :: hffac
 
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
@@ -556,7 +556,7 @@
               else !use PBL fluxes when CICE fluxes is unavailable
                 dusfci_cpl(i) = dusfc1(i)
                 dvsfci_cpl(i) = dvsfc1(i)
-                dtsfci_cpl(i) = dtsfc1(i)
+                dtsfci_cpl(i) = dtsfc1(i)*hffac(i)
                 dqsfci_cpl(i) = dqsfc1(i)
               end if
             elseif (icy(i) .or. dry(i)) then ! use stress_ocean from sfc_diff for opw component at mixed point
@@ -575,7 +575,7 @@
               dusfci_cpl(i) = dusfc1(i)
               dvsfci_cpl(i) = dvsfc1(i)
               dtsfci_cpl(i) = dtsfc1(i)*hffac(i)
-              dqsfci_cpl(i) = dqsfc1(i)*hefac(i)
+              dqsfci_cpl(i) = dqsfc1(i)
             endif
 !
             dusfc_cpl (i) = dusfc_cpl(i) + dusfci_cpl(i) * dtf
@@ -601,7 +601,7 @@
           dusfci_diag(i) = dusfc1(i)
           dvsfci_diag(i) = dvsfc1(i)
           dtsfci_diag(i) = dtsfc1(i)*hffac(i)
-          dqsfci_diag(i) = dqsfc1(i)*hefac(i)
+          dqsfci_diag(i) = dqsfc1(i)
           dtsfc_diag (i) = dtsfc_diag(i) + dtsfci_diag(i) * dtf
           dqsfc_diag (i) = dqsfc_diag(i) + dqsfci_diag(i) * dtf
         enddo
