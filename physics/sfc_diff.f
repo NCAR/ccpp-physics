@@ -357,7 +357,8 @@
                  z0rl_wat(i) = 1.0e-4_kp
               endif
 
-            elseif (z0rl_wav(i) <= 1.0e-7_kp) then
+            elseif (z0rl_wav(i) <= 1.0e-7_kp .or.                       &
+     &              z0rl_wav(i) > 1.0_kp) then
               z0 = (charnock / grav) * ustar_wat(i) * ustar_wat(i)
 
               if (redrag) then
