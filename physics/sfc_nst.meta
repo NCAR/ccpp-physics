@@ -195,6 +195,32 @@
   kind = kind_phys
   intent = in
   optional = F
+[lseaspray]
+  standard_name = flag_for_sea_spray
+  long_name = flag for sea spray parameterization
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[fm]
+  standard_name = Monin_Obukhov_similarity_function_for_momentum_over_water
+  long_name = Monin-Obukhov similarity function for momentum over water
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[fm10]
+  standard_name = Monin_Obukhov_similarity_function_for_momentum_at_10m_over_water
+  long_name = Monin-Obukhov similarity parameter for momentum at 10m over water
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [prsl1]
   standard_name = air_pressure_at_lowest_model_layer
   long_name = surface layer mean pressure
