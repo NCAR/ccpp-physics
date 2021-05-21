@@ -216,12 +216,13 @@
         epi, gfluxi, t1, q1, u1, v1, dlwsfci_cpl, dswsfci_cpl, dlwsfc_cpl, dswsfc_cpl, dnirbmi_cpl, dnirdfi_cpl, dvisbmi_cpl,       &
         dvisdfi_cpl, dnirbm_cpl, dnirdf_cpl, dvisbm_cpl, dvisdf_cpl, nlwsfci_cpl, nlwsfc_cpl, t2mi_cpl, q2mi_cpl, u10mi_cpl,        &
         v10mi_cpl, tsfci_cpl, psurfi_cpl, nnirbmi_cpl, nnirdfi_cpl, nvisbmi_cpl, nvisdfi_cpl, nswsfci_cpl, nswsfc_cpl, nnirbm_cpl,  &
-        nnirdf_cpl, nvisbm_cpl, nvisdf_cpl, gflux, evbsa, evcwa, transa, sbsnoa, snowca, snohfa, ep,                                &
-        runoff, srunoff, runof, drain, lheatstrg, z0fac, e0fac, zorl, hflx, evap, hflxq, evapq, hffac, hefac, errmsg, errflg)
+        nnirdf_cpl, nvisbm_cpl, nvisdf_cpl, gflux, evbsa, evcwa, transa, sbsnoa, snowca, snohfa, ep, islmsk, sigmaf,                &
+        runoff, srunoff, runof, drain, lheatstrg, h0facu, h0facs, zorl, hflx, evap, hflxq, zvfun, hffac, errmsg, errflg)
 
         implicit none
 
         integer,                                intent(in) :: im
+        integer, dimension(im),                 intent(in) :: islmsk
         logical,                                intent(in) :: cplflx, cplwav, lssav
         logical, dimension(:),                  intent(in) :: icy, wet
         real(kind=kind_phys),                   intent(in) :: dtf
@@ -237,15 +238,15 @@
           evcwa, transa, sbsnoa, snowca, snohfa, ep
 
         real(kind=kind_phys), dimension(:), intent(inout) :: runoff, srunoff
-        real(kind=kind_phys), dimension(:), intent(in)    :: drain, runof
+        real(kind=kind_phys), dimension(:), intent(in)    :: drain, runof, sigmaf
 
         ! For canopy heat storage
         logical, intent(in) :: lheatstrg
-        real(kind=kind_phys), intent(in) :: z0fac, e0fac
+        real(kind=kind_phys), intent(in) :: h0facu, h0facs
         real(kind=kind_phys), dimension(:), intent(in)  :: zorl
         real(kind=kind_phys), dimension(:), intent(in)  :: hflx,  evap
-        real(kind=kind_phys), dimension(:), intent(out) :: hflxq, evapq
-        real(kind=kind_phys), dimension(:), intent(out) :: hffac, hefac
+        real(kind=kind_phys), dimension(:), intent(out) :: hflxq
+        real(kind=kind_phys), dimension(:), intent(out) :: zvfun, hffac
 
         ! CCPP error handling variables
         character(len=*), intent(out) :: errmsg
@@ -255,8 +256,7 @@
         real(kind=kind_phys), parameter :: albdf = 0.06_kind_phys
 
         ! Parameters for canopy heat storage parametrization
-        real(kind=kind_phys), parameter :: z0min=0.2, z0max=1.0
-        real(kind=kind_phys), parameter :: u10min=2.5, u10max=7.5
+        real(kind=kind_phys), parameter :: z0min=0.1, z0max=1.0
 
         integer :: i
         real(kind=kind_phys) :: xcosz_loc, ocalnirdf_cpl, ocalnirbm_cpl, ocalvisdf_cpl, ocalvisbm_cpl
@@ -361,32 +361,43 @@
           enddo
         endif
 
-!  --- ...  Boundary Layer and Free atmospheic turbulence parameterization
 !
-!  in order to achieve heat storage within canopy layer, in the canopy heat
-!    storage parameterization the kinematic sensible and latent heat fluxes
-!    (hflx & evap) as surface boundary forcings to the pbl scheme are
-!    reduced as a function of surface roughness
+!  in order to achieve heat storage within canopy layer, in the canopy
+!    heat torage parameterization the kinematic sensible heat flux
+!    (hflx) as surface boundary forcing to the pbl scheme is
+!    reduced as a function of surface roughness & green vegetation
+!    fraction
 !
+!    background diffusivity & background mixing length are also given by
+!     a function of surface roughness & green vegetation fraction
+!
+       do i=1,im
+          if(islmsk(i) == 1) then
+            tem = 0.01 * zorl(i)     ! change unit from cm to m
+            tem1 = (tem - z0min) / (z0max - z0min)
+            tem1 = min(max(tem1, 0.0), 1.0)
+            tem2 = max(sigmaf(i), 0.1)
+!           tem2 = sigmaf(i)
+            zvfun(i) = sqrt(tem1 * tem2)
+          else
+            zvfun(i) = 0.
+          endif
+        enddo
         do i=1,im
           hflxq(i) = hflx(i)
-          evapq(i) = evap(i)
           hffac(i) = 1.0
-          hefac(i) = 1.0
         enddo
         if (lheatstrg) then
           do i=1,im
-            tem = 0.01 * zorl(i)     ! change unit from cm to m
-            tem1 = (tem - z0min) / (z0max - z0min)
-            hffac(i) = z0fac * min(max(tem1, 0.0), 1.0)
-            tem = sqrt(u10m(i)**2+v10m(i)**2)
-            tem1 = (tem - u10min) / (u10max - u10min)
-            tem2 = 1.0 - min(max(tem1, 0.0), 1.0)
-            hffac(i) = tem2 * hffac(i)
-            hefac(i) = 1. + e0fac * hffac(i)
-            hffac(i) = 1. + hffac(i)
-            hflxq(i) = hflx(i) / hffac(i)
-            evapq(i) = evap(i) / hefac(i)
+            if(islmsk(i) == 1) then
+              if(hflx(i) > 0.) then
+                hffac(i) = h0facu * zvfun(i)
+              else
+                hffac(i) = h0facs * zvfun(i)
+              endif
+              hffac(i) = 1. + hffac(i)
+              hflxq(i) = hflx(i) / hffac(i)
+            endif
           enddo
         endif
 
