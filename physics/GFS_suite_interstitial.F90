@@ -315,7 +315,7 @@
             idtend = dtidx(index_of_temperature,index_of_process_longwave)
             if(idtend>=1) then
               if (use_LW_jacobian) then
-                dtend(:,:,idtend)) = dtend(:,:,idtend) + htrlwu(:,:)*dtf
+                dtend(:,:,idtend) = dtend(:,:,idtend) + htrlwu(:,:)*dtf
               else
                 dtend(:,:,idtend) = dtend(:,:,idtend) + htrlw(:,:)*dtf
               endif

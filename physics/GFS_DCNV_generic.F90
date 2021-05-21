@@ -99,8 +99,8 @@
 !> \section arg_table_GFS_DCNV_generic_post_run Argument Table
 !! \htmlinclude GFS_DCNV_generic_post_run.html
 !!
-    subroutine GFS_DCNV_generic_post_run (im, levs, lssav, ldiag3d, ras, cscnv,   &
-      frain, rain1, dtf, cld1d, save_u, save_v, save_t, gu0, gv0, gt0,            &
+    subroutine GFS_DCNV_generic_post_run (im, levs, lssav, ldiag3d, qdiag3d, ras, &
+      cscnv, frain, rain1, dtf, cld1d, save_u, save_v, save_t, gu0, gv0, gt0,     &
       ud_mf, dd_mf, dt_mf, con_g, npdf3d, num_p3d, ncnvcld3d, nsamftrac,          &
       rainc, cldwrk, upd_mf, dwn_mf, det_mf, dtend, dtidx, index_of_process_dcnv, &
       index_of_temperature, index_of_x_wind, index_of_y_wind, ntqv, gq0, save_q,  &
@@ -113,7 +113,7 @@
       implicit none
 
       integer, intent(in) :: im, levs, nsamftrac
-      logical, intent(in) :: lssav, ldiag3d, ras, cscnv
+      logical, intent(in) :: lssav, ldiag3d, qdiag3d, ras, cscnv
       logical, intent(in) :: flag_for_dcnv_generic_tend
 
       real(kind=kind_phys), intent(in) :: frain, dtf
@@ -205,15 +205,13 @@
 
           ! convective mass fluxes
           if(qdiag3d) then
-             do k=1,levs
-                do i=1,im
-                   dq3dt(i,k) = dq3dt(i,k) + (gq0_water_vapor(i,k)-save_qv(i,k)) * frain
-                   ! convective mass fluxes
-                   upd_mf(i,k)  = upd_mf(i,k)  + ud_mf(i,k) * (con_g*frain)
-                   dwn_mf(i,k)  = dwn_mf(i,k)  + dd_mf(i,k) * (con_g*frain)
-                   det_mf(i,k)  = det_mf(i,k)  + dt_mf(i,k) * (con_g*frain)
-                enddo
-             enddo
+            do k=1,levs
+              do i=1,im
+                upd_mf(i,k)  = upd_mf(i,k)  + ud_mf(i,k) * (con_g*frain)
+                dwn_mf(i,k)  = dwn_mf(i,k)  + dd_mf(i,k) * (con_g*frain)
+                det_mf(i,k)  = det_mf(i,k)  + dt_mf(i,k) * (con_g*frain)
+              enddo
+            enddo
           endif
         endif ! if (ldiag3d)
 

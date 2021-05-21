@@ -228,6 +228,14 @@
   type = logical
   intent = in
   optional = F
+[qdiag3d]
+  standard_name = flag_tracer_diagnostics_3D
+  long_name = flag for 3d tracer diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [ras]
   standard_name = flag_for_ras_deep_convection
   long_name = flag for ras convection scheme
