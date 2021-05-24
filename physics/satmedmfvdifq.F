@@ -1295,6 +1295,13 @@ c
             rtg(i,k,ntke) = rtg(i,k,ntke)+qtend
          enddo
       enddo
+      if(ldiag3d) then
+         idtend = dtidx(ntke+100,index_of_process_pbl)
+         if(idtend>0) then
+            dtend(1:im,1:km,idtend) = dtend(1:im,1:km,idtend) +         &
+     &        (f1(1:im,1:km)-q1(1:im,1:km,ntke))*rdt
+         endif
+      endif
 c
 !> ## Compute tridiagonal matrix elements for heat and moisture
 c
@@ -1459,14 +1466,7 @@ c
             is = (kk-1) * km
             idtend = dtidx(kk+100,index_of_process_pbl)
             if(idtend>=1) then
-              if(kk==ntke) then
-                do k = 1, km
-                  do i = 1, im
-                    qtend = (f1(i,k)-q1(i,k,kk))*rdt
-                    dtend(i,k,idtend) = dtend(i,k,idtend)+qtend*delt
-                  enddo
-                enddo
-              else
+              if(kk/=ntke) then
                 do k = 1, km
                   do i = 1, im
                     qtend = (f2(i,k+is)-q1(i,k,kk))*rdt

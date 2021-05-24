@@ -17,14 +17,17 @@
 !!
     subroutine GFS_DCNV_generic_pre_run (im, levs, ldiag3d, qdiag3d, do_cnvgwd, cplchm,  &
                                          gu0, gv0, gt0, gq0, nsamftrac, ntqv,            &
-                                         save_u, save_v, save_t, save_q, dqdti,          &
+                                         save_u, save_v, save_t, save_q, dqdti, clw,     &
+                                         ntcw,ntiw,ntclamt,ntrw,ntsw,ntrnc,ntsnc,ntgl,   &
+                                         ntgnc, cscnv, satmedmf, trans_trac, ras, ntrac, &
                                          dtidx, index_of_process_dcnv, errmsg, errflg)
 
       use machine, only: kind_phys
 
       implicit none
 
-      integer, intent(in) :: im, levs, nsamftrac, ntqv, index_of_process_dcnv, dtidx(:,:)
+      integer, intent(in) :: im, levs, nsamftrac, ntqv, index_of_process_dcnv, dtidx(:,:), &
+           ntcw,ntiw,ntclamt,ntrw,ntsw,ntrnc,ntsnc,ntgl,ntrac,ntgnc
       logical, intent(in) :: ldiag3d, qdiag3d, do_cnvgwd, cplchm
       real(kind=kind_phys), dimension(im,levs), intent(in)    :: gu0
       real(kind=kind_phys), dimension(im,levs), intent(in)    :: gv0
@@ -38,9 +41,11 @@
       real(kind=kind_phys), dimension(:,:),     intent(inout) :: dqdti
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
-
+      logical, intent(in) :: cscnv, satmedmf, trans_trac, ras
       real(kind=kind_phys), parameter :: zero    = 0.0d0
-      integer :: i, k, n
+      real(kind=kind_phys), dimension(:,:,:), intent(in) :: clw
+
+      integer :: i, k, n, tracers
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -63,19 +68,28 @@
       endif
 
       if ((ldiag3d.and.qdiag3d) .or. cplchm) then
-        if(nsamftrac>0) then
-          do n=1,nsamftrac
-            if(n==ntqv .or. dtidx(n+100,index_of_process_dcnv)>=1) then
-              save_q(:,:,n) = gq0(:,:,n)
-            endif
-          enddo
-        else
-          do k=1,levs
-            do i=1,im
-              save_q(i,k,ntqv) = gq0(i,k,ntqv)
+         if (cscnv .or. satmedmf .or. trans_trac .or. ras) then
+            print *,'dcnv store clw'
+            tracers = 2
+            do n=2,ntrac
+               if ( n /= ntcw  .and. n /= ntiw  .and. n /= ntclamt .and. &
+                    n /= ntrw  .and. n /= ntsw  .and. n /= ntrnc   .and. &
+                    n /= ntsnc .and. n /= ntgl  .and. n /= ntgnc) then
+                  tracers = tracers + 1
+                  if(dtidx(100+n,index_of_process_dcnv)>0) then
+                     save_q(:,:,n) = clw(:,:,tracers)
+                  endif
+               endif
             enddo
-          enddo
-        endif
+         else
+            print *,'dcnv store gq0'
+            do n=2,ntrac
+               if(dtidx(100+n,index_of_process_dcnv)>0) then
+                  save_q(:,:,n) = gq0(:,:,n)
+               endif
+            enddo
+         endif ! end if_ras or cfscnv or samf
+         save_q(:,:,ntqv) = gq0(:,:,ntqv)
       endif
 
       if (cplchm) then
@@ -105,7 +119,8 @@
       rainc, cldwrk, upd_mf, dwn_mf, det_mf, dtend, dtidx, index_of_process_dcnv, &
       index_of_temperature, index_of_x_wind, index_of_y_wind, ntqv, gq0, save_q,  &
       cnvw, cnvc, cnvw_phy_f3d, cnvc_phy_f3d, flag_for_dcnv_generic_tend,         &
-      errmsg, errflg)
+      ntcw,ntiw,ntclamt,ntrw,ntsw,ntrnc,ntsnc,ntgl,ntgnc, ntrac,clw,              &
+      satmedmf, trans_trac, errmsg, errflg)
 
 
       use machine,               only: kind_phys
@@ -124,6 +139,7 @@
       real(kind=kind_phys), dimension(im,levs), intent(in) :: ud_mf, dd_mf, dt_mf
       real(kind=kind_phys), intent(in) :: con_g
       integer, intent(in) :: npdf3d, num_p3d, ncnvcld3d
+      logical, intent(in) :: satmedmf, trans_trac
 
       real(kind=kind_phys), dimension(im), intent(inout) :: rainc, cldwrk
       ! dtend, upd_mf, dwn_mf, det_mf only allocated if ldiag3d == .true.
@@ -133,6 +149,9 @@
       real(kind=kind_phys), dimension(:,:,:), intent(inout) :: dtend
       integer, intent(in) :: dtidx(:,:), index_of_process_dcnv, index_of_temperature, &
            index_of_x_wind, index_of_y_wind, ntqv
+      integer, intent(in) :: ntcw,ntiw,ntclamt,ntrw,ntsw,ntrnc,ntsnc,ntgl,ntrac,ntgnc
+      real(kind=kind_phys), dimension(:,:,:), intent(in) :: clw
+
 
       ! The following arrays may not be allocated, depending on certain flags and microphysics schemes.
       ! Since Intel 15 crashes when passing unallocated arrays to arrays defined with explicit shape,
@@ -143,7 +162,7 @@
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
 
-      integer :: i, k, n, idtend
+      integer :: i, k, n, idtend, tracers
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -194,18 +213,32 @@
             dtend(:,:,idtend) = dtend(:,:,idtend) + (gv0-save_v)*frain
           endif
 
-          if(nsamftrac>0) then
-            do n=1,nsamftrac
-              idtend=dtidx(100+n,index_of_process_dcnv)
-              if(idtend>=1) then
-                dtend(:,:,idtend) = dtend(:,:,idtend) + (gq0(:,:,n)-save_q(:,:,n))*frain
-              endif
-            enddo
+          if (cscnv .or. satmedmf .or. trans_trac .or. ras) then
+             print *,'dcnv accum clw'
+             tracers = 2
+             do n=2,ntrac
+                if ( n /= ntcw  .and. n /= ntiw  .and. n /= ntclamt .and. &
+                     n /= ntrw  .and. n /= ntsw  .and. n /= ntrnc   .and. &
+                     n /= ntsnc .and. n /= ntgl  .and. n /= ntgnc) then
+                   tracers = tracers + 1
+                   idtend = dtidx(100+n,index_of_process_dcnv)
+                   if(idtend>0) then
+                      dtend(:,:,idtend) = dtend(:,:,idtend) + clw(:,:,tracers)-save_q(:,:,n) * frain
+                   endif
+                endif
+             enddo
           else
-            idtend=dtidx(100+ntqv,index_of_process_dcnv)
-            if(idtend>=1) then
-              dtend(:,:,idtend) = dtend(:,:,idtend) + (gq0(:,:,ntqv)-save_q(:,:,ntqv))*frain
-            endif
+            print *,'dcnv accume gq0'
+            do n=2,ntrac
+               idtend = dtidx(100+n,index_of_process_dcnv)
+               if(idtend>0) then
+                  dtend(:,:,idtend) = dtend(:,:,idtend) + (gq0(:,:,n)-save_q(:,:,n))*frain
+               endif
+            enddo
+          endif
+          idtend = dtidx(100+ntqv, index_of_process_dcnv)
+          if(idtend>=1) then
+             dtend(:,:,idtend) = dtend(:,:,idtend) + (gq0(:,:,ntqv) - save_q(:,:,ntqv)) * frain
           endif
 
           ! convective mass fluxes

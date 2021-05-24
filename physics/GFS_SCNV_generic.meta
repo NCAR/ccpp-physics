@@ -151,6 +151,127 @@
   type = integer
   intent = in
   optional = F
+[cscnv]
+  standard_name = flag_for_Chikira_Sugiyama_deep_convection
+  long_name = flag for Chikira-Sugiyama convection
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[satmedmf]
+  standard_name = flag_for_scale_aware_TKE_moist_EDMF_PBL
+  long_name = flag for scale-aware TKE moist EDMF PBL scheme
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[trans_trac]
+  standard_name = flag_for_convective_transport_of_tracers
+  long_name = flag for convective transport of tracers
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[ras]
+  standard_name = flag_for_ras_deep_convection
+  long_name = flag for ras convection scheme
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[ntcw]
+  standard_name = index_for_liquid_cloud_condensate
+  long_name = tracer index for cloud condensate (or liquid water)
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntiw]
+  standard_name = index_for_ice_cloud_condensate
+  long_name = tracer index for  ice water
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntclamt]
+  standard_name = index_for_cloud_amount
+  long_name = tracer index for cloud amount integer
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntrw]
+  standard_name = index_for_rain_water
+  long_name = tracer index for rain water
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntsw]
+  standard_name = index_for_snow_water
+  long_name = tracer index for snow water
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntrnc]
+  standard_name = index_for_rain_number_concentration
+  long_name = tracer index for rain   number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntsnc]
+  standard_name = index_for_snow_number_concentration
+  long_name = tracer index for snow   number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntgl]
+  standard_name = index_for_graupel
+  long_name = tracer index for graupel
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntgnc]
+  standard_name = index_for_graupel_number_concentration
+  long_name = tracer index for graupel number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[clw]
+  standard_name = convective_transportable_tracers
+  long_name = array to contain cloud water and other convective trans. tracers
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers_for_convective_transport)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[ntrac]
+  standard_name = number_of_tracers
+  long_name = number of tracers
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -531,6 +652,118 @@
   standard_name = flag_for_samf_shallow_convection_scheme
   long_name = flag for SAMF shallow convection scheme
   units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[cscnv]
+  standard_name = flag_for_Chikira_Sugiyama_deep_convection
+  long_name = flag for Chikira-Sugiyama convection
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[satmedmf]
+  standard_name = flag_for_scale_aware_TKE_moist_EDMF_PBL
+  long_name = flag for scale-aware TKE moist EDMF PBL scheme
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[trans_trac]
+  standard_name = flag_for_convective_transport_of_tracers
+  long_name = flag for convective transport of tracers
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[ras]
+  standard_name = flag_for_ras_deep_convection
+  long_name = flag for ras convection scheme
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[ntcw]
+  standard_name = index_for_liquid_cloud_condensate
+  long_name = tracer index for cloud condensate (or liquid water)
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntiw]
+  standard_name = index_for_ice_cloud_condensate
+  long_name = tracer index for  ice water
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntclamt]
+  standard_name = index_for_cloud_amount
+  long_name = tracer index for cloud amount integer
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntrw]
+  standard_name = index_for_rain_water
+  long_name = tracer index for rain water
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntsw]
+  standard_name = index_for_snow_water
+  long_name = tracer index for snow water
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntrnc]
+  standard_name = index_for_rain_number_concentration
+  long_name = tracer index for rain   number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntsnc]
+  standard_name = index_for_snow_number_concentration
+  long_name = tracer index for snow   number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntgl]
+  standard_name = index_for_graupel
+  long_name = tracer index for graupel
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntgnc]
+  standard_name = index_for_graupel_number_concentration
+  long_name = tracer index for graupel number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntrac]
+  standard_name = number_of_tracers
+  long_name = number of tracers
+  units = count
   dimensions = ()
   type = integer
   intent = in
