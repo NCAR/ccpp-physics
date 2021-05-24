@@ -8,7 +8,22 @@
 
       contains
 
-      subroutine myjpbl_wrapper_init ()
+      subroutine myjpbl_wrapper_init (do_myjpbl,errmsg,errflg)
+      
+      logical,              intent(in)  :: do_myjpbl
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
+
+     ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
+
+    ! Consistency checks
+      if (.not. do_myjpbl) then
+        write(errmsg,fmt='(*(a))') 'Logic error: do_myjpbl=.false.'        
+        errflg = 1
+        return
+      end if
       end subroutine myjpbl_wrapper_init
 
       subroutine myjpbl_wrapper_finalize ()
