@@ -223,7 +223,7 @@
 
         integer,                                intent(in) :: im
         logical,                                intent(in) :: cplflx, cplchm, cplwav, lssav
-        logical, dimension(im),                 intent(in) :: icy, wet
+        logical, dimension(:),                  intent(in) :: icy, wet
         real(kind=kind_phys),                   intent(in) :: dtf
 
         real(kind=kind_phys), dimension(:),  intent(in)  :: ep1d, gflx, tgrs_1, qgrs_1, ugrs_1, vgrs_1, adjsfcdlw, adjsfcdsw,  &
