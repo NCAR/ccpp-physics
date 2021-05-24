@@ -178,10 +178,10 @@
      &       sfcnirbmu,sfcnirdfu,sfcvisbmu,sfcvisdfu,                   &
      &       sfcnirbmd,sfcnirdfd,sfcvisbmd,sfcvisdfd,                   &
      &       im, levs, deltim, fhswr,                                   &
-     &       dry, icy, wet, minGPtemp, maxGPtemp,                       &
-     &       minGPpres, use_LW_jacobian, sfculw, fluxlwUP_jac,          &
-     &       t_lay, t_lev, p_lay, p_lev, flux2D_lwUP, flux2D_lwDOWN,    &
-     &       pert_radtend, do_sppt,ca_global,                           &
+     &       dry, icy, wet, minGPtemp, maxGPtemp, damp_LW_fluxadj,      &
+     &       lfnc_k_grad, lfnc_p0, minGPpres, use_LW_jacobian, sfculw,  &
+     &       fluxlwUP_jac, t_lay, t_lev, p_lay, p_lev, flux2D_lwUP,     &
+     &       flux2D_lwDOWN, pert_radtend, do_sppt,ca_global,            &
 !    &       dry, icy, wet, lprnt, ipr,                                 &
 !  ---  input/output:
      &       dtdt,dtdtnp,htrlw,                                         &
@@ -213,11 +213,12 @@
 !     integer, intent(in) :: ipr
 !     logical lprnt
       logical, dimension(:), intent(in) :: dry, icy, wet
-      logical, intent(in) :: use_LW_jacobian, pert_radtend
+      logical, intent(in) :: use_LW_jacobian, damp_LW_fluxadj,          &
+     &     pert_radtend
       logical, intent(in) :: do_sppt,ca_global
       real(kind=kind_phys),   intent(in) :: solhr, slag, cdec, sdec,    &
-     &                                      deltim, fhswr, minGPpres,   &
-     &                                      minGPtemp, maxGPtemp
+     &     deltim, fhswr, minGPpres, minGPtemp, maxGPtemp, lfnc_k_grad, &
+     &     lfnc_p0
 
       real(kind=kind_phys), dimension(:), intent(in) ::                 &
      &      sinlat, coslat, xlon, coszen, tf, tsflw, sfcdlw,            &
@@ -259,10 +260,11 @@
      &                        rstl, solang, dT
       real(kind=kind_phys), dimension(im,levs+1) :: flxlwup_adj,        &
      &     flxlwdn_adj, t_lev2
-      real(kind=kind_phys) :: fluxlwnet_adj,fluxlwnet,c1,c2,c3,c4,c5,ku
-      ! Pressure limit for LW flux adjustment  
+      real(kind=kind_phys) :: fluxlwnet_adj,fluxlwnet,c1,c2,c3,c4,c5,   &
+     &     dP,lfnc
+      ! Length scale for flux-adjustment scaling
       real(kind=kind_phys), parameter ::                                &
-     &     plim_fluxAdj_upper = 10000.
+     &     L = 1.
       ! Scaling factor for downwelling LW Jacobian profile.
       real(kind=kind_phys), parameter ::                                &
      &     c0 = 0.2
@@ -393,34 +395,36 @@
          !     J_dn_sfc / J_up_sfc = scaling_factor
          !     J_dn_toa / J_up_sfc = 0
          !
+         ! Optionally, the flux adjustment can be damped with height using a logistic function
+         ! fx ~ L / (1 + exp(-k*dp)), where dp = p - p0
+         ! L = 1, fix scale between 0-1.
+         ! k (steepness) and p0 (midpoint) are controlled via namelist
          do i = 1, im
             c1 = fluxlwUP_jac(i,iSFC)
             c2 = fluxlwUP_jac(i,iTOA) / c1
             c3 = t_lev2(i,iSFC) - t_lev(i,iSFC)
             do k = 1, levs
                ! Only apply the Jacobian adjustment below plim_fluxAdj_upper
-               if (p_lev(i,k) .gt. plim_fluxAdj_upper) then
-                  c4 = fluxlwUP_jac(i,k)/c1
-                  fluxlwnet = (flux2D_lwUP(i,k+1)   - flux2D_lwUP(i,k) -&
-     &                        flux2D_lwDOWN(i,k+1) + flux2D_lwDOWN(i,k))
-                  ! (Eq. 9)
-                  c5 = c0 * (c4 - c2) / (1 - c2)
-                  ! (Eq. 10)
-                  fluxlwnet_adj = fluxlwnet + c3*(c4-c5)
-                  ! Compute adjusted heating rate
-                  htrlw(i,k) = fluxlwnet_adj * con_g /                  &
-     &                         (con_cp * (p_lev(i,k+1) - p_lev(i,k)))
+               c4 = fluxlwUP_jac(i,k)/c1
+               fluxlwnet = (flux2D_lwUP(i,k+1)   - flux2D_lwUP(i,k) -   &
+     &              flux2D_lwDOWN(i,k+1) + flux2D_lwDOWN(i,k))
+               ! (Eq. 9)
+               c5 = c0 * (c4 - c2) / (1 - c2)
+               ! (Eq. 10)
+               fluxlwnet_adj = fluxlwnet + c3*(c4-c5)
+               ! Compute adjusted heating rate
+               htrlw(i,k) = fluxlwnet_adj * con_g /                     &
+     &              (con_cp * (p_lev(i,k+1) - p_lev(i,k)))
 
-                  ! Store vertical index for plim_fluxAdj_upper
-                  ku = k
-               ! Above, offset the heating rate by he same amount as in plim_fluxAdj_upper
+               ! Add radiative heating rates to physics heating rate. Optionally, scaled w/ height
+               ! using a logistic function
+               if (damp_LW_fluxadj) then
+                  dp   = p_lev(i,k) - lfnc_p0
+                  lfnc = L / (1+exp(-lfnc_k_grad*exp(1.)*dp/lfnc_p0))
                else
-                  htrlw(i,k) = hlw(i,k)+(p_lev(i,k)/plim_fluxAdj_upper)*&
-     &                                  (htrlw(i,ku)-hlw(i,ku))
+                  lfnc = 1.
                endif
-
-               ! Add radiative heating rates to physics heating rate 
-               dtdt(i,k)  = dtdt(i,k)  + swh(i,k)*xmu(i)  + htrlw(i,k)
+               dtdt(i,k) = dtdt(i,k) + swh(i,k)*xmu(i) + htrlw(i,k)*lfnc
             enddo
          enddo
       else

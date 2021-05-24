@@ -388,6 +388,32 @@
   type = logical  
   intent = in
   optional = F
+[damp_LW_fluxadj]
+  standard_name = flag_to_damp_RRTMGP_LW_jacobian_flux_adjustment
+  long_name = logical flag to control RRTMGP LW calculation
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[lfnc_k_grad]
+  standard_name = steepness_of_flux_damping
+  long_name = steepness of logistic function for damping the LW flux adjustment	
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[lfnc_p0]
+  standard_name = midpoint_used_for_flux_damping
+  long_name = midpoint for damping the LW flux adjustment
+  units = Pa
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [sfculw]
   standard_name = surface_upwelling_longwave_flux_on_radiation_time_step
   long_name = total sky sfc upward lw flux
