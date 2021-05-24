@@ -85,9 +85,6 @@
      &,                    ENG0, ENG1, tem1, tem2, dti, hfbcpdt, rtrd
       real(kind=kind_phys) tx1(im), deltaA, deltaB, deltaC
       integer              i, k, uidx,vidx,tidx
-      logical saw_non_zero
-
-      saw_non_zero = .false.
 
       if(ldiag3d) then
          uidx=dtidx(index_of_x_wind,index_of_process_rayleigh_damping)
@@ -136,8 +133,6 @@
           A(I,K)  = A(I,K) + deltaA
           B(I,K)  = B(I,K) + deltaB
           C(I,K)  = C(I,K) + deltaC
-          saw_non_zero = saw_non_zero .or. abs(deltaA)>0 .or.           &
-     &         abs(deltaB)>0 .or. abs(deltaC)>0
           IF(vidx>=1) THEN
             dtend(i,k,vidx) = dtend(i,k,vidx) + deltaA
           ENDIF
@@ -149,7 +144,7 @@
           ENDIF
         ENDDO
       ENDDO
-      if(saw_non_zero) print *,'Saw non-zero rayleigh_damp changes!'
+
       RETURN
       end subroutine rayleigh_damp_run
 !> @}

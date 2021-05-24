@@ -69,7 +69,6 @@
 
       if ((ldiag3d.and.qdiag3d) .or. cplchm) then
          if (cscnv .or. satmedmf .or. trans_trac .or. ras) then
-            print *,'dcnv store clw'
             tracers = 2
             do n=2,ntrac
                if ( n /= ntcw  .and. n /= ntiw  .and. n /= ntclamt .and. &
@@ -82,7 +81,6 @@
                endif
             enddo
          else
-            print *,'dcnv store gq0'
             do n=2,ntrac
                if(dtidx(100+n,index_of_process_dcnv)>0) then
                   save_q(:,:,n) = gq0(:,:,n)
@@ -209,7 +207,6 @@
           endif
 
           if (cscnv .or. satmedmf .or. trans_trac .or. ras) then
-             print *,'dcnv accum clw'
              tracers = 2
              do n=2,ntrac
                 if ( n /= ntcw  .and. n /= ntiw  .and. n /= ntclamt .and. &
@@ -223,7 +220,6 @@
                 endif
              enddo
           else
-            print *,'dcnv accume gq0'
             do n=2,ntrac
                idtend = dtidx(100+n,index_of_process_dcnv)
                if(idtend>0) then
