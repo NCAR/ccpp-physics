@@ -1,4 +1,4 @@
-!> \file GFS_GWD_generic.f
+!> \file GFS_GWD_generic.F90
 !! This file contains the CCPP-compliant orographic gravity wave
 !! drag pre interstitial codes.
 
@@ -6,6 +6,9 @@ module GFS_GWD_generic_pre
 
 contains
 
+!! \section arg_table_GFS_GWD_generic_pre_init Argument Table
+!! \htmlinclude GFS_GWD_generic_pre_init.html
+!!
       subroutine GFS_GWD_generic_pre_init()
       end subroutine GFS_GWD_generic_pre_init
 
@@ -29,15 +32,15 @@ contains
       implicit none
 
       integer, intent(in) :: im, levs, nmtvr
-      real(kind=kind_phys), intent(in) :: mntvar(im,nmtvr)
+      real(kind=kind_phys), intent(in) :: mntvar(:,:)
 
       real(kind=kind_phys), intent(out) ::                              &
-     &  oc(im), oa4(im,4), clx(im,4),                                   &
+     &  oc(:), oa4(:,:), clx(:,:),                                      &
      &  varss(:), ocss(:), oa4ss(:,:), clxss(:,:),                      &
-     &  theta(im), sigma(im), gamma(im), elvmax(im)
+     &  theta(:), sigma(:), gamma(:), elvmax(:)
 
       logical, intent(in) :: lssav, ldiag3d, flag_for_gwd_generic_tend
-      real(kind=kind_phys), intent(in) :: dtdt(im,levs), dudt(im,levs), dvdt(im,levs)
+      real(kind=kind_phys), intent(in) :: dtdt(:,:), dudt(:,:), dvdt(:,:)
       ! dtend only allocated only if ldiag3d is .true.
       real(kind=kind_phys), intent(inout) :: dtend(:,:,:)
       integer, intent(in) :: dtidx(:,:), index_of_temperature,          &
@@ -141,6 +144,9 @@ contains
       end subroutine GFS_GWD_generic_pre_run
 !> @}
 
+!! \section arg_table_GFS_GWD_generic_pre_finalize Argument Table
+!! \htmlinclude GFS_GWD_generic_pre_finalize.html
+!!
       subroutine GFS_GWD_generic_pre_finalize()
       end subroutine GFS_GWD_generic_pre_finalize
 
@@ -216,6 +222,9 @@ contains
     end subroutine GFS_GWD_generic_post_run
 !> @}
     
+!! \section arg_table_GFS_GWD_generic_post_finalize Argument Table
+!! \htmlinclude GFS_GWD_generic_post_finalize.html
+!!
     subroutine GFS_GWD_generic_post_finalize()
     end subroutine GFS_GWD_generic_post_finalize
 

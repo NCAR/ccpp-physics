@@ -40,15 +40,15 @@ module cs_conv_aw_adj
       logical,                                    intent(in)    :: do_cscnv, do_aw, do_shoc
       integer,                                    intent(in)    :: ntrac, ncld, ntcw, ntclamt, nncl
       real(kind_phys),                            intent(in)    :: con_g
-      real(kind_phys),  dimension(im,levs),       intent(inout) :: sigmafrac
-      real(kind_phys),  dimension(im,levs),       intent(inout) :: gt0
-      real(kind_phys),  dimension(im,levs,ntrac), intent(inout) :: gq0
-      real(kind_phys),  dimension(im,levs),       intent(in)    :: save_t
-      real(kind_phys),  dimension(im,levs,ntrac), intent(in)    :: save_q
-      real(kind_phys),  dimension(im,levs+1),     intent(in)    :: prsi
-      real(kind_phys),  dimension(im,levs),       intent(inout) :: cldfrac
-      real(kind_phys),  dimension(im,levs),       intent(inout) :: subcldfrac
-      real(kind_phys),  dimension(im),            intent(inout) :: prcp
+      real(kind_phys),  dimension(:,:),       intent(inout) :: sigmafrac
+      real(kind_phys),  dimension(:,:),       intent(inout) :: gt0
+      real(kind_phys),  dimension(:,:,:), intent(inout) :: gq0
+      real(kind_phys),  dimension(:,:),       intent(in)    :: save_t
+      real(kind_phys),  dimension(:,:,:), intent(in)    :: save_q
+      real(kind_phys),  dimension(:,:),     intent(in)    :: prsi
+      real(kind_phys),  dimension(:,:),       intent(inout) :: cldfrac
+      real(kind_phys),  dimension(:,:),       intent(inout) :: subcldfrac
+      real(kind_phys),  dimension(:),            intent(inout) :: prcp
       integer,                                    intent(in   ) :: imp_physics, imp_physics_mg
       character(len=*),                           intent(  out) :: errmsg
       integer,                                    intent(  out) :: errflg

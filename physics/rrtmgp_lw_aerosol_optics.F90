@@ -2,7 +2,7 @@ module rrtmgp_lw_aerosol_optics
   use machine,                   only: kind_phys
   use mo_gas_optics_rrtmgp,      only: ty_gas_optics_rrtmgp
   use mo_optical_props,          only: ty_optical_props_1scl
-  use rrtmgp_aux,                only: check_error_msg
+  use radiation_tools,                only: check_error_msg
   use rrtmgp_sw_gas_optics,      only: sw_gas_props
   use rrtmgp_lw_gas_optics,      only: lw_gas_props
   use module_radiation_aerosols, only: &
@@ -42,26 +42,26 @@ contains
          nLev,                  & ! Number of vertical layers
          nTracer,               & ! Number of tracers
          nTracerAer               ! Number of aerosol tracers
-    real(kind_phys), dimension(nCol), intent(in) :: &
+    real(kind_phys), dimension(:), intent(in) :: &
          lon,                   & ! Longitude
          lat,                   & ! Latitude
          lsmask                   ! Land/sea/sea-ice mask
-    real(kind_phys), dimension(nCol,Nlev),intent(in) :: &
+    real(kind_phys), dimension(:,:),intent(in) :: &
          p_lay,                 & ! Pressure @ layer-centers (Pa)
          tv_lay,                & ! Virtual-temperature @ layer-centers (K)
          relhum,                & ! Relative-humidity @ layer-centers
          p_lk                     ! Exner function @ layer-centers (1)
-    real(kind_phys), dimension(nCol, nLev, nTracer),intent(in) :: &
+    real(kind_phys), dimension(:,:, :),intent(in) :: &
          tracer                   ! trace gas concentrations
-    real(kind_phys), dimension(nCol, nLev, nTracerAer),intent(in) :: &
+    real(kind_phys), dimension(:,:, :),intent(in) :: &
          aerfld                   ! aerosol input concentrations
-    real(kind_phys), dimension(nCol,nLev+1),intent(in) :: &
+    real(kind_phys), dimension(:,:),intent(in) :: &
          p_lev                    ! Pressure @ layer-interfaces (Pa)
 
     ! Outputs
-    real(kind_phys), dimension(nCol,NSPC1), intent(inout) :: &
+    real(kind_phys), dimension(:,:), intent(inout) :: &
          aerodp                   ! Vertical integrated optical depth for various aerosol species 
-    type(ty_optical_props_1scl),intent(out) :: &
+    type(ty_optical_props_1scl),intent(inout) :: &
          lw_optical_props_aerosol ! RRTMGP DDT: Longwave aerosol optical properties (tau)
     integer, intent(out) :: &
          errflg                   ! CCPP error flag
@@ -73,6 +73,7 @@ contains
          aerosolslw            !
     real(kind_phys), dimension(nCol, nLev, sw_gas_props%get_nband(), NF_AESW) :: &
          aerosolssw
+    integer :: iBand
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -81,15 +82,17 @@ contains
     if (.not. doLWrad) return
 
     ! Call module_radiation_aerosols::setaer(),to setup aerosols property profile
-    call setaer(p_lev, p_lay, p_lk, tv_lay, relhum, lsmask, tracer, aerfld, lon, lat, ncol, nLev, &
+    call setaer(p_lev/100., p_lay/100., p_lk, tv_lay, relhum, lsmask, tracer, aerfld, lon, lat, ncol, nLev, &
          nLev+1, .true., .true., aerosolssw, aerosolslw, aerodp)
-
-    ! Allocate RRTMGP DDT: Aerosol optics [nCol,nlev,nBands]
-    call check_error_msg('rrtmgp_lw_aerosol_optics_run',lw_optical_props_aerosol%alloc_1scl(      &
-         ncol, nlev, lw_gas_props%get_band_lims_wavenumber()))
 
     ! Copy aerosol optical information to RRTMGP DDT
     lw_optical_props_aerosol%tau = aerosolslw(:,:,:,1) * (1. - aerosolslw(:,:,:,2))
+
+    lw_optical_props_aerosol%band_lims_wvn = lw_gas_props%get_band_lims_wavenumber()
+    do iBand=1,lw_gas_props%get_nband()
+       lw_optical_props_aerosol%band2gpt(1:2,iBand) = iBand
+       lw_optical_props_aerosol%gpt2band(iBand)     = iBand
+    end do
 
   end subroutine rrtmgp_lw_aerosol_optics_run
   

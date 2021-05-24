@@ -92,34 +92,36 @@
       real(kind=kind_phys),intent(in) :: dt_phs, xkzm_m, xkzm_h, xkzm_s
 
 !MYJ-2D
-      real(kind=kind_phys),dimension(im),intent(in) ::         &
-     &     prsik_1, prslk_1, prslki, slmsk, garea,             &
+      real(kind=kind_phys),dimension(:),intent(in) ::        &
+     &     prsik_1, prslk_1, prslki, slmsk, garea,           &
            snowd, evap, hflx, cm, ch, wind, hprime1
-      real(kind=kind_phys),dimension(im),intent(inout) ::      &
-     &     pblh, zorl, ustar, tsfc, qsfc
-      real(kind=kind_phys),dimension(im),intent(inout)   ::    &
-     &        phy_myj_qsfc, phy_myj_thz0, phy_myj_qz0,         &
-     &        phy_myj_uz0, phy_myj_vz0, phy_myj_z0base,        &
-     &        phy_myj_akhs, phy_myj_akms,                      &
-     &        phy_myj_chkqlm, phy_myj_elflx,                   &
+      real(kind=kind_phys),dimension(:),intent(inout) ::     &
+     &     zorl, ustar, tsfc, qsfc
+      real(kind=kind_phys),dimension(:),intent(inout)   ::   &
+     &        phy_myj_qsfc, phy_myj_thz0, phy_myj_qz0,       &
+     &        phy_myj_uz0, phy_myj_vz0, phy_myj_z0base,      &
+     &        phy_myj_akhs, phy_myj_akms,                    &
+     &        phy_myj_chkqlm, phy_myj_elflx,                 &
      &        phy_myj_a1u, phy_myj_a1t, phy_myj_a1q
-      real(kind=kind_phys),dimension(im),intent(out) ::        &
-     &     dusfc,dvsfc,dtsfc,dqsfc,gamt,gamq
-      integer,dimension(im),intent(out) :: kpbl
-      integer,dimension(im),intent(in) ::  kinver
+      real(kind=kind_phys),dimension(:),intent(out) ::       &
+     &     pblh,dusfc,dvsfc,dtsfc,dqsfc,gamt,gamq
+      integer,dimension(:),intent(out) :: kpbl
+      integer,dimension(:),intent(in) ::  kinver
 
 !MYJ-3D
-      real(kind=kind_phys),dimension(im,levs+1),intent(in) ::  &
+      real(kind=kind_phys),dimension(:,:),intent(in) ::      &
               phii, prsi
-      real(kind=kind_phys),dimension(im,levs),intent(in) ::    &
+      real(kind=kind_phys),dimension(:,:),intent(in) ::      &
      &        ugrs, vgrs, tgrs, prsl
-      real(kind=kind_phys),dimension(im,levs),intent(inout) :: &
+!      real(kind=kind_phys),dimension(:,:),intent(inout)  :: &
+!             dudt, dvdt, dtdt, dkt
+      real(kind=kind_phys),dimension(:,:),intent(inout)   :: &
              dudt, dvdt, dtdt
-      real(kind=kind_phys),dimension(im,levs-1),intent(out) :: &
+      real(kind=kind_phys),dimension(:,:),intent(out)     :: &
              dkt
 
 !MYJ-4D
-      real(kind=kind_phys),dimension(im,levs,ntrac),intent(inout) ::  &
+      real(kind=kind_phys),dimension(:,:,:),intent(inout) :: &
      &       qgrs,dqdt
 
 !LOCAL
@@ -556,12 +558,12 @@
 !         end do
       end do
 
-      dkt2=0.
+      dkt=0.
       do k=1,levs
          k1=levs-k+1
          do i=1,im
-!            dkt2(i,k)=max(xcofh(i,k1),xkzo(i,k))
-           dkt2(i,k)=xcofh(i,k1)
+!            dkt(i,k)=max(xcofh(i,k1),xkzo(i,k))
+           dkt(i,k)=xcofh(i,k1)
          end do
       end do
       if(ntke.gt.0)then
@@ -662,7 +664,7 @@
                    q2(i,k)
              end do
              do k=1,levs
-                print*,'xcofh,el_myj,dkt2=',k,xcofh(i,k),el_myj(i,k),dkt2(i,k)
+                print*,'xcofh,el_myj,dkt=',k,xcofh(i,k),el_myj(i,k),dkt(i,k)
              end do
          end if
 
@@ -804,9 +806,6 @@
 !          print*,"===Finished with myj_bl_driver; output:"
 !          print*
 !       endif
-
-      ! External dkt has dimensions (1:im,1:levs-1)
-      dkt(1:im,1:levs-1) = dkt2(1:im,1:levs-1)
 
   END SUBROUTINE myjpbl_wrapper_run
 

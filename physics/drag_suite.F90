@@ -302,12 +302,13 @@
    integer, intent(in) :: im, km, imx, kdt, ipr, me, master
    integer, intent(in) :: gwd_opt
    logical, intent(in) :: lprnt
-   integer, intent(in) :: KPBL(im)
-   real(kind=kind_phys), intent(in) :: deltim, G, CP, RD, RV, cdmbgwd(2)
+   integer, intent(in) :: KPBL(:)
+   real(kind=kind_phys), intent(in) :: deltim, G, CP, RD, RV, cdmbgwd(:)
    real(kind=kind_phys), intent(inout) :: dtend(:,:,:)
    logical, intent(in) :: ldiag3d
    integer, intent(in) :: dtidx(:,:), index_of_temperature,      &
      &  index_of_process_orographic_gwd, index_of_x_wind, index_of_y_wind
+
    integer              ::  kpblmax
    integer, parameter   ::  ims=1, kms=1, its=1, kts=1
    real(kind=kind_phys), intent(in) ::  fv, pi
@@ -315,29 +316,29 @@
    real(kind=kind_phys) ::  g_inv
 
    real(kind=kind_phys), intent(inout) ::                        &
-     &                   dudt(im,km),dvdt(im,km),                &
-     &                   dtdt(im,km)
-   real(kind=kind_phys), intent(out) :: rdxzb(im)
+     &                   dudt(:,:),dvdt(:,:),                &
+     &                   dtdt(:,:)
+   real(kind=kind_phys), intent(out) :: rdxzb(:)
    real(kind=kind_phys), intent(in) ::                           &
-     &                            u1(im,km),v1(im,km),           &
-     &                            t1(im,km),q1(im,km),           &
-     &                            PHII(im,km+1),prsl(im,km),     &
-     &                            prslk(im,km),PHIL(im,km)
-   real(kind=kind_phys), intent(in) ::  prsi(im,km+1),           &
-     &                                  del(im,km)
-   real(kind=kind_phys), intent(in) ::   var(im),oc1(im),        &
-     &                                   oa4(im,4),ol4(im,4),    &
-     &                                   dx(im)
-   real(kind=kind_phys), intent(in) ::   varss(im),oc1ss(im),    &
-     &                              oa4ss(im,4),ol4ss(im,4)
-   real(kind=kind_phys), intent(in) :: THETA(im),SIGMA(im),      &
-     &                                 GAMMA(im),ELVMAX(im)
+     &                            u1(:,:),v1(:,:),           &
+     &                            t1(:,:),q1(:,:),           &
+     &                            PHII(:,:),prsl(:,:),     &
+     &                            prslk(:,:),PHIL(:,:)
+   real(kind=kind_phys), intent(in) ::  prsi(:,:),           &
+     &                                  del(:,:)
+   real(kind=kind_phys), intent(in) ::   var(:),oc1(:),        &
+     &                                   oa4(:,:),ol4(:,:),    &
+     &                                   dx(:)
+   real(kind=kind_phys), intent(in) ::   varss(:),oc1ss(:),    &
+     &                              oa4ss(:,:),ol4ss(:,:)
+   real(kind=kind_phys), intent(in) :: THETA(:),SIGMA(:),      &
+     &                                 GAMMA(:),ELVMAX(:)
 
 ! added for small-scale orographic wave drag
    real(kind=kind_phys), dimension(im,km) :: utendwave,vtendwave,thx,thvx
-   real(kind=kind_phys), intent(in) ::     br1(im),              &
-     &                                     hpbl(im),             &
-     &                                     slmsk(im)
+   real(kind=kind_phys), intent(in) ::     br1(:),              &
+     &                                     hpbl(:),             &
+     &                                     slmsk(:)
    real(kind=kind_phys), dimension(im)    :: govrth,xland
    !real(kind=kind_phys), dimension(im,km) :: dz2
    real(kind=kind_phys)                   :: tauwavex0,tauwavey0,  &
@@ -351,7 +352,7 @@
 
 !Output:
    real(kind=kind_phys), intent(out) ::                          &
-     &                      dusfc(im),   dvsfc(im)
+     &                      dusfc(:),   dvsfc(:)
 !Output (optional):
    real(kind=kind_phys), intent(out) ::                          &
      &                      dusfc_ls(:),dvsfc_ls(:),             &
@@ -1354,7 +1355,6 @@ endif
    end subroutine drag_suite_run
 !-------------------------------------------------------------------
 !
-
       subroutine drag_suite_finalize()
       end subroutine drag_suite_finalize
 

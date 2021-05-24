@@ -297,7 +297,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
   optional = F
 [rain1]
   standard_name = lwe_thickness_of_explicit_precipitation_amount

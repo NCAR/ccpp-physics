@@ -65,19 +65,19 @@
    integer,  intent(in   )   ::     im,km,ntrac,ndiff,ntcw,ntiw,ntoz
    real(kind=kind_phys),     intent(in   )   ::     g,cp,rd,rv,ep1,ep2,xlv,dt
 
-   real(kind=kind_phys),     dimension( im,km ),                                    &
+   real(kind=kind_phys),     dimension( :,: ),                                    &
              intent(in)      ::                 pi2d,p2d,phil,ux,vx,swh,hlw,tx
 
-   real(kind=kind_phys),     dimension( im,km,ntrac )                             , &
+   real(kind=kind_phys),     dimension( :,:,: )                             , &
              intent(in   )   ::                                             qx
 
-   real(kind=kind_phys),     dimension( im, km+1 )                                , &
+   real(kind=kind_phys),     dimension( :,: )                                , &
              intent(in   )   ::                                      p2di,phii
 
-   real(kind=kind_phys),     dimension( im )                                      , &
+   real(kind=kind_phys),     dimension( : )                                      , &
              intent(in)  ::     stress,zorl,heat,evap,wspd,br,psim,psih,psfcpa,     &
                                                                    u10,v10,xmu
-   integer,  dimension(im)                                                         ,&
+   integer,  dimension(:)                                                         ,&
              intent(in   )   ::                                      landmask
    logical,  intent(in   )   :: lssav, ldiag3d, qdiag3d,                            &
                                 flag_for_pbl_generic_tend
@@ -85,9 +85,9 @@
 !----------------------------------------------------------------------------------
 ! input/output variables
 !
-   real(kind=kind_phys),     dimension( im,km )                                   , &
+   real(kind=kind_phys),     dimension( :,: )                                   , &
              intent(inout)   ::                                utnp,vtnp,ttnp
-   real(kind=kind_phys),     dimension( im,km,ntrac )                             , &
+   real(kind=kind_phys),     dimension( :,:,: )                              , &
              intent(inout)   ::                                          qtnp
    real(kind=kind_phys), optional, intent(inout) :: dtend(:,:,:)
    integer, intent(in) :: dtidx(:,:), ntqv, index_of_temperature,                  &
@@ -95,9 +95,11 @@
 !
 !---------------------------------------------------------------------------------
 ! output variables
-   integer,  dimension( im ), intent(out  )   ::                       kpbl1d
-   real(kind=kind_phys),     dimension( im ),                                       &
+   integer,  dimension( : ), intent(out  )   ::                       kpbl1d
+   real(kind=kind_phys),     dimension( : ),                                   &
              intent(out)   ::                                            hpbl
+   real(kind=kind_phys),    dimension( : ),                                    &
+              intent(out)  :: dusfc,dvsfc, dtsfc,dqsfc
 
    ! error messages
    character(len=*), intent(out)    ::                                 errmsg
@@ -110,7 +112,7 @@
    real(kind=kind_phys),     dimension( im )            ::                hol
    real(kind=kind_phys),     dimension( im, km+1 ) ::                      zq
 !
-   real(kind=kind_phys),     dimension( im, km )   ::                                &
+   real(kind=kind_phys),     dimension( im, km )   ::                          &
                                                                thx,thvx,thlix, &
                                                                           del, &
                                                                           dza, &
@@ -119,7 +121,7 @@
                                                                         xkzoh, &
                                                                            za
 !
-   real(kind=kind_phys),    dimension( im )             ::                                &
+   real(kind=kind_phys),    dimension( im )             ::                     &
                                                                          rhox, &
                                                                        govrth, &
                                                                   zl1,thermal, &
@@ -127,8 +129,6 @@
                                                                   hgamt,hgamq, &
                                                                     brdn,brup, &
                                                                     phim,phih, &
-                                                                  dusfc,dvsfc, &
-                                                                  dtsfc,dqsfc, &
                                                                         prpbl, &
                                                               wspd1,thermalli
 !

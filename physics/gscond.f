@@ -10,14 +10,14 @@
 
 ! \brief Brief description of the subroutine
 !
-!> \section arg_table_gscond_init  Argument Table
+!> \section arg_table_zhaocarr_gscond_init  Argument Table
 !!
        subroutine zhaocarr_gscond_init
        end subroutine zhaocarr_gscond_init
 
 ! \brief Brief description of the subroutine
 !
-!> \section arg_table_gscond_finalize  Argument Table
+!> \section arg_table_zhaocarr_gscond_finalize  Argument Table
 !!
        subroutine zhaocarr_gscond_finalize
        end subroutine zhaocarr_gscond_finalize
@@ -73,14 +73,14 @@
 ! Interface variables
       integer,              intent(in)    :: im, km, ipr
       real(kind=kind_phys), intent(in)    :: dt, dtf
-      real(kind=kind_phys), intent(in)    :: prsl(im,km), ps(im)
-      real(kind=kind_phys), intent(inout) :: q(im,km)
-      real(kind=kind_phys), intent(in)    :: clw1(im,km), clw2(im,km)
-      real(kind=kind_phys), intent(out)   :: cwm(im,km)
-      real(kind=kind_phys), intent(inout) :: t(im,km)                   &
-     &,                     tp(im,km),   qp(im,km),   psp(im)           &
-     &,                     tp1(im,km),  qp1(im,km),  psp1(im)
-      real(kind=kind_phys), intent(in)    :: u(im,km)
+      real(kind=kind_phys), intent(in)    :: prsl(:,:), ps(:)
+      real(kind=kind_phys), intent(inout) :: q(:,:)
+      real(kind=kind_phys), intent(in)    :: clw1(:,:), clw2(:,:)
+      real(kind=kind_phys), intent(out)   :: cwm(:,:)
+      real(kind=kind_phys), intent(inout) :: t(:,:)                     &
+     &,                     tp(:,:),   qp(:,:),   psp(:)                &
+     &,                     tp1(:,:),  qp1(:,:),  psp1(:)
+      real(kind=kind_phys), intent(in)    :: u(:,:)
       logical,              intent(in)    :: lprnt
 !
       character(len=*), intent(out) :: errmsg

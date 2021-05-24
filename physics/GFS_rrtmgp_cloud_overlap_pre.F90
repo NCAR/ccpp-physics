@@ -3,7 +3,7 @@
 ! ########################################################################################
 module GFS_rrtmgp_cloud_overlap_pre
   use machine,      only: kind_phys
-  use rrtmgp_aux,   only: check_error_msg
+  use radiation_tools,   only: check_error_msg
   use module_radiation_cloud_overlap, only: cmp_dcorr_lgth, get_alpha_exp  
 
   public GFS_rrtmgp_cloud_overlap_pre_init, GFS_rrtmgp_cloud_overlap_pre_run, GFS_rrtmgp_cloud_overlap_pre_finalize
@@ -21,13 +21,13 @@ contains
 !!  
   subroutine GFS_rrtmgp_cloud_overlap_pre_run(nCol, nLev, yearlen, doSWrad, doLWrad,     &
        julian, lat, p_lev, p_lay, tv_lay, con_pi, con_g, con_rd, con_epsq, dcorr_con,    &
-       idcor, iovr, iovr_dcorr, iovr_exprand, iovr_exp, idcor_con, idcor_hogan,          &
+       idcor, iovr, iovr_dcorr, iovr_exp, iovr_exprand, idcor_con, idcor_hogan,          &
        idcor_oreopoulos, cld_frac,                                                       &
-       cloud_overlap_param, precip_overlap_param, de_lgth, deltaZc, errmsg, errflg)
+       de_lgth, cloud_overlap_param, precip_overlap_param, deltaZc, errmsg, errflg)
     implicit none
     
     ! Inputs   
-    integer, intent(in)    :: &
+    integer, intent(in)     :: &
          nCol,                 & ! Number of horizontal grid points
          nLev,                 & ! Number of vertical layers
          yearlen,              & ! Length of current year (365/366) WTF?
@@ -39,7 +39,7 @@ contains
          idcor_con,            & ! Flag for decorrelation-length. Use constant value
          idcor_hogan,          & ! Flag for decorrelation-length. (https://rmets.onlinelibrary.wiley.com/doi/full/10.1002/qj.647)
          idcor_oreopoulos        ! Flag for decorrelation-length. (10.5194/acp-12-9097-2012) 
-    logical, intent(in) :: &
+    logical, intent(in)     :: &
     	 doSWrad,              & ! Call SW radiation?
     	 doLWrad                 ! Call LW radiation
     real(kind_phys), intent(in) :: &
@@ -49,19 +49,19 @@ contains
          con_rd,               & ! Physical constant: gas-constant for dry air
          con_epsq,             & ! Physical constant: Minimum value for specific humidity
          dcorr_con               ! Decorrelation-length (used if idcor = idcor_con)
-    real(kind_phys), dimension(nCol), intent(in) :: &
+    real(kind_phys), dimension(:), intent(in) :: &
          lat                     ! Latitude             
-    real(kind_phys), dimension(nCol,nLev), intent(in) :: &         
+    real(kind_phys), dimension(:,:), intent(in) :: &         
          tv_lay,               & ! Virtual temperature (K)
          p_lay,                & ! Pressure at model-layers (Pa)
          cld_frac                ! Total cloud fraction
-    real(kind_phys), dimension(nCol,nLev+1), intent(in) :: &         
+    real(kind_phys), dimension(:,:), intent(in) :: &         
          p_lev                   ! Pressure at model-level interfaces (Pa) 
     
     ! Outputs     
-    real(kind_phys), dimension(nCol),intent(out) :: &
+    real(kind_phys), dimension(:),intent(out) :: &
          de_lgth                 ! Decorrelation length     
-    real(kind_phys), dimension(nCol,nLev),intent(out) :: &
+    real(kind_phys), dimension(:,:),intent(out) :: &
          cloud_overlap_param,  & ! Cloud-overlap parameter
          precip_overlap_param, & ! Precipitation overlap parameter  
          deltaZc                 ! Layer thickness (from layer-centers)(km)          

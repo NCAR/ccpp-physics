@@ -61,17 +61,15 @@
       real(kind=kind_phys),intent(in) :: con_g
       real :: gravi
       integer, intent(in) :: im, levs, ko3, pl_coeff,me
-      real(kind=kind_phys), intent(in) :: po3(ko3),                     &
-     &                                    prsl(im,levs), tin(im,levs),  &
-     &                                    delp(im,levs),                &
-     &                                    prdout(im,ko3,pl_coeff), dt
-      ! dtend may not be allocated and needs an assumed array size
+      real(kind=kind_phys), intent(in) :: po3(:),                       &
+     &                                    prsl(:,:), tin(:,:),          &
+     &                                    delp(:,:),                    &
+     &                                    prdout(:,:,:), dt
       real(kind=kind_phys), intent(inout) :: dtend(:,:,:)
       integer, intent(in) :: dtidx(:,:), ntoz,                          &
      &  index_of_process_prod_loss, index_of_process_ozmix,             &
      &  index_of_process_temp, index_of_process_overhead_ozone
       real(kind=kind_phys), intent(inout) :: oz(im,levs)
-
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg

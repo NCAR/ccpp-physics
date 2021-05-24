@@ -347,14 +347,14 @@ module mp_thompson
          real(kind_phys),           intent(in   ) :: con_eps
          ! Hydrometeors
          logical,                   intent(in   ) :: convert_dry_rho
-         real(kind_phys),           intent(inout) :: spechum(1:ncol,1:nlev)
-         real(kind_phys),           intent(inout) :: qc(1:ncol,1:nlev)
-         real(kind_phys),           intent(inout) :: qr(1:ncol,1:nlev)
-         real(kind_phys),           intent(inout) :: qi(1:ncol,1:nlev)
-         real(kind_phys),           intent(inout) :: qs(1:ncol,1:nlev)
-         real(kind_phys),           intent(inout) :: qg(1:ncol,1:nlev)
-         real(kind_phys),           intent(inout) :: ni(1:ncol,1:nlev)
-         real(kind_phys),           intent(inout) :: nr(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout) :: spechum(:,:)
+         real(kind_phys),           intent(inout) :: qc(:,:)
+         real(kind_phys),           intent(inout) :: qr(:,:)
+         real(kind_phys),           intent(inout) :: qi(:,:)
+         real(kind_phys),           intent(inout) :: qs(:,:)
+         real(kind_phys),           intent(inout) :: qg(:,:)
+         real(kind_phys),           intent(inout) :: ni(:,:)
+         real(kind_phys),           intent(inout) :: nr(:,:)
          ! Aerosols
          logical,                   intent(in)    :: is_aerosol_aware, reset
          ! The following arrays are not allocated if is_aerosol_aware is false
@@ -364,25 +364,25 @@ module mp_thompson
          real(kind_phys), optional, intent(in   ) :: nwfa2d(:)
          real(kind_phys), optional, intent(in   ) :: nifa2d(:)
          ! State variables and timestep information
-         real(kind_phys),           intent(inout) :: tgrs(1:ncol,1:nlev)
-         real(kind_phys),           intent(in   ) :: prsl(1:ncol,1:nlev)
-         real(kind_phys),           intent(in   ) :: phii(1:ncol,1:nlev+1)
-         real(kind_phys),           intent(in   ) :: omega(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout) :: tgrs(:,:)
+         real(kind_phys),           intent(in   ) :: prsl(:,:)
+         real(kind_phys),           intent(in   ) :: phii(:,:)
+         real(kind_phys),           intent(in   ) :: omega(:,:)
          real(kind_phys),           intent(in   ) :: dtp
          ! Precip/rain/snow/graupel fall amounts and fraction of frozen precip
-         real(kind_phys),           intent(  out) :: prcp(1:ncol)
-         real(kind_phys),           intent(  out) :: rain(1:ncol)
-         real(kind_phys),           intent(  out) :: graupel(1:ncol)
-         real(kind_phys),           intent(  out) :: ice(1:ncol)
-         real(kind_phys),           intent(  out) :: snow(1:ncol)
-         real(kind_phys),           intent(  out) :: sr(1:ncol)
+         real(kind_phys),           intent(inout) :: prcp(:)
+         real(kind_phys),           intent(inout) :: rain(:)
+         real(kind_phys),           intent(inout) :: graupel(:)
+         real(kind_phys),           intent(inout) :: ice(:)
+         real(kind_phys),           intent(inout) :: snow(:)
+         real(kind_phys),           intent(  out) :: sr(:)
          ! Radar reflectivity
-         real(kind_phys),           intent(  out) :: refl_10cm(1:ncol,1:nlev)
+         real(kind_phys),           intent(  out) :: refl_10cm(:,:)
          logical,         optional, intent(in   ) :: do_radar_ref
          ! Cloud effective radii
-         real(kind_phys), optional, intent(  out) :: re_cloud(1:ncol,1:nlev)
-         real(kind_phys), optional, intent(  out) :: re_ice(1:ncol,1:nlev)
-         real(kind_phys), optional, intent(  out) :: re_snow(1:ncol,1:nlev)
+         real(kind_phys), optional, intent(  out) :: re_cloud(:,:)
+         real(kind_phys), optional, intent(  out) :: re_ice(:,:)
+         real(kind_phys), optional, intent(  out) :: re_snow(:,:)
          ! MPI information
          integer,                   intent(in)    :: mpicomm
          integer,                   intent(in)    :: mpirank
@@ -547,45 +547,85 @@ module mp_thompson
 
          !> - Call mp_gt_driver() with or without aerosols
          if (is_aerosol_aware) then
-            call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
-                              nc=nc, nwfa=nwfa, nifa=nifa, nwfa2d=nwfa2d, nifa2d=nifa2d,     &
-                              tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtp,                        &
-                              rainnc=rain_mp, rainncv=delta_rain_mp,                         &
-                              snownc=snow_mp, snowncv=delta_snow_mp,                         &
-                              icenc=ice_mp, icencv=delta_ice_mp,                             &
-                              graupelnc=graupel_mp, graupelncv=delta_graupel_mp, sr=sr,      &
-                              refl_10cm=refl_10cm,                                           &
-                              diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
-                              re_cloud=re_cloud, re_ice=re_ice, re_snow=re_snow,             &
-                              has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
-                              rand_perturb_on=rand_perturb_on, kme_stoch=kme_stoch,          &
-                              ! DH* 2020-06-05 not passing this optional argument, see
-                              !       comment in module_mp_thompson.F90 / mp_gt_driver
-                              !rand_pert=rand_pert,                                          &
-                              ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
-                              ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
-                              its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
-                              errmsg=errmsg, errflg=errflg, reset=reset)
-
+            if (do_effective_radii) then
+               call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
+                                 nc=nc, nwfa=nwfa, nifa=nifa, nwfa2d=nwfa2d, nifa2d=nifa2d,     &
+                                 tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtp,                        &
+                                 rainnc=rain_mp, rainncv=delta_rain_mp,                         &
+                                 snownc=snow_mp, snowncv=delta_snow_mp,                         &
+                                 icenc=ice_mp, icencv=delta_ice_mp,                             &
+                                 graupelnc=graupel_mp, graupelncv=delta_graupel_mp, sr=sr,      &
+                                 refl_10cm=refl_10cm,                                           &
+                                 diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
+                                 re_cloud=re_cloud, re_ice=re_ice, re_snow=re_snow,             &
+                                 has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
+                                 rand_perturb_on=rand_perturb_on, kme_stoch=kme_stoch,          &
+                                 ! DH* 2020-06-05 not passing this optional argument, see
+                                 !       comment in module_mp_thompson.F90 / mp_gt_driver
+                                 !rand_pert=rand_pert,                                          &
+                                 ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
+                                 ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
+                                 its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
+                                 errmsg=errmsg, errflg=errflg, reset=reset)
+            else
+               call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
+                                 nc=nc, nwfa=nwfa, nifa=nifa, nwfa2d=nwfa2d, nifa2d=nifa2d,     &
+                                 tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtp,                        &
+                                 rainnc=rain_mp, rainncv=delta_rain_mp,                         &
+                                 snownc=snow_mp, snowncv=delta_snow_mp,                         &
+                                 icenc=ice_mp, icencv=delta_ice_mp,                             &
+                                 graupelnc=graupel_mp, graupelncv=delta_graupel_mp, sr=sr,      &
+                                 refl_10cm=refl_10cm,                                           &
+                                 diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
+                                 has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
+                                 rand_perturb_on=rand_perturb_on, kme_stoch=kme_stoch,          &
+                                 ! DH* 2020-06-05 not passing this optional argument, see
+                                 !       comment in module_mp_thompson.F90 / mp_gt_driver
+                                 !rand_pert=rand_pert,                                          &
+                                 ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
+                                 ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
+                                 its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
+                                 errmsg=errmsg, errflg=errflg, reset=reset)
+            end if
          else
-            call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
-                              tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtp,                        &
-                              rainnc=rain_mp, rainncv=delta_rain_mp,                         &
-                              snownc=snow_mp, snowncv=delta_snow_mp,                         &
-                              icenc=ice_mp, icencv=delta_ice_mp,                             &
-                              graupelnc=graupel_mp, graupelncv=delta_graupel_mp, sr=sr,      &
-                              refl_10cm=refl_10cm,                                           &
-                              diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
-                              re_cloud=re_cloud, re_ice=re_ice, re_snow=re_snow,             &
-                              has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
-                              rand_perturb_on=rand_perturb_on, kme_stoch=kme_stoch,          &
-                              ! DH* 2020-06-05 not passing this optional argument, see
-                              !       comment in module_mp_thompson.F90 / mp_gt_driver
-                              !rand_pert=rand_pert,                                          &
-                              ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
-                              ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
-                              its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
-                              errmsg=errmsg, errflg=errflg, reset=reset)
+            if (do_effective_radii) then
+               call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
+                                 tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtp,                        &
+                                 rainnc=rain_mp, rainncv=delta_rain_mp,                         &
+                                 snownc=snow_mp, snowncv=delta_snow_mp,                         &
+                                 icenc=ice_mp, icencv=delta_ice_mp,                             &
+                                 graupelnc=graupel_mp, graupelncv=delta_graupel_mp, sr=sr,      &
+                                 refl_10cm=refl_10cm,                                           &
+                                 diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
+                                 re_cloud=re_cloud, re_ice=re_ice, re_snow=re_snow,             &
+                                 has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
+                                 rand_perturb_on=rand_perturb_on, kme_stoch=kme_stoch,          &
+                                 ! DH* 2020-06-05 not passing this optional argument, see
+                                 !       comment in module_mp_thompson.F90 / mp_gt_driver
+                                 !rand_pert=rand_pert,                                          &
+                                 ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
+                                 ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
+                                 its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
+                                 errmsg=errmsg, errflg=errflg, reset=reset)
+            else
+               call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
+                                 tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtp,                        &
+                                 rainnc=rain_mp, rainncv=delta_rain_mp,                         &
+                                 snownc=snow_mp, snowncv=delta_snow_mp,                         &
+                                 icenc=ice_mp, icencv=delta_ice_mp,                             &
+                                 graupelnc=graupel_mp, graupelncv=delta_graupel_mp, sr=sr,      &
+                                 refl_10cm=refl_10cm,                                           &
+                                 diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
+                                 has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
+                                 rand_perturb_on=rand_perturb_on, kme_stoch=kme_stoch,          &
+                                 ! DH* 2020-06-05 not passing this optional argument, see
+                                 !       comment in module_mp_thompson.F90 / mp_gt_driver
+                                 !rand_pert=rand_pert,                                          &
+                                 ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
+                                 ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
+                                 its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
+                                 errmsg=errmsg, errflg=errflg, reset=reset)
+            end if
          end if
          if (errflg/=0) return
 
@@ -610,11 +650,11 @@ module mp_thompson
 
          !> - Convert rainfall deltas from mm to m (on physics timestep); add to inout variables
          ! "rain" in Thompson MP refers to precipitation (total of liquid rainfall+snow+graupel+ice)
-         prcp    = max(0.0, delta_rain_mp/1000.0_kind_phys)
-         graupel = max(0.0, delta_graupel_mp/1000.0_kind_phys)
-         ice     = max(0.0, delta_ice_mp/1000.0_kind_phys)
-         snow    = max(0.0, delta_snow_mp/1000.0_kind_phys)
-         rain    = max(0.0, (delta_rain_mp - (delta_graupel_mp + delta_ice_mp + delta_snow_mp))/1000.0_kind_phys)
+         prcp    = prcp    + max(0.0, delta_rain_mp/1000.0_kind_phys)
+         graupel = graupel + max(0.0, delta_graupel_mp/1000.0_kind_phys)
+         ice     = ice     + max(0.0, delta_ice_mp/1000.0_kind_phys)
+         snow    = snow    + max(0.0, delta_snow_mp/1000.0_kind_phys)
+         rain    = rain    + max(0.0, (delta_rain_mp - (delta_graupel_mp + delta_ice_mp + delta_snow_mp))/1000.0_kind_phys)
 
       end subroutine mp_thompson_run
 !>@}

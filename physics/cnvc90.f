@@ -27,16 +27,16 @@
       ! Interface variables
       real(kind=kind_phys), intent(in) :: clstp
       integer,              intent(in) :: im, km
-      real(kind=kind_phys), intent(in) :: RN(IM)
-      integer,              intent(in) :: KBOT(IM)
-      integer,              intent(in) :: KTOP(IM)
-      real(kind=kind_phys), intent(in) :: prsi(IM,km+1)
-      real(kind=kind_phys), intent(inout) :: ACV(IM)
-      real(kind=kind_phys), intent(inout) :: ACVB(IM)
-      real(kind=kind_phys), intent(inout) :: ACVT(IM)
-      real(kind=kind_phys), intent(inout) :: CV(IM)
-      real(kind=kind_phys), intent(inout) :: CVB(IM)
-      real(kind=kind_phys), intent(inout) :: CVT(IM)
+      real(kind=kind_phys), intent(in) :: RN(:)
+      integer,              intent(in) :: KBOT(:)
+      integer,              intent(in) :: KTOP(:)
+      real(kind=kind_phys), intent(in) :: prsi(:,:)
+      real(kind=kind_phys), intent(inout) :: ACV(:)
+      real(kind=kind_phys), intent(inout) :: ACVB(:)
+      real(kind=kind_phys), intent(inout) :: ACVT(:)
+      real(kind=kind_phys), intent(inout) :: CV(:)
+      real(kind=kind_phys), intent(inout) :: CVB(:)
+      real(kind=kind_phys), intent(inout) :: CVT(:)
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -129,6 +129,7 @@
 
       subroutine cnvc90_finalize()
       end subroutine cnvc90_finalize
+
 
       end module cnvc90
 

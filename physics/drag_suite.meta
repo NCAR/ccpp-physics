@@ -271,7 +271,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = F
 [dtaux2d_ls]
   standard_name = tendency_of_x_wind_due_to_mesoscale_orographic_gravity_wave_drag

@@ -37,23 +37,23 @@ contains
        logical, intent(in) :: reset, lradar
        integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_fer_hires
        real(kind_phys), intent(in   ) :: con_g
-       real(kind_phys), intent(in   ) :: phil(im,levs)
-       real(kind_phys), intent(in   ) :: gt0(im,levs)
-       real(kind_phys), intent(in   ) :: refl_10cm(im,levs)
-       real(kind_phys), intent(inout) :: refdmax(im)
-       real(kind_phys), intent(inout) :: refdmax263k(im)
-       real(kind_phys), intent(in   ) :: u10m(im)
-       real(kind_phys), intent(in   ) :: v10m(im)
-       real(kind_phys), intent(inout) :: u10max(im)
-       real(kind_phys), intent(inout) :: v10max(im)
-       real(kind_phys), intent(inout) :: spd10max(im)
-       real(kind_phys), intent(in   ) :: pgr(im)
-       real(kind_phys), intent(in   ) :: t2m(im)
-       real(kind_phys), intent(in   ) :: q2m(im)
-       real(kind_phys), intent(inout) :: t02max(im)
-       real(kind_phys), intent(inout) :: t02min(im)
-       real(kind_phys), intent(inout) :: rh02max(im)
-       real(kind_phys), intent(inout) :: rh02min(im)
+       real(kind_phys), intent(in   ) :: phil(:,:)
+       real(kind_phys), intent(in   ) :: gt0(:,:)
+       real(kind_phys), intent(in   ) :: refl_10cm(:,:)
+       real(kind_phys), intent(inout) :: refdmax(:)
+       real(kind_phys), intent(inout) :: refdmax263k(:)
+       real(kind_phys), intent(in   ) :: u10m(:)
+       real(kind_phys), intent(in   ) :: v10m(:)
+       real(kind_phys), intent(inout) :: u10max(:)
+       real(kind_phys), intent(inout) :: v10max(:)
+       real(kind_phys), intent(inout) :: spd10max(:)
+       real(kind_phys), intent(in   ) :: pgr(:)
+       real(kind_phys), intent(in   ) :: t2m(:)
+       real(kind_phys), intent(in   ) :: q2m(:)
+       real(kind_phys), intent(inout) :: t02max(:)
+       real(kind_phys), intent(inout) :: t02min(:)
+       real(kind_phys), intent(inout) :: rh02max(:)
+       real(kind_phys), intent(inout) :: rh02min(:)
        character(len=*), intent(out)  :: errmsg
        integer, intent(out)           :: errflg
 
@@ -126,12 +126,12 @@ contains
    subroutine max_fields(phil,ref3D,grav,im,levs,refd,tk,refd263k)
       integer, intent(in)               :: im,levs
       real (kind=kind_phys), intent(in) :: grav
-      real (kind=kind_phys), intent(in),dimension(im,levs)  :: phil,ref3D,tk
+      real (kind=kind_phys), intent(in),dimension(:,:)  :: phil,ref3D,tk
       integer               :: i,k,ll,ipt,kpt
       real :: dbz1avg,zmidp1,zmidloc,refl,fact
       real, dimension(im,levs) :: z
       real, dimension(im) :: zintsfc
-      real, dimension(im), intent(inout) :: refd,refd263k
+      real, dimension(:), intent(inout) :: refd,refd263k
       REAL :: dbz1(2),dbzk,dbzk1
       logical :: counter
       do i=1,im
