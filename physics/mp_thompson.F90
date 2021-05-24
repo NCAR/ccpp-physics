@@ -99,14 +99,6 @@ module mp_thompson
 
          if (is_initialized) return
 
-         ! DH* temporary
-         if (mpirank==mpiroot) then
-            write(0,*) ' ----------------------------------------------------------------------------------------------------------------'
-            write(0,*) ' --- WARNING --- the CCPP Thompson MP scheme is currently under development, use at your own risk --- WARNING ---'
-            write(0,*) ' ----------------------------------------------------------------------------------------------------------------'
-         end if
-         ! *DH temporary
-
          ! Consistency checks
          if (imp_physics/=imp_physics_thompson) then
             write(errmsg,'(*(a))') "Logic error: namelist choice of microphysics is different from Thompson MP"
@@ -470,9 +462,8 @@ module mp_thompson
          !> - either kg of species per kg of dry air, or per kg of (dry + vapor).
 
          ! DH* - do this only if istep == 1? Would be ok if it was
-         ! guaranteed that nothing else in the same subcycle construct
-         ! was using these arrays - which is currently the case for
-         ! mp_thompson_pre/post - but it is somewhat dangerous.
+         ! guaranteed that nothing else in the same subcycle group
+         ! was using these arrays, but it is somewhat dangerous.
          qv = spechum/(1.0_kind_phys-spechum)
 
          if (convert_dry_rho) then
@@ -652,9 +643,8 @@ module mp_thompson
          if (errflg/=0) return
 
          ! DH* - do this only if istep == nsteps? Would be ok if it was
-         ! guaranteed that nothing else in the same subcycle construct
-         ! was using these arrays - which is currently the case for
-         ! mp_thompson_pre/post - but it is somewhat dangerous.
+         ! guaranteed that nothing else in the same subcycle group
+         ! was using these arrays, but it is somewhat dangerous.
 
          !> - Convert water vapor mixing ratio back to specific humidity
          spechum = qv/(1.0_kind_phys+qv)
