@@ -1018,7 +1018,7 @@ MODULE module_mp_thompson
                               ids,ide, jds,jde, kds,kde,              &  ! domain dims
                               ims,ime, jms,jme, kms,kme,              &  ! memory dims
                               its,ite, jts,jte, kts,kte,              &  ! tile dims
-                              errmsg, errflg, reset)
+                              errmsg, errflg, reset, vts1)
 
       implicit none
 
@@ -1028,6 +1028,8 @@ MODULE module_mp_thompson
                             its,ite, jts,jte, kts,kte
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT):: &
                           qv, qc, qr, qi, qs, qg, ni, nr
+      REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT):: vts1
+
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(INOUT):: &
                           tt, th
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(IN):: &
@@ -1067,6 +1069,8 @@ MODULE module_mp_thompson
                           qv1d, qc1d, qi1d, qr1d, qs1d, qg1d, ni1d,     &
                           nr1d, nc1d, nwfa1d, nifa1d,                   &
                           t1d, p1d, w1d, dz1d, rho, dBZ
+      REAL, DIMENSION(kts:kte):: vtsk1
+
       REAL, DIMENSION(kts:kte):: re_qc1d, re_qi1d, re_qs1d
 #if ( WRF_CHEM == 1 )
       REAL, DIMENSION(kts:kte):: &
@@ -1260,6 +1264,8 @@ MODULE module_mp_thompson
             ni1d(k) = ni(i,k,j)
             nr1d(k) = nr(i,k,j)
             rho(k) = 0.622*p1d(k)/(R*t1d(k)*(qv1d(k)+0.622))
+            vtsk1(k) = 0.
+            vts1(i,k,j) = 0.
          enddo
          if (is_aerosol_aware) then
             do k = kts, kte
@@ -1283,7 +1289,7 @@ MODULE module_mp_thompson
                       rainprod1d, evapprod1d, &
 #endif
                       rand1, rand2, rand3, &
-                      kts, kte, dt, i, j)
+                      kts, kte, dt, i, j, vtsk1)
 
          pcp_ra(i,j) = pptrain
          pcp_sn(i,j) = pptsnow
@@ -1337,6 +1343,7 @@ MODULE module_mp_thompson
             qg(i,k,j) = qg1d(k)
             ni(i,k,j) = ni1d(k)
             nr(i,k,j) = nr1d(k)
+            vts1(i,k,j) = vtsk1(k)
             if (present(tt)) then;
                tt(i,k,j) = t1d(k)
             else
@@ -1550,7 +1557,7 @@ MODULE module_mp_thompson
                           rainprod, evapprod, &
 #endif
                           rand1, rand2, rand3, &
-                          kts, kte, dt, ii, jj)
+                          kts, kte, dt, ii, jj, vtsk1)
 #ifdef MPI
       use mpi
 #endif
@@ -1565,6 +1572,7 @@ MODULE module_mp_thompson
       REAL, INTENT(INOUT):: pptrain, pptsnow, pptgraul, pptice
       REAL, INTENT(IN):: dt
       REAL, INTENT(IN):: rand1, rand2, rand3
+      REAL, DIMENSION(kts:kte), INTENT(OUT):: vtsk1
 
 #if ( WRF_CHEM == 1 )
       REAL, DIMENSION(kts:kte), INTENT(INOUT):: &
@@ -3362,6 +3370,7 @@ MODULE module_mp_thompson
          vtgk(k) = 0.
          vtck(k) = 0.
          vtnck(k) = 0.
+         vtsk1(k) = 0.
       enddo
 
       if (ANY(L_qr .eqv. .true.)) then
@@ -3469,6 +3478,7 @@ MODULE module_mp_thompson
        nstep = 0
        do k = kte, kts, -1
           vts = 0.
+          vtsk1(k)=0.
 
           if (rs(k).gt. R1) then
            xDs = smoc(k) / smob(k)
@@ -3487,11 +3497,14 @@ MODULE module_mp_thompson
 !    &                vts*((vtrk(k)-vts*vts_boost(k))/(temp(k)-T_0)))
             SR = rs(k)/(rs(k)+rr(k))
             vtsk(k) = vts*SR + (1.-SR)*vtrk(k)
+            vtsk1(k)=vtsk(k)
            else
             vtsk(k) = vts*vts_boost(k)
+            vtsk1(k)=vtsk(k)
            endif
           else
             vtsk(k) = vtsk(k+1)
+            vtsk1(k)=0
           endif
 
           if (vtsk(k) .gt. 1.E-3) then

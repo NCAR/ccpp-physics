@@ -333,7 +333,7 @@ module mp_thompson
                               refl_10cm, reset, do_radar_ref,      &
                               re_cloud, re_ice, re_snow,           &
                               mpicomm, mpirank, mpiroot,           &
-                              errmsg, errflg)
+                              errmsg, errflg,naux3d, aux3d)
 
          implicit none
 
@@ -390,6 +390,9 @@ module mp_thompson
          ! CCPP error handling
          character(len=*),          intent(  out) :: errmsg
          integer,                   intent(  out) :: errflg
+         ! Auxillary output
+         integer, intent(in) :: naux3d
+         real(kind_phys), intent(inout) :: aux3d(:,:,:)
 
          ! Local variables
 
@@ -606,7 +609,7 @@ module mp_thompson
                                  ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
                                  ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                                  its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
-                                 errmsg=errmsg, errflg=errflg, reset=reset)
+                                 errmsg=errmsg, errflg=errflg, reset=reset, vts1=vts1)
             else
                call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
                                  tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtp,                        &
@@ -624,7 +627,7 @@ module mp_thompson
                                  ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
                                  ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                                  its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
-                                 errmsg=errmsg, errflg=errflg, reset=reset)
+                                 errmsg=errmsg, errflg=errflg, reset=reset, vts1=vts1)
             end if
          end if
          if (errflg/=0) return
@@ -655,7 +658,7 @@ module mp_thompson
          ice     = ice     + max(0.0, delta_ice_mp/1000.0_kind_phys)
          snow    = snow    + max(0.0, delta_snow_mp/1000.0_kind_phys)
          rain    = rain    + max(0.0, (delta_rain_mp - (delta_graupel_mp + delta_ice_mp + delta_snow_mp))/1000.0_kind_phys)
-
+         aux3d(:,:,1) = vts1
       end subroutine mp_thompson_run
 !>@}
 
