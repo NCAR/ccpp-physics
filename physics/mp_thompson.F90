@@ -431,9 +431,6 @@ module mp_thompson
                             ims,ime, jms,jme, kms,kme, &
                             its,ite, jts,jte, kts,kte
 
-         !Auxillary fields
-         real(kind_phys) :: vts1(1:ncol,1:nlev),prw_vcdc(1:ncol,1:nlev),prw_vcde(1:ncol,1:nlev)
-
          ! Initialize the CCPP error handling variables
          errmsg = ''
          errflg = 0
@@ -572,8 +569,8 @@ module mp_thompson
                                  ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
                                  ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                                  its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
-                                 errmsg=errmsg, errflg=errflg, reset=reset, vts1=vts1,          &
-                                 prw_vcdc=prw_vcdc, prw_vcde=prw_vcde)
+                                 errmsg=errmsg, errflg=errflg, reset=reset, vts1=aux3d(:,:,1),  &
+                                 prw_vcdc=aux3d(:,:,2), prw_vcde=aux3d(:,:,3))
             else
                call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
                                  nc=nc, nwfa=nwfa, nifa=nifa, nwfa2d=nwfa2d, nifa2d=nifa2d,     &
@@ -592,8 +589,8 @@ module mp_thompson
                                  ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
                                  ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                                  its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
-                                 errmsg=errmsg, errflg=errflg, reset=reset, vts1=vts1,          &
-                                 prw_vcdc=prw_vcdc, prw_vcde=prw_vcde)
+                                 errmsg=errmsg, errflg=errflg, reset=reset, vts1=aux3d(:,:,1),  &
+                                 prw_vcdc=aux3d(:,:,2), prw_vcde=aux3d(:,:,3))
             end if
          else
             if (do_effective_radii) then
@@ -614,8 +611,8 @@ module mp_thompson
                                  ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
                                  ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                                  its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
-                                 errmsg=errmsg, errflg=errflg, reset=reset, vts1=vts1,          &
-                                 prw_vcdc=prw_vcdc, prw_vcde=prw_vcde)
+                                 errmsg=errmsg, errflg=errflg, reset=reset, vts1=aux3d(:,:,1),  &
+                                 prw_vcdc=aux3d(:,:,2), prw_vcde=aux3d(:,:,3))
             else
                call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
                                  tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtp,                        &
@@ -633,8 +630,8 @@ module mp_thompson
                                  ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
                                  ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                                  its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
-                                 errmsg=errmsg, errflg=errflg, reset=reset, vts1=vts1,          &
-                                 prw_vcdc=prw_vcdc, prw_vcde=prw_vcde)
+                                 errmsg=errmsg, errflg=errflg, reset=reset, vts1=aux3d(:,:,1),  &
+                                 prw_vcdc=aux3d(:,:,2), prw_vcde=aux3d(:,:,3))
             end if
          end if
          if (errflg/=0) return
@@ -665,10 +662,7 @@ module mp_thompson
          ice     = ice     + max(0.0, delta_ice_mp/1000.0_kind_phys)
          snow    = snow    + max(0.0, delta_snow_mp/1000.0_kind_phys)
          rain    = rain    + max(0.0, (delta_rain_mp - (delta_graupel_mp + delta_ice_mp + delta_snow_mp))/1000.0_kind_phys)
-!Diagnostics
-         aux3d(:,:,1) = vts1
-         aux3d(:,:,2) = aux3d(:,:,2) + prw_vcdc
-         aux3d(:,:,3) = aux3d(:,:,3) + prw_vcde
+
       end subroutine mp_thompson_run
 !>@}
 
