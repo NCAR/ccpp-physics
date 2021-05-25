@@ -51,8 +51,8 @@ contains
 !! \section arg_table_mp_thompson_post_run Argument Table
 !! \htmlinclude mp_thompson_post_run.html
 !!
-   subroutine mp_thompson_post_run(ncol, nlev, tgrs_save, tgrs, prslk, dtp, nsteps, &
-                                   ttendlim, kdt, mpicomm, mpirank, mpiroot, errmsg, errflg)
+   subroutine mp_thompson_post_run(ncol, nlev, tgrs_save, tgrs, prslk, dtp, ttendlim, &
+                                   kdt, mpicomm, mpirank, mpiroot, errmsg, errflg)
 
       implicit none
 
@@ -63,7 +63,6 @@ contains
       real(kind_phys), dimension(:,:), intent(inout) :: tgrs
       real(kind_phys), dimension(:,:), intent(in)    :: prslk
       real(kind_phys),                 intent(in)    :: dtp
-      integer,                         intent(in)    :: nsteps
       real(kind_phys),                 intent(in)    :: ttendlim
       integer,                         intent(in)    :: kdt
       ! MPI information
@@ -76,12 +75,10 @@ contains
 
       ! Local variables
       real(kind_phys), dimension(1:ncol,1:nlev) :: mp_tend
-      real(kind_phys) :: dtstep
-
       integer :: i, k
-!#ifdef DEBUG
+#ifdef DEBUG
       integer :: events
-!#endif
+#endif
 
       ! Initialize the CCPP error handling variables
       errmsg = ''
@@ -97,40 +94,33 @@ contains
       ! If limiter is deactivated, return immediately
       if (.not.apply_limiter) return
 
-      ! Set reduced time step if subcycling is used
-      if (nsteps>1) then
-         dtstep = dtp/real(nsteps, kind=kind_phys)
-      else
-         dtstep = dtp
-      end if
-
       ! mp_tend and ttendlim are expressed in potential temperature
       mp_tend = (tgrs - tgrs_save)/prslk
 
-!#ifdef DEBUG
+#ifdef DEBUG
       events = 0
-!#endif
+#endif
       do k=1,nlev
          do i=1,ncol
-            mp_tend(i,k) = max( -ttendlim*dtstep, min( ttendlim*dtstep, mp_tend(i,k) ) )
+            mp_tend(i,k) = max( -ttendlim*dtp, min( ttendlim*dtp, mp_tend(i,k) ) )
 
-!#ifdef DEBUG
+#ifdef DEBUG
             if (tgrs_save(i,k) + mp_tend(i,k)*prslk(i,k) .ne. tgrs(i,k)) then
-              !write(0,'(a,3i6,3e16.7)') "mp_thompson_post_run mp_tend limiter: kdt, i, k, t_old, t_new, t_lim:", &
-              !                       & kdt, i, k, tgrs_save(i,k), tgrs(i,k), tgrs_save(i,k) + mp_tend(i,k)*prslk(i,k)
+              write(0,'(a,3i6,3e16.7)') "mp_thompson_post_run mp_tend limiter: kdt, i, k, t_old, t_new, t_lim:", &
+                                      & kdt, i, k, tgrs_save(i,k), tgrs(i,k), tgrs_save(i,k) + mp_tend(i,k)*prslk(i,k)
               events = events + 1
             end if
-!#endif
+#endif
             tgrs(i,k) = tgrs_save(i,k) + mp_tend(i,k)*prslk(i,k)
          end do
       end do
 
-!#ifdef DEBUG
+#ifdef DEBUG
       if (events > 0) then
-        write(0,'(3(a,i0),a,f6.2,a)') "mp_thompson_post_run: ttendlim applied ", events, "/", nlev*ncol, &
-                                    & " times at model step ", kdt, " for a time step of ", dtstep, "s"
+        write(0,'(a,i0,a,i0,a,i0)') "mp_thompson_post_run: ttendlim applied ", events, "/", nlev*ncol, &
+                                  & " times at timestep ", kdt
       end if
-!#endif
+#endif
 
    end subroutine mp_thompson_post_run
 
