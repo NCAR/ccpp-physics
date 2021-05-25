@@ -1018,7 +1018,8 @@ MODULE module_mp_thompson
                               ids,ide, jds,jde, kds,kde,              &  ! domain dims
                               ims,ime, jms,jme, kms,kme,              &  ! memory dims
                               its,ite, jts,jte, kts,kte,              &  ! tile dims
-                              errmsg, errflg, reset, vts1)
+                              errmsg, errflg, reset, vts1, prw_vcdc,  &
+                              prw_vcde)
 
       implicit none
 
@@ -1028,7 +1029,8 @@ MODULE module_mp_thompson
                             its,ite, jts,jte, kts,kte
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT):: &
                           qv, qc, qr, qi, qs, qg, ni, nr
-      REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT):: vts1
+      REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT):: &
+                          vts1,prw_vcdc,prw_vcde
 
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(INOUT):: &
                           tt, th
@@ -1069,7 +1071,7 @@ MODULE module_mp_thompson
                           qv1d, qc1d, qi1d, qr1d, qs1d, qg1d, ni1d,     &
                           nr1d, nc1d, nwfa1d, nifa1d,                   &
                           t1d, p1d, w1d, dz1d, rho, dBZ
-      REAL, DIMENSION(kts:kte):: vtsk1
+      REAL, DIMENSION(kts:kte):: vtsk1,prw_vcdc1,prw_vcde1
 
       REAL, DIMENSION(kts:kte):: re_qc1d, re_qi1d, re_qs1d
 #if ( WRF_CHEM == 1 )
@@ -1266,6 +1268,10 @@ MODULE module_mp_thompson
             rho(k) = 0.622*p1d(k)/(R*t1d(k)*(qv1d(k)+0.622))
             vtsk1(k) = 0.
             vts1(i,k,j) = 0.
+            prw_vcdc1(k) = 0.
+            prw_vcdc(i,k,j) = 0.
+            prw_vcde1(k) = 0.
+            prw_vcde(i,k,j) = 0.
          enddo
          if (is_aerosol_aware) then
             do k = kts, kte
@@ -1289,7 +1295,7 @@ MODULE module_mp_thompson
                       rainprod1d, evapprod1d, &
 #endif
                       rand1, rand2, rand3, &
-                      kts, kte, dt, i, j, vtsk1)
+                      kts, kte, dt, i, j, vtsk1, prw_vcdc1, prw_vcde1)
 
          pcp_ra(i,j) = pptrain
          pcp_sn(i,j) = pptsnow
@@ -1343,7 +1349,10 @@ MODULE module_mp_thompson
             qg(i,k,j) = qg1d(k)
             ni(i,k,j) = ni1d(k)
             nr(i,k,j) = nr1d(k)
-            vts1(i,k,j) = vtsk1(k)
+            vts1(i,k,j)      = vtsk1(k)
+            prw_vcdc(i,k,j)  = prw_vcdc1(k)
+            prw_vcde(i,k,j)  = prw_vcde1(k)
+
             if (present(tt)) then;
                tt(i,k,j) = t1d(k)
             else
@@ -1557,7 +1566,7 @@ MODULE module_mp_thompson
                           rainprod, evapprod, &
 #endif
                           rand1, rand2, rand3, &
-                          kts, kte, dt, ii, jj, vtsk1)
+                          kts, kte, dt, ii, jj, vtsk1, prw_vcdc1, prw_vcde1)
 #ifdef MPI
       use mpi
 #endif
@@ -1572,7 +1581,7 @@ MODULE module_mp_thompson
       REAL, INTENT(INOUT):: pptrain, pptsnow, pptgraul, pptice
       REAL, INTENT(IN):: dt
       REAL, INTENT(IN):: rand1, rand2, rand3
-      REAL, DIMENSION(kts:kte), INTENT(OUT):: vtsk1
+      REAL, DIMENSION(kts:kte), INTENT(OUT):: vtsk1,prw_vcdc1,prw_vcde1
 
 #if ( WRF_CHEM == 1 )
       REAL, DIMENSION(kts:kte), INTENT(INOUT):: &
@@ -3371,6 +3380,8 @@ MODULE module_mp_thompson
          vtck(k) = 0.
          vtnck(k) = 0.
          vtsk1(k) = 0.
+         prw_vcdc1(k) = 0.
+         prw_vcde1(k) = 0.
       enddo
 
       if (ANY(L_qr .eqv. .true.)) then
@@ -3789,6 +3800,14 @@ MODULE module_mp_thompson
          if (qs1d(k) .le. R1) qs1d(k) = 0.0
          qg1d(k) = qg1d(k) + qgten(k)*DT
          if (qg1d(k) .le. R1) qg1d(k) = 0.0
+      enddo
+! Diagnostics
+      do k = kts, kte
+         if(prw_vcd(k).gt.0)then
+            prw_vcdc1(k) = prw_vcd(k)*dt
+         elseif(prw_vcd(k).lt.0)then
+            prw_vcde1(k) = -1*prw_vcd(k)*dt
+         endif
       enddo
 
       end subroutine mp_thompson
