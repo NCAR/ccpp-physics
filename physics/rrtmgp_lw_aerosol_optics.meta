@@ -1,11 +1,11 @@
 [ccpp-table-properties]
-  name = GFS_rrtmgp_aerosol_optics
+  name = rrtmgp_lw_aerosol_optics
   type = scheme
   dependencies = iounitdef.f,machine.F,radiation_aerosols.f,radiation_tools.F90
 
 ########################################################################
 [ccpp-arg-table]
-  name = GFS_rrtmgp_aerosol_optics_run
+  name = rrtmgp_lw_aerosol_optics_run
   type = scheme
 [doLWrad]
   standard_name = flag_to_calc_lw
@@ -20,22 +20,6 @@
   long_name = horizontal dimension
   units = count
   dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[nday]
-  standard_name = daytime_points_dimension
-  long_name = daytime points dimension
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[idxday]
-  standard_name = daytime_points
-  long_name = daytime points
-  units = index
-  dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
   optional = F
@@ -169,14 +153,6 @@
   dimensions = ()
   type = ty_optical_props_1scl
   intent = inout
-  optional = F
-[sw_optical_props_aerosol]
-  standard_name = shortwave_optical_properties_for_aerosols
-  long_name = Fortran DDT containing RRTMGP optical properties
-  units = DDT
-  dimensions = ()
-  type = ty_optical_props_2str
-  intent = out
   optional = F
 [errmsg]
   standard_name = ccpp_error_message
