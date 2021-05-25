@@ -431,6 +431,9 @@ module mp_thompson
                             ims,ime, jms,jme, kms,kme, &
                             its,ite, jts,jte, kts,kte
 
+         !Auxillary fields
+         real(kind_phys) :: vts1(1:ncol,1:nlev)
+
          ! Initialize the CCPP error handling variables
          errmsg = ''
          errflg = 0
@@ -569,7 +572,7 @@ module mp_thompson
                                  ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
                                  ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                                  its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
-                                 errmsg=errmsg, errflg=errflg, reset=reset)
+                                 errmsg=errmsg, errflg=errflg, reset=reset, vts1=vts1)
             else
                call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
                                  nc=nc, nwfa=nwfa, nifa=nifa, nwfa2d=nwfa2d, nifa2d=nifa2d,     &
@@ -588,7 +591,7 @@ module mp_thompson
                                  ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
                                  ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                                  its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
-                                 errmsg=errmsg, errflg=errflg, reset=reset)
+                                 errmsg=errmsg, errflg=errflg, reset=reset, vts1=vts1)
             end if
          else
             if (do_effective_radii) then

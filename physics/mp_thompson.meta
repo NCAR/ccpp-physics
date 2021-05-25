@@ -319,19 +319,6 @@
   type = integer
   intent = out
   optional = F
-[naux3d]
-  standard_name = number_of_3d_auxiliary_arrays
-  long_name = number of 3d auxiliary arrays to output (for debugging)
-  units = count
-  dimensions = ()
-  type = integer
-[aux3d]
-  standard_name = auxiliary_3d_arrays
-  long_name = auxiliary 3d arrays to output (for debugging)
-  units = none
-  dimensions = (horizontal_dimension,vertical_dimension,number_of_3d_auxiliary_arrays)
-  type = real
-  kind = kind_phys
 
 ########################################################################
 [ccpp-arg-table]
@@ -705,6 +692,19 @@
   type = integer
   intent = out
   optional = F
+[naux3d]
+  standard_name = number_of_3d_auxiliary_arrays
+  long_name = number of 3d auxiliary arrays to output (for debugging)
+  units = count
+  dimensions = ()
+  type = integer
+[aux3d]
+  standard_name = auxiliary_3d_arrays
+  long_name = auxiliary 3d arrays to output (for debugging)
+  units = none
+  dimensions = (horizontal_dimension,vertical_dimension,number_of_3d_auxiliary_arrays)
+  type = real
+  kind = kind_phys
 
 ########################################################################
 [ccpp-arg-table]
