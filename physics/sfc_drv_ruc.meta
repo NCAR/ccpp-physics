@@ -810,15 +810,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[snet]
-  standard_name = surface_net_downwelling_shortwave_flux
-  long_name = surface net downwelling shortwave flux at current time
-  units = W m-2
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [tg3]
   standard_name = deep_soil_temperature
   long_name = deep soil temperature

@@ -277,7 +277,6 @@ module lsm_ruc
 !     sigmaf   - real, areal fractional cover of green vegetation  im   !
 !     dlwflx   - real, total sky sfc downward lw flux ( w/m**2 )   im   !
 !     dswflx   - real, total sky sfc downward sw flux ( w/m**2 )   im   !
-!     snet     - real, total sky sfc netsw flx into ground(w/m**2) im   !
 !     delt     - real, time interval (second)                      1    !
 !     tg3      - real, deep soil temperature (k)                   im   !
 !     cm       - real, surface exchange coeff for momentum (m/s)   im   !
@@ -337,7 +336,7 @@ module lsm_ruc
      &       imp_physics, imp_physics_gfdl, imp_physics_thompson,       &
      &       do_mynnsfclay, lsoil_ruc, lsoil, rdlai, zs,                &
      &       t1, q1, qc, soiltyp, vegtype, sigmaf, laixy,               &
-     &       dlwflx, dswsfc, snet, tg3, coszen, land, icy, lake,        &
+     &       dlwflx, dswsfc, tg3, coszen, land, icy, lake,              &
      &       rainnc, rainc, ice, snow, graupel,                         &
      &       prsl1, zf, wind, shdmin, shdmax,                           &
      &       srflag, sfalb_lnd_bck, snoalb,                             &
@@ -389,7 +388,7 @@ module lsm_ruc
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson
 
       real (kind=kind_phys), dimension(:), intent(in) ::          &
-     &       t1, sigmaf, laixy, dlwflx, dswsfc, snet, tg3,        &
+     &       t1, sigmaf, laixy, dlwflx, dswsfc, tg3,              &
      &       coszen, prsl1, wind, shdmin, shdmax,                 &
      &       sfalb_lnd_bck, snoalb, zf, qc, q1,                   &
      ! for land
@@ -938,17 +937,8 @@ module lsm_ruc
 
         snoalb1d_lnd(i,j) = snoalb(i)
         albbck_lnd(i,j)   = albbcksol(i) !sfalb_lnd_bck(i)
-        ! alb_lnd takes into account snow on the ground
-        !if (kdt == 1) then
-        !  if (dswsfc(i) > 0.) then
-        !    alb_lnd(i,j) = max(0.01, 1. - snet(i)/dswsfc(i))
-        !  else
-        !    alb_lnd(i,j) = albbck_lnd(i,j) * (1.-sncovr_lnd(i,j)) + snoalb(i) * sncovr_lnd(i,j)
-        !  endif
-        !else
         alb_lnd(i,j) = albbck_lnd(i,j) * (1.-sncovr_lnd(i,j)) + snoalb(i) * sncovr_lnd(i,j) ! sfalb_lnd(i)
-        !endif
-        solnet_lnd(i,j) = snet(i) !dswsfc(i)*(1.-alb_lnd(i,j)) !..net sw rad flx (dn-up) at sfc in w/m2
+        solnet_lnd(i,j) = dswsfc(i)*(1.-alb_lnd(i,j)) !..net sw rad flx (dn-up) at sfc in w/m2
 
         cmc(i,j) = canopy(i)            !  [mm] 
         soilt_lnd(i,j) = tsurf_lnd(i)            ! clu_q2m_iter
@@ -1239,21 +1229,13 @@ module lsm_ruc
         !-- alb_ice* is computed in setalb called from rrtmg_sw_pre.
         snoalb1d_ice(i,j) = 0.75 !alb_ice_snow(i) !0.75 is RAP value for max snow alb on ice
         albbck_ice(i,j)   = 0.55 !alb_ice_snowfree(i) !0.55 is RAP value for ice alb
-        if (kdt == 1) then
-          if (dswsfc(i) > 0.) then
-            alb_ice(i,j) = max(0.01, 1. - snet(i)/dswsfc(i))
-          else
-            alb_ice(i,j) = albbck_ice(i,j) * (1.-sncovr_ice(i,j)) + snoalb1d_ice(i,j) * sncovr_ice(i,j)
-          endif
-        else
-          alb_ice(i,j) = sfalb_ice(i)
-        endif
-        solnet_ice(i,j) = snet(i) !dswsfc(i)*(1.-alb_ice(i,j))
+        alb_ice(i,j)    = sfalb_ice(i)
+        solnet_ice(i,j) = dswsfc(i)*(1.-alb_ice(i,j))
         qvg_ice(i,j)    = sfcqv_ice(i)
         qsfc_ice(i,j)   = sfcqv_ice(i)/(1.+sfcqv_ice(i))
         qsg_ice(i,j)    = rslf(prsl1(i),tsurf_ice(i))
         qcg_ice(i,j)    = sfcqc_ice(i)
-        semis_bck(i,j)   = 0.99
+        semis_bck(i,j)  = 0.99
         if (kdt == 1) then
           sfcems_ice(i,j) = semisbase(i) * (1.-sncovr_ice(i,j)) + 0.99 * sncovr_ice(i,j)
         else
