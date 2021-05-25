@@ -424,7 +424,8 @@
                else
                   lfnc = 1.
                endif
-               dtdt(i,k) = dtdt(i,k) + swh(i,k)*xmu(i) + htrlw(i,k)*lfnc
+               dtdt(i,k) = dtdt(i,k) + swh(i,k)*xmu(i) +                &
+     &              htrlw(i,k)*lfnc + (1.-lfnc)*hlw(i,k)
             enddo
          enddo
       else
