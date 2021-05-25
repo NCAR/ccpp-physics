@@ -307,7 +307,7 @@
 
       private
 
-      public GFS_diagtoscreen_init, GFS_diagtoscreen_run, GFS_diagtoscreen_finalize
+      public GFS_diagtoscreen_init, GFS_diagtoscreen_timestep_init, GFS_diagtoscreen_run, GFS_diagtoscreen_finalize
 
       contains
 
@@ -343,6 +343,39 @@
          end do
 
       end subroutine GFS_diagtoscreen_init
+
+!> \section arg_table_GFS_diagtoscreen_timestep_init Argument Table
+!! \htmlinclude GFS_diagtoscreen_timestep_init.html
+!!
+      subroutine GFS_diagtoscreen_timestep_init (Model, Data, Interstitial, errmsg, errflg)
+
+         use GFS_typedefs,          only: GFS_control_type, GFS_data_type, &
+                                          GFS_interstitial_type
+
+         implicit none
+
+         !--- interface variables
+         type(GFS_control_type),      intent(in)  :: Model
+         type(GFS_data_type),         intent(in)  :: Data(:)
+         type(GFS_interstitial_type), intent(in)  :: Interstitial(:)
+         character(len=*),            intent(out) :: errmsg
+         integer,                     intent(out) :: errflg
+
+         !--- local variables
+         integer :: i
+
+         ! Initialize CCPP error handling variables
+         errmsg = ''
+         errflg = 0
+
+         do i=1,size(Data)
+           call GFS_diagtoscreen_run (Model, Data(i)%Statein, Data(i)%Stateout, Data(i)%Sfcprop,    &
+                                      Data(i)%Coupling, Data(i)%Grid, Data(i)%Tbd, Data(i)%Cldprop, &
+                                      Data(i)%Radtend, Data(i)%Intdiag, Interstitial(1),            &
+                                      size(Interstitial), i, errmsg, errflg)
+         end do
+
+      end subroutine GFS_diagtoscreen_timestep_init
 
       subroutine GFS_diagtoscreen_finalize ()
       end subroutine GFS_diagtoscreen_finalize
@@ -870,17 +903,17 @@
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Grid%coslat', Grid%coslat)
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Grid%area  ', Grid%area  )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Grid%dx    ', Grid%dx    )
-                     if (Model%ntoz > 0) then
+                     if (Model%kdt>0 .and. Model%ntoz>0) then
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Grid%ddy_o3   ', Grid%ddy_o3   )
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Grid%jindx1_o3', Grid%jindx1_o3)
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Grid%jindx2_o3', Grid%jindx2_o3)
                      endif
-                     if (Model%h2o_phys) then
+                     if (Model%kdt>0 .and. Model%h2o_phys) then
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Grid%ddy_h   ', Grid%ddy_h   )
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Grid%jindx1_h', Grid%jindx1_h)
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Grid%jindx2_h', Grid%jindx2_h)
                      endif
-                     if (Model%do_ugwp_v1) then
+                     if (Model%kdt>0 .and. Model%do_ugwp_v1) then
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Grid%ddy_j1tau ', Grid%ddy_j1tau  )
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Grid%ddy_j2tau ', Grid%ddy_j2tau  )
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Grid%jindx1_tau', Grid%jindx1_tau )
@@ -916,10 +949,13 @@
 
       private
 
-      public GFS_interstitialtoscreen_init, GFS_interstitialtoscreen_run, GFS_interstitialtoscreen_finalize
+      public GFS_interstitialtoscreen_init, GFS_interstitialtoscreen_timestep_init, GFS_interstitialtoscreen_run, GFS_interstitialtoscreen_finalize
 
       contains
 
+!> \section arg_table_GFS_interstitialtoscreen_init Argument Table
+!! \htmlinclude GFS_interstitialtoscreen_init.html
+!!
       subroutine GFS_interstitialtoscreen_init (Model, Data, Interstitial, errmsg, errflg)
 
          use GFS_typedefs,          only: GFS_control_type, GFS_data_type, &
@@ -950,6 +986,40 @@
          end do
 
       end subroutine GFS_interstitialtoscreen_init
+
+!> \section arg_table_GFS_interstitialtoscreen_timestep_init Argument Table
+!! \htmlinclude GFS_interstitialtoscreen_timestep_init.html
+!!
+      subroutine GFS_interstitialtoscreen_timestep_init (Model, Data, Interstitial, errmsg, errflg)
+
+         use GFS_typedefs,          only: GFS_control_type, GFS_data_type, &
+                                          GFS_interstitial_type
+
+         implicit none
+
+         !--- interface variables
+         type(GFS_control_type),      intent(in)  :: Model
+         type(GFS_data_type),         intent(in)  :: Data(:)
+         type(GFS_interstitial_type), intent(in)  :: Interstitial(:)
+         character(len=*),            intent(out) :: errmsg
+         integer,                     intent(out) :: errflg
+
+         !--- local variables
+         integer :: i
+
+         ! Initialize CCPP error handling variables
+         errmsg = ''
+         errflg = 0
+
+
+         do i=1,size(Interstitial)
+           call GFS_interstitialtoscreen_run (Model, Data(1)%Statein, Data(1)%Stateout, Data(1)%Sfcprop,    &
+                                              Data(1)%Coupling, Data(1)%Grid, Data(1)%Tbd, Data(1)%Cldprop, &
+                                              Data(1)%Radtend, Data(1)%Intdiag, Interstitial(i),            &
+                                              size(Interstitial), -999, errmsg, errflg)
+         end do
+
+      end subroutine GFS_interstitialtoscreen_timestep_init
 
       subroutine GFS_interstitialtoscreen_finalize ()
       end subroutine GFS_interstitialtoscreen_finalize
