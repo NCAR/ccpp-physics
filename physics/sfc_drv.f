@@ -21,10 +21,12 @@
 !! \section arg_table_lsm_noah_init Argument Table
 !! \htmlinclude lsm_noah_init.html
 !!
-      subroutine lsm_noah_init(me, isot, ivegsrc, nlunit,
+      subroutine lsm_noah_init(lsm, lsm_noah, me, isot, ivegsrc, nlunit,
      &                         pores, resid, errmsg, errflg)
 
       implicit none
+      integer,              intent(in) :: lsm
+      integer,              intent(in) :: lsm_noah      
 
       integer,              intent(in)  :: me, isot, ivegsrc, nlunit
 
@@ -37,6 +39,14 @@
       errmsg = ''
       errflg = 0
       
+      ! Consistency checks
+      if (lsm/=lsm_noah) then
+        write(errmsg,'(*(a))') 'Logic error: namelist choice of ',
+     &       'LSM is different from Noah'
+        errflg = 1
+        return
+      end if
+
       if (ivegsrc > 2) then
         errmsg = 'The NOAH LSM expects that the ivegsrc physics '//
      &            'namelist parameter is 0, 1, or 2. Exiting...'

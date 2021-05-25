@@ -48,7 +48,7 @@ module GFS_rrtmg_setup
           icliq_sw, crick_proof, ccnorm,                      &
           imp_physics,                                        &
           norad_precip, idate, iflip,                         &
-          im, faerlw, faersw, aerodp,                         & ! for consistency checks
+          do_RRTMGP, im, faerlw, faersw, aerodp,              & ! for consistency checks
           me, errmsg, errflg)
 ! =================   subprogram documentation block   ================ !
 !                                                                       !
@@ -173,6 +173,8 @@ module GFS_rrtmg_setup
       integer, intent(in) :: idate(:)
       integer, intent(in) :: iflip
       ! For consistency checks
+      
+      logical, intent(in)         :: do_RRTMGP
       integer, intent(in)         :: im
       real(kind_phys), intent(in) :: faerlw(:,:,:,:)
       real(kind_phys), intent(in) :: faersw(:,:,:,:)
@@ -193,6 +195,12 @@ module GFS_rrtmg_setup
       errflg = 0
 
       if (is_initialized) return
+      
+      if (do_RRTMGP) then
+        write(errmsg,'(*(a))') "Logic error: do_RRTMGP must be set to .false."
+        errflg = 1
+        return
+      end if
 
       ! Consistency checks for dimensions of arrays, this is required
       ! to detect differences in FV3's parameters that are used to
