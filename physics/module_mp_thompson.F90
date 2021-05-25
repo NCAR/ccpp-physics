@@ -1267,11 +1267,8 @@ MODULE module_mp_thompson
             nr1d(k) = nr(i,k,j)
             rho(k) = 0.622*p1d(k)/(R*t1d(k)*(qv1d(k)+0.622))
             vtsk1(k) = 0.
-            vts1(i,k,j) = 0.
             prw_vcdc1(k) = 0.
-            prw_vcdc(i,k,j) = 0.
             prw_vcde1(k) = 0.
-            prw_vcde(i,k,j) = 0.
          enddo
          if (is_aerosol_aware) then
             do k = kts, kte
@@ -1350,8 +1347,8 @@ MODULE module_mp_thompson
             ni(i,k,j) = ni1d(k)
             nr(i,k,j) = nr1d(k)
             vts1(i,k,j)      = vtsk1(k)
-            prw_vcdc(i,k,j)  = prw_vcdc1(k)
-            prw_vcde(i,k,j)  = prw_vcde1(k)
+            prw_vcdc(i,k,j)  = prw_vcdc(i,k,j) + prw_vcdc1(k)
+            prw_vcde(i,k,j)  = prw_vcde(i,k,j) + prw_vcde1(k)
 
             if (present(tt)) then;
                tt(i,k,j) = t1d(k)
