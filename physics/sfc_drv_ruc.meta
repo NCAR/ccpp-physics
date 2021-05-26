@@ -82,8 +82,8 @@
   intent = in
   optional = F
 [im]
-  standard_name = horizontal_loop_extent
-  long_name = horizontal loop extent
+  standard_name = horizontal_dimension
+  long_name = horizontal dimension
   units = count
   dimensions = ()
   type = integer
@@ -168,7 +168,7 @@
   standard_name = water_vapor_specific_humidity_at_lowest_model_layer
   long_name = water vapor specific humidity at lowest model layer
   units = kg kg-1
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -177,7 +177,7 @@
   standard_name = air_pressure_at_lowest_model_layer
   long_name = mean pressure at lowest model layer
   units = Pa
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -195,7 +195,7 @@
   standard_name = sea_ice_temperature
   long_name = sea ice surface skin temperature
   units = K
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -249,7 +249,7 @@
   standard_name = sea_ice_concentration
   long_name = ice fraction over open water
   units = frac
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -267,7 +267,7 @@
   standard_name = surface_snow_area_fraction_over_land
   long_name = surface snow area fraction over land
   units = frac
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -276,7 +276,7 @@
   standard_name = surface_snow_area_fraction_over_ice
   long_name = surface snow area fraction over ice
   units = frac
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -285,7 +285,7 @@
   standard_name = upper_bound_on_max_albedo_over_deep_snow
   long_name = maximum snow albedo
   units = frac
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -348,7 +348,7 @@
   standard_name = water_vapor_mixing_ratio_at_surface_over_land
   long_name = water vapor mixing ratio at surface over land
   units = kg kg-1
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -357,7 +357,7 @@
   standard_name = water_vapor_mixing_ratio_at_surface_over_ice
   long_name = water vapor mixing ratio at surface over ice
   units = kg kg-1
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -366,7 +366,7 @@
   standard_name =surface_snow_free_albedo_over_land
   long_name = surface snow-free albedo over ice
   units = frac
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -375,7 +375,7 @@
   standard_name = baseline_surface_longwave_emissivity
   long_name = baseline surface lw emissivity in fraction
   units = frac
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -384,7 +384,7 @@
   standard_name = surface_longwave_emissivity_over_land
   long_name = surface lw emissivity in fraction over land
   units = frac
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -393,7 +393,7 @@
   standard_name = surface_longwave_emissivity_over_ice
   long_name = surface lw emissivity in fraction over ice
   units = frac
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -402,7 +402,7 @@
   standard_name = surface_albedo_direct_visible_over_land
   long_name = direct surface albedo visible band over land
   units = frac
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -411,7 +411,7 @@
   standard_name = surface_albedo_direct_NIR_over_land
   long_name = direct surface albedo NIR band over land
   units = frac
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -420,7 +420,7 @@
   standard_name = surface_albedo_diffuse_visible_over_land
   long_name = diffuse surface albedo visible band over land
   units = frac
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -429,7 +429,7 @@
   standard_name = surface_albedo_diffuse_NIR_over_land
   long_name = diffuse surface albedo NIR band over land
   units = frac
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -438,7 +438,7 @@
   standard_name = surface_albedo_direct_visible_over_ice
   long_name = direct surface albedo visible band over ice
   units = frac
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -447,7 +447,7 @@
   standard_name = surface_albedo_direct_NIR_over_ice
   long_name = direct surface albedo NIR band over ice
   units = frac
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -456,7 +456,7 @@
   standard_name = surface_albedo_diffuse_visible_over_ice
   long_name = diffuse surface albedo visible band over ice
   units = frac
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -465,7 +465,7 @@
   standard_name = surface_albedo_diffuse_NIR_over_ice
   long_name = diffuse surface albedo NIR band over ice
   units = frac
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
