@@ -420,7 +420,7 @@
                ! using a logistic function
                if (damp_LW_fluxadj) then
                   dp   = p_lev(i,k) - lfnc_p0
-                  lfnc = L / (1+exp(-lfnc_k_grad*exp(1.)*dp/lfnc_p0))
+                  lfnc = L / (1+exp(-lfnc_k_grad*dp/lfnc_p0))
                else
                   lfnc = 1.
                endif
