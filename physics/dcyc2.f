@@ -260,14 +260,14 @@
      &                        rstl, solang, dT
       real(kind=kind_phys), dimension(im,levs+1) :: flxlwup_adj,        &
      &     flxlwdn_adj, t_lev2
-      real(kind=kind_phys) :: fluxlwnet_adj,fluxlwnet,c1,c2,c3,c4,c5,   &
-     &     dP,lfnc
+      real(kind=kind_phys) :: fluxlwnet_adj,fluxlwnet,dT_sfc,           &
+     &fluxlwDOWN_jac,dP,lfnc,c1
       ! Length scale for flux-adjustment scaling
       real(kind=kind_phys), parameter ::                                &
      &     L = 1.
       ! Scaling factor for downwelling LW Jacobian profile.
       real(kind=kind_phys), parameter ::                                &
-     &     c0 = 0.2
+     &     gamma = 0.2
 !
 !===> ...  begin here
 !
@@ -400,19 +400,21 @@
          ! L = 1, fix scale between 0-1.
          ! k (steepness) and p0 (midpoint) are controlled via namelist
          do i = 1, im
-            c1 = fluxlwUP_jac(i,iSFC)
-            c2 = fluxlwUP_jac(i,iTOA) / c1
-            c3 = t_lev2(i,iSFC) - t_lev(i,iSFC)
+            c1 = fluxlwUP_jac(i,iTOA) / fluxlwUP_jac(i,iSFC)
+            dT_sfc = t_lev2(i,iSFC) - t_lev(i,iSFC)
             do k = 1, levs
-               ! Only apply the Jacobian adjustment below plim_fluxAdj_upper
-               c4 = fluxlwUP_jac(i,k)/c1
-               fluxlwnet = (flux2D_lwUP(i,k+1)   - flux2D_lwUP(i,k) -   &
-     &              flux2D_lwDOWN(i,k+1) + flux2D_lwDOWN(i,k))
-               ! (Eq. 9)
-               c5 = c0 * (c4 - c2) / (1 - c2)
-               ! (Eq. 10)
-               fluxlwnet_adj = fluxlwnet + c3*(c4-c5)
-               ! Compute adjusted heating rate
+               ! LW net flux
+               fluxlwnet = (flux2D_lwUP(i,  k+1) - flux2D_lwUP(i,  k) - &
+     &                      flux2D_lwDOWN(i,k+1) + flux2D_lwDOWN(i,k))
+               ! Downward LW Jacobian (Eq. 9)
+               fluxlwDOWN_jac = gamma *                                 &
+     &              (fluxlwUP_jac(i,k)/fluxlwUP_jac(i,iSFC) - c1) /     &
+     &              (1 - c1)
+               ! Adjusted LW net flux(Eq. 10)
+               fluxlwnet_adj = fluxlwnet + dT_sfc*                      &
+     &              (fluxlwUP_jac(i,k)/fluxlwUP_jac(i,iSFC) -           &
+     &              fluxlwDOWN_jac)
+               ! Adjusted LW heating rate
                htrlw(i,k) = fluxlwnet_adj * con_g /                     &
      &              (con_cp * (p_lev(i,k+1) - p_lev(i,k)))
 
@@ -420,7 +422,7 @@
                ! using a logistic function
                if (damp_LW_fluxadj) then
                   dp   = p_lev(i,k) - lfnc_p0
-                  lfnc = L / (1+exp(-lfnc_k_grad*dp/lfnc_p0))
+                  lfnc = L / (1+exp(-(lfnc_k_grad/lfnc_p0)*dp))
                else
                   lfnc = 1.
                endif
