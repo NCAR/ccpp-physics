@@ -178,10 +178,10 @@
      &       sfcnirbmu,sfcnirdfu,sfcvisbmu,sfcvisdfu,                   &
      &       sfcnirbmd,sfcnirdfd,sfcvisbmd,sfcvisdfd,                   &
      &       im, levs, deltim, fhswr,                                   &
-     &       dry, icy, wet, minGPtemp, maxGPtemp, damp_LW_fluxadj,      &
-     &       lfnc_k, lfnc_p0, minGPpres, use_LW_jacobian, sfculw,       &
-     &       fluxlwUP_jac, t_lay, t_lev, p_lay, p_lev, flux2D_lwUP,     &
-     &       flux2D_lwDOWN, pert_radtend, do_sppt,ca_global,            &
+     &       dry, icy, wet, damp_LW_fluxadj, lfnc_k, lfnc_p0,           &
+     &       minGPpres, use_LW_jacobian, sfculw, fluxlwUP_jac,          &
+     &       t_lay, t_lev, p_lay, p_lev, flux2D_lwUP, flux2D_lwDOWN,    &
+     &       pert_radtend, do_sppt,ca_global,                           &
 !    &       dry, icy, wet, lprnt, ipr,                                 &
 !  ---  input/output:
      &       dtdt,dtdtnp,htrlw,                                         &
@@ -217,8 +217,7 @@
      &     pert_radtend
       logical, intent(in) :: do_sppt,ca_global
       real(kind=kind_phys),   intent(in) :: solhr, slag, cdec, sdec,    &
-     &     deltim, fhswr, minGPpres, minGPtemp, maxGPtemp, lfnc_k,      &
-     &     lfnc_p0
+     &     deltim, fhswr, minGPpres, minGPtemp, lfnc_k, lfnc_p0
 
       real(kind=kind_phys), dimension(:), intent(in) ::                 &
      &      sinlat, coslat, xlon, coszen, tf, tsflw, sfcdlw,            &
@@ -384,8 +383,8 @@
          !
          ! Compute temperatute at level interfaces.
          !
-         call cmp_tlev(im, levs, minGPpres, minGPtemp, maxGPtemp, p_lay,& 
-     &                  t_lay, p_lev, tsfc, t_lev2)
+         call cmp_tlev(im, levs, minGPpres, p_lay, t_lay, p_lev, tsfc,  &
+     &        t_lev2)
 
          ! Compute adjusted net LW flux foillowing Hogan and Bozzo 2015 (10.1002/2015MS000455)
          ! Here we assume that the profile of the downwelling LW Jaconiam has the same shape

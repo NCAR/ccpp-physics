@@ -76,7 +76,7 @@ contains
 !! \htmlinclude rrtmgp_lw_gas_optics_init.html
 !!
   subroutine rrtmgp_lw_gas_optics_init(rrtmgp_root_dir, rrtmgp_lw_file_gas, mpicomm,        &
-       mpirank, mpiroot, gas_concentrations, minGPpres, minGPtemp, maxGPtemp, errmsg, errflg)
+       mpirank, mpiroot, gas_concentrations, minGPpres, minGPtemp, errmsg, errflg)
 
     ! Inputs
     type(ty_gas_concs), intent(inout) :: &
@@ -96,7 +96,6 @@ contains
          errflg              ! CCPP error code
     real(kind_phys), intent(out) :: &
          minGPtemp,        & ! Minimum temperature allowed by RRTMGP.
-         maxGPtemp,        & ! Maximum temperature allowed by RRTMG.
          minGPpres           ! Minimum pressure allowed by RRTMGP. 
 
     ! Local variables
@@ -451,7 +450,6 @@ contains
     ! temperature (GFS_rrtmgp_pre.F90)
     minGPpres = lw_gas_props%get_press_min()
     minGPtemp = lw_gas_props%get_temp_min() 
-    maxGPtemp = lw_gas_props%get_temp_max()
 
   end subroutine rrtmgp_lw_gas_optics_init
 

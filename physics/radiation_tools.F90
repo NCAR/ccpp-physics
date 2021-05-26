@@ -2,16 +2,20 @@ module radiation_tools
   use machine, only: &
        kind_phys                   ! Working type
   implicit none
+
+  real(kind_phys) :: &
+       rrtmgp_minP, & ! Minimum pressure allowed in RRTMGP
+       rrtmgp_minT    ! Minimum temperature allowed in RRTMGP
 contains
 
   ! ######################################################################################### 
   ! ######################################################################################### 
-  subroutine cmp_tlev(nCol,nLev,minP,minT,maxT,p_lay,t_lay,p_lev,tsfc,t_lev)
+  subroutine cmp_tlev(nCol,nLev,minP,p_lay,t_lay,p_lev,tsfc,t_lev)
     ! Inputs
     integer, intent(in) :: &
          nCol,nLev
     real(kind_phys),intent(in) :: &
-         minP,minT,maxT
+         minP
     real(kind_phys),dimension(nCol),intent(in) :: &
          tsfc
     real(kind_phys),dimension(nCol,nLev),intent(in) :: &
@@ -73,18 +77,6 @@ contains
         enddo
        t_lev(1:NCOL,iTOA+1) = t_lay(1:NCOL,iTOA)
     endif
-
-    ! Bound temperature at layer interfaces
-    do iCol=1,NCOL
-       do iLay=1,nLev+1
-          if (t_lev(iCol,iLay) .le. minT) then
-             t_lev(iCol,iLay) = minT + epsilon(minT)
-          endif
-          if (t_lev(iCol,iLay) .ge. maxT) then
-             t_lev(iCol,iLay) = maxT - epsilon(maxT)
-          endif
-       enddo
-    enddo
 
   end subroutine cmp_tlev
 
