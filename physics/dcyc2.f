@@ -179,7 +179,7 @@
      &       sfcnirbmd,sfcnirdfd,sfcvisbmd,sfcvisdfd,                   &
      &       im, levs, deltim, fhswr,                                   &
      &       dry, icy, wet, minGPtemp, maxGPtemp, damp_LW_fluxadj,      &
-     &       lfnc_k_grad, lfnc_p0, minGPpres, use_LW_jacobian, sfculw,  &
+     &       lfnc_k, lfnc_p0, minGPpres, use_LW_jacobian, sfculw,       &
      &       fluxlwUP_jac, t_lay, t_lev, p_lay, p_lev, flux2D_lwUP,     &
      &       flux2D_lwDOWN, pert_radtend, do_sppt,ca_global,            &
 !    &       dry, icy, wet, lprnt, ipr,                                 &
@@ -217,7 +217,7 @@
      &     pert_radtend
       logical, intent(in) :: do_sppt,ca_global
       real(kind=kind_phys),   intent(in) :: solhr, slag, cdec, sdec,    &
-     &     deltim, fhswr, minGPpres, minGPtemp, maxGPtemp, lfnc_k_grad, &
+     &     deltim, fhswr, minGPpres, minGPtemp, maxGPtemp, lfnc_k,      &
      &     lfnc_p0
 
       real(kind=kind_phys), dimension(:), intent(in) ::                 &
@@ -261,7 +261,7 @@
       real(kind=kind_phys), dimension(im,levs+1) :: flxlwup_adj,        &
      &     flxlwdn_adj, t_lev2
       real(kind=kind_phys) :: fluxlwnet_adj,fluxlwnet,dT_sfc,           &
-     &fluxlwDOWN_jac,dP,lfnc,c1
+     &fluxlwDOWN_jac,lfnc,c1
       ! Length scale for flux-adjustment scaling
       real(kind=kind_phys), parameter ::                                &
      &     L = 1.
@@ -397,8 +397,9 @@
          !
          ! Optionally, the flux adjustment can be damped with height using a logistic function
          ! fx ~ L / (1 + exp(-k*dp)), where dp = p - p0
-         ! L = 1, fix scale between 0-1.
-         ! k (steepness) and p0 (midpoint) are controlled via namelist
+         ! L  = 1, fix scale between 0-1.      - Fixed
+         ! k  = 1 / pressure decay length (Pa) - Controlled by namelist
+         ! p0 = Transition pressure (Pa)       - Controlled by namelsit
          do i = 1, im
             c1 = fluxlwUP_jac(i,iTOA) / fluxlwUP_jac(i,iSFC)
             dT_sfc = t_lev2(i,iSFC) - t_lev(i,iSFC)
@@ -421,8 +422,7 @@
                ! Add radiative heating rates to physics heating rate. Optionally, scaled w/ height
                ! using a logistic function
                if (damp_LW_fluxadj) then
-                  dp   = p_lev(i,k) - lfnc_p0
-                  lfnc = L / (1+exp(-(lfnc_k_grad/lfnc_p0)*dp))
+                  lfnc = L / (1+exp(-lfnc_k*(p_lev(i,k) - lfnc_p0)))
                else
                   lfnc = 1.
                endif

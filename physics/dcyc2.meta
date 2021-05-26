@@ -396,18 +396,18 @@
   type = logical
   intent = in
   optional = F
-[lfnc_k_grad]
-  standard_name = steepness_of_flux_damping
-  long_name = steepness of logistic function for damping the LW flux adjustment	
-  units = none
+[lfnc_k]
+  standard_name = transition_pressure_length_scale_for_flux_damping
+  long_name = depth of transition layer in logistic function for LW flux adjustment damping
+  units = Pa
   dimensions = ()
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [lfnc_p0]
-  standard_name = midpoint_used_for_flux_damping
-  long_name = midpoint for damping the LW flux adjustment
+  standard_name = transition_pressure_for_flux_damping
+  long_name = transition pressure for LW flux adjustment damping
   units = Pa
   dimensions = ()
   type = real
