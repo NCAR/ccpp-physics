@@ -9,8 +9,7 @@
 
       contains
 
-      subroutine samfshalcnv_init(imfshalcnv, imfshalcnv_samf,
-&
+      subroutine samfshalcnv_init(imfshalcnv, imfshalcnv_samf,          &
      &                            errmsg, errflg)
 
       integer,                   intent(in) :: imfshalcnv
@@ -22,8 +21,7 @@
 
       ! Consistency checks
       if (imfshalcnv/=imfshalcnv_samf) then
-        write(errmsg,'(*(a))') 'Logic error: namelist choice of',
-&
+        write(errmsg,'(*(a))') 'Logic error: namelist choice of',       &
      &  ' shallow convection is different from SAMF'
         errflg = 1
         return
