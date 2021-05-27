@@ -421,7 +421,7 @@
                ! Add radiative heating rates to physics heating rate. Optionally, scaled w/ height
                ! using a logistic function
                if (damp_LW_fluxadj) then
-                  lfnc = L / (1+exp(-lfnc_k*(p_lev(i,k) - lfnc_p0)))
+                  lfnc = L / (1+exp(-(p_lev(i,k) - lfnc_p0)/lfnc_k))
                else
                   lfnc = 1.
                endif
