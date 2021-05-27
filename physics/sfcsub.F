@@ -788,8 +788,8 @@
 !     do i=1,len
 !       if (ifp .eq. 0 .and. rla(i) .gt. 80.0) print *,' rla=',rla(i)
 !    *,' rlo=',rlo(i)
-!       tem1 = abs(rla(i) + 66.35)
-!       tem2 = abs(rlo(i) - 109.01)
+!       tem1 = abs(rla(i) - 60.11)
+!       tem2 = abs(rlo(i) - 5.38)
 !       if(tem1 < 0.10 .and. tem2 < 0.10) then
 !         lprnt = .true.
 !         iprnt = i
@@ -1093,6 +1093,8 @@
         icefl1(i) = .true.
       enddo
 !     if(lprnt) print *,' tsffcsin=',tsffcs(iprnt)
+!     if(lprnt) print *,' slifcsin=',slifcs(iprnt)
+!     if(lprnt) print *,'slmskl=',slmskl(iprnt),' slmskw=',slmskw(iprnt)
 !
 !  read climatology fields
 !
@@ -1198,7 +1200,7 @@
       call setlsi(slmskw,aisclm,len,aicice,sliclm)
 
 !     if(lprnt) print *,' aisclm=',aisclm(iprnt),' sliclm='
-!    *,sliclm(iprnt),' slmskw=',slmskw(iprnt)
+!    &,sliclm(iprnt),' slmskw=',slmskw(iprnt)
 !
 !     write(6,*) 'sliclm'
 !     znnt=1.
@@ -1542,8 +1544,8 @@
           aisanl(i) = acnanl(i)
         enddo
       endif
-!     if(lprnt) print *,' aisanl1=',aisanl(iprnt),' glacir='
-!    &,glacir(iprnt),' slmskw=',slmskw(iprnt)
+!     if(lprnt) print *,' aisanl1=',aisanl(iprnt),' glacir='            &
+!    &,glacir(iprnt),' slmskwl=',slmskw(iprnt),slmskl(iprnt)
 !
       call qcsice(aisanl,glacir,amxice,aicice,aicsea,sllnd,slmskw,
      &            rla,rlo,len,me)
@@ -1552,8 +1554,8 @@
 !
       call setlsi(slmskw,aisanl,len,aicice,slianl)
 
-!     if(lprnt) print *,' aisanl=',aisanl(iprnt),' slianl='
-!    *,slianl(iprnt),' slmskw=',slmskw(iprnt)
+!     if(lprnt) print *,' aisanl=',aisanl(iprnt),' slianl='             &
+!    &,slianl(iprnt),' slmskwl=',slmskw(iprnt),slmskl(iprnt)
 !
 !
       do k=1,lsoil
@@ -2074,7 +2076,7 @@
 !     if(lprnt) print *,'tsfanl=',tsfanl(iprnt),' tsffcs=',tsffcs(iprnt)
 !     if(lprnt) print *,' slian=',slianl(iprnt),' slifn=',slifcs(iprnt)
 !     if(lprnt) print *,' stcan=',stcanl(iprnt,:)
-!
+ 
 !  set tsfc to tsnow over snow
 !
       call snosfc(snoanl,tsfanl,tsfsmx,len,me)
@@ -2504,9 +2506,15 @@
            endif
          enddo
        endif
+       do i=1,len
+         if (nint(slmskl(i)) == 1 .and. nint(slmskw(i)) == 0) then
+           slifcs(i) = slmskl(i)  ! resetting slmsk to land value where land/wate/ice coexist
+         endif
+       enddo
 !
 !     if(lprnt) print *,' tsffcsf=',tsffcs(iprnt)
 !     if(lprnt) print *,' stcfcsend=',stcfcs(iprnt,:)
+!     if(lprnt) print *,' slifcsend=',slifcs(iprnt)
       return
       end subroutine sfccycle 
 
@@ -7411,7 +7419,7 @@ cjfe
           if (me .eq. 0) write(6,*) 'climatological slope read in.'
         endif
 !
-!  max snow albeod
+!  max snow albedo
 !
         if(fnabsc(1:8).ne.'        ') then
           if ( index(fnabsc, "tileX.nc") == 0) then ! grib file
