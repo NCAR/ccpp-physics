@@ -410,6 +410,14 @@
   type = integer
   intent = in
   optional = F
+[thsfc_loc]
+  standard_name = flag_for_reference_pressure_theta
+  long_name = flag for reference pressure in theta calculation
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [tskin]
   standard_name = surface_skin_temperature_for_nsst
   long_name = ocean surface skin temperature
