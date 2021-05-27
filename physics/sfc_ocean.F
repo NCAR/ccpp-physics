@@ -98,11 +98,12 @@
       implicit none
 
 !  ---  constant parameters:
-      real (kind=kind_phys), parameter :: one  = 1.0_kind_phys, zero = 0.0_kind_phys    &
-     &,                                   qmin = 1.0e-8_kind_phys
+      real (kind=kind_phys), parameter :: one  = 1.0_kind_phys,         &
+     &           zero = 0.0_kind_phys, qmin = 1.0e-8_kind_phys
 !  ---  inputs:
       integer, intent(in) :: im
-      real (kind=kind_phys), intent(in) :: hvap, cp, rd, eps, epsm1, rvrdm1
+      real (kind=kind_phys), intent(in) :: hvap, cp, rd,                &
+     &                 eps, epsm1, rvrdm1
 
       real (kind=kind_phys), dimension(:), intent(in) :: ps, u1, v1,    &
      &      t1, q1, tskin, cm, ch, fm, fm10, prsl1, prslki, wind
