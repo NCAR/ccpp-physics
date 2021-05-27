@@ -179,6 +179,11 @@
      &                     ucko(im,km),  vcko(im,km),
      &                     buou(im,km),  xmf(im,km)
 !
+!   temporary local variables for instantaneous surface fluxes
+!     (they will be removed later)
+!
+      real(kind=kind_phys) dusfc1(im),dvsfc1(im),dtsfc1(im),dqsfc1(im)
+!
 !   variables for stratocumulus-top induced downdrafts
 !
       real(kind=kind_phys) tcdo(im,km),  qcdo(im,km,ntrac),
@@ -379,11 +384,11 @@
 !>  - Some output variables and logical flags are initialized
       do i = 1,im
          z0(i)    = 0.01 * zorl(i)
-         rho_a(i) = prsl(i,1) / (rd * t1(i,1))
-         dusfc(i) = 0.
-         dvsfc(i) = 0.
-         dtsfc(i) = 0.
-         dqsfc(i) = 0.
+         rho_a(i) = prsl(i,1)/(rd*t1(i,1)*(1.+fv*max(q1(i,1,1),qmin)))
+         dusfc1(i) = 0.
+         dvsfc1(i) = 0.
+         dtsfc1(i) = 0.
+         dqsfc1(i) = 0.
          kpbl(i) = 1
          hpbl(i) = 0.
          kpblx(i) = 1
@@ -1479,8 +1484,8 @@ c
             qtend      = (f2(i,k)-q1(i,k,1))*rdt
             tdt(i,k)   = tdt(i,k)+ttend
             rtg(i,k,1) = rtg(i,k,1)+qtend
-!           dtsfc(i)   = dtsfc(i)+cont*del(i,k)*ttend
-!           dqsfc(i)   = dqsfc(i)+conq*del(i,k)*qtend
+            dtsfc1(i)  = dtsfc1(i)+cont*del(i,k)*ttend
+            dqsfc1(i)  = dqsfc1(i)+conq*del(i,k)*qtend
          enddo
       enddo
       do i = 1,im
@@ -1618,8 +1623,8 @@ c
             vtend = (f2(i,k)-v1(i,k))*rdt
             du(i,k)  = du(i,k)+utend
             dv(i,k)  = dv(i,k)+vtend
-!           dusfc(i) = dusfc(i)+conw*del(i,k)*utend
-!           dvsfc(i) = dvsfc(i)+conw*del(i,k)*vtend
+            dusfc1(i) = dusfc1(i)+conw*del(i,k)*utend
+            dvsfc1(i) = dvsfc1(i)+conw*del(i,k)*vtend
          enddo
       enddo
       do i = 1,im
