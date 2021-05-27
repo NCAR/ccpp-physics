@@ -217,7 +217,7 @@
      &     pert_radtend
       logical, intent(in) :: do_sppt,ca_global
       real(kind=kind_phys),   intent(in) :: solhr, slag, cdec, sdec,    &
-     &     deltim, fhswr, minGPpres, minGPtemp, lfnc_k, lfnc_p0
+     &     deltim, fhswr, minGPpres, lfnc_k, lfnc_p0
 
       real(kind=kind_phys), dimension(:), intent(in) ::                 &
      &      sinlat, coslat, xlon, coszen, tf, tsflw, sfcdlw,            &
