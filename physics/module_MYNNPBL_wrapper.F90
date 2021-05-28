@@ -726,11 +726,12 @@ SUBROUTINE mynnedmf_wrapper_run(        &
           call dtend_helper(index_of_y_wind,RVBLTEN)
           call dtend_helper(index_of_temperature,RTHBLTEN,exner)
           if(ldiag3d) then
-            idtend = dtidx(100+ntoz,index_of_process_pbl)
-            if(idtend>=1) then
-              dtend(:,:,idtend) = dtend(:,:,idtend) + (ozone-old_ozone)
-              deallocate(old_ozone)
-            endif
+            call dtend_helper(100+ntoz,dqdt_ozone)
+            ! idtend = dtidx(100+ntoz,index_of_process_pbl)
+            ! if(idtend>=1) then
+            !   dtend(:,:,idtend) = dtend(:,:,idtend) + (ozone-old_ozone)
+            !   deallocate(old_ozone)
+            ! endif
           endif
         endif accum_duvt3dt
         !Update T, U and V:
