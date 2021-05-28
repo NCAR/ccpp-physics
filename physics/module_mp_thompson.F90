@@ -1019,12 +1019,19 @@ MODULE module_mp_thompson
                               ims,ime, jms,jme, kms,kme,              &  ! memory dims
                               its,ite, jts,jte, kts,kte,              &  ! tile dims
                               errmsg, errflg, reset, vts1, prw_vcdc,  &
-                              prw_vcde, tpri_inu, tpri_ide, tprs_ide, &
-                              tprs_sde, tprg_gde, tpri_iha, tpri_wfz, &
+                              prw_vcde, tpri_inu, tpri_ide_d,         &
+                              tpri_ide_s, tprs_ide_d, tprs_ide_s,     &
+                              tprs_sde_d, tprs_sde_s, tprg_gde_d,     &
+                              tprg_gde_s, tpri_iha, tpri_wfz,         &
                               tpri_rfz, tprg_rfz, tprs_scw, tprg_scw, &
-                              tprs_scw, tprg_rcs, tprs_rcs, tprr_rci, &
-                              tprg_rcg, tprw_vcd, tprr_sml, tprr_gml, &
-                              tprr_rcg, tprr_rcs, tprv_rev, txri,txrc)
+                              tprg_rcs, tprs_rcs_s, tprs_rcs_r,       &
+                              tprr_rci, tprg_rcg_g, tprg_rcg_r,       &
+                              tprw_vcd_c, tprw_vcd_e, tprr_sml,       &
+                              tprr_gml, tprr_rcg_r, tprr_rcg_g,       &
+                              tprr_rcs_r, tprr_rcs_s, tprv_rev, txri, &
+                              txrc, tten3, qvten3, qrten3, qsten3,    &
+                              qgten3, qiten3, niten3, nrten3, ncten3, &
+                              qcten3)
 
       implicit none
 
@@ -1035,13 +1042,20 @@ MODULE module_mp_thompson
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT):: &
                           qv, qc, qr, qi, qs, qg, ni, nr
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT):: &
-                          vts1,prw_vcdc,prw_vcde,                  &
-                     tpri_inu,tpri_ide,tprs_ide,tprs_sde,tprg_gde, &
-                      tpri_iha,tpri_wfz,tpri_rfz,tprg_rfz,tprs_scw, &
-                      tprg_scw,tprs_scw,tprg_rcs,tprs_rcs,tprr_rci, &
-                      tprg_rcg,tprw_vcd,tprr_sml,tprr_gml,tprr_rcg, &
-                      tprr_rcs,tprv_rev,txri,txrc
-
+                              vts1, prw_vcdc,                         &
+                              prw_vcde, tpri_inu, tpri_ide_d,         &
+                              tpri_ide_s, tprs_ide_d, tprs_ide_s,     &
+                              tprs_sde_d, tprs_sde_s, tprg_gde_d,     &
+                              tprg_gde_s, tpri_iha, tpri_wfz,         &
+                              tpri_rfz, tprg_rfz, tprs_scw, tprg_scw, &
+                              tprg_rcs, tprs_rcs_s, tprs_rcs_r,       &
+                              tprr_rci, tprg_rcg_g, tprg_rcg_r,       &
+                              tprw_vcd_c, tprw_vcd_e, tprr_sml,       &
+                              tprr_gml, tprr_rcg_r, tprr_rcg_g,       &
+                              tprr_rcs_r, tprr_rcs_s, tprv_rev, txri, &
+                              txrc, tten3, qvten3, qrten3, qsten3,    &
+                              qgten3, qiten3, niten3, nrten3, ncten3, &
+                              qcten3 
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(INOUT):: &
                           tt, th
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(IN):: &
@@ -1081,12 +1095,21 @@ MODULE module_mp_thompson
                           qv1d, qc1d, qi1d, qr1d, qs1d, qg1d, ni1d,     &
                           nr1d, nc1d, nwfa1d, nifa1d,                   &
                           t1d, p1d, w1d, dz1d, rho, dBZ
-      REAL, DIMENSION(kts:kte):: vtsk1,prw_vcdc1,prw_vcde1,             &
-                     tpri_inu1,tpri_ide1,tprs_ide1,tprs_sde1,tprg_gde1, &
-                      tpri_iha1,tpri_wfz1,tpri_rfz1,tprg_rfz1,tprs_scw1, &
-                      tprg_scw1,tprs_scw1,tprg_rcs1,tprs_rcs1,tprr_rci1, &
-                      tprg_rcg1,tprw_vcd1,tprr_sml1,tprr_gml1,tprr_rcg1, &
-                      tprr_rcs1,tprv_rev1,txri1,txrc1
+      REAL, DIMENSION(kts:kte):: &
+                              vtsk1, prw_vcdc1,                          &
+                              prw_vcde1, tpri_inu1, tpri_ide1_d,         &
+                              tpri_ide1_s, tprs_ide1_d, tprs_ide1_s,     &
+                              tprs_sde1_d, tprs_sde1_s, tprg_gde1_d,     &
+                              tprg_gde1_s, tpri_iha1, tpri_wfz1,         &
+                              tpri_rfz1, tprg_rfz1, tprs_scw1, tprg_scw1,&
+                              tprg_rcs1, tprs_rcs1_s, tprs_rcs1_r,       &
+                              tprr_rci1, tprg_rcg1_g, tprg_rcg1_r,       &
+                              tprw_vcd1_c, tprw_vcd1_e, tprr_sml1,       &
+                              tprr_gml1, tprr_rcg1_r, tprr_rcg1_g,       &
+                              tprr_rcs1_r, tprr_rcs1_s, tprv_rev1, txri1,&
+                              txrc1, tten1, qvten1, qrten1, qsten1,      &
+                              qgten1, qiten1, niten1, nrten1, ncten1,    &
+                              qcten1 
 
       REAL, DIMENSION(kts:kte):: re_qc1d, re_qi1d, re_qs1d
 #if ( WRF_CHEM == 1 )
@@ -1281,32 +1304,52 @@ MODULE module_mp_thompson
             ni1d(k) = ni(i,k,j)
             nr1d(k) = nr(i,k,j)
             rho(k) = 0.622*p1d(k)/(R*t1d(k)*(qv1d(k)+0.622))
+                              
             vtsk1(k) = 0.
             prw_vcdc1(k) = 0.
             prw_vcde1(k) = 0.
-            tpri_inu(k) = 0.
-            tpri_ide(k) = 0.
-            tprs_ide(k) = 0.
-            tprs_sde(k) = 0.
-            tprg_gde(k) = 0.
-            tpri_iha(k) = 0.
-            tpri_wfz(k) = 0.
-            tpri_rfz(k) = 0.
-            tprg_rfz(k) = 0.
-            tprs_scw(k) = 0.
-            tprg_scw(k) = 0.
-            tprs_scw(k) = 0.
-            tprg_rcs(k) = 0.
-            tprs_rcs(k) = 0.
-            tprr_rci(k) = 0.
-            tprg_rcg(k) = 0.
-            tprw_vcd(k) = 0.
-            tprr_sml(k) = 0.
-            tprr_gml(k) = 0.
-            tprr_rcg(k) = 0.
-            tprr_rcs(k) = 0.
-            tprv_rev(k) = 0.
-
+            tpri_inu1(k) = 0.
+            tpri_ide1_d(k) = 0.
+            tpri_ide1_s(k) = 0.
+            tprs_ide1_d(k) = 0.
+            tprs_ide1_s(k) = 0.
+            tprs_sde1_d(k) = 0.
+            tprs_sde1_s(k) = 0.
+            tprg_gde1_d(k) = 0.
+            tprg_gde1_s(k) = 0.
+            tpri_iha1(k) = 0.
+            tpri_wfz1(k) = 0.
+            tpri_rfz1(k) = 0.
+            tprg_rfz1(k) = 0.
+            tprg_scw1(k) = 0.
+            tprs_scw1(k) = 0.
+            tprg_rcs1(k) = 0.
+            tprs_rcs1_s(k) = 0.
+            tprs_rcs1_r(k) = 0.
+            tprr_rci1(k) = 0.
+            tprg_rcg1_g(k) = 0.
+            tprg_rcg1_r(k) = 0.
+            tprw_vcd1_c(k) = 0.
+            tprw_vcd1_e(k) = 0.
+            tprr_sml1(k) = 0.
+            tprr_gml1(k) = 0.
+            tprr_rcg1_r(k) = 0.
+            tprr_rcg1_g(k) = 0.
+            tprr_rcs1_r(k) = 0.
+            tprr_rcs1_s(k) = 0.
+            tprv_rev1(k) = 0.
+            txrc1(k) = 0.
+            txri1(k) = 0.
+            tten1(k) = 0.
+            qvten1(k) = 0.
+            qrten1(k) = 0.
+            qsten1(k) = 0.
+            qgten1(k) = 0.
+            qiten1(k) = 0.
+            niten1(k) = 0.
+            nrten1(k) = 0.
+            ncten1(k) = 0.
+            qcten1(k) = 0.
          enddo
          if (is_aerosol_aware) then
             do k = kts, kte
@@ -1331,11 +1374,16 @@ MODULE module_mp_thompson
 #endif
                       rand1, rand2, rand3, &
                       kts, kte, dt, i, j, vtsk1, prw_vcdc1, prw_vcde1, &
-                      tpri_inu1,tpri_ide1,tprs_ide1,tprs_sde1,tprg_gde1, &
-                      tpri_iha1,tpri_wfz1,tpri_rfz1,tprg_rfz1,tprs_scw1, &
-                      tprg_scw1,tprs_scw1,tprg_rcs1,tprs_rcs1,tprr_rci1, &
-                      tprg_rcg1,tprw_vcd1,tprr_sml1,tprr_gml1,tprr_rcg1, &
-                      tprr_rcs1,tprv_rev1,txri1,txrc1)
+                      tpri_inu1, tpri_ide1_d, tpri_ide1_s, tprs_ide1_d,&
+                      tprs_ide1_s, tprs_sde1_d, tprs_sde1_s,           &
+                      tprg_gde1_d, tprg_gde1_s, tpri_iha1, tpri_wfz1,  &
+                      tpri_rfz1, tprg_rfz1, tprs_scw1, tprg_scw1,      &
+                      tprg_rcs1, tprs_rcs1_s, tprs_rcs1_r, tprr_rci1,  &
+                      tprg_rcg1_g, tprg_rcg1_r, tprw_vcd1_c,           &
+                      tprw_vcd1_e, tprr_sml1, tprr_gml1, tprr_rcg1_r,  &
+                      tprr_rcg1_g, tprr_rcs1_r, tprr_rcs1_s, tprv_rev1,&
+                      txri1, txrc1, tten1, qvten1, qrten1, qsten1,     &
+                      qgten1, qiten1, niten1, nrten1, ncten1, qcten1)
 
          pcp_ra(i,j) = pptrain
          pcp_sn(i,j) = pptsnow
@@ -1389,33 +1437,48 @@ MODULE module_mp_thompson
             qg(i,k,j) = qg1d(k)
             ni(i,k,j) = ni1d(k)
             nr(i,k,j) = nr1d(k)
-            vts1(i,k,j)      = vtsk1(k)
-            prw_vcdc(i,k,j)  = prw_vcdc(i,k,j) + prw_vcdc1(k)
-            prw_vcde(i,k,j)  = prw_vcde(i,k,j) + prw_vcde1(k)
-            tpri_inu(i,k,j) = tpri_inu(i,k,j) + tpri_inu1(k) 
-            tpri_ide(i,k,j) = tpri_ide(i,k,j) + tpri_ide1(k)
-            tprs_ide(i,k,j) = tprs_ide(i,k,j) + tprs_ide1(k)
-            tprs_sde(i,k,j) = tprs_sde(i,k,j) + tprs_sde1(k)
-            tprg_gde(i,k,j) = tprg_gde(i,k,j) + tprg_gde1(k)
-            tpri_iha(i,k,j) = tpri_iha(i,k,j) + tpri_iha1(k)
-            tpri_wfz(i,k,j) = tpri_wfz(i,k,j) + tpri_wfz1(k)
-            tpri_rfz(i,k,j) = tpri_rfz(i,k,j) + tpri_rfz1(k)
-            tprg_rfz(i,k,j) = tprg_rfz(i,k,j) + tprg_rfz1(k)
-            tprs_scw(i,k,j) = tprs_scw(i,k,j) + tprs_scw1(k)
-            tprg_scw(i,k,j) = tprg_scw(i,k,j) + tprg_scw1(k)
-            tprs_scw(i,k,j) = tprs_scw(i,k,j) + tprs_scw1(k)
-            tprg_rcs(i,k,j) = tprg_rcs(i,k,j) + tprg_rcs1(k)
-            tprs_rcs(i,k,j) = tprs_rcs(i,k,j) + tprs_rcs1(k)
-            tprr_rci(i,k,j) = tprr_rci(i,k,j) + tprr_rci1(k)
-            tprg_rcg(i,k,j) = tprg_rcg(i,k,j) + tprg_rcg1(k)
-            tprw_vcd(i,k,j) = tprw_vcd(i,k,j) + tprw_vcd1(k)
-            tprr_sml(i,k,j) = tprr_sml(i,k,j) + tprr_sml1(k)
-            tprr_gml(i,k,j) = tprr_gml(i,k,j) + tprr_gml1(k)
-            tprr_rcg(i,k,j) = tprr_rcg(i,k,j) + tprr_rcg1(k)
-            tprr_rcs(i,k,j) = tprr_rcs(i,k,j) + tprr_rcs1(k)
-            tprv_rev(i,k,j) = tprv_rev(i,k,j) + tprv_rev1(k)
-            txri(i,k,j)     = txri(i,k,j)     + txri1(k)
-            txrc(i,k,j)     = txrc(i,k,j)     + txrc1(k)
+            vts1(i,k,j)       = vtsk1(k)
+            prw_vcdc(i,k,j)   = prw_vcdc(i,k,j)   + prw_vcdc1(k)
+            prw_vcde(i,k,j)   = prw_vcde(i,k,j)   + prw_vcde1(k)
+            tpri_inu(i,k,j)   = tpri_inu(i,k,j)   + tpri_inu1(k) 
+            tpri_ide_s(i,k,j) = tpri_ide_s(i,k,j) + tpri_ide1_s(k)
+            tprs_ide_d(i,k,j) = tprs_ide_d(i,k,j) + tprs_ide1_d(k)
+            tprs_sde_s(i,k,j) = tprs_sde_s(i,k,j) + tprs_sde1_s(k)
+            tprs_sde_d(i,k,j) = tprs_sde_d(i,k,j) + tprs_sde1_d(k)
+            tprg_gde_s(i,k,j) = tprg_gde_s(i,k,j) + tprg_gde1_s(k)
+            tpri_iha(i,k,j)   = tpri_iha(i,k,j)   + tpri_iha1(k)
+            tpri_wfz(i,k,j)   = tpri_wfz(i,k,j)   + tpri_wfz1(k)
+            tpri_rfz(i,k,j)   = tpri_rfz(i,k,j)   + tpri_rfz1(k)
+            tprg_rfz(i,k,j)   = tprg_rfz(i,k,j)   + tprg_rfz1(k)
+            tprs_scw(i,k,j)   = tprs_scw(i,k,j)   + tprs_scw1(k)
+            tprg_scw(i,k,j)   = tprg_scw(i,k,j)   + tprg_scw1(k)
+            tprg_rcs(i,k,j)   = tprg_rcs(i,k,j)   + tprg_rcs1(k)
+            tprs_rcs_s(i,k,j) = tprs_rcs_s(i,k,j) + tprs_rcs1_s(k)
+            tprs_rcs_r(i,k,j) = tprs_rcs_r(i,k,j) + tprs_rcs1_r(k)
+            tprr_rci(i,k,j)   = tprr_rci(i,k,j)   + tprr_rci1(k)
+            tprg_rcg_g(i,k,j) = tprg_rcg_g(i,k,j) + tprg_rcg1_g(k)
+            tprg_rcg_r(i,k,j) = tprg_rcg_r(i,k,j) + tprg_rcg1_r(k)
+            tprw_vcd_c(i,k,j) = tprw_vcd_c(i,k,j) + tprw_vcd1_c(k)
+            tprw_vcd_e(i,k,j) = tprw_vcd_e(i,k,j) + tprw_vcd1_e(k)
+            tprr_sml(i,k,j)   = tprr_sml(i,k,j)   + tprr_sml1(k)
+            tprr_gml(i,k,j)   = tprr_gml(i,k,j)   + tprr_gml1(k)
+            tprr_rcg_r(i,k,j) = tprr_rcg_r(i,k,j) + tprr_rcg1_r(k)
+            tprr_rcg_g(i,k,j) = tprr_rcg_g(i,k,j) + tprr_rcg1_g(k)
+            tprr_rcs_r(i,k,j) = tprr_rcs_r(i,k,j) + tprr_rcs1_r(k)
+            tprr_rcs_s(i,k,j) = tprr_rcs_s(i,k,j) + tprr_rcs1_s(k)
+            tprv_rev(i,k,j)   = tprv_rev(i,k,j)   + tprv_rev1(k)
+            txri(i,k,j)       = txri(i,k,j)       + txri1(k)
+            txrc(i,k,j)       = txrc(i,k,j)       + txrc1(k)
+            tten3(i,k,j)      = tten3(i,k,j)      + tten1(k) 
+            qvten3(i,k,j)     = qvten3(i,k,j)     + qvten1(k)
+            qrten3(i,k,j)     = qrten3(i,k,j)     + qrten1(k)
+            qsten3(i,k,j)     = qsten3(i,k,j)     + qsten1(k)
+            qgten3(i,k,j)     = qgten3(i,k,j)     + qgten1(k)
+            qiten3(i,k,j)     = qiten3(i,k,j)     + qiten1(k) 
+            niten3(i,k,j)     = niten3(i,k,j)     + niten1(k)
+            nrten3(i,k,j)     = nrten3(i,k,j)     + nrten1(k)
+            ncten3(i,k,j)     = ncten3(i,k,j)     + ncten1(k)
+            qcten3(i,k,j)     = qcten3(i,k,j)     + qcten1(k)
             if (present(tt)) then;
                tt(i,k,j) = t1d(k)
             else
@@ -1629,12 +1692,17 @@ MODULE module_mp_thompson
                           rainprod, evapprod, &
 #endif
                           rand1, rand2, rand3, &
-                          kts, kte, dt, ii, jj, vtsk1, prw_vcdc1, prw_vcde1,&
-                         tpri_inu1,tpri_ide1,tprs_ide1,tprs_sde1,tprg_gde1, &
-                         tpri_iha1,tpri_wfz1,tpri_rfz1,tprg_rfz1,tprs_scw1, &
-                         tprg_scw1,tprs_scw1,tprg_rcs1,tprs_rcs1,tprr_rci1, &
-                         tprg_rcg1,tprw_vcd1,tprr_sml1,tprr_gml1,tprr_rcg1, &
-                         tprr_rcs1,tprv_rev1,txri1,txrc1)
+                          kts, kte, dt, ii, jj,vtsk1, prw_vcdc1, prw_vcde1, &
+                      tpri_inu1, tpri_ide1_d, tpri_ide1_s, tprs_ide1_d,&
+                      tprs_ide1_s, tprs_sde1_d, tprs_sde1_s,           &
+                      tprg_gde1_d, tprg_gde1_s, tpri_iha1, tpri_wfz1,  &
+                      tpri_rfz1, tprg_rfz1, tprs_scw1, tprg_scw1,      &
+                      tprg_rcs1, tprs_rcs1_s, tprs_rcs1_r, tprr_rci1,  &
+                      tprg_rcg1_g, tprg_rcg1_r, tprw_vcd1_c,           &
+                      tprw_vcd1_e, tprr_sml1, tprr_gml1, tprr_rcg1_r,  &
+                      tprr_rcg1_g, tprr_rcs1_r, tprr_rcs1_s, tprv_rev1,&
+                      txri1, txrc1, tten1, qvten1, qrten1, qsten1,     &
+                      qgten1, qiten1, niten1, nrten1, ncten1, qcten1) 
 #ifdef MPI
       use mpi
 #endif
@@ -1649,12 +1717,21 @@ MODULE module_mp_thompson
       REAL, INTENT(INOUT):: pptrain, pptsnow, pptgraul, pptice
       REAL, INTENT(IN):: dt
       REAL, INTENT(IN):: rand1, rand2, rand3
-      REAL, DIMENSION(kts:kte), INTENT(OUT):: vtsk1,prw_vcdc1,prw_vcde1, &
-                      tpri_inu1,tpri_ide1,tprs_ide1,tprs_sde1,tprg_gde1, &
-                      tpri_iha1,tpri_wfz1,tpri_rfz1,tprg_rfz1,tprs_scw1, &
-                      tprg_scw1,tprs_scw1,tprg_rcs1,tprs_rcs1,tprr_rci1, &
-                      tprg_rcg1,tprw_vcd1,tprr_sml1,tprr_gml1,tprr_rcg1, &
-                      tprr_rcs1,tprv_rev1,txri1,txrc1
+      REAL, DIMENSION(kts:kte), INTENT(OUT):: &
+                              vtsk1, prw_vcdc1,                          &
+                              prw_vcde1, tpri_inu1, tpri_ide1_d,         &
+                              tpri_ide1_s, tprs_ide1_d, tprs_ide1_s,     &
+                              tprs_sde1_d, tprs_sde1_s, tprg_gde1_d,     &
+                              tprg_gde1_s, tpri_iha1, tpri_wfz1,         &
+                              tpri_rfz1, tprg_rfz1, tprs_scw1, tprg_scw1,&
+                              tprg_rcs1, tprs_rcs1_s, tprs_rcs1_r,       &
+                              tprr_rci1, tprg_rcg1_g, tprg_rcg1_r,       &
+                              tprw_vcd1_c, tprw_vcd1_e, tprr_sml1,       &
+                              tprr_gml1, tprr_rcg1_r, tprr_rcg1_g,       &
+                              tprr_rcs1_r, tprr_rcs1_s, tprv_rev1, txri1,&
+                              txrc1, tten1, qvten1, qrten1, qsten1,      &
+                              qgten1, qiten1, niten1, nrten1, ncten1,    &
+                              qcten1
 #if ( WRF_CHEM == 1 )
       REAL, DIMENSION(kts:kte), INTENT(INOUT):: &
                           rainprod, evapprod
@@ -1856,30 +1933,51 @@ MODULE module_mp_thompson
          pnd_scd(k) = 0.
          pnd_gcd(k) = 0.
 !Diagnostics
-         prw_vcdc1(k) = 0.
-         prw_vcde1(k) = 0.
-         tpri_inu1(k) = 0.
-         tpri_ide1(k) = 0.
-         tprs_ide1(k) = 0.
-         tprs_sde1(k) = 0.
-         tprg_gde1(k) = 0.
-         tpri_iha1(k) = 0.
-         tpri_wfz1(k) = 0.
-         tpri_rfz1(k) = 0.
-         tprg_rfz1(k) = 0.
-         tprs_scw1(k) = 0.
-         tprg_scw1(k) = 0.
-         tprs_scw1(k) = 0.
-         tprg_rcs1(k) = 0.
-         tprs_rcs1(k) = 0.
-         tprr_rci1(k) = 0.
-         tprg_rcg1(k) = 0.
-         tprw_vcd1(k) = 0.
-         tprr_sml1(k) = 0.
-         tprr_gml1(k) = 0.
-         tprr_rcg1(k) = 0.
-         tprr_rcs1(k) = 0.
-         tprv_rev1(k) = 0.
+            vtsk1(k) = 0.
+            prw_vcdc1(k) = 0.
+            prw_vcde1(k) = 0.
+            tpri_inu1(k) = 0.
+            tpri_ide1_d(k) = 0.
+            tpri_ide1_s(k) = 0.
+            tprs_ide1_d(k) = 0.
+            tprs_ide1_s(k) = 0.
+            tprs_sde1_d(k) = 0.
+            tprs_sde1_s(k) = 0.
+            tprg_gde1_d(k) = 0.
+            tprg_gde1_s(k) = 0.
+            tpri_iha1(k) = 0.
+            tpri_wfz1(k) = 0.
+            tpri_rfz1(k) = 0.
+            tprg_rfz1(k) = 0.
+            tprg_scw1(k) = 0.
+            tprs_scw1(k) = 0.
+            tprg_rcs1(k) = 0.
+            tprs_rcs1_s(k) = 0.
+            tprs_rcs1_r(k) = 0.
+            tprr_rci1(k) = 0.
+            tprg_rcg1_g(k) = 0.
+            tprg_rcg1_r(k) = 0.
+            tprw_vcd1_c(k) = 0.
+            tprw_vcd1_e(k) = 0.
+            tprr_sml1(k) = 0.
+            tprr_gml1(k) = 0.
+            tprr_rcg1_r(k) = 0.
+            tprr_rcg1_g(k) = 0.
+            tprr_rcs1_r(k) = 0.
+            tprr_rcs1_s(k) = 0.
+            tprv_rev1(k) = 0.
+            txrc1(k) = 0.
+            txri1(k) = 0.
+            tten1(k) = 0.
+            qvten1(k) = 0.
+            qrten1(k) = 0.
+            qsten1(k) = 0.
+            qgten1(k) = 0.
+            qiten1(k) = 0.
+            niten1(k) = 0.
+            nrten1(k) = 0.
+            ncten1(k) = 0.
+            qcten1(k) = 0.
       enddo
 #if ( WRF_CHEM == 1 )
       do k = kts, kte
@@ -3907,30 +4005,87 @@ MODULE module_mp_thompson
          elseif(prw_vcd(k).lt.0)then
             prw_vcde1(k) = -1*prw_vcd(k)*dt
          endif
-!heating terms
+!heating/cooling diagnostics 
          tpri_inu1(k) = pri_inu(k)*lsub*ocp(k)*orho * (1-IFDRY)*DT
-         tpri_ide1(k) = pri_ide(k)*lsub*ocp(k)*orho * (1-IFDRY)*DT
-         tprs_ide1(k) = prs_ide(k)*lsub*ocp(k)*orho * (1-IFDRY)*DT
-         tprs_sde1(k) = prs_sde(k)*lsub*ocp(k)*orho * (1-IFDRY)*DT
-         tprg_gde1(k) = prg_gde(k)*lsub*ocp(k)*orho * (1-IFDRY)*DT
+
+         if(pri_ide(k).gt.0)then
+            tpri_ide1_d(k) = pri_ide(k)*lsub*ocp(k)*orho * (1-IFDRY)*DT
+         else
+            tpri_ide1_s(k) = -pri_ide(k)*lsub*ocp(k)*orho * (1-IFDRY)*DT
+         endif
+
+         if(prs_ide(k).gt.0)then
+           tprs_ide1_d(k) = prs_ide(k)*lsub*ocp(k)*orho * (1-IFDRY)*DT
+         else
+           tprs_ide1_s(k) = -prs_ide(k)*lsub*ocp(k)*orho * (1-IFDRY)*DT
+         endif
+
+         if(prs_sde(k).gt.0)then
+            tprs_sde1_d(k) = prs_sde(k)*lsub*ocp(k)*orho * (1-IFDRY)*DT
+         else
+            tprs_sde1_s(k) = -prs_sde(k)*lsub*ocp(k)*orho * (1-IFDRY)*DT
+         endif
+
+         if(prg_gde(k).gt.0)then
+           tprg_gde1_d(k) = prg_gde(k)*lsub*ocp(k)*orho * (1-IFDRY)*DT
+         else
+           tprg_gde1_s(k) = -prg_gde(k)*lsub*ocp(k)*orho * (1-IFDRY)*DT
+         endif
+
          tpri_iha1(k) = pri_iha(k)*lsub*ocp(k)*orho * (1-IFDRY)*DT
          tpri_wfz1(k) = pri_wfz(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
          tpri_rfz1(k) = pri_rfz(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
          tprg_rfz1(k) = prg_rfz(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
          tprs_scw1(k) = prs_scw(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
          tprg_scw1(k) = prg_scw(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
-         tprs_scw1(k) = prs_scw(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
          tprg_rcs1(k) = prg_rcs(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
-         tprs_rcs1(k) = prs_rcs(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
+
+         if(prs_rcs(k).gt.0)then
+           tprs_rcs1_s(k) = prs_rcs(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
+         else
+           tprs_rcs1_r(k) = -prs_rcs(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
+         endif
+
          tprr_rci1(k) = prr_rci(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
-         tprg_rcg1(k) = prg_rcg(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
-         tprw_vcd1(k) = lvap(k)*ocp(k)*prw_vcd(k)*(1-IFDRY)*DT
+
+         if(prg_rcg(k).gt.0)then
+            tprg_rcg1_g(k) = prg_rcg(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
+         else
+            tprg_rcg1_r(k) = -prg_rcg(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
+         endif
+
+         if(prw_vcd(k).gt.0)then
+            tprw_vcd1_c(k) = lvap(k)*ocp(k)*prw_vcd(k)*(1-IFDRY)*DT
+         else
+            tprw_vcd1_e(k) = -lvap(k)*ocp(k)*prw_vcd(k)*(1-IFDRY)*DT
+         endif
+
 ! cooling terms
          tprr_sml1(k) = prr_sml(k)*lfus*ocp(k)*orho * (1-IFDRY)*DT
          tprr_gml1(k) = prr_gml(k)*lfus*ocp(k)*orho * (1-IFDRY)*DT
-         tprr_rcg1(k) = prr_rcg(k)*lfus*ocp(k)*orho * (1-IFDRY)*DT
-         tprr_rcs1(k) = prr_rcs(k)*lfus*ocp(k)*orho * (1-IFDRY)*DT
+
+         if(prr_rcg(k).gt.0)then
+            tprr_rcg1_r(k) = prr_rcg(k)*lfus*ocp(k)*orho * (1-IFDRY)*DT
+         else
+            tprr_rcg1_g(k) = -prr_rcg(k)*lfus*ocp(k)*orho * (1-IFDRY)*DT
+         endif
+
+         if(prr_rcs(k).gt.0)then
+            tprr_rcs1_r(k) = prr_rcs(k)*lfus*ocp(k)*orho * (1-IFDRY)*DT
+         else
+            tprr_rcs1_s(k) = prr_rcs(k)*lfus*ocp(k)*orho * (1-IFDRY)*DT
+         endif
+
          tprv_rev1(k) = lvap(k)*ocp(k)*prv_rev(k)*(1-IFDRY)*DT
+         tten1(k) = tten(k)*DT
+         qvten1(k) = qvten(k)*DT
+         qrten1(k) = qrten(k)*DT
+         qsten1(k) = qsten(k)*DT
+         qgten1(k) = qgten(k)*DT
+         niten1(k) = niten1(k)*DT
+         nrten1(k) = nrten1(k)*DT
+         ncten1(k) = ncten1(k)*DT
+         qcten1(k) = qcten1(k)*DT
       enddo
       end subroutine mp_thompson
 !>@}

@@ -570,7 +570,28 @@ module mp_thompson
                                  ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                                  its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
                                  errmsg=errmsg, errflg=errflg, reset=reset, vts1=aux3d(:,:,1),  &
-                                 prw_vcdc=aux3d(:,:,2), prw_vcde=aux3d(:,:,3))
+                                 prw_vcdc=aux3d(:,:,2), prw_vcde=aux3d(:,:,3),                  &
+                                 tpri_inu=aux3d(:,:,4), tpri_ide_d=aux3d(:,:,5),                & 
+                                 tpri_ide_s=aux3d(:,:,6), tprs_ide_d=aux3d(:,:,7),              &
+                                 tprs_ide_s=aux3d(:,:,8), tprs_sde_d=aux3d(:,:,9),              &
+                                 tprs_sde_s=aux3d(:,:,10), tprg_gde_d=aux3d(:,:,11),            &
+                                 tprg_gde_s=aux3d(:,:,12), tpri_iha=aux3d(:,:,13),              &
+                                 tpri_wfz=aux3d(:,:,14), tpri_rfz=aux3d(:,:,15),                & 
+                                 tprg_rfz=aux3d(:,:,16), tprs_scw=aux3d(:,:,17),                &
+                                 tprg_scw=aux3d(:,:,18), tprg_rcs=aux3d(:,:,19),                &
+                                 tprs_rcs_s=aux3d(:,:,20), tprs_rcs_r=aux3d(:,:,21),            &
+                                 tprr_rci=aux3d(:,:,22), tprg_rcg_g=aux3d(:,:,23),              &
+                                 tprg_rcg_r=aux3d(:,:,24), tprw_vcd_c=aux3d(:,:,25),            &
+                                 tprw_vcd_e=aux3d(:,:,26), tprr_sml=aux3d(:,:,27),              &
+                                 tprr_gml=aux3d(:,:,28), tprr_rcg_r=aux3d(:,:,29),              &
+                                 tprr_rcg_g=aux3d(:,:,30), tprr_rcs_r=aux3d(:,:,31),            &
+                                 tprr_rcs_s=aux3d(:,:,32), tprv_rev=aux3d(:,:,33),              &
+                                 txri=aux3d(:,:,34), txrc=aux3d(:,:,35), tten3=aux3d(:,:,36),   &
+                                 qvten3=aux3d(:,:,37) ,qrten3=aux3d(:,:,38),                    &
+                                 qsten3=aux3d(:,:,39), qgten3=aux3d(:,:,40),                    &
+                                 qiten3=aux3d(:,:,41), niten3=aux3d(:,:,42),                    &
+                                 nrten3=aux3d(:,:,43) ,ncten3=aux3d(:,:,44),                    &
+                                 qcten3=aux3d(:,:,45))
             else
                call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
                                  nc=nc, nwfa=nwfa, nifa=nifa, nwfa2d=nwfa2d, nifa2d=nifa2d,     &
@@ -590,7 +611,28 @@ module mp_thompson
                                  ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                                  its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
                                  errmsg=errmsg, errflg=errflg, reset=reset, vts1=aux3d(:,:,1),  &
-                                 prw_vcdc=aux3d(:,:,2), prw_vcde=aux3d(:,:,3))
+                                 prw_vcdc=aux3d(:,:,2), prw_vcde=aux3d(:,:,3),                  &
+                                 tpri_inu=aux3d(:,:,4), tpri_ide_d=aux3d(:,:,5),                &
+                                 tpri_ide_s=aux3d(:,:,6), tprs_ide_d=aux3d(:,:,7),              &
+                                 tprs_ide_s=aux3d(:,:,8), tprs_sde_d=aux3d(:,:,9),              &
+                                 tprs_sde_s=aux3d(:,:,10), tprg_gde_d=aux3d(:,:,11),            &
+                                 tprg_gde_s=aux3d(:,:,12), tpri_iha=aux3d(:,:,13),              &
+                                 tpri_wfz=aux3d(:,:,14), tpri_rfz=aux3d(:,:,15),                &
+                                 tprg_rfz=aux3d(:,:,16), tprs_scw=aux3d(:,:,17),                &
+                                 tprg_scw=aux3d(:,:,18), tprg_rcs=aux3d(:,:,19),                &
+                                 tprs_rcs_s=aux3d(:,:,20), tprs_rcs_r=aux3d(:,:,21),            &
+                                 tprr_rci=aux3d(:,:,22), tprg_rcg_g=aux3d(:,:,23),              &
+                                 tprg_rcg_r=aux3d(:,:,24), tprw_vcd_c=aux3d(:,:,25),            &
+                                 tprw_vcd_e=aux3d(:,:,26), tprr_sml=aux3d(:,:,27),              &
+                                 tprr_gml=aux3d(:,:,28), tprr_rcg_r=aux3d(:,:,29),              &
+                                 tprr_rcg_g=aux3d(:,:,30), tprr_rcs_r=aux3d(:,:,31),            &
+                                 tprr_rcs_s=aux3d(:,:,32), tprv_rev=aux3d(:,:,33),              &
+                                 txri=aux3d(:,:,34), txrc=aux3d(:,:,35), tten3=aux3d(:,:,36),   &
+                                 qvten3=aux3d(:,:,37) ,qrten3=aux3d(:,:,38),                    &
+                                 qsten3=aux3d(:,:,39), qgten3=aux3d(:,:,40),                    &
+                                 qiten3=aux3d(:,:,41), niten3=aux3d(:,:,42),                    &
+                                 nrten3=aux3d(:,:,43) ,ncten3=aux3d(:,:,44),                    &
+                                 qcten3=aux3d(:,:,45))
             end if
          else
             if (do_effective_radii) then
@@ -612,7 +654,28 @@ module mp_thompson
                                  ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                                  its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
                                  errmsg=errmsg, errflg=errflg, reset=reset, vts1=aux3d(:,:,1),  &
-                                 prw_vcdc=aux3d(:,:,2), prw_vcde=aux3d(:,:,3))
+                                 prw_vcdc=aux3d(:,:,2), prw_vcde=aux3d(:,:,3),                  &
+                                 tpri_inu=aux3d(:,:,4), tpri_ide_d=aux3d(:,:,5),                &
+                                 tpri_ide_s=aux3d(:,:,6), tprs_ide_d=aux3d(:,:,7),              &
+                                 tprs_ide_s=aux3d(:,:,8), tprs_sde_d=aux3d(:,:,9),              &
+                                 tprs_sde_s=aux3d(:,:,10), tprg_gde_d=aux3d(:,:,11),            &
+                                 tprg_gde_s=aux3d(:,:,12), tpri_iha=aux3d(:,:,13),              &
+                                 tpri_wfz=aux3d(:,:,14), tpri_rfz=aux3d(:,:,15),                &
+                                 tprg_rfz=aux3d(:,:,16), tprs_scw=aux3d(:,:,17),                &
+                                 tprg_scw=aux3d(:,:,18), tprg_rcs=aux3d(:,:,19),                &
+                                 tprs_rcs_s=aux3d(:,:,20), tprs_rcs_r=aux3d(:,:,21),            &
+                                 tprr_rci=aux3d(:,:,22), tprg_rcg_g=aux3d(:,:,23),              &
+                                 tprg_rcg_r=aux3d(:,:,24), tprw_vcd_c=aux3d(:,:,25),            &
+                                 tprw_vcd_e=aux3d(:,:,26), tprr_sml=aux3d(:,:,27),              &
+                                 tprr_gml=aux3d(:,:,28), tprr_rcg_r=aux3d(:,:,29),              &
+                                 tprr_rcg_g=aux3d(:,:,30), tprr_rcs_r=aux3d(:,:,31),            &
+                                 tprr_rcs_s=aux3d(:,:,32), tprv_rev=aux3d(:,:,33),              &
+                                 txri=aux3d(:,:,34), txrc=aux3d(:,:,35), tten3=aux3d(:,:,36),   &
+                                 qvten3=aux3d(:,:,37) ,qrten3=aux3d(:,:,38),                    &
+                                 qsten3=aux3d(:,:,39), qgten3=aux3d(:,:,40),                    &
+                                 qiten3=aux3d(:,:,41), niten3=aux3d(:,:,42),                    &
+                                 nrten3=aux3d(:,:,43) ,ncten3=aux3d(:,:,44),                    &
+                                 qcten3=aux3d(:,:,45))
             else
                call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
                                  tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtp,                        &
@@ -631,7 +694,28 @@ module mp_thompson
                                  ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                                  its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
                                  errmsg=errmsg, errflg=errflg, reset=reset, vts1=aux3d(:,:,1),  &
-                                 prw_vcdc=aux3d(:,:,2), prw_vcde=aux3d(:,:,3))
+                                 prw_vcdc=aux3d(:,:,2), prw_vcde=aux3d(:,:,3),                  &
+                                 tpri_inu=aux3d(:,:,4), tpri_ide_d=aux3d(:,:,5),                &
+                                 tpri_ide_s=aux3d(:,:,6), tprs_ide_d=aux3d(:,:,7),              &
+                                 tprs_ide_s=aux3d(:,:,8), tprs_sde_d=aux3d(:,:,9),              &
+                                 tprs_sde_s=aux3d(:,:,10), tprg_gde_d=aux3d(:,:,11),            &
+                                 tprg_gde_s=aux3d(:,:,12), tpri_iha=aux3d(:,:,13),              &
+                                 tpri_wfz=aux3d(:,:,14), tpri_rfz=aux3d(:,:,15),                &
+                                 tprg_rfz=aux3d(:,:,16), tprs_scw=aux3d(:,:,17),                &
+                                 tprg_scw=aux3d(:,:,18), tprg_rcs=aux3d(:,:,19),                &
+                                 tprs_rcs_s=aux3d(:,:,20), tprs_rcs_r=aux3d(:,:,21),            &
+                                 tprr_rci=aux3d(:,:,22), tprg_rcg_g=aux3d(:,:,23),              &
+                                 tprg_rcg_r=aux3d(:,:,24), tprw_vcd_c=aux3d(:,:,25),            &
+                                 tprw_vcd_e=aux3d(:,:,26), tprr_sml=aux3d(:,:,27),              &
+                                 tprr_gml=aux3d(:,:,28), tprr_rcg_r=aux3d(:,:,29),              &
+                                 tprr_rcg_g=aux3d(:,:,30), tprr_rcs_r=aux3d(:,:,31),            &
+                                 tprr_rcs_s=aux3d(:,:,32), tprv_rev=aux3d(:,:,33),              &
+                                 txri=aux3d(:,:,34), txrc=aux3d(:,:,35), tten3=aux3d(:,:,36),   &
+                                 qvten3=aux3d(:,:,37), qrten3=aux3d(:,:,38),                    &
+                                 qsten3=aux3d(:,:,39), qgten3=aux3d(:,:,40),                    &
+                                 qiten3=aux3d(:,:,41), niten3=aux3d(:,:,42),                    &
+                                 nrten3=aux3d(:,:,43), ncten3=aux3d(:,:,44),                    &
+                                 qcten3=aux3d(:,:,45))
             end if
          end if
          if (errflg/=0) return
