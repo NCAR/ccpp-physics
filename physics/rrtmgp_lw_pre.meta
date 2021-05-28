@@ -15,99 +15,10 @@
   type = logical
   intent = in
   optional = F
-[nCol]
-  standard_name = horizontal_loop_extent
-  long_name = horizontal loop extent
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[xlon]
-  standard_name = longitude
-  long_name = longitude
-  units = radian
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[xlat]
-  standard_name = latitude
-  long_name = latitude
-  units = radian
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[landfrac]
-  standard_name = land_area_fraction
-  long_name = fraction of horizontal grid area occupied by land
+[semis]
+  standard_name = surface_longwave_emissivity
+  long_name = surface lw emissivity in fraction
   units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[zorl]
-  standard_name = surface_roughness_length
-  long_name = surface roughness length
-  units = cm
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[snowd]
-  standard_name = surface_snow_thickness_water_equivalent
-  long_name = water equivalent snow depth
-  units = mm
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[sncovr]
-  standard_name = surface_snow_area_fraction_over_land
-  long_name = surface snow area fraction
-  units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[fice]
-  standard_name = sea_ice_concentration
-  long_name = ice fraction over open water
-  units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[tsfg]
-  standard_name = surface_ground_temperature_for_radiation
-  long_name = surface ground temperature for radiation
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[tsfa]
-  standard_name = surface_air_temperature_for_radiation
-  long_name = lowest model layer air temperature for radiation
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F  
-[hprime]
-  standard_name = standard_deviation_of_subgrid_orography
-  long_name = standard deviation of subgrid orography
-  units = m
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
@@ -120,25 +31,7 @@
   dimensions = (number_of_lw_bands_rrtmgp,horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
-  optional = F
-[emiss]
-  standard_name = surface_emissivity_lsm
-  long_name = surface emissivity from lsm
-  units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[semis]
-  standard_name = surface_longwave_emissivity
-  long_name = surface lw emissivity in fraction
-  units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [errmsg]
   standard_name = ccpp_error_message

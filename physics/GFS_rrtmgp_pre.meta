@@ -86,7 +86,7 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F  
+  optional = F
 [i_o3]
   standard_name = index_for_ozone
   long_name = tracer index for ozone mixing ratio
@@ -324,7 +324,7 @@
   standard_name = saturation_vapor_pressure
   long_name = saturation vapor pressure
   units = Pa
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -333,7 +333,7 @@
   standard_name = water_vapor_mixing_ratio
   long_name = water vaport mixing ratio
   units = kg/kg
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout

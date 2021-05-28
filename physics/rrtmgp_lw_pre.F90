@@ -25,37 +25,21 @@ contains
 !> \section arg_table_rrtmgp_lw_pre_run
 !! \htmlinclude rrtmgp_lw_pre_run.html
 !!
-  subroutine rrtmgp_lw_pre_run (doLWrad, nCol, xlon, xlat, landfrac, zorl, snowd, sncovr, &
-       fice, tsfg, tsfa, hprime, sfc_emiss_byband, emis, semis, errmsg, errflg)
-    
+  subroutine rrtmgp_lw_pre_run (doLWrad, semis, sfc_emiss_byband, errmsg, errflg)
+
     ! Inputs
     logical, intent(in) :: &
-         doLWrad          ! Logical flag for longwave radiation call
-    integer, intent(in) :: &
-         nCol             ! Number of horizontal grid points
+         doLWrad
     real(kind_phys), dimension(:), intent(in) :: &
-         xlon,          & ! Longitude
-         xlat,          & ! Latitude
-         landfrac,      & ! Land fraction
-         zorl,          & ! Surface roughness length (cm)
-         snowd,         & ! water equivalent snow depth (mm)
-         sncovr,        & ! Surface snow are fraction (1)
-         fice,          & ! Sea/Lake ice fraction (1)
-         tsfg,          & ! Surface ground temperature for radiation (K)
-         tsfa,          & ! Lowest model layer air temperature for radiation (K)
-         hprime           ! Standard deviation of subgrid orography
-    real(kind_phys), dimension(:), intent(in) :: &
-         emiss            ! Surface emissivity from Noah MP
+         semis
 
-    ! Outputs 
-    real(kind_phys), dimension(:,:), intent(out) :: &
+    ! Outputs
+    real(kind_phys), dimension(:,:), intent(inout) :: &
          sfc_emiss_byband ! Surface emissivity in each band
     character(len=*), intent(out) :: &
          errmsg           ! Error message
     integer, intent(out) :: &  
          errflg           ! Error flag
-    real(kind_phys), dimension(:), intent(out) :: &
-         semis
 
     ! Local variables
     integer :: iBand
@@ -63,13 +47,8 @@ contains
     ! Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0
-    
-    if (.not. doLWrad) return
 
-    ! #######################################################################################
-    ! Call module_radiation_surface::setemis(),to setup surface emissivity for LW radiation.
-    ! #######################################################################################
-    call setemis (xlon, xlat, landfrac, snowd, sncovr, fice, zorl, tsfg, tsfa, hprime, emis, nCol, semis)
+    if (.not. doLWrad) return
 
     ! Assign same emissivity to all bands
     do iBand=1,lw_gas_props%get_nband()
