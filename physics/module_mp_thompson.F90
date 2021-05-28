@@ -4082,10 +4082,10 @@ MODULE module_mp_thompson
          qrten1(k) = qrten(k)*DT
          qsten1(k) = qsten(k)*DT
          qgten1(k) = qgten(k)*DT
-         niten1(k) = niten1(k)*DT
-         nrten1(k) = nrten1(k)*DT
-         ncten1(k) = ncten1(k)*DT
-         qcten1(k) = qcten1(k)*DT
+         niten1(k) = niten(k)*DT
+         nrten1(k) = nrten(k)*DT
+         ncten1(k) = ncten(k)*DT
+         qcten1(k) = qcten(k)*DT
       enddo
       end subroutine mp_thompson
 !>@}
