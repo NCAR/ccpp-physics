@@ -10,7 +10,23 @@
 
       contains
 
-      subroutine samfdeepcnv_init()
+      subroutine samfdeepcnv_init(imfdeepcnv,imfdeepcnv_samf,             &
+     &                            errmsg, errflg)
+      
+      integer,                   intent(in) :: imfdeepcnv
+      integer,                   intent(in) :: imfdeepcnv_samf
+      character(len=*),          intent(out) :: errmsg
+      integer,                   intent(out) :: errflg
+
+
+      ! Consistency checks
+      if (imfdeepcnv/=imfdeepcnv_samf) then
+        write(errmsg,'(*(a))') 'Logic error: namelist choice of',       &
+     &    ' deep convection is different from SAMF scheme'
+           errflg = 1
+        return
+      end if
+
       end subroutine samfdeepcnv_init
 
       subroutine samfdeepcnv_finalize()

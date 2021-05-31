@@ -2,12 +2,20 @@
   name = GFS_rrtmgp_setup
   type = scheme
   dependencies = iounitdef.f,machine.F,module_bfmicrophysics.f,physparam.f,radiation_aerosols.f,radiation_astronomy.f
-  dependencies = module_mp_thompson.F90,radiation_clouds.f,radiation_gases.f,radiation_surface.f
+  dependencies = module_mp_thompson.F90,radiation_clouds.f,radiation_gases.f
 
 ########################################################################
 [ccpp-arg-table]
   name = GFS_rrtmgp_setup_init
   type = scheme
+[do_RRTMGP]
+  standard_name = flag_for_rrtmgp_radiation_scheme
+  long_name = flag for RRTMGP scheme
+  units = flag
+  dimensions =  ()
+  type = logical
+  intent = in
+  optional = F
 [imp_physics]
   standard_name = flag_for_microphysics_scheme
   long_name = choice of microphysics scheme
@@ -118,22 +126,6 @@
 [iaer]
   standard_name = flag_for_default_aerosol_effect_in_shortwave_radiation
   long_name = default aerosol effect in sw only
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[ialb]
-  standard_name = flag_for_using_climatology_albedo
-  long_name = flag for using climatology alb, based on sfc type
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[iems]
-  standard_name = flag_for_surface_emissivity_control
-  long_name = surface emissivity control flag, use fixed value of 1
   units = flag
   dimensions = ()
   type = integer

@@ -69,16 +69,18 @@
               isot, ivegsrc, nlunit, sncovr, sncovr_ice, lsm, lsm_noahmp, lsm_ruc, min_seaice,     &
               fice, landfrac, vtype, weasd, lsoil, zs, dzs, lsnow_lsm_lbound, lsnow_lsm_ubound,    &
               tvxy, tgxy, tahxy, canicexy, canliqxy, eahxy, cmxy, chxy, fwetxy, sneqvoxy, alboldxy,&
-              qsnowxy, wslakexy, albdvis, albdnir, albivis, albinir, emiss, taussxy, waxy, wtxy,   &
+              qsnowxy, wslakexy, albdvis_lnd, albdnir_lnd, albivis_lnd, albinir_lnd, albdvis_ice,  & 
+              albdnir_ice, albivis_ice, albinir_ice, emiss_lnd, emiss_ice, taussxy, waxy, wtxy,    &
               zwtxy, xlaixy, xsaixy, lfmassxy, stmassxy, rtmassxy, woodxy, stblcpxy, fastcpxy,     &
               smcwtdxy, deeprechxy, rechxy, snowxy, snicexy, snliqxy, tsnoxy , smoiseq, zsnsoxy,   &
-              slc, smc, stc, tsfcl, snowd, canopy, tg3, stype, con_t0c, nthrds, errmsg, errflg)
+              slc, smc, stc, tsfcl, snowd, canopy, tg3, stype, con_t0c, flag_restart, nthrds,      &
+              errmsg, errflg)
 
          implicit none
 
          ! Interface variables
          integer,              intent(in)    :: me, master, ntoz, iccn, iflip, im, nx, ny
-         logical,              intent(in)    :: h2o_phys, iaerclm
+         logical,              intent(in)    :: h2o_phys, iaerclm, flag_restart
          integer,              intent(in)    :: idate(:)
          real(kind_phys),      intent(in)    :: xlat_d(:), xlon_d(:)
 
@@ -119,11 +121,16 @@
          real(kind_phys),      intent(inout) :: alboldxy(:)
          real(kind_phys),      intent(inout) :: qsnowxy(:)
          real(kind_phys),      intent(inout) :: wslakexy(:)
-         real(kind_phys),      intent(inout) :: albdvis(:)
-         real(kind_phys),      intent(inout) :: albdnir(:)
-         real(kind_phys),      intent(inout) :: albivis(:)
-         real(kind_phys),      intent(inout) :: albinir(:)
-         real(kind_phys),      intent(inout) :: emiss(:)
+         real(kind_phys),      intent(inout) :: albdvis_lnd(:)
+         real(kind_phys),      intent(inout) :: albdnir_lnd(:)
+         real(kind_phys),      intent(inout) :: albivis_lnd(:)
+         real(kind_phys),      intent(inout) :: albinir_lnd(:)
+         real(kind_phys),      intent(inout) :: albdvis_ice(:)
+         real(kind_phys),      intent(inout) :: albdnir_ice(:)
+         real(kind_phys),      intent(inout) :: albivis_ice(:)
+         real(kind_phys),      intent(inout) :: albinir_ice(:)
+         real(kind_phys),      intent(inout) :: emiss_lnd(:)
+         real(kind_phys),      intent(inout) :: emiss_ice(:)
          real(kind_phys),      intent(inout) :: taussxy(:)
          real(kind_phys),      intent(inout) :: waxy(:)
          real(kind_phys),      intent(inout) :: wtxy(:)
@@ -339,8 +346,30 @@
            if (errflg/=0) return
          end if
 
-         if (lsm == lsm_noahmp) then
-           if (all(tvxy <= zero)) then
+         !--- For Noah MP or RUC LSMs: initialize four components of albedo for
+         !--- land and ice - not for restart runs
+         lsm_init: if (.not.flag_restart) then
+           if (lsm == lsm_noahmp .or. lsm == lsm_ruc) then
+             if (me == master ) write(0,'(a)') 'GFS_phys_time_vary_init: initialize albedo for land and ice' 
+             do ix=1,im
+               albdvis_lnd(ix)  = 0.2_kind_phys
+               albdnir_lnd(ix)  = 0.2_kind_phys
+               albivis_lnd(ix)  = 0.2_kind_phys
+               albinir_lnd(ix)  = 0.2_kind_phys
+               emiss_lnd(ix)    = 0.95_kind_phys
+             enddo
+           endif
+           if (lsm == lsm_ruc) then
+             do ix=1,im
+               albdvis_ice(ix)  = 0.6_kind_phys
+               albdnir_ice(ix)  = 0.6_kind_phys
+               albivis_ice(ix)  = 0.6_kind_phys
+               albinir_ice(ix)  = 0.6_kind_phys
+               emiss_ice(ix)    = 0.97_kind_phys
+             enddo
+           endif
+
+           noahmp_init: if (lsm == lsm_noahmp) then
              allocate(dzsno (lsnow_lsm_lbound:lsnow_lsm_ubound))
              allocate(dzsnso(lsnow_lsm_lbound:lsoil)           )
              dzsno(:)    = missing_value
@@ -359,11 +388,6 @@
              alboldxy(:) = missing_value
              qsnowxy(:)  = missing_value
              wslakexy(:) = missing_value
-             albdvis(:)  = missing_value
-             albdnir(:)  = missing_value
-             albivis(:)  = missing_value
-             albinir(:)  = missing_value
-             emiss(:)    = missing_value
              taussxy(:)  = missing_value
              waxy(:)     = missing_value
              wtxy(:)     = missing_value
@@ -418,11 +442,6 @@
                  ! already set to 0.0
                  wslakexy(ix) = zero
                  taussxy(ix)  = zero
-                 albdvis(ix)  = 0.2_kind_phys
-                 albdnir(ix)  = 0.2_kind_phys
-                 albivis(ix)  = 0.2_kind_phys
-                 albinir(ix)  = 0.2_kind_phys
-                 emiss(ix)    = 0.95_kind_phys
 
                  waxy(ix)     = 4900.0_kind_phys
                  wtxy(ix)     = waxy(ix)
@@ -592,8 +611,8 @@
              deallocate(dzsno)
              deallocate(dzsnso)
 
-           endif
-         endif   !if Noah MP cold start ends
+           endif noahmp_init
+         endif lsm_init
 
          is_initialized = .true.
 

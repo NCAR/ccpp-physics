@@ -13,9 +13,10 @@
 !> \section arg_table_mynnedmf_wrapper_init Argument Table
 !! \htmlinclude mynnedmf_wrapper_init.html
 !!
-      subroutine mynnedmf_wrapper_init (lheatstrg, errmsg, errflg)
+      subroutine mynnedmf_wrapper_init (do_mynnedmf, lheatstrg, errmsg, errflg)
         implicit none
-
+        
+        logical,          intent(in)  :: do_mynnedmf
         logical,          intent(in)  :: lheatstrg
         character(len=*), intent(out) :: errmsg
         integer,          intent(out) :: errflg
@@ -23,6 +24,13 @@
         ! Initialize CCPP error handling variables
         errmsg = ''
         errflg = 0
+
+        ! Consistency checks
+        if (.not. do_mynnedmf) then
+          errmsg = 'Logic error: do_mynnedmf = .false.'
+          errflg = 1
+            return
+         end if
 
         if (lheatstrg) then
           errmsg = 'Logic error: lheatstrg not implemented for MYNN PBL'
