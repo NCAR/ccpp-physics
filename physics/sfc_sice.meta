@@ -281,6 +281,14 @@
   type = integer
   intent = in
   optional = F
+[thsfc_loc]
+  standard_name = flag_for_reference_pressure_theta
+  long_name = flag for reference pressure in theta calculation
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [hice]
   standard_name = sea_ice_thickness
   long_name = sea-ice thickness

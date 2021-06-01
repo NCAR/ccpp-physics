@@ -24,7 +24,7 @@
       implicit none
 
       integer,                              intent(in)    :: im, levr, levs,   &
-                                                             ltp, nday, lm, kd   
+                                                             ltp, nday, lm, kd
       logical,                              intent(in)    :: lsswr, swhtr
       real(kind=kind_phys), dimension(:),   intent(in)    :: sfcalb1, sfcalb2, &
                                                              sfcalb3, sfcalb4

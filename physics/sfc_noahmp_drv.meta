@@ -1034,8 +1034,8 @@
   intent = inout
   optional = F
 [albdvis]
-  standard_name = surface_albedo_direct_visible
-  long_name = direct surface albedo visible band
+  standard_name = surface_albedo_direct_visible_over_land
+  long_name = direct surface albedo visible band over land
   units = frac
   dimensions = (horizontal_loop_extent)
   type = real
@@ -1043,8 +1043,8 @@
   intent = out
   optional = F
 [albdnir]
-  standard_name = surface_albedo_direct_NIR
-  long_name = direct surface albedo NIR band
+  standard_name = surface_albedo_direct_NIR_over_land
+  long_name = direct surface albedo NIR band over land
   units = frac
   dimensions = (horizontal_loop_extent)
   type = real
@@ -1052,8 +1052,8 @@
   intent = out
   optional = F
 [albivis]
-  standard_name = surface_albedo_diffuse_visible
-  long_name = diffuse surface albedo visible band
+  standard_name = surface_albedo_diffuse_visible_over_land
+  long_name = diffuse surface albedo visible band over land
   units = frac
   dimensions = (horizontal_loop_extent)
   type = real
@@ -1061,8 +1061,8 @@
   intent = out
   optional = F
 [albinir]
-  standard_name = surface_albedo_diffuse_NIR
-  long_name = diffuse surface albedo NIR band
+  standard_name = surface_albedo_diffuse_NIR_over_land
+  long_name = diffuse surface albedo NIR band over land
   units = frac
   dimensions = (horizontal_loop_extent)
   type = real
@@ -1070,8 +1070,8 @@
   intent = out
   optional = F
 [emiss]
-  standard_name = surface_emissivity_lsm
-  long_name = surface emissivity from lsm
+  standard_name = surface_longwave_emissivity_over_land
+  long_name = surface lw emissivity in fraction over land
   units = frac
   dimensions = (horizontal_loop_extent)
   type = real
