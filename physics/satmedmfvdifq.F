@@ -179,11 +179,6 @@
      &                     ucko(im,km),  vcko(im,km),
      &                     buou(im,km),  xmf(im,km)
 !
-!   temporary local variables for instantaneous surface fluxes
-!     (they will be removed later)
-!
-      real(kind=kind_phys) dusfc1(im),dvsfc1(im),dtsfc1(im),dqsfc1(im)
-!
 !   variables for stratocumulus-top induced downdrafts
 !
       real(kind=kind_phys) tcdo(im,km),  qcdo(im,km,ntrac),
@@ -199,7 +194,7 @@
       real(kind=kind_phys) aphi16,  aphi5,
      &                     wfac,    cfac,
      &                     gamcrt,  gamcrq, sfcfrac,
-     &                     conq,    cont,   conw,
+!    &                     conq,    cont,   conw,
      &                     dsdz2,   dsdzt,  dkmax,
      &                     dsig,    dt2,    dtodsd,
      &                     dtodsu,  g,      factor, dz,
@@ -256,10 +251,10 @@
       gravi=1.0/grav
       g=grav
       gocp=g/cp
-      cont=cp/g
-      conq=hvap/g
-      conw=1.0/g  ! for del in pa
-!     parameter(cont=1000.*cp/g,conq=1000.*hvap/g,conw=1000./g) !kpa
+!     cont=cp/g
+!     conq=hvap/g
+!     conw=1.0/g  ! for del in pa
+!!    parameter(cont=1000.*cp/g,conq=1000.*hvap/g,conw=1000./g) !kpa
       elocp=hvap/cp
       el2orc=hvap*hvap/(rv*cp)
 !
@@ -385,10 +380,10 @@
       do i = 1,im
          z0(i)    = 0.01 * zorl(i)
          rho_a(i) = prsl(i,1)/(rd*t1(i,1)*(1.+fv*max(q1(i,1,1),qmin)))
-         dusfc1(i) = 0.
-         dvsfc1(i) = 0.
-         dtsfc1(i) = 0.
-         dqsfc1(i) = 0.
+         dusfc(i) = 0.
+         dvsfc(i) = 0.
+         dtsfc(i) = 0.
+         dqsfc(i) = 0.
          kpbl(i) = 1
          hpbl(i) = 0.
          kpblx(i) = 1
@@ -1484,8 +1479,8 @@ c
             qtend      = (f2(i,k)-q1(i,k,1))*rdt
             tdt(i,k)   = tdt(i,k)+ttend
             rtg(i,k,1) = rtg(i,k,1)+qtend
-            dtsfc1(i)  = dtsfc1(i)+cont*del(i,k)*ttend
-            dqsfc1(i)  = dqsfc1(i)+conq*del(i,k)*qtend
+!           dtsfc(i)   = dtsfc(i)+cont*del(i,k)*ttend
+!           dqsfc(i)   = dqsfc(i)+conq*del(i,k)*qtend
          enddo
       enddo
       do i = 1,im
@@ -1623,8 +1618,8 @@ c
             vtend = (f2(i,k)-v1(i,k))*rdt
             du(i,k)  = du(i,k)+utend
             dv(i,k)  = dv(i,k)+vtend
-            dusfc1(i) = dusfc1(i)+conw*del(i,k)*utend
-            dvsfc1(i) = dvsfc1(i)+conw*del(i,k)*vtend
+!           dusfc(i) = dusfc(i)+conw*del(i,k)*utend
+!           dvsfc(i) = dvsfc(i)+conw*del(i,k)*vtend
          enddo
       enddo
       do i = 1,im
