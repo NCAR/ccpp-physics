@@ -218,7 +218,7 @@
      &           do_gsl_drag_ls_bl, do_gsl_drag_ss, do_gsl_drag_tofd,   &
      &           dtend, dtidx, index_of_process_orographic_gwd,         &
      &           index_of_temperature, index_of_x_wind,                 &
-     &           index_of_y_wind, ldiag3d, errmsg, errflg     )
+     &           index_of_y_wind, ldiag3d, errmsg, errflg)
 
 !   ********************************************************************
 ! ----->  I M P L E M E N T A T I O N    V E R S I O N   <----------
@@ -504,8 +504,12 @@
    ! Initialize CCPP error handling variables
    errmsg = ''
    errflg = 0
-   var_temp2 = 0.
 
+   ! Initialize local variables
+   var_temp2 = 0.
+   udtend = -1
+   vdtend = -1
+   Tdtend = -1
 
    if(ldiag3d) then
       udtend = dtidx(index_of_x_wind,index_of_process_orographic_gwd)

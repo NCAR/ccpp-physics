@@ -342,7 +342,9 @@ contains
                  con_fvirt,con_pi,lonr,                              &
                  cdmbgwd(1:2),me,master,lprnt,ipr,rdxzb,dx,gwd_opt,  &
                  do_gsl_drag_ls_bl,do_gsl_drag_ss,do_gsl_drag_tofd,  &
-                 errmsg,errflg)
+                 dtend, dtidx, index_of_process_orographic_gwd,      &
+                 index_of_temperature, index_of_x_wind,              &
+                 index_of_y_wind, ldiag3d, errmsg, errflg)
 !
 ! put zeros due to xy GSL-drag style: dtaux2d_bl,dtauy2d_bl,dtaux2d_ss.......dusfc_ls,dvsfc_ls
 !

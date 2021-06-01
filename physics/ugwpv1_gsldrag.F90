@@ -429,8 +429,7 @@ contains
 !
     real(kind=kind_phys), intent(inout), dimension(:,:) :: dudt, dvdt, dtdt
 
-    ! dtend is only allocated if ldiag=.true.
-    real(kind=kind_phys), optional, intent(inout)            :: dtend(:,:,:)
+    real(kind=kind_phys), intent(inout)                      :: dtend(:,:,:)
     integer, intent(in)                                      :: dtidx(:,:),   &
          index_of_x_wind, index_of_y_wind, index_of_temperature,              &
          index_of_process_orographic_gwd, index_of_process_nonorographic_gwd
@@ -548,16 +547,18 @@ contains
                  kpbl,prsi,del,prsl,prslk,phii,phil,dtp,             &
                  kdt,hprime,oc,oa4,clx,varss,oc1ss,oa4ss,            &
                  ol4ss,theta,sigma,gamma,elvmax,                     &
-                  dudt_ogw, dvdt_ogw, dudt_obl, dvdt_obl,            &
-                  dudt_oss, dvdt_oss, dudt_ofd, dvdt_ofd,            &
-                  dusfcg,  dvsfcg,                                   &
-                  du_ogwcol, dv_ogwcol, du_oblcol, dv_oblcol,        &
-                  du_osscol, dv_osscol, du_ofdcol, dv_ofdcol,        &
+                 dudt_ogw, dvdt_ogw, dudt_obl, dvdt_obl,             &
+                 dudt_oss, dvdt_oss, dudt_ofd, dvdt_ofd,             &
+                 dusfcg,  dvsfcg,                                    &
+                 du_ogwcol, dv_ogwcol, du_oblcol, dv_oblcol,         &
+                 du_osscol, dv_osscol, du_ofdcol, dv_ofdcol,         &
                  slmsk,br1,hpbl, con_g,con_cp,con_rd,con_rv,         &
                  con_fv, con_pi, lonr,                               &
                  cdmbgwd(1:2),me,master,lprnt,ipr,rdxzb,dx,gwd_opt,  &
                  do_gsl_drag_ls_bl,do_gsl_drag_ss,do_gsl_drag_tofd,  &
-                 errmsg,errflg)
+                 dtend, dtidx, index_of_process_orographic_gwd,      &
+                 index_of_temperature, index_of_x_wind,              &
+                 index_of_y_wind, ldiag3d, errmsg, errflg)
 !
 ! dusfcg = du_ogwcol + du_oblcol + du_osscol + du_ofdcol
 !
