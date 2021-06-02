@@ -1065,63 +1065,66 @@ MODULE module_mp_thompson
       if (present(errmsg)) errmsg = ''
       if (present(errflg)) errflg = 0
 
-      ! DH* 2020-06-05: The stochastic perturbations code was retrofitted
-      ! from a newer version of the Thompson MP scheme, but it has not been
-      ! tested yet.
-      if (rand_perturb_on .ne. 0) then
-        errmsg = 'Logic error in mp_gt_driver: the stochastic perturbations code ' // &
-                 'has not been tested yet with this version of the Thompson scheme'
-        errflg = 1
-        return
-      end if
-      ! Activate this code when removing the guard above
-      !if (rand_perturb_on .ne. 0 .and. .not. present(rand_pert)) then
-      !  errmsg = 'Logic error in mp_gt_driver: random perturbations are on, ' // &
-      !           'but optional argument rand_pert is not present'
-      !  errflg = 1
-      !  return
-      !end if
-      ! *DH 2020-06-05
-
-      if ( (present(tt) .and. (present(th) .or. present(pii))) .or. &
-           (.not.present(tt) .and. .not.(present(th) .and. present(pii))) ) then
-         if (present(errmsg)) then
-            write(errmsg, '(a)') 'Logic error in mp_gt_driver: provide either tt or th+pii'
-         else
-            write(*,'(a)') 'Logic error in mp_gt_driver: provide either tt or th+pii'
+      ! No need to test for every subcycling step
+      first_step_only: if (istep==nsteps) then
+         ! DH* 2020-06-05: The stochastic perturbations code was retrofitted
+         ! from a newer version of the Thompson MP scheme, but it has not been
+         ! tested yet.
+         if (rand_perturb_on .ne. 0) then
+           errmsg = 'Logic error in mp_gt_driver: the stochastic perturbations code ' // &
+                    'has not been tested yet with this version of the Thompson scheme'
+           errflg = 1
+           return
          end if
-         if (present(errflg)) then
-            errflg = 1
-            return
-         else
-            stop
+         ! Activate this code when removing the guard above
+         !if (rand_perturb_on .ne. 0 .and. .not. present(rand_pert)) then
+         !  errmsg = 'Logic error in mp_gt_driver: random perturbations are on, ' // &
+         !           'but optional argument rand_pert is not present'
+         !  errflg = 1
+         !  return
+         !end if
+         ! *DH 2020-06-05
+   
+         if ( (present(tt) .and. (present(th) .or. present(pii))) .or. &
+              (.not.present(tt) .and. .not.(present(th) .and. present(pii))) ) then
+            if (present(errmsg)) then
+               write(errmsg, '(a)') 'Logic error in mp_gt_driver: provide either tt or th+pii'
+            else
+               write(*,'(a)') 'Logic error in mp_gt_driver: provide either tt or th+pii'
+            end if
+            if (present(errflg)) then
+               errflg = 1
+               return
+            else
+               stop
+            end if
          end if
-      end if
-
-      if (is_aerosol_aware .and. (.not.present(nc)     .or. &
-                                  .not.present(nwfa)   .or. &
-                                  .not.present(nifa)   .or. &
-                                  .not.present(nwfa2d) .or. &
-                                  .not.present(nifa2d)      )) then
-         if (present(errmsg)) then
-            write(errmsg, '(*(a))') 'Logic error in mp_gt_driver: provide nc, nwfa, nifa, nwfa2d', &
-                                    ' and nifa2d for aerosol-aware version of Thompson microphysics'
-         else
-            write(*, '(*(a))') 'Logic error in mp_gt_driver: provide nc, nwfa, nifa, nwfa2d', &
-                               ' and nifa2d for aerosol-aware version of Thompson microphysics'
+   
+         if (is_aerosol_aware .and. (.not.present(nc)     .or. &
+                                     .not.present(nwfa)   .or. &
+                                     .not.present(nifa)   .or. &
+                                     .not.present(nwfa2d) .or. &
+                                     .not.present(nifa2d)      )) then
+            if (present(errmsg)) then
+               write(errmsg, '(*(a))') 'Logic error in mp_gt_driver: provide nc, nwfa, nifa, nwfa2d', &
+                                       ' and nifa2d for aerosol-aware version of Thompson microphysics'
+            else
+               write(*, '(*(a))') 'Logic error in mp_gt_driver: provide nc, nwfa, nifa, nwfa2d', &
+                                  ' and nifa2d for aerosol-aware version of Thompson microphysics'
+            end if
+            if (present(errflg)) then
+               errflg = 1
+               return
+            else
+               stop
+            end if
+         else if (.not.is_aerosol_aware .and. (present(nwfa)   .or. &
+                                               present(nifa)   .or. &
+                                               present(nwfa2d) .or. &
+                                               present(nifa2d)      )) then
+            write(*,*) 'WARNING, nc/nwfa/nifa/nwfa2d/nifa2d present but is_aerosol_aware is FALSE'
          end if
-         if (present(errflg)) then
-            errflg = 1
-            return
-         else
-            stop
-         end if
-      else if (.not.is_aerosol_aware .and. (present(nwfa)   .or. &
-                                            present(nifa)   .or. &
-                                            present(nwfa2d) .or. &
-                                            present(nifa2d)      )) then
-         write(*,*) 'WARNING, nc/nwfa/nifa/nwfa2d/nifa2d present but is_aerosol_aware is FALSE'
-      end if
+      end if first_step_only
 
 !+---+
       i_start = its
