@@ -27,7 +27,7 @@ contains
 !> \section arg_table_GFS_surface_composites_pre_run Argument Table
 !! \htmlinclude GFS_surface_composites_pre_run.html
 !!
-   subroutine GFS_surface_composites_pre_run (im, flag_init, lkm, lsm, lsm_noahmp, lsm_ruc, frac_grid,                    &
+   subroutine GFS_surface_composites_pre_run (im, flag_init, flag_restart, lkm, lsm, lsm_noahmp, lsm_ruc, frac_grid,      &
                                  flag_cice, cplflx, cplwav2atm, landfrac, lakefrac, lakedepth, oceanfrac, frland,         &
                                  dry, icy, use_flake, ocean, wet, hice, cice, zorlo, zorll, zorli,                        &
                                  snowd, snowd_wat, snowd_lnd, snowd_ice, tprcp, tprcp_wat,                                &
@@ -43,7 +43,7 @@ contains
       ! Interface variables
       integer,                             intent(in   ) :: im, lkm
       integer,                             intent(in   ) :: lsm, lsm_noahmp, lsm_ruc
-      logical,                             intent(in   ) :: flag_init, frac_grid, cplflx, cplwav2atm
+      logical,                             intent(in   ) :: flag_init, flag_restart, frac_grid, cplflx, cplwav2atm
       logical, dimension(:),              intent(inout)  :: flag_cice
       logical,              dimension(:), intent(inout)  :: dry, icy, use_flake, ocean, wet
       real(kind=kind_phys), dimension(:), intent(in   )  :: landfrac, lakefrac, lakedepth, oceanfrac
@@ -231,7 +231,7 @@ contains
            snowd_ice(i) = snowd(i)
             ep1d_ice(i) = zero
             gflx_ice(i) = zero
-          if (iemsflg == 2 .and. .not. flag_init .and. lsm == lsm_ruc) then
+          if (iemsflg == 2 .and. (.not.flag_init .or. flag_restart) .and. lsm == lsm_ruc) then
            !-- use emis_ice from RUC LSM with snow effect
            semis_ice(i) = emis_ice(i)
           else
