@@ -69,7 +69,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
      &   tskin_wat, tskin_lnd, tskin_ice,  &  !intent(in)
      &   tsurf_wat, tsurf_lnd, tsurf_ice,  &  !intent(in)
      &    qsfc_wat,  qsfc_lnd,  qsfc_ice,  &  !intent(in)
-     &   snowh_wat, snowh_lnd, snowh_ice,  &  !intent(in)
+     &              snowh_lnd, snowh_ice,  &  !intent(in)
      &     znt_wat,   znt_lnd,   znt_ice,  &  !intent(inout)
      &     ust_wat,   ust_lnd,   ust_ice,  &  !intent(inout)
      &      cm_wat,    cm_lnd,    cm_ice,  &  !intent(inout)
@@ -163,7 +163,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
       real(kind=kind_phys), dimension(:), intent(in)    ::  &
      &                    tskin_wat, tskin_lnd, tskin_ice,  &
      &                    tsurf_wat, tsurf_lnd, tsurf_ice,  &
-     &                    snowh_wat, snowh_lnd, snowh_ice
+     &                               snowh_lnd, snowh_ice
 
       real(kind=kind_phys), dimension(:), intent(inout) ::  &
      &                      znt_wat,   znt_lnd,   znt_ice,  &
@@ -194,7 +194,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
       real, dimension(im) ::                                &
      &        hfx, znt, psim, psih,                         &
      &        chs, ck, cd, mavail, xland, GZ1OZ0,           &
-     &        cpm, qgh, qfx, qsfc_ruc
+     &        cpm, qgh, qfx, qsfc_ruc, snowh_wat
 
      real(kind=kind_phys), dimension(im,levs) ::            &
     &        pattern_spp_pbl, dz, th, qv
@@ -240,6 +240,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
           !znt_wat(i)=znt_wat(i)*0.01  !cm -> m
           !znt_ice(i)=znt_ice(i)*0.01  !cm -> m
           cpm(i)=cp
+          snowh_wat(i) = 0.0
       enddo
 
       ! cm -> m
