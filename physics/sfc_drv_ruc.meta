@@ -63,9 +63,27 @@
   type = logical
   intent = in
   optional = F
+[con_fvirt]
+  standard_name = ratio_of_vapor_to_dry_air_gas_constants_minus_one
+  long_name = rv/rd - 1 (rv = ideal gas constant for water vapor)
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[con_rd]
+  standard_name = gas_constant_dry_air
+  long_name = ideal gas constant for dry air
+  units = J kg-1 K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [im]
-  standard_name = horizontal_loop_extent
-  long_name = horizontal loop extent
+  standard_name = horizontal_dimension
+  long_name = horizontal dimension
   units = count
   dimensions = ()
   type = integer
@@ -146,9 +164,36 @@
   kind = kind_phys
   intent = in
   optional = F
+[q1]
+  standard_name = water_vapor_specific_humidity_at_lowest_model_layer
+  long_name = water vapor specific humidity at lowest model layer
+  units = kg kg-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[prsl1]
+  standard_name = air_pressure_at_lowest_model_layer
+  long_name = mean pressure at lowest model layer
+  units = Pa
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [tsfc_lnd]
   standard_name = surface_skin_temperature
   long_name = surface skin temperature
+  units = K
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[tsfc_ice]
+  standard_name = sea_ice_temperature
+  long_name = sea ice surface skin temperature
   units = K
   dimensions = (horizontal_dimension)
   type = real
@@ -199,6 +244,231 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = F
+[fice]
+  standard_name = sea_ice_concentration
+  long_name = ice fraction over open water
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[min_seaice]
+  standard_name = sea_ice_minimum
+  long_name = minimum sea ice value
+  units = frac
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[sncovr_lnd]
+  standard_name = surface_snow_area_fraction_over_land
+  long_name = surface snow area fraction over land
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[sncovr_ice]
+  standard_name = surface_snow_area_fraction_over_ice
+  long_name = surface snow area fraction over ice
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[snoalb]
+  standard_name = upper_bound_on_max_albedo_over_deep_snow
+  long_name = maximum snow albedo
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[facsf]
+  standard_name = fractional_coverage_with_strong_cosz_dependency
+  long_name = fractional coverage with strong cosz dependency
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[facwf]
+  standard_name = fractional_coverage_with_weak_cosz_dependency
+  long_name = fractional coverage with weak cosz dependency
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[alvsf]
+  standard_name = mean_vis_albedo_with_strong_cosz_dependency
+  long_name = mean vis albedo with strong cosz dependency
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[alvwf]
+  standard_name = mean_vis_albedo_with_weak_cosz_dependency
+  long_name = mean vis albedo with weak cosz dependency
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[alnsf]
+  standard_name = mean_nir_albedo_with_strong_cosz_dependency
+  long_name = mean nir albedo with strong cosz dependency
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[alnwf]
+  standard_name = mean_nir_albedo_with_weak_cosz_dependency
+  long_name = mean nir albedo with weak cosz dependency
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[sfcqv_lnd]
+  standard_name = water_vapor_mixing_ratio_at_surface_over_land
+  long_name = water vapor mixing ratio at surface over land
+  units = kg kg-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[sfcqv_ice]
+  standard_name = water_vapor_mixing_ratio_at_surface_over_ice
+  long_name = water vapor mixing ratio at surface over ice
+  units = kg kg-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[sfalb_lnd_bck]
+  standard_name =surface_snow_free_albedo_over_land
+  long_name = surface snow-free albedo over ice
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[semisbase]
+  standard_name = baseline_surface_longwave_emissivity
+  long_name = baseline surface lw emissivity in fraction
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[semis_lnd]
+  standard_name = surface_longwave_emissivity_over_land
+  long_name = surface lw emissivity in fraction over land
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[semis_ice]
+  standard_name = surface_longwave_emissivity_over_ice
+  long_name = surface lw emissivity in fraction over ice
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[albdvis_lnd]
+  standard_name = surface_albedo_direct_visible_over_land
+  long_name = direct surface albedo visible band over land
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[albdnir_lnd]
+  standard_name = surface_albedo_direct_NIR_over_land
+  long_name = direct surface albedo NIR band over land
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[albivis_lnd]
+  standard_name = surface_albedo_diffuse_visible_over_land
+  long_name = diffuse surface albedo visible band over land
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[albinir_lnd]
+  standard_name = surface_albedo_diffuse_NIR_over_land
+  long_name = diffuse surface albedo NIR band over land
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[albdvis_ice]
+  standard_name = surface_albedo_direct_visible_over_ice
+  long_name = direct surface albedo visible band over ice
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[albdnir_ice]
+  standard_name = surface_albedo_direct_NIR_over_ice
+  long_name = direct surface albedo NIR band over ice
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[albivis_ice]
+  standard_name = surface_albedo_diffuse_visible_over_ice
+  long_name = diffuse surface albedo visible band over ice
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[albinir_ice]
+  standard_name = surface_albedo_diffuse_NIR_over_ice
+  long_name = diffuse surface albedo NIR band over ice
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
   optional = F
 [zs]
   standard_name = depth_of_soil_levels_for_land_surface_model
@@ -540,19 +810,19 @@
   kind = kind_phys
   intent = in
   optional = F
-[snet]
-  standard_name = surface_net_downwelling_shortwave_flux
-  long_name = surface net downwelling shortwave flux at current time
-  units = W m-2
+[tg3]
+  standard_name = deep_soil_temperature
+  long_name = deep soil temperature
+  units = K
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
   optional = F
-[tg3]
-  standard_name = deep_soil_temperature
-  long_name = deep soil temperature
-  units = K
+[coszen]
+  standard_name = instantaneous_cosine_of_zenith_angle
+  long_name = cosine of zenith angle at current time
+  units = none
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
@@ -672,28 +942,19 @@
   kind = kind_phys
   intent = in
   optional = F
-[alvwf]
-  standard_name = mean_vis_albedo_with_weak_cosz_dependency
-  long_name = mean vis albedo with weak cosz dependency
-  units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[alnwf]
-  standard_name = mean_nir_albedo_with_weak_cosz_dependency
-  long_name = mean nir albedo with weak cosz dependency
-  units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [srflag]
   standard_name = flag_for_precipitation_type
   long_name = snow/rain flag for precipitation
   units = flag
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[sfalb_lnd_bck]
+  standard_name =surface_snow_free_albedo_over_land
+  long_name = surface snow-free albedo over ice
+  units = frac
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
@@ -750,6 +1011,33 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
+[min_lakeice]
+  standard_name = lake_ice_minimum
+  long_name = minimum lake ice value
+  units = frac
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[min_seaice]
+  standard_name = sea_ice_minimum
+  long_name = minimum sea ice value
+  units = frac
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[oceanfrac]
+  standard_name = sea_area_fraction
+  long_name = fraction of horizontal grid area occupied by ocean
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
   optional = F
 [con_cp]
   standard_name = specific_heat_of_dry_air_at_constant_pressure
@@ -832,9 +1120,18 @@
   kind = kind_phys
   intent = in
   optional = F
+[semisbase]
+  standard_name = baseline_surface_longwave_emissivity
+  long_name = baseline surface lw emissivity in fraction
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
 [semis_lnd]
-  standard_name = surface_longwave_emissivity_over_land_interstitial
-  long_name = surface lw emissivity in fraction over land (temporary use as interstitial)
+  standard_name = surface_longwave_emissivity_over_land
+  long_name = surface lw emissivity in fraction over land 
   units = frac
   dimensions = (horizontal_loop_extent)
   type = real
@@ -842,8 +1139,26 @@
   intent = inout
   optional = F
 [semis_ice]
-  standard_name = surface_longwave_emissivity_over_ice_interstitial
-  long_name = surface lw emissivity in fraction over ice (temporary use as interstitial)
+  standard_name = surface_longwave_emissivity_over_ice
+  long_name = surface lw emissivity in fraction over ice
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[sfalb_lnd]
+  standard_name = surface_diffused_shortwave_albedo_over_land
+  long_name = mean surface diffused sw albedo over land
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[sfalb_ice]
+  standard_name = surface_diffused_shortwave_albedo_over_ice
+  long_name = mean surface diffused sw albedo over ice
   units = frac
   dimensions = (horizontal_loop_extent)
   type = real
@@ -1174,6 +1489,42 @@
   kind = kind_phys
   intent = inout
   optional = F
+[albdvis_lnd]
+  standard_name = surface_albedo_direct_visible_over_land
+  long_name = direct surface albedo visible band over land
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[albdnir_lnd]
+  standard_name = surface_albedo_direct_NIR_over_land
+  long_name = direct surface albedo NIR band over land
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[albivis_lnd]
+  standard_name = surface_albedo_diffuse_visible_over_land
+  long_name = diffuse surface albedo visible band over land
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[albinir_lnd]
+  standard_name = surface_albedo_diffuse_NIR_over_land
+  long_name = diffuse surface albedo NIR band over land
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
 [sfcqc_ice]
   standard_name = cloud_condensed_water_mixing_ratio_at_surface_over_ice
   long_name = moist cloud water mixing ratio at surface over ice
@@ -1299,6 +1650,42 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
+[albdvis_ice]
+  standard_name = surface_albedo_direct_visible_over_ice
+  long_name = direct surface albedo visible band over ice
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[albdnir_ice]
+  standard_name = surface_albedo_direct_NIR_over_ice
+  long_name = direct surface albedo NIR band over ice
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[albivis_ice]
+  standard_name = surface_albedo_diffuse_visible_over_ice
+  long_name = diffuse surface albedo visible band over ice
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[albinir_ice]
+  standard_name = surface_albedo_diffuse_NIR_over_ice
+  long_name = diffuse surface albedo NIR band over ice
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
   optional = F
 [rhosnf]
   standard_name = density_of_frozen_precipitation

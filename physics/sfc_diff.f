@@ -11,6 +11,7 @@
       implicit none
 
       public :: sfc_diff_init, sfc_diff_run, sfc_diff_finalize
+      public :: stability
 
       private
 
@@ -68,6 +69,7 @@
      &                    flag_iter,redrag,                             &  !intent(in)
      &                    u10m,v10m,sfc_z0_type,                        &  !hafs,z0 type !intent(in)
      &                    wet,dry,icy,                                  &  !intent(in)
+     &                    thsfc_loc,                                    &  !intent(in)
      &                    tskin_wat, tskin_lnd, tskin_ice,              &  !intent(in)
      &                    tsurf_wat, tsurf_lnd, tsurf_ice,              &  !intent(in)
      &                     z0rl_wat,  z0rl_lnd,  z0rl_ice,              &  !intent(inout)
@@ -81,6 +83,7 @@
      &                       fh_wat,    fh_lnd,    fh_ice,              &  !intent(inout)
      &                     fm10_wat,  fm10_lnd,  fm10_ice,              &  !intent(inout)
      &                      fh2_wat,   fh2_lnd,   fh2_ice,              &  !intent(inout)
+     &                    ztmax_wat, ztmax_lnd, ztmax_ice,              &  !intent(inout)
      &                    errmsg, errflg)                                  !intent(out)
 !
       implicit none
@@ -93,6 +96,8 @@
 
       logical, intent(in) :: redrag ! reduced drag coeff. flag for high wind over sea (j.han)
       logical, dimension(:), intent(in) :: flag_iter, wet, dry, icy
+
+      logical, intent(in) :: thsfc_loc ! Flag for reference pressure in theta calculation
 
       real(kind=kind_phys), dimension(:), intent(in)    :: u10m,v10m
       real(kind=kind_phys), intent(in) :: rvrdm1, eps, epsm1, grav
@@ -115,7 +120,9 @@
      &                       fm_wat,    fm_lnd,    fm_ice,              &
      &                       fh_wat,    fh_lnd,    fh_ice,              &
      &                     fm10_wat,  fm10_lnd,  fm10_ice,              &
-     &                      fh2_wat,   fh2_lnd,   fh2_ice
+     &                      fh2_wat,   fh2_lnd,   fh2_ice,              &
+     &                    ztmax_wat, ztmax_lnd, ztmax_ice
+!
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 !
@@ -125,6 +132,7 @@
 !
       real(kind=kind_phys) :: rat, tv1, thv1, restar, wind10m,
      &                        czilc, tem1, tem2, virtfac
+!
 
       real(kind=kind_phys) :: tvs, z0, z0max, ztmax, zvfun, gdx
 !
@@ -166,9 +174,21 @@
 
       do i=1,im
         if(flag_iter(i)) then
+
+          ! Need to initialize ztmax arrays
+          ztmax_lnd(i) = 1. ! log(1) = 0
+          ztmax_ice(i) = 1. ! log(1) = 0
+          ztmax_wat(i) = 1. ! log(1) = 0
+
           virtfac = one + rvrdm1 * max(q1(i),qmin)
-          tv1 = t1(i) * virtfac
-          thv1    = tv1 * prslki(i)
+
+          tv1 = t1(i) * virtfac ! Virtual temperature in middle of lowest layer
+          if(thsfc_loc) then ! Use local potential temperature
+            thv1  = t1(i) * prslki(i) * virtfac
+          else ! Use potential temperature reference to 1000 hPa
+            thv1    = t1(i) / prslk1(i) * virtfac
+          endif
+
           zvfun = zero
           gdx = sqrt(garea(i))
 
@@ -176,12 +196,14 @@
 !  this portion of the code is presently suppressed
 !
           if (dry(i)) then ! Some land
-#ifdef GSD_SURFACE_FLUXES_BUGFIX
-            tvs   = half * (tsurf_lnd(i)+tskin_lnd(i))/prsik1(i)
-     &                   * virtfac
-#else
-            tvs   = half * (tsurf_lnd(i)+tskin_lnd(i)) * virtfac
-#endif
+
+            if(thsfc_loc) then ! Use local potential temperature
+              tvs   = half * (tsurf_lnd(i)+tskin_lnd(i)) * virtfac
+            else ! Use potential temperature referenced to 1000 hPa
+              tvs   = half * (tsurf_lnd(i)+tskin_lnd(i))/prsik1(i)
+     &                     * virtfac
+            endif
+
             z0max = max(zmin, min(0.01_kp * z0rl_lnd(i), z1(i)))
 !** xubin's new z0  over land
             tem1  = one - shdmax(i)
@@ -230,23 +252,23 @@
 
 !!          czilc = 10.0 ** (- (0.40/0.07) * z0) ! fei's canopy height dependance of czil
 !           czilc = 0.8_kp
-
+!
 !           tem1  = 1.0_kp - sigmaf(i)
-!           ztmax = z0max*exp( - tem1*tem1
+!           ztmax_lnd(i) = z0max*exp( - tem1*tem1
 !    &              * czilc*ca*sqrt(ustar_lnd(i)*(0.01/1.5e-05)))
 !
             czilc = 10.0_kp ** (- 4.0_kp * z0max) ! Trier et al. (2011,WAF)
             czilc = min(czilc, 0.8_kp)
             tem1 = 1.0_kp - sigmaf(i)
             czilc = czilc * tem1 * tem1
-            ztmax = z0max * exp( - czilc * ca
+            ztmax_lnd(i) = z0max * exp( - czilc * ca
      &            * 258.2_kp * sqrt(ustar_lnd(i)*z0max) )
 !
 ! mg, sfc-perts: add surface perturbations to ztmax/z0max ratio over land
             if (ztpert(i) /= zero) then
-              ztmax = ztmax * (10.0_kp**ztpert(i))
+              ztmax_lnd(i) = ztmax_lnd(i) * (10.0_kp**ztpert(i))
             endif
-            ztmax = max(ztmax, zmin)
+            ztmax_lnd(i) = max(ztmax_lnd(i), zmin)
 !
             tem1 = (z0max - z0lo) / (z0up - z0lo)
             tem1 = min(max(tem1, zero), 1.0_kp)
@@ -256,14 +278,21 @@
             call stability
 !  ---  inputs:
      &       (z1(i), zvfun, gdx, tv1, thv1, wind(i),
-     &        z0max, ztmax, tvs, grav,
+     &        z0max, ztmax_lnd(i), tvs, grav, thsfc_loc,
 !  ---  outputs:
      &        rb_lnd(i), fm_lnd(i), fh_lnd(i), fm10_lnd(i), fh2_lnd(i),
      &        cm_lnd(i), ch_lnd(i), stress_lnd(i), ustar_lnd(i))
           endif ! Dry points
 
           if (icy(i)) then ! Some ice
-            tvs   = half * (tsurf_ice(i)+tskin_ice(i)) * virtfac
+
+            if(thsfc_loc) then ! Use local potential temperature
+              tvs   = half * (tsurf_ice(i)+tskin_ice(i)) * virtfac
+            else ! Use potential temperature referenced to 1000 hPa
+              tvs   = half * (tsurf_ice(i)+tskin_ice(i))/prsik1(i)
+     &                     * virtfac 
+            endif
+
             z0max = max(zmin, min(0.01_kp * z0rl_ice(i), z1(i)))
 !** xubin's new z0  over land and sea ice
             tem1  = one - shdmax(i)
@@ -282,24 +311,24 @@
 !!          czilc = 10.0 ** (- (0.40/0.07) * z0) ! fei's canopy height
 !           dependance of czil
 !           czilc = 0.8_kp
-
+!
 !           tem1  = 1.0_kp - sigmaf(i)
-!           ztmax = z0max*exp( - tem1*tem1
+!           ztmax_ice(i) = z0max*exp( - tem1*tem1
 !    &              * czilc*ca*sqrt(ustar_ice(i)*(0.01/1.5e-05)))
 !
             czilc = 10.0_kp ** (- 4.0_kp * z0max)
             czilc = min(czilc, 0.8_kp)
             tem1 = 1.0_kp - sigmaf(i)
             czilc = czilc * tem1 * tem1
-            ztmax = z0max * exp( - czilc * ca
+            ztmax_ice(i) = z0max * exp( - czilc * ca
      &            * 258.2_kp * sqrt(ustar_ice(i)*z0max) )
 !
-            ztmax = max(ztmax, 1.0e-6)
+            ztmax_ice(i) = max(ztmax_ice(i), 1.0e-6)
 !
             call stability
 !  ---  inputs:
      &     (z1(i), zvfun, gdx, tv1, thv1, wind(i),
-     &      z0max, ztmax, tvs, grav,
+     &      z0max, ztmax_ice(i), tvs, grav, thsfc_loc,
 !  ---  outputs:
      &      rb_ice(i), fm_ice(i), fh_ice(i), fm10_ice(i), fh2_ice(i),
      &      cm_ice(i), ch_ice(i), stress_ice(i), ustar_ice(i))
@@ -309,7 +338,14 @@
 !      the stuff now put into "stability"
 
           if (wet(i)) then ! Some open ocean
-            tvs          = half * (tsurf_wat(i)+tskin_wat(i)) * virtfac
+
+            if(thsfc_loc) then ! Use local potential temperature
+              tvs        = half * (tsurf_wat(i)+tskin_wat(i)) * virtfac
+            else
+              tvs        = half * (tsurf_wat(i)+tskin_wat(i))/prsik1(i)
+     &                          * virtfac
+            endif
+
             z0           = 0.01_kp * z0rl_wat(i)
             z0max        = max(zmin, min(z0,z1(i)))
 !           ustar_wat(i) = sqrt(grav * z0 / charnock)
@@ -329,12 +365,12 @@
 !  rat taken from zeng, zhao and dickinson 1997
 
             rat   = min(7.0_kp, 2.67_kp * sqrt(sqrt(restar)) - 2.57_kp)
-            ztmax = max(z0max * exp(-rat), zmin)
+            ztmax_wat(i) = max(z0max * exp(-rat), zmin)
 !
             if (sfc_z0_type == 6) then
-              call znot_t_v6(wind10m, ztmax)   ! 10-m wind,m/s, ztmax(m)
+              call znot_t_v6(wind10m, ztmax_wat(i))   ! 10-m wind,m/s, ztmax(m)
             else if (sfc_z0_type == 7) then
-              call znot_t_v7(wind10m, ztmax)   ! 10-m wind,m/s, ztmax(m)
+              call znot_t_v7(wind10m, ztmax_wat(i))   ! 10-m wind,m/s, ztmax(m)
             else if (sfc_z0_type > 0) then
               write(0,*)'no option for sfc_z0_type=',sfc_z0_type
               stop
@@ -343,7 +379,7 @@
             call stability
 !  ---  inputs:
      &       (z1(i), zvfun, gdx, tv1, thv1, wind(i),
-     &        z0max, ztmax, tvs, grav,
+     &        z0max, ztmax_wat(i), tvs, grav, thsfc_loc,
 !  ---  outputs:
      &        rb_wat(i), fm_wat(i), fh_wat(i), fm10_wat(i), fh2_wat(i),
      &        cm_wat(i), ch_wat(i), stress_wat(i), ustar_wat(i))
@@ -408,6 +444,7 @@
       subroutine stability                                              &
 !  ---  inputs:
      &     ( z1, zvfun, gdx, tv1, thv1, wind, z0max, ztmax, tvs, grav,  &
+     &       thsfc_loc,                                                 &
 !  ---  outputs:
      &       rb, fm, fh, fm10, fh2, cm, ch, stress, ustar)
 !-----
@@ -416,6 +453,7 @@
 !  ---  inputs:
       real(kind=kind_phys), intent(in) ::                               &
      &       z1, zvfun, gdx, tv1, thv1, wind, z0max, ztmax, tvs, grav
+      logical,              intent(in) :: thsfc_loc
 
 !  ---  outputs:
       real(kind=kind_phys), intent(out) ::                              &
@@ -465,13 +503,15 @@
           dtv     = thv1 - tvs
           adtv    = max(abs(dtv),0.001_kp)
           dtv     = sign(1.,dtv) * adtv
-#ifdef GSD_SURFACE_FLUXES_BUGFIX
-          rb      = max(-5000.0_kp, grav * dtv * z1
-     &            / (thv1 * wind * wind))
-#else
-          rb      = max(-5000.0_kp, (grav+grav) * dtv * z1
-     &            / ((thv1 + tvs) * wind * wind))
-#endif
+
+          if(thsfc_loc) then ! Use local potential temperature
+            rb      = max(-5000.0_kp, (grav+grav) * dtv * z1
+     &              / ((thv1 + tvs) * wind * wind))
+          else ! Use potential temperature referenced to 1000 hPa
+            rb      = max(-5000.0_kp, grav * dtv * z1
+     &              / (tv1 * wind * wind))
+          endif
+
           tem1    = one / z0max
           tem2    = one / ztmax
           fm      = log((z0max+z1)  * tem1)
