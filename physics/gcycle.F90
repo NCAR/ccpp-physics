@@ -93,6 +93,7 @@ contains
 
 
     logical              :: lake(nx*ny)
+    integer              :: i_indx(nx*ny), j_indx(nx*ny)
     character(len=6)     :: tile_num_ch
     real(kind=kind_phys) :: sig1t, dt_warm
     integer              :: npts, nb, ix, jx, ls, ios, ll
@@ -120,6 +121,9 @@ contains
       end if
 !
       do ix=1,npts
+        i_indx(ix) = imap(ix) + isc - 1
+        j_indx(ix) = jmap(ix) + jsc - 1
+
         ZORFCS(ix) = zorll (ix)
         if (slmsk(ix) > 1.9_kind_phys .and. .not. frac_grid) then
           ZORFCS(ix) = zorli  (ix)
@@ -190,7 +194,7 @@ contains
                      nlunit, size(input_nml_file), input_nml_file,   &
                      lake, min_lakeice, min_seaice,                  &
                      ialb, isot, ivegsrc,                            &
-                     trim(tile_num_ch), imap, jmap)
+                     trim(tile_num_ch), i_indx, j_indx)
 #ifndef INTERNAL_FILE_NML
       close (Model%nlunit)
 #endif
