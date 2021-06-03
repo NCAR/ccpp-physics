@@ -281,6 +281,12 @@
           enddo
         endif
 
+        if (cplflx .or. cplchm) then
+          do i=1,im
+            tsfci_cpl(i) = tsfc(i)
+          enddo
+        endif
+
         if (cplflx) then
           do i=1,im
             dlwsfci_cpl (i) = adjsfcdlw(i)
@@ -302,8 +308,6 @@
             nlwsfc_cpl  (i) = nlwsfc_cpl(i) + nlwsfci_cpl(i)*dtf
             t2mi_cpl    (i) = t2m(i)
             q2mi_cpl    (i) = q2m(i)
-            tsfci_cpl   (i) = tsfc(i)
-!           tsfci_cpl   (i) = tsfc_wat(i)
             psurfi_cpl  (i) = pgr(i)
           enddo
 
