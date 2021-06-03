@@ -268,8 +268,7 @@ contains
     real(kind=kind_phys),    intent(out), dimension(:,:)        :: dudt_mtb, dudt_tms
     real(kind=kind_phys),    intent(out), dimension(:,:)        :: dtaux2d_ls, dtauy2d_ls
 
-    ! The dtend array is are only allocated if ldiag=.true.
-    real(kind=kind_phys), intent(inout), optional :: dtend(:,:,:)
+    real(kind=kind_phys), intent(inout) :: dtend(:,:,:)
     integer, intent(in) :: dtidx(:,:), index_of_temperature, index_of_x_wind, &
          index_of_y_wind, index_of_process_nonorographic_gwd, &
          index_of_process_orographic_gwd
@@ -340,7 +339,7 @@ contains
                  dusfc_ss,dvsfc_ss,dusfc_fd,dvsfc_fd,                &
                  slmsk,br1,hpbl,con_g,con_cp,con_rd,con_rv,          &
                  con_fvirt,con_pi,lonr,                              &
-                 cdmbgwd(1:2),me,master,lprnt,ipr,rdxzb,dx,gwd_opt,  &
+                 cdmbgwd,me,master,lprnt,ipr,rdxzb,dx,gwd_opt,       &
                  do_gsl_drag_ls_bl,do_gsl_drag_ss,do_gsl_drag_tofd,  &
                  dtend, dtidx, index_of_process_orographic_gwd,      &
                  index_of_temperature, index_of_x_wind,              &
