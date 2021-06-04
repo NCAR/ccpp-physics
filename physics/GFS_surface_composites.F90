@@ -375,14 +375,14 @@ contains
 !!
    subroutine GFS_surface_composites_post_run (                                                                                   &
       im, kice, km, rd, rvrdm1, cplflx, cplwav2atm, frac_grid, flag_cice, thsfc_loc, islmsk, dry, wet, icy, wind, t1, q1, prsl1,  &
-      landfrac, lakefrac, oceanfrac, zorl, zorlo, zorll, zorli,                                                                   &
+      landfrac, lakefrac, oceanfrac, zorl, zorlo, zorll, zorli, garea,                                                            &
       cd, cd_wat, cd_lnd, cd_ice, cdq, cdq_wat, cdq_lnd, cdq_ice, rb, rb_wat, rb_lnd, rb_ice, stress, stress_wat, stress_lnd,     &
       stress_ice, ffmm, ffmm_wat, ffmm_lnd, ffmm_ice, ffhh, ffhh_wat, ffhh_lnd, ffhh_ice, uustar, uustar_wat, uustar_lnd,         &
       uustar_ice, fm10, fm10_wat, fm10_lnd, fm10_ice, fh2, fh2_wat, fh2_lnd, fh2_ice, tsurf_wat, tsurf_lnd, tsurf_ice,            &
       cmm, cmm_wat, cmm_lnd, cmm_ice, chh, chh_wat, chh_lnd, chh_ice, gflx, gflx_wat, gflx_lnd, gflx_ice, ep1d, ep1d_wat,         &
       ep1d_lnd, ep1d_ice, weasd, weasd_wat, weasd_lnd, weasd_ice, snowd, snowd_wat, snowd_lnd, snowd_ice, tprcp, tprcp_wat,       &
       tprcp_lnd, tprcp_ice, evap, evap_wat, evap_lnd, evap_ice, hflx, hflx_wat, hflx_lnd, hflx_ice, qss, qss_wat, qss_lnd,        &
-      qss_ice, tsfc, tsfco, tsfcl, tsfc_wat, tsfc_lnd, tsfc_ice, tisfc, tice, hice, cice, min_seaice, tiice, stc,                 &
+      qss_ice, tsfc, tsfco, tsfcl, tsfc_wat, tsfc_lnd, tsfc_ice, tisfc, tice, hice, cice, min_seaice, tiice, sigmaf, zvfun, stc,  &
       grav, prsik1, prslk1, prslki, z1, ztmax_wat, ztmax_lnd, ztmax_ice, errmsg, errflg)
 
       implicit none
@@ -397,13 +397,14 @@ contains
         fm10_wat, fm10_lnd, fm10_ice, fh2_wat, fh2_lnd, fh2_ice, tsurf_wat, tsurf_lnd, tsurf_ice, cmm_wat, cmm_lnd, cmm_ice,    &
         chh_wat, chh_lnd, chh_ice, gflx_wat, gflx_lnd, gflx_ice, ep1d_wat, ep1d_lnd, ep1d_ice, weasd_wat, weasd_lnd, weasd_ice, &
         snowd_wat, snowd_lnd, snowd_ice,tprcp_wat, tprcp_lnd, tprcp_ice, evap_wat, evap_lnd, evap_ice, hflx_wat, hflx_lnd,      &
-        hflx_ice, qss_wat, qss_lnd, qss_ice, tsfc_wat, tsfc_lnd, tsfc_ice, zorlo, zorll, zorli
+        hflx_ice, qss_wat, qss_lnd, qss_ice, tsfc_wat, tsfc_lnd, tsfc_ice, zorlo, zorll, zorli, garea
 
       real(kind=kind_phys), dimension(:),   intent(inout) :: zorl, cd, cdq, rb, stress, ffmm, ffhh, uustar, fm10,               &
         fh2, cmm, chh, gflx, ep1d, weasd, snowd, tprcp, evap, hflx, qss, tsfc, tsfco, tsfcl, tisfc
 
       real(kind=kind_phys), dimension(:),   intent(in   ) :: tice ! interstitial sea ice temperature
       real(kind=kind_phys), dimension(:),   intent(inout) :: hice, cice
+      real(kind=kind_phys), dimension(:),   intent(inout) :: sigmaf, zvfun
       real(kind=kind_phys),                 intent(in   ) :: min_seaice
       real(kind=kind_phys),                 intent(in   ) :: rd, rvrdm1
 
@@ -424,6 +425,10 @@ contains
       real(kind=kind_phys) :: txl, txi, txo, wfrac, q0, rho
       ! For calling "stability"
       real(kind=kind_phys) :: tsurf, virtfac, tv1, thv1, tvs, z0max, ztmax
+!
+      real(kind=kind_phys) :: tem1, tem2, gdx
+      real(kind=kind_phys), parameter :: z0lo=0.1, z0up=1.0
+!
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -448,6 +453,8 @@ contains
           weasd(i)  = txl*weasd_lnd(i)  + txi*weasd_ice(i)
           snowd(i)  = txl*snowd_lnd(i)  + txi*snowd_ice(i)
          !tprcp(i)  = txl*tprcp_lnd(i)  + txi*tprcp_ice(i)  + txo*tprcp_wat(i)
+!
+          sigmaf(i) = txl*sigmaf(i)
 
           if (.not. flag_cice(i) .and. islmsk(i) == 2) then
             evap(i) = txl*evap_lnd(i)   + wfrac*evap_ice(i)
@@ -524,8 +531,17 @@ contains
             stress(i) = stress_ice(i)
             uustar(i) = uustar_ice(i)
           else ! Mix of multiple surface types (land, water, and/or ice)
-            call stability(z1(i), snowd(i), thv1, wind(i), z0max, ztmax, tvs, grav, & ! inputs
-                           tv1, thsfc_loc,                                          & ! inputs
+!
+! compute zvfun with composite surface roughness & green vegetation fraction
+!
+            tem1 = (z0max - z0lo) / (z0up - z0lo)
+            tem1 = min(max(tem1, zero), one)
+            tem2 = max(sigmaf(i), 0.1)
+            zvfun(i) = sqrt(tem1 * tem2)
+            gdx = sqrt(garea(i))
+!
+            call stability(z1(i), zvfun(i), gdx, tv1, thv1, wind(i),                & ! inputs
+                           z0max, ztmax, tvs, grav, thsfc_loc,                      & ! inputs          
                            rb(i), ffmm(i), ffhh(i), fm10(i), fh2(i), cd(i), cdq(i), & ! outputs
                            stress(i), uustar(i))
           endif ! Checking to see if point is one or multiple surface types
