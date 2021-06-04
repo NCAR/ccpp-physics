@@ -84,6 +84,7 @@
      &                     fm10_wat,  fm10_lnd,  fm10_ice,              &  !intent(inout)
      &                      fh2_wat,   fh2_lnd,   fh2_ice,              &  !intent(inout)
      &                    ztmax_wat, ztmax_lnd, ztmax_ice,              &  !intent(inout)
+     &                    zvfun,                                        &  !intent(out)
      &                    errmsg, errflg)                                  !intent(out)
 !
       implicit none
@@ -122,6 +123,7 @@
      &                     fm10_wat,  fm10_lnd,  fm10_ice,              &
      &                      fh2_wat,   fh2_lnd,   fh2_ice,              &
      &                    ztmax_wat, ztmax_lnd, ztmax_ice
+      real(kind=kind_phys), dimension(:), intent(out)    :: zvfun
 !
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -134,7 +136,7 @@
      &                        czilc, tem1, tem2, virtfac
 !
 
-      real(kind=kind_phys) :: tvs, z0, z0max, ztmax, zvfun, gdx
+      real(kind=kind_phys) :: tvs, z0, z0max, ztmax, gdx
 !
       real(kind=kind_phys), parameter :: z0lo=0.1, z0up=1.0
 !
@@ -189,7 +191,7 @@
             thv1    = t1(i) / prslk1(i) * virtfac
           endif
 
-          zvfun = zero
+          zvfun(i) = zero
           gdx = sqrt(garea(i))
 
 !  compute stability dependent exchange coefficients
@@ -270,14 +272,16 @@
             endif
             ztmax_lnd(i) = max(ztmax_lnd(i), zmin)
 !
+! compute a function of surface roughness & green vegetation fraction (zvfun)       
+!
             tem1 = (z0max - z0lo) / (z0up - z0lo)
             tem1 = min(max(tem1, zero), 1.0_kp)
             tem2 = max(sigmaf(i), 0.1_kp)
-            zvfun = sqrt(tem1 * tem2)
+            zvfun(i) = sqrt(tem1 * tem2)
 !
             call stability
 !  ---  inputs:
-     &       (z1(i), zvfun, gdx, tv1, thv1, wind(i),
+     &       (z1(i), zvfun(i), gdx, tv1, thv1, wind(i),
      &        z0max, ztmax_lnd(i), tvs, grav, thsfc_loc,
 !  ---  outputs:
      &        rb_lnd(i), fm_lnd(i), fh_lnd(i), fm10_lnd(i), fh2_lnd(i),
@@ -327,7 +331,7 @@
 !
             call stability
 !  ---  inputs:
-     &     (z1(i), zvfun, gdx, tv1, thv1, wind(i),
+     &     (z1(i), zvfun(i), gdx, tv1, thv1, wind(i),
      &      z0max, ztmax_ice(i), tvs, grav, thsfc_loc,
 !  ---  outputs:
      &      rb_ice(i), fm_ice(i), fh_ice(i), fm10_ice(i), fh2_ice(i),
@@ -378,7 +382,7 @@
 !
             call stability
 !  ---  inputs:
-     &       (z1(i), zvfun, gdx, tv1, thv1, wind(i),
+     &       (z1(i), zvfun(i), gdx, tv1, thv1, wind(i),
      &        z0max, ztmax_wat(i), tvs, grav, thsfc_loc,
 !  ---  outputs:
      &        rb_wat(i), fm_wat(i), fh_wat(i), fm10_wat(i), fh2_wat(i),
