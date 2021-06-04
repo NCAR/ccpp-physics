@@ -51,6 +51,52 @@
 
 ########################################################################
 [ccpp-arg-table]
+  name = GFS_diagtoscreen_timestep_init
+  type = scheme
+[Model]
+  standard_name = GFS_control_type_instance
+  long_name = instance of derived type GFS_control_type in FV3
+  units = DDT
+  dimensions = ()
+  type = GFS_control_type
+  intent = in
+  optional = F
+[Data]
+  standard_name = GFS_data_type_instance_all_blocks
+  long_name = instance of derived type GFS_data_type
+  units = DDT
+  dimensions = (ccpp_block_count)
+  type = GFS_data_type
+  intent = in
+  optional = F
+[Interstitial]
+  standard_name = GFS_interstitial_type_instance_all_threads
+  long_name = instance of derived type GFS_interstitial_type
+  units = DDT
+  dimensions = (omp_threads)
+  type = GFS_interstitial_type
+  intent = in
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+
+########################################################################
+[ccpp-arg-table]
   name = GFS_diagtoscreen_run
   type = scheme
 [Model]
@@ -184,6 +230,52 @@
 ########################################################################
 [ccpp-arg-table]
   name = GFS_interstitialtoscreen_init
+  type = scheme
+[Model]
+  standard_name = GFS_control_type_instance
+  long_name = instance of derived type GFS_control_type in FV3
+  units = DDT
+  dimensions = ()
+  type = GFS_control_type
+  intent = in
+  optional = F
+[Data]
+  standard_name = GFS_data_type_instance_all_blocks
+  long_name = instance of derived type GFS_data_type
+  units = DDT
+  dimensions = (ccpp_block_count)
+  type = GFS_data_type
+  intent = in
+  optional = F
+[Interstitial]
+  standard_name = GFS_interstitial_type_instance_all_threads
+  long_name = instance of derived type GFS_interstitial_type
+  units = DDT
+  dimensions = (omp_threads)
+  type = GFS_interstitial_type
+  intent = in
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+
+########################################################################
+[ccpp-arg-table]
+  name = GFS_interstitialtoscreen_timestep_init
   type = scheme
 [Model]
   standard_name = GFS_control_type_instance
