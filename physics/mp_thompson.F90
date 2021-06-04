@@ -443,7 +443,7 @@ module mp_thompson
          else
             dtstep = dtp
          end if
-         if (first_time_step .and. mpirank==mpiroot .and. blkno==1) then
+         if (first_time_step .and. istep==1 .and. mpirank==mpiroot .and. blkno==1) then
             write(*,'(a,i0,a,a,f6.2,a)') 'Thompson MP is using ', nsteps, ' substep(s) per time step', &
                                          ' with an effective time step of ', dtstep, ' seconds'
          end if
