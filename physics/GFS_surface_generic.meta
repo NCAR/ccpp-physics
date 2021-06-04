@@ -1221,15 +1221,6 @@
   type = integer
   intent = in
   optional = F
-[sigmaf]
-  standard_name = bounded_vegetation_area_fraction
-  long_name = areal fractional cover of green vegetation bounded on the bottom
-  units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [runoff]
   standard_name = total_runoff
   long_name = total water runoff
@@ -1288,15 +1279,6 @@
   long_name = canopy heat storage factor for sensible heat flux in stable surface layer
   units = none
   dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[zorl]
-  standard_name = surface_roughness_length
-  long_name = surface roughness length
-  units = cm
-  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
