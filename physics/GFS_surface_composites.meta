@@ -1919,6 +1919,33 @@
   kind = kind_phys
   intent = in
   optional = F
+[garea]
+  standard_name = cell_area
+  long_name = area of the grid cell
+  units = m2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[zvfun]
+  standard_name = function_of_surface_roughness_length_and_green_vegetation_fraction
+  long_name = function of surface roughness length and green vegetation fraction
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[sigmaf]
+  standard_name = bounded_vegetation_area_fraction
+  long_name = areal fractional cover of green vegetation bounded on the bottom
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
 [ztmax_wat]
   standard_name = bounded_surface_roughness_length_for_heat_over_water
   long_name = bounded surface roughness length for heat over water
