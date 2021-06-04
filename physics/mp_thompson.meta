@@ -545,6 +545,14 @@
   kind = kind_phys
   intent = in
   optional = F
+[first_time_step]
+  standard_name = flag_for_first_time_step
+  long_name = flag for first time step for time integration loop (cold/warmstart)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [istep]
   standard_name = ccpp_loop_counter
   long_name = loop counter for subcycling loops in CCPP

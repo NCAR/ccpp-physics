@@ -321,7 +321,7 @@ module mp_thompson
                               is_aerosol_aware, nc, nwfa, nifa,    &
                               nwfa2d, nifa2d,                      &
                               tgrs, prsl, phii, omega,             &
-                              dtp, istep, nsteps,                  &
+                              dtp, first_time_step, istep, nsteps, &
                               prcp, rain, graupel, ice, snow, sr,  &
                               refl_10cm, reset, do_radar_ref,      &
                               re_cloud, re_ice, re_snow,           &
@@ -362,6 +362,7 @@ module mp_thompson
          real(kind_phys),           intent(in   ) :: phii(:,:)
          real(kind_phys),           intent(in   ) :: omega(:,:)
          real(kind_phys),           intent(in   ) :: dtp
+         logical,                   intent(in   ) :: first_time_step
          integer,                   intent(in   ) :: istep, nsteps
          ! Precip/rain/snow/graupel fall amounts and fraction of frozen precip
          real(kind_phys),           intent(inout) :: prcp(:)
@@ -441,8 +442,12 @@ module mp_thompson
          else
             dtstep = dtp
          end if
+         if (first_time_step .and. mpirank==mpiroot) then
+            write(*,'(a,i0,a,a,f6.2,a)') 'Thompson MP is using ', nsteps, ' substeps per time step', &
+                                         'with an effective time step of ', dtstep, ' seconds'
+         end if
 
-         if (istep==1) then
+         if (first_time_step .and. istep==1) then
            if (is_aerosol_aware .and. .not. (present(nc)     .and. &
                                              present(nwfa)   .and. &
                                              present(nifa)   .and. &
@@ -576,7 +581,7 @@ module mp_thompson
                                  ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                                  its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
                                  reset=reset, istep=istep, nsteps=nsteps,                       &
-                                 errmsg=errmsg, errflg=errflg)
+                                 first_time_step=first_time_step, errmsg=errmsg, errflg=errflg)
             else
                call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
                                  nc=nc, nwfa=nwfa, nifa=nifa, nwfa2d=nwfa2d, nifa2d=nifa2d,     &
@@ -596,7 +601,7 @@ module mp_thompson
                                  ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                                  its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
                                  reset=reset, istep=istep, nsteps=nsteps,                       &
-                                 errmsg=errmsg, errflg=errflg)
+                                 first_time_step=first_time_step, errmsg=errmsg, errflg=errflg)
             end if
          else
             if (do_effective_radii) then
@@ -618,7 +623,7 @@ module mp_thompson
                                  ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                                  its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
                                  reset=reset, istep=istep, nsteps=nsteps,                       &
-                                 errmsg=errmsg, errflg=errflg)
+                                 first_time_step=first_time_step, errmsg=errmsg, errflg=errflg)
             else
                call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
                                  tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtp,                        &
@@ -637,7 +642,7 @@ module mp_thompson
                                  ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                                  its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
                                  reset=reset, istep=istep, nsteps=nsteps,                       &
-                                 errmsg=errmsg, errflg=errflg)
+                                 first_time_step=first_time_step, errmsg=errmsg, errflg=errflg)
             end if
          end if
          if (errflg/=0) return
@@ -676,7 +681,8 @@ module mp_thompson
 
          ! Recompute sr at last subcycling step
          if (nsteps>1 .and. istep == nsteps) then
-           sr = (snow + graupel + ice)/(rain+1.e-12)
+           ! Unlike inside mp_gt_driver, rain does not contain frozen precip
+           sr = (snow + graupel + ice)/(rain + snow + graupel + ice +1.e-12)
          end if
 
       end subroutine mp_thompson_run

@@ -1028,7 +1028,7 @@ MODULE module_mp_thompson
                           refl_10cm
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(INOUT):: &
                           vt_dbz_wt
-      LOGICAL, OPTIONAL, INTENT(IN) :: first_time_step
+      LOGICAL, INTENT(IN) :: first_time_step
       REAL, INTENT(IN):: dt_in
       ! To support subcycling: current step and maximum number of steps
       INTEGER, INTENT (IN) :: istep, nsteps
@@ -1066,7 +1066,7 @@ MODULE module_mp_thompson
       if (present(errflg)) errflg = 0
 
       ! No need to test for every subcycling step
-      first_step_only: if (istep==nsteps) then
+      test_only_once: if (first_time_step .and. istep==1) then
          ! DH* 2020-06-05: The stochastic perturbations code was retrofitted
          ! from a newer version of the Thompson MP scheme, but it has not been
          ! tested yet.
@@ -1124,7 +1124,7 @@ MODULE module_mp_thompson
                                                present(nifa2d)      )) then
             write(*,*) 'WARNING, nc/nwfa/nifa/nwfa2d/nifa2d present but is_aerosol_aware is FALSE'
          end if
-      end if first_step_only
+      end if test_only_once
 
 !+---+
       i_start = its
@@ -1412,16 +1412,16 @@ MODULE module_mp_thompson
                melti=.false.
              endif
 !
-             if (present(vt_dbz_wt) .and. present(first_time_step)) then
+             !if (present(vt_dbz_wt) .and. present(first_time_step)) then
                call calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d,   &
                                    t1d, p1d, dBZ, rand1, kts, kte, i, j, &
                                    melti, vt_dbz_wt(i,:,j),              &
                                    first_time_step)
-             else
-               call calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d,   &
-                                   t1d, p1d, dBZ, rand1, kts, kte, i, j, &
-                                   melti)
-             end if
+             !else
+             !  call calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d,   &
+             !                      t1d, p1d, dBZ, rand1, kts, kte, i, j, &
+             !                      melti)
+             !end if
              do k = kts, kte
                refl_10cm(i,k,j) = MAX(-35., dBZ(k))
              enddo
