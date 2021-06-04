@@ -1335,7 +1335,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = in
   optional = F
 [hffac]
   standard_name = surface_upward_sensible_heat_flux_reduction_factor
