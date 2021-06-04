@@ -987,7 +987,7 @@ MODULE module_mp_thompson
                               ids,ide, jds,jde, kds,kde,              &  ! domain dims
                               ims,ime, jms,jme, kms,kme,              &  ! memory dims
                               its,ite, jts,jte, kts,kte,              &  ! tile dims
-                              reset, istep, nsteps,                   &
+                              reset_dBZ, istep, nsteps,               &
                               errmsg, errflg)
 
       implicit none
@@ -1032,7 +1032,7 @@ MODULE module_mp_thompson
       REAL, INTENT(IN):: dt_in
       ! To support subcycling: current step and maximum number of steps
       INTEGER, INTENT (IN) :: istep, nsteps
-      LOGICAL, INTENT (IN) :: reset
+      LOGICAL, INTENT (IN) :: reset_dBZ
 
 !..Local variables
       REAL, DIMENSION(kts:kte):: &
@@ -1406,7 +1406,7 @@ MODULE module_mp_thompson
            if (diagflag .and. do_radar_ref == 1) then
 !
              ! Only set melti to true at the output times
-             if (reset) then
+             if (reset_dBZ) then
                melti=.true.
              else
                melti=.false.

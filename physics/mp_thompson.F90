@@ -323,10 +323,10 @@ module mp_thompson
                               tgrs, prsl, phii, omega,             &
                               dtp, first_time_step, istep, nsteps, &
                               prcp, rain, graupel, ice, snow, sr,  &
-                              refl_10cm, reset, do_radar_ref,      &
+                              refl_10cm, reset_dBZ, do_radar_ref,  &
                               re_cloud, re_ice, re_snow,           &
                               mpicomm, mpirank, mpiroot,           &
-                              errmsg, errflg)
+                              blkno, errmsg, errflg)
 
          implicit none
 
@@ -349,7 +349,7 @@ module mp_thompson
          real(kind_phys),           intent(inout) :: ni(:,:)
          real(kind_phys),           intent(inout) :: nr(:,:)
          ! Aerosols
-         logical,                   intent(in)    :: is_aerosol_aware, reset
+         logical,                   intent(in)    :: is_aerosol_aware, reset_dBZ
          ! The following arrays are not allocated if is_aerosol_aware is false
          real(kind_phys), optional, intent(inout) :: nc(:,:)
          real(kind_phys), optional, intent(inout) :: nwfa(:,:)
@@ -378,7 +378,8 @@ module mp_thompson
          real(kind_phys), optional, intent(  out) :: re_cloud(:,:)
          real(kind_phys), optional, intent(  out) :: re_ice(:,:)
          real(kind_phys), optional, intent(  out) :: re_snow(:,:)
-         ! MPI information
+         ! MPI and block information
+         integer,                   intent(in)    :: blkno
          integer,                   intent(in)    :: mpicomm
          integer,                   intent(in)    :: mpirank
          integer,                   intent(in)    :: mpiroot
@@ -442,9 +443,9 @@ module mp_thompson
          else
             dtstep = dtp
          end if
-         if (first_time_step .and. mpirank==mpiroot) then
-            write(*,'(a,i0,a,a,f6.2,a)') 'Thompson MP is using ', nsteps, ' substeps per time step', &
-                                         'with an effective time step of ', dtstep, ' seconds'
+         if (first_time_step .and. mpirank==mpiroot .and. blkno==1) then
+            write(*,'(a,i0,a,a,f6.2,a)') 'Thompson MP is using ', nsteps, ' substep(s) per time step', &
+                                         ' with an effective time step of ', dtstep, ' seconds'
          end if
 
          if (first_time_step .and. istep==1) then
@@ -580,7 +581,7 @@ module mp_thompson
                                  ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
                                  ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                                  its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
-                                 reset=reset, istep=istep, nsteps=nsteps,                       &
+                                 reset_dBZ=reset_dBZ, istep=istep, nsteps=nsteps,               &
                                  first_time_step=first_time_step, errmsg=errmsg, errflg=errflg)
             else
                call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
@@ -600,7 +601,7 @@ module mp_thompson
                                  ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
                                  ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                                  its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
-                                 reset=reset, istep=istep, nsteps=nsteps,                       &
+                                 reset_dBZ=reset_dBZ, istep=istep, nsteps=nsteps,               &
                                  first_time_step=first_time_step, errmsg=errmsg, errflg=errflg)
             end if
          else
@@ -622,7 +623,7 @@ module mp_thompson
                                  ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
                                  ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                                  its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
-                                 reset=reset, istep=istep, nsteps=nsteps,                       &
+                                 reset_dBZ=reset_dBZ, istep=istep, nsteps=nsteps,               &
                                  first_time_step=first_time_step, errmsg=errmsg, errflg=errflg)
             else
                call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
@@ -641,7 +642,7 @@ module mp_thompson
                                  ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
                                  ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                                  its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
-                                 reset=reset, istep=istep, nsteps=nsteps,                       &
+                                 reset_dBZ=reset_dBZ, istep=istep, nsteps=nsteps,               &
                                  first_time_step=first_time_step, errmsg=errmsg, errflg=errflg)
             end if
          end if
