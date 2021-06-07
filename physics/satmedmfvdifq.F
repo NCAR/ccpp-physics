@@ -19,16 +19,26 @@
 !> \section arg_table_satmedmfvdifq_init Argument Table
 !! \htmlinclude satmedmfvdifq_init.html
 !!
-      subroutine satmedmfvdifq_init (isatmedmf,isatmedmf_vdifq,
+      subroutine satmedmfvdifq_init (satmedmf,
+     &                               isatmedmf,isatmedmf_vdifq,
      &                               errmsg,errflg)
 
+      logical, intent(in   ) :: satmedmf
       integer, intent(in) :: isatmedmf,isatmedmf_vdifq
+
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
 ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+
+! Consistency checks
+      if (.not. satmedmf) then
+        write(errmsg,fmt='(*(a))') 'Logic error: satmedmf = .false.'        
+        errflg = 1
+        return
+      end if
 
       if (.not. isatmedmf==isatmedmf_vdifq) then
         write(errmsg,fmt='(*(a))') 'Logic error: satmedmfvdif is ',

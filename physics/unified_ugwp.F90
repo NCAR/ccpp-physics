@@ -63,7 +63,7 @@ contains
                 fn_nml2, jdat, lonr, latr, levs, ak, bk, dtp, cdmbgwd, cgwf,   &
                 con_pi, con_rerth, pa_rf_in, tau_rf_in, con_p0, do_ugwp,       &
                 do_ugwp_v0, do_ugwp_v0_orog_only, do_ugwp_v0_nst_only,         &
-                do_gsl_drag_ls_bl, do_gsl_drag_ss, do_gsl_drag_tofd,           &
+                do_gsl_drag_ls_bl, do_gsl_drag_ss, do_gsl_drag_tofd, gwd_opt,  &
                 errmsg, errflg)
 
 !----  initialization of unified_ugwp
@@ -96,7 +96,8 @@ contains
     logical :: exists
     real    :: dxsg
     integer :: k
-
+    
+    integer,          intent(in)  :: gwd_opt
     character(len=*), intent(out) :: errmsg
     integer,          intent(out) :: errflg
 
@@ -104,6 +105,13 @@ contains
     errmsg = ''
     errflg = 0
 
+    ! Consistency checks
+    if (gwd_opt/=2 .and. gwd_opt/=22) then
+      write(errmsg,'(*(a))') "Logic error: namelist choice of gravity wave &
+        & drag is different from unified_ugwp scheme"
+      errflg = 1
+      return
+    end if
 
     ! Test to make sure that at most only one large-scale/blocking
     ! orographic drag scheme is chosen
@@ -260,8 +268,7 @@ contains
     real(kind=kind_phys),    intent(out), dimension(:,:)        :: dudt_mtb, dudt_tms
     real(kind=kind_phys),    intent(out), dimension(:,:)        :: dtaux2d_ls, dtauy2d_ls
 
-    ! The dtend array is are only allocated if ldiag=.true.
-    real(kind=kind_phys), intent(inout), optional :: dtend(:,:,:)
+    real(kind=kind_phys), intent(inout) :: dtend(:,:,:)
     integer, intent(in) :: dtidx(:,:), index_of_temperature, index_of_x_wind, &
          index_of_y_wind, index_of_process_nonorographic_gwd, &
          index_of_process_orographic_gwd
@@ -332,9 +339,11 @@ contains
                  dusfc_ss,dvsfc_ss,dusfc_fd,dvsfc_fd,                &
                  slmsk,br1,hpbl,con_g,con_cp,con_rd,con_rv,          &
                  con_fvirt,con_pi,lonr,                              &
-                 cdmbgwd(1:2),me,master,lprnt,ipr,rdxzb,dx,gwd_opt,  &
+                 cdmbgwd,me,master,lprnt,ipr,rdxzb,dx,gwd_opt,       &
                  do_gsl_drag_ls_bl,do_gsl_drag_ss,do_gsl_drag_tofd,  &
-                 errmsg,errflg)
+                 dtend, dtidx, index_of_process_orographic_gwd,      &
+                 index_of_temperature, index_of_x_wind,              &
+                 index_of_y_wind, ldiag3d, errmsg, errflg)
 !
 ! put zeros due to xy GSL-drag style: dtaux2d_bl,dtauy2d_bl,dtaux2d_ss.......dusfc_ls,dvsfc_ls
 !

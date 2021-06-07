@@ -7,7 +7,24 @@
 
       contains
 
-      subroutine drag_suite_init()
+      subroutine drag_suite_init(gwd_opt, errmsg, errflg)
+
+      integer,          intent(in)  :: gwd_opt
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
+
+
+      ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
+
+      ! Consistency checks
+      if (gwd_opt/=3 .and. gwd_opt/=33) then
+        write(errmsg,'(*(a))') "Logic error: namelist choice of gravity wave &
+          & drag is different from drag_suite scheme"
+        errflg = 1
+        return
+      end if        
       end subroutine drag_suite_init
 
 ! \defgroup GFS_ogwd GFS Orographic Gravity Wave Drag
@@ -201,7 +218,7 @@
      &           do_gsl_drag_ls_bl, do_gsl_drag_ss, do_gsl_drag_tofd,   &
      &           dtend, dtidx, index_of_process_orographic_gwd,         &
      &           index_of_temperature, index_of_x_wind,                 &
-     &           index_of_y_wind, ldiag3d, errmsg, errflg     )
+     &           index_of_y_wind, ldiag3d, errmsg, errflg)
 
 !   ********************************************************************
 ! ----->  I M P L E M E N T A T I O N    V E R S I O N   <----------
@@ -487,8 +504,12 @@
    ! Initialize CCPP error handling variables
    errmsg = ''
    errflg = 0
-   var_temp2 = 0.
 
+   ! Initialize local variables
+   var_temp2 = 0.
+   udtend = -1
+   vdtend = -1
+   Tdtend = -1
 
    if(ldiag3d) then
       udtend = dtidx(index_of_x_wind,index_of_process_orographic_gwd)

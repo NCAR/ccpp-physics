@@ -155,6 +155,14 @@
   kind = kind_phys
   intent = in
   optional = F
+[gwd_opt]
+  standard_name = gwd_opt
+  long_name = flag to choose gwd scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [do_ugwp]
   standard_name = do_ugwp
   long_name = flag to activate CIRES UGWP
