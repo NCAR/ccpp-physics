@@ -190,7 +190,7 @@
   optional = F
 [dsnow_cpl]
   standard_name = tendency_of_lwe_thickness_of_snow_amount_for_coupling
-  long_name = change in show_cpl (coupling_type)
+  long_name = change in snow_cpl (coupling_type)
   units = m
   dimensions = (horizontal_loop_extent)
   type = real

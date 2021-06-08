@@ -114,8 +114,8 @@
   intent = in
   optional = F
 [weasd]
-  standard_name = water_equivalent_accumulated_snow_depth_over_water
-  long_name = water equiv of acc snow depth over water
+  standard_name = water_equivalent_accumulated_snow_depth_over_ice
+  long_name = water equiv of acc snow depth over ice
   units = mm
   dimensions = (horizontal_loop_extent)
   type = real
@@ -217,8 +217,8 @@
   intent = in
   optional = F
 [snwdph]
-  standard_name = surface_snow_thickness_water_equivalent_over_water
-  long_name = water equivalent snow depth over water
+  standard_name = surface_snow_thickness_water_equivalent_over_ice
+  long_name = water equivalent snow depth over ice
   units = mm
   dimensions = (horizontal_loop_extent)
   type = real
