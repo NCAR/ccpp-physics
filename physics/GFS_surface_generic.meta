@@ -504,6 +504,14 @@
   type = logical
   intent = in
   optional = F
+[dry]
+  standard_name = flag_nonzero_land_surface_fraction
+  long_name = flag indicating presence of some land surface area fraction
+  units = flag
+  dimensions = (horizontal_loop_extent)
+  type = logical
+  intent = in
+  optional = F
 [icy]
   standard_name = flag_nonzero_sea_ice_surface_fraction
   long_name = flag indicating presence of some sea ice surface area fraction
@@ -1212,14 +1220,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
-[islmsk]
-  standard_name = sea_land_ice_mask
-  long_name = landmask: sea/land/ice=0/1/2
-  units = flag
-  dimensions = (horizontal_loop_extent)
-  type = integer
-  intent = in
   optional = F
 [runoff]
   standard_name = total_runoff
