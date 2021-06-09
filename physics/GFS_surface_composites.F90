@@ -720,15 +720,10 @@ contains
                 stress(i) = txi * stress_ice(i) + txo * stress_wat(i)
                 qss(i)    = txi * qss_ice(i)    + txo * qss_wat(i)
                 ep1d(i)   = txi * ep1d_ice(i)   + txo * ep1d_wat(i)
-                zorl(i)   = txi * zorli(i)      + txo * zorlo(i)
-!               zorl(i)   = txi * log(zorli(i)) + txo * log(zorlo(i))
-!               zorl(i)   = exp(zorl(i))
-!               snowd(i)  = txi * snowd_ice(i)
+                zorl(i)   = exp(txi*log(zorli(i)) + txo*log(zorlo(i)))
               endif
             elseif (wet(i)) then  ! return updated lake ice thickness & concentration to global array
-              zorl(i)  = cice(i)*zorli(i) + (one-cice(i))*zorlo(i)
-!             zorl(i)  = cice(i)*log(zorli(i)) + (one-cice(i))*log(zorlo(i))
-!             zorl(i)  = exp(zorl(i))
+              zorl(i)  = exp(cice(i)*log(zorli(i)) + (one-cice(i))*log(zorlo(i)))
             endif
 !
             if (wet(i)) then
