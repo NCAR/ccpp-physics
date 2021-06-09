@@ -82,14 +82,30 @@
   kind = kind_phys
   intent = in
   optional = F
-[gq0_water_vapor]
-  standard_name = water_vapor_specific_humidity_updated_by_physics
-  long_name = water vapor specific humidity updated by physics
+[gq0]
+  standard_name = tracer_concentration_updated_by_physics
+  long_name = tracer concentration updated by physics
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers)
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
+[nsamftrac]
+  standard_name = number_of_tracers_for_samf
+  long_name = number of tracers for scale-aware mass flux schemes
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntqv]
+  standard_name = index_for_water_vapor
+  long_name = tracer index for water vapor (specific humidity)
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
   optional = F
 [save_u]
   standard_name = x_wind_save
@@ -118,14 +134,14 @@
   kind = kind_phys
   intent = inout
   optional = F
-[save_qv]
-  standard_name = water_vapor_specific_humidity_save
-  long_name = water vapor specific humidity before entering a physics scheme
+[save_q]
+  standard_name = tracer_concentration_save
+  long_name = tracer concentration before entering a physics scheme
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = F
 [dqdti]
   standard_name = instantaneous_water_vapor_specific_humidity_tendency_due_to_convection
@@ -135,6 +151,143 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
+[dtidx]
+  standard_name = cumulative_change_of_state_variables_outer_index
+  long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
+  units = index
+  dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
+  type = integer
+  intent = in
+  optional = F
+[index_of_process_dcnv]
+  standard_name = index_of_deep_convection_process_process_in_cumulative_change_index
+  long_name = index of deep convection process in second dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[cscnv]
+  standard_name = flag_for_Chikira_Sugiyama_deep_convection
+  long_name = flag for Chikira-Sugiyama convection
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[satmedmf]
+  standard_name = flag_for_scale_aware_TKE_moist_EDMF_PBL
+  long_name = flag for scale-aware TKE moist EDMF PBL scheme
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[trans_trac]
+  standard_name = flag_for_convective_transport_of_tracers
+  long_name = flag for convective transport of tracers
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[ras]
+  standard_name = flag_for_ras_deep_convection
+  long_name = flag for ras convection scheme
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[ntcw]
+  standard_name = index_for_liquid_cloud_condensate
+  long_name = tracer index for cloud condensate (or liquid water)
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntiw]
+  standard_name = index_for_ice_cloud_condensate
+  long_name = tracer index for  ice water
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntclamt]
+  standard_name = index_for_cloud_amount
+  long_name = tracer index for cloud amount integer
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntrw]
+  standard_name = index_for_rain_water
+  long_name = tracer index for rain water
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntsw]
+  standard_name = index_for_snow_water
+  long_name = tracer index for snow water
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntrnc]
+  standard_name = index_for_rain_number_concentration
+  long_name = tracer index for rain   number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntsnc]
+  standard_name = index_for_snow_number_concentration
+  long_name = tracer index for snow   number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntgl]
+  standard_name = index_for_graupel
+  long_name = tracer index for graupel
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntgnc]
+  standard_name = index_for_graupel_number_concentration
+  long_name = tracer index for graupel number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[clw]
+  standard_name = convective_transportable_tracers
+  long_name = array to contain cloud water and other convective trans. tracers
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers_for_convective_transport)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[ntrac]
+  standard_name = number_of_tracers
+  long_name = number of tracers
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
   optional = F
 [errmsg]
   standard_name = ccpp_error_message
@@ -212,14 +365,6 @@
   type = logical
   intent = in
   optional = F
-[cscnv]
-  standard_name = flag_for_Chikira_Sugiyama_deep_convection
-  long_name = flag for Chikira-Sugiyama convection
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
 [frain]
   standard_name = dynamics_to_physics_timestep_ratio
   long_name = ratio of dynamics timestep to physics timestep
@@ -283,15 +428,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[save_qv]
-  standard_name = water_vapor_specific_humidity_save
-  long_name = water vapor specific humidity before entering a physics scheme
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [gu0]
   standard_name = x_wind_updated_by_physics
   long_name = zonal wind updated by physics
@@ -314,15 +450,6 @@
   standard_name = air_temperature_updated_by_physics
   long_name = temperature updated by physics
   units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[gq0_water_vapor]
-  standard_name = water_vapor_specific_humidity_updated_by_physics
-  long_name = water vapor specific humidity updated by physics
-  units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
@@ -351,6 +478,81 @@
   long_name = (detrainment mass flux) * delt
   units = kg m-2
   dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[dtend]
+  standard_name = cumulative_change_of_state_variables
+  long_name = diagnostic tendencies for state variables
+  units = various
+  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_cumulative_change_processes)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dtidx]
+  standard_name = cumulative_change_of_state_variables_outer_index
+  long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
+  units = index
+  dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
+  type = integer
+  intent = in
+  optional = F
+[index_of_process_dcnv]
+  standard_name = index_of_deep_convection_process_process_in_cumulative_change_index
+  long_name = index of deep convection process in second dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[index_of_temperature]
+  standard_name = index_of_temperature_in_cumulative_change_index
+  long_name = index of temperature in first dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[index_of_x_wind]
+  standard_name = index_of_x_wind_in_cumulative_change_index
+  long_name = index of x-wind in first dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[index_of_y_wind]
+  standard_name = index_of_y_wind_in_cumulative_change_index
+  long_name = index of x-wind in first dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntqv]
+  standard_name = index_for_water_vapor
+  long_name = tracer index for water vapor (specific humidity)
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[gq0]
+  standard_name = tracer_concentration_updated_by_physics
+  long_name = tracer concentration updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[save_q]
+  standard_name = tracer_concentration_save
+  long_name = tracer concentration before entering a physics scheme
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers)
   type = real
   kind = kind_phys
   intent = in
@@ -388,6 +590,14 @@
   type = integer
   intent = in
   optional = F
+[nsamftrac]
+  standard_name = number_of_tracers_for_samf
+  long_name = number of tracers for scale-aware mass flux schemes
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [rainc]
   standard_name = lwe_thickness_of_convective_precipitation_amount_on_dynamics_timestep
   long_name = convective rain at this time step
@@ -402,42 +612,6 @@
   long_name = cumulative cloud work function (valid only with sas)
   units = m2 s-1
   dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[dt3dt]
-  standard_name = cumulative_change_in_temperature_due_to_deep_convection
-  long_name = cumulative change in temperature due to deep conv.
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[dq3dt]
-  standard_name = cumulative_change_in_water_vapor_specific_humidity_due_to_deep_convection
-  long_name = cumulative change in water vapor specific humidity due to deep conv.
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[du3dt]
-  standard_name = cumulative_change_in_x_wind_due_to_deep_convection
-  long_name = cumulative change in x wind due to deep convection
-  units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[dv3dt]
-  standard_name = cumulative_change_in_y_wind_due_to_deep_convection
-  long_name = cumulative change in y wind due to deep convection
-  units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -511,6 +685,119 @@
   units = flag
   dimensions = ()
   type = logical
+  intent = in
+  optional = F
+[cscnv]
+  standard_name = flag_for_Chikira_Sugiyama_deep_convection
+  long_name = flag for Chikira-Sugiyama convection
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[satmedmf]
+  standard_name = flag_for_scale_aware_TKE_moist_EDMF_PBL
+  long_name = flag for scale-aware TKE moist EDMF PBL scheme
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[trans_trac]
+  standard_name = flag_for_convective_transport_of_tracers
+  long_name = flag for convective transport of tracers
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[ntcw]
+  standard_name = index_for_liquid_cloud_condensate
+  long_name = tracer index for cloud condensate (or liquid water)
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntiw]
+  standard_name = index_for_ice_cloud_condensate
+  long_name = tracer index for  ice water
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntclamt]
+  standard_name = index_for_cloud_amount
+  long_name = tracer index for cloud amount integer
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntrw]
+  standard_name = index_for_rain_water
+  long_name = tracer index for rain water
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntsw]
+  standard_name = index_for_snow_water
+  long_name = tracer index for snow water
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntrnc]
+  standard_name = index_for_rain_number_concentration
+  long_name = tracer index for rain   number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntsnc]
+  standard_name = index_for_snow_number_concentration
+  long_name = tracer index for snow   number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntgl]
+  standard_name = index_for_graupel
+  long_name = tracer index for graupel
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntgnc]
+  standard_name = index_for_graupel_number_concentration
+  long_name = tracer index for graupel number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[clw]
+  standard_name = convective_transportable_tracers
+  long_name = array to contain cloud water and other convective trans. tracers
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers_for_convective_transport)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[ntrac]
+  standard_name = number_of_tracers
+  long_name = number of tracers
+  units = count
+  dimensions = ()
+  type = integer
   intent = in
   optional = F
 [errmsg]

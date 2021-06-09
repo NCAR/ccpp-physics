@@ -38,7 +38,7 @@
 !! \section genal_h2ophys GFS H2O Physics Scheme General Algorithm
 !> @{
       subroutine h2ophys_run(im, levs, kh2o, dt, h2o, ph2o, prsl,       &
-     &                     h2opltc, h2o_coeff, ldiag3d, me,             &
+     &                     h2opltc, h2o_coeff, me,                      &
      &                     errmsg, errflg)
 !
 ! May 2015 - Shrinivas Moorthi - Adaptation of NRL H2O physics for
@@ -56,7 +56,6 @@
       real(kind=kind_phys), intent(in) :: ph2o(:)
       real(kind=kind_phys), intent(in) :: prsl(:,:)
       real(kind=kind_phys), intent(in) :: h2opltc(:,:,:)
-      logical             , intent(in) :: ldiag3d
       !real(kind=kind_phys), intent(inout) :: h2op(im,levs,h2o_coeff)
       character(len=*),     intent(out) :: errmsg
       integer,              intent(out) :: errflg

@@ -75,7 +75,8 @@
      &     prsi,del,prsl,prslk,phii,phil,delt,                          &
      &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,dkt,dku,                &
      &     kinver,xkzm_m,xkzm_h,xkzm_s,dspfac,bl_upfr,bl_dnfr,          &
-     &     ntoz,du3dt,dv3dt,dt3dt,dq3dt,do3dt,gen_tend,ldiag3d,qdiag3d, &
+     &     ntoz,ntqv,dtend,dtidx,index_of_temperature,index_of_x_wind,  &
+     &     index_of_y_wind,index_of_process_pbl,gen_tend,ldiag3d,       &
      &     errmsg,errflg)
 !
       use machine  , only : kind_phys
@@ -84,11 +85,11 @@
       implicit none
 !
 !----------------------------------------------------------------------
-      integer, intent(in)  :: im, km, ntrac, ntcw, ntiw, ntke, ntoz
+      integer, intent(in)  :: im, km, ntrac, ntcw, ntiw, ntke, ntoz,ntqv
       integer, intent(in)  :: kinver(:)
       integer, intent(in)  :: islimsk(:)
       integer, intent(out) :: kpbl(:)
-      logical, intent(in)  :: gen_tend,ldiag3d,qdiag3d
+      logical, intent(in)  :: gen_tend,ldiag3d
 !
       real(kind=kind_phys), intent(in) :: grav,rd,cp,rv,hvap,hfus,fv,   &
      &                                    eps,epsm1
@@ -111,10 +112,9 @@
      &                     prsi(:,:), del(:,:),                         &
      &                     prsl(:,:),   prslk(:,:),                     &
      &                     phii(:,:), phil(:,:)
-      real(kind=kind_phys), intent(inout), dimension(:,:) ::            &
-     &                     du3dt(:,:),    dv3dt(:,:),                   &
-     &                     dt3dt(:,:),    dq3dt(:,:),                   &
-     &                     do3dt(:,:)
+      real(kind=kind_phys), intent(inout), dimension(:,:,:) :: dtend
+      integer, intent(in) :: dtidx(:,:), index_of_temperature,          &
+     &       index_of_x_wind, index_of_y_wind, index_of_process_pbl
       real(kind=kind_phys), intent(out) ::                              &
      &                     dusfc(:),      dvsfc(:),                     &
      &                     dtsfc(:),      dqsfc(:),                     &
@@ -132,7 +132,7 @@
 !***
 !***  local variables
 !***
-      integer i,is,k,kk,n,ndt,km1,kmpbl,kmscu,ntrac1
+      integer i,is,k,kk,n,ndt,km1,kmpbl,kmscu,ntrac1,idtend
       integer lcld(im),kcld(im),krad(im),mrad(im)
       integer kx1(im), kpblx(im)
 !
@@ -1310,6 +1310,13 @@ c
             rtg(i,k,ntke) = rtg(i,k,ntke)+qtend
          enddo
       enddo
+      if(ldiag3d) then
+         idtend = dtidx(ntke+100,index_of_process_pbl)
+         if(idtend>0) then
+            dtend(1:im,1:km,idtend) = dtend(1:im,1:km,idtend) +         &
+     &        (f1(1:im,1:km)-q1(1:im,1:km,ntke))*rdt
+         endif
+      endif
 c
 !> ## Compute tridiagonal matrix elements for heat and moisture
 c
@@ -1437,17 +1444,22 @@ c
          enddo
       enddo
       if(ldiag3d .and. .not. gen_tend) then
-        do  k = 1,km
-          do i = 1,im
-            ttend      = (f1(i,k)-t1(i,k))*rdt
-            dt3dt(i,k) = dt3dt(i,k)+ttend*delt
+        idtend=dtidx(index_of_temperature,index_of_process_pbl)
+        if(idtend>=1) then
+          do  k = 1,km
+            do i = 1,im
+              ttend      = (f1(i,k)-t1(i,k))*rdt
+              dtend(i,k,idtend) = dtend(i,k,idtend)+ttend*delt
+            enddo
           enddo
-        enddo
-        if(qdiag3d) then
+        endif
+        ! Send tendencies just for QV; other tracers are below.
+        idtend=dtidx(100+ntqv,index_of_process_pbl)
+        if(idtend>=1) then
           do  k = 1,km
             do i = 1,im
               qtend      = (f2(i,k)-q1(i,k,1))*rdt
-              dq3dt(i,k) = dq3dt(i,k)+qtend*delt
+              dtend(i,k,idtend) = dtend(i,k,idtend)+qtend*delt
             enddo
           enddo
         endif
@@ -1463,14 +1475,21 @@ c
             enddo
           enddo
         enddo
-        if(ldiag3d .and. .not. gen_tend .and. qdiag3d .and. ntoz>0) then
-          kk=ntoz
-          is = (kk-1) * km
-          do k = 1, km
-            do i = 1, im
-              qtend = (f2(i,k+is)-q1(i,k,kk))*rdt
-              do3dt(i,k) = do3dt(i,k)+qtend*delt
-            enddo
+        if(ldiag3d .and. .not. gen_tend) then
+          ! Send tendencies for all tracers that were selected.
+          do kk = 2, ntrac1
+            is = (kk-1) * km
+            idtend = dtidx(kk+100,index_of_process_pbl)
+            if(idtend>=1) then
+              if(kk/=ntke) then
+                do k = 1, km
+                  do i = 1, im
+                    qtend = (f2(i,k+is)-q1(i,k,kk))*rdt
+                    dtend(i,k,idtend) = dtend(i,k,idtend)+qtend*delt
+                  enddo
+                enddo
+              endif
+            endif
           enddo
         endif
       endif
@@ -1487,12 +1506,15 @@ c
           enddo
         enddo
         if(ldiag3d .and. .not. gen_tend) then
-          do k = 1,km1
-            do i = 1,im
-              ttend = diss(i,k) / cp
-              dt3dt(i,k) = dt3dt(i,k)+dspfac * ttend*delt
+          idtend=dtidx(index_of_temperature,index_of_process_pbl)
+          if(idtend>=1) then
+            do k = 1,km1
+              do i = 1,im
+                ttend = diss(i,k) / cp
+                dtend(i,k,idtend) = dtend(i,k,idtend)+dspfac*ttend*delt
+              enddo
             enddo
-          enddo
+          endif
         endif
       endif
 c
@@ -1572,14 +1594,25 @@ c
          enddo
       enddo
       if(ldiag3d .and. .not. gen_tend) then
-        do k = 1,km
-          do i = 1,im
-            utend = (f1(i,k)-u1(i,k))*rdt
-            vtend = (f2(i,k)-v1(i,k))*rdt
-            du3dt(i,k) = du3dt(i,k) + utend*delt
-            dv3dt(i,k) = dv3dt(i,k) + vtend*delt
+        idtend=dtidx(index_of_x_wind,index_of_process_pbl)
+        if(idtend>=1) then
+          do k = 1,km
+            do i = 1,im
+              utend = (f1(i,k)-u1(i,k))*rdt
+              dtend(i,k,idtend) = dtend(i,k,idtend) + utend*delt
+            enddo
           enddo
-        enddo
+        endif
+
+        idtend=dtidx(index_of_y_wind,index_of_process_pbl)
+        if(idtend>=1) then
+          do k = 1,km
+            do i = 1,im
+              vtend = (f2(i,k)-v1(i,k))*rdt
+              dtend(i,k,idtend) = dtend(i,k,idtend) + vtend*delt
+            enddo
+          enddo
+        endif
       endif
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

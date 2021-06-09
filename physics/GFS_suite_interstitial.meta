@@ -664,59 +664,78 @@
   kind = kind_phys
   intent = inout
   optional = F
-[dt3dt_lw]
-  standard_name = cumulative_change_in_temperature_due_to_longwave_radiation
-  long_name = cumulative change in temperature due to longwave radiation
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+[dtend]
+  standard_name = cumulative_change_of_state_variables
+  long_name = diagnostic tendencies for state variables
+  units = various
+  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_cumulative_change_processes)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
-[dt3dt_sw]
-  standard_name = cumulative_change_in_temperature_due_to_shortwave_radiation
-  long_name = cumulative change in temperature due to shortwave radiation
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
+[dtidx]
+  standard_name = cumulative_change_of_state_variables_outer_index
+  long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
+  units = index
+  dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
+  type = integer
+  intent = in
   optional = F
-[dt3dt_pbl]
-  standard_name = cumulative_change_in_temperature_due_to_PBL
-  long_name = cumulative change in temperature due to PBL
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
+[index_of_process_longwave]
+  standard_name = index_of_longwave_heating_process_in_cumulative_change_index
+  long_name = index of longwave heating process in second dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
   optional = F
-[dt3dt_dcnv]
-  standard_name = cumulative_change_in_temperature_due_to_deep_convection
-  long_name = cumulative change in temperature due to deep conv.
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
+[index_of_process_shortwave]
+  standard_name = index_of_shortwave_heating_process_in_cumulative_change_index
+  long_name = index of shortwave heating process in second dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
   optional = F
-[dt3dt_scnv]
-  standard_name = cumulative_change_in_temperature_due_to_shallow_convection
-  long_name = cumulative change in temperature due to shal conv.
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
+[index_of_process_pbl]
+  standard_name = index_of_subgrid_scale_vertical_mixing_process_in_cumulative_change_index
+  long_name = index of subgrid scale vertical mixing process in second dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
   optional = F
-[dt3dt_mp]
-  standard_name = cumulative_change_in_temperature_due_to_microphysics
-  long_name = cumulative change in temperature due to microphysics
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
+[index_of_process_dcnv]
+  standard_name = index_of_deep_convection_process_process_in_cumulative_change_index
+  long_name = index of deep convection process in second dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[index_of_process_scnv]
+  standard_name = index_of_shallow_convection_process_process_in_cumulative_change_index
+  long_name = index of shallow convection process in second dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[index_of_process_mp]
+  standard_name = index_of_microphysics_process_process_in_cumulative_change_index
+  long_name = index of microphysics transport process in second dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[index_of_temperature]
+  standard_name = index_of_temperature_in_cumulative_change_index
+  long_name = index of temperature in first dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
   optional = F
 [ctei_rml]
   standard_name = grid_sensitive_critical_cloud_top_entrainment_instability_criteria
@@ -1558,6 +1577,72 @@
   kind = kind_phys
   intent = inout
   optional = F
+[ldiag3d]
+  standard_name = flag_diagnostics_3D
+  long_name = flag for 3d diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[qdiag3d]
+  standard_name = flag_tracer_diagnostics_3D
+  long_name = flag for 3d tracer diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[index_of_process_conv_trans]
+  standard_name = index_of_convective_transport_process_in_cumulative_change_index
+  long_name = index of convective transport process in second dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[save_lnc]
+  standard_name = liquid_cloud_number_concentration_save
+  long_name = liquid cloud number concentration before entering a physics scheme
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[save_inc]
+  standard_name = ice_cloud_number_concentration_save
+  long_name = ice cloud number concentration before entering a physics scheme
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[ntlnc]
+  standard_name = index_for_liquid_cloud_number_concentration
+  long_name = tracer index for liquid number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntinc]
+  standard_name = index_for_ice_cloud_number_concentration
+  long_name = tracer index for ice    number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[dtidx]
+  standard_name = cumulative_change_of_state_variables_outer_index
+  long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
+  units = index
+  dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
+  type = integer
+  intent = in
+  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -1805,6 +1890,24 @@
   kind = kind_phys
   intent = in
   optional = F
+[save_lnc]
+  standard_name = liquid_cloud_number_concentration_save
+  long_name = liquid cloud number concentration before entering a physics scheme
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[save_inc]
+  standard_name = ice_cloud_number_concentration_save
+  long_name = ice cloud number concentration before entering a physics scheme
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [con_pi]
   standard_name = pi
   long_name = ratio of a circle's circumference to its diameter
@@ -1894,6 +1997,63 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
+[dtidx]
+  standard_name = cumulative_change_of_state_variables_outer_index
+  long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
+  units = index
+  dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
+  type = integer
+  intent = in
+  optional = F
+[dtend]
+  standard_name = cumulative_change_of_state_variables
+  long_name = diagnostic tendencies for state variables
+  units = various
+  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_cumulative_change_processes)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[ntk]
+  standard_name = index_for_turbulent_kinetic_energy_convective_transport_tracer
+  long_name = index for turbulent kinetic energy in the convectively transported tracer array
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntke]
+  standard_name = index_for_turbulent_kinetic_energy
+  long_name = tracer index for turbulent kinetic energy
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ldiag3d]
+  standard_name = flag_diagnostics_3D
+  long_name = flag for 3d diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[qdiag3d]
+  standard_name = flag_tracer_diagnostics_3D
+  long_name = flag for 3d tracer diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[index_of_process_conv_trans]
+  standard_name = index_of_convective_transport_process_in_cumulative_change_index
+  long_name = index of convective transport process in second dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
   optional = F
 [errmsg]
   standard_name = ccpp_error_message
