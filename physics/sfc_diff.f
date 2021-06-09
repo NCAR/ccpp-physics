@@ -290,6 +290,8 @@
 
           if (icy(i)) then ! Some ice
 
+            zvfun(i) = zero
+
             if(thsfc_loc) then ! Use local potential temperature
               tvs   = half * (tsurf_ice(i)+tskin_ice(i)) * virtfac
             else ! Use potential temperature referenced to 1000 hPa
@@ -342,6 +344,8 @@
 !      the stuff now put into "stability"
 
           if (wet(i)) then ! Some open ocean
+  
+            zvfun(i) = zero
 
             if(thsfc_loc) then ! Use local potential temperature
               tvs        = half * (tsurf_wat(i)+tskin_wat(i)) * virtfac
