@@ -382,13 +382,15 @@ contains
       cmm, cmm_wat, cmm_lnd, cmm_ice, chh, chh_wat, chh_lnd, chh_ice, gflx, gflx_wat, gflx_lnd, gflx_ice, ep1d, ep1d_wat,         &
       ep1d_lnd, ep1d_ice, weasd, weasd_wat, weasd_lnd, weasd_ice, snowd, snowd_wat, snowd_lnd, snowd_ice, tprcp, tprcp_wat,       &
       tprcp_lnd, tprcp_ice, evap, evap_wat, evap_lnd, evap_ice, hflx, hflx_wat, hflx_lnd, hflx_ice, qss, qss_wat, qss_lnd,        &
-      qss_ice, tsfc, tsfco, tsfcl, tsfc_wat, tsfc_lnd, tsfc_ice, tisfc, tice, hice, cice, min_seaice, tiice, sigmaf, zvfun, stc,  &
+      qss_ice, tsfc, tsfco, tsfcl, tsfc_wat, tsfc_lnd, tsfc_ice, tisfc, tice, hice, cice, min_seaice, tiice,                      &
+      sigmaf, zvfun, lheatstrg, h0facu, h0facs, hflxq, hffac, stc,                                                                &
       grav, prsik1, prslk1, prslki, z1, ztmax_wat, ztmax_lnd, ztmax_ice, errmsg, errflg)
 
       implicit none
 
       integer,                              intent(in) :: im, kice, km
       logical,                              intent(in) :: cplflx, frac_grid, cplwav2atm
+      logical,                              intent(in) :: lheatstrg
       logical, dimension(:),                intent(in) :: flag_cice, dry, wet, icy
       integer, dimension(:),                intent(in) :: islmsk
       real(kind=kind_phys), dimension(:),   intent(in) :: wind, t1, q1, prsl1, landfrac, lakefrac, oceanfrac,                   &
@@ -404,7 +406,8 @@ contains
 
       real(kind=kind_phys), dimension(:),   intent(in   ) :: tice ! interstitial sea ice temperature
       real(kind=kind_phys), dimension(:),   intent(inout) :: hice, cice
-      real(kind=kind_phys), dimension(:),   intent(inout) :: sigmaf, zvfun
+      real(kind=kind_phys), dimension(:),   intent(inout) :: sigmaf, zvfun, hflxq, hffac                  
+      real(kind=kind_phys),                 intent(in   ) :: h0facu, h0facs
       real(kind=kind_phys),                 intent(in   ) :: min_seaice
       real(kind=kind_phys),                 intent(in   ) :: rd, rvrdm1
 
@@ -532,13 +535,33 @@ contains
             uustar(i) = uustar_ice(i)
           else ! Mix of multiple surface types (land, water, and/or ice)
 !
-! compute zvfun with composite surface roughness & green vegetation fraction
+! re-compute zvfun with composite surface roughness & green vegetation fraction
 !
             tem1 = (z0max - z0lo) / (z0up - z0lo)
             tem1 = min(max(tem1, zero), one)
             tem2 = max(sigmaf(i), 0.1)
             zvfun(i) = sqrt(tem1 * tem2)
             gdx = sqrt(garea(i))
+!
+! re-compute variables for canopy heat storage parameterization with the updated zvfun
+!      in the fractional grid
+! 
+!
+            do i=1,im
+              hflxq(i) = hflx(i)
+              hffac(i) = 1.0
+            enddo
+            if (lheatstrg) then
+              do i=1,im
+                if(hflx(i) > 0.) then
+                  hffac(i) = h0facu * zvfun(i)
+                else
+                  hffac(i) = h0facs * zvfun(i)
+                endif
+                hffac(i) = 1. + hffac(i)
+                hflxq(i) = hflx(i) / hffac(i)
+              enddo
+            endif
 !
             call stability(z1(i), zvfun(i), gdx, tv1, thv1, wind(i),                & ! inputs
                            z0max, ztmax, tvs, grav, thsfc_loc,                      & ! inputs          
