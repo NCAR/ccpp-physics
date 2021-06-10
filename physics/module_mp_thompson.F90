@@ -1412,16 +1412,16 @@ MODULE module_mp_thompson
                melti=.false.
              endif
 !
-             !if (present(vt_dbz_wt) .and. present(first_time_step)) then
+             if (present(vt_dbz_wt)) then
                call calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d,   &
                                    t1d, p1d, dBZ, rand1, kts, kte, i, j, &
                                    melti, vt_dbz_wt(i,:,j),              &
                                    first_time_step)
-             !else
-             !  call calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d,   &
-             !                      t1d, p1d, dBZ, rand1, kts, kte, i, j, &
-             !                      melti)
-             !end if
+             else
+               call calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d,   &
+                                   t1d, p1d, dBZ, rand1, kts, kte, i, j, &
+                                   melti)
+             end if
              do k = kts, kte
                refl_10cm(i,k,j) = MAX(-35., dBZ(k))
              enddo
