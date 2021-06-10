@@ -7,6 +7,14 @@
 [ccpp-arg-table]
   name = satmedmfvdifq_init
   type = scheme
+[satmedmf]
+  standard_name = flag_for_scale_aware_TKE_moist_EDMF_PBL
+  long_name = flag for scale-aware TKE moist EDMF PBL scheme
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [isatmedmf]
   standard_name = choice_of_scale_aware_TKE_moist_EDMF_PBL
   long_name = choice of scale-aware TKE moist EDMF PBL scheme
@@ -678,7 +686,7 @@
   units = flag
   dimensions = ()
   type = logical
-  intent = inout
+  intent = in
   optional = F
 [qdiag3d]
   standard_name = flag_tracer_diagnostics_3D
@@ -686,7 +694,7 @@
   units = flag
   dimensions = ()
   type = logical
-  intent = inout
+  intent = in
   optional = F
 [errmsg]
   standard_name = ccpp_error_message

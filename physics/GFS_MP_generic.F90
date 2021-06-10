@@ -12,18 +12,19 @@
 !> \section arg_table_GFS_MP_generic_pre_run Argument Table
 !! \htmlinclude GFS_MP_generic_pre_run.html
 !!
-      subroutine GFS_MP_generic_pre_run(im, levs, ldiag3d, qdiag3d, do_aw, ntcw, nncl, ntrac, gt0, gq0, save_t, save_qv, save_q, errmsg, errflg)
+      subroutine GFS_MP_generic_pre_run(im, levs, ldiag3d, qdiag3d, do_aw, ntcw, nncl, &
+                               ntrac, gt0, gq0, save_t, save_qv, save_q, errmsg, errflg)
 !
       use machine,               only: kind_phys
 
       implicit none
-      integer,                                          intent(in) :: im, levs, ntcw, nncl, ntrac
-      logical,                                          intent(in) :: ldiag3d, qdiag3d, do_aw
-      real(kind=kind_phys), dimension(im, levs),        intent(in) :: gt0
-      real(kind=kind_phys), dimension(im, levs, ntrac), intent(in) :: gq0
+      integer,                                intent(in) :: im, levs, ntcw, nncl, ntrac
+      logical,                                intent(in) :: ldiag3d, qdiag3d, do_aw
+      real(kind=kind_phys), dimension(:,:),   intent(in) :: gt0
+      real(kind=kind_phys), dimension(:,:,:), intent(in) :: gq0
 
-      real(kind=kind_phys), dimension(im, levs),        intent(inout) :: save_t, save_qv
-      real(kind=kind_phys), dimension(im, levs, ntrac), intent(inout) :: save_q
+      real(kind=kind_phys), dimension(:,:),   intent(inout) :: save_t, save_qv
+      real(kind=kind_phys), dimension(:,:,:), intent(inout) :: save_q
 
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
@@ -100,41 +101,41 @@
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_mg, imp_physics_fer_hires
       logical, intent(in) :: cal_pre, lssav, ldiag3d, qdiag3d, cplflx, cplchm
 
-      real(kind=kind_phys),                           intent(in)    :: dtf, frain, con_g
-      real(kind=kind_phys), dimension(im),            intent(in)    :: rain1, xlat, xlon, tsfc
-      real(kind=kind_phys), dimension(im),            intent(inout) :: ice, snow, graupel, rainc
-      real(kind=kind_phys), dimension(:),             intent(in)    :: rain0, ice0, snow0, graupel0 ! conditionally allocated in GFS_typedefs (imp_physics == GFDL or Thompson)
-      real(kind=kind_phys), dimension(im,nrcm),       intent(in)    :: rann
-      real(kind=kind_phys), dimension(im,levs),       intent(in)    :: gt0, prsl, save_t, save_qv, del
-      real(kind=kind_phys), dimension(im,levs+1),     intent(in)    :: prsi, phii
-      real(kind=kind_phys), dimension(im,levs,ntrac), intent(in)    :: gq0
+      real(kind=kind_phys),                    intent(in)    :: dtf, frain, con_g
+      real(kind=kind_phys), dimension(:),      intent(in)    :: rain1, xlat, xlon, tsfc
+      real(kind=kind_phys), dimension(:),      intent(inout) :: ice, snow, graupel, rainc
+      real(kind=kind_phys), dimension(:),      intent(in)    :: rain0, ice0, snow0, graupel0
+      real(kind=kind_phys), dimension(:,:),    intent(in)    :: rann
+      real(kind=kind_phys), dimension(:,:),    intent(in)    :: gt0, prsl, save_t, save_qv, del
+      real(kind=kind_phys), dimension(:,:),    intent(in)    :: prsi, phii
+      real(kind=kind_phys), dimension(:,:,:),  intent(in)    :: gq0
 
-      real(kind=kind_phys), dimension(im),      intent(in   ) :: sr
-      real(kind=kind_phys), dimension(im),      intent(inout) :: rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp,  &
-                                                                 srflag, cnvprcp, totprcp, totice, totsnw, totgrp, cnvprcpb, &
-                                                                 totprcpb, toticeb, totsnwb, totgrpb, pwat
-      real(kind=kind_phys), dimension(:),       intent(inout) :: rain_cpl, rainc_cpl, snow_cpl
+      real(kind=kind_phys), dimension(:),      intent(in   ) :: sr
+      real(kind=kind_phys), dimension(:),      intent(inout) :: rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp,  &
+                                                                srflag, cnvprcp, totprcp, totice, totsnw, totgrp, cnvprcpb, &
+                                                                totprcpb, toticeb, totsnwb, totgrpb, pwat
+      real(kind=kind_phys), dimension(:),      intent(inout) :: rain_cpl, rainc_cpl, snow_cpl
 
-      real(kind=kind_phys), dimension(:,:),     intent(inout) :: dt3dt ! only if ldiag3d
-      real(kind=kind_phys), dimension(:,:),     intent(inout) :: dq3dt ! only if ldiag3d and qdiag3d
+      real(kind=kind_phys), dimension(:,:),    intent(inout) :: dt3dt ! only if ldiag3d
+      real(kind=kind_phys), dimension(:,:),    intent(inout) :: dq3dt ! only if ldiag3d and qdiag3d
 
       ! Stochastic physics / surface perturbations
-      real(kind=kind_phys), dimension(:),       intent(inout) :: drain_cpl, dsnow_cpl
+      real(kind=kind_phys), dimension(:),      intent(inout) :: drain_cpl, dsnow_cpl
 
       ! Rainfall variables previous time step
       integer, intent(in) :: lsm, lsm_ruc, lsm_noahmp
-      real(kind=kind_phys), dimension(:),       intent(inout) :: raincprv
-      real(kind=kind_phys), dimension(:),       intent(inout) :: rainncprv
-      real(kind=kind_phys), dimension(:),       intent(inout) :: iceprv
-      real(kind=kind_phys), dimension(:),       intent(inout) :: snowprv
-      real(kind=kind_phys), dimension(:),       intent(inout) :: graupelprv
-      real(kind=kind_phys), dimension(:),       intent(inout) :: draincprv
-      real(kind=kind_phys), dimension(:),       intent(inout) :: drainncprv
-      real(kind=kind_phys), dimension(:),       intent(inout) :: diceprv
-      real(kind=kind_phys), dimension(:),       intent(inout) :: dsnowprv
-      real(kind=kind_phys), dimension(:),       intent(inout) :: dgraupelprv
+      real(kind=kind_phys), dimension(:),      intent(inout) :: raincprv
+      real(kind=kind_phys), dimension(:),      intent(inout) :: rainncprv
+      real(kind=kind_phys), dimension(:),      intent(inout) :: iceprv
+      real(kind=kind_phys), dimension(:),      intent(inout) :: snowprv
+      real(kind=kind_phys), dimension(:),      intent(inout) :: graupelprv
+      real(kind=kind_phys), dimension(:),      intent(inout) :: draincprv
+      real(kind=kind_phys), dimension(:),      intent(inout) :: drainncprv
+      real(kind=kind_phys), dimension(:),      intent(inout) :: diceprv
+      real(kind=kind_phys), dimension(:),      intent(inout) :: dsnowprv
+      real(kind=kind_phys), dimension(:),      intent(inout) :: dgraupelprv
 
-      real(kind=kind_phys),                     intent(in)    :: dtp
+      real(kind=kind_phys),                    intent(in)    :: dtp
 
       ! CCPP error handling
       character(len=*), intent(out) :: errmsg

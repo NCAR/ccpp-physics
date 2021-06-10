@@ -130,16 +130,16 @@
         logical,                intent(in) :: cplwav, cplwav2atm !GJF: this scheme has not been tested with these on
         logical,                intent(in) :: lcurr_sf           !GJF: this scheme has not been tested with this option turned on; the variables scurx and scury need to be input in order to use this
         logical,                intent(in) :: pert_Cd            !GJF: this scheme has not been tested with this option turned on; the variables ens_random_seed and ens_Cdamp need to be input in order to use this
-        logical, dimension(im), intent(in) :: flag_iter, wet, dry, icy
-        integer, dimension(im), intent(in) :: isltyp, vegtype
-        real(kind=kind_phys),                      intent(in) :: dt, sfenth
-        real(kind=kind_phys),                      intent(in) :: rd,grav,ep1,ep2
-        real(kind=kind_phys), dimension(im,nsoil), intent(in) :: smois
-        real(kind=kind_phys), dimension(im),       intent(in) :: psfc, prsl1,   &
+        logical, dimension(:),  intent(in) :: flag_iter, wet, dry, icy
+        integer, dimension(:),  intent(in) :: isltyp, vegtype
+        real(kind=kind_phys),                 intent(in) :: dt, sfenth
+        real(kind=kind_phys),                 intent(in) :: rd,grav,ep1,ep2
+        real(kind=kind_phys), dimension(:,:), intent(in) :: smois
+        real(kind=kind_phys), dimension(:),   intent(in) :: psfc, prsl1,        &
             q1, t1, u1, v1, wspd, u10, v10, gsw, glw, z1, shdmax, sigmaf, xlat, &
             xlon, tsurf_wat, tsurf_lnd, tsurf_ice
 
-        real(kind=kind_phys), intent(inout), dimension(im) :: tskin_wat,        &
+        real(kind=kind_phys), intent(inout), dimension(:) :: tskin_wat,         &
             tskin_lnd, tskin_ice, ustar_wat, ustar_lnd, ustar_ice,              &
             znt_wat, znt_lnd, znt_ice, cdm_wat, cdm_lnd, cdm_ice,               &
             stress_wat, stress_lnd, stress_ice, rib_wat, rib_lnd, rib_ice,      &
@@ -373,10 +373,10 @@
               ztmax(i) = ztmax(i)*100.0   !convert from m to cm
               z0max(i) = z0max(i)*100.0   !convert from m to cm
 
-              call mflux2 (fxh(i), fxe(i), fxmx(i), fxmy(i), cdm_lnd(i), rib_lnd(i), &
+              call mflux2 (fxh(i), fxe(i), fxmx(i), fxmy(i), cdm_lnd(i:i), rib_lnd(i:i), &
                 xxfh(i), ztmax(i), z0max(i), tstrc(i),   &
                 pspc(i), pkmax(i), wetc(i), slwdc(i), z1_cm(i), icoef_sf, iwavecpl, lcurr_sf, charn(i), msang(i), &
-                scurx(i), scury(i), pert_Cd, ens_random_seed, ens_Cdamp, upc(i), vpc(i), t1(i), q1(i), &
+                scurx(i), scury(i), pert_Cd, ens_random_seed, ens_Cdamp, upc(i), vpc(i), t1(i:i), q1(i:i), &
                 dt, wind10(i), xxfh2(i), ntsflg, sfenth, tzot(i), ep2, errmsg, &
                 errflg)
                 if (errflg /= 0) return
@@ -522,10 +522,10 @@
               ztmax(i) = ztmax(i)*100.0 !m to cm
               z0max(i) = z0max(i)*100.0 !m to cm
 
-              call mflux2 (fxh(i), fxe(i), fxmx(i), fxmy(i), cdm_ice(i), rib_ice(i), &
+              call mflux2 (fxh(i), fxe(i), fxmx(i), fxmy(i), cdm_ice(i:i), rib_ice(i:i), &
                 xxfh(i), ztmax(i), z0max(i), tstrc(i),   &
                 pspc(i), pkmax(i), wetc(i), slwdc(i), z1_cm(i), icoef_sf, iwavecpl, lcurr_sf, charn(i), msang(i), &
-                scurx(i), scury(i), pert_Cd, ens_random_seed, ens_Cdamp, upc(i), vpc(i), t1(i), q1(i), &
+                scurx(i), scury(i), pert_Cd, ens_random_seed, ens_Cdamp, upc(i), vpc(i), t1(i:i), q1(i:i), &
                 dt, wind10(i), xxfh2(i), ntsflg, sfenth, tzot(i), ep2, errmsg, &
                 errflg)
                 if (errflg /= 0) return
@@ -629,10 +629,10 @@
               !GJF: mflux2 expects negative roughness length for ocean points
               znt_wat(i) = -znt_wat(i)
 
-              call mflux2 (fxh(i), fxe(i), fxmx(i), fxmy(i), cdm_wat(i), rib_wat(i), &
-                xxfh(i), znt_wat(i), mznt(i), tstrc(i),   &
+              call mflux2 (fxh(i), fxe(i), fxmx(i), fxmy(i), cdm_wat(i:i), rib_wat(i:i), &
+                xxfh(i), znt_wat(i:i), mznt(i), tstrc(i),   &
                 pspc(i), pkmax(i), wetc(i), slwdc(i), z1_cm(i), icoef_sf, iwavecpl, lcurr_sf, charn(i), msang(i), &
-                scurx(i), scury(i), pert_Cd, ens_random_seed, ens_Cdamp, upc(i), vpc(i), t1(i), q1(i), &
+                scurx(i), scury(i), pert_Cd, ens_random_seed, ens_Cdamp, upc(i), vpc(i), t1(i:i), q1(i:i), &
                 dt, wind10(i), xxfh2(i), ntsflg, sfenth, tzot(i), ep2, errmsg, &
                 errflg)
                 if (errflg /= 0) return

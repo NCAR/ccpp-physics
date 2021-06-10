@@ -106,10 +106,13 @@ contains
 !! \section arg_table_cu_ntiedtke_init Argument Table
 !! \htmlinclude cu_ntiedtke_init.html
 !!
-      subroutine cu_ntiedtke_init(mpirank, mpiroot, errmsg, errflg)
+      subroutine cu_ntiedtke_init(imfshalcnv, imfshalcnv_ntiedtke, imfdeepcnv,  &
+                          imfdeepcnv_ntiedtke,mpirank, mpiroot, errmsg, errflg)
 
          implicit none
 
+         integer,                   intent(in) :: imfshalcnv, imfshalcnv_ntiedtke
+         integer,                   intent(in) :: imfdeepcnv, imfdeepcnv_ntiedtke           
          integer,                   intent(in)    :: mpirank
          integer,                   intent(in)    :: mpiroot
          character(len=*),          intent(  out) :: errmsg
@@ -127,6 +130,21 @@ contains
          end if
          ! *DH temporary
 
+         ! Consistency checks
+         if (imfshalcnv/=imfshalcnv_ntiedtke) then
+           write(errmsg,'(*(a))') 'Logic error: namelist choice of',       &
+        &    ' shallow convection is different from new Tiedtke scheme'
+           errflg = 1
+           return
+         end if
+
+         if (imfdeepcnv/=imfdeepcnv_ntiedtke) then
+           write(errmsg,'(*(a))') 'Logic error: namelist choice of',       &
+        &    ' deep convection is different from new Tiedtke scheme'
+           errflg = 1
+           return
+         end if
+         
       end subroutine cu_ntiedtke_init
 
       subroutine cu_ntiedtke_finalize()
@@ -154,16 +172,16 @@ contains
 ! in&out variables
       integer, intent(in)  ::  lq, km, ktrac
       real(kind=kind_phys),     intent(in ) :: dt
-      integer, dimension( lq ),   intent(in)  :: lmask
-      real(kind=kind_phys), dimension( lq ),     intent(in ) :: evap, hfx, dx
-      real(kind=kind_phys), dimension( lq , km ),     intent(inout) :: pu, pv, pt, pqv
-      real(kind=kind_phys), dimension( lq , km ),     intent(in )   :: tdi, qvdi, poz, prsl, pomg, pqvf, ptf
-      real(kind=kind_phys), dimension( lq , km+1 ),   intent(in )   :: pzz, prsi
-      real(kind=kind_phys), dimension( lq , km, ktrac ),    intent(inout ) ::  clw
+      integer, dimension( : ),   intent(in)  :: lmask
+      real(kind=kind_phys), dimension( : ),     intent(in ) :: evap, hfx, dx
+      real(kind=kind_phys), dimension( :, : ),     intent(inout) :: pu, pv, pt, pqv
+      real(kind=kind_phys), dimension( :, :),     intent(in )   :: tdi, qvdi, poz, prsl, pomg, pqvf, ptf
+      real(kind=kind_phys), dimension( :, : ),   intent(in )   :: pzz, prsi
+      real(kind=kind_phys), dimension( :, :, : ),    intent(inout ) ::  clw
 
-      integer, dimension( lq ),   intent(out)  :: kbot, ktop, kcnv
-      real(kind=kind_phys), dimension( lq ),   intent(out)  :: zprecc
-      real(kind=kind_phys), dimension (lq,km), intent(out)  :: ud_mf, dd_mf, dt_mf, cnvw, cnvc
+      integer, dimension( : ),   intent(out)  :: kbot, ktop, kcnv
+      real(kind=kind_phys), dimension( : ),   intent(out)  :: zprecc
+      real(kind=kind_phys), dimension (:, :), intent(out)  :: ud_mf, dd_mf, dt_mf, cnvw, cnvc
  
 ! error messages
       character(len=*), intent(out)    ::                                 errmsg

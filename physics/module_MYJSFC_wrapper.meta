@@ -5,6 +5,36 @@
 
 ########################################################################
 [ccpp-arg-table]
+  name = myjsfc_wrapper_init
+  type = scheme
+[do_myjsfc]
+  standard_name = do_myjsfc
+  long_name = flag to activate MYJ surface layer scheme
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+  
+########################################################################
+[ccpp-arg-table]
   name = myjsfc_wrapper_run
   type = scheme
 [restart]
@@ -208,7 +238,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = F
 [phy_myj_qsfc]
   standard_name = surface_specific_humidity_for_MYJ_schemes
@@ -397,7 +427,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [ffm]
   standard_name = Monin_Obukhov_similarity_function_for_momentum
@@ -748,7 +778,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [con_cp]
   standard_name = specific_heat_of_dry_air_at_constant_pressure

@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = GFS_surface_composites_pre
   type = scheme
-  dependencies = machine.F
+  dependencies = machine.F,sfc_diff.f
 
 ########################################################################
 [ccpp-arg-table]
@@ -15,9 +15,41 @@
   type = integer
   intent = in
   optional = F
+[flag_init]
+  standard_name = flag_for_first_time_step
+  long_name = flag signaling first time step for time integration loop
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [lkm]
   standard_name = flag_for_lake_surface_scheme
   long_name = flag for lake surface model
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[lsm]
+  standard_name = flag_for_land_surface_scheme
+  long_name = flag for land surface model
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[lsm_noahmp]
+  standard_name = flag_for_noahmp_land_surface_scheme
+  long_name = flag for NOAH MP land surface model
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[lsm_ruc]
+  standard_name = flag_for_ruc_land_surface_scheme
+  long_name = flag for RUC land surface model
   units = flag
   dimensions = ()
   type = integer
@@ -37,7 +69,7 @@
   units = flag
   dimensions = (horizontal_loop_extent)
   type = logical
-  intent = in
+  intent = inout
   optional = F
 [cplflx]
   standard_name = flag_for_flux_coupling
@@ -153,6 +185,33 @@
   standard_name = sea_ice_concentration
   long_name = ice fraction over open water
   units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[zorlo]
+  standard_name = surface_roughness_length_over_water
+  long_name = surface roughness length over water
+  units = cm
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[zorll]
+  standard_name = surface_roughness_length_over_land
+  long_name = surface roughness length over land
+  units = cm
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[zorli]
+  standard_name = surface_roughness_length_over_ice
+  long_name = surface roughness length over ice
+  units = cm
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
@@ -383,15 +442,6 @@
   kind = kind_phys
   intent = out
   optional = F
-[tsurf]
-  standard_name = surface_skin_temperature_after_iteration
-  long_name = surface skin temperature after iteration
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
 [tsurf_wat]
   standard_name = surface_skin_temperature_after_iteration_over_water
   long_name = surface skin temperature after iteration over water
@@ -498,6 +548,24 @@
   kind = kind_phys
   intent = inout
   optional = F
+[emis_lnd]
+  standard_name = surface_longwave_emissivity_over_land
+  long_name = surface lw emissivity in fraction over land
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[emis_ice]
+  standard_name = surface_longwave_emissivity_over_ice
+  long_name = surface lw emissivity in fraction over ice
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
 [qss]
   standard_name = surface_specific_humidity
   long_name = surface air saturation specific humidity
@@ -587,33 +655,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
-[zorlo]
-  standard_name = surface_roughness_length_over_water
-  long_name = surface roughness length over water
-  units = cm
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[zorll]
-  standard_name = surface_roughness_length_over_land
-  long_name = surface roughness length over land
-  units = cm
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[zorli]
-  standard_name = surface_roughness_length_over_ice
-  long_name = surface roughness length over ice
-  units = cm
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
   optional = F
 [errmsg]
   standard_name = ccpp_error_message
@@ -817,6 +858,24 @@
   type = integer
   intent = in
   optional = F
+[rd]
+  standard_name = gas_constant_dry_air
+  long_name = ideal gas constant for dry air
+  units = J kg-1 K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[rvrdm1]
+  standard_name = ratio_of_vapor_to_dry_air_gas_constants_minus_one
+  long_name = (rv/rd) - 1 (rv = ideal gas constant for water vapor)
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [cplflx]
   standard_name = flag_for_flux_coupling
   long_name = flag controlling cplflx collection (default off)
@@ -846,6 +905,14 @@
   long_name = flag for cice
   units = flag
   dimensions = (horizontal_loop_extent)
+  type = logical
+  intent = in
+  optional = F
+[thsfc_loc]
+  standard_name = flag_for_reference_pressure_theta
+  long_name = flag for reference pressure in theta calculation
+  units = flag
+  dimensions = ()
   type = logical
   intent = in
   optional = F
@@ -879,6 +946,42 @@
   units = flag
   dimensions = (horizontal_loop_extent)
   type = logical
+  intent = in
+  optional = F
+[wind]
+  standard_name = wind_speed_at_lowest_model_layer
+  long_name = wind speed at lowest model level
+  units = m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[t1]
+  standard_name = air_temperature_at_lowest_model_layer
+  long_name = surface layer mean temperature
+  units = K
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[q1]
+  standard_name = water_vapor_specific_humidity_at_lowest_model_layer
+  long_name = surface layer mean specific humidity
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[prsl1]
+  standard_name = air_pressure_at_lowest_model_layer
+  long_name = surface layer mean pressure
+  units = Pa
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
   intent = in
   optional = F
 [landfrac]
@@ -924,7 +1027,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = F
 [zorll]
   standard_name = surface_roughness_length_over_land
@@ -933,7 +1036,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = F
 [zorli]
   standard_name = surface_roughness_length_over_ice
@@ -942,7 +1045,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = F
 [cd]
   standard_name = surface_drag_coefficient_for_momentum_in_air
@@ -1267,15 +1370,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
-[tsurf]
-  standard_name = surface_skin_temperature_after_iteration
-  long_name = surface skin temperature after iteration
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
   optional = F
 [tsurf_wat]
   standard_name = surface_skin_temperature_after_iteration_over_water
@@ -1769,7 +1863,7 @@
   dimensions = (horizontal_loop_extent,ice_vertical_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = F
 [stc]
   standard_name = soil_temperature
@@ -1779,6 +1873,78 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
+[grav]
+  standard_name = gravitational_acceleration
+  long_name = gravitational acceleration
+  units = m s-2
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[prsik1]
+  standard_name = dimensionless_exner_function_at_lowest_model_interface
+  long_name = dimensionless Exner function at the ground surface
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[prslk1]
+  standard_name = dimensionless_exner_function_at_lowest_model_layer
+  long_name = dimensionless Exner function at the lowest model layer
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[prslki]
+  standard_name = ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer
+  long_name = Exner function ratio bt midlayer and interface at 1st layer
+  units = ratio
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[z1]
+  standard_name = height_above_ground_at_lowest_model_layer
+  long_name = height above ground at 1st model layer
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[ztmax_wat]
+  standard_name = bounded_surface_roughness_length_for_heat_over_water
+  long_name = bounded surface roughness length for heat over water
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[ztmax_lnd]
+  standard_name = bounded_surface_roughness_length_for_heat_over_land
+  long_name = bounded surface roughness length for heat over land
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[ztmax_ice]
+  standard_name = bounded_surface_roughness_length_for_heat_over_ice
+  long_name = bounded surface roughness length for heat over ice
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
   optional = F
 [errmsg]
   standard_name = ccpp_error_message

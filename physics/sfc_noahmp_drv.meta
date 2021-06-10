@@ -7,6 +7,22 @@
 [ccpp-arg-table]
   name = noahmpdrv_init
   type = scheme
+[lsm]
+  standard_name = flag_for_land_surface_scheme
+  long_name = flag for land surface model
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[lsm_noahmp]
+  standard_name = flag_for_noahmp_land_surface_scheme
+  long_name = flag for NOAH MP land surface model
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [me]
   standard_name = mpi_rank
   long_name = current MPI-rank
@@ -88,6 +104,14 @@
 [km]
   standard_name = soil_vertical_dimension
   long_name = soil vertical layer dimension
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[lsnowl]
+  standard_name = lower_bound_of_snow_vertical_dimension_for_land_surface_model
+  long_name = lower bound of of snow-related arrays for land surface model
   units = count
   dimensions = ()
   type = integer
@@ -320,7 +344,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
   optional = F
 [flag_iter]
   standard_name = flag_for_iteration
@@ -1010,8 +1034,8 @@
   intent = inout
   optional = F
 [albdvis]
-  standard_name = surface_albedo_direct_visible
-  long_name = direct surface albedo visible band
+  standard_name = surface_albedo_direct_visible_over_land
+  long_name = direct surface albedo visible band over land
   units = frac
   dimensions = (horizontal_loop_extent)
   type = real
@@ -1019,8 +1043,8 @@
   intent = out
   optional = F
 [albdnir]
-  standard_name = surface_albedo_direct_NIR
-  long_name = direct surface albedo NIR band
+  standard_name = surface_albedo_direct_NIR_over_land
+  long_name = direct surface albedo NIR band over land
   units = frac
   dimensions = (horizontal_loop_extent)
   type = real
@@ -1028,8 +1052,8 @@
   intent = out
   optional = F
 [albivis]
-  standard_name = surface_albedo_diffuse_visible
-  long_name = diffuse surface albedo visible band
+  standard_name = surface_albedo_diffuse_visible_over_land
+  long_name = diffuse surface albedo visible band over land
   units = frac
   dimensions = (horizontal_loop_extent)
   type = real
@@ -1037,8 +1061,8 @@
   intent = out
   optional = F
 [albinir]
-  standard_name = surface_albedo_diffuse_NIR
-  long_name = diffuse surface albedo NIR band
+  standard_name = surface_albedo_diffuse_NIR_over_land
+  long_name = diffuse surface albedo NIR band over land
   units = frac
   dimensions = (horizontal_loop_extent)
   type = real
@@ -1046,8 +1070,8 @@
   intent = out
   optional = F
 [emiss]
-  standard_name = surface_emissivity_lsm
-  long_name = surface emissivity from lsm
+  standard_name = surface_longwave_emissivity_over_land
+  long_name = surface lw emissivity in fraction over land
   units = frac
   dimensions = (horizontal_loop_extent)
   type = real

@@ -749,7 +749,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
   optional = F
 [errmsg]
   standard_name = ccpp_error_message

@@ -2,7 +2,7 @@
   name = GFS_rrtmgp_pre
   type = scheme
   dependencies = funcphys.f90,iounitdef.f,machine.F,module_bfmicrophysics.f,physcons.F90,physparam.f,radcons.f90,radiation_aerosols.f
-  dependencies = radiation_astronomy.f,radiation_clouds.f,module_mp_thompson.F90,radiation_gases.f,radiation_surface.f,rrtmgp_aux.F90,rrtmg_lw_cloud_optics.F90
+  dependencies = radiation_astronomy.f,radiation_clouds.f,module_mp_thompson.F90,radiation_gases.f,radiation_surface.f,radiation_tools.F90,rrtmg_lw_cloud_optics.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -86,7 +86,7 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F  
+  optional = F
 [i_o3]
   standard_name = index_for_ozone
   long_name = tracer index for ozone mixing ratio
@@ -237,7 +237,7 @@
   dimensions = ()
   type = real
   kind = kind_phys
-  intent = out
+  intent = in
   optional = F
 [raddt]
   standard_name = time_step_for_radiation
@@ -324,7 +324,7 @@
   standard_name = saturation_vapor_pressure
   long_name = saturation vapor pressure
   units = Pa
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -333,7 +333,7 @@
   standard_name = water_vapor_mixing_ratio
   long_name = water vaport mixing ratio
   units = kg/kg
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout

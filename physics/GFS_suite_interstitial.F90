@@ -59,9 +59,9 @@
 
       ! interface variables
       type(GFS_interstitial_type), intent(inout) :: Interstitial
-      type(GFS_control_type),      intent(in)    :: Model
-      character(len=*),            intent(out)   :: errmsg
-      integer,                     intent(out)   :: errflg
+      type(GFS_control_type),      intent(in   ) :: Model
+      character(len=*),            intent(  out) :: errmsg
+      integer,                     intent(  out) :: errflg
 
       errmsg = ''
       errflg = 0
@@ -94,19 +94,20 @@
       implicit none
 
       ! interface variables
-      integer,              intent(in) :: im, levs, ntrac
-      real(kind=kind_phys), intent(in) :: dtf, dtp, dxmin, dxinv
-      real(kind=kind_phys), intent(in), dimension(im) :: slmsk, area, pgr
+      integer,              intent(in )                   :: im, levs, ntrac
+      real(kind=kind_phys), intent(in )                   :: dtf, dtp, dxmin, dxinv
+      real(kind=kind_phys), intent(in ), dimension(:)     :: slmsk, area, pgr
 
-      integer,              intent(out), dimension(im) :: islmsk
-      real(kind=kind_phys), intent(out), dimension(im) :: work1, work2, psurf
-      real(kind=kind_phys), intent(out), dimension(im,levs) :: dudt, dvdt, dtdt
-      real(kind=kind_phys), intent(out), dimension(im,levs,ntrac) ::  dqdt
-      real(kind=kind_phys), parameter   :: zero = 0.0_kind_phys, one = 1.0_kind_phys
-      character(len=*),     intent(out) :: errmsg
-      integer,              intent(out) :: errflg
+      integer,              intent(out), dimension(:)     :: islmsk
+      real(kind=kind_phys), intent(out), dimension(:)     :: work1, work2, psurf
+      real(kind=kind_phys), intent(out), dimension(:,:)   :: dudt, dvdt, dtdt
+      real(kind=kind_phys), intent(out), dimension(:,:,:) :: dqdt
+      
+      character(len=*),     intent(out)                   :: errmsg
+      integer,              intent(out)                   :: errflg
 
       ! local variables
+      real(kind=kind_phys), parameter   :: zero = 0.0_kind_phys, one = 1.0_kind_phys
       integer :: i, k, n
 
       ! Initialize CCPP error handling variables
@@ -163,38 +164,38 @@
       do_shoc, frac_grid, imfshalcnv, dtf, xcosz, adjsfcdsw, adjsfcdlw, cice, pgr, ulwsfc_cice, lwhd, htrsw, htrlw, xmu, ctei_rm, &
       work1, work2, prsi, tgrs, prsl, qgrs_water_vapor, qgrs_cloud_water, cp, hvap, prslk, suntim, adjsfculw, adjsfculw_lnd,      &
       adjsfculw_ice, adjsfculw_wat, dlwsfc, ulwsfc, psmean, dt3dt_lw, dt3dt_sw, dt3dt_pbl, dt3dt_dcnv, dt3dt_scnv, dt3dt_mp,      &
-      ctei_rml, ctei_r, kinver, dry, icy, wet, frland, huge, use_LW_jacobian, errmsg, errflg)
+      ctei_rml, ctei_r, kinver, dry, icy, wet, frland, huge, use_LW_jacobian, htrlwu, errmsg, errflg)
 
       implicit none
 
       ! interface variables
-      integer,              intent(in   ) :: im, levs, imfshalcnv
-      logical,              intent(in   ) :: lssav, ldiag3d, lsidea, shal_cnv
-      logical,              intent(in   ) :: old_monin, mstrat, do_shoc, frac_grid, use_LW_jacobian
-      real(kind=kind_phys), intent(in   ) :: dtf, cp, hvap
+      integer,              intent(in   )                   :: im, levs, imfshalcnv
+      logical,              intent(in   )                   :: lssav, ldiag3d, lsidea, shal_cnv
+      logical,              intent(in   )                   :: old_monin, mstrat, do_shoc, frac_grid, use_LW_jacobian
+      real(kind=kind_phys), intent(in   )                   :: dtf, cp, hvap
 
-      logical,              intent(in   ), dimension(im) :: flag_cice
-      real(kind=kind_phys), intent(in   ), dimension(2) :: ctei_rm
-      real(kind=kind_phys), intent(in   ), dimension(im) :: xcosz, adjsfcdsw, adjsfcdlw, pgr, xmu, work1, work2
-      real(kind=kind_phys), intent(in   ), dimension(:)  :: ulwsfc_cice
-      real(kind=kind_phys), intent(in   ), dimension(im) :: cice
-      real(kind=kind_phys), intent(in   ), dimension(im, levs) :: htrsw, htrlw, tgrs, prsl, qgrs_water_vapor, qgrs_cloud_water, prslk
-      real(kind=kind_phys), intent(in   ), dimension(im, levs+1) :: prsi
-      real(kind=kind_phys), intent(in   ), dimension(im, levs, 6) :: lwhd
-      integer,              intent(inout), dimension(im) :: kinver
-      real(kind=kind_phys), intent(inout), dimension(im) :: suntim, dlwsfc, ulwsfc, psmean, ctei_rml, ctei_r
-      real(kind=kind_phys), intent(in   ), dimension(im) :: adjsfculw_lnd, adjsfculw_ice, adjsfculw_wat
-      real(kind=kind_phys), intent(inout), dimension(im) :: adjsfculw
+      logical,              intent(in   ), dimension(:)     :: flag_cice
+      real(kind=kind_phys), intent(in   ), dimension(:)     :: ctei_rm
+      real(kind=kind_phys), intent(in   ), dimension(:)     :: xcosz, adjsfcdsw, adjsfcdlw, pgr, xmu, work1, work2
+      real(kind=kind_phys), intent(in   ), dimension(:)     :: ulwsfc_cice
+      real(kind=kind_phys), intent(in   ), dimension(:)     :: cice
+      real(kind=kind_phys), intent(in   ), dimension(:,:)   :: htrsw, htrlw, htrlwu, tgrs, prsl, qgrs_water_vapor, qgrs_cloud_water, prslk
+      real(kind=kind_phys), intent(in   ), dimension(:,:)   :: prsi
+      real(kind=kind_phys), intent(in   ), dimension(:,:,:) :: lwhd
+      integer,              intent(inout), dimension(:)     :: kinver
+      real(kind=kind_phys), intent(inout), dimension(:)     :: suntim, dlwsfc, ulwsfc, psmean, ctei_rml, ctei_r
+      real(kind=kind_phys), intent(in   ), dimension(:)     :: adjsfculw_lnd, adjsfculw_ice, adjsfculw_wat
+      real(kind=kind_phys), intent(inout), dimension(:)     :: adjsfculw
 
       ! These arrays are only allocated if ldiag3d is .true.
-      real(kind=kind_phys), intent(inout), dimension(:,:) :: dt3dt_lw, dt3dt_sw, dt3dt_pbl, dt3dt_dcnv, dt3dt_scnv, dt3dt_mp
+      real(kind=kind_phys), intent(inout), dimension(:,:)   :: dt3dt_lw, dt3dt_sw, dt3dt_pbl, dt3dt_dcnv, dt3dt_scnv, dt3dt_mp
 
-      logical,              intent(in   ), dimension(im) :: dry, icy, wet
-      real(kind=kind_phys), intent(in   ), dimension(im) :: frland
-      real(kind=kind_phys), intent(in   ) :: huge
+      logical,              intent(in   ), dimension(:)     :: dry, icy, wet
+      real(kind=kind_phys), intent(in   ), dimension(:)     :: frland
+      real(kind=kind_phys), intent(in   )                   :: huge
 
-      character(len=*),     intent(out) :: errmsg
-      integer,              intent(out) :: errflg
+      character(len=*),     intent(  out)                   :: errmsg
+      integer,              intent(  out)                   :: errflg
 
       ! local variables
       real(kind=kind_phys), parameter :: czmin   = 0.0001_kind_phys      ! cos(89.994)
@@ -289,7 +290,11 @@
           else
             do k=1,levs
               do i=1,im
-                dt3dt_lw(i,k) = dt3dt_lw(i,k) + htrlw(i,k)*dtf
+                 if (use_LW_jacobian) then
+                    dt3dt_lw(i,k) = dt3dt_lw(i,k) + htrlwu(i,k)*dtf
+                 else
+                    dt3dt_lw(i,k) = dt3dt_lw(i,k) + htrlw(i,k)*dtf
+                 endif
                 dt3dt_sw(i,k) = dt3dt_sw(i,k) + htrsw(i,k)*dtf*xmu(i)
               enddo
             enddo
@@ -373,16 +378,16 @@
       implicit none
 
       ! interface variables
-      integer, intent(in) :: im
-      integer, intent(in) :: levs
-      integer, intent(in) :: ntrac
-      real(kind=kind_phys), dimension(im,levs),       intent(in)  :: tgrs, ugrs, vgrs
-      real(kind=kind_phys), dimension(im,levs,ntrac), intent(in)  :: qgrs
-      real(kind=kind_phys), dimension(im,levs),       intent(out) :: gt0, gu0, gv0
-      real(kind=kind_phys), dimension(im,levs,ntrac), intent(out) :: gq0
+      integer,              intent(in )                   :: im
+      integer,              intent(in )                   :: levs
+      integer,              intent(in )                   :: ntrac
+      real(kind=kind_phys), intent(in ), dimension(:,:)   :: tgrs, ugrs, vgrs
+      real(kind=kind_phys), intent(in ), dimension(:,:,:) :: qgrs
+      real(kind=kind_phys), intent(out), dimension(:,:)   :: gt0, gu0, gv0
+      real(kind=kind_phys), intent(out), dimension(:,:,:) :: gq0
 
-      character(len=*), intent(out) :: errmsg
-      integer,          intent(out) :: errflg
+      character(len=*),     intent(out)                   :: errmsg
+      integer,              intent(out)                   :: errflg
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -421,22 +426,22 @@
       implicit none
 
       ! Interface variables
-      integer,              intent(in) :: im
-      integer,              intent(in) :: levs
-      integer,              intent(in) :: ntrac
-      integer,              intent(in) :: imp_physics,imp_physics_fer_hires
-      integer,              intent(in) :: ntiw, nqrimef
-      real(kind=kind_phys), intent(in) :: dtp, epsq
+      integer,              intent(in )                   :: im
+      integer,              intent(in )                   :: levs
+      integer,              intent(in )                   :: ntrac
+      integer,              intent(in )                   :: imp_physics,imp_physics_fer_hires
+      integer,              intent(in )                   :: ntiw, nqrimef
+      real(kind=kind_phys), intent(in )                   :: dtp, epsq
 
-      real(kind=kind_phys), dimension(im,levs),       intent(in)  :: tgrs, ugrs, vgrs
-      real(kind=kind_phys), dimension(im,levs,ntrac), intent(in)  :: qgrs
-      real(kind=kind_phys), dimension(im,levs),       intent(in)  :: dudt, dvdt, dtdt
-      real(kind=kind_phys), dimension(im,levs,ntrac), intent(in)  :: dqdt
-      real(kind=kind_phys), dimension(im,levs),       intent(out) :: gt0, gu0, gv0
-      real(kind=kind_phys), dimension(im,levs,ntrac), intent(out) :: gq0
+      real(kind=kind_phys), intent(in ), dimension(:,:)   :: tgrs, ugrs, vgrs
+      real(kind=kind_phys), intent(in ), dimension(:,:,:) :: qgrs
+      real(kind=kind_phys), intent(in ), dimension(:,:)   :: dudt, dvdt, dtdt
+      real(kind=kind_phys), intent(in ), dimension(:,:,:) :: dqdt
+      real(kind=kind_phys), intent(out), dimension(:,:)   :: gt0, gu0, gv0
+      real(kind=kind_phys), intent(out), dimension(:,:,:) :: gq0
 
-      character(len=*), intent(out) :: errmsg
-      integer,          intent(out) :: errflg
+      character(len=*),     intent(out)                   :: errmsg
+      integer,              intent(out)                   :: errflg
 
       integer                       :: i, k
       ! Initialize CCPP error handling variables
@@ -494,28 +499,28 @@
       implicit none
 
       ! interface variables
-      integer,                                          intent(in) :: im, levs, nn, ntrac, ntcw, ntiw, ntclamt, ntrw,   &
-        ntsw, ntrnc, ntsnc, ntgl, ntgnc, imp_physics, imp_physics_mg, imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, &
+      integer,              intent(in   )                   :: im, levs, nn, ntrac, ntcw, ntiw, ntclamt, ntrw, ntsw,&
+        ntrnc, ntsnc, ntgl, ntgnc, imp_physics, imp_physics_mg, imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,   &
         imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,imp_physics_fer_hires, me
-      integer, dimension(im),                           intent(in) :: islmsk, kpbl, kinver
-      logical,                                          intent(in) :: cscnv, satmedmf, trans_trac, do_shoc, ltaerosol, ras
+      integer,              intent(in   ), dimension(:)     :: islmsk, kpbl, kinver
+      logical,              intent(in   )                   :: cscnv, satmedmf, trans_trac, do_shoc, ltaerosol, ras
 
-      real(kind=kind_phys),                             intent(in) :: rhcbot, rhcmax, rhcpbl, rhctop
-      real(kind=kind_phys), dimension(im),              intent(in) :: work1, work2
-      real(kind=kind_phys), dimension(im, levs),        intent(in) :: prsl, prslk
-      real(kind=kind_phys), dimension(im, levs+1),      intent(in) :: prsi
-      real(kind=kind_phys), dimension(im),              intent(in) :: xlon, xlat
-      real(kind=kind_phys), dimension(im, levs),        intent(in) :: gt0
-      real(kind=kind_phys), dimension(im, levs, ntrac), intent(in) :: gq0
+      real(kind=kind_phys), intent(in   )                   :: rhcbot, rhcmax, rhcpbl, rhctop
+      real(kind=kind_phys), intent(in   ), dimension(:)     :: work1, work2
+      real(kind=kind_phys), intent(in   ), dimension(:,:)   :: prsl, prslk
+      real(kind=kind_phys), intent(in   ), dimension(:,:)   :: prsi
+      real(kind=kind_phys), intent(in   ), dimension(:)     :: xlon, xlat
+      real(kind=kind_phys), intent(in   ), dimension(:,:)   :: gt0
+      real(kind=kind_phys), intent(in   ), dimension(:,:,:) :: gq0
 
-      real(kind=kind_phys), dimension(im, levs),      intent(inout) :: rhc, save_qc
+      real(kind=kind_phys), intent(inout), dimension(:,:)   :: rhc, save_qc
       ! save_qi is not allocated for Zhao-Carr MP
-      real(kind=kind_phys), dimension(:, :),          intent(inout) :: save_qi
-      real(kind=kind_phys), dimension(:, :),          intent(inout) :: save_tcp
-      real(kind=kind_phys), dimension(im, levs, nn),  intent(inout) :: clw
+      real(kind=kind_phys), intent(inout), dimension(:,:)   :: save_qi
+      real(kind=kind_phys), intent(inout), dimension(:,:)   :: save_tcp
+      real(kind=kind_phys), intent(inout), dimension(:,:,:) :: clw
 
-      character(len=*), intent(out) :: errmsg
-      integer,          intent(out) :: errflg
+      character(len=*),     intent(  out)                   :: errmsg
+      integer,              intent(  out)                   :: errflg
 
       ! local variables
       integer :: i,k,n,tracers,kk
@@ -660,33 +665,32 @@
 
       ! interface variables
 
-      integer,                                  intent(in) :: im, levs, tracers_total, ntrac, ntcw, ntiw, ntclamt, ntrw,  &
+      integer,              intent(in   )                   :: im, levs, tracers_total, ntrac, ntcw, ntiw, ntclamt, ntrw, &
         ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,           &
         imp_physics_zhao_carr, imp_physics_zhao_carr_pdf
 
-      logical,                                  intent(in) :: ltaerosol, cplchm, convert_dry_rho
+      logical,              intent(in   )                   :: ltaerosol, cplchm, convert_dry_rho
 
-      real(kind=kind_phys),                     intent(in) :: con_pi, dtf
-      real(kind=kind_phys), dimension(im,levs), intent(in) :: save_qc
+      real(kind=kind_phys), intent(in   )                   :: con_pi, dtf
+      real(kind=kind_phys), intent(in   ), dimension(:,:)   :: save_qc
       ! save_qi is not allocated for Zhao-Carr MP
-      real(kind=kind_phys), dimension(:, :),    intent(in) :: save_qi
+      real(kind=kind_phys), intent(in   ), dimension(:,:)   :: save_qi
 
-      real(kind=kind_phys), dimension(im,levs,ntrac), intent(inout) :: gq0
-      real(kind=kind_phys), dimension(im,levs,nn),    intent(inout) :: clw
-      real(kind=kind_phys), dimension(im,levs),       intent(in) :: prsl
-      real(kind=kind_phys),                           intent(in) :: con_rd, con_eps
-      real(kind=kind_phys), dimension(:,:),           intent(in) :: nwfa, save_tcp
-      real(kind=kind_phys), dimension(im,levs),       intent(in) :: spechum
+      real(kind=kind_phys), intent(inout), dimension(:,:,:) :: gq0
+      real(kind=kind_phys), intent(inout), dimension(:,:,:) :: clw
+      real(kind=kind_phys), intent(in   ), dimension(:,:)   :: prsl
+      real(kind=kind_phys), intent(in   )                   :: con_rd, con_eps
+      real(kind=kind_phys), intent(in   ), dimension(:,:)   :: nwfa, save_tcp
+      real(kind=kind_phys), intent(in   ), dimension(:,:)   :: spechum
 
       ! dqdti may not be allocated
-      real(kind=kind_phys), dimension(:,:),           intent(inout) :: dqdti
+      real(kind=kind_phys), intent(inout), dimension(:,:)   :: dqdti
 
-      real(kind=kind_phys), parameter :: zero = 0.0_kind_phys, one = 1.0_kind_phys
-
-      character(len=*), intent(out) :: errmsg
-      integer,          intent(out) :: errflg
+      character(len=*),     intent(  out)                   :: errmsg
+      integer,              intent(  out)                   :: errflg
 
       ! local variables
+      real(kind=kind_phys), parameter :: zero = 0.0_kind_phys, one = 1.0_kind_phys
       integer :: i,k,n,tracers
 
       real(kind=kind_phys) :: rho, orho
@@ -837,14 +841,14 @@
       implicit none
 
       ! interface variables
-      integer,                                          intent(in)  :: im, levs, ntrac, ntcw, ntiw, nn
+      integer,              intent(in )                   :: im, levs, ntrac, ntcw, ntiw, nn
 
-      real(kind=kind_phys), dimension(im, levs, ntrac), intent(in)  :: gq0
+      real(kind=kind_phys), intent(in ), dimension(:,:,:) :: gq0
 
-      real(kind=kind_phys), dimension(im, levs, nn),    intent(out) :: clw
+      real(kind=kind_phys), intent(out), dimension(:,:,:) :: clw
 
-      character(len=*), intent(out) :: errmsg
-      integer,          intent(out) :: errflg
+      character(len=*),     intent(out)                   :: errmsg
+      integer,              intent(out)                   :: errflg
 
       ! local variables
       integer :: i,k

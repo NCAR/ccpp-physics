@@ -32,7 +32,7 @@
      &       sinlat, stress,                                            &
      &       sfcemis, dlwflx, sfcnsw, rain, timestep, kdt, solhr,xcosz, &
      &       wind, flag_iter, flag_guess, nstf_name1, nstf_name4,       &
-     &       nstf_name5, lprnt, ipr,                                    &
+     &       nstf_name5, lprnt, ipr, thsfc_loc,                         &
      &       tskin, tsurf, xt, xs, xu, xv, xz, zm, xtts, xzts, dt_cool, &  ! --- input/output:
      &       z_c,   c_0,   c_d,   w_0, w_d, d_conv, ifd, qrain,         &
      &       qsurf, gflux, cmm, chh, evap, hflx, ep, errmsg, errflg     &  ! --- outputs:
@@ -50,7 +50,7 @@
 !            prsl1, prslki, wet, use_flake, xlon, sinlat, stress,       !
 !            sfcemis, dlwflx, sfcnsw, rain, timestep, kdt,solhr,xcosz,  !
 !            wind,  flag_iter, flag_guess, nstf_name1, nstf_name4,      !
-!            nstf_name5, lprnt, ipr,                                    !
+!            nstf_name5, lprnt, ipr, thsfc_loc,                         !
 !       input/outputs:                                                  !
 !            tskin, tsurf, xt, xs, xu, xv, xz, zm, xtts, xzts, dt_cool, !
 !            z_c, c_0,   c_d,   w_0, w_d, d_conv, ifd, qrain,           !
@@ -123,6 +123,7 @@
 !                nstf_name5 : zsea2 in mm                          1    !
 !     lprnt    - logical, control flag for check print out         1    !
 !     ipr      - integer, grid index for check print out           1    !
+!     thsfc_loc- logical, flag for reference pressure in theta     1    !
 !                                                                       !
 !  input/outputs:
 ! li added for oceanic components
@@ -188,26 +189,27 @@
      &       nstf_name5
       real (kind=kind_phys), intent(in) :: hvap, cp, hfus, jcal, eps,   &
      &       epsm1, rvrdm1, rd, rhw0, sbc, pi, tgice
-      real (kind=kind_phys), dimension(im), intent(in) :: ps, u1, v1,   &
+      real (kind=kind_phys), dimension(:), intent(in) :: ps, u1, v1,    &
      &       t1, q1, tref, cm, ch, prsl1, prslki, prsik1, prslk1,       &
      &       xlon,xcosz,                                                &
      &       sinlat, stress, sfcemis, dlwflx, sfcnsw, rain, wind
       real (kind=kind_phys), intent(in) :: timestep
       real (kind=kind_phys), intent(in) :: solhr
 
-      logical, dimension(im), intent(in) :: flag_iter, flag_guess, wet, &
-     &                                      use_flake 
+      logical, dimension(:), intent(in) :: flag_iter, flag_guess, wet,  &
+     &                                     use_flake 
 !    &,      icy
       logical,                intent(in) :: lprnt
+      logical,                intent(in) :: thsfc_loc
 
 !  ---  input/outputs:
 ! control variables of dtl system (5+2) and sl (2) and coefficients for d(tz)/d(ts) calculation
-      real (kind=kind_phys), dimension(im), intent(inout) :: tskin,     &
+      real (kind=kind_phys), dimension(:), intent(inout) :: tskin,      &
      &      tsurf, xt, xs, xu, xv, xz, zm, xtts, xzts, dt_cool,         &
      &      z_c, c_0, c_d, w_0, w_d, d_conv, ifd, qrain
 
 !  ---  outputs:
-      real (kind=kind_phys), dimension(im), intent(inout) ::            &
+      real (kind=kind_phys), dimension(:), intent(inout) ::             &
      &       qsurf, gflux, cmm, chh, evap, hflx, ep
 
       character(len=*), intent(out) :: errmsg
@@ -297,11 +299,13 @@ cc
           wndmag(i) = sqrt(u1(i)*u1(i) + v1(i)*v1(i))
 
           q0(i)     = max(q1(i), 1.0e-8_kp)
-#ifdef GSD_SURFACE_FLUXES_BUGFIX
-          theta1(i) = t1(i) / prslk1(i) ! potential temperature at the middle of lowest model layer
-#else
-          theta1(i) = t1(i) * prslki(i)
-#endif
+
+          if(thsfc_loc) then ! Use local potential temperature
+            theta1(i) = t1(i) * prslki(i)
+          else ! Use potential temperature referenced to 1000 hPa
+            theta1(i) = t1(i) / prslk1(i) ! potential temperature at the middle of lowest model layer
+          endif
+
           tv1(i)    = t1(i) * (one + rvrdm1*q0(i))
           rho_a(i)  = prsl1(i) / (rd*tv1(i))
           qss(i)    = fpvs(tsurf(i))                          ! pa
@@ -322,11 +326,12 @@ cc
 !           at previous time step
           evap(i)    = elocp * rch(i) * (qss(i) - q0(i))
           qsurf(i)   = qss(i)
-#ifdef GSD_SURFACE_FLUXES_BUGFIX
-          hflx(i)    = rch(i) * (tsurf(i)/prsik1(i) - theta1(i))
-#else
-          hflx(i)    = rch(i) * (tsurf(i) - theta1(i))
-#endif
+
+          if(thsfc_loc) then ! Use local potential temperature
+            hflx(i)    = rch(i) * (tsurf(i) - theta1(i))
+          else ! Use potential temperature referenced to 1000 hPa
+            hflx(i)    = rch(i) * (tsurf(i)/prsik1(i) - theta1(i))
+          endif
 
 !     if (lprnt .and. i == ipr) print *,' tskin=',tskin(i),' theta1=',
 !    & theta1(i),' hflx=',hflx(i),' t1=',t1(i),'prslki=',prslki(i)
@@ -621,11 +626,13 @@ cc
             qss(i)   = eps*qss(i) / (ps(i) + epsm1*qss(i))
             qsurf(i) = qss(i)
             evap(i)  = elocp*rch(i) * (qss(i) - q0(i))
-#ifdef GSD_SURFACE_FLUXES_BUGFIX
-            hflx(i)  = rch(i) * (tskin(i)/prsik1(i) - theta1(i))
-#else
-            hflx(i)  = rch(i) * (tskin(i) - theta1(i))
-#endif
+
+            if(thsfc_loc) then ! Use local potential temperature
+              hflx(i)  = rch(i) * (tskin(i) - theta1(i))
+            else ! Use potential temperature referenced to 1000 hPa
+              hflx(i)  = rch(i) * (tskin(i)/prsik1(i) - theta1(i))
+            endif
+
           endif
         enddo
       endif                   ! if ( nstf_name1 > 1 ) then
@@ -683,15 +690,15 @@ cc
 
 !  ---  inputs:
       integer, intent(in) :: im, nthreads
-      logical, dimension(im), intent(in) :: wet, use_flake
+      logical, dimension(:), intent(in) :: wet, use_flake
       real (kind=kind_phys), intent(in) :: tgice
-      real (kind=kind_phys), dimension(im), intent(in) ::
+      real (kind=kind_phys), dimension(:), intent(in) ::
      &      tsfc_wat, xt, xz, dt_cool, z_c, oceanfrac,
      &      tsfco
       logical, intent(in) :: cplflx
 
 !  ---  input/outputs:
-      real (kind=kind_phys), dimension(im), intent(inout) ::
+      real (kind=kind_phys), dimension(:), intent(inout) ::
      &    tsurf_wat, tseal, tref
 
 !  ---  outputs:
@@ -794,20 +801,19 @@ cc
 
 !  ---  inputs:
       integer, intent(in) :: im, kdt, nthreads
-      logical, dimension(im), intent(in) :: wet, icy, use_flake
+      logical, dimension(:), intent(in) :: wet, icy, use_flake
       real (kind=kind_phys), intent(in) :: rlapse, tgice
-      real (kind=kind_phys), dimension(im), intent(in) :: oro, oro_uf
+      real (kind=kind_phys), dimension(:), intent(in) :: oro, oro_uf
       integer, intent(in) :: nstf_name1, nstf_name4, nstf_name5
-      real (kind=kind_phys), dimension(im), intent(in) :: xt, xz,       &
+      real (kind=kind_phys), dimension(:), intent(in) :: xt, xz,        &
      &      dt_cool, z_c, tref, xlon
 
 !  ---  input/outputs:
-      real (kind=kind_phys), dimension(im), intent(inout) :: tsurf_wat, &
+      real (kind=kind_phys), dimension(:), intent(inout) :: tsurf_wat,  &
      &      tsfc_wat
 
 !  ---  outputs:
-      real (kind=kind_phys), dimension(size(xlon,1)), intent(out) ::    &
-     &      dtzm
+      real (kind=kind_phys), dimension(:), intent(out) :: dtzm
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg

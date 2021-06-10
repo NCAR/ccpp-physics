@@ -250,7 +250,7 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
   optional = T
 [re_ice]
   standard_name = effective_radius_of_stratiform_cloud_ice_particle_in_um
@@ -259,7 +259,7 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
   optional = T
 [re_snow]
   standard_name = effective_radius_of_stratiform_cloud_snow_particle_in_um
@@ -268,7 +268,7 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
   optional = T
 [mpicomm]
   standard_name = mpi_comm
@@ -545,6 +545,30 @@
   kind = kind_phys
   intent = in
   optional = F
+[first_time_step]
+  standard_name = flag_for_first_time_step
+  long_name = flag for first time step for time integration loop (cold/warmstart)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[istep]
+  standard_name = ccpp_loop_counter
+  long_name = loop counter for subcycling loops in CCPP
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[nsteps]
+  standard_name = ccpp_loop_extent
+  long_name = loop extent for subcycling loops in CCPP
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [prcp]
   standard_name = lwe_thickness_of_explicit_precipitation_amount
   long_name = explicit precipitation (rain, ice, snow, graupel) on physics timestep
@@ -608,7 +632,7 @@
   kind = kind_phys
   intent = out
   optional = F
-[reset]
+[reset_dBZ]
   standard_name = flag_for_resetting_radar_reflectivity_calculation
   long_name = flag for resetting radar reflectivity calculation
   units = flag
@@ -670,6 +694,14 @@
 [mpiroot]
   standard_name = mpi_root
   long_name = master MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[blkno]
+  standard_name = ccpp_block_number
+  long_name = number of block for explicit data blocking in CCPP
   units = index
   dimensions = ()
   type = integer

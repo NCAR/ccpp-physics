@@ -10,9 +10,13 @@
 
       contains
 
-      subroutine mynnedmf_wrapper_init (lheatstrg, errmsg, errflg)
+!> \section arg_table_mynnedmf_wrapper_init Argument Table
+!! \htmlinclude mynnedmf_wrapper_init.html
+!!
+      subroutine mynnedmf_wrapper_init (do_mynnedmf, lheatstrg, errmsg, errflg)
         implicit none
-
+        
+        logical,          intent(in)  :: do_mynnedmf
         logical,          intent(in)  :: lheatstrg
         character(len=*), intent(out) :: errmsg
         integer,          intent(out) :: errflg
@@ -20,6 +24,13 @@
         ! Initialize CCPP error handling variables
         errmsg = ''
         errflg = 0
+
+        ! Consistency checks
+        if (.not. do_mynnedmf) then
+          errmsg = 'Logic error: do_mynnedmf = .false.'
+          errflg = 1
+            return
+         end if
 
         if (lheatstrg) then
           errmsg = 'Logic error: lheatstrg not implemented for MYNN PBL'
@@ -236,13 +247,13 @@ SUBROUTINE mynnedmf_wrapper_run(        &
       REAL(kind=kind_phys) :: tem
 
 !MYNN-3D
-      real(kind=kind_phys), dimension(im,levs+1), intent(in) :: phii
-      real(kind=kind_phys), dimension(im,levs  ), intent(inout) ::       &
+      real(kind=kind_phys), dimension(:,:), intent(in) :: phii
+      real(kind=kind_phys), dimension(:,:), intent(inout) ::             &
      &        dtdt, dudt, dvdt,                                          &
      &        dqdt_water_vapor, dqdt_liquid_cloud, dqdt_ice_cloud,       &
      &        dqdt_cloud_droplet_num_conc, dqdt_ice_num_conc,            &
      &        dqdt_ozone, dqdt_water_aer_num_conc, dqdt_ice_aer_num_conc
-      real(kind=kind_phys), dimension(im,levs), intent(inout) ::         &
+      real(kind=kind_phys), dimension(:,:), intent(inout) ::             &
      &        qke, qke_adv, EL_PBL, Sh3D,                                &
      &        qc_bl, qi_bl, cldfra_bl
 !These 10 arrays are only allocated when bl_mynn_output > 0
@@ -250,7 +261,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &        edmf_a,edmf_w,edmf_qt,                                     &
      &        edmf_thl,edmf_ent,edmf_qc,                                 &
      &        sub_thl,sub_sqv,det_thl,det_sqv
-     real(kind=kind_phys), dimension(im,levs), intent(in) ::             &
+     real(kind=kind_phys), dimension(:,:), intent(in) ::                 &
     &        u,v,omega,t3d,                                              &
     &        exner,prsl,                                                 &
     &        qgrs_water_vapor,                                           &
@@ -261,13 +272,13 @@ SUBROUTINE mynnedmf_wrapper_run(        &
     &        qgrs_ozone,                                                 &
     &        qgrs_water_aer_num_conc,                                    &
     &        qgrs_ice_aer_num_conc
-     real(kind=kind_phys), dimension(im,levs), intent(out) ::            &
+     real(kind=kind_phys), dimension(:,:), intent(out) ::                &
     &        Tsq, Qsq, Cov, exch_h, exch_m
      real(kind=kind_phys), dimension(:,:), intent(inout) ::              &
     &        du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD,               &
     &        do3dt_PBL, dq3dt_PBL, dt3dt_PBL
-    real(kind=kind_phys), dimension(im), intent(in) :: xmu
-    real(kind=kind_phys), dimension(im, levs), intent(in) :: htrsw, htrlw
+    real(kind=kind_phys), dimension(:), intent(in) :: xmu
+    real(kind=kind_phys), dimension(:,:), intent(in) :: htrsw, htrlw
      !LOCAL
       real(kind=kind_phys), dimension(im,levs) ::                        &
      &        sqv,sqc,sqi,qnc,qni,ozone,qnwfa,qnifa,                     &
@@ -286,31 +297,30 @@ SUBROUTINE mynnedmf_wrapper_run(        &
       REAL(kind=kind_phys), DIMENSION( ndvel ) :: vd1
 
 !MYNN-2D
-      real(kind=kind_phys), dimension(im), intent(in) ::                 &
+      real(kind=kind_phys), dimension(:), intent(in) ::                  &
      &        dx,zorl,slmsk,tsurf,qsfc,ps,                               &
      &        hflx,qflx,ust,wspd,rb,recmol
 
-      real(kind=kind_phys), dimension(im), intent(in) ::                 &
+      real(kind=kind_phys), dimension(:), intent(in) ::                  &
      &        dusfc_cice,dvsfc_cice,dtsfc_cice,dqsfc_cice,               &
      &        stress_wat,hflx_wat,qflx_wat,                              &
      &        oceanfrac,fice
 
-      logical, dimension(im), intent(in) ::                              &
+      logical, dimension(:), intent(in) ::                               &
      &        wet, dry, icy
 
-      real(kind=kind_phys), dimension(im), intent(inout) ::              &
-     &        pblh
-      real(kind=kind_phys), dimension(im), intent(out) ::                &
+      real(kind=kind_phys), dimension(:), intent(inout) ::               &
+     &        pblh,dusfc_diag,dvsfc_diag,dtsfc_diag,dqsfc_diag
+      real(kind=kind_phys), dimension(:), intent(out) ::                 &
      &        ch,dtsfc1,dqsfc1,dusfc1,dvsfc1,                            &
-     &        dtsfci_diag,dqsfci_diag,dtsfc_diag,dqsfc_diag,             &
-     &        dusfci_diag,dvsfci_diag,dusfc_diag,dvsfc_diag,             &
+     &        dtsfci_diag,dqsfci_diag,dusfci_diag,dvsfci_diag,           &
      &        maxMF
-      integer, dimension(im), intent(inout) ::                           &
+      integer, dimension(:), intent(inout) ::                            &
      &        kpbl,nupdraft,ktop_plume
 
-      real(kind=kind_phys), dimension(:), intent(inout) ::              &
+      real(kind=kind_phys), dimension(:), intent(inout) ::               &
      &        dusfc_cpl,dvsfc_cpl,dtsfc_cpl,dqsfc_cpl
-      real(kind=kind_phys), dimension(:), intent(inout) ::              &
+      real(kind=kind_phys), dimension(:), intent(inout) ::               &
      &        dusfci_cpl,dvsfci_cpl,dtsfci_cpl,dqsfci_cpl
 
      !LOCAL

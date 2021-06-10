@@ -66,6 +66,8 @@
   units = none
   dimensions = (8)
   type = integer
+  intent = in
+  optional = F
 [lonr]
   standard_name = number_of_equatorial_longitude_points
   long_name = number of global points in x-dir (i) along the equator
@@ -236,6 +238,14 @@
   type = logical
   intent = in
   optional = F
+[gwd_opt]
+  standard_name = gwd_opt
+  long_name = flag to choose gwd scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -352,6 +362,8 @@
   dimensions = ()
   type = real
   kind = kind_phys
+  intent = in
+  optional = F
 [kdt]
   standard_name = index_of_time_step
   long_name = current forecast iteration
@@ -713,6 +725,8 @@
   units = none
   dimensions = (8)
   type = integer
+  intent = in
+  optional = F
 [xlat]
   standard_name = latitude
   long_name = grid latitude

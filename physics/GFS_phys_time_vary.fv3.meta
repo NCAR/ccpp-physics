@@ -755,45 +755,90 @@
   kind = kind_phys
   intent = inout
   optional = F
-[albdvis]
-  standard_name = surface_albedo_direct_visible
-  long_name = direct surface albedo visible band
+[albdvis_lnd]
+  standard_name = surface_albedo_direct_visible_over_land
+  long_name = direct surface albedo visible band over land
   units = frac
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
-[albdnir]
-  standard_name = surface_albedo_direct_NIR
-  long_name = direct surface albedo NIR band
+[albdnir_lnd]
+  standard_name = surface_albedo_direct_NIR_over_land
+  long_name = direct surface albedo NIR band over land
   units = frac
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
-[albivis]
-  standard_name = surface_albedo_diffuse_visible
-  long_name = diffuse surface albedo visible band
+[albivis_lnd]
+  standard_name = surface_albedo_diffuse_visible_over_land
+  long_name = diffuse surface albedo visible band over land
   units = frac
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
-[albinir]
-  standard_name = surface_albedo_diffuse_NIR
-  long_name = diffuse surface albedo NIR band
+[albinir_lnd]
+  standard_name = surface_albedo_diffuse_NIR_over_land
+  long_name = diffuse surface albedo NIR band over land
   units = frac
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
-[emiss]
-  standard_name = surface_emissivity_lsm
-  long_name = surface emissivity from lsm
+[albdvis_ice]
+  standard_name = surface_albedo_direct_visible_over_ice
+  long_name = direct surface albedo visible band over ice
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[albdnir_ice]
+  standard_name = surface_albedo_direct_NIR_over_ice
+  long_name = direct surface albedo NIR band over ice
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[albivis_ice]
+  standard_name = surface_albedo_diffuse_visible_over_ice
+  long_name = diffuse surface albedo visible band over ice
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[albinir_ice]
+  standard_name = surface_albedo_diffuse_NIR_over_ice
+  long_name = diffuse surface albedo NIR band over ice
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[emiss_lnd]
+  standard_name = surface_longwave_emissivity_over_land
+  long_name = surface lw emissivity in fraction over land
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[emiss_ice]
+  standard_name = surface_longwave_emissivity_over_ice
+  long_name = surface lw emissivity in fraction over ice
   units = frac
   dimensions = (horizontal_dimension)
   type = real
@@ -933,6 +978,14 @@
   dimensions = ()
   type = real
   kind = kind_phys
+  intent = in
+  optional = F
+[flag_restart]
+  standard_name = flag_for_restart
+  long_name = flag for restart (warmstart) or coldstart
+  units = flag
+  dimensions = ()
+  type = logical
   intent = in
   optional = F
 [nthrds]
@@ -1672,7 +1725,6 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  active = (flag_for_nsstm_run > 0)
   intent = inout
   optional = F
 [tsfc]
