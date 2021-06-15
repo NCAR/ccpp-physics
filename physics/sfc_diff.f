@@ -174,6 +174,8 @@
 
 !       write(0,*)'in sfc_diff, sfc_z0_type=',sfc_z0_type
 
+      snwdph_wat = zero
+
       do i=1,im
         if(flag_iter(i)) then
 
@@ -356,7 +358,6 @@
               stop
             endif
 !
-            snwdph_wat = zero
             call stability
 !  ---  inputs:
      &       (z1(i), snwdph_wat, thv1, wind(i),

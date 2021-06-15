@@ -75,7 +75,7 @@
               isot, ivegsrc, nlunit, sncovr, sncovr_ice, lsm, lsm_noahmp, lsm_ruc, min_seaice,     &
               fice, landfrac, vtype, weasd, lsoil, zs, dzs, lsnow_lsm_lbound, lsnow_lsm_ubound,    &
               tvxy, tgxy, tahxy, canicexy, canliqxy, eahxy, cmxy, chxy, fwetxy, sneqvoxy, alboldxy,&
-              qsnowxy, wslakexy, albdvis_lnd, albdnir_lnd, albivis_lnd, albinir_lnd, albdvis_ice,  & 
+              qsnowxy, wslakexy, albdvis_lnd, albdnir_lnd, albivis_lnd, albinir_lnd, albdvis_ice,  &
               albdnir_ice, albivis_ice, albinir_ice, emiss_lnd, emiss_ice, taussxy, waxy, wtxy,    &
               zwtxy, xlaixy, xsaixy, lfmassxy, stmassxy, rtmassxy, woodxy, stblcpxy, fastcpxy,     &
               smcwtdxy, deeprechxy, rechxy, snowxy, snicexy, snliqxy, tsnoxy , smoiseq, zsnsoxy,   &
@@ -897,13 +897,13 @@
 !> - Call gcycle() to repopulate specific time-varying surface properties for AMIP/forecast runs
          if (nscyc >  0) then
            if (mod(kdt,nscyc) == 1) THEN
-             call gcycle (me, nthrds, nx, ny, isc, jsc, nsst, tile_num, nlunit,       &
-                 input_nml_file, lsoil, lsoil_lsm, kice, idate, ialb, isot, ivegsrc,  &
-                 use_ufo, nst_anl, fhcyc, phour, landfrac, lakefrac, min_seaice, min_lakeice,   &
-                 frac_grid, smc, slc, stc, smois, sh2o, tslb, tiice, tg3, tref, tsfc, &
-                 tsfco, tisfc, hice, fice, facsf, facwf, alvsf, alvwf, alnsf, alnwf,  &
-                 zorli, zorll, zorlo, weasd, slope, snoalb, canopy, vfrac, vtype,     &
-                 stype, shdmin, shdmax, snowd, cv, cvb, cvt, oro, oro_uf,             &
+             call gcycle (me, nthrds, nx, ny, isc, jsc, nsst, tile_num, nlunit,              &
+                 input_nml_file, lsoil, lsoil_lsm, kice, idate, ialb, isot, ivegsrc,         &
+                 use_ufo, nst_anl, fhcyc, phour, landfrac, lakefrac, min_seaice, min_lakeice,&
+                 frac_grid, smc, slc, stc, smois, sh2o, tslb, tiice, tg3, tref, tsfc,        &
+                 tsfco, tisfc, hice, fice, facsf, facwf, alvsf, alvwf, alnsf, alnwf,         &
+                 zorli, zorll, zorlo, weasd, slope, snoalb, canopy, vfrac, vtype,            &
+                 stype, shdmin, shdmax, snowd, cv, cvb, cvt, oro, oro_uf,                    &
                  xlat_d, xlon_d, slmsk, imap, jmap)
            endif
          endif

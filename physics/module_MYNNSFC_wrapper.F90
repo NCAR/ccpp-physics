@@ -233,13 +233,13 @@ SUBROUTINE mynnsfc_wrapper_run(            &
           else
             xland(i)=2.0
           endif
-          qgh(i)=0.0
-          mavail(i)=1.0
-          !snowh(i)=snowd(i)*800. !mm -> m
-          !znt_lnd(i)=znt_lnd(i)*0.01  !cm -> m
-          !znt_wat(i)=znt_wat(i)*0.01  !cm -> m
-          !znt_ice(i)=znt_ice(i)*0.01  !cm -> m
-          cpm(i)=cp
+          qgh(i)       = 0.0
+          mavail(i)    = 1.0
+          !snowh(i)    = snowd(i)*800. !mm -> m
+          !znt_lnd(i)  = znt_lnd(i)*0.01  !cm -> m
+          !znt_wat(i)  = znt_wat(i)*0.01  !cm -> m
+          !znt_ice(i)  = znt_ice(i)*0.01  !cm -> m
+          cpm(i)       = cp
           snowh_wat(i) = 0.0
       enddo
 

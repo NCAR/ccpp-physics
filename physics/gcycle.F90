@@ -127,7 +127,6 @@ contains
           if (landfrac(ix) > -1.0e-8_kind_phys) then
             slmskl(ix) = ceiling(landfrac(ix)-1.0e-8_kind_phys)
             slmskw(ix) = floor(landfrac(ix)+1.0e-8_kind_phys)
-!           slmskw(ix) = slmskl(ix)
           else
             if (nint(slmsk(ix)) == 1) then
               slmskl(ix) = 1.0_kind_phys

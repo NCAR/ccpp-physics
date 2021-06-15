@@ -646,6 +646,14 @@
   kind = kind_phys
   intent = in
   optional = F
+[kdt]
+  standard_name = index_of_time_step
+  long_name = current forecast iteration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

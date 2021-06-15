@@ -29,21 +29,21 @@ contains
 !!
    subroutine GFS_surface_composites_pre_run (im, flag_init, lkm, lsm, lsm_noahmp, lsm_ruc, frac_grid,                    &
                                  flag_cice, cplflx, cplwav2atm, landfrac, lakefrac, lakedepth, oceanfrac, frland,         &
-                                 dry, icy, lake, use_flake, ocean, wet, hice, cice, zorlo, zorll, zorli,                        &
+                                 dry, icy, lake, use_flake, ocean, wet, hice, cice, zorlo, zorll, zorli,                  &
                                  snowd,            snowd_lnd, snowd_ice, tprcp, tprcp_wat,                                &
                                  tprcp_lnd, tprcp_ice, uustar, uustar_wat, uustar_lnd, uustar_ice,                        &
                                  weasd,            weasd_lnd, weasd_ice, ep1d_ice, tsfc, tsfco, tsfcl, tsfc_wat,          &
                                  tsfc_lnd, tsfc_ice, tisfc, tice, tsurf_wat, tsurf_lnd, tsurf_ice,                        &
                                  gflx_ice, tgice, islmsk, islmsk_cice, slmsk, semis_rad, semis_wat, semis_lnd, semis_ice, &
                                  emis_lnd, emis_ice, qss, qss_wat, qss_lnd, qss_ice, hflx, hflx_wat, hflx_lnd, hflx_ice,  &
-                                 min_lakeice, min_seaice, errmsg, errflg)
+                                 min_lakeice, min_seaice, kdt, errmsg, errflg)
 
       implicit none
 
       ! Interface variables
-      integer,                            intent(in   )  :: im, lkm
-      integer,                            intent(in   )  :: lsm, lsm_noahmp, lsm_ruc
-      logical,                            intent(in   )  :: flag_init, frac_grid, cplflx, cplwav2atm
+      integer,                             intent(in   ) :: im, lkm, kdt
+      integer,                             intent(in   ) :: lsm, lsm_noahmp, lsm_ruc
+      logical,                             intent(in   ) :: flag_init, frac_grid, cplflx, cplwav2atm
       logical, dimension(:),              intent(inout)  :: flag_cice
       logical,              dimension(:), intent(inout)  :: dry, icy, lake, use_flake, ocean, wet
       real(kind=kind_phys), dimension(:), intent(in   )  :: landfrac, lakefrac, lakedepth, oceanfrac
@@ -67,6 +67,8 @@ contains
       real(kind=kind_phys), dimension(:), intent(inout)  :: zorlo, zorll, zorli
       !
       real(kind=kind_phys), parameter :: timin = 173.0_kind_phys  ! minimum temperature allowed for snow/ice
+
+      real(kind=kind_phys) :: tem
 
       ! CCPP error handling
       character(len=*), intent(out) :: errmsg
@@ -102,7 +104,7 @@ contains
                 flag_cice(i)   = .false.
                 islmsk_cice(i) = 0
                 islmsk(i)      = 0
-                snowd_ice(i)   = zero
+                icy(i)         = .false.
               endif
               if (cice(i) < one) then
                 wet(i) = .true. ! some open ocean
@@ -117,7 +119,7 @@ contains
                 cice(i)   = zero
                 hice(i)   = zero
                 islmsk(i) = 0
-                snowd_ice(i)   = zero
+                icy(i)    = .false.
               endif
               islmsk_cice(i) = islmsk(i)
               flag_cice(i)   = .false.
@@ -131,15 +133,9 @@ contains
             hice(i)        = zero
             islmsk_cice(i) = 1
             islmsk(i)      = 1
-            snowd_ice(i)   = zero
-          endif
-        enddo
-
-        do i=1,im
-          if (dry(i)) then
-            snowd_lnd(i) = (snowd(i) - snowd_ice(i)*cice(i)*(one-frland(i))) / frland(i)
-          else
-            snowd_lnd(i) = zero
+            wet(i)         = .false.
+            icy(i)         = .false.
+            flag_cice(i)   = .false.
           endif
         enddo
 
@@ -147,17 +143,14 @@ contains
 
         do i = 1, IM
           if (islmsk(i) == 1) then
-!           tsfcl(i)     = tsfc(i)
-            dry(i)       = .true.
-            frland(i)    = one
-            cice(i)      = zero
-            hice(i)      = zero
-            snowd_lnd(i) = snowd(i)
-            snowd_ice(i) = zero
+!           tsfcl(i)  = tsfc(i)
+            dry(i)    = .true.
+            frland(i) = one
+            cice(i)   = zero
+            hice(i)   = zero
+            icy(i)    = .false.
           else
             frland(i)    = zero
-            snowd_lnd(i) = zero
-            snowd_ice(i) = snowd(i)
             if (oceanfrac(i) > zero) then
               if (cice(i) >= min_seaice) then
                 icy(i)   = .true.
@@ -176,7 +169,7 @@ contains
                 flag_cice(i)   = .false.
                 islmsk(i)      = 0
                 islmsk_cice(i) = 0
-                snowd_ice(i)   = zero
+                icy(i)         = .false.
               endif
               if (cice(i) < one) then
                 wet(i) = .true. ! some open ocean
@@ -188,10 +181,10 @@ contains
                 tisfc(i) = max(timin, min(tisfc(i), tgice))
                 islmsk(i) = 2
               else
-                cice(i)      = zero
-                hice(i)      = zero
-                islmsk(i)    = 0
-                snowd_ice(i) = zero
+                cice(i)   = zero
+                hice(i)   = zero
+                islmsk(i) = 0
+                icy(i)    = .false.
               endif
               islmsk_cice(i) = islmsk(i)
               flag_cice(i)   = .false.
@@ -243,7 +236,6 @@ contains
            weasd_ice(i) = weasd(i)
             tsfc_ice(i) = tisfc(i)
            tsurf_ice(i) = tisfc(i)
-!          snowd_ice(i) = snowd(i) / cice(i)
             ep1d_ice(i) = zero
             gflx_ice(i) = zero
           if (iemsflg == 2 .and. .not. flag_init .and. lsm == lsm_ruc) then
@@ -275,6 +267,43 @@ contains
         endif
       enddo
 !
+      if (.not. cplflx .or. kdt == 1) then
+        if (frac_grid) then
+          do i=1,im
+            if (dry(i)) then
+              if (icy(i)) then
+                tem = one / (cice(i)*(one-frland(i)))
+                snowd_ice(i) = max(zero, (snowd(i) - snowd_lnd(i)*frland(i)) * tem)
+                weasd_ice(i) = max(zero, (weasd(i) - weasd_lnd(i)*frland(i)) * tem)
+              endif
+            elseif (icy(i)) then
+              tem = one / cice(i)
+              snowd_lnd(i) = zero
+              snowd_ice(i) = snowd(i) * tem
+              weasd_lnd(i) = zero
+              weasd_ice(i) = weasd(i) * tem
+            endif
+          enddo
+        else
+          do i=1,im
+            if (dry(i)) then
+              snowd_lnd(i) = snowd(i)
+              weasd_lnd(i) = weasd(i)
+              snowd_ice(i) = zero
+              weasd_ice(i) = zero
+            elseif (icy(i)) then
+              snowd_lnd(i) = zero
+              weasd_lnd(i) = zero
+              tem = one / cice(i)
+              snowd_ice(i) = snowd(i) * tem
+              weasd_ice(i) = weasd(i) * tem
+            endif
+          enddo
+        endif
+      endif
+
+!     write(0,*)' minmax of ice snow=',minval(snowd_ice),maxval(snowd_ice)
+
      ! Assign sea ice temperature to interstitial variable
       do i = 1, im
         tice(i) = tisfc(i)
@@ -462,11 +491,18 @@ contains
           snowd(i)  = txl*snowd_lnd(i)  + txi*snowd_ice(i)
          !tprcp(i)  = txl*tprcp_lnd(i)  + txi*tprcp_ice(i)  + txo*tprcp_wat(i)
 
-          if (.not. flag_cice(i) .and. islmsk(i) == 2) then
-            evap(i) = txl*evap_lnd(i)   + wfrac*evap_ice(i)
-            hflx(i) = txl*hflx_lnd(i)   + wfrac*hflx_ice(i)
-            qss(i)  = txl*qss_lnd(i)    + wfrac*qss_ice(i)
-            gflx(i) = txl*gflx_lnd(i)   + wfrac*gflx_ice(i)
+          if (.not. flag_cice(i)) then
+            if (islmsk(i) == 2) then
+              evap(i) = txl*evap_lnd(i)   + wfrac*evap_ice(i)
+              hflx(i) = txl*hflx_lnd(i)   + wfrac*hflx_ice(i)
+              qss(i)  = txl*qss_lnd(i)    + wfrac*qss_ice(i)
+              gflx(i) = txl*gflx_lnd(i)   + wfrac*gflx_ice(i)
+            else
+              evap(i) = txl*evap_lnd(i)   + wfrac*evap_wat(i)
+              hflx(i) = txl*hflx_lnd(i)   + wfrac*hflx_wat(i)
+              qss(i)  = txl*qss_lnd(i)    + wfrac*qss_wat(i)
+              gflx(i) = txl*gflx_lnd(i)   + wfrac*gflx_wat(i)
+            endif
           else
             evap(i) = txl*evap_lnd(i)   + txi*evap_ice(i)   + txo*evap_wat(i)
             hflx(i) = txl*hflx_lnd(i)   + txi*hflx_ice(i)   + txo*hflx_wat(i)
@@ -665,8 +701,8 @@ contains
             chh(i)    = chh_ice(i)
             gflx(i)   = gflx_ice(i)
             ep1d(i)   = ep1d_ice(i)
-            weasd(i)  = weasd_ice(i)
-            snowd(i)  = snowd_ice(i)
+            weasd(i)  = weasd_ice(i) * cice(i)
+            snowd(i)  = snowd_ice(i) * cice(i)
             qss(i)    = qss_ice(i)
             tsfc(i)   = tsfc_ice(i)
             evap(i)   = evap_ice(i)
@@ -684,15 +720,10 @@ contains
                 stress(i) = txi * stress_ice(i) + txo * stress_wat(i)
                 qss(i)    = txi * qss_ice(i)    + txo * qss_wat(i)
                 ep1d(i)   = txi * ep1d_ice(i)   + txo * ep1d_wat(i)
-                zorl(i)   = txi * zorli(i)      + txo * zorlo(i)
-!               zorl(i)   = txi * log(zorli(i)) + txo * log(zorlo(i))
-!               zorl(i)   = exp(zorl(i))
-                snowd(i)  = txi * snowd_ice(i)
+                zorl(i)   = exp(txi*log(zorli(i)) + txo*log(zorlo(i)))
               endif
             elseif (wet(i)) then  ! return updated lake ice thickness & concentration to global array
-              zorl(i)  = cice(i)*zorli(i) + (one-cice(i))*zorlo(i)
-!             zorl(i)  = cice(i)*log(zorli(i)) + (one-cice(i))*log(zorlo(i))
-!             zorl(i)  = exp(zorl(i))
+              zorl(i)  = exp(cice(i)*log(zorli(i)) + (one-cice(i))*log(zorlo(i)))
             endif
 !
             if (wet(i)) then

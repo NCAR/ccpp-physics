@@ -63,7 +63,7 @@ MODULE module_mp_thompson
 
       USE module_mp_radar
 
-#if !defined(SION) && defined(MPI)
+#ifdef MPI
       use mpi
 #endif
 
@@ -421,8 +421,7 @@ MODULE module_mp_thompson
 !..MPI communicator
       INTEGER:: mpi_communicator
 
-!..If SIONlib isn't used, write Thompson tables with master MPI task
-!.. after computing them in thompson_init
+!..Write tables with master MPI task after computing them in thompson_init
       LOGICAL:: thompson_table_writer
 
 !+---+
@@ -453,12 +452,7 @@ MODULE module_mp_thompson
       INTEGER:: i, j, k, l, m, n
       LOGICAL:: micro_init
       real :: stime, etime
-#ifdef SION
-      INTEGER :: ierr
-      LOGICAL :: precomputed_tables
-#else
       LOGICAL, PARAMETER :: precomputed_tables = .FALSE.
-#endif
 
 ! Set module variable is_aerosol_aware
       is_aerosol_aware = is_aerosol_aware_in
@@ -766,18 +760,7 @@ MODULE module_mp_thompson
 
       ! Assign mpicomm to module variable
       mpi_communicator = mpicomm
-#ifdef SION
-      call cpu_time(stime)
-      call readwrite_tables(thomp_table_file, "read", mpicomm, mpirank, mpiroot, ierr)
-      call cpu_time(etime)
-      if (ierr==0) then
-         precomputed_tables = .true.
-         if (mpirank==mpiroot) print '("Reading and broadcasting precomputed Thompson tables took ",f10.3," seconds.")', etime-stime
-      else
-         precomputed_tables = .false.
-         if (mpirank==mpiroot) write(0,*) "An error occurred reading Thompson tables from disk, recalculate"
-      end if
-#endif
+
       ! Standard tables are only written by master MPI task;
       ! (physics init cannot be called by multiple threads,
       !  hence no need to test for a specific thread number)
@@ -899,9 +882,6 @@ MODULE module_mp_thompson
 !>  - Call table_ccnact() to read a static file containing CCN activation of aerosols. The
 !! data were created from a parcel model by Feingold & Heymsfield with
 !! further changes by Eidhammer and Kriedenweis
-      ! This computation is cheap compared to the others below, and
-      ! doing it always ensures that the correct data is in the SIONlib
-      ! file containing the precomputed tables *DH
       if (mpirank==mpiroot) write(0,*) '  calling table_ccnAct routine'
       call table_ccnAct(errmsg,errflg)
       if (.not. errflg==0) return
@@ -971,17 +951,6 @@ MODULE module_mp_thompson
       call cpu_time(etime)
       if (mpirank==mpiroot) print '("Calculating Thompson tables part 2 took ",f10.3," seconds.")', etime-stime
 
-#ifdef SION
-      call cpu_time(stime)
-      call readwrite_tables(thomp_table_file, "write", mpicomm, mpirank, mpiroot, ierr)
-      if (ierr/=0) then
-          write(0,*) "An error occurred writing Thompson tables to disk"
-          stop 1
-      end if
-      call cpu_time(etime)
-      if (mpirank==mpiroot) print '("Writing Thompson tables took ",f10.3," seconds.")', etime-stime
-#endif
-
       end if precomputed_tables_2
 
       endif if_not_iiwarm
@@ -1018,7 +987,8 @@ MODULE module_mp_thompson
                               ids,ide, jds,jde, kds,kde,              &  ! domain dims
                               ims,ime, jms,jme, kms,kme,              &  ! memory dims
                               its,ite, jts,jte, kts,kte,              &  ! tile dims
-                              errmsg, errflg, reset)
+                              reset_dBZ, istep, nsteps,               &
+                              errmsg, errflg)
 
       implicit none
 
@@ -1058,9 +1028,11 @@ MODULE module_mp_thompson
                           refl_10cm
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(INOUT):: &
                           vt_dbz_wt
-      LOGICAL, OPTIONAL, INTENT(IN) :: first_time_step
+      LOGICAL, INTENT(IN) :: first_time_step
       REAL, INTENT(IN):: dt_in
-      LOGICAL, INTENT (IN) :: reset
+      ! To support subcycling: current step and maximum number of steps
+      INTEGER, INTENT (IN) :: istep, nsteps
+      LOGICAL, INTENT (IN) :: reset_dBZ
 
 !..Local variables
       REAL, DIMENSION(kts:kte):: &
@@ -1093,63 +1065,66 @@ MODULE module_mp_thompson
       if (present(errmsg)) errmsg = ''
       if (present(errflg)) errflg = 0
 
-      ! DH* 2020-06-05: The stochastic perturbations code was retrofitted
-      ! from a newer version of the Thompson MP scheme, but it has not been
-      ! tested yet.
-      if (rand_perturb_on .ne. 0) then
-        errmsg = 'Logic error in mp_gt_driver: the stochastic perturbations code ' // &
-                 'has not been tested yet with this version of the Thompson scheme'
-        errflg = 1
-        return
-      end if
-      ! Activate this code when removing the guard above
-      !if (rand_perturb_on .ne. 0 .and. .not. present(rand_pert)) then
-      !  errmsg = 'Logic error in mp_gt_driver: random perturbations are on, ' // &
-      !           'but optional argument rand_pert is not present'
-      !  errflg = 1
-      !  return
-      !end if
-      ! *DH 2020-06-05
-
-      if ( (present(tt) .and. (present(th) .or. present(pii))) .or. &
-           (.not.present(tt) .and. .not.(present(th) .and. present(pii))) ) then
-         if (present(errmsg)) then
-            write(errmsg, '(a)') 'Logic error in mp_gt_driver: provide either tt or th+pii'
-         else
-            write(*,'(a)') 'Logic error in mp_gt_driver: provide either tt or th+pii'
+      ! No need to test for every subcycling step
+      test_only_once: if (first_time_step .and. istep==1) then
+         ! DH* 2020-06-05: The stochastic perturbations code was retrofitted
+         ! from a newer version of the Thompson MP scheme, but it has not been
+         ! tested yet.
+         if (rand_perturb_on .ne. 0) then
+           errmsg = 'Logic error in mp_gt_driver: the stochastic perturbations code ' // &
+                    'has not been tested yet with this version of the Thompson scheme'
+           errflg = 1
+           return
          end if
-         if (present(errflg)) then
-            errflg = 1
-            return
-         else
-            stop
+         ! Activate this code when removing the guard above
+         !if (rand_perturb_on .ne. 0 .and. .not. present(rand_pert)) then
+         !  errmsg = 'Logic error in mp_gt_driver: random perturbations are on, ' // &
+         !           'but optional argument rand_pert is not present'
+         !  errflg = 1
+         !  return
+         !end if
+         ! *DH 2020-06-05
+   
+         if ( (present(tt) .and. (present(th) .or. present(pii))) .or. &
+              (.not.present(tt) .and. .not.(present(th) .and. present(pii))) ) then
+            if (present(errmsg)) then
+               write(errmsg, '(a)') 'Logic error in mp_gt_driver: provide either tt or th+pii'
+            else
+               write(*,'(a)') 'Logic error in mp_gt_driver: provide either tt or th+pii'
+            end if
+            if (present(errflg)) then
+               errflg = 1
+               return
+            else
+               stop
+            end if
          end if
-      end if
-
-      if (is_aerosol_aware .and. (.not.present(nc)     .or. &
-                                  .not.present(nwfa)   .or. &
-                                  .not.present(nifa)   .or. &
-                                  .not.present(nwfa2d) .or. &
-                                  .not.present(nifa2d)      )) then
-         if (present(errmsg)) then
-            write(errmsg, '(*(a))') 'Logic error in mp_gt_driver: provide nc, nwfa, nifa, nwfa2d', &
-                                    ' and nifa2d for aerosol-aware version of Thompson microphysics'
-         else
-            write(*, '(*(a))') 'Logic error in mp_gt_driver: provide nc, nwfa, nifa, nwfa2d', &
-                               ' and nifa2d for aerosol-aware version of Thompson microphysics'
+   
+         if (is_aerosol_aware .and. (.not.present(nc)     .or. &
+                                     .not.present(nwfa)   .or. &
+                                     .not.present(nifa)   .or. &
+                                     .not.present(nwfa2d) .or. &
+                                     .not.present(nifa2d)      )) then
+            if (present(errmsg)) then
+               write(errmsg, '(*(a))') 'Logic error in mp_gt_driver: provide nc, nwfa, nifa, nwfa2d', &
+                                       ' and nifa2d for aerosol-aware version of Thompson microphysics'
+            else
+               write(*, '(*(a))') 'Logic error in mp_gt_driver: provide nc, nwfa, nifa, nwfa2d', &
+                                  ' and nifa2d for aerosol-aware version of Thompson microphysics'
+            end if
+            if (present(errflg)) then
+               errflg = 1
+               return
+            else
+               stop
+            end if
+         else if (.not.is_aerosol_aware .and. (present(nwfa)   .or. &
+                                               present(nifa)   .or. &
+                                               present(nwfa2d) .or. &
+                                               present(nifa2d)      )) then
+            write(*,*) 'WARNING, nc/nwfa/nifa/nwfa2d/nifa2d present but is_aerosol_aware is FALSE'
          end if
-         if (present(errflg)) then
-            errflg = 1
-            return
-         else
-            stop
-         end if
-      else if (.not.is_aerosol_aware .and. (present(nwfa)   .or. &
-                                            present(nifa)   .or. &
-                                            present(nwfa2d) .or. &
-                                            present(nifa2d)      )) then
-         write(*,*) 'WARNING, nc/nwfa/nifa/nwfa2d/nifa2d present but is_aerosol_aware is FALSE'
-      end if
+      end if test_only_once
 
 !+---+
       i_start = its
@@ -1421,49 +1396,54 @@ MODULE module_mp_thompson
             endif
          enddo
 
+         ! Diagnostic calculations only for last step
+         ! if Thompson MP is called multiple times
+         last_step_only: IF (istep == nsteps) THEN
+
 !> - Call calc_refl10cm()
 
-         IF ( PRESENT (diagflag) ) THEN
-         if (diagflag .and. do_radar_ref == 1) then
+           diagflag_present: IF ( PRESENT (diagflag) ) THEN
+           if (diagflag .and. do_radar_ref == 1) then
 !
-         ! Only set melti to true at the output times
-            if (reset) then
+             ! Only set melti to true at the output times
+             if (reset_dBZ) then
                melti=.true.
-            else
+             else
                melti=.false.
-            endif
+             endif
 !
-          if (present(vt_dbz_wt) .and. present(first_time_step)) then
-            call calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d,   &
-                                t1d, p1d, dBZ, rand1, kts, kte, i, j, &
-                                melti, vt_dbz_wt(i,:,j),              &
-                                first_time_step)
-          else
-            call calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d,   &
-                                t1d, p1d, dBZ, rand1, kts, kte, i, j, &
-                                melti)
-          end if
-          do k = kts, kte
-             refl_10cm(i,k,j) = MAX(-35., dBZ(k))
-          enddo
-         endif
-         ENDIF
+             if (present(vt_dbz_wt)) then
+               call calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d,   &
+                                   t1d, p1d, dBZ, rand1, kts, kte, i, j, &
+                                   melti, vt_dbz_wt(i,:,j),              &
+                                   first_time_step)
+             else
+               call calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d,   &
+                                   t1d, p1d, dBZ, rand1, kts, kte, i, j, &
+                                   melti)
+             end if
+             do k = kts, kte
+               refl_10cm(i,k,j) = MAX(-35., dBZ(k))
+             enddo
+           endif
+           ENDIF diagflag_present
 
-         IF (has_reqc.ne.0 .and. has_reqi.ne.0 .and. has_reqs.ne.0) THEN
-          do k = kts, kte
-             re_qc1d(k) = re_qc_min
-             re_qi1d(k) = re_qi_min
-             re_qs1d(k) = re_qs_min
-          enddo
+           IF (has_reqc.ne.0 .and. has_reqi.ne.0 .and. has_reqs.ne.0) THEN
+             do k = kts, kte
+                re_qc1d(k) = re_qc_min
+                re_qi1d(k) = re_qi_min
+                re_qs1d(k) = re_qs_min
+             enddo
 !> - Call calc_effectrad()
-          call calc_effectRad (t1d, p1d, qv1d, qc1d, nc1d, qi1d, ni1d, qs1d,  &
-                      re_qc1d, re_qi1d, re_qs1d, kts, kte)
-          do k = kts, kte
-             re_cloud(i,k,j) = MAX(re_qc_min, MIN(re_qc1d(k), re_qc_max))
-             re_ice(i,k,j)   = MAX(re_qi_min, MIN(re_qi1d(k), re_qi_max))
-             re_snow(i,k,j)  = MAX(re_qs_min, MIN(re_qs1d(k), re_qs_max))
-          enddo
-         ENDIF
+             call calc_effectRad (t1d, p1d, qv1d, qc1d, nc1d, qi1d, ni1d, qs1d,  &
+                                  re_qc1d, re_qi1d, re_qs1d, kts, kte)
+             do k = kts, kte
+               re_cloud(i,k,j) = MAX(re_qc_min, MIN(re_qc1d(k), re_qc_max))
+               re_ice(i,k,j)   = MAX(re_qi_min, MIN(re_qi1d(k), re_qi_max))
+               re_snow(i,k,j)  = MAX(re_qs_min, MIN(re_qs1d(k), re_qs_max))
+             enddo
+           ENDIF
+         ENDIF last_step_only
 
       enddo i_loop
       enddo j_loop
@@ -3853,10 +3833,10 @@ MODULE module_mp_thompson
         ENDIF
 
       IF (.NOT. good .EQ. 1 ) THEN
-#ifndef SION
-        if (thompson_table_writer) write_thompson_tables = .true.
-#endif
-        if (thompson_table_writer) write(0,*) "ThompMP: computing qr_acr_qg"
+        if (thompson_table_writer) then
+          write_thompson_tables = .true.
+          write(0,*) "ThompMP: computing qr_acr_qg"
+        endif
         do n2 = 1, nbr
 !        vr(n2) = av_r*Dr(n2)**bv_r * DEXP(-fv_r*Dr(n2))
          vr(n2) = -0.1021 + 4.932E3*Dr(n2) - 0.9551E6*Dr(n2)*Dr(n2)     &
@@ -4035,10 +4015,10 @@ MODULE module_mp_thompson
         ENDIF
 
       IF (.NOT. good .EQ. 1 ) THEN
-#ifndef SION
-        if (thompson_table_writer) write_thompson_tables = .true.
-#endif
-        if (thompson_table_writer) write(0,*) "ThompMP: computing qr_acr_qs"
+        if (thompson_table_writer) then
+          write_thompson_tables = .true.
+          write(0,*) "ThompMP: computing qr_acr_qs"
+        endif
         do n2 = 1, nbr
 !        vr(n2) = av_r*Dr(n2)**bv_r * DEXP(-fv_r*Dr(n2))
          vr(n2) = -0.1021 + 4.932E3*Dr(n2) - 0.9551E6*Dr(n2)*Dr(n2)     &
@@ -4290,10 +4270,10 @@ MODULE module_mp_thompson
         ENDIF
 
       IF (.NOT. good .EQ. 1 ) THEN
-#ifndef SION
-        if (thompson_table_writer) write_thompson_tables = .true.
-#endif
-        if (thompson_table_writer) write(0,*) "ThompMP: computing freezeH2O"
+        if (thompson_table_writer) then
+          write_thompson_tables = .true.
+          write(0,*) "ThompMP: computing freezeH2O"
+        endif
 
         orho_w = 1./rho_w
 
@@ -5613,300 +5593,6 @@ MODULE module_mp_thompson
 
       end subroutine calc_refl10cm
 !
-
-#ifdef SION
-!>\ingroup aathompson
-      subroutine readwrite_tables(filename, mode, mpicomm, mpirank, mpiroot, ierr)
-
-#ifdef MPI
-         use mpi
-#endif
-         use sion_f90
-
-         implicit none
-
-         ! Interface variables
-         character(len=*), intent(in)  :: filename
-         character(len=*), intent(in)  :: mode
-         integer,          intent(in)  :: mpicomm
-         integer,          intent(in)  :: mpirank
-         integer,          intent(in)  :: mpiroot
-         integer,          intent(out) :: ierr
-
-#ifdef MPI
-         ! MPI variables
-         integer :: mpierr
-#endif
-
-         ! SIONlib variables
-         integer            :: SIONLIB_fsblksize
-         integer            :: SIONLIB_numfiles
-         character*2        :: SIONLIB_filemode
-         !
-         integer                              :: nprocs
-         integer,   dimension(:), allocatable :: procs
-         integer*8, dimension(:), allocatable :: chunksizes
-         !
-         integer*8          :: brw
-         integer            :: sid
-         integer            :: f_endian, s_endian
-         logical            :: exists
-         integer*8          :: tables_size
-         real*8             :: checksum
-
-         integer :: i
-
-         continue
-
-         ierr = 0
-
-         ! Test if SIONlib file containing pre-computed tables exists
-         inquire(file=trim(filename), exist=exists)
-         if (trim(mode)=="read") then
-            SIONLIB_filemode = "rb"
-            if (.not.exists) then
-               if (mpirank==mpiroot) write(0,*) "SIONlib file " // trim(filename) // &
-                                      " with precomputed Thompson MP tables not found"
-               ierr = 1
-               return
-            end if
-         else if (trim(mode)=="write") then
-            SIONLIB_filemode = "wb"
-            SIONLIB_numfiles = 1
-            if (exists) then
-               if (mpirank==mpiroot) write(0,*) "SIONlib file " // trim(filename) // &
-                                 " with precomputed Thompson MP tables already exists"
-               ierr = 1
-               return
-            end if
-         end if
-
-#ifdef MPI
-         ! To avoid that MPI master task creates the file before
-         ! other tasks pass the inquire test above
-         call MPI_BARRIER(mpicomm, mpierr)
-#endif
-
-         mpi_master_io_only: if (mpirank==mpiroot) then
-            tables_size = sizeof(tcg_racg)
-            tables_size = tables_size + sizeof(tmr_racg)
-            tables_size = tables_size + sizeof(tcr_gacr)
-            tables_size = tables_size + sizeof(tmg_gacr)
-            tables_size = tables_size + sizeof(tnr_racg)
-            tables_size = tables_size + sizeof(tnr_gacr)
-            tables_size = tables_size + sizeof(tcs_racs1)
-            tables_size = tables_size + sizeof(tmr_racs1)
-            tables_size = tables_size + sizeof(tcs_racs2)
-            tables_size = tables_size + sizeof(tmr_racs2)
-            tables_size = tables_size + sizeof(tcr_sacr1)
-            tables_size = tables_size + sizeof(tms_sacr1)
-            tables_size = tables_size + sizeof(tcr_sacr2)
-            tables_size = tables_size + sizeof(tms_sacr2)
-            tables_size = tables_size + sizeof(tnr_racs1)
-            tables_size = tables_size + sizeof(tnr_racs2)
-            tables_size = tables_size + sizeof(tnr_sacr1)
-            tables_size = tables_size + sizeof(tnr_sacr2)
-            tables_size = tables_size + sizeof(tpi_qcfz)
-            tables_size = tables_size + sizeof(tni_qcfz)
-            tables_size = tables_size + sizeof(tpi_qrfz)
-            tables_size = tables_size + sizeof(tpg_qrfz)
-            tables_size = tables_size + sizeof(tni_qrfz)
-            tables_size = tables_size + sizeof(tnr_qrfz)
-            tables_size = tables_size + sizeof(tps_iaus)
-            tables_size = tables_size + sizeof(tni_iaus)
-            tables_size = tables_size + sizeof(tpi_ide)
-            tables_size = tables_size + sizeof(t_Efrw)
-            tables_size = tables_size + sizeof(t_Efsw)
-            tables_size = tables_size + sizeof(tnr_rev)
-            tables_size = tables_size + sizeof(tpc_wev)
-            tables_size = tables_size + sizeof(tnc_wev)
-            tables_size = tables_size + sizeof(tnccn_act)
-
-            ! Autodetect SIONlib filesystem block size
-            SIONLIB_fsblksize = -1
-
-            nprocs = 1
-            allocate (procs(1:nprocs))
-            allocate (chunksizes(1:nprocs))
-            do i=1,nprocs
-               procs(i) = i
-               chunksizes(i) = sizeof(checksum) + tables_size
-            end do
-
-            write(0,'(a)') "Opening file " // trim(filename)
-            call fsion_open(trim(filename), SIONLIB_filemode, nprocs, SIONLIB_numfiles, chunksizes(1), SIONLIB_fsblksize, procs(1), sid)
-            if (sid<0) write(0,'(a)') "Error opening " // trim(filename) // " in " // trim(mode) // " mode"
-
-            call fsion_seek(sid, mpirank, SION_CURRENT_BLK, SION_CURRENT_POS, ierr)
-            ! fsion_seek returns ierr=1 if cursor could be positioned as requested and 0 otherwise
-            if (ierr==1) ierr=0
-
-            if (trim(mode)=="read") then
-                ! Check that file endianness is identical to system endianness
-                call fsion_get_file_endianness(sid, f_endian)
-                call fsion_get_endianess(s_endian)
-                if (f_endian .ne. s_endian) then
-                   write(0,'(a)') "Error, endianness of SIONlib file " // trim(filename) // " differs " // &
-                                  "from filesystem endianness; please delete file and recalculate tables!"
-                   ierr = 1
-                end if
-                if (ierr==0) then
-                   ! Read checksum
-                   call fsion_read(checksum, int(kind(checksum),8), int(1,8), sid, brw)
-                   ! Read arrays tcg_racg through tnccn_act
-                   call fsion_read(tcg_racg(1,1,1,1),    int(kind(tcg_racg(1,1,1,1)),8),    int(size(tcg_racg),8),  sid, brw)
-                   call fsion_read(tmr_racg(1,1,1,1),    int(kind(tmr_racg(1,1,1,1)),8),    int(size(tmr_racg),8),  sid, brw)
-                   call fsion_read(tcr_gacr(1,1,1,1),    int(kind(tcr_gacr(1,1,1,1)),8),    int(size(tcr_gacr),8),  sid, brw)
-                   call fsion_read(tmg_gacr(1,1,1,1),    int(kind(tmg_gacr(1,1,1,1)),8),    int(size(tmg_gacr),8),  sid, brw)
-                   call fsion_read(tnr_racg(1,1,1,1),    int(kind(tnr_racg(1,1,1,1)),8),    int(size(tnr_racg),8),  sid, brw)
-                   call fsion_read(tnr_gacr(1,1,1,1),    int(kind(tnr_gacr(1,1,1,1)),8),    int(size(tnr_gacr),8),  sid, brw)
-                   call fsion_read(tcs_racs1(1,1,1,1),   int(kind(tcs_racs1(1,1,1,1)),8),   int(size(tcs_racs1),8), sid, brw)
-                   call fsion_read(tmr_racs1(1,1,1,1),   int(kind(tmr_racs1(1,1,1,1)),8),   int(size(tmr_racs1),8), sid, brw)
-                   call fsion_read(tcs_racs2(1,1,1,1),   int(kind(tcs_racs2(1,1,1,1)),8),   int(size(tcs_racs2),8), sid, brw)
-                   call fsion_read(tmr_racs2(1,1,1,1),   int(kind(tmr_racs2(1,1,1,1)),8),   int(size(tmr_racs2),8), sid, brw)
-                   call fsion_read(tcr_sacr1(1,1,1,1),   int(kind(tcr_sacr1(1,1,1,1)),8),   int(size(tcr_sacr1),8), sid, brw)
-                   call fsion_read(tms_sacr1(1,1,1,1),   int(kind(tms_sacr1(1,1,1,1)),8),   int(size(tms_sacr1),8), sid, brw)
-                   call fsion_read(tcr_sacr2(1,1,1,1),   int(kind(tcr_sacr2(1,1,1,1)),8),   int(size(tcr_sacr2),8), sid, brw)
-                   call fsion_read(tms_sacr2(1,1,1,1),   int(kind(tms_sacr2(1,1,1,1)),8),   int(size(tms_sacr2),8), sid, brw)
-                   call fsion_read(tnr_racs1(1,1,1,1),   int(kind(tnr_racs1(1,1,1,1)),8),   int(size(tnr_racs1),8), sid, brw)
-                   call fsion_read(tnr_racs2(1,1,1,1),   int(kind(tnr_racs2(1,1,1,1)),8),   int(size(tnr_racs2),8), sid, brw)
-                   call fsion_read(tnr_sacr1(1,1,1,1),   int(kind(tnr_sacr1(1,1,1,1)),8),   int(size(tnr_sacr1),8), sid, brw)
-                   call fsion_read(tnr_sacr2(1,1,1,1),   int(kind(tnr_sacr2(1,1,1,1)),8),   int(size(tnr_sacr2),8), sid, brw)
-                   call fsion_read(tpi_qcfz(1,1,1,1),    int(kind(tpi_qcfz(1,1,1,1)),8),    int(size(tpi_qcfz),8),  sid, brw)
-                   call fsion_read(tni_qcfz(1,1,1,1),    int(kind(tni_qcfz(1,1,1,1)),8),    int(size(tni_qcfz),8),  sid, brw)
-                   call fsion_read(tpi_qrfz(1,1,1,1),    int(kind(tpi_qrfz(1,1,1,1)),8),    int(size(tpi_qrfz),8),  sid, brw)
-                   call fsion_read(tpg_qrfz(1,1,1,1),    int(kind(tpg_qrfz(1,1,1,1)),8),    int(size(tpg_qrfz),8),  sid, brw)
-                   call fsion_read(tni_qrfz(1,1,1,1),    int(kind(tni_qrfz(1,1,1,1)),8),    int(size(tni_qrfz),8),  sid, brw)
-                   call fsion_read(tnr_qrfz(1,1,1,1),    int(kind(tnr_qrfz(1,1,1,1)),8),    int(size(tnr_qrfz),8),  sid, brw)
-                   call fsion_read(tps_iaus(1,1),        int(kind(tps_iaus(1,1)),8),        int(size(tps_iaus),8),  sid, brw)
-                   call fsion_read(tni_iaus(1,1),        int(kind(tni_iaus(1,1)),8),        int(size(tni_iaus),8),  sid, brw)
-                   call fsion_read(tpi_ide(1,1),         int(kind(tpi_ide(1,1)),8),         int(size(tpi_ide),8),   sid, brw)
-                   call fsion_read(t_Efrw(1,1),          int(kind(t_Efrw(1,1)),8),          int(size(t_Efrw),8),    sid, brw)
-                   call fsion_read(t_Efsw(1,1),          int(kind(t_Efsw(1,1)),8),          int(size(t_Efsw),8),    sid, brw)
-                   call fsion_read(tnr_rev(1,1,1),       int(kind(tnr_rev(1,1,1)),8),       int(size(tnr_rev),8),   sid, brw)
-                   call fsion_read(tpc_wev(1,1,1),       int(kind(tpc_wev(1,1,1)),8),       int(size(tpc_wev),8),   sid, brw)
-                   call fsion_read(tnc_wev(1,1,1),       int(kind(tnc_wev  (1,1,1)),8),     int(size(tnc_wev),8),   sid, brw)
-                   call fsion_read(tnccn_act(1,1,1,1,1), int(kind(tnccn_act(1,1,1,1,1)),8), int(size(tnccn_act),8), sid, brw)
-                else
-                    ! Wrong endianness (ierr/=0) will force checksum match to fail
-                   checksum = -1
-                end if
-            else if (trim(mode)=="write") then
-                ! Calculate and write checksum
-                checksum = calculate_checksum()
-                call fsion_write(checksum, int(kind(checksum),8), int(1,8), sid, brw)
-                ! Write arrays tcg_racg through tnccn_act
-                call fsion_write(tcg_racg(1,1,1,1),    int(kind(tcg_racg(1,1,1,1)),8),    int(size(tcg_racg),8),  sid, brw)
-                call fsion_write(tmr_racg(1,1,1,1),    int(kind(tmr_racg(1,1,1,1)),8),    int(size(tmr_racg),8),  sid, brw)
-                call fsion_write(tcr_gacr(1,1,1,1),    int(kind(tcr_gacr(1,1,1,1)),8),    int(size(tcr_gacr),8),  sid, brw)
-                call fsion_write(tmg_gacr(1,1,1,1),    int(kind(tmg_gacr(1,1,1,1)),8),    int(size(tmg_gacr),8),  sid, brw)
-                call fsion_write(tnr_racg(1,1,1,1),    int(kind(tnr_racg(1,1,1,1)),8),    int(size(tnr_racg),8),  sid, brw)
-                call fsion_write(tnr_gacr(1,1,1,1),    int(kind(tnr_gacr(1,1,1,1)),8),    int(size(tnr_gacr),8),  sid, brw)
-                call fsion_write(tcs_racs1(1,1,1,1),   int(kind(tcs_racs1(1,1,1,1)),8),   int(size(tcs_racs1),8), sid, brw)
-                call fsion_write(tmr_racs1(1,1,1,1),   int(kind(tmr_racs1(1,1,1,1)),8),   int(size(tmr_racs1),8), sid, brw)
-                call fsion_write(tcs_racs2(1,1,1,1),   int(kind(tcs_racs2(1,1,1,1)),8),   int(size(tcs_racs2),8), sid, brw)
-                call fsion_write(tmr_racs2(1,1,1,1),   int(kind(tmr_racs2(1,1,1,1)),8),   int(size(tmr_racs2),8), sid, brw)
-                call fsion_write(tcr_sacr1(1,1,1,1),   int(kind(tcr_sacr1(1,1,1,1)),8),   int(size(tcr_sacr1),8), sid, brw)
-                call fsion_write(tms_sacr1(1,1,1,1),   int(kind(tms_sacr1(1,1,1,1)),8),   int(size(tms_sacr1),8), sid, brw)
-                call fsion_write(tcr_sacr2(1,1,1,1),   int(kind(tcr_sacr2(1,1,1,1)),8),   int(size(tcr_sacr2),8), sid, brw)
-                call fsion_write(tms_sacr2(1,1,1,1),   int(kind(tms_sacr2(1,1,1,1)),8),   int(size(tms_sacr2),8), sid, brw)
-                call fsion_write(tnr_racs1(1,1,1,1),   int(kind(tnr_racs1(1,1,1,1)),8),   int(size(tnr_racs1),8), sid, brw)
-                call fsion_write(tnr_racs2(1,1,1,1),   int(kind(tnr_racs2(1,1,1,1)),8),   int(size(tnr_racs2),8), sid, brw)
-                call fsion_write(tnr_sacr1(1,1,1,1),   int(kind(tnr_sacr1(1,1,1,1)),8),   int(size(tnr_sacr1),8), sid, brw)
-                call fsion_write(tnr_sacr2(1,1,1,1),   int(kind(tnr_sacr2(1,1,1,1)),8),   int(size(tnr_sacr2),8), sid, brw)
-                call fsion_write(tpi_qcfz(1,1,1,1),    int(kind(tpi_qcfz(1,1,1,1)),8),    int(size(tpi_qcfz),8),  sid, brw)
-                call fsion_write(tni_qcfz(1,1,1,1),    int(kind(tni_qcfz(1,1,1,1)),8),    int(size(tni_qcfz),8),  sid, brw)
-                call fsion_write(tpi_qrfz(1,1,1,1),    int(kind(tpi_qrfz(1,1,1,1)),8),    int(size(tpi_qrfz),8),  sid, brw)
-                call fsion_write(tpg_qrfz(1,1,1,1),    int(kind(tpg_qrfz(1,1,1,1)),8),    int(size(tpg_qrfz),8),  sid, brw)
-                call fsion_write(tni_qrfz(1,1,1,1),    int(kind(tni_qrfz(1,1,1,1)),8),    int(size(tni_qrfz),8),  sid, brw)
-                call fsion_write(tnr_qrfz(1,1,1,1),    int(kind(tnr_qrfz(1,1,1,1)),8),    int(size(tnr_qrfz),8),  sid, brw)
-                call fsion_write(tps_iaus(1,1),        int(kind(tps_iaus(1,1)),8),        int(size(tps_iaus),8),  sid, brw)
-                call fsion_write(tni_iaus(1,1),        int(kind(tni_iaus(1,1)),8),        int(size(tni_iaus),8),  sid, brw)
-                call fsion_write(tpi_ide(1,1),         int(kind(tpi_ide(1,1)),8),         int(size(tpi_ide),8),   sid, brw)
-                call fsion_write(t_Efrw(1,1),          int(kind(t_Efrw(1,1)),8),          int(size(t_Efrw),8),    sid, brw)
-                call fsion_write(t_Efsw(1,1),          int(kind(t_Efsw(1,1)),8),          int(size(t_Efsw),8),    sid, brw)
-                call fsion_write(tnr_rev(1,1,1),       int(kind(tnr_rev(1,1,1)),8),       int(size(tnr_rev),8),   sid, brw)
-                call fsion_write(tpc_wev(1,1,1),       int(kind(tpc_wev(1,1,1)),8),       int(size(tpc_wev),8),   sid, brw)
-                call fsion_write(tnc_wev(1,1,1),       int(kind(tnc_wev  (1,1,1)),8),     int(size(tnc_wev),8),   sid, brw)
-                call fsion_write(tnccn_act(1,1,1,1,1), int(kind(tnccn_act(1,1,1,1,1)),8), int(size(tnccn_act),8), sid, brw)
-            end if
-
-            write(0,'(a)') "Closing file " // trim(filename)
-            call fsion_close(sid, ierr)
-
-            ierr = 0
-            ! Test if checksum matches, this fails if wrong endianness (checksum=-1, see above)
-            if (trim(mode)=="read" .and. checksum/=calculate_checksum()) then
-               write(0,'(2(a,e20.9))') "Checksum mismatch, expected", calculate_checksum(), " but got", checksum
-               call system('rm -f ' // trim(filename))
-               ierr = 1
-            end if
-
-            deallocate (procs)
-            deallocate (chunksizes)
-
-         else
-
-            ierr = 0
-
-         end if mpi_master_io_only
-
-#ifdef MPI
-         if (trim(mode)=="read") then
-            ! After reading the tables, broadcast the information to all MPI tasks.
-            ! First, broadcast the current error code from MPI master (0 = success)
-            call MPI_BCAST(ierr, 1, MPI_INTEGER, mpiroot, mpicomm, mpierr)
-            if (ierr/=0) return
-            call MPI_BCAST(tcg_racg,  size(tcg_racg),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tmr_racg,  size(tmr_racg),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tcr_gacr,  size(tcr_gacr),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tmg_gacr,  size(tmg_gacr),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tnr_racg,  size(tnr_racg),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tnr_gacr,  size(tnr_gacr),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tcs_racs1, size(tcs_racs1), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tmr_racs1, size(tmr_racs1), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tcs_racs2, size(tcs_racs2), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tmr_racs2, size(tmr_racs2), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tcr_sacr1, size(tcr_sacr1), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tms_sacr1, size(tms_sacr1), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tcr_sacr2, size(tcr_sacr2), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tms_sacr2, size(tms_sacr2), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tnr_racs1, size(tnr_racs1), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tnr_racs2, size(tnr_racs2), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tnr_sacr1, size(tnr_sacr1), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tnr_sacr2, size(tnr_sacr2), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tpi_qcfz,  size(tpi_qcfz),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tni_qcfz,  size(tni_qcfz),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tpi_qrfz,  size(tpi_qrfz),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tpg_qrfz,  size(tpg_qrfz),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tni_qrfz,  size(tni_qrfz),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tnr_qrfz,  size(tnr_qrfz),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tps_iaus,  size(tps_iaus),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tni_iaus,  size(tni_iaus),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tpi_ide,   size(tpi_ide),   MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(t_Efrw,    size(t_Efrw),    MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(t_Efsw,    size(t_Efsw),    MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tnr_rev,   size(tnr_rev),   MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tpc_wev,   size(tpc_wev),   MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tnc_wev,   size(tnc_wev),   MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tnccn_act, size(tnccn_act), MPI_REAL,             mpiroot, mpicomm, mpierr)
-         else if (trim(mode)=="write") then
-            call MPI_BARRIER(mpicomm, mpierr)
-         end if
-#endif
-
-         return
-
-      contains
-
-         function calculate_checksum() result(checksum)
-             real*8 :: checksum
-             checksum = real(tables_size,8)*sum(tcg_racg)
-         end function calculate_checksum
-
-      end subroutine readwrite_tables
-#endif
-
 !+---+-----------------------------------------------------------------+
 !+---+-----------------------------------------------------------------+
 END MODULE module_mp_thompson
