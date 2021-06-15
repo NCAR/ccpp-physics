@@ -629,6 +629,14 @@
   kind = kind_phys
   intent = in
   optional = F
+[sfc_rlm]
+  standard_name = choice_of_near_surface_mixing_length_in_boundary_layer_mass_flux_scheme
+  long_name = choice of near surface mixing length in boundary layer mass flux scheme
+  units = none
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [ntoz]
   standard_name = index_for_ozone
   long_name = tracer index for ozone mixing ratio
