@@ -99,14 +99,6 @@ module mp_thompson
 
          if (is_initialized) return
 
-         ! DH* temporary
-         if (mpirank==mpiroot) then
-            write(0,*) ' ----------------------------------------------------------------------------------------------------------------'
-            write(0,*) ' --- WARNING --- the CCPP Thompson MP scheme is currently under development, use at your own risk --- WARNING ---'
-            write(0,*) ' ----------------------------------------------------------------------------------------------------------------'
-         end if
-         ! *DH temporary
-
          ! Consistency checks
          if (imp_physics/=imp_physics_thompson) then
             write(errmsg,'(*(a))') "Logic error: namelist choice of microphysics is different from Thompson MP"
@@ -328,12 +320,13 @@ module mp_thompson
                               spechum, qc, qr, qi, qs, qg, ni, nr, &
                               is_aerosol_aware, nc, nwfa, nifa,    &
                               nwfa2d, nifa2d,                      &
-                              tgrs, prsl, phii, omega, dtp,        &
+                              tgrs, prsl, phii, omega,             &
+                              dtp, first_time_step, istep, nsteps, &
                               prcp, rain, graupel, ice, snow, sr,  &
-                              refl_10cm, reset, do_radar_ref,      &
+                              refl_10cm, reset_dBZ, do_radar_ref,  &
                               re_cloud, re_ice, re_snow,           &
                               mpicomm, mpirank, mpiroot,           &
-                              errmsg, errflg,naux3d, aux3d)
+                              blkno, errmsg, errflg, naux3d, aux3d)
 
          implicit none
 
@@ -356,7 +349,7 @@ module mp_thompson
          real(kind_phys),           intent(inout) :: ni(:,:)
          real(kind_phys),           intent(inout) :: nr(:,:)
          ! Aerosols
-         logical,                   intent(in)    :: is_aerosol_aware, reset
+         logical,                   intent(in)    :: is_aerosol_aware, reset_dBZ
          ! The following arrays are not allocated if is_aerosol_aware is false
          real(kind_phys), optional, intent(inout) :: nc(:,:)
          real(kind_phys), optional, intent(inout) :: nwfa(:,:)
@@ -369,6 +362,8 @@ module mp_thompson
          real(kind_phys),           intent(in   ) :: phii(:,:)
          real(kind_phys),           intent(in   ) :: omega(:,:)
          real(kind_phys),           intent(in   ) :: dtp
+         logical,                   intent(in   ) :: first_time_step
+         integer,                   intent(in   ) :: istep, nsteps
          ! Precip/rain/snow/graupel fall amounts and fraction of frozen precip
          real(kind_phys),           intent(inout) :: prcp(:)
          real(kind_phys),           intent(inout) :: rain(:)
@@ -383,7 +378,8 @@ module mp_thompson
          real(kind_phys), optional, intent(  out) :: re_cloud(:,:)
          real(kind_phys), optional, intent(  out) :: re_ice(:,:)
          real(kind_phys), optional, intent(  out) :: re_snow(:,:)
-         ! MPI information
+         ! MPI and block information
+         integer,                   intent(in)    :: blkno
          integer,                   intent(in)    :: mpicomm
          integer,                   intent(in)    :: mpirank
          integer,                   intent(in)    :: mpiroot
@@ -396,6 +392,8 @@ module mp_thompson
 
          ! Local variables
 
+         ! Reduced time step if subcycling is used
+         real(kind_phys) :: dtstep
          ! Air density
          real(kind_phys) :: rho(1:ncol,1:nlev)              !< kg m-3
          ! Water vapor mixing ratio (instead of specific humidity)
@@ -442,23 +440,39 @@ module mp_thompson
             return
          end if
 
-         if (is_aerosol_aware .and. .not. (present(nc)     .and. &
-                                           present(nwfa)   .and. &
-                                           present(nifa)   .and. &
-                                           present(nwfa2d) .and. &
-                                           present(nifa2d)       )) then
-            write(errmsg,fmt='(*(a))') 'Logic error in mp_thompson_run:',  &
-                                       ' aerosol-aware microphysics require all of the', &
-                                       ' following optional arguments:', &
-                                       ' nc, nwfa, nifa, nwfa2d, nifa2d'
-            errflg = 1
-            return
+         ! Set reduced time step if subcycling is used
+         if (nsteps>1) then
+            dtstep = dtp/real(nsteps, kind=kind_phys)
+         else
+            dtstep = dtp
+         end if
+         if (first_time_step .and. istep==1 .and. mpirank==mpiroot .and. blkno==1) then
+            write(*,'(a,i0,a,a,f6.2,a)') 'Thompson MP is using ', nsteps, ' substep(s) per time step', &
+                                         ' with an effective time step of ', dtstep, ' seconds'
+         end if
+
+         if (first_time_step .and. istep==1) then
+           if (is_aerosol_aware .and. .not. (present(nc)     .and. &
+                                             present(nwfa)   .and. &
+                                             present(nifa)   .and. &
+                                             present(nwfa2d) .and. &
+                                             present(nifa2d)       )) then
+              write(errmsg,fmt='(*(a))') 'Logic error in mp_thompson_run:',  &
+                                         ' aerosol-aware microphysics require all of the', &
+                                         ' following optional arguments:', &
+                                         ' nc, nwfa, nifa, nwfa2d, nifa2d'
+              errflg = 1
+              return
+           end if
          end if
 
          !> - Convert specific humidity to water vapor mixing ratio.
          !> - Also, hydrometeor variables are mass or number mixing ratio
          !> - either kg of species per kg of dry air, or per kg of (dry + vapor).
 
+         ! DH* - do this only if istep == 1? Would be ok if it was
+         ! guaranteed that nothing else in the same subcycle group
+         ! was using these arrays, but it is somewhat dangerous.
          qv = spechum/(1.0_kind_phys-spechum)
 
          if (convert_dry_rho) then
@@ -476,6 +490,7 @@ module mp_thompson
               nifa = nifa/(1.0_kind_phys-spechum)
            end if
          end if
+         ! *DH
 
          !> - Density of air in kg m-3
          rho = con_eps*prsl/(con_rd*tgrs*(qv+con_eps))
@@ -569,7 +584,9 @@ module mp_thompson
                                  ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
                                  ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                                  its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
-                                 errmsg=errmsg, errflg=errflg, reset=reset, vts1=aux3d(:,:,1),  &
+                                 reset_dBZ=reset_dBZ, istep=istep, nsteps=nsteps,               &
+                                 first_time_step=first_time_step, errmsg=errmsg, errflg=errflg, &
+                                 vts1=aux3d(:,:,1),  &
                                  prw_vcdc=aux3d(:,:,2), prw_vcde=aux3d(:,:,3),                  &
                                  tpri_inu=aux3d(:,:,4), tpri_ide_d=aux3d(:,:,5),                & 
                                  tpri_ide_s=aux3d(:,:,6), tprs_ide_d=aux3d(:,:,7),              &
@@ -610,7 +627,9 @@ module mp_thompson
                                  ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
                                  ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                                  its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
-                                 errmsg=errmsg, errflg=errflg, reset=reset, vts1=aux3d(:,:,1),  &
+                                 reset_dBZ=reset_dBZ, istep=istep, nsteps=nsteps,               &
+                                 first_time_step=first_time_step, errmsg=errmsg, errflg=errflg, &
+                                 vts1=aux3d(:,:,1),  &
                                  prw_vcdc=aux3d(:,:,2), prw_vcde=aux3d(:,:,3),                  &
                                  tpri_inu=aux3d(:,:,4), tpri_ide_d=aux3d(:,:,5),                &
                                  tpri_ide_s=aux3d(:,:,6), tprs_ide_d=aux3d(:,:,7),              &
@@ -653,7 +672,9 @@ module mp_thompson
                                  ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
                                  ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                                  its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
-                                 errmsg=errmsg, errflg=errflg, reset=reset, vts1=aux3d(:,:,1),  &
+                                 reset_dBZ=reset_dBZ, istep=istep, nsteps=nsteps,               &
+                                 first_time_step=first_time_step, errmsg=errmsg, errflg=errflg, &
+                                  vts1=aux3d(:,:,1),  &
                                  prw_vcdc=aux3d(:,:,2), prw_vcde=aux3d(:,:,3),                  &
                                  tpri_inu=aux3d(:,:,4), tpri_ide_d=aux3d(:,:,5),                &
                                  tpri_ide_s=aux3d(:,:,6), tprs_ide_d=aux3d(:,:,7),              &
@@ -693,7 +714,9 @@ module mp_thompson
                                  ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
                                  ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                                  its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
-                                 errmsg=errmsg, errflg=errflg, reset=reset, vts1=aux3d(:,:,1),  &
+                                 reset_dBZ=reset_dBZ, istep=istep, nsteps=nsteps,               &
+                                 first_time_step=first_time_step, errmsg=errmsg, errflg=errflg, &
+                                 vts1=aux3d(:,:,1),  &
                                  prw_vcdc=aux3d(:,:,2), prw_vcde=aux3d(:,:,3),                  &
                                  tpri_inu=aux3d(:,:,4), tpri_ide_d=aux3d(:,:,5),                &
                                  tpri_ide_s=aux3d(:,:,6), tprs_ide_d=aux3d(:,:,7),              &
@@ -720,6 +743,10 @@ module mp_thompson
          end if
          if (errflg/=0) return
 
+         ! DH* - do this only if istep == nsteps? Would be ok if it was
+         ! guaranteed that nothing else in the same subcycle group
+         ! was using these arrays, but it is somewhat dangerous.
+
          !> - Convert water vapor mixing ratio back to specific humidity
          spechum = qv/(1.0_kind_phys+qv)
 
@@ -738,6 +765,7 @@ module mp_thompson
               nifa = nifa/(1.0_kind_phys+qv)
            end if
          end if
+         ! *DH
 
          !> - Convert rainfall deltas from mm to m (on physics timestep); add to inout variables
          ! "rain" in Thompson MP refers to precipitation (total of liquid rainfall+snow+graupel+ice)
@@ -746,6 +774,12 @@ module mp_thompson
          ice     = ice     + max(0.0, delta_ice_mp/1000.0_kind_phys)
          snow    = snow    + max(0.0, delta_snow_mp/1000.0_kind_phys)
          rain    = rain    + max(0.0, (delta_rain_mp - (delta_graupel_mp + delta_ice_mp + delta_snow_mp))/1000.0_kind_phys)
+
+         ! Recompute sr at last subcycling step
+         if (nsteps>1 .and. istep == nsteps) then
+           ! Unlike inside mp_gt_driver, rain does not contain frozen precip
+           sr = (snow + graupel + ice)/(rain + snow + graupel + ice +1.e-12)
+         end if
 
       end subroutine mp_thompson_run
 !>@}
