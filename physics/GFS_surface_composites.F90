@@ -62,7 +62,7 @@ contains
       real(kind=kind_phys), dimension(:), intent(in   )  :: semis_rad
       real(kind=kind_phys), dimension(:), intent(inout)  :: semis_wat, semis_lnd, semis_ice, slmsk
       real(kind=kind_phys), dimension(:), intent(inout)  :: emis_lnd, emis_ice
-      real(kind=kind_phys),                intent(in   ) :: min_lakeice, min_seaice
+      real(kind=kind_phys),               intent(in   )  :: min_lakeice, min_seaice
       !
       real(kind=kind_phys), dimension(:), intent(inout)  :: zorlo, zorll, zorli
       !
@@ -129,28 +129,28 @@ contains
               endif
             endif
           else            ! all land
-            cice(i) = zero
-            hice(i) = zero
+            cice(i)        = zero
+            hice(i)        = zero
             islmsk_cice(i) = 1
             islmsk(i)      = 1
             wet(i)         = .false.
             icy(i)         = .false.
             flag_cice(i)   = .false.
           endif
-        enddo  
+        enddo
 
       else
 
         do i = 1, IM
           if (islmsk(i) == 1) then
-!           tsfcl(i) = tsfc(i)
+!           tsfcl(i)  = tsfc(i)
             dry(i)    = .true.
             frland(i) = one
             cice(i)   = zero
             hice(i)   = zero
             icy(i)    = .false.
           else
-            frland(i) = zero
+            frland(i)    = zero
             if (oceanfrac(i) > zero) then
               if (cice(i) >= min_seaice) then
                 icy(i)   = .true.
