@@ -64,7 +64,8 @@
      &     tsea,heat,evap,stress,spd1,kpbl,                             &
      &     prsi,del,prsl,prslk,phii,phil,delt,                          &
      &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,dkt,dku,                &
-     &     kinver,xkzm_m,xkzm_h,xkzm_s,dspfac,bl_upfr,bl_dnfr,rlmx,elmx,&
+     &     kinver,xkzm_m,xkzm_h,xkzm_s,dspfac,bl_upfr,bl_dnfr,          &
+     &     rlmx,elmx,sfc_rlm,                                           &
      &     ntoz,du3dt,dv3dt,dt3dt,dq3dt,do3dt,gen_tend,ldiag3d,qdiag3d, &
      &     errmsg,errflg)
 !
@@ -75,6 +76,7 @@
 !
 !----------------------------------------------------------------------
       integer, intent(in)  :: im, km, ntrac, ntcw, ntiw, ntke, ntoz
+      integer, intent(in)  :: sfc_rlm
       integer, intent(in)  :: kinver(:)
       integer, intent(in)  :: islimsk(:)
       integer, intent(out) :: kpbl(:)
@@ -971,6 +973,12 @@
             zk = tem / ptem
           endif 
           elm(i,k) = zk*rlam(i,k)/(rlam(i,k)+zk)
+
+!>  - If sfc_rlm=1, use zk for elm within surface layer
+          if ( sfc_rlm == 1 ) then
+            if ( sfcflg(i) .and.
+     &           zl(i,k) < min(100.0,hpbl(i)*0.05) ) elm(i,k)=zk
+          endif
 !
           dz = zi(i,k+1) - zi(i,k)
           tem = max(gdx(i),dz)
