@@ -302,6 +302,22 @@
   type = integer
   intent = in
   optional = F
+[ext_diag]
+  standard_name = flag_for_extended_diagnostic_output_from_thompson_microphysics
+  long_name = flag for extended diagnostic output from thompson microphysics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[ext_ndiag3d]
+  standard_name = number_of_3d_arrays_for_extended_diagnostic_output_from_thompson_microphysics
+  long_name = number of 3d arrays for extended diagnostic output from thompson microphysics
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -707,6 +723,24 @@
   type = integer
   intent = in
   optional = F
+[ext_diag]
+  standard_name = flag_for_extended_diagnostic_output_from_thompson_microphysics
+  long_name = flag for extended diagnostic output from thompson microphysics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[diag3d]
+  standard_name = extended_diagnostics_output_from_thompson_microphysics
+  long_name = set of 3d arrays for extended diagnostics output from thompson microphysics
+  units = none
+  dimensions = (horizontal_dimension,vertical_dimension,number_of_3d_diagnostic_output_arrays_from_thompson_microphysics)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -724,19 +758,6 @@
   type = integer
   intent = out
   optional = F
-[naux3d]
-  standard_name = number_of_3d_auxiliary_arrays
-  long_name = number of 3d auxiliary arrays to output (for debugging)
-  units = count
-  dimensions = ()
-  type = integer
-[aux3d]
-  standard_name = auxiliary_3d_arrays
-  long_name = auxiliary 3d arrays to output (for debugging)
-  units = none
-  dimensions = (horizontal_dimension,vertical_dimension,number_of_3d_auxiliary_arrays)
-  type = real
-  kind = kind_phys
 
 ########################################################################
 [ccpp-arg-table]
