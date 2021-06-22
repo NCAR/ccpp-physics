@@ -1195,7 +1195,7 @@ MODULE module_mp_thompson
          allocate (tpri_rfz1(kts:kte))
          allocate (tprg_rfz1(kts:kte))
          allocate (tprs_scw1(kts:kte))
-         allocate (tprg_scw1,(kts:kte))
+         allocate (tprg_scw1(kts:kte))
          allocate (tprg_rcs1(kts:kte))
          allocate (tprs_rcs1_s(kts:kte))
          allocate (tprs_rcs1_r(kts:kte))
@@ -1211,7 +1211,7 @@ MODULE module_mp_thompson
          allocate (tprr_rcs1_r(kts:kte))
          allocate (tprr_rcs1_s(kts:kte))
          allocate (tprv_rev1(kts:kte))
-         allocate (txri1,(kts:kte))
+         allocate (txri1(kts:kte))
          allocate (txrc1(kts:kte))
          allocate (tten1(kts:kte))
          allocate (qvten1(kts:kte))
@@ -1391,7 +1391,7 @@ MODULE module_mp_thompson
                vtsk1(k) = 0.
                txrc1(k) = 0.
                txri1(k) = 0.
-            endif
+            endif initialize_extended_diagnostics
          enddo
          if (is_aerosol_aware) then
             do k = kts, kte
@@ -1415,7 +1415,8 @@ MODULE module_mp_thompson
                       rainprod1d, evapprod1d, &
 #endif
                       rand1, rand2, rand3, &
-                      kts, kte, dt, i, j, vtsk1, prw_vcdc1, prw_vcde1, &
+                      kts, kte, dt, i, j, &
+                      ext_diag, vtsk1, prw_vcdc1, prw_vcde1,           &
                       tpri_inu1, tpri_ide1_d, tpri_ide1_s, tprs_ide1_d,&
                       tprs_ide1_s, tprs_sde1_d, tprs_sde1_s,           &
                       tprg_gde1_d, tprg_gde1_s, tpri_iha1, tpri_wfz1,  &
@@ -1691,7 +1692,7 @@ MODULE module_mp_thompson
          deallocate (tpri_rfz1)
          deallocate (tprg_rfz1)
          deallocate (tprs_scw1)
-         deallocate (tprg_scw1,)
+         deallocate (tprg_scw1)
          deallocate (tprg_rcs1)
          deallocate (tprs_rcs1_s)
          deallocate (tprs_rcs1_r)
@@ -1707,7 +1708,7 @@ MODULE module_mp_thompson
          deallocate (tprr_rcs1_r)
          deallocate (tprr_rcs1_s)
          deallocate (tprv_rev1)
-         deallocate (txri1,)
+         deallocate (txri1)
          deallocate (txrc1)
          deallocate (tten1)
          deallocate (qvten1)
@@ -3689,7 +3690,6 @@ MODULE module_mp_thompson
          vtgk(k) = 0.
          vtck(k) = 0.
          vtnck(k) = 0.
-         vtsk1(k) = 0.
       enddo
 
       if (ANY(L_qr .eqv. .true.)) then
@@ -4113,95 +4113,99 @@ MODULE module_mp_thompson
          qg1d(k) = qg1d(k) + qgten(k)*DT
          if (qg1d(k) .le. R1) qg1d(k) = 0.0
       enddo
+
 ! Diagnostics
-      do k = kts, kte
-         if(prw_vcd(k).gt.0)then
-            prw_vcdc1(k) = prw_vcd(k)*dt
-         elseif(prw_vcd(k).lt.0)then
-            prw_vcde1(k) = -1*prw_vcd(k)*dt
-         endif
-!heating/cooling diagnostics 
-         tpri_inu1(k) = pri_inu(k)*lsub*ocp(k)*orho * (1-IFDRY)*DT
+      calculate_extended_diagnostics: if (ext_diag) then
+         do k = kts, kte
+            if(prw_vcd(k).gt.0)then
+               prw_vcdc1(k) = prw_vcd(k)*dt
+            elseif(prw_vcd(k).lt.0)then
+               prw_vcde1(k) = -1*prw_vcd(k)*dt
+            endif
+!heating/cooling diagnostics
+            tpri_inu1(k) = pri_inu(k)*lsub*ocp(k)*orho * (1-IFDRY)*DT
 
-         if(pri_ide(k).gt.0)then
-            tpri_ide1_d(k) = pri_ide(k)*lsub*ocp(k)*orho * (1-IFDRY)*DT
-         else
-            tpri_ide1_s(k) = -pri_ide(k)*lsub*ocp(k)*orho * (1-IFDRY)*DT
-         endif
+            if(pri_ide(k).gt.0)then
+               tpri_ide1_d(k) = pri_ide(k)*lsub*ocp(k)*orho * (1-IFDRY)*DT
+            else
+               tpri_ide1_s(k) = -pri_ide(k)*lsub*ocp(k)*orho * (1-IFDRY)*DT
+            endif
 
-         if(prs_ide(k).gt.0)then
-           tprs_ide1_d(k) = prs_ide(k)*lsub*ocp(k)*orho * (1-IFDRY)*DT
-         else
-           tprs_ide1_s(k) = -prs_ide(k)*lsub*ocp(k)*orho * (1-IFDRY)*DT
-         endif
+            if(prs_ide(k).gt.0)then
+              tprs_ide1_d(k) = prs_ide(k)*lsub*ocp(k)*orho * (1-IFDRY)*DT
+            else
+              tprs_ide1_s(k) = -prs_ide(k)*lsub*ocp(k)*orho * (1-IFDRY)*DT
+            endif
 
-         if(prs_sde(k).gt.0)then
-            tprs_sde1_d(k) = prs_sde(k)*lsub*ocp(k)*orho * (1-IFDRY)*DT
-         else
-            tprs_sde1_s(k) = -prs_sde(k)*lsub*ocp(k)*orho * (1-IFDRY)*DT
-         endif
+            if(prs_sde(k).gt.0)then
+               tprs_sde1_d(k) = prs_sde(k)*lsub*ocp(k)*orho * (1-IFDRY)*DT
+            else
+               tprs_sde1_s(k) = -prs_sde(k)*lsub*ocp(k)*orho * (1-IFDRY)*DT
+            endif
 
-         if(prg_gde(k).gt.0)then
-           tprg_gde1_d(k) = prg_gde(k)*lsub*ocp(k)*orho * (1-IFDRY)*DT
-         else
-           tprg_gde1_s(k) = -prg_gde(k)*lsub*ocp(k)*orho * (1-IFDRY)*DT
-         endif
+            if(prg_gde(k).gt.0)then
+              tprg_gde1_d(k) = prg_gde(k)*lsub*ocp(k)*orho * (1-IFDRY)*DT
+            else
+              tprg_gde1_s(k) = -prg_gde(k)*lsub*ocp(k)*orho * (1-IFDRY)*DT
+            endif
 
-         tpri_iha1(k) = pri_iha(k)*lsub*ocp(k)*orho * (1-IFDRY)*DT
-         tpri_wfz1(k) = pri_wfz(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
-         tpri_rfz1(k) = pri_rfz(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
-         tprg_rfz1(k) = prg_rfz(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
-         tprs_scw1(k) = prs_scw(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
-         tprg_scw1(k) = prg_scw(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
-         tprg_rcs1(k) = prg_rcs(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
+            tpri_iha1(k) = pri_iha(k)*lsub*ocp(k)*orho * (1-IFDRY)*DT
+            tpri_wfz1(k) = pri_wfz(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
+            tpri_rfz1(k) = pri_rfz(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
+            tprg_rfz1(k) = prg_rfz(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
+            tprs_scw1(k) = prs_scw(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
+            tprg_scw1(k) = prg_scw(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
+            tprg_rcs1(k) = prg_rcs(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
 
-         if(prs_rcs(k).gt.0)then
-           tprs_rcs1_s(k) = prs_rcs(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
-         else
-           tprs_rcs1_r(k) = -prs_rcs(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
-         endif
+            if(prs_rcs(k).gt.0)then
+              tprs_rcs1_s(k) = prs_rcs(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
+            else
+              tprs_rcs1_r(k) = -prs_rcs(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
+            endif
 
-         tprr_rci1(k) = prr_rci(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
+            tprr_rci1(k) = prr_rci(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
 
-         if(prg_rcg(k).gt.0)then
-            tprg_rcg1_g(k) = prg_rcg(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
-         else
-            tprg_rcg1_r(k) = -prg_rcg(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
-         endif
+            if(prg_rcg(k).gt.0)then
+               tprg_rcg1_g(k) = prg_rcg(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
+            else
+               tprg_rcg1_r(k) = -prg_rcg(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
+            endif
 
-         if(prw_vcd(k).gt.0)then
-            tprw_vcd1_c(k) = lvap(k)*ocp(k)*prw_vcd(k)*(1-IFDRY)*DT
-         else
-            tprw_vcd1_e(k) = -lvap(k)*ocp(k)*prw_vcd(k)*(1-IFDRY)*DT
-         endif
+            if(prw_vcd(k).gt.0)then
+               tprw_vcd1_c(k) = lvap(k)*ocp(k)*prw_vcd(k)*(1-IFDRY)*DT
+            else
+               tprw_vcd1_e(k) = -lvap(k)*ocp(k)*prw_vcd(k)*(1-IFDRY)*DT
+            endif
 
 ! cooling terms
-         tprr_sml1(k) = prr_sml(k)*lfus*ocp(k)*orho * (1-IFDRY)*DT
-         tprr_gml1(k) = prr_gml(k)*lfus*ocp(k)*orho * (1-IFDRY)*DT
+            tprr_sml1(k) = prr_sml(k)*lfus*ocp(k)*orho * (1-IFDRY)*DT
+            tprr_gml1(k) = prr_gml(k)*lfus*ocp(k)*orho * (1-IFDRY)*DT
 
-         if(prr_rcg(k).gt.0)then
-            tprr_rcg1_r(k) = prr_rcg(k)*lfus*ocp(k)*orho * (1-IFDRY)*DT
-         else
-            tprr_rcg1_g(k) = -prr_rcg(k)*lfus*ocp(k)*orho * (1-IFDRY)*DT
-         endif
+            if(prr_rcg(k).gt.0)then
+               tprr_rcg1_r(k) = prr_rcg(k)*lfus*ocp(k)*orho * (1-IFDRY)*DT
+            else
+               tprr_rcg1_g(k) = -prr_rcg(k)*lfus*ocp(k)*orho * (1-IFDRY)*DT
+            endif
 
-         if(prr_rcs(k).gt.0)then
-            tprr_rcs1_r(k) = prr_rcs(k)*lfus*ocp(k)*orho * (1-IFDRY)*DT
-         else
-            tprr_rcs1_s(k) = prr_rcs(k)*lfus*ocp(k)*orho * (1-IFDRY)*DT
-         endif
+            if(prr_rcs(k).gt.0)then
+               tprr_rcs1_r(k) = prr_rcs(k)*lfus*ocp(k)*orho * (1-IFDRY)*DT
+            else
+               tprr_rcs1_s(k) = prr_rcs(k)*lfus*ocp(k)*orho * (1-IFDRY)*DT
+            endif
 
-         tprv_rev1(k) = lvap(k)*ocp(k)*prv_rev(k)*(1-IFDRY)*DT
-         tten1(k) = tten(k)*DT
-         qvten1(k) = qvten(k)*DT
-         qrten1(k) = qrten(k)*DT
-         qsten1(k) = qsten(k)*DT
-         qgten1(k) = qgten(k)*DT
-         niten1(k) = niten(k)*DT
-         nrten1(k) = nrten(k)*DT
-         ncten1(k) = ncten(k)*DT
-         qcten1(k) = qcten(k)*DT
-      enddo
+            tprv_rev1(k) = lvap(k)*ocp(k)*prv_rev(k)*(1-IFDRY)*DT
+            tten1(k) = tten(k)*DT
+            qvten1(k) = qvten(k)*DT
+            qrten1(k) = qrten(k)*DT
+            qsten1(k) = qsten(k)*DT
+            qgten1(k) = qgten(k)*DT
+            niten1(k) = niten(k)*DT
+            nrten1(k) = nrten(k)*DT
+            ncten1(k) = ncten(k)*DT
+            qcten1(k) = qcten(k)*DT
+         enddo
+      endif calculate_extended_diagnostics
+
       end subroutine mp_thompson
 !>@}
 

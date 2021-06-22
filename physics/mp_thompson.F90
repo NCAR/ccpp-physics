@@ -38,7 +38,7 @@ module mp_thompson
                                   nwfa, nifa, tgrs, prsl, phil, area,   &
                                   re_cloud, re_ice, re_snow,            &
                                   mpicomm, mpirank, mpiroot,            &
-                                  threads, ext_diag, ext_ndiag3d_in,    &
+                                  threads, ext_diag, diag3d,            &
                                   errmsg, errflg)
 
          implicit none
@@ -84,7 +84,7 @@ module mp_thompson
          integer,                   intent(in   ) :: threads
          ! Extended diagnostics
          logical,                   intent(in   ) :: ext_diag
-         integer,                   intent(in   ) :: ext_ndiag3d_in
+         real(kind_phys),           intent(in   ) :: diag3d(:,:,:)
          ! CCPP error handling
          character(len=*),          intent(  out) :: errmsg
          integer,                   intent(  out) :: errflg
@@ -112,10 +112,12 @@ module mp_thompson
             return
          end if
 
-         if (ext_diag and ext_ndiag3d_in /= ext_ndiag3d) then
-            write(errmsg,'(*(a))') "Logic error: number of diagnostic 3d arrays from model does not match requirements"
-            errflg = 1
-            return
+         if (ext_diag) then
+            if (size(diag3d,dim=3) /= ext_ndiag3d) then
+               write(errmsg,'(*(a))') "Logic error: number of diagnostic 3d arrays from model does not match requirements"
+               errflg = 1
+               return
+            end if
          end if
 
          ! Call Thompson init
@@ -398,7 +400,7 @@ module mp_thompson
          integer,                   intent(in)    :: mpiroot
          ! Extended diagnostic output
          logical,                   intent(in)    :: ext_diag
-         real(kind_phys),           intent(inout) :: diag3d(:,:,:)
+         real(kind_phys), target,   intent(inout) :: diag3d(:,:,:)
 
          ! CCPP error handling
          character(len=*),          intent(  out) :: errmsg
@@ -443,51 +445,51 @@ module mp_thompson
                             ims,ime, jms,jme, kms,kme, &
                             its,ite, jts,jte, kts,kte
          ! Pointer arrays for extended diagnostics
-         real(kind_phys), dimension(:,:), pointer :: vts1       => null()
-         real(kind_phys), dimension(:,:), pointer :: prw_vcdc   => null()
-         real(kind_phys), dimension(:,:), pointer :: prw_vcde   => null()
-         real(kind_phys), dimension(:,:), pointer :: tpri_inu   => null()
-         real(kind_phys), dimension(:,:), pointer :: tpri_ide_d => null()
-         real(kind_phys), dimension(:,:), pointer :: tpri_ide_s => null()
-         real(kind_phys), dimension(:,:), pointer :: tprs_ide_d => null()
-         real(kind_phys), dimension(:,:), pointer :: tprs_ide_s => null()
-         real(kind_phys), dimension(:,:), pointer :: tprs_sde_d => null()
-         real(kind_phys), dimension(:,:), pointer :: tprs_sde_s => null()
-         real(kind_phys), dimension(:,:), pointer :: tprg_gde_d => null()
-         real(kind_phys), dimension(:,:), pointer :: tprg_gde_s => null()
-         real(kind_phys), dimension(:,:), pointer :: tpri_iha   => null()
-         real(kind_phys), dimension(:,:), pointer :: tpri_wfz   => null()
-         real(kind_phys), dimension(:,:), pointer :: tpri_rfz   => null()
-         real(kind_phys), dimension(:,:), pointer :: tprg_rfz   => null()
-         real(kind_phys), dimension(:,:), pointer :: tprs_scw   => null()
-         real(kind_phys), dimension(:,:), pointer :: tprg_scw   => null()
-         real(kind_phys), dimension(:,:), pointer :: tprg_rcs   => null()
-         real(kind_phys), dimension(:,:), pointer :: tprs_rcs_s => null()
-         real(kind_phys), dimension(:,:), pointer :: tprs_rcs_r => null()
-         real(kind_phys), dimension(:,:), pointer :: tprr_rci   => null()
-         real(kind_phys), dimension(:,:), pointer :: tprg_rcg_g => null()
-         real(kind_phys), dimension(:,:), pointer :: tprg_rcg_r => null()
-         real(kind_phys), dimension(:,:), pointer :: tprw_vcd_c => null()
-         real(kind_phys), dimension(:,:), pointer :: tprw_vcd_e => null()
-         real(kind_phys), dimension(:,:), pointer :: tprr_sml   => null()
-         real(kind_phys), dimension(:,:), pointer :: tprr_gml   => null()
-         real(kind_phys), dimension(:,:), pointer :: tprr_rcg_r => null()
-         real(kind_phys), dimension(:,:), pointer :: tprr_rcg_g => null()
-         real(kind_phys), dimension(:,:), pointer :: tprr_rcs_r => null()
-         real(kind_phys), dimension(:,:), pointer :: tprr_rcs_s => null()
-         real(kind_phys), dimension(:,:), pointer :: tprv_rev   => null()
-         real(kind_phys), dimension(:,:), pointer :: txri       => null()
-         real(kind_phys), dimension(:,:), pointer :: txrc       => null()
-         real(kind_phys), dimension(:,:), pointer :: tten3      => null()
-         real(kind_phys), dimension(:,:), pointer :: qvten3     => null()
-         real(kind_phys), dimension(:,:), pointer :: qrten3     => null()
-         real(kind_phys), dimension(:,:), pointer :: qsten3     => null()
-         real(kind_phys), dimension(:,:), pointer :: qgten3     => null()
-         real(kind_phys), dimension(:,:), pointer :: qiten3     => null()
-         real(kind_phys), dimension(:,:), pointer :: niten3     => null()
-         real(kind_phys), dimension(:,:), pointer :: nrten3     => null()
-         real(kind_phys), dimension(:,:), pointer :: ncten3     => null()
-         real(kind_phys), dimension(:,:), pointer :: qcten3     => null()
+         real(kind_phys), dimension(:,:,:), pointer :: vts1       => null()
+         real(kind_phys), dimension(:,:,:), pointer :: prw_vcdc   => null()
+         real(kind_phys), dimension(:,:,:), pointer :: prw_vcde   => null()
+         real(kind_phys), dimension(:,:,:), pointer :: tpri_inu   => null()
+         real(kind_phys), dimension(:,:,:), pointer :: tpri_ide_d => null()
+         real(kind_phys), dimension(:,:,:), pointer :: tpri_ide_s => null()
+         real(kind_phys), dimension(:,:,:), pointer :: tprs_ide_d => null()
+         real(kind_phys), dimension(:,:,:), pointer :: tprs_ide_s => null()
+         real(kind_phys), dimension(:,:,:), pointer :: tprs_sde_d => null()
+         real(kind_phys), dimension(:,:,:), pointer :: tprs_sde_s => null()
+         real(kind_phys), dimension(:,:,:), pointer :: tprg_gde_d => null()
+         real(kind_phys), dimension(:,:,:), pointer :: tprg_gde_s => null()
+         real(kind_phys), dimension(:,:,:), pointer :: tpri_iha   => null()
+         real(kind_phys), dimension(:,:,:), pointer :: tpri_wfz   => null()
+         real(kind_phys), dimension(:,:,:), pointer :: tpri_rfz   => null()
+         real(kind_phys), dimension(:,:,:), pointer :: tprg_rfz   => null()
+         real(kind_phys), dimension(:,:,:), pointer :: tprs_scw   => null()
+         real(kind_phys), dimension(:,:,:), pointer :: tprg_scw   => null()
+         real(kind_phys), dimension(:,:,:), pointer :: tprg_rcs   => null()
+         real(kind_phys), dimension(:,:,:), pointer :: tprs_rcs_s => null()
+         real(kind_phys), dimension(:,:,:), pointer :: tprs_rcs_r => null()
+         real(kind_phys), dimension(:,:,:), pointer :: tprr_rci   => null()
+         real(kind_phys), dimension(:,:,:), pointer :: tprg_rcg_g => null()
+         real(kind_phys), dimension(:,:,:), pointer :: tprg_rcg_r => null()
+         real(kind_phys), dimension(:,:,:), pointer :: tprw_vcd_c => null()
+         real(kind_phys), dimension(:,:,:), pointer :: tprw_vcd_e => null()
+         real(kind_phys), dimension(:,:,:), pointer :: tprr_sml   => null()
+         real(kind_phys), dimension(:,:,:), pointer :: tprr_gml   => null()
+         real(kind_phys), dimension(:,:,:), pointer :: tprr_rcg_r => null()
+         real(kind_phys), dimension(:,:,:), pointer :: tprr_rcg_g => null()
+         real(kind_phys), dimension(:,:,:), pointer :: tprr_rcs_r => null()
+         real(kind_phys), dimension(:,:,:), pointer :: tprr_rcs_s => null()
+         real(kind_phys), dimension(:,:,:), pointer :: tprv_rev   => null()
+         real(kind_phys), dimension(:,:,:), pointer :: txri       => null()
+         real(kind_phys), dimension(:,:,:), pointer :: txrc       => null()
+         real(kind_phys), dimension(:,:,:), pointer :: tten3      => null()
+         real(kind_phys), dimension(:,:,:), pointer :: qvten3     => null()
+         real(kind_phys), dimension(:,:,:), pointer :: qrten3     => null()
+         real(kind_phys), dimension(:,:,:), pointer :: qsten3     => null()
+         real(kind_phys), dimension(:,:,:), pointer :: qgten3     => null()
+         real(kind_phys), dimension(:,:,:), pointer :: qiten3     => null()
+         real(kind_phys), dimension(:,:,:), pointer :: niten3     => null()
+         real(kind_phys), dimension(:,:,:), pointer :: nrten3     => null()
+         real(kind_phys), dimension(:,:,:), pointer :: ncten3     => null()
+         real(kind_phys), dimension(:,:,:), pointer :: qcten3     => null()
 
          ! Initialize the CCPP error handling variables
          errmsg = ''
@@ -625,51 +627,51 @@ module mp_thompson
 
          ! Set pointers for extended diagnostics
          set_extended_diagnostic_pointers: if (ext_diag) then
-           vts1       => diag3d(:,:,1)
-           prw_vcdc   => diag3d(:,:,2)
-           prw_vcde   => diag3d(:,:,3)
-           tpri_inu   => diag3d(:,:,4)
-           tpri_ide_d => diag3d(:,:,5)
-           tpri_ide_s => diag3d(:,:,6)
-           tprs_ide_d => diag3d(:,:,7)
-           tprs_ide_s => diag3d(:,:,8)
-           tprs_sde_d => diag3d(:,:,9)
-           tprs_sde_s => diag3d(:,:,10)
-           tprg_gde_d => diag3d(:,:,11)
-           tprg_gde_s => diag3d(:,:,12)
-           tpri_iha   => diag3d(:,:,13)
-           tpri_wfz   => diag3d(:,:,14)
-           tpri_rfz   => diag3d(:,:,15)
-           tprg_rfz   => diag3d(:,:,16)
-           tprs_scw   => diag3d(:,:,17)
-           tprg_scw   => diag3d(:,:,18)
-           tprg_rcs   => diag3d(:,:,19)
-           tprs_rcs_s => diag3d(:,:,20)
-           tprs_rcs_r => diag3d(:,:,21)
-           tprr_rci   => diag3d(:,:,22)
-           tprg_rcg_g => diag3d(:,:,23)
-           tprg_rcg_r => diag3d(:,:,24)
-           tprw_vcd_c => diag3d(:,:,25)
-           tprw_vcd_e => diag3d(:,:,26)
-           tprr_sml   => diag3d(:,:,27)
-           tprr_gml   => diag3d(:,:,28)
-           tprr_rcg_r => diag3d(:,:,29)
-           tprr_rcg_g => diag3d(:,:,30)
-           tprr_rcs_r => diag3d(:,:,31)
-           tprr_rcs_s => diag3d(:,:,32)
-           tprv_rev   => diag3d(:,:,33)
-           txri       => diag3d(:,:,34)
-           txrc       => diag3d(:,:,35)
-           tten3      => diag3d(:,:,36)
-           qvten3     => diag3d(:,:,37)
-           qrten3     => diag3d(:,:,38)
-           qsten3     => diag3d(:,:,39)
-           qgten3     => diag3d(:,:,40)
-           qiten3     => diag3d(:,:,41)
-           niten3     => diag3d(:,:,42)
-           nrten3     => diag3d(:,:,43)
-           ncten3     => diag3d(:,:,44)
-           qcten3     => diag3d(:,:,45)
+            vts1       => diag3d(:,:,1:1)
+            prw_vcdc   => diag3d(:,:,2:2)
+            prw_vcde   => diag3d(:,:,3:3)
+            tpri_inu   => diag3d(:,:,4:4)
+            tpri_ide_d => diag3d(:,:,5:5)
+            tpri_ide_s => diag3d(:,:,6:6)
+            tprs_ide_d => diag3d(:,:,7:7)
+            tprs_ide_s => diag3d(:,:,8:8)
+            tprs_sde_d => diag3d(:,:,9:9)
+            tprs_sde_s => diag3d(:,:,10:10)
+            tprg_gde_d => diag3d(:,:,11:11)
+            tprg_gde_s => diag3d(:,:,12:12)
+            tpri_iha   => diag3d(:,:,13:13)
+            tpri_wfz   => diag3d(:,:,14:14)
+            tpri_rfz   => diag3d(:,:,15:15)
+            tprg_rfz   => diag3d(:,:,16:16)
+            tprs_scw   => diag3d(:,:,17:17)
+            tprg_scw   => diag3d(:,:,18:18)
+            tprg_rcs   => diag3d(:,:,19:19)
+            tprs_rcs_s => diag3d(:,:,20:20)
+            tprs_rcs_r => diag3d(:,:,21:21)
+            tprr_rci   => diag3d(:,:,22:22)
+            tprg_rcg_g => diag3d(:,:,23:23)
+            tprg_rcg_r => diag3d(:,:,24:24)
+            tprw_vcd_c => diag3d(:,:,25:25)
+            tprw_vcd_e => diag3d(:,:,26:26)
+            tprr_sml   => diag3d(:,:,27:27)
+            tprr_gml   => diag3d(:,:,28:28)
+            tprr_rcg_r => diag3d(:,:,29:29)
+            tprr_rcg_g => diag3d(:,:,30:30)
+            tprr_rcs_r => diag3d(:,:,31:31)
+            tprr_rcs_s => diag3d(:,:,32:32)
+            tprv_rev   => diag3d(:,:,33:33)
+            txri       => diag3d(:,:,34:34)
+            txrc       => diag3d(:,:,35:35)
+            tten3      => diag3d(:,:,36:36)
+            qvten3     => diag3d(:,:,37:37)
+            qrten3     => diag3d(:,:,38:38)
+            qsten3     => diag3d(:,:,39:39)
+            qgten3     => diag3d(:,:,40:40)
+            qiten3     => diag3d(:,:,41:41)
+            niten3     => diag3d(:,:,42:42)
+            nrten3     => diag3d(:,:,43:43)
+            ncten3     => diag3d(:,:,44:44)
+            qcten3     => diag3d(:,:,45:45)
          end if set_extended_diagnostic_pointers
 
          !> - Call mp_gt_driver() with or without aerosols
@@ -713,7 +715,7 @@ module mp_thompson
                                  tprv_rev=tprv_rev, txri=txri, txrc=txrc, tten3=tten3,          &
                                  qvten3=qvten3, qrten3=qrten3, qsten3=qsten3, qgten3=qgten3,    &
                                  qiten3=qiten3, niten3=niten3, nrten3=nrten3, ncten3=ncten3,    &
-                                 qcten3=qcten3))
+                                 qcten3=qcten3)
             else
                call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
                                  nc=nc, nwfa=nwfa, nifa=nifa, nwfa2d=nwfa2d, nifa2d=nifa2d,     &
@@ -752,7 +754,7 @@ module mp_thompson
                                  tprv_rev=tprv_rev, txri=txri, txrc=txrc, tten3=tten3,          &
                                  qvten3=qvten3, qrten3=qrten3, qsten3=qsten3, qgten3=qgten3,    &
                                  qiten3=qiten3, niten3=niten3, nrten3=nrten3, ncten3=ncten3,    &
-                                 qcten3=qcten3))
+                                 qcten3=qcten3)
             end if
          else
             if (do_effective_radii) then
@@ -793,7 +795,7 @@ module mp_thompson
                                  tprv_rev=tprv_rev, txri=txri, txrc=txrc, tten3=tten3,          &
                                  qvten3=qvten3, qrten3=qrten3, qsten3=qsten3, qgten3=qgten3,    &
                                  qiten3=qiten3, niten3=niten3, nrten3=nrten3, ncten3=ncten3,    &
-                                 qcten3=qcten3))
+                                 qcten3=qcten3)
             else
                call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
                                  tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtp,                        &
@@ -831,7 +833,7 @@ module mp_thompson
                                  tprv_rev=tprv_rev, txri=txri, txrc=txrc, tten3=tten3,          &
                                  qvten3=qvten3, qrten3=qrten3, qsten3=qsten3, qgten3=qgten3,    &
                                  qiten3=qiten3, niten3=niten3, nrten3=nrten3, ncten3=ncten3,    &
-                                 qcten3=qcten3))
+                                 qcten3=qcten3)
             end if
          end if
          if (errflg/=0) return
