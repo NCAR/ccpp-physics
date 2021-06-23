@@ -451,8 +451,7 @@ module mp_thompson
          real(kind_phys), dimension(:,:,:), pointer :: tpri_inu   => null()
          real(kind_phys), dimension(:,:,:), pointer :: tpri_ide_d => null()
          real(kind_phys), dimension(:,:,:), pointer :: tpri_ide_s => null()
-         real(kind_phys), dimension(:,:,:), pointer :: tprs_ide_d => null()
-         real(kind_phys), dimension(:,:,:), pointer :: tprs_ide_s => null()
+         real(kind_phys), dimension(:,:,:), pointer :: tprs_ide   => null()
          real(kind_phys), dimension(:,:,:), pointer :: tprs_sde_d => null()
          real(kind_phys), dimension(:,:,:), pointer :: tprs_sde_s => null()
          real(kind_phys), dimension(:,:,:), pointer :: tprg_gde_d => null()
@@ -464,19 +463,15 @@ module mp_thompson
          real(kind_phys), dimension(:,:,:), pointer :: tprs_scw   => null()
          real(kind_phys), dimension(:,:,:), pointer :: tprg_scw   => null()
          real(kind_phys), dimension(:,:,:), pointer :: tprg_rcs   => null()
-         real(kind_phys), dimension(:,:,:), pointer :: tprs_rcs_s => null()
-         real(kind_phys), dimension(:,:,:), pointer :: tprs_rcs_r => null()
+         real(kind_phys), dimension(:,:,:), pointer :: tprs_rcs   => null()
          real(kind_phys), dimension(:,:,:), pointer :: tprr_rci   => null()
-         real(kind_phys), dimension(:,:,:), pointer :: tprg_rcg_g => null()
-         real(kind_phys), dimension(:,:,:), pointer :: tprg_rcg_r => null()
+         real(kind_phys), dimension(:,:,:), pointer :: tprg_rcg   => null()
          real(kind_phys), dimension(:,:,:), pointer :: tprw_vcd_c => null()
          real(kind_phys), dimension(:,:,:), pointer :: tprw_vcd_e => null()
          real(kind_phys), dimension(:,:,:), pointer :: tprr_sml   => null()
          real(kind_phys), dimension(:,:,:), pointer :: tprr_gml   => null()
-         real(kind_phys), dimension(:,:,:), pointer :: tprr_rcg_r => null()
-         real(kind_phys), dimension(:,:,:), pointer :: tprr_rcg_g => null()
-         real(kind_phys), dimension(:,:,:), pointer :: tprr_rcs_r => null()
-         real(kind_phys), dimension(:,:,:), pointer :: tprr_rcs_s => null()
+         real(kind_phys), dimension(:,:,:), pointer :: tprr_rcg   => null()
+         real(kind_phys), dimension(:,:,:), pointer :: tprr_rcs   => null()
          real(kind_phys), dimension(:,:,:), pointer :: tprv_rev   => null()
          real(kind_phys), dimension(:,:,:), pointer :: txri       => null()
          real(kind_phys), dimension(:,:,:), pointer :: txrc       => null()
@@ -633,45 +628,40 @@ module mp_thompson
             tpri_inu   => diag3d(:,:,4:4)
             tpri_ide_d => diag3d(:,:,5:5)
             tpri_ide_s => diag3d(:,:,6:6)
-            tprs_ide_d => diag3d(:,:,7:7)
-            tprs_ide_s => diag3d(:,:,8:8)
-            tprs_sde_d => diag3d(:,:,9:9)
-            tprs_sde_s => diag3d(:,:,10:10)
-            tprg_gde_d => diag3d(:,:,11:11)
-            tprg_gde_s => diag3d(:,:,12:12)
-            tpri_iha   => diag3d(:,:,13:13)
-            tpri_wfz   => diag3d(:,:,14:14)
-            tpri_rfz   => diag3d(:,:,15:15)
-            tprg_rfz   => diag3d(:,:,16:16)
-            tprs_scw   => diag3d(:,:,17:17)
-            tprg_scw   => diag3d(:,:,18:18)
-            tprg_rcs   => diag3d(:,:,19:19)
-            tprs_rcs_s => diag3d(:,:,20:20)
-            tprs_rcs_r => diag3d(:,:,21:21)
-            tprr_rci   => diag3d(:,:,22:22)
-            tprg_rcg_g => diag3d(:,:,23:23)
-            tprg_rcg_r => diag3d(:,:,24:24)
-            tprw_vcd_c => diag3d(:,:,25:25)
-            tprw_vcd_e => diag3d(:,:,26:26)
-            tprr_sml   => diag3d(:,:,27:27)
-            tprr_gml   => diag3d(:,:,28:28)
-            tprr_rcg_r => diag3d(:,:,29:29)
-            tprr_rcg_g => diag3d(:,:,30:30)
-            tprr_rcs_r => diag3d(:,:,31:31)
-            tprr_rcs_s => diag3d(:,:,32:32)
-            tprv_rev   => diag3d(:,:,33:33)
-            txri       => diag3d(:,:,34:34)
-            txrc       => diag3d(:,:,35:35)
-            tten3      => diag3d(:,:,36:36)
-            qvten3     => diag3d(:,:,37:37)
-            qrten3     => diag3d(:,:,38:38)
-            qsten3     => diag3d(:,:,39:39)
-            qgten3     => diag3d(:,:,40:40)
-            qiten3     => diag3d(:,:,41:41)
-            niten3     => diag3d(:,:,42:42)
-            nrten3     => diag3d(:,:,43:43)
-            ncten3     => diag3d(:,:,44:44)
-            qcten3     => diag3d(:,:,45:45)
+            tprs_ide   => diag3d(:,:,7:7)
+            tprs_sde_d => diag3d(:,:,8:8)
+            tprs_sde_s => diag3d(:,:,9:9)
+            tprg_gde_d => diag3d(:,:,10:10)
+            tprg_gde_s => diag3d(:,:,11:11)
+            tpri_iha   => diag3d(:,:,12:12)
+            tpri_wfz   => diag3d(:,:,13:13)
+            tpri_rfz   => diag3d(:,:,14:14)
+            tprg_rfz   => diag3d(:,:,15:15)
+            tprs_scw   => diag3d(:,:,16:16)
+            tprg_scw   => diag3d(:,:,17:17)
+            tprg_rcs   => diag3d(:,:,18:18)
+            tprs_rcs   => diag3d(:,:,19:19)
+            tprr_rci   => diag3d(:,:,20:20)
+            tprg_rcg   => diag3d(:,:,21:21)
+            tprw_vcd_c => diag3d(:,:,22:22)
+            tprw_vcd_e => diag3d(:,:,23:23)
+            tprr_sml   => diag3d(:,:,24:24)
+            tprr_gml   => diag3d(:,:,25:25)
+            tprr_rcg   => diag3d(:,:,26:26)
+            tprr_rcs   => diag3d(:,:,27:27)
+            tprv_rev   => diag3d(:,:,28:28)
+            txri       => diag3d(:,:,29:29)
+            txrc       => diag3d(:,:,30:30)
+            tten3      => diag3d(:,:,31:31)
+            qvten3     => diag3d(:,:,32:32)
+            qrten3     => diag3d(:,:,33:33)
+            qsten3     => diag3d(:,:,34:34)
+            qgten3     => diag3d(:,:,35:35)
+            qiten3     => diag3d(:,:,36:36)
+            niten3     => diag3d(:,:,37:37)
+            nrten3     => diag3d(:,:,38:38)
+            ncten3     => diag3d(:,:,39:39)
+            qcten3     => diag3d(:,:,40:40)
          end if set_extended_diagnostic_pointers
 
          !> - Call mp_gt_driver() with or without aerosols
@@ -700,140 +690,140 @@ module mp_thompson
                                  ! Extended diagnostics
                                  ext_diag=ext_diag, vts1=vts1, prw_vcdc=prw_vcdc,               &
                                  prw_vcde=prw_vcde, tpri_inu=tpri_inu, tpri_ide_d=tpri_ide_d,   &
-                                 tpri_ide_s=tpri_ide_s, tprs_ide_d=tprs_ide_d,                  &
-                                 tprs_ide_s=tprs_ide_s, tprs_sde_d=tprs_sde_d,                  &
+                                 tpri_ide_s=tpri_ide_s, tprs_ide=tprs_ide,                      &
+                                 tprs_sde_d=tprs_sde_d,                                         &
                                  tprs_sde_s=tprs_sde_s, tprg_gde_d=tprg_gde_d,                  &
                                  tprg_gde_s=tprg_gde_s, tpri_iha=tpri_iha,                      &
                                  tpri_wfz=tpri_wfz, tpri_rfz=tpri_rfz, tprg_rfz=tprg_rfz,       &
                                  tprs_scw=tprs_scw, tprg_scw=tprg_scw, tprg_rcs=tprg_rcs,       &
-                                 tprs_rcs_s=tprs_rcs_s, tprs_rcs_r=tprs_rcs_r,                  &
-                                 tprr_rci=tprr_rci, tprg_rcg_g=tprg_rcg_g,                      &
-                                 tprg_rcg_r=tprg_rcg_r, tprw_vcd_c=tprw_vcd_c,                  &
+                                 tprs_rcs=tprs_rcs,                                             &
+                                 tprr_rci=tprr_rci, tprg_rcg=tprg_rcg,                      &
+                                 tprw_vcd_c=tprw_vcd_c,                  &
                                  tprw_vcd_e=tprw_vcd_e, tprr_sml=tprr_sml, tprr_gml=tprr_gml,   &
-                                 tprr_rcg_r=tprr_rcg_r, tprr_rcg_g=tprr_rcg_g,                  &
-                                 tprr_rcs_r=tprr_rcs_r, tprr_rcs_s=tprr_rcs_s,                  &
+                                 tprr_rcg=tprr_rcg,               &
+                                 tprr_rcs=tprr_rcs, &
                                  tprv_rev=tprv_rev, txri=txri, txrc=txrc, tten3=tten3,          &
                                  qvten3=qvten3, qrten3=qrten3, qsten3=qsten3, qgten3=qgten3,    &
                                  qiten3=qiten3, niten3=niten3, nrten3=nrten3, ncten3=ncten3,    &
                                  qcten3=qcten3)
             else
-               call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
-                                 nc=nc, nwfa=nwfa, nifa=nifa, nwfa2d=nwfa2d, nifa2d=nifa2d,     &
-                                 tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtp,                        &
-                                 rainnc=rain_mp, rainncv=delta_rain_mp,                         &
-                                 snownc=snow_mp, snowncv=delta_snow_mp,                         &
-                                 icenc=ice_mp, icencv=delta_ice_mp,                             &
-                                 graupelnc=graupel_mp, graupelncv=delta_graupel_mp, sr=sr,      &
-                                 refl_10cm=refl_10cm,                                           &
-                                 diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
-                                 has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
-                                 rand_perturb_on=rand_perturb_on, kme_stoch=kme_stoch,          &
-                                 ! DH* 2020-06-05 not passing this optional argument, see
-                                 !       comment in module_mp_thompson.F90 / mp_gt_driver
-                                 !rand_pert=rand_pert,                                          &
-                                 ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
-                                 ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
-                                 its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
-                                 reset_dBZ=reset_dBZ, istep=istep, nsteps=nsteps,               &
-                                 first_time_step=first_time_step, errmsg=errmsg, errflg=errflg, &
-                                 ! Extended diagnostics
-                                 ext_diag=ext_diag, vts1=vts1, prw_vcdc=prw_vcdc,               &
-                                 prw_vcde=prw_vcde, tpri_inu=tpri_inu, tpri_ide_d=tpri_ide_d,   &
-                                 tpri_ide_s=tpri_ide_s, tprs_ide_d=tprs_ide_d,                  &
-                                 tprs_ide_s=tprs_ide_s, tprs_sde_d=tprs_sde_d,                  &
-                                 tprs_sde_s=tprs_sde_s, tprg_gde_d=tprg_gde_d,                  &
-                                 tprg_gde_s=tprg_gde_s, tpri_iha=tpri_iha,                      &
-                                 tpri_wfz=tpri_wfz, tpri_rfz=tpri_rfz, tprg_rfz=tprg_rfz,       &
-                                 tprs_scw=tprs_scw, tprg_scw=tprg_scw, tprg_rcs=tprg_rcs,       &
-                                 tprs_rcs_s=tprs_rcs_s, tprs_rcs_r=tprs_rcs_r,                  &
-                                 tprr_rci=tprr_rci, tprg_rcg_g=tprg_rcg_g,                      &
-                                 tprg_rcg_r=tprg_rcg_r, tprw_vcd_c=tprw_vcd_c,                  &
-                                 tprw_vcd_e=tprw_vcd_e, tprr_sml=tprr_sml, tprr_gml=tprr_gml,   &
-                                 tprr_rcg_r=tprr_rcg_r, tprr_rcg_g=tprr_rcg_g,                  &
-                                 tprr_rcs_r=tprr_rcs_r, tprr_rcs_s=tprr_rcs_s,                  &
-                                 tprv_rev=tprv_rev, txri=txri, txrc=txrc, tten3=tten3,          &
-                                 qvten3=qvten3, qrten3=qrten3, qsten3=qsten3, qgten3=qgten3,    &
-                                 qiten3=qiten3, niten3=niten3, nrten3=nrten3, ncten3=ncten3,    &
-                                 qcten3=qcten3)
+               !!! call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
+               !!!                   nc=nc, nwfa=nwfa, nifa=nifa, nwfa2d=nwfa2d, nifa2d=nifa2d,     &
+               !!!                   tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtp,                        &
+               !!!                   rainnc=rain_mp, rainncv=delta_rain_mp,                         &
+               !!!                   snownc=snow_mp, snowncv=delta_snow_mp,                         &
+               !!!                   icenc=ice_mp, icencv=delta_ice_mp,                             &
+               !!!                   graupelnc=graupel_mp, graupelncv=delta_graupel_mp, sr=sr,      &
+               !!!                   refl_10cm=refl_10cm,                                           &
+               !!!                   diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
+               !!!                   has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
+               !!!                   rand_perturb_on=rand_perturb_on, kme_stoch=kme_stoch,          &
+               !!!                   ! DH* 2020-06-05 not passing this optional argument, see
+               !!!                   !       comment in module_mp_thompson.F90 / mp_gt_driver
+               !!!                   !rand_pert=rand_pert,                                          &
+               !!!                   ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
+               !!!                   ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
+               !!!                   its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
+               !!!                   reset_dBZ=reset_dBZ, istep=istep, nsteps=nsteps,               &
+               !!!                   first_time_step=first_time_step, errmsg=errmsg, errflg=errflg, &
+               !!!                   ! Extended diagnostics
+               !!!                   ext_diag=ext_diag, vts1=vts1, prw_vcdc=prw_vcdc,               &
+               !!!                   prw_vcde=prw_vcde, tpri_inu=tpri_inu, tpri_ide_d=tpri_ide_d,   &
+               !!!                   tpri_ide_s=tpri_ide_s, tprs_ide_d=tprs_ide_d,                  &
+               !!!                   tprs_ide_s=tprs_ide_s, tprs_sde_d=tprs_sde_d,                  &
+               !!!                   tprs_sde_s=tprs_sde_s, tprg_gde_d=tprg_gde_d,                  &
+               !!!                   tprg_gde_s=tprg_gde_s, tpri_iha=tpri_iha,                      &
+               !!!                   tpri_wfz=tpri_wfz, tpri_rfz=tpri_rfz, tprg_rfz=tprg_rfz,       &
+               !!!                   tprs_scw=tprs_scw, tprg_scw=tprg_scw, tprg_rcs=tprg_rcs,       &
+               !!!                   tprs_rcs_s=tprs_rcs_s, tprs_rcs_r=tprs_rcs_r,                  &
+               !!!                   tprr_rci=tprr_rci, tprg_rcg_g=tprg_rcg_g,                      &
+               !!!                   tprg_rcg_r=tprg_rcg_r, tprw_vcd_c=tprw_vcd_c,                  &
+               !!!                   tprw_vcd_e=tprw_vcd_e, tprr_sml=tprr_sml, tprr_gml=tprr_gml,   &
+               !!!                   tprr_rcg_r=tprr_rcg_r, tprr_rcg_g=tprr_rcg_g,                  &
+               !!!                   tprr_rcs_r=tprr_rcs_r, tprr_rcs_s=tprr_rcs_s,                  &
+               !!!                   tprv_rev=tprv_rev, txri=txri, txrc=txrc, tten3=tten3,          &
+               !!!                   qvten3=qvten3, qrten3=qrten3, qsten3=qsten3, qgten3=qgten3,    &
+               !!!                   qiten3=qiten3, niten3=niten3, nrten3=nrten3, ncten3=ncten3,    &
+               !!!                   qcten3=qcten3)
             end if
          else
             if (do_effective_radii) then
-               call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
-                                 tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtp,                        &
-                                 rainnc=rain_mp, rainncv=delta_rain_mp,                         &
-                                 snownc=snow_mp, snowncv=delta_snow_mp,                         &
-                                 icenc=ice_mp, icencv=delta_ice_mp,                             &
-                                 graupelnc=graupel_mp, graupelncv=delta_graupel_mp, sr=sr,      &
-                                 refl_10cm=refl_10cm,                                           &
-                                 diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
-                                 re_cloud=re_cloud, re_ice=re_ice, re_snow=re_snow,             &
-                                 has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
-                                 rand_perturb_on=rand_perturb_on, kme_stoch=kme_stoch,          &
-                                 ! DH* 2020-06-05 not passing this optional argument, see
-                                 !       comment in module_mp_thompson.F90 / mp_gt_driver
-                                 !rand_pert=rand_pert,                                          &
-                                 ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
-                                 ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
-                                 its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
-                                 reset_dBZ=reset_dBZ, istep=istep, nsteps=nsteps,               &
-                                 first_time_step=first_time_step, errmsg=errmsg, errflg=errflg, &
-                                 ! Extended diagnostics
-                                 ext_diag=ext_diag, vts1=vts1, prw_vcdc=prw_vcdc,               &
-                                 prw_vcde=prw_vcde, tpri_inu=tpri_inu, tpri_ide_d=tpri_ide_d,   &
-                                 tpri_ide_s=tpri_ide_s, tprs_ide_d=tprs_ide_d,                  &
-                                 tprs_ide_s=tprs_ide_s, tprs_sde_d=tprs_sde_d,                  &
-                                 tprs_sde_s=tprs_sde_s, tprg_gde_d=tprg_gde_d,                  &
-                                 tprg_gde_s=tprg_gde_s, tpri_iha=tpri_iha,                      &
-                                 tpri_wfz=tpri_wfz, tpri_rfz=tpri_rfz, tprg_rfz=tprg_rfz,       &
-                                 tprs_scw=tprs_scw, tprg_scw=tprg_scw, tprg_rcs=tprg_rcs,       &
-                                 tprs_rcs_s=tprs_rcs_s, tprs_rcs_r=tprs_rcs_r,                  &
-                                 tprr_rci=tprr_rci, tprg_rcg_g=tprg_rcg_g,                      &
-                                 tprg_rcg_r=tprg_rcg_r, tprw_vcd_c=tprw_vcd_c,                  &
-                                 tprw_vcd_e=tprw_vcd_e, tprr_sml=tprr_sml, tprr_gml=tprr_gml,   &
-                                 tprr_rcg_r=tprr_rcg_r, tprr_rcg_g=tprr_rcg_g,                  &
-                                 tprr_rcs_r=tprr_rcs_r, tprr_rcs_s=tprr_rcs_s,                  &
-                                 tprv_rev=tprv_rev, txri=txri, txrc=txrc, tten3=tten3,          &
-                                 qvten3=qvten3, qrten3=qrten3, qsten3=qsten3, qgten3=qgten3,    &
-                                 qiten3=qiten3, niten3=niten3, nrten3=nrten3, ncten3=ncten3,    &
-                                 qcten3=qcten3)
+               !!!call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
+               !!!                  tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtp,                        &
+               !!!                  rainnc=rain_mp, rainncv=delta_rain_mp,                         &
+               !!!                  snownc=snow_mp, snowncv=delta_snow_mp,                         &
+               !!!                  icenc=ice_mp, icencv=delta_ice_mp,                             &
+               !!!                  graupelnc=graupel_mp, graupelncv=delta_graupel_mp, sr=sr,      &
+               !!!                  refl_10cm=refl_10cm,                                           &
+               !!!                  diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
+               !!!                  re_cloud=re_cloud, re_ice=re_ice, re_snow=re_snow,             &
+               !!!                  has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
+               !!!                  rand_perturb_on=rand_perturb_on, kme_stoch=kme_stoch,          &
+               !!!                  ! DH* 2020-06-05 not passing this optional argument, see
+               !!!                  !       comment in module_mp_thompson.F90 / mp_gt_driver
+               !!!                  !rand_pert=rand_pert,                                          &
+               !!!                  ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
+               !!!                  ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
+               !!!                  its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
+               !!!                  reset_dBZ=reset_dBZ, istep=istep, nsteps=nsteps,               &
+               !!!                  first_time_step=first_time_step, errmsg=errmsg, errflg=errflg, &
+               !!!                  ! Extended diagnostics
+               !!!                  ext_diag=ext_diag, vts1=vts1, prw_vcdc=prw_vcdc,               &
+               !!!                  prw_vcde=prw_vcde, tpri_inu=tpri_inu, tpri_ide_d=tpri_ide_d,   &
+               !!!                  tpri_ide_s=tpri_ide_s, tprs_ide_d=tprs_ide_d,                  &
+               !!!                  tprs_ide_s=tprs_ide_s, tprs_sde_d=tprs_sde_d,                  &
+               !!!                  tprs_sde_s=tprs_sde_s, tprg_gde_d=tprg_gde_d,                  &
+               !!!                  tprg_gde_s=tprg_gde_s, tpri_iha=tpri_iha,                      &
+               !!!                  tpri_wfz=tpri_wfz, tpri_rfz=tpri_rfz, tprg_rfz=tprg_rfz,       &
+               !!!                  tprs_scw=tprs_scw, tprg_scw=tprg_scw, tprg_rcs=tprg_rcs,       &
+               !!!                  tprs_rcs_s=tprs_rcs_s, tprs_rcs_r=tprs_rcs_r,                  &
+               !!!                  tprr_rci=tprr_rci, tprg_rcg_g=tprg_rcg_g,                      &
+               !!!                  tprg_rcg_r=tprg_rcg_r, tprw_vcd_c=tprw_vcd_c,                  &
+               !!!                  tprw_vcd_e=tprw_vcd_e, tprr_sml=tprr_sml, tprr_gml=tprr_gml,   &
+               !!!                  tprr_rcg_r=tprr_rcg_r, tprr_rcg_g=tprr_rcg_g,                  &
+               !!!                  tprr_rcs_r=tprr_rcs_r, tprr_rcs_s=tprr_rcs_s,                  &
+               !!!                  tprv_rev=tprv_rev, txri=txri, txrc=txrc, tten3=tten3,          &
+               !!!                  qvten3=qvten3, qrten3=qrten3, qsten3=qsten3, qgten3=qgten3,    &
+               !!!                  qiten3=qiten3, niten3=niten3, nrten3=nrten3, ncten3=ncten3,    &
+               !!!                  qcten3=qcten3)
             else
-               call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
-                                 tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtp,                        &
-                                 rainnc=rain_mp, rainncv=delta_rain_mp,                         &
-                                 snownc=snow_mp, snowncv=delta_snow_mp,                         &
-                                 icenc=ice_mp, icencv=delta_ice_mp,                             &
-                                 graupelnc=graupel_mp, graupelncv=delta_graupel_mp, sr=sr,      &
-                                 refl_10cm=refl_10cm,                                           &
-                                 diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
-                                 has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
-                                 rand_perturb_on=rand_perturb_on, kme_stoch=kme_stoch,          &
-                                 ! DH* 2020-06-05 not passing this optional argument, see
-                                 !       comment in module_mp_thompson.F90 / mp_gt_driver
-                                 !rand_pert=rand_pert,                                          &
-                                 ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
-                                 ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
-                                 its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
-                                 reset_dBZ=reset_dBZ, istep=istep, nsteps=nsteps,               &
-                                 first_time_step=first_time_step, errmsg=errmsg, errflg=errflg, &
-                                 ! Extended diagnostics
-                                 ext_diag=ext_diag, vts1=vts1, prw_vcdc=prw_vcdc,               &
-                                 prw_vcde=prw_vcde, tpri_inu=tpri_inu, tpri_ide_d=tpri_ide_d,   &
-                                 tpri_ide_s=tpri_ide_s, tprs_ide_d=tprs_ide_d,                  &
-                                 tprs_ide_s=tprs_ide_s, tprs_sde_d=tprs_sde_d,                  &
-                                 tprs_sde_s=tprs_sde_s, tprg_gde_d=tprg_gde_d,                  &
-                                 tprg_gde_s=tprg_gde_s, tpri_iha=tpri_iha,                      &
-                                 tpri_wfz=tpri_wfz, tpri_rfz=tpri_rfz, tprg_rfz=tprg_rfz,       &
-                                 tprs_scw=tprs_scw, tprg_scw=tprg_scw, tprg_rcs=tprg_rcs,       &
-                                 tprs_rcs_s=tprs_rcs_s, tprs_rcs_r=tprs_rcs_r,                  &
-                                 tprr_rci=tprr_rci, tprg_rcg_g=tprg_rcg_g,                      &
-                                 tprg_rcg_r=tprg_rcg_r, tprw_vcd_c=tprw_vcd_c,                  &
-                                 tprw_vcd_e=tprw_vcd_e, tprr_sml=tprr_sml, tprr_gml=tprr_gml,   &
-                                 tprr_rcg_r=tprr_rcg_r, tprr_rcg_g=tprr_rcg_g,                  &
-                                 tprr_rcs_r=tprr_rcs_r, tprr_rcs_s=tprr_rcs_s,                  &
-                                 tprv_rev=tprv_rev, txri=txri, txrc=txrc, tten3=tten3,          &
-                                 qvten3=qvten3, qrten3=qrten3, qsten3=qsten3, qgten3=qgten3,    &
-                                 qiten3=qiten3, niten3=niten3, nrten3=nrten3, ncten3=ncten3,    &
-                                 qcten3=qcten3)
+               !!!call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
+               !!!                  tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtp,                        &
+               !!!                  rainnc=rain_mp, rainncv=delta_rain_mp,                         &
+               !!!                  snownc=snow_mp, snowncv=delta_snow_mp,                         &
+               !!!                  icenc=ice_mp, icencv=delta_ice_mp,                             &
+               !!!                  graupelnc=graupel_mp, graupelncv=delta_graupel_mp, sr=sr,      &
+               !!!                  refl_10cm=refl_10cm,                                           &
+               !!!                  diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
+               !!!                  has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
+               !!!                  rand_perturb_on=rand_perturb_on, kme_stoch=kme_stoch,          &
+               !!!                  ! DH* 2020-06-05 not passing this optional argument, see
+               !!!                  !       comment in module_mp_thompson.F90 / mp_gt_driver
+               !!!                  !rand_pert=rand_pert,                                          &
+               !!!                  ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
+               !!!                  ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
+               !!!                  its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
+               !!!                  reset_dBZ=reset_dBZ, istep=istep, nsteps=nsteps,               &
+               !!!                  first_time_step=first_time_step, errmsg=errmsg, errflg=errflg, &
+               !!!                  ! Extended diagnostics
+               !!!                  ext_diag=ext_diag, vts1=vts1, prw_vcdc=prw_vcdc,               &
+               !!!                  prw_vcde=prw_vcde, tpri_inu=tpri_inu, tpri_ide_d=tpri_ide_d,   &
+               !!!                  tpri_ide_s=tpri_ide_s, tprs_ide_d=tprs_ide_d,                  &
+               !!!                  tprs_ide_s=tprs_ide_s, tprs_sde_d=tprs_sde_d,                  &
+               !!!                  tprs_sde_s=tprs_sde_s, tprg_gde_d=tprg_gde_d,                  &
+               !!!                  tprg_gde_s=tprg_gde_s, tpri_iha=tpri_iha,                      &
+               !!!                  tpri_wfz=tpri_wfz, tpri_rfz=tpri_rfz, tprg_rfz=tprg_rfz,       &
+               !!!                  tprs_scw=tprs_scw, tprg_scw=tprg_scw, tprg_rcs=tprg_rcs,       &
+               !!!                  tprs_rcs_s=tprs_rcs_s, tprs_rcs_r=tprs_rcs_r,                  &
+               !!!                  tprr_rci=tprr_rci, tprg_rcg_g=tprg_rcg_g,                      &
+               !!!                  tprg_rcg_r=tprg_rcg_r, tprw_vcd_c=tprw_vcd_c,                  &
+               !!!                  tprw_vcd_e=tprw_vcd_e, tprr_sml=tprr_sml, tprr_gml=tprr_gml,   &
+               !!!                  tprr_rcg_r=tprr_rcg_r, tprr_rcg_g=tprr_rcg_g,                  &
+               !!!                  tprr_rcs_r=tprr_rcs_r, tprr_rcs_s=tprr_rcs_s,                  &
+               !!!                  tprv_rev=tprv_rev, txri=txri, txrc=txrc, tten3=tten3,          &
+               !!!                  qvten3=qvten3, qrten3=qrten3, qsten3=qsten3, qgten3=qgten3,    &
+               !!!                  qiten3=qiten3, niten3=niten3, nrten3=nrten3, ncten3=ncten3,    &
+               !!!                  qcten3=qcten3)
             end if
          end if
          if (errflg/=0) return
@@ -883,8 +873,7 @@ module mp_thompson
            tpri_inu   => null()
            tpri_ide_d => null()
            tpri_ide_s => null()
-           tprs_ide_d => null()
-           tprs_ide_s => null()
+           tprs_ide   => null()
            tprs_sde_d => null()
            tprs_sde_s => null()
            tprg_gde_d => null()
@@ -896,19 +885,15 @@ module mp_thompson
            tprs_scw   => null()
            tprg_scw   => null()
            tprg_rcs   => null()
-           tprs_rcs_s => null()
-           tprs_rcs_r => null()
+           tprs_rcs   => null()
            tprr_rci   => null()
-           tprg_rcg_g => null()
-           tprg_rcg_r => null()
+           tprg_rcg   => null()
            tprw_vcd_c => null()
            tprw_vcd_e => null()
            tprr_sml   => null()
            tprr_gml   => null()
-           tprr_rcg_r => null()
-           tprr_rcg_g => null()
-           tprr_rcs_r => null()
-           tprr_rcs_s => null()
+           tprr_rcg   => null()
+           tprr_rcs   => null()
            tprv_rev   => null()
            txri       => null()
            txrc       => null()
