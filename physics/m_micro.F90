@@ -180,7 +180,7 @@ end subroutine m_micro_init
        real (kind=kind_phys), dimension(:,:),intent(in)  ::             &
      &                prsl_i,u_i,v_i,phil,   omega_i, QLLS_i,QILS_i,    &
      &                                       lwheat_i,swheat_i
-       real (kind=kind_phys), dimension(:,:),intent(in):: prsi_i, phii
+       real (kind=kind_phys), dimension(:,0:),intent(in):: prsi_i, phii
 ! GJF* These variables are conditionally allocated depending on whether the
 !     Morrison-Gettelman microphysics is used, so they must be declared 
 !     using assumed shape.
