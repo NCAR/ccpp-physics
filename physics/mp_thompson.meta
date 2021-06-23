@@ -742,8 +742,8 @@
   intent = inout
   optional = F
 [reset_diag3d]
-  standard_name = flag_reset_maximum_hourly_fields
-  long_name = flag for resetting maximum hourly fields
+  standard_name = flag_reset_extended_diagnostics_output_arrays_from_thompson_microphysics
+  long_name = flag for resetting extended diagnostics output arrays from thompson microphysics
   units = flag
   dimensions = ()
   type = logical
