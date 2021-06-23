@@ -64,7 +64,7 @@
   intent = in
   optional = F
 [ntcw]
-  standard_name = index_for_liquid_cloud_condensate
+  standard_name = index_of_cloud_liquid_water_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for cloud condensate (or liquid water)
   units = index
   dimensions = ()
@@ -72,7 +72,7 @@
   intent = in
   optional = F
 [ntclamt]
-  standard_name = index_for_cloud_amount
+  standard_name = index_of_cloud_area_fraction_in_atmosphere_layer_in_tracer_concentration_array
   long_name = tracer index for cloud amount integer
   units = index
   dimensions = ()
@@ -106,7 +106,7 @@
   intent = inout
   optional = F
 [gt0]
-  standard_name = air_temperature_updated_by_physics
+  standard_name = air_temperature_of_new_state
   long_name = temperature updated by physics
   units = K
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -115,7 +115,7 @@
   intent = inout
   optional = F
 [gq0]
-  standard_name = tracer_concentration_updated_by_physics
+  standard_name = tracer_concentration_of_new_state
   long_name = tracer concentration updated by physics
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers)
@@ -145,7 +145,7 @@
   standard_name = air_pressure_at_interface
   long_name = air pressure at model layer interfaces
   units = Pa
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -178,7 +178,7 @@
   intent = inout
   optional = F
 [imp_physics]
-  standard_name = flag_for_microphysics_scheme
+  standard_name = control_for_microphysics_scheme
   long_name = choice of microphysics scheme
   units = flag
   dimensions = ()
@@ -186,7 +186,7 @@
   intent = in
   optional = F
 [imp_physics_mg]
-  standard_name = flag_for_morrison_gettelman_microphysics_scheme
+  standard_name = identifier_for_morrison_gettelman_microphysics_scheme
   long_name = choice of Morrison-Gettelman microphysics scheme
   units = flag
   dimensions = ()

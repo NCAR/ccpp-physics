@@ -33,7 +33,7 @@
   intent = in
   optional = F
 [con_rd]
-  standard_name = gas_constant_dry_air
+  standard_name = gas_constant_of_dry_air
   long_name = ideal gas constant for dry air
   units = J kg-1 K-1
   dimensions = ()
@@ -59,7 +59,7 @@
   intent = in
   optional = F
 [imp_physics]
-  standard_name = flag_for_microphysics_scheme
+  standard_name = control_for_microphysics_scheme
   long_name = choice of microphysics scheme
   units = flag
   dimensions = ()
@@ -67,7 +67,7 @@
   intent = in
   optional = F
 [imp_physics_thompson]
-  standard_name = flag_for_thompson_microphysics_scheme
+  standard_name = identifier_for_thompson_microphysics_scheme
   long_name = choice of Thompson microphysics scheme
   units = flag
   dimensions = ()
@@ -83,7 +83,7 @@
   intent = in
   optional = F
 [spechum]
-  standard_name = water_vapor_specific_humidity
+  standard_name = specific_humidity
   long_name = water vapor specific humidity
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
@@ -92,7 +92,7 @@
   intent = inout
   optional = F
 [qc]
-  standard_name = cloud_condensed_water_mixing_ratio
+  standard_name = cloud_liquid_water_mixing_ratio
   long_name = cloud water mixing ratio wrt dry+vapor (no condensates)
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
@@ -101,7 +101,7 @@
   intent = inout
   optional = F
 [qr]
-  standard_name = rain_water_mixing_ratio
+  standard_name = rain_mixing_ratio
   long_name = rain water mixing ratio wrt dry+vapor (no condensates)
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
@@ -110,7 +110,7 @@
   intent = inout
   optional = F
 [qi]
-  standard_name = ice_water_mixing_ratio
+  standard_name = cloud_ice_mixing_ratio
   long_name = ice water mixing ratio wrt dry+vapor (no condensates)
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
@@ -119,7 +119,7 @@
   intent = inout
   optional = F
 [qs]
-  standard_name = snow_water_mixing_ratio
+  standard_name = snow_mixing_ratio
   long_name = snow water mixing ratio wrt dry+vapor (no condensates)
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
@@ -137,7 +137,7 @@
   intent = inout
   optional = F
 [ni]
-  standard_name = ice_number_concentration
+  standard_name = mass_number_concentration_of_cloud_ice_water_crystals_in_air
   long_name = ice number concentration
   units = kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
@@ -146,7 +146,7 @@
   intent = inout
   optional = F
 [nr]
-  standard_name = rain_number_concentration
+  standard_name = mass_number_concentration_of_rain_water_in_air
   long_name = rain number concentration
   units = kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
@@ -163,7 +163,7 @@
   intent = in
   optional = F
 [nc]
-  standard_name = cloud_droplet_number_concentration
+  standard_name = mass_number_concentration_of_cloud_liquid_water_particles_in_air
   long_name = cloud droplet number concentration
   units = kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
@@ -172,7 +172,7 @@
   intent = inout
   optional = T
 [nwfa2d]
-  standard_name = tendency_of_water_friendly_aerosols_at_surface
+  standard_name = tendency_of_hygroscopic_aerosols_at_surface_adjacent_layer
   long_name = instantaneous fake water-friendly surface aerosol source
   units = kg-1 s-1
   dimensions = (horizontal_dimension)
@@ -181,7 +181,7 @@
   intent = inout
   optional = T
 [nifa2d]
-  standard_name = tendency_of_ice_friendly_aerosols_at_surface
+  standard_name = tendency_of_nonhygroscopic_ice_nucleating_aerosols_at_surface_adjacent_layer
   long_name = instantaneous fake ice-friendly surface aerosol source
   units = kg-1 s-1
   dimensions = (horizontal_dimension)
@@ -190,7 +190,7 @@
   intent = inout
   optional = T
 [nwfa]
-  standard_name = water_friendly_aerosol_number_concentration
+  standard_name = mass_number_concentration_of_hygroscopic_aerosols
   long_name = number concentration of water-friendly aerosols
   units = kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
@@ -199,7 +199,7 @@
   intent = inout
   optional = T
 [nifa]
-  standard_name = ice_friendly_aerosol_number_concentration
+  standard_name = mass_number_concentration_of_nonhygroscopic_ice_nucleating_aerosols
   long_name = number concentration of ice-friendly aerosols
   units = kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
@@ -244,7 +244,7 @@
   intent = in
   optional = F
 [re_cloud]
-  standard_name = effective_radius_of_stratiform_cloud_liquid_water_particle_in_um
+  standard_name = effective_radius_of_stratiform_cloud_liquid_water_particle
   long_name = eff. radius of cloud liquid water particle in micrometer
   units = m
   dimensions = (horizontal_dimension,vertical_dimension)
@@ -253,7 +253,7 @@
   intent = out
   optional = T
 [re_ice]
-  standard_name = effective_radius_of_stratiform_cloud_ice_particle_in_um
+  standard_name = effective_radius_of_stratiform_cloud_ice_particle
   long_name = eff. radius of cloud ice water particle in micrometer
   units = m
   dimensions = (horizontal_dimension,vertical_dimension)
@@ -262,7 +262,7 @@
   intent = out
   optional = T
 [re_snow]
-  standard_name = effective_radius_of_stratiform_cloud_snow_particle_in_um
+  standard_name = effective_radius_of_stratiform_cloud_snow_particle
   long_name = effective radius of cloud snow particle in micrometer
   units = m
   dimensions = (horizontal_dimension,vertical_dimension)
@@ -271,7 +271,7 @@
   intent = out
   optional = T
 [mpicomm]
-  standard_name = mpi_comm
+  standard_name = mpi_communicator
   long_name = MPI communicator
   units = index
   dimensions = ()
@@ -295,7 +295,7 @@
   intent = in
   optional = F
 [threads]
-  standard_name = omp_threads
+  standard_name = number_of_openmp_threads
   long_name = number of OpenMP threads available to scheme
   units = count
   dimensions = ()
@@ -350,7 +350,7 @@
   intent = in
   optional = F
 [con_rd]
-  standard_name = gas_constant_dry_air
+  standard_name = gas_constant_of_dry_air
   long_name = ideal gas constant for dry air
   units = J kg-1 K-1
   dimensions = ()
@@ -376,7 +376,7 @@
   intent = in
   optional = F
 [spechum]
-  standard_name = water_vapor_specific_humidity_updated_by_physics
+  standard_name = specific_humidity_of_new_state
   long_name = water vapor specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -385,7 +385,7 @@
   intent = inout
   optional = F
 [qc]
-  standard_name = cloud_condensed_water_mixing_ratio_updated_by_physics
+  standard_name = cloud_liquid_water_mixing_ratio_of_new_state
   long_name = cloud water mixing ratio wrt dry+vapor (no condensates)
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -394,7 +394,7 @@
   intent = inout
   optional = F
 [qr]
-  standard_name = rain_water_mixing_ratio_updated_by_physics
+  standard_name = rain_mixing_ratio_of_new_state
   long_name = rain water mixing ratio wrt dry+vapor (no condensates)
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -403,7 +403,7 @@
   intent = inout
   optional = F
 [qi]
-  standard_name = ice_water_mixing_ratio_updated_by_physics
+  standard_name = cloud_ice_mixing_ratio_of_new_state
   long_name = ice water mixing ratio wrt dry+vapor (no condensates)
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -412,7 +412,7 @@
   intent = inout
   optional = F
 [qs]
-  standard_name = snow_water_mixing_ratio_updated_by_physics
+  standard_name = snow_mixing_ratio_of_new_state
   long_name = snow water mixing ratio wrt dry+vapor (no condensates)
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -421,7 +421,7 @@
   intent = inout
   optional = F
 [qg]
-  standard_name = graupel_mixing_ratio_updated_by_physics
+  standard_name = graupel_mixing_ratio_of_new_state
   long_name = graupel mixing ratio wrt dry+vapor (no condensates)
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -430,7 +430,7 @@
   intent = inout
   optional = F
 [ni]
-  standard_name = ice_number_concentration_updated_by_physics
+  standard_name = mass_number_concentration_of_cloud_ice_water_crystals_in_air_of_new_state
   long_name = ice number concentration
   units = kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -439,7 +439,7 @@
   intent = inout
   optional = F
 [nr]
-  standard_name = rain_number_concentration_updated_by_physics
+  standard_name = mass_number_concentration_of_rain_of_new_state
   long_name = rain number concentration
   units = kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -456,7 +456,7 @@
   intent = in
   optional = F
 [nc]
-  standard_name = cloud_droplet_number_concentration_updated_by_physics
+  standard_name = mass_number_concentration_of_cloud_liquid_water_particles_in_air_of_new_state
   long_name = cloud droplet number concentration
   units = kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -465,7 +465,7 @@
   intent = inout
   optional = T
 [nwfa]
-  standard_name = water_friendly_aerosol_number_concentration_updated_by_physics
+  standard_name = mass_number_concentration_of_hygroscopic_aerosols_of_new_state
   long_name = number concentration of water-friendly aerosols
   units = kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -474,7 +474,7 @@
   intent = inout
   optional = T
 [nifa]
-  standard_name = ice_friendly_aerosol_number_concentration_updated_by_physics
+  standard_name = mass_number_concentration_of_nonhygroscopic_ice_nucleating_aerosols_of_new_state
   long_name = number concentration of ice-friendly aerosols
   units = kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -483,7 +483,7 @@
   intent = inout
   optional = T
 [nwfa2d]
-  standard_name = tendency_of_water_friendly_aerosols_at_surface
+  standard_name = tendency_of_hygroscopic_aerosols_at_surface_adjacent_layer
   long_name = instantaneous fake water-friendly surface aerosol source
   units = kg-1 s-1
   dimensions = (horizontal_loop_extent)
@@ -492,7 +492,7 @@
   intent = in
   optional = T
 [nifa2d]
-  standard_name = tendency_of_ice_friendly_aerosols_at_surface
+  standard_name = tendency_of_nonhygroscopic_ice_nucleating_aerosols_at_surface_adjacent_layer
   long_name = instantaneous fake ice-friendly surface aerosol source
   units = kg-1 s-1
   dimensions = (horizontal_loop_extent)
@@ -501,7 +501,7 @@
   intent = in
   optional = T
 [tgrs]
-  standard_name = air_temperature_updated_by_physics
+  standard_name = air_temperature_of_new_state
   long_name = model layer mean temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -522,13 +522,13 @@
   standard_name = geopotential_at_interface
   long_name = geopotential at model layer interfaces
   units = m2 s-2
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [omega]
-  standard_name = omega
+  standard_name = lagrangian_tendency_of_air_pressure
   long_name = layer mean vertical velocity
   units = Pa s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -537,7 +537,7 @@
   intent = in
   optional = F
 [dtp]
-  standard_name = time_step_for_physics
+  standard_name = timestep_for_physics
   long_name = physics timestep
   units = s
   dimensions = ()
@@ -649,7 +649,7 @@
   intent = in
   optional = F
 [re_cloud]
-  standard_name = effective_radius_of_stratiform_cloud_liquid_water_particle_in_um
+  standard_name = effective_radius_of_stratiform_cloud_liquid_water_particle
   long_name = eff. radius of cloud liquid water particle in micrometer (meter here)
   units = m
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -658,7 +658,7 @@
   intent = out
   optional = T
 [re_ice]
-  standard_name = effective_radius_of_stratiform_cloud_ice_particle_in_um
+  standard_name = effective_radius_of_stratiform_cloud_ice_particle
   long_name = eff. radius of cloud ice water particle in micrometer (meter here)
   units = m
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -667,7 +667,7 @@
   intent = out
   optional = T
 [re_snow]
-  standard_name = effective_radius_of_stratiform_cloud_snow_particle_in_um
+  standard_name = effective_radius_of_stratiform_cloud_snow_particle
   long_name = effective radius of cloud snow particle in micrometer  (meter here)
   units = m
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -676,7 +676,7 @@
   intent = out
   optional = T
 [mpicomm]
-  standard_name = mpi_comm
+  standard_name = mpi_communicator
   long_name = MPI communicator
   units = index
   dimensions = ()

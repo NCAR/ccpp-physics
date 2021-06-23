@@ -40,7 +40,7 @@
   intent = in
   optional = F
 [q]
-  standard_name = water_vapor_specific_humidity_updated_by_physics
+  standard_name = specific_humidity_of_new_state
   long_name = water vapor specific humidity updated by physics
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -327,7 +327,7 @@
   intent = in
   optional = F
 [t]
-  standard_name = air_temperature_updated_by_physics
+  standard_name = air_temperature_of_new_state
   long_name = mid-layer temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -336,7 +336,7 @@
   intent = inout
   optional = F
 [q]
-  standard_name = water_vapor_specific_humidity_updated_by_physics
+  standard_name = specific_humidity_of_new_state
   long_name = mid-layer specific humidity of water vapor
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -375,7 +375,7 @@
   standard_name = geopotential_at_interface
   long_name = interface geopotential
   units = m2 s-2
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -393,13 +393,13 @@
   standard_name = air_pressure_at_interface
   long_name = interface pressure
   units = Pa
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [delta]
-  standard_name = time_step_for_physics
+  standard_name = timestep_for_physics
   long_name = physics time step
   units = s
   dimensions = ()
@@ -408,7 +408,7 @@
   intent = in
   optional = F
 [delti]
-  standard_name = time_step_for_dynamics
+  standard_name = timestep_for_dynamics
   long_name = dynamics time step
   units = s
   dimensions = ()
@@ -444,7 +444,7 @@
   intent = inout
   optional = F
 [u]
-  standard_name = x_wind_updated_by_physics
+  standard_name = x_wind_of_new_state
   long_name = mid-layer zonal wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -453,7 +453,7 @@
   intent = inout
   optional = F
 [v]
-  standard_name = y_wind_updated_by_physics
+  standard_name = y_wind_of_new_state
   long_name = mid-layer meridional wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -480,7 +480,7 @@
   intent = in
   optional = F
 [cbmfx]
-  standard_name = cloud_base_mass_flux
+  standard_name = atmosphere_updraft_convective_mass_flux_at_cloud_base_by_cloud_type
   long_name = cloud base mass flux
   units = kg m-2 s-1
   dimensions = (horizontal_loop_extent,number_of_cloud_types_CS)
@@ -550,7 +550,7 @@
   intent = in
   optional = F
 [do_awdd]
-  standard_name = flag_arakawa_wu_downdraft
+  standard_name = flag_for_arakawa_wu_downdrafts_for_deep_convection
   long_name = flag to enable treating convective tendencies following Arakwaw-Wu for downdrafts (2013)
   units = flag
   dimensions = ()
@@ -680,7 +680,7 @@
   intent = out
   optional = F
 [mp_phys]
-  standard_name = flag_for_microphysics_scheme
+  standard_name = control_for_microphysics_scheme
   long_name = flag for microphysics scheme
   units = flag
   dimensions = ()

@@ -24,7 +24,7 @@
   intent = in
   optional = F   
 [yearlen]
-  standard_name = number_of_days_in_year
+  standard_name = number_of_days_in_current_year
   long_name = number of days in a year
   units = days
   dimensions = ()
@@ -32,7 +32,7 @@
   intent = in
   optional = F  
 [doSWrad]
-  standard_name = flag_to_calc_sw
+  standard_name = flag_for_calling_shortwave_radiation
   long_name = logical flags for sw radiation calls
   units = flag
   dimensions = ()
@@ -40,7 +40,7 @@
   intent = in
   optional = F
 [doLWrad]
-  standard_name = flag_to_calc_lw
+  standard_name = flag_for_calling_longwave_radiation
   long_name = logical flags for lw radiation calls
   units = flag
   dimensions = ()
@@ -48,7 +48,7 @@
   intent = in
   optional = F    
 [julian]
-  standard_name = julian_day
+  standard_name = forecast_julian_day
   long_name = julian day
   units = days
   dimensions = ()
@@ -69,7 +69,7 @@
   standard_name = air_pressure_at_interface_for_RRTMGP_in_hPa
   long_name = air pressure at vertical interface for radiation calculation
   units = hPa
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -111,7 +111,7 @@
   intent = in
   optional = F 
 [con_rd]
-  standard_name = gas_constant_dry_air
+  standard_name = gas_constant_of_dry_air
   long_name = ideal gas constant for dry air
   units = J kg-1 K-1
   dimensions = ()
@@ -129,7 +129,7 @@
   intent = in
   optional = F       
 [dcorr_con]
-  standard_name = decorreltion_length_used_by_overlap_method
+  standard_name = decorrelation_length_used_by_overlap_method
   long_name = decorrelation length (default) used by cloud overlap method (iovr)
   units = km
   dimensions = ()

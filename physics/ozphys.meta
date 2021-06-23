@@ -8,7 +8,7 @@
   name = ozphys_init
   type = scheme
 [oz_phys]
-  standard_name = flag_for_ozone_physics
+  standard_name = flag_for_nrl_2006_ozone_scheme
   long_name = flag for old (2006) ozone physics
   units = flag
   dimensions = ()
@@ -62,7 +62,7 @@
   intent = in
   optional = F
 [dt]
-  standard_name = time_step_for_physics
+  standard_name = timestep_for_physics
   long_name = physics time step
   units = s
   dimensions = ()
@@ -71,7 +71,7 @@
   intent = in
   optional = F
 [oz]
-  standard_name = ozone_concentration_updated_by_physics
+  standard_name = ozone_concentration_of_new_state
   long_name = ozone concentration updated by physics
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -80,7 +80,7 @@
   intent = inout
   optional = F
 [tin]
-  standard_name = air_temperature_updated_by_physics
+  standard_name = air_temperature_of_new_state
   long_name = updated air temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_dimension)

@@ -41,7 +41,7 @@
   intent = in
   optional = F
 [lsswr]
-  standard_name = flag_to_calc_sw
+  standard_name = flag_for_calling_shortwave_radiation
   long_name = logical flags for sw radiation calls
   units = flag
   dimensions = ()
@@ -49,7 +49,7 @@
   intent = in
   optional = F
 [do_sw_clrsky_hr]
-  standard_name = flag_for_output_of_shortwave_heating_rate
+  standard_name = flag_for_output_of_tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_timestep_assuming_clear_sky
   long_name = flag to output sw heating rate
   units = flag
   dimensions = ()
@@ -57,7 +57,7 @@
   intent = in
   optional = F      
 [save_diag]
-  standard_name = flag_diagnostics
+  standard_name = flag_for_diagnostics
   long_name = logical flag for storing diagnostics
   units = flag
   dimensions = ()
@@ -65,7 +65,7 @@
   intent = in
   optional = F   
 [fhswr]
-  standard_name = frequency_for_shortwave_radiation
+  standard_name = period_of_shortwave_radiation_calls
   long_name = frequency for shortwave radiation
   units = s
   dimensions = ()
@@ -74,7 +74,7 @@
   intent = in
   optional = F 
 [coszen]
-  standard_name = cosine_of_zenith_angle
+  standard_name = cosine_of_solar_zenith_angle_for_daytime_points_on_radiation_timestep
   long_name = mean cos of zenith angle over rad call period
   units = none
   dimensions = (horizontal_loop_extent)
@@ -83,7 +83,7 @@
   intent = in
   optional = F 
 [coszdg]
-  standard_name = daytime_mean_cosz_over_rad_call_period
+  standard_name = cosine_of_solar_zenith_angle_on_radiation_timestep
   long_name = daytime mean cosz over rad call period
   units = none
   dimensions = (horizontal_loop_extent)
@@ -104,7 +104,7 @@
   standard_name = air_pressure_at_interface_for_RRTMGP_in_hPa
   long_name = air pressure level
   units = hPa
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -113,7 +113,7 @@
   standard_name = surface_albedo_nearIR_direct
   long_name = near-IR (direct) surface albedo (sfc_alb_nir_dir)
   units = none
-  dimensions = (number_of_sw_bands_rrtmgp,horizontal_loop_extent)
+  dimensions = (number_of_shortwave_bands,horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -122,7 +122,7 @@
   standard_name = surface_albedo_nearIR_diffuse
   long_name = near-IR (diffuse) surface albedo (sfc_alb_nir_dif) 
   units = none
-  dimensions = (number_of_sw_bands_rrtmgp,horizontal_loop_extent)
+  dimensions = (number_of_shortwave_bands,horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -131,7 +131,7 @@
   standard_name =  surface_albedo_uvvis_dir
   long_name = UVVIS (direct) surface albedo (sfc_alb_uvvis_dir)
   units = none
-  dimensions = (number_of_sw_bands_rrtmgp,horizontal_loop_extent)
+  dimensions = (number_of_shortwave_bands,horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -140,7 +140,7 @@
   standard_name =  surface_albedo_uvvis_dif
   long_name = UVVIS (diffuse) surface albedo (sfc_alb_uvvis_dif)
   units = none
-  dimensions = (number_of_sw_bands_rrtmgp,horizontal_loop_extent)
+  dimensions = (number_of_shortwave_bands,horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -149,7 +149,7 @@
   standard_name = RRTMGP_sw_flux_profile_upward_allsky
   long_name = RRTMGP upward shortwave all-sky flux profile
   units = W m-2
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -158,7 +158,7 @@
   standard_name = RRTMGP_sw_flux_profile_downward_allsky
   long_name = RRTMGP downward shortwave all-sky flux profile
   units = W m-2
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -167,7 +167,7 @@
   standard_name = RRTMGP_sw_flux_profile_upward_clrsky
   long_name = RRTMGP upward shortwave clr-sky flux profile
   units = W m-2
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -176,7 +176,7 @@
   standard_name = RRTMGP_sw_flux_profile_downward_clrsky
   long_name = RRTMGP downward shortwave clr-sky flux profile
   units = W m-2
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -246,13 +246,13 @@
   standard_name = cumulative_radiation_diagnostic
   long_name = time-accumulated 2D radiation-related diagnostic fields
   units = various
-  dimensions = (horizontal_loop_extent,number_of_radiation_diagnostic_variables)
+  dimensions = (horizontal_loop_extent,number_of_diagnostics_variables_for_radiation)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [nirbmdi]
-  standard_name = surface_downwelling_direct_near_infrared_shortwave_flux_on_radiation_time_step
+  standard_name = surface_downwelling_direct_nir_shortwave_flux_on_radiation_timestep
   long_name = sfc nir beam sw downward flux
   units = W m-2
   dimensions = (horizontal_loop_extent)
@@ -261,7 +261,7 @@
   intent = inout
   optional = F
 [nirdfdi]
-  standard_name = surface_downwelling_diffuse_near_infrared_shortwave_flux_on_radiation_time_step
+  standard_name = surface_downwelling_diffuse_nir_shortwave_flux_on_radiation_timestep
   long_name = sfc nir diff sw downward flux
   units = W m-2
   dimensions = (horizontal_loop_extent)
@@ -270,7 +270,7 @@
   intent = inout
   optional = F
 [visbmdi]
-  standard_name = surface_downwelling_direct_ultraviolet_and_visible_shortwave_flux_on_radiation_time_step
+  standard_name = surface_downwelling_direct_uv_and_vis_shortwave_flux_on_radiation_timestep
   long_name = sfc uv+vis beam sw downward flux
   units = W m-2
   dimensions = (horizontal_loop_extent)
@@ -279,7 +279,7 @@
   intent = inout
   optional = F
 [visdfdi]
-  standard_name = surface_downwelling_diffuse_ultraviolet_and_visible_shortwave_flux_on_radiation_time_step
+  standard_name = surface_downwelling_diffuse_uv_and_vis_shortwave_flux_on_radiation_timestep
   long_name = sfc uv+vis diff sw downward flux
   units = W m-2
   dimensions = (horizontal_loop_extent)
@@ -288,7 +288,7 @@
   intent = inout
   optional = F
 [nirbmui]
-  standard_name = surface_upwelling_direct_near_infrared_shortwave_flux_on_radiation_time_step
+  standard_name = surface_upwelling_direct_nir_shortwave_flux_on_radiation_timestep
   long_name = sfc nir beam sw upward flux
   units = W m-2
   dimensions = (horizontal_loop_extent)
@@ -297,7 +297,7 @@
   intent = inout
   optional = F
 [nirdfui]
-  standard_name = surface_upwelling_diffuse_near_infrared_shortwave_flux_on_radiation_time_step
+  standard_name = surface_upwelling_diffuse_nir_shortwave_flux_on_radiation_timestep
   long_name = sfc nir diff sw upward flux
   units = W m-2
   dimensions = (horizontal_loop_extent)
@@ -306,7 +306,7 @@
   intent = inout
   optional = F
 [visbmui]
-  standard_name = surface_upwelling_direct_ultraviolet_and_visible_shortwave_flux_on_radiation_time_step
+  standard_name = surface_upwelling_direct_uv_and_vis_shortwave_flux_on_radiation_timestep
   long_name = sfc uv+vis beam sw upward flux
   units = W m-2
   dimensions = (horizontal_loop_extent)
@@ -315,7 +315,7 @@
   intent = inout
   optional = F
 [visdfui]
-  standard_name = surface_upwelling_diffuse_ultraviolet_and_visible_shortwave_flux_on_radiation_time_step
+  standard_name = surface_upwelling_diffuse_uv_and_vis_shortwave_flux_on_radiation_timestep
   long_name = sfc uv+vis diff sw upward flux
   units = W m-2
   dimensions = (horizontal_loop_extent)
@@ -324,7 +324,7 @@
   intent = inout
   optional = F  
 [sfcnsw]
-  standard_name = surface_net_downwelling_shortwave_flux_on_radiation_time_step
+  standard_name = surface_net_downwelling_shortwave_flux_on_radiation_timestep
   long_name = total sky sfc netsw flx into ground
   units = W m-2
   dimensions = (horizontal_loop_extent)
@@ -333,7 +333,7 @@
   intent = inout
   optional = F
 [sfcdsw]
-  standard_name = surface_downwelling_shortwave_flux_on_radiation_time_step
+  standard_name = surface_downwelling_shortwave_flux_on_radiation_timestep
   long_name = total sky sfc downward sw flux
   units = W m-2
   dimensions = (horizontal_loop_extent)
@@ -342,7 +342,7 @@
   intent = inout
   optional = F
 [htrsw]
-  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step
+  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_timestep
   long_name = total sky sw heating rate
   units = K s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -351,7 +351,7 @@
   intent = inout
   optional = F
 [sfcfsw]
-  standard_name = sw_fluxes_sfc
+  standard_name = surface_sw_fluxes_assuming_total_and_clear_sky_on_radiation_timestep
   long_name = sw radiation fluxes at sfc
   units = W m-2
   dimensions = (horizontal_loop_extent)
@@ -367,7 +367,7 @@
   intent = inout
   optional = F  
 [htrswc]
-  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_assuming_clear_sky_on_radiation_time_step
+  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_assuming_clear_sky_on_radiation_timestep
   long_name = clear sky sw heating rates
   units = K s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)

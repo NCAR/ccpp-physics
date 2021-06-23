@@ -8,7 +8,7 @@
   name = mp_thompson_post_init
   type = scheme
 [ttendlim]
-  standard_name = limit_for_temperature_tendency_for_microphysics
+  standard_name = max_tendency_of_air_potential_temperature_due_to_large_scale_precipitation
   long_name = temperature tendency limiter per physics time step
   units = K s-1
   dimensions = ()
@@ -64,7 +64,7 @@
   intent = in
   optional = F
 [tgrs]
-  standard_name = air_temperature_updated_by_physics
+  standard_name = air_temperature_of_new_state
   long_name = model layer mean temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -73,7 +73,7 @@
   intent = inout
   optional = F
 [prslk]
-  standard_name = dimensionless_exner_function_at_model_layers
+  standard_name = dimensionless_exner_function
   long_name = dimensionless Exner function at model layer centers
   units = none
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -82,7 +82,7 @@
   intent = in
   optional = F
 [dtp]
-  standard_name = time_step_for_physics
+  standard_name = timestep_for_physics
   long_name = physics timestep
   units = s
   dimensions = ()
@@ -91,7 +91,7 @@
   intent = in
   optional = F
 [ttendlim]
-  standard_name = limit_for_temperature_tendency_for_microphysics
+  standard_name = max_tendency_of_air_potential_temperature_due_to_large_scale_precipitation
   long_name = temperature tendency limiter per physics time step
   units = K s-1
   dimensions = ()
@@ -108,7 +108,7 @@
   intent = in
   optional = F
 [mpicomm]
-  standard_name = mpi_comm
+  standard_name = mpi_communicator
   long_name = MPI communicator
   units = index
   dimensions = ()

@@ -8,7 +8,7 @@
   name = cnvc90_run
   type = scheme
 [clstp]
-  standard_name = convective_cloud_switch
+  standard_name = control_for_convective_cloud_diagnostics
   long_name = switch for saving convective clouds
   units = none
   dimensions = ()
@@ -61,13 +61,13 @@
   standard_name = air_pressure_at_interface
   long_name = interface pressure
   units = Pa
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [acv]
-  standard_name = accumulated_lwe_thickness_of_convective_precipitation_amount_cnvc90
+  standard_name = cumulative_lwe_thickness_of_convective_precipitation_amount_between_sw_radiation_calls
   long_name = accumulated convective rainfall amount for cnvc90 only
   units = m
   dimensions = (horizontal_loop_extent)
@@ -76,7 +76,7 @@
   intent = inout
   optional = F
 [acvb]
-  standard_name = smallest_cloud_base_vertical_index_encountered_thus_far
+  standard_name = cumulative_min_vertical_index_at_cloud_base_between_sw_radiation_calls
   long_name = smallest cloud base vertical index encountered thus far
   units = index
   dimensions = (horizontal_loop_extent)
@@ -85,7 +85,7 @@
   intent = inout
   optional = F
 [acvt]
-  standard_name = largest_cloud_top_vertical_index_encountered_thus_far
+  standard_name = cumulative_max_vertical_index_at_cloud_base_between_sw_radiation_calls
   long_name = largest cloud top vertical index encountered thus far
   units = index
   dimensions = (horizontal_loop_extent)
@@ -94,7 +94,7 @@
   intent = inout
   optional = F
 [cv]
-  standard_name = fraction_of_convective_cloud
+  standard_name = convective_cloud_area_fraction_between_sw_radiation_calls_from_cnvc90
   long_name = fraction of convective cloud
   units = frac
   dimensions = (horizontal_loop_extent)
@@ -103,7 +103,7 @@
   intent = inout
   optional = F
 [cvb]
-  standard_name = pressure_at_bottom_of_convective_cloud
+  standard_name = pressure_at_convective_cloud_base_between_sw_radiation_calls_from_cnvc90
   long_name = pressure at bottom of convective cloud
   units = Pa
   dimensions = (horizontal_loop_extent)
@@ -112,7 +112,7 @@
   intent = inout
   optional = F
 [cvt]
-  standard_name = pressure_at_top_of_convective_cloud
+  standard_name = pressure_at_convective_cloud_top_between_sw_radiation_calls_from_cnvc90
   long_name = pressure at top of convective cloud
   units = Pa
   dimensions = (horizontal_loop_extent)

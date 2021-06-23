@@ -40,7 +40,7 @@
   intent = in
   optional = F
 [gu0]
-  standard_name = x_wind_updated_by_physics
+  standard_name = x_wind_of_new_state
   long_name = updated x-direction wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -49,7 +49,7 @@
   intent = in
   optional = F
 [gv0]
-  standard_name = y_wind_updated_by_physics
+  standard_name = y_wind_of_new_state
   long_name = updated y-direction wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -58,7 +58,7 @@
   intent = in
   optional = F
 [gt0]
-  standard_name = air_temperature_updated_by_physics
+  standard_name = air_temperature_of_new_state
   long_name = temperature updated by physics
   units = K
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -67,7 +67,7 @@
   intent = in
   optional = F
 [gq0_water_vapor]
-  standard_name = water_vapor_specific_humidity_updated_by_physics
+  standard_name = specific_humidity_of_new_state
   long_name = water vapor specific humidity updated by physics
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -112,7 +112,7 @@
   intent = inout
   optional = F
 [flag_for_scnv_generic_tend]
-  standard_name = flag_for_generic_shallow_convection_tendency
+  standard_name = flag_for_generic_tendency_due_to_shallow_convection
   long_name = true if GFS_SCNV_generic should calculate tendencies
   units = flag
   dimensions = ()
@@ -172,7 +172,7 @@
   intent = in
   optional = F
 [lssav]
-  standard_name = flag_diagnostics
+  standard_name = flag_for_diagnostics
   long_name = logical flag for storing diagnostics
   units = flag
   dimensions = ()
@@ -213,7 +213,7 @@
   intent = in
   optional = F
 [gu0]
-  standard_name = x_wind_updated_by_physics
+  standard_name = x_wind_of_new_state
   long_name = updated x-direction wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -222,7 +222,7 @@
   intent = in
   optional = F
 [gv0]
-  standard_name = y_wind_updated_by_physics
+  standard_name = y_wind_of_new_state
   long_name = updated y-direction wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -231,7 +231,7 @@
   intent = in
   optional = F
 [gt0]
-  standard_name = air_temperature_updated_by_physics
+  standard_name = air_temperature_of_new_state
   long_name = temperature updated by physics
   units = K
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -240,7 +240,7 @@
   intent = in
   optional = F
 [gq0_water_vapor]
-  standard_name = water_vapor_specific_humidity_updated_by_physics
+  standard_name = specific_humidity_of_new_state
   long_name = water vapor specific humidity updated by physics
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -285,7 +285,7 @@
   intent = in
   optional = F
 [dqdti]
-  standard_name = instantaneous_water_vapor_specific_humidity_tendency_due_to_convection
+  standard_name = tendency_of_specific_humidity_due_to_moist_convection_for_coupling
   long_name = instantaneous moisture tendency due to convection
   units = kg kg-1 s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -339,7 +339,7 @@
   intent = inout
   optional = F
 [shcnvcw]
-  standard_name = flag_shallow_convective_cloud
+  standard_name = flag_for_saving_shallow_convective_cloud_area_fraction
   long_name = flag for shallow convective cloud
   units = 
   dimensions = ()
@@ -356,7 +356,7 @@
   intent = in
   optional = F
 [npdf3d]
-  standard_name = number_of_3d_arrays_associated_with_pdf_based_clouds
+  standard_name = number_of_pdf_based_variables_in_xyz_dimensioned_restart_array
   long_name = number of 3d arrays associated with pdf based clouds/mp
   units = count
   dimensions = ()
@@ -364,7 +364,7 @@
   intent = in
   optional = F
 [num_p3d]
-  standard_name = array_dimension_of_3d_arrays_for_microphysics
+  standard_name = number_of_microphysics_variables_in_xyz_dimensioned_restart_array
   long_name = number of 3D arrays needed for microphysics
   units = count
   dimensions = ()
@@ -372,7 +372,7 @@
   intent = in
   optional = F
 [ncnvcld3d]
-  standard_name = number_of_convective_3d_cloud_fields
+  standard_name = number_of_convective_cloud_variables_in_xyz_dimensioned_restart_array
   long_name = number of convective 3d clouds fields
   units = count
   dimensions = ()
@@ -425,7 +425,7 @@
   intent = inout
   optional = F
 [cnvw_phy_f3d]
-  standard_name = convective_cloud_water_mixing_ratio_in_phy_f3d
+  standard_name = convective_cloud_condensate_mixing_ratio
   long_name = convective cloud water mixing ratio in the phy_f3d array
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -434,7 +434,7 @@
   intent = inout
   optional = F
 [cnvc_phy_f3d]
-  standard_name = convective_cloud_cover_in_phy_f3d
+  standard_name = convective_cloud_area_fraction
   long_name = convective cloud cover in the phy_f3d array
   units = frac
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -443,7 +443,7 @@
   intent = inout
   optional = F
 [flag_for_scnv_generic_tend]
-  standard_name = flag_for_generic_shallow_convection_tendency
+  standard_name = flag_for_generic_tendency_due_to_shallow_convection
   long_name = true if GFS_SCNV_generic should calculate tendencies
   units = flag
   dimensions = ()
@@ -451,7 +451,7 @@
   intent = in
   optional = F
 [imfshalcnv]
-  standard_name = flag_for_mass_flux_shallow_convection_scheme
+  standard_name = control_for_shallow_convection_scheme
   long_name = flag for mass-flux shallow convection scheme
   units = flag
   dimensions = ()
@@ -459,7 +459,7 @@
   intent = in
   optional = F
 [imfshalcnv_sas]
-  standard_name = flag_for_sas_shallow_convection_scheme
+  standard_name = identifier_for_simplified_arakawa_schubert_shallow_convection
   long_name = flag for SAS shallow convection scheme
   units = flag
   dimensions = ()
@@ -467,7 +467,7 @@
   intent = in
   optional = F
 [imfshalcnv_samf]
-  standard_name = flag_for_samf_shallow_convection_scheme
+  standard_name = identifier_for_scale_aware_mass_flux_shallow_convection
   long_name = flag for SAMF shallow convection scheme
   units = flag
   dimensions = ()

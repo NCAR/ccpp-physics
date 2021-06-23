@@ -16,7 +16,7 @@
   intent = in
   optional = F
 [dt]
-  standard_name = time_step_for_physics
+  standard_name = timestep_for_physics
   long_name = physics time step
   units = s
   dimensions = ()
@@ -43,7 +43,7 @@
   intent = in
   optional = F
 [con_rd] 
-  standard_name = gas_constant_dry_air
+  standard_name = gas_constant_of_dry_air
   long_name = ideal gas constant for dry air
   units = J kg-1 K-1
   dimensions = ()
@@ -219,7 +219,7 @@
   intent = in
   optional = F
 [dt]
-  standard_name = time_step_for_physics
+  standard_name = timestep_for_physics
   long_name = physics time step
   units = s
   dimensions = ()
@@ -228,7 +228,7 @@
   intent = in
   optional = F
 [dtf]
-  standard_name = time_step_for_dynamics
+  standard_name = timestep_for_dynamics
   long_name = dynamics timestep
   units = s
   dimensions = ()
@@ -237,7 +237,7 @@
   intent = in
   optional = F
 [ccwf]
-  standard_name = multiplication_factor_for_critical_cloud_workfunction
+  standard_name = tunable_parameter_for_critical_cloud_workfunction_in_relaxed_arakawa_schubert_deep_convection
   long_name = multiplication factor for tical_cloud_workfunction
   units = none
   dimensions = (2)
@@ -255,7 +255,7 @@
   intent = in
   optional = F
 [dxmin]
-  standard_name = minimum_scaling_factor_for_critical_relative_humidity
+  standard_name = min_grid_scale
   long_name = minimum scaling factor for critical relative humidity
   units = m2 rad-2
   dimensions = ()
@@ -264,7 +264,7 @@
   intent = in
   optional = F
 [dxinv]
-  standard_name = inverse_scaling_factor_for_critical_relative_humidity
+  standard_name = reciprocal_of_grid_scale_range
   long_name = inverse scaling factor for critical relative humidity
   units = rad2 m-2
   dimensions = ()
@@ -273,7 +273,7 @@
   intent = in
   optional = F
 [psauras]
-  standard_name = coefficient_from_cloud_ice_to_snow_ras
+  standard_name = autoconversion_to_snow_coefficient_for_deep_convection
   long_name = conversion coefficient from cloud ice to snow in ras
   units = none
   dimensions = (2)
@@ -282,7 +282,7 @@
   intent = in
   optional = F
 [prauras]
-  standard_name = coefficient_from_cloud_water_to_rain_ras
+  standard_name = autoconversion_to_rain_coefficient_for_deep_convection
   long_name = conversion coefficient from cloud water to rain in ras
   units = none
   dimensions = (2)
@@ -291,7 +291,7 @@
   intent = in
   optional = F
 [wminras]
-  standard_name = cloud_condensed_water_ice_conversion_threshold_ras
+  standard_name = cloud_condensate_autoconversion_threshold_coefficient_for_deep_convection
   long_name = conversion coefficient from cloud liquid and ice to precipitation in ras
   units = none
   dimensions = (2)
@@ -300,7 +300,7 @@
   intent = in
   optional = F
 [dlqf]
-  standard_name = condensate_fraction_detrained_in_updraft_layers
+  standard_name = cloud_condensate_detrainment_coefficient
   long_name = condensate fraction detrained with in a updraft layers
   units = none
   dimensions = (2)
@@ -325,16 +325,16 @@
   intent = in
   optional = F
 [rannum]
-  standard_name = random_number_array
+  standard_name = random_number
   long_name = random number array (0-1)
   units = none
-  dimensions = (horizontal_loop_extent,array_dimension_of_random_number)
+  dimensions = (horizontal_loop_extent,number_of_random_numbers)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [nrcm]
-  standard_name = array_dimension_of_random_number
+  standard_name = number_of_random_numbers
   long_name = second dimension of random number stream for RAS
   units = count
   dimensions = ()
@@ -342,7 +342,7 @@
   intent = in
   optional = F
 [mp_phys]
-  standard_name = flag_for_microphysics_scheme
+  standard_name = control_for_microphysics_scheme
   long_name = choice of microphysics scheme
   units = flag
   dimensions = ()
@@ -350,7 +350,7 @@
   intent = in
   optional = F
 [mp_phys_mg]
-  standard_name = flag_for_morrison_gettelman_microphysics_scheme
+  standard_name = identifier_for_morrison_gettelman_microphysics_scheme
   long_name = choice of Morrison-Gettelman microphysics scheme
   units = flag
   dimensions = ()
@@ -383,7 +383,7 @@
   intent = in
   optional = F
 [tin]
-  standard_name = air_temperature_updated_by_physics
+  standard_name = air_temperature_of_new_state
   long_name = updated temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -392,7 +392,7 @@
   intent = inout
   optional = F
 [qin]
-  standard_name = water_vapor_specific_humidity_updated_by_physics
+  standard_name = specific_humidity_of_new_state
   long_name = updated vapor specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -401,7 +401,7 @@
   intent = inout
   optional = F
 [uin]
-  standard_name = x_wind_updated_by_physics
+  standard_name = x_wind_of_new_state
   long_name = updated x-direction wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -410,7 +410,7 @@
   intent = inout
   optional = F
 [vin]
-  standard_name = y_wind_updated_by_physics
+  standard_name = y_wind_of_new_state
   long_name = updated y-direction wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -428,7 +428,7 @@
   intent = inout
   optional = F
 [fscav]
-  standard_name = coefficients_for_aerosol_scavenging
+  standard_name = chemical_tracer_scavenging_fractions
   long_name = array of aerosol scavenging coefficients
   units = none
   dimensions = (number_of_chemical_tracers)
@@ -455,7 +455,7 @@
   intent = in
   optional = F
 [prsik]
-  standard_name = dimensionless_exner_function_at_model_interfaces
+  standard_name = dimensionless_exner_function_at_interface
   long_name = dimensionless Exner function at model layer interfaces
   units = none
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -464,7 +464,7 @@
   intent = in
   optional = F
 [prslk]
-  standard_name = dimensionless_exner_function_at_model_layers
+  standard_name = dimensionless_exner_function
   long_name = dimensionless Exner function at model layer centers
   units = none
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -485,7 +485,7 @@
   standard_name = geopotential_at_interface
   long_name = geopotential at model layer interfaces
   units = m2 s-2
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -541,7 +541,7 @@
   intent = inout
   optional = F
 [ddvel]
-  standard_name = surface_wind_enhancement_due_to_convection
+  standard_name = enhancement_to_wind_speed_at_surface_adjacent_layer_due_to_convection
   long_name = surface wind enhancement due to convection
   units = m s-1
   dimensions = (horizontal_loop_extent)

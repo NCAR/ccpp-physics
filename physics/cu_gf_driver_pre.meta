@@ -41,7 +41,7 @@
   intent = in
   optional = F
 [dtp]
-  standard_name = time_step_for_physics
+  standard_name = timestep_for_physics
   long_name = physics timestep
   units = s
   dimensions = ()
@@ -59,7 +59,7 @@
   intent = in
   optional = F
 [q]
-  standard_name = water_vapor_specific_humidity
+  standard_name = specific_humidity
   long_name = water vapor specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -68,7 +68,7 @@
   intent = in
   optional = F
 [prevst]
-  standard_name = temperature_from_previous_timestep
+  standard_name = air_temperature_on_previous_timestep
   long_name = temperature from previous time step
   units = K
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -77,7 +77,7 @@
   intent = in
   optional = F
 [prevsq]
-  standard_name = moisture_from_previous_timestep
+  standard_name = specific_humidity_on_previous_timestep
   long_name = moisture from previous time step
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -86,7 +86,7 @@
   intent = in
   optional = F
 [forcet]
-  standard_name = temperature_tendency_due_to_dynamics
+  standard_name = tendency_of_air_temperature_due_to_nonphysics
   long_name = temperature tendency due to dynamics only
   units = K s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -95,7 +95,7 @@
   intent = out
   optional = F
 [forceq]
-  standard_name = moisture_tendency_due_to_dynamics
+  standard_name = tendendy_of_specific_humidity_due_to_nonphysics
   long_name = moisture tendency due to dynamics only
   units = kg kg-1 s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -104,7 +104,7 @@
   intent = out
   optional = F
 [cactiv]
-  standard_name = conv_activity_counter
+  standard_name = counter_for_grell_freitas_convection
   long_name = convective activity memory
   units = none
   dimensions = (horizontal_loop_extent)
@@ -112,7 +112,7 @@
   intent = out
   optional = F
 [conv_act]
-  standard_name = gf_memory_counter
+  standard_name = consecutive_calls_for_grell_freitas_convection
   long_name = Memory counter for GF
   units = none
   dimensions = (horizontal_loop_extent)

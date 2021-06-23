@@ -8,7 +8,7 @@
   name = hedmf_init
   type = scheme
 [hybedmf]
-  standard_name = flag_for_hedmf
+  standard_name = flag_for_hybrid_edmf_pbl_scheme
   long_name = flag for hybrid edmf pbl scheme (moninedmf)
   units = flag
   dimensions = ()
@@ -16,7 +16,7 @@
   intent = in
   optional = F
 [moninq_fac]
-  standard_name = atmosphere_diffusivity_coefficient_factor
+  standard_name = multiplicative_tuning_parameter_for_atmosphere_diffusivity
   long_name = multiplicative constant for atmospheric diffusivities
   units = none
   dimensions = ()
@@ -71,7 +71,7 @@
   intent = in
   optional = F
 [ntcw]
-  standard_name = index_for_liquid_cloud_condensate
+  standard_name = index_of_cloud_liquid_water_mixing_ratio_in_tracer_concentration_array
   long_name = cloud condensate index in tracer array
   units = index
   dimensions = ()
@@ -79,7 +79,7 @@
   intent = in
   optional = F
 [dv]
-  standard_name = tendency_of_y_wind_due_to_model_physics
+  standard_name = process_split_cumulative_tendency_of_y_wind
   long_name = updated tendency of the y wind
   units = m s-2
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -88,7 +88,7 @@
   intent = inout
   optional = F
 [du]
-  standard_name = tendency_of_x_wind_due_to_model_physics
+  standard_name = process_split_cumulative_tendency_of_x_wind
   long_name = updated tendency of the x wind
   units = m s-2
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -97,7 +97,7 @@
   intent = inout
   optional = F
 [tau]
-  standard_name = tendency_of_air_temperature_due_to_model_physics
+  standard_name = process_split_cumulative_tendency_of_air_temperature
   long_name = updated tendency of the temperature
   units = K s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -151,7 +151,7 @@
   intent = in
   optional = F
 [swh]
-  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step
+  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_timestep
   long_name = total sky shortwave heating rate
   units = K s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -160,7 +160,7 @@
   intent = in
   optional = F
 [hlw]
-  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step
+  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_timestep
   long_name = total sky longwave heating rate
   units = K s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -178,7 +178,7 @@
   intent = in
   optional = F
 [psk]
-  standard_name = dimensionless_exner_function_at_lowest_model_interface
+  standard_name = surface_dimensionless_exner_function
   long_name = dimensionless Exner function at the surface interface
   units = none
   dimensions = (horizontal_loop_extent)
@@ -297,7 +297,7 @@
   standard_name = air_pressure_at_interface
   long_name = air pressure at model layer interfaces
   units = Pa
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -321,7 +321,7 @@
   intent = in
   optional = F
 [prslk]
-  standard_name = dimensionless_exner_function_at_model_layers
+  standard_name = dimensionless_exner_function
   long_name = Exner function at layers
   units = none
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -333,7 +333,7 @@
   standard_name = geopotential_at_interface
   long_name = geopotential at model layer interfaces
   units = m2 s-2
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -348,7 +348,7 @@
   intent = in
   optional = F
 [delt]
-  standard_name = time_step_for_physics
+  standard_name = timestep_for_physics
   long_name = time step for physics
   units = s
   dimensions = ()
@@ -454,7 +454,7 @@
   intent = in
   optional = F
 [xkzm_m]
-  standard_name = atmosphere_momentum_diffusivity_background
+  standard_name = atmosphere_momentum_diffusivity_due_to_background
   long_name = background value of momentum diffusivity
   units = m2 s-1
   dimensions = ()
@@ -463,7 +463,7 @@
   intent = in
   optional = F
 [xkzm_h]
-  standard_name = atmosphere_heat_diffusivity_background
+  standard_name = atmosphere_heat_diffusivity_due_to_background
   long_name = background value of heat diffusivity
   units = m2 s-1
   dimensions = ()
@@ -472,7 +472,7 @@
   intent = in
   optional = F
 [xkzm_s]
-  standard_name = diffusivity_background_sigma_level
+  standard_name = sigma_pressure_threshold_at_upper_extent_of_background_diffusion
   long_name = sigma level threshold for background diffusivity
   units = none
   dimensions = ()
@@ -497,7 +497,7 @@
   intent = in
   optional = F
 [xkzminv]
-  standard_name = atmosphere_heat_diffusivity_background_maximum
+  standard_name = max_atmosphere_heat_diffusivity_due_to_background
   long_name = maximum background value of heat diffusivity
   units = m2 s-1
   dimensions = ()
@@ -506,7 +506,7 @@
   intent = in
   optional = F
 [moninq_fac]
-  standard_name = atmosphere_diffusivity_coefficient_factor
+  standard_name = multiplicative_tuning_parameter_for_atmosphere_diffusivity
   long_name = multiplicative constant for atmospheric diffusivities
   units = none
   dimensions = ()
@@ -531,7 +531,7 @@
   intent = in
   optional = F
 [var_ric]
-  standard_name = flag_variable_bulk_richardson_number
+  standard_name = control_for_variable_bulk_richardson_number
   long_name = flag for calculating variable bulk richardson number for hurricane PBL
   units = flag
   dimensions = ()
@@ -558,7 +558,7 @@
   intent = in
   optional = F
 [lssav]
-  standard_name = flag_diagnostics
+  standard_name = flag_for_diagnostics
   long_name = logical flag for storing diagnostics
   units = flag
   dimensions = ()
@@ -582,7 +582,7 @@
   intent = in
   optional = F
 [ntoz]
-  standard_name = index_for_ozone
+  standard_name = index_of_ozone_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for ozone mixing ratio
   units = index
   dimensions = ()
@@ -635,7 +635,7 @@
   intent = inout
   optional = F
 [flag_for_pbl_generic_tend]
-  standard_name = flag_for_generic_planetary_boundary_layer_tendency
+  standard_name = flag_for_generic_tendency_due_to_planetary_boundary_layer
   long_name = true if GFS_PBL_generic should calculate tendencies
   units = flag
   dimensions = ()

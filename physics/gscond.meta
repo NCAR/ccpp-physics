@@ -8,7 +8,7 @@
   name = zhaocarr_gscond_init
   type = scheme
 [imp_physics]
-  standard_name = flag_for_microphysics_scheme
+  standard_name = control_for_microphysics_scheme
   long_name = choice of microphysics scheme
   units = flag
   dimensions = ()
@@ -16,7 +16,7 @@
   intent = in
   optional = F
 [imp_physics_zhao_carr]
-  standard_name = flag_for_zhao_carr_microphysics_scheme
+  standard_name = identifier_for_zhao_carr_microphysics_scheme
   long_name = choice of Zhao-Carr microphysics scheme
   units = flag
   dimensions = ()
@@ -24,7 +24,7 @@
   intent = in
   optional = F
 [imp_physics_zhao_carr_pdf]
-  standard_name = flag_for_zhao_carr_pdf_microphysics_scheme
+  standard_name = identifier_for_zhao_carr_pdf_microphysics_scheme
   long_name = choice of Zhao-Carr microphysics scheme with PDF clouds
   units = flag
   dimensions = ()
@@ -75,7 +75,7 @@
   intent = in
   optional = F
 [dt]
-  standard_name = time_step_for_physics
+  standard_name = timestep_for_physics
   long_name = physics time step
   units = s
   dimensions = ()
@@ -84,7 +84,7 @@
   intent = in
   optional = F
 [dtf]
-  standard_name = time_step_for_dynamics
+  standard_name = timestep_for_dynamics
   long_name = dynamics time step
   units = s
   dimensions = ()
@@ -111,7 +111,7 @@
   intent = in
   optional = F
 [q]
-  standard_name = water_vapor_specific_humidity_updated_by_physics
+  standard_name = specific_humidity_of_new_state
   long_name = water vapor specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -138,7 +138,7 @@
   intent = in
   optional = F
 [cwm]
-  standard_name = cloud_condensed_water_mixing_ratio_updated_by_physics
+  standard_name = cloud_liquid_water_mixing_ratio_of_new_state
   long_name = moist cloud condensed water mixing ratio
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -147,7 +147,7 @@
   intent = out
   optional = F
 [t]
-  standard_name = air_temperature_updated_by_physics
+  standard_name = air_temperature_of_new_state
   long_name = layer mean air temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -165,7 +165,7 @@
   intent = inout
   optional = F
 [qp]
-  standard_name = water_vapor_specific_humidity_two_timesteps_back
+  standard_name = specific_humidity_two_timesteps_back
   long_name = water vapor specific humidity two timesteps back
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -183,7 +183,7 @@
   intent = inout
   optional = F
 [tp1]
-  standard_name = air_temperature_at_previous_timestep
+  standard_name = air_temperature_on_previous_timestep_in_xyz_dimensioned_restart_array
   long_name = air temperature at previous timestep
   units = K
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -192,7 +192,7 @@
   intent = inout
   optional = F
 [qp1]
-  standard_name = water_vapor_specific_humidity_at_previous_timestep
+  standard_name = specific_humidity_on_previous_timestep_in_xyz_dimensioned_restart_array
   long_name = water vapor specific humidity at previous timestep
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -201,7 +201,7 @@
   intent = inout
   optional = F
 [psp1]
-  standard_name = surface_air_pressure_at_previous_timestep
+  standard_name = surface_air_pressure_on_previous_timestep
   long_name = surface air surface pressure at previous timestep
   units = Pa
   dimensions = (horizontal_loop_extent)

@@ -120,7 +120,7 @@
   intent = in
   optional = F
 [dtf]
-  standard_name = time_step_for_dynamics
+  standard_name = timestep_for_dynamics
   long_name = dynamics timestep
   units = s
   dimensions = ()
@@ -129,7 +129,7 @@
   intent = in
   optional = F
 [dtp]
-  standard_name = time_step_for_physics
+  standard_name = timestep_for_physics
   long_name = physics timestep
   units = s
   dimensions = ()
@@ -138,7 +138,7 @@
   intent = in
   optional = F
 [slmsk]
-  standard_name = sea_land_ice_mask_real
+  standard_name = area_type
   long_name = landmask: sea/land/ice=0/1/2
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -156,7 +156,7 @@
   intent = in
   optional = F
 [dxmin]
-  standard_name = minimum_scaling_factor_for_critical_relative_humidity
+  standard_name = min_grid_scale
   long_name = minimum scaling factor for critical relative humidity
   units = m2 rad-2
   dimensions = ()
@@ -165,7 +165,7 @@
   intent = in
   optional = F
 [dxinv]
-  standard_name = inverse_scaling_factor_for_critical_relative_humidity
+  standard_name = reciprocal_of_grid_scale_range
   long_name = inverse scaling factor for critical relative humidity
   units = rad2 m-2
   dimensions = ()
@@ -218,7 +218,7 @@
   intent = out
   optional = F
 [dudt]
-  standard_name = tendency_of_x_wind_due_to_model_physics
+  standard_name = process_split_cumulative_tendency_of_x_wind
   long_name = updated tendency of the x wind
   units = m s-2
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -227,7 +227,7 @@
   intent = out
   optional = F
 [dvdt]
-  standard_name = tendency_of_y_wind_due_to_model_physics
+  standard_name = process_split_cumulative_tendency_of_y_wind
   long_name = updated tendency of the y wind
   units = m s-2
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -236,7 +236,7 @@
   intent = out
   optional = F
 [dtdt]
-  standard_name = tendency_of_air_temperature_due_to_model_physics
+  standard_name = process_split_cumulative_tendency_of_air_temperature
   long_name = updated tendency of the temperature
   units = K s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -245,7 +245,7 @@
   intent = out
   optional = F
 [dqdt]
-  standard_name = tendency_of_tracers_due_to_model_physics
+  standard_name = process_split_cumulative_tendency_of_tracers
   long_name = updated tendency of the tracers
   units = kg kg-1 s-1
   dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers)
@@ -298,7 +298,7 @@
   intent = in
   optional = F
 [lssav]
-  standard_name = flag_diagnostics
+  standard_name = flag_for_diagnostics
   long_name = logical flag for storing diagnostics
   units = flag
   dimensions = ()
@@ -314,7 +314,7 @@
   intent = in
   optional = F
 [lsidea]
-  standard_name = flag_idealized_physics
+  standard_name = flag_for_integrated_dynamics_through_earths_atmosphere
   long_name = flag for idealized physics
   units = flag
   dimensions = ()
@@ -330,7 +330,7 @@
   intent = in
   optional = F
 [shal_cnv]
-  standard_name = flag_for_shallow_convection
+  standard_name = flag_for_simplified_arakawa_schubert_shallow_convection
   long_name = flag for calling shallow convection
   units = flag
   dimensions = ()
@@ -362,7 +362,7 @@
   intent = in
   optional = F
 [frac_grid]
-  standard_name = flag_for_fractional_grid
+  standard_name = flag_for_fractional_landmask
   long_name = flag for fractional grid
   units = flag
   dimensions = ()
@@ -370,7 +370,7 @@
   intent = in
   optional = F
 [imfshalcnv]
-  standard_name = flag_for_mass_flux_shallow_convection_scheme
+  standard_name = control_for_shallow_convection_scheme
   long_name = flag for mass-flux shallow convection scheme
   units = flag
   dimensions = ()
@@ -378,7 +378,7 @@
   intent = in
   optional = F
 [dtf]
-  standard_name = time_step_for_dynamics
+  standard_name = timestep_for_dynamics
   long_name = dynamics timestep
   units = s
   dimensions = ()
@@ -414,7 +414,7 @@
   intent = in
   optional = F
 [cice]
-  standard_name = sea_ice_concentration
+  standard_name = sea_ice_area_fraction_of_sea_area_fraction
   long_name = ice fraction over open water
   units = frac
   dimensions = (horizontal_loop_extent)
@@ -432,7 +432,7 @@
   intent = in
   optional = F
 [ulwsfc_cice]
-  standard_name = surface_upwelling_longwave_flux_for_coupling
+  standard_name = surface_upwelling_longwave_flux_from_coupled_process
   long_name = surface upwelling longwave flux for coupling
   units = W m-2
   dimensions = (horizontal_loop_extent)
@@ -441,7 +441,7 @@
   intent = in
   optional = F
 [lwhd]
-  standard_name = tendency_of_air_temperature_due_to_longwave_heating_for_idea
+  standard_name = tendency_of_air_temperature_due_to_integrated_dynamics_through_earths_atmosphere
   long_name = idea sky lw heating rates
   units = K s-1
   dimensions = (horizontal_loop_extent,vertical_dimension,6)
@@ -450,7 +450,7 @@
   intent = in
   optional = F
 [htrsw]
-  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step
+  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_timestep
   long_name = total sky sw heating rate
   units = K s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -459,7 +459,7 @@
   intent = in
   optional = F
 [htrlw]
-  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step
+  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_timestep
   long_name = total sky lw heating rate
   units = K s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -477,7 +477,7 @@
   intent = in
   optional = F
 [ctei_rm]
-  standard_name = critical_cloud_top_entrainment_instability_criteria
+  standard_name = tunable_parameter_for_critical_cloud_top_entrainment_instability_criteria
   long_name = critical cloud top entrainment instability criteria
   units = none
   dimensions = (2)
@@ -507,7 +507,7 @@
   standard_name = air_pressure_at_interface
   long_name = air pressure at model layer interfaces
   units = Pa
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -531,7 +531,7 @@
   intent = in
   optional = F
 [qgrs_water_vapor]
-  standard_name = water_vapor_specific_humidity
+  standard_name = specific_humidity
   long_name = water vapor specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -540,7 +540,7 @@
   intent = in
   optional = F
 [qgrs_cloud_water]
-  standard_name = cloud_condensed_water_mixing_ratio
+  standard_name = cloud_liquid_water_mixing_ratio
   long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates)
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -567,7 +567,7 @@
   intent = in
   optional = F
 [prslk]
-  standard_name = dimensionless_exner_function_at_model_layers
+  standard_name = dimensionless_exner_function
   long_name = dimensionless Exner function at model layer centers
   units = none
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -875,7 +875,7 @@
   intent = in
   optional = F
 [gt0]
-  standard_name = air_temperature_updated_by_physics
+  standard_name = air_temperature_of_new_state
   long_name = temperature updated by physics
   units = K
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -884,7 +884,7 @@
   intent = out
   optional = F
 [gu0]
-  standard_name = x_wind_updated_by_physics
+  standard_name = x_wind_of_new_state
   long_name = zonal wind updated by physics
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -893,7 +893,7 @@
   intent = out
   optional = F
 [gv0]
-  standard_name = y_wind_updated_by_physics
+  standard_name = y_wind_of_new_state
   long_name = meridional wind updated by physics
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -902,7 +902,7 @@
   intent = out
   optional = F
 [gq0]
-  standard_name = tracer_concentration_updated_by_physics
+  standard_name = tracer_concentration_of_new_state
   long_name = tracer concentration updated by physics
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers)
@@ -963,7 +963,7 @@
   intent = in
   optional = F
 [dtp]
-  standard_name = time_step_for_physics
+  standard_name = timestep_for_physics
   long_name = physics timestep
   units = s
   dimensions = ()
@@ -1008,7 +1008,7 @@
   intent = in
   optional = F
 [dudt]
-  standard_name = tendency_of_x_wind_due_to_model_physics
+  standard_name = process_split_cumulative_tendency_of_x_wind
   long_name = updated tendency of the x wind
   units = m s-2
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -1017,7 +1017,7 @@
   intent = in
   optional = F
 [dvdt]
-  standard_name = tendency_of_y_wind_due_to_model_physics
+  standard_name = process_split_cumulative_tendency_of_y_wind
   long_name = updated tendency of the y wind
   units = m s-2
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -1026,7 +1026,7 @@
   intent = in
   optional = F
 [dtdt]
-  standard_name = tendency_of_air_temperature_due_to_model_physics
+  standard_name = process_split_cumulative_tendency_of_air_temperature
   long_name = updated tendency of the temperature
   units = K s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -1035,7 +1035,7 @@
   intent = in
   optional = F
 [dqdt]
-  standard_name = tendency_of_tracers_due_to_model_physics
+  standard_name = process_split_cumulative_tendency_of_tracers
   long_name = updated tendency of the tracers
   units = kg kg-1 s-1
   dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers)
@@ -1044,7 +1044,7 @@
   intent = in
   optional = F
 [gt0]
-  standard_name = air_temperature_updated_by_physics
+  standard_name = air_temperature_of_new_state
   long_name = temperature updated by physics
   units = K
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -1053,7 +1053,7 @@
   intent = out
   optional = F
 [gu0]
-  standard_name = x_wind_updated_by_physics
+  standard_name = x_wind_of_new_state
   long_name = zonal wind updated by physics
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -1062,7 +1062,7 @@
   intent = out
   optional = F
 [gv0]
-  standard_name = y_wind_updated_by_physics
+  standard_name = y_wind_of_new_state
   long_name = meridional wind updated by physics
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -1071,7 +1071,7 @@
   intent = out
   optional = F
 [gq0]
-  standard_name = tracer_concentration_updated_by_physics
+  standard_name = tracer_concentration_of_new_state
   long_name = tracer concentration updated by physics
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers)
@@ -1080,7 +1080,7 @@
   intent = out
   optional = F
 [ntiw]
-  standard_name = index_for_ice_cloud_condensate
+  standard_name = index_of_cloud_ice_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for  ice water
   units = index
   dimensions = ()
@@ -1088,7 +1088,7 @@
   intent = in
   optional = F
 [nqrimef]
-  standard_name = index_for_mass_weighted_rime_factor
+  standard_name = index_of_mass_weighted_rime_factor_in_tracer_concentration_array
   long_name = tracer index for mass weighted rime factor
   units = index
   dimensions = ()
@@ -1096,7 +1096,7 @@
   intent = in
   optional = F 
 [imp_physics]
-  standard_name = flag_for_microphysics_scheme
+  standard_name = control_for_microphysics_scheme
   long_name = choice of microphysics scheme
   units = flag
   dimensions = ()
@@ -1104,7 +1104,7 @@
   intent = in
   optional = F
 [imp_physics_fer_hires]
-  standard_name = flag_for_fer_hires_microphysics_scheme
+  standard_name = identifier_for_fer_hires_microphysics_scheme
   long_name = choice of Ferrier-Aligo microphysics scheme
   units = flag
   dimensions = ()
@@ -1221,7 +1221,7 @@
   intent = in
   optional = F
 [ntcw]
-  standard_name = index_for_liquid_cloud_condensate
+  standard_name = index_of_cloud_liquid_water_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for cloud condensate (or liquid water)
   units = index
   dimensions = ()
@@ -1229,7 +1229,7 @@
   intent = in
   optional = F
 [ntiw]
-  standard_name = index_for_ice_cloud_condensate
+  standard_name = index_of_cloud_ice_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for  ice water
   units = index
   dimensions = ()
@@ -1237,7 +1237,7 @@
   intent = in
   optional = F
 [ntclamt]
-  standard_name = index_for_cloud_amount
+  standard_name = index_of_cloud_area_fraction_in_atmosphere_layer_in_tracer_concentration_array
   long_name = tracer index for cloud amount integer
   units = index
   dimensions = ()
@@ -1245,7 +1245,7 @@
   intent = in
   optional = F
 [ntrw]
-  standard_name = index_for_rain_water
+  standard_name = index_of_rain_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for rain water
   units = index
   dimensions = ()
@@ -1253,7 +1253,7 @@
   intent = in
   optional = F
 [ntsw]
-  standard_name = index_for_snow_water
+  standard_name = index_of_snow_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for snow water
   units = index
   dimensions = ()
@@ -1261,7 +1261,7 @@
   intent = in
   optional = F
 [ntrnc]
-  standard_name = index_for_rain_number_concentration
+  standard_name = index_of_mass_number_concentration_of_rain_in_tracer_concentration_array
   long_name = tracer index for rain   number concentration
   units = index
   dimensions = ()
@@ -1269,7 +1269,7 @@
   intent = in
   optional = F
 [ntsnc]
-  standard_name = index_for_snow_number_concentration
+  standard_name = index_of_mass_number_concentration_of_snow_in_tracer_concentration_array
   long_name = tracer index for snow   number concentration
   units = index
   dimensions = ()
@@ -1277,7 +1277,7 @@
   intent = in
   optional = F
 [ntgl]
-  standard_name = index_for_graupel
+  standard_name = index_of_graupel_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for graupel
   units = index
   dimensions = ()
@@ -1285,7 +1285,7 @@
   intent = in
   optional = F
 [ntgnc]
-  standard_name = index_for_graupel_number_concentration
+  standard_name = index_of_mass_number_concentration_of_graupel_in_tracer_concentration_array
   long_name = tracer index for graupel number concentration
   units = index
   dimensions = ()
@@ -1311,7 +1311,7 @@
   intent = in
   optional = F
 [gt0]
-  standard_name = air_temperature_updated_by_physics
+  standard_name = air_temperature_of_new_state
   long_name = temperature updated by physics
   units = K
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -1320,7 +1320,7 @@
   intent = in
   optional = F
 [gq0]
-  standard_name = tracer_concentration_updated_by_physics
+  standard_name = tracer_concentration_of_new_state
   long_name = tracer concentration updated by physics
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers)
@@ -1329,7 +1329,7 @@
   intent = in
   optional = F
 [imp_physics]
-  standard_name = flag_for_microphysics_scheme
+  standard_name = control_for_microphysics_scheme
   long_name = choice of microphysics scheme
   units = flag
   dimensions = ()
@@ -1337,7 +1337,7 @@
   intent = in
   optional = F
 [imp_physics_mg]
-  standard_name = flag_for_morrison_gettelman_microphysics_scheme
+  standard_name = identifier_for_morrison_gettelman_microphysics_scheme
   long_name = choice of Morrison-Gettelman microphysics scheme
   units = flag
   dimensions = ()
@@ -1345,7 +1345,7 @@
   intent = in
   optional = F
 [imp_physics_zhao_carr]
-  standard_name = flag_for_zhao_carr_microphysics_scheme
+  standard_name = identifier_for_zhao_carr_microphysics_scheme
   long_name = choice of Zhao-Carr microphysics scheme
   units = flag
   dimensions = ()
@@ -1353,7 +1353,7 @@
   intent = in
   optional = F
 [imp_physics_zhao_carr_pdf]
-  standard_name = flag_for_zhao_carr_pdf_microphysics_scheme
+  standard_name = identifier_for_zhao_carr_pdf_microphysics_scheme
   long_name = choice of Zhao-Carr microphysics scheme with PDF clouds
   units = flag
   dimensions = ()
@@ -1361,7 +1361,7 @@
   intent = in
   optional = F
 [imp_physics_gfdl]
-  standard_name = flag_for_gfdl_microphysics_scheme
+  standard_name = identifier_for_gfdl_microphysics_scheme
   long_name = choice of GFDL microphysics scheme
   units = flag
   dimensions = ()
@@ -1369,7 +1369,7 @@
   intent = in
   optional = F
 [imp_physics_thompson]
-  standard_name = flag_for_thompson_microphysics_scheme
+  standard_name = identifier_for_thompson_microphysics_scheme
   long_name = choice of Thompson microphysics scheme
   units = flag
   dimensions = ()
@@ -1377,7 +1377,7 @@
   intent = in
   optional = F
 [imp_physics_wsm6]
-  standard_name = flag_for_wsm6_microphysics_scheme
+  standard_name = identifier_for_wsm6_microphysics_scheme
   long_name = choice of WSM6 microphysics scheme
   units = flag
   dimensions = ()
@@ -1385,7 +1385,7 @@
   intent = in
   optional = F
 [imp_physics_fer_hires]
-  standard_name = flag_for_fer_hires_microphysics_scheme
+  standard_name = identifier_for_fer_hires_microphysics_scheme
   long_name = choice of Ferrier-Aligo microphysics scheme
   units = flag
   dimensions = ()
@@ -1396,7 +1396,7 @@
   standard_name = air_pressure_at_interface
   long_name = air pressure at model layer interfaces
   units = Pa
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -1411,7 +1411,7 @@
   intent = in
   optional = F
 [prslk]
-  standard_name = dimensionless_exner_function_at_model_layers
+  standard_name = dimensionless_exner_function
   long_name = dimensionless Exner function at model layer centers
   units = none
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -1438,7 +1438,7 @@
   intent = in
   optional = F
 [rhctop]
-  standard_name = critical_relative_humidity_at_top_of_atmosphere
+  standard_name = critical_relative_humidity_at_toa
   long_name = critical relative humidity at the top of atmosphere
   units = frac
   dimensions = ()
@@ -1447,7 +1447,7 @@
   intent = in
   optional = F
 [rhcmax]
-  standard_name = maximum_critical_relative_humidity
+  standard_name = max_critical_relative_humidity
   long_name = maximum critical relative humidity
   units = frac
   dimensions = ()
@@ -1498,7 +1498,7 @@
   intent = in
   optional = F
 [ras]
-  standard_name = flag_for_ras_deep_convection
+  standard_name = flag_for_relaxed_arakawa_schubert_deep_convection
   long_name = flag for ras convection scheme
   units = flag
   dimensions = ()
@@ -1635,7 +1635,7 @@
   intent = in
   optional = F
 [ntcw]
-  standard_name = index_for_liquid_cloud_condensate
+  standard_name = index_of_cloud_liquid_water_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for cloud condensate (or liquid water)
   units = index
   dimensions = ()
@@ -1643,7 +1643,7 @@
   intent = in
   optional = F
 [ntiw]
-  standard_name = index_for_ice_cloud_condensate
+  standard_name = index_of_cloud_ice_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for  ice water
   units = index
   dimensions = ()
@@ -1651,7 +1651,7 @@
   intent = in
   optional = F
 [ntclamt]
-  standard_name = index_for_cloud_amount
+  standard_name = index_of_cloud_area_fraction_in_atmosphere_layer_in_tracer_concentration_array
   long_name = tracer index for cloud amount integer
   units = index
   dimensions = ()
@@ -1659,7 +1659,7 @@
   intent = in
   optional = F
 [ntrw]
-  standard_name = index_for_rain_water
+  standard_name = index_of_rain_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for rain water
   units = index
   dimensions = ()
@@ -1667,7 +1667,7 @@
   intent = in
   optional = F
 [ntsw]
-  standard_name = index_for_snow_water
+  standard_name = index_of_snow_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for snow water
   units = index
   dimensions = ()
@@ -1675,7 +1675,7 @@
   intent = in
   optional = F
 [ntrnc]
-  standard_name = index_for_rain_number_concentration
+  standard_name = index_of_mass_number_concentration_of_rain_in_tracer_concentration_array
   long_name = tracer index for rain   number concentration
   units = index
   dimensions = ()
@@ -1683,7 +1683,7 @@
   intent = in
   optional = F
 [ntsnc]
-  standard_name = index_for_snow_number_concentration
+  standard_name = index_of_mass_number_concentration_of_snow_in_tracer_concentration_array
   long_name = tracer index for snow   number concentration
   units = index
   dimensions = ()
@@ -1691,7 +1691,7 @@
   intent = in
   optional = F
 [ntgl]
-  standard_name = index_for_graupel
+  standard_name = index_of_graupel_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for graupel
   units = index
   dimensions = ()
@@ -1699,7 +1699,7 @@
   intent = in
   optional = F
 [ntgnc]
-  standard_name = index_for_graupel_number_concentration
+  standard_name = index_of_mass_number_concentration_of_graupel_in_tracer_concentration_array
   long_name = tracer index for graupel number concentration
   units = index
   dimensions = ()
@@ -1707,7 +1707,7 @@
   intent = in
   optional = F
 [ntlnc]
-  standard_name = index_for_liquid_cloud_number_concentration
+  standard_name = index_of_mass_number_concentration_of_cloud_droplets_in_tracer_concentration_array
   long_name = tracer index for liquid number concentration
   units = index
   dimensions = ()
@@ -1715,7 +1715,7 @@
   intent = in
   optional = F
 [ntinc]
-  standard_name = index_for_ice_cloud_number_concentration
+  standard_name = index_of_mass_number_concentration_of_cloud_ice_in_tracer_concentration_array
   long_name = tracer index for ice    number concentration
   units = index
   dimensions = ()
@@ -1731,7 +1731,7 @@
   intent = in
   optional = F
 [imp_physics]
-  standard_name = flag_for_microphysics_scheme
+  standard_name = control_for_microphysics_scheme
   long_name = choice of microphysics scheme
   units = flag
   dimensions = ()
@@ -1739,7 +1739,7 @@
   intent = in
   optional = F
 [imp_physics_gfdl]
-  standard_name = flag_for_gfdl_microphysics_scheme
+  standard_name = identifier_for_gfdl_microphysics_scheme
   long_name = choice of GFDL microphysics scheme
   units = flag
   dimensions = ()
@@ -1747,7 +1747,7 @@
   intent = in
   optional = F
 [imp_physics_thompson]
-  standard_name = flag_for_thompson_microphysics_scheme
+  standard_name = identifier_for_thompson_microphysics_scheme
   long_name = choice of Thompson microphysics scheme
   units = flag
   dimensions = ()
@@ -1755,7 +1755,7 @@
   intent = in
   optional = F
 [imp_physics_zhao_carr]
-  standard_name = flag_for_zhao_carr_microphysics_scheme
+  standard_name = identifier_for_zhao_carr_microphysics_scheme
   long_name = choice of Zhao-Carr microphysics scheme
   units = flag
   dimensions = ()
@@ -1763,7 +1763,7 @@
   intent = in
   optional = F
 [imp_physics_zhao_carr_pdf]
-  standard_name = flag_for_zhao_carr_pdf_microphysics_scheme
+  standard_name = identifier_for_zhao_carr_pdf_microphysics_scheme
   long_name = choice of Zhao-Carr microphysics scheme with PDF clouds
   units = flag
   dimensions = ()
@@ -1779,7 +1779,7 @@
   intent = in
   optional = F
 [dtf]
-  standard_name = time_step_for_dynamics
+  standard_name = timestep_for_dynamics
   long_name = dynamics timestep
   units = s
   dimensions = ()
@@ -1815,7 +1815,7 @@
   intent = in
   optional = F
 [gq0]
-  standard_name = tracer_concentration_updated_by_physics
+  standard_name = tracer_concentration_of_new_state
   long_name = tracer concentration updated by physics
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers)
@@ -1851,7 +1851,7 @@
   intent = in
   optional = F
 [con_rd]
-  standard_name = gas_constant_dry_air
+  standard_name = gas_constant_of_dry_air
   long_name = ideal gas constant for dry air
   units = J kg-1 K-1
   dimensions = ()
@@ -1869,7 +1869,7 @@
   intent = in
   optional = F
 [nwfa]
-  standard_name = water_friendly_aerosol_number_concentration
+  standard_name = mass_number_concentration_of_hygroscopic_aerosols
   long_name = number concentration of water-friendly aerosols
   units = kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -1878,7 +1878,7 @@
   intent = in
   optional = F
 [spechum]
-  standard_name = water_vapor_specific_humidity
+  standard_name = specific_humidity
   long_name = water vapor specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -1887,7 +1887,7 @@
   intent = inout
   optional = F
 [dqdti]
-  standard_name = instantaneous_water_vapor_specific_humidity_tendency_due_to_convection
+  standard_name = tendency_of_specific_humidity_due_to_moist_convection_for_coupling
   long_name = instantaneous moisture tendency due to convection
   units = kg kg-1 s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -1948,7 +1948,7 @@
   intent = in
   optional = F
 [ntcw]
-  standard_name = index_for_liquid_cloud_condensate
+  standard_name = index_of_cloud_liquid_water_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for cloud condensate (or liquid water)
   units = index
   dimensions = ()
@@ -1956,7 +1956,7 @@
   intent = in
   optional = F
 [ntiw]
-  standard_name = index_for_ice_cloud_condensate
+  standard_name = index_of_cloud_ice_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for  ice water
   units = index
   dimensions = ()
@@ -1972,7 +1972,7 @@
   intent = in
   optional = F
 [gq0]
-  standard_name = tracer_concentration_updated_by_physics
+  standard_name = tracer_concentration_of_new_state
   long_name = tracer concentration updated by physics
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers)

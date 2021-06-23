@@ -8,7 +8,7 @@
   name = cu_ntiedtke_init
   type = scheme
 [imfshalcnv]
-  standard_name = flag_for_mass_flux_shallow_convection_scheme
+  standard_name = control_for_shallow_convection_scheme
   long_name = flag for mass-flux shallow convection scheme
   units = flag
   dimensions = ()
@@ -16,7 +16,7 @@
   intent = in
   optional = F
 [imfshalcnv_ntiedtke]
-  standard_name = flag_for_ntiedtke_shallow_convection_scheme
+  standard_name = identifier_for_new_tiedtke_shallow_convection
   long_name = flag for new Tiedtke shallow convection scheme
   units = flag
   dimensions = ()
@@ -24,7 +24,7 @@
   intent = in
   optional = F
 [imfdeepcnv]
-  standard_name = flag_for_mass_flux_deep_convection_scheme
+  standard_name = control_for_deep_convection_scheme
   long_name = flag for mass-flux deep convection scheme
   units = flag
   dimensions = ()
@@ -32,7 +32,7 @@
   intent = in
   optional = F
 [imfdeepcnv_ntiedtke]
-  standard_name = flag_for_ntiedtke_deep_convection_scheme
+  standard_name = identifier_for_new_tiedtke_deep_convection
   long_name = flag for new Tiedtke deep convection scheme
   units = flag
   dimensions = ()
@@ -78,7 +78,7 @@
   name = cu_ntiedtke_run
   type = scheme
 [pu]
-  standard_name = x_wind_updated_by_physics
+  standard_name = x_wind_of_new_state
   long_name = updated x-direction wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -87,7 +87,7 @@
   intent = inout
   optional = F
 [pv]
-  standard_name = y_wind_updated_by_physics
+  standard_name = y_wind_of_new_state
   long_name = updated y-direction wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -96,7 +96,7 @@
   intent = inout
   optional = F
 [pt]
-  standard_name = air_temperature_updated_by_physics
+  standard_name = air_temperature_of_new_state
   long_name = updated temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -105,7 +105,7 @@
   intent = inout
   optional = F
 [pqv]
-  standard_name = water_vapor_specific_humidity_updated_by_physics
+  standard_name = specific_humidity_of_new_state
   long_name = water vapor specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -123,7 +123,7 @@
   intent = in
   optional = F
 [qvdi]
-  standard_name = water_vapor_specific_humidity
+  standard_name = specific_humidity
   long_name = water vapor specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -132,7 +132,7 @@
   intent = in
   optional = F
 [pqvf]
-  standard_name = moisture_tendency_due_to_dynamics
+  standard_name = tendendy_of_specific_humidity_due_to_nonphysics
   long_name = moisture tendency due to dynamics only
   units = kg kg-1 s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -141,7 +141,7 @@
   intent = in
   optional = F
 [ptf]
-  standard_name = temperature_tendency_due_to_dynamics
+  standard_name = tendency_of_air_temperature_due_to_nonphysics
   long_name = temperature tendency due to dynamics only
   units = K s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -171,7 +171,7 @@
   standard_name = geopotential_at_interface
   long_name = geopotential at model layer interfaces
   units = m2 s-2
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -189,13 +189,13 @@
   standard_name = air_pressure_at_interface
   long_name = air pressure at model layer interfaces
   units = Pa
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [pomg]
-  standard_name = omega
+  standard_name = lagrangian_tendency_of_air_pressure
   long_name = layer mean vertical velocity
   units = Pa s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
@@ -255,7 +255,7 @@
   intent = in
   optional = F
 [dt]
-  standard_name = time_step_for_physics
+  standard_name = timestep_for_physics
   long_name = physics time step
   units = s
   dimensions = ()
@@ -264,7 +264,7 @@
   intent = in
   optional = F
 [dx]
-  standard_name = cell_size
+  standard_name = characteristic_grid_lengthscale
   long_name = size of the grid cell
   units = m
   dimensions = (horizontal_loop_extent)

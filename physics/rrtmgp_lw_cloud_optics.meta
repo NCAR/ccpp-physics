@@ -32,7 +32,7 @@
   intent = in
   optional = F      
 [nrghice]
-  standard_name = number_of_rrtmgp_ice_roughness
+  standard_name = number_of_ice_roughness_categories
   long_name = number of ice-roughness categories in RRTMGP calculation
   units = count
   dimensions =  ()
@@ -49,7 +49,7 @@
   optional = F
   kind = len=128
 [rrtmgp_lw_file_clouds]
-  standard_name = rrtmgp_coeff_lw_cloud_optics 
+  standard_name = filename_of_rrtmgp_longwave_cloud_optics_coefficients 
   long_name = file containing coefficients for RRTMGP LW cloud optics
   units = none
   dimensions =  ()
@@ -74,7 +74,7 @@
   intent = in
   optional = F
 [mpicomm]
-  standard_name = mpi_comm
+  standard_name = mpi_communicator
   long_name = MPI communicator
   units = index
   dimensions = ()
@@ -104,7 +104,7 @@
   name = rrtmgp_lw_cloud_optics_run
   type = scheme
 [doLWrad]
-  standard_name = flag_to_calc_lw
+  standard_name = flag_for_calling_longwave_radiation
   long_name = logical flags for lw radiation calls
   units = flag
   dimensions = ()
@@ -266,7 +266,7 @@
   intent = in
   optional = F
 [nbndsGPlw]
-  standard_name = number_of_lw_bands_rrtmgp
+  standard_name = number_of_longwave_bands
   long_name = number of lw bands used in RRTMGP
   units = count
   dimensions =  ()
