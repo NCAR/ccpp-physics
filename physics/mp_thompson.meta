@@ -741,6 +741,14 @@
   kind = kind_phys
   intent = inout
   optional = F
+[reset_diag3d]
+  standard_name = flag_reset_maximum_hourly_fields
+  long_name = flag for resetting maximum hourly fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

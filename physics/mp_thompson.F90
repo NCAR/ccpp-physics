@@ -22,7 +22,7 @@ module mp_thompson
 
       logical :: is_initialized = .False.
 
-      integer, parameter :: ext_ndiag3d = 45
+      integer, parameter :: ext_ndiag3d = 40
 
    contains
 
@@ -339,8 +339,8 @@ module mp_thompson
                               prcp, rain, graupel, ice, snow, sr,  &
                               refl_10cm, reset_dBZ, do_radar_ref,  &
                               re_cloud, re_ice, re_snow,           &
-                              mpicomm, mpirank, mpiroot,           &
-                              blkno, ext_diag, diag3d,             &
+                              mpicomm, mpirank, mpiroot, blkno,    &
+                              ext_diag, diag3d, reset_diag3d,      &
                               errmsg, errflg)
 
          implicit none
@@ -401,6 +401,7 @@ module mp_thompson
          ! Extended diagnostic output
          logical,                   intent(in)    :: ext_diag
          real(kind_phys), target,   intent(inout) :: diag3d(:,:,:)
+         logical,                   intent(in)    :: reset_diag3d
 
          ! CCPP error handling
          character(len=*),          intent(  out) :: errmsg
@@ -622,6 +623,9 @@ module mp_thompson
 
          ! Set pointers for extended diagnostics
          set_extended_diagnostic_pointers: if (ext_diag) then
+            if (reset_diag3d) then
+               diag3d = 0.0
+            end if
             vts1       => diag3d(:,:,1:1)
             prw_vcdc   => diag3d(:,:,2:2)
             prw_vcde   => diag3d(:,:,3:3)
