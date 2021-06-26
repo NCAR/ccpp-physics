@@ -468,6 +468,9 @@ module mp_thompson
          !> - Also, hydrometeor variables are mass or number mixing ratio
          !> - either kg of species per kg of dry air, or per kg of (dry + vapor).
 
+#if 0
+         if (istep==1) then
+#endif
          ! DH* - do this only if istep == 1? Would be ok if it was
          ! guaranteed that nothing else in the same subcycle group
          ! was using these arrays, but it is somewhat dangerous.
@@ -489,6 +492,9 @@ module mp_thompson
            end if
          end if
          ! *DH
+#if 0
+         endif
+#endif
 
          !> - Density of air in kg m-3
          rho = con_eps*prsl/(con_rd*tgrs*(qv+con_eps))
@@ -566,7 +572,7 @@ module mp_thompson
             if (do_effective_radii) then
                call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
                                  nc=nc, nwfa=nwfa, nifa=nifa, nwfa2d=nwfa2d, nifa2d=nifa2d,     &
-                                 tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtp, dt_inner=dt_inner,     &
+                                 tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtstep, dt_inner=dt_inner,  &
                                  rainnc=rain_mp, rainncv=delta_rain_mp,                         &
                                  snownc=snow_mp, snowncv=delta_snow_mp,                         &
                                  icenc=ice_mp, icencv=delta_ice_mp,                             &
@@ -587,7 +593,7 @@ module mp_thompson
             else
                call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
                                  nc=nc, nwfa=nwfa, nifa=nifa, nwfa2d=nwfa2d, nifa2d=nifa2d,     &
-                                 tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtp, dt_inner=dt_inner,    &
+                                 tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtstep, dt_inner=dt_inner,  &
                                  rainnc=rain_mp, rainncv=delta_rain_mp,                         &
                                  snownc=snow_mp, snowncv=delta_snow_mp,                         &
                                  icenc=ice_mp, icencv=delta_ice_mp,                             &
@@ -608,7 +614,7 @@ module mp_thompson
          else
             if (do_effective_radii) then
                call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
-                                 tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtp, dt_inner=dt_inner,     &
+                                 tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtstep, dt_inner=dt_inner,  &
                                  rainnc=rain_mp, rainncv=delta_rain_mp,                         &
                                  snownc=snow_mp, snowncv=delta_snow_mp,                         &
                                  icenc=ice_mp, icencv=delta_ice_mp,                             &
@@ -628,7 +634,7 @@ module mp_thompson
                                  first_time_step=first_time_step, errmsg=errmsg, errflg=errflg)
             else
                call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
-                                 tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtp, dt_inner=dt_inner,     &
+                                 tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtstep, dt_inner=dt_inner,  &
                                  rainnc=rain_mp, rainncv=delta_rain_mp,                         &
                                  snownc=snow_mp, snowncv=delta_snow_mp,                         &
                                  icenc=ice_mp, icencv=delta_ice_mp,                             &
@@ -653,6 +659,9 @@ module mp_thompson
          ! guaranteed that nothing else in the same subcycle group
          ! was using these arrays, but it is somewhat dangerous.
 
+#if 0
+         if(istep==nsteps) then
+#endif
          !> - Convert water vapor mixing ratio back to specific humidity
          spechum = qv/(1.0_kind_phys+qv)
 
@@ -672,7 +681,9 @@ module mp_thompson
            end if
          end if
          ! *DH
-
+#if 0
+         endif
+#endif
          !> - Convert rainfall deltas from mm to m (on physics timestep); add to inout variables
          ! "rain" in Thompson MP refers to precipitation (total of liquid rainfall+snow+graupel+ice)
          prcp    = prcp    + max(0.0, delta_rain_mp/1000.0_kind_phys)
