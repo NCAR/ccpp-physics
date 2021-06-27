@@ -545,6 +545,15 @@
   kind = kind_phys
   intent = in
   optional = F
+[dt_inner]
+  standard_name = time_step_for_inner_loop
+  long_name = time step for inner loop 
+  units = s
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [first_time_step]
   standard_name = flag_for_first_time_step
   long_name = flag for first time step for time integration loop (cold/warmstart)
