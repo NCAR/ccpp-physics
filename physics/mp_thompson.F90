@@ -468,9 +468,6 @@ module mp_thompson
          !> - Also, hydrometeor variables are mass or number mixing ratio
          !> - either kg of species per kg of dry air, or per kg of (dry + vapor).
 
-#if 0
-         if (istep==1) then
-#endif
          ! DH* - do this only if istep == 1? Would be ok if it was
          ! guaranteed that nothing else in the same subcycle group
          ! was using these arrays, but it is somewhat dangerous.
@@ -492,9 +489,6 @@ module mp_thompson
            end if
          end if
          ! *DH
-#if 0
-         endif
-#endif
 
          !> - Density of air in kg m-3
          rho = con_eps*prsl/(con_rd*tgrs*(qv+con_eps))
@@ -659,9 +653,6 @@ module mp_thompson
          ! guaranteed that nothing else in the same subcycle group
          ! was using these arrays, but it is somewhat dangerous.
 
-#if 0
-         if(istep==nsteps) then
-#endif
          !> - Convert water vapor mixing ratio back to specific humidity
          spechum = qv/(1.0_kind_phys+qv)
 
@@ -681,9 +672,7 @@ module mp_thompson
            end if
          end if
          ! *DH
-#if 0
-         endif
-#endif
+
          !> - Convert rainfall deltas from mm to m (on physics timestep); add to inout variables
          ! "rain" in Thompson MP refers to precipitation (total of liquid rainfall+snow+graupel+ice)
          prcp    = prcp    + max(0.0, delta_rain_mp/1000.0_kind_phys)
