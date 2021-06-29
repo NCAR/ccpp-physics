@@ -1142,7 +1142,6 @@ MODULE module_mp_thompson
 !        j_end   = jte
 !     endif
 
-!->rsun minor time interval
 !     dt = dt_in
       RAINNC(:,:) = 0.0
       SNOWNC(:,:) = 0.0
@@ -1159,8 +1158,8 @@ MODULE module_mp_thompson
          write(*,*) 'WARNING: innerloop cant not be used with sybcycle'
          ndt = 1 
       endif 
+
       do it = 1, ndt
-!<-rsun
 
       qc_max = 0.
       qr_max = 0.
@@ -1413,19 +1412,26 @@ MODULE module_mp_thompson
             endif
          enddo
 
-         if (ndt > 1 .and. it == ndt) then
+         if (ndt>1 .and. it==ndt) then
 
-         SR(i,j) = (pcp_sn(i,j) + pcp_gr(i,j) + pcp_ic(i,j))/(RAINNC(i,j)+1.e-12)
-         RAINNCV(i,j) = RAINNC(i,j)
-         IF ( PRESENT (snowncv) ) THEN
-            SNOWNCV(i,j) = SNOWNC(i,j)
-         ENDIF
-         IF ( PRESENT (icencv) ) THEN
-            ICENCV(i,j) = ICENC(i,j)
-         ENDIF
-         IF ( PRESENT (graupelncv) ) THEN
-            GRAUPELNCV(i,j) = GRAUPELNC(i,j)
-         ENDIF
+           SR(i,j) = (pcp_sn(i,j) + pcp_gr(i,j) + pcp_ic(i,j))/(RAINNC(i,j)+1.e-12)
+           RAINNCV(i,j) = RAINNC(i,j)
+           IF ( PRESENT (snowncv) ) THEN
+              SNOWNCV(i,j) = SNOWNC(i,j)
+           ENDIF
+           IF ( PRESENT (icencv) ) THEN
+              ICENCV(i,j) = ICENC(i,j)
+           ENDIF
+           IF ( PRESENT (graupelncv) ) THEN
+              GRAUPELNCV(i,j) = GRAUPELNC(i,j)
+           ENDIF
+         endif 
+
+         ! Diagnostic calculations only for last step
+         ! if Thompson MP is called multiple times
+         last_step_only:if ((ndt>1 .and. it==ndt) 			 & 
+ 		.or. (nsteps>1 .and. istep==nsteps) 			 & 
+		.or. (nsteps==1 .and. ndt==1)) then  
 
 !> - Call calc_refl10cm()
 
@@ -1471,58 +1477,7 @@ MODULE module_mp_thompson
              enddo
            ENDIF
 
-         else !  if (ndt > 1 .and. it == ndt) then
-
-         ! Diagnostic calculations only for last step
-         ! if Thompson MP is called multiple times
-         last_step_only: IF (istep == nsteps) THEN
-
-!> - Call calc_refl10cm()
-
-           diagflag_present: IF ( PRESENT (diagflag) ) THEN
-           if (diagflag .and. do_radar_ref == 1) then
-!
-             ! Only set melti to true at the output times
-             if (reset_dBZ) then
-               melti=.true.
-             else
-               melti=.false.
-             endif
-!
-             if (present(vt_dbz_wt)) then
-               call calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d,   &
-                                   t1d, p1d, dBZ, rand1, kts, kte, i, j, &
-                                   melti, vt_dbz_wt(i,:,j),              &
-                                   first_time_step)
-             else
-               call calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d,   &
-                                   t1d, p1d, dBZ, rand1, kts, kte, i, j, &
-                                   melti)
-             end if
-             do k = kts, kte
-               refl_10cm(i,k,j) = MAX(-35., dBZ(k))
-             enddo
-           endif
-           ENDIF diagflag_present
-
-           IF (has_reqc.ne.0 .and. has_reqi.ne.0 .and. has_reqs.ne.0) THEN
-             do k = kts, kte
-                re_qc1d(k) = re_qc_min
-                re_qi1d(k) = re_qi_min
-                re_qs1d(k) = re_qs_min
-             enddo
-!> - Call calc_effectrad()
-             call calc_effectRad (t1d, p1d, qv1d, qc1d, nc1d, qi1d, ni1d, qs1d,  &
-                                  re_qc1d, re_qi1d, re_qs1d, kts, kte)
-             do k = kts, kte
-               re_cloud(i,k,j) = MAX(re_qc_min, MIN(re_qc1d(k), re_qc_max))
-               re_ice(i,k,j)   = MAX(re_qi_min, MIN(re_qi1d(k), re_qi_max))
-               re_snow(i,k,j)  = MAX(re_qs_min, MIN(re_qs1d(k), re_qs_max))
-             enddo
-           ENDIF
-         ENDIF last_step_only
-         endif !if (ndt > 1 .and. it == ndt) then
-
+         endif last_step_only 
       enddo i_loop
       enddo j_loop
 
