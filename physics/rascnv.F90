@@ -403,7 +403,7 @@
       fscav_ = -999.0_kp                 ! By default no scavenging
       if (itc > 0 .and. ntc > 0) then
         if (ntr >= itc + ntc - 3) then
-          fscav_(itc:ntc-1) = fscav
+          fscav_(itc:ntc) = fscav
         else
           errmsg = 'Error in rascnv_run: test ntr >= itc + ntc - 3 FAILED'
           errflg = 1
