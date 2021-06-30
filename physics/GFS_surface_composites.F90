@@ -202,7 +202,7 @@ contains
         tprcp_lnd(i) = tprcp(i)
         tprcp_ice(i) = tprcp(i)
         if (wet(i)) then                   ! Water
-!         uustar_wat(i) = uustar(i)
+          uustar_wat(i) = uustar(i)
             tsfc_wat(i) = tsfco(i)
            tsurf_wat(i) = tsfco(i)
            !-- reference emiss value for surface emissivity in setemis
