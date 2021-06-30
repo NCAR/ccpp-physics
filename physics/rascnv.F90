@@ -401,10 +401,12 @@
       real                fscav_(ntr+2)  ! Fraction scavenged per km
 !
       fscav_ = -999.0_kp                 ! By default no scavenging
-      if (ntr > 0 .and. fscav(1) > zero) then
-        do i=1,ntr
-          fscav_(i) = fscav(i)
-        enddo
+      if (ntr > 0) then
+        if (fscav(1) > zero) then
+          do i=1,ntr
+            fscav_(i) = fscav(i)
+          enddo
+        endif
       endif
       trcmin = -99999.0_kp
       if (ntk-2 > 0) trcmin(ntk-2) = 1.0e-4_kp
