@@ -127,15 +127,6 @@
   kind = kind_phys
   intent = inout
   optional = F
-[dqdti]
-  standard_name = instantaneous_water_vapor_specific_humidity_tendency_due_to_convection
-  long_name = instantaneous moisture tendency due to convection
-  units = kg kg-1 s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

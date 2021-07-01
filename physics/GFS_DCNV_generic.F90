@@ -17,7 +17,7 @@
 !!
     subroutine GFS_DCNV_generic_pre_run (im, levs, ldiag3d, qdiag3d, do_cnvgwd, cplchm,&
                                          gu0, gv0, gt0, gq0_water_vapor,               &
-                                         save_u, save_v, save_t, save_qv, dqdti,       &
+                                         save_u, save_v, save_t, save_qv,              &
                                          errmsg, errflg)
 
       use machine, only: kind_phys
@@ -34,8 +34,6 @@
       real(kind=kind_phys), dimension(:,:), intent(inout) :: save_v
       real(kind=kind_phys), dimension(:,:), intent(inout) :: save_t
       real(kind=kind_phys), dimension(:,:), intent(inout) :: save_qv
-      ! dqdti only allocated if cplchm is .true.
-      real(kind=kind_phys), dimension(:,:),     intent(inout) :: dqdti
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
 
@@ -68,10 +66,6 @@
             save_qv(i,k) = gq0_water_vapor(i,k)
           enddo
         enddo
-      endif
-
-      if (cplchm) then
-        dqdti = zero
       endif
 
     end subroutine GFS_DCNV_generic_pre_run
