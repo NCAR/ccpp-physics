@@ -297,7 +297,7 @@
 !! \section arg_table_rascnv_run Argument Table
 !! \htmlinclude rascnv_run.html
 !!
-      subroutine rascnv_run(IM,     k,      ntr,   dt,   dtf            &
+      subroutine rascnv_run(IM,     k,      itc, ntc, ntr,   dt,  dtf   &
      &,                     ccwf,   area,   dxmin, dxinv                &
      &,                     psauras, prauras, wminras, dlqf, flipv      &
      &,                     me,     rannum, nrcm,  mp_phys, mp_phys_mg  &
@@ -332,7 +332,7 @@
 !
       logical, intent(in) :: flipv
 !
-      integer, intent(in) :: im, k, ntr, me, nrcm, ntk, kdt             &
+      integer, intent(in) :: im, k, itc, ntc, ntr, me, nrcm, ntk, kdt   &
      &,                      mp_phys, mp_phys_mg
       integer, dimension(:), intent(out)   :: kbot, ktop
       integer, dimension(:), intent(inout) :: kcnv
@@ -401,11 +401,15 @@
       real                fscav_(ntr+2)  ! Fraction scavenged per km
 !
       fscav_ = -999.0_kp                 ! By default no scavenging
-      if (ntr > 0 .and. fscav(1) > zero) then
-        do i=1,ntr
-          fscav_(i) = fscav(i)
-        enddo
-      endif
+      if (itc > 0 .and. ntc > 0) then
+        if (ntr >= itc + ntc - 3) then
+          fscav_(itc:ntc) = fscav
+        else
+          errmsg = 'Error in rascnv_run: test ntr >= itc + ntc - 3 FAILED'
+          errflg = 1
+          return
+        end if
+      end if
       trcmin = -99999.0_kp
       if (ntk-2 > 0) trcmin(ntk-2) = 1.0e-4_kp
 
