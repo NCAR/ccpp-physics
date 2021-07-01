@@ -187,7 +187,6 @@
         if (land(i) .and. flag_guess(i)) then
           weasd_save(i) = weasd(i)
           snwdph_save(i) = snwdph(i)
-!mz          tsfc_save(i) = tsfc(i)
           canopy_save(i) = canopy(i)
         
           do k=1,nsoil
@@ -738,7 +737,6 @@
           if (flag_guess(i)) then
             weasd(i) = weasd_save(i)
             snwdph(i) = snwdph_save(i)
-!mz            tsfc(i) = tsfc_save(i)
             canopy(i) = canopy_save(i)
             
             do k=1,nsoil

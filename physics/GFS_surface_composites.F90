@@ -196,8 +196,8 @@ contains
            weasd_lnd(i) = weasd(i)
            snowd_lnd(i) = snowd(i)
            semis_lnd(i) = semis_rad(i)
-           qss_lnd(i) = qss(i)
-           hflx_lnd(i) = hflx(i)
+             qss_lnd(i) = qss(i)
+            hflx_lnd(i) = hflx(i)
         ! DH*
         else
           zorll(i) = huge
@@ -206,7 +206,7 @@ contains
         if (icy(i)) then                   ! Ice
           uustar_ice(i) = uustar(i)
            weasd_ice(i) = weasd(i)
-           tsfci(i) = tisfc(i)
+               tsfci(i) = tisfc(i)
            snowd_ice(i) = snowd(i)
             ep1d_ice(i) = zero
             gflx_ice(i) = zero
@@ -562,7 +562,6 @@ contains
 !             tisfc(i) = tice(i) ! over lake ice (and sea ice when uncoupled)
               zorl(i)  = cice(i) * zorli(i)   + (one - cice(i)) * zorlo(i)
               tsfc(i)  = tsfci(i) ! over lake (and ocean when uncoupled)
-              
             elseif (wet(i)) then
               if (cice(i) >= min_seaice) then ! this was already done for lake ice in sfc_sice
                 txi = cice(i)
