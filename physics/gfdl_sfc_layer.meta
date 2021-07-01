@@ -16,7 +16,7 @@
   intent = in
   optional = F
 [cplwav]
-  standard_name = flag_for_wave_coupling
+  standard_name = flag_for_ocean_wave_coupling
   long_name = flag controlling cplwav collection (default off)
   units = flag
   dimensions = ()
@@ -24,7 +24,7 @@
   intent = in
   optional = F
 [cplwav2atm]
-  standard_name = flag_for_wave_coupling_to_atm
+  standard_name = flag_for_one_way_ocean_wave_coupling_to_atmosphere
   long_name = flag controlling ocean wave coupling to the atmosphere (default off)
   units = flag
   dimensions = ()
@@ -32,7 +32,7 @@
   intent = in
   optional = F
 [lcurr_sf]
-  standard_name = flag_for_ocean_currents_in_surface_layer_scheme
+  standard_name = flag_for_surface_layer_scheme_ocean_currents
   long_name = flag for taking ocean currents into account in surface layer scheme
   units = flag
   dimensions = ()
@@ -40,7 +40,7 @@
   intent = in
   optional = F
 [pert_cd]
-  standard_name = flag_for_perturbation_of_surface_drag_coefficient_for_momentum_in_air
+  standard_name = flag_for_surface_layer_scheme_surface_drag_coefficient_for_momentum_in_air_perturbations
   long_name = flag for perturbing the surface drag coefficient for momentum in surface layer scheme
   units = flag
   dimensions = ()
@@ -48,7 +48,7 @@
   intent = in
   optional = F
 [ntsflg]
-  standard_name = flag_for_updating_skin_temperatuer_in_surface_layer_scheme
+  standard_name = control_for_surface_layer_scheme_skin_temperature_update
   long_name = flag for updating skin temperature in the surface layer scheme
   units = flag
   dimensions = ()
@@ -86,7 +86,7 @@
   intent = in
   optional = F
 [nsoil]
-  standard_name = soil_vertical_dimension
+  standard_name = vertical_dimension_of_soil
   long_name = soil vertical layer dimension
   units = count
   dimensions = ()
@@ -94,7 +94,7 @@
   intent = in
   optional = F
 [km]
-  standard_name = vertical_dimension
+  standard_name = vertical_layer_dimension
   long_name = number of vertical levels
   units = count
   dimensions = ()
@@ -128,7 +128,7 @@
   intent = in
   optional = F
 [lsm]
-  standard_name = flag_for_land_surface_scheme
+  standard_name = control_for_land_surface_scheme
   long_name = flag for land surface model
   units = flag
   dimensions = ()
@@ -136,7 +136,7 @@
   intent = in
   optional = F
 [lsm_noah]
-  standard_name = flag_for_noah_land_surface_scheme
+  standard_name = identifier_for_noah_land_surface_scheme
   long_name = flag for NOAH land surface model
   units = flag
   dimensions = ()
@@ -144,7 +144,7 @@
   intent = in
   optional = F
 [lsm_noahmp]
-  standard_name = flag_for_noahmp_land_surface_scheme
+  standard_name = identifier_for_noahmp_land_surface_scheme
   long_name = flag for NOAH MP land surface model
   units = flag
   dimensions = ()
@@ -152,7 +152,7 @@
   intent = in
   optional = F
 [lsm_ruc]
-  standard_name = flag_for_ruc_land_surface_scheme
+  standard_name = identifier_for_ruc_land_surface_scheme
   long_name = flag for RUC land surface model
   units = flag
   dimensions = ()
@@ -160,7 +160,7 @@
   intent = in
   optional = F
 [lsm_noah_wrfv4]
-  standard_name = flag_for_noah_wrfv4_land_surface_scheme
+  standard_name = identifier_for_noah_wrfv4_land_surface_scheme
   long_name = flag for NOAH WRFv4 land surface model
   units = flag
   dimensions = ()
@@ -176,7 +176,7 @@
   intent = in
   optional = F
 [cplwav]
-  standard_name = flag_for_wave_coupling
+  standard_name = flag_for_ocean_wave_coupling
   long_name = flag controlling cplwav collection (default off)
   units = flag
   dimensions = ()
@@ -184,7 +184,7 @@
   intent = in
   optional = F
 [cplwav2atm]
-  standard_name = flag_for_wave_coupling_to_atm
+  standard_name = flag_for_one_way_ocean_wave_coupling_to_atmosphere
   long_name = flag controlling ocean wave coupling to the atmosphere (default off)
   units = flag
   dimensions = ()
@@ -192,7 +192,7 @@
   intent = in
   optional = F
 [lcurr_sf]
-  standard_name = flag_for_ocean_currents_in_surface_layer_scheme
+  standard_name = flag_for_surface_layer_scheme_ocean_currents
   long_name = flag for taking ocean currents into account in surface layer scheme
   units = flag
   dimensions = ()
@@ -200,7 +200,7 @@
   intent = in
   optional = F
 [pert_Cd]
-  standard_name = flag_for_perturbation_of_surface_drag_coefficient_for_momentum_in_air
+  standard_name = flag_for_surface_layer_scheme_surface_drag_coefficient_for_momentum_in_air_perturbations
   long_name = flag for perturbing the surface drag coefficient for momentum in surface layer scheme
   units = flag
   dimensions = ()
@@ -208,7 +208,7 @@
   intent = in
   optional = F
 [ntsflg]
-  standard_name = flag_for_updating_skin_temperatuer_in_surface_layer_scheme
+  standard_name = control_for_surface_layer_scheme_skin_temperature_update
   long_name = flag for updating skin temperature in the surface layer scheme
   units = flag
   dimensions = ()
@@ -216,7 +216,7 @@
   intent = in
   optional = F
 [sfenth]
-  standard_name = enthalpy_flux_factor
+  standard_name = surface_layer_scheme_enthalpy_flux_factor
   long_name = enthalpy flux factor used in surface layer scheme
   units = none
   dimensions = ()
@@ -234,7 +234,7 @@
   intent = in
   optional = F
 [shdmax]
-  standard_name = maximum_vegetation_area_fraction
+  standard_name = max_vegetation_area_fraction
   long_name = max fractnl cover of green veg
   units = frac
   dimensions = (horizontal_loop_extent)
@@ -243,7 +243,7 @@
   intent = in
   optional = F
 [ivegsrc]
-  standard_name = vegetation_type_dataset_choice
+  standard_name = control_for_vegetation_dataset
   long_name = land use dataset choice
   units = index
   dimensions = ()
@@ -268,7 +268,7 @@
   intent = in
   optional = F
 [dt]
-  standard_name = time_step_for_physics
+  standard_name = timestep_for_physics
   long_name = physics timestep
   units = s
   dimensions = ()
@@ -309,7 +309,7 @@
   intent = in
   optional = F
 [rd]
-  standard_name = gas_constant_dry_air
+  standard_name = gas_constant_of_dry_air
   long_name = ideal gas constant for dry air
   units = J kg-1 K-1
   dimensions = ()
@@ -345,10 +345,10 @@
   intent = in
   optional = F
 [smois]
-  standard_name = volume_fraction_of_soil_moisture
+  standard_name = volume_fraction_of_condensed_water_in_soil
   long_name = total soil moisture
   units = frac
-  dimensions = (horizontal_loop_extent,soil_vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension_of_soil)
   type = real
   kind = kind_phys
   intent = in
@@ -363,7 +363,7 @@
   intent = in
   optional = F
 [prsl1]
-  standard_name = air_pressure_at_lowest_model_layer
+  standard_name = air_pressure_at_surface_adjacent_layer
   long_name = mean pressure at lowest model layer
   units = Pa
   dimensions = (horizontal_loop_extent)
@@ -372,7 +372,7 @@
   intent = in
   optional = F
 [q1]
-  standard_name = water_vapor_specific_humidity_at_lowest_model_layer
+  standard_name = specific_humidity_at_surface_adjacent_layer
   long_name = water vapor specific humidity at lowest model layer
   units = kg kg-1
   dimensions = (horizontal_loop_extent)
@@ -381,7 +381,7 @@
   intent = in
   optional = F
 [t1]
-  standard_name = air_temperature_at_lowest_model_layer
+  standard_name = air_temperature_at_surface_adjacent_layer
   long_name = 1st model layer air temperature
   units = K
   dimensions = (horizontal_loop_extent)
@@ -390,7 +390,7 @@
   intent = in
   optional = F
 [u1]
-  standard_name = x_wind_at_lowest_model_layer
+  standard_name = x_wind_at_surface_adjacent_layer
   long_name = zonal wind at lowest model layer
   units = m s-1
   dimensions = (horizontal_loop_extent)
@@ -399,7 +399,7 @@
   intent = in
   optional = F
 [v1]
-  standard_name = y_wind_at_lowest_model_layer
+  standard_name = y_wind_at_surface_adjacent_layer
   long_name = meridional wind at lowest model layer
   units = m s-1
   dimensions = (horizontal_loop_extent)
