@@ -71,7 +71,7 @@
 !! \htmlinclude GFS_SCNV_generic_post_run.html
 !!
       subroutine GFS_SCNV_generic_post_run (im, levs, nn, lssav, ldiag3d, qdiag3d, cplchm, &
-        frain, gu0, gv0, gt0, gq0_water_vapor, save_u, save_v, save_t, save_qv, dqdti, du3dt, dv3dt, dt3dt, dq3dt, clw,   &
+        frain, gu0, gv0, gt0, gq0_water_vapor, save_u, save_v, save_t, save_qv, du3dt, dv3dt, dt3dt, dq3dt, clw,   &
         shcnvcw, rain1, npdf3d, num_p3d, ncnvcld3d, cnvc, cnvw,                   &
         rainc, cnvprcp, cnvprcpb, cnvw_phy_f3d, cnvc_phy_f3d,                     &
         flag_for_scnv_generic_tend,                                               &
@@ -87,8 +87,7 @@
       real(kind=kind_phys), dimension(:, :), intent(in) :: gu0, gv0, gt0, gq0_water_vapor
       real(kind=kind_phys), dimension(:, :), intent(in) :: save_u, save_v, save_t, save_qv
 
-      ! dqdti, dt3dt, dq3dt, only allocated if ldiag3d == .true.
-      real(kind=kind_phys), dimension(:,:), intent(inout) :: dqdti
+      ! dt3dt, dq3dt, only allocated if ldiag3d == .true.
       real(kind=kind_phys), dimension(:,:), intent(inout) :: du3dt, dv3dt, dt3dt, dq3dt
       real(kind=kind_phys), dimension(:, :,:), intent(inout) :: clw
 
@@ -153,15 +152,6 @@
              enddo
           endif
         endif
-      endif
-!
-      if (cplchm) then
-        do k=1,levs
-          do i=1,im
-            tem  = (gq0_water_vapor(i,k)-save_qv(i,k)) * frain
-            dqdti(i,k) = dqdti(i,k) + tem
-          enddo
-        enddo
       endif
 !
       do k=1,levs

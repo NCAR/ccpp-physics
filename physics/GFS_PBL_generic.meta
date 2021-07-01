@@ -255,14 +255,6 @@
   type = integer
   intent = in
   optional = F
-[cplchm]
-  standard_name = flag_for_chemistry_coupling
-  long_name = flag controlling cplchm collection (default off)
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
 [ltaerosol]
   standard_name = flag_for_aerosol_physics
   long_name = flag for aerosol physics
@@ -1312,24 +1304,6 @@
   long_name = meridional wind at lowest model layer
   units = m s-1
   dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[dkt_cpl]
-  standard_name = instantaneous_atmosphere_heat_diffusivity
-  long_name = instantaneous atmospheric heat diffusivity
-  units = m2 s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[dkt]
-  standard_name = atmosphere_heat_diffusivity
-  long_name = atmospheric heat diffusivity
-  units = m2 s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
