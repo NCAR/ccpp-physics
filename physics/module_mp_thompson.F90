@@ -969,7 +969,7 @@ MODULE module_mp_thompson
       SUBROUTINE mp_gt_driver(qv, qc, qr, qi, qs, qg, ni, nr, nc,     &
                               nwfa, nifa, nwfa2d, nifa2d,             &
                               tt, th, pii,                            &
-                              p, w, dz, dt_in,                        &
+                              p, w, dz, dt_in, dt_inner,              &
                               RAINNC, RAINNCV,                        &
                               SNOWNC, SNOWNCV,                        &
                               ICENC, ICENCV,                          &
@@ -1029,7 +1029,7 @@ MODULE module_mp_thompson
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(INOUT):: &
                           vt_dbz_wt
       LOGICAL, INTENT(IN) :: first_time_step
-      REAL, INTENT(IN):: dt_in
+      REAL, INTENT(IN):: dt_in, dt_inner
       ! To support subcycling: current step and maximum number of steps
       INTEGER, INTENT (IN) :: istep, nsteps
       LOGICAL, INTENT (IN) :: reset_dBZ
@@ -1056,6 +1056,7 @@ MODULE module_mp_thompson
       LOGICAL, OPTIONAL, INTENT(IN) :: diagflag
       INTEGER, OPTIONAL, INTENT(IN) :: do_radar_ref
       logical :: melti = .false.
+      INTEGER :: ndt, it
 
       ! CCPP error handling
       character(len=*), optional, intent(  out) :: errmsg
@@ -1141,7 +1142,24 @@ MODULE module_mp_thompson
 !        j_end   = jte
 !     endif
 
-      dt = dt_in
+!     dt = dt_in
+      RAINNC(:,:) = 0.0
+      SNOWNC(:,:) = 0.0
+      ICENC(:,:) = 0.0
+      GRAUPELNC(:,:) = 0.0
+      pcp_ra(:,:) = 0.0
+      pcp_sn(:,:) = 0.0
+      pcp_gr(:,:) = 0.0
+      pcp_ic(:,:) = 0.0
+      ndt = max(nint(dt_in/dt_inner),1)
+      dt = dt_in/ndt
+      if(dt_in .le. dt_inner) dt= dt_in
+      if(nsteps > 1) then 
+         write(*,*) 'WARNING: innerloop cant not be used with sybcycle'
+         ndt = 1 
+      endif 
+
+      do it = 1, ndt
 
       qc_max = 0.
       qr_max = 0.
@@ -1260,10 +1278,10 @@ MODULE module_mp_thompson
                       rand1, rand2, rand3, &
                       kts, kte, dt, i, j)
 
-         pcp_ra(i,j) = pptrain
-         pcp_sn(i,j) = pptsnow
-         pcp_gr(i,j) = pptgraul
-         pcp_ic(i,j) = pptice
+         pcp_ra(i,j) = pcp_ra(i,j) + pptrain
+         pcp_sn(i,j) = pcp_sn(i,j) + pptsnow
+         pcp_gr(i,j) = pcp_gr(i,j) + pptgraul
+         pcp_ic(i,j) = pcp_ic(i,j) + pptice
          RAINNCV(i,j) = pptrain + pptsnow + pptgraul + pptice
          RAINNC(i,j) = RAINNC(i,j) + pptrain + pptsnow + pptgraul + pptice
          IF ( PRESENT(snowncv) .AND. PRESENT(snownc) ) THEN
@@ -1286,8 +1304,6 @@ MODULE module_mp_thompson
             GRAUPELNC(i,j) = GRAUPELNC(i,j) + pptgraul
          ENDIF
          SR(i,j) = (pptsnow + pptgraul + pptice)/(RAINNCV(i,j)+1.e-12)
-
-
 
 !..Reset lowest model level to initial state aerosols (fake sfc source).
 !.. Changed 13 May 2013 to fake emissions in which nwfa2d is aerosol
@@ -1396,9 +1412,26 @@ MODULE module_mp_thompson
             endif
          enddo
 
+         if (ndt>1 .and. it==ndt) then
+
+           SR(i,j) = (pcp_sn(i,j) + pcp_gr(i,j) + pcp_ic(i,j))/(RAINNC(i,j)+1.e-12)
+           RAINNCV(i,j) = RAINNC(i,j)
+           IF ( PRESENT (snowncv) ) THEN
+              SNOWNCV(i,j) = SNOWNC(i,j)
+           ENDIF
+           IF ( PRESENT (icencv) ) THEN
+              ICENCV(i,j) = ICENC(i,j)
+           ENDIF
+           IF ( PRESENT (graupelncv) ) THEN
+              GRAUPELNCV(i,j) = GRAUPELNC(i,j)
+           ENDIF
+         endif 
+
          ! Diagnostic calculations only for last step
          ! if Thompson MP is called multiple times
-         last_step_only: IF (istep == nsteps) THEN
+         last_step_only:if ((ndt>1 .and. it==ndt) 			 & 
+ 		.or. (nsteps>1 .and. istep==nsteps) 			 & 
+		.or. (nsteps==1 .and. ndt==1)) then  
 
 !> - Call calc_refl10cm()
 
@@ -1443,8 +1476,8 @@ MODULE module_mp_thompson
                re_snow(i,k,j)  = MAX(re_qs_min, MIN(re_qs1d(k), re_qs_max))
              enddo
            ENDIF
-         ENDIF last_step_only
 
+         endif last_step_only 
       enddo i_loop
       enddo j_loop
 
@@ -1458,6 +1491,7 @@ MODULE module_mp_thompson
 !         'ni: ', ni_max, '(', imax_ni, ',', jmax_ni, ',', kmax_ni, ')', &
 !         'nr: ', nr_max, '(', imax_nr, ',', jmax_nr, ',', kmax_nr, ')'
 ! END DEBUG - GT
+      enddo ! end of nt loop
 
       END SUBROUTINE mp_gt_driver
 !> @}
