@@ -284,15 +284,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[dqdti]
-  standard_name = instantaneous_water_vapor_specific_humidity_tendency_due_to_convection
-  long_name = instantaneous moisture tendency due to convection
-  units = kg kg-1 s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
 [du3dt]
   standard_name = cumulative_change_in_x_wind_due_to_shallow_convection
   long_name = cumulative change in x wind due to shallow convection
