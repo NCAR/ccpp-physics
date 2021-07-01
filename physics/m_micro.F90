@@ -181,9 +181,6 @@ end subroutine m_micro_init
      &                prsl_i,u_i,v_i,phil,   omega_i, QLLS_i,QILS_i,    &
      &                                       lwheat_i,swheat_i
        real (kind=kind_phys), dimension(:,0:),intent(in):: prsi_i, phii
-! GJF* These variables are conditionally allocated depending on whether the
-!     Morrison-Gettelman microphysics is used, so they must be declared 
-!     using assumed shape.
        real (kind=kind_phys), dimension(:,:),  intent(in)  ::           &
      &       CNV_DQLDT_i, CLCN_i,     QLCN_i, QICN_i,                   &
      &       CNV_MFD_i,               cf_upi, CNV_FICE_i, CNV_NDROP_i,  &
@@ -210,9 +207,6 @@ end subroutine m_micro_init
        integer, dimension(:), intent(inout):: KCBL
        real (kind=kind_phys),dimension(:,:),intent(inout):: q_io, t_io,   &
      &                                             ncpl_io,ncpi_io,CLLS_io
-! GJF* These variables are conditionally allocated depending on whether the
-!     Morrison-Gettelman microphysics is used, so they must be declared 
-!     using assumed shape.
        real (kind=kind_phys),dimension(:,:),intent(inout):: rnw_io,snw_io,&
      &                                             ncpr_io, ncps_io,        &
      &                                             qgl_io,  ncgl_io

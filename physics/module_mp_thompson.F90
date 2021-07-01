@@ -1069,8 +1069,8 @@ MODULE module_mp_thompson
 
 !..Local variables
       REAL, DIMENSION(kts:kte):: &
-                          qv1d, qc1d, qi1d, qr1d, qs1d, qg1d, ni1d,  &
-                          nr1d, nc1d, nwfa1d, nifa1d,                &
+                          qv1d, qc1d, qi1d, qr1d, qs1d, qg1d, ni1d,     &
+                          nr1d, nc1d, nwfa1d, nifa1d,                   &
                           t1d, p1d, w1d, dz1d, rho, dBZ
 !..Extended diagnostics, single column arrays
       REAL, DIMENSION(:), ALLOCATABLE::                              &
