@@ -1435,7 +1435,7 @@ MODULE module_mp_thompson
 
 !> - Call calc_refl10cm()
 
-           diagflag_presenti: IF ( PRESENT (diagflag) ) THEN
+           diagflag_present: IF ( PRESENT (diagflag) ) THEN
            if (diagflag .and. do_radar_ref == 1) then
 !
              ! Only set melti to true at the output times
@@ -1459,7 +1459,7 @@ MODULE module_mp_thompson
                refl_10cm(i,k,j) = MAX(-35., dBZ(k))
              enddo
            endif
-           ENDIF diagflag_presenti
+           ENDIF diagflag_present
 
            IF (has_reqc.ne.0 .and. has_reqi.ne.0 .and. has_reqs.ne.0) THEN
              do k = kts, kte
