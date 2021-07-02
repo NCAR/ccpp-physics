@@ -430,6 +430,15 @@
   kind = kind_phys
   intent = in
   optional = F
+[evef]
+  standard_name = rain_evaporation_coefficient_convection
+  long_name = convective rain evaporation coefficient for convection
+  units = frac
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [pgcon]
   standard_name = momentum_transport_reduction_factor_pgf_shallow_convection
   long_name = reduction factor in momentum transport due to shal conv. induced pressure gradient force

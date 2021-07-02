@@ -53,7 +53,7 @@ module scm_sfc_flux_spec
 !!  -# Calculate the surface drag coefficient for heat and moisture.
 !!  -# Calculate the u and v wind at 10m.
   subroutine scm_sfc_flux_spec_run (u1, v1, z1, t1, q1, p1, roughness_length, spec_sh_flux, spec_lh_flux, &
-    exner_inverse, T_surf, cp, grav, hvap, rd, fvirt, vonKarman, sh_flux, lh_flux, sh_flux_chs, lh_flux_chs, u_star, sfc_stress, cm, ch, &
+    exner_inverse, T_surf, cp, grav, hvap, rd, fvirt, vonKarman, sh_flux, lh_flux, sh_flux_chs, u_star, sfc_stress, cm, ch, &
     fm, fh, rb, u10m, v10m, wind1, qss, t2m, q2m, errmsg, errflg)
 
     use machine,             only: kind_phys
@@ -63,7 +63,7 @@ module scm_sfc_flux_spec
     real(kind=kind_phys), intent(in) :: cp, grav, hvap, rd, fvirt, vonKarman
     real(kind=kind_phys), intent(out) :: sh_flux(:), lh_flux(:), u_star(:), sfc_stress(:), &
       cm(:), ch(:), fm(:), fh(:), rb(:), u10m(:), v10m(:), wind1(:), qss(:), t2m(:), q2m(:), &
-      sh_flux_chs(:), lh_flux_chs(:)
+      sh_flux_chs(:)
 
     character(len=*), intent(out) :: errmsg
     integer,          intent(out) :: errflg
@@ -83,8 +83,7 @@ module scm_sfc_flux_spec
     sh_flux(i) = spec_sh_flux(i)
     lh_flux(i) = spec_lh_flux(i)
     sh_flux_chs(i) = sh_flux(i)
-    lh_flux_chs(i) = lh_flux(i)
-
+    
     roughness_length_m = 0.01*roughness_length(i)
 
     wind1(i) = sqrt(u1(i)*u1(i) + v1(i)*v1(i))

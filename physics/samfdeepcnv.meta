@@ -375,6 +375,15 @@
   type = integer
   intent = in
   optional = F
+[hpbl]
+  standard_name = atmosphere_boundary_layer_thickness
+  long_name = PBL top height
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [ud_mf]
   standard_name = instantaneous_atmosphere_updraft_convective_mass_flux
   long_name = (updraft mass flux) * delt
@@ -571,18 +580,9 @@
   kind = kind_phys
   intent = in
   optional = F
-[evfact]
-  standard_name = rain_evaporation_coefficient_deep_convection
-  long_name = convective rain evaporation coefficient for deep conv.
-  units = frac
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[evfactl]
-  standard_name = rain_evaporation_coefficient_over_land_deep_convection
-  long_name = convective rain evaporation coefficient over land for deep conv.
+[evef]
+  standard_name = rain_evaporation_coefficient_convection
+  long_name = convective rain evaporation coefficient for convection
   units = frac
   dimensions = ()
   type = real
