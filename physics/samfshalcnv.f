@@ -273,6 +273,7 @@ c
         cina(i) = 0.
 !       vshear(i) = 0.
         gdx(i) = sqrt(garea(i))
+        xmb(i) = 0.
           scaldfunc(i)=-1.0  ! wang initialized
           sigmagfm(i)=-1.0
        enddo
@@ -298,6 +299,7 @@ c
         cina(i) = 0.
 !       vshear(i) = 0.
         gdx(i) = sqrt(garea(i))
+        xmb(i) = 0.
        enddo
       endif
 !!
