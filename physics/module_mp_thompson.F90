@@ -991,7 +991,9 @@ MODULE module_mp_thompson
                               errmsg, errflg,                         &
                               ! Extended diagnostics, array pointers
                               ! only associated if ext_diag flag is .true.
-                              ext_diag, vts1, prw_vcdc,               &
+                              ext_diag,                               &
+                              !vts1, txri, txrc,                       &
+                              prw_vcdc,                               &
                               prw_vcde, tpri_inu, tpri_ide_d,         &
                               tpri_ide_s, tprs_ide, tprs_sde_d,       &
                               tprs_sde_s, tprg_gde_d,                 &
@@ -1001,10 +1003,9 @@ MODULE module_mp_thompson
                               tprr_rci, tprg_rcg,                     &
                               tprw_vcd_c, tprw_vcd_e, tprr_sml,       &
                               tprr_gml, tprr_rcg,                     &
-                              tprr_rcs, tprv_rev, txri,               &
-                              txrc, tten3, qvten3, qrten3, qsten3,    &
-                              qgten3, qiten3, niten3, nrten3, ncten3, &
-                              qcten3)
+                              tprr_rcs, tprv_rev, tten3, qvten3,      &
+                              qrten3, qsten3, qgten3, qiten3, niten3, &
+                              nrten3, ncten3, qcten3)
 
       implicit none
 
@@ -1052,7 +1053,8 @@ MODULE module_mp_thompson
       ! Extended diagnostics, array pointers only associated if ext_diag flag is .true.
       LOGICAL, INTENT (IN) :: ext_diag
       REAL, DIMENSION(:,:,:), INTENT(INOUT)::                     &
-                          vts1, prw_vcdc,                         &
+                          !vts1, txri, txrc,                       &
+                          prw_vcdc,                               &
                           prw_vcde, tpri_inu, tpri_ide_d,         &
                           tpri_ide_s, tprs_ide,                   &
                           tprs_sde_d, tprs_sde_s, tprg_gde_d,     &
@@ -1062,10 +1064,9 @@ MODULE module_mp_thompson
                           tprr_rci, tprg_rcg,                     &
                           tprw_vcd_c, tprw_vcd_e, tprr_sml,       &
                           tprr_gml, tprr_rcg,                     &
-                          tprr_rcs, tprv_rev, txri,               &
-                          txrc, tten3, qvten3, qrten3, qsten3,    &
-                          qgten3, qiten3, niten3, nrten3, ncten3, &
-                          qcten3
+                          tprr_rcs, tprv_rev, tten3, qvten3,      &
+                          qrten3, qsten3, qgten3, qiten3, niten3, &
+                          nrten3, ncten3, qcten3
 
 !..Local variables
       REAL, DIMENSION(kts:kte):: &
@@ -1074,7 +1075,8 @@ MODULE module_mp_thompson
                           t1d, p1d, w1d, dz1d, rho, dBZ
 !..Extended diagnostics, single column arrays
       REAL, DIMENSION(:), ALLOCATABLE::                              &
-                          vtsk1, prw_vcdc1,                          &
+                          !vtsk1, txri1, txrc1,                       &
+                          prw_vcdc1,                                 &
                           prw_vcde1, tpri_inu1, tpri_ide1_d,         &
                           tpri_ide1_s, tprs_ide1,                    &
                           tprs_sde1_d, tprs_sde1_s, tprg_gde1_d,     &
@@ -1084,10 +1086,9 @@ MODULE module_mp_thompson
                           tprr_rci1, tprg_rcg1,                      &
                           tprw_vcd1_c, tprw_vcd1_e, tprr_sml1,       &
                           tprr_gml1, tprr_rcg1,                      &
-                          tprr_rcs1, tprv_rev1, txri1,               &
-                          txrc1, tten1, qvten1, qrten1, qsten1,      &
-                          qgten1, qiten1, niten1, nrten1, ncten1,    &
-                          qcten1
+                          tprr_rcs1, tprv_rev1,  tten1, qvten1,      &
+                          qrten1, qsten1, qgten1, qiten1, niten1,    &
+                          nrten1, ncten1, qcten1
 
       REAL, DIMENSION(kts:kte):: re_qc1d, re_qi1d, re_qs1d
 #if ( WRF_CHEM == 1 )
@@ -1176,8 +1177,11 @@ MODULE module_mp_thompson
          end if
       end if test_only_once
 
+      ! These must be alwyas allocated
+      !allocate (vtsk1(kts:kte))
+      !allocate (txri1(kts:kte))
+      !allocate (txrc1(kts:kte))
       allocate_extended_diagnostics: if (ext_diag) then
-         allocate (vtsk1(kts:kte))
          allocate (prw_vcdc1(kts:kte))
          allocate (prw_vcde1(kts:kte))
          allocate (tpri_inu1(kts:kte))
@@ -1205,8 +1209,6 @@ MODULE module_mp_thompson
          allocate (tprr_rcg1(kts:kte))
          allocate (tprr_rcs1(kts:kte))
          allocate (tprv_rev1(kts:kte))
-         allocate (txri1(kts:kte))
-         allocate (txrc1(kts:kte))
          allocate (tten1(kts:kte))
          allocate (qvten1(kts:kte))
          allocate (qrten1(kts:kte))
@@ -1217,11 +1219,6 @@ MODULE module_mp_thompson
          allocate (nrten1(kts:kte))
          allocate (ncten1(kts:kte))
          allocate (qcten1(kts:kte))
-      else
-         ! These must be allocated always
-         allocate (vtsk1(kts:kte))
-         allocate (txri1(kts:kte))
-         allocate (txrc1(kts:kte))
       end if allocate_extended_diagnostics
 
 !+---+
@@ -1334,52 +1331,48 @@ MODULE module_mp_thompson
             nr1d(k) = nr(i,k,j)
             rho(k) = 0.622*p1d(k)/(R*t1d(k)*(qv1d(k)+0.622))
 
+            ! These arrays are always allocated and must be initialized
+            !vtsk1(k) = 0.
+            !txrc1(k) = 0.
+            !txri1(k) = 0.
             initialize_extended_diagnostics: if (ext_diag) then
-               vtsk1 = 0.
-               prw_vcdc1 = 0.
-               prw_vcde1 = 0.
-               tpri_inu1 = 0.
-               tpri_ide1_d = 0.
-               tpri_ide1_s = 0.
-               tprs_ide1 = 0.
-               tprs_sde1_d = 0.
-               tprs_sde1_s = 0.
-               tprg_gde1_d = 0.
-               tprg_gde1_s = 0.
-               tpri_iha1 = 0.
-               tpri_wfz1 = 0.
-               tpri_rfz1 = 0.
-               tprg_rfz1 = 0.
-               tprs_scw1 = 0.
-               tprg_scw1 = 0.
-               tprg_rcs1 = 0.
-               tprs_rcs1 = 0.
-               tprr_rci1 = 0.
-               tprg_rcg1 = 0.
-               tprw_vcd1_c = 0.
-               tprw_vcd1_e = 0.
-               tprr_sml1 = 0.
-               tprr_gml1 = 0.
-               tprr_rcg1 = 0.
-               tprr_rcs1 = 0.
-               tprv_rev1 = 0.
-               txri1 = 0.
-               txrc1 = 0.
-               tten1 = 0.
-               qvten1 = 0.
-               qrten1 = 0.
-               qsten1 = 0.
-               qgten1 = 0.
-               qiten1 = 0.
-               niten1 = 0.
-               nrten1 = 0.
-               ncten1 = 0.
-               qcten1 = 0.
-            else
-               ! These arrays are always allocated and must be initialized
-               vtsk1(k) = 0.
-               txrc1(k) = 0.
-               txri1(k) = 0.
+               prw_vcdc1(k) = 0.
+               prw_vcde1(k) = 0.
+               tpri_inu1(k) = 0.
+               tpri_ide1_d(k) = 0.
+               tpri_ide1_s(k) = 0.
+               tprs_ide1(k) = 0.
+               tprs_sde1_d(k) = 0.
+               tprs_sde1_s(k) = 0.
+               tprg_gde1_d(k) = 0.
+               tprg_gde1_s(k) = 0.
+               tpri_iha1(k) = 0.
+               tpri_wfz1(k) = 0.
+               tpri_rfz1(k) = 0.
+               tprg_rfz1(k) = 0.
+               tprs_scw1(k) = 0.
+               tprg_scw1(k) = 0.
+               tprg_rcs1(k) = 0.
+               tprs_rcs1(k) = 0.
+               tprr_rci1(k) = 0.
+               tprg_rcg1(k) = 0.
+               tprw_vcd1_c(k) = 0.
+               tprw_vcd1_e(k) = 0.
+               tprr_sml1(k) = 0.
+               tprr_gml1(k) = 0.
+               tprr_rcg1(k) = 0.
+               tprr_rcs1(k) = 0.
+               tprv_rev1(k) = 0.
+               tten1(k) = 0.
+               qvten1(k) = 0.
+               qrten1(k) = 0.
+               qsten1(k) = 0.
+               qgten1(k) = 0.
+               qiten1(k) = 0.
+               niten1(k) = 0.
+               nrten1(k) = 0.
+               ncten1(k) = 0.
+               qcten1(k) = 0.
             endif initialize_extended_diagnostics
          enddo
          if (is_aerosol_aware) then
@@ -1405,7 +1398,9 @@ MODULE module_mp_thompson
 #endif
                       rand1, rand2, rand3, &
                       kts, kte, dt, i, j, &
-                      ext_diag, vtsk1, prw_vcdc1, prw_vcde1,           &
+                      ext_diag, &
+                      !vtsk1, txri1, txrc1,                             &
+                      prw_vcdc1, prw_vcde1,                            &
                       tpri_inu1, tpri_ide1_d, tpri_ide1_s, tprs_ide1,  &
                       tprs_sde1_d, tprs_sde1_s,                        &
                       tprg_gde1_d, tprg_gde1_s, tpri_iha1, tpri_wfz1,  &
@@ -1414,7 +1409,7 @@ MODULE module_mp_thompson
                       tprg_rcg1, tprw_vcd1_c,                          &
                       tprw_vcd1_e, tprr_sml1, tprr_gml1, tprr_rcg1,    &
                       tprr_rcs1, tprv_rev1,                            &
-                      txri1, txrc1, tten1, qvten1, qrten1, qsten1,     &
+                      tten1, qvten1, qrten1, qsten1,                   &
                       qgten1, qiten1, niten1, nrten1, ncten1, qcten1)
 
          pcp_ra(i,j) = pptrain
@@ -1555,7 +1550,9 @@ MODULE module_mp_thompson
 
          assign_extended_diagnostics: if (ext_diag) then
            do k=kts,kte
-            vts1(i,k,j)       = vtsk1(k)
+            !vts1(i,k,j)       = vtsk1(k)
+            !txri(i,k,j)       = txri(i,k,j)       + txri1(k)
+            !txrc(i,k,j)       = txrc(i,k,j)       + txrc1(k)
             prw_vcdc(i,k,j)   = prw_vcdc(i,k,j)   + prw_vcdc1(k)
             prw_vcde(i,k,j)   = prw_vcde(i,k,j)   + prw_vcde1(k)
             tpri_inu(i,k,j)   = tpri_inu(i,k,j)   + tpri_inu1(k) 
@@ -1583,8 +1580,6 @@ MODULE module_mp_thompson
             tprr_rcg(i,k,j)   = tprr_rcg(i,k,j)   + tprr_rcg1(k)
             tprr_rcs(i,k,j)   = tprr_rcs(i,k,j)   + tprr_rcs1(k)
             tprv_rev(i,k,j)   = tprv_rev(i,k,j)   + tprv_rev1(k)
-            txri(i,k,j)       = txri(i,k,j)       + txri1(k)
-            txrc(i,k,j)       = txrc(i,k,j)       + txrc1(k)
             tten3(i,k,j)      = tten3(i,k,j)      + tten1(k) 
             qvten3(i,k,j)     = qvten3(i,k,j)     + qvten1(k)
             qrten3(i,k,j)     = qrten3(i,k,j)     + qrten1(k)
@@ -1662,8 +1657,11 @@ MODULE module_mp_thompson
 !         'nr: ', nr_max, '(', imax_nr, ',', jmax_nr, ',', kmax_nr, ')'
 ! END DEBUG - GT
 
+      ! These are always allocated
+      !deallocate (vtsk1)
+      !deallocate (txri1)
+      !deallocate (txrc1)
       deallocate_extended_diagnostics: if (ext_diag) then
-         deallocate (vtsk1)
          deallocate (prw_vcdc1)
          deallocate (prw_vcde1)
          deallocate (tpri_inu1)
@@ -1691,8 +1689,6 @@ MODULE module_mp_thompson
          deallocate (tprr_rcg1)
          deallocate (tprr_rcs1)
          deallocate (tprv_rev1)
-         deallocate (txri1)
-         deallocate (txrc1)
          deallocate (tten1)
          deallocate (qvten1)
          deallocate (qrten1)
@@ -1703,11 +1699,6 @@ MODULE module_mp_thompson
          deallocate (nrten1)
          deallocate (ncten1)
          deallocate (qcten1)
-      else
-         ! These are always allocated
-         deallocate (vtsk1)
-         deallocate (txri1)
-         deallocate (txrc1)
       end if deallocate_extended_diagnostics
 
       END SUBROUTINE mp_gt_driver
@@ -1784,7 +1775,9 @@ MODULE module_mp_thompson
                           kts, kte, dt, ii, jj,                            &
                           ! Extended diagnostics, most arrays only
                           ! allocated if ext_diag flag is .true.
-                          ext_diag, vtsk1, prw_vcdc1, prw_vcde1,           &
+                          ext_diag, &
+                          !vtsk1, txri1, txrc1,                             &
+                          prw_vcdc1, prw_vcde1,                            &
                           tpri_inu1, tpri_ide1_d, tpri_ide1_s, tprs_ide1,  &
                           tprs_sde1_d, tprs_sde1_s,                        &
                           tprg_gde1_d, tprg_gde1_s, tpri_iha1, tpri_wfz1,  &
@@ -1793,7 +1786,7 @@ MODULE module_mp_thompson
                           tprg_rcg1, tprw_vcd1_c,                          &
                           tprw_vcd1_e, tprr_sml1, tprr_gml1, tprr_rcg1,    &
                           tprr_rcs1, tprv_rev1,                            &
-                          txri1, txrc1, tten1, qvten1, qrten1, qsten1,     &
+                          tten1, qvten1, qrten1, qsten1,                   &
                           qgten1, qiten1, niten1, nrten1, ncten1, qcten1) 
 
 #ifdef MPI
@@ -1813,7 +1806,8 @@ MODULE module_mp_thompson
       ! Extended diagnostics, most arrays only allocated if ext_diag is true
       LOGICAL, INTENT(IN) :: ext_diag
       REAL, DIMENSION(:), INTENT(OUT):: &
-                          vtsk1, prw_vcdc1,                          &
+                          !vtsk1, txri1, txrc1,                       &
+                          prw_vcdc1,                                 &
                           prw_vcde1, tpri_inu1, tpri_ide1_d,         &
                           tpri_ide1_s, tprs_ide1,                    &
                           tprs_sde1_d, tprs_sde1_s, tprg_gde1_d,     &
@@ -1823,10 +1817,9 @@ MODULE module_mp_thompson
                           tprr_rci1, tprg_rcg1,                      &
                           tprw_vcd1_c, tprw_vcd1_e, tprr_sml1,       &
                           tprr_gml1, tprr_rcg1,                      &
-                          tprr_rcs1, tprv_rev1, txri1,               &
-                          txrc1, tten1, qvten1, qrten1, qsten1,      &
-                          qgten1, qiten1, niten1, nrten1, ncten1,    &
-                          qcten1
+                          tprr_rcs1, tprv_rev1, tten1, qvten1,       &
+                          qrten1, qsten1, qgten1, qiten1, niten1,    &
+                          nrten1, ncten1, qcten1
 
 #if ( WRF_CHEM == 1 )
       REAL, DIMENSION(kts:kte), INTENT(INOUT):: &
@@ -2039,7 +2032,9 @@ MODULE module_mp_thompson
 !Diagnostics
       if (ext_diag) then
          do k = kts, kte
-            vtsk1(k) = 0.
+            !vtsk1(k) = 0.
+            !txrc1(k) = 0.
+            !txri1(k) = 0.
             prw_vcdc1(k) = 0.
             prw_vcde1(k) = 0.
             tpri_inu1(k) = 0.
@@ -2067,8 +2062,6 @@ MODULE module_mp_thompson
             tprr_rcg1(k) = 0.
             tprr_rcs1(k) = 0.
             tprv_rev1(k) = 0.
-            txrc1(k) = 0.
-            txri1(k) = 0.
             tten1(k) = 0.
             qvten1(k) = 0.
             qrten1(k) = 0.
@@ -3777,7 +3770,7 @@ MODULE module_mp_thompson
        nstep = 0
        do k = kte, kts, -1
           vts = 0.
-          vtsk1(k)=0.
+          !vtsk1(k)=0.
 
           if (rs(k).gt. R1) then
            xDs = smoc(k) / smob(k)
@@ -3796,14 +3789,14 @@ MODULE module_mp_thompson
 !    &                vts*((vtrk(k)-vts*vts_boost(k))/(temp(k)-T_0)))
             SR = rs(k)/(rs(k)+rr(k))
             vtsk(k) = vts*SR + (1.-SR)*vtrk(k)
-            vtsk1(k)=vtsk(k)
+            !vtsk1(k)=vtsk(k)
            else
             vtsk(k) = vts*vts_boost(k)
-            vtsk1(k)=vtsk(k)
+            !vtsk1(k)=vtsk(k)
            endif
           else
             vtsk(k) = vtsk(k+1)
-            vtsk1(k)=0
+            !vtsk1(k)=0
           endif
 
           if (vtsk(k) .gt. 1.E-3) then
@@ -4002,7 +3995,7 @@ MODULE module_mp_thompson
           niten(k) = -ni1d(k)*odt
           tten(k) = tten(k) - lfus*ocp(k)*xri*odt*(1-IFDRY)
 !diag
-          txri1(k) = lfus*ocp(k)*xri*odt*(1-IFDRY)
+          !txri1(k) = lfus*ocp(k)*xri*odt*(1-IFDRY)
          endif
 
          xrc = MAX(0.0, qc1d(k) + qcten(k)*DT)
@@ -4015,7 +4008,7 @@ MODULE module_mp_thompson
           ncten(k) = ncten(k) - xnc*odt
           tten(k) = tten(k) + lfus2*ocp(k)*xrc*odt*(1-IFDRY)
 !diag
-          txrc1(k) = lfus2*ocp(k)*xrc*odt*(1-IFDRY)*DT
+          !txrc1(k) = lfus2*ocp(k)*xrc*odt*(1-IFDRY)*DT
          endif
       enddo
       endif
