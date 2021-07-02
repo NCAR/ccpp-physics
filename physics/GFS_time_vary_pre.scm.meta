@@ -76,22 +76,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[lsm]
-  standard_name = flag_for_land_surface_scheme
-  long_name = flag for land surface model
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[lsm_noahmp]
-  standard_name = flag_for_noahmp_land_surface_scheme
-  long_name = flag for NOAH MP land surface model
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [nsswr]
   standard_name = number_of_timesteps_between_shortwave_radiation_calls
   long_name = number of timesteps between shortwave radiation calls
