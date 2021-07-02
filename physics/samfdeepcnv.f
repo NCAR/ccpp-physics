@@ -341,11 +341,19 @@ c
         cina(i) = 0.
         pwavo(i)= 0.
         pwevo(i)= 0.
+        xmb(i)  = 0.
         xpwav(i)= 0.
         xpwev(i)= 0.
         vshear(i) = 0.
         rainevap(i) = 0.
         gdx(i) = sqrt(garea(i))
+      enddo
+
+      do k=1,km
+        do i=1,im
+          xlamud(i,k) = 0.
+          xlamue(i,k) = 0.
+        enddo
       enddo
 !
       if (hwrf_samfdeep) then
