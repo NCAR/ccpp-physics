@@ -260,7 +260,7 @@
 !    &              * czilc*ca*sqrt(ustar_lnd(i)*(0.01/1.5e-05)))
 !
             czilc = 10.0_kp ** (- 4.0_kp * z0max) ! Trier et al. (2011,WAF)
-            czilc = min(czilc, 0.8_kp)
+            czilc = max(min(czilc, 0.8_kp), 0.08_kp)
             tem1 = 1.0_kp - sigmaf(i)
             czilc = czilc * tem1 * tem1
             ztmax_lnd(i) = z0max * exp( - czilc * ca
@@ -323,7 +323,7 @@
 !    &              * czilc*ca*sqrt(ustar_ice(i)*(0.01/1.5e-05)))
 !
             czilc = 10.0_kp ** (- 4.0_kp * z0max)
-            czilc = min(czilc, 0.8_kp)
+            czilc = max(min(czilc, 0.8_kp), 0.08_kp)
             tem1 = 1.0_kp - sigmaf(i)
             czilc = czilc * tem1 * tem1
             ztmax_ice(i) = z0max * exp( - czilc * ca
