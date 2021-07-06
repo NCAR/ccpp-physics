@@ -332,9 +332,10 @@
 !! @{
 !-----------------------------------
       subroutine setalb                                                 &
-     &     ( slmsk,lsm,lsm_noahmp,lsm_ruc,snowf,                        & !  ---  inputs:
+     &     ( slmsk,lsm,lsm_noahmp,lsm_ruc,use_cice_alb,snowf,           & !  ---  inputs:
      &       sncovr,sncovr_ice,snoalb,zorlf,coszf,                      &
-     &       tsknf,tairf,hprif,frac_grid,min_seaice,                    & 
+     &       tsknf,tairf,hprif,frac_grid, lakefrac,                     & 
+!    &       tsknf,tairf,hprif,frac_grid,min_seaice,                    & 
      &       alvsf,alnsf,alvwf,alnwf,facsf,facwf,fice,tisfc,            &
      &       lsmalbdvis, lsmalbdnir, lsmalbivis, lsmalbinir,            &
      &       icealbdvis, icealbdnir, icealbivis, icealbinir,            &
@@ -406,16 +407,17 @@
 !  ---  inputs
       integer, intent(in) :: IMAX
       integer, intent(in) :: lsm, lsm_noahmp, lsm_ruc
-      logical, intent(in) :: frac_grid
+      logical, intent(in) :: use_cice_alb, frac_grid
 
       real (kind=kind_phys), dimension(:), intent(in) ::                &
+     &       lakefrac,                                                  &
      &       slmsk, snowf, zorlf, coszf, tsknf, tairf, hprif,           &
      &       alvsf, alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc,     &
      &       lsmalbdvis, lsmalbdnir, lsmalbivis, lsmalbinir,            &
      &       icealbdvis, icealbdnir, icealbivis, icealbinir,            &
      &       sncovr, sncovr_ice, snoalb, albPpert           ! sfc-perts, mgehne
       real (kind=kind_phys),  intent(in) :: pertalb         ! sfc-perts, mgehne
-      real (kind=kind_phys),  intent(in) :: min_seaice
+!     real (kind=kind_phys),  intent(in) :: min_seaice
       real (kind=kind_phys), dimension(:), intent(in) ::                &
      &       fracl, fraco, fraci
       logical, dimension(:), intent(in) ::                              &
@@ -581,8 +583,9 @@
           !     model. Otherwise it uses the backup albedo computation 
           !     from ialbflg = 1.
           if (icy(i)) then
-            if(lsm == lsm_ruc ) then
-            !-- use ice albedo from the RUC ice model
+            if (lsm == lsm_ruc .or.                                     &
+     &        (use_cice_alb .and. lakefrac(i)  < 0.0)) then
+            !-- use ice albedo from the RUC ice model or 
               asevd_ice = icealbivis(i)
               asend_ice = icealbinir(i)
               asevb_ice = icealbdvis(i)
@@ -700,7 +703,8 @@
 !-----------------------------------
       subroutine setemis                                                &
      &     ( lsm,lsm_noahmp,lsm_ruc,vtype,frac_grid,                    &  !  ---  inputs:
-     &       min_seaice,xlon,xlat,slmsk,snowf,sncovr,sncovr_ice,        &
+     &                  xlon,xlat,slmsk,snowf,sncovr,sncovr_ice,        &
+!    &       min_seaice,xlon,xlat,slmsk,snowf,sncovr,sncovr_ice,        &
      &       zorlf,tsknf,tairf,hprif,                                   &
      &       semis_lnd,semis_ice,IMAX,fracl,fraco,fraci,icy,            &
      &       semisbase, sfcemis                                         &  !  ---  outputs:
@@ -757,7 +761,7 @@
       integer, intent(in) :: lsm, lsm_noahmp, lsm_ruc
       logical, intent(in) :: frac_grid
       real (kind=kind_phys), dimension(:), intent(in) :: vtype
-      real (kind=kind_phys), intent(in) :: min_seaice
+!     real (kind=kind_phys), intent(in) :: min_seaice
 
       real (kind=kind_phys), dimension(:), intent(in) ::                &
      &       xlon,xlat, slmsk, snowf,sncovr, sncovr_ice,                &
