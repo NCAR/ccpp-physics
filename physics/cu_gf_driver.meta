@@ -119,9 +119,25 @@
   kind = kind_phys
   intent = in
   optional = F
+[flag_init]
+  standard_name = flag_for_first_time_step
+  long_name = flag signaling first time step for time integration loop
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [cactiv]
   standard_name = conv_activity_counter
   long_name = convective activity memory
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = inout
+  optional = F
+[cactiv_m]
+  standard_name = mid_conv_activity_counter
+  long_name = mid-level cloud convective activity memory
   units = none
   dimensions = (horizontal_loop_extent)
   type = integer
@@ -302,6 +318,15 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = F
+[aod_gf]
+  standard_name = aod_gf_deep
+  long_name = aerosol optical depth used in Grell-Freitas Convective Parameterization
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
   optional = F
 [cliw]
   standard_name = ice_water_mixing_ratio_convective_transport_tracer
