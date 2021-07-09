@@ -41,16 +41,17 @@
 !!
 !>  @{
       subroutine sfc_sice_run                                           &
-     &    ( im, kice, sbc, hvap, tgice, cp, eps, epsm1, rvrdm1, grav,   & !  ---  inputs:
-     &      t0c, rd, ps, t1, q1, delt,                                  &
-     &      sfcemis, dlwflx, sfcnsw, sfcdsw, srflag,                    &
-     &      cm, ch, prsl1, prslki, prsik1, prslk1, wind,                &
-     &      flag_iter, lprnt, ipr,                                      &
-     &      hice, fice, tice, weasd, tskin, tprcp, tiice, ep,           & !  ---  input/outputs:
-     &      snwdph, qsurf, snowmt, gflux, cmm, chh, evap, hflx,         & !  
-     &      frac_grid, icy, islmsk_cice,                                &
-     &      min_lakeice, min_seaice, oceanfrac,                         &
-     &      errmsg, errflg )
+     &     ( im, kice, sbc, hvap, tgice, cp, eps, epsm1, rvrdm1, grav,  & !  ---  inputs:
+     &       t0c, rd, ps, t1, q1, delt,                                 &
+     &       sfcemis, dlwflx, sfcnsw, sfcdsw, srflag,                   &
+     &       cm, ch, prsl1, prslki, prsik1, prslk1, wind,               &
+     &       flag_iter, lprnt, ipr, thsfc_loc,                          &
+     &       hice, fice, tice, weasd, tskin, tprcp, tiice, ep,          & !  ---  input/outputs:
+     &       snwdph, qsurf, snowmt, gflux, cmm, chh, evap, hflx,        & !  
+     &       frac_grid, icy, islmsk_cice,                               &
+     &       min_lakeice, min_seaice, oceanfrac,                        &
+     &       errmsg, errflg
+     &     )
 
 ! ===================================================================== !
 !  description:                                                         !
@@ -110,6 +111,7 @@
 !     islimsk  - integer, sea/land/ice mask (=0/1/2)               im   !
 !     wind     - real,                                             im   !
 !     flag_iter- logical,                                          im   !
+!     thsfc_loc- logical, reference pressure for potential temp    im   !
 !                                                                       !
 !  input/outputs:                                                       !
 !     hice     - real, sea-ice thickness                           im   !
@@ -152,6 +154,7 @@
 !  ---  inputs:
       integer, intent(in) :: im, kice, ipr
       logical, intent(in) :: lprnt
+      logical, intent(in) :: thsfc_loc
       logical, intent(in) :: frac_grid
 
       real (kind=kind_phys), intent(in) :: sbc, hvap, tgice, cp, eps,   &
@@ -276,11 +279,13 @@
 
           q0        = max(q1(i), qmin)
 !         tsurf(i)  = tskin(i)
-#ifdef GSD_SURFACE_FLUXES_BUGFIX
-          theta1(i) = t1(i) / prslk1(i) ! potential temperature in middle of lowest atm. layer
-#else
-          theta1(i) = t1(i) * prslki(i)
-#endif
+
+          if(thsfc_loc) then ! Use local potential temperature
+            theta1(i) = t1(i) * prslki(i)
+          else ! Use potential temperature referenced to 1000 hPa
+            theta1(i) = t1(i) / prslk1(i) ! potential temperature in middle of lowest atm. layer
+          endif
+
           rho(i)    = prsl1(i) / (rd*t1(i)*(one+rvrdm1*q0))
           qs1       = fpvs(t1(i))
           qs1       = max(eps*qs1 / (prsl1(i) + epsm1*qs1), qmin)
@@ -333,13 +338,14 @@
 
 !> - Calculate net non-solar and upir heat flux @ ice surface \a hfi.
 
-#ifdef GSD_SURFACE_FLUXES_BUGFIX
-          hfi(i) = -dlwflx(i) + sfcemis(i)*sbc*t14 + evapi(i)           &
-     &           + rch(i)*(tice(i)/prsik1(i) - theta1(i))
-#else
-          hfi(i) = -dlwflx(i) + sfcemis(i)*sbc*t14 + evapi(i)           &
-     &           + rch(i)*(tice(i) - theta1(i))
-#endif
+          if(thsfc_loc) then ! Use local potential temperature
+            hfi(i) = -dlwflx(i) + sfcemis(i)*sbc*t14 + evapi(i)         &
+     &             + rch(i)*(tice(i) - theta1(i))
+          else ! Use potential temperature referenced to 1000 hPa
+            hfi(i) = -dlwflx(i) + sfcemis(i)*sbc*t14 + evapi(i)         &
+     &             + rch(i)*(tice(i)/prsik1(i) - theta1(i))
+          endif
+
 !> - Calculate heat flux derivative at surface \a hfd.
           hfd(i) = 4.0_kind_phys*sfcemis(i)*sbc*tice(i)*t12             &
      &           + (one + elocp*eps*hvap*qs1/(rd*t12)) * rch(i)
@@ -415,13 +421,14 @@
         if (flag(i)) then
 !  --- ...  calculate sensible heat flux (& evap over sea ice)
 
-#ifdef GSD_SURFACE_FLUXES_BUGFIX
-          hflxi    = rch(i) * (tice(i)/prsik1(i) - theta1(i))
-          hflxw    = rch(i) * (tgice / prsik1(i) - theta1(i))
-#else
-          hflxi    = rch(i) * (tice(i) - theta1(i))
-          hflxw    = rch(i) * (tgice - theta1(i))
-#endif
+          if(thsfc_loc) then ! Use local potential temperature
+            hflxi    = rch(i) * (tice(i) - theta1(i))
+            hflxw    = rch(i) * (tgice - theta1(i))
+          else ! Use potential temperature referenced to 1000 hPa
+            hflxi    = rch(i) * (tice(i)/prsik1(i) - theta1(i))
+            hflxw    = rch(i) * (tgice / prsik1(i) - theta1(i))
+          endif
+
           hflx(i)  = fice(i)*hflxi    + ffw(i)*hflxw
           evap(i)  = fice(i)*evapi(i) + ffw(i)*evapw(i)
 !

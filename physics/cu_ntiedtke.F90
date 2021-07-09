@@ -106,10 +106,13 @@ contains
 !! \section arg_table_cu_ntiedtke_init Argument Table
 !! \htmlinclude cu_ntiedtke_init.html
 !!
-      subroutine cu_ntiedtke_init(mpirank, mpiroot, errmsg, errflg)
+      subroutine cu_ntiedtke_init(imfshalcnv, imfshalcnv_ntiedtke, imfdeepcnv,  &
+                          imfdeepcnv_ntiedtke,mpirank, mpiroot, errmsg, errflg)
 
          implicit none
 
+         integer,                   intent(in) :: imfshalcnv, imfshalcnv_ntiedtke
+         integer,                   intent(in) :: imfdeepcnv, imfdeepcnv_ntiedtke           
          integer,                   intent(in)    :: mpirank
          integer,                   intent(in)    :: mpiroot
          character(len=*),          intent(  out) :: errmsg
@@ -127,6 +130,21 @@ contains
          end if
          ! *DH temporary
 
+         ! Consistency checks
+         if (imfshalcnv/=imfshalcnv_ntiedtke) then
+           write(errmsg,'(*(a))') 'Logic error: namelist choice of',       &
+        &    ' shallow convection is different from new Tiedtke scheme'
+           errflg = 1
+           return
+         end if
+
+         if (imfdeepcnv/=imfdeepcnv_ntiedtke) then
+           write(errmsg,'(*(a))') 'Logic error: namelist choice of',       &
+        &    ' deep convection is different from new Tiedtke scheme'
+           errflg = 1
+           return
+         end if
+         
       end subroutine cu_ntiedtke_init
 
       subroutine cu_ntiedtke_finalize()

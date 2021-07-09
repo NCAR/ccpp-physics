@@ -14,7 +14,22 @@ module shoc
 
 contains
 
-subroutine shoc_init ()
+subroutine shoc_init (do_shoc, errmsg, errflg)
+  implicit none
+  logical, intent(in) :: do_shoc
+  character(len=*), intent(out) :: errmsg
+  integer,          intent(out) :: errflg
+
+! Initialize CCPP error handling variables
+  errmsg = ''
+  errflg = 0
+
+! Consistency checks
+  if (.not. do_shoc) then
+    errflg = 1
+    write(errmsg,'(*(a))') 'Logic error: do_shoc == .false.'
+    return
+  end if
 end subroutine shoc_init
 
 subroutine shoc_finalize ()

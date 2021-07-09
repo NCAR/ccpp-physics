@@ -486,6 +486,32 @@
   kind = kind_phys
   intent = inout
   optional = F
+[cplchm]
+  standard_name = flag_for_chemistry_coupling
+  long_name = flag controlling cplchm collection (default off)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[pfi_lsan]
+  standard_name = ice_flux_due_to_large_scale_precipitation
+  long_name = instantaneous 3D flux of ice from nonconvective precipitation
+  units = kg m-2 s-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[pfl_lsan]
+  standard_name = liquid_flux_due_to_large_scale_precipitation
+  long_name = instantaneous 3D flux of liquid water from nonconvective precipitation
+  units = kg m-2 s-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

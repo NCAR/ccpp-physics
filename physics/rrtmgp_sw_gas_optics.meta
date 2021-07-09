@@ -8,7 +8,7 @@
   name = rrtmgp_sw_gas_optics_init
   type = scheme
 [ncol]
-  standard_name = horizontal_loop_extent
+  standard_name = horizontal_dimension
   long_name = horizontal dimension
   units = count
   dimensions = ()
