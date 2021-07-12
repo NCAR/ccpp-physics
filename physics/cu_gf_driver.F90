@@ -1019,7 +1019,7 @@ contains
             do k=kts,ktf
               do i=its,itf
                 tem_shal = dt*(outqcs(i,k)*cutens(i)+outqcm(i,k)*cutenm(i))
-                tem_deep = dt*(outqc(i,k)*cuten(i)+clw_ten1(k))
+                tem_deep = dt*(outqc(i,k)*cuten(i)+clw_ten(i,k))
                 tem  = tem_shal+tem_deep
                 tem1 = max(0.0, min(1.0, (tcr-t(i,k))*tcrf))
                 weight_sum = abs(tem_shal)+abs(tem_deep)
