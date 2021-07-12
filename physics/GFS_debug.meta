@@ -27,7 +27,7 @@
   standard_name = GFS_interstitial_type_instance_all_threads
   long_name = instance of derived type GFS_interstitial_type
   units = DDT
-  dimensions = (omp_threads)
+  dimensions = (number_of_openmp_threads)
   type = GFS_interstitial_type
   intent = in
   optional = F
@@ -73,7 +73,7 @@
   standard_name = GFS_interstitial_type_instance_all_threads
   long_name = instance of derived type GFS_interstitial_type
   units = DDT
-  dimensions = (omp_threads)
+  dimensions = (number_of_openmp_threads)
   type = GFS_interstitial_type
   intent = in
   optional = F
@@ -188,7 +188,7 @@
   intent = in
   optional = F
 [nthreads]
-  standard_name = omp_threads
+  standard_name = number_of_openmp_threads
   long_name = number of OpenMP threads or fast physics schemes
   units = count
   dimensions = ()
@@ -251,7 +251,7 @@
   standard_name = GFS_interstitial_type_instance_all_threads
   long_name = instance of derived type GFS_interstitial_type
   units = DDT
-  dimensions = (omp_threads)
+  dimensions = (number_of_openmp_threads)
   type = GFS_interstitial_type
   intent = in
   optional = F
@@ -297,7 +297,7 @@
   standard_name = GFS_interstitial_type_instance_all_threads
   long_name = instance of derived type GFS_interstitial_type
   units = DDT
-  dimensions = (omp_threads)
+  dimensions = (number_of_openmp_threads)
   type = GFS_interstitial_type
   intent = in
   optional = F
@@ -412,7 +412,7 @@
   intent = in
   optional = F
 [nthreads]
-  standard_name = omp_threads
+  standard_name = number_of_openmp_threads
   long_name = number of OpenMP threads or fast physics schemes
   units = count
   dimensions = ()
@@ -532,7 +532,7 @@
   intent = in
   optional = F
 [kdt]
-  standard_name = index_of_time_step
+  standard_name = index_of_timestep
   long_name = current number of time steps
   units = index
   dimensions = ()
@@ -564,7 +564,7 @@
   intent = in
   optional = F
 [flag_init]
-  standard_name = flag_for_first_time_step
+  standard_name = flag_for_first_timestep
   long_name = flag signaling first time step for time integration loop
   units = flag
   dimensions = ()
@@ -580,7 +580,7 @@
   intent = in
   optional = F
 [frac_grid]
-  standard_name = flag_for_fractional_grid
+  standard_name = flag_for_fractional_landmask
   long_name = flag for fractional grid
   units = flag
   dimensions = ()
@@ -588,7 +588,7 @@
   intent = in
   optional = F
 [isot]
-  standard_name = soil_type_dataset_choice
+  standard_name = control_for_soil_type_dataset
   long_name = soil type dataset choice
   units = index
   dimensions = ()
@@ -596,7 +596,7 @@
   intent = in
   optional = F
 [ivegsrc]
-  standard_name = vegetation_type_dataset_choice
+  standard_name = control_for_vegetation_dataset
   long_name = land use dataset choice
   units = index
   dimensions = ()
@@ -722,7 +722,7 @@
   intent = in
   optional = F
 [slmsk]
-  standard_name = sea_land_ice_mask_real
+  standard_name = area_type
   long_name = landmask: sea/land/ice=0/1/2
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -775,7 +775,7 @@
   intent = in
   optional = F
 [fice]
-  standard_name = sea_ice_concentration
+  standard_name = sea_ice_area_fraction_of_sea_area_fraction
   long_name = ice fraction over open water
   units = frac
   dimensions = (horizontal_loop_extent)

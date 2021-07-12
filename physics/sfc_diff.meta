@@ -61,7 +61,7 @@
   intent = in
   optional = F
 [t1]
-  standard_name = air_temperature_at_lowest_model_layer
+  standard_name = air_temperature_at_surface_adjacent_layer
   long_name = 1st model layer air temperature
   units = K
   dimensions = (horizontal_loop_extent)
@@ -70,7 +70,7 @@
   intent = in
   optional = F
 [q1]
-  standard_name = water_vapor_specific_humidity_at_lowest_model_layer
+  standard_name = specific_humidity_at_surface_adjacent_layer
   long_name = 1st model layer specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent)
@@ -97,7 +97,7 @@
   intent = in
   optional = F
 [prsl1]
-  standard_name = air_pressure_at_lowest_model_layer
+  standard_name = air_pressure_at_surface_adjacent_layer
   long_name = Model layer 1 mean pressure
   units = Pa
   dimensions = (horizontal_loop_extent)
@@ -115,7 +115,7 @@
   intent = in
   optional = F
 [prsik1]
-  standard_name = dimensionless_exner_function_at_lowest_model_interface
+  standard_name = surface_dimensionless_exner_function
   long_name = dimensionless Exner function at the ground surface
   units = none
   dimensions = (horizontal_loop_extent)
@@ -124,7 +124,7 @@
   intent = in
   optional = F
 [prslk1]
-  standard_name = dimensionless_exner_function_at_lowest_model_layer
+  standard_name = dimensionless_exner_function_at_surface_adjacent_layer
   long_name = dimensionless Exner function at the lowest model layer
   units = none
   dimensions = (horizontal_loop_extent)
@@ -150,7 +150,7 @@
   intent = in
   optional = F
 [shdmax]
-  standard_name = maximum_vegetation_area_fraction
+  standard_name = max_vegetation_area_fraction
   long_name = max fractnl cover of green veg
   units = frac
   dimensions = (horizontal_loop_extent)
@@ -159,7 +159,7 @@
   intent = in
   optional = F
 [ivegsrc]
-  standard_name = vegetation_type_dataset_choice
+  standard_name = control_for_vegetation_dataset
   long_name = land use dataset choice
   units = index
   dimensions = ()
@@ -193,7 +193,7 @@
   intent = in
   optional = F
 [redrag]
-  standard_name = flag_for_reduced_drag_coefficient_over_sea
+  standard_name = flag_for_limited_surface_roughness_length_over_ocean
   long_name = flag for reduced drag coefficient over sea
   units = flag
   dimensions = ()

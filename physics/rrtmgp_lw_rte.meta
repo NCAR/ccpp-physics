@@ -9,7 +9,7 @@
   name = rrtmgp_lw_rte_run
   type = scheme
 [doLWrad]
-  standard_name = flag_to_calc_lw
+  standard_name = flag_for_calling_longwave_radiation
   long_name = logical flags for lw radiation calls
   units = flag
   dimensions = ()
@@ -17,7 +17,7 @@
   intent = in
   optional = F
 [doLWclrsky]
-  standard_name = flag_for_output_of_longwave_heating_rate
+  standard_name = flag_for_output_of_tendency_of_air_temperature_due_to_longwave_heating_on_radiation_timestep_assuming_clear_sky
   long_name = flag to output lw heating rate (Radtend%lwhc)
   units = flag
   dimensions = ()
@@ -49,7 +49,7 @@
   intent = in
   optional = F
 [nLev]
-  standard_name = vertical_dimension
+  standard_name = vertical_layer_dimension
   long_name = number of vertical levels
   units = count
   dimensions = ()
@@ -57,7 +57,7 @@
   intent = in
   optional = F
 [nGauss_angles]
-  standard_name = number_of_angles_used_in_gaussian_quadrature
+  standard_name = number_of_gaussian_quadrature_angles_for_radiation
   long_name = Number of angles used in Gaussian quadrature
   units = count
   dimensions =  ()
@@ -68,7 +68,7 @@
   standard_name = air_pressure_at_interface_for_RRTMGP_in_hPa
   long_name = air pressure level
   units = hPa
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -77,7 +77,7 @@
   standard_name = surface_emissivity_in_each_RRTMGP_LW_band
   long_name = surface emissivity in each RRTMGP LW band
   units = none
-  dimensions = (number_of_lw_bands_rrtmgp,horizontal_loop_extent)
+  dimensions = (number_of_longwave_bands,horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -118,7 +118,7 @@
   standard_name = RRTMGP_lw_flux_profile_upward_allsky
   long_name = RRTMGP upward longwave all-sky flux profile
   units = W m-2
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -127,7 +127,7 @@
   standard_name = RRTMGP_lw_flux_profile_downward_allsky
   long_name = RRTMGP downward longwave all-sky flux profile
   units = W m-2
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -136,7 +136,7 @@
   standard_name = RRTMGP_lw_flux_profile_upward_clrsky
   long_name = RRTMGP upward longwave clr-sky flux profile
   units = W m-2
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -145,7 +145,7 @@
   standard_name = RRTMGP_lw_flux_profile_downward_clrsky
   long_name = RRTMGP downward longwave clr-sky flux profile
   units = W m-2
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -154,7 +154,7 @@
   standard_name = RRTMGP_jacobian_of_lw_flux_upward
   long_name = RRTMGP Jacobian upward longwave flux profile
   units = W m-2 K-1
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = inout

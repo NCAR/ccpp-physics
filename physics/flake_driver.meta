@@ -69,7 +69,7 @@
   intent = in
   optional = F
 [t1]
-  standard_name = air_temperature_at_lowest_model_layer
+  standard_name = air_temperature_at_surface_adjacent_layer
   long_name = mean temperature at lowest model layer
   units = K
   dimensions = (horizontal_loop_extent)
@@ -78,7 +78,7 @@
   intent = in
   optional = F
 [q1]
-  standard_name = water_vapor_specific_humidity_at_lowest_model_layer
+  standard_name = specific_humidity_at_surface_adjacent_layer
   long_name = water vapor specific humidity at lowest model layer
   units = kg kg-1
   dimensions = (horizontal_loop_extent)
@@ -149,7 +149,7 @@
   intent = in
   optional = F
 [delt]
-  standard_name = time_step_for_dynamics
+  standard_name = timestep_for_dynamics
   long_name = dynamics time step
   units = s
   dimensions = ()
@@ -167,8 +167,8 @@
   intent = in
   optional = F
 [elev]
-  standard_name = orography
-  long_name = orography
+  standard_name = height_above_mean_sea_level
+  long_name = height_above_mean_sea_level
   units = m
   dimensions = (horizontal_loop_extent)
   type = real
@@ -192,7 +192,7 @@
   intent = in
   optional = F
 [yearlen]
-  standard_name = number_of_days_in_year
+  standard_name = number_of_days_in_current_year
   long_name = number of days in a year
   units = days
   dimensions = ()
@@ -200,7 +200,7 @@
   intent = in
   optional = F
 [julian]
-  standard_name = julian_day
+  standard_name = forecast_julian_day
   long_name = julian day
   units = days
   dimensions = ()
@@ -244,7 +244,7 @@
   intent = inout
   optional = F
 [fice]
-  standard_name = sea_ice_concentration
+  standard_name = sea_ice_area_fraction_of_sea_area_fraction
   long_name = ice fraction over open water
   units = frac
   dimensions = (horizontal_loop_extent)

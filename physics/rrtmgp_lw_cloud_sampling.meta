@@ -38,7 +38,7 @@
   name = rrtmgp_lw_cloud_sampling_run
   type = scheme
 [doLWrad]
-  standard_name = flag_to_calc_lw
+  standard_name = flag_for_calling_longwave_radiation
   long_name = logical flags for lw radiation calls
   units = flag
   dimensions = ()
@@ -62,7 +62,7 @@
   intent = in
   optional = F
 [nLev]
-  standard_name = vertical_dimension
+  standard_name = vertical_layer_dimension
   long_name = number of vertical levels
   units = count
   dimensions = ()
@@ -142,7 +142,7 @@
   intent = in
   optional = F
 [icseed_lw]
-  standard_name = seed_random_numbers_lw
+  standard_name = random_number_seed_for_mcica_longwave
   long_name = seed for random number generation for longwave radiation
   units = none
   dimensions = (horizontal_loop_extent)
@@ -153,7 +153,7 @@
   standard_name = total_cloud_fraction
   long_name = layer total cloud fraction
   units = frac
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -162,7 +162,7 @@
   standard_name = precipitation_fraction_by_layer
   long_name = precipitation fraction in each layer
   units = frac
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -171,7 +171,7 @@
   standard_name = cloud_overlap_param
   long_name = cloud overlap parameter
   units = km
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -180,7 +180,7 @@
   standard_name = precip_overlap_param
   long_name = precipitation overlap parameter
   units = km
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in

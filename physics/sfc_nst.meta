@@ -79,7 +79,7 @@
   intent = in
   optional = F
 [rd]
-  standard_name = gas_constant_dry_air
+  standard_name = gas_constant_of_dry_air
   long_name = ideal gas constant for dry air
   units = J kg-1 K-1
   dimensions = ()
@@ -133,7 +133,7 @@
   intent = in
   optional = F
 [u1]
-  standard_name = x_wind_at_lowest_model_layer
+  standard_name = x_wind_at_surface_adjacent_layer
   long_name = x component of surface layer wind
   units = m s-1
   dimensions = (horizontal_loop_extent)
@@ -142,7 +142,7 @@
   intent = in
   optional = F
 [v1]
-  standard_name = y_wind_at_lowest_model_layer
+  standard_name = y_wind_at_surface_adjacent_layer
   long_name = y component of surface layer wind
   units = m s-1
   dimensions = (horizontal_loop_extent)
@@ -151,7 +151,7 @@
   intent = in
   optional = F
 [t1]
-  standard_name = air_temperature_at_lowest_model_layer
+  standard_name = air_temperature_at_surface_adjacent_layer
   long_name = surface layer mean temperature
   units = K
   dimensions = (horizontal_loop_extent)
@@ -160,7 +160,7 @@
   intent = in
   optional = F
 [q1]
-  standard_name = water_vapor_specific_humidity_at_lowest_model_layer
+  standard_name = specific_humidity_at_surface_adjacent_layer
   long_name = surface layer mean specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent)
@@ -169,7 +169,7 @@
   intent = in
   optional = F
 [tref]
-  standard_name = sea_surface_reference_temperature
+  standard_name = reference_sea_surface_temperature
   long_name = reference/foundation temperature
   units = K
   dimensions = (horizontal_loop_extent)
@@ -196,7 +196,7 @@
   intent = in
   optional = F
 [prsl1]
-  standard_name = air_pressure_at_lowest_model_layer
+  standard_name = air_pressure_at_surface_adjacent_layer
   long_name = surface layer mean pressure
   units = Pa
   dimensions = (horizontal_loop_extent)
@@ -214,7 +214,7 @@
   intent = in
   optional = F
 [prsik1]
-  standard_name = dimensionless_exner_function_at_lowest_model_interface
+  standard_name = surface_dimensionless_exner_function
   long_name = dimensionless Exner function at the ground surface
   units = none
   dimensions = (horizontal_loop_extent)
@@ -223,7 +223,7 @@
   intent = in
   optional = F
 [prslk1]
-  standard_name = dimensionless_exner_function_at_lowest_model_layer
+  standard_name = dimensionless_exner_function_at_surface_adjacent_layer
   long_name = dimensionless Exner function at the lowest model layer
   units = none
   dimensions = (horizontal_loop_extent)
@@ -311,7 +311,7 @@
   intent = in
   optional = F
 [timestep]
-  standard_name = time_step_for_dynamics
+  standard_name = timestep_for_dynamics
   long_name = timestep interval
   units = s
   dimensions = ()
@@ -320,7 +320,7 @@
   intent = in
   optional = F
 [kdt]
-  standard_name = index_of_time_step
+  standard_name = index_of_timestep
   long_name = current time step index
   units = index
   dimensions = ()
@@ -328,7 +328,7 @@
   intent = in
   optional = F
 [solhr]
-  standard_name = forecast_hour_of_the_day
+  standard_name = forecast_utc_hour
   long_name = time in hours after 00z at the current timestep
   units = h
   dimensions = ()
@@ -371,7 +371,7 @@
   intent = in
   optional = F
 [nstf_name1]
-  standard_name = flag_for_nsstm_run
+  standard_name = control_for_nsstm
   long_name = NSSTM flag: off/uncoupled/coupled=0/1/2
   units = flag
   dimensions = ()
@@ -379,7 +379,7 @@
   intent = in
   optional = F
 [nstf_name4]
-  standard_name = vertical_temperature_average_range_lower_bound
+  standard_name = lower_bound_for_depth_of_sea_temperature_for_nsstm
   long_name = zsea1
   units = mm
   dimensions = ()
@@ -387,7 +387,7 @@
   intent = in
   optional = F
 [nstf_name5]
-  standard_name = vertical_temperature_average_range_upper_bound
+  standard_name = upper_bound_for_depth_of_sea_temperature_for_nsstm
   long_name = zsea2
   units = mm
   dimensions = ()
@@ -437,7 +437,7 @@
   intent = inout
   optional = F
 [xt]
-  standard_name = diurnal_thermocline_layer_heat_content
+  standard_name = heat_content_in_diurnal_thermocline
   long_name = heat content in diurnal thermocline layer
   units = K m
   dimensions = (horizontal_loop_extent)
@@ -446,7 +446,7 @@
   intent = inout
   optional = F
 [xs]
-  standard_name = sea_water_salinity
+  standard_name = sea_water_salinity_in_diurnal_thermocline
   long_name = salinity  content in diurnal thermocline layer
   units = ppt m
   dimensions = (horizontal_loop_extent)
@@ -455,7 +455,7 @@
   intent = inout
   optional = F
 [xu]
-  standard_name = diurnal_thermocline_layer_x_current
+  standard_name = x_current_in_diurnal_thermocline
   long_name = u-current content in diurnal thermocline layer
   units = m2 s-1
   dimensions = (horizontal_loop_extent)
@@ -464,7 +464,7 @@
   intent = inout
   optional = F
 [xv]
-  standard_name = diurnal_thermocline_layer_y_current
+  standard_name = y_current_in_diurnal_thermocline
   long_name = v-current content in diurnal thermocline layer
   units = m2 s-1
   dimensions = (horizontal_loop_extent)
@@ -491,7 +491,7 @@
   intent = inout
   optional = F
 [xtts]
-  standard_name = sensitivity_of_dtl_heat_content_to_surface_temperature
+  standard_name = derivative_of_heat_content_in_diurnal_thermocline_wrt_surface_skin_temperature
   long_name = d(xt)/d(ts)
   units = m
   dimensions = (horizontal_loop_extent)
@@ -500,7 +500,7 @@
   intent = inout
   optional = F
 [xzts]
-  standard_name = sensitivity_of_dtl_thickness_to_surface_temperature
+  standard_name = derivative_of_diurnal_thermocline_layer_thickness_wrt_surface_skin_temperature
   long_name = d(xz)/d(ts)
   units = m K-1
   dimensions = (horizontal_loop_extent)
@@ -509,7 +509,7 @@
   intent = inout
   optional = F
 [dt_cool]
-  standard_name = sub_layer_cooling_amount
+  standard_name = molecular_sublayer_temperature_correction_in_sea_water
   long_name = sub-layer cooling amount
   units = K
   dimensions = (horizontal_loop_extent)
@@ -518,7 +518,7 @@
   intent = inout
   optional = F
 [z_c]
-  standard_name = sub_layer_cooling_thickness
+  standard_name = molecular_sublayer_thickness_in_sea_water
   long_name = sub-layer cooling thickness
   units = m
   dimensions = (horizontal_loop_extent)
@@ -563,7 +563,7 @@
   intent = inout
   optional = F
 [d_conv]
-  standard_name = free_convection_layer_thickness
+  standard_name = free_convection_layer_thickness_in_sea_water
   long_name = thickness of free convection layer
   units = m
   dimensions = (horizontal_loop_extent)
@@ -572,7 +572,7 @@
   intent = inout
   optional = F
 [ifd]
-  standard_name = index_of_dtlm_start
+  standard_name = control_for_diurnal_thermocline_calculation
   long_name = index to start dtlm run or not
   units = index
   dimensions = (horizontal_loop_extent)
@@ -581,7 +581,7 @@
   intent = inout
   optional = F
 [qrain]
-  standard_name = sensible_heat_flux_due_to_rainfall
+  standard_name = surface_sensible_heat_due_to_rainfall
   long_name = sensible heat flux due to rainfall
   units = W
   dimensions = (horizontal_loop_extent)
@@ -750,7 +750,7 @@
   intent = inout
   optional = F
 [xt]
-  standard_name = diurnal_thermocline_layer_heat_content
+  standard_name = heat_content_in_diurnal_thermocline
   long_name = heat content in diurnal thermocline layer
   units = K m
   dimensions = (horizontal_loop_extent)
@@ -768,7 +768,7 @@
   intent = in
   optional = F
 [dt_cool]
-  standard_name = sub_layer_cooling_amount
+  standard_name = molecular_sublayer_temperature_correction_in_sea_water
   long_name = sub-layer cooling amount
   units = K
   dimensions = (horizontal_loop_extent)
@@ -777,7 +777,7 @@
   intent = in
   optional = F
 [z_c]
-  standard_name = sub_layer_cooling_thickness
+  standard_name = molecular_sublayer_thickness_in_sea_water
   long_name = sub-layer cooling thickness
   units = m
   dimensions = (horizontal_loop_extent)
@@ -786,7 +786,7 @@
   intent = in
   optional = F
 [tref]
-  standard_name = sea_surface_reference_temperature
+  standard_name = reference_sea_surface_temperature
   long_name = reference/foundation temperature
   units = K
   dimensions = (horizontal_loop_extent)
@@ -795,7 +795,7 @@
   intent = inout
   optional = F
 [cplflx]
-  standard_name = flag_for_flux_coupling
+  standard_name = flag_for_surface_flux_coupling
   long_name = flag controlling cplflx collection (default off)
   units = flag
   dimensions = ()
@@ -812,7 +812,7 @@
   intent = in
   optional = F
 [nthreads]
-  standard_name = omp_threads
+  standard_name = number_of_openmp_threads
   long_name = number of OpenMP threads available for physics schemes
   units = count
   dimensions = ()
@@ -856,7 +856,7 @@
   intent = in
   optional = F
 [kdt]
-  standard_name = index_of_time_step
+  standard_name = index_of_timestep
   long_name = current time step index
   units = index
   dimensions = ()
@@ -906,8 +906,8 @@
   intent = in
   optional = F
 [oro]
-  standard_name = orography
-  long_name = orography
+  standard_name = height_above_mean_sea_level
+  long_name = height_above_mean_sea_level
   units = m
   dimensions = (horizontal_loop_extent)
   type = real
@@ -915,8 +915,8 @@
   intent = in
   optional = F
 [oro_uf]
-  standard_name = orography_unfiltered
-  long_name = unfiltered orography
+  standard_name = unfiltered_height_above_mean_sea_level
+  long_name = unfiltered height_above_mean_sea_level
   units = m
   dimensions = (horizontal_loop_extent)
   type = real
@@ -924,7 +924,7 @@
   intent = in
   optional = F
 [nstf_name1]
-  standard_name = flag_for_nsstm_run
+  standard_name = control_for_nsstm
   long_name = NSSTM flag: off/uncoupled/coupled=0/1/2
   units = flag
   dimensions = ()
@@ -932,7 +932,7 @@
   intent = in
   optional = F
 [nstf_name4]
-  standard_name = vertical_temperature_average_range_lower_bound
+  standard_name = lower_bound_for_depth_of_sea_temperature_for_nsstm
   long_name = zsea1
   units = mm
   dimensions = ()
@@ -940,7 +940,7 @@
   intent = in
   optional = F
 [nstf_name5]
-  standard_name = vertical_temperature_average_range_upper_bound
+  standard_name = upper_bound_for_depth_of_sea_temperature_for_nsstm
   long_name = zsea2
   units = mm
   dimensions = ()
@@ -948,7 +948,7 @@
   intent = in
   optional = F
 [xt]
-  standard_name = diurnal_thermocline_layer_heat_content
+  standard_name = heat_content_in_diurnal_thermocline
   long_name = heat content in diurnal thermocline layer
   units = K m
   dimensions = (horizontal_loop_extent)
@@ -966,7 +966,7 @@
   intent = in
   optional = F
 [dt_cool]
-  standard_name = sub_layer_cooling_amount
+  standard_name = molecular_sublayer_temperature_correction_in_sea_water
   long_name = sub-layer cooling amount
   units = K
   dimensions = (horizontal_loop_extent)
@@ -975,7 +975,7 @@
   intent = in
   optional = F
 [z_c]
-  standard_name = sub_layer_cooling_thickness
+  standard_name = molecular_sublayer_thickness_in_sea_water
   long_name = sub-layer cooling thickness
   units = m
   dimensions = (horizontal_loop_extent)
@@ -984,7 +984,7 @@
   intent = in
   optional = F
 [tref]
-  standard_name = sea_surface_reference_temperature
+  standard_name = reference_sea_surface_temperature
   long_name = reference/foundation temperature
   units = K
   dimensions = (horizontal_loop_extent)
@@ -1020,7 +1020,7 @@
   intent = inout
   optional = F
 [nthreads]
-  standard_name = omp_threads
+  standard_name = number_of_openmp_threads
   long_name = number of OpenMP threads available for physics schemes
   units = count
   dimensions = ()

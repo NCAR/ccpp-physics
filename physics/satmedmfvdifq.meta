@@ -62,7 +62,7 @@
   intent = in
   optional = F
 [km]
-  standard_name = vertical_dimension
+  standard_name = vertical_layer_dimension
   long_name = vertical layer dimension
   units = count
   dimensions = ()
@@ -78,7 +78,7 @@
   intent = in
   optional = F
 [ntcw]
-  standard_name = index_for_liquid_cloud_condensate
+  standard_name = index_of_cloud_liquid_water_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for cloud condensate (or liquid water)
   units = index
   dimensions = ()
@@ -111,7 +111,7 @@
   intent = in
   optional = F
 [rd]
-  standard_name = gas_constant_dry_air
+  standard_name = gas_constant_of_dry_air
   long_name = ideal gas constant for dry air
   units = J kg-1 K-1
   dimensions = ()
@@ -183,28 +183,28 @@
   intent = in
   optional = F
 [dv]
-  standard_name = tendency_of_y_wind_due_to_model_physics
+  standard_name = process_split_cumulative_tendency_of_y_wind
   long_name = updated tendency of the y wind
   units = m s-2
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [du]
-  standard_name = tendency_of_x_wind_due_to_model_physics
+  standard_name = process_split_cumulative_tendency_of_x_wind
   long_name = updated tendency of the x wind
   units = m s-2
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [tdt]
-  standard_name = tendency_of_air_temperature_due_to_model_physics
+  standard_name = process_split_cumulative_tendency_of_air_temperature
   long_name = updated tendency of the temperature
   units = K s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -213,7 +213,7 @@
   standard_name = tendency_of_vertically_diffused_tracer_concentration
   long_name = updated tendency of the tracers due to vertical diffusion in PBL scheme
   units = kg kg-1 s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_vertical_diffusion_tracers)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_vertical_diffusion_tracers)
   type = real
   kind = kind_phys
   intent = inout
@@ -222,7 +222,7 @@
   standard_name = x_wind
   long_name = x component of layer wind
   units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -231,7 +231,7 @@
   standard_name = y_wind
   long_name = y component of layer wind
   units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -240,7 +240,7 @@
   standard_name = air_temperature
   long_name = layer mean air temperature
   units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -249,25 +249,25 @@
   standard_name = vertically_diffused_tracer_concentration
   long_name = tracer concentration diffused by PBL scheme
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_vertical_diffusion_tracers)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_vertical_diffusion_tracers)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [swh]
-  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step
+  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_timestep
   long_name = total sky shortwave heating rate
   units = K s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [hlw]
-  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step
+  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_timestep
   long_name = total sky longwave heating rate
   units = K s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -308,7 +308,7 @@
   intent = in
   optional = F
 [psk]
-  standard_name = dimensionless_exner_function_at_lowest_model_interface
+  standard_name = surface_dimensionless_exner_function
   long_name = dimensionless Exner function at the surface interface
   units = none
   dimensions = (horizontal_loop_extent)
@@ -427,7 +427,7 @@
   standard_name = air_pressure_at_interface
   long_name = air pressure at model layer interfaces
   units = Pa
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -436,7 +436,7 @@
   standard_name = air_pressure_difference_between_midlayers
   long_name = pres(k) - pres(k+1)
   units = Pa
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -445,16 +445,16 @@
   standard_name = air_pressure
   long_name = mean layer pressure
   units = Pa
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [prslk]
-  standard_name = dimensionless_exner_function_at_model_layers
+  standard_name = dimensionless_exner_function
   long_name = Exner function at layers
   units = none
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -463,7 +463,7 @@
   standard_name = geopotential_at_interface
   long_name = geopotential at model layer interfaces
   units = m2 s-2
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -472,13 +472,13 @@
   standard_name = geopotential
   long_name = geopotential at model layer centers
   units = m2 s-2
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [delt]
-  standard_name = time_step_for_physics
+  standard_name = timestep_for_physics
   long_name = time step for physics
   units = s
   dimensions = ()
@@ -543,7 +543,7 @@
   standard_name = atmosphere_heat_diffusivity
   long_name = atmospheric heat diffusivity
   units = m2 s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -552,7 +552,7 @@
   standard_name = atmosphere_momentum_diffusivity
   long_name = atmospheric momentum diffusivity
   units = m2 s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -566,7 +566,7 @@
   intent = in
   optional = F
 [xkzm_m]
-  standard_name = atmosphere_momentum_diffusivity_background
+  standard_name = atmosphere_momentum_diffusivity_due_to_background
   long_name = background value of momentum diffusivity
   units = m2 s-1
   dimensions = ()
@@ -575,7 +575,7 @@
   intent = in
   optional = F
 [xkzm_h]
-  standard_name = atmosphere_heat_diffusivity_background
+  standard_name = atmosphere_heat_diffusivity_due_to_background
   long_name = background value of heat diffusivity
   units = m2 s-1
   dimensions = ()
@@ -584,7 +584,7 @@
   intent = in
   optional = F
 [xkzm_s]
-  standard_name = diffusivity_background_sigma_level
+  standard_name = sigma_pressure_threshold_at_upper_extent_of_background_diffusion
   long_name = sigma level threshold for background diffusivity
   units = none
   dimensions = ()
@@ -593,7 +593,7 @@
   intent = in
   optional = F
 [dspfac]
-  standard_name = tke_dissipative_heating_factor
+  standard_name = multiplicative_tuning_parameter_for_tke_dissipative_heating
   long_name = tke dissipative heating factor
   units = none
   dimensions = ()
@@ -602,7 +602,7 @@
   intent = in
   optional = F
 [bl_upfr]
-  standard_name = updraft_fraction_in_boundary_layer_mass_flux_scheme
+  standard_name = updraft_area_fraction_in_scale_aware_tke_moist_edmf_pbl_scheme
   long_name = updraft fraction in boundary layer mass flux scheme
   units = none
   dimensions = ()
@@ -611,7 +611,7 @@
   intent = in
   optional = F
 [bl_dnfr]
-  standard_name = downdraft_fraction_in_boundary_layer_mass_flux_scheme
+  standard_name = downdraft_area_fraction_in_scale_aware_tke_moist_edmf_pbl_scheme
   long_name = downdraft fraction in boundary layer mass flux scheme
   units = none
   dimensions = ()
@@ -620,7 +620,7 @@
   intent = in
   optional = F
 [ntoz]
-  standard_name = index_for_ozone
+  standard_name = index_of_ozone_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for ozone mixing ratio
   units = index
   dimensions = ()
@@ -631,7 +631,7 @@
   standard_name = cumulative_change_in_x_wind_due_to_PBL
   long_name = cumulative change in x wind due to PBL
   units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -640,7 +640,7 @@
   standard_name = cumulative_change_in_y_wind_due_to_PBL
   long_name = cumulative change in y wind due to PBL
   units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -649,7 +649,7 @@
   standard_name = cumulative_change_in_temperature_due_to_PBL
   long_name = cumulative change in temperature due to PBL
   units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -658,7 +658,7 @@
   standard_name = cumulative_change_in_water_vapor_specific_humidity_due_to_PBL
   long_name = cumulative change in water vapor specific humidity due to PBL
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -667,13 +667,13 @@
   standard_name = cumulative_change_in_ozone_mixing_ratio_due_to_PBL
   long_name = cumulative change in ozone mixing ratio due to PBL
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [gen_tend]
-  standard_name = flag_for_generic_planetary_boundary_layer_tendency
+  standard_name = flag_for_generic_tendency_due_to_planetary_boundary_layer
   long_name = true if GFS_PBL_generic should calculate tendencies
   units = flag
   dimensions = ()

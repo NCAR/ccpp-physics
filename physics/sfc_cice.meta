@@ -16,7 +16,7 @@
   intent = in
   optional = F
 [cplflx]
-  standard_name = flag_for_flux_coupling
+  standard_name = flag_for_surface_flux_coupling
   long_name = flag controlling cplflx collection (default off)
   units = flag
   dimensions = ()
@@ -51,7 +51,7 @@
   intent = in
   optional = F
 [rd]
-  standard_name = gas_constant_dry_air
+  standard_name = gas_constant_of_dry_air
   long_name = ideal gas constant for dry air
   units = J kg-1 K-1
   dimensions = ()
@@ -60,7 +60,7 @@
   intent = in
   optional = F
 [t1]
-  standard_name = air_temperature_at_lowest_model_layer
+  standard_name = air_temperature_at_surface_adjacent_layer
   long_name = surface layer mean temperature
   units = K
   dimensions = (horizontal_loop_extent)
@@ -69,7 +69,7 @@
   intent = in
   optional = F
 [q1]
-  standard_name = water_vapor_specific_humidity_at_lowest_model_layer
+  standard_name = specific_humidity_at_surface_adjacent_layer
   long_name = surface layer mean specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent)
@@ -96,7 +96,7 @@
   intent = in
   optional = F
 [prsl1]
-  standard_name = air_pressure_at_lowest_model_layer
+  standard_name = air_pressure_at_surface_adjacent_layer
   long_name = surface layer mean pressure
   units = Pa
   dimensions = (horizontal_loop_extent)
@@ -130,7 +130,7 @@
   intent = in
   optional = F
 [dqsfc]
-  standard_name = surface_upward_latent_heat_flux_for_coupling
+  standard_name = surface_upward_latent_heat_flux_from_coupled_process
   long_name = sfc latent heat flux for coupling
   units = W m-2
   dimensions = (horizontal_loop_extent)
@@ -139,7 +139,7 @@
   intent = in
   optional = F
 [dtsfc]
-  standard_name = surface_upward_sensible_heat_flux_for_coupling
+  standard_name = surface_upward_sensible_heat_flux_from_coupled_process
   long_name = sfc sensible heat flux for coupling
   units = W m-2
   dimensions = (horizontal_loop_extent)
@@ -148,7 +148,7 @@
   intent = in
   optional = F
 [dusfc]
-  standard_name = surface_x_momentum_flux_for_coupling
+  standard_name = surface_x_momentum_flux_from_coupled_process
   long_name = sfc x momentum flux for coupling
   units = Pa 
   dimensions = (horizontal_loop_extent)
@@ -157,7 +157,7 @@
   intent = in
   optional = F
 [dvsfc]
-  standard_name = surface_y_momentum_flux_for_coupling
+  standard_name = surface_y_momentum_flux_from_coupled_process
   long_name = sfc y momentum flux for coupling
   units = Pa 
   dimensions = (horizontal_loop_extent)
@@ -166,7 +166,7 @@
   intent = in
   optional = F
 [snowd]
-  standard_name = surface_snow_thickness_for_coupling
+  standard_name = lwe_surface_snow_from_coupled_process
   long_name = sfc snow depth in meters over sea ice for coupling
   units = m
   dimensions = (horizontal_loop_extent)

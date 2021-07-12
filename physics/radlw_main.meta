@@ -62,7 +62,7 @@
   intent = in
   optional = F
 [gasvmr_co2]
-  standard_name = volume_mixing_ratio_co2
+  standard_name = volume_mixing_ratio_of_co2
   long_name = volume mixing ratio co2
   units = kg kg-1
   dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
@@ -71,7 +71,7 @@
   intent = in
   optional = F
 [gasvmr_n2o]
-  standard_name = volume_mixing_ratio_n2o
+  standard_name = volume_mixing_ratio_of_n2o
   long_name = volume mixing ratio no2
   units = kg kg-1
   dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
@@ -80,7 +80,7 @@
   intent = in
   optional = F
 [gasvmr_ch4]
-  standard_name = volume_mixing_ratio_ch4
+  standard_name = volume_mixing_ratio_of_ch4
   long_name = volume mixing ratio ch4
   units = kg kg-1
   dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
@@ -89,7 +89,7 @@
   intent = in
   optional = F
 [gasvmr_o2]
-  standard_name = volume_mixing_ratio_o2
+  standard_name = volume_mixing_ratio_of_o2
   long_name = volume mixing ratio o2
   units = kg kg-1
   dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
@@ -98,7 +98,7 @@
   intent = in
   optional = F
 [gasvmr_co]
-  standard_name = volume_mixing_ratio_co
+  standard_name = volume_mixing_ratio_of_co
   long_name = volume mixing ratio co
   units = kg kg-1
   dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
@@ -107,7 +107,7 @@
   intent = in
   optional = F
 [gasvmr_cfc11]
-  standard_name = volume_mixing_ratio_cfc11
+  standard_name = volume_mixing_ratio_of_cfc11
   long_name = volume mixing ratio cfc11
   units = kg kg-1
   dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
@@ -116,7 +116,7 @@
   intent = in
   optional = F
 [gasvmr_cfc12]
-  standard_name = volume_mixing_ratio_cfc12
+  standard_name = volume_mixing_ratio_of_cfc12
   long_name = volume mixing ratio cfc12
   units = kg kg-1
   dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
@@ -125,7 +125,7 @@
   intent = in
   optional = F
 [gasvmr_cfc22]
-  standard_name = volume_mixing_ratio_cfc22
+  standard_name = volume_mixing_ratio_of_cfc22
   long_name = volume mixing ratio cfc22
   units = kg kg-1
   dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
@@ -134,7 +134,7 @@
   intent = in
   optional = F
 [gasvmr_ccl4]
-  standard_name = volume_mixing_ratio_ccl4
+  standard_name = volume_mixing_ratio_of_ccl4
   long_name = volume mixing ratio ccl4
   units = kg kg-1
   dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
@@ -143,7 +143,7 @@
   intent = in
   optional = F
 [icseed]
-  standard_name = seed_random_numbers_lw
+  standard_name = random_number_seed_for_mcica_longwave
   long_name = seed for random number generation for longwave radiation
   units = none
   dimensions = (horizontal_loop_extent)
@@ -264,7 +264,7 @@
   intent = in
   optional = F
 [lslwr]
-  standard_name = flag_to_calc_lw
+  standard_name = flag_for_calling_longwave_radiation
   long_name = flag to calculate LW irradiances
   units = flag
   dimensions = ()
@@ -289,7 +289,7 @@
   intent = inout
   optional = F
 [sfcflx]
-  standard_name = lw_fluxes_sfc
+  standard_name = surface_lw_fluxes_assuming_total_and_clear_sky_on_radiation_timestep
   long_name = longwave total sky fluxes at the Earth surface
   units = W m-2
   dimensions = (horizontal_loop_extent)

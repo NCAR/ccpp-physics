@@ -16,7 +16,7 @@
   intent = in
   optional = F
 [levs]
-  standard_name = vertical_dimension
+  standard_name = vertical_layer_dimension
   long_name = number of vertical levels
   units = count
   dimensions = ()
@@ -32,7 +32,7 @@
   intent = in
   optional = F
 [lm]
-  standard_name = number_of_vertical_layers_for_radiation_calculations
+  standard_name = vertical_dimension_for_radiation
   long_name = number of vertical layers for radiation calculation
   units = count
   dimensions = ()
@@ -48,7 +48,7 @@
   intent = in
   optional = F
 [lslwr]
-  standard_name = flag_to_calc_lw
+  standard_name = flag_for_calling_longwave_radiation
   long_name = logical flags for lw radiation calls
   units = flag
   dimensions = ()
@@ -56,7 +56,7 @@
   intent = in
   optional = F
 [lwhtr]
-  standard_name = flag_for_output_of_longwave_heating_rate
+  standard_name = flag_for_output_of_tendency_of_air_temperature_due_to_longwave_heating_on_radiation_timestep_assuming_clear_sky
   long_name = flag to output lw heating rate (Radtend%lwhc)
   units = flag
   dimensions = ()
@@ -91,7 +91,7 @@
   intent = in
   optional = F
 [sfcflw]
-  standard_name = lw_fluxes_sfc
+  standard_name = surface_lw_fluxes_assuming_total_and_clear_sky_on_radiation_timestep
   long_name = lw radiation fluxes at sfc
   units = W m-2
   dimensions = (horizontal_loop_extent)
@@ -99,7 +99,7 @@
   intent = in
   optional = F
 [tsflw]
-  standard_name = surface_midlayer_air_temperature_in_longwave_radiation
+  standard_name = air_temperature_at_surface_adjacent_layer_on_radiation_timestep
   long_name = surface air temp during lw calculation
   units = K
   dimensions = (horizontal_loop_extent)
@@ -108,7 +108,7 @@
   intent = inout
   optional = F
 [sfcdlw]
-  standard_name = surface_downwelling_longwave_flux_on_radiation_time_step
+  standard_name = surface_downwelling_longwave_flux_on_radiation_timestep
   long_name = total sky sfc downward lw flux
   units = W m-2
   dimensions = (horizontal_loop_extent)
@@ -117,19 +117,19 @@
   intent = inout
   optional = F
 [htrlw]
-  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step
+  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_timestep
   long_name = total sky lw heating rate
   units = K s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [lwhc]
-  standard_name = tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_time_step
+  standard_name = tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_timestep
   long_name = clear sky lw heating rates
   units = K s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
