@@ -2060,7 +2060,7 @@ CONTAINS
 
        !!!Shear Term
        !!!qSHEAR1D(k)=-(upwp*dudz + vpwp*dvdz)
-       qSHEAR1D(k) = elq*sm(k)*gm(k) !staggared
+       qSHEAR1D(k) = elq*sm(k)*gm(k) !staggered
 
        !!!Buoyancy Term    
        !!!qBUOY1D(k)=g*Tpwp/thl(k)
@@ -2068,7 +2068,7 @@ CONTAINS
        !qBUOY1D(k) = elq*(sh(k)*(-dTdz*g/thl(k)) + gamv) !! ORIGINAL CODE
        
        !! Buoyncy term takes the TKEprodTD(k) production now
-       qBUOY1D(k) = elq*(sh(k)*gh(k)+gamv)+TKEprodTD(k) !staggared
+       qBUOY1D(k) = elq*(sh(k)*gh(k)+gamv)+TKEprodTD(k) !staggered
 
        !!!Dissipation Term (now it evaluated on mym_predict)
        !qDISS1D(k) = (q3sq**(3./2.))/(b1*MAX(el(k),1.)) !! ORIGINAL CODE
@@ -2332,7 +2332,7 @@ CONTAINS
                             0.5*(s_aw(k+1)*tke_up(k+1)+(s_aw(k+1)-s_aw(k))*tke_up(k)-s_aw(k)*tke_up(k-1)+(s_awqke(k)-s_awqke(k+1)))*onoff) !unstaggered
         ENDDO
         k=kte
-        qWT1D(k)=dzinv(k)*(-kqdz(k)*(tke_up(k)-tke_up(k-1))+0.5*(-s_aw(k)*tke_up(k)-s_aw(k)*tke_up(k-1)+s_awqke(k))*onoff) !unstaggared
+        qWT1D(k)=dzinv(k)*(-kqdz(k)*(tke_up(k)-tke_up(k-1))+0.5*(-s_aw(k)*tke_up(k)-s_aw(k)*tke_up(k-1)+s_awqke(k))*onoff) !unstaggered
         !!  >> EOBvt
         qDISS1D=bp*tke_up !! TKE dissipation rate !unstaggered
     END IF
