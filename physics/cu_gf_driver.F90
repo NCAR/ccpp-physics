@@ -205,7 +205,7 @@ contains
 !  qfx2 -- latent heat flux (kg/kg m/s), positive upward from sfc 
 !  gf needs them in w/m2. define hfx and qfx after simple unit conversion
    real(kind=kind_phys), dimension (im)  :: hfx,qfx
-   real(kind=kind_phys) trash,tem,tem1,tf,tcr,tcrf
+   real(kind=kind_phys) tem,tem1,tf,tcr,tcrf
    real(kind=kind_phys) :: cliw_shal,clcw_shal,tem_shal, cliw_both, weight_sum
    real(kind=kind_phys) :: cliw_deep,clcw_deep,tem_deep, clcw_both
    integer :: cliw_deep_idx, clcw_deep_idx, cliw_shal_idx, clcw_shal_idx
