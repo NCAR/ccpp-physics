@@ -142,7 +142,7 @@
 !        A description of the MYNN-EDMF scheme and coupling to other components in WRF-ARW. 
 !        NOAA Tech. Memo. OAR GSD, 61, 37 pp., https://doi.org/10.25923/n9wm-be49.
 !   Puhales, Franciano S., Joseph B. Olson, Jimy Dudhia, Douglas Lima de Bem, Rafael Maroneze, 
-!        Otávio C. Acevedo, Felipe D. Costa, and Vagner Anabor, 2020: Turbulent Kinetic Energy 
+!        Otavio C. Acevedo, Felipe D. Costa, and Vagner Anabor, 2020: Turbulent Kinetic Energy 
 !        Budget for MYNN-EDMF PBL Scheme in WRF model. Universidade Federal de Santa Maria Technical Note. 9 pp.
 !-------------------------------------------------------------------
 
