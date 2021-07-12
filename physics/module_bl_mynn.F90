@@ -7536,8 +7536,8 @@ SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
      ! New stability function parameters for momentum (Puhales, 2020, WRF 4.2.1)
      ! The forms in unstable conditions (z/L < 0) use Grachev et al. (2000), which are a blend of 
      ! the classical (Kansas) forms (i.e., Paulson 1970, Dyer and Hicks 1970), valid for weakly 
-     ! unstable conditions (−1 < z/L < 0). The stability functions for stable conditions use an 
-     ! updated form taken from Cheng and Brutsaert (2005), which extends the validity into very 
+     ! unstable conditions (-1 < z/L < 0). The stability functions for stable conditions use an
+     ! updated form taken from Cheng and Brutsaert (2005), which extends the validity into very
      ! stable conditions [z/L ~ O(10)].
       IMPLICIT NONE
 
@@ -7571,7 +7571,7 @@ SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
 
          dummy_0 = zet**2
          dummy_1 = 1./(1.+dummy_0) ! denon
-         dummy_11 = 2.*zet         ! ddenon/dzet
+         dummy_11 = 2.*zet         ! denon/dzet
          dummy_2 = ((1-phi_m)/zet+dummy_11*dummy_4+dummy_0*dummy_44)*dummy_1
          dummy_22 = -dummy_11*(dummy_psi+dummy_0*dummy_4)*dummy_1**2
 
@@ -7585,12 +7585,12 @@ SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
 ! ===================================================================
 
   FUNCTION phih(zet)
-    !! New stability function parameters for heat (Puhales, 2020, WRF 4.2.1)
-    !! The forms in unstable conditions (z/L < 0) use Grachev et al. (2000), which are a blend of
-    !! the classical “Kansas” forms (i.e., Paulson 1970, Dyer and Hicks 1970), valid for weakly
-    !! unstable conditions (−1 < z/L < 0). The stability functions for stable conditions use an
-    !! updated form taken from Cheng and Brutsaert (2005), which extends the validity into very
-    !! stable conditions [z/L ~ O(10)].
+    ! New stability function parameters for heat (Puhales, 2020, WRF 4.2.1)
+    ! The forms in unstable conditions (z/L < 0) use Grachev et al. (2000), which are a blend of
+    ! the classical “Kansas” forms (i.e., Paulson 1970, Dyer and Hicks 1970), valid for weakly
+    ! unstable conditions (-1 < z/L < 0). The stability functions for stable conditions use an
+    ! updated form taken from Cheng and Brutsaert (2005), which extends the validity into very
+    ! stable conditions [z/L ~ O(10)].
       IMPLICIT NONE
 
       REAL, INTENT(IN):: zet
