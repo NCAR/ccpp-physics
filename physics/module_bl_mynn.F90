@@ -7533,12 +7533,12 @@ SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
 ! ===================================================================
 
   FUNCTION phim(zet)
-    !! New stability function parameters for momentum (Puhales, 2020, WRF 4.2.1)
-    !! The forms in unstable conditions (z/L < 0) use Grachev et al. (2000), which are a blend of 
-    !! the classical (Kansas) forms (i.e., Paulson 1970, Dyer and Hicks 1970), valid for weakly 
-    !! unstable conditions (−1 < z/L < 0). The stability functions for stable conditions use an 
-    !! updated form taken from Cheng and Brutsaert (2005), which extends the validity into very 
-    !! stable conditions [z/L ~ O(10)].
+     ! New stability function parameters for momentum (Puhales, 2020, WRF 4.2.1)
+     ! The forms in unstable conditions (z/L < 0) use Grachev et al. (2000), which are a blend of 
+     ! the classical (Kansas) forms (i.e., Paulson 1970, Dyer and Hicks 1970), valid for weakly 
+     ! unstable conditions (−1 < z/L < 0). The stability functions for stable conditions use an 
+     ! updated form taken from Cheng and Brutsaert (2005), which extends the validity into very 
+     ! stable conditions [z/L ~ O(10)].
       IMPLICIT NONE
 
       REAL, INTENT(IN):: zet
