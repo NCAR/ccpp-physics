@@ -1904,6 +1904,10 @@ endif   ! croptype == 0
 ! ground snow cover fraction [niu and yang, 2007, jgr]
 
      fsno = 0.
+     if(snowh <= 1.e-6 .or. sneqv <= 1.e-3) then
+       snowh = 0.0
+       sneqv = 0.0
+     end if
      if(snowh.gt.0.)  then
          bdsno    = sneqv / snowh
          fmelt    = (bdsno/100.)**parameters%mfsno
@@ -7070,7 +7074,7 @@ endif   ! croptype == 0
       end if
    end if
 
-   if(snowh <= 1.e-8 .or. sneqv <= 1.e-6) then
+   if(snowh <= 1.e-6 .or. sneqv <= 1.e-3) then
      snowh = 0.0
      sneqv = 0.0
    end if
