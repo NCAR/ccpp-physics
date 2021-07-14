@@ -321,15 +321,15 @@
 !
 
       do i = 1, im
-         tem1 = tf(i) / tsflw(i)
-         tem2 = tem1 * tem1
-         adjsfcdlw(i) = sfcdlw(i) * tem2 * tem2
 !> - LW time-step adjustment:
          if (use_LW_Jacobian) then
             ! F_adj = F_o + (dF/dT) * dT
             dT           = tf(i) - tsflw(i)
             adjsfculw(i) = sfculw(i) + fluxlwUP_jac(i,iSFC) * dT
          else
+           tem1 = tf(i) / tsflw(i)
+           tem2 = tem1 * tem1
+           adjsfcdlw(i) = sfcdlw(i) * tem2 * tem2
 !!  - adjust \a sfc downward LW flux to account for t changes in the lowest model layer.
 !! compute 4th power of the ratio of \c tf in the lowest model layer over the mean value \c tsflw.
            if (dry(i)) then

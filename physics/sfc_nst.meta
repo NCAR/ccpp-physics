@@ -240,8 +240,8 @@
   intent = in
   optional = F
 [use_flake]
-  standard_name = flag_nonzero_lake_surface_fraction
-  long_name = flag indicating presence of some lake surface area fraction
+  standard_name = flag_for_using_flake
+  long_name = flag indicating lake points using flake model
   units = flag
   dimensions = (horizontal_loop_extent)
   type = logical
@@ -696,14 +696,6 @@
   type = logical
   intent = in
   optional = F
-[use_flake]
-  standard_name = flag_nonzero_lake_surface_fraction
-  long_name = flag indicating presence of some lake surface area fraction
-  units = flag
-  dimensions = (horizontal_loop_extent)
-  type = logical
-  intent = in
-  optional = F
 [tgice]
   standard_name = freezing_point_temperature_of_seawater
   long_name = freezing point temperature of seawater
@@ -716,15 +708,6 @@
 [tsfco]
   standard_name = sea_surface_temperature
   long_name = sea surface temperature
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[tsfc_wat]
-  standard_name = surface_skin_temperature_over_water_interstitial
-  long_name = surface skin temperature over water (temporary use as interstitial)
   units = K
   dimensions = (horizontal_loop_extent)
   type = real
@@ -890,8 +873,8 @@
   intent = in
   optional = F
 [use_flake]
-  standard_name = flag_nonzero_lake_surface_fraction
-  long_name = flag indicating presence of some lake surface area fraction
+  standard_name = flag_for_using_flake
+  long_name = flag indicating lake points using flake model
   units = flag
   dimensions = (horizontal_loop_extent)
   type = logical
