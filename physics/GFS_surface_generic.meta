@@ -170,15 +170,6 @@
   kind = kind_phys
   intent = inout
   optional = F
-[tsurf]
-  standard_name = surface_skin_temperature_after_iteration
-  long_name = surface skin temperature after iteration
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
 [zlvl]
   standard_name = height_above_ground_at_lowest_model_layer
   long_name = layer 1 height above ground (not MSL)
@@ -492,6 +483,14 @@
 [cplflx]
   standard_name = flag_for_flux_coupling
   long_name = flag controlling cplflx collection (default off)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[cplchm]
+  standard_name = flag_for_chemistry_coupling
+  long_name = flag controlling cplchm collection (default off)
   units = flag
   dimensions = ()
   type = logical

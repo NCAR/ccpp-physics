@@ -15,14 +15,23 @@
 !! \htmlinclude mynnsfc_wrapper_init.html
 
 !!
-      subroutine mynnsfc_wrapper_init(errmsg, errflg)
+      subroutine mynnsfc_wrapper_init(do_mynnsfclay, &
+       &                             errmsg, errflg)
 
+         logical,          intent(in)  :: do_mynnsfclay
          character(len=*), intent(out) :: errmsg
          integer, intent(out) :: errflg
 
          ! Initialize CCPP error handling variables
          errmsg = ''
          errflg = 0
+
+        ! Consistency checks
+        if (.not. do_mynnsfclay) then
+          write(errmsg,fmt='(*(a))') 'Logic error: do_mynnsfclay = .false.'
+          errflg = 1
+          return
+        end if 
 
          ! initialize tables for psih and psim (stable and unstable)
          CALL PSI_INIT(psi_opt,errmsg,errflg)
