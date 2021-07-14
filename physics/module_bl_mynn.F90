@@ -4145,20 +4145,6 @@ ENDIF
     DO ic = 1,nchem
        k=kts
 
-       !a(1)=0.
-       !b(1)=1.+dtz(k)*dfh(k+1)  - 0.5*dtz(k)*s_aw(k+1)
-       !c(1)=  -dtz(k)*dfh(k+1)  - 0.5*dtz(k)*s_aw(k+1)
-       !d(1)=chem1(k,ic) + dtz(k) * -vd1(ic)*chem1(1,ic) - dtz(k)*s_awchem(k+1,ic)
-
-       !DO k=kts+1,kte-1
-       !   a(k)=  -dtz(k)*dfh(k)   + 0.5*dtz(k)*s_aw(k)
-       !   b(k)=1.+dtz(k)*(dfh(k)+dfh(k+1)) +  0.5*dtz(k)*(s_aw(k)-s_aw(k+1))
-       !   c(k)=  -dtz(k)*dfh(k+1) - 0.5*dtz(k)*s_aw(k+1)
-       !   ! d(kk)=chem1(k,ic) + qcd(k)*delt
-       !   d(k)=chem1(k,ic) + rhs*delt + dtz(k)*(s_awchem(k,ic)-s_awchem(k+1,ic))
-       !ENDDO
-
-!rho-weighted:
        a(k)=  -dtz(k)*khdz(k)*rhoinv(k)
        b(k)=1.+dtz(k)*(khdz(k+1)+khdz(k))*rhoinv(k) - 0.5*dtz(k)*s_aw(k+1)
        c(k)=  -dtz(k)*khdz(k+1)*rhoinv(k)           - 0.5*dtz(k)*s_aw(k+1)
