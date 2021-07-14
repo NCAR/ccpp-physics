@@ -69,7 +69,7 @@
               isot, ivegsrc, nlunit, sncovr, sncovr_ice, lsm, lsm_noahmp, lsm_ruc, min_seaice,     &
               fice, landfrac, vtype, weasd, lsoil, zs, dzs, lsnow_lsm_lbound, lsnow_lsm_ubound,    &
               tvxy, tgxy, tahxy, canicexy, canliqxy, eahxy, cmxy, chxy, fwetxy, sneqvoxy, alboldxy,&
-              qsnowxy, wslakexy, albdvis_lnd, albdnir_lnd, albivis_lnd, albinir_lnd, albdvis_ice,  & 
+              qsnowxy, wslakexy, albdvis_lnd, albdnir_lnd, albivis_lnd, albinir_lnd, albdvis_ice,  &
               albdnir_ice, albivis_ice, albinir_ice, emiss_lnd, emiss_ice, taussxy, waxy, wtxy,    &
               zwtxy, xlaixy, xsaixy, lfmassxy, stmassxy, rtmassxy, woodxy, stblcpxy, fastcpxy,     &
               smcwtdxy, deeprechxy, rechxy, snowxy, snicexy, snliqxy, tsnoxy , smoiseq, zsnsoxy,   &
@@ -281,10 +281,10 @@
                             jindx2_aer, ddy_aer, xlon_d,     &
                             iindx1_aer, iindx2_aer, ddx_aer, &
                             me, master)
-           iamin=min(minval(iindx1_aer), iamin)
-           iamax=max(maxval(iindx2_aer), iamax)
-           jamin=min(minval(jindx1_aer), jamin)
-           jamax=max(maxval(jindx2_aer), jamax)
+           iamin = min(minval(iindx1_aer), iamin)
+           iamax = max(maxval(iindx2_aer), iamax)
+           jamin = min(minval(jindx1_aer), jamin)
+           jamax = max(maxval(jindx2_aer), jamax)
          endif
 
 !> - Call setindxci() to initialize IN and CCN data
@@ -691,8 +691,7 @@
          integer,              intent(out)   :: errflg
 
          ! Local variables
-         integer :: i, j, k, iseed, iskip, ix, kdt_rad
-         real(kind=kind_phys) :: sec_zero, rsnow
+         integer :: i, j, k, iseed, iskip, ix
          real(kind=kind_phys) :: wrk(1)
          real(kind=kind_phys) :: rannie(cny)
          real(kind=kind_phys) :: rndval(cnx*cny*nrcm)
@@ -792,18 +791,18 @@
          
 !       Not needed for SCM:
 !> - Call gcycle() to repopulate specific time-varying surface properties for AMIP/forecast runs
-        !if (nscyc >  0) then
-        !   if (mod(kdt,nscyc) == 1) THEN
-        !     call gcycle (me, nthrds, nx, ny, isc, jsc, nsst, tile_num, nlunit,       &
-        !         input_nml_file, lsoil, lsoil_lsm, kice, idate, ialb, isot, ivegsrc,  &
-        !         use_ufo, nst_anl, fhcyc, phour, lakefrac, min_seaice, min_lakeice,   &
-        !         frac_grid, smc, slc, stc, smois, sh2o, tslb, tiice, tg3, tref, tsfc, &
-        !         tsfco, tisfc, hice, fice, facsf, facwf, alvsf, alvwf, alnsf, alnwf,  &
-        !         zorli, zorll, zorlo, weasd, slope, snoalb, canopy, vfrac, vtype,     &
-        !         stype, shdmin, shdmax, snowd, cv, cvb, cvt, oro, oro_uf,             &
-        !         xlat_d, xlon_d, slmsk, imap, jmap)
-        !   endif
-        !endif
+         ! if (nscyc >  0) then
+         !   if (mod(kdt,nscyc) == 1) THEN
+         !     call gcycle (me, nthrds, nx, ny, isc, jsc, nsst, tile_num, nlunit,              &
+         !         input_nml_file, lsoil, lsoil_lsm, kice, idate, ialb, isot, ivegsrc,         &
+         !         use_ufo, nst_anl, fhcyc, phour, landfrac, lakefrac, min_seaice, min_lakeice,&
+         !         frac_grid, smc, slc, stc, smois, sh2o, tslb, tiice, tg3, tref, tsfc,        &
+         !         tsfco, tisfc, hice, fice, facsf, facwf, alvsf, alvwf, alnsf, alnwf,         &
+         !         zorli, zorll, zorlo, weasd, slope, snoalb, canopy, vfrac, vtype,            &
+         !         stype, shdmin, shdmax, snowd, cv, cvb, cvt, oro, oro_uf,                    &
+         !         xlat_d, xlon_d, slmsk, imap, jmap)
+         !   endif
+         ! endif
 
       end subroutine GFS_phys_time_vary_timestep_init
 !! @}

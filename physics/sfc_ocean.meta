@@ -194,8 +194,8 @@
   intent = in
   optional = F
 [use_flake]
-  standard_name = flag_nonzero_lake_surface_fraction
-  long_name = flag indicating presence of some lake surface area fraction
+  standard_name = flag_for_using_flake
+  long_name = flag indicating lake points using flake model
   units = flag
   dimensions = (horizontal_loop_extent)
   type = logical

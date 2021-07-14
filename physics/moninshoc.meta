@@ -70,8 +70,8 @@
   intent = in
   optional = F
 [ncnd]
-  standard_name = number_of_tracers_for_cloud_condensate
-  long_name = number of tracers for cloud condensate
+  standard_name = number_of_cloud_condensate_types
+  long_name = number of cloud condensate types
   units = count
   dimensions = ()
   type = integer

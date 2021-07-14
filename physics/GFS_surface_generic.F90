@@ -31,7 +31,7 @@
                           drain_cpl, dsnow_cpl, rain_cpl, snow_cpl, lndp_type, n_var_lndp, sfc_wts,        &
                           lndp_var_list, lndp_prt_list,                                                    &
                           z01d, zt1d, bexp1d, xlai1d, vegf1d, lndp_vgf, sfc_wts_inv,                       &
-                          cplflx, flag_cice, islmsk_cice, slimskin_cpl, tisfc, tsfco, fice, hice,          &
+                          cplflx, flag_cice, islmsk_cice, slimskin_cpl,                                    &
                           wind, u1, v1, cnvwind, smcwlt2, smcref2, errmsg, errflg)
 
         use surface_perturbation,  only: cdfnor
@@ -56,8 +56,7 @@
         real(kind=kind_phys), dimension(:),   intent(out) :: dsnow_cpl
         real(kind=kind_phys), dimension(:),   intent(in)  :: rain_cpl
         real(kind=kind_phys), dimension(:),   intent(in)  :: snow_cpl
-        integer, intent(in) :: lndp_type
-        integer, intent(in) :: n_var_lndp
+        integer,                              intent(in)  :: lndp_type, n_var_lndp
         character(len=3),     dimension(:),   intent(in)  :: lndp_var_list
         real(kind=kind_phys), dimension(:),   intent(in)  :: lndp_prt_list
         real(kind=kind_phys), dimension(:,:), intent(in)  :: sfc_wts
@@ -67,21 +66,19 @@
         real(kind=kind_phys), dimension(:),   intent(out) :: xlai1d
         real(kind=kind_phys), dimension(:),   intent(out) :: vegf1d
         real(kind=kind_phys),                 intent(out) :: lndp_vgf
-        real(kind=kind_phys), dimension(:,:), intent(inout)  :: sfc_wts_inv
+        real(kind=kind_phys), dimension(:,:), intent(inout) :: sfc_wts_inv
 
-        logical, intent(in) :: cplflx
-        real(kind=kind_phys), dimension(:), intent(in) :: slimskin_cpl
-        logical, dimension(:), intent(inout) :: flag_cice
-        integer, dimension(:), intent(out) :: islmsk_cice
-        real(kind=kind_phys), dimension(:), intent(in) :: &
-             tisfc, tsfco, fice, hice
+        logical,                              intent(in)    :: cplflx
+        real(kind=kind_phys), dimension(:),   intent(in)    :: slimskin_cpl
+        logical,              dimension(:),   intent(inout) :: flag_cice
+        integer,              dimension(:),   intent(out)   :: islmsk_cice
 
-        real(kind=kind_phys), dimension(:), intent(out) :: wind
-        real(kind=kind_phys), dimension(:), intent(in ) :: u1, v1
+        real(kind=kind_phys), dimension(:),   intent(out) :: wind
+        real(kind=kind_phys), dimension(:),   intent(in ) :: u1, v1
         ! surface wind enhancement due to convection
-        real(kind=kind_phys), dimension(:), intent(inout ) :: cnvwind
+        real(kind=kind_phys), dimension(:),   intent(inout ) :: cnvwind
         !
-        real(kind=kind_phys), dimension(:), intent(out) :: smcwlt2, smcref2
+        real(kind=kind_phys), dimension(:),   intent(out)    :: smcwlt2, smcref2
 
         ! CCPP error handling
         character(len=*), intent(out) :: errmsg
@@ -89,8 +86,7 @@
 
         ! Local variables
         integer              :: i, k
-        real(kind=kind_phys) :: onebg
-        real(kind=kind_phys) :: cdfz
+        real(kind=kind_phys) :: onebg, cdfz
 
         ! Set constants
         onebg  = 1.0/con_g
@@ -98,7 +94,6 @@
         ! Initialize CCPP error handling variables
         errmsg = ''
         errflg = 0
-
 
         ! Scale random patterns for surface perturbations with perturbation size
         ! Turn vegetation fraction pattern into percentile pattern
@@ -108,25 +103,25 @@
            sfc_wts_inv(:,:)=sfc_wts(:,:)
         endif
         if (lndp_type==1) then
-        do k =1,n_var_lndp
-           select case(lndp_var_list(k))
-           case ('rz0')
+          do k =1,n_var_lndp
+            select case(lndp_var_list(k))
+            case ('rz0')
                 z01d(:) = lndp_prt_list(k)* sfc_wts(:,k)
-           case ('rzt')
-                zt1d(:) = lndp_prt_list(k)* sfc_wts(:,k)
-           case ('shc')
-                bexp1d(:) = lndp_prt_list(k) * sfc_wts(:,k)
-           case ('lai')
+            case ('rzt')
+                 zt1d(:) = lndp_prt_list(k)* sfc_wts(:,k)
+            case ('shc')
+                 bexp1d(:) = lndp_prt_list(k) * sfc_wts(:,k)
+            case ('lai')
                 xlai1d(:) = lndp_prt_list(k)* sfc_wts(:,k)
-           case ('vgf')
+            case ('vgf')
         ! note that the pertrubed vegfrac is being used in sfc_drv, but not sfc_diff
               do i=1,im
                 call cdfnor(sfc_wts(i,k),cdfz)
                 vegf1d(i) = cdfz
               enddo
               lndp_vgf = lndp_prt_list(k)
-           end select
-        enddo
+            end select
+          enddo
         endif
 
         ! End of stochastic physics / surface perturbation
@@ -136,20 +131,20 @@
           islmsk_cice(i) = islmsk(i)
           if (islmsk(i) == 2) then
             if (isot == 1) then
-              soiltyp(i)  = 16
+              soiltyp(i) = 16
             else
-              soiltyp(i)  = 9
+              soiltyp(i) = 9
             endif
             if (ivegsrc == 0 .or. ivegsrc == 4) then
-              vegtype(i)  = 24
+              vegtype(i) = 24
             elseif (ivegsrc == 1) then
-              vegtype(i)  = 15
+              vegtype(i) = 15
             elseif (ivegsrc == 2) then
-              vegtype(i)  = 13
+              vegtype(i) = 13
             elseif (ivegsrc == 3 .or. ivegsrc == 5) then
-              vegtype(i)  = 15
+              vegtype(i) = 15
             endif
-            slopetyp(i) = 9
+            slopetyp(i)  = 9
           else
             soiltyp(i)  = int( stype(i)+0.5_kind_phys )
             vegtype(i)  = int( vtype(i)+0.5_kind_phys )
@@ -167,9 +162,9 @@
 
           wind(i)  = max(sqrt(u1(i)*u1(i) + v1(i)*v1(i))   &
                          + max(zero, min(cnvwind(i), 30.0_kind_phys)), one)
-          !wind(i)  = max(sqrt(Statein%ugrs(i,1)*Statein%ugrs(i,1) + &
-          !                         Statein%vgrs(i,1)*Statein%vgrs(i,1))  &
-          !              + max(zero, min(Tbd%phy_f2d(i,Model%num_p2d), 30.0)), one)
+         !wind(i)  = max(sqrt(Statein%ugrs(i,1)*Statein%ugrs(i,1) + &
+         !                         Statein%vgrs(i,1)*Statein%vgrs(i,1))  &
+         !              + max(zero, min(Tbd%phy_f2d(i,Model%num_p2d), 30.0)), one)
           cnvwind(i) = zero
 
         enddo
@@ -312,7 +307,7 @@
 
           do i=1,im
 !           if (Sfcprop%landfrac(i) < one) then ! Not 100% land
-            if (wet(i)) then                    ! some open water 
+            if (wet(i)) then                    ! some open water
 !  ---  compute open water albedo
               xcosz_loc = max( zero, min( one, xcosz(i) ))
               ocalnirdf_cpl = 0.06_kind_phys

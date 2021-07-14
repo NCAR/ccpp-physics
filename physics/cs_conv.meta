@@ -31,14 +31,6 @@
   type = integer
   intent = in
   optional = F
-[ncld]
-  standard_name = number_of_hydrometeors
-  long_name = number of hydrometeors
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [q]
   standard_name = water_vapor_specific_humidity_updated_by_physics
   long_name = water vapor specific humidity updated by physics

@@ -282,7 +282,7 @@ module GFS_rrtmg_setup
         print *,'  In rad_initialize (GFS_rrtmg_setup_init), before calling radinit'
         print *,' si =',si
         print *,' levr=',levr,' ictm=',ictm,' isol=',isol,' ico2=',ico2,&
-     &          ' iaer=',iaer,' ntcw=',ntcw
+     &          ' iaermdl=',iaermdl,' iaerflg=',iaerflg
         print *,' np3d=',num_p3d,' ntoz=',ntoz,                         &
      &          ' iovr=',iovr,' isubc_sw=',isubc_sw,                    &
      &          ' isubc_lw=',isubc_lw,' icliq_sw=',icliq_sw,            &

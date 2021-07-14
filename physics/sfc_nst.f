@@ -100,7 +100,7 @@
 !     prsik1   - real,                                             im   !
 !     prslk1   - real,                                             im   !
 !     wet      - logical, =T if any ocn/lake water (F otherwise)   im   !
-!     use_flake     - logical, =T if any lake otherwise ocn
+!     use_flake- logical, =T if flake model is used for lake       im   !
 !     icy      - logical, =T if any ice                            im   !
 !     xlon     - real, longitude         (radians)                 im   !
 !     sinlat   - real, sin of latitude                             im   !
@@ -253,6 +253,7 @@
       real(kind=kind_phys) fw,q_warm
       real(kind=kind_phys) t12,alon,tsea,sstc,dta,dtz
       real(kind=kind_phys) zsea1,zsea2,soltim
+      logical do_nst
 
 !  external functions called: iw3jdn
       integer :: iw3jdn
@@ -274,6 +275,8 @@ cc
       errmsg = ''
       errflg = 0
 
+      if (nstf_name1 == 0) return ! No NSST model used
+
       cpinv = one/cp
       hvapi = one/hvap
       elocp = hvap/cp
@@ -282,10 +285,13 @@ cc
 !
 ! flag for open water and where the iteration is on
 !
+      do_nst = .false.
       do i = 1, im
 !       flag(i) = wet(i) .and. .not.icy(i) .and. flag_iter(i)
         flag(i) = wet(i) .and. flag_iter(i) .and. .not. use_flake(i)
+        do_nst  = do_nst .or. flag(i)
       enddo
+      if (.not. do_nst) return
 !
 !  save nst-related prognostic fields for guess run
 !
@@ -724,7 +730,7 @@ cc
 !> \section NSST_general_pre_algorithm General Algorithm
 !! @{
       subroutine sfc_nst_pre_run
-     &    (im, wet, use_flake, tgice, tsfco, tsfc_wat, tsurf_wat,
+     &    (im, wet, tgice, tsfco, tsurf_wat,
      &     tseal, xt, xz, dt_cool, z_c, tref, cplflx,
      &     oceanfrac, nthreads, errmsg, errflg)
 
@@ -737,11 +743,10 @@ cc
 
 !  ---  inputs:
       integer, intent(in) :: im, nthreads
-      logical, dimension(:), intent(in) :: wet, use_flake
+      logical, dimension(:), intent(in) :: wet
       real (kind=kind_phys), intent(in) :: tgice
       real (kind=kind_phys), dimension(:), intent(in) ::
-     &      tsfc_wat, xt, xz, dt_cool, z_c, oceanfrac,
-     &      tsfco
+     &      tsfco, xt, xz, dt_cool, z_c, oceanfrac
       logical, intent(in) :: cplflx
 
 !  ---  input/outputs:
@@ -759,33 +764,32 @@ cc
      &                                   half = 0.5_kp,
      &                                   omz1 = 2.0_kp
       real(kind=kind_phys) :: tem1, tem2, dnsst
-      real(kind=kind_phys), dimension(im) :: dtzm,z_c_0
+      real(kind=kind_phys), dimension(im) :: dtzm, z_c_0
 
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
 
       do i=1,im
-        if (wet(i) .and. .not. use_flake(i)) then
+        if (wet(i) .and. oceanfrac(i) > 0.0) then
 !          tem         = (oro(i)-oro_uf(i)) * rlapse
           ! DH* 20190927 simplyfing this code because tem is zero
           !tem          = zero
-          !tseal(i)     = tsfc_wat(i)  + tem
-          tseal(i)      = tsfc_wat(i)
+          !tseal(i)     = tsfco(i)  + tem
+          tseal(i)      = tsfco(i)
           !tsurf_wat(i) = tsurf_wat(i) + tem
           ! *DH
         endif
       enddo
-
 !
 !   update tsfc & tref with T1 from OGCM & NSST Profile if coupled
 !
       if (cplflx) then
-        z_c_0 = 0.0
+        z_c_0 = zero
         call get_dtzm_2d (xt,  xz, dt_cool,                             &
      &                    z_c_0, wet, zero, omz1, im, 1, nthreads, dtzm)
         do i=1,im
-         if (wet(i) .and. oceanfrac(i)>zero .and..not.use_flake(i)) then
+         if (wet(i) .and. oceanfrac(i) > zero ) then
 !           dnsst   = tsfc_wat(i) - tref(i)                 !  retrive/get difference of Ts and Tf
             tref(i) = max(tgice, tsfco(i) - dtzm(i))        !  update Tf with T1 and NSST T-Profile
 !           tsfc_wat(i) = max(271.2,tref(i) + dnsst)        !  get Ts updated due to Tf update

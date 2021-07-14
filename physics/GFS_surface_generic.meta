@@ -190,7 +190,7 @@
   optional = F
 [dsnow_cpl]
   standard_name = tendency_of_lwe_thickness_of_snow_amount_for_coupling
-  long_name = change in show_cpl (coupling_type)
+  long_name = change in snow_cpl (coupling_type)
   units = m
   dimensions = (horizontal_loop_extent)
   type = real
@@ -349,42 +349,6 @@
   standard_name = sea_land_ice_mask_in
   long_name = sea/land/ice mask input (=0/1/2)
   units = flag
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[tisfc]
-  standard_name = sea_ice_temperature
-  long_name = sea-ice surface temperature
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[tsfco]
-  standard_name = sea_surface_temperature
-  long_name = sea surface temperature
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[fice]
-  standard_name = sea_ice_concentration
-  long_name = sea-ice concentration [0,1]
-  units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[hice]
-  standard_name = sea_ice_thickness
-  long_name = sea-ice thickness
-  units = m
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
