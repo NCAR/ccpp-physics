@@ -18,7 +18,7 @@
       ! in the CCPP version - they are defined in the interstitial_create routine
       subroutine GFS_rrtmg_pre_run (im, levs, lm, lmk, lmp, n_var_lndp,        &
         imfdeepcnv, imfdeepcnv_gf, me, ncnd, ntrac, num_p3d, npdf3d, ncnvcld3d,&
-        ntqv, ntcw,ntiw, ntlnc, ntinc, ntrw, ntsw, ntgl, ntwa, ntoz,           &
+        ntqv, ntcw,ntiw, ntlnc, ntinc, ncld, ntrw, ntsw, ntgl, ntwa, ntoz,     &
         ntclamt, nleffr, nieffr, nseffr, lndp_type, kdt, imp_physics,          &
         imp_physics_thompson, imp_physics_gfdl, imp_physics_zhao_carr,         &
         imp_physics_zhao_carr_pdf, imp_physics_mg, imp_physics_wsm6,           &
@@ -83,7 +83,7 @@
                                            imfdeepcnv,                         &
                                            imfdeepcnv_gf, me, ncnd, ntrac,     &
                                            num_p3d, npdf3d, ncnvcld3d, ntqv,   &
-                                           ntcw, ntiw, ntlnc, ntinc,           &
+                                           ntcw, ntiw, ntlnc, ntinc, ncld,     &
                                            ntrw, ntsw, ntgl, ntwa, ntoz,       &
                                            ntclamt, nleffr, nieffr, nseffr,    &
                                            lndp_type,                          &
@@ -594,7 +594,7 @@
 !!      call module_radiation_clouds::progcld1()
 !!    - For Zhao/Moorthi's prognostic cloud+pdfcld,
 !!      call module_radiation_clouds::progcld3()
-!!      call module_radiation_clouds::progclduni() for unified cloud and ncnd>=2
+!!      call module_radiation_clouds::progclduni() for unified cloud and ncld=2
 
 !  --- ...  obtain cloud information for radiation calculations
 
@@ -690,6 +690,11 @@
             ccnd(:,:,1) = ccnd(:,:,1) + tracer1(:,1:LMK,ntiw)
             ccnd(:,:,1) = ccnd(:,:,1) + tracer1(:,1:LMK,ntsw)
             ccnd(:,:,1) = ccnd(:,:,1) + tracer1(:,1:LMK,ntgl)
+
+!          else
+!            do j=1,ncld
+!              ccnd(:,:,1) = ccnd(:,:,1) + tracer1(:,1:LMK,ntcw+j-1) ! cloud condensate amount
+!            enddo
           endif
           do k=1,LMK
             do i=1,IM
@@ -944,7 +949,7 @@
         if (imp_physics == imp_physics_zhao_carr .or. imp_physics == imp_physics_mg) then ! zhao/moorthi's prognostic cloud scheme
                                          ! or unified cloud and/or with MG microphysics
 
-          if (uni_cld .and. ncndl >= 2) then
+          if (uni_cld .and. ncld >= 2) then
             call progclduni (plyr, plvl, tlyr, tvly, ccnd, ncndl,         & !  ---  inputs
                              xlat, xlon, slmsk, dz, delp,                 &
                              IM, LMK, LMP, cldcov,                        &

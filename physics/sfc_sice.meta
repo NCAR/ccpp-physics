@@ -265,14 +265,6 @@
   type = logical
   intent = in
   optional = F
-[use_flake]
-  standard_name = flag_for_using_flake
-  long_name = flag indicating lake points using flake model
-  units = flag
-  dimensions = (horizontal_loop_extent)
-  type = logical
-  intent = in
-  optional = F
 [lprnt]
   standard_name = flag_print
   long_name = switch for printing sample column to stdout
@@ -441,12 +433,55 @@
   kind = kind_phys
   intent = inout
   optional = F
-[islmsk]
+[frac_grid]
+  standard_name = flag_for_fractional_grid
+  long_name = flag for fractional grid
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[icy]
+  standard_name = flag_nonzero_sea_ice_surface_fraction
+  long_name = flag indicating presence of some sea ice surface area fraction
+  units = flag
+  dimensions = (horizontal_loop_extent)
+  type = logical
+  intent = in
+  optional = F
+[islmsk_cice]
   standard_name = sea_land_ice_mask_cice
   long_name = sea/land/ice mask cice (=0/1/2)
   units = flag
   dimensions = (horizontal_loop_extent)
   type = integer
+  intent = in
+  optional = F
+[min_lakeice]
+  standard_name = lake_ice_minimum
+  long_name = minimum lake ice value
+  units = frac
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[min_seaice]
+  standard_name = sea_ice_minimum
+  long_name = minimum sea ice value
+  units = frac
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[oceanfrac]
+  standard_name = sea_area_fraction
+  long_name = fraction of horizontal grid area occupied by ocean
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
   intent = in
   optional = F
 [errmsg]

@@ -685,8 +685,7 @@
         if (advups) then               ! For first order upstream for updraft
           alfint(:,:) = one
         elseif (advtvd) then           ! TVD flux limiter scheme for updraft
-!         alfint(:,:) = one
-          alfint(:,:) = half
+          alfint(:,:) = one
           l   = krmin
           lm1 = l - 1
           dtvd(1,1) = cp*(toi(l)-toi(lm1)) + phi_l(l)-phi_l(lm1)        &

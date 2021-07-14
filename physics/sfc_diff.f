@@ -72,7 +72,7 @@
      &                    thsfc_loc,                                    &  !intent(in)
      &                    tskin_wat, tskin_lnd, tskin_ice,              &  !intent(in)
      &                    tsurf_wat, tsurf_lnd, tsurf_ice,              &  !intent(in)
-     &                               snwdph_lnd,snwdph_ice,             &  !intent(in)
+     &                    snwdph_wat,snwdph_lnd,snwdph_ice,             &  !intent(in)
      &                    z0rl_wat,  z0rl_lnd,  z0rl_ice,               &  !intent(inout)
      &                    z0rl_wav,                                     &  !intent(inout)
      &                    ustar_wat, ustar_lnd, ustar_ice,              &  !intent(inout)
@@ -109,7 +109,7 @@
       real(kind=kind_phys), dimension(:), intent(in)    ::              &
      &                    tskin_wat, tskin_lnd, tskin_ice,              &
      &                    tsurf_wat, tsurf_lnd, tsurf_ice,              &
-     &                              snwdph_lnd,snwdph_ice
+     &                   snwdph_wat,snwdph_lnd,snwdph_ice
 
       real(kind=kind_phys), dimension(:), intent(in)    :: z0rl_wav
       real(kind=kind_phys), dimension(:), intent(inout) ::              &
@@ -138,7 +138,7 @@
 
       real(kind=kind_phys) :: tv1
 
-      real(kind=kind_phys) :: tvs, z0, z0max, snwdph_wat
+      real(kind=kind_phys) :: tvs, z0, z0max
 !
       real(kind=kind_phys), parameter ::
      &        one=1.0_kp, zero=0.0_kp, half=0.5_kp, qmin=1.0e-8_kp
@@ -173,8 +173,6 @@
 !
 
 !       write(0,*)'in sfc_diff, sfc_z0_type=',sfc_z0_type
-
-      snwdph_wat = zero
 
       do i=1,im
         if(flag_iter(i)) then
@@ -360,7 +358,7 @@
 !
             call stability
 !  ---  inputs:
-     &       (z1(i), snwdph_wat, thv1, wind(i),
+     &       (z1(i), snwdph_wat(i), thv1, wind(i),
      &        z0max, ztmax_wat(i), tvs, grav, tv1, thsfc_loc,
 !  ---  outputs:
      &        rb_wat(i), fm_wat(i), fh_wat(i), fm10_wat(i), fh2_wat(i),

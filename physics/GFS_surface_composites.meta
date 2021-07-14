@@ -148,17 +148,9 @@
   type = logical
   intent = inout
   optional = F
-[lake]
+[use_flake]
   standard_name = flag_nonzero_lake_surface_fraction
   long_name = flag indicating presence of some lake surface area fraction
-  units = flag
-  dimensions = (horizontal_loop_extent)
-  type = logical
-  intent = inout
-  optional = F
-[use_flake]
-  standard_name = flag_for_using_flake
-  long_name = flag indicating lake points using flake model
   units = flag
   dimensions = (horizontal_loop_extent)
   type = logical
@@ -233,6 +225,15 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = F
+[snowd_wat]
+  standard_name = surface_snow_thickness_water_equivalent_over_water
+  long_name = water equivalent snow depth over water
+  units = mm
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
   optional = F
 [snowd_lnd]
   standard_name = surface_snow_thickness_water_equivalent_over_land
@@ -332,6 +333,15 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = F
+[weasd_wat]
+  standard_name = water_equivalent_accumulated_snow_depth_over_water
+  long_name = water equiv of acc snow depth over water
+  units = mm
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
   optional = F
 [weasd_lnd]
   standard_name = water_equivalent_accumulated_snow_depth_over_land
@@ -644,14 +654,6 @@
   dimensions = ()
   type = real
   kind = kind_phys
-  intent = in
-  optional = F
-[kdt]
-  standard_name = index_of_time_step
-  long_name = current forecast iteration
-  units = index
-  dimensions = ()
-  type = integer
   intent = in
   optional = F
 [errmsg]
@@ -1549,6 +1551,15 @@
   kind = kind_phys
   intent = inout
   optional = F
+[weasd_wat]
+  standard_name = water_equivalent_accumulated_snow_depth_over_water
+  long_name = water equiv of acc snow depth over water
+  units = mm
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [weasd_lnd]
   standard_name = water_equivalent_accumulated_snow_depth_over_land
   long_name = water equiv of acc snow depth over land
@@ -1575,6 +1586,15 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
+[snowd_wat]
+  standard_name = surface_snow_thickness_water_equivalent_over_water
+  long_name = water equivalent snow depth over water
+  units = mm
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
   optional = F
 [snowd_lnd]
   standard_name = surface_snow_thickness_water_equivalent_over_land

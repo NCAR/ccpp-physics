@@ -66,7 +66,7 @@ c  This subprogram sets up gfs_phy_tracer
 c 
       implicit none
 ! input
-      integer, intent(in)     :: me, ntoz,ntcw,ntke,
+      integer, intent(in)     :: me, ntoz,ntcw,ncld,ntke,
      &                           ntiw,ntlnc,ntinc,nto,nto2,
      &                           fprcp,ntrw,ntsw,ntrnc,ntsnc
 ! output
@@ -83,7 +83,19 @@ c
 
 ! initialize chem tracers
       call gocart_tracer_config(me)
+!     call gocart_tracer_config(gfs_phy_tracer,me)
 
+! ntrac_met = number of met tracers
+!hmhj if ( ntoz < ntcw ) then                       
+!hmhj   gfs_phy_tracer%ntrac_met = ntcw + ncld - 1   
+!hmhj else                                                           
+!hmhj   gfs_phy_tracer%ntrac_met = ntoz                              
+!hmhj endif                                          
+!hmhj if ( gfs_phy_tracer%ntrac_met /= ntrac ) then
+!hmhj   print *,'LU_TRC: ERROR ! inconsistency in ntrac:',
+!hmhj&           ntrac, gfs_phy_tracer%ntrac_met
+!hmhj   stop 222   
+!hmhj endif
 ! input ntrac is meteorological tracers
       gfs_phy_tracer%ntrac_met = ntrac
 
@@ -218,7 +230,7 @@ c
         endif
 
       enddo
-      name_out = trim(name_out)
+      name_out=trim(name_out)
       return
 
       end subroutine fixchar

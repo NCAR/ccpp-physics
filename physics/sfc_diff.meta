@@ -312,6 +312,15 @@
   kind = kind_phys
   intent = in
   optional = F
+[snwdph_wat]
+  standard_name = surface_snow_thickness_water_equivalent_over_water
+  long_name = water equivalent snow depth over water
+  units = mm
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [snwdph_lnd]
   standard_name = surface_snow_thickness_water_equivalent_over_land
   long_name = water equivalent snow depth over land

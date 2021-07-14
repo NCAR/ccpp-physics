@@ -56,8 +56,8 @@
   intent = in
   optional = F
 [nncl]
-  standard_name = number_of_cloud_condensate_types
-  long_name = number of cloud condensate types
+  standard_name = number_of_tracers_for_cloud_condensate
+  long_name = number of tracers for cloud condensate
   units = count
   dimensions = ()
   type = integer
@@ -176,9 +176,17 @@
   type = integer
   intent = in
   optional = F
+[ncld]
+  standard_name = number_of_hydrometeors
+  long_name = choice of cloud scheme / number of hydrometeors
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [nncl]
-  standard_name = number_of_cloud_condensate_types
-  long_name = number of cloud condensate types
+  standard_name = number_of_tracers_for_cloud_condensate
+  long_name = number of tracers for cloud condensate
   units = count
   dimensions = ()
   type = integer

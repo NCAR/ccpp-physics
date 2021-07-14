@@ -569,7 +569,8 @@
           snwdph(i)  = snowh * 1000.0_kind_phys
           weasd(i)   = sneqv * 1000.0_kind_phys
           sncovr1(i) = sncovr
-!  ---- ... outside sflx, roughness uses cm as unit (update after snow's effect)
+!  ---- ... outside sflx, roughness uses cm as unit (update after snow's
+!  effect)
           zorl(i) = z0*100.0_kind_phys
 
 !>  - Do not return the following output fields to parent model:
