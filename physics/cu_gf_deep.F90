@@ -4113,7 +4113,7 @@ endif
                  qc(i,k)=qrch
                endif
                if(qch(i,k).le.qrch)then
-                 qch(i,k)=qrch
+                 qch(i,k)=qrch+1e-8
                endif
 !
 !------- total condensed water before rainout
