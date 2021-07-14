@@ -4110,7 +4110,7 @@ endif
                          (zu(i,k-1)-.5*up_massdetr(i,k-1)+up_massentr(i,k-1))
 
                if(qc(i,k).le.qrch)then
-                 qc(i,k)=qrch
+                 qc(i,k)=qrch+1e-8
                endif
                if(qch(i,k).le.qrch)then
                  qch(i,k)=qrch+1e-8
