@@ -1695,14 +1695,6 @@
   type = logical
   intent = in
   optional = F
-[cplchm]
-  standard_name = flag_for_chemistry_coupling
-  long_name = flag controlling cplchm collection (default off)
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
 [tracers_total]
   standard_name = number_of_total_tracers
   long_name = total number of tracers

@@ -92,7 +92,7 @@
 !! \htmlinclude GFS_SCNV_generic_post_run.html
 !!
       subroutine GFS_SCNV_generic_post_run (im, levs, nn, lssav, ldiag3d, qdiag3d, &
-        cplchm, frain, gu0, gv0, gt0, gq0, save_u, save_v, save_t, save_q, dqdti,  &
+        frain, gu0, gv0, gt0, gq0, save_u, save_v, save_t, save_q, dqdti,  &
         clw, shcnvcw, rain1, npdf3d, num_p3d, ncnvcld3d, cnvc, cnvw, nsamftrac,    &
         rainc, cnvprcp, cnvprcpb, cnvw_phy_f3d, cnvc_phy_f3d,                      &
         dtend, dtidx, index_of_temperature, index_of_x_wind, index_of_y_wind,      &
@@ -208,15 +208,6 @@
              dtend(:,:,idtend) = dtend(:,:,idtend) + (gq0(:,:,ntqv) - save_q(:,:,ntqv)) * frain
           endif
         endif
-      endif
-!
-      if (cplchm) then
-        do k=1,levs
-          do i=1,im
-            tem  = (gq0(i,k,ntqv)-save_q(i,k,ntqv)) * frain
-            dqdti(i,k) = dqdti(i,k) + tem
-          enddo
-        enddo
       endif
 !
       do k=1,levs

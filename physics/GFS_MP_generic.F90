@@ -98,7 +98,7 @@
 
       implicit none
 
-      integer, intent(in) :: im, levs, kdt, nrcm, ncld, nncl, ntcw, ntrac
+      integer, intent(in) :: im, levs, kdt, nrcm, nncl, ntcw, ntrac
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_mg, imp_physics_fer_hires
       logical, intent(in) :: cal_pre, lssav, ldiag3d, qdiag3d, cplflx, cplchm
       integer, intent(in) :: index_of_temperature,index_of_process_mp
@@ -383,7 +383,7 @@
         do i=1, im
           work1(i) = zero
         enddo
-        if (ncld > 0) then
+        if (nncl > 0) then
           do ic = ntcw, ntcw+nncl-1
             do i=1,im
               work1(i) = work1(i) + gq0(i,k,ic)

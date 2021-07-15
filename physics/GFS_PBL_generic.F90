@@ -83,7 +83,7 @@
         ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc,                 &
         ntwa, ntia, ntgl, ntoz, ntke, ntkev, nqrimef, trans_aero, ntchs, ntchm,          &
         imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,           &
-        imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires, cplchm, ltaerosol, &
+        imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires, ltaerosol, &
         hybedmf, do_shoc, satmedmf, qgrs, vdftra, save_u, save_v, save_t, save_q,        &
         flag_for_pbl_generic_tend, ldiag3d, qdiag3d, lssav, ugrs, vgrs, tgrs, errmsg, errflg)
         
@@ -100,7 +100,7 @@
       logical, intent(in) :: trans_aero, ldiag3d, qdiag3d, lssav
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
       integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires
-      logical, intent(in) :: cplchm, ltaerosol, hybedmf, do_shoc, satmedmf, flag_for_pbl_generic_tend
+      logical, intent(in) :: ltaerosol, hybedmf, do_shoc, satmedmf, flag_for_pbl_generic_tend
 
       real(kind=kind_phys), dimension(:,:,:), intent(in) :: qgrs
       real(kind=kind_phys), dimension(:,:), intent(in) :: ugrs, vgrs, tgrs
@@ -258,7 +258,7 @@
                                         imp_physics_mg, ntgl, imp_physics_gfdl, &
                                         imp_physics_zhao_carr, kk,              &
                                         errmsg, errflg)
-          if (.not.errflg==1) return
+          if (errflg /= 0) return
           !
           k1 = kk
           do n=ntchs,ntchm+ntchs-1
@@ -344,14 +344,13 @@
       implicit none
 
       integer, parameter  :: kp = kind_phys
-      integer, intent(in) :: im, levs, nvdiff, ntrac, ntchs, ntchm
+      integer, intent(in) :: im, levs, nvdiff, ntrac, ntchs, ntchm, kdt
       integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev, nqrimef
       logical, intent(in) :: trans_aero
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
       integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires
       logical, intent(in) :: ltaerosol, cplflx, cplchm, lssav, ldiag3d, lsidea
       logical, intent(in) :: hybedmf, do_shoc, satmedmf, shinhong, do_ysu
-      integer, intent(in) :: kdt
 
       logical, intent(in) :: flag_for_pbl_generic_tend      
       real(kind=kind_phys), dimension(:,:), intent(in) :: save_u, save_v, save_t
@@ -386,11 +385,8 @@
       logical, dimension(:),intent(in) :: wet, dry, icy
       real(kind=kind_phys), dimension(:), intent(out) ::  ushfsfci
 
-      real(kind=kind_phys), dimension(:,:), intent(inout) :: dkt_cpl
-      real(kind=kind_phys), dimension(:,:), intent(in)    :: dkt
-
       ! From canopy heat storage - reduction factors in latent/sensible heat flux due to surface roughness
-      real(kind=kind_phys), dimension(:), intent(in) :: hffac, hefac
+      real(kind=kind_phys), dimension(:), intent(in) :: hffac
 
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
@@ -425,7 +421,7 @@
                                         imp_physics_mg, ntgl, imp_physics_gfdl, &
                                         imp_physics_zhao_carr, kk,              &
                                         errmsg, errflg)
-          if (.not.errflg==1) return
+          if (errflg /= 0) return
           !
           k1 = kk
           do n=ntchs,ntchm+ntchs-1
@@ -554,30 +550,21 @@
 
       endif ! nvdiff == ntrac
 
-      if (cplchm) then
-        do i = 1, im
-          tem  = prsl(i,1) / (rd*t1(i)*(one+fvirt*max(q1(i), qmin)))
-          ushfsfci(i) = -cp * tem * hflx(i) ! upward sensible heat flux
-        enddo
-        dkt_cpl(1:im,1:levs) = dkt(1:im,1:levs)
-      endif
-
-
 !  --- ...  coupling insertion
 
       if (cplflx) then
         do i=1,im
-          if (oceanfrac(i) > zero) then ! Ocean only, NO LAKES
+          if (oceanfrac(i) > zero) then      ! Ocean only, NO LAKES
             if ( .not. wet(i)) then ! no open water
-              if ( kdt > 1 ) then !use results from CICE
+              if (kdt > 1) then              !use results from CICE
                 dusfci_cpl(i) = dusfc_cice(i)
                 dvsfci_cpl(i) = dvsfc_cice(i)
                 dtsfci_cpl(i) = dtsfc_cice(i)
                 dqsfci_cpl(i) = dqsfc_cice(i)
-              else !use PBL fluxes when CICE fluxes is unavailable
+              else                           !use PBL fluxes when CICE fluxes is unavailable
                 dusfci_cpl(i) = dusfc1(i)
                 dvsfci_cpl(i) = dvsfc1(i)
-                dtsfci_cpl(i) = dtsfc1(i)
+                dtsfci_cpl(i) = dtsfc1(i)*hffac(i)
                 dqsfci_cpl(i) = dqsfc1(i)
               end if
             elseif (icy(i) .or. dry(i)) then ! use stress_ocean from sfc_diff for opw component at mixed point
@@ -596,7 +583,7 @@
               dusfci_cpl(i) = dusfc1(i)
               dvsfci_cpl(i) = dvsfc1(i)
               dtsfci_cpl(i) = dtsfc1(i)*hffac(i)
-              dqsfci_cpl(i) = dqsfc1(i)*hefac(i)
+              dqsfci_cpl(i) = dqsfc1(i)
             endif
 !
             dusfc_cpl (i) = dusfc_cpl(i) + dusfci_cpl(i) * dtf
@@ -614,6 +601,24 @@
         enddo
       endif
 
+      if (cplchm) then
+        if (cplflx) then
+          do i = 1, im
+            if (oceanfrac(i) > zero) then
+              ushfsfci(i) = dtsfci_cpl(i)
+            else
+              rho = prsl(i,1) / (rd*t1(i)*(one+fvirt*max(q1(i), qmin)))
+              ushfsfci(i) = cp * rho * hflx(i)
+            end if
+          end do
+        else
+          do i = 1, im
+            rho = prsl(i,1) / (rd*t1(i)*(one+fvirt*max(q1(i), qmin)))
+            ushfsfci(i) = cp * rho * hflx(i)
+          end do
+        end if
+      end if
+
 !-------------------------------------------------------lssav if loop ----------
       if (lssav) then
         do i=1,im
@@ -622,7 +627,7 @@
           dusfci_diag(i) = dusfc1(i)
           dvsfci_diag(i) = dvsfc1(i)
           dtsfci_diag(i) = dtsfc1(i)*hffac(i)
-          dqsfci_diag(i) = dqsfc1(i)*hefac(i)
+          dqsfci_diag(i) = dqsfc1(i)
           dtsfc_diag (i) = dtsfc_diag(i) + dtsfci_diag(i) * dtf
           dqsfc_diag (i) = dqsfc_diag(i) + dqsfci_diag(i) * dtf
         enddo

@@ -446,15 +446,6 @@
   kind = kind_phys
   intent = inout
   optional = F
-[dtend]
-  standard_name = cumulative_change_of_state_variables
-  long_name = diagnostic tendencies for state variables
-  units = various
-  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_cumulative_change_processes)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
 [dtidx]
   standard_name = cumulative_change_of_state_variables_outer_index
   long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index

@@ -235,8 +235,8 @@
 
 !  --- ...  sfc lw fluxes used by atmospheric model are saved for output
         if (.not. use_LW_jacobian) then
-        if (frac_grid) then
-           do i=1,im
+          if (frac_grid) then
+            do i=1,im
               tem = (one - frland(i)) * cice(i) ! tem = ice fraction wrt whole cell
               if (flag_cice(i)) then
                  adjsfculw(i) = adjsfculw_lnd(i) * frland(i)               &
@@ -247,9 +247,9 @@
                               + adjsfculw_ice(i) * tem                     &
                               + adjsfculw_wat(i) * (one - frland(i) - tem)
               endif
-           enddo
-        else
-           do i=1,im
+            enddo
+          else
+            do i=1,im
               if (dry(i)) then                     ! all land
                  adjsfculw(i) = adjsfculw_lnd(i)
               elseif (icy(i)) then                 ! ice (and water)
@@ -270,15 +270,15 @@
               else                                 ! all water
                  adjsfculw(i) = adjsfculw_wat(i)
               endif
-           enddo
-        endif
+            enddo
+          endif
         endif
 
         do i=1,im
           dlwsfc(i) = dlwsfc(i) + adjsfcdlw(i)*dtf
           ulwsfc(i) = ulwsfc(i) + adjsfculw(i)*dtf
           psmean(i) = psmean(i) + pgr(i)*dtf        ! mean surface pressure
-        end do
+        enddo
 
         if (ldiag3d) then
           if (lsidea) then
@@ -699,7 +699,7 @@
 !> \section arg_table_GFS_suite_interstitial_4_run Argument Table
 !! \htmlinclude GFS_suite_interstitial_4_run.html
 !!
-    subroutine GFS_suite_interstitial_4_run (im, levs, ltaerosol, cplchm, tracers_total, ntrac, ntcw, ntiw, ntclamt, &
+    subroutine GFS_suite_interstitial_4_run (im, levs, ltaerosol, tracers_total, ntrac, ntcw, ntiw, ntclamt, &
       ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,  &
       imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, convert_dry_rho, dtf, save_qc, save_qi, con_pi, dtidx, dtend,&
       index_of_process_conv_trans, gq0, clw, prsl, save_tcp, con_rd, con_eps, nwfa, spechum, dqdti, ldiag3d,         &
@@ -716,7 +716,7 @@
         ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,           &
         imp_physics_zhao_carr, imp_physics_zhao_carr_pdf
 
-      logical,              intent(in   )                   :: ltaerosol, cplchm, convert_dry_rho
+      logical,                                  intent(in) :: ltaerosol, convert_dry_rho
 
       real(kind=kind_phys), intent(in   )                   :: con_pi, dtf
       real(kind=kind_phys), intent(in   ), dimension(:,:)   :: save_qc
@@ -735,9 +735,6 @@
       real(kind=kind_phys),                   intent(in) :: con_rd, con_eps
       real(kind=kind_phys), dimension(:,:),   intent(in) :: nwfa, save_tcp
       real(kind=kind_phys), dimension(:,:),   intent(in) :: spechum
-
-      ! dqdti may not be allocated
-      real(kind=kind_phys), intent(inout), dimension(:,:)   :: dqdti
 
       character(len=*),     intent(  out)                   :: errmsg
       integer,              intent(  out)                   :: errflg
@@ -909,15 +906,6 @@
           enddo
         enddo
       endif   ! end if_ntcw
-
-! dqdt_v : instaneous moisture tendency (kg/kg/sec)
-      if (cplchm) then
-        do k=1,levs
-          do i=1,im
-            dqdti(i,k) = dqdti(i,k) * (one / dtf)
-          enddo
-        enddo
-      endif
 
     end subroutine GFS_suite_interstitial_4_run
 

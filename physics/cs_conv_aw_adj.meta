@@ -55,14 +55,6 @@
   type = integer
   intent = in
   optional = F
-[ncld]
-  standard_name = number_of_hydrometeors
-  long_name = number of hydrometeors
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [ntcw]
   standard_name = index_for_liquid_cloud_condensate
   long_name = tracer index for cloud condensate (or liquid water)
@@ -80,8 +72,8 @@
   intent = in
   optional = F
 [nncl]
-  standard_name = number_of_tracers_for_cloud_condensate
-  long_name = number of tracers for cloud condensate
+  standard_name = number_of_cloud_condensate_types
+  long_name = number of cloud condensate types
   units = count
   dimensions = ()
   type = integer

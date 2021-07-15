@@ -17,7 +17,7 @@
 !!
     subroutine GFS_DCNV_generic_pre_run (im, levs, ldiag3d, qdiag3d, do_cnvgwd, cplchm,  &
                                          gu0, gv0, gt0, gq0, nsamftrac, ntqv,            &
-                                         save_u, save_v, save_t, save_q, dqdti, clw,     &
+                                         save_u, save_v, save_t, save_q, clw,            &
                                          ntcw,ntiw,ntclamt,ntrw,ntsw,ntrnc,ntsnc,ntgl,   &
                                          ntgnc, cscnv, satmedmf, trans_trac, ras, ntrac, &
                                          dtidx, index_of_process_dcnv, errmsg, errflg)
@@ -37,8 +37,6 @@
       real(kind=kind_phys), dimension(:,:),   intent(inout) :: save_v
       real(kind=kind_phys), dimension(:,:),   intent(inout) :: save_t
       real(kind=kind_phys), dimension(:,:,:), intent(inout) :: save_q
-      ! dqdti only allocated if cplchm is .true.
-      real(kind=kind_phys), dimension(:,:),     intent(inout) :: dqdti
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
       logical, intent(in) :: cscnv, satmedmf, trans_trac, ras
@@ -88,10 +86,6 @@
             enddo
          endif ! end if_ras or cfscnv or samf
          save_q(:,:,ntqv) = gq0(:,:,ntqv)
-      endif
-
-      if (cplchm) then
-        dqdti = zero
       endif
 
     end subroutine GFS_DCNV_generic_pre_run
