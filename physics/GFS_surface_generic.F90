@@ -204,20 +204,21 @@
 !> \section arg_table_GFS_surface_generic_post_run Argument Table
 !! \htmlinclude GFS_surface_generic_post_run.html
 !!
-      subroutine GFS_surface_generic_post_run (im, cplflx, cplchm, cplwav, lssav, icy, wet, dtf, ep1d, gflx, tgrs_1, qgrs_1, ugrs_1, vgrs_1,&
+      subroutine GFS_surface_generic_post_run (im, cplflx, cplchm, cplwav, lssav, dry, icy, wet,                                    &
+        dtf, ep1d, gflx, tgrs_1, qgrs_1, ugrs_1, vgrs_1,                                                                            &
         adjsfcdlw, adjsfcdsw, adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd, adjsfculw, adjsfculw_wat, adjnirbmu, adjnirdfu,           &
         adjvisbmu, adjvisdfu,t2m, q2m, u10m, v10m, tsfc, tsfc_wat, pgr, xcosz, evbs, evcw, trans, sbsno, snowc, snohf,              &
         epi, gfluxi, t1, q1, u1, v1, dlwsfci_cpl, dswsfci_cpl, dlwsfc_cpl, dswsfc_cpl, dnirbmi_cpl, dnirdfi_cpl, dvisbmi_cpl,       &
         dvisdfi_cpl, dnirbm_cpl, dnirdf_cpl, dvisbm_cpl, dvisdf_cpl, nlwsfci_cpl, nlwsfc_cpl, t2mi_cpl, q2mi_cpl, u10mi_cpl,        &
         v10mi_cpl, tsfci_cpl, psurfi_cpl, nnirbmi_cpl, nnirdfi_cpl, nvisbmi_cpl, nvisdfi_cpl, nswsfci_cpl, nswsfc_cpl, nnirbm_cpl,  &
         nnirdf_cpl, nvisbm_cpl, nvisdf_cpl, gflux, evbsa, evcwa, transa, sbsnoa, snowca, snohfa, ep,                                &
-        runoff, srunoff, runof, drain, lheatstrg, z0fac, e0fac, zorl, hflx, evap, hflxq, evapq, hffac, hefac, errmsg, errflg)
+        runoff, srunoff, runof, drain, lheatstrg, h0facu, h0facs, zvfun, hflx, evap, hflxq, hffac, errmsg, errflg)
 
         implicit none
 
         integer,                                intent(in) :: im
         logical,                                intent(in) :: cplflx, cplchm, cplwav, lssav
-        logical, dimension(:),                  intent(in) :: icy, wet
+        logical, dimension(:),                  intent(in) :: dry, icy, wet
         real(kind=kind_phys),                   intent(in) :: dtf
 
         real(kind=kind_phys), dimension(:),  intent(in)  :: ep1d, gflx, tgrs_1, qgrs_1, ugrs_1, vgrs_1, adjsfcdlw, adjsfcdsw,  &
@@ -235,11 +236,11 @@
 
         ! For canopy heat storage
         logical, intent(in) :: lheatstrg
-        real(kind=kind_phys), intent(in) :: z0fac, e0fac
-        real(kind=kind_phys), dimension(:), intent(in)  :: zorl
+        real(kind=kind_phys), intent(in) :: h0facu, h0facs
+        real(kind=kind_phys), dimension(:), intent(in)  :: zvfun
         real(kind=kind_phys), dimension(:), intent(in)  :: hflx,  evap
-        real(kind=kind_phys), dimension(:), intent(out) :: hflxq, evapq
-        real(kind=kind_phys), dimension(:), intent(out) :: hffac, hefac
+        real(kind=kind_phys), dimension(:), intent(out) :: hflxq
+        real(kind=kind_phys), dimension(:), intent(out) :: hffac
 
         ! CCPP error handling variables
         character(len=*), intent(out) :: errmsg
@@ -248,13 +249,8 @@
         ! Local variables
         real(kind=kind_phys), parameter :: albdf = 0.06_kind_phys
 
-        ! Parameters for canopy heat storage parametrization
-        real(kind=kind_phys), parameter :: z0min=0.2, z0max=1.0
-        real(kind=kind_phys), parameter :: u10min=2.5, u10max=7.5
-
         integer :: i
         real(kind=kind_phys) :: xcosz_loc, ocalnirdf_cpl, ocalnirbm_cpl, ocalvisdf_cpl, ocalvisbm_cpl
-        real(kind=kind_phys) :: tem, tem1, tem2
 
         ! Initialize CCPP error handling variables
         errmsg = ''
@@ -359,32 +355,28 @@
           enddo
         endif
 
-!  --- ...  Boundary Layer and Free atmospheic turbulence parameterization
 !
-!  in order to achieve heat storage within canopy layer, in the canopy heat
-!    storage parameterization the kinematic sensible and latent heat fluxes
-!    (hflx & evap) as surface boundary forcings to the pbl scheme are
-!    reduced as a function of surface roughness
+!  in order to achieve heat storage within canopy layer, in the canopy
+!    heat torage parameterization the kinematic sensible heat flux
+!    (hflx) as surface boundary forcing to the pbl scheme is
+!    reduced in a factor of hffac given as a function of surface roughness &
+!    green vegetation fraction (zvfun) 
 !
         do i=1,im
           hflxq(i) = hflx(i)
-          evapq(i) = evap(i)
-          hffac(i) = one
-          hefac(i) = one
+          hffac(i) = 1.0
         enddo
         if (lheatstrg) then
           do i=1,im
-            tem = 0.01_kind_phys * zorl(i)     ! change unit from cm to m
-            tem1 = (tem - z0min) / (z0max - z0min)
-            hffac(i) = z0fac * min(max(tem1, zero), one)
-            tem  = sqrt(u10m(i)*u10m(i)+v10m(i)*v10m(i))
-            tem1 = (tem - u10min) / (u10max - u10min)
-            tem2 = one - min(max(tem1, zero), one)
-            hffac(i) = tem2 * hffac(i)
-            hefac(i) = one + e0fac * hffac(i)
-            hffac(i) = one + hffac(i)
-            hflxq(i) = hflx(i) / hffac(i)
-            evapq(i) = evap(i) / hefac(i)
+            if (dry(i)) then
+              if(hflx(i) > 0.) then
+                hffac(i) = h0facu * zvfun(i)
+              else
+                hffac(i) = h0facs * zvfun(i)
+              endif
+              hffac(i) = 1. + hffac(i)
+              hflxq(i) = hflx(i) / hffac(i)
+            endif
           enddo
         endif
 
