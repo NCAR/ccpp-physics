@@ -4485,7 +4485,7 @@ ENDIF
 
     REAL, DIMENSION(IMS:IME,KMS:KME) :: Sh3D
 
-    REAL, DIMENSION(IMS:IME,KMS:KME), INTENT(inout), optional :: &
+    REAL, DIMENSION(IMS:IME,KMS:KME), INTENT(inout) :: &
          &qc_bl,qi_bl,cldfra_bl
     REAL, DIMENSION(KTS:KTE) :: qc_bl1D,qi_bl1D,cldfra_bl1D,&
                          qc_bl1D_old,qi_bl1D_old,cldfra_bl1D_old
