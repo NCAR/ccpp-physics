@@ -48,10 +48,10 @@
      &                          prsi,del,prsl,prslk,phii,phil,delt,
      &                          dusfc,dvsfc,dtsfc,dqsfc,dkt,hpbl,
      &                          kinver,xkzm_m,xkzm_h,xkzm_s,xkzminv,
-     &                          grav,rd,cp,hvap,fv,ntoz,dt3dt_PBL,
-     &                          du3dt_PBL,dv3dt_PBL,dq3dt_PBL,do3dt_PBL,
-     &                          gen_tend,ldiag3d,qdiag3d,
-     &                          errmsg,errflg)
+     &                          grav,rd,cp,hvap,fv,ntoz,dtend,dtidx,
+     &                          index_of_temperature,index_of_x_wind,
+     &                          index_of_y_wind,index_of_process_pbl,
+     &                          gen_tend,ldiag3d,ntqv,errmsg,errflg)
 !
       use machine  , only : kind_phys
       use funcphys , only : fpvs
@@ -78,10 +78,12 @@
      &  tau
       real(kind=kind_phys), dimension(:,:,:), intent(inout) :: rtg
 
-      real(kind=kind_phys), dimension(:,:),     intent(inout) :: 
-     &  du3dt_PBL, dv3dt_PBL, dt3dt_PBL, dq3dt_PBL, do3dt_PBL
+      real(kind=kind_phys), dimension(:,:,:),   intent(inout) :: dtend
+      integer,              dimension(:,:),     intent(in)    :: dtidx
+      integer, intent(in) :: index_of_temperature, index_of_x_wind,
+     &  index_of_y_wind, index_of_process_pbl, ntqv
       logical,                                  intent(in) :: ldiag3d, 
-     &  qdiag3d, gen_tend
+     &  gen_tend
 
       integer, dimension(:),                    intent(out) :: kpbl
       real(kind=kind_phys), dimension(:),       intent(out) :: dusfc,
@@ -126,6 +128,7 @@
      &,              prmin=0.25_kp,  prmax=4.0_kp,    vk=0.4_kp,
      &               cfac=6.5_kp
       real(kind=kind_phys) :: gravi, cont, conq, gocp, go2
+      integer :: idtend
 
       gravi = one  / grav
       cont  = cp   * gravi
@@ -468,19 +471,13 @@
         enddo
       enddo
       if(ldiag3d .and. .not. gen_tend) then
-        do  k = 1,km
-          do i = 1,im
-            ttend      = (a1(i,k)-t1(i,k))
-            dt3dt_PBL(i,k) = dt3dt_PBL(i,k) + ttend
-          enddo
-        enddo
-        if(qdiag3d) then
-          do  k = 1,km
-            do i = 1,im
-              qtend      = (a2(i,k)-q1(i,k,1))
-              dq3dt_PBL(i,k) = dq3dt_PBL(i,k) + qtend
-            enddo
-          enddo
+        idtend = dtidx(index_of_temperature,index_of_process_pbl)
+        if(idtend>=1) then
+          dtend(:,:,idtend) = dtend(:,:,idtend) + (a1-t1)
+        endif
+        idtend = dtidx(ntqv+100,index_of_process_pbl)
+        if(idtend>=1) then
+          dtend(:,:,idtend) = dtend(:,:,idtend) + a2-q1(:,:,1)
         endif
       endif
       do i = 1,im
@@ -500,15 +497,18 @@
             enddo
           endif
         enddo
-        if(ldiag3d .and. ntoz>0 .and. qdiag3d .and. .not. gen_tend) then
-          kk = ntoz
-          is = (kk-1) * km
-          do k = 1, km
-            do i = 1, im
-              qtend = (a2(i,k+is)-q1(i,k,kk))
-              do3dt_PBL(i,k) = do3dt_PBL(i,k)+qtend
+        if(ldiag3d .and. ntoz>0 .and. .not. gen_tend) then
+          idtend=dtidx(100+ntoz,index_of_process_pbl)
+          if(idtend>=1) then
+            kk = ntoz
+            is = (kk-1) * km
+            do k = 1, km
+              do i = 1, im
+                qtend = (a2(i,k+is)-q1(i,k,kk))
+                dtend(i,k,idtend) = dtend(i,k,idtend) + qtend
+              enddo
             enddo
-          enddo
+          endif
         endif
       endif
 !
@@ -556,14 +556,14 @@
         enddo
       enddo
       if (ldiag3d .and. .not. gen_tend) then
-        do k = 1,km
-          do i = 1,im
-            utend    = (a1(i,k)-u1(i,k))
-            vtend    = (a2(i,k)-v1(i,k))
-            du3dt_PBL(i,k) = du3dt_PBL(i,k) + utend
-            dv3dt_PBL(i,k) = dv3dt_PBL(i,k) + vtend
-          enddo
-        enddo
+        idtend = dtidx(index_of_x_wind,index_of_process_pbl)
+        if(idtend>=1) then
+          dtend(:,:,idtend) = dtend(:,:,idtend) + a1-u1
+        endif
+        idtend = dtidx(index_of_y_wind,index_of_process_pbl)
+        if(idtend>=1) then
+          dtend(:,:,idtend) = dtend(:,:,idtend) + a1-v1
+        endif
       endif
 !
       if (ntke > 0) then    ! solve tridiagonal problem for momentum and tke

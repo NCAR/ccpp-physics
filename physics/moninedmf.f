@@ -75,8 +75,9 @@
      &   dusfc,dvsfc,dtsfc,dqsfc,hpbl,hgamt,hgamq,dkt,dku,              &
      &   kinver,xkzm_m,xkzm_h,xkzm_s,lprnt,ipr,                         &
      &   xkzminv,moninq_fac,hurr_pbl,islimsk,var_ric,                   &
-     &   coef_ric_l,coef_ric_s,lssav,ldiag3d,qdiag3d,ntoz,              &
-     &   du3dt_PBL,dv3dt_PBL,dt3dt_PBL,dq3dt_PBL,do3dt_PBL,             &
+     &   coef_ric_l,coef_ric_s,ldiag3d,ntqv,rtg_ozone_index,ntoz,       &
+     &   dtend,dtidx,index_of_process_pbl,index_of_x_wind,              &
+     &   index_of_y_wind,index_of_temperature,                          &
      &   flag_for_pbl_generic_tend,errmsg,errflg)
 !
       use machine  , only : kind_phys
@@ -91,7 +92,7 @@
 !
 !     arguments
 !
-      logical, intent(in) :: lprnt, hurr_pbl, lssav, ldiag3d, qdiag3d
+      logical, intent(in) :: lprnt, hurr_pbl, ldiag3d
       logical, intent(in) :: flag_for_pbl_generic_tend
       integer, intent(in) :: ipr, islimsk(:)
       integer, intent(in) :: im, km, ntrac, ntcw, kinver(:), ntoz
@@ -103,9 +104,11 @@
      &                     coef_ric_l, coef_ric_s
       real(kind=kind_phys), intent(inout) :: dv(:,:),     du(:,:),      &
      &                     tau(:,:),    rtg(:,:,:)
-      ! Only allocated if ldiag3d or qdiag3d are true
-      real(kind=kind_phys), intent(inout), dimension(:,:) ::            &
-     &   du3dt_PBL,dv3dt_PBL,dt3dt_PBL,dq3dt_PBL,do3dt_PBL
+      ! dtend is only allocated if ldiag3d or qdiag3d are true
+      real(kind=kind_phys), intent(inout) :: dtend(:,:,:)
+      integer, intent(in) :: dtidx(:,:)
+      integer, intent(in) :: index_of_x_wind, index_of_y_wind,          &
+     & index_of_process_pbl, index_of_temperature, ntqv, rtg_ozone_index
       real(kind=kind_phys), intent(in) ::                               &
      &                     u1(:,:),     v1(:,:),                        &
      &                     t1(:,:),     q1(:,:,:),                      &
@@ -206,6 +209,8 @@
       real(kind=kind_phys) zstblmax,h1,     h2,     qlcr,  actei,
      &                     cldtime
       real :: ttend_fac
+
+      integer :: idtend1, idtend2
       
       !! for hurricane application
       real(kind=kind_phys) wspm(im,km-1)
@@ -281,6 +286,10 @@ c
       rdt   = 1. / dt2
       km1   = km - 1
       kmpbl = km / 2
+
+      idtend1 = 0
+      idtend2 = 0
+
 !>  - Compute physical height of the layer centers and interfaces from the geopotential height (zi and zl)
       do k=1,km
         do i=1,im
@@ -1297,15 +1306,28 @@ c
             rtg(i,k,1) = rtg(i,k,1)+qtend
             dtsfc(i)   = dtsfc(i)+cont*del(i,k)*ttend
             dqsfc(i)   = dqsfc(i)+conq*del(i,k)*qtend
-            if(lssav .and. ldiag3d .and. .not.                          &
-     &                flag_for_pbl_generic_tend) then
-               dt3dt_PBL(i,k) = dt3dt_PBL(i,k) + ttend*delt
-               if(qdiag3d) then
-                  dq3dt_PBL(i,k) = dq3dt_PBL(i,k) + qtend*delt
-               endif
-            endif
          enddo
       enddo
+      if(.not.flag_for_pbl_generic_tend) then
+        idtend1=dtidx(index_of_temperature,index_of_process_pbl)
+        idtend2=dtidx(ntqv+100,index_of_process_pbl)
+        if(idtend1>=1) then
+           do  k = 1,km
+              do i = 1,im
+                 ttend      = (a1(i,k)-t1(i,k)) * rdt
+                 dtend(i,k,idtend1) = dtend(i,k,idtend1) + ttend*delt
+              enddo
+           enddo
+        endif
+        if(idtend2>=1) then
+           do  k = 1,km
+              do i = 1,im
+                 qtend      = (a2(i,k)-q1(i,k,1))*rdt
+                 dtend(i,k,idtend2) = dtend(i,k,idtend2) + qtend*delt
+              enddo
+           enddo
+        endif
+      endif
       if(ntrac >= 2) then
         do kk = 2, ntrac
           is = (kk-1) * km
@@ -1316,16 +1338,19 @@ c
             enddo
           enddo
         enddo
-        if(lssav .and. ldiag3d .and. ntoz>0 .and. qdiag3d .and.         &
-     &               .not. flag_for_pbl_generic_tend) then
-          kk = ntoz
-          is = (kk-1) * km
-          do k = 1, km
-            do i = 1, im
-              qtend = (a2(i,k+is)-q1(i,k,kk))
-              do3dt_PBL(i,k) = do3dt_PBL(i,k)+qtend
-            enddo
-          enddo
+        if(.not.flag_for_pbl_generic_tend .and. ldiag3d .and.           &
+     &        rtg_ozone_index>0) then
+          idtend1 = dtidx(100+ntoz,index_of_process_pbl)
+          if(idtend1>=1) then
+             kk = rtg_ozone_index
+             is = (kk-1) * km
+             do k = 1, km
+               do i = 1, im
+                 qtend = (a2(i,k+is)-q1(i,k,kk))
+                 dtend(i,k,idtend1) = dtend(i,k,idtend1)+qtend
+               enddo
+             enddo
+          endif
         endif
       endif
 !
@@ -1435,11 +1460,6 @@ c
             dv(i,k)  = dv(i,k)  + vtend
             dusfc(i) = dusfc(i) + conw*del(i,k)*utend
             dvsfc(i) = dvsfc(i) + conw*del(i,k)*vtend
-            if(lssav .and. ldiag3d .and. .not.                          &
-     &             flag_for_pbl_generic_tend) then
-               du3dt_PBL(i,k) = du3dt_PBL(i,k) + utend*delt
-               dv3dt_PBL(i,k) = dv3dt_PBL(i,k) + vtend*delt
-            endif
 !
 !  for dissipative heating for ecmwf model
 !
@@ -1452,6 +1472,27 @@ c
 !
          enddo
       enddo
+      if(.not.flag_for_pbl_generic_tend) then
+         idtend1 = dtidx(index_of_x_wind,index_of_process_pbl)
+         if(idtend1>=1) then
+            do k = 1,km
+               do i = 1,im
+                  utend = (a1(i,k)-u1(i,k))*rdt
+                  dtend(i,k,idtend1) = dtend(i,k,idtend1) + utend*delt
+               enddo
+            enddo
+         endif
+
+         idtend2 = dtidx(index_of_y_wind,index_of_process_pbl)
+         if(idtend2>=1) then
+            do k = 1,km
+               do i = 1,im
+                  vtend = (a2(i,k)-v1(i,k))*rdt
+                  dtend(i,k,idtend2) = dtend(i,k,idtend2) + vtend*delt
+               enddo
+            enddo
+         endif
+      endif
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !

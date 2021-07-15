@@ -114,14 +114,6 @@
   type = integer
   intent = in
   optional = F
-[ldiag3d]
-  standard_name = flag_diagnostics_3D
-  long_name = flag for calculating 3-D diagnostic fields
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
 [me]
   standard_name = mpi_rank
   long_name = rank of the current MPI task

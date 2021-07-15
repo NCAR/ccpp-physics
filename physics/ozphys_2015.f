@@ -49,11 +49,10 @@
 !!     climatological T and O3 are in location 5 and 6 of prdout array
 !!\author June 2015 - Shrinivas Moorthi
       subroutine ozphys_2015_run (                                      &
-     &                        im, levs, ko3, dt, oz, tin, po3,          &
-     &                        prsl, prdout, pl_coeff, delp,             &
-     &                        ldiag3d, qdiag3d,                         &
-     &                        ozp1,ozp2,ozp3,ozp4,con_g,                &
-     &                        me, errmsg, errflg)
+     &     im, levs, ko3, dt, oz, tin, po3, prsl, prdout, pl_coeff,     &
+     &     delp, ldiag3d, dtend, dtidx, ntoz, index_of_process_prod_loss&
+     &     , index_of_process_ozmix, index_of_process_temp,             &
+     &     index_of_process_overhead_ozone, con_g, me, errmsg, errflg)
 !
 !
       use machine , only : kind_phys
@@ -62,22 +61,21 @@
       real(kind=kind_phys),intent(in) :: con_g
       real :: gravi
       integer, intent(in) :: im, levs, ko3, pl_coeff,me
-      logical, intent(in) :: ldiag3d, qdiag3d
       real(kind=kind_phys), intent(in) :: po3(:),                       &
      &                                    prsl(:,:), tin(:,:),          &
      &                                    delp(:,:),                    &
      &                                    prdout(:,:,:), dt
-      ! These arrays may not be allocated and need assumed array sizes
-      real(kind=kind_phys), intent(inout) ::                            &
-     &                  ozp1(:,:), ozp2(:,:), ozp3(:,:),ozp4(:,:)
-      real(kind=kind_phys), intent(inout) :: oz(:,:)
-
+      real(kind=kind_phys), intent(inout) :: dtend(:,:,:)
+      integer, intent(in) :: dtidx(:,:), ntoz,                          &
+     &  index_of_process_prod_loss, index_of_process_ozmix,             &
+     &  index_of_process_temp, index_of_process_overhead_ozone
+      real(kind=kind_phys), intent(inout) :: oz(im,levs)
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
-      integer k,kmax,kmin,l,i,j
-      logical flg(im)
+      integer k,kmax,kmin,l,i,j, idtend(4)
+      logical              ldiag3d, flg(im), qdiag3d
       real(kind=kind_phys) pmax, pmin, tem, temp
       real(kind=kind_phys) wk1(im), wk2(im), wk3(im),prod(im,pl_coeff), &
      &                     ozib(im), colo3(im,levs+1), coloz(im,levs+1),&
@@ -86,6 +84,15 @@
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+
+      if(ldiag3d) then
+         idtend(1) = dtidx(100+ntoz,index_of_process_prod_loss)          ! was ozp1
+         idtend(2) = dtidx(100+ntoz,index_of_process_ozmix)              ! was ozp2
+         idtend(3) = dtidx(100+ntoz,index_of_process_temp)               ! was ozp3
+         idtend(4) = dtidx(100+ntoz,index_of_process_overhead_ozone)     ! was ozp4
+      else
+         idtend=0
+      endif
 
 !ccpp: save input oz in ozi
       ozi = oz
@@ -160,14 +167,21 @@
 !ccpp            ozo(i,l) = (ozib(i)  + tem*dt) / (1.0 - prod(i,2)*dt)
           oz(i,l) = (ozib(i)  + tem*dt) / (1.0 - prod(i,2)*dt)
         enddo
-        if (ldiag3d .and. qdiag3d) then     !     ozone change diagnostics
-          do i=1,im
-            ozp1(i,l) = ozp1(i,l) + (prod(i,1)-prod(i,2)*prod(i,6))*dt
-            ozp2(i,l) = ozp2(i,l) + (oz(i,l) - ozib(i))
-            ozp3(i,l) = ozp3(i,l) + prod(i,3)*(tin(i,l)-prod(i,5))*dt
-            ozp4(i,l) = ozp4(i,l) + prod(i,4)
-     &                              * (colo3(i,l)-coloz(i,l))*dt
-          enddo
+        if(idtend(1)>=1) then
+           dtend(:,l,idtend(1)) = dtend(:,l,idtend(1)) + ! was ozp1
+     &          (prod(:,1)-prod(:,2)*prod(:,6))*dt
+        endif
+        if(idtend(2)>=1) then
+           dtend(:,l,idtend(2)) = dtend(:,l,idtend(2)) + ! was ozp2
+     &          (oz(:,l) - ozib(:))
+        endif
+        if(idtend(3)>=1) then
+           dtend(:,l,idtend(3)) = dtend(:,l,idtend(3)) + ! was ozp3
+     &          prod(:,3)*(tin(:,l)-prod(:,5))*dt
+        endif
+        if(idtend(4)>=1) then
+           dtend(:,l,idtend(4)) = dtend(:,l,idtend(4)) + ! was ozp4
+     &       prod(:,4) * (colo3(:,l)-coloz(:,l))*dt
         endif
       enddo                                ! vertical loop
 !

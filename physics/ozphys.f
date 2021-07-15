@@ -46,8 +46,10 @@
 !> @{
       subroutine ozphys_run (                                           &
      &  im, levs, ko3, dt, oz, tin, po3,                                &
-     &  prsl, prdout, oz_coeff, delp, ldiag3d, qdiag3d,                 &
-     &  ozp1, ozp2, ozp3, ozp4, con_g, me, errmsg, errflg)
+     &  prsl, prdout, oz_coeff, delp, ldiag3d,                          &
+     &  ntoz, dtend, dtidx, index_of_process_prod_loss,                 &
+     &  index_of_process_ozmix, index_of_process_temp,                  &
+     &  index_of_process_overhead_ozone, con_g, me, errmsg, errflg)
 !
 !     this code assumes that both prsl and po3 are from bottom to top
 !     as are all other variables
@@ -57,23 +59,23 @@
 !
       ! Interface variables
       integer, intent(in) :: im, levs, ko3, oz_coeff, me
-      real(kind=kind_phys), intent(inout) ::                            &
-     &                     oz(:,:)
-      ! These arrays may not be allocated and need assumed array sizes
-      real(kind=kind_phys), intent(inout) ::                            &
-     &                     ozp1(:,:), ozp2(:,:), ozp3(:,:), ozp4(:,:)
+      real(kind=kind_phys), intent(inout) :: oz(:,:)
+      real(kind=kind_phys), intent(inout) :: dtend(:,:,:)
+      integer, intent(in) :: dtidx(:,:), ntoz,                          &
+     &  index_of_process_prod_loss, index_of_process_ozmix,             &
+     &  index_of_process_temp, index_of_process_overhead_ozone
       real(kind=kind_phys), intent(in) ::                               &
      &                     dt, po3(:), prdout(:,:,:),                   &
      &                     prsl(:,:), tin(:,:), delp(:,:),              &
      &                     con_g
       real :: gravi
-      logical, intent(in) :: ldiag3d, qdiag3d
+      logical, intent(in) :: ldiag3d
       
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 !
       ! Local variables
-      integer k,kmax,kmin,l,i,j
+      integer k,kmax,kmin,l,i,j, idtend(4)
       logical flg(im)
       real(kind=kind_phys) pmax, pmin, tem, temp
       real(kind=kind_phys) wk1(im), wk2(im), wk3(im), prod(im,oz_coeff),
@@ -86,6 +88,17 @@
 !     save input oz in ozi
       ozi = oz
       gravi=1.0/con_g
+
+
+      if(ldiag3d) then
+         idtend(1) = dtidx(100+ntoz,index_of_process_prod_loss)          ! was ozp1
+         idtend(2) = dtidx(100+ntoz,index_of_process_ozmix)              ! was ozp2
+         idtend(3) = dtidx(100+ntoz,index_of_process_temp)               ! was ozp3
+         idtend(4) = dtidx(100+ntoz,index_of_process_overhead_ozone)     ! was ozp4
+      else
+         idtend=0
+      endif
+
 !
 !> - Calculate vertical integrated column ozone values.
       if (oz_coeff > 2) then
@@ -152,11 +165,13 @@
             oz(i,l)   = (ozib(i) + prod(i,1)*dt) / (1.0 + prod(i,2)*dt)
           enddo
 !
-          if (ldiag3d .and. qdiag3d) then     !     ozone change diagnostics
-            do i=1,im
-              ozp1(i,l) = ozp1(i,l) + prod(i,1)*dt
-              ozp2(i,l) = ozp2(i,l) + (oz(i,l) - ozib(i))
-            enddo
+          if(idtend(1)>=1) then
+             dtend(:,l,idtend(1)) = dtend(:,l,idtend(1)) +              ! was ozp1
+     &            prod(:,1)*dt
+          endif
+          if(idtend(2)>=1) then
+             dtend(:,l,idtend(2)) = dtend(:,l,idtend(2)) +              ! was ozp2
+     &            (oz(:,l) - ozib(:))
           endif
         endif
 !> - Calculate the 4 terms of prognostic ozone change during time \a dt:  
@@ -173,16 +188,23 @@
 !    &,' ozib=',ozib(i),' l=',l,' tin=',tin(i,l),'colo3=',colo3(i,l+1)
             oz(i,l) = (ozib(i)  + tem*dt) / (1.0 + prod(i,2)*dt)
           enddo
-          if(ldiag3d .and. qdiag3d) then
-            do i=1,im
-              ozp1(i,l) = ozp1(i,l) + prod(i,1)*dt
-              ozp2(i,l) = ozp2(i,l) + (oz(i,l) - ozib(i))
-              ozp3(i,l) = ozp3(i,l) + prod(i,3)*tin(i,l)*dt
-              ozp4(i,l) = ozp4(i,l) + prod(i,4)*colo3(i,l+1)*dt
-            enddo
+          if(idtend(1)>=1) then
+            dtend(:,l,idtend(1)) = dtend(:,l,idtend(1)) +              ! was ozp1
+     &            prod(:,1)*dt
+          endif
+          if(idtend(2)>=1) then
+            dtend(:,l,idtend(2)) = dtend(:,l,idtend(2)) +              ! was ozp2
+     &            (oz(:,l)-ozib(:))
+          endif
+          if(idtend(3)>=1) then
+            dtend(:,l,idtend(3)) = dtend(:,l,idtend(3)) +              ! was ozp3
+     &            prod(:,3)*tin(:,l)*dt
+          endif
+          if(idtend(4)>=1) then
+            dtend(:,l,idtend(4)) = dtend(:,l,idtend(4)) +              ! was ozp4
+     &            prod(:,4)*colo3(:,l+1)*dt
           endif
         endif
-
       enddo                                ! vertical loop
 !
       return

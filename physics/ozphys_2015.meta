@@ -140,49 +140,62 @@
   type = logical
   intent = in
   optional = F
-[qdiag3d]
-  standard_name = flag_tracer_diagnostics_3D
-  long_name = flag for 3d tracer diagnostic fields
-  units = flag
-  dimensions = ()
-  type = logical
+[dtend]
+  standard_name = cumulative_change_of_state_variables
+  long_name = diagnostic tendencies for state variables
+  units = various
+  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_cumulative_change_processes)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dtidx]
+  standard_name = cumulative_change_of_state_variables_outer_index
+  long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
+  units = index
+  dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
+  type = integer
   intent = in
   optional = F
-[ozp1]
-  standard_name = cumulative_change_in_ozone_concentration_due_to_production_and_loss_rate
-  long_name = cumulative change in ozone concentration due to production and loss rate
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
+[ntoz]
+  standard_name = index_for_ozone
+  long_name = tracer index for ozone mixing ratio
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
   optional = F
-[ozp2]
-  standard_name = cumulative_change_in_ozone_concentration_due_to_ozone_mixing_ratio
-  long_name = cumulative change in ozone concentration due to ozone mixing ratio
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
+[index_of_process_prod_loss]
+  standard_name = index_of_production_and_loss_process_in_cumulative_change_index
+  long_name = index of production and loss effect in photochemistry process in second dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
   optional = F
-[ozp3]
-  standard_name = cumulative_change_in_ozone_concentration_due_to_temperature
-  long_name = cumulative change in ozone concentration due to temperature
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
+[index_of_process_ozmix]
+  standard_name = index_of_ozone_mixing_ratio_process_in_cumulative_change_index
+  long_name = index of ozone mixing ratio effect in photochemistry process in second dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
   optional = F
-[ozp4]
-  standard_name = cumulative_change_in_ozone_concentration_due_to_overhead_ozone_column
-  long_name = cumulative change in ozone concentration due to overhead ozone column
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
+[index_of_process_temp]
+  standard_name = index_of_temperature_process_in_cumulative_change_index
+  long_name = index of temperature effect in photochemistry process in second dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[index_of_process_overhead_ozone]
+  standard_name = index_of_overhead_process_in_cumulative_change_index
+  long_name = index of overhead ozone effect in photochemistry process in second dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
   optional = F
 [con_g]
   standard_name = gravitational_acceleration

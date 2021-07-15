@@ -214,7 +214,8 @@ contains
          dudt_mtb, dudt_tms, du3dt_mtb, du3dt_ogw, du3dt_tms,                          &
          dudt, dvdt, dtdt, rdxzb, con_g, con_omega, con_pi, con_cp, con_rd, con_rv,    &
          con_rerth, con_fvirt, rain, ntke, q_tke, dqdt_tke, lprnt, ipr,                &
-         ldu3dt_ogw, ldv3dt_ogw, ldt3dt_ogw, ldu3dt_cgw, ldv3dt_cgw, ldt3dt_cgw,       &
+         dtend, dtidx, index_of_temperature, index_of_x_wind, index_of_y_wind,         &
+         index_of_process_orographic_gwd, index_of_process_nonorographic_gwd,          &
          ldiag3d, lssav, flag_for_gwd_generic_tend, do_ugwp_v0, do_ugwp_v0_orog_only,  &
          do_ugwp_v0_nst_only, do_gsl_drag_ls_bl, do_gsl_drag_ss, do_gsl_drag_tofd,     &
          gwd_opt, errmsg, errflg)
@@ -267,9 +268,10 @@ contains
     real(kind=kind_phys),    intent(out), dimension(:,:)        :: dudt_mtb, dudt_tms
     real(kind=kind_phys),    intent(out), dimension(:,:)        :: dtaux2d_ls, dtauy2d_ls
 
-    ! These arrays are only allocated if ldiag=.true.
-    real(kind=kind_phys),    intent(inout), dimension(:,:)      :: ldu3dt_ogw, ldv3dt_ogw, ldt3dt_ogw
-    real(kind=kind_phys),    intent(inout), dimension(:,:)      :: ldu3dt_cgw, ldv3dt_cgw, ldt3dt_cgw
+    real(kind=kind_phys), intent(inout) :: dtend(:,:,:)
+    integer, intent(in) :: dtidx(:,:), index_of_temperature, index_of_x_wind, &
+         index_of_y_wind, index_of_process_nonorographic_gwd, &
+         index_of_process_orographic_gwd
     logical,                 intent(in)                         :: ldiag3d, lssav
 
     ! These arrays only allocated if ldiag_ugwp = .true.
@@ -305,7 +307,7 @@ contains
  
     real(kind=kind_phys), parameter :: tamp_mpa=30.e-3
 
-    integer :: nmtvr_temp
+    integer :: nmtvr_temp, idtend
 
     real(kind=kind_phys), dimension(:,:), allocatable :: tke
     real(kind=kind_phys), dimension(:),   allocatable :: turb_fac, tem
@@ -337,9 +339,11 @@ contains
                  dusfc_ss,dvsfc_ss,dusfc_fd,dvsfc_fd,                &
                  slmsk,br1,hpbl,con_g,con_cp,con_rd,con_rv,          &
                  con_fvirt,con_pi,lonr,                              &
-                 cdmbgwd(1:2),me,master,lprnt,ipr,rdxzb,dx,gwd_opt,  &
+                 cdmbgwd,me,master,lprnt,ipr,rdxzb,dx,gwd_opt,       &
                  do_gsl_drag_ls_bl,do_gsl_drag_ss,do_gsl_drag_tofd,  &
-                 errmsg,errflg)
+                 dtend, dtidx, index_of_process_orographic_gwd,      &
+                 index_of_temperature, index_of_x_wind,              &
+                 index_of_y_wind, ldiag3d, errmsg, errflg)
 !
 ! put zeros due to xy GSL-drag style: dtaux2d_bl,dtauy2d_bl,dtaux2d_ss.......dusfc_ls,dvsfc_ls
 !
@@ -390,13 +394,20 @@ contains
 
 
       if(ldiag3d .and. lssav .and. .not. flag_for_gwd_generic_tend) then
-        do k=1,levs
-          do i=1,im
-             ldu3dt_ogw(i,k) = ldu3dt_ogw(i,k) + Pdudt(i,k)*dtp
-             ldv3dt_ogw(i,k) = ldv3dt_ogw(i,k) + Pdvdt(i,k)*dtp
-             ldt3dt_ogw(i,k) = ldt3dt_ogw(i,k) + Pdtdt(i,k)*dtp
-          enddo
-        enddo
+        idtend = dtidx(index_of_x_wind,index_of_process_orographic_gwd)
+        if(idtend>=1) then
+          dtend(:,:,idtend) = dtend(:,:,idtend) + Pdudt*dtp
+        endif
+        
+        idtend = dtidx(index_of_y_wind,index_of_process_orographic_gwd)
+        if(idtend>=1) then
+          dtend(:,:,idtend) = dtend(:,:,idtend) + Pdvdt*dtp
+        endif
+
+        idtend = dtidx(index_of_temperature,index_of_process_orographic_gwd)
+        if(idtend>=1) then
+          dtend(:,:,idtend) = dtend(:,:,idtend) + Pdtdt*dtp
+        endif
       endif
    
     end if 
@@ -483,13 +494,20 @@ contains
       endif  ! cdmbgwd(3) > 0.0
  
       if(ldiag3d .and. lssav .and. .not. flag_for_gwd_generic_tend) then
-        do k=1,levs
-          do i=1,im
-             ldu3dt_cgw(i,k) = ldu3dt_cgw(i,k) + (gw_dudt(i,k) - Pdudt(i,k))*dtp
-             ldv3dt_cgw(i,k) = ldv3dt_cgw(i,k) + (gw_dvdt(i,k) - Pdvdt(i,k))*dtp
-             ldt3dt_cgw(i,k) = ldt3dt_cgw(i,k) + (gw_dtdt(i,k) - Pdtdt(i,k))*dtp
-          enddo
-        enddo
+        idtend = dtidx(index_of_x_wind,index_of_process_nonorographic_gwd)
+        if(idtend>=1) then
+          dtend(:,:,idtend) = dtend(:,:,idtend) + Pdudt*dtp
+        endif
+        
+        idtend = dtidx(index_of_y_wind,index_of_process_nonorographic_gwd)
+        if(idtend>=1) then
+          dtend(:,:,idtend) = dtend(:,:,idtend) + Pdvdt*dtp
+        endif
+
+        idtend = dtidx(index_of_temperature,index_of_process_nonorographic_gwd)
+        if(idtend>=1) then
+          dtend(:,:,idtend) = dtend(:,:,idtend) + Pdtdt*dtp
+        endif
       endif
 
     end if  ! do_ugwp_v0.or.do_ugwp_v0_nst_only 

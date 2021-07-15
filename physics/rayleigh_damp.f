@@ -22,10 +22,10 @@
 !>\section gen_ray_damp_run GFS rayleigh_damp_runGeneral Algorithm
 !> @{
       subroutine rayleigh_damp_run (                                    &
-     &           lsidea,IM,KM,A,B,C,U1,V1,DT,CP,                        &
-     &           LEVR,pgr,PRSL,PRSLRD0,ral_ts,                          &
-     &           ldiag3d,du3dt,dv3dt,dt3dt,                             &
-     &           errmsg,errflg)
+     &  lsidea,IM,KM,A,B,C,U1,V1,DT,CP,LEVR,pgr,PRSL,PRSLRD0,ral_ts,    &
+     &  ldiag3d,dtend,dtidx,index_of_process_rayleigh_damping,          &
+     &  index_of_temperature,index_of_x_wind,index_of_y_wind,           &
+     &  errmsg,errflg)
 !
 !   ********************************************************************
 ! ----->  I M P L E M E N T A T I O N    V E R S I O N   <----------
@@ -72,9 +72,10 @@
       real(kind=kind_phys),intent(in)    :: pgr(:), PRSL(:,:)
       real(kind=kind_phys),intent(in)    :: U1(:,:), V1(:,:)
       real(kind=kind_phys),intent(inout) :: A(:,:), B(:,:), C(:,:)
-      real(kind=kind_phys),intent(inout) :: du3dt(:,:)
-      real(kind=kind_phys),intent(inout) :: dv3dt(:,:)
-      real(kind=kind_phys),intent(inout) :: dt3dt(:,:)
+      real(kind=kind_phys),optional, intent(inout) :: dtend(:,:,:)
+      integer, intent(in)                :: dtidx(:,:),                  &
+     &  index_of_process_rayleigh_damping, index_of_temperature,         &
+     &  index_of_x_wind, index_of_y_wind
       character(len=*),    intent(out)   :: errmsg
       integer,             intent(out)   :: errflg
 
@@ -83,7 +84,18 @@
       real(kind=kind_phys) DTAUX, DTAUY, wrk1, rtrd1, rfactrd, wrk2
      &,                    ENG0, ENG1, tem1, tem2, dti, hfbcpdt, rtrd
       real(kind=kind_phys) tx1(im), deltaA, deltaB, deltaC
-      integer              i, k
+      integer              i, k, uidx,vidx,tidx
+
+      if(ldiag3d) then
+         uidx=dtidx(index_of_x_wind,index_of_process_rayleigh_damping)
+         vidx=dtidx(index_of_y_wind,index_of_process_rayleigh_damping)
+         tidx=dtidx(index_of_temperature,                               &
+     &              index_of_process_rayleigh_damping)
+      else
+         uidx=0
+         vidx=0
+         tidx=0
+      endif
 !
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -121,10 +133,14 @@
           A(I,K)  = A(I,K) + deltaA
           B(I,K)  = B(I,K) + deltaB
           C(I,K)  = C(I,K) + deltaC
-          IF(ldiag3d) THEN
-             dv3dt(I,K) = dv3dt(I,K) + deltaA
-             du3dt(I,K) = du3dt(I,K) + deltaB
-             dt3dt(I,K) = dt3dt(I,K) + deltaC
+          IF(vidx>=1) THEN
+            dtend(i,k,vidx) = dtend(i,k,vidx) + deltaA
+          ENDIF
+          IF(uidx>=1) THEN
+            dtend(i,k,uidx) = dtend(i,k,uidx) + deltaB
+          ENDIF
+          IF(tidx>=1) THEN
+            dtend(i,k,tidx) = dtend(i,k,tidx) + deltaC
           ENDIF
         ENDDO
       ENDDO
