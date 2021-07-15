@@ -60,7 +60,7 @@
   intent = in
   optional = F
 [cactiv_m]
-  standard_name = conv_mid_activity_counter
+  standard_name = mid_conv_activity_counter
   long_name = midlevel convective activity memory
   units = none
   dimensions = (horizontal_loop_extent)
