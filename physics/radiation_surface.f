@@ -464,49 +464,54 @@
             asenb_wat = asevb_wat
           endif
 
-          if (icy(i)) then
-          !-- Computation of ice albedo
-            asnow = 0.02*snowf(i)
-            argh  = min(0.50, max(.025, 0.01*zorlf(i)))
-            hrgh  = min(f_one,max(0.20,1.0577-1.1538e-3*hprif(i)))
-            fsno0 = asnow / (argh + asnow) * hrgh ! snow fraction on ice
-            ! diffused
-            if (tsknf(i) > 271.1 .and. tsknf(i) < 271.5) then
-            !tgs: looks like albedo reduction from puddles on ice
-              a1 = (tsknf(i) - 271.1)**2
-              asevd_ice = 0.7 - 4.0*a1
-              asend_ice = 0.65 - 3.6875*a1
+          if (icy(i)) then   !-- Computation of ice albedo
+
+            if (use_cice_alb .and. lakefrac(i)  < 0.0) then !-- use ice albedo from CICE for sea-ice
+              asevd_ice = icealbivis(i)
+              asend_ice = icealbinir(i)
+              asevb_ice = icealbdvis(i)
+              asenb_ice = icealbdnir(i)
             else
-              asevd_ice = 0.70
-              asend_ice = 0.65
-            endif
-            ! direct
-            asevb_ice = asevd_ice
-            asenb_ice = asend_ice
-
-            if (fsno0 > f_zero) then
-            ! Snow on ice
-              dtgd = max(f_zero, min(5.0, (con_ttp-tisfc(i)) ))
-              b1   = 0.03 * dtgd
-              asnvd = (asevd_ice + b1) ! diffused snow albedo
-              asnnd = (asend_ice + b1)
-              if (coszf(i) > 0.0001 .and. coszf(i) < 0.5) then ! direct snow albedo
-                csnow = 0.5 * (3.0 / (f_one+4.0*coszf(i)) - f_one)
-                asnvb = min( 0.98, asnvd+(f_one-asnvd)*csnow )
-                asnnb = min( 0.98, asnnd+(f_one-asnnd)*csnow )
+              asnow = 0.02*snowf(i)
+              argh  = min(0.50, max(.025, 0.01*zorlf(i)))
+              hrgh  = min(f_one,max(0.20,1.0577-1.1538e-3*hprif(i)))
+              fsno0 = asnow / (argh + asnow) * hrgh ! snow fraction on ice
+              ! diffused
+              if (tsknf(i) > 271.1 .and. tsknf(i) < 271.5) then
+              !tgs: looks like albedo reduction from puddles on ice
+                a1 = (tsknf(i) - 271.1)**2
+                asevd_ice = 0.7 - 4.0*a1
+                asend_ice = 0.65 - 3.6875*a1
               else
-                asnvb = asnvd
-                asnnb = asnnd
+                asevd_ice = 0.70
+                asend_ice = 0.65
               endif
+              ! direct
+              asevb_ice = asevd_ice
+              asenb_ice = asend_ice
 
-              ! composite ice and snow albedos
-              asevd_ice = asevd_ice * (1. - fsno0) + asnvd * fsno0
-              asend_ice = asend_ice * (1. - fsno0) + asnnd * fsno0
-              asevb_ice = asevb_ice * (1. - fsno0) + asnvb * fsno0
-              asenb_ice = asenb_ice * (1. - fsno0) + asnnb * fsno0
-            endif ! snow
-          else
-          ! icy = false, fill in values
+              if (fsno0 > f_zero) then     ! Snow on ice
+                dtgd = max(f_zero, min(5.0, (con_ttp-tisfc(i)) ))
+                b1   = 0.03 * dtgd
+                asnvd = (asevd_ice + b1) ! diffused snow albedo
+                asnnd = (asend_ice + b1)
+                if (coszf(i) > 0.0001 .and. coszf(i) < 0.5) then ! direct snow albedo
+                  csnow = 0.5 * (3.0 / (f_one+4.0*coszf(i)) - f_one)
+                  asnvb = min( 0.98, asnvd+(f_one-asnvd)*csnow )
+                  asnnb = min( 0.98, asnnd+(f_one-asnnd)*csnow )
+                else
+                  asnvb = asnvd
+                  asnnb = asnnd
+                endif
+
+                ! composite ice and snow albedos
+                asevd_ice = asevd_ice * (1. - fsno0) + asnvd * fsno0
+                asend_ice = asend_ice * (1. - fsno0) + asnnd * fsno0
+                asevb_ice = asevb_ice * (1. - fsno0) + asnvb * fsno0
+                asenb_ice = asenb_ice * (1. - fsno0) + asnnb * fsno0
+              endif ! snow
+            endif   ! if (use_cice_alb .and. lakefrac > 0)
+          else      ! icy = false, fill in values
             asevd_ice = 0.70
             asend_ice = 0.65
             asevb_ice = 0.70
