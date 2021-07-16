@@ -45,11 +45,10 @@
      &       t0c, rd, ps, t1, q1, delt,                                 &
      &       sfcemis, dlwflx, sfcnsw, sfcdsw, srflag,                   &
      &       cm, ch, prsl1, prslki, prsik1, prslk1, wind,               &
-     &       flag_iter, lprnt, ipr, thsfc_loc,                          &
+     &       flag_iter, use_flake, lprnt, ipr, thsfc_loc,               &
      &       hice, fice, tice, weasd, tskin, tprcp, tiice, ep,          & !  ---  input/outputs:
-     &       snwdph, qsurf, snowmt, gflux, cmm, chh, evap, hflx,        & !  
-     &       frac_grid, icy, islmsk_cice,                               &
-     &       min_lakeice, min_seaice, oceanfrac,                        &
+     &       snwdph, qsurf, snowmt, gflux, cmm, chh, evap, hflx,        &
+     &       islmsk,                                                    &
      &       errmsg, errflg
      &     )
 
@@ -71,22 +70,22 @@
 !                                                                       !
 !  subprogram called:  ice3lay.                                         !
 !                                                                       !
-!>  program history log:                                                 
-!!-         2005  --  xingren wu created  from original progtm and added  
-!!                     two-layer ice model                               
-!!-         200x  -- sarah lu    added flag_iter           
-!!-    oct  2006  -- h. wei      added cmm and chh to output     
+!>  program history log:
+!!-         2005  --  xingren wu created  from original progtm and added
+!!                     two-layer ice model
+!!-         200x  -- sarah lu    added flag_iter
+!!-    oct  2006  -- h. wei      added cmm and chh to output
 !!-         2007  -- x. wu modified for mom4 coupling (i.e. cpldice)
 !!                                    (not used anymore)
-!!-         2007  -- s. moorthi micellaneous changes   
-!!-    may  2009  -- y.-t. hou   modified to include surface emissivity  
-!!                     effect on lw radiation. replaced the confusing  
+!!-         2007  -- s. moorthi micellaneous changes
+!!-    may  2009  -- y.-t. hou   modified to include surface emissivity
+!!                     effect on lw radiation. replaced the confusing
 !!                     slrad with sfc net sw sfcnsw (dn-up). reformatted
-!!                     the code and add program documentation block. 
-!!-    sep  2009 -- s. moorthi removed rcl, changed pressure units and 
-!!                     further optimized    
-!!-    jan  2015 -- x. wu change "cimin = 0.15" for both  
-!!                              uncoupled and coupled case 
+!!                     the code and add program documentation block.
+!!-    sep  2009 -- s. moorthi removed rcl, changed pressure units and
+!!                     further optimized
+!!-    jan  2015 -- x. wu change "cimin = 0.15" for both
+!!                              uncoupled and coupled case
 !                                                                       !
 !                                                                       !
 !  ====================  defination of variables  ====================  !
@@ -111,6 +110,7 @@
 !     islimsk  - integer, sea/land/ice mask (=0/1/2)               im   !
 !     wind     - real,                                             im   !
 !     flag_iter- logical,                                          im   !
+!     use_flake- logical, true for lakes when when lkm > 0         im   !
 !     thsfc_loc- logical, reference pressure for potential temp    im   !
 !                                                                       !
 !  input/outputs:                                                       !
@@ -135,7 +135,7 @@
 !                                                                       !
 ! ===================================================================== !
 !
-      use machine, only : kind_phys
+      use machine,  only : kind_phys
       use funcphys, only : fpvs
 !
       implicit none
@@ -155,21 +155,18 @@
       integer, intent(in) :: im, kice, ipr
       logical, intent(in) :: lprnt
       logical, intent(in) :: thsfc_loc
-      logical, intent(in) :: frac_grid
 
       real (kind=kind_phys), intent(in) :: sbc, hvap, tgice, cp, eps,   &
      &       epsm1, grav, rvrdm1, t0c, rd
 
       real (kind=kind_phys), dimension(:), intent(in) :: ps,            &
      &       t1, q1, sfcemis, dlwflx, sfcnsw, sfcdsw, srflag, cm, ch,   &
-     &       prsl1, prslki, prsik1, prslk1, wind, oceanfrac
+     &       prsl1, prslki, prsik1, prslk1, wind
 
-!     integer, dimension(im), intent(in) :: islimsk
-      integer, dimension(:), intent(in) :: islmsk_cice
-      real (kind=kind_phys), intent(in)  :: delt, min_seaice,           &
-     &                                            min_lakeice
+      integer, dimension(:), intent(in)  :: islmsk
+      real (kind=kind_phys), intent(in)  :: delt
 
-      logical, dimension(:), intent(in) :: flag_iter, icy
+      logical, dimension(im), intent(in) :: flag_iter, use_flake
 
 !  ---  input/outputs:
       real (kind=kind_phys), dimension(:), intent(inout) :: hice,       &
@@ -193,10 +190,11 @@
 
       real (kind=kind_phys) :: t12, t14, tem, stsice(im,kice)
      &,                        hflxi, hflxw, q0, qs1, qssi, qssw
-      real (kind=kind_phys) :: cpinv, hvapi, elocp, snetw, cimin
+      real (kind=kind_phys) :: cpinv, hvapi, elocp, snetw
+!     real (kind=kind_phys) :: cpinv, hvapi, elocp, snetw, cimin
+      logical do_sice
 
       integer :: i, k
-      integer, dimension(im) :: islmsk_local
 
       logical :: flag(im)
 !
@@ -209,35 +207,20 @@
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
-
-
-      islmsk_local = islmsk_cice
-      if (frac_grid) then
-        do i=1,im
-          if (icy(i) .and. islmsk_local(i) < 2) then
-            if (oceanfrac(i) > zero) then
-              tem = min_seaice
-            else
-              tem = min_lakeice
-            endif
-            if (fice(i) > tem) then
-              islmsk_local(i) = 2
-              tice(i) =min( tice(i), tgice)
-            endif
-          endif
-        enddo
-      endif
-
 !
 !> - Set flag for sea-ice.
 
+      do_sice = .false.
       do i = 1, im
-        flag(i) = (islmsk_local(i) == 2) .and. flag_iter(i)
-        if (flag_iter(i) .and. islmsk_local(i) < 2) then
-          hice(i) = zero
-          fice(i) = zero
-        endif
+        flag(i) = islmsk(i) == 2 .and. flag_iter(i)                     &
+     &                           .and. .not. use_flake(i)
+        do_sice = do_sice .or. flag(i)
+!       if (flag_iter(i) .and. islmsk(i) < 2) then
+!         hice(i) = zero
+!         fice(i) = zero
+!       endif
       enddo
+      if (.not. do_sice) return
 
       do i = 1, im
         if (flag(i)) then
@@ -266,38 +249,30 @@
 
       do i = 1, im
         if (flag(i)) then
-          if (oceanfrac(i) > zero) then
-            cimin = min_seaice
-          else
-            cimin = min_lakeice
-          endif
-!         psurf(i) = 1000.0 * ps(i)
-!         ps1(i)   = 1000.0 * prsl1(i)
 
 !         dlwflx has been given a negative sign for downward longwave
 !         sfcnsw is the net shortwave flux (direction: dn-up)
 
           q0        = max(q1(i), qmin)
-!         tsurf(i)  = tskin(i)
 
-          if(thsfc_loc) then ! Use local potential temperature
+          if (thsfc_loc) then ! Use local potential temperature
             theta1(i) = t1(i) * prslki(i)
-          else ! Use potential temperature referenced to 1000 hPa
+          else                ! Use potential temperature referenced to 1000 hPa
             theta1(i) = t1(i) / prslk1(i) ! potential temperature in middle of lowest atm. layer
           endif
 
-          rho(i)    = prsl1(i) / (rd*t1(i)*(one+rvrdm1*q0))
-          qs1       = fpvs(t1(i))
-          qs1       = max(eps*qs1 / (prsl1(i) + epsm1*qs1), qmin)
-          q0        = min(qs1, q0)
+          rho(i) = prsl1(i) / (rd*t1(i)*(one+rvrdm1*q0))
+          qs1    = fpvs(t1(i))
+          qs1    = max(eps*qs1 / (prsl1(i) + epsm1*qs1), qmin)
+          q0     = min(qs1, q0)
 
-          if (fice(i) < cimin) then
+!         if (fice(i) < cimin) then
 !           print *,'warning: ice fraction is low:', fice(i)
-            fice(i) = cimin
-            tice(i) = tgice
-            tskin(i)= tgice
+!           fice(i) = cimin
+!           tice(i) = tgice
+!           tskin(i)= tgice
 !           print *,'fix ice fraction: reset it to:', fice(i)
-          endif
+!         endif
           ffw(i)    = one - fice(i)
 
           qssi = fpvs(tice(i))
@@ -378,7 +353,7 @@
 !> - Call the three-layer thermodynamics sea ice model ice3lay().
       call ice3lay
 !  ---  inputs:                                                         !
-     &     ( im, kice, fice, flag, hfi, hfd, sneti, focn, delt,          !
+     &     ( im, kice, fice, flag, hfi, hfd, sneti, focn, delt,         !
      &       lprnt, ipr,
 !  ---  outputs:                                                        !
      &       snowd, hice, stsice, tice, snof, snowmt, gflux )           !
@@ -387,14 +362,12 @@
         if (flag(i)) then
           if (tice(i) < timin) then
             print *,'warning: snow/ice temperature is too low:',tice(i)
-     &,' i=',i
             tice(i) = timin
             print *,'fix snow/ice temperature: reset it to:',tice(i)
           endif
 
           if (stsice(i,1) < timin) then
             print *,'warning: layer 1 ice temp is too low:',stsice(i,1)
-     &,' i=',i
             stsice(i,1) = timin
             print *,'fix layer 1 ice temp: reset it to:',stsice(i,1)
           endif
@@ -405,7 +378,6 @@
             print *,'fix layer 2 ice temp: reset it to:',stsice(i,2)
           endif
 
-          tskin(i) = tice(i)*fice(i) + tgice*ffw(i)
         endif
       enddo
 
@@ -431,6 +403,7 @@
 
           hflx(i)  = fice(i)*hflxi    + ffw(i)*hflxw
           evap(i)  = fice(i)*evapi(i) + ffw(i)*evapw(i)
+          tskin(i) = fice(i)*tice(i)  + ffw(i)*tgice
 !
 !  --- ...  the rest of the output
 
@@ -696,8 +669,8 @@
             snowd (i) = snowd(i) - snowmt(i)
           else
             snowmt(i) = snowd(i)
-            h1 = h1 - (tmelt - snowd(i)*dsli)                           &
-     &         / (di * (ci - li/stsice(i,1)) * (tfi - stsice(i,1)))
+            h1 = max(zero, h1 - (tmelt - snowd(i)*dsli)                 &
+     &         / (di * (ci - li/stsice(i,1)) * (tfi - stsice(i,1))))
             snowd(i) = zero
           endif
 
@@ -712,6 +685,7 @@
           else
             h2 = h2 - bmelt / (dili + dici*(tfi - stsice(i,2)))
           endif
+          h2 = max(h2, zero)
 
 !>  - If ice remains, even up 2 layers, else, pass negative energy back in snow.
 !! Calculate the new upper layer temperature (see \a eq.(38)).

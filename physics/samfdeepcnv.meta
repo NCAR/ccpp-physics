@@ -368,11 +368,20 @@
   intent = in
   optional = F
 [ncloud]
-  standard_name = number_of_hydrometeors
-  long_name = number of hydrometeors
+  standard_name = number_of_cloud_condensate_types
+  long_name = number of cloud condensate types
   units = count
   dimensions = ()
   type = integer
+  intent = in
+  optional = F
+[hpbl]
+  standard_name = atmosphere_boundary_layer_thickness
+  long_name = PBL top height
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
   intent = in
   optional = F
 [ud_mf]
@@ -571,18 +580,9 @@
   kind = kind_phys
   intent = in
   optional = F
-[evfact]
-  standard_name = rain_evaporation_coefficient_deep_convection
-  long_name = convective rain evaporation coefficient for deep conv.
-  units = frac
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[evfactl]
-  standard_name = rain_evaporation_coefficient_over_land_deep_convection
-  long_name = convective rain evaporation coefficient over land for deep conv.
+[evef]
+  standard_name = rain_evaporation_coefficient_convection
+  long_name = convective rain evaporation coefficient for convection
   units = frac
   dimensions = ()
   type = real

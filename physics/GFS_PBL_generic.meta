@@ -1317,15 +1317,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[hefac]
-  standard_name = surface_upward_latent_heat_flux_reduction_factor
-  long_name = surface upward latent heat flux reduction factor from canopy heat storage
-  units = none
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [ugrs]
   standard_name = x_wind
   long_name = zonal wind
