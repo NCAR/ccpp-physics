@@ -439,6 +439,7 @@
       real (kind=kind_phys) :: alndnb, alndnd, alndvb, alndvd
 
       real (kind=kind_phys) ffw, dtgd
+      real (kind=kind_phys), parameter :: epsln=1.0e-8_kind_phys
 
       integer :: i, k, kk, iflag
 
@@ -466,7 +467,8 @@
 
           if (icy(i)) then   !-- Computation of ice albedo
 
-            if (use_cice_alb .and. lakefrac(i)  < 0.0) then !-- use ice albedo from CICE for sea-ice
+            if (use_cice_alb .and. lakefrac(i)  < epsln                 &
+     &                       .and. icealbivis(i) > epsln) then !-- use ice albedo from CICE for sea-ice
               asevd_ice = icealbivis(i)
               asend_ice = icealbinir(i)
               asevb_ice = icealbdvis(i)
@@ -510,7 +512,7 @@
                 asevb_ice = asevb_ice * (1. - fsno0) + asnvb * fsno0
                 asenb_ice = asenb_ice * (1. - fsno0) + asnnb * fsno0
               endif ! snow
-            endif   ! if (use_cice_alb .and. lakefrac > 0)
+            endif   ! if (use_cice_alb .and. lakefrac < epsln)
           else      ! icy = false, fill in values
             asevd_ice = 0.70
             asend_ice = 0.65
@@ -589,7 +591,7 @@
           !     from ialbflg = 1.
           if (icy(i)) then
             if (lsm == lsm_ruc .or.                                     &
-     &        (use_cice_alb .and. lakefrac(i)  < 0.0)) then
+     &        (use_cice_alb .and. lakefrac(i)  < epsln)) then !-- use ice albedo from CICE for sea-ice
             !-- use ice albedo from the RUC ice model or 
               asevd_ice = icealbivis(i)
               asend_ice = icealbinir(i)
