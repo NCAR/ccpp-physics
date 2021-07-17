@@ -85,7 +85,7 @@
 !!
 !> \section gfs_mp_gen GFS MP Generic Post General Algorithm
 !> @{
-      subroutine GFS_MP_generic_post_run(im, levs, kdt, nrcm, ncld, nncl, ntcw, ntrac, imp_physics, imp_physics_gfdl,     &
+      subroutine GFS_MP_generic_post_run(im, levs, kdt, nrcm, nncl, ntcw, ntrac, imp_physics, imp_physics_gfdl,     &
         imp_physics_thompson, imp_physics_mg, imp_physics_fer_hires, cal_pre, lssav, ldiag3d, qdiag3d, cplflx, cplchm, con_g, dtf, frain, rainc, rain1,   &
         rann, xlat, xlon, gt0, gq0, prsl, prsi, phii, tsfc, ice, snow, graupel, save_t, save_qv, rain0, ice0, snow0,      &
         graupel0, del, rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp, srflag, sr, cnvprcp, totprcp, totice,   &
@@ -97,7 +97,7 @@
 
       implicit none
 
-      integer, intent(in) :: im, levs, kdt, nrcm, ncld, nncl, ntcw, ntrac
+      integer, intent(in) :: im, levs, kdt, nrcm, nncl, ntcw, ntrac
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_mg, imp_physics_fer_hires
       logical, intent(in) :: cal_pre, lssav, ldiag3d, qdiag3d, cplflx, cplchm
 
@@ -373,7 +373,7 @@
         do i=1, im
           work1(i) = zero
         enddo
-        if (ncld > 0) then
+        if (nncl > 0) then
           do ic = ntcw, ntcw+nncl-1
             do i=1,im
               work1(i) = work1(i) + gq0(i,k,ic)

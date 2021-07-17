@@ -70,8 +70,8 @@
   intent = in
   optional = F
 [ncnd]
-  standard_name = number_of_tracers_for_cloud_condensate
-  long_name = number of tracers for cloud condensate
+  standard_name = number_of_cloud_condensate_types
+  long_name = number of cloud condensate types
   units = count
   dimensions = ()
   type = integer
@@ -248,8 +248,8 @@
   intent = in
   optional = F
 [heat]
-  standard_name = kinematic_surface_upward_sensible_heat_flux_reduced_by_surface_roughness
-  long_name = kinematic surface upward sensible heat flux
+  standard_name = kinematic_surface_upward_sensible_heat_flux_reduced_by_surface_roughness_and_vegetation
+  long_name = kinematic surface upward sensible heat flux reduced by surface roughness and vegetation
   units = K m s-1
   dimensions = (horizontal_loop_extent)
   type = real
@@ -257,7 +257,7 @@
   intent = in
   optional = F
 [evap]
-  standard_name = kinematic_surface_upward_latent_heat_flux_reduced_by_surface_roughness
+  standard_name = kinematic_surface_upward_latent_heat_flux
   long_name = kinematic surface upward latent heat flux
   units = kg kg-1 m s-1
   dimensions = (horizontal_loop_extent)

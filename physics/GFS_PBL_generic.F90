@@ -317,7 +317,7 @@
         dqsfc_cpl, dusfci_cpl, dvsfci_cpl, dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag, dqsfc_diag,             &
         dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag, dt3dt, du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD, dq3dt,        &
         dq3dt_ozone, rd, cp, fvirt, hvap, t1, q1, prsl, hflx, ushfsfci, oceanfrac, kdt, dusfc_cice, dvsfc_cice,                &
-        dtsfc_cice, dqsfc_cice, wet, dry, icy, wind, stress_wat, hflx_wat, evap_wat, ugrs1, vgrs1, hffac, hefac, &
+        dtsfc_cice, dqsfc_cice, wet, dry, icy, wind, stress_wat, hflx_wat, evap_wat, ugrs1, vgrs1, hffac,                      &
         ugrs, vgrs, tgrs, qgrs, save_u, save_v, save_t, save_q, errmsg, errflg)
 
       use machine,                only : kind_phys
@@ -326,14 +326,13 @@
       implicit none
 
       integer, parameter  :: kp = kind_phys
-      integer, intent(in) :: im, levs, nvdiff, ntrac, ntchs, ntchm
+      integer, intent(in) :: im, levs, nvdiff, ntrac, ntchs, ntchm, kdt
       integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev, nqrimef
       logical, intent(in) :: trans_aero
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
       integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires
       logical, intent(in) :: ltaerosol, cplflx, cplchm, lssav, ldiag3d, qdiag3d, lsidea
       logical, intent(in) :: hybedmf, do_shoc, satmedmf, shinhong, do_ysu
-      integer, intent(in) :: kdt
 
       logical, intent(in) :: flag_for_pbl_generic_tend      
       real(kind=kind_phys), dimension(:,:), intent(in) :: save_u, save_v, save_t
@@ -367,7 +366,7 @@
       real(kind=kind_phys), dimension(:), intent(out) ::  ushfsfci
 
       ! From canopy heat storage - reduction factors in latent/sensible heat flux due to surface roughness
-      real(kind=kind_phys), dimension(:), intent(in) :: hffac, hefac
+      real(kind=kind_phys), dimension(:), intent(in) :: hffac
 
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
@@ -534,17 +533,17 @@
 
       if (cplflx) then
         do i=1,im
-          if (oceanfrac(i) > zero) then ! Ocean only, NO LAKES
+          if (oceanfrac(i) > zero) then      ! Ocean only, NO LAKES
             if ( .not. wet(i)) then ! no open water
-              if ( kdt > 1 ) then !use results from CICE
+              if (kdt > 1) then              !use results from CICE
                 dusfci_cpl(i) = dusfc_cice(i)
                 dvsfci_cpl(i) = dvsfc_cice(i)
                 dtsfci_cpl(i) = dtsfc_cice(i)
                 dqsfci_cpl(i) = dqsfc_cice(i)
-              else !use PBL fluxes when CICE fluxes is unavailable
+              else                           !use PBL fluxes when CICE fluxes is unavailable
                 dusfci_cpl(i) = dusfc1(i)
                 dvsfci_cpl(i) = dvsfc1(i)
-                dtsfci_cpl(i) = dtsfc1(i)
+                dtsfci_cpl(i) = dtsfc1(i)*hffac(i)
                 dqsfci_cpl(i) = dqsfc1(i)
               end if
             elseif (icy(i) .or. dry(i)) then ! use stress_ocean from sfc_diff for opw component at mixed point
@@ -563,7 +562,7 @@
               dusfci_cpl(i) = dusfc1(i)
               dvsfci_cpl(i) = dvsfc1(i)
               dtsfci_cpl(i) = dtsfc1(i)*hffac(i)
-              dqsfci_cpl(i) = dqsfc1(i)*hefac(i)
+              dqsfci_cpl(i) = dqsfc1(i)
             endif
 !
             dusfc_cpl (i) = dusfc_cpl(i) + dusfci_cpl(i) * dtf
@@ -607,7 +606,7 @@
           dusfci_diag(i) = dusfc1(i)
           dvsfci_diag(i) = dvsfc1(i)
           dtsfci_diag(i) = dtsfc1(i)*hffac(i)
-          dqsfci_diag(i) = dqsfc1(i)*hefac(i)
+          dqsfci_diag(i) = dqsfc1(i)
           dtsfc_diag (i) = dtsfc_diag(i) + dtsfci_diag(i) * dtf
           dqsfc_diag (i) = dqsfc_diag(i) + dqsfci_diag(i) * dtf
         enddo

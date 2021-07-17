@@ -40,12 +40,13 @@
 c  local variables and arrays
 !
       integer   i, j, k, n, ndc
+      integer   kpblx(im), kpbly(im)
 !
       real(kind=kind_phys) dt2,     dz,      ce0,     cm,
      &                     factor,  gocp,
      &                     g,       b1,      f1,
      &                     bb1,     bb2,
-     &                     a1,      pgcon,
+     &                     alp,     vpertmax,a1,      pgcon,
      &                     qmin,    qlmin,   xmmx,    rbint,
      &                     tem,     tem1,    tem2,
      &                     ptem,    ptem1,   ptem2
@@ -54,7 +55,8 @@ c  local variables and arrays
      &                     tlu,     gamma,   qlu,
      &                     thup,    thvu,    dq
 !
-      real(kind=kind_phys) rbdn(im), rbup(im), xlamuem(im,km-1)
+      real(kind=kind_phys) rbdn(im), rbup(im), hpblx(im),
+     &                     xlamuem(im,km-1)
       real(kind=kind_phys) delz(im), xlamax(im)
 !
       real(kind=kind_phys) wu2(im,km), thlu(im,km),
@@ -71,7 +73,7 @@ c  local variables and arrays
       parameter(elocp=hvap/cp,el2orc=hvap*hvap/(rv*cp))
       parameter(ce0=0.4,cm=1.0)
       parameter(qmin=1.e-8,qlmin=1.e-12)
-      parameter(pgcon=0.55)
+      parameter(alp=1.5,vpertmax=3.0,pgcon=0.55)
       parameter(b1=0.5,f1=0.15)
 !
 !************************************************************************
@@ -99,9 +101,11 @@ c  local variables and arrays
 !
       do i=1,im
         if(cnvflg(i)) then
-          thlu(i,1)= thlx(i,1) + vpert(i)
+          ptem = alp * vpert(i)
+          ptem = min(ptem, vpertmax)
+          thlu(i,1)= thlx(i,1) + ptem
           qtu(i,1) = qtx(i,1)
-          buo(i,1) = g * vpert(i) / thvx(i,1)
+          buo(i,1) = g * ptem / thvx(i,1)
         endif
       enddo
 !
@@ -213,6 +217,8 @@ c  local variables and arrays
 !
       do i=1,im
          flg(i)  = .true.
+         kpblx(i) = 1
+         kpbly(i) = kpbl(i)
          if(cnvflg(i)) then
            flg(i)  = .false.
            rbup(i) = wu2(i,1)
@@ -223,14 +229,14 @@ c  local variables and arrays
         if(.not.flg(i)) then
           rbdn(i) = rbup(i)
           rbup(i) = wu2(i,k)
-          kpbl(i)= k
+          kpblx(i)= k
           flg(i)  = rbup(i).le.0.
         endif
       enddo
       enddo
       do i = 1,im
         if(cnvflg(i)) then
-           k = kpbl(i)
+           k = kpblx(i)
            if(rbdn(i) <= 0.) then
               rbint = 0.
            elseif(rbup(i) >= 0.) then
@@ -238,7 +244,17 @@ c  local variables and arrays
            else
               rbint = rbdn(i)/(rbdn(i)-rbup(i))
            endif
-           hpbl(i) = zm(i,k-1) + rbint*(zm(i,k)-zm(i,k-1))
+           hpblx(i) = zm(i,k-1) + rbint*(zm(i,k)-zm(i,k-1))
+        endif
+      enddo
+!
+      do i = 1,im
+        if(cnvflg(i)) then
+          if(kpblx(i) < kpbl(i)) then
+            kpbl(i) = kpblx(i)
+            hpbl(i) = hpblx(i)
+          endif
+          if(kpbl(i) <= 1) cnvflg(i)=.false.
         endif
       enddo
 ! 
@@ -255,7 +271,8 @@ c  local variables and arrays
 !
       do k = 1, kmpbl
         do i=1,im
-          if(cnvflg(i)) then
+          if(cnvflg(i) .and. kpblx(i) < kpbly(i)) then
+!         if(cnvflg(i)) then
             if(k < kpbl(i)) then
               ptem = 1./(zm(i,k)+delz(i))
               tem = max((hpbl(i)-zm(i,k)+delz(i)) ,delz(i))

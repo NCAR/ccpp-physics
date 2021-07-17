@@ -65,7 +65,7 @@
 !> \section arg_table_GFS_time_vary_pre_timestep_init Argument Table
 !! \htmlinclude GFS_time_vary_pre_timestep_init.html
 !!
-      subroutine GFS_time_vary_pre_timestep_init (jdat, idat, dtp, lsm, lsm_noahmp, nsswr, &
+      subroutine GFS_time_vary_pre_timestep_init (jdat, idat, dtp, nsswr, &
         nslwr, idate, debug, me, master, nscyc, sec, phour, zhour, fhour, kdt,   &
         julian, yearlen, ipt, lprnt, lssav, lsswr, lslwr, solhr, errmsg, errflg)
 
@@ -75,8 +75,7 @@
         
         integer,                          intent(in)    :: idate(:)
         integer,                          intent(in)    :: jdat(:), idat(:)
-        integer,                          intent(in)    :: lsm, lsm_noahmp,      &
-                                                           nsswr, nslwr, me,     &
+        integer,                          intent(in)    :: nsswr, nslwr, me,     &
                                                            master, nscyc
         logical,                          intent(in)    :: debug
         real(kind=kind_phys),             intent(in)    :: dtp

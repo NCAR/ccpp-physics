@@ -334,7 +334,7 @@
       subroutine setalb                                                 &
      &     ( slmsk,lsm,lsm_noahmp,lsm_ruc,snowf,                        & !  ---  inputs:
      &       sncovr,sncovr_ice,snoalb,zorlf,coszf,                      &
-     &       tsknf,tairf,hprif,landfrac,frac_grid,min_seaice,           & 
+     &       tsknf,tairf,hprif,frac_grid,min_seaice,                    & 
      &       alvsf,alnsf,alvwf,alnwf,facsf,facwf,fice,tisfc,            &
      &       lsmalbdvis, lsmalbdnir, lsmalbivis, lsmalbinir,            &
      &       icealbdvis, icealbdnir, icealbivis, icealbinir,            &
@@ -409,7 +409,7 @@
       logical, intent(in) :: frac_grid
 
       real (kind=kind_phys), dimension(:), intent(in) ::                &
-     &       slmsk, snowf, zorlf, coszf, tsknf, tairf, hprif, landfrac, &
+     &       slmsk, snowf, zorlf, coszf, tsknf, tairf, hprif,           &
      &       alvsf, alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc,     &
      &       lsmalbdvis, lsmalbdnir, lsmalbivis, lsmalbinir,            &
      &       icealbdvis, icealbdnir, icealbivis, icealbinir,            &
@@ -687,7 +687,6 @@
 !!                  or -pi -> +pi ranges
 !!\param xlat      (IMAX), latitude  in radiance, default to pi/2 ->
 !!                  -pi/2 range, otherwise see in-line comment
-!!\param landfrac  (IMAX), fraction of grid that is land
 !!\param snowf     (IMAX), snow depth water equivalent in mm
 !!\param sncovr    (IMAX), snow cover over land
 !!\param zorlf     (IMAX), surface roughness in cm
@@ -700,7 +699,7 @@
 !! @{
 !-----------------------------------
       subroutine setemis                                                &
-     &     ( lsm,lsm_noahmp,lsm_ruc,vtype,landfrac,frac_grid,           &  !  ---  inputs:
+     &     ( lsm,lsm_noahmp,lsm_ruc,vtype,frac_grid,                    &  !  ---  inputs:
      &       min_seaice,xlon,xlat,slmsk,snowf,sncovr,sncovr_ice,        &
      &       zorlf,tsknf,tairf,hprif,                                   &
      &       semis_lnd,semis_ice,IMAX,fracl,fraco,fraci,icy,            &
@@ -723,7 +722,6 @@
 !     xlat  (IMAX)  - latitude  in radiance, default to pi/2 -> -pi/2   !
 !                     range, otherwise see in-line comment              !
 !     slmsk (IMAX)  - sea(0),land(1),ice(2) mask on fcst model grid     !
-!     landfrac (IMAX) - fraction of land on on fcst model grid          !
 !     snowf (IMAX)  - snow depth water equivalent in mm                 !
 !     sncovr(IMAX)  - ialbflg=1: snow cover over land in fraction       !
 !     sncovr_ice(IMAX) - snow cover over ice in fraction                !
@@ -759,7 +757,6 @@
       integer, intent(in) :: lsm, lsm_noahmp, lsm_ruc
       logical, intent(in) :: frac_grid
       real (kind=kind_phys), dimension(:), intent(in) :: vtype
-      real (kind=kind_phys), dimension(:), intent(in) :: landfrac
       real (kind=kind_phys), intent(in) :: min_seaice
 
       real (kind=kind_phys), dimension(:), intent(in) ::                &
@@ -892,7 +889,7 @@
                 asnow = 0.02*snowf(i)
                 argh  = min(0.50, max(.025,0.01*zorlf(i)))
                 hrgh  = min(f_one,max(0.20,1.0577-1.1538e-3*hprif(i)))
-                fsno = asnow / (argh + asnow) * hrgh
+                fsno  = asnow / (argh + asnow) * hrgh
                 sfcemis_ice = sfcemis_ice*(f_one-fsno)+emsref(8)*fsno
               endif
             elseif (lsm == lsm_ruc) then
@@ -906,7 +903,7 @@
 
           !-- Composite emissivity from land, water and ice fractions.
           sfcemis(i) = fracl(i)*sfcemis_land + fraco(i)*emsref(1)             &
-     &                                    + fraci(i)*sfcemis_ice
+     &                                       + fraci(i)*sfcemis_ice
 
          enddo  ! i
 
