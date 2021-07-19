@@ -28,9 +28,9 @@ module cu_gf_deep
      real(kind=kind_phys), parameter :: pgcd = 0.1
 !
 !> aerosol awareness, do not user yet!
-     integer, parameter :: autoconv=1
-     integer, parameter :: aeroevap=1
-     real(kind=kind_phys), parameter :: ccnclean=250.
+     integer, parameter :: autoconv=2 !1
+     integer, parameter :: aeroevap=3 !1
+     real(kind=kind_phys), parameter :: scav_factor = 0.5
 !> still 16 ensembles for clousres
      integer, parameter:: maxens3=16
 
@@ -56,6 +56,7 @@ contains
               ,ichoice       &  ! choice of closure, use "0" for ensemble average
               ,ipr           &  ! this flag can be used for debugging prints
               ,ccn           &  ! not well tested yet
+              ,ccnclean      &
               ,dtime         &  ! dt over which forcing is applied
               ,imid          &  ! flag to turn on mid level convection
               ,kpbl          &  ! level of boundary layer height
@@ -176,15 +177,15 @@ contains
          q,qo,zuo,zdo,zdm
      real(kind=kind_phys), dimension (its:ite)                                         &
         ,intent (in   )                   ::                           &
-        dx,ccn,z1,psur,xland
+        dx,z1,psur,xland
      real(kind=kind_phys), dimension (its:ite)                                         &
         ,intent (inout   )                ::                           &
-        mconv
+        mconv,ccn
 
        
        real(kind=kind_phys)                                                            &
         ,intent (in   )                   ::                           &
-        dtime
+        dtime,ccnclean
 
 
 !
@@ -291,7 +292,7 @@ contains
      real(kind=kind_phys),    dimension (its:ite) ::                                     &
        edt,edto,edtm,aa1,aa0,xaa0,hkb,                                        &
        hkbo,xhkb,                                                        &
-       xmb,pwavo,                                                        &
+       xmb,pwavo,ccnloss,                                                &
        pwevo,bu,bud,cap_max,                                             &
        cap_max_increment,closure_n,psum,psumh,sig,sigd
      real(kind=kind_phys),    dimension (its:ite) ::                                     &
@@ -305,7 +306,7 @@ contains
      integer                              ::                             &
        iloop,nens3,ki,kk,i,k
      real(kind=kind_phys)                            ::                             &
-      dz,dzo,mbdt,radius,                                                &
+      dz,dzo,mbdt,radius,pefc,                                           &
       zcutdown,depth_min,zkbmax,z_detr,zktop,                            &
       dh,cap_maxs,trash,trash2,frh,sig_thresh
      real(kind=kind_phys) entdo,dp,subin,detdo,entup,                                    &
@@ -504,8 +505,8 @@ contains
 !
 !--- minimum depth (m), clouds must have
 !
-      depth_min=1000.
-      if(imid.eq.1)depth_min=500.
+      depth_min=3000.
+      if(imid.eq.1)depth_min=2500.
 !
 !--- maximum depth (mb) of capping 
 !--- inversion (larger cap = no convection)
@@ -844,8 +845,8 @@ contains
               exit
            endif
         enddo
-        ktop(i)=ktopkeep(i)
-        if(ierr(i).eq.0)ktop(i)=ktopkeep(i)
+        !ktop(i)=ktopkeep(i)
+        !if(ierr(i).eq.0)ktop(i)=ktopkeep(i)
       enddo
       do 37 i=its,itf
          kzdown(i)=0
@@ -947,14 +948,14 @@ contains
         call cup_up_moisture('mid',ierr,zo_cup,qco,qrco,pwo,pwavo,               &
              p_cup,kbcon,ktop,dbyo,clw_all,xland1,                               &
              qo,gammao_cup,zuo,qeso_cup,k22,qo_cup,c0,                           &
-             zqexec,ccn,rho,c1d,tn_cup,up_massentr,up_massdetr,psum,psumh,       &
+             zqexec,ccn,ccnclean,rho,c1d,tn_cup,autoconv,up_massentr,up_massdetr,psum,psumh,       &
              1,itf,ktf,                                                          &
              its,ite, kts,kte)
       else
          call cup_up_moisture('deep',ierr,zo_cup,qco,qrco,pwo,pwavo,             &
              p_cup,kbcon,ktop,dbyo,clw_all,xland1,                               &
              qo,gammao_cup,zuo,qeso_cup,k22,qo_cup,c0,                           &
-             zqexec,ccn,rho,c1d,tn_cup,up_massentr,up_massdetr,psum,psumh,       &
+             zqexec,ccn,ccnclean,rho,c1d,tn_cup,autoconv,up_massentr,up_massdetr,psum,psumh,       &
              1,itf,ktf,                                                          &
              its,ite, kts,kte)
      endif
@@ -1022,8 +1023,8 @@ contains
               exit
            endif
         enddo
-        ktop(i)=ktopkeep(i)
-        if(ierr(i).eq.0)ktop(i)=ktopkeep(i)
+        !ktop(i)=ktopkeep(i)
+        !if(ierr(i).eq.0)ktop(i)=ktopkeep(i)
       enddo
 41    continue
       do i=its,itf
@@ -1478,8 +1479,8 @@ contains
 !> - Call cup_dd_edt() to determine downdraft strength in terms of windshear
 !
       call cup_dd_edt(ierr,us,vs,zo,ktop,kbcon,edt,po,pwavo,  &
-           pwo,ccn,pwevo,edtmax,edtmin,edtc,psum,psumh,       &
-           rho,aeroevap,itf,ktf,                              &
+           pwo,ccn,ccnclean,pwevo,edtmax,edtmin,edtc,psum,psumh,       &
+           rho,aeroevap,pefc,itf,ktf,                              &
            its,ite, kts,kte)
         do i=its,itf
         if(ierr(i)/=0)cycle
@@ -1714,6 +1715,14 @@ contains
 !            xt(i,k)= (dellat(i,k)-xlv/cp*dellaqc(i,k))*mbdt+tn(i,k)
             xt(i,k)= dellat(i,k)*mbdt+tn(i,k)
             xt(i,k)=max(190.,xt(i,k))
+           enddo
+
+          ! Smooth dellas (HCB)
+           do k=kts+1,ktf
+            xt(i,k)=tn(i,k)+0.25*(dellat(i,k-1) + 2.*dellat(i,k) + dellat(i,k+1)) * mbdt
+            xt(i,k)=max(190.,xt(i,k))
+            xq(i,k)=max(1.e-16, qo(i,k)+0.25*(dellaq(i,k-1) + 2.*dellaq(i,k) + dellaq(i,k+1)) * mbdt)
+            xhe(i,k)=heo(i,k)+0.25*(dellah(i,k-1) + 2.*dellah(i,k) + dellah(i,k+1)) * mbdt
            enddo
          endif
       enddo
@@ -2019,6 +2028,16 @@ contains
       endif
       enddo
       endif
+
+      do i=its,itf
+         if(ierr(i).eq.0) then
+            if(aeroevap.gt.1)then
+              ! aerosol scavagening
+              ccnloss(i)=ccn(i)*pefc*xmb(i) ! HCB
+              ccn(i) = ccn(i) - ccnloss(i)*scav_factor
+            endif
+         endif
+      enddo
 !
 ! since kinetic energy is being dissipated, add heating accordingly (from ecmwf)
 !
@@ -2317,8 +2336,8 @@ contains
 
 
    subroutine cup_dd_edt(ierr,us,vs,z,ktop,kbcon,edt,p,pwav, &
-              pw,ccn,pwev,edtmax,edtmin,edtc,psum2,psumh,    &
-              rho,aeroevap,itf,ktf,                          &
+              pw,ccn,ccnclean,pwev,edtmax,edtmin,edtc,psum2,psumh,    &
+              rho,aeroevap,pefc,itf,ktf,                          &
               its,ite, kts,kte                     )
 
    implicit none
@@ -2336,15 +2355,22 @@ contains
      real(kind=kind_phys),    dimension (its:ite,1)                          &
         ,intent (out  )                   ::                 &
         edtc
+     real(kind=kind_phys),    intent (out ) ::                 &
+        pefc
      real(kind=kind_phys),    dimension (its:ite)                            &
         ,intent (out  )                   ::                 &
         edt
      real(kind=kind_phys),    dimension (its:ite)                            &
         ,intent (in   )                   ::                 &
-        pwav,pwev,ccn,psum2,psumh,edtmax,edtmin
+        pwav,pwev,psum2,psumh,edtmax,edtmin
      integer, dimension (its:ite)                            &
         ,intent (in   )                   ::                 &
         ktop,kbcon
+     real(kind=kind_phys),    intent (in  ) ::               &                 !HCB
+        ccnclean
+     real(kind=kind_phys),    dimension (its:ite)            &
+        ,intent (inout )                   ::                &
+        ccn
      integer, dimension (its:ite)                            &
         ,intent (inout)                   ::                 &
         ierr
@@ -2356,11 +2382,13 @@ contains
      real(kind=kind_phys)    einc,pef,pefb,prezk,zkbc
      real(kind=kind_phys),    dimension (its:ite)         ::                 &
       vshear,sdp,vws
-     real(kind=kind_phys) :: prop_c,pefc,aeroadd,alpha3,beta3
-     prop_c=8. !10.386
-     alpha3 = 1.9
-     beta3  = -1.13
+     real(kind=kind_phys) :: prop_c,aeroadd,alpha3,beta3
+     prop_c=0. !10.386
+     alpha3 = 0.75
+     beta3  = -0.15
      pefc=0.
+     pefb=0.
+     pef=0.
 
 !
 !--- determine downdraft strength in terms of windshear
@@ -2410,18 +2438,23 @@ contains
             pefb=1./(1.+prezk)
             if(pefb.gt.0.9)pefb=0.9
             if(pefb.lt.0.1)pefb=0.1
+            pefb=pef
+
             edt(i)=1.-.5*(pefb+pef)
             if(aeroevap.gt.1)then
-               aeroadd=(ccnclean**beta3)*((psumh(i))**(alpha3-1)) !*1.e6
-!              prop_c=.9/aeroadd
+               aeroadd=0.
+               if((psumh(i)>0.).and.(psum2(i)>0.))then
+               aeroadd=((1.e-2*ccnclean)**beta3)*((psumh(i)*1.e0)**(alpha3-1))
                prop_c=.5*(pefb+pef)/aeroadd
-               aeroadd=(ccn(i)**beta3)*((psum2(i))**(alpha3-1)) !*1.e6
+               aeroadd=((1.e-2*ccn(i))**beta3)*((psum2(i)*1.e0)**(alpha3-1))
                aeroadd=prop_c*aeroadd
                pefc=aeroadd
+
                if(pefc.gt.0.9)pefc=0.9
                if(pefc.lt.0.1)pefc=0.1
                edt(i)=1.-pefc
                if(aeroevap.eq.2)edt(i)=1.-.25*(pefb+pef+2.*pefc)
+               endif
             endif
 
 
@@ -3105,12 +3138,12 @@ contains
               xf_ens(i,5)=max(0.,xff_ens3(5))
               xf_ens(i,6)=max(0.,xff_ens3(6))
               xf_ens(i,14)=max(0.,xff_ens3(14))
-              a1=max(1.e-5,pr_ens(i,7))
+              a1=max(1.e-3,pr_ens(i,7))
               xf_ens(i,7)=max(0.,xff_ens3(7)/a1)
-              a1=max(1.e-5,pr_ens(i,8))
+              a1=max(1.e-3,pr_ens(i,8))
               xf_ens(i,8)=max(0.,xff_ens3(8)/a1)
 !              forcing(i,7)=xf_ens(i,8)
-              a1=max(1.e-5,pr_ens(i,9))
+              a1=max(1.e-3,pr_ens(i,9))
               xf_ens(i,9)=max(0.,xff_ens3(9)/a1)
               a1=max(1.e-3,pr_ens(i,15))
               xf_ens(i,15)=max(0.,xff_ens3(15)/a1)
@@ -3875,7 +3908,7 @@ endif
    subroutine cup_up_moisture(name,ierr,z_cup,qc,qrc,pw,pwav,     &
               p_cup,kbcon,ktop,dby,clw_all,xland1,                &
               q,gamma_cup,zu,qes_cup,k22,qe_cup,c0,               &
-              zqexec,ccn,rho,c1d,t,                               &
+              zqexec,ccn,ccnclean,rho,c1d,t,autoconv,             &
               up_massentr,up_massdetr,psum,psumh,                 &
               itest,itf,ktf,                                      &
               its,ite, kts,kte                     )
@@ -3891,6 +3924,7 @@ endif
 
      integer                                                      &
         ,intent (in   )                   ::                      &
+                                  autoconv,                       &
                                   itest,itf,ktf,                  &
                                   its,ite, kts,kte
   ! cd= detrainment function 
@@ -3914,7 +3948,7 @@ endif
         ,intent (in   )                   ::                      &
         kbcon,ktop,k22,xland1
      real(kind=kind_phys),    intent (in  ) ::                    & ! HCB
-        c0
+        c0,ccnclean
 !
 ! input and output
 !
@@ -3937,9 +3971,9 @@ endif
         ,intent (out  )                   ::                       &
         qc,qrc,pw,clw_all
      real(kind=kind_phys),    dimension (its:ite,kts:kte) ::                       &
-        qch,qrcb,pwh,clw_allh,c1d,t
+        qch,qrcb,pwh,clw_allh,c1d,c1d_b,t
      real(kind=kind_phys),    dimension (its:ite)         ::                       &
-        pwavh
+        pwavh,kklev
      real(kind=kind_phys),    dimension (its:ite)                                  &
         ,intent (out  )                   ::                       &
         pwav,psum,psumh
@@ -3963,7 +3997,7 @@ endif
 !
         prop_b(kts:kte)=0
         iall=0
-        clwdet=50.
+        c1d_b=c1d
         bdsp=bdispm
 !
 !--- no precip for small clouds
@@ -4016,11 +4050,12 @@ endif
 !
 !            if(name == "deep" )then
             do k=k22(i)+1,kbcon(i)
-              if(t(i,k) > 273.16) then
-               c0t = c0
-              else
-               c0t = c0 * exp(0.07 * (t(i,k) - 273.16))
-              endif
+              c0t = c0
+              !if(t(i,k) > 273.16) then
+              ! c0t = c0
+              !else
+              ! c0t = c0 * exp(0.07 * (t(i,k) - 273.16))
+              !endif
               qc(i,k)=   (qc(i,k-1)*zu(i,k-1)-.5*up_massdetr(i,k-1)* qc(i,k-1)+ &
                          up_massentr(i,k-1)*q(i,k-1))   /                       &
                          (zu(i,k-1)-.5*up_massdetr(i,k-1)+up_massentr(i,k-1))
@@ -4041,13 +4076,12 @@ endif
 !now do the rest
 !
             do k=kbcon(i)+1,ktop(i)
-               !c0=.004 HCB tuning
-               !if(t(i,k).lt.270.)c0=.002 HCB tuning
-               if(t(i,k) > 273.16) then
-                  c0t = c0
-               else
-                  c0t = c0 * exp(0.07 * (t(i,k) - 273.16))
-               endif
+               c0t = c0
+               !if(t(i,k) > 273.16) then
+               !   c0t = c0
+               !else
+               !   c0t = c0 * exp(0.07 * (t(i,k) - 273.16))
+               !endif
                denom=zu(i,k-1)-.5*up_massdetr(i,k-1)+up_massentr(i,k-1)
                if(denom.lt.1.e-16)then
                      ierr(i)=51
@@ -4076,21 +4110,27 @@ endif
                          (zu(i,k-1)-.5*up_massdetr(i,k-1)+up_massentr(i,k-1))
 
                if(qc(i,k).le.qrch)then
-                 qc(i,k)=qrch
+                 qc(i,k)=qrch+1e-8
                endif
                if(qch(i,k).le.qrch)then
-                 qch(i,k)=qrch
+                 qch(i,k)=qrch+1e-8
                endif
 !
 !------- total condensed water before rainout
 !
+               if(name == "deep" )then
+                 clwdet=0.1                 ! 05/11/2021
+                 kklev(i)=maxloc(zu(i,:),1)     ! 05/05/2021
+                 if(k.lt.kklev(i)) clwdet=0.    ! 05/05/2021
+               else
+                 clwdet=0.1                  ! 05/05/2021
+               endif
+               if(k.gt.kbcon(i)+1)c1d(i,k)=clwdet*up_massdetr(i,k-1)
+               if(k.gt.kbcon(i)+1)c1d_b(i,k)=clwdet*up_massdetr(i,k-1)
                clw_all(i,k)=max(0.,qc(i,k)-qrch)
-               qrc(i,k)=max(0.,(qc(i,k)-qrch)) ! /(1.+c0*dz*zu(i,k))
                clw_allh(i,k)=max(0.,qch(i,k)-qrch)
-               qrcb(i,k)=max(0.,(qch(i,k)-qrch)) ! /(1.+c0*dz*zu(i,k))
+
                if(autoconv.eq.2) then
-
-
 ! 
 ! normalized berry
 !
@@ -4098,41 +4138,38 @@ endif
 ! this will also determine proportionality constant prop_b, which, if applied,
 ! would give the same results as c0 under these conditions
 !
-                 q1=1.e3*rhoc*qrcb(i,k)  ! g/m^3 ! g[h2o]/cm^3
-                 berryc0=q1*q1/(60.0*(5.0 + 0.0366*ccnclean/                           &
+                 q1=1.e3*rhoc*clw_allh(i,k)  ! g/m^3 ! g[h2o]/cm^3
+                 berryc0=q1*q1/(60.0*(5.0 + 0.0366*ccnclean/ &
                     ( q1 * bdsp)  ) ) !/(
-                 qrcb_h=((qch(i,k)-qrch)*zu(i,k)-qrcb(i,k-1)*(.5*up_massdetr(i,k-1)))/ &
-                   (zu(i,k)+.5*up_massdetr(i,k-1)+c0t*dz*zu(i,k))
-                 prop_b(k)=c0t*qrcb_h*zu(i,k)/(1.e-3*berryc0)
+                 qrcb_h=(qch(i,k)-qrch)/(1.+(c1d_b(i,k)+c0t)*dz)
+                 prop_b(k)=(c0t*qrcb_h)/max(1.e-8,(1.e-3*berryc0))
+                 if(prop_b(k)>5.) prop_b(k)=5.
                  pwh(i,k)=zu(i,k)*1.e-3*berryc0*dz*prop_b(k) ! 2.
-                 berryc=qrcb(i,k)
-                 qrcb(i,k)=((qch(i,k)-qrch)*zu(i,k)-pwh(i,k)-qrcb(i,k-1)*(.5*up_massdetr(i,k-1)))/ &
-                       (zu(i,k)+.5*up_massdetr(i,k-1))
+                 qrcb(i,k)=(max(0.,(qch(i,k)-qrch))*zu(i,k)-pwh(i,k))/(zu(i,k)*(1+c1d_b(i,k)*dz))
                  if(qrcb(i,k).lt.0.)then
-                   berryc0=(qrcb(i,k-1)*(.5*up_massdetr(i,k-1))-(qch(i,k)-qrch)*zu(i,k))/zu(i,k)*1.e-3*dz*prop_b(k)
+                   berryc0=max(0.,(qch(i,k)-qrch))/(1.e-3*dz*prop_b(k))
                    pwh(i,k)=zu(i,k)*1.e-3*berryc0*dz*prop_b(k)
                    qrcb(i,k)=0.
                  endif
                  qch(i,k)=qrcb(i,k)+qrch
                  pwavh(i)=pwavh(i)+pwh(i,k)
-                 psumh(i)=psumh(i)+clw_allh(i,k)*zu(i,k) *dz
+                 psumh(i)=psumh(i)+pwh(i,k) ! HCB
+                 !psumh(i)=psumh(i)+clw_allh(i,k)*zu(i,k) *dz
         !
 ! then the real berry
 !
-                 q1=1.e3*rhoc*qrc(i,k)  ! g/m^3 ! g[h2o]/cm^3
-                 berryc0=q1*q1/(60.0*(5.0 + 0.0366*ccn(i)/                                             &
+                 q1=1.e3*rhoc*clw_all(i,k)  ! g/m^3 ! g[h2o]/cm^3
+                 berryc0=q1*q1/(60.0*(5.0 + 0.0366*ccn(i)/     &
                     ( q1 * bdsp)  ) ) !/(
                  berryc0=1.e-3*berryc0*dz*prop_b(k) ! 2.
-                 berryc=qrc(i,k)
-                 qrc(i,k)=((qc(i,k)-qrch)*zu(i,k)-zu(i,k)*berryc0-qrc(i,k-1)*(.5*up_massdetr(i,k-1)))/ &
-                       (zu(i,k)+.5*up_massdetr(i,k-1))
+                 qrc(i,k)=(max(0.,(qc(i,k)-qrch))*zu(i,k)-zu(i,k)*berryc0)/(zu(i,k)*(1+c1d(i,k)*dz))
                  if(qrc(i,k).lt.0.)then
-                    berryc0=((qc(i,k)-qrch)*zu(i,k)-qrc(i,k-1)*(.5*up_massdetr(i,k-1)))/zu(i,k)
+                    berryc0=max(0.,(qc(i,k)-qrch))/(1.e-3*dz*prop_b(k))
                     qrc(i,k)=0.
                  endif
                  pw(i,k)=berryc0*zu(i,k)
                  qc(i,k)=qrc(i,k)+qrch
-!
+
 !  if not running with berry at all, do the following
 !
                else       !c0=.002
@@ -4149,7 +4186,8 @@ endif
                    if(qrc(i,k).lt.0.)then  ! hli new test 02/12/19
                       qrc(i,k)=0.
                    endif
-                   pw(i,k)=c0t*dz*qrc(i,k)*zu(i,k) 
+                   pw(i,k)=c0t*dz*qrc(i,k)*zu(i,k)
+
 !-----srf-08aug2017-----begin
 ! pw(i,k)=(c1d(i,k)+c0)*dz*max(0.,qrc(i,k) -qrc_crit)! units kg[rain]/kg[air] 
 !-----srf-08aug2017-----end
@@ -4161,7 +4199,7 @@ endif
                  qc(i,k)=qrc(i,k)+qrch
                endif !autoconv
                pwav(i)=pwav(i)+pw(i,k)
-               psum(i)=psum(i)+clw_all(i,k)*zu(i,k) *dz
+               psum(i)=psum(i)+pw(i,k) ! HCB
             enddo ! k=kbcon,ktop
 ! do not include liquid/ice in qc
        do k=k22(i)+1,ktop(i)
@@ -4304,6 +4342,7 @@ endif
         kfinalzu=ktf-2
         ktop(i)=kfinalzu
 412     continue
+        ktop(i)=ktopdby(i) ! HCB
         kklev=min(kklev+3,ktop(i)-2)
 !
 ! at least overshoot by one level

@@ -59,9 +59,26 @@
   type = integer
   intent = in
   optional = F
+[cactiv_m]
+  standard_name = mid_conv_activity_counter
+  long_name = midlevel convective activity memory
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = in
+  optional = F
 [conv_act]
   standard_name = gf_memory_counter
   long_name = Memory counter for GF
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[conv_act_m]
+  standard_name = gf_mid_memory_counter
+  long_name = Memory counter for GF midlevel
   units = none
   dimensions = (horizontal_loop_extent)
   type = real

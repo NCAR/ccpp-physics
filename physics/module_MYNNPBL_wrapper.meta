@@ -1231,14 +1231,6 @@
   type = integer
   intent = in
   optional = F
-[bl_mynn_edmf_part]
-  standard_name = edmf_partition_flag
-  long_name = flag to partitioning of the MF and ED areas
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [bl_mynn_cloudmix]
   standard_name = cloud_specie_mix_flag
   long_name = flag to activate mixing of cloud species

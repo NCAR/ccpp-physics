@@ -609,6 +609,11 @@
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Tbd%in_nm'           , Tbd%in_nm)
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Tbd%ccn_nm'          , Tbd%ccn_nm)
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Tbd%aer_nm'          , Tbd%aer_nm)
+                     if (Model%imfdeepcnv == Model%imfdeepcnv_gf) then
+                       call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Tbd%cactiv'        , Tbd%cactiv)
+                       call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Tbd%cactiv_m'      , Tbd%cactiv_m)
+                       call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Tbd%aod_gf'        , Tbd%aod_gf)
+                     end if
                      ! Diag
                      !call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%fluxr       ',    Diag%fluxr)
                      !do n=1,size(Diag%fluxr(1,:))
