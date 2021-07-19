@@ -1981,15 +1981,6 @@
   kind = kind_phys
   intent = inout
   optional = F
-[dqdti]
-  standard_name = instantaneous_water_vapor_specific_humidity_tendency_due_to_convection
-  long_name = instantaneous moisture tendency due to convection
-  units = kg kg-1 s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
 [dtidx]
   standard_name = cumulative_change_of_state_variables_outer_index
   long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index

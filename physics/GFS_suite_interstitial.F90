@@ -702,7 +702,7 @@
     subroutine GFS_suite_interstitial_4_run (im, levs, ltaerosol, tracers_total, ntrac, ntcw, ntiw, ntclamt, &
       ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,  &
       imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, convert_dry_rho, dtf, save_qc, save_qi, con_pi, dtidx, dtend,&
-      index_of_process_conv_trans, gq0, clw, prsl, save_tcp, con_rd, con_eps, nwfa, spechum, dqdti, ldiag3d,         &
+      index_of_process_conv_trans, gq0, clw, prsl, save_tcp, con_rd, con_eps, nwfa, spechum, ldiag3d,                &
       qdiag3d, save_lnc, save_inc, ntk, ntke, errmsg, errflg)
 
       use machine,               only: kind_phys

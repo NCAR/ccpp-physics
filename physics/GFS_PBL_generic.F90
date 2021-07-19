@@ -335,7 +335,7 @@
         index_of_process_pbl, dqsfc_cpl, dusfci_cpl, dvsfci_cpl, dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag,   &
         dqsfc_diag, dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag,                                                        &
         rd, cp, fvirt, hvap, t1, q1, prsl, hflx, ushfsfci, oceanfrac, kdt, dusfc_cice, dvsfc_cice,                             &
-        dtsfc_cice, dqsfc_cice, wet, dry, icy, wind, stress_wat, hflx_wat, evap_wat, ugrs1, vgrs1, dkt_cpl, dkt, hffac, hefac, &
+        dtsfc_cice, dqsfc_cice, wet, dry, icy, wind, stress_wat, hflx_wat, evap_wat, ugrs1, vgrs1, hffac, &
         ugrs, vgrs, tgrs, qgrs, save_u, save_v, save_t, save_q, errmsg, errflg)
 
       use machine,                only : kind_phys
