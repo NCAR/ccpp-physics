@@ -420,7 +420,7 @@
          integer,                    intent(out) :: errflg
 
          !--- local variables
-         integer :: impi, iomp, ierr, n
+         integer :: impi, iomp, ierr, n, idtend, iprocess, itracer
          integer :: mpirank, mpisize, mpicomm
          integer :: omprank, ompsize
 
@@ -667,6 +667,16 @@
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%v1          ',    Diag%v1)
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%chh         ',    Diag%chh)
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%cmm         ',    Diag%cmm)
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dlwsfci     ',    Diag%dlwsfci)
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%ulwsfci     ',    Diag%ulwsfci)
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dswsfci     ',    Diag%dswsfci)
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%nswsfci     ',    Diag%nswsfci)
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%uswsfci     ',    Diag%uswsfci)
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dusfci      ',    Diag%dusfci)
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dvsfci      ',    Diag%dvsfci)
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dtsfci      ',    Diag%dtsfci)
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dqsfci      ',    Diag%dqsfci)
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%gfluxi      ',    Diag%gfluxi)
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%epi         ',    Diag%epi)
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%smcwlt2     ',    Diag%smcwlt2)
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%smcref2     ',    Diag%smcref2)
@@ -687,25 +697,21 @@
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%shum_wts    ',    Diag%shum_wts)
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%zmtnblck    ',    Diag%zmtnblck)
                      if (Model%ldiag3d) then
-                       call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%du3dt       ',    Diag%du3dt)
-                       do n=1,size(Diag%du3dt(1,1,:))
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%du3dt_n     ',  Diag%du3dt(:,:,n))
-                       end do
-                       call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dv3dt       ',    Diag%dv3dt)
-                       do n=1,size(Diag%dv3dt(1,1,:))
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dv3dt_n     ',  Diag%dv3dt(:,:,n))
-                       end do
-                       call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dt3dt       ',    Diag%dt3dt)
-                       do n=1,size(Diag%dt3dt(1,1,:))
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dt3dt_n     ',  Diag%dt3dt(:,:,n))
-                       end do
-                       call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dq3dt       ',    Diag%dq3dt)
-                       do n=1,size(Diag%dq3dt(1,1,:))
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dq3dt_n     ',  Diag%dq3dt(:,:,n))
-                       end do
-                       !call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%upd_mf      ',    Diag%upd_mf)
-                       !call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dwn_mf      ',    Diag%dwn_mf)
-                       !call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%det_mf      ',    Diag%det_mf)
+                       !do itracer=2,Model%ntracp100
+                       !   do iprocess=1,Model%nprocess
+                       !      idtend = Model%dtidx(itracer,iprocess)
+                       !      if(idtend>=1) then
+                       !         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, &
+                       !              'dtend_'//Model%dtend_tracer_labels(itracer)//'_' &
+                       !              //Model%dtend_cause_labels(iprocess), Diag%dtend(1,1,idtend))
+                       !      endif
+                       !   enddo
+                       !enddo
+                       if (Model%qdiag3d) then
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%upd_mf      ',    Diag%upd_mf)
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dwn_mf      ',    Diag%dwn_mf)
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%det_mf      ',    Diag%det_mf)
+                       end if
                      end if
                      if(Model%lradar) then
                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%refl_10cm   ',  Diag%refl_10cm)
