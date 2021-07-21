@@ -172,6 +172,13 @@ contains
           min_ice(ix) = min_seaice
         endif
 
+        ZORFCS(ix) = zorll (ix)
+        if (slmsk(ix) > 1.9_kind_phys .and. .not. frac_grid) then
+          ZORFCS(ix) = zorli  (ix)
+        elseif (slmsk(ix) < 0.1_kind_phys .and. .not. frac_grid) then
+          ZORFCS(ix) = zorlo  (ix)
+        endif
+
         IF (slmsk(ix) > 1.99_kind_phys) THEN
           AISFCS(ix) = 1.0_kind_phys
         ELSE
