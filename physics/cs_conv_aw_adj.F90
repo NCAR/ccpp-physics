@@ -27,7 +27,7 @@ module cs_conv_aw_adj
 !!
 !\section gen_cs_conv_aw_adj_run CPT cs_conv_aw_adj_run General Algorithm
    subroutine cs_conv_aw_adj_run(im, levs, do_cscnv, do_aw, do_shoc, &
-                ntrac, ncld, ntcw, ntclamt, nncl, con_g, sigmafrac,  &
+                ntrac, ntcw, ntclamt, nncl, con_g, sigmafrac,        &
                 gt0, gq0, save_t, save_q, prsi, cldfrac, subcldfrac, &
                 prcp, imp_physics, imp_physics_mg, errmsg, errflg)
 
@@ -38,7 +38,7 @@ module cs_conv_aw_adj
 ! --- interface variables
       integer,                                    intent(in)    :: im, levs
       logical,                                    intent(in)    :: do_cscnv, do_aw, do_shoc
-      integer,                                    intent(in)    :: ntrac, ncld, ntcw, ntclamt, nncl
+      integer,                                    intent(in)    :: ntrac, ntcw, ntclamt, nncl
       real(kind_phys),                            intent(in)    :: con_g
       real(kind_phys),  dimension(:,:),       intent(inout) :: sigmafrac
       real(kind_phys),  dimension(:,:),       intent(inout) :: gt0

@@ -233,6 +233,33 @@
   kind = kind_phys
   intent = inout
   optional = F
+[dtp]
+  standard_name = time_step_for_physics
+  long_name = physics timestep
+  units = s
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[rain]
+  standard_name = lwe_thickness_of_precipitation_amount_on_dynamics_timestep
+  long_name = total rain at this time step
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[pratemax]
+  standard_name = maximum_precipitation_rate_over_maximum_hourly_time_interval
+  long_name = maximum precipitation rate over maximum hourly time interval
+  units = mm h-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

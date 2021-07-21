@@ -92,7 +92,7 @@
 !! \htmlinclude GFS_SCNV_generic_post_run.html
 !!
       subroutine GFS_SCNV_generic_post_run (im, levs, nn, lssav, ldiag3d, qdiag3d, &
-        cplchm, frain, gu0, gv0, gt0, gq0, save_u, save_v, save_t, save_q, dqdti,  &
+        frain, gu0, gv0, gt0, gq0, save_u, save_v, save_t, save_q,                 &
         clw, shcnvcw, rain1, npdf3d, num_p3d, ncnvcld3d, cnvc, cnvw, nsamftrac,    &
         rainc, cnvprcp, cnvprcpb, cnvw_phy_f3d, cnvc_phy_f3d,                      &
         dtend, dtidx, index_of_temperature, index_of_x_wind, index_of_y_wind,      &
@@ -107,14 +107,13 @@
 
       integer, intent(in) :: im, levs, nn, ntqv, nsamftrac
       integer, intent(in) :: ntcw,ntiw,ntclamt,ntrw,ntsw,ntrnc,ntsnc,ntgl,ntgnc,ntrac
-      logical, intent(in) :: lssav, ldiag3d, qdiag3d, cplchm, flag_for_scnv_generic_tend
+      logical, intent(in) :: lssav, ldiag3d, qdiag3d, flag_for_scnv_generic_tend
       real(kind=kind_phys),                     intent(in) :: frain
       real(kind=kind_phys), dimension(:,:), intent(in) :: gu0, gv0, gt0
       real(kind=kind_phys), dimension(:,:), intent(in) :: save_u, save_v, save_t
       real(kind=kind_phys), dimension(:,:,:),   intent(in) :: save_q, gq0
 
       ! dtend only allocated if ldiag3d == .true.
-      real(kind=kind_phys), dimension(:,:), intent(inout) :: dqdti
       real(kind=kind_phys), intent(inout) :: dtend(:,:,:)
       integer, intent(in) :: dtidx(:,:)
       integer, intent(in) :: index_of_temperature, index_of_x_wind, index_of_y_wind, index_of_process_scnv
@@ -208,15 +207,6 @@
              dtend(:,:,idtend) = dtend(:,:,idtend) + (gq0(:,:,ntqv) - save_q(:,:,ntqv)) * frain
           endif
         endif
-      endif
-!
-      if (cplchm) then
-        do k=1,levs
-          do i=1,im
-            tem  = (gq0(i,k,ntqv)-save_q(i,k,ntqv)) * frain
-            dqdti(i,k) = dqdti(i,k) + tem
-          enddo
-        enddo
       endif
 !
       do k=1,levs
