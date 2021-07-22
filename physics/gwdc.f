@@ -1459,7 +1459,8 @@
       subroutine gwdc_post_run(                                         &
      &  im, levs, lssav, ldiag3d, dtf, dtp, con_cp,                     &
      &  tauctx, taucty, gwdcu, gwdcv,                                   &
-     &  dugwd, dvgwd, du3dt, dv3dt, gu0, gv0, gt0,                      &
+     &  dugwd, dvgwd, dtend, dtidx, index_of_x_wind, index_of_y_wind,   &
+     &  index_of_process_nonorographic_gwd, gu0, gv0, gt0,              &
      &  errmsg, errflg)
 
       use machine, only : kind_phys
@@ -1471,14 +1472,17 @@
       real(kind=kind_phys), intent(in) ::                               &
      &  tauctx(:), taucty(:), gwdcu(:,:), gwdcv(:,:)
 
-      real(kind=kind_phys), intent(inout) ::                            &
-     &  dugwd(:), dvgwd(:), du3dt(:,:), dv3dt(:,:),                     &
+      real(kind=kind_phys), intent(inout) :: dugwd(:), dvgwd(:),        &
      &  gu0(:,:), gv0(:,:), gt0(:,:)
+      real(kind=kind_phys), intent(inout), optional :: dtend(:,:,:)
+      integer, intent(in) :: dtidx(:,:)
+      integer, intent(in) :: index_of_process_nonorographic_gwd
+      integer, intent(in) :: index_of_x_wind, index_of_y_wind
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
-      integer :: i, k
+      integer :: i, k, idtend
       real(kind=kind_phys) :: eng0, eng1
 
       ! Initialize CCPP error handling variables
@@ -1493,8 +1497,16 @@
       endif   ! end if_lssav
 
       if (ldiag3d) then
-         du3dt(:,:) = du3dt(:,:) + gwdcu(:,:)  * dtf
-         dv3dt(:,:) = dv3dt(:,:) + gwdcv(:,:)  * dtf
+         idtend = dtidx(index_of_x_wind,index_of_process_nonorographic_g&
+     &                  wd)
+         if(idtend>=1) then
+            dtend(:,:,idtend) = dtend(:,:,idtend) + gwdcu(:,:)  * dtf
+         endif
+         idtend = dtidx(index_of_y_wind,index_of_process_nonorographic_g&
+     &                  wd)
+         if(idtend>=1) then
+            dtend(:,:,idtend) = dtend(:,:,idtend) + gwdcv(:,:)  * dtf
+         endif
       endif
 
 !  --- ...  update the wind components with  gwdc tendencies

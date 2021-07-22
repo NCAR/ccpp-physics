@@ -159,7 +159,7 @@
       if (lslwr) then
 !>  - Call module_radiation_surface::setemis(),to set up surface
 !! emissivity for LW radiation.
-        call setemis (lsm, lsm_noahmp, lsm_ruc, vtype, landfrac,   &
+        call setemis (lsm, lsm_noahmp, lsm_ruc, vtype,             &
                       frac_grid, min_seaice, xlon, xlat, slmsk,    &
                       snowd, sncovr, sncovr_ice, zorl, tsfg, tsfa, &
                       hprime, semis_lnd, semis_ice, im,            &
@@ -182,7 +182,7 @@
 !! albedor for SW radiation.
 
         call setalb (slmsk, lsm, lsm_noahmp, lsm_ruc, snowd, sncovr, sncovr_ice, snoalb, &
-                     zorl, coszen, tsfg, tsfa, hprime, landfrac, frac_grid, min_seaice,  &
+                     zorl, coszen, tsfg, tsfa, hprime,           frac_grid, min_seaice,  &
                      alvsf, alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc,              &
                      albdvis_lnd, albdnir_lnd, albivis_lnd, albinir_lnd,                 &
                      albdvis_ice, albdnir_ice, albivis_ice, albinir_ice,                 &

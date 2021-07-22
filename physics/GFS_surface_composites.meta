@@ -23,6 +23,14 @@
   type = logical
   intent = in
   optional = F
+[flag_restart]
+  standard_name = flag_for_restart
+  long_name = flag for restart (warmstart) or coldstart
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [lkm]
   standard_name = flag_for_lake_surface_scheme
   long_name = flag for lake surface model
@@ -148,9 +156,17 @@
   type = logical
   intent = inout
   optional = F
-[use_flake]
+[lake]
   standard_name = flag_nonzero_lake_surface_fraction
   long_name = flag indicating presence of some lake surface area fraction
+  units = flag
+  dimensions = (horizontal_loop_extent)
+  type = logical
+  intent = inout
+  optional = F
+[use_flake]
+  standard_name = flag_for_using_flake
+  long_name = flag indicating lake points using flake model
   units = flag
   dimensions = (horizontal_loop_extent)
   type = logical
@@ -225,15 +241,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
-[snowd_wat]
-  standard_name = surface_snow_thickness_water_equivalent_over_water
-  long_name = water equivalent snow depth over water
-  units = mm
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
   optional = F
 [snowd_lnd]
   standard_name = surface_snow_thickness_water_equivalent_over_land
@@ -333,15 +340,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
-[weasd_wat]
-  standard_name = water_equivalent_accumulated_snow_depth_over_water
-  long_name = water equiv of acc snow depth over water
-  units = mm
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
   optional = F
 [weasd_lnd]
   standard_name = water_equivalent_accumulated_snow_depth_over_land
@@ -654,6 +652,14 @@
   dimensions = ()
   type = real
   kind = kind_phys
+  intent = in
+  optional = F
+[kdt]
+  standard_name = index_of_time_step
+  long_name = current forecast iteration
+  units = index
+  dimensions = ()
+  type = integer
   intent = in
   optional = F
 [errmsg]
@@ -1551,15 +1557,6 @@
   kind = kind_phys
   intent = inout
   optional = F
-[weasd_wat]
-  standard_name = water_equivalent_accumulated_snow_depth_over_water
-  long_name = water equiv of acc snow depth over water
-  units = mm
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [weasd_lnd]
   standard_name = water_equivalent_accumulated_snow_depth_over_land
   long_name = water equiv of acc snow depth over land
@@ -1586,15 +1583,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
-[snowd_wat]
-  standard_name = surface_snow_thickness_water_equivalent_over_water
-  long_name = water equivalent snow depth over water
-  units = mm
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
   optional = F
 [snowd_lnd]
   standard_name = surface_snow_thickness_water_equivalent_over_land
@@ -1918,6 +1906,77 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = F
+[garea]
+  standard_name = cell_area
+  long_name = area of the grid cell
+  units = m2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[zvfun]
+  standard_name = function_of_surface_roughness_length_and_green_vegetation_fraction
+  long_name = function of surface roughness length and green vegetation fraction
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[lheatstrg]
+  standard_name = flag_for_canopy_heat_storage
+  long_name = flag for canopy heat storage parameterization
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[h0facu]
+  standard_name = canopy_heat_storage_factor_for_sensible_heat_flux_in_unstable_surface_layer
+  long_name = canopy heat storage factor for sensible heat flux in unstable surface layer
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[h0facs]
+  standard_name = canopy_heat_storage_factor_for_sensible_heat_flux_in_stable_surface_layer
+  long_name = canopy heat storage factor for sensible heat flux in stable surface layer
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[hflxq]
+  standard_name = kinematic_surface_upward_sensible_heat_flux_reduced_by_surface_roughness_and_vegetation
+  long_name = kinematic surface upward sensible heat flux reduced by surface roughness and vegetation
+  units = K m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[hffac]
+  standard_name = surface_upward_sensible_heat_flux_reduction_factor
+  long_name = surface upward sensible heat flux reduction factor from canopy heat storage
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[sigmaf]
+  standard_name = bounded_vegetation_area_fraction
+  long_name = areal fractional cover of green vegetation bounded on the bottom
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
   optional = F
 [ztmax_wat]
   standard_name = bounded_surface_roughness_length_for_heat_over_water

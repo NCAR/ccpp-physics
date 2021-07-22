@@ -28,6 +28,7 @@
       subroutine sfc_nst_run                                            &
      &     ( im, hvap, cp, hfus, jcal, eps, epsm1, rvrdm1, rd, rhw0,    &  ! --- inputs:
      &       pi, tgice, sbc, ps, u1, v1, t1, q1, tref, cm, ch,          &
+     &       lseaspray, fm, fm10,                                       &
      &       prsl1, prslki, prsik1, prslk1, wet, use_flake, xlon,       &
      &       sinlat, stress,                                            &
      &       sfcemis, dlwflx, sfcnsw, rain, timestep, kdt, solhr,xcosz, &
@@ -47,6 +48,7 @@
 !    call sfc_nst                                                       !
 !       inputs:                                                         !
 !          ( im, ps, u1, v1, t1, q1, tref, cm, ch,                      !
+!            lseaspray, fm, fm10,                                       !
 !            prsl1, prslki, wet, use_flake, xlon, sinlat, stress,       !
 !            sfcemis, dlwflx, sfcnsw, rain, timestep, kdt,solhr,xcosz,  !
 !            wind,  flag_iter, flag_guess, nstf_name1, nstf_name4,      !
@@ -89,12 +91,16 @@
 !     tref     - real, reference/foundation temperature ( k )      im   !
 !     cm       - real, surface exchange coeff for momentum (m/s)   im   !
 !     ch       - real, surface exchange coeff heat & moisture(m/s) im   !
+!     lseaspray- logical, .t. for parameterization for sea spray   1    !
+!     fm       - real, a stability profile function for momentum   im   !
+!     fm10     - real, a stability profile function for momentum   im   !
+!                       at 10m                                          !
 !     prsl1    - real, surface layer mean pressure (pa)            im   !
 !     prslki   - real,                                             im   !
 !     prsik1   - real,                                             im   !
 !     prslk1   - real,                                             im   !
 !     wet      - logical, =T if any ocn/lake water (F otherwise)   im   !
-!     use_flake     - logical, =T if any lake otherwise ocn
+!     use_flake- logical, =T if flake model is used for lake       im   !
 !     icy      - logical, =T if any ice                            im   !
 !     xlon     - real, longitude         (radians)                 im   !
 !     sinlat   - real, sin of latitude                             im   !
@@ -190,12 +196,15 @@
       real (kind=kind_phys), intent(in) :: hvap, cp, hfus, jcal, eps,   &
      &       epsm1, rvrdm1, rd, rhw0, sbc, pi, tgice
       real (kind=kind_phys), dimension(:), intent(in) :: ps, u1, v1,    &
-     &       t1, q1, tref, cm, ch, prsl1, prslki, prsik1, prslk1,       &
-     &       xlon,xcosz,                                                &
+     &       t1, q1, tref, cm, ch, fm, fm10,                            &
+     &       prsl1, prslki, prsik1, prslk1, xlon, xcosz,                &
      &       sinlat, stress, sfcemis, dlwflx, sfcnsw, rain, wind
       real (kind=kind_phys), intent(in) :: timestep
       real (kind=kind_phys), intent(in) :: solhr
 
+! For sea spray effect
+      logical, intent(in) :: lseaspray
+!
       logical, dimension(:), intent(in) :: flag_iter, flag_guess, wet,  &
      &                                     use_flake 
 !    &,      icy
@@ -244,14 +253,29 @@
       real(kind=kind_phys) fw,q_warm
       real(kind=kind_phys) t12,alon,tsea,sstc,dta,dtz
       real(kind=kind_phys) zsea1,zsea2,soltim
+      logical do_nst
 
 !  external functions called: iw3jdn
       integer :: iw3jdn
+!
+!  parameters for sea spray effect
+!
+      real (kind=kind_phys) :: f10m, u10m, v10m, ws10, ru10, qss1,
+     &                         bb1, hflxs, evaps, ptem
+!
+!     real (kind=kind_phys), parameter :: alps=0.5, bets=0.5, gams=0.1,
+!     real (kind=kind_phys), parameter :: alps=0.5, bets=0.5, gams=0.0,
+!     real (kind=kind_phys), parameter :: alps=1.0, bets=1.0, gams=0.2,
+      real (kind=kind_phys), parameter :: alps=0.75,bets=0.75,gams=0.15,
+     &                       ws10cr=30., conlf=7.2e-9, consf=6.4e-8
+!
 !======================================================================================================
 cc
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+
+      if (nstf_name1 == 0) return ! No NSST model used
 
       cpinv = one/cp
       hvapi = one/hvap
@@ -261,10 +285,13 @@ cc
 !
 ! flag for open water and where the iteration is on
 !
+      do_nst = .false.
       do i = 1, im
 !       flag(i) = wet(i) .and. .not.icy(i) .and. flag_iter(i)
         flag(i) = wet(i) .and. flag_iter(i) .and. .not. use_flake(i)
+        do_nst  = do_nst .or. flag(i)
       enddo
+      if (.not. do_nst) return
 !
 !  save nst-related prognostic fields for guess run
 !
@@ -636,7 +663,33 @@ cc
           endif
         enddo
       endif                   ! if ( nstf_name1 > 1 ) then
-
+!
+!  include sea spray effects
+!
+      do i=1,im
+        if(lseaspray .and. flag(i)) then
+          f10m = fm10(i) / fm(i)
+          u10m = f10m * u1(i)
+          v10m = f10m * v1(i)
+          ws10 = sqrt(u10m*u10m + v10m*v10m)
+          ws10 = max(ws10,1.)
+          ws10 = min(ws10,ws10cr)
+          tem = .015 * ws10 * ws10
+          ru10 = 1. - .087 * log(10./tem)
+          qss1 = fpvs(t1(i))
+          qss1 = eps * qss1 / (prsl1(i) + epsm1 * qss1)
+          tem = rd * cp * t1(i) * t1(i)
+          tem = 1. + eps * hvap * hvap * qss1 / tem
+          bb1 = 1. / tem
+          evaps = conlf * (ws10**5.4) * ru10 * bb1
+          evaps = evaps * rho_a(i) * hvap * (qss1 - q0(i))
+          evap(i) = evap(i) + alps * evaps
+          hflxs = consf * (ws10**3.4) * ru10
+          hflxs = hflxs * rho_a(i) * cp * (tskin(i) - t1(i))
+          ptem = alps - gams
+          hflx(i) = hflx(i) + bets * hflxs - ptem * evaps
+        endif
+      enddo
 !
       do i=1,im
         if ( flag(i) ) then
@@ -677,7 +730,7 @@ cc
 !> \section NSST_general_pre_algorithm General Algorithm
 !! @{
       subroutine sfc_nst_pre_run
-     &    (im, wet, use_flake, tgice, tsfco, tsfc_wat, tsurf_wat,
+     &    (im, wet, tgice, tsfco, tsurf_wat,
      &     tseal, xt, xz, dt_cool, z_c, tref, cplflx,
      &     oceanfrac, nthreads, errmsg, errflg)
 
@@ -690,11 +743,10 @@ cc
 
 !  ---  inputs:
       integer, intent(in) :: im, nthreads
-      logical, dimension(:), intent(in) :: wet, use_flake
+      logical, dimension(:), intent(in) :: wet
       real (kind=kind_phys), intent(in) :: tgice
       real (kind=kind_phys), dimension(:), intent(in) ::
-     &      tsfc_wat, xt, xz, dt_cool, z_c, oceanfrac,
-     &      tsfco
+     &      tsfco, xt, xz, dt_cool, z_c, oceanfrac
       logical, intent(in) :: cplflx
 
 !  ---  input/outputs:
@@ -712,33 +764,32 @@ cc
      &                                   half = 0.5_kp,
      &                                   omz1 = 2.0_kp
       real(kind=kind_phys) :: tem1, tem2, dnsst
-      real(kind=kind_phys), dimension(im) :: dtzm,z_c_0
+      real(kind=kind_phys), dimension(im) :: dtzm, z_c_0
 
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
 
       do i=1,im
-        if (wet(i) .and. .not. use_flake(i)) then
+        if (wet(i) .and. oceanfrac(i) > 0.0) then
 !          tem         = (oro(i)-oro_uf(i)) * rlapse
           ! DH* 20190927 simplyfing this code because tem is zero
           !tem          = zero
-          !tseal(i)     = tsfc_wat(i)  + tem
-          tseal(i)      = tsfc_wat(i)
+          !tseal(i)     = tsfco(i)  + tem
+          tseal(i)      = tsfco(i)
           !tsurf_wat(i) = tsurf_wat(i) + tem
           ! *DH
         endif
       enddo
-
 !
 !   update tsfc & tref with T1 from OGCM & NSST Profile if coupled
 !
       if (cplflx) then
-        z_c_0 = 0.0
+        z_c_0 = zero
         call get_dtzm_2d (xt,  xz, dt_cool,                             &
      &                    z_c_0, wet, zero, omz1, im, 1, nthreads, dtzm)
         do i=1,im
-         if (wet(i) .and. oceanfrac(i)>zero .and..not.use_flake(i)) then
+         if (wet(i) .and. oceanfrac(i) > zero ) then
 !           dnsst   = tsfc_wat(i) - tref(i)                 !  retrive/get difference of Ts and Tf
             tref(i) = max(tgice, tsfco(i) - dtzm(i))        !  update Tf with T1 and NSST T-Profile
 !           tsfc_wat(i) = max(271.2,tref(i) + dnsst)        !  get Ts updated due to Tf update

@@ -370,6 +370,32 @@
   type = logical  
   intent = in
   optional = F
+[damp_LW_fluxadj]
+  standard_name = flag_to_damp_RRTMGP_LW_jacobian_flux_adjustment
+  long_name = logical flag to control RRTMGP LW calculation
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[lfnc_k]
+  standard_name = transition_pressure_length_scale_for_flux_damping
+  long_name = depth of transition layer in logistic function for LW flux adjustment damping
+  units = Pa
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[lfnc_p0]
+  standard_name = transition_pressure_for_flux_damping
+  long_name = transition pressure for LW flux adjustment damping
+  units = Pa
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [sfculw]
   standard_name = surface_upwelling_longwave_flux_on_radiation_time_step
   long_name = total sky sfc upward lw flux
