@@ -531,7 +531,7 @@
   dimensions = (horizontal_dimension,ice_vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [pores]
   standard_name = maximum_soil_moisture_content_for_land_surface_model
