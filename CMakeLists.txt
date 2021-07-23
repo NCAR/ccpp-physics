@@ -7,7 +7,7 @@ endif (NOT PROJECT)
 #------------------------------------------------------------------------------
 cmake_minimum_required(VERSION 3.0)
 
-project(ccppphys
+project(ccpp_physics
         VERSION 4.0.0
         LANGUAGES C CXX Fortran)
 
@@ -336,7 +336,7 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
 endif ()
 
 #------------------------------------------------------------------------------
-add_library(ccppphys STATIC ${SCHEMES} ${SCHEMES_SFX_OPT} ${CAPS})
+add_library(ccpp_physics STATIC ${SCHEMES} ${SCHEMES_SFX_OPT} ${CAPS})
 # Generate list of Fortran modules from defined sources
 foreach(source_f90 ${CAPS})
     get_filename_component(tmp_source_f90 ${source_f90} NAME)
@@ -345,20 +345,22 @@ foreach(source_f90 ${CAPS})
     list(APPEND MODULES_F90 ${CMAKE_CURRENT_BINARY_DIR}/${module_f90})
 endforeach()
 
-set_target_properties(ccppphys PROPERTIES VERSION ${PROJECT_VERSION}
+target_link_libraries(ccpp_physics PUBLIC NetCDF::NetCDF_Fortran)
+    
+set_target_properties(ccpp_physics PROPERTIES VERSION ${PROJECT_VERSION}
                                      SOVERSION ${PROJECT_VERSION_MAJOR})
 
 if (PROJECT STREQUAL "CCPP-FV3")
   # Define where to install the library
-  install(TARGETS ccppphys
-          EXPORT ccppphys-targets
+  install(TARGETS ccpp_physics
+          EXPORT ccpp_physics-targets
           ARCHIVE DESTINATION lib
           LIBRARY DESTINATION lib
           RUNTIME DESTINATION lib
   )
   # Export our configuration
-  install(EXPORT ccppphys-targets
-          FILE ccppphys-config.cmake
+  install(EXPORT ccpp_physics-targets
+          FILE ccpp_physics-config.cmake
           DESTINATION lib/cmake
   )
   # Define where to install the C headers and Fortran modules
