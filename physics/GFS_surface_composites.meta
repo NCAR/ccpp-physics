@@ -23,6 +23,14 @@
   type = logical
   intent = in
   optional = F
+[flag_restart]
+  standard_name = flag_for_restart
+  long_name = flag for restart (warmstart) or coldstart
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [lkm]
   standard_name = flag_for_lake_surface_scheme
   long_name = flag for lake surface model

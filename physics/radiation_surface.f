@@ -413,13 +413,15 @@
      &       lakefrac,                                                  &
      &       slmsk, snowf, zorlf, coszf, tsknf, tairf, hprif,           &
      &       alvsf, alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc,     &
-     &       lsmalbdvis, lsmalbdnir, lsmalbivis, lsmalbinir,            &
      &       icealbdvis, icealbdnir, icealbivis, icealbinir,            &
      &       sncovr, sncovr_ice, snoalb, albPpert           ! sfc-perts, mgehne
       real (kind=kind_phys),  intent(in) :: pertalb         ! sfc-perts, mgehne
 !     real (kind=kind_phys),  intent(in) :: min_seaice
       real (kind=kind_phys), dimension(:), intent(in) ::                &
      &       fracl, fraco, fraci
+      real (kind=kind_phys), dimension(:),intent(inout) ::              &
+     &     lsmalbdvis, lsmalbdnir, lsmalbivis, lsmalbinir 
+
       logical, dimension(:), intent(in) ::                              &
      &       icy
 
@@ -546,6 +548,10 @@
             alndnd = alnwf(i)*flnd + snoalb(i) * fsno
             alndvb = ab2bm   *flnd + snoalb(i) * fsno
             alndvd = alvwf(i)*flnd + snoalb(i) * fsno
+            lsmalbdnir(i) = min(0.99,max(0.01,alndnb))
+            lsmalbinir(i) = min(0.99,max(0.01,alndnd))
+            lsmalbdvis(i) = min(0.99,max(0.01,alndvb))
+            lsmalbivis(i) = min(0.99,max(0.01,alndvd))
           else
           !-- fill in values for land albedo
             alndnb = 0.

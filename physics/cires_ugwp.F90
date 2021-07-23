@@ -164,7 +164,8 @@ contains
          dudt_mtb,dudt_ogw, dudt_tms, du3dt_mtb, du3dt_ogw, du3dt_tms,                 &
          dudt, dvdt, dtdt, rdxzb, con_g, con_pi, con_cp, con_rd, con_rv, con_fvirt,    &
          con_omega, rain, ntke, q_tke, dqdt_tke, lprnt, ipr,                           &
-         ldu3dt_ogw, ldv3dt_ogw, ldt3dt_ogw, ldu3dt_cgw, ldv3dt_cgw, ldt3dt_cgw,       &
+         dtend, dtidx, index_of_x_wind, index_of_y_wind, index_of_temperature,         &
+         index_of_process_orographic_gwd, index_of_process_nonorographic_gwd,          &
          ldiag3d, lssav, flag_for_gwd_generic_tend, errmsg, errflg)
 
     implicit none
@@ -190,9 +191,12 @@ contains
     real(kind=kind_phys),    intent(out), dimension(:, :):: gw_dudt, gw_dvdt, gw_dtdt, gw_kdis
     real(kind=kind_phys),    intent(out), dimension(:, :):: dudt_mtb, dudt_ogw, dudt_tms
 
-    ! These arrays are only allocated if ldiag=.true.
-    real(kind=kind_phys),    intent(inout), dimension(:,:)      :: ldu3dt_ogw, ldv3dt_ogw, ldt3dt_ogw
-    real(kind=kind_phys),    intent(inout), dimension(:,:)      :: ldu3dt_cgw, ldv3dt_cgw, ldt3dt_cgw
+    ! dtend is only allocated if ldiag=.true.
+    real(kind=kind_phys), optional, intent(inout)            :: dtend(:,:,:)
+    integer, intent(in)                                      :: dtidx(:,:), &
+         index_of_x_wind, index_of_y_wind, index_of_temperature,         &
+         index_of_process_orographic_gwd, index_of_process_nonorographic_gwd
+
     logical,                 intent(in)                         :: ldiag3d, lssav
 
     ! These arrays only allocated if ldiag_ugwp = .true.
@@ -214,7 +218,7 @@ contains
     integer,                 intent(out) :: errflg
 
     ! local variables
-    integer :: i, k
+    integer :: i, k, idtend
     real(kind=kind_phys), dimension(im)       :: sgh30
     real(kind=kind_phys), dimension(im, levs) :: Pdvdt, Pdudt
     real(kind=kind_phys), dimension(im, levs) :: Pdtdt, Pkdis
@@ -288,13 +292,18 @@ contains
 
 
     if(ldiag3d .and. lssav .and. .not. flag_for_gwd_generic_tend) then
-      do k=1,levs
-        do i=1,im
-           ldu3dt_ogw(i,k) = ldu3dt_ogw(i,k) + Pdudt(i,k)*dtp
-           ldv3dt_ogw(i,k) = ldv3dt_ogw(i,k) + Pdvdt(i,k)*dtp
-           ldt3dt_ogw(i,k) = ldt3dt_ogw(i,k) + Pdtdt(i,k)*dtp
-        enddo
-      enddo
+      idtend = dtidx(index_of_x_wind,index_of_process_orographic_gwd)
+      if(idtend>=1) then
+         dtend(:,:,idtend) = dtend(:,:,idtend) + Pdudt*dtp
+      endif
+      idtend = dtidx(index_of_y_wind,index_of_process_orographic_gwd)
+      if(idtend>=1) then
+         dtend(:,:,idtend) = dtend(:,:,idtend) + Pdvdt*dtp
+      endif
+      idtend = dtidx(index_of_temperature,index_of_process_orographic_gwd)
+      if(idtend>=1) then
+         dtend(:,:,idtend) = dtend(:,:,idtend) + Pdtdt*dtp
+      endif
     endif
     
 
@@ -374,13 +383,18 @@ contains
     endif
 
     if(ldiag3d .and. lssav .and. .not. flag_for_gwd_generic_tend) then
-      do k=1,levs
-        do i=1,im
-           ldu3dt_cgw(i,k) = ldu3dt_cgw(i,k) + (gw_dudt(i,k) - Pdudt(i,k))*dtp
-           ldv3dt_cgw(i,k) = ldv3dt_cgw(i,k) + (gw_dvdt(i,k) - Pdvdt(i,k))*dtp
-           ldt3dt_cgw(i,k) = ldt3dt_cgw(i,k) + (gw_dtdt(i,k) - Pdtdt(i,k))*dtp
-        enddo
-      enddo
+      idtend = dtidx(index_of_x_wind,index_of_process_nonorographic_gwd)
+      if(idtend>=1) then
+         dtend(:,:,idtend) = dtend(:,:,idtend) + (gw_dudt - Pdudt)*dtp
+      endif
+      idtend = dtidx(index_of_y_wind,index_of_process_nonorographic_gwd)
+      if(idtend>=1) then
+         dtend(:,:,idtend) = dtend(:,:,idtend) + (gw_dvdt - Pdvdt)*dtp
+      endif
+      idtend = dtidx(index_of_temperature,index_of_process_nonorographic_gwd)
+      if(idtend>=1) then
+         dtend(:,:,idtend) = dtend(:,:,idtend) + (gw_dtdt - Pdtdt)*dtp
+      endif
     endif
 
     end subroutine cires_ugwp_run
