@@ -8,8 +8,8 @@ endif (NOT PROJECT)
 cmake_minimum_required(VERSION 3.0)
 
 project(ccpp_physics
-        VERSION 4.0.0
-        LANGUAGES C CXX Fortran)
+        VERSION 5.0.0
+        LANGUAGES Fortran)
 
 # Use rpaths on MacOSX
 set(CMAKE_MACOSX_RPATH 1)
@@ -31,25 +31,9 @@ set(AUTHORS "Grant Firl" "Dom Heinzeller" "Man Zhang" "Laurie Carson")
 if (OPENMP)
   include(detect_openmp)
   detect_openmp()
-  #set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-  #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-  #set (CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS}")
-  message(STATUS "Enable OpenMP support for C/C++/Fortran compiler")
+  message(STATUS "Enable OpenMP support")
 else (OPENMP)
-  message (STATUS "Disable OpenMP support for C/C++/Fortran compiler")
-endif()
-
-#------------------------------------------------------------------------------
-# The Fortran compiler/linker flag inserted by cmake to create shared libraries
-# with the Intel compiler is deprecated (-i_dynamic), correct here.
-# CMAKE_Fortran_COMPILER_ID = {"Intel", "PGI", "GNU", "Clang", "MSVC", ...}
-if ("${CMAKE_Fortran_COMPILER_ID}" STREQUAL "Intel")
-    string(REPLACE "-i_dynamic" "-shared-intel"
-           CMAKE_SHARED_LIBRARY_CREATE_Fortran_FLAGS
-           "${CMAKE_SHARED_LIBRARY_CREATE_Fortran_FLAGS}")
-    string(REPLACE "-i_dynamic" "-shared-intel"
-           CMAKE_SHARED_LIBRARY_LINK_Fortran_FLAGS
-           "${CMAKE_SHARED_LIBRARY_LINK_Fortran_FLAGS}")
+  message (STATUS "Disable OpenMP support")
 endif()
 
 #------------------------------------------------------------------------------
@@ -321,20 +305,6 @@ else()
   message (FATAL_ERROR "This program has only been compiled with gfortran, pgf90 and ifort. If another compiler is needed, the appropriate flags must be added in ${GFS_PHYS_SRC}/CMakeLists.txt")
 endif()
 
-# The auto-generated caps can contain calls to physics schemes in
-# which some of the arguments (pointers, arrays) are not associated/allocated.
-# This is on purpose to avoid allocating fields that are not used inside the
-# scheme if, for example, certain conditions are not met. To avoid
-# Fortran runtime errors, it is necessary to remove checks for pointers
-# that are not associated and for array bounds from the caps ONLY. For the
-# physics schemes, these checks can and should remain enabled. Overwriting
-# the pointer check flags explicitly works for Intel and GNU, but not for PGI.
-if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
-  set_property(SOURCE ${CAPS} APPEND_STRING PROPERTY COMPILE_FLAGS " -fcheck=no-pointer,no-bounds ")
-elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
-  set_property(SOURCE ${CAPS} APPEND_STRING PROPERTY COMPILE_FLAGS " -check nopointers,nobounds ")
-endif ()
-
 #------------------------------------------------------------------------------
 add_library(ccpp_physics STATIC ${SCHEMES} ${SCHEMES_SFX_OPT} ${CAPS})
 # Generate list of Fortran modules from defined sources
@@ -345,10 +315,13 @@ foreach(source_f90 ${CAPS})
     list(APPEND MODULES_F90 ${CMAKE_CURRENT_BINARY_DIR}/${module_f90})
 endforeach()
 
-target_link_libraries(ccpp_physics PUBLIC NetCDF::NetCDF_Fortran)
-    
 set_target_properties(ccpp_physics PROPERTIES VERSION ${PROJECT_VERSION}
                                      SOVERSION ${PROJECT_VERSION_MAJOR})
+
+target_include_directories(ccpp_physics PUBLIC
+                           $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
+
+target_link_libraries(ccpp_physics PUBLIC NetCDF::NetCDF_Fortran)
 
 if (PROJECT STREQUAL "CCPP-FV3")
   # Define where to install the library
