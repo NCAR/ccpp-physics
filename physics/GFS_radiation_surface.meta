@@ -411,7 +411,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
   optional = F
 [albdnir_lnd]
   standard_name = surface_albedo_direct_NIR_over_land
@@ -420,7 +420,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
   optional = F
 [albivis_lnd]
   standard_name = surface_albedo_diffuse_visible_over_land
@@ -429,7 +429,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
   optional = F
 [albinir_lnd]
   standard_name = surface_albedo_diffuse_NIR_over_land
@@ -438,7 +438,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
   optional = F
 [albdvis_ice]
   standard_name = surface_albedo_direct_visible_over_ice

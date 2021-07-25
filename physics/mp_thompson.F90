@@ -334,7 +334,7 @@ module mp_thompson
                               spechum, qc, qr, qi, qs, qg, ni, nr, &
                               is_aerosol_aware, nc, nwfa, nifa,    &
                               nwfa2d, nifa2d,                      &
-                              tgrs, prsl, phii, omega,             &
+                              tgrs, prsl, phii, omega, dt_inner,   &
                               dtp, first_time_step, istep, nsteps, &
                               prcp, rain, graupel, ice, snow, sr,  &
                               refl_10cm, reset_dBZ, do_radar_ref,  &
@@ -389,6 +389,7 @@ module mp_thompson
          ! Radar reflectivity
          real(kind_phys),           intent(  out) :: refl_10cm(:,:)
          logical,         optional, intent(in   ) :: do_radar_ref
+         real,                      intent(in   ) :: dt_inner
          ! Cloud effective radii
          real(kind_phys), optional, intent(  out) :: re_cloud(:,:)
          real(kind_phys), optional, intent(  out) :: re_ice(:,:)
@@ -673,7 +674,7 @@ module mp_thompson
             if (do_effective_radii) then
                call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
                                  nc=nc, nwfa=nwfa, nifa=nifa, nwfa2d=nwfa2d, nifa2d=nifa2d,     &
-                                 tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtp,                        &
+                                 tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtstep, dt_inner=dt_inner,  &
                                  rainnc=rain_mp, rainncv=delta_rain_mp,                         &
                                  snownc=snow_mp, snowncv=delta_snow_mp,                         &
                                  icenc=ice_mp, icencv=delta_ice_mp,                             &
@@ -713,7 +714,7 @@ module mp_thompson
             else
                call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
                                  nc=nc, nwfa=nwfa, nifa=nifa, nwfa2d=nwfa2d, nifa2d=nifa2d,     &
-                                 tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtp,                        &
+                                 tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtstep, dt_inner=dt_inner,  &
                                  rainnc=rain_mp, rainncv=delta_rain_mp,                         &
                                  snownc=snow_mp, snowncv=delta_snow_mp,                         &
                                  icenc=ice_mp, icencv=delta_ice_mp,                             &
@@ -753,7 +754,7 @@ module mp_thompson
          else
             if (do_effective_radii) then
                call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
-                                 tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtp,                        &
+                                 tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtstep, dt_inner=dt_inner,  &
                                  rainnc=rain_mp, rainncv=delta_rain_mp,                         &
                                  snownc=snow_mp, snowncv=delta_snow_mp,                         &
                                  icenc=ice_mp, icencv=delta_ice_mp,                             &
@@ -792,7 +793,7 @@ module mp_thompson
                                  qcten3=qcten3)
             else
                call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
-                                 tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtp,                        &
+                                 tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtstep, dt_inner=dt_inner,  &
                                  rainnc=rain_mp, rainncv=delta_rain_mp,                         &
                                  snownc=snow_mp, snowncv=delta_snow_mp,                         &
                                  icenc=ice_mp, icencv=delta_ice_mp,                             &
