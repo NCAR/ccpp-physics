@@ -29,7 +29,7 @@
         prsi, prsl, prslk, tgrs, sfc_wts, mg_cld, effrr_in, pert_clds,         &
         sppt_wts, sppt_amp, cnvw_in, cnvc_in, qgrs, aer_nm, dx, icloud,        & !inputs from here and above
         coszen, coszdg, effrl_inout, effri_inout, effrs_inout,                 &
-        clouds1, clouds2, clouds3, clouds4, clouds5,                           & !in/out from here and above
+        clouds1, clouds2, clouds3, clouds4, clouds5,qci_conv,                  & !in/out from here and above
         kd, kt, kb, mtopa, mbota, raddt, tsfg, tsfa, de_lgth, alb1d, delp, dz, & !output from here and below
         plvl, plyr, tlvl, tlyr, qlyr, olyr, gasvmr_co2, gasvmr_n2o, gasvmr_ch4,&
         gasvmr_o2, gasvmr_co, gasvmr_cfc11, gasvmr_cfc12, gasvmr_cfc22,        &
@@ -125,6 +125,7 @@
       real(kind=kind_phys), dimension(:,:), intent(inout) :: clouds1,          &
                                                              clouds2, clouds3, &
                                                              clouds4, clouds5
+      real(kind=kind_phys),  dimension(im,levs), intent(inout) :: qci_conv
 
       integer,                              intent(out) :: kd, kt, kb
 
@@ -735,6 +736,18 @@
                 ! MYNN sub-grid cloud fraction
                   cldcov(i,k1) = clouds1(i,k1)
                 endif
+              enddo
+            enddo
+          elseif (imfdeepcnv == imfdeepcnv_gf .and. kdt>1) THEN
+            do k=1,lm
+              k1 = k + kd
+              do i=1,im
+              if (qci_conv(i,k)>0.) then
+                ! GF sub-grid cloud fraction
+                cldcov(i,k1) = clouds1(i,k1)
+              else
+                cldcov(i,k1) = tracer1(I,k1,ntclamt)
+              endif
               enddo
             enddo
           else

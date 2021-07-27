@@ -804,6 +804,15 @@
   kind = kind_phys
   intent = inout
   optional = F
+[qci_conv]
+  standard_name = convective_cloud_condesate_after_rainout
+  long_name = convective cloud condesate after rainout
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
 [kd]
   standard_name = vertical_index_difference_between_inout_and_local
   long_name = vertical index difference between in/out and local

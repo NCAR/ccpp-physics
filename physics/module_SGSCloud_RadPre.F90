@@ -266,7 +266,7 @@
                   if(qi(i,k)>1.E-8)clouds5(i,k)=max(173.45 + 2.14*Tc, 20.)
                 endif
 
-                if ( do_mynnedmf .or. (imp_physics == imp_physics_gfdl) ) then
+                if ( do_mynnedmf ) then
                   !print *,'MYNN PBL or GFDL MP cldcov used'
                 else
                   !print *,'GF with Xu-Randall cloud fraction'
@@ -290,7 +290,7 @@
                   endif
                   !print*,"XuRandla- cf:",clouds1(i,k)," rh:",rhgrid," qt:",h2oliq
                   !print*,"XuRandlb- clwt:",clwt," qsat:",qsat," p:",p3d(i,k)
-                endif ! not MYNN PBL or GFDL MP
+                endif ! not MYNN PBL
               endif ! qci_conv
             enddo
           enddo
