@@ -13,7 +13,7 @@ module cs_conv_pre
 !! \section arg_table_cs_conv_pre_run Argument Table
 !! \htmlinclude cs_conv_pre_run.html
 !!
-  subroutine cs_conv_pre_run(im, levs, ntrac, ncld, q, clw1, clw2,      &
+  subroutine cs_conv_pre_run(im, levs, ntrac, q, clw1, clw2,            &
      &                       work1, work2, cs_parm1, cs_parm2, wcbmax,  &
      &                       fswtr, fscav, save_q1, save_q2, save_q3,   &
      &                       errmsg, errflg)
@@ -24,7 +24,7 @@ module cs_conv_pre
   implicit none
 
 ! --- inputs
-  integer, intent(in) :: im, levs, ntrac, ncld
+  integer, intent(in) :: im, levs, ntrac
   real(kind_phys), dimension(:,:), intent(in) :: q
   real(kind_phys), dimension(:,:), intent(in) :: clw1,clw2
   real(kind_phys), dimension(:),   intent(in) :: work1, work2

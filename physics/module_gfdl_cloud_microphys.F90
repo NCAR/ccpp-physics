@@ -361,7 +361,7 @@ subroutine gfdl_cloud_microphys_mod_driver (                                    
             qv_dt, ql_dt, qr_dt, qi_dt, qs_dt, qg_dt, qa_dt, pt_dt, pt, w,      &
             uin, vin, udt, vdt, dz, delp, area, dt_in, land,                    &
             rain, snow, ice, graupel, hydrostatic, phys_hydrostatic,            &
-            p, lradar, refl_10cm,reset)
+            p, lradar, refl_10cm, reset, pfils, pflls)
 
    implicit none
 
@@ -392,6 +392,7 @@ subroutine gfdl_cloud_microphys_mod_driver (                                    
    logical, intent (in) :: lradar
    real, intent (out), dimension (iis:iie, jjs:jje, kks:kke) :: refl_10cm
    logical, intent (in) :: reset
+   real, intent (out), dimension (iis:iie, jjs:jje, kks:kke) :: pfils, pflls
 
    ! Local variables
    logical :: melti = .false.
@@ -483,6 +484,9 @@ subroutine gfdl_cloud_microphys_mod_driver (                                    
        enddo
    enddo
 
+   pfils = 0.
+   pflls = 0.
+
    ! -----------------------------------------------------------------------
    ! major cloud microphysics
    ! -----------------------------------------------------------------------
@@ -494,6 +498,12 @@ subroutine gfdl_cloud_microphys_mod_driver (                                    
            m2_sol, cond (:, j), area (:, j), land (:, j), udt, vdt, pt_dt,    &
            qv_dt, ql_dt, qr_dt, qi_dt, qs_dt, qg_dt, qa_dt, w_var, vt_r,      &
            vt_s, vt_g, vt_i, qn2)
+       do k = ktop, kbot
+           do i = is, ie
+               pfils(i, j, k) = m2_sol (i, k)
+               pflls(i, j, k) = m2_rain(i, k)
+           enddo
+       enddo
    enddo
 
    ! -----------------------------------------------------------------------

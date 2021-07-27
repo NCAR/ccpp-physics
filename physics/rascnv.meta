@@ -210,6 +210,22 @@
   type = integer
   intent = in
   optional = F
+[itc]
+  standard_name = number_of_aerosol_tracers_for_convection
+  long_name = number of aerosol tracers transported/scavenged by convection
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntc]
+  standard_name = number_of_chemical_tracers
+  long_name = number of chemical tracers
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [ntr]
   standard_name = number_of_tracers_for_samf
   long_name = number of tracers for scale-aware mass flux schemes

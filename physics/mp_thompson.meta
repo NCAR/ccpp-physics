@@ -302,6 +302,23 @@
   type = integer
   intent = in
   optional = F
+[ext_diag]
+  standard_name = flag_for_extended_diagnostic_output_from_thompson_microphysics
+  long_name = flag for extended diagnostic output from thompson microphysics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[diag3d]
+  standard_name = extended_diagnostics_output_from_thompson_microphysics
+  long_name = set of 3d arrays for extended diagnostics output from thompson microphysics
+  units = none
+  dimensions = (horizontal_dimension,vertical_dimension,number_of_3d_diagnostic_output_arrays_from_thompson_microphysics)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -545,6 +562,30 @@
   kind = kind_phys
   intent = in
   optional = F
+[first_time_step]
+  standard_name = flag_for_first_time_step
+  long_name = flag for first time step for time integration loop (cold/warmstart)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[istep]
+  standard_name = ccpp_loop_counter
+  long_name = loop counter for subcycling loops in CCPP
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[nsteps]
+  standard_name = ccpp_loop_extent
+  long_name = loop extent for subcycling loops in CCPP
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [prcp]
   standard_name = lwe_thickness_of_explicit_precipitation_amount
   long_name = explicit precipitation (rain, ice, snow, graupel) on physics timestep
@@ -608,7 +649,7 @@
   kind = kind_phys
   intent = out
   optional = F
-[reset]
+[reset_dBZ]
   standard_name = flag_for_resetting_radar_reflectivity_calculation
   long_name = flag for resetting radar reflectivity calculation
   units = flag
@@ -673,6 +714,39 @@
   units = index
   dimensions = ()
   type = integer
+  intent = in
+  optional = F
+[blkno]
+  standard_name = ccpp_block_number
+  long_name = number of block for explicit data blocking in CCPP
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ext_diag]
+  standard_name = flag_for_extended_diagnostic_output_from_thompson_microphysics
+  long_name = flag for extended diagnostic output from thompson microphysics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[diag3d]
+  standard_name = extended_diagnostics_output_from_thompson_microphysics
+  long_name = set of 3d arrays for extended diagnostics output from thompson microphysics
+  units = none
+  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_3d_diagnostic_output_arrays_from_thompson_microphysics)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[reset_diag3d]
+  standard_name = flag_reset_extended_diagnostics_output_arrays_from_thompson_microphysics
+  long_name = flag for resetting extended diagnostics output arrays from thompson microphysics
+  units = flag
+  dimensions = ()
+  type = logical
   intent = in
   optional = F
 [errmsg]
