@@ -746,7 +746,7 @@
                 ! GF sub-grid cloud fraction
                 cldcov(i,k1) = clouds1(i,k1)
               else
-                cldcov(i,k1) = tracer1(I,k1,ntclamt)
+                cldcov(i,k1) = tracer1(i,k1,ntclamt)
               endif
               enddo
             enddo
