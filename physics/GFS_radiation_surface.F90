@@ -88,7 +88,7 @@
                                                            alnwf, facsf, facwf,         &
                                                            semis_lnd, semis_ice, snoalb
       character(len=3)    , dimension(:),   intent(in)  :: lndp_var_list
-      real(kind=kind_phys), dimension(:),   intent(in)  :: albdvis_lnd, albdnir_lnd,    &
+      real(kind=kind_phys), dimension(:),   intent(inout)  :: albdvis_lnd, albdnir_lnd, &
                                                            albivis_lnd, albinir_lnd
       real(kind=kind_phys), dimension(:),   intent(in)  :: albdvis_ice, albdnir_ice,    &
                                                            albivis_ice, albinir_ice

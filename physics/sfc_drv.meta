@@ -273,15 +273,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[snet]
-  standard_name = surface_net_downwelling_shortwave_flux
-  long_name = total sky surface net shortwave flux
-  units = W m-2
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [delt]
   standard_name = time_step_for_dynamics
   long_name = dynamics time step
@@ -478,6 +469,78 @@
   long_name = magnitude of perturbation of vegetation fraction
   units = frac
   dimensions = () 
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[albdvis_lnd]
+  standard_name = surface_albedo_direct_visible_over_land
+  long_name = direct surface albedo visible band over land
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[albdnir_lnd]
+  standard_name = surface_albedo_direct_NIR_over_land
+  long_name = direct surface albedo NIR band over land
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[albivis_lnd]
+  standard_name = surface_albedo_diffuse_visible_over_land
+  long_name = diffuse surface albedo visible band over land
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[albinir_lnd]
+  standard_name = surface_albedo_diffuse_NIR_over_land
+  long_name = diffuse surface albedo NIR band over land
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[adjvisbmd]
+  standard_name = surface_downwelling_direct_ultraviolet_and_visible_shortwave_flux
+  long_name = surface downwelling beam ultraviolet plus visible shortwave flux at current time
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[adjnirbmd]
+  standard_name = surface_downwelling_direct_near_infrared_shortwave_flux
+  long_name = surface downwelling beam near-infrared shortwave flux at current time
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[adjvisdfd]
+  standard_name = surface_downwelling_diffuse_ultraviolet_and_visible_shortwave_flux
+  long_name = surface downwelling diffuse ultraviolet plus visible shortwave flux at current time
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[adjnirdfd]
+  standard_name = surface_downwelling_diffuse_near_infrared_shortwave_flux
+  long_name = surface downwelling diffuse near-infrared shortwave flux at current time
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
