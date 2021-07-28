@@ -72,7 +72,7 @@
   intent = in
   optional = F
 [nncl]
-  standard_name = number_of_cloud_condensate_types
+  standard_name = number_of_condensate_species
   long_name = number of cloud condensate types
   units = count
   dimensions = ()

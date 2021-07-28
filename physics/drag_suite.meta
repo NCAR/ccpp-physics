@@ -652,7 +652,7 @@
   dimensions = (horizontal_loop_extent,vertical_dimension,number_of_cumulative_change_processes)
   type = real
   kind = kind_phys
-  active = (flag_diagnostics_3D)
+  active = (flag_for_diagnostics_3D)
   intent = inout
   optional = F
 [dtidx]
@@ -696,7 +696,7 @@
   intent = in
   optional = F
 [ldiag3d]
-  standard_name = flag_diagnostics_3D
+  standard_name = flag_for_diagnostics_3D
   long_name = flag for 3d diagnostic fields
   units = flag
   dimensions = ()

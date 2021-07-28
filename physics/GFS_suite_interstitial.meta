@@ -306,7 +306,7 @@
   intent = in
   optional = F
 [ldiag3d]
-  standard_name = flag_diagnostics_3D
+  standard_name = flag_for_diagnostics_3D
   long_name = flag for 3d diagnostic fields
   units = flag
   dimensions = ()
@@ -736,52 +736,6 @@
   dimensions = ()
   type = integer
   intent = in
-=======
-[dt3dt_sw]
-  standard_name = cumulative_change_in_temperature_due_to_shortwave_radiation
-  long_name = cumulative change in temperature due to shortwave radiation
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[dt3dt_pbl]
-  standard_name = cumulative_change_in_temperature_due_to_PBL
-  long_name = cumulative change in temperature due to PBL
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[dt3dt_dcnv]
-  standard_name = cumulative_change_in_temperature_due_to_deep_convection
-  long_name = cumulative change in temperature due to deep conv.
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[dt3dt_scnv]
-  standard_name = cumulative_change_in_temperature_due_to_shallow_convection
-  long_name = cumulative change in temperature due to shal conv.
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[dt3dt_mp]
-  standard_name = cumulative_change_in_temperature_due_to_microphysics
-  long_name = cumulative change in temperature due to microphysics
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
->>>>>>> 3b326607e302bf102a7c92f32c33830299124fa6
   optional = F
 [ctei_rml]
   standard_name = grid_sensitive_critical_cloud_top_entrainment_instability_criteria
@@ -1624,7 +1578,7 @@
   intent = inout
   optional = F
 [ldiag3d]
-  standard_name = flag_diagnostics_3D
+  standard_name = flag_for_diagnostics_3D
   long_name = flag for 3d diagnostic fields
   units = flag
   dimensions = ()
@@ -1632,7 +1586,7 @@
   intent = in
   optional = F
 [qdiag3d]
-  standard_name = flag_tracer_diagnostics_3D
+  standard_name = flag_for_tracer_diagnostics_3D
   long_name = flag for 3d tracer diagnostic fields
   units = flag
   dimensions = ()
@@ -1666,7 +1620,7 @@
   intent = inout
   optional = F
 [ntlnc]
-  standard_name = index_for_liquid_cloud_number_concentration
+  standard_name = index_of_mass_number_concentration_of_cloud_droplets_in_tracer_concentration_array
   long_name = tracer index for liquid number concentration
   units = index
   dimensions = ()
@@ -1674,7 +1628,7 @@
   intent = in
   optional = F
 [ntinc]
-  standard_name = index_for_ice_cloud_number_concentration
+  standard_name = index_of_mass_number_concentration_of_cloud_ice_in_tracer_concentration_array
   long_name = tracer index for ice    number concentration
   units = index
   dimensions = ()
@@ -2053,7 +2007,7 @@
   intent = in
   optional = F
 [ntke]
-  standard_name = index_for_turbulent_kinetic_energy
+  standard_name = index_of_turbulent_kinetic_energy_in_tracer_concentration_array
   long_name = tracer index for turbulent kinetic energy
   units = index
   dimensions = ()
@@ -2061,7 +2015,7 @@
   intent = in
   optional = F
 [ldiag3d]
-  standard_name = flag_diagnostics_3D
+  standard_name = flag_for_diagnostics_3D
   long_name = flag for 3d diagnostic fields
   units = flag
   dimensions = ()
@@ -2069,7 +2023,7 @@
   intent = in
   optional = F
 [qdiag3d]
-  standard_name = flag_tracer_diagnostics_3D
+  standard_name = flag_for_tracer_diagnostics_3D
   long_name = flag for 3d tracer diagnostic fields
   units = flag
   dimensions = ()

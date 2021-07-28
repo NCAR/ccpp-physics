@@ -218,7 +218,7 @@
   intent = out
   optional = F
 [lh_flux_chs]
-  standard_name = kinematic_surface_upward_latent_heat_flux_reduced_by_surface_roughness
+  standard_name = surface_upward_specific_humidity_flux_reduced_by_surface_roughness
   long_name = kinematic surface upward latent heat flux reduced by surface roughness
   units = kg kg-1 m s-1
   dimensions = (horizontal_loop_extent)

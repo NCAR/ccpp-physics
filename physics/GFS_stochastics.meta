@@ -474,7 +474,7 @@
   intent = inout
   optional = F
 [drain_cpl]
-  standard_name = lwe_thickness_of_rain_amount_on_dynamics_timestep_for_coupling
+  standard_name = tendency_of_lwe_thickness_of_rain_amount_on_dynamics_timestep_for_coupling
   long_name = change in rain_cpl (coupling_type)
   units = m
   dimensions = (horizontal_loop_extent)
@@ -483,7 +483,7 @@
   intent = in
   optional = F
 [dsnow_cpl]
-  standard_name = lwe_thickness_of_snowfall_amount_on_dynamics_timestep_for_coupling
+  standard_name = tendency_of_lwe_thickness_of_snowfall_amount_on_dynamics_timestep_for_coupling
   long_name = change in show_cpl (coupling_type)
   units = m
   dimensions = (horizontal_loop_extent)

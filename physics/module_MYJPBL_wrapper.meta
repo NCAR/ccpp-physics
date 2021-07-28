@@ -474,7 +474,7 @@
   intent = inout
   optional = F
 [evap]
-  standard_name = kinematic_surface_upward_latent_heat_flux
+  standard_name = surface_upward_specific_humidity_flux
   long_name = kinematic surface upward latent heat flux
   units = kg kg-1 m s-1
   dimensions = (horizontal_loop_extent)
@@ -710,7 +710,7 @@
   intent = in
   optional = F
 [ntqv]
-  standard_name = index_for_water_vapor
+  standard_name = index_of_specific_humidity_in_tracer_concentration_array
   long_name = tracer index for water vapor (specific humidity)
   units = index
   dimensions = ()
@@ -725,7 +725,7 @@
   type = logical
   intent = in
 [ldiag3d]
-  standard_name = flag_diagnostics_3D
+  standard_name = flag_for_diagnostics_3D
   long_name = flag for 3d diagnostic fields
   units = flag
   dimensions = ()

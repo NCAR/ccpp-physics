@@ -314,7 +314,7 @@
   standard_name = extended_diagnostics_output_from_thompson_microphysics
   long_name = set of 3d arrays for extended diagnostics output from thompson microphysics
   units = none
-  dimensions = (horizontal_dimension,vertical_dimension,number_of_3d_diagnostic_output_arrays_from_thompson_microphysics)
+  dimensions = (horizontal_dimension,vertical_layer_dimension,number_of_3d_diagnostic_output_arrays_from_thompson_microphysics)
   type = real
   kind = kind_phys
   intent = in
@@ -745,7 +745,7 @@
   standard_name = extended_diagnostics_output_from_thompson_microphysics
   long_name = set of 3d arrays for extended diagnostics output from thompson microphysics
   units = none
-  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_3d_diagnostic_output_arrays_from_thompson_microphysics)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_3d_diagnostic_output_arrays_from_thompson_microphysics)
   type = real
   kind = kind_phys
   intent = inout

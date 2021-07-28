@@ -24,7 +24,7 @@
   intent = in
   optional = F
 [ldiag3d]
-  standard_name = flag_diagnostics_3D
+  standard_name = flag_for_diagnostics_3D
   long_name = logical flag for 3D diagnostics
   units = flag
   dimensions = ()
@@ -32,7 +32,7 @@
   intent = in
   optional = F
 [qdiag3d]
-  standard_name = flag_tracer_diagnostics_3D
+  standard_name = flag_for_tracer_diagnostics_3D
   long_name = logical flag for 3D tracer diagnostics
   units = flag
   dimensions = ()
@@ -56,7 +56,7 @@
   intent = in
   optional = F
 [nncl]
-  standard_name = number_of_cloud_condensate_types
+  standard_name = number_of_condensate_species
   long_name = number of cloud condensate types
   units = count
   dimensions = ()
@@ -168,7 +168,7 @@
   intent = in
   optional = F
 [nncl]
-  standard_name = number_of_cloud_condensate_types
+  standard_name = number_of_condensate_species
   long_name = number of cloud condensate types
   units = count
   dimensions = ()
@@ -670,7 +670,7 @@
   intent = inout
   optional = F
 [drain_cpl]
-  standard_name = lwe_thickness_of_rain_amount_on_dynamics_timestep_for_coupling
+  standard_name = tendency_of_lwe_thickness_of_rain_amount_on_dynamics_timestep_for_coupling
   long_name = change in rain_cpl (coupling_type)
   units = m
   dimensions = (horizontal_loop_extent)
@@ -679,7 +679,7 @@
   intent = inout
   optional = F
 [dsnow_cpl]
-  standard_name = lwe_thickness_of_snowfall_amount_on_dynamics_timestep_for_coupling
+  standard_name = tendency_of_lwe_thickness_of_snowfall_amount_on_dynamics_timestep_for_coupling
   long_name = change in show_cpl (coupling_type)
   units = m
   dimensions = (horizontal_loop_extent)
@@ -844,7 +844,7 @@
   intent = in
   optional = F
 [ldiag3d]
-  standard_name = flag_diagnostics_3D
+  standard_name = flag_for_diagnostics_3D
   long_name = flag for 3d diagnostic fields
   units = flag
   dimensions = ()
@@ -852,7 +852,7 @@
   intent = in
   optional = F
 [qdiag3d]
-  standard_name = flag_tracer_diagnostics_3D
+  standard_name = flag_for_tracer_diagnostics_3D
   long_name = logical flag for 3D tracer diagnostics
   units = flag
   dimensions = ()
@@ -860,7 +860,7 @@
   intent = in
   optional = F
 [lssav]
-  standard_name = flag_diagnostics
+  standard_name = flag_for_diagnostics
   long_name = logical flag for storing diagnostics
   units = flag
   dimensions = ()

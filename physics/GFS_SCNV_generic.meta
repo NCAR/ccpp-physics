@@ -24,7 +24,7 @@
   intent = in
   optional = F
 [ldiag3d]
-  standard_name = flag_diagnostics_3D
+  standard_name = flag_for_diagnostics_3D
   long_name = flag for 3d diagnostic fields
   units = flag
   dimensions = ()
@@ -32,7 +32,7 @@
   intent = in
   optional = F
 [qdiag3d]
-  standard_name = flag_tracer_diagnostics_3D
+  standard_name = flag_for_tracer_diagnostics_3D
   long_name = flag for 3d tracer diagnostic fields
   units = flag
   dimensions = ()
@@ -112,7 +112,7 @@
   intent = in
   optional = F
 [ntqv]
-  standard_name = index_for_water_vapor
+  standard_name = index_of_specific_humidity_in_tracer_concentration_array
   long_name = tracer index for water vapor (specific humidity)
   units = index
   dimensions = ()
@@ -176,7 +176,7 @@
   intent = in
   optional = F
 [ras]
-  standard_name = flag_for_ras_deep_convection
+  standard_name = flag_for_relaxed_arakawa_schubert_deep_convection
   long_name = flag for ras convection scheme
   units = flag
   dimensions = ()
@@ -184,7 +184,7 @@
   intent = in
   optional = F
 [ntcw]
-  standard_name = index_for_liquid_cloud_condensate
+  standard_name = index_of_cloud_liquid_water_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for cloud condensate (or liquid water)
   units = index
   dimensions = ()
@@ -192,7 +192,7 @@
   intent = in
   optional = F
 [ntiw]
-  standard_name = index_for_ice_cloud_condensate
+  standard_name = index_of_cloud_ice_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for  ice water
   units = index
   dimensions = ()
@@ -200,7 +200,7 @@
   intent = in
   optional = F
 [ntclamt]
-  standard_name = index_for_cloud_amount
+  standard_name = index_of_cloud_area_fraction_in_atmosphere_layer_in_tracer_concentration_array
   long_name = tracer index for cloud amount integer
   units = index
   dimensions = ()
@@ -208,7 +208,7 @@
   intent = in
   optional = F
 [ntrw]
-  standard_name = index_for_rain_water
+  standard_name = index_of_rain_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for rain water
   units = index
   dimensions = ()
@@ -216,7 +216,7 @@
   intent = in
   optional = F
 [ntsw]
-  standard_name = index_for_snow_water
+  standard_name = index_of_snow_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for snow water
   units = index
   dimensions = ()
@@ -224,7 +224,7 @@
   intent = in
   optional = F
 [ntrnc]
-  standard_name = index_for_rain_number_concentration
+  standard_name = index_of_mass_number_concentration_of_rain_in_tracer_concentration_array
   long_name = tracer index for rain   number concentration
   units = index
   dimensions = ()
@@ -232,7 +232,7 @@
   intent = in
   optional = F
 [ntsnc]
-  standard_name = index_for_snow_number_concentration
+  standard_name = index_of_mass_number_concentration_of_snow_in_tracer_concentration_array
   long_name = tracer index for snow   number concentration
   units = index
   dimensions = ()
@@ -240,7 +240,7 @@
   intent = in
   optional = F
 [ntgl]
-  standard_name = index_for_graupel
+  standard_name = index_of_graupel_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for graupel
   units = index
   dimensions = ()
@@ -248,7 +248,7 @@
   intent = in
   optional = F
 [ntgnc]
-  standard_name = index_for_graupel_number_concentration
+  standard_name = index_of_mass_number_concentration_of_graupel_in_tracer_concentration_array
   long_name = tracer index for graupel number concentration
   units = index
   dimensions = ()
@@ -333,7 +333,7 @@
   intent = in
   optional = F
 [ldiag3d]
-  standard_name = flag_diagnostics_3D
+  standard_name = flag_for_diagnostics_3D
   long_name = flag for 3d diagnostic fields
   units = flag
   dimensions = ()
@@ -341,7 +341,7 @@
   intent = in
   optional = F
 [qdiag3d]
-  standard_name = flag_tracer_diagnostics_3D
+  standard_name = flag_for_tracer_diagnostics_3D
   long_name = flag for 3d tracer diagnostic fields
   units = flag
   dimensions = ()
@@ -664,7 +664,7 @@
   intent = in
   optional = F
 [ras]
-  standard_name = flag_for_ras_deep_convection
+  standard_name = flag_for_relaxed_arakawa_schubert_deep_convection
   long_name = flag for ras convection scheme
   units = flag
   dimensions = ()
@@ -672,7 +672,7 @@
   intent = in
   optional = F
 [ntcw]
-  standard_name = index_for_liquid_cloud_condensate
+  standard_name = index_of_cloud_liquid_water_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for cloud condensate (or liquid water)
   units = index
   dimensions = ()
@@ -680,7 +680,7 @@
   intent = in
   optional = F
 [ntiw]
-  standard_name = index_for_ice_cloud_condensate
+  standard_name = index_of_cloud_ice_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for  ice water
   units = index
   dimensions = ()
@@ -688,7 +688,7 @@
   intent = in
   optional = F
 [ntclamt]
-  standard_name = index_for_cloud_amount
+  standard_name = index_of_cloud_area_fraction_in_atmosphere_layer_in_tracer_concentration_array
   long_name = tracer index for cloud amount integer
   units = index
   dimensions = ()
@@ -696,7 +696,7 @@
   intent = in
   optional = F
 [ntrw]
-  standard_name = index_for_rain_water
+  standard_name = index_of_rain_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for rain water
   units = index
   dimensions = ()
@@ -704,7 +704,7 @@
   intent = in
   optional = F
 [ntsw]
-  standard_name = index_for_snow_water
+  standard_name = index_of_snow_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for snow water
   units = index
   dimensions = ()
@@ -712,7 +712,7 @@
   intent = in
   optional = F
 [ntrnc]
-  standard_name = index_for_rain_number_concentration
+  standard_name = index_of_mass_number_concentration_of_rain_in_tracer_concentration_array
   long_name = tracer index for rain   number concentration
   units = index
   dimensions = ()
@@ -720,7 +720,7 @@
   intent = in
   optional = F
 [ntsnc]
-  standard_name = index_for_snow_number_concentration
+  standard_name = index_of_mass_number_concentration_of_snow_in_tracer_concentration_array
   long_name = tracer index for snow   number concentration
   units = index
   dimensions = ()
@@ -728,7 +728,7 @@
   intent = in
   optional = F
 [ntgl]
-  standard_name = index_for_graupel
+  standard_name = index_of_graupel_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for graupel
   units = index
   dimensions = ()
@@ -736,7 +736,7 @@
   intent = in
   optional = F
 [ntgnc]
-  standard_name = index_for_graupel_number_concentration
+  standard_name = index_of_mass_number_concentration_of_graupel_in_tracer_concentration_array
   long_name = tracer index for graupel number concentration
   units = index
   dimensions = ()
