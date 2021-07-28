@@ -8,7 +8,7 @@
   name = samfdeepcnv_init
   type = scheme
 [imfdeepcnv]
-  standard_name = flag_for_mass_flux_deep_convection_scheme
+  standard_name = control_for_deep_convection_scheme
   long_name = flag for mass-flux deep convection scheme
   units = flag
   dimensions = ()
@@ -16,7 +16,7 @@
   intent = in
   optional = F
 [imfdeepcnv_samf]
-  standard_name = flag_for_samf_deep_convection_scheme
+  standard_name = identifer_for_scale_aware_mass_flux_deep_convection
   long_name = flag for SAMF deep convection scheme
   units = flag
   dimensions = ()
@@ -54,7 +54,7 @@
   intent = in
   optional = F
 [km]
-  standard_name = vertical_dimension
+  standard_name = vertical_layer_dimension
   long_name = vertical layer dimension
   units = count
   dimensions = ()
@@ -150,7 +150,7 @@
   intent = in
   optional = F
 [rd]
-  standard_name = gas_constant_dry_air
+  standard_name = gas_constant_of_dry_air
   long_name = ideal gas constant for dry air
   units = J kg-1 K-1
   dimensions = ()
@@ -177,7 +177,7 @@
   intent = in
   optional = F
 [delt]
-  standard_name = time_step_for_physics
+  standard_name = timestep_for_physics
   long_name = physics time step
   units = s
   dimensions = ()
@@ -205,7 +205,7 @@
   standard_name = air_pressure_difference_between_midlayers
   long_name = pres(k) - pres(k+1)
   units = Pa
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -214,7 +214,7 @@
   standard_name = air_pressure
   long_name = mean layer pressure
   units = Pa
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -232,7 +232,7 @@
   standard_name = geopotential
   long_name = layer geopotential
   units = m2 s-2
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -241,49 +241,49 @@
   standard_name = convective_transportable_tracers
   long_name = array to contain cloud water and other convective trans. tracers
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers_for_convective_transport)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers_for_convective_transport)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [q1]
-  standard_name = water_vapor_specific_humidity_updated_by_physics
+  standard_name = specific_humidity_of_new_state
   long_name = updated vapor specific humidity
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [t1]
-  standard_name = air_temperature_updated_by_physics
+  standard_name = air_temperature_of_new_state
   long_name = updated temperature
   units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [u1]
-  standard_name = x_wind_updated_by_physics
+  standard_name = x_wind_of_new_state
   long_name = updated x-direction wind
   units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [v1]
-  standard_name = y_wind_updated_by_physics
+  standard_name = y_wind_of_new_state
   long_name = updated y-direction wind
   units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [fscav]
-  standard_name = coefficients_for_aerosol_scavenging
+  standard_name = chemical_tracer_scavenging_fractions
   long_name = array of aerosol scavenging coefficients
   units = none
   dimensions = (number_of_chemical_tracers)
@@ -292,7 +292,7 @@
   intent = in
   optional = F
 [hwrf_samfdeep]
-  standard_name = flag_for_hwrf_samfdeepcnv_scheme
+  standard_name = flag_for_hurricane_specific_code_in_scale_aware_mass_flux_deep_convection
   long_name = flag for hwrf samfdeepcnv scheme 
   units = flag
   dimensions = ()
@@ -359,10 +359,10 @@
   intent = in
   optional = F
 [dot]
-  standard_name = omega
+  standard_name = lagrangian_tendency_of_air_pressure
   long_name = layer mean vertical velocity
   units = Pa s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -388,7 +388,7 @@
   standard_name = instantaneous_atmosphere_updraft_convective_mass_flux
   long_name = (updraft mass flux) * delt
   units = kg m-2
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -397,7 +397,7 @@
   standard_name = instantaneous_atmosphere_downdraft_convective_mass_flux
   long_name = (downdraft mass flux) * delt
   units = kg m-2
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -406,7 +406,7 @@
   standard_name = instantaneous_atmosphere_detrainment_convective_mass_flux
   long_name = (detrainment mass flux) * delt
   units = kg m-2
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -415,7 +415,7 @@
   standard_name = convective_cloud_water_mixing_ratio
   long_name = moist convective cloud water mixing ratio
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -424,7 +424,7 @@
   standard_name = convective_cloud_cover
   long_name = convective cloud cover
   units = frac
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -433,7 +433,7 @@
   standard_name = mass_fraction_of_convective_cloud_liquid_water
   long_name = mass fraction of convective cloud liquid water
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -442,7 +442,7 @@
   standard_name = mass_fraction_of_convective_cloud_ice
   long_name = mass fraction of convective cloud ice water
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -451,7 +451,7 @@
   standard_name = vertical_velocity_for_updraft
   long_name = vertical velocity for updraft
   units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -460,7 +460,7 @@
   standard_name = convective_cloud_fraction_for_microphysics
   long_name = convective cloud fraction for microphysics
   units = frac
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -469,7 +469,7 @@
   standard_name = detrained_mass_flux
   long_name = detrained mass flux
   units = kg m-2 s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -478,7 +478,7 @@
   standard_name = tendency_of_cloud_water_due_to_convective_microphysics
   long_name = tendency of cloud water due to convective microphysics
   units = kg m-2 s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -487,7 +487,7 @@
   standard_name = convective_cloud_volume_fraction
   long_name = convective cloud volume fraction
   units = frac
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -496,7 +496,7 @@
   standard_name = ice_fraction_in_convective_tower
   long_name = ice fraction in convective tower
   units = frac
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -505,7 +505,7 @@
   standard_name = number_concentration_of_cloud_liquid_water_particles_for_detrainment
   long_name = droplet number concentration in convective detrainment
   units = m-3
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -514,13 +514,13 @@
   standard_name = number_concentration_of_ice_crystals_for_detrainment
   long_name = crystal number concentration in convective detrainment
   units = m-3
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [mp_phys]
-  standard_name = flag_for_microphysics_scheme
+  standard_name = control_for_microphysics_scheme
   long_name = choice of microphysics scheme
   units = flag
   dimensions = ()
@@ -528,7 +528,7 @@
   intent = in
   optional = F
 [mp_phys_mg]
-  standard_name = flag_for_morrison_gettelman_microphysics_scheme
+  standard_name = identifier_for_morrison_gettelman_microphysics_scheme
   long_name = choice of Morrison-Gettelman microphysics scheme
   units = flag
   dimensions = ()
@@ -536,7 +536,7 @@
   intent = in
   optional = F
 [clam]
-  standard_name = entrainment_rate_coefficient_deep_convection
+  standard_name = entrainment_rate_coefficient_for_deep_convection
   long_name = entrainment rate coefficient for deep conv.
   units = none
   dimensions = ()
@@ -545,7 +545,7 @@
   intent = in
   optional = F
 [c0s]
-  standard_name = rain_conversion_parameter_deep_convection
+  standard_name = rain_conversion_parameter_for_deep_convection
   long_name = convective rain conversion parameter for deep conv.
   units = m-1
   dimensions = ()
@@ -554,7 +554,7 @@
   intent = in
   optional = F
 [c1]
-  standard_name = detrainment_conversion_parameter_deep_convection
+  standard_name = detrainment_conversion_parameter_for_deep_convection
   long_name = convective detrainment conversion parameter for deep conv.
   units = m-1
   dimensions = ()
@@ -563,7 +563,7 @@
   intent = in
   optional = F
 [betal]
-  standard_name = downdraft_fraction_reaching_surface_over_land_deep_convection
+  standard_name = downdraft_fraction_reaching_surface_over_land_for_deep_convection
   long_name = downdraft fraction reaching surface over land for deep conv.
   units = frac
   dimensions = ()
@@ -572,7 +572,7 @@
   intent = in
   optional = F
 [betas]
-  standard_name = downdraft_fraction_reaching_surface_over_water_deep_convection
+  standard_name = downdraft_fraction_reaching_surface_over_water_for_deep_convection
   long_name = downdraft fraction reaching surface over water for deep conv.
   units = frac
   dimensions = ()
@@ -581,8 +581,8 @@
   intent = in
   optional = F
 [evef]
-  standard_name = rain_evaporation_coefficient_convection
-  long_name = convective rain evaporation coefficient for convection
+  standard_name = rain_evaporation_coefficient_for_deep_convection
+  long_name = convective rain evaporation coefficient for deep onvection
   units = frac
   dimensions = ()
   type = real
@@ -590,7 +590,7 @@
   intent = in
   optional = F
 [pgcon]
-  standard_name = momentum_transport_reduction_factor_pgf_deep_convection
+  standard_name = momentum_transport_reduction_factor_due_to_pressure_gradient_force_for_deep_convection
   long_name = reduction factor in momentum transport due to deep conv. induced pressure gradient force
   units = frac
   dimensions = ()
@@ -599,7 +599,7 @@
   intent = in
   optional = F
 [asolfac]
-  standard_name = aerosol_aware_parameter_deep_convection
+  standard_name = aerosol_aware_multiplicative_rain_conversion_parameter_for_deep_convection
   long_name = aerosol-aware parameter inversely proportional to CCN number concentraion from Lim (2011) for deep conv.
   units = none
   dimensions = ()
@@ -624,7 +624,7 @@
   intent = in
   optional = F
 [ca_entr]
-  standard_name = flag_for_global_cellular_automata_entr
+  standard_name =  flag_for_global_cellular_automata_deep_convective_entrainment
   long_name = switch for ca on entr
   units = flag
   dimensions = ()
@@ -640,7 +640,7 @@
   intent = in
   optional = F
 [nthresh]
-  standard_name = threshold_for_perturbed_vertical_velocity
+  standard_name =  cellular_automata_vertical_velocity_perturbation_threshold_for_deep_convection
   long_name = threshold used for perturbed vertical velocity
   units = m s-1
   dimensions = ()
@@ -649,7 +649,7 @@
   intent = in
   optional = F
 [ca_deep]
-  standard_name = fraction_of_cellular_automata_for_deep_convection
+  standard_name = cellular_automata_area_fraction_for_deep_convection_from_coupled_process
   long_name = fraction of cellular automata for deep convection
   units = frac
   dimensions = (horizontal_loop_extent)

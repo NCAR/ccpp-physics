@@ -16,7 +16,7 @@
   intent = in
   optional = F
 [flag_init]
-  standard_name = flag_for_first_time_step
+  standard_name = flag_for_first_timestep
   long_name = flag signaling first time step for time integration loop
   units = flag
   dimensions = ()
@@ -32,7 +32,7 @@
   intent = in
   optional = F
 [lkm]
-  standard_name = flag_for_lake_surface_scheme
+  standard_name = control_for_lake_surface_scheme
   long_name = flag for lake surface model
   units = flag
   dimensions = ()
@@ -40,7 +40,7 @@
   intent = in
   optional = F
 [lsm]
-  standard_name = flag_for_land_surface_scheme
+  standard_name = control_for_land_surface_scheme
   long_name = flag for land surface model
   units = flag
   dimensions = ()
@@ -48,7 +48,7 @@
   intent = in
   optional = F
 [lsm_noahmp]
-  standard_name = flag_for_noahmp_land_surface_scheme
+  standard_name = identifier_for_noahmp_land_surface_scheme
   long_name = flag for NOAH MP land surface model
   units = flag
   dimensions = ()
@@ -56,7 +56,7 @@
   intent = in
   optional = F
 [lsm_ruc]
-  standard_name = flag_for_ruc_land_surface_scheme
+  standard_name = identifier_for_ruc_land_surface_scheme
   long_name = flag for RUC land surface model
   units = flag
   dimensions = ()
@@ -64,7 +64,7 @@
   intent = in
   optional = F
 [frac_grid]
-  standard_name = flag_for_fractional_grid
+  standard_name = flag_for_fractional_landmask
   long_name = flag for fractional grid
   units = flag
   dimensions = ()
@@ -80,7 +80,7 @@
   intent = inout
   optional = F
 [cplflx]
-  standard_name = flag_for_flux_coupling
+  standard_name = flag_for_surface_flux_coupling
   long_name = flag controlling cplflx collection (default off)
   units = flag
   dimensions = ()
@@ -88,7 +88,7 @@
   intent = in
   optional = F
 [cplwav2atm]
-  standard_name = flag_for_wave_coupling_to_atm
+  standard_name = flag_for_one_way_ocean_wave_coupling_to_atmosphere
   long_name = flag controlling ocean wave coupling to the atmosphere (default off)
   units = flag
   dimensions = ()
@@ -198,7 +198,7 @@
   intent = inout
   optional = F
 [cice]
-  standard_name = sea_ice_concentration
+  standard_name = sea_ice_area_fraction_of_sea_area_fraction
   long_name = ice fraction over open water
   units = frac
   dimensions = (horizontal_loop_extent)
@@ -234,7 +234,7 @@
   intent = inout
   optional = F
 [snowd]
-  standard_name = surface_snow_thickness_water_equivalent
+  standard_name = lwe_surface_snow
   long_name = water equivalent snow depth
   units = mm
   dimensions = (horizontal_loop_extent)
@@ -333,7 +333,7 @@
   intent = inout
   optional = F
 [weasd]
-  standard_name = water_equivalent_accumulated_snow_depth
+  standard_name = lwe_thickness_of_surface_snow_amount
   long_name = water equiv of acc snow depth over land and sea ice
   units = mm
   dimensions = (horizontal_loop_extent)
@@ -502,7 +502,7 @@
   intent = inout
   optional = F
 [slmsk]
-  standard_name = sea_land_ice_mask_real
+  standard_name = area_type
   long_name = landmask: sea/land/ice=0/1/2
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -601,7 +601,7 @@
   intent = inout
   optional = F
 [hflx]
-  standard_name = kinematic_surface_upward_sensible_heat_flux
+  standard_name = surface_upward_temperature_flux
   long_name = kinematic surface upward sensible heat flux
   units = K m s-1
   dimensions = (horizontal_loop_extent)
@@ -637,7 +637,7 @@
   intent = inout
   optional = F
 [min_lakeice]
-  standard_name = lake_ice_minimum
+  standard_name = min_lake_ice_area_fraction
   long_name = minimum lake ice value
   units = frac
   dimensions = ()
@@ -646,7 +646,7 @@
   intent = in
   optional = F
 [min_seaice]
-  standard_name = sea_ice_minimum
+  standard_name = min_sea_ice_area_fraction
   long_name = minimum sea ice value
   units = frac
   dimensions = ()
@@ -849,7 +849,7 @@
   intent = in
   optional = F
 [kice]
-  standard_name = ice_vertical_dimension
+  standard_name = vertical_dimension_of_sea_ice
   long_name = vertical loop extent for ice levels, start at 1
   units = count
   dimensions = ()
@@ -857,7 +857,7 @@
   intent = in
   optional = F
 [km]
-  standard_name = soil_vertical_dimension
+  standard_name = vertical_dimension_of_soil
   long_name = soil vertical layer dimension
   units = count
   dimensions = ()
@@ -865,7 +865,7 @@
   intent = in
   optional = F
 [rd]
-  standard_name = gas_constant_dry_air
+  standard_name = gas_constant_of_dry_air
   long_name = ideal gas constant for dry air
   units = J kg-1 K-1
   dimensions = ()
@@ -883,7 +883,7 @@
   intent = in
   optional = F
 [cplflx]
-  standard_name = flag_for_flux_coupling
+  standard_name = flag_for_surface_flux_coupling
   long_name = flag controlling cplflx collection (default off)
   units = flag
   dimensions = ()
@@ -891,7 +891,7 @@
   intent = in
   optional = F
 [cplwav2atm]
-  standard_name = flag_for_wave_coupling_to_atm
+  standard_name = flag_for_one_way_ocean_wave_coupling_to_atmosphere
   long_name = flag controlling ocean wave coupling to the atmosphere (default off)
   units = flag
   dimensions = ()
@@ -899,7 +899,7 @@
   intent = in
   optional = F
 [frac_grid]
-  standard_name = flag_for_fractional_grid
+  standard_name = flag_for_fractional_landmask
   long_name = flag for fractional grid
   units = flag
   dimensions = ()
@@ -964,7 +964,7 @@
   intent = in
   optional = F
 [t1]
-  standard_name = air_temperature_at_lowest_model_layer
+  standard_name = air_temperature_at_surface_adjacent_layer
   long_name = surface layer mean temperature
   units = K
   dimensions = (horizontal_loop_extent)
@@ -973,7 +973,7 @@
   intent = in
   optional = F
 [q1]
-  standard_name = water_vapor_specific_humidity_at_lowest_model_layer
+  standard_name = specific_humidity_at_surface_adjacent_layer
   long_name = surface layer mean specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent)
@@ -982,7 +982,7 @@
   intent = in
   optional = F
 [prsl1]
-  standard_name = air_pressure_at_lowest_model_layer
+  standard_name = air_pressure_at_surface_adjacent_layer
   long_name = surface layer mean pressure
   units = Pa
   dimensions = (horizontal_loop_extent)
@@ -1549,7 +1549,7 @@
   intent = in
   optional = F
 [weasd]
-  standard_name = water_equivalent_accumulated_snow_depth
+  standard_name = lwe_thickness_of_surface_snow_amount
   long_name = water equiv of acc snow depth over land and sea ice
   units = mm
   dimensions = (horizontal_loop_extent)
@@ -1576,7 +1576,7 @@
   intent = in
   optional = F
 [snowd]
-  standard_name = surface_snow_thickness_water_equivalent
+  standard_name = lwe_surface_snow
   long_name = water equivalent snow depth
   units = mm
   dimensions = (horizontal_loop_extent)
@@ -1639,7 +1639,7 @@
   intent = in
   optional = F
 [evap]
-  standard_name = kinematic_surface_upward_latent_heat_flux
+  standard_name = surface_upward_specific_humidity_flux
   long_name = kinematic surface upward latent heat flux
   units = kg kg-1 m s-1
   dimensions = (horizontal_loop_extent)
@@ -1675,7 +1675,7 @@
   intent = in
   optional = F
 [hflx]
-  standard_name = kinematic_surface_upward_sensible_heat_flux
+  standard_name = surface_upward_temperature_flux
   long_name = kinematic surface upward sensible heat flux
   units = K m s-1
   dimensions = (horizontal_loop_extent)
@@ -1828,7 +1828,7 @@
   intent = inout
   optional = F
 [cice]
-  standard_name = sea_ice_concentration
+  standard_name = sea_ice_area_fraction_of_sea_area_fraction
   long_name = ice fraction over open water
   units = frac
   dimensions = (horizontal_loop_extent)
@@ -1837,7 +1837,7 @@
   intent = inout
   optional = F
 [min_seaice]
-  standard_name = sea_ice_minimum
+  standard_name = min_sea_ice_area_fraction
   long_name = minimum sea ice value
   units = frac
   dimensions = ()
@@ -1845,10 +1845,10 @@
   kind = kind_phys
   intent = in
 [tiice]
-  standard_name = internal_ice_temperature
+  standard_name = temperature_in_ice_layer
   long_name = sea ice internal temperature
   units = K
-  dimensions = (horizontal_loop_extent,ice_vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension_of_sea_ice)
   type = real
   kind = kind_phys
   intent = in
@@ -1857,7 +1857,7 @@
   standard_name = soil_temperature
   long_name = soil temperature
   units = K
-  dimensions = (horizontal_loop_extent,soil_vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension_of_soil)
   type = real
   kind = kind_phys
   intent = inout
@@ -1872,7 +1872,7 @@
   intent = in
   optional = F
 [prsik1]
-  standard_name = dimensionless_exner_function_at_lowest_model_interface
+  standard_name = surface_dimensionless_exner_function
   long_name = dimensionless Exner function at the ground surface
   units = none
   dimensions = (horizontal_loop_extent)
@@ -1881,7 +1881,7 @@
   intent = in
   optional = F
 [prslk1]
-  standard_name = dimensionless_exner_function_at_lowest_model_layer
+  standard_name = dimensionless_exner_function_at_surface_adjacent_layer
   long_name = dimensionless Exner function at the lowest model layer
   units = none
   dimensions = (horizontal_loop_extent)
@@ -1934,7 +1934,7 @@
   intent = in
   optional = F
 [h0facu]
-  standard_name = canopy_heat_storage_factor_for_sensible_heat_flux_in_unstable_surface_layer
+  standard_name = multiplicative_tuning_parameter_for_reduced_surface_heat_fluxes_due_to_canopy_heat_storage
   long_name = canopy heat storage factor for sensible heat flux in unstable surface layer
   units = none
   dimensions = ()
@@ -1943,7 +1943,7 @@
   intent = in
   optional = F
 [h0facs]
-  standard_name = canopy_heat_storage_factor_for_sensible_heat_flux_in_stable_surface_layer
+  standard_name = multiplicative_tuning_parameter_for_reduced_latent_heat_flux_due_to_canopy_heat_storage
   long_name = canopy heat storage factor for sensible heat flux in stable surface layer
   units = none
   dimensions = ()

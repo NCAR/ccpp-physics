@@ -16,7 +16,7 @@
   intent = in
   optional = F
 [cgwf]
-  standard_name = multiplication_factors_for_convective_gravity_wave_drag
+  standard_name = tunable_parameters_for_convective_gravity_wave_drag
   long_name = multiplication factors for convective gravity wave drag
   units = none
   dimensions = (2)
@@ -25,7 +25,7 @@
   intent = in
   optional = F
 [dx]
-  standard_name = cell_size
+  standard_name = characteristic_grid_lengthscale
   long_name = grid size in zonal direction
   units = m
   dimensions = (horizontal_loop_extent)
@@ -70,7 +70,7 @@
   intent = out
   optional = F
 [levs]
-  standard_name = vertical_dimension
+  standard_name = vertical_layer_dimension
   long_name = number of vertical layers
   units = count
   dimensions = ()
@@ -94,7 +94,7 @@
   intent = in
   optional = F
 [dtp]
-  standard_name = time_step_for_physics
+  standard_name = timestep_for_physics
   long_name = physics time step
   units = s
   dimensions = ()
@@ -103,10 +103,10 @@
   intent = in
   optional = F
 [gt0]
-  standard_name = air_temperature_updated_by_physics
+  standard_name = air_temperature_of_new_state
   long_name = updated air temperature
   units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -115,7 +115,7 @@
   standard_name = air_temperature_save
   long_name = air temperature before entering convection scheme
   units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -124,7 +124,7 @@
   standard_name = air_pressure_difference_between_midlayers
   long_name = difference between mid-layer pressures
   units = Pa
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -205,7 +205,7 @@
   intent = in
   optional = F
 [km]
-  standard_name = vertical_dimension
+  standard_name = vertical_layer_dimension
   long_name = number of vertical layers
   units = count
   dimensions = ()
@@ -224,7 +224,7 @@
   standard_name = x_wind
   long_name = zonal wind
   units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -233,7 +233,7 @@
   standard_name = y_wind
   long_name = meridional wind
   units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -242,22 +242,22 @@
   standard_name = air_temperature
   long_name = mid-layer temperature
   units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [q1]
-  standard_name = water_vapor_specific_humidity
+  standard_name = specific_humidity
   long_name = mid-layer specific humidity of water vapor
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [deltim]
-  standard_name = time_step_for_physics
+  standard_name = timestep_for_physics
   long_name = physics time step
   units = s
   dimensions = ()
@@ -269,7 +269,7 @@
   standard_name = air_pressure
   long_name = mid-layer pressure
   units = Pa
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -278,7 +278,7 @@
   standard_name = air_pressure_at_interface
   long_name = interface pressure
   units = Pa
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -287,7 +287,7 @@
   standard_name = air_pressure_difference_between_midlayers
   long_name = difference between mid-layer pressures
   units = Pa
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -353,7 +353,7 @@
   intent = in
   optional = F
 [rd]
-  standard_name = gas_constant_dry_air
+  standard_name = gas_constant_of_dry_air
   long_name = ideal gas constant for dry air
   units = J kg-1 K-1
   dimensions = ()
@@ -417,7 +417,7 @@
   standard_name = tendency_of_x_wind_due_to_convective_gravity_wave_drag
   long_name = zonal wind tendency due to convective gravity wave drag
   units = m s-2
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -426,7 +426,7 @@
   standard_name = tendency_of_y_wind_due_to_convective_gravity_wave_drag
   long_name = meridional wind tendency due to convective gravity wave drag
   units = m s-2
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -486,7 +486,7 @@
   intent = in
   optional = F
 [levs]
-  standard_name = vertical_dimension
+  standard_name = vertical_layer_dimension
   long_name = number of vertical layers
   units = count
   dimensions = ()
@@ -494,7 +494,7 @@
   intent = in
   optional = F
 [lssav]
-  standard_name = flag_diagnostics
+  standard_name = flag_for_diagnostics
   long_name = flag for calculating diagnostic fields
   units = flag
   dimensions = ()
@@ -510,7 +510,7 @@
   intent = in
   optional = F
 [dtf]
-  standard_name = time_step_for_dynamics
+  standard_name = timestep_for_dynamics
   long_name = dynamics time step
   units = s
   dimensions = ()
@@ -519,7 +519,7 @@
   intent = in
   optional = F
 [dtp]
-  standard_name = time_step_for_physics
+  standard_name = timestep_for_physics
   long_name = physics time step
   units = s
   dimensions = ()
@@ -558,7 +558,7 @@
   standard_name = tendency_of_x_wind_due_to_convective_gravity_wave_drag
   long_name = zonal wind tendency due to convective gravity wave drag
   units = m s-2
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -567,7 +567,7 @@
   standard_name = tendency_of_y_wind_due_to_convective_gravity_wave_drag
   long_name = meridional wind tendency due to convective gravity wave drag
   units = m s-2
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -594,7 +594,7 @@
   standard_name = cumulative_change_of_state_variables
   long_name = diagnostic tendencies for state variables
   units = various
-  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_cumulative_change_processes)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_cumulative_change_processes)
   type = real
   kind = kind_phys
   active = (flag_diagnostics_3D)
@@ -633,28 +633,28 @@
   intent = in
   optional = F
 [gu0]
-  standard_name = x_wind_updated_by_physics
+  standard_name = x_wind_of_new_state
   long_name = updated zonal wind
   units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [gv0]
-  standard_name = y_wind_updated_by_physics
+  standard_name = y_wind_of_new_state
   long_name = updated meridional wind
   units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [gt0]
-  standard_name = air_temperature_updated_by_physics
+  standard_name = air_temperature_of_new_state
   long_name = updated air temperature
   units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout

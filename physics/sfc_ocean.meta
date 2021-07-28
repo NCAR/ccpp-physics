@@ -34,7 +34,7 @@
   intent = in
   optional = F
 [rd]
-  standard_name = gas_constant_dry_air
+  standard_name = gas_constant_of_dry_air
   long_name = ideal gas constant for dry air
   units = J kg-1 K-1
   dimensions = ()
@@ -97,7 +97,7 @@
   intent = in
   optional = F
 [t1]
-  standard_name = air_temperature_at_lowest_model_layer
+  standard_name = air_temperature_at_surface_adjacent_layer
   long_name = surface layer mean temperature
   units = K
   dimensions = (horizontal_loop_extent)
@@ -106,7 +106,7 @@
   intent = in
   optional = F
 [q1]
-  standard_name = water_vapor_specific_humidity_at_lowest_model_layer
+  standard_name = specific_humidity_at_surface_adjacent_layer
   long_name = surface layer mean specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent)
@@ -168,7 +168,7 @@
   intent = in
   optional = F
 [prsl1]
-  standard_name = air_pressure_at_lowest_model_layer
+  standard_name = air_pressure_at_surface_adjacent_layer
   long_name = surface layer mean pressure
   units = Pa
   dimensions = (horizontal_loop_extent)

@@ -8,7 +8,7 @@
   name = ozphys_2015_init
   type = scheme
 [oz_phys_2015]
-  standard_name = flag_for_2015_ozone_physics
+  standard_name = flag_for_nrl_2015_ozone_scheme
   long_name = flag for new (2015) ozone physics
   units = flag
   dimensions = ()
@@ -46,7 +46,7 @@
   intent = in
   optional = F
 [levs]
-  standard_name = vertical_dimension
+  standard_name = vertical_layer_dimension
   long_name = number of vertical layers
   units = count
   dimensions = ()
@@ -62,7 +62,7 @@
   intent = in
   optional = F
 [dt]
-  standard_name = time_step_for_physics
+  standard_name = timestep_for_physics
   long_name = physics time step
   units = s
   dimensions = ()
@@ -71,19 +71,19 @@
   intent = in
   optional = F
 [oz]
-  standard_name = ozone_concentration_updated_by_physics
+  standard_name = ozone_concentration_of_new_state
   long_name = ozone concentration updated by physics
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [tin]
-  standard_name = air_temperature_updated_by_physics
+  standard_name = air_temperature_of_new_state
   long_name = updated air temperature
   units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -101,7 +101,7 @@
   standard_name = air_pressure
   long_name = mid-layer pressure
   units = Pa
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -127,7 +127,7 @@
   standard_name = air_pressure_difference_between_midlayers
   long_name = difference between mid-layer pressures
   units = Pa
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -144,7 +144,7 @@
   standard_name = cumulative_change_of_state_variables
   long_name = diagnostic tendencies for state variables
   units = various
-  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_cumulative_change_processes)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_cumulative_change_processes)
   type = real
   kind = kind_phys
   intent = inout
