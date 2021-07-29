@@ -99,7 +99,7 @@ module lsm_ruc
 !  ---  out
       real (kind=kind_phys), dimension(:),   intent(out) :: zs
       real (kind=kind_phys), dimension(:),   intent(inout) :: sfalb_lnd_bck
-      real (kind=kind_phys), dimension(:,:), intent(out) :: tsice
+      real (kind=kind_phys), dimension(:,:), intent(inout) :: tsice
       real (kind=kind_phys), dimension(:),   intent(out) :: semisbase
       real (kind=kind_phys), dimension(:),   intent(out) :: pores, resid
 
@@ -221,16 +221,17 @@ module lsm_ruc
 
       enddo ! i
 
-        call init_soil_depth_3 ( zs , dzs , lsoil_ruc )
+      call init_soil_depth_3 ( zs , dzs , lsoil_ruc )
 
-        call rucinit   (flag_restart, im, lsoil_ruc, lsoil, nlev,   & ! in
-                        me, master, lsm_ruc, lsm, slmsk,            & ! in
-                        soiltyp, vegtype,                           & ! in
-                        tsfc_lnd, tsfc_wat, tg3,                    & ! in
-                        zs, dzs, smc, slc, stc,                     & ! in
-                        sh2o, smfrkeep, tslb, smois,                & ! out
-                        wetness, errmsg, errflg)
+      call rucinit   (flag_restart, im, lsoil_ruc, lsoil, nlev,   & ! in
+                      me, master, lsm_ruc, lsm, slmsk,            & ! in
+                      soiltyp, vegtype,                           & ! in
+                      tsfc_lnd, tsfc_wat, tg3,                    & ! in
+                      zs, dzs, smc, slc, stc,                     & ! in
+                      sh2o, smfrkeep, tslb, smois,                & ! out
+                      wetness, errmsg, errflg)
 
+      if (.not.flag_restart) then
         do i  = 1, im ! i - horizontal loop
           do k = 1, min(kice,lsoil_ruc)
           ! - at initial time set sea ice T (tsice) 
@@ -238,6 +239,7 @@ module lsm_ruc
              tsice   (i,k) = tslb(i,k)
           enddo
         enddo ! i
+      endif ! .not. restart
 
       !-- end of initialization
 

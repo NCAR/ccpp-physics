@@ -114,8 +114,8 @@
   intent = in
   optional = F
 [weasd]
-  standard_name = water_equivalent_accumulated_snow_depth_over_water
-  long_name = water equiv of acc snow depth over water
+  standard_name = water_equivalent_accumulated_snow_depth_over_ice
+  long_name = water equiv of acc snow depth over ice
   units = mm
   dimensions = (horizontal_loop_extent)
   type = real
@@ -132,8 +132,8 @@
   intent = in
   optional = F
 [use_flake]
-  standard_name = flag_nonzero_lake_surface_fraction
-  long_name = flag indicating presence of some lake surface area fraction
+  standard_name = flag_for_using_flake
+  long_name = flag indicating lake points using flake model
   units = flag
   dimensions = (horizontal_loop_extent)
   type = logical
@@ -217,8 +217,8 @@
   intent = in
   optional = F
 [snwdph]
-  standard_name = surface_snow_thickness_water_equivalent_over_water
-  long_name = water equivalent snow depth over water
+  standard_name = surface_snow_thickness_water_equivalent_over_ice
+  long_name = water equivalent snow depth over ice
   units = mm
   dimensions = (horizontal_loop_extent)
   type = real
