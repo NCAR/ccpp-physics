@@ -339,7 +339,7 @@ contains
      integer :: turn,pmin_lev(its:ite),start_level(its:ite),ktopkeep(its:ite)
      real(kind=kind_phys),    dimension (its:ite,kts:kte) :: dtempdz
      integer, dimension (its:ite,kts:kte) ::  k_inv_layers 
-     real(kind=kind_phys) :: c0    ! HCB
+     real(kind=kind_phys),    dimension (its:ite) :: c0    ! HCB
  
 ! rainevap from sas
      real(kind=kind_phys) zuh2(40)
@@ -388,11 +388,13 @@ contains
 !
 !---------------------------------------------------- ! HCB
 ! Set cloud water to rain water conversion rate (c0)
-      c0=0.004
-      if(xland1(i).eq.1)c0=.002
-      if(imid.eq.1)then
-        c0=0.002
-      endif
+      do i=its,itf
+         c0(i)=0.004
+         if(xland1(i).eq.1)c0(i)=.002
+         if(imid.eq.1)then
+           c0(i)=0.002
+         endif
+      enddo
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       ztexec(:)     = 0.
@@ -3943,13 +3945,13 @@ endif
         up_massentr,up_massdetr,dby,qes_cup,z_cup
      real(kind=kind_phys),    dimension (its:ite)                                 &
         ,intent (in   )                   ::                      &
-        zqexec
+        zqexec,c0
   ! entr= entrainment rate 
      integer, dimension (its:ite)                                 &
         ,intent (in   )                   ::                      &
         kbcon,ktop,k22,xland1
      real(kind=kind_phys),    intent (in  ) ::                    & ! HCB
-        c0,ccnclean
+        ccnclean
 !
 ! input and output
 !
@@ -4054,9 +4056,9 @@ endif
 !            if(name == "deep" )then
             do k=k22(i)+1,kbcon(i)
               if(t(i,k) > 273.16) then
-               c0t = c0
+               c0t = c0(i)
               else
-               c0t = c0 * exp(c0_iceconv * (t(i,k) - 273.16))
+               c0t = c0(i) * exp(c0_iceconv * (t(i,k) - 273.16))
               endif
               qc(i,k)=   (qc(i,k-1)*zu(i,k-1)-.5*up_massdetr(i,k-1)* qc(i,k-1)+ &
                          up_massentr(i,k-1)*q(i,k-1))   /                       &
@@ -4079,9 +4081,9 @@ endif
 !
             do k=kbcon(i)+1,ktop(i)
                if(t(i,k) > 273.16) then
-                  c0t = c0
+                  c0t = c0(i)
                else
-                  c0t = c0 * exp(c0_iceconv * (t(i,k) - 273.16))
+                  c0t = c0(i) * exp(c0_iceconv * (t(i,k) - 273.16))
                endif
                if(name == "mid")c0t=.004
 
@@ -4122,9 +4124,9 @@ endif
 !------- total condensed water before rainout
 !
                clw_all(i,k)=max(0.,qc(i,k)-qrch)
-               qrc(i,k)=max(0.,(qc(i,k)-qrch)) ! /(1.+c0*dz*zu(i,k))
+               qrc(i,k)=max(0.,(qc(i,k)-qrch)) ! /(1.+c0(i)*dz*zu(i,k))
                clw_allh(i,k)=max(0.,qch(i,k)-qrch) 
-               qrcb(i,k)=max(0.,(qch(i,k)-qrch)) ! /(1.+c0*dz*zu(i,k))
+               qrcb(i,k)=max(0.,(qch(i,k)-qrch)) ! /(1.+c0(i)*dz*zu(i,k))
                if(name == "deep" )then
                  clwdet=0.02                 ! 05/11/2021
                  kklev(i)=maxloc(zu(i,:),1)     ! 05/05/2021
