@@ -79,6 +79,7 @@
 !> @{
         subroutine zhaocarr_gscond_run (im,km,dt,dtf,prsl,ps,q,clw1     &
      &,                  clw2, cwm, t, tp, qp, psp                      &
+     &,                  psat,hvap,grav,hfus,ttp,rd,cp,eps,epsm1,rv     &
      &,                  tp1, qp1, psp1, u, lprnt, ipr, errmsg, errflg)
 
 !
@@ -99,10 +100,6 @@
 !
       use machine , only : kind_phys
       use funcphys , only : fpvs
-      use physcons, psat => con_psat, hvap => con_hvap, grav => con_g
-     &,             hfus => con_hfus, ttp => con_ttp, rd => con_rd
-     &,             cp => con_cp, eps => con_eps, epsm1 => con_epsm1
-     &,             rv => con_rv
 !      use namelist_def, only: nsdfi,fhdfi
       implicit none
 !
@@ -118,6 +115,8 @@
      &,                     tp1(:,:),  qp1(:,:),  psp1(:)
       real(kind=kind_phys), intent(in)    :: u(:,:)
       logical,              intent(in)    :: lprnt
+      real(kind=kind_phys), intent(in)    :: psat, hvap, grav, hfus     &
+     &,                     ttp, rd, cp, eps, epsm1, rv
 !
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -127,10 +126,10 @@
      &,                     d00,  elwv, eliv
      &,                     epsq
      &,                     r,     cpr,  rcp
-      parameter (h1=1.e0,       d00=0.e0
-     &,          elwv=hvap,     eliv=hvap+hfus
-     &,          epsq=2.e-12,   r=rd
-     &,          cpr=cp*r,      rcp=h1/cp)
+      
+      parameter (h1=1.e0,       d00=0.e0                                &           
+     &,          epsq=2.e-12)                               
+                                   
 !
       real(kind=kind_phys), parameter :: cons_0=0.0, cons_m15=-15.0
 !
@@ -158,6 +157,12 @@
        enddo
 !-----------------prepare constants for later uses-----------------
 !
+      elwv=hvap
+      eliv=hvap+hfus
+      r=rd
+      cpr=cp*r
+      rcp=h1/cp
+      
       el2orc = hvap*hvap / (rv*cp)
       albycp = hvap / cp
 !     write(0,*)' in gscond im=',im

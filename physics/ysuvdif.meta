@@ -116,6 +116,14 @@
   kind = kind_phys
   intent = in
   optional = F
+[karman]
+  standard_name = von_karman_constant
+  long_name = von karman constant
+  units = none
+  dimensions = ()
+  type = real
+  intent = in
+  optional = F
 [utnp]
   standard_name = process_split_cumulative_tendency_of_x_wind
   long_name = updated tendency of the x wind

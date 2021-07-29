@@ -40,7 +40,7 @@
 !! \htmlinclude shinhongvdif_run.html
 !!
 !-------------------------------------------------------------------------------
-   subroutine shinhongvdif_run(im,km,ux,vx,tx,qx,p2d,p2di,pi2d,                &
+   subroutine shinhongvdif_run(im,km,ux,vx,tx,qx,p2d,p2di,pi2d,karman,         &
                   utnp,vtnp,ttnp,qtnp,ntrac,ndiff,ntcw,ntiw,                   &
                   phii,phil,psfcpa,                                            &
                   zorl,stress,hpbl,psim,psih,                                  &
@@ -103,7 +103,7 @@
    real(kind=kind_phys),parameter    ::  tmin=1.e-2
    real(kind=kind_phys),parameter    ::  gamcrt = 3.,gamcrq = 2.e-3
    real(kind=kind_phys),parameter    ::  xka = 2.4e-5
-   real(kind=kind_phys),parameter    ::  karman = 0.4
+   real(kind=kind_phys),intent(in)   :: karman
    real(kind=kind_phys),parameter    ::  corf=0.000073 
    real(kind=kind_phys),parameter    ::  rcl = 1.0
    integer,parameter ::  imvdif = 1
