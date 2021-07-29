@@ -150,7 +150,7 @@ contains
             hice(i)   = zero
             icy(i)    = .false.
           else
-            frland(i)    = zero
+            frland(i) = zero
             if (oceanfrac(i) > zero) then
               if (cice(i) >= min_seaice) then
                 icy(i)   = .true.

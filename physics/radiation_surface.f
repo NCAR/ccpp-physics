@@ -597,8 +597,8 @@
           !     from ialbflg = 1.
           if (icy(i)) then
             if (lsm == lsm_ruc .or.                                     &
-     &        (use_cice_alb .and. lakefrac(i)  < epsln)) then !-- use ice albedo from CICE for sea-ice
-            !-- use ice albedo from the RUC ice model or 
+     &        (use_cice_alb .and. lakefrac(i)  < epsln)) then !-- use ice albedo from the RUC ice model or
+                                                              !-- use ice albedo from CICE for sea-ice
               asevd_ice = icealbivis(i)
               asend_ice = icealbinir(i)
               asevb_ice = icealbdvis(i)
