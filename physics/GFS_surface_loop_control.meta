@@ -134,7 +134,7 @@
   intent = in
   optional = F
 [nstf_name1]
-  standard_name = flag_for_nsstm_run
+  standard_name = control_for_nsstm
   long_name = NSSTM flag: off/uncoupled/coupled=0/1/2
   units = flag
   dimensions = ()
