@@ -171,7 +171,8 @@
 !> @{
       subroutine dcyc2t3_run                                            &
 !  ---  inputs:
-     &     ( solhr,slag,sdec,cdec,sinlat,coslat,con_pi,con_sbc,         &
+     &     ( solhr,slag,sdec,cdec,sinlat,coslat,                        &
+     &       con_g, con_cp, con_pi, con_sbc,                            &
      &       xlon,coszen,tsfc_lnd,tsfc_ice,tsfc_wat,tf,tsflw,tsfc,      &
      &       sfcemis_lnd, sfcemis_ice, sfcemis_wat,                     &
      &       sfcdsw,sfcnsw,sfcdlw,swh,swhc,hlw,hlwc,                    &
@@ -236,7 +237,9 @@
       real(kind=kind_phys), dimension(:,:), intent(in) :: p_lev,        &
      &     flux2D_lwUP, flux2D_lwDOWN, fluxlwUP_jac, t_lev
 
-      real(kind_phys),           intent(in   ) :: con_pi, con_sbc
+      real(kind_phys),           intent(in   ) :: con_g, con_cp,        &
+     &     con_pi, con_sbc
+
       real(kind_phys)  :: pid12
 
 

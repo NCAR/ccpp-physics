@@ -96,7 +96,7 @@
   intent = in
   optional = F
 [r_d]
-  standard_name = gas_constant_dry_air
+  standard_name = gas_constant_of_dry_air
   long_name = ideal gas constant for dry air
   units = J kg-1 K-1
   dimensions = ()

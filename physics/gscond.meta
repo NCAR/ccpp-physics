@@ -183,8 +183,8 @@
   intent = inout
   optional = F
 [psat]
-  standard_name = pres_at_H2O_3pt
-  long_name = pres_at_H2O_3pt
+  standard_name = saturation_pressure_at_triple_point_of_water
+  long_name = saturation pressure at triple point of water
   units = Pa
   dimensions = ()
   type = real
@@ -228,7 +228,7 @@
   intent = in
   optional = F
 [rd]
-  standard_name = gas_constant_dry_air
+  standard_name = gas_constant_of_dry_air
   long_name = ideal gas constant for dry air
   units = J kg-1 K-1
   dimensions = ()
