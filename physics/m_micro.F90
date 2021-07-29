@@ -38,7 +38,7 @@ subroutine m_micro_init(imp_physics, imp_physics_mg, fprcp, gravit, rair, rh2o, 
                                         mg_do_graupel, mg_nccons, mg_nicons, mg_ngcons, &
                                         mg_do_ice_gmao, mg_do_liq_liu
     real(kind=kind_phys), intent(in) :: gravit, rair, rh2o, cpair, eps, tmelt, latvap, latice
-    real(kind=kind_phys), intent(in) :: mg_dcs, mg_qcvar, mg_ts_auto_ice(2), mg_rhmini, &
+    real(kind=kind_phys), intent(in) :: mg_dcs, mg_qcvar, mg_ts_auto_ice(:), mg_rhmini, &
                                         mg_berg_eff_factor, mg_ncnst, mg_ninst, mg_ngnst
     character(len=16),    intent(in) :: mg_precip_frac_method
     character(len=*),     intent(out) :: errmsg
@@ -172,45 +172,38 @@ end subroutine m_micro_init
        integer, parameter :: ncolmicro = 1
        integer,intent(in) :: im, lm, kdt, fprcp, pdfflag, iccn
        logical,intent(in) :: flipv, skip_macro
-       real (kind=kind_phys), intent(in):: dt_i, alf_fac, qc_min(2)
+       real (kind=kind_phys), intent(in):: dt_i, alf_fac, qc_min(:)
 
-       real (kind=kind_phys), dimension(im,lm),intent(in)  ::           &
+       real (kind=kind_phys), dimension(:,:),intent(in)  ::             &
      &                prsl_i,u_i,v_i,phil,   omega_i, QLLS_i,QILS_i,    &
      &                                       lwheat_i,swheat_i
-       real (kind=kind_phys), dimension(im,0:lm),intent(in):: prsi_i,   &
-     &                                                        phii
-! GJF* These variables are conditionally allocated depending on whether the
-!     Morrison-Gettelman microphysics is used, so they must be declared 
-!     using assumed shape.
+       real (kind=kind_phys), dimension(:,0:),intent(in):: prsi_i, phii
        real (kind=kind_phys), dimension(:,:),  intent(in)  ::           &
      &       CNV_DQLDT_i, CLCN_i,     QLCN_i, QICN_i,                   &
      &       CNV_MFD_i,               cf_upi, CNV_FICE_i, CNV_NDROP_i,  &
      &       CNV_NICE_i,  w_upi
 ! *GJF
-       real (kind=kind_phys), dimension(im,lm),intent(in)  ::           &
+       real (kind=kind_phys), dimension(:,:),intent(in)  ::             &
      &       rhc_i, naai_i, npccn_i
-       real (kind=kind_phys), dimension(im,lm,ntrcaer),intent(in) ::    &
+       real (kind=kind_phys), dimension(:,:,:),intent(in) ::            &
      &       aerfld_i
-       real (kind=kind_phys),dimension(im),intent(in):: TAUGWX,         &
+       real (kind=kind_phys),dimension(:),intent(in):: TAUGWX,          &
      &       TAUGWY, TAUOROX, TAUOROY, FRLAND,ZPBL,xlat,xlon
 !    &       TAUGWY, TAUX, TAUY, TAUOROX, TAUOROY,ps_i,FRLAND,ZPBL
 !    &       CNVPRCP
 
 !   output
-       real (kind=kind_phys),dimension(im,lm), intent(out) :: lwm_o, qi_o,  &
+       real (kind=kind_phys),dimension(:,:), intent(out) :: lwm_o, qi_o,  &
                         cldreffl, cldreffi, cldreffr, cldreffs, cldreffg
-       real (kind=kind_phys),dimension(im), intent(out) :: rn_o,  sr_o
+       real (kind=kind_phys),dimension(:), intent(out) :: rn_o,  sr_o
        character(len=*),                    intent(out) :: errmsg
        integer,                             intent(out) :: errflg
 
 !   input and output
 !      Anning Cheng 10/24/2016 twat for total water, diagnostic purpose
-       integer, dimension(IM), intent(inout):: KCBL
-       real (kind=kind_phys),dimension(im,lm),intent(inout):: q_io, t_io,   &
+       integer, dimension(:), intent(inout):: KCBL
+       real (kind=kind_phys),dimension(:,:),intent(inout):: q_io, t_io,   &
      &                                             ncpl_io,ncpi_io,CLLS_io
-! GJF* These variables are conditionally allocated depending on whether the
-!     Morrison-Gettelman microphysics is used, so they must be declared 
-!     using assumed shape.
        real (kind=kind_phys),dimension(:,:),intent(inout):: rnw_io,snw_io,&
      &                                             ncpr_io, ncps_io,        &
      &                                             qgl_io,  ncgl_io
@@ -547,16 +540,19 @@ end subroutine m_micro_init
      &                            NCPI(I,K), qc_min)
              if (rnw(i,k) <= qc_min(1)) then
                ncpr(i,k) = zero
+               rnw(i,k)  = zero
              elseif (ncpr(i,k) <= nmin) then ! make sure NL > 0 if Q >0
                ncpr(i,k) = max(rnw(i,k) / (fourb3 * PI *RL_cub*997.0_kp), nmin)
              endif
              if (snw(i,k) <= qc_min(2)) then
                ncps(i,k) = zero
+               snw(i,k)  = zero
              elseif (ncps(i,k) <= nmin) then
                ncps(i,k) = max(snw(i,k) / (fourb3 * PI *RL_cub*500.0_kp), nmin)
              endif
              if (qgl(i,k) <= qc_min(2)) then
                ncgl(i,k) = zero
+               qgl(i,k)  = zero
              elseif (ncgl(i,k) <= nmin) then
                ncgl(i,k) = max(qgl(i,k) / (fourb3 * PI *RL_cub*500.0_kp), nmin)
              endif
@@ -1701,16 +1697,19 @@ end subroutine m_micro_init
             QI_TOT(I,K) = QILS(I,K) + QICN(I,K)
             if (rnw(i,k) <= qc_min(1)) then
               ncpr(i,k) = zero
+              rnw(i,k)  = zero
             elseif (ncpr(i,k) <= nmin) then ! make sure NL > 0 if Q >0
               ncpr(i,k) = max(rnw(i,k) / (fourb3 * PI *RL_cub*997.0_kp), nmin)
             endif
             if (snw(i,k) <= qc_min(2)) then
               ncps(i,k) = zero
+              snw(i,k)  = zero
             elseif (ncps(i,k) <= nmin) then
               ncps(i,k) = max(snw(i,k) / (fourb3 * PI *RL_cub*500.0_kp), nmin)
             endif
             if (qgl(i,k) <= qc_min(2)) then
               ncgl(i,k) = zero
+              qgl(i,k)  = zero
             elseif (ncgl(i,k) <= nmin) then
               ncgl(i,k) = max(qgl(i,k) / (fourb3 * PI *RL_cub*500.0_kp), nmin)
             endif
@@ -1741,16 +1740,19 @@ end subroutine m_micro_init
 !
             if (rnw(i,k) <= qc_min(1)) then
               ncpr(i,k) = zero
+              rnw(i,k)  = zero
             elseif (ncpr(i,k) <= nmin) then ! make sure NL > 0 if Q >0
               ncpr(i,k) = max(rnw(i,k) / (fourb3 * PI *RL_cub*997.0_kp), nmin)
             endif
             if (snw(i,k) <= qc_min(2)) then
               ncps(i,k) = zero
+              snw(i,k)  = zero
             elseif (ncps(i,k) <= nmin) then
               ncps(i,k) = max(snw(i,k) / (fourb3 * PI *RL_cub*500.0_kp), nmin)
             endif
             if (qgl(i,k) <= qc_min(2)) then
               ncgl(i,k) = zero
+              qgl(i,k)  = zero
             elseif (ncgl(i,k) <= nmin) then
               ncgl(i,k) = max(qgl(i,k) / (fourb3 * PI *RL_cub*500.0_kp), nmin)
             endif

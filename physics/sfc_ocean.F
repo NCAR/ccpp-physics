@@ -26,8 +26,9 @@
       subroutine sfc_ocean_run                                          &
 !...................................
 !  ---  inputs:
-     &     ( im, rd, eps, epsm1, rvrdm1, ps, t1, q1,                    &
-     &       tskin, cm, ch, prsl1, prslki, wet, lake, wind,             &,  ! --- inputs
+     &     ( im, hvap, cp, rd, eps, epsm1, rvrdm1, ps, u1, v1, t1, q1,  &
+     &       tskin, cm, ch, lseaspray, fm, fm10,                        &
+     &       prsl1, prslki, wet, use_flake, wind,                       &,  ! --- inputs
      &       flag_iter,                                                 &
      &       qsurf, cmm, chh, gflux, evap, hflx, ep,                    &   ! --- outputs
      &       errmsg, errflg                                             &
@@ -40,9 +41,8 @@
 !                                                                       !
 !    call sfc_ocean                                                     !
 !       inputs:                                                         !
-!          ( im, ps, t1, q1, tskin, cm, ch,                             !
-!!         ( im, ps, u1, v1, t1, q1, tskin, cm, ch,                     !
-!            prsl1, prslki, wet, lake, wind, flag_iter,                 !
+!        ( im, ps, u1, v1, t1, q1, tskin, cm, ch, lseaspray, fm, fm10,  !
+!            prsl1, prslki, wet, use_flake, wind, flag_iter,            !
 !       outputs:                                                        !
 !            qsurf, cmm, chh, gflux, evap, hflx, ep )                   !
 !                                                                       !
@@ -65,11 +65,16 @@
 !  inputs:                                                       size   !
 !     im       - integer, horizontal dimension                     1    !
 !     ps       - real, surface pressure                            im   !
+!     u1, v1   - real, u/v component of surface layer wind (m/s)   im   !
 !     t1       - real, surface layer mean temperature ( k )        im   !
 !     q1       - real, surface layer mean specific humidity        im   !
 !     tskin    - real, ground surface skin temperature ( k )       im   !
 !     cm       - real, surface exchange coeff for momentum (m/s)   im   !
 !     ch       - real, surface exchange coeff heat & moisture(m/s) im   !
+!     lseaspray- logical, .t. for parameterization for sea spray   1    !
+!     fm       - real, a stability profile function for momentum   im   !
+!     fm10     - real, a stability profile function for momentum   im   !
+!                       at 10m                                          !
 !     prsl1    - real, surface layer mean pressure                 im   !
 !     prslki   - real,                                             im   !
 !     wet      - logical, =T if any ocean/lak, =F otherwise        im   !
@@ -93,19 +98,23 @@
       implicit none
 
 !  ---  constant parameters:
-      real (kind=kind_phys), parameter :: one  = 1.0_kind_phys, zero = 0.0_kind_phys    &
-     &,                                   qmin = 1.0e-8_kind_phys
+      real (kind=kind_phys), parameter :: one  = 1.0_kind_phys,         &
+     &           zero = 0.0_kind_phys, qmin = 1.0e-8_kind_phys
 !  ---  inputs:
       integer, intent(in) :: im
-      real (kind=kind_phys), intent(in) :: rd, eps, epsm1, rvrdm1
+      real (kind=kind_phys), intent(in) :: hvap, cp, rd,                &
+     &                 eps, epsm1, rvrdm1
 
-      real (kind=kind_phys), dimension(im), intent(in) :: ps,           &
-     &      t1, q1, tskin, cm, ch, prsl1, prslki, wind
+      real (kind=kind_phys), dimension(:), intent(in) :: ps, u1, v1,    &
+     &      t1, q1, tskin, cm, ch, fm, fm10, prsl1, prslki, wind
 
-      logical, dimension(im), intent(in) :: flag_iter, wet, lake
+! For sea spray effect
+      logical, intent(in) :: lseaspray
+!
+      logical, dimension(:), intent(in) :: flag_iter, wet, use_flake
 
 !  ---  outputs:
-      real (kind=kind_phys), dimension(im), intent(inout) :: qsurf,     &
+      real (kind=kind_phys), dimension(:), intent(inout) :: qsurf,      &
      &       cmm, chh, gflux, evap, hflx, ep
 
       character(len=*), intent(out) :: errmsg
@@ -113,48 +122,105 @@
 
 !  ---  locals:
 
-      real (kind=kind_phys) :: q0, qss, rch, rho, tem
+      real (kind=kind_phys) :: qss, rch, tem,
+     &                         elocp, cpinv, hvapi
+      real (kind=kind_phys), dimension(im) :: rho, q0
 
       integer :: i
 
+      logical :: flag(im)
+!
+!  parameters for sea spray effect
+!
+      real (kind=kind_phys) :: f10m, u10m, v10m, ws10, ru10, qss1,
+     &                         bb1, hflxs, evaps, ptem
+!
+!     real (kind=kind_phys), parameter :: alps=0.5, bets=0.5, gams=0.1,
+!     real (kind=kind_phys), parameter :: alps=0.5, bets=0.5, gams=0.0,
+!     real (kind=kind_phys), parameter :: alps=1.0, bets=1.0, gams=0.2,
+      real (kind=kind_phys), parameter :: alps=0.75,bets=0.75,gams=0.15,
+     &                       ws10cr=30., conlf=7.2e-9, consf=6.4e-8
+!
+!======================================================================================================
 !===> ...  begin here
 !
 !  -- ...  initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+
+      cpinv = one/cp
+      hvapi = one/hvap
+      elocp = hvap/cp
 !
 !  --- ...  flag for open water
       do i = 1, im
-
+        flag(i) = (wet(i) .and. flag_iter(i) .and. .not. use_flake(i))
 !  --- ...  initialize variables. all units are supposedly m.k.s. unless specified
 !           ps is in pascals, wind is wind speed,
 !           rho is density, qss is sat. hum. at surface
 
-        if (wet(i) .and. flag_iter(i) .and. .not. lake(i)) then
-          q0       = max( q1(i), qmin )
-          rho      = prsl1(i) / (rd*t1(i)*(one + rvrdm1*q0))
+        if ( flag(i) ) then
+          q0(i)     = max( q1(i), qmin )
+          rho(i)   = prsl1(i) / (rd*t1(i)*(one + rvrdm1*q0(i)))
 
           qss      = fpvs( tskin(i) )
           qss      = eps*qss / (ps(i) + epsm1*qss)
 
 !  --- ...    rcp  = rho cp ch v
 
+          rch      = rho(i) * cp * ch(i) * wind(i)
           tem      = ch(i) * wind(i)
           cmm(i)   = cm(i) * wind(i)
-          chh(i)   = rho * tem
+          chh(i)   = rho(i) * tem
 
 !  --- ...  sensible and latent heat flux over open water
 
-          hflx(i)  = tem * (tskin(i) - t1(i) * prslki(i))
+          hflx(i)  = rch * (tskin(i) - t1(i) * prslki(i))
 
-          evap(i)  = tem * (qss - q0)
+          evap(i)  = elocp * rch * (qss - q0(i))
 
-          ep(i)    = evap(i)
           qsurf(i) = qss
           gflux(i) = zero
         endif
       enddo
 !
+!  include sea spray effects
+!
+      do i=1,im
+        if(lseaspray .and. flag(i)) then
+          f10m = fm10(i) / fm(i)
+          u10m = f10m * u1(i)
+          v10m = f10m * v1(i)
+          ws10 = sqrt(u10m*u10m + v10m*v10m)
+          ws10 = max(ws10,1.)
+          ws10 = min(ws10,ws10cr)
+          tem = .015 * ws10 * ws10
+          ru10 = 1. - .087 * log(10./tem)
+          qss1 = fpvs(t1(i))
+          qss1 = eps * qss1 / (prsl1(i) + epsm1 * qss1)
+          tem = rd * cp * t1(i) * t1(i)
+          tem = 1. + eps * hvap * hvap * qss1 / tem
+          bb1 = 1. / tem
+          evaps = conlf * (ws10**5.4) * ru10 * bb1
+          evaps = evaps * rho(i) * hvap * (qss1 - q0(i))
+          evap(i) = evap(i) + alps * evaps
+          hflxs = consf * (ws10**3.4) * ru10
+          hflxs = hflxs * rho(i) * cp * (tskin(i) - t1(i))
+          ptem = alps - gams
+          hflx(i) = hflx(i) + bets * hflxs - ptem * evaps
+        endif
+      enddo
+!
+      do i = 1, im
+        if ( flag(i) ) then
+          tem      = 1.0 / rho(i)
+          hflx(i)  = hflx(i) * tem * cpinv
+          evap(i)  = evap(i) * tem * hvapi
+          ep(i)    = evap(i)
+        endif
+      enddo
+!
+
       return
 !...................................
       end subroutine sfc_ocean_run

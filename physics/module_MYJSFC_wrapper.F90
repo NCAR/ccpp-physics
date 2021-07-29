@@ -8,7 +8,23 @@
 
       contains
 
-      subroutine myjsfc_wrapper_init ()
+      subroutine myjsfc_wrapper_init (do_myjsfc,    &
+      & errmsg,errflg)
+
+        logical,          intent(in)  :: do_myjsfc
+        character(len=*), intent(out) :: errmsg
+        integer,          intent(out) :: errflg
+
+      ! Initialize CCPP error handling variables
+        errmsg = ''
+        errflg = 0
+
+      ! Consistency checks
+        if (.not. do_myjsfc) then
+          write(errmsg,fmt='(*(a))') 'Logic error: do_myjsfc = .false.'
+          errflg = 1
+          return
+        end if
       end subroutine myjsfc_wrapper_init
 
       subroutine myjsfc_wrapper_finalize ()
@@ -91,22 +107,22 @@
       real(kind=kind_phys),intent(in) :: con_cp, con_g, con_rd
 
 !MYJ-2D
-      logical,dimension(im),intent(in) :: flag_iter
-      real(kind=kind_phys),dimension(im),intent(in)      ::  &
+      logical,dimension(:),intent(in) :: flag_iter
+      real(kind=kind_phys),dimension(:),intent(in)      ::   &
      &        prsik_1, prslk_1, tsfc, qsfc, slmsk
-      real(kind=kind_phys),dimension(im),intent(inout)   ::  &
+      real(kind=kind_phys),dimension(:),intent(inout)   ::   &
      &        phy_myj_qsfc, phy_myj_thz0, phy_myj_qz0,       &
      &        phy_myj_uz0, phy_myj_vz0, phy_myj_z0base,      &
      &        phy_myj_akhs, phy_myj_akms,                    &
      &        phy_myj_chkqlm, phy_myj_elflx,                 &
      &        phy_myj_a1u, phy_myj_a1t, phy_myj_a1q
-      real(kind=kind_phys),dimension(im),intent(inout)   ::  &
+      real(kind=kind_phys),dimension(:),intent(inout)   ::   &
      &        pblh, zorl, ustar, rib
-      real(kind=kind_phys),dimension(im),intent(out)     ::  &
+      real(kind=kind_phys),dimension(:),intent(inout)   ::   &
      &        cm, ch, stress, ffm, ffh, fm10, fh2
-      real(kind=kind_phys), dimension(im), intent(inout) ::  &
+      real(kind=kind_phys), dimension(:), intent(inout) ::   &
      &        landfrac, lakefrac, oceanfrac, fice
-      real(kind=kind_phys), dimension(im), intent(inout) ::  &
+      real(kind=kind_phys), dimension(:), intent(inout) ::   &
      &                    z0rl_wat,  z0rl_lnd,  z0rl_ice,    &
      &                   ustar_wat, ustar_lnd, ustar_ice,    &
      &                      cm_wat,    cm_lnd,    cm_ice,    &
@@ -121,12 +137,12 @@
 
 
 !MYJ-3D
-      real(kind=kind_phys),dimension(im,levs+1),intent(in) ::  &
+      real(kind=kind_phys),dimension(:,:),intent(in) ::      &
               phii, prsi
-      real(kind=kind_phys),dimension(im,levs),intent(in)   ::  &
+      real(kind=kind_phys),dimension(:,:),intent(in) ::      &
      &        ugrs, vgrs, tgrs, prsl
 !MYJ-4D
-      real(kind=kind_phys),dimension(im,levs,ntrac),intent(in) :: &
+      real(kind=kind_phys),dimension(:,:,:),intent(in) ::    &
      &       qgrs
 
 !LOCAL

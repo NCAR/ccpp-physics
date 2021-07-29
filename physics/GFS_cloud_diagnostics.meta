@@ -15,7 +15,7 @@
   intent = in
   optional = F
 [nLev]
-  standard_name = vertical_dimension
+  standard_name = vertical_layer_dimension
   long_name = number of vertical levels
   units = count
   dimensions = ()
@@ -23,7 +23,7 @@
   intent = in
   optional = F  
 [lsswr]
-  standard_name = flag_to_calc_sw
+  standard_name = flag_for_calling_shortwave_radiation
   long_name = logical flags for sw radiation calls
   units = flag
   dimensions = ()
@@ -31,7 +31,7 @@
   intent = in
   optional = F
 [lslwr]
-  standard_name = flag_to_calc_lw
+  standard_name = flag_for_calling_longwave_radiation
   long_name = logical flags for lw radiation calls
   units = flag
   dimensions = ()
@@ -47,11 +47,20 @@
   intent = in
   kind = kind_phys
   optional = F  
+[de_lgth]
+  standard_name = cloud_decorrelation_length
+  long_name = cloud decorrelation length
+  units = km
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [p_lay]
   standard_name = air_pressure_at_layer_for_RRTMGP_in_hPa
   long_name = air pressure at vertical layer for radiation calculation
   units = hPa
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -60,7 +69,7 @@
   standard_name = total_cloud_fraction
   long_name = layer total cloud fraction
   units = frac
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -69,11 +78,47 @@
   standard_name = air_pressure_at_interface_for_RRTMGP_in_hPa
   long_name = air pressure at vertical interface for radiation calculation
   units = hPa
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F    
+[deltaZ]
+  standard_name = layer_thickness
+  long_name = layer_thickness
+  units = m
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F    
+[cloud_overlap_param]
+  standard_name = cloud_overlap_param
+  long_name = cloud overlap parameter
+  units = km
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[precip_overlap_param]
+  standard_name = precip_overlap_param
+  long_name = precipitation overlap parameter
+  units = km
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F  
+[con_pi]
+  standard_name = pi
+  long_name = ratio of a circle's circumference to its diameter
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F   
 [mtopa]
   standard_name = model_layer_number_at_cloud_top
   long_name = vertical indices for low, middle and high cloud tops
@@ -90,51 +135,6 @@
   type = integer
   intent = out
   optional = F
-[de_lgth]
-  standard_name = cloud_decorrelation_length
-  long_name = cloud decorrelation length
-  units = km
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[deltaZ]
-  standard_name = layer_thickness
-  long_name = layer_thickness
-  units = m
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F    
-[cloud_overlap_param]
-  standard_name = cloud_overlap_param
-  long_name = cloud overlap parameter
-  units = km
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[precip_overlap_param]
-  standard_name = precip_overlap_param
-  long_name = precipitation overlap parameter
-  units = km
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F  
-[con_pi]
-  standard_name = pi
-  long_name = ratio of a circle's circumference to its diameter
-  units = none
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F   
 [cldsa]
   standard_name = cloud_area_fraction_for_radiation
   long_name = fraction of clouds for low, middle, high, total and BL

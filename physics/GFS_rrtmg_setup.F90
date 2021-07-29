@@ -1,12 +1,13 @@
 !> \file GFS_rrtmg_setup.f90
 !! This file contains
+
+!> \defgroup GFS_rrtmg_setup_mod GFS RRTMG Scheme Setup
 module GFS_rrtmg_setup
 
-   use physparam, only : isolar , ictmflg, ico2flg, ioznflg, iaerflg,&
-!  &             iaermdl, laswflg, lalwflg, lavoflg, icldflg,         &
+   use physparam, only : isolar , ictmflg, ico2flg, ioznflg, iaerflg, &
    &             iaermdl,                            icldflg,         &
    &             iovrRad=>iovr, lcrick , lcnorm , lnoprec,            &
-   &             ialbflg, iemsflg, isubcsw, isubclw, ivflip , ipsd0,  &
+   &             isubcsw, isubclw, ivflip , ipsd0,                    &
    &             iswcliq,                                             &
    &             kind_phys
 
@@ -38,18 +39,16 @@ module GFS_rrtmg_setup
 
    contains
 
-!> \defgroup GFS_rrtmg_setup GFS RRTMG Scheme Setup
-!! @{
-!! \section arg_table_GFS_rrtmg_setup_init Argument Table
+!> \section arg_table_GFS_rrtmg_setup_init Argument Table
 !! \htmlinclude GFS_rrtmg_setup_init.html
 !!
    subroutine GFS_rrtmg_setup_init (                          &
-          si, levr, ictm, isol, ico2, iaer, ialb, iems, ntcw, &
+          si, levr, ictm, isol, ico2, iaer, ntcw,             &
           num_p3d, npdf3d, ntoz, iovr, isubc_sw, isubc_lw,    &
           icliq_sw, crick_proof, ccnorm,                      &
           imp_physics,                                        &
           norad_precip, idate, iflip,                         &
-          im, faerlw, faersw, aerodp,                         & ! for consistency checks
+          do_RRTMGP, im, faerlw, faersw, aerodp,              & ! for consistency checks
           me, errmsg, errflg)
 ! =================   subprogram documentation block   ================ !
 !                                                                       !
@@ -106,15 +105,6 @@ module GFS_rrtmg_setup
 !                        =1 include tropspheric aerosols for lw         !
 !                     c: =0 no topospheric aerosol in sw radiation      !
 !                        =1 include tropspheric aerosols for sw         !
-!   ialb             : control flag for surface albedo schemes          !
-!                     =0: climatology, based on surface veg types       !
-!                     =1: modis retrieval based surface albedo scheme   !
-!   iems             : ab 2-digit control flag                          !
-!                     a: =0 set sfc air/ground t same for lw radiation  !
-!                        =1 set sfc air/ground t diff for lw radiation  !
-!                     b: =0 use fixed sfc emissivity=1.0 (black-body)   !
-!                        =1 use varying climtology sfc emiss (veg based)!
-!                        =2 future development (not yet)                !
 !   ntcw             :=0 no cloud condensate calculated                 !
 !                     >0 array index location for cloud condensate      !
 !   num_p3d          :=3: ferrier's microphysics cloud scheme           !
@@ -158,21 +148,16 @@ module GFS_rrtmg_setup
       use module_radsw_parameters,  only: NBDSW
       use module_radlw_parameters,  only: NBDLW
       use module_radiation_aerosols,only: NF_AELW, NF_AESW, NSPC1
-      use module_radiation_clouds,  only: NF_CLDS
-      use module_radiation_gases,   only: NF_VGAS
-      use module_radiation_surface, only: NF_ALBD
 
       implicit none
 
       ! interface variables
-      real (kind=kind_phys), intent(in) :: si(levr+1)
+      real (kind=kind_phys), intent(in) :: si(:)
       integer, intent(in) :: levr
       integer, intent(in) :: ictm
       integer, intent(in) :: isol
       integer, intent(in) :: ico2
       integer, intent(in) :: iaer
-      integer, intent(in) :: ialb
-      integer, intent(in) :: iems
       integer, intent(in) :: ntcw
       integer, intent(in) :: num_p3d
       integer, intent(in) :: npdf3d
@@ -185,9 +170,11 @@ module GFS_rrtmg_setup
       logical, intent(in) :: ccnorm
       integer, intent(in) :: imp_physics
       logical, intent(in) :: norad_precip
-      integer, intent(in) :: idate(4)
+      integer, intent(in) :: idate(:)
       integer, intent(in) :: iflip
       ! For consistency checks
+      
+      logical, intent(in)         :: do_RRTMGP
       integer, intent(in)         :: im
       real(kind_phys), intent(in) :: faerlw(:,:,:,:)
       real(kind_phys), intent(in) :: faersw(:,:,:,:)
@@ -208,6 +195,12 @@ module GFS_rrtmg_setup
       errflg = 0
 
       if (is_initialized) return
+      
+      if (do_RRTMGP) then
+        write(errmsg,'(*(a))') "Logic error: do_RRTMGP must be set to .false."
+        errflg = 1
+        return
+      end if
 
       ! Consistency checks for dimensions of arrays, this is required
       ! to detect differences in FV3's parameters that are used to
@@ -277,9 +270,6 @@ module GFS_rrtmg_setup
       isubcsw = isubc_sw                ! sub-column cloud approx flag in sw radiation
       isubclw = isubc_lw                ! sub-column cloud approx flag in lw radiation
 
-      ialbflg= ialb                     ! surface albedo control flag
-      iemsflg= iems                     ! surface emissivity control flag
-
       ivflip = iflip                    ! vertical index direction control flag
 
 !  ---  assign initial permutation seed for mcica cloud-radiation
@@ -292,7 +282,7 @@ module GFS_rrtmg_setup
         print *,'  In rad_initialize (GFS_rrtmg_setup_init), before calling radinit'
         print *,' si =',si
         print *,' levr=',levr,' ictm=',ictm,' isol=',isol,' ico2=',ico2,&
-     &          ' iaer=',iaer,' ialb=',ialb,' iems=',iems,' ntcw=',ntcw
+     &          ' iaermdl=',iaermdl,' iaerflg=',iaerflg
         print *,' np3d=',num_p3d,' ntoz=',ntoz,                         &
      &          ' iovr=',iovr,' isubc_sw=',isubc_sw,                    &
      &          ' isubc_lw=',isubc_lw,' icliq_sw=',icliq_sw,            &
@@ -448,15 +438,6 @@ module GFS_rrtmg_setup
 !   ioznflg  : ozone data source control flag                           !
 !              =0: use climatological ozone profile                     !
 !              =1: use interactive ozone profile                        !
-!   ialbflg  : albedo scheme control flag                               !
-!              =0: climatology, based on surface veg types              !
-!              =1: modis retrieval based surface albedo scheme          !
-!   iemsflg  : emissivity scheme cntrl flag (ab 2-digit integer)        !
-!              a:=0 set sfc air/ground t same for lw radiation          !
-!                =1 set sfc air/ground t diff for lw radiation          !
-!              b:=0 use fixed sfc emissivity=1.0 (black-body)           !
-!                =1 use varying climtology sfc emiss (veg based)        !
-!                =2 future development (not yet)                        !
 !   icldflg  : cloud optical property scheme control flag               !
 !              =0: use diagnostic cloud scheme                          !
 !              =1: use prognostic cloud scheme (default)                !
@@ -489,7 +470,7 @@ module GFS_rrtmg_setup
 !              =1: index from surface to toa                            !
 !                                                                       !
 !  subroutines called: sol_init, aer_init, gas_init, cld_init,          !
-!                      sfc_init, rlwinit, rswinit                       !
+!                      rlwinit, rswinit                                 !
 !                                                                       !
 !  usage:       call radinit                                            !
 !                                                                       !
@@ -499,9 +480,7 @@ module GFS_rrtmg_setup
       use module_radiation_astronomy, only : sol_init
       use module_radiation_aerosols,  only : aer_init
       use module_radiation_gases,     only : gas_init
-      use module_radiation_surface,   only : sfc_init
       use module_radiation_clouds,    only : cld_init
-      ! DH* these should be called by rrtmg_lw_init and rrtmg_sw_init!
       use rrtmg_lw,                   only : rlwinit
       use rrtmg_sw,                   only : rswinit
 
@@ -521,16 +500,6 @@ module GFS_rrtmg_setup
 !
 !> -# Set up control variables and external module variables in
 !!    module physparam
-#if 0
-      ! DH* WHAT IS THIS?
-      ! GFS_radiation_driver.F90 may in the future initialize air/ground
-      ! temperature differently; however, this is not used at the moment
-      ! and as such we avoid the difficulty of dealing with exchanging
-      ! itsfc between GFS_rrtmg_setup and a yet-to-be-created/-used
-      ! interstitial routine (or GFS_radiation_driver.F90)
-      itsfc  = iemsflg / 10             ! sfc air/ground temp control
-      ! *DH
-#endif
       loz1st = (ioznflg == 0)           ! first-time clim ozone data read flag
       month0 = 0
       iyear0 = 0
@@ -543,7 +512,7 @@ module GFS_rrtmg_setup
         print *, VTAGRAD                !print out version tag
         print *,' - Selected Control Flag settings: ICTMflg=',ictmflg,  &
      &    ' ISOLar =',isolar, ' ICO2flg=',ico2flg,' IAERflg=',iaerflg,  &
-     &    ' IALBflg=',ialbflg,' IEMSflg=',iemsflg,' ICLDflg=',icldflg,  &
+     &    ' ICLDflg=',icldflg,                                          &
      &    ' IMP_PHYSICS=',imp_physics,' IOZNflg=',ioznflg
         print *,' IVFLIP=',ivflip,' IOVR=',iovrRad,                     &
      &    ' ISUBCSW=',isubcsw,' ISUBCLW=',isubclw
@@ -598,8 +567,6 @@ module GFS_rrtmg_setup
 !! call module_radiation_aerosols::aer_init()
 !! - CO2 and other gases intialization routine:
 !! call module_radiation_gases::gas_init()
-!! - surface intialization routine:
-!! call module_radiation_surface::sfc_init()
 !! - cloud initialization routine:
 !! call module_radiation_clouds::cld_init()
 !! - LW radiation initialization routine:
@@ -614,8 +581,6 @@ module GFS_rrtmg_setup
 
       call gas_init ( me )          !  --- ...  co2 and other gases initialization routine
 
-      call sfc_init ( me )          !  --- ...  surface initialization routine
-
       call cld_init ( si, NLAY, imp_physics, me) !  --- ...  cloud initialization routine
 
       call rlwinit ( me )           !  --- ...  lw radiation initialization routine
@@ -623,7 +588,7 @@ module GFS_rrtmg_setup
       call rswinit ( me )           !  --- ...  sw radiation initialization routine
 !
       return
-!...................................
+!
       end subroutine radinit
       !-----------------------------------
 
@@ -817,5 +782,4 @@ module GFS_rrtmg_setup
       end subroutine radupdate
 !-----------------------------------
 
-!! @}
 end module GFS_rrtmg_setup

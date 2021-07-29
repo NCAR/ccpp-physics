@@ -57,14 +57,14 @@ contains
       implicit none
 
       ! Interface variables
-      integer,                                   intent(in)    :: ncol
-      integer,                                   intent(in)    :: nlev
-      real(kind_phys), dimension(1:ncol,1:nlev), intent(in)    :: tgrs_save
-      real(kind_phys), dimension(1:ncol,1:nlev), intent(inout) :: tgrs
-      real(kind_phys), dimension(1:ncol,1:nlev), intent(in)    :: prslk
-      real(kind_phys),                           intent(in)    :: dtp
-      real(kind_phys),                           intent(in)    :: ttendlim
-      integer,                                   intent(in)    :: kdt
+      integer,                         intent(in)    :: ncol
+      integer,                         intent(in)    :: nlev
+      real(kind_phys), dimension(:,:), intent(in)    :: tgrs_save
+      real(kind_phys), dimension(:,:), intent(inout) :: tgrs
+      real(kind_phys), dimension(:,:), intent(in)    :: prslk
+      real(kind_phys),                 intent(in)    :: dtp
+      real(kind_phys),                 intent(in)    :: ttendlim
+      integer,                         intent(in)    :: kdt
       ! MPI information
       integer,          intent(in   ) :: mpicomm
       integer,          intent(in   ) :: mpirank

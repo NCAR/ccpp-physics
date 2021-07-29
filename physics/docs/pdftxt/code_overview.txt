@@ -2,7 +2,7 @@
 \page subpage_overview Overview of the Code
 
 In the CCPP-Physics v2 code, each parameterization is placed in its own modern Fortran module, which facilitates model development and
-code maintenance. While some individual parameterization can be invoked for GMTB SCM, most users will assemble the 
+code maintenance. While some individual parameterization can be invoked for CCPP SCM, most users will assemble the 
 parameterizations in suites. The parameterizations contained in CCPP-Physics v2 can be used to run two suites: FV3GFS default
 (with GFDL cloud microphysics) and GFS with Zhao-Carr microphysics. 
 

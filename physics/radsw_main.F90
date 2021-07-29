@@ -701,60 +701,60 @@
 
       logical, intent(in) :: lprnt, lsswr
 
-      real (kind=kind_phys), dimension(npts,nlp1), intent(in) ::        &
+      real (kind=kind_phys), dimension(:,:), intent(in) ::              &
      &       plvl, tlvl
-      real (kind=kind_phys), dimension(npts,nlay), intent(in) ::        &
+      real (kind=kind_phys), dimension(:,:), intent(in) ::              &
      &       plyr, tlyr, qlyr, olyr, dzlyr, delpin
 
-      real (kind=kind_phys),dimension(npts),intent(in):: sfcalb_nir_dir 
-      real (kind=kind_phys),dimension(npts),intent(in):: sfcalb_nir_dif 
-      real (kind=kind_phys),dimension(npts),intent(in):: sfcalb_uvis_dir
-      real (kind=kind_phys),dimension(npts),intent(in):: sfcalb_uvis_dif
+      real (kind=kind_phys),dimension(:),intent(in):: sfcalb_nir_dir 
+      real (kind=kind_phys),dimension(:),intent(in):: sfcalb_nir_dif 
+      real (kind=kind_phys),dimension(:),intent(in):: sfcalb_uvis_dir
+      real (kind=kind_phys),dimension(:),intent(in):: sfcalb_uvis_dif
 
-      real(kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_co2
-      real(kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_n2o
-      real(kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_ch4
-      real(kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_o2
-      real(kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_co
-      real(kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_cfc11
-      real(kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_cfc12
-      real(kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_cfc22
-      real(kind=kind_phys),dimension(npts,nlay),intent(in)::gasvmr_ccl4
+      real(kind=kind_phys),dimension(:,:),intent(in)::gasvmr_co2
+      real(kind=kind_phys),dimension(:,:),intent(in)::gasvmr_n2o
+      real(kind=kind_phys),dimension(:,:),intent(in)::gasvmr_ch4
+      real(kind=kind_phys),dimension(:,:),intent(in)::gasvmr_o2
+      real(kind=kind_phys),dimension(:,:),intent(in)::gasvmr_co
+      real(kind=kind_phys),dimension(:,:),intent(in)::gasvmr_cfc11
+      real(kind=kind_phys),dimension(:,:),intent(in)::gasvmr_cfc12
+      real(kind=kind_phys),dimension(:,:),intent(in)::gasvmr_cfc22
+      real(kind=kind_phys),dimension(:,:),intent(in)::gasvmr_ccl4
 
-      real (kind=kind_phys), dimension(npts,nlay),intent(in):: cld_cf
-      real (kind=kind_phys), dimension(npts,nlay),intent(in),optional:: &
+      real (kind=kind_phys), dimension(:,:),intent(in):: cld_cf
+      real (kind=kind_phys), dimension(:,:),intent(in),optional::       &
      &       cld_lwp, cld_ref_liq,  cld_iwp, cld_ref_ice,               &
      &       cld_rwp, cld_ref_rain, cld_swp, cld_ref_snow,              &
      &       cld_od, cld_ssa, cld_asy
 
-      real(kind=kind_phys),dimension(npts,nlay,nbdsw),intent(in)::aeraod
-      real(kind=kind_phys),dimension(npts,nlay,nbdsw),intent(in)::aerssa
-      real(kind=kind_phys),dimension(npts,nlay,nbdsw),intent(in)::aerasy
+      real(kind=kind_phys),dimension(:,:,:),intent(in)::aeraod
+      real(kind=kind_phys),dimension(:,:,:),intent(in)::aerssa
+      real(kind=kind_phys),dimension(:,:,:),intent(in)::aerasy
 
       real (kind=kind_phys), intent(in) :: cosz(npts), solcon,          &
      &       de_lgth(npts)
       real (kind=kind_phys), dimension(npts,nlay), intent(in) :: alpha
 
 !  ---  outputs:
-      real (kind=kind_phys), dimension(npts,nlay), intent(inout) :: hswc
-      real (kind=kind_phys), dimension(npts,nlay), intent(inout) ::     &
+      real (kind=kind_phys), dimension(:,:), intent(inout) :: hswc
+      real (kind=kind_phys), dimension(:,:), intent(inout) ::           &
      &       cldtau
 
-      type (topfsw_type),    dimension(npts), intent(inout) :: topflx
-      type (sfcfsw_type),    dimension(npts), intent(inout) :: sfcflx
+      type (topfsw_type),    dimension(:), intent(inout) :: topflx
+      type (sfcfsw_type),    dimension(:), intent(inout) :: sfcflx
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
 !! ---  optional outputs:
-      real (kind=kind_phys), dimension(npts,nlay,nbdsw), optional,      &
+      real (kind=kind_phys), dimension(:,:,:), optional,                &
      &       intent(inout) :: hswb
 
-      real (kind=kind_phys), dimension(npts,nlay),       optional,      &
+      real (kind=kind_phys), dimension(:,:),       optional,            &
      &       intent(inout) :: hsw0
-      type (profsw_type),    dimension(npts,nlp1),       optional,      &
+      type (profsw_type),    dimension(:,:),       optional,            &
      &       intent(inout) :: flxprf
-      type (cmpfsw_type),    dimension(npts),            optional,      &
+      type (cmpfsw_type),    dimension(:),            optional,         &
      &       intent(inout) :: fdncmp
 
 !  ---  locals:
@@ -2946,8 +2946,13 @@
           else                          ! for non-conservative scattering
             za1 = zgam1*zgam4 + zgam2*zgam3
             za2 = zgam1*zgam3 + zgam2*zgam4
-            zrk = sqrt ( (zgam1 - zgam2) * (zgam1 + zgam2) )
-            zrk2= 2.0 * zrk
+            zrk = (zgam1 - zgam2) * (zgam1 + zgam2)
+            if (zrk > eps1) then
+              zrk = sqrt(zrk)
+            else
+              zrk = f_zero
+            endif
+            zrk2= zrk + zrk
 
             zrp  = zrk * cosz
             zrp1 = f_one + zrp
@@ -2993,7 +2998,8 @@
             ze1r45 = zr4*zexp1 + zr5*zexm1
 
 !      ...  collimated beam
-            if (ze1r45>=-eps1 .and. ze1r45<=eps1) then
+!           if (ze1r45>=-eps1 .and. ze1r45<=eps1) then
+            if (abs(ze1r45) <= eps1) then
               zrefb(kp) = eps1
               ztrab(kp) = zexm2
             else
@@ -3005,7 +3011,11 @@
             endif
 
 !      ...  diffuse beam
-            zden1 = zr4 / (ze1r45 * zrkg1)
+            if (ze1r45 >= f_zero) then
+              zden1   = zr4 / max(eps1, ze1r45*zrkg1)
+            else
+              zden1   = zr4 / min(-eps1, ze1r45*zrkg1)
+            endif
             zrefd(kp) = max(f_zero, min(f_one,                          &
      &                  zgam2*(zexp1 - zexm1)*zden1 ))
             ztrad(kp) = max(f_zero, min(f_one, zrk2*zden1 ))
@@ -3171,8 +3181,13 @@
               else                          ! for non-conservative scattering
                 za1 = zgam1*zgam4 + zgam2*zgam3
                 za2 = zgam1*zgam3 + zgam2*zgam4
-                zrk = sqrt ( (zgam1 - zgam2) * (zgam1 + zgam2) )
-                zrk2= 2.0 * zrk
+                zrk = (zgam1 - zgam2) * (zgam1 + zgam2)
+                if (zrk > eps1) then
+                  zrk = sqrt(zrk)
+                else
+                  zrk = f_zero
+                endif
+                zrk2= zrk + zrk
 
                 zrp  = zrk * cosz
                 zrp1 = f_one + zrp
@@ -3218,7 +3233,8 @@
                 ze1r45 = zr4*zexp1 + zr5*zexm1
 
 !      ...  collimated beam
-                if ( ze1r45>=-eps1 .and. ze1r45<=eps1 ) then
+!               if ( ze1r45>=-eps1 .and. ze1r45<=eps1 ) then
+                if ( abs(ze1r45) <= eps1 ) then
                   zrefb(kp) = eps1
                   ztrab(kp) = zexm2
                 else
@@ -3230,7 +3246,11 @@
                 endif
 
 !      ...  diffuse beam
-                zden1 = zr4 / (ze1r45 * zrkg1)
+                if (ze1r45 >= f_zero) then
+                  zden1   = zr4 / max(eps1, ze1r45*zrkg1)
+                else
+                  zden1   = zr4 / min(-eps1, ze1r45*zrkg1)
+                endif
                 zrefd(kp) = max(f_zero, min(f_one,                      &
      &                      zgam2*(zexp1 - zexm1)*zden1 ))
                 ztrad(kp) = max(f_zero, min(f_one, zrk2*zden1 ))
@@ -3723,8 +3743,13 @@
           else                          ! for non-conservative scattering
             za1 = zgam1*zgam4 + zgam2*zgam3
             za2 = zgam1*zgam3 + zgam2*zgam4
-            zrk = sqrt ( (zgam1 - zgam2) * (zgam1 + zgam2) )
-            zrk2= 2.0 * zrk
+            zrk = (zgam1 - zgam2) * (zgam1 + zgam2)
+            if (zrk > eps1) then
+              zrk = sqrt(zrk)
+            else
+              zrk = f_zero
+            endif
+            zrk2= zrk + zrk
 
             zrp  = zrk * cosz
             zrp1 = f_one + zrp
@@ -3770,7 +3795,8 @@
             ze1r45 = zr4*zexp1 + zr5*zexm1
 
 !      ...  collimated beam
-            if (ze1r45>=-eps1 .and. ze1r45<=eps1) then
+!           if (ze1r45>=-eps1 .and. ze1r45<=eps1) then
+            if (abs(ze1r45) <= eps1) then
               zrefb(kp) = eps1
               ztrab(kp) = zexm2
             else
@@ -3782,7 +3808,11 @@
             endif
 
 !      ...  diffuse beam
-            zden1 = zr4 / (ze1r45 * zrkg1)
+            if (ze1r45 >= f_zero) then
+              zden1   = zr4 / max(eps1, ze1r45*zrkg1)
+            else
+              zden1   = zr4 / min(-eps1, ze1r45*zrkg1)
+            endif
             zrefd(kp) = max(f_zero, min(f_one,                          &
      &                  zgam2*(zexp1 - zexm1)*zden1 ))
             ztrad(kp) = max(f_zero, min(f_one, zrk2*zden1 ))
@@ -3935,8 +3965,13 @@
               else                          ! for non-conservative scattering
                 za1 = zgam1*zgam4 + zgam2*zgam3
                 za2 = zgam1*zgam3 + zgam2*zgam4
-                zrk = sqrt ( (zgam1 - zgam2) * (zgam1 + zgam2) )
-                zrk2= 2.0 * zrk
+                zrk = (zgam1 - zgam2) * (zgam1 + zgam2)
+                if (zrk > eps1) then
+                  zrk = sqrt(zrk)
+                else
+                  zrk = f_zero
+                endif
+                zrk2= zrk + zrk
 
                 zrp  = zrk * cosz
                 zrp1 = f_one + zrp
@@ -3982,7 +4017,8 @@
                 ze1r45 = zr4*zexp1 + zr5*zexm1
 
 !      ...  collimated beam
-                if ( ze1r45>=-eps1 .and. ze1r45<=eps1 ) then
+!               if ( ze1r45>=-eps1 .and. ze1r45<=eps1 ) then
+                if ( abs(ze1r45) <= eps1 ) then
                   zrefb(kp) = eps1
                   ztrab(kp) = zexm2
                 else
@@ -3994,7 +4030,11 @@
                 endif
 
 !      ...  diffuse beam
-                zden1 = zr4 / (ze1r45 * zrkg1)
+                if (ze1r45 >= f_zero) then
+                  zden1   = zr4 / max(eps1, ze1r45*zrkg1)
+                else
+                  zden1   = zr4 / min(-eps1, ze1r45*zrkg1)
+                endif
                 zrefd(kp) = max(f_zero, min(f_one,                      &
      &                      zgam2*(zexp1 - zexm1)*zden1 ))
                 ztrad(kp) = max(f_zero, min(f_one, zrk2*zden1 ))

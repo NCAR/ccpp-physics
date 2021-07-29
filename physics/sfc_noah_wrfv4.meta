@@ -8,7 +8,7 @@
   name = sfc_noah_wrfv4_init
   type = scheme
 [lsm]
-  standard_name = flag_for_land_surface_scheme
+  standard_name = control_for_land_surface_scheme
   long_name = flag for land surface model
   units = flag
   dimensions = ()
@@ -16,7 +16,7 @@
   intent = in
   optional = F
 [lsm_noah_wrfv4]
-  standard_name = flag_for_noah_wrfv4_land_surface_scheme
+  standard_name = identifier_for_noah_wrfv4_land_surface_scheme
   long_name = flag for NOAH WRFv4 land surface model
   units = flag
   dimensions = ()
@@ -24,7 +24,7 @@
   intent = in
   optional = F
 [nsoil]
-  standard_name = soil_vertical_dimension
+  standard_name = vertical_dimension_of_soil
   long_name = soil vertical layer dimension
   units = count
   dimensions = ()
@@ -40,7 +40,7 @@
   intent = in
   optional = F
 [fasdas]
-  standard_name = flag_flux_adjusting_surface_data_assimilation_system
+  standard_name = control_for_flux_adjusting_surface_data_assimilation_system
   long_name = flag to use the flux adjusting surface data assimilation system for NOAH LSM WRFv4 (see module_sf_noahlsm.F)
   units = flag
   dimensions = ()
@@ -108,7 +108,7 @@
   intent = in
   optional = F
 [isice]
-  standard_name = ice_vegetation_category
+  standard_name = index_of_ice_vegetation_category
   long_name = index of the permanent snow/ice category in the chosen vegetation dataset
   units = index
   dimensions = ()
@@ -132,7 +132,7 @@
   intent = in
   optional = F
 [srflag]
-  standard_name = flag_for_precipitation_type
+  standard_name = precipitation_type
   long_name = flag for snow or rain precipitation
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -141,7 +141,7 @@
   intent = in
   optional = F  
 [isurban]
-  standard_name = urban_vegetation_category
+  standard_name = index_of_urban_vegetation_category
   long_name = index of the urban vegetation category in the chosen vegetation dataset
   units = index
   dimensions = ()
@@ -165,7 +165,7 @@
   intent = in
   optional = F
 [usemonalb]
-  standard_name = flag_for_reading_surface_diffused_shortwave_albedo_from_input
+  standard_name = flag_for_reading_surface_albedo_for_diffused_shortwave_from_input
   long_name = flag for reading surface diffused shortwave albedo for NOAH LSM WRFv4 (see module_sf_noahlsm.F)
   units = flag
   dimensions = ()
@@ -173,7 +173,7 @@
   intent = in
   optional = F
 [aoasis]
-  standard_name = potential_evaporation_multiplicative_factor
+  standard_name = multiplicative_tuning_parameter_for_potential_evaporation
   long_name = potential evaporation multiplicative factor for NOAH LSM WRFv4 (see module_sf_noahlsm.F)
   units = none
   dimensions = ()
@@ -182,7 +182,7 @@
   intent = in
   optional = F
 [fasdas]
-  standard_name = flag_flux_adjusting_surface_data_assimilation_system
+  standard_name = control_for_flux_adjusting_surface_data_assimilation_system
   long_name = flag to use the flux adjusting surface data assimilation system for NOAH LSM WRFv4 (see module_sf_noahlsm.F)
   units = flag
   dimensions = ()
@@ -190,7 +190,7 @@
   intent = in
   optional = F
 [dt]
-  standard_name = time_step_for_dynamics
+  standard_name = timestep_for_dynamics
   long_name = dynamics timestep
   units = s
   dimensions = ()
@@ -208,7 +208,7 @@
   intent = in
   optional = F  
 [nsoil]
-  standard_name = soil_vertical_dimension
+  standard_name = vertical_dimension_of_soil
   long_name = soil vertical layer dimension
   units = count
   dimensions = ()
@@ -216,10 +216,10 @@
   intent = in
   optional = F  
 [sthick]
-  standard_name = soil_layer_thickness
+  standard_name = thickness_of_soil_layers_for_land_surface_model
   long_name = soil layer thickness
   units = m
-  dimensions = (soil_vertical_dimension)
+  dimensions = (vertical_dimension_of_soil)
   type = real
   kind = kind_phys
   intent = in
@@ -252,7 +252,7 @@
   intent = in
   optional = F
 [sfcprs]
-  standard_name = air_pressure_at_lowest_model_layer
+  standard_name = air_pressure_at_surface_adjacent_layer
   long_name = Model layer 1 mean pressure
   units = Pa
   dimensions = (horizontal_loop_extent)
@@ -270,7 +270,7 @@
   intent = in
   optional = F
 [sfctmp]
-  standard_name = air_temperature_at_lowest_model_layer
+  standard_name = air_temperature_at_surface_adjacent_layer
   long_name = 1st model layer air temperature
   units = K
   dimensions = (horizontal_loop_extent)
@@ -348,7 +348,7 @@
   intent = inout
   optional = F
 [shmin]
-  standard_name = minimum_vegetation_area_fraction
+  standard_name = min_vegetation_area_fraction
   long_name = min fractional coverage of green vegetation
   units = frac
   dimensions = (horizontal_loop_extent)
@@ -357,7 +357,7 @@
   intent = in
   optional = F
 [shmax]
-  standard_name = maximum_vegetation_area_fraction
+  standard_name = max_vegetation_area_fraction
   long_name = max fractional coverage of green vegetation
   units = frac
   dimensions = (horizontal_loop_extent)
@@ -366,7 +366,7 @@
   intent = in
   optional = F
 [albbrd]
-  standard_name = surface_diffused_shortwave_albedo
+  standard_name = surface_albedo_for_diffused_shortwave_on_radiation_timestep
   long_name = mean surface diffused shortwave albedo
   units = frac
   dimensions = (horizontal_loop_extent)
@@ -375,7 +375,7 @@
   intent = inout
   optional = F
 [snoalb]
-  standard_name = upper_bound_on_max_albedo_over_deep_snow
+  standard_name = upper_bound_of_max_albedo_assuming_deep_snow
   long_name = maximum snow albedo
   units = frac
   dimensions = (horizontal_loop_extent)
@@ -402,7 +402,7 @@
   intent = inout
   optional = F
 [z0k]
-  standard_name = surface_roughness_length_over_land_interstitial
+  standard_name = surface_roughness_length_over_land
   long_name = surface roughness length over land  (temporary use as interstitial)
   units = m
   dimensions = (horizontal_loop_extent)
@@ -450,25 +450,25 @@
   standard_name = soil_temperature
   long_name = soil temperature
   units = K
-  dimensions = (horizontal_loop_extent,soil_vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension_of_soil)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [smc]
-  standard_name = volume_fraction_of_soil_moisture
+  standard_name = volume_fraction_of_condensed_water_in_soil
   long_name = volumetric fraction of soil moisture
   units = frac
-  dimensions = (horizontal_loop_extent,soil_vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension_of_soil)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [swc]
-  standard_name = volume_fraction_of_unfrozen_soil_moisture
+  standard_name = volume_fraction_of_unfrozen_water_in_soil
   long_name = volume fraction of unfrozen soil moisture
   units = frac
-  dimensions = (horizontal_loop_extent,soil_vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension_of_soil)
   type = real
   kind = kind_phys
   intent = inout
@@ -510,7 +510,7 @@
   intent = in
   optional = F
 [rd]
-  standard_name = gas_constant_dry_air
+  standard_name = gas_constant_of_dry_air
   long_name = ideal gas constant for dry air
   units = J kg-1 K-1
   dimensions = ()
@@ -735,7 +735,7 @@
   intent = inout
   optional = F
 [opt_thcnd]
-  standard_name = flag_for_thermal_conductivity_option
+  standard_name = control_for_land_surface_scheme_thermal_conductivity_option
   long_name = choice for thermal conductivity option (see module_sf_noahlsm)
   units = index
   dimensions = ()
@@ -749,7 +749,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
   optional = F
 [errmsg]
   standard_name = ccpp_error_message

@@ -5,19 +5,55 @@
 
 !> This module contains the CCPP-compliant zhao_carr_gscond scheme.
       module zhaocarr_gscond
-      contains
+
+        implicit none
+        public :: zhaocarr_gscond_init, zhaocarr_gscond_run,            &
+     &            zhaocarr_gscond_finalize
+        private
+        logical :: is_initialized = .False.
+      contains      
 
 
 ! \brief Brief description of the subroutine
 !
-!> \section arg_table_gscond_init  Argument Table
+!> \section arg_table_zhaocarr_gscond_init  Argument Table
 !!
-       subroutine zhaocarr_gscond_init
+       subroutine zhaocarr_gscond_init (imp_physics,                    &
+     &                                  imp_physics_zhao_carr,          &
+     &                                  imp_physics_zhao_carr_pdf,      &
+     &                                  errmsg, errflg)
+        implicit none
+
+        ! Interface variables
+         integer,              intent(in   ) :: imp_physics
+         integer,              intent(in   ) :: imp_physics_zhao_carr,  &
+     &                                      imp_physics_zhao_carr_pdf
+
+         ! CCPP error handling
+         character(len=*),          intent(  out) :: errmsg
+         integer,                   intent(  out) :: errflg
+
+         ! Initialize the CCPP error handling variables
+         errmsg = ''
+         errflg = 0
+
+         if (is_initialized) return
+
+         ! Consistency checks
+         if (imp_physics/=imp_physics_zhao_carr .and.                   &
+     &       imp_physics/=imp_physics_zhao_carr_pdf) then
+            write(errmsg,'(*(a))') "Logic error: namelist choice of     &
+     &                  microphysics is different from Zhao-Carr MP"
+            errflg = 1
+            return
+         end if
+
+         is_initialized = .true.
        end subroutine zhaocarr_gscond_init
 
 ! \brief Brief description of the subroutine
 !
-!> \section arg_table_gscond_finalize  Argument Table
+!> \section arg_table_zhaocarr_gscond_finalize  Argument Table
 !!
        subroutine zhaocarr_gscond_finalize
        end subroutine zhaocarr_gscond_finalize
@@ -70,14 +106,14 @@
 ! Interface variables
       integer,              intent(in)    :: im, km, ipr
       real(kind=kind_phys), intent(in)    :: dt, dtf
-      real(kind=kind_phys), intent(in)    :: prsl(im,km), ps(im)
-      real(kind=kind_phys), intent(inout) :: q(im,km)
-      real(kind=kind_phys), intent(in)    :: clw1(im,km), clw2(im,km)
-      real(kind=kind_phys), intent(out)   :: cwm(im,km)
-      real(kind=kind_phys), intent(inout) :: t(im,km)                   &
-     &,                     tp(im,km),   qp(im,km),   psp(im)           &
-     &,                     tp1(im,km),  qp1(im,km),  psp1(im)
-      real(kind=kind_phys), intent(in)    :: u(im,km)
+      real(kind=kind_phys), intent(in)    :: prsl(:,:), ps(:)
+      real(kind=kind_phys), intent(inout) :: q(:,:)
+      real(kind=kind_phys), intent(in)    :: clw1(:,:), clw2(:,:)
+      real(kind=kind_phys), intent(out)   :: cwm(:,:)
+      real(kind=kind_phys), intent(inout) :: t(:,:)                     &
+     &,                     tp(:,:),   qp(:,:),   psp(:)                &
+     &,                     tp1(:,:),  qp1(:,:),  psp1(:)
+      real(kind=kind_phys), intent(in)    :: u(:,:)
       logical,              intent(in)    :: lprnt
       real(kind=kind_phys), intent(in)    :: psat, hvap, grav, hfus     &
      &,                     ttp, rd, cp, eps, epsm1, rv

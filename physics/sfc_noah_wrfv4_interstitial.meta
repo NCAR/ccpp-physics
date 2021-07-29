@@ -8,7 +8,7 @@
   name = sfc_noah_wrfv4_pre_init
   type = scheme
 [lsm]
-  standard_name = flag_for_land_surface_scheme
+  standard_name = control_for_land_surface_scheme
   long_name = flag for land surface model
   units = flag
   dimensions = ()
@@ -16,7 +16,7 @@
   intent = in
   optional = F
 [lsm_noah_wrfv4]
-  standard_name = flag_for_noah_wrfv4_land_surface_scheme
+  standard_name = identifier_for_noah_wrfv4_land_surface_scheme
   long_name = flag for NOAH WRFv4 land surface model
   units = flag
   dimensions = ()
@@ -24,7 +24,7 @@
   intent = in
   optional = F
 [veg_data_choice]
-  standard_name = vegetation_type_dataset_choice
+  standard_name = control_for_vegetation_dataset
   long_name = land use dataset choice
   units = index
   dimensions = ()
@@ -32,7 +32,7 @@
   intent = in
   optional = F
 [soil_data_choice]
-  standard_name = soil_type_dataset_choice
+  standard_name = control_for_soil_type_dataset
   long_name = soil type dataset choice
   units = index
   dimensions = ()
@@ -40,7 +40,7 @@
   intent = in
   optional = F
 [isurban]
-  standard_name = urban_vegetation_category
+  standard_name = index_of_urban_vegetation_category
   long_name = index of the urban vegetation category in the chosen vegetation dataset
   units = index
   dimensions = ()
@@ -48,7 +48,7 @@
   intent = inout
   optional = F
 [isice]
-  standard_name = ice_vegetation_category
+  standard_name = index_of_ice_vegetation_category
   long_name = index of the permanent snow/ice category in the chosen vegetation dataset
   units = index
   dimensions = ()
@@ -56,7 +56,7 @@
   intent = inout
   optional = F
 [iswater]
-  standard_name = water_vegetation_category
+  standard_name = index_of_water_vegetation_category
   long_name = index of the water body vegetation category in the chosen vegetation dataset
   units = index
   dimensions = ()
@@ -116,7 +116,7 @@
   intent = in
   optional = F
 [nsoil]
-  standard_name = soil_vertical_dimension
+  standard_name = vertical_dimension_of_soil
   long_name = soil vertical layer dimension
   units = count
   dimensions = ()
@@ -124,7 +124,7 @@
   intent = in
   optional = F
 [ialb]
-  standard_name = flag_for_using_climatology_albedo
+  standard_name = control_for_surface_albedo
   long_name = flag for using climatology alb, based on sfc type
   units = flag
   dimensions = ()
@@ -132,7 +132,7 @@
   intent = in
   optional = F
 [isice]
-  standard_name = ice_vegetation_category
+  standard_name = index_of_ice_vegetation_category
   long_name = index of the permanent snow/ice category in the chosen vegetation dataset
   units = index
   dimensions = ()
@@ -172,7 +172,7 @@
   intent = in
   optional = F
 [first_time_step]
-  standard_name = flag_for_first_time_step
+  standard_name = flag_for_first_timestep
   long_name = flag for first time step for time integration loop (cold/warmstart)
   units = flag
   dimensions = ()
@@ -196,7 +196,7 @@
   intent = inout
   optional = F
 [dt]
-  standard_name = time_step_for_dynamics
+  standard_name = timestep_for_dynamics
   long_name = dynamics timestep
   units = s
   dimensions = ()
@@ -205,7 +205,7 @@
   intent = in
   optional = F
 [rhowater]
-  standard_name = liquid_water_density
+  standard_name = fresh_liquid_water_density_at_0c
   long_name = density of liquid water
   units = kg m-3
   dimensions = ()
@@ -214,7 +214,7 @@
   intent = in
   optional = F
 [rd]
-  standard_name = gas_constant_dry_air
+  standard_name = gas_constant_of_dry_air
   long_name = ideal gas constant for dry air
   units = J kg-1 K-1
   dimensions = ()
@@ -250,7 +250,7 @@
   intent = in
   optional = F
 [sfcprs]
-  standard_name = air_pressure_at_lowest_model_layer
+  standard_name = air_pressure_at_surface_adjacent_layer
   long_name = Model layer 1 mean pressure
   units = Pa
   dimensions = (horizontal_loop_extent)
@@ -268,7 +268,7 @@
   intent = in
   optional = F
 [sfctmp]
-  standard_name = air_temperature_at_lowest_model_layer
+  standard_name = air_temperature_at_surface_adjacent_layer
   long_name = 1st model layer air temperature
   units = K
   dimensions = (horizontal_loop_extent)
@@ -277,7 +277,7 @@
   intent = in
   optional = F
 [q1]
-  standard_name = water_vapor_specific_humidity_at_lowest_model_layer
+  standard_name = specific_humidity_at_surface_adjacent_layer
   long_name = 1st model layer specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent)
@@ -358,10 +358,10 @@
   intent = in
   optional = F
 [smc]
-  standard_name = volume_fraction_of_soil_moisture
+  standard_name = volume_fraction_of_condensed_water_in_soil
   long_name = volumetric fraction of soil moisture
   units = frac
-  dimensions = (horizontal_loop_extent,soil_vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension_of_soil)
   type = real
   kind = kind_phys
   intent = in
@@ -370,22 +370,22 @@
   standard_name = soil_temperature
   long_name = soil temperature
   units = K
-  dimensions = (horizontal_loop_extent,soil_vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension_of_soil)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [slc]
-  standard_name = volume_fraction_of_unfrozen_soil_moisture
+  standard_name = volume_fraction_of_unfrozen_water_in_soil
   long_name = liquid soil moisture
   units = frac
-  dimensions = (horizontal_loop_extent,soil_vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension_of_soil)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [snoalb]
-  standard_name = upper_bound_on_max_albedo_over_deep_snow
+  standard_name = upper_bound_of_max_albedo_assuming_deep_snow
   long_name = maximum snow albedo
   units = frac
   dimensions = (horizontal_loop_extent)
@@ -541,7 +541,7 @@
   standard_name = volume_fraction_of_soil_moisture_save
   long_name = total soil moisture before entering a physics scheme
   units = frac
-  dimensions = (horizontal_loop_extent,soil_vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension_of_soil)
   type = real
   kind = kind_phys
   intent = inout
@@ -550,7 +550,7 @@
   standard_name = soil_temperature_save
   long_name = soil temperature before entering a physics scheme
   units = K
-  dimensions = (horizontal_loop_extent,soil_vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension_of_soil)
   type = real
   kind = kind_phys
   intent = inout
@@ -559,7 +559,7 @@
   standard_name = volume_fraction_of_unfrozen_soil_moisture_save
   long_name = liquid soil moisture before entering a physics scheme
   units = frac
-  dimensions = (horizontal_loop_extent,soil_vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension_of_soil)
   type = real
   kind = kind_phys
   intent = inout
@@ -664,10 +664,10 @@
   intent = inout
   optional = F
 [sthick]
-  standard_name = soil_layer_thickness
+  standard_name = thickness_of_soil_layers_for_land_surface_model
   long_name = soil layer thickness
   units = m
-  dimensions = (soil_vertical_dimension)
+  dimensions = (vertical_dimension_of_soil)
   type = real
   kind = kind_phys
   intent = inout
@@ -709,7 +709,7 @@
   intent = in
   optional = F
 [nsoil]
-  standard_name = soil_vertical_dimension
+  standard_name = vertical_dimension_of_soil
   long_name = soil vertical layer dimension
   units = count
   dimensions = ()
@@ -741,7 +741,7 @@
   intent = in
   optional = F
 [rhowater]
-  standard_name = liquid_water_density
+  standard_name = fresh_liquid_water_density_at_0c
   long_name = density of liquid water
   units = kg m-3
   dimensions = ()
@@ -924,7 +924,7 @@
   standard_name = volume_fraction_of_soil_moisture_save
   long_name = total soil moisture before entering a physics scheme
   units = frac
-  dimensions = (horizontal_loop_extent,soil_vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension_of_soil)
   type = real
   kind = kind_phys
   intent = in
@@ -933,7 +933,7 @@
   standard_name = soil_temperature_save
   long_name = soil temperature before entering a physics scheme
   units = K
-  dimensions = (horizontal_loop_extent,soil_vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension_of_soil)
   type = real
   kind = kind_phys
   intent = in
@@ -942,7 +942,7 @@
   standard_name = volume_fraction_of_unfrozen_soil_moisture_save
   long_name = liquid soil moisture before entering a physics scheme
   units = frac
-  dimensions = (horizontal_loop_extent,soil_vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension_of_soil)
   type = real
   kind = kind_phys
   intent = in
@@ -1056,10 +1056,10 @@
   intent = inout
   optional = F
 [smc]
-  standard_name = volume_fraction_of_soil_moisture
+  standard_name = volume_fraction_of_condensed_water_in_soil
   long_name = volumetric fraction of soil moisture
   units = frac
-  dimensions = (horizontal_loop_extent,soil_vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension_of_soil)
   type = real
   kind = kind_phys
   intent = inout
@@ -1068,16 +1068,16 @@
   standard_name = soil_temperature
   long_name = soil temperature
   units = K
-  dimensions = (horizontal_loop_extent,soil_vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension_of_soil)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [slc]
-  standard_name = volume_fraction_of_unfrozen_soil_moisture
+  standard_name = volume_fraction_of_unfrozen_water_in_soil
   long_name = liquid soil moisture
   units = frac
-  dimensions = (horizontal_loop_extent,soil_vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension_of_soil)
   type = real
   kind = kind_phys
   intent = inout

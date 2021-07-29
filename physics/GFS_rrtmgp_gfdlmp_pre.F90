@@ -4,9 +4,10 @@
 ! ########################################################################################
 module GFS_rrtmgp_gfdlmp_pre
   use machine,      only: kind_phys
-  use rrtmgp_aux,   only: check_error_msg
+  use radiation_tools,   only: check_error_msg
   use module_radiation_cloud_overlap, only: cmp_dcorr_lgth, get_alpha_exp  
-  use rrtmgp_lw_cloud_optics, only: radliq_lwr, radliq_upr, radice_lwr, radice_upr
+  use rrtmgp_lw_cloud_optics, only: radliq_lwr => radliq_lwrLW, radliq_upr => radliq_uprLW,&
+                                    radice_lwr => radice_lwrLW, radice_upr => radice_uprLW
 
   ! Parameters
   real(kind_phys), parameter :: &
@@ -63,20 +64,20 @@ contains
     real(kind_phys), intent(in) :: &
          con_g,                & ! Physical constant: gravitational constant
          con_rd                  ! Physical constant: gas-constant for dry air
-    real(kind_phys), dimension(nCol,nLev), intent(in) :: &         
+    real(kind_phys), dimension(:,:), intent(in) :: &         
          tv_lay,               & ! Virtual temperature (K)
          p_lay,                & ! Pressure at model-layers (Pa)
          effrin_cldliq,        & ! Effective radius for liquid cloud-particles (microns)
          effrin_cldice,        & ! Effective radius for ice cloud-particles (microns)
          effrin_cldrain,       & ! Effective radius for rain cloud-particles (microns)
          effrin_cldsnow          ! Effective radius for snow cloud-particles (microns)
-    real(kind_phys), dimension(nCol,nLev+1), intent(in) :: &         
+    real(kind_phys), dimension(:,:), intent(in) :: &
          p_lev                   ! Pressure at model-level interfaces (Pa)
-    real(kind_phys), dimension(nCol, nLev, nTracers),intent(in) :: &
+    real(kind_phys), dimension(:,:,:),intent(in) :: &
          tracer                  ! Cloud condensate amount in layer by type ()         
     
     ! Outputs     
-    real(kind_phys), dimension(nCol,nLev),intent(inout) :: &
+    real(kind_phys), dimension(:,:),intent(inout) :: &
          cld_frac,             & ! Total cloud fraction
          cld_lwp,              & ! Cloud liquid water path
          cld_reliq,            & ! Cloud liquid effective radius
@@ -165,7 +166,8 @@ contains
        where(cld_reice .gt. radice_upr) cld_reice = radice_upr
     endif
     
-    ! Cloud-fraction
+    ! Cloud-fraction. For mynnedmf, cld_frac is adjusted for precipitation here, otherwise
+    ! it passes through this interface. It is adjusted prior in sgscloudradpre. 
     if (do_mynnedmf .and. kdt .gt. 1) then
        do iLay = 1, nLev
           do iCol = 1, nCol

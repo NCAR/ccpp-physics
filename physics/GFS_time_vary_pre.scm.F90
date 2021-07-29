@@ -1,4 +1,4 @@
-!> \file GFS_time_vary_pre.F90
+!> \file GFS_time_vary_pre.scm.F90
 !!  Contains code related to GFS physics suite setup (generic part of time_vary_step)
 
    module GFS_time_vary_pre
@@ -9,7 +9,7 @@
 
       private
 
-      public GFS_time_vary_pre_init, GFS_time_vary_pre_run, GFS_time_vary_pre_finalize
+      public GFS_time_vary_pre_init, GFS_time_vary_pre_timestep_init, GFS_time_vary_pre_finalize
 
       logical :: is_initialized = .false.
 
@@ -62,10 +62,10 @@
       end subroutine GFS_time_vary_pre_finalize
 
 
-!> \section arg_table_GFS_time_vary_pre_run Argument Table
-!! \htmlinclude GFS_time_vary_pre_run.html
+!> \section arg_table_GFS_time_vary_pre_timestep_init Argument Table
+!! \htmlinclude GFS_time_vary_pre_timestep_init.html
 !!
-      subroutine GFS_time_vary_pre_run (jdat, idat, dtp, lsm, lsm_noahmp, nsswr, &
+      subroutine GFS_time_vary_pre_timestep_init (jdat, idat, dtp, nsswr, &
         nslwr, idate, debug, me, master, nscyc, sec, phour, zhour, fhour, kdt,   &
         julian, yearlen, ipt, lprnt, lssav, lsswr, lslwr, solhr, errmsg, errflg)
 
@@ -73,10 +73,9 @@
 
         implicit none
         
-        integer,                          intent(in)    :: idate(4)
-        integer,                          intent(in)    :: jdat(1:8), idat(1:8)
-        integer,                          intent(in)    :: lsm, lsm_noahmp,      &
-                                                           nsswr, nslwr, me,     &
+        integer,                          intent(in)    :: idate(:)
+        integer,                          intent(in)    :: jdat(:), idat(:)
+        integer,                          intent(in)    :: nsswr, nslwr, me,     &
                                                            master, nscyc
         logical,                          intent(in)    :: debug
         real(kind=kind_phys),             intent(in)    :: dtp
@@ -104,14 +103,14 @@
 
         ! Check initialization status
         if (.not.is_initialized) then
-           write(errmsg,'(*(a))') "Logic error: GFS_time_vary_pre_run called &
+           write(errmsg,'(*(a))') "Logic error: GFS_time_vary_pre_timestep_init called &
                                   &before GFS_time_vary_pre_init"
            errflg = 1
            return
         end if
 
         !--- jdat is being updated directly inside of the time integration
-        !--- loop of gmtb_scm.F90
+        !--- loop of scm.F90
         !--- update calendars and triggers
         rinc(1:5)   = 0
         call w3difdat(jdat,idat,4,rinc)
@@ -185,6 +184,6 @@
           print *,' solhr ', solhr
         endif
 
-      end subroutine GFS_time_vary_pre_run
+      end subroutine GFS_time_vary_pre_timestep_init
 
     end module GFS_time_vary_pre

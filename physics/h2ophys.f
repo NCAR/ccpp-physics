@@ -12,7 +12,22 @@
 
       contains
 
-      subroutine h2ophys_init()
+      subroutine h2ophys_init(h2o_phys, errmsg, errflg)
+
+      implicit none
+      logical,          intent(in)  :: h2o_phys
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
+
+      ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
+
+      if (.not.h2o_phys) then
+        write (errmsg,'(*(a))') 'Logic error: h2o_phys == .false.'
+        errflg = 1
+        return
+      endif      
       end subroutine h2ophys_init
 
 !>\defgroup GFS_h2ophys GFS Water Vapor Photochemical Production and Loss Module
@@ -23,7 +38,7 @@
 !! \section genal_h2ophys GFS H2O Physics Scheme General Algorithm
 !> @{
       subroutine h2ophys_run(im, levs, kh2o, dt, h2o, ph2o, prsl,       &
-     &                     h2opltc, h2o_coeff, ldiag3d, me,             &
+     &                     h2opltc, h2o_coeff, me,                      &
      &                     errmsg, errflg)
 !
 ! May 2015 - Shrinivas Moorthi - Adaptation of NRL H2O physics for
@@ -37,11 +52,10 @@
 !     interface variables
       integer, intent(in) :: im, levs, kh2o, h2o_coeff, me
       real(kind=kind_phys), intent(in) :: dt
-      real(kind=kind_phys), intent(inout) :: h2o(im,levs)
-      real(kind=kind_phys), intent(in) :: ph2o(kh2o)
-      real(kind=kind_phys), intent(in) :: prsl(im,levs)
-      real(kind=kind_phys), intent(in) :: h2opltc(im,kh2o,h2o_coeff)
-      logical             , intent(in) :: ldiag3d
+      real(kind=kind_phys), intent(inout) :: h2o(:,:)
+      real(kind=kind_phys), intent(in) :: ph2o(:)
+      real(kind=kind_phys), intent(in) :: prsl(:,:)
+      real(kind=kind_phys), intent(in) :: h2opltc(:,:,:)
       !real(kind=kind_phys), intent(inout) :: h2op(im,levs,h2o_coeff)
       character(len=*),     intent(out) :: errmsg
       integer,              intent(out) :: errflg

@@ -12,18 +12,19 @@
 !> \section arg_table_GFS_MP_generic_pre_run Argument Table
 !! \htmlinclude GFS_MP_generic_pre_run.html
 !!
-      subroutine GFS_MP_generic_pre_run(im, levs, ldiag3d, qdiag3d, do_aw, ntcw, nncl, ntrac, gt0, gq0, save_t, save_qv, save_q, errmsg, errflg)
+      subroutine GFS_MP_generic_pre_run(im, levs, ldiag3d, qdiag3d, do_aw, ntcw, nncl, &
+                                        ntrac, gt0, gq0, save_t, save_q, errmsg, errflg)
 !
       use machine,               only: kind_phys
 
       implicit none
-      integer,                                          intent(in) :: im, levs, ntcw, nncl, ntrac
-      logical,                                          intent(in) :: ldiag3d, qdiag3d, do_aw
-      real(kind=kind_phys), dimension(im, levs),        intent(in) :: gt0
-      real(kind=kind_phys), dimension(im, levs, ntrac), intent(in) :: gq0
+      integer,                                intent(in) :: im, levs, ntcw, nncl, ntrac
+      logical,                                intent(in) :: ldiag3d, qdiag3d, do_aw
+      real(kind=kind_phys), dimension(:,:),   intent(in) :: gt0
+      real(kind=kind_phys), dimension(:,:,:), intent(in) :: gq0
 
-      real(kind=kind_phys), dimension(im, levs),        intent(inout) :: save_t, save_qv
-      real(kind=kind_phys), dimension(im, levs, ntrac), intent(inout) :: save_q
+      real(kind=kind_phys), dimension(:,:),   intent(inout) :: save_t
+      real(kind=kind_phys), dimension(:,:,:), intent(inout) :: save_q
 
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
@@ -41,16 +42,15 @@
           enddo
         enddo
         if(qdiag3d) then
-           do k=1,levs
-              do i=1,im
-                 ! Here, gq0(...,1) is used instead of gq0_water_vapor
-                 ! to be consistent with the GFS_MP_generic_post_run
-                 ! code.
-                 save_qv(i,k) = gq0(i,k,1)
+           do n=1,ntrac
+              do k=1,levs
+                 do i=1,im
+                    save_q(i,k,n) = gq0(i,k,n)
+                 enddo
               enddo
            enddo
-        endif
-        if(do_aw) then
+        else if(do_aw) then
+           ! if qdiag3d, all q are saved already
            save_q(1:im,:,1) = gq0(1:im,:,1)
            do n=ntcw,ntcw+nncl-1
               save_q(1:im,:,n) = gq0(1:im,:,n)
@@ -84,61 +84,61 @@
 !!
 !> \section gfs_mp_gen GFS MP Generic Post General Algorithm
 !> @{
-      subroutine GFS_MP_generic_post_run(im, levs, kdt, nrcm, ncld, nncl, ntcw, ntrac, imp_physics, imp_physics_gfdl,     &
-        imp_physics_thompson, imp_physics_mg, imp_physics_fer_hires, cal_pre, lssav, ldiag3d, qdiag3d, cplflx, cplchm, con_g, rainmin, dtf, frain, rainc, rain1,   &
-        rann, xlat, xlon, gt0, gq0, prsl, prsi, phii, tsfc, ice, snow, graupel, save_t, save_qv, rain0, ice0, snow0,      &
+      subroutine GFS_MP_generic_post_run(                                                                                 &
+        im, levs, kdt, nrcm, nncl, ntcw, ntrac, imp_physics, imp_physics_gfdl, imp_physics_thompson,                      &
+        imp_physics_mg, imp_physics_fer_hires, cal_pre, cplflx, cplchm, con_g, rainmin, dtf, frain, rainc,                &
+        rain1, rann, xlat, xlon, gt0, gq0, prsl, prsi, phii, tsfc, ice, snow, graupel, save_t, save_q, rain0, ice0, snow0,&
         graupel0, del, rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp, srflag, sr, cnvprcp, totprcp, totice,   &
-        totsnw, totgrp, cnvprcpb, totprcpb, toticeb, totsnwb, totgrpb, dt3dt, dq3dt, rain_cpl, rainc_cpl, snow_cpl, pwat, &
-        do_sppt, ca_global, dtdtr, dtdtc, drain_cpl, dsnow_cpl, lsm, lsm_ruc, lsm_noahmp, raincprv, rainncprv, iceprv, snowprv,      &
-        graupelprv, draincprv, drainncprv, diceprv, dsnowprv, dgraupelprv, dtp, errmsg, errflg)
+        totsnw, totgrp, cnvprcpb, totprcpb, toticeb, totsnwb, totgrpb, rain_cpl, rainc_cpl, snow_cpl, pwat,               &
+        drain_cpl, dsnow_cpl, lsm, lsm_ruc, lsm_noahmp, raincprv, rainncprv, iceprv, snowprv,                             &
+        graupelprv, draincprv, drainncprv, diceprv, dsnowprv, dgraupelprv, dtp,                                           &
+        dtend, dtidx, index_of_temperature, index_of_process_mp,ldiag3d, qdiag3d, lssav,                                  &
+        errmsg, errflg)
 !
       use machine, only: kind_phys
 
       implicit none
 
-      integer, intent(in) :: im, levs, kdt, nrcm, ncld, nncl, ntcw, ntrac
+      integer, intent(in) :: im, levs, kdt, nrcm, nncl, ntcw, ntrac
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_mg, imp_physics_fer_hires
       logical, intent(in) :: cal_pre, lssav, ldiag3d, qdiag3d, cplflx, cplchm
+      integer, intent(in) :: index_of_temperature,index_of_process_mp
 
-      real(kind=kind_phys),                           intent(in)    :: dtf, frain, con_g, rainmin
-      real(kind=kind_phys), dimension(im),            intent(in)    :: rain1, xlat, xlon, tsfc
-      real(kind=kind_phys), dimension(im),            intent(inout) :: ice, snow, graupel, rainc
-      real(kind=kind_phys), dimension(im),            intent(in)    :: rain0, ice0, snow0, graupel0
-      real(kind=kind_phys), dimension(im,nrcm),       intent(in)    :: rann
-      real(kind=kind_phys), dimension(im,levs),       intent(in)    :: gt0, prsl, save_t, save_qv, del
-      real(kind=kind_phys), dimension(im,levs+1),     intent(in)    :: prsi, phii
-      real(kind=kind_phys), dimension(im,levs,ntrac), intent(in)    :: gq0
+      real(kind=kind_phys),                    intent(in)    :: dtf, frain, con_g, rainmin
+      real(kind=kind_phys), dimension(:),      intent(in)    :: rain1, xlat, xlon, tsfc
+      real(kind=kind_phys), dimension(:),      intent(inout) :: ice, snow, graupel, rainc
+      real(kind=kind_phys), dimension(:),      intent(in)    :: rain0, ice0, snow0, graupel0
+      real(kind=kind_phys), dimension(:,:),    intent(in)    :: rann
+      real(kind=kind_phys), dimension(:,:),    intent(in)    :: gt0, prsl, save_t, del
+      real(kind=kind_phys), dimension(:,:),    intent(in)    :: prsi, phii
+      real(kind=kind_phys), dimension(:,:,:),  intent(in)    :: gq0, save_q
 
-      real(kind=kind_phys), dimension(im),      intent(in   ) :: sr
-      real(kind=kind_phys), dimension(im),      intent(inout) :: rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp,  &
-                                                                 srflag, cnvprcp, totprcp, totice, totsnw, totgrp, cnvprcpb, &
-                                                                 totprcpb, toticeb, totsnwb, totgrpb, rain_cpl, rainc_cpl,   &
-                                                                 snow_cpl, pwat
+      real(kind=kind_phys), dimension(:),      intent(in   ) :: sr
+      real(kind=kind_phys), dimension(:),      intent(inout) :: rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp,  &
+                                                                srflag, cnvprcp, totprcp, totice, totsnw, totgrp, cnvprcpb, &
+                                                                totprcpb, toticeb, totsnwb, totgrpb, pwat
+      real(kind=kind_phys), dimension(:),      intent(inout) :: rain_cpl, rainc_cpl, snow_cpl
 
-      real(kind=kind_phys), dimension(:,:),     intent(inout) :: dt3dt ! only if ldiag3d
-      real(kind=kind_phys), dimension(:,:),     intent(inout) :: dq3dt ! only if ldiag3d and qdiag3d
+      real(kind=kind_phys), dimension(:,:,:),   intent(inout) :: dtend
+      integer,         dimension(:,:), intent(in)    :: dtidx
 
       ! Stochastic physics / surface perturbations
-      logical, intent(in) :: do_sppt, ca_global
-      real(kind=kind_phys), dimension(im,levs), intent(inout) :: dtdtr
-      real(kind=kind_phys), dimension(im,levs), intent(in)    :: dtdtc
-      real(kind=kind_phys), dimension(im),      intent(inout) :: drain_cpl
-      real(kind=kind_phys), dimension(im),      intent(inout) :: dsnow_cpl
+      real(kind=kind_phys), dimension(:),      intent(inout) :: drain_cpl, dsnow_cpl
 
       ! Rainfall variables previous time step
       integer, intent(in) :: lsm, lsm_ruc, lsm_noahmp
-      real(kind=kind_phys), dimension(im),      intent(inout) :: raincprv
-      real(kind=kind_phys), dimension(im),      intent(inout) :: rainncprv
-      real(kind=kind_phys), dimension(im),      intent(inout) :: iceprv
-      real(kind=kind_phys), dimension(im),      intent(inout) :: snowprv
-      real(kind=kind_phys), dimension(im),      intent(inout) :: graupelprv
-      real(kind=kind_phys), dimension(im),      intent(inout) :: draincprv
-      real(kind=kind_phys), dimension(im),      intent(inout) :: drainncprv
-      real(kind=kind_phys), dimension(im),      intent(inout) :: diceprv
-      real(kind=kind_phys), dimension(im),      intent(inout) :: dsnowprv
-      real(kind=kind_phys), dimension(im),      intent(inout) :: dgraupelprv
+      real(kind=kind_phys), dimension(:),      intent(inout) :: raincprv
+      real(kind=kind_phys), dimension(:),      intent(inout) :: rainncprv
+      real(kind=kind_phys), dimension(:),      intent(inout) :: iceprv
+      real(kind=kind_phys), dimension(:),      intent(inout) :: snowprv
+      real(kind=kind_phys), dimension(:),      intent(inout) :: graupelprv
+      real(kind=kind_phys), dimension(:),      intent(inout) :: draincprv
+      real(kind=kind_phys), dimension(:),      intent(inout) :: drainncprv
+      real(kind=kind_phys), dimension(:),      intent(inout) :: diceprv
+      real(kind=kind_phys), dimension(:),      intent(inout) :: dsnowprv
+      real(kind=kind_phys), dimension(:),      intent(inout) :: dgraupelprv
 
-      real(kind=kind_phys),                     intent(in)    :: dtp
+      real(kind=kind_phys),                    intent(in)    :: dtp
 
       ! CCPP error handling
       character(len=*), intent(out) :: errmsg
@@ -150,7 +150,7 @@
       real(kind=kind_phys), parameter :: p850    = 85000.0_kind_phys
       ! *DH
 
-      integer :: i, k, ic
+      integer :: i, k, ic, itrac, idtend
 
       real(kind=kind_phys), parameter :: zero = 0.0_kind_phys, one = 1.0_kind_phys
       real(kind=kind_phys) :: crain, csnow, onebg, tem, total_precip, tem1, tem2
@@ -321,7 +321,7 @@
         endif
       endif
 
-      if (lssav) then
+      if_save_fields: if (lssav) then
 !        if (Model%me == 0) print *,'in phys drive, kdt=',Model%kdt, &
 !          'totprcpb=', Diag%totprcpb(1),'totprcp=',Diag%totprcp(1), &
 !          'rain=',Diag%rain(1)
@@ -339,21 +339,29 @@
           totgrpb (i) = totgrpb (i) + graupel(i)
         enddo
 
-        if (ldiag3d) then
-          do k=1,levs
-            do i=1,im
-              dt3dt(i,k) = dt3dt(i,k) + (gt0(i,k)-save_t(i,k)) * frain
-            enddo
-          enddo
-          if (qdiag3d) then
-             do k=1,levs
-                do i=1,im
-                   dq3dt(i,k) = dq3dt(i,k) + (gq0(i,k,1)-save_qv(i,k)) * frain
-                enddo
-             enddo
-          endif
-        endif
-      endif
+        if_tendency_diagnostics: if (ldiag3d) then
+           idtend = dtidx(index_of_temperature,index_of_process_mp)
+           if(idtend>=1) then
+              do k=1,levs
+                 do i=1,im
+                    dtend(i,k,idtend) = dtend(i,k,idtend) + (gt0(i,k)-save_t(i,k)) * frain
+                 enddo
+              enddo
+           endif
+           if_tracer_diagnostics: if (qdiag3d) then
+              dtend_q: do itrac=1,ntrac
+                 idtend = dtidx(itrac+100,index_of_process_mp)
+                 if(idtend>=1) then
+                    do k=1,levs
+                       do i=1,im
+                          dtend(i,k,idtend) = dtend(i,k,idtend) + (gq0(i,k,itrac)-save_q(i,k,itrac)) * frain
+                       enddo
+                    enddo
+                 endif
+              enddo dtend_q
+           endif if_tracer_diagnostics
+        endif if_tendency_diagnostics
+      endif if_save_fields
 
       if (cplflx .or. cplchm) then
         do i = 1, im
@@ -375,7 +383,7 @@
         do i=1, im
           work1(i) = zero
         enddo
-        if (ncld > 0) then
+        if (nncl > 0) then
           do ic = ntcw, ntcw+nncl-1
             do i=1,im
               work1(i) = work1(i) + gq0(i,k,ic)
@@ -390,11 +398,6 @@
         pwat(i) = pwat(i) * onebg
       enddo
 
-      ! Stochastic physics / surface perturbations
-      if (do_sppt .or. ca_global) then
-!--- radiation heating rate
-        dtdtr(1:im,:) = dtdtr(1:im,:) + dtdtc(1:im,:)*dtf
-      endif
 
       end subroutine GFS_MP_generic_post_run
 !> @}

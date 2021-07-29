@@ -49,10 +49,10 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = GFS_time_vary_pre_run
+  name = GFS_time_vary_pre_timestep_init
   type = scheme
 [jdat]
-  standard_name = forecast_date_and_time
+  standard_name = date_and_time_of_forecast_in_united_states_order
   long_name = current forecast date and time
   units = none
   dimensions = (8)
@@ -60,7 +60,7 @@
   intent = in
   optional = F
 [idat]
-  standard_name = date_and_time_at_model_initialization
+  standard_name = date_and_time_at_model_initialization_in_iso_order
   long_name = initialization date and time
   units = none
   dimensions = (8)
@@ -68,28 +68,12 @@
   intent = in
   optional = F
 [dtp]
-  standard_name = time_step_for_physics
+  standard_name = timestep_for_physics
   long_name = physics timestep
   units = s
   dimensions = ()
   type = real
   kind = kind_phys
-  intent = in
-  optional = F
-[lsm]
-  standard_name = flag_for_land_surface_scheme
-  long_name = flag for land surface model
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[lsm_noahmp]
-  standard_name = flag_for_noahmp_land_surface_scheme
-  long_name = flag for NOAH MP land surface model
-  units = flag
-  dimensions = ()
-  type = integer
   intent = in
   optional = F
 [nsswr]
@@ -109,7 +93,7 @@
   intent = in
   optional = F
 [idate]
-  standard_name = date_and_time_at_model_initialization_reordered
+  standard_name = date_and_time_at_model_initialization_in_united_states_order
   long_name = initial date with different size and ordering
   units = none
   dimensions = (4)
@@ -117,7 +101,7 @@
   intent = in
   optional = F
 [debug]
-  standard_name = flag_debug
+  standard_name = flag_for_debug_output
   long_name = control flag for debug
   units = flag
   dimensions = ()
@@ -149,7 +133,7 @@
   intent = in
   optional = F
 [sec]
-  standard_name = seconds_elapsed_since_model_initialization
+  standard_name = forecast_time_in_seconds
   long_name = seconds elapsed since model initialization
   units = s
   dimensions = ()
@@ -158,7 +142,7 @@
   intent = out
   optional = F
 [phour]
-  standard_name = forecast_time_at_previous_timestep
+  standard_name = forecast_time_on_previous_timestep
   long_name = forecast time at the previous timestep
   units = h
   dimensions = ()
@@ -167,7 +151,7 @@
   intent = out
   optional = F
 [zhour]
-  standard_name = time_since_diagnostics_zeroed
+  standard_name = time_elapsed_since_diagnostics_reset
   long_name = time since diagnostics variables have been zeroed
   units = h
   dimensions = ()
@@ -185,7 +169,7 @@
   intent = out
   optional = F
 [kdt]
-  standard_name = index_of_time_step
+  standard_name = index_of_timestep
   long_name = current forecast iteration
   units = index
   dimensions = ()
@@ -193,7 +177,7 @@
   intent = out
   optional = F
 [julian]
-  standard_name = julian_day
+  standard_name = forecast_julian_day
   long_name = julian day
   units = days
   dimensions = ()
@@ -202,7 +186,7 @@
   intent = out
   optional = F
 [yearlen]
-  standard_name = number_of_days_in_year
+  standard_name = number_of_days_in_current_year
   long_name = number of days in a year
   units = days
   dimensions = ()
@@ -210,7 +194,7 @@
   intent = out
   optional = F
 [ipt]
-  standard_name = index_for_diagnostic_printout
+  standard_name = index_of_horizontal_gridpoint_for_debug_output
   long_name = horizontal index for point used for diagnostic printout
   units = index 
   dimensions = ()
@@ -226,7 +210,7 @@
   intent = out
   optional = F
 [lssav]
-  standard_name = flag_diagnostics
+  standard_name = flag_for_diagnostics
   long_name = logical flag for storing diagnostics
   units = flag
   dimensions = ()
@@ -234,7 +218,7 @@
   intent = out
   optional = F
 [lsswr]
-  standard_name = flag_to_calc_sw
+  standard_name = flag_for_calling_shortwave_radiation
   long_name = logical flags for sw radiation calls
   units = flag
   dimensions = ()
@@ -242,7 +226,7 @@
   intent = out
   optional = F
 [lslwr]
-  standard_name = flag_to_calc_lw
+  standard_name = flag_for_calling_longwave_radiation
   long_name = logical flags for lw radiation calls
   units = flag
   dimensions = ()
@@ -250,7 +234,7 @@
   intent = out
   optional = F
 [solhr]
-  standard_name = forecast_hour_of_the_day
+  standard_name = forecast_utc_hour
   long_name = time in hours after 00z at the current timestep
   units = h
   dimensions = ()

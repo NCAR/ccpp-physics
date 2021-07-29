@@ -5,6 +5,52 @@
 
 ########################################################################
 [ccpp-arg-table]
+  name = zhaocarr_precpd_init
+  type = scheme
+[imp_physics]
+  standard_name = control_for_microphysics_scheme
+  long_name = choice of microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[imp_physics_zhao_carr]
+  standard_name = identifier_for_zhao_carr_microphysics_scheme
+  long_name = choice of Zhao-Carr microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[imp_physics_zhao_carr_pdf]
+  standard_name = identifier_for_zhao_carr_pdf_microphysics_scheme
+  long_name = choice of Zhao-Carr microphysics scheme with PDF clouds
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+
+########################################################################
+[ccpp-arg-table]
   name = zhaocarr_precpd_run
   type = scheme
 [im]
@@ -16,7 +62,7 @@
   intent = in
   optional = F
 [km]
-  standard_name = vertical_dimension
+  standard_name = vertical_layer_dimension
   long_name = vertical layer dimension
   units = count
   dimensions = ()
@@ -24,7 +70,7 @@
   intent = in
   optional = F
 [dt]
-  standard_name = time_step_for_physics
+  standard_name = timestep_for_physics
   long_name = physics time step
   units = s
   dimensions = ()
@@ -36,7 +82,7 @@
   standard_name = air_pressure_difference_between_midlayers
   long_name = pressure level thickness
   units = Pa
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -45,34 +91,34 @@
   standard_name = air_pressure
   long_name = layer mean pressure
   units = Pa
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [q]
-  standard_name = water_vapor_specific_humidity_updated_by_physics
+  standard_name = specific_humidity_of_new_state
   long_name = water vapor specific humidity
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [cwm]
-  standard_name = cloud_condensed_water_mixing_ratio_updated_by_physics
+  standard_name = cloud_liquid_water_mixing_ratio_of_new_state
   long_name = moist cloud condensed water mixing ratio
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [t]
-  standard_name = air_temperature_updated_by_physics
+  standard_name = air_temperature_of_new_state
   long_name = layer mean air temperature
   units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -162,7 +208,7 @@
   standard_name = tendency_of_rain_water_mixing_ratio_due_to_microphysics
   long_name = tendency of rain water mixing ratio due to microphysics
   units = kg kg-1 s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -171,13 +217,13 @@
   standard_name = critical_relative_humidity
   long_name = critical relative humidity
   units = frac
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [psautco]
-  standard_name = coefficient_from_cloud_ice_to_snow
+  standard_name = autoconversion_to_snow_coefficient
   long_name = conversion coefficient from cloud ice to snow
   units = none
   dimensions = (2)
@@ -186,7 +232,7 @@
   intent = in
   optional = F
 [prautco]
-  standard_name = coefficient_from_cloud_water_to_rain
+  standard_name = autoconversion_to_rain_coefficient
   long_name = conversion coefficient from cloud water to rain
   units = none
   dimensions = (2)
@@ -195,7 +241,7 @@
   intent = in
   optional = F
 [evpco]
-  standard_name = coefficient_for_evaporation_of_rainfall
+  standard_name = precipitation_evaporation_coefficient
   long_name = coefficient for evaporation of rainfall
   units = none
   dimensions = ()
@@ -204,7 +250,7 @@
   intent = in
   optional = F
 [wminco]
-  standard_name = cloud_condensed_water_conversion_threshold
+  standard_name = cloud_condensate_autoconversion_threshold_coefficient
   long_name = conversion coefficient from cloud liquid and ice to precipitation
   units = none
   dimensions = (2)

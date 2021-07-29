@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = rrtmgp_lw_cloud_optics
   type = scheme
-  dependencies = machine.F,rrtmg_lw_cloud_optics.F90,rrtmgp_aux.F90
+  dependencies = machine.F,rrtmg_lw_cloud_optics.F90,radiation_tools.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -32,7 +32,7 @@
   intent = in
   optional = F      
 [nrghice]
-  standard_name = number_of_rrtmgp_ice_roughness
+  standard_name = number_of_ice_roughness_categories
   long_name = number of ice-roughness categories in RRTMGP calculation
   units = count
   dimensions =  ()
@@ -49,7 +49,7 @@
   optional = F
   kind = len=128
 [rrtmgp_lw_file_clouds]
-  standard_name = rrtmgp_coeff_lw_cloud_optics 
+  standard_name = filename_of_rrtmgp_longwave_cloud_optics_coefficients 
   long_name = file containing coefficients for RRTMGP LW cloud optics
   units = none
   dimensions =  ()
@@ -74,7 +74,7 @@
   intent = in
   optional = F
 [mpicomm]
-  standard_name = mpi_comm
+  standard_name = mpi_communicator
   long_name = MPI communicator
   units = index
   dimensions = ()
@@ -98,21 +98,13 @@
   type = integer
   intent = out
   optional = F
-[lw_cloud_props]
-  standard_name = coefficients_for_lw_cloud_optics
-  long_name = DDT containing spectral information for RRTMGP LW radiation scheme
-  units = DDT
-  dimensions = ()
-  type = ty_cloud_optics
-  intent = out
-  optional = F
 
 ########################################################################
 [ccpp-arg-table]
   name = rrtmgp_lw_cloud_optics_run
   type = scheme
 [doLWrad]
-  standard_name = flag_to_calc_lw
+  standard_name = flag_for_calling_longwave_radiation
   long_name = logical flags for lw radiation calls
   units = flag
   dimensions = ()
@@ -176,18 +168,10 @@
   intent = in
   optional = F
 [nLev]
-  standard_name = vertical_dimension
+  standard_name = vertical_layer_dimension
   long_name = number of vertical levels
   units = count
   dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[nrghice]
-  standard_name = number_of_rrtmgp_ice_roughness
-  long_name = number of ice-roughness categories in RRTMGP calculation
-  units = count
-  dimensions =  ()
   type = integer
   intent = in
   optional = F
@@ -195,7 +179,7 @@
   standard_name = total_cloud_fraction
   long_name = layer total cloud fraction
   units = frac
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   intent = in
   kind = kind_phys
@@ -203,7 +187,7 @@
   standard_name = cloud_liquid_water_path
   long_name = layer cloud liquid water path
   units = g m-2
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   intent = in
   kind = kind_phys
@@ -211,7 +195,7 @@
   standard_name = mean_effective_radius_for_liquid_cloud
   long_name = mean effective radius for liquid cloud
   units = um
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   intent = in
   kind = kind_phys
@@ -219,7 +203,7 @@
   standard_name = cloud_ice_water_path
   long_name = layer cloud ice water path
   units = g m-2
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   intent = in
   kind = kind_phys
@@ -227,7 +211,7 @@
   standard_name = mean_effective_radius_for_ice_cloud
   long_name = mean effective radius for ice cloud
   units = um
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   intent = in
   kind = kind_phys
@@ -235,7 +219,7 @@
   standard_name = cloud_snow_water_path
   long_name = cloud snow water path
   units = g m-2
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   intent = in
   kind = kind_phys
@@ -243,7 +227,7 @@
   standard_name = mean_effective_radius_for_snow_flake
   long_name = mean effective radius for snow flake
   units = um
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   intent = in
   kind = kind_phys
@@ -251,7 +235,7 @@
   standard_name = cloud_rain_water_path
   long_name = cloud rain water path
   units = g m-2
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   intent = in
   kind = kind_phys
@@ -259,7 +243,7 @@
   standard_name = mean_effective_radius_for_rain_drop
   long_name = mean effective radius for rain drop
   units = um
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   intent = in
   kind = kind_phys
@@ -267,7 +251,7 @@
   standard_name = precipitation_fraction_by_layer
   long_name = precipitation fraction in each layer
   units = frac
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -276,26 +260,18 @@
   standard_name = air_pressure_at_layer_for_RRTMGP_in_hPa
   long_name = air pressure layer
   units = hPa
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
-[lw_gas_props]
-  standard_name = coefficients_for_lw_gas_optics
-  long_name = DDT containing spectral information for RRTMGP LW radiation scheme
-  units = DDT
-  dimensions = ()
+[nbndsGPlw]
+  standard_name = number_of_longwave_bands
+  long_name = number of lw bands used in RRTMGP
+  units = count
+  dimensions =  ()
+  type = integer
   intent = in
-  type = ty_gas_optics_rrtmgp
-  optional = F
-[lw_cloud_props]
-  standard_name = coefficients_for_lw_cloud_optics
-  long_name = DDT containing spectral information for RRTMGP LW radiation scheme
-  units = DDT
-  dimensions = ()
-  intent = in
-  type = ty_cloud_optics
   optional = F
 [lon]
   standard_name = longitude
@@ -319,7 +295,7 @@
   standard_name = RRTMGP_cloud_optical_depth_layers_at_10mu_band
   long_name = approx 10mu band layer cloud optical depth
   units = none
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -330,7 +306,7 @@
   units = DDT
   dimensions = ()
   type = ty_optical_props_2str
-  intent = out
+  intent = inout
   optional = F
 [lw_optical_props_precipByBand]
   standard_name = longwave_optical_properties_for_precipitation_by_band
@@ -338,7 +314,7 @@
   units = DDT
   dimensions = ()
   type = ty_optical_props_2str
-  intent = out
+  intent = inout
   optional = F  
 [errmsg]
   standard_name = ccpp_error_message

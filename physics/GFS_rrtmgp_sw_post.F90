@@ -5,7 +5,8 @@ module GFS_rrtmgp_sw_post
   use mo_gas_optics_rrtmgp,      only: ty_gas_optics_rrtmgp
   use mo_fluxes_byband,          only: ty_fluxes_byband
   use mo_heating_rates,          only: compute_heating_rate
-  use rrtmgp_aux,                only: check_error_msg
+  use radiation_tools,                only: check_error_msg
+  use rrtmgp_sw_gas_optics,      only: sw_gas_props
   implicit none
   
   public GFS_rrtmgp_sw_post_init,GFS_rrtmgp_sw_post_run,GFS_rrtmgp_sw_post_finalize
@@ -26,7 +27,7 @@ contains
 !!
   subroutine GFS_rrtmgp_sw_post_run (nCol, nLev, nDay, idxday, lsswr, do_sw_clrsky_hr,      &
        save_diag, fhswr,  coszen, coszdg, t_lay, p_lev, sfc_alb_nir_dir, sfc_alb_nir_dif,   &
-       sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, sw_gas_props, fluxswUP_allsky,                 &
+       sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, fluxswUP_allsky,                               &
        fluxswDOWN_allsky, fluxswUP_clrsky, fluxswDOWN_clrsky, raddt, aerodp, cldsa, mbota,  &
        mtopa, cld_frac, cldtausw, fluxr,                                                    &
        nirbmdi, nirdfdi, visbmdi, visdfdi, nirbmui, nirdfui, visbmui, visdfui, sfcnsw,      &
@@ -43,8 +44,6 @@ contains
     	 lsswr,             & ! Call SW radiation?
     	 do_sw_clrsky_hr,   & ! Output clear-sky SW heating-rate?         
     	 save_diag            ! Output radiation diagnostics?
-    type(ty_gas_optics_rrtmgp),intent(in) :: &
-         sw_gas_props         ! DDT containing SW spectral information
     real(kind_phys), intent(in) :: &
          fhswr                ! Frequency for SW radiation
     real(kind_phys), dimension(nCol), intent(in) :: &

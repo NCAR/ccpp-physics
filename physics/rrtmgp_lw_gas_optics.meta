@@ -1,8 +1,7 @@
 [ccpp-table-properties]
   name = rrtmgp_lw_gas_optics
   type = scheme
-  dependencies = machine.F,rte-rrtmgp/extensions/mo_compute_bc.F90,rte-rrtmgp/rte/mo_fluxes.F90,rte-rrtmgp/rte/kernels/mo_fluxes_broadband_kernels.F90
-  dependencies = rte-rrtmgp/rte/mo_rte_lw.F90,rte-rrtmgp/rte/mo_rte_sw.F90,rte-rrtmgp/rte/kernels/mo_rte_solver_kernels.F90,rrtmgp_aux.F90
+  dependencies = machine.F,radiation_tools.F90,GFS_rrtmgp_pre.F90,rte-rrtmgp/rrtmgp/mo_gas_optics_rrtmgp.F90,rte-rrtmgp/rte/mo_rte_kind.F90,rte-rrtmgp/rrtmgp/mo_gas_concentrations.F90,rte-rrtmgp/rte/mo_optical_props.F90,rte-rrtmgp/rte/mo_source_functions.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -18,7 +17,7 @@
   optional = F
   kind = len=128
 [rrtmgp_lw_file_gas]
-  standard_name = rrtmgp_kdistribution_lw
+  standard_name = filename_of_rrtmgp_longwave_k_distribution
   long_name = file containing RRTMGP LW k-distribution
   units = none
   dimensions =  ()
@@ -26,22 +25,13 @@
   intent = in
   optional = F
   kind = len=128
-[rrtmgp_nGases]
-  standard_name = number_of_active_gases_used_by_RRTMGP
-  long_name = number of gases available used by RRTMGP
-  units = count
-  dimensions =  ()
-  type = integer
-  intent = in
-  optional = F
-[active_gases_array]
-  standard_name = list_of_active_gases_used_by_RRTMGP
-  long_name = list of active gases used by RRTMGP
-  units = none
-  dimensions =  (number_of_active_gases_used_by_RRTMGP)
-  type = character
-  kind = len=*
-  intent = in
+[gas_concentrations]
+  standard_name = Gas_concentrations_for_RRTMGP_suite
+  long_name = DDT containing gas concentrations for RRTMGP radiation scheme
+  units = DDT
+  dimensions = ()
+  type = ty_gas_concs
+  intent = inout
   optional = F
 [mpirank]
   standard_name = mpi_rank
@@ -60,7 +50,7 @@
   intent = in
   optional = F
 [mpicomm]
-  standard_name = mpi_comm
+  standard_name = mpi_communicator
   long_name = MPI communicator
   units = index
   dimensions = ()
@@ -84,12 +74,22 @@
   type = integer
   intent = out
   optional = F
-[lw_gas_props]
-  standard_name = coefficients_for_lw_gas_optics
-  long_name = DDT containing spectral information for RRTMGP LW radiation scheme
-  units = DDT
+[minGPpres]
+  standard_name = minimum_pressure_in_RRTMGP
+  long_name = minimum pressure allowed in RRTMGP
+  units = Pa
   dimensions = ()
-  type = ty_gas_optics_rrtmgp
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[minGPtemp]
+  standard_name = minimum_temperature_in_RRTMGP
+  long_name = minimum temperature allowed in RRTMGP
+  units = K
+  dimensions = ()
+  type = real
+  kind = kind_phys
   intent = out
   optional = F
 
@@ -98,7 +98,7 @@
   name = rrtmgp_lw_gas_optics_run
   type = scheme
 [doLWrad]
-  standard_name = flag_to_calc_lw
+  standard_name = flag_for_calling_longwave_radiation
   long_name = flag to calculate LW irradiances
   units = flag
   dimensions = ()
@@ -114,26 +114,18 @@
   intent = in
   optional = F
 [nLev]
-  standard_name = vertical_dimension
+  standard_name = vertical_layer_dimension
   long_name = number of vertical levels
   units = count
   dimensions = ()
   type = integer
   intent = in
   optional = F
-[lw_gas_props]
-  standard_name = coefficients_for_lw_gas_optics
-  long_name = DDT containing spectral information for RRTMGP LW radiation scheme
-  units = DDT
-  dimensions = ()
-  type = ty_gas_optics_rrtmgp
-  intent = in
-  optional = F
 [p_lay]
   standard_name = air_pressure_at_layer_for_RRTMGP_in_hPa
   long_name = air pressure layer
   units = hPa
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -142,7 +134,7 @@
   standard_name = air_pressure_at_interface_for_RRTMGP_in_hPa
   long_name = air pressure level
   units = hPa
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -151,7 +143,7 @@
   standard_name = air_temperature_at_layer_for_RRTMGP
   long_name = air temperature layer
   units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -160,7 +152,7 @@
   standard_name = air_temperature_at_interface_for_RRTMGP
   long_name = air temperature level
   units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -188,7 +180,7 @@
   units = DDT
   dimensions = ()
   type = ty_optical_props_1scl
-  intent = out
+  intent = inout
   optional = F
 [sources]
   standard_name = longwave_source_function
@@ -196,7 +188,7 @@
   units = DDT
   dimensions = ()
   type = ty_source_func_lw
-  intent = out
+  intent = inout
   optional = F
 [errmsg]
   standard_name = ccpp_error_message

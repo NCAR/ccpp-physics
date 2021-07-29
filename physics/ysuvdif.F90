@@ -11,7 +11,22 @@
       module ysuvdif
       contains
 
-      subroutine ysuvdif_init ()
+      subroutine ysuvdif_init (do_ysu,errmsg,errflg)
+
+        logical,          intent(in) :: do_ysu
+        character(len=*), intent(out) :: errmsg
+        integer,          intent(out) :: errflg
+
+        ! Initialize CCPP error handling variables
+        errmsg = ''
+        errflg = 0
+
+        ! Consistency checks
+        if (.not. do_ysu) then
+          write(errmsg,fmt='(*(a))') 'Logic error: do_ysu = .false.'      
+          errflg = 1
+          return
+        end if
       end subroutine ysuvdif_init
 
       subroutine ysuvdif_finalize ()
@@ -34,8 +49,9 @@
                     g,rd,cp,rv,ep1,ep2,xlv,                                    &
                     dusfc,dvsfc,dtsfc,dqsfc,                                   &
                     dt,kpbl1d,u10,v10,lssav,ldiag3d,qdiag3d,                   &
-                    flag_for_pbl_generic_tend,ntoz,du3dt_PBL,dv3dt_PBL,        &
-                    dt3dt_PBL,dq3dt_PBL,do3dt_PBL,errmsg,errflg   )
+                    flag_for_pbl_generic_tend,ntoz,ntqv,dtend,dtidx,           &
+                    index_of_temperature,index_of_x_wind,index_of_y_wind,      &
+                    index_of_process_pbl,errmsg,errflg   )
 
    use machine , only : kind_phys
 !
@@ -64,19 +80,19 @@
    integer,  intent(in   )   ::     im,km,ntrac,ndiff,ntcw,ntiw,ntoz
    real(kind=kind_phys),     intent(in   )   ::     g,cp,rd,rv,ep1,ep2,xlv,dt
 
-   real(kind=kind_phys),     dimension( im,km ),                                    &
+   real(kind=kind_phys),     dimension( :,: ),                                    &
              intent(in)      ::                 pi2d,p2d,phil,ux,vx,swh,hlw,tx
 
-   real(kind=kind_phys),     dimension( im,km,ntrac )                             , &
+   real(kind=kind_phys),     dimension( :,:,: )                             , &
              intent(in   )   ::                                             qx
 
-   real(kind=kind_phys),     dimension( im, km+1 )                                , &
+   real(kind=kind_phys),     dimension( :,: )                                , &
              intent(in   )   ::                                      p2di,phii
 
-   real(kind=kind_phys),     dimension( im )                                      , &
+   real(kind=kind_phys),     dimension( : )                                      , &
              intent(in)  ::     stress,zorl,heat,evap,wspd,br,psim,psih,psfcpa,     &
                                                                    u10,v10,xmu
-   integer,  dimension(im)                                                         ,&
+   integer,  dimension(:)                                                         ,&
              intent(in   )   ::                                      landmask
    logical,  intent(in   )   :: lssav, ldiag3d, qdiag3d,                            &
                                 flag_for_pbl_generic_tend
@@ -84,18 +100,21 @@
 !----------------------------------------------------------------------------------
 ! input/output variables
 !
-   real(kind=kind_phys),     dimension( im,km )                                   , &
+   real(kind=kind_phys),     dimension( :,: )                                   , &
              intent(inout)   ::                                utnp,vtnp,ttnp
-   real(kind=kind_phys),     dimension( im,km,ntrac )                             , &
+   real(kind=kind_phys),     dimension( :,:,: )                              , &
              intent(inout)   ::                                          qtnp
-   real(kind=kind_phys),     dimension(im,km)                                     , &
-             intent(inout)   :: du3dt_PBL, dv3dt_PBL, dt3dt_PBL, dq3dt_PBL, do3dt_PBL
+   real(kind=kind_phys), optional, intent(inout) :: dtend(:,:,:)
+   integer, intent(in) :: dtidx(:,:), ntqv, index_of_temperature,                  &
+        index_of_x_wind, index_of_y_wind, index_of_process_pbl
 !
 !---------------------------------------------------------------------------------
 ! output variables
-   integer,  dimension( im ), intent(out  )   ::                       kpbl1d
-   real(kind=kind_phys),     dimension( im ),                                       &
+   integer,  dimension( : ), intent(out  )   ::                       kpbl1d
+   real(kind=kind_phys),     dimension( : ),                                   &
              intent(out)   ::                                            hpbl
+   real(kind=kind_phys),    dimension( : ),                                    &
+              intent(out)  :: dusfc,dvsfc, dtsfc,dqsfc
 
    ! error messages
    character(len=*), intent(out)    ::                                 errmsg
@@ -108,7 +127,7 @@
    real(kind=kind_phys),     dimension( im )            ::                hol
    real(kind=kind_phys),     dimension( im, km+1 ) ::                      zq
 !
-   real(kind=kind_phys),     dimension( im, km )   ::                                &
+   real(kind=kind_phys),     dimension( im, km )   ::                          &
                                                                thx,thvx,thlix, &
                                                                           del, &
                                                                           dza, &
@@ -117,7 +136,7 @@
                                                                         xkzoh, &
                                                                            za
 !
-   real(kind=kind_phys),    dimension( im )             ::                                &
+   real(kind=kind_phys),    dimension( im )             ::                     &
                                                                          rhox, &
                                                                        govrth, &
                                                                   zl1,thermal, &
@@ -125,8 +144,6 @@
                                                                   hgamt,hgamq, &
                                                                     brdn,brup, &
                                                                     phim,phih, &
-                                                                  dusfc,dvsfc, &
-                                                                  dtsfc,dqsfc, &
                                                                         prpbl, &
                                                               wspd1,thermalli
 !
@@ -195,6 +212,7 @@
                dsdzu,dsdzv,wm3,dthx,dqx,wspd10,ross,tem1,dsig,tvcon,conpr,     &
                prfac,prfac2,phim8z,radsum,tmp1,templ,rvls,temps,ent_eff,    &
                rcldb,bruptmp,radflux
+   integer                 ::  idtend
 !
 !-------------------------------------------------------------------------------
 !
@@ -854,12 +872,10 @@
      enddo
    enddo
    if(lssav .and. ldiag3d .and. .not. flag_for_pbl_generic_tend) then
-     do k = km,1,-1
-       do i = 1,im
-         ttend = (f1(i,k)-thx(i,k)+300.)*rdt*pi2d(i,k)
-         dt3dt_PBL(i,k) = dt3dt_PBL(i,k) + ttend*dtstep
-       enddo
-     enddo
+     idtend = dtidx(index_of_temperature,index_of_process_pbl)
+     if(idtend>=1) then
+       dtend(:,:,idtend) = dtend(:,:,idtend) + dtstep*(f1-thx+300.)*rdt*pi2d
+     endif
    endif
 !
 !     compute tridiagonal matrix elements for moisture, clouds, and gases
@@ -970,12 +986,10 @@
      enddo
    enddo
    if(lssav .and. ldiag3d .and. qdiag3d .and. .not. flag_for_pbl_generic_tend) then
-     do k = km,1,-1
-       do i = 1,im
-         qtend = (f3(i,k,1)-qx(i,k,1))*rdt
-         dq3dt_PBL(i,k) = dq3dt_PBL(i,k) + qtend*dtstep
-       enddo
-     enddo
+     idtend = dtidx(ntqv+100,index_of_process_pbl)
+     if(idtend>=1) then
+       dtend(:,:,idtend) = dtend(:,:,idtend) + dtstep*(f3(:,:,1)-qx(:,:,1))*rdt
+     endif
    endif
 !
    if(ndiff.ge.2) then
@@ -989,13 +1003,10 @@
      enddo
      if(lssav .and. ldiag3d .and. ntoz>0 .and. qdiag3d .and.         &
   &               .not. flag_for_pbl_generic_tend) then
-       ic = ntoz
-       do k = km,1,-1
-         do i = 1,im
-           qtend = f3(i,k,ic)-qx(i,k,ic)
-           do3dt_PBL(i,k) = do3dt_PBL(i,k)+qtend
-         enddo
-       enddo
+       idtend = dtidx(100+ntoz,index_of_process_pbl)
+       if(idtend>=1) then
+         dtend(:,:,idtend) = dtend(:,:,idtend) + f3(:,:,ntoz)-qx(:,:,ntoz)
+       endif
      endif
    endif
 !
@@ -1079,14 +1090,15 @@
      enddo
    enddo
    if(lssav .and. ldiag3d .and. .not. flag_for_pbl_generic_tend) then
-     do k = km,1,-1
-       do i = 1,im
-         utend = (f1(i,k)-ux(i,k))*rdt
-         vtend = (f2(i,k)-vx(i,k))*rdt
-         du3dt_PBL(i,k) = du3dt_PBL(i,k) + utend*dtstep
-         dv3dt_PBL(i,k) = dv3dt_PBL(i,k) + vtend*dtstep
-       enddo
-     enddo
+     idtend = dtidx(index_of_x_wind,index_of_process_pbl)
+     if(idtend>=1) then
+       dtend(:,:,idtend) = dtend(:,:,idtend) + dtstep*(f1-ux)*rdt
+     endif
+
+     idtend = dtidx(index_of_y_wind,index_of_process_pbl)
+     if(idtend>=1) then
+       dtend(:,:,idtend) = dtend(:,:,idtend) + dtstep*(f2-vx)*rdt
+     endif
    endif
 !
 !---- end of vertical diffusion

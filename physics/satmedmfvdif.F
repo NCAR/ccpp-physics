@@ -10,9 +10,11 @@
 !> \section arg_table_satmedmfvdif_init Argument Table
 !! \htmlinclude satmedmfvdif_init.html
 !!
-      subroutine satmedmfvdif_init (isatmedmf,isatmedmf_vdif,
+      subroutine satmedmfvdif_init (satmedmf,
+     &                              isatmedmf,isatmedmf_vdif,
      &                              errmsg,errflg)
 
+      logical, intent(in) :: satmedmf
       integer, intent(in) :: isatmedmf,isatmedmf_vdif
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -20,6 +22,13 @@
 ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+
+! Consistency checks
+      if (.not. satmedmf) then
+        write(errmsg,fmt='(*(a))') 'Logic error: satmedmf = .false.'        
+        errflg = 1
+        return
+      end if
 
       if (.not. isatmedmf==isatmedmf_vdif) then
         write(errmsg,fmt='(*(a))') 'Logic error: satmedmfvdif is ',
@@ -61,8 +70,9 @@
      &     prsi,del,prsl,prslk,phii,phil,delt,                          &
      &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,                        &
      &     kinver,xkzm_m,xkzm_h,xkzm_s,                                 &
-     &     dt3dt_PBL,du3dt_PBL,dv3dt_PBL,dq3dt_PBL,do3dt_PBL,           &
-     &     gen_tend,ldiag3d,qdiag3d,errmsg,errflg)
+     &     index_of_temperature,index_of_x_wind,index_of_y_wind,        &
+     &     index_of_process_pbl,ntqv,ntoz,dtend,dtidx,                  &
+     &     gen_tend,ldiag3d,errmsg,errflg)
 !
       use machine  , only : kind_phys
       use funcphys , only : fpvs
@@ -71,36 +81,37 @@
 !
 !----------------------------------------------------------------------
       integer, intent(in)  :: im, km, ntrac, ntcw, ntiw, ntke
-      integer, intent(in)  :: kinver(im)
-      integer, intent(out) :: kpbl(im)
+      integer, intent(in)  :: kinver(:)
+      integer, intent(out) :: kpbl(:)
 !
-      logical, intent(in)  :: gen_tend, ldiag3d, qdiag3d
-      real(kind=kind_phys), intent(inout), dimension(:,:) ::            &
-     &  dt3dt_PBL,du3dt_PBL,dv3dt_PBL,dq3dt_PBL,do3dt_PBL
+      logical, intent(in)  :: gen_tend, ldiag3d
+      real(kind=kind_phys), intent(inout), dimension(:,:,:) :: dtend
+      integer, intent(in) :: index_of_temperature,index_of_x_wind,      &
+     &  index_of_y_wind, ntqv, ntoz, dtidx(:,:), index_of_process_pbl
 !
       real(kind=kind_phys), intent(in) :: grav,rd,cp,rv,hvap,hfus,fv,   &
      &                                    eps,epsm1
       real(kind=kind_phys), intent(in) :: delt, xkzm_m, xkzm_h, xkzm_s
-      real(kind=kind_phys), intent(inout) :: dv(im,km),     du(im,km),  &
-     &                     tdt(im,km),    rtg(im,km,ntrac)
+      real(kind=kind_phys), intent(inout) :: dv(:,:),     du(:,:),      &
+     &                     tdt(:,:),    rtg(:,:,:)
       real(kind=kind_phys), intent(in) ::                               &
-     &                     u1(im,km),     v1(im,km),                    &
-     &                     t1(im,km),     q1(im,km,ntrac),              &
-     &                     swh(im,km),    hlw(im,km),                   &
-     &                     xmu(im),       garea(im),                    &
-     &                     psk(im),       rbsoil(im),                   &
-     &                     zorl(im),      tsea(im),                     &
-     &                     u10m(im),      v10m(im),                     &
-     &                     fm(im),        fh(im),                       &
-     &                     evap(im),      heat(im),                     &
-     &                     stress(im),    spd1(im),                     &
-     &                     prsi(im,km+1), del(im,km),                   &
-     &                     prsl(im,km),   prslk(im,km),                 &
-     &                     phii(im,km+1), phil(im,km)
+     &                     u1(:,:),     v1(:,:),                        &
+     &                     t1(:,:),     q1(:,:,:),                      &
+     &                     swh(:,:),    hlw(:,:),                       &
+     &                     xmu(:),       garea(:),                      &
+     &                     psk(:),       rbsoil(:),                     &
+     &                     zorl(:),      tsea(:),                       &
+     &                     u10m(:),      v10m(:),                       &
+     &                     fm(:),        fh(:),                         &
+     &                     evap(:),      heat(:),                       &
+     &                     stress(:),    spd1(:),                       &
+     &                     prsi(:,:), del(:,:),                         &
+     &                     prsl(:,:),   prslk(:,:),                     &
+     &                     phii(:,:), phil(:,:)
       real(kind=kind_phys), intent(out) ::                              &
-     &                     dusfc(im),     dvsfc(im),                    &
-     &                     dtsfc(im),     dqsfc(im),                    &
-     &                     hpbl(im)
+     &                     dusfc(:),     dvsfc(:),                      &
+     &                     dtsfc(:),     dqsfc(:),                      &
+     &                     hpbl(:)
 !
       logical, intent(in)  :: dspheat
       character(len=*), intent(out) :: errmsg
@@ -206,6 +217,7 @@
       real(kind=kind_phys) qlcr, zstblmax
 !
       real(kind=kind_phys) h1 
+      integer :: idtend
 !!
       parameter(wfac=7.0,cfac=4.5)
       parameter(gamcrt=3.,gamcrq=0.,sfcfrac=0.1)
@@ -1400,19 +1412,13 @@
          enddo
       enddo
       if (ldiag3d .and. .not. gen_tend) then
-        do  k = 1,km
-           do i = 1,im
-             ttend      = (f1(i,k)-t1(i,k))*rdt
-             dt3dt_PBL(i,k) = dt3dt_PBL(i,k) + ttend*delt
-           enddo
-        enddo
-        if (qdiag3d) then
-          do  k = 1,km
-             do i = 1,im
-               qtend      = (f2(i,k)-q1(i,k,1))*rdt
-               dq3dt_PBL(i,k) = dq3dt_PBL(i,k) + qtend*delt
-             enddo
-          enddo
+        idtend = dtidx(index_of_temperature,index_of_process_pbl)
+        if(idtend>=1) then
+          dtend(:,:,idtend) = dtend(:,:,idtend) + delt*rdt*(f1-t1)
+        endif
+        idtend = dtidx(100+ntqv,index_of_process_pbl)
+        if(idtend>=1) then
+          dtend(:,:,idtend) = dtend(:,:,idtend) +delt*rdt*(f2-q1(:,:,1))
         endif
       endif
 !
@@ -1516,14 +1522,14 @@
          enddo
       enddo
       if (ldiag3d .and. .not. gen_tend) then
-        do k = 1,km
-           do i = 1,im
-             utend = (f1(i,k)-u1(i,k))*rdt
-             vtend = (f2(i,k)-v1(i,k))*rdt
-             du3dt_PBL(i,k) = du3dt_PBL(i,k) + utend*delt
-             dv3dt_PBL(i,k) = dv3dt_PBL(i,k) + vtend*delt
-           enddo
-        enddo
+        idtend=dtidx(index_of_x_wind,index_of_process_pbl)
+        if(idtend>=1) then
+          dtend(:,:,idtend) = dtend(:,:,idtend) + delt*rdt*(f1-u1)
+        endif
+        idtend=dtidx(index_of_y_wind,index_of_process_pbl)
+        if(idtend>=1) then
+          dtend(:,:,idtend) = dtend(:,:,idtend) + delt*rdt*(f2-v1)
+        endif
       endif
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

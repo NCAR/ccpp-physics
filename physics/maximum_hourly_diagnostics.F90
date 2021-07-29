@@ -30,30 +30,34 @@ contains
                                              imp_physics_fer_hires,con_g, phil,                    &
                                              gt0, refl_10cm, refdmax, refdmax263k, u10m, v10m,     &
                                              u10max, v10max, spd10max, pgr, t2m, q2m, t02max,      &
-                                             t02min, rh02max, rh02min, errmsg, errflg)
+                                             t02min, rh02max, rh02min, dtp, rain, pratemax,        &
+                                             errmsg, errflg)
 
        ! Interface variables
        integer, intent(in) :: im, levs
        logical, intent(in) :: reset, lradar
        integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_fer_hires
        real(kind_phys), intent(in   ) :: con_g
-       real(kind_phys), intent(in   ) :: phil(im,levs)
-       real(kind_phys), intent(in   ) :: gt0(im,levs)
-       real(kind_phys), intent(in   ) :: refl_10cm(im,levs)
-       real(kind_phys), intent(inout) :: refdmax(im)
-       real(kind_phys), intent(inout) :: refdmax263k(im)
-       real(kind_phys), intent(in   ) :: u10m(im)
-       real(kind_phys), intent(in   ) :: v10m(im)
-       real(kind_phys), intent(inout) :: u10max(im)
-       real(kind_phys), intent(inout) :: v10max(im)
-       real(kind_phys), intent(inout) :: spd10max(im)
-       real(kind_phys), intent(in   ) :: pgr(im)
-       real(kind_phys), intent(in   ) :: t2m(im)
-       real(kind_phys), intent(in   ) :: q2m(im)
-       real(kind_phys), intent(inout) :: t02max(im)
-       real(kind_phys), intent(inout) :: t02min(im)
-       real(kind_phys), intent(inout) :: rh02max(im)
-       real(kind_phys), intent(inout) :: rh02min(im)
+       real(kind_phys), intent(in   ) :: phil(:,:)
+       real(kind_phys), intent(in   ) :: gt0(:,:)
+       real(kind_phys), intent(in   ) :: refl_10cm(:,:)
+       real(kind_phys), intent(inout) :: refdmax(:)
+       real(kind_phys), intent(inout) :: refdmax263k(:)
+       real(kind_phys), intent(in   ) :: u10m(:)
+       real(kind_phys), intent(in   ) :: v10m(:)
+       real(kind_phys), intent(inout) :: u10max(:)
+       real(kind_phys), intent(inout) :: v10max(:)
+       real(kind_phys), intent(inout) :: spd10max(:)
+       real(kind_phys), intent(in   ) :: pgr(:)
+       real(kind_phys), intent(in   ) :: t2m(:)
+       real(kind_phys), intent(in   ) :: q2m(:)
+       real(kind_phys), intent(inout) :: t02max(:)
+       real(kind_phys), intent(inout) :: t02min(:)
+       real(kind_phys), intent(inout) :: rh02max(:)
+       real(kind_phys), intent(inout) :: rh02min(:)
+       real(kind_phys), intent(in   ) :: dtp
+       real(kind_phys), intent(in   ) :: rain(im)
+       real(kind_phys), intent(inout) :: pratemax(im)
        character(len=*), intent(out)  :: errmsg
        integer, intent(out)           :: errflg
 
@@ -96,6 +100,7 @@ contains
              t02min(i)   = 999.
              rh02max(i)  = -999.
              rh02min(i)  = 999.
+             pratemax(i) = 0.
           enddo
        endif
        do i=1,im
@@ -119,6 +124,7 @@ contains
           rh02min(i) = min(rh02min(i),rh02)
           t02max(i)  = max(t02max(i),t2m(i))  !<--- hourly max 2m t
           t02min(i)  = min(t02min(i),t2m(i))  !<--- hourly min 2m t
+          pratemax(i) = max(pratemax(i),(3.6E6/dtp)*rain(i))
        enddo
 
    end subroutine maximum_hourly_diagnostics_run
@@ -126,12 +132,12 @@ contains
    subroutine max_fields(phil,ref3D,grav,im,levs,refd,tk,refd263k)
       integer, intent(in)               :: im,levs
       real (kind=kind_phys), intent(in) :: grav
-      real (kind=kind_phys), intent(in),dimension(im,levs)  :: phil,ref3D,tk
+      real (kind=kind_phys), intent(in),dimension(:,:)  :: phil,ref3D,tk
       integer               :: i,k,ll,ipt,kpt
       real :: dbz1avg,zmidp1,zmidloc,refl,fact
       real, dimension(im,levs) :: z
       real, dimension(im) :: zintsfc
-      real, dimension(im), intent(inout) :: refd,refd263k
+      real, dimension(:), intent(inout) :: refd,refd263k
       REAL :: dbz1(2),dbzk,dbzk1
       logical :: counter
       do i=1,im

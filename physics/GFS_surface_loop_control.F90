@@ -15,11 +15,9 @@
 
 !> \brief Brief description of the subroutine
 !!
-#if 0
 !! \section arg_table_GFS_surface_loop_control_part1_run Arguments
 !! \htmlinclude GFS_surface_loop_control_part1_run.html
 !!
-#endif
 !!  \section general General Algorithm
 !!  \section detailed Detailed Algorithm
 !!  @{
@@ -31,10 +29,10 @@
       implicit none
 
       ! Interface variables
-      integer, intent(in)                                :: im
-      integer, intent(in)                                :: iter
-      real(kind=kind_phys), dimension(im), intent(in)    :: wind
-      logical,              dimension(im), intent(inout) :: flag_guess
+      integer, intent(in)                               :: im
+      integer, intent(in)                               :: iter
+      real(kind=kind_phys), dimension(:), intent(in)    :: wind
+      logical,              dimension(:), intent(inout) :: flag_guess
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -80,7 +78,7 @@
 !!  \section detailed Detailed Algorithm
 !!  @{
 
-      subroutine GFS_surface_loop_control_part2_run (im, iter,  wind, &
+      subroutine GFS_surface_loop_control_part2_run (im, iter, wind, &
              flag_guess, flag_iter, dry, wet, icy, nstf_name1, errmsg, errflg)
 
       use machine,           only: kind_phys
@@ -90,10 +88,10 @@
       ! Interface variables
       integer,                             intent(in)    :: im
       integer,                             intent(in)    :: iter
-      real(kind=kind_phys), dimension(im), intent(in)    :: wind
-      logical,              dimension(im), intent(inout) :: flag_guess
-      logical,              dimension(im), intent(inout) :: flag_iter
-      logical,              dimension(im), intent(in)    :: dry, wet, icy
+      real(kind=kind_phys), dimension(:),  intent(in)    :: wind
+      logical,              dimension(:),  intent(inout) :: flag_guess
+      logical,              dimension(:),  intent(inout) :: flag_iter
+      logical,              dimension(:),  intent(in)    :: dry, wet, icy
       integer,                             intent(in)    :: nstf_name1
 
       character(len=*), intent(out) :: errmsg

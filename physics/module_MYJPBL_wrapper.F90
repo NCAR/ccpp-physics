@@ -8,7 +8,22 @@
 
       contains
 
-      subroutine myjpbl_wrapper_init ()
+      subroutine myjpbl_wrapper_init (do_myjpbl,errmsg,errflg)
+      
+      logical,              intent(in)  :: do_myjpbl
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
+
+     ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
+
+    ! Consistency checks
+      if (.not. do_myjpbl) then
+        write(errmsg,fmt='(*(a))') 'Logic error: do_myjpbl=.false.'        
+        errflg = 1
+        return
+      end if
       end subroutine myjpbl_wrapper_init
 
       subroutine myjpbl_wrapper_finalize ()
@@ -40,9 +55,10 @@
      &  dusfc,dvsfc,dtsfc,dqsfc,                    &
      &  dkt,xkzm_m, xkzm_h,xkzm_s, gamt,gamq,       &
      &  con_cp,con_g,con_rd,                        &
-     &  me, lprnt, dt3dt_PBL, du3dt_PBL, dv3dt_PBL, &
-     &  dq3dt_PBL, gen_tend, ldiag3d, qdiag3d,      &
-     &  errmsg, errflg )
+     &  me, lprnt, gen_tend, ldiag3d, dtend, dtidx, &
+     &  index_of_temperature, index_of_x_wind,      &
+     &  index_of_y_wind, index_of_process_pbl,      &
+     &  ntqv, errmsg, errflg )
 
 !
 
@@ -77,47 +93,50 @@
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
 
+      real(kind=kind_phys), intent(inout), optional :: dtend(:,:,:)
+      integer, intent(in) :: dtidx(:,:)
+      integer, intent(in) :: index_of_temperature, index_of_x_wind, &
+     &                       index_of_y_wind, index_of_process_pbl, ntqv
+
 !MYJ-1D
       integer,intent(in) :: im, levs
       integer,intent(in) :: kdt, me
       integer,intent(in) :: ntrac,ntke,ntcw,ntiw,ntrw,ntsw,ntgl
-      logical,intent(in) :: restart,do_myjsfc,lprnt,ldiag3d,qdiag3d,gen_tend
+      logical,intent(in) :: restart,do_myjsfc,lprnt,ldiag3d,gen_tend
       real(kind=kind_phys),intent(in) :: con_cp, con_g, con_rd
       real(kind=kind_phys),intent(in) :: dt_phs, xkzm_m, xkzm_h, xkzm_s
 
 !MYJ-2D
-      real(kind=kind_phys),dimension(im),intent(in) ::         &
-     &     prsik_1, prslk_1, prslki, slmsk, garea,             &
+      real(kind=kind_phys),dimension(:),intent(in) ::        &
+     &     prsik_1, prslk_1, prslki, slmsk, garea,           &
            snowd, evap, hflx, cm, ch, wind, hprime1
-      real(kind=kind_phys),dimension(im),intent(inout) ::      &
-     &     pblh, zorl, ustar, tsfc, qsfc
-      real(kind=kind_phys),dimension(im),intent(inout)   ::    &
-     &        phy_myj_qsfc, phy_myj_thz0, phy_myj_qz0,         &
-     &        phy_myj_uz0, phy_myj_vz0, phy_myj_z0base,        &
-     &        phy_myj_akhs, phy_myj_akms,                      &
-     &        phy_myj_chkqlm, phy_myj_elflx,                   &
+      real(kind=kind_phys),dimension(:),intent(inout) ::     &
+     &     zorl, ustar, tsfc, qsfc
+      real(kind=kind_phys),dimension(:),intent(inout)   ::   &
+     &        phy_myj_qsfc, phy_myj_thz0, phy_myj_qz0,       &
+     &        phy_myj_uz0, phy_myj_vz0, phy_myj_z0base,      &
+     &        phy_myj_akhs, phy_myj_akms,                    &
+     &        phy_myj_chkqlm, phy_myj_elflx,                 &
      &        phy_myj_a1u, phy_myj_a1t, phy_myj_a1q
-      real(kind=kind_phys),dimension(im),intent(out) ::        &
-     &     dusfc,dvsfc,dtsfc,dqsfc,gamt,gamq
-      integer,dimension(im),intent(out) :: kpbl
-      integer,dimension(im),intent(in) ::  kinver
+      real(kind=kind_phys),dimension(:),intent(out) ::       &
+     &     pblh,dusfc,dvsfc,dtsfc,dqsfc,gamt,gamq
+      integer,dimension(:),intent(out) :: kpbl
+      integer,dimension(:),intent(in) ::  kinver
 
 !MYJ-3D
-      real(kind=kind_phys),dimension(im,levs+1),intent(in) ::  &
+      real(kind=kind_phys),dimension(:,:),intent(in) ::      &
               phii, prsi
-      real(kind=kind_phys),dimension(im,levs),intent(in) ::    &
+      real(kind=kind_phys),dimension(:,:),intent(in) ::      &
      &        ugrs, vgrs, tgrs, prsl
-!      real(kind=kind_phys),dimension(im,levs),intent(inout) :: &
+!      real(kind=kind_phys),dimension(:,:),intent(inout)  :: &
 !             dudt, dvdt, dtdt, dkt
-      real(kind=kind_phys),dimension(im,levs),intent(inout) :: &
+      real(kind=kind_phys),dimension(:,:),intent(inout)   :: &
              dudt, dvdt, dtdt
-      real(kind=kind_phys),dimension(im,levs-1),intent(out) :: &
+      real(kind=kind_phys),dimension(:,:),intent(out)     :: &
              dkt
-      real(kind=kind_phys),dimension(:,:),intent(inout)     :: &
-             du3dt_PBL, dv3dt_PBL, dt3dt_PBL, dq3dt_PBL
 
 !MYJ-4D
-      real(kind=kind_phys),dimension(im,levs,ntrac),intent(inout) ::  &
+      real(kind=kind_phys),dimension(:,:,:),intent(inout) :: &
      &       qgrs,dqdt
 
 !LOCAL
@@ -158,6 +177,7 @@
 !      real(kind=kind_phys), dimension(im,levs,ntrac) ::    &
 !     &        qgrs_myj
       real(kind=kind_phys),dimension(im,levs) :: dkt2
+      integer :: uidx, vidx, tidx, qidx
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -553,12 +573,12 @@
 !         end do
       end do
 
-      dkt2=0.
+      dkt=0.
       do k=1,levs
          k1=levs-k+1
          do i=1,im
-!            dkt2(i,k)=max(xcofh(i,k1),xkzo(i,k))
-           dkt2(i,k)=xcofh(i,k1)
+!            dkt(i,k)=max(xcofh(i,k1),xkzo(i,k))
+           dkt(i,k)=xcofh(i,k1)
          end do
       end do
       if(ntke.gt.0)then
@@ -581,22 +601,19 @@
          end do
       end do
       if (ldiag3d .and. .not. gen_tend) then
+        uidx = dtidx(index_of_x_wind,index_of_process_pbl)
+        vidx = dtidx(index_of_y_wind,index_of_process_pbl)
+        tidx = dtidx(index_of_temperature,index_of_process_pbl)
+        qidx = dtidx(ntqv+100,index_of_process_pbl)
+        ! NOTE: The code that was here before was wrong. It replaced the
+        ! cumulative value with the instantaneous value.
         do k=1,levs
            k1=levs+1-k
-           do i=1,im
-             du3dt_PBL(i,k) = rublten(i,k1)*dt_phs
-             dv3dt_PBL(i,k) = rvblten(i,k1)*dt_phs
-             dt3dt_PBL(i,k) = rthblten(i,k1)*exner(i,k1)*dt_phs
-           end do
+           if(uidx>=1) dtend(:,k,uidx)=dtend(:,k,uidx)+rublten(:,k1)*dt_phs
+           if(vidx>=1) dtend(:,k,vidx)=dtend(:,k,vidx)+rvblten(:,k1)*dt_phs
+           if(tidx>=1) dtend(:,k,tidx)=dtend(:,k,tidx)+rthblten(:,k1)*exner(:,k1)*dt_phs
+           if(qidx>=1) dtend(:,k,qidx)=dtend(:,k,qidx)+rqvblten(:,k1)*dt_phs
         end do
-        if (qdiag3d) then
-          do k=1,levs
-             k1=levs+1-k
-             do i=1,im
-               dq3dt_PBL(i,k) = rqvblten(i,k1)*dt_phs
-             end do
-          end do
-        end if
       end if
 
       if (lprnt1) then
@@ -662,7 +679,7 @@
                    q2(i,k)
              end do
              do k=1,levs
-                print*,'xcofh,el_myj,dkt2=',k,xcofh(i,k),el_myj(i,k),dkt2(i,k)
+                print*,'xcofh,el_myj,dkt=',k,xcofh(i,k),el_myj(i,k),dkt(i,k)
              end do
          end if
 
@@ -804,9 +821,6 @@
 !          print*,"===Finished with myj_bl_driver; output:"
 !          print*
 !       endif
-
-      ! External dkt has dimensions (1:im,1:levs-1)
-      dkt(1:im,1:levs-1) = dkt2(1:im,1:levs-1)
 
   END SUBROUTINE myjpbl_wrapper_run
 

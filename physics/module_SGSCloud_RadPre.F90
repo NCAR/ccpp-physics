@@ -6,19 +6,24 @@
 !!       scale) qc, qi and cloud fraction coming from the microphysics scheme.
 !!    4) Recompute the diagnostic high, mid, low, total and bl clouds to be consistent with radiation
 
+!> \defgroup sgsrad_group GSD sgscloud_radpre_run Module
       module sgscloud_radpre
 
       contains
 
+!> \section arg_table_sgscloud_radpre_init Argument Table
+!! \htmlinclude sgscloud_radpre_init.html
+!!
       subroutine sgscloud_radpre_init ()
       end subroutine sgscloud_radpre_init
 
+!> \section arg_table_sgscloud_radpre_finalize Argument Table
+!! \htmlinclude sgscloud_radpre_finalize.html
+!!
       subroutine sgscloud_radpre_finalize ()
       end subroutine sgscloud_radpre_finalize
 
-!> \defgroup sgsrad_group GSD sgscloud_radpre_run Module
-!> \ingroup sgscloud_radpre
-!! This interstitial code adds the subgrid clouds to the resolved-scale clouds 
+!> This interstitial code adds the subgrid clouds to the resolved-scale clouds 
 !! if there is no resolved-scale clouds in that particular grid box. It can also 
 !! specify a cloud fraction for resolved-scale clouds, using Xu-Randall (1996),
 !! if desired.
@@ -67,20 +72,20 @@
       integer,          intent(in)  :: im, levs, imfdeepcnv, imfdeepcnv_gf, &
            &               nlay, imp_physics, imp_physics_gfdl
       logical,          intent(in)  :: flag_init, flag_restart, do_mynnedmf
-      real(kind=kind_phys), dimension(im,levs), intent(inout) :: qc, qi
-      real(kind=kind_phys), dimension(im,levs), intent(inout) :: qr, qs, qg
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: qc, qi
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: qr, qs, qg
       ! qci_conv only allocated if GF is used
       real(kind=kind_phys), dimension(:,:),     intent(inout) :: qci_conv
-      real(kind=kind_phys), dimension(im,levs), intent(in)    :: T3D,delp, &
+      real(kind=kind_phys), dimension(:,:), intent(in)    :: T3D,delp, &
            &                                                     qv,P3D
-      real(kind=kind_phys), dimension(im,levs), intent(inout) :: &
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: &
            &         clouds1,clouds2,clouds3,clouds4,clouds5
-      real(kind=kind_phys), dimension(im,levs), intent(inout) :: qc_save, qi_save
-      real(kind=kind_phys), dimension(im,levs), intent(in)    :: qc_bl, qi_bl, cldfra_bl
-      real(kind=kind_phys), dimension(im),      intent(in)    :: slmsk, xlat, de_lgth
-      real(kind=kind_phys), dimension(im,nlay), intent(in)    :: plyr, dz      
-      real(kind=kind_phys), dimension(im,5),    intent(inout) :: cldsa
-      integer,              dimension(im,3),    intent(inout) :: mbota, mtopa
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: qc_save, qi_save
+      real(kind=kind_phys), dimension(:,:), intent(in)    :: qc_bl, qi_bl, cldfra_bl
+      real(kind=kind_phys), dimension(:),      intent(in)    :: slmsk, xlat, de_lgth
+      real(kind=kind_phys), dimension(:,:), intent(in)    :: plyr, dz      
+      real(kind=kind_phys), dimension(:,:),    intent(inout) :: cldsa
+      integer,              dimension(:,:),    intent(inout) :: mbota, mtopa
       integer,                                  intent(in)    :: iovr
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg

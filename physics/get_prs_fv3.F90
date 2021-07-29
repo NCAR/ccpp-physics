@@ -25,14 +25,14 @@ contains
      ! Interface variables
      integer, intent(in) :: ix, levs
      real(kind=kind_phys), intent(in) :: con_fvirt
-     real(kind=kind_phys), dimension(ix,levs+1),     intent(in)    :: phii
-     real(kind=kind_phys), dimension(ix,levs+1),     intent(in)    :: prsi
-     real(kind=kind_phys), dimension(ix,levs),       intent(in)    :: tgrs
-     real(kind=kind_phys), dimension(ix,levs),       intent(in)    :: qgrs1
-     real(kind=kind_phys), dimension(ix,levs),       intent(out)   :: del
-     real(kind=kind_phys), dimension(ix,levs+1),     intent(out)   :: del_gz
-     character(len=*),                               intent(out)   :: errmsg
-     integer,                                        intent(out)   :: errflg
+     real(kind=kind_phys), dimension(:,:),     intent(in)    :: phii
+     real(kind=kind_phys), dimension(:,:),     intent(in)    :: prsi
+     real(kind=kind_phys), dimension(:,:),     intent(in)    :: tgrs
+     real(kind=kind_phys), dimension(:,:),     intent(in)    :: qgrs1
+     real(kind=kind_phys), dimension(:,:),     intent(out)   :: del
+     real(kind=kind_phys), dimension(:,:),     intent(out)   :: del_gz
+     character(len=*),                         intent(out)   :: errmsg
+     integer,                                  intent(out)   :: errflg
 
      ! Local variables
      integer :: i, k
@@ -87,13 +87,13 @@ contains
      ! Interface variables
      integer, intent(in) :: ix, levs
      real(kind=kind_phys), intent(in) :: con_fvirt
-     real(kind=kind_phys), dimension(ix,levs),       intent(in)    :: gt0
-     real(kind=kind_phys), dimension(ix,levs),       intent(in)    :: gq01
-     real(kind=kind_phys), dimension(ix,levs+1),     intent(inout) :: del_gz
-     real(kind=kind_phys), dimension(ix,levs+1),     intent(out)   :: phii
-     real(kind=kind_phys), dimension(ix,levs),       intent(out)   :: phil
-     character(len=*),                               intent(out)   :: errmsg
-     integer,                                        intent(out)   :: errflg
+     real(kind=kind_phys), dimension(:,:),     intent(in)    :: gt0
+     real(kind=kind_phys), dimension(:,:),     intent(in)    :: gq01
+     real(kind=kind_phys), dimension(:,:),     intent(inout) :: del_gz
+     real(kind=kind_phys), dimension(:,:),     intent(out)   :: phii
+     real(kind=kind_phys), dimension(:,:),     intent(out)   :: phil
+     character(len=*),                         intent(out)   :: errmsg
+     integer,                                  intent(out)   :: errflg
 
      ! Local variables
      integer :: i, k

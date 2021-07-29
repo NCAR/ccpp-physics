@@ -5,6 +5,36 @@
 
 ########################################################################
 [ccpp-arg-table]
+  name = h2ophys_init
+  type = scheme
+[h2o_phys]
+  standard_name = flag_for_stratospheric_water_vapor_physics
+  long_name = flag for stratospheric water vapor physics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+
+########################################################################
+[ccpp-arg-table]
   name = h2ophys_run
   type = scheme
 [im]
@@ -16,7 +46,7 @@
   intent = in
   optional = F
 [levs]
-  standard_name = vertical_dimension
+  standard_name = vertical_layer_dimension
   long_name = number of vertical layers
   units = count
   dimensions = ()
@@ -32,7 +62,7 @@
   intent = in
   optional = F
 [dt]
-  standard_name = time_step_for_physics
+  standard_name = timestep_for_physics
   long_name = physics time step
   units = s
   dimensions = ()
@@ -41,10 +71,10 @@
   intent = in
   optional = F
 [h2o]
-  standard_name = water_vapor_specific_humidity_updated_by_physics
+  standard_name = specific_humidity_of_new_state
   long_name = water vapor specific humidity updated by physics
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -62,13 +92,13 @@
   standard_name = air_pressure
   long_name = mid-layer pressure
   units = Pa
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [h2opltc]
-  standard_name = h2o_forcing
+  standard_name = stratospheric_water_vapor_forcing
   long_name = water forcing data
   units = various
   dimensions = (horizontal_loop_extent,vertical_dimension_of_h2o_forcing_data,number_of_coefficients_in_h2o_forcing_data)
@@ -82,14 +112,6 @@
   units = index
   dimensions = ()
   type = integer
-  intent = in
-  optional = F
-[ldiag3d]
-  standard_name = flag_diagnostics_3D
-  long_name = flag for calculating 3-D diagnostic fields
-  units = flag
-  dimensions = ()
-  type = logical
   intent = in
   optional = F
 [me]

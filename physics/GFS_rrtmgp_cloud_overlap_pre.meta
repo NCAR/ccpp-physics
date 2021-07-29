@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = GFS_rrtmgp_cloud_overlap_pre
   type = scheme
-  dependencies = rrtmgp_aux.F90, radiation_cloud_overlap.F90
+  dependencies = radiation_tools.F90, radiation_cloud_overlap.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -16,15 +16,23 @@
   intent = in
   optional = F
 [nLev]
-  standard_name = vertical_dimension
+  standard_name = vertical_layer_dimension
   long_name = number of vertical levels
   units = count
   dimensions = ()
   type = integer
   intent = in
   optional = F   
+[yearlen]
+  standard_name = number_of_days_in_current_year
+  long_name = number of days in a year
+  units = days
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F  
 [doSWrad]
-  standard_name = flag_to_calc_sw
+  standard_name = flag_for_calling_shortwave_radiation
   long_name = logical flags for sw radiation calls
   units = flag
   dimensions = ()
@@ -32,23 +40,15 @@
   intent = in
   optional = F
 [doLWrad]
-  standard_name = flag_to_calc_lw
+  standard_name = flag_for_calling_longwave_radiation
   long_name = logical flags for lw radiation calls
   units = flag
   dimensions = ()
   type = logical
   intent = in
   optional = F    
-[yearlen]
-  standard_name = number_of_days_in_year
-  long_name = number of days in a year
-  units = days
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F  
 [julian]
-  standard_name = julian_day
+  standard_name = forecast_julian_day
   long_name = julian day
   units = days
   dimensions = ()
@@ -69,7 +69,7 @@
   standard_name = air_pressure_at_interface_for_RRTMGP_in_hPa
   long_name = air pressure at vertical interface for radiation calculation
   units = hPa
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -78,7 +78,7 @@
   standard_name = air_pressure_at_layer_for_RRTMGP_in_hPa
   long_name = air pressure at vertical layer for radiation calculation
   units = hPa
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -87,7 +87,7 @@
   standard_name = virtual_temperature
   long_name = layer virtual temperature
   units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -111,7 +111,7 @@
   intent = in
   optional = F 
 [con_rd]
-  standard_name = gas_constant_dry_air
+  standard_name = gas_constant_of_dry_air
   long_name = ideal gas constant for dry air
   units = J kg-1 K-1
   dimensions = ()
@@ -128,6 +128,23 @@
   kind = kind_phys
   intent = in
   optional = F       
+[dcorr_con]
+  standard_name = decorrelation_length_used_by_overlap_method
+  long_name = decorrelation length (default) used by cloud overlap method (iovr)
+  units = km
+  dimensions = ()
+  type = real
+  intent = in
+  kind = kind_phys
+  optional = F
+[idcor]
+  standard_name = flag_for_decorrelation_length_method
+  long_name = flag for decorrelation length method used in cloud overlap method (iovr)
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [iovr]
   standard_name = flag_for_cloud_overlap_method_for_radiation
   long_name = flag for cloud overlap method
@@ -160,14 +177,6 @@
   type = integer
   intent = in
   optional = F
-[idcor]
-  standard_name = flag_for_decorrelation_length_method
-  long_name = flag for decorrelation length method used in cloud overlap method (iovr)
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [idcor_con]
   standard_name = flag_for_constant_decorrelation_length_method
   long_name = choice of decorrelation length computation (costant)
@@ -192,20 +201,11 @@
   type = integer
   intent = in
   optional = F
-[dcorr_con]
-  standard_name = decorreltion_length_used_by_overlap_method
-  long_name = decorrelation length (default) used by cloud overlap method (iovr)
-  units = km
-  dimensions = ()
-  type = real
-  intent = in
-  kind = kind_phys
-  optional = F
 [cld_frac]
   standard_name = total_cloud_fraction
   long_name = layer total cloud fraction
   units = frac
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -223,7 +223,7 @@
   standard_name = cloud_overlap_param
   long_name = cloud overlap parameter
   units = km
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -232,7 +232,7 @@
   standard_name = precip_overlap_param
   long_name = precipitation overlap parameter
   units = km
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -241,7 +241,7 @@
   standard_name = layer_thickness
   long_name = layer_thickness
   units = m
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = out

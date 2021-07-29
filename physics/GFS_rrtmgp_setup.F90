@@ -5,12 +5,11 @@ module GFS_rrtmgp_setup
   use module_radiation_astronomy, only : sol_init, sol_update
   use module_radiation_aerosols,  only : aer_init, aer_update
   use module_radiation_gases,     only : gas_init, gas_update
-  use module_radiation_surface,   only : sfc_init
   use GFS_cloud_diagnostics,      only : hml_cloud_diagnostics_initialize
   ! *NOTE* These parameters below are required radiation_****** modules. They are not
   !        directly used by the RRTMGP routines.
   use physparam,                  only : isolar,  ictmflg, ico2flg, ioznflg, iaerflg,    &
-                                         iaermdl, ialbflg, iemsflg, ivflip
+                                         iaermdl, ivflip
   implicit none
   
   public GFS_rrtmgp_setup_init, GFS_rrtmgp_setup_timestep_init, GFS_rrtmgp_setup_finalize
@@ -40,13 +39,14 @@ contains
 !! \section arg_table_GFS_rrtmgp_setup_init
 !! \htmlinclude GFS_rrtmgp_setup_init.html
 !!
-  subroutine GFS_rrtmgp_setup_init(imp_physics, imp_physics_fer_hires, imp_physics_gfdl,    &
-       imp_physics_thompson, imp_physics_wsm6, imp_physics_zhao_carr,                       &
-       imp_physics_zhao_carr_pdf, imp_physics_mg,  si, levr, ictm, isol, ico2, iaer, ialb,  &
-       iems, ntcw, num_p3d,  ntoz, iovr, isubc_sw, isubc_lw, icliq_sw, crick_proof, ccnorm, &
+  subroutine GFS_rrtmgp_setup_init(do_RRTMGP, imp_physics, imp_physics_fer_hires,        &
+       imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, imp_physics_zhao_carr,  &
+       imp_physics_zhao_carr_pdf, imp_physics_mg,  si, levr, ictm, isol, ico2, iaer,     &
+       ntcw, num_p3d,  ntoz, iovr, isubc_sw, isubc_lw, icliq_sw, crick_proof, ccnorm,    &
        norad_precip, idate, iflip, me, errmsg, errflg)
 
     ! Inputs
+    logical, intent(in) :: do_RRTMGP
     integer, intent(in) :: &
          imp_physics,               & ! Flag for MP scheme
          imp_physics_fer_hires,     & ! Flag for fer-hires scheme
@@ -56,14 +56,14 @@ contains
          imp_physics_zhao_carr,     & ! Flag for zhao-carr scheme
          imp_physics_zhao_carr_pdf, & ! Flag for zhao-carr+PDF scheme
          imp_physics_mg               ! Flag for MG scheme
-    real(kind_phys), dimension(levr+1), intent(in) :: &
+    real(kind_phys), dimension(:), intent(in) :: &
          si
-    integer, intent(in) :: levr, ictm, isol, ico2, iaer, ialb, iems,   & 
-         ntcw, num_p3d, ntoz, iovr, isubc_sw, isubc_lw,                &
+    integer, intent(in) :: levr, ictm, isol, ico2, iaer, & 
+         ntcw, num_p3d, ntoz, iovr, isubc_sw, isubc_lw,  &
          icliq_sw, iflip, me 
     logical, intent(in) :: &
          crick_proof, ccnorm, norad_precip
-    integer, intent(in), dimension(4) :: &
+    integer, intent(in), dimension(:) :: &
          idate
 
     ! Outputs
@@ -75,14 +75,19 @@ contains
     errflg = 0
     
     if (is_initialized) return
-    
+
+    ! Consistency checks
+    if (.not. do_RRTMGP) then
+      write(errmsg,'(*(a))') "Logic error: do_RRTMGP must be set to .true."
+      errflg = 1
+      return
+    end if
+
     ! Set radiation parameters
     isolar  = isol                     ! solar constant control flag
     ictmflg = ictm                     ! data ic time/date control flag
     ico2flg = ico2                     ! co2 data source control flag
     ioznflg = ntoz                     ! ozone data source control flag
-    ialbflg = ialb                     ! surface albedo control flag
-    iemsflg = iems                     ! surface emissivity control flag
     ivflip  = iflip                    ! vertical index direction control flag
     
     if ( ictm==0 .or. ictm==-2 ) then
@@ -105,8 +110,6 @@ contains
                ' isol     = ',isol,      &
                ' ico2     = ',ico2,      &
                ' iaer     = ',iaer,      &
-               ' ialb     = ',ialb,      &
-               ' iems     = ',iems,      &
                ' ntcw     = ',ntcw
        print *,' np3d     = ',num_p3d,   &
                ' ntoz     = ',ntoz,      &
@@ -118,14 +121,6 @@ contains
                ' me       = ',me
     endif
     
-#if 0
-    ! GFS_radiation_driver.F90 may in the future initialize air/ground
-    ! temperature differently; however, this is not used at the moment
-    ! and as such we avoid the difficulty of dealing with exchanging
-    ! itsfc between GFS_rrtmgp_setup and a yet-to-be-created/-used
-    ! interstitial routine (or GFS_radiation_driver.F90)
-    itsfc  = iemsflg / 10             ! sfc air/ground temp control
-#endif
     loz1st = (ioznflg == 0)           ! first-time clim ozone data read flag
     month0 = 0
     iyear0 = 0
@@ -135,7 +130,6 @@ contains
     call sol_init ( me )
     call aer_init ( levr, me )
     call gas_init ( me )
-    call sfc_init ( me )
     call hml_cloud_diagnostics_initialize(imp_physics, imp_physics_fer_hires,           &
          imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,                      &
          imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, imp_physics_mg, levr, me, si,&

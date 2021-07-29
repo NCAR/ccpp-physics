@@ -3189,7 +3189,7 @@
       endif
 
       ! Call subroutine get_alpha_exp to define alpha parameter for exponential cloud overlap options
-      if ( iovr == 4 .or. iovr == 5) then
+      if ( iovr == 3 .or. iovr == 4 .or. iovr == 5) then
          call get_alpha_exp(ix, nLay, dzlay, de_lgth, alpha)
       else
          de_lgth(:) = 0.

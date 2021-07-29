@@ -11,6 +11,7 @@
       implicit none
 
       public :: sfc_diff_init, sfc_diff_run, sfc_diff_finalize
+      public :: stability
 
       private
 
@@ -61,16 +62,16 @@
 !! - Calculate the exchange coefficients:\f$cm\f$, \f$ch\f$, and \f$stress\f$ as inputs of other \a sfc schemes.
 !!
       subroutine sfc_diff_run (im,rvrdm1,eps,epsm1,grav,                &  !intent(in)
-     &                    ps,t1,q1,z1,wind,                             &  !intent(in)
+     &                    ps,t1,q1,z1,garea,wind,                       &  !intent(in)
      &                    prsl1,prslki,prsik1,prslk1,                   &  !intent(in)
      &                    sigmaf,vegtype,shdmax,ivegsrc,                &  !intent(in)
      &                    z0pert,ztpert,                                &  ! mg, sfc-perts !intent(in)
      &                    flag_iter,redrag,                             &  !intent(in)
      &                    u10m,v10m,sfc_z0_type,                        &  !hafs,z0 type !intent(in)
      &                    wet,dry,icy,                                  &  !intent(in)
+     &                    thsfc_loc,                                    &  !intent(in)
      &                    tskin_wat, tskin_lnd, tskin_ice,              &  !intent(in)
      &                    tsurf_wat, tsurf_lnd, tsurf_ice,              &  !intent(in)
-     &                   snwdph_wat,snwdph_lnd,snwdph_ice,              &  !intent(in)
      &                     z0rl_wat,  z0rl_lnd,  z0rl_ice,              &  !intent(inout)
      &                     z0rl_wav,                                    &  !intent(inout)
      &                    ustar_wat, ustar_lnd, ustar_ice,              &  !intent(inout)
@@ -82,6 +83,8 @@
      &                       fh_wat,    fh_lnd,    fh_ice,              &  !intent(inout)
      &                     fm10_wat,  fm10_lnd,  fm10_ice,              &  !intent(inout)
      &                      fh2_wat,   fh2_lnd,   fh2_ice,              &  !intent(inout)
+     &                    ztmax_wat, ztmax_lnd, ztmax_ice,              &  !intent(inout)
+     &                    zvfun,                                        &  !intent(out)
      &                    errmsg, errflg)                                  !intent(out)
 !
       implicit none
@@ -90,24 +93,25 @@
       integer, intent(in) :: im, ivegsrc
       integer, intent(in) :: sfc_z0_type ! option for calculating surface roughness length over ocean
 
-      integer, dimension(im), intent(in) :: vegtype
+      integer, dimension(:), intent(in) :: vegtype
 
       logical, intent(in) :: redrag ! reduced drag coeff. flag for high wind over sea (j.han)
-      logical, dimension(im), intent(in) :: flag_iter, wet, dry, icy
+      logical, dimension(:), intent(in) :: flag_iter, wet, dry, icy
 
-      real(kind=kind_phys), dimension(im), intent(in)    :: u10m,v10m
+      logical, intent(in) :: thsfc_loc ! Flag for reference pressure in theta calculation
+
+      real(kind=kind_phys), dimension(:), intent(in)    :: u10m,v10m
       real(kind=kind_phys), intent(in) :: rvrdm1, eps, epsm1, grav
-      real(kind=kind_phys), dimension(im), intent(in)    ::             &
-     &                    ps,t1,q1,z1,prsl1,prslki,prsik1,prslk1,       &
+      real(kind=kind_phys), dimension(:), intent(in)    ::              &
+     &                    ps,t1,q1,z1,garea,prsl1,prslki,prsik1,prslk1, &
      &                    wind,sigmaf,shdmax,                           &
      &                    z0pert,ztpert ! mg, sfc-perts
-      real(kind=kind_phys), dimension(im), intent(in)    ::             &
+      real(kind=kind_phys), dimension(:), intent(in)    ::              &
      &                    tskin_wat, tskin_lnd, tskin_ice,              &
-     &                    tsurf_wat, tsurf_lnd, tsurf_ice,              &
-     &                   snwdph_wat,snwdph_lnd,snwdph_ice
+     &                    tsurf_wat, tsurf_lnd, tsurf_ice
 
-      real(kind=kind_phys), dimension(im), intent(in)    :: z0rl_wav
-      real(kind=kind_phys), dimension(im), intent(inout) ::             &
+      real(kind=kind_phys), dimension(:), intent(in)    :: z0rl_wav
+      real(kind=kind_phys), dimension(:), intent(inout) ::              &
      &                     z0rl_wat,  z0rl_lnd,  z0rl_ice,              &
      &                    ustar_wat, ustar_lnd, ustar_ice,              &
      &                       cm_wat,    cm_lnd,    cm_ice,              &
@@ -117,7 +121,10 @@
      &                       fm_wat,    fm_lnd,    fm_ice,              &
      &                       fh_wat,    fh_lnd,    fh_ice,              &
      &                     fm10_wat,  fm10_lnd,  fm10_ice,              &
-     &                      fh2_wat,   fh2_lnd,   fh2_ice
+     &                      fh2_wat,   fh2_lnd,   fh2_ice,              &
+     &                    ztmax_wat, ztmax_lnd, ztmax_ice
+      real(kind=kind_phys), dimension(:), intent(out)    :: zvfun
+!
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 !
@@ -125,14 +132,17 @@
 !
       integer   i
 !
-      real(kind=kind_phys) :: rat,   thv1, restar, wind10m,
+      real(kind=kind_phys) :: rat, tv1, thv1, restar, wind10m,
      &                        czilc, tem1, tem2, virtfac
+!
 
-      real(kind=kind_phys) :: tvs, z0, z0max, ztmax
+      real(kind=kind_phys) :: tvs, z0, z0max, ztmax, gdx
+!
+      real(kind=kind_phys), parameter :: z0lo=0.1, z0up=1.0
 !
       real(kind=kind_phys), parameter ::
      &        one=1.0_kp, zero=0.0_kp, half=0.5_kp, qmin=1.0e-8_kp
-     &,       charnock=.014_kp, z0s_max=.317e-2_kp                      &! a limiting value at high winds over sea
+     &,       charnock=.018_kp, z0s_max=.317e-2_kp                      &! a limiting value at high winds over sea
      &,       zmin=1.0e-6_kp                                            &
      &,       vis=1.4e-5_kp, rnu=1.51e-5_kp, visi=one/vis               &
      &,       log01=log(0.01_kp), log05=log(0.05_kp), log07=log(0.07_kp)
@@ -166,19 +176,36 @@
 
       do i=1,im
         if(flag_iter(i)) then
+
+          ! Need to initialize ztmax arrays
+          ztmax_lnd(i) = 1. ! log(1) = 0
+          ztmax_ice(i) = 1. ! log(1) = 0
+          ztmax_wat(i) = 1. ! log(1) = 0
+
           virtfac = one + rvrdm1 * max(q1(i),qmin)
-          thv1    = t1(i) * prslki(i) * virtfac
+
+          tv1 = t1(i) * virtfac ! Virtual temperature in middle of lowest layer
+          if(thsfc_loc) then ! Use local potential temperature
+            thv1  = t1(i) * prslki(i) * virtfac
+          else ! Use potential temperature reference to 1000 hPa
+            thv1    = t1(i) / prslk1(i) * virtfac
+          endif
+
+          zvfun(i) = zero
+          gdx = sqrt(garea(i))
 
 !  compute stability dependent exchange coefficients
 !  this portion of the code is presently suppressed
 !
           if (dry(i)) then ! Some land
-#ifdef GSD_SURFACE_FLUXES_BUGFIX
-            tvs   = half * (tsurf_lnd(i)+tskin_lnd(i))/prsik1(i)
-     &                   * virtfac
-#else
-            tvs   = half * (tsurf_lnd(i)+tskin_lnd(i)) * virtfac
-#endif
+
+            if(thsfc_loc) then ! Use local potential temperature
+              tvs   = half * (tsurf_lnd(i)+tskin_lnd(i)) * virtfac
+            else ! Use potential temperature referenced to 1000 hPa
+              tvs   = half * (tsurf_lnd(i)+tskin_lnd(i))/prsik1(i)
+     &                     * virtfac
+            endif
+
             z0max = max(zmin, min(0.01_kp * z0rl_lnd(i), z1(i)))
 !** xubin's new z0  over land
             tem1  = one - shdmax(i)
@@ -225,31 +252,53 @@
 
             z0max = max(z0max, zmin)
 
-!           czilc = 10.0 ** (- (0.40/0.07) * z0) ! fei's canopy height dependance of czil
-            czilc = 0.8_kp
-
-            tem1  = 1.0_kp - sigmaf(i)
-            ztmax = z0max*exp( - tem1*tem1
-     &              * czilc*ca*sqrt(ustar_lnd(i)*(0.01/1.5e-05)))
-
-
+!!          czilc = 10.0 ** (- (0.40/0.07) * z0) ! fei's canopy height dependance of czil
+!           czilc = 0.8_kp
+!
+!           tem1  = 1.0_kp - sigmaf(i)
+!           ztmax_lnd(i) = z0max*exp( - tem1*tem1
+!    &              * czilc*ca*sqrt(ustar_lnd(i)*(0.01/1.5e-05)))
+!
+            czilc = 10.0_kp ** (- 4.0_kp * z0max) ! Trier et al. (2011,WAF)
+            czilc = max(min(czilc, 0.8_kp), 0.08_kp)
+            tem1 = 1.0_kp - sigmaf(i)
+            czilc = czilc * tem1 * tem1
+            ztmax_lnd(i) = z0max * exp( - czilc * ca
+     &            * 258.2_kp * sqrt(ustar_lnd(i)*z0max) )
+!
 ! mg, sfc-perts: add surface perturbations to ztmax/z0max ratio over land
             if (ztpert(i) /= zero) then
-              ztmax = ztmax * (10.0_kp**ztpert(i))
+              ztmax_lnd(i) = ztmax_lnd(i) * (10.0_kp**ztpert(i))
             endif
-            ztmax = max(ztmax, zmin)
+            ztmax_lnd(i) = max(ztmax_lnd(i), zmin)
+!
+! compute a function of surface roughness & green vegetation fraction (zvfun)       
+!
+            tem1 = (z0max - z0lo) / (z0up - z0lo)
+            tem1 = min(max(tem1, zero), 1.0_kp)
+            tem2 = max(sigmaf(i), 0.1_kp)
+            zvfun(i) = sqrt(tem1 * tem2)
 !
             call stability
 !  ---  inputs:
-     &       (z1(i), snwdph_lnd(i), thv1, wind(i),
-     &        z0max, ztmax, tvs, grav,
+     &       (z1(i), zvfun(i), gdx, tv1, thv1, wind(i),
+     &        z0max, ztmax_lnd(i), tvs, grav, thsfc_loc,
 !  ---  outputs:
      &        rb_lnd(i), fm_lnd(i), fh_lnd(i), fm10_lnd(i), fh2_lnd(i),
      &        cm_lnd(i), ch_lnd(i), stress_lnd(i), ustar_lnd(i))
           endif ! Dry points
 
           if (icy(i)) then ! Some ice
-            tvs   = half * (tsurf_ice(i)+tskin_ice(i)) * virtfac
+
+            zvfun(i) = zero
+
+            if(thsfc_loc) then ! Use local potential temperature
+              tvs   = half * (tsurf_ice(i)+tskin_ice(i)) * virtfac
+            else ! Use potential temperature referenced to 1000 hPa
+              tvs   = half * (tsurf_ice(i)+tskin_ice(i))/prsik1(i)
+     &                     * virtfac 
+            endif
+
             z0max = max(zmin, min(0.01_kp * z0rl_ice(i), z1(i)))
 !** xubin's new z0  over land and sea ice
             tem1  = one - shdmax(i)
@@ -265,19 +314,27 @@
 
             z0max = max(z0max, zmin)
 
-!           czilc = 10.0 ** (- (0.40/0.07) * z0) ! fei's canopy height
+!!          czilc = 10.0 ** (- (0.40/0.07) * z0) ! fei's canopy height
 !           dependance of czil
-            czilc = 0.8_kp
-
-            tem1  = 1.0_kp - sigmaf(i)
-            ztmax = z0max*exp( - tem1*tem1
-     &              * czilc*ca*sqrt(ustar_ice(i)*(0.01/1.5e-05)))
-            ztmax = max(ztmax, 1.0e-6)
+!           czilc = 0.8_kp
+!
+!           tem1  = 1.0_kp - sigmaf(i)
+!           ztmax_ice(i) = z0max*exp( - tem1*tem1
+!    &              * czilc*ca*sqrt(ustar_ice(i)*(0.01/1.5e-05)))
+!
+            czilc = 10.0_kp ** (- 4.0_kp * z0max)
+            czilc = max(min(czilc, 0.8_kp), 0.08_kp)
+            tem1 = 1.0_kp - sigmaf(i)
+            czilc = czilc * tem1 * tem1
+            ztmax_ice(i) = z0max * exp( - czilc * ca
+     &            * 258.2_kp * sqrt(ustar_ice(i)*z0max) )
+!
+            ztmax_ice(i) = max(ztmax_ice(i), 1.0e-6)
 !
             call stability
 !  ---  inputs:
-     &     (z1(i), snwdph_ice(i), thv1, wind(i),
-     &      z0max, ztmax, tvs, grav,
+     &     (z1(i), zvfun(i), gdx, tv1, thv1, wind(i),
+     &      z0max, ztmax_ice(i), tvs, grav, thsfc_loc,
 !  ---  outputs:
      &      rb_ice(i), fm_ice(i), fh_ice(i), fm10_ice(i), fh2_ice(i),
      &      cm_ice(i), ch_ice(i), stress_ice(i), ustar_ice(i))
@@ -287,10 +344,19 @@
 !      the stuff now put into "stability"
 
           if (wet(i)) then ! Some open ocean
-            tvs          = half * (tsurf_wat(i)+tskin_wat(i)) * virtfac
+  
+            zvfun(i) = zero
+
+            if(thsfc_loc) then ! Use local potential temperature
+              tvs        = half * (tsurf_wat(i)+tskin_wat(i)) * virtfac
+            else
+              tvs        = half * (tsurf_wat(i)+tskin_wat(i))/prsik1(i)
+     &                          * virtfac
+            endif
+
             z0           = 0.01_kp * z0rl_wat(i)
             z0max        = max(zmin, min(z0,z1(i)))
-            ustar_wat(i) = sqrt(grav * z0 / charnock)
+!           ustar_wat(i) = sqrt(grav * z0 / charnock)
             wind10m      = sqrt(u10m(i)*u10m(i)+v10m(i)*v10m(i))
 
 !**  test xubin's new z0
@@ -307,12 +373,12 @@
 !  rat taken from zeng, zhao and dickinson 1997
 
             rat   = min(7.0_kp, 2.67_kp * sqrt(sqrt(restar)) - 2.57_kp)
-            ztmax = max(z0max * exp(-rat), zmin)
+            ztmax_wat(i) = max(z0max * exp(-rat), zmin)
 !
             if (sfc_z0_type == 6) then
-              call znot_t_v6(wind10m, ztmax)   ! 10-m wind,m/s, ztmax(m)
+              call znot_t_v6(wind10m, ztmax_wat(i))   ! 10-m wind,m/s, ztmax(m)
             else if (sfc_z0_type == 7) then
-              call znot_t_v7(wind10m, ztmax)   ! 10-m wind,m/s, ztmax(m)
+              call znot_t_v7(wind10m, ztmax_wat(i))   ! 10-m wind,m/s, ztmax(m)
             else if (sfc_z0_type > 0) then
               write(0,*)'no option for sfc_z0_type=',sfc_z0_type
               stop
@@ -320,8 +386,8 @@
 !
             call stability
 !  ---  inputs:
-     &       (z1(i), snwdph_wat(i), thv1, wind(i),
-     &        z0max, ztmax, tvs, grav,
+     &       (z1(i), zvfun(i), gdx, tv1, thv1, wind(i),
+     &        z0max, ztmax_wat(i), tvs, grav, thsfc_loc,
 !  ---  outputs:
      &        rb_wat(i), fm_wat(i), fh_wat(i), fm10_wat(i), fh2_wat(i),
      &        cm_wat(i), ch_wat(i), stress_wat(i), ustar_wat(i))
@@ -330,7 +396,10 @@
 !
             if (sfc_z0_type >= 0) then
               if (sfc_z0_type == 0) then
-                z0 = (charnock / grav) * ustar_wat(i) * ustar_wat(i)
+!               z0 = (charnock / grav) * ustar_wat(i) * ustar_wat(i)
+                tem1 = 0.11 * vis / ustar_wat(i)
+                z0 = tem1 + (charnock/grav)*ustar_wat(i)*ustar_wat(i)
+
 
 ! mbek -- toga-coare flux algorithm
 !               z0 = (charnock / grav) * ustar(i)*ustar(i) +  arnu/ustar(i)
@@ -358,7 +427,9 @@
               endif
 
             elseif (z0rl_wav(i) <= 1.0e-7_kp) then
-              z0 = (charnock / grav) * ustar_wat(i) * ustar_wat(i)
+!             z0 = (charnock / grav) * ustar_wat(i) * ustar_wat(i)
+              tem1 = 0.11 * vis / ustar_wat(i)
+              z0 = tem1 + (charnock/grav)*ustar_wat(i)*ustar_wat(i)
 
               if (redrag) then
                 z0rl_wat(i) = 100.0_kp * max(min(z0, z0s_max),1.0e-7_kp)
@@ -380,7 +451,8 @@
 !>\ingroup GFS_diff_main
       subroutine stability                                              &
 !  ---  inputs:
-     &     ( z1, snwdph, thv1, wind, z0max, ztmax, tvs, grav,           &
+     &     ( z1, zvfun, gdx, tv1, thv1, wind, z0max, ztmax, tvs, grav,  &
+     &       thsfc_loc,                                                 &
 !  ---  outputs:
      &       rb, fm, fh, fm10, fh2, cm, ch, stress, ustar)
 !-----
@@ -388,7 +460,8 @@
       integer, parameter :: kp = kind_phys
 !  ---  inputs:
       real(kind=kind_phys), intent(in) ::                               &
-     &       z1, snwdph, thv1, wind, z0max, ztmax, tvs, grav
+     &       z1, zvfun, gdx, tv1, thv1, wind, z0max, ztmax, tvs, grav
+      logical,              intent(in) :: thsfc_loc
 
 !  ---  outputs:
       real(kind=kind_phys), intent(out) ::                              &
@@ -397,40 +470,56 @@
 !  ---  locals:
       real(kind=kind_phys), parameter :: alpha=5.0_kp, a0=-3.975_kp     &
      &,         a1=12.32_kp,   alpha4=4.0_kp*alpha                      &
-     &,         b1=-7.755_kp,  b2=6.041_kp,  alpha2=alpha+alpha         &
-     &,         beta=1.0_kp                                             &
+     &,         b1=-7.755_kp,  b2=6.041_kp                              &
+     &,         xkrefsqr=0.3_kp,  xkmin=0.05_kp                         & 
+     &,         xkgdx=3000.0_kp                                         &
      &,         a0p=-7.941_kp, a1p=24.75_kp, b1p=-8.705_kp, b2p=7.899_kp&
-     &,         ztmin1=-999.0_kp, zero=0.0_kp, one=1.0_kp
+     &,         zolmin=-10.0_kp, zero=0.0_kp, one=1.0_kp
 
       real(kind=kind_phys) aa,     aa0,    bb,     bb0, dtv,   adtv,
      &                     hl1,    hl12,   pm,     ph,  pm10,  ph2,
      &                     z1i,
      &                     fms,    fhs,    hl0,    hl0inf, hlinf,
      &                     hl110,  hlt,    hltinf, olinf,
-     &                     tem1,   tem2, ztmax1
+     &                     tem1,   tem2,   zolmax
+
+      real(kind=kind_phys) xkzo
 
           z1i = one / z1
 
-          tem1   = z0max/z1
-          if (abs(one-tem1) > 1.0e-6_kp) then
-            ztmax1 = - beta*log(tem1)/(alpha2*(one-tem1))
+!
+!  set background diffusivities with one for gdx >= xkgdx and 
+!   as a function of horizontal grid size for gdx < xkgdx 
+!   (i.e., gdx/xkgdx for gdx < xkgdx)
+!
+          if(gdx >= xkgdx) then
+            xkzo = one
           else
-            ztmax1 = 99.0_kp
+            xkzo = gdx / xkgdx
           endif
-          if( z0max < 0.05_kp .and. snwdph < 10.0_kp ) ztmax1 = 99.0_kp
+
+          tem1 = tv1 - tvs
+          if(tem1 > zero) then
+            tem2 = xkzo * zvfun
+            xkzo = min(max(tem2, xkmin), xkzo)
+          endif
+
+          zolmax = xkrefsqr / sqrt(xkzo)
 
 !  compute stability indices (rb and hlinf)
 
           dtv     = thv1 - tvs
           adtv    = max(abs(dtv),0.001_kp)
           dtv     = sign(1.,dtv) * adtv
-#ifdef GSD_SURFACE_FLUXES_BUGFIX
-          rb      = max(-5000.0_kp, grav * dtv * z1
-     &            / (thv1 * wind * wind))
-#else
-          rb      = max(-5000.0_kp, (grav+grav) * dtv * z1
-     &            / ((thv1 + tvs) * wind * wind))
-#endif
+
+          if(thsfc_loc) then ! Use local potential temperature
+            rb      = max(-5000.0_kp, (grav+grav) * dtv * z1
+     &              / ((thv1 + tvs) * wind * wind))
+          else ! Use potential temperature referenced to 1000 hPa
+            rb      = max(-5000.0_kp, grav * dtv * z1
+     &              / (tv1 * wind * wind))
+          endif
+
           tem1    = one / z0max
           tem2    = one / ztmax
           fm      = log((z0max+z1)  * tem1)
@@ -438,7 +527,7 @@
           fm10    = log((z0max+10.0_kp) * tem1)
           fh2     = log((ztmax+2.0_kp)  * tem2)
           hlinf   = rb * fm * fm / fh
-          hlinf   = min(max(hlinf,ztmin1),ztmax1)
+          hlinf   = min(max(hlinf,zolmin),zolmax)
 !
 !  stable case
 !
@@ -457,7 +546,7 @@
               fms    = fm - pm
               fhs    = fh - ph
               hl1    = fms * fms * rb / fhs
-              hl1    = min(max(hl1, ztmin1), ztmax1)
+              hl1    = min(hl1, zolmax)
             endif
 !
 !  second iteration
@@ -472,11 +561,9 @@
             pm    = aa0 - aa + log( (one+aa)/(one+aa0) )
             ph    = bb0 - bb + log( (one+bb)/(one+bb0) )
             hl110 = hl1 * 10.0_kp * z1i
-            hl110 = min(max(hl110, ztmin1), ztmax1)
             aa    = sqrt(one + alpha4 * hl110)
             pm10  = aa0 - aa + log( (one+aa)/(one+aa0) )
             hl12  = (hl1+hl1) * z1i
-            hl12  = min(max(hl12,ztmin1),ztmax1)
 !           aa    = sqrt(one + alpha4 * hl12)
             bb    = sqrt(one + alpha4 * hl12)
             ph2   = bb0 - bb + log( (one+bb)/(one+bb0) )
@@ -488,7 +575,7 @@
             tem1  = 50.0_kp * z0max
             if(abs(olinf) <= tem1) then
               hlinf = -z1 / tem1
-              hlinf = min(max(hlinf,ztmin1),ztmax1)
+              hlinf = max(hlinf, zolmin)
             endif
 !
 !  get pm and ph
@@ -498,10 +585,8 @@
               pm    = (a0  + a1*hl1)  * hl1   / (one+ (b1+b2*hl1)  *hl1)
               ph    = (a0p + a1p*hl1) * hl1   / (one+ (b1p+b2p*hl1)*hl1)
               hl110 = hl1 * 10.0_kp * z1i
-              hl110 = min(max(hl110, ztmin1), ztmax1)
               pm10  = (a0 + a1*hl110) * hl110/(one+(b1+b2*hl110)*hl110)
               hl12  = (hl1+hl1) * z1i
-              hl12  = min(max(hl12, ztmin1), ztmax1)
               ph2   = (a0p + a1p*hl12) * hl12/(one+(b1p+b2p*hl12)*hl12)
             else                       ! hlinf < 0.05
               hl1   = -hlinf
@@ -511,11 +596,9 @@
 !             pm    = log(hl1) + 2.0 * hl1 ** (-.25) - .8776
 !             ph    = log(hl1) + 0.5 * hl1 ** (-.5) + 1.386
               hl110 = hl1 * 10.0_kp * z1i
-              hl110 = min(max(hl110, ztmin1), ztmax1)
               pm10  = log(hl110) + 2.0_kp/sqrt(sqrt(hl110)) - 0.8776_kp
 !             pm10  = log(hl110) + 2. * hl110 ** (-.25) - .8776
               hl12  = (hl1+hl1) * z1i
-              hl12  = min(max(hl12, ztmin1), ztmax1)
               ph2   = log(hl12) + 0.5_kp / sqrt(hl12) + 1.386_kp
 !             ph2   = log(hl12) + .5 * hl12 ** (-.5) + 1.386
             endif

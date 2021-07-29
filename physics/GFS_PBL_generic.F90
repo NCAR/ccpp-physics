@@ -79,33 +79,34 @@
 !! \section arg_table_GFS_PBL_generic_pre_run Argument Table
 !! \htmlinclude GFS_PBL_generic_pre_run.html
 !!
-      subroutine GFS_PBL_generic_pre_run (im, levs, nvdiff, ntrac,                       &
+      subroutine GFS_PBL_generic_pre_run (im, levs, nvdiff, ntrac, rtg_ozone_index,      &
         ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc,                 &
         ntwa, ntia, ntgl, ntoz, ntke, ntkev, nqrimef, trans_aero, ntchs, ntchm,          &
         imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,           &
-        imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires, cplchm, ltaerosol, &
+        imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires, ltaerosol, &
         hybedmf, do_shoc, satmedmf, qgrs, vdftra, save_u, save_v, save_t, save_q,        &
-        ldiag3d, qdiag3d, lssav, ugrs, vgrs, tgrs, errmsg, errflg)
-
+        flag_for_pbl_generic_tend, ldiag3d, qdiag3d, lssav, ugrs, vgrs, tgrs, errmsg, errflg)
+        
       use machine,                only : kind_phys
       use GFS_PBL_generic_common, only : set_aerosol_tracer_index
 
       implicit none
 
       integer, parameter  :: kp = kind_phys
+      integer, intent(out) :: rtg_ozone_index
       integer, intent(in) :: im, levs, nvdiff, ntrac
       integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc
       integer, intent(in) :: ntwa, ntia, ntgl, ntoz, ntke, ntkev, nqrimef,ntchs, ntchm
       logical, intent(in) :: trans_aero, ldiag3d, qdiag3d, lssav
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
       integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires
-      logical, intent(in) :: cplchm, ltaerosol, hybedmf, do_shoc, satmedmf
+      logical, intent(in) :: ltaerosol, hybedmf, do_shoc, satmedmf, flag_for_pbl_generic_tend
 
-      real(kind=kind_phys), dimension(im, levs, ntrac), intent(in) :: qgrs
-      real(kind=kind_phys), dimension(im, levs), intent(in) :: ugrs, vgrs, tgrs
-      real(kind=kind_phys), dimension(im, levs, nvdiff), intent(inout) :: vdftra
-      real(kind=kind_phys), dimension(im, levs), intent(out) :: save_u, save_v, save_t
-      real(kind=kind_phys), dimension(im, levs, ntrac), intent(out) :: save_q
+      real(kind=kind_phys), dimension(:,:,:), intent(in) :: qgrs
+      real(kind=kind_phys), dimension(:,:), intent(in) :: ugrs, vgrs, tgrs
+      real(kind=kind_phys), dimension(:,:, :), intent(inout) :: vdftra
+      real(kind=kind_phys), dimension(:,:), intent(out) :: save_u, save_v, save_t
+      real(kind=kind_phys), dimension(:,:, :), intent(out) :: save_q
 
       ! CCPP error handling variables
       character(len=*), intent(out) :: errmsg
@@ -120,9 +121,11 @@
       errmsg = ''
       errflg = 0
 
+      rtg_ozone_index=-1
 !DH: dvdftra is only used if nvdiff != ntrac or (nvdiff == ntrac .and. )
       if (nvdiff == ntrac .and. (hybedmf .or. do_shoc .or. satmedmf)) then
         vdftra = qgrs
+        rtg_ozone_index = ntoz
       else
         if (imp_physics == imp_physics_wsm6) then
   ! WSM6
@@ -134,6 +137,7 @@
               vdftra(i,k,4) = qgrs(i,k,ntoz)
             enddo
           enddo
+          rtg_ozone_index = 4
 
   ! Ferrier-Aligo
         elseif (imp_physics == imp_physics_fer_hires) then
@@ -147,6 +151,7 @@
               vdftra(i,k,6) = qgrs(i,k,ntoz)
             enddo
           enddo
+          rtg_ozone_index = 6
         
         elseif (imp_physics == imp_physics_thompson) then
   ! Thompson
@@ -167,6 +172,7 @@
                 vdftra(i,k,12) = qgrs(i,k,ntia)
               enddo
             enddo
+            rtg_ozone_index = 10
           else
             do k=1,levs
               do i=1,im
@@ -181,6 +187,7 @@
                 vdftra(i,k,9) = qgrs(i,k,ntoz)
               enddo
             enddo
+            rtg_ozone_index = 9
           endif
   ! MG
         elseif (imp_physics == imp_physics_mg) then        ! MG3/2
@@ -201,6 +208,7 @@
                 vdftra(i,k,12) = qgrs(i,k,ntoz)
               enddo
             enddo
+            rtg_ozone_index = 12
           else                                             ! MG2
             do k=1,levs
               do i=1,im
@@ -216,6 +224,7 @@
                 vdftra(i,k,10) = qgrs(i,k,ntoz)
               enddo
             enddo
+            rtg_ozone_index = 10
           endif
         elseif (imp_physics == imp_physics_gfdl) then
   ! GFDL MP
@@ -230,6 +239,7 @@
               vdftra(i,k,7) = qgrs(i,k,ntoz)
             enddo
           enddo
+          rtg_ozone_index = 7
         elseif (imp_physics == imp_physics_zhao_carr) then
 ! Zhao/Carr/Sundqvist
           do k=1,levs
@@ -239,6 +249,7 @@
               vdftra(i,k,3) = qgrs(i,k,ntoz)
             enddo
           enddo
+          rtg_ozone_index = 3
         endif
 !
         if (trans_aero) then
@@ -247,7 +258,7 @@
                                         imp_physics_mg, ntgl, imp_physics_gfdl, &
                                         imp_physics_zhao_carr, kk,              &
                                         errmsg, errflg)
-          if (.not.errflg==1) return
+          if (errflg /= 0) return
           !
           k1 = kk
           do n=ntchs,ntchm+ntchs-1
@@ -270,7 +281,7 @@
 !
       endif
 
-      if(ldiag3d .and. lssav) then
+      if(ldiag3d .and. lssav .and. flag_for_pbl_generic_tend) then
         do k=1,levs
           do i=1,im
             save_t(i,k) = tgrs(i,k)
@@ -285,6 +296,13 @@
               save_q(i,k,ntoz) = qgrs(i,k,ntoz)
             enddo
           enddo
+          if(ntke>0) then
+            do k=1,levs
+              do i=1,im
+                save_q(i,k,ntke) = qgrs(i,k,ntke)
+              enddo
+            enddo
+          endif
         endif
       endif
 
@@ -311,13 +329,13 @@
         trans_aero, ntchs, ntchm,                                                                                              &
         imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, imp_physics_zhao_carr, imp_physics_mg,          &
         imp_physics_fer_hires,                                                                                                 &
-        ltaerosol, cplflx, cplchm, lssav, flag_for_pbl_generic_tend, ldiag3d, qdiag3d, lsidea, hybedmf, do_shoc, satmedmf,     &
+        ltaerosol, cplflx, cplchm, lssav, flag_for_pbl_generic_tend, ldiag3d, lsidea, hybedmf, do_shoc, satmedmf,              &
         shinhong, do_ysu, dvdftra, dusfc1, dvsfc1, dtsfc1, dqsfc1, dtf, dudt, dvdt, dtdt, htrsw, htrlw, xmu,                   &
-        dqdt, dusfc_cpl, dvsfc_cpl, dtsfc_cpl,                                                                                 &
-        dqsfc_cpl, dusfci_cpl, dvsfci_cpl, dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag, dqsfc_diag,             &
-        dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag, dt3dt, du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD, dq3dt,        &
-        dq3dt_ozone, rd, cp, fvirt, hvap, t1, q1, prsl, hflx, ushfsfci, oceanfrac, flag_cice, dusfc_cice, dvsfc_cice,          &
-        dtsfc_cice, dqsfc_cice, wet, dry, icy, wind, stress_wat, hflx_wat, evap_wat, ugrs1, vgrs1, dkt_cpl, dkt, hffac, hefac, &
+        dqdt, dusfc_cpl, dvsfc_cpl, dtsfc_cpl, dtend, dtidx, index_of_temperature, index_of_x_wind, index_of_y_wind,           &
+        index_of_process_pbl, dqsfc_cpl, dusfci_cpl, dvsfci_cpl, dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag,   &
+        dqsfc_diag, dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag,                                                        &
+        rd, cp, fvirt, hvap, t1, q1, prsl, hflx, ushfsfci, oceanfrac, kdt, dusfc_cice, dvsfc_cice,                             &
+        dtsfc_cice, dqsfc_cice, wet, dry, icy, wind, stress_wat, hflx_wat, evap_wat, ugrs1, vgrs1, hffac, &
         ugrs, vgrs, tgrs, qgrs, save_u, save_v, save_t, save_q, errmsg, errflg)
 
       use machine,                only : kind_phys
@@ -326,18 +344,17 @@
       implicit none
 
       integer, parameter  :: kp = kind_phys
-      integer, intent(in) :: im, levs, nvdiff, ntrac, ntchs, ntchm
+      integer, intent(in) :: im, levs, nvdiff, ntrac, ntchs, ntchm, kdt
       integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev, nqrimef
       logical, intent(in) :: trans_aero
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
       integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires
-      logical, intent(in) :: ltaerosol, cplflx, cplchm, lssav, ldiag3d, qdiag3d, lsidea
+      logical, intent(in) :: ltaerosol, cplflx, cplchm, lssav, ldiag3d, lsidea
       logical, intent(in) :: hybedmf, do_shoc, satmedmf, shinhong, do_ysu
-      logical, dimension(:), intent(in) :: flag_cice
 
       logical, intent(in) :: flag_for_pbl_generic_tend      
-      real(kind=kind_phys), dimension(im, levs), intent(in) :: save_u, save_v, save_t
-      real(kind=kind_phys), dimension(im, levs, ntrac), intent(in) :: save_q
+      real(kind=kind_phys), dimension(:,:), intent(in) :: save_u, save_v, save_t
+      real(kind=kind_phys), dimension(:,:, :), intent(in) :: save_q
 
       real(kind=kind_phys), intent(in) :: dtf
       real(kind=kind_phys), intent(in) :: rd, cp, fvirt, hvap
@@ -346,31 +363,30 @@
       real(kind=kind_phys), dimension(:), intent(in) :: dusfc_cice, dvsfc_cice, dtsfc_cice, dqsfc_cice, &
           wind, stress_wat, hflx_wat, evap_wat, ugrs1, vgrs1
 
-      real(kind=kind_phys), dimension(im, levs, ntrac), intent(in) :: qgrs
-      real(kind=kind_phys), dimension(im, levs), intent(in) :: ugrs, vgrs, tgrs
+      real(kind=kind_phys), dimension(:,:, :), intent(in) :: qgrs
+      real(kind=kind_phys), dimension(:,:), intent(in) :: ugrs, vgrs, tgrs
 
-      real(kind=kind_phys), dimension(im, levs, nvdiff), intent(in) :: dvdftra
-      real(kind=kind_phys), dimension(im), intent(in) :: dusfc1, dvsfc1, dtsfc1, dqsfc1, xmu
-      real(kind=kind_phys), dimension(im, levs), intent(in) :: dudt, dvdt, dtdt, htrsw, htrlw
+      real(kind=kind_phys), dimension(:,:, :), intent(in) :: dvdftra
+      real(kind=kind_phys), dimension(:), intent(in) :: dusfc1, dvsfc1, dtsfc1, dqsfc1, xmu
+      real(kind=kind_phys), dimension(:,:), intent(in) :: dudt, dvdt, dtdt, htrsw, htrlw
 
-      real(kind=kind_phys), dimension(im, levs, ntrac), intent(inout) :: dqdt
+      real(kind=kind_phys), dimension(:,:, :), intent(inout) :: dqdt
 
       ! The following arrays may not be allocated, depending on certain flags (cplflx, ...).
       ! Since Intel 15 crashes when passing unallocated arrays to arrays defined with explicit shape,
       ! use assumed-shape arrays. Note that Intel 18 and GNU 6.2.0-8.1.0 tolerate explicit-shape arrays
       ! as long as these do not get used when not allocated.
-      real(kind=kind_phys), dimension(:,:), intent(inout) :: dt3dt, du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD, dq3dt, dq3dt_ozone
       real(kind=kind_phys), dimension(:),   intent(inout) :: dusfc_cpl, dvsfc_cpl, dtsfc_cpl, dqsfc_cpl, dusfci_cpl, dvsfci_cpl, &
         dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag, dqsfc_diag, dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag
+      real(kind=kind_phys), intent(inout), optional :: dtend(:,:,:)
+      integer, intent(in) :: dtidx(:,:)
+      integer, intent(in) :: index_of_temperature, index_of_x_wind, index_of_y_wind, index_of_process_pbl
 
       logical, dimension(:),intent(in) :: wet, dry, icy
       real(kind=kind_phys), dimension(:), intent(out) ::  ushfsfci
 
-      real(kind=kind_phys), dimension(:,:), intent(inout) :: dkt_cpl
-      real(kind=kind_phys), dimension(:,:), intent(in)    :: dkt
-
       ! From canopy heat storage - reduction factors in latent/sensible heat flux due to surface roughness
-      real(kind=kind_phys), dimension(im), intent(in) :: hffac, hefac
+      real(kind=kind_phys), dimension(:), intent(in) :: hffac
 
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
@@ -380,7 +396,8 @@
       real(kind=kind_phys), parameter :: qmin  = 1.0e-8_kp
       integer :: i, k, kk, k1, n
       real(kind=kind_phys) :: tem, rho
-
+      integer :: idtend
+      
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
@@ -404,7 +421,7 @@
                                         imp_physics_mg, ntgl, imp_physics_gfdl, &
                                         imp_physics_zhao_carr, kk,              &
                                         errmsg, errflg)
-          if (.not.errflg==1) return
+          if (errflg /= 0) return
           !
           k1 = kk
           do n=ntchs,ntchm+ntchs-1
@@ -533,31 +550,21 @@
 
       endif ! nvdiff == ntrac
 
-      if (cplchm) then
-        do i = 1, im
-          tem  = prsl(i,1) / (rd*t1(i)*(one+fvirt*max(q1(i), qmin)))
-          ushfsfci(i) = -cp * tem * hflx(i) ! upward sensible heat flux
-        enddo
-        ! dkt_cpl has dimensions (1:im,1:levs), but dkt has (1:im,1:levs-1)
-        dkt_cpl(1:im,1:levs-1) = dkt(1:im,1:levs-1)
-      endif
-
-
 !  --- ...  coupling insertion
 
       if (cplflx) then
         do i=1,im
-          if (oceanfrac(i) > zero) then ! Ocean only, NO LAKES
+          if (oceanfrac(i) > zero) then      ! Ocean only, NO LAKES
             if ( .not. wet(i)) then ! no open water
-              if (flag_cice(i)) then !use results from CICE
+              if (kdt > 1) then              !use results from CICE
                 dusfci_cpl(i) = dusfc_cice(i)
                 dvsfci_cpl(i) = dvsfc_cice(i)
                 dtsfci_cpl(i) = dtsfc_cice(i)
                 dqsfci_cpl(i) = dqsfc_cice(i)
-              else !use PBL fluxes when CICE fluxes is unavailable
+              else                           !use PBL fluxes when CICE fluxes is unavailable
                 dusfci_cpl(i) = dusfc1(i)
                 dvsfci_cpl(i) = dvsfc1(i)
-                dtsfci_cpl(i) = dtsfc1(i)
+                dtsfci_cpl(i) = dtsfc1(i)*hffac(i)
                 dqsfci_cpl(i) = dqsfc1(i)
               end if
             elseif (icy(i) .or. dry(i)) then ! use stress_ocean from sfc_diff for opw component at mixed point
@@ -576,7 +583,7 @@
               dusfci_cpl(i) = dusfc1(i)
               dvsfci_cpl(i) = dvsfc1(i)
               dtsfci_cpl(i) = dtsfc1(i)*hffac(i)
-              dqsfci_cpl(i) = dqsfc1(i)*hefac(i)
+              dqsfci_cpl(i) = dqsfc1(i)
             endif
 !
             dusfc_cpl (i) = dusfc_cpl(i) + dusfci_cpl(i) * dtf
@@ -594,6 +601,24 @@
         enddo
       endif
 
+      if (cplchm) then
+        if (cplflx) then
+          do i = 1, im
+            if (oceanfrac(i) > zero) then
+              ushfsfci(i) = dtsfci_cpl(i)
+            else
+              rho = prsl(i,1) / (rd*t1(i)*(one+fvirt*max(q1(i), qmin)))
+              ushfsfci(i) = cp * rho * hflx(i)
+            end if
+          end do
+        else
+          do i = 1, im
+            rho = prsl(i,1) / (rd*t1(i)*(one+fvirt*max(q1(i), qmin)))
+            ushfsfci(i) = cp * rho * hflx(i)
+          end do
+        end if
+      end if
+
 !-------------------------------------------------------lssav if loop ----------
       if (lssav) then
         do i=1,im
@@ -602,34 +627,42 @@
           dusfci_diag(i) = dusfc1(i)
           dvsfci_diag(i) = dvsfc1(i)
           dtsfci_diag(i) = dtsfc1(i)*hffac(i)
-          dqsfci_diag(i) = dqsfc1(i)*hefac(i)
+          dqsfci_diag(i) = dqsfc1(i)
           dtsfc_diag (i) = dtsfc_diag(i) + dtsfci_diag(i) * dtf
           dqsfc_diag (i) = dqsfc_diag(i) + dqsfci_diag(i) * dtf
         enddo
 
-        if (ldiag3d .and. flag_for_pbl_generic_tend .and. lssav) then
+        if (ldiag3d .and. flag_for_pbl_generic_tend) then
           if (lsidea) then
-            dt3dt(1:im,:) = dt3dt(1:im,:) + dtdt(1:im,:)*dtf
+            idtend = dtidx(index_of_temperature, index_of_process_pbl)
+            if(idtend>=1) then
+              dtend(1:im,1:levs,idtend) = dtend(1:im,1:levs,idtend) + dtdt(1:im,1:levs)*dtf
+            endif
           else
-            do k=1,levs
-              do i=1,im
-                dt3dt(i,k) = dt3dt(i,k) + (tgrs(i,k) - save_t(i,k))
-              enddo
-            enddo
+            idtend = dtidx(index_of_temperature, index_of_process_pbl)
+            if(idtend>=1) then
+              dtend(1:im,1:levs,idtend) = dtend(1:im,1:levs,idtend) + (tgrs(1:im,1:levs) - save_t(1:im,1:levs))
+            endif
           endif
-          do k=1,levs
-            do i=1,im
-              du3dt_PBL(i,k) = du3dt_PBL(i,k) + (ugrs(i,k) - save_u(i,k))
-              dv3dt_PBL(i,k) = dv3dt_PBL(i,k) + (vgrs(i,k) - save_v(i,k))
-            enddo
-          enddo
-          if(qdiag3d) then
-            do k=1,levs
-              do i=1,im
-                dq3dt      (i,k) = dq3dt      (i,k) + (qgrs(i,k,ntqv)-save_q(i,k,ntqv))
-                dq3dt_ozone(i,k) = dq3dt_ozone(i,k) + (qgrs(i,k,ntoz)-save_q(i,k,ntoz))
-              enddo
-            enddo
+          idtend = dtidx(index_of_x_wind, index_of_process_pbl)
+          if(idtend>=1) then
+            dtend(1:im,1:levs,idtend) = dtend(1:im,1:levs,idtend) + (ugrs(1:im,1:levs) - save_u(1:im,1:levs))
+          endif
+          idtend = dtidx(index_of_y_wind, index_of_process_pbl)
+          if(idtend>=1) then
+            dtend(1:im,1:levs,idtend) = dtend(1:im,1:levs,idtend) + (vgrs(1:im,1:levs) - save_v(1:im,1:levs))
+          endif
+          idtend = dtidx(100+ntqv, index_of_process_pbl)
+          if(idtend>=1) then
+            dtend(1:im,1:levs,idtend) = dtend(1:im,1:levs,idtend) + qgrs(1:im,1:levs,ntqv) - save_q(1:im,1:levs,ntqv)
+          endif
+          idtend = dtidx(100+ntoz, index_of_process_pbl)
+          if(idtend>=1) then
+            dtend(1:im,1:levs,idtend) = dtend(1:im,1:levs,idtend) + qgrs(1:im,1:levs,ntoz) - save_q(1:im,1:levs,ntoz)
+          endif
+          idtend = dtidx(100+ntke, index_of_process_pbl)
+          if(idtend>=1) then
+            dtend(1:im,1:levs,idtend) = dtend(1:im,1:levs,idtend) + (qgrs(1:im,1:levs,ntke) - save_q(1:im,1:levs,ntke))
           endif
         endif
 

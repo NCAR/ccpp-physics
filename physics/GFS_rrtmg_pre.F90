@@ -18,16 +18,16 @@
       ! in the CCPP version - they are defined in the interstitial_create routine
       subroutine GFS_rrtmg_pre_run (im, levs, lm, lmk, lmp, n_var_lndp,        &
         imfdeepcnv, imfdeepcnv_gf, me, ncnd, ntrac, num_p3d, npdf3d, ncnvcld3d,&
-        ntqv, ntcw,ntiw, ntlnc, ntinc, ncld, ntrw, ntsw, ntgl, ntwa, ntoz,     &
+        ntqv, ntcw,ntiw, ntlnc, ntinc, ntrw, ntsw, ntgl, ntwa, ntoz,           &
         ntclamt, nleffr, nieffr, nseffr, lndp_type, kdt, imp_physics,          &
         imp_physics_thompson, imp_physics_gfdl, imp_physics_zhao_carr,         &
         imp_physics_zhao_carr_pdf, imp_physics_mg, imp_physics_wsm6,           &
         imp_physics_fer_hires, julian, yearlen, lndp_var_list, lsswr, lslwr,   &
         ltaerosol, lgfdlmprad, uni_cld, effr_in, do_mynnedmf, lmfshal,         &
-        lmfdeep2, fhswr, fhlwr, solhr, sup, eps, epsm1, fvirt,                 &
+        lmfdeep2, fhswr, fhlwr, solhr, sup, con_eps, epsm1, fvirt,             &
         rog, rocp, con_rd, xlat_d, xlat, xlon, coslat, sinlat, tsfc, slmsk,    &
-        prsi, prsl, prslk, tgrs, sfc_wts, mg_cld, effrr_in,                    &
-        cnvw_in, cnvc_in, qgrs, aer_nm, dx, icloud,                            & !inputs from here and above
+        prsi, prsl, prslk, tgrs, sfc_wts, mg_cld, effrr_in, pert_clds,         &
+        sppt_wts, sppt_amp, cnvw_in, cnvc_in, qgrs, aer_nm, dx, icloud,        & !inputs from here and above
         coszen, coszdg, effrl_inout, effri_inout, effrs_inout,                 &
         clouds1, clouds2, clouds3, clouds4, clouds5,                           & !in/out from here and above
         kd, kt, kb, mtopa, mbota, raddt, tsfg, tsfa, de_lgth, alb1d, delp, dz, & !output from here and below
@@ -65,13 +65,16 @@
      &                                     profsw_type, NBDSW
       use module_radlw_parameters,   only: topflw_type, sfcflw_type, &
      &                                     proflw_type, NBDLW
-      use surface_perturbation,      only: cdfnor
+      use surface_perturbation,      only: cdfnor,ppfbet
 
       ! For Thompson MP
-      use module_mp_thompson,        only: calc_effectRad, Nt_c
-      use module_mp_thompson_make_number_concentrations, only:         &
-                                           make_IceNumber,             &
-                                           make_DropletNumber,         &
+      use module_mp_thompson,        only: calc_effectRad, Nt_c,     &
+                                           re_qc_min, re_qc_max,     &
+                                           re_qi_min, re_qi_max,     &
+                                           re_qs_min, re_qs_max
+      use module_mp_thompson_make_number_concentrations, only:       &
+                                           make_IceNumber,           &
+                                           make_DropletNumber,       &
                                            make_RainNumber
 
       implicit none
@@ -80,7 +83,7 @@
                                            imfdeepcnv,                         &
                                            imfdeepcnv_gf, me, ncnd, ntrac,     &
                                            num_p3d, npdf3d, ncnvcld3d, ntqv,   &
-                                           ntcw, ntiw, ntlnc, ntinc, ncld,     &
+                                           ntcw, ntiw, ntlnc, ntinc,           &
                                            ntrw, ntsw, ntgl, ntwa, ntoz,       &
                                            ntclamt, nleffr, nieffr, nseffr,    &
                                            lndp_type,                          &
@@ -97,10 +100,10 @@
 
       logical,              intent(in) :: lsswr, lslwr, ltaerosol, lgfdlmprad, &
                                           uni_cld, effr_in, do_mynnedmf,       &
-                                          lmfshal, lmfdeep2
+                                          lmfshal, lmfdeep2, pert_clds
 
-      real(kind=kind_phys), intent(in) :: fhswr, fhlwr, solhr, sup, julian
-      real(kind=kind_phys), intent(in) :: eps, epsm1, fvirt, rog, rocp, con_rd
+      real(kind=kind_phys), intent(in) :: fhswr, fhlwr, solhr, sup, julian, sppt_amp
+      real(kind=kind_phys), intent(in) :: con_eps, epsm1, fvirt, rog, rocp, con_rd
 
       real(kind=kind_phys), dimension(:), intent(in) :: xlat_d, xlat, xlon,    &
                                                         coslat, sinlat, tsfc,  &
@@ -109,7 +112,8 @@
       real(kind=kind_phys), dimension(:,:), intent(in) :: prsi, prsl, prslk,   &
                                                           tgrs, sfc_wts,       &
                                                           mg_cld, effrr_in,    &
-                                                          cnvw_in, cnvc_in
+                                                          cnvw_in, cnvc_in,    &
+                                                          sppt_wts
 
       real(kind=kind_phys), dimension(:,:,:), intent(in) :: qgrs, aer_nm
 
@@ -118,54 +122,52 @@
       real(kind=kind_phys), dimension(:,:), intent(inout) :: effrl_inout,      &
                                                              effri_inout,      &
                                                              effrs_inout
-      real(kind=kind_phys), dimension(im,lm+LTP), intent(inout) :: clouds1,    &
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: clouds1,          &
                                                              clouds2, clouds3, &
                                                              clouds4, clouds5
 
-      integer,                                      intent(out) :: kd, kt, kb
+      integer,                              intent(out) :: kd, kt, kb
 
-      integer, dimension(im,3),                     intent(out) :: mbota, mtopa
+      integer, dimension(:,:),              intent(out) :: mbota, mtopa
 
-      real(kind=kind_phys),                         intent(out) :: raddt
+      real(kind=kind_phys),                 intent(out) :: raddt
 
-      real(kind=kind_phys), dimension(im),          intent(out) :: tsfg, tsfa
-      real(kind=kind_phys), dimension(im),          intent(out) :: de_lgth,    &
-                                                                   alb1d
+      real(kind=kind_phys), dimension(:),   intent(out) :: tsfg, tsfa
+      real(kind=kind_phys), dimension(:),   intent(out) :: de_lgth,    &
+                                                           alb1d
 
-      real(kind=kind_phys), dimension(im,lm+LTP),   intent(out) :: delp, dz,   &
-                                                                   plyr, tlyr, &
-                                                                   qlyr, olyr
+      real(kind=kind_phys), dimension(:,:), intent(out) :: delp, dz,   &
+                                                           plyr, tlyr, &
+                                                           qlyr, olyr
 
-      real(kind=kind_phys), dimension(im,lm+1+LTP), intent(out) :: plvl, tlvl
+      real(kind=kind_phys), dimension(:,:), intent(out) :: plvl, tlvl
 
+      real(kind=kind_phys), dimension(:,:), intent(out) :: gasvmr_co2, &
+                                                           gasvmr_n2o, &
+                                                           gasvmr_ch4, &
+                                                           gasvmr_o2,  &
+                                                           gasvmr_co,  &
+                                                           gasvmr_cfc11,&
+                                                           gasvmr_cfc12,&
+                                                           gasvmr_cfc22,&
+                                                           gasvmr_ccl4,&
+                                                           gasvmr_cfc113
+      real(kind=kind_phys), dimension(:,:), intent(out) :: aerodp
+      real(kind=kind_phys), dimension(:,:), intent(out) :: clouds6,   &
+                                                           clouds7,   &
+                                                           clouds8,   &
+                                                           clouds9,   &
+                                                           cldfra
+      real(kind=kind_phys), dimension(:,:), intent(out) :: cldsa
 
+      real(kind=kind_phys), dimension(:,:,:), intent(out) :: faersw1,&
+                                                             faersw2,&
+                                                             faersw3
 
-      real(kind=kind_phys), dimension(im,lm+LTP),   intent(out) :: gasvmr_co2, &
-                                                                   gasvmr_n2o, &
-                                                                   gasvmr_ch4, &
-                                                                   gasvmr_o2,  &
-                                                                   gasvmr_co,  &
-                                                                   gasvmr_cfc11,&
-                                                                   gasvmr_cfc12,&
-                                                                   gasvmr_cfc22,&
-                                                                   gasvmr_ccl4,&
-                                                                   gasvmr_cfc113
-      real(kind=kind_phys), dimension(im,NSPC1),     intent(out) :: aerodp
-      real(kind=kind_phys), dimension(im,lm+LTP),    intent(out) :: clouds6,   &
-                                                                    clouds7,   &
-                                                                    clouds8,   &
-                                                                    clouds9,   &
-                                                                    cldfra
-      real(kind=kind_phys), dimension(im,5),            intent(out) :: cldsa
-
-      real(kind=kind_phys), dimension(im,lm+LTP,NBDSW), intent(out) :: faersw1,&
-                                                                       faersw2,&
-                                                                       faersw3
-
-      real(kind=kind_phys), dimension(im,lm+LTP,NBDLW), intent(out) :: faerlw1,&
-                                                                       faerlw2,&
-                                                                       faerlw3
-      real(kind=kind_phys), dimension(im,lm+LTP),       intent(out) :: alpha
+      real(kind=kind_phys), dimension(:,:,:), intent(out) :: faerlw1,&
+                                                             faerlw2,&
+                                                             faerlw3
+      real(kind=kind_phys), dimension(:,:),   intent(out) :: alpha
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -200,6 +202,11 @@
       real(kind=kind_phys), dimension(im,lm+LTP,NF_VGAS)       :: gasvmr
       real(kind=kind_phys), dimension(im,lm+LTP,NBDSW,NF_AESW) :: faersw
       real(kind=kind_phys), dimension(im,lm+LTP,NBDLW,NF_AELW) :: faerlw
+
+      ! for stochastic cloud perturbations
+      real(kind=kind_phys), dimension(im) :: cldp1d
+      real (kind=kind_phys) :: alpha0,beta0,m,s,cldtmp,tmp_wt,cdfz
+      integer  :: iflag
 
       integer :: ids, ide, jds, jde, kds, kde, &
                  ims, ime, jms, jme, kms, kme, &
@@ -288,12 +295,10 @@
           plyr(i,k1)    = prsl(i,k2)    * 0.01   ! pa to mb (hpa)
           tlyr(i,k1)    = tgrs(i,k2)
           prslk1(i,k1)  = prslk(i,k2)
-          rho(i,k1)     = plyr(i,k1)/(con_rd*tlyr(i,k1))
-          orho(i,k1)    = 1.0/rho(i,k1)
 
 !>  - Compute relative humidity.
           es  = min( prsl(i,k2),  fpvs( tgrs(i,k2) ) )  ! fpvs and prsl in pa
-          qs  = max( QMIN, eps * es / (prsl(i,k2) + epsm1*es) )
+          qs  = max( QMIN, con_eps * es / (prsl(i,k2) + epsm1*es) )
           rhly(i,k1) = max( 0.0, min( 1.0, max(QMIN, qgrs(i,k2,ntqv))/qs ) )
           qstl(i,k1) = qs
         enddo
@@ -345,7 +350,7 @@
           if ( plvl(i,lla) <= prsmin ) plvl(i,lla) = 2.0*prsmin
           plyr(i,lyb)   = 0.5 * plvl(i,lla)
           tlyr(i,lyb)   = tlyr(i,lya)
-          prslk1(i,lyb) = (plyr(i,lyb)*0.001) ** rocp ! plyr in Pa
+          prslk1(i,lyb) = (plyr(i,lyb)*0.001) ** rocp ! plyr in hPa
           rhly(i,lyb)   = rhly(i,lya)
           qstl(i,lyb)   = qstl(i,lya)
         enddo
@@ -589,7 +594,7 @@
 !!      call module_radiation_clouds::progcld1()
 !!    - For Zhao/Moorthi's prognostic cloud+pdfcld,
 !!      call module_radiation_clouds::progcld3()
-!!      call module_radiation_clouds::progclduni() for unified cloud and ncld=2
+!!      call module_radiation_clouds::progclduni() for unified cloud and ncnd>=2
 
 !  --- ...  obtain cloud information for radiation calculations
 
@@ -631,11 +636,13 @@
             enddo
           enddo
           ! for Thompson MP - prepare variables for calc_effr
-          if (imp_physics == imp_physics_thompson .and. ltaerosol) then
+          if_thompson: if (imp_physics == imp_physics_thompson .and. ltaerosol) then
             do k=1,LMK
               do i=1,IM
-                qvs = qgrs(i,k,ntqv)
+                qvs = qlyr(i,k)
                 qv_mp (i,k) = qvs/(1.-qvs)
+                rho   (i,k) = con_eps*plyr(i,k)*100./(con_rd*tlyr(i,k)*(qv_mp(i,k)+con_eps))
+                orho  (i,k) = 1.0/rho(i,k)
                 qc_mp (i,k) = tracer1(i,k,ntcw)/(1.-qvs)
                 qi_mp (i,k) = tracer1(i,k,ntiw)/(1.-qvs)
                 qs_mp (i,k) = tracer1(i,k,ntsw)/(1.-qvs)
@@ -647,8 +654,10 @@
           elseif (imp_physics == imp_physics_thompson) then
             do k=1,LMK
               do i=1,IM
-                qvs = qgrs(i,k,ntqv)
+                qvs = qlyr(i,k)
                 qv_mp (i,k) = qvs/(1.-qvs)
+                rho   (i,k) = con_eps*plyr(i,k)*100./(con_rd*tlyr(i,k)*(qv_mp(i,k)+con_eps))
+                orho  (i,k) = 1.0/rho(i,k)
                 qc_mp (i,k) = tracer1(i,k,ntcw)/(1.-qvs)
                 qi_mp (i,k) = tracer1(i,k,ntiw)/(1.-qvs)
                 qs_mp (i,k) = tracer1(i,k,ntsw)/(1.-qvs)
@@ -656,7 +665,7 @@
                 ni_mp (i,k) = tracer1(i,k,ntinc)/(1.-qvs)
               enddo
             enddo
-          endif
+          endif if_thompson
         endif
         do n=1,ncndl
           do k=1,LMK
@@ -681,11 +690,6 @@
             ccnd(:,:,1) = ccnd(:,:,1) + tracer1(:,1:LMK,ntiw)
             ccnd(:,:,1) = ccnd(:,:,1) + tracer1(:,1:LMK,ntsw)
             ccnd(:,:,1) = ccnd(:,:,1) + tracer1(:,1:LMK,ntgl)
-
-!          else
-!            do j=1,ncld
-!              ccnd(:,:,1) = ccnd(:,:,1) + tracer1(:,1:LMK,ntcw+j-1) ! cloud condensate amount
-!            enddo
           endif
           do k=1,LMK
             do i=1,IM
@@ -761,7 +765,7 @@
           do k=1,lm
             do i=1,im
               if (ltaerosol .and. qc_mp(i,k)>1.e-12 .and. nc_mp(i,k)<100.) then
-                nc_mp(i,k) = make_DropletNumber(qc_mp(i,k)*rho(i,k), nwfa(i,k)) * orho(i,k)
+                nc_mp(i,k) = make_DropletNumber(qc_mp(i,k)*rho(i,k), nwfa(i,k)*rho(i,k)) * orho(i,k)
               endif
               if (qi_mp(i,k)>1.e-12 .and. ni_mp(i,k)<100.) then
                 ni_mp(i,k) = make_IceNumber(qi_mp(i,k)*rho(i,k), tlyr(i,k)) * orho(i,k)
@@ -774,9 +778,14 @@
             !tgs: progclduni has different limits for ice radii (10.0-150.0) than
             !     calc_effectRad (4.99-125.0 for WRFv3.8.1; 2.49-125.0 for WRFv4+)
             !     it will raise the low limit from 5 to 10, but the high limit will remain 125.
-            call calc_effectRad (tlyr(i,:), plyr(i,:), qv_mp(i,:), qc_mp(i,:),   &
+            call calc_effectRad (tlyr(i,:), plyr(i,:)*100., qv_mp(i,:), qc_mp(i,:),   &
                                  nc_mp(i,:), qi_mp(i,:), ni_mp(i,:), qs_mp(i,:), &
                                  re_cloud(i,:), re_ice(i,:), re_snow(i,:), 1, lm )
+            do k=1,lm
+              re_cloud(i,k) = MAX(re_qc_min, MIN(re_cloud(i,k), re_qc_max))
+              re_ice(i,k)   = MAX(re_qi_min, MIN(re_ice(i,k),   re_qi_max))
+              re_snow(i,k)  = MAX(re_qs_min, MIN(re_snow(i,k),  re_qs_max))
+            end do
           end do
           ! Scale Thompson's effective radii from meter to micron
           do k=1,lm
@@ -887,8 +896,8 @@
 
           do i =1, im
             do k =1, lmk
-               qc_save(i,k) = ccnd(i,k,1)  
-               qi_save(i,k) = ccnd(i,k,2) 
+               qc_save(i,k) = ccnd(i,k,1)
+               qi_save(i,k) = ccnd(i,k,2)
                qs_save(i,k) = ccnd(i,k,4)
             enddo
           enddo
@@ -932,11 +941,10 @@
           ccnd(1:IM,1:LMK,1) = ccnd(1:IM,1:LMK,1) + cnvw(1:IM,1:LMK)
         endif
 
-
         if (imp_physics == imp_physics_zhao_carr .or. imp_physics == imp_physics_mg) then ! zhao/moorthi's prognostic cloud scheme
                                          ! or unified cloud and/or with MG microphysics
 
-          if (uni_cld .and. ncld >= 2) then
+          if (uni_cld .and. ncndl >= 2) then
             call progclduni (plyr, plvl, tlyr, tvly, ccnd, ncndl,         & !  ---  inputs
                              xlat, xlon, slmsk, dz, delp,                 &
                              IM, LMK, LMP, cldcov,                        &
@@ -1038,6 +1046,31 @@
 
 !      endif                             ! end_if_ntcw
 
+! perturb cld cover
+       if (pert_clds) then
+          do i=1,im
+             tmp_wt= -1*log( ( 2.0 / ( sppt_wts(i,38) ) ) - 1 )
+              call cdfnor(tmp_wt,cdfz)
+              cldp1d(i) = cdfz
+          enddo
+          do k = 1, LMK
+             do i = 1, IM
+                ! compute beta distribution parameters
+                m = clouds(i,k,1)
+                if (m<0.99 .AND. m > 0.01) then
+                   s = sppt_amp*m*(1.-m)
+                   alpha0 = m*m*(1.-m)/(s*s)-m
+                   beta0  = alpha0*(1.-m)/m
+           ! compute beta distribution value corresponding
+           ! to the given percentile albPpert to use as new albedo
+                   call ppfbet(cldp1d(i),alpha0,beta0,iflag,cldtmp)
+                   clouds(i,k,1) = cldtmp
+                else
+                   clouds(i,k,1) = m
+                endif
+             enddo     ! end_do_i_loop
+          enddo     ! end_do_k_loop
+       endif
        do k = 1, LMK
          do i = 1, IM
             clouds1(i,k)  = clouds(i,k,1)

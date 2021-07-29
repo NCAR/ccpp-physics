@@ -26,4 +26,3 @@
   dimensions = (vertical_dimension_of_h2o_forcing_data)
   type = real
   kind = kind_phys
-  active = (flag_for_stratospheric_water_vapor_physics)

@@ -61,7 +61,7 @@
   intent = in
   optional = F
 [u1]
-  standard_name = x_wind_at_lowest_model_layer_updated_by_physics
+  standard_name = x_wind_of_new_state_at_surface_adjacent_layer
   long_name = x component of 1st model layer wind
   units = m s-1
   dimensions = (horizontal_loop_extent)
@@ -70,7 +70,7 @@
   intent = in
   optional = F
 [v1]
-  standard_name = y_wind_at_lowest_model_layer_updated_by_physics
+  standard_name = y_wind_of_new_state_at_surface_adjacent_layer
   long_name = y component of 1st model layer wind
   units = m s-1
   dimensions = (horizontal_loop_extent)
@@ -79,7 +79,7 @@
   intent = in
   optional = F
 [t1]
-  standard_name = air_temperature_at_lowest_model_layer_updated_by_physics
+  standard_name = air_temperature_of_new_state_at_surface_adjacent_layer
   long_name = 1st model layer air temperature
   units = K
   dimensions = (horizontal_loop_extent)
@@ -88,7 +88,7 @@
   intent = in
   optional = F
 [q1]
-  standard_name = water_vapor_specific_humidity_at_lowest_model_layer_updated_by_physics
+  standard_name = specific_humidity_of_new_state_at_surface_adjacent_layer
   long_name = 1st model layer specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent)
@@ -106,7 +106,7 @@
   intent = in
   optional = F
 [evap]
-  standard_name = kinematic_surface_upward_latent_heat_flux
+  standard_name = surface_upward_specific_humidity_flux
   long_name = surface upward evaporation flux
   units = kg kg-1 m s-1
   dimensions = (horizontal_loop_extent)
@@ -168,8 +168,16 @@
   kind = kind_phys
   intent = in
   optional = F
+[thsfc_loc]
+  standard_name = flag_for_reference_pressure_theta
+  long_name = flag for reference pressure in theta calculation
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [f10m]
-  standard_name = ratio_of_wind_at_lowest_model_layer_and_wind_at_10m
+  standard_name = ratio_of_wind_at_surface_adjacent_layer_to_wind_at_10m
   long_name = ratio of fm10 and fm
   units = ratio
   dimensions = (horizontal_loop_extent)
@@ -196,7 +204,7 @@
   intent = out
   optional = F
 [t2m]
-  standard_name = temperature_at_2m
+  standard_name = air_temperature_at_2m
   long_name = temperature at 2 m
   units = K
   dimensions = (horizontal_loop_extent)

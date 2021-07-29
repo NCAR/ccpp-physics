@@ -23,7 +23,7 @@
 !!  @{
       subroutine sfc_diag_run                                           &
      &                   (im,grav,cp,eps,epsm1,ps,u1,v1,t1,q1,prslki,   &
-     &                    evap,fm,fh,fm10,fh2,tskin,qsurf,              &
+     &                    evap,fm,fh,fm10,fh2,tskin,qsurf,thsfc_loc,    &
      &                    f10m,u10m,v10m,t2m,q2m,errmsg,errflg          &
      &                   )
 !
@@ -32,11 +32,12 @@
       implicit none
 !
       integer, intent(in) :: im
+      logical, intent(in) :: thsfc_loc  ! Flag for reference pot. temp.
       real(kind=kind_phys), intent(in) :: grav,cp,eps,epsm1
-      real(kind=kind_phys), dimension(im), intent(in) ::                &
+      real(kind=kind_phys), dimension(:), intent(in) ::                 &
      &                       ps, u1, v1, t1, q1, tskin,                 &
      &                       qsurf, prslki, evap, fm, fh, fm10, fh2
-      real(kind=kind_phys), dimension(im), intent(out) ::               &
+      real(kind=kind_phys), dimension(:), intent(out) ::                &
      &                       f10m, u10m, v10m, t2m, q2m
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -74,11 +75,12 @@
 !       t2m(i)  = t2m(i) * sig2k
         wrk     = 1.0 - fhi
 
-#ifdef GSD_SURFACE_FLUXES_BUGFIX
-        t2m(i)  = tskin(i)*wrk + t1(i)*fhi - (grav+grav)/cp
-#else
-        t2m(i)  = tskin(i)*wrk + t1(i)*prslki(i)*fhi - (grav+grav)/cp
-#endif
+
+        if(thsfc_loc) then ! Use local potential temperature
+          t2m(i)  = tskin(i)*wrk + t1(i)*prslki(i)*fhi - (grav+grav)/cp
+        else ! Use potential temperature referenced to 1000 hPa
+          t2m(i)  = tskin(i)*wrk + t1(i)*fhi - (grav+grav)/cp
+        endif
 
         if(evap(i) >= 0.) then !  for evaporation>0, use inferred qsurf to deduce q2m
           q2m(i) = qsurf(i)*wrk + max(qmin,q1(i))*fhi
