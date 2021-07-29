@@ -25,7 +25,7 @@
   intent = in
   optional = F
 [ialb]
-  standard_name = flag_for_using_climatology_albedo
+  standard_name = control_for_surface_albedo
   long_name = flag for using climatology alb, based on sfc type
   units = flag
   dimensions = ()
@@ -33,7 +33,7 @@
   intent = in
   optional = F
 [iems]
-  standard_name = flag_for_surface_emissivity_control
+  standard_name = control_for_surface_emissivity
   long_name = surface emissivity control flag, use fixed value of 1
   units = flag
   dimensions = ()
@@ -71,7 +71,7 @@
   intent = in
   optional = F
 [frac_grid]
-  standard_name = flag_for_fractional_grid
+  standard_name = flag_for_fractional_landmask
   long_name = flag for fractional grid
   units = flag
   dimensions = ()
@@ -79,7 +79,7 @@
   intent = in
   optional = F
 [lslwr]
-  standard_name = flag_to_calc_lw
+  standard_name = flag_for_calling_longwave_radiation
   long_name = logical flags for lw radiation calls
   units = flag
   dimensions = ()
@@ -87,7 +87,7 @@
   intent = in
   optional = F
 [lsswr]
-  standard_name = flag_to_calc_sw
+  standard_name = flag_for_calling_shortwave_radiation
   long_name = logical flags for sw radiation calls
   units = flag
   dimensions = ()
@@ -95,7 +95,7 @@
   intent = in
   optional = F
 [lsm]
-  standard_name = flag_for_land_surface_scheme
+  standard_name = control_for_land_surface_scheme
   long_name = flag for land surface model
   units = flag
   dimensions = ()
@@ -103,7 +103,7 @@
   intent = in
   optional = F
 [lsm_noahmp]
-  standard_name = flag_for_noahmp_land_surface_scheme
+  standard_name = identifier_for_noahmp_land_surface_scheme
   long_name = flag for NOAH MP land surface model
   units = flag
   dimensions = ()
@@ -111,7 +111,7 @@
   intent = in
   optional = F
 [lsm_ruc]
-  standard_name = flag_for_ruc_land_surface_scheme
+  standard_name = identifier_for_ruc_land_surface_scheme
   long_name = flag for RUC land surface model
   units = flag
   dimensions = ()
@@ -146,7 +146,7 @@
   intent = in
   optional = F
 [slmsk]
-  standard_name = sea_land_ice_mask_real
+  standard_name = area_type
   long_name = landmask: sea/land/ice=0/1/2
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -155,7 +155,7 @@
   intent = in
   optional = F
 [lndp_type]
-  standard_name = index_for_stochastic_land_surface_perturbation_type
+  standard_name = control_for_stochastic_land_surface_perturbation
   long_name = index for stochastic land surface perturbations type
   units = index
   dimensions = ()
@@ -163,7 +163,7 @@
   intent = in
   optional = F
 [n_var_lndp]
-  standard_name = number_of_land_surface_variables_perturbed
+  standard_name = number_of_perturbed_land_surface_variables
   long_name = number of land surface variables perturbed
   units = count
   dimensions = ()
@@ -180,19 +180,19 @@
   intent = in
   optional = F
 [lndp_var_list]
-  standard_name = variables_to_be_perturbed_for_landperts
+  standard_name = land_surface_perturbation_variables
   long_name = variables to be perturbed for landperts
   units = none
-  dimensions =  (number_of_land_surface_variables_perturbed)
+  dimensions =  (number_of_perturbed_land_surface_variables)
   type = character
   kind = len=3
   intent = in
   optional = F
 [lndp_prt_list]
-  standard_name = magnitude_of_perturbations_for_landperts
+  standard_name = land_surface_perturbation_magnitudes
   long_name = magnitude of perturbations for landperts
   units = variable
-  dimensions = (number_of_land_surface_variables_perturbed)
+  dimensions = (number_of_perturbed_land_surface_variables)
   type = real
   kind = kind_phys
   intent = in
@@ -207,7 +207,7 @@
   intent = in
   optional = F
 [snowd]
-  standard_name = surface_snow_thickness_water_equivalent
+  standard_name = lwe_surface_snow
   long_name = water equivalent snow depth
   units = mm
   dimensions = (horizontal_loop_extent)
@@ -234,7 +234,7 @@
   intent = in
   optional = F
 [fice]
-  standard_name = sea_ice_concentration
+  standard_name = sea_ice_area_fraction_of_sea_area_fraction
   long_name = ice fraction over open water
   units = frac
   dimensions = (horizontal_loop_extent)
@@ -253,7 +253,7 @@
   optional = F
 [hprime]
   standard_name = standard_deviation_of_subgrid_orography
-  long_name = standard deviation of subgrid orography
+  long_name = standard deviation of subgrid height_above_mean_sea_level
   units = m
   dimensions = (horizontal_loop_extent)
   type = real
@@ -288,7 +288,7 @@
   intent = in
   optional = F
 [coszen]
-  standard_name = cosine_of_zenith_angle
+  standard_name = cosine_of_solar_zenith_angle_for_daytime_points_on_radiation_timestep
   long_name = mean cos of zenith angle over rad call period
   units = none
   dimensions = (horizontal_loop_extent)
@@ -297,7 +297,7 @@
   intent = in
   optional = F
 [min_seaice]
-  standard_name = sea_ice_minimum
+  standard_name = min_sea_ice_area_fraction
   long_name = minimum sea ice value
   units = frac
   dimensions = ()
@@ -306,7 +306,7 @@
   intent = in
   optional = F
 [min_lakeice]
-  standard_name = lake_ice_minimum
+  standard_name = min_lake_ice_area_fraction
   long_name = minimum lake ice value
   units = frac
   dimensions = ()
@@ -324,7 +324,7 @@
   intent = in
   optional = F
 [alvsf]
-  standard_name = mean_vis_albedo_with_strong_cosz_dependency
+  standard_name = vis_albedo_strong_cosz
   long_name = mean vis albedo with strong cosz dependency
   units = frac
   dimensions = (horizontal_loop_extent)
@@ -333,7 +333,7 @@
   intent = in
   optional = F
 [alnsf]
-  standard_name = mean_nir_albedo_with_strong_cosz_dependency
+  standard_name = nir_albedo_strong_cosz
   long_name = mean nir albedo with strong cosz dependency
   units = frac
   dimensions = (horizontal_loop_extent)
@@ -342,7 +342,7 @@
   intent = in
   optional = F
 [alvwf]
-  standard_name = mean_vis_albedo_with_weak_cosz_dependency
+  standard_name = vis_albedo_weak_cosz
   long_name = mean vis albedo with weak cosz dependency
   units = frac
   dimensions = (horizontal_loop_extent)
@@ -351,7 +351,7 @@
   intent = in
   optional = F
 [alnwf]
-  standard_name = mean_nir_albedo_with_weak_cosz_dependency
+  standard_name = nir_albedo_weak_cosz
   long_name = mean nir albedo with weak cosz dependency
   units = frac
   dimensions = (horizontal_loop_extent)
@@ -360,7 +360,7 @@
   intent = in
   optional = F
 [facsf]
-  standard_name =fractional_coverage_with_strong_cosz_dependency
+  standard_name =strong_cosz_area_fraction
   long_name = fractional coverage with strong cosz dependency
   units = frac
   dimensions = (horizontal_loop_extent)
@@ -369,7 +369,7 @@
   intent = in
   optional = F
 [facwf]
-  standard_name = fractional_coverage_with_weak_cosz_dependency
+  standard_name = weak_cosz_area_fraction
   long_name = fractional coverage with weak cosz dependency
   units = frac
   dimensions = (horizontal_loop_extent)
@@ -396,7 +396,7 @@
   intent = in
   optional = F
 [snoalb]
-  standard_name = upper_bound_on_max_albedo_over_deep_snow
+  standard_name = upper_bound_of_max_albedo_assuming_deep_snow
   long_name = maximum snow albedo
   units = frac
   dimensions = (horizontal_loop_extent)
@@ -504,7 +504,7 @@
   intent = inout
   optional = F
 [sfc_alb_dif]
-  standard_name = surface_diffused_shortwave_albedo
+  standard_name = surface_albedo_for_diffused_shortwave_on_radiation_timestep
   long_name = mean surface diffused sw albedo
   units = frac
   dimensions = (horizontal_loop_extent)

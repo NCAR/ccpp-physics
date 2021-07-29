@@ -9,16 +9,16 @@
   name = GFS_rrtmg_setup_init
   type = scheme
 [si]
-  standard_name = vertical_sigma_coordinate_for_radiation_initialization
+  standard_name = sigma_pressure_hybrid_vertical_coordinate
   long_name = vertical sigma coordinate for radiation initialization
   units = none
-  dimensions = (number_of_vertical_layers_for_radiation_calculations_plus_one)
+  dimensions = (vertical_interface_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [levr]
-  standard_name = number_of_vertical_layers_for_radiation_calculations
+  standard_name = vertical_dimension_for_radiation
   long_name = number of vertical levels for radiation calculations
   units = count
   dimensions = ()
@@ -34,7 +34,7 @@
   intent = in
   optional = F
 [isol]
-  standard_name = flag_for_solar_constant
+  standard_name = control_for_solar_constant
   long_name = use prescribed solar constant
   units = flag
   dimensions = ()
@@ -42,7 +42,7 @@
   intent = in
   optional = F
 [ico2]
-  standard_name = flag_for_using_prescribed_global_mean_co2_value
+  standard_name = control_for_co2
   long_name = prescribed global mean value (old opernl)
   units = flag
   dimensions = ()
@@ -50,7 +50,7 @@
   intent = in
   optional = F
 [iaer]
-  standard_name = flag_for_default_aerosol_effect_in_shortwave_radiation
+  standard_name = control_for_shortwave_radiation_aerosols
   long_name = default aerosol effect in sw only
   units = flag
   dimensions = ()
@@ -58,7 +58,7 @@
   intent = in
   optional = F
 [ntcw]
-  standard_name = index_for_liquid_cloud_condensate
+  standard_name = index_of_cloud_liquid_water_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for cloud condensate (or liquid water)
   units = index
   dimensions = ()
@@ -66,7 +66,7 @@
   intent = in
   optional = F
 [num_p3d]
-  standard_name = array_dimension_of_3d_arrays_for_microphysics
+  standard_name = number_of_microphysics_variables_in_xyz_dimensioned_restart_array
   long_name = number of 3D arrays needed for microphysics
   units = count
   dimensions = ()
@@ -74,7 +74,7 @@
   intent = in
   optional = F
 [npdf3d]
-  standard_name = number_of_3d_arrays_associated_with_pdf_based_clouds
+  standard_name = number_of_pdf_based_variables_in_xyz_dimensioned_restart_array
   long_name = number of 3d arrays associated with pdf based clouds/mp
   units = count
   dimensions = ()
@@ -82,7 +82,7 @@
   intent = in
   optional = F
 [ntoz]
-  standard_name = index_for_ozone
+  standard_name = index_of_ozone_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for ozone mixing ratio
   units = index
   dimensions = ()
@@ -114,7 +114,7 @@
   intent = in
   optional = F
 [icliq_sw]
-  standard_name = flag_for_optical_property_for_liquid_clouds_for_shortwave_radiation
+  standard_name = control_for_shortwave_radiation_liquid_clouds
   long_name = sw optical property for liquid clouds
   units = flag
   dimensions = ()
@@ -130,7 +130,7 @@
   intent = in
   optional = F
 [ccnorm]
-  standard_name = flag_for_cloud_condensate_normalized_by_cloud_cover
+  standard_name = flag_for_in_cloud_condensate
   long_name = flag for cloud condensate normalized by cloud cover
   units = flag
   dimensions = ()
@@ -138,7 +138,7 @@
   intent = in
   optional = F
 [imp_physics]
-  standard_name = flag_for_microphysics_scheme
+  standard_name = control_for_microphysics_scheme
   long_name = choice of microphysics scheme
   units = flag
   dimensions = ()
@@ -146,7 +146,7 @@
   intent = in
   optional = F
 [norad_precip]
-  standard_name = flag_for_precipitation_effect_on_radiation
+  standard_name = flag_for_turning_off_precipitation_radiative_effect
   long_name = radiation precip flag for Ferrier/Moorthi
   units = flag
   dimensions = ()
@@ -154,7 +154,7 @@
   intent = in
   optional = F
 [idate]
-  standard_name = date_and_time_at_model_initialization_reordered
+  standard_name = date_and_time_at_model_initialization_in_united_states_order
   long_name = initialization date and time
   units = none
   dimensions = (4)
@@ -162,7 +162,7 @@
   intent = in
   optional = F
 [iflip]
-  standard_name = flag_for_vertical_index_direction_control
+  standard_name = control_for_vertical_index_direction
   long_name = flag for vertical index direction control
   units = flag
   dimensions = ()
@@ -243,7 +243,7 @@
   name = GFS_rrtmg_setup_timestep_init
   type = scheme
 [idate]
-  standard_name = date_and_time_at_model_initialization
+  standard_name = date_and_time_at_model_initialization_in_iso_order
   long_name = initialization date and time
   units = none
   dimensions = (8)
@@ -251,7 +251,7 @@
   intent = in
   optional = F
 [jdate]
-  standard_name = forecast_date_and_time
+  standard_name = date_and_time_of_forecast_in_united_states_order
   long_name = current forecast date and time
   units = none
   dimensions = (8)
@@ -259,7 +259,7 @@
   intent = in
   optional = F
 [deltsw]
-  standard_name = frequency_for_shortwave_radiation
+  standard_name = period_of_shortwave_radiation_calls
   long_name = frequency for shortwave radiation
   units = s
   dimensions = ()
@@ -268,7 +268,7 @@
   intent = in
   optional = F
 [deltim]
-  standard_name = time_step_for_dynamics
+  standard_name = timestep_for_dynamics
   long_name = dynamics timestep
   units = s
   dimensions = ()
@@ -277,7 +277,7 @@
   intent = in
   optional = F
 [lsswr]
-  standard_name = flag_to_calc_sw
+  standard_name = flag_for_calling_shortwave_radiation
   long_name = logical flags for sw radiation calls
   units = flag
   dimensions = ()

@@ -24,7 +24,7 @@
   intent = in
   optional = F
 [doSWrad]
-  standard_name = flag_to_calc_sw
+  standard_name = flag_for_calling_shortwave_radiation
   long_name = logical flags for sw radiation calls
   units = flag
   dimensions = ()
@@ -32,7 +32,7 @@
   intent = in
   optional = F
 [solhr]
-  standard_name = forecast_hour_of_the_day
+  standard_name = forecast_utc_hour
   long_name = time in hours after 00z at the current timestep
   units = h
   dimensions = ()
@@ -84,7 +84,7 @@
   intent = out
   optional = F
 [coszen]
-  standard_name = cosine_of_zenith_angle
+  standard_name = cosine_of_solar_zenith_angle_for_daytime_points_on_radiation_timestep
   long_name = mean cos of zenith angle over rad call period
   units = none
   dimensions = (horizontal_loop_extent)
@@ -93,7 +93,7 @@
   intent = inout
   optional = F
 [coszdg]
-  standard_name = daytime_mean_cosz_over_rad_call_period
+  standard_name = cosine_of_solar_zenith_angle_on_radiation_timestep
   long_name = daytime mean cosz over rad call period
   units = none
   dimensions = (horizontal_loop_extent)
@@ -114,7 +114,7 @@
   standard_name = surface_albedo_nearIR_direct
   long_name = near-IR (direct) surface albedo (sfc_alb_nir_dir)
   units = none
-  dimensions = (number_of_sw_bands_rrtmgp,horizontal_loop_extent)
+  dimensions = (number_of_shortwave_bands,horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
@@ -123,7 +123,7 @@
   standard_name = surface_albedo_nearIR_diffuse
   long_name = near-IR (diffuse) surface albedo (sfc_alb_nir_dif)
   units = none
-  dimensions = (number_of_sw_bands_rrtmgp,horizontal_loop_extent)
+  dimensions = (number_of_shortwave_bands,horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
@@ -132,7 +132,7 @@
   standard_name =  surface_albedo_uvvis_dir
   long_name = UVVIS (direct) surface albedo (sfc_alb_uvvis_dir)
   units = none
-  dimensions = (number_of_sw_bands_rrtmgp,horizontal_loop_extent)
+  dimensions = (number_of_shortwave_bands,horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
@@ -141,7 +141,7 @@
   standard_name =  surface_albedo_uvvis_dif
   long_name = UVVIS (diffuse) surface albedo (sfc_alb_uvvis_dif)
   units = none
-  dimensions = (number_of_sw_bands_rrtmgp,horizontal_loop_extent)
+  dimensions = (number_of_shortwave_bands,horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
