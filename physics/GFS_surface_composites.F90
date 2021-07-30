@@ -155,6 +155,13 @@ contains
               if (cice(i) >= min_seaice) then
                 icy(i)   = .true.
                 tisfc(i) = max(timin, min(tisfc(i), tgice))
+                ! This cplice namelist option was added to deal with the
+                ! situation of the FV3ATM-HYCOM coupling without an active sea
+                ! ice (e.g., CICE6) component. By default, the cplice is true
+                ! when cplflx is .true. (e.g., for the S2S application).
+                ! Whereas, for the HAFS FV3ATM-HYCOM coupling, cplice is set as
+                ! .false.. In the future HAFS FV3ATM-MOM6 coupling, the cplflx
+                ! could be .true., while cplice being .false.. 
                 if (cplice .and. cplflx)  then
                   islmsk_cice(i) = 4
                   flag_cice(i)   = .true.
