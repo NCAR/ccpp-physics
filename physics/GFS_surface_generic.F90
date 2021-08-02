@@ -149,7 +149,6 @@
             soiltyp(i)  = int( stype(i)+0.5_kind_phys )
             vegtype(i)  = int( vtype(i)+0.5_kind_phys )
             slopetyp(i) = int( slope(i)+0.5_kind_phys )    !! clu: slope -> slopetyp
-            if (soiltyp(i)  < 1) soiltyp(i)  = 14
             if (vegtype(i)  < 1) vegtype(i)  = 17
             if (slopetyp(i) < 1) slopetyp(i) = 1
           endif

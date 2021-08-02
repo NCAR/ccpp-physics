@@ -172,14 +172,6 @@
   type = logical
   intent = inout
   optional = F
-[ocean]
-  standard_name = flag_nonzero_ocean_surface_fraction
-  long_name = flag indicating presence of some ocean surface area fraction
-  units = flag
-  dimensions = (horizontal_loop_extent)
-  type = logical
-  intent = inout
-  optional = F
 [wet]
   standard_name = flag_nonzero_wet_surface_fraction
   long_name = flag indicating presence of some ocean or lake surface area fraction
