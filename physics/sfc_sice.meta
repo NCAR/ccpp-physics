@@ -316,8 +316,8 @@
   intent = inout
   optional = F
 [tice]
-  standard_name = sea_ice_temperature_interstitial
-  long_name = sea-ice surface temperature use as interstitial
+  standard_name = sea_ice_temperature
+  long_name = sea ice surface skin temperature 
   units = K
   dimensions = (horizontal_loop_extent)
   type = real

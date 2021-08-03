@@ -432,7 +432,9 @@ module lsm_ruc
      ! for ice
      &       weasd_ice, snwdph_ice, tskin_ice,                           &
      &       tsurf_ice, z0rl_ice, tsnow_ice,                             &
-     &       sfcqc_ice, sfcqv_ice, fice, tice
+     &       sfcqc_ice, sfcqv_ice, fice
+     !mjz: sea_ice_temperature as OUT
+      real (kind=kind_phys), dimension(:), intent(out) :: tice  
 
 !  ---  in
       real (kind=kind_phys), dimension(:), intent(in) ::                 &

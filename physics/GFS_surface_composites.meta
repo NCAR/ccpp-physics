@@ -431,15 +431,6 @@
   kind = kind_phys
   intent = inout
   optional = F
-[tice]
-  standard_name = sea_ice_temperature_interstitial
-  long_name = sea ice surface skin temperature use as interstitial
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
 [tsurf_wat]
   standard_name = surface_skin_temperature_after_iteration_over_water
   long_name = surface skin temperature after iteration over water
@@ -1808,15 +1799,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
-[tice]
-  standard_name = sea_ice_temperature_interstitial
-  long_name = sea ice surface skin temperature use as interstitial
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
   optional = F
 [hice]
   standard_name = sea_ice_thickness
