@@ -1669,7 +1669,7 @@ CONTAINS
     INTEGER,  INTENT(IN)                          ::    spp_pbl
     REAL, DIMENSION(KTS:KTE)                      ::    rstoch_col
     REAL :: Prnum
-    REAL, PARAMETER :: Prlimit = 5.0
+    REAL, PARAMETER :: Prlimit = 10.0
 
 
 !
@@ -1777,8 +1777,8 @@ CONTAINS
           !sm(k) = sm(k) * qdiv
 
           !Use level 2.0 functions as in original MYNN
-          !sh(k) = sh(k) * qdiv
-          !sm(k) = Prnum*sh(k)
+          sh(k) = sh(k) * qdiv
+          sm(k) = Prnum*sh(k)
 
           !Recalculate terms for later use
           !JOE-Canuto/Kitamura mod
@@ -1794,8 +1794,8 @@ CONTAINS
           eden = MAX( eden, 1.0d-20 )
           !!JOE-Canuto/Kitamura mod
           !!sh(k) = q3sq*a2*( e2+3.0*c1*e5c*gmel )/eden  - retro 5
-          sh(k) = q3sq*(a2*a2fac)*( e2+3.0*c1*e5c*gmel )/eden
-          sm(k) = Prnum*sh(k)
+          !sh(k) = q3sq*(a2*a2fac)*( e2+3.0*c1*e5c*gmel )/eden
+          !sm(k) = Prnum*sh(k)
        ELSE
           !JOE-Canuto/Kitamura mod
           !e1   = q3sq - e1c*ghel
@@ -1822,8 +1822,8 @@ CONTAINS
        gmelq    = MAX(gmel/q3sq, 1e-8)
        sm25max  = MIN(sm20*3.0, SQRT(.1936/gmelq))
        sh25max  = MIN(sh20*3.0, 0.76*b2)
-       sm25min  = MAX(sm20*0.1, 1e-6)
-       sh25min  = MAX(sh20*0.1, 1e-6)
+       sm25min  = 0.0
+       sh25min  = 0.0
 
        !JOE: Level 2.5 debug prints
        ! HL88 , lev2.5 criteria from eqs. 3.17, 3.19, & 3.20
@@ -2304,10 +2304,16 @@ CONTAINS
 !!       d(k-kts+1)=rp(k)*delt + qke(k) - qke(k)*bp(k)*delt
 !!    ENDDO
 
-    a(kte)=-1. !0.
+!! "no flux at top"
+!    a(kte)=-1. !0.
+!    b(kte)=1.
+!    c(kte)=0.
+!    d(kte)=0.
+!! "prescribed value"
+    a(kte)=0.
     b(kte)=1.
     c(kte)=0.
-    d(kte)=0.
+    d(kte)=qke(kte)
 
 !    CALL tridiag(kte,a,b,c,d)
     CALL tridiag2(kte,a,b,c,d,x)
@@ -4032,7 +4038,7 @@ ENDIF
 
 ! ==================================================================
 #if (WRF_CHEM == 1)
-  SUBROUTINE mynn_mix_chem(kts,kte,i,j,   &
+  SUBROUTINE mynn_mix_chem(kts,kte,i,     &
        grav_settling,                     &
        delt,dz,pblh,                      &
        nchem, kdvel, ndvel, num_vert_mix, &
@@ -4051,7 +4057,7 @@ ENDIF
        enh_vermix                         )
 
 !-------------------------------------------------------------------
-    INTEGER, INTENT(in) :: kts,kte,i,j
+    INTEGER, INTENT(in) :: kts,kte,i
     INTEGER, INTENT(in) :: grav_settling
     INTEGER, INTENT(in) :: bl_mynn_cloudmix
 
@@ -4460,9 +4466,8 @@ ENDIF
          & edmf_a,edmf_w,edmf_qt,edmf_thl,edmf_ent,edmf_qc, &
          & sub_thl3D,sub_sqv3D,det_thl3D,det_sqv3D
 
-   !REAL, DIMENSION(:,:), OPTIONAL     :: &
-   REAL, DIMENSION(IMS:IME,KMS:KME)   :: &
-         & edmf_a_dd,edmf_w_dd,edmf_qt_dd,edmf_thl_dd,edmf_ent_dd,edmf_qc_dd
+!   REAL, DIMENSION(IMS:IME,KMS:KME)   :: &
+!         & edmf_a_dd,edmf_w_dd,edmf_qt_dd,edmf_thl_dd,edmf_ent_dd,edmf_qc_dd
 
     REAL, DIMENSION(IMS:IME), INTENT(inout) :: Pblh,wstar,delta,rmol
 
@@ -4563,38 +4568,29 @@ ENDIF
     ITF=ITE
     KTF=KTE
 
-    IF (bl_mynn_edmf > 0) THEN
-      ! setup random seed
-      !call init_random_seed
+    IF (bl_mynn_output > 0) THEN !research mode
+       edmf_a(its:ite,kts:kte)=0.
+       edmf_w(its:ite,kts:kte)=0.
+       edmf_qt(its:ite,kts:kte)=0.
+       edmf_thl(its:ite,kts:kte)=0.
+       edmf_ent(its:ite,kts:kte)=0.
+       edmf_qc(its:ite,kts:kte)=0.
+       sub_thl3D(its:ite,kts:kte)=0.
+       sub_sqv3D(its:ite,kts:kte)=0.
+       det_thl3D(its:ite,kts:kte)=0.
+       det_sqv3D(its:ite,kts:kte)=0.
 
-      IF (bl_mynn_output > 0) THEN !research mode
-         edmf_a(its:ite,kts:kte)=0.
-         edmf_w(its:ite,kts:kte)=0.
-         edmf_qt(its:ite,kts:kte)=0.
-         edmf_thl(its:ite,kts:kte)=0.
-         edmf_ent(its:ite,kts:kte)=0.
-         edmf_qc(its:ite,kts:kte)=0.
-         sub_thl3D(its:ite,kts:kte)=0.
-         sub_sqv3D(its:ite,kts:kte)=0.
-         det_thl3D(its:ite,kts:kte)=0.
-         det_sqv3D(its:ite,kts:kte)=0.
-      ENDIF
-      ktop_plume(its:ite)=0   !int
-      nupdraft(its:ite)=0     !int
-      maxmf(its:ite)=0.
+       !edmf_a_dd(its:ite,kts:kte)=0.
+       !edmf_w_dd(its:ite,kts:kte)=0.
+       !edmf_qt_dd(its:ite,kts:kte)=0.
+       !edmf_thl_dd(its:ite,kts:kte)=0.
+       !edmf_ent_dd(its:ite,kts:kte)=0.
+       !edmf_qc_dd(its:ite,kts:kte)=0.
     ENDIF
+    ktop_plume(its:ite)=0   !int
+    nupdraft(its:ite)=0     !int
+    maxmf(its:ite)=0.
     maxKHtopdown(its:ite)=0.
-
-    IF (bl_mynn_edmf_dd > 0) THEN
-      IF (bl_mynn_output > 0) THEN
-       edmf_a_dd(its:ite,kts:kte)=0.
-       edmf_w_dd(its:ite,kts:kte)=0.
-       edmf_qt_dd(its:ite,kts:kte)=0.
-       edmf_thl_dd(its:ite,kts:kte)=0.
-       edmf_ent_dd(its:ite,kts:kte)=0.
-       edmf_qc_dd(its:ite,kts:kte)=0.
-      ENDIF
-    ENDIF
 
     ! DH* CHECK HOW MUCH OF THIS INIT IF-BLOCK IS ACTUALLY NEEDED FOR RESTARTS
 !> - Within the MYNN-EDMF, there is a dependecy check for the first time step,
@@ -5236,6 +5232,7 @@ ENDIF
           DO k=kts,kte-1
              ! Set max dissipative heating rate to 7.2 K per hour
              diss_heat(k) = MIN(MAX(0.75*(qke1(k)**1.5)/(b1*MAX(0.5*(el(k)+el(k+1)),1.))/cp, 0.0),0.002)
+             diss_heat(k) = diss_heat(k) * exp(-10000./MAX(p1(k),1.))
           ENDDO
           diss_heat(kte) = 0.
 
@@ -5401,29 +5398,32 @@ ENDIF
              dqke(i,k)=0.
           ENDIF
 
-          !update updraft properties
-          IF (bl_mynn_output > 0) THEN !research mode == 1
-             DO k = kts,kte
-                edmf_a(i,k)=edmf_a1(k)
-                edmf_w(i,k)=edmf_w1(k)
-                edmf_qt(i,k)=edmf_qt1(k)
-                edmf_thl(i,k)=edmf_thl1(k)
-                edmf_ent(i,k)=edmf_ent1(k)
-                edmf_qc(i,k)=edmf_qc1(k)
-                sub_thl3D(i,k)=sub_thl(k)
-                sub_sqv3D(i,k)=sub_sqv(k)
-                det_thl3D(i,k)=det_thl(k)
-                det_sqv3D(i,k)=det_sqv(k)
-             ENDDO
-               if (bl_mynn_edmf_dd > 0) THEN
-                   !update downdraft properties
-                   edmf_a_dd(i,k)=edmf_a_dd1(k)
-                   edmf_w_dd(i,k)=edmf_w_dd1(k)
-                   edmf_qt_dd(i,k)=edmf_qt_dd1(k)
-                   edmf_thl_dd(i,k)=edmf_thl_dd1(k)
-                   edmf_ent_dd(i,k)=edmf_ent_dd1(k)
-                   edmf_qc_dd(i,k)=edmf_qc_dd1(k)
-               ENDIF
+          !update updraft/downdraft properties
+          if (bl_mynn_output > 0) THEN !research mode == 1
+             if (bl_mynn_edmf > 0) THEN
+                DO k = kts,kte
+                   edmf_a(i,k)=edmf_a1(k)
+                   edmf_w(i,k)=edmf_w1(k)
+                   edmf_qt(i,k)=edmf_qt1(k)
+                   edmf_thl(i,k)=edmf_thl1(k)
+                   edmf_ent(i,k)=edmf_ent1(k)
+                   edmf_qc(i,k)=edmf_qc1(k)
+                   sub_thl3D(i,k)=sub_thl(k)
+                   sub_sqv3D(i,k)=sub_sqv(k)
+                   det_thl3D(i,k)=det_thl(k)
+                   det_sqv3D(i,k)=det_sqv(k)
+                ENDDO
+             endif
+!             if (bl_mynn_edmf_dd > 0) THEN
+!                DO k = kts,kte
+!                   edmf_a_dd(i,k)=edmf_a_dd1(k)
+!                   edmf_w_dd(i,k)=edmf_w_dd1(k)
+!                   edmf_qt_dd(i,k)=edmf_qt_dd1(k)
+!                   edmf_thl_dd(i,k)=edmf_thl_dd1(k)
+!                   edmf_ent_dd(i,k)=edmf_ent_dd1(k)
+!                   edmf_qc_dd(i,k)=edmf_qc_dd1(k)
+!                ENDDO
+!             ENDIF
           ENDIF
 
           !***  Begin debug prints
@@ -6063,7 +6063,7 @@ ENDIF
   !Criteria (2)
     maxwidth = 1.2*PBLH 
   ! Criteria (3)
-    maxwidth = MIN(maxwidth,0.75*cloud_base)
+    maxwidth = MIN(maxwidth,0.666*cloud_base)
   ! Criteria (4)
     wspd_pbl=SQRT(MAX(u(kts)**2 + v(kts)**2, 0.01))
     !Note: area fraction (acfac) is modified below
@@ -6207,15 +6207,19 @@ ENDIF
        overshoot = 0
        l  = dl*I                            ! diameter of plume
        DO k=KTS+1,KTE-1
-          !w-dependency for entrainment a la Tian and Kuang (2016)
+          !Entrainment from Tian and Kuang (2016)
           !ENT(k,i) = 0.35/(MIN(MAX(UPW(K-1,I),0.75),1.9)*l)
-          wmin = 0.3 + l*0.0005 !* MAX(pblh-ZW(k+1), 0.0)/pblh
-          ENT(k,i) = 0.33/(MIN(MAX(UPW(K-1,I),wmin),1.9)*l)
+          !wmin = 0.3 + l*0.0005 !* MAX(pblh-ZW(k+1), 0.0)/pblh
+          !ENT(k,i) = 0.33/(MIN(MAX(UPW(K-1,I),wmin),1.9)*l)
+
           !Entrainment from Negggers (2015, JAMES)
           !ENT(k,i) = 0.02*l**-0.35 - 0.0009
+          ENT(k,i) = 0.07*l**-0.60 - 0.00079   !diverse-b
+
           !Minimum background entrainment 
           ENT(k,i) = max(ENT(k,i),0.0003)
-          !ENT(k,i) = max(ENT(k,i),0.05/ZW(k))  !not needed for Tian and Kuang
+          ENT(k,i) = max(ENT(k,i),0.05/ZW(k))  !not needed for Tian and Kuang
+
           !JOE - increase entrainment for plumes extending very high.
           IF(ZW(k) >= MIN(pblh+1500., 4000.))THEN
             ENT(k,i)=ENT(k,i) + (ZW(k)-MIN(pblh+1500.,4000.))*5.0E-6
