@@ -7,10 +7,25 @@
 !> This module contains the CCPP-compliant Morrison-Gettelman microphysics (MG1, MG2 and MG3) scheme.
 module m_micro
 
+  use machine, only: kind_phys
+
   implicit none
   public :: m_micro_init, m_micro_run, m_micro_finalize
   private
   logical :: is_initialized = .False.
+
+  real, parameter  :: one    = 1.0_kind_phys,     &
+                                      oneb3  = one/3.0_kind_phys, &
+                                      zero   = 0.0_kind_phys,     &
+                                      half   = 0.5_kind_phys,     &
+                                      qsmall = 1.0e-14_kind_phys, &
+                                      fourb3 = 4.0_kind_phys/3.0_kind_phys, &
+                                      RL_cub = 1.0e-15_kind_phys, &
+                                      nmin   = 1.0_kind_phys
+
+  real(kind=kind_phys) :: grav, pi, rgas, cp, hvap, hfus, ttp,     &
+                          tice, eps, epsm1, VIREPS, onebcp, onebg, &
+                          kapa, cpbg, lvbcp, lsbcp
 
 contains
 
@@ -19,7 +34,8 @@ contains
 !! \htmlinclude m_micro_init.html
 !!
 subroutine m_micro_init(imp_physics, imp_physics_mg, fprcp, gravit, rair, rh2o, cpair,&
-                        eps, tmelt, latvap, latice, mg_dcs, mg_qcvar, mg_ts_auto_ice,  &
+                        eps_in, epsm1_in, tmelt, latvap, latice, pi_in, tice_in,      &
+                        VIREPS_in, mg_dcs, mg_qcvar, mg_ts_auto_ice,                  &
                         mg_rhmini, microp_uniform, do_cldice, hetfrz_classnuc,        &
                         mg_precip_frac_method, mg_berg_eff_factor, sed_supersat,      &
                         do_sb_physics, mg_do_hail,  mg_do_graupel, mg_nccons,         &
@@ -37,7 +53,8 @@ subroutine m_micro_init(imp_physics, imp_physics_mg, fprcp, gravit, rair, rh2o, 
                                         sed_supersat, do_sb_physics, mg_do_hail,        &
                                         mg_do_graupel, mg_nccons, mg_nicons, mg_ngcons, &
                                         mg_do_ice_gmao, mg_do_liq_liu
-    real(kind=kind_phys), intent(in) :: gravit, rair, rh2o, cpair, eps, tmelt, latvap, latice
+    real(kind=kind_phys), intent(in) :: gravit, rair, rh2o, cpair, eps_in, epsm1_in,    &
+                                        tmelt, latvap, latice, pi_in, tice_in, VIREPS_in
     real(kind=kind_phys), intent(in) :: mg_dcs, mg_qcvar, mg_ts_auto_ice(:), mg_rhmini, &
                                         mg_berg_eff_factor, mg_ncnst, mg_ninst, mg_ngnst
     character(len=16),    intent(in) :: mg_precip_frac_method
@@ -54,6 +71,25 @@ subroutine m_micro_init(imp_physics, imp_physics_mg, fprcp, gravit, rair, rh2o, 
        errflg = 1
        return
     end if
+
+    ! Assign constants
+    grav   = gravit
+    pi     = pi_in
+    rgas   = rair
+    cp     = cpair
+    hvap   = latvap
+    hfus   = latice
+    ttp    = tmelt
+    tice   = tice_in
+    eps    = eps_in
+    epsm1  = epsm1_in
+    VIREPS = VIREPS_in
+    onebcp = one/cp
+    onebg  = one/grav
+    kapa   = rgas*onebcp
+    cpbg   = cp/grav
+    lvbcp  = hvap*onebcp
+    lsbcp  = (hvap+hfus)*onebcp
 
     if (fprcp <= 0) then
       call ini_micro (mg_dcs, mg_qcvar, mg_ts_auto_ice(1))
@@ -108,9 +144,6 @@ end subroutine m_micro_init
 !>\section detail_m_micro_run MG m_micro_run Detailed Algorithm
 !> @{
       subroutine m_micro_run(   im,       lm,     flipv, dt_i           &
-     &,                         grav,     pi,     rgas,  cp             &
-     &,                         hvap,     hfus,   ttp,   tice           &
-     &,                         eps,      epsm1, VIREPS                 &
      &,                         prsl_i,   prsi_i, phil,   phii          &
      &,                         omega_i,  QLLS_i, QLCN_i, QILS_i, QICN_i&
      &,                         lwheat_i, swheat_i, w_upi, cf_upi       &
@@ -124,14 +157,12 @@ end subroutine m_micro_init
      &,                         qgl_io,   ncpr_io, ncps_io, ncgl_io     &
      &,                         CLLS_io,  KCBL, rainmin                 &
      &,                         CLDREFFL, CLDREFFI, CLDREFFR, CLDREFFS  &
-     &,                         CLDREFFG, aerfld_i                      &
+     &,                         CLDREFFG, ntrcaer, aerfld_i             &
      &,                         naai_i, npccn_i, iccn                   &
      &,                         skip_macro                              &
      &,                         alf_fac, qc_min, pdfflag                &
      &,                         kdt, xlat, xlon, rhc_i,                 &
      &                          errmsg, errflg)
-
-       use machine ,      only: kind_phys
 
 !      use funcphys,      only: fpvs                !< saturation vapor pressure for water-ice mixed
 !      use funcphys,      only: fpvsl, fpvsi, fpvs  !< saturation vapor pressure for water,ice & mixed
@@ -142,8 +173,6 @@ end subroutine m_micro_init
        use cldwat2m_micro,only: mmicro_pcond
        use micro_mg2_0,   only: micro_mg_tend2_0 => micro_mg_tend, qcvar2 => qcvar
        use micro_mg3_0,   only: micro_mg_tend3_0 => micro_mg_tend, qcvar3 => qcvar
-       ! DH* TODO - make this an input argument, no cross-import!
-       use aerclm_def,    only: ntrcaer
 
 !      use wv_saturation, only: aqsat
 
@@ -160,17 +189,10 @@ end subroutine m_micro_init
 !   input
 !      real,   parameter  :: r_air = 3.47d-3
        integer, parameter :: kp = kind_phys
-       real(kind=kind_phys), intent(in   ) :: rainmin, grav, pi, rgas, cp,   &
-    &                        hvap, hfus, ttp, tice, eps, epsm1, VIREPS
+       real(kind=kind_phys), intent(in   ) :: rainmin
     
-       real,   parameter  :: one=1.0_kp, oneb3=one/3.0_kp,                   &
-                             zero=0.0_kp, half=0.5_kp,                       &
-     &                       qsmall=1.0e-14_kp,                              &
-     &                       fourb3=4.0_kp/3.0_kp, RL_cub=1.0e-15_kp,        &
-     &                       nmin=1.0_kp
-       real(kind=kind_phys) ::  onebcp, onebg, kapa, cpbg, lvbcp, lsbcp
        integer, parameter :: ncolmicro = 1
-       integer,intent(in) :: im, lm, kdt, fprcp, pdfflag, iccn
+       integer,intent(in) :: im, lm, kdt, fprcp, pdfflag, iccn, ntrcaer
        logical,intent(in) :: flipv, skip_macro
        real (kind=kind_phys), intent(in):: dt_i, alf_fac, qc_min(:)
 
@@ -394,13 +416,6 @@ end subroutine m_micro_init
        ipr   = 1
 
 !      rhr8 = 1.0
-       
-       onebcp=one/cp
-       onebg=one/grav
-       kapa=rgas*onebcp
-       cpbg=cp/grav
-       lvbcp=hvap*onebcp
-       lsbcp=(hvap+hfus)*onebcp
 
        if(flipv) then
          DO K=1, LM
