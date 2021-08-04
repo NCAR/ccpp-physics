@@ -6214,7 +6214,7 @@ ENDIF
 
           !Entrainment from Negggers (2015, JAMES)
           !ENT(k,i) = 0.02*l**-0.35 - 0.0009
-          ENT(k,i) = 0.07*l**-0.60 - 0.00079   !diverse-b
+          ENT(k,i) = 0.04*l**-0.50 - 0.0009   !more plume diversity
 
           !Minimum background entrainment 
           ENT(k,i) = max(ENT(k,i),0.0003)
@@ -6313,46 +6313,7 @@ ENDIF
              Wn = UPW(K-1,I) - MIN(1.25*(ZW(k)-ZW(k-1))/200., 2.0)
           ENDIF
           Wn = MIN(MAX(Wn,0.0), 3.0)
-! WA ACP mod 5/7/20 for accelerating plumes above cloud base, add entrainment
-! and recalculate updraft variables
-          IF (QCn > 0.0 .AND. Wn > UPW(K-1,I)) THEN
-             ENT(K,I) = ENT(K,I) * 2.0
-             EntExp= ENT(K,I)*(ZW(k+1)-ZW(k))
-             QTn =UPQT(k-1,I) *(1.-EntExp) + QT(k)*EntExp
-             THLn=UPTHL(k-1,I)*(1.-EntExp) + THL(k)*EntExp
-             Un  =UPU(k-1,I)  *(1.-EntExp) + U(k)*EntExp
-             Vn  =UPV(k-1,I)  *(1.-EntExp) + V(k)*EntExp
-             QKEn=UPQKE(k-1,I)*(1.-EntExp) + QKE(k)*EntExp
-             QNCn=UPQNC(k-1,I)*(1.-EntExp) + QNC(k)*EntExp
-             QNIn=UPQNI(k-1,I)*(1.-EntExp) + QNI(k)*EntExp
-             QNWFAn=UPQNWFA(k-1,I)*(1.-EntExp) + QNWFA(k)*EntExp
-             QNIFAn=UPQNIFA(k-1,I)*(1.-EntExp) + QNIFA(k)*EntExp
-             ! Define pressure at model interface
-             Pk    =(P(k)*DZ(k+1)+P(k+1)*DZ(k))/(DZ(k+1)+DZ(k))
-             ! Compute new plume properties thvn and qcn
-             call condensation_edmf(QTn,THLn,Pk,ZW(k+1),THVn,QCn)
-             ! Define environment THV at the model interface levels
-             THVk  =(THV(k)*DZ(k+1)+THV(k+1)*DZ(k))/(DZ(k+1)+DZ(k))
-             THVkm1=(THV(k-1)*DZ(k)+THV(k)*DZ(k-1))/(DZ(k-1)+DZ(k))
-             B=g*(THVn/THVk - 1.0)
-             IF(B>0.)THEN
-               BCOEFF = 0.15
-             ELSE
-               BCOEFF = 0.2 !0.33
-             ENDIF
 
-             IF (UPW(K-1,I) < 0.2 ) THEN
-                Wn = UPW(K-1,I) + (-2. * ENT(K,I) * UPW(K-1,I) + BCOEFF*B / MAX(UPW(K-1,I),0.2)) * MIN(ZW(k)-ZW(k-1), 250.)
-             ELSE
-                Wn = UPW(K-1,I) + (-2. * ENT(K,I) * UPW(K-1,I) + BCOEFF*B / UPW(K-1,I)) * MIN(ZW(k)-ZW(k-1), 250.)
-             ENDIF
-             IF (UPW(K-1,I) < 0.2 ) THEN
-                Wn = UPW(K-1,I) + (-2. * ENT(K,I) * UPW(K-1,I) + BCOEFF*B / MAX(UPW(K-1,I),0.2)) * MIN(ZW(k)-ZW(k-1), 250.)
-             ELSE
-                Wn = UPW(K-1,I) + (-2. * ENT(K,I) * UPW(K-1,I) + BCOEFF*B / UPW(K-1,I)) * MIN(ZW(k)-ZW(k-1), 250.)
-             ENDIF
-          ENDIF
-! END WA TEST
           !Check to make sure that the plume made it up at least one level.
           !if it failed, then set nup2=0 and exit the mass-flux portion.
           IF (k==kts+1 .AND. Wn == 0.) THEN
