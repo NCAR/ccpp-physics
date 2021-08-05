@@ -75,6 +75,7 @@
      &     prsi,del,prsl,prslk,phii,phil,delt,                          &
      &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,dkt,dku,                &
      &     kinver,xkzm_m,xkzm_h,xkzm_s,dspfac,bl_upfr,bl_dnfr,          &
+     &     rlmx,elmx,sfc_rlm,                                           &
      &     ntoz,ntqv,dtend,dtidx,index_of_temperature,index_of_x_wind,  &
      &     index_of_y_wind,index_of_process_pbl,gen_tend,ldiag3d,       &
      &     errmsg,errflg)
@@ -86,6 +87,7 @@
 !
 !----------------------------------------------------------------------
       integer, intent(in)  :: im, km, ntrac, ntcw, ntiw, ntke, ntoz,ntqv
+      integer, intent(in)  :: sfc_rlm
       integer, intent(in)  :: kinver(:)
       integer, intent(out) :: kpbl(:)
       logical, intent(in)  :: gen_tend,ldiag3d
@@ -94,6 +96,7 @@
      &                                    eps,epsm1
       real(kind=kind_phys), intent(in) :: delt, xkzm_m, xkzm_h, xkzm_s
       real(kind=kind_phys), intent(in) :: dspfac, bl_upfr, bl_dnfr
+      real(kind=kind_phys), intent(in) :: rlmx, elmx
       real(kind=kind_phys), intent(inout) :: dv(:,:),     du(:,:),      &
      &                     tdt(:,:),    rtg(:,:,:)
       real(kind=kind_phys), intent(in) ::                               &
@@ -212,7 +215,6 @@
      &                     rdt,     rdz,    qmin,   qlmin,
      &                     rimin,   rbcr,   rbint,  tdzmin,
      &                     rlmn,    rlmn0,  rlmn1,  rlmn2,
-     &                     rlmx,    elmx,
      &                     ttend,   utend,  vtend,  qtend,
      &                     zfac,    zfmin,  vk,     spdk2,
      &                     tkmin,   tkbmx,  xkgdx,
@@ -232,7 +234,6 @@
       parameter(vk=0.4,rimin=-100.)
       parameter(rbcr=0.25,zolcru=-0.02,tdzmin=1.e-3)
       parameter(rlmn=30.,rlmn0=5.,rlmn1=5.,rlmn2=10.)
-      parameter(rlmx=300.,elmx=300.)
       parameter(prmin=0.25,prmax=4.0)
       parameter(pr0=1.0,prtke=1.0,prscu=0.67)
       parameter(f0=1.e-4,crbmin=0.15,crbmax=0.35)
@@ -1029,6 +1030,12 @@
             zk = tem / ptem
           endif 
           elm(i,k) = zk*rlam(i,k)/(rlam(i,k)+zk)
+
+!>  - If sfc_rlm=1, use zk for elm within surface layer
+          if ( sfc_rlm == 1 ) then
+            if ( sfcflg(i) .and.
+     &           zl(i,k) < min(100.0,hpbl(i)*0.05) ) elm(i,k)=zk
+          endif
 !
           dz = zi(i,k+1) - zi(i,k)
           tem = max(gdx(i),dz)

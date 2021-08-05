@@ -611,6 +611,32 @@
   kind = kind_phys
   intent = in
   optional = F
+[rlmx]
+  standard_name = maximum_allowed_mixing_length_in_boundary_layer_mass_flux_scheme
+  long_name = maximum allowed mixing length in boundary layer mass flux scheme
+  units = m
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[elmx]
+  standard_name = maximum_allowed_dissipation_mixing_length_in_boundary_layer_mass_flux_scheme
+  long_name = maximum allowed dissipation mixing length in boundary layer mass flux scheme
+  units = m
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[sfc_rlm]
+  standard_name = choice_of_near_surface_mixing_length_in_boundary_layer_mass_flux_scheme
+  long_name = choice of near surface mixing length in boundary layer mass flux scheme
+  units = none
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [ntoz]
   standard_name = index_of_ozone_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for ozone mixing ratio
