@@ -56,7 +56,6 @@ contains
                     tprcp_lnd, tprcp_ice, tsfc_wat, tsfc_lnd, tsfc_ice, tsurf_wat,tsurf_lnd, tsurf_ice, &
                     uustar_wat, uustar_lnd, uustar_ice, weasd_lnd, weasd_ice,                           &
                     qss_wat, qss_lnd, qss_ice, hflx_wat, hflx_lnd, hflx_ice, ep1d_ice, gflx_ice
-      !mjz real(kind=kind_phys), dimension(:), intent(  out)  :: tice
       real(kind=kind_phys),                intent(in   ) :: tgice
       integer,              dimension(:), intent(inout)  :: islmsk, islmsk_cice
       real(kind=kind_phys), dimension(:), intent(in   )  :: semis_rad
@@ -304,11 +303,6 @@ contains
 
 !     write(0,*)' minmax of ice snow=',minval(snowd_ice),maxval(snowd_ice)
 
-     ! Assign sea ice temperature to interstitial variable
-     !mjz do i = 1, im
-     !mjz   tice(i) = tisfc(i)
-     !mjz enddo
-
    end subroutine GFS_surface_composites_pre_run
 
 end module GFS_surface_composites_pre
@@ -448,7 +442,6 @@ contains
       real(kind=kind_phys), dimension(:),   intent(inout) :: zorl, cd, cdq, rb, stress, ffmm, ffhh, uustar, fm10,               &
         fh2, cmm, chh, gflx, ep1d, weasd, snowd, tprcp, evap, hflx, qss, tsfc, tsfco, tsfcl, tisfc
 
-      !mjz real(kind=kind_phys), dimension(:),   intent(in   ) :: tice ! interstitial sea ice temperature
       real(kind=kind_phys), dimension(:),   intent(inout) :: hice, cice
       real(kind=kind_phys), dimension(:),   intent(inout) :: sigmaf, zvfun, hflxq, hffac                  
       real(kind=kind_phys),                 intent(in   ) :: h0facu, h0facs
