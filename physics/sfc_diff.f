@@ -426,7 +426,8 @@
                  z0rl_wat(i) = 1.0e-4_kp
               endif
 
-            elseif (z0rl_wav(i) <= 1.0e-7_kp) then
+            elseif (z0rl_wav(i) <= 1.0e-7_kp .or.                       &
+     &              z0rl_wav(i) > 1.0_kp) then
 !             z0 = (charnock / grav) * ustar_wat(i) * ustar_wat(i)
               tem1 = 0.11 * vis / ustar_wat(i)
               z0 = tem1 + (charnock/grav)*ustar_wat(i)*ustar_wat(i)
