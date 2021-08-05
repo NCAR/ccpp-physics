@@ -1197,7 +1197,7 @@
 !
 !  set ocean/land/sea-ice mask
 !
-      call setlsi(slmskw,aisclm,len,aicice,sliclm)
+      call setlsi(slmskl,aisclm,len,aicice,sliclm)
 
 !     if(lprnt) print *,' aisclm=',aisclm(iprnt),' sliclm='
 !    &,sliclm(iprnt),' slmskw=',slmskw(iprnt)
@@ -1530,9 +1530,10 @@
             slianl(i) = 0.
 !           print *,'cycle - ice free: fice=',sicanl(i)
           elseif (nint(slianl(i)) == 1 .and. sicanl(i) >= crit) then
-            if (nint(slmskw(i)) == 0) then  ! can happen only for fractional grid
-              slianl(i) = 2.0_kind_io8
-            else
+!           if (nint(slmskw(i)) == 0) then  ! can happen only for fractional grid
+!             slianl(i) = 2.0_kind_io8
+!           else
+            if (nint(slmskw(i)) /= 0) then  ! can happen only for fractional grid
 !             print *,'cycle - land covered by sea-ice: fice=',sicanl(i)
               sicanl(i) = 0.0_kind_io8
             endif
@@ -1560,7 +1561,7 @@
 !
 !  set ocean/land/sea-ice mask
 !
-      call setlsi(slmskw,aisanl,len,aicice,slianl)
+      call setlsi(slmskl,aisanl,len,aicice,slianl)
 
 !     if(lprnt) print *,' aisanl=',aisanl(iprnt),' slianl='             &
 !    &,slianl(iprnt),' slmskwl=',slmskw(iprnt),slmskl(iprnt)
@@ -1568,7 +1569,7 @@
 !
       do k=1,lsoil
         do i=1,len
-          if (slianl(i) .eq. 0) then
+          if (slianl(i) == 0 .and. nint(slmskl(i)) /= 1) then
             smcanl(i,k) = smcomx
             stcanl(i,k) = tsfanl(i)
           endif
@@ -4477,13 +4478,12 @@
       end
 
 !>\ingroup mod_sfcsub
-      subroutine bktges(smcfcs,slianl,stcfcs,len,lsoil)
+      subroutine bktges(smcfcs,stcfcs,len,lsoil)
 !
       use machine , only : kind_io8,kind_io4
       implicit none
       integer i,j,len,lsoil,k
-      real (kind=kind_io8) smcfcs(len,lsoil), stcfcs(len,lsoil),        &
-     &                     slianl(len)
+      real (kind=kind_io8) smcfcs(len,lsoil), stcfcs(len,lsoil)
 !
 !  note that smfcs comes in with the original unit (cm?) (not grib file)
 !
@@ -5058,7 +5058,7 @@
 !
 !  snow over sea ice is cycled
 !
-        if(slianl(i).eq.2.) then
+        if (nint(slianl(i)) == 2) then
           snoanl(i) = snofcs(i)
         endif
 !
@@ -5089,7 +5089,7 @@
 !
       do k = 1, 4
         do i=i1_t,i2_t
-          if(slianl(i).eq.0.) then
+          if (nint(slianl(i)) == 0) then
             albanl(i,k) = albfcs(i,k)*ralbs + albanl(i,k)*qalbs
           else
             albanl(i,k) = albfcs(i,k)*ralbl + albanl(i,k)*qalbl
@@ -5099,7 +5099,7 @@
 !
       do k = 1, 2
         do i=i1_t,i2_t
-          if(slianl(i).eq.0.) then
+          if (nint(slianl(i)) == 0) then
             alfanl(i,k) = alffcs(i,k)*ralfs + alfanl(i,k)*qalfs
           else
             alfanl(i,k) = alffcs(i,k)*ralfl + alfanl(i,k)*qalfl
@@ -5109,7 +5109,7 @@
 !
       do k = 1, lsoil
         do i=i1_t,i2_t
-          if(slianl(i).eq.0.) then
+          if (nint(slianl(i)) == 0) then
             smcanl(i,k) = smcfcs(i,k)*rsmcs(k) + smcanl(i,k)*qsmcs(k)
             stcanl(i,k) = stcfcs(i,k)*rstcs(k) + stcanl(i,k)*qstcs(k)
           else
@@ -7076,7 +7076,7 @@ cjfe
         cvbclm(i) = 0.0
         cvtclm(i) = 0.0
         cnpclm(i) = 0.0
-        sliclm(i) = 0.0
+        sliclm(i) = slmskl(i)
         scvclm(i) = 0.0
         vmnclm(i) = 0.0
         vmxclm(i) = 0.0
