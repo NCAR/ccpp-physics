@@ -29,7 +29,7 @@ contains
 !!
    subroutine GFS_surface_composites_pre_run (im, flag_init, flag_restart, lkm, lsm, lsm_noahmp, lsm_ruc, frac_grid,      &
                                  flag_cice, cplflx, cplice, cplwav2atm, landfrac, lakefrac, lakedepth, oceanfrac, frland, &
-                                 dry, icy, lake, use_flake, ocean, wet, hice, cice, zorlo, zorll, zorli,                  &
+                                 dry, icy, lake, use_flake, wet, hice, cice, zorlo, zorll, zorli,                         &
                                  snowd,            snowd_lnd, snowd_ice, tprcp, tprcp_wat,                                &
                                  tprcp_lnd, tprcp_ice, uustar, uustar_wat, uustar_lnd, uustar_ice,                        &
                                  weasd,            weasd_lnd, weasd_ice, ep1d_ice, tsfc, tsfco, tsfcl, tsfc_wat,          &
@@ -45,7 +45,7 @@ contains
       integer,                             intent(in   ) :: lsm, lsm_noahmp, lsm_ruc
       logical,                             intent(in   ) :: flag_init, flag_restart, frac_grid, cplflx, cplice, cplwav2atm
       logical, dimension(:),              intent(inout)  :: flag_cice
-      logical,              dimension(:), intent(inout)  :: dry, icy, lake, use_flake, ocean, wet
+      logical,              dimension(:), intent(inout)  :: dry, icy, lake, use_flake, wet
       real(kind=kind_phys), dimension(:), intent(in   )  :: landfrac, lakefrac, lakedepth, oceanfrac
       real(kind=kind_phys), dimension(:), intent(inout)  :: cice, hice
       real(kind=kind_phys), dimension(:), intent(  out)  :: frland
@@ -61,7 +61,7 @@ contains
       real(kind=kind_phys), dimension(:), intent(in   )  :: semis_rad
       real(kind=kind_phys), dimension(:), intent(inout)  :: semis_wat, semis_lnd, semis_ice, slmsk
       real(kind=kind_phys), dimension(:), intent(inout)  :: emis_lnd, emis_ice
-      real(kind=kind_phys),                intent(in   ) :: min_lakeice, min_seaice
+      real(kind=kind_phys),               intent(in   )  :: min_lakeice, min_seaice
       !
       real(kind=kind_phys), dimension(:), intent(inout)  :: zorlo, zorll, zorli
       !
@@ -128,21 +128,21 @@ contains
               endif
             endif
           else            ! all land
-            cice(i) = zero
-            hice(i) = zero
+            cice(i)        = zero
+            hice(i)        = zero
             islmsk_cice(i) = 1
             islmsk(i)      = 1
             wet(i)         = .false.
             icy(i)         = .false.
             flag_cice(i)   = .false.
           endif
-        enddo  
+        enddo
 
       else
 
         do i = 1, IM
           if (islmsk(i) == 1) then
-!           tsfcl(i) = tsfc(i)
+!           tsfcl(i)  = tsfc(i)
             dry(i)    = .true.
             frland(i) = one
             cice(i)   = zero
