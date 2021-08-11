@@ -79,6 +79,42 @@
   kind = kind_phys
   intent = in
   optional = F
+[con_g]
+  standard_name = gravitational_acceleration
+  long_name = gravitational acceleration
+  units = m s-2
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[con_cp]
+  standard_name = specific_heat_of_dry_air_at_constant_pressure
+  long_name = specific heat of dry air at constant pressure
+  units = J kg-1 K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[con_pi]
+  standard_name = pi
+  long_name = ratio of a circle's circumference to its diameter
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[con_sbc]
+  standard_name = stefan_boltzmann_constant
+  long_name = Stefan-Boltzmann constant
+  units = W m-2 K-4
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [tsfc_lnd]
   standard_name = surface_skin_temperature_over_land_interstitial
   long_name = surface skin temperature over land  (temporary use as interstitial)
