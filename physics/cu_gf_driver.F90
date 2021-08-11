@@ -607,7 +607,7 @@ contains
               ,mconv         &
               ,omeg          &
 
-              ,cactiv        &
+              ,cactiv_m      &
               ,cnvwtm        &
               ,zum           &
               ,zdm           & ! hli
