@@ -67,18 +67,9 @@
   kind = kind_phys
   intent = in
   optional = F
-[eps_in]
+[eps]
   standard_name = ratio_of_dry_air_to_water_vapor_gas_constants
   long_name = rd/rv
-  units = none
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[epsm1_in]
-  standard_name = ratio_of_dry_air_to_water_vapor_gas_constants_minus_one
-  long_name = (rd/rv) - 1
   units = none
   dimensions = ()
   type = real
@@ -107,33 +98,6 @@
   standard_name = latent_heat_of_fusion_of_water_at_0C
   long_name = latent heat of fusion
   units = J kg-1
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[pi_in]
-  standard_name = pi
-  long_name = ratio of a circle's circumference to its diameter
-  units = none
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[tice_in]
-  standard_name = temperature_at_zero_celsius
-  long_name = temperature at 0 degree Celsius
-  units = K
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[VIREPS_in]
-  standard_name = ratio_of_vapor_to_dry_air_gas_constants_minus_one
-  long_name = (rv/rd) - 1 (rv = ideal gas constant for water vapor)
-  units = none
   dimensions = ()
   type = real
   kind = kind_phys
@@ -352,15 +316,6 @@
   units = count
   dimensions = ()
   type = integer
-  intent = in
-  optional = F
-[rainmin]
-  standard_name = lwe_thickness_of_minimum_rain_amount
-  long_name = minimum rain amount
-  units = m
-  dimensions = ()
-  type = real
-  kind = kind_phys
   intent = in
   optional = F
 [flipv]
@@ -818,14 +773,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
-[ntrcaer]
-  standard_name = number_of_aerosol_tracers_MG
-  long_name = number of aerosol tracers for Morrison Gettelman MP
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
   optional = F
 [aerfld_i]
   standard_name = mass_number_concentration_of_aerosol_from_gocart_climatology

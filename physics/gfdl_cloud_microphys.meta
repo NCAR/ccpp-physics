@@ -141,15 +141,6 @@
   type = integer
   intent = in
   optional = F
-[rainmin]
-  standard_name = lwe_thickness_of_minimum_rain_amount
-  long_name = minimum rain amount
-  units = m
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [con_g]
   standard_name = gravitational_acceleration
   long_name = gravitational acceleration

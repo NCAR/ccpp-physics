@@ -40,7 +40,7 @@
 !! \htmlinclude ysuvdif_run.html
 !!
 !-------------------------------------------------------------------------------
-   subroutine ysuvdif_run(im,km,ux,vx,tx,qx,p2d,p2di,pi2d,karman,              &
+   subroutine ysuvdif_run(im,km,ux,vx,tx,qx,p2d,p2di,pi2d,                     &
                     utnp,vtnp,ttnp,qtnp,                                       &
                     swh,hlw,xmu,ntrac,ndiff,ntcw,ntiw,                         &
                     phii,phil,psfcpa,                                          &
@@ -71,7 +71,7 @@
    real(kind=kind_phys),parameter    ::  gamcrt = 3.,gamcrq = 2.e-3
    real(kind=kind_phys),parameter    ::  xka = 2.4e-5
    real(kind=kind_phys),parameter    ::  rcl = 1.0
-   real(kind=kind_phys),intent(in)   ::  karman
+   real(kind=kind_phys),parameter    ::  karman = 0.4
    integer,parameter ::  imvdif = 1
    integer,parameter ::  ysu_topdown_pblmix = 1
 !

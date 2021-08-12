@@ -35,7 +35,7 @@ contains
                                  weasd,            weasd_lnd, weasd_ice, ep1d_ice, tsfc, tsfco, tsfcl, tsfc_wat,          &
                                  tsfc_ice, tisfc, tsurf_wat, tsurf_lnd, tsurf_ice,                                        &
                                  gflx_ice, tgice, islmsk, islmsk_cice, slmsk, semis_rad, semis_wat, semis_lnd, semis_ice, &
-                                 emis_lnd, emis_ice, qss, qss_wat, qss_lnd, qss_ice, hflx, hflx_wat, hflx_lnd, hflx_ice,  &
+                                 emis_lnd, emis_ice, qss, qss_wat, qss_lnd, qss_ice,                                      &
                                  min_lakeice, min_seaice, kdt, errmsg, errflg)
 
       implicit none
@@ -49,13 +49,13 @@ contains
       real(kind=kind_phys), dimension(:), intent(in   )  :: landfrac, lakefrac, lakedepth, oceanfrac
       real(kind=kind_phys), dimension(:), intent(inout)  :: cice, hice
       real(kind=kind_phys), dimension(:), intent(  out)  :: frland
-      real(kind=kind_phys), dimension(:), intent(in   )  :: snowd, tprcp, uustar, weasd, qss, hflx
+      real(kind=kind_phys), dimension(:), intent(in   )  :: snowd, tprcp, uustar, weasd, qss
 
       real(kind=kind_phys), dimension(:), intent(inout)  :: tsfc, tsfco, tsfcl, tisfc
       real(kind=kind_phys), dimension(:), intent(inout)  :: snowd_lnd, snowd_ice, tprcp_wat,            &
                     tprcp_lnd, tprcp_ice, tsfc_wat, tsfc_ice, tsurf_wat,tsurf_lnd, tsurf_ice,           &
                     uustar_wat, uustar_lnd, uustar_ice, weasd_lnd, weasd_ice,                           &
-                    qss_wat, qss_lnd, qss_ice, hflx_wat, hflx_lnd, hflx_ice, ep1d_ice, gflx_ice
+                    qss_wat, qss_lnd, qss_ice, ep1d_ice, gflx_ice
       real(kind=kind_phys),                intent(in   ) :: tgice
       integer,              dimension(:), intent(inout)  :: islmsk, islmsk_cice
       real(kind=kind_phys), dimension(:), intent(in   )  :: semis_rad
@@ -639,7 +639,7 @@ contains
             tsfco(i) = tsfcl(i)       ! over land
           endif
           if (icy(i)) then
-            tisfc(i) = tisfc(i)           ! over lake or ocean ice when uncoupled
+            !tisfc(i) = tisfc(i)           ! over lake or ocean ice when uncoupled
           elseif (wet(i)) then
             tisfc(i) = tsfc_wat(i)       ! over lake or ocean when uncoupled
           else
@@ -741,10 +741,10 @@ contains
             weasd(i)  = weasd_ice(i) * cice(i)
             snowd(i)  = snowd_ice(i) * cice(i)
             qss(i)    = qss_ice(i)
-            tsfc(i)   = tsfc_ice(i)
+            !tsfc(i)   = tsfc_ice(i)
             evap(i)   = evap_ice(i)
             hflx(i)   = hflx_ice(i)
-            tisfc(i)  = tisfc(i)     ! over lake ice (and sea ice when uncoupled)
+            !tisfc(i)  = tisfc(i)     ! over lake ice (and sea ice when uncoupled)
             tsfc(i)   = tsfc_ice(i) ! over lake (and ocean when uncoupled)
 !
             if (flag_cice(i)) then
