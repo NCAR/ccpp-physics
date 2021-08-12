@@ -5,7 +5,7 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = unified_ugwp_init
+  name = drag_suite_init
   type = scheme
 [gwd_opt]
   standard_name = control_for_drag_suite_gravity_wave_drag
@@ -720,4 +720,3 @@
   type = integer
   intent = out
   optional = F
-
