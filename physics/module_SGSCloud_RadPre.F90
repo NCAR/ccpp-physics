@@ -42,6 +42,7 @@
       subroutine sgscloud_radpre_run(    &
            im,levs,                      &
            flag_init,flag_restart,       &
+           con_g, con_pi, eps, epsm1,    &
            do_mynnedmf,                  &
            qc, qi, qv, T3D, P3D,         &
            qr, qs, qg,                   &
@@ -59,9 +60,6 @@
 
 ! should be moved to inside the mynn:
       use machine , only : kind_phys
-      use physcons, only : con_g, con_pi, &
-                        eps   => con_eps, & ! Rd/Rv
-                      epsm1 => con_epsm1    ! Rd/Rv-1
       use module_radiation_clouds, only : gethml
       use radcons, only: qmin               ! Minimum vlaues for varius calculations
       use funcphys, only: fpvs              ! Function ot compute sat. vapor pressure over liq.
@@ -69,7 +67,8 @@
       implicit none
 !------------------------------------------------------------------- 
       ! Interface variables
-      real (kind=kind_phys), parameter :: gfac=1.0e5/con_g
+      real(kind=kind_phys), intent(in) :: con_g, con_pi, eps, epsm1 
+      real (kind=kind_phys)         :: gfac
       integer,          intent(in)  :: im, levs, imfdeepcnv, imfdeepcnv_gf, &
            &               nlay, imp_physics, imp_physics_gfdl
       logical,          intent(in)  :: flag_init, flag_restart, do_mynnedmf
@@ -114,7 +113,7 @@
 
       !write(0,*)"=============================================="
       !write(0,*)"in SGSCLoud_RadPre"
-
+      gfac=1.0e5/con_g
       if (flag_init .and. (.not. flag_restart)) then
         !write (0,*) 'Skip this flag_init = ', flag_init
         ! return
