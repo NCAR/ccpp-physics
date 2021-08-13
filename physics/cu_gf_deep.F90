@@ -4079,6 +4079,7 @@ endif
 !
 !now do the rest
 !
+            kklev(i)=maxloc(zu(i,:),1)    
             do k=kbcon(i)+1,ktop(i)
                if(t(i,k) > 273.16) then
                   c0t = c0(i)
@@ -4127,7 +4128,6 @@ endif
                qrc(i,k)=max(0.,(qc(i,k)-qrch)) ! /(1.+c0(i)*dz*zu(i,k))
                clw_allh(i,k)=max(0.,qch(i,k)-qrch) 
                qrcb(i,k)=max(0.,(qch(i,k)-qrch)) ! /(1.+c0(i)*dz*zu(i,k))
-               kklev(i)=maxloc(zu(i,:),1)     ! 05/05/2021
                if(name == "deep" )then
                  clwdet=0.02                 ! 05/11/2021
                  if(k.lt.kklev(i)) clwdet=0.    ! 05/05/2021
