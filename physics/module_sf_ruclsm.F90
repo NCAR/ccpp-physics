@@ -708,8 +708,7 @@ CONTAINS
     ENDIF
  
 !> - Call soilvegin() to initialize soil and surface properties
-     IF((XLAND(I,J)-1.5).LT.0..and. xice(i,j).lt.xice_threshold)THEN
-     !-- land
+     !-- land or ice
        CALL SOILVEGIN  ( debug_print, &
                        soilfrac,nscat,shdmin(i,j),shdmax(i,j),mosaic_lu, mosaic_soil,&
                        NLCAT,ILAND,ISOIL,iswater,MYJ,IFOREST,lufrac,VEGFRA(I,J),     &
@@ -724,16 +723,10 @@ CONTAINS
          print *,'after SOILVEGIN - z0,znt(1,26),lai(1,26)',z0(i,j),znt(i,j),lai(i,j)
 
       if(init)then
-!         print *,'NLCAT,iland,lufrac,EMISSL(I,J),PC(I,J),ZNT(I,J),LAI(I,J)', &
-!                  NLCAT,iland,lufrac,EMISSL(I,J),PC(I,J),ZNT(I,J),LAI(I,J),i,j
          print *,'NLCAT,iland,EMISSL(I,J),PC(I,J),ZNT(I,J),LAI(I,J)', &
                   NLCAT,iland,EMISSL(I,J),PC(I,J),ZNT(I,J),LAI(I,J),i,j
-
-!         print *,'NSCAT,soilfrac,QWRTZ,RHOCS,BCLH,DQM,KSAT,PSIS,QMIN,REF,WILT',&
-!                 NSCAT,soilfrac,QWRTZ,RHOCS,BCLH,DQM,KSAT,PSIS,QMIN,REF,WILT,i,j
          print *,'NSCAT,QWRTZ,RHOCS,BCLH,DQM,KSAT,PSIS,QMIN,REF,WILT',&
                  NSCAT,QWRTZ,RHOCS,BCLH,DQM,KSAT,PSIS,QMIN,REF,WILT,i,j
-
       endif
     ENDIF
 
@@ -784,7 +777,6 @@ CONTAINS
          print *,'NROOT, meltfactor, iforest, ivgtyp, i,j ', nroot,meltfactor,iforest,ivgtyp(I,J),I,J
     ENDIF
 
-     ENDIF ! land
 !!*** SET ZERO-VALUE FOR SOME OUTPUT DIAGNOSTIC ARRAYS
 !    if(i.eq.397.and.j.eq.562) then
 !        print *,'RUC LSM - xland(i,j),xice(i,j),snow(i,j)',i,j,xland(i,j),xice(i,j),snow(i,j)
@@ -7052,7 +7044,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 !> This subroutine computes liquid and forezen soil moisture from the
 !! total soil moisture, and also computes soil moisture availability in
 !! the top soil layer.
-  SUBROUTINE RUCLSMINIT( debug_print, slmsk,                       &
+  SUBROUTINE RUCLSMINIT( debug_print, landfrac, fice, min_seaice,  &
                      nzs, isltyp, ivgtyp, mavail,                  &
                      sh2o, smfr3d, tslb, smois,                    &
                      ims,ime, jms,jme, kms,kme,                    &
@@ -7065,7 +7057,8 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 #endif
    IMPLICIT NONE
    LOGICAL,  INTENT(IN   )   ::  debug_print
-   REAL, DIMENSION( ims:ime),  INTENT(IN   )   :: slmsk
+   REAL, DIMENSION( ims:ime),  INTENT(IN   )   :: landfrac, fice
+   REAL,                       INTENT(IN   )   :: min_seaice
 
    INTEGER,  INTENT(IN   )   ::     &
                                     ims,ime, jms,jme, kms,kme,  &
@@ -7125,7 +7118,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
        ! has isltyp=14 for water
        if (isltyp(i,j) == 0) isltyp(i,j)=14
      
-       if(slmsk(i) == 1. ) then
+       if(landfrac(i) > 0. ) then
        !-- land
        !-- Computate volumetric content of ice in soil
        !-- and initialize MAVAIL
@@ -7158,7 +7151,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
            endif
          ENDDO
 
-       elseif( slmsk(i) == 2.) then
+       elseif( fice(i) > min_seaice) then
        !-- ice
          mavail(i,j) = 1.
          DO L=1,NZS
