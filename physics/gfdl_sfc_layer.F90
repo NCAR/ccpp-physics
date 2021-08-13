@@ -100,7 +100,7 @@
 !! \htmlinclude gfdl_sfc_layer_run.html
 !!
       subroutine gfdl_sfc_layer_run (im, nsoil, km, xlat, xlon, flag_iter, lsm, &
-        lsm_noah, lsm_noahmp, lsm_ruc, lsm_noah_wrfv4, icoef_sf, cplwav,        &
+        lsm_noah, lsm_noahmp, lsm_ruc, lsm_noah_wrfv4, icoef_sf, cplwav, karman,&
         cplwav2atm, lcurr_sf, pert_Cd, ntsflg, sfenth, z1, shdmax, ivegsrc,     &
         vegtype, sigmaf, dt, wet, dry, icy, isltyp, rd, grav, ep1, ep2, smois,  &
         psfc, prsl1, q1, t1, u1, v1, wspd, u10, v10, gsw, glw, tsurf_wat,       &
@@ -157,7 +157,7 @@
         logical :: ch_bound_excursion
 
         !GJF: the vonKarman constant should come in through the CCPP and be defined by the host model
-        real (kind=kind_phys), parameter :: karman = 0.4
+        real (kind=kind_phys), intent(in) :: karman
         real (kind=kind_phys), parameter :: log01=log(0.01), log05=log(0.05),   &
             log07=log(0.07)
 
