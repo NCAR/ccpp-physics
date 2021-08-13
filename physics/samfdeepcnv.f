@@ -2683,7 +2683,7 @@ c
 
       if (do_aerosols)
      &  call samfdeepcnv_aerosols(im, im, km, itc, ntc, ntr, delt,
-     &  xlamde, xlamdd, cnvflg, jmin, kb, kmax, kbcon, ktcon, fscav,
+     &  xlamde, xlamdd, cnvflg, jmin, kb, kmax, kd94, ktcon, fscav,
      &  edto, xlamd, xmb, c0t, eta, etad, zi, xlamue, xlamud, delp,
      &  qtr, qaero)
 
