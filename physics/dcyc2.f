@@ -329,32 +329,27 @@
 
       do i = 1, im
 !> - LW time-step adjustment:
-         if (use_LW_Jacobian) then
-            ! F_adj = F_o + (dF/dT) * dT
-            dT           = tf(i) - tsflw(i)
-            adjsfculw(i) = sfculw(i) + fluxlwUP_jac(i,iSFC) * dT
-         else
-           tem1 = tf(i) / tsflw(i)
-           tem2 = tem1 * tem1
-           adjsfcdlw(i) = sfcdlw(i) * tem2 * tem2
+         tem1 = tf(i) / tsflw(i)
+         tem2 = tem1 * tem1
+         adjsfcdlw(i) = sfcdlw(i) * tem2 * tem2
 !!  - adjust \a sfc downward LW flux to account for t changes in the lowest model layer.
 !! compute 4th power of the ratio of \c tf in the lowest model layer over the mean value \c tsflw.
-           if (dry(i)) then
-             tem2 = tsfc_lnd(i) * tsfc_lnd(i)
-             adjsfculw_lnd(i) =  sfcemis_lnd(i) * con_sbc * tem2 * tem2
+         if (dry(i)) then
+            tem2 = tsfc_lnd(i) * tsfc_lnd(i)
+            adjsfculw_lnd(i) =  sfcemis_lnd(i) * con_sbc * tem2 * tem2
      &                        + (one - sfcemis_lnd(i)) * adjsfcdlw(i)
-           endif
-           if (icy(i)) then
-             tem2 = tsfc_ice(i) * tsfc_ice(i)
-             adjsfculw_ice(i) =  sfcemis_ice(i) * con_sbc * tem2 * tem2
+         endif
+         if (icy(i)) then
+            tem2 = tsfc_ice(i) * tsfc_ice(i)
+            adjsfculw_ice(i) =  sfcemis_ice(i) * con_sbc * tem2 * tem2
      &                        + (one - sfcemis_ice(i)) * adjsfcdlw(i)
-           endif
-           if (wet(i)) then
-             tem2 = tsfc_wat(i) * tsfc_wat(i)
-             adjsfculw_wat(i) =  sfcemis_wat(i) * con_sbc * tem2 * tem2
+         endif
+         if (wet(i)) then
+            tem2 = tsfc_wat(i) * tsfc_wat(i)
+            adjsfculw_wat(i) =  sfcemis_wat(i) * con_sbc * tem2 * tem2
      &                        + (one - sfcemis_wat(i)) * adjsfcdlw(i)
-          endif
-        endif  
+         endif
+
 !     if (lprnt .and. i == ipr) write(0,*)' in dcyc3: dry==',dry(i)
 !    &,' wet=',wet(i),' icy=',icy(i),' tsfc3=',tsfc3(i,:)
 !    &,' sfcemis=',sfcemis(i,:),' adjsfculw=',adjsfculw(i,:)
