@@ -87,6 +87,14 @@
   type = logical
   intent = in
   optional = F
+[cplice]
+  standard_name = flag_for_sea_ice_coupling
+  long_name = flag controlling cplice collection (default on)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [cplwav2atm]
   standard_name = flag_for_one_way_ocean_wave_coupling_to_atmosphere
   long_name = flag controlling ocean wave coupling to the atmosphere (default off)
@@ -167,14 +175,6 @@
 [use_flake]
   standard_name = flag_for_using_flake
   long_name = flag indicating lake points using flake model
-  units = flag
-  dimensions = (horizontal_loop_extent)
-  type = logical
-  intent = inout
-  optional = F
-[ocean]
-  standard_name = flag_nonzero_ocean_surface_fraction
-  long_name = flag indicating presence of some ocean surface area fraction
   units = flag
   dimensions = (horizontal_loop_extent)
   type = logical

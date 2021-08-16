@@ -28,8 +28,8 @@ contains
 !! \htmlinclude GFS_surface_composites_pre_run.html
 !!
    subroutine GFS_surface_composites_pre_run (im, flag_init, flag_restart, lkm, lsm, lsm_noahmp, lsm_ruc, frac_grid,      &
-                                 flag_cice, cplflx, cplwav2atm, landfrac, lakefrac, lakedepth, oceanfrac, frland,         &
-                                 dry, icy, lake, use_flake, ocean, wet, hice, cice, zorlo, zorll, zorli,                  &
+                                 flag_cice, cplflx, cplice, cplwav2atm, landfrac, lakefrac, lakedepth, oceanfrac, frland, &
+                                 dry, icy, lake, use_flake, wet, hice, cice, zorlo, zorll, zorli,                         &
                                  snowd,            snowd_lnd, snowd_ice, tprcp, tprcp_wat,                                &
                                  tprcp_lnd, tprcp_ice, uustar, uustar_wat, uustar_lnd, uustar_ice,                        &
                                  weasd,            weasd_lnd, weasd_ice, ep1d_ice, tsfc, tsfco, tsfcl, tsfc_wat,          &
@@ -43,9 +43,9 @@ contains
       ! Interface variables
       integer,                             intent(in   ) :: im, lkm, kdt
       integer,                             intent(in   ) :: lsm, lsm_noahmp, lsm_ruc
-      logical,                             intent(in   ) :: flag_init, flag_restart, frac_grid, cplflx, cplwav2atm
+      logical,                             intent(in   ) :: flag_init, flag_restart, frac_grid, cplflx, cplice, cplwav2atm
       logical, dimension(:),              intent(inout)  :: flag_cice
-      logical,              dimension(:), intent(inout)  :: dry, icy, lake, use_flake, ocean, wet
+      logical,              dimension(:), intent(inout)  :: dry, icy, lake, use_flake, wet
       real(kind=kind_phys), dimension(:), intent(in   )  :: landfrac, lakefrac, lakedepth, oceanfrac
       real(kind=kind_phys), dimension(:), intent(inout)  :: cice, hice
       real(kind=kind_phys), dimension(:), intent(  out)  :: frland
@@ -62,7 +62,7 @@ contains
       real(kind=kind_phys), dimension(:), intent(in   )  :: semis_rad
       real(kind=kind_phys), dimension(:), intent(inout)  :: semis_wat, semis_lnd, semis_ice, slmsk
       real(kind=kind_phys), dimension(:), intent(inout)  :: emis_lnd, emis_ice
-      real(kind=kind_phys),                intent(in   ) :: min_lakeice, min_seaice
+      real(kind=kind_phys),               intent(in   )  :: min_lakeice, min_seaice
       !
       real(kind=kind_phys), dimension(:), intent(inout)  :: zorlo, zorll, zorli
       !
@@ -129,21 +129,21 @@ contains
               endif
             endif
           else            ! all land
-            cice(i) = zero
-            hice(i) = zero
+            cice(i)        = zero
+            hice(i)        = zero
             islmsk_cice(i) = 1
             islmsk(i)      = 1
             wet(i)         = .false.
             icy(i)         = .false.
             flag_cice(i)   = .false.
           endif
-        enddo  
+        enddo
 
       else
 
         do i = 1, IM
           if (islmsk(i) == 1) then
-!           tsfcl(i) = tsfc(i)
+!           tsfcl(i)  = tsfc(i)
             dry(i)    = .true.
             frland(i) = one
             cice(i)   = zero
@@ -155,7 +155,14 @@ contains
               if (cice(i) >= min_seaice) then
                 icy(i)   = .true.
                 tisfc(i) = max(timin, min(tisfc(i), tgice))
-                if (cplflx)  then
+                ! This cplice namelist option was added to deal with the
+                ! situation of the FV3ATM-HYCOM coupling without an active sea
+                ! ice (e.g., CICE6) component. By default, the cplice is true
+                ! when cplflx is .true. (e.g., for the S2S application).
+                ! Whereas, for the HAFS FV3ATM-HYCOM coupling, cplice is set as
+                ! .false.. In the future HAFS FV3ATM-MOM6 coupling, the cplflx
+                ! could be .true., while cplice being .false.. 
+                if (cplice .and. cplflx)  then
                   islmsk_cice(i) = 4
                   flag_cice(i)   = .true.
                 else
@@ -173,7 +180,11 @@ contains
               endif
               if (cice(i) < one) then
                 wet(i) = .true. ! some open ocean
-                if (.not. cplflx .and. icy(i)) tsfco(i) = max(tisfc(i), tgice)
+                if (cplice) then
+                  if (.not. cplflx .and. icy(i)) tsfco(i) = max(tisfc(i), tgice)
+                else
+                  if (icy(i)) tsfco(i) = max(tisfc(i), tgice)
+                endif
               endif
             else
               if (cice(i) >= min_lakeice) then

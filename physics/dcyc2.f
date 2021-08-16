@@ -172,6 +172,7 @@
       subroutine dcyc2t3_run                                            &
 !  ---  inputs:
      &     ( solhr,slag,sdec,cdec,sinlat,coslat,                        &
+     &       con_g, con_cp, con_pi, con_sbc,                            &
      &       xlon,coszen,tsfc_lnd,tsfc_ice,tsfc_wat,tf,tsflw,tsfc,      &
      &       sfcemis_lnd, sfcemis_ice, sfcemis_wat,                     &
      &       sfcdsw,sfcnsw,sfcdlw,swh,swhc,hlw,hlwc,                    &
@@ -194,8 +195,8 @@
      &     )
 !
       use machine,         only : kind_phys
-      use physcons,        only : con_pi, con_sbc, con_cp, con_g
-      use radiation_tools,      only : cmp_tlev
+      use radiation_tools, only : cmp_tlev
+
       implicit none
 !
 !  ---  constant parameters:
@@ -204,8 +205,7 @@
      &                                   hour12 = 12.0_kind_phys,       &
      &                                   f3600  = one/3600.0_kind_phys, &
      &                                   f7200  = one/7200.0_kind_phys, &
-     &                                   czlimt = 0.0001_kind_phys,     &    ! ~ cos(89.99427)
-     &                                   pid12  = con_pi / hour12
+     &                                   czlimt = 0.0001_kind_phys        ! ~ cos(89.99427)
 
 !  ---  inputs:
       integer, intent(in) :: im, levs
@@ -236,6 +236,12 @@
 
       real(kind=kind_phys), dimension(:,:), intent(in) :: p_lev,        &
      &     flux2D_lwUP, flux2D_lwDOWN, fluxlwUP_jac, t_lev
+
+      real(kind_phys),           intent(in   ) :: con_g, con_cp,        &
+     &     con_pi, con_sbc
+
+      real(kind_phys)  :: pid12
+
 
 !  ---  input/output:
       real(kind=kind_phys), dimension(:,:), intent(inout) :: dtdt, htrlw
@@ -286,6 +292,7 @@
       tem1 = fhswr / deltim
       nstp = max(6, nint(tem1))
       nstl = max(1, nint(nstp/tem1))
+      pid12  = con_pi / hour12
 !
 !  --- ...  sw time-step adjustment for current cosine of zenith angle
 !           ----------------------------------------------------------
