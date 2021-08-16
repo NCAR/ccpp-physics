@@ -1550,7 +1550,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [tsurf_ice]
   standard_name = surface_skin_temperature_after_iteration_over_ice

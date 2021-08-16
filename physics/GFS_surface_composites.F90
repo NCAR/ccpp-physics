@@ -741,10 +741,8 @@ contains
             weasd(i)  = weasd_ice(i) * cice(i)
             snowd(i)  = snowd_ice(i) * cice(i)
             qss(i)    = qss_ice(i)
-            !tsfc(i)   = tsfc_ice(i)
             evap(i)   = evap_ice(i)
             hflx(i)   = hflx_ice(i)
-            !tisfc(i)  = tisfc(i)     ! over lake ice (and sea ice when uncoupled)
             tsfc(i)   = tsfc_ice(i) ! over lake (and ocean when uncoupled)
 !
             if (flag_cice(i)) then
