@@ -267,7 +267,7 @@
                 endif
 
                 if ( do_mynnedmf ) then
-                  !print *,'MYNN PBL or GFDL MP cldcov used'
+                  !print *,'MYNN PBL cldcov used'
                 else
                   !print *,'GF with Xu-Randall cloud fraction'
                   ! Xu-Randall (1996) cloud fraction

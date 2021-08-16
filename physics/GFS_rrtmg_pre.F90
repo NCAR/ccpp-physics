@@ -125,7 +125,7 @@
       real(kind=kind_phys), dimension(:,:), intent(inout) :: clouds1,          &
                                                              clouds2, clouds3, &
                                                              clouds4, clouds5
-      real(kind=kind_phys),  dimension(:,:), intent(inout) :: qci_conv
+      real(kind=kind_phys), dimension(:,:), intent(in) :: qci_conv
 
       integer,                              intent(out) :: kd, kt, kb
 

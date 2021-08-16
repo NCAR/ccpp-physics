@@ -390,7 +390,7 @@ contains
 ! Set cloud water to rain water conversion rate (c0)
       do i=its,itf
          c0(i)=0.004
-         if(xland1(i).eq.1)c0(i)=.002
+         if(xland1(i).eq.1)c0(i)=0.002
          if(imid.eq.1)then
            c0(i)=0.002
          endif
@@ -3976,7 +3976,7 @@ endif
      real(kind=kind_phys),    dimension (its:ite,kts:kte) ::                       &
         qch,qrcb,pwh,clw_allh,c1d,c1d_b,t
      real(kind=kind_phys),    dimension (its:ite)         ::                       &
-        pwavh,kklev
+        pwavh
      real(kind=kind_phys),    dimension (its:ite)                                  &
         ,intent (out  )                   ::                       &
         pwav,psum,psumh
@@ -3989,7 +3989,7 @@ endif
 
      integer                              ::                       &
         iprop,iall,i,k
-     integer :: start_level(its:ite)
+     integer :: start_level(its:ite),kklev(its:ite)
      real(kind=kind_phys)                                 ::                       &
         prop_ave,qrcb_h,bdsp,dp,rhoc,qrch,qaver,clwdet,                   &
         dz,berryc0,q1,berryc
@@ -4001,7 +4001,7 @@ endif
         prop_b(kts:kte)=0
         iall=0
         clwdet=0.02 
-        c0_iceconv=.01
+        c0_iceconv=0.01
         c1d_b=c1d
         bdsp=bdispm
 !
@@ -4086,7 +4086,7 @@ endif
                else
                   c0t = c0(i) * exp(c0_iceconv * (t(i,k) - 273.16))
                endif
-               if(name == "mid")c0t=.004
+               if(name == "mid")c0t=0.004
 
                denom=zu(i,k-1)-.5*up_massdetr(i,k-1)+up_massentr(i,k-1)
                if(denom.lt.1.e-16)then
