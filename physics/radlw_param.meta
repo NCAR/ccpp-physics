@@ -19,6 +19,16 @@
 
 ########################################################################
 [ccpp-table-properties]
+  name = proflw_type
+  type = ddt
+  dependencies = 
+
+[ccpp-arg-table]
+  name = proflw_type
+  type = ddt
+
+########################################################################
+[ccpp-table-properties]
   name = module_radlw_parameters
   type = module
   dependencies = 
