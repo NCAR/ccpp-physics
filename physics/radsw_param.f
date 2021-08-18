@@ -94,6 +94,9 @@
       end type sfcfsw_type
 !
 !> derived type for SW fluxes' column profiles (at layer interfaces)
+!! \section arg_table_profsw_type
+!! \htmlinclude profsw_type.html
+!!
       type profsw_type
         real (kind=kind_phys) :: upfxc      !< total-sky upward flux
         real (kind=kind_phys) :: dnfxc      !< total-sky downward flux

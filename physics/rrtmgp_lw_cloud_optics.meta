@@ -292,7 +292,7 @@
   intent = in
   optional = F
 [cldtaulw]
-  standard_name = RRTMGP_cloud_optical_depth_layers_at_10mu_band
+  standard_name = cloud_optical_depth_layers_at_10mu_band
   long_name = approx 10mu band layer cloud optical depth
   units = none
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
