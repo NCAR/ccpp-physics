@@ -144,7 +144,7 @@
   intent = inout
   optional = F
 [cactiv_m]
-  standard_name = mid_conv_activity_counter
+  standard_name = counter_for_grell_freitas_mid_level_convection
   long_name = mid-level cloud convective activity memory
   units = none
   dimensions = (horizontal_loop_extent)
