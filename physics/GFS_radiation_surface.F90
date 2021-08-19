@@ -62,7 +62,7 @@
         sncovr_ice, fice, zorl, hprime, tsfg, tsfa, tisfc, coszen,      &
         min_seaice, min_lakeice, lakefrac,                              &
         alvsf, alnsf, alvwf, alnwf, facsf, facwf,                       &
-        semis_lnd, semis_ice, snoalb,                                   &
+        semis_lnd, semis_ice, snoalb, use_cice_alb,                     &
         albdvis_lnd, albdnir_lnd, albivis_lnd, albinir_lnd,             &
         albdvis_ice, albdnir_ice, albivis_ice, albinir_ice,             &
         semisbase, semis, sfcalb, sfc_alb_dif, errmsg, errflg)
@@ -74,7 +74,7 @@
       implicit none
 
       integer,              intent(in) :: im
-      logical,              intent(in) :: frac_grid, lslwr, lsswr
+      logical,              intent(in) :: frac_grid, lslwr, lsswr, use_cice_alb
       integer,              intent(in) :: lsm, lsm_noahmp, lsm_ruc, lndp_type, n_var_lndp
       real(kind=kind_phys), intent(in) :: min_seaice, min_lakeice
 
@@ -88,7 +88,7 @@
                                                            alnwf, facsf, facwf,         &
                                                            semis_lnd, semis_ice, snoalb
       character(len=3)    , dimension(:),   intent(in)  :: lndp_var_list
-      real(kind=kind_phys), dimension(:),   intent(in)  :: albdvis_lnd, albdnir_lnd,    &
+      real(kind=kind_phys), dimension(:),   intent(inout)  :: albdvis_lnd, albdnir_lnd, &
                                                            albivis_lnd, albinir_lnd
       real(kind=kind_phys), dimension(:),   intent(in)  :: albdvis_ice, albdnir_ice,    &
                                                            albivis_ice, albinir_ice
@@ -160,7 +160,8 @@
 !>  - Call module_radiation_surface::setemis(),to set up surface
 !! emissivity for LW radiation.
         call setemis (lsm, lsm_noahmp, lsm_ruc, vtype,             &
-                      frac_grid, min_seaice, xlon, xlat, slmsk,    &
+                      frac_grid,             xlon, xlat, slmsk,    &
+!                     frac_grid, min_seaice, xlon, xlat, slmsk,    &
                       snowd, sncovr, sncovr_ice, zorl, tsfg, tsfa, &
                       hprime, semis_lnd, semis_ice, im,            &
                       fracl, fraco, fraci, icy,                    & !  ---  inputs
@@ -181,13 +182,14 @@
 !>  - Call module_radiation_surface::setalb(),to set up surface
 !! albedor for SW radiation.
 
-        call setalb (slmsk, lsm, lsm_noahmp, lsm_ruc, snowd, sncovr, sncovr_ice, snoalb, &
-                     zorl, coszen, tsfg, tsfa, hprime,           frac_grid, min_seaice,  &
-                     alvsf, alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc,              &
-                     albdvis_lnd, albdnir_lnd, albivis_lnd, albinir_lnd,                 &
-                     albdvis_ice, albdnir_ice, albivis_ice, albinir_ice,                 &
-                     IM, sfc_alb_pert, lndp_alb, fracl, fraco, fraci, icy,               & !  ---  inputs
-                     sfcalb )                                                              !  ---  outputs
+        call setalb (slmsk, lsm, lsm_noahmp, lsm_ruc, use_cice_alb, snowd, sncovr, sncovr_ice, &
+                     snoalb, zorl, coszen, tsfg, tsfa, hprime, frac_grid, lakefrac,            &
+!                    snoalb, zorl, coszen, tsfg, tsfa, hprime, frac_grid, min_seaice,          &
+                     alvsf, alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc,                    &
+                     albdvis_lnd, albdnir_lnd, albivis_lnd, albinir_lnd,                       &
+                     albdvis_ice, albdnir_ice, albivis_ice, albinir_ice,                       &
+                     IM, sfc_alb_pert, lndp_alb, fracl, fraco, fraci, icy,                     & !  ---  inputs
+                     sfcalb )                                                                    !  ---  outputs
 
 !> -# Approximate mean surface albedo from vis- and nir- diffuse values.
         sfc_alb_dif(:) = max(0.01, 0.5 * (sfcalb(:,2) + sfcalb(:,4)))

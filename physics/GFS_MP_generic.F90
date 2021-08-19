@@ -84,8 +84,9 @@
 !!
 !> \section gfs_mp_gen GFS MP Generic Post General Algorithm
 !> @{
-      subroutine GFS_MP_generic_post_run(im, levs, kdt, nrcm, nncl, ntcw, ntrac, imp_physics, imp_physics_gfdl,     &
-        imp_physics_thompson, imp_physics_mg, imp_physics_fer_hires, cal_pre, cplflx, cplchm, con_g, dtf, frain, rainc,   &
+      subroutine GFS_MP_generic_post_run(                                                                                 &
+        im, levs, kdt, nrcm, nncl, ntcw, ntrac, imp_physics, imp_physics_gfdl, imp_physics_thompson,                      &
+        imp_physics_mg, imp_physics_fer_hires, cal_pre, cplflx, cplchm, con_g, rainmin, dtf, frain, rainc,                &
         rain1, rann, xlat, xlon, gt0, gq0, prsl, prsi, phii, tsfc, ice, snow, graupel, save_t, save_q, rain0, ice0, snow0,&
         graupel0, del, rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp, srflag, sr, cnvprcp, totprcp, totice,   &
         totsnw, totgrp, cnvprcpb, totprcpb, toticeb, totsnwb, totgrpb, rain_cpl, rainc_cpl, snow_cpl, pwat,               &
@@ -103,7 +104,7 @@
       logical, intent(in) :: cal_pre, lssav, ldiag3d, qdiag3d, cplflx, cplchm
       integer, intent(in) :: index_of_temperature,index_of_process_mp
 
-      real(kind=kind_phys),                    intent(in)    :: dtf, frain, con_g
+      real(kind=kind_phys),                    intent(in)    :: dtf, frain, con_g, rainmin
       real(kind=kind_phys), dimension(:),      intent(in)    :: rain1, xlat, xlon, tsfc
       real(kind=kind_phys), dimension(:),      intent(inout) :: ice, snow, graupel, rainc
       real(kind=kind_phys), dimension(:),      intent(in)    :: rain0, ice0, snow0, graupel0
@@ -146,7 +147,6 @@
       ! DH* TODO: CLEANUP, all of these should be coming in through the argument list
       real(kind=kind_phys), parameter :: con_p001= 0.001_kind_phys
       real(kind=kind_phys), parameter :: con_day = 86400.0_kind_phys
-      real(kind=kind_phys), parameter :: rainmin = 1.0e-13_kind_phys
       real(kind=kind_phys), parameter :: p850    = 85000.0_kind_phys
       ! *DH
 

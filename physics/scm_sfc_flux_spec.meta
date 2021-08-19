@@ -8,7 +8,7 @@
   name = scm_sfc_flux_spec_init
   type = scheme
 [lheatstrg]
-  standard_name = flag_for_canopy_heat_storage
+  standard_name = flag_for_canopy_heat_storage_in_land_surface_scheme
   long_name = flag for canopy heat storage parameterization
   units = flag
   dimensions = ()
@@ -38,7 +38,7 @@
   name = scm_sfc_flux_spec_run
   type = scheme
 [u1]
-  standard_name = x_wind_at_lowest_model_layer
+  standard_name = x_wind_at_surface_adjacent_layer
   long_name = x component of 1st model layer wind
   units = m s-1
   dimensions = (horizontal_loop_extent)
@@ -47,7 +47,7 @@
   intent = in
   optional = F
 [v1]
-  standard_name = y_wind_at_lowest_model_layer
+  standard_name = y_wind_at_surface_adjacent_layer
   long_name = y component of 1st model layer wind
   units = m s-1
   dimensions = (horizontal_loop_extent)
@@ -65,7 +65,7 @@
   intent = in
   optional = F
 [t1]
-  standard_name = air_temperature_at_lowest_model_layer
+  standard_name = air_temperature_at_surface_adjacent_layer
   long_name = 1st model layer air temperature
   units = K
   dimensions = (horizontal_loop_extent)
@@ -74,7 +74,7 @@
   intent = in
   optional = F
 [q1]
-  standard_name = water_vapor_specific_humidity_at_lowest_model_layer
+  standard_name = specific_humidity_at_surface_adjacent_layer
   long_name = 1st model layer specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent)
@@ -83,7 +83,7 @@
   intent = in
   optional = F
 [p1]
-  standard_name = air_pressure_at_lowest_model_layer
+  standard_name = air_pressure_at_surface_adjacent_layer
   long_name = Model layer 1 mean pressure
   units = Pa
   dimensions = (horizontal_loop_extent)
@@ -101,7 +101,7 @@
   intent = in
   optional = F
 [spec_sh_flux]
-  standard_name = specified_kinematic_surface_upward_sensible_heat_flux
+  standard_name = specified_surface_upward_temperature_flux
   long_name = specified kinematic surface upward sensible heat flux
   units = K m s-1
   dimensions = (horizontal_loop_extent)
@@ -110,7 +110,7 @@
   intent = in
   optional = F
 [spec_lh_flux]
-  standard_name = specified_kinematic_surface_upward_latent_heat_flux
+  standard_name = specified_surface_upward_specific_humidity_flux
   long_name = specified kinematic surface upward latent heat flux
   units = kg kg-1 m s-1
   dimensions = (horizontal_loop_extent)
@@ -164,7 +164,7 @@
   intent = in
   optional = F
 [rd]
-  standard_name = gas_constant_dry_air
+  standard_name = gas_constant_of_dry_air
   long_name = ideal gas constant for dry air
   units = J kg-1 K-1
   dimensions = ()
@@ -191,7 +191,7 @@
   intent = in
   optional = F
 [sh_flux]
-  standard_name = kinematic_surface_upward_sensible_heat_flux
+  standard_name = surface_upward_temperature_flux
   long_name = surface upward sensible heat flux
   units = K m s-1
   dimensions = (horizontal_loop_extent)
@@ -200,7 +200,7 @@
   intent = out
   optional = F
 [lh_flux]
-  standard_name = kinematic_surface_upward_latent_heat_flux
+  standard_name = surface_upward_specific_humidity_flux
   long_name = surface upward evaporation flux
   units = kg kg-1 m s-1
   dimensions = (horizontal_loop_extent)
@@ -218,7 +218,7 @@
   intent = out
   optional = F
 [lh_flux_chs]
-  standard_name = kinematic_surface_upward_latent_heat_flux_reduced_by_surface_roughness
+  standard_name = surface_upward_specific_humidity_flux_reduced_by_surface_roughness
   long_name = kinematic surface upward latent heat flux reduced by surface roughness
   units = kg kg-1 m s-1
   dimensions = (horizontal_loop_extent)
@@ -326,7 +326,7 @@
   intent = out
   optional = F
 [t2m]
-  standard_name = temperature_at_2m
+  standard_name = air_temperature_at_2m
   long_name = 2 meter temperature
   units = K
   dimensions = (horizontal_loop_extent)
