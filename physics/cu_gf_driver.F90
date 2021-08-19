@@ -260,6 +260,10 @@ contains
      rand_mom(:)    = 0.
      rand_vmas(:)   = 0.
      rand_clos(:,:) = 0.
+
+     cnvwtm(:,:) = 0.
+     cnvwts(:,:) = 0.
+     cnvwt(:,:) = 0.
 !
      its=1
      ite=im

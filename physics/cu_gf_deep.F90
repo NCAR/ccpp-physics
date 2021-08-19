@@ -390,7 +390,9 @@ contains
 ! Set cloud water to rain water conversion rate (c0)
       do i=its,itf
          c0(i)=0.004
+         xland1(i)=int(xland(i)+.0001) ! 1.
          if(xland1(i).eq.1)c0(i)=0.002
+
          if(imid.eq.1)then
            c0(i)=0.002
          endif
@@ -435,7 +437,6 @@ contains
 !
 ! for water or ice
 !
-        xland1(i)=int(xland(i)+.0001) ! 1.
         if(xland(i).gt.1.5 .or. xland(i).lt.0.5)then
             xland1(i)=0
 !            if(imid.eq.0)cap_max(i)=cap_maxs-25.
@@ -3973,8 +3974,11 @@ endif
      real(kind=kind_phys),    dimension (its:ite,kts:kte)                          &
         ,intent (out  )                   ::                       &
         qc,qrc,pw,clw_all
+     real(kind=kind_phys),    dimension (its:ite,kts:kte)                          &
+        ,intent (inout)                   ::                       &
+        c1d
      real(kind=kind_phys),    dimension (its:ite,kts:kte) ::                       &
-        qch,qrcb,pwh,clw_allh,c1d,c1d_b,t
+        qch,qrcb,pwh,clw_allh,c1d_b,t
      real(kind=kind_phys),    dimension (its:ite)         ::                       &
         pwavh
      real(kind=kind_phys),    dimension (its:ite)                                  &
@@ -4137,8 +4141,6 @@ endif
                endif
                if(k.gt.kbcon(i)+1)c1d(i,k)=clwdet*up_massdetr(i,k-1)
                if(k.gt.kbcon(i)+1)c1d_b(i,k)=clwdet*up_massdetr(i,k-1)
-               clw_all(i,k)=max(0.,qc(i,k)-qrch)
-               clw_allh(i,k)=max(0.,qch(i,k)-qrch)
 
                if(autoconv.eq.2) then
 ! 
