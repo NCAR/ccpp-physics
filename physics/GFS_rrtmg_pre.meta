@@ -803,7 +803,7 @@
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = F
 [kd]
   standard_name = vertical_index_difference_between_inout_and_local
