@@ -442,6 +442,7 @@ contains
 
      cnvwt(:,:)=0.
      cnvwts(:,:)=0.
+     cnvwtm(:,:)=0.
 
      hco(:,:)=0.
      hcom(:,:)=0.

@@ -388,8 +388,12 @@ contains
 !
 !---------------------------------------------------- ! HCB
 ! Set cloud water to rain water conversion rate (c0)
+      c0(:)=0.004
       do i=its,itf
-         c0(i)=0.004
+         xland1(i)=int(xland(i)+.0001) ! 1.
+         if(xland(i).gt.1.5 .or. xland(i).lt.0.5)then
+             xland1(i)=0
+         endif
          if(xland1(i).eq.1)c0(i)=0.002
          if(imid.eq.1)then
            c0(i)=0.002
@@ -435,9 +439,7 @@ contains
 !
 ! for water or ice
 !
-        xland1(i)=int(xland(i)+.0001) ! 1.
-        if(xland(i).gt.1.5 .or. xland(i).lt.0.5)then
-            xland1(i)=0
+        if (xland1(i)==0) then
 !            if(imid.eq.0)cap_max(i)=cap_maxs-25.
 !            if(imid.eq.1)cap_max(i)=cap_maxs-50.
             cap_max_increment(i)=20.
@@ -4079,7 +4081,7 @@ endif
 !
 !now do the rest
 !
-            kklev(i)=maxloc(zu(i,:),1)    
+            kklev(i)=maxloc(zu(i,:),1)
             do k=kbcon(i)+1,ktop(i)
                if(t(i,k) > 273.16) then
                   c0t = c0(i)
