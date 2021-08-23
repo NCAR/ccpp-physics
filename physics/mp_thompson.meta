@@ -270,6 +270,31 @@
   kind = kind_phys
   intent = out
   optional = T
+[iccn]
+  standard_name = flag_for_in_ccn_forcing_for_morrison_gettelman_microphysics
+  long_name = flag for IN and CCN forcing for morrison gettelman microphysics
+  units = none
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[iaerclm]
+  standard_name = flag_for_aerosol_input_MG_radiation
+  long_name = flag for using aerosols in Morrison-Gettelman MP_radiation
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[aerfld]
+  standard_name = aerosol_number_concentration_from_gocart_aerosol_climatology
+  long_name = GOCART aerosol climatology number concentration
+  units = kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_aerosol_tracers_MG)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [mpicomm]
   standard_name = mpi_communicator
   long_name = MPI communicator
@@ -701,6 +726,31 @@
   kind = kind_phys
   intent = out
   optional = T
+[iccn]
+  standard_name = flag_for_in_ccn_forcing_for_morrison_gettelman_microphysics
+  long_name = flag for IN and CCN forcing for morrison gettelman microphysics
+  units = none
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[iaerclm]
+  standard_name = flag_for_aerosol_input_MG_radiation
+  long_name = flag for using aerosols in Morrison-Gettelman MP_radiation
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[aerfld]
+  standard_name = aerosol_number_concentration_from_gocart_aerosol_climatology
+  long_name = GOCART aerosol climatology number concentration
+  units = kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_aerosol_tracers_MG)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [mpicomm]
   standard_name = mpi_communicator
   long_name = MPI communicator

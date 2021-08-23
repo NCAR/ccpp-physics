@@ -37,6 +37,7 @@ module mp_thompson
                                   is_aerosol_aware, nc, nwfa2d, nifa2d, &
                                   nwfa, nifa, tgrs, prsl, phil, area,   &
                                   re_cloud, re_ice, re_snow,            &
+                                  iccn, iaerclm, aerfld,                &
                                   mpicomm, mpirank, mpiroot,            &
                                   threads, ext_diag, diag3d,            &
                                   errmsg, errflg)
@@ -49,6 +50,8 @@ module mp_thompson
          real(kind_phys),           intent(in   ) :: con_g, con_rd, con_eps
          logical,                   intent(in   ) :: restart
          integer,                   intent(in   ) :: imp_physics
+         integer,                   intent(in   ) :: iccn
+         logical,                   intent(in   ) :: iaerclm
          integer,                   intent(in   ) :: imp_physics_thompson
          ! Hydrometeors
          logical,                   intent(in   ) :: convert_dry_rho
@@ -72,6 +75,7 @@ module mp_thompson
          real(kind_phys),           intent(in   ) :: prsl(:,:)
          real(kind_phys),           intent(in   ) :: phil(:,:)
          real(kind_phys),           intent(in   ) :: area(:)
+         real (kind=kind_phys), dimension(:,:,:),intent(in):: aerfld
          ! Cloud effective radii
          real(kind_phys), optional, intent(  out) :: re_cloud(:,:)
          real(kind_phys), optional, intent(  out) :: re_ice(:,:)
@@ -104,7 +108,9 @@ module mp_thompson
          errflg = 0
 
          if (is_initialized) return
-
+         if(iccn == 3 .and. iaerclm) then
+           call get_niwfa(aerfld, nifa, nwfa, ncol, nlev)
+         end if
          ! Consistency checks
          if (imp_physics/=imp_physics_thompson) then
             write(errmsg,'(*(a))') "Logic error: namelist choice of microphysics is different from Thompson MP"
@@ -339,6 +345,7 @@ module mp_thompson
                               prcp, rain, graupel, ice, snow, sr,  &
                               refl_10cm, reset_dBZ, do_radar_ref,  &
                               re_cloud, re_ice, re_snow,           &
+                              iccn, iaerclm, aerfld,               &
                               mpicomm, mpirank, mpiroot, blkno,    &
                               ext_diag, diag3d, reset_diag3d,      &
                               errmsg, errflg)
@@ -350,6 +357,8 @@ module mp_thompson
          ! Dimensions and constants
          integer,                   intent(in   ) :: ncol
          integer,                   intent(in   ) :: nlev
+         integer,                   intent(in   ) :: iccn
+         logical,                   intent(in   ) :: iaerclm
          real(kind_phys),           intent(in   ) :: con_g
          real(kind_phys),           intent(in   ) :: con_rd
          real(kind_phys),           intent(in   ) :: con_eps
@@ -376,6 +385,7 @@ module mp_thompson
          real(kind_phys),           intent(in   ) :: prsl(:,:)
          real(kind_phys),           intent(in   ) :: phii(:,:)
          real(kind_phys),           intent(in   ) :: omega(:,:)
+         real (kind=kind_phys), dimension(:,:,:),intent(in):: aerfld
          real(kind_phys),           intent(in   ) :: dtp
          logical,                   intent(in   ) :: first_time_step
          integer,                   intent(in   ) :: istep, nsteps
@@ -497,6 +507,10 @@ module mp_thompson
             write(errmsg, fmt='((a))') 'mp_thompson_run called before mp_thompson_init'
             errflg = 1
             return
+         end if
+
+         if(iccn == 3 .and. iaerclm) then
+           call get_niwfa(aerfld, nifa, nwfa, ncol, nlev)
          end if
 
          ! Set reduced time step if subcycling is used
@@ -938,5 +952,17 @@ module mp_thompson
          is_initialized = .false.
 
       end subroutine mp_thompson_finalize
+      subroutine get_niwfa(aerfld, nifa, nwfa, ncol, nlev)
+        implicit none
+        integer, intent(in)::ncol, nlev
+        real (kind=kind_phys), dimension(:,:,:),intent(in):: aerfld
+        real (kind=kind_phys), dimension(:,:),intent(out)::nifa, nwfa
+        nifa=(aerfld(:,:,1)/4.0737762+aerfld(:,:,2)/30.459203+aerfld(:,:,3)/153.45048+ &
+             aerfld(:,:,4)/1011.5142+ aerfld(:,:,5)/5683.3501)*1.e15
+        nwfa=((aerfld(:,:,6)/0.0045435214+aerfld(:,:,7)/0.2907854+aerfld(:,:,8)/12.91224+ &
+             aerfld(:,:,9)/206.2216+ aerfld(:,:,10)/4326.23)*1.+aerfld(:,:,11)/0.3053104*5+  &
+             +aerfld(:,:,15)/0.3232698*1)*1.e15
+      end subroutine get_niwfa
+
 
 end module mp_thompson
