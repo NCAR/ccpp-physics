@@ -3975,8 +3975,11 @@ endif
      real(kind=kind_phys),    dimension (its:ite,kts:kte)                          &
         ,intent (out  )                   ::                       &
         qc,qrc,pw,clw_all
+     real(kind=kind_phys),    dimension (its:ite,kts:kte)                          &
+        ,intent (inout)                   ::                       &
+        c1d
      real(kind=kind_phys),    dimension (its:ite,kts:kte) ::                       &
-        qch,qrcb,pwh,clw_allh,c1d,c1d_b,t
+        qch,qrcb,pwh,clw_allh,c1d_b,t
      real(kind=kind_phys),    dimension (its:ite)         ::                       &
         pwavh
      real(kind=kind_phys),    dimension (its:ite)                                  &
@@ -4139,8 +4142,6 @@ endif
                endif
                if(k.gt.kbcon(i)+1)c1d(i,k)=clwdet*up_massdetr(i,k-1)
                if(k.gt.kbcon(i)+1)c1d_b(i,k)=clwdet*up_massdetr(i,k-1)
-               clw_all(i,k)=max(0.,qc(i,k)-qrch)
-               clw_allh(i,k)=max(0.,qch(i,k)-qrch)
 
                if(autoconv.eq.2) then
 ! 
