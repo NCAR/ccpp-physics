@@ -108,9 +108,6 @@ module mp_thompson
          errflg = 0
 
          if (is_initialized) return
-         if(iccn == 3 .and. iaerclm) then
-           call get_niwfa(aerfld, nifa, nwfa, ncol, nlev)
-         end if
          ! Consistency checks
          if (imp_physics/=imp_physics_thompson) then
             write(errmsg,'(*(a))') "Logic error: namelist choice of microphysics is different from Thompson MP"
@@ -124,6 +121,9 @@ module mp_thompson
                errflg = 1
                return
             end if
+         end if
+         if(iccn == 3 .and. iaerclm) then
+           call get_niwfa(aerfld, nifa, nwfa, ncol, nlev)
          end if
 
          ! Call Thompson init
@@ -952,6 +952,7 @@ module mp_thompson
          is_initialized = .false.
 
       end subroutine mp_thompson_finalize
+
       subroutine get_niwfa(aerfld, nifa, nwfa, ncol, nlev)
         implicit none
         integer, intent(in)::ncol, nlev

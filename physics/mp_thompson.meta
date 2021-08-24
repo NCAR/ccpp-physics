@@ -271,7 +271,7 @@
   intent = out
   optional = T
 [iccn]
-  standard_name = flag_for_in_ccn_forcing_for_morrison_gettelman_microphysics
+  standard_name = control_for_ice_cloud_condensation_nuclei_forcing
   long_name = flag for IN and CCN forcing for morrison gettelman microphysics
   units = none
   dimensions = ()
@@ -287,10 +287,10 @@
   intent = in
   optional = F
 [aerfld]
-  standard_name = aerosol_number_concentration_from_gocart_aerosol_climatology
+  standard_name = mass_number_concentration_of_aerosol_from_gocart_climatology
   long_name = GOCART aerosol climatology number concentration
   units = kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_aerosol_tracers_MG)
+  dimensions = (horizontal_dimension,vertical_layer_dimension,number_of_aerosol_tracers_MG)
   type = real
   kind = kind_phys
   intent = in
@@ -727,7 +727,7 @@
   intent = out
   optional = T
 [iccn]
-  standard_name = flag_for_in_ccn_forcing_for_morrison_gettelman_microphysics
+  standard_name = control_for_ice_cloud_condensation_nuclei_forcing
   long_name = flag for IN and CCN forcing for morrison gettelman microphysics
   units = none
   dimensions = ()
@@ -743,10 +743,10 @@
   intent = in
   optional = F
 [aerfld]
-  standard_name = aerosol_number_concentration_from_gocart_aerosol_climatology
+  standard_name = mass_number_concentration_of_aerosol_from_gocart_climatology
   long_name = GOCART aerosol climatology number concentration
   units = kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_aerosol_tracers_MG)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_aerosol_tracers_MG)
   type = real
   kind = kind_phys
   intent = in
