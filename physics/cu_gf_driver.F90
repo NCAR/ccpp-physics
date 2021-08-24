@@ -256,7 +256,8 @@ contains
 !
 ! these should be coming in from outside
 !
-!    cactiv(:)      = 0
+     cactiv(:)      = 0
+     cactiv_m(:)    = 0
      rand_mom(:)    = 0.
      rand_vmas(:)   = 0.
      rand_clos(:,:) = 0.
@@ -275,9 +276,9 @@ contains
 !
 !> - Set tuning constants for radiation coupling
 !
-     tun_rad_shall(:)=.02
-     tun_rad_mid(:)=.15
-     tun_rad_deep(:)=.13
+     tun_rad_shall(:)=.01
+     tun_rad_mid(:)=.02
+     tun_rad_deep(:)=.065
      edt(:)=0.
      edtm(:)=0.
      edtd(:)=0.
@@ -442,6 +443,7 @@ contains
 
      cnvwt(:,:)=0.
      cnvwts(:,:)=0.
+     cnvwtm(:,:)=0.
 
      hco(:,:)=0.
      hcom(:,:)=0.
@@ -607,7 +609,7 @@ contains
               ,mconv         &
               ,omeg          &
 
-              ,cactiv        &
+              ,cactiv_m      &
               ,cnvwtm        &
               ,zum           &
               ,zdm           & ! hli
@@ -816,7 +818,8 @@ contains
                vs(i,k)=vs(i,k)+outv(i,k)*cuten(i)*dt +outvm(i,k)*cutenm(i)*dt +outvs(i,k)*cutens(i)*dt
 
                gdc(i,k,1)= max(0.,tun_rad_shall(i)*cupclws(i,k)*cutens(i))      ! my mod
-               gdc2(i,k,1)=max(0.,tun_rad_deep(i)*(cupclwm(i,k)*cutenm(i)+cupclw(i,k)*cuten(i)))
+               !gdc2(i,k,1)=max(0.,tun_rad_deep(i)*(cupclwm(i,k)*cutenm(i)+cupclw(i,k)*cuten(i)))
+               gdc2(i,k,1)=max(0.,tun_rad_mid(i)*cupclwm(i,k)*cutenm(i)+tun_rad_deep(i)*cupclw(i,k)*cuten(i)+tun_rad_shall(i)*cupclws(i,k)*cutens(i))
                qci_conv(i,k)=gdc2(i,k,1)
                gdc(i,k,2)=(outt(i,k))*86400.
                gdc(i,k,3)=(outtm(i,k))*86400.
@@ -885,15 +888,13 @@ contains
                       +outqcm(i,k)*cutenm(i)                           &
                       +clw_ten(i,k)                                    &
                          )
-               !tem1 = max(0.0, min(1.0, (tcr-t(i,k))*tcrf))
-               !if (clcw(i,k) .gt. -999.0) then
-               ! cliw(i,k) = max(0.,cliw(i,k) + tem * tem1)            ! ice
-               ! clcw(i,k) = max(0.,clcw(i,k) + tem *(1.0-tem1))       ! water
-               !else
-               ! cliw(i,k) = max(0.,cliw(i,k) + tem)
-               !endif
-               if(t(i,k).le.270.) cliw(i,k) = max(0.,cliw(i,k) + tem) ! HCB
-               if(t(i,k).gt.270) clcw(i,k) = max(0.,clcw(i,k) + tem)
+               tem1 = max(0.0, min(1.0, (tcr-t(i,k))*tcrf))
+               if (clcw(i,k) .gt. -999.0) then
+                cliw(i,k) = max(0.,cliw(i,k) + tem * tem1)            ! ice
+                clcw(i,k) = max(0.,clcw(i,k) + tem *(1.0-tem1))       ! water
+               else
+                cliw(i,k) = max(0.,cliw(i,k) + tem)
+               endif
 
              enddo
 

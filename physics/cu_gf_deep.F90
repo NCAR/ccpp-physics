@@ -28,8 +28,8 @@ module cu_gf_deep
      real(kind=kind_phys), parameter :: pgcd = 0.1
 !
 !> aerosol awareness, do not user yet!
-     integer, parameter :: autoconv=2 !1
-     integer, parameter :: aeroevap=3 !1
+     integer, parameter :: autoconv=1
+     integer, parameter :: aeroevap=1
      real(kind=kind_phys), parameter :: scav_factor = 0.5
 !> still 16 ensembles for clousres
      integer, parameter:: maxens3=16
@@ -339,7 +339,7 @@ contains
      integer :: turn,pmin_lev(its:ite),start_level(its:ite),ktopkeep(its:ite)
      real(kind=kind_phys),    dimension (its:ite,kts:kte) :: dtempdz
      integer, dimension (its:ite,kts:kte) ::  k_inv_layers 
-     real(kind=kind_phys) :: c0    ! HCB
+     real(kind=kind_phys),    dimension (its:ite) :: c0    ! HCB
  
 ! rainevap from sas
      real(kind=kind_phys) zuh2(40)
@@ -388,10 +388,17 @@ contains
 !
 !---------------------------------------------------- ! HCB
 ! Set cloud water to rain water conversion rate (c0)
-      c0=0.004
-      if(imid.eq.1)then
-        c0=0.002
-      endif
+      c0(:)=0.004
+      do i=its,itf
+         xland1(i)=int(xland(i)+.0001) ! 1.
+         if(xland(i).gt.1.5 .or. xland(i).lt.0.5)then
+             xland1(i)=0
+         endif
+         if(xland1(i).eq.1)c0(i)=0.002
+         if(imid.eq.1)then
+           c0(i)=0.002
+         endif
+      enddo
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       ztexec(:)     = 0.
@@ -432,9 +439,7 @@ contains
 !
 ! for water or ice
 !
-        xland1(i)=int(xland(i)+.0001) ! 1.
-        if(xland(i).gt.1.5 .or. xland(i).lt.0.5)then
-            xland1(i)=0
+        if (xland1(i)==0) then
 !            if(imid.eq.0)cap_max(i)=cap_maxs-25.
 !            if(imid.eq.1)cap_max(i)=cap_maxs-50.
             cap_max_increment(i)=20.
@@ -1996,7 +2001,7 @@ contains
          do k = ktop(i), 1, -1
               rain =  pwo(i,k) + edto(i) * pwdo(i,k)
               rn(i) = rn(i) + rain * xmb(i) * .001 * dtime
-            if(po(i,k).gt.400.)then
+            !if(po(i,k).gt.400.)then
               if(flg(i))then
               q1=qo(i,k)+(outq(i,k))*dtime
               t1=tn(i,k)+(outt(i,k))*dtime
@@ -2021,7 +2026,7 @@ contains
                 pre(i)=max(pre(i),0.)
                 delqev(i) = delqev(i) + .001*dp*qevap(i)/g
               endif
-            endif ! 400mb
+            !endif ! 400mb
           endif
         enddo
 !       pre(i)=1000.*rn(i)/dtime
@@ -3942,13 +3947,13 @@ endif
         up_massentr,up_massdetr,dby,qes_cup,z_cup
      real(kind=kind_phys),    dimension (its:ite)                                 &
         ,intent (in   )                   ::                      &
-        zqexec
+        zqexec,c0
   ! entr= entrainment rate 
      integer, dimension (its:ite)                                 &
         ,intent (in   )                   ::                      &
         kbcon,ktop,k22,xland1
      real(kind=kind_phys),    intent (in  ) ::                    & ! HCB
-        c0,ccnclean
+        ccnclean
 !
 ! input and output
 !
@@ -3970,10 +3975,13 @@ endif
      real(kind=kind_phys),    dimension (its:ite,kts:kte)                          &
         ,intent (out  )                   ::                       &
         qc,qrc,pw,clw_all
+     real(kind=kind_phys),    dimension (its:ite,kts:kte)                          &
+        ,intent (inout)                   ::                       &
+        c1d
      real(kind=kind_phys),    dimension (its:ite,kts:kte) ::                       &
-        qch,qrcb,pwh,clw_allh,c1d,c1d_b,t
+        qch,qrcb,pwh,clw_allh,c1d_b,t
      real(kind=kind_phys),    dimension (its:ite)         ::                       &
-        pwavh,kklev
+        pwavh
      real(kind=kind_phys),    dimension (its:ite)                                  &
         ,intent (out  )                   ::                       &
         pwav,psum,psumh
@@ -3986,17 +3994,19 @@ endif
 
      integer                              ::                       &
         iprop,iall,i,k
-     integer :: start_level(its:ite)
+     integer :: start_level(its:ite),kklev(its:ite)
      real(kind=kind_phys)                                 ::                       &
         prop_ave,qrcb_h,bdsp,dp,rhoc,qrch,qaver,clwdet,                   &
         dz,berryc0,q1,berryc
      real(kind=kind_phys)                                 ::                       &
-        denom, c0t
+        denom, c0t, c0_iceconv
      real(kind=kind_phys),    dimension (kts:kte)         ::                       &
         prop_b
 !
         prop_b(kts:kte)=0
         iall=0
+        clwdet=0.02 
+        c0_iceconv=0.01
         c1d_b=c1d
         bdsp=bdispm
 !
@@ -4050,12 +4060,11 @@ endif
 !
 !            if(name == "deep" )then
             do k=k22(i)+1,kbcon(i)
-              c0t = c0
-              !if(t(i,k) > 273.16) then
-              ! c0t = c0
-              !else
-              ! c0t = c0 * exp(0.07 * (t(i,k) - 273.16))
-              !endif
+              if(t(i,k) > 273.16) then
+               c0t = c0(i)
+              else
+               c0t = c0(i) * exp(c0_iceconv * (t(i,k) - 273.16))
+              endif
               qc(i,k)=   (qc(i,k-1)*zu(i,k-1)-.5*up_massdetr(i,k-1)* qc(i,k-1)+ &
                          up_massentr(i,k-1)*q(i,k-1))   /                       &
                          (zu(i,k-1)-.5*up_massdetr(i,k-1)+up_massentr(i,k-1))
@@ -4075,13 +4084,15 @@ endif
 !
 !now do the rest
 !
+            kklev(i)=maxloc(zu(i,:),1)
             do k=kbcon(i)+1,ktop(i)
-               c0t = c0
-               !if(t(i,k) > 273.16) then
-               !   c0t = c0
-               !else
-               !   c0t = c0 * exp(0.07 * (t(i,k) - 273.16))
-               !endif
+               if(t(i,k) > 273.16) then
+                  c0t = c0(i)
+               else
+                  c0t = c0(i) * exp(c0_iceconv * (t(i,k) - 273.16))
+               endif
+               if(name == "mid")c0t=0.004
+
                denom=zu(i,k-1)-.5*up_massdetr(i,k-1)+up_massentr(i,k-1)
                if(denom.lt.1.e-16)then
                      ierr(i)=51
@@ -4118,17 +4129,19 @@ endif
 !
 !------- total condensed water before rainout
 !
+               clw_all(i,k)=max(0.,qc(i,k)-qrch)
+               qrc(i,k)=max(0.,(qc(i,k)-qrch)) ! /(1.+c0(i)*dz*zu(i,k))
+               clw_allh(i,k)=max(0.,qch(i,k)-qrch) 
+               qrcb(i,k)=max(0.,(qch(i,k)-qrch)) ! /(1.+c0(i)*dz*zu(i,k))
                if(name == "deep" )then
-                 clwdet=0.1                 ! 05/11/2021
-                 kklev(i)=maxloc(zu(i,:),1)     ! 05/05/2021
+                 clwdet=0.02                 ! 05/11/2021
                  if(k.lt.kklev(i)) clwdet=0.    ! 05/05/2021
                else
-                 clwdet=0.1                  ! 05/05/2021
+                 clwdet=0.02                  ! 05/05/2021
+                 if(k.lt.kklev(i)) clwdet=0.     ! 05/25/2021
                endif
                if(k.gt.kbcon(i)+1)c1d(i,k)=clwdet*up_massdetr(i,k-1)
                if(k.gt.kbcon(i)+1)c1d_b(i,k)=clwdet*up_massdetr(i,k-1)
-               clw_all(i,k)=max(0.,qc(i,k)-qrch)
-               clw_allh(i,k)=max(0.,qch(i,k)-qrch)
 
                if(autoconv.eq.2) then
 ! 
@@ -4181,7 +4194,7 @@ endif
 ! create clw detrainment profile that depends on mass detrainment and 
 ! in-cloud clw/ice
 !
-                   c1d(i,k)=clwdet*up_massdetr(i,k-1)*qrc(i,k-1)
+                   !c1d(i,k)=clwdet*up_massdetr(i,k-1)*qrc(i,k-1)
                    qrc(i,k)=(qc(i,k)-qrch)/(1.+(c1d(i,k)+c0t)*dz)
                    if(qrc(i,k).lt.0.)then  ! hli new test 02/12/19
                       qrc(i,k)=0.
