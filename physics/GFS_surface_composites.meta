@@ -396,17 +396,8 @@
   intent = inout
   optional = F
 [tsfc_wat]
-  standard_name = surface_skin_temperature_over_water_interstitial
-  long_name = surface skin temperature over water (temporary use as interstitial)
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[tsfc_lnd]
-  standard_name = surface_skin_temperature_over_land_interstitial
-  long_name = surface skin temperature over land  (temporary use as interstitial)
+  standard_name = surface_skin_temperature_over_water
+  long_name = surface skin temperature over water
   units = K
   dimensions = (horizontal_loop_extent)
   type = real
@@ -414,8 +405,8 @@
   intent = inout
   optional = F
 [tsfc_ice]
-  standard_name = surface_skin_temperature_over_ice_interstitial
-  long_name = surface skin temperature over ice   (temporary use as interstitial)
+  standard_name = surface_skin_temperature_over_ice
+  long_name = surface skin temperature over ice
   units = K
   dimensions = (horizontal_loop_extent)
   type = real
@@ -430,15 +421,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
-[tice]
-  standard_name = sea_ice_temperature_interstitial
-  long_name = sea ice surface skin temperature use as interstitial
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = out
   optional = F
 [tsurf_wat]
   standard_name = surface_skin_temperature_after_iteration_over_water
@@ -520,8 +502,8 @@
   intent = in
   optional = F
 [semis_wat]
-  standard_name = surface_longwave_emissivity_over_water_interstitial
-  long_name = surface lw emissivity in fraction over water (temporary use as interstitial)
+  standard_name = surface_longwave_emissivity_over_water
+  long_name = surface lw emissivity in fraction over water
   units = frac
   dimensions = (horizontal_loop_extent)
   type = real
@@ -595,42 +577,6 @@
   standard_name = surface_specific_humidity_over_ice
   long_name = surface air saturation specific humidity over ice
   units = kg kg-1
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[hflx]
-  standard_name = surface_upward_temperature_flux
-  long_name = kinematic surface upward sensible heat flux
-  units = K m s-1
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[hflx_wat]
-  standard_name = kinematic_surface_upward_sensible_heat_flux_over_water
-  long_name = kinematic surface upward sensible heat flux over water
-  units = K m s-1
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[hflx_lnd]
-  standard_name = kinematic_surface_upward_sensible_heat_flux_over_land
-  long_name = kinematic surface upward sensible heat flux over land
-  units = K m s-1
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[hflx_ice]
-  standard_name = kinematic_surface_upward_sensible_heat_flux_over_ice
-  long_name = kinematic surface upward sensible heat flux over ice
-  units = K m s-1
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
@@ -723,8 +669,8 @@
   intent = in
   optional = F
 [semis_wat]
-  standard_name = surface_longwave_emissivity_over_water_interstitial
-  long_name = surface lw emissivity in fraction over water (temporary use as interstitial)
+  standard_name = surface_longwave_emissivity_over_water
+  long_name = surface lw emissivity in fraction over water
   units = frac
   dimensions = (horizontal_loop_extent)
   type = real
@@ -1774,17 +1720,8 @@
   intent = inout
   optional = F
 [tsfc_wat]
-  standard_name = surface_skin_temperature_over_water_interstitial
-  long_name = surface skin temperature over water (temporary use as interstitial)
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[tsfc_lnd]
-  standard_name = surface_skin_temperature_over_land_interstitial
-  long_name = surface skin temperature over land  (temporary use as interstitial)
+  standard_name = surface_skin_temperature_over_water
+  long_name = surface skin temperature over water
   units = K
   dimensions = (horizontal_loop_extent)
   type = real
@@ -1792,8 +1729,8 @@
   intent = in
   optional = F
 [tsfc_ice]
-  standard_name = surface_skin_temperature_over_ice_interstitial
-  long_name = surface skin temperature over ice   (temporary use as interstitial)
+  standard_name = surface_skin_temperature_over_ice
+  long_name = surface skin temperature over ice
   units = K
   dimensions = (horizontal_loop_extent)
   type = real
@@ -1808,15 +1745,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
-[tice]
-  standard_name = sea_ice_temperature_interstitial
-  long_name = sea ice surface skin temperature use as interstitial
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
   optional = F
 [hice]
   standard_name = sea_ice_thickness
