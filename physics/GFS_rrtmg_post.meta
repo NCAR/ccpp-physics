@@ -16,7 +16,7 @@
   intent = in
   optional = F
 [km]
-  standard_name = vertical_dimension
+  standard_name = vertical_layer_dimension
   long_name = number of vertical levels
   units = count
   dimensions = ()
@@ -24,7 +24,7 @@
   intent = in
   optional = F
 [kmp1]
-  standard_name = vertical_dimension_plus_one
+  standard_name = vertical_interface_dimension
   long_name = number of vertical levels plus one
   units = count
   dimensions = ()
@@ -32,7 +32,7 @@
   intent = in
   optional = F
 [lm]
-  standard_name = number_of_vertical_layers_for_radiation_calculations
+  standard_name = vertical_dimension_for_radiation
   long_name = number of vertical layers for radiation calculation
   units = count
   dimensions = ()
@@ -80,7 +80,7 @@
   intent = in
   optional = F
 [nfxr]
-  standard_name = number_of_radiation_diagnostic_variables
+  standard_name = number_of_diagnostics_variables_for_radiation
   long_name = number of variables stored in the fluxr array
   units = count
   dimensions = ()
@@ -96,7 +96,7 @@
   intent = in
   optional = F
 [lsswr]
-  standard_name = flag_to_calc_sw
+  standard_name = flag_for_calling_shortwave_radiation
   long_name = logical flags for sw radiation calls
   units = flag
   dimensions = ()
@@ -104,7 +104,7 @@
   intent = in
   optional = F
 [lslwr]
-  standard_name = flag_to_calc_lw
+  standard_name = flag_for_calling_longwave_radiation
   long_name = logical flags for lw radiation calls
   units = flag
   dimensions = ()
@@ -112,7 +112,7 @@
   intent = in
   optional = F
 [lssav]
-  standard_name = flag_diagnostics
+  standard_name = flag_for_diagnostics
   long_name = logical flag for storing diagnostics
   units = flag
   dimensions = ()
@@ -120,7 +120,7 @@
   intent = in
   optional = F
 [fhlwr]
-  standard_name = frequency_for_longwave_radiation
+  standard_name = period_of_longwave_radiation_calls
   long_name = frequency for longwave radiation
   units = s
   dimensions = ()
@@ -129,7 +129,7 @@
   intent = in
   optional = F
 [fhswr]
-  standard_name = frequency_for_shortwave_radiation
+  standard_name = period_of_shortwave_radiation_calls
   long_name = frequency for shortwave radiation
   units = s
   dimensions = ()
@@ -147,7 +147,7 @@
   intent = in
   optional = F
 [coszen]
-  standard_name = cosine_of_zenith_angle
+  standard_name = cosine_of_solar_zenith_angle_for_daytime_points_on_radiation_timestep
   long_name = mean cos of zenith angle over rad call period
   units = none
   dimensions = (horizontal_loop_extent)
@@ -156,7 +156,7 @@
   intent = in
   optional = F
 [coszdg]
-  standard_name = daytime_mean_cosz_over_rad_call_period
+  standard_name = cosine_of_solar_zenith_angle_on_radiation_timestep
   long_name = daytime mean cosz over rad call period
   units = none
   dimensions = (horizontal_loop_extent)
@@ -168,7 +168,7 @@
   standard_name = air_pressure_at_interface
   long_name = air pressure at model layer interfaces
   units = Pa
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -177,7 +177,7 @@
   standard_name = air_temperature
   long_name = model layer mean temperature
   units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -220,7 +220,7 @@
   standard_name = total_cloud_fraction
   long_name = layer total cloud fraction
   units = frac
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -244,7 +244,7 @@
   intent = in
   optional = F
 [sfcflw]
-  standard_name = lw_fluxes_sfc
+  standard_name = surface_lw_fluxes_assuming_total_and_clear_sky_on_radiation_timestep
   long_name = lw radiation fluxes at sfc
   units = W m-2
   dimensions = (horizontal_loop_extent)
@@ -252,7 +252,7 @@
   intent = in
   optional = F
 [sfcfsw]
-  standard_name = sw_fluxes_sfc
+  standard_name = surface_sw_fluxes_assuming_total_and_clear_sky_on_radiation_timestep
   long_name = sw radiation fluxes at sfc
   units = W m-2
   dimensions = (horizontal_loop_extent)
@@ -287,7 +287,7 @@
   standard_name = cumulative_radiation_diagnostic
   long_name = time-accumulated 2D radiation-related diagnostic fields
   units = various
-  dimensions = (horizontal_loop_extent,number_of_radiation_diagnostic_variables)
+  dimensions = (horizontal_loop_extent,number_of_diagnostics_variables_for_radiation)
   type = real
   kind = kind_phys
   intent = inout

@@ -24,7 +24,7 @@
   intent = in
   optional = F
 [nlunit]
-  standard_name = iounit_namelist
+  standard_name = iounit_of_namelist
   long_name = fortran unit number for opening nameliust file
   units = none
   dimensions = ()
@@ -32,16 +32,16 @@
   intent = in
   optional = F
 [input_nml_file]
-  standard_name = namelist_filename_for_internal_file_reads
+  standard_name = filename_of_internal_namelist
   long_name = character string to store full namelist contents
   units = none
-  dimensions = (number_of_lines_of_namelist_filename_for_internal_file_reads)
+  dimensions = (number_of_lines_in_internal_namelist)
   type = character
   kind = len=*
   intent = in
   optional = F
 [logunit]
-  standard_name = iounit_log
+  standard_name = iounit_of_log
   long_name = fortran unit number for writing logfile
   units = none
   dimensions = ()
@@ -49,7 +49,7 @@
   intent = in
   optional = F
 [fn_nml]
-  standard_name = namelist_filename
+  standard_name = filename_of_namelist
   long_name = namelist filename
   units = none
   dimensions = ()
@@ -58,7 +58,7 @@
   intent = in
   optional = F
 [imp_physics]
-  standard_name = flag_for_microphysics_scheme
+  standard_name = control_for_microphysics_scheme
   long_name = choice of microphysics scheme
   units = flag
   dimensions = ()
@@ -66,7 +66,7 @@
   intent = in
   optional = F
 [imp_physics_gfdl]
-  standard_name = flag_for_gfdl_microphysics_scheme
+  standard_name = identifier_for_gfdl_microphysics_scheme
   long_name = choice of GFDL microphysics scheme
   units = flag
   dimensions = ()
@@ -126,7 +126,7 @@
   name = gfdl_cloud_microphys_run
   type = scheme
 [levs]
-  standard_name = vertical_dimension
+  standard_name = vertical_layer_dimension
   long_name = number of vertical levels
   units = count
   dimensions = ()
@@ -139,6 +139,15 @@
   units = count
   dimensions = ()
   type = integer
+  intent = in
+  optional = F
+[rainmin]
+  standard_name = lwe_thickness_of_minimum_rain_amount
+  long_name = minimum rain amount
+  units = m
+  dimensions = ()
+  type = real
+  kind = kind_phys
   intent = in
   optional = F
 [con_g]
@@ -160,7 +169,7 @@
   intent = in
   optional = F
 [con_rd]
-  standard_name = gas_constant_dry_air
+  standard_name = gas_constant_of_dry_air
   long_name = ideal gas constant for dry air
   units = J kg-1 K-1
   dimensions = ()
@@ -204,100 +213,100 @@
   intent = in
   optional = F
 [gq0]
-  standard_name = water_vapor_specific_humidity_updated_by_physics
+  standard_name = specific_humidity_of_new_state
   long_name = water vapor specific humidity updated by physics
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [gq0_ntcw]
-  standard_name = cloud_condensed_water_mixing_ratio_updated_by_physics
+  standard_name = cloud_liquid_water_mixing_ratio_of_new_state
   long_name = cloud condensed water mixing ratio updated by physics
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [gq0_ntrw]
-  standard_name = rain_water_mixing_ratio_updated_by_physics
+  standard_name = rain_mixing_ratio_of_new_state
   long_name = moist mixing ratio of rain updated by physics
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [gq0_ntiw]
-  standard_name = ice_water_mixing_ratio_updated_by_physics
+  standard_name = cloud_ice_mixing_ratio_of_new_state
   long_name = moist mixing ratio of cloud ice updated by physics
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [gq0_ntsw]
-  standard_name = snow_water_mixing_ratio_updated_by_physics
+  standard_name = snow_mixing_ratio_of_new_state
   long_name = moist mixing ratio of snow updated by physics
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [gq0_ntgl]
-  standard_name = graupel_mixing_ratio_updated_by_physics
+  standard_name = graupel_mixing_ratio_of_new_state
   long_name = moist ratio of mass of graupel to mass of dry air plus vapor (without condensates) updated by physics
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [gq0_ntclamt]
-  standard_name = cloud_fraction_updated_by_physics
+  standard_name = cloud_area_fraction_in_atmosphere_layer_of_new_state
   long_name = cloud fraction updated by physics
   units = frac
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [gt0]
-  standard_name = air_temperature_updated_by_physics
+  standard_name = air_temperature_of_new_state
   long_name = air temperature updated by physics
   units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [gu0]
-  standard_name = x_wind_updated_by_physics
+  standard_name = x_wind_of_new_state
   long_name = zonal wind updated by physics
   units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [gv0]
-  standard_name = y_wind_updated_by_physics
+  standard_name = y_wind_of_new_state
   long_name = meridional wind updated by physics
   units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [vvl]
-  standard_name = omega
+  standard_name = lagrangian_tendency_of_air_pressure
   long_name = layer mean vertical velocity
   units = Pa s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -306,7 +315,7 @@
   standard_name = air_pressure
   long_name = mean layer pressure
   units = Pa
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -315,7 +324,7 @@
   standard_name = geopotential_at_interface
   long_name = geopotential at model layer interfaces
   units = m2 s-2
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -324,7 +333,7 @@
   standard_name = air_pressure_difference_between_midlayers
   long_name = air pressure difference between mid-layers
   units = Pa
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -384,7 +393,7 @@
   intent = out
   optional = F
 [dtp]
-  standard_name = time_step_for_physics
+  standard_name = timestep_for_physics
   long_name = physics timestep
   units = s
   dimensions = ()
@@ -420,7 +429,7 @@
   standard_name = radar_reflectivity_10cm
   long_name = instantaneous refl_10cm
   units = dBZ
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -442,46 +451,46 @@
   intent = in
   optional = F
 [rew]
-  standard_name = effective_radius_of_stratiform_cloud_liquid_water_particle_in_um
+  standard_name = effective_radius_of_stratiform_cloud_liquid_water_particle
   long_name = eff. radius of cloud liquid water particle in micrometer
   units = um
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [rei]
-  standard_name = effective_radius_of_stratiform_cloud_ice_particle_in_um
+  standard_name = effective_radius_of_stratiform_cloud_ice_particle
   long_name = eff. radius of cloud ice water particle in micrometer
   units = um
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [rer]
-  standard_name = effective_radius_of_stratiform_cloud_rain_particle_in_um
+  standard_name = effective_radius_of_stratiform_cloud_rain_particle
   long_name = effective radius of cloud rain particle in micrometers
   units = um
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [res]
-  standard_name = effective_radius_of_stratiform_cloud_snow_particle_in_um
+  standard_name = effective_radius_of_stratiform_cloud_snow_particle
   long_name = effective radius of cloud snow particle in micrometers
   units = um
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [reg]
-  standard_name = effective_radius_of_stratiform_cloud_graupel_particle_in_um
+  standard_name = effective_radius_of_stratiform_cloud_graupel_particle
   long_name = eff. radius of cloud graupel particle in micrometer
   units = um
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -498,7 +507,7 @@
   standard_name = ice_flux_due_to_large_scale_precipitation
   long_name = instantaneous 3D flux of ice from nonconvective precipitation
   units = kg m-2 s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -507,7 +516,7 @@
   standard_name = liquid_flux_due_to_large_scale_precipitation
   long_name = instantaneous 3D flux of liquid water from nonconvective precipitation
   units = kg m-2 s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout

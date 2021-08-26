@@ -5,7 +5,7 @@
 module cu_gf_driver
 
    ! DH* TODO: replace constants with arguments to cu_gf_driver_run
-   use physcons  , g => con_g, cp => con_cp, xlv => con_hvap, r_v => con_rv
+   !use physcons  , g => con_g, cp => con_cp, xlv => con_hvap, r_v => con_rv
    use machine   , only: kind_phys
    use cu_gf_deep, only: cu_gf_deep_run,neg_check,fct1d3
    use cu_gf_sh  , only: cu_gf_sh_run
@@ -76,8 +76,8 @@ contains
 !>\section gen_gf_driver GSD GF Cumulus Scheme General Algorithm
 !> @{
       subroutine cu_gf_driver_run(ntracer,garea,im,km,dt,flag_init,flag_restart,&
-               cactiv,cactiv_m,forcet,forceqv_spechum,phil,raincv,qv_spechum,   &
-               t,cld1d,us,vs,t2di,w,qv2di_spechum,p2di,psuri,                   &
+               cactiv,cactiv_m,g,cp,xlv,r_v,forcet,forceqv_spechum,phil,raincv, &
+               qv_spechum,t,cld1d,us,vs,t2di,w,qv2di_spechum,p2di,psuri,        &
                hbot,htop,kcnv,xland,hfx2,qfx2,aod_gf,cliw,clcw,                 &
                pbl,ud_mf,dd_mf,dt_mf,cnvw_moist,cnvc,imfshalcnv,                &
                flag_for_scnv_generic_tend,flag_for_dcnv_generic_tend,           &
@@ -109,9 +109,10 @@ contains
    integer, intent(in   ) :: im,km,ntracer
    logical, intent(in   ) :: flag_init, flag_restart
    logical, intent(in   ) :: flag_for_scnv_generic_tend,flag_for_dcnv_generic_tend
+   real (kind=kind_phys), intent(in) :: g,cp,xlv,r_v
    logical, intent(in   ) :: ldiag3d
 
-   real(kind=kind_phys), optional, intent(inout)            :: dtend(:,:,:)
+   real(kind=kind_phys), intent(inout)                      :: dtend(:,:,:)
    integer, intent(in)                                      :: dtidx(:,:), &
         index_of_x_wind, index_of_y_wind, index_of_temperature,            &
         index_of_process_scnv, index_of_process_dcnv, ntqv, ntcw, ntiw
