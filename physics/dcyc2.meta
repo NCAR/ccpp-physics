@@ -460,7 +460,7 @@
   intent = in
   optional = F
 [t_lev]
-  standard_name = air_temperature_at_interface_for_RRTMGP
+  standard_name = air_temperature_at_interface_on_radiation_timestep
   long_name = air temperature  at vertical interface for radiation calculation
   units = K
   dimensions = (horizontal_loop_extent,vertical_interface_dimension)

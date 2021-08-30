@@ -284,6 +284,15 @@
   kind = kind_phys
   intent = inout
   optional = F
+[t_lev_radtime]
+  standard_name = air_temperature_at_interface_on_radiation_timestep
+  long_name = air temperature layer
+  units = K
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
 [tsfg]
   standard_name = surface_ground_temperature_for_radiation
   long_name = surface ground temperature for radiation
