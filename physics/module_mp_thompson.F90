@@ -980,6 +980,7 @@ MODULE module_mp_thompson
                               refl_10cm, diagflag, do_radar_ref,      &
                               vt_dbz_wt, first_time_step,             &
                               re_cloud, re_ice, re_snow,              &
+                              iccn, iaerclm,                          &
                               has_reqc, has_reqi, has_reqs,           &
                               rand_perturb_on,                        &
                               kme_stoch,                              &
@@ -1046,6 +1047,9 @@ MODULE module_mp_thompson
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(INOUT):: &
                           vt_dbz_wt
       LOGICAL, INTENT(IN) :: first_time_step
+      integer, intent(in   ) :: iccn
+      logical, intent(in   ) :: iaerclm
+
       REAL, INTENT(IN):: dt_in, dt_inner
       ! To support subcycling: current step and maximum number of steps
       INTEGER, INTENT (IN) :: istep, nsteps
@@ -1107,6 +1111,7 @@ MODULE module_mp_thompson
       LOGICAL, OPTIONAL, INTENT(IN) :: diagflag
       INTEGER, OPTIONAL, INTENT(IN) :: do_radar_ref
       logical :: melti = .false.
+      logical :: merra2_aerosol_aware
       INTEGER :: ndt, it
 
       ! CCPP error handling
@@ -1151,7 +1156,7 @@ MODULE module_mp_thompson
                stop
             end if
          end if
-   
+         if(iccn == 3 .and. iaerclm) merra2_aerosol_aware=.true.
          if (is_aerosol_aware .and. (.not.present(nc)     .or. &
                                      .not.present(nwfa)   .or. &
                                      .not.present(nifa)   .or. &

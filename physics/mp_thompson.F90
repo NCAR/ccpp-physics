@@ -102,6 +102,7 @@ module mp_thompson
          !
          real (kind=kind_phys) :: h_01, airmass, niIN3, niCCN3
          integer :: i, k
+         logical         :: merra2_aerosol_aware            ! set to true by iccn and iaerclm, coupling merra2 with thompson
 
          ! Initialize the CCPP error handling variables
          errmsg = ''
@@ -123,6 +124,7 @@ module mp_thompson
             end if
          end if
          if(iccn == 3 .and. iaerclm) then
+           merra2_aerosol_aware=.true.
            call get_niwfa(aerfld, nifa, nwfa, ncol, nlev)
          end if
 
@@ -164,7 +166,7 @@ module mp_thompson
 
            ni = ni/(1.0_kind_phys-spechum)
            nr = nr/(1.0_kind_phys-spechum)
-           if (is_aerosol_aware) then
+           if (is_aerosol_aware.or.merra2_aerosol_aware) then
               nc = nc/(1.0_kind_phys-spechum)
               nwfa = nwfa/(1.0_kind_phys-spechum)
               nifa = nifa/(1.0_kind_phys-spechum)
@@ -317,7 +319,7 @@ module mp_thompson
 
            ni = ni/(1.0_kind_phys+qv)
            nr = nr/(1.0_kind_phys+qv)
-           if (is_aerosol_aware) then
+           if (is_aerosol_aware.or.merra2_aerosol_aware) then
               nc = nc/(1.0_kind_phys+qv)
               nwfa = nwfa/(1.0_kind_phys+qv)
               nifa = nifa/(1.0_kind_phys+qv)
@@ -440,6 +442,7 @@ module mp_thompson
          real(kind_phys) :: delta_snow_mp(1:ncol)           ! mm
          ! Radar reflectivity
          logical         :: diagflag                        ! must be true if do_radar_ref is true, not used otherwise
+         logical         :: merra2_aerosol_aware            ! set to true by iccn and iaerclm, coupling merra2 with thompson
          integer         :: do_radar_ref_mp                 ! integer instead of logical do_radar_ref
          ! Effective cloud radii
          logical         :: do_effective_radii
@@ -510,6 +513,7 @@ module mp_thompson
          end if
 
          if(iccn == 3 .and. iaerclm) then
+           merra2_aerosol_aware=.true.
            call get_niwfa(aerfld, nifa, nwfa, ncol, nlev)
          end if
 
@@ -557,7 +561,7 @@ module mp_thompson
 
            ni = ni/(1.0_kind_phys-spechum)
            nr = nr/(1.0_kind_phys-spechum)
-           if (is_aerosol_aware) then
+           if (is_aerosol_aware.merra2_aerosol_aware) then
               nc = nc/(1.0_kind_phys-spechum)
               nwfa = nwfa/(1.0_kind_phys-spechum)
               nifa = nifa/(1.0_kind_phys-spechum)
@@ -684,7 +688,7 @@ module mp_thompson
          end if set_extended_diagnostic_pointers
 
          !> - Call mp_gt_driver() with or without aerosols
-         if (is_aerosol_aware) then
+         if (is_aerosol_aware.merra2_aerosol_aware) then
             if (do_effective_radii) then
                call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
                                  nc=nc, nwfa=nwfa, nifa=nifa, nwfa2d=nwfa2d, nifa2d=nifa2d,     &
@@ -696,6 +700,7 @@ module mp_thompson
                                  refl_10cm=refl_10cm,                                           &
                                  diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
                                  re_cloud=re_cloud, re_ice=re_ice, re_snow=re_snow,             &
+                                 iccn=iccn, iaerclm=iaerclm,                                    &
                                  has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
                                  rand_perturb_on=rand_perturb_on, kme_stoch=kme_stoch,          &
                                  ! DH* 2020-06-05 not passing this optional argument, see
@@ -744,7 +749,9 @@ module mp_thompson
                                  ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                                  its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
                                  reset_dBZ=reset_dBZ, istep=istep, nsteps=nsteps,               &
-                                 first_time_step=first_time_step, errmsg=errmsg, errflg=errflg, &
+                                 first_time_step=first_time_step,                               &
+                                 iccn=iccn, iaerclm=iaerclm,                                    &
+                                 errmsg=errmsg, errflg=errflg,                                  &
                                  ! Extended diagnostics
                                  ext_diag=ext_diag,                                             &
                                  ! vts1=vts1, txri=txri, txrc=txrc,                             &
@@ -776,6 +783,7 @@ module mp_thompson
                                  refl_10cm=refl_10cm,                                           &
                                  diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
                                  re_cloud=re_cloud, re_ice=re_ice, re_snow=re_snow,             &
+                                 iccn=iccn, iaerclm=iaerclm,                                    &
                                  has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
                                  rand_perturb_on=rand_perturb_on, kme_stoch=kme_stoch,          &
                                  ! DH* 2020-06-05 not passing this optional argument, see
@@ -823,7 +831,9 @@ module mp_thompson
                                  ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                                  its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
                                  reset_dBZ=reset_dBZ, istep=istep, nsteps=nsteps,               &
-                                 first_time_step=first_time_step, errmsg=errmsg, errflg=errflg, &
+                                 first_time_step=first_time_step,                               &
+                                 iccn=iccn, iaerclm=iaerclm,                                    &
+                                 errmsg=errmsg, errflg=errflg,                                  &
                                  ! Extended diagnostics
                                  ext_diag=ext_diag,                                             &
                                  ! vts1=vts1, txri=txri, txrc=txrc,                             &
