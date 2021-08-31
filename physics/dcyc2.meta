@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = dcyc2t3
   type = scheme
-  dependencies = machine.F,physcons.F90,radiation_tools.F90
+  dependencies = machine.F,physcons.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -163,6 +163,15 @@
 [tsfc]
   standard_name = surface_skin_temperature
   long_name = surface skin temperature
+  units = K
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[tsfc_radtime]
+  standard_name = surface_skin_temperature_on_radiation_timestep
+  long_name = surface skin temperature on radiation timestep
   units = K
   dimensions = (horizontal_loop_extent)
   type = real
@@ -455,15 +464,6 @@
   long_name = model layer mean temperature updated by physics
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[t_lev]
-  standard_name = air_temperature_at_interface_on_radiation_timestep
-  long_name = air temperature  at vertical interface for radiation calculation
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = in

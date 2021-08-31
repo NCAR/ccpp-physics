@@ -99,7 +99,7 @@ contains
   subroutine GFS_rrtmgp_pre_run(nCol, nLev, nTracers, i_o3, lsswr, lslwr, fhswr, fhlwr,     &
        xlat, xlon,  prsl, tgrs, prslk, prsi, qgrs, tsfc, con_eps, con_epsm1, con_fvirt,     &
        con_epsqs, minGPpres, minGPtemp, raddt, p_lay, t_lay, p_lev, t_lev, tsfg, tsfa,      & 
-       qs_lay, q_lay, tv_lay, relhum, tracer, gas_concentrations, t_lev_radtime, errmsg,    &
+       qs_lay, q_lay, tv_lay, relhum, tracer, gas_concentrations, tsfc_radtime, errmsg,     &
        errflg)
     
     ! Inputs   
@@ -143,7 +143,8 @@ contains
          raddt                ! Radiation time-step
     real(kind_phys), dimension(ncol), intent(inout) :: &
          tsfg,              & ! Ground temperature
-         tsfa                 ! Skin temperature    
+         tsfa,              & ! Skin temperature    
+         tsfc_radtime         ! Surface temperature at radiation timestep
     real(kind_phys), dimension(nCol,nLev), intent(inout) :: &
          p_lay,             & ! Pressure at model-layer
          t_lay,             & ! Temperature at model layer
@@ -153,8 +154,7 @@ contains
          qs_lay               ! Saturation vapor pressure at model-layers
     real(kind_phys), dimension(nCol,nLev+1), intent(inout) :: &
          p_lev,             & ! Pressure at model-interface
-         t_lev,             & ! Temperature at model-interface
-         t_lev_radtime        ! Temperature at model-interface (Save for use in between radiation calls)
+         t_lev                ! Temperature at model-interface
     real(kind_phys), dimension(nCol, nLev, nTracers),intent(inout) :: &
          tracer               ! Array containing trace gases
     type(ty_gas_concs),intent(inout) :: &
@@ -215,7 +215,10 @@ contains
 
     ! Temperature at layer-interfaces          
     call cmp_tlev(nCol,nLev,minGPpres,p_lay,t_lay,p_lev,tsfc,t_lev)
-    t_lev_radtime = t_lev
+
+    ! Save surface temperature at radiation time-step, used for LW flux adjustment betwen
+    ! radiation calls.
+    tsfc_radtime = tsfc
 
     ! Compute a bunch of thermodynamic fields needed by the cloud microphysics schemes. 
     ! Relative humidity, saturation mixing-ratio, vapor mixing-ratio, virtual temperature, 

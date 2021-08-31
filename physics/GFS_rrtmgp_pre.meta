@@ -284,14 +284,14 @@
   kind = kind_phys
   intent = inout
   optional = F
-[t_lev_radtime]
-  standard_name = air_temperature_at_interface_on_radiation_timestep
-  long_name = air temperature layer
+[tsfc_radtime]
+  standard_name = surface_skin_temperature_on_radiation_timestep
+  long_name = surface skin temperature on radiation timestep
   units = K
-  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = F
 [tsfg]
   standard_name = surface_ground_temperature_for_radiation
