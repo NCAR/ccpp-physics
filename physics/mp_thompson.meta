@@ -270,22 +270,6 @@
   kind = kind_phys
   intent = out
   optional = T
-[iccn]
-  standard_name = control_for_ice_cloud_condensation_nuclei_forcing
-  long_name = flag for IN and CCN forcing for morrison gettelman microphysics
-  units = none
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[iaerclm]
-  standard_name = flag_for_aerosol_input_MG_radiation
-  long_name = flag for using aerosols in Morrison-Gettelman MP_radiation
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
 [aerfld]
   standard_name = mass_number_concentration_of_aerosol_from_gocart_climatology
   long_name = GOCART aerosol climatology number concentration
@@ -492,6 +476,14 @@
 [is_aerosol_aware]
   standard_name = flag_for_aerosol_physics
   long_name = flag for aerosol-aware physics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[is_aerosol_aware]
+  standard_name = flag_for_merra2_aerosol_aware_for_thompson
+  long_name = flag for merra2 aerosol-aware physics
   units = flag
   dimensions = ()
   type = logical
@@ -726,22 +718,6 @@
   kind = kind_phys
   intent = out
   optional = T
-[iccn]
-  standard_name = control_for_ice_cloud_condensation_nuclei_forcing
-  long_name = flag for IN and CCN forcing for morrison gettelman microphysics
-  units = none
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[iaerclm]
-  standard_name = flag_for_aerosol_input_MG_radiation
-  long_name = flag for using aerosols in Morrison-Gettelman MP_radiation
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
 [aerfld]
   standard_name = mass_number_concentration_of_aerosol_from_gocart_climatology
   long_name = GOCART aerosol climatology number concentration

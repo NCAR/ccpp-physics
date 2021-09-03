@@ -10,6 +10,7 @@ module mp_thompson
 
       use module_mp_thompson, only : thompson_init, mp_gt_driver, thompson_finalize, calc_effectRad
       use module_mp_thompson, only : naIN0, naIN1, naCCN0, naCCN1, eps, Nt_c
+      use module_mp_thompson, only : merra2_aerosol_aware
       use module_mp_thompson, only : re_qc_min, re_qc_max, re_qi_min, re_qi_max, re_qs_min, re_qs_max
 
       use module_mp_thompson_make_number_concentrations, only: make_IceNumber, make_DropletNumber, make_RainNumber
@@ -27,17 +28,17 @@ module mp_thompson
    contains
 
 !> This subroutine is a wrapper around the actual thompson_init().
-!! \section arg_table_mp_thompson_init Argument Table
+!! \section arg_table_mp_thompson      use module_mp_thompson, only : _init Argument Table
 !! \htmlinclude mp_thompson_init.html
 !!
       subroutine mp_thompson_init(ncol, nlev, con_g, con_rd, con_eps,   &
                                   restart, imp_physics,                 &
                                   imp_physics_thompson, convert_dry_rho,&
                                   spechum, qc, qr, qi, qs, qg, ni, nr,  &
-                                  is_aerosol_aware, nc, nwfa2d, nifa2d, &
+                                  is_aerosol_aware, merra2_aerosol_aware&
+                                  nc, nwfa2d, nifa2d,                   &
                                   nwfa, nifa, tgrs, prsl, phil, area,   &
-                                  re_cloud, re_ice, re_snow,            &
-                                  iccn, iaerclm, aerfld,                &
+                                  re_cloud, re_ice, re_snow, aerfld,    &
                                   mpicomm, mpirank, mpiroot,            &
                                   threads, ext_diag, diag3d,            &
                                   errmsg, errflg)
@@ -50,8 +51,6 @@ module mp_thompson
          real(kind_phys),           intent(in   ) :: con_g, con_rd, con_eps
          logical,                   intent(in   ) :: restart
          integer,                   intent(in   ) :: imp_physics
-         integer,                   intent(in   ) :: iccn
-         logical,                   intent(in   ) :: iaerclm
          integer,                   intent(in   ) :: imp_physics_thompson
          ! Hydrometeors
          logical,                   intent(in   ) :: convert_dry_rho
@@ -65,6 +64,7 @@ module mp_thompson
          real(kind_phys),           intent(inout) :: nr(:,:)
          ! Aerosols
          logical,                   intent(in   ) :: is_aerosol_aware
+         logical,                   intent(in   ) :: merra2_aerosol_aware
          real(kind_phys), optional, intent(inout) :: nc(:,:)
          real(kind_phys), optional, intent(inout) :: nwfa(:,:)
          real(kind_phys), optional, intent(inout) :: nifa(:,:)
@@ -102,7 +102,6 @@ module mp_thompson
          !
          real (kind=kind_phys) :: h_01, airmass, niIN3, niCCN3
          integer :: i, k
-         logical         :: merra2_aerosol_aware            ! set to true by iccn and iaerclm, coupling merra2 with thompson
 
          ! Initialize the CCPP error handling variables
          errmsg = ''
@@ -123,13 +122,10 @@ module mp_thompson
                return
             end if
          end if
-         if(iccn == 3 .and. iaerclm) then
-           merra2_aerosol_aware=.true.
-           call get_niwfa(aerfld, nifa, nwfa, ncol, nlev)
-         end if
 
          ! Call Thompson init
-         call thompson_init(is_aerosol_aware_in=is_aerosol_aware, mpicomm=mpicomm, &
+         call thompson_init(is_aerosol_aware_in=is_aerosol_aware,                  &
+                            merra2_aerosol_aware, mpicomm=mpicomm,                 &
                             mpirank=mpirank, mpiroot=mpiroot, threads=threads,     &
                             errmsg=errmsg, errflg=errflg)
          if (errflg /= 0) return
@@ -166,7 +162,7 @@ module mp_thompson
 
            ni = ni/(1.0_kind_phys-spechum)
            nr = nr/(1.0_kind_phys-spechum)
-           if (is_aerosol_aware.or.merra2_aerosol_aware) then
+           if (is_aerosol_aware .or. merra2_aerosol_aware) then
               nc = nc/(1.0_kind_phys-spechum)
               nwfa = nwfa/(1.0_kind_phys-spechum)
               nifa = nifa/(1.0_kind_phys-spechum)
@@ -273,6 +269,12 @@ module mp_thompson
 
            ! Copy to local array for calculating cloud effective radii below
            nc_local = nc
+         else if(merra2_aerosol_aware) then
+           call get_niwfa(aerfld, nifa, nwfa, ncol, nlev)
+           ! Ensure we have 1st guess cloud droplet number where mass non-zero but no number.
+           where(qc .LE. 0.0) nc=0.0
+           where(qc .GT. 0 .and. nc .LE. 0.0) nc = make_DropletNumber(qc*rho, nwfa*rho) * orho
+           where(qc .EQ. 0.0 .and. nc .GT. 0.0) nc = 0.0
 
          else
 
@@ -319,7 +321,7 @@ module mp_thompson
 
            ni = ni/(1.0_kind_phys+qv)
            nr = nr/(1.0_kind_phys+qv)
-           if (is_aerosol_aware.or.merra2_aerosol_aware) then
+           if (is_aerosol_aware .or. merra2_aerosol_aware) then
               nc = nc/(1.0_kind_phys+qv)
               nwfa = nwfa/(1.0_kind_phys+qv)
               nifa = nifa/(1.0_kind_phys+qv)
@@ -337,19 +339,19 @@ module mp_thompson
 !>\ingroup aathompson
 !>\section gen_thompson_hrrr Thompson MP General Algorithm
 !>@{
-      subroutine mp_thompson_run(ncol, nlev, con_g, con_rd,        &
-                              con_eps, convert_dry_rho,            &
-                              spechum, qc, qr, qi, qs, qg, ni, nr, &
-                              is_aerosol_aware, nc, nwfa, nifa,    &
-                              nwfa2d, nifa2d,                      &
-                              tgrs, prsl, phii, omega, dt_inner,   &
-                              dtp, first_time_step, istep, nsteps, &
-                              prcp, rain, graupel, ice, snow, sr,  &
-                              refl_10cm, reset_dBZ, do_radar_ref,  &
-                              re_cloud, re_ice, re_snow,           &
-                              iccn, iaerclm, aerfld,               &
-                              mpicomm, mpirank, mpiroot, blkno,    &
-                              ext_diag, diag3d, reset_diag3d,      &
+      subroutine mp_thompson_run(ncol, nlev, con_g, con_rd,           &
+                              con_eps, convert_dry_rho,               &
+                              spechum, qc, qr, qi, qs, qg, ni, nr,    &
+                              is_aerosol_aware, merra2_aerosol_aware, &
+                              nc, nwfa, nifa,                         &
+                              nwfa2d, nifa2d,                         &
+                              tgrs, prsl, phii, omega, dt_inner,      &
+                              dtp, first_time_step, istep, nsteps,    &
+                              prcp, rain, graupel, ice, snow, sr,     &
+                              refl_10cm, reset_dBZ, do_radar_ref,     &
+                              re_cloud, re_ice, re_snow, aerfld,      &
+                              mpicomm, mpirank, mpiroot, blkno,       &
+                              ext_diag, diag3d, reset_diag3d,         &
                               errmsg, errflg)
 
          implicit none
@@ -359,8 +361,6 @@ module mp_thompson
          ! Dimensions and constants
          integer,                   intent(in   ) :: ncol
          integer,                   intent(in   ) :: nlev
-         integer,                   intent(in   ) :: iccn
-         logical,                   intent(in   ) :: iaerclm
          real(kind_phys),           intent(in   ) :: con_g
          real(kind_phys),           intent(in   ) :: con_rd
          real(kind_phys),           intent(in   ) :: con_eps
@@ -376,6 +376,7 @@ module mp_thompson
          real(kind_phys),           intent(inout) :: nr(:,:)
          ! Aerosols
          logical,                   intent(in)    :: is_aerosol_aware, reset_dBZ
+         logical,                   intent(in)    :: merra2_aerosol_aware
          ! The following arrays are not allocated if is_aerosol_aware is false
          real(kind_phys), optional, intent(inout) :: nc(:,:)
          real(kind_phys), optional, intent(inout) :: nwfa(:,:)
@@ -442,7 +443,6 @@ module mp_thompson
          real(kind_phys) :: delta_snow_mp(1:ncol)           ! mm
          ! Radar reflectivity
          logical         :: diagflag                        ! must be true if do_radar_ref is true, not used otherwise
-         logical         :: merra2_aerosol_aware            ! set to true by iccn and iaerclm, coupling merra2 with thompson
          integer         :: do_radar_ref_mp                 ! integer instead of logical do_radar_ref
          ! Effective cloud radii
          logical         :: do_effective_radii
@@ -512,10 +512,6 @@ module mp_thompson
             return
          end if
 
-         if(iccn == 3 .and. iaerclm) then
-           merra2_aerosol_aware=.true.
-           call get_niwfa(aerfld, nifa, nwfa, ncol, nlev)
-         end if
 
          ! Set reduced time step if subcycling is used
          if (nsteps>1) then
@@ -561,10 +557,12 @@ module mp_thompson
 
            ni = ni/(1.0_kind_phys-spechum)
            nr = nr/(1.0_kind_phys-spechum)
-           if (is_aerosol_aware.merra2_aerosol_aware) then
+           if (is_aerosol_aware) then
               nc = nc/(1.0_kind_phys-spechum)
               nwfa = nwfa/(1.0_kind_phys-spechum)
               nifa = nifa/(1.0_kind_phys-spechum)
+           else if (merra2_aerosol_aware) then
+             call get_niwfa(aerfld, nifa, nwfa, ncol, nlev)
            end if
          end if
          ! *DH
@@ -688,7 +686,7 @@ module mp_thompson
          end if set_extended_diagnostic_pointers
 
          !> - Call mp_gt_driver() with or without aerosols
-         if (is_aerosol_aware.merra2_aerosol_aware) then
+         if (is_aerosol_aware .or. merra2_aerosol_aware) then
             if (do_effective_radii) then
                call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
                                  nc=nc, nwfa=nwfa, nifa=nifa, nwfa2d=nwfa2d, nifa2d=nifa2d,     &
@@ -700,7 +698,6 @@ module mp_thompson
                                  refl_10cm=refl_10cm,                                           &
                                  diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
                                  re_cloud=re_cloud, re_ice=re_ice, re_snow=re_snow,             &
-                                 iccn=iccn, iaerclm=iaerclm,                                    &
                                  has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
                                  rand_perturb_on=rand_perturb_on, kme_stoch=kme_stoch,          &
                                  ! DH* 2020-06-05 not passing this optional argument, see
@@ -750,7 +747,6 @@ module mp_thompson
                                  its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
                                  reset_dBZ=reset_dBZ, istep=istep, nsteps=nsteps,               &
                                  first_time_step=first_time_step,                               &
-                                 iccn=iccn, iaerclm=iaerclm,                                    &
                                  errmsg=errmsg, errflg=errflg,                                  &
                                  ! Extended diagnostics
                                  ext_diag=ext_diag,                                             &
@@ -783,7 +779,6 @@ module mp_thompson
                                  refl_10cm=refl_10cm,                                           &
                                  diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
                                  re_cloud=re_cloud, re_ice=re_ice, re_snow=re_snow,             &
-                                 iccn=iccn, iaerclm=iaerclm,                                    &
                                  has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
                                  rand_perturb_on=rand_perturb_on, kme_stoch=kme_stoch,          &
                                  ! DH* 2020-06-05 not passing this optional argument, see
@@ -832,7 +827,6 @@ module mp_thompson
                                  its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
                                  reset_dBZ=reset_dBZ, istep=istep, nsteps=nsteps,               &
                                  first_time_step=first_time_step,                               &
-                                 iccn=iccn, iaerclm=iaerclm,                                    &
                                  errmsg=errmsg, errflg=errflg,                                  &
                                  ! Extended diagnostics
                                  ext_diag=ext_diag,                                             &
@@ -873,7 +867,7 @@ module mp_thompson
 
            ni = ni/(1.0_kind_phys+qv)
            nr = nr/(1.0_kind_phys+qv)
-           if (is_aerosol_aware) then
+           if (is_aerosol_aware .or. merra2_aerosol_aware) then
               nc = nc/(1.0_kind_phys+qv)
               nwfa = nwfa/(1.0_kind_phys+qv)
               nifa = nifa/(1.0_kind_phys+qv)

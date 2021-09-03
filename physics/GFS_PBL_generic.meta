@@ -271,6 +271,14 @@
   type = logical
   intent = in
   optional = F
+[mraerosol]
+  standard_name = flag_for_merra2_aerosol_aware_for_thompson
+  long_name = flag for merra2 aerosol-aware physics for thompson microphysics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [hybedmf]
   standard_name = flag_for_hybrid_edmf_pbl_scheme
   long_name = flag for hybrid edmf pbl scheme (moninedmf)
@@ -687,6 +695,14 @@
 [ltaerosol]
   standard_name = flag_for_aerosol_physics
   long_name = flag for aerosol physics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[mraerosol]
+  standard_name = flag_for_merra2_aerosol_aware_for_thompson
+  long_name = flag for merra2 aerosol-aware physics for thompson microphysics
   units = flag
   dimensions = ()
   type = logical

@@ -16,25 +16,25 @@
 !!
       ! Attention - the output arguments lm, im, lmk, lmp must not be set
       ! in the CCPP version - they are defined in the interstitial_create routine
-      subroutine GFS_rrtmg_pre_run (im, levs, lm, lmk, lmp, n_var_lndp,        &
-        imfdeepcnv, imfdeepcnv_gf, me, ncnd, ntrac, num_p3d, npdf3d, ncnvcld3d,&
-        ntqv, ntcw,ntiw, ntlnc, ntinc, ntrw, ntsw, ntgl, ntwa, ntoz,           &
-        ntclamt, nleffr, nieffr, nseffr, lndp_type, kdt, imp_physics,          &
-        imp_physics_thompson, imp_physics_gfdl, imp_physics_zhao_carr,         &
-        imp_physics_zhao_carr_pdf, imp_physics_mg, imp_physics_wsm6,           &
-        imp_physics_fer_hires, julian, yearlen, lndp_var_list, lsswr, lslwr,   &
-        ltaerosol, lgfdlmprad, uni_cld, effr_in, do_mynnedmf, lmfshal,         &
-        lmfdeep2, fhswr, fhlwr, solhr, sup, con_eps, epsm1, fvirt,             &
-        rog, rocp, con_rd, xlat_d, xlat, xlon, coslat, sinlat, tsfc, slmsk,    &
-        prsi, prsl, prslk, tgrs, sfc_wts, mg_cld, effrr_in, pert_clds,         &
-        sppt_wts, sppt_amp, cnvw_in, cnvc_in, qgrs, aer_nm, dx, icloud,        & !inputs from here and above
-        coszen, coszdg, effrl_inout, effri_inout, effrs_inout,                 &
-        clouds1, clouds2, clouds3, clouds4, clouds5,                           & !in/out from here and above
-        kd, kt, kb, mtopa, mbota, raddt, tsfg, tsfa, de_lgth, alb1d, delp, dz, & !output from here and below
-        plvl, plyr, tlvl, tlyr, qlyr, olyr, gasvmr_co2, gasvmr_n2o, gasvmr_ch4,&
-        gasvmr_o2, gasvmr_co, gasvmr_cfc11, gasvmr_cfc12, gasvmr_cfc22,        &
-        gasvmr_ccl4,  gasvmr_cfc113, aerodp, clouds6, clouds7, clouds8,        &
-        clouds9, cldsa, cldfra, faersw1, faersw2, faersw3, faerlw1, faerlw2,   &
+      subroutine GFS_rrtmg_pre_run (im, levs, lm, lmk, lmp, n_var_lndp,          &
+        imfdeepcnv, imfdeepcnv_gf, me, ncnd, ntrac, num_p3d, npdf3d, ncnvcld3d,  &
+        ntqv, ntcw,ntiw, ntlnc, ntinc, ntrw, ntsw, ntgl, ntwa, ntoz,             &
+        ntclamt, nleffr, nieffr, nseffr, lndp_type, kdt, imp_physics,            &
+        imp_physics_thompson, imp_physics_gfdl, imp_physics_zhao_carr,           &
+        imp_physics_zhao_carr_pdf, imp_physics_mg, imp_physics_wsm6,             &
+        imp_physics_fer_hires, julian, yearlen, lndp_var_list, lsswr, lslwr,     &
+        ltaerosol, mraerosol, lgfdlmprad, uni_cld, effr_in, do_mynnedmf, lmfshal,&
+        lmfdeep2, fhswr, fhlwr, solhr, sup, con_eps, epsm1, fvirt,               &
+        rog, rocp, con_rd, xlat_d, xlat, xlon, coslat, sinlat, tsfc, slmsk,      &
+        prsi, prsl, prslk, tgrs, sfc_wts, mg_cld, effrr_in, pert_clds,           &
+        sppt_wts, sppt_amp, cnvw_in, cnvc_in, qgrs, aer_nm, dx, icloud,          & !inputs from here and above
+        coszen, coszdg, effrl_inout, effri_inout, effrs_inout,                   &
+        clouds1, clouds2, clouds3, clouds4, clouds5,                             & !in/out from here and above
+        kd, kt, kb, mtopa, mbota, raddt, tsfg, tsfa, de_lgth, alb1d, delp, dz,   & !output from here and below
+        plvl, plyr, tlvl, tlyr, qlyr, olyr, gasvmr_co2, gasvmr_n2o, gasvmr_ch4,  &
+        gasvmr_o2, gasvmr_co, gasvmr_cfc11, gasvmr_cfc12, gasvmr_cfc22,          &
+        gasvmr_ccl4,  gasvmr_cfc113, aerodp, clouds6, clouds7, clouds8,          &
+        clouds9, cldsa, cldfra, faersw1, faersw2, faersw3, faerlw1, faerlw2,     &
         faerlw3, alpha, errmsg, errflg)
 
       use machine,                   only: kind_phys
@@ -98,9 +98,9 @@
 
       character(len=3), dimension(:), intent(in) :: lndp_var_list
 
-      logical,              intent(in) :: lsswr, lslwr, ltaerosol, lgfdlmprad, &
-                                          uni_cld, effr_in, do_mynnedmf,       &
-                                          lmfshal, lmfdeep2, pert_clds
+      logical,              intent(in) :: lsswr, lslwr, ltaerosol, lgfdlmprad,   &
+                                          uni_cld, effr_in, do_mynnedmf,         &
+                                          lmfshal, lmfdeep2, pert_clds,mraerosol
 
       real(kind=kind_phys), intent(in) :: fhswr, fhlwr, solhr, sup, julian, sppt_amp
       real(kind=kind_phys), intent(in) :: con_eps, epsm1, fvirt, rog, rocp, con_rd
@@ -651,6 +651,21 @@
                 nwfa  (i,k) = tracer1(i,k,ntwa)
               enddo
             enddo
+          else if (imp_physics == imp_physics_thompson .and. mraerosol) then
+                        do k=1,LMK
+              do i=1,IM
+                qvs = qlyr(i,k)
+                qv_mp (i,k) = qvs/(1.-qvs)
+                rho   (i,k) = con_eps*plyr(i,k)*100./(con_rd*tlyr(i,k)*(qv_mp(i,k)+con_eps))
+                orho  (i,k) = 1.0/rho(i,k)
+                qc_mp (i,k) = tracer1(i,k,ntcw)/(1.-qvs)
+                qi_mp (i,k) = tracer1(i,k,ntiw)/(1.-qvs)
+                qs_mp (i,k) = tracer1(i,k,ntsw)/(1.-qvs)
+                nc_mp (i,k) = tracer1(i,k,ntlnc)/(1.-qvs)
+                ni_mp (i,k) = tracer1(i,k,ntinc)/(1.-qvs)
+              enddo
+            enddo
+
           elseif (imp_physics == imp_physics_thompson) then
             do k=1,LMK
               do i=1,IM
