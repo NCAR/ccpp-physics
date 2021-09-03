@@ -817,6 +817,24 @@
   kind = kind_phys
   intent = in
   optional = F
+[pah]
+  standard_name = total_precipitation_advected_heat
+  long_name = precipitation advected heat - total
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[pahi]
+  standard_name = instantaneous_total_precipitation_advected_heat
+  long_name = instantaneous precipitation advected heat - total
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [epi]
   standard_name = instantaneous_surface_potential_evaporation
   long_name = instantaneous sfc potential evaporation
@@ -1204,6 +1222,15 @@
   kind = kind_phys
   intent = inout
   optional = F
+[paha]
+  standard_name = cumulative_precipitation_advected_heat_flux_multiplied_by_timestep
+  long_name = cumulative precipitation advected heat flux multiplied by timestep
+  units = W m-2 s
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
 [ep]
   standard_name = cumulative_surface_upward_potential_latent_heat_flux_multiplied_by_timestep
   long_name = cumulative surface upward potential latent heat flux multiplied by timestep
@@ -1212,6 +1239,42 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
+[ecan]
+  standard_name = evaporation_of_intercepted_water
+  long_name = evaporation of intercepted water
+  units = kg m-2 s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[etran]
+  standard_name = transpiration_rate
+  long_name = transpiration rate
+  units = kg m-2 s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[edir]
+  standard_name = soil_surface_evaporation_rate
+  long_name = soil surface evaporation rate
+  units = kg m-2 s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[waxy]
+  standard_name = water_storage_in_aquifer
+  long_name = water storage in aquifer
+  units = mm
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
   optional = F
 [runoff]
   standard_name = total_runoff
@@ -1248,6 +1311,42 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = F
+[tecan]
+  standard_name = total_evaporation_of_intercepted_water
+  long_name = total evaporation of intercepted water
+  units = kg m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[tetran]
+  standard_name = total_transpiration_rate
+  long_name = total transpiration rate
+  units = kg m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[tedir]
+  standard_name = total_soil_surface_evaporation_rate
+  long_name = total soil surface evaporation rate
+  units = kg m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[twa]
+  standard_name = total_water_storage_in_aquifer
+  long_name = total water storage in aquifer
+  units = kg m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
   optional = F
 [lheatstrg]
   standard_name = flag_for_canopy_heat_storage

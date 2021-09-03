@@ -131,8 +131,9 @@
 
 !  ---  outputs:
       sncovr1, qsurf, gflux, drain, evap, hflx, ep, runoff,      &
-      cmm, chh, evbs, evcw, sbsno, snowc, stm, snohf,            &
-      smcwlt2, smcref2, wet1, t2mmp, q2mp, errmsg, errflg)     
+      cmm, chh, evbs, evcw, sbsno, pah, ecan, etran, edir,snowc, &
+      stm, snohf,smcwlt2, smcref2, wet1, t2mmp, q2mp,            &
+      errmsg, errflg)     
 
   use machine ,   only : kind_phys
   use funcphys,   only : fpvs
@@ -288,6 +289,10 @@
   real(kind=kind_phys), dimension(:)     , intent(out)   :: evbs       ! direct soil evaporation [m/s]
   real(kind=kind_phys), dimension(:)     , intent(out)   :: evcw       ! canopy water evaporation [m/s]
   real(kind=kind_phys), dimension(:)     , intent(out)   :: sbsno      ! sublimation/deposit from snopack [W/m2]
+  real(kind=kind_phys), dimension(:)     , intent(out)   :: pah        ! precipitation advected heat - total (w/m2) 
+  real(kind=kind_phys), dimension(:)     , intent(out)   :: ecan       ! evaporation of intercepted water (mm/s)
+  real(kind=kind_phys), dimension(:)     , intent(out)   :: etran      ! transpiration rate (mm/s) 
+  real(kind=kind_phys), dimension(:)     , intent(out)   :: edir       ! soil surface evaporation rate (mm/s)
   real(kind=kind_phys), dimension(:)     , intent(out)   :: snowc      ! fractional snow cover [-]
   real(kind=kind_phys), dimension(:)     , intent(out)   :: stm        ! total soil column moisture content [mm]
   real(kind=kind_phys), dimension(:)     , intent(out)   :: snohf      ! snow/freezing-rain latent heat flux [W/m2]
@@ -924,6 +929,7 @@
       gflux     (i)   = -1.0*ground_heat_total                          ! opposite sign to be consistent with noah
       snohf     (i)   = snowmelt_out * con_hfus         ! only snow that exits pack
       sbsno     (i)   = snow_sublimation
+      pah       (i)   = precip_adv_heat_total
 
       cmxy      (i)   = cm_noahmp
       chxy      (i)   = ch_noahmp
@@ -943,6 +949,9 @@
       waxy      (i)   = aquifer_water
       wtxy      (i)   = saturated_water
       qsnowxy   (i)   = snowfall
+      ecan      (i)   = evaporation_canopy
+      etran     (i)   = transpiration
+      edir      (i)   = evaporation_soil
       drain     (i)   = runoff_baseflow
       runoff    (i)   = runoff_surface
 
