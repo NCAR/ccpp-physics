@@ -140,13 +140,23 @@ contains
     ! Save LW outputs.
     ! #######################################################################################
     ! Copy fluxes from RRTGMP types into model radiation types.
+
+    do i=1,nCol
     ! Mandatory outputs
-    topflw(:)%upfxc = fluxlwUP_allsky(:,iTOA)
-    topflw(:)%upfx0 = fluxlwUP_clrsky(:,iTOA)
-    sfcflw(:)%upfxc = fluxlwUP_allsky(:,iSFC)
-    sfcflw(:)%upfx0 = fluxlwUP_clrsky(:,iSFC)
-    sfcflw(:)%dnfxc = fluxlwDOWN_allsky(:,iSFC)
-    sfcflw(:)%dnfx0 = fluxlwDOWN_clrsky(:,iSFC)
+       topflw(i)%upfxc = fluxlwUP_allsky(i,iTOA)
+       topflw(i)%upfx0 = fluxlwUP_clrsky(i,iTOA)
+       sfcflw(i)%upfxc = fluxlwUP_allsky(i,iSFC)
+       sfcflw(i)%upfx0 = fluxlwUP_clrsky(i,iSFC)
+       sfcflw(i)%dnfxc = fluxlwDOWN_allsky(i,iSFC)
+       sfcflw(i)%dnfx0 = fluxlwDOWN_clrsky(i,iSFC)
+
+    ! Save surface air temp for diurnal adjustment at model t-steps
+       tsflw (i) = tsfa(i)
+
+    ! Radiation fluxes for other physics processes
+       sfcdlw(i) = sfcflw(i)%dnfxc
+       sfculw(i) = sfcflw(i)%upfxc
+    enddo
 
     ! Optional outputs
     if(l_fluxeslw2d) then
@@ -155,13 +165,6 @@ contains
         flxprf_lw%upfx0 = fluxlwUP_clrsky
         flxprf_lw%dnfx0 = fluxlwDOWN_clrsky
     endif
-
-    ! Save surface air temp for diurnal adjustment at model t-steps
-    tsflw (:) = tsfa(:)
-
-    ! Radiation fluxes for other physics processes
-    sfcdlw(:) = sfcflw(:)%dnfxc
-    sfculw(:) = sfcflw(:)%upfxc
 
     ! #######################################################################################
     ! Save LW diagnostics

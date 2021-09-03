@@ -178,14 +178,17 @@ contains
        ! Save SW outputs
        ! #######################################################################################
        ! Copy fluxes from RRTGMP types into model radiation types.
+
        ! Mandatory outputs
-       topfsw(:)%upfxc = fluxswUP_allsky(:,iTOA)
-       topfsw(:)%upfx0 = fluxswUP_clrsky(:,iTOA)
-       topfsw(:)%dnfxc = fluxswDOWN_allsky(:,iTOA)
-       sfcfsw(:)%upfxc = fluxswUP_allsky(:,iSFC)
-       sfcfsw(:)%upfx0 = fluxswUP_clrsky(:,iSFC)
-       sfcfsw(:)%dnfxc = fluxswDOWN_allsky(:,iSFC)
-       sfcfsw(:)%dnfx0 = fluxswDOWN_clrsky(:,iSFC)
+       do i=1,nCol
+          topfsw(i)%upfxc = fluxswUP_allsky(i,iTOA)
+          topfsw(i)%upfx0 = fluxswUP_clrsky(i,iTOA)
+          topfsw(i)%dnfxc = fluxswDOWN_allsky(i,iTOA)
+          sfcfsw(i)%upfxc = fluxswUP_allsky(i,iSFC)
+          sfcfsw(i)%upfx0 = fluxswUP_clrsky(i,iSFC)
+          sfcfsw(i)%dnfxc = fluxswDOWN_allsky(i,iSFC)
+          sfcfsw(i)%dnfx0 = fluxswDOWN_clrsky(i,iSFC)
+       enddo
 
        ! Optional output
        if(l_fluxessw2D) then
