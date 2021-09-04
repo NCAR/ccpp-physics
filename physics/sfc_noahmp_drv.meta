@@ -1195,6 +1195,42 @@
   kind = kind_phys
   intent = out
   optional = F
+[pah]
+  standard_name = total_precipitation_advected_heat
+  long_name = precipitation advected heat - total
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[ecan]
+  standard_name = evaporation_of_intercepted_water
+  long_name = evaporation of intercepted water
+  units = kg m-2 s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[etran]
+  standard_name = transpiration_rate
+  long_name = transpiration rate
+  units = kg m-2 s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[edir]
+  standard_name = soil_surface_evaporation_rate
+  long_name = soil surface evaporation rate
+  units = kg m-2 s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
 [snowc]
   standard_name = surface_snow_area_fraction
   long_name = surface snow area fraction
