@@ -216,7 +216,9 @@
      &           g, cp, rd, rv, fv, pi, imx, cdmbgwd, me, master,       &
      &           lprnt, ipr, rdxzb, dx, gwd_opt,                        &
      &           do_gsl_drag_ls_bl, do_gsl_drag_ss, do_gsl_drag_tofd,   &
-     &           errmsg, errflg     )
+     &           dtend, dtidx, index_of_process_orographic_gwd,         &
+     &           index_of_temperature, index_of_x_wind,                 &
+     &           index_of_y_wind, ldiag3d, errmsg, errflg)
 
 !   ********************************************************************
 ! ----->  I M P L E M E N T A T I O N    V E R S I O N   <----------
@@ -319,6 +321,10 @@
    logical, intent(in) :: lprnt
    integer, intent(in) :: KPBL(:)
    real(kind=kind_phys), intent(in) :: deltim, G, CP, RD, RV, cdmbgwd(:)
+   real(kind=kind_phys), intent(inout) :: dtend(:,:,:)
+   logical, intent(in) :: ldiag3d
+   integer, intent(in) :: dtidx(:,:), index_of_temperature,      &
+     &  index_of_process_orographic_gwd, index_of_x_wind, index_of_y_wind
 
    integer              ::  kpblmax
    integer, parameter   ::  ims=1, kms=1, its=1, kts=1
@@ -490,14 +496,26 @@
    character(len=*), intent(out) :: errmsg
    integer,          intent(out) :: errflg
 
+   integer :: udtend, vdtend, Tdtend
+
    ! Calculate inverse of gravitational acceleration
    g_inv = 1./G
 
    ! Initialize CCPP error handling variables
    errmsg = ''
    errflg = 0
-   var_temp2 = 0.
 
+   ! Initialize local variables
+   var_temp2 = 0.
+   udtend = -1
+   vdtend = -1
+   Tdtend = -1
+
+   if(ldiag3d) then
+      udtend = dtidx(index_of_x_wind,index_of_process_orographic_gwd)
+      vdtend = dtidx(index_of_y_wind,index_of_process_orographic_gwd)
+      Tdtend = dtidx(index_of_temperature,index_of_process_orographic_gwd)
+   endif
 
 !--------------------------------------------------------------------
 ! SCALE-ADPTIVE PARAMETER FROM GFS GWD SCHEME
@@ -1032,6 +1050,12 @@ ENDIF   ! (do_gsl_drag_ls_bl).and.((gwd_opt_ls .EQ. 1).or.(gwd_opt_bl .EQ. 1))
          dvsfc(i)   = dvsfc(i) + vtendwave(i,k) * del(i,k)
        enddo
     enddo
+    if(udtend>0) then
+       dtend(its:im,kts:km,udtend) = dtend(its:im,kts:km,udtend) + utendwave(its:im,kts:km)*deltim
+    endif
+    if(vdtend>0) then
+       dtend(its:im,kts:km,vdtend) = dtend(its:im,kts:km,vdtend) + vtendwave(its:im,kts:km)*deltim
+    endif
     if ( (gwd_opt == 33).or.(gwd_opt == 22) ) then
       do k = kts,km
         do i = its,im
@@ -1090,6 +1114,12 @@ IF ( (do_gsl_drag_tofd).and.(ss_taper.GT.1.E-02) ) THEN
          dvsfc(i)   = dvsfc(i) + vtendform(i,k) * del(i,k)
       enddo
    enddo
+    if(udtend>0) then
+       dtend(its:im,kts:km,udtend) = dtend(its:im,kts:km,udtend) + utendform(its:im,kts:km)*deltim
+    endif
+    if(vdtend>0) then
+       dtend(its:im,kts:km,vdtend) = dtend(its:im,kts:km,vdtend) + vtendform(its:im,kts:km)*deltim
+    endif
    if ( (gwd_opt == 33).or.(gwd_opt == 22) ) then
      do k = kts,km
        do i = its,im
@@ -1283,6 +1313,26 @@ IF ( (do_gsl_drag_ls_bl) .and.                                       &
          dusfc(i)   = dusfc(i) + taud_ls(i,k)*xn(i)*del(i,k) + taud_bl(i,k)*xn(i)*del(i,k)
          dvsfc(i)   = dvsfc(i) + taud_ls(i,k)*yn(i)*del(i,k) + taud_bl(i,k)*yn(i)*del(i,k)
       enddo
+      if(udtend>0) then
+         dtend(its:im,k,udtend) = dtend(its:im,k,udtend) + (taud_ls(its:im,k) * xn(its:im) + &
+              taud_bl(its:im,k) * xn(its:im)) * deltim
+      endif
+      if(vdtend>0) then
+         dtend(its:im,k,vdtend) = dtend(its:im,k,vdtend) + (taud_ls(its:im,k) * yn(its:im) + &
+              taud_bl(its:im,k) * yn(its:im)) * deltim
+      endif
+      if(gsd_diss_ht_opt .EQ. 1 .and. Tdtend>0) then
+         do i=its,im
+            ! Calculate dissipation heating
+            ! Initial kinetic energy (at t0-dt)
+            eng0 = 0.5*( (rcs*u1(i,k))**2. + (rcs*v1(i,k))**2. )
+            ! Kinetic energy after wave-breaking/flow-blocking
+            eng1 = 0.5*( (rcs*(u1(i,k)+(dtaux+dtauxb)*deltim))**2 + &
+                         (rcs*(v1(i,k)+(dtauy+dtauyb)*deltim))**2 )
+            ! Modify theta tendency
+            dtend(i,k,Tdtend) = dtend(i,k,Tdtend) + max((eng0-eng1),0.0)/cp
+         enddo
+      endif
    enddo
 
    !  Finalize dusfc and dvsfc diagnostics

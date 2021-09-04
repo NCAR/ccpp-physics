@@ -63,7 +63,7 @@ MODULE module_mp_thompson
 
       USE module_mp_radar
 
-#if !defined(SION) && defined(MPI)
+#ifdef MPI
       use mpi
 #endif
 
@@ -421,8 +421,7 @@ MODULE module_mp_thompson
 !..MPI communicator
       INTEGER:: mpi_communicator
 
-!..If SIONlib isn't used, write Thompson tables with master MPI task
-!.. after computing them in thompson_init
+!..Write tables with master MPI task after computing them in thompson_init
       LOGICAL:: thompson_table_writer
 
 !+---+
@@ -453,12 +452,7 @@ MODULE module_mp_thompson
       INTEGER:: i, j, k, l, m, n
       LOGICAL:: micro_init
       real :: stime, etime
-#ifdef SION
-      INTEGER :: ierr
-      LOGICAL :: precomputed_tables
-#else
       LOGICAL, PARAMETER :: precomputed_tables = .FALSE.
-#endif
 
 ! Set module variable is_aerosol_aware
       is_aerosol_aware = is_aerosol_aware_in
@@ -766,18 +760,7 @@ MODULE module_mp_thompson
 
       ! Assign mpicomm to module variable
       mpi_communicator = mpicomm
-#ifdef SION
-      call cpu_time(stime)
-      call readwrite_tables(thomp_table_file, "read", mpicomm, mpirank, mpiroot, ierr)
-      call cpu_time(etime)
-      if (ierr==0) then
-         precomputed_tables = .true.
-         if (mpirank==mpiroot) print '("Reading and broadcasting precomputed Thompson tables took ",f10.3," seconds.")', etime-stime
-      else
-         precomputed_tables = .false.
-         if (mpirank==mpiroot) write(0,*) "An error occurred reading Thompson tables from disk, recalculate"
-      end if
-#endif
+
       ! Standard tables are only written by master MPI task;
       ! (physics init cannot be called by multiple threads,
       !  hence no need to test for a specific thread number)
@@ -899,9 +882,6 @@ MODULE module_mp_thompson
 !>  - Call table_ccnact() to read a static file containing CCN activation of aerosols. The
 !! data were created from a parcel model by Feingold & Heymsfield with
 !! further changes by Eidhammer and Kriedenweis
-      ! This computation is cheap compared to the others below, and
-      ! doing it always ensures that the correct data is in the SIONlib
-      ! file containing the precomputed tables *DH
       if (mpirank==mpiroot) write(0,*) '  calling table_ccnAct routine'
       call table_ccnAct(errmsg,errflg)
       if (.not. errflg==0) return
@@ -971,17 +951,6 @@ MODULE module_mp_thompson
       call cpu_time(etime)
       if (mpirank==mpiroot) print '("Calculating Thompson tables part 2 took ",f10.3," seconds.")', etime-stime
 
-#ifdef SION
-      call cpu_time(stime)
-      call readwrite_tables(thomp_table_file, "write", mpicomm, mpirank, mpiroot, ierr)
-      if (ierr/=0) then
-          write(0,*) "An error occurred writing Thompson tables to disk"
-          stop 1
-      end if
-      call cpu_time(etime)
-      if (mpirank==mpiroot) print '("Writing Thompson tables took ",f10.3," seconds.")', etime-stime
-#endif
-
       end if precomputed_tables_2
 
       endif if_not_iiwarm
@@ -1000,7 +969,7 @@ MODULE module_mp_thompson
       SUBROUTINE mp_gt_driver(qv, qc, qr, qi, qs, qg, ni, nr, nc,     &
                               nwfa, nifa, nwfa2d, nifa2d,             &
                               tt, th, pii,                            &
-                              p, w, dz, dt_in,                        &
+                              p, w, dz, dt_in, dt_inner,              &
                               RAINNC, RAINNCV,                        &
                               SNOWNC, SNOWNCV,                        &
                               ICENC, ICENCV,                          &
@@ -1018,7 +987,25 @@ MODULE module_mp_thompson
                               ids,ide, jds,jde, kds,kde,              &  ! domain dims
                               ims,ime, jms,jme, kms,kme,              &  ! memory dims
                               its,ite, jts,jte, kts,kte,              &  ! tile dims
-                              errmsg, errflg, reset)
+                              reset_dBZ, istep, nsteps,               &
+                              errmsg, errflg,                         &
+                              ! Extended diagnostics, array pointers
+                              ! only associated if ext_diag flag is .true.
+                              ext_diag,                               &
+                              !vts1, txri, txrc,                       &
+                              prw_vcdc,                               &
+                              prw_vcde, tpri_inu, tpri_ide_d,         &
+                              tpri_ide_s, tprs_ide, tprs_sde_d,       &
+                              tprs_sde_s, tprg_gde_d,                 &
+                              tprg_gde_s, tpri_iha, tpri_wfz,         &
+                              tpri_rfz, tprg_rfz, tprs_scw, tprg_scw, &
+                              tprg_rcs, tprs_rcs,                     &
+                              tprr_rci, tprg_rcg,                     &
+                              tprw_vcd_c, tprw_vcd_e, tprr_sml,       &
+                              tprr_gml, tprr_rcg,                     &
+                              tprr_rcs, tprv_rev, tten3, qvten3,      &
+                              qrten3, qsten3, qgten3, qiten3, niten3, &
+                              nrten3, ncten3, qcten3)
 
       implicit none
 
@@ -1058,15 +1045,51 @@ MODULE module_mp_thompson
                           refl_10cm
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(INOUT):: &
                           vt_dbz_wt
-      LOGICAL, OPTIONAL, INTENT(IN) :: first_time_step
-      REAL, INTENT(IN):: dt_in
-      LOGICAL, INTENT (IN) :: reset
+      LOGICAL, INTENT(IN) :: first_time_step
+      REAL, INTENT(IN):: dt_in, dt_inner
+      ! To support subcycling: current step and maximum number of steps
+      INTEGER, INTENT (IN) :: istep, nsteps
+      LOGICAL, INTENT (IN) :: reset_dBZ
+      ! Extended diagnostics, array pointers only associated if ext_diag flag is .true.
+      LOGICAL, INTENT (IN) :: ext_diag
+      REAL, DIMENSION(:,:,:), INTENT(INOUT)::                     &
+                          !vts1, txri, txrc,                       &
+                          prw_vcdc,                               &
+                          prw_vcde, tpri_inu, tpri_ide_d,         &
+                          tpri_ide_s, tprs_ide,                   &
+                          tprs_sde_d, tprs_sde_s, tprg_gde_d,     &
+                          tprg_gde_s, tpri_iha, tpri_wfz,         &
+                          tpri_rfz, tprg_rfz, tprs_scw, tprg_scw, &
+                          tprg_rcs, tprs_rcs,                     &
+                          tprr_rci, tprg_rcg,                     &
+                          tprw_vcd_c, tprw_vcd_e, tprr_sml,       &
+                          tprr_gml, tprr_rcg,                     &
+                          tprr_rcs, tprv_rev, tten3, qvten3,      &
+                          qrten3, qsten3, qgten3, qiten3, niten3, &
+                          nrten3, ncten3, qcten3
 
 !..Local variables
       REAL, DIMENSION(kts:kte):: &
                           qv1d, qc1d, qi1d, qr1d, qs1d, qg1d, ni1d,     &
                           nr1d, nc1d, nwfa1d, nifa1d,                   &
                           t1d, p1d, w1d, dz1d, rho, dBZ
+!..Extended diagnostics, single column arrays
+      REAL, DIMENSION(:), ALLOCATABLE::                              &
+                          !vtsk1, txri1, txrc1,                       &
+                          prw_vcdc1,                                 &
+                          prw_vcde1, tpri_inu1, tpri_ide1_d,         &
+                          tpri_ide1_s, tprs_ide1,                    &
+                          tprs_sde1_d, tprs_sde1_s, tprg_gde1_d,     &
+                          tprg_gde1_s, tpri_iha1, tpri_wfz1,         &
+                          tpri_rfz1, tprg_rfz1, tprs_scw1, tprg_scw1,&
+                          tprg_rcs1, tprs_rcs1,                      &
+                          tprr_rci1, tprg_rcg1,                      &
+                          tprw_vcd1_c, tprw_vcd1_e, tprr_sml1,       &
+                          tprr_gml1, tprr_rcg1,                      &
+                          tprr_rcs1, tprv_rev1,  tten1, qvten1,      &
+                          qrten1, qsten1, qgten1, qiten1, niten1,    &
+                          nrten1, ncten1, qcten1
+
       REAL, DIMENSION(kts:kte):: re_qc1d, re_qi1d, re_qs1d
 #if ( WRF_CHEM == 1 )
       REAL, DIMENSION(kts:kte):: &
@@ -1084,6 +1107,7 @@ MODULE module_mp_thompson
       LOGICAL, OPTIONAL, INTENT(IN) :: diagflag
       INTEGER, OPTIONAL, INTENT(IN) :: do_radar_ref
       logical :: melti = .false.
+      INTEGER :: ndt, it
 
       ! CCPP error handling
       character(len=*), optional, intent(  out) :: errmsg
@@ -1093,63 +1117,110 @@ MODULE module_mp_thompson
       if (present(errmsg)) errmsg = ''
       if (present(errflg)) errflg = 0
 
-      ! DH* 2020-06-05: The stochastic perturbations code was retrofitted
-      ! from a newer version of the Thompson MP scheme, but it has not been
-      ! tested yet.
-      if (rand_perturb_on .ne. 0) then
-        errmsg = 'Logic error in mp_gt_driver: the stochastic perturbations code ' // &
-                 'has not been tested yet with this version of the Thompson scheme'
-        errflg = 1
-        return
-      end if
-      ! Activate this code when removing the guard above
-      !if (rand_perturb_on .ne. 0 .and. .not. present(rand_pert)) then
-      !  errmsg = 'Logic error in mp_gt_driver: random perturbations are on, ' // &
-      !           'but optional argument rand_pert is not present'
-      !  errflg = 1
-      !  return
-      !end if
-      ! *DH 2020-06-05
+      ! No need to test for every subcycling step
+      test_only_once: if (first_time_step .and. istep==1) then
+         ! DH* 2020-06-05: The stochastic perturbations code was retrofitted
+         ! from a newer version of the Thompson MP scheme, but it has not been
+         ! tested yet.
+         if (rand_perturb_on .ne. 0) then
+           errmsg = 'Logic error in mp_gt_driver: the stochastic perturbations code ' // &
+                    'has not been tested yet with this version of the Thompson scheme'
+           errflg = 1
+           return
+         end if
+         ! Activate this code when removing the guard above
+         !if (rand_perturb_on .ne. 0 .and. .not. present(rand_pert)) then
+         !  errmsg = 'Logic error in mp_gt_driver: random perturbations are on, ' // &
+         !           'but optional argument rand_pert is not present'
+         !  errflg = 1
+         !  return
+         !end if
+         ! *DH 2020-06-05
+   
+         if ( (present(tt) .and. (present(th) .or. present(pii))) .or. &
+              (.not.present(tt) .and. .not.(present(th) .and. present(pii))) ) then
+            if (present(errmsg)) then
+               write(errmsg, '(a)') 'Logic error in mp_gt_driver: provide either tt or th+pii'
+            else
+               write(*,'(a)') 'Logic error in mp_gt_driver: provide either tt or th+pii'
+            end if
+            if (present(errflg)) then
+               errflg = 1
+               return
+            else
+               stop
+            end if
+         end if
+   
+         if (is_aerosol_aware .and. (.not.present(nc)     .or. &
+                                     .not.present(nwfa)   .or. &
+                                     .not.present(nifa)   .or. &
+                                     .not.present(nwfa2d) .or. &
+                                     .not.present(nifa2d)      )) then
+            if (present(errmsg)) then
+               write(errmsg, '(*(a))') 'Logic error in mp_gt_driver: provide nc, nwfa, nifa, nwfa2d', &
+                                       ' and nifa2d for aerosol-aware version of Thompson microphysics'
+            else
+               write(*, '(*(a))') 'Logic error in mp_gt_driver: provide nc, nwfa, nifa, nwfa2d', &
+                                  ' and nifa2d for aerosol-aware version of Thompson microphysics'
+            end if
+            if (present(errflg)) then
+               errflg = 1
+               return
+            else
+               stop
+            end if
+         else if (.not.is_aerosol_aware .and. (present(nwfa)   .or. &
+                                               present(nifa)   .or. &
+                                               present(nwfa2d) .or. &
+                                               present(nifa2d)      )) then
+            write(*,*) 'WARNING, nc/nwfa/nifa/nwfa2d/nifa2d present but is_aerosol_aware is FALSE'
+         end if
+      end if test_only_once
 
-      if ( (present(tt) .and. (present(th) .or. present(pii))) .or. &
-           (.not.present(tt) .and. .not.(present(th) .and. present(pii))) ) then
-         if (present(errmsg)) then
-            write(errmsg, '(a)') 'Logic error in mp_gt_driver: provide either tt or th+pii'
-         else
-            write(*,'(a)') 'Logic error in mp_gt_driver: provide either tt or th+pii'
-         end if
-         if (present(errflg)) then
-            errflg = 1
-            return
-         else
-            stop
-         end if
-      end if
-
-      if (is_aerosol_aware .and. (.not.present(nc)     .or. &
-                                  .not.present(nwfa)   .or. &
-                                  .not.present(nifa)   .or. &
-                                  .not.present(nwfa2d) .or. &
-                                  .not.present(nifa2d)      )) then
-         if (present(errmsg)) then
-            write(errmsg, '(*(a))') 'Logic error in mp_gt_driver: provide nc, nwfa, nifa, nwfa2d', &
-                                    ' and nifa2d for aerosol-aware version of Thompson microphysics'
-         else
-            write(*, '(*(a))') 'Logic error in mp_gt_driver: provide nc, nwfa, nifa, nwfa2d', &
-                               ' and nifa2d for aerosol-aware version of Thompson microphysics'
-         end if
-         if (present(errflg)) then
-            errflg = 1
-            return
-         else
-            stop
-         end if
-      else if (.not.is_aerosol_aware .and. (present(nwfa)   .or. &
-                                            present(nifa)   .or. &
-                                            present(nwfa2d) .or. &
-                                            present(nifa2d)      )) then
-         write(*,*) 'WARNING, nc/nwfa/nifa/nwfa2d/nifa2d present but is_aerosol_aware is FALSE'
-      end if
+      ! These must be alwyas allocated
+      !allocate (vtsk1(kts:kte))
+      !allocate (txri1(kts:kte))
+      !allocate (txrc1(kts:kte))
+      allocate_extended_diagnostics: if (ext_diag) then
+         allocate (prw_vcdc1(kts:kte))
+         allocate (prw_vcde1(kts:kte))
+         allocate (tpri_inu1(kts:kte))
+         allocate (tpri_ide1_d(kts:kte))
+         allocate (tpri_ide1_s(kts:kte))
+         allocate (tprs_ide1(kts:kte))
+         allocate (tprs_sde1_d(kts:kte))
+         allocate (tprs_sde1_s(kts:kte))
+         allocate (tprg_gde1_d(kts:kte))
+         allocate (tprg_gde1_s(kts:kte))
+         allocate (tpri_iha1(kts:kte))
+         allocate (tpri_wfz1(kts:kte))
+         allocate (tpri_rfz1(kts:kte))
+         allocate (tprg_rfz1(kts:kte))
+         allocate (tprs_scw1(kts:kte))
+         allocate (tprg_scw1(kts:kte))
+         allocate (tprg_rcs1(kts:kte))
+         allocate (tprs_rcs1(kts:kte))
+         allocate (tprr_rci1(kts:kte))
+         allocate (tprg_rcg1(kts:kte))
+         allocate (tprw_vcd1_c(kts:kte))
+         allocate (tprw_vcd1_e(kts:kte))
+         allocate (tprr_sml1(kts:kte))
+         allocate (tprr_gml1(kts:kte))
+         allocate (tprr_rcg1(kts:kte))
+         allocate (tprr_rcs1(kts:kte))
+         allocate (tprv_rev1(kts:kte))
+         allocate (tten1(kts:kte))
+         allocate (qvten1(kts:kte))
+         allocate (qrten1(kts:kte))
+         allocate (qsten1(kts:kte))
+         allocate (qgten1(kts:kte))
+         allocate (qiten1(kts:kte))
+         allocate (niten1(kts:kte))
+         allocate (nrten1(kts:kte))
+         allocate (ncten1(kts:kte))
+         allocate (qcten1(kts:kte))
+      end if allocate_extended_diagnostics
 
 !+---+
       i_start = its
@@ -1166,7 +1237,30 @@ MODULE module_mp_thompson
 !        j_end   = jte
 !     endif
 
-      dt = dt_in
+!     dt = dt_in
+      RAINNC(:,:) = 0.0
+      SNOWNC(:,:) = 0.0
+      ICENC(:,:) = 0.0
+      GRAUPELNC(:,:) = 0.0
+      pcp_ra(:,:) = 0.0
+      pcp_sn(:,:) = 0.0
+      pcp_gr(:,:) = 0.0
+      pcp_ic(:,:) = 0.0
+      ndt = max(nint(dt_in/dt_inner),1)
+      dt = dt_in/ndt
+      if(dt_in .le. dt_inner) dt= dt_in
+      if(nsteps>1 .and. ndt>1) then
+         if (present(errmsg) .and. present(errflg)) then
+            write(errmsg, '(a)') 'Logic error in mp_gt_driver: inner loop cannot be used with subcycling'
+            errflg = 1
+            return
+         else
+            write(*,'(a)') 'Warning: inner loop cannot be used with subcycling, resetting ndt=1'
+            ndt = 1
+         endif
+      endif
+
+      do it = 1, ndt
 
       qc_max = 0.
       qr_max = 0.
@@ -1260,6 +1354,50 @@ MODULE module_mp_thompson
             ni1d(k) = ni(i,k,j)
             nr1d(k) = nr(i,k,j)
             rho(k) = 0.622*p1d(k)/(R*t1d(k)*(qv1d(k)+0.622))
+
+            ! These arrays are always allocated and must be initialized
+            !vtsk1(k) = 0.
+            !txrc1(k) = 0.
+            !txri1(k) = 0.
+            initialize_extended_diagnostics: if (ext_diag) then
+               prw_vcdc1(k) = 0.
+               prw_vcde1(k) = 0.
+               tpri_inu1(k) = 0.
+               tpri_ide1_d(k) = 0.
+               tpri_ide1_s(k) = 0.
+               tprs_ide1(k) = 0.
+               tprs_sde1_d(k) = 0.
+               tprs_sde1_s(k) = 0.
+               tprg_gde1_d(k) = 0.
+               tprg_gde1_s(k) = 0.
+               tpri_iha1(k) = 0.
+               tpri_wfz1(k) = 0.
+               tpri_rfz1(k) = 0.
+               tprg_rfz1(k) = 0.
+               tprs_scw1(k) = 0.
+               tprg_scw1(k) = 0.
+               tprg_rcs1(k) = 0.
+               tprs_rcs1(k) = 0.
+               tprr_rci1(k) = 0.
+               tprg_rcg1(k) = 0.
+               tprw_vcd1_c(k) = 0.
+               tprw_vcd1_e(k) = 0.
+               tprr_sml1(k) = 0.
+               tprr_gml1(k) = 0.
+               tprr_rcg1(k) = 0.
+               tprr_rcs1(k) = 0.
+               tprv_rev1(k) = 0.
+               tten1(k) = 0.
+               qvten1(k) = 0.
+               qrten1(k) = 0.
+               qsten1(k) = 0.
+               qgten1(k) = 0.
+               qiten1(k) = 0.
+               niten1(k) = 0.
+               nrten1(k) = 0.
+               ncten1(k) = 0.
+               qcten1(k) = 0.
+            endif initialize_extended_diagnostics
          enddo
          if (is_aerosol_aware) then
             do k = kts, kte
@@ -1283,12 +1421,25 @@ MODULE module_mp_thompson
                       rainprod1d, evapprod1d, &
 #endif
                       rand1, rand2, rand3, &
-                      kts, kte, dt, i, j)
+                      kts, kte, dt, i, j, &
+                      ext_diag, &
+                      !vtsk1, txri1, txrc1,                             &
+                      prw_vcdc1, prw_vcde1,                            &
+                      tpri_inu1, tpri_ide1_d, tpri_ide1_s, tprs_ide1,  &
+                      tprs_sde1_d, tprs_sde1_s,                        &
+                      tprg_gde1_d, tprg_gde1_s, tpri_iha1, tpri_wfz1,  &
+                      tpri_rfz1, tprg_rfz1, tprs_scw1, tprg_scw1,      &
+                      tprg_rcs1, tprs_rcs1, tprr_rci1,                 &
+                      tprg_rcg1, tprw_vcd1_c,                          &
+                      tprw_vcd1_e, tprr_sml1, tprr_gml1, tprr_rcg1,    &
+                      tprr_rcs1, tprv_rev1,                            &
+                      tten1, qvten1, qrten1, qsten1,                   &
+                      qgten1, qiten1, niten1, nrten1, ncten1, qcten1)
 
-         pcp_ra(i,j) = pptrain
-         pcp_sn(i,j) = pptsnow
-         pcp_gr(i,j) = pptgraul
-         pcp_ic(i,j) = pptice
+         pcp_ra(i,j) = pcp_ra(i,j) + pptrain
+         pcp_sn(i,j) = pcp_sn(i,j) + pptsnow
+         pcp_gr(i,j) = pcp_gr(i,j) + pptgraul
+         pcp_ic(i,j) = pcp_ic(i,j) + pptice
          RAINNCV(i,j) = pptrain + pptsnow + pptgraul + pptice
          RAINNC(i,j) = RAINNC(i,j) + pptrain + pptsnow + pptgraul + pptice
          IF ( PRESENT(snowncv) .AND. PRESENT(snownc) ) THEN
@@ -1421,49 +1572,117 @@ MODULE module_mp_thompson
             endif
          enddo
 
+         assign_extended_diagnostics: if (ext_diag) then
+           do k=kts,kte
+            !vts1(i,k,j)       = vtsk1(k)
+            !txri(i,k,j)       = txri(i,k,j)       + txri1(k)
+            !txrc(i,k,j)       = txrc(i,k,j)       + txrc1(k)
+            prw_vcdc(i,k,j)   = prw_vcdc(i,k,j)   + prw_vcdc1(k)
+            prw_vcde(i,k,j)   = prw_vcde(i,k,j)   + prw_vcde1(k)
+            tpri_inu(i,k,j)   = tpri_inu(i,k,j)   + tpri_inu1(k) 
+            tpri_ide_d(i,k,j) = tpri_ide_d(i,k,j) + tpri_ide1_d(k)
+            tpri_ide_s(i,k,j) = tpri_ide_s(i,k,j) + tpri_ide1_s(k)
+            tprs_ide(i,k,j)   = tprs_ide(i,k,j)   + tprs_ide1(k)
+            tprs_sde_s(i,k,j) = tprs_sde_s(i,k,j) + tprs_sde1_s(k)
+            tprs_sde_d(i,k,j) = tprs_sde_d(i,k,j) + tprs_sde1_d(k)
+            tprg_gde_d(i,k,j) = tprg_gde_d(i,k,j) + tprg_gde1_d(k)
+            tprg_gde_s(i,k,j) = tprg_gde_s(i,k,j) + tprg_gde1_s(k)
+            tpri_iha(i,k,j)   = tpri_iha(i,k,j)   + tpri_iha1(k)
+            tpri_wfz(i,k,j)   = tpri_wfz(i,k,j)   + tpri_wfz1(k)
+            tpri_rfz(i,k,j)   = tpri_rfz(i,k,j)   + tpri_rfz1(k)
+            tprg_rfz(i,k,j)   = tprg_rfz(i,k,j)   + tprg_rfz1(k)
+            tprs_scw(i,k,j)   = tprs_scw(i,k,j)   + tprs_scw1(k)
+            tprg_scw(i,k,j)   = tprg_scw(i,k,j)   + tprg_scw1(k)
+            tprg_rcs(i,k,j)   = tprg_rcs(i,k,j)   + tprg_rcs1(k)
+            tprs_rcs(i,k,j)   = tprs_rcs(i,k,j)   + tprs_rcs1(k)
+            tprr_rci(i,k,j)   = tprr_rci(i,k,j)   + tprr_rci1(k)
+            tprg_rcg(i,k,j)   = tprg_rcg(i,k,j)   + tprg_rcg1(k)
+            tprw_vcd_c(i,k,j) = tprw_vcd_c(i,k,j) + tprw_vcd1_c(k)
+            tprw_vcd_e(i,k,j) = tprw_vcd_e(i,k,j) + tprw_vcd1_e(k)
+            tprr_sml(i,k,j)   = tprr_sml(i,k,j)   + tprr_sml1(k)
+            tprr_gml(i,k,j)   = tprr_gml(i,k,j)   + tprr_gml1(k)
+            tprr_rcg(i,k,j)   = tprr_rcg(i,k,j)   + tprr_rcg1(k)
+            tprr_rcs(i,k,j)   = tprr_rcs(i,k,j)   + tprr_rcs1(k)
+            tprv_rev(i,k,j)   = tprv_rev(i,k,j)   + tprv_rev1(k)
+            tten3(i,k,j)      = tten3(i,k,j)      + tten1(k) 
+            qvten3(i,k,j)     = qvten3(i,k,j)     + qvten1(k)
+            qrten3(i,k,j)     = qrten3(i,k,j)     + qrten1(k)
+            qsten3(i,k,j)     = qsten3(i,k,j)     + qsten1(k)
+            qgten3(i,k,j)     = qgten3(i,k,j)     + qgten1(k)
+            qiten3(i,k,j)     = qiten3(i,k,j)     + qiten1(k) 
+            niten3(i,k,j)     = niten3(i,k,j)     + niten1(k)
+            nrten3(i,k,j)     = nrten3(i,k,j)     + nrten1(k)
+            ncten3(i,k,j)     = ncten3(i,k,j)     + ncten1(k)
+            qcten3(i,k,j)     = qcten3(i,k,j)     + qcten1(k)
+
+           enddo
+         endif assign_extended_diagnostics
+
+         if (ndt>1 .and. it==ndt) then
+
+           SR(i,j) = (pcp_sn(i,j) + pcp_gr(i,j) + pcp_ic(i,j))/(RAINNC(i,j)+1.e-12)
+           RAINNCV(i,j) = RAINNC(i,j)
+           IF ( PRESENT (snowncv) ) THEN
+              SNOWNCV(i,j) = SNOWNC(i,j)
+           ENDIF
+           IF ( PRESENT (icencv) ) THEN
+              ICENCV(i,j) = ICENC(i,j)
+           ENDIF
+           IF ( PRESENT (graupelncv) ) THEN
+              GRAUPELNCV(i,j) = GRAUPELNC(i,j)
+           ENDIF
+         endif 
+
+         ! Diagnostic calculations only for last step
+         ! if Thompson MP is called multiple times
+         last_step_only: IF ((ndt>1 .and. it==ndt) .or. &
+                             (nsteps>1 .and. istep==nsteps) .or. &
+                             (nsteps==1 .and. ndt==1)) THEN
+
 !> - Call calc_refl10cm()
 
-         IF ( PRESENT (diagflag) ) THEN
-         if (diagflag .and. do_radar_ref == 1) then
+           diagflag_present: IF ( PRESENT (diagflag) ) THEN
+           if (diagflag .and. do_radar_ref == 1) then
 !
-         ! Only set melti to true at the output times
-            if (reset) then
+             ! Only set melti to true at the output times
+             if (reset_dBZ) then
                melti=.true.
-            else
+             else
                melti=.false.
-            endif
+             endif
 !
-          if (present(vt_dbz_wt) .and. present(first_time_step)) then
-            call calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d,   &
-                                t1d, p1d, dBZ, rand1, kts, kte, i, j, &
-                                melti, vt_dbz_wt(i,:,j),              &
-                                first_time_step)
-          else
-            call calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d,   &
-                                t1d, p1d, dBZ, rand1, kts, kte, i, j, &
-                                melti)
-          end if
-          do k = kts, kte
-             refl_10cm(i,k,j) = MAX(-35., dBZ(k))
-          enddo
-         endif
-         ENDIF
+             if (present(vt_dbz_wt)) then
+               call calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d,   &
+                                   t1d, p1d, dBZ, rand1, kts, kte, i, j, &
+                                   melti, vt_dbz_wt(i,:,j),              &
+                                   first_time_step)
+             else
+               call calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d,   &
+                                   t1d, p1d, dBZ, rand1, kts, kte, i, j, &
+                                   melti)
+             end if
+             do k = kts, kte
+               refl_10cm(i,k,j) = MAX(-35., dBZ(k))
+             enddo
+           endif
+           ENDIF diagflag_present
 
-         IF (has_reqc.ne.0 .and. has_reqi.ne.0 .and. has_reqs.ne.0) THEN
-          do k = kts, kte
-             re_qc1d(k) = re_qc_min
-             re_qi1d(k) = re_qi_min
-             re_qs1d(k) = re_qs_min
-          enddo
+           IF (has_reqc.ne.0 .and. has_reqi.ne.0 .and. has_reqs.ne.0) THEN
+             do k = kts, kte
+                re_qc1d(k) = re_qc_min
+                re_qi1d(k) = re_qi_min
+                re_qs1d(k) = re_qs_min
+             enddo
 !> - Call calc_effectrad()
-          call calc_effectRad (t1d, p1d, qv1d, qc1d, nc1d, qi1d, ni1d, qs1d,  &
-                      re_qc1d, re_qi1d, re_qs1d, kts, kte)
-          do k = kts, kte
-             re_cloud(i,k,j) = MAX(re_qc_min, MIN(re_qc1d(k), re_qc_max))
-             re_ice(i,k,j)   = MAX(re_qi_min, MIN(re_qi1d(k), re_qi_max))
-             re_snow(i,k,j)  = MAX(re_qs_min, MIN(re_qs1d(k), re_qs_max))
-          enddo
-         ENDIF
+             call calc_effectRad (t1d, p1d, qv1d, qc1d, nc1d, qi1d, ni1d, qs1d,  &
+                                  re_qc1d, re_qi1d, re_qs1d, kts, kte)
+             do k = kts, kte
+               re_cloud(i,k,j) = MAX(re_qc_min, MIN(re_qc1d(k), re_qc_max))
+               re_ice(i,k,j)   = MAX(re_qi_min, MIN(re_qi1d(k), re_qi_max))
+               re_snow(i,k,j)  = MAX(re_qs_min, MIN(re_qs1d(k), re_qs_max))
+             enddo
+           ENDIF
+         ENDIF last_step_only
 
       enddo i_loop
       enddo j_loop
@@ -1478,6 +1697,51 @@ MODULE module_mp_thompson
 !         'ni: ', ni_max, '(', imax_ni, ',', jmax_ni, ',', kmax_ni, ')', &
 !         'nr: ', nr_max, '(', imax_nr, ',', jmax_nr, ',', kmax_nr, ')'
 ! END DEBUG - GT
+      enddo ! end of nt loop
+
+      ! These are always allocated
+      !deallocate (vtsk1)
+      !deallocate (txri1)
+      !deallocate (txrc1)
+      deallocate_extended_diagnostics: if (ext_diag) then
+         deallocate (prw_vcdc1)
+         deallocate (prw_vcde1)
+         deallocate (tpri_inu1)
+         deallocate (tpri_ide1_d)
+         deallocate (tpri_ide1_s)
+         deallocate (tprs_ide1)
+         deallocate (tprs_sde1_d)
+         deallocate (tprs_sde1_s)
+         deallocate (tprg_gde1_d)
+         deallocate (tprg_gde1_s)
+         deallocate (tpri_iha1)
+         deallocate (tpri_wfz1)
+         deallocate (tpri_rfz1)
+         deallocate (tprg_rfz1)
+         deallocate (tprs_scw1)
+         deallocate (tprg_scw1)
+         deallocate (tprg_rcs1)
+         deallocate (tprs_rcs1)
+         deallocate (tprr_rci1)
+         deallocate (tprg_rcg1)
+         deallocate (tprw_vcd1_c)
+         deallocate (tprw_vcd1_e)
+         deallocate (tprr_sml1)
+         deallocate (tprr_gml1)
+         deallocate (tprr_rcg1)
+         deallocate (tprr_rcs1)
+         deallocate (tprv_rev1)
+         deallocate (tten1)
+         deallocate (qvten1)
+         deallocate (qrten1)
+         deallocate (qsten1)
+         deallocate (qgten1)
+         deallocate (qiten1)
+         deallocate (niten1)
+         deallocate (nrten1)
+         deallocate (ncten1)
+         deallocate (qcten1)
+      end if deallocate_extended_diagnostics
 
       END SUBROUTINE mp_gt_driver
 !> @}
@@ -1543,14 +1807,30 @@ MODULE module_mp_thompson
 !! Thompson et al. (2004, 2008)\cite Thompson_2004 \cite Thompson_2008.
 !>\section gen_mp_thompson  mp_thompson General Algorithm
 !> @{
-      subroutine mp_thompson (qv1d, qc1d, qi1d, qr1d, qs1d, qg1d, ni1d, &
-                          nr1d, nc1d, nwfa1d, nifa1d, t1d, p1d, w1d, dzq, &
-                          pptrain, pptsnow, pptgraul, pptice, &
+      subroutine mp_thompson (qv1d, qc1d, qi1d, qr1d, qs1d, qg1d, ni1d,    &
+                          nr1d, nc1d, nwfa1d, nifa1d, t1d, p1d, w1d, dzq,  &
+                          pptrain, pptsnow, pptgraul, pptice,              &
 #if ( WRF_CHEM == 1 )
-                          rainprod, evapprod, &
+                          rainprod, evapprod,                              &
 #endif
-                          rand1, rand2, rand3, &
-                          kts, kte, dt, ii, jj)
+                          rand1, rand2, rand3,                             &
+                          kts, kte, dt, ii, jj,                            &
+                          ! Extended diagnostics, most arrays only
+                          ! allocated if ext_diag flag is .true.
+                          ext_diag, &
+                          !vtsk1, txri1, txrc1,                             &
+                          prw_vcdc1, prw_vcde1,                            &
+                          tpri_inu1, tpri_ide1_d, tpri_ide1_s, tprs_ide1,  &
+                          tprs_sde1_d, tprs_sde1_s,                        &
+                          tprg_gde1_d, tprg_gde1_s, tpri_iha1, tpri_wfz1,  &
+                          tpri_rfz1, tprg_rfz1, tprs_scw1, tprg_scw1,      &
+                          tprg_rcs1, tprs_rcs1, tprr_rci1,                 &
+                          tprg_rcg1, tprw_vcd1_c,                          &
+                          tprw_vcd1_e, tprr_sml1, tprr_gml1, tprr_rcg1,    &
+                          tprr_rcs1, tprv_rev1,                            &
+                          tten1, qvten1, qrten1, qsten1,                   &
+                          qgten1, qiten1, niten1, nrten1, ncten1, qcten1) 
+
 #ifdef MPI
       use mpi
 #endif
@@ -1565,6 +1845,23 @@ MODULE module_mp_thompson
       REAL, INTENT(INOUT):: pptrain, pptsnow, pptgraul, pptice
       REAL, INTENT(IN):: dt
       REAL, INTENT(IN):: rand1, rand2, rand3
+      ! Extended diagnostics, most arrays only allocated if ext_diag is true
+      LOGICAL, INTENT(IN) :: ext_diag
+      REAL, DIMENSION(:), INTENT(OUT):: &
+                          !vtsk1, txri1, txrc1,                       &
+                          prw_vcdc1,                                 &
+                          prw_vcde1, tpri_inu1, tpri_ide1_d,         &
+                          tpri_ide1_s, tprs_ide1,                    &
+                          tprs_sde1_d, tprs_sde1_s, tprg_gde1_d,     &
+                          tprg_gde1_s, tpri_iha1, tpri_wfz1,         &
+                          tpri_rfz1, tprg_rfz1, tprs_scw1, tprg_scw1,&
+                          tprg_rcs1, tprs_rcs1,                      &
+                          tprr_rci1, tprg_rcg1,                      &
+                          tprw_vcd1_c, tprw_vcd1_e, tprr_sml1,       &
+                          tprr_gml1, tprr_rcg1,                      &
+                          tprr_rcs1, tprv_rev1, tten1, qvten1,       &
+                          qrten1, qsten1, qgten1, qiten1, niten1,    &
+                          nrten1, ncten1, qcten1
 
 #if ( WRF_CHEM == 1 )
       REAL, DIMENSION(kts:kte), INTENT(INOUT):: &
@@ -1773,6 +2070,52 @@ MODULE module_mp_thompson
          evapprod(k) = 0.
       enddo
 #endif
+
+!Diagnostics
+      if (ext_diag) then
+         do k = kts, kte
+            !vtsk1(k) = 0.
+            !txrc1(k) = 0.
+            !txri1(k) = 0.
+            prw_vcdc1(k) = 0.
+            prw_vcde1(k) = 0.
+            tpri_inu1(k) = 0.
+            tpri_ide1_d(k) = 0.
+            tpri_ide1_s(k) = 0.
+            tprs_ide1(k) = 0.
+            tprs_sde1_d(k) = 0.
+            tprs_sde1_s(k) = 0.
+            tprg_gde1_d(k) = 0.
+            tprg_gde1_s(k) = 0.
+            tpri_iha1(k) = 0.
+            tpri_wfz1(k) = 0.
+            tpri_rfz1(k) = 0.
+            tprg_rfz1(k) = 0.
+            tprg_scw1(k) = 0.
+            tprs_scw1(k) = 0.
+            tprg_rcs1(k) = 0.
+            tprs_rcs1(k) = 0.
+            tprr_rci1(k) = 0.
+            tprg_rcg1(k) = 0.
+            tprw_vcd1_c(k) = 0.
+            tprw_vcd1_e(k) = 0.
+            tprr_sml1(k) = 0.
+            tprr_gml1(k) = 0.
+            tprr_rcg1(k) = 0.
+            tprr_rcs1(k) = 0.
+            tprv_rev1(k) = 0.
+            tten1(k) = 0.
+            qvten1(k) = 0.
+            qrten1(k) = 0.
+            qsten1(k) = 0.
+            qgten1(k) = 0.
+            qiten1(k) = 0.
+            niten1(k) = 0.
+            nrten1(k) = 0.
+            ncten1(k) = 0.
+            qcten1(k) = 0.
+         enddo
+      endif
 
 !..Bug fix (2016Jun15), prevent use of uninitialized value(s) of snow moments.
       do k = kts, kte
@@ -3469,6 +3812,7 @@ MODULE module_mp_thompson
        nstep = 0
        do k = kte, kts, -1
           vts = 0.
+          !vtsk1(k)=0.
 
           if (rs(k).gt. R1) then
            xDs = smoc(k) / smob(k)
@@ -3487,11 +3831,14 @@ MODULE module_mp_thompson
 !    &                vts*((vtrk(k)-vts*vts_boost(k))/(temp(k)-T_0)))
             SR = rs(k)/(rs(k)+rr(k))
             vtsk(k) = vts*SR + (1.-SR)*vtrk(k)
+            !vtsk1(k)=vtsk(k)
            else
             vtsk(k) = vts*vts_boost(k)
+            !vtsk1(k)=vtsk(k)
            endif
           else
             vtsk(k) = vtsk(k+1)
+            !vtsk1(k)=0
           endif
 
           if (vtsk(k) .gt. 1.E-3) then
@@ -3689,6 +4036,8 @@ MODULE module_mp_thompson
           qiten(k) = qiten(k) - xri*odt
           niten(k) = -ni1d(k)*odt
           tten(k) = tten(k) - lfus*ocp(k)*xri*odt*(1-IFDRY)
+!diag
+          !txri1(k) = lfus*ocp(k)*xri*odt*(1-IFDRY)
          endif
 
          xrc = MAX(0.0, qc1d(k) + qcten(k)*DT)
@@ -3700,6 +4049,8 @@ MODULE module_mp_thompson
           qcten(k) = qcten(k) - xrc*odt
           ncten(k) = ncten(k) - xnc*odt
           tten(k) = tten(k) + lfus2*ocp(k)*xrc*odt*(1-IFDRY)
+!diag
+          !txrc1(k) = lfus2*ocp(k)*xrc*odt*(1-IFDRY)*DT
          endif
       enddo
       endif
@@ -3778,6 +4129,89 @@ MODULE module_mp_thompson
          if (qg1d(k) .le. R1) qg1d(k) = 0.0
       enddo
 
+! Diagnostics
+      calculate_extended_diagnostics: if (ext_diag) then
+         do k = kts, kte
+            if(prw_vcd(k).gt.0)then
+               prw_vcdc1(k) = prw_vcd(k)*dt
+            elseif(prw_vcd(k).lt.0)then
+               prw_vcde1(k) = -1*prw_vcd(k)*dt
+            endif
+!heating/cooling diagnostics
+            tpri_inu1(k) = pri_inu(k)*lsub*ocp(k)*orho * (1-IFDRY)*DT
+
+            if(pri_ide(k).gt.0)then
+               tpri_ide1_d(k) = pri_ide(k)*lsub*ocp(k)*orho * (1-IFDRY)*DT
+            else
+               tpri_ide1_s(k) = -pri_ide(k)*lsub*ocp(k)*orho * (1-IFDRY)*DT
+            endif
+
+            if(temp(k).lt.T_0)then
+              tprs_ide1(k) = prs_ide(k)*lsub*ocp(k)*orho * (1-IFDRY)*DT
+            endif
+
+            if(prs_sde(k).gt.0)then
+               tprs_sde1_d(k) = prs_sde(k)*lsub*ocp(k)*orho * (1-IFDRY)*DT
+            else
+               tprs_sde1_s(k) = -prs_sde(k)*lsub*ocp(k)*orho * (1-IFDRY)*DT
+            endif
+
+            if(prg_gde(k).gt.0)then
+              tprg_gde1_d(k) = prg_gde(k)*lsub*ocp(k)*orho * (1-IFDRY)*DT
+            else
+              tprg_gde1_s(k) = -prg_gde(k)*lsub*ocp(k)*orho * (1-IFDRY)*DT
+            endif
+
+            tpri_iha1(k) = pri_iha(k)*lsub*ocp(k)*orho * (1-IFDRY)*DT
+            tpri_wfz1(k) = pri_wfz(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
+            tpri_rfz1(k) = pri_rfz(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
+            tprg_rfz1(k) = prg_rfz(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
+            tprs_scw1(k) = prs_scw(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
+            tprg_scw1(k) = prg_scw(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
+            tprg_rcs1(k) = prg_rcs(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
+
+            if(temp(k).lt.T_0)then
+              tprs_rcs1(k) = prs_rcs(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
+            endif
+
+            tprr_rci1(k) = prr_rci(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
+
+            if(temp(k).lt.T_0)then
+               tprg_rcg1(k) = prg_rcg(k)*lfus2*ocp(k)*orho * (1-IFDRY)*DT
+            endif
+
+            if(prw_vcd(k).gt.0)then
+               tprw_vcd1_c(k) = lvap(k)*ocp(k)*prw_vcd(k)*(1-IFDRY)*DT
+            else
+               tprw_vcd1_e(k) = -lvap(k)*ocp(k)*prw_vcd(k)*(1-IFDRY)*DT
+            endif
+
+! cooling terms
+            tprr_sml1(k) = prr_sml(k)*lfus*ocp(k)*orho * (1-IFDRY)*DT
+            tprr_gml1(k) = prr_gml(k)*lfus*ocp(k)*orho * (1-IFDRY)*DT
+
+            if(temp(k).ge.T_0)then
+               tprr_rcg1(k) = -prr_rcg(k)*lfus*ocp(k)*orho * (1-IFDRY)*DT
+            endif
+         
+            if(temp(k).ge.T_0)then
+               tprr_rcs1(k) = -prr_rcs(k)*lfus*ocp(k)*orho * (1-IFDRY)*DT
+            endif
+         
+            tprv_rev1(k) = lvap(k)*ocp(k)*prv_rev(k)*(1-IFDRY)*DT
+            tten1(k) = tten(k)*DT
+            qvten1(k) = qvten(k)*DT
+            qiten1(k) = qiten(k)*DT
+            qrten1(k) = qrten(k)*DT
+            qsten1(k) = qsten(k)*DT
+            qgten1(k) = qgten(k)*DT
+            niten1(k) = niten(k)*DT
+            nrten1(k) = nrten(k)*DT
+            ncten1(k) = ncten(k)*DT
+            qcten1(k) = qcten(k)*DT
+         enddo
+      endif calculate_extended_diagnostics
+
       end subroutine mp_thompson
 !>@}
 
@@ -3853,10 +4287,10 @@ MODULE module_mp_thompson
         ENDIF
 
       IF (.NOT. good .EQ. 1 ) THEN
-#ifndef SION
-        if (thompson_table_writer) write_thompson_tables = .true.
-#endif
-        if (thompson_table_writer) write(0,*) "ThompMP: computing qr_acr_qg"
+        if (thompson_table_writer) then
+          write_thompson_tables = .true.
+          write(0,*) "ThompMP: computing qr_acr_qg"
+        endif
         do n2 = 1, nbr
 !        vr(n2) = av_r*Dr(n2)**bv_r * DEXP(-fv_r*Dr(n2))
          vr(n2) = -0.1021 + 4.932E3*Dr(n2) - 0.9551E6*Dr(n2)*Dr(n2)     &
@@ -4035,10 +4469,10 @@ MODULE module_mp_thompson
         ENDIF
 
       IF (.NOT. good .EQ. 1 ) THEN
-#ifndef SION
-        if (thompson_table_writer) write_thompson_tables = .true.
-#endif
-        if (thompson_table_writer) write(0,*) "ThompMP: computing qr_acr_qs"
+        if (thompson_table_writer) then
+          write_thompson_tables = .true.
+          write(0,*) "ThompMP: computing qr_acr_qs"
+        endif
         do n2 = 1, nbr
 !        vr(n2) = av_r*Dr(n2)**bv_r * DEXP(-fv_r*Dr(n2))
          vr(n2) = -0.1021 + 4.932E3*Dr(n2) - 0.9551E6*Dr(n2)*Dr(n2)     &
@@ -4290,10 +4724,10 @@ MODULE module_mp_thompson
         ENDIF
 
       IF (.NOT. good .EQ. 1 ) THEN
-#ifndef SION
-        if (thompson_table_writer) write_thompson_tables = .true.
-#endif
-        if (thompson_table_writer) write(0,*) "ThompMP: computing freezeH2O"
+        if (thompson_table_writer) then
+          write_thompson_tables = .true.
+          write(0,*) "ThompMP: computing freezeH2O"
+        endif
 
         orho_w = 1./rho_w
 
@@ -5613,300 +6047,6 @@ MODULE module_mp_thompson
 
       end subroutine calc_refl10cm
 !
-
-#ifdef SION
-!>\ingroup aathompson
-      subroutine readwrite_tables(filename, mode, mpicomm, mpirank, mpiroot, ierr)
-
-#ifdef MPI
-         use mpi
-#endif
-         use sion_f90
-
-         implicit none
-
-         ! Interface variables
-         character(len=*), intent(in)  :: filename
-         character(len=*), intent(in)  :: mode
-         integer,          intent(in)  :: mpicomm
-         integer,          intent(in)  :: mpirank
-         integer,          intent(in)  :: mpiroot
-         integer,          intent(out) :: ierr
-
-#ifdef MPI
-         ! MPI variables
-         integer :: mpierr
-#endif
-
-         ! SIONlib variables
-         integer            :: SIONLIB_fsblksize
-         integer            :: SIONLIB_numfiles
-         character*2        :: SIONLIB_filemode
-         !
-         integer                              :: nprocs
-         integer,   dimension(:), allocatable :: procs
-         integer*8, dimension(:), allocatable :: chunksizes
-         !
-         integer*8          :: brw
-         integer            :: sid
-         integer            :: f_endian, s_endian
-         logical            :: exists
-         integer*8          :: tables_size
-         real*8             :: checksum
-
-         integer :: i
-
-         continue
-
-         ierr = 0
-
-         ! Test if SIONlib file containing pre-computed tables exists
-         inquire(file=trim(filename), exist=exists)
-         if (trim(mode)=="read") then
-            SIONLIB_filemode = "rb"
-            if (.not.exists) then
-               if (mpirank==mpiroot) write(0,*) "SIONlib file " // trim(filename) // &
-                                      " with precomputed Thompson MP tables not found"
-               ierr = 1
-               return
-            end if
-         else if (trim(mode)=="write") then
-            SIONLIB_filemode = "wb"
-            SIONLIB_numfiles = 1
-            if (exists) then
-               if (mpirank==mpiroot) write(0,*) "SIONlib file " // trim(filename) // &
-                                 " with precomputed Thompson MP tables already exists"
-               ierr = 1
-               return
-            end if
-         end if
-
-#ifdef MPI
-         ! To avoid that MPI master task creates the file before
-         ! other tasks pass the inquire test above
-         call MPI_BARRIER(mpicomm, mpierr)
-#endif
-
-         mpi_master_io_only: if (mpirank==mpiroot) then
-            tables_size = sizeof(tcg_racg)
-            tables_size = tables_size + sizeof(tmr_racg)
-            tables_size = tables_size + sizeof(tcr_gacr)
-            tables_size = tables_size + sizeof(tmg_gacr)
-            tables_size = tables_size + sizeof(tnr_racg)
-            tables_size = tables_size + sizeof(tnr_gacr)
-            tables_size = tables_size + sizeof(tcs_racs1)
-            tables_size = tables_size + sizeof(tmr_racs1)
-            tables_size = tables_size + sizeof(tcs_racs2)
-            tables_size = tables_size + sizeof(tmr_racs2)
-            tables_size = tables_size + sizeof(tcr_sacr1)
-            tables_size = tables_size + sizeof(tms_sacr1)
-            tables_size = tables_size + sizeof(tcr_sacr2)
-            tables_size = tables_size + sizeof(tms_sacr2)
-            tables_size = tables_size + sizeof(tnr_racs1)
-            tables_size = tables_size + sizeof(tnr_racs2)
-            tables_size = tables_size + sizeof(tnr_sacr1)
-            tables_size = tables_size + sizeof(tnr_sacr2)
-            tables_size = tables_size + sizeof(tpi_qcfz)
-            tables_size = tables_size + sizeof(tni_qcfz)
-            tables_size = tables_size + sizeof(tpi_qrfz)
-            tables_size = tables_size + sizeof(tpg_qrfz)
-            tables_size = tables_size + sizeof(tni_qrfz)
-            tables_size = tables_size + sizeof(tnr_qrfz)
-            tables_size = tables_size + sizeof(tps_iaus)
-            tables_size = tables_size + sizeof(tni_iaus)
-            tables_size = tables_size + sizeof(tpi_ide)
-            tables_size = tables_size + sizeof(t_Efrw)
-            tables_size = tables_size + sizeof(t_Efsw)
-            tables_size = tables_size + sizeof(tnr_rev)
-            tables_size = tables_size + sizeof(tpc_wev)
-            tables_size = tables_size + sizeof(tnc_wev)
-            tables_size = tables_size + sizeof(tnccn_act)
-
-            ! Autodetect SIONlib filesystem block size
-            SIONLIB_fsblksize = -1
-
-            nprocs = 1
-            allocate (procs(1:nprocs))
-            allocate (chunksizes(1:nprocs))
-            do i=1,nprocs
-               procs(i) = i
-               chunksizes(i) = sizeof(checksum) + tables_size
-            end do
-
-            write(0,'(a)') "Opening file " // trim(filename)
-            call fsion_open(trim(filename), SIONLIB_filemode, nprocs, SIONLIB_numfiles, chunksizes(1), SIONLIB_fsblksize, procs(1), sid)
-            if (sid<0) write(0,'(a)') "Error opening " // trim(filename) // " in " // trim(mode) // " mode"
-
-            call fsion_seek(sid, mpirank, SION_CURRENT_BLK, SION_CURRENT_POS, ierr)
-            ! fsion_seek returns ierr=1 if cursor could be positioned as requested and 0 otherwise
-            if (ierr==1) ierr=0
-
-            if (trim(mode)=="read") then
-                ! Check that file endianness is identical to system endianness
-                call fsion_get_file_endianness(sid, f_endian)
-                call fsion_get_endianess(s_endian)
-                if (f_endian .ne. s_endian) then
-                   write(0,'(a)') "Error, endianness of SIONlib file " // trim(filename) // " differs " // &
-                                  "from filesystem endianness; please delete file and recalculate tables!"
-                   ierr = 1
-                end if
-                if (ierr==0) then
-                   ! Read checksum
-                   call fsion_read(checksum, int(kind(checksum),8), int(1,8), sid, brw)
-                   ! Read arrays tcg_racg through tnccn_act
-                   call fsion_read(tcg_racg(1,1,1,1),    int(kind(tcg_racg(1,1,1,1)),8),    int(size(tcg_racg),8),  sid, brw)
-                   call fsion_read(tmr_racg(1,1,1,1),    int(kind(tmr_racg(1,1,1,1)),8),    int(size(tmr_racg),8),  sid, brw)
-                   call fsion_read(tcr_gacr(1,1,1,1),    int(kind(tcr_gacr(1,1,1,1)),8),    int(size(tcr_gacr),8),  sid, brw)
-                   call fsion_read(tmg_gacr(1,1,1,1),    int(kind(tmg_gacr(1,1,1,1)),8),    int(size(tmg_gacr),8),  sid, brw)
-                   call fsion_read(tnr_racg(1,1,1,1),    int(kind(tnr_racg(1,1,1,1)),8),    int(size(tnr_racg),8),  sid, brw)
-                   call fsion_read(tnr_gacr(1,1,1,1),    int(kind(tnr_gacr(1,1,1,1)),8),    int(size(tnr_gacr),8),  sid, brw)
-                   call fsion_read(tcs_racs1(1,1,1,1),   int(kind(tcs_racs1(1,1,1,1)),8),   int(size(tcs_racs1),8), sid, brw)
-                   call fsion_read(tmr_racs1(1,1,1,1),   int(kind(tmr_racs1(1,1,1,1)),8),   int(size(tmr_racs1),8), sid, brw)
-                   call fsion_read(tcs_racs2(1,1,1,1),   int(kind(tcs_racs2(1,1,1,1)),8),   int(size(tcs_racs2),8), sid, brw)
-                   call fsion_read(tmr_racs2(1,1,1,1),   int(kind(tmr_racs2(1,1,1,1)),8),   int(size(tmr_racs2),8), sid, brw)
-                   call fsion_read(tcr_sacr1(1,1,1,1),   int(kind(tcr_sacr1(1,1,1,1)),8),   int(size(tcr_sacr1),8), sid, brw)
-                   call fsion_read(tms_sacr1(1,1,1,1),   int(kind(tms_sacr1(1,1,1,1)),8),   int(size(tms_sacr1),8), sid, brw)
-                   call fsion_read(tcr_sacr2(1,1,1,1),   int(kind(tcr_sacr2(1,1,1,1)),8),   int(size(tcr_sacr2),8), sid, brw)
-                   call fsion_read(tms_sacr2(1,1,1,1),   int(kind(tms_sacr2(1,1,1,1)),8),   int(size(tms_sacr2),8), sid, brw)
-                   call fsion_read(tnr_racs1(1,1,1,1),   int(kind(tnr_racs1(1,1,1,1)),8),   int(size(tnr_racs1),8), sid, brw)
-                   call fsion_read(tnr_racs2(1,1,1,1),   int(kind(tnr_racs2(1,1,1,1)),8),   int(size(tnr_racs2),8), sid, brw)
-                   call fsion_read(tnr_sacr1(1,1,1,1),   int(kind(tnr_sacr1(1,1,1,1)),8),   int(size(tnr_sacr1),8), sid, brw)
-                   call fsion_read(tnr_sacr2(1,1,1,1),   int(kind(tnr_sacr2(1,1,1,1)),8),   int(size(tnr_sacr2),8), sid, brw)
-                   call fsion_read(tpi_qcfz(1,1,1,1),    int(kind(tpi_qcfz(1,1,1,1)),8),    int(size(tpi_qcfz),8),  sid, brw)
-                   call fsion_read(tni_qcfz(1,1,1,1),    int(kind(tni_qcfz(1,1,1,1)),8),    int(size(tni_qcfz),8),  sid, brw)
-                   call fsion_read(tpi_qrfz(1,1,1,1),    int(kind(tpi_qrfz(1,1,1,1)),8),    int(size(tpi_qrfz),8),  sid, brw)
-                   call fsion_read(tpg_qrfz(1,1,1,1),    int(kind(tpg_qrfz(1,1,1,1)),8),    int(size(tpg_qrfz),8),  sid, brw)
-                   call fsion_read(tni_qrfz(1,1,1,1),    int(kind(tni_qrfz(1,1,1,1)),8),    int(size(tni_qrfz),8),  sid, brw)
-                   call fsion_read(tnr_qrfz(1,1,1,1),    int(kind(tnr_qrfz(1,1,1,1)),8),    int(size(tnr_qrfz),8),  sid, brw)
-                   call fsion_read(tps_iaus(1,1),        int(kind(tps_iaus(1,1)),8),        int(size(tps_iaus),8),  sid, brw)
-                   call fsion_read(tni_iaus(1,1),        int(kind(tni_iaus(1,1)),8),        int(size(tni_iaus),8),  sid, brw)
-                   call fsion_read(tpi_ide(1,1),         int(kind(tpi_ide(1,1)),8),         int(size(tpi_ide),8),   sid, brw)
-                   call fsion_read(t_Efrw(1,1),          int(kind(t_Efrw(1,1)),8),          int(size(t_Efrw),8),    sid, brw)
-                   call fsion_read(t_Efsw(1,1),          int(kind(t_Efsw(1,1)),8),          int(size(t_Efsw),8),    sid, brw)
-                   call fsion_read(tnr_rev(1,1,1),       int(kind(tnr_rev(1,1,1)),8),       int(size(tnr_rev),8),   sid, brw)
-                   call fsion_read(tpc_wev(1,1,1),       int(kind(tpc_wev(1,1,1)),8),       int(size(tpc_wev),8),   sid, brw)
-                   call fsion_read(tnc_wev(1,1,1),       int(kind(tnc_wev  (1,1,1)),8),     int(size(tnc_wev),8),   sid, brw)
-                   call fsion_read(tnccn_act(1,1,1,1,1), int(kind(tnccn_act(1,1,1,1,1)),8), int(size(tnccn_act),8), sid, brw)
-                else
-                    ! Wrong endianness (ierr/=0) will force checksum match to fail
-                   checksum = -1
-                end if
-            else if (trim(mode)=="write") then
-                ! Calculate and write checksum
-                checksum = calculate_checksum()
-                call fsion_write(checksum, int(kind(checksum),8), int(1,8), sid, brw)
-                ! Write arrays tcg_racg through tnccn_act
-                call fsion_write(tcg_racg(1,1,1,1),    int(kind(tcg_racg(1,1,1,1)),8),    int(size(tcg_racg),8),  sid, brw)
-                call fsion_write(tmr_racg(1,1,1,1),    int(kind(tmr_racg(1,1,1,1)),8),    int(size(tmr_racg),8),  sid, brw)
-                call fsion_write(tcr_gacr(1,1,1,1),    int(kind(tcr_gacr(1,1,1,1)),8),    int(size(tcr_gacr),8),  sid, brw)
-                call fsion_write(tmg_gacr(1,1,1,1),    int(kind(tmg_gacr(1,1,1,1)),8),    int(size(tmg_gacr),8),  sid, brw)
-                call fsion_write(tnr_racg(1,1,1,1),    int(kind(tnr_racg(1,1,1,1)),8),    int(size(tnr_racg),8),  sid, brw)
-                call fsion_write(tnr_gacr(1,1,1,1),    int(kind(tnr_gacr(1,1,1,1)),8),    int(size(tnr_gacr),8),  sid, brw)
-                call fsion_write(tcs_racs1(1,1,1,1),   int(kind(tcs_racs1(1,1,1,1)),8),   int(size(tcs_racs1),8), sid, brw)
-                call fsion_write(tmr_racs1(1,1,1,1),   int(kind(tmr_racs1(1,1,1,1)),8),   int(size(tmr_racs1),8), sid, brw)
-                call fsion_write(tcs_racs2(1,1,1,1),   int(kind(tcs_racs2(1,1,1,1)),8),   int(size(tcs_racs2),8), sid, brw)
-                call fsion_write(tmr_racs2(1,1,1,1),   int(kind(tmr_racs2(1,1,1,1)),8),   int(size(tmr_racs2),8), sid, brw)
-                call fsion_write(tcr_sacr1(1,1,1,1),   int(kind(tcr_sacr1(1,1,1,1)),8),   int(size(tcr_sacr1),8), sid, brw)
-                call fsion_write(tms_sacr1(1,1,1,1),   int(kind(tms_sacr1(1,1,1,1)),8),   int(size(tms_sacr1),8), sid, brw)
-                call fsion_write(tcr_sacr2(1,1,1,1),   int(kind(tcr_sacr2(1,1,1,1)),8),   int(size(tcr_sacr2),8), sid, brw)
-                call fsion_write(tms_sacr2(1,1,1,1),   int(kind(tms_sacr2(1,1,1,1)),8),   int(size(tms_sacr2),8), sid, brw)
-                call fsion_write(tnr_racs1(1,1,1,1),   int(kind(tnr_racs1(1,1,1,1)),8),   int(size(tnr_racs1),8), sid, brw)
-                call fsion_write(tnr_racs2(1,1,1,1),   int(kind(tnr_racs2(1,1,1,1)),8),   int(size(tnr_racs2),8), sid, brw)
-                call fsion_write(tnr_sacr1(1,1,1,1),   int(kind(tnr_sacr1(1,1,1,1)),8),   int(size(tnr_sacr1),8), sid, brw)
-                call fsion_write(tnr_sacr2(1,1,1,1),   int(kind(tnr_sacr2(1,1,1,1)),8),   int(size(tnr_sacr2),8), sid, brw)
-                call fsion_write(tpi_qcfz(1,1,1,1),    int(kind(tpi_qcfz(1,1,1,1)),8),    int(size(tpi_qcfz),8),  sid, brw)
-                call fsion_write(tni_qcfz(1,1,1,1),    int(kind(tni_qcfz(1,1,1,1)),8),    int(size(tni_qcfz),8),  sid, brw)
-                call fsion_write(tpi_qrfz(1,1,1,1),    int(kind(tpi_qrfz(1,1,1,1)),8),    int(size(tpi_qrfz),8),  sid, brw)
-                call fsion_write(tpg_qrfz(1,1,1,1),    int(kind(tpg_qrfz(1,1,1,1)),8),    int(size(tpg_qrfz),8),  sid, brw)
-                call fsion_write(tni_qrfz(1,1,1,1),    int(kind(tni_qrfz(1,1,1,1)),8),    int(size(tni_qrfz),8),  sid, brw)
-                call fsion_write(tnr_qrfz(1,1,1,1),    int(kind(tnr_qrfz(1,1,1,1)),8),    int(size(tnr_qrfz),8),  sid, brw)
-                call fsion_write(tps_iaus(1,1),        int(kind(tps_iaus(1,1)),8),        int(size(tps_iaus),8),  sid, brw)
-                call fsion_write(tni_iaus(1,1),        int(kind(tni_iaus(1,1)),8),        int(size(tni_iaus),8),  sid, brw)
-                call fsion_write(tpi_ide(1,1),         int(kind(tpi_ide(1,1)),8),         int(size(tpi_ide),8),   sid, brw)
-                call fsion_write(t_Efrw(1,1),          int(kind(t_Efrw(1,1)),8),          int(size(t_Efrw),8),    sid, brw)
-                call fsion_write(t_Efsw(1,1),          int(kind(t_Efsw(1,1)),8),          int(size(t_Efsw),8),    sid, brw)
-                call fsion_write(tnr_rev(1,1,1),       int(kind(tnr_rev(1,1,1)),8),       int(size(tnr_rev),8),   sid, brw)
-                call fsion_write(tpc_wev(1,1,1),       int(kind(tpc_wev(1,1,1)),8),       int(size(tpc_wev),8),   sid, brw)
-                call fsion_write(tnc_wev(1,1,1),       int(kind(tnc_wev  (1,1,1)),8),     int(size(tnc_wev),8),   sid, brw)
-                call fsion_write(tnccn_act(1,1,1,1,1), int(kind(tnccn_act(1,1,1,1,1)),8), int(size(tnccn_act),8), sid, brw)
-            end if
-
-            write(0,'(a)') "Closing file " // trim(filename)
-            call fsion_close(sid, ierr)
-
-            ierr = 0
-            ! Test if checksum matches, this fails if wrong endianness (checksum=-1, see above)
-            if (trim(mode)=="read" .and. checksum/=calculate_checksum()) then
-               write(0,'(2(a,e20.9))') "Checksum mismatch, expected", calculate_checksum(), " but got", checksum
-               call system('rm -f ' // trim(filename))
-               ierr = 1
-            end if
-
-            deallocate (procs)
-            deallocate (chunksizes)
-
-         else
-
-            ierr = 0
-
-         end if mpi_master_io_only
-
-#ifdef MPI
-         if (trim(mode)=="read") then
-            ! After reading the tables, broadcast the information to all MPI tasks.
-            ! First, broadcast the current error code from MPI master (0 = success)
-            call MPI_BCAST(ierr, 1, MPI_INTEGER, mpiroot, mpicomm, mpierr)
-            if (ierr/=0) return
-            call MPI_BCAST(tcg_racg,  size(tcg_racg),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tmr_racg,  size(tmr_racg),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tcr_gacr,  size(tcr_gacr),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tmg_gacr,  size(tmg_gacr),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tnr_racg,  size(tnr_racg),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tnr_gacr,  size(tnr_gacr),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tcs_racs1, size(tcs_racs1), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tmr_racs1, size(tmr_racs1), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tcs_racs2, size(tcs_racs2), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tmr_racs2, size(tmr_racs2), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tcr_sacr1, size(tcr_sacr1), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tms_sacr1, size(tms_sacr1), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tcr_sacr2, size(tcr_sacr2), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tms_sacr2, size(tms_sacr2), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tnr_racs1, size(tnr_racs1), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tnr_racs2, size(tnr_racs2), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tnr_sacr1, size(tnr_sacr1), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tnr_sacr2, size(tnr_sacr2), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tpi_qcfz,  size(tpi_qcfz),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tni_qcfz,  size(tni_qcfz),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tpi_qrfz,  size(tpi_qrfz),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tpg_qrfz,  size(tpg_qrfz),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tni_qrfz,  size(tni_qrfz),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tnr_qrfz,  size(tnr_qrfz),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tps_iaus,  size(tps_iaus),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tni_iaus,  size(tni_iaus),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tpi_ide,   size(tpi_ide),   MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(t_Efrw,    size(t_Efrw),    MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(t_Efsw,    size(t_Efsw),    MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tnr_rev,   size(tnr_rev),   MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tpc_wev,   size(tpc_wev),   MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tnc_wev,   size(tnc_wev),   MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-            call MPI_BCAST(tnccn_act, size(tnccn_act), MPI_REAL,             mpiroot, mpicomm, mpierr)
-         else if (trim(mode)=="write") then
-            call MPI_BARRIER(mpicomm, mpierr)
-         end if
-#endif
-
-         return
-
-      contains
-
-         function calculate_checksum() result(checksum)
-             real*8 :: checksum
-             checksum = real(tables_size,8)*sum(tcg_racg)
-         end function calculate_checksum
-
-      end subroutine readwrite_tables
-#endif
-
 !+---+-----------------------------------------------------------------+
 !+---+-----------------------------------------------------------------+
 END MODULE module_mp_thompson

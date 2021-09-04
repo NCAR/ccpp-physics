@@ -15,8 +15,26 @@
   type = integer
   intent = in
   optional = F
+[hvap]
+  standard_name = latent_heat_of_vaporization_of_water_at_0C
+  long_name = latent heat of evaporation/sublimation
+  units = J kg-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[cp]
+  standard_name = specific_heat_of_dry_air_at_constant_pressure
+  long_name = specific heat of dry air at constant pressure
+  units = J kg-1 K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [rd]
-  standard_name = gas_constant_dry_air
+  standard_name = gas_constant_of_dry_air
   long_name = ideal gas constant for dry air
   units = J kg-1 K-1
   dimensions = ()
@@ -60,8 +78,26 @@
   kind = kind_phys
   intent = in
   optional = F
+[u1]
+  standard_name = x_wind_at_surface_adjacent_layer
+  long_name = x component of surface layer wind
+  units = m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[v1]
+  standard_name = y_wind_at_surface_adjacent_layer
+  long_name = y component of surface layer wind
+  units = m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [t1]
-  standard_name = air_temperature_at_lowest_model_layer
+  standard_name = air_temperature_at_surface_adjacent_layer
   long_name = surface layer mean temperature
   units = K
   dimensions = (horizontal_loop_extent)
@@ -70,7 +106,7 @@
   intent = in
   optional = F
 [q1]
-  standard_name = water_vapor_specific_humidity_at_lowest_model_layer
+  standard_name = specific_humidity_at_surface_adjacent_layer
   long_name = surface layer mean specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent)
@@ -79,8 +115,8 @@
   intent = in
   optional = F
 [tskin]
-  standard_name = surface_skin_temperature_over_water_interstitial
-  long_name = surface skin temperature over water (temporary use as interstitial)
+  standard_name = surface_skin_temperature_over_water
+  long_name = surface skin temperature over water
   units = K
   dimensions = (horizontal_loop_extent)
   type = real
@@ -105,8 +141,34 @@
   kind = kind_phys
   intent = in
   optional = F
+[lseaspray]
+  standard_name = flag_for_sea_spray
+  long_name = flag for sea spray parameterization
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[fm]
+  standard_name = Monin_Obukhov_similarity_function_for_momentum_over_water
+  long_name = Monin-Obukhov similarity function for momentum over water
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[fm10]
+  standard_name = Monin_Obukhov_similarity_function_for_momentum_at_10m_over_water
+  long_name = Monin-Obukhov similarity parameter for momentum at 10m over water
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [prsl1]
-  standard_name = air_pressure_at_lowest_model_layer
+  standard_name = air_pressure_at_surface_adjacent_layer
   long_name = surface layer mean pressure
   units = Pa
   dimensions = (horizontal_loop_extent)
@@ -132,8 +194,8 @@
   intent = in
   optional = F
 [use_flake]
-  standard_name = flag_nonzero_lake_surface_fraction
-  long_name = flag indicating presence of some lake surface area fraction
+  standard_name = flag_for_using_flake
+  long_name = flag indicating lake points using flake model
   units = flag
   dimensions = (horizontal_loop_extent)
   type = logical

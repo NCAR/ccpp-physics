@@ -332,9 +332,10 @@
 !! @{
 !-----------------------------------
       subroutine setalb                                                 &
-     &     ( slmsk,lsm,lsm_noahmp,lsm_ruc,snowf,                        & !  ---  inputs:
+     &     ( slmsk,lsm,lsm_noahmp,lsm_ruc,use_cice_alb,snowf,           & !  ---  inputs:
      &       sncovr,sncovr_ice,snoalb,zorlf,coszf,                      &
-     &       tsknf,tairf,hprif,landfrac,frac_grid,min_seaice,           & 
+     &       tsknf,tairf,hprif,frac_grid, lakefrac,                     & 
+!    &       tsknf,tairf,hprif,frac_grid,min_seaice,                    & 
      &       alvsf,alnsf,alvwf,alnwf,facsf,facwf,fice,tisfc,            &
      &       lsmalbdvis, lsmalbdnir, lsmalbivis, lsmalbinir,            &
      &       icealbdvis, icealbdnir, icealbivis, icealbinir,            &
@@ -406,18 +407,21 @@
 !  ---  inputs
       integer, intent(in) :: IMAX
       integer, intent(in) :: lsm, lsm_noahmp, lsm_ruc
-      logical, intent(in) :: frac_grid
+      logical, intent(in) :: use_cice_alb, frac_grid
 
       real (kind=kind_phys), dimension(:), intent(in) ::                &
-     &       slmsk, snowf, zorlf, coszf, tsknf, tairf, hprif, landfrac, &
+     &       lakefrac,                                                  &
+     &       slmsk, snowf, zorlf, coszf, tsknf, tairf, hprif,           &
      &       alvsf, alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc,     &
-     &       lsmalbdvis, lsmalbdnir, lsmalbivis, lsmalbinir,            &
      &       icealbdvis, icealbdnir, icealbivis, icealbinir,            &
      &       sncovr, sncovr_ice, snoalb, albPpert           ! sfc-perts, mgehne
       real (kind=kind_phys),  intent(in) :: pertalb         ! sfc-perts, mgehne
-      real (kind=kind_phys),  intent(in) :: min_seaice
+!     real (kind=kind_phys),  intent(in) :: min_seaice
       real (kind=kind_phys), dimension(:), intent(in) ::                &
      &       fracl, fraco, fraci
+      real (kind=kind_phys), dimension(:),intent(inout) ::              &
+     &     lsmalbdvis, lsmalbdnir, lsmalbivis, lsmalbinir 
+
       logical, dimension(:), intent(in) ::                              &
      &       icy
 
@@ -436,7 +440,8 @@
 
       real (kind=kind_phys) :: alndnb, alndnd, alndvb, alndvd
 
-      real (kind=kind_phys) ffw, dtgd
+      real (kind=kind_phys) ffw, dtgd, icealb
+      real (kind=kind_phys), parameter :: epsln=1.0e-8_kind_phys
 
       integer :: i, k, kk, iflag
 
@@ -462,49 +467,59 @@
             asenb_wat = asevb_wat
           endif
 
-          if (icy(i)) then
-          !-- Computation of ice albedo
-            asnow = 0.02*snowf(i)
-            argh  = min(0.50, max(.025, 0.01*zorlf(i)))
-            hrgh  = min(f_one,max(0.20,1.0577-1.1538e-3*hprif(i)))
-            fsno0 = asnow / (argh + asnow) * hrgh ! snow fraction on ice
-            ! diffused
-            if (tsknf(i) > 271.1 .and. tsknf(i) < 271.5) then
-            !tgs: looks like albedo reduction from puddles on ice
-              a1 = (tsknf(i) - 271.1)**2
-              asevd_ice = 0.7 - 4.0*a1
-              asend_ice = 0.65 - 3.6875*a1
+          if (icy(i)) then   !-- Computation of ice albedo
+
+            if (use_cice_alb .and. lakefrac(i)  < epsln) then
+              icealb = icealbivis(i)
             else
-              asevd_ice = 0.70
-              asend_ice = 0.65
+              icealb = f_zero
             endif
-            ! direct
-            asevb_ice = asevd_ice
-            asenb_ice = asend_ice
-
-            if (fsno0 > f_zero) then
-            ! Snow on ice
-              dtgd = max(f_zero, min(5.0, (con_ttp-tisfc(i)) ))
-              b1   = 0.03 * dtgd
-              asnvd = (asevd_ice + b1) ! diffused snow albedo
-              asnnd = (asend_ice + b1)
-              if (coszf(i) > 0.0001 .and. coszf(i) < 0.5) then ! direct snow albedo
-                csnow = 0.5 * (3.0 / (f_one+4.0*coszf(i)) - f_one)
-                asnvb = min( 0.98, asnvd+(f_one-asnvd)*csnow )
-                asnnb = min( 0.98, asnnd+(f_one-asnnd)*csnow )
+            if (icealb > epsln) then !-- use ice albedo from CICE for sea-ice
+              asevd_ice = icealbivis(i)
+              asend_ice = icealbinir(i)
+              asevb_ice = icealbdvis(i)
+              asenb_ice = icealbdnir(i)
+            else
+              asnow = 0.02*snowf(i)
+              argh  = min(0.50, max(.025, 0.01*zorlf(i)))
+              hrgh  = min(f_one,max(0.20,1.0577-1.1538e-3*hprif(i)))
+              fsno0 = asnow / (argh + asnow) * hrgh ! snow fraction on ice
+              ! diffused
+              if (tsknf(i) > 271.1 .and. tsknf(i) < 271.5) then
+              !tgs: looks like albedo reduction from puddles on ice
+                a1 = (tsknf(i) - 271.1)**2
+                asevd_ice = 0.7 - 4.0*a1
+                asend_ice = 0.65 - 3.6875*a1
               else
-                asnvb = asnvd
-                asnnb = asnnd
+                asevd_ice = 0.70
+                asend_ice = 0.65
               endif
+              ! direct
+              asevb_ice = asevd_ice
+              asenb_ice = asend_ice
 
-              ! composite ice and snow albedos
-              asevd_ice = asevd_ice * (1. - fsno0) + asnvd * fsno0
-              asend_ice = asend_ice * (1. - fsno0) + asnnd * fsno0
-              asevb_ice = asevb_ice * (1. - fsno0) + asnvb * fsno0
-              asenb_ice = asenb_ice * (1. - fsno0) + asnnb * fsno0
-            endif ! snow
-          else
-          ! icy = false, fill in values
+              if (fsno0 > f_zero) then     ! Snow on ice
+                dtgd = max(f_zero, min(5.0, (con_ttp-tisfc(i)) ))
+                b1   = 0.03 * dtgd
+                asnvd = (asevd_ice + b1) ! diffused snow albedo
+                asnnd = (asend_ice + b1)
+                if (coszf(i) > 0.0001 .and. coszf(i) < 0.5) then ! direct snow albedo
+                  csnow = 0.5 * (3.0 / (f_one+4.0*coszf(i)) - f_one)
+                  asnvb = min( 0.98, asnvd+(f_one-asnvd)*csnow )
+                  asnnb = min( 0.98, asnnd+(f_one-asnnd)*csnow )
+                else
+                  asnvb = asnvd
+                  asnnb = asnnd
+                endif
+
+                ! composite ice and snow albedos
+                asevd_ice = asevd_ice * (1. - fsno0) + asnvd * fsno0
+                asend_ice = asend_ice * (1. - fsno0) + asnnd * fsno0
+                asevb_ice = asevb_ice * (1. - fsno0) + asnvb * fsno0
+                asenb_ice = asenb_ice * (1. - fsno0) + asnnb * fsno0
+              endif ! snow
+            endif   ! if (use_cice_alb .and. lakefrac < epsln)
+          else      ! icy = false, fill in values
             asevd_ice = 0.70
             asend_ice = 0.65
             asevb_ice = 0.70
@@ -537,6 +552,10 @@
             alndnd = alnwf(i)*flnd + snoalb(i) * fsno
             alndvb = ab2bm   *flnd + snoalb(i) * fsno
             alndvd = alvwf(i)*flnd + snoalb(i) * fsno
+            lsmalbdnir(i) = min(0.99,max(0.01,alndnb))
+            lsmalbinir(i) = min(0.99,max(0.01,alndnd))
+            lsmalbdvis(i) = min(0.99,max(0.01,alndvb))
+            lsmalbivis(i) = min(0.99,max(0.01,alndvd))
           else
           !-- fill in values for land albedo
             alndnb = 0.
@@ -580,9 +599,17 @@
           !tgs: this part of the code needs the input from the ice
           !     model. Otherwise it uses the backup albedo computation 
           !     from ialbflg = 1.
-          if (icy(i)) then
-            if(lsm == lsm_ruc ) then
-            !-- use ice albedo from the RUC ice model
+
+          if (icy(i)) then   !-- Computation of ice albedo
+
+            if (use_cice_alb .and. lakefrac(i) < epsln) then
+              icealb = icealbivis(i)
+            else
+              icealb = f_zero
+            endif
+
+            if (lsm == lsm_ruc .or. icealb > epsln) then !-- use ice albedo from the RUC ice model or
+                                                         !-- use ice albedo from CICE for sea-ice
               asevd_ice = icealbivis(i)
               asend_ice = icealbinir(i)
               asevb_ice = icealbdvis(i)
@@ -687,7 +714,6 @@
 !!                  or -pi -> +pi ranges
 !!\param xlat      (IMAX), latitude  in radiance, default to pi/2 ->
 !!                  -pi/2 range, otherwise see in-line comment
-!!\param landfrac  (IMAX), fraction of grid that is land
 !!\param snowf     (IMAX), snow depth water equivalent in mm
 !!\param sncovr    (IMAX), snow cover over land
 !!\param zorlf     (IMAX), surface roughness in cm
@@ -700,8 +726,9 @@
 !! @{
 !-----------------------------------
       subroutine setemis                                                &
-     &     ( lsm,lsm_noahmp,lsm_ruc,vtype,landfrac,frac_grid,           &  !  ---  inputs:
-     &       min_seaice,xlon,xlat,slmsk,snowf,sncovr,sncovr_ice,        &
+     &     ( lsm,lsm_noahmp,lsm_ruc,vtype,frac_grid,                    &  !  ---  inputs:
+     &                  xlon,xlat,slmsk,snowf,sncovr,sncovr_ice,        &
+!    &       min_seaice,xlon,xlat,slmsk,snowf,sncovr,sncovr_ice,        &
      &       zorlf,tsknf,tairf,hprif,                                   &
      &       semis_lnd,semis_ice,IMAX,fracl,fraco,fraci,icy,            &
      &       semisbase, sfcemis                                         &  !  ---  outputs:
@@ -723,7 +750,6 @@
 !     xlat  (IMAX)  - latitude  in radiance, default to pi/2 -> -pi/2   !
 !                     range, otherwise see in-line comment              !
 !     slmsk (IMAX)  - sea(0),land(1),ice(2) mask on fcst model grid     !
-!     landfrac (IMAX) - fraction of land on on fcst model grid          !
 !     snowf (IMAX)  - snow depth water equivalent in mm                 !
 !     sncovr(IMAX)  - ialbflg=1: snow cover over land in fraction       !
 !     sncovr_ice(IMAX) - snow cover over ice in fraction                !
@@ -759,8 +785,7 @@
       integer, intent(in) :: lsm, lsm_noahmp, lsm_ruc
       logical, intent(in) :: frac_grid
       real (kind=kind_phys), dimension(:), intent(in) :: vtype
-      real (kind=kind_phys), dimension(:), intent(in) :: landfrac
-      real (kind=kind_phys), intent(in) :: min_seaice
+!     real (kind=kind_phys), intent(in) :: min_seaice
 
       real (kind=kind_phys), dimension(:), intent(in) ::                &
      &       xlon,xlat, slmsk, snowf,sncovr, sncovr_ice,                &
@@ -892,7 +917,7 @@
                 asnow = 0.02*snowf(i)
                 argh  = min(0.50, max(.025,0.01*zorlf(i)))
                 hrgh  = min(f_one,max(0.20,1.0577-1.1538e-3*hprif(i)))
-                fsno = asnow / (argh + asnow) * hrgh
+                fsno  = asnow / (argh + asnow) * hrgh
                 sfcemis_ice = sfcemis_ice*(f_one-fsno)+emsref(8)*fsno
               endif
             elseif (lsm == lsm_ruc) then
@@ -906,7 +931,7 @@
 
           !-- Composite emissivity from land, water and ice fractions.
           sfcemis(i) = fracl(i)*sfcemis_land + fraco(i)*emsref(1)             &
-     &                                    + fraci(i)*sfcemis_ice
+     &                                       + fraci(i)*sfcemis_ice
 
          enddo  ! i
 

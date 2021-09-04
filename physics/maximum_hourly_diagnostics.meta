@@ -16,7 +16,7 @@
   intent = in
   optional = F
 [levs]
-  standard_name = vertical_dimension
+  standard_name = vertical_layer_dimension
   long_name = number of vertical levels
   units = count
   dimensions = ()
@@ -40,7 +40,7 @@
   intent = in
   optional = F
 [imp_physics]
-  standard_name = flag_for_microphysics_scheme
+  standard_name = control_for_microphysics_scheme
   long_name = choice of microphysics scheme
   units = flag
   dimensions = ()
@@ -48,7 +48,7 @@
   intent = in
   optional = F
 [imp_physics_gfdl]
-  standard_name = flag_for_gfdl_microphysics_scheme
+  standard_name = identifier_for_gfdl_microphysics_scheme
   long_name = choice of GFDL microphysics scheme
   units = flag
   dimensions = ()
@@ -56,7 +56,7 @@
   intent = in
   optional = F
 [imp_physics_thompson]
-  standard_name = flag_for_thompson_microphysics_scheme
+  standard_name = identifier_for_thompson_microphysics_scheme
   long_name = choice of Thompson microphysics scheme
   units = flag
   dimensions = ()
@@ -64,7 +64,7 @@
   intent = in
   optional = F
 [imp_physics_fer_hires]
-  standard_name = flag_for_fer_hires_microphysics_scheme
+  standard_name = identifier_for_fer_hires_microphysics_scheme
   long_name = choice of Ferrier-Aligo microphysics scheme
   units = flag
   dimensions = ()
@@ -84,16 +84,16 @@
   standard_name = geopotential
   long_name = geopotential at model layer centers
   units = m2 s-2
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [gt0]
-  standard_name = air_temperature_updated_by_physics
+  standard_name = air_temperature_of_new_state
   long_name = temperature updated by physics
   units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -102,7 +102,7 @@
   standard_name = radar_reflectivity_10cm
   long_name = instantaneous refl_10cm
   units = dBZ
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -180,7 +180,7 @@
   intent = in
   optional = F
 [t2m]
-  standard_name = temperature_at_2m
+  standard_name = air_temperature_at_2m
   long_name = 2 meter temperature
   units = K
   dimensions = (horizontal_loop_extent)
@@ -228,6 +228,33 @@
   standard_name = minimum_relative_humidity_at_2m_over_maximum_hourly_time_interval
   long_name = minumum relative humidity at 2m over maximum hourly time interval
   units = %
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dtp]
+  standard_name = timestep_for_physics
+  long_name = physics timestep
+  units = s
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[rain]
+  standard_name = lwe_thickness_of_precipitation_amount_on_dynamics_timestep
+  long_name = total rain at this time step
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[pratemax]
+  standard_name = maximum_precipitation_rate_over_maximum_hourly_time_interval
+  long_name = maximum precipitation rate over maximum hourly time interval
+  units = mm h-1
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys

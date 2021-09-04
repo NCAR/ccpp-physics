@@ -16,7 +16,7 @@
   intent = in
   optional = F
 [kice]
-  standard_name = ice_vertical_dimension
+  standard_name = vertical_dimension_of_sea_ice
   long_name = vertical loop extent for ice levels, start at 1
   units = count
   dimensions = ()
@@ -105,7 +105,7 @@
   intent = in
   optional = F
 [rd]
-  standard_name = gas_constant_dry_air
+  standard_name = gas_constant_of_dry_air
   long_name = ideal gas constant for dry air
   units = J kg-1 K-1
   dimensions = ()
@@ -123,7 +123,7 @@
   intent = in
   optional = F
 [t1]
-  standard_name = air_temperature_at_lowest_model_layer
+  standard_name = air_temperature_at_surface_adjacent_layer
   long_name = surface layer mean temperature
   units = K
   dimensions = (horizontal_loop_extent)
@@ -132,7 +132,7 @@
   intent = in
   optional = F
 [q1]
-  standard_name = water_vapor_specific_humidity_at_lowest_model_layer
+  standard_name = specific_humidity_at_surface_adjacent_layer
   long_name = surface layer mean specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent)
@@ -141,7 +141,7 @@
   intent = in
   optional = F
 [delt]
-  standard_name = time_step_for_dynamics
+  standard_name = timestep_for_dynamics
   long_name = time step
   units = s
   dimensions = ()
@@ -186,7 +186,7 @@
   intent = in
   optional = F
 [srflag]
-  standard_name = flag_for_precipitation_type
+  standard_name = precipitation_type
   long_name = snow/rain flag for precipitation
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -213,7 +213,7 @@
   intent = in
   optional = F
 [prsl1]
-  standard_name = air_pressure_at_lowest_model_layer
+  standard_name = air_pressure_at_surface_adjacent_layer
   long_name = surface layer mean pressure
   units = Pa
   dimensions = (horizontal_loop_extent)
@@ -231,7 +231,7 @@
   intent = in
   optional = F
 [prsik1]
-  standard_name = dimensionless_exner_function_at_lowest_model_interface
+  standard_name = surface_dimensionless_exner_function
   long_name = dimensionless Exner function at the ground surface
   units = none
   dimensions = (horizontal_loop_extent)
@@ -240,7 +240,7 @@
   intent = in
   optional = F
 [prslk1]
-  standard_name = dimensionless_exner_function_at_lowest_model_layer
+  standard_name = dimensionless_exner_function_at_surface_adjacent_layer
   long_name = dimensionless Exner function at the lowest model layer
   units = none
   dimensions = (horizontal_loop_extent)
@@ -260,6 +260,14 @@
 [flag_iter]
   standard_name = flag_for_iteration
   long_name = flag for iteration
+  units = flag
+  dimensions = (horizontal_loop_extent)
+  type = logical
+  intent = in
+  optional = F
+[use_flake]
+  standard_name = flag_for_using_flake
+  long_name = flag indicating lake points using flake model
   units = flag
   dimensions = (horizontal_loop_extent)
   type = logical
@@ -299,7 +307,7 @@
   intent = inout
   optional = F
 [fice]
-  standard_name = sea_ice_concentration
+  standard_name = sea_ice_area_fraction_of_sea_area_fraction
   long_name = sea-ice concentration [0,1]
   units = frac
   dimensions = (horizontal_loop_extent)
@@ -308,8 +316,8 @@
   intent = inout
   optional = F
 [tice]
-  standard_name = sea_ice_temperature_interstitial
-  long_name = sea-ice surface temperature use as interstitial
+  standard_name = sea_ice_temperature
+  long_name = sea ice surface skin temperature 
   units = K
   dimensions = (horizontal_loop_extent)
   type = real
@@ -326,8 +334,8 @@
   intent = inout
   optional = F
 [tskin]
-  standard_name = surface_skin_temperature_over_ice_interstitial
-  long_name = surface skin temperature over ice   (temporary use as interstitial)
+  standard_name = surface_skin_temperature_over_ice
+  long_name = surface skin temperature over ice
   units = K
   dimensions = (horizontal_loop_extent)
   type = real
@@ -344,10 +352,10 @@
   intent = inout
   optional = F
 [tiice]
-  standard_name = internal_ice_temperature
+  standard_name = temperature_in_ice_layer
   long_name = sea ice internal temperature
   units = K
-  dimensions = (horizontal_loop_extent,ice_vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension_of_sea_ice)
   type = real
   kind = kind_phys
   intent = inout
@@ -433,55 +441,12 @@
   kind = kind_phys
   intent = inout
   optional = F
-[frac_grid]
-  standard_name = flag_for_fractional_grid
-  long_name = flag for fractional grid
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[icy]
-  standard_name = flag_nonzero_sea_ice_surface_fraction
-  long_name = flag indicating presence of some sea ice surface area fraction
-  units = flag
-  dimensions = (horizontal_loop_extent)
-  type = logical
-  intent = in
-  optional = F
-[islmsk_cice]
+[islmsk]
   standard_name = sea_land_ice_mask_cice
   long_name = sea/land/ice mask cice (=0/1/2)
   units = flag
   dimensions = (horizontal_loop_extent)
   type = integer
-  intent = in
-  optional = F
-[min_lakeice]
-  standard_name = lake_ice_minimum
-  long_name = minimum lake ice value
-  units = frac
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[min_seaice]
-  standard_name = sea_ice_minimum
-  long_name = minimum sea ice value
-  units = frac
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[oceanfrac]
-  standard_name = sea_area_fraction
-  long_name = fraction of horizontal grid area occupied by ocean
-  units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
   intent = in
   optional = F
 [errmsg]

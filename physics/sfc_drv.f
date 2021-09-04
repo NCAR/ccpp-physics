@@ -94,10 +94,12 @@
 !      call sfc_drv                                                     !
 !  ---  inputs:                                                         !
 !          ( im, km, ps, t1, q1, soiltyp, vegtype, sigmaf,              !
-!            sfcemis, dlwflx, dswsfc, snet, delt, tg3, cm, ch,          !
+!            sfcemis, dlwflx, dswsfc, delt, tg3, cm, ch,                !
 !            prsl1, prslki, zf, land, wind,  slopetyp,                  !
 !            shdmin, shdmax, snoalb, sfalb, flag_iter, flag_guess,      !
 !            lheatstrg, isot, ivegsrc,                                  !
+!            albdvis_lnd, albdnir_lnd, albivis_lnd, albinir_lnd,        !
+!            adjvisbmd, adjnirbmd, adjvisdfd, adjnirdfd,                ! 
 !  ---  in/outs:                                                        !
 !            weasd, snwdph, tskin, tprcp, srflag, smc, stc, slc,        !
 !            canopy, trans, tsurf, zorl,                                !
@@ -133,7 +135,6 @@
 !     sfcemis  - real, sfc lw emissivity ( fraction )              im   !
 !     dlwflx   - real, total sky sfc downward lw flux ( w/m**2 )   im   !
 !     dswflx   - real, total sky sfc downward sw flux ( w/m**2 )   im   !
-!     snet     - real, total sky sfc netsw flx into ground(w/m**2) im   !
 !     delt     - real, time interval (second)                      1    !
 !     tg3      - real, deep soil temperature (k)                   im   !
 !     cm       - real, surface exchange coeff for momentum (m/s)   im   !
@@ -148,6 +149,14 @@
 !     shdmax   - real, max fractnl cover of green veg (not used)   im   !
 !     snoalb   - real, upper bound on max albedo over deep snow    im   !
 !     sfalb    - real, mean sfc diffused sw albedo (fractional)    im   !
+!     albdvis_lnd  - real, sfc vis direct sw albedo over land      im   !
+!     albdnir_lnd  - real, sfc nir direct sw albedo over land      im   !
+!     albivis_lnd  - real, sfc vis diffused sw albedo over land    im   !
+!     albinir_lnd  - real, sfc nir diffused sw albedo over land    im   !
+!     adjvisbmd    - real, t adj sfc uv+vis-beam sw dnward flux    im   !
+!     adjnirbmd    - real, t adj sfc nir-beam sw dnward flux       im   !
+!     adjvisdfd    - real, t adj sfc uv+vis-diff sw dnward flux    im   !
+!     adjnirdfd    - real, t adj sfc nir-diff sw dnward flux       im   !
 !     flag_iter- logical,                                          im   !
 !     flag_guess-logical,                                          im   !
 !     lheatstrg- logical, flag for canopy heat storage             1    !
@@ -203,11 +212,13 @@
       subroutine lsm_noah_run                                           &
      &     ( im, km, grav, cp, hvap, rd, eps, epsm1, rvrdm1, ps,        & !  ---  inputs:
      &       t1, q1, soiltyp, vegtype, sigmaf,                          &
-     &       sfcemis, dlwflx, dswsfc, snet, delt, tg3, cm, ch,          &
+     &       sfcemis, dlwflx, dswsfc, delt, tg3, cm, ch,                &
      &       prsl1, prslki, zf, land, wind, slopetyp,                   &
      &       shdmin, shdmax, snoalb, sfalb, flag_iter, flag_guess,      &
      &       lheatstrg, isot, ivegsrc,                                  &
      &       bexppert, xlaipert, vegfpert,pertvegf,                     &  ! sfc perts, mgehne
+     &       albdvis_lnd, albdnir_lnd, albivis_lnd, albinir_lnd,        &  
+     &       adjvisbmd, adjnirbmd, adjvisdfd, adjnirdfd,                &  
 !  ---  in/outs:
      &       weasd, snwdph, tskin, tprcp, srflag, smc, stc, slc,        &
      &       canopy, trans, tsurf, zorl,                                &
@@ -247,10 +258,12 @@
       integer, dimension(:), intent(in) :: soiltyp, vegtype, slopetyp
 
       real (kind=kind_phys), dimension(:), intent(in) :: ps,            &
-     &       t1, q1, sigmaf, sfcemis, dlwflx, dswsfc, snet, tg3, cm,    &
+     &       t1, q1, sigmaf, sfcemis, dlwflx, dswsfc, tg3, cm,          &
      &       ch, prsl1, prslki, wind, shdmin, shdmax,                   &
      &       snoalb, sfalb, zf,                                         &
-     &       bexppert, xlaipert, vegfpert
+     &       bexppert, xlaipert, vegfpert,                              &
+     &       albdvis_lnd, albdnir_lnd, albivis_lnd, albinir_lnd,        &
+     &       adjvisbmd, adjnirbmd, adjvisdfd, adjnirdfd
 
       real (kind=kind_phys),  intent(in) :: delt
 
@@ -400,7 +413,12 @@
 
           lwdn   = dlwflx(i)         !..downward lw flux at sfc in w/m2
           swdn   = dswsfc(i)         !..downward sw flux at sfc in w/m2
-          solnet = snet(i)           !..net sw rad flx (dn-up) at sfc in w/m2
+!net sw rad flx (dn-up) at sfc in w/m2
+          solnet = adjvisbmd(i)*(1-albdvis_lnd(i))                       &
+     &            +adjnirbmd(i)*(1-albdnir_lnd(i))                       &
+     &            +adjvisdfd(i)*(1-albivis_lnd(i))                       &
+     &            +adjnirdfd(i)*(1-albinir_lnd(i))  
+
           sfcems = sfcemis(i)
 
           sfcprs = prsl1(i)
@@ -569,8 +587,7 @@
           snwdph(i)  = snowh * 1000.0_kind_phys
           weasd(i)   = sneqv * 1000.0_kind_phys
           sncovr1(i) = sncovr
-!  ---- ... outside sflx, roughness uses cm as unit (update after snow's
-!  effect)
+!  ---- ... outside sflx, roughness uses cm as unit (update after snow's effect)
           zorl(i) = z0*100.0_kind_phys
 
 !>  - Do not return the following output fields to parent model:

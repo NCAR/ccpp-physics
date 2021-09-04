@@ -112,13 +112,14 @@ contains
 !! \section arg_table_gfdl_cloud_microphys_run Argument Table
 !! \htmlinclude gfdl_cloud_microphys_run.html
 !!
-   subroutine gfdl_cloud_microphys_run(                                       &
-      levs, im, con_g, con_fvirt, con_rd, con_eps, frland, garea, islmsk,     &
-      gq0, gq0_ntcw, gq0_ntrw, gq0_ntiw, gq0_ntsw, gq0_ntgl, gq0_ntclamt,     &
-      gt0, gu0, gv0, vvl, prsl, phii, del,                                    &
-      rain0, ice0, snow0, graupel0, prcp0, sr,                                &
-      dtp, hydrostatic, phys_hydrostatic, lradar, refl_10cm,                  &
-      reset, effr_in, rew, rei, rer, res, reg, errmsg, errflg)
+   subroutine gfdl_cloud_microphys_run(                                            &
+      levs, im, rainmin, con_g, con_fvirt, con_rd, con_eps, frland, garea, islmsk, &
+      gq0, gq0_ntcw, gq0_ntrw, gq0_ntiw, gq0_ntsw, gq0_ntgl, gq0_ntclamt,          &
+      gt0, gu0, gv0, vvl, prsl, phii, del,                                         &
+      rain0, ice0, snow0, graupel0, prcp0, sr,                                     &
+      dtp, hydrostatic, phys_hydrostatic, lradar, refl_10cm,                       &
+      reset, effr_in, rew, rei, rer, res, reg,                                     &
+      cplchm, pfi_lsan, pfl_lsan, errmsg, errflg)
 
       use machine, only: kind_phys
 
@@ -129,16 +130,16 @@ contains
       real(kind=kind_phys), parameter :: one = 1.0d0
       real(kind=kind_phys), parameter :: con_p001= 0.001d0
       real(kind=kind_phys), parameter :: con_day = 86400.d0
-      real(kind=kind_phys), parameter :: rainmin = 1.0d-13
+      !real(kind=kind_phys), parameter :: rainmin = 1.0d-13
       ! *DH
 
       ! interface variables
       integer,              intent(in   ) :: levs, im
-      real(kind=kind_phys), intent(in   ) :: con_g, con_fvirt, con_rd, con_eps
+      real(kind=kind_phys), intent(in   ) :: con_g, con_fvirt, con_rd, con_eps, rainmin
       real(kind=kind_phys), intent(in   ), dimension(:)     :: frland, garea
       integer,              intent(in   ), dimension(:)     :: islmsk
       real(kind=kind_phys), intent(inout), dimension(:,:)   :: gq0, gq0_ntcw, gq0_ntrw, gq0_ntiw, &
-                                                                       gq0_ntsw, gq0_ntgl, gq0_ntclamt
+                                                               gq0_ntsw, gq0_ntgl, gq0_ntclamt
       real(kind=kind_phys), intent(inout), dimension(:,:)   :: gt0, gu0, gv0
       real(kind=kind_phys), intent(in   ), dimension(:,:)   :: vvl, prsl, del
       real(kind=kind_phys), intent(in   ), dimension(:,:)   :: phii
@@ -158,6 +159,9 @@ contains
       real(kind=kind_phys), intent(inout), dimension(:,:) :: refl_10cm
       logical, intent (in) :: reset, effr_in
       real(kind=kind_phys), intent(inout), dimension(:,:) :: rew, rei, rer, res, reg
+      logical, intent (in) :: cplchm
+      ! ice and liquid water 3d precipitation fluxes - only allocated if cplchm is .true.
+      real(kind=kind_phys), intent(inout), dimension(:,:) :: pfi_lsan, pfl_lsan
 
       character(len=*), intent(out) :: errmsg
       integer, intent(out)          :: errflg
@@ -168,6 +172,7 @@ contains
       real(kind=kind_phys), dimension(1:im,1:levs) :: delp, dz, uin, vin, pt, qv1, ql1, qr1, qg1, qa1, qn1, qi1,    &
                                                       qs1, pt_dt, qa_dt, u_dt, v_dt, w, qv_dt, ql_dt, qr_dt, qi_dt, &
                                                       qs_dt, qg_dt, p123, refl
+      real(kind=kind_phys), dimension(1:im,1,1:levs) :: pfils, pflls
       real(kind=kind_phys), dimension(:,:), allocatable :: den
       real(kind=kind_phys) :: onebg
       real(kind=kind_phys) :: tem
@@ -202,6 +207,8 @@ contains
             u_dt(i,k)  = 0.0
             v_dt(i,k)  = 0.0
             qn1(i,k)   = 0.0
+            pfils(i,1,k) = 0.0
+            pflls(i,1,k) = 0.0
             ! flip vertical (k) coordinate
             qv1(i,k)  = gq0(i,kk)
             ql1(i,k)  = gq0_ntcw(i,kk)
@@ -232,7 +239,7 @@ contains
                  qv1, ql1, qr1, qi1, qs1, qg1, qa1, qn1, qv_dt, ql_dt, qr_dt, qi_dt, &
                  qs_dt, qg_dt, qa_dt, pt_dt, pt, w,  uin, vin, u_dt, v_dt, dz, delp, &
                  garea, dtp, frland, rain0, snow0, ice0, graupel0, hydrostatic,      &
-                 phys_hydrostatic, p123, lradar, refl, reset)
+                 phys_hydrostatic, p123, lradar, refl, reset, pfils, pflls)
       tem   = dtp*con_p001/con_day
 
       ! fix negative values
@@ -290,6 +297,17 @@ contains
             refl_10cm(i,k)   = refl(i,kk)
         enddo
       enddo
+
+      ! output ice and liquid water 3d precipitation fluxes if requested
+      if (cplchm) then
+        do k=1,levs
+          kk = levs-k+1
+          do i=1,im
+            pfi_lsan(i,k) = pfils(i,1,kk)
+            pfl_lsan(i,k) = pflls(i,1,kk)
+          enddo
+        enddo
+      endif
 
       if(effr_in) then
          allocate(den(1:im,1:levs))
