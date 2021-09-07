@@ -16,7 +16,7 @@
   intent = in
   optional = F
 [levs]
-  standard_name = vertical_dimension
+  standard_name = vertical_layer_dimension
   long_name = vertical layer dimension
   units = count
   dimensions = ()
@@ -24,7 +24,7 @@
   intent = in
   optional = F
 [flag_init]
-  standard_name = flag_for_first_time_step
+  standard_name = flag_for_first_timestep
   long_name = flag signaling first time step for time integration loop
   units = flag
   dimensions = ()
@@ -39,8 +39,44 @@
   type = logical
   intent = in
   optional = F
+[con_g]
+  standard_name = gravitational_acceleration
+  long_name = gravitational acceleration
+  units = m s-2
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[con_pi]
+  standard_name = pi
+  long_name = ratio of a circle's circumference to its diameter
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[eps]
+  standard_name = ratio_of_dry_air_to_water_vapor_gas_constants
+  long_name = rd/rv
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[epsm1]
+  standard_name = ratio_of_dry_air_to_water_vapor_gas_constants_minus_one
+  long_name = (rd/rv) - 1
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F 
 [do_mynnedmf]
-  standard_name = do_mynnedmf
+  standard_name = flag_for_mellor_yamada_nakanishi_niino_pbl_scheme
   long_name = flag to activate MYNN-EDMF
   units = flag
   dimensions = ()
@@ -48,28 +84,28 @@
   intent = in
   optional = F
 [qc]
-  standard_name = cloud_condensed_water_mixing_ratio
+  standard_name = cloud_liquid_water_mixing_ratio
   long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates)
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [qi]
-  standard_name = ice_water_mixing_ratio
+  standard_name = cloud_ice_mixing_ratio
   long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates)
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [qv]
-  standard_name = water_vapor_specific_humidity
+  standard_name = specific_humidity
   long_name = water vapor specific humidity
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -78,7 +114,7 @@
   standard_name = air_temperature
   long_name = layer mean air temperature
   units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -87,25 +123,25 @@
   standard_name = air_pressure
   long_name = mean layer pressure
   units = Pa
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [qr]
-  standard_name = rain_water_mixing_ratio
+  standard_name = rain_mixing_ratio
   long_name = moist (dry+vapor, no condensates) mixing ratio of rain water
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [qs]
-  standard_name = snow_water_mixing_ratio
+  standard_name = snow_mixing_ratio
   long_name = moist (dry+vapor, no condensates) mixing ratio of snow water
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -114,7 +150,7 @@
   standard_name = graupel_mixing_ratio
   long_name = graupel mixing ratio wrt dry+vapor (no condensates)
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -123,13 +159,13 @@
   standard_name = convective_cloud_condesate_after_rainout
   long_name = convective cloud condesate after rainout
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [imfdeepcnv]
-  standard_name = flag_for_mass_flux_deep_convection_scheme
+  standard_name = control_for_deep_convection_scheme
   long_name = flag for mass-flux deep convection scheme
   units = flag
   dimensions = ()
@@ -137,7 +173,7 @@
   intent = in
   optional = F
 [imfdeepcnv_gf]
-  standard_name = flag_for_gf_deep_convection_scheme
+  standard_name = identifier_for_grell_freitas_deep_convection
   long_name = flag for Grell-Freitas deep convection scheme
   units = flag
   dimensions = ()
@@ -148,7 +184,7 @@
   standard_name = cloud_condensed_water_mixing_ratio_save
   long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates) before entering a physics scheme
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -157,34 +193,34 @@
   standard_name = ice_water_mixing_ratio_save
   long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates) before entering a physics scheme
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [QC_BL]
-  standard_name = subgrid_cloud_water_mixing_ratio_pbl
+  standard_name = subgrid_scale_cloud_liquid_water_mixing_ratio
   long_name = subgrid cloud water mixing ratio from PBL scheme
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [QI_BL]
-  standard_name = subgrid_cloud_ice_mixing_ratio_pbl
+  standard_name = subgrid_scale_cloud_ice_mixing_ratio
   long_name = subgrid cloud ice mixing ratio from PBL scheme
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [CLDFRA_BL]
-  standard_name = subgrid_cloud_fraction_pbl
+  standard_name = subgrid_scale_cloud_area_fraction_in_atmosphere_layer
   long_name = subgrid cloud fraction from PBL scheme
   units = frac
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -202,7 +238,7 @@
   standard_name = total_cloud_fraction
   long_name = layer total cloud fraction
   units = frac
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -211,7 +247,7 @@
   standard_name = cloud_liquid_water_path
   long_name = layer cloud liquid water path
   units = g m-2
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -220,7 +256,7 @@
   standard_name = mean_effective_radius_for_liquid_cloud
   long_name = mean effective radius for liquid cloud
   units = um
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -229,7 +265,7 @@
   standard_name = cloud_ice_water_path
   long_name = layer cloud ice water path
   units = g m-2
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -238,13 +274,13 @@
   standard_name = mean_effective_radius_for_ice_cloud
   long_name = mean effective radius for ice cloud
   units = um
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [slmsk]
-  standard_name = sea_land_ice_mask_real
+  standard_name = area_type
   long_name = landmask: sea/land/ice=0/1/2
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -322,7 +358,7 @@
   intent = inout
   optional = F
 [imp_physics]
-  standard_name = flag_for_microphysics_scheme
+  standard_name = control_for_microphysics_scheme
   long_name = choice of microphysics scheme
   units = flag
   dimensions = ()
@@ -330,7 +366,7 @@
   intent = in
   optional = F
 [imp_physics_gfdl]
-  standard_name = flag_for_gfdl_microphysics_scheme
+  standard_name = identifier_for_gfdl_microphysics_scheme
   long_name = choice of GFDL microphysics scheme
   units = flag
   dimensions = ()

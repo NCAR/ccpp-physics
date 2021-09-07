@@ -112,13 +112,13 @@ contains
 !! \section arg_table_gfdl_cloud_microphys_run Argument Table
 !! \htmlinclude gfdl_cloud_microphys_run.html
 !!
-   subroutine gfdl_cloud_microphys_run(                                       &
-      levs, im, con_g, con_fvirt, con_rd, con_eps, frland, garea, islmsk,     &
-      gq0, gq0_ntcw, gq0_ntrw, gq0_ntiw, gq0_ntsw, gq0_ntgl, gq0_ntclamt,     &
-      gt0, gu0, gv0, vvl, prsl, phii, del,                                    &
-      rain0, ice0, snow0, graupel0, prcp0, sr,                                &
-      dtp, hydrostatic, phys_hydrostatic, lradar, refl_10cm,                  &
-      reset, effr_in, rew, rei, rer, res, reg,                                &
+   subroutine gfdl_cloud_microphys_run(                                            &
+      levs, im, rainmin, con_g, con_fvirt, con_rd, con_eps, frland, garea, islmsk, &
+      gq0, gq0_ntcw, gq0_ntrw, gq0_ntiw, gq0_ntsw, gq0_ntgl, gq0_ntclamt,          &
+      gt0, gu0, gv0, vvl, prsl, phii, del,                                         &
+      rain0, ice0, snow0, graupel0, prcp0, sr,                                     &
+      dtp, hydrostatic, phys_hydrostatic, lradar, refl_10cm,                       &
+      reset, effr_in, rew, rei, rer, res, reg,                                     &
       cplchm, pfi_lsan, pfl_lsan, errmsg, errflg)
 
       use machine, only: kind_phys
@@ -130,16 +130,16 @@ contains
       real(kind=kind_phys), parameter :: one = 1.0d0
       real(kind=kind_phys), parameter :: con_p001= 0.001d0
       real(kind=kind_phys), parameter :: con_day = 86400.d0
-      real(kind=kind_phys), parameter :: rainmin = 1.0d-13
+      !real(kind=kind_phys), parameter :: rainmin = 1.0d-13
       ! *DH
 
       ! interface variables
       integer,              intent(in   ) :: levs, im
-      real(kind=kind_phys), intent(in   ) :: con_g, con_fvirt, con_rd, con_eps
+      real(kind=kind_phys), intent(in   ) :: con_g, con_fvirt, con_rd, con_eps, rainmin
       real(kind=kind_phys), intent(in   ), dimension(:)     :: frland, garea
       integer,              intent(in   ), dimension(:)     :: islmsk
       real(kind=kind_phys), intent(inout), dimension(:,:)   :: gq0, gq0_ntcw, gq0_ntrw, gq0_ntiw, &
-                                                                       gq0_ntsw, gq0_ntgl, gq0_ntclamt
+                                                               gq0_ntsw, gq0_ntgl, gq0_ntclamt
       real(kind=kind_phys), intent(inout), dimension(:,:)   :: gt0, gu0, gv0
       real(kind=kind_phys), intent(in   ), dimension(:,:)   :: vvl, prsl, del
       real(kind=kind_phys), intent(in   ), dimension(:,:)   :: phii

@@ -16,7 +16,7 @@
   intent = in
   optional = F
 [lsswr]
-  standard_name = flag_to_calc_sw
+  standard_name = flag_for_calling_shortwave_radiation
   long_name = logical flags for sw radiation calls
   units = flag
   dimensions = ()
@@ -24,7 +24,7 @@
   intent = in
   optional = F
 [coszen]
-  standard_name = cosine_of_zenith_angle
+  standard_name = cosine_of_solar_zenith_angle_for_daytime_points_on_radiation_timestep
   long_name = mean cos of zenith angle over rad call period
   units = none
   dimensions = (horizontal_loop_extent)

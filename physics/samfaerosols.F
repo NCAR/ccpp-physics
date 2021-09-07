@@ -9,7 +9,7 @@
       contains
 
       subroutine samfdeepcnv_aerosols(im, ix, km, itc, ntc, ntr, delt,
-     &  xlamde, xlamdd, cnvflg, jmin, kb, kmax, kbcon, ktcon, fscav,
+     &  xlamde, xlamdd, cnvflg, jmin, kb, kmax, kd94, ktcon, fscav,
      &  edto, xlamd, xmb, c0t, eta, etad, zi, xlamue, xlamud, delp,
      &  qtr, qaero)
 
@@ -25,7 +25,7 @@ c     -- input arguments
      &  xlamde, xlamdd
       logical,              dimension(im),          intent(in) :: cnvflg
       integer,              dimension(im),          intent(in) :: jmin,
-     &  kb, kmax, kbcon, ktcon
+     &  kb, kmax, kd94, ktcon
       real(kind=kind_phys), dimension(im),          intent(in) :: edto,
      &  xlamd, xmb
       real(kind=kind_phys), dimension(ntc),         intent(in) :: fscav
@@ -195,7 +195,7 @@ c     reevaporation of some, pw and pwd terms needed later for dellae2
           do i = 1, im
             if (cnvflg(i) .and. (k < jmin(i))) then
               dz = zi(i,kp1) - zi(i,k)
-              if (k >= kbcon(i)) then
+              if (k >= kd94(i)) then
                 tem  = xlamde * dz
                 tem1 = half * xlamdd * dz
               else
@@ -264,7 +264,7 @@ c     now for every chemistry tracer
               tem  = half * (xlamue(i,k) + xlamue(i,kk))
               tem1 = half * (xlamud(i,k) + xlamud(i,kk))
 
-              if (k <= kbcon(i)) then
+              if (k <= kd94(i)) then
                 ptem  = xlamde
                 ptem1 = xlamd(i) + xlamdd
               else

@@ -124,9 +124,10 @@ contains
 !
       if (frac_grid) then
         do ix=1,npts
-          if (landfrac(ix) > -1.0e-8_kind_phys) then
-            slmskl(ix) = ceiling(landfrac(ix)-1.0e-8_kind_phys)
-            slmskw(ix) = floor(landfrac(ix)+1.0e-8_kind_phys)
+!         if (landfrac(ix) > -1.0e-8_kind_phys) then
+          if (landfrac(ix) > 0.0_kind_phys) then
+            slmskl(ix) = ceiling(landfrac(ix)-1.0e-6_kind_phys)
+            slmskw(ix) =   floor(landfrac(ix)+1.0e-6_kind_phys)
           else
             if (nint(slmsk(ix)) == 1) then
               slmskl(ix) = 1.0_kind_phys
