@@ -22,7 +22,8 @@
 !!  \section detailed Detailed Algorithm
 !!  @{
 
-      subroutine GFS_surface_loop_control_part1_run (im, iter, wind, flag_guess, errmsg, errflg)
+      subroutine GFS_surface_loop_control_part1_run (im, lsm,lsm_noahmp, iter, &
+                                   wind, flag_guess, errmsg, errflg)
 
       use machine,           only: kind_phys
 
@@ -31,6 +32,8 @@
       ! Interface variables
       integer, intent(in)                               :: im
       integer, intent(in)                               :: iter
+      integer, intent(in)                               :: lsm
+      integer, intent(in)                               :: lsm_noahmp
       real(kind=kind_phys), dimension(:), intent(in)    :: wind
       logical,              dimension(:), intent(inout) :: flag_guess
 
@@ -45,7 +48,7 @@
       errflg = 0
 
       do i=1,im
-        if (iter == 1 .and. wind(i) < 2.0d0) then
+        if (iter == 1 .and. wind(i) < 2.0d0 .and. lsm /= lsm_noahmp) then
           flag_guess(i) = .true.
         endif
       enddo
@@ -78,8 +81,8 @@
 !!  \section detailed Detailed Algorithm
 !!  @{
 
-      subroutine GFS_surface_loop_control_part2_run (im, iter, wind, &
-             flag_guess, flag_iter, dry, wet, icy, nstf_name1, errmsg, errflg)
+      subroutine GFS_surface_loop_control_part2_run (im,lsm,lsm_noahmp, iter,&
+       wind, flag_guess, flag_iter, dry, wet, icy, nstf_name1, errmsg, errflg)
 
       use machine,           only: kind_phys
 
@@ -88,6 +91,8 @@
       ! Interface variables
       integer,                             intent(in)    :: im
       integer,                             intent(in)    :: iter
+      integer,                             intent(in)    :: lsm
+      integer,                             intent(in)    :: lsm_noahmp
       real(kind=kind_phys), dimension(:),  intent(in)    :: wind
       logical,              dimension(:),  intent(inout) :: flag_guess
       logical,              dimension(:),  intent(inout) :: flag_iter
@@ -110,7 +115,7 @@
 
         if (iter == 1 .and. wind(i) < 2.0d0) then
           !if (dry(i) .or. (wet(i) .and. .not.icy(i) .and. nstf_name1 > 0)) then
-          if (dry(i) .or. (wet(i) .and. nstf_name1 > 0)) then
+          if((dry(i).and.lsm /= lsm_noahmp) .or. (wet(i) .and. nstf_name1 > 0)) then
             flag_iter(i) = .true.
           endif
         endif
