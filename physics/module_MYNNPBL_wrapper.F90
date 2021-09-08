@@ -50,6 +50,8 @@
 SUBROUTINE mynnedmf_wrapper_run(        &
      &  im,levs,                        &
      &  flag_init,flag_restart,         &
+     &  cp, g, r_d, r_v, cpv, cliq,Cice,&
+     &  rcp, XLV, XLF, EP_1, EP_2,      &
      &  lssav, ldiag3d, qdiag3d,        &
      &  lsidea, cplflx,                 &
      &  delt,dtf,dx,zorl,               &
@@ -112,19 +114,6 @@ SUBROUTINE mynnedmf_wrapper_run(        &
       use machine , only : kind_phys
 !      use funcphys, only : fpvs
 
-      use physcons, only : cp     => con_cp,              &
-     &                     g      => con_g,               &
-     &                     r_d    => con_rd,              &
-     &                     r_v    => con_rv,              &
-     &                     cpv    => con_cvap,            &
-     &                     cliq   => con_cliq,            &
-     &                     Cice   => con_csol,            &
-     &                     rcp    => con_rocp,            &
-     &                     XLV    => con_hvap,            &
-     &                     XLF    => con_hfus,            &
-     &                     EP_1   => con_fvirt,           &
-     &                     EP_2   => con_eps
-
       USE module_bl_mynn, only : mynn_bl_driver
 
 !------------------------------------------------------------------- 
@@ -184,13 +173,15 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 !   REAL    , PARAMETER :: EP_1         = R_v/R_d-1.
 !   REAL    , PARAMETER :: EP_2         = R_d/R_v
 !
+  
+  real(kind=kind_phys), intent(in) :: cp, g, r_d, r_v, cpv, &
+                      & cliq, Cice, rcp, XLV, XLF, EP_1, EP_2
 
-  REAL, PARAMETER :: xlvcp=xlv/cp, xlscp=(xlv+xlf)/cp, ev=xlv, rd=r_d, &
-       &rk=cp/rd, svp11=svp1*1.e3, p608=ep_1, ep_3=1.-ep_2
+  real(kind=kind_phys) :: xlvcp, xlscp, ev, rd,             &
+       &     rk, svp11, p608, ep_3,tv0, tv1, gtr,g_inv
 
   REAL, PARAMETER :: tref=300.0     !< reference temperature (K)
   REAL, PARAMETER :: TKmin=253.0    !< for total water conversion, Tripoli and Cotton (1981)
-  REAL, PARAMETER :: tv0=p608*tref, tv1=(1.+p608)*tref, gtr=g/tref, g_inv=1./g
 
   REAL, PARAMETER :: zero=0.0d0, one=1.0d0
   REAL, PARAMETER :: huge=9.9692099683868690E36 ! NetCDF float FillValue, same as in GFS_typedefs.F90
@@ -365,6 +356,19 @@ SUBROUTINE mynnedmf_wrapper_run(        &
          initflag=0
          !print*,"in MYNN, initflag=",initflag
       endif
+      
+      xlvcp=xlv/cp
+      xlscp=(xlv+xlf)/cp
+      ev=xlv
+      rd=r_d
+      rk=cp/rd
+      svp11=svp1*1.e3
+      p608=ep_1
+      ep_3=1.-ep_2
+      tv0=p608*tref
+      tv1=(1.+p608)*tref
+      gtr=g/tref
+      g_inv=1./g
 
   ! Assign variables for each microphysics scheme
         if (imp_physics == imp_physics_wsm6) then

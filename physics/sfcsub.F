@@ -1197,7 +1197,7 @@
 !
 !  set ocean/land/sea-ice mask
 !
-      call setlsi(slmskw,aisclm,len,aicice,sliclm)
+      call setlsi(slmskl,aisclm,len,aicice,sliclm)
 
 !     if(lprnt) print *,' aisclm=',aisclm(iprnt),' sliclm='
 !    &,sliclm(iprnt),' slmskw=',slmskw(iprnt)
@@ -1285,7 +1285,8 @@
         call getsmc(wetclm,len,lsoil,smcclm,me)
       endif
       do k=1,lsoil
-      call qcmxmn(message('stc',k),smcclm(1,k),sliclm,snoclm,icefl1,
+!     call qcmxmn(message('stc',k),smcclm(1,k),sliclm,snoclm,icefl1,
+      call qcmxmn(message('stc',k),smcclm(1,k),slmskl,snoclm,icefl1,
      &            smclmx,smclmn,smcomx,smcomn,smcimx,smcimn,
      &            smcjmx,smcjmn,smcsmx,smcsmn,epssmc,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
@@ -1295,20 +1296,24 @@
         call getstc(tsfclm,tg3clm,sliclm,len,lsoil,stcclm,tsfimx)
       endif
       do k=1,lsoil
-      call qcmxmn(message('stc',k),stcclm(1,k),sliclm,snoclm,icefl1,
+!     call qcmxmn(message('stc',k),stcclm(1,k),sliclm,snoclm,icefl1,
+      call qcmxmn(message('stc',k),stcclm(1,k),slmskl,snoclm,icefl1,
      &            stclmx,stclmn,stcomx,stcomn,stcimx,stcimn,
      &            stcjmx,stcjmn,stcsmx,stcsmn,eptsfc,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
       enddo
-      call qcmxmn('vegc    ',vegclm,sliclm,snoclm,icefl1,
+!     call qcmxmn('vegc    ',vegclm,sliclm,snoclm,icefl1,
+      call qcmxmn('vegc    ',vegclm,slmskl,snoclm,icefl1,
      &            veglmx,veglmn,vegomx,vegomn,vegimx,vegimn,
      &            vegjmx,vegjmn,vegsmx,vegsmn,epsveg,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
-      call qcmxmn('vetc    ',vetclm,sliclm,snoclm,icefl1,
+!     call qcmxmn('vetc    ',vetclm,sliclm,snoclm,icefl1,
+      call qcmxmn('vetc    ',vetclm,slmskl,snoclm,icefl1,
      &            vetlmx,vetlmn,vetomx,vetomn,vetimx,vetimn,
      &            vetjmx,vetjmn,vetsmx,vetsmn,epsvet,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
-      call qcmxmn('sotc    ',sotclm,sliclm,snoclm,icefl1,
+!     call qcmxmn('sotc    ',sotclm,sliclm,snoclm,icefl1,
+      call qcmxmn('sotc    ',sotclm,slmskl,snoclm,icefl1,
      &            sotlmx,sotlmn,sotomx,sotomn,sotimx,sotimn,
      &            sotjmx,sotjmn,sotsmx,sotsmn,epssot,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
@@ -1322,15 +1327,18 @@
 !    &            sicjmx,sicjmn,sicsmx,sicsmn,epssic,
 !    &            rla,rlo,len,kqcm,percrit,lgchek,me)
 !clu [+16l] ---------------------------------------------------------------
-      call qcmxmn('vmnc    ',vmnclm,sliclm,snoclm,icefl1,
+!     call qcmxmn('vmnc    ',vmnclm,sliclm,snoclm,icefl1,
+      call qcmxmn('vmnc    ',vmnclm,slmskl,snoclm,icefl1,
      &            vmnlmx,vmnlmn,vmnomx,vmnomn,vmnimx,vmnimn,
      &            vmnjmx,vmnjmn,vmnsmx,vmnsmn,epsvmn,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
-      call qcmxmn('vmxc    ',vmxclm,sliclm,snoclm,icefl1,
+!     call qcmxmn('vmxc    ',vmxclm,sliclm,snoclm,icefl1,
+      call qcmxmn('vmxc    ',vmxclm,slmskl,snoclm,icefl1,
      &            vmxlmx,vmxlmn,vmxomx,vmxomn,vmximx,vmximn,
      &            vmxjmx,vmxjmn,vmxsmx,vmxsmn,epsvmx,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
-      call qcmxmn('slpc    ',slpclm,sliclm,snoclm,icefl1,
+!     call qcmxmn('slpc    ',slpclm,sliclm,snoclm,icefl1,
+      call qcmxmn('slpc    ',slpclm,slmskl,snoclm,icefl1,
      &            slplmx,slplmn,slpomx,slpomn,slpimx,slpimn,
      &            slpjmx,slpjmn,slpsmx,slpsmn,epsslp,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
@@ -1522,9 +1530,10 @@
             slianl(i) = 0.
 !           print *,'cycle - ice free: fice=',sicanl(i)
           elseif (nint(slianl(i)) == 1 .and. sicanl(i) >= crit) then
-            if (nint(slmskw(i)) == 0) then  ! can happen only for fractional grid
-              slianl(i) = 2.0_kind_io8
-            else
+!           if (nint(slmskw(i)) == 0) then  ! can happen only for fractional grid
+!             slianl(i) = 2.0_kind_io8
+!           else
+            if (nint(slmskw(i)) /= 0) then  ! can happen only for fractional grid
 !             print *,'cycle - land covered by sea-ice: fice=',sicanl(i)
               sicanl(i) = 0.0_kind_io8
             endif
@@ -1552,7 +1561,7 @@
 !
 !  set ocean/land/sea-ice mask
 !
-      call setlsi(slmskw,aisanl,len,aicice,slianl)
+      call setlsi(slmskl,aisanl,len,aicice,slianl)
 
 !     if(lprnt) print *,' aisanl=',aisanl(iprnt),' slianl='             &
 !    &,slianl(iprnt),' slmskwl=',slmskw(iprnt),slmskl(iprnt)
@@ -1560,7 +1569,7 @@
 !
       do k=1,lsoil
         do i=1,len
-          if (slianl(i) .eq. 0) then
+          if (slianl(i) == 0 .and. nint(slmskl(i)) /= 1) then
             smcanl(i,k) = smcomx
             stcanl(i,k) = tsfanl(i)
           endif
@@ -1651,7 +1660,8 @@
 !    &            plrjmx,plrjmn,plrsmx,plrsmn,epsplr,
 !    &            rla,rlo,len,kqcm,percrit,lgchek,me)
 !     endif
-      call qcmxmn('tg3a    ',tg3anl,slianl,snoanl,icefl1,
+!     call qcmxmn('tg3a    ',tg3anl,slianl,snoanl,icefl1,
+      call qcmxmn('tg3a    ',tg3anl,slmskl,snoanl,icefl1,
      &            tg3lmx,tg3lmn,tg3omx,tg3omn,tg3imx,tg3imn,
      &            tg3jmx,tg3jmn,tg3smx,tg3smn,epstg3,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
@@ -1663,7 +1673,8 @@
       endif
       !-- soil moisture
       do k=1,lsoil
-       call qcmxmn(message('smca',k),smcanl(1,1),slianl,snoanl,icefl1,
+!      call qcmxmn(message('smca',k),smcanl(1,1),slianl,snoanl,icefl1,
+       call qcmxmn(message('smca',k),smcanl(1,1),slmskl,snoanl,icefl1,
      &            smclmx,smclmn,smcomx,smcomn,smcimx,smcimn,
      &            smcjmx,smcjmn,smcsmx,smcsmn,epssmc,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
@@ -1673,33 +1684,40 @@
         call getstc(tsfanl,tg3anl,slianl,len,lsoil,stcanl,tsfimx)
       endif
       do k=1,lsoil
-        call qcmxmn(message('stca',k),stcanl(1,1),slianl,snoanl,icefl1,
+!       call qcmxmn(message('stca',k),stcanl(1,1),slianl,snoanl,icefl1,
+        call qcmxmn(message('stca',k),stcanl(1,1),slmskl,snoanl,icefl1,
      &            stclmx,stclmn,stcomx,stcomn,stcimx,stcimn,
      &            stcjmx,stcjmn,stcsmx,stcsmn,eptsfc,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
       enddo
-      call qcmxmn('vega    ',veganl,slianl,snoanl,icefl1,
+!     call qcmxmn('vega    ',veganl,slianl,snoanl,icefl1,
+      call qcmxmn('vega    ',veganl,slmskl,snoanl,icefl1,
      &            veglmx,veglmn,vegomx,vegomn,vegimx,vegimn,
      &            vegjmx,vegjmn,vegsmx,vegsmn,epsveg,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
-      call qcmxmn('veta    ',vetanl,slianl,snoanl,icefl1,
+!     call qcmxmn('veta    ',vetanl,slianl,snoanl,icefl1,
+      call qcmxmn('veta    ',vetanl,slmskl,snoanl,icefl1,
      &            vetlmx,vetlmn,vetomx,vetomn,vetimx,vetimn,
      &            vetjmx,vetjmn,vetsmx,vetsmn,epsvet,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
-      call qcmxmn('sota    ',sotanl,slianl,snoanl,icefl1,
+!     call qcmxmn('sota    ',sotanl,slianl,snoanl,icefl1,
+      call qcmxmn('sota    ',sotanl,slmskl,snoanl,icefl1,
      &            sotlmx,sotlmn,sotomx,sotomn,sotimx,sotimn,
      &            sotjmx,sotjmn,sotsmx,sotsmn,epssot,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
 !clu [+16l]----------------------------------------------------------------------
-      call qcmxmn('vmna    ',vmnanl,slianl,snoanl,icefl1,
+!     call qcmxmn('vmna    ',vmnanl,slianl,snoanl,icefl1,
+      call qcmxmn('vmna    ',vmnanl,slmskl,snoanl,icefl1,
      &            vmnlmx,vmnlmn,vmnomx,vmnomn,vmnimx,vmnimn,
      &            vmnjmx,vmnjmn,vmnsmx,vmnsmn,epsvmn,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
-      call qcmxmn('vmxa    ',vmxanl,slianl,snoanl,icefl1,
+!     call qcmxmn('vmxa    ',vmxanl,slianl,snoanl,icefl1,
+      call qcmxmn('vmxa    ',vmxanl,slmskl,snoanl,icefl1,
      &            vmxlmx,vmxlmn,vmxomx,vmxomn,vmximx,vmximn,
      &            vmxjmx,vmxjmn,vmxsmx,vmxsmn,epsvmx,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
-      call qcmxmn('slpa    ',slpanl,slianl,snoanl,icefl1,
+!     call qcmxmn('slpa    ',slpanl,slianl,snoanl,icefl1,
+      call qcmxmn('slpa    ',slpanl,slmskl,snoanl,icefl1,
      &            slplmx,slplmn,slpomx,slpomn,slpimx,slpimn,
      &            slpjmx,slpjmn,slpsmx,slpsmn,epsslp,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
@@ -1796,11 +1814,13 @@
      &                tsflmx,tsflmn,tsfomx,tsfomn,tsfimx,tsfimn,
      &                tsfjmx,tsfjmn,tsfsmx,tsfsmn,epstsf,
      &                rla,rlo,len,kqcm,percrit,lgchek,me)
-          call qcmxmn('stc1f   ',stcfcs(1,1),slifcs,snofcs,icefl1,
+!         call qcmxmn('stc1f   ',stcfcs(1,1),slifcs,snofcs,icefl1,
+          call qcmxmn('stc1f   ',stcfcs(1,1),slmskl,snofcs,icefl1,
      &                stclmx,stclmn,stcomx,stcomn,stcimx,stcimn,
      &                stcjmx,stcjmn,stcsmx,stcsmn,eptsfc,
      &                rla,rlo,len,kqcm,percrit,lgchek,me)
-          call qcmxmn('stc2f   ',stcfcs(1,2),slifcs,snofcs,icefl1,
+!         call qcmxmn('stc2f   ',stcfcs(1,2),slifcs,snofcs,icefl1,
+          call qcmxmn('stc2f   ',stcfcs(1,2),slmskl,snofcs,icefl1,
      &                stclmx,stclmn,stcomx,stcomn,stcimx,stcimn,
      &                stcjmx,stcjmn,stcsmx,stcsmn,eptsfc,
      &                rla,rlo,len,kqcm,percrit,lgchek,me)
@@ -1882,7 +1902,8 @@
 !    &                plrjmx,plrjmn,plrsmx,plrsmn,epsplr,
 !    &                rla,rlo,len,kqcm,percrit,lgchek,me)
 !       endif
-          call qcmxmn('tg3f    ',tg3fcs,slifcs,snofcs,icefl1,
+!         call qcmxmn('tg3f    ',tg3fcs,slifcs,snofcs,icefl1,
+          call qcmxmn('tg3f    ',tg3fcs,slmskl,snofcs,icefl1,
      &                tg3lmx,tg3lmn,tg3omx,tg3omn,tg3imx,tg3imn,
      &                tg3jmx,tg3jmn,tg3smx,tg3smn,epstg3,
      &                rla,rlo,len,kqcm,percrit,lgchek,me)
@@ -1897,7 +1918,8 @@
 !    &                rla,rlo,len,kqcm,percrit,lgchek,me)
 !-- soil moisture forecast
         do k=1,lsoil
-          call qcmxmn(message('smcfcw',k),smcfcs(1,k),slifcs,
+!         call qcmxmn(message('smcfcw',k),smcfcs(1,k),slifcs,
+          call qcmxmn(message('smcfcw',k),smcfcs(1,k),slmskl,
      &                snofcs,icefl1,
      &                smclmx,smclmn,smcomx,smcomn,smcimx,smcimn,
      &                smcjmx,smcjmn,smcsmx,smcsmn,epssmc,
@@ -1905,35 +1927,42 @@
         enddo
 !-- soil temperature forecast
         do k=1,lsoil
-          call qcmxmn(message('stcf',k),stcfcs(1,k),slifcs,
+!         call qcmxmn(message('stcf',k),stcfcs(1,k),slifcs,
+          call qcmxmn(message('stcf',k),stcfcs(1,k),slmskl,
      &                snofcs,icefl1,
      &                stclmx,stclmn,stcomx,stcomn,stcimx,stcimn,
      &                stcjmx,stcjmn,stcsmx,stcsmn,eptsfc,
      &                rla,rlo,len,kqcm,percrit,lgchek,me)
         enddo
-          call qcmxmn('vegf    ',vegfcs,slifcs,snofcs,icefl1,
+!         call qcmxmn('vegf    ',vegfcs,slifcs,snofcs,icefl1,
+          call qcmxmn('vegf    ',vegfcs,slmskl,snofcs,icefl1,
      &                veglmx,veglmn,vegomx,vegomn,vegimx,vegimn,
      &                vegjmx,vegjmn,vegsmx,vegsmn,epsveg,
      &                rla,rlo,len,kqcm,percrit,lgchek,me)
-          call qcmxmn('vetf    ',vetfcs,slifcs,snofcs,icefl1,
+!         call qcmxmn('vetf    ',vetfcs,slifcs,snofcs,icefl1,
+          call qcmxmn('vetf    ',vetfcs,slmskl,snofcs,icefl1,
      &                vetlmx,vetlmn,vetomx,vetomn,vetimx,vetimn,
      &                vetjmx,vetjmn,vetsmx,vetsmn,epsvet,
      &                rla,rlo,len,kqcm,percrit,lgchek,me)
-          call qcmxmn('sotf    ',sotfcs,slifcs,snofcs,icefl1,
+!         call qcmxmn('sotf    ',sotfcs,slifcs,snofcs,icefl1,
+          call qcmxmn('sotf    ',sotfcs,slmskl,snofcs,icefl1,
      &                sotlmx,sotlmn,sotomx,sotomn,sotimx,sotimn,
      &                sotjmx,sotjmn,sotsmx,sotsmn,epssot,
      &                rla,rlo,len,kqcm,percrit,lgchek,me)
 
 !clu [+16l] ---------------------------------------------------------------
-          call qcmxmn('vmnf    ',vmnfcs,slifcs,snofcs,icefl1,
+!         call qcmxmn('vmnf    ',vmnfcs,slifcs,snofcs,icefl1,
+          call qcmxmn('vmnf    ',vmnfcs,slmskl,snofcs,icefl1,
      &                vmnlmx,vmnlmn,vmnomx,vmnomn,vmnimx,vmnimn,
      &                vmnjmx,vmnjmn,vmnsmx,vmnsmn,epsvmn,
      &                rla,rlo,len,kqcm,percrit,lgchek,me)
-          call qcmxmn('vmxf    ',vmxfcs,slifcs,snofcs,icefl1,
+!         call qcmxmn('vmxf    ',vmxfcs,slifcs,snofcs,icefl1,
+          call qcmxmn('vmxf    ',vmxfcs,slmskl,snofcs,icefl1,
      &                vmxlmx,vmxlmn,vmxomx,vmxomn,vmximx,vmximn,
      &                vmxjmx,vmxjmn,vmxsmx,vmxsmn,epsvmx,
      &                rla,rlo,len,kqcm,percrit,lgchek,me)
-          call qcmxmn('slpf    ',slpfcs,slifcs,snofcs,icefl1,
+!         call qcmxmn('slpf    ',slpfcs,slifcs,snofcs,icefl1,
+          call qcmxmn('slpf    ',slpfcs,slmskl,snofcs,icefl1,
      &                slplmx,slplmn,slpomx,slpomn,slpimx,slpimn,
      &                slpjmx,slpjmn,slpsmx,slpsmn,epsslp,
      &                rla,rlo,len,kqcm,percrit,lgchek,me)
@@ -1990,12 +2019,14 @@
 !    *,' tsffcs=',tsffcs(iprnt),' slianl=',slianl(iprnt)
 
       do i=1,len
+       if (nint(slmskl(i)) /= 1) then
         if (sicanl(i) >= min_ice(i)) then
           slianl(i) = 2.0_kind_io8
         else
           slianl(i) = zero
           sicanl(i) = zero
         endif
+       endif
       enddo
 
       if (fh-deltsfc > -0.001 ) then
@@ -2117,27 +2148,32 @@
 !    &            rla,rlo,len,kqcm,percrit,lgchek,me)
 !     endif
       do k=1,lsoil
-        call qcmxmn(message('stcm',k),stcanl(1,k),slianl,snoanl,icefl1,
+!       call qcmxmn(message('stcm',k),stcanl(1,k),slianl,snoanl,icefl1,
+        call qcmxmn(message('stcm',k),stcanl(1,k),slmskl,snoanl,icefl1,
      &            stclmx,stclmn,stcomx,stcomn,stcimx,stcimn,
      &            stcjmx,stcjmn,stcsmx,stcsmn,eptsfc,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
       enddo
       do k=1,lsoil
-        call qcmxmn(message('smcm',k),smcanl(1,k),slianl,snoanl,icefl1,
+!       call qcmxmn(message('smcm',k),smcanl(1,k),slianl,snoanl,icefl1,
+        call qcmxmn(message('smcm',k),smcanl(1,k),slmskl,snoanl,icefl1,
      &            smclmx,smclmn,smcomx,smcomn,smcimx,smcimn,
      &            smcjmx,smcjmn,smcsmx,smcsmn,epssmc,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
       enddo
       kqcm = 1
-      call qcmxmn('vegm    ',veganl,slianl,snoanl,icefl1,
+!     call qcmxmn('vegm    ',veganl,slianl,snoanl,icefl1,
+      call qcmxmn('vegm    ',veganl,slmskl,snoanl,icefl1,
      &            veglmx,veglmn,vegomx,vegomn,vegimx,vegimn,
      &            vegjmx,vegjmn,vegsmx,vegsmn,epsveg,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
-      call qcmxmn('vetm    ',vetanl,slianl,snoanl,icefl1,
+!     call qcmxmn('vetm    ',vetanl,slianl,snoanl,icefl1,
+      call qcmxmn('vetm    ',vetanl,slmskl,snoanl,icefl1,
      &            vetlmx,vetlmn,vetomx,vetomn,vetimx,vetimn,
      &            vetjmx,vetjmn,vetsmx,vetsmn,epsvet,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
-      call qcmxmn('sotm    ',sotanl,slianl,snoanl,icefl1,
+!     call qcmxmn('sotm    ',sotanl,slianl,snoanl,icefl1,
+      call qcmxmn('sotm    ',sotanl,slmskl,snoanl,icefl1,
      &            sotlmx,sotlmn,sotomx,sotomn,sotimx,sotimn,
      &            sotjmx,sotjmn,sotsmx,sotsmn,epssot,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
@@ -2151,15 +2187,18 @@
 !    &            sicjmx,sicjmn,sicsmx,sicsmn,epssic,
 !    &            rla,rlo,len,kqcm,percrit,lgchek,me)
 !clu [+16l] add vmn, vmx, slp, abs
-      call qcmxmn('vmnm    ',vmnanl,slianl,snoanl,icefl1,
+!     call qcmxmn('vmnm    ',vmnanl,slianl,snoanl,icefl1,
+      call qcmxmn('vmnm    ',vmnanl,slmskl,snoanl,icefl1,
      &            vmnlmx,vmnlmn,vmnomx,vmnomn,vmnimx,vmnimn,
      &            vmnjmx,vmnjmn,vmnsmx,vmnsmn,epsvmn,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
-      call qcmxmn('vmxm    ',vmxanl,slianl,snoanl,icefl1,
+!     call qcmxmn('vmxm    ',vmxanl,slianl,snoanl,icefl1,
+      call qcmxmn('vmxm    ',vmxanl,slmskl,snoanl,icefl1,
      &            vmxlmx,vmxlmn,vmxomx,vmxomn,vmximx,vmximn,
      &            vmxjmx,vmxjmn,vmxsmx,vmxsmn,epsvmx,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
-      call qcmxmn('slpm    ',slpanl,slianl,snoanl,icefl1,
+!     call qcmxmn('slpm    ',slpanl,slianl,snoanl,icefl1,
+      call qcmxmn('slpm    ',slpanl,slmskl,snoanl,icefl1,
      &            slplmx,slplmn,slpomx,slpomn,slpimx,slpimn,
      &            slpjmx,slpjmn,slpsmx,slpsmn,epsslp,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
@@ -4441,13 +4480,12 @@
       end
 
 !>\ingroup mod_sfcsub
-      subroutine bktges(smcfcs,slianl,stcfcs,len,lsoil)
+      subroutine bktges(smcfcs,stcfcs,len,lsoil)
 !
       use machine , only : kind_io8,kind_io4
       implicit none
       integer i,j,len,lsoil,k
-      real (kind=kind_io8) smcfcs(len,lsoil), stcfcs(len,lsoil),        &
-     &                     slianl(len)
+      real (kind=kind_io8) smcfcs(len,lsoil), stcfcs(len,lsoil)
 !
 !  note that smfcs comes in with the original unit (cm?) (not grib file)
 !
@@ -5022,7 +5060,7 @@
 !
 !  snow over sea ice is cycled
 !
-        if(slianl(i).eq.2.) then
+        if (nint(slianl(i)) == 2) then
           snoanl(i) = snofcs(i)
         endif
 !
@@ -5053,7 +5091,7 @@
 !
       do k = 1, 4
         do i=i1_t,i2_t
-          if(slianl(i).eq.0.) then
+          if (nint(slianl(i)) == 0) then
             albanl(i,k) = albfcs(i,k)*ralbs + albanl(i,k)*qalbs
           else
             albanl(i,k) = albfcs(i,k)*ralbl + albanl(i,k)*qalbl
@@ -5063,7 +5101,7 @@
 !
       do k = 1, 2
         do i=i1_t,i2_t
-          if(slianl(i).eq.0.) then
+          if (nint(slianl(i)) == 0) then
             alfanl(i,k) = alffcs(i,k)*ralfs + alfanl(i,k)*qalfs
           else
             alfanl(i,k) = alffcs(i,k)*ralfl + alfanl(i,k)*qalfl
@@ -5073,7 +5111,7 @@
 !
       do k = 1, lsoil
         do i=i1_t,i2_t
-          if(slianl(i).eq.0.) then
+          if (nint(slianl(i)) == 0) then
             smcanl(i,k) = smcfcs(i,k)*rsmcs(k) + smcanl(i,k)*qsmcs(k)
             stcanl(i,k) = stcfcs(i,k)*rstcs(k) + stcanl(i,k)*qstcs(k)
           else
@@ -7040,7 +7078,7 @@ cjfe
         cvbclm(i) = 0.0
         cvtclm(i) = 0.0
         cnpclm(i) = 0.0
-        sliclm(i) = 0.0
+        sliclm(i) = slmskl(i)
         scvclm(i) = 0.0
         vmnclm(i) = 0.0
         vmxclm(i) = 0.0
