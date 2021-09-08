@@ -247,7 +247,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
   optional = F
 [ch]
   standard_name = surface_drag_coefficient_for_heat_and_moisture_in_air_over_land
@@ -256,7 +256,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
   optional = F
 [prsl1]
   standard_name = air_pressure_at_surface_adjacent_layer
@@ -267,10 +267,28 @@
   kind = kind_phys
   intent = in
   optional = F
+[prslk1]
+  standard_name = dimensionless_exner_function_at_surface_adjacent_layer
+  long_name = dimensionless Exner function at the lowest model layer
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [prslki]
   standard_name = ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer
   long_name = Exner function ratio bt midlayer and interface at 1st layer
   units = ratio
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[prsik1]
+  standard_name = surface_dimensionless_exner_function
+  long_name = dimensionless Exner function at the ground surface
+  units = none
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
@@ -349,14 +367,6 @@
 [flag_iter]
   standard_name = flag_for_iteration
   long_name = flag for iteration
-  units = flag
-  dimensions = (horizontal_loop_extent)
-  type = logical
-  intent = in
-  optional = F
-[flag_guess]
-  standard_name = flag_for_guess_run
-  long_name = flag for guess run
   units = flag
   dimensions = (horizontal_loop_extent)
   type = logical
@@ -493,6 +503,15 @@
   kind = kind_phys
   intent = in
   optional = F
+[garea]
+  standard_name = cell_area
+  long_name = area of the grid cell
+  units = m2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [rainn_mp]
   standard_name = explicit_precipitation_rate_on_previous_timestep
   long_name = explicit rainfall rate previous timestep
@@ -619,6 +638,14 @@
   kind = kind_phys
   intent = in
   optional = F
+[thsfc_loc]
+  standard_name = flag_for_reference_pressure_theta
+  long_name = flag for reference pressure in theta calculation
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [weasd]
   standard_name = water_equivalent_accumulated_snow_depth_over_land
   long_name = water equiv of acc snow depth over land
@@ -709,19 +736,73 @@
   kind = kind_phys
   intent = inout
   optional = F
-[tsurf]
-  standard_name = surface_skin_temperature_after_iteration_over_land
-  long_name = surface skin temperature after iteration over land
-  units = K
+[zorl]
+  standard_name = surface_roughness_length_over_land
+  long_name = surface roughness length over land  (temporary use as interstitial)
+  units = cm
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
-[zorl]
-  standard_name = surface_roughness_length_over_land
-  long_name = surface roughness length over land  (temporary use as interstitial)
-  units = cm
+[rb1]
+  standard_name = bulk_richardson_number_at_lowest_model_level_over_land
+  long_name = bulk Richardson number at the surface over land
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[fm1]
+  standard_name = Monin_Obukhov_similarity_function_for_momentum_over_land
+  long_name = Monin-Obukhov similarity function for momentum over land
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[fh1]
+  standard_name = Monin_Obukhov_similarity_function_for_heat_over_land
+  long_name = Monin-Obukhov similarity function for heat over land
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[ustar1]
+  standard_name = surface_friction_velocity_over_land
+  long_name = surface friction velocity over land
+  units = m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[stress1]
+  standard_name = surface_wind_stress_over_land
+  long_name = surface wind stress over land
+  units = m2 s-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[fm101]
+  standard_name = Monin_Obukhov_similarity_function_for_momentum_at_10m_over_land
+  long_name = Monin-Obukhov similarity parameter for momentum at 10m over land
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[fh21]
+  standard_name = Monin_Obukhov_similarity_function_for_heat_at_2m_over_land
+  long_name = Monin-Obukhov similarity parameter for heat at 2m over land
+  units = none
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
@@ -1298,6 +1379,15 @@
   standard_name = specific_humidity_at_2m_from_noahmp
   long_name = 2 meter specific humidity from noahmp
   units = kg kg-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[zvfun]
+  standard_name = function_of_surface_roughness_length_and_green_vegetation_fraction
+  long_name = function of surface roughness length and green vegetation fraction
+  units = none
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys

@@ -119,10 +119,10 @@ contains
                    prcp    ,lwdn    ,tbot    ,zlvl    ,ficeold ,zsoil   , & ! in : forcing
                    qsnow   ,sneqvo  ,albold  ,cm      ,ch      ,isnow   , & ! in/out : 
                    sneqv   ,smc     ,zsnso   ,snowh   ,snice   ,snliq   , & ! in/out :
-                   tg      ,stc     ,sh2o    ,tauss   ,qsfc    ,          & ! in/out : 
+                   tg      ,stc     ,sh2o    ,tauss   ,qsfc             , & ! in/out : 
                    fsa     ,fsr     ,fira    ,fsh     ,fgev    ,ssoil   , & ! out : 
                    trad    ,edir    ,runsrf  ,runsub  ,sag     ,albedo  , & ! out :
-                   qsnbot  ,ponding ,ponding1,ponding2,t2m     ,q2e     , & ! out :
+                   qsnbot ,ponding ,ponding1,ponding2,t2m,q2e,z0h_total , & ! out :
 #ifdef CCPP
                    emissi,  fpice   ,ch2b    , esnow, albsnd, albsni    , &
                    errmsg, errflg) 
@@ -198,6 +198,7 @@ contains
   real (kind=kind_phys)                           , intent(out)   :: ponding2!< surface ponding [mm]
   real (kind=kind_phys)                           , intent(out)   :: t2m     !< 2-m air temperature over bare ground part [k]
   real (kind=kind_phys)                           , intent(out)   :: q2e
+  real (kind=kind_phys)                           , intent(out)   :: z0h_total !< roughness length for heat
   real (kind=kind_phys)                           , intent(out)   :: emissi
   real (kind=kind_phys)                           , intent(out)   :: fpice
   real (kind=kind_phys)                           , intent(out)   :: ch2b
@@ -269,7 +270,7 @@ contains
                          imelt  ,snicev ,snliqv ,epore  ,qmelt  ,ponding, & !out
                          sag    ,fsa    ,fsr    ,fira   ,fsh    ,fgev   , & !out
                          trad   ,t2m    ,ssoil  ,lathea ,q2e    ,emissi,  & !out
-                         ch2b   ,albsnd ,albsni                         )   !out
+                         ch2b   ,albsnd ,albsni ,z0h_total           )      !out
 
 #ifdef CCPP
     if (errflg /= 0) return
@@ -399,7 +400,7 @@ contains
                              imelt  ,snicev ,snliqv ,epore  ,qmelt  ,ponding, & !out
                              sag    ,fsa    ,fsr    ,fira   ,fsh    ,fgev   , & !out
                              trad   ,t2m    ,ssoil  ,lathea ,q2e    ,emissi,  & !out
-                             ch2b   ,albsnd ,albsni                         )   !out
+                             ch2b   ,albsnd ,albsni ,z0h_total          )       !out
 
 ! --------------------------------------------------------------------------------------------------
 ! --------------------------------------------------------------------------------------------------
@@ -474,6 +475,7 @@ contains
   real (kind=kind_phys)                              , intent(out)   :: ch2b   !< sensible heat conductance, canopy air to zlvl air (m/s)
   real (kind=kind_phys), dimension(1:2)              , intent(out)   :: albsnd !< snow albedo (direct)
   real (kind=kind_phys), dimension(1:2)              , intent(out)   :: albsni !< snow albedo (diffuse)
+  real (kind=kind_phys)                              , intent(out)   :: z0h_total !< roughness length for heat
 
 
 ! local
@@ -543,7 +545,7 @@ contains
                        cm      ,ch      ,tg      ,qsfc    ,          & !inout
 #endif
                        fira    ,fsh     ,fgev    ,ssoil   ,          & !out
-                       t2m     ,q2e     ,ch2b)                         !out 
+                       t2m     ,q2e     ,ch2b    ,z0h_total)           !out 
 
 !energy balance at surface: sag=(irb+shb+evb+ghb)
 
@@ -978,7 +980,7 @@ contains
                            cm      ,ch      ,tgb     ,qsfc    ,          & !inout
 #endif
                            irb     ,shb     ,evb     ,ghb     ,          & !out
-                           t2mb    ,q2b     ,ehb2)                         !out 
+                           t2mb    ,q2b     ,ehb2    ,z0h_total)           !out 
 
 ! --------------------------------------------------------------------------------------------------
 ! use newton-raphson iteration to solve ground (tg) temperature
@@ -1038,6 +1040,7 @@ contains
   real (kind=kind_phys),                           intent(out) :: t2mb   !< 2 m height air temperature (k)
   real (kind=kind_phys),                           intent(out) :: q2b    !< bare ground heat conductance
   real (kind=kind_phys),                           intent(out) :: ehb2   !< sensible heat conductance for diagnostics
+  real (kind=kind_phys),                           intent(out) :: z0h_total !< roughness length for heat
 
 
 ! local variables 
@@ -1058,6 +1061,7 @@ contains
   real (kind=kind_phys)    :: cq2b    !<
   integer                  :: iter    !< iteration index
   real (kind=kind_phys)    :: z0h     !< roughness length, sensible heat, ground (m)
+  real (kind=kind_phys)    :: reyni   !< Roughness Reynolds # over ice
   real (kind=kind_phys)    :: moz     !< monin-obukhov stability parameter
   real (kind=kind_phys)    :: fm      !< momentum stability correction, weighted by prior iters
   real (kind=kind_phys)    :: fh      !< sen heat stability correction, weighted by prior iters
@@ -1090,13 +1094,23 @@ contains
         h      = 0.
         fv     = 0.1
 
+        reyni  = fv*z0m/(1.5e-05)                         !introduction of fv dependent z0h for the iter 
+
+         if (reyni .gt. 2.0) then 
+            z0h = z0m/exp(2.46*(reyni)**0.25 - log(7.4))  !Brutsaert 1982 
+         else 
+            z0h = z0m/exp(-log(0.397))                    !Brusaert 1982, table 4
+         endif
+
+        z0h_total = z0h
+
         cir = emg*sb
         cgh = 2.*df(isnow+1)/dzsnso(isnow+1)
 
 ! -----------------------------------------------------------------
       loop3: do iter = 1, niterb  ! begin stability iteration
 
-        z0h = z0m 
+!       z0h = z0m 
 
 !       for now, only allow sfcdif1 until others can be fixed
 
