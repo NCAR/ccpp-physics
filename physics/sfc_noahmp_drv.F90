@@ -319,7 +319,7 @@
   real(kind=kind_phys), dimension(:)     , intent(out)   :: wet1       ! normalized surface soil saturated fraction
   real(kind=kind_phys), dimension(:)     , intent(out)   :: t2mmp      ! combined T2m from tiles
   real(kind=kind_phys), dimension(:)     , intent(out)   :: q2mp       ! combined q2m from tiles
-  real(kind=kind_phys), dimension(:)     , intent(out)   :: zvfun
+  real(kind=kind_phys), dimension(:)     , intent(out)   :: zvfun      ! 
   character(len=*)    ,                    intent(out)   :: errmsg
   integer             ,                    intent(out)   :: errflg
 
@@ -350,6 +350,7 @@
   real (kind=kind_phys), dimension(       1:nsoil) :: soil_interface_depth  ! in    | soil layer-bottom depth from surface [m]
   integer                                          :: max_snow_levels       ! in    | maximum number of snow levels
   real (kind=kind_phys)                            :: vegetation_frac       ! in    | vegetation fraction [0.0-1.0]
+  real (kind=kind_phys)                            :: area_grid             ! in    | 
   real (kind=kind_phys)                            :: max_vegetation_frac   ! in    | annual maximum vegetation fraction [0.0-1.0]
   integer                                          :: vegetation_category   ! in    | vegetation category
   integer                                          :: ice_flag              ! in    | ice flag (1->ice)
@@ -385,6 +386,7 @@
   real (kind=kind_phys), dimension(       1:nsoil) :: soil_moisture_vol     ! inout | volumetric soil moisture (ice + liq.) [m3/m3]
 
   real (kind=kind_phys)                            :: surface_temperature   !  out  | surface aerodynamic temp
+  real (kind=kind_phys)                            :: zvfun1                !  out  | 
 
   real (kind=kind_phys)                            :: temperature_canopy_air! inout | canopy air tmeperature [K]
   real (kind=kind_phys)                            :: vapor_pres_canopy_air ! inout | canopy air vapor pressure [Pa]
@@ -498,6 +500,9 @@
   real (kind=kind_phys)                            :: leaf_air_resistance   !   out | leaf boundary layer resistance [s/m]
 
   real (kind=kind_phys)                            :: ustarx                !  inout |surface friction velocity
+  real (kind=kind_phys)                            :: prslkix               !  in exner function
+  real (kind=kind_phys)                            :: prsik1x               !  in exner function
+  real (kind=kind_phys)                            :: prslk1x               !  in exner function
 
 !
 !  ---  local variable
@@ -586,6 +591,11 @@ do i = 1, im
       air_pressure_forcing  = prsl1(i)
       uwind_forcing         = u1(i)
       vwind_forcing         = v1(i)
+      area_grid             = garea(i)
+
+      prslkix               = prslki(i)
+      prsik1x               = prsik1(i)
+      prslk1x               = prslk1(i)
 
       spec_humidity_forcing = max(q1(i), 1.e-8)                            ! specific humidity at level 1 (kg/kg)
       virtual_temperature   = temperature_forcing * &
@@ -704,7 +714,7 @@ do i = 1, im
         ice_flag = -1
         temperature_soil_bot = min(temperature_soil_bot,263.15)
 
-        call noahmp_options_glacier(iopt_alb, iopt_snf, iopt_tbot, iopt_stc, iopt_gla )
+        call noahmp_options_glacier(iopt_alb, iopt_snf, iopt_tbot, iopt_stc, iopt_gla, iopt_sfc )
 
         call noahmp_glacier (                                                                      &
           i_location           ,1                    ,cosine_zenith        ,nsnow                , &
@@ -712,6 +722,7 @@ do i = 1, im
           temperature_forcing  ,air_pressure_forcing ,uwind_forcing        ,vwind_forcing        , &
           spec_humidity_forcing,sw_radiation_forcing ,precipitation_forcing,radiation_lw_forcing , &
           temperature_soil_bot ,forcing_height       ,snow_ice_frac_old    ,zsoil                , &
+          thsfc_loc,prslkix ,prsik1x ,prslk1x,vegetation_frac,area_grid                          , &
           snowfall             ,snow_water_equiv_old ,snow_albedo_old      ,                       &
           cm_noahmp            ,ch_noahmp            ,snow_levels          ,snow_water_equiv     , &
           soil_moisture_vol    ,interface_depth      ,snow_depth           ,snow_level_ice       , &
@@ -724,9 +735,9 @@ do i = 1, im
           z0h_total                                                                              , &
           emissivity_total     ,precip_frozen_frac   ,ch_bare_ground_2m    ,snow_sublimation     , &
 #ifdef CCPP
-          albedo_direct        ,albedo_diffuse       ,errmsg               ,errflg )
+          albedo_direct        ,albedo_diffuse,zvfun1,       errmsg               ,errflg )
 #else
-          albedo_direct        ,albedo_diffuse  )
+          albedo_direct        ,albedo_diffuse,zvfun1  )
 #endif
 
 #ifdef CCPP
@@ -768,6 +779,7 @@ do i = 1, im
         q2mp(i)                = spec_humidity_bare_2m
 
         tskin(i)               = temperature_ground
+        zvfun(i)               = zvfun1 
 
       else  ! not glacier
 
@@ -782,12 +794,14 @@ do i = 1, im
           ice_flag              ,surface_type          ,crop_type             , &
           eq_soil_water_vol     ,temperature_forcing   ,air_pressure_forcing  , &
           air_pressure_surface  ,uwind_forcing         ,vwind_forcing         , &
-          spec_humidity_forcing ,cloud_water_forcing   ,sw_radiation_forcing  , &
-          radiation_lw_forcing  ,precip_convective     , &
+          spec_humidity_forcing ,area_grid, cloud_water_forcing               , &
+          sw_radiation_forcing  ,radiation_lw_forcing                         , &
+          thsfc_loc, prslkix,prsik1x,prslk1x                                  , &
+          precip_convective                                                   , &
           precip_non_convective ,precip_sh_convective  ,precip_snow           , &
           precip_graupel        ,precip_hail           ,temperature_soil_bot  , &
           co2_air               ,o2_air                ,foliage_nitrogen      , &
-          snow_ice_frac_old     ,                                               &
+          snow_ice_frac_old                                                   , &
           forcing_height        ,snow_albedo_old       ,snow_water_equiv_old  , &
           temperature_snow_soil ,soil_liquid_vol       ,soil_moisture_vol     , &
           temperature_canopy_air,vapor_pres_canopy_air ,canopy_wet_fraction   , &
@@ -817,7 +831,8 @@ do i = 1, im
           albedo_total          ,snowmelt_out          ,snowmelt_shallow      , &
           snowmelt_shallow_1    ,snowmelt_shallow_2    ,rs_sunlit             , &
           rs_shaded             ,albedo_direct         ,albedo_diffuse        , &
-          albedo_direct_snow    ,albedo_diffuse_snow   ,canopy_gap_fraction   , &
+          albedo_direct_snow    ,albedo_diffuse_snow   ,zvfun1                , &
+          canopy_gap_fraction                                                 , &
           incanopy_gap_fraction ,ch_vegetated          ,ch_bare_ground        , &
           emissivity_total      ,sensible_heat_grd_veg ,sensible_heat_leaf    , &
           sensible_heat_grd_bar ,latent_heat_grd_veg   ,latent_heat_grd_bare  , &
@@ -846,6 +861,7 @@ do i = 1, im
                   spec_humidity_bare_2m * (1-vegetation_fraction)
 
          tskin(i) = surface_temperature
+         zvfun(i) = zvfun1
 
       endif          ! glacial split ends
 
@@ -901,7 +917,7 @@ do i = 1, im
       snowc     (i)   = snow_cover_fraction
       sncovr1   (i)   = snow_cover_fraction
 
-      qsurf     (i)   = spec_humidity_surface
+!     qsurf     (i)   = spec_humidity_surface
 
       tvxy      (i)   = temperature_leaf
       tgxy      (i)   = temperature_ground
@@ -959,7 +975,7 @@ do i = 1, im
 
             tem1 = (z0_total - z0lo) / (z0up - z0lo)
             tem1 = min(max(tem1, 0.0_kind_phys), 1.0_kind_phys)
-            tem2 = max(sigmaf(i), 0.1_kind_phys)
+            tem2 = max(vegetation_fraction, 0.1_kind_phys)
             zvfun(i) = sqrt(tem1 * tem2)
             gdx=sqrt(garea(i))
 
@@ -975,6 +991,7 @@ do i = 1, im
       cmm       (i)   = cmxy(i)  * wind(i)
 
       snwdph    (i)   = snow_depth * 1000.0       ! convert from m to mm; wait after the stability call
+      qsurf     (i)   = q1(i) + evap(i)/(con_hvap*density*ch(i)*wind(i))
 
 !      
 !  --- change units for output
