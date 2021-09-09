@@ -553,18 +553,42 @@
   kind = kind_phys
   intent = in
   optional = F
-[dtp]
-  standard_name = timestep_for_physics
-  long_name = physics timestep
+[dt_inner]
+  standard_name = time_step_for_inner_loop
+  long_name = time step for inner loop
   units = s
   dimensions = ()
   type = real
   kind = kind_phys
   intent = in
   optional = F
-[dt_inner]
-  standard_name = time_step_for_inner_loop
-  long_name = time step for inner loop 
+[sedi_semi]
+  standard_name = flag_for_semi_Lagrangian_sedi_rain
+  long_name = flag for semi Lagrangian sedi of rain
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[sedi_semi_update]
+  standard_name = flag_for_v_update_in_semi_Lagrangian_sedi
+  long_name = flag for v update in semi Lagrangian sedi of rain
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[sedi_semi_decfl]
+  standard_name = flag_for_iteration_with_semi_Lagrangian_sedi
+  long_name = flag for interation with semi Lagrangian sedi of rain
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[dtp]
+  standard_name = timestep_for_physics
+  long_name = physics timestep
   units = s
   dimensions = ()
   type = real

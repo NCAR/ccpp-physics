@@ -970,6 +970,8 @@ MODULE module_mp_thompson
                               nwfa, nifa, nwfa2d, nifa2d,             &
                               tt, th, pii,                            &
                               p, w, dz, dt_in, dt_inner,              &
+                              sedi_semi, sedi_semi_update,            &
+                              sedi_semi_decfl,                        &
                               RAINNC, RAINNCV,                        &
                               SNOWNC, SNOWNCV,                        &
                               ICENC, ICENCV,                          &
@@ -1047,6 +1049,7 @@ MODULE module_mp_thompson
                           vt_dbz_wt
       LOGICAL, INTENT(IN) :: first_time_step
       REAL, INTENT(IN):: dt_in, dt_inner
+      LOGICAL, INTENT(IN) :: sedi_semi, sedi_semi_update,  sedi_semi_decfl
       ! To support subcycling: current step and maximum number of steps
       INTEGER, INTENT (IN) :: istep, nsteps
       LOGICAL, INTENT (IN) :: reset_dBZ
@@ -1421,9 +1424,9 @@ MODULE module_mp_thompson
                       rainprod1d, evapprod1d, &
 #endif
                       rand1, rand2, rand3, &
-                      kts, kte, dt, i, j, &
-                      ext_diag, &
-                      !vtsk1, txri1, txrc1,                             &
+                      kts, kte, dt, i, j, ext_diag,                    & 
+                      sedi_semi, sedi_semi_update,  sedi_semi_decfl,   &
+                      !vtsk1, txri1, txrc1,                            &
                       prw_vcdc1, prw_vcde1,                            &
                       tpri_inu1, tpri_ide1_d, tpri_ide1_s, tprs_ide1,  &
                       tprs_sde1_d, tprs_sde1_s,                        &
@@ -1817,8 +1820,9 @@ MODULE module_mp_thompson
                           kts, kte, dt, ii, jj,                            &
                           ! Extended diagnostics, most arrays only
                           ! allocated if ext_diag flag is .true.
-                          ext_diag, &
-                          !vtsk1, txri1, txrc1,                             &
+                          ext_diag,                                        & 
+                          sedi_semi, sedi_semi_update, sedi_semi_decfl,    &
+                          !vtsk1, txri1, txrc1,                            &
                           prw_vcdc1, prw_vcde1,                            &
                           tpri_inu1, tpri_ide1_d, tpri_ide1_s, tprs_ide1,  &
                           tprs_sde1_d, tprs_sde1_s,                        &
@@ -1847,6 +1851,7 @@ MODULE module_mp_thompson
       REAL, INTENT(IN):: rand1, rand2, rand3
       ! Extended diagnostics, most arrays only allocated if ext_diag is true
       LOGICAL, INTENT(IN) :: ext_diag
+      LOGICAL, INTENT(IN) :: sedi_semi, sedi_semi_update,  sedi_semi_decfl
       REAL, DIMENSION(:), INTENT(OUT):: &
                           !vtsk1, txri1, txrc1,                       &
                           prw_vcdc1,                                 &
@@ -1902,9 +1907,15 @@ MODULE module_mp_thompson
            prg_rcg, prg_ihm
 
       DOUBLE PRECISION, PARAMETER:: zeroD0 = 0.0d0
+      REAL, PARAMETER :: decfl = 8.0
+      REAL :: dtcfl,precip
+      INTEGER :: niter 
 
       REAL, DIMENSION(kts:kte):: temp, pres, qv
       REAL, DIMENSION(kts:kte):: rc, ri, rr, rs, rg, ni, nr, nc, nwfa, nifa
+      REAL, DIMENSION(kts:kte):: rr_tmp,vtrk_tmp,nr_tmp,vtnrk_tmp
+      REAL, DIMENSION(kts:kte):: ri_tmp,vtik_tmp,ni_tmp,vtnik_tmp
+      REAL, DIMENSION(kts:kte):: rs_tmp,vtsk_tmp,rg_tmp,vtgk_tmp
       REAL, DIMENSION(kts:kte):: rho, rhof, rhof2
       REAL, DIMENSION(kts:kte):: qvs, qvsi, delQvs
       REAL, DIMENSION(kts:kte):: satw, sati, ssatw, ssati
@@ -3888,6 +3899,8 @@ MODULE module_mp_thompson
 
       if (ANY(L_qr .eqv. .true.)) then
       nstep = NINT(1./onstep(1))
+
+      if(.not. sedi_semi) then
       do n = 1, nstep
          do k = kte, kts, -1
             sed_r(k) = vtrk(k)*rr(k)
@@ -3916,6 +3929,54 @@ MODULE module_mp_thompson
          if (rr(kts).gt.R1*10.) &
          pptrain = pptrain + sed_r(kts)*DT*onstep(1)
       enddo
+      else !if(.not. sedi_semi)
+        niter = 1
+        dtcfl = dt
+        if(sedi_semi_decfl) then
+          niter = ifix(nstep/decfl) + 1
+          dtcfl = dt/niter
+        endif 
+        do n = 1, niter
+          rr_tmp(:) = rr(:)
+          nr_tmp(:) = nr(:)
+          do k = 1,kte
+            vtrk_tmp(k) = vtrk(k)
+            vtnrk_tmp(k) = vtnrk(k)
+          enddo
+          call nislfv_rain_ppm(kte,rho,rhof,temp,dzq,vtrk_tmp,rr,precip,dtcfl,1,0,R1)
+          call nislfv_rain_ppm(kte,rho,rhof,temp,dzq,vtnrk_tmp,nr,vtr,dtcfl,1,0,R2)
+          do k = kts, kte
+            qrten(k) = qrten(k) + (rr(k) - rr_tmp(k))/rho(k)/dt
+            nrten(k) = nrten(k) + (nr(k) - nr_tmp(k))/rho(k)/dt
+          enddo
+          pptrain = pptrain + precip
+
+
+          if(sedi_semi_update) then
+            do k = kte+1, kts, -1
+              vtrk(k) = 0.
+              vtnrk(k) = 0.
+            enddo
+            do k = kte, kts, -1
+              vtr = 0.
+              if (rr(k).gt. R1) then
+                lamr = (am_r*crg(3)*org2*nr(k)/rr(k))**obmr
+                vtr = rhof(k)*av_r*crg(6)*org3 * lamr**cre(3)               &
+                   *((lamr+fv_r)**(-cre(6)))
+                vtrk(k) = vtr
+ ! First below is technically correct:
+ !         vtr = rhof(k)*av_r*crg(5)*org2 * lamr**cre(2)                &
+ !                     *((lamr+fv_r)**(-cre(5)))
+ ! Test: make number fall faster (but still slower than mass)
+ ! Goal: less prominent size sorting
+                vtr = rhof(k)*av_r*crg(7)/crg(12) * lamr**cre(12)           &
+                     *((lamr+fv_r)**(-cre(7)))
+                vtnrk(k) = vtr
+              endif
+            enddo
+          endif ! if(sedi_semi_update)
+        enddo
+      endif! if(.not. sedi_semi)
       endif
 
 !+---+-----------------------------------------------------------------+
@@ -6047,6 +6108,296 @@ MODULE module_mp_thompson
 
       end subroutine calc_refl10cm
 !
+!-------------------------------------------------------------------
+      SUBROUTINE nislfv_rain_ppm(km,denl,denfacl,tkl,dzl,wwl,rql,precip,dt,id,iter,R1)
+!         ,oams,a_,b_,Lam0,Lam1,fv_s,Kap0,Kap1,mu_s,csg,cse,av_s,T_0,vts_boost,ii,jj)
+!      call nislfv_rain_ppm(1,kte,rho,rhof,temp,dzq,vtsk,rs,rs,dt,1,1,&
+!         R1,oams,a_,b_,Lam0,Lam1,fv_s,Kap0,Kap1,mu_s,csg,cse,av_s,T_0,vts_boost)
+!-------------------------------------------------------------------
+!
+! for non-iteration semi-Lagrangain forward advection for cloud
+! with mass conservation and positive definite advection
+! 2nd order interpolation with monotonic piecewise parabolic method
+! this routine is under assumption of decfl < 1 for semi_Lagrangian
+!
+! dzl    depth of model layer in meter
+! wwl    terminal velocity at model layer m/s
+! rql    cloud density*mixing ratio
+! precip precipitation
+! dt     time step
+! id     kind of precip: 0 test case; 1 raindrop
+! iter   how many time to guess mean terminal velocity: 0 pure forward.
+!        0 : use departure wind for advection
+!        1 : use mean wind for advection
+!        > 1 : use mean wind after iter-1 iterations
+!
+! author: hann-ming henry juang <henry.juang@noaa.gov>
+!         implemented by song-you hong
+!
+      implicit none
+      integer km,id
+      real  dt
+      real  dzl(km),wwl(km),rql(km),precip
+      real  denl(km),denfacl(km),tkl(km)
+! for thompson scheme
+      real R1
+!     real oams,a_,b_,Lam0,Lam1,fv_s,Kap0,Kap1,mu_s,av_s,T_0
+!     real xDs,Mrat,ils1,ils2,t1_vts,t2_vts,t3_vts,t4_vts,vts
+!     real csg(18),cse(18),vts_boost(km),smo2(km),smob(km),smoc(km)
+!
+      integer  i,k,n,m,kk,kb,kt,iter,ii,jj
+      real  tl,tl2,qql,dql,qqd
+      real  th,th2,qqh,dqh
+      real  zsum,qsum,dim,dip,c1,con1,fa1,fa2
+      real  allold, allnew, zz, dzamin, cflmax, decfl
+      real  dz(km), ww(km), qq(km), wd(km), wa(km), was(km)
+      real  den(km), denfac(km), tk(km)
+      real  wi(km+1), zi(km+1), za(km+2)    !hmhj
+      real  qn(km), qr(km),tmp(km),tmp1(km),tmp2(km),tmp3(km)
+      real  dza(km+1), qa(km+1), qmi(km+1), qpi(km+1)
+!
+      precip = 0.0
+      qa(:) = 0.0
+      qq(:) = 0.0
+!     smo2(:) = 0.0
+!     smob(:) = 0.0
+!     smoc(:) = 0.0
+!
+      !i_loop : do i=1,im
+! -----------------------------------
+      dz(:) = dzl(:)
+      ww(:) = wwl(:)
+      do k = 1,km
+        if(rql(k).gt.R1) qq(k) = rql(k) 
+        if(qq(k).le.R1) ww(k) = 0.0
+      enddo
+      den(:) = denl(:)
+      denfac(:) = denfacl(:)
+      tk(:) = tkl(:)
+! skip for no precipitation for all layers
+      allold = 0.0
+      do k=1,km
+        allold = allold + qq(k)
+      enddo
+      if(allold.le.0.0) then
+!        cycle i_loop
+        go to 158
+      endif
+!
+! compute interface values
+      zi(1)=0.0
+      do k=1,km
+        zi(k+1) = zi(k)+dz(k)
+      enddo
+! save departure wind
+      wd(:) = ww(:)
+      n=1
+ 100  continue
+! plm is 2nd order, we can use 2nd order wi or 3rd order wi
+! 2nd order interpolation to get wi
+      wi(1) = ww(1)
+      wi(km+1) = ww(km)
+      do k=2,km
+        wi(k) = (ww(k)*dz(k-1)+ww(k-1)*dz(k))/(dz(k-1)+dz(k))
+      enddo
+! 3rd order interpolation to get wi
+      fa1 = 9./16.
+      fa2 = 1./16.
+      wi(1) = ww(1)
+      wi(2) = 0.5*(ww(2)+ww(1))
+      do k=3,km-1
+        wi(k) = fa1*(ww(k)+ww(k-1))-fa2*(ww(k+1)+ww(k-2))
+      enddo
+      wi(km) = 0.5*(ww(km)+ww(km-1))
+      wi(km+1) = ww(km)
+!
+! terminate of top of raingroup
+      do k=2,km
+        if( ww(k).eq.0.0 ) wi(k)=ww(k-1)
+      enddo
+!
+! diffusivity of wi
+      con1 = 0.05
+      do k=km,1,-1
+        decfl = (wi(k+1)-wi(k))*dt/dz(k)
+        if( decfl .gt. con1 ) then
+          wi(k) = wi(k+1) - con1*dz(k)/dt
+        endif
+      enddo
+! compute arrival point
+      do k=1,km+1
+        za(k) = zi(k) - wi(k)*dt
+      enddo
+      za(km+2) = zi(km+1)   !hmhj
+!
+      do k=1,km+1  !hmhj
+        dza(k) = za(k+1)-za(k)
+      enddo
+!hmhj dza(km+1) = zi(km+1) - za(km+1)
+!
+! computer deformation at arrival point
+      do k=1,km
+        qa(k) = qq(k)*dz(k)/dza(k)
+        qr(k) = qa(k)/den(k)
+      enddo
+      qa(km+1) = 0.0
+!     call maxmin(km,1,qa,' arrival points ')
+!
+! compute arrival terminal velocity, and estimate mean terminal velocity
+! then back to use mean terminal velocity
+!     if( n.le.iter ) then
+!       call slope_wsm3(qr,den,denfac,tk,tmp,tmp1,tmp2,tmp3,wa,1,1,1,km)
+! thompson scheme vts, neglect the snow ratio over rain
+!       do k=1,km
+!         if (qa(k).gt. R1) then
+!          smob(k) = qa(k)*oams
+!          smo2(k) = smob(k)
+!          smoc(k) = a_ * smo2(k)**b_
+!          xDs = smoc(k) / smob(k)
+!          Mrat = 1./xDs
+!          ils1 = 1./(Mrat*Lam0 + fv_s)
+!          ils2 = 1./(Mrat*Lam1 + fv_s)
+!          t1_vts = Kap0*csg(4)*ils1**cse(4)
+!          t2_vts = Kap1*Mrat**mu_s*csg(10)*ils2**cse(10)
+!          ils1 = 1./(Mrat*Lam0)
+!          ils2 = 1./(Mrat*Lam1)
+!          t3_vts = Kap0*csg(1)*ils1**cse(1)
+!          t4_vts = Kap1*Mrat**mu_s*csg(7)*ils2**cse(7)
+!          vts = denfac(k)*av_s * (t1_vts+t2_vts)/(t3_vts+t4_vts)
+!     print*,' ils1 ils2 mu_s t1-4 vts
+!     ',ils1,ils2,mu_s,t1_vts,t2_vts,t3_vts,t4_vts
+!     print*,' k mrat lam0 lam1 kap0 kap1 boost
+!     ',k,mrat,lam0,lam1,kap0,kap1,vts_boost(k)
+!     print*,' tk t_0 qa rr vts  ',k,tk(k),t_0,qa(k),vts
+!           wa(k) = vts*vts_boost(k)
+!           wa(k) = vts
+!         endif
+!       enddo
+! end of thompson
+!       if( n.ge.2 ) wa(1:km)=0.5*(wa(1:km)+was(1:km))
+!       do k=1,km
+! mean wind is average of departure and new arrival winds
+!         ww(k) = 0.5* ( wd(k)+wa(k) )
+!       enddo
+!       was(:) = wa(:)
+!       n=n+1
+!       go to 100
+!     endif
+!
+! estimate values at arrival cell interface with monotone
+      do k=2,km
+        dip=(qa(k+1)-qa(k))/(dza(k+1)+dza(k))
+        dim=(qa(k)-qa(k-1))/(dza(k-1)+dza(k))
+        if( dip*dim.le.0.0 ) then
+          qmi(k)=qa(k)
+          qpi(k)=qa(k)
+        else
+          qpi(k)=qa(k)+0.5*(dip+dim)*dza(k)
+          qmi(k)=2.0*qa(k)-qpi(k)
+          if( qpi(k).lt.0.0 .or. qmi(k).lt.0.0 ) then
+            qpi(k) = qa(k)
+            qmi(k) = qa(k)
+          endif
+        endif
+      enddo
+      qpi(1)=qa(1)
+      qmi(1)=qa(1)
+      qmi(km+1)=qa(km+1)
+      qpi(km+1)=qa(km+1)
+!
+! interpolation to regular point
+      qn = 0.0
+      kb=1
+      kt=1
+      intp : do k=1,km
+             kb=max(kb-1,1)
+             kt=max(kt-1,1)
+! find kb and kt
+             if( zi(k).ge.za(km+1) ) then
+               exit intp
+             else
+               find_kb : do kk=kb,km
+                         if( zi(k).le.za(kk+1) ) then
+                           kb = kk
+                           exit find_kb
+                         else
+                           cycle find_kb
+                         endif
+               enddo find_kb
+               find_kt : do kk=kt,km+2    !hmhj
+                         if( zi(k+1).le.za(kk) ) then
+                           kt = kk
+                           exit find_kt
+                         else
+                           cycle find_kt
+                         endif
+               enddo find_kt
+               kt = kt - 1
+! compute q with piecewise constant method
+               if( kt.eq.kb ) then
+                 tl=(zi(k)-za(kb))/dza(kb)
+                 th=(zi(k+1)-za(kb))/dza(kb)
+                 tl2=tl*tl
+                 th2=th*th
+                 qqd=0.5*(qpi(kb)-qmi(kb))
+                 qqh=qqd*th2+qmi(kb)*th
+                 qql=qqd*tl2+qmi(kb)*tl
+                 qn(k) = (qqh-qql)/(th-tl)
+               else if( kt.gt.kb ) then
+                 tl=(zi(k)-za(kb))/dza(kb)
+                 tl2=tl*tl
+                 qqd=0.5*(qpi(kb)-qmi(kb))
+                 qql=qqd*tl2+qmi(kb)*tl
+                 dql = qa(kb)-qql
+                 zsum  = (1.-tl)*dza(kb)
+                 qsum  = dql*dza(kb)
+                 if( kt-kb.gt.1 ) then
+                 do m=kb+1,kt-1
+                   zsum = zsum + dza(m)
+                   qsum = qsum + qa(m) * dza(m)
+                 enddo
+                 endif
+                 th=(zi(k+1)-za(kt))/dza(kt)
+                 th2=th*th
+                 qqd=0.5*(qpi(kt)-qmi(kt))
+                 dqh=qqd*th2+qmi(kt)*th
+                 zsum  = zsum + th*dza(kt)
+                 qsum  = qsum + dqh*dza(kt)
+                 qn(k) = qsum/zsum
+               endif
+               cycle intp
+             endif
+!
+       enddo intp
+!
+! rain out
+      sum_precip: do k=1,km
+                    if( za(k).lt.0.0 .and. za(k+1).le.0.0 ) then
+!hmhj
+                      precip = precip + qa(k)*dza(k)
+                      cycle sum_precip
+                    else if ( za(k).lt.0.0 .and. za(k+1).gt.0.0 ) then
+!hmhj
+!hmhj                 precip(i) = precip(i) + qa(k)*(0.0-za(k))
+                      th = (0.0-za(k))/dza(k)               !hmhj
+                      th2 = th*th                           !hmhj
+                      qqd = 0.5*(qpi(k)-qmi(k))             !hmhj
+                      qqh = qqd*th2+qmi(k)*th               !hmhj
+                      precip = precip + qqh*dza(k)    !hmhj
+                      exit sum_precip
+                    endif
+                    exit sum_precip
+      enddo sum_precip
+!
+! replace the new values
+      rql(:) = max(qn(:),R1)
+!
+  158  continue
+! ----------------------------------
+!      enddo i_loop
+!
+  END SUBROUTINE nislfv_rain_ppm
+!+---+-----------------------------------------------------------------+
 !+---+-----------------------------------------------------------------+
 !+---+-----------------------------------------------------------------+
 END MODULE module_mp_thompson
