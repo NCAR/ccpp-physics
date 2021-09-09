@@ -386,7 +386,6 @@
   real (kind=kind_phys), dimension(       1:nsoil) :: soil_moisture_vol     ! inout | volumetric soil moisture (ice + liq.) [m3/m3]
 
   real (kind=kind_phys)                            :: surface_temperature   !  out  | surface aerodynamic temp
-  real (kind=kind_phys)                            :: zvfun1                !  out  | 
 
   real (kind=kind_phys)                            :: temperature_canopy_air! inout | canopy air tmeperature [K]
   real (kind=kind_phys)                            :: vapor_pres_canopy_air ! inout | canopy air vapor pressure [Pa]
@@ -735,9 +734,9 @@ do i = 1, im
           z0h_total                                                                              , &
           emissivity_total     ,precip_frozen_frac   ,ch_bare_ground_2m    ,snow_sublimation     , &
 #ifdef CCPP
-          albedo_direct        ,albedo_diffuse,zvfun1,       errmsg               ,errflg )
+          albedo_direct        ,albedo_diffuse,       errmsg               ,errflg )
 #else
-          albedo_direct        ,albedo_diffuse,zvfun1  )
+          albedo_direct        ,albedo_diffuse,)
 #endif
 
 #ifdef CCPP
@@ -779,7 +778,6 @@ do i = 1, im
         q2mp(i)                = spec_humidity_bare_2m
 
         tskin(i)               = temperature_ground
-        zvfun(i)               = zvfun1 
 
       else  ! not glacier
 
@@ -831,7 +829,7 @@ do i = 1, im
           albedo_total          ,snowmelt_out          ,snowmelt_shallow      , &
           snowmelt_shallow_1    ,snowmelt_shallow_2    ,rs_sunlit             , &
           rs_shaded             ,albedo_direct         ,albedo_diffuse        , &
-          albedo_direct_snow    ,albedo_diffuse_snow   ,zvfun1                , &
+          albedo_direct_snow    ,albedo_diffuse_snow                          , &
           canopy_gap_fraction                                                 , &
           incanopy_gap_fraction ,ch_vegetated          ,ch_bare_ground        , &
           emissivity_total      ,sensible_heat_grd_veg ,sensible_heat_leaf    , &
@@ -861,7 +859,6 @@ do i = 1, im
                   spec_humidity_bare_2m * (1-vegetation_fraction)
 
          tskin(i) = surface_temperature
-         zvfun(i) = zvfun1
 
       endif          ! glacial split ends
 

@@ -398,7 +398,7 @@ contains
                    runsrf  , runsub  , apar    , psn     , sav     , sag     , & ! out :
                    fsno    , nee     , gpp     , npp     , fveg    , albedo  , & ! out :
                    qsnbot  , ponding , ponding1, ponding2, rssun   , rssha   , & ! out :
-                   albd    , albi    , albsnd  , albsni  , zvfun1            , & ! out :
+                   albd    , albi    , albsnd  , albsni                      , & ! out :
                    bgap    , wgap    , chv     , chb     , emissi  ,           & ! out :
 		   shg     , shc     , shb     , evg     , evb     , ghv     , & ! out :
 		   ghb     , irg     , irc     , irb     , tr      , evc     , & ! out :
@@ -536,7 +536,6 @@ contains
   real (kind=kind_phys)                           , intent(out)   :: ponding1!< surface ponding [mm]
   real (kind=kind_phys)                           , intent(out)   :: ponding2!< surface ponding [mm]
   real (kind=kind_phys)                           , intent(out)   :: esnow
-  real (kind=kind_phys)                           , intent(out)   :: zvfun1
   real (kind=kind_phys)                           , intent(out)   :: rb        !< leaf boundary layer resistance (s/m)
   real (kind=kind_phys)                           , intent(out)   :: laisun    !< sunlit leaf area index (m2/m2)
   real (kind=kind_phys)                           , intent(out)   :: laisha    !< shaded leaf area index (m2/m2)
@@ -778,7 +777,7 @@ contains
                  sav    ,sag    ,qmelt  ,fsa    ,fsr    ,taux   , & !out
                  tauy   ,fira   ,fsh    ,fcev   ,fgev   ,fctr   , & !out
                  trad   ,psn    ,apar   ,ssoil  ,btrani ,btran  , & !out
-                 ponding,ts     ,latheav , latheag , frozen_canopy,frozen_ground,zvfun1,   & !out
+                 ponding,ts     ,latheav , latheag , frozen_canopy,frozen_ground,          & !out
                  tv     ,tg     ,stc    ,snowh  ,eah    ,tah    , & !inout
                  sneqvo ,sneqv  ,sh2o   ,smc    ,snice  ,snliq  , & !inout
                  albold ,cm     ,ch     ,dx     ,dz8w   ,q2     , & !inout
@@ -1609,7 +1608,7 @@ endif   ! croptype == 0
                      sav    ,sag    ,qmelt  ,fsa    ,fsr    ,taux   , & !out
                      tauy   ,fira   ,fsh    ,fcev   ,fgev   ,fctr   , & !out
                      trad   ,psn    ,apar   ,ssoil  ,btrani ,btran  , & !out
-                     ponding,ts     ,latheav , latheag , frozen_canopy,frozen_ground,zvfun1,    & !out
+                     ponding,ts     ,latheav , latheag , frozen_canopy,frozen_ground,      & !out
                      tv     ,tg     ,stc    ,snowh  ,eah    ,tah    , & !inout
                      sneqvo ,sneqv  ,sh2o   ,smc    ,snice  ,snliq  , & !inout
                      albold ,cm     ,ch     ,dx     ,dz8w   ,q2     , &   !inout
@@ -1755,7 +1754,6 @@ endif   ! croptype == 0
   real (kind=kind_phys)                              , intent(out)   :: latheav !latent heat vap./sublimation (j/kg)
   real (kind=kind_phys)                              , intent(out)   :: latheag !latent heat vap./sublimation (j/kg)
   real (kind=kind_phys)                              , intent(out)   :: ts     !surface temperature (k)
-  real (kind=kind_phys)                              , intent(out)   :: zvfun1 
   logical                           , intent(out)   :: frozen_ground ! used to define latent heat pathway
   logical                           , intent(out)   :: frozen_canopy ! used to define latent heat pathway
 
@@ -2168,7 +2166,7 @@ endif   ! croptype == 0
 #endif
                     tauxv   ,tauyv   ,irg     ,irc     ,shg     , & !out
                     shc     ,evg     ,evc     ,tr      ,ghv     , & !out
-                    t2mv    ,psnsun  ,psnsha  ,csigmaf1,zvfun1  , & !out
+                    t2mv    ,psnsun  ,psnsha  ,csigmaf1,          & !out
 !jref:start
                     qc      ,qsfc    ,psfc    , & !in
                     q2v     ,chv2, chleaf, chuc)               !inout 
@@ -2198,7 +2196,7 @@ endif   ! croptype == 0
 #else
                     tgb     ,cmb     ,chb, ustarx,                   & !inout
 #endif
-                    tauxb   ,tauyb   ,irb     ,shb     ,evb,csigmaf0,zvfun1,& !out
+                    tauxb   ,tauyb   ,irb     ,shb     ,evb,csigmaf0,& !out
                     ghb     ,t2mb    ,dx      ,dz8w    ,vegtyp  , & !out
 !jref:start
                     qc      ,qsfc    ,psfc    , & !in
@@ -3610,7 +3608,7 @@ endif   ! croptype == 0
 #endif
                        tauxv   ,tauyv   ,irg     ,irc     ,shg     , & !out
                        shc     ,evg     ,evc     ,tr      ,gh      , & !out
-                       t2mv    ,psnsun  ,psnsha  ,csigmaf1,zvfun1  , & !out
+                       t2mv    ,psnsun  ,psnsha  ,csigmaf1,          & !out
                        qc      ,qsfc    ,psfc    ,                   & !in
                        q2v     ,cah2    ,chleaf  ,chuc    )            !inout 
 
@@ -3729,7 +3727,6 @@ endif   ! croptype == 0
   real (kind=kind_phys),                           intent(out) :: psnsun !sunlit leaf photosynthesis (umolco2/m2/s)
   real (kind=kind_phys),                           intent(out) :: psnsha !shaded leaf photosynthesis (umolco2/m2/s)
   real (kind=kind_phys),                           intent(out) :: csigmaf1
-  real (kind=kind_phys),                           intent(out) :: zvfun1
   real (kind=kind_phys),                           intent(out) :: chleaf !leaf exchange coefficient
   real (kind=kind_phys),                           intent(out) :: chuc   !under canopy exchange coefficient
 
@@ -3834,7 +3831,7 @@ endif   ! croptype == 0
   real (kind=kind_phys) :: laisune      !sunlit leaf area index, one-sided (m2/m2),effective
   real (kind=kind_phys) :: laishae      !shaded leaf area index, one-sided (m2/m2),effective
 
-  real(kind=kind_phys) ::  tem1,tem2,gdx
+  real(kind=kind_phys) ::  tem1,tem2,zvfun1,gdx
   real(kind=kind_phys), parameter :: z0lo=0.1, z0up=1.0
 
   integer :: k         !index
@@ -4368,7 +4365,7 @@ endif   ! croptype == 0
 #else
                         tgb     ,cm      ,ch,ustarx,          & !inout
 #endif
-                        tauxb   ,tauyb   ,irb     ,shb     ,evb,csigmaf0,zvfun1,& !out
+                        tauxb   ,tauyb   ,irb     ,shb     ,evb,csigmaf0,& !out
                         ghb     ,t2mb    ,dx      ,dz8w    ,ivgtyp  , & !out
                         qc      ,qsfc    ,psfc    ,                   & !in
                         sfcprs  ,q2b     ,ehb2    )                     !in 
@@ -4454,7 +4451,6 @@ endif   ! croptype == 0
   real (kind=kind_phys),                           intent(out) :: ghb    !ground heat flux (w/m2)  [+ to soil]
   real (kind=kind_phys),                           intent(out) :: t2mb   !2 m height air temperature (k)
   real (kind=kind_phys),                           intent(out) :: csigmaf0  !
-  real (kind=kind_phys),                           intent(out) :: zvfun1  !
 !jref:start
   real (kind=kind_phys),                           intent(out) :: q2b    !bare ground heat conductance
   real (kind=kind_phys) :: ehb    !bare ground heat conductance
@@ -4539,7 +4535,7 @@ endif   ! croptype == 0
   real (kind=kind_phys) :: fh2          !monin-obukhov heat adjustment at 2m
   real (kind=kind_phys) :: ch2          !surface exchange at 2m
 
-  real(kind=kind_phys) ::  tem1,tem2,gdx
+  real(kind=kind_phys) ::  tem1,tem2,zvfun1,gdx
   real(kind=kind_phys), parameter :: z0lo=0.1, z0up=1.0
 
   integer :: iter    !iteration index

@@ -129,10 +129,10 @@ contains
                    trad    ,edir    ,runsrf  ,runsub  ,sag     ,albedo  , & ! out :
                    qsnbot ,ponding ,ponding1,ponding2,t2m,q2e,z0h_total , & ! out :
 #ifdef CCPP
-                   emissi,  fpice   ,ch2b , esnow, albsnd, albsni,zvfun1, &
+                   emissi,  fpice   ,ch2b , esnow, albsnd, albsni,        &
                    errmsg, errflg) 
 #else
-                   emissi,  fpice   ,ch2b , esnow, albsnd, albsni,zvfun1) 
+                   emissi,  fpice   ,ch2b , esnow, albsnd, albsni) 
 #endif
                    
 
@@ -217,7 +217,6 @@ contains
   real (kind=kind_phys)                           , intent(out)   :: esnow
   real (kind=kind_phys), dimension(1:2)           , intent(out)   :: albsnd !< snow albedo (direct)
   real (kind=kind_phys), dimension(1:2)           , intent(out)   :: albsni !< snow albedo (diffuse)
-  real (kind=kind_phys)                           , intent(out)   :: zvfun1
 
 
 #ifdef CCPP  
@@ -284,7 +283,7 @@ contains
                          imelt  ,snicev ,snliqv ,epore  ,qmelt  ,ponding, & !out
                          sag    ,fsa    ,fsr    ,fira   ,fsh    ,fgev   , & !out
                          trad   ,t2m    ,ssoil  ,lathea ,q2e    ,emissi,  & !out
-                         ch2b   ,albsnd ,albsni ,z0h_total,zvfun1    )      !out
+                         ch2b   ,albsnd ,albsni ,z0h_total)                 !out
 
 #ifdef CCPP
     if (errflg /= 0) return
@@ -415,7 +414,7 @@ contains
                              imelt  ,snicev ,snliqv ,epore  ,qmelt  ,ponding, & !out
                              sag    ,fsa    ,fsr    ,fira   ,fsh    ,fgev   , & !out
                              trad   ,t2m    ,ssoil  ,lathea ,q2e    ,emissi,  & !out
-                             ch2b   ,albsnd ,albsni ,z0h_total,zvfun1   )       !out
+                             ch2b   ,albsnd ,albsni ,z0h_total)                 !out
 
 ! --------------------------------------------------------------------------------------------------
 ! --------------------------------------------------------------------------------------------------
@@ -498,7 +497,6 @@ contains
   real (kind=kind_phys), dimension(1:2)              , intent(out)   :: albsnd !< snow albedo (direct)
   real (kind=kind_phys), dimension(1:2)              , intent(out)   :: albsni !< snow albedo (diffuse)
   real (kind=kind_phys)                              , intent(out)   :: z0h_total !< roughness length for heat
-  real (kind=kind_phys)                              , intent(out)   :: zvfun1
 
 
 ! local
@@ -569,7 +567,7 @@ contains
                        cm      ,ch      ,tg      ,qsfc    ,          & !inout
 #endif
                        fira    ,fsh     ,fgev    ,ssoil   ,          & !out
-                       t2m     ,q2e     ,ch2b    ,z0h_total,zvfun1)     !out 
+                       t2m     ,q2e     ,ch2b    ,z0h_total)           !out 
 
 !energy balance at surface: sag=(irb+shb+evb+ghb)
 
@@ -1005,7 +1003,7 @@ contains
                            cm      ,ch      ,tgb     ,qsfc    ,          & !inout
 #endif
                            irb     ,shb     ,evb     ,ghb     ,          & !out
-                           t2mb    ,q2b     ,ehb2    ,z0h_total,zvfun1)    !out 
+                           t2mb    ,q2b     ,ehb2    ,z0h_total)           !out 
 
 ! --------------------------------------------------------------------------------------------------
 ! use newton-raphson iteration to solve ground (tg) temperature
@@ -1073,7 +1071,6 @@ contains
   real (kind=kind_phys),                           intent(out) :: q2b    !< bare ground heat conductance
   real (kind=kind_phys),                           intent(out) :: ehb2   !< sensible heat conductance for diagnostics
   real (kind=kind_phys),                           intent(out) :: z0h_total !< roughness length for heat
-  real (kind=kind_phys),                           intent(out) :: zvfun1  !
 
 
 ! local variables 
@@ -1113,7 +1110,7 @@ contains
   real(kind=kind_phys)     :: reyni   ! roughness Reynolds #
   real(kind=kind_phys)     :: virtfaci! virutal factor
 
-  real(kind=kind_phys) ::  tem1,tem2,gdx
+  real(kind=kind_phys) ::  tem1,tem2,zvfun1,gdx
   real(kind=kind_phys), parameter :: z0lo=0.1, z0up=1.0
 
   real (kind=kind_phys)    :: moz     !< monin-obukhov stability parameter
