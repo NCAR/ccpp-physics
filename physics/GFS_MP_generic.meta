@@ -823,7 +823,7 @@
   standard_name = cumulative_change_of_state_variables
   long_name = diagnostic tendencies for state variables
   units = various
-  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_cumulative_change_processes)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_cumulative_change_processes)
   type = real
   kind = kind_phys
   intent = inout
@@ -832,7 +832,7 @@
   standard_name = cumulative_change_of_state_variables_outer_index
   long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
   units = index
-  dimensions = (number_of_tracers_plus_one_hundred,number_of_causes)
+  dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
   type = integer
   intent = in
   optional = F
