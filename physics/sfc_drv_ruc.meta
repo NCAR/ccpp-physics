@@ -147,21 +147,19 @@
   intent = in
   optional = F
 [stype]
-  standard_name = soil_type_classification_real
+  standard_name = soil_type_classification
   long_name = soil type for lsm
   units = index
   dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
+  type = integer
   intent = in
   optional = F
 [vtype]
-  standard_name = vegetation_type_classification_real
+  standard_name = vegetation_type_classification
   long_name = vegetation type for lsm
   units = index
   dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
+  type = integer
   intent = in
   optional = F
 [q1]
@@ -758,21 +756,21 @@
   kind = kind_phys
   intent = in
   optional = F
-[soiltyp]
+[stype]
   standard_name = soil_type_classification
   long_name = soil type at each grid cell
   units = index
   dimensions = (horizontal_loop_extent)
   type = integer
-  intent = inout
+  intent = in
   optional = F
-[vegtype]
+[vtype]
   standard_name = vegetation_type_classification
   long_name = vegetation type at each grid cell
   units = index
   dimensions = (horizontal_loop_extent)
   type = integer
-  intent = inout
+  intent = in
   optional = F
 [sigmaf]
   standard_name = vegetation_area_fraction

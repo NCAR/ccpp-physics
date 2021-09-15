@@ -16,7 +16,57 @@
 
       contains
 
-      subroutine GFS_surface_generic_pre_init ()
+!> \section arg_table_GFS_surface_generic_pre_init Argument Table
+!! \htmlinclude GFS_surface_generic_pre_init.html
+!!
+      subroutine GFS_surface_generic_pre_init (im, slmsk, isot, ivegsrc, stype, vtype, slope, errmsg, errflg)
+
+         implicit none
+
+         ! Interface variables
+         integer,                       intent(in)    :: im, isot, ivegsrc
+         real(kind_phys), dimension(:), intent(in)    :: slmsk
+         integer,         dimension(:), intent(inout) :: vtype, stype, slope
+
+         ! CCPP error handling
+         character(len=*), intent(out) :: errmsg
+         integer,          intent(out) :: errflg
+
+         ! Local variables
+         integer              :: i
+
+         ! Initialize CCPP error handling variables
+         errmsg = ''
+         errflg = 0
+
+         do i=1,im
+           if (nint(slmsk(i)) == 2) then
+             if (isot == 1) then
+               stype(i) = 16
+             else
+               stype(i) = 9
+             endif
+             if (ivegsrc == 0 .or. ivegsrc == 4) then
+               vtype(i) = 24
+             elseif (ivegsrc == 1) then
+               vtype(i) = 15
+             elseif (ivegsrc == 2) then
+               vtype(i) = 13
+             elseif (ivegsrc == 3 .or. ivegsrc == 5) then
+               vtype(i) = 15
+             endif
+             slope(i)  = 9
+           else
+             ! DH* remove else block if not needed
+             !soiltyp(i)  = int( stype(i)+0.5_kind_phys )
+             !vegtype(i)  = int( vtype(i)+0.5_kind_phys )
+             !slopetyp(i) = int( slope(i)+0.5_kind_phys )    !! clu: slope -> slopetyp
+             !if (vegtype(i)  < 1) vegtype(i)  = 17
+             !if (slopetyp(i) < 1) slopetyp(i) = 1
+             ! *DH
+           endif
+         enddo
+
       end subroutine GFS_surface_generic_pre_init
 
       subroutine GFS_surface_generic_pre_finalize()
@@ -26,8 +76,7 @@
 !! \htmlinclude GFS_surface_generic_pre_run.html
 !!
       subroutine GFS_surface_generic_pre_run (im, levs, vfrac, islmsk, isot, ivegsrc, stype, vtype, slope, &
-                          prsik_1, prslk_1, tsfc, phil, con_g,                                             &
-                          sigmaf, soiltyp, vegtype, slopetyp, work3, zlvl,                                 &
+                          prsik_1, prslk_1, tsfc, phil, con_g, sigmaf, work3, zlvl,                        &
                           drain_cpl, dsnow_cpl, rain_cpl, snow_cpl, lndp_type, n_var_lndp, sfc_wts,        &
                           lndp_var_list, lndp_prt_list,                                                    &
                           z01d, zt1d, bexp1d, xlai1d, vegf1d, lndp_vgf, sfc_wts_inv,                       &
@@ -41,10 +90,10 @@
         ! Interface variables
         integer, intent(in) :: im, levs, isot, ivegsrc
         integer, dimension(:), intent(in) :: islmsk
-        integer, dimension(:), intent(inout) :: soiltyp, vegtype, slopetyp
 
         real(kind=kind_phys), intent(in) :: con_g
-        real(kind=kind_phys), dimension(:), intent(in) :: vfrac, stype, vtype, slope, prsik_1, prslk_1
+        real(kind=kind_phys), dimension(:), intent(in) :: vfrac, prsik_1, prslk_1
+        integer, dimension(:), intent(inout) :: vtype, stype, slope
 
         real(kind=kind_phys), dimension(:), intent(inout) :: tsfc
         real(kind=kind_phys), dimension(:,:), intent(in) :: phil
@@ -131,26 +180,28 @@
           islmsk_cice(i) = islmsk(i)
           if (islmsk(i) == 2) then
             if (isot == 1) then
-              soiltyp(i) = 16
+              stype(i) = 16
             else
-              soiltyp(i) = 9
+              stype(i) = 9
             endif
             if (ivegsrc == 0 .or. ivegsrc == 4) then
-              vegtype(i) = 24
+              vtype(i) = 24
             elseif (ivegsrc == 1) then
-              vegtype(i) = 15
+              vtype(i) = 15
             elseif (ivegsrc == 2) then
-              vegtype(i) = 13
+              vtype(i) = 13
             elseif (ivegsrc == 3 .or. ivegsrc == 5) then
-              vegtype(i) = 15
+              vtype(i) = 15
             endif
-            slopetyp(i)  = 9
+            slope(i)  = 9
           else
-            soiltyp(i)  = int( stype(i)+0.5_kind_phys )
-            vegtype(i)  = int( vtype(i)+0.5_kind_phys )
-            slopetyp(i) = int( slope(i)+0.5_kind_phys )    !! clu: slope -> slopetyp
-            if (vegtype(i)  < 1) vegtype(i)  = 17
-            if (slopetyp(i) < 1) slopetyp(i) = 1
+            ! DH* REMOVE else block if not needeed - create separate subroutine to be called by both init and run?
+            !soiltyp(i)  = int( stype(i)+0.5_kind_phys )
+            !vegtype(i)  = int( vtype(i)+0.5_kind_phys )
+            !slopetyp(i) = int( slope(i)+0.5_kind_phys )    !! clu: slope -> slopetyp
+            !if (vegtype(i)  < 1) vegtype(i)  = 17
+            !if (slopetyp(i) < 1) slopetyp(i) = 1
+            ! *DH
           endif
 
           work3(i)   = prsik_1(i) / prslk_1(i)

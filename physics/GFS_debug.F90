@@ -1309,14 +1309,12 @@
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%sigmaf              ', Interstitial%sigmaf                  )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%sigmafrac           ', Interstitial%sigmafrac               )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%sigmatot            ', Interstitial%sigmatot                )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%slopetype           ', Interstitial%slopetype               )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%snowc               ', Interstitial%snowc                   )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%snowd_ice           ', Interstitial%snowd_ice               )
 !                    call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%snowd_land          ', Interstitial%snowd_land              )
 !                    call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%snowd_water         ', Interstitial%snowd_water             )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%snohf               ', Interstitial%snohf                   )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%snowmt              ', Interstitial%snowmt                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%soiltype            ', Interstitial%soiltype                )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%stress              ', Interstitial%stress                  )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%stress_ice          ', Interstitial%stress_ice              )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%stress_land         ', Interstitial%stress_land             )
@@ -1344,7 +1342,6 @@
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%uustar_water        ', Interstitial%uustar_water            )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%vdftra              ', Interstitial%vdftra                  )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%vegf1d              ', Interstitial%vegf1d                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%vegtype             ', Interstitial%vegtype                 )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%wcbmax              ', Interstitial%wcbmax                  )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%weasd_ice           ', Interstitial%weasd_ice               )
 !                    call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%weasd_land          ', Interstitial%weasd_land              )
@@ -1551,8 +1548,7 @@
 !!
       subroutine GFS_checkland_run (me, master, blkno, im, kdt, iter, flag_iter, flag_guess, &
               flag_init, flag_restart, frac_grid, isot, ivegsrc, stype, vtype, slope,        &
-              soiltyp, vegtype, slopetyp, dry, icy, wet, lake, ocean,                        &
-              oceanfrac, landfrac, lakefrac, slmsk, islmsk,                                  &
+              dry, icy, wet, lake, ocean, oceanfrac, landfrac, lakefrac, slmsk, islmsk,      &
               zorl, zorlw, zorll, zorli, fice, errmsg, errflg )
 
          use machine, only: kind_phys
@@ -1566,34 +1562,31 @@
          integer,          intent(in   ) :: im
          integer,          intent(in   ) :: kdt
          integer,          intent(in   ) :: iter
-         logical,          intent(in   ) :: flag_iter(im)
-         logical,          intent(in   ) :: flag_guess(im)
+         logical,          intent(in   ) :: flag_iter(:)
+         logical,          intent(in   ) :: flag_guess(:)
          logical,          intent(in   ) :: flag_init
          logical,          intent(in   ) :: flag_restart
          logical,          intent(in   ) :: frac_grid
          integer,          intent(in   ) :: isot
          integer,          intent(in   ) :: ivegsrc
-         real(kind_phys),  intent(in   ) :: stype(im)
-         real(kind_phys),  intent(in   ) :: vtype(im)
-         real(kind_phys),  intent(in   ) :: slope(im)
-         integer,          intent(in   ) :: soiltyp(im)
-         integer,          intent(in   ) :: vegtype(im)
-         integer,          intent(in   ) :: slopetyp(im)
-         logical,          intent(in   ) :: dry(im)
-         logical,          intent(in   ) :: icy(im)
-         logical,          intent(in   ) :: wet(im)
-         logical,          intent(in   ) :: lake(im)
-         logical,          intent(in   ) :: ocean(im)
-         real(kind_phys),  intent(in   ) :: oceanfrac(im)
-         real(kind_phys),  intent(in   ) :: landfrac(im)
-         real(kind_phys),  intent(in   ) :: lakefrac(im)
-         real(kind_phys),  intent(in   ) :: slmsk(im)
-         integer,          intent(in   ) :: islmsk(im)
-         real(kind_phys),  intent(in   ) :: zorl(im)
-         real(kind_phys),  intent(in   ) :: zorlw(im)
-         real(kind_phys),  intent(in   ) :: zorll(im)
-         real(kind_phys),  intent(in   ) :: zorli(im)
-         real(kind_phys),  intent(in   ) :: fice(im)
+         integer,          intent(in   ) :: stype(:)
+         integer,          intent(in   ) :: vtype(:)
+         integer,          intent(in   ) :: slope(:)
+         logical,          intent(in   ) :: dry(:)
+         logical,          intent(in   ) :: icy(:)
+         logical,          intent(in   ) :: wet(:)
+         logical,          intent(in   ) :: lake(:)
+         logical,          intent(in   ) :: ocean(:)
+         real(kind_phys),  intent(in   ) :: oceanfrac(:)
+         real(kind_phys),  intent(in   ) :: landfrac(:)
+         real(kind_phys),  intent(in   ) :: lakefrac(:)
+         real(kind_phys),  intent(in   ) :: slmsk(:)
+         integer,          intent(in   ) :: islmsk(:)
+         real(kind_phys),  intent(in   ) :: zorl(:)
+         real(kind_phys),  intent(in   ) :: zorlw(:)
+         real(kind_phys),  intent(in   ) :: zorll(:)
+         real(kind_phys),  intent(in   ) :: zorli(:)
+         real(kind_phys),  intent(in   ) :: fice(:)
          character(len=*), intent(  out) :: errmsg
          integer,          intent(  out) :: errflg
 
@@ -1623,9 +1616,6 @@
              write(0,'(a,2i5,1x,e16.7)')'YYY: i, blk, stype(i)      :', i, blkno, stype(i)
              write(0,'(a,2i5,1x,e16.7)')'YYY: i, blk, vtype(i)      :', i, blkno, vtype(i)
              write(0,'(a,2i5,1x,e16.7)')'YYY: i, blk, slope(i)      :', i, blkno, slope(i)
-             write(0,'(a,2i5,1x,i5)')   'YYY: i, blk, soiltyp(i)    :', i, blkno, soiltyp(i)
-             write(0,'(a,2i5,1x,i5)')   'YYY: i, blk, vegtype(i)    :', i, blkno, vegtype(i)
-             write(0,'(a,2i5,1x,i5)')   'YYY: i, blk, slopetyp(i)   :', i, blkno, slopetyp(i)
              write(0,'(a,2i5,1x,1x,l)') 'YYY: i, blk, dry(i)        :', i, blkno, dry(i)
              write(0,'(a,2i5,1x,1x,l)') 'YYY: i, blk, icy(i)        :', i, blkno, icy(i)
              write(0,'(a,2i5,1x,1x,l)') 'YYY: i, blk, wet(i)        :', i, blkno, wet(i)
