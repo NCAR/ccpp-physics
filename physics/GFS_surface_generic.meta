@@ -159,6 +159,30 @@
   type = integer
   intent = inout
   optional = F
+[vtype_save]
+  standard_name = vegetation_type_classification_save
+  long_name = vegetation type for lsm save
+  units = index
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = out
+  optional = F
+[stype_save]
+  standard_name = soil_type_classification_save
+  long_name = soil type for lsm save
+  units = index
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = out
+  optional = F
+[slope_save]
+  standard_name = surface_slope_classification_save
+  long_name = sfc slope type for lsm save
+  units = index
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = out
+  optional = F
 [prsik_1]
   standard_name = surface_dimensionless_exner_function
   long_name = dimensionless Exner function at lowest model interface
@@ -1380,7 +1404,7 @@
   standard_name = vegetation_type_classification
   long_name = vegetation type for lsm
   units = index
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = integer
   intent = inout
   optional = F
@@ -1388,7 +1412,7 @@
   standard_name = soil_type_classification
   long_name = soil type for lsm
   units = index
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = integer
   intent = inout
   optional = F
@@ -1396,9 +1420,33 @@
   standard_name = surface_slope_classification
   long_name = sfc slope type for lsm
   units = index
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = integer
   intent = inout
+  optional = F
+[vtype_save]
+  standard_name = vegetation_type_classification_save
+  long_name = vegetation type for lsm save
+  units = index
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = in
+  optional = F
+[stype_save]
+  standard_name = soil_type_classification_save
+  long_name = soil type for lsm save
+  units = index
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = in
+  optional = F
+[slope_save]
+  standard_name = surface_slope_classification_save
+  long_name = sfc slope type for lsm save
+  units = index
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = in
   optional = F
 [errmsg]
   standard_name = ccpp_error_message

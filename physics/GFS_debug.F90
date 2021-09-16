@@ -1463,6 +1463,11 @@
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%cloud_overlap_param ', Interstitial%cloud_overlap_param     )
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%precip_overlap_param', Interstitial%precip_overlap_param    )
                      end if
+                     ! DH*
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%vtype_save', Interstitial%vtype_save)
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%stype_save', Interstitial%stype_save)
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%slope_save', Interstitial%slope_save)
+                     ! *DH
                  end if
 #ifdef OPENMP
 !$OMP BARRIER

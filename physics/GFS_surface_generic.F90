@@ -81,7 +81,9 @@
                           lndp_var_list, lndp_prt_list,                                                    &
                           z01d, zt1d, bexp1d, xlai1d, vegf1d, lndp_vgf, sfc_wts_inv,                       &
                           cplflx, flag_cice, islmsk_cice, slimskin_cpl,                                    &
-                          wind, u1, v1, cnvwind, smcwlt2, smcref2, errmsg, errflg)
+                          wind, u1, v1, cnvwind, smcwlt2, smcref2, &
+                          vtype_save, stype_save, slope_save, &
+                          errmsg, errflg)
 
         use surface_perturbation,  only: cdfnor
 
@@ -94,6 +96,8 @@
         real(kind=kind_phys), intent(in) :: con_g
         real(kind=kind_phys), dimension(:), intent(in) :: vfrac, prsik_1, prslk_1
         integer, dimension(:), intent(inout) :: vtype, stype, slope
+        ! DH* - DO WE NEED THIS? SEE BELOW
+        integer, dimension(:), intent(out) :: vtype_save(:), stype_save(:), slope_save(:)
 
         real(kind=kind_phys), dimension(:), intent(inout) :: tsfc
         real(kind=kind_phys), dimension(:,:), intent(in) :: phil
@@ -174,6 +178,11 @@
         endif
 
         ! End of stochastic physics / surface perturbation
+
+        ! DH* DO WE NEED THIS???
+        vtype_save(:) = vtype(:)
+        stype_save(:) = stype(:)
+        slope_save(:) = slope(:)
 
         do i=1,im
           sigmaf(i) = max(vfrac(i), 0.01_kind_phys)
@@ -263,7 +272,7 @@
         v10mi_cpl, tsfci_cpl, psurfi_cpl, nnirbmi_cpl, nnirdfi_cpl, nvisbmi_cpl, nvisdfi_cpl, nswsfci_cpl, nswsfc_cpl, nnirbm_cpl,  &
         nnirdf_cpl, nvisbm_cpl, nvisdf_cpl, gflux, evbsa, evcwa, transa, sbsnoa, snowca, snohfa, ep,                                &
         runoff, srunoff, runof, drain, lheatstrg, h0facu, h0facs, zvfun, hflx, evap, hflxq, hffac,                                  &
-        isot, ivegsrc, islmsk, vtype, stype, slope, errmsg, errflg)
+        isot, ivegsrc, islmsk, vtype, stype, slope, vtype_save, stype_save, slope_save, errmsg, errflg)
 
         implicit none
 
@@ -293,8 +302,8 @@
         real(kind=kind_phys), dimension(:), intent(out) :: hflxq
         real(kind=kind_phys), dimension(:), intent(out) :: hffac
 
-        ! DH* - DO WE NEED THIS? SEE BELOW?
-        integer, intent(in) :: isot, ivegsrc, islmsk(:)
+        ! DH* - DO WE NEED THIS? SEE BELOW
+        integer, intent(in) :: isot, ivegsrc, islmsk(:), vtype_save(:), stype_save(:), slope_save(:)
         integer, intent(inout) :: vtype(:), stype(:), slope(:)
         ! *DH
 
@@ -436,34 +445,10 @@
           enddo
         endif
 
-        ! DH* cludge - DO WE NEED THIS
-        do i=1,im
-          if (islmsk(i) == 2) then
-            if (isot == 1 .and. stype(i) == 16) then
-              stype(i) = 0
-            elseif (stype(i) == 9) then
-              stype(i) = 0
-            endif
-            if ( (ivegsrc == 0 .or. ivegsrc == 4) .and. vtype(i) == 24) then
-              vtype(i) = 0
-            elseif (ivegsrc == 1 .and. vtype(i) == 15) then
-              vtype(i) = 0
-            elseif (ivegsrc == 2 .and. vtype(i) == 13) then
-              vtype(i) = 0
-            elseif ( (ivegsrc == 3 .or. ivegsrc == 5) .and. vtype(i) == 15) then
-              vtype(i) = 0
-            endif
-            if (slope(i) == 9) slope(i) = 0
-          else
-            ! DH* REMOVE else block if not needeed - create separate subroutine to be called by both init and run?
-            !soiltyp(i)  = int( stype(i)+0.5_kind_phys )
-            !vegtype(i)  = int( vtype(i)+0.5_kind_phys )
-            !slopetyp(i) = int( slope(i)+0.5_kind_phys )    !! clu: slope -> slopetyp
-            !if (vegtype(i)  < 1) vegtype(i)  = 17
-            !if (slopetyp(i) < 1) slopetyp(i) = 1
-            ! *DH
-          endif
-        enddo
+        ! DH* cludge - DO WE NEED THIS ???
+        vtype(:) = vtype_save(:)
+        stype(:) = stype_save(:)
+        slope(:) = slope_save(:)
         ! *DH cludge
 
       end subroutine GFS_surface_generic_post_run
