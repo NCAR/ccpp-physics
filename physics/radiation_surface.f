@@ -876,7 +876,7 @@
               sfcemis(i) = emsref(idx)
             else
               sfcemis(i) = fracl(i)*emsref(idx) + fraco(i)*emsref(1)          &
-     &                                       + fraci(i)*emsref(7)
+     &                                          + fraci(i)*emsref(7)
             endif
             semisbase(i) = sfcemis(i)
 

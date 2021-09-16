@@ -170,8 +170,8 @@
   intent = in
   optional = F
 [sfcemis_lnd]
-  standard_name = surface_longwave_emissivity_over_land_interstitial
-  long_name = surface lw emissivity in fraction over land (temporary use as interstitial)
+  standard_name = surface_longwave_emissivity_over_land
+  long_name = surface lw emissivity in fraction over land
   units = frac
   dimensions = (horizontal_loop_extent)
   type = real
@@ -179,8 +179,8 @@
   intent = in
   optional = F
 [sfcemis_ice]
-  standard_name = surface_longwave_emissivity_over_ice_interstitial
-  long_name = surface lw emissivity in fraction over ice (temporary use as interstitial)
+  standard_name = surface_longwave_emissivity_over_ice
+  long_name = surface lw emissivity in fraction over ice
   units = frac
   dimensions = (horizontal_loop_extent)
   type = real
