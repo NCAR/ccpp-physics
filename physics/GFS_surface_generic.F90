@@ -262,7 +262,8 @@
         dvisdfi_cpl, dnirbm_cpl, dnirdf_cpl, dvisbm_cpl, dvisdf_cpl, nlwsfci_cpl, nlwsfc_cpl, t2mi_cpl, q2mi_cpl, u10mi_cpl,        &
         v10mi_cpl, tsfci_cpl, psurfi_cpl, nnirbmi_cpl, nnirdfi_cpl, nvisbmi_cpl, nvisdfi_cpl, nswsfci_cpl, nswsfc_cpl, nnirbm_cpl,  &
         nnirdf_cpl, nvisbm_cpl, nvisdf_cpl, gflux, evbsa, evcwa, transa, sbsnoa, snowca, snohfa, ep,                                &
-        runoff, srunoff, runof, drain, lheatstrg, h0facu, h0facs, zvfun, hflx, evap, hflxq, hffac, errmsg, errflg)
+        runoff, srunoff, runof, drain, lheatstrg, h0facu, h0facs, zvfun, hflx, evap, hflxq, hffac,                                  &
+        isot, ivegsrc, islmsk, vtype, stype, slope, errmsg, errflg)
 
         implicit none
 
@@ -291,6 +292,11 @@
         real(kind=kind_phys), dimension(:), intent(in)  :: hflx,  evap
         real(kind=kind_phys), dimension(:), intent(out) :: hflxq
         real(kind=kind_phys), dimension(:), intent(out) :: hffac
+
+        ! DH* - DO WE NEED THIS? SEE BELOW?
+        integer, intent(in) :: isot, ivegsrc, islmsk(:)
+        integer, intent(inout) :: vtype(:), stype(:), slope(:)
+        ! *DH
 
         ! CCPP error handling variables
         character(len=*), intent(out) :: errmsg
@@ -429,6 +435,36 @@
             endif
           enddo
         endif
+
+        ! DH* cludge - DO WE NEED THIS
+        do i=1,im
+          if (islmsk(i) == 2) then
+            if (isot == 1 .and. stype(i) == 16) then
+              stype(i) = 0
+            elseif (stype(i) == 9) then
+              stype(i) = 0
+            endif
+            if ( (ivegsrc == 0 .or. ivegsrc == 4) .and. vtype(i) == 24) then
+              vtype(i) = 0
+            elseif (ivegsrc == 1 .and. vtype(i) == 15) then
+              vtype(i) = 0
+            elseif (ivegsrc == 2 .and. vtype(i) == 13) then
+              vtype(i) = 0
+            elseif ( (ivegsrc == 3 .or. ivegsrc == 5) .and. vtype(i) == 15) then
+              vtype(i) = 0
+            endif
+            if (slope(i) == 9) slope(i) = 0
+          else
+            ! DH* REMOVE else block if not needeed - create separate subroutine to be called by both init and run?
+            !soiltyp(i)  = int( stype(i)+0.5_kind_phys )
+            !vegtype(i)  = int( vtype(i)+0.5_kind_phys )
+            !slopetyp(i) = int( slope(i)+0.5_kind_phys )    !! clu: slope -> slopetyp
+            !if (vegtype(i)  < 1) vegtype(i)  = 17
+            !if (slopetyp(i) < 1) slopetyp(i) = 1
+            ! *DH
+          endif
+        enddo
+        ! *DH cludge
 
       end subroutine GFS_surface_generic_post_run
 

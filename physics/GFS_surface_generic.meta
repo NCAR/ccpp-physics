@@ -1352,6 +1352,54 @@
   kind = kind_phys
   intent = out
   optional = F
+[isot]
+  standard_name = control_for_soil_type_dataset
+  long_name = soil type dataset choice
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ivegsrc]
+  standard_name = control_for_vegetation_dataset
+  long_name = land use dataset choice
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[islmsk]
+  standard_name = sea_land_ice_mask
+  long_name = landmask: sea/land/ice=0/1/2
+  units = flag
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = in
+  optional = F
+[vtype]
+  standard_name = vegetation_type_classification
+  long_name = vegetation type for lsm
+  units = index
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = inout
+  optional = F
+[stype]
+  standard_name = soil_type_classification
+  long_name = soil type for lsm
+  units = index
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = inout
+  optional = F
+[slope]
+  standard_name = surface_slope_classification
+  long_name = sfc slope type for lsm
+  units = index
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = inout
+  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
