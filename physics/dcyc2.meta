@@ -398,15 +398,6 @@
   type = logical
   intent = in
   optional = F
-[minGPpres]
-  standard_name = minimum_pressure_in_RRTMGP
-  long_name = minimum pressure allowed in RRTMGP
-  units = Pa
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [use_LW_jacobian]
   standard_name = flag_to_calc_RRTMGP_LW_jacobian
   long_name = logical flag to control RRTMGP LW calculation

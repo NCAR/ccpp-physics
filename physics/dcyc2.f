@@ -180,7 +180,7 @@
      &       sfcnirbmd,sfcnirdfd,sfcvisbmd,sfcvisdfd,                   &
      &       im, levs, deltim, fhswr,                                   &
      &       dry, icy, wet, damp_LW_fluxadj, lfnc_k, lfnc_p0,           &
-     &       minGPpres, use_LW_jacobian, sfculw, fluxlwUP_jac,          &
+     &       use_LW_jacobian, sfculw, fluxlwUP_jac,                     &
      &       t_lay, p_lay, p_lev, flux2D_lwUP, flux2D_lwDOWN,           &
      &       pert_radtend, do_sppt,ca_global, tsfc_radtime,             &
 !    &       dry, icy, wet, lprnt, ipr,                                 &
@@ -216,7 +216,7 @@
      &     pert_radtend
       logical, intent(in) :: do_sppt,ca_global
       real(kind=kind_phys),   intent(in) :: solhr, slag, cdec, sdec,    &
-     &     deltim, fhswr, minGPpres, lfnc_k, lfnc_p0
+     &     deltim, fhswr, lfnc_k, lfnc_p0
 
       real(kind=kind_phys), dimension(:), intent(in) ::                 &
      &      sinlat, coslat, xlon, coszen, tf, tsflw, sfcdlw,            &

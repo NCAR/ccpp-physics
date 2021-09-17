@@ -98,9 +98,9 @@ contains
 !!
   subroutine GFS_rrtmgp_pre_run(nCol, nLev, nTracers, i_o3, lsswr, lslwr, fhswr, fhlwr,     &
        xlat, xlon,  prsl, tgrs, prslk, prsi, qgrs, tsfc, con_eps, con_epsm1, con_fvirt,     &
-       con_epsqs, minGPpres, minGPtemp, raddt, p_lay, t_lay, p_lev, t_lev, tsfg, tsfa,      & 
-       qs_lay, q_lay, tv_lay, relhum, tracer, gas_concentrations, tsfc_radtime, errmsg,     &
-       errflg)
+       con_epsqs, minGPpres, maxGPpres, minGPtemp, maxGPtemp, raddt, p_lay, t_lay, p_lev,   &
+       t_lev, tsfg, tsfa, qs_lay, q_lay, tv_lay, relhum, tracer, gas_concentrations,        &
+       tsfc_radtime, errmsg, errflg)
     
     ! Inputs   
     integer, intent(in)    :: &
@@ -113,7 +113,9 @@ contains
     	 lslwr                ! Call LW radiation
     real(kind_phys), intent(in) :: &
          minGPtemp,         & ! Minimum temperature allowed in RRTMGP.
+         maxGPtemp,         & ! Maximum ...
          minGPpres,         & ! Minimum pressure allowed in RRTMGP.
+         maxGPpres,         & ! Maximum pressure allowed in RRTMGP. 
          fhswr,             & ! Frequency of SW radiation call.
          fhlwr                ! Frequency of LW radiation call.
     real(kind_phys), intent(in) :: &
@@ -204,11 +206,20 @@ contains
     ! Temperature at layer-center
     t_lay(1:NCOL,:) = tgrs(1:NCOL,:)
 
-    ! Bound temperature at layer centers.
+    ! Bound temperature/pressure at layer centers.
     do iCol=1,NCOL
        do iLay=1,nLev
           if (t_lay(iCol,iLay) .le. minGPtemp) then
              t_lay(iCol,iLay) = minGPtemp + epsilon(minGPtemp)
+          endif
+          if (p_lay(iCol,iLay) .le. minGPpres) then
+             p_lay(iCol,iLay) = minGPpres + epsilon(minGPpres)
+          endif
+          if (t_lay(iCol,iLay) .ge. maxGPtemp) then
+             t_lay(iCol,iLay) = maxGPtemp - epsilon(maxGPtemp)
+          endif
+          if (p_lay(iCol,iLay) .ge. maxGPpres) then
+             p_lay(iCol,iLay) = maxGPpres - epsilon(maxGPpres)
           endif
        enddo
     enddo
