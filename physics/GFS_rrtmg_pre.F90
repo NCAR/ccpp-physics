@@ -652,7 +652,7 @@
               enddo
             enddo
           else if (imp_physics == imp_physics_thompson .and. mraerosol) then
-                        do k=1,LMK
+            do k=1,LMK
               do i=1,IM
                 qvs = qlyr(i,k)
                 qv_mp (i,k) = qvs/(1.-qvs)
@@ -779,7 +779,7 @@
           ! Update number concentration, consistent with sub-grid clouds (GF, MYNN) or without (all others)
           do k=1,lm
             do i=1,im
-              if (ltaerosol .and. qc_mp(i,k)>1.e-12 .and. nc_mp(i,k)<100.) then
+              if ((ltaerosol .or. mraerosol) .and. qc_mp(i,k)>1.e-12 .and. nc_mp(i,k)<100.) then
                 nc_mp(i,k) = make_DropletNumber(qc_mp(i,k)*rho(i,k), nwfa(i,k)*rho(i,k)) * orho(i,k)
               endif
               if (qi_mp(i,k)>1.e-12 .and. ni_mp(i,k)<100.) then

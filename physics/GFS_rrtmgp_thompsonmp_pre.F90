@@ -41,7 +41,7 @@ contains
        i_cldliq, i_cldice, i_cldrain, i_cldsnow, i_cldgrpl, i_cldtot, i_cldliq_nc,       &
        i_cldice_nc, i_twa, effr_in, p_lev, p_lay, tv_lay, t_lay, effrin_cldliq,          &
        effrin_cldice, effrin_cldsnow, tracer, qs_lay, q_lay, relhum, con_g, con_rd,      &
-       con_eps, lmfshal, ltaerosol, do_mynnedmf, imfdeepcnv, imfdeepcnv_gf,              &
+       con_eps, lmfshal, ltaerosol, mraerosol, do_mynnedmf, imfdeepcnv, imfdeepcnv_gf,   &
        doGP_cldoptics_PADE, doGP_cldoptics_LUT,                                          &
        cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp,   &
        cld_rerain, precip_frac, errmsg, errflg)
@@ -69,6 +69,7 @@ contains
          effr_in,           & ! Use cloud effective radii provided by model?
          lmfshal,           & ! Flag for mass-flux shallow convection scheme used by Xu-Randall
          ltaerosol,         & ! Flag for aerosol option
+         mraerosol,         & ! Flag for merra2 aerosol option
          do_mynnedmf,       & ! Flag to activate MYNN-EDMF
          doGP_cldoptics_LUT,& ! Flag to do GP cloud-optics (LUTs)
          doGP_cldoptics_PADE  !                            (PADE approximation)
@@ -162,6 +163,11 @@ contains
           if (ltaerosol) then
              nc_mp(iCol,iLay) = tracer(iCol,iLay,i_cldliq_nc) / (1.-q_lay(iCol,iLay))
              nwfa(iCol,iLay)  = tracer(iCol,iLay,i_twa)
+             if (qc_mp(iCol,iLay) > 1.e-12 .and. nc_mp(iCol,iLay) < 100.) then
+               nc_mp(iCol,iLay) = make_DropletNumber(qc_mp(iCol,iLay)*rho, nwfa(iCol,iLay)*rho) * orho
+             endif
+          elseif (mraerosol) then
+             nc_mp(iCol,iLay) = tracer(iCol,iLay,i_cldliq_nc) / (1.-q_lay(iCol,iLay))
              if (qc_mp(iCol,iLay) > 1.e-12 .and. nc_mp(iCol,iLay) < 100.) then
                nc_mp(iCol,iLay) = make_DropletNumber(qc_mp(iCol,iLay)*rho, nwfa(iCol,iLay)*rho) * orho
              endif
