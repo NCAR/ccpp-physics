@@ -35,9 +35,7 @@ contains
                                  weasd,            weasd_lnd, weasd_ice, ep1d_ice, tsfc, tsfco, tsfcl, tsfc_wat,          &
                                  tsfc_ice, tisfc, tsurf_wat, tsurf_lnd, tsurf_ice,                                        &
                                  gflx_ice, tgice, islmsk, islmsk_cice, slmsk,            semis_wat, semis_lnd, semis_ice, &
-!                                gflx_ice, tgice, islmsk, islmsk_cice, slmsk, semis_rad, semis_wat, semis_lnd, semis_ice, &
                                                      qss, qss_wat, qss_lnd, qss_ice,                                      &
-!                                emis_lnd, emis_ice, qss, qss_wat, qss_lnd, qss_ice,                                      &
                                  min_lakeice, min_seaice, kdt, errmsg, errflg)
 
       implicit none
@@ -60,9 +58,7 @@ contains
                     qss_wat, qss_lnd, qss_ice, ep1d_ice, gflx_ice
       real(kind=kind_phys),                intent(in   ) :: tgice
       integer,              dimension(:), intent(inout)  :: islmsk, islmsk_cice
-!     real(kind=kind_phys), dimension(:), intent(in   )  :: semis_rad
       real(kind=kind_phys), dimension(:), intent(inout)  :: semis_wat, semis_lnd, semis_ice, slmsk
-!     real(kind=kind_phys), dimension(:), intent(inout)  :: emis_lnd, emis_ice
       real(kind=kind_phys),               intent(in   )  :: min_lakeice, min_seaice
       !
       real(kind=kind_phys), dimension(:), intent(inout)  :: zorlo, zorll, zorli
@@ -231,12 +227,6 @@ contains
           uustar_lnd(i) = uustar(i)
            weasd_lnd(i) = weasd(i)
            tsurf_lnd(i) = tsfcl(i)
-!         if (iemsflg == 2 .and. .not. flag_init) then
-!          !-- use land emissivity from the LSM
-!          semis_lnd(i) = emis_lnd(i)
-!         else
-!          semis_lnd(i) = semis_rad(i)
-!         endif
         ! DH*
         else
           zorll(i) = huge
@@ -251,13 +241,6 @@ contains
            tsurf_ice(i) = tisfc(i)
             ep1d_ice(i) = zero
             gflx_ice(i) = zero
-!         if (iemsflg == 2 .and. (.not.flag_init .or. flag_restart) .and. lsm == lsm_ruc) then
-           !-- use emis_ice from RUC LSM with snow effect
-!          semis_ice(i) = emis_ice(i)
-!         else
-          if (lsm /= lsm_ruc) then
-           semis_ice(i) = 0.95_kind_phys
-          endif
         ! DH*
         else
           zorli(i) = huge

@@ -334,8 +334,7 @@
       subroutine setalb                                                 &
      &     ( slmsk,lsm,lsm_noahmp,lsm_ruc,use_cice_alb,snowf,           & !  ---  inputs:
      &       sncovr,sncovr_ice,snoalb,zorlf,coszf,                      &
-     &       tsknf,tairf,hprif,frac_grid, lakefrac,                     & 
-!    &       tsknf,tairf,hprif,frac_grid,min_seaice,                    & 
+     &       tsknf,tairf,hprif,frac_grid, lakefrac,                     &
      &       alvsf,alnsf,alvwf,alnwf,facsf,facwf,fice,tisfc,            &
      &       lsmalbdvis, lsmalbdnir, lsmalbivis, lsmalbinir,            &
      &       icealbdvis, icealbdnir, icealbivis, icealbinir,            &
@@ -416,7 +415,6 @@
      &       icealbdvis, icealbdnir, icealbivis, icealbinir,            &
      &       sncovr, sncovr_ice, snoalb, albPpert           ! sfc-perts, mgehne
       real (kind=kind_phys),  intent(in) :: pertalb         ! sfc-perts, mgehne
-!     real (kind=kind_phys),  intent(in) :: min_seaice
       real (kind=kind_phys), dimension(:), intent(in) ::                &
      &       fracl, fraco, fraci
       real (kind=kind_phys), dimension(:),intent(inout) ::              &
@@ -728,7 +726,6 @@
       subroutine setemis                                                &
      &     ( lsm,lsm_noahmp,lsm_ruc,vtype,frac_grid,                    &  !  ---  inputs:
      &                  xlon,xlat,slmsk,snowf,sncovr,sncovr_ice,        &
-!    &       min_seaice,xlon,xlat,slmsk,snowf,sncovr,sncovr_ice,        &
      &       zorlf,tsknf,tairf,hprif,                                   &
      &       semis_lnd,semis_ice,IMAX,fracl,fraco,fraci,icy,            &
      &       semisbase, sfcemis                                         &  !  ---  outputs:
@@ -785,13 +782,14 @@
       integer, intent(in) :: lsm, lsm_noahmp, lsm_ruc
       logical, intent(in) :: frac_grid
       real (kind=kind_phys), dimension(:), intent(in) :: vtype
-!     real (kind=kind_phys), intent(in) :: min_seaice
 
       real (kind=kind_phys), dimension(:), intent(in) ::                &
      &       xlon,xlat, slmsk, snowf,sncovr, sncovr_ice,                &
-     &       zorlf, tsknf, tairf, hprif, semis_lnd, semis_ice
+     &       zorlf, tsknf, tairf, hprif
       real (kind=kind_phys), dimension(:), intent(in) ::                &
      &       fracl, fraco, fraci
+      real (kind=kind_phys), dimension(:), intent(inout) ::             &
+     &      semis_lnd, semis_ice
       logical, dimension(:), intent(in) ::                              &
      &       icy
 
@@ -829,6 +827,7 @@
 
         lab_do_IMAX : do i = 1, IMAX
 
+          semis_ice(i) = emsref(7)
           if (fracl(i) < epsln) then                    ! no land
             if ( abs(fraco(i)-f_one) < epsln ) then     ! open water point
               sfcemis(i) = emsref(1)
@@ -875,10 +874,11 @@
             if (abs(fracl(i)-f_one) < epsln) then
               sfcemis(i) = emsref(idx)
             else
-              sfcemis(i) = fracl(i)*emsref(idx) + fraco(i)*emsref(1)          &
+              sfcemis(i) = fracl(i)*emsref(idx) + fraco(i)*emsref(1)    &
      &                                          + fraci(i)*emsref(7)
             endif
             semisbase(i) = sfcemis(i)
+            semis_lnd(i) = emsref(idx)
 
           endif   ! end if_slmsk_block
 
@@ -887,16 +887,39 @@
 
             fsno = sncovr(i)
             sfcemis(i) = sfcemis(i)*(f_one - fsno) + emsref(8)*fsno
+            if (fracl(i) > f_zero) then
+              if (fracl(i) <= fsno) then
+                semis_lnd(i) = emsref(8)
+              else
+                tmp1 = (fracl(i)-fsno) / fracl(i)
+                semis_lnd(i) = semis_lnd(i) * tmp1 +  (f_one-tmp1)*fsno
+              endif
+            endif
+            if (fraci(i) > f_zero) then
+              semis_ice(i) = emsref(8)
+            endif
 
           else                                           ! compute snow cover from snow depth
-            if ( snowf(i) > f_zero ) then
+            if (abs(fraco(i)-f_one) > epsln .and.                       &
+     &          snowf(i) > f_zero) then
               asnow = 0.02*snowf(i)
               argh  = min(0.50, max(.025, 0.01*zorlf(i)))
               hrgh  = min(f_one, max(0.20, 1.0577-1.1538e-3*hprif(i) ) )
               fsno = asnow / (argh + asnow) * hrgh
 
-              if (abs(fraco(i)-f_one) < epsln) fsno = f_zero         ! no snow over open water
               sfcemis(i) = sfcemis(i)*(f_one - fsno) + emsref(8)*fsno
+
+              if (fracl(i) > f_zero) then
+                if (fracl(i) <= fsno) then
+                  semis_lnd(i) = emsref(8)
+                else
+                  tmp1 = (fracl(i)-fsno) / fracl(i)
+                  semis_lnd(i) = semis_lnd(i)*tmp1 +  (f_one-tmp1)*fsno
+                endif
+              endif
+              if (fraci(i) > f_zero) then
+                semis_ice(i) = emsref(8)
+              endif
             endif
 
           endif                                          ! end if_ialbflg
@@ -918,8 +941,14 @@
                 argh  = min(0.50, max(.025,0.01*zorlf(i)))
                 hrgh  = min(f_one,max(0.20,1.0577-1.1538e-3*hprif(i)))
                 fsno  = asnow / (argh + asnow) * hrgh
-                sfcemis_ice = sfcemis_ice*(f_one-fsno)+emsref(8)*fsno
+                if (fraci(i) > fsno) then
+                  tmp1 = (fraci(i) - fsno) / fraci(i)
+                  sfcemis_ice = sfcemis_ice*tmp1+emsref(8)*(f_one-tmp1)
+                else
+                  sfcemis_ice = emsref(8)
+                endif
               endif
+              semis_ice(i) = sfcemis_ice
             elseif (lsm == lsm_ruc) then
               sfcemis_ice = semis_ice(i) ! output from lsm (with snow effect)
             endif ! lsm check

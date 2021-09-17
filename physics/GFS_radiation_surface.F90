@@ -80,21 +80,23 @@
 
       real(kind=kind_phys), dimension(:),   intent(in)  :: xlat, xlon, vtype, slmsk,    &
                                                            sfc_alb_pert, lndp_prt_list, &
-                                                           landfrac, lakefrac,         &
+                                                           landfrac, lakefrac,          &
                                                            snowd, sncovr,               &
                                                            sncovr_ice, fice, zorl,      &
                                                            hprime, tsfg, tsfa, tisfc,   &
                                                            coszen, alvsf, alnsf, alvwf, &
-                                                           alnwf, facsf, facwf,         &
-                                                           semis_lnd, semis_ice, snoalb
+                                                           alnwf, facsf, facwf, snoalb
       character(len=3)    , dimension(:),   intent(in)  :: lndp_var_list
-      real(kind=kind_phys), dimension(:),   intent(inout)  :: albdvis_lnd, albdnir_lnd, &
-                                                           albivis_lnd, albinir_lnd
       real(kind=kind_phys), dimension(:),   intent(in)  :: albdvis_ice, albdnir_ice,    &
                                                            albivis_ice, albinir_ice
+
+      real(kind=kind_phys), dimension(:),   intent(inout) :: albdvis_lnd, albdnir_lnd,  &
+                                                             albivis_lnd, albinir_lnd,  &
+                                                             semis_lnd,   semis_ice
       real(kind=kind_phys), dimension(:),   intent(inout) :: semisbase, semis
       real(kind=kind_phys), dimension(:,:), intent(inout) :: sfcalb
       real(kind=kind_phys), dimension(:),   intent(inout) :: sfc_alb_dif
+
       character(len=*),                     intent(out) :: errmsg
       integer,                              intent(out) :: errflg
 
