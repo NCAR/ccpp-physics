@@ -116,7 +116,7 @@ module lsm_ruc
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0 
-      
+
       ! Consistency checks
       if (lsm/=lsm_ruc) then
         write(errmsg,'(*(a))') 'Logic error: namelist choice of ',     &

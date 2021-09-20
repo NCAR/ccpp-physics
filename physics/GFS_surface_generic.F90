@@ -19,29 +19,37 @@
 !> \section arg_table_GFS_surface_generic_pre_init Argument Table
 !! \htmlinclude GFS_surface_generic_pre_init.html
 !!
-      subroutine GFS_surface_generic_pre_init (nthreads, im, slmsk, isot, ivegsrc, stype, vtype, slope, errmsg, errflg)
+      subroutine GFS_surface_generic_pre_init (nthreads, im, slmsk, isot, ivegsrc, stype, vtype, slope, &
+                                               vtype_save, stype_save, slope_save, errmsg, errflg)
 
-         implicit none
+        implicit none
 
-         ! Interface variables
-         integer,                       intent(in)    :: nthreads, im, isot, ivegsrc
-         real(kind_phys), dimension(:), intent(in)    :: slmsk
-         integer,         dimension(:), intent(inout) :: vtype, stype, slope
+        ! Interface variables
+        integer,                       intent(in)    :: nthreads, im, isot, ivegsrc
+        real(kind_phys), dimension(:), intent(in)    :: slmsk
+        integer,         dimension(:), intent(inout) :: vtype, stype, slope
+        integer,         dimension(:), intent(out)   :: vtype_save, stype_save, slope_save
 
-         ! CCPP error handling
-         character(len=*), intent(out) :: errmsg
-         integer,          intent(out) :: errflg
+        ! CCPP error handling
+        character(len=*), intent(out) :: errmsg
+        integer,          intent(out) :: errflg
 
-         ! Local variables
-         integer, dimension(1:im) :: islmsk
-         integer :: i
+        ! Local variables
+        integer, dimension(1:im) :: islmsk
+        integer :: i
 
-         ! Initialize CCPP error handling variables
-         errmsg = ''
-         errflg = 0
+        ! Initialize CCPP error handling variables
+        errmsg = ''
+        errflg = 0
 
-         islmsk = nint(slmsk)
-         call update_vegetation_soil_slope_type(nthreads, im, isot, ivegsrc, islmsk, vtype, stype, slope)
+        islmsk = nint(slmsk)
+
+        ! Save current values of vegetation, soil and slope type
+        vtype_save(:) = vtype(:)
+        stype_save(:) = stype(:)
+        slope_save(:) = slope(:)
+
+        call update_vegetation_soil_slope_type(nthreads, im, isot, ivegsrc, islmsk, vtype, stype, slope)
 
       end subroutine GFS_surface_generic_pre_init
 
@@ -72,8 +80,7 @@
         real(kind=kind_phys), intent(in) :: con_g
         real(kind=kind_phys), dimension(:), intent(in) :: vfrac, prsik_1, prslk_1
         integer, dimension(:), intent(inout) :: vtype, stype, slope
-        ! DH* - DO WE NEED THIS? SEE BELOW
-        integer, dimension(:), intent(out) :: vtype_save(:), stype_save(:), slope_save(:)
+        integer, dimension(:), intent(out)   :: vtype_save(:), stype_save(:), slope_save(:)
 
         real(kind=kind_phys), dimension(:), intent(inout) :: tsfc
         real(kind=kind_phys), dimension(:,:), intent(in) :: phil
@@ -155,12 +162,10 @@
 
         ! End of stochastic physics / surface perturbation
 
-#if 1
-        ! DH* DO WE NEED THIS???
+        ! Save current values of vegetation, soil and slope type
         vtype_save(:) = vtype(:)
         stype_save(:) = stype(:)
         slope_save(:) = slope(:)
-#endif
 
         call update_vegetation_soil_slope_type(nthreads, im, isot, ivegsrc, islmsk, vtype, stype, slope)
 
@@ -220,13 +225,8 @@
             endif
             slope(i)  = 9
           else
-            ! DH* REMOVE else block if not needeed - create separate subroutine to be called by both init and run?
-            !soiltyp(i)  = int( stype(i)+0.5_kind_phys )
-            !vegtype(i)  = int( vtype(i)+0.5_kind_phys )
-            !slopetyp(i) = int( slope(i)+0.5_kind_phys )    !! clu: slope -> slopetyp
             if (vtype(i)  < 1) vtype(i)  = 17
             if (slope(i) < 1) slope(i) = 1
-            ! *DH
           endif
         enddo
 !$OMP end parallel do
@@ -250,7 +250,27 @@
 
       contains
 
-      subroutine GFS_surface_generic_post_init ()
+!> \section arg_table_GFS_surface_generic_post_init Argument Table
+!! \htmlinclude GFS_surface_generic_post_init.html
+!!
+      subroutine GFS_surface_generic_post_init (vtype, stype, slope, vtype_save, stype_save, slope_save, errmsg, errflg)
+
+        integer, dimension(:), intent(in)  :: vtype_save, stype_save, slope_save
+        integer, dimension(:), intent(out) :: vtype, stype, slope
+
+        ! CCPP error handling
+        character(len=*), intent(out) :: errmsg
+        integer,          intent(out) :: errflg
+
+        ! Initialize CCPP error handling variables
+        errmsg = ''
+        errflg = 0
+
+        ! Restore vegetation, soil and slope type
+        vtype(:) = vtype_save(:)
+        stype(:) = stype_save(:)
+        slope(:) = slope_save(:)
+
       end subroutine GFS_surface_generic_post_init
 
       subroutine GFS_surface_generic_post_finalize()
@@ -298,10 +318,8 @@
         real(kind=kind_phys), dimension(:), intent(out) :: hflxq
         real(kind=kind_phys), dimension(:), intent(out) :: hffac
 
-        ! DH* - DO WE NEED THIS? SEE BELOW
         integer, intent(in) :: isot, ivegsrc, islmsk(:), vtype_save(:), stype_save(:), slope_save(:)
-        integer, intent(inout) :: vtype(:), stype(:), slope(:)
-        ! *DH
+        integer, intent(out) :: vtype(:), stype(:), slope(:)
 
         ! CCPP error handling variables
         character(len=*), intent(out) :: errmsg
@@ -441,13 +459,10 @@
           enddo
         endif
 
-#if 1
-        ! DH* cludge - DO WE NEED THIS ???
+        ! Restore vegetation, soil and slope type
         vtype(:) = vtype_save(:)
         stype(:) = stype_save(:)
         slope(:) = slope_save(:)
-        ! *DH cludge
-#endif
 
       end subroutine GFS_surface_generic_post_run
 
