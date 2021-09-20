@@ -19,12 +19,12 @@
 !> \section arg_table_GFS_surface_generic_pre_init Argument Table
 !! \htmlinclude GFS_surface_generic_pre_init.html
 !!
-      subroutine GFS_surface_generic_pre_init (im, slmsk, isot, ivegsrc, stype, vtype, slope, errmsg, errflg)
+      subroutine GFS_surface_generic_pre_init (nthreads, im, slmsk, isot, ivegsrc, stype, vtype, slope, errmsg, errflg)
 
          implicit none
 
          ! Interface variables
-         integer,                       intent(in)    :: im, isot, ivegsrc
+         integer,                       intent(in)    :: nthreads, im, isot, ivegsrc
          real(kind_phys), dimension(:), intent(in)    :: slmsk
          integer,         dimension(:), intent(inout) :: vtype, stype, slope
 
@@ -33,39 +33,15 @@
          integer,          intent(out) :: errflg
 
          ! Local variables
-         integer              :: i
+         integer, dimension(1:im) :: islmsk
+         integer :: i
 
          ! Initialize CCPP error handling variables
          errmsg = ''
          errflg = 0
 
-         do i=1,im
-           if (nint(slmsk(i)) == 2) then
-             if (isot == 1) then
-               stype(i) = 16
-             else
-               stype(i) = 9
-             endif
-             if (ivegsrc == 0 .or. ivegsrc == 4) then
-               vtype(i) = 24
-             elseif (ivegsrc == 1) then
-               vtype(i) = 15
-             elseif (ivegsrc == 2) then
-               vtype(i) = 13
-             elseif (ivegsrc == 3 .or. ivegsrc == 5) then
-               vtype(i) = 15
-             endif
-             slope(i)  = 9
-           else
-             ! DH* remove else block if not needed
-             !soiltyp(i)  = int( stype(i)+0.5_kind_phys )
-             !vegtype(i)  = int( vtype(i)+0.5_kind_phys )
-             !slopetyp(i) = int( slope(i)+0.5_kind_phys )    !! clu: slope -> slopetyp
-             !if (vegtype(i)  < 1) vegtype(i)  = 17
-             !if (slopetyp(i) < 1) slopetyp(i) = 1
-             ! *DH
-           endif
-         enddo
+         islmsk = nint(slmsk)
+         call update_vegetation_soil_slope_type(nthreads, im, isot, ivegsrc, islmsk, vtype, stype, slope)
 
       end subroutine GFS_surface_generic_pre_init
 
@@ -75,7 +51,7 @@
 !> \section arg_table_GFS_surface_generic_pre_run Argument Table
 !! \htmlinclude GFS_surface_generic_pre_run.html
 !!
-      subroutine GFS_surface_generic_pre_run (im, levs, vfrac, islmsk, isot, ivegsrc, stype, vtype, slope, &
+      subroutine GFS_surface_generic_pre_run (nthreads, im, levs, vfrac, islmsk, isot, ivegsrc, stype, vtype, slope, &
                           prsik_1, prslk_1, tsfc, phil, con_g, sigmaf, work3, zlvl,                        &
                           drain_cpl, dsnow_cpl, rain_cpl, snow_cpl, lndp_type, n_var_lndp, sfc_wts,        &
                           lndp_var_list, lndp_prt_list,                                                    &
@@ -90,7 +66,7 @@
         implicit none
 
         ! Interface variables
-        integer, intent(in) :: im, levs, isot, ivegsrc
+        integer, intent(in) :: nthreads, im, levs, isot, ivegsrc
         integer, dimension(:), intent(in) :: islmsk
 
         real(kind=kind_phys), intent(in) :: con_g
@@ -179,39 +155,18 @@
 
         ! End of stochastic physics / surface perturbation
 
+#if 1
         ! DH* DO WE NEED THIS???
         vtype_save(:) = vtype(:)
         stype_save(:) = stype(:)
         slope_save(:) = slope(:)
+#endif
+
+        call update_vegetation_soil_slope_type(nthreads, im, isot, ivegsrc, islmsk, vtype, stype, slope)
 
         do i=1,im
           sigmaf(i) = max(vfrac(i), 0.01_kind_phys)
           islmsk_cice(i) = islmsk(i)
-          if (islmsk(i) == 2) then
-            if (isot == 1) then
-              stype(i) = 16
-            else
-              stype(i) = 9
-            endif
-            if (ivegsrc == 0 .or. ivegsrc == 4) then
-              vtype(i) = 24
-            elseif (ivegsrc == 1) then
-              vtype(i) = 15
-            elseif (ivegsrc == 2) then
-              vtype(i) = 13
-            elseif (ivegsrc == 3 .or. ivegsrc == 5) then
-              vtype(i) = 15
-            endif
-            slope(i)  = 9
-          else
-            ! DH* REMOVE else block if not needeed - create separate subroutine to be called by both init and run?
-            !soiltyp(i)  = int( stype(i)+0.5_kind_phys )
-            !vegtype(i)  = int( vtype(i)+0.5_kind_phys )
-            !slopetyp(i) = int( slope(i)+0.5_kind_phys )    !! clu: slope -> slopetyp
-            !if (vegtype(i)  < 1) vegtype(i)  = 17
-            !if (slopetyp(i) < 1) slopetyp(i) = 1
-            ! *DH
-          endif
 
           work3(i)   = prsik_1(i) / prslk_1(i)
 
@@ -236,6 +191,47 @@
       endif
 
       end subroutine GFS_surface_generic_pre_run
+
+      subroutine update_vegetation_soil_slope_type(nthreads, im, isot, ivegsrc, islmsk, vtype, stype, slope)
+
+        implicit none
+
+        integer, intent(in)    :: nthreads, im, isot, ivegsrc, islmsk(:)
+        integer, intent(inout) :: vtype(:), stype(:), slope(:)
+        integer :: i
+
+!$OMP  parallel do num_threads(nthreads) default(none) private(i) &
+!$OMP      shared(im, isot, ivegsrc, islmsk, vtype, stype, slope)
+        do i=1,im
+          if (islmsk(i) == 2) then
+            if (isot == 1) then
+              stype(i) = 16
+            else
+              stype(i) = 9
+            endif
+            if (ivegsrc == 0 .or. ivegsrc == 4) then
+              vtype(i) = 24
+            elseif (ivegsrc == 1) then
+              vtype(i) = 15
+            elseif (ivegsrc == 2) then
+              vtype(i) = 13
+            elseif (ivegsrc == 3 .or. ivegsrc == 5) then
+              vtype(i) = 15
+            endif
+            slope(i)  = 9
+          else
+            ! DH* REMOVE else block if not needeed - create separate subroutine to be called by both init and run?
+            !soiltyp(i)  = int( stype(i)+0.5_kind_phys )
+            !vegtype(i)  = int( vtype(i)+0.5_kind_phys )
+            !slopetyp(i) = int( slope(i)+0.5_kind_phys )    !! clu: slope -> slopetyp
+            if (vtype(i)  < 1) vtype(i)  = 17
+            if (slope(i) < 1) slope(i) = 1
+            ! *DH
+          endif
+        enddo
+!$OMP end parallel do
+
+      end subroutine update_vegetation_soil_slope_type
 
       end module GFS_surface_generic_pre
 
@@ -445,11 +441,13 @@
           enddo
         endif
 
+#if 1
         ! DH* cludge - DO WE NEED THIS ???
         vtype(:) = vtype_save(:)
         stype(:) = stype_save(:)
         slope(:) = slope_save(:)
         ! *DH cludge
+#endif
 
       end subroutine GFS_surface_generic_post_run
 
