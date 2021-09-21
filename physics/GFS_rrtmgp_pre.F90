@@ -211,19 +211,15 @@ contains
        do iLay=1,nLev
           if (t_lay(iCol,iLay) .le. minGPtemp) then
              t_lay(iCol,iLay) = minGPtemp + epsilon(minGPtemp)
-             error_msg = "WARNING: GFS_rrtmgp_pre(), array t_lay has values outside range. Enforce lower temperature limit"
           endif
           if (p_lay(iCol,iLay) .le. minGPpres) then
              p_lay(iCol,iLay) = minGPpres + epsilon(minGPpres)
-             error_msg = "WARNING: GFS_rrtmgp_pre(), array p_lay has values outside range. Enforce lower pressure limit"
           endif
           if (t_lay(iCol,iLay) .ge. maxGPtemp) then
              t_lay(iCol,iLay) = maxGPtemp - epsilon(maxGPtemp)
-             error_msg = "WARNING: GFS_rrtmgp_pre(), array t_lay has values outside range. Enforce upper temperature limit"
           endif
           if (p_lay(iCol,iLay) .ge. maxGPpres) then
              p_lay(iCol,iLay) = maxGPpres - epsilon(maxGPpres)
-             error_msg = "WARNING: GFS_rrtmgp_pre(), array p_lay has values outside range. Enforce upper pressure limit"
           endif
        enddo
     enddo
