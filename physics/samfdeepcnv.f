@@ -286,6 +286,7 @@ c    &            .743,.813,.886,.947,1.138,1.377,1.896/
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+      print*,'do_ca and ca_trigger',do_ca,ca_trigger
 
 
       elocp = hvap/cp
@@ -773,6 +774,7 @@ c
       enddo
 !!
       if(do_ca .and. ca_trigger)then
+         print*,'max ca_deep',minval(ca_deep),maxval(ca_deep),nthresh 
          do i=1,im
             if(ca_deep(i) > nthresh) cnvflg(i) = .true.
             if(kbcon(i) == kmax(i)) cnvflg(i) = .false.

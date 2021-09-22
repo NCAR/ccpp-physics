@@ -3,6 +3,52 @@
   type = scheme
   dependencies = machine.F
 
+[ccpp-arg-table]
+  name = GFS_stochastics_init
+  type = scheme
+[km]
+  standard_name = vertical_layer_dimension
+  long_name = number of vertical levels
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[si]
+  standard_name = sigma_pressure_hybrid_vertical_coordinate
+  long_name = vertical sigma coordinate for radiation initialization
+  units = none
+  dimensions = (vertical_interface_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[vfact_ca]
+  standard_name = cellular_automata_vertical_weight
+  long_name = vertical weight for ca
+  units = frac
+  dimensions = (vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
 ########################################################################
 [ccpp-arg-table]
   name = GFS_stochastics_run
@@ -105,15 +151,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[si]
-  standard_name = sigma_pressure_hybrid_vertical_coordinate
-  long_name = vertical sigma coordinate for radiation initialization
-  units = none
-  dimensions = (vertical_interface_dimension_for_radiation)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [vfact_ca]
   standard_name = cellular_automata_vertical_weight
   long_name = vertical weight for ca
@@ -121,7 +158,7 @@
   dimensions = (vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = F
 [zmtnblck]
   standard_name = level_of_dividing_streamline
