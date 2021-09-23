@@ -229,7 +229,6 @@ contains
           uustar_lnd(i) = uustar(i)
            weasd_lnd(i) = weasd(i)
            tsurf_lnd(i) = tsfcl(i)
-          !if (iemsflg == 2 .and. .not. flag_init) then
           if (iemsflg == 2 .and. (.not.flag_init .or. flag_restart)) then
            !-- use land emissivity from the LSM
            semis_lnd(i) = emis_lnd(i)
