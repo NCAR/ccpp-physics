@@ -892,7 +892,7 @@
                 semis_lnd(i) = emsref(8)
               else
                 tmp1 = (fracl(i)-fsno) / fracl(i)
-                semis_lnd(i) = semis_lnd(i) * tmp1 +  (f_one-tmp1)*fsno
+                semis_lnd(i) = semis_lnd(i) * tmp1 + (f_one-tmp1)*fsno*emsref(8)
               endif
             endif
             if (fraci(i) > f_zero) then
@@ -914,7 +914,7 @@
                   semis_lnd(i) = emsref(8)
                 else
                   tmp1 = (fracl(i)-fsno) / fracl(i)
-                  semis_lnd(i) = semis_lnd(i)*tmp1 +  (f_one-tmp1)*fsno
+                  semis_lnd(i) = semis_lnd(i)*tmp1 + (f_one-tmp1)*fsno*emsref(8)
                 endif
               endif
               if (fraci(i) > f_zero) then
