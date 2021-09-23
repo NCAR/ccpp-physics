@@ -8,7 +8,7 @@
   name = mynnsfc_wrapper_init
   type = scheme
 [do_mynnsfclay]
-  standard_name = do_mynnsfclay
+  standard_name = flag_for_mellor_yamada_nakanishi_niino_surface_layer_scheme
   long_name = flag to activate MYNN surface layer
   units = flag
   dimensions = ()
@@ -46,7 +46,7 @@
   intent = in
   optional = F
 [levs]
-  standard_name = vertical_dimension
+  standard_name = vertical_layer_dimension
   long_name = vertical layer dimension
   units = count
   dimensions = ()
@@ -54,7 +54,7 @@
   intent = in
   optional = F
 [itimestep]
-  standard_name = index_of_time_step
+  standard_name = index_of_timestep
   long_name = current number of time steps
   units = index
   dimensions = ()
@@ -70,7 +70,7 @@
   intent = in
   optional = F
 [flag_init]
-  standard_name = flag_for_first_time_step
+  standard_name = flag_for_first_timestep
   long_name = flag signaling first time step for time integration loop
   units = flag
   dimensions = ()
@@ -86,7 +86,7 @@
   intent = in
   optional = F
 [lsm]
-  standard_name = flag_for_land_surface_scheme
+  standard_name = control_for_land_surface_scheme
   long_name = flag for land surface model
   units = flag
   dimensions = ()
@@ -94,7 +94,7 @@
   intent = in
   optional = F
 [lsm_ruc]
-  standard_name = flag_for_ruc_land_surface_scheme
+  standard_name = identifier_for_ruc_land_surface_scheme
   long_name = flag for RUC land surface model
   units = flag
   dimensions = ()
@@ -119,7 +119,7 @@
   intent = in
   optional = F
 [shdmax]
-  standard_name = maximum_vegetation_area_fraction
+  standard_name = max_vegetation_area_fraction
   long_name = max fractnl cover of green veg
   units = frac
   dimensions = (horizontal_loop_extent)
@@ -128,7 +128,7 @@
   intent = in
   optional = F
 [ivegsrc]
-  standard_name = vegetation_type_dataset_choice
+  standard_name = control_for_vegetation_dataset
   long_name = land use dataset choice
   units = index
   dimensions = ()
@@ -154,7 +154,7 @@
   intent = in
   optional = F
 [redrag]
-  standard_name = flag_for_reduced_drag_coefficient_over_sea
+  standard_name = flag_for_limited_surface_roughness_length_over_ocean
   long_name = flag for reduced drag coefficient over sea
   units = flag
   dimensions = ()
@@ -170,7 +170,7 @@
   intent = in
   optional = F
 [delt]
-  standard_name = time_step_for_physics
+  standard_name = timestep_for_physics
   long_name = time step for physics
   units = s
   dimensions = ()
@@ -179,7 +179,7 @@
   intent = in
   optional = F
 [dx]
-  standard_name = cell_size
+  standard_name = characteristic_grid_lengthscale
   long_name = size of the grid cell
   units = m
   dimensions = (horizontal_loop_extent)
@@ -191,7 +191,7 @@
   standard_name = x_wind
   long_name = x component of layer wind
   units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -200,7 +200,7 @@
   standard_name = y_wind
   long_name = y component of layer wind
   units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -209,25 +209,25 @@
   standard_name = air_temperature
   long_name = layer mean air temperature
   units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [qvsh]
-  standard_name = water_vapor_specific_humidity
+  standard_name = specific_humidity
   long_name = water vapor specific humidity
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [qc]
-  standard_name = cloud_condensed_water_mixing_ratio
+  standard_name = cloud_liquid_water_mixing_ratio
   long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates)
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -236,7 +236,7 @@
   standard_name = air_pressure
   long_name = mean layer pressure
   units = Pa
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -245,16 +245,16 @@
   standard_name = geopotential_at_interface
   long_name = geopotential at model layer interfaces
   units = m2 s-2
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [exner]
-  standard_name = dimensionless_exner_function_at_model_layers
+  standard_name = dimensionless_exner_function
   long_name = Exner function at layers
   units = none
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -278,7 +278,7 @@
   intent = in
   optional = F
 [slmsk]
-  standard_name = sea_land_ice_mask_real
+  standard_name = area_type
   long_name = landmask: sea/land/ice=0/1/2
   units = flag
   dimensions = (horizontal_loop_extent)
@@ -311,8 +311,8 @@
   intent = in
   optional = F
 [tskin_wat]
-  standard_name = surface_skin_temperature_over_water_interstitial
-  long_name = surface skin temperature over water (temporary use as interstitial)
+  standard_name = surface_skin_temperature_over_water
+  long_name = surface skin temperature over water
   units = K
   dimensions = (horizontal_loop_extent)
   type = real
@@ -320,8 +320,8 @@
   intent = in
   optional = F
 [tskin_lnd]
-  standard_name = surface_skin_temperature_over_land_interstitial
-  long_name = surface skin temperature over land  (temporary use as interstitial)
+  standard_name = surface_skin_temperature_over_land
+  long_name = surface skin temperature over land
   units = K
   dimensions = (horizontal_loop_extent)
   type = real
@@ -329,8 +329,8 @@
   intent = in
   optional = F
 [tskin_ice]
-  standard_name = surface_skin_temperature_over_ice_interstitial
-  long_name = surface skin temperature over ice   (temporary use as interstitial)
+  standard_name = surface_skin_temperature_over_ice
+  long_name = surface skin temperature over ice
   units = K
   dimensions = (horizontal_loop_extent)
   type = real
@@ -390,15 +390,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
-[snowh_wat]
-  standard_name = surface_snow_thickness_water_equivalent_over_water
-  long_name = water equivalent snow depth over water
-  units = mm
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
   optional = F
 [snowh_lnd]
   standard_name = surface_snow_thickness_water_equivalent_over_land
@@ -770,7 +761,7 @@
   intent = in
   optional = F
 [ustm]
-  standard_name = surface_friction_velocity_drag
+  standard_name = surface_friction_velocity_for_momentum
   long_name = friction velocity isolated for momentum only
   units = m s-1
   dimensions = (horizontal_loop_extent)
@@ -779,7 +770,7 @@
   intent = inout
   optional = F
 [zol]
-  standard_name = surface_stability_parameter
+  standard_name = ratio_of_height_to_monin_obukhov_length
   long_name = monin obukhov surface stability parameter
   units = none
   dimensions = (horizontal_loop_extent)
@@ -788,7 +779,7 @@
   intent = inout
   optional = F
 [mol]
-  standard_name = theta_star
+  standard_name = surface_temperature_scale
   long_name = temperature flux divided by ustar (temperature scale)
   units = K
   dimensions = (horizontal_loop_extent)
@@ -824,7 +815,7 @@
   intent = inout
   optional = F
 [hflx]
-  standard_name = kinematic_surface_upward_sensible_heat_flux
+  standard_name = surface_upward_temperature_flux
   long_name = kinematic surface upward sensible heat flux
   units = K m s-1
   dimensions = (horizontal_loop_extent)
@@ -833,7 +824,7 @@
   intent = inout
   optional = F
 [qflx]
-  standard_name = kinematic_surface_upward_latent_heat_flux
+  standard_name = surface_upward_specific_humidity_flux
   long_name = kinematic surface upward latent heat flux
   units = kg kg-1 m s-1
   dimensions = (horizontal_loop_extent)
@@ -842,7 +833,7 @@
   intent = inout
   optional = F
 [lh]
-  standard_name = surface_latent_heat
+  standard_name = surface_upward_latent_heat_flux
   long_name = latent heating at the surface (pos = up)
   units = W m-2
   dimensions = (horizontal_loop_extent)
@@ -887,7 +878,7 @@
   intent = inout
   optional = F
 [th2]
-  standard_name = potential_temperature_at_2m
+  standard_name = air_potential_temperature_at_2m
   long_name = 2 meter potential temperature
   units = K
   dimensions = (horizontal_loop_extent)
@@ -896,7 +887,7 @@
   intent = inout
   optional = F
 [t2]
-  standard_name = temperature_at_2m
+  standard_name = air_temperature_at_2m
   long_name = 2 meter temperature
   units = K
   dimensions = (horizontal_loop_extent)
@@ -914,7 +905,7 @@
   intent = inout
   optional = F
 [wstar]
-  standard_name = surface_wind_enhancement_due_to_convection
+  standard_name = enhancement_to_wind_speed_at_surface_adjacent_layer_due_to_convection
   long_name = surface wind enhancement due to convection
   units = m s-1
   dimensions = (horizontal_loop_extent)

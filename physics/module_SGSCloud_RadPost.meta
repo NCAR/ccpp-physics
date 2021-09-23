@@ -16,7 +16,7 @@
   intent = in
   optional = F
 [levs]
-  standard_name = vertical_dimension
+  standard_name = vertical_layer_dimension
   long_name = vertical layer dimension
   units = count
   dimensions = ()
@@ -24,7 +24,7 @@
   intent = in
   optional = F
 [flag_init]
-  standard_name = flag_for_first_time_step
+  standard_name = flag_for_first_timestep
   long_name = flag signaling first time step for time integration loop
   units = flag
   dimensions = ()
@@ -40,19 +40,19 @@
   intent = in
   optional = F
 [qc]
-  standard_name = cloud_condensed_water_mixing_ratio
+  standard_name = cloud_liquid_water_mixing_ratio
   long_name = no condensates) ratio of mass of cloud water to mass of dry air plus vapor (without condensates)
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [qi]
-  standard_name = ice_water_mixing_ratio
+  standard_name = cloud_ice_mixing_ratio
   long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates)
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -61,7 +61,7 @@
   standard_name = cloud_condensed_water_mixing_ratio_save
   long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates) before entering a physics scheme
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -70,7 +70,7 @@
   standard_name = ice_water_mixing_ratio_save
   long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates) before entering a physics scheme
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in

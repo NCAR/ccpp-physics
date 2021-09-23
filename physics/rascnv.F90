@@ -402,8 +402,9 @@
 !
       fscav_ = -999.0_kp                 ! By default no scavenging
       if (itc > 0 .and. ntc > 0) then
-        if (ntr >= itc + ntc - 3) then
-          fscav_(itc:ntc) = fscav
+        n = itc + ntc - 1
+        if (n <= ntr + 2) then
+          fscav_(itc:n) = fscav
         else
           errmsg = 'Error in rascnv_run: test ntr >= itc + ntc - 3 FAILED'
           errflg = 1
@@ -685,7 +686,8 @@
         if (advups) then               ! For first order upstream for updraft
           alfint(:,:) = one
         elseif (advtvd) then           ! TVD flux limiter scheme for updraft
-          alfint(:,:) = one
+!         alfint(:,:) = one
+          alfint(:,:) = half
           l   = krmin
           lm1 = l - 1
           dtvd(1,1) = cp*(toi(l)-toi(lm1)) + phi_l(l)-phi_l(lm1)        &

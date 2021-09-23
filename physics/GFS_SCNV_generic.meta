@@ -16,7 +16,7 @@
   intent = in
   optional = F
 [levs]
-  standard_name = vertical_dimension
+  standard_name = vertical_layer_dimension
   long_name = vertical layer dimension
   units = count
   dimensions = ()
@@ -24,7 +24,7 @@
   intent = in
   optional = F
 [ldiag3d]
-  standard_name = flag_diagnostics_3D
+  standard_name = flag_for_diagnostics_3D
   long_name = flag for 3d diagnostic fields
   units = flag
   dimensions = ()
@@ -32,7 +32,7 @@
   intent = in
   optional = F
 [qdiag3d]
-  standard_name = flag_tracer_diagnostics_3D
+  standard_name = flag_for_tracer_diagnostics_3D
   long_name = flag for 3d tracer diagnostic fields
   units = flag
   dimensions = ()
@@ -40,37 +40,37 @@
   intent = in
   optional = F
 [gu0]
-  standard_name = x_wind_updated_by_physics
+  standard_name = x_wind_of_new_state
   long_name = updated x-direction wind
   units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [gv0]
-  standard_name = y_wind_updated_by_physics
+  standard_name = y_wind_of_new_state
   long_name = updated y-direction wind
   units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [gt0]
-  standard_name = air_temperature_updated_by_physics
+  standard_name = air_temperature_of_new_state
   long_name = temperature updated by physics
   units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
-[gq0_water_vapor]
-  standard_name = water_vapor_specific_humidity_updated_by_physics
-  long_name = water vapor specific humidity updated by physics
+[gq0]
+  standard_name = tracer_concentration_of_new_state
+  long_name = tracer concentration updated by physics
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
   type = real
   kind = kind_phys
   intent = in
@@ -79,7 +79,7 @@
   standard_name = x_wind_save
   long_name = x-wind before entering a physics scheme
   units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -88,7 +88,7 @@
   standard_name = y_wind_save
   long_name = y-wind before entering a physics scheme
   units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -97,26 +97,179 @@
   standard_name = air_temperature_save
   long_name = air temperature before entering a physics scheme
   units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
-[save_qv]
-  standard_name = water_vapor_specific_humidity_save
-  long_name = water vapor specific humidity before entering a physics scheme
+[save_q]
+  standard_name = tracer_concentration_save
+  long_name = tracer concentration before entering a physics scheme
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
+  optional = F
+[ntqv]
+  standard_name = index_of_specific_humidity_in_tracer_concentration_array
+  long_name = tracer index for water vapor (specific humidity)
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[nsamftrac]
+  standard_name = number_of_tracers_for_samf
+  long_name = number of tracers for scale-aware mass flux schemes
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
   optional = F
 [flag_for_scnv_generic_tend]
-  standard_name = flag_for_generic_shallow_convection_tendency
+  standard_name = flag_for_generic_tendency_due_to_shallow_convection
   long_name = true if GFS_SCNV_generic should calculate tendencies
   units = flag
   dimensions = ()
   type = logical
+  intent = in
+  optional = F
+[dtidx]
+  standard_name = cumulative_change_of_state_variables_outer_index
+  long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
+  units = index
+  dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
+  type = integer
+  intent = in
+  optional = F
+[index_of_process_scnv]
+  standard_name = index_of_shallow_convection_process_process_in_cumulative_change_index
+  long_name = index of shallow convection process in second dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[cscnv]
+  standard_name = flag_for_Chikira_Sugiyama_deep_convection
+  long_name = flag for Chikira-Sugiyama convection
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[satmedmf]
+  standard_name = flag_for_scale_aware_TKE_moist_EDMF_PBL
+  long_name = flag for scale-aware TKE moist EDMF PBL scheme
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[trans_trac]
+  standard_name = flag_for_convective_transport_of_tracers
+  long_name = flag for convective transport of tracers
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[ras]
+  standard_name = flag_for_relaxed_arakawa_schubert_deep_convection
+  long_name = flag for ras convection scheme
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[ntcw]
+  standard_name = index_of_cloud_liquid_water_mixing_ratio_in_tracer_concentration_array
+  long_name = tracer index for cloud condensate (or liquid water)
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntiw]
+  standard_name = index_of_cloud_ice_mixing_ratio_in_tracer_concentration_array
+  long_name = tracer index for  ice water
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntclamt]
+  standard_name = index_of_cloud_area_fraction_in_atmosphere_layer_in_tracer_concentration_array
+  long_name = tracer index for cloud amount integer
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntrw]
+  standard_name = index_of_rain_mixing_ratio_in_tracer_concentration_array
+  long_name = tracer index for rain water
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntsw]
+  standard_name = index_of_snow_mixing_ratio_in_tracer_concentration_array
+  long_name = tracer index for snow water
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntrnc]
+  standard_name = index_of_mass_number_concentration_of_rain_in_tracer_concentration_array
+  long_name = tracer index for rain   number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntsnc]
+  standard_name = index_of_mass_number_concentration_of_snow_in_tracer_concentration_array
+  long_name = tracer index for snow   number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntgl]
+  standard_name = index_of_graupel_mixing_ratio_in_tracer_concentration_array
+  long_name = tracer index for graupel
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntgnc]
+  standard_name = index_of_mass_number_concentration_of_graupel_in_tracer_concentration_array
+  long_name = tracer index for graupel number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[clw]
+  standard_name = convective_transportable_tracers
+  long_name = array to contain cloud water and other convective trans. tracers
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers_for_convective_transport)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[ntrac]
+  standard_name = number_of_tracers
+  long_name = number of tracers
+  units = count
+  dimensions = ()
+  type = integer
   intent = in
   optional = F
 [errmsg]
@@ -156,7 +309,7 @@
   intent = in
   optional = F
 [levs]
-  standard_name = vertical_dimension
+  standard_name = vertical_layer_dimension
   long_name = vertical layer dimension
   units = count
   dimensions = ()
@@ -172,7 +325,7 @@
   intent = in
   optional = F
 [lssav]
-  standard_name = flag_diagnostics
+  standard_name = flag_for_diagnostics
   long_name = logical flag for storing diagnostics
   units = flag
   dimensions = ()
@@ -180,7 +333,7 @@
   intent = in
   optional = F
 [ldiag3d]
-  standard_name = flag_diagnostics_3D
+  standard_name = flag_for_diagnostics_3D
   long_name = flag for 3d diagnostic fields
   units = flag
   dimensions = ()
@@ -188,16 +341,8 @@
   intent = in
   optional = F
 [qdiag3d]
-  standard_name = flag_tracer_diagnostics_3D
+  standard_name = flag_for_tracer_diagnostics_3D
   long_name = flag for 3d tracer diagnostic fields
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[cplchm]
-  standard_name = flag_for_chemistry_coupling
-  long_name = flag controlling cplchm collection (default off)
   units = flag
   dimensions = ()
   type = logical
@@ -213,37 +358,37 @@
   intent = in
   optional = F
 [gu0]
-  standard_name = x_wind_updated_by_physics
+  standard_name = x_wind_of_new_state
   long_name = updated x-direction wind
   units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [gv0]
-  standard_name = y_wind_updated_by_physics
+  standard_name = y_wind_of_new_state
   long_name = updated y-direction wind
   units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [gt0]
-  standard_name = air_temperature_updated_by_physics
+  standard_name = air_temperature_of_new_state
   long_name = temperature updated by physics
   units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
-[gq0_water_vapor]
-  standard_name = water_vapor_specific_humidity_updated_by_physics
-  long_name = water vapor specific humidity updated by physics
+[gq0]
+  standard_name = tracer_concentration_of_new_state
+  long_name = tracer concentration updated by physics
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
   type = real
   kind = kind_phys
   intent = in
@@ -252,7 +397,7 @@
   standard_name = x_wind_save
   long_name = x-wind before entering a physics scheme
   units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -261,7 +406,7 @@
   standard_name = y_wind_save
   long_name = y-wind before entering a physics scheme
   units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -270,67 +415,88 @@
   standard_name = air_temperature_save
   long_name = air temperature before entering a physics scheme
   units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
-[save_qv]
-  standard_name = water_vapor_specific_humidity_save
-  long_name = water vapor specific humidity before entering a physics scheme
+[save_q]
+  standard_name = tracer_concentration_save
+  long_name = tracer concentration before entering a physics scheme
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
   type = real
   kind = kind_phys
   intent = in
   optional = F
-[du3dt]
-  standard_name = cumulative_change_in_x_wind_due_to_shallow_convection
-  long_name = cumulative change in x wind due to shallow convection
-  units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+[dtend]
+  standard_name = cumulative_change_of_state_variables
+  long_name = diagnostic tendencies for state variables
+  units = various
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_cumulative_change_processes)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
-[dv3dt]
-  standard_name = cumulative_change_in_y_wind_due_to_shallow_convection
-  long_name = cumulative change in y wind due to shallow convection
-  units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
+[dtidx]
+  standard_name = cumulative_change_of_state_variables_outer_index
+  long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
+  units = index
+  dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
+  type = integer
+  intent = in
   optional = F
-[dt3dt]
-  standard_name = cumulative_change_in_temperature_due_to_shallow_convection
-  long_name = cumulative change in temperature due to shal conv.
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
+[index_of_temperature]
+  standard_name = index_of_temperature_in_cumulative_change_index
+  long_name = index of temperature in first dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
   optional = F
-[dq3dt]
-  standard_name = cumulative_change_in_water_vapor_specific_humidity_due_to_shallow_convection
-  long_name = cumulative change in water vapor specific humidity due to shal conv.
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
+[index_of_x_wind]
+  standard_name = index_of_x_wind_in_cumulative_change_index
+  long_name = index of x-wind in first dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[index_of_y_wind]
+  standard_name = index_of_y_wind_in_cumulative_change_index
+  long_name = index of x-wind in first dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[index_of_process_scnv]
+  standard_name = index_of_shallow_convection_process_process_in_cumulative_change_index
+  long_name = index of shallow convection process in second dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntqv]
+  standard_name = index_of_specific_humidity_in_tracer_concentration_array
+  long_name = tracer index for water vapor (specific humidity)
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
   optional = F
 [clw]
   standard_name = convective_transportable_tracers
   long_name = array to contain cloud water and other convective trans. tracers
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers_for_convective_transport)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers_for_convective_transport)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [shcnvcw]
-  standard_name = flag_shallow_convective_cloud
+  standard_name = flag_for_saving_shallow_convective_cloud_area_fraction
   long_name = flag for shallow convective cloud
   units = 
   dimensions = ()
@@ -347,7 +513,7 @@
   intent = in
   optional = F
 [npdf3d]
-  standard_name = number_of_3d_arrays_associated_with_pdf_based_clouds
+  standard_name = number_of_pdf_based_variables_in_xyz_dimensioned_restart_array
   long_name = number of 3d arrays associated with pdf based clouds/mp
   units = count
   dimensions = ()
@@ -355,7 +521,7 @@
   intent = in
   optional = F
 [num_p3d]
-  standard_name = array_dimension_of_3d_arrays_for_microphysics
+  standard_name = number_of_microphysics_variables_in_xyz_dimensioned_restart_array
   long_name = number of 3D arrays needed for microphysics
   units = count
   dimensions = ()
@@ -363,7 +529,7 @@
   intent = in
   optional = F
 [ncnvcld3d]
-  standard_name = number_of_convective_3d_cloud_fields
+  standard_name = number_of_convective_cloud_variables_in_xyz_dimensioned_restart_array
   long_name = number of convective 3d clouds fields
   units = count
   dimensions = ()
@@ -374,7 +540,7 @@
   standard_name = convective_cloud_cover
   long_name = convective cloud cover
   units = frac
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -383,9 +549,17 @@
   standard_name = convective_cloud_water_mixing_ratio
   long_name = moist convective cloud water mixing ratio
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
+  intent = in
+  optional = F
+[nsamftrac]
+  standard_name = number_of_tracers_for_samf
+  long_name = number of tracers for scale-aware mass flux schemes
+  units = count
+  dimensions = ()
+  type = integer
   intent = in
   optional = F
 [rainc]
@@ -416,25 +590,25 @@
   intent = inout
   optional = F
 [cnvw_phy_f3d]
-  standard_name = convective_cloud_water_mixing_ratio_in_phy_f3d
+  standard_name = convective_cloud_condensate_mixing_ratio
   long_name = convective cloud water mixing ratio in the phy_f3d array
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [cnvc_phy_f3d]
-  standard_name = convective_cloud_cover_in_phy_f3d
+  standard_name = convective_cloud_area_fraction
   long_name = convective cloud cover in the phy_f3d array
   units = frac
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [flag_for_scnv_generic_tend]
-  standard_name = flag_for_generic_shallow_convection_tendency
+  standard_name = flag_for_generic_tendency_due_to_shallow_convection
   long_name = true if GFS_SCNV_generic should calculate tendencies
   units = flag
   dimensions = ()
@@ -442,7 +616,7 @@
   intent = in
   optional = F
 [imfshalcnv]
-  standard_name = flag_for_mass_flux_shallow_convection_scheme
+  standard_name = control_for_shallow_convection_scheme
   long_name = flag for mass-flux shallow convection scheme
   units = flag
   dimensions = ()
@@ -450,7 +624,7 @@
   intent = in
   optional = F
 [imfshalcnv_sas]
-  standard_name = flag_for_sas_shallow_convection_scheme
+  standard_name = identifier_for_simplified_arakawa_schubert_shallow_convection
   long_name = flag for SAS shallow convection scheme
   units = flag
   dimensions = ()
@@ -458,9 +632,121 @@
   intent = in
   optional = F
 [imfshalcnv_samf]
-  standard_name = flag_for_samf_shallow_convection_scheme
+  standard_name = identifier_for_scale_aware_mass_flux_shallow_convection
   long_name = flag for SAMF shallow convection scheme
   units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[cscnv]
+  standard_name = flag_for_Chikira_Sugiyama_deep_convection
+  long_name = flag for Chikira-Sugiyama convection
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[satmedmf]
+  standard_name = flag_for_scale_aware_TKE_moist_EDMF_PBL
+  long_name = flag for scale-aware TKE moist EDMF PBL scheme
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[trans_trac]
+  standard_name = flag_for_convective_transport_of_tracers
+  long_name = flag for convective transport of tracers
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[ras]
+  standard_name = flag_for_relaxed_arakawa_schubert_deep_convection
+  long_name = flag for ras convection scheme
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[ntcw]
+  standard_name = index_of_cloud_liquid_water_mixing_ratio_in_tracer_concentration_array
+  long_name = tracer index for cloud condensate (or liquid water)
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntiw]
+  standard_name = index_of_cloud_ice_mixing_ratio_in_tracer_concentration_array
+  long_name = tracer index for  ice water
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntclamt]
+  standard_name = index_of_cloud_area_fraction_in_atmosphere_layer_in_tracer_concentration_array
+  long_name = tracer index for cloud amount integer
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntrw]
+  standard_name = index_of_rain_mixing_ratio_in_tracer_concentration_array
+  long_name = tracer index for rain water
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntsw]
+  standard_name = index_of_snow_mixing_ratio_in_tracer_concentration_array
+  long_name = tracer index for snow water
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntrnc]
+  standard_name = index_of_mass_number_concentration_of_rain_in_tracer_concentration_array
+  long_name = tracer index for rain   number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntsnc]
+  standard_name = index_of_mass_number_concentration_of_snow_in_tracer_concentration_array
+  long_name = tracer index for snow   number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntgl]
+  standard_name = index_of_graupel_mixing_ratio_in_tracer_concentration_array
+  long_name = tracer index for graupel
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntgnc]
+  standard_name = index_of_mass_number_concentration_of_graupel_in_tracer_concentration_array
+  long_name = tracer index for graupel number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntrac]
+  standard_name = number_of_tracers
+  long_name = number of tracers
+  units = count
   dimensions = ()
   type = integer
   intent = in

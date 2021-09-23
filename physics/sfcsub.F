@@ -8,6 +8,7 @@
 !! This module contains grib code for each parameter-used in subroutines sfccycle()
 !! and setrmsk().
       module sfccyc_module
+      use machine , only : kind_io8,kind_io4
       implicit none
       save
 !
@@ -19,12 +20,12 @@
      &,       kpdvmn,kpdvmx,kpdslp,kpdabs
      &,       kpdsnd, kpdabs_0, kpdabs_1, kpdalb(4)
       parameter(kpdtsf=11,  kpdwet=86, kpdsno=65,  kpdzor=83,
-!    1          kpdalb=84,  kpdais=91, kpdtg3=11,  kpdplr=224,
-     1          kpdais=91,  kpdtg3=11, kpdplr=224,
-     2          kpdgla=238, kpdmxi=91, kpdscv=238, kpdsmc=144,
-     3          kpdoro=8,   kpdmsk=81, kpdstc=11,  kpdacn=91, kpdveg=87,
+!    &          kpdalb=84,  kpdais=91, kpdtg3=11,  kpdplr=224,
+     &          kpdais=91,  kpdtg3=11, kpdplr=224,
+     &          kpdgla=238, kpdmxi=91, kpdscv=238, kpdsmc=144,
+     &          kpdoro=8,   kpdmsk=81, kpdstc=11,  kpdacn=91, kpdveg=87,
 !cbosu  max snow albedo uses a grib id number of 159, not 255.
-     &          kpdvmn=255, kpdvmx=255,kpdslp=236, kpdabs_0=255,    
+     &          kpdvmn=255, kpdvmx=255,kpdslp=236, kpdabs_0=255,
      &          kpdvet=225, kpdsot=224,kpdabs_1=159,
      &          kpdsnd=66 )
 !
@@ -32,6 +33,7 @@
       integer, parameter :: kpdalb_1(4)=(/189,190,191,192/)
       integer, parameter :: kpdalf(2)=(/214,217/)
 !
+      real (kind=kind_io8), parameter :: ten=10.0, one=1.0, zero=0.0
       integer, parameter :: xdata=5000, ydata=2500, mdata=xdata*ydata
       integer            :: veg_type_landice
       integer            :: soil_type_landice
@@ -52,11 +54,11 @@
       end module sfccyc_module
 
 !>\ingroup mod_GFS_phys_time_vary
-!! This subroutine reads or interpolates surface climatology data in analysis 
+!! This subroutine reads or interpolates surface climatology data in analysis
 !! and forecast mode.
 !!\param lugb   the unit number used in this subprogram
 !!\param len    number of points on which sfccyc operates
-!!\param lsoil  number of soil layers 
+!!\param lsoil  number of soil layers
 !!\param sig1t  sigma level 1 temperature for dead start. it should be on gaussian
 !!              grid. If not dead start, no need for dimension but set to zero as
 !!              in the example below.
@@ -71,18 +73,18 @@
 !!\param nst_anl
 !!
 
-      subroutine sfccycle(lugb,len,lsoil,sig1t,deltsfc                  &
-     &,                   iy,im,id,ih,fh                                &
-     &,                   rla, rlo, slmask,orog,orog_uf,use_ufo,nst_anl &
-     &,                   sihfcs,sicfcs,sitfcs                          &
-     &,                   swdfcs,slcfcs                                 &
-     &,                   vmnfcs,vmxfcs,slpfcs,absfcs                   &
-     &,                   tsffcs,snofcs,zorfcs,albfcs,tg3fcs            &
-     &,                   cnpfcs,smcfcs,stcfcs,slifcs,aisfcs            &
-     &,                   vegfcs,vetfcs,sotfcs,alffcs                   &
-     &,                   cvfcs,cvbfcs,cvtfcs,me,nthrds,nlunit          &
-     &,                   sz_nml,input_nml_file                         &
-     &,                   lake, min_lakeice, min_seaice                 &
+      subroutine sfccycle(lugb,len,lsoil,sig1t,deltsfc                    &
+     &,                   iy,im,id,ih,fh,rla,rlo                          &
+     &,                   slmskl,slmskw,orog,orog_uf,use_ufo,nst_anl      &
+     &,                   sihfcs,sicfcs,sitfcs                            &
+     &,                   swdfcs,slcfcs                                   &
+     &,                   vmnfcs,vmxfcs,slpfcs,absfcs                     &
+     &,                   tsffcs,snofcs,zorfcs,albfcs,tg3fcs              &
+     &,                   cnpfcs,smcfcs,stcfcs,slifcs,aisfcs              &
+     &,                   vegfcs,vetfcs,sotfcs,alffcs                     &
+     &,                   cvfcs,cvbfcs,cvtfcs,me,nthrds,nlunit            &
+     &,                   sz_nml,input_nml_file                           &
+     &,                   min_ice                                         &
      &,                   ialb,isot,ivegsrc,tile_num_ch,i_index,j_index)
 !
       use machine , only : kind_io8,kind_io4
@@ -92,8 +94,7 @@
       integer,              intent(in) :: i_index(len), j_index(len),   &
      &                                    me, nthrds
       logical,              intent(in) :: use_ufo, nst_anl
-      logical,              intent(in) :: lake(len)
-      real (kind=kind_io8), intent(in) :: min_lakeice, min_seaice
+      real (kind=kind_io8), intent(in) :: min_ice(len)
 
       real (kind=kind_io8) sllnd,slsea,aicice,aicsea,tgice,rlapse,      &
      &                     orolmx,orolmn,oroomx,oroomn,orosmx,          &
@@ -316,7 +317,7 @@
       parameter(plrlmx=1000.,plrlmn=0.0,plromx=1000.0,plromn=0.0,
      &          plrsmx=1000.,plrsmn=0.0,plrimx=1000.,plrimn=0.0,
      &          plrjmx=1000.,plrjmn=0.0)
-!clu [-1l/+1l] relax tsfsmx 
+!clu [-1l/+1l] relax tsfsmx
       parameter(tsflmx=353.,tsflmn=173.0,tsfomx=313.0,tsfomn=271.2,
      &          tsfsmx=305.0,tsfsmn=173.0,tsfimx=271.2,tsfimn=173.0,
      &          tsfjmx=273.16,tsfjmn=173.0)
@@ -342,19 +343,19 @@
      &          vegjmx=0.0,vegjmn=0.0)
       parameter(vmnlmx=1.0,vmnlmn=0.0,vmnomx=0.0,vmnomn=0.0,
      &          vmnsmx=1.0,vmnsmn=0.0,vmnimx=0.0,vmnimn=0.0,
-     &          vmnjmx=0.0,vmnjmn=0.0)   
+     &          vmnjmx=0.0,vmnjmn=0.0)
       parameter(vmxlmx=1.0,vmxlmn=0.0,vmxomx=0.0,vmxomn=0.0,
      &          vmxsmx=1.0,vmxsmn=0.0,vmximx=0.0,vmximn=0.0,
-     &          vmxjmx=0.0,vmxjmn=0.0)  
+     &          vmxjmx=0.0,vmxjmn=0.0)
       parameter(slplmx=9.0,slplmn=1.0,slpomx=0.0,slpomn=0.0,
      &          slpsmx=9.0,slpsmn=1.0,slpimx=0.,slpimn=0.,
-     &          slpjmx=0.,slpjmn=0.) 
+     &          slpjmx=0.,slpjmn=0.)
 !  note: the range values for bare land and snow covered land
 !        (alblmx, alblmn, albsmx, albsmn) are set below
 !        based on whether the old or new radiation is selected
       parameter(absomx=0.0,absomn=0.0,
      &          absimx=0.0,absimn=0.0,
-     &          absjmx=0.0,absjmn=0.0)    
+     &          absjmx=0.0,absjmn=0.0)
 !  vegetation type
       parameter(vetlmx=20.,vetlmn=1.0,vetomx=0.0,vetomn=0.0,
      &          vetsmx=20.,vetsmn=1.0,vetimx=0.,vetimn=0.,
@@ -399,7 +400,7 @@
 !
 !     parameter(snwmin=25.,snwmax=100.)
       parameter(snwmin=5.0,snwmax=100.)
-      real (kind=kind_io8), parameter :: ten=10.0, one=1.0
+!     real (kind=kind_io8), parameter :: ten=10.0, one=1.0, zero=0.0
 !
 !  coefficients of blending forecast and interpolated clim
 !  (or analyzed) fields over sea or land(l) (not for clouds)
@@ -451,9 +452,9 @@
 !
 !  mask orography and variance on gaussian grid
 !
-      real (kind=kind_io8) slmask(len),orog(len), orog_uf(len)          &
-     &,                    orogd(len)
-      real (kind=kind_io8) rla(len), rlo(len)
+      real (kind=kind_io8) slmskl(len), slmskw(len)
+      real (kind=kind_io8) orog(len),   orog_uf(len), orogd(len)
+      real (kind=kind_io8) rla(len),    rlo(len)
 !
 !  permanent/extremes
 !
@@ -467,7 +468,7 @@
       character*500 fntsfc,fnwetc,fnsnoc,fnzorc,fnalbc,fnaisc           &
      &,             fnplrc,fntg3c,fnscvc,fnsmcc,fnstcc,fnacnc           &
      &,             fnvegc,fnvetc,fnsotc                                &
-     &,             fnvmnc,fnvmxc,fnslpc,fnabsc, fnalbc2 
+     &,             fnvmnc,fnvmxc,fnslpc,fnabsc, fnalbc2
       real (kind=kind_io8) tsfclm(len), wetclm(len),   snoclm(len)      &
      &,    zorclm(len), albclm(len,4), aisclm(len)                      &
      &,    tg3clm(len), acnclm(len),   cnpclm(len)                      &
@@ -483,7 +484,7 @@
       character*500 fntsfa,fnweta,fnsnoa,fnzora,fnalba,fnaisa           &
      &,             fnplra,fntg3a,fnscva,fnsmca,fnstca,fnacna           &
      &,             fnvega,fnveta,fnsota                                &
-     &,             fnvmna,fnvmxa,fnslpa,fnabsa       
+     &,             fnvmna,fnvmxa,fnslpa,fnabsa
 !
       real (kind=kind_io8) tsfanl(len), wetanl(len),   snoanl(len)      &
      &,    zoranl(len), albanl(len,4), aisanl(len)                      &
@@ -514,7 +515,7 @@
 ! in this program).
 !
       real (kind=kind_io8) f10m  (len)
-      real (kind=kind_io8) fsmcl(25),fsmcs(25),fstcl(25),fstcs(25)
+      real (kind=kind_io8) fsmcl(25), fsmcs(25), fstcl(25), fstcs(25)
       real (kind=kind_io8) fcsmcl(25),fcsmcs(25),fcstcl(25),fcstcs(25)
 
 !clu [+1l] add swratio (soil moisture liquid-to-total ratio)
@@ -532,6 +533,13 @@
       integer kpd7, kpd9
 !
       logical icefl1(len), icefl2(len)
+!
+      real (kind=kind_io8), allocatable, dimension(:) ::                &
+     &     tsffcsd, snofcsd, tg3fcsd, zorfcsd, slifcsd, aisfcsd,        &
+     &     cnpfcsd, vegfcsd, vetfcsd, sotfcsd, sihfcsd, sicfcsd,        &
+     &     vmnfcsd, vmxfcsd, slpfcsd, absfcsd
+      real (kind=kind_io8), allocatable, dimension(:,:) ::              &
+     &                                        smcfcsd, stcfcsd, albfcsd
 !
 !  input and output surface fields (bges) file names
 !
@@ -777,19 +785,19 @@
       num_threads = nthrds
 !
       lprnt = .false.
-      iprnt = 1
 !     do i=1,len
 !       if (ifp .eq. 0 .and. rla(i) .gt. 80.0) print *,' rla=',rla(i)
 !    *,' rlo=',rlo(i)
-!       tem1 = abs(rla(i) - 48.75)
-!       tem2 = abs(rlo(i) - (-68.50))
-!       if(tem1 .lt. 0.25 .and. tem2 .lt. 0.50) then
+!       tem1 = abs(rla(i) - 60.11)
+!       tem2 = abs(rlo(i) - 5.38)
+!       if(tem1 < 0.10 .and. tem2 < 0.10) then
 !         lprnt = .true.
 !         iprnt = i
 !         print *,' lprnt=',lprnt,' iprnt=',iprnt
 !         print *,' rla(i)=',rla(i),' rlo(i)=',rlo(i)
 !       endif
 !     enddo
+
       if (ialb == 1) then
         kpdabs = kpdabs_1
         kpdalb = kpdalb_1
@@ -855,14 +863,14 @@
         endif
 
         if (ivegsrc == 2) then   ! sib
-          veg_type_landice=13
+          veg_type_landice = 13
         else
-          veg_type_landice=15
+          veg_type_landice = 15
         endif
         if (isot == 0) then
-          soil_type_landice=9
+          soil_type_landice = 9
         else
-          soil_type_landice=16
+          soil_type_landice = 16
         endif
 !
         deltf = deltsfc / 24.0
@@ -1052,8 +1060,8 @@
 !
         kpd9 = -1
         kpd7 = -1
-        call fixrdc(lugb,fnglac,kpdgla,kpd7,kpd9,slmask,
-     &              glacir,len,iret
+        call fixrdc(lugb,fnglac,kpdgla,kpd7,kpd9,slmskl
+     &,             glacir,len,iret
      &,             imsk, jmsk, slmskh, gausm, blnmsk, bltmsk
      &,             rla, rlo, me)
 !     znnt=1.
@@ -1062,8 +1070,8 @@
 !  read maximum ice extent
 !
         kpd7 = -1
-        call fixrdc(lugb,fnmxic,kpdmxi,kpd7,kpd9,slmask,
-     &              amxice,len,iret
+        call fixrdc(lugb,fnmxic,kpdmxi,kpd7,kpd9,slmskl
+     &,             amxice,len,iret
      &,             imsk, jmsk, slmskh, gausm, blnmsk, bltmsk
      &,             rla, rlo, me)
 !     znnt=1.
@@ -1085,6 +1093,8 @@
         icefl1(i) = .true.
       enddo
 !     if(lprnt) print *,' tsffcsin=',tsffcs(iprnt)
+!     if(lprnt) print *,' slifcsin=',slifcs(iprnt)
+!     if(lprnt) print *,'slmskl=',slmskl(iprnt),' slmskw=',slmskw(iprnt)
 !
 !  read climatology fields
 !
@@ -1096,7 +1106,7 @@
 !
       percrit=critp1
 !
-      call clima(lugb,iy,im,id,ih,fh,len,lsoil,slmask,
+      call clima(lugb,iy,im,id,ih,fh,len,lsoil,slmskl,slmskw,
      &           fntsfc,fnwetc,fnsnoc,fnzorc,fnalbc,fnaisc,
      &           fntg3c,fnscvc,fnsmcc,fnstcc,fnacnc,fnvegc,
      &           fnvetc,fnsotc,
@@ -1113,6 +1123,7 @@
      &           deltsfc, lanom
      &,          imsk, jmsk, slmskh, rla, rlo, gausm, blnmsk, bltmsk,me
      &,          lprnt,iprnt,fnalbc2,ialb,tile_num_ch,i_index,j_index)
+
 !     if(lprnt) print *,'tsfclm=',tsfclm(iprnt),' tsfcl2=',tsfcl2(iprnt)
 !
 !  scale surface roughness and albedo to model required units
@@ -1135,11 +1146,11 @@
 !
 !  set albedo over ocean to albomx
 !
-      call albocn(albclm,slmask,albomx,len)
+      call albocn(albclm,slmskl,albomx,len)
 !
 !  make sure vegetation type and soil type are non zero over land
 !
-      call landtyp(vetclm,sotclm,slpclm,slmask,len)
+      call landtyp(vetclm,sotclm,slpclm,slmskl,len)
 !
 !cwu [-1l/+1l]
 !* ice concentration or ice mask (only ice mask used in the model now)
@@ -1150,7 +1161,7 @@
         do i=1,len
          sihclm(i) = 3.0*aisclm(i)
          sicclm(i) = aisclm(i)
-          if(nint(slmask(i)) == 0 .and. nint(glacir(i)) == 1            &
+          if(nint(slmskl(i)) == 0 .and. nint(glacir(i)) == 1            &
      &                            .and. sicclm(i) /= 1.0) then
             sicclm(i) = sicimx
             sihfcs(i) = glacir_hice
@@ -1159,21 +1170,21 @@
         crit=aislim
 !*      crit=0.5
 !       call rof01(aisclm,len,'ge',crit)
-        call rof01_len(aisclm, len, 'ge', lake, min_lakeice, min_seaice)
+        call rof01_len(aisclm, len, 'ge', min_ice)
 
       elseif(fnacnc(1:8) /= '        ') then
 !cwu [+4l] update sihclm, sicclm
         do i=1,len
          sihclm(i) = 3.0*acnclm(i)
          sicclm(i) = acnclm(i)
-          if(nint(slmask(i)) == 0 .and. nint(glacir(i)) == 1            &
+          if(nint(slmskw(i)) == 0 .and. nint(glacir(i)) == 1            &
      &                            .and. sicclm(i).ne.1.) then
             sicclm(i) = sicimx
             sihfcs(i) = glacir_hice
           endif
         enddo
 !       call rof01(acnclm,len,'ge',aislim)
-        call rof01_len(acnclm, len, 'ge', lake, min_lakeice, min_seaice)
+        call rof01_len(acnclm, len, 'ge', min_ice)
         do i=1,len
          aisclm(i) = acnclm(i)
         enddo
@@ -1181,15 +1192,15 @@
 !
 !  quality control of sea ice mask
 !
-      call qcsice(aisclm,glacir,amxice,aicice,aicsea,sllnd,slmask,
+      call qcsice(aisclm,glacir,amxice,aicice,aicsea,sllnd,slmskw,
      &            rla,rlo,len,me)
 !
 !  set ocean/land/sea-ice mask
 !
-      call setlsi(slmask,aisclm,len,aicice,sliclm)
+      call setlsi(slmskl,aisclm,len,aicice,sliclm)
 
 !     if(lprnt) print *,' aisclm=',aisclm(iprnt),' sliclm='
-!    *,sliclm(iprnt),' slmask=',slmask(iprnt)
+!    &,sliclm(iprnt),' slmskw=',slmskw(iprnt)
 !
 !     write(6,*) 'sliclm'
 !     znnt=1.
@@ -1197,7 +1208,7 @@
 !
 !  quality control of snow
 !
-      call qcsnow(snoclm,slmask,aisclm,glacir,len,snosmx,landice,me)
+      call qcsnow(snoclm,slmskl,aisclm,glacir,len,snosmx,landice,me)
 !
       call setzro(snoclm,epssno,len)
 !
@@ -1274,7 +1285,8 @@
         call getsmc(wetclm,len,lsoil,smcclm,me)
       endif
       do k=1,lsoil
-      call qcmxmn(message('stc',k),smcclm(1,k),sliclm,snoclm,icefl1,
+!     call qcmxmn(message('stc',k),smcclm(1,k),sliclm,snoclm,icefl1,
+      call qcmxmn(message('stc',k),smcclm(1,k),slmskl,snoclm,icefl1,
      &            smclmx,smclmn,smcomx,smcomn,smcimx,smcimn,
      &            smcjmx,smcjmn,smcsmx,smcsmn,epssmc,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
@@ -1284,20 +1296,24 @@
         call getstc(tsfclm,tg3clm,sliclm,len,lsoil,stcclm,tsfimx)
       endif
       do k=1,lsoil
-      call qcmxmn(message('stc',k),stcclm(1,k),sliclm,snoclm,icefl1,
+!     call qcmxmn(message('stc',k),stcclm(1,k),sliclm,snoclm,icefl1,
+      call qcmxmn(message('stc',k),stcclm(1,k),slmskl,snoclm,icefl1,
      &            stclmx,stclmn,stcomx,stcomn,stcimx,stcimn,
      &            stcjmx,stcjmn,stcsmx,stcsmn,eptsfc,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
       enddo
-      call qcmxmn('vegc    ',vegclm,sliclm,snoclm,icefl1,
+!     call qcmxmn('vegc    ',vegclm,sliclm,snoclm,icefl1,
+      call qcmxmn('vegc    ',vegclm,slmskl,snoclm,icefl1,
      &            veglmx,veglmn,vegomx,vegomn,vegimx,vegimn,
      &            vegjmx,vegjmn,vegsmx,vegsmn,epsveg,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
-      call qcmxmn('vetc    ',vetclm,sliclm,snoclm,icefl1,
+!     call qcmxmn('vetc    ',vetclm,sliclm,snoclm,icefl1,
+      call qcmxmn('vetc    ',vetclm,slmskl,snoclm,icefl1,
      &            vetlmx,vetlmn,vetomx,vetomn,vetimx,vetimn,
      &            vetjmx,vetjmn,vetsmx,vetsmn,epsvet,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
-      call qcmxmn('sotc    ',sotclm,sliclm,snoclm,icefl1,
+!     call qcmxmn('sotc    ',sotclm,sliclm,snoclm,icefl1,
+      call qcmxmn('sotc    ',sotclm,slmskl,snoclm,icefl1,
      &            sotlmx,sotlmn,sotomx,sotomn,sotimx,sotimn,
      &            sotjmx,sotjmn,sotsmx,sotsmn,epssot,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
@@ -1311,15 +1327,18 @@
 !    &            sicjmx,sicjmn,sicsmx,sicsmn,epssic,
 !    &            rla,rlo,len,kqcm,percrit,lgchek,me)
 !clu [+16l] ---------------------------------------------------------------
-      call qcmxmn('vmnc    ',vmnclm,sliclm,snoclm,icefl1,
+!     call qcmxmn('vmnc    ',vmnclm,sliclm,snoclm,icefl1,
+      call qcmxmn('vmnc    ',vmnclm,slmskl,snoclm,icefl1,
      &            vmnlmx,vmnlmn,vmnomx,vmnomn,vmnimx,vmnimn,
      &            vmnjmx,vmnjmn,vmnsmx,vmnsmn,epsvmn,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
-      call qcmxmn('vmxc    ',vmxclm,sliclm,snoclm,icefl1,
+!     call qcmxmn('vmxc    ',vmxclm,sliclm,snoclm,icefl1,
+      call qcmxmn('vmxc    ',vmxclm,slmskl,snoclm,icefl1,
      &            vmxlmx,vmxlmn,vmxomx,vmxomn,vmximx,vmximn,
      &            vmxjmx,vmxjmn,vmxsmx,vmxsmn,epsvmx,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
-      call qcmxmn('slpc    ',slpclm,sliclm,snoclm,icefl1,
+!     call qcmxmn('slpc    ',slpclm,sliclm,snoclm,icefl1,
+      call qcmxmn('slpc    ',slpclm,slmskl,snoclm,icefl1,
      &            slplmx,slplmn,slpomx,slpomn,slpimx,slpimn,
      &            slpjmx,slpjmn,slpsmx,slpsmn,epsslp,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
@@ -1388,13 +1407,13 @@
      &            cnpanl,smcanl,stcanl,slianl,scvanl,veganl,
      &            vetanl,sotanl,alfanl,
      &            sihanl,sicanl,
-     &            vmnanl,vmxanl,slpanl,absanl, 
+     &            vmnanl,vmxanl,slpanl,absanl,
      &            tsfclm,tsfcl2,wetclm,snoclm,zorclm,albclm,aisclm,
      &            tg3clm,cvclm ,cvbclm,cvtclm,
      &            cnpclm,smcclm,stcclm,sliclm,scvclm,vegclm,
      &            vetclm,sotclm,alfclm,
      &            sihclm,sicclm,
-     &            vmnclm,vmxclm,slpclm,absclm,      
+     &            vmnclm,vmxclm,slpclm,absclm,
      &            len,lsoil)
 !
 !  reverse scaling to match with grib analysis input
@@ -1418,7 +1437,7 @@
 !
 !  read analysis fields
 !
-      call analy(lugb,iy,im,id,ih,fh,len,lsoil,slmask,
+      call analy(lugb,iy,im,id,ih,fh,len,lsoil,slmskl,slmskw,
      &           fntsfa,fnweta,fnsnoa,fnzora,fnalba,fnaisa,
      &           fntg3a,fnscva,fnsmca,fnstca,fnacna,fnvega,
      &           fnveta,fnsota,
@@ -1427,17 +1446,18 @@
      &           tg3anl,cvanl ,cvbanl,cvtanl,
      &           smcanl,stcanl,slianl,scvanl,acnanl,veganl,
      &           vetanl,sotanl,alfanl,tsfan0,
-     &           vmnanl,vmxanl,slpanl,absanl,      
+     &           vmnanl,vmxanl,slpanl,absanl,
      &           kpdtsf,kpdwet,kpdsno,kpdsnd,kpdzor,kpdalb,kpdais,
      &           kpdtg3,kpdscv,kpdacn,kpdsmc,kpdstc,kpdveg,
      &           kpdvet,kpdsot,kpdalf,
-     &           kpdvmn,kpdvmx,kpdslp,kpdabs,      
+     &           kpdvmn,kpdvmx,kpdslp,kpdabs,
      &           irttsf,irtwet,irtsno,irtzor,irtalb,irtais,
      &           irttg3,irtscv,irtacn,irtsmc,irtstc,irtveg,
      &           irtvet,irtsot,irtalf
-     &,          irtvmn,irtvmx,irtslp,irtabs, 
+     &,          irtvmn,irtvmx,irtslp,irtabs,
      &           imsk, jmsk, slmskh, rla, rlo, gausm, blnmsk, bltmsk
      &,          me, lanom)
+
 !     if(lprnt) print *,' tsfanl=',tsfanl(iprnt)
 !
 !  scale zor and alb to match forecast model units
@@ -1469,7 +1489,7 @@
 !
         if (use_ufo .and. .not. nst_anl) then
           ztsfc = 0.0
-          call tsfcor(tsfanl,orog_uf,slmask,ztsfc,len,rlapse)
+          call tsfcor(tsfanl,orog_uf,slmskw,ztsfc,len,rlapse)
         endif
 !
 !  ice concentration or ice mask (only ice mask used in the model now)
@@ -1479,7 +1499,7 @@
         do i=1,len
          sihanl(i) = 3.0*aisanl(i)
          sicanl(i) = aisanl(i)
-          if(nint(slmask(i)) == 0 .and. nint(glacir(i)) == 1            &
+          if(nint(slmskw(i)) == 0 .and. nint(glacir(i)) == 1            &
      &                            .and. sicanl(i) /= 1.) then
             sicanl(i) = sicimx
             sihfcs(i) = glacir_hice
@@ -1488,13 +1508,13 @@
 !       crit=aislim
 !*      crit=0.5
 !       call rof01(aisanl,len,'ge',crit)
-        call rof01_len(aisanl, len, 'ge', lake, min_lakeice, min_seaice)
+        call rof01_len(aisanl, len, 'ge', min_ice)
       elseif(fnacna(1:8) /= '        ') then
 !cwu [+17l] update sihanl, sicanl
         do i=1,len
           sihanl(i) = 3.0*acnanl(i)
           sicanl(i) = acnanl(i)
-          if(nint(slmask(i)) == 0 .and. nint(glacir(i)) == 1            &
+          if(nint(slmskw(i)) == 0 .and. nint(glacir(i)) == 1            &
      &                            .and. sicanl(i) /= 1.) then
             sicanl(i) = sicimx
             sihfcs(i) = glacir_hice
@@ -1502,20 +1522,21 @@
         enddo
 !       crit=aislim
         do i=1,len
-          if (lake(i)) then
-            crit = min_lakeice
-          else
-            crit = min_seaice
-          endif
+          crit = min_ice(i)
           if (nint(slianl(i)) == 0 .and. sicanl(i) >= crit) then
-            slianl(i) = 2.
+            slianl(i) = 2.0_kind_io8
 !           print *,'cycle - new ice form: fice=',sicanl(i)
           elseif (nint(slianl(i)) >= 2 .and. sicanl(i) < crit) then
             slianl(i) = 0.
 !           print *,'cycle - ice free: fice=',sicanl(i)
-          elseif (nint(slianl(i)) == 1 .and. sicanl(i) > crit) then
-!           print *,'cycle - land covered by sea-ice: fice=',sicanl(i)
-            sicanl(i) = 0.
+          elseif (nint(slianl(i)) == 1 .and. sicanl(i) >= crit) then
+!           if (nint(slmskw(i)) == 0) then  ! can happen only for fractional grid
+!             slianl(i) = 2.0_kind_io8
+!           else
+            if (nint(slmskw(i)) /= 0) then  ! can happen only for fractional grid
+!             print *,'cycle - land covered by sea-ice: fice=',sicanl(i)
+              sicanl(i) = 0.0_kind_io8
+            endif
           endif
         enddo
 !       znnt=10.
@@ -1527,27 +1548,28 @@
 !       enddo
 !     if(lprnt) print *,' acnanl=',acnanl(iprnt)
 !       call rof01(acnanl,len,'ge',aislim)
-        call rof01_len(acnanl, len, 'ge', lake, min_lakeice, min_seaice)
+        call rof01_len(acnanl, len, 'ge', min_ice)
         do i=1,len
           aisanl(i) = acnanl(i)
         enddo
       endif
-!     if(lprnt) print *,' aisanl1=',aisanl(iprnt),' glacir='
-!    &,glacir(iprnt),' slmask=',slmask(iprnt)
+!     if(lprnt) print *,' aisanl1=',aisanl(iprnt),' glacir='            &
+!    &,glacir(iprnt),' slmskwl=',slmskw(iprnt),slmskl(iprnt)
 !
-      call qcsice(aisanl,glacir,amxice,aicice,aicsea,sllnd,slmask,
+      call qcsice(aisanl,glacir,amxice,aicice,aicsea,sllnd,slmskw,
      &            rla,rlo,len,me)
 !
 !  set ocean/land/sea-ice mask
 !
-      call setlsi(slmask,aisanl,len,aicice,slianl)
-!     if(lprnt) print *,' aisanl=',aisanl(iprnt),' slianl='
-!    *,slianl(iprnt),' slmask=',slmask(iprnt)
+      call setlsi(slmskl,aisanl,len,aicice,slianl)
+
+!     if(lprnt) print *,' aisanl=',aisanl(iprnt),' slianl='             &
+!    &,slianl(iprnt),' slmskwl=',slmskw(iprnt),slmskl(iprnt)
 !
 !
       do k=1,lsoil
         do i=1,len
-          if (slianl(i) .eq. 0) then
+          if (slianl(i) == 0 .and. nint(slmskl(i)) /= 1) then
             smcanl(i,k) = smcomx
             stcanl(i,k) = tsfanl(i)
           endif
@@ -1569,14 +1591,14 @@
 !
 !  set albedo over ocean to albomx
 !
-      call albocn(albanl,slmask,albomx,len)
+      call albocn(albanl,slmskl,albomx,len)
 !
 !  quality control of snow and sea-ice
 !    process snow depth or snow cover
 !
       if (fnsnoa(1:8) /= '        ') then
         call setzro(snoanl,epssno,len)
-        call qcsnow(snoanl,slmask,aisanl,glacir,len,ten,landice,me)
+        call qcsnow(snoanl,slmskl,aisanl,glacir,len,ten,landice,me)
         if (.not.landice) then
           call snodpth2(glacir,snosmx,snoanl, len, me)
         endif
@@ -1594,14 +1616,14 @@
       else
         crit = 0.5
         call rof01(scvanl,len,'ge',crit)
-        call qcsnow(scvanl,slmask,aisanl,glacir,len,one,landice,me)
+        call qcsnow(scvanl,slmskl,aisanl,glacir,len,one,landice,me)
         call qcmxmn('sncva   ',scvanl,slianl,scvanl,icefl1,
      &              scvlmx,scvlmn,scvomx,scvomn,scvimx,scvimn,
      &              scvjmx,scvjmn,scvsmx,scvsmn,epsscv,
      &              rla,rlo,len,kqcm,percrit,lgchek,me)
         call snodpth(scvanl,slianl,tsfanl,snoclm,
      &               glacir,snwmax,snwmin,landice,len,snoanl,me)
-        call qcsnow(scvanl,slmask,aisanl,glacir,len,snosmx,landice,me)
+        call qcsnow(scvanl,slmskl,aisanl,glacir,len,snosmx,landice,me)
         call snosfc(snoanl,tsfanl,tsfsmx,len,me)
         call qcmxmn('snowa   ',snoanl,slianl,snoanl,icefl1,
      &              snolmx,snolmn,snoomx,snoomn,snoimx,snoimn,
@@ -1638,7 +1660,8 @@
 !    &            plrjmx,plrjmn,plrsmx,plrsmn,epsplr,
 !    &            rla,rlo,len,kqcm,percrit,lgchek,me)
 !     endif
-      call qcmxmn('tg3a    ',tg3anl,slianl,snoanl,icefl1,
+!     call qcmxmn('tg3a    ',tg3anl,slianl,snoanl,icefl1,
+      call qcmxmn('tg3a    ',tg3anl,slmskl,snoanl,icefl1,
      &            tg3lmx,tg3lmn,tg3omx,tg3omn,tg3imx,tg3imn,
      &            tg3jmx,tg3jmn,tg3smx,tg3smn,epstg3,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
@@ -1650,7 +1673,8 @@
       endif
       !-- soil moisture
       do k=1,lsoil
-       call qcmxmn(message('smca',k),smcanl(1,1),slianl,snoanl,icefl1,
+!      call qcmxmn(message('smca',k),smcanl(1,1),slianl,snoanl,icefl1,
+       call qcmxmn(message('smca',k),smcanl(1,1),slmskl,snoanl,icefl1,
      &            smclmx,smclmn,smcomx,smcomn,smcimx,smcimn,
      &            smcjmx,smcjmn,smcsmx,smcsmn,epssmc,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
@@ -1660,33 +1684,40 @@
         call getstc(tsfanl,tg3anl,slianl,len,lsoil,stcanl,tsfimx)
       endif
       do k=1,lsoil
-        call qcmxmn(message('stca',k),stcanl(1,1),slianl,snoanl,icefl1,
+!       call qcmxmn(message('stca',k),stcanl(1,1),slianl,snoanl,icefl1,
+        call qcmxmn(message('stca',k),stcanl(1,1),slmskl,snoanl,icefl1,
      &            stclmx,stclmn,stcomx,stcomn,stcimx,stcimn,
      &            stcjmx,stcjmn,stcsmx,stcsmn,eptsfc,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
       enddo
-      call qcmxmn('vega    ',veganl,slianl,snoanl,icefl1,
+!     call qcmxmn('vega    ',veganl,slianl,snoanl,icefl1,
+      call qcmxmn('vega    ',veganl,slmskl,snoanl,icefl1,
      &            veglmx,veglmn,vegomx,vegomn,vegimx,vegimn,
      &            vegjmx,vegjmn,vegsmx,vegsmn,epsveg,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
-      call qcmxmn('veta    ',vetanl,slianl,snoanl,icefl1,
+!     call qcmxmn('veta    ',vetanl,slianl,snoanl,icefl1,
+      call qcmxmn('veta    ',vetanl,slmskl,snoanl,icefl1,
      &            vetlmx,vetlmn,vetomx,vetomn,vetimx,vetimn,
      &            vetjmx,vetjmn,vetsmx,vetsmn,epsvet,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
-      call qcmxmn('sota    ',sotanl,slianl,snoanl,icefl1,
+!     call qcmxmn('sota    ',sotanl,slianl,snoanl,icefl1,
+      call qcmxmn('sota    ',sotanl,slmskl,snoanl,icefl1,
      &            sotlmx,sotlmn,sotomx,sotomn,sotimx,sotimn,
      &            sotjmx,sotjmn,sotsmx,sotsmn,epssot,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
 !clu [+16l]----------------------------------------------------------------------
-      call qcmxmn('vmna    ',vmnanl,slianl,snoanl,icefl1,
+!     call qcmxmn('vmna    ',vmnanl,slianl,snoanl,icefl1,
+      call qcmxmn('vmna    ',vmnanl,slmskl,snoanl,icefl1,
      &            vmnlmx,vmnlmn,vmnomx,vmnomn,vmnimx,vmnimn,
      &            vmnjmx,vmnjmn,vmnsmx,vmnsmn,epsvmn,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
-      call qcmxmn('vmxa    ',vmxanl,slianl,snoanl,icefl1,
+!     call qcmxmn('vmxa    ',vmxanl,slianl,snoanl,icefl1,
+      call qcmxmn('vmxa    ',vmxanl,slmskl,snoanl,icefl1,
      &            vmxlmx,vmxlmn,vmxomx,vmxomn,vmximx,vmximn,
      &            vmxjmx,vmxjmn,vmxsmx,vmxsmn,epsvmx,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
-      call qcmxmn('slpa    ',slpanl,slianl,snoanl,icefl1,
+!     call qcmxmn('slpa    ',slpanl,slianl,snoanl,icefl1,
+      call qcmxmn('slpa    ',slpanl,slmskl,snoanl,icefl1,
      &            slplmx,slplmn,slpomx,slpomn,slpimx,slpimn,
      &            slpjmx,slpjmn,slpsmx,slpsmn,epsslp,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
@@ -1770,7 +1801,7 @@
 !cwu [+1l] add ()anl for sih, sic
      &              sihanl,sicanl,
 !clu [+1l] add ()anl for vmn, vmx, slp, abs
-     &              vmnanl,vmxanl,slpanl,absanl,     
+     &              vmnanl,vmxanl,slpanl,absanl,
      &              len,lsoil)
         if (sig1t(1) /= 0.) then
           call usesgt(sig1t,slianl,tg3anl,len,lsoil,tsffcs,stcfcs,
@@ -1783,11 +1814,13 @@
      &                tsflmx,tsflmn,tsfomx,tsfomn,tsfimx,tsfimn,
      &                tsfjmx,tsfjmn,tsfsmx,tsfsmn,epstsf,
      &                rla,rlo,len,kqcm,percrit,lgchek,me)
-          call qcmxmn('stc1f   ',stcfcs(1,1),slifcs,snofcs,icefl1,
+!         call qcmxmn('stc1f   ',stcfcs(1,1),slifcs,snofcs,icefl1,
+          call qcmxmn('stc1f   ',stcfcs(1,1),slmskl,snofcs,icefl1,
      &                stclmx,stclmn,stcomx,stcomn,stcimx,stcimn,
      &                stcjmx,stcjmn,stcsmx,stcsmn,eptsfc,
      &                rla,rlo,len,kqcm,percrit,lgchek,me)
-          call qcmxmn('stc2f   ',stcfcs(1,2),slifcs,snofcs,icefl1,
+!         call qcmxmn('stc2f   ',stcfcs(1,2),slifcs,snofcs,icefl1,
+          call qcmxmn('stc2f   ',stcfcs(1,2),slmskl,snofcs,icefl1,
      &                stclmx,stclmn,stcomx,stcomn,stcimx,stcimn,
      &                stcjmx,stcjmn,stcsmx,stcsmn,eptsfc,
      &                rla,rlo,len,kqcm,percrit,lgchek,me)
@@ -1807,13 +1840,13 @@
 !
           if ( index(fntg3c, "tileX.nc") == 0) then ! global file
             ztsfc = 1.0
-            call tsfcor(tg3fcs,orogd,slmask,ztsfc,len,-rlapse)
+            call tsfcor(tg3fcs,orogd,slmskl,ztsfc,len,-rlapse)
           endif
           ztsfc = 0.
-          call tsfcor(tsffcs,orogd,slmask,ztsfc,len,-rlapse)
+          call tsfcor(tsffcs,orogd,slmskw,ztsfc,len,-rlapse)
         else
           ztsfc = 0.
-          call tsfcor(tsffcs,orog,slmask,ztsfc,len,-rlapse)
+          call tsfcor(tsffcs,orog,slmskw,ztsfc,len,-rlapse)
         endif
 
 !clu [+12l]  --------------------------------------------------------------
@@ -1833,7 +1866,7 @@
 !
         if (lqcbgs .and. irtacn == 0) then
           call qcsli(slianl,slifcs,len,me)
-          call albocn(albfcs,slmask,albomx,len)
+          call albocn(albfcs,slmskl,albomx,len)
          do i=1,len
             icefl2(i) = sicfcs(i) .gt. 0.99999
           enddo
@@ -1869,7 +1902,8 @@
 !    &                plrjmx,plrjmn,plrsmx,plrsmn,epsplr,
 !    &                rla,rlo,len,kqcm,percrit,lgchek,me)
 !       endif
-          call qcmxmn('tg3f    ',tg3fcs,slifcs,snofcs,icefl1,
+!         call qcmxmn('tg3f    ',tg3fcs,slifcs,snofcs,icefl1,
+          call qcmxmn('tg3f    ',tg3fcs,slmskl,snofcs,icefl1,
      &                tg3lmx,tg3lmn,tg3omx,tg3omn,tg3imx,tg3imn,
      &                tg3jmx,tg3jmn,tg3smx,tg3smn,epstg3,
      &                rla,rlo,len,kqcm,percrit,lgchek,me)
@@ -1884,7 +1918,8 @@
 !    &                rla,rlo,len,kqcm,percrit,lgchek,me)
 !-- soil moisture forecast
         do k=1,lsoil
-          call qcmxmn(message('smcfcw',k),smcfcs(1,k),slifcs,
+!         call qcmxmn(message('smcfcw',k),smcfcs(1,k),slifcs,
+          call qcmxmn(message('smcfcw',k),smcfcs(1,k),slmskl,
      &                snofcs,icefl1,
      &                smclmx,smclmn,smcomx,smcomn,smcimx,smcimn,
      &                smcjmx,smcjmn,smcsmx,smcsmn,epssmc,
@@ -1892,35 +1927,42 @@
         enddo
 !-- soil temperature forecast
         do k=1,lsoil
-          call qcmxmn(message('stcf',k),stcfcs(1,k),slifcs,
+!         call qcmxmn(message('stcf',k),stcfcs(1,k),slifcs,
+          call qcmxmn(message('stcf',k),stcfcs(1,k),slmskl,
      &                snofcs,icefl1,
      &                stclmx,stclmn,stcomx,stcomn,stcimx,stcimn,
      &                stcjmx,stcjmn,stcsmx,stcsmn,eptsfc,
      &                rla,rlo,len,kqcm,percrit,lgchek,me)
         enddo
-          call qcmxmn('vegf    ',vegfcs,slifcs,snofcs,icefl1,
+!         call qcmxmn('vegf    ',vegfcs,slifcs,snofcs,icefl1,
+          call qcmxmn('vegf    ',vegfcs,slmskl,snofcs,icefl1,
      &                veglmx,veglmn,vegomx,vegomn,vegimx,vegimn,
      &                vegjmx,vegjmn,vegsmx,vegsmn,epsveg,
      &                rla,rlo,len,kqcm,percrit,lgchek,me)
-          call qcmxmn('vetf    ',vetfcs,slifcs,snofcs,icefl1,
+!         call qcmxmn('vetf    ',vetfcs,slifcs,snofcs,icefl1,
+          call qcmxmn('vetf    ',vetfcs,slmskl,snofcs,icefl1,
      &                vetlmx,vetlmn,vetomx,vetomn,vetimx,vetimn,
      &                vetjmx,vetjmn,vetsmx,vetsmn,epsvet,
      &                rla,rlo,len,kqcm,percrit,lgchek,me)
-          call qcmxmn('sotf    ',sotfcs,slifcs,snofcs,icefl1,
+!         call qcmxmn('sotf    ',sotfcs,slifcs,snofcs,icefl1,
+          call qcmxmn('sotf    ',sotfcs,slmskl,snofcs,icefl1,
      &                sotlmx,sotlmn,sotomx,sotomn,sotimx,sotimn,
      &                sotjmx,sotjmn,sotsmx,sotsmn,epssot,
      &                rla,rlo,len,kqcm,percrit,lgchek,me)
 
 !clu [+16l] ---------------------------------------------------------------
-          call qcmxmn('vmnf    ',vmnfcs,slifcs,snofcs,icefl1,
+!         call qcmxmn('vmnf    ',vmnfcs,slifcs,snofcs,icefl1,
+          call qcmxmn('vmnf    ',vmnfcs,slmskl,snofcs,icefl1,
      &                vmnlmx,vmnlmn,vmnomx,vmnomn,vmnimx,vmnimn,
      &                vmnjmx,vmnjmn,vmnsmx,vmnsmn,epsvmn,
      &                rla,rlo,len,kqcm,percrit,lgchek,me)
-          call qcmxmn('vmxf    ',vmxfcs,slifcs,snofcs,icefl1,
+!         call qcmxmn('vmxf    ',vmxfcs,slifcs,snofcs,icefl1,
+          call qcmxmn('vmxf    ',vmxfcs,slmskl,snofcs,icefl1,
      &                vmxlmx,vmxlmn,vmxomx,vmxomn,vmximx,vmximn,
      &                vmxjmx,vmxjmn,vmxsmx,vmxsmn,epsvmx,
      &                rla,rlo,len,kqcm,percrit,lgchek,me)
-          call qcmxmn('slpf    ',slpfcs,slifcs,snofcs,icefl1,
+!         call qcmxmn('slpf    ',slpfcs,slifcs,snofcs,icefl1,
+          call qcmxmn('slpf    ',slpfcs,slmskl,snofcs,icefl1,
      &                slplmx,slplmn,slpomx,slpomn,slpimx,slpimn,
      &                slpjmx,slpjmn,slpsmx,slpsmn,epsslp,
      &                rla,rlo,len,kqcm,percrit,lgchek,me)
@@ -1976,6 +2018,17 @@
 !     if(lprnt) print *,'tsfclm=',tsfclm(iprnt),' tsfcl2=',tsfcl2(iprnt)
 !    *,' tsffcs=',tsffcs(iprnt),' slianl=',slianl(iprnt)
 
+      do i=1,len
+       if (nint(slmskl(i)) /= 1) then
+        if (sicanl(i) >= min_ice(i)) then
+          slianl(i) = 2.0_kind_io8
+        else
+          slianl(i) = zero
+          sicanl(i) = zero
+        endif
+       endif
+      enddo
+
       if (fh-deltsfc > -0.001 ) then
         do i=1,len
           if(slianl(i) == 0.0) then
@@ -2004,15 +2057,18 @@
 !
 !  merge analysis and forecast.  note tg3, ais are not merged
 !
+!     if(lprnt) print *,' stcfcsbefmer=',stcfcs(iprnt,:)
+!     if(lprnt) print *,' stcanlbefmer=',stcanl(iprnt,:)
+
       call merge(len,lsoil,iy,im,id,ih,fh,deltsfc,
-     &           sihfcs,sicfcs,
-     &           vmnfcs,vmxfcs,slpfcs,absfcs, 
+     &           slmskl,slmskw,sihfcs,sicfcs,
+     &           vmnfcs,vmxfcs,slpfcs,absfcs,
      &           tsffcs,wetfcs,snofcs,zorfcs,albfcs,aisfcs,
      &           cvfcs ,cvbfcs,cvtfcs,
      &           cnpfcs,smcfcs,stcfcs,slifcs,vegfcs,
      &           vetfcs,sotfcs,alffcs,
-     &           sihanl,sicanl,                
-     &           vmnanl,vmxanl,slpanl,absanl,       
+     &           sihanl,sicanl,
+     &           vmnanl,vmxanl,slpanl,absanl,
      &           tsfanl,tsfan2,wetanl,snoanl,zoranl,albanl,aisanl,
      &           cvanl ,cvbanl,cvtanl,
      &           cnpanl,smcanl,stcanl,slianl,veganl,
@@ -2025,20 +2081,22 @@
      &           cvmnl,cvmns,cvmxl,cvmxs,cslpl,cslps,cabsl,cabss, 
      &           irttsf,irtwet,irtsno,irtzor,irtalb,irtais,
      &           irttg3,irtscv,irtacn,irtsmc,irtstc,irtveg,
-     &           irtvmn,irtvmx,irtslp,irtabs,        
+     &           irtvmn,irtvmx,irtslp,irtabs,
      &           irtvet,irtsot,irtalf,landice,me)
 
       call setzro(snoanl,epssno,len)
 
 !     if(lprnt) print *,' tanlm=',tsfanl(iprnt),' tfcsm=',tsffcs(iprnt)
 !     if(lprnt) print *,' sliam=',slianl(iprnt),' slifm=',slifcs(iprnt)
+!     if(lprnt) print *,' stcfcsmer=',stcfcs(iprnt,:)
+!     if(lprnt) print *,' stcanlmer=',stcanl(iprnt,:)
 
 !
 !  new ice/melted ice
 !
       call newice(slianl,slifcs,tsfanl,tsffcs,len,lsoil,
 !cwu [+1l] add sihnew, aislim, sihanl & sicanl
-     &            sihnew,aislim,sihanl,sicanl,      
+     &            sihnew,aislim,sihanl,sicanl,
      &            albanl,snoanl,zoranl,smcanl,stcanl,
      &            albomx,snoomx,zoromx,smcomx,smcimx,
 !cwu [-1l/+1l] change albimx to albimn - note albimx & albimn have been modified
@@ -2048,7 +2106,8 @@
 
 !     if(lprnt) print *,'tsfanl=',tsfanl(iprnt),' tsffcs=',tsffcs(iprnt)
 !     if(lprnt) print *,' slian=',slianl(iprnt),' slifn=',slifcs(iprnt)
-!
+!     if(lprnt) print *,' stcan=',stcanl(iprnt,:)
+ 
 !  set tsfc to tsnow over snow
 !
       call snosfc(snoanl,tsfanl,tsfsmx,len,me)
@@ -2089,27 +2148,32 @@
 !    &            rla,rlo,len,kqcm,percrit,lgchek,me)
 !     endif
       do k=1,lsoil
-        call qcmxmn(message('stcm',k),stcanl(1,k),slianl,snoanl,icefl1,
+!       call qcmxmn(message('stcm',k),stcanl(1,k),slianl,snoanl,icefl1,
+        call qcmxmn(message('stcm',k),stcanl(1,k),slmskl,snoanl,icefl1,
      &            stclmx,stclmn,stcomx,stcomn,stcimx,stcimn,
      &            stcjmx,stcjmn,stcsmx,stcsmn,eptsfc,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
       enddo
       do k=1,lsoil
-        call qcmxmn(message('smcm',k),smcanl(1,k),slianl,snoanl,icefl1,
+!       call qcmxmn(message('smcm',k),smcanl(1,k),slianl,snoanl,icefl1,
+        call qcmxmn(message('smcm',k),smcanl(1,k),slmskl,snoanl,icefl1,
      &            smclmx,smclmn,smcomx,smcomn,smcimx,smcimn,
      &            smcjmx,smcjmn,smcsmx,smcsmn,epssmc,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
       enddo
       kqcm = 1
-      call qcmxmn('vegm    ',veganl,slianl,snoanl,icefl1,
+!     call qcmxmn('vegm    ',veganl,slianl,snoanl,icefl1,
+      call qcmxmn('vegm    ',veganl,slmskl,snoanl,icefl1,
      &            veglmx,veglmn,vegomx,vegomn,vegimx,vegimn,
      &            vegjmx,vegjmn,vegsmx,vegsmn,epsveg,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
-      call qcmxmn('vetm    ',vetanl,slianl,snoanl,icefl1,
+!     call qcmxmn('vetm    ',vetanl,slianl,snoanl,icefl1,
+      call qcmxmn('vetm    ',vetanl,slmskl,snoanl,icefl1,
      &            vetlmx,vetlmn,vetomx,vetomn,vetimx,vetimn,
      &            vetjmx,vetjmn,vetsmx,vetsmn,epsvet,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
-      call qcmxmn('sotm    ',sotanl,slianl,snoanl,icefl1,
+!     call qcmxmn('sotm    ',sotanl,slianl,snoanl,icefl1,
+      call qcmxmn('sotm    ',sotanl,slmskl,snoanl,icefl1,
      &            sotlmx,sotlmn,sotomx,sotomn,sotimx,sotimn,
      &            sotjmx,sotjmn,sotsmx,sotsmn,epssot,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
@@ -2123,15 +2187,18 @@
 !    &            sicjmx,sicjmn,sicsmx,sicsmn,epssic,
 !    &            rla,rlo,len,kqcm,percrit,lgchek,me)
 !clu [+16l] add vmn, vmx, slp, abs
-      call qcmxmn('vmnm    ',vmnanl,slianl,snoanl,icefl1,
+!     call qcmxmn('vmnm    ',vmnanl,slianl,snoanl,icefl1,
+      call qcmxmn('vmnm    ',vmnanl,slmskl,snoanl,icefl1,
      &            vmnlmx,vmnlmn,vmnomx,vmnomn,vmnimx,vmnimn,
      &            vmnjmx,vmnjmn,vmnsmx,vmnsmn,epsvmn,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
-      call qcmxmn('vmxm    ',vmxanl,slianl,snoanl,icefl1,
+!     call qcmxmn('vmxm    ',vmxanl,slianl,snoanl,icefl1,
+      call qcmxmn('vmxm    ',vmxanl,slmskl,snoanl,icefl1,
      &            vmxlmx,vmxlmn,vmxomx,vmxomn,vmximx,vmximn,
      &            vmxjmx,vmxjmn,vmxsmx,vmxsmn,epsvmx,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
-      call qcmxmn('slpm    ',slpanl,slianl,snoanl,icefl1,
+!     call qcmxmn('slpm    ',slpanl,slianl,snoanl,icefl1,
+      call qcmxmn('slpm    ',slpanl,slmskl,snoanl,icefl1,
      &            slplmx,slplmn,slpomx,slpomn,slpimx,slpimn,
      &            slpjmx,slpjmn,slpsmx,slpsmn,epsslp,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
@@ -2158,13 +2225,13 @@
 !
         if ( index(fntg3c, "tileX.nc") == 0) then ! global file
           ztsfc = 1.
-          call tsfcor(tg3anl,orogd,slmask,ztsfc,len,rlapse)
+          call tsfcor(tg3anl,orogd,slmskl,ztsfc,len,rlapse)
         endif
         ztsfc = 0.
-        call tsfcor(tsfanl,orogd,slmask,ztsfc,len,rlapse)
+        call tsfcor(tsfanl,orogd,slmskw,ztsfc,len,rlapse)
       else
         ztsfc = 0.
-        call tsfcor(tsfanl,orog,slmask,ztsfc,len,rlapse)
+        call tsfcor(tsfanl,orog,slmskw,ztsfc,len,rlapse)
       endif
 !     if(lprnt) print *,' tsfaf=',tsfanl(iprnt)
 !
@@ -2214,37 +2281,45 @@
       endif
 !
       if (mondif) then
+        allocate (tsffcsd(len), snofcsd(len), tg3fcsd(len),             &
+     &            zorfcsd(len), slifcsd(len), aisfcsd(len),             &
+     &            cnpfcsd(len), vegfcsd(len), vetfcsd(len),             &
+     &            sotfcsd(len), sihfcsd(len), sicfcsd(len),             &
+     &            vmnfcsd(len), vmxfcsd(len), slpfcsd(len),             &
+     &            absfcsd(len))
+         allocate (smcfcsd(len,lsoil), stcfcsd(len,lsoil),              &
+     &             albfcsd(len,4))
         do i=1,len
-          tsffcs(i) = tsfanl(i) - tsffcs(i)
-          snofcs(i) = snoanl(i) - snofcs(i)
-          tg3fcs(i) = tg3anl(i) - tg3fcs(i)
-          zorfcs(i) = zoranl(i) - zorfcs(i)
+          tsffcsd(i) = tsfanl(i) - tsffcs(i)
+          snofcsd(i) = snoanl(i) - snofcs(i)
+          tg3fcsd(i) = tg3anl(i) - tg3fcs(i)
+          zorfcsd(i) = zoranl(i) - zorfcs(i)
 !         plrfcs(i) = plranl(i) - plrfcs(i)
 !         albfcs(i) = albanl(i) - albfcs(i)
-          slifcs(i) = slianl(i) - slifcs(i)
-          aisfcs(i) = aisanl(i) - aisfcs(i)
-          cnpfcs(i) = cnpanl(i) - cnpfcs(i)
-          vegfcs(i) = veganl(i) - vegfcs(i)
-          vetfcs(i) = vetanl(i) - vetfcs(i)
-          sotfcs(i) = sotanl(i) - sotfcs(i)
+          slifcsd(i) = slianl(i) - slifcs(i)
+          aisfcsd(i) = aisanl(i) - aisfcs(i)
+          cnpfcsd(i) = cnpanl(i) - cnpfcs(i)
+          vegfcsd(i) = veganl(i) - vegfcs(i)
+          vetfcsd(i) = vetanl(i) - vetfcs(i)
+          sotfcsd(i) = sotanl(i) - sotfcs(i)
 !clu [+2l] add sih, sic
-          sihfcs(i) = sihanl(i) - sihfcs(i)
-          sicfcs(i) = sicanl(i) - sicfcs(i)
+          sihfcsd(i) = sihanl(i) - sihfcs(i)
+          sicfcsd(i) = sicanl(i) - sicfcs(i)
 !clu [+4l] add vmn, vmx, slp, abs
-          vmnfcs(i) = vmnanl(i) - vmnfcs(i)
-          vmxfcs(i) = vmxanl(i) - vmxfcs(i)
-          slpfcs(i) = slpanl(i) - slpfcs(i)
-          absfcs(i) = absanl(i) - absfcs(i)
+          vmnfcsd(i) = vmnanl(i) - vmnfcs(i)
+          vmxfcsd(i) = vmxanl(i) - vmxfcs(i)
+          slpfcsd(i) = slpanl(i) - slpfcs(i)
+          absfcsd(i) = absanl(i) - absfcs(i)
         enddo
         do j = 1,lsoil
           do i = 1,len
-            smcfcs(i,j) = smcanl(i,j) - smcfcs(i,j)
-            stcfcs(i,j) = stcanl(i,j) - stcfcs(i,j)
+            smcfcsd(i,j) = smcanl(i,j) - smcfcs(i,j)
+            stcfcsd(i,j) = stcanl(i,j) - stcfcs(i,j)
           enddo
         enddo
         do j = 1,4
           do i = 1,len
-            albfcs(i,j) = albanl(i,j) - albfcs(i,j)
+            albfcsd(i,j) = albanl(i,j) - albfcs(i,j)
           enddo
         enddo
 !
@@ -2255,40 +2330,45 @@
         print *,'monitor of difference'
         print *,'   (includes angulation correction)'
         print *,' '
-        call monitr('tsfdif',tsffcs,slianl,snoanl,len)
-        call monitr('albdif',albfcs,slianl,snoanl,len)
-        call monitr('albdif1',albfcs,slianl,snoanl,len)
-        call monitr('albdif2',albfcs(1,2),slianl,snoanl,len)
-        call monitr('albdif3',albfcs(1,3),slianl,snoanl,len)
-        call monitr('albdif4',albfcs(1,4),slianl,snoanl,len)
-        call monitr('aisdif',aisfcs,slianl,snoanl,len)
-        call monitr('snodif',snofcs,slianl,snoanl,len)
+        call monitr('tsfdif', tsffcsd,slianl,snoanl,len)
+        call monitr('albdif', albfcsd,slianl,snoanl,len)
+        call monitr('albdif1',albfcsd,slianl,snoanl,len)
+        call monitr('albdif2',albfcsd(1,2),slianl,snoanl,len)
+        call monitr('albdif3',albfcsd(1,3),slianl,snoanl,len)
+        call monitr('albdif4',albfcsd(1,4),slianl,snoanl,len)
+        call monitr('aisdif', aisfcsd,slianl,snoanl,len)
+        call monitr('snodif', snofcsd,slianl,snoanl,len)
         do k=1,lsoil
-          call monitr(message('smcanl',k),smcfcs(1,k),slianl,snoanl,len)
-          call monitr(message('stcanl',k),stcfcs(1,k),slianl,snoanl,len)
+         call monitr(message('smcanl',k),smcfcsd(1,k),slianl,snoanl,len)
+         call monitr(message('stcanl',k),stcfcsd(1,k),slianl,snoanl,len)
         enddo
-        call monitr('tg3dif',tg3fcs,slianl,snoanl,len)
-        call monitr('zordif',zorfcs,slianl,snoanl,len)
+        call monitr('tg3dif',tg3fcsd,slianl,snoanl,len)
+        call monitr('zordif',zorfcsd,slianl,snoanl,len)
 !       if (gaus) then
           call monitr('cvadif',cvfcs ,slianl,snoanl,len)
           call monitr('cvbdif',cvbfcs,slianl,snoanl,len)
           call monitr('cvtdif',cvtfcs,slianl,snoanl,len)
 !       endif
-        call monitr('slidif',slifcs,slianl,snoanl,len)
+        call monitr('slidif',slifcsd,slianl,snoanl,len)
 !       call monitr('plrdif',plrfcs,slianl,snoanl,len)
-        call monitr('cnpdif',cnpfcs,slianl,snoanl,len)
-        call monitr('vegdif',vegfcs,slianl,snoanl,len)
-        call monitr('vetdif',vetfcs,slianl,snoanl,len)
-        call monitr('sotdif',sotfcs,slianl,snoanl,len)
+        call monitr('cnpdif',cnpfcsd,slianl,snoanl,len)
+        call monitr('vegdif',vegfcsd,slianl,snoanl,len)
+        call monitr('vetdif',vetfcsd,slianl,snoanl,len)
+        call monitr('sotdif',sotfcsd,slianl,snoanl,len)
 !cwu [+2l] add sih, sic
-        call monitr('sihdif',sihfcs,slianl,snoanl,len)
-        call monitr('sicdif',sicfcs,slianl,snoanl,len)
+        call monitr('sihdif',sihfcsd,slianl,snoanl,len)
+        call monitr('sicdif',sicfcsd,slianl,snoanl,len)
 !clu [+4l] add vmn, vmx, slp, abs
-        call monitr('vmndif',vmnfcs,slianl,snoanl,len)
-        call monitr('vmxdif',vmxfcs,slianl,snoanl,len)
-        call monitr('slpdif',slpfcs,slianl,snoanl,len)
-        call monitr('absdif',absfcs,slianl,snoanl,len)
+        call monitr('vmndif',vmnfcsd,slianl,snoanl,len)
+        call monitr('vmxdif',vmxfcsd,slianl,snoanl,len)
+        call monitr('slpdif',slpfcsd,slianl,snoanl,len)
+        call monitr('absdif',absfcsd,slianl,snoanl,len)
        endif
+       deallocate (tsffcsd, snofcsd, tg3fcsd, zorfcsd, slifcsd,         &
+     &             aisfcsd, cnpfcsd, vegfcsd, vetfcsd, sotfcsd,         &
+     &             sihfcsd, sicfcsd, vmnfcsd, vmxfcsd, slpfcsd,         &
+     &             absfcsd)
+        deallocate (smcfcsd, stcfcsd, albfcsd)
       endif
 !
 !
@@ -2324,6 +2404,8 @@
           endif
         enddo
       enddo
+!     if(lprnt) print *,' stcfcs=',stcfcs(iprnt,:),'slifcs=',           &
+!    & slifcs(iprnt)
       do j = 1,4
         do i = 1,len
           albfcs(i,j) = albanl(i,j)
@@ -2338,27 +2420,29 @@
 !cwu [+20l] update sihfcs, sicfcs. remove sea ice over non-ice points
 !     crit = aislim
       do i=1,len
-        sihfcs(i) = sihanl(i)
-        sitfcs(i) = tsffcs(i)
-        if (lake(i)) then
-          crit = min_lakeice
-        else
-          crit = min_seaice
-        endif
-        if (slifcs(i) >= 1.99_kind_io8) then
-          if (sicfcs(i) > crit) then
-            tem1 = 1.0_kind_io8 / sicfcs(i)
-            tsffcs(i) = (sicanl(i)*tsffcs(i)
-     &                + (sicfcs(i)-sicanl(i))*tgice) * tem1
-            sitfcs(i) = (tsffcs(i)-tgice*(1.0-sicfcs(i))) * tem1
-            sicfcs(i) = sicanl(i)
+        if (slmskw(i) == zero) then
+          crit = min_ice(i)
+          if (sicanl(i) >= crit) then
+            sihfcs(i) = sihanl(i)
+            sitfcs(i) = tsffcs(i)
+            if (sicfcs(i) >= crit) then
+              tem1 = 1.0_kind_io8 / sicfcs(i)
+              tsffcs(i) = (sicanl(i)*tsffcs(i)
+     &                  + (sicfcs(i)-sicanl(i))*tgice) * tem1
+              sitfcs(i) = (tsffcs(i)-tgice*(1.0-sicfcs(i))) * tem1
+              sicfcs(i) = sicanl(i)
+            else
+              tsffcs(i) = tgice
+              sitfcs(i) = tgice
+              sicfcs(i) = sicanl(i)
+              sihfcs(i) = sihnew
+            endif
           else
             tsffcs(i) = tsfanl(i)
-!           tsffcs(i) = tgice
-!           sihfcs(i) = sihnew
-            sihfcs(i) = 0.0_kind_io8
-            sicfcs(i) = 0.0_kind_io8
-            slifcs(i) = 0.0_kind_io8
+            sihfcs(i) = zero
+            sicfcs(i) = zero
+            slifcs(i) = zero
+            sitfcs(i) = tsffcs(i)
           endif
         endif
         if (slifcs(i) > 1.5_kind_io8 .and. sicfcs(i)  < crit) then
@@ -2373,11 +2457,7 @@
 !         sicfcs(i) = 0.0_kind_io8
 !         sitfcs(i) = tsffcs(i)
 !       else
-!         if (lake(i)) then
-!           crit = min_lakeice
-!         else
-!           crit = min_seaice
-!         endif
+!         crit = min_ice(i)
 !         if (sicfcs(i)  < crit) then
 !           print *,'warning: check, slifcs and sicfcs',                &
 !    &               slifcs(i),sicfcs(i)
@@ -2464,9 +2544,16 @@
              tsffcs(i) = min(tsffcs(i),273.15)
            endif
          enddo
-       end if
+       endif
+       do i=1,len
+         if (nint(slmskl(i)) == 1 .and. nint(slmskw(i)) == 0) then
+           slifcs(i) = slmskl(i)  ! resetting slmsk to land value where land/wate/ice coexist
+         endif
+       enddo
 !
 !     if(lprnt) print *,' tsffcsf=',tsffcs(iprnt)
+!     if(lprnt) print *,' stcfcsend=',stcfcs(iprnt,:)
+!     if(lprnt) print *,' slifcsend=',slifcs(iprnt)
       return
       end subroutine sfccycle 
 
@@ -3315,8 +3402,10 @@
 !cggg routine assign a default.
 
               if (num_threads == 1) then
-                print*,'no matching mask found ',i,i1,j1,ix,jx
-                print*,'set to default value.'
+                print*,'no matching mask found ',i,i1,j1,ix,jx          &
+     &,                ' slmask=',slmask(i),' me=',me                   & 
+     &,                ' outlon=',outlon(i),' outlat=',outlat(i)
+     &,                'set to default value.'
               endif
               gauout(i) = 0.0
 
@@ -3581,7 +3670,7 @@
      &     slianl(len),scvanl(len),veganl(len),                         &
      &     vetanl(len),sotanl(len),alfanl(len,2)                        &
      &,    sihanl(len),sicanl(len)                                      &
-     &,    vmnanl(len),vmxanl(len),slpanl(len),absanl(len)         
+     &,    vmnanl(len),vmxanl(len),slpanl(len),absanl(len)
       real (kind=kind_io8) tsfclm(len),tsfcl2(len),wetclm(len),         &
      &     snoclm(len),                                                 &
      &     zorclm(len),albclm(len,4),aisclm(len),                       &
@@ -3617,7 +3706,7 @@
         sicanl(i)   = sicclm(i)      !  sea ice concentration
 !clu [+4l] add vmn, vmx, slp, abs
         vmnanl(i)   = vmnclm(i)      !  min vegetation cover
-        vmxanl(i)   = vmxclm(i)      !  max vegetation cover 
+        vmxanl(i)   = vmxclm(i)      !  max vegetation cover
         slpanl(i)   = slpclm(i)      !  slope type
         absanl(i)   = absclm(i)      !  max snow albedo
       enddo
@@ -3643,8 +3732,8 @@
       end
 
 !>\ingroup mod_sfcsub
-      subroutine analy(lugb,iy,im,id,ih,fh,len,lsoil,                   &
-     &                 slmask,fntsfa,fnweta,fnsnoa,fnzora,fnalba,fnaisa,&
+      subroutine analy(lugb,iy,im,id,ih,fh,len,lsoil,slmskl,slmskw,     &
+     &                 fntsfa,fnweta,fnsnoa,fnzora,fnalba,fnaisa,       &
      &                 fntg3a,fnscva,fnsmca,fnstca,fnacna,fnvega,       &
      &                 fnveta,fnsota,                                   &
      &                 fnvmna,fnvmxa,fnslpa,fnabsa,                     & !clu [+1l] add fn()a for vmn, vmx, slp, abs
@@ -3674,7 +3763,7 @@
      &,       kpdvmn,kpdvmx,kpdslp,kpdabs,irtvmn,irtvmx,irtslp,irtabs
       real (kind=kind_io8) blto,blno,fh
 !
-      real (kind=kind_io8)    slmask(len)
+      real (kind=kind_io8)    slmskl(len), slmskw(len)
       real (kind=kind_io8)    slmskh(imsk,jmsk)
       real (kind=kind_io8)    outlat(len), outlon(len)
       integer kpdalb(4),   kpdalf(2)
@@ -3704,7 +3793,7 @@
 !
       irttsf = 1
       if(fntsfa(1:8).ne.'        ') then
-        call fixrda(lugb,fntsfa,kpdtsf,slmask,
+        call fixrda(lugb,fntsfa,kpdtsf,slmskw,
      &              iy,im,id,ih,fh,tsfanl,len,iret
      &,             imsk, jmsk, slmskh, gaus,blno, blto
      &,             outlat, outlon, me)
@@ -3731,7 +3820,7 @@
 ! tsf0
 !
       if(fntsfa(1:8).ne.'        ' .and. lanom) then
-        call fixrda(lugb,fntsfa,kpdtsf,slmask,
+        call fixrda(lugb,fntsfa,kpdtsf,slmskw,
      &              iy,im,id,ih,0.,tsfan0,len,iret
      &,             imsk, jmsk, slmskh, gaus,blno, blto
      &,             outlat, outlon, me)
@@ -3759,7 +3848,7 @@
       irtalb = 0
       if(fnalba(1:8).ne.'        ') then
         do kk = 1, 4
-          call fixrda(lugb,fnalba,kpdalb(kk),slmask,
+          call fixrda(lugb,fnalba,kpdalb(kk),slmskl,
      &               iy,im,id,ih,fh,albanl(1,kk),len,iret
      &,              imsk, jmsk, slmskh, gaus,blno, blto
      &,              outlat, outlon, me)
@@ -3790,7 +3879,7 @@
       irtalf = 0
       if(fnalba(1:8).ne.'        ') then
         do kk = 1, 2
-          call fixrda(lugb,fnalba,kpdalf(kk),slmask,
+          call fixrda(lugb,fnalba,kpdalf(kk),slmskl,
      &               iy,im,id,ih,fh,alfanl(1,kk),len,iret
      &,              imsk, jmsk, slmskh, gaus,blno, blto
      &,              outlat, outlon, me)
@@ -3821,7 +3910,7 @@
       irtwet=0
       irtsmc=0
       if(fnweta(1:8).ne.'        ') then
-        call fixrda(lugb,fnweta,kpdwet,slmask,
+        call fixrda(lugb,fnweta,kpdwet,slmskl,
      &             iy,im,id,ih,fh,wetanl,len,iret
      &,            imsk, jmsk, slmskh, gaus,blno, blto
      &,            outlat, outlon, me)
@@ -3839,11 +3928,11 @@
           if (me .eq. 0) print *,'bucket wetness analysis provided.'
         endif
       elseif(fnsmca(1:8).ne.'        ') then
-        call fixrda(lugb,fnsmca,kpdsmc,slmask,
+        call fixrda(lugb,fnsmca,kpdsmc,slmskl,
      &             iy,im,id,ih,fh,smcanl(1,1),len,iret
      &,            imsk, jmsk, slmskh, gaus,blno, blto
      &,            outlat, outlon, me)
-        call fixrda(lugb,fnsmca,kpdsmc,slmask,
+        call fixrda(lugb,fnsmca,kpdsmc,slmskl,
      &             iy,im,id,ih,fh,smcanl(1,2),len,iret
      &,            imsk, jmsk, slmskh, gaus,blno, blto
      &,            outlat, outlon, me)
@@ -3904,14 +3993,14 @@
           call abort
         endif
         if (kgds(1) == 4) then  ! gaussian data is depth
-          call fixrda(lugb,fnsnoa,kpdsnd,slmask,
+          call fixrda(lugb,fnsnoa,kpdsnd,slmskl,
      &                iy,im,id,ih,fh,snoanl,len,iret
      &,               imsk, jmsk, slmskh, gaus,blno, blto
      &,               outlat, outlon, me)
-          snoanl=snoanl*100.  ! convert from meters to liq. eq.
-                              ! depth in mm using 10:1 ratio
+          snoanl = snoanl*100.  ! convert from meters to liq. eq.
+                                ! depth in mm using 10:1 ratio
         else                    ! lat/lon data is liq equv. depth
-          call fixrda(lugb,fnsnoa,kpdsno,slmask,
+          call fixrda(lugb,fnsnoa,kpdsno,slmskl,
      &                iy,im,id,ih,fh,snoanl,len,iret
      &,               imsk, jmsk, slmskh, gaus,blno, blto
      &,               outlat, outlon, me)
@@ -3933,9 +4022,9 @@
         irtsno=0
       elseif(fnscva(1:8).ne.'        ') then
         do i=1,len
-          snoanl(i)=0.
+          snoanl(i) = 0.
         enddo
-        call fixrda(lugb,fnscva,kpdscv,slmask,
+        call fixrda(lugb,fnscva,kpdscv,slmskl,
      &             iy,im,id,ih,fh,scvanl,len,iret
      &,            imsk, jmsk, slmskh, gaus,blno, blto
      &,            outlat, outlon, me)
@@ -3964,7 +4053,7 @@
       irtacn=0
       irtais=0
       if(fnacna(1:8).ne.'        ') then
-        call fixrda(lugb,fnacna,kpdacn,slmask,
+        call fixrda(lugb,fnacna,kpdacn,slmskw,
      &             iy,im,id,ih,fh,acnanl,len,iret
      &,            imsk, jmsk, slmskh, gaus,blno, blto
      &,            outlat, outlon, me)
@@ -3984,7 +4073,7 @@
           if (me .eq. 0) print *,'ice concentration analysis provided.'
         endif
       elseif(fnaisa(1:8).ne.'        ') then
-        call fixrda(lugb,fnaisa,kpdais,slmask,
+        call fixrda(lugb,fnaisa,kpdais,slmskw,
      &             iy,im,id,ih,fh,aisanl,len,iret
      &,            imsk, jmsk, slmskh, gaus,blno, blto
      &,            outlat, outlon, me)
@@ -4012,7 +4101,7 @@
 !
       irtzor=0
       if(fnzora(1:8).ne.'        ') then
-        call fixrda(lugb,fnzora,kpdzor,slmask,
+        call fixrda(lugb,fnzora,kpdzor,slmskl,
      &             iy,im,id,ih,fh,zoranl,len,iret
      &,            imsk, jmsk, slmskh, gaus,blno, blto
      &,            outlat, outlon, me)
@@ -4041,7 +4130,7 @@
       irttg3=0
       irtstc=0
       if(fntg3a(1:8).ne.'        ') then
-        call fixrda(lugb,fntg3a,kpdtg3,slmask,
+        call fixrda(lugb,fntg3a,kpdtg3,slmskl,
      &             iy,im,id,ih,fh,tg3anl,len,iret
      &,            imsk, jmsk, slmskh, gaus,blno, blto
      &,            outlat, outlon, me)
@@ -4060,11 +4149,11 @@
           if (me .eq. 0) print *,'deep soil tmp analysis provided.'
         endif
       elseif(fnstca(1:8).ne.'        ') then
-        call fixrda(lugb,fnstca,kpdstc,slmask,
+        call fixrda(lugb,fnstca,kpdstc,slmskl,
      &             iy,im,id,ih,fh,stcanl(1,1),len,iret
      &,            imsk, jmsk, slmskh, gaus,blno, blto
      &,            outlat, outlon, me)
-        call fixrda(lugb,fnstca,kpdstc,slmask,
+        call fixrda(lugb,fnstca,kpdstc,slmskl,
      &             iy,im,id,ih,fh,stcanl(1,2),len,iret
      &,            imsk, jmsk, slmskh, gaus,blno, blto
      &,            outlat, outlon, me)
@@ -4093,7 +4182,7 @@
 !
       irtveg=0
       if(fnvega(1:8).ne.'        ') then
-        call fixrda(lugb,fnvega,kpdveg,slmask,
+        call fixrda(lugb,fnvega,kpdveg,slmskl,
      &             iy,im,id,ih,fh,veganl,len,iret
      &,            imsk, jmsk, slmskh, gaus,blno, blto
      &,            outlat, outlon, me)
@@ -4123,7 +4212,7 @@
 !
       irtvet=0
       if(fnveta(1:8).ne.'        ') then
-        call fixrda(lugb,fnveta,kpdvet,slmask,
+        call fixrda(lugb,fnveta,kpdvet,slmskl,
      &             iy,im,id,ih,fh,vetanl,len,iret
      &,            imsk, jmsk, slmskh, gaus,blno, blto
      &,            outlat, outlon, me)
@@ -4153,7 +4242,7 @@
 !
       irtsot=0
       if(fnsota(1:8).ne.'        ') then
-        call fixrda(lugb,fnsota,kpdsot,slmask,
+        call fixrda(lugb,fnsota,kpdsot,slmskl,
      &             iy,im,id,ih,fh,sotanl,len,iret
      &,            imsk, jmsk, slmskh, gaus,blno, blto
      &,            outlat, outlon, me)
@@ -4184,7 +4273,7 @@
 !
       irtvmn=0
       if(fnvmna(1:8).ne.'        ') then
-        call fixrda(lugb,fnvmna,kpdvmn,slmask,
+        call fixrda(lugb,fnvmna,kpdvmn,slmskl,
      &             iy,im,id,ih,fh,vmnanl,len,iret
      &,            imsk, jmsk, slmskh, gaus,blno, blto
      &,            outlat, outlon, me)
@@ -4214,7 +4303,7 @@
 !
       irtvmx=0
       if(fnvmxa(1:8).ne.'        ') then
-        call fixrda(lugb,fnvmxa,kpdvmx,slmask,
+        call fixrda(lugb,fnvmxa,kpdvmx,slmskl,
      &             iy,im,id,ih,fh,vmxanl,len,iret
      &,            imsk, jmsk, slmskh, gaus,blno, blto
      &,            outlat, outlon, me)
@@ -4244,7 +4333,7 @@
 !
       irtslp=0
       if(fnslpa(1:8).ne.'        ') then
-        call fixrda(lugb,fnslpa,kpdslp,slmask,
+        call fixrda(lugb,fnslpa,kpdslp,slmskl,
      &             iy,im,id,ih,fh,slpanl,len,iret
      &,            imsk, jmsk, slmskh, gaus,blno, blto
      &,            outlat, outlon, me)
@@ -4274,7 +4363,7 @@
 !
       irtabs=0
       if(fnabsa(1:8).ne.'        ') then
-        call fixrda(lugb,fnabsa,kpdabs,slmask,
+        call fixrda(lugb,fnabsa,kpdabs,slmskl,
      &             iy,im,id,ih,fh,absanl,len,iret
      &,            imsk, jmsk, slmskh, gaus,blno, blto
      &,            outlat, outlon, me)
@@ -4331,7 +4420,7 @@
      &     slifcs(len),vegfcs(len),                                     &
      &     vetfcs(len),sotfcs(len),alffcs(len,2)                        &
      &,    sihfcs(len),sicfcs(len)                                      &
-     &,    vmnfcs(len),vmxfcs(len),slpfcs(len),absfcs(len)      
+     &,    vmnfcs(len),vmxfcs(len),slpfcs(len),absfcs(len)
       real (kind=kind_io8) tsfanl(len),wetanl(len),snoanl(len),         &
      &     zoranl(len),albanl(len,4),aisanl(len),                       &
      &     tg3anl(len),                                                 &
@@ -4391,13 +4480,12 @@
       end
 
 !>\ingroup mod_sfcsub
-      subroutine bktges(smcfcs,slianl,stcfcs,len,lsoil)
+      subroutine bktges(smcfcs,stcfcs,len,lsoil)
 !
       use machine , only : kind_io8,kind_io4
       implicit none
       integer i,j,len,lsoil,k
-      real (kind=kind_io8) smcfcs(len,lsoil), stcfcs(len,lsoil),        &
-     &                     slianl(len)
+      real (kind=kind_io8) smcfcs(len,lsoil), stcfcs(len,lsoil)
 !
 !  note that smfcs comes in with the original unit (cm?) (not grib file)
 !
@@ -4470,21 +4558,14 @@
       end
 
 !>\ingroup mod_sfcsub
-      subroutine rof01_len(aisfld, len, op, lake, critl, crits)
+      subroutine rof01_len(aisfld, len, op, crit)
       use machine , only : kind_io8,kind_io4
       implicit none
       integer i,len
-      logical :: lake(len)
-      real (kind=kind_io8) aisfld(len), critl, crits, crit(len)
+      real (kind=kind_io8), intent(in) :: crit(len)
+      real (kind=kind_io8) aisfld(len)
       character*2 op
 !
-      do i=1,len
-        if (lake(i)) then
-          crit(i) = critl
-        else
-          crit(i) = crits
-        endif
-      enddo
       if(op == 'ge') then
         do i=1,len
           if(aisfld(i) >= crit(i)) then
@@ -4602,7 +4683,7 @@
 !>\ingroup mod_sfcsub
 !! This subroutine merges analysis and forecast.
       subroutine merge(len,lsoil,iy,im,id,ih,fh,deltsfc,                &
-     &                 sihfcs,sicfcs,                                   &
+     &                 slmskl,slmskw,sihfcs,sicfcs,                     &
      &                 vmnfcs,vmxfcs,slpfcs,absfcs,                     &
      &                 tsffcs,wetfcs,snofcs,zorfcs,albfcs,aisfcs,       &
      &                 cvfcs ,cvbfcs,cvtfcs,                            &
@@ -4626,7 +4707,7 @@
      &                 irtvet,irtsot,irtalf, landice, me)
       use machine , only : kind_io8,kind_io4
       use sfccyc_module, only : veg_type_landice, soil_type_landice,    &
-     &                          num_threads
+     &                          num_threads, zero, one
       implicit none
       integer k,i,im,id,iy,len,lsoil,ih,irtacn,irtsmc,irtscv,irtais,    &
      &        irttg3,irtstc,irtalf,me,irtsot,irtveg,irtvet, irtzor,     &
@@ -4651,6 +4732,7 @@
      &,                    rslpl,rslps,rabsl,rabss,qvmnl,qvmns          &
      &,                    qvmxl,qvmxs,qslpl,qslps,qabsl,qabss
 !
+      real (kind=kind_io8) slmskl(len), slmskw(len)
       real (kind=kind_io8) tsffcs(len), wetfcs(len),   snofcs(len),     &
      &     zorfcs(len), albfcs(len,4), aisfcs(len),                     &
      &     cvfcs (len), cvbfcs(len),   cvtfcs(len),                     &
@@ -4835,8 +4917,8 @@
       if (me == 0) then
       write(6,100) rtsfl,ralbl,raisl,rsnol,rsmcl,rzorl,rvegl
   100 format('rtsfl,ralbl,raisl,rsnol,rsmcl,rzorl,rvegl=',10f7.3)
-      write(6,101) rtsfs,ralbs,raiss,rsnos,rsmcs,rzors,rvegs
-  101 format('rtsfs,ralbs,raiss,rsnos,rsmcs,rzors,rvegs=',10f7.3)
+      write(6,101) rtsfs,ralbs,raiss,rsnos,rsmcs,rzors,rvegs,rsics
+  101 format('rtsfs,ralbs,raiss,rsnos,rsmcs,rzors,rvegs,rsics=',11f7.3)
 !     print *,' ralfl=',ralfl,' ralfs=',ralfs,' rsotl=',rsotl
 !    *,' rsots=',rsots,' rvetl=',rvetl,' rvets=',rvets
       endif
@@ -4914,7 +4996,7 @@
         i1_t       = (it-1)*len_thread_m+1
         i2_t       = min(i1_t+len_thread_m-1,len)
         do i=i1_t,i2_t
-          if(slianl(i).eq.0.) then
+          if(slianl(i) == zero) then
             vetanl(i) = vetfcs(i)*rvets + vetanl(i)*qvets
             sotanl(i) = sotfcs(i)*rsots + sotanl(i)*qsots
           else
@@ -4932,7 +5014,8 @@
         i2_t       = min(i1_t+len_thread_m-1,len)
 !
       do i=i1_t,i2_t
-        if(slianl(i).eq.0.) then
+        if(slianl(i) == zero) then
+!       if(slmskw(i) == zero) then
 !.... tsffc2 is the previous anomaly + today's climatology
 !         tsffc2 = (tsffcs(i)-tsfan2(i))+tsfanl(i)
 !         tsfanl(i) = tsffc2    *rtsfs+tsfanl(i)*qtsfs
@@ -4950,7 +5033,8 @@
           vmxanl(i) = vmxfcs(i)*rvmxs + vmxanl(i)*qvmxs
           slpanl(i) = slpfcs(i)*rslps + slpanl(i)*qslps
           absanl(i) = absfcs(i)*rabss + absanl(i)*qabss
-        else
+        endif
+        if(slmskl(i) == one .or. slianl(i) > zero) then
           tsfanl(i) = tsffcs(i)*rtsfl + tsfanl(i)*qtsfl
 !         albanl(i) = albfcs(i)*ralbl + albanl(i)*qalbl
           aisanl(i) = aisfcs(i)*raisl + aisanl(i)*qaisl
@@ -4976,7 +5060,7 @@
 !
 !  snow over sea ice is cycled
 !
-        if(slianl(i).eq.2.) then
+        if (nint(slianl(i)) == 2) then
           snoanl(i) = snofcs(i)
         endif
 !
@@ -5007,7 +5091,7 @@
 !
       do k = 1, 4
         do i=i1_t,i2_t
-          if(slianl(i).eq.0.) then
+          if (nint(slianl(i)) == 0) then
             albanl(i,k) = albfcs(i,k)*ralbs + albanl(i,k)*qalbs
           else
             albanl(i,k) = albfcs(i,k)*ralbl + albanl(i,k)*qalbl
@@ -5017,7 +5101,7 @@
 !
       do k = 1, 2
         do i=i1_t,i2_t
-          if(slianl(i).eq.0.) then
+          if (nint(slianl(i)) == 0) then
             alfanl(i,k) = alffcs(i,k)*ralfs + alfanl(i,k)*qalfs
           else
             alfanl(i,k) = alffcs(i,k)*ralfl + alfanl(i,k)*qalfl
@@ -5027,7 +5111,7 @@
 !
       do k = 1, lsoil
         do i=i1_t,i2_t
-          if(slianl(i).eq.0.) then
+          if (nint(slianl(i)) == 0) then
             smcanl(i,k) = smcfcs(i,k)*rsmcs(k) + smcanl(i,k)*qsmcs(k)
             stcanl(i,k) = stcfcs(i,k)*rstcs(k) + stcanl(i,k)*qstcs(k)
           else
@@ -5053,11 +5137,11 @@
 
 !>\ingroup mod_sfcsub
       subroutine newice(slianl,slifcs,tsfanl,tsffcs,len,lsoil,          &
-     &                   sihnew,sicnew,sihanl,sicanl,                   & !cwu [+1l] add sihnew,sicnew,sihanl,sicanl      
-     &                   albanl,snoanl,zoranl,smcanl,stcanl,            &
-     &                   albsea,snosea,zorsea,smcsea,smcice,            &
-     &                   tsfmin,tsfice,albice,zorice,tgice,             &
-     &                   rla,rlo,me)
+     &                  sihnew,sicnew,sihanl,sicanl,                    & !cwu [+1l] add sihnew,sicnew,sihanl,sicanl      
+     &                  albanl,snoanl,zoranl,smcanl,stcanl,             &
+     &                  albsea,snosea,zorsea,smcsea,smcice,             &
+     &                  tsfmin,tsfice,albice,zorice,tgice,              &
+     &                  rla,rlo,me)
 !
       use machine , only : kind_io8,kind_io4
       implicit none
@@ -5081,8 +5165,8 @@
       kount1 = 0
       kount2 = 0
       do i=1,len
-        if(slifcs(i).ne.slianl(i)) then
-          if(slifcs(i).eq.1..or.slianl(i).eq.1.) then
+        if (nint(slifcs(i)) /= nint(slianl(i))) then
+          if (nint(slifcs(i)) == 1 .or. nint(slianl(i)) == 1) then
             print *,'FATAL ERROR: inconsistency in slifcs or slianl.'
             print 910,rla(i),rlo(i),slifcs(i),slianl(i),
      &                tsffcs(i),tsfanl(i)
@@ -5093,7 +5177,7 @@
 !
 !  interpolated climatology indicates melted sea ice
 !
-          if(slianl(i).eq.0..and.slifcs(i).eq.2.) then
+          if (nint(slianl(i)) == 0 .and. nint(slifcs(i)) == 2) then
             tsfanl(i)   = tsfmin
             albanl(i,1) = albsea
             albanl(i,2) = albsea
@@ -5114,7 +5198,7 @@
 !
 !  interplated climatoloyg/analysis indicates new sea ice
 !
-          if(slianl(i).eq.2..and.slifcs(i).eq.0.) then
+          if (nint(slianl(i)) == 2 .and. nint(slifcs(i)) == 0) then
             tsfanl(i)   = tsfice
             albanl(i,1) = albice
             albanl(i,2) = albice
@@ -5134,15 +5218,15 @@
         endif
       enddo
 !
-      if (me .eq. 0) then
-      if(kount1.gt.0) then
-        write(6,*) 'sea ice melted.  tsf,alb,zor are filled',
-     &             ' at ',kount1,' points'
-      endif
-      if(kount2.gt.0) then
-        write(6,*) 'sea ice formed.  tsf,alb,zor are filled',
-     &             ' at ',kount2,' points'
-      endif
+      if (me == 0) then
+        if (kount1 > 0) then
+          write(6,*) 'sea ice melted.  tsf,alb,zor are filled',
+     &               ' at ',kount1,' points'
+        endif
+        if(kount2 > 0) then
+          write(6,*) 'sea ice formed.  tsf,alb,zor are filled',
+     &               ' at ',kount2,' points'
+        endif
       endif
 !
       return
@@ -5884,7 +5968,7 @@
       real (kind=kind_io8) albomx
       real (kind=kind_io8) albclm(len,4), slmask(len)
       do i=1,len
-        if(slmask(i).eq.0) then
+        if(slmask(i) == 0) then
           albclm(i,1) = albomx
           albclm(i,2) = albomx
           albclm(i,3) = albomx
@@ -6256,7 +6340,7 @@
           do j = 1, jmax
             do i = 1, imax
               if (lbms(i,j)) then
-                rslmsk(i,j) = 1.  
+                rslmsk(i,j) = 1.
               end if
             enddo
           enddo
@@ -6271,7 +6355,7 @@
           do j = 1, jmax
             do i = 1, imax
               if (lbms(i,j)) then
-                rslmsk(i,j) = 1.  
+                rslmsk(i,j) = 1.
               end if
             enddo
           enddo
@@ -6286,7 +6370,7 @@
           do j = 1, jmax
             do i = 1, imax
               if (lbms(i,j)) then
-                rslmsk(i,j) = 1.  
+                rslmsk(i,j) = 1.
               end if
             enddo
           enddo
@@ -6301,7 +6385,7 @@
           do j = 1, jmax
             do i = 1, imax
               if (lbms(i,j)) then
-                rslmsk(i,j) = 1.  
+                rslmsk(i,j) = 1.
               end if
             enddo
           enddo
@@ -6479,9 +6563,9 @@
 !  veg type is zero over water, use this to get a bitmap.
         else
           do j = 1, jmax
-          do i = 1, imax
-            rslmsk(i,j) = data(i,j)
-          enddo
+            do i = 1, imax
+              rslmsk(i,j) = data(i,j)
+            enddo
           enddo
           crit=0.1
           call rof01(rslmsk,ijmax,'gt',crit)
@@ -6542,7 +6626,7 @@
           do j = 1, jmax
             do i = 1, imax
               if (lbms(i,j)) then
-                rslmsk(i,j) = 1.  
+                rslmsk(i,j) = 1.
               end if
             enddo
           enddo
@@ -6877,8 +6961,8 @@ cjfe
       end
 
 !>\ingroup mod_sfcsub
-      subroutine clima(lugb,iy,im,id,ih,fh,len,lsoil,                   &
-     &                 slmask,fntsfc,fnwetc,fnsnoc,fnzorc,fnalbc,fnaisc,&
+      subroutine clima(lugb,iy,im,id,ih,fh,len,lsoil,slmskl,slmskw,     &
+     &                 fntsfc,fnwetc,fnsnoc,fnzorc,fnalbc,fnaisc,       &
      &                 fntg3c,fnscvc,fnsmcc,fnstcc,fnacnc,fnvegc,       &
      &                 fnvetc,fnsotc,                                   &
      &                 fnvmnc,fnvmxc,fnslpc,fnabsc,                     &
@@ -6928,7 +7012,7 @@ cjfe
       real (kind=kind_io8) slmskh(imsk,jmsk)
       real (kind=kind_io8) outlat(len), outlon(len)
 !
-      real (kind=kind_io8) slmask(len), tsfcl0(len)
+      real (kind=kind_io8) slmskl(len), slmskw(len), tsfcl0(len)
       real (kind=kind_io8), allocatable :: slmask_noice(:)
 !
       logical lanom, gaus, first
@@ -6994,7 +7078,7 @@ cjfe
         cvbclm(i) = 0.0
         cvtclm(i) = 0.0
         cnpclm(i) = 0.0
-        sliclm(i) = 0.0
+        sliclm(i) = slmskl(i)
         scvclm(i) = 0.0
         vmnclm(i) = 0.0
         vmxclm(i) = 0.0
@@ -7100,7 +7184,7 @@ cjfe
           do nn=1,2
             mon = mon1
             if (nn == 2) mon = mon2
-            call fixrdc(lugb,fntsfc,kpdtsf,kpd7,mon,slmask,
+            call fixrdc(lugb,fntsfc,kpdtsf,kpd7,mon,slmskw,
      &                 tsf(1,nn),len,iret
      &,                imsk, jmsk, slmskh, gaus,blno, blto
      &,                outlat, outlon, me)
@@ -7242,7 +7326,7 @@ cjfe
         if (ialb == 1 .or. ialb == 2) then
 !cbosu    still need facsf and facwf.  read them from the production file
           if ( index(fnalbc2, "tileX.nc") == 0) then ! grib file
-            call fixrdc(lugb,fnalbc2,kpdalf(1),kpd7,kpd9,slmask
+            call fixrdc(lugb,fnalbc2,kpdalf(1),kpd7,kpd9,slmskl
      &,                 alf,len,iret
      &,                 imsk, jmsk, slmskh, gaus,blno, blto
      &,                 outlat, outlon, me)
@@ -7251,13 +7335,13 @@ cjfe
      &                       kpdalf(1), alf(:,1), 1, len, me)
           endif
         else
-          call fixrdc(lugb,fnalbc,kpdalf(1),kpd7,kpd9,slmask
+          call fixrdc(lugb,fnalbc,kpdalf(1),kpd7,kpd9,slmskl
      &,               alf,len,iret
      &,               imsk, jmsk, slmskh, gaus,blno, blto
      &,               outlat, outlon, me)
         endif
         do i = 1, len
-          if(slmask(i).eq.1.) then
+          if(slmskl(i) == 1.) then
             alf(i,2) = 100. - alf(i,1)
           endif
         enddo
@@ -7267,7 +7351,7 @@ cjfe
         if(fntg3c(1:8).ne.'        ') then
           if ( index(fntg3c, "tileX.nc") == 0) then ! grib file
             kpd7=-1
-            call fixrdc(lugb,fntg3c,kpdtg3,kpd7,kpd9,slmask,
+            call fixrdc(lugb,fntg3c,kpdtg3,kpd7,kpd9,slmskl,
      &                  tg3,len,iret
      &,                 imsk, jmsk, slmskh, gaus,blno, blto
      &,                 outlat, outlon, me)
@@ -7285,7 +7369,7 @@ cjfe
         if(fnvetc(1:8).ne.'        ') then
           if ( index(fnvetc, "tileX.nc") == 0) then ! grib file
             kpd7=-1
-            call fixrdc(lugb,fnvetc,kpdvet,kpd7,kpd9,slmask,
+            call fixrdc(lugb,fnvetc,kpdvet,kpd7,kpd9,slmskl,
      &                  vet,len,iret
      &,                 imsk, jmsk, slmskh, gaus,blno, blto
      &,                 outlat, outlon, me)
@@ -7312,7 +7396,7 @@ cjfe
         if(fnsotc(1:8).ne.'        ') then
           if ( index(fnsotc, "tileX.nc") == 0) then ! grib file
             kpd7=-1
-            call fixrdc(lugb,fnsotc,kpdsot,kpd7,kpd9,slmask,
+            call fixrdc(lugb,fnsotc,kpdsot,kpd7,kpd9,slmskl,
      &                  sot,len,iret
      &,                 imsk, jmsk, slmskh, gaus,blno, blto
      &,                 outlat, outlon, me)
@@ -7329,7 +7413,7 @@ cjfe
         if(fnvmnc(1:8).ne.'        ') then
           if ( index(fnvmnc, "tileX.nc") == 0) then ! grib file
             kpd7=-1
-            call fixrdc(lugb,fnvmnc,kpdvmn,kpd7,kpd9,slmask,
+            call fixrdc(lugb,fnvmnc,kpdvmn,kpd7,kpd9,slmskl,
      &                  vmn,len,iret
      &,                 imsk, jmsk, slmskh, gaus,blno, blto
      &,                 outlat, outlon, me)
@@ -7346,7 +7430,7 @@ cjfe
         if(fnvmxc(1:8).ne.'        ') then
           if ( index(fnvmxc, "tileX.nc") == 0) then ! grib file
             kpd7=-1
-            call fixrdc(lugb,fnvmxc,kpdvmx,kpd7,kpd9,slmask,
+            call fixrdc(lugb,fnvmxc,kpdvmx,kpd7,kpd9,slmskl,
      &                  vmx,len,iret
      &,                 imsk, jmsk, slmskh, gaus,blno, blto
      &,                 outlat, outlon, me)
@@ -7362,7 +7446,7 @@ cjfe
         if(fnslpc(1:8).ne.'        ') then
           if ( index(fnslpc, "tileX.nc") == 0) then ! grib file
             kpd7=-1
-            call fixrdc(lugb,fnslpc,kpdslp,kpd7,kpd9,slmask,
+            call fixrdc(lugb,fnslpc,kpdslp,kpd7,kpd9,slmskl,
      &                  slp,len,iret
      &,                 imsk, jmsk, slmskh, gaus,blno, blto
      &,                 outlat, outlon, me)
@@ -7373,12 +7457,12 @@ cjfe
           if (me .eq. 0) write(6,*) 'climatological slope read in.'
         endif
 !
-!  max snow albeod
+!  max snow albedo
 !
         if(fnabsc(1:8).ne.'        ') then
           if ( index(fnabsc, "tileX.nc") == 0) then ! grib file
             kpd7=-1
-            call fixrdc(lugb,fnabsc,kpdabs,kpd7,kpd9,slmask,
+            call fixrdc(lugb,fnabsc,kpdabs,kpd7,kpd9,slmskl,
      &                  absm,len,iret
      &,                 imsk, jmsk, slmskh, gaus,blno, blto
      &,                 outlat, outlon, me)
@@ -7392,20 +7476,20 @@ cjfe
 !
         is1 = sea1/3 + 1
         is2 = sea2/3 + 1
-        if (is1 .eq. 5) is1 = 1
-        if (is2 .eq. 5) is2 = 1
+        if (is1 == 5) is1 = 1
+        if (is2 == 5) is2 = 1
         do nn=1,2
 !
 !     seasonal mean climatology
-          if(nn.eq.1) then
-             isx=is1
+          if(nn == 1) then
+             isx = is1
           else
-             isx=is2
+             isx = is2
           endif
-          if(isx.eq.1) kpd9 = 12
-          if(isx.eq.2) kpd9 = 3
-          if(isx.eq.3) kpd9 = 6
-          if(isx.eq.4) kpd9 = 9
+          if(isx == 1) kpd9 = 12
+          if(isx == 2) kpd9 = 3
+          if(isx == 3) kpd9 = 6
+          if(isx == 4) kpd9 = 9
 !
 !         seasonal mean climatology
 !
@@ -7417,7 +7501,7 @@ cjfe
           if (ialb == 0) then
             kpd7=-1
             do k = 1, 4
-              call fixrdc(lugb,fnalbc,kpdalb(k),kpd7,kpd9,slmask,
+              call fixrdc(lugb,fnalbc,kpdalb(k),kpd7,kpd9,slmskl,
      &                    alb(1,k,nn),len,iret
      &,                   imsk, jmsk, slmskh, gaus,blno, blto
      &,                   outlat, outlon, me)
@@ -7434,7 +7518,7 @@ cjfe
             if ( index(fnalbc, "tileX.nc") == 0) then ! grib file
               kpd7=-1
               do k = 1, 4
-                call fixrdc(lugb,fnalbc,kpdalb(k),kpd7,mon,slmask,
+                call fixrdc(lugb,fnalbc,kpdalb(k),kpd7,mon,slmskl,
      &                      alb(1,k,nn),len,iret
      &,                     imsk, jmsk, slmskh, gaus,blno, blto
      &,                     outlat, outlon, me)
@@ -7452,7 +7536,7 @@ cjfe
 !  tsf at the current time t
 !
           kpd7=-1
-          call fixrdc(lugb,fntsfc,kpdtsf,kpd7,mon,slmask,
+          call fixrdc(lugb,fntsfc,kpdtsf,kpd7,mon,slmskw,
      &               tsf(1,nn),len,iret
      &,              imsk, jmsk, slmskh, gaus,blno, blto
      &,              outlat, outlon, me)
@@ -7462,7 +7546,7 @@ cjfe
 !
 !     fh2 = fh - deltsfc
 !     if (fh2 .gt. 0.0) then
-!       call fixrd(lugb,fntsfc,kpdtsf,lclim,slmask,
+!       call fixrd(lugb,fntsfc,kpdtsf,lclim,slmskw,
 !    &             iy,im,id,ih,fh2,tsfcl2,len,iret
 !    &,            imsk, jmsk, slmskh, gaus,blno, blto
 !    &,            outlat, outlon, me)
@@ -7476,14 +7560,14 @@ cjfe
 !
           if(fnwetc(1:8).ne.'        ') then
             kpd7=-1
-            call fixrdc(lugb,fnwetc,kpdwet,kpd7,mon,slmask,
+            call fixrdc(lugb,fnwetc,kpdwet,kpd7,mon,slmskl,
      &                  wet(1,nn),len,iret
      &,                 imsk, jmsk, slmskh, gaus,blno, blto
      &,                 outlat, outlon, me)
           elseif(fnsmcc(1:8).ne.'        ') then
             if (index(fnsmcc,'global_soilmcpc.1x1.grb') /= 0) then ! the old climo data
               kpd7=-1
-              call fixrdc(lugb,fnsmcc,kpdsmc,kpd7,mon,slmask,
+              call fixrdc(lugb,fnsmcc,kpdsmc,kpd7,mon,slmskl,
      &                    smc(1,lsoil,nn),len,iret
      &,                   imsk, jmsk, slmskh, gaus,blno, blto
      &,                   outlat, outlon, me)
@@ -7496,7 +7580,7 @@ cjfe
                   ! points.  so for efficiency, don't have fixrdc try to
                   ! find a value at landice points as defined by the vet type (vet).
               allocate(slmask_noice(len))
-              slmask_noice=1.0
+              slmask_noice = 1.0
               do i = 1, len
                 if (nint(vet(i)) < 1 .or.
      &              nint(vet(i)) == landice_cat) then
@@ -7525,7 +7609,7 @@ cjfe
 !
           if(fnstcc(1:8).ne.'        ') then
             kpd7=-1
-            call fixrdc(lugb,fnstcc,kpdstc,kpd7,mon,slmask,
+            call fixrdc(lugb,fnstcc,kpdstc,kpd7,mon,slmskl,
      &                  stc(1,lsoil,nn),len,iret
      &,                 imsk, jmsk, slmskh, gaus,blno, blto
      &,                 outlat, outlon, me)
@@ -7540,12 +7624,12 @@ cjfe
 !
           kpd7=-1
           if(fnacnc(1:8).ne.'        ') then
-            call fixrdc(lugb,fnacnc,kpdacn,kpd7,mon,slmask,
+            call fixrdc(lugb,fnacnc,kpdacn,kpd7,mon,slmskw,
      &                  acn(1,nn),len,iret
      &,                 imsk, jmsk, slmskh, gaus,blno, blto
      &,                 outlat, outlon, me)
           elseif(fnaisc(1:8).ne.'        ') then
-            call fixrdc(lugb,fnaisc,kpdais,kpd7,mon,slmask,
+            call fixrdc(lugb,fnaisc,kpdais,kpd7,mon,slmskw,
      &                  ais(1,nn),len,iret
      &,                 imsk, jmsk, slmskh, gaus,blno, blto
      &,                 outlat, outlon, me)
@@ -7558,7 +7642,7 @@ cjfe
 !  snow depth
 !
           kpd7=-1
-          call fixrdc(lugb,fnsnoc,kpdsno,kpd7,mon,slmask,
+          call fixrdc(lugb,fnsnoc,kpdsno,kpd7,mon,slmskl,
      &                sno(1,nn),len,iret
      &,               imsk, jmsk, slmskh, gaus,blno, blto
      &,               outlat, outlon, me)
@@ -7567,7 +7651,7 @@ cjfe
 !
           if(fnscvc(1:8).ne.'        ') then
             kpd7=-1
-            call fixrdc(lugb,fnscvc,kpdscv,kpd7,mon,slmask,
+            call fixrdc(lugb,fnscvc,kpdscv,kpd7,mon,slmskl,
      &                  scv(1,nn),len,iret
      &,                 imsk, jmsk, slmskh, gaus,blno, blto
      &,                 outlat, outlon, me)
@@ -7586,7 +7670,7 @@ cjfe
         endif
       else
         kpd7=-1
-        call fixrdc(lugb,fnzorc,kpdzor,kpd7,mon,slmask,
+        call fixrdc(lugb,fnzorc,kpdzor,kpd7,mon,slmskl,
      &              zor(1,nn),len,iret
      &,             imsk, jmsk, slmskh, gaus,blno, blto
      &,             outlat, outlon, me)
@@ -7606,7 +7690,7 @@ cjfe
           if(fnvegc(1:8).ne.'        ') then
             if ( index(fnvegc, "tileX.nc") == 0) then ! grib file
               kpd7=-1
-              call fixrdc(lugb,fnvegc,kpdveg,kpd7,mon,slmask,
+              call fixrdc(lugb,fnvegc,kpdveg,kpd7,mon,slmskl,
      &                    veg(1,nn),len,iret
      &,                   imsk, jmsk, slmskh, gaus,blno, blto
      &,                   outlat, outlon, me)
@@ -7655,7 +7739,7 @@ cjfe
           k1  = mod(k2,2) + 1
           mon = mon1s
           kpd7=-1
-          call fixrdc(lugb,fntsfc,kpdtsf,kpd7,mon,slmask,
+          call fixrdc(lugb,fntsfc,kpdtsf,kpd7,mon,slmskw,
      &               tsf(1,k1),len,iret
      &,              imsk, jmsk, slmskh, gaus,blno, blto
      &,              outlat, outlon, me)
@@ -7695,7 +7779,7 @@ cjfe
         if (ialb == 0) then
            kpd7=-1
            do k = 1, 4
-             call fixrdc(lugb,fnalbc,kpdalb(k),kpd7,kpd9,slmask
+             call fixrdc(lugb,fnalbc,kpdalb(k),kpd7,kpd9,slmskl
      &,                 alb(1,k,m2),len,iret
      &,                 imsk, jmsk, slmskh, gaus,blno, blto
      &,                 outlat, outlon, me)
@@ -7722,7 +7806,7 @@ cjfe
             if ( index(fnalbc, "tileX.nc") == 0) then ! grib file
               kpd7 = -1
               do k = 1, 4
-                call fixrdc(lugb,fnalbc,kpdalb(k),kpd7,mon,slmask,
+                call fixrdc(lugb,fnalbc,kpdalb(k),kpd7,mon,slmskl,
      &                      alb(1,k,nn),len,iret
      &,                     imsk, jmsk, slmskh, gaus,blno, blto
      &,                     outlat, outlon, me)
@@ -7738,7 +7822,7 @@ cjfe
 !  tsf at the current time t
 !
           kpd7 = -1
-          call fixrdc(lugb,fntsfc,kpdtsf,kpd7,mon,slmask,
+          call fixrdc(lugb,fntsfc,kpdtsf,kpd7,mon,slmskw,
      &               tsf(1,nn),len,iret
      &,              imsk, jmsk, slmskh, gaus,blno, blto
      &,              outlat, outlon, me)
@@ -7747,14 +7831,14 @@ cjfe
 !
           if (fnwetc(1:8).ne.'        ') then
             kpd7=-1
-            call fixrdc(lugb,fnwetc,kpdwet,kpd7,mon,slmask,
+            call fixrdc(lugb,fnwetc,kpdwet,kpd7,mon,slmskl,
      &                  wet(1,nn),len,iret
      &,                 imsk, jmsk, slmskh, gaus,blno, blto
      &,                 outlat, outlon, me)
           elseif (fnsmcc(1:8).ne.'        ') then
             if (index(fnsmcc,'global_soilmcpc.1x1.grb') /= 0) then ! the old climo data
               kpd7=-1
-              call fixrdc(lugb,fnsmcc,kpdsmc,kpd7,mon,slmask,
+              call fixrdc(lugb,fnsmcc,kpdsmc,kpd7,mon,slmskl,
      &                    smc(1,lsoil,nn),len,iret
      &,                   imsk, jmsk, slmskh, gaus,blno, blto
      &,                   outlat, outlon, me)
@@ -7796,12 +7880,12 @@ cjfe
 !
           kpd7 = -1
           if (fnacnc(1:8).ne.'        ') then
-            call fixrdc(lugb,fnacnc,kpdacn,kpd7,mon,slmask,
+            call fixrdc(lugb,fnacnc,kpdacn,kpd7,mon,slmskw,
      &                  acn(1,nn),len,iret
      &,                 imsk, jmsk, slmskh, gaus,blno, blto
      &,                 outlat, outlon, me)
           elseif (fnaisc(1:8).ne.'        ') then
-            call fixrdc(lugb,fnaisc,kpdais,kpd7,mon,slmask,
+            call fixrdc(lugb,fnaisc,kpdais,kpd7,mon,slmskw,
      &                  ais(1,nn),len,iret
      &,                 imsk, jmsk, slmskh, gaus,blno, blto
      &,                 outlat, outlon, me)
@@ -7814,7 +7898,7 @@ cjfe
 !  snow depth
 !
           kpd7=-1
-          call fixrdc(lugb,fnsnoc,kpdsno,kpd7,mon,slmask,
+          call fixrdc(lugb,fnsnoc,kpdsno,kpd7,mon,slmskl,
      &                sno(1,nn),len,iret
      &,               imsk, jmsk, slmskh, gaus,blno, blto
      &,               outlat, outlon, me)
@@ -7823,7 +7907,7 @@ cjfe
 !
           if (fnscvc(1:8).ne.'        ') then
             kpd7=-1
-            call fixrdc(lugb,fnscvc,kpdscv,kpd7,mon,slmask,
+            call fixrdc(lugb,fnscvc,kpdscv,kpd7,mon,slmskl,
      &                  scv(1,nn),len,iret
      &,                 imsk, jmsk, slmskh, gaus,blno, blto
      &,                 outlat, outlon, me)
@@ -7842,7 +7926,7 @@ cjfe
         endif
       else
         kpd7=-1
-        call fixrdc(lugb,fnzorc,kpdzor,kpd7,mon,slmask,
+        call fixrdc(lugb,fnzorc,kpdzor,kpd7,mon,slmskl,
      &              zor(1,nn),len,iret
      &,             imsk, jmsk, slmskh, gaus,blno, blto
      &,             outlat, outlon, me)
@@ -7853,7 +7937,7 @@ cjfe
           if (fnvegc(1:8) .ne. '        ') then
             if ( index(fnvegc, "tileX.nc") == 0) then ! grib file
               kpd7=-1
-              call fixrdc(lugb,fnvegc,kpdveg,kpd7,mon,slmask,
+              call fixrdc(lugb,fnvegc,kpdveg,kpd7,mon,slmskl,
      &                    veg(1,nn),len,iret
      &,                   imsk, jmsk, slmskh, gaus,blno, blto
      &,                   outlat, outlon, me)
@@ -8368,8 +8452,8 @@ cjfe
                          inttyp = 0
         if(kpds5.eq.225) inttyp = 1
         if(kpds5.eq.230) inttyp = 1
-        if(kpds5.eq.236) inttyp = 1  
-        if(kpds5.eq.224) inttyp = 1  
+        if(kpds5.eq.236) inttyp = 1
+        if(kpds5.eq.224) inttyp = 1
         if (me .eq. 0) then
         if(inttyp.eq.1) print *, ' nearest grid point used'
      &,   ' kpds5=',kpds5, ' lmask = ',lmask
@@ -8401,7 +8485,7 @@ cjfe
       integer nrepmx,nvalid,imo,iyr,idy,jret,ihr,nrept,lskip,lugi,      &
      &        lgrib,j,ndata,i,inttyp,jmax,imax,ijmax,ij,jday,len,iret,  &
      &        jmsk,imsk,ih,kpds5,lugb,iy,id,im,jh,jd,jdoy,jdow,jm,me,   &
-     &        monend,jy,iy4,kmami,iret2,jj,w3kindreal,w3kindint      
+     &        monend,jy,iy4,kmami,iret2,jj,w3kindreal,w3kindint
       real (kind=kind_io8) rnlat,rslat,wlon,elon,dlon,dlat,fh,blno,     &
      &                     rjday,blto
 !

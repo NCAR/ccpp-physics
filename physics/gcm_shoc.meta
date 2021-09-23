@@ -46,7 +46,7 @@
   intent = in
   optional = F
 [nzm]
-  standard_name = vertical_dimension
+  standard_name = vertical_layer_dimension
   long_name = vertical layer dimension
   units = count
   dimensions = ()
@@ -63,7 +63,7 @@
   intent = in
   optional = F
 [tcrf]
-  standard_name = cloud_phase_transition_denominator
+  standard_name = reciprocal_of_cloud_phase_transition_temperature_range
   long_name = denominator in cloud phase transition = 1/(tcr-tf)
   units = K-1
   dimensions = ()
@@ -117,7 +117,7 @@
   intent = in
   optional = F
 [con_rd]
-  standard_name = gas_constant_dry_air
+  standard_name = gas_constant_of_dry_air
   long_name = ideal gas constant for dry air
   units = J kg-1 K-1
   dimensions = ()
@@ -153,7 +153,7 @@
   intent = in
   optional = F
 [dtp]
-  standard_name = time_step_for_physics
+  standard_name = timestep_for_physics
   long_name = time step for physics
   units = s
   dimensions = ()
@@ -165,7 +165,7 @@
   standard_name = air_pressure
   long_name = mean layer pressure
   units = Pa
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -174,7 +174,7 @@
   standard_name = air_pressure_difference_between_midlayers
   long_name = pres(k) - pres(k+1)
   units = Pa
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -183,7 +183,7 @@
   standard_name = geopotential_at_interface
   long_name = geopotential at model layer interfaces
   units = m2 s-2
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -192,34 +192,34 @@
   standard_name = geopotential
   long_name = geopotential at model layer centers
   units = m2 s-2
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [u]
-  standard_name = x_wind_updated_by_physics
+  standard_name = x_wind_of_new_state
   long_name = zonal wind updated by physics
   units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [v]
-  standard_name = y_wind_updated_by_physics
+  standard_name = y_wind_of_new_state
   long_name = meridional wind updated by physics
   units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [omega]
-  standard_name = omega
+  standard_name = lagrangian_tendency_of_air_pressure
   long_name = layer mean vertical velocity
   units = Pa s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -228,13 +228,13 @@
   standard_name = critical_relative_humidity
   long_name = critical relative humidity
   units = frac
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [supice]
-  standard_name = ice_supersaturation_threshold
+  standard_name = tunable_parameter_for_ice_supersaturation
   long_name = ice supersaturation parameter for PDF clouds
   units = none
   dimensions = ()
@@ -243,7 +243,7 @@
   intent = in
   optional = F
 [pcrit]
-  standard_name = shoc_tke_dissipatation_pressure_threshold
+  standard_name = pressure_threshold_for_increased_tke_dissipation
   long_name = pressure below which extra TKE diss. is applied in SHOC
   units = Pa
   dimensions = ()
@@ -252,7 +252,7 @@
   intent = in
   optional = F
 [cefac]
-  standard_name = shoc_tke_dissipation_tunable_parameter
+  standard_name = multiplicative_tunable_parameter_for_tke_dissipation
   long_name = mult. tuning parameter for TKE diss. in SHOC
   units = none
   dimensions = ()
@@ -261,7 +261,7 @@
   intent = in
   optional = F
 [cesfac]
-  standard_name = shoc_tke_dissipation_tunable_parameter_near_surface
+  standard_name = multiplicative_tunable_parameter_for_tke_dissipation_at_surface_adjacent_layer
   long_name = mult. tuning parameter for TKE diss. at surface in SHOC
   units = none
   dimensions = ()
@@ -288,8 +288,8 @@
   intent = in
   optional = F
 [hflx]
-  standard_name = kinematic_surface_upward_sensible_heat_flux_reduced_by_surface_roughness
-  long_name = kinematic surface upward sensible heat flux
+  standard_name = kinematic_surface_upward_sensible_heat_flux_reduced_by_surface_roughness_and_vegetation
+  long_name = kinematic surface upward sensible heat flux reduced by surface roughness and vegetation
   units = K m s-1
   dimensions = (horizontal_loop_extent)
   type = real
@@ -297,7 +297,7 @@
   intent = in
   optional = F
 [evap]
-  standard_name = kinematic_surface_upward_latent_heat_flux_reduced_by_surface_roughness
+  standard_name = surface_upward_specific_humidity_flux
   long_name = kinematic surface upward latent heat flux
   units = kg kg-1 m s-1
   dimensions = (horizontal_loop_extent)
@@ -309,25 +309,25 @@
   standard_name = prandtl_number
   long_name = turbulent Prandtl number
   units = none
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [gt0]
-  standard_name = air_temperature_updated_by_physics
+  standard_name = air_temperature_of_new_state
   long_name = temperature updated by physics
   units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [gq0]
-  standard_name = tracer_concentration_updated_by_physics
+  standard_name = tracer_concentration_of_new_state
   long_name = tracer concentration updated by physics
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
   type = real
   kind = kind_phys
   intent = inout
@@ -341,7 +341,7 @@
   intent = in
   optional = F
 [ntqv]
-  standard_name = index_for_water_vapor
+  standard_name = index_of_specific_humidity_in_tracer_concentration_array
   long_name = tracer index for water vapor (specific humidity)
   units = index
   dimensions = ()
@@ -349,7 +349,7 @@
   intent = in
   optional = F
 [ntcw]
-  standard_name = index_for_liquid_cloud_condensate
+  standard_name = index_of_cloud_liquid_water_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for cloud condensate (or liquid water)
   units = index
   dimensions = ()
@@ -357,7 +357,7 @@
   intent = in
   optional = F
 [ntiw]
-  standard_name = index_for_ice_cloud_condensate
+  standard_name = index_of_cloud_ice_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for  ice water
   units = index
   dimensions = ()
@@ -365,7 +365,7 @@
   intent = in
   optional = F
 [ntrw]
-  standard_name = index_for_rain_water
+  standard_name = index_of_rain_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for rain water
   units = index
   dimensions = ()
@@ -373,7 +373,7 @@
   intent = in
   optional = F
 [ntsw]
-  standard_name = index_for_snow_water
+  standard_name = index_of_snow_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for snow water
   units = index
   dimensions = ()
@@ -381,7 +381,7 @@
   intent = in
   optional = F
 [ntgl]
-  standard_name = index_for_graupel
+  standard_name = index_of_graupel_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for graupel
   units = index
   dimensions = ()
@@ -389,7 +389,7 @@
   intent = in
   optional = F
 [ntlnc]
-  standard_name = index_for_liquid_cloud_number_concentration
+  standard_name = index_of_mass_number_concentration_of_cloud_droplets_in_tracer_concentration_array
   long_name = tracer index for liquid number concentration
   units = index
   dimensions = ()
@@ -397,7 +397,7 @@
   intent = in
   optional = F
 [ntinc]
-  standard_name = index_for_ice_cloud_number_concentration
+  standard_name = index_of_mass_number_concentration_of_cloud_ice_in_tracer_concentration_array
   long_name = tracer index for ice    number concentration
   units = index
   dimensions = ()
@@ -408,7 +408,7 @@
   standard_name = subgrid_scale_cloud_fraction_from_shoc
   long_name = subgrid-scale cloud fraction from the SHOC scheme
   units = frac
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -417,7 +417,7 @@
   standard_name = turbulent_kinetic_energy_convective_transport_tracer
   long_name = turbulent kinetic energy in the convectively transported tracer array
   units = m2 s-2
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -426,16 +426,16 @@
   standard_name = atmosphere_heat_diffusivity_from_shoc
   long_name = diffusivity for heat from the SHOC scheme
   units = m2 s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [wthv_sec]
-  standard_name = kinematic_buoyancy_flux_from_shoc
+  standard_name = upward_virtual_potential_temperature_flux
   long_name = upward kinematic buoyancy flux from the SHOC scheme
   units = K m s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
