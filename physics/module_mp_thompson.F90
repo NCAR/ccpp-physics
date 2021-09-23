@@ -6110,9 +6110,6 @@ MODULE module_mp_thompson
 !
 !-------------------------------------------------------------------
       SUBROUTINE nislfv_rain_ppm(km,denl,denfacl,tkl,dzl,wwl,rql,precip,dt,id,iter,R1)
-!         ,oams,a_,b_,Lam0,Lam1,fv_s,Kap0,Kap1,mu_s,csg,cse,av_s,T_0,vts_boost,ii,jj)
-!      call nislfv_rain_ppm(1,kte,rho,rhof,temp,dzq,vtsk,rs,rs,dt,1,1,&
-!         R1,oams,a_,b_,Lam0,Lam1,fv_s,Kap0,Kap1,mu_s,csg,cse,av_s,T_0,vts_boost)
 !-------------------------------------------------------------------
 !
 ! for non-iteration semi-Lagrangain forward advection for cloud
@@ -6141,10 +6138,6 @@ MODULE module_mp_thompson
       real  denl(km),denfacl(km),tkl(km)
 ! for thompson scheme
       real R1
-!     real oams,a_,b_,Lam0,Lam1,fv_s,Kap0,Kap1,mu_s,av_s,T_0
-!     real xDs,Mrat,ils1,ils2,t1_vts,t2_vts,t3_vts,t4_vts,vts
-!     real csg(18),cse(18),vts_boost(km),smo2(km),smob(km),smoc(km)
-!
       integer  i,k,n,m,kk,kb,kt,iter,ii,jj
       real  tl,tl2,qql,dql,qqd
       real  th,th2,qqh,dqh
@@ -6159,11 +6152,7 @@ MODULE module_mp_thompson
       precip = 0.0
       qa(:) = 0.0
       qq(:) = 0.0
-!     smo2(:) = 0.0
-!     smob(:) = 0.0
-!     smoc(:) = 0.0
-!
-      !i_loop : do i=1,im
+
 ! -----------------------------------
       dz(:) = dzl(:)
       ww(:) = wwl(:)
@@ -6192,7 +6181,6 @@ MODULE module_mp_thompson
 ! save departure wind
       wd(:) = ww(:)
       n=1
- 100  continue
 ! plm is 2nd order, we can use 2nd order wi or 3rd order wi
 ! 2nd order interpolation to get wi
       wi(1) = ww(1)
@@ -6233,7 +6221,6 @@ MODULE module_mp_thompson
       do k=1,km+1  !hmhj
         dza(k) = za(k+1)-za(k)
       enddo
-!hmhj dza(km+1) = zi(km+1) - za(km+1)
 !
 ! computer deformation at arrival point
       do k=1,km
@@ -6241,48 +6228,6 @@ MODULE module_mp_thompson
         qr(k) = qa(k)/den(k)
       enddo
       qa(km+1) = 0.0
-!     call maxmin(km,1,qa,' arrival points ')
-!
-! compute arrival terminal velocity, and estimate mean terminal velocity
-! then back to use mean terminal velocity
-!     if( n.le.iter ) then
-!       call slope_wsm3(qr,den,denfac,tk,tmp,tmp1,tmp2,tmp3,wa,1,1,1,km)
-! thompson scheme vts, neglect the snow ratio over rain
-!       do k=1,km
-!         if (qa(k).gt. R1) then
-!          smob(k) = qa(k)*oams
-!          smo2(k) = smob(k)
-!          smoc(k) = a_ * smo2(k)**b_
-!          xDs = smoc(k) / smob(k)
-!          Mrat = 1./xDs
-!          ils1 = 1./(Mrat*Lam0 + fv_s)
-!          ils2 = 1./(Mrat*Lam1 + fv_s)
-!          t1_vts = Kap0*csg(4)*ils1**cse(4)
-!          t2_vts = Kap1*Mrat**mu_s*csg(10)*ils2**cse(10)
-!          ils1 = 1./(Mrat*Lam0)
-!          ils2 = 1./(Mrat*Lam1)
-!          t3_vts = Kap0*csg(1)*ils1**cse(1)
-!          t4_vts = Kap1*Mrat**mu_s*csg(7)*ils2**cse(7)
-!          vts = denfac(k)*av_s * (t1_vts+t2_vts)/(t3_vts+t4_vts)
-!     print*,' ils1 ils2 mu_s t1-4 vts
-!     ',ils1,ils2,mu_s,t1_vts,t2_vts,t3_vts,t4_vts
-!     print*,' k mrat lam0 lam1 kap0 kap1 boost
-!     ',k,mrat,lam0,lam1,kap0,kap1,vts_boost(k)
-!     print*,' tk t_0 qa rr vts  ',k,tk(k),t_0,qa(k),vts
-!           wa(k) = vts*vts_boost(k)
-!           wa(k) = vts
-!         endif
-!       enddo
-! end of thompson
-!       if( n.ge.2 ) wa(1:km)=0.5*(wa(1:km)+was(1:km))
-!       do k=1,km
-! mean wind is average of departure and new arrival winds
-!         ww(k) = 0.5* ( wd(k)+wa(k) )
-!       enddo
-!       was(:) = wa(:)
-!       n=n+1
-!       go to 100
-!     endif
 !
 ! estimate values at arrival cell interface with monotone
       do k=2,km
@@ -6394,7 +6339,6 @@ MODULE module_mp_thompson
 !
   158  continue
 ! ----------------------------------
-!      enddo i_loop
 !
   END SUBROUTINE nislfv_rain_ppm
 !+---+-----------------------------------------------------------------+
