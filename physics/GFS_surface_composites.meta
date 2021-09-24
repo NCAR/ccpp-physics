@@ -39,30 +39,6 @@
   type = integer
   intent = in
   optional = F
-[lsm]
-  standard_name = control_for_land_surface_scheme
-  long_name = flag for land surface model
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[lsm_noahmp]
-  standard_name = identifier_for_noahmp_land_surface_scheme
-  long_name = flag for NOAH MP land surface model
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[lsm_ruc]
-  standard_name = identifier_for_ruc_land_surface_scheme
-  long_name = flag for RUC land surface model
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [frac_grid]
   standard_name = flag_for_fractional_landmask
   long_name = flag for fractional grid
