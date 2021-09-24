@@ -182,8 +182,8 @@
   intent = in
   optional = F
 [vonKarman]
-  standard_name = vonKarman_constant
-  long_name = vonKarman constant
+  standard_name = von_karman_constant
+  long_name = Von Karman constant
   units = none
   dimensions = ()
   type = real
@@ -209,18 +209,9 @@
   intent = out
   optional = F
 [sh_flux_chs]
-  standard_name = kinematic_surface_upward_sensible_heat_flux_reduced_by_surface_roughness
-  long_name = kinematic surface upward sensible heat flux reduced by surface roughness
+  standard_name = kinematic_surface_upward_sensible_heat_flux_reduced_by_surface_roughness_and_vegetation
+  long_name = kinematic surface upward sensible heat flux reduced by surface roughness and vegetation
   units = K m s-1
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
-[lh_flux_chs]
-  standard_name = surface_upward_specific_humidity_flux_reduced_by_surface_roughness
-  long_name = kinematic surface upward latent heat flux reduced by surface roughness
-  units = kg kg-1 m s-1
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
