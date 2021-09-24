@@ -13,7 +13,7 @@
 !>\section gfs_stochy_general GFS_stochastics_init General Algorithm
 !! This is the GFS stochastic physics initialization.
 !! -# define vertical tapering for CA global
-      subroutine GFS_stochastics_init (si,vfact_ca,km, errmsg, errflg)
+      subroutine GFS_stochastics_init (si,vfact_ca,km,do_ca,ca_global, errmsg, errflg)
 
       use machine,               only: kind_phys
 
@@ -21,23 +21,28 @@
       real(kind_phys), dimension(:),         intent(in)    :: si
       real(kind_phys), dimension(:),         intent(inout) :: vfact_ca
       integer,                               intent(in)    :: km
+      logical,                               intent(in)    :: do_ca
+      logical,                               intent(in)    :: ca_global
       character(len=*),                      intent(out)   :: errmsg
       integer,                               intent(out)   :: errflg
       integer :: k
 
       errmsg = ''
       errflg = 0
-      do k=1,km
-         if (si(k) .lt. 0.1 .and. si(k) .gt. 0.025) then
-            vfact_ca(k) = (si(k)-0.025)/(0.1-0.025)
-         else if (si(k) .lt. 0.025) then
-            vfact_ca(k) = 0.0
-         else
-            vfact_ca(k) = 1.0
-         endif
-      enddo
-      vfact_ca(2)=vfact_ca(3)*0.5
-      vfact_ca(1)=0.0
+      if (do_ca .and. ca_global) then
+         vfact_ca(:)=0.0
+         do k=1,km
+            if (si(k) .lt. 0.1 .and. si(k) .gt. 0.025) then
+               vfact_ca(k) = (si(k)-0.025)/(0.1-0.025)
+            else if (si(k) .lt. 0.025) then
+               vfact_ca(k) = 0.0
+            else
+               vfact_ca(k) = 1.0
+            endif
+         enddo
+         vfact_ca(2)=vfact_ca(3)*0.5
+         vfact_ca(1)=0.0
+      endif
       end subroutine GFS_stochastics_init
 
       subroutine GFS_stochastics_finalize()
