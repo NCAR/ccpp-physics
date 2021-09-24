@@ -1469,8 +1469,8 @@ MODULE module_mp_thompson
 !.. Changed 13 May 2013 to fake emissions in which nwfa2d is aerosol
 !.. number tendency (number per kg per second).
          if (is_aerosol_aware) then
-            nwfa1d(kts) = nwfa1d(kts) + nwfa2d(i,j)*dt_in
-            nifa1d(kts) = nifa1d(kts) + nifa2d(i,j)*dt_in
+            nwfa1d(kts) = nwfa1d(kts) + nwfa2d(i,j)*dt
+            nifa1d(kts) = nifa1d(kts) + nifa2d(i,j)*dt
 
             do k = kts, kte
                nc(i,k,j) = nc1d(k)
