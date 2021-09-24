@@ -27,7 +27,7 @@ contains
 !> \section arg_table_GFS_surface_composites_pre_run Argument Table
 !! \htmlinclude GFS_surface_composites_pre_run.html
 !!
-   subroutine GFS_surface_composites_pre_run (im, flag_init, flag_restart, lkm, lsm, lsm_noahmp, lsm_ruc, frac_grid,      &
+   subroutine GFS_surface_composites_pre_run (im, flag_init, flag_restart, lkm, frac_grid,                                &
                                  flag_cice, cplflx, cplice, cplwav2atm, landfrac, lakefrac, lakedepth, oceanfrac, frland, &
                                  dry, icy, lake, use_flake, wet, hice, cice, zorlo, zorll, zorli,                         &
                                  snowd,            snowd_lnd, snowd_ice, tprcp, tprcp_wat,                                &
@@ -42,7 +42,6 @@ contains
 
       ! Interface variables
       integer,                             intent(in   ) :: im, lkm, kdt
-      integer,                             intent(in   ) :: lsm, lsm_noahmp, lsm_ruc
       logical,                             intent(in   ) :: flag_init, flag_restart, frac_grid, cplflx, cplice, cplwav2atm
       logical, dimension(:),              intent(inout)  :: flag_cice
       logical,              dimension(:), intent(inout)  :: dry, icy, lake, use_flake, wet
@@ -158,7 +157,7 @@ contains
                 ! when cplflx is .true. (e.g., for the S2S application).
                 ! Whereas, for the HAFS FV3ATM-HYCOM coupling, cplice is set as
                 ! .false.. In the future HAFS FV3ATM-MOM6 coupling, the cplflx
-                ! could be .true., while cplice being .false.. 
+                ! could be .true., while cplice being .false..
                 if (cplice .and. cplflx)  then
                   islmsk_cice(i) = 4
                   flag_cice(i)   = .true.
@@ -441,7 +440,7 @@ contains
         fh2, cmm, chh, gflx, ep1d, weasd, snowd, tprcp, evap, hflx, qss, tsfc, tsfco, tsfcl, tisfc
 
       real(kind=kind_phys), dimension(:),   intent(inout) :: hice, cice
-      real(kind=kind_phys), dimension(:),   intent(inout) :: sigmaf, zvfun, hflxq, hffac                  
+      real(kind=kind_phys), dimension(:),   intent(inout) :: sigmaf, zvfun, hflxq, hffac
       real(kind=kind_phys),                 intent(in   ) :: h0facu, h0facs
       real(kind=kind_phys),                 intent(in   ) :: min_seaice
       real(kind=kind_phys),                 intent(in   ) :: rd, rvrdm1
@@ -599,7 +598,7 @@ contains
             endif
 !
             call stability(z1(i), zvfun(i), gdx, tv1, thv1, wind(i),                & ! inputs
-                           z0max, ztmax, tvs, grav, thsfc_loc,                      & ! inputs          
+                           z0max, ztmax, tvs, grav, thsfc_loc,                      & ! inputs
                            rb(i), ffmm(i), ffhh(i), fm10(i), fh2(i), cd(i), cdq(i), & ! outputs
                            stress(i), uustar(i))
           endif ! Checking to see if point is one or multiple surface types
