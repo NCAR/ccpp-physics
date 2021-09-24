@@ -100,7 +100,7 @@
 !! \htmlinclude gfdl_sfc_layer_run.html
 !!
       subroutine gfdl_sfc_layer_run (im, nsoil, km, xlat, xlon, flag_iter, lsm, &
-        lsm_noah, lsm_noahmp, lsm_ruc, lsm_noah_wrfv4, icoef_sf, cplwav, karman,&
+        lsm_noah, lsm_noahmp, lsm_ruc, icoef_sf, cplwav, karman,                &
         cplwav2atm, lcurr_sf, pert_Cd, ntsflg, sfenth, z1, shdmax, ivegsrc,     &
         vegtype, sigmaf, dt, wet, dry, icy, isltyp, rd, grav, ep1, ep2, smois,  &
         psfc, prsl1, q1, t1, u1, v1, wspd, u10, v10, gsw, glw, tsurf_wat,       &
@@ -118,15 +118,13 @@
         use namelist_soilveg, only: maxsmc_noah => maxsmc, drysmc_noah => drysmc
         use namelist_soilveg_ruc, only: maxsmc_ruc => maxsmc, drysmc_ruc => drysmc
         use noahmp_tables, only: maxsmc_noahmp => smcmax_table, drysmc_noahmp => smcdry_table
-        use module_sf_noahlsm, only: maxsmc_noah_wrfv4 => maxsmc, drysmc_noah_wrfv4 => drysmc
         !################################################################################################
 
         implicit none
 
         integer,                intent(in) :: im, nsoil, km, ivegsrc
         integer,                intent(in) :: lsm, lsm_noah, lsm_noahmp,        &
-                                              lsm_ruc, lsm_noah_wrfv4, icoef_sf,&
-                                              ntsflg
+                                              lsm_ruc, icoef_sf, ntsflg
         logical,                intent(in) :: cplwav, cplwav2atm !GJF: this scheme has not been tested with these on
         logical,                intent(in) :: lcurr_sf           !GJF: this scheme has not been tested with this option turned on; the variables scurx and scury need to be input in order to use this
         logical,                intent(in) :: pert_Cd            !GJF: this scheme has not been tested with this option turned on; the variables ens_random_seed and ens_Cdamp need to be input in order to use this
@@ -195,9 +193,6 @@
         else if (lsm == lsm_ruc) then
           maxsmc = maxsmc_ruc
           drysmc = drysmc_ruc
-        else if (lsm == lsm_noah_wrfv4) then
-          maxsmc = maxsmc_noah_wrfv4
-          drysmc = drysmc_noah_wrfv4
         else
           !GJF: These data were from the original GFDL surface layer scheme, but
           !     rather than being hard-coded here, they should be shared with the
