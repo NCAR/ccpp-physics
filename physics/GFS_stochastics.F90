@@ -25,13 +25,14 @@
       logical,                               intent(in)    :: ca_global
       character(len=*),                      intent(out)   :: errmsg
       integer,                               intent(out)   :: errflg
-      integer :: k
+      integer :: k,nz
 
       errmsg = ''
       errflg = 0
       if (do_ca .and. ca_global) then
+         nz=min(km,size(vfact_ca))
          vfact_ca(:)=0.0
-         do k=1,km
+         do k=1,nz
             if (si(k) .lt. 0.1 .and. si(k) .gt. 0.025) then
                vfact_ca(k) = (si(k)-0.025)/(0.1-0.025)
             else if (si(k) .lt. 0.025) then
