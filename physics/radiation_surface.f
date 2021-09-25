@@ -802,7 +802,7 @@
       integer :: ivgtyp
 
       real (kind=kind_phys) :: dltg, hdlt, tmp1, tmp2,                  &
-     &      asnow, argh, hrgh, fsno
+     &      asnow, argh, hrgh, fsno, fsnol, fsnoi
       real (kind=kind_phys) :: sfcemis_land, sfcemis_ice
 
 !  ---  reference emiss value for diff surface emiss index
@@ -883,22 +883,21 @@
           endif   ! end if_slmsk_block
 
 !> - Check for snow covered area.
-          if ( sncovr(i) > f_zero ) then ! input land/ice area snow cover
+          if ( sncovr(i)+sncovr_ice(i) > f_zero ) then ! input land/ice area snow cover
 
-            fsno = sncovr(i)
-            sfcemis(i) = sfcemis(i)*(f_one - fsno) + emsref(8)*fsno
-            if (fracl(i) > f_zero) then
-              if (fracl(i) <= fsno) then
-                semis_lnd(i) = emsref(8)
-              else
-                tmp1 = (fracl(i)-fsno) / fracl(i)
-                semis_lnd(i) = semis_lnd(i) * tmp1                      &
-     &                       + emsref(8)    * (f_one-tmp1)
-              endif
+!  it is assume here that "snocovr" is the fraction of land covered by snow
+!                   and "snocovr_ice" is the fraction of ice coverd by snow
+
+            if (sncovr(i) > f_zero) then
+              semis_lnd(i) = semis_lnd(i) * (f_one - sncovr(i))         &
+     &                     + emsref(8)    * sncovr(i)
             endif
-            if (fraci(i) > f_zero) then
-              semis_ice(i) = emsref(8)
+            if (sncovr_ice(i) > f_zero) then
+              semis_ice(i) = semis_ice(i) * (f_one - sncovr_ice(i))     &
+     &                     + emsref(8)    * sncovr_ice(i)
             endif
+            sfcemis(i) = fracl(i)*semis_lnd(i) + fraco(i)*emsref(1)     &
+     &                                         + fraci(i)*semis_ice(i)
 
           else                                           ! compute snow cover from snow depth
             if (abs(fraco(i)-f_one) > epsln .and.                       &
@@ -906,23 +905,36 @@
               asnow = 0.02*snowf(i)
               argh  = min(0.50, max(.025, 0.01*zorlf(i)))
               hrgh  = min(f_one, max(0.20, 1.0577-1.1538e-3*hprif(i) ) )
-              fsno = asnow / (argh + asnow) * hrgh
+              tmp1  = fracl(i) + fraci(i)
+              if (tmp1 > f_zero) then
+                fsno  = min(tmp1, asnow / (argh + asnow) * hrgh)
+                tmp2  = fsno / tmp1
+                fsnol = fracl(i) * tmp2
+                fsnoi = fraci(i) * tmp2
+             
 
-              sfcemis(i) = sfcemis(i)*(f_one - fsno) + emsref(8)*fsno
-
-              if (fracl(i) > f_zero) then
-                if (fracl(i) <= fsno) then
-                  semis_lnd(i) = emsref(8)
-                else
-                  tmp1 = (fracl(i)-fsno) / fracl(i)
-                  semis_lnd(i) = semis_lnd(i) * tmp1                    &
-     &                         + emsref(8)    * (f_one-tmp1)
+                if (fracl(i) > f_zero) then
+                  if (fracl(i) <= fsnol) then
+                    semis_lnd(i) = emsref(8)
+                  else
+                    tmp1 = (fracl(i)-fsnol) / fracl(i)
+                    semis_lnd(i) = semis_lnd(i) * tmp1                  &
+     &                           + emsref(8)    * (f_one-tmp1)
+                  endif
+                endif
+                if (fraci(i) > f_zero) then
+                  if (fraci(i) <= fsnoi) then
+                    semis_ice(i) = emsref(8)
+                  else
+                    tmp1 = (fraci(i)-fsnoi) / fraci(i)
+                    semis_ice(i) = semis_ice(i) * tmp1                  &
+     &                           + emsref(8)    * (f_one-tmp1)
+                  endif
                 endif
               endif
-              if (fraci(i) > f_zero) then
-                semis_ice(i) = emsref(8)
-              endif
             endif
+            sfcemis(i) = fracl(i)*semis_lnd(i) + fraco(i)*emsref(1)     &
+     &                                         + fraci(i)*semis_ice(i)
 
           endif                                          ! end if_ialbflg
 
@@ -932,23 +944,20 @@
 
         do i = 1, IMAX
 
-          !-- ice emissivity
-          sfcemis_ice = emsref(7)
+          if ( icy(i) ) then                !-- ice emissivity
 
-          if ( icy(i) ) then 
           !-- complete or fractional ice
             if (lsm == lsm_noahmp) then
-              if ( snowf(i) > f_zero ) then
+              if (sncovr_ice(i) > f_zero) then
+                sfcemis_ice = emsref(7) * (f_one-sncovr_ice(i))         &
+     &                      + emsref(8) * sncovr_ice(i)
+              elseif (snowf(i) > f_zero) then
                 asnow = 0.02*snowf(i)
                 argh  = min(0.50, max(.025,0.01*zorlf(i)))
                 hrgh  = min(f_one,max(0.20,1.0577-1.1538e-3*hprif(i)))
                 fsno  = asnow / (argh + asnow) * hrgh
-                if (fraci(i) > fsno) then
-                  tmp1 = (fraci(i) - fsno) / fraci(i)
-                  sfcemis_ice = sfcemis_ice*tmp1+emsref(8)*(f_one-tmp1)
-                else
-                  sfcemis_ice = emsref(8)
-                endif
+                fsnoi = min(f_one, fsno / (fraci(i)+fracl(i)))
+                sfcemis_ice = emsref(7)*(f_one-fsnoi) + emsref(8)*fsnoi
               endif
               semis_ice(i) = sfcemis_ice
             elseif (lsm == lsm_ruc) then
@@ -961,7 +970,7 @@
           sfcemis_land = semis_lnd(i) ! albedo with snow effect from LSM
 
           !-- Composite emissivity from land, water and ice fractions.
-          sfcemis(i) = fracl(i)*sfcemis_land + fraco(i)*emsref(1)             &
+          sfcemis(i) = fracl(i)*sfcemis_land + fraco(i)*emsref(1)       &
      &                                       + fraci(i)*sfcemis_ice
 
          enddo  ! i
