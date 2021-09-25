@@ -885,8 +885,8 @@
 !> - Check for snow covered area.
           if ( sncovr(i)+sncovr_ice(i) > f_zero ) then ! input land/ice area snow cover
 
-!  it is assume here that "snocovr" is the fraction of land covered by snow
-!                   and "snocovr_ice" is the fraction of ice coverd by snow
+!  it is assume here that "sncovr" is the fraction of land covered by snow
+!                   and "sncovr_ice" is the fraction of ice coverd by snow
 
             if (sncovr(i) > f_zero) then
               semis_lnd(i) = semis_lnd(i) * (f_one - sncovr(i))         &
