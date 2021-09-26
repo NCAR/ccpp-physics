@@ -96,9 +96,9 @@
 !!
 !!\version NCEP-Radiation_surface   v5.1  Nov 2012
 
-!> This module sets up surface albedo for SW radiation and surface  
+!> This module sets up surface albedo for SW radiation and surface
 !! emissivity for LW radiation.  
-      module module_radiation_surface   
+      module module_radiation_surface
 !
 !! \section arg_table_module_radiation_surface
 !! \htmlinclude module_radiation_surface.html
@@ -631,7 +631,7 @@
               ! direct
               asevb_ice = asevd_ice
               asenb_ice = asend_ice
-  
+
               if (fsno0 > f_zero) then 
               ! Snow on ice
                 dtgd = max(f_zero, min(5.0, (con_ttp-tisfc(i)) ))
@@ -647,7 +647,7 @@
                   asnvb = asnvd
                   asnnb = asnnd
                 endif
-  
+
                 ! composite ice and snow albedos
                 asevd_ice = asevd_ice * (1. - fsno0) + asnvd * fsno0
                 asend_ice = asend_ice * (1. - fsno0) + asnnd * fsno0
@@ -885,8 +885,8 @@
 !> - Check for snow covered area.
           if ( sncovr(i)+sncovr_ice(i) > f_zero ) then ! input land/ice area snow cover
 
-!  it is assume here that "snocovr" is the fraction of land covered by snow
-!                   and "snocovr_ice" is the fraction of ice coverd by snow
+!  it is assume here that "sncovr" is the fraction of land covered by snow
+!                   and "sncovr_ice" is the fraction of ice coverd by snow
 
             if (sncovr(i) > f_zero) then
               semis_lnd(i) = semis_lnd(i) * (f_one - sncovr(i))         &
@@ -911,7 +911,6 @@
                 tmp2  = fsno / tmp1
                 fsnol = fracl(i) * tmp2
                 fsnoi = fraci(i) * tmp2
-             
 
                 if (fracl(i) > f_zero) then
                   if (fracl(i) <= fsnol) then
