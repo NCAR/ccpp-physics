@@ -103,7 +103,7 @@
       ! Local variables
       integer                             :: i
       real(kind=kind_phys)                :: lndp_alb
-      real(kind=kind_phys), dimension(im) :: fracl, fraci, fraco, cimin
+      real(kind=kind_phys), dimension(im) :: cimin, fracl, fraci, fraco
       logical,              dimension(im) :: icy
 
       ! Initialize CCPP error handling variables
