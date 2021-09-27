@@ -103,8 +103,7 @@
       ! Local variables
       integer                             :: i
       real(kind=kind_phys)                :: lndp_alb
-      real(kind=kind_phys)                :: cimin
-      real(kind=kind_phys), dimension(im) :: fracl, fraci, fraco
+      real(kind=kind_phys), dimension(im) :: cimin, fracl, fraci, fraco
       logical,              dimension(im) :: icy
 
       ! Initialize CCPP error handling variables
@@ -116,9 +115,9 @@
 
       do i=1,im
         if (lakefrac(i) > f_zero) then
-          cimin = min_lakeice
+          cimin(i) = min_lakeice
         else
-          cimin = min_seaice
+          cimin(i) = min_seaice
         endif
       enddo
 
@@ -133,7 +132,7 @@
           else
             fracl(i) = f_zero
             fraco(i) = f_one
-            if(fice(i) < cimin) then
+            if(fice(i) < cimin(i)) then
               fraci(i) = f_zero
               icy(i)   = .false.
             else
@@ -147,7 +146,7 @@
         do i=1,im
           fracl(i) = landfrac(i)
           fraco(i) = max(f_zero, f_one - fracl(i))
-          if(fice(i) < cimin) then
+          if(fice(i) < cimin(i)) then
             fraci(i) = f_zero
             icy(i)   = .false.
           else

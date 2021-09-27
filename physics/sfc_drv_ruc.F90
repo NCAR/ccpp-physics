@@ -538,7 +538,7 @@ module lsm_ruc
       ! local
       integer :: ims,ime, its,ite, jms,jme, jts,jte, kms,kme, kts,kte
       integer :: l, k, i, j,  fractional_seaice, ilst
-      real (kind=kind_phys) :: dm, cimin
+      real (kind=kind_phys) :: dm, cimin(im)
       logical :: flag(im), flag_ice(im), flag_ice_uncoupled(im)
       logical :: rdlai2d, myj, frpcpn
       logical :: debug_print
@@ -558,11 +558,11 @@ module lsm_ruc
         if (icy(i) .and. .not. flag_cice(i)) then
         ! - uncoupled ice model
           if (oceanfrac(i) > zero) then
-            cimin = min_seaice
+            cimin(i) = min_seaice
           else
-            cimin = min_lakeice
+            cimin(i) = min_lakeice
           endif
-          if (fice(i) >= cimin) then
+          if (fice(i) >= cimin(i)) then
           ! - ice fraction is above the threshold for ice
             flag_ice(i) = .true.
           endif
@@ -1400,10 +1400,10 @@ module lsm_ruc
               fwat =  1.0 - fice(i)
              ! Check if ice fraction is below the minimum value: 15% in GFS
              ! physics.
-              if (fice(i) < cimin) then ! cimin - minimal ice fraction
+              if (fice(i) < cimin(i)) then ! cimin - minimal ice fraction
                         write (0,*)'warning: ice fraction is low:', fice(i)
-                fice(i) = cimin
-                fwat    = 1.0 - cimin
+                fice(i) = cimin(i)
+                fwat    = 1.0 - cimin(i)
                 write (0,*)'fix ice fraction: reset it to:', fice(i), tskin_wat(i)
               endif
 
