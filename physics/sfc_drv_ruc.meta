@@ -192,8 +192,8 @@
   intent = in
   optional = F
 [tsfc_ice]
-  standard_name = sea_ice_temperature
-  long_name = sea ice surface skin temperature
+  standard_name = surface_skin_temperature_over_ice
+  long_name = surface skin temperature over ice
   units = K
   dimensions = (horizontal_dimension)
   type = real
@@ -1538,15 +1538,6 @@
   standard_name = water_vapor_mixing_ratio_at_surface_over_ice
   long_name = water vapor mixing ratio at surface over ice
   units = kg kg-1
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[tice]
-  standard_name = sea_ice_temperature
-  long_name = sea ice surface skin temperature
-  units = K
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys

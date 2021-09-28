@@ -279,8 +279,8 @@
   intent = in
   optional = F
 [tisfc]
-  standard_name = sea_ice_temperature
-  long_name = sea ice surface skin temperature
+  standard_name = surface_skin_temperature_over_ice
+  long_name = surface_skin_temperature_over_ice
   units = K
   dimensions = (horizontal_loop_extent)
   type = real
@@ -294,6 +294,14 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
+  intent = in
+  optional = F
+[cplice]
+  standard_name = flag_for_sea_ice_coupling
+  long_name = flag controlling cplice collection (default on)
+  units = flag
+  dimensions = ()
+  type = logical
   intent = in
   optional = F
 [min_seaice]

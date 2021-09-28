@@ -33,7 +33,7 @@ contains
                                  snowd,            snowd_lnd, snowd_ice, tprcp, tprcp_wat,                                &
                                  tprcp_lnd, tprcp_ice, uustar, uustar_wat, uustar_lnd, uustar_ice,                        &
                                  weasd,            weasd_lnd, weasd_ice, ep1d_ice, tsfc, tsfco, tsfcl, tsfc_wat,          &
-                                 tsfc_ice, tisfc, tsurf_wat, tsurf_lnd, tsurf_ice,                                        &
+                                           tisfc, tsurf_wat, tsurf_lnd, tsurf_ice,                                        &
                                  gflx_ice, tgice, islmsk, islmsk_cice, slmsk,            semis_wat, semis_lnd, semis_ice, &
                                                      qss, qss_wat, qss_lnd, qss_ice,                                      &
                                  min_lakeice, min_seaice, kdt, errmsg, errflg)
@@ -52,7 +52,7 @@ contains
 
       real(kind=kind_phys), dimension(:), intent(inout)  :: tsfc, tsfco, tsfcl, tisfc
       real(kind=kind_phys), dimension(:), intent(inout)  :: snowd_lnd, snowd_ice, tprcp_wat,            &
-                    tprcp_lnd, tprcp_ice, tsfc_wat, tsfc_ice, tsurf_wat,tsurf_lnd, tsurf_ice,           &
+                    tprcp_lnd, tprcp_ice, tsfc_wat, tsurf_wat,tsurf_lnd, tsurf_ice,                     &
                     uustar_wat, uustar_lnd, uustar_ice, weasd_lnd, weasd_ice,                           &
                     qss_wat, qss_lnd, qss_ice, ep1d_ice, gflx_ice
       real(kind=kind_phys),                intent(in   ) :: tgice
@@ -236,7 +236,6 @@ contains
         if (icy(i)) then                   ! Ice
           uustar_ice(i) = uustar(i)
            weasd_ice(i) = weasd(i)
-            tsfc_ice(i) = tisfc(i)
            tsurf_ice(i) = tisfc(i)
             ep1d_ice(i) = zero
             gflx_ice(i) = zero
@@ -417,7 +416,8 @@ contains
       cmm, cmm_wat, cmm_lnd, cmm_ice, chh, chh_wat, chh_lnd, chh_ice, gflx, gflx_wat, gflx_lnd, gflx_ice, ep1d, ep1d_wat,         &
       ep1d_lnd, ep1d_ice, weasd, weasd_lnd, weasd_ice, snowd, snowd_lnd, snowd_ice, tprcp, tprcp_wat,                             &
       tprcp_lnd, tprcp_ice, evap, evap_wat, evap_lnd, evap_ice, hflx, hflx_wat, hflx_lnd, hflx_ice, qss, qss_wat, qss_lnd,        &
-      qss_ice, tsfc, tsfco, tsfcl, tsfc_wat, tsfc_ice, tisfc, hice, cice, min_seaice, tiice,                                      &
+      qss_ice, tsfc, tsfco, tsfcl, tsfc_wat, tisfc, hice, cice,             tiice,                                                &
+!     qss_ice, tsfc, tsfco, tsfcl, tsfc_wat, tisfc, hice, cice, min_seaice, tiice,                                                &
       sigmaf, zvfun, lheatstrg, h0facu, h0facs, hflxq, hffac, stc,                                                                &
       grav, prsik1, prslk1, prslki, z1, ztmax_wat, ztmax_lnd, ztmax_ice, errmsg, errflg)
 
@@ -434,7 +434,7 @@ contains
         fm10_wat, fm10_lnd, fm10_ice, fh2_wat, fh2_lnd, fh2_ice, tsurf_wat, tsurf_lnd, tsurf_ice, cmm_wat, cmm_lnd, cmm_ice,    &
         chh_wat, chh_lnd, chh_ice, gflx_wat, gflx_lnd, gflx_ice, ep1d_wat, ep1d_lnd, ep1d_ice, weasd_lnd, weasd_ice,            &
         snowd_lnd, snowd_ice, tprcp_wat, tprcp_lnd, tprcp_ice, evap_wat, evap_lnd, evap_ice, hflx_wat, hflx_lnd,                &
-        hflx_ice, qss_wat, qss_lnd, qss_ice, tsfc_wat, tsfc_ice, zorlo, zorll, zorli, garea
+        hflx_ice, qss_wat, qss_lnd, qss_ice, tsfc_wat, zorlo, zorll, zorli, garea
 
       real(kind=kind_phys), dimension(:),   intent(inout) :: zorl, cd, cdq, rb, stress, ffmm, ffhh, uustar, fm10,               &
         fh2, cmm, chh, gflx, ep1d, weasd, snowd, tprcp, evap, hflx, qss, tsfc, tsfco, tsfcl, tisfc
@@ -442,7 +442,7 @@ contains
       real(kind=kind_phys), dimension(:),   intent(inout) :: hice, cice
       real(kind=kind_phys), dimension(:),   intent(inout) :: sigmaf, zvfun, hflxq, hffac
       real(kind=kind_phys),                 intent(in   ) :: h0facu, h0facs
-      real(kind=kind_phys),                 intent(in   ) :: min_seaice
+!     real(kind=kind_phys),                 intent(in   ) :: min_seaice
       real(kind=kind_phys),                 intent(in   ) :: rd, rvrdm1
 
       real(kind=kind_phys), dimension(:,:), intent(in   ) :: tiice
@@ -491,24 +491,24 @@ contains
 !
           sigmaf(i) = txl*sigmaf(i)
 
-          if (.not. flag_cice(i)) then
-            if (islmsk(i) == 2) then
-              evap(i) = txl*evap_lnd(i)   + wfrac*evap_ice(i)
-              hflx(i) = txl*hflx_lnd(i)   + wfrac*hflx_ice(i)
-              qss(i)  = txl*qss_lnd(i)    + wfrac*qss_ice(i)
-              gflx(i) = txl*gflx_lnd(i)   + wfrac*gflx_ice(i)
-            else
-              evap(i) = txl*evap_lnd(i)   + wfrac*evap_wat(i)
-              hflx(i) = txl*hflx_lnd(i)   + wfrac*hflx_wat(i)
-              qss(i)  = txl*qss_lnd(i)    + wfrac*qss_wat(i)
-              gflx(i) = txl*gflx_lnd(i)   + wfrac*gflx_wat(i)
-            endif
-          else
+!         if (.not. flag_cice(i)) then
+!           if (islmsk(i) == 2) then
+!             evap(i) = txl*evap_lnd(i)   + wfrac*evap_ice(i)
+!             hflx(i) = txl*hflx_lnd(i)   + wfrac*hflx_ice(i)
+!             qss(i)  = txl*qss_lnd(i)    + wfrac*qss_ice(i)
+!             gflx(i) = txl*gflx_lnd(i)   + wfrac*gflx_ice(i)
+!           else
+!             evap(i) = txl*evap_lnd(i)   + wfrac*evap_wat(i)
+!             hflx(i) = txl*hflx_lnd(i)   + wfrac*hflx_wat(i)
+!             qss(i)  = txl*qss_lnd(i)    + wfrac*qss_wat(i)
+!             gflx(i) = txl*gflx_lnd(i)   + wfrac*gflx_wat(i)
+!           endif
+!         else
             evap(i) = txl*evap_lnd(i)   + txi*evap_ice(i)   + txo*evap_wat(i)
             hflx(i) = txl*hflx_lnd(i)   + txi*hflx_ice(i)   + txo*hflx_wat(i)
             qss(i)  = txl*qss_lnd(i)    + txi*qss_ice(i)    + txo*qss_wat(i)
             gflx(i) = txl*gflx_lnd(i)   + txi*gflx_ice(i)   + txo*gflx_wat(i)
-          endif
+!         endif
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !         Call stability for consistent surface properties. Currently this comes from !
@@ -631,12 +631,6 @@ contains
             tisfc(i) = tsfcl(i)       ! over land
           endif
                                                   ! for coupled model ocean will replace this
-!         if (icy(i)) tisfc(i) = tsfc_ice(i)      ! over ice when uncoupled
-!         if (icy(i)) tisfc(i) = tice(i)          ! over ice when uncoupled
-
-!         if (wet(i) .and. .not. cplflx) then
-!           tsfco(i) = tsfc_wat(i)                ! over lake or ocean when uncoupled
-!           tisfc(i) = tsfc_ice(i)                ! over ice when uncoupled
 !         endif
 
 !         if (.not. flag_cice(i)) then
@@ -728,23 +722,23 @@ contains
             qss(i)    = qss_ice(i)
             evap(i)   = evap_ice(i)
             hflx(i)   = hflx_ice(i)
-            tsfc(i)   = tsfc_ice(i) ! over lake (and ocean when uncoupled)
+!           tsfc(i)   = tisfc(i) ! over lake (and ocean when uncoupled)
 !
-            if (flag_cice(i)) then
-              if (wet(i) .and. cice(i) >= min_seaice) then  ! this was already done for lake ice in sfc_sice
+!           if (flag_cice(i)) then
+!             if (wet(i) .and. cice(i) >= min_seaice) then  ! this was already done for lake ice in sfc_sice
                 txi = cice(i)
                 txo = one - txi
                 evap(i)   = txi * evap_ice(i)   + txo * evap_wat(i)
                 hflx(i)   = txi * hflx_ice(i)   + txo * hflx_wat(i)
-                tsfc(i)   = txi * tsfc_ice(i)   + txo * tsfc_wat(i)
+                tsfc(i)   = txi * tisfc(i)      + txo * tsfc_wat(i)
                 stress(i) = txi * stress_ice(i) + txo * stress_wat(i)
                 qss(i)    = txi * qss_ice(i)    + txo * qss_wat(i)
                 ep1d(i)   = txi * ep1d_ice(i)   + txo * ep1d_wat(i)
                 zorl(i)   = exp(txi*log(zorli(i)) + txo*log(zorlo(i)))
-              endif
-            elseif (wet(i)) then  ! return updated lake ice thickness & concentration to global array
-              zorl(i)  = exp(cice(i)*log(zorli(i)) + (one-cice(i))*log(zorlo(i)))
-            endif
+!             endif
+!           elseif (wet(i)) then  ! return updated lake ice thickness & concentration to global array
+!             zorl(i)  = exp(cice(i)*log(zorli(i)) + (one-cice(i))*log(zorlo(i)))
+!           endif
 !
             if (wet(i)) then
               tsfco(i) = tsfc_wat(i)
