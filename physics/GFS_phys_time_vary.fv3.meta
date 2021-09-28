@@ -1746,8 +1746,8 @@
   intent = inout
   optional = F
 [tisfc]
-  standard_name = sea_ice_temperature
-  long_name = sea ice surface skin temperature
+  standard_name = surface_skin_temperature_over_ice
+  long_name = surface skin temperature over ice
   units = K
   dimensions = (horizontal_dimension)
   type = real

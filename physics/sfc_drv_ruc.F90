@@ -370,7 +370,8 @@ module lsm_ruc
      &       albdvis_lnd, albdnir_lnd,  albivis_lnd,  albinir_lnd,      & 
      ! for ice
      &       sfcqc_ice, sfcqv_ice,                                      &
-     &       tice, tsurf_ice, tsnow_ice, z0rl_ice,                      &
+     &             tsurf_ice, tsnow_ice, z0rl_ice,                      &
+!    &       tice, tsurf_ice, tsnow_ice, z0rl_ice,                      &
      &       qsurf_ice, gflux_ice, evap_ice, ep1d_ice, hflx_ice,        &
      &       cm_ice, ch_ice, snowfallac_ice,                            &
      &       albdvis_ice, albdnir_ice,  albivis_ice,  albinir_ice,      &
@@ -432,7 +433,8 @@ module lsm_ruc
      ! for ice
      &       weasd_ice, snwdph_ice, tskin_ice,                           &
      &       tsurf_ice, z0rl_ice, tsnow_ice,                             &
-     &       sfcqc_ice, sfcqv_ice, fice, tice
+     &       sfcqc_ice, sfcqv_ice, fice
+!    &       sfcqc_ice, sfcqv_ice, fice, tice
 
 !  ---  in
       real (kind=kind_phys), dimension(:), intent(in) ::                 &
@@ -1466,7 +1468,7 @@ module lsm_ruc
             if(debug_print) write (0,*)'iter run', i,j, tskin_ice(i),tsurf_ice(i)
             tskin_lnd(i) = tsurf_lnd(i)
             tskin_ice(i) = tsurf_ice(i)
-            tice(i)      = tsurf_ice(i)
+!           tice(i)      = tsurf_ice(i)
           endif ! flag_guess
         endif ! flag
       enddo  ! i

@@ -724,8 +724,8 @@
 !! @{
 !-----------------------------------
       subroutine setemis                                                &
-     &     ( lsm,lsm_noahmp,lsm_ruc,vtype,frac_grid,                    &  !  ---  inputs:
-     &                  xlon,xlat,slmsk,snowf,sncovr,sncovr_ice,        &
+     &     ( lsm,lsm_noahmp,lsm_ruc,vtype,frac_grid,cplice,             &  !  ---  inputs:
+     &       lakefrac,xlon,xlat,slmsk,snowf,sncovr,sncovr_ice,          &
      &       zorlf,tsknf,tairf,hprif,                                   &
      &       semis_lnd,semis_ice,IMAX,fracl,fraco,fraci,icy,            &
      &       semisbase, sfcemis                                         &  !  ---  outputs:
@@ -742,6 +742,7 @@
 !  ====================  defination of variables  ====================  !
 !                                                                       !
 !  inputs:                                                              !
+!     cplice        - logical, ".true." when coupled to an ice model    !
 !     xlon  (IMAX)  - longitude in radiance, ok for both 0->2pi or      !
 !                     -pi -> +pi ranges                                 !
 !     xlat  (IMAX)  - latitude  in radiance, default to pi/2 -> -pi/2   !
@@ -754,7 +755,8 @@
 !     tsknf (IMAX)  - ground surface temperature in k                   !
 !     tairf (IMAX)  - lowest model layer air temperature in k           !
 !     hprif (IMAX)  - topographic sdv in m                              !
-!     semis_lnd (IMAX) - emissivity from lsm                            !
+!     semis_lnd (IMAX) - land emissivity                                !
+!     semis_ice (IMAX) - ice emissivity                                 !
 !     IMAX          - array horizontal dimension                        !
 !                                                                       !
 !  outputs:                                                             !
@@ -780,8 +782,9 @@
 !  ---  inputs
       integer, intent(in) :: IMAX
       integer, intent(in) :: lsm, lsm_noahmp, lsm_ruc
-      logical, intent(in) :: frac_grid
-      real (kind=kind_phys), dimension(:), intent(in) :: vtype
+      logical, intent(in) :: frac_grid, cplice
+      real (kind=kind_phys), dimension(:), intent(in) :: vtype,         &
+     ^       lakefrac
 
       real (kind=kind_phys), dimension(:), intent(in) ::                &
      &       xlon,xlat, slmsk, snowf,sncovr, sncovr_ice,                &
@@ -802,7 +805,7 @@
       integer :: ivgtyp
 
       real (kind=kind_phys) :: dltg, hdlt, tmp1, tmp2,                  &
-     &      asnow, argh, hrgh, fsno, fsnol, fsnoi
+     &      asnow, argh, hrgh, fsno, fsnol, fsnoi, snowc
       real (kind=kind_phys) :: sfcemis_land, sfcemis_ice
 
 !  ---  reference emiss value for diff surface emiss index
@@ -827,7 +830,11 @@
 
         lab_do_IMAX : do i = 1, IMAX
 
-          semis_ice(i) = emsref(7)
+          snowc = sncovr(i)
+          if (.not. cplice .or. lakefrac(i) > f_zero) then
+            semis_ice(i) = emsref(7)
+            snowc = sncovr(i) + sncovr_ice(i)
+          endif
           if (fracl(i) < epsln) then                    ! no land
             if ( abs(fraco(i)-f_one) < epsln ) then     ! open water point
               sfcemis(i) = emsref(1)
@@ -883,7 +890,8 @@
           endif   ! end if_slmsk_block
 
 !> - Check for snow covered area.
-          if ( sncovr(i)+sncovr_ice(i) > f_zero ) then ! input land/ice area snow cover
+
+          if (snowc > f_zero) then ! input land/ice area snow cover
 
 !  it is assume here that "sncovr" is the fraction of land covered by snow
 !                   and "sncovr_ice" is the fraction of ice coverd by snow
@@ -892,7 +900,7 @@
               semis_lnd(i) = semis_lnd(i) * (f_one - sncovr(i))         &
      &                     + emsref(8)    * sncovr(i)
             endif
-            if (sncovr_ice(i) > f_zero) then
+            if (sncovr_ice(i) > f_zero .and. .not. cplice) then
               semis_ice(i) = semis_ice(i) * (f_one - sncovr_ice(i))     &
      &                     + emsref(8)    * sncovr_ice(i)
             endif
@@ -921,7 +929,8 @@
      &                           + emsref(8)    * (f_one-tmp1)
                   endif
                 endif
-                if (fraci(i) > f_zero) then
+                if (fraci(i) > f_zero .and.                             &
+     &             (lakefrac(i) > f_zero .or. .not. cplice)) then
                   if (fraci(i) <= fsnoi) then
                     semis_ice(i) = emsref(8)
                   else
@@ -947,18 +956,22 @@
 
           !-- complete or fractional ice
             if (lsm == lsm_noahmp) then
-              if (sncovr_ice(i) > f_zero) then
-                sfcemis_ice = emsref(7) * (f_one-sncovr_ice(i))         &
-     &                      + emsref(8) * sncovr_ice(i)
-              elseif (snowf(i) > f_zero) then
-                asnow = 0.02*snowf(i)
-                argh  = min(0.50, max(.025,0.01*zorlf(i)))
-                hrgh  = min(f_one,max(0.20,1.0577-1.1538e-3*hprif(i)))
-                fsno  = asnow / (argh + asnow) * hrgh
-                fsnoi = min(f_one, fsno / (fraci(i)+fracl(i)))
-                sfcemis_ice = emsref(7)*(f_one-fsnoi) + emsref(8)*fsnoi
+              if (.not. cplice .or. lakefrac(i) > f_zero) then
+                if (sncovr_ice(i) > f_zero) then
+                  sfcemis_ice = emsref(7) * (f_one-sncovr_ice(i))         &
+     &                        + emsref(8) * sncovr_ice(i)
+                elseif (snowf(i) > f_zero) then
+                  asnow = 0.02*snowf(i)
+                  argh  = min(0.50, max(.025,0.01*zorlf(i)))
+                  hrgh  = min(f_one,max(0.20,1.0577-1.1538e-3*hprif(i)))
+                  fsno  = asnow / (argh + asnow) * hrgh
+                  fsnoi = min(f_one, fsno / (fraci(i)+fracl(i)))
+                  sfcemis_ice = emsref(7)*(f_one-fsnoi) + emsref(8)*fsnoi
+                endif
+                semis_ice(i) = sfcemis_ice
+              else
+                sfcemis_ice = semis_ice(i) ! output from CICE
               endif
-              semis_ice(i) = sfcemis_ice
             elseif (lsm == lsm_ruc) then
               sfcemis_ice = semis_ice(i) ! output from lsm (with snow effect)
             endif ! lsm check

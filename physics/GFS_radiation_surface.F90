@@ -60,7 +60,7 @@
         vtype, xlat, xlon, slmsk, lndp_type, n_var_lndp, sfc_alb_pert,  &
         lndp_var_list, lndp_prt_list, landfrac, snowd, sncovr,          &
         sncovr_ice, fice, zorl, hprime, tsfg, tsfa, tisfc, coszen,      &
-        min_seaice, min_lakeice, lakefrac,                              &
+        cplice, min_seaice, min_lakeice, lakefrac,                      &
         alvsf, alnsf, alvwf, alnwf, facsf, facwf,                       &
         semis_lnd, semis_ice, snoalb, use_cice_alb,                     &
         albdvis_lnd, albdnir_lnd, albivis_lnd, albinir_lnd,             &
@@ -74,7 +74,7 @@
       implicit none
 
       integer,              intent(in) :: im
-      logical,              intent(in) :: frac_grid, lslwr, lsswr, use_cice_alb
+      logical,              intent(in) :: frac_grid, lslwr, lsswr, use_cice_alb, cplice
       integer,              intent(in) :: lsm, lsm_noahmp, lsm_ruc, lndp_type, n_var_lndp
       real(kind=kind_phys), intent(in) :: min_seaice, min_lakeice
 
@@ -161,7 +161,7 @@
 !>  - Call module_radiation_surface::setemis(),to set up surface
 !! emissivity for LW radiation.
         call setemis (lsm, lsm_noahmp, lsm_ruc, vtype,             &
-                      frac_grid,             xlon, xlat, slmsk,    &
+                      frac_grid,cplice,lakefrac, xlon, xlat, slmsk,&
 !                     frac_grid, min_seaice, xlon, xlat, slmsk,    &
                       snowd, sncovr, sncovr_ice, zorl, tsfg, tsfa, &
                       hprime, semis_lnd, semis_ice, im,            &
