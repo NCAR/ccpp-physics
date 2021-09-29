@@ -581,9 +581,9 @@ contains
 !      endif
 !     endif
 
-    else
+    endif
 !
-! not gsldrag oro-scheme for example "do_ugwp_v1_orog_only"
+! not gsldrag large-scale oro-scheme for example "do_ugwp_v1_orog_only"
 !
 
     if ( do_ugwp_v1_orog_only ) then
@@ -641,7 +641,6 @@ contains
          dtend(:,:,idtend) = dtend(:,:,idtend) + Pdtdt*dtp
       endif
     endif
-   ENDIF
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Begin non-stationary GW schemes
