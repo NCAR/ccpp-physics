@@ -952,6 +952,7 @@
 
         do i = 1, IMAX
 
+          sfcemis_ice = emsref(7)
           if ( icy(i) ) then                !-- ice emissivity
 
           !-- complete or fractional ice
