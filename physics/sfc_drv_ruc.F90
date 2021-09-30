@@ -430,7 +430,6 @@ module lsm_ruc
      &       weasd_ice, snwdph_ice, tskin_ice,                           &
      &       tsurf_ice, z0rl_ice, tsnow_ice,                             &
      &       sfcqc_ice, sfcqv_ice, fice
-!    &       sfcqc_ice, sfcqv_ice, fice, tice
 
 !  ---  in
       real (kind=kind_phys), dimension(:), intent(in) ::                 &
@@ -1168,11 +1167,12 @@ module lsm_ruc
         !snohf(i) = snoh(i,j)
 
         ! Interstitial
-        evap_lnd(i)   = qfx_lnd(i,j) / rho(i)           ! kinematic
-        hflx_lnd(i)   = hfx_lnd(i,j) / (con_cp*rho(i))  ! kinematic
-        gflux_lnd(i)  = ssoil_lnd(i,j)
+        evap_lnd(i)    = qfx_lnd(i,j) / rho(i)           ! kinematic
+        hflx_lnd(i)    = hfx_lnd(i,j) / (con_cp*rho(i))  ! kinematic
+        gflux_lnd(i)   = ssoil_lnd(i,j)
         qsurf_lnd(i)   = qsfc_lnd(i,j)
         tsurf_lnd(i)   = soilt_lnd(i,j)
+        tsnow_lnd(i)   = soilt1_lnd(i,j)
         stm(i)         = soilm(i,j) * 1.e-3 ! convert to [m]
 
         runof (i)  = runoff1(i,j)
@@ -1341,6 +1341,7 @@ module lsm_ruc
 
         qsurf_ice(i)   = qsfc_ice(i,j)
         tsurf_ice(i)   = soilt_ice(i,j)
+        tsnow_ice(i)   = soilt1_ice(i,j)
 
         sfcqv_ice(i)  = qvg_ice(i,j)
         sfcqc_ice(i)  = qcg_ice(i,j)
@@ -1428,7 +1429,6 @@ module lsm_ruc
             if(debug_print) write (0,*)'iter run', i,j, tskin_ice(i),tsurf_ice(i)
             tskin_lnd(i) = tsurf_lnd(i)
             tskin_ice(i) = tsurf_ice(i)
-!           tice(i)      = tsurf_ice(i)
           endif ! flag_guess
         endif ! flag
       enddo  ! i
