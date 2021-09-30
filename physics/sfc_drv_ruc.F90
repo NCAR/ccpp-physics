@@ -353,8 +353,6 @@ module lsm_ruc
      ! --- constants
      &       con_cp, con_rd, con_rv, con_g, con_pi, con_hvap,           &
      &       con_fvirt,                                                 &
-     ! for water
-     &       ch_wat, tskin_wat,                                         &
      ! --- in/outs for ice and land
      &       semisbase, semis_lnd, semis_ice, sfalb_lnd, sfalb_ice,     &
      &       sncovr1_lnd, weasd_lnd, snwdph_lnd, tskin_lnd,             &
@@ -370,8 +368,7 @@ module lsm_ruc
      &       albdvis_lnd, albdnir_lnd,  albivis_lnd,  albinir_lnd,      & 
      ! for ice
      &       sfcqc_ice, sfcqv_ice,                                      &
-     &             tsurf_ice, tsnow_ice, z0rl_ice,                      &
-!    &       tice, tsurf_ice, tsnow_ice, z0rl_ice,                      &
+     &       tsurf_ice, tsnow_ice, z0rl_ice,                            &
      &       qsurf_ice, gflux_ice, evap_ice, ep1d_ice, hflx_ice,        &
      &       cm_ice, ch_ice, snowfallac_ice,                            &
      &       albdvis_ice, albdnir_ice,  albivis_ice,  albinir_ice,      &
@@ -388,7 +385,6 @@ module lsm_ruc
 !  ---  constant parameters:
       real(kind=kind_phys), parameter :: rhoh2o  = 1000.0
       real(kind=kind_phys), parameter :: stbolt  = 5.670400e-8
-      real(kind=kind_phys), parameter :: con_tice = 271.2
 
 !  ---  input:
       integer, intent(in) :: me, master
@@ -403,7 +399,7 @@ module lsm_ruc
      ! for land
      &       cm_lnd, ch_lnd,                                      &
      ! for water
-     &       ch_wat, tskin_wat, oceanfrac,                        &
+     &       oceanfrac,                                           &
      ! for ice
      &       cm_ice, ch_ice
 
@@ -557,7 +553,7 @@ module lsm_ruc
 
       do i  = 1, im ! i - horizontal loop
         flag_ice(i) = .false.
-        if (icy(i) .and. .not. flag_cice(i)) then
+        if (icy(i) .and. .not. flag_cice(i)) then ! flag_cice(i)=.true. when coupled to CICE
         ! - uncoupled ice model
           if (oceanfrac(i) > zero) then
             cimin(i) = min_seaice
@@ -569,8 +565,8 @@ module lsm_ruc
             flag_ice(i) = .true.
           endif
         endif
-        ! - Set flag for ice points for uncoupled model (islmsk(i) == 4 when coupled to CICE)
-        ! - Exclude ice on the lakes if the lake model is turned on.
+        ! - Ice points for uncoupled model 
+        ! - Exclude ice on the lakes if the lake model is turned on: lake(i)=.true.
         flag_ice_uncoupled(i) = (flag_ice(i) .and. .not.  lake(i))
         !> - Set flag for land and ice points.
         !- 10may19 - ice points are turned off.
@@ -1387,42 +1383,6 @@ module lsm_ruc
         endif   ! end if_flag_iter_and_flag
       enddo   ! j
       enddo   ! i
-
-      !-- Take care of fractional sea ice for uncoupled run with frac_grid=.false.
-      !-- When frac_grid=.true. GFS_surface_composite will take care of this.
-      do i  = 1, im   ! i - horizontal loop
-        if ( flag_iter(i) .and. flag(i) ) then
-        ! Do this only when the fractional grid is not turned on!
-        ! Compute composite for a fractional sea ice: fice(i) < 1.
-        ! This is needed for the 2-way coupling 
-        ! in the upcoupled case (when sfc_cice is not used).
-          if(.not. frac_grid) then
-            if( flag_ice_uncoupled(i) .and. fice(i) < 1.) then
-              !write (0,*)'Fractional sea ice at i', i, fice(i)
-              fwat =  1.0 - fice(i)
-             ! Check if ice fraction is below the minimum value: 15% in GFS
-             ! physics.
-              if (fice(i) < cimin(i)) then ! cimin - minimal ice fraction
-                        write (0,*)'warning: ice fraction is low:', fice(i)
-                fice(i) = cimin(i)
-                fwat    = 1.0 - cimin(i)
-                write (0,*)'fix ice fraction: reset it to:', fice(i), tskin_wat(i)
-              endif
-
-            ! Compute the composite of ice and open water for 2-way coupling in the
-            ! uncoupled sea-ice model. Use ice variables for the composite.
-              tsurf_ice(i) = tsurf_ice(i) * fice(i) + min(con_tice,tskin_wat(i)) * fwat
-              chh_ice(i)   = chh_ice(i) * fice(i) + ch_wat(i) * wind(i) * rho(i) * fwat
-              hfxw         = ch_wat(i) * wind(i) * (min(con_tice,tskin_wat(i)) - t1(i))
-              hflx_ice(i)  = hflx_ice(i) * fice(i) + hfxw * fwat
-              qsw          = rslf(prsl1(i),min(con_tice,tskin_wat(i)))
-              evapw        = ch_wat(i) * wind(i) * (qsw - q0(i))
-              evap_ice(i)  = evap_ice(i) * fice(i) + evapw * fwat
-              qsurf_ice(i) = q1(i) + evap_ice(i) * rho(i) / chh_ice(i) 
-            endif ! flag_ice_uncoupled(i) .and. fice(i) < 1.
-          endif ! flag_iter, icy, not frac_grid
-        endif
-      enddo ! i
 
 !> - Restore land-related prognostic fields for guess run.
       do j  = 1, 1
