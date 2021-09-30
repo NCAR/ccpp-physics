@@ -7,7 +7,43 @@
 
       contains
 
-      subroutine GFS_stochastics_init ()
+!> \section arg_table_GFS_stochastics_init Argument Table
+!! \htmlinclude GFS_stochastics_init.html
+!!
+!>\section gfs_stochy_general GFS_stochastics_init General Algorithm
+!! This is the GFS stochastic physics initialization.
+!! -# define vertical tapering for CA global
+      subroutine GFS_stochastics_init (si,vfact_ca,km,do_ca,ca_global, errmsg, errflg)
+
+      use machine,               only: kind_phys
+
+      implicit none
+      real(kind_phys), dimension(:),         intent(in)    :: si
+      real(kind_phys), dimension(:),         intent(inout) :: vfact_ca
+      integer,                               intent(in)    :: km
+      logical,                               intent(in)    :: do_ca
+      logical,                               intent(in)    :: ca_global
+      character(len=*),                      intent(out)   :: errmsg
+      integer,                               intent(out)   :: errflg
+      integer :: k,nz
+
+      errmsg = ''
+      errflg = 0
+      if (do_ca .and. ca_global) then
+         nz=min(km,size(vfact_ca))
+         vfact_ca(:)=0.0
+         do k=1,nz
+            if (si(k) .lt. 0.1 .and. si(k) .gt. 0.025) then
+               vfact_ca(k) = (si(k)-0.025)/(0.1-0.025)
+            else if (si(k) .lt. 0.025) then
+               vfact_ca(k) = 0.0
+            else
+               vfact_ca(k) = 1.0
+            endif
+         enddo
+         vfact_ca(2)=vfact_ca(3)*0.5
+         vfact_ca(1)=0.0
+      endif
       end subroutine GFS_stochastics_init
 
       subroutine GFS_stochastics_finalize()
@@ -26,10 +62,9 @@
 !! -# interpolates coefficients for prognostic ozone calculation
 !! -# performs surface data cycling via the GFS gcycle routine
       subroutine GFS_stochastics_run (im, km, kdt, delt, do_sppt, pert_mp, use_zmtnblck, &
-                                      do_shum ,do_skeb, do_ca,ca_global,ca1,si,vfact_ca, &
+                                      do_shum ,do_skeb, do_ca,ca_global,ca1,vfact_ca,    &
                                       zmtnblck, sppt_wts, skebu_wts, skebv_wts, shum_wts,&
-                                      sppt_wts_inv, skebu_wts_inv, skebv_wts_inv,        &
-                                      shum_wts_inv, diss_est, ugrs, vgrs, tgrs, qgrs_wv, &
+                                      diss_est, ugrs, vgrs, tgrs, qgrs_wv,               &
                                       qgrs_cw, qgrs_rw, qgrs_sw, qgrs_iw, qgrs_gl,       &
                                       gu0, gv0, gt0, gq0_wv, dtdtnp,                     &
                                       gq0_cw, gq0_rw, gq0_sw, gq0_iw, gq0_gl,            &
@@ -62,11 +97,6 @@
          real(kind_phys), dimension(:,:),       intent(in)    :: skebv_wts
          ! shum_wts only allocated if do_shum == .true.
          real(kind_phys), dimension(:,:),       intent(in)    :: shum_wts
-         ! inverse/flipped weights are always allocated
-         real(kind_phys), dimension(:,:),       intent(inout) :: sppt_wts_inv
-         real(kind_phys), dimension(:,:),       intent(inout) :: skebu_wts_inv
-         real(kind_phys), dimension(:,:),       intent(inout) :: skebv_wts_inv
-         real(kind_phys), dimension(:,:),       intent(inout) :: shum_wts_inv
          real(kind_phys), dimension(:,:),       intent(in)    :: diss_est
          real(kind_phys), dimension(:,:),       intent(in)    :: ugrs
          real(kind_phys), dimension(:,:),       intent(in)    :: vgrs
@@ -106,8 +136,7 @@
          ! drain_cpl, dsnow_cpl only allocated if cplflx == .true. or cplchm == .true.
          real(kind_phys), dimension(:),         intent(in)    :: drain_cpl
          real(kind_phys), dimension(:),         intent(in)    :: dsnow_cpl
-         real(kind_phys), dimension(:),         intent(in)    :: si
-         real(kind_phys), dimension(:),         intent(inout) :: vfact_ca
+         real(kind_phys), dimension(:),         intent(in)    :: vfact_ca
          real(kind_phys), dimension(:),         intent(in)    :: ca1
          character(len=*),                      intent(out)   :: errmsg
          integer,                               intent(out)   :: errflg
@@ -144,7 +173,6 @@
                if (use_zmtnblck)then
                   sppt_wts(i,k)=(sppt_wts(i,k)-1)*sppt_vwt+1.0
                endif
-               sppt_wts_inv(i,k)=sppt_wts(i,k)
 
                upert = (gu0(i,k) - ugrs(i,k))   * sppt_wts(i,k)
                vpert = (gv0(i,k) - vgrs(i,k))   * sppt_wts(i,k)
@@ -225,19 +253,8 @@
 
          if (do_ca .and. ca_global) then
 
-          if(kdt == 1)then
-            do k=1,km
-               if (si(k) .lt. 0.1 .and. si(k) .gt. 0.025) then
-                  vfact_ca(k) = (si(k)-0.025)/(0.1-0.025)
-               else if (si(k) .lt. 0.025) then
-                  vfact_ca(k) = 0.0
-               else
-                  vfact_ca(k) = 1.0
-               endif
-            enddo
-            vfact_ca(2)=vfact_ca(3)*0.5
-            vfact_ca(1)=0.0
-          endif
+          !if(kdt == 1)then
+          !endif
    
             do k = 1,km
                do i = 1,im
@@ -340,7 +357,6 @@
          if (do_shum) then
            do k=1,km
              gq0_wv(:,k) = gq0_wv(:,k)*(1.0 + shum_wts(:,k))
-             shum_wts_inv(:,k) = shum_wts(:,k)
            end do
          endif
          
@@ -348,8 +364,6 @@
            do k=1,km
              gu0(:,k) = gu0(:,k)+skebu_wts(:,k)*(diss_est(:,k))
              gv0(:,k) = gv0(:,k)+skebv_wts(:,k)*(diss_est(:,k))
-             skebu_wts_inv(:,k) = skebu_wts(:,k)
-             skebv_wts_inv(:,k) = skebv_wts(:,k)
            enddo
          endif
 
