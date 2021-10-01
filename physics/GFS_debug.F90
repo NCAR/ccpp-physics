@@ -694,10 +694,10 @@
                      else
                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%wet1        ',  Diag%wet1)
                      end if
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%skebu_wts   ',    Diag%skebu_wts)
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%skebv_wts   ',    Diag%skebv_wts)
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%sppt_wts    ',    Diag%sppt_wts)
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%shum_wts    ',    Diag%shum_wts)
+                     !call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%skebu_wts   ',    Diag%skebu_wts)
+                     !call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%skebv_wts   ',    Diag%skebv_wts)
+                     !call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%sppt_wts    ',    Diag%sppt_wts)
+                     !call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%shum_wts    ',    Diag%shum_wts)
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%zmtnblck    ',    Diag%zmtnblck)
                      if (Model%ldiag3d) then
                        !do itracer=2,Model%ntracp100
