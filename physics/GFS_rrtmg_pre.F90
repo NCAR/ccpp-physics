@@ -18,9 +18,9 @@
       ! in the CCPP version - they are defined in the interstitial_create routine
       subroutine GFS_rrtmg_pre_run (im, levs, lm, lmk, lmp, n_var_lndp,        &
         imfdeepcnv, imfdeepcnv_gf, me, ncnd, ntrac, num_p3d, npdf3d, ncnvcld3d,&
-        ntqv, ntcw,ntiw, ntlnc, ntinc, ntrw, ntsw, ntgl, nthl, ntwa, ntoz,           &
-        ntclamt, nleffr, nieffr, nseffr, lndp_type, kdt, imp_physics,          &
-        imp_physics_nssl2m, imp_physics_nssl2mccn,                             &
+        ntqv, ntcw,ntiw, ntlnc, ntinc, ntrnc, ntsnc, ntccn ntrw, ntsw, ntgl, nthl, ntwa, ntoz, &
+        ntclamt, nleffr, nieffr, nseffr, lndp_type, kdt, first_time_step,      &
+        imp_physics,imp_physics_nssl,                                          &
         imp_physics_thompson, imp_physics_gfdl, imp_physics_zhao_carr,         &
         imp_physics_zhao_carr_pdf, imp_physics_mg, imp_physics_wsm6,           &
         imp_physics_fer_hires, julian, yearlen, lndp_var_list, lsswr, lslwr,   &
@@ -36,7 +36,7 @@
         gasvmr_o2, gasvmr_co, gasvmr_cfc11, gasvmr_cfc12, gasvmr_cfc22,        &
         gasvmr_ccl4,  gasvmr_cfc113, aerodp, clouds6, clouds7, clouds8,        &
         clouds9, cldsa, cldfra, faersw1, faersw2, faersw3, faerlw1, faerlw2,   &
-        faerlw3, alpha, errmsg, errflg)
+        faerlw3, alpha, errmsg, errflg,mpiroot)
 
       use machine,                   only: kind_phys
 
@@ -78,6 +78,8 @@
                                            make_DropletNumber,       &
                                            make_RainNumber
 
+      use module_mp_nssl_2mom,       only: calc_eff_radius, calcnfromq, na
+
       implicit none
 
       integer,              intent(in)  :: im, levs, lm, lmk, lmp, n_var_lndp, &
@@ -85,6 +87,7 @@
                                            imfdeepcnv_gf, me, ncnd, ntrac,     &
                                            num_p3d, npdf3d, ncnvcld3d, ntqv,   &
                                            ntcw, ntiw, ntlnc, ntinc,           &
+                                           ntrnc, ntsnc,ntccn,                 &
                                            ntrw, ntsw, ntgl, nthl, ntwa, ntoz, &
                                            ntclamt, nleffr, nieffr, nseffr,    &
                                            lndp_type,                          &
@@ -94,7 +97,7 @@
                                            imp_physics_zhao_carr,              &
                                            imp_physics_zhao_carr_pdf,          &
                                            imp_physics_mg, imp_physics_wsm6,   &
-                                    imp_physics_nssl2m, imp_physics_nssl2mccn, &
+                                           imp_physics_nssl,                   &
                                            imp_physics_fer_hires,              &
                                            yearlen, icloud
 
@@ -102,8 +105,9 @@
 
       logical,              intent(in) :: lsswr, lslwr, ltaerosol, lgfdlmprad, &
                                           uni_cld, effr_in, do_mynnedmf,       &
-                                          lmfshal, lmfdeep2, pert_clds
+                                          lmfshal, lmfdeep2, pert_clds,first_time_step
 
+      logical,              intent(in) :: nssl_ccn_on, nssl_invertccn
       real(kind=kind_phys), intent(in) :: fhswr, fhlwr, solhr, sup, julian, sppt_amp
       real(kind=kind_phys), intent(in) :: con_eps, epsm1, fvirt, rog, rocp, con_rd
 
@@ -116,6 +120,7 @@
                                                           mg_cld, effrr_in,    &
                                                           cnvw_in, cnvc_in,    &
                                                           sppt_wts
+
 
       real(kind=kind_phys), dimension(:,:,:), intent(in) :: qgrs, aer_nm
 
@@ -173,6 +178,7 @@
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
+      integer,          intent(in)  :: mpiroot
 
       ! Local variables
       integer :: ncndl
@@ -193,6 +199,10 @@
       real(kind=kind_phys), dimension(im,lm+LTP) ::         &
                                   re_cloud, re_ice, re_snow, qv_mp, qc_mp, &
                                   qi_mp, qs_mp, nc_mp, ni_mp, nwfa
+      ! for NSSL MP
+      real(kind=kind_phys), dimension(im,lm+LTP) ::         &
+                             re_rain, qr_mp, ns_mp, nr_mp, nh_mp, vh_mp, cccn_mp,cccna_mp, nc_mp2
+      real, allocatable :: an(:,:,:,:) ! temporary scalar array
 
       ! for F-A MP
       real(kind=kind_phys), dimension(im,lm+LTP)   :: qc_save, qi_save, qs_save
@@ -215,6 +225,7 @@
                  its, ite, jts, jte, kts, kte
 
       real(kind=kind_phys) :: qvs
+      real (kind=kind_phys) :: sum1,sum2,max1,max2
 !
 !===> ...  begin here
 !
@@ -673,6 +684,30 @@
               enddo
             enddo
           endif if_thompson
+          if (imp_physics == imp_physics_nssl) then
+           ! write(6,*) 'rrtm_pre: set qx_mp for NSSL',ntlnc,ntinc,ntsnc,ntrnc
+            do k=1,LMK
+!              IF ( me == mpiroot ) write(6,*) 'k,rho: ',k,rho(1,k)
+              do i=1,IM
+                qvs = qgrs(i,k,ntqv)
+                qv_mp (i,k) = qvs/(1.-qvs)
+                qc_mp (i,k) = tracer1(i,k,ntcw)/(1.-qvs)
+                qi_mp (i,k) = tracer1(i,k,ntiw)/(1.-qvs)
+                qs_mp (i,k) = tracer1(i,k,ntsw)/(1.-qvs)
+                qr_mp (i,k) = tracer1(i,k,ntrw)/(1.-qvs)
+                nc_mp (i,k) = tracer1(i,k,ntlnc)/(1.-qvs)
+                ni_mp (i,k) = tracer1(i,k,ntinc)/(1.-qvs)
+                ns_mp (i,k) = tracer1(i,k,ntsnc)/(1.-qvs)
+                nr_mp (i,k) = tracer1(i,k,ntrnc)/(1.-qvs)
+                IF ( nssl_ccn_on ) cccn_mp(i,k) = tracer1(i,k,ntccn)/(1.-qvs)
+              enddo
+            enddo
+!            write(6,*) 'rrtmg_pre: max qctrac,qc,qcphy,nctrac,ccw,ccwphy: ',maxval(qc_mp),maxval(qc), &
+!                   maxval(qc_phys),maxval(nc_mp),maxval(ccw),maxval(ccw_phys)
+!            write(6,*) 'rrtmg_pre: max ni,ns,nr = ',maxval(ni_mp),maxval(ns_mp),maxval(nr_mp)
+            ! IF ( maxval(ni_mp) > 1.0 ) write(6,*) 'NI max = ',maxval(ni_mp)
+            ! IF ( maxval(qi_mp) > 0.01e-3 ) write(6,*) 'QI max = ',maxval(qi_mp)
+          endif
         endif
         do n=1,ncndl
           do k=1,LMK
@@ -765,19 +800,112 @@
             enddo
           endif
 
-        elseif (imp_physics == imp_physics_nssl2m .or. &
-                imp_physics == imp_physics_nssl2mccn ) then                          ! NSSL MP
+        elseif (imp_physics == imp_physics_nssl ) then                          ! NSSL MP
           cldcov = 0.0
           if(effr_in) then
+!          if( kdt > 2 ) then
+!          IF ( .true. .or. maxval(nc_mp) >= 1.e-20 ) THEN
            do k=1,lm
              k1 = k + kd
              do i=1,im
                effrl(i,k1) = effrl_inout(i,k)! re_cloud (i,k)
                effri(i,k1) = effri_inout(i,k)! re_ice (i,k)
-               effrr(i,k1) = 1000. ! rrain_def=1000.
+               effrr(i,k1) = effrr_in(i,k)
                effrs(i,k1) = effrs_inout(i,k) ! re_snow(i,k)
              enddo
            enddo
+          else
+         ! calculate radii here, but something is not right with incoming number concentrations
+ !          IF ( .true. .and. first_time_step ) THEN
+            IF ( ( maxval(qc_mp) > 1.e-11 .and. maxval(nc_mp) < 1.e-5 ) .or. &
+                 ( maxval(qr_mp) > 1.e-11 .and. maxval(nr_mp) < 1.e-5 ) .or. &
+                 ( maxval(qi_mp) > 1.e-11 .and. maxval(ni_mp) < 1.e-5 ) .or. &
+                 ( maxval(qs_mp) > 1.e-11 .and. maxval(ns_mp) < 1.e-5 ) .or. kdt < 3 ) THEN
+!                 ( maxval(qs_mp) > 1.e-11 .and. maxval(ns_mp) < 1.e-5 ) .or. .true. ) THEN
+
+         allocate( an(im,1,lm,na) )
+         an(:,:,:,:) = 0.0
+         IF ( .true. .or. kdt <= 3 ) THEN
+         IF ( me == mpiroot ) THEN 
+!            write(6,*) 'before calcn: max ccw = ',maxval(nc_mp),sum(nc_mp)
+            nc_mp2 = nc_mp
+            max1 = maxval(nc_mp)
+            sum1 = sum(nc_mp)
+         ENDIF
+!         IF ( maxval(nc_mp) < 1.e-20 ) THEN
+        call calcnfromq(nx=im,ny=1,nz=lm,an=an,na=na,nor=0,norz=0,dn=rho, &
+     &  qcw=qc_mp,qci=qi_mp, qsw=qs_mp,qrw=qr_mp, &
+     &  ccw=nc_mp,cci=ni_mp, csw=ns_mp,crw=nr_mp, &
+     &  qv=qv_mp, invertccn_flag=nssl_invertccn )
+!         ENDIF
+         IF ( .false. .and. me == mpiroot ) THEN
+            max2 = maxval(nc_mp)
+            sum2 = sum(nc_mp)
+           write(6,*) 'after calcn: max ccw = ',maxval(nc_mp),sum(nc_mp)
+            IF ( Abs(max1-max2) < 1.0 .and. Abs(sum2-sum1) > 1.0 ) THEN
+              DO k=1,lm
+                DO i=1,im
+                  IF ( qc_mp(i,k) > 1.e-6 .and. (nc_mp2(i,k) /= nc_mp(i,k) ) ) THEN
+                    write(6,*) 'i,k,qc,nc1,nc2 = ',i,k,qc_mp(i,k),nc_mp2(i,k),nc_mp(i,k)
+                  ENDIF
+                ENDDO
+              ENDDO
+            ENDIF
+         ENDIF
+         ELSE
+!        call calcnfromq(nx=im,ny=1,nz=lm,an=an,na=na,nor=0,norz=0,dn=rho, &
+!     &  qcw=qc_mp, & !qci=qi_mp, & ! qsw=qs_mp,qrw=qr_mp, &
+!     &  ccw=nc_mp, & !cci=ni_mp, & ! csw=ns_mp,crw=nr_mp, &
+!     &  cccn=cccn_mp,qv=qv_mp )
+        call calcnfromq(nx=im,ny=1,nz=lm,an=an,na=na,nor=0,norz=0,dn=rho, &
+     &  qci=qi_mp, qsw=qs_mp,qrw=qr_mp, &
+     &  cci=ni_mp, csw=ns_mp,crw=nr_mp, &
+     &  qv=qv_mp, invertccn_flag=nssl_invertccn )
+         ENDIF
+         !   write(0,*) 'rrtmg_pre2: ni,ns,nr maxval: ',maxval(ni_mp),maxval(ns_mp),maxval(nr_mp),kdt
+           
+           deallocate( an )
+           ENDIF
+           re_cloud = 0
+           re_ice = 0
+           re_snow = 0
+           re_rain = 0
+           call calc_eff_radius    &
+     &  (nx=im,ny=1,nz=lm,na=1,jyslab=1 & 
+     &  ,nor=0,norz=0 & 
+     &  ,t1=re_cloud,t2=re_ice,t3=re_snow,t4=re_rain  & 
+     &  ,qcw=qc_mp,qci=qi_mp,qsw=qs_mp,qrw=qr_mp &
+     &  ,ccw=nc_mp,cci=ni_mp,csw=ns_mp,crw=nr_mp &
+     &  ,dn=rho )
+
+          do k=1,lm
+            k1 = k + kd
+            do i=1,im
+              IF ( .false. ) THEN
+                effrl(i,k1) = MAX(2.51E-6, MIN( re_cloud(i,k), 50.E-6))*1.e6
+                effri(i,k1) = MAX(10.01E-6, MIN( re_ice(i,k), 125.E-6))*1.e6
+                effrs(i,k1) = MAX(25.E-6, MIN( re_snow(i,k), 999.E-6))*1.e6
+        !        effri(i,k1) = effri_inout(i,k)! re_ice (i,k)
+        !        effrs(i,k1) = effrs_inout(i,k) ! re_snow(i,k)
+              ELSE
+                 effrl(i,k1) = effrl_inout(i,k)! re_cloud (i,k)
+                 effri(i,k1) = effri_inout(i,k)! re_ice (i,k)
+                 effrs(i,k1) = effrs_inout(i,k) ! re_snow(i,k)
+              ENDIF
+              effrr(i,k1) = MAX(25.E-6, MIN( re_rain(i,k), 2999.E-6))*1.e6
+            enddo
+          enddo
+
+          ! Update global arrays
+          do k=1,lm
+            k1 = k + kd
+            do i=1,im
+              effrl_inout(i,k) = effrl(i,k1)
+              effri_inout(i,k) = effri(i,k1)
+              effrs_inout(i,k) = effrs(i,k1)
+            enddo
+          enddo
+
           endif
 
         elseif (imp_physics == imp_physics_thompson) then                     !  Thompson MP
@@ -1032,9 +1160,8 @@
                          effri_inout(:,:), effrs_inout(:,:),               &
                          dzb, xlat_d, julian, yearlen,                     &
                          clouds,cldsa,mtopa,mbota, de_lgth, alpha)            !  --- outputs
-        elseif( imp_physics == imp_physics_nssl2m          &
-             .or. imp_physics == imp_physics_nssl2mccn     &
-                        ) then                              ! Thompson MP
+        
+        elseif ( imp_physics == imp_physics_nssl ) then                              ! NSSL MP
 
           if(do_mynnedmf .or. imfdeepcnv == imfdeepcnv_gf ) then ! MYNN PBL or GF conv
               !-- MYNN PBL or convective GF
@@ -1045,7 +1172,7 @@
                 enddo
               enddo
 
-                ! --- use clduni as with the GFDL microphysics.
+                ! --- use clduni with the NSSL microphysics.
                 ! --- make sure that effr_in=.true. in the input.nml!
                 call progclduni (plyr, plvl, tlyr, tvly, ccnd, ncndl,   & !  ---  inputs
                          xlat, xlon, slmsk, dz, delp, IM, LMK, LMP,     &
@@ -1068,10 +1195,7 @@
           endif ! MYNN PBL or GF
 
 
-        elseif(imp_physics == imp_physics_thompson      &
-!             .or.  imp_physics == imp_physics_nssl2m          &
-!             .or. imp_physics == imp_physics_nssl2mccn     &
-                        ) then                              ! Thompson MP
+        elseif(imp_physics == imp_physics_thompson  ) then                              ! Thompson MP
 
           if(do_mynnedmf .or. imfdeepcnv == imfdeepcnv_gf ) then ! MYNN PBL or GF conv
               !-- MYNN PBL or convective GF

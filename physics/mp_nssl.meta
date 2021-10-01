@@ -1,10 +1,10 @@
 [ccpp-table-properties]
-  name = mp_nsslg
+  name = mp_nssl
   type = scheme
   dependencies = machine.F,module_mp_nssl_2mom.F90
 
 [ccpp-arg-table]
-  name = mp_nsslg_init
+  name = mp_nssl_init
   type = scheme
 [ncol]
   standard_name = horizontal_loop_extent
@@ -20,6 +20,39 @@
   units = count
   dimensions = ()
   type = integer
+  intent = in
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+[threads]
+  standard_name = omp_threads
+  long_name = number of OpenMP threads available to scheme
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[restart]
+  standard_name = flag_for_restart
+  long_name = flag for restart (warmstart) or coldstart
+  units = flag
+  dimensions = ()
+  type = logical
   intent = in
   optional = F
 [mpicomm]
@@ -46,14 +79,6 @@
   type = integer
   intent = in
   optional = F
-[threads]
-  standard_name = omp_threads
-  long_name = number of OpenMP threads available to scheme
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [imp_physics]
   standard_name = flag_for_microphysics_scheme
   long_name = choice of microphysics scheme
@@ -62,17 +87,9 @@
   type = integer
   intent = in
   optional = F
-[imp_physics_nssl2m]
+[imp_physics_nssl]
   standard_name = flag_for_nssl2m_microphysics_scheme
   long_name = choice of NSSL 2-moment microphysics scheme
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[imp_physics_nssl2mccn]
-  standard_name = flag_for_nssl2mccn_microphysics_scheme
-  long_name = choice of NSSL 2-moment microphysics scheme with CCN
   units = flag
   dimensions = ()
   type = integer
@@ -105,6 +122,14 @@
   kind = kind_phys
   intent = in
   optional = F
+[nssl_ccn_on]
+  standard_name = nssl_ccn_on
+  long_name = CCN activation flag in NSSL micro
+  units = none
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [nssl_hail_on]
   standard_name = nssl_hail_on
   long_name = hail activation flag in NSSL micro
@@ -113,27 +138,213 @@
   type = logical
   intent = in
   optional = F
-[errmsg]
-  standard_name = ccpp_error_message
-  long_name = error message for error handling in CCPP
+[nssl_invertccn]
+  standard_name = nssl_invertccn
+  long_name = flag to invert CCN in NSSL micro
   units = none
   dimensions = ()
-  type = character
-  kind = len=*
-  intent = out
+  type = logical
+  intent = in
   optional = F
-[errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
+[first_time_step]
+  standard_name = flag_for_first_time_step
+  long_name = flag for first time step for time integration loop (cold/warmstart)
   units = flag
   dimensions = ()
-  type = integer
-  intent = out
+  type = logical
+  intent = in
+  optional = F
+[spechum]
+  standard_name = water_vapor_specific_humidity
+  long_name = water vapor specific humidity
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[qc]
+  standard_name = cloud_condensed_water_mixing_ratio
+  long_name = cloud water mixing ratio wrt dry+vapor (no condensates)
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[qr]
+  standard_name = rain_water_mixing_ratio
+  long_name = rain water mixing ratio wrt dry+vapor (no condensates)
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[qi]
+  standard_name = ice_water_mixing_ratio
+  long_name = ice water mixing ratio wrt dry+vapor (no condensates)
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[qs]
+  standard_name = snow_water_mixing_ratio
+  long_name = snow water mixing ratio wrt dry+vapor (no condensates)
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[qh]
+  standard_name = graupel_mixing_ratio
+  long_name = graupel mixing ratio wrt dry+vapor (no condensates)
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[qhl]
+  standard_name = hail_mixing_ratio
+  long_name = moist (dry+vapor, no condensates) mixing ratio of hail
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[cccn]
+  standard_name = cloud_condensation_nuclei_number_concentration
+  long_name = number concentration of cloud condensation nuclei
+  units = kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[cccna]
+  standard_name = activated_cloud_condensation_nuclei_number_concentration
+  long_name = number concentration of activated cloud condensation nuclei
+  units = kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[ccw]
+  standard_name = cloud_droplet_number_concentration
+  long_name = cloud droplet number concentration
+  units = kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[crw]
+  standard_name = rain_number_concentration
+  long_name = rain number concentration
+  units = kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[cci]
+  standard_name = ice_number_concentration
+  long_name = ice number concentration
+  units = kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[csw]
+  standard_name = snow_number_concentration
+  long_name = snow number concentration
+  units = kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[chw]
+  standard_name = graupel_number_concentration
+  long_name = graupel number concentration
+  units = kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[chl]
+  standard_name = hail_number_concentration
+  long_name = hail number concentration
+  units = kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[vh]
+  standard_name = graupel_volume
+  long_name = graupel particle volume
+  units = m3 kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[vhl]
+  standard_name = hail_volume
+  long_name = hail particle volume
+  units = m3 kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[tgrs]
+  standard_name = air_temperature
+  long_name = model layer mean temperature
+  units = K
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[prslk]
+  standard_name = dimensionless_exner_function_at_model_layers
+  long_name = dimensionless Exner function at model layer centers
+  units = none
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+[prsl]
+  standard_name = air_pressure
+  long_name = mean layer pressure
+  units = Pa
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[csw_phys]
+  standard_name = snow_number_concentration_updated_by_physics
+  long_name = snow number concentration
+  units = kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
   optional = F
 
 ########################################################################
 [ccpp-arg-table]
-  name = mp_nsslg_run
+  name = mp_nssl_run
   type = scheme
 [ncol]
   standard_name = horizontal_loop_extent
@@ -167,6 +378,14 @@
   dimensions = ()
   type = real
   kind = kind_phys
+  intent = in
+  optional = F
+[mpirank]
+  standard_name = mpi_rank
+  long_name = current MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
   intent = in
   optional = F
 [spechum]
@@ -480,6 +699,15 @@
   kind = kind_phys
   intent = out
   optional = T
+[re_rain]
+  standard_name = effective_radius_of_stratiform_cloud_rain_particle_in_um
+  long_name = effective radius of cloud rain particle in micrometers
+  units = um
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = T
 [imp_physics]
   standard_name = flag_for_microphysics_scheme
   long_name = choice of microphysics scheme
@@ -488,7 +716,7 @@
   type = integer
   intent = in
   optional = F
-[imp_physics_nssl2m]
+[imp_physics_nssl]
   standard_name = flag_for_nssl2m_microphysics_scheme
   long_name = choice of NSSL 2-moment microphysics scheme
   units = flag
@@ -496,12 +724,12 @@
   type = integer
   intent = in
   optional = F
-[imp_physics_nssl2mccn]
-  standard_name = flag_for_nssl2mccn_microphysics_scheme
-  long_name = choice of NSSL 2-moment microphysics scheme with CCN
-  units = flag
+[nssl_ccn_on]
+  standard_name = nssl_ccn_on
+  long_name = CCN activation flag in NSSL micro
+  units = none
   dimensions = ()
-  type = integer
+  type = logical
   intent = in
   optional = F
 [nssl_hail_on]
@@ -556,7 +784,7 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = mp_nsslg_finalize
+  name = mp_nssl_finalize
   type = scheme
 [errmsg]
   standard_name = ccpp_error_message
