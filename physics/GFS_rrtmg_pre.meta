@@ -161,6 +161,22 @@
   type = integer
   intent = in
   optional = F
+[ntrnc]
+  standard_name = index_for_rain_number_concentration
+  long_name = tracer index for rain   number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntsnc]
+  standard_name = index_for_snow_number_concentration
+  long_name = tracer index for snow   number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [ntrw]
   standard_name = index_of_rain_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for rain water
@@ -193,6 +209,14 @@
   type = integer
   intent = in
   optional = F
+[ntccn]
+  standard_name = index_for_cloud_condensation_nuclei_number_concentration
+  long_name = tracer index for cloud condensation nuclei number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [ntwa]
   standard_name = index_of_mass_number_concentration_of_hygroscopic_aerosols_in_tracer_concentration_array
   long_name = tracer index for water friendly aerosol
@@ -207,6 +231,22 @@
   units = index
   dimensions = ()
   type = integer
+  intent = in
+  optional = F
+[nssl_ccn_on]
+  standard_name = nssl_ccn_on
+  long_name = CCN activation flag in NSSL micro
+  units = none
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[nssl_invertccn]
+  standard_name = nssl_invertccn
+  long_name = flag to invert CCN in NSSL micro
+  units = none
+  dimensions = ()
+  type = logical
   intent = in
   optional = F
 [ntclamt]
@@ -257,6 +297,14 @@
   type = integer
   intent = in
   optional = F
+[first_time_step]
+  standard_name = flag_for_first_time_step
+  long_name = flag for first time step for time integration loop (cold/warmstart)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [imp_physics]
   standard_name = control_for_microphysics_scheme
   long_name = choice of microphysics scheme
@@ -265,17 +313,9 @@
   type = integer
   intent = in
   optional = F
-[imp_physics_nssl2m]
+[imp_physics_nssl]
   standard_name = flag_for_nssl2m_microphysics_scheme
   long_name = choice of NSSL 2-moment microphysics scheme
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[imp_physics_nssl2mccn]
-  standard_name = flag_for_nssl2mccn_microphysics_scheme
-  long_name = choice of NSSL 2-moment microphysics scheme with CCN
   units = flag
   dimensions = ()
   type = integer
@@ -1209,4 +1249,12 @@
   dimensions = ()
   type = integer
   intent = out
+  optional = F
+[mpiroot]
+  standard_name = mpi_root
+  long_name = master MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
   optional = F

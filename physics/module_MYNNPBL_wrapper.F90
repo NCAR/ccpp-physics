@@ -64,6 +64,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  qgrs_ozone,                     &
      &  qgrs_water_aer_num_conc,        &
      &  qgrs_ice_aer_num_conc,          &
+     &  qgrs_cccn,                      &
      &  prsl,exner,                     &
      &  slmsk,tsurf,qsfc,ps,            &
      &  ust,ch,hflx,qflx,wspd,rb,       &
@@ -95,6 +96,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  dqdt_ice_cloud, dqdt_ozone,                        & ! <=== ntiw, ntoz
      &  dqdt_cloud_droplet_num_conc, dqdt_ice_num_conc,    & ! <=== ntlnc, ntinc
      &  dqdt_water_aer_num_conc, dqdt_ice_aer_num_conc,    & ! <=== ntwa, ntia
+     &  dqdt_cccn,                                         & ! <=== ntccn
      &  flag_for_pbl_generic_tend,                         &
      &  dtend, dtidx, index_of_temperature,                &
      &  index_of_x_wind, index_of_y_wind, ntke,            &
@@ -108,7 +110,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  icloud_bl, do_mynnsfclay,                          &
      &  imp_physics, imp_physics_gfdl,                     &
      &  imp_physics_thompson, imp_physics_wsm6,            &
-     &  imp_physics_nssl2m, imp_physics_nssl2mccn,         &
+     &  imp_physics_nssl, nssl_ccn_on,                     &
      &  ltaerosol, lprnt, errmsg, errflg  )
 
 ! should be moved to inside the mynn:
@@ -196,7 +198,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 ! NAMELIST OPTIONS (INPUT):
       LOGICAL, INTENT(IN) :: bl_mynn_tkeadvect, ltaerosol,  &
                              lprnt, do_mynnsfclay,          &
-                             flag_for_pbl_generic_tend
+                             flag_for_pbl_generic_tend, nssl_ccn_on
       INTEGER, INTENT(IN) ::                                &
      &       bl_mynn_cloudpdf,                              &
      &       bl_mynn_mixlength,                             &
@@ -212,7 +214,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &       grav_settling,                                 &
      &       imp_physics, imp_physics_wsm6,                 &
      &       imp_physics_thompson, imp_physics_gfdl,        &
-     &       imp_physics_nssl2m, imp_physics_nssl2mccn
+     &       imp_physics_nssl
 
 !TENDENCY DIAGNOSTICS
       real(kind=kind_phys), intent(inout), optional :: dtend(:,:,:)
@@ -254,6 +256,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &        dqdt_water_vapor, dqdt_liquid_cloud, dqdt_ice_cloud,       &
      &        dqdt_cloud_droplet_num_conc, dqdt_ice_num_conc,            &
      &        dqdt_ozone, dqdt_water_aer_num_conc, dqdt_ice_aer_num_conc
+      real(kind=kind_phys), dimension(:,:), intent(inout) ::dqdt_cccn
       real(kind=kind_phys), dimension(:,:), intent(inout) ::             &
      &        qke, qke_adv, EL_PBL, Sh3D,                                &
      &        qc_bl, qi_bl, cldfra_bl
@@ -273,6 +276,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
     &        qgrs_ozone,                                                 &
     &        qgrs_water_aer_num_conc,                                    &
     &        qgrs_ice_aer_num_conc
+     real(kind=kind_phys), dimension(:,:), intent(in) ::qgrs_cccn
      real(kind=kind_phys), dimension(:,:), intent(out) ::                &
     &        Tsq, Qsq, Cov, exch_h, exch_m
      real(kind=kind_phys), dimension(:), intent(in) :: xmu
@@ -400,14 +404,15 @@ SUBROUTINE mynnedmf_wrapper_run(        &
               qnifa(i,k) = 0.
             enddo
           enddo
-        elseif (imp_physics == imp_physics_nssl2m .or. imp_physics == imp_physics_nssl2mccn ) then
+        elseif (imp_physics == imp_physics_nssl ) then
   ! NSSL
          FLAG_QI = .true.
          FLAG_QNI= .true.
          FLAG_QC = .true.
          FLAG_QNC= .true.
-         FLAG_QNWFA= .false.
+         FLAG_QNWFA= nssl_ccn_on ! ERM: Perhaps could use this field for CCN field?
          FLAG_QNIFA= .false.
+         ! p_q vars not used?
          p_qc = 2
          p_qr = 0
          p_qi = 2 
@@ -424,6 +429,9 @@ SUBROUTINE mynnedmf_wrapper_run(        &
               qnc(i,k)   = qgrs_cloud_droplet_num_conc(i,k)
               qni(i,k)   = qgrs_cloud_ice_num_conc(i,k)
               qnwfa(i,k) = 0.
+              IF ( nssl_ccn_on ) THEN
+                qnwfa(i,k) = qgrs_cccn(i,k)
+              ENDIF
               qnifa(i,k) = 0.
             enddo
           enddo
@@ -872,6 +880,21 @@ SUBROUTINE mynnedmf_wrapper_run(        &
              !  enddo
              !enddo
            endif !end thompson choice
+        elseif (imp_physics == imp_physics_nssl) then
+           ! NSSL
+             do k=1,levs
+               do i=1,im
+                 dqdt_water_vapor(i,k)             = RQVBLTEN(i,k) !/(1.0 + qv(i,k))
+                 dqdt_liquid_cloud(i,k)            = RQCBLTEN(i,k) !/(1.0 + qv(i,k))
+                 dqdt_cloud_droplet_num_conc(i,k)  = RQNCBLTEN(i,k)
+                 dqdt_ice_cloud(i,k)               = RQIBLTEN(i,k) !/(1.0 + qv(i,k))
+                 dqdt_ice_num_conc(i,k)            = RQNIBLTEN(i,k)
+                 IF ( nssl_ccn_on ) THEN ! 
+                   dqdt_cccn(i,k)      = RQNWFABLTEN(i,k)
+                 ENDIF
+               enddo
+             enddo
+
         elseif (imp_physics == imp_physics_gfdl) then
            ! GFDL MP
            do k=1,levs

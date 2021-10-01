@@ -520,7 +520,7 @@
                imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,        &
                imp_physics_gfdl, imp_physics_thompson, dtidx, ntlnc,    &
                imp_physics_wsm6, imp_physics_fer_hires, prsi, ntinc,    &
-               imp_physics_nssl2m, imp_physics_nssl2mccn,               &
+               imp_physics_nssl,                                        &
                prsl, prslk, rhcbot,rhcpbl, rhctop, rhcmax, islmsk,      &
                work1, work2, kpbl, kinver, ras, me, save_lnc, save_inc, &
                ldiag3d, qdiag3d, index_of_process_conv_trans,           &
@@ -536,7 +536,7 @@
       integer,              intent(in   )                   :: im, levs, nn, ntrac, ntcw, ntiw, ntclamt, ntrw, ntsw,&
         ntrnc, ntsnc, ntgl, ntgnc, imp_physics, imp_physics_mg, imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,   &
         imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,imp_physics_fer_hires,  &
-        imp_physics_nssl2m, imp_physics_nssl2mccn ,me, index_of_process_conv_trans
+        imp_physics_nssl, me, index_of_process_conv_trans
       integer,              intent(in   ), dimension(:)     :: islmsk, kpbl, kinver
       logical,              intent(in   )                   :: cscnv, satmedmf, trans_trac, do_shoc, ltaerosol, ras
 
@@ -668,7 +668,7 @@
         else
           save_qi(:,:) = clw(:,:,1)
         endif
-      else if (imp_physics == imp_physics_nssl2m .or. imp_physics == imp_physics_nssl2mccn ) then
+      else if (imp_physics == imp_physics_nssl ) then
         do k=1,levs
           do i=1,im
             clw(i,k,1) = gq0(i,k,ntiw)                    ! ice
@@ -712,10 +712,11 @@
 !!
     subroutine GFS_suite_interstitial_4_run (im, levs, ltaerosol, tracers_total, ntrac, ntcw, ntiw, ntclamt, &
       ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,  &
-      imp_physics_nssl2m,imp_physics_nssl2mccn, nssl_invertccn, otsptflag, ntracp1,                                  &
+      imp_physics_nssl, nssl_invertccn, nssl_ccn_on, nssl_invertccn,                                                 &
       imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, convert_dry_rho, dtf, save_qc, save_qi, con_pi, dtidx, dtend,&
       index_of_process_conv_trans, gq0, clw, prsl, save_tcp, con_rd, con_eps, nwfa, spechum, ldiag3d,                &
       qdiag3d, save_lnc, save_inc, ntk, ntke, errmsg, errflg)
+      otsptflag, ntracp1, errmsg, errflg)
 
       use machine,               only: kind_phys
       use module_mp_nssl_2mom,   only: qccn
@@ -730,10 +731,10 @@
       integer, intent(in)     :: ntracp1
       integer,              intent(in   )                   :: im, levs, tracers_total, ntrac, ntcw, ntiw, ntclamt, ntrw, &
         ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,           &
-        imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, imp_physics_nssl2m, imp_physics_nssl2mccn
+        imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, imp_physics_nssl
 
       logical,                                  intent(in) :: ltaerosol, convert_dry_rho
-      logical,                                  intent(in) :: nssl_invertccn
+      logical,                                  intent(in) :: nssl_ccn_on, nssl_invertccn
 
       real(kind=kind_phys), intent(in   )                   :: con_pi, dtf
       real(kind=kind_phys), intent(in   ), dimension(:,:)   :: save_qc
@@ -852,14 +853,14 @@
             enddo
           enddo
 
-          if ( .true. .and. ( imp_physics == imp_physics_nssl2m .or. imp_physics == imp_physics_nssl2mccn ) ) then
+          if ( .true. .and. ( imp_physics == imp_physics_nssl ) ) then
               liqm =  con_pi/6.*1.e3*(40.e-6)**3  ! 4./3.*con_pi*1.e-12
               icem =  con_pi/6.*1.e3*(120.e-6)**3 ! 4./3.*con_pi*3.2768*1.e-14*890.
               ! qccn = nssl_cccn/1.225
               do k=1,levs
                 do i=1,im
                    ! check number of available ccn
-                   IF ( imp_physics == imp_physics_nssl2mccn ) THEN
+                   IF ( nssl_ccn_on ) THEN
                      IF ( nssl_invertccn ) THEN
                        xccn = qccn - gq0(i,k,ntccn)
                      ELSE
@@ -884,7 +885,7 @@
                   IF ( xccn > 0.0 ) THEN
                   xccw = Min( xccn, max(0.0, (clw(i,k,2)-save_qc(i,k))) / xcwmas )
                   gq0(i,k,ntlnc) = gq0(i,k,ntlnc) + xccw 
-                  IF ( imp_physics == imp_physics_nssl2mccn ) THEN
+                  IF ( nssl_ccn_on ) THEN
                      IF ( nssl_invertccn ) THEN
                        ! ccn are activated CCN, so add
                        gq0(i,k,ntccn) = gq0(i,k,ntccn) + xccw

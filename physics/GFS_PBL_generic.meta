@@ -303,17 +303,9 @@
   type = integer
   intent = in
   optional = F
-[imp_physics_nssl2m]
+[imp_physics_nssl]
   standard_name = flag_for_nssl2m_microphysics_scheme
   long_name = choice of NSSL 2-moment microphysics scheme
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[imp_physics_nssl2mccn]
-  standard_name = flag_for_nssl2mccn_microphysics_scheme
-  long_name = choice of NSSL 2-moment microphysics scheme with CCN
   units = flag
   dimensions = ()
   type = integer
@@ -323,6 +315,14 @@
   standard_name = flag_for_aerosol_physics
   long_name = flag for aerosol physics
   units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[nssl_ccn_on]
+  standard_name = nssl_ccn_on
+  long_name = CCN activation flag in NSSL micro
+  units = none
   dimensions = ()
   type = logical
   intent = in
@@ -788,17 +788,9 @@
   type = integer
   intent = in
   optional = F
-[imp_physics_nssl2m]
+[imp_physics_nssl]
   standard_name = flag_for_nssl2m_microphysics_scheme
   long_name = choice of NSSL 2-moment microphysics scheme
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[imp_physics_nssl2mccn]
-  standard_name = flag_for_nssl2mccn_microphysics_scheme
-  long_name = choice of NSSL 2-moment microphysics scheme with CCN
   units = flag
   dimensions = ()
   type = integer
@@ -808,6 +800,14 @@
   standard_name = flag_for_aerosol_physics
   long_name = flag for aerosol physics
   units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[nssl_ccn_on]
+  standard_name = nssl_ccn_on
+  long_name = CCN activation flag in NSSL micro
+  units = none
   dimensions = ()
   type = logical
   intent = in
