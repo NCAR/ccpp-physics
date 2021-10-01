@@ -671,10 +671,12 @@
       else if (imp_physics == imp_physics_nssl ) then
         do k=1,levs
           do i=1,im
-            clw(i,k,1) = gq0(i,k,ntiw)                    ! ice
-            clw(i,k,2) = gq0(i,k,ntcw)                    ! water
+            clw(i,k,1) = gq0(i,k,ntiw)                    ! cloud ice
+            clw(i,k,2) = gq0(i,k,ntcw)                    ! cloud droplets
           enddo
         enddo
+          save_qi(:,:) = clw(:,:,1)
+          save_qc(:,:) = clw(:,:,2)
       elseif (imp_physics == imp_physics_wsm6 .or. imp_physics == imp_physics_mg .or. imp_physics == imp_physics_fer_hires) then
         do k=1,levs
           do i=1,im
@@ -867,8 +869,8 @@
             enddo
           enddo
 
-          if ( .true. .and. ( imp_physics == imp_physics_nssl ) ) then
-              liqm =  con_pi/6.*1.e3*(40.e-6)**3  ! 4./3.*con_pi*1.e-12
+          if ( imp_physics == imp_physics_nssl ) then
+              liqm =  con_pi/6.*1.e3*(18.e-6)**3  ! 4./3.*con_pi*1.e-12
               icem =  con_pi/6.*1.e3*(120.e-6)**3 ! 4./3.*con_pi*3.2768*1.e-14*890.
               ! qccn = nssl_cccn/1.225
               do k=1,levs
