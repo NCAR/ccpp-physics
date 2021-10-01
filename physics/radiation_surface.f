@@ -784,7 +784,7 @@
       integer, intent(in) :: lsm, lsm_noahmp, lsm_ruc
       logical, intent(in) :: frac_grid, cplice
       real (kind=kind_phys), dimension(:), intent(in) :: vtype,         &
-     ^       lakefrac
+     &       lakefrac
 
       real (kind=kind_phys), dimension(:), intent(in) ::                &
      &       xlon,xlat, slmsk, snowf,sncovr, sncovr_ice,                &
