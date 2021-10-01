@@ -493,7 +493,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers_for_convective_transport)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = F
 [shcnvcw]
   standard_name = flag_for_saving_shallow_convective_cloud_area_fraction
