@@ -65,8 +65,7 @@
                           lndp_var_list, lndp_prt_list,                                                    &
                           z01d, zt1d, bexp1d, xlai1d, vegf1d, lndp_vgf,                                    &
                           cplflx, flag_cice, islmsk_cice, slimskin_cpl,                                    &
-                          wind, u1, v1, cnvwind, smcwlt2, smcref2, &
-                          vtype_save, stype_save, slope_save, &
+                          wind, u1, v1, cnvwind, smcwlt2, smcref2, vtype_save, stype_save, slope_save,     &
                           errmsg, errflg)
 
         use surface_perturbation,  only: cdfnor
