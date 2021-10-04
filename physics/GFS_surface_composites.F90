@@ -249,7 +249,7 @@ contains
 
 ! to prepare to separate lake from ocean under water category
       do i = 1, im
-        if(wet(i) .and. lakefrac(i) > zero) then
+        if ((wet(i) .or. icy(i)) .and. lakefrac(i) > zero) then
           lake(i) = .true.
           if (lkm == 1 .and. lakefrac(i) >= 0.15 .and. lakedepth(i) > one) then
             use_flake(i) = .true.
