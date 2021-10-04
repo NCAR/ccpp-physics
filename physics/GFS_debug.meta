@@ -604,51 +604,24 @@
   intent = in
   optional = F
 [stype]
-  standard_name = soil_type_classification_real
+  standard_name = soil_type_classification
   long_name = soil type for lsm
   units = index
   dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
+  type = integer
   intent = in
   optional = F
 [vtype]
-  standard_name = vegetation_type_classification_real
+  standard_name = vegetation_type_classification
   long_name = vegetation type for lsm
   units = index
   dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
+  type = integer
   intent = in
   optional = F
 [slope]
-  standard_name = surface_slope_classification_real
-  long_name = sfc slope type for lsm
-  units = index
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[soiltyp]
-  standard_name = soil_type_classification
-  long_name = soil type at each grid cell
-  units = index
-  dimensions = (horizontal_loop_extent)
-  type = integer
-  intent = in
-  optional = F
-[vegtype]
-  standard_name = vegetation_type_classification
-  long_name = vegetation type at each grid cell
-  units = index
-  dimensions = (horizontal_loop_extent)
-  type = integer
-  intent = in
-  optional = F
-[slopetyp]
   standard_name = surface_slope_classification
-  long_name = surface slope type at each grid cell
+  long_name = sfc slope type for lsm
   units = index
   dimensions = (horizontal_loop_extent)
   type = integer

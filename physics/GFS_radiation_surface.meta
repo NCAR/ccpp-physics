@@ -118,15 +118,6 @@
   type = integer
   intent = in
   optional = F
-[vtype]
-  standard_name = vegetation_type_classification_real
-  long_name = vegetation type for lsm
-  units = index
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [xlat]
   standard_name = latitude
   long_name = latitude
