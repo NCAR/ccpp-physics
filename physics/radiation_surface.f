@@ -724,7 +724,7 @@
 !! @{
 !-----------------------------------
       subroutine setemis                                                &
-     &     ( lsm,lsm_noahmp,lsm_ruc,vtype,frac_grid,cplice,             &  !  ---  inputs:
+     &     ( lsm,lsm_noahmp,lsm_ruc,frac_grid,cplice,use_flake,         &  !  ---  inputs:
      &       lakefrac,xlon,xlat,slmsk,snowf,sncovr,sncovr_ice,          &
      &       zorlf,tsknf,tairf,hprif,                                   &
      &       semis_lnd,semis_ice,IMAX,fracl,fraco,fraci,icy,            &
@@ -783,8 +783,8 @@
       integer, intent(in) :: IMAX
       integer, intent(in) :: lsm, lsm_noahmp, lsm_ruc
       logical, intent(in) :: frac_grid, cplice
-      real (kind=kind_phys), dimension(:), intent(in) :: vtype,         &
-     &       lakefrac
+      logical, dimension(:), intent(in) :: use_flake
+      real (kind=kind_phys), dimension(:), intent(in) :: lakefrac
 
       real (kind=kind_phys), dimension(:), intent(in) ::                &
      &       xlon,xlat, slmsk, snowf,sncovr, sncovr_ice,                &
@@ -959,7 +959,7 @@
             if (lsm == lsm_noahmp) then
               if (.not. cplice .or. lakefrac(i) > f_zero) then
                 if (sncovr_ice(i) > f_zero) then
-                  sfcemis_ice = emsref(7) * (f_one-sncovr_ice(i))         &
+                  sfcemis_ice = emsref(7) * (f_one-sncovr_ice(i))       &
      &                        + emsref(8) * sncovr_ice(i)
                 elseif (snowf(i) > f_zero) then
                   asnow = 0.02*snowf(i)
@@ -967,14 +967,30 @@
                   hrgh  = min(f_one,max(0.20,1.0577-1.1538e-3*hprif(i)))
                   fsno  = asnow / (argh + asnow) * hrgh
                   fsnoi = min(f_one, fsno / (fraci(i)+fracl(i)))
-                  sfcemis_ice = emsref(7)*(f_one-fsnoi) + emsref(8)*fsnoi
+                  sfcemis_ice = emsref(7)*(f_one-fsnoi)+emsref(8)*fsnoi
                 endif
                 semis_ice(i) = sfcemis_ice
               else
                 sfcemis_ice = semis_ice(i) ! output from CICE
               endif
             elseif (lsm == lsm_ruc) then
-              sfcemis_ice = semis_ice(i) ! output from lsm (with snow effect)
+              if (.not. cplice .or.                                     &
+     &           (lakefrac(i) > f_zero .and. use_flake(i))) then
+                if (sncovr_ice(i) > f_zero) then
+                  sfcemis_ice = emsref(7) * (f_one-sncovr_ice(i))       &
+     &                        + emsref(8) * sncovr_ice(i)
+                elseif (snowf(i) > f_zero) then
+                  asnow = 0.02*snowf(i)
+                  argh  = min(0.50, max(.025,0.01*zorlf(i)))
+                  hrgh  = min(f_one,max(0.20,1.0577-1.1538e-3*hprif(i)))
+                  fsno  = asnow / (argh + asnow) * hrgh
+                  fsnoi = min(f_one, fsno / (fraci(i)+fracl(i)))
+                  sfcemis_ice = emsref(7)*(f_one-fsnoi)+emsref(8)*fsnoi
+                endif
+                semis_ice(i) = sfcemis_ice
+              else
+                sfcemis_ice = semis_ice(i) ! output from CICE or from RUC lsm (with snow effect)
+              endif
             endif ! lsm check
           endif ! icy
 
