@@ -974,8 +974,7 @@
                 sfcemis_ice = semis_ice(i) ! output from CICE
               endif
             elseif (lsm == lsm_ruc) then
-              if (.not. cplice .or.                                     &
-     &           (lakefrac(i) > f_zero .and. use_flake(i))) then
+              if (use_flake(i)) then
                 if (sncovr_ice(i) > f_zero) then
                   sfcemis_ice = emsref(7) * (f_one-sncovr_ice(i))       &
      &                        + emsref(8) * sncovr_ice(i)
