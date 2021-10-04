@@ -13,30 +13,20 @@
 !> \section arg_table_GFS_radiation_surface_init Argument Table
 !! \htmlinclude GFS_radiation_surface_init.html
 !!
-      subroutine GFS_radiation_surface_init (me, sfcalb, ialb, iems, errmsg, errflg)
+      subroutine GFS_radiation_surface_init (me, ialb, iems, errmsg, errflg)
 
       use physparam,                only: ialbflg, iemsflg
-      use module_radiation_surface, only: NF_ALBD, sfc_init
+      use module_radiation_surface, only: sfc_init
 
       implicit none
 
       integer,                              intent(in)  :: me, ialb, iems
-      real(kind=kind_phys), dimension(:,:), intent(in)  :: sfcalb
       character(len=*),                     intent(out) :: errmsg
       integer,                              intent(out) :: errflg
 
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
-
-      ! Consistency check that the number of albedo components in array
-      ! sfcalb matches the parameter NF_ALBD from radiation_surface.f
-      if (size(sfcalb,dim=2)/=NF_ALBD) then
-        errmsg = 'Error in GFS_radiation_surface_init: second' // &
-                 ' dimension of array sfcalb does not match' //   &
-                 ' parameter NF_ALBD in radiation_surface.f'
-        errflg = 1
-      end if
 
       ialbflg= ialb                     ! surface albedo control flag
       iemsflg= iems                     ! surface emissivity control flag

@@ -15,15 +15,6 @@
   type = integer
   intent = in
   optional = F
-[sfcalb]
-  standard_name = surface_albedo_components
-  long_name = surface albedo IR/UV/VIS components
-  units = frac
-  dimensions = (horizontal_dimension,number_of_components_for_surface_albedo)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [ialb]
   standard_name = control_for_surface_albedo
   long_name = flag for using climatology alb, based on sfc type
