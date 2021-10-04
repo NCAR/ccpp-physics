@@ -5,8 +5,7 @@ module rrtmgp_lw_gas_optics
   use mo_gas_concentrations, only: ty_gas_concs  
   use mo_source_functions,   only: ty_source_func_lw
   use mo_optical_props,      only: ty_optical_props_1scl
-  use radiation_tools,            only: check_error_msg
-  use GFS_rrtmgp_pre,        only: active_gases_array
+  use radiation_tools,       only: check_error_msg
   use netcdf
 #ifdef MPI
   use mpi
@@ -76,11 +75,9 @@ contains
 !! \htmlinclude rrtmgp_lw_gas_optics_init.html
 !!
   subroutine rrtmgp_lw_gas_optics_init(rrtmgp_root_dir, rrtmgp_lw_file_gas, mpicomm,        &
-       mpirank, mpiroot, gas_concentrations, minGPpres, minGPtemp, errmsg, errflg)
+       mpirank, mpiroot, minGPpres, minGPtemp, active_gases_array, errmsg, errflg)
 
     ! Inputs
-    type(ty_gas_concs), intent(inout) :: &
-         gas_concentrations  ! RRTMGP DDT: trace gas concentrations (vmr)
     character(len=128),intent(in) :: &
          rrtmgp_root_dir,  & ! RTE-RRTMGP root directory
          rrtmgp_lw_file_gas  ! RRTMGP file containing coefficients used to compute gaseous optical properties
@@ -97,12 +94,15 @@ contains
     real(kind_phys), intent(out) :: &
          minGPtemp,        & ! Minimum temperature allowed by RRTMGP.
          minGPpres           ! Minimum pressure allowed by RRTMGP. 
+    character(len=*), dimension(:), intent(in) :: &
+         active_gases_array ! List of active gases from namelist as array
 
     ! Local variables
     integer :: ncid, dimID, varID, status, iGas, ierr, ii, mpierr, iChar
     integer,dimension(:),allocatable :: temp1, temp2, temp3, temp4, &
          temp_log_array1, temp_log_array2, temp_log_array3, temp_log_array4
     character(len=264) :: lw_gas_props_file
+    type(ty_gas_concs) :: gas_concentrations  ! RRTMGP DDT: trace gas concentrations (vmr)
 
     ! Initialize
     errmsg = ''
@@ -435,6 +435,7 @@ contains
     ! Initialize RRTMGP DDT's...
     !
     ! #######################################################################################
+    allocate(gas_concentrations%gas_name(1:size(active_gases_array)))
     gas_concentrations%gas_name(:) = active_gases_array(:)
     call check_error_msg('rrtmgp_lw_gas_optics_init',lw_gas_props%load(gas_concentrations,  &
          gas_namesLW, key_speciesLW, band2gptLW, band_limsLW, press_refLW, press_ref_tropLW,&
@@ -459,8 +460,9 @@ contains
 !! \section arg_table_rrtmgp_lw_gas_optics_run
 !! \htmlinclude rrtmgp_lw_gas_optics_run.html
 !!
-  subroutine rrtmgp_lw_gas_optics_run(doLWrad, nCol, nLev, p_lay, p_lev, t_lay, t_lev, tsfg,&
-       gas_concentrations, lw_optical_props_clrsky, sources,  errmsg, errflg)
+  subroutine rrtmgp_lw_gas_optics_run(doLWrad, nCol, nLev, p_lay, p_lev, t_lay, t_lev, tsfg, &
+       active_gases_array, gas_concentrations, lw_optical_props_clrsky, sources,             &
+       errmsg, errflg)
 
     ! Inputs
     logical, intent(in) :: &
@@ -476,8 +478,10 @@ contains
          t_lev                   ! Temperature @ model levels
     real(kind_phys), dimension(ncol), intent(in) :: &
          tsfg                    ! Surface ground temperature (K)
-    type(ty_gas_concs),intent(in) :: &
+    type(ty_gas_concs),intent(inout) :: &
          gas_concentrations      ! RRTMGP DDT: trace gas concentrations (vmr)
+    character(len=*), dimension(:), intent(in) :: &
+         active_gases_array ! List of active gases from namelist as array
 
     ! Output
     character(len=*), intent(out) :: &
@@ -497,6 +501,8 @@ contains
     errflg = 0
 
     if (.not. doLWrad) return
+
+    gas_concentrations%gas_name(:) = active_gases_array(:)
 
     ! Copy spectral information into GP DDTs.
     lw_optical_props_clrsky%band2gpt      = lw_gas_props%get_band_lims_gpoint()

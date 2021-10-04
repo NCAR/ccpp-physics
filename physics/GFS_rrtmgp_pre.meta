@@ -8,6 +8,14 @@
 [ccpp-arg-table]
   name = GFS_rrtmgp_pre_init
   type = scheme
+[nGases]
+  standard_name = number_of_active_gases_used_by_RRTMGP
+  long_name = number of gases available used by RRTMGP (Model%nGases)
+  units = count
+  dimensions =  ()
+  type = integer  
+  intent = in
+  optional = F  
 [active_gases]
   standard_name = active_gases_used_by_RRTMGP
   long_name = active gases used by RRTMGP
@@ -17,13 +25,14 @@
   kind = len=128
   intent = in
   optional = F  
-[nGases]
-  standard_name = number_of_active_gases_used_by_RRTMGP
-  long_name = number of gases available used by RRTMGP (Model%nGases)
-  units = count
-  dimensions =  ()
-  type = integer  
-  intent = in
+[active_gases_array]
+  standard_name = list_of_active_gases_used_by_RRTMGP
+  long_name = list of active gases used by RRTMGP
+  units = none
+  dimensions =  (number_of_active_gases_used_by_RRTMGP)
+  type = character
+  kind = len=128
+  intent = out
   optional = F  
 [errmsg]
   standard_name = ccpp_error_message
@@ -346,6 +355,15 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
+[active_gases_array]
+  standard_name = list_of_active_gases_used_by_RRTMGP
+  long_name = list of active gases used by RRTMGP
+  units = none
+  dimensions =  (number_of_active_gases_used_by_RRTMGP)
+  type = character
+  kind = len=*
+  intent = in
   optional = F
 [gas_concentrations]
   standard_name = Gas_concentrations_for_RRTMGP_suite
