@@ -349,12 +349,11 @@
   intent = in
   optional = F
 [vtype]
-  standard_name = vegetation_type_classification_real
+  standard_name = vegetation_type_classification
   long_name = vegetation type for lsm
   units = index
   dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
+  type = integer
   intent = in
   optional = F
 [smc]
