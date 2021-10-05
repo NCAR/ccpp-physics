@@ -104,7 +104,7 @@
      &                     dq,      dqsdp,   dqsdt,   dt,
      &                     dt2,     dtmax,   dtmin,   dxcrt,
      &                     dv1h,    dv2h,    dv3h,
-     &                     dv1q,    dv2q,    dv3q,
+     &                     dv2q,
      &                     dz,      dz1,     e1,
      &                     el2orc,  elocp,   aafac,   cm,
      &                     es,      etah,    h1,
@@ -188,7 +188,12 @@ c  local variables and arrays
      &                     uo(im,km),      vo(im,km),     qeso(im,km),
      &                     ctr(im,km,ntr), ctro(im,km,ntr)
 !  for aerosol transport
-      real(kind=kind_phys) qaero(im,km,ntc)
+!     real(kind=kind_phys) qaero(im,km,ntc)
+c  variables for tracer wet deposition,
+      real(kind=kind_phys), dimension(im,km,ntc) :: chem_c, chem_pw,
+     &  wet_dep
+      real(kind=kind_phys), parameter :: escav   = 0.8 ! wet scavenging efficiency
+!
 !  for updraft velocity calculation
       real(kind=kind_phys) wu2(im,km),     buo(im,km),    drag(im,km)
       real(kind=kind_phys) wc(im),         scaldfunc(im), sigmagfm(im)
@@ -208,6 +213,14 @@ c  cloud water
      &                     zi(im,km),      pwo(im,km),    c0t(im,km),
      &                     sumx(im),       tx1(im),       cnvwt(im,km)
      &,                    rhbar(im)
+!
+!  variables for Total Variation Diminishing (TVD) flux-limiter scheme
+!     on environmental subsidence and uplifting
+!
+      real(kind=kind_phys) q_diff(im,0:km-1), e_diff(im,0:km-1,ntr),
+     &                     flxtvd(im,km-1)
+      real(kind=kind_phys) rrkp, phkp
+      real(kind=kind_phys) tsumn(im), tsump(im), rtnp(im)
 !
       logical do_aerosols, totflg, cnvflg(im), flg(im)
 !
@@ -252,6 +265,11 @@ c
 c  initialize arrays
 c
 !>  - Initialize column-integrated and other single-value-per-column variable arrays.
+!
+      chem_c  = 0.
+      chem_pw = 0.
+      wet_dep = 0.
+!
       if(hwrf_samfshal) then
        do i=1,im
         cnvflg(i) = .true.
@@ -966,7 +984,12 @@ c
       enddo
 
       if (.not.hwrf_samfshal) then
-       do n = 1, ntr
+       if (do_aerosols) then
+         kk = itc -3
+       else
+         kk = ntr
+       endif
+       do n = 1, kk
        do k = 2, km1
         do i = 1, im
           if (cnvflg(i)) then
@@ -981,6 +1004,28 @@ c
         enddo
        enddo
        enddo
+       if (do_aerosols) then
+         do n = 1, ntc
+           kk = n + itc -3
+           do k = 2, km1
+             do i = 1, im
+               if (cnvflg(i)) then
+                 if(k > kb(i) .and. k < kmax(i)) then
+                   dz = zi(i,k) - zi(i,k-1)
+                   tem  = 0.25 * (xlamue(i,k)+xlamue(i,k-1)) * dz
+                   factor = 1. + tem
+                   ecko(i,k,kk) = ((1.-tem)*ecko(i,k-1,kk)+tem*
+     &                     (ctro(i,k,kk)+ctro(i,k-1,kk)))/factor
+                   chem_c(i,k,n)=escav*fscav(n)*ecko(i,k,kk)
+                   tem=chem_c(i,k,n)/(1.+c0t(i,k)*dz)
+                   chem_pw(i,k,n)=c0t(i,k)*dz*tem*eta(i,k-1)
+                   ecko(i,k,kk)=tem+ecko(i,k,kk)-chem_c(i,k,n)
+                 endif
+               endif
+             enddo
+           enddo
+         enddo
+       endif
       endif
 c
 c   taking account into convection inhibition due to existence of
@@ -1520,9 +1565,7 @@ c
               dv1h = heo(i,k)
               dv2h = .5 * (heo(i,k) + heo(i,k-1))
               dv3h = heo(i,k-1)
-              dv1q = qo(i,k)
               dv2q = .5 * (qo(i,k) + qo(i,k-1))
-              dv3q = qo(i,k-1)
 c
               tem  = 0.5 * (xlamue(i,k)+xlamue(i,k-1))
               tem1 = xlamud(i)
@@ -1534,8 +1577,7 @@ cj
      &         ) *grav/dp
 cj
               dellaq(i,k) = dellaq(i,k) +
-     &     ( eta(i,k)*dv1q - eta(i,k-1)*dv3q
-     &    -  tem*eta(i,k-1)*dv2q*dz
+     &     ( - tem*eta(i,k-1)*dv2q*dz
      &    +  tem1*eta(i,k-1)*.5*(qrcko(i,k)+qcko(i,k-1))*dz
      &         ) *grav/dp
 cj
@@ -1559,8 +1601,8 @@ cj
             if(k > kb(i) .and. k < ktcon(i)) then
               dp = 1000. * del(i,k)
 cj
-              tem1=eta(i,k)*(ctro(i,k,n)-ecko(i,k,n))
-              tem2=eta(i,k-1)*(ctro(i,k-1,n)-ecko(i,k-1,n))
+              tem1 = -eta(i,k) * ecko(i,k,n)
+              tem2 = -eta(i,k-1) * ecko(i,k-1,n)
               dellae(i,k,n) = dellae(i,k,n) + (tem1-tem2) * grav/dp
 cj
             endif
@@ -1579,9 +1621,8 @@ c
           dv1h = heo(i,indx-1)
           dellah(i,indx) = eta(i,indx-1) *
      &                     (hcko(i,indx-1) - dv1h) * grav / dp
-          dv1q = qo(i,indx-1)
           dellaq(i,indx) = eta(i,indx-1) *
-     &                     (qcko(i,indx-1) - dv1q) * grav / dp
+     &                     qcko(i,indx-1) * grav / dp
           dellau(i,indx) = eta(i,indx-1) *
      &             (ucko(i,indx-1) - uo(i,indx-1)) * grav / dp
           dellav(i,indx) = eta(i,indx-1) *
@@ -1600,10 +1641,123 @@ c
           indx = ktcon(i)
           dp = 1000. * del(i,indx)
           dellae(i,indx,n) = eta(i,indx-1) *
-     &           (ecko(i,indx-1,n) - ctro(i,indx-1,n)) * grav / dp
+     &             ecko(i,indx-1,n) * grav / dp
         endif
       enddo
       enddo
+      endif
+!
+! compute change rates due to environmental subsidence & uplift
+!     using a positive definite TVD flux-limiter scheme
+!
+!  for moisture
+!
+      do k=1,km1
+        do i=1,im
+          if(cnvflg(i) .and. k <= ktcon(i)) then
+            q_diff(i,k) = q1(i,k) - q1(i,k+1)
+          endif
+        enddo
+      enddo
+      do i=1,im
+        if(cnvflg(i)) then
+          if(q1(i,1) >= 0.) then
+            q_diff(i,0) = max(0.,2.*q1(i,1)-q1(i,2))-
+     &                        q1(i,1)
+          else
+            q_diff(i,0) = min(0.,2.*q1(i,1)-q1(i,2))-
+     &                          q1(i,1)
+          endif
+        endif
+      enddo
+!
+      flxtvd = 0.
+      do k = 1, km1
+        do i = 1, im
+          if(cnvflg(i) .and.
+     &      (k >= kb(i) .and. k < ktcon(i))) then
+            if(eta(i,k) > 0.) then
+              rrkp = 0.
+              if(abs(q_diff(i,k)) > 1.e-22)
+     &               rrkp = q_diff(i,k+1) / q_diff(i,k)
+              phkp = (rrkp+abs(rrkp)) / (1.+abs(rrkp))
+              tem1 = q1(i,k+1) +
+     &                   phkp*(qo(i,k)-q1(i,k+1))
+              flxtvd(i,k) = eta(i,k) * tem1
+            endif
+          endif
+        enddo
+      enddo
+!
+      do k = 2, km1
+        do i = 1, im
+          if(cnvflg(i) .and.
+     &      (k > kb(i) .and. k <= ktcon(i))) then
+             dp = 1000. * del(i,k)
+             dellaq(i,k) = dellaq(i,k) +
+     &           (flxtvd(i,k) - flxtvd(i,k-1)) * grav/dp
+          endif
+        enddo
+      enddo
+!
+!  for tracers including TKE & ozone
+!
+      if (.not.hwrf_samfshal) then
+!
+      do n=1,ntr
+        do k=1,km1
+          do i=1,im
+            if(cnvflg(i) .and. k <= ktcon(i)) then
+              e_diff(i,k,n) = ctr(i,k,n) - ctr(i,k+1,n)
+            endif
+          enddo
+        enddo
+        do i=1,im
+          if(cnvflg(i)) then
+            if(ctr(i,1,n) >= 0.) then
+              e_diff(i,0,n) = max(0.,2.*ctr(i,1,n)-ctr(i,2,n))-
+     &                          ctr(i,1,n)
+            else
+              e_diff(i,0,n) = min(0.,2.*ctr(i,1,n)-ctr(i,2,n))-
+     &                          ctr(i,1,n)
+            endif
+          endif
+        enddo
+      enddo
+!
+      do n=1,ntr
+!
+        flxtvd = 0.
+        do k= 1, km1
+          do i = 1, im
+            if(cnvflg(i) .and.
+     &        (k >= kb(i) .and. k < ktcon(i))) then
+              if(eta(i,k) > 0.) then
+                rrkp = 0.
+                if(abs(e_diff(i,k,n)) > 1.e-22)
+     &                 rrkp = e_diff(i,k+1,n) / e_diff(i,k,n)
+                phkp = (rrkp+abs(rrkp)) / (1.+abs(rrkp))
+                tem1 = ctr(i,k+1,n) +
+     &                     phkp*(ctro(i,k,n)-ctr(i,k+1,n))
+                flxtvd(i,k) = eta(i,k) * tem1
+              endif
+            endif
+          enddo
+        enddo
+!
+        do k = 2, km1
+          do i = 1, im
+            if(cnvflg(i) .and.
+     &        (k > kb(i) .and. k <= ktcon(i))) then
+               dp = 1000. * del(i,k)
+               dellae(i,k,n) = dellae(i,k,n) +
+     &             (flxtvd(i,k) - flxtvd(i,k-1)) * grav/dp
+            endif
+          enddo
+        enddo
+!
+      enddo
+!
       endif
 !
 !  compute convective turn-over time
@@ -1694,15 +1848,15 @@ c
 !
 !> - Transport aerosols if present
 !
-      if (.not.hwrf_samfshal) then
-       if (do_aerosols)
-     &  call samfshalcnv_aerosols(im, im, km, itc, ntc, ntr, delt,
-!    &  xlamde, xlamdd, cnvflg, jmin, kb, kmax, kbcon, ktcon, fscav,
-     &  cnvflg, kb, kmax, kbcon, ktcon, fscav,
-!    &  edto, xlamd, xmb, c0t, eta, etad, zi, xlamue, xlamud, delp,
-     &  xmb, c0t, eta, zi, xlamue, xlamud, delp,
-     &  qtr, qaero)
-      endif
+!     if (.not.hwrf_samfshal) then
+!      if (do_aerosols)
+!    &  call samfshalcnv_aerosols(im, im, km, itc, ntc, ntr, delt,
+!!   &  xlamde, xlamdd, cnvflg, jmin, kb, kmax, kbcon, ktcon, fscav,
+!    &  cnvflg, kb, kmax, ktcon, fscav,
+!!   &  edto, xlamd, xmb, c0t, eta, etad, zi, xlamue, xlamud, delp,
+!    &  xmb, c0t, eta, zi, xlamue, xlamud, delp,
+!    &  qtr, qaero)
+!     endif
 !
 !> ## For the "feedback control", calculate updated values of the state variables by multiplying the cloud base mass flux and the tendencies calculated per unit cloud base mass flux from the static control.
 !! - Recalculate saturation specific humidity.
@@ -1761,21 +1915,173 @@ c
           endif
         enddo
       enddo
-      if (.not.hwrf_samfshal) then
-      do n = 1, ntr
-         kk = n+2
-      do k = 1, km
-        do i = 1, im
-          if (cnvflg(i) .and. k <= kmax(i)) then
-            if(k <= ktcon(i)) then
-              ctr(i,k,n) = ctr(i,k,n)+dellae(i,k,n)*xmb(i)*dt2
-              delebar(i,n)=delebar(i,n)+dellae(i,k,n)*xmb(i)*dp/grav
-              qtr(i,k,kk) = ctr(i,k,n)
+!
+! Negative moisture is set to zero after borrowing it from
+!   positive values within the mass-flux transport layers
+!
+      do i = 1,im
+        tsumn(i) = 0.
+        tsump(i) = 0.
+        rtnp(i) = 1.
+      enddo
+      do k = 1,km
+        do i = 1,im
+          if (cnvflg(i)) then
+            if(k > kb(i) .and. k <= ktcon(i)) then
+              if(q1(i,k) < 0.) tsumn(i) = tsumn(i) + q1(i,k)
+              if(q1(i,k) > 0.) tsump(i) = tsump(i) + q1(i,k)
             endif
           endif
         enddo
       enddo
+      do i = 1,im
+        if(cnvflg(i)) then
+          if(tsump(i) > 0. .and. tsumn(i) < 0.) then
+            if(tsump(i) > abs(tsumn(i))) then
+              rtnp(i) = tsumn(i) / tsump(i)
+            else
+              rtnp(i) = tsump(i) / tsumn(i)
+            endif
+          endif
+        endif
       enddo
+      do k = 1,km
+        do i = 1,im
+          if (cnvflg(i)) then
+            if(k > kb(i) .and. k <= ktcon(i)) then
+              if(rtnp(i) < 0.) then
+                if(tsump(i) > abs(tsumn(i))) then
+                  if(q1(i,k) < 0.) q1(i,k)= 0.
+                  if(q1(i,k) > 0.) q1(i,k)=(1.+rtnp(i))*q1(i,k)
+                else
+                  if(q1(i,k) < 0.) q1(i,k)=(1.+rtnp(i))*q1(i,k)
+                  if(q1(i,k) > 0.) q1(i,k)=0.
+                endif
+              endif
+            endif
+          endif
+        enddo
+      enddo
+!
+      if (.not.hwrf_samfshal) then
+!
+      do n = 1, ntr
+!
+       do k = 1, km
+         do i = 1, im
+           if (cnvflg(i)) then
+             if(k > kb(i) .and. k <= ktcon(i)) then
+               ctr(i,k,n) = ctr(i,k,n)+dellae(i,k,n)*xmb(i)*dt2
+               dp = 1000. * del(i,k)
+               delebar(i,n)=delebar(i,n)+dellae(i,k,n)*xmb(i)*dp/grav
+             endif
+           endif
+         enddo
+       enddo
+!
+! Negative TKE, ozone, and aerosols are set to zero after borrowing them
+!     from positive values within the mass-flux transport layers
+!
+        do i = 1,im
+          tsumn(i) = 0.
+          tsump(i) = 0.
+          rtnp(i) = 1.
+        enddo
+        do k = 1,km
+          do i = 1,im
+            if (cnvflg(i)) then
+              if(k > kb(i) .and. k <= ktcon(i)) then
+                if(ctr(i,k,n) < 0.) tsumn(i) = tsumn(i) + ctr(i,k,n)
+                if(ctr(i,k,n) > 0.) tsump(i) = tsump(i) + ctr(i,k,n)
+              endif
+            endif
+          enddo
+        enddo
+        do i = 1,im
+          if(cnvflg(i)) then
+            if(tsump(i) > 0. .and. tsumn(i) < 0.) then
+              if(tsump(i) > abs(tsumn(i))) then
+                rtnp(i) = tsumn(i) / tsump(i)
+              else
+                rtnp(i) = tsump(i) / tsumn(i)
+              endif
+            endif
+          endif
+        enddo
+        do k = 1,km
+        do i = 1,im
+          if (cnvflg(i)) then
+            if(k > kb(i) .and. k <= ktcon(i)) then
+              if(rtnp(i) < 0.) then
+                if(tsump(i) > abs(tsumn(i))) then
+                  if(ctr(i,k,n)<0.) ctr(i,k,n)=0.
+                  if(ctr(i,k,n)>0.) ctr(i,k,n)=(1.+rtnp(i))*ctr(i,k,n)
+                else
+                  if(ctr(i,k,n)<0.) ctr(i,k,n)=(1.+rtnp(i))*ctr(i,k,n)
+                  if(ctr(i,k,n)>0.) ctr(i,k,n)=0.
+                endif
+              endif
+            endif
+          endif
+        enddo
+        enddo
+!
+        kk = n+2
+        do k = 1, km
+        do i = 1, im
+          if (cnvflg(i)) then
+            if(k > kb(i) .and. k <= ktcon(i)) then
+              qtr(i,k,kk) = ctr(i,k,n)
+            endif
+          endif
+        enddo
+        enddo
+!
+      enddo
+!
+       if (do_aerosols) then
+!
+        do n = 1, ntc
+!
+!  convert wet deposition to total mass deposited over dt2 and dp
+          do k = 2, km1
+            do i = 1, im
+              if (cnvflg(i)) then
+                if(k > kb(i) .and. k < ktcon(i)) then
+                  dp = 1000. * del(i,k)
+                  wet_dep(i,k,n) = chem_pw(i,k,n)*grav/dp
+                  wet_dep(i,k,n) = wet_dep(i,k,n)*xmb(i)*dt2*dp
+                endif
+              endif
+            enddo
+          enddo
+!
+          kk = n + itc - 1
+          do k = 2, km1
+            do i = 1, im
+              if (cnvflg(i)) then
+                if(k > kb(i) .and. k < ktcon(i)) then
+                  dp = 1000. * del(i,k)
+                  if (qtr(i,k,kk) < 0.) then
+!   borrow negative mass from wet deposition
+                    tem = -qtr(i,k,kk)*dp
+                    if(wet_dep(i,k,n) >= tem) then
+                      wet_dep(i,k,n) = wet_dep(i,k,n) - tem
+                      qtr(i,k,kk) = 0.
+                    else
+                      wet_dep(i,k,n) = 0.
+                      qtr(i,k,kk) = qtr(i,k,kk)+wet_dep(i,k,n)/dp
+                    endif
+                  endif
+                endif
+              endif
+            enddo
+          enddo
+!
+        enddo
+!
+       endif
+!
       endif
 !
 !> - Recalculate saturation specific humidity using the updated temperature.
@@ -1946,20 +2252,20 @@ c
 !
       endif
 !> - Store aerosol concentrations if present
-      if (.not. hwrf_samfshal) then
-       if (do_aerosols) then
-        do n = 1, ntc
-          kk = n + itc - 1
-          do k = 1, km
-            do i = 1, im
-              if(cnvflg(i) .and. rn(i) > 0.) then
-                if (k <= kmax(i)) qtr(i,k,kk) = qaero(i,k,n)
-              endif
-            enddo
-          enddo
-        enddo
-       endif
-      endif
+!     if (.not. hwrf_samfshal) then
+!      if (do_aerosols) then
+!       do n = 1, ntc
+!         kk = n + itc - 1
+!         do k = 1, km
+!           do i = 1, im
+!             if(cnvflg(i) .and. rn(i) > 0.) then
+!               if (k <= kmax(i)) qtr(i,k,kk) = qaero(i,k,n)
+!             endif
+!           enddo
+!         enddo
+!       enddo
+!      endif
+!     endif
 !
 ! hchuang code change
 !
