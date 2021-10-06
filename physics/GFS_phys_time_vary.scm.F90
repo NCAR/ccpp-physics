@@ -101,7 +101,8 @@
          real(kind_phys),      intent(inout) :: sncovr(:), sncovr_ice(:)
          integer,              intent(in)    :: lsm, lsm_noahmp, lsm_ruc
          real(kind_phys),      intent(in)    :: min_seaice, fice(:)
-         real(kind_phys),      intent(in)    :: landfrac(:), vtype(:)
+         real(kind_phys),      intent(in)    :: landfrac(:)
+         integer,              intent(in)    :: vtype(:)
          real(kind_phys),      intent(inout) :: weasd(:)
 
          ! NoahMP - only allocated when NoahMP is used
@@ -159,7 +160,7 @@
          real(kind_phys),      intent(in)    :: snowd(:)
          real(kind_phys),      intent(in)    :: canopy(:)
          real(kind_phys),      intent(in)    :: tg3(:)
-         real(kind_phys),      intent(in)    :: stype(:)
+         integer,              intent(in)    :: stype(:)
          real(kind_phys),      intent(in)    :: con_t0c
 
          integer,              intent(in)    :: nthrds
