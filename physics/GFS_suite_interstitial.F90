@@ -648,9 +648,9 @@
             clw(i,k,1) = gq0(i,k,ntcw)
           enddo
         enddo
-      elseif (imp_physics == imp_physics_gfdl) then
-        clw(1:im,:,1) = gq0(1:im,:,ntcw)
-      elseif (imp_physics == imp_physics_thompson) then
+      !elseif (imp_physics == imp_physics_gfdl) then
+      !  clw(1:im,:,1) = gq0(1:im,:,ntcw)
+      elseif (imp_physics == imp_physics_thompson .or. imp_physics == imp_physics_gfdl) then
         do k=1,levs
           do i=1,im
             clw(i,k,1)    = gq0(i,k,ntiw)                    ! ice
@@ -776,9 +776,8 @@
             endif
          endif
          if(ntcw>0) then
-            if (imp_physics == imp_physics_zhao_carr     .or. &
-                 imp_physics == imp_physics_zhao_carr_pdf .or. &
-                 imp_physics == imp_physics_gfdl) then
+            if (imp_physics == imp_physics_zhao_carr .or. &
+                imp_physics == imp_physics_zhao_carr_pdf) then
                idtend=dtidx(100+ntcw,index_of_process_conv_trans)
                if(idtend>=1) then
                   dtend(:,:,idtend) = dtend(:,:,idtend) + clw(:,:,1)+clw(:,:,2) - gq0(:,:,ntcw)
@@ -830,9 +829,8 @@
       if (ntcw > 0) then
 
 !  for microphysics
-        if (imp_physics == imp_physics_zhao_carr     .or. &
-            imp_physics == imp_physics_zhao_carr_pdf .or. &
-            imp_physics == imp_physics_gfdl) then
+        if (imp_physics == imp_physics_zhao_carr .or. &
+            imp_physics == imp_physics_zhao_carr_pdf) then
            gq0(1:im,:,ntcw) = clw(1:im,:,1) + clw(1:im,:,2)
 
         elseif (ntiw > 0) then
@@ -843,7 +841,7 @@
             enddo
           enddo
 
-          if (imp_physics == imp_physics_thompson .and. (ntlnc>0 .or. ntinc>0)) then
+          thompson_only: if (imp_physics == imp_physics_thompson .and. (ntlnc>0 .or. ntinc>0)) then
             if_convert_dry_rho: if (convert_dry_rho) then
               do k=1,levs
                 do i=1,im
@@ -903,7 +901,7 @@
                 dtend(:,:,idtend) = dtend(:,:,idtend) + gq0(:,:,ntinc) - save_inc
               endif
             endif
-          endif
+          endif thompson_only
 
         else
           do k=1,levs
