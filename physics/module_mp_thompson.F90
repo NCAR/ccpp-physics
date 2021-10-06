@@ -1162,6 +1162,7 @@ MODULE module_mp_thompson
                stop
             end if
          end if
+   
          if (is_aerosol_aware .and. (.not.present(nc)     .or. &
                                      .not.present(nwfa)   .or. &
                                      .not.present(nifa)   .or. &

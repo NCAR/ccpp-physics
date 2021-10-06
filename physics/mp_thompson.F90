@@ -28,7 +28,7 @@ module mp_thompson
    contains
 
 !> This subroutine is a wrapper around the actual thompson_init().
-!! \section arg_table_mp_thompson      use module_mp_thompson, only : _init Argument Table
+!! \section arg_table_mp_thompson_init Argument Table
 !! \htmlinclude mp_thompson_init.html
 !!
       subroutine mp_thompson_init(ncol, nlev, con_g, con_rd, con_eps,   &
@@ -108,6 +108,7 @@ module mp_thompson
          errflg = 0
 
          if (is_initialized) return
+
          ! Consistency checks
          if (imp_physics/=imp_physics_thompson) then
             write(errmsg,'(*(a))') "Logic error: namelist choice of microphysics is different from Thompson MP"
@@ -274,7 +275,6 @@ module mp_thompson
            ! Ensure we have 1st guess cloud droplet number where mass non-zero but no number.
            where(qc .LE. 0.0) nc=0.0
            where(qc .GT. 0 .and. nc .LE. 0.0) nc = make_DropletNumber(qc*rho, nwfa*rho) * orho
-           where(qc .EQ. 0.0 .and. nc .GT. 0.0) nc = 0.0
 
          else
 
@@ -512,7 +512,6 @@ module mp_thompson
             return
          end if
 
-
          ! Set reduced time step if subcycling is used
          if (nsteps>1) then
             dtstep = dtp/real(nsteps, kind=kind_phys)
@@ -746,8 +745,7 @@ module mp_thompson
                                  ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                                  its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
                                  reset_dBZ=reset_dBZ, istep=istep, nsteps=nsteps,               &
-                                 first_time_step=first_time_step,                               &
-                                 errmsg=errmsg, errflg=errflg,                                  &
+                                 first_time_step=first_time_step, errmsg=errmsg, errflg=errflg, &
                                  ! Extended diagnostics
                                  ext_diag=ext_diag,                                             &
                                  ! vts1=vts1, txri=txri, txrc=txrc,                             &
@@ -826,8 +824,7 @@ module mp_thompson
                                  ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                                  its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
                                  reset_dBZ=reset_dBZ, istep=istep, nsteps=nsteps,               &
-                                 first_time_step=first_time_step,                               &
-                                 errmsg=errmsg, errflg=errflg,                                  &
+                                 first_time_step=first_time_step, errmsg=errmsg, errflg=errflg, &
                                  ! Extended diagnostics
                                  ext_diag=ext_diag,                                             &
                                  ! vts1=vts1, txri=txri, txrc=txrc,                             &

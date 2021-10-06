@@ -176,7 +176,7 @@
               enddo
             enddo
             rtg_ozone_index = 10
-          elseif(ltaerosol) then
+          elseif(mraerosol) then
             do k=1,levs
               do i=1,im
                 vdftra(i,k,1)  = qgrs(i,k,ntqv)
