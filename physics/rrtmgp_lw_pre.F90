@@ -1,8 +1,6 @@
 module rrtmgp_lw_pre
   use machine, only: &
        kind_phys                   ! Working type
-  use module_radiation_surface,  only: &
-       setemis                     ! Routine to compute surface-emissivity
   use mo_gas_optics_rrtmgp,  only: &
        ty_gas_optics_rrtmgp
   use rrtmgp_lw_gas_optics, only: lw_gas_props

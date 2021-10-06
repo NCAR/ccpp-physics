@@ -1,6 +1,4 @@
 !>\file rrtmg_lw_pre.f90
-!! This file contains a call to module_radiation_surface::setemis() to
-!! setup surface emissivity for LW radiation.
       module rrtmg_lw_pre
       contains
 
