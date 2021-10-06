@@ -74,7 +74,6 @@ MODULE module_mp_thompson
       LOGICAL, PRIVATE:: merra2_aerosol_aware = .false.
       LOGICAL, PARAMETER, PRIVATE:: dustyIce = .true.
       LOGICAL, PARAMETER, PRIVATE:: homogIce = .true.
-      LOGICAL :: merra2_aerosol_aware = .false.
 
       INTEGER, PARAMETER, PRIVATE:: IFDRY = 0
       REAL, PARAMETER, PRIVATE:: T_0 = 273.15
@@ -440,7 +439,7 @@ MODULE module_mp_thompson
 !>\section gen_thompson_init thompson_init General Algorithm
 !> @{
       SUBROUTINE thompson_init(is_aerosol_aware_in,       &
-                               merra2_erosol_aware_in,    &
+                               merra2_aerosol_aware_in,    &
                                mpicomm, mpirank, mpiroot, &
                                threads, errmsg, errflg)
 
@@ -987,7 +986,6 @@ MODULE module_mp_thompson
                               refl_10cm, diagflag, do_radar_ref,      &
                               vt_dbz_wt, first_time_step,             &
                               re_cloud, re_ice, re_snow,              &
-                              iccn, iaerclm,                          &
                               has_reqc, has_reqi, has_reqs,           &
                               rand_perturb_on,                        &
                               kme_stoch,                              &
@@ -1028,7 +1026,9 @@ MODULE module_mp_thompson
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(IN):: &
                           pii
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(INOUT):: &
-                          nc, nwfa, nifa
+                          nc
+      REAL, DIMENSION(ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(INOUT):: &
+                          nwfa, nifa
       REAL, DIMENSION(ims:ime, jms:jme), OPTIONAL, INTENT(IN):: nwfa2d, nifa2d
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(INOUT):: &
                           re_cloud, re_ice, re_snow
@@ -1054,8 +1054,6 @@ MODULE module_mp_thompson
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(INOUT):: &
                           vt_dbz_wt
       LOGICAL, INTENT(IN) :: first_time_step
-      integer, intent(in   ) :: iccn
-      logical, intent(in   ) :: iaerclm
 
       REAL, INTENT(IN):: dt_in, dt_inner
       ! To support subcycling: current step and maximum number of steps
@@ -3533,8 +3531,8 @@ MODULE module_mp_thompson
             pnc_wcd(k) = 0.5*(xnc-nc(k) + abs(xnc-nc(k)))*odts*orho
 
 !+---+-----------------------------------------------------------------+ !  EVAPORATION
-           elseif (clap .lt. -eps .AND. ssatw(k).lt.-1.E-6 .AND. 
-     &            (is_aerosol_aware .or. merra_aerosol_aware)) then  &
+           elseif (clap .lt. -eps .AND. ssatw(k).lt.-1.E-6 .AND.     &
+                  (is_aerosol_aware .or. merra2_aerosol_aware)) then  
             tempc = temp(k) - 273.15
             otemp = 1./temp(k)
             rvs = rho(k)*qvs(k)

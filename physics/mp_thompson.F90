@@ -10,7 +10,6 @@ module mp_thompson
 
       use module_mp_thompson, only : thompson_init, mp_gt_driver, thompson_finalize, calc_effectRad
       use module_mp_thompson, only : naIN0, naIN1, naCCN0, naCCN1, eps, Nt_c
-      use module_mp_thompson, only : merra2_aerosol_aware
       use module_mp_thompson, only : re_qc_min, re_qc_max, re_qi_min, re_qi_max, re_qs_min, re_qs_max
 
       use module_mp_thompson_make_number_concentrations, only: make_IceNumber, make_DropletNumber, make_RainNumber
@@ -31,16 +30,16 @@ module mp_thompson
 !! \section arg_table_mp_thompson_init Argument Table
 !! \htmlinclude mp_thompson_init.html
 !!
-      subroutine mp_thompson_init(ncol, nlev, con_g, con_rd, con_eps,   &
-                                  restart, imp_physics,                 &
-                                  imp_physics_thompson, convert_dry_rho,&
-                                  spechum, qc, qr, qi, qs, qg, ni, nr,  &
-                                  is_aerosol_aware, merra2_aerosol_aware&
-                                  nc, nwfa2d, nifa2d,                   &
-                                  nwfa, nifa, tgrs, prsl, phil, area,   &
-                                  re_cloud, re_ice, re_snow, aerfld,    &
-                                  mpicomm, mpirank, mpiroot,            &
-                                  threads, ext_diag, diag3d,            &
+      subroutine mp_thompson_init(ncol, nlev, con_g, con_rd, con_eps,    &
+                                  restart, imp_physics,                  &
+                                  imp_physics_thompson, convert_dry_rho, &
+                                  spechum, qc, qr, qi, qs, qg, ni, nr,   &
+                                  is_aerosol_aware, merra2_aerosol_aware,&
+                                  nc, nwfa2d, nifa2d,                    &
+                                  nwfa, nifa, tgrs, prsl, phil, area,    &
+                                  re_cloud, re_ice, re_snow, aerfld,     &
+                                  mpicomm, mpirank, mpiroot,             &
+                                  threads, ext_diag, diag3d,             &
                                   errmsg, errflg)
 
          implicit none
@@ -65,6 +64,7 @@ module mp_thompson
          ! Aerosols
          logical,                   intent(in   ) :: is_aerosol_aware
          logical,                   intent(in   ) :: merra2_aerosol_aware
+
          real(kind_phys), optional, intent(inout) :: nc(:,:)
          real(kind_phys), optional, intent(inout) :: nwfa(:,:)
          real(kind_phys), optional, intent(inout) :: nifa(:,:)
@@ -126,7 +126,8 @@ module mp_thompson
 
          ! Call Thompson init
          call thompson_init(is_aerosol_aware_in=is_aerosol_aware,                  &
-                            merra2_aerosol_aware, mpicomm=mpicomm,                 &
+                            merra2_aerosol_aware_in=merra2_aerosol_aware,          &
+                            mpicomm=mpicomm,                                       &
                             mpirank=mpirank, mpiroot=mpiroot, threads=threads,     &
                             errmsg=errmsg, errflg=errflg)
          if (errflg /= 0) return
