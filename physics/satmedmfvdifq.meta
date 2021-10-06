@@ -86,8 +86,8 @@
   intent = in
   optional = F
 [ntrw]
-  standard_name = index_of_rain_mixing_ratio_in_tracer_concentration_array
-  long_name = tracer index for rain water
+  standard_name = index_for_rain_water_vertical_diffusion_tracer
+  long_name = tracer index for rain water in the vertically diffused tracer array
   units = index
   dimensions = ()
   type = integer
