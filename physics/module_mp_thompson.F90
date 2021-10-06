@@ -1181,7 +1181,7 @@ MODULE module_mp_thompson
             end if
          else if (merra2_aerosol_aware .and. (.not.present(nc)     .or. &
                                               .not.present(nwfa)   .or. &
-                                              .not.present(nifa)   .or. )) then
+                                              .not.present(nifa)        )) then
             if (present(errmsg)) then
                write(errmsg, '(*(a))') 'Logic error in mp_gt_driver: provide nc, nwfa, and nifa', &
                                        ' for merra2 aerosol-aware version of Thompson microphysics'

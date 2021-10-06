@@ -125,7 +125,7 @@ module mp_thompson
          end if
 
          if (is_aerosol_aware .and. merra2_aerosol_aware) then
-            write(errmsg,'(*(a))') "Logic error: Only one Thompson aerosol option can be true, either is_aerosol_aware or merra2_aerosol_aware)'
+            write(errmsg,'(*(a))') "Logic error: Only one Thompson aerosol option can be true, either is_aerosol_aware or merra2_aerosol_aware)"
             errflg = 1
             return
          end if
@@ -546,7 +546,7 @@ module mp_thompson
               return
            else if (is_aerosol_aware .and. .not. (present(nc)     .and. &
                                                   present(nwfa)   .and. &
-                                                  present(nifa)   .and. )) then
+                                                  present(nifa)         )) then
               write(errmsg,fmt='(*(a))') 'Logic error in mp_thompson_run:', &
                                          ' merra2 aerosol-aware microphysics require the', &
                                          ' following optional arguments: nc, nwfa, nifa'
@@ -981,8 +981,8 @@ module mp_thompson
         nifa=(aerfld(:,:,1)/4.0737762+aerfld(:,:,2)/30.459203+aerfld(:,:,3)/153.45048+ &
              aerfld(:,:,4)/1011.5142+ aerfld(:,:,5)/5683.3501)*1.e15
         nwfa=((aerfld(:,:,6)/0.0045435214+aerfld(:,:,7)/0.2907854+aerfld(:,:,8)/12.91224+ &
-             aerfld(:,:,9)/206.2216+ aerfld(:,:,10)/4326.23)*1.+aerfld(:,:,11)/0.3053104*5+  &
-             +aerfld(:,:,15)/0.3232698*1)*1.e15
+             aerfld(:,:,9)/206.2216+ aerfld(:,:,10)/4326.23)*1.+aerfld(:,:,11)/0.3053104*5+ &
+             aerfld(:,:,15)/0.3232698*1)*1.e15
       end subroutine get_niwfa
 
 end module mp_thompson
