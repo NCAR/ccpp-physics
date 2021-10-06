@@ -726,7 +726,7 @@
 !! @{
 !-----------------------------------
       subroutine setemis                                                &
-     &     ( lsm,lsm_noahmp,lsm_ruc,vtype,frac_grid,                    &  !  ---  inputs:
+     &     ( lsm,lsm_noahmp,lsm_ruc,frac_grid,                          &  !  ---  inputs:
      &                  xlon,xlat,slmsk,snowf,sncovr,sncovr_ice,        &
 !    &       min_seaice,xlon,xlat,slmsk,snowf,sncovr,sncovr_ice,        &
      &       zorlf,tsknf,tairf,hprif,                                   &
@@ -784,7 +784,6 @@
       integer, intent(in) :: IMAX
       integer, intent(in) :: lsm, lsm_noahmp, lsm_ruc
       logical, intent(in) :: frac_grid
-      real (kind=kind_phys), dimension(:), intent(in) :: vtype
 !     real (kind=kind_phys), intent(in) :: min_seaice
 
       real (kind=kind_phys), dimension(:), intent(in) ::                &
