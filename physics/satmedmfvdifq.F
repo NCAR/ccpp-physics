@@ -1887,7 +1887,7 @@ c
 !   and then borrow it from the other layers if there is still
 !   negative water
 !
-      if(ntrac1 >= 2) then
+      if(ntrw > 0) then
         is = (ntrw-1) * km
         do k = 1,kps
           do i = 1,im
