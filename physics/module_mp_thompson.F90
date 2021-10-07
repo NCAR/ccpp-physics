@@ -439,7 +439,7 @@ MODULE module_mp_thompson
 !>\section gen_thompson_init thompson_init General Algorithm
 !> @{
       SUBROUTINE thompson_init(is_aerosol_aware_in,       &
-                               merra2_aerosol_aware_in,    &
+                               merra2_aerosol_aware_in,   &
                                mpicomm, mpirank, mpiroot, &
                                threads, errmsg, errflg)
 
@@ -457,11 +457,11 @@ MODULE module_mp_thompson
       real :: stime, etime
       LOGICAL, PARAMETER :: precomputed_tables = .FALSE.
 
-! Set module variable is_aerosol_aware
+! Set module variable is_aerosol_aware/merra2_aerosol_aware
       is_aerosol_aware = is_aerosol_aware_in
       merra2_aerosol_aware = merra2_aerosol_aware_in
       if (mpirank==mpiroot) then
-         if (is_aerosol_aware) then
+        if (is_aerosol_aware) then
             write (0,'(a)') 'Using aerosol-aware version of Thompson microphysics'
         else if(merra2_aerosol_aware) then
             write (0,'(a)') 'Using merra2 aerosol-aware version of Thompson microphysics'
@@ -1160,6 +1160,7 @@ MODULE module_mp_thompson
                stop
             end if
          end if
+   
          if (is_aerosol_aware .and. (.not.present(nc)     .or. &
                                      .not.present(nwfa)   .or. &
                                      .not.present(nifa)   .or. &
@@ -1178,11 +1179,25 @@ MODULE module_mp_thompson
             else
                stop
             end if
-         else if (.not.is_aerosol_aware .and. (present(nwfa)   .or. &
-                                               present(nifa)   .or. &
-                                               present(nwfa2d) .or. &
-                                               present(nifa2d)      )) then
-            write(*,*) 'WARNING, nc/nwfa/nifa/nwfa2d/nifa2d present but is_aerosol_aware is FALSE'
+         else if (merra2_aerosol_aware .and. (.not.present(nc)     .or. &
+                                              .not.present(nwfa)   .or. &
+                                              .not.present(nifa)        )) then
+            if (present(errmsg)) then
+               write(errmsg, '(*(a))') 'Logic error in mp_gt_driver: provide nc, nwfa, and nifa', &
+                                       ' for merra2 aerosol-aware version of Thompson microphysics'
+            else
+               write(*, '(*(a))') 'Logic error in mp_gt_driver: provide nc, nwfa, and nifa', &
+                                  ' for merra2 aerosol-aware version of Thompson microphysics'
+            end if
+            if (present(errflg)) then
+               errflg = 1
+               return
+            else
+               stop
+            end if
+         else if (.not.is_aerosol_aware .and. .not.merra2_aerosol_aware .and. &
+                  (present(nwfa) .or. present(nifa) .or. present(nwfa2d) .or. present(nifa2d))) then
+            write(*,*) 'WARNING, nc/nwfa/nifa/nwfa2d/nifa2d present but is_aerosol_aware/merra2_aerosol_aware are FALSE'
          end if
       end if test_only_once
 

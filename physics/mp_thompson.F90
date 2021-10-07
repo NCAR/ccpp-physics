@@ -108,6 +108,7 @@ module mp_thompson
          errflg = 0
 
          if (is_initialized) return
+
          ! Consistency checks
          if (imp_physics/=imp_physics_thompson) then
             write(errmsg,'(*(a))') "Logic error: namelist choice of microphysics is different from Thompson MP"
@@ -123,12 +124,17 @@ module mp_thompson
             end if
          end if
 
+         if (is_aerosol_aware .and. merra2_aerosol_aware) then
+            write(errmsg,'(*(a))') "Logic error: Only one Thompson aerosol option can be true, either is_aerosol_aware or merra2_aerosol_aware)"
+            errflg = 1
+            return
+         end if
+
          ! Call Thompson init
-         call thompson_init(is_aerosol_aware_in=is_aerosol_aware,                  &
-                            merra2_aerosol_aware_in=merra2_aerosol_aware,          &
-                            mpicomm=mpicomm,                                       &
-                            mpirank=mpirank, mpiroot=mpiroot, threads=threads,     &
-                            errmsg=errmsg, errflg=errflg)
+         call thompson_init(is_aerosol_aware_in=is_aerosol_aware,              &
+                            merra2_aerosol_aware_in=merra2_aerosol_aware,      &
+                            mpicomm=mpicomm, mpirank=mpirank, mpiroot=mpiroot, &
+                            threads=threads, errmsg=errmsg, errflg=errflg)
          if (errflg /= 0) return
 
          ! For restart runs, the init is done here
@@ -147,6 +153,10 @@ module mp_thompson
          where(qi<0)      qi = 0.0
          where(qs<0)      qs = 0.0
          where(qg<0)      qg = 0.0
+
+         if (merra2_aerosol_aware) then
+           call get_niwfa(aerfld, nifa, nwfa, ncol, nlev)
+         end if
 
          !> - Convert specific humidity to water vapor mixing ratio.
          !> - Also, hydrometeor variables are mass or number mixing ratio
@@ -262,7 +272,6 @@ module mp_thompson
            ! Ensure we have 1st guess cloud droplet number where mass non-zero but no number.
            where(qc .LE. 0.0) nc=0.0
            where(qc .GT. 0 .and. nc .LE. 0.0) nc = make_DropletNumber(qc*rho, nwfa*rho) * orho
-           where(qc .EQ. 0.0 .and. nc .GT. 0.0) nc = 0.0
 
            ! Ensure non-negative aerosol number concentrations.
            where(nwfa .LE. 0.0) nwfa = 1.1E6
@@ -270,12 +279,12 @@ module mp_thompson
 
            ! Copy to local array for calculating cloud effective radii below
            nc_local = nc
-         else if(merra2_aerosol_aware) then
-           call get_niwfa(aerfld, nifa, nwfa, ncol, nlev)
+ 
+        else if (merra2_aerosol_aware) then
+
            ! Ensure we have 1st guess cloud droplet number where mass non-zero but no number.
            where(qc .LE. 0.0) nc=0.0
            where(qc .GT. 0 .and. nc .LE. 0.0) nc = make_DropletNumber(qc*rho, nwfa*rho) * orho
-           where(qc .EQ. 0.0 .and. nc .GT. 0.0) nc = 0.0
 
          else
 
@@ -314,11 +323,11 @@ module mp_thompson
          end if
 
          if (convert_dry_rho) then
-           !qc = qc/(1.0_kind_phys+qv)
-           !qr = qr/(1.0_kind_phys+qv)
-           !qi = qi/(1.0_kind_phys+qv)
-           !qs = qs/(1.0_kind_phys+qv)
-           !qg = qg/(1.0_kind_phys+qv)
+           qc = qc/(1.0_kind_phys+qv)
+           qr = qr/(1.0_kind_phys+qv)
+           qi = qi/(1.0_kind_phys+qv)
+           qs = qs/(1.0_kind_phys+qv)
+           qg = qg/(1.0_kind_phys+qv)
 
            ni = ni/(1.0_kind_phys+qv)
            nr = nr/(1.0_kind_phys+qv)
@@ -344,8 +353,7 @@ module mp_thompson
                               con_eps, convert_dry_rho,               &
                               spechum, qc, qr, qi, qs, qg, ni, nr,    &
                               is_aerosol_aware, merra2_aerosol_aware, &
-                              nc, nwfa, nifa,                         &
-                              nwfa2d, nifa2d,                         &
+                              nc, nwfa, nifa, nwfa2d, nifa2d,         &
                               tgrs, prsl, phii, omega, dt_inner,      &
                               dtp, first_time_step, istep, nsteps,    &
                               prcp, rain, graupel, ice, snow, sr,     &
@@ -513,7 +521,6 @@ module mp_thompson
             return
          end if
 
-
          ! Set reduced time step if subcycling is used
          if (nsteps>1) then
             dtstep = dtp/real(nsteps, kind=kind_phys)
@@ -531,13 +538,25 @@ module mp_thompson
                                              present(nifa)   .and. &
                                              present(nwfa2d) .and. &
                                              present(nifa2d)       )) then
-              write(errmsg,fmt='(*(a))') 'Logic error in mp_thompson_run:',  &
+              write(errmsg,fmt='(*(a))') 'Logic error in mp_thompson_run:', &
                                          ' aerosol-aware microphysics require all of the', &
                                          ' following optional arguments:', &
                                          ' nc, nwfa, nifa, nwfa2d, nifa2d'
               errflg = 1
               return
+           else if (is_aerosol_aware .and. .not. (present(nc)     .and. &
+                                                  present(nwfa)   .and. &
+                                                  present(nifa)         )) then
+              write(errmsg,fmt='(*(a))') 'Logic error in mp_thompson_run:', &
+                                         ' merra2 aerosol-aware microphysics require the', &
+                                         ' following optional arguments: nc, nwfa, nifa'
+              errflg = 1
+              return
            end if
+         end if
+
+         if (merra2_aerosol_aware) then
+           call get_niwfa(aerfld, nifa, nwfa, ncol, nlev)
          end if
 
          !> - Convert specific humidity to water vapor mixing ratio.
@@ -562,8 +581,6 @@ module mp_thompson
               nc = nc/(1.0_kind_phys-spechum)
               nwfa = nwfa/(1.0_kind_phys-spechum)
               nifa = nifa/(1.0_kind_phys-spechum)
-           else if (merra2_aerosol_aware) then
-             call get_niwfa(aerfld, nifa, nwfa, ncol, nlev)
            end if
          end if
          ! *DH
@@ -747,8 +764,7 @@ module mp_thompson
                                  ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                                  its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
                                  reset_dBZ=reset_dBZ, istep=istep, nsteps=nsteps,               &
-                                 first_time_step=first_time_step,                               &
-                                 errmsg=errmsg, errflg=errflg,                                  &
+                                 first_time_step=first_time_step, errmsg=errmsg, errflg=errflg, &
                                  ! Extended diagnostics
                                  ext_diag=ext_diag,                                             &
                                  ! vts1=vts1, txri=txri, txrc=txrc,                             &
@@ -827,8 +843,7 @@ module mp_thompson
                                  ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                                  its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
                                  reset_dBZ=reset_dBZ, istep=istep, nsteps=nsteps,               &
-                                 first_time_step=first_time_step,                               &
-                                 errmsg=errmsg, errflg=errflg,                                  &
+                                 first_time_step=first_time_step, errmsg=errmsg, errflg=errflg, &
                                  ! Extended diagnostics
                                  ext_diag=ext_diag,                                             &
                                  ! vts1=vts1, txri=txri, txrc=txrc,                             &
@@ -966,9 +981,8 @@ module mp_thompson
         nifa=(aerfld(:,:,1)/4.0737762+aerfld(:,:,2)/30.459203+aerfld(:,:,3)/153.45048+ &
              aerfld(:,:,4)/1011.5142+ aerfld(:,:,5)/5683.3501)*1.e15
         nwfa=((aerfld(:,:,6)/0.0045435214+aerfld(:,:,7)/0.2907854+aerfld(:,:,8)/12.91224+ &
-             aerfld(:,:,9)/206.2216+ aerfld(:,:,10)/4326.23)*1.+aerfld(:,:,11)/0.3053104*5+  &
-             +aerfld(:,:,15)/0.3232698*1)*1.e15
+             aerfld(:,:,9)/206.2216+ aerfld(:,:,10)/4326.23)*1.+aerfld(:,:,11)/0.3053104*5+ &
+             aerfld(:,:,15)/0.3232698*1)*1.e15
       end subroutine get_niwfa
-
 
 end module mp_thompson
