@@ -109,6 +109,8 @@
   units = flag
   dimensions = ()
   type = integer
+  intent = out
+  optional = F
 
 ########################################################################
 [ccpp-arg-table]
