@@ -505,10 +505,10 @@ contains
     integer,intent(in),dimension(ncol) :: &
          idxday                  ! Indices for daylit points.
     real(kind_phys), dimension(ncol,nLev), intent(in) :: &
-         p_lay,                & ! Pressure @ model layer-centers (hPa)
+         p_lay,                & ! Pressure @ model layer-centers (Pa)
          t_lay                   ! Temperature (K)
     real(kind_phys), dimension(ncol,nLev+1), intent(in) :: &
-         p_lev,                & ! Pressure @ model layer-interfaces (hPa)
+         p_lev,                & ! Pressure @ model layer-interfaces (Pa)
          t_lev                   ! Temperature @ model levels
     type(ty_gas_concs),intent(inout) :: &
          gas_concentrations      ! RRTMGP DDT: trace gas concentrations (vmr)
