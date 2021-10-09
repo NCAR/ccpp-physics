@@ -1,5 +1,5 @@
       module aerclm_def
-      use machine , only : kind_phys
+      use machine , only : kind_phys, kind_io4
       implicit none
 
       integer, parameter   :: levsaer=72, ntrcaerm=15, timeaer=12
