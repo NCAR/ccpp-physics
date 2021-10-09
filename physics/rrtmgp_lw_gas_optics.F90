@@ -76,7 +76,8 @@ contains
 !! \htmlinclude rrtmgp_lw_gas_optics_init.html
 !!
   subroutine rrtmgp_lw_gas_optics_init(rrtmgp_root_dir, rrtmgp_lw_file_gas, mpicomm,        &
-       mpirank, mpiroot, gas_concentrations, minGPpres, minGPtemp, errmsg, errflg)
+       mpirank, mpiroot, gas_concentrations, minGPpres, maxGPpres, minGPtemp, maxGPtemp,    &
+       errmsg, errflg)
 
     ! Inputs
     type(ty_gas_concs), intent(inout) :: &
@@ -96,7 +97,9 @@ contains
          errflg              ! CCPP error code
     real(kind_phys), intent(out) :: &
          minGPtemp,        & ! Minimum temperature allowed by RRTMGP.
-         minGPpres           ! Minimum pressure allowed by RRTMGP. 
+         maxGPtemp,        & ! Maximum ...
+         minGPpres,        & ! Minimum pressure allowed by RRTMGP. 
+         maxGPpres           ! Maximum pressure allowed by RRTMGP. 
 
     ! Local variables
     integer :: ncid, dimID, varID, status, iGas, ierr, ii, mpierr, iChar
@@ -449,7 +452,9 @@ contains
     ! The minimum pressure allowed in GP RTE calculations. Used to bound uppermost layer
     ! temperature (GFS_rrtmgp_pre.F90)
     minGPpres = lw_gas_props%get_press_min()
+    maxGPpres = lw_gas_props%get_press_max()
     minGPtemp = lw_gas_props%get_temp_min() 
+    maxGPtemp = lw_gas_props%get_temp_max()
 
   end subroutine rrtmgp_lw_gas_optics_init
 
@@ -469,10 +474,10 @@ contains
          ncol,                &  ! Number of horizontal points
          nLev                    ! Number of vertical levels
     real(kind_phys), dimension(ncol,nLev), intent(in) :: &
-         p_lay,                & ! Pressure @ model layer-centers (hPa)
+         p_lay,                & ! Pressure @ model layer-centers (Pa)
          t_lay                   ! Temperature (K)
     real(kind_phys), dimension(ncol,nLev+1), intent(in) :: &
-         p_lev,                & ! Pressure @ model layer-interfaces (hPa)
+         p_lev,                & ! Pressure @ model layer-interfaces (Pa)
          t_lev                   ! Temperature @ model levels
     real(kind_phys), dimension(ncol), intent(in) :: &
          tsfg                    ! Surface ground temperature (K)
