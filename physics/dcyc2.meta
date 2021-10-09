@@ -61,24 +61,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[xlon]
-  standard_name = longitude
-  long_name = longitude of grid box
-  units = radian
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[coszen]
-  standard_name = cosine_of_solar_zenith_angle_for_daytime_points_on_radiation_timestep
-  long_name = average of cosine of zenith angle over daytime shortwave call time interval
-  units = none
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [con_g]
   standard_name = gravitational_acceleration
   long_name = gravitational acceleration
@@ -111,6 +93,24 @@
   long_name = Stefan-Boltzmann constant
   units = W m-2 K-4
   dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[xlon]
+  standard_name = longitude
+  long_name = longitude of grid box
+  units = radian
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[coszen]
+  standard_name = cosine_of_solar_zenith_angle_for_daytime_points_on_radiation_timestep
+  long_name = average of cosine of zenith angle over daytime shortwave call time interval
+  units = none
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -163,15 +163,6 @@
 [tsfc]
   standard_name = surface_skin_temperature
   long_name = surface skin temperature
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[tsfc_radtime]
-  standard_name = surface_skin_temperature_on_radiation_timestep
-  long_name = surface skin temperature on radiation timestep
   units = K
   dimensions = (horizontal_loop_extent)
   type = real
@@ -398,14 +389,6 @@
   type = logical
   intent = in
   optional = F
-[use_LW_jacobian]
-  standard_name = flag_to_calc_RRTMGP_LW_jacobian
-  long_name = logical flag to control RRTMGP LW calculation
-  units = flag
-  dimensions = ()
-  type = logical  
-  intent = in
-  optional = F
 [damp_LW_fluxadj]
   standard_name = flag_to_damp_RRTMGP_LW_jacobian_flux_adjustment
   long_name = logical flag to control RRTMGP LW calculation
@@ -430,6 +413,14 @@
   dimensions = ()
   type = real
   kind = kind_phys
+  intent = in
+  optional = F
+[use_LW_jacobian]
+  standard_name = flag_to_calc_RRTMGP_LW_jacobian
+  long_name = logical flag to control RRTMGP LW calculation
+  units = flag
+  dimensions = ()
+  type = logical
   intent = in
   optional = F
 [sfculw]
@@ -517,6 +508,15 @@
   units = flag
   dimensions = ()
   type = logical
+  intent = in
+  optional = F
+[tsfc_radtime]
+  standard_name = surface_skin_temperature_on_radiation_timestep
+  long_name = surface skin temperature on radiation timestep
+  units = K
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
   intent = in
   optional = F
 [dtdt]

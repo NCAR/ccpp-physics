@@ -120,12 +120,12 @@
 
 !  ---  constant parameters
       integer, parameter, public :: NF_ALBD = 4     !< number of surface albedo components
-      integer, parameter, public :: IMXEMS = 360    !< number of longtitude points in global emis-type map
-      integer, parameter, public :: JMXEMS = 180    !< number of latitude points in global emis-type map
+      integer, parameter, public :: IMXEMS  = 360   !< number of longtitude points in global emis-type map
+      integer, parameter, public :: JMXEMS  = 180   !< number of latitude points in global emis-type map
       real (kind=kind_phys), parameter :: f_zero = 0.0
       real (kind=kind_phys), parameter :: f_one  = 1.0
       real (kind=kind_phys), parameter :: epsln  = 1.0e-6
-      real (kind=kind_phys), parameter :: rad2dg= 180.0 / con_pi
+      real (kind=kind_phys), parameter :: rad2dg = 180.0 / con_pi
       integer, allocatable  ::  idxems(:,:)         !< global surface emissivity index array
       integer :: iemslw = 1                         !< global surface emissivity control flag set up in 'sfc_init'
 !
@@ -830,19 +830,21 @@
 
         lab_do_IMAX : do i = 1, IMAX
 
-          snowc = sncovr(i)
+          snowc = sncovr(i) * fracl(i)
           if (.not. cplice .or. lakefrac(i) > f_zero) then
             semis_ice(i) = emsref(7)
-            snowc = sncovr(i) + sncovr_ice(i)
+            snowc = sncovr(i) + sncovr_ice(i)*fraci(i)
           endif
           if (fracl(i) < epsln) then                    ! no land
             if ( abs(fraco(i)-f_one) < epsln ) then     ! open water point
               sfcemis(i) = emsref(1)
-            elseif ( abs(fraci(i)-f_one) > epsln ) then ! complete sea/lake ice
-              sfcemis(i) = emsref(7)
+            elseif ( abs(fraci(i)-f_one) < epsln ) then ! complete sea/lake ice
+!             sfcemis(i) = emsref(7)
+              sfcemis(i) = semis_ice(i)
             else
             !-- fractional sea ice
-              sfcemis(i) = fraco(i)*emsref(1) + fraci(i)*emsref(7)
+!             sfcemis(i) = fraco(i)*emsref(1) + fraci(i)*emsref(7)
+              sfcemis(i) = fraco(i)*emsref(1) + fraci(i)*semis_ice(i)
             endif
 
           else                                     ! land or fractional grid
@@ -900,7 +902,8 @@
               semis_lnd(i) = semis_lnd(i) * (f_one - sncovr(i))         &
      &                     + emsref(8)    * sncovr(i)
             endif
-            if (sncovr_ice(i) > f_zero .and. .not. cplice) then
+            if (sncovr_ice(i) > f_zero .and.                            &
+     &         (lakefrac(i) > f_zero .or. .not. cplice)) then
               semis_ice(i) = semis_ice(i) * (f_one - sncovr_ice(i))     &
      &                     + emsref(8)    * sncovr_ice(i)
             endif
