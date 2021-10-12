@@ -1914,8 +1914,6 @@ MODULE module_mp_thompson
       REAL, DIMENSION(kts:kte):: temp, pres, qv
       REAL, DIMENSION(kts:kte):: rc, ri, rr, rs, rg, ni, nr, nc, nwfa, nifa
       REAL, DIMENSION(kts:kte):: rr_tmp,vtrk_tmp,nr_tmp,vtnrk_tmp
-      REAL, DIMENSION(kts:kte):: ri_tmp,vtik_tmp,ni_tmp,vtnik_tmp
-      REAL, DIMENSION(kts:kte):: rs_tmp,vtsk_tmp,rg_tmp,vtgk_tmp
       REAL, DIMENSION(kts:kte):: rho, rhof, rhof2
       REAL, DIMENSION(kts:kte):: qvs, qvsi, delQvs
       REAL, DIMENSION(kts:kte):: satw, sati, ssatw, ssati
@@ -3933,24 +3931,24 @@ MODULE module_mp_thompson
         niter = 1
         dtcfl = dt
         if(sedi_semi_decfl) then
-          niter = ifix(nstep/decfl) + 1
+          niter = int(nstep/decfl) + 1
           dtcfl = dt/niter
         endif 
         do n = 1, niter
           rr_tmp(:) = rr(:)
           nr_tmp(:) = nr(:)
-          do k = 1,kte
+          do k = kts,kte
             vtrk_tmp(k) = vtrk(k)
             vtnrk_tmp(k) = vtnrk(k)
           enddo
-          call nislfv_rain_ppm(kte,rho,rhof,temp,dzq,vtrk_tmp,rr,precip,dtcfl,1,0,R1)
-          call nislfv_rain_ppm(kte,rho,rhof,temp,dzq,vtnrk_tmp,nr,vtr,dtcfl,1,0,R2)
+          call nislfv_rain_ppm(kte,dzq,vtrk_tmp,rr,precip,dtcfl,R1)
+          call nislfv_rain_ppm(kte,dzq,vtnrk_tmp,nr,vtr,dtcfl,R2)
           do k = kts, kte
             qrten(k) = qrten(k) + (rr(k) - rr_tmp(k))/rho(k)/dt
             nrten(k) = nrten(k) + (nr(k) - nr_tmp(k))/rho(k)/dt
           enddo
+          if (rr(kts).gt.R1*10.) & !Songyou: is this needed? 
           pptrain = pptrain + precip
-
 
           if(sedi_semi_update) then
             do k = kte+1, kts, -1
@@ -6109,7 +6107,7 @@ MODULE module_mp_thompson
       end subroutine calc_refl10cm
 !
 !-------------------------------------------------------------------
-      SUBROUTINE nislfv_rain_ppm(km,denl,denfacl,tkl,dzl,wwl,rql,precip,dt,id,iter,R1)
+      SUBROUTINE nislfv_rain_ppm(km,dzl,wwl,rql,precip,dt,R1)
 !-------------------------------------------------------------------
 !
 ! for non-iteration semi-Lagrangain forward advection for cloud
@@ -6119,58 +6117,49 @@ MODULE module_mp_thompson
 !
 ! dzl    depth of model layer in meter
 ! wwl    terminal velocity at model layer m/s
-! rql    cloud density*mixing ratio
-! precip precipitation
+! rql    dry air density*mixing ratio
+! precip precipitation at surface 
 ! dt     time step
-! id     kind of precip: 0 test case; 1 raindrop
-! iter   how many time to guess mean terminal velocity: 0 pure forward.
-!        0 : use departure wind for advection
-!        1 : use mean wind for advection
-!        > 1 : use mean wind after iter-1 iterations
 !
 ! author: hann-ming henry juang <henry.juang@noaa.gov>
 !         implemented by song-you hong
 !
       implicit none
-      integer km,id
-      real  dt
-      real  dzl(km),wwl(km),rql(km),precip
-      real  denl(km),denfacl(km),tkl(km)
-! for thompson scheme
-      real R1
-      integer  i,k,n,m,kk,kb,kt,iter,ii,jj
+
+      integer, intent(in) :: km
+      real, intent(in) ::  dt, R1
+      real, intent(in) :: dzl(km),wwl(km)
+      real, intent(out) :: precip
+      real, intent(inout) :: rql(km)
+      integer  k,m,kk,kb,kt
       real  tl,tl2,qql,dql,qqd
       real  th,th2,qqh,dqh
-      real  zsum,qsum,dim,dip,c1,con1,fa1,fa2
-      real  allold, allnew, zz, dzamin, cflmax, decfl
-      real  dz(km), ww(km), qq(km), wd(km), wa(km), was(km)
-      real  den(km), denfac(km), tk(km)
+      real  zsum,qsum,dim,dip,con1,fa1,fa2
+      real  allold, decfl
+      real  dz(km), ww(km), qq(km)
       real  wi(km+1), zi(km+1), za(km+2)    !hmhj
-      real  qn(km), qr(km),tmp(km),tmp1(km),tmp2(km),tmp3(km)
+      real  qn(km)
       real  dza(km+1), qa(km+1), qmi(km+1), qpi(km+1)
 !
       precip = 0.0
       qa(:) = 0.0
       qq(:) = 0.0
-
-! -----------------------------------
       dz(:) = dzl(:)
       ww(:) = wwl(:)
       do k = 1,km
-        if(rql(k).gt.R1) qq(k) = rql(k) 
-        if(qq(k).le.R1) ww(k) = 0.0
+        if(rql(k).gt.R1) then 
+          qq(k) = rql(k) 
+        else 
+          ww(k) = 0.0 
+        endif 
       enddo
-      den(:) = denl(:)
-      denfac(:) = denfacl(:)
-      tk(:) = tkl(:)
 ! skip for no precipitation for all layers
       allold = 0.0
       do k=1,km
         allold = allold + qq(k)
       enddo
       if(allold.le.0.0) then
-!        cycle i_loop
-        go to 158
+         return 
       endif
 !
 ! compute interface values
@@ -6178,9 +6167,7 @@ MODULE module_mp_thompson
       do k=1,km
         zi(k+1) = zi(k)+dz(k)
       enddo
-! save departure wind
-      wd(:) = ww(:)
-      n=1
+!     n=1
 ! plm is 2nd order, we can use 2nd order wi or 3rd order wi
 ! 2nd order interpolation to get wi
       wi(1) = ww(1)
@@ -6225,7 +6212,6 @@ MODULE module_mp_thompson
 ! computer deformation at arrival point
       do k=1,km
         qa(k) = qq(k)*dz(k)/dza(k)
-        qr(k) = qa(k)/den(k)
       enddo
       qa(km+1) = 0.0
 !
@@ -6337,7 +6323,6 @@ MODULE module_mp_thompson
 ! replace the new values
       rql(:) = max(qn(:),R1)
 !
-  158  continue
 ! ----------------------------------
 !
   END SUBROUTINE nislfv_rain_ppm
