@@ -1913,7 +1913,7 @@ MODULE module_mp_thompson
 
       REAL, DIMENSION(kts:kte):: temp, pres, qv
       REAL, DIMENSION(kts:kte):: rc, ri, rr, rs, rg, ni, nr, nc, nwfa, nifa
-      REAL, DIMENSION(kts:kte):: rr_tmp,vtrk_tmp,nr_tmp,vtnrk_tmp
+      REAL, DIMENSION(kts:kte):: rr_tmp,nr_tmp
       REAL, DIMENSION(kts:kte):: rho, rhof, rhof2
       REAL, DIMENSION(kts:kte):: qvs, qvsi, delQvs
       REAL, DIMENSION(kts:kte):: satw, sati, ssatw, ssati
@@ -3937,12 +3937,8 @@ MODULE module_mp_thompson
         do n = 1, niter
           rr_tmp(:) = rr(:)
           nr_tmp(:) = nr(:)
-          do k = kts,kte
-            vtrk_tmp(k) = vtrk(k)
-            vtnrk_tmp(k) = vtnrk(k)
-          enddo
-          call nislfv_rain_ppm(kte,dzq,vtrk_tmp,rr,precip,dtcfl,R1)
-          call nislfv_rain_ppm(kte,dzq,vtnrk_tmp,nr,vtr,dtcfl,R2)
+          call nislfv_rain_ppm(kte,dzq,vtrk,rr,precip,dtcfl,R1)
+          call nislfv_rain_ppm(kte,dzq,vtnrk,nr,vtr,dtcfl,R2)
           do k = kts, kte
             qrten(k) = qrten(k) + (rr(k) - rr_tmp(k))/rho(k)/dt
             nrten(k) = nrten(k) + (nr(k) - nr_tmp(k))/rho(k)/dt
