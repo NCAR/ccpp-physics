@@ -1,4 +1,4 @@
-[ccpp-table-properties]
+uccpp-table-properties]
   name = mp_thompson
   type = scheme
   dependencies = machine.F,module_mp_radar.F90,module_mp_thompson.F90,module_mp_thompson_make_number_concentrations.F90
@@ -553,15 +553,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[dt_inner]
-  standard_name = time_step_for_inner_loop
-  long_name = time step for inner loop
-  units = s
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [sedi_semi]
   standard_name = flag_for_semi_Lagrangian_sedi_rain
   long_name = flag for semi Lagrangian sedi of rain
@@ -589,6 +580,15 @@
 [dtp]
   standard_name = timestep_for_physics
   long_name = physics timestep
+  units = s
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[dt_inner]
+  standard_name = time_step_for_inner_loop
+  long_name = time step for inner loop
   units = s
   dimensions = ()
   type = real

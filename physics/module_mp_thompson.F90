@@ -1908,7 +1908,7 @@ MODULE module_mp_thompson
 
       DOUBLE PRECISION, PARAMETER:: zeroD0 = 0.0d0
       REAL, PARAMETER :: decfl = 8.0
-      REAL :: dtcfl,precip
+      REAL :: dtcfl,rainsfc
       INTEGER :: niter 
 
       REAL, DIMENSION(kts:kte):: temp, pres, qv
@@ -3899,34 +3899,34 @@ MODULE module_mp_thompson
       nstep = NINT(1./onstep(1))
 
       if(.not. sedi_semi) then
-      do n = 1, nstep
-         do k = kte, kts, -1
-            sed_r(k) = vtrk(k)*rr(k)
-            sed_n(k) = vtnrk(k)*nr(k)
-         enddo
-         k = kte
-         odzq = 1./dzq(k)
-         orho = 1./rho(k)
-         qrten(k) = qrten(k) - sed_r(k)*odzq*onstep(1)*orho
-         nrten(k) = nrten(k) - sed_n(k)*odzq*onstep(1)*orho
-         rr(k) = MAX(R1, rr(k) - sed_r(k)*odzq*DT*onstep(1))
-         nr(k) = MAX(R2, nr(k) - sed_n(k)*odzq*DT*onstep(1))
-         do k = ksed1(1), kts, -1
-            odzq = 1./dzq(k)
-            orho = 1./rho(k)
-            qrten(k) = qrten(k) + (sed_r(k+1)-sed_r(k))                 &
-                                               *odzq*onstep(1)*orho
-            nrten(k) = nrten(k) + (sed_n(k+1)-sed_n(k))                 &
-                                               *odzq*onstep(1)*orho
-            rr(k) = MAX(R1, rr(k) + (sed_r(k+1)-sed_r(k)) &
-                                           *odzq*DT*onstep(1))
-            nr(k) = MAX(R2, nr(k) + (sed_n(k+1)-sed_n(k)) &
-                                           *odzq*DT*onstep(1))
-         enddo
+        do n = 1, nstep
+          do k = kte, kts, -1
+             sed_r(k) = vtrk(k)*rr(k)
+             sed_n(k) = vtnrk(k)*nr(k)
+          enddo
+          k = kte
+          odzq = 1./dzq(k)
+          orho = 1./rho(k)
+          qrten(k) = qrten(k) - sed_r(k)*odzq*onstep(1)*orho
+          nrten(k) = nrten(k) - sed_n(k)*odzq*onstep(1)*orho
+          rr(k) = MAX(R1, rr(k) - sed_r(k)*odzq*DT*onstep(1))
+          nr(k) = MAX(R2, nr(k) - sed_n(k)*odzq*DT*onstep(1))
+          do k = ksed1(1), kts, -1
+             odzq = 1./dzq(k)
+             orho = 1./rho(k)
+             qrten(k) = qrten(k) + (sed_r(k+1)-sed_r(k))                &
+                                                *odzq*onstep(1)*orho
+             nrten(k) = nrten(k) + (sed_n(k+1)-sed_n(k))                &
+                                                *odzq*onstep(1)*orho
+             rr(k) = MAX(R1, rr(k) + (sed_r(k+1)-sed_r(k)) &
+                                            *odzq*DT*onstep(1))
+             nr(k) = MAX(R2, nr(k) + (sed_n(k+1)-sed_n(k)) &
+                                            *odzq*DT*onstep(1))
+          enddo
 
-         if (rr(kts).gt.R1*10.) &
-         pptrain = pptrain + sed_r(kts)*DT*onstep(1)
-      enddo
+          if (rr(kts).gt.R1*10.) &
+          pptrain = pptrain + sed_r(kts)*DT*onstep(1)
+        enddo
       else !if(.not. sedi_semi)
         niter = 1
         dtcfl = dt
@@ -3937,14 +3937,14 @@ MODULE module_mp_thompson
         do n = 1, niter
           rr_tmp(:) = rr(:)
           nr_tmp(:) = nr(:)
-          call nislfv_rain_ppm(kte,dzq,vtrk,rr,precip,dtcfl,R1)
+          call nislfv_rain_ppm(kte,dzq,vtrk,rr,rainsfc,dtcfl,R1)
           call nislfv_rain_ppm(kte,dzq,vtnrk,nr,vtr,dtcfl,R2)
           do k = kts, kte
             qrten(k) = qrten(k) + (rr(k) - rr_tmp(k))/rho(k)/dt
             nrten(k) = nrten(k) + (nr(k) - nr_tmp(k))/rho(k)/dt
           enddo
           if (rr(kts).gt.R1*10.) & !Songyou: is this needed? 
-          pptrain = pptrain + precip
+          pptrain = pptrain + rainsfc
 
           if(sedi_semi_update) then
             do k = kte+1, kts, -1
@@ -3955,7 +3955,7 @@ MODULE module_mp_thompson
               vtr = 0.
               if (rr(k).gt. R1) then
                 lamr = (am_r*crg(3)*org2*nr(k)/rr(k))**obmr
-                vtr = rhof(k)*av_r*crg(6)*org3 * lamr**cre(3)               &
+                vtr = rhof(k)*av_r*crg(6)*org3 * lamr**cre(3)           &
                    *((lamr+fv_r)**(-cre(6)))
                 vtrk(k) = vtr
  ! First below is technically correct:
@@ -3963,7 +3963,7 @@ MODULE module_mp_thompson
  !                     *((lamr+fv_r)**(-cre(5)))
  ! Test: make number fall faster (but still slower than mass)
  ! Goal: less prominent size sorting
-                vtr = rhof(k)*av_r*crg(7)/crg(12) * lamr**cre(12)           &
+                vtr = rhof(k)*av_r*crg(7)/crg(12) * lamr**cre(12)       &
                      *((lamr+fv_r)**(-cre(7)))
                 vtnrk(k) = vtr
               endif

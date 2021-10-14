@@ -334,10 +334,10 @@ module mp_thompson
                               spechum, qc, qr, qi, qs, qg, ni, nr, &
                               is_aerosol_aware, nc, nwfa, nifa,    &
                               nwfa2d, nifa2d,                      &
-                              tgrs, prsl, phii, omega, dt_inner,   &
+                              tgrs, prsl, phii, omega,             &
                               sedi_semi, sedi_semi_update,         &
-                              sedi_semi_decfl,                     &
-                              dtp, first_time_step, istep, nsteps, &
+                              sedi_semi_decfl, dtp, dt_inner,      & 
+                              first_time_step, istep, nsteps,      &
                               prcp, rain, graupel, ice, snow, sr,  &
                               refl_10cm, reset_dBZ, do_radar_ref,  &
                               re_cloud, re_ice, re_snow,           &
