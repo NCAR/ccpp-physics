@@ -3943,7 +3943,6 @@ MODULE module_mp_thompson
             qrten(k) = qrten(k) + (rr(k) - rr_tmp(k))/rho(k)/dt
             nrten(k) = nrten(k) + (nr(k) - nr_tmp(k))/rho(k)/dt
           enddo
-          if (rr(kts).gt.R1*10.) & 
           pptrain = pptrain + rainsfc
 
           if(sedi_semi_update) then
