@@ -1,6 +1,4 @@
 !>\file rrtmg_sw_pre.f90
-!! This file contains a subroutine to module_radiation_surface::setalb() to
-!! setup surface albedo for SW radiation.
       module rrtmg_sw_pre
       contains
 
