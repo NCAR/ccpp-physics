@@ -19,7 +19,8 @@
                                          gu0, gv0, gt0, gq0, nsamftrac, ntqv,            &
                                          save_u, save_v, save_t, save_q, clw,            &
                                          ntcw,ntiw,ntclamt,ntrw,ntsw,ntrnc,ntsnc,ntgl,   &
-                                         ntgnc, cscnv, satmedmf, trans_trac, ras, ntrac, &
+                                         ntgnc, nthl, nthnc, nthv, ntgv,                 &
+                                         cscnv, satmedmf, trans_trac, ras, ntrac,        &
                                          dtidx, index_of_process_dcnv, errmsg, errflg)
 
       use machine, only: kind_phys
@@ -27,7 +28,7 @@
       implicit none
 
       integer, intent(in) :: im, levs, nsamftrac, ntqv, index_of_process_dcnv, dtidx(:,:), &
-           ntcw,ntiw,ntclamt,ntrw,ntsw,ntrnc,ntsnc,ntgl,ntrac,ntgnc
+           ntcw,ntiw,ntclamt,ntrw,ntsw,ntrnc,ntsnc,ntgl,ntrac,ntgnc,nthl,nthnc,nthv,ntgv
       logical, intent(in) :: ldiag3d, qdiag3d, do_cnvgwd, cplchm
       real(kind=kind_phys), dimension(:,:),   intent(in)    :: gu0
       real(kind=kind_phys), dimension(:,:),   intent(in)    :: gv0
@@ -71,7 +72,9 @@
             do n=2,ntrac
                if ( n /= ntcw  .and. n /= ntiw  .and. n /= ntclamt .and. &
                     n /= ntrw  .and. n /= ntsw  .and. n /= ntrnc   .and. &
-                    n /= ntsnc .and. n /= ntgl  .and. n /= ntgnc) then
+                    n /= ntsnc .and. n /= ntgl  .and. n /= ntgnc   .and. &
+                    n /= nthl  .and. n /= nthnc .and. n /= nthv    .and. &
+                    n /= ntgv ) then
                   tracers = tracers + 1
                   if(dtidx(100+n,index_of_process_dcnv)>0) then
                      save_q(:,:,n) = clw(:,:,tracers)

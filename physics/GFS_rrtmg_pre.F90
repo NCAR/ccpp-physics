@@ -18,9 +18,9 @@
       ! in the CCPP version - they are defined in the interstitial_create routine
       subroutine GFS_rrtmg_pre_run (im, levs, lm, lmk, lmp, n_var_lndp,        &
         imfdeepcnv, imfdeepcnv_gf, me, ncnd, ntrac, num_p3d, npdf3d, ncnvcld3d,&
-        ntqv, ntcw,ntiw, ntlnc, ntinc, ntrnc, ntsnc, ntccn ntrw, ntsw, ntgl, nthl, ntwa, ntoz, &
+        ntqv, ntcw,ntiw, ntlnc, ntinc, ntrnc, ntsnc, ntccn, ntrw, ntsw, ntgl, nthl, ntwa, ntoz, &
         ntclamt, nleffr, nieffr, nseffr, lndp_type, kdt, first_time_step,      &
-        imp_physics,imp_physics_nssl,                                          &
+        imp_physics,imp_physics_nssl, nssl_ccn_on, nssl_invertccn,             &
         imp_physics_thompson, imp_physics_gfdl, imp_physics_zhao_carr,         &
         imp_physics_zhao_carr_pdf, imp_physics_mg, imp_physics_wsm6,           &
         imp_physics_fer_hires, julian, yearlen, lndp_var_list, lsswr, lslwr,   &
@@ -78,7 +78,7 @@
                                            make_DropletNumber,       &
                                            make_RainNumber
 
-      use module_mp_nssl_2mom,       only: calc_eff_radius, calcnfromq, na
+!      use module_mp_nssl_2mom,       only: calc_eff_radius, calcnfromq, na
 
       implicit none
 
@@ -686,11 +686,13 @@
           endif if_thompson
           if (imp_physics == imp_physics_nssl) then
            ! write(6,*) 'rrtm_pre: set qx_mp for NSSL',ntlnc,ntinc,ntsnc,ntrnc
+            IF ( .not. effr_in ) THEN
             do k=1,LMK
 !              IF ( me == mpiroot ) write(6,*) 'k,rho: ',k,rho(1,k)
               do i=1,IM
                 qvs = qgrs(i,k,ntqv)
                 qv_mp (i,k) = qvs/(1.-qvs)
+                rho   (i,k) = con_eps*plyr(i,k)*100./(con_rd*tlyr(i,k)*(qv_mp(i,k)+con_eps))
                 qc_mp (i,k) = tracer1(i,k,ntcw)/(1.-qvs)
                 qi_mp (i,k) = tracer1(i,k,ntiw)/(1.-qvs)
                 qs_mp (i,k) = tracer1(i,k,ntsw)/(1.-qvs)
@@ -702,6 +704,7 @@
                 IF ( nssl_ccn_on ) cccn_mp(i,k) = tracer1(i,k,ntccn)/(1.-qvs)
               enddo
             enddo
+            ENDIF
 !            write(6,*) 'rrtmg_pre: max qctrac,qc,qcphy,nctrac,ccw,ccwphy: ',maxval(qc_mp),maxval(qc), &
 !                   maxval(qc_phys),maxval(nc_mp),maxval(ccw),maxval(ccw_phys)
 !            write(6,*) 'rrtmg_pre: max ni,ns,nr = ',maxval(ni_mp),maxval(ns_mp),maxval(nr_mp)
@@ -803,8 +806,6 @@
         elseif (imp_physics == imp_physics_nssl ) then                          ! NSSL MP
           cldcov = 0.0
           if(effr_in) then
-!          if( kdt > 2 ) then
-!          IF ( .true. .or. maxval(nc_mp) >= 1.e-20 ) THEN
            do k=1,lm
              k1 = k + kd
              do i=1,im
@@ -815,6 +816,7 @@
              enddo
            enddo
           else
+#if 0
          ! calculate radii here, but something is not right with incoming number concentrations
  !          IF ( .true. .and. first_time_step ) THEN
             IF ( ( maxval(qc_mp) > 1.e-11 .and. maxval(nc_mp) < 1.e-5 ) .or. &
@@ -905,7 +907,7 @@
               effrs_inout(i,k) = effrs(i,k1)
             enddo
           enddo
-
+#endif
           endif
 
         elseif (imp_physics == imp_physics_thompson) then                     !  Thompson MP

@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = GFS_suite_interstitial_rad_reset
   type = scheme
-  dependencies = machine.F,module_mp_thompson_make_number_concentrations.F90
+  dependencies = machine.F,module_mp_thompson_make_number_concentrations.F90,module_mp_nssl_2mom.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -1271,7 +1271,7 @@
   type = integer
   intent = in
 [imp_physics_nssl]
-  standard_name = flag_for_nssl2m_microphysics_scheme
+  standard_name = identifier_for_nssl_microphysics_scheme
   long_name = choice of NSSL 2-moment microphysics scheme
   units = flag
   dimensions = ()
@@ -1629,7 +1629,7 @@
   type = integer
   intent = in
 [ntccn]
-  standard_name = index_for_cloud_condensation_nuclei_number_concentration
+  standard_name = index_of_cloud_condensation_nuclei_number_concentration_in_tracer_concentration_array
   long_name = tracer index for cloud condensation nuclei number concentration
   units = index
   dimensions = ()
@@ -1678,13 +1678,8 @@
   dimensions = ()
   type = logical
   intent = in
-<<<<<<< HEAD
-[imp_physics_nssl2m]
-=======
-  optional = F
 [imp_physics_nssl]
->>>>>>> 9d0fcbd1 ( - Changed from two imp_physics_nssl flags to a single one with second flag for nssl_ccn_on)
-  standard_name = flag_for_nssl2m_microphysics_scheme
+  standard_name = identifier_for_nssl_microphysics_scheme
   long_name = choice of NSSL 2-moment microphysics scheme
   units = flag
   dimensions = ()

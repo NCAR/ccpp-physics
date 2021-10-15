@@ -24,13 +24,13 @@ module mp_nssl
 !! \htmlinclude mp_nssl_init.html
 !!
     subroutine mp_nssl_init(ncol, nlev, errflg, errmsg, threads, restart, &
-                              mpicomm, mpirank, mpiroot,    &
+                              mpirank, mpiroot,    &
                               imp_physics, imp_physics_nssl,   &
                               nssl_cccn, nssl_alphah, nssl_alphahl, &
                               nssl_ccn_on, nssl_hail_on, nssl_invertccn, first_time_step, &
                               spechum, qc, qr, qi, qs, qh, qhl,         &
-                              cccn, cccna, ccw, crw, cci, csw, chw, chl, vh, vhl, tgrs, prslk, prsl, &
-                              csw_phys )
+                              cccn, cccna, ccw, crw, cci, csw, chw, chl, vh, vhl, tgrs, prslk, prsl )
+                              
 
         use module_mp_nssl_2mom, only: nssl_2mom_init, calcnfromq, na
         use physcons, only: con_rd
@@ -44,7 +44,6 @@ module mp_nssl
          integer,                   intent(in)    :: threads
          logical,                   intent(in)    :: restart
 
-         integer,                   intent(in)    :: mpicomm
          integer,                   intent(in)    :: mpirank
          integer,                   intent(in)    :: mpiroot
          integer,                   intent(in)    :: imp_physics
@@ -71,8 +70,6 @@ module mp_nssl
          real(kind_phys),           intent(inout) :: chl(:,:) ! (1:ncol,1:nlev) ! hail number
          real(kind_phys),           intent(inout) :: vh(1:ncol,1:nlev)  ! graupel volume
          real(kind_phys),           intent(inout) :: vhl(:,:) ! (1:ncol,1:nlev) ! hail volume
-
-         real(kind_phys),           intent(inout) :: csw_phys(1:ncol,1:nlev)
 
          ! State variables and timestep information
          real(kind_phys),           intent(inout) :: tgrs(1:ncol,1:nlev)
@@ -188,6 +185,7 @@ module mp_nssl
          
          ENDIF ! .not. is_initialized
          
+#if 0
 !         IF ( is_initialized .and. ((.not. first_time_step) .or. restart ) ) THEN
 !           return
 !         ENDIF
@@ -260,7 +258,6 @@ module mp_nssl
             cccn = cccn_mp
           ENDIF
         ENDIF
-        csw_phys = csw
         
 !        qs = 0
 !        qi = 0
@@ -277,6 +274,7 @@ module mp_nssl
 
          
          deallocate( an )
+#endif
          
          return
 
@@ -425,7 +423,7 @@ module mp_nssl
                             its,ite, jts,jte, kts,kte, i,j,k
          integer :: itimestep ! timestep counter
          integer :: ntmul, n
-         real, parameter    :: dtpmax = 300. ! 600. ! 120.
+         real, parameter    :: dtpmax = 150. ! 300. ! 600. ! 120.
          real(kind_phys)    :: dtptmp
          integer, parameter :: ndebug = 0
          logical, parameter :: convertdry = .true.
@@ -643,6 +641,7 @@ module mp_nssl
           itimestep = 2
         ENDIF
          
+        IF ( .false. ) THEN
          ! incoming droplet field may have some inconsistent number concentrations (e.g., from PBL)
          ! so check for that, otherwise mass may be zapped into vapor
          allocate( an(ncol,1,nlev,na) )
@@ -670,6 +669,7 @@ module mp_nssl
 
 
          deallocate( an )
+        ENDIF
          
        IF ( nssl_ccn_on ) THEN
          IF ( invertccn ) THEN
@@ -696,7 +696,7 @@ module mp_nssl
           ENDIF
         ENDIF
        
-       
+       IF ( .true. ) THEN
         DO n = 1,ntmul
         
         itimestep = itimestep + 1
@@ -817,6 +817,8 @@ module mp_nssl
            ENDDO
 
           ENDDO
+          
+          ENDIF
 
 
          IF ( nssl_ccn_on )  THEN

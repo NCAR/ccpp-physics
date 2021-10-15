@@ -183,7 +183,7 @@
   type = integer
   intent = in
 [ntccn]
-  standard_name = index_for_cloud_condensation_nuclei_number_concentration
+  standard_name = index_of_cloud_condensation_nuclei_number_concentration_in_tracer_concentration_array
   long_name = tracer index for cloud condensation nuclei number concentration
   units = index
   dimensions = ()
@@ -191,7 +191,7 @@
   intent = in
   optional = F
 [nthl]
-  standard_name = index_for_hail
+  standard_name = index_of_hail_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for hail
   units = index
   dimensions = ()
@@ -199,7 +199,7 @@
   intent = in
   optional = F
 [nthnc]
-  standard_name = index_for_hail_number_concentration
+  standard_name = index_of_mass_number_concentration_of_hail_in_tracer_concentration_array
   long_name = tracer index for hail number concentration
   units = index
   dimensions = ()
@@ -207,7 +207,7 @@
   intent = in
   optional = F
 [ntgv]
-  standard_name = index_for_graupel_volume
+  standard_name = index_of_graupel_volume_in_tracer_concentration_array
   long_name = tracer index for graupel particle volume
   units = index
   dimensions = ()
@@ -215,7 +215,7 @@
   intent = in
   optional = F
 [nthv]
-  standard_name = index_for_hail_volume
+  standard_name = index_of_hail_volume_in_tracer_concentration_array
   long_name = tracer index for hail particle volume
   units = index
   dimensions = ()
@@ -272,7 +272,7 @@
   type = integer
   intent = in
 [imp_physics_nssl]
-  standard_name = flag_for_nssl2m_microphysics_scheme
+  standard_name = identifier_for_nssl_microphysics_scheme
   long_name = choice of NSSL 2-moment microphysics scheme
   units = flag
   dimensions = ()
@@ -618,7 +618,7 @@
   type = integer
   intent = in
 [ntccn]
-  standard_name = index_for_cloud_condensation_nuclei_number_concentration
+  standard_name = index_of_cloud_condensation_nuclei_number_concentration_in_tracer_concentration_array
   long_name = tracer index for cloud condensation nuclei number concentration
   units = index
   dimensions = ()
@@ -626,7 +626,7 @@
   intent = in
   optional = F
 [nthl]
-  standard_name = index_for_hail
+  standard_name = index_of_hail_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for hail
   units = index
   dimensions = ()
@@ -634,7 +634,7 @@
   intent = in
   optional = F
 [nthnc]
-  standard_name = index_for_hail_number_concentration
+  standard_name = index_of_mass_number_concentration_of_hail_in_tracer_concentration_array
   long_name = tracer index for hail number concentration
   units = index
   dimensions = ()
@@ -642,7 +642,7 @@
   intent = in
   optional = F
 [ntgv]
-  standard_name = index_for_graupel_volume
+  standard_name = index_of_graupel_volume_in_tracer_concentration_array
   long_name = tracer index for graupel particle volume
   units = index
   dimensions = ()
@@ -650,7 +650,7 @@
   intent = in
   optional = F
 [nthv]
-  standard_name = index_for_hail_volume
+  standard_name = index_of_hail_volume_in_tracer_concentration_array
   long_name = tracer index for hail particle volume
   units = index
   dimensions = ()
@@ -707,7 +707,7 @@
   type = integer
   intent = in
 [imp_physics_nssl]
-  standard_name = flag_for_nssl2m_microphysics_scheme
+  standard_name = identifier_for_nssl_microphysics_scheme
   long_name = choice of NSSL 2-moment microphysics scheme
   units = flag
   dimensions = ()
