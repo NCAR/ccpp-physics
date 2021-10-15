@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = GFS_rrtmg_pre
   type = scheme
-  dependencies = funcphys.f90,iounitdef.f,machine.F,module_bfmicrophysics.f,module_mp_radar.F90,module_mp_thompson.F90
+  dependencies = funcphys.f90,iounitdef.f,machine.F,module_bfmicrophysics.f,module_mp_radar.F90,module_mp_thompson.F90,module_mp_nssl_2mom.F90
   dependencies = module_mp_thompson_make_number_concentrations.F90,physcons.F90,physparam.f,radcons.f90,radiation_aerosols.f
   dependencies = radiation_astronomy.f,radiation_clouds.f,radiation_gases.f,radlw_param.f,radsw_param.f,surface_perturbation.F90,radiation_cloud_overlap.F90
 
@@ -162,7 +162,7 @@
   intent = in
   optional = F
 [ntrnc]
-  standard_name = index_for_rain_number_concentration
+  standard_name = index_of_mass_number_concentration_of_rain_in_tracer_concentration_array
   long_name = tracer index for rain   number concentration
   units = index
   dimensions = ()
@@ -170,7 +170,7 @@
   intent = in
   optional = F
 [ntsnc]
-  standard_name = index_for_snow_number_concentration
+  standard_name = index_of_mass_number_concentration_of_snow_in_tracer_concentration_array
   long_name = tracer index for snow   number concentration
   units = index
   dimensions = ()
@@ -202,7 +202,7 @@
   intent = in
   optional = F
 [nthl]
-  standard_name = index_for_hail
+  standard_name = index_of_hail_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for hail
   units = index
   dimensions = ()
@@ -210,7 +210,7 @@
   intent = in
   optional = F
 [ntccn]
-  standard_name = index_for_cloud_condensation_nuclei_number_concentration
+  standard_name = index_of_cloud_condensation_nuclei_number_concentration_in_tracer_concentration_array
   long_name = tracer index for cloud condensation nuclei number concentration
   units = index
   dimensions = ()
@@ -298,7 +298,7 @@
   intent = in
   optional = F
 [first_time_step]
-  standard_name = flag_for_first_time_step
+  standard_name = flag_for_first_timestep
   long_name = flag for first time step for time integration loop (cold/warmstart)
   units = flag
   dimensions = ()
@@ -314,7 +314,7 @@
   intent = in
   optional = F
 [imp_physics_nssl]
-  standard_name = flag_for_nssl2m_microphysics_scheme
+  standard_name = identifier_for_nssl_microphysics_scheme
   long_name = choice of NSSL 2-moment microphysics scheme
   units = flag
   dimensions = ()

@@ -1,7 +1,7 @@
 !WRF:MODEL_LAYER:PHYSICS
 
 
-! prepocessed on "Sep 30 2021" at "11:13:44"
+! prepocessed on "Oct  6 2021" at "17:14:05"
 
 
 
@@ -214,7 +214,7 @@ MODULE module_mp_nssl_2mom
   integer  :: iusewetgraupel = 1 ! =1 to turn on use of QHW for graupel reflectivity (only for ZVDM -- mixedphase)
                                  ! =2 turn on for graupel density less than 300. only 
   integer  :: iusewethail = 0 ! =1 to turn on use of QHW for graupel reflectivity (only for ZVDM -- mixedphase)
-  integer  :: iusewetsnow = 0 ! =1 to turn on diagnosed bright band
+  integer  :: iusewetsnow = 0 ! =1 to turn on diagnosed bright band; =2 'old' snow reflectivity (dry), =3 'old' snow dbz + brightband
 ! microphysics
 
   real, private :: rho_qr = 1000., cnor = 8.0e5  ! cnor is set in namelist!!  rain params
@@ -1248,7 +1248,7 @@ MODULE module_mp_nssl_2mom
       
 
 
-      IF ( .true. ) THEN ! set to true to enable internal namelist read
+      IF ( .false. ) THEN ! set to true to enable internal namelist read
       open(15,file='input.nml',status='old',form='formatted',action='read')
       rewind(15)
       read(15,NML=nssl_mp_params,iostat=istat)
@@ -2832,7 +2832,11 @@ SUBROUTINE nssl_2mom_driver(qv, qc, qr, qi, qs, qh, qhl, ccw, crw, cci, csw, chw
 
        IF ( present(has_reqr) .and. present( re_rain ) ) THEN
          IF ( has_reqr /= 0 ) THEN
-           re_rain(ix,kz,jy)  = MAX(50.E-6, MIN(t3(ix,1,kz), 2999.E-6))
+         DO kz = kts,kte
+           DO ix = its,ite
+            re_rain(ix,kz,jy)  = MAX(50.E-6, MIN(t4(ix,1,kz), 2999.E-6))
+           ENDDO
+         ENDDO
          ENDIF
        ENDIF
        
@@ -3786,13 +3790,17 @@ END SUBROUTINE nssl_2mom_driver
 
       DO n = 1,ndfall
 
-      IF ( do_accurate_sedimentation .and. n .ge. 2 .and. ( n == interval_sedi_vt*(n/interval_sedi_vt) ) ) THEN
+      IF ( ( il /= lc .and. il /= li ) .and. do_accurate_sedimentation .and. n .ge. 2 .and. &
+          ( n == interval_sedi_vt*(n/interval_sedi_vt) ) ) THEN
 !
 !  zero the precip flux arrays (2d)
 !
       
 !      xvt(:,:,:,il) = 0.0
       dummy = 0.d0
+
+      IF ( il == lh .or. il == lr ) xvt(kzb:kze,ix,1:3,il) = 0.0 ! reset to zero because routine will only compute points with q > qmin
+
       call ziegfall1d(nx,ny,nz,nor,norz,na,dtp,jgs,ix, & 
      &  xvt, rhovtzx, & 
      &  an,dn,ipconc,t0,t7,cwmasn,cwmasx, & 
@@ -6395,7 +6403,9 @@ END SUBROUTINE nssl_2mom_driver
 !      DO il = lc,lhab
 !      IF ( il .ne. lr ) THEN
         DO mgs = 1,ngscnt
-          vtxbar(mgs,lc,2) = vtxbar(mgs,lc,1)
+          IF ( ildo == 0 .or. ildo == lc ) THEN
+            vtxbar(mgs,lc,2) = vtxbar(mgs,lc,1)
+          ENDIF
         IF ( li .gt. 1 ) THEN
 !          vtxbar(mgs,li,2) = rhovt(mgs)*49420.*1.25447*xdia(mgs,li,1)**(1.415) ! n-wgt (Ferrier 94)
 !          vtxbar(mgs,li,2) = vtxbar(mgs,li,1)
@@ -7774,8 +7784,8 @@ END SUBROUTINE nssl_2mom_driver
              if (lsw .gt. 1) THEN 
                qxw = an(ix,jy,kz,lsw)
                qxw1 = 0.0
-             ELSEIF ( iusewetsnow == 1 .and. temk(ix,jy,kz) .gt. tfr+1. .and. an(ix,jy,kz,ls) > an(ix,jy,kz,lr) &
-     &              .and. an(ix,jy,kz,lr) > qsmin) THEN
+             ELSEIF ( ( iusewetsnow == 1 .or. iusewetsnow == 3) .and. temk(ix,jy,kz) .gt. tfr+1. & 
+     &                  .and. an(ix,jy,kz,ls) > an(ix,jy,kz,lr) .and. an(ix,jy,kz,lr) > qsmin) THEN
                qxw = Min(0.5*an(ix,jy,kz,ls), an(ix,jy,kz,lr))
                qxw1 = qxw
              ENDIF
@@ -7786,7 +7796,7 @@ END SUBROUTINE nssl_2mom_driver
              ksq = 0.189 ! Smith (1984, JAMC) for equiv. ice sphere
              IF ( an(ix,jy,kz,lns) .gt. 1.e-7 ) THEN
      !          IF ( .true. ) THEN
-               IF ( qxw > qsmin ) THEN ! old version
+               IF ( qxw > qsmin .or. iusewetsnow >= 2) THEN ! old version
 !                gtmp(ix,kz) = 3.6e18*(snu+2.)*( 0.224*an(ix,jy,kz,ls) + 0.776*qxw)*an(ix,jy,kz,ls)/ &
 !     &              (an(ix,jy,kz,lns)*(snu+1.)*rwdn**2)*db(ix,jy,kz)**2
                 gtmp(ix,kz) = 3.6e18*(snu+2.)*( 0.224*(an(ix,jy,kz,ls)+qxw1) + 0.776*qxw)*(an(ix,jy,kz,ls)+qxw1)/ &

@@ -113,7 +113,7 @@
       integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires
       logical, intent(in) :: ltaerosol, hybedmf, do_shoc, satmedmf, flag_for_pbl_generic_tend
       integer, intent(in) :: imp_physics_nssl
-      logical, intent(in) :: cplchm, ltaerosol, nssl_hail_on, nssl_ccn_on
+      logical, intent(in) :: nssl_hail_on, nssl_ccn_on
 
       real(kind=kind_phys), dimension(:,:,:), intent(in) :: qgrs
       real(kind=kind_phys), dimension(:,:), intent(in) :: ugrs, vgrs, tgrs
@@ -413,10 +413,12 @@
       integer, parameter  :: kp = kind_phys
       integer, intent(in) :: im, levs, nvdiff, ntrac, ntchs, ntchm, kdt
       integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev, nqrimef
+      integer, intent(in) :: ntccn, nthl, nthnc, ntgv, nthv
       logical, intent(in) :: trans_aero
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
       integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires
-      integer, intent(in) :: imp_physics_nssl, nssl_ccn_on, nssl_hail_on
+      integer, intent(in) :: imp_physics_nssl
+      logical, intent(in) :: nssl_ccn_on, nssl_hail_on
       logical, intent(in) :: ltaerosol, cplflx, cplchm, lssav, ldiag3d, lsidea
       logical, intent(in) :: hybedmf, do_shoc, satmedmf, shinhong, do_ysu
 
