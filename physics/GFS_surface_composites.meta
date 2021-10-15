@@ -459,33 +459,6 @@
   kind = kind_phys
   intent = inout
   optional = F
-[semis_wat]
-  standard_name = surface_longwave_emissivity_over_water
-  long_name = surface lw emissivity in fraction over water
-  units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[semis_lnd]
-  standard_name = surface_longwave_emissivity_over_land
-  long_name = surface lw emissivity in fraction over land
-  units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[semis_ice]
-  standard_name = surface_longwave_emissivity_over_ice
-  long_name = surface lw emissivity in fraction over ice
-  units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
 [qss]
   standard_name = surface_specific_humidity
   long_name = surface air saturation specific humidity
@@ -615,15 +588,6 @@
   units = flag
   dimensions = (horizontal_loop_extent)
   type = logical
-  intent = in
-  optional = F
-[semis_wat]
-  standard_name = surface_longwave_emissivity_over_water
-  long_name = surface lw emissivity in fraction over water
-  units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
   intent = in
   optional = F
 [semis_lnd]
