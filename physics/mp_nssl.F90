@@ -25,7 +25,7 @@ module mp_nssl
 !!
     subroutine mp_nssl_init(ncol, nlev, errflg, errmsg, threads, restart, &
                               mpirank, mpiroot,    &
-                              imp_physics, imp_physics_nssl,   &
+                              imp_physics, imp_physics_nssl, convert_dry_rho,  &
                               nssl_cccn, nssl_alphah, nssl_alphahl, &
                               nssl_ccn_on, nssl_hail_on, nssl_invertccn, first_time_step, &
                               spechum, qc, qr, qi, qs, qh, qhl,         &
@@ -53,6 +53,7 @@ module mp_nssl
          logical,                   intent(in)    :: first_time_step
 
          ! Hydrometeors
+         logical,                   intent(in   ) :: convert_dry_rho
          real(kind_phys),           intent(inout) :: spechum(1:ncol,1:nlev)
          real(kind_phys),           intent(inout) :: qc(1:ncol,1:nlev)
          real(kind_phys),           intent(inout) :: qr(1:ncol,1:nlev)
@@ -294,7 +295,7 @@ module mp_nssl
                               prcp, rain, graupel, ice, snow, sr,            &
                              refl_10cm, do_radar_ref, first_time_step,       &
                              re_cloud, re_ice, re_snow, re_rain,             &
-                             imp_physics,                                    &
+                             imp_physics, convert_dry_rho,                   &
                              imp_physics_nssl, nssl_ccn_on,                  &
                              nssl_hail_on, nssl_invertccn, ntccn, ntccna,    &
                              errflg, errmsg)
@@ -307,6 +308,7 @@ module mp_nssl
          real(kind_phys),           intent(in   ) :: con_rd
          integer,                   intent(in)    :: mpirank
          ! Hydrometeors
+         logical,                   intent(in   ) :: convert_dry_rho
          real(kind_phys),           intent(inout) :: spechum(1:ncol,1:nlev)
          real(kind_phys),           intent(inout) :: cccn(:,:) ! (1:ncol,1:nlev)
          real(kind_phys),           intent(inout) :: cccna(:,:) ! (1:ncol,1:nlev)
@@ -426,7 +428,6 @@ module mp_nssl
          real, parameter    :: dtpmax = 150. ! 300. ! 600. ! 120.
          real(kind_phys)    :: dtptmp
          integer, parameter :: ndebug = 0
-         logical, parameter :: convertdry = .true.
          logical :: invertccn
          real :: cwmas
          
@@ -453,7 +454,7 @@ module mp_nssl
          !> - Convert specific humidity/moist mixing ratios to dry mixing ratios
          ! NOTE: Implied loops!
          qv_mp = spechum/(1.0_kind_phys-spechum)
-         IF ( convertdry ) THEN
+         IF ( convert_dry_rho ) THEN
          qc_mp = qc/(1.0_kind_phys-spechum)
          qr_mp = qr/(1.0_kind_phys-spechum)
          qi_mp = qi/(1.0_kind_phys-spechum)
@@ -874,7 +875,7 @@ module mp_nssl
 
          !> - Convert dry mixing ratios to specific humidity/moist mixing ratios
          spechum = qv_mp/(1.0_kind_phys+qv_mp)
-         IF ( convertdry ) THEN
+         IF ( convert_dry_rho ) THEN
          qc      = qc_mp/(1.0_kind_phys+qv_mp)
          qr      = qr_mp/(1.0_kind_phys+qv_mp)
          qi      = qi_mp/(1.0_kind_phys+qv_mp)
