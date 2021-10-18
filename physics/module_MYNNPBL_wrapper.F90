@@ -449,6 +449,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                 qnc(i,k)   = qgrs_cloud_droplet_num_conc(i,k)
                 qni(i,k)   = qgrs_cloud_ice_num_conc(i,k)
                 ozone(i,k) = qgrs_ozone(i,k)
+                qnwfa(i,k) = 0.
+                qnifa(i,k) = 0.
               enddo
             enddo
           else

@@ -197,7 +197,7 @@
       real(kind=kind_phys), dimension(im,lm+LTP+1) :: tem2db, hz
 
       real(kind=kind_phys), dimension(im,lm+LTP,min(4,ncnd))   :: ccnd
-      real(kind=kind_phys), dimension(im,lm+LTP,2:ntrac+2)     :: tracer1
+      real(kind=kind_phys), dimension(im,lm+LTP,2:ntrac)       :: tracer1
       real(kind=kind_phys), dimension(im,lm+LTP,NF_CLDS)       :: clouds
       real(kind=kind_phys), dimension(im,lm+LTP,NF_VGAS)       :: gasvmr
       real(kind=kind_phys), dimension(im,lm+LTP,NBDSW,NF_AESW) :: faersw
@@ -651,7 +651,6 @@
                 nwfa  (i,k) = tracer1(i,k,ntwa)
               enddo
             enddo
-
           elseif (imp_physics == imp_physics_thompson) then
             do k=1,LMK
               do i=1,IM

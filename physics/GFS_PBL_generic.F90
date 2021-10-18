@@ -12,7 +12,7 @@
       contains
 
       subroutine set_aerosol_tracer_index(imp_physics, imp_physics_wsm6,                &
-                                          imp_physics_thompson, ltaerosol,mraerosol,   &
+                                          imp_physics_thompson, ltaerosol,mraerosol,    &
                                           imp_physics_mg, ntgl, imp_physics_gfdl,       &
                                           imp_physics_zhao_carr, kk,                    &
                                           errmsg, errflg)
@@ -191,7 +191,7 @@
                 vdftra(i,k,10) = qgrs(i,k,ntoz)
               enddo
             enddo
-            rtg_ozone_index = 8
+            rtg_ozone_index = 10
           else
             do k=1,levs
               do i=1,im
