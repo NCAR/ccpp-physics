@@ -460,14 +460,20 @@ MODULE module_mp_thompson
 ! Set module variable is_aerosol_aware/merra2_aerosol_aware
       is_aerosol_aware = is_aerosol_aware_in
       merra2_aerosol_aware = merra2_aerosol_aware_in
+      if (is_aerosol_aware .and. merra2_aerosol_aware) then
+          errmsg = 'Logic error in thompson_init: only one of the two options can be true, ' // &
+                   'not both: is_aerosol_aware or merra2_aerosol_aware'
+          errflg = 1
+          return
+      end if
       if (mpirank==mpiroot) then
-        if (is_aerosol_aware) then
-            write (0,'(a)') 'Using aerosol-aware version of Thompson microphysics'
-        else if(merra2_aerosol_aware) then
-            write (0,'(a)') 'Using merra2 aerosol-aware version of Thompson microphysics'
-        else
-            write (0,'(a)') 'Using non-aerosol-aware version of Thompson microphysics'
-        end if
+          if (is_aerosol_aware) then
+              write (0,'(a)') 'Using aerosol-aware version of Thompson microphysics'
+          else if(merra2_aerosol_aware) then
+              write (0,'(a)') 'Using merra2 aerosol-aware version of Thompson microphysics'
+          else
+              write (0,'(a)') 'Using non-aerosol-aware version of Thompson microphysics'
+          end if
       end if
 
       micro_init = .FALSE.
@@ -1026,9 +1032,7 @@ MODULE module_mp_thompson
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(IN):: &
                           pii
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(INOUT):: &
-                          nc
-      REAL, DIMENSION(ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(INOUT):: &
-                          nwfa, nifa
+                          nc, nwfa, nifa
       REAL, DIMENSION(ims:ime, jms:jme), OPTIONAL, INTENT(IN):: nwfa2d, nifa2d
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(INOUT):: &
                           re_cloud, re_ice, re_snow
@@ -1054,7 +1058,6 @@ MODULE module_mp_thompson
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(INOUT):: &
                           vt_dbz_wt
       LOGICAL, INTENT(IN) :: first_time_step
-
       REAL, INTENT(IN):: dt_in, dt_inner
       ! To support subcycling: current step and maximum number of steps
       INTEGER, INTENT (IN) :: istep, nsteps
@@ -1179,9 +1182,9 @@ MODULE module_mp_thompson
             else
                stop
             end if
-         else if (merra2_aerosol_aware .and. (.not.present(nc)     .or. &
-                                              .not.present(nwfa)   .or. &
-                                              .not.present(nifa)        )) then
+         else if (merra2_aerosol_aware .and. (.not.present(nc)   .or. &
+                                              .not.present(nwfa) .or. &
+                                              .not.present(nifa)      )) then
             if (present(errmsg)) then
                write(errmsg, '(*(a))') 'Logic error in mp_gt_driver: provide nc, nwfa, and nifa', &
                                        ' for merra2 aerosol-aware version of Thompson microphysics'

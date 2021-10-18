@@ -64,18 +64,17 @@ module mp_thompson
          ! Aerosols
          logical,                   intent(in   ) :: is_aerosol_aware
          logical,                   intent(in   ) :: merra2_aerosol_aware
-
          real(kind_phys), optional, intent(inout) :: nc(:,:)
          real(kind_phys), optional, intent(inout) :: nwfa(:,:)
          real(kind_phys), optional, intent(inout) :: nifa(:,:)
          real(kind_phys), optional, intent(inout) :: nwfa2d(:)
          real(kind_phys), optional, intent(inout) :: nifa2d(:)
+         real(kind_phys),           intent(in)    :: aerfld(:,:,:)
          ! State variables
          real(kind_phys),           intent(in   ) :: tgrs(:,:)
          real(kind_phys),           intent(in   ) :: prsl(:,:)
          real(kind_phys),           intent(in   ) :: phil(:,:)
          real(kind_phys),           intent(in   ) :: area(:)
-         real (kind=kind_phys), dimension(:,:,:),intent(in):: aerfld
          ! Cloud effective radii
          real(kind_phys), optional, intent(  out) :: re_cloud(:,:)
          real(kind_phys), optional, intent(  out) :: re_ice(:,:)
@@ -169,7 +168,7 @@ module mp_thompson
 
            ni = ni/(1.0_kind_phys-spechum)
            nr = nr/(1.0_kind_phys-spechum)
-           if (is_aerosol_aware .or. merra2_aerosol_aware) then
+           if (is_aerosol_aware) then
               nc = nc/(1.0_kind_phys-spechum)
               nwfa = nwfa/(1.0_kind_phys-spechum)
               nifa = nifa/(1.0_kind_phys-spechum)
@@ -384,18 +383,17 @@ module mp_thompson
          ! Aerosols
          logical,                   intent(in)    :: is_aerosol_aware, reset_dBZ
          logical,                   intent(in)    :: merra2_aerosol_aware
-         ! The following arrays are not allocated if is_aerosol_aware is false
          real(kind_phys), optional, intent(inout) :: nc(:,:)
          real(kind_phys), optional, intent(inout) :: nwfa(:,:)
          real(kind_phys), optional, intent(inout) :: nifa(:,:)
          real(kind_phys), optional, intent(in   ) :: nwfa2d(:)
          real(kind_phys), optional, intent(in   ) :: nifa2d(:)
+         real(kind_phys),           intent(in)    :: aerfld(:,:,:)
          ! State variables and timestep information
          real(kind_phys),           intent(inout) :: tgrs(:,:)
          real(kind_phys),           intent(in   ) :: prsl(:,:)
          real(kind_phys),           intent(in   ) :: phii(:,:)
          real(kind_phys),           intent(in   ) :: omega(:,:)
-         real (kind=kind_phys), dimension(:,:,:),intent(in):: aerfld
          real(kind_phys),           intent(in   ) :: dtp
          logical,                   intent(in   ) :: first_time_step
          integer,                   intent(in   ) :: istep, nsteps
@@ -518,6 +516,7 @@ module mp_thompson
             errflg = 1
             return
          end if
+
          ! Set reduced time step if subcycling is used
          if (nsteps>1) then
             dtstep = dtp/real(nsteps, kind=kind_phys)
@@ -541,7 +540,7 @@ module mp_thompson
                                          ' nc, nwfa, nifa, nwfa2d, nifa2d'
               errflg = 1
               return
-           else if (merra2_aerosol_aware .and. .not. (present(nc)     .and. &
+           else if (merra2_aerosol_aware .and. .not. (present(nc) .and. &
                                                   present(nwfa)   .and. &
                                                   present(nifa)         )) then
               write(errmsg,fmt='(*(a))') 'Logic error in mp_thompson_run:', &
@@ -551,7 +550,6 @@ module mp_thompson
               return
            end if
          end if
-
 
          !> - Convert specific humidity to water vapor mixing ratio.
          !> - Also, hydrometeor variables are mass or number mixing ratio
@@ -699,8 +697,8 @@ module mp_thompson
          if (merra2_aerosol_aware) then
            call get_niwfa(aerfld, nifa, nwfa, ncol, nlev)
          end if
-         !> - Call mp_gt_driver() with or without aerosols
-         if (is_aerosol_aware .or. merra2_aerosol_aware) then
+         !> - Call mp_gt_driver() with or without aerosols, with or without effective radii, ...
+         if (is_aerosol_aware) then
             if (do_effective_radii) then
                call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
                                  nc=nc, nwfa=nwfa, nifa=nifa, nwfa2d=nwfa2d, nifa2d=nifa2d,     &
@@ -781,7 +779,88 @@ module mp_thompson
                                  qiten3=qiten3, niten3=niten3, nrten3=nrten3, ncten3=ncten3,    &
                                  qcten3=qcten3)
             end if
-         else
+         else if (merra2_aerosol_aware) then
+            if (do_effective_radii) then
+               call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
+                                 nc=nc, nwfa=nwfa, nifa=nifa,                                   &
+                                 tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtstep, dt_inner=dt_inner,  &
+                                 rainnc=rain_mp, rainncv=delta_rain_mp,                         &
+                                 snownc=snow_mp, snowncv=delta_snow_mp,                         &
+                                 icenc=ice_mp, icencv=delta_ice_mp,                             &
+                                 graupelnc=graupel_mp, graupelncv=delta_graupel_mp, sr=sr,      &
+                                 refl_10cm=refl_10cm,                                           &
+                                 diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
+                                 re_cloud=re_cloud, re_ice=re_ice, re_snow=re_snow,             &
+                                 has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
+                                 rand_perturb_on=rand_perturb_on, kme_stoch=kme_stoch,          &
+                                 ! DH* 2020-06-05 not passing this optional argument, see
+                                 !       comment in module_mp_thompson.F90 / mp_gt_driver
+                                 !rand_pert=rand_pert,                                          &
+                                 ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
+                                 ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
+                                 its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
+                                 reset_dBZ=reset_dBZ, istep=istep, nsteps=nsteps,               &
+                                 first_time_step=first_time_step, errmsg=errmsg, errflg=errflg, &
+                                 ! Extended diagnostics
+                                 ext_diag=ext_diag,                                             &
+                                 ! vts1=vts1, txri=txri, txrc=txrc,                             &
+                                 prw_vcdc=prw_vcdc,                                             &
+                                 prw_vcde=prw_vcde, tpri_inu=tpri_inu, tpri_ide_d=tpri_ide_d,   &
+                                 tpri_ide_s=tpri_ide_s, tprs_ide=tprs_ide,                      &
+                                 tprs_sde_d=tprs_sde_d,                                         &
+                                 tprs_sde_s=tprs_sde_s, tprg_gde_d=tprg_gde_d,                  &
+                                 tprg_gde_s=tprg_gde_s, tpri_iha=tpri_iha,                      &
+                                 tpri_wfz=tpri_wfz, tpri_rfz=tpri_rfz, tprg_rfz=tprg_rfz,       &
+                                 tprs_scw=tprs_scw, tprg_scw=tprg_scw, tprg_rcs=tprg_rcs,       &
+                                 tprs_rcs=tprs_rcs,                                             &
+                                 tprr_rci=tprr_rci, tprg_rcg=tprg_rcg, tprw_vcd_c=tprw_vcd_c,   &
+                                 tprw_vcd_e=tprw_vcd_e, tprr_sml=tprr_sml, tprr_gml=tprr_gml,   &
+                                 tprr_rcg=tprr_rcg, tprr_rcs=tprr_rcs,                          &
+                                 tprv_rev=tprv_rev, tten3=tten3,                                &
+                                 qvten3=qvten3, qrten3=qrten3, qsten3=qsten3, qgten3=qgten3,    &
+                                 qiten3=qiten3, niten3=niten3, nrten3=nrten3, ncten3=ncten3,    &
+                                 qcten3=qcten3)
+            else
+               call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
+                                 nc=nc, nwfa=nwfa, nifa=nifa,                                   &
+                                 tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtstep, dt_inner=dt_inner,  &
+                                 rainnc=rain_mp, rainncv=delta_rain_mp,                         &
+                                 snownc=snow_mp, snowncv=delta_snow_mp,                         &
+                                 icenc=ice_mp, icencv=delta_ice_mp,                             &
+                                 graupelnc=graupel_mp, graupelncv=delta_graupel_mp, sr=sr,      &
+                                 refl_10cm=refl_10cm,                                           &
+                                 diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
+                                 has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
+                                 rand_perturb_on=rand_perturb_on, kme_stoch=kme_stoch,          &
+                                 ! DH* 2020-06-05 not passing this optional argument, see
+                                 !       comment in module_mp_thompson.F90 / mp_gt_driver
+                                 !rand_pert=rand_pert,                                          &
+                                 ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
+                                 ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
+                                 its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
+                                 reset_dBZ=reset_dBZ, istep=istep, nsteps=nsteps,               &
+                                 first_time_step=first_time_step, errmsg=errmsg, errflg=errflg, &
+                                 ! Extended diagnostics
+                                 ext_diag=ext_diag,                                             &
+                                 ! vts1=vts1, txri=txri, txrc=txrc,                             &
+                                 prw_vcdc=prw_vcdc,                                             &
+                                 prw_vcde=prw_vcde, tpri_inu=tpri_inu, tpri_ide_d=tpri_ide_d,   &
+                                 tpri_ide_s=tpri_ide_s, tprs_ide=tprs_ide,                      &
+                                 tprs_sde_d=tprs_sde_d,                                         &
+                                 tprs_sde_s=tprs_sde_s, tprg_gde_d=tprg_gde_d,                  &
+                                 tprg_gde_s=tprg_gde_s, tpri_iha=tpri_iha,                      &
+                                 tpri_wfz=tpri_wfz, tpri_rfz=tpri_rfz, tprg_rfz=tprg_rfz,       &
+                                 tprs_scw=tprs_scw, tprg_scw=tprg_scw, tprg_rcs=tprg_rcs,       &
+                                 tprs_rcs=tprs_rcs,                                             &
+                                 tprr_rci=tprr_rci, tprg_rcg=tprg_rcg, tprw_vcd_c=tprw_vcd_c,   &
+                                 tprw_vcd_e=tprw_vcd_e, tprr_sml=tprr_sml, tprr_gml=tprr_gml,   &
+                                 tprr_rcg=tprr_rcg, tprr_rcs=tprr_rcs,                          &
+                                 tprv_rev=tprv_rev, tten3=tten3,                                &
+                                 qvten3=qvten3, qrten3=qrten3, qsten3=qsten3, qgten3=qgten3,    &
+                                 qiten3=qiten3, niten3=niten3, nrten3=nrten3, ncten3=ncten3,    &
+                                 qcten3=qcten3)
+            end if
+         else ! neither is_aerosol_aware nor merra2_aerosol_aware
             if (do_effective_radii) then
                call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
                                  tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtstep, dt_inner=dt_inner,  &
@@ -970,15 +1049,17 @@ module mp_thompson
       end subroutine mp_thompson_finalize
 
       subroutine get_niwfa(aerfld, nifa, nwfa, ncol, nlev)
-        implicit none
-        integer, intent(in)::ncol, nlev
-        real (kind=kind_phys), dimension(:,:,:),intent(in):: aerfld
-        real (kind=kind_phys), dimension(:,:),intent(out)::nifa, nwfa
-        nifa=(aerfld(:,:,1)/4.0737762+aerfld(:,:,2)/30.459203+aerfld(:,:,3)/153.45048+ &
-             aerfld(:,:,4)/1011.5142+ aerfld(:,:,5)/5683.3501)*1.e15
-        nwfa=((aerfld(:,:,6)/0.0045435214+aerfld(:,:,7)/0.2907854+aerfld(:,:,8)/12.91224+ &
-             aerfld(:,:,9)/206.2216+ aerfld(:,:,10)/4326.23)*1.+aerfld(:,:,11)/0.3053104*5+ &
-             aerfld(:,:,15)/0.3232698*1)*1.e15
+         implicit none
+         integer, intent(in)::ncol, nlev
+         real (kind=kind_phys), dimension(:,:,:), intent(in)  :: aerfld
+         real (kind=kind_phys), dimension(:,:),   intent(out ):: nifa, nwfa
+
+         nifa=(aerfld(:,:,1)/4.0737762+aerfld(:,:,2)/30.459203+aerfld(:,:,3)/153.45048+ &
+              aerfld(:,:,4)/1011.5142+ aerfld(:,:,5)/5683.3501)*1.e15
+
+         nwfa=((aerfld(:,:,6)/0.0045435214+aerfld(:,:,7)/0.2907854+aerfld(:,:,8)/12.91224+ &
+              aerfld(:,:,9)/206.2216+ aerfld(:,:,10)/4326.23)*1.+aerfld(:,:,11)/0.3053104*5+ &
+              aerfld(:,:,15)/0.3232698*1)*1.e15
       end subroutine get_niwfa
 
 end module mp_thompson
