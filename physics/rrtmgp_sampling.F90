@@ -82,16 +82,16 @@ contains
   !
   ! -------------------------------------------------------------------------------------------------
   subroutine sampled_mask(randoms, cloud_frac, cloud_mask, overlap_param, randoms2)
-  	! Inputs
+    ! Inputs
     real(wp), dimension(:,:,:),  intent(in )           :: randoms       ! ngpt,nlay,ncol
     real(wp), dimension(:,:),    intent(in )           :: cloud_frac    ! ncol,nlay
 
-	! Outputs
+    ! Outputs
     logical,  dimension(:,:,:),  intent(out)           :: cloud_mask    ! ncol,nlay,ngpt
 
-	! Inputs (optional)
+    ! Inputs (optional)
     real(wp), dimension(:,:),    intent(in ), optional :: overlap_param ! ncol,nlay-1
-	real(wp), dimension(:,:,:),  intent(in ), optional :: randoms2      ! ngpt,nlay,ncol
+    real(wp), dimension(:,:,:),  intent(in ), optional :: randoms2      ! ngpt,nlay,ncol
     
     ! Local variables
     integer                              :: ncol, nlay, ngpt, icol, ilay, igpt
@@ -103,11 +103,11 @@ contains
     logical                              :: l_use_second_rng = .false.
     character(len=128)                   :: error_msg
 
-	! Array dimensions
+    ! Array dimensions
     ncol = size(randoms, 3)
     nlay = size(randoms, 2)
     ngpt = size(randoms, 1)
-
+    
     ! Using cloud-overlap parameter (alpha)?
     if (present(overlap_param)) l_use_overlap_param = .true.
     
@@ -116,67 +116,67 @@ contains
     
     ! Construct the cloud mask for each column
     do icol = 1, ncol
-      cloud_mask_layer(1:nlay) = cloud_frac(icol,1:nlay) > 0._wp
-      if(.not. any(cloud_mask_layer)) then
-        cloud_mask(icol,1:nlay,1:ngpt) = .false.
-        cycle
-      end if
-      cloud_lay_fst = findloc(cloud_mask_layer, .true., dim=1)
-      cloud_lay_lst = findloc(cloud_mask_layer, .true., dim=1, back = .true.)
-      cloud_mask(icol,1:cloud_lay_fst,1:ngpt) = .false.
-
-      ilay = cloud_lay_fst
-      local_rands(1:ngpt) = randoms(1:ngpt,cloud_lay_fst,icol)
-      cloud_mask(icol,ilay,1:ngpt) = local_rands(1:ngpt) > (1._wp - cloud_frac(icol,ilay))
-      do ilay = cloud_lay_fst+1, cloud_lay_lst
-	    ! ################################################################################
-        ! Max-random overlap
-        !   new  random deviates if the adjacent layer isn't cloudy
-        !   same random deviates if the adjacent layer is    cloudy
-	    ! ################################################################################
-	    if (.not. l_use_overlap_param) then
-           if(cloud_mask_layer(ilay)) then
-             if(.not. cloud_mask_layer(ilay-1)) local_rands(1:ngpt) = randoms(1:ngpt,ilay,icol)
-             cloud_mask(icol,ilay,1:ngpt) = local_rands(1:ngpt) > (1._wp - cloud_frac(icol,ilay))
-           else
-             cloud_mask(icol,ilay,1:ngpt) = .false.
-           end if
-	    end if   ! END COND: Maximum-random overlap
-	    ! ################################################################################
-        ! Exponential-random overlap
-        !   new  random deviates if the adjacent layer isn't cloudy
-        !   correlated  deviates if the adjacent layer is    cloudy
-	    ! ################################################################################
-		if (l_use_overlap_param) then
-           if(cloud_mask_layer(ilay)) then
-               if(cloud_mask_layer(ilay-1)) then
-               ! Create random deviates correlated between this layer and the previous layer
-               !    (have to remove mean value before enforcing correlation).
-               rho = overlap_param(icol,ilay-1)
-               local_rands(1:ngpt) =  rho*(local_rands(1:ngpt)      -0.5_wp) + &
-                      sqrt(1._wp-rho*rho)*(randoms(1:ngpt,ilay,icol)-0.5_wp) + 0.5_wp
+       cloud_mask_layer(1:nlay) = cloud_frac(icol,1:nlay) > 0._wp
+       if(.not. any(cloud_mask_layer)) then
+          cloud_mask(icol,1:nlay,1:ngpt) = .false.
+          cycle
+       end if
+       cloud_lay_fst = findloc(cloud_mask_layer, .true., dim=1)
+       cloud_lay_lst = findloc(cloud_mask_layer, .true., dim=1, back = .true.)
+       cloud_mask(icol,1:cloud_lay_fst,1:ngpt) = .false.
+       
+       ilay = cloud_lay_fst
+       local_rands(1:ngpt) = randoms(1:ngpt,cloud_lay_fst,icol)
+       cloud_mask(icol,ilay,1:ngpt) = local_rands(1:ngpt) > (1._wp - cloud_frac(icol,ilay))
+       do ilay = cloud_lay_fst+1, cloud_lay_lst
+          ! ################################################################################
+          ! Max-random overlap
+          !   new  random deviates if the adjacent layer isn't cloudy
+          !   same random deviates if the adjacent layer is    cloudy
+          ! ################################################################################
+          if (.not. l_use_overlap_param) then
+             if(cloud_mask_layer(ilay)) then
+                if(.not. cloud_mask_layer(ilay-1)) local_rands(1:ngpt) = randoms(1:ngpt,ilay,icol)
+                cloud_mask(icol,ilay,1:ngpt) = local_rands(1:ngpt) > (1._wp - cloud_frac(icol,ilay))
              else
-               local_rands(1:ngpt) = randoms(1:ngpt,ilay,icol)
-             end if        
-             cloud_mask(icol,ilay,1:ngpt) = local_rands(1:ngpt) > (1._wp - cloud_frac(icol,ilay))
-  		  endif   
-		endif   ! END COND: Exponential/Exponential-random overlap
-	    ! ################################################################################
-        ! Exponential-decorrelation overlap
-        !   new  random deviates if the adjacent layer isn't cloudy
-        !   correlated  deviates if the adjacent layer is    cloudy and decorrelation-length
-	    ! ################################################################################		
-		if (l_use_overlap_param .and. l_use_second_rng) then
-	       where(randoms2(1:nGpt,iLay,iCol) .le. overlap_param(iCol,iLay))	      
-	          cloud_mask(iCol,iLay,1:nGpt) = randoms(1:ngpt,iLay-1,iCol) > (1._wp - cloud_frac(iCol,iLay))
-           elsewhere
-              cloud_mask(iCol,iLay,1:nGpt) = randoms(1:ngpt,iLay,iCol)   > (1._wp - cloud_frac(iCol,iLay))
-	       end where	
-		endif 	! END COND: Exponential decorrelation-length
-      end do    ! END LOOP: Layers
-      
-      ! Set cloud-mask in layer below clouds to false      
-      cloud_mask(icol,cloud_lay_lst+1:nlay, 1:ngpt) = .false.
+                cloud_mask(icol,ilay,1:ngpt) = .false.
+             end if
+          end if   ! END COND: Maximum-random overlap
+          ! ################################################################################
+          ! Exponential-random overlap
+          !   new  random deviates if the adjacent layer isn't cloudy
+          !   correlated  deviates if the adjacent layer is    cloudy
+          ! ################################################################################
+          if (l_use_overlap_param) then
+             if(cloud_mask_layer(ilay)) then
+                if(cloud_mask_layer(ilay-1)) then
+                   ! Create random deviates correlated between this layer and the previous layer
+                   !    (have to remove mean value before enforcing correlation).
+                   rho = overlap_param(icol,ilay-1)
+                   local_rands(1:ngpt) =  rho*(local_rands(1:ngpt)      -0.5_wp) + &
+                        sqrt(1._wp-rho*rho)*(randoms(1:ngpt,ilay,icol)-0.5_wp) + 0.5_wp
+                else
+                   local_rands(1:ngpt) = randoms(1:ngpt,ilay,icol)
+                end if
+                cloud_mask(icol,ilay,1:ngpt) = local_rands(1:ngpt) > (1._wp - cloud_frac(icol,ilay))
+             endif
+          endif   ! END COND: Exponential/Exponential-random overlap
+          ! ################################################################################
+          ! Exponential-decorrelation overlap
+          !   new  random deviates if the adjacent layer isn't cloudy
+          !   correlated  deviates if the adjacent layer is    cloudy and decorrelation-length
+          ! ################################################################################		
+          if (l_use_overlap_param .and. l_use_second_rng) then
+             where(randoms2(1:nGpt,iLay,iCol) .le. overlap_param(iCol,iLay-1))
+                cloud_mask(iCol,iLay,1:nGpt) = randoms(1:ngpt,iLay-1,iCol) > (1._wp - cloud_frac(iCol,iLay))
+             elsewhere
+                cloud_mask(iCol,iLay,1:nGpt) = randoms(1:ngpt,iLay,iCol)   > (1._wp - cloud_frac(iCol,iLay))
+             end where
+          endif 	! END COND: Exponential decorrelation-length
+       end do    ! END LOOP: Layers
+       
+       ! Set cloud-mask in layer below clouds to false      
+       cloud_mask(icol,cloud_lay_lst+1:nlay, 1:ngpt) = .false.
     end do		! END LOOP: Columns
     
   end subroutine sampled_mask
