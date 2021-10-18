@@ -197,7 +197,7 @@
       real(kind=kind_phys), dimension(im,lm+LTP+1) :: tem2db, hz
 
       real(kind=kind_phys), dimension(im,lm+LTP,min(4,ncnd))   :: ccnd
-      real(kind=kind_phys), dimension(im,lm+LTP,2:ntrac)       :: tracer1
+      real(kind=kind_phys), dimension(im,lm+LTP,2:ntrac+2)     :: tracer1
       real(kind=kind_phys), dimension(im,lm+LTP,NF_CLDS)       :: clouds
       real(kind=kind_phys), dimension(im,lm+LTP,NF_VGAS)       :: gasvmr
       real(kind=kind_phys), dimension(im,lm+LTP,NBDSW,NF_AESW) :: faersw
@@ -305,7 +305,7 @@
       enddo
 
       !--- recast remaining all tracers (except sphum) forcing them all to be positive
-      do j = 2, ntrac
+      do j = 2, ntrac 
         do k = 1, LM
           k1 = k + kd
           k2 = k + lsk
@@ -636,7 +636,7 @@
             enddo
           enddo
           ! for Thompson MP - prepare variables for calc_effr
-          if_thompson: if (imp_physics == imp_physics_thompson .and. ltaerosol) then
+          if_thompson: if (imp_physics == imp_physics_thompson .and. (ltaerosol .or. mraerosol)) then
             do k=1,LMK
               do i=1,IM
                 qvs = qlyr(i,k)
@@ -649,20 +649,6 @@
                 nc_mp (i,k) = tracer1(i,k,ntlnc)/(1.-qvs)
                 ni_mp (i,k) = tracer1(i,k,ntinc)/(1.-qvs)
                 nwfa  (i,k) = tracer1(i,k,ntwa)
-              enddo
-            enddo
-          else if (imp_physics == imp_physics_thompson .and. mraerosol) then
-            do k=1,LMK
-              do i=1,IM
-                qvs = qlyr(i,k)
-                qv_mp (i,k) = qvs/(1.-qvs)
-                rho   (i,k) = con_eps*plyr(i,k)*100./(con_rd*tlyr(i,k)*(qv_mp(i,k)+con_eps))
-                orho  (i,k) = 1.0/rho(i,k)
-                qc_mp (i,k) = tracer1(i,k,ntcw)/(1.-qvs)
-                qi_mp (i,k) = tracer1(i,k,ntiw)/(1.-qvs)
-                qs_mp (i,k) = tracer1(i,k,ntsw)/(1.-qvs)
-                nc_mp (i,k) = tracer1(i,k,ntlnc)/(1.-qvs)
-                ni_mp (i,k) = tracer1(i,k,ntinc)/(1.-qvs)
               enddo
             enddo
 

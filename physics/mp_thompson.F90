@@ -154,10 +154,6 @@ module mp_thompson
          where(qs<0)      qs = 0.0
          where(qg<0)      qg = 0.0
 
-         if (merra2_aerosol_aware) then
-           call get_niwfa(aerfld, nifa, nwfa, ncol, nlev)
-         end if
-
          !> - Convert specific humidity to water vapor mixing ratio.
          !> - Also, hydrometeor variables are mass or number mixing ratio
          !> - either kg of species per kg of dry air, or per kg of (dry + vapor).
@@ -218,6 +214,8 @@ module mp_thompson
                  nwfa(i,k) = naCCN1+naCCN0*exp(-((hgt(i,k)-hgt(i,1))/1000.)*niCCN3)
                enddo
              enddo
+           else if (merra2_aerosol_aware) then
+             call get_niwfa(aerfld, nifa, nwfa, ncol, nlev)
            else
              if (mpirank==mpiroot) write(*,*) ' Apparently initial CCN aerosols are present.'
              if (MAXVAL(nwfa2d) .lt. eps) then
@@ -520,7 +518,6 @@ module mp_thompson
             errflg = 1
             return
          end if
-
          ! Set reduced time step if subcycling is used
          if (nsteps>1) then
             dtstep = dtp/real(nsteps, kind=kind_phys)
@@ -544,7 +541,7 @@ module mp_thompson
                                          ' nc, nwfa, nifa, nwfa2d, nifa2d'
               errflg = 1
               return
-           else if (is_aerosol_aware .and. .not. (present(nc)     .and. &
+           else if (merra2_aerosol_aware .and. .not. (present(nc)     .and. &
                                                   present(nwfa)   .and. &
                                                   present(nifa)         )) then
               write(errmsg,fmt='(*(a))') 'Logic error in mp_thompson_run:', &
@@ -555,9 +552,6 @@ module mp_thompson
            end if
          end if
 
-         if (merra2_aerosol_aware) then
-           call get_niwfa(aerfld, nifa, nwfa, ncol, nlev)
-         end if
 
          !> - Convert specific humidity to water vapor mixing ratio.
          !> - Also, hydrometeor variables are mass or number mixing ratio
@@ -702,7 +696,9 @@ module mp_thompson
             ncten3     => diag3d(:,:,36:36)
             qcten3     => diag3d(:,:,37:37)
          end if set_extended_diagnostic_pointers
-
+         if (merra2_aerosol_aware) then
+           call get_niwfa(aerfld, nifa, nwfa, ncol, nlev)
+         end if
          !> - Call mp_gt_driver() with or without aerosols
          if (is_aerosol_aware .or. merra2_aerosol_aware) then
             if (do_effective_radii) then
