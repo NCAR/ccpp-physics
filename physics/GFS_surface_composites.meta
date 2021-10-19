@@ -590,7 +590,7 @@
   type = logical
   intent = in
   optional = F
-[sfcemis_wat]
+[semis_wat]
   standard_name = surface_longwave_emissivity_over_water
   long_name = surface lw emissivity in fraction over water
   units = frac
