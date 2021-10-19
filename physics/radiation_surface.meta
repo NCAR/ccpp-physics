@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = module_radiation_surface
   type = module
-  dependencies = 
+  dependencies = namelist_soilveg_ruc.F90,set_soilveg_ruc.F90 
 
 ########################################################################
 [ccpp-arg-table]
