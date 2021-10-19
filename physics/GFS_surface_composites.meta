@@ -590,6 +590,15 @@
   type = logical
   intent = in
   optional = F
+[sfcemis_wat]
+  standard_name = surface_longwave_emissivity_over_water
+  long_name = surface lw emissivity in fraction over water
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [semis_lnd]
   standard_name = surface_longwave_emissivity_over_land
   long_name = surface lw emissivity in fraction over land
