@@ -8,7 +8,7 @@
   name = myjsfc_wrapper_init
   type = scheme
 [do_myjsfc]
-  standard_name = flag_for_mellor_yamada_janic_surface_layer_scheme
+  standard_name = flag_for_mellor_yamada_janjic_surface_layer_scheme
   long_name = flag to activate MYJ surface layer scheme
   units = flag
   dimensions = ()
@@ -322,7 +322,7 @@
   intent = inout
   optional = F
 [phy_myj_elflx]
-  standard_name = surface_upward_specific_humidity_flux_for_mellor_yamada_janic_surface_layer_scheme
+  standard_name = surface_upward_specific_humidity_flux_for_mellor_yamada_janjic_surface_layer_scheme
   long_name = kinematic surface latent heat flux
   units = m s-1 kg kg-1
   dimensions = (horizontal_loop_extent)
