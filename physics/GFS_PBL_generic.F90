@@ -336,7 +336,7 @@
         dqsfc_diag, dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag,                                                        &
         rd, cp, fvirt, hvap, t1, q1, prsl, hflx, ushfsfci, oceanfrac, kdt, dusfc_cice, dvsfc_cice,                             &
         dtsfc_cice, dqsfc_cice, wet, dry, icy, wind, stress_wat, hflx_wat, evap_wat, ugrs1, vgrs1, hffac, &
-        ugrs, vgrs, tgrs, qgrs, save_u, save_v, save_t, save_q, errmsg, errflg)
+        ugrs, vgrs, tgrs, qgrs, save_u, save_v, save_t, save_q, huge, errmsg, errflg)
 
       use machine,                only : kind_phys
       use GFS_PBL_generic_common, only : set_aerosol_tracer_index
@@ -357,7 +357,7 @@
       real(kind=kind_phys), dimension(:,:, :), intent(in) :: save_q
 
       real(kind=kind_phys), intent(in) :: dtf
-      real(kind=kind_phys), intent(in) :: rd, cp, fvirt, hvap
+      real(kind=kind_phys), intent(in) :: rd, cp, fvirt, hvap, huge
       real(kind=kind_phys), dimension(:), intent(in) :: t1, q1, hflx, oceanfrac
       real(kind=kind_phys), dimension(:,:), intent(in) :: prsl
       real(kind=kind_phys), dimension(:), intent(in) :: dusfc_cice, dvsfc_cice, dtsfc_cice, dqsfc_cice, &
@@ -392,7 +392,7 @@
       integer, intent(out) :: errflg
 
       real(kind=kind_phys), parameter :: zero  = 0.0_kp, one = 1.0_kp
-      real(kind=kind_phys), parameter :: huge  = 9.9692099683868690E36 ! NetCDF float FillValue, same as in GFS_typedefs.F90
+!     real(kind=kind_phys), parameter :: huge  = 9.9692099683868690E36 ! NetCDF float FillValue, same as in GFS_typedefs.F90
       real(kind=kind_phys), parameter :: qmin  = 1.0e-8_kp
       integer :: i, k, kk, k1, n
       real(kind=kind_phys) :: tem, rho
