@@ -1,7 +1,8 @@
-!WRF:MODEL_LAYER:PHYSICS
+! !>  \file module_mp_nssl_2mom.F90
+!! This file contains the NSSL cloud microphysics scheme by Edward Mansell (NOAA/NSSL)
 
 
-! prepocessed on "Oct  6 2021" at "17:14:05"
+! prepocessed on "Oct 18 2021" at "17:18:18"
 
 
 
@@ -169,11 +170,11 @@
 
 
 MODULE module_mp_nssl_2mom
-  use physcons, only: con_pi, con_g, con_rd, con_cp, con_rv, con_t0c, con_cliq, con_csol, con_eps
   IMPLICIT NONE
   
   public nssl_2mom_driver
   public nssl_2mom_init
+  public nssl_2mom_init_const
   public calc_eff_radius
   public calcnfromq
   private gamma_sp,gamxinf,GAML02, GAML02d300, GAML02d500, fqvs, fqis
@@ -830,12 +831,12 @@ MODULE module_mp_nssl_2mom
 !  new values for  cs and ds
       real, parameter :: cs = 12.42             ! snow terminal velocity power law coefficient 
       real, parameter :: ds = 0.42              ! snow terminal velocity power law coefficient 
-      real, parameter :: cp608 = con_eps ! 0.608          ! constant used in conversion of T to Tv
-      real, parameter :: pi = con_pi
+      real :: cp608 = 0.608          ! constant used in conversion of T to Tv
+      real :: gr = 9.8
+
+      real, parameter :: pi = 3.141592653589793
       real, parameter :: piinv = 1./pi
       real, parameter :: pid4 = pi/4.0
-
-      real, parameter :: gr = con_g
 
 !
 ! max and min mean volumes
@@ -899,19 +900,23 @@ MODULE module_mp_nssl_2mom
       real, parameter :: cbwbolton = 29.65 ! constants for Bolton formulation
       real, parameter :: cawbolton = 17.67
 
-      real, parameter :: tfr = con_t0c, tfrh = 233.15
+      real, parameter :: tfrh = 233.15
+      real :: tfr = 273.15
 
-      real, parameter :: cp = con_cp, rd = con_rd, rw = con_rv
-      REAL, PRIVATE, parameter ::      cpl = con_cliq ! 4190.0
-      REAL, PRIVATE, parameter ::      cpigb = con_csol ! 2106.0
-      real, parameter :: cpi = 1./cp
-      real, parameter :: cap = rd/cp, poo = 1.0e+05
+      real :: cp = 1004.0, rd = 287.04
+      real :: rw = 461.5              ! gas const. for water vapor
+      REAL, PRIVATE ::      cpl = 4190.0
+     REAL, PRIVATE ::      cpigb = 2106.0
+      real :: cpi 
+      real :: cap 
+      real :: tfrcbw
+      real :: tfrcbi
+      real :: rovcp
 
+      real, parameter :: poo = 1.0e+05
       real, parameter :: advisc0 = 1.832e-05     ! reference dynamic viscosity (SMT; see Beard & Pruppacher 71)
       real, parameter :: advisc1 = 1.718e-05     ! dynamic viscosity constant used in thermal conductivity calc
       real, parameter :: tka0 = 2.43e-02         ! reference thermal conductivity
-      real, parameter :: tfrcbw = tfr - cbw
-      real, parameter :: tfrcbi = tfr - cbi
 
      ! GHB: Needed for eqtset=2 in cm1
 !     REAL, PRIVATE ::      cv = cp - rd
@@ -1094,44 +1099,6 @@ MODULE module_mp_nssl_2mom
 ! #####################################################################
 ! #####################################################################
 
- SUBROUTINE wrf_debug( level, message )
-   implicit none
-   integer :: level
-   character(*) :: message
-   
-   IF ( level < 0 ) THEN
-     write(0,*) message
-   ENDIF
-   
- END SUBROUTINE wrf_debug
-
-!
-! #####################################################################
-!
- SUBROUTINE wrf_message( message )
-   implicit none
-   character(*) :: message
-   
-     write(0,*) message
-   
- END SUBROUTINE wrf_message
-
-!
-! #####################################################################
-!
- SUBROUTINE wrf_error_fatal( message )
-  !  USE COMMASMPI_MODULE, only: commasmpi_abort
-   implicit none
-   character(*) :: message
-   
-     write(0,*) message
-   !  call commasmpi_abort()
-   
- END SUBROUTINE wrf_error_fatal
-
-!
-! #####################################################################
-!
 
  REAL FUNCTION fqvs(t)
   implicit none
@@ -1148,6 +1115,35 @@ MODULE module_mp_nssl_2mom
 
 
 
+! #####################################################################
+! #####################################################################
+
+
+       SUBROUTINE nssl_2mom_init_const(  &
+         con_g, con_rd, con_cp, con_rv, con_t0c, con_cliq, con_csol, con_eps )
+         
+         implicit none
+         real, intent(in) :: con_g, con_rd, con_cp, con_rv, &
+                             con_t0c, con_cliq, con_csol, con_eps
+       
+       cp608 = con_eps ! 0.608          ! constant used in conversion of T to Tv
+       gr = con_g
+       tfr = con_t0c
+       cp = con_cp
+       rd = con_rd
+       rw = con_rv
+       cpl = con_cliq ! 4190.0
+       cpigb = con_csol ! 2106.0
+       cpi = 1./cp
+       cap = rd/cp
+       tfrcbw = tfr - cbw
+       tfrcbi = tfr - cbi
+       rovcp = rd/cp
+       
+       
+
+        RETURN
+       END SUBROUTINE nssl_2mom_init_const
 ! #####################################################################
 ! #####################################################################
 
@@ -1581,7 +1577,9 @@ MODULE module_mp_nssl_2mom
 !      ltmp = lhlw
       ENDIF
     ELSE
-      CALL wrf_error_fatal( 'nssl_2mom_init: Invalid value of ipctmp' )
+      errmsg = 'nssl_2mom_init: Invalid value of ipctmp'
+      errflg = 1
+      RETURN
     ENDIF
 
 
@@ -2299,19 +2297,6 @@ SUBROUTINE nssl_2mom_driver(qv, qc, qr, qi, qs, qh, qhl, ccw, crw, cci, csw, chw
 
      
 
-     IF ( switchccn .and. lccna > 1 .and. .not. invertccn) THEN
-     ! hack to switch from ccn to ccna from a restart
-     
-        DO jy = jts,jte
-         DO kz = kts,kte
-           DO ix = its,ite
-             cn(ix,kz,jy) = Max( 0.0, old_qccn - cn(ix,kz,jy) )
-           ENDDO
-         ENDDO
-       ENDDO
-     
-       switchccn = .false.
-     ENDIF
 
 !     ENDIF ! itimestep == 1
 
@@ -2365,6 +2350,7 @@ SUBROUTINE nssl_2mom_driver(qv, qc, qr, qi, qs, qh, qhl, ccw, crw, cci, csw, chw
 !     write(0,*) 'N2M: jy loop 1, lhl,na = ',lhl,na,present(qhl)
 
           ancuten(its:ite,1,kts:kte,:) = 0.0
+          thproclocal(:,:) = 0.0
 
      DO jy = jts,jye
      
@@ -2739,7 +2725,6 @@ SUBROUTINE nssl_2mom_driver(qv, qc, qr, qi, qs, qh, qhl, ccw, crw, cci, csw, chw
      &  ,t0,t9 & 
      &  ,an,dn1,t77 & 
      &  ,pn,wn & 
-     &  ,thproclocal,nproc,dx1,dy1,dz2d    &
      &  ,axtra2d, makediag  &
      &  ,ssat,t00,t77,flag_qndrop)
 
@@ -2823,7 +2808,7 @@ SUBROUTINE nssl_2mom_driver(qv, qc, qr, qi, qs, qh, qhl, ccw, crw, cci, csw, chw
         DO kz = kts,kte
           DO ix = its,ite
              re_cloud(ix,kz,jy) = MAX(2.51E-6, MIN(t1(ix,1,kz), 50.E-6))
-             re_ice(ix,kz,jy)   = MAX(10.01E-6, MIN(t2(ix,1,kz), 125.E-6))
+             re_ice(ix,kz,jy)   = MAX(10.01E-6, MIN(t2(ix,1,kz), 200.E-6))
              re_snow(ix,kz,jy)  = MAX(25.E-6, MIN(t3(ix,1,kz), 999.E-6))
              ! check for case where snow needs to be treated as cloud ice (for rrtmg radiation)
              IF ( .not. present(qi) ) re_ice(ix,kz,jy)  = MAX(10.E-6, MIN(t3(ix,1,kz), 125.E-6))
@@ -2925,6 +2910,7 @@ SUBROUTINE nssl_2mom_driver(qv, qc, qr, qi, qs, qh, qhl, ccw, crw, cci, csw, chw
        ENDDO
   
      ENDDO ! jy
+
      
 
 
@@ -2957,7 +2943,6 @@ END SUBROUTINE nssl_2mom_driver
 
       IF ( xx <= 0.0 ) THEN
         write(0,*) 'Argument to gamma must be > 0!! xx = ',xx
-        STOP
       ENDIF
       
       x = xx
@@ -3021,7 +3006,6 @@ END SUBROUTINE nssl_2mom_driver
         XAM=-X+A*DLOG(X)
         IF (XAM.GT.700.0.OR.A.GT.170.0) THEN
            WRITE(*,*)'a and/or x too large'
-           STOP
         ENDIF
         IF (X.EQ.0.0) THEN
            GIN=0.0
@@ -3082,7 +3066,6 @@ END SUBROUTINE nssl_2mom_driver
         XAM=-X+A*DLOG(X)
         IF (XAM.GT.700.0.OR.A.GT.170.0) THEN
            WRITE(*,*)'a and/or x too large'
-           STOP
         ENDIF
         IF (X.EQ.0.0) THEN
            GIN=0.0
@@ -3502,7 +3485,6 @@ END SUBROUTINE nssl_2mom_driver
         del = tmp - dgam*i
         IF ( i+1 > ngm0 ) THEN
           write(0,*) 'delabk: i+1 > ngm0!!!!',i,ngm0,nua,mua,tmp
-          STOP
         ENDIF
         g1pnua = gmoi(i) + (gmoi(i+1) - gmoi(i))*del*dgami
 !        write(91,*) 'delabk: g1pnua,gamma = ',g1pnua,Gamma_sp((1. + nua)/mua)
@@ -3790,8 +3772,7 @@ END SUBROUTINE nssl_2mom_driver
 
       DO n = 1,ndfall
 
-      IF ( ( il /= lc .and. il /= li ) .and. do_accurate_sedimentation .and. n .ge. 2 .and. &
-          ( n == interval_sedi_vt*(n/interval_sedi_vt) ) ) THEN
+      IF ( do_accurate_sedimentation .and. n .ge. 2 .and. ( n == interval_sedi_vt*(n/interval_sedi_vt) ) ) THEN
 !
 !  zero the precip flux arrays (2d)
 !
@@ -3799,7 +3780,7 @@ END SUBROUTINE nssl_2mom_driver
 !      xvt(:,:,:,il) = 0.0
       dummy = 0.d0
 
-      IF ( il == lh .or. il == lr ) xvt(kzb:kze,ix,1:3,il) = 0.0 ! reset to zero because routine will only compute points with q > qmin
+      xvt(kzb:kze,ix,1:3,il) = 0.0 ! reset to zero because routine will only compute points with q > qmin
 
       call ziegfall1d(nx,ny,nz,nor,norz,na,dtp,jgs,ix, & 
      &  xvt, rhovtzx, & 
@@ -6403,9 +6384,7 @@ END SUBROUTINE nssl_2mom_driver
 !      DO il = lc,lhab
 !      IF ( il .ne. lr ) THEN
         DO mgs = 1,ngscnt
-          IF ( ildo == 0 .or. ildo == lc ) THEN
-            vtxbar(mgs,lc,2) = vtxbar(mgs,lc,1)
-          ENDIF
+          vtxbar(mgs,lc,2) = vtxbar(mgs,lc,1)
         IF ( li .gt. 1 ) THEN
 !          vtxbar(mgs,li,2) = rhovt(mgs)*49420.*1.25447*xdia(mgs,li,1)**(1.415) ! n-wgt (Ferrier 94)
 !          vtxbar(mgs,li,2) = vtxbar(mgs,li,1)
@@ -8128,8 +8107,7 @@ END SUBROUTINE nssl_2mom_driver
           write(0,*) 'dtmpr = ',dtmpr
           write(0,*) 'gtmp = ',gtmp(ix,kz),dtmp(ix,kz)
           IF ( .not. (dbz(ix,jy,kz) .gt. -100 .and. dbz(ix,jy,kz) .lt. 200 ) ) THEN
-            write(0,*) 'dbz out of bounds! STOP!'
-!            STOP
+            write(0,*) 'dbz out of bounds!'
           ENDIF
          ENDIF
 
@@ -8178,7 +8156,6 @@ END SUBROUTINE nssl_2mom_driver
      &  ,t0,t9 & 
      &  ,an,dn,p2 & 
      &  ,pn,w & 
-     &  ,thproc,numproc, dx1,dy1,gz    &
      &  ,axtra,io_flag &
      &  ,ssfilt,t00,t77,flag_qndrop  &
      & )
@@ -8233,9 +8210,6 @@ END SUBROUTINE nssl_2mom_driver
     ! local
 
 
-      integer, intent(in) :: numproc
-      real, intent(inout) :: thproc(nz,numproc)
-      real, intent(in) :: dx1,dy1, gz(-nor+ng1:nx+nor,-nor+ng1:ny+nor,-norz+ng1:nz+norz)
       real axtra(-nor+ng1:nx+nor,-nor+ng1:ny+nor,-norz+ng1:nz+norz,nxtra)
       logical :: io_flag
       
@@ -8397,7 +8371,6 @@ END SUBROUTINE nssl_2mom_driver
       
       real :: cvm,cpm,rmm
 
-      real, parameter :: rovcp = rd/cp
       real, parameter ::      cpv = 1885.0       ! specific heat of water vapor at constant pressure
       
       integer :: kstag
@@ -8854,11 +8827,6 @@ END SUBROUTINE nssl_2mom_driver
       IF ( qx(mgs,lc) .LT. QEVAP ) THEN ! GO TO 63
         qwvp(mgs) = qwvp(mgs) + qx(mgs,lc)
         thetap(mgs) = thetap(mgs) - felv(mgs)*qx(mgs,lc)/(cp*pi0(mgs))
-        IF ( numproc > 1 ) THEN
-         dv = dx1*dy1*gz(igs(mgs),1,kgs(mgs))
-         thproc(kzbeg-1+kgs(mgs),16) = thproc(kzbeg-1+kgs(mgs),16) - felv(mgs)*qx(mgs,lc)/(cp*pi0(mgs))*dv  ! latent heating
-         thproc(kzbeg-1+kgs(mgs),18) = thproc(kzbeg-1+kgs(mgs),18) - qx(mgs,lc)*rho0(mgs)*dv/dtp  ! evaporation rate
-        ENDIF
         IF ( io_flag .and. nxtra > 1 ) THEN
            axtra(igs(mgs),jy,kgs(mgs),1) = -qx(mgs,lc)/dtp
         ENDIF
@@ -8915,11 +8883,6 @@ END SUBROUTINE nssl_2mom_driver
           cx(mgs,lc) = cx(mgs,lc) - tmp
         ENDIF
         thetap(mgs) = thetap(mgs) - felv(mgs)*QEVAP/(CP*pi0(mgs))
-        IF ( numproc > 1 ) THEN
-         dv = dx1*dy1*gz(igs(mgs),1,kgs(mgs))
-         thproc(kzbeg-1+kgs(mgs),16) = thproc(kzbeg-1+kgs(mgs),16) - felv(mgs)*QEVAP/(CP*pi0(mgs))*dv  ! latent heating
-         thproc(kzbeg-1+kgs(mgs),18) = thproc(kzbeg-1+kgs(mgs),18) - QEVAP*rho0(mgs)*dv/dtp  ! evaporation rate
-        ENDIF
         IF ( io_flag .and. nxtra > 1 ) THEN
            axtra(igs(mgs),jy,kgs(mgs),1) = -QEVAP/dtp
         ENDIF
@@ -9190,11 +9153,6 @@ END SUBROUTINE nssl_2mom_driver
         IF ( eqtset > 2 ) THEN
            pipert(mgs) = pipert(mgs) + felvpi(mgs)*(DCLOUD + dqr)
         ENDIF
-        IF ( numproc > 1 ) THEN
-         dv = dx1*dy1*gz(igs(mgs),1,kgs(mgs))
-         thproc(kzbeg-1+kgs(mgs),16) = thproc(kzbeg-1+kgs(mgs),16) + e1*(DCLOUD + dqr)*dv  ! latent heating
-         thproc(kzbeg-1+kgs(mgs),17) = thproc(kzbeg-1+kgs(mgs),17) + (DCLOUD + dqr)*rho0(mgs)*dv/dtp  ! condensation rate
-        ENDIF
         IF ( io_flag .and. nxtra > 1 ) THEN
            axtra(igs(mgs),jy,kgs(mgs),1) = DCLOUD/dtp
            axtra(igs(mgs),jy,kgs(mgs),2) = axtra(igs(mgs),jy,kgs(mgs),2) + dqr/dtp
@@ -9262,11 +9220,6 @@ END SUBROUTINE nssl_2mom_driver
         thetap(mgs) = thetap(mgs) + felvcp(mgs)*DCLOUD/(pi0(mgs))
         qwvp(mgs) = qwvp(mgs) - DCLOUD
         qx(mgs,lc) = qx(mgs,lc) + DCLOUD
-        IF ( numproc > 1 ) THEN
-         dv = dx1*dy1*gz(igs(mgs),1,kgs(mgs))
-         thproc(kzbeg-1+kgs(mgs),16) = thproc(kzbeg-1+kgs(mgs),16) + felv(mgs)*DCLOUD/(CP*pi0(mgs))*dv  ! latent heating
-         thproc(kzbeg-1+kgs(mgs),17) = thproc(kzbeg-1+kgs(mgs),17) + DCLOUD*rho0(mgs)*dv/dtp  ! condensation rate
-        ENDIF
         IF ( io_flag .and. nxtra > 1 ) THEN
            axtra(igs(mgs),jy,kgs(mgs),1) = DCLOUD/dtp
         ENDIF
@@ -9524,11 +9477,6 @@ END SUBROUTINE nssl_2mom_driver
         qx(mgs,lc) = qx(mgs,lc) + DCLOUD
         thetap(mgs) = thetap(mgs) + felvcp(mgs)*DCLOUD/(pi0(mgs))
         qwvp(mgs) = qwvp(mgs) - DCLOUD
-        IF ( numproc > 1 ) THEN
-         dv = dx1*dy1*gz(igs(mgs),1,kgs(mgs))
-         thproc(kzbeg-1+kgs(mgs),16) = thproc(kzbeg-1+kgs(mgs),16) + felv(mgs)*DCLOUD/(CP*pi0(mgs))*dv  ! latent heating
-         thproc(kzbeg-1+kgs(mgs),17) = thproc(kzbeg-1+kgs(mgs),17) + DCLOUD*rho0(mgs)*dv/dtp  ! condensation rate
-        ENDIF
         ENDIF
        ! 6/13/2016: Phillips et al. appears not to decrement CCN, but only increments CCNa.
        ! This would allow an initially non-homogeneous (vertically, e.g.) initial value of CCN/rho_air
@@ -9635,11 +9583,6 @@ END SUBROUTINE nssl_2mom_driver
         qx(mgs,lc) = qx(mgs,lc) + DCLOUD
         thetap(mgs) = thetap(mgs) + felvcp(mgs)*DCLOUD/(pi0(mgs))
         qwvp(mgs) = qwvp(mgs) - DCLOUD
-        IF ( numproc > 1 ) THEN
-         dv = dx1*dy1*gz(igs(mgs),1,kgs(mgs))
-         thproc(kzbeg-1+kgs(mgs),16) = thproc(kzbeg-1+kgs(mgs),16) + felv(mgs)*DCLOUD/(CP*pi0(mgs))*dv  ! latent heating
-         thproc(kzbeg-1+kgs(mgs),17) = thproc(kzbeg-1+kgs(mgs),17) + DCLOUD*rho0(mgs)*dv/dtp  ! condensation rate
-        ENDIF
   !      ccnc(mgs) = Max(0.0, ccnc(mgs) - cn(mgs))
          ccncuf(mgs) = Max(0.0, ccncuf(mgs) - cnuf(mgs))
         ENDIF
@@ -9698,11 +9641,6 @@ END SUBROUTINE nssl_2mom_driver
         qx(mgs,lc) = qx(mgs,lc) + DCLOUD
         thetap(mgs) = thetap(mgs) + felvcp(mgs)*DCLOUD/(pi0(mgs))
         qwvp(mgs) = qwvp(mgs) - DCLOUD
-        IF ( numproc > 1 ) THEN
-         dv = dx1*dy1*gz(igs(mgs),1,kgs(mgs))
-         thproc(kzbeg-1+kgs(mgs),16) = thproc(kzbeg-1+kgs(mgs),16) + felv(mgs)*DCLOUD/(CP*pi0(mgs))*dv  ! latent heating
-         thproc(kzbeg-1+kgs(mgs),17) = thproc(kzbeg-1+kgs(mgs),17) + DCLOUD*rho0(mgs)*dv/dtp  ! condensation rate
-        ENDIF
   !      ccnc(mgs) = Max(0.0, ccnc(mgs) - cn(mgs))
         ENDIF
        
@@ -9750,11 +9688,6 @@ END SUBROUTINE nssl_2mom_driver
 
         IF ( qvex .gt. 0.0 ) THEN
         thetap(mgs) = thetap(mgs) + felvcp(mgs)*qvex/(pi0(mgs))
-        IF ( numproc > 1 ) THEN
-         dv = dx1*dy1*gz(igs(mgs),1,kgs(mgs))
-         thproc(kzbeg-1+kgs(mgs),16) = thproc(kzbeg-1+kgs(mgs),16) + felv(mgs)*qvex/(CP*pi0(mgs))*dv  ! latent heating
-         thproc(kzbeg-1+kgs(mgs),17) = thproc(kzbeg-1+kgs(mgs),17) + qvex*rho0(mgs)*dv/dtp  ! condensation rate
-        ENDIF
         IF ( io_flag .and. nxtra > 1 ) THEN
            axtra(igs(mgs),jy,kgs(mgs),1) = axtra(igs(mgs),jy,kgs(mgs),1) + qvex/dtp
         ENDIF
@@ -10775,7 +10708,6 @@ END SUBROUTINE nssl_2mom_driver
       
       real cvm,cpm,rmm
 
-      real, parameter :: rovcp = rd/cp
       real, parameter ::      cpv = 1885.0       ! specific heat of water vapor at constant pressure
 !
       real fcci(ngs), fcip(ngs)
@@ -19731,104 +19663,6 @@ END SUBROUTINE nssl_2mom_driver
 !
 ! Load the save arrays
 !
-      IF ( numproc > 1 ) THEN
-      DO mgs = 1,ngscnt
-       dv = dx1*dy1*gz(igs(mgs),1,kgs(mgs))
-       IF ( ipconc > 2 ) THEN
-       thproc(kzbeg-1+kgs(mgs),1) = thproc(kzbeg-1+kgs(mgs),1) + crfrzf(mgs)*dtp*dv
-       ELSE
-       thproc(kzbeg-1+kgs(mgs),1) = thproc(kzbeg-1+kgs(mgs),1) + qrfrzf(mgs)*rho0(mgs)*dtp*dv
-       ENDIF
-       thproc(kzbeg-1+kgs(mgs),2) = thproc(kzbeg-1+kgs(mgs),2) + il5(mgs)*ciacrf(mgs)*dtp*dv
-       thproc(kzbeg-1+kgs(mgs),3) = thproc(kzbeg-1+kgs(mgs),3) + chcnsh(mgs)*dtp*dv
-       thproc(kzbeg-1+kgs(mgs),4) = thproc(kzbeg-1+kgs(mgs),4) + chcnih(mgs)*dtp*dv
-       IF (  qhacw(mgs)+qhacr(mgs) > 0.0 .and. temg(mgs) < tfr ) THEN
-       thproc(kzbeg-1+kgs(mgs),5) = thproc(kzbeg-1+kgs(mgs),5) + (qhacw(mgs)+qhacr(mgs)+qhshr(mgs))*rho0(mgs)*dtp*dv
-       ENDIF
-       thproc(kzbeg-1+kgs(mgs),6) = thproc(kzbeg-1+kgs(mgs),6) + qracw(mgs)*rho0(mgs)*dtp*dv
-       thproc(kzbeg-1+kgs(mgs),7) = thproc(kzbeg-1+kgs(mgs),7) + qrcnw(mgs)*rho0(mgs)*dtp*dv
-       IF ( qhacw(mgs) > 0.0 .and. temg(mgs) < tfr ) THEN
-       thproc(kzbeg-1+kgs(mgs),8) = thproc(kzbeg-1+kgs(mgs),8) + (vhacw(mgs)+vhacr(mgs)+vhshdr(mgs))*dtp*dv
-!       thproc(kzbeg-1+kgs(mgs),8) = thproc(kzbeg-1+kgs(mgs),8) + qhacw(mgs)*rho0(mgs)/rimdn(mgs,lh)*dtp*dv
-       ENDIF
-       thproc(kzbeg-1+kgs(mgs),9) = thproc(kzbeg-1+kgs(mgs),9) + ptem(mgs)*dtp*dv  ! latent heating
-       thproc(kzbeg-1+kgs(mgs),10) = thproc(kzbeg-1+kgs(mgs),10) +  &
-     &                             ( chmul1(mgs) + chlmul1(mgs)  )*dtp*dv
-       IF ( lf > 1 ) THEN
-       ELSE
-       thproc(kzbeg-1+kgs(mgs),11) = thproc(kzbeg-1+kgs(mgs),11) +  &
-     &                             ( csplinter(mgs) + csplinter2(mgs) )*dtp*dv
-       ENDIF
-       thproc(kzbeg-1+kgs(mgs),12) = thproc(kzbeg-1+kgs(mgs),12) + qrfrzf(mgs)*rho0(mgs)*dtp*dv
-       thproc(kzbeg-1+kgs(mgs),13) = thproc(kzbeg-1+kgs(mgs),13) + il5(mgs)*qiacrf(mgs)*rho0(mgs)*dtp*dv ! mass of rain freezing by ice crystal capture
-       thproc(kzbeg-1+kgs(mgs),14) = thproc(kzbeg-1+kgs(mgs),14) + crcnw(mgs)*dtp*dv    ! rain drop prod. by autoconv.
-       thproc(kzbeg-1+kgs(mgs),15) = thproc(kzbeg-1+kgs(mgs),15) + (pcrwi(mgs)-crcnw(mgs))*dtp*dv ! rain drop prod by melting/shedding (i.e., everything but autoconv.)
-!       thproc(kzbeg-1+kgs(mgs),18) = thproc(kzbeg-1+kgs(mgs),18) + pevap(mgs)*rho0(mgs)*dv ! rain evaporation rate
-       thproc(kzbeg-1+kgs(mgs),19) = thproc(kzbeg-1+kgs(mgs),19) + pmlt(mgs)*rho0(mgs)*dv  ! melting rate
-       thproc(kzbeg-1+kgs(mgs),20) = thproc(kzbeg-1+kgs(mgs),20) + pdep(mgs)*rho0(mgs)*dv  ! deposition rate
-       thproc(kzbeg-1+kgs(mgs),21) = thproc(kzbeg-1+kgs(mgs),21) + (psub(mgs)-pdep(mgs))*rho0(mgs)*dv  ! sublimation rate
-       thproc(kzbeg-1+kgs(mgs),22) = thproc(kzbeg-1+kgs(mgs),22) + (pfrz(mgs)-pmlt(mgs))*rho0(mgs)*dv  ! freezing rate
-
-!       thproc(kzbeg-1+kgs(mgs),20) = thproc(kzbeg-1+kgs(mgs),20) + (1./pi0(mgs))*felfcp(mgs)*pvap(mgs)*rho0(mgs)*dv  ! deposition rate
-!       thproc(kzbeg-1+kgs(mgs),21) = thproc(kzbeg-1+kgs(mgs),21) + (1./pi0(mgs))*felscp(mgs)*psub(mgs)*rho0(mgs)*dv  ! sublimation rate
-!       thproc(kzbeg-1+kgs(mgs),22) = thproc(kzbeg-1+kgs(mgs),22) + (1./pi0(mgs))*felfcp(mgs)*pfrz(mgs)*rho0(mgs)*dv ! (pfrz(mgs)-pmlt(mgs))*rho0(mgs)*dv  ! freezing rate
-
-       thproc(kzbeg-1+kgs(mgs),23) = thproc(kzbeg-1+kgs(mgs),23) + crfrzs(mgs)*dtp*dv
-       thproc(kzbeg-1+kgs(mgs),24) = thproc(kzbeg-1+kgs(mgs),24) + il5(mgs)*ciacrs(mgs)*dtp*dv
-
-       thproc(kzbeg-1+kgs(mgs),25) = thproc(kzbeg-1+kgs(mgs),25) + qhmlr(mgs)*rho0(mgs)*dv  ! melting rate
-       thproc(kzbeg-1+kgs(mgs),26) = thproc(kzbeg-1+kgs(mgs),26) + qhlmlr(mgs)*rho0(mgs)*dv  ! melting rate
-
-       IF (  qhlacw(mgs)+qhlacr(mgs) > 0.0 .and. temg(mgs) < tfr ) THEN
-        thproc(kzbeg-1+kgs(mgs),27) = thproc(kzbeg-1+kgs(mgs),27) + (qhlacw(mgs)+qhlacr(mgs)+qhlshr(mgs))*rho0(mgs)*dtp*dv
-        thproc(kzbeg-1+kgs(mgs),28) = thproc(kzbeg-1+kgs(mgs),28) + (qhlacw(mgs))*rho0(mgs)*dtp*dv
-        thproc(kzbeg-1+kgs(mgs),29) = thproc(kzbeg-1+kgs(mgs),29) + (qhlacr(mgs))*rho0(mgs)*dtp*dv
-       ENDIF
-
-       IF ( temg(mgs) < tfr ) THEN
-        thproc(kzbeg-1+kgs(mgs),30) = thproc(kzbeg-1+kgs(mgs),30) + (qhacw(mgs))*rho0(mgs)*dtp*dv
-        thproc(kzbeg-1+kgs(mgs),31) = thproc(kzbeg-1+kgs(mgs),31) + (qhacr(mgs))*rho0(mgs)*dtp*dv
-       ENDIF
-
-       thproc(kzbeg-1+kgs(mgs),32) = thproc(kzbeg-1+kgs(mgs),32) + qhlcnh(mgs)*rho0(mgs)*dtp*dv ! graupel mass conversion to hail
-
-       IF ( ihrn > 0 ) THEN
-       thproc(kzbeg-1+kgs(mgs),33) = thproc(kzbeg-1+kgs(mgs),33) + ciihr(mgs)*dtp*dv ! contact freezing of droplets
-       ELSE
-       IF ( qwctfz(mgs)*dtp >= qxmin(li) ) THEN
-       thproc(kzbeg-1+kgs(mgs),33) = thproc(kzbeg-1+kgs(mgs),33) + cwctfz(mgs)*dtp*dv ! contact freezing of droplets
-       ENDIF
-       ENDIF
-       thproc(kzbeg-1+kgs(mgs),34) = thproc(kzbeg-1+kgs(mgs),34) + pevap(mgs)*rho0(mgs)*dv ! rain evaporation rate
-       IF ( qiint(mgs)*dtp >= qxmin(li) ) THEN
-       thproc(kzbeg-1+kgs(mgs),35) = thproc(kzbeg-1+kgs(mgs),35) + ciint(mgs)*dtp*dv ! primary ice initiation
-       ENDIF
-       IF ( lf > 1 ) THEN
-       ELSE
-          thproc(kzbeg-1+kgs(mgs),38) = thproc(kzbeg-1+kgs(mgs),38) + (vhacw(mgs)+vhacr(mgs)+vhshdr(mgs))*dtp*dv
-        ENDIF
-      IF ( lhl > 1 ) THEN
-        thproc(kzbeg-1+kgs(mgs),36) = thproc(kzbeg-1+kgs(mgs),36) + chlcnhhl(mgs)*dtp*dv
-          thproc(kzbeg-1+kgs(mgs),37) = thproc(kzbeg-1+kgs(mgs),37) + (vhlacw(mgs)+vhlacr(mgs)+vhlshdr(mgs))*dtp*dv
-       ELSE
-         IF ( lf > 1 ) THEN 
-         ELSE
-           thproc(kzbeg-1+kgs(mgs),36) = thproc(kzbeg-1+kgs(mgs),36) + (pchwi(mgs))*dtp*dv
-           thproc(kzbeg-1+kgs(mgs),39) = thproc(kzbeg-1+kgs(mgs),39) + (pchwd(mgs))*dtp*dv
-           thproc(kzbeg-1+kgs(mgs),37) = thproc(kzbeg-1+kgs(mgs),37) + (chmlr(mgs))*dtp*dv
-         ENDIF
-       ENDIF
-!       thproc(kzbeg-1+kgs(mgs),35) = thproc(kzbeg-1+kgs(mgs),35) + pevap(mgs)*rho0(mgs)*dv ! rain evaporation rate
-
-
-!      ptem(mgs) =    &
-!     &  (1./pi0(mgs))*   &
-!     &  (felfcp(mgs)*pfrz(mgs)   &
-!     &  +felscp(mgs)*psub(mgs)    &
-!     &  +felvcp(mgs)*pvap(mgs))
-
-      ENDDO
-      ENDIF
 
 
 ! Sample code for using the axtra array to load microphysical rates or quantities for output

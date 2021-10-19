@@ -25,6 +25,8 @@ module mp_nssl
 !!
     subroutine mp_nssl_init(ncol, nlev, errflg, errmsg, threads, restart, &
                               mpirank, mpiroot,    &
+                              con_g, con_rd, con_cp, con_rv,  &
+                              con_t0c, con_cliq, con_csol, con_eps,   &
                               imp_physics, imp_physics_nssl, convert_dry_rho,  &
                               nssl_cccn, nssl_alphah, nssl_alphahl, &
                               nssl_ccn_on, nssl_hail_on, nssl_invertccn, first_time_step, &
@@ -32,8 +34,7 @@ module mp_nssl
                               cccn, cccna, ccw, crw, cci, csw, chw, chl, vh, vhl, tgrs, prslk, prsl )
                               
 
-        use module_mp_nssl_2mom, only: nssl_2mom_init, calcnfromq, na
-        use physcons, only: con_rd
+        use module_mp_nssl_2mom, only: nssl_2mom_init, nssl_2mom_init_const, calcnfromq, na
 
         implicit none
 
@@ -43,6 +44,8 @@ module mp_nssl
          integer,                   intent(  out) :: errflg
          integer,                   intent(in)    :: threads
          logical,                   intent(in)    :: restart
+         real(kind_phys), intent(in) :: con_g, con_rd, con_cp, con_rv, &
+                             con_t0c, con_cliq, con_csol, con_eps
 
          integer,                   intent(in)    :: mpirank
          integer,                   intent(in)    :: mpiroot
@@ -134,6 +137,11 @@ module mp_nssl
             return
          end if
 
+         ! set physical constants
+         call nssl_2mom_init_const(  &
+           con_g, con_rd, con_cp, con_rv, con_t0c, con_cliq, con_csol, con_eps )
+         
+         
          ! Set internal dimensions
          ims = 1
          ime = ncol
