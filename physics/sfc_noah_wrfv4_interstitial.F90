@@ -150,7 +150,8 @@
 
       logical,              dimension(:),   intent(in) :: flag_guess, flag_iter, land
       real(kind=kind_phys), dimension(:),   intent(in) :: sfcprs, tprcp, sfctmp, q1, prslki, wind, cm, ch, snwdph
-      real(kind=kind_phys), dimension(:),   intent(in) :: weasd, tsfc, vtype
+      real(kind=kind_phys), dimension(:),   intent(in) :: weasd, tsfc
+      integer             , dimension(:),   intent(in) :: vtype
       real(kind=kind_phys), dimension(:,:), intent(in) :: smc, stc, slc
 
       logical,              dimension(:),   intent(inout) :: flag_lsm, flag_lsm_glacier
@@ -179,7 +180,7 @@
       !from module_sf_noahdrv.F/lsminit
       if (.not. restart .and. first_time_step .and. ialb == 0) then
         do i = 1, im      
-             snoalb(i) = maxalb(int(0.5 + vtype(i)))*0.01
+             snoalb(i) = maxalb(vtype(i))*0.01
         end do
       end if
       

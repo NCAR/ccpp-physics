@@ -160,7 +160,7 @@ contains
                 ! when cplflx is .true. (e.g., for the S2S application).
                 ! Whereas, for the HAFS FV3ATM-HYCOM coupling, cplice is set as
                 ! .false.. In the future HAFS FV3ATM-MOM6 coupling, the cplflx
-                ! could be .true., while cplice being .false.. 
+                ! could be .true., while cplice being .false..
                 if (cplice .and. cplflx)  then
                   islmsk_cice(i) = 4
                   flag_cice(i)   = .true.
@@ -229,7 +229,7 @@ contains
           uustar_lnd(i) = uustar(i)
            weasd_lnd(i) = weasd(i)
            tsurf_lnd(i) = tsfcl(i)
-          if (iemsflg == 2 .and. .not. flag_init) then
+          if (iemsflg == 2 .and. (.not.flag_init .or. flag_restart)) then
            !-- use land emissivity from the LSM
            semis_lnd(i) = emis_lnd(i)
           else
@@ -455,7 +455,7 @@ contains
         fh2, cmm, chh, gflx, ep1d, weasd, snowd, tprcp, evap, hflx, qss, tsfc, tsfco, tsfcl, tisfc
 
       real(kind=kind_phys), dimension(:),   intent(inout) :: hice, cice
-      real(kind=kind_phys), dimension(:),   intent(inout) :: sigmaf, zvfun, hflxq, hffac                  
+      real(kind=kind_phys), dimension(:),   intent(inout) :: sigmaf, zvfun, hflxq, hffac
       real(kind=kind_phys),                 intent(in   ) :: h0facu, h0facs
       real(kind=kind_phys),                 intent(in   ) :: min_seaice
       real(kind=kind_phys),                 intent(in   ) :: rd, rvrdm1
@@ -613,7 +613,7 @@ contains
             endif
 !
             call stability(z1(i), zvfun(i), gdx, tv1, thv1, wind(i),                & ! inputs
-                           z0max, ztmax, tvs, grav, thsfc_loc,                      & ! inputs          
+                           z0max, ztmax, tvs, grav, thsfc_loc,                      & ! inputs
                            rb(i), ffmm(i), ffhh(i), fm10(i), fh2(i), cd(i), cdq(i), & ! outputs
                            stress(i), uustar(i))
           endif ! Checking to see if point is one or multiple surface types

@@ -62,9 +62,8 @@ module lsm_ruc
 
 
       real (kind=kind_phys), dimension(:), intent(in) :: slmsk
-      real (kind=kind_phys), dimension(:), intent(in) :: stype
-      real (kind=kind_phys), dimension(:), intent(in) :: vtype
-      real (kind=kind_phys), dimension(:), intent(in) :: landfrac
+      integer,               dimension(:), intent(in) :: stype
+      integer,               dimension(:), intent(in) :: vtype
       real (kind=kind_phys), dimension(:), intent(in) :: q1
       real (kind=kind_phys), dimension(:), intent(in) :: prsl1
       real (kind=kind_phys), dimension(:), intent(in) :: tsfc_lnd
@@ -113,12 +112,11 @@ module lsm_ruc
       real (kind=kind_phys) :: q0, qs1
       integer  :: ipr, i, k
       logical  :: debug_print
-      integer, dimension(im) :: soiltyp, vegtype
 
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0 
-      
+
       ! Consistency checks
       if (lsm/=lsm_ruc) then
         write(errmsg,'(*(a))') 'Logic error: namelist choice of ',     &
@@ -165,32 +163,10 @@ module lsm_ruc
       pores (:) = maxsmc (:)
       resid (:) = drysmc (:)
 
-      soiltyp(:) = 0
-      vegtype(:) = 0
-
       do i  = 1, im ! i - horizontal loop
-        !if (slmsk(i) == 2.) then
-        if (fice(i) > min_seaice) then
-        !-- ice
-          if (isot == 1) then
-            soiltyp(i)  = 16
-          else
-            soiltyp(i)  = 9
-          endif
-          if (ivegsrc == 1) then
-            vegtype(i)  = 15
-          elseif(ivegsrc == 2) then
-            vegtype(i)  = 13
-          endif
-        else
-        !-- land or water
-          soiltyp(i)  = int( stype(i)+0.5 )
-          vegtype(i)  = int( vtype(i)+0.5 )
-          if (soiltyp(i)  < 1) soiltyp(i)  = 14
-          if (vegtype(i)  < 1) vegtype(i)  = 17
-        endif
+
         !-- initialize background emissivity
-        semisbase(i) = lemitbl(vegtype(i)) ! no snow effect
+        semisbase(i) = lemitbl(vtype(i)) ! no snow effect
 
         if (.not.flag_restart) then
           !-- land
@@ -225,13 +201,13 @@ module lsm_ruc
 
       call init_soil_depth_3 ( zs , dzs , lsoil_ruc )
 
-      call rucinit   (flag_restart, im, lsoil_ruc, lsoil, nlev,   & ! in
-                      me, master, lsm_ruc, lsm, slmsk,            & ! in
-                      soiltyp, vegtype, landfrac, fice,           & ! in
-                      min_seaice, tsfc_lnd, tsfc_wat, tg3,        & ! in
-                      zs, dzs, smc, slc, stc,                     & ! in
-                      sh2o, smfrkeep, tslb, smois,                & ! out
-                      wetness, errmsg, errflg)
+      call rucinit (flag_restart, im, lsoil_ruc, lsoil, nlev,   & ! in
+                    me, master, lsm_ruc, lsm, slmsk,            & ! in
+                    stype, vtype, landfrac, fice,               & ! in
+                    min_seaice, tsfc_lnd, tsfc_wat, tg3,        & ! in
+                    zs, dzs, smc, slc, stc,                     & ! in
+                    sh2o, smfrkeep, tslb, smois,                & ! out
+                    wetness, errmsg, errflg)
 
       if (.not.flag_restart) then
         do i  = 1, im ! i - horizontal loop
@@ -284,8 +260,8 @@ module lsm_ruc
 !     ps       - real, surface pressure (pa)                       im   !
 !     t1       - real, surface layer mean temperature (k)          im   !
 !     q1       - real, surface layer mean specific humidity        im   !
-!     soiltyp  - integer, soil type (integer index)                im   !
-!     vegtype  - integer, vegetation type (integer index)          im   !
+!     stype    - integer, soil type (integer index)                im   !
+!     vtype    - integer, vegetation type (integer index)          im   !
 !     sigmaf   - real, areal fractional cover of green vegetation  im   !
 !     dlwflx   - real, total sky sfc downward lw flux ( w/m**2 )   im   !
 !     dswflx   - real, total sky sfc downward sw flux ( w/m**2 )   im   !
@@ -347,8 +323,8 @@ module lsm_ruc
      &     ( iter, me, master, delt, kdt, im, nlev, lsm_ruc, lsm,       &
      &       imp_physics, imp_physics_gfdl, imp_physics_thompson,       &
      &       do_mynnsfclay, lsoil_ruc, lsoil, rdlai, zs,                &
-     &       t1, q1, qc, soiltyp, vegtype, sigmaf, laixy,               &
-     &       dlwflx, dswsfc, tg3, coszen, land, icy, use_lake,          &
+     &       t1, q1, qc, stype, vtype, sigmaf, laixy,                   &
+     &       dlwflx, dswsfc, tg3, coszen, land, icy, lake,              &
      &       rainnc, rainc, ice, snow, graupel,                         &
      &       prsl1, zf, wind, shdmin, shdmax,                           &
      &       srflag, sfalb_lnd_bck, snoalb,                             &
@@ -424,7 +400,8 @@ module lsm_ruc
       logical,                intent(in) :: rdlai
 
 !  ---  in/out:
-      integer, dimension(:),  intent(inout) :: soiltyp, vegtype
+      integer, dimension(:),  intent(inout) :: stype
+      integer, dimension(:),  intent(in) :: vtype
       real (kind=kind_phys), dimension(:), intent(in)    :: zs
       real (kind=kind_phys), dimension(:), intent(in)    :: srflag
       real (kind=kind_phys), dimension(:), intent(inout) ::              &
@@ -548,7 +525,7 @@ module lsm_ruc
       ! local
       integer :: ims,ime, its,ite, jms,jme, jts,jte, kms,kme, kts,kte
       integer :: l, k, i, j,  fractional_seaice, ilst
-      real (kind=kind_phys) :: dm, cimin
+      real (kind=kind_phys) :: dm, cimin(im)
       logical :: flag(im), flag_ice(im), flag_ice_uncoupled(im)
       logical :: rdlai2d, myj, frpcpn
       logical :: debug_print
@@ -568,11 +545,11 @@ module lsm_ruc
         if (icy(i) .and. .not. flag_cice(i)) then
         ! - uncoupled ice model
           if (oceanfrac(i) > zero) then
-            cimin = min_seaice
+            cimin(i) = min_seaice
           else
-            cimin = min_lakeice
+            cimin(i) = min_lakeice
           endif
-          if (fice(i) >= cimin) then
+          if (fice(i) >= cimin(i)) then
           ! - ice fraction is above the threshold for ice
             flag_ice(i) = .true.
           endif
@@ -601,8 +578,8 @@ module lsm_ruc
 
       if(debug_print) then
         write (0,*)'RUC LSM run'
-        write (0,*)'soiltyp=',ipr,soiltyp(ipr)
-        write (0,*)'vegtype=',ipr,vegtype(ipr)
+        write (0,*)'stype=',ipr,stype(ipr)
+        write (0,*)'vtype=',ipr,vtype(ipr)
         write (0,*)'kdt, iter =',kdt,iter
         write (0,*)'flag_init =',flag_init
         write (0,*)'flag_restart =',flag_restart
@@ -671,8 +648,8 @@ module lsm_ruc
           smcwlt2 (i) = 0.
         else
           !land 
-          smcref2 (i) = REFSMC(soiltyp(i))
-          smcwlt2 (i) = WLTSMC(soiltyp(i))
+          smcref2 (i) = REFSMC(stype(i))
+          smcwlt2 (i) = WLTSMC(stype(i))
         endif
       enddo
 
@@ -869,18 +846,18 @@ module lsm_ruc
         tbot(i,j) = tg3(i)
 
 !>  -   3. canopy/soil characteristics (s):
-!!\n \a vegtyp  - vegetation type (integer index)                   -> vtype
-!!\n \a soiltyp - soil type (integer index)                         -> stype
-!!\n \a sfcems  -  surface emmisivity                               -> sfcemis
-!!\n \a sfalb_lnd_bck  - backround snow-free surface albedo (fraction) -> albbck_lnd
-!!\n \a snoalb  - upper bound on maximum albedo over deep snow      -> snoalb1d_lnd
+!!\n \a vtype         - vegetation type (integer index)
+!!\n \a stype         - soil type (integer index)
+!!\n \a sfcems        - surface emmisivity                            -> sfcemis
+!!\n \a sfalb_lnd_bck - backround snow-free surface albedo (fraction) -> albbck_lnd
+!!\n \a snoalb        - upper bound on maximum albedo over deep snow  -> snoalb1d_lnd
 
         if(ivegsrc == 1) then   ! IGBP - MODIS
             vtype_wat(i,j) = 17 ! 17 - water (oceans and lakes) in MODIS
             stype_wat(i,j) = 14
             xland_wat(i,j) = 2. ! xland = 2 for water
-            vtype_lnd(i,j) = vegtype(i)
-            stype_lnd(i,j) = soiltyp(i)
+            vtype_lnd(i,j) = vtype(i)
+            stype_lnd(i,j) = stype(i)
             vtype_ice(i,j) = 15 ! MODIS
             if(isot == 0) then
               stype_ice(i,j) = 9  ! ZOBLER
@@ -951,7 +928,7 @@ module lsm_ruc
 
         if(coszen(i) > 0. .and. weasd_lnd(i) < 1.e-4) then
         !-- solar zenith angle dependence when no snow
-          ilst=istwe(vegtype(i)) ! 1 or 2
+          ilst=istwe(vtype(i)) ! 1 or 2
           dm = (1.+2.*d(ilst))/(1.+2.*d(ilst)*coszen(i))
           albbcksol(i) = sfalb_lnd_bck(i)*dm
         else
@@ -1436,10 +1413,10 @@ module lsm_ruc
               fwat =  1.0 - fice(i)
              ! Check if ice fraction is below the minimum value: 15% in GFS
              ! physics.
-              if (fice(i) < cimin) then ! cimin - minimal ice fraction
+              if (fice(i) < cimin(i)) then ! cimin - minimal ice fraction
                         write (0,*)'warning: ice fraction is low:', fice(i)
-                fice(i) = cimin
-                fwat    = 1.0 - cimin
+                fice(i) = cimin(i)
+                fwat    = 1.0 - cimin(i)
                 write (0,*)'fix ice fraction: reset it to:', fice(i), tskin_wat(i)
               endif
 
@@ -1520,8 +1497,8 @@ module lsm_ruc
 !! This subroutine contains RUC LSM initialization.
       subroutine rucinit        (restart, im, lsoil_ruc, lsoil, nlev,   & ! in
                                  me, master, lsm_ruc, lsm, slmsk,       & ! in
-                                 soiltyp, vegtype, landfrac, fice,      & ! in
-                                 min_seaice, tskin_lnd, tskin_wat, tg3, & ! in
+                                 stype, vtype, landfrac, fice,          & ! in
+                                 min_seaice, tskin_lnd, tskin_wat, tg3, & ! !in
                                  zs, dzs, smc, slc, stc,                & ! in
                                  sh2o, smfrkeep, tslb, smois,           & ! out
                                  wetness, errmsg, errflg)
@@ -1546,8 +1523,7 @@ module lsm_ruc
       real (kind=kind_phys), dimension(im,lsoil),     intent(in   ) :: stc !  Noah
       real (kind=kind_phys), dimension(im,lsoil),     intent(in   ) :: slc !  Noah
 
-      integer,               dimension(im),    intent(inout) :: soiltyp
-      integer,               dimension(im),    intent(inout) :: vegtype
+      integer,               dimension(im),    intent(in) :: stype, vtype
       real (kind=kind_phys), dimension(im),    intent(inout) :: wetness
       real (kind=kind_phys), dimension(im,lsoil_ruc), intent(inout) :: smois! ruc
       real (kind=kind_phys), dimension(im,lsoil_ruc), intent(inout) :: tslb ! ruc
@@ -1678,13 +1654,13 @@ module lsm_ruc
       endif
 
       if(debug_print) then
-         write (0,*)'smc(ipr,:) ==', ipr, smc(ipr,:)
-         write (0,*)'stc(ipr,:) ==', ipr, stc(ipr,:)
-         write (0,*)'tskin_lnd(:)=',tskin_lnd(:)
-         write (0,*)'tskin_wat(:)=',tskin_wat(:)
-         write (0,*)'vegtype(ipr) ==', ipr, vegtype(ipr)
-         write (0,*)'soiltyp(ipr) ==', ipr, soiltyp(ipr)
-         write (0,*)'its,ite,jts,jte ',its,ite,jts,jte 
+         write (0,*)'smc(ipr,:)      =', ipr, smc(ipr,:)
+         write (0,*)'stc(ipr,:)      =', ipr, stc(ipr,:)
+         write (0,*)'tskin_lnd(ipr)  =', tskin_lnd(ipr)
+         write (0,*)'tskin_wat(ipr)  =', tskin_wat(ipr)
+         write (0,*)'vtype(ipr)      =', ipr, vtype(ipr)
+         write (0,*)'stype(ipr)      =', ipr, stype(ipr)
+         write (0,*)'its,ite,jts,jte =',its,ite,jts,jte 
       endif
 
 
@@ -1693,8 +1669,8 @@ module lsm_ruc
 
             sst(i,j) = tskin_wat(i)
             tbot(i,j) = tg3(i)
-            ivgtyp(i,j) = vegtype(i)
-            isltyp(i,j) = soiltyp(i)
+            ivgtyp(i,j) = vtype(i)
+            isltyp(i,j) = stype(i)
           if (landfrac(i) > 0. .or. fice(i) > 0.) then
           !-- land or ice
             tsk(i,j) = tskin_lnd(i)

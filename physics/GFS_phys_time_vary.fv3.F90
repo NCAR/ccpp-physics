@@ -105,9 +105,9 @@
 
          integer,              intent(in)    :: isot, ivegsrc, nlunit
          real(kind_phys),      intent(inout) :: sncovr(:), sncovr_ice(:)
-         integer,              intent(in)    :: lsm, lsm_noahmp, lsm_ruc
+         integer,              intent(in)    :: lsm, lsm_noahmp, lsm_ruc, vtype(:)
          real(kind_phys),      intent(in)    :: min_seaice, fice(:)
-         real(kind_phys),      intent(in)    :: landfrac(:), vtype(:)
+         real(kind_phys),      intent(in)    :: landfrac(:)
          real(kind_phys),      intent(inout) :: weasd(:)
 
          ! NoahMP - only allocated when NoahMP is used
@@ -165,7 +165,7 @@
          real(kind_phys),      intent(in)    :: snowd(:)
          real(kind_phys),      intent(in)    :: canopy(:)
          real(kind_phys),      intent(in)    :: tg3(:)
-         real(kind_phys),      intent(in)    :: stype(:)
+         integer,              intent(in)    :: stype(:)
          real(kind_phys),      intent(in)    :: con_t0c
 
          integer,              intent(in)    :: nthrds
@@ -765,9 +765,10 @@
                                       tslb(:,:), tiice(:,:), tg3(:), tref(:),                        &
                                       tsfc(:), tsfco(:), tisfc(:), hice(:), fice(:),                 &
                                       facsf(:), facwf(:), alvsf(:), alvwf(:), alnsf(:), alnwf(:),    &
-                                      zorli(:), zorll(:), zorlo(:), weasd(:), slope(:), snoalb(:),   &
-                                      canopy(:), vfrac(:), vtype(:), stype(:), shdmin(:), shdmax(:), &
+                                      zorli(:), zorll(:), zorlo(:), weasd(:), snoalb(:),             &
+                                      canopy(:), vfrac(:), shdmin(:), shdmax(:),                     &
                                       snowd(:), cv(:), cvb(:), cvt(:), oro(:), oro_uf(:), slmsk(:)
+         integer,              intent(inout) :: vtype(:), stype(:), slope(:)
 
          character(len=*),     intent(out)   :: errmsg
          integer,              intent(out)   :: errflg
