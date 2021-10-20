@@ -159,6 +159,7 @@ contains
    real(kind=kind_phys), dimension (im)    :: ccn_gf,ccn_m
    real(kind=kind_phys) :: ccnclean
    real(kind=kind_phys), dimension (im)    :: dx
+   real(kind=kind_phys), dimension (im)    :: frhm,frhd
    real(kind=kind_phys), dimension (im,km) :: outt,outq,outqc,phh,subm,cupclw,cupclws
    real(kind=kind_phys), dimension (im,km) :: dhdt,zu,zus,zd,phf,zum,zdm,outum,outvm
    real(kind=kind_phys), dimension (im,km) :: outts,outqs,outqcs,outu,outv,outus,outvs
@@ -256,8 +257,8 @@ contains
 !
 ! these should be coming in from outside
 !
-     cactiv(:)      = 0
-     cactiv_m(:)    = 0
+!    cactiv(:)      = 0
+!    cactiv_m(:)    = 0
      rand_mom(:)    = 0.
      rand_vmas(:)   = 0.
      rand_clos(:,:) = 0.
@@ -277,8 +278,8 @@ contains
 !> - Set tuning constants for radiation coupling
 !
      tun_rad_shall(:)=.01
-     tun_rad_mid(:)=.02
-     tun_rad_deep(:)=.065
+     tun_rad_mid(:)=.3 !.02
+     tun_rad_deep(:)=.3 !.065
      edt(:)=0.
      edtm(:)=0.
      edtd(:)=0.
@@ -628,6 +629,7 @@ contains
               ,kbconm        &
               ,ktopm         &
               ,cupclwm       &
+              ,frhm          &
               ,ierrm         &
               ,ierrcm        &
 !    the following should be set to zero if not available
@@ -710,6 +712,7 @@ contains
               ,kbcon        &
               ,ktop         &
               ,cupclw       &
+              ,frhd         &
               ,ierr         &
               ,ierrc        &
 !    the following should be set to zero if not available
@@ -819,7 +822,8 @@ contains
 
                gdc(i,k,1)= max(0.,tun_rad_shall(i)*cupclws(i,k)*cutens(i))      ! my mod
                !gdc2(i,k,1)=max(0.,tun_rad_deep(i)*(cupclwm(i,k)*cutenm(i)+cupclw(i,k)*cuten(i)))
-               gdc2(i,k,1)=max(0.,tun_rad_mid(i)*cupclwm(i,k)*cutenm(i)+tun_rad_deep(i)*cupclw(i,k)*cuten(i)+tun_rad_shall(i)*cupclws(i,k)*cutens(i))
+               !gdc2(i,k,1)=max(0.,tun_rad_mid(i)*cupclwm(i,k)*cutenm(i)+tun_rad_deep(i)*cupclw(i,k)*cuten(i)+tun_rad_shall(i)*cupclws(i,k)*cutens(i))
+               gdc2(i,k,1) = min(0.1, max(0.01, tun_rad_mid(i)*frhm(i)))*cupclwm(i,k)*cutenm(i) + min(0.1, max(0.01, tun_rad_deep(i)*(frhd(i))))*cupclw(i,k)*cuten(i) + tun_rad_shall(i)*cupclws(i,k)*cutens(i)
                qci_conv(i,k)=gdc2(i,k,1)
                gdc(i,k,2)=(outt(i,k))*86400.
                gdc(i,k,3)=(outtm(i,k))*86400.
