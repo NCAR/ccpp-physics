@@ -28,8 +28,8 @@ module cu_gf_deep
      real(kind=kind_phys), parameter :: pgcd = 0.1
 !
 !> aerosol awareness, do not user yet!
-     integer, parameter :: autoconv=1
-     integer, parameter :: aeroevap=1
+     integer, parameter :: autoconv=2
+     integer, parameter :: aeroevap=3
      real(kind=kind_phys), parameter :: scav_factor = 0.5
 !> still 16 ensembles for clousres
      integer, parameter:: maxens3=16
@@ -98,6 +98,7 @@ contains
               ,kbcon         &  ! lfc of parcel from k22
               ,ktop          &  ! cloud top
               ,cupclw        &  ! used for direct coupling to radiation, but with tuning factors
+              ,frh_out       &  ! fractional coverage
               ,ierr          &  ! ierr flags are error flags, used for debugging
               ,ierrc         &  ! the following should be set to zero if not available
               ,rand_mom      &  ! for stochastics mom, if temporal and spatial patterns exist
@@ -149,6 +150,9 @@ contains
      real(kind=kind_phys),    dimension (its:ite,kts:kte)                              &
         ,intent (inout  )                   ::                         &
         cnvwt,outu,outv,outt,outq,outqc,cupclw
+     real(kind=kind_phys),    dimension (its:ite)                                      &
+        ,intent (out    )                   ::                         &
+        frh_out
      real(kind=kind_phys),    dimension (its:ite)                                      &
         ,intent (inout  )                   ::                         &
         pre,xmb_out
@@ -364,8 +368,8 @@ contains
       c1_max=c1
       elocp=xlv/cp
       el2orc=xlv*xlv/(r_v*cp)
-      evfact=.4 ! .2
-      evfactl=.2
+      evfact=0.25 ! .4
+      evfactl=0.25 ! .2
      !evfact=.0   ! for 4F5f
      !evfactl=.4 
 
@@ -473,6 +477,7 @@ contains
             entr_rate(i)=.2/radius
          endif
          sig(i)=(1.-frh)**2
+         frh_out(i) = frh
       enddo
       sig_thresh = (1.-frh_thresh)**2
 
@@ -1996,8 +2001,8 @@ contains
          qevap(i) = 0.
          flg(i) = .true.
          if(ierr(i).eq.0)then
-         evef = edt(i) * evfact
-         if(xland(i).gt.0.5 .and. xland(i).lt.1.5) evef=edt(i) * evfactl
+         evef = edt(i) * evfact * sig(i)**2
+         if(xland(i).gt.0.5 .and. xland(i).lt.1.5) evef = edt(i) * evfactl * sig(i)**2
          do k = ktop(i), 1, -1
               rain =  pwo(i,k) + edto(i) * pwdo(i,k)
               rn(i) = rn(i) + rain * xmb(i) * .001 * dtime
@@ -4005,7 +4010,7 @@ endif
 !
         prop_b(kts:kte)=0
         iall=0
-        clwdet=0.02 
+        clwdet=0.1 !0.02
         c0_iceconv=0.01
         c1d_b=c1d
         bdsp=bdispm
@@ -4134,10 +4139,10 @@ endif
                clw_allh(i,k)=max(0.,qch(i,k)-qrch) 
                qrcb(i,k)=max(0.,(qch(i,k)-qrch)) ! /(1.+c0(i)*dz*zu(i,k))
                if(name == "deep" )then
-                 clwdet=0.02                 ! 05/11/2021
+                 clwdet=0.1 !0.02                 ! 05/11/2021
                  if(k.lt.kklev(i)) clwdet=0.    ! 05/05/2021
                else
-                 clwdet=0.02                  ! 05/05/2021
+                 clwdet=0.1 !0.02                  ! 05/05/2021
                  if(k.lt.kklev(i)) clwdet=0.     ! 05/25/2021
                endif
                if(k.gt.kbcon(i)+1)c1d(i,k)=clwdet*up_massdetr(i,k-1)
