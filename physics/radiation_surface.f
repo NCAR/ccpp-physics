@@ -20,18 +20,22 @@
 !                                                                      !
 !      'setalb'     -- set up four-component surface albedoes          !
 !         inputs:                                                      !
-!           (slmsk,snowf,sncovr,snoalb,zorlf,coszf,tsknf,tairf,hprif,  !
+!           (slmsk,snodi,sncovr,snoalb,zorlf,coszf,tsknf,tairf,hprif,  !
 !            alvsf,alnsf,alvwf,alnwf,facsf,facwf,fice,tisfc            !
 !            IMAX)                                                     !
 !         outputs:                                                     !
 !           (sfcalb)                                                   !
 !                                                                      !
 !      'setemis'    -- set up surface emissivity for lw radiation      !
-!         inputs:                                                      !
-!           (xlon,xlat,slmsk,snowf,sncovr,zorlf,tsknf,tairf,hprif,     !
-!            IMAX)                                                     !
-!         outputs:                                                     !
-!           (sfcemis)                                                  !
+!          ( lsm,lsm_noahmp,lsm_ruc,frac_grid,cplice,use_flake,        !
+!  ---  inputs:
+!            lakefrac,xlon,xlat,slmsk,snodl,snodi,sncovr,sncovr_ice,   !
+!            zorlf,tsknf,tairf,hprif,                                  !
+!            semis_lnd,semis_ice,semis_wat,IMAX,fracl,fraco,fraci,icy, !
+!
+!  ---  outputs:
+!            semisbase, sfcemis                                        !
+!
 !                                                                      !
 !    external modules referenced:                                      !
 !                                                                      !
@@ -298,7 +302,7 @@
 !! \n 1) climatological surface albedo scheme (\cite briegleb_1992)
 !! \n 2) MODIS retrieval based scheme from Boston univ.
 !!\param slmsk      (IMAX), sea(0),land(1),ice(2) mask on fcst model grid
-!!\param snowf      (IMAX), snow depth water equivalent in mm over land
+!!\param snodi      (IMAX), snow depth water equivalent in mm over ice
 !!\param sncovr     (IMAX), snow cover over land
 !!\param snoalb     (IMAX), maximum snow albedo over land (for deep snow)
 !!\param zorlf      (IMAX), surface roughness in cm
@@ -332,7 +336,7 @@
 !! @{
 !-----------------------------------
       subroutine setalb                                                 &
-     &     ( slmsk,lsm,lsm_noahmp,lsm_ruc,use_cice_alb,snowf,           & !  ---  inputs:
+     &     ( slmsk,lsm,lsm_noahmp,lsm_ruc,use_cice_alb,snodi,           & !  ---  inputs:
      &       sncovr,sncovr_ice,snoalb,zorlf,coszf,                      &
      &       tsknf,tairf,hprif,frac_grid, lakefrac,                     &
      &       alvsf,alnsf,alvwf,alnwf,facsf,facwf,fice,tisfc,            &
@@ -358,7 +362,7 @@
 !                                                                       !
 !  inputs:                                                              !
 !     slmsk (IMAX)  - sea(0),land(1),ice(2) mask on fcst model grid     !
-!     snowf (IMAX)  - snow depth water equivalent in mm                 !
+!     snodi (IMAX)  - snow depth water equivalent in mm over ice        !
 !     sncovr(IMAX)  - ialgflg=0: not used                               !
 !                     ialgflg=1: snow cover over land in fraction       !
 !     sncovr_ice(IMAX)  - ialgflg=0: not used                           !
@@ -410,7 +414,7 @@
 
       real (kind=kind_phys), dimension(:), intent(in) ::                &
      &       lakefrac,                                                  &
-     &       slmsk, snowf, zorlf, coszf, tsknf, tairf, hprif,           &
+     &       slmsk, snodi, zorlf, coszf, tsknf, tairf, hprif,           &
      &       alvsf, alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc,     &
      &       icealbdvis, icealbdnir, icealbivis, icealbinir,            &
      &       sncovr, sncovr_ice, snoalb, albPpert           ! sfc-perts, mgehne
@@ -478,7 +482,7 @@
               asevb_ice = icealbdvis(i)
               asenb_ice = icealbdnir(i)
             else
-              asnow = 0.02*snowf(i)
+              asnow = 0.02*snodi(i)
               argh  = min(0.50, max(.025, 0.01*zorlf(i)))
               hrgh  = min(f_one,max(0.20,1.0577-1.1538e-3*hprif(i)))
               fsno0 = asnow / (argh + asnow) * hrgh ! snow fraction on ice
@@ -614,7 +618,7 @@
               asenb_ice = icealbdnir(i)
             else
             !-- Computation of ice albedo
-              asnow = 0.02*snowf(i)
+              asnow = 0.02*snodi(i)
               argh  = min(0.50, max(.025, 0.01*zorlf(i)))
               hrgh  = min(f_one,max(0.20,1.0577-1.1538e-3*hprif(i)))
               fsno0 = asnow / (argh + asnow) * hrgh
@@ -750,7 +754,7 @@
 !                     range, otherwise see in-line comment              !
 !     slmsk (IMAX)  - sea(0),land(1),ice(2) mask on fcst model grid     !
 !     snodl (IMAX)  - snow depth water equivalent in mm over land       !
-!     snodi (IMAX)  - snow depth water equivalent in mm over ice       !
+!     snodi (IMAX)  - snow depth water equivalent in mm over ice        !
 !     sncovr(IMAX)  - ialbflg=1: snow cover over land in fraction       !
 !     sncovr_ice(IMAX) - snow cover over ice in fraction                !
 !     zorlf (IMAX)  - surface roughness in cm                           !
