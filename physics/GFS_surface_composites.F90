@@ -319,9 +319,8 @@ contains
 !> \section arg_table_GFS_surface_composites_inter_run Argument Table
 !! \htmlinclude GFS_surface_composites_inter_run.html
 !!
-!  subroutine GFS_surface_composites_inter_run (im, dry, icy, wet, semis_wat, semis_lnd, semis_ice, adjsfcdlw, &
-   subroutine GFS_surface_composites_inter_run (im, dry, icy, wet, semis_lnd, semis_ice, adjsfcdlw, &
-                                                gabsbdlw_lnd, gabsbdlw_ice, gabsbdlw_wat,           &
+   subroutine GFS_surface_composites_inter_run (im, dry, icy, wet, semis_wat, semis_lnd, semis_ice, &
+                                                adjsfcdlw, gabsbdlw_lnd, gabsbdlw_ice, gabsbdlw_wat,&
                                                 adjsfcusw, adjsfcdsw, adjsfcnsw, errmsg, errflg)
 
       implicit none
@@ -329,23 +328,15 @@ contains
       ! Interface variables
       integer,                            intent(in   ) :: im
       logical,              dimension(:), intent(in   ) :: dry, icy, wet
-!     real(kind=kind_phys), dimension(:), intent(in   ) :: semis_wat, semis_lnd, semis_ice, adjsfcdlw, &
-      real(kind=kind_phys), dimension(:), intent(in   ) :: semis_lnd, semis_ice, adjsfcdlw, &
-                                                           adjsfcdsw, adjsfcnsw
+      real(kind=kind_phys), dimension(:), intent(in   ) :: semis_wat, semis_lnd, semis_ice,  &
+                                                           adjsfcdlw, adjsfcdsw, adjsfcnsw
       real(kind=kind_phys), dimension(:), intent(inout) :: gabsbdlw_lnd, gabsbdlw_ice, gabsbdlw_wat
       real(kind=kind_phys), dimension(:), intent(out)   :: adjsfcusw
 
       ! CCPP error handling
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
-
 !
-      !-- reference emiss value for surface emissivity in setemis
-      !   1-open water, 2-grass/shrub land, 3-bare soil, tundra,
-      !   4-sandy desert, 5-rocky desert, 6-forest, 7-ice, 8-snow
-      !data  emsref / 0.97, 0.95, 0.94, 0.90, 0.93, 0.96, 0.96, 0.99 /
-      real(kind=kind_phys), parameter :: semis_wat = 0.97_kind_phys ! consistent with setemis
-
       ! Local variables
       integer :: i
 
@@ -374,7 +365,7 @@ contains
       do i=1,im
         if (dry(i)) gabsbdlw_lnd(i) = semis_lnd(i) * adjsfcdlw(i)
         if (icy(i)) gabsbdlw_ice(i) = semis_ice(i) * adjsfcdlw(i)
-        if (wet(i)) gabsbdlw_wat(i) = semis_wat    * adjsfcdlw(i)
+        if (wet(i)) gabsbdlw_wat(i) = semis_wat(i) * adjsfcdlw(i)
         adjsfcusw(i) = adjsfcdsw(i) - adjsfcnsw(i)
       enddo
 

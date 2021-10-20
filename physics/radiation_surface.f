@@ -757,10 +757,12 @@
 !     tsknf (IMAX)  - ground surface temperature in k                   !
 !     tairf (IMAX)  - lowest model layer air temperature in k           !
 !     hprif (IMAX)  - topographic sdv in m                              !
+!     IMAX          - array horizontal dimension                        !
+!                                                                       !
+!  inputs/outputs:                                                      !
 !     semis_lnd (IMAX) - land emissivity                                !
 !     semis_ice (IMAX) - ice emissivity                                 !
 !     semis_wat (IMAX) - water emissivity                               !
-!     IMAX          - array horizontal dimension                        !
 !                                                                       !
 !  outputs:                                                             !
 !     sfcemis(IMAX)   - surface emissivity                              !
