@@ -3237,6 +3237,7 @@ CONTAINS
 
     ustdrag = MIN(ust*ust,0.99)/wspd  ! limit at ~ 20 m/s
     ustdiff = MIN(ust*ust,0.01)/wspd  ! limit at ~ 2 m/s
+    dth(kts:kte) = 0.0  ! must initialize for moisture_check routine
 
 !!============================================
 !! u
