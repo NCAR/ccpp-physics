@@ -184,7 +184,7 @@
 !>  - Call module_radiation_surface::setalb(),to set up surface
 !! albedor for SW radiation.
 
-        call setalb (slmsk, lsm, lsm_noahmp, lsm_ruc, use_cice_alb, snodl, sncovr, sncovr_ice, &
+        call setalb (slmsk, lsm, lsm_noahmp, lsm_ruc, use_cice_alb, snodi, sncovr, sncovr_ice, &
                      snoalb, zorl, coszen, tsfg, tsfa, hprime, frac_grid, lakefrac,            &
 !                    snoalb, zorl, coszen, tsfg, tsfa, hprime, frac_grid, min_seaice,          &
                      alvsf, alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc,                    &
