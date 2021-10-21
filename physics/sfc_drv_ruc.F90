@@ -64,6 +64,7 @@ module lsm_ruc
       real (kind=kind_phys), dimension(:), intent(in) :: slmsk
       integer,               dimension(:), intent(in) :: stype
       integer,               dimension(:), intent(in) :: vtype
+      real (kind=kind_phys), dimension(:), intent(in) :: landfrac
       real (kind=kind_phys), dimension(:), intent(in) :: q1
       real (kind=kind_phys), dimension(:), intent(in) :: prsl1
       real (kind=kind_phys), dimension(:), intent(in) :: tsfc_lnd
@@ -324,7 +325,7 @@ module lsm_ruc
      &       imp_physics, imp_physics_gfdl, imp_physics_thompson,       &
      &       do_mynnsfclay, lsoil_ruc, lsoil, rdlai, zs,                &
      &       t1, q1, qc, stype, vtype, sigmaf, laixy,                   &
-     &       dlwflx, dswsfc, tg3, coszen, land, icy, lake,              &
+     &       dlwflx, dswsfc, tg3, coszen, land, icy, use_lake,          &
      &       rainnc, rainc, ice, snow, graupel,                         &
      &       prsl1, zf, wind, shdmin, shdmax,                           &
      &       srflag, sfalb_lnd_bck, snoalb,                             &
@@ -1694,8 +1695,8 @@ module lsm_ruc
 
           !--- initialize smcwlt2 and smcref2 with Noah values
           if(landfrac(i) > 0.) then
-            smcref2 (i) = REFSMCnoah(soiltyp(i))
-            smcwlt2 (i) = WLTSMCnoah(soiltyp(i))
+            smcref2 (i) = REFSMCnoah(stype(i))
+            smcwlt2 (i) = WLTSMCnoah(stype(i))
           else
             smcref2 (i) = 1.
             smcwlt2 (i) = 0.
