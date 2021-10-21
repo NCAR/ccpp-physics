@@ -223,7 +223,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &       spp_pbl=0,                                     &
      &       bl_mynn_mixscalars=1
       REAL, PARAMETER ::                                    &
-     &       closure=2.5   !2.5, 2.6 or 3.0
+     &       closure=2.6   !2.5, 2.6 or 3.0
       LOGICAL ::                                            &
      &       FLAG_QI, FLAG_QNI, FLAG_QC, FLAG_QNC,          &
      &       FLAG_QNWFA, FLAG_QNIFA
