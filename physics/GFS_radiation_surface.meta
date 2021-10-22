@@ -197,9 +197,18 @@
   kind = kind_phys
   intent = in
   optional = F
-[snowd]
-  standard_name = lwe_surface_snow
-  long_name = water equivalent snow depth
+[snodl]
+  standard_name = surface_snow_thickness_water_equivalent_over_land
+  long_name = water equivalent snow depth over land
+  units = mm
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[snodi]
+  standard_name = surface_snow_thickness_water_equivalent_over_ice
+  long_name = water equivalent snow depth over ice
   units = mm
   dimensions = (horizontal_loop_extent)
   type = real
@@ -270,8 +279,8 @@
   intent = in
   optional = F
 [tisfc]
-  standard_name = sea_ice_temperature
-  long_name = sea ice surface skin temperature
+  standard_name = surface_skin_temperature_over_ice
+  long_name = surface_skin_temperature_over_ice
   units = K
   dimensions = (horizontal_loop_extent)
   type = real
@@ -285,6 +294,14 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
+  intent = in
+  optional = F
+[cplice]
+  standard_name = flag_for_sea_ice_coupling
+  long_name = flag controlling cplice collection (default on)
+  units = flag
+  dimensions = ()
+  type = logical
   intent = in
   optional = F
 [min_seaice]
@@ -313,6 +330,14 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = F
+[use_flake]
+  standard_name = flag_for_using_flake
+  long_name = flag indicating lake points using flake model
+  units = flag
+  dimensions = (horizontal_loop_extent)
+  type = logical
+  intent = inout
   optional = F
 [alvsf]
   standard_name = vis_albedo_strong_cosz
@@ -385,6 +410,15 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = F
+[semis_wat]
+  standard_name = surface_longwave_emissivity_over_water
+  long_name = surface lw emissivity in fraction over water
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
   optional = F
 [snoalb]
   standard_name = upper_bound_of_max_albedo_assuming_deep_snow
