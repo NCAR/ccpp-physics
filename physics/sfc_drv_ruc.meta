@@ -199,7 +199,7 @@
   intent = in
   optional = F
 [tsfc_wat]
-  standard_name = surface_skin_temperature_over_water
+  standard_name = sea_surface_temperature
   long_name = surface skin temperature over water
   units = K
   dimensions = (horizontal_dimension)
