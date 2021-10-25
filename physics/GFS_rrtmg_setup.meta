@@ -156,37 +156,6 @@
   dimensions =  ()
   type = logical
   intent = in
-[im]
-  standard_name = horizontal_dimension
-  long_name = horizontal dimension
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-[faerlw]
-  standard_name = aerosol_optical_properties_for_longwave_bands_01_16
-  long_name = optical properties for longwave bands 01-16
-  units = various
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation,number_of_aerosol_bands_for_longwave_radiation,number_of_aerosol_output_fields_for_longwave_radiation)
-  type = real
-  kind = kind_phys
-  intent = in
-[faersw]
-  standard_name = aerosol_optical_properties_for_shortwave_bands_01_16
-  long_name = aerosol optical properties for shortwave bands 01-16
-  units = various
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation,number_of_aerosol_bands_for_shortwave_radiation,number_of_aerosol_output_fields_for_shortwave_radiation)
-  type = real
-  kind = kind_phys
-  intent = in
-[aerodp]
-  standard_name = atmosphere_optical_thickness_due_to_ambient_aerosol_particles
-  long_name = vertical integrated optical depth for various aerosol species
-  units = none
-  dimensions = (horizontal_dimension,number_of_species_for_aerosol_optical_depth)
-  type = real
-  kind = kind_phys
-  intent = in
 [me]
   standard_name = mpi_rank
   long_name = current MPI-rank

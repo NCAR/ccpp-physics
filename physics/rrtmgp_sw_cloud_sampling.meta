@@ -3,33 +3,6 @@
   type = scheme
   dependencies = machine.F,mersenne_twister.f,physparam.f,rrtmgp_sampling.F90,radiation_tools.F90
 
-########################################################################
-[ccpp-arg-table]
-  name = rrtmgp_sw_cloud_sampling_init
-  type = scheme
-[ipsdsw0]
-  standard_name = initial_permutation_seed_sw
-  long_name = initial seed for McICA SW
-  units = none
-  dimensions = ()
-  type = integer
-  intent = out
-[errmsg]
-  standard_name = ccpp_error_message
-  long_name = error message for error handling in CCPP
-  units = none
-  dimensions = ()
-  type = character
-  kind = len=*
-  intent = out
-[errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = out
-
 ######################################################
 [ccpp-arg-table]
   name = rrtmgp_sw_cloud_sampling_run
@@ -66,13 +39,6 @@
   standard_name = flag_for_sw_clouds_grid_approximation
   long_name = flag for sw clouds sub-grid approximation
   units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-[ipsdsw0]
-  standard_name = initial_permutation_seed_sw
-  long_name = initial seed for McICA SW
-  units = none
   dimensions = ()
   type = integer
   intent = in

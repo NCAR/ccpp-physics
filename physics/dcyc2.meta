@@ -55,22 +55,6 @@
   type = real
   kind = kind_phys
   intent = in
-[xlon]
-  standard_name = longitude
-  long_name = longitude of grid box
-  units = radian
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-[coszen]
-  standard_name = cosine_of_solar_zenith_angle_for_daytime_points_on_radiation_timestep
-  long_name = average of cosine of zenith angle over daytime shortwave call time interval
-  units = none
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
 [con_g]
   standard_name = gravitational_acceleration
   long_name = gravitational acceleration
@@ -100,6 +84,22 @@
   long_name = Stefan-Boltzmann constant
   units = W m-2 K-4
   dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[xlon]
+  standard_name = longitude
+  long_name = longitude of grid box
+  units = radian
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[coszen]
+  standard_name = cosine_of_solar_zenith_angle_for_daytime_points_on_radiation_timestep
+  long_name = average of cosine of zenith angle over daytime shortwave call time interval
+  units = none
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -151,25 +151,17 @@
   type = real
   kind = kind_phys
   intent = in
-[tsfc_radtime]
-  standard_name = surface_skin_temperature_on_radiation_timestep
-  long_name = surface skin temperature on radiation timestep
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
 [sfcemis_lnd]
-  standard_name = surface_longwave_emissivity_over_land_interstitial
-  long_name = surface lw emissivity in fraction over land (temporary use as interstitial)
+  standard_name = surface_longwave_emissivity_over_land
+  long_name = surface lw emissivity in fraction over land
   units = frac
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
 [sfcemis_ice]
-  standard_name = surface_longwave_emissivity_over_ice_interstitial
-  long_name = surface lw emissivity in fraction over ice (temporary use as interstitial)
+  standard_name = surface_longwave_emissivity_over_ice
+  long_name = surface lw emissivity in fraction over ice
   units = frac
   dimensions = (horizontal_loop_extent)
   type = real
@@ -359,7 +351,7 @@
   long_name = logical flag to control RRTMGP LW calculation
   units = flag
   dimensions = ()
-  type = logical  
+  type = logical
   intent = in
 [damp_LW_fluxadj]
   standard_name = flag_to_damp_RRTMGP_LW_jacobian_flux_adjustment
@@ -383,6 +375,13 @@
   dimensions = ()
   type = real
   kind = kind_phys
+  intent = in
+[use_LW_jacobian]
+  standard_name = flag_to_calc_RRTMGP_LW_jacobian
+  long_name = logical flag to control RRTMGP LW calculation
+  units = flag
+  dimensions = ()
+  type = logical
   intent = in
 [sfculw]
   standard_name = surface_upwelling_longwave_flux_on_radiation_timestep
@@ -460,6 +459,14 @@
   units = flag
   dimensions = ()
   type = logical
+  intent = in
+[tsfc_radtime]
+  standard_name = surface_skin_temperature_on_radiation_timestep
+  long_name = surface skin temperature on radiation timestep
+  units = K
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
   intent = in
 [dtdt]
   standard_name = process_split_cumulative_tendency_of_air_temperature

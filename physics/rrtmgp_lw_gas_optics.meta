@@ -23,13 +23,6 @@
   type = character
   intent = in
   kind = len=128
-[gas_concentrations]
-  standard_name = Gas_concentrations_for_RRTMGP_suite
-  long_name = DDT containing gas concentrations for RRTMGP radiation scheme
-  units = DDT
-  dimensions = ()
-  type = ty_gas_concs
-  intent = inout
 [mpirank]
   standard_name = mpi_rank
   long_name = current MPI rank
@@ -51,21 +44,6 @@
   dimensions = ()
   type = integer
   intent = in
-[errmsg]
-  standard_name = ccpp_error_message
-  long_name = error message for error handling in CCPP
-  units = none
-  dimensions = ()
-  type = character
-  kind = len=*
-  intent = out
-[errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = out
 [minGPpres]
   standard_name = minimum_pressure_in_RRTMGP
   long_name = minimum pressure allowed in RRTMGP
@@ -97,6 +75,29 @@
   dimensions = ()
   type = real
   kind = kind_phys
+  intent = out
+[active_gases_array]
+  standard_name = list_of_active_gases_used_by_RRTMGP
+  long_name = list of active gases used by RRTMGP
+  units = none
+  dimensions =  (number_of_active_gases_used_by_RRTMGP)
+  type = character
+  kind = len=*
+  intent = in
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
   intent = out
 
 ########################################################################
@@ -164,13 +165,21 @@
   type = real
   kind = kind_phys
   intent = in
+[active_gases_array]
+  standard_name = list_of_active_gases_used_by_RRTMGP
+  long_name = list of active gases used by RRTMGP
+  units = none
+  dimensions =  (number_of_active_gases_used_by_RRTMGP)
+  type = character
+  kind = len=*
+  intent = in
 [gas_concentrations]
   standard_name = Gas_concentrations_for_RRTMGP_suite
   long_name = DDT containing gas concentrations for RRTMGP radiation scheme
   units = DDT
   dimensions = ()
   type = ty_gas_concs
-  intent = in
+  intent = inout
 [lw_optical_props_clrsky]
   standard_name = longwave_optical_properties_for_clear_sky
   long_name = Fortran DDT containing RRTMGP optical properties

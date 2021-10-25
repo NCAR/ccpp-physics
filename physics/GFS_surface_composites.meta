@@ -35,27 +35,6 @@
   dimensions = ()
   type = integer
   intent = in
-[lsm]
-  standard_name = control_for_land_surface_scheme
-  long_name = flag for land surface model
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-[lsm_noahmp]
-  standard_name = identifier_for_noahmp_land_surface_scheme
-  long_name = flag for NOAH MP land surface model
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-[lsm_ruc]
-  standard_name = identifier_for_ruc_land_surface_scheme
-  long_name = flag for RUC land surface model
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
 [frac_grid]
   standard_name = flag_for_fractional_landmask
   long_name = flag for fractional grid
@@ -358,17 +337,9 @@
   type = real
   kind = kind_phys
   intent = inout
-[tsfc_ice]
+[tisfc]
   standard_name = surface_skin_temperature_over_ice
   long_name = surface skin temperature over ice
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-[tisfc]
-  standard_name = sea_ice_temperature
-  long_name = sea ice surface skin temperature
   units = K
   dimensions = (horizontal_loop_extent)
   type = real
@@ -436,54 +407,6 @@
   type = real
   kind = kind_phys
   intent = inout
-[semis_rad]
-  standard_name = surface_longwave_emissivity
-  long_name = surface lw emissivity in fraction
-  units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-[semis_wat]
-  standard_name = surface_longwave_emissivity_over_water
-  long_name = surface lw emissivity in fraction over water
-  units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-[semis_lnd]
-  standard_name = surface_longwave_emissivity_over_land_interstitial
-  long_name = surface lw emissivity in fraction over land (temporary use as interstitial)
-  units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-[semis_ice]
-  standard_name = surface_longwave_emissivity_over_ice_interstitial
-  long_name = surface lw emissivity in fraction over ice (temporary use as interstitial)
-  units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-[emis_lnd]
-  standard_name = surface_longwave_emissivity_over_land
-  long_name = surface lw emissivity in fraction over land
-  units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-[emis_ice]
-  standard_name = surface_longwave_emissivity_over_ice
-  long_name = surface lw emissivity in fraction over ice
-  units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
 [qss]
   standard_name = surface_specific_humidity
   long_name = surface air saturation specific humidity
@@ -538,6 +461,14 @@
   units = index
   dimensions = ()
   type = integer
+  intent = in
+[huge]
+  standard_name = netcdf_float_fillvalue
+  long_name = definition of NetCDF float FillValue
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
   intent = in
 [errmsg]
   standard_name = ccpp_error_message
@@ -602,16 +533,16 @@
   kind = kind_phys
   intent = in
 [semis_lnd]
-  standard_name = surface_longwave_emissivity_over_land_interstitial
-  long_name = surface lw emissivity in fraction over land (temporary use as interstitial)
+  standard_name = surface_longwave_emissivity_over_land
+  long_name = surface lw emissivity in fraction over land
   units = frac
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
 [semis_ice]
-  standard_name = surface_longwave_emissivity_over_ice_interstitial
-  long_name = surface lw emissivity in fraction over ice (temporary use as interstitial)
+  standard_name = surface_longwave_emissivity_over_ice
+  long_name = surface lw emissivity in fraction over ice
   units = frac
   dimensions = (horizontal_loop_extent)
   type = real
@@ -1535,17 +1466,9 @@
   type = real
   kind = kind_phys
   intent = in
-[tsfc_ice]
+[tisfc]
   standard_name = surface_skin_temperature_over_ice
   long_name = surface skin temperature over ice
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-[tisfc]
-  standard_name = sea_ice_temperature
-  long_name = sea ice surface skin temperature
   units = K
   dimensions = (horizontal_loop_extent)
   type = real
@@ -1567,14 +1490,6 @@
   type = real
   kind = kind_phys
   intent = inout
-[min_seaice]
-  standard_name = min_sea_ice_area_fraction
-  long_name = minimum sea ice value
-  units = frac
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
 [tiice]
   standard_name = temperature_in_ice_layer
   long_name = sea ice internal temperature
@@ -1715,6 +1630,14 @@
   long_name = bounded surface roughness length for heat over ice
   units = m
   dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[huge]
+  standard_name = netcdf_float_fillvalue
+  long_name = definition of NetCDF float FillValue
+  units = none
+  dimensions = ()
   type = real
   kind = kind_phys
   intent = in

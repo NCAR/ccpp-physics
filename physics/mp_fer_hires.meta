@@ -50,30 +50,6 @@
   dimensions = ()
   type = logical
   intent = in
-[f_ice]
-  standard_name = fraction_of_ice_water_cloud
-  long_name = fraction of ice water cloud
-  units = frac
-  dimensions = (horizontal_dimension,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-[f_rain]
-  standard_name = fraction_of_rain_water_cloud
-  long_name = fraction of rain water cloud
-  units = frac
-  dimensions = (horizontal_dimension,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-[f_rimef]
-  standard_name = rime_factor
-  long_name = rime factor
-  units = frac
-  dimensions = (horizontal_dimension,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
 [mpicomm]
   standard_name = mpi_communicator
   long_name = MPI communicator
@@ -210,14 +186,6 @@
   type = real
   kind = kind_phys
   intent = inout
-[cwm]
-  standard_name = total_cloud_condensate_mixing_ratio_updated_by_physics
-  long_name = total cloud condensate mixing ratio (except water vapor) updated by physics
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
 [train]
   standard_name = accumulated_change_of_air_temperature_due_to_FA_scheme
   long_name = accumulated change of air temperature due to FA MP scheme
@@ -231,30 +199,6 @@
   long_name = snow ratio: ratio of snow to total precipitation (explicit only)
   units = frac
   dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = out
-[f_ice]
-  standard_name = fraction_of_ice_water_cloud
-  long_name = fraction of ice water cloud
-  units = frac
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-[f_rain]
-  standard_name = fraction_of_rain_water_cloud
-  long_name = fraction of rain water cloud
-  units = frac
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-[f_rimef]
-  standard_name = rime_factor
-  long_name = rime factor
-  units = frac
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = out

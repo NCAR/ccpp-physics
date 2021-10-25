@@ -160,16 +160,16 @@
   kind = kind_phys
   intent = in
 [tsfc_lnd]
-  standard_name = surface_skin_temperature
-  long_name = surface skin temperature
+  standard_name = surface_skin_temperature_over_land
+  long_name = surface skin temperature over land
   units = K
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in
 [tsfc_ice]
-  standard_name = sea_ice_temperature
-  long_name = sea ice surface skin temperature
+  standard_name = surface_skin_temperature_over_ice
+  long_name = surface skin temperature over ice
   units = K
   dimensions = (horizontal_dimension)
   type = real
@@ -177,7 +177,7 @@
   intent = in
 [tsfc_wat]
   standard_name = sea_surface_temperature
-  long_name = sea surface temperature
+  long_name = surface skin temperature over water
   units = K
   dimensions = (horizontal_dimension)
   type = real
@@ -977,22 +977,6 @@
   type = real
   kind = kind_phys
   intent = in
-[ch_wat]
-  standard_name = surface_drag_coefficient_for_heat_and_moisture_in_air_over_water
-  long_name = surface exchange coeff heat surface exchange coeff heat & moisture over ocean moisture over water
-  units = none
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-[tskin_wat]
-  standard_name = surface_skin_temperature_over_water
-  long_name = surface skin temperature over water
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
 [semisbase]
   standard_name = baseline_surface_longwave_emissivity
   long_name = baseline surface lw emissivity in fraction
@@ -1365,14 +1349,6 @@
   standard_name = water_vapor_mixing_ratio_at_surface_over_ice
   long_name = water vapor mixing ratio at surface over ice
   units = kg kg-1
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-[tice]
-  standard_name = sea_ice_temperature
-  long_name = sea ice surface skin temperature
-  units = K
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys

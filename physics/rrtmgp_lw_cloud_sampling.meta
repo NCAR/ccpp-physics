@@ -3,33 +3,6 @@
   type = scheme
   dependencies = machine.F,mersenne_twister.f,physparam.f,rrtmgp_sampling.F90,radiation_tools.F90
 
-########################################################################
-[ccpp-arg-table]
-  name = rrtmgp_lw_cloud_sampling_init
-  type = scheme
-[ipsdlw0]
-  standard_name = initial_permutation_seed_lw
-  long_name = initial seed for McICA LW
-  units = none
-  dimensions = ()
-  type = integer
-  intent = out
-[errmsg]
-  standard_name = ccpp_error_message
-  long_name = error message for error handling in CCPP
-  units = none
-  dimensions = ()
-  type = character
-  kind = len=*
-  intent = out
-[errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = out
-
 ######################################################
 [ccpp-arg-table]
   name = rrtmgp_lw_cloud_sampling_run
@@ -46,7 +19,7 @@
   long_name = logical flag to control the addition of LW scattering in RRTMGP 
   units = flag
   dimensions = ()
-  type = logical  
+  type = logical
   intent = in
 [ncol]
   standard_name = horizontal_loop_extent
@@ -66,13 +39,6 @@
   standard_name = flag_for_lw_clouds_sub_grid_approximation
   long_name = flag for lw clouds sub-grid approximation
   units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-[ipsdlw0]
-  standard_name = initial_permutation_seed_lw
-  long_name = initial seed for McICA LW
-  units = none
   dimensions = ()
   type = integer
   intent = in
