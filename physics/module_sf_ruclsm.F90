@@ -60,7 +60,7 @@ CONTAINS
 !>\section gen_lsmruc GSD RUC LSM General Algorithm
 !! @{
     SUBROUTINE LSMRUC(                                           &
-                   DT,init,restart,KTAU,iter,NSL,                &
+                   DT,init,lsm_cold_start,KTAU,iter,NSL,         &
                    graupelncv,snowncv,rainncv,raincv,            &
                    ZS,RAINBL,SNOW,SNOWH,SNOWC,FRZFRAC,frpcpn,    &
                    rhosnf,precipfr,                              &
@@ -97,7 +97,7 @@ CONTAINS
 !-----------------------------------------------------------------
 !-- DT            time step (second)
 !        init - flag for initialization
-!     restart - flag for restart run
+!lsm_cold_start - flag for cold start run
 !        ktau - number of time step
 !        NSL  - number of soil layers
 !        NZS  - number of levels in soil
@@ -166,7 +166,7 @@ CONTAINS
 !   INTEGER,     PARAMETER            ::     nddzs=2*(nzss-2)
 
    REAL,       INTENT(IN   )    ::     DT
-   LOGICAL,    INTENT(IN   )    ::     myj,frpcpn,init,restart
+   LOGICAL,    INTENT(IN   )    ::     myj,frpcpn,init,lsm_cold_start
    INTEGER,    INTENT(IN   )    ::     NLCAT, NSCAT ! , mosaic_lu, mosaic_soil
    INTEGER,    INTENT(IN   )    ::     ktau, iter, nsl, isice, iswater, &
                                        ims,ime, jms,jme, kms,kme, &
@@ -423,7 +423,7 @@ CONTAINS
 !> - Initialize soil/vegetation parameters
 !--- This is temporary until SI is added to mass coordinate ---!!!!!
 
-     if(init .and. (.not. restart) .and. iter == 1) then
+     if(init .and. (lsm_cold_start) .and. iter == 1) then
      DO J=jts,jte
          DO i=its,ite
 !            do k=1,nsl
