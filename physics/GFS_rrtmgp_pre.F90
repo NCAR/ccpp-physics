@@ -21,8 +21,6 @@ module GFS_rrtmgp_pre
   ! Save trace gas indices.
   integer :: iStr_h2o, iStr_co2, iStr_o3, iStr_n2o, iStr_ch4, iStr_o2, iStr_ccl4, &
        iStr_cfc11, iStr_cfc12, iStr_cfc22 
-    character(len=32),dimension(:),allocatable :: &
-         active_gases_array 
 
   public GFS_rrtmgp_pre_run,GFS_rrtmgp_pre_init,GFS_rrtmgp_pre_finalize  
 contains
@@ -33,12 +31,15 @@ contains
 !! \section arg_table_GFS_rrtmgp_pre_init
 !! \htmlinclude GFS_rrtmgp_pre_init.html
 !!
-  subroutine GFS_rrtmgp_pre_init(nGases, active_gases, errmsg, errflg)
+  subroutine GFS_rrtmgp_pre_init(nGases, active_gases, active_gases_array, errmsg, errflg)
     ! Inputs
     integer, intent(in) :: &
          nGases       ! Number of active gases in RRTMGP
     character(len=*), intent(in) :: &
-         active_gases ! List of active gases from namelist.     
+         active_gases ! List of active gases from namelist
+    character(len=*), dimension(:), intent(out) :: &
+         active_gases_array ! List of active gases from namelist as array
+
     ! Outputs
     character(len=*), intent(out) :: &
          errmsg             ! Error message
@@ -73,7 +74,6 @@ contains
     gasIndices(nGases,2)=len(trim(active_gases))
     
     ! Now extract the gas names
-    allocate(active_gases_array(nGases))
     do ij=1,nGases
        active_gases_array(ij) = active_gases(gasIndices(ij,1):gasIndices(ij,2))
        if(trim(active_gases_array(ij)) .eq. 'h2o')   istr_h2o       = ij
@@ -99,8 +99,8 @@ contains
   subroutine GFS_rrtmgp_pre_run(nCol, nLev, nTracers, i_o3, lsswr, lslwr, fhswr, fhlwr,     &
        xlat, xlon,  prsl, tgrs, prslk, prsi, qgrs, tsfc, con_eps, con_epsm1, con_fvirt,     &
        con_epsqs, minGPpres, maxGPpres, minGPtemp, maxGPtemp, raddt, p_lay, t_lay, p_lev,   &
-       t_lev, tsfg, tsfa, qs_lay, q_lay, tv_lay, relhum, tracer, gas_concentrations,        &
-       tsfc_radtime, errmsg, errflg)
+       t_lev, tsfg, tsfa, qs_lay, q_lay, tv_lay, relhum, tracer, active_gases_array,        &
+       gas_concentrations, tsfc_radtime, errmsg, errflg)
     
     ! Inputs   
     integer, intent(in)    :: &
@@ -159,7 +159,9 @@ contains
          t_lev                ! Temperature at model-interface
     real(kind_phys), dimension(nCol, nLev, nTracers),intent(inout) :: &
          tracer               ! Array containing trace gases
-    type(ty_gas_concs),intent(inout) :: &
+    character(len=*), dimension(:), intent(in) :: &
+         active_gases_array ! List of active gases from namelist as array
+    type(ty_gas_concs), intent(inout) :: &
          gas_concentrations   ! RRTMGP DDT: gas volumne mixing ratios
          
     ! Local variables
@@ -169,7 +171,6 @@ contains
     real(kind_phys) :: es, tem1, tem2
     real(kind_phys), dimension(nCol,nLev) :: o3_lay
     real(kind_phys), dimension(nCol,nLev, NF_VGAS) :: gas_vmr
-    character(len=32), dimension(gas_concentrations%get_num_gases()) :: active_gases
 
     ! Initialize CCPP error handling variables
     errmsg = ''

@@ -13,30 +13,20 @@
 !> \section arg_table_GFS_radiation_surface_init Argument Table
 !! \htmlinclude GFS_radiation_surface_init.html
 !!
-      subroutine GFS_radiation_surface_init (me, sfcalb, ialb, iems, errmsg, errflg)
+      subroutine GFS_radiation_surface_init (me, ialb, iems, errmsg, errflg)
 
       use physparam,                only: ialbflg, iemsflg
-      use module_radiation_surface, only: NF_ALBD, sfc_init
+      use module_radiation_surface, only: sfc_init
 
       implicit none
 
       integer,                              intent(in)  :: me, ialb, iems
-      real(kind=kind_phys), dimension(:,:), intent(in)  :: sfcalb
       character(len=*),                     intent(out) :: errmsg
       integer,                              intent(out) :: errflg
 
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
-
-      ! Consistency check that the number of albedo components in array
-      ! sfcalb matches the parameter NF_ALBD from radiation_surface.f
-      if (size(sfcalb,dim=2)/=NF_ALBD) then
-        errmsg = 'Error in GFS_radiation_surface_init: second' // &
-                 ' dimension of array sfcalb does not match' //   &
-                 ' parameter NF_ALBD in radiation_surface.f'
-        errflg = 1
-      end if
 
       ialbflg= ialb                     ! surface albedo control flag
       iemsflg= iems                     ! surface emissivity control flag
@@ -184,7 +174,7 @@
 !>  - Call module_radiation_surface::setalb(),to set up surface
 !! albedor for SW radiation.
 
-        call setalb (slmsk, lsm, lsm_noahmp, lsm_ruc, use_cice_alb, snodl, sncovr, sncovr_ice, &
+        call setalb (slmsk, lsm, lsm_noahmp, lsm_ruc, use_cice_alb, snodi, sncovr, sncovr_ice, &
                      snoalb, zorl, coszen, tsfg, tsfa, hprime, frac_grid, lakefrac,            &
 !                    snoalb, zorl, coszen, tsfg, tsfa, hprime, frac_grid, min_seaice,          &
                      alvsf, alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc,                    &
