@@ -333,13 +333,6 @@
   type = real
   kind = kind_phys
   intent = inout
-[flxprf_sw]
-  standard_name = RRTMGP_sw_fluxes
-  long_name = sw fluxes total sky / csk and up / down at levels
-  units = W m-2
-  dimensions = (horizontal_loop_extent,adjusted_vertical_level_dimension_plus_one)
-  type = profsw_type
-  intent = inout
 [scmpsw]
   standard_name = components_of_surface_downward_shortwave_fluxes
   long_name = derived type for special components of surface downward shortwave fluxes

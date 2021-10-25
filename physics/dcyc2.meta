@@ -346,13 +346,6 @@
   dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
-[use_LW_jacobian]
-  standard_name = flag_to_calc_RRTMGP_LW_jacobian
-  long_name = logical flag to control RRTMGP LW calculation
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
 [damp_LW_fluxadj]
   standard_name = flag_to_damp_RRTMGP_LW_jacobian_flux_adjustment
   long_name = logical flag to control RRTMGP LW calculation

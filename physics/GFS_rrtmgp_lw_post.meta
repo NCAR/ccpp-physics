@@ -214,13 +214,6 @@
   dimensions = (horizontal_loop_extent)
   type = topflw_type
   intent = out  
-[flxprf_lw]
-  standard_name = RRTMGP_lw_fluxes
-  long_name = lw fluxes total sky / csk and up / down at levels
-  units = W m-2
-  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
-  type = proflw_type
-  intent = inout
 [htrlwc]
   standard_name = tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_timestep
   long_name = longwave clear sky heating rate
