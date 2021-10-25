@@ -14,7 +14,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [levs]
   standard_name = vertical_layer_dimension
   long_name = number of vertical levels
@@ -22,7 +21,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ldiag_ugwp]
   standard_name = flag_for_unified_gravity_wave_physics_diagnostics
   long_name = flag for CIRES UGWP Diagnostics
@@ -30,7 +28,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [dtf]
   standard_name = timestep_for_dynamics
   long_name = dynamics timestep
@@ -39,7 +36,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [dudt_gw]
   standard_name = tendency_of_x_wind_due_to_gravity_wave_drag
   long_name = zonal wind tendency due to all GWs
@@ -48,7 +44,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [dvdt_gw]
   standard_name = tendency_of_y_wind_due_to_gravity_wave_drag
   long_name = meridional wind tendency due to all GWs
@@ -57,7 +52,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [dtdt_gw]
   standard_name = tendency_of_air_temperature_due_to_gravity_wave_drag
   long_name = air temperature tendency due to all GWs
@@ -66,7 +60,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F 
 [du_ofdcol]
   standard_name = vertically_integrated_x_momentum_flux_due_to_form_drag
   long_name = integrated x momentum flux from form drag
@@ -75,7 +68,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F  
 [du_oblcol]
   standard_name = vertically_integrated_x_momentum_flux_due_to_blocking_drag
   long_name = integrated x momentum flux from blocking drag
@@ -84,7 +76,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [tau_ogw]
   standard_name = instantaneous_momentum_flux_due_to_orographic_gravity_wave_drag
   long_name = momentum flux or stress due to orographic gravity wave drag
@@ -93,7 +84,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [tau_ngw]
   standard_name = instantaneous_momentum_flux_due_to_nonstationary_gravity_wave
   long_name = momentum flux or stress due to nonstationary gravity waves
@@ -102,7 +92,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [zobl]
   standard_name = height_of_mountain_blocking
   long_name = height of mountain blocking drag_v1
@@ -111,7 +100,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [zlwb]
   standard_name = height_of_low_level_wave_breaking
   long_name = height of low level wave breaking for OGWs
@@ -128,7 +116,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [dudt_obl]
   standard_name = tendency_of_x_momentum_due_to_blocking_drag
   long_name = x momentum tendency from blocking drag
@@ -137,7 +124,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [dudt_ofd]
   standard_name = tendency_of_x_momentum_due_to_form_drag
   long_name = x momentum tendency from form drag
@@ -146,7 +132,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [dudt_ogw]
   standard_name = tendency_of_x_wind_due_to_mesoscale_orographic_gravity_wave_drag
   long_name = x momentum tendency from meso scale ogw
@@ -155,7 +140,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F    
 [tot_zmtb]
   standard_name = time_integral_of_height_of_mountain_blocking
   long_name = time integral of height of mountain blocking drag
@@ -164,7 +148,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [tot_zlwb]
   standard_name = time_integral_of_height_of_low_level_wave_breaking
   long_name = time integral of height of drag due to low level wave breaking
@@ -173,7 +156,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [tot_zogw]
   standard_name = time_integral_of_height_of_launch_level_of_orographic_gravity_wave
   long_name = time integral of height of launch level of orographic gravity wave
@@ -182,7 +164,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [tot_tofd]
   standard_name = time_integral_of_momentum_flux_due_to_turbulent_orographic_form_drag
   long_name = time integral of momentum flux due to TOFD
@@ -191,7 +172,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [tot_mtb]
   standard_name = time_integral_of_momentum_flux_due_to_mountain_blocking_drag
   long_name = time integral of momentum flux due to mountain blocking drag
@@ -200,7 +180,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [tot_ogw]
   standard_name = time_integral_of_momentum_flux_due_to_orographic_gravity_wave_drag
   long_name = time integral of momentum flux due to orographic gravity wave drag
@@ -209,7 +188,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [tot_ngw]
   standard_name = time_integral_of_momentum_flux_due_to_nonstationary_gravity_wave
   long_name = time integral of momentum flux due to nonstationary gravity waves
@@ -218,7 +196,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [du3dt_mtb]
   standard_name = time_integral_of_change_in_x_wind_due_to_mountain_blocking_drag
   long_name = time integral of change in x wind due to mountain blocking drag
@@ -227,7 +204,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [du3dt_ogw]
   standard_name = time_integral_of_change_in_x_wind_due_to_orographic_gravity_wave_drag
   long_name = time integral of change in x wind due to orographic gw drag
@@ -236,7 +212,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [du3dt_tms]
   standard_name = time_integral_of_change_in_x_wind_due_to_turbulent_orographic_form_drag
   long_name = time integral of change in x wind due to TOFD
@@ -245,7 +220,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [du3dt_ngw]
   standard_name = time_integral_of_change_in_x_wind_due_to_nonstationary_gravity_wave
   long_name = time integral of change in x wind due to NGW
@@ -254,7 +228,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [dv3dt_ngw]
   standard_name = time_integral_of_change_in_y_wind_due_to_nonstationary_gravity_wave
   long_name = time integral of change in y wind due to NGW
@@ -263,7 +236,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [dtdt]
   standard_name = process_split_cumulative_tendency_of_air_temperature
   long_name = air temperature tendency due to model physics
@@ -272,7 +244,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [dudt]
   standard_name = process_split_cumulative_tendency_of_x_wind
   long_name = zonal wind tendency due to model physics
@@ -281,7 +252,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [dvdt]
   standard_name = process_split_cumulative_tendency_of_y_wind
   long_name = meridional wind tendency due to model physics
@@ -290,7 +260,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -299,7 +268,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -307,4 +275,3 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F

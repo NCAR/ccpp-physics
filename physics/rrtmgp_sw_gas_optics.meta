@@ -14,7 +14,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [nLev]
   standard_name = vertical_layer_dimension
   long_name = number of vertical levels
@@ -22,7 +21,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [nThreads]
   standard_name = number_of_openmp_threads
   long_name = number of OpenMP threads available to scheme
@@ -30,7 +28,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [rrtmgp_root_dir]
   standard_name = directory_for_rte_rrtmgp_source_code
   long_name = directory for rte+rrtmgp source code
@@ -38,7 +35,6 @@
   dimensions =  ()
   type = character
   intent = in
-  optional = F
   kind = len=128
 [rrtmgp_sw_file_gas]
   standard_name = filename_of_rrtmgp_shortwave_k_distribution
@@ -47,7 +43,6 @@
   dimensions =  ()
   type = character
   intent = in
-  optional = F
   kind = len=128
 [gas_concentrations]
   standard_name = Gas_concentrations_for_RRTMGP_suite
@@ -56,7 +51,6 @@
   dimensions = ()
   type = ty_gas_concs
   intent = inout
-  optional = F
 [mpirank]
   standard_name = mpi_rank
   long_name = current MPI rank
@@ -64,7 +58,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [mpiroot]
   standard_name = mpi_root
   long_name = master MPI rank
@@ -72,7 +65,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [mpicomm]
   standard_name = mpi_communicator
   long_name = MPI communicator
@@ -80,7 +72,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -89,7 +80,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -97,7 +87,6 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 
 ########################################################################
 [ccpp-arg-table]
@@ -110,7 +99,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [ncol]
   standard_name = horizontal_loop_extent
   long_name = horizontal dimension
@@ -118,7 +106,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [nLev]
   standard_name = vertical_layer_dimension
   long_name = number of vertical levels
@@ -126,7 +113,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [nday]
   standard_name = daytime_points_dimension
   long_name = daytime points dimension
@@ -134,7 +120,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [idxday]
   standard_name = daytime_points
   long_name = daytime points
@@ -142,7 +127,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
-  optional = F
 [ngptsGPsw]
   standard_name = number_of_shortwave_spectral_points
   long_name = number of spectral points in RRTMGP SW calculation
@@ -150,7 +134,6 @@
   dimensions =  ()
   type = integer
   intent = in
-  optional = F
 [p_lay]
   standard_name = air_pressure_at_layer_for_RRTMGP
   long_name = air pressure layer
@@ -159,7 +142,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [p_lev]
   standard_name = air_pressure_at_interface_for_RRTMGP
   long_name = air pressure level
@@ -168,7 +150,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [t_lay]
   standard_name = air_temperature_at_layer_for_RRTMGP
   long_name = air temperature layer
@@ -177,7 +158,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [t_lev]
   standard_name = air_temperature_at_interface_for_RRTMGP
   long_name = air temperature level
@@ -186,7 +166,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [toa_src_sw]
   standard_name = toa_incident_sw_flux_by_spectral_point
   long_name = TOA shortwave incident flux at each spectral points
@@ -195,7 +174,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [gas_concentrations]
   standard_name = Gas_concentrations_for_RRTMGP_suite
   long_name = DDT containing gas concentrations for RRTMGP radiation scheme
@@ -203,7 +181,6 @@
   dimensions = ()
   type = ty_gas_concs
   intent = in
-  optional = F
 [solcon]
   standard_name = solar_constant
   long_name = solar constant
@@ -212,7 +189,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -221,7 +197,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -229,7 +204,6 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 [sw_optical_props_clrsky]
   standard_name = shortwave_optical_properties_for_clear_sky
   long_name = Fortran DDT containing RRTMGP optical properties
@@ -237,4 +211,3 @@
   dimensions = ()
   type = ty_optical_props_2str
   intent = out
-  optional = F

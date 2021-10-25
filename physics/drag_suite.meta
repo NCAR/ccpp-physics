@@ -14,7 +14,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -23,7 +22,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -31,7 +29,6 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 
 ########################################################################
 [ccpp-arg-table]
@@ -44,7 +41,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [km]
   standard_name = vertical_layer_dimension
   long_name = number of vertical layers
@@ -52,7 +48,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [dvdt]
   standard_name = process_split_cumulative_tendency_of_y_wind
   long_name = meridional wind tendency due to model physics
@@ -61,7 +56,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [dudt]
   standard_name = process_split_cumulative_tendency_of_x_wind
   long_name = zonal wind tendency due to model physics
@@ -70,7 +64,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [dtdt]
   standard_name = process_split_cumulative_tendency_of_air_temperature
   long_name = air temperature tendency due to model physics
@@ -79,7 +72,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [u1]
   standard_name = x_wind
   long_name = zonal wind
@@ -88,7 +80,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [v1]
   standard_name = y_wind
   long_name = meridional wind
@@ -97,7 +88,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [t1]
   standard_name = air_temperature
   long_name = mid-layer temperature
@@ -106,7 +96,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [q1]
   standard_name = specific_humidity
   long_name = mid-layer specific humidity of water vapor
@@ -115,7 +104,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [kpbl]
   standard_name = vertical_index_at_top_of_atmosphere_boundary_layer
   long_name = vertical index at top atmospheric boundary layer
@@ -123,7 +111,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
-  optional = F
 [prsi]
   standard_name = air_pressure_at_interface
   long_name = interface pressure
@@ -132,7 +119,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [del]
   standard_name = air_pressure_difference_between_midlayers
   long_name = difference between mid-layer pressures
@@ -141,7 +127,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [prsl]
   standard_name = air_pressure
   long_name = mid-layer pressure
@@ -150,7 +135,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [prslk]
   standard_name = dimensionless_exner_function
   long_name = mid-layer Exner function
@@ -159,7 +143,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [phii]
   standard_name = geopotential_at_interface
   long_name = interface geopotential
@@ -168,7 +151,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [phil]
   standard_name = geopotential
   long_name = mid-layer geopotential
@@ -177,7 +159,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [deltim]
   standard_name = timestep_for_physics
   long_name = physics time step
@@ -186,7 +167,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [kdt]
   standard_name = index_of_timestep
   long_name = current time step index
@@ -194,7 +174,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [var]
   standard_name = standard_deviation_of_subgrid_orography
   long_name = standard deviation of subgrid height_above_mean_sea_level
@@ -203,7 +182,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [oc1]
   standard_name = convexity_of_subgrid_orography
   long_name = convexity of subgrid height_above_mean_sea_level
@@ -212,7 +190,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [oa4]
   standard_name = asymmetry_of_subgrid_orography
   long_name = asymmetry of subgrid height_above_mean_sea_level
@@ -221,7 +198,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [ol4]
   standard_name = fraction_of_grid_box_with_subgrid_orography_higher_than_critical_height
   long_name = horizontal fraction of grid box covered by subgrid height_above_mean_sea_level higher than critical height
@@ -230,7 +206,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [varss]
   standard_name = standard_deviation_of_subgrid_orography_small_scale
   long_name = standard deviation of subgrid height_above_mean_sea_level small scale
@@ -239,7 +214,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [oc1ss]
   standard_name = convexity_of_subgrid_orography_small_scale
   long_name = convexity of subgrid height_above_mean_sea_level small scale
@@ -248,7 +222,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [oa4ss]
   standard_name = asymmetry_of_subgrid_orography_small_scale
   long_name = asymmetry of subgrid height_above_mean_sea_level small scale
@@ -257,7 +230,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [ol4ss]
   standard_name = fraction_of_grid_box_with_subgrid_orography_higher_than_critical_height_small_scale
   long_name = horizontal fraction of grid box covered by subgrid height_above_mean_sea_level higher than critical height small scale
@@ -266,7 +238,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [theta]
   standard_name = angle_from_east_of_maximum_subgrid_orographic_variations
   long_name = angle with respect to east of maximum subgrid orographic variations
@@ -275,7 +246,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [sigma]
   standard_name = slope_of_subgrid_orography
   long_name = slope of subgrid height_above_mean_sea_level
@@ -284,7 +254,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [gamma]
   standard_name = anisotropy_of_subgrid_orography
   long_name = anisotropy of subgrid height_above_mean_sea_level
@@ -293,7 +262,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [elvmax]
   standard_name = maximum_subgrid_orography
   long_name = maximum of subgrid height_above_mean_sea_level
@@ -302,7 +270,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [dtaux2d_ls]
   standard_name = tendency_of_x_wind_due_to_mesoscale_orographic_gravity_wave_drag
   long_name = x momentum tendency from large scale gwd
@@ -311,7 +278,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [dtauy2d_ls]
   standard_name = tendency_of_y_wind_due_to_mesoscale_orographic_gravity_wave_drag
   long_name = y momentum tendency from large scale gwd
@@ -320,7 +286,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [dtaux2d_bl]
   standard_name = tendency_of_x_momentum_due_to_blocking_drag
   long_name = x momentum tendency from blocking drag
@@ -329,7 +294,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [dtauy2d_bl]
   standard_name = tendency_of_y_momentum_due_to_blocking_drag
   long_name = y momentum tendency from blocking drag
@@ -338,7 +302,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [dtaux2d_ss]
   standard_name = tendency_of_x_momentum_due_to_small_scale_gravity_wave_drag
   long_name = x momentum tendency from small scale gwd
@@ -347,7 +310,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [dtauy2d_ss]
   standard_name = tendency_of_y_momentum_due_to_small_scale_gravity_wave_drag
   long_name = y momentum tendency from small scale gwd
@@ -356,7 +318,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [dtaux2d_fd]
   standard_name = tendency_of_x_momentum_due_to_form_drag
   long_name = x momentum tendency from form drag
@@ -365,7 +326,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [dtauy2d_fd]
   standard_name = tendency_of_y_momentum_due_to_form_drag
   long_name = y momentum tendency from form drag
@@ -374,7 +334,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [dusfc]
   standard_name = instantaneous_x_stress_due_to_gravity_wave_drag
   long_name = zonal surface stress due to orographic gravity wave drag
@@ -383,7 +342,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [dvsfc]
   standard_name = instantaneous_y_stress_due_to_gravity_wave_drag
   long_name = meridional surface stress due to orographic gravity wave drag
@@ -392,7 +350,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [dusfc_ls]
   standard_name = vertically_integrated_x_momentum_flux_due_to_mesoscale_orographic_gravity_wave_drag
   long_name = integrated x momentum flux from large scale gwd
@@ -401,7 +358,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [dvsfc_ls]
   standard_name = vertically_integrated_y_momentum_flux_due_to_mesoscale_orographic_gravity_wave_drag
   long_name = integrated y momentum flux from large scale gwd
@@ -410,7 +366,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [dusfc_bl]
   standard_name = vertically_integrated_x_momentum_flux_due_to_blocking_drag
   long_name = integrated x momentum flux from blocking drag
@@ -419,7 +374,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [dvsfc_bl]
   standard_name = vertically_integrated_y_momentum_flux_due_to_blocking_drag
   long_name = integrated y momentum flux from blocking drag
@@ -428,7 +382,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [dusfc_ss]
   standard_name = vertically_integrated_x_momentum_flux_due_to_small_scale_gravity_wave_drag
   long_name = integrated x momentum flux from small scale gwd
@@ -437,7 +390,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [dvsfc_ss]
   standard_name = vertically_integrated_y_momentum_flux_due_to_small_scale_gravity_wave_drag
   long_name = integrated y momentum flux from small scale gwd
@@ -446,7 +398,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [dusfc_fd]
   standard_name = vertically_integrated_x_momentum_flux_due_to_form_drag
   long_name = integrated x momentum flux from form drag
@@ -455,7 +406,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [dvsfc_fd]
   standard_name = vertically_integrated_y_momentum_flux_due_to_form_drag
   long_name = integrated y momentum flux from form drag
@@ -464,7 +414,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [slmsk]
   standard_name = area_type
   long_name = landmask: sea/land/ice=0/1/2
@@ -473,7 +422,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [br1]
   standard_name = bulk_richardson_number_at_lowest_model_level
   long_name = bulk Richardson number at the surface
@@ -482,7 +430,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [hpbl]
   standard_name = atmosphere_boundary_layer_thickness
   long_name = PBL thickness
@@ -491,7 +438,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [g]
   standard_name = gravitational_acceleration
   long_name = gravitational acceleration
@@ -500,7 +446,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [cp]
   standard_name = specific_heat_of_dry_air_at_constant_pressure
   long_name = specific heat of dry air at constant pressure
@@ -509,7 +454,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [rd]
   standard_name = gas_constant_of_dry_air
   long_name = ideal gas constant for dry air
@@ -518,7 +462,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [rv]
   standard_name = gas_constant_water_vapor
   long_name = ideal gas constant for water vapor
@@ -527,7 +470,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [fv]
   standard_name = ratio_of_vapor_to_dry_air_gas_constants_minus_one
   long_name = (rv/rd) - 1 (rv = ideal gas constant for water vapor)
@@ -536,7 +478,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [pi]
   standard_name = pi
   long_name = ratio of a circle's circumference to its diameter
@@ -545,7 +486,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [imx]
   standard_name = number_of_equatorial_longitude_points
   long_name = number of longitude points along the equator
@@ -553,7 +493,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [cdmbgwd]
   standard_name = multiplicative_tunable_parameters_for_mountain_blocking_and_orographic_gravity_wave_drag
   long_name = multiplic. factors for (1) mountain blocking drag coeff. and (2) ref. level orographic gravity wave drag
@@ -562,7 +501,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [me]
   standard_name = mpi_rank
   long_name = rank of the current MPI task
@@ -570,7 +508,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [master]
   standard_name = mpi_root
   long_name = master MPI-rank
@@ -578,7 +515,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [lprnt]
   standard_name = flag_print
   long_name = flag for debugging printouts
@@ -586,7 +522,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [ipr]
   standard_name = horizontal_index_of_printed_column
   long_name = horizontal index of column used in debugging printouts
@@ -594,7 +529,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [rdxzb]
   standard_name = level_of_dividing_streamline
   long_name = level of the dividing streamline
@@ -603,7 +537,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [dx]
   standard_name = characteristic_grid_lengthscale
   long_name = size of the grid cell
@@ -612,7 +545,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [gwd_opt]
   standard_name = control_for_drag_suite_gravity_wave_drag
   long_name = flag to choose gwd scheme
@@ -620,7 +552,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [do_gsl_drag_ls_bl]
   standard_name = flag_for_gsl_drag_suite_large_scale_orographic_and_blocking_drag
   long_name = flag to activate GSL drag suite - large-scale GWD and blocking
@@ -628,7 +559,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [do_gsl_drag_ss]
   standard_name = flag_for_gsl_drag_suite_small_scale_orographic_drag
   long_name = flag to activate GSL drag suite - small-scale GWD
@@ -636,7 +566,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [do_gsl_drag_tofd]
   standard_name = flag_for_gsl_drag_suite_turbulent_orographic_form_drag
   long_name = flag to activate GSL drag suite - turb orog form drag
@@ -644,7 +573,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [dtend]
   standard_name = cumulative_change_of_state_variables
   long_name = diagnostic tendencies for state variables
@@ -654,7 +582,6 @@
   kind = kind_phys
   active = (flag_for_diagnostics_3D)
   intent = inout
-  optional = F
 [dtidx]
   standard_name = cumulative_change_of_state_variables_outer_index
   long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
@@ -662,7 +589,6 @@
   dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
   type = integer
   intent = in
-  optional = F
 [index_of_process_orographic_gwd]
   standard_name = index_of_orographic_gravity_wave_drag_process_in_cumulative_change_index
   long_name = index of orographic gravity wave drag process in second dimension of array cumulative change index
@@ -670,7 +596,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [index_of_temperature]
   standard_name = index_of_temperature_in_cumulative_change_index
   long_name = index of temperature in first dimension of array cumulative change index
@@ -678,7 +603,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [index_of_x_wind]
   standard_name = index_of_x_wind_in_cumulative_change_index
   long_name = index of x-wind in first dimension of array cumulative change index
@@ -686,7 +610,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [index_of_y_wind]
   standard_name = index_of_y_wind_in_cumulative_change_index
   long_name = index of x-wind in first dimension of array cumulative change index
@@ -694,7 +617,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ldiag3d]
   standard_name = flag_for_diagnostics_3D
   long_name = flag for 3d diagnostic fields
@@ -702,7 +624,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -711,7 +632,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -719,4 +639,3 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F

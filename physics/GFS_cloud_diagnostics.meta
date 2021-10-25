@@ -13,7 +13,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [nLev]
   standard_name = vertical_layer_dimension
   long_name = number of vertical levels
@@ -21,7 +20,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F  
 [lsswr]
   standard_name = flag_for_calling_shortwave_radiation
   long_name = logical flags for sw radiation calls
@@ -29,7 +27,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [lslwr]
   standard_name = flag_for_calling_longwave_radiation
   long_name = logical flags for lw radiation calls
@@ -37,7 +34,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F    
 [lat]
   standard_name = latitude
   long_name = latitude
@@ -46,7 +42,6 @@
   type = real
   intent = in
   kind = kind_phys
-  optional = F  
 [de_lgth]
   standard_name = cloud_decorrelation_length
   long_name = cloud decorrelation length
@@ -55,7 +50,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [p_lay]
   standard_name = air_pressure_at_layer_for_RRTMGP
   long_name = air pressure at vertical layer for radiation calculation
@@ -64,7 +58,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F   
 [cld_frac]
   standard_name = total_cloud_fraction
   long_name = layer total cloud fraction
@@ -73,7 +66,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F 
 [p_lev]
   standard_name = air_pressure_at_interface_for_RRTMGP
   long_name = air pressure at vertical interface for radiation calculation
@@ -82,7 +74,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F    
 [deltaZ]
   standard_name = layer_thickness
   long_name = layer_thickness
@@ -91,7 +82,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F    
 [cloud_overlap_param]
   standard_name = cloud_overlap_param
   long_name = cloud overlap parameter
@@ -100,7 +90,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [precip_overlap_param]
   standard_name = precip_overlap_param
   long_name = precipitation overlap parameter
@@ -109,7 +98,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F  
 [con_pi]
   standard_name = pi
   long_name = ratio of a circle's circumference to its diameter
@@ -118,7 +106,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F   
 [mtopa]
   standard_name = model_layer_number_at_cloud_top
   long_name = vertical indices for low, middle and high cloud tops
@@ -126,7 +113,6 @@
   dimensions = (horizontal_loop_extent,3)
   type = integer
   intent = out
-  optional = F
 [mbota]
   standard_name = model_layer_number_at_cloud_base
   long_name = vertical indices for low, middle and high cloud bases
@@ -134,7 +120,6 @@
   dimensions = (horizontal_loop_extent,3)
   type = integer
   intent = out
-  optional = F
 [cldsa]
   standard_name = cloud_area_fraction_for_radiation
   long_name = fraction of clouds for low, middle, high, total and BL
@@ -143,7 +128,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F  
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -152,7 +136,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -160,4 +143,3 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F    
