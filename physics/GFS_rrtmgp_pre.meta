@@ -15,7 +15,6 @@
   dimensions =  ()
   type = integer  
   intent = in
-  optional = F  
 [active_gases]
   standard_name = active_gases_used_by_RRTMGP
   long_name = active gases used by RRTMGP

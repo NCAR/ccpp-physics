@@ -293,7 +293,6 @@
   dimensions = (horizontal_loop_extent)
   type = logical
   intent = inout
-  optional = F
 [alvsf]
   standard_name = vis_albedo_strong_cosz
   long_name = mean vis albedo with strong cosz dependency
