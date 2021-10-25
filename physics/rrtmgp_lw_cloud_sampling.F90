@@ -13,36 +13,12 @@ module rrtmgp_lw_cloud_sampling
 contains
 
   ! #########################################################################################
-  ! SUBROUTINE rrtmgp_lw_cloud_sampling_init()
-  ! #########################################################################################
-!! \section arg_table_rrtmgp_lw_cloud_sampling_init
-!! \htmlinclude rrtmgp_lw_cloud_sampling_init.html
-!!
-  subroutine rrtmgp_lw_cloud_sampling_init(ipsdlw0, errmsg, errflg)
-    ! Outputs
-    integer, intent(out) :: &
-         ipsdlw0      ! Initial permutation seed for McICA
-    character(len=*), intent(out) :: &
-         errmsg       ! Error message
-    integer,          intent(out) :: &
-         errflg       ! Error flag
-
-    ! Initialize CCPP error handling variables
-    errmsg = ''
-    errflg = 0
-
-    ! Set initial permutation seed for McICA, initially set to number of G-points
-    ipsdlw0 = lw_gas_props%get_ngpt()
-
-  end subroutine rrtmgp_lw_cloud_sampling_init
-
-  ! #########################################################################################
   ! SUBROTUINE rrtmgp_lw_cloud_sampling_run()
   ! #########################################################################################
 !! \section arg_table_rrtmgp_lw_cloud_sampling_run
 !! \htmlinclude rrtmgp_lw_cloud_sampling_run.html
 !!
-  subroutine rrtmgp_lw_cloud_sampling_run(doLWrad, nCol, nLev, ipsdlw0, icseed_lw, iovr,    &
+  subroutine rrtmgp_lw_cloud_sampling_run(doLWrad, nCol, nLev, icseed_lw, iovr,             &
        iovr_max, iovr_maxrand, iovr_rand, iovr_dcorr, iovr_exp, iovr_exprand, isubc_lw,     &
        cld_frac, precip_frac, cloud_overlap_param, precip_overlap_param,                    &
        doGP_lwscat, lw_optical_props_cloudsByBand, lw_optical_props_precipByBand,           &
@@ -62,7 +38,6 @@ contains
          iovr_dcorr,                       & ! Flag for decorrelation-length cloud overlap method
          iovr_exp,                         & ! Flag for exponential cloud overlap method
          iovr_exprand,                     & ! Flag for exponential-random cloud overlap method
-         ipsdlw0,                          & ! Initial permutation seed for McICA
          isubc_lw 
     integer,intent(in),dimension(ncol) :: &
          icseed_lw                           ! auxiliary special cloud related array when module 
@@ -115,7 +90,7 @@ contains
     ! Change random number seed value for each radiation invocation (isubc_lw =1 or 2).
     if(isubc_lw == 1) then      ! advance prescribed permutation seed
        do iCol = 1, ncol
-          ipseed_lw(iCol) = ipsdlw0 + iCol
+          ipseed_lw(iCol) = lw_gas_props%get_ngpt() + iCol
        enddo
     elseif (isubc_lw == 2) then ! use input array of permutaion seeds
        do iCol = 1, ncol
@@ -184,7 +159,7 @@ contains
     ! Change random number seed value for each radiation invocation (isubc_lw =1 or 2).
     if(isubc_lw == 1) then      ! advance prescribed permutation seed
        do iCol = 1, ncol
-          ipseed_lw(iCol) = ipsdlw0 + iCol
+          ipseed_lw(iCol) = lw_gas_props%get_ngpt() + iCol
        enddo
     elseif (isubc_lw == 2) then ! use input array of permutaion seeds
        do iCol = 1, ncol
