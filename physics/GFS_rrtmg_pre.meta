@@ -800,7 +800,7 @@
   standard_name = convective_cloud_condesate_after_rainout
   long_name = convective cloud condesate after rainout
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
