@@ -403,7 +403,7 @@
   optional = F
 [z0k]
   standard_name = surface_roughness_length_over_land
-  long_name = surface roughness length over land  (temporary use as interstitial)
+  long_name = surface roughness length over land
   units = m
   dimensions = (horizontal_loop_extent)
   type = real
@@ -411,8 +411,8 @@
   intent = inout
   optional = F
 [emissi]
-  standard_name = surface_longwave_emissivity_over_land_interstitial
-  long_name = surface lw emissivity in fraction over land (temporary use as interstitial)
+  standard_name = surface_longwave_emissivity_over_land
+  long_name = surface lw emissivity in fraction over land
   units = frac
   dimensions = (horizontal_loop_extent)
   type = real
