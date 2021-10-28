@@ -181,7 +181,7 @@ contains
              endif
              do i = iamin, iamax
                aerin(i,j,k,ii,imon) = 1.d0*buffx(i,j,klev,1)
-               if(aerin(i,j,k,ii,imon) < 0 .or. aerin(i,j,k,ii,imon) > 1.)  then
+               if(aerin(i,j,k,ii,imon) < 0. .or. aerin(i,j,k,ii,imon) > 1.)  then
                  aerin(i,j,k,ii,imon) = 1.e-15
                endif
              enddo   !i-loop (lon)
