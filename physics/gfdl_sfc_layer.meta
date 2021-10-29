@@ -148,13 +148,6 @@
   dimensions = ()
   type = integer
   intent = in
-[lsm_noah_wrfv4]
-  standard_name = identifier_for_noah_wrfv4_land_surface_scheme
-  long_name = flag for NOAH WRFv4 land surface model
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
 [icoef_sf]
   standard_name = flag_for_surface_roughness_option_over_water
   long_name = surface roughness options over water
