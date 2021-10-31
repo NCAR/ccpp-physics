@@ -323,7 +323,7 @@ module lsm_ruc
       subroutine lsm_ruc_run                                            & ! inputs
      &     ( iter, me, master, delt, kdt, im, nlev, lsm_ruc, lsm,       &
      &       imp_physics, imp_physics_gfdl, imp_physics_thompson,       &
-     &       do_mynnsfclay, lsoil_ruc, lsoil, rdlai, zs,                &
+     &       do_mynnsfclay, lsoil_ruc, lsoil, rdlai, xlat_d, xlon_d, zs,&
      &       t1, q1, qc, stype, vtype, sigmaf, laixy,                   &
      &       dlwflx, dswsfc, tg3, coszen, land, icy, use_lake,          &
      &       rainnc, rainc, ice, snow, graupel,                         &
@@ -372,6 +372,7 @@ module lsm_ruc
       integer, intent(in) :: im, nlev, iter, lsoil_ruc, lsoil, kdt, isot, ivegsrc
       integer, intent(in) :: lsm_ruc, lsm
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson
+      real (kind=kind_phys), dimension(:), intent(in) :: xlat_d, xlon_d
 
       real (kind=kind_phys), dimension(:), intent(in) ::          &
      &       t1, sigmaf, laixy, dlwflx, dswsfc, tg3,              &
@@ -527,12 +528,20 @@ module lsm_ruc
       logical :: flag(im), flag_ice(im), flag_ice_uncoupled(im)
       logical :: rdlai2d, myj, frpcpn
       logical :: debug_print
+
+      !-- diagnostic point
+      real (kind=kind_phys) :: testptlat, testptlon
 !
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
 
       ipr = 10
+ 
+      !--
+      testptlat = 74.12 !29.5 
+      testptlon = 164.0 !283.0 
+      !--
 
       debug_print=.false.
 
@@ -833,6 +842,26 @@ module lsm_ruc
         rainncv(i,j)    = rhoh2o * rainnc(i)                   ! total time-step explicit precip 
         graupelncv(i,j) = rhoh2o * graupel(i)
         snowncv(i,j)    = rhoh2o * snow(i)
+        if (debug_print) then
+        !-- diagnostics for a test point with known lat/lon
+        if (abs(xlat_d(i)-testptlat).lt.2.5 .and.   &
+            abs(xlon_d(i)-testptlon).lt.6.5)then
+          if(weasd_lnd(i) > 0.) &
+            print 100,'(ruc_lsm_drv)  i=',i,          &
+            '  lat,lon=',xlat_d(i),xlon_d(i),         &
+            'rainc',rainc(i),'rainnc',rainnc(i),      &
+            'graupel',graupel(i),'qc',qc(i),'sfcqv_lnd',sfcqv_lnd(i),&
+            'dlwflx',dlwflx(i),'dswsfc',dswsfc(i),    &
+            'sncovr1_lnd',sncovr1_lnd(i),'sfalb_lnd_bck',sfalb_lnd_bck(i),&
+            'prsl1',prsl1(i),'t1',t1(i),              &
+            !'snow',snow(i), 'snowncv',snowncv(i,j),   &
+            'srflag',srflag(i),'weasd_lnd',weasd_lnd(i), &
+            'tsurf_lnd',tsurf_lnd(i),'tslb(i,1)',tslb(i,1)
+        endif
+        endif
+ 100      format (";;; ",a,i4,a,2f9.2/(4(a10,'='es9.2)))
+        !--
+
         ! ice precipitation is not used
         ! precipfr(i,j)   = rainncv(i,j) * ffrozp(i,j)
 
@@ -1244,6 +1273,25 @@ module lsm_ruc
 
    if (flag_ice_uncoupled(i)) then ! at least some ice in the grid cell
    !-- ice point
+
+      if (debug_print) then
+        if (abs(xlat_d(i)-testptlat).lt.2.5 .and.   &
+            abs(xlon_d(i)-testptlon).lt.6.5)then
+          if(weasd_lnd(i) > 0.) &
+            print 101,'(ruc_lsm_drv ice)  i=',i,      &
+            '  lat,lon=',xlat_d(i),xlon_d(i),'flag_ice',flag_ice(i),&
+            !'rainc',rainc(i),'rainnc',rainnc(i),      &
+            'sfcqv_ice',sfcqv_ice(i),&
+            !'dlwflx',dlwflx(i),'dswsfc',dswsfc(i),    &
+            'sncovr1_ice',sncovr1_ice(i),'sfalb_ice',sfalb_ice(i),&
+            'sfcqc_ice',sfcqc_ice(i),'tsnow_ice',tsnow_ice(i), &
+            'prsl1',prsl1(i),'t1',t1(i),              &
+            !'snow',snow(i), 'snowncv',snowncv(i,j),   &
+            'srflag',srflag(i),'weasd_ice',weasd_ice(i), &
+            'tsurf_ice',tsurf_ice(i),'tslb(i,1)',tslb(i,1)
+        endif
+      endif
+ 101      format (";;; ",a,i4,a,2f9.2/(4(a10,'='es9.2)))
 
         sncovr_ice(i,j)   = sncovr1_ice(i)
         !-- alb_ice* is computed in setalb called from rrtmg_sw_pre.
