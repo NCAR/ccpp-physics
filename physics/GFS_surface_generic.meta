@@ -5,8 +5,127 @@
 
 ########################################################################
 [ccpp-arg-table]
+  name = GFS_surface_generic_pre_init
+  type = scheme
+[nthreads]
+  standard_name = number_of_openmp_threads
+  long_name = number of OpenMP threads available for physics schemes
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[im]
+  standard_name = horizontal_dimension
+  long_name = horizontal dimension
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[slmsk]
+  standard_name = area_type
+  long_name = landmask: sea/land/ice=0/1/2
+  units = flag
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[isot]
+  standard_name = control_for_soil_type_dataset
+  long_name = soil type dataset choice
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ivegsrc]
+  standard_name = control_for_vegetation_dataset
+  long_name = land use dataset choice
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[stype]
+  standard_name = soil_type_classification
+  long_name = soil type for lsm
+  units = index
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = inout
+  optional = F
+[vtype]
+  standard_name = vegetation_type_classification
+  long_name = vegetation type for lsm
+  units = index
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = inout
+  optional = F
+[slope]
+  standard_name = surface_slope_classification
+  long_name = sfc slope type for lsm
+  units = index
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = inout
+  optional = F
+[stype_save]
+  standard_name = soil_type_classification_save
+  long_name = soil type for lsm save
+  units = index
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = out
+  optional = F
+[vtype_save]
+  standard_name = vegetation_type_classification_save
+  long_name = vegetation type for lsm save
+  units = index
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = out
+  optional = F
+[slope_save]
+  standard_name = surface_slope_classification_save
+  long_name = sfc slope type for lsm save
+  units = index
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = out
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+
+########################################################################
+[ccpp-arg-table]
   name = GFS_surface_generic_pre_run
   type = scheme
+[nthreads]
+  standard_name = number_of_openmp_threads
+  long_name = number of OpenMP threads available for physics schemes
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [im]
   standard_name = horizontal_loop_extent
   long_name = horizontal loop extent
@@ -57,31 +176,52 @@
   intent = in
   optional = F
 [stype]
-  standard_name = soil_type_classification_real
+  standard_name = soil_type_classification
   long_name = soil type for lsm
   units = index
   dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
+  type = integer
+  intent = inout
   optional = F
 [vtype]
-  standard_name = vegetation_type_classification_real
+  standard_name = vegetation_type_classification
   long_name = vegetation type for lsm
   units = index
   dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
+  type = integer
+  intent = inout
   optional = F
 [slope]
-  standard_name = surface_slope_classification_real
+  standard_name = surface_slope_classification
   long_name = sfc slope type for lsm
   units = index
   dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
+  type = integer
+  intent = inout
+  optional = F
+[vtype_save]
+  standard_name = vegetation_type_classification_save
+  long_name = vegetation type for lsm save
+  units = index
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = out
+  optional = F
+[stype_save]
+  standard_name = soil_type_classification_save
+  long_name = soil type for lsm save
+  units = index
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = out
+  optional = F
+[slope_save]
+  standard_name = surface_slope_classification_save
+  long_name = sfc slope type for lsm save
+  units = index
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = out
   optional = F
 [prsik_1]
   standard_name = surface_dimensionless_exner_function
@@ -135,30 +275,6 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = inout
-  optional = F
-[soiltyp]
-  standard_name = soil_type_classification
-  long_name = soil type at each grid cell
-  units = index
-  dimensions = (horizontal_loop_extent)
-  type = integer
-  intent = inout
-  optional = F
-[vegtype]
-  standard_name = vegetation_type_classification
-  long_name = vegetation type at each grid cell
-  units = index
-  dimensions = (horizontal_loop_extent)
-  type = integer
-  intent = inout
-  optional = F
-[slopetyp]
-  standard_name = surface_slope_classification
-  long_name = surface slope type at each grid cell
-  units = index
-  dimensions = (horizontal_loop_extent)
-  type = integer
   intent = inout
   optional = F
 [work3]
@@ -312,15 +428,6 @@
   kind = kind_phys
   intent = out
   optional = F
-[sfc_wts_inv]
-  standard_name = weights_for_stochastic_surface_physics_perturbation_flipped
-  long_name = weights for stochastic surface physics perturbation, flipped
-  units = none
-  dimensions = (horizontal_loop_extent,number_of_perturbed_land_surface_variables)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
 [cplflx]
   standard_name = flag_for_surface_flux_coupling
   long_name = flag controlling cplflx collection (default off)
@@ -431,6 +538,76 @@
   name = GFS_surface_generic_post
   type = scheme
   dependencies = machine.F,surface_perturbation.F90
+
+########################################################################
+[ccpp-arg-table]
+  name = GFS_surface_generic_post_init
+  type = scheme
+[vtype]
+  standard_name = vegetation_type_classification
+  long_name = vegetation type for lsm
+  units = index
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = out
+  optional = F
+[stype]
+  standard_name = soil_type_classification
+  long_name = soil type for lsm
+  units = index
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = out
+  optional = F
+[slope]
+  standard_name = surface_slope_classification
+  long_name = sfc slope type for lsm
+  units = index
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = out
+  optional = F
+[vtype_save]
+  standard_name = vegetation_type_classification_save
+  long_name = vegetation type for lsm save
+  units = index
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = in
+  optional = F
+[stype_save]
+  standard_name = soil_type_classification_save
+  long_name = soil type for lsm save
+  units = index
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = in
+  optional = F
+[slope_save]
+  standard_name = surface_slope_classification_save
+  long_name = sfc slope type for lsm save
+  units = index
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = in
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
 
 ########################################################################
 [ccpp-arg-table]
@@ -1398,6 +1575,78 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = F
+[isot]
+  standard_name = control_for_soil_type_dataset
+  long_name = soil type dataset choice
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ivegsrc]
+  standard_name = control_for_vegetation_dataset
+  long_name = land use dataset choice
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[islmsk]
+  standard_name = sea_land_ice_mask
+  long_name = landmask: sea/land/ice=0/1/2
+  units = flag
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = in
+  optional = F
+[vtype]
+  standard_name = vegetation_type_classification
+  long_name = vegetation type for lsm
+  units = index
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = out
+  optional = F
+[stype]
+  standard_name = soil_type_classification
+  long_name = soil type for lsm
+  units = index
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = out
+  optional = F
+[slope]
+  standard_name = surface_slope_classification
+  long_name = sfc slope type for lsm
+  units = index
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = out
+  optional = F
+[vtype_save]
+  standard_name = vegetation_type_classification_save
+  long_name = vegetation type for lsm save
+  units = index
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = in
+  optional = F
+[stype_save]
+  standard_name = soil_type_classification_save
+  long_name = soil type for lsm save
+  units = index
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = in
+  optional = F
+[slope_save]
+  standard_name = surface_slope_classification_save
+  long_name = sfc slope type for lsm save
+  units = index
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = in
   optional = F
 [errmsg]
   standard_name = ccpp_error_message

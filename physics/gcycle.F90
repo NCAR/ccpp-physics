@@ -60,12 +60,9 @@ contains
                                            zorll(:),   &
                                            zorlo(:),   &
                                            weasd(:),   &
-                                           slope(:),   &
                                            snoalb(:),  &
                                            canopy(:),  &
                                            vfrac(:),   &
-                                           vtype(:),   &
-                                           stype(:),   &
                                            shdmin(:),  &
                                            shdmax(:),  &
                                            snowd(:),   &
@@ -75,6 +72,9 @@ contains
                                            oro(:),     &
                                            oro_uf(:),  &
                                            slmsk(:)
+    integer,              intent(inout) :: vtype(:),   &
+                                           stype(:),   &
+                                           slope(:)
 
     integer,              intent(in)    :: imap(:), jmap(:)
 !
@@ -84,6 +84,9 @@ contains
     real(kind=kind_io8) ::                   &
         slmskl (nx*ny),                      &
         slmskw (nx*ny),                      &
+        slpfcs (nx*ny),                      &
+        vegfcs (nx*ny),                      &
+        sltfcs (nx*ny),                      &
         TSFFCS (nx*ny),                      &
         ZORFCS (nx*ny),                      &
         AISFCS (nx*ny),                      &
@@ -121,6 +124,10 @@ contains
       else
         TSFFCS = tsfco
       end if
+! integer to real/double precision
+      slpfcs = real(slope)
+      vegfcs = real(vtype)
+      sltfcs = real(stype)
 !
       if (frac_grid) then
         do ix=1,npts
@@ -217,10 +224,10 @@ contains
                      phour, xlat_d, xlon_d, slmskl, slmskw,          &
                      oro, oro_uf, use_ufo, nst_anl,                  &
                      hice, fice, tisfc, snowd, slcfc1,               &
-                     shdmin, shdmax, slope, snoalb, tsffcs,          &
+                     shdmin, shdmax, slpfcs, snoalb, tsffcs,         &
                      weasd, zorfcs, albfc1, tg3, canopy,             &
                      smcfc1, stcfc1, slmsk, aisfcs,                  &
-                     vfrac, vtype, stype, alffc1, cv,                &
+                     vfrac, vegfcs, sltfcs, alffc1, cv,              &
                      cvb, cvt, me, nthrds,                           &
                      nlunit, size(input_nml_file), input_nml_file,   &
                      min_ice, ialb, isot, ivegsrc,                   &
@@ -235,6 +242,11 @@ contains
         tsfc  = TSFFCS
         tsfco = TSFFCS
       endif
+!
+! real/double precision to integer
+      slope = int(slpfcs)
+      vtype = int(vegfcs)
+      stype = int(sltfcs)
 !
       do ix=1,npts
         zorll(ix) = ZORFCS(ix)

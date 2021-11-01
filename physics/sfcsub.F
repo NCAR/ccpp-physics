@@ -2019,14 +2019,14 @@
 !    *,' tsffcs=',tsffcs(iprnt),' slianl=',slianl(iprnt)
 
       do i=1,len
-       if (nint(slmskl(i)) /= 1) then
-        if (sicanl(i) >= min_ice(i)) then
-          slianl(i) = 2.0_kind_io8
-        else
-          slianl(i) = zero
-          sicanl(i) = zero
+        if (nint(slmskl(i)) /= 1) then
+          if (sicanl(i) >= min_ice(i)) then
+            slianl(i) = 2.0_kind_io8
+          else
+            slianl(i) = zero
+            sicanl(i) = zero
+          endif
         endif
-       endif
       enddo
 
       if (fh-deltsfc > -0.001 ) then

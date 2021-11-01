@@ -49,13 +49,14 @@
   intent = in
   optional = F
   kind = len=128
-[gas_concentrations]
-  standard_name = Gas_concentrations_for_RRTMGP_suite
-  long_name = DDT containing gas concentrations for RRTMGP radiation scheme
-  units = DDT
-  dimensions = ()
-  type = ty_gas_concs
-  intent = inout
+[active_gases_array]
+  standard_name = list_of_active_gases_used_by_RRTMGP
+  long_name = list of active gases used by RRTMGP
+  units = none
+  dimensions =  (number_of_active_gases_used_by_RRTMGP)
+  type = character
+  kind = len=*
+  intent = in
   optional = F
 [mpirank]
   standard_name = mpi_rank
@@ -152,18 +153,18 @@
   intent = in
   optional = F
 [p_lay]
-  standard_name = air_pressure_at_layer_for_RRTMGP_in_hPa
+  standard_name = air_pressure_at_layer_for_RRTMGP
   long_name = air pressure layer
-  units = hPa
+  units = Pa
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [p_lev]
-  standard_name = air_pressure_at_interface_for_RRTMGP_in_hPa
+  standard_name = air_pressure_at_interface_for_RRTMGP
   long_name = air pressure level
-  units = hPa
+  units = Pa
   dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
@@ -196,13 +197,22 @@
   kind = kind_phys
   intent = out
   optional = F
+[active_gases_array]
+  standard_name = list_of_active_gases_used_by_RRTMGP
+  long_name = list of active gases used by RRTMGP
+  units = none
+  dimensions =  (number_of_active_gases_used_by_RRTMGP)
+  type = character
+  kind = len=*
+  intent = in
+  optional = F
 [gas_concentrations]
   standard_name = Gas_concentrations_for_RRTMGP_suite
   long_name = DDT containing gas concentrations for RRTMGP radiation scheme
   units = DDT
   dimensions = ()
   type = ty_gas_concs
-  intent = in
+  intent = inout
   optional = F
 [solcon]
   standard_name = solar_constant

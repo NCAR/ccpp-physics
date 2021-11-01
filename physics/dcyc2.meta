@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = dcyc2t3
   type = scheme
-  dependencies = machine.F,physcons.F90,radiation_tools.F90
+  dependencies = machine.F,physcons.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -61,24 +61,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[xlon]
-  standard_name = longitude
-  long_name = longitude of grid box
-  units = radian
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[coszen]
-  standard_name = cosine_of_solar_zenith_angle_for_daytime_points_on_radiation_timestep
-  long_name = average of cosine of zenith angle over daytime shortwave call time interval
-  units = none
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [con_g]
   standard_name = gravitational_acceleration
   long_name = gravitational acceleration
@@ -111,6 +93,24 @@
   long_name = Stefan-Boltzmann constant
   units = W m-2 K-4
   dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[xlon]
+  standard_name = longitude
+  long_name = longitude of grid box
+  units = radian
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[coszen]
+  standard_name = cosine_of_solar_zenith_angle_for_daytime_points_on_radiation_timestep
+  long_name = average of cosine of zenith angle over daytime shortwave call time interval
+  units = none
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -170,8 +170,8 @@
   intent = in
   optional = F
 [sfcemis_lnd]
-  standard_name = surface_longwave_emissivity_over_land_interstitial
-  long_name = surface lw emissivity in fraction over land (temporary use as interstitial)
+  standard_name = surface_longwave_emissivity_over_land
+  long_name = surface lw emissivity in fraction over land
   units = frac
   dimensions = (horizontal_loop_extent)
   type = real
@@ -179,8 +179,8 @@
   intent = in
   optional = F
 [sfcemis_ice]
-  standard_name = surface_longwave_emissivity_over_ice_interstitial
-  long_name = surface lw emissivity in fraction over ice (temporary use as interstitial)
+  standard_name = surface_longwave_emissivity_over_ice
+  long_name = surface lw emissivity in fraction over ice
   units = frac
   dimensions = (horizontal_loop_extent)
   type = real
@@ -389,23 +389,6 @@
   type = logical
   intent = in
   optional = F
-[minGPpres]
-  standard_name = minimum_pressure_in_RRTMGP
-  long_name = minimum pressure allowed in RRTMGP
-  units = Pa
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[use_LW_jacobian]
-  standard_name = flag_to_calc_RRTMGP_LW_jacobian
-  long_name = logical flag to control RRTMGP LW calculation
-  units = flag
-  dimensions = ()
-  type = logical  
-  intent = in
-  optional = F
 [damp_LW_fluxadj]
   standard_name = flag_to_damp_RRTMGP_LW_jacobian_flux_adjustment
   long_name = logical flag to control RRTMGP LW calculation
@@ -432,6 +415,14 @@
   kind = kind_phys
   intent = in
   optional = F
+[use_LW_jacobian]
+  standard_name = flag_to_calc_RRTMGP_LW_jacobian
+  long_name = logical flag to control RRTMGP LW calculation
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [sfculw]
   standard_name = surface_upwelling_longwave_flux_on_radiation_timestep
   long_name = total sky sfc upward lw flux
@@ -455,15 +446,6 @@
   long_name = model layer mean temperature updated by physics
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[t_lev]
-  standard_name = air_temperature_at_interface_for_RRTMGP
-  long_name = air temperature  at vertical interface for radiation calculation
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -526,6 +508,15 @@
   units = flag
   dimensions = ()
   type = logical
+  intent = in
+  optional = F
+[tsfc_radtime]
+  standard_name = surface_skin_temperature_on_radiation_timestep
+  long_name = surface skin temperature on radiation timestep
+  units = K
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
   intent = in
   optional = F
 [dtdt]

@@ -3,38 +3,14 @@ module rrtmgp_sw_cloud_sampling
   use mo_gas_optics_rrtmgp,     only: ty_gas_optics_rrtmgp
   use mo_optical_props,         only: ty_optical_props_2str
   use rrtmgp_sampling,          only: sampled_mask, draw_samples
-  use mersenne_twister,         only: random_setseed, random_number, random_stat  
-  use radiation_tools,               only: check_error_msg
+  use mersenne_twister,         only: random_setseed, random_number, random_stat
+  use radiation_tools,          only: check_error_msg
   use rrtmgp_sw_gas_optics,     only: sw_gas_props
   use netcdf
 
   implicit none
 
 contains
-  ! #########################################################################################
-  ! SUBROUTINE rrtmgp_sw_cloud_sampling_init()
-  ! #########################################################################################
-!! \section arg_table_rrtmgp_sw_cloud_sampling_init
-!! \htmlinclude rrtmgp_sw_cloud_sampling.html
-!!
-  subroutine rrtmgp_sw_cloud_sampling_init(ipsdsw0, errmsg, errflg)
-
-    ! Outputs
-    integer, intent(out) :: &
-         ipsdsw0      ! Initial permutation seed for McICA
-    character(len=*), intent(out) :: &
-         errmsg       ! Error message
-    integer,          intent(out) :: &
-         errflg       ! Error flag
-
-    ! Initialize CCPP error handling variables
-    errmsg = ''
-    errflg = 0
-    
-    ! Set initial permutation seed for McICA, initially set to number of G-points
-    ipsdsw0 = sw_gas_props%get_ngpt()
-    
-  end subroutine rrtmgp_sw_cloud_sampling_init
 
   ! #########################################################################################
   ! SUBROTUINE rrtmgp_sw_cloud_sampling_run()
@@ -42,7 +18,7 @@ contains
 !! \section arg_table_rrtmgp_sw_cloud_sampling_run
 !! \htmlinclude rrtmgp_sw_cloud_sampling.html
 !!
-  subroutine rrtmgp_sw_cloud_sampling_run(doSWrad, nCol, nDay, nLev, ipsdsw0, idxday, iovr, &
+  subroutine rrtmgp_sw_cloud_sampling_run(doSWrad, nCol, nDay, nLev, idxday, iovr,          &
        iovr_max, iovr_maxrand, iovr_rand, iovr_dcorr, iovr_exp, iovr_exprand, isubc_sw,     &
        icseed_sw, cld_frac, precip_frac, cloud_overlap_param, precip_overlap_param,         &
        sw_optical_props_cloudsByBand, sw_optical_props_precipByBand,                        &
@@ -55,7 +31,6 @@ contains
          nCol,                            & ! Number of horizontal gridpoints
          nDay,                            & ! Number of daylit points.
          nLev,                            & ! Number of vertical layers
-         ipsdsw0,                         & ! Initial permutation seed for McICA
          iovr,                            & ! Choice of cloud-overlap method                                                                                                                 
          iovr_max,                        & ! Flag for maximum cloud overlap method                                                                                                          
          iovr_maxrand,                    & ! Flag for maximum-random cloud overlap method                                                                                                   
@@ -120,7 +95,7 @@ contains
        ! Change random number seed value for each radiation invocation (isubc_sw =1 or 2).
        if(isubc_sw == 1) then      ! advance prescribed permutation seed
           do iday = 1, nday
-             ipseed_sw(iday) = ipsdsw0 + iday
+             ipseed_sw(iday) = sw_gas_props%get_ngpt() + iday
           enddo
        elseif (isubc_sw == 2) then ! use input array of permutaion seeds
           do iday = 1, nday
@@ -193,7 +168,7 @@ contains
        ! Change random number seed value for each radiation invocation (isubc_sw =1 or 2).
        if(isubc_sw == 1) then      ! advance prescribed permutation seed
           do iday = 1, nday
-             ipseed_sw(iday) = ipsdsw0 + iday
+             ipseed_sw(iday) = sw_gas_props%get_ngpt() + iday
           enddo
        elseif (isubc_sw == 2) then ! use input array of permutaion seeds
           do iday = 1, nday

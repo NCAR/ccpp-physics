@@ -15,15 +15,6 @@
   type = integer
   intent = in
   optional = F
-[sfcalb]
-  standard_name = surface_albedo_components
-  long_name = surface albedo IR/UV/VIS components
-  units = frac
-  dimensions = (horizontal_dimension,number_of_components_for_surface_albedo)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [ialb]
   standard_name = control_for_surface_albedo
   long_name = flag for using climatology alb, based on sfc type
@@ -118,15 +109,6 @@
   type = integer
   intent = in
   optional = F
-[vtype]
-  standard_name = vegetation_type_classification_real
-  long_name = vegetation type for lsm
-  units = index
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [xlat]
   standard_name = latitude
   long_name = latitude
@@ -206,9 +188,18 @@
   kind = kind_phys
   intent = in
   optional = F
-[snowd]
-  standard_name = lwe_surface_snow
-  long_name = water equivalent snow depth
+[snodl]
+  standard_name = surface_snow_thickness_water_equivalent_over_land
+  long_name = water equivalent snow depth over land
+  units = mm
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[snodi]
+  standard_name = surface_snow_thickness_water_equivalent_over_ice
+  long_name = water equivalent snow depth over ice
   units = mm
   dimensions = (horizontal_loop_extent)
   type = real
@@ -279,8 +270,8 @@
   intent = in
   optional = F
 [tisfc]
-  standard_name = sea_ice_temperature
-  long_name = sea ice surface skin temperature
+  standard_name = surface_skin_temperature_over_ice
+  long_name = surface_skin_temperature_over_ice
   units = K
   dimensions = (horizontal_loop_extent)
   type = real
@@ -294,6 +285,14 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
+  intent = in
+  optional = F
+[cplice]
+  standard_name = flag_for_sea_ice_coupling
+  long_name = flag controlling cplice collection (default on)
+  units = flag
+  dimensions = ()
+  type = logical
   intent = in
   optional = F
 [min_seaice]
@@ -322,6 +321,14 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = F
+[use_flake]
+  standard_name = flag_for_using_flake
+  long_name = flag indicating lake points using flake model
+  units = flag
+  dimensions = (horizontal_loop_extent)
+  type = logical
+  intent = inout
   optional = F
 [alvsf]
   standard_name = vis_albedo_strong_cosz
@@ -394,6 +401,15 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = F
+[semis_wat]
+  standard_name = surface_longwave_emissivity_over_water
+  long_name = surface lw emissivity in fraction over water
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
   optional = F
 [snoalb]
   standard_name = upper_bound_of_max_albedo_assuming_deep_snow
