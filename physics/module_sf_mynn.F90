@@ -725,7 +725,7 @@ CONTAINS
         DO I=its,ite
            write(0,*)"=== important input to mynnsfclayer, i:", i
            IF (dry(i)) THEN
-             write(0,*)"dry=",dry(i)," =",pblh(i)," tsk=", tskin_lnd(i),&
+             write(0,*)"dry=",dry(i)," pblh=",pblh(i)," tsk=", tskin_lnd(i),&
              " tsurf=", tsurf_lnd(i)," qsfc=", qsfc_lnd(i)," znt=", znt_lnd(i),&
              " ust=", ust_lnd(i)," snowh=", snowh_lnd(i)," psfcpa=",PSFCPA(i),  &
              " dz=",dz8w1d(i)," qflx=",qflx(i)," hflx=",hflx(i)," hpbl=",pblh(i)
