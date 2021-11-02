@@ -15,7 +15,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [slag]
   standard_name = equation_of_time
   long_name = equation of time
@@ -24,7 +23,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [sdec]
   standard_name = sine_of_solar_declination_angle
   long_name = sine of solar declination angle
@@ -33,7 +31,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [cdec]
   standard_name = cosine_of_solar_declination_angle
   long_name = cosine of solar declination angle
@@ -42,7 +39,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [sinlat]
   standard_name = sine_of_latitude
   long_name = sine of latitude
@@ -51,7 +47,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [coslat]
   standard_name = cosine_of_latitude
   long_name = cosine of latitude
@@ -60,7 +55,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [con_g]
   standard_name = gravitational_acceleration
   long_name = gravitational acceleration
@@ -69,7 +63,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [con_cp]
   standard_name = specific_heat_of_dry_air_at_constant_pressure
   long_name = specific heat of dry air at constant pressure
@@ -78,7 +71,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [con_pi]
   standard_name = pi
   long_name = ratio of a circle's circumference to its diameter
@@ -87,7 +79,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [con_sbc]
   standard_name = stefan_boltzmann_constant
   long_name = Stefan-Boltzmann constant
@@ -96,7 +87,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [xlon]
   standard_name = longitude
   long_name = longitude of grid box
@@ -105,7 +95,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [coszen]
   standard_name = cosine_of_solar_zenith_angle_for_daytime_points_on_radiation_timestep
   long_name = average of cosine of zenith angle over daytime shortwave call time interval
@@ -114,7 +103,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [tsfc_lnd]
   standard_name = surface_skin_temperature_over_land
   long_name = surface skin temperature over land
@@ -123,7 +111,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [tsfc_ice]
   standard_name = surface_skin_temperature_over_ice
   long_name = surface skin temperature over ice
@@ -132,7 +119,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [tsfc_wat]
   standard_name = surface_skin_temperature_over_water
   long_name = surface skin temperature over water
@@ -141,7 +127,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F  
 [tf]
   standard_name = air_temperature_at_surface_adjacent_layer
   long_name = air temperature at lowest model layer
@@ -150,7 +135,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [tsflw]
   standard_name = air_temperature_at_surface_adjacent_layer_on_radiation_timestep
   long_name = surface (first layer) air temperature saved in longwave radiation call
@@ -159,7 +143,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [tsfc]
   standard_name = surface_skin_temperature
   long_name = surface skin temperature
@@ -168,7 +151,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [sfcemis_lnd]
   standard_name = surface_longwave_emissivity_over_land
   long_name = surface lw emissivity in fraction over land
@@ -177,7 +159,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [sfcemis_ice]
   standard_name = surface_longwave_emissivity_over_ice
   long_name = surface lw emissivity in fraction over ice
@@ -186,7 +167,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [sfcemis_wat]
   standard_name = surface_longwave_emissivity_over_water
   long_name = surface lw emissivity in fraction over water
@@ -195,7 +175,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [sfcdsw]
   standard_name = surface_downwelling_shortwave_flux_on_radiation_timestep
   long_name = total sky surface downwelling shortwave flux on radiation time step
@@ -204,7 +183,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [sfcnsw]
   standard_name = surface_net_downwelling_shortwave_flux_on_radiation_timestep
   long_name = total sky surface net downwelling shortwave flux on radiation time step
@@ -213,7 +191,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [sfcdlw]
   standard_name = surface_downwelling_longwave_flux_on_radiation_timestep
   long_name = total sky surface downwelling longwave flux on radiation time step
@@ -222,7 +199,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [swh]
   standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_timestep
   long_name = total sky shortwave heating rate on radiation time step
@@ -231,7 +207,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [swhc]
   standard_name = tendency_of_air_temperature_due_to_shortwave_heating_assuming_clear_sky_on_radiation_timestep
   long_name = clear sky shortwave heating rate on radiation time step
@@ -240,7 +215,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [hlw]
   standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_timestep
   long_name = total sky longwave heating rate on radiation time step
@@ -249,7 +223,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [hlwc]
   standard_name = tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_timestep
   long_name = clear sky longwave heating rate on radiation time step
@@ -258,7 +231,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [sfcnirbmu]
   standard_name = surface_upwelling_direct_nir_shortwave_flux_on_radiation_timestep
   long_name = total sky surface upwelling beam near-infrared shortwave flux on radiation time step
@@ -267,7 +239,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [sfcnirdfu]
   standard_name = surface_upwelling_diffuse_nir_shortwave_flux_on_radiation_timestep
   long_name = total sky surface upwelling diffuse near-infrared shortwave flux on radiation time step
@@ -276,7 +247,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [sfcvisbmu]
   standard_name = surface_upwelling_direct_uv_and_vis_shortwave_flux_on_radiation_timestep
   long_name = total sky surface upwelling beam ultraviolet plus visible shortwave flux on radiation time step
@@ -285,7 +255,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [sfcvisdfu]
   standard_name = surface_upwelling_diffuse_uv_and_vis_shortwave_flux_on_radiation_timestep
   long_name = total sky surface upwelling diffuse ultraviolet plus visible shortwave flux on radiation time step
@@ -294,7 +263,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [sfcnirbmd]
   standard_name = surface_downwelling_direct_nir_shortwave_flux_on_radiation_timestep
   long_name = total sky surface downwelling beam near-infrared shortwave flux on radiation time step
@@ -303,7 +271,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [sfcnirdfd]
   standard_name = surface_downwelling_diffuse_nir_shortwave_flux_on_radiation_timestep
   long_name = total sky surface downwelling diffuse near-infrared shortwave flux on radiation time step
@@ -312,7 +279,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [sfcvisbmd]
   standard_name = surface_downwelling_direct_uv_and_vis_shortwave_flux_on_radiation_timestep
   long_name = total sky surface downwelling beam ultraviolet plus visible shortwave flux on radiation time step
@@ -321,7 +287,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [sfcvisdfd]
   standard_name = surface_downwelling_diffuse_uv_and_vis_shortwave_flux_on_radiation_timestep
   long_name = total sky surface downwelling diffuse ultraviolet plus visible shortwave flux on radiation time step
@@ -330,7 +295,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [im]
   standard_name = horizontal_loop_extent
   long_name = horizontal loop extent
@@ -338,7 +302,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [levs]
   standard_name = vertical_layer_dimension
   long_name = number of vertical layers
@@ -346,7 +309,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [deltim]
   standard_name = timestep_for_dynamics
   long_name = dynamics timestep
@@ -355,7 +317,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [fhswr]
   standard_name = period_of_shortwave_radiation_calls
   long_name = frequency for shortwave radiation
@@ -364,7 +325,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [dry]
   standard_name = flag_nonzero_land_surface_fraction
   long_name = flag indicating presence of some land surface area fraction
@@ -372,7 +332,6 @@
   dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
-  optional = F
 [icy]
   standard_name = flag_nonzero_sea_ice_surface_fraction
   long_name = flag indicating presence of some sea ice surface area fraction
@@ -380,7 +339,6 @@
   dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
-  optional = F
 [wet]
   standard_name = flag_nonzero_wet_surface_fraction
   long_name = flag indicating presence of some ocean or lake surface area fraction
@@ -388,7 +346,6 @@
   dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
-  optional = F
 [damp_LW_fluxadj]
   standard_name = flag_to_damp_RRTMGP_LW_jacobian_flux_adjustment
   long_name = logical flag to control RRTMGP LW calculation
@@ -396,7 +353,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [lfnc_k]
   standard_name = transition_pressure_length_scale_for_flux_damping
   long_name = depth of transition layer in logistic function for LW flux adjustment damping
@@ -405,7 +361,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [lfnc_p0]
   standard_name = transition_pressure_for_flux_damping
   long_name = transition pressure for LW flux adjustment damping
@@ -414,7 +369,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [use_LW_jacobian]
   standard_name = flag_to_calc_RRTMGP_LW_jacobian
   long_name = logical flag to control RRTMGP LW calculation
@@ -422,7 +376,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [sfculw]
   standard_name = surface_upwelling_longwave_flux_on_radiation_timestep
   long_name = total sky sfc upward lw flux
@@ -431,7 +384,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [fluxlwUP_jac]
   standard_name = RRTMGP_jacobian_of_lw_flux_upward
   long_name = RRTMGP Jacobian upward longwave flux profile
@@ -440,7 +392,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [t_lay]
   standard_name = air_temperature_of_new_state
   long_name = model layer mean temperature updated by physics
@@ -449,7 +400,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [p_lay]
   standard_name = air_pressure
   long_name = mean layer pressure
@@ -458,7 +408,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [p_lev]
   standard_name = air_pressure_at_interface
   long_name = air pressure at model layer interfaces
@@ -467,7 +416,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [flux2D_lwUP]
   standard_name = RRTMGP_lw_flux_profile_upward_allsky
   long_name = RRTMGP upward longwave all-sky flux profile
@@ -476,7 +424,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [flux2D_lwDOWN]
   standard_name = RRTMGP_lw_flux_profile_downward_allsky
   long_name = RRTMGP downward longwave all-sky flux profile
@@ -485,7 +432,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [pert_radtend]
   standard_name = flag_for_stochastic_radiative_heating_perturbations
   long_name = flag for stochastic radiative heating perturbations
@@ -493,7 +439,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [do_sppt]
   standard_name = flag_for_stochastic_physics_perturbations
   long_name = flag for stochastic physics perturbations
@@ -501,7 +446,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [ca_global]
   standard_name = flag_for_global_cellular_automata
   long_name = switch for global ca
@@ -509,7 +453,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [tsfc_radtime]
   standard_name = surface_skin_temperature_on_radiation_timestep
   long_name = surface skin temperature on radiation timestep
@@ -518,7 +461,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [dtdt]
   standard_name = process_split_cumulative_tendency_of_air_temperature
   long_name = total radiative heating rate at current time
@@ -527,7 +469,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [dtdtnp]
   standard_name = tendency_of_air_temperature_to_withold_from_sppt
   long_name = temp. change from physics that should not be perturbed by sppt
@@ -536,7 +477,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [htrlw]
   standard_name = updated_tendency_of_air_temperature_due_to_longwave_heating_on_physics_timestep
   long_name = total sky longwave heating rate on physics time step
@@ -545,7 +485,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [adjsfcdsw]
   standard_name = surface_downwelling_shortwave_flux
   long_name = surface downwelling shortwave flux at current time
@@ -554,7 +493,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [adjsfcnsw]
   standard_name = surface_net_downwelling_shortwave_flux
   long_name = surface net downwelling shortwave flux at current time
@@ -563,7 +501,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [adjsfcdlw]
   standard_name = surface_downwelling_longwave_flux
   long_name = surface downwelling longwave flux at current time
@@ -572,7 +509,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [adjsfculw]
   standard_name = surface_upwelling_longwave_flux
   long_name = surface upwelling longwave flux at current time
@@ -581,7 +517,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [adjsfculw_lnd]
   standard_name = surface_upwelling_longwave_flux_over_land
   long_name = surface upwelling longwave flux at current time over land
@@ -590,7 +525,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [adjsfculw_ice]
   standard_name = surface_upwelling_longwave_flux_over_ice
   long_name = surface upwelling longwave flux at current time over ice
@@ -599,7 +533,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [adjsfculw_wat]
   standard_name = surface_upwelling_longwave_flux_over_water
   long_name = surface upwelling longwave flux at current time over water
@@ -608,7 +541,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [xmu]
   standard_name = zenith_angle_temporal_adjustment_factor_for_shortwave_fluxes
   long_name = zenith angle temporal adjustment factor for shortwave fluxes
@@ -617,7 +549,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [xcosz]
   standard_name = instantaneous_cosine_of_zenith_angle
   long_name = cosine of zenith angle at current time
@@ -626,7 +557,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [adjnirbmu]
   standard_name = surface_upwelling_direct_near_infrared_shortwave_flux
   long_name = surface upwelling beam near-infrared shortwave flux at current time
@@ -635,7 +565,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [adjnirdfu]
   standard_name = surface_upwelling_diffuse_near_infrared_shortwave_flux
   long_name = surface upwelling diffuse near-infrared shortwave flux at current time
@@ -644,7 +573,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [adjvisbmu]
   standard_name = surface_upwelling_direct_ultraviolet_and_visible_shortwave_flux
   long_name = surface upwelling beam ultraviolet plus visible shortwave flux at current time
@@ -653,7 +581,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [adjvisdfu]
   standard_name = surface_upwelling_diffuse_ultraviolet_and_visible_shortwave_flux
   long_name = surface upwelling diffuse ultraviolet plus visible shortwave flux at current time
@@ -662,7 +589,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [adjnirbmd]
   standard_name = surface_downwelling_direct_near_infrared_shortwave_flux
   long_name = surface downwelling beam near-infrared shortwave flux at current time
@@ -671,7 +597,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [adjnirdfd]
   standard_name = surface_downwelling_diffuse_near_infrared_shortwave_flux
   long_name = surface downwelling diffuse near-infrared shortwave flux at current time
@@ -680,7 +605,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [adjvisbmd]
   standard_name = surface_downwelling_direct_ultraviolet_and_visible_shortwave_flux
   long_name = surface downwelling beam ultraviolet plus visible shortwave flux at current time
@@ -689,7 +613,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [adjvisdfd]
   standard_name = surface_downwelling_diffuse_ultraviolet_and_visible_shortwave_flux
   long_name = surface downwelling diffuse ultraviolet plus visible shortwave flux at current time
@@ -698,7 +621,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -707,7 +629,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -715,4 +636,3 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F

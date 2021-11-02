@@ -14,7 +14,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [nlev]
   standard_name = vertical_layer_dimension
   long_name = vertical layer dimension
@@ -22,7 +21,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [dtp]
   standard_name = timestep_for_physics
   long_name = physics timestep
@@ -31,7 +29,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [imp_physics]
   standard_name = control_for_microphysics_scheme
   long_name = choice of microphysics scheme
@@ -39,7 +36,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [imp_physics_fer_hires]
   standard_name = identifier_for_fer_hires_microphysics_scheme
   long_name = choice of Ferrier-Aligo microphysics scheme
@@ -47,7 +43,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [restart]
   standard_name = flag_for_restart
   long_name = flag for restart (warmstart) or coldstart
@@ -55,7 +50,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [mpicomm]
   standard_name = mpi_communicator
   long_name = MPI communicator
@@ -63,7 +57,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [mpirank]
   standard_name = mpi_rank
   long_name = current MPI-rank
@@ -71,7 +64,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [mpiroot]
   standard_name = mpi_root
   long_name = master MPI-rank
@@ -79,7 +71,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [threads]
   standard_name = number_of_openmp_threads
   long_name = number of OpenMP threads available to scheme
@@ -87,7 +78,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -96,7 +86,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -104,7 +93,6 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 ########################################################################
 [ccpp-arg-table]
   name = mp_fer_hires_finalize
@@ -117,7 +105,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -125,7 +112,6 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 
 ########################################################################
 [ccpp-arg-table]
@@ -138,7 +124,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [nlev]
   standard_name = vertical_layer_dimension
   long_name = vertical layer dimension
@@ -146,7 +131,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [dt]
   standard_name = timestep_for_physics
   long_name = physics time step
@@ -155,7 +139,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [spec_adv]
   standard_name = flag_for_separate_advection_of_condensate_species
   long_name = flag for individual cloud species advected
@@ -163,7 +146,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [slmsk]
   standard_name = area_type
   long_name = landmask: sea/land/ice=0/1/2
@@ -172,7 +154,6 @@
   type = real
   kind= kind_phys
   intent = in
-  optional = F
 [prsi]
   standard_name = air_pressure_at_interface
   long_name = air pressure at model layer interfaces
@@ -181,7 +162,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [p_phy]
   standard_name = air_pressure
   long_name = mean layer pressure
@@ -190,7 +170,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [t]
   standard_name = air_temperature_of_new_state
   long_name = temperature updated by physics
@@ -199,7 +178,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [q]
   standard_name = specific_humidity_of_new_state
   long_name = water vapor specific humidity updated by physics
@@ -208,7 +186,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [train]
   standard_name = accumulated_change_of_air_temperature_due_to_FA_scheme
   long_name = accumulated change of air temperature due to FA MP scheme
@@ -217,7 +194,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [sr]
   standard_name = ratio_of_snowfall_to_rainfall
   long_name = snow ratio: ratio of snow to total precipitation (explicit only)
@@ -226,7 +202,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [qc]
   standard_name = cloud_liquid_water_mixing_ratio_of_new_state
   long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates) updated by physics
@@ -235,7 +210,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [qr]
   standard_name = rain_mixing_ratio_of_new_state
   long_name = ratio of mass of rain water to mass of dry air plus vapor (without condensates) updated by physics
@@ -244,7 +218,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [qi]
   standard_name = cloud_ice_mixing_ratio_of_new_state
   long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates) updated by physics
@@ -253,7 +226,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [qg]
   standard_name = mass_weighted_rime_factor_of_new_state
   long_name = mass weighted rime factor updated by physics
@@ -262,7 +234,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [prec]
   standard_name = lwe_thickness_of_explicit_precipitation_amount
   long_name = explicit precipitation ( rain, ice, snow, graupel, ...) on physics timestep
@@ -271,7 +242,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [mpirank]
   standard_name = mpi_rank
   long_name = current MPI-rank
@@ -279,7 +249,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [mpiroot]
   standard_name = mpi_root
   long_name = master MPI-rank
@@ -287,7 +256,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [threads]
   standard_name = number_of_openmp_threads
   long_name = number of OpenMP threads available to scheme
@@ -295,7 +263,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [refl_10cm]
   standard_name = radar_reflectivity_10cm
   long_name = instantaneous refl_10cm
@@ -304,7 +271,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [rhgrd]
   standard_name = relative_humidity_threshold_for_condensation
   long_name = relative humidity threshold parameter for condensation for FA scheme
@@ -313,7 +279,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [dx]
   standard_name = characteristic_grid_lengthscale
   long_name = relative dx for the grid cell
@@ -322,7 +287,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [EPSQ]
   standard_name = minimum_value_of_specific_humidity
   long_name = floor value for specific humidity
@@ -331,7 +295,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [R_D]
   standard_name = gas_constant_of_dry_air
   long_name = ideal gas constant for dry air
@@ -340,7 +303,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [P608]
   standard_name = ratio_of_vapor_to_dry_air_gas_constants_minus_one
   long_name = (rv/rd) - 1 (rv = ideal gas constant for water vapor)
@@ -349,7 +311,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [CP]
   standard_name = specific_heat_of_dry_air_at_constant_pressure
   long_name = specific heat of dry air at constant pressure
@@ -358,7 +319,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [G]
   standard_name = gravitational_acceleration
   long_name = gravitational acceleration
@@ -367,7 +327,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -376,7 +335,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -384,4 +342,3 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F

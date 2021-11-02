@@ -14,7 +14,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -23,7 +22,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -31,7 +29,6 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 
 ########################################################################
 [ccpp-arg-table]
@@ -44,7 +41,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [levs]
   standard_name = vertical_layer_dimension
   long_name = number of vertical layers
@@ -52,7 +48,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [kh2o]
   standard_name = vertical_dimension_of_h2o_forcing_data
   long_name = number of vertical layers in h2o forcing data
@@ -60,7 +55,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [dt]
   standard_name = timestep_for_physics
   long_name = physics time step
@@ -69,7 +63,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [h2o]
   standard_name = specific_humidity_of_new_state
   long_name = water vapor specific humidity updated by physics
@@ -78,7 +71,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [ph2o]
   standard_name = natural_log_of_h2o_forcing_data_pressure_levels
   long_name = natural log of h2o forcing data pressure levels
@@ -87,7 +79,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [prsl]
   standard_name = air_pressure
   long_name = mid-layer pressure
@@ -96,7 +87,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [h2opltc]
   standard_name = stratospheric_water_vapor_forcing
   long_name = water forcing data
@@ -105,7 +95,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [h2o_coeff]
   standard_name = number_of_coefficients_in_h2o_forcing_data
   long_name = number of coefficients in h2o forcing data
@@ -113,7 +102,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [me]
   standard_name = mpi_rank
   long_name = rank of the current MPI task
@@ -121,7 +109,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -130,7 +117,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -138,5 +124,4 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 
