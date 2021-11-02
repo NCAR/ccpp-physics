@@ -664,6 +664,7 @@ CONTAINS
          IF (ITIMESTEP == 1) THEN
          !initialize surface specific humidity and mixing ratios for land, ice and water
             IF (wet(i)) THEN
+               TSK_wat(I) = 0.5 * (tsurf_wat(i)+tskin_wat(i))
                IF (TSK_wat(I) .LT. 273.15) THEN
                   !SATURATION VAPOR PRESSURE WRT ICE (SVP1=.6112; 10*mb)
                   E1=SVP1*EXP(4648*(1./273.15 - 1./TSK_wat(I)) - &
@@ -676,6 +677,7 @@ CONTAINS
                QSFCMR_wat(I)=EP2*E1/(PSFC(I)-E1)                !mixing ratio 
             ENDIF
             IF (dry(i)) THEN
+              TSK_lnd(I) = 0.5 * (tsurf_lnd(i)+tskin_lnd(i))
               if( lsm == lsm_ruc) then
                 QSFCMR_lnd(I)=QSFC_lnd(I)/(1.-QSFC_lnd(I))       !mixing ratio 
               else
@@ -694,6 +696,7 @@ CONTAINS
               endif ! lsm
             ENDIF
             IF (icy(i)) THEN
+              TSK_ice(I) = 0.5 * (tsurf_ice(i)+tskin_ice(i))
               if( lsm == lsm_ruc) then
                 QSFCMR_ice(I)=QSFC_ice(I)/(1.-QSFC_ice(I))       !mixing ratio 
               else
