@@ -742,7 +742,7 @@
   standard_name = longitude_in_degree
   long_name = longitude in degree east
   units = degree_east
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
