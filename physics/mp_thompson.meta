@@ -82,6 +82,22 @@
   type = logical
   intent = in
   optional = F
+[d0s]
+  standard_name = diameter_of_ice_particle_to_be_converted_to_snow
+  long_name =  diameter of ice particle to be converted to snow
+  units = meter
+  dimensions = ()
+  type = real
+  intent = in
+  kind = kind_phys
+[d0g]
+  standard_name = diameter_of_snow_particle_to_be_converted_to_graupel
+  long_name =  diameter of snow particle to be converted to graupel
+  units = meter
+  dimensions = ()
+  type = real
+  intent = in
+  kind = kind_phys
 [spechum]
   standard_name = specific_humidity
   long_name = water vapor specific humidity
@@ -577,6 +593,30 @@
   type = logical
   intent = in
   optional = F
+[crt_sati]
+  standard_name = critical_over_saturation_for_ice_generation
+  long_name = critical over saturation for ice generation
+  units = none
+  dimensions = ()
+  type = real
+  intent = in
+  kind = kind_phys
+[d0s]
+  standard_name = diameter_of_ice_particle_to_be_converted_to_snow
+  long_name =  diameter of ice particle to be converted to snow
+  units = meter
+  dimensions = ()
+  type = real
+  intent = in
+  kind = kind_phys
+[d0g]
+  standard_name = diameter_of_snow_particle_to_be_converted_to_graupel
+  long_name =  diameter of snow particle to be converted to graupel
+  units = meter
+  dimensions = ()
+  type = real
+  intent = in
+  kind = kind_phys
 [dtp]
   standard_name = timestep_for_physics
   long_name = physics timestep

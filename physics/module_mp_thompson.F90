@@ -214,8 +214,8 @@ MODULE module_mp_thompson
       REAL, PARAMETER, PRIVATE:: xm0i = 1.E-12
       REAL, PARAMETER, PRIVATE:: D0c = 1.E-6
       REAL, PARAMETER, PRIVATE:: D0r = 50.E-6
-      REAL, PARAMETER, PRIVATE:: D0s = 200.E-6
-      REAL, PARAMETER, PRIVATE:: D0g = 250.E-6
+      !REAL, PARAMETER, PRIVATE:: D0s = 200.E-6
+      !REAL, PARAMETER, PRIVATE:: D0g = 250.E-6
       REAL, PRIVATE:: D0i, xm0s, xm0g
 
 !..Min and max radiative effective radius of cloud water, cloud ice, and snow;
@@ -437,12 +437,13 @@ MODULE module_mp_thompson
 !! lookup tables in Thomspson scheme.
 !>\section gen_thompson_init thompson_init General Algorithm
 !> @{
-      SUBROUTINE thompson_init(is_aerosol_aware_in,       &
+      SUBROUTINE thompson_init(D0s, D0g, is_aerosol_aware_in,  &
                                mpicomm, mpirank, mpiroot, &
                                threads, errmsg, errflg)
 
       IMPLICIT NONE
 
+      REAL,    INTENT(IN) :: D0s, D0g
       LOGICAL, INTENT(IN) :: is_aerosol_aware_in
       INTEGER, INTENT(IN) :: mpicomm, mpirank, mpiroot
       INTEGER, INTENT(IN) :: threads
@@ -461,6 +462,7 @@ MODULE module_mp_thompson
             write (0,'(a)') 'Using aerosol-aware version of Thompson microphysics'
         else
             write (0,'(a)') 'Using non-aerosol-aware version of Thompson microphysics'
+            write (0,'(a)') '_init: D0s,d0g:',D0s,d0g
         end if
       end if
 
@@ -890,15 +892,15 @@ MODULE module_mp_thompson
 !! between rain/snow and cloud water
       if (mpirank==mpiroot) write(0,*) '  creating qc collision eff tables'
       call table_Efrw
-      call table_Efsw
+      call table_Efsw (D0s)
 
 !>  - Call table_dropevap() to creat rain drop evaporation table
       if (mpirank==mpiroot) write(0,*) '  creating rain evap table'
       call table_dropEvap
 
-!>  - Call qi_aut_qs() to create conversion of some ice mass into snow category
+!>  - Call qi_aut_qs(D0s) to create conversion of some ice mass into snow category
       if (mpirank==mpiroot) write(0,*) '  creating ice converting to snow table'
-      call qi_aut_qs
+      call qi_aut_qs(D0s)
 
       call cpu_time(etime)
       if (mpirank==mpiroot) print '("Calculating Thompson tables part 1 took ",f10.3," seconds.")', etime-stime
@@ -972,6 +974,7 @@ MODULE module_mp_thompson
                               p, w, dz, dt_in, dt_inner,              &
                               sedi_semi, sedi_semi_update,            &
                               sedi_semi_decfl,                        &
+                              crt_sati, D0s, D0g,                     &
                               RAINNC, RAINNCV,                        &
                               SNOWNC, SNOWNCV,                        &
                               ICENC, ICENCV,                          &
@@ -1050,6 +1053,7 @@ MODULE module_mp_thompson
       LOGICAL, INTENT(IN) :: first_time_step
       REAL, INTENT(IN):: dt_in, dt_inner
       LOGICAL, INTENT(IN) :: sedi_semi, sedi_semi_update,  sedi_semi_decfl
+      REAL, INTENT(IN) :: crt_sati, D0s, D0g 
       ! To support subcycling: current step and maximum number of steps
       INTEGER, INTENT (IN) :: istep, nsteps
       LOGICAL, INTENT (IN) :: reset_dBZ
@@ -1119,6 +1123,8 @@ MODULE module_mp_thompson
       ! CCPP
       if (present(errmsg)) errmsg = ''
       if (present(errflg)) errflg = 0
+
+      write (0,*) '_driver: crt_sati, D0s,d0g:',crt_sati, D0s,d0g
 
       ! No need to test for every subcycling step
       test_only_once: if (first_time_step .and. istep==1) then
@@ -1426,6 +1432,7 @@ MODULE module_mp_thompson
                       rand1, rand2, rand3, &
                       kts, kte, dt, i, j, ext_diag,                    & 
                       sedi_semi, sedi_semi_update,  sedi_semi_decfl,   &
+                      crt_sati, D0s, D0g,                              & 
                       !vtsk1, txri1, txrc1,                            &
                       prw_vcdc1, prw_vcde1,                            &
                       tpri_inu1, tpri_ide1_d, tpri_ide1_s, tprs_ide1,  &
@@ -1822,6 +1829,7 @@ MODULE module_mp_thompson
                           ! allocated if ext_diag flag is .true.
                           ext_diag,                                        & 
                           sedi_semi, sedi_semi_update, sedi_semi_decfl,    &
+                          crt_sati, D0s, D0g,                              &
                           !vtsk1, txri1, txrc1,                            &
                           prw_vcdc1, prw_vcde1,                            &
                           tpri_inu1, tpri_ide1_d, tpri_ide1_s, tprs_ide1,  &
@@ -1852,6 +1860,7 @@ MODULE module_mp_thompson
       ! Extended diagnostics, most arrays only allocated if ext_diag is true
       LOGICAL, INTENT(IN) :: ext_diag
       LOGICAL, INTENT(IN) :: sedi_semi, sedi_semi_update,  sedi_semi_decfl
+      REAL, INTENT(IN) :: crt_sati, D0s, D0g 
       REAL, DIMENSION(:), INTENT(OUT):: &
                           !vtsk1, txri1, txrc1,                       &
                           prw_vcdc1,                                 &
@@ -1908,12 +1917,12 @@ MODULE module_mp_thompson
 
       DOUBLE PRECISION, PARAMETER:: zeroD0 = 0.0d0
       REAL, PARAMETER :: decfl = 8.0
-      REAL :: dtcfl,rainsfc
+      REAL :: dtcfl,rainsfc, grlesfc
       INTEGER :: niter 
 
       REAL, DIMENSION(kts:kte):: temp, pres, qv
       REAL, DIMENSION(kts:kte):: rc, ri, rr, rs, rg, ni, nr, nc, nwfa, nifa
-      REAL, DIMENSION(kts:kte):: rr_tmp,nr_tmp
+      REAL, DIMENSION(kts:kte):: rr_tmp, nr_tmp, rg_tmp, vtgk_tmp 
       REAL, DIMENSION(kts:kte):: rho, rhof, rhof2
       REAL, DIMENSION(kts:kte):: qvs, qvsi, delQvs
       REAL, DIMENSION(kts:kte):: satw, sati, ssatw, ssati
@@ -1927,7 +1936,7 @@ MODULE module_mp_thompson
 
       REAL, DIMENSION(kts:kte):: sed_r, sed_s, sed_g, sed_i, sed_n,sed_c
 
-      REAL:: rgvm, delta_tp, orho, lfus2
+      REAL:: rgvm, delta_tp, orho, lfus2, orhodt
       REAL, DIMENSION(5):: onstep
       DOUBLE PRECISION:: N0_exp, N0_min, lam_exp, lamc, lamr, lamg
       DOUBLE PRECISION:: lami, ilami, ilamc
@@ -1963,6 +1972,8 @@ MODULE module_mp_thompson
       INTEGER:: nu_c
 
 !+---+
+
+      write (0,*) '_thompsonn: crt_sati, D0s,d0g:',crt_sati, D0s,d0g
 
       debug_flag = .false.
 !     if (ii.eq.901 .and. jj.eq.379) debug_flag = .true.
@@ -2885,7 +2896,7 @@ MODULE module_mp_thompson
 
 !>  - Deposition nucleation of dust/mineral from DeMott et al (2010)
 !! we may need to relax the temperature and ssati constraints.
-          if ( (ssati(k).ge. 0.25) .or. (ssatw(k).gt. eps &
+          if ( (ssati(k).ge. crt_sati) .or. (ssatw(k).gt. eps &
                                 .and. temp(k).lt.253.15) ) then
            if (dustyIce .AND. is_aerosol_aware) then
             xnc = iceDeMott(tempc,qv(k),qvs(k),qvsi(k),rho(k),nifa(k))
@@ -3940,8 +3951,9 @@ MODULE module_mp_thompson
           call nislfv_rain_ppm(kte,dzq,vtrk,rr,rainsfc,dtcfl,R1)
           call nislfv_rain_ppm(kte,dzq,vtnrk,nr,vtr,dtcfl,R2)
           do k = kts, kte
-            qrten(k) = qrten(k) + (rr(k) - rr_tmp(k))/rho(k)/dt
-            nrten(k) = nrten(k) + (nr(k) - nr_tmp(k))/rho(k)/dt
+            orhodt = 1./(rho(k)*dt)
+            qrten(k) = qrten(k) + (rr(k) - rr_tmp(k)) * orhodt 
+            nrten(k) = nrten(k) + (nr(k) - nr_tmp(k)) * orhodt
           enddo
           pptrain = pptrain + rainsfc
 
@@ -4054,27 +4066,62 @@ MODULE module_mp_thompson
 
       if (ANY(L_qg .eqv. .true.)) then
       nstep = NINT(1./onstep(4))
-      do n = 1, nstep
-         do k = kte, kts, -1
-            sed_g(k) = vtgk(k)*rg(k)
-         enddo
-         k = kte
-         odzq = 1./dzq(k)
-         orho = 1./rho(k)
-         qgten(k) = qgten(k) - sed_g(k)*odzq*onstep(4)*orho
-         rg(k) = MAX(R1, rg(k) - sed_g(k)*odzq*DT*onstep(4))
-         do k = ksed1(4), kts, -1
-            odzq = 1./dzq(k)
-            orho = 1./rho(k)
-            qgten(k) = qgten(k) + (sed_g(k+1)-sed_g(k))                 &
+      if(.not. sedi_semi) then
+        do n = 1, nstep
+           do k = kte, kts, -1
+              sed_g(k) = vtgk(k)*rg(k)
+           enddo
+           k = kte
+           odzq = 1./dzq(k)
+           orho = 1./rho(k)
+           qgten(k) = qgten(k) - sed_g(k)*odzq*onstep(4)*orho
+           rg(k) = MAX(R1, rg(k) - sed_g(k)*odzq*DT*onstep(4))
+           do k = ksed1(4), kts, -1
+              odzq = 1./dzq(k)
+              orho = 1./rho(k)
+              qgten(k) = qgten(k) + (sed_g(k+1)-sed_g(k))                 &
                                                *odzq*onstep(4)*orho
-            rg(k) = MAX(R1, rg(k) + (sed_g(k+1)-sed_g(k)) &
+              rg(k) = MAX(R1, rg(k) + (sed_g(k+1)-sed_g(k)) &
                                            *odzq*DT*onstep(4))
-         enddo
+           enddo
 
-         if (rg(kts).gt.R1*10.) &
-         pptgraul = pptgraul + sed_g(kts)*DT*onstep(4)
-      enddo
+           if (rg(kts).gt.R1*10.) &
+           pptgraul = pptgraul + sed_g(kts)*DT*onstep(4)
+        enddo
+      else ! if(.not. sedi_semi) then
+        niter = 1
+        dtcfl = dt
+        if(SEDI_SEMI_DECFL) then
+          niter = int(nstep/decfl) + 1
+          dtcfl = dt/niter
+        endif
+
+        do n = 1, niter
+          rg_tmp(:) = rg(:)
+          call nislfv_rain_ppm(kte,dzq,vtgk,rg,grlesfc,dtcfl,R1)
+          do k = kts, kte
+            orhodt = 1./(rho(k)*dt)
+            qgten(k) = qgten(k) + (rg(k) - rg_tmp(k))*orhodt
+          enddo
+          pptgraul = pptgraul + grlesfc
+          if(sedi_semi_update) then
+            do k = kte+1, kts, -1
+             vtgk(k) = 0.
+            enddo
+            do k = kte, kts, -1
+               vtg = 0.
+               if (rg(k).gt. R1) then
+                vtg = rhof(k)*av_g*cgg(6)*ogg3 * ilamg(k)**bv_g
+                if (temp(k).gt. T_0) then
+                 vtgk(k) = MAX(vtg, vtrk(k))
+                else
+                 vtgk(k) = vtg
+                endif
+               endif
+            enddo
+          endif
+        enddo
+      endif ! if(.not. sedi_semi) then
       endif
 
 !+---+-----------------------------------------------------------------+
@@ -4886,10 +4933,11 @@ MODULE module_mp_thompson
 !! of ice depositional growth from diameter=0 to D0s.  Amount of
 !! ice depositional growth is this portion of distrib while larger
 !! diameters contribute to snow growth (as in Harrington et al. 1995).
-      subroutine qi_aut_qs
+      subroutine qi_aut_qs(D0s)
 
       implicit none
 
+      REAL, INTENT(IN) :: D0s
 !..Local variables
       INTEGER:: i, j, n2
       DOUBLE PRECISION, DIMENSION(nbi):: N_i
@@ -4897,6 +4945,8 @@ MODULE module_mp_thompson
       REAL:: xlimit_intg
 
 !+---+
+
+      write (0,*) '_aut_qs: D0s:', D0s
 
       do j = 1, ntb_i1
          do i = 1, ntb_i
@@ -4999,14 +5049,17 @@ MODULE module_mp_thompson
 !! Variable collision efficiency for snow collecting cloud water using
 !! method of Wang and Ji, 2000 except equate melted snow diameter to
 !! their "effective collision cross-section."
-      subroutine table_Efsw
+      subroutine table_Efsw (D0s)
 
       implicit none
 
+      REAL, INTENT(IN) :: D0s
 !..Local variables
       DOUBLE PRECISION:: Ds_m, vts, vtc, stokes, reynolds, Ef_sw
       DOUBLE PRECISION:: p, yc0, F, G, H, z, K0
       INTEGER:: i, j
+
+      write (0,*) 'table_Efsw: D0s:', D0s
 
       do j = 1, nbc
       vtc = 1.19D4 * (1.0D4*Dc(j)*Dc(j)*0.25D0)
