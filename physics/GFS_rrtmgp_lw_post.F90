@@ -27,7 +27,8 @@ contains
   subroutine GFS_rrtmgp_lw_post_run (nCol, nLev, lslwr, do_lw_clrsky_hr, save_diag, fhlwr, &
        p_lev, t_lay, tsfa, fluxlwUP_allsky, fluxlwDOWN_allsky, fluxlwUP_clrsky,            &
        fluxlwDOWN_clrsky, raddt, aerodp, cldsa, mtopa, mbota, cld_frac, cldtaulw, fluxr,   &
-       sfcdlw, sfculw, sfcflw, tsflw, htrlw, topflw, flxprf_lw, htrlwc, errmsg, errflg)
+       sfcdlw, sfculw, sfcflw, tsflw, htrlw, htrlwu, topflw, flxprf_lw, htrlwc, errmsg,    &
+       errflg)
 
     ! Inputs                    
     integer, intent(in) :: &
@@ -72,7 +73,8 @@ contains
     type(sfcflw_type), dimension(nCol), intent(inout) :: &
          sfcflw               ! LW radiation fluxes at sfc    
     real(kind_phys), dimension(nCol,nLev), intent(inout) :: &
-         htrlw                ! LW all-sky heating rate
+         htrlw,             & ! LW all-sky heating rate
+         htrlwu               ! Heating-rate updated in-between radiation calls.
     type(topflw_type), dimension(nCol), intent(out) :: &
          topflw               ! lw_fluxes_top_atmosphere
     character(len=*), intent(out) :: &
@@ -162,6 +164,9 @@ contains
     ! Radiation fluxes for other physics processes
     sfcdlw(:) = sfcflw(:)%dnfxc
     sfculw(:) = sfcflw(:)%upfxc
+
+    ! Heating-rate at radiation timestep, used for adjustment between radiation calls.
+    htrlwu = htrlw
 
     ! #######################################################################################
     ! Save LW diagnostics

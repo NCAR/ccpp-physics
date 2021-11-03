@@ -469,7 +469,7 @@
   intent = in
   optional = F
 [flux2D_lwUP]
-  standard_name = RRTMGP_lw_flux_profile_upward_allsky
+  standard_name = RRTMGP_lw_flux_profile_upward_allsky_on_radiation_timestep
   long_name = RRTMGP upward longwave all-sky flux profile
   units = W m-2
   dimensions = (horizontal_loop_extent,vertical_interface_dimension)
@@ -478,7 +478,7 @@
   intent = in
   optional = F
 [flux2D_lwDOWN]
-  standard_name = RRTMGP_lw_flux_profile_downward_allsky
+  standard_name = RRTMGP_lw_flux_profile_downward_allsky_on_radiation_timestep
   long_name = RRTMGP downward longwave all-sky flux profile
   units = W m-2
   dimensions = (horizontal_loop_extent,vertical_interface_dimension)

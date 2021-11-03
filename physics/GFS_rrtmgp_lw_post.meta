@@ -233,6 +233,15 @@
   kind = kind_phys
   intent = inout  
   optional = F
+[htrlwu]
+  standard_name = updated_tendency_of_air_temperature_due_to_longwave_heating_on_physics_timestep
+  long_name = total sky longwave heating rate on physics time step
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
 [topflw]
   standard_name = lw_fluxes_top_atmosphere
   long_name = lw radiation fluxes at top

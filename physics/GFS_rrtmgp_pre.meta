@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = GFS_rrtmgp_pre
   type = scheme
-  dependencies = funcphys.f90,iounitdef.f,machine.F,module_bfmicrophysics.f,physcons.F90,physparam.f,radcons.f90,radiation_aerosols.f
+  dependencies = funcphys.f90,iounitdef.f,machine.F,module_bfmicrophysics.f,physcons.F90,radcons.f90,radiation_aerosols.f
   dependencies = radiation_astronomy.f,radiation_clouds.f,radiation_gases.f,radiation_tools.F90,rrtmg_lw_cloud_optics.F90
 
 ########################################################################

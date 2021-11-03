@@ -31,7 +31,8 @@ contains
   subroutine rrtmgp_lw_rte_run(doLWrad, doLWclrsky, use_LW_jacobian, doGP_lwscat, nCol,     &
        nLev, p_lev, sfc_emiss_byband, sources, lw_optical_props_clrsky,                     &
        lw_optical_props_clouds, lw_optical_props_aerosol, nGauss_angles, fluxlwUP_allsky,   &
-       fluxlwDOWN_allsky, fluxlwUP_clrsky, fluxlwDOWN_clrsky, fluxlwUP_jac, errmsg, errflg)
+       fluxlwDOWN_allsky, fluxlwUP_clrsky, fluxlwDOWN_clrsky, fluxlwUP_jac,                 &
+       fluxlwUP_radtime, fluxlwDOWN_radtime, errmsg, errflg)
 
     ! Inputs
     logical, intent(in) :: &
@@ -61,7 +62,9 @@ contains
          fluxlwUP_allsky,          & ! All-sky flux (W/m2)
          fluxlwDOWN_allsky,        & ! All-sky flux (W/m2)
          fluxlwUP_clrsky,          & ! Clear-sky flux (W/m2)
-         fluxlwDOWN_clrsky           ! All-sky flux (W/m2)
+         fluxlwDOWN_clrsky,        & ! All-sky flux (W/m2)
+         fluxlwUP_radtime,         & ! Copy of fluxes (Used for coupling)
+         fluxlwDOWN_radtime
     character(len=*), intent(out) :: & 
          errmsg                      ! CCPP error message
     integer, intent(out) :: & 
@@ -191,6 +194,10 @@ contains
     ! Store fluxes
     fluxlwUP_allsky   = sum(flux_allsky%bnd_flux_up,dim=3)
     fluxlwDOWN_allsky = sum(flux_allsky%bnd_flux_dn,dim=3) 
+
+    ! Save fluxes for coupling
+    fluxlwUP_radtime   = fluxlwUP_allsky
+    fluxlwDOWN_radtime = fluxlwDOWN_allsky
 
   end subroutine rrtmgp_lw_rte_run
   

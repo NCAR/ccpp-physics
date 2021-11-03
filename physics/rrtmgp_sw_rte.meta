@@ -135,7 +135,7 @@
   intent = in
   optional = F
 [sfc_alb_uvvis_dir]
-  standard_name =  surface_albedo_uvvis_dir
+  standard_name =  surface_albedo_uvvis_direct
   long_name = UVVIS (direct) surface albedo (sfc_alb_uvvis_dir)
   units = none
   dimensions = (number_of_shortwave_bands,horizontal_loop_extent)
@@ -144,7 +144,7 @@
   intent = in
   optional = F
 [sfc_alb_uvvis_dif]
-  standard_name =  surface_albedo_uvvis_dif
+  standard_name =  surface_albedo_uvvis_diffuse
   long_name = UVVIS (diffuse) surface albedo (sfc_alb_uvvis_dif)
   units = none
   dimensions = (number_of_shortwave_bands,horizontal_loop_extent)

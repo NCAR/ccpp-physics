@@ -101,16 +101,43 @@
   kind = kind_phys
   intent = inout
   optional = F
-[sfcalb]
-  standard_name = surface_albedo_components
-  long_name = surface albedo IR/UV/VIS components
+[sfc_alb_nir_dir]
+  standard_name = surface_albedo_due_to_near_IR_direct
+  long_name = surface albedo due to near IR direct beam
   units = frac
-  dimensions = (horizontal_loop_extent,number_of_components_for_surface_albedo)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
   optional = F
-[sfc_alb_nir_dir]
+[sfc_alb_nir_dif]
+  standard_name = surface_albedo_due_to_near_IR_diffused
+  long_name = surface albedo due to near IR diffused beam
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[sfc_alb_uvvis_dir]
+  standard_name = surface_albedo_due_to_UV_and_VIS_direct
+  long_name = surface albedo due to UV+VIS direct beam
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[sfc_alb_uvvis_dif]
+  standard_name = surface_albedo_due_to_UV_and_VIS_diffused
+  long_name = surface albedo due to UV+VIS diffused beam
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[sfc_alb_nir_dir_byband]
   standard_name = surface_albedo_nearIR_direct
   long_name = near-IR (direct) surface albedo (sfc_alb_nir_dir)
   units = none
@@ -119,7 +146,7 @@
   kind = kind_phys
   intent = out
   optional = F
-[sfc_alb_nir_dif]
+[sfc_alb_nir_dif_byband]
   standard_name = surface_albedo_nearIR_diffuse
   long_name = near-IR (diffuse) surface albedo (sfc_alb_nir_dif)
   units = none
@@ -128,8 +155,8 @@
   kind = kind_phys
   intent = out
   optional = F
-[sfc_alb_uvvis_dir]
-  standard_name =  surface_albedo_uvvis_dir
+[sfc_alb_uvvis_dir_byband]
+  standard_name =  surface_albedo_uvvis_direct
   long_name = UVVIS (direct) surface albedo (sfc_alb_uvvis_dir)
   units = none
   dimensions = (number_of_shortwave_bands,horizontal_loop_extent)
@@ -137,8 +164,8 @@
   kind = kind_phys
   intent = out
   optional = F
-[sfc_alb_uvvis_dif]
-  standard_name =  surface_albedo_uvvis_dif
+[sfc_alb_uvvis_dif_byband]
+  standard_name =  surface_albedo_uvvis_diffuse
   long_name = UVVIS (diffuse) surface albedo (sfc_alb_uvvis_dif)
   units = none
   dimensions = (number_of_shortwave_bands,horizontal_loop_extent)

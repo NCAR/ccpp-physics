@@ -197,27 +197,28 @@ contains
        
        ! Surface down and up spectral component fluxes
        ! - Save two spectral bands' surface downward and upward fluxes for output.
-	   if (l_scmpsw) then
-           do i=1,nCol
-              nirbmdi(i) = scmpsw(i)%nirbm
-              nirdfdi(i) = scmpsw(i)%nirdf
-              visbmdi(i) = scmpsw(i)%visbm
-              visdfdi(i) = scmpsw(i)%visdf
-              nirbmui(i) = scmpsw(i)%nirbm * sfc_alb_nir_dir(1,i)
-              nirdfui(i) = scmpsw(i)%nirdf * sfc_alb_nir_dif(1,i)
-              visbmui(i) = scmpsw(i)%visbm * sfc_alb_uvvis_dir(1,i)
-              visdfui(i) = scmpsw(i)%visdf * sfc_alb_uvvis_dif(1,i)
+       if (l_scmpsw) then
+          do i=1,nCol
+             nirbmdi(i) = scmpsw(i)%nirbm
+             nirdfdi(i) = scmpsw(i)%nirdf
+             visbmdi(i) = scmpsw(i)%visbm
+             visdfdi(i) = scmpsw(i)%visdf
+             nirbmui(i) = scmpsw(i)%nirbm * sfc_alb_nir_dir(1,i)
+             nirdfui(i) = scmpsw(i)%nirdf * sfc_alb_nir_dif(1,i)
+             visbmui(i) = scmpsw(i)%visbm * sfc_alb_uvvis_dir(1,i)
+             visdfui(i) = scmpsw(i)%visdf * sfc_alb_uvvis_dif(1,i)
            enddo
         else
-          nirbmdi(:) = 0.0
-          nirdfdi(:) = 0.0
-          visbmdi(:) = 0.0
-          visdfdi(:) = 0.0
-          nirbmui(:) = 0.0
-          nirdfui(:) = 0.0
-          visbmui(:) = 0.0
-          visdfui(:) = 0.0        
-        endif	
+           scmpsw     = cmpfsw_type( 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 )
+           nirbmdi(:) = 0.0
+           nirdfdi(:) = 0.0
+           visbmdi(:) = 0.0
+           visdfdi(:) = 0.0
+           nirbmui(:) = 0.0
+           nirdfui(:) = 0.0
+           visbmui(:) = 0.0
+           visdfui(:) = 0.0
+        endif
     else                   ! if_nday_block
        ! #######################################################################################
        ! Dark everywhere
@@ -225,6 +226,7 @@ contains
        htrsw(:,:) = 0.0
        sfcfsw     = sfcfsw_type( 0.0, 0.0, 0.0, 0.0 )
        topfsw     = topfsw_type( 0.0, 0.0, 0.0 )
+       scmpsw     = cmpfsw_type( 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 )
        nirbmdi(:) = 0.0
        nirdfdi(:) = 0.0
        visbmdi(:) = 0.0

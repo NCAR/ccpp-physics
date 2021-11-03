@@ -9,7 +9,7 @@ module GFS_rrtmgp_pre
        getozn                      ! Routine to setup ozone
   ! RRTMGP types
   use mo_gas_concentrations, only: ty_gas_concs
-  use radiation_tools,            only: check_error_msg,cmp_tlev
+  use radiation_tools,       only: check_error_msg,cmp_tlev
 
   real(kind_phys), parameter :: &
        amd   = 28.9644_kind_phys,  & ! Molecular weight of dry-air     (g/mol)
@@ -131,9 +131,9 @@ contains
          prsl,              & ! Pressure at model-layer centers (Pa)
          tgrs,              & ! Temperature at model-layer centers (K)
          prslk                ! Exner function at model layer centers (1)
-    real(kind_phys), dimension(nCol,nLev+1) :: & 
+    real(kind_phys), dimension(nCol,nLev+1), intent(in) :: & 
          prsi                 ! Pressure at model-interfaces (Pa)
-    real(kind_phys), dimension(nCol,nLev,nTracers) :: & 
+    real(kind_phys), dimension(nCol,nLev,nTracers), intent(in) :: & 
          qgrs                 ! Tracer concentrations (kg/kg)
 
     ! Outputs
@@ -202,7 +202,7 @@ contains
     p_lev(1:NCOL,:) = prsi(1:NCOL,:)
 
     ! Pressure at layer-center
-    p_lay(1:NCOL,:)   = prsl(1:NCOL,:)
+    p_lay(1:NCOL,:) = prsl(1:NCOL,:)
 
     ! Temperature at layer-center
     t_lay(1:NCOL,:) = tgrs(1:NCOL,:)
@@ -274,7 +274,10 @@ contains
     vmr_h2o = merge((q_lay/(1-q_lay))*amdw, 0., q_lay  .ne. 1.)
     vmr_o3  = merge(o3_lay*amdo3,           0., o3_lay .gt. 0.)
     
+    print*,"istr: ",istr_o2,istr_co2,istr_ch4,istr_n2o,istr_h2o,istr_o3
     ! Populate RRTMGP DDT w/ gas-concentrations
+    gas_concentrations%ncol                       = nCol
+    gas_concentrations%nlay                       = nLev
     gas_concentrations%gas_name(:)                = active_gases_array(:)
     gas_concentrations%concs(istr_o2)%conc(:,:)   = gas_vmr(:,:,4)
     gas_concentrations%concs(istr_co2)%conc(:,:)  = gas_vmr(:,:,1)

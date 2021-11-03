@@ -7,30 +7,6 @@
 [ccpp-arg-table]
   name = rrtmgp_sw_gas_optics_init
   type = scheme
-[ncol]
-  standard_name = horizontal_dimension
-  long_name = horizontal dimension
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[nLev]
-  standard_name = vertical_layer_dimension
-  long_name = number of vertical levels
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[nThreads]
-  standard_name = number_of_openmp_threads
-  long_name = number of OpenMP threads available to scheme
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [rrtmgp_root_dir]
   standard_name = directory_for_rte_rrtmgp_source_code
   long_name = directory for rte+rrtmgp source code
