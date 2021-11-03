@@ -1769,9 +1769,9 @@ endif   ! croptype == 0
   real (kind=kind_phys)                              , intent(inout) :: cm     !momentum drag coefficient
   real (kind=kind_phys)                              , intent(inout) :: ch     !sensible heat exchange coefficient
   real (kind=kind_phys)                              , intent(inout) :: q1
-  real                              , intent(inout) :: rb     !leaf boundary layer resistance (s/m)
-  real                              , intent(inout) :: laisun !sunlit leaf area index (m2/m2)
-  real                              , intent(inout) :: laisha !shaded leaf area index (m2/m2)
+  real (kind=kind_phys)                              , intent(inout) :: rb     !leaf boundary layer resistance (s/m)
+  real (kind=kind_phys)                              , intent(inout) :: laisun !sunlit leaf area index (m2/m2)
+  real (kind=kind_phys)                              , intent(inout) :: laisha !shaded leaf area index (m2/m2)
 #ifdef CCPP
   character(len=*)                  , intent(inout) :: errmsg
   integer                           , intent(inout) :: errflg
@@ -5868,8 +5868,8 @@ endif   ! croptype == 0
 1001      continue
           if (.not.( (nlog < 10) .and. (kcount == 0)))   goto 1002
           nlog = nlog +1
-          df = alog ( ( parameters%psisat(isoil) * grav / hfus ) * ( ( 1. + ck * swl )**2.) * &
-               ( parameters%smcmax(isoil) / (smc - swl) )** bx) - alog ( - (               &
+          df = log ( ( parameters%psisat(isoil) * grav / hfus ) * ( ( 1. + ck * swl )**2.) * &
+               ( parameters%smcmax(isoil) / (smc - swl) )** bx) - log ( - (               &
                tkelv - tfrz)/ tkelv)
           denom = 2. * ck / ( 1. + ck * swl ) + bx / ( smc - swl )
           swlk = swl - df / denom

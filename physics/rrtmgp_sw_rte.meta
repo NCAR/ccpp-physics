@@ -15,7 +15,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [doSWclrsky]
   standard_name = flag_for_output_of_tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_timestep_assuming_clear_sky
   long_name = flag to output sw heating rate (Radtend%swhc)
@@ -23,7 +22,6 @@
   dimensions = ()
   type = logical  
   intent = in
-  optional = F
 [ncol]
   standard_name = horizontal_loop_extent
   long_name = horizontal dimension
@@ -31,7 +29,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [nLev]
   standard_name = vertical_layer_dimension
   long_name = number of vertical levels
@@ -39,7 +36,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [nday]
   standard_name = daytime_points_dimension
   long_name = daytime points dimension
@@ -47,7 +43,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [idxday]
   standard_name = daytime_points
   long_name = daytime points
@@ -55,7 +50,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
-  optional = F
 [coszen]
   standard_name = cosine_of_solar_zenith_angle_for_daytime_points_on_radiation_timestep
   long_name = mean cos of zenith angle over rad call period
@@ -64,7 +58,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [p_lay]
   standard_name = air_pressure_at_layer_for_RRTMGP
   long_name = air pressure layer
@@ -73,7 +66,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [p_lev]
   standard_name = air_pressure_at_interface_for_RRTMGP
   long_name = air pressure level
@@ -82,7 +74,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [t_lay]
   standard_name = air_temperature_at_layer_for_RRTMGP
   long_name = air temperature layer
@@ -91,7 +82,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [sw_optical_props_clrsky]
   standard_name = shortwave_optical_properties_for_clear_sky
   long_name = Fortran DDT containing RRTMGP optical properties
@@ -99,7 +89,6 @@
   dimensions = ()
   type = ty_optical_props_2str
   intent = inout
-  optional = F
 [sw_optical_props_clouds]
   standard_name = shortwave_optical_properties_for_cloudy_atmosphere
   long_name = Fortran DDT containing RRTMGP optical properties
@@ -107,7 +96,6 @@
   dimensions = ()
   type = ty_optical_props_2str
   intent = in
-  optional = F
 [sw_optical_props_aerosol]
   standard_name = shortwave_optical_properties_for_aerosols
   long_name = Fortran DDT containing RRTMGP optical properties
@@ -115,7 +103,6 @@
   dimensions = ()
   type = ty_optical_props_2str
   intent = in
-  optional = F
 [sfc_alb_nir_dir]
   standard_name = surface_albedo_nearIR_direct
   long_name = near-IR (direct) surface albedo (sfc_alb_nir_dir)
@@ -124,7 +111,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [sfc_alb_nir_dif]
   standard_name = surface_albedo_nearIR_diffuse
   long_name = near-IR (diffuse) surface albedo (sfc_alb_nir_dif) 
@@ -133,7 +119,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [sfc_alb_uvvis_dir]
   standard_name =  surface_albedo_uvvis_dir
   long_name = UVVIS (direct) surface albedo (sfc_alb_uvvis_dir)
@@ -142,7 +127,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [sfc_alb_uvvis_dif]
   standard_name =  surface_albedo_uvvis_dif
   long_name = UVVIS (diffuse) surface albedo (sfc_alb_uvvis_dif)
@@ -151,7 +135,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [toa_src_sw]
   standard_name = toa_incident_sw_flux_by_spectral_point
   long_name = TOA shortwave incident flux at each spectral points
@@ -160,7 +143,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [scmpsw]
   standard_name = components_of_surface_downward_shortwave_fluxes
   long_name = derived type for special components of surface downward shortwave fluxes
@@ -168,7 +150,6 @@
   dimensions = (horizontal_loop_extent)
   type = cmpfsw_type
   intent = inout
-  optional = T
 [fluxswUP_allsky]
   standard_name = RRTMGP_sw_flux_profile_upward_allsky
   long_name = RRTMGP upward shortwave all-sky flux profile
@@ -177,7 +158,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [fluxswDOWN_allsky]
   standard_name = RRTMGP_sw_flux_profile_downward_allsky
   long_name = RRTMGP downward shortwave all-sky flux profile
@@ -186,7 +166,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [fluxswUP_clrsky]
   standard_name = RRTMGP_sw_flux_profile_upward_clrsky
   long_name = RRTMGP upward shortwave clr-sky flux profile
@@ -195,7 +174,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [fluxswDOWN_clrsky]
   standard_name = RRTMGP_sw_flux_profile_downward_clrsky
   long_name = RRTMGP downward shortwave clr-sky flux profile
@@ -204,7 +182,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -213,7 +190,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -221,4 +197,3 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
