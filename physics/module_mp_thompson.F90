@@ -1922,7 +1922,7 @@ MODULE module_mp_thompson
 
       REAL, DIMENSION(kts:kte):: temp, pres, qv
       REAL, DIMENSION(kts:kte):: rc, ri, rr, rs, rg, ni, nr, nc, nwfa, nifa
-      REAL, DIMENSION(kts:kte):: rr_tmp, nr_tmp, rg_tmp, vtgk_tmp 
+      REAL, DIMENSION(kts:kte):: rr_tmp, nr_tmp, rg_tmp
       REAL, DIMENSION(kts:kte):: rho, rhof, rhof2
       REAL, DIMENSION(kts:kte):: qvs, qvsi, delQvs
       REAL, DIMENSION(kts:kte):: satw, sati, ssatw, ssati
