@@ -661,6 +661,9 @@ CONTAINS
 !-------------------------------------------------------------------
       DO I=its,ite
 
+         ! PSFC ( in cmb) is used later in saturation checks
+         PSFC(I)=PSFCPA(I)/1000.
+
          IF (ITIMESTEP == 1) THEN
          !initialize surface specific humidity and mixing ratios for land, ice and water
             IF (wet(i)) THEN
@@ -870,6 +873,9 @@ CONTAINS
             ! subgrid-scale velocity (VSGD) following Beljaars (1995, QJRMS) 
             ! and Mahrt and Sun (1995, MWR), respectively
             !-------------------------------------------------------
+            !tgs - the line below could be used when hflx_wat,qflx_wat are moved from
+            !      Interstitial to Sfcprop
+            !fluxc = max(hflx_wat(i) + ep1*THVSK_wat(I)*qflx_wat(i),0.)
             fluxc = max(hfx(i)/RHO1D(i)/cp                    &
             &    + ep1*THVSK_wat(I)*qfx(i)/RHO1D(i),0.)
             !WSTAR(I) = vconvc*(g/TSK(i)*pblh(i)*fluxc)**onethird
@@ -902,6 +908,9 @@ CONTAINS
             ! subgrid-scale velocity (VSGD) following Beljaars (1995, QJRMS)
             ! and Mahrt and Sun (1995, MWR), respectively
             !-------------------------------------------------------
+            !tgs - the line below could be used when hflx_lnd,qflx_wat are moved from
+            !      Interstitial to Sfcprop
+            !fluxc = max(hflx_lnd(i) + ep1*THVSK_lnd(I)*qflx_lnd(i),0.)
             fluxc = max(hfx(i)/RHO1D(i)/cp                    &
             &    + ep1*THVSK_lnd(I)*qfx(i)/RHO1D(i),0.)
             ! WSTAR(I) = vconvc*(g/TSK(i)*pblh(i)*fluxc)**onethird
@@ -942,6 +951,9 @@ CONTAINS
             ! subgrid-scale velocity (VSGD) following Beljaars (1995, QJRMS)
             ! and Mahrt and Sun (1995, MWR), respectively
             !-------------------------------------------------------
+            !tgs - the line below could be used when hflx_ice,qflx_ice are moved from
+            !      Interstitial to Sfcprop
+            !fluxc = max(hflx_ice(i) + ep1*THVSK_ice(I)*qflx_ice(i)/RHO1D(i),0.)
             fluxc = max(hfx(i)/RHO1D(i)/cp                    &
             &    + ep1*THVSK_ice(I)*qfx(i)/RHO1D(i),0.)
             ! WSTAR(I) = vconvc*(g/TSK(i)*pblh(i)*fluxc)**onethird
@@ -1175,6 +1187,15 @@ CONTAINS
                          UST_lnd(I),KARMAN,1.0,0,spp_pbl,rstoch1D(i))
           ENDIF
        ENDIF
+       IF (ZNTstoch_lnd(i) < 1E-8 .OR. Zt_lnd(i) < 1E-10) THEN 
+         write(0,*)"===(land) capture bad input in mynn sfc layer, i=:",i
+         write(0,*)" ZNT=", ZNTstoch_lnd(i)," ZT=",Zt_lnd(i) 
+         write(0,*)" tsk=", tskin_lnd(i)," restar=",restar,&
+         " tsurf=", tsurf_lnd(i)," qsfc=", qsfc_lnd(i)," znt=", znt_lnd(i),&
+         " ust=", ust_lnd(i)," snowh=", snowh_lnd(i),"psfcpa=",PSFCPA(i), &
+         " dz=",dz8w1d(i)," qflx=",qflx_lnd(i)," hflx=",hflx_lnd(i)," hpbl=",pblh(i)
+       ENDIF
+
 
        GZ1OZ0_lnd(I)= LOG((ZA(I)+ZNTstoch_lnd(I))/ZNTstoch_lnd(I))
        GZ1OZt_lnd(I)= LOG((ZA(I)+ZNTstoch_lnd(i))/ZT_lnd(i))
