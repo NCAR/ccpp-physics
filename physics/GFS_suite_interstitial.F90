@@ -234,9 +234,8 @@
         enddo
 
 !  --- ...  sfc lw fluxes used by atmospheric model are saved for output
-        if (.not. use_LW_jacobian) then
-          if (frac_grid) then
-            do i=1,im
+        if (frac_grid) then
+           do i=1,im
               tem = (one - frland(i)) * cice(i) ! tem = ice fraction wrt whole cell
               if (flag_cice(i)) then
                  adjsfculw(i) = adjsfculw_lnd(i) * frland(i)               &
@@ -247,9 +246,9 @@
                               + adjsfculw_ice(i) * tem                     &
                               + adjsfculw_wat(i) * (one - frland(i) - tem)
               endif
-            enddo
-          else
-            do i=1,im
+           enddo
+        else
+           do i=1,im
               if (dry(i)) then                     ! all land
                  adjsfculw(i) = adjsfculw_lnd(i)
               elseif (icy(i)) then                 ! ice (and water)
@@ -270,8 +269,7 @@
               else                                 ! all water
                  adjsfculw(i) = adjsfculw_wat(i)
               endif
-            enddo
-          endif
+           enddo
         endif
 
         do i=1,im
