@@ -646,8 +646,6 @@
             clw(i,k,1) = gq0(i,k,ntcw)
           enddo
         enddo
-      !elseif (imp_physics == imp_physics_gfdl) then
-      !  clw(1:im,:,1) = gq0(1:im,:,ntcw)
       elseif (imp_physics == imp_physics_thompson .or. imp_physics == imp_physics_gfdl) then
         do k=1,levs
           do i=1,im
