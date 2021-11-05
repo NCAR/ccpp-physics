@@ -143,25 +143,6 @@ set(SCHEMES_OPENMP_OFF ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rrtmgp/mo_
 #------------------------------------------------------------------------------
 if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
 
-  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -ffree-line-length-none")
-
-  SET_SOURCE_FILES_PROPERTIES(${LOCAL_CURRENT_SOURCE_DIR}/physics/module_bfmicrophysics.f
-                              ${LOCAL_CURRENT_SOURCE_DIR}/physics/sflx.f
-                              ${LOCAL_CURRENT_SOURCE_DIR}/physics/sfc_diff.f
-                              ${LOCAL_CURRENT_SOURCE_DIR}/physics/sfc_diag.f
-                              ${LOCAL_CURRENT_SOURCE_DIR}/physics/module_nst_model.f90
-                              ${LOCAL_CURRENT_SOURCE_DIR}/physics/calpreciptype.f90
-                              ${LOCAL_CURRENT_SOURCE_DIR}/physics/mersenne_twister.f
-                              ${LOCAL_CURRENT_SOURCE_DIR}/physics/module_nst_water_prop.f90
-                              ${LOCAL_CURRENT_SOURCE_DIR}/physics/aer_cloud.F
-                              ${LOCAL_CURRENT_SOURCE_DIR}/physics/wv_saturation.F
-                              ${LOCAL_CURRENT_SOURCE_DIR}/physics/cldwat2m_micro.F
-                              ${LOCAL_CURRENT_SOURCE_DIR}/physics/surface_perturbation.F90
-                              ${LOCAL_CURRENT_SOURCE_DIR}/physics/module_mp_thompson_make_number_concentrations.F90
-                              ${LOCAL_CURRENT_SOURCE_DIR}/physics/module_SF_JSFC.F90
-                              ${LOCAL_CURRENT_SOURCE_DIR}/physics/module_BL_MYJPBL.F90
-                              PROPERTIES COMPILE_FLAGS "-fdefault-real-8 -fdefault-double-8 ${OpenMP_Fortran_FLAGS}")
-
   if (PROJECT STREQUAL "CCPP-FV3")
     # Set 32-bit floating point precision flags for certain files
     # that are executed in the dynamics (fast physics part)
@@ -274,29 +255,6 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
     SET_PROPERTY(SOURCE ${SCHEMES2} ${CAPS}
                  APPEND_STRING PROPERTY COMPILE_FLAGS " ${CMAKE_Fortran_FLAGS_DEFAULT_PREC} ${OpenMP_Fortran_FLAGS} ")
 
-  else (PROJECT STREQUAL "CCPP-FV3")
-    SET_SOURCE_FILES_PROPERTIES(${LOCAL_CURRENT_SOURCE_DIR}/physics/module_bfmicrophysics.f
-                                ${LOCAL_CURRENT_SOURCE_DIR}/physics/sflx.f
-                                ${LOCAL_CURRENT_SOURCE_DIR}/physics/sfc_diff.f
-                                ${LOCAL_CURRENT_SOURCE_DIR}/physics/sfc_diag.f
-                                PROPERTIES COMPILE_FLAGS "-r8 ${OpenMP_Fortran_FLAGS} ")
-    SET_SOURCE_FILES_PROPERTIES(${LOCAL_CURRENT_SOURCE_DIR}/physics/module_nst_model.f90
-                                ${LOCAL_CURRENT_SOURCE_DIR}/physics/calpreciptype.f90
-                                PROPERTIES COMPILE_FLAGS "-r8 -free ${OpenMP_Fortran_FLAGS} ")
-    SET_SOURCE_FILES_PROPERTIES(${LOCAL_CURRENT_SOURCE_DIR}/physics/mersenne_twister.f
-                                PROPERTIES COMPILE_FLAGS "-r8 -ftz ${OpenMP_Fortran_FLAGS} ")
-    SET_SOURCE_FILES_PROPERTIES(${LOCAL_CURRENT_SOURCE_DIR}/physics/module_nst_water_prop.f90
-                                PROPERTIES COMPILE_FLAGS "-extend-source 132 -r8 -free ${OpenMP_Fortran_FLAGS} ")
-    SET_SOURCE_FILES_PROPERTIES(${LOCAL_CURRENT_SOURCE_DIR}/physics/aer_cloud.F
-                                ${LOCAL_CURRENT_SOURCE_DIR}/physics/wv_saturation.F
-                                ${LOCAL_CURRENT_SOURCE_DIR}/physics/cldwat2m_micro.F
-                                ${LOCAL_CURRENT_SOURCE_DIR}/physics/surface_perturbation.F90
-                                PROPERTIES COMPILE_FLAGS "-r8 ${OpenMP_Fortran_FLAGS} ")
-    SET_SOURCE_FILES_PROPERTIES(${LOCAL_CURRENT_SOURCE_DIR}/physics/module_mp_thompson_make_number_concentrations.F90
-                                PROPERTIES COMPILE_FLAGS "-r8 ${OpenMP_Fortran_FLAGS} ")
-    SET_SOURCE_FILES_PROPERTIES(${LOCAL_CURRENT_SOURCE_DIR}/physics/module_SF_JSFC.F90
-                                ${LOCAL_CURRENT_SOURCE_DIR}/physics/module_BL_MYJPBL.F90
-                                PROPERTIES COMPILE_FLAGS "-r8 ${OpenMP_Fortran_FLAGS} ")
   endif (PROJECT STREQUAL "CCPP-FV3")
 
 else()
