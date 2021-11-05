@@ -195,24 +195,6 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
       list(APPEND SCHEMES_SFX_OPT ${LOCAL_CURRENT_SOURCE_DIR}/physics/module_sf_mynn.F90)
     endif()
 
-    if (${LOCAL_CURRENT_SOURCE_DIR}/physics/radiation_aerosols.f IN_LIST SCHEMES)
-      # Replace -xHost or -xCORE-AVX2 with -xCORE-AVX-I for certain files
-      set(CMAKE_Fortran_FLAGS_LOPT1 ${CMAKE_Fortran_FLAGS_OPT})
-      string(REPLACE "-xHOST" "-xCORE-AVX-I"
-             CMAKE_Fortran_FLAGS_LOPT1
-             "${CMAKE_Fortran_FLAGS_LOPT1}")
-      string(REPLACE "-xCORE-AVX2" "-xCORE-AVX-I"
-             CMAKE_Fortran_FLAGS_LOPT1
-             "${CMAKE_Fortran_FLAGS_LOPT1}")
-      string(REPLACE "-axSSE4.2,CORE-AVX2" "-axSSE4.2,CORE-AVX-I"
-             CMAKE_Fortran_FLAGS_LOPT1
-             "${CMAKE_Fortran_FLAGS_LOPT1}")
-      SET_SOURCE_FILES_PROPERTIES(${LOCAL_CURRENT_SOURCE_DIR}/physics/radiation_aerosols.f
-                                  PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_LOPT1}")
-      # Add all of the above files to the list of schemes with special compiler flags
-      list(APPEND SCHEMES_SFX_OPT ${LOCAL_CURRENT_SOURCE_DIR}/physics/radiation_aerosols.f)
-    endif()
-
     # Remove files with special compiler flags from list of files with standard compiler flags
     if (SCHEMES_SFX_OPT)
       list(REMOVE_ITEM SCHEMES ${SCHEMES_SFX_OPT})
@@ -260,7 +242,7 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
 else()
   message ("CMAKE_Fortran_COMPILER full path: " ${CMAKE_Fortran_COMPILER})
   message ("Fortran compiler: " ${CMAKE_Fortran_COMPILER_ID})
-  message (FATAL_ERROR "This program has only been compiled with gfortran, pgf90 and ifort. If another compiler is needed, the appropriate flags must be added in ${GFS_PHYS_SRC}/CMakeLists.txt")
+  message (FATAL_ERROR "This program has only been compiled with gfortran and ifort. If another compiler is needed, the appropriate flags must be added in ${GFS_PHYS_SRC}/CMakeLists.txt")
 endif()
 
 #------------------------------------------------------------------------------
