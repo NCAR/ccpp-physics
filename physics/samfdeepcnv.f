@@ -1210,12 +1210,12 @@ c
                    dz = zi(i,k) - zi(i,k-1)
                    tem  = 0.25 * (xlamue(i,k)+xlamue(i,k-1)) * dz
                    factor = 1. + tem
-                   ecko(i,k,kk) = ((1.-tem)*ecko(i,k-1,kk)+tem*
-     &                     (ctro(i,k,kk)+ctro(i,k-1,kk)))/factor
-                   chem_c(i,k,n)=fscav(n)*ecko(i,k,kk)
-                   tem=chem_c(i,k,n)/(1.+c0t(i,k)*dz)
-                   chem_pw(i,k,n)=c0t(i,k)*dz*tem*eta(i,k-1)
-                   ecko(i,k,kk)=tem+ecko(i,k,kk)-chem_c(i,k,n)
+                   ecko(i,k,kk) = ((1. - tem) * ecko(i,k-1,kk) + tem *
+     &                     (ctro(i,k,kk) + ctro(i,k-1,kk))) / factor
+                   chem_c(i,k,n) = fscav(n) * ecko(i,k,kk)
+                   tem = chem_c(i,k,n) / (1. + c0t(i,k) * dz)
+                   chem_pw(i,k,n) = c0t(i,k) * dz * tem * eta(i,k-1)
+                   ecko(i,k,kk) = tem + ecko(i,k,kk) - chem_c(i,k,n)
                  endif
                endif
              enddo
@@ -1792,8 +1792,8 @@ c
         do i = 1, im
           if (cnvflg(i)) then
             if(k > kb(i) .and. k <= ktcon(i)) then
-              shear= sqrt((uo(i,k)-uo(i,k-1)) ** 2
-     &                  + (vo(i,k)-vo(i,k-1)) ** 2)
+              shear = sqrt((uo(i,k)-uo(i,k-1)) ** 2
+     &                   + (vo(i,k)-vo(i,k-1)) ** 2)
               vshear(i) = vshear(i) + shear
             endif
           endif
@@ -1992,18 +1992,18 @@ c
         do i = 1, im
           if (cnvflg(i) .and. k < jmin(i)) then
               gamma = el2orc * qeso(i,k) / to(i,k)**2
-              dhh=hcdo(i,k)
-              dt=to(i,k)
-              dg=gamma
-              dh=heso(i,k)
-              dz=-1.*(zo(i,k+1)-zo(i,k))
+              dhh = hcdo(i,k)
+              dt = to(i,k)
+              dg = gamma
+              dh = heso(i,k)
+              dz = -1.*(zo(i,k+1)-zo(i,k))
 !             aa1(i)=aa1(i)+edto(i)*dz*etad(i,k)
-              aa1(i)=aa1(i)+edto(i)*dz
-     &               *(grav/(cp*dt))*((dhh-dh)/(1.+dg))
-     &               *(1.+fv*cp*dg*dt/hvap)
-              val=0.
+              aa1(i) = aa1(i)+edto(i)*dz
+     &                 *(grav/(cp*dt))*((dhh-dh)/(1.+dg))
+     &                 *(1.+fv*cp*dg*dt/hvap)
+              val = 0.
 !             aa1(i)=aa1(i)+edto(i)*dz*etad(i,k)
-              aa1(i)=aa1(i)+edto(i)*dz
+              aa1(i) = aa1(i)+edto(i)*dz
      &               *grav*fv*max(val,(qeso(i,k)-qo(i,k)))
           endif
         enddo
@@ -2638,19 +2638,19 @@ c
         do i = 1, im
           if (asqecflg(i) .and. k < jmin(i)) then
               gamma = el2orc * qeso(i,k) / to(i,k)**2
-              dhh=hcdo(i,k)
-              dt= to(i,k)
-              dg= gamma
-              dh= heso(i,k)
-              dz=-1.*(zo(i,k+1)-zo(i,k))
+              dhh = hcdo(i,k)
+              dt = to(i,k)
+              dg = gamma
+              dh = heso(i,k)
+              dz = -1.*(zo(i,k+1)-zo(i,k))
 !             xaa0(i)=xaa0(i)+edtx(i)*dz*etad(i,k)
-              xaa0(i)=xaa0(i)+edtx(i)*dz
-     &                *(grav/(cp*dt))*((dhh-dh)/(1.+dg))
-     &                *(1.+fv*cp*dg*dt/hvap)
-              val=0.
+              xaa0(i) = xaa0(i)+edtx(i)*dz
+     &                  *(grav/(cp*dt))*((dhh-dh)/(1.+dg))
+     &                  *(1.+fv*cp*dg*dt/hvap)
+              val = 0.
 !             xaa0(i)=xaa0(i)+edtx(i)*dz*etad(i,k)
-              xaa0(i)=xaa0(i)+edtx(i)*dz
-     &                *grav*fv*max(val,(qeso(i,k)-qo(i,k)))
+              xaa0(i) = xaa0(i)+edtx(i)*dz
+     &                  *grav*fv*max(val,(qeso(i,k)-qo(i,k)))
           endif
         enddo
       enddo

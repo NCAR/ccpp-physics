@@ -260,15 +260,15 @@
       parameter(ce0=0.4,cs0=0.2)
       parameter(rchck=1.5,ndt=20)
 
-      gravi=1.0/grav
-      g=grav
-      gocp=g/cp
+      gravi = 1.0 / grav
+      g = grav
+      gocp = g / cp
 !     cont=cp/g
 !     conq=hvap/g
 !     conw=1.0/g  ! for del in pa
 !!    parameter(cont=1000.*cp/g,conq=1000.*hvap/g,conw=1000./g) !kpa
-      elocp=hvap/cp
-      el2orc=hvap*hvap/(rv*cp)
+      elocp  = hvap / cp
+      el2orc = hvap * hvap / (rv * cp)
 !
 !************************************************************************
 ! Initialize CCPP error handling variables
@@ -461,11 +461,11 @@
           cfly(i,k) = 0.
           clwt = 1.0e-6 * (plyr(i,k)*0.001)
           if (qlx(i,k) > clwt) then
-            onemrh= max(1.e-10, 1.0-rhly(i,k))
-            tem1  = min(max((onemrh*qstl(i,k))**0.49,0.0001),1.0)
-            tem1  = cql / tem1
-            value = max(min( tem1*qlx(i,k), 50.0), 0.0)
-            tem2  = sqrt(sqrt(rhly(i,k)))
+            onemrh = max(1.e-10, 1.0-rhly(i,k))
+            tem1   = min(max((onemrh*qstl(i,k))**0.49,0.0001),1.0)
+            tem1   = cql / tem1
+            value  = max(min( tem1*qlx(i,k), 50.0), 0.0)
+            tem2   = sqrt(sqrt(rhly(i,k)))
             cfly(i,k) = min(max(tem2*(1.0-exp(-value)), 0.0), 1.0)
           endif
         enddo
@@ -2046,7 +2046,7 @@ c
       enddo
 !
       if(ldiag3d .and. .not. gen_tend) then
-        idtend=dtidx(index_of_temperature,index_of_process_pbl)
+        idtend = dtidx(index_of_temperature,index_of_process_pbl)
         if(idtend>=1) then
           do  k = 1,km
             do i = 1,im
@@ -2056,7 +2056,7 @@ c
           enddo
         endif
         ! Send tendencies just for QV; other tracers are below.
-        idtend=dtidx(100+ntqv,index_of_process_pbl)
+        idtend = dtidx(100+ntqv,index_of_process_pbl)
         if(idtend>=1) then
           do  k = 1,km
             do i = 1,im
@@ -2108,7 +2108,7 @@ c
           enddo
         enddo
         if(ldiag3d .and. .not. gen_tend) then
-          idtend=dtidx(index_of_temperature,index_of_process_pbl)
+          idtend = dtidx(index_of_temperature,index_of_process_pbl)
           if(idtend>=1) then
             do k = 1,km1
               do i = 1,im
@@ -2200,7 +2200,7 @@ c
       enddo
 !
       if(ldiag3d .and. .not. gen_tend) then
-        idtend=dtidx(index_of_x_wind,index_of_process_pbl)
+        idtend = dtidx(index_of_x_wind,index_of_process_pbl)
         if(idtend>=1) then
           do k = 1,km
             do i = 1,im
@@ -2210,7 +2210,7 @@ c
           enddo
         endif
 
-        idtend=dtidx(index_of_y_wind,index_of_process_pbl)
+        idtend = dtidx(index_of_y_wind,index_of_process_pbl)
         if(idtend>=1) then
           do k = 1,km
             do i = 1,im

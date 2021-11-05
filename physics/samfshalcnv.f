@@ -1014,12 +1014,12 @@ c
                    dz = zi(i,k) - zi(i,k-1)
                    tem  = 0.25 * (xlamue(i,k)+xlamue(i,k-1)) * dz
                    factor = 1. + tem
-                   ecko(i,k,kk) = ((1.-tem)*ecko(i,k-1,kk)+tem*
-     &                     (ctro(i,k,kk)+ctro(i,k-1,kk)))/factor
-                   chem_c(i,k,n)=escav*fscav(n)*ecko(i,k,kk)
-                   tem=chem_c(i,k,n)/(1.+c0t(i,k)*dz)
-                   chem_pw(i,k,n)=c0t(i,k)*dz*tem*eta(i,k-1)
-                   ecko(i,k,kk)=tem+ecko(i,k,kk)-chem_c(i,k,n)
+                   ecko(i,k,kk) = ((1. - tem) * ecko(i,k-1,kk) + tem *
+     &                     (ctro(i,k,kk) + ctro(i,k-1,kk))) / factor
+                   chem_c(i,k,n) = escav * fscav(n) * ecko(i,k,kk)
+                   tem = chem_c(i,k,n) / (1. + c0t(i,k) * dz)
+                   chem_pw(i,k,n) = c0t(i,k) * dz * tem * eta(i,k-1)
+                   ecko(i,k,kk) = tem + ecko(i,k,kk) - chem_c(i,k,n)
                  endif
                endif
              enddo
