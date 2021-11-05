@@ -136,7 +136,7 @@ CONTAINS
      &        sigmaf,vegtype,shdmax,ivegsrc,         & !intent(in)
      &        z0pert,ztpert,                         & !intent(in)
      &        redrag,sfc_z0_type,                    & !intent(in)
-              itimestep,iter,                        & !in
+              itimestep,iter,flag_iter,              & !in
                     wet,       dry,       icy,       & !intent(in)
               tskin_wat, tskin_lnd, tskin_ice,       & !intent(in)
               tsurf_wat, tsurf_lnd, tsurf_ice,       & !intent(in)
@@ -330,7 +330,7 @@ CONTAINS
                                                             WSTAR
 
       LOGICAL, DIMENSION( ims:ime ), INTENT(IN)    ::              &
-     &                          wet,       dry,       icy
+&                             wet,  dry,  icy,  flag_iter
 
       REAL, DIMENSION( ims:ime ), INTENT(IN)    ::                 &
      &                    tskin_wat, tskin_lnd, tskin_ice,         &
@@ -428,7 +428,7 @@ CONTAINS
          ENDDO
       ENDIF
 
-      CALL SFCLAY1D_mynn(                                       &
+      CALL SFCLAY1D_mynn(flag_iter,                             &
            J,U1D,V1D,T1D,QV1D,P1D,dz8w1d,                       &
            U1D2,V1D2,dz2w1d,                                    &
            PSFCPA,PBLH,MAVAIL,XLAND,DX,                         &
@@ -476,7 +476,7 @@ CONTAINS
 !! which are passed to subsequent scheme to calculate the fluxes.
 !! This scheme has options to calculate the fluxes and near-surface
 !! diagnostics, as was needed in WRF, but these are skipped for FV3.
-   SUBROUTINE SFCLAY1D_mynn(                                      &
+   SUBROUTINE SFCLAY1D_mynn(flag_iter,                            &
              J,U1D,V1D,T1D,QV1D,P1D,dz8w1d,U1D2,V1D2,dz2w1d,      &
              PSFCPA,PBLH,MAVAIL,XLAND,DX,                         &
              CP,G,ROVCP,R,XLV,SVP1,SVP2,SVP3,SVPT0,               &
@@ -580,7 +580,7 @@ CONTAINS
                                                              USTM
 
       LOGICAL, DIMENSION( ims:ime ), INTENT(IN)    ::              &
-     &                          wet,       dry,       icy
+     &                wet,     dry,     icy,    flag_iter
 
       REAL,     DIMENSION( ims:ime ), INTENT(in)    ::             &
      &                    tskin_wat, tskin_lnd, tskin_ice,         &
@@ -661,13 +661,15 @@ CONTAINS
 !-------------------------------------------------------------------
       DO I=its,ite
 
-         ! PSFC ( in cmb) is used later in saturation checks
-         PSFC(I)=PSFCPA(I)/1000.
+        ! PSFC ( in cmb) is used later in saturation checks
+        PSFC(I)=PSFCPA(I)/1000.
+         !tgs - do computations if flag_iter(i) = .true.
+         if ( flag_iter(i) ) then
 
          IF (ITIMESTEP == 1) THEN
          !initialize surface specific humidity and mixing ratios for land, ice and water
             IF (wet(i)) THEN
-               TSK_wat(I) = 0.5 * (tsurf_wat(i)+tskin_wat(i))
+               TSK_wat(I) = tskin_wat(i)
                IF (TSK_wat(I) .LT. 273.15) THEN
                   !SATURATION VAPOR PRESSURE WRT ICE (SVP1=.6112; 10*mb)
                   E1=SVP1*EXP(4648*(1./273.15 - 1./TSK_wat(I)) - &
@@ -678,9 +680,10 @@ CONTAINS
                ENDIF
                QSFC_wat(I)=EP2*E1/(PSFC(I)-ep_3*E1)             !specific humidity    
                QSFCMR_wat(I)=EP2*E1/(PSFC(I)-E1)                !mixing ratio 
+               IF(QSFC_wat(I)>1..or.QSFC_wat(I)<0.) print *,' QSFC_wat(I)',itimestep,i,QSFC_wat(I),TSK_wat(i)
             ENDIF
             IF (dry(i)) THEN
-              TSK_lnd(I) = 0.5 * (tsurf_lnd(i)+tskin_lnd(i))
+              TSK_lnd(I) = tskin_lnd(i)
               if( lsm == lsm_ruc) then
                 QSFCMR_lnd(I)=QSFC_lnd(I)/(1.-QSFC_lnd(I))       !mixing ratio 
               else
@@ -697,9 +700,10 @@ CONTAINS
                  QSFC_lnd(I)=0.5*(QSFC_lnd(I) + QSFC(I))
                  QSFCMR_lnd(I)=QSFC_lnd(I)/(1.-QSFC_lnd(I))       !mixing ratio
               endif ! lsm
+              IF(QSFC_lnd(I)>1..or.QSFC_lnd(I)<0.) print *,' QSFC_lnd(I)',itimestep,i,QSFC_lnd(I),Tskin_lnd(i),tsurf_lnd(i),qsfc(i)
             ENDIF
             IF (icy(i)) THEN
-              TSK_ice(I) = 0.5 * (tsurf_ice(i)+tskin_ice(i))
+              TSK_ice(I) = tskin_ice(i)
               if( lsm == lsm_ruc) then
                 QSFCMR_ice(I)=QSFC_ice(I)/(1.-QSFC_ice(I))       !mixing ratio 
               else
@@ -714,16 +718,57 @@ CONTAINS
                  QSFC_ice(I)=EP2*E1/(PSFC(I)-ep_3*E1)             !specific humidity
                  QSFCMR_ice(I)=EP2*E1/(PSFC(I)-E1)                !mixing ratio
               endif ! lsm
+              IF(QSFC_ice(I)>1..or.QSFC_ice(I)<0.) print *,' QSFC_ice(I)',itimestep,i,QSFC_ice(I),TSK_ice(i)
             ENDIF
 
          ELSE
 
-            ! Use what comes out of the LSM, NST, and CICE
+            ! Use what comes out of the NST, LSM, SICE after check
+            IF (wet(i)) then
+               TSK_wat(I) = tskin_wat(i)
+               IF (TSK_wat(I) .LT. 273.15) THEN
+                  !SATURATION VAPOR PRESSURE WRT ICE (SVP1=.6112; 10*mb)
+                  E1=SVP1*EXP(4648*(1./273.15 - 1./TSK_wat(I)) - &
+                    & 11.64*LOG(273.15/TSK_wat(I)) + 0.02265*(273.15 - TSK_wat(I)))
+               ELSE
+                  !SATURATION VAPOR PRESSURE WRT WATER (Bolton 1980)
+                  E1=SVP1*EXP(SVP2*(TSK_wat(I)-SVPT0)/(TSK_wat(i)-SVP3))
+               ENDIF
+               QSFC_wat(I)=EP2*E1/(PSFC(I)-ep_3*E1)             !specific humidity    
+            ENDIF
+            IF (dry(i).and.(QSFC_lnd(I)>1..or.QSFC_lnd(I)<0.)) then
+               !print *,'bad QSFC_lnd(I)',itimestep,iter,i,QSFC_lnd(I),TSKin_lnd(I)
+               TABS = 0.5*(TSKin_lnd(I) + T1D(I))
+               IF (TABS .LT. 273.15) THEN
+                  !SATURATION VAPOR PRESSURE WRT ICE (SVP1=.6112; 10*mb)
+                  E1=SVP1*EXP(4648*(1./273.15 - 1./TABS) - &
+                    & 11.64*LOG(273.15/TABS) + 0.02265*(273.15 - TABS))
+               ELSE
+                  !SATURATION VAPOR PRESSURE WRT WATER (Bolton 1980)
+                  E1=SVP1*EXP(SVP2*(TABS-SVPT0)/(TABS-SVP3))
+               ENDIF
+                 QSFC_lnd(I)=EP2*E1/(PSFC(I)-ep_3*E1)             !specific humidity
+                 QSFC_lnd(I)=0.5*(QSFC_lnd(I) + QSFC(I))
+            ENDIF
+            IF (icy(i).and.(QSFC_ice(I)>1..or.QSFC_ice(I)<0.)) then
+               !print *,'bad QSFC_ice(I)',itimestep,iter,i,QSFC_ice(I),TSKin_ice(I)
+               IF (TSKin_ice(I) .LT. 273.15) THEN
+                  !SATURATION VAPOR PRESSURE WRT ICE (SVP1=.6112; 10*mb)
+                  E1=SVP1*EXP(4648*(1./273.15 - 1./TSKin_ice(I)) - &
+                    & 11.64*LOG(273.15/TSKin_ice(I)) + 0.02265*(273.15 - TSKin_ice(I)))
+               ELSE
+                  !SATURATION VAPOR PRESSURE WRT WATER (Bolton 1980)
+                  E1=SVP1*EXP(SVP2*(TSKin_ice(I)-SVPT0)/(TSKin_ice(i)-SVP3))
+               ENDIF
+                 QSFC_ice(I)=EP2*E1/(PSFC(I)-ep_3*E1)             !specific humidity
+            ENDIF
+
             IF (wet(i)) QSFCMR_wat(I)=QSFC_wat(I)/(1.-QSFC_wat(I))
             IF (dry(i)) QSFCMR_lnd(I)=QSFC_lnd(I)/(1.-QSFC_lnd(I))
             IF (icy(i)) QSFCMR_ice(I)=QSFC_ice(I)/(1.-QSFC_ice(I))
 
          ENDIF
+       endif ! flag_iter
       ENDDO
 
       IF (debug_code >= 1) THEN
@@ -756,31 +801,36 @@ CONTAINS
          PSFC(I)=PSFCPA(I)/1000.
          QVSH(I)=QV1D(I)/(1.+QV1D(I))        !CONVERT TO SPEC HUM (kg/kg)
          THCON(I)=(100000./PSFCPA(I))**ROVCP
+        if( flag_iter(i) ) then
          ! DEFINE SKIN TEMPERATURES FOR LAND/WATER/ICE
          if(dry(i)) then
-           TSK_lnd(I) = 0.5 * (tsurf_lnd(i)+tskin_lnd(i))
+           TSK_lnd(I) = tskin_lnd(i)
+           !TSK_lnd(I) = 0.5 * (tsurf_lnd(i)+tskin_lnd(i))
            ! CONVERT SKIN TEMPERATURES TO POTENTIAL TEMPERATURE: 
            THSK_lnd(I) = TSK_lnd(I)*THCON(I)   !(K)
            THVSK_lnd(I) = THSK_lnd(I)*(1.+EP1*qsfc_lnd(I))
-           if(THVSK_lnd(I) < 170. .or. THVSK_lnd(I) > 350.) &
-           print *,'THVSK_lnd(I)',i,THVSK_lnd(I),THSK_lnd(i),tsurf_lnd(i),tskin_lnd(i),qsfc_lnd(i)
+           if(THVSK_lnd(I) < 170. .or. THVSK_lnd(I) > 360.) &
+           print *,'THVSK_lnd(I)',itimestep,i,THVSK_lnd(I),THSK_lnd(i),tsurf_lnd(i),tskin_lnd(i),qsfc_lnd(i)
          endif
          if(icy(i)) then
-           TSK_ice(I) = 0.5 * (tsurf_ice(i)+tskin_ice(i))
+           TSK_ice(I) = tskin_ice(i)
+           !TSK_ice(I) = 0.5 * (tsurf_ice(i)+tskin_ice(i))
            ! CONVERT SKIN TEMPERATURES TO POTENTIAL TEMPERATURE: 
            THSK_ice(I) = TSK_ice(I)*THCON(I)   !(K)
            THVSK_ice(I) = THSK_ice(I)*(1.+EP1*qsfc_ice(I))   !(K)
-           if(THVSK_ice(I) < 170. .or. THVSK_ice(I) > 350.) &
-           print *,'THVSK_ice(I)',i,THVSK_ice(I),THSK_ice(i),tsurf_ice(i),tskin_ice(i),qsfc_ice(i)
+           if(THVSK_ice(I) < 170. .or. THVSK_ice(I) > 360.) &
+           print *,'THVSK_ice(I)',itimestep,i,THVSK_ice(I),THSK_ice(i),tsurf_ice(i),tskin_ice(i),qsfc_ice(i)
          endif
          if(wet(i)) then
-           TSK_wat(I) = 0.5 * (tsurf_wat(i)+tskin_wat(i))
+           TSK_wat(I) = tskin_wat(i)
+           !TSK_wat(I) = 0.5 * (tsurf_wat(i)+tskin_wat(i))
            ! CONVERT SKIN TEMPERATURES TO POTENTIAL TEMPERATURE: 
            THSK_wat(I) = TSK_wat(I)*THCON(I)   !(K)
            THVSK_wat(I) = THSK_wat(I)*(1.+EP1*QVSH(I))   !(K)
-           if(THVSK_wat(I) < 170. .or. THVSK_wat(I) > 350.) &
+           if(THVSK_wat(I) < 170. .or. THVSK_wat(I) > 360.) &
            print *,'THVSK_wat(I)',i,THVSK_wat(I),THSK_wat(i),tsurf_wat(i),tskin_wat(i),qsfc_wat(i)
          endif
+        endif ! flag_iter
       ENDDO
 
       DO I=its,ite
@@ -857,6 +907,7 @@ CONTAINS
       ENDIF
 
       DO I=its,ite
+        if( flag_iter(i) ) then
          ! DH* 20200401 - note. A weird bug in Intel 18 on hera prevents using the
          ! normal -O2 optimization in REPRO and PROD mode for this file. Not reproducible
          ! by every user, the bug manifests itself in the resulting wind speed WSPD(I)
@@ -999,6 +1050,7 @@ CONTAINS
          !    IF(MOL(I).LT.0.)BR(I)=MIN(BR(I),0.0)
          !ENDIF
      
+        endif ! flag_iter
       ENDDO
 
  1006   format(A,F7.3,A,f9.4,A,f9.5,A,f9.4)
@@ -1011,6 +1063,7 @@ CONTAINS
 !--------------------------------------------------------------------
 
  DO I=its,ite
+   if( flag_iter(i) ) then
 
     !COMPUTE KINEMATIC VISCOSITY (m2/s) Andreas (1989) CRREL Rep. 89-11
     !valid between -173 and 277 degrees C.
@@ -1744,6 +1797,7 @@ CONTAINS
        qstar(I)=KARMAN*DQG/PSIQ_ice(I)/PRT
     ENDIF
 
+   endif ! flag_iter
  ENDDO   ! end i-loop
 
  IF (debug_code == 2) THEN
@@ -1771,6 +1825,7 @@ CONTAINS
    !  COMPUTE SURFACE HEAT AND MOISTURE FLUXES
    !----------------------------------------------------------
  DO I=its,ite
+  if( flag_iter(i) ) then
 
     IF (ISFFLX .LT. 1) THEN                            
 
@@ -1957,10 +2012,12 @@ CONTAINS
       ENDIF
 
    ENDIF !end ISFFLX option
+  endif ! flag_iter
 ENDDO ! end i-loop
 
 IF (compute_diag) then
    DO I=its,ite
+     if( flag_iter(i) ) then
       !-----------------------------------------------------
       !COMPUTE DIAGNOSTICS
       !-----------------------------------------------------
@@ -2065,6 +2122,7 @@ IF (compute_diag) then
          Q2(I)= MAX(Q2(I), MIN(QSFC_ice(I), QV1D(I)))
          Q2(I)= MIN(Q2(I), 1.05*QV1D(I))
       ENDIF
+     endif ! flag_iter
    ENDDO
 ENDIF ! end compute_diag
 

@@ -57,7 +57,7 @@
 !###===================================================================
 SUBROUTINE mynnsfc_wrapper_run(            &
      &  im,levs,                           &
-     &  itimestep,iter,                    &
+     &  itimestep,iter,flag_iter,          &
      &  flag_init,flag_restart,lsm,lsm_ruc,&
      &  sigmaf,vegtype,shdmax,ivegsrc,     &  !intent(in)
      &  z0pert,ztpert,                     &  !intent(in)
@@ -111,6 +111,15 @@ SUBROUTINE mynnsfc_wrapper_run(            &
 !     &                     EP_2   => con_eps
 
 !      USE module_sf_mynn, only : SFCLAY_mynn 
+!tgs - info on iterations: 
+!     flag_iter- logical, execution or not (im)
+!                when iter = 1, flag_iter = .true. for all grids   im   !
+!                when iter = 2, flag_iter = .true. when wind < 2   im   !
+!                for both land and ocean (when nstf_name1 > 0)     im   !
+!     flag_guess-logical, .true.=  guess step to get CD et al      im   !
+!                when iter = 1, flag_guess = .true. when wind < 2  im   !
+!                when iter = 2, flag_guess = .false. for all grids im   !
+
 
 !------------------------------------------------------------------- 
       implicit none
@@ -141,6 +150,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
 
       integer, intent(in) :: im, levs
       integer, intent(in) :: iter, itimestep, lsm, lsm_ruc
+      logical, dimension(:), intent(in) :: flag_iter
       logical, intent(in) :: flag_init,flag_restart,lprnt
       integer, intent(in) :: ivegsrc
       integer, intent(in) :: sfc_z0_type ! option for calculating surface roughness length over ocean
@@ -295,7 +305,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
     &        sigmaf=sigmaf,vegtype=vegtype,shdmax=shdmax,ivegsrc=ivegsrc,     & !intent(in)
     &        z0pert=z0pert,ztpert=ztpert,                                     & !intent(in)
     &        redrag=redrag,sfc_z0_type=sfc_z0_type,                           & !intent(in)
-             itimestep=itimestep,iter=iter,                                   &
+             itimestep=itimestep,iter=iter,flag_iter=flag_iter,               &
                          wet=wet,              dry=dry,              icy=icy, &  !intent(in)
              tskin_wat=tskin_wat,  tskin_lnd=tskin_lnd,  tskin_ice=tskin_ice, &  !intent(in)
              tsurf_wat=tsurf_wat,  tsurf_lnd=tsurf_lnd,  tsurf_ice=tsurf_ice, &  !intent(in)
