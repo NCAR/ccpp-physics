@@ -3937,8 +3937,8 @@ MODULE module_mp_thompson
         do n = 1, niter
           rr_tmp(:) = rr(:)
           nr_tmp(:) = nr(:)
-          call nislfv_precip_ppm(kte,dzq,vtrk,rr,rainsfc,dtcfl,R1)
-          call nislfv_precip_ppm(kte,dzq,vtnrk,nr,vtr,dtcfl,R2)
+          call semi_lagrange_sedim(kte,dzq,vtrk,rr,rainsfc,dtcfl,R1)
+          call semi_lagrange_sedim(kte,dzq,vtnrk,nr,vtr,dtcfl,R2)
           do k = kts, kte
             orhodt = 1./(rho(k)*dt)
             qrten(k) = qrten(k) + (rr(k) - rr_tmp(k)) * orhodt
@@ -4087,7 +4087,7 @@ MODULE module_mp_thompson
 
         do n = 1, niter
           rg_tmp(:) = rg(:)
-          call nislfv_precip_ppm(kte,dzq,vtgk,rg,graulsfc,dtcfl,R1)
+          call semi_lagrange_sedim(kte,dzq,vtgk,rg,graulsfc,dtcfl,R1)
           do k = kts, kte
             orhodt = 1./(rho(k)*dt)
             qgten(k) = qgten(k) + (rg(k) - rg_tmp(k))*orhodt
@@ -6138,13 +6138,13 @@ MODULE module_mp_thompson
       end subroutine calc_refl10cm
 !
 !-------------------------------------------------------------------
-      SUBROUTINE nislfv_precip_ppm(km,dzl,wwl,rql,precip,dt,R1)
+      SUBROUTINE semi_lagrange_sedim(km,dzl,wwl,rql,precip,dt,R1)
 !-------------------------------------------------------------------
 !
-! for non-iteration semi-Lagrangain forward advection for cloud
+! This routine is a semi-Lagrangain forward advection for hydrometeors
 ! with mass conservation and positive definite advection
-! 2nd order interpolation with monotonic piecewise parabolic method
-! this routine is under assumption of decfl < 1 for semi_Lagrangian
+! 2nd order interpolation with monotonic piecewise parabolic method is used.
+! This routine is under assumption of decfl < 1 for semi_Lagrangian
 !
 ! dzl    depth of model layer in meter
 ! wwl    terminal velocity at model layer m/s
@@ -6154,6 +6154,9 @@ MODULE module_mp_thompson
 !
 ! author: hann-ming henry juang <henry.juang@noaa.gov>
 !         implemented by song-you hong
+! reference: Juang, H.-M., and S.-Y. Hong, 2010: Forward semi-Lagrangian advection
+!         with mass conservation and positive definiteness for falling
+!         hydrometeors. *Mon.  Wea. Rev.*, *138*, 1778-1791
 !
       implicit none
 
@@ -6356,7 +6359,7 @@ MODULE module_mp_thompson
 !
 ! ----------------------------------
 !
-  END SUBROUTINE nislfv_precip_ppm
+  END SUBROUTINE semi_lagrange_sedim
 !+---+-----------------------------------------------------------------+
 !+---+-----------------------------------------------------------------+
 !+---+-----------------------------------------------------------------+
