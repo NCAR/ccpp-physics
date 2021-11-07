@@ -167,7 +167,8 @@ contains
         endif
       end do
 !
-#ifndef INTERNAL_FILE_NML
+#if 0
+# ifndef INTERNAL_FILE_NML
       inquire (file=trim(Model%fn_nml),exist=exists)
       if (.not. exists) then
         write(6,*) 'gcycle:: namelist file: ',trim(Model%fn_nml),' does not exist'
@@ -176,6 +177,7 @@ contains
         open (unit=Model%nlunit, file=trim(Model%fn_nml), action='READ', status='OLD', iostat=ios)
         rewind (Model%nlunit)
       endif
+# endif
 #endif
       CALL SFCCYCLE (9998, npts, max(lsoil,lsoil_lsm), sig1t, fhcyc, &
                      idate(4), idate(2), idate(3), idate(1),         &
@@ -191,8 +193,10 @@ contains
                      lake, min_lakeice, min_seaice,                  &
                      ialb, isot, ivegsrc,                            &
                      trim(tile_num_ch), imap, jmap)
-#ifndef INTERNAL_FILE_NML
+#if 0
+# ifndef INTERNAL_FILE_NML
       close (Model%nlunit)
+# endif
 #endif
 !
       if ( nsst > 0 ) then

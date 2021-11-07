@@ -310,7 +310,7 @@
       use physcons,         only : con_g, con_cp, con_avgd, con_amd,    &
      &                             con_amw, con_amo3
       use machine,          only : rb => kind_phys, im => kind_io4,     &
-     &                             kind_phys
+     &                             kind_phys, kind_dbl_prec
 
       use module_radsw_parameters
       use mersenne_twister, only : random_setseed, random_number,       &
@@ -1733,6 +1733,10 @@
         tfn = float(i) / float(NTBMX-i)
         tau = bpade * tfn
         exp_tbl(i) = exp( -tau )
+#ifdef SINGLE_PREC
+        ! from WRF version, prevents zero at single prec
+        if (exp_tbl(i) .le. expeps) exp_tbl(i) = expeps
+#endif
       enddo
 
       return
@@ -2213,8 +2217,9 @@
 
 !  ---  locals:
       real (kind=kind_phys) :: cdfunc(nlay,ngptsw), tem1,               &
-     &       rand2d(nlay*ngptsw), rand1d(ngptsw), fac_lcf(nlay),        &
+     &                                            fac_lcf(nlay),        &
      &       cdfun2(nlay,ngptsw)
+      real (kind=kind_dbl_prec) :: rand2d(nlay*ngptsw), rand1d(ngptsw)
 
       type (random_stat) :: stat          ! for thread safe random generator
 

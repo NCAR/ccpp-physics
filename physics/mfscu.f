@@ -1,3 +1,5 @@
+      module mod_mfscu
+      contains
 !>\file mfscu.f
 !! This file contains the mass flux and downdraft parcel preperties
 !! parameterization for stratocumulus-top-driven turbulence.
@@ -554,3 +556,4 @@ c
       return
       end
 !> @}
+      end module mod_mfscu

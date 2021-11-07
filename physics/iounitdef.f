@@ -66,9 +66,9 @@
       integer, parameter :: NICLTUN = 43
       integer, parameter :: NIO3CLM = 48
       integer, parameter :: NIMICPH = 1
-      integer, parameter :: NISFCYC = 101
-      integer, parameter :: NIAERCM = 102
-      integer, parameter :: NIRADSF = 102
+      integer, parameter :: NISFCYC = 111 ! CCE (Cray) forbids 100-102 20210701 JM
+      integer, parameter :: NIAERCM = 112 ! CCE (Cray) forbids 100-102 20210701 JM
+      integer, parameter :: NIRADSF = 112 ! CCE (Cray) forbids 100-102 20210701 JM
 
 !  --- ... output units
 

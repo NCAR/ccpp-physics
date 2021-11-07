@@ -94,6 +94,7 @@
         graupelprv, draincprv, drainncprv, diceprv, dsnowprv, dgraupelprv, dtp, errmsg, errflg)
 !
       use machine, only: kind_phys
+      use mod_calpreciptype
 
       implicit none
 

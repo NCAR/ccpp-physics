@@ -123,7 +123,7 @@
           enddo
         endif
         do i=1,im
-          if (prsl(i,l) < prsmax) then
+          if (prsl(i,l) < prsmax .and. pltc(i,2).ne.0.) then    ! TODO JM  20211104
             h2oib(i)  = h2o(i,l)            ! no filling
             tem       = 1.0 / pltc(i,2)     ! 1/teff
             h2o(i,l)  = (h2oib(i) + (pltc(i,1)+pltc(i,3)*tem)*dt)

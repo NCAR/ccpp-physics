@@ -1,3 +1,5 @@
+      module mod_tridi
+      contains
 !>\file tridi.f
 !! These subroutines are originally internal subroutines in moninedmf.f
 
@@ -220,3 +222,4 @@
       return
       end subroutine tridit
 !> @}
+      end module mod_tridi

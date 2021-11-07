@@ -1,3 +1,5 @@
+      module mod_cires_ugwp_triggers
+      contains
 !
       subroutine slat_geos5_tamp_v0(im, tau_amp, xlatdeg, tau_gw)
 !=================
@@ -97,3 +99,4 @@
           yaz(4) =-1.0     !S
       endif      
       end  subroutine init_nazdir_v0
+      end module mod_cires_ugwp_triggers

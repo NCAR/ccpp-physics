@@ -82,6 +82,20 @@ foreach(typedef_module ${TYPEDEFS})
     list(APPEND MODULES_F90 ${CMAKE_CURRENT_BINARY_DIR}/${typedef_module})
 endforeach()
 
+# This is a hack because I don't know how to get the pre_build to add these
+# modules to the install list --PAR
+if (PROJECT STREQUAL "CCPP-NEPTUNE")
+    # added for CCPP 5: ozne_def.mod, h2o_def.mod, module_radiation_surface.mod
+    list(APPEND MODULES_F90 ${CMAKE_CURRENT_BINARY_DIR}/namelist_soilveg.mod
+                            ${CMAKE_CURRENT_BINARY_DIR}/set_soilveg_mod.mod
+                            ${CMAKE_CURRENT_BINARY_DIR}/physcons.mod
+                            ${CMAKE_CURRENT_BINARY_DIR}/funcphys.mod
+                            ${CMAKE_CURRENT_BINARY_DIR}/ozne_def.mod
+                            ${CMAKE_CURRENT_BINARY_DIR}/h2o_def.mod
+                            ${CMAKE_CURRENT_BINARY_DIR}/module_radiation_surface.mod
+        )
+endif (PROJECT STREQUAL "CCPP-NEPTUNE")
+
 #------------------------------------------------------------------------------
 # Set the sources: physics schemes
 set(SCHEMES $ENV{CCPP_SCHEMES})
@@ -291,30 +305,52 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
                  APPEND_STRING PROPERTY COMPILE_FLAGS " ${CMAKE_Fortran_FLAGS_DEFAULT_PREC} ${OpenMP_Fortran_FLAGS} ")
 
   else (PROJECT STREQUAL "CCPP-FV3")
-    SET_SOURCE_FILES_PROPERTIES(${LOCAL_CURRENT_SOURCE_DIR}/physics/module_bfmicrophysics.f
-                                ${LOCAL_CURRENT_SOURCE_DIR}/physics/sflx.f
-                                ${LOCAL_CURRENT_SOURCE_DIR}/physics/sfc_diff.f
-                                ${LOCAL_CURRENT_SOURCE_DIR}/physics/sfc_diag.f
-                                PROPERTIES COMPILE_FLAGS "-r8 ${OpenMP_Fortran_FLAGS} ")
-    SET_SOURCE_FILES_PROPERTIES(${LOCAL_CURRENT_SOURCE_DIR}/physics/module_nst_model.f90
-                                ${LOCAL_CURRENT_SOURCE_DIR}/physics/calpreciptype.f90
-                                PROPERTIES COMPILE_FLAGS "-r8 -free ${OpenMP_Fortran_FLAGS} ")
     SET_SOURCE_FILES_PROPERTIES(${LOCAL_CURRENT_SOURCE_DIR}/physics/mersenne_twister.f
                                 PROPERTIES COMPILE_FLAGS "-r8 -ftz ${OpenMP_Fortran_FLAGS} ")
-    SET_SOURCE_FILES_PROPERTIES(${LOCAL_CURRENT_SOURCE_DIR}/physics/module_nst_water_prop.f90
-                                PROPERTIES COMPILE_FLAGS "-extend-source 132 -r8 -free ${OpenMP_Fortran_FLAGS} ")
-    SET_SOURCE_FILES_PROPERTIES(${LOCAL_CURRENT_SOURCE_DIR}/physics/aer_cloud.F
-                                ${LOCAL_CURRENT_SOURCE_DIR}/physics/wv_saturation.F
-                                ${LOCAL_CURRENT_SOURCE_DIR}/physics/cldwat2m_micro.F
-                                ${LOCAL_CURRENT_SOURCE_DIR}/physics/surface_perturbation.F90
-                                PROPERTIES COMPILE_FLAGS "-r8 ${OpenMP_Fortran_FLAGS} ")
-    SET_SOURCE_FILES_PROPERTIES(${LOCAL_CURRENT_SOURCE_DIR}/physics/module_mp_thompson_make_number_concentrations.F90
-                                PROPERTIES COMPILE_FLAGS "-r8 ${OpenMP_Fortran_FLAGS} ")
-    SET_SOURCE_FILES_PROPERTIES(${LOCAL_CURRENT_SOURCE_DIR}/physics/module_SF_JSFC.F90
-                                ${LOCAL_CURRENT_SOURCE_DIR}/physics/module_BL_MYJPBL.F90
-                                PROPERTIES COMPILE_FLAGS "-r8 ${OpenMP_Fortran_FLAGS} ")
+    if ( $ENV{SINGLE} MATCHES "t" )
+      SET_SOURCE_FILES_PROPERTIES(${LOCAL_CURRENT_SOURCE_DIR}/physics/module_bfmicrophysics.f
+                                  ${LOCAL_CURRENT_SOURCE_DIR}/physics/sflx.f
+                                  ${LOCAL_CURRENT_SOURCE_DIR}/physics/sfc_diff.f
+                                  ${LOCAL_CURRENT_SOURCE_DIR}/physics/sfc_diag.f
+                                  PROPERTIES COMPILE_FLAGS " ${OpenMP_Fortran_FLAGS} ")
+      SET_SOURCE_FILES_PROPERTIES(${LOCAL_CURRENT_SOURCE_DIR}/physics/module_nst_model.f90
+                                  ${LOCAL_CURRENT_SOURCE_DIR}/physics/calpreciptype.f90
+                                  PROPERTIES COMPILE_FLAGS " -free ${OpenMP_Fortran_FLAGS} ")
+      SET_SOURCE_FILES_PROPERTIES(${LOCAL_CURRENT_SOURCE_DIR}/physics/module_nst_water_prop.f90
+                                  PROPERTIES COMPILE_FLAGS "-extend-source 132 -free ${OpenMP_Fortran_FLAGS} ")
+      SET_SOURCE_FILES_PROPERTIES(${LOCAL_CURRENT_SOURCE_DIR}/physics/aer_cloud.F
+                                  ${LOCAL_CURRENT_SOURCE_DIR}/physics/wv_saturation.F
+                                  ${LOCAL_CURRENT_SOURCE_DIR}/physics/cldwat2m_micro.F
+                                  ${LOCAL_CURRENT_SOURCE_DIR}/physics/surface_perturbation.F90
+                                  PROPERTIES COMPILE_FLAGS " ${OpenMP_Fortran_FLAGS} ")
+      SET_SOURCE_FILES_PROPERTIES(${LOCAL_CURRENT_SOURCE_DIR}/physics/module_mp_thompson_make_number_concentrations.F90
+                                  PROPERTIES COMPILE_FLAGS "${OpenMP_Fortran_FLAGS} ")
+      SET_SOURCE_FILES_PROPERTIES(${LOCAL_CURRENT_SOURCE_DIR}/physics/module_SF_JSFC.F90
+                                  ${LOCAL_CURRENT_SOURCE_DIR}/physics/module_BL_MYJPBL.F90
+                                  PROPERTIES COMPILE_FLAGS " ${OpenMP_Fortran_FLAGS} ")
+    else ( $ENV{SINGLE} MATCHES "t" )
+      SET_SOURCE_FILES_PROPERTIES(${LOCAL_CURRENT_SOURCE_DIR}/physics/module_bfmicrophysics.f
+                                  ${LOCAL_CURRENT_SOURCE_DIR}/physics/sflx.f
+                                  ${LOCAL_CURRENT_SOURCE_DIR}/physics/sfc_diff.f
+                                  ${LOCAL_CURRENT_SOURCE_DIR}/physics/sfc_diag.f
+                                  PROPERTIES COMPILE_FLAGS "-r8 ${OpenMP_Fortran_FLAGS} ")
+      SET_SOURCE_FILES_PROPERTIES(${LOCAL_CURRENT_SOURCE_DIR}/physics/module_nst_model.f90
+                                  ${LOCAL_CURRENT_SOURCE_DIR}/physics/calpreciptype.f90
+                                  PROPERTIES COMPILE_FLAGS "-r8 -free ${OpenMP_Fortran_FLAGS} ")
+      SET_SOURCE_FILES_PROPERTIES(${LOCAL_CURRENT_SOURCE_DIR}/physics/module_nst_water_prop.f90
+                                  PROPERTIES COMPILE_FLAGS "-r8 -extend-source 132 -free ${OpenMP_Fortran_FLAGS} ")
+      SET_SOURCE_FILES_PROPERTIES(${LOCAL_CURRENT_SOURCE_DIR}/physics/aer_cloud.F
+                                  ${LOCAL_CURRENT_SOURCE_DIR}/physics/wv_saturation.F
+                                  ${LOCAL_CURRENT_SOURCE_DIR}/physics/cldwat2m_micro.F
+                                  ${LOCAL_CURRENT_SOURCE_DIR}/physics/surface_perturbation.F90
+                                  PROPERTIES COMPILE_FLAGS "-r8 ${OpenMP_Fortran_FLAGS} ")
+      SET_SOURCE_FILES_PROPERTIES(${LOCAL_CURRENT_SOURCE_DIR}/physics/module_mp_thompson_make_number_concentrations.F90
+                                  PROPERTIES COMPILE_FLAGS "-r8 ${OpenMP_Fortran_FLAGS} ")
+      SET_SOURCE_FILES_PROPERTIES(${LOCAL_CURRENT_SOURCE_DIR}/physics/module_SF_JSFC.F90
+                                  ${LOCAL_CURRENT_SOURCE_DIR}/physics/module_BL_MYJPBL.F90
+                                  PROPERTIES COMPILE_FLAGS "-r8 ${OpenMP_Fortran_FLAGS} ")
+    endif ( $ENV{SINGLE} MATCHES "t" )
   endif (PROJECT STREQUAL "CCPP-FV3")
-
 else()
   message ("CMAKE_Fortran_COMPILER full path: " ${CMAKE_Fortran_COMPILER})
   message ("Fortran compiler: " ${CMAKE_Fortran_COMPILER_ID})
@@ -348,7 +384,7 @@ endforeach()
 set_target_properties(ccppphys PROPERTIES VERSION ${PROJECT_VERSION}
                                      SOVERSION ${PROJECT_VERSION_MAJOR})
 
-if (PROJECT STREQUAL "CCPP-FV3")
+if (PROJECT STREQUAL "CCPP-FV3" OR PROJECT STREQUAL "CCPP-NEPTUNE")
   # Define where to install the library
   install(TARGETS ccppphys
           EXPORT ccppphys-targets
@@ -364,4 +400,4 @@ if (PROJECT STREQUAL "CCPP-FV3")
   # Define where to install the C headers and Fortran modules
   #install(FILES ${HEADERS_C} DESTINATION include)
   install(FILES ${MODULES_F90} DESTINATION include)
-endif (PROJECT STREQUAL "CCPP-FV3")
+endif (PROJECT STREQUAL "CCPP-FV3" OR PROJECT STREQUAL "CCPP-NEPTUNE")

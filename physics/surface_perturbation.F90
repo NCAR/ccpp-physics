@@ -48,7 +48,7 @@ module surface_perturbation
           cdfz = 0.5
         else
           x = 0.5*z*z
-          call cdfgam(x,0.5,del,iflag, cdfx)
+          call cdfgam(x,0.5_kind_phys,del,iflag, cdfx)
           if (iflag.ne.0) return
           if (z.gt.0.0) then
             cdfz = 0.5+0.5*cdfx

@@ -11,8 +11,6 @@ module GFS_rrtmg_setup
    &             iswcliq,                                             &
    &             kind_phys
 
-   use radcons, only: ltp, lextop
-
    implicit none
 
    public GFS_rrtmg_setup_init, GFS_rrtmg_setup_timestep_init, GFS_rrtmg_setup_finalize
@@ -46,7 +44,7 @@ module GFS_rrtmg_setup
           si, levr, ictm, isol, ico2, iaer, ntcw,             &
           num_p3d, npdf3d, ntoz, iovr, isubc_sw, isubc_lw,    &
           icliq_sw, crick_proof, ccnorm,                      &
-          imp_physics,                                        &
+          imp_physics, ltp,                                   &
           norad_precip, idate, iflip,                         &
           do_RRTMGP, im, faerlw, faersw, aerodp,              & ! for consistency checks
           me, errmsg, errflg)
@@ -169,6 +167,7 @@ module GFS_rrtmg_setup
       logical, intent(in) :: crick_proof
       logical, intent(in) :: ccnorm
       integer, intent(in) :: imp_physics
+      integer, intent(in) :: ltp
       logical, intent(in) :: norad_precip
       integer, intent(in) :: idate(:)
       integer, intent(in) :: iflip
@@ -293,7 +292,7 @@ module GFS_rrtmg_setup
 
       call radinit                                                      &
 !  ---  inputs:
-     &     ( si, levr, imp_physics, me )
+     &     ( si, levr, imp_physics, ltp, me )
 !  ---  outputs:
 !          ( none )
 
@@ -374,7 +373,7 @@ module GFS_rrtmg_setup
 ! Private functions
 
 
-   subroutine radinit( si, NLAY, imp_physics, me )
+   subroutine radinit( si, NLAY, imp_physics, ltp, me )
 !...................................
 
 !  ---  inputs:
@@ -487,7 +486,7 @@ module GFS_rrtmg_setup
       implicit none
 
 !  ---  inputs:
-      integer, intent(in) :: NLAY, me, imp_physics 
+      integer, intent(in) :: NLAY, me, imp_physics, ltp
 
       real (kind=kind_phys), intent(in) :: si(:)
 
@@ -517,7 +516,7 @@ module GFS_rrtmg_setup
         print *,' IVFLIP=',ivflip,' IOVR=',iovrRad,                     &
      &    ' ISUBCSW=',isubcsw,' ISUBCLW=',isubclw
         print *,' LCRICK=',lcrick,' LCNORM=',lcnorm,' LNOPREC=',lnoprec
-        print *,' LTP =',ltp,', add extra top layer =',lextop
+        print *,' LTP =',ltp,', add extra top layer =', ltp == 1
 
         if ( ictmflg==0 .or. ictmflg==-2 ) then
           print *,'   Data usage is limited by initial condition!'

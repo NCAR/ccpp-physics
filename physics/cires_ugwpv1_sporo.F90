@@ -1,4 +1,5 @@
-
+      module mod_cires_ugwpv1_sporo
+      contains
       subroutine oro_spectral_solver(im, levs,npt,ipt, kref,kdt,me,master, &
         dtp,dxres, taub, u1, v1, t1, xn, yn, bn2, rho, prsi, prsL,         &
         del, sigma, hprime, gamma, theta,                                  &
@@ -348,4 +349,4 @@
       dzi(k)  =  dzi(k-1)
 
       end subroutine oro_meanflow
-
+      end module mod_cires_ugwpv1_sporo

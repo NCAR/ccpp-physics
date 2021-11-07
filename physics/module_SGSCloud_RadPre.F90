@@ -63,7 +63,7 @@
                         eps   => con_eps, & ! Rd/Rv
                       epsm1 => con_epsm1    ! Rd/Rv-1
       use module_radiation_clouds, only : gethml
-      use radcons, only: qmin               ! Minimum vlaues for varius calculations
+      use radcons, only: qmin               ! Minimum values for various calculations
       use funcphys, only: fpvs              ! Function ot compute sat. vapor pressure over liq.
 !------------------------------------------------------------------- 
       implicit none
