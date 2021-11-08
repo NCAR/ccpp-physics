@@ -1996,7 +1996,7 @@ c
               dt = to(i,k)
               dg = gamma
               dh = heso(i,k)
-              dz = -1.*(zo(i,k+1)-zo(i,k))
+              dz = zo(i,k) - zo(i,k+1)
 !             aa1(i)=aa1(i)+edto(i)*dz*etad(i,k)
               aa1(i) = aa1(i)+edto(i)*dz
      &                 *(grav/(cp*dt))*((dhh-dh)/(1.+dg))
@@ -2636,7 +2636,7 @@ c
               dt = to(i,k)
               dg = gamma
               dh = heso(i,k)
-              dz = -1.*(zo(i,k+1)-zo(i,k))
+              dz = zo(i,k) - zo(i,k+1)
 !             xaa0(i)=xaa0(i)+edtx(i)*dz*etad(i,k)
               xaa0(i) = xaa0(i)+edtx(i)*dz
      &                  *(grav/(cp*dt))*((dhh-dh)/(1.+dg))
