@@ -14,7 +14,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [levs]
   standard_name = vertical_layer_dimension
   long_name = number of vertical layers
@@ -22,7 +21,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [do_shoc]
   standard_name = flag_for_shoc
   long_name = flag for SHOC
@@ -30,7 +28,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [skip_macro]
   standard_name = flag_skip_macro
   long_name = flag to skip cloud macrophysics in Morrison scheme
@@ -38,7 +35,6 @@
   dimensions = ()
   type = logical
   intent = inout
-  optional = F
 [fprcp]
   standard_name = number_of_frozen_precipitation_species
   long_name = number of frozen precipitation species
@@ -46,7 +42,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [mg3_as_mg2]
   standard_name = flag_mg3_as_mg2
   long_name = flag for controlling prep for Morrison-Gettelman microphysics
@@ -54,7 +49,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [gq0_ice]
   standard_name = cloud_ice_mixing_ratio_of_new_state
   long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates) updated by physics
@@ -63,7 +57,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [gq0_water]
   standard_name = cloud_liquid_water_mixing_ratio_of_new_state
   long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates) updated by physics
@@ -72,7 +65,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [gq0_rain]
   standard_name = rain_mixing_ratio_of_new_state
   long_name = ratio of mass of rain water to mass of dry air plus vapor (without condensates) updated by physics
@@ -81,7 +73,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [gq0_snow]
   standard_name = snow_mixing_ratio_of_new_state
   long_name = ratio of mass of snow water to mass of dry air plus vapor (without condensates) updated by physics
@@ -90,7 +81,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [gq0_graupel]
   standard_name = graupel_mixing_ratio_of_new_state
   long_name = ratio of mass of graupel to mass of dry air plus vapor (without condensates) updated by physics
@@ -99,7 +89,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [gq0_rain_nc]
   standard_name = mass_number_concentration_of_rain_of_new_state
   long_name = number concentration of rain updated by physics
@@ -108,7 +97,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [gq0_snow_nc]
   standard_name = mass_number_concentration_of_snow_of_new_state
   long_name = number concentration of snow updated by physics
@@ -117,7 +105,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [gq0_graupel_nc]
   standard_name = mass_number_concentration_of_graupel_of_new_state
   long_name = number concentration of graupel updated by physics
@@ -126,7 +113,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [cld_shoc]
   standard_name = subgrid_scale_cloud_fraction_from_shoc
   long_name = subgrid-scale cloud fraction from the SHOC scheme
@@ -135,7 +121,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [cnvc]
   standard_name = convective_cloud_cover
   long_name = convective cloud cover
@@ -144,7 +129,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [cnvw]
   standard_name = convective_cloud_water_mixing_ratio
   long_name = moist convective cloud water mixing ratio
@@ -153,7 +137,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [tcr]
   standard_name = cloud_phase_transition_threshold_temperature
   long_name = threshold temperature below which cloud starts to freeze
@@ -162,7 +145,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [tcrf]
   standard_name = reciprocal_of_cloud_phase_transition_temperature_range
   long_name = denominator in cloud phase transition = 1/(tcr-tf)
@@ -171,7 +153,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [gt0]
   standard_name = air_temperature_of_new_state
   long_name = temperature updated by physics
@@ -180,7 +161,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [qrn]
   standard_name = local_rain_water_mixing_ratio
   long_name = ratio of mass of rain water to mass of dry air plus vapor (without condensates) local to physics
@@ -189,7 +169,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [qsnw]
   standard_name = local_snow_water_mixing_ratio
   long_name = ratio of mass of snow water to mass of dry air plus vapor (without condensates) local to physics
@@ -198,7 +177,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [qgl]
   standard_name = local_graupel_mixing_ratio
   long_name = ratio of mass of graupel to mass of dry air plus vapor (without condensates) local to physics
@@ -207,7 +185,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [ncpr]
   standard_name = local_rain_number_concentration
   long_name = number concentration of rain local to physics
@@ -216,7 +193,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [ncps]
   standard_name = local_snow_number_concentration
   long_name = number concentration of snow local to physics
@@ -225,7 +201,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [ncgl]
   standard_name = local_graupel_number_concentration
   long_name = number concentration of graupel local to physics
@@ -234,7 +209,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [cld_frc_MG]
   standard_name = cloud_fraction_for_MG
   long_name = cloud fraction used by Morrison-Gettelman MP
@@ -243,7 +217,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [clw_water]
   standard_name = cloud_condensed_water_mixing_ratio_convective_transport_tracer
   long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates) in the convectively transported tracer array
@@ -252,7 +225,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [clw_ice]
   standard_name = ice_water_mixing_ratio_convective_transport_tracer
   long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates) in the convectively transported tracer array
@@ -261,7 +233,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [clcn]
   standard_name = convective_cloud_volume_fraction
   long_name = convective cloud volume fraction
@@ -270,7 +241,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -279,7 +249,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -287,7 +256,6 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 
 ########################################################################
 [ccpp-table-properties]
@@ -306,7 +274,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [levs]
   standard_name = vertical_layer_dimension
   long_name = number of vertical layers
@@ -314,7 +281,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [fprcp]
   standard_name = number_of_frozen_precipitation_species
   long_name = number of frozen precipitation species
@@ -322,7 +288,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [mg3_as_mg2]
   standard_name = flag_mg3_as_mg2
   long_name = flag for controlling prep for Morrison-Gettelman microphysics
@@ -330,7 +295,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [ncpr]
   standard_name = local_rain_number_concentration
   long_name = number concentration of rain local to physics
@@ -339,7 +303,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [ncps]
   standard_name = local_snow_number_concentration
   long_name = number concentration of snow local to physics
@@ -348,7 +311,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [ncgl]
   standard_name = local_graupel_number_concentration
   long_name = number concentration of graupel local to physics
@@ -357,7 +319,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [qrn]
   standard_name = local_rain_water_mixing_ratio
   long_name = ratio of mass of rain water to mass of dry air plus vapor (without condensates) local to physics
@@ -366,7 +327,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [qsnw]
   standard_name = local_snow_water_mixing_ratio
   long_name = ratio of mass of snow water to mass of dry air plus vapor (without condensates) local to physics
@@ -375,7 +335,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [qgl]
   standard_name = local_graupel_mixing_ratio
   long_name = ratio of mass of graupel to mass of dry air plus vapor (without condensates) local to physics
@@ -384,7 +343,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [gq0_ice]
   standard_name = cloud_ice_mixing_ratio_of_new_state
   long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates) updated by physics
@@ -393,7 +351,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [gq0_rain]
   standard_name = rain_mixing_ratio_of_new_state
   long_name = ratio of mass of rain water to mass of dry air plus vapor (without condensates) updated by physics
@@ -402,7 +359,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [gq0_snow]
   standard_name = snow_mixing_ratio_of_new_state
   long_name = ratio of mass of snow water to mass of dry air plus vapor (without condensates) updated by physics
@@ -411,7 +367,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [gq0_graupel]
   standard_name = graupel_mixing_ratio_of_new_state
   long_name = ratio of mass of graupel to mass of dry air plus vapor (without condensates) updated by physics
@@ -420,7 +375,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [gq0_rain_nc]
   standard_name = mass_number_concentration_of_rain_of_new_state
   long_name = number concentration of rain updated by physics
@@ -429,7 +383,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [gq0_snow_nc]
   standard_name = mass_number_concentration_of_snow_of_new_state
   long_name = number concentration of snow updated by physics
@@ -438,7 +391,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [gq0_graupel_nc]
   standard_name = mass_number_concentration_of_graupel_of_new_state
   long_name = number concentration of graupel updated by physics
@@ -447,7 +399,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [ice]
   standard_name = lwe_thickness_of_ice_amount_on_dynamics_timestep
   long_name = ice fall at this time step
@@ -456,7 +407,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [snow]
   standard_name = lwe_thickness_of_snow_amount_on_dynamics_timestep
   long_name = snow fall at this time step
@@ -465,7 +415,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [graupel]
   standard_name = lwe_thickness_of_graupel_amount_on_dynamics_timestep
   long_name = graupel fall at this time step
@@ -474,7 +423,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [dtp]
   standard_name = timestep_for_physics
   long_name = physics timestep
@@ -483,7 +431,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -492,7 +439,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -500,5 +446,4 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 

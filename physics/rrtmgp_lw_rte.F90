@@ -44,7 +44,7 @@ contains
          nLev,                    & ! Number of vertical levels
          nGauss_angles              ! Number of angles used in Gaussian quadrature
     real(kind_phys), dimension(ncol,nLev+1), intent(in) :: &
-         p_lev                      ! Pressure @ model layer-interfaces (hPa)
+         p_lev                      ! Pressure @ model layer-interfaces (Pa)
     real(kind_phys), dimension(lw_gas_props%get_nband(),ncol), intent(in) :: &
          sfc_emiss_byband           ! Surface emissivity in each band
     type(ty_source_func_lw),intent(in) :: &

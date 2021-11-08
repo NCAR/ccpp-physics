@@ -234,9 +234,8 @@
         enddo
 
 !  --- ...  sfc lw fluxes used by atmospheric model are saved for output
-        if (.not. use_LW_jacobian) then
-          if (frac_grid) then
-            do i=1,im
+        if (frac_grid) then
+           do i=1,im
               tem = (one - frland(i)) * cice(i) ! tem = ice fraction wrt whole cell
               if (flag_cice(i)) then
                  adjsfculw(i) = adjsfculw_lnd(i) * frland(i)               &
@@ -247,9 +246,9 @@
                               + adjsfculw_ice(i) * tem                     &
                               + adjsfculw_wat(i) * (one - frland(i) - tem)
               endif
-            enddo
-          else
-            do i=1,im
+           enddo
+        else
+           do i=1,im
               if (dry(i)) then                     ! all land
                  adjsfculw(i) = adjsfculw_lnd(i)
               elseif (icy(i)) then                 ! ice (and water)
@@ -270,8 +269,7 @@
               else                                 ! all water
                  adjsfculw(i) = adjsfculw_wat(i)
               endif
-            enddo
-          endif
+           enddo
         endif
 
         do i=1,im
@@ -753,6 +751,20 @@
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+
+      ! This code was previously in GFS_SCNV_generic_post, but it really belongs
+      ! here, because it fixes the convective transportable_tracers mess for Zhao-Carr
+      ! and GFDL MP from GFS_suite_interstitial_3. This whole code around clw(:,:,2)
+      ! being set to -999 for Zhao-Carr MP (which doesn't have cloud ice) and GFDL-MP
+      ! (which does have cloud ice, but for some reason it was decided to code it up
+      ! in the same way as for Zhao-Carr, nowadays unnecessary and confusing) needs
+      ! to be cleaned up. The convection schemes doing something different internally
+      ! based on clw(i,k,2) being -999.0 or not is not a good idea.
+      do k=1,levs
+        do i=1,im
+          if (clw(i,k,2) <= -999.0) clw(i,k,2) = 0.0
+        enddo
+      enddo
 
       if(ldiag3d) then
          if(ntk>0 .and. ntk<=size(clw,3)) then

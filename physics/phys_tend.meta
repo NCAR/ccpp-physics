@@ -14,16 +14,14 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [dtend]
   standard_name = cumulative_change_of_state_variables
   long_name = diagnostic tendencies for state variables
   units = various
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_cumulative_change_processes)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,cumulative_change_of_state_variables_outer_index_max)
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [dtidx]
   standard_name = cumulative_change_of_state_variables_outer_index
   long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
@@ -31,7 +29,6 @@
   dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
   type = integer
   intent = in
-  optional = F
 [ntracp100]
   standard_name = number_of_tracers_plus_one_hundred
   long_name = number of tracers plus one hundred
@@ -39,7 +36,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [index_of_process_physics]
   standard_name = index_of_all_physics_process_in_cumulative_change_index
   long_name = index of all physics transport process in second dimension of array cumulative change index
@@ -47,7 +43,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [index_of_process_photochem]
   standard_name = index_of_photochemistry_process_in_cumulative_change_index
   long_name = index of photochemistry process in second dimension of array cumulative change index
@@ -55,7 +50,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [nprocess]
   standard_name = number_of_cumulative_change_processes
   long_name = number of processes that cause changes in state variables
@@ -63,7 +57,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [nprocess_summed]
   standard_name = number_of_physics_causes_of_tracer_changes
   long_name = number of causes in dtidx per tracer summed for total physics tendency
@@ -71,7 +64,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [is_photochem]
   standard_name = flags_for_photochemistry_processes_to_sum
   long_name = flags for photochemistry processes to sum as the total photochemistry process cumulative change
@@ -79,7 +71,6 @@
   dimensions = (number_of_cumulative_change_processes)
   type = logical
   intent = in
-  optional = F
 [ntoz]
   standard_name = index_of_ozone_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for ozone mixing ratio
@@ -87,7 +78,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -96,7 +86,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -104,4 +93,3 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
