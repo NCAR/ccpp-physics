@@ -1569,25 +1569,27 @@ c
 c
               tem  = 0.5 * (xlamue(i,k)+xlamue(i,k-1))
               tem1 = xlamud(i)
+
+              factor = grav / dp
 cj
               dellah(i,k) = dellah(i,k) +
      &     ( eta(i,k)*dv1h - eta(i,k-1)*dv3h
      &    -  tem*eta(i,k-1)*dv2h*dz
      &    +  tem1*eta(i,k-1)*.5*(hcko(i,k)+hcko(i,k-1))*dz
-     &         ) *grav/dp
+     &         ) * factor
 cj
               dellaq(i,k) = dellaq(i,k) +
      &     ( - tem*eta(i,k-1)*dv2q*dz
      &    +  tem1*eta(i,k-1)*.5*(qrcko(i,k)+qcko(i,k-1))*dz
-     &         ) *grav/dp
+     &         ) * factor
 cj
               tem1=eta(i,k)*(uo(i,k)-ucko(i,k))
               tem2=eta(i,k-1)*(uo(i,k-1)-ucko(i,k-1))
-              dellau(i,k) = dellau(i,k) + (tem1-tem2) * grav/dp
+              dellau(i,k) = dellau(i,k) + (tem1-tem2) * factor
 cj
               tem1=eta(i,k)*(vo(i,k)-vcko(i,k))
               tem2=eta(i,k-1)*(vo(i,k-1)-vcko(i,k-1))
-              dellav(i,k) = dellav(i,k) + (tem1-tem2) * grav/dp
+              dellav(i,k) = dellav(i,k) + (tem1-tem2) * factor
 cj
             endif
           endif
@@ -1618,20 +1620,15 @@ c
         if(cnvflg(i)) then
           indx = ktcon(i)
           dp = 1000. * del(i,indx)
-          dv1h = heo(i,indx-1)
-          dellah(i,indx) = eta(i,indx-1) *
-     &                     (hcko(i,indx-1) - dv1h) * grav / dp
-          dellaq(i,indx) = eta(i,indx-1) *
-     &                     qcko(i,indx-1) * grav / dp
-          dellau(i,indx) = eta(i,indx-1) *
-     &             (ucko(i,indx-1) - uo(i,indx-1)) * grav / dp
-          dellav(i,indx) = eta(i,indx-1) *
-     &             (vcko(i,indx-1) - vo(i,indx-1)) * grav / dp
+          tem = eta(i,indx-1) * grav / dp
+          dellah(i,indx) = tem * (hcko(i,indx-1) - heo(i,indx-1))
+          dellaq(i,indx) = tem *  qcko(i,indx-1)
+          dellau(i,indx) = tem * (ucko(i,indx-1) - uo(i,indx-1))
+          dellav(i,indx) = tem * (vcko(i,indx-1) - vo(i,indx-1))
 c
 c  cloud water
 c
-          dellal(i,indx) = eta(i,indx-1) *
-     &                     qlko_ktcon(i) * grav / dp
+          dellal(i,indx) = tem * qlko_ktcon(i)
         endif
       enddo
       if (.not.hwrf_samfshal) then
@@ -1906,11 +1903,12 @@ c
               u1(i,k) = u1(i,k) + dellau(i,k) * xmb(i) * dt2
               v1(i,k) = v1(i,k) + dellav(i,k) * xmb(i) * dt2
               dp = 1000. * del(i,k)
-              delhbar(i) = delhbar(i) + dellah(i,k)*xmb(i)*dp/grav
-              delqbar(i) = delqbar(i) + dellaq(i,k)*xmb(i)*dp/grav
-              deltbar(i) = deltbar(i) + dellat*xmb(i)*dp/grav
-              delubar(i) = delubar(i) + dellau(i,k)*xmb(i)*dp/grav
-              delvbar(i) = delvbar(i) + dellav(i,k)*xmb(i)*dp/grav
+              tem = xmb(i) * dp / grav
+              delhbar(i) = delhbar(i) + tem * dellah(i,k)
+              delqbar(i) = delqbar(i) + tem * dellaq(i,k)
+              deltbar(i) = deltbar(i) + tem * dellat
+              delubar(i) = delubar(i) + tem * dellau(i,k)
+              delvbar(i) = delvbar(i) + tem * dellav(i,k)
             endif
           endif
         enddo
@@ -2138,10 +2136,11 @@ c
               qcond(i) = evef * (q1(i,k) - qeso(i,k))
      &                 / (1. + el2orc * qeso(i,k) / t1(i,k)**2)
               dp = 1000. * del(i,k)
+              factor = dp / grav
               if(rn(i) > 0. .and. qcond(i) < 0.) then
                 qevap(i) = -qcond(i) * (1.-exp(-.32*sqrt(dt2*rn(i))))
                 qevap(i) = min(qevap(i), rn(i)*1000.*grav/dp)
-                delq2(i) = delqev(i) + .001 * qevap(i) * dp / grav
+                delq2(i) = delqev(i) + .001 * qevap(i) * factor
               endif
               if(rn(i) > 0. .and. qcond(i) < 0. .and.
      &           delq2(i) > rntot(i)) then
@@ -2149,7 +2148,7 @@ c
                 flg(i) = .false.
               endif
               if(rn(i) > 0. .and. qevap(i) > 0.) then
-                tem  = .001 * dp / grav
+                tem  = .001 * factor
                 tem1 = qevap(i) * tem
                 if(tem1 > rn(i)) then
                   qevap(i) = rn(i) / tem
@@ -2161,10 +2160,10 @@ c
                 t1(i,k) = t1(i,k) - elocp * qevap(i)
                 deltv(i) = - elocp*qevap(i)/dt2
                 delq(i) =  + qevap(i)/dt2
-                delqev(i) = delqev(i) + .001*dp*qevap(i)/grav
+                delqev(i) = delqev(i) + tem * qevap(i)
               endif
-              delqbar(i) = delqbar(i) + delq(i)*dp/grav
-              deltbar(i) = deltbar(i) + deltv(i)*dp/grav
+              delqbar(i) = delqbar(i) + delq(i)  * factor
+              deltbar(i) = deltbar(i) + deltv(i) * factor
             endif
           endif
         enddo
