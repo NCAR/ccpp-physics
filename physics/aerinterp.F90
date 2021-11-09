@@ -11,7 +11,7 @@ module aerinterp
 
     private
 
-    public :: read_aerdata, setindxaer, aerinterpol, read_aerdataf
+    public :: read_aerdata, setindxaer, aerinterpol,read_aerdataf
 
 contains
 
@@ -45,7 +45,7 @@ contains
 !! ===================================================================
 !! check if all necessary files exist
 !! ===================================================================
-      do imon = 1, timeaer
+      do imon = 1, 12
          write(mn,'(i2.2)') imon
          fname=trim("aeroclim.m"//mn//".nc")
          inquire (file = fname, exist = file_exist)
@@ -97,23 +97,27 @@ contains
       END SUBROUTINE read_aerdata
 !
 !**********************************************************************
-      SUBROUTINE read_aerdataf (iamin, iamax, jamin, jamax,           &
-                                me, master, iflip, idate, errmsg, errflg)
+      SUBROUTINE read_aerdataf ( me, master, iflip, idate, FHOUR, errmsg, errflg)
       use machine, only: kind_phys, kind_io4, kind_io8
       use aerclm_def
       use netcdf
 
 !--- in/out
       integer, intent(in) :: me, master, iflip, idate(4)
-      integer, intent(in) :: iamin, iamax, jamin, jamax
       character(len=*), intent(inout) :: errmsg
       integer, intent(inout) :: errflg
-
+      real(kind=kind_phys), intent(in) :: fhour
 !--- locals
       integer      :: ncid, varid
-      integer      :: i, j, k, n, ii, imon, klev
+      integer      :: i, j, k, n, ii, imon, klev, n1, n2
       character    :: fname*50, mn*2, vname*10
       logical      :: file_exist
+      integer  IDAT(8),JDAT(8)
+      real(kind=kind_phys) RINC(5), rjday
+      integer jdow, jdoy, jday
+      real(4) rinc4(5)
+      integer w3kindreal,w3kindint      
+
       integer, allocatable  :: invardims(:)
       real(kind=kind_io4),allocatable,dimension(:,:,:) :: buff
       real(kind=kind_io4),allocatable,dimension(:,:,:,:):: buffx
@@ -128,12 +132,43 @@ contains
       allocate (buff(lonsaer, latsaer, levsw))
       allocate (pres_tmp(lonsaer, levsw))
       allocate (buffx(lonsaer, latsaer, levsw, 1))
-
+!!  found interpolation months
+      IDAT = 0
+      IDAT(1) = IDATE(4)
+      IDAT(2) = IDATE(2)
+      IDAT(3) = IDATE(3)
+      IDAT(5) = IDATE(1)
+      RINC = 0.
+      RINC(2) = FHOUR
+      call w3kind(w3kindreal,w3kindint)
+      if(w3kindreal == 4) then
+        rinc4 = rinc
+        CALL W3MOVDAT(RINC4,IDAT,JDAT)
+      else
+        CALL W3MOVDAT(RINC,IDAT,JDAT)
+      endif
+!
+      jdow = 0
+      jdoy = 0
+      jday = 0
+      call w3doxdat(jdat,jdow,jdoy,jday)
+      rjday = jdoy + jdat(5) / 24.
+      IF (RJDAY < aer_time(1)) RJDAY = RJDAY+365.
+!
+      n2 = 13
+      do j=2, 12
+       if (rjday < aer_time(j)) then
+          n2 = j
+          exit
+       endif
+      enddo
+      n1 = n2 - 1
+      if (n2 > 12) n2 = n2 -12
+      write(*,*)"AAA0",n1, n2, iamin, iamax, jamin, jamax
 !! ===================================================================
 !! loop thru m01 - m12 for aer/pres array
 !! ===================================================================
-      do imon = 1, timeaer
-       write(mn,'(i2.2)') imon
+       write(mn,'(i2.2)') n1 
        fname=trim("aeroclim.m"//mn//".nc")
        call nf_open(fname , nf90_NOWRITE, ncid)
 
@@ -158,7 +193,68 @@ contains
            klev = ( levsw - k ) + 1
          endif
          do i = iamin, iamax
-         aer_pres(i,j,k,imon)    = 1.d0*pres_tmp(i,klev)
+         aer_pres(i,j,k,1)    = 1.d0*pres_tmp(i,klev)
+         enddo     !i-loop (lon)
+        enddo     !k-loop (lev)
+       enddo     !j-loop (lat)
+
+! ====> construct 4-d aerosol array (kg/kg)
+! merra2 data is top down
+! for GFS, iflip 0: toa to sfc; 1: sfc to toa
+       DO ii = 1, ntrcaerm
+         vname=trim(specname(ii))
+         call nf_inq_varid(ncid, vname, varid)
+      write(*,*)"AAA2",vname
+         call nf_get_var(ncid, varid, buffx)
+
+         do j = jamin, jamax
+           do k = 1, levsaer
+! input is from toa to sfc
+             if ( iflip == 0 )  then             ! data from toa to sfc
+               klev = k
+             else                                ! data from sfc to top
+               klev = ( levsw - k ) + 1
+             endif
+             do i = iamin, iamax
+               aerin(i,j,k,ii,1) = 1.d0*buffx(i,j,klev,1)
+               if(aerin(i,j,k,ii,1) < 0 .or. aerin(i,j,k,ii,1) > 1.)  then
+                 aerin(i,j,k,ii,1) = 1.e-15
+               endif
+             enddo   !i-loop (lon)
+           enddo     !k-loop (lev)
+         enddo       !j-loop (lat)
+
+       ENDDO         ! ii-loop (ntracaerm)
+
+! close the file
+       call nf_close(ncid)
+!! ===================================================================
+       write(mn,'(i2.2)') n2 
+       fname=trim("aeroclim.m"//mn//".nc")
+       call nf_open(fname , nf90_NOWRITE, ncid)
+
+! ====> construct 3-d pressure array (Pa)
+       call nf_inq_varid(ncid, "DELP", varid)
+       call nf_get_var(ncid, varid, buff)
+
+       do j = jamin, jamax
+        do i = iamin, iamax
+! constract pres_tmp (top-down), note input is top-down
+         pres_tmp(i,1) = 0.
+         do k=2, levsw
+          pres_tmp(i,k) = pres_tmp(i,k-1)+buff(i,j,k)
+         enddo    !k-loop
+        enddo     !i-loop (lon)
+
+! extract pres_tmp to fill aer_pres (in  Pa)
+        do k = 1, levsaer
+         if ( iflip == 0 )  then             ! data from toa to sfc
+           klev = k
+         else                                ! data from sfc to top
+           klev = ( levsw - k ) + 1
+         endif
+         do i = iamin, iamax
+         aer_pres(i,j,k,2)    = 1.d0*pres_tmp(i,klev)
          enddo     !i-loop (lon)
         enddo     !k-loop (lev)
        enddo     !j-loop (lat)
@@ -180,9 +276,9 @@ contains
                klev = ( levsw - k ) + 1
              endif
              do i = iamin, iamax
-               aerin(i,j,k,ii,imon) = 1.d0*buffx(i,j,klev,1)
-               if(aerin(i,j,k,ii,imon) < 0. .or. aerin(i,j,k,ii,imon) > 1.)  then
-                 aerin(i,j,k,ii,imon) = 1.e-15
+               aerin(i,j,k,ii,2) = 1.d0*buffx(i,j,klev,1)
+               if(aerin(i,j,k,ii,2) < 0 .or. aerin(i,j,k,ii,2) > 1.)  then
+                 aerin(i,j,k,ii,2) = 1.e-15
                endif
              enddo   !i-loop (lon)
            enddo     !k-loop (lev)
@@ -192,7 +288,8 @@ contains
 
 ! close the file
        call nf_close(ncid)
-      enddo      !imon-loop
+       n1sv=n1
+       n2sv=n2
 !---
       deallocate (buff, pres_tmp)
       deallocate (buffx)
@@ -256,15 +353,20 @@ contains
 !**********************************************************************
 !**********************************************************************
 !
-      SUBROUTINE aerinterpol(me,master,nthrds,npts,IDATE,FHOUR,jindx1,jindx2, &
+      SUBROUTINE aerinterpol( me,master,nthrds,npts,IDATE,FHOUR,iflip, jindx1,jindx2, &
                              ddy,iindx1,iindx2,ddx,lev,prsl,aerout)
 !
-      USE MACHINE,  ONLY : kind_phys
+      use machine, only: kind_phys, kind_io4, kind_io8
       use aerclm_def
+      use netcdf
+
       implicit none
-      integer   i1,i2, iday,j,j1,j2,l,npts,nc,n1,n2,lev,k,i,ii
+      integer, intent(in) :: iflip
+      integer   i1,i2, iday,j,j1,j2,l,npts,nc,n1,n2,lev,k,i,ii, klev
       real(kind=kind_phys) fhour,temj, tx1, tx2,temi, tem
       real(kind=kind_phys), dimension(npts) :: temij,temiy,temjx,ddxy
+      character    :: fname*50, mn*2, vname*10
+      
 !
 
       integer  JINDX1(npts), JINDX2(npts), iINDX1(npts), iINDX2(npts)
@@ -279,6 +381,11 @@ contains
       integer jdow, jdoy, jday
       real(4) rinc4(5)
       integer w3kindreal,w3kindint
+      integer ncid, varid
+      real(kind=kind_io4),allocatable,dimension(:,:,:) :: buff
+      real(kind=kind_io4),allocatable,dimension(:,:,:,:):: buffx
+      real(kind=kind_io4),allocatable,dimension(:,:)   :: pres_tmp
+
 !
       IDAT = 0
       IDAT(1) = IDATE(4)
@@ -310,6 +417,86 @@ contains
        endif
       enddo
       n1 = n2 - 1
+!     need to read a new month 
+      if (n1>n1sv) then
+        DO ii = 1, ntrcaerm
+          do j = jamin, jamax
+            do k = 1, levsaer
+              do i = iamin, iamax
+                aerin(i,j,k,ii,1) = aerin(i,j,k,ii,2)
+              enddo   !i-loop (lon)
+            enddo     !k-loop (lev)
+          enddo       !j-loop (lat)
+        ENDDO         ! ii-loop (ntracaerm)
+!! ===================================================================
+        allocate (buff(lonsaer, latsaer, levsw))
+        allocate (pres_tmp(lonsaer, levsw))
+        allocate (buffx(lonsaer, latsaer, levsw, 1))
+
+        write(mn,'(i2.2)') n2 
+        fname=trim("aeroclim.m"//mn//".nc")
+        call nf_open(fname , nf90_NOWRITE, ncid)
+
+! ====> construct 3-d pressure array (Pa)
+        call nf_inq_varid(ncid, "DELP", varid)
+        call nf_get_var(ncid, varid, buff)
+
+        do j = jamin, jamax
+          do i = iamin, iamax
+! constract pres_tmp (top-down), note input is top-down
+            pres_tmp(i,1) = 0.
+            do k=2, levsw
+              pres_tmp(i,k) = pres_tmp(i,k-1)+buff(i,j,k)
+            enddo    !k-loop
+          enddo     !i-loop (lon)
+
+! extract pres_tmp to fill aer_pres (in  Pa)
+          do k = 1, levsaer
+            if ( iflip == 0 )  then             ! data from toa to sfc
+              klev = k
+            else                                ! data from sfc to top
+              klev = ( levsw - k ) + 1
+            endif
+            do i = iamin, iamax
+              aer_pres(i,j,k,2)    = 1.d0*pres_tmp(i,klev)
+            enddo     !i-loop (lon)
+          enddo     !k-loop (lev)
+        enddo     !j-loop (lat)
+
+! ====> construct 4-d aerosol array (kg/kg)
+! merra2 data is top down
+! for GFS, iflip 0: toa to sfc; 1: sfc to toa
+        DO ii = 1, ntrcaerm
+          vname=trim(specname(ii))
+          call nf_inq_varid(ncid, vname, varid)
+          call nf_get_var(ncid, varid, buffx)
+
+          do j = jamin, jamax
+            do k = 1, levsaer
+! input is from toa to sfc
+              if ( iflip == 0 )  then             ! data from toa to sfc
+                klev = k
+              else                                ! data from sfc to top
+                klev = ( levsw - k ) + 1
+              endif
+              do i = iamin, iamax
+                aerin(i,j,k,ii,2) = 1.d0*buffx(i,j,klev,1)
+                if(aerin(i,j,k,ii,2) < 0 .or. aerin(i,j,k,ii,2) > 1.)  then
+                  aerin(i,j,k,ii,2) = 1.e-15
+                endif
+              enddo   !i-loop (lon)
+            enddo     !k-loop (lev)
+          enddo       !j-loop (lat)
+
+        ENDDO         ! ii-loop (ntracaerm)
+
+! close the file
+        call nf_close(ncid)
+        deallocate (buff, pres_tmp)
+        deallocate (buffx)
+        n1sv=n1
+        n2sv=n2
+      end if
 !
       tx1 = (aer_time(n2) - rjday) / (aer_time(n2) - aer_time(n1))
       tx2 = 1.0 - tx1
@@ -328,7 +515,7 @@ contains
 !$OMP parallel num_threads(nthrds) default(none)             &
 !$OMP          shared(npts,ntrcaer,aerin,aer_pres,prsl)      &
 !$OMP          shared(ddx,ddy,jindx1,jindx2,iindx1,iindx2)   &
-!$OMP          shared(aerpm,aerpres,aerout,n1,n2,lev,nthrds) &
+!$OMP          shared(aerpm,aerpres,aerout,lev,nthrds) &
 !$OMP          shared(temij,temiy,temjx,ddxy)                &
 !$OMP          private(l,j,k,ii,i1,i2,j1,j2,tem)             &
 !$OMP          copyin(tx1,tx2) firstprivate(tx1,tx2)
@@ -343,17 +530,17 @@ contains
           I2    = IINDX2(J)
           DO ii=1,ntrcaer
            aerpm(j,L,ii) =                                                  &
-           tx1*(TEMIJ(j)*aerin(I1,J1,L,ii,n1)+DDXY(j)*aerin(I2,J2,L,ii,n1)  &
-               +TEMIY(j)*aerin(I1,J2,L,ii,n1)+temjx(j)*aerin(I2,J1,L,ii,n1))&
-          +tx2*(TEMIJ(j)*aerin(I1,J1,L,ii,n2)+DDXY(j)*aerin(I2,J2,L,ii,n2)  &
-               +TEMIY(j)*aerin(I1,J2,L,ii,n2)+temjx(j)*aerin(I2,J1,L,ii,n2))
+           tx1*(TEMIJ(j)*aerin(I1,J1,L,ii,1)+DDXY(j)*aerin(I2,J2,L,ii,1)  &
+               +TEMIY(j)*aerin(I1,J2,L,ii,1)+temjx(j)*aerin(I2,J1,L,ii,1))&
+          +tx2*(TEMIJ(j)*aerin(I1,J1,L,ii,2)+DDXY(j)*aerin(I2,J2,L,ii,2)  &
+               +TEMIY(j)*aerin(I1,J2,L,ii,2)+temjx(j)*aerin(I2,J1,L,ii,2))
           ENDDO
 
           aerpres(j,L) =                                                    &
-           tx1*(TEMIJ(j)*aer_pres(I1,J1,L,n1)+DDXY(j)*aer_pres(I2,J2,L,n1)  &
-               +TEMIY(j)*aer_pres(I1,J2,L,n1)+temjx(j)*aer_pres(I2,J1,L,n1))&
-          +tx2*(TEMIJ(j)*aer_pres(I1,J1,L,n2)+DDXY(j)*aer_pres(I2,J2,L,n2)  &
-               +TEMIY(j)*aer_pres(I1,J2,L,n2)+temjx(j)*aer_pres(I2,J1,L,n2))
+           tx1*(TEMIJ(j)*aer_pres(I1,J1,L,1)+DDXY(j)*aer_pres(I2,J2,L,1)  &
+               +TEMIY(j)*aer_pres(I1,J2,L,1)+temjx(j)*aer_pres(I2,J1,L,1))&
+          +tx2*(TEMIJ(j)*aer_pres(I1,J1,L,2)+DDXY(j)*aer_pres(I2,J2,L,2)  &
+               +TEMIY(j)*aer_pres(I1,J2,L,2)+temjx(j)*aer_pres(I2,J1,L,2))
         ENDDO
       ENDDO
 #ifndef __GFORTRAN__
