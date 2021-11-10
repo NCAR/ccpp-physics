@@ -318,7 +318,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
   optional = F
 [tsfg]
   standard_name = surface_ground_temperature_for_radiation
