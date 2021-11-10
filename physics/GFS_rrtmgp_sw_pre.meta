@@ -122,7 +122,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [sfc_alb_nir_dir_byband]
   standard_name = surface_albedo_nearIR_direct
   long_name = near-IR (direct) surface albedo (sfc_alb_nir_dir)
