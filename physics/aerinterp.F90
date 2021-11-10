@@ -417,7 +417,8 @@ contains
       n1 = n2 - 1
       if (n2 > 12) n2 = n2 -12
 !     need to read a new month 
-      if (n1>n1sv) then
+      if (n1.ne.n1sv) then
+        if (me == master) write(*,*)"read in a new month MERRA2", n2
         DO ii = 1, ntrcaerm
           do j = jamin, jamax
             do k = 1, levsaer
