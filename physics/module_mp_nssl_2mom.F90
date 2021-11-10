@@ -1,8 +1,4 @@
 ! !>  \file module_mp_nssl_2mom.F90
-!! This file contains the NSSL cloud microphysics scheme by Edward Mansell (NOAA/NSSL)
-
-
-! prepocessed on "Oct 18 2021" at "17:18:18"
 
 
 
@@ -11,6 +7,9 @@
 
 
 
+!---------------------------------------------------------------------
+! code snapshot: "Oct 29 2021" at "19:44:39"
+!---------------------------------------------------------------------
 !---------------------------------------------------------------------
 ! IMPORTANT: Best results are attained using the 5th-order WENO (Weighted Essentially Non-Oscillatory) advection option (4) for scalars:
 ! moist_adv_opt                       = 4,
@@ -2811,7 +2810,7 @@ SUBROUTINE nssl_2mom_driver(qv, qc, qr, qi, qs, qh, qhl, ccw, crw, cci, csw, chw
              re_ice(ix,kz,jy)   = MAX(10.01E-6, MIN(t2(ix,1,kz), 200.E-6))
              re_snow(ix,kz,jy)  = MAX(25.E-6, MIN(t3(ix,1,kz), 999.E-6))
              ! check for case where snow needs to be treated as cloud ice (for rrtmg radiation)
-             IF ( .not. present(qi) ) re_ice(ix,kz,jy)  = MAX(10.E-6, MIN(t3(ix,1,kz), 125.E-6))
+             IF ( .not. present(qi) ) re_ice(ix,kz,jy)  = MAX(10.E-6, MIN(t3(ix,1,kz), 200.E-6))
           ENDDO
          ENDDO
 
@@ -3777,7 +3776,6 @@ END SUBROUTINE nssl_2mom_driver
 !  zero the precip flux arrays (2d)
 !
       
-!      xvt(:,:,:,il) = 0.0
       dummy = 0.d0
 
       xvt(kzb:kze,ix,1:3,il) = 0.0 ! reset to zero because routine will only compute points with q > qmin
@@ -6384,7 +6382,9 @@ END SUBROUTINE nssl_2mom_driver
 !      DO il = lc,lhab
 !      IF ( il .ne. lr ) THEN
         DO mgs = 1,ngscnt
-          vtxbar(mgs,lc,2) = vtxbar(mgs,lc,1)
+          IF ( ildo == 0 .or. ildo == lc ) THEN
+            vtxbar(mgs,lc,2) = vtxbar(mgs,lc,1)
+          ENDIF
         IF ( li .gt. 1 ) THEN
 !          vtxbar(mgs,li,2) = rhovt(mgs)*49420.*1.25447*xdia(mgs,li,1)**(1.415) ! n-wgt (Ferrier 94)
 !          vtxbar(mgs,li,2) = vtxbar(mgs,li,1)
@@ -10867,6 +10867,7 @@ END SUBROUTINE nssl_2mom_driver
 
       real chlsbv(ngs), chldpv(ngs)
       real chlmlr(ngs), chlmlrr(ngs)
+      real chlfmlr(ngs)
 !      real chlmlrsave(ngs),chlsave(ngs),qhlsave(ngs)
       real chlshr(ngs), chlshrr(ngs)
 
@@ -12016,6 +12017,13 @@ END SUBROUTINE nssl_2mom_driver
 
       ENDIF
 
+
+!
+! Set liquid water fraction
+!
+      fhw(:) = 0.0
+      fsw(:) = 0.0
+      fhlw(:) = 0.0
 
 
 
@@ -15547,6 +15555,7 @@ END SUBROUTINE nssl_2mom_driver
       chmlr(:) = 0.0
       chmlrr(:) = 0.0
       chlmlr(:) = 0.0
+      chlfmlr(:) = 0.0
 !      chlmlrsave(:) = 0.0
 !      qhlmlrsave(:) = 0.0
 !      chlsave(:) = 0.0
@@ -18147,10 +18156,8 @@ END SUBROUTINE nssl_2mom_driver
 !        qwfrzp(mgs)  = frac*qwfrzp(mgs)
 !        qwctfzp(mgs) = frac*qwctfzp(mgs)
         qwfrzc(mgs)  = frac*qwfrzc(mgs)
-        qwfrzis(mgs)  = frac*qwfrzis(mgs)
         qwfrz(mgs)  = frac*qwfrz(mgs)
         qwctfzc(mgs) = frac*qwctfzc(mgs)
-        qwctfzis(mgs) = frac*qwctfzis(mgs)
         qwctfz(mgs) = frac*qwctfz(mgs)
         qracw(mgs)   = frac*qracw(mgs)
         qsacw(mgs)   = frac*qsacw(mgs)
@@ -18818,10 +18825,9 @@ END SUBROUTINE nssl_2mom_driver
       write(iunit,*)   ' Conc:'
       write(iunit,*)   pccii(mgs),pccid(mgs)
       write(iunit,*)   il5(mgs),cicint(mgs)
-      write(iunit,*)   cwacii(mgs),cwfrzc(mgs),cwctfzc(mgs)
+      write(iunit,*)   cwfrzc(mgs),cwctfzc(mgs)
       write(iunit,*)   cicichr(mgs)
       write(iunit,*)   chmul1(mgs)
-      write(iunit,*)   cfmul1(mgs)
       write(iunit,*)   chlmul1(mgs)
       write(iunit,*)   csmul(mgs)
 !
@@ -18835,7 +18841,6 @@ END SUBROUTINE nssl_2mom_driver
       write(iunit,*)   -il5(mgs)*qiacw(mgs)
       write(iunit,*)   -il5(mgs)*qwfrzc(mgs)
       write(iunit,*)   -il5(mgs)*qwctfzc(mgs)
-      write(iunit,*)   -il5(mgs)*qwctfzis(mgs)
 !      write(iunit,*)   -il5(mgs)*qwfrzp(mgs)
 !      write(iunit,*)   -il5(mgs)*qwctfzp(mgs)
       write(iunit,*)   -il5(mgs)*qiihr(mgs)
@@ -18884,7 +18889,6 @@ END SUBROUTINE nssl_2mom_driver
       write(iunit,*)        -qhlacr(mgs)
       write(iunit,*)        qrcev(mgs)
       write(iunit,*)       'pqrwd = ', pqrwd(mgs) 
-      write(iunit,*)       'fhw, fhlw = ',fhw(mgs),fhlw(mgs)
       write(iunit,*)        'qrzfac = ', qrzfac(mgs)
 !
       

@@ -267,13 +267,6 @@
   dimensions = ()
   type = integer
   intent = in
-[first_time_step]
-  standard_name = flag_for_first_timestep
-  long_name = flag for first time step for time integration loop (cold/warmstart)
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
   optional = F
 [imp_physics]
   standard_name = control_for_microphysics_scheme
@@ -1129,11 +1122,4 @@
   dimensions = ()
   type = integer
   intent = out
-[mpiroot]
-  standard_name = mpi_root
-  long_name = master MPI-rank
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
   optional = F
