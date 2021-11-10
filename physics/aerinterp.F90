@@ -164,7 +164,6 @@ contains
       enddo
       n1 = n2 - 1
       if (n2 > 12) n2 = n2 -12
-      write(*,*)"AAA0",n1, n2, iamin, iamax, jamin, jamax
 !! ===================================================================
 !! loop thru m01 - m12 for aer/pres array
 !! ===================================================================
@@ -204,7 +203,6 @@ contains
        DO ii = 1, ntrcaerm
          vname=trim(specname(ii))
          call nf_inq_varid(ncid, vname, varid)
-      write(*,*)"AAA2",vname
          call nf_get_var(ncid, varid, buffx)
 
          do j = jamin, jamax
