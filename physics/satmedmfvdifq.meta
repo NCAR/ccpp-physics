@@ -76,6 +76,13 @@
   dimensions = ()
   type = integer
   intent = in
+[ntrw]
+  standard_name = index_for_rain_water_vertical_diffusion_tracer
+  long_name = tracer index for rain water in the vertically diffused tracer array
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
 [ntiw]
   standard_name = index_for_ice_cloud_condensate_vertical_diffusion_tracer
   long_name = tracer index for ice water in the vertically diffused tracer array
@@ -563,13 +570,6 @@
   standard_name = choice_of_near_surface_mixing_length_in_boundary_layer_mass_flux_scheme
   long_name = choice of near surface mixing length in boundary layer mass flux scheme
   units = none
-  dimensions = ()
-  type = integer
-  intent = in
-[ntoz]
-  standard_name = index_of_ozone_mixing_ratio_in_tracer_concentration_array
-  long_name = tracer index for ozone mixing ratio
-  units = index
   dimensions = ()
   type = integer
   intent = in
