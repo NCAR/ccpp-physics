@@ -1175,14 +1175,6 @@
   type = logical
   intent = in
   optional = F
-[ntracp1]
-  standard_name = number_of_tracers_plus_one
-  long_name = number of tracers plus one
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [im]
   standard_name = horizontal_loop_extent
   long_name = horizontal loop extent
@@ -2100,14 +2092,6 @@
   units = flag
   dimensions = (number_of_tracers_plus_one)
   type = logical
-  intent = in
-  optional = F
-[ntracp1]
-  standard_name = number_of_tracers_plus_one
-  long_name = number of tracers plus one
-  units = count
-  dimensions = ()
-  type = integer
   intent = in
   optional = F
 [errmsg]

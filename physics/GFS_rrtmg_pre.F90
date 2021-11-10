@@ -19,7 +19,7 @@
       subroutine GFS_rrtmg_pre_run (im, levs, lm, lmk, lmp, n_var_lndp,        &
         imfdeepcnv, imfdeepcnv_gf, me, ncnd, ntrac, num_p3d, npdf3d, ncnvcld3d,&
         ntqv, ntcw,ntiw, ntlnc, ntinc, ntrnc, ntsnc, ntccn, ntrw, ntsw, ntgl, nthl, ntwa, ntoz, &
-        ntclamt, nleffr, nieffr, nseffr, lndp_type, kdt, first_time_step,      &
+        ntclamt, nleffr, nieffr, nseffr, lndp_type, kdt,                       &
         imp_physics,imp_physics_nssl, nssl_ccn_on, nssl_invertccn,             &
         imp_physics_thompson, imp_physics_gfdl, imp_physics_zhao_carr,         &
         imp_physics_zhao_carr_pdf, imp_physics_mg, imp_physics_wsm6,           &
@@ -36,7 +36,7 @@
         gasvmr_o2, gasvmr_co, gasvmr_cfc11, gasvmr_cfc12, gasvmr_cfc22,        &
         gasvmr_ccl4,  gasvmr_cfc113, aerodp, clouds6, clouds7, clouds8,        &
         clouds9, cldsa, cldfra, faersw1, faersw2, faersw3, faerlw1, faerlw2,   &
-        faerlw3, alpha, errmsg, errflg,mpiroot)
+        faerlw3, alpha, errmsg, errflg)
 
       use machine,                   only: kind_phys
 
@@ -103,7 +103,7 @@
 
       logical,              intent(in) :: lsswr, lslwr, ltaerosol, lgfdlmprad, &
                                           uni_cld, effr_in, do_mynnedmf,       &
-                                          lmfshal, lmfdeep2, pert_clds,first_time_step
+                                          lmfshal, lmfdeep2, pert_clds
 
       logical,              intent(in) :: nssl_ccn_on, nssl_invertccn
       real(kind=kind_phys), intent(in) :: fhswr, fhlwr, solhr, sup, julian, sppt_amp
@@ -176,7 +176,6 @@
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
-      integer,          intent(in)  :: mpiroot
 
       ! Local variables
       integer :: ncndl
@@ -197,10 +196,6 @@
       real(kind=kind_phys), dimension(im,lm+LTP) ::         &
                                   re_cloud, re_ice, re_snow, qv_mp, qc_mp, &
                                   qi_mp, qs_mp, nc_mp, ni_mp, nwfa
-      ! for NSSL MP
-      real(kind=kind_phys), dimension(im,lm+LTP) ::         &
-                             re_rain, qr_mp, ns_mp, nr_mp, nh_mp, vh_mp, cccn_mp,cccna_mp, nc_mp2
-      real, allocatable :: an(:,:,:,:) ! temporary scalar array
 
       ! for F-A MP
       real(kind=kind_phys), dimension(im,lm+LTP)   :: qc_save, qi_save, qs_save
@@ -223,7 +218,6 @@
                  its, ite, jts, jte, kts, kte
 
       real(kind=kind_phys) :: qvs
-      real (kind=kind_phys) :: sum1,sum2,max1,max2
 !
 !===> ...  begin here
 !
@@ -682,26 +676,6 @@
               enddo
             enddo
           endif if_thompson
-          if (imp_physics == imp_physics_nssl) then
-            IF ( .not. effr_in ) THEN
-            do k=1,LMK
-              do i=1,IM
-                qvs = qgrs(i,k,ntqv)
-                qv_mp (i,k) = qvs/(1.-qvs)
-                rho   (i,k) = con_eps*plyr(i,k)*100./(con_rd*tlyr(i,k)*(qv_mp(i,k)+con_eps))
-                qc_mp (i,k) = tracer1(i,k,ntcw)/(1.-qvs)
-                qi_mp (i,k) = tracer1(i,k,ntiw)/(1.-qvs)
-                qs_mp (i,k) = tracer1(i,k,ntsw)/(1.-qvs)
-                qr_mp (i,k) = tracer1(i,k,ntrw)/(1.-qvs)
-                nc_mp (i,k) = tracer1(i,k,ntlnc)/(1.-qvs)
-                ni_mp (i,k) = tracer1(i,k,ntinc)/(1.-qvs)
-                ns_mp (i,k) = tracer1(i,k,ntsnc)/(1.-qvs)
-                nr_mp (i,k) = tracer1(i,k,ntrnc)/(1.-qvs)
-                IF ( nssl_ccn_on ) cccn_mp(i,k) = tracer1(i,k,ntccn)/(1.-qvs)
-              enddo
-            enddo
-            ENDIF
-          endif
         endif
         do n=1,ncndl
           do k=1,LMK
@@ -1097,7 +1071,7 @@
           endif ! MYNN PBL or GF
 
 
-        elseif(imp_physics == imp_physics_thompson  ) then                              ! Thompson MP
+        elseif(imp_physics == imp_physics_thompson) then                              ! Thompson MP
 
           if(do_mynnedmf .or. imfdeepcnv == imfdeepcnv_gf ) then ! MYNN PBL or GF conv
               !-- MYNN PBL or convective GF
@@ -1195,5 +1169,7 @@
 
       subroutine GFS_rrtmg_pre_finalize ()
       end subroutine GFS_rrtmg_pre_finalize
+
+!! @}
 
       end module GFS_rrtmg_pre

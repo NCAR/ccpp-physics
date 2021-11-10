@@ -512,7 +512,7 @@
 !> \section arg_table_GFS_suite_interstitial_3_run Argument Table
 !! \htmlinclude GFS_suite_interstitial_3_run.html
 !!
-    subroutine GFS_suite_interstitial_3_run (otsptflag, ntracp1,   &
+    subroutine GFS_suite_interstitial_3_run (otsptflag,                 &
                im, levs, nn, cscnv,                                     &
                satmedmf, trans_trac, do_shoc, ltaerosol, ntrac, ntcw,   &
                ntiw, ntclamt, ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc,    &
@@ -531,8 +531,7 @@
       implicit none
 
       ! interface variables
-      logical, intent(in)     :: otsptflag(1:ntracp1)!  on/off switch for tracer transport
-      integer, intent(in)     :: ntracp1
+      logical, intent(in)     :: otsptflag(:)!  on/off switch for tracer transport (size ntrac)
       integer,              intent(in   )                   :: im, levs, nn, ntrac, ntcw, ntiw, ntclamt, ntrw, ntsw,&
         ntrnc, ntsnc, ntgl, ntgnc, imp_physics, imp_physics_mg, imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,   &
         imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,imp_physics_fer_hires,  &
@@ -717,7 +716,7 @@
       imp_physics_nssl, nssl_invertccn, nssl_ccn_on,                                                  &
       imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, convert_dry_rho, dtf, save_qc, save_qi, con_pi, dtidx, dtend,&
       index_of_process_conv_trans, gq0, clw, prsl, save_tcp, con_rd, con_eps, nwfa, spechum, ldiag3d,                &
-      qdiag3d, save_lnc, save_inc, ntk, ntke, otsptflag, ntracp1, errmsg, errflg)
+      qdiag3d, save_lnc, save_inc, ntk, ntke, otsptflag, errmsg, errflg)
 
       use machine,               only: kind_phys
       use module_mp_nssl_2mom,   only: qccn
@@ -728,8 +727,7 @@
 
       ! interface variables
 
-      logical, intent(in)     :: otsptflag(1:ntracp1)! on/off switch for tracer transport by updraft and
-      integer, intent(in)     :: ntracp1
+      logical, intent(in)     :: otsptflag(:)! on/off switch for tracer transport by updraft and
       integer,              intent(in   )                   :: im, levs, tracers_total, ntrac, ntcw, ntiw, ntclamt, ntrw, &
         ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, ntccn, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,    &
         imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, imp_physics_nssl
