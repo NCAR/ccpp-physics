@@ -14,7 +14,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [nLev]
   standard_name = vertical_layer_dimension
   long_name = number of vertical levels
@@ -22,7 +21,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F   
 [lslwr]
   standard_name = flag_for_calling_longwave_radiation
   long_name = logical flags for lw radiation calls
@@ -30,7 +28,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F   
 [do_lw_clrsky_hr]
   standard_name = flag_for_output_of_tendency_of_air_temperature_due_to_longwave_heating_on_radiation_timestep_assuming_clear_sky
   long_name = flag to output lw heating rate
@@ -38,7 +35,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F   
 [save_diag]
   standard_name = flag_for_diagnostics
   long_name = logical flag for storing diagnostics
@@ -46,7 +42,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F 
 [fhlwr]
   standard_name = period_of_longwave_radiation_calls
   long_name = frequency for longwave radiation
@@ -55,7 +50,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F      
 [tsfa]
   standard_name = surface_air_temperature_for_radiation
   long_name = lowest model layer air temperature for radiation
@@ -64,7 +58,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [t_lay]
   standard_name = air_temperature_at_layer_for_RRTMGP
   long_name = air temperature at vertical layer for radiation calculation
@@ -73,7 +66,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F  
 [p_lev]
   standard_name = air_pressure_at_interface_for_RRTMGP
   long_name = air pressure level
@@ -82,7 +74,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [fluxlwUP_allsky]
   standard_name = RRTMGP_lw_flux_profile_upward_allsky
   long_name = RRTMGP upward longwave all-sky flux profile
@@ -91,7 +82,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [fluxlwDOWN_allsky]
   standard_name = RRTMGP_lw_flux_profile_downward_allsky
   long_name = RRTMGP downward longwave all-sky flux profile
@@ -100,7 +90,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [fluxlwUP_clrsky]
   standard_name = RRTMGP_lw_flux_profile_upward_clrsky
   long_name = RRTMGP upward longwave clr-sky flux profile
@@ -109,7 +98,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [fluxlwDOWN_clrsky]
   standard_name = RRTMGP_lw_flux_profile_downward_clrsky
   long_name = RRTMGP downward longwave clr-sky flux profile
@@ -118,7 +106,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [raddt]
   standard_name = time_step_for_radiation
   long_name = radiation time step
@@ -127,7 +114,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [aerodp]
   standard_name = atmosphere_optical_thickness_due_to_ambient_aerosol_particles
   long_name = vertical integrated optical depth for various aerosol species
@@ -136,7 +122,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [cldsa]
   standard_name = cloud_area_fraction_for_radiation
   long_name = fraction of clouds for low, middle, high, total and BL
@@ -145,7 +130,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [mtopa]
   standard_name = model_layer_number_at_cloud_top
   long_name = vertical indices for low, middle and high cloud tops
@@ -153,7 +137,6 @@
   dimensions = (horizontal_loop_extent,3)
   type = integer
   intent = in
-  optional = F
 [mbota]
   standard_name = model_layer_number_at_cloud_base
   long_name = vertical indices for low, middle and high cloud bases
@@ -161,7 +144,6 @@
   dimensions = (horizontal_loop_extent,3)
   type = integer
   intent = in
-  optional = F
 [cld_frac]
   standard_name = total_cloud_fraction
   long_name = layer total cloud fraction
@@ -170,7 +152,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [cldtaulw]
   standard_name = cloud_optical_depth_layers_at_10mu_band
   long_name = approx 10mu band layer cloud optical depth
@@ -179,7 +160,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [fluxr]
   standard_name = cumulative_radiation_diagnostic
   long_name = time-accumulated 2D radiation-related diagnostic fields
@@ -188,7 +168,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [sfcdlw]
   standard_name = surface_downwelling_longwave_flux_on_radiation_timestep
   long_name = total sky sfc downward lw flux
@@ -197,7 +176,6 @@
   type = real
   kind = kind_phys
   intent = inout  
-  optional = F
 [sfculw]
   standard_name = surface_upwelling_longwave_flux_on_radiation_timestep
   long_name = total sky sfc upward lw flux
@@ -206,7 +184,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [sfcflw]
   standard_name = surface_lw_fluxes_assuming_total_and_clear_sky_on_radiation_timestep
   long_name = lw radiation fluxes at sfc
@@ -214,7 +191,6 @@
   dimensions = (horizontal_loop_extent)
   type = sfcflw_type
   intent = inout  
-  optional = F
 [tsflw]
   standard_name = air_temperature_at_surface_adjacent_layer_on_radiation_timestep
   long_name = surface air temp during lw calculation
@@ -223,7 +199,6 @@
   type = real
   kind = kind_phys
   intent = inout  
-  optional = F  
 [htrlw]
   standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_timestep
   long_name = total sky lw heating rate
@@ -232,7 +207,6 @@
   type = real
   kind = kind_phys
   intent = inout  
-  optional = F
 [htrlwu]
   standard_name = updated_tendency_of_air_temperature_due_to_longwave_heating_on_physics_timestep
   long_name = total sky longwave heating rate on physics time step
@@ -241,7 +215,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [topflw]
   standard_name = lw_fluxes_top_atmosphere
   long_name = lw radiation fluxes at top
@@ -249,15 +222,6 @@
   dimensions = (horizontal_loop_extent)
   type = topflw_type
   intent = out  
-  optional = F      
-[flxprf_lw]
-  standard_name = RRTMGP_lw_fluxes
-  long_name = lw fluxes total sky / csk and up / down at levels
-  units = W m-2
-  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
-  type = proflw_type
-  intent = inout
-  optional = T
 [htrlwc]
   standard_name = tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_timestep
   long_name = longwave clear sky heating rate
@@ -266,7 +230,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = T
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -275,7 +238,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -283,4 +245,3 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F

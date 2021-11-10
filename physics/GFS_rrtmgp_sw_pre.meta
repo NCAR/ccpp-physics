@@ -14,7 +14,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ncol]
   standard_name = horizontal_loop_extent
   long_name = horizontal loop extent
@@ -22,7 +21,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [doSWrad]
   standard_name = flag_for_calling_shortwave_radiation
   long_name = logical flags for sw radiation calls
@@ -30,7 +28,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [solhr]
   standard_name = forecast_utc_hour
   long_name = time in hours after 00z at the current timestep
@@ -39,7 +36,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [lon]
   standard_name = longitude
   long_name = longitude
@@ -48,7 +44,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [coslat]
   standard_name = cosine_of_latitude
   long_name = cosine of latitude
@@ -57,7 +52,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [sinlat]
   standard_name = sine_of_latitude
   long_name = sine of latitude
@@ -66,7 +60,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [nday]
   standard_name = daytime_points_dimension
   long_name = daytime points dimension
@@ -74,7 +67,6 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 [idxday]
   standard_name = daytime_points
   long_name = daytime points
@@ -82,7 +74,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = out
-  optional = F
 [coszen]
   standard_name = cosine_of_solar_zenith_angle_for_daytime_points_on_radiation_timestep
   long_name = mean cos of zenith angle over rad call period
@@ -91,7 +82,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [coszdg]
   standard_name = cosine_of_solar_zenith_angle_on_radiation_timestep
   long_name = daytime mean cosz over rad call period
@@ -100,7 +90,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [sfc_alb_nir_dir]
   standard_name = surface_albedo_due_to_near_IR_direct
   long_name = surface albedo due to near IR direct beam
@@ -109,7 +98,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [sfc_alb_nir_dif]
   standard_name = surface_albedo_due_to_near_IR_diffused
   long_name = surface albedo due to near IR diffused beam
@@ -118,7 +106,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [sfc_alb_uvvis_dir]
   standard_name = surface_albedo_due_to_UV_and_VIS_direct
   long_name = surface albedo due to UV+VIS direct beam
@@ -127,7 +114,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [sfc_alb_uvvis_dif]
   standard_name = surface_albedo_due_to_UV_and_VIS_diffused
   long_name = surface albedo due to UV+VIS diffused beam
@@ -145,7 +131,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [sfc_alb_nir_dif_byband]
   standard_name = surface_albedo_nearIR_diffuse
   long_name = near-IR (diffuse) surface albedo (sfc_alb_nir_dif)
@@ -154,7 +139,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [sfc_alb_uvvis_dir_byband]
   standard_name =  surface_albedo_uvvis_direct
   long_name = UVVIS (direct) surface albedo (sfc_alb_uvvis_dir)
@@ -163,7 +147,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [sfc_alb_uvvis_dif_byband]
   standard_name =  surface_albedo_uvvis_diffuse
   long_name = UVVIS (diffuse) surface albedo (sfc_alb_uvvis_dif)
@@ -172,7 +155,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -181,7 +163,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -189,4 +170,3 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F

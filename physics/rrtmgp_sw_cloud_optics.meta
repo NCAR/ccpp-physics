@@ -14,7 +14,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F  
 [doGP_cldoptics_PADE]
   standard_name = flag_to_calc_lw_cld_optics_using_RRTMGP_PADE
   long_name = logical flag to control cloud optics scheme.
@@ -22,7 +21,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F 
 [doGP_cldoptics_LUT]
   standard_name = flag_to_calc_lw_cld_optics_using_RRTMGP_LUT
   long_name = logical flag to control cloud optics scheme.
@@ -30,7 +28,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F     
 [nrghice]
   standard_name = number_of_ice_roughness_categories
   long_name = number of ice-roughness categories in RRTMGP calculation
@@ -38,7 +35,6 @@
   dimensions =  ()
   type = integer
   intent = inout
-  optional = F
 [rrtmgp_root_dir]
   standard_name = directory_for_rte_rrtmgp_source_code
   long_name = directory for rte+rrtmgp source code
@@ -46,7 +42,6 @@
   dimensions =  ()
   type = character
   intent = in
-  optional = F
   kind = len=128
 [rrtmgp_sw_file_clouds]
   standard_name = filename_of_rrtmgp_shortwave_cloud_optics_coefficients 
@@ -55,7 +50,6 @@
   dimensions =  ()
   type = character
   intent = in
-  optional = F
   kind = len=128
 [mpirank]
   standard_name = mpi_rank
@@ -64,7 +58,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [mpiroot]
   standard_name = mpi_root
   long_name = master MPI rank
@@ -72,7 +65,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [mpicomm]
   standard_name = mpi_communicator
   long_name = MPI communicator
@@ -80,7 +72,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -89,7 +80,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -97,7 +87,6 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 ########################################################################
 [ccpp-arg-table]
   name = rrtmgp_sw_cloud_optics_run
@@ -109,7 +98,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [ncol]
   standard_name = horizontal_loop_extent
   long_name = horizontal dimension
@@ -117,7 +105,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [nLev]
   standard_name = vertical_layer_dimension
   long_name = number of vertical levels
@@ -125,7 +112,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [doG_cldoptics]
   standard_name = flag_to_calc_lw_cld_optics_using_RRTMG
   long_name = logical flag to control cloud optics scheme.
@@ -133,7 +119,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F  
 [icliq_sw]
   standard_name = control_for_shortwave_radiation_liquid_clouds
   long_name = sw optical property for liquid clouds
@@ -141,7 +126,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [icice_sw]
   standard_name = flag_for_optical_property_for_ice_clouds_for_shortwave_radiation
   long_name = sw optical property for ice clouds
@@ -149,7 +133,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [doGP_cldoptics_PADE]
   standard_name = flag_to_calc_lw_cld_optics_using_RRTMGP_PADE
   long_name = logical flag to control cloud optics scheme.
@@ -157,7 +140,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F 
 [doGP_cldoptics_LUT]
   standard_name = flag_to_calc_lw_cld_optics_using_RRTMGP_LUT
   long_name = logical flag to control cloud optics scheme.
@@ -165,7 +147,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F   
 [cld_frac]
   standard_name = total_cloud_fraction
   long_name = layer total cloud fraction
@@ -174,7 +155,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [cld_lwp]
   standard_name = cloud_liquid_water_path
   long_name = layer cloud liquid water path
@@ -183,7 +163,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [cld_reliq]
   standard_name = mean_effective_radius_for_liquid_cloud
   long_name = mean effective radius for liquid cloud
@@ -192,7 +171,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [cld_iwp]
   standard_name = cloud_ice_water_path
   long_name = layer cloud ice water path
@@ -201,7 +179,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [cld_reice]
   standard_name = mean_effective_radius_for_ice_cloud
   long_name = mean effective radius for ice cloud
@@ -210,7 +187,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [cld_swp]
   standard_name = cloud_snow_water_path
   long_name = layer cloud snow water path
@@ -219,7 +195,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [cld_resnow]
   standard_name = mean_effective_radius_for_snow_flake
   long_name = mean effective radius for snow cloud
@@ -228,7 +203,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [cld_rwp]
   standard_name = cloud_rain_water_path
   long_name = layer cloud rain water path
@@ -237,7 +211,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [cld_rerain]
   standard_name = mean_effective_radius_for_rain_drop
   long_name = mean effective radius for rain cloud
@@ -246,7 +219,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [precip_frac]
   standard_name = precipitation_fraction_by_layer
   long_name = precipitation fraction in each layer
@@ -255,7 +227,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F   
 [nbndsGPsw]
   standard_name = number_of_shortwave_bands
   long_name = number of sw bands used in RRTMGP
@@ -263,7 +234,6 @@
   dimensions =  ()
   type = integer
   intent = in
-  optional = F
 [nday]
   standard_name = daytime_points_dimension
   long_name = daytime points dimension
@@ -271,7 +241,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [idxday]
   standard_name = daytime_points
   long_name = daytime points
@@ -279,7 +248,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
-  optional = F
 [sw_optical_props_cloudsByBand]
   standard_name = shortwave_optical_properties_for_cloudy_atmosphere_by_band
   long_name = Fortran DDT containing RRTMGP optical properties
@@ -287,7 +255,6 @@
   dimensions = ()
   type = ty_optical_props_2str
   intent = out
-  optional = F
 [sw_optical_props_precipByBand]
   standard_name = shortwave_optical_properties_for_precipitation_by_band
   long_name = Fortran DDT containing RRTMGP optical properties
@@ -295,7 +262,6 @@
   dimensions = ()
   type = ty_optical_props_2str
   intent = out
-  optional = F  
 [cldtausw]
   standard_name = cloud_optical_depth_layers_at_0p55mu_band
   long_name = approx .55mu band layer cloud optical depth
@@ -304,7 +270,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -313,7 +278,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -321,4 +285,3 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F

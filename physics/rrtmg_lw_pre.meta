@@ -15,7 +15,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -23,4 +22,3 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
