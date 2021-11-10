@@ -415,6 +415,7 @@ contains
        endif
       enddo
       n1 = n2 - 1
+      if (n2 > 12) n2 = n2 -12
 !     need to read a new month 
       if (n1>n1sv) then
         DO ii = 1, ntrcaerm
