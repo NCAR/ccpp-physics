@@ -31,7 +31,7 @@
 [mntvar]
   standard_name = statistical_measures_of_subgrid_orography_collection_array
   long_name = array of statistical measures of subgrid height_above_mean_sea_level
-  units = various
+  units = mixed
   dimensions = (horizontal_loop_extent,number_of_statistical_measures_of_subgrid_orography)
   type = real
   kind = kind_phys
@@ -165,7 +165,7 @@
 [dtend]
   standard_name = cumulative_change_of_state_variables
   long_name = diagnostic tendencies for state variables
-  units = various
+  units = mixed
   dimensions = (horizontal_loop_extent,vertical_layer_dimension,cumulative_change_of_state_variables_outer_index_max)
   type = real
   kind = kind_phys
@@ -327,7 +327,7 @@
 [dtend]
   standard_name = cumulative_change_of_state_variables
   long_name = diagnostic tendencies for state variables
-  units = various
+  units = mixed
   dimensions = (horizontal_loop_extent,vertical_layer_dimension,cumulative_change_of_state_variables_outer_index_max)
   type = real
   kind = kind_phys
