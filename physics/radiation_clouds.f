@@ -2861,7 +2861,7 @@
      &       xlat,xlon,slmsk,dz,delp,                                   &
      &       ntrac,ntcw,ntiw,ntrw,ntsw,ntgl,                            &
      &       IX, NLAY, NLP1,                                            &
-     &       uni_cld, lmfshal, lmfdeep2, cldcov,                        &
+     &       uni_cld, lmfshal, lmfdeep2, cldcov, cnvw,                  &
      &       re_cloud,re_ice,re_snow,                                   &
      &       dzlay, latdeg, julian, yearlen,                            &
      &       clouds,clds,mtop,mbot,de_lgth,alpha                        &    !  ---  outputs:
@@ -2955,7 +2955,7 @@
 
       real (kind=kind_phys), dimension(:,:), intent(in) :: plvl, plyr,  &
      &       tlyr, qlyr, qstl, rhly, cldcov, delp, dz, dzlay,           &
-     &       re_cloud, re_ice, re_snow
+     &       re_cloud, re_ice, re_snow, cnvw 
 
       real (kind=kind_phys), dimension(:,:,:), intent(in) :: clw
 
@@ -2987,8 +2987,8 @@
       integer :: i, k, id, nf
 
 !  ---  constant values
-!     real (kind=kind_phys), parameter :: xrc3 = 200.
-      real (kind=kind_phys), parameter :: xrc3 = 100.
+      real (kind=kind_phys), parameter :: xrc3 = 200.
+!     real (kind=kind_phys), parameter :: xrc3 = 100.
 
 !
 !===> ... begin here
@@ -3042,6 +3042,7 @@
         do k = 1, NLAY
           do i = 1, IX
             clwf(i,k) = clw(i,k,ntcw) +  clw(i,k,ntiw) + clw(i,k,ntsw)
+     &      +clw(i,k,ntrw) + clw(i,k,ntgl) + cnvw(i,k)
           enddo
         enddo
 !> - Find top pressure for each cloud domain for given latitude.
@@ -3111,24 +3112,29 @@
         else
           do k = 1, NLAY
           do i = 1, IX
-            clwt = 1.0e-6 * (plyr(i,k)*0.001)
+!           clwt = 1.0e-6 * (plyr(i,k)*0.001)
 !           clwt = 2.0e-6 * (plyr(i,k)*0.001)
+            clwt = 1.0e-10 * (plyr(i,k)*0.001)
 
             if (clwf(i,k) > clwt) then
-              onemrh= max( 1.e-10, 1.0-rhly(i,k) )
-              clwm  = clwmin / max( 0.01, plyr(i,k)*0.001 )
-!
-              tem1  = min(max((onemrh*qstl(i,k))**0.49,0.0001),1.0)  !jhan
-              if (lmfdeep2) then
-                tem1  = xrc3 / tem1
+              if(rhly(i,k) > 1.) then
+                cldtot(i,k) = 1.
               else
-                tem1  = 100.0 / tem1
-              endif
+                onemrh= max( 1.e-10, 1.0-rhly(i,k) )
+                clwm  = clwmin / max( 0.01, plyr(i,k)*0.001 )
 !
-              value = max( min( tem1*(clwf(i,k)-clwm), 50.0 ), 0.0 )
-              tem2  = sqrt( sqrt(rhly(i,k)) )
-
-              cldtot(i,k) = max( tem2*(1.0-exp(-value)), 0.0 )
+                tem1  = min(max((onemrh*qstl(i,k))**0.49,0.0001),1.0)  !jhan
+                if (lmfdeep2) then
+                  tem1  = xrc3 / tem1
+                else
+                  tem1  = 100.0 / tem1
+                endif
+!
+                value = max( min( tem1*(clwf(i,k)-clwm), 50.0 ), 0.0 )
+                tem2  = sqrt( sqrt(rhly(i,k)) )
+  
+                cldtot(i,k) = max( tem2*(1.0-exp(-value)), 0.0 )
+              endif 
             endif
           enddo
           enddo
