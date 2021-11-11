@@ -108,7 +108,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  icloud_bl, do_mynnsfclay,                          &
      &  imp_physics, imp_physics_gfdl,                     &
      &  imp_physics_thompson, imp_physics_wsm6,            &
-     &  ltaerosol, lprnt, errmsg, errflg  )
+     &  ltaerosol, spp_wts_pbl, do_spp, lprnt, errmsg, errflg  )
 
 ! should be moved to inside the mynn:
       use machine , only : kind_phys
@@ -195,6 +195,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 ! NAMELIST OPTIONS (INPUT):
       LOGICAL, INTENT(IN) :: bl_mynn_tkeadvect, ltaerosol,  &
                              lprnt, do_mynnsfclay,          &
+                             do_spp,                        &
                              flag_for_pbl_generic_tend
       INTEGER, INTENT(IN) ::                                &
      &       bl_mynn_cloudpdf,                              &
@@ -221,7 +222,6 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 
 !MISC CONFIGURATION OPTIONS
       INTEGER, PARAMETER ::                                 &
-     &       spp_pbl=0,                                     &
      &       bl_mynn_mixscalars=1,                          &
      &       levflag=2
       LOGICAL ::                                            &
@@ -231,7 +231,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
       LOGICAL, PARAMETER :: cycling = .false.
       INTEGER, PARAMETER :: param_first_scalar = 1
       INTEGER ::                                            &
-       &      p_qc, p_qr, p_qi, p_qs, p_qg, p_qnc, p_qni
+     &      spp_pbl,                                        &
+     &      p_qc, p_qr, p_qi, p_qs, p_qg, p_qnc, p_qni
 
 !MYNN-1D
       REAL(kind=kind_phys), intent(in) :: delt, dtf
@@ -275,6 +276,9 @@ SUBROUTINE mynnedmf_wrapper_run(        &
     &        Tsq, Qsq, Cov, exch_h, exch_m
      real(kind=kind_phys), dimension(:), intent(in) :: xmu
      real(kind=kind_phys), dimension(:,:), intent(in) :: htrsw, htrlw
+    ! spp_wts_pbl only allocated if do_spp == .true.
+    real(kind_phys), dimension(:,:),       intent(in) :: spp_wts_pbl
+
      !LOCAL
       real(kind=kind_phys), dimension(im,levs) ::                        &
      &        sqv,sqc,sqi,qnc,qni,ozone,qnwfa,qnifa,                     &
@@ -282,8 +286,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &        RUBLTEN, RVBLTEN, RTHBLTEN, RQVBLTEN,                      &
      &        RQCBLTEN, RQNCBLTEN, RQIBLTEN, RQNIBLTEN,                  &
      &        RQNWFABLTEN, RQNIFABLTEN,                                  &
-     &        dqke,qWT,qSHEAR,qBUOY,qDISS,                               &
-     &        pattern_spp_pbl
+     &        dqke,qWT,qSHEAR,qBUOY,qDISS
       real(kind=kind_phys), allocatable :: old_ozone(:,:)
 
 !MYNN-CHEM arrays
@@ -525,9 +528,12 @@ SUBROUTINE mynnedmf_wrapper_run(        &
           !   qi(i,k)=qi(i,k)/(1.0 - qvsh(i,k))
              rho(i,k)=prsl(i,k)/(r_d*t3d(i,k))
              w(i,k) = -omega(i,k)/(rho(i,k)*g)
-             pattern_spp_pbl(i,k)=0.0
          enddo
       enddo
+      if ( do_spp ) then
+         spp_pbl=1
+      endif
+
       do i=1,im
          if (slmsk(i)==1. .or. slmsk(i)==2.) then !sea/land/ice mask (=0/1/2) in FV3
             xland(i)=1.0                          !but land/water = (1/2) in SFCLAY_mynn
@@ -708,7 +714,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &             ,det_thl3D=det_thl,det_sqv3D=det_sqv                &
      &             ,nupdraft=nupdraft,maxMF=maxMF                      & !output
      &             ,ktop_plume=ktop_plume                              & !output
-     &             ,spp_pbl=spp_pbl,pattern_spp_pbl=pattern_spp_pbl    & !input
+     &             ,spp_pbl=spp_pbl,pattern_spp_pbl=spp_wts_pbl        & !input
      &             ,RTHRATEN=htrlw                                     & !input
      &             ,FLAG_QI=flag_qi,FLAG_QNI=flag_qni                  & !input
      &             ,FLAG_QC=flag_qc,FLAG_QNC=flag_qnc                  & !input

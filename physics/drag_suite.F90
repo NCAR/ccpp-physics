@@ -218,7 +218,8 @@
      &           do_gsl_drag_ls_bl, do_gsl_drag_ss, do_gsl_drag_tofd,   &
      &           dtend, dtidx, index_of_process_orographic_gwd,         &
      &           index_of_temperature, index_of_x_wind,                 &
-     &           index_of_y_wind, ldiag3d, errmsg, errflg)
+     &           index_of_y_wind, ldiag3d,                              &
+     &           spp_wts_gwd, do_spp, errmsg, errflg)
 
 !   ********************************************************************
 ! ----->  I M P L E M E N T A T I O N    V E R S I O N   <----------
@@ -365,6 +366,11 @@
    real(kind=kind_phys), dimension(im,km)           ::     zl      ! = PHIL/g
 
 !SPP
+   real(kind=kind_phys), dimension(im) :: var_stoch, varss_stoch, &
+                                       varmax_ss_stoch, varmax_fd_stoch
+   real(kind=kind_phys), intent(in) :: spp_wts_gwd(:,:)
+   logical, intent(in) :: do_spp
+
    real(kind=kind_phys), dimension(im)              :: rstoch
 
 !Output:
@@ -601,6 +607,21 @@ else
    end if
 end if
 ! if (me==master) print *,"in Drag Suite, ss_taper:",ss_taper
+
+! SPP, if do_spp is false, no perturbations are applied.
+if ( do_spp ) then
+  do i = its,im
+    var_stoch(i)   = var(i)   + var(i)*0.75*spp_wts_gwd(i,1)
+    varss_stoch(i) = varss(i) + varss(i)*0.75*spp_wts_gwd(i,1)
+    varmax_ss_stoch(i) = varmax_ss + varmax_ss*0.75*spp_wts_gwd(i,1)
+    varmax_fd_stoch(i) = varmax_fd + varmax_fd*0.75*spp_wts_gwd(i,1)
+  enddo
+else
+  var_stoch   = var
+  varss_stoch = varss
+  varmax_ss_stoch = varmax_ss
+  varmax_fd_stoch = varmax_fd
+endif
 
 !--- calculate length of grid for flow-blocking drag
 !

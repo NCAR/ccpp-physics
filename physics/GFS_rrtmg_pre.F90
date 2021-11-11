@@ -35,7 +35,7 @@
         gasvmr_o2, gasvmr_co, gasvmr_cfc11, gasvmr_cfc12, gasvmr_cfc22,        &
         gasvmr_ccl4,  gasvmr_cfc113, aerodp, clouds6, clouds7, clouds8,        &
         clouds9, cldsa, cldfra, faersw1, faersw2, faersw3, faerlw1, faerlw2,   &
-        faerlw3, alpha, errmsg, errflg)
+        faerlw3, alpha, spp_wts_rad, do_spp, errmsg, errflg)
 
       use machine,                   only: kind_phys
 
@@ -101,6 +101,9 @@
       logical,              intent(in) :: lsswr, lslwr, ltaerosol, lgfdlmprad, &
                                           uni_cld, effr_in, do_mynnedmf,       &
                                           lmfshal, lmfdeep2, pert_clds
+
+      logical,    optional, intent(in) :: do_spp
+      real(kind_phys),              intent(in) :: spp_wts_rad(:,:)
 
       real(kind=kind_phys), intent(in) :: fhswr, fhlwr, solhr, sup, julian, sppt_amp
       real(kind=kind_phys), intent(in) :: con_eps, epsm1, fvirt, rog, rocp, con_rd
@@ -1085,6 +1088,27 @@
             cldfra(i,k)   = clouds(i,k,1)
          enddo
        enddo
+
+! --- add spp
+      if ( do_spp .ne. 0 ) then
+
+      do k=1,lm
+        if (k < levs) then
+          do i=1,im
+            effrl_inout(i,k) = effrl_inout(i,k) - spp_wts_rad(i,k) * effrl_inout(i,k)
+            effri_inout(i,k) = effri_inout(i,k) - spp_wts_rad(i,k) * effri_inout(i,k)
+            effrs_inout(i,k) = effrs_inout(i,k) - spp_wts_rad(i,k) * effrs_inout(i,k)
+          enddo
+        else
+          do i=1,im
+            effrl_inout(i,k) = effrl_inout(i,k) - spp_wts_rad(i,levs) * effrl_inout(i,k)
+            effri_inout(i,k) = effri_inout(i,k) - spp_wts_rad(i,levs) * effri_inout(i,k)
+            effrs_inout(i,k) = effrs_inout(i,k) - spp_wts_rad(i,levs) * effrs_inout(i,k)
+          enddo
+        endif
+      enddo
+
+      endif
 
 ! mg, sfc-perts
 !  ---  scale random patterns for surface perturbations with
