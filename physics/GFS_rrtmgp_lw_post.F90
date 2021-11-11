@@ -1,12 +1,11 @@
 module GFS_rrtmgp_lw_post 
   use machine,                   only: kind_phys
-  use module_radiation_aerosols, only: NSPC1
   use module_radlw_parameters,   only: topflw_type, sfcflw_type, proflw_type
   ! RRTMGP DDT's
   use mo_gas_optics_rrtmgp,      only: ty_gas_optics_rrtmgp
   use mo_fluxes_byband,          only: ty_fluxes_byband
   use mo_heating_rates,          only: compute_heating_rate
-  use radiation_tools,                only: check_error_msg
+  use radiation_tools,           only: check_error_msg
   implicit none
   
   public GFS_rrtmgp_lw_post_init,GFS_rrtmgp_lw_post_run,GFS_rrtmgp_lw_post_finalize
@@ -26,9 +25,8 @@ contains
 !!
   subroutine GFS_rrtmgp_lw_post_run (nCol, nLev, lslwr, do_lw_clrsky_hr, save_diag, fhlwr, &
        p_lev, t_lay, tsfa, fluxlwUP_allsky, fluxlwDOWN_allsky, fluxlwUP_clrsky,            &
-       fluxlwDOWN_clrsky, raddt, aerodp, cldsa, mtopa, mbota, cld_frac, cldtaulw, fluxr,   &
-       sfcdlw, sfculw, sfcflw, tsflw, htrlw, htrlwu, topflw, flxprf_lw, htrlwc, errmsg,    &
-       errflg)
+       fluxlwDOWN_clrsky, raddt, cldsa, mtopa, mbota, cld_frac, cldtaulw, fluxr, sfcdlw,   &
+       sfculw, sfcflw, tsflw, htrlw, htrlwu, topflw, flxprf_lw, htrlwc, errmsg, errflg)
 
     ! Inputs                    
     integer, intent(in) :: &
@@ -52,8 +50,6 @@ contains
          fluxlwDOWN_clrsky    ! RRTMGP longwave clear-sky flux (W/m2)
     real(kind_phys), intent(in) :: &
          raddt                ! Radiation time step
-    real(kind_phys), dimension(nCol,NSPC1), intent(in) :: &
-         aerodp               ! Vertical integrated optical depth for various aerosol species  
     real(kind_phys), dimension(nCol,5), intent(in) :: &
          cldsa                ! Fraction of clouds for low, middle, high, total and BL 
     integer,         dimension(nCol,3), intent(in) ::&

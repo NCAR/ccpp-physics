@@ -274,7 +274,6 @@ contains
     vmr_h2o = merge((q_lay/(1-q_lay))*amdw, 0., q_lay  .ne. 1.)
     vmr_o3  = merge(o3_lay*amdo3,           0., o3_lay .gt. 0.)
     
-    print*,"istr: ",istr_o2,istr_co2,istr_ch4,istr_n2o,istr_h2o,istr_o3
     ! Populate RRTMGP DDT w/ gas-concentrations
     gas_concentrations%ncol                       = nCol
     gas_concentrations%nlay                       = nLev

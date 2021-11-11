@@ -257,12 +257,12 @@ contains
     ! #######################################################################################
     if (save_diag) then
        do i=1,nCol
-          fluxr(i,34) = fluxr(i,34) + fhswr*aerodp(i,1)  ! total aod at 550nm
-          fluxr(i,35) = fluxr(i,35) + fhswr*aerodp(i,2)  ! DU aod at 550nm
-          fluxr(i,36) = fluxr(i,36) + fhswr*aerodp(i,3)  ! BC aod at 550nm
-          fluxr(i,37) = fluxr(i,37) + fhswr*aerodp(i,4)  ! OC aod at 550nm
-          fluxr(i,38) = fluxr(i,38) + fhswr*aerodp(i,5)  ! SU aod at 550nm
-          fluxr(i,39) = fluxr(i,39) + fhswr*aerodp(i,6)  ! SS aod at 550nm
+          fluxr(i,34) = aerodp(i,1)  ! total aod at 550nm
+          fluxr(i,35) = aerodp(i,2)  ! DU aod at 550nm
+          fluxr(i,36) = aerodp(i,3)  ! BC aod at 550nm
+          fluxr(i,37) = aerodp(i,4)  ! OC aod at 550nm
+          fluxr(i,38) = aerodp(i,5)  ! SU aod at 550nm
+          fluxr(i,39) = aerodp(i,6)  ! SS aod at 550nm
           if (coszen(i) > 0.) then
              ! SW all-sky fluxes
              tem0d = fhswr * coszdg(i) / coszen(i)
