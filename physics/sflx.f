@@ -3556,7 +3556,6 @@
 !  --- ...  store ice content at each soil layer before calling srt & sstep
 
       do i = 1, nsoil
-        smc(i) = 0. ! TODO tmpfix for smc used-before-set warning JM 20211112
         sice(i) = smc(i) - sh2o(i)
       enddo
 
