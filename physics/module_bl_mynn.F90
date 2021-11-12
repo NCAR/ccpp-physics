@@ -2525,7 +2525,7 @@ CONTAINS
            !CLOUD FRACTION. rr2 = 1/SQRT(2) = 0.707
            cldfra_bl1D(k) = 0.5*( 1.0+erf( q1(k)*rr2 ) )
 
-           eq1  = rrp*EXP( -0.5*q1k*q1k )
+           eq1  = rrp*EXP( -0.5*q1k*q1k )  ! TODO q1k is used before defined, 20211112 JM
            qll  = MAX( cldfra_bl1D(k)*q1k + eq1, 0.0 )
            !ESTIMATED LIQUID WATER CONTENT (UNNORMALIZED)
            ql(k) = alp(k)*sgm(k)*qll
