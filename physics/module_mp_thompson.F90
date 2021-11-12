@@ -1221,7 +1221,7 @@ MODULE module_mp_thompson
             m = RSHIFT(ABS(rand_perturb_on),1)
             if (MOD(m,2) .ne. 0) rand2 = rand_pert(i,1,j)*2.
             m = RSHIFT(ABS(rand_perturb_on),2)
-            if (MOD(m,2) .ne. 0) rand3 = 0.25*(rand_pert(i,1,j)+ABS(min_rand))
+            if (MOD(m,2) .ne. 0) rand3 = 0.25*(rand_pert(i,1,j)+ABS(min_rand)) !TODO min_rand used before set 2021112 JM
             m = RSHIFT(ABS(rand_perturb_on),3)
          endif
 !+---+-----------------------------------------------------------------+
