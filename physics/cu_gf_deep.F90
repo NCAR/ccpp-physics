@@ -2623,10 +2623,10 @@ contains
         p,t,q
      real(kind=kind_phys),    dimension (its:ite,kts:kte)                &
         ,intent (out  )                   ::             &
-        he,hes,qes
+        hes,qes
      real(kind=kind_phys),    dimension (its:ite,kts:kte)                &
         ,intent (inout)                   ::             &
-        z
+        he,z
      real(kind=kind_phys),    dimension (its:ite)                        &
         ,intent (in   )                   ::             &
         psur,z1
