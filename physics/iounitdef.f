@@ -57,7 +57,7 @@
       integer, parameter :: NISIGI2 = 12
       integer, parameter :: NISFCI  = 14
       integer, parameter :: NICO2TR = 15
-      integer, parameter :: NICO2CN = 102
+      integer, parameter :: NICO2CN = 113 ! CCE (Cray) forbids 100-102 20211112 JM
       integer, parameter :: NIMTNVR = 24
       integer, parameter :: NIDTBTH = 27
       integer, parameter :: NIO3PRD = 28
