@@ -3,6 +3,8 @@ module GFS_rrtmgp_pre
        kind_phys                   ! Working type
   use funcphys, only:            &
        fpvs                        ! Function ot compute sat. vapor pressure over liq.
+  use module_radiation_astronomy, only: &
+       coszmn 
   use module_radiation_gases,    only: &
        NF_VGAS,                  & ! Number of active gas species
        getgases,                 & ! Routine to setup trace gases
@@ -96,11 +98,11 @@ contains
 !> \section arg_table_GFS_rrtmgp_pre_run
 !! \htmlinclude GFS_rrtmgp_pre_run.html
 !!
-  subroutine GFS_rrtmgp_pre_run(nCol, nLev, nTracers, i_o3, lsswr, lslwr, fhswr, fhlwr,     &
-       xlat, xlon,  prsl, tgrs, prslk, prsi, qgrs, tsfc, con_eps, con_epsm1, con_fvirt,     &
-       con_epsqs, minGPpres, maxGPpres, minGPtemp, maxGPtemp, raddt, p_lay, t_lay, p_lev,   &
-       t_lev, tsfg, tsfa, qs_lay, q_lay, tv_lay, relhum, tracer, active_gases_array,        &
-       gas_concentrations, tsfc_radtime, errmsg, errflg)
+  subroutine GFS_rrtmgp_pre_run(me, nCol, nLev, nTracers, i_o3, lsswr, lslwr, fhswr, fhlwr, &
+       xlat, xlon,  prsl, tgrs, prslk, prsi, qgrs, tsfc, coslat, sinlat, con_eps, con_epsm1,&
+       con_fvirt, con_epsqs, solhr, minGPpres, maxGPpres, minGPtemp, maxGPtemp, raddt,      &
+       p_lay, t_lay, p_lev, t_lev, tsfg, tsfa, qs_lay, q_lay, tv_lay, relhum, tracer,       &
+       active_gases_array, gas_concentrations, tsfc_radtime, coszen, coszdg, errmsg, errflg)
     
     ! Inputs   
     integer, intent(in)    :: &
@@ -122,11 +124,14 @@ contains
          con_eps,           & ! Physical constant: Epsilon (Rd/Rv)
          con_epsm1,         & ! Physical constant: Epsilon (Rd/Rv) minus one
          con_fvirt,         & ! Physical constant: Inverse of epsilon minus one
-         con_epsqs            ! Physical constant: Minimum saturation mixing-ratio (kg/kg)
+         con_epsqs,         & ! Physical constant: Minimum saturation mixing-ratio (kg/kg)
+         solhr                ! Time in hours after 00z at the current timestep 
     real(kind_phys), dimension(nCol), intent(in) :: & 
     	 xlon,              & ! Longitude
     	 xlat,              & ! Latitude
-    	 tsfc                 ! Surface skin temperature (K)
+    	 tsfc,              & ! Surface skin temperature (K)
+         coslat,            & ! Cosine(latitude)
+         sinlat               ! Sine(latitude) 
     real(kind_phys), dimension(nCol,nLev), intent(in) :: & 
          prsl,              & ! Pressure at model-layer centers (Pa)
          tgrs,              & ! Temperature at model-layer centers (K)
@@ -163,6 +168,9 @@ contains
          active_gases_array ! List of active gases from namelist as array
     type(ty_gas_concs), intent(inout) :: &
          gas_concentrations   ! RRTMGP DDT: gas volumne mixing ratios
+    real(kind_phys), dimension(:), intent(inout) :: &
+         coszen,            & ! Cosine of SZA
+         coszdg               ! Cosine of SZA, daytime
          
     ! Local variables
     integer :: i, j, iCol, iBand, iSFC, iTOA, iLay
@@ -295,6 +303,13 @@ contains
     ! #######################################################################################
     tsfg(1:NCOL) = tsfc(1:NCOL)
     tsfa(1:NCOL) = t_lay(1:NCOL,iSFC)
+
+    ! #######################################################################################
+    ! Compute cosine of zenith angle (only when SW is called)
+    ! #######################################################################################
+    if (lsswr) then
+       call coszmn (xlon, sinlat, coslat, solhr, nCol, me, coszen, coszdg)
+    endif
 
   end subroutine GFS_rrtmgp_pre_run
   

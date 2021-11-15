@@ -1,13 +1,9 @@
 module GFS_rrtmgp_sw_pre
-  use machine, only: &
-       kind_phys                   ! Working type
-  use module_radiation_astronomy, only: &
-       coszmn                      ! Function to compute cos(SZA)
-  use mo_gas_optics_rrtmgp,  only: &
-       ty_gas_optics_rrtmgp
+  use machine,               only: kind_phys
+  use mo_gas_optics_rrtmgp,  only: ty_gas_optics_rrtmgp
   use rrtmgp_sw_gas_optics,  only: sw_gas_props
-  public GFS_rrtmgp_sw_pre_run, GFS_rrtmgp_sw_pre_init, GFS_rrtmgp_sw_pre_finalize
 
+  public GFS_rrtmgp_sw_pre_run, GFS_rrtmgp_sw_pre_init, GFS_rrtmgp_sw_pre_finalize
 contains
 
   ! #########################################################################################
@@ -22,25 +18,18 @@ contains
 !> \section arg_table_GFS_rrtmgp_sw_pre_run
 !! \htmlinclude GFS_rrtmgp_sw_pre.html
 !!
-  subroutine GFS_rrtmgp_sw_pre_run(me, nCol, doSWrad, solhr, lon, coslat, sinlat, &
-       nday, idxday, coszen, coszdg, sfc_alb_nir_dir, sfc_alb_nir_dif, sfc_alb_uvvis_dir,   &
-       sfc_alb_uvvis_dif, sfc_alb_nir_dir_byband, sfc_alb_nir_dif_byband,                   &
-       sfc_alb_uvvis_dir_byband, sfc_alb_uvvis_dif_byband, errmsg, errflg)
+  subroutine GFS_rrtmgp_sw_pre_run(nCol, doSWrad, coszen, nday, idxday, sfc_alb_nir_dir,    &
+       sfc_alb_nir_dif, sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, sfc_alb_nir_dir_byband,       &
+       sfc_alb_nir_dif_byband, sfc_alb_uvvis_dir_byband, sfc_alb_uvvis_dif_byband, errmsg,  &
+       errflg)
 
     ! Input
     integer, intent(in)    :: &
-         me,                & ! Current MPI rank
          nCol                 ! Number of horizontal grid points
-
     logical,intent(in) :: &
          doSWrad              ! Call RRTMGP SW radiation?
-    real(kind_phys), intent(in) :: &
-         solhr                ! Time in hours after 00z at the current timestep
     real(kind_phys), dimension(:), intent(in) :: &
-         lon,               & ! Longitude
-         coslat,            & ! Cosine(latitude)
-         sinlat               ! Sine(latitude)
-
+         coszen
     real(kind_phys), dimension(:), intent(in) :: &
          sfc_alb_nir_dir,   & !
          sfc_alb_nir_dif,   & !
@@ -52,9 +41,6 @@ contains
          nday                 ! Number of daylit points
     integer, dimension(:), intent(out) :: &
          idxday               ! Indices for daylit points
-    real(kind_phys), dimension(:), intent(inout) :: &
-         coszen,            & ! Cosine of SZA
-         coszdg               ! Cosine of SZA, daytime
     real(kind_phys), dimension(:,:), intent(out) :: &
          sfc_alb_nir_dir_byband,   & ! Surface albedo (direct)
          sfc_alb_nir_dif_byband,   & ! Surface albedo (diffuse)
@@ -73,12 +59,6 @@ contains
     errflg = 0
 
     if (doSWrad) then
-
-       ! ####################################################################################
-       ! Compute cosine of zenith angle (only when SW is called)
-       ! ####################################################################################
-       call coszmn (lon, sinlat, coslat, solhr, nCol, me, coszen, coszdg)
-
        ! ####################################################################################
        ! For SW gather daylit points
        ! ####################################################################################
