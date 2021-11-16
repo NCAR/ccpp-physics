@@ -196,9 +196,10 @@
       real(kind=kind_phys), dimension(im,lm+LTP) ::         &
                                   re_cloud, re_ice, re_snow, qv_mp, qc_mp, &
                                   qi_mp, qs_mp, nc_mp, ni_mp, nwfa
+      real (kind=kind_phys), dimension(lm) :: cldfra1d, qv1d,           &
+     &                                 qc1d, qi1d, qs1d, dz1d, p1d, t1d
 
       ! for F-A MP
-      real(kind=kind_phys), dimension(im,lm+LTP)   :: qc_save, qi_save, qs_save
       real(kind=kind_phys), dimension(im,lm+LTP+1) :: tem2db, hz
 
       real(kind=kind_phys), dimension(im,lm+LTP,min(4,ncnd))   :: ccnd
@@ -211,6 +212,7 @@
       ! for stochastic cloud perturbations
       real(kind=kind_phys), dimension(im) :: cldp1d
       real (kind=kind_phys) :: alpha0,beta0,m,s,cldtmp,tmp_wt,cdfz
+      real (kind=kind_phys) :: max_relh
       integer  :: iflag
 
       integer :: ids, ide, jds, jde, kds, kde, &
@@ -906,27 +908,29 @@
             endif
           enddo
 
+          if (imp_physics == imp_physics_thompson) then
+             max_relh = 1.5
+          else
+             max_relh = 1.1
+          endif
+
           do i =1, im
-            do k =1, lmk
-               qc_save(i,k) = ccnd(i,k,1)
-               qi_save(i,k) = ccnd(i,k,2)
-               qs_save(i,k) = ccnd(i,k,4)
+            cldfra1d(:) = 0.0
+            do k = 1, lm-1
+              qv1d(k) = qlyr(i,k)
+              qc1d(k) = max(0.0, tracer1(i,k,ntcw))
+              qi1d(k) = max(0.0, tracer1(i,k,ntiw))
+              qs1d(k) = max(0.0, tracer1(i,k,ntsw))
+              dz1d(k) = dz(i,k)*1.E3
+              p1d(k) = plyr(i,k)*100.0
+              t1d(k) = tlyr(i,k)
             enddo
-          enddo
 
-
-!         call cal_cldfra3(cldcov,qlyr,ccnd(:,:,1),ccnd(:,:,2),      &
-!                          ccnd(:,:,4),plyrpa,tlyr,rho,xland,gridkm, &
-!                          ids,ide,jds,jde,kds,kde,                  &
-!                          ims,ime,jms,jme,kms,kme,                  &
-!                          its,ite,jts,jte,kts,kte)
-
-          !mz* back to micro-only qc  qi,qs
-          do i =1, im
-            do k =1, lmk
-              ccnd(i,k,1) = qc_save(i,k)
-              ccnd(i,k,2) = qi_save(i,k)
-              ccnd(i,k,4) = qs_save(i,k)
+            call cal_cldfra3(cldfra1d, qv1d, qc1d, qi1d, qs1d, dz1d,    &
+     &                       p1d, t1d, xland(i), gridkm,                &
+     &                       .false., max_relh, 1, lm-1, .false.)
+            do k = 1, lm-1
+              cldcov(i,k) = cldfra1d(k)
             enddo
           enddo
 
