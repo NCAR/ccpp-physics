@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = GFS_rrtmgp_sw_post
   type = scheme
-  dependencies = iounitdef.f,machine.F,radiation_aerosols.f,radsw_param.f,rte-rrtmgp/extensions/mo_fluxes_byband.F90,rte-rrtmgp/extensions/mo_fluxes_byband_kernels.F90
+  dependencies = iounitdef.f,machine.F,radiation_aerosols.f,radsw_param.f,rte-rrtmgp/extensions/mo_fluxes_byband.F90
   dependencies = rte-rrtmgp/rte/mo_fluxes.F90,rte-rrtmgp/rte/kernels/mo_fluxes_broadband_kernels.F90,rte-rrtmgp/extensions/mo_heating_rates.F90,radiation_tools.F90
 
 ########################################################################
