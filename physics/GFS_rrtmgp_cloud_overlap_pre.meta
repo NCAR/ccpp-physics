@@ -14,7 +14,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [nLev]
   standard_name = vertical_layer_dimension
   long_name = number of vertical levels
@@ -22,7 +21,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F   
 [yearlen]
   standard_name = number_of_days_in_current_year
   long_name = number of days in a year
@@ -30,7 +28,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F  
 [doSWrad]
   standard_name = flag_for_calling_shortwave_radiation
   long_name = logical flags for sw radiation calls
@@ -38,7 +35,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [doLWrad]
   standard_name = flag_for_calling_longwave_radiation
   long_name = logical flags for lw radiation calls
@@ -46,7 +42,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F    
 [julian]
   standard_name = forecast_julian_day
   long_name = julian day
@@ -55,7 +50,6 @@
   type = real
   kind = kind_phys  
   intent = in
-  optional = F   
 [lat]
   standard_name = latitude
   long_name = latitude
@@ -64,7 +58,6 @@
   type = real
   intent = in
   kind = kind_phys 
-  optional = F     
 [p_lev]
   standard_name = air_pressure_at_interface_for_RRTMGP
   long_name = air pressure at vertical interface for radiation calculation
@@ -73,7 +66,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [p_lay]
   standard_name = air_pressure_at_layer_for_RRTMGP
   long_name = air pressure at vertical layer for radiation calculation
@@ -82,7 +74,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [tv_lay]
   standard_name = virtual_temperature
   long_name = layer virtual temperature
@@ -91,7 +82,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F    
 [con_pi]
   standard_name = pi
   long_name = ratio of a circle's circumference to its diameter
@@ -100,7 +90,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F 
 [con_g]
   standard_name = gravitational_acceleration
   long_name = gravitational acceleration
@@ -109,7 +98,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F 
 [con_rd]
   standard_name = gas_constant_of_dry_air
   long_name = ideal gas constant for dry air
@@ -118,7 +106,6 @@
   type = real
   kind = kind_phys      
   intent = in
-  optional = F   
 [con_epsq]
   standard_name = minimum_value_of_specific_humidity
   long_name = floor value for specific humidity
@@ -127,7 +114,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F       
 [dcorr_con]
   standard_name = decorrelation_length_used_by_overlap_method
   long_name = decorrelation length (default) used by cloud overlap method (iovr)
@@ -136,7 +122,6 @@
   type = real
   intent = in
   kind = kind_phys
-  optional = F
 [idcor]
   standard_name = flag_for_decorrelation_length_method
   long_name = flag for decorrelation length method used in cloud overlap method (iovr)
@@ -144,7 +129,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [iovr]
   standard_name = flag_for_cloud_overlap_method_for_radiation
   long_name = flag for cloud overlap method
@@ -152,7 +136,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [iovr_dcorr]
   standard_name = flag_for_decorrelation_length_cloud_overlap_method
   long_name = choice of decorrelation-length cloud overlap method
@@ -160,7 +143,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [iovr_exp]
   standard_name = flag_for_exponential_cloud_overlap_method
   long_name = choice of exponential cloud overlap method
@@ -168,7 +150,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [iovr_exprand]
   standard_name = flag_for_exponential_random_cloud_overlap_method
   long_name = choice of exponential-random cloud overlap method
@@ -176,7 +157,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [idcor_con]
   standard_name = flag_for_constant_decorrelation_length_method
   long_name = choice of decorrelation length computation (costant)
@@ -184,7 +164,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [idcor_hogan]
   standard_name = flag_for_hogan_decorrelation_length_method
   long_name = choice of decorrelation length computation (hogan)
@@ -192,7 +171,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [idcor_oreopoulos]
   standard_name = flag_for_oreopoulos_decorrelation_length_method
   long_name = choice of decorrelation length computation (oreopoulos)
@@ -200,7 +178,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [cld_frac]
   standard_name = total_cloud_fraction
   long_name = layer total cloud fraction
@@ -209,7 +186,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F  
 [de_lgth]
   standard_name = cloud_decorrelation_length
   long_name = cloud decorrelation length
@@ -218,7 +194,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F   
 [cloud_overlap_param]
   standard_name = cloud_overlap_param
   long_name = cloud overlap parameter
@@ -227,7 +202,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [precip_overlap_param]
   standard_name = precip_overlap_param
   long_name = precipitation overlap parameter
@@ -236,7 +210,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F  
 [deltaZc]
   standard_name = layer_thickness
   long_name = layer_thickness
@@ -245,7 +218,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F    
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -254,7 +226,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -262,4 +233,3 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F  

@@ -15,7 +15,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -23,7 +22,6 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 
 ########################################################################
 [ccpp-arg-table]
@@ -37,7 +35,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -45,7 +42,6 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 
 ########################################################################
 [ccpp-arg-table]
@@ -58,7 +54,6 @@
   dimensions = (8)
   type = integer
   intent = in
-  optional = F
 [idat]
   standard_name = date_and_time_at_model_initialization_in_iso_order
   long_name = initialization date and time
@@ -66,7 +61,6 @@
   dimensions = (8)
   type = integer
   intent = in
-  optional = F
 [dtp]
   standard_name = timestep_for_physics
   long_name = physics timestep
@@ -75,7 +69,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [nsswr]
   standard_name = number_of_timesteps_between_shortwave_radiation_calls
   long_name = number of timesteps between shortwave radiation calls
@@ -83,7 +76,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [nslwr]
   standard_name = number_of_timesteps_between_longwave_radiation_calls
   long_name = number of timesteps between longwave radiation calls
@@ -91,7 +83,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [nhfrad]
   standard_name = number_of_timesteps_for_concurrent_radiation_and_remainder_physics_calls_after_model_initialization
   long_name = number of timesteps for radiation calls on physics timestep (coldstarts only)
@@ -99,7 +90,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [idate]
   standard_name = date_and_time_at_model_initialization_in_united_states_order
   long_name = initial date with different size and ordering
@@ -107,7 +97,6 @@
   dimensions = (4)
   type = integer
   intent = in
-  optional = F
 [debug]
   standard_name = flag_for_debug_output
   long_name = control flag for debug
@@ -115,7 +104,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [me]
   standard_name = mpi_rank
   long_name = current MPI-rank
@@ -123,7 +111,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [master]
   standard_name = mpi_root
   long_name = master MPI-rank
@@ -131,7 +118,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [nscyc]
   standard_name = number_of_timesteps_between_surface_cycling_calls
   long_name = number of timesteps between surface cycling calls
@@ -139,7 +125,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [sec]
   standard_name = forecast_time_in_seconds
   long_name = seconds elapsed since model initialization
@@ -148,7 +133,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [phour]
   standard_name = forecast_time_on_previous_timestep
   long_name = forecast time at the previous timestep
@@ -157,7 +141,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [zhour]
   standard_name = time_elapsed_since_diagnostics_reset
   long_name = time since diagnostics variables have been zeroed
@@ -166,7 +149,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [fhour]
   standard_name = forecast_time
   long_name = current forecast time
@@ -175,7 +157,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [kdt]
   standard_name = index_of_timestep
   long_name = current forecast iteration
@@ -183,7 +164,6 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 [julian]
   standard_name = forecast_julian_day
   long_name = julian day
@@ -192,7 +172,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [yearlen]
   standard_name = number_of_days_in_current_year
   long_name = number of days in a year
@@ -200,7 +179,6 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 [ipt]
   standard_name = index_of_horizontal_gridpoint_for_debug_output
   long_name = horizontal index for point used for diagnostic printout
@@ -208,7 +186,6 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 [lprnt]
   standard_name = flag_print
   long_name = control flag for diagnostic print out
@@ -216,7 +193,6 @@
   dimensions = ()
   type = logical
   intent = out
-  optional = F
 [lssav]
   standard_name = flag_for_diagnostics
   long_name = logical flag for storing diagnostics
@@ -224,7 +200,6 @@
   dimensions = ()
   type = logical
   intent = out
-  optional = F
 [lsswr]
   standard_name = flag_for_calling_shortwave_radiation
   long_name = logical flags for sw radiation calls
@@ -232,7 +207,6 @@
   dimensions = ()
   type = logical
   intent = out
-  optional = F
 [lslwr]
   standard_name = flag_for_calling_longwave_radiation
   long_name = logical flags for lw radiation calls
@@ -240,7 +214,6 @@
   dimensions = ()
   type = logical
   intent = out
-  optional = F
 [solhr]
   standard_name = forecast_utc_hour
   long_name = time in hours after 00z at the current timestep
@@ -249,7 +222,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -258,7 +230,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -266,4 +237,3 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
