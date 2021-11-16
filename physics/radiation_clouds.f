@@ -4566,7 +4566,7 @@
      &                              ((qc(k)+qi(k)).lt.1.E-6)) then
             CLDFRA(K) = MIN(0.99, 0.25*(10.0 + log10(qc(k)+qi(k))))
          endif
-         if (cldfra(k).gt.0.0 .and. p(k).gt.7000.0) CLDFRA(K) = 0.0
+         if (cldfra(k).gt.0.0 .and. p(k).lt.7000.0) CLDFRA(K) = 0.0
          if (debug_flag .and. ndebug.lt.25) then
           write(6,'(a,x,i3,x,f8.2,f7.1,f7.2,f6.1,x,f5.3,f12.7,f12.7,
      &       f12.7)') ' DEBUG-GT: ', k, p(k)*0.01, dz(k), t(k)-273.15,  &
