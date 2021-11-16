@@ -854,72 +854,6 @@
           enddo
         endif
 
-        !mz HWRF physics: icloud=3
-        if(icloud == 3) then
-
-          ! Set internal dimensions
-          ids = 1
-          ims = 1
-          its = 1
-          ide = size(xlon,1)
-          ime = size(xlon,1)
-          ite = size(xlon,1)
-          jds = 1
-          jms = 1
-          jts = 1
-          jde = 1
-          jme = 1
-          jte = 1
-          kds = 1
-          kms = 1
-          kts = 1
-          kde = lm+LTP ! should this be lmk instead of lm? no, or?
-          kme = lm+LTP
-          kte = lm+LTP
-
-          do k = 1, LMK
-            do i = 1, IM
-              rho(i,k)=plyr(i,k)*100./(con_rd*tlyr(i,k))
-              plyrpa(i,k)=plyr(i,k)*100.    !hPa->Pa
-            end do
-          end do
-
-          do i=1,im
-            if (slmsk(i)==1. .or. slmsk(i)==2.) then ! sea/land/ice mask (=0/1/2) in FV3
-               xland(i)=1.0                          ! but land/water = (1/2) in HWRF
-            else
-               xland(i)=2.0
-            endif
-          enddo
-
-          gridkm = sqrt(2.0)*sqrt(dx(1)*0.001*dx(1)*0.001)
-
-          do i =1, im
-            do k =1, lmk
-               qc_save(i,k) = ccnd(i,k,1)
-               qi_save(i,k) = ccnd(i,k,2)
-               qs_save(i,k) = ccnd(i,k,4)
-            enddo
-          enddo
-
-
-          call cal_cldfra3(cldcov,qlyr,ccnd(:,:,1),ccnd(:,:,2),      &
-                           ccnd(:,:,4),plyrpa,tlyr,rho,xland,gridkm, &
-                           ids,ide,jds,jde,kds,kde,                  &
-                           ims,ime,jms,jme,kms,kme,                  &
-                           its,ite,jts,jte,kts,kte)
-
-          !mz* back to micro-only qc  qi,qs
-          do i =1, im
-            do k =1, lmk
-              ccnd(i,k,1) = qc_save(i,k)
-              ccnd(i,k,2) = qi_save(i,k)
-              ccnd(i,k,4) = qs_save(i,k)
-            enddo
-          enddo
-
-        endif ! icloud == 3
-
         if (lextop) then
           do i=1,im
             cldcov(i,lyb) = cldcov(i,lya)
@@ -1002,7 +936,6 @@
           call progcld5 (plyr,plvl,tlyr,tvly,qlyr,qstl,rhly,tracer1,       &  !  --- inputs
                          xlat,xlon,slmsk,dz,delp,                          &
                          ntrac-1, ntcw-1,ntiw-1,ntrw-1,                    &
-!mz                       ntsw-1,ntgl-1,                                   &
                          im, lmk, lmp, icloud, uni_cld, lmfshal, lmfdeep2, &
                          cldcov(:,1:LMK),effrl_inout(:,:),                 &
                          effri_inout(:,:), effrs_inout(:,:),               &
