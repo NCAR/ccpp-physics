@@ -34,8 +34,9 @@
         plvl, plyr, tlvl, tlyr, qlyr, olyr, gasvmr_co2, gasvmr_n2o, gasvmr_ch4,&
         gasvmr_o2, gasvmr_co, gasvmr_cfc11, gasvmr_cfc12, gasvmr_cfc22,        &
         gasvmr_ccl4,  gasvmr_cfc113, aerodp, clouds6, clouds7, clouds8,        &
-        clouds9, cldsa, cldfra, faersw1, faersw2, faersw3, faerlw1, faerlw2,   &
-        faerlw3, alpha, errmsg, errflg)
+        clouds9, cldsa, cldfra, cldfra2d, lwp_ex,iwp_ex, lwp_fc,iwp_fc,        &
+        faersw1, faersw2, faersw3,           &
+        faerlw1, faerlw2, faerlw3, alpha, errmsg, errflg)
 
       use machine,                   only: kind_phys
 
@@ -54,6 +55,7 @@
      &                                     progcld2,                 &
      &                                     progcld4, progcld5,       &
      &                                     progcld6,                 &
+     &                                     progcld_thompson,         &
      &                                     progclduni,               &
      &                                     cal_cldfra3,              &
      &                                     find_cloudLayers,         &
@@ -125,6 +127,8 @@
       real(kind=kind_phys), dimension(:,:), intent(inout) :: clouds1,          &
                                                              clouds2, clouds3, &
                                                              clouds4, clouds5
+      real(kind=kind_phys), dimension(:), intent(out) :: lwp_ex,iwp_ex, &
+     &                                                   lwp_fc,iwp_fc
 
       integer,                              intent(out) :: kd, kt, kb
 
@@ -158,6 +162,7 @@
                                                            clouds8,   &
                                                            clouds9,   &
                                                            cldfra
+      real(kind=kind_phys), dimension(:), intent(out) :: cldfra2d
       real(kind=kind_phys), dimension(:,:), intent(out) :: cldsa
 
       real(kind=kind_phys), dimension(:,:,:), intent(out) :: faersw1,&
@@ -227,6 +232,15 @@
 
       LP1 = LM + 1               ! num of in/out levels
 
+
+      gridkm = sqrt(2.0)*sqrt(dx(1)*0.001*dx(1)*0.001)
+
+      do i = 1, IM
+         lwp_ex(i) = 0.0
+         iwp_ex(i) = 0.0
+         lwp_fc(i) = 0.0
+         iwp_fc(i) = 0.0
+      enddo
 
 !  --- ...  set local /level/layer indexes corresponding to in/out
 !  variables
@@ -637,7 +651,7 @@
           enddo
           ! for Thompson MP - prepare variables for calc_effr
           if_thompson: if (imp_physics == imp_physics_thompson .and. ltaerosol) then
-            do k=1,LMK
+            do k=1,LM
               do i=1,IM
                 qvs = qlyr(i,k)
                 qv_mp (i,k) = qvs/(1.-qvs)
@@ -652,7 +666,7 @@
               enddo
             enddo
           elseif (imp_physics == imp_physics_thompson) then
-            do k=1,LMK
+            do k=1,LM
               do i=1,IM
                 qvs = qlyr(i,k)
                 qv_mp (i,k) = qvs/(1.-qvs)
@@ -892,8 +906,6 @@
             endif
           enddo
 
-          gridkm = sqrt(2.0)*sqrt(dx(1)*0.001*dx(1)*0.001)
-
           do i =1, im
             do k =1, lmk
                qc_save(i,k) = ccnd(i,k,1)
@@ -903,11 +915,11 @@
           enddo
 
 
-          call cal_cldfra3(cldcov,qlyr,ccnd(:,:,1),ccnd(:,:,2),      &
-                           ccnd(:,:,4),plyrpa,tlyr,rho,xland,gridkm, &
-                           ids,ide,jds,jde,kds,kde,                  &
-                           ims,ime,jms,jme,kms,kme,                  &
-                           its,ite,jts,jte,kts,kte)
+!         call cal_cldfra3(cldcov,qlyr,ccnd(:,:,1),ccnd(:,:,2),      &
+!                          ccnd(:,:,4),plyrpa,tlyr,rho,xland,gridkm, &
+!                          ids,ide,jds,jde,kds,kde,                  &
+!                          ims,ime,jms,jme,kms,kme,                  &
+!                          its,ite,jts,jte,kts,kte)
 
           !mz* back to micro-only qc  qi,qs
           do i =1, im
@@ -1031,14 +1043,26 @@
 
           else
             ! MYNN PBL or GF convective are not used
-            call progcld6 (plyr,plvl,tlyr,qlyr,qstl,rhly,tracer1,   & !  --- inputs
-                         xlat,xlon,slmsk,dz,delp,                   &
+!           call progcld6 (plyr,plvl,tlyr,qlyr,qstl,rhly,tracer1,   & !  --- inputs
+!                        xlat,xlon,slmsk,dz,delp,                   &
+!                        ntrac-1, ntcw-1,ntiw-1,ntrw-1,             &
+!                        ntsw-1,ntgl-1,                             &
+!                        im, lmk, lmp, uni_cld, lmfshal, lmfdeep2,  &
+!                        cldcov(:,1:LMK), effrl_inout,              &
+!                        effri_inout, effrs_inout,                  &
+!                        lwp_ex, iwp_ex, lwp_fc, iwp_fc,            &
+!                        dzb, xlat_d, julian, yearlen,              &
+!                        clouds, cldsa, mtopa ,mbota, de_lgth, alpha) !  --- outputs
+
+            call progcld_thompson (plyr,plvl,tlyr,qlyr,qstl,rhly,   & !  --- inputs
+                         tracer1,xlat,xlon,slmsk,dz,delp,           &
                          ntrac-1, ntcw-1,ntiw-1,ntrw-1,             &
                          ntsw-1,ntgl-1,                             &
-                         im, lmk, lmp, uni_cld, lmfshal, lmfdeep2,  &
-                         cldcov(:,1:LMK), effrl_inout(:,:),         &
-                         effri_inout(:,:), effrs_inout(:,:),        &
-                         dzb, xlat_d, julian, yearlen,              &
+                         im, lm, lmp, uni_cld, lmfshal, lmfdeep2,   &
+                         cldcov(:,1:LM), effrl_inout,               &
+                         effri_inout, effrs_inout,                  &
+                         lwp_ex, iwp_ex, lwp_fc, iwp_fc,            &
+                         dzb, xlat_d, julian, yearlen, gridkm,      &
                          clouds, cldsa, mtopa ,mbota, de_lgth, alpha) !  --- outputs
           endif ! MYNN PBL or GF
 
@@ -1071,7 +1095,7 @@
              enddo     ! end_do_i_loop
           enddo     ! end_do_k_loop
        endif
-       do k = 1, LMK
+       do k = 1, LM
          do i = 1, IM
             clouds1(i,k)  = clouds(i,k,1)
             clouds2(i,k)  = clouds(i,k,2)
@@ -1083,6 +1107,12 @@
             clouds8(i,k)  = clouds(i,k,8)
             clouds9(i,k)  = clouds(i,k,9)
             cldfra(i,k)   = clouds(i,k,1)
+         enddo
+       enddo
+       do i = 1, IM
+         cldfra2d(i) = 0.0
+         do k = 1, LM-1
+           cldfra2d(i) = max(cldfra2d(i), cldfra(i,k))
          enddo
        enddo
 

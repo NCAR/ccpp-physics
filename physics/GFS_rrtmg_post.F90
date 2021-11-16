@@ -17,7 +17,7 @@
               nfxr, nday, lsswr, lslwr, lssav, fhlwr, fhswr, raddt, coszen,    &
               coszdg, prsi, tgrs, aerodp, cldsa, mtopa, mbota, clouds1,        &
               cldtaulw, cldtausw, sfcflw, sfcfsw, topflw, topfsw, scmpsw,      &
-              fluxr, errmsg, errflg)
+              fluxr, total_albedo, errmsg, errflg)
 
       use machine,                             only: kind_phys
       use module_radsw_parameters,             only: topfsw_type, sfcfsw_type, &
@@ -43,6 +43,7 @@
       real(kind=kind_phys), dimension(im,lm+LTP), intent(in) :: clouds1
       real(kind=kind_phys), dimension(im,lm+LTP), intent(in) :: cldtausw
       real(kind=kind_phys), dimension(im,lm+LTP), intent(in) :: cldtaulw
+      real(kind=kind_phys), dimension(im),        intent(out) :: total_albedo
       
       type(sfcflw_type), dimension(im), intent(in) :: sfcflw
       type(sfcfsw_type), dimension(im), intent(in) :: sfcfsw
@@ -196,6 +197,12 @@
         endif
 
       endif                                ! end_if_lssav
+
+!  ---  The total sky (with clouds) shortwave albedo
+
+        do i=1,im
+           total_albedo(i) = topfsw(i)%upfxc/topfsw(i)%dnfxc
+        enddo
 !
       end subroutine GFS_rrtmg_post_run
 

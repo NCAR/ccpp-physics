@@ -2458,7 +2458,7 @@ MODULE module_mp_thompson
           tau  = 3.72/(rc(k)*taud)
           prr_wau(k) = zeta/tau
           prr_wau(k) = MIN(DBLE(rc(k)*odts), prr_wau(k))
-          pnr_wau(k) = prr_wau(k) / (am_r*nu_c*200.*D0r*D0r*D0r)            ! RAIN2M
+          pnr_wau(k) = prr_wau(k) / (am_r*nu_c*10.*D0r*D0r*D0r)             ! RAIN2M
           pnc_wau(k) = MIN(DBLE(nc(k)*odts), prr_wau(k)                 &
                      / (am_r*mvd_c(k)*mvd_c(k)*mvd_c(k)))                   ! Qc2M
          endif
@@ -3826,7 +3826,7 @@ MODULE module_mp_thompson
            t3_vts = Kap0*csg(1)*ils1**cse(1)
            t4_vts = Kap1*Mrat**mu_s*csg(7)*ils2**cse(7)
            vts = rhof(k)*av_s * (t1_vts+t2_vts)/(t3_vts+t4_vts)
-           if (temp(k).gt. (T_0+0.1)) then
+           if (prr_sml(k) .gt. 0.0) then
 !           vtsk(k) = MAX(vts*vts_boost(k),                             &
 !    &                vts*((vtrk(k)-vts*vts_boost(k))/(temp(k)-T_0)))
             SR = rs(k)/(rs(k)+rr(k))
