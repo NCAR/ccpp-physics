@@ -3107,6 +3107,8 @@
             lwp_ex(i) = lwp_ex(i) + cwp(i,k)
             iwp_ex(i) = iwp_ex(i) + cip(i,k) + csp(i,k)
          enddo
+         lwp_ex(i) = lwp_ex(i)*1.E-3
+         iwp_ex(i) = iwp_ex(i)*1.E-3
       enddo
 
       if (uni_cld) then     ! use unified sgs clouds generated outside
