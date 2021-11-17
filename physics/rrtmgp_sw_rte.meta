@@ -66,13 +66,19 @@
   type = real
   kind = kind_phys
   intent = in
-[p_lev]
-  standard_name = air_pressure_at_interface_for_RRTMGP
-  long_name = air pressure level
-  units = Pa
-  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
-  type = real
-  kind = kind_phys
+[top_at_1]
+  standard_name = flag_for_vertical_ordering_in_RRTMGP
+  long_name = flag for vertical ordering in RRTMGP
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[iSFC]
+  standard_name = vertical_index_for_surface_in_RRTMGP
+  long_name = index for surface layer in RRTMGP
+  units = flag
+  dimensions = ()
+  type = integer
   intent = in
 [t_lay]
   standard_name = air_temperature_at_layer_for_RRTMGP

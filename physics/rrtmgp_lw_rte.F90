@@ -2,14 +2,11 @@
 ! ###########################################################################################
 module rrtmgp_lw_rte
   use machine,                only: kind_phys
-  use mo_rte_kind,            only: wl
-  use mo_gas_optics_rrtmgp,   only: ty_gas_optics_rrtmgp
-  use mo_cloud_optics,        only: ty_cloud_optics
   use mo_optical_props,       only: ty_optical_props_1scl, ty_optical_props_2str
   use mo_rte_lw,              only: rte_lw
   use mo_fluxes_byband,       only: ty_fluxes_byband
   use mo_source_functions,    only: ty_source_func_lw
-  use radiation_tools,             only: check_error_msg
+  use radiation_tools,        only: check_error_msg
   use rrtmgp_lw_gas_optics,   only: lw_gas_props
   implicit none
 
@@ -29,13 +26,14 @@ contains
 !! \htmlinclude rrtmgp_lw_rte_run.html
 !!
   subroutine rrtmgp_lw_rte_run(doLWrad, doLWclrsky, use_LW_jacobian, doGP_lwscat, nCol,     &
-       nLev, p_lev, sfc_emiss_byband, sources, lw_optical_props_clrsky,                     &
+       nLev, top_at_1, sfc_emiss_byband, sources, lw_optical_props_clrsky,                  &
        lw_optical_props_clouds, lw_optical_props_aerosol, nGauss_angles, fluxlwUP_allsky,   &
        fluxlwDOWN_allsky, fluxlwUP_clrsky, fluxlwDOWN_clrsky, fluxlwUP_jac,                 &
        fluxlwUP_radtime, fluxlwDOWN_radtime, errmsg, errflg)
 
     ! Inputs
     logical, intent(in) :: &
+         top_at_1,                & ! Vertical ordering flag
          doLWrad,                 & ! Logical flag for longwave radiation call
          doLWclrsky,              & ! Compute clear-sky fluxes for clear-sky heating-rate?
          use_LW_jacobian,         & ! Compute Jacobian of LW to update radiative fluxes between radiation calls?
@@ -44,8 +42,6 @@ contains
          nCol,                    & ! Number of horizontal gridpoints
          nLev,                    & ! Number of vertical levels
          nGauss_angles              ! Number of angles used in Gaussian quadrature
-    real(kind_phys), dimension(ncol,nLev+1), intent(in) :: &
-         p_lev                      ! Pressure @ model layer-interfaces (Pa)
     real(kind_phys), dimension(lw_gas_props%get_nband(),ncol), intent(in) :: &
          sfc_emiss_byband           ! Surface emissivity in each band
     type(ty_source_func_lw),intent(in) :: &
@@ -75,9 +71,6 @@ contains
          flux_allsky, flux_clrsky
     real(kind_phys), dimension(ncol,nLev+1,lw_gas_props%get_nband()),target :: &
          fluxLW_up_allsky, fluxLW_up_clrsky, fluxLW_dn_allsky, fluxLW_dn_clrsky
-    logical :: &
-         top_at_1
-    integer :: iSFC, iTOA
     real(kind_phys), dimension(nCol,lw_gas_props%get_ngpt()) :: lw_Ds
 
     ! Initialize CCPP error handling variables
@@ -85,16 +78,6 @@ contains
     errflg = 0
 
     if (.not. doLWrad) return
-
-    ! Vertical ordering?
-    top_at_1 = (p_lev(1,1) .lt. p_lev(1, nLev))
-    if (top_at_1) then
-       iSFC = nLev+1
-       iTOA = 1
-    else
-       iSFC = 1
-       iTOA = nLev+1
-    endif
 
     ! Initialize RRTMGP DDT containing 2D(3D) fluxes
     flux_allsky%bnd_flux_up => fluxLW_up_allsky

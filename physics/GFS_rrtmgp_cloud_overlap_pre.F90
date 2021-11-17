@@ -22,7 +22,7 @@ contains
   subroutine GFS_rrtmgp_cloud_overlap_pre_run(nCol, nLev, yearlen, doSWrad, doLWrad,     &
        julian, lat, p_lev, p_lay, tv_lay, con_pi, con_g, con_rd, con_epsq, dcorr_con,    &
        idcor, iovr, iovr_dcorr, iovr_exp, iovr_exprand, idcor_con, idcor_hogan,          &
-       idcor_oreopoulos, cld_frac,                                                       &
+       idcor_oreopoulos, cld_frac, top_at_1,                                             &
        de_lgth, cloud_overlap_param, precip_overlap_param, deltaZc, errmsg, errflg)
     implicit none
     
@@ -40,6 +40,7 @@ contains
          idcor_hogan,          & ! Flag for decorrelation-length. (https://rmets.onlinelibrary.wiley.com/doi/full/10.1002/qj.647)
          idcor_oreopoulos        ! Flag for decorrelation-length. (10.5194/acp-12-9097-2012) 
     logical, intent(in)     :: &
+         top_at_1,             & ! Vertical ordering flag
     	 doSWrad,              & ! Call SW radiation?
     	 doLWrad                 ! Call LW radiation
     real(kind_phys), intent(in) :: &
@@ -74,24 +75,14 @@ contains
     real(kind_phys) :: tem1,pfac
     real(kind_phys), dimension(nLev+1) :: hgtb
     real(kind_phys), dimension(nLev)   :: hgtc
-    integer :: iCol,iLay,l,iSFC,iTOA
+    integer :: iCol,iLay,l
     real(kind_phys), dimension(nCol,nLev) :: deltaZ
-    logical :: top_at_1
 
     ! Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0
 
     if (.not. (doSWrad .or. doLWrad)) return
-    ! What is vertical ordering?            
-    top_at_1 = (p_lev(1,1) .lt.  p_lev(1, nLev))
-    if (top_at_1) then
-       iSFC = nLev
-       iTOA = 1
-    else
-       iSFC = 1
-       iTOA = nLev
-    endif
 
     !
     ! Compute layer-thickness between layer boundaries (deltaZ) and layer centers (deltaZc)

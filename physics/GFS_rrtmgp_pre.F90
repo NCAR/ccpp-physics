@@ -102,7 +102,8 @@ contains
        xlat, xlon,  prsl, tgrs, prslk, prsi, qgrs, tsfc, coslat, sinlat, con_eps, con_epsm1,&
        con_fvirt, con_epsqs, solhr, minGPpres, maxGPpres, minGPtemp, maxGPtemp, raddt,      &
        p_lay, t_lay, p_lev, t_lev, tsfg, tsfa, qs_lay, q_lay, tv_lay, relhum, tracer,       &
-       active_gases_array, gas_concentrations, tsfc_radtime, coszen, coszdg, errmsg, errflg)
+       active_gases_array, gas_concentrations, tsfc_radtime, coszen, coszdg, top_at_1, iSFC,&
+       iTOA, errmsg, errflg)
     
     ! Inputs   
     integer, intent(in)    :: &
@@ -145,7 +146,11 @@ contains
     character(len=*), intent(out) :: &
          errmsg               ! Error message
     integer, intent(out) :: &  
-         errflg               ! Error flag    
+         errflg,            & ! Error flag
+         iSFC,              & ! Vertical index for surface
+         iTOA                 ! Vertical index for TOA
+    logical, intent(out) :: &
+         top_at_1             ! Vertical ordering flag
     real(kind_phys), intent(inout) :: &
          raddt                ! Radiation time-step
     real(kind_phys), dimension(ncol), intent(inout) :: &
@@ -165,7 +170,7 @@ contains
     real(kind_phys), dimension(nCol, nLev, nTracers),intent(inout) :: &
          tracer               ! Array containing trace gases
     character(len=*), dimension(:), intent(in) :: &
-         active_gases_array ! List of active gases from namelist as array
+         active_gases_array   ! List of active gases from namelist as array
     type(ty_gas_concs), intent(inout) :: &
          gas_concentrations   ! RRTMGP DDT: gas volumne mixing ratios
     real(kind_phys), dimension(:), intent(inout) :: &
@@ -173,8 +178,7 @@ contains
          coszdg               ! Cosine of SZA, daytime
          
     ! Local variables
-    integer :: i, j, iCol, iBand, iSFC, iTOA, iLay
-    logical :: top_at_1
+    integer :: i, j, iCol, iBand, iLay
     real(kind_phys),dimension(nCol,nLev) :: vmr_o3, vmr_h2o
     real(kind_phys) :: es, tem1, tem2
     real(kind_phys), dimension(nCol,nLev) :: o3_lay

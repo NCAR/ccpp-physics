@@ -22,6 +22,20 @@
   dimensions = ()
   type = integer
   intent = in
+[iSFC]
+  standard_name = vertical_index_for_surface_in_RRTMGP
+  long_name = index for surface layer in RRTMGP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[iTOA]
+  standard_name = vertical_index_for_TOA_in_RRTMGP
+  long_name = index for TOA layer in RRTMGP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
 [nday]
   standard_name = daytime_points_dimension
   long_name = daytime points dimension

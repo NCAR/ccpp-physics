@@ -31,13 +31,13 @@ contains
          nCol,                            & ! Number of horizontal gridpoints
          nDay,                            & ! Number of daylit points.
          nLev,                            & ! Number of vertical layers
-         iovr,                            & ! Choice of cloud-overlap method                                                                                                                 
-         iovr_max,                        & ! Flag for maximum cloud overlap method                                                                                                          
-         iovr_maxrand,                    & ! Flag for maximum-random cloud overlap method                                                                                                   
-         iovr_rand,                       & ! Flag for random cloud overlap method                                                                                                           
-         iovr_dcorr,                      & ! Flag for decorrelation-length cloud overlap method                                                                                             
-         iovr_exp,                        & ! Flag for exponential cloud overlap method                                                                                                      
-         iovr_exprand,                    & ! Flag for exponential-random cloud overlap method 
+         iovr,                            & ! Choice of cloud-overlap method
+         iovr_max,                        & ! Flag for maximum cloud overlap method
+         iovr_maxrand,                    & ! Flag for maximum-random cloud overlap method
+         iovr_rand,                       & ! Flag for random cloud overlap method
+         iovr_dcorr,                      & ! Flag for decorrelation-length cloud overlap method
+         iovr_exp,                        & ! Flag for exponential cloud overlap method
+         iovr_exprand,                    & ! Flag for exponential-random cloud overlap method
          isubc_sw
     integer,intent(in),dimension(ncol) :: &
          idxday                             ! Indices for daylit points.
@@ -54,7 +54,7 @@ contains
          precip_overlap_param               ! Precipitation overlap parameter
     type(ty_optical_props_2str),intent(in) :: &
          sw_optical_props_cloudsByBand,   & ! RRTMGP DDT: Shortwave optical properties in each band (clouds)
-         sw_optical_props_precipByBand      ! RRTMGP DDT: Shortwave optical properties in each band (precipitation)    
+         sw_optical_props_precipByBand      ! RRTMGP DDT: Shortwave optical properties in each band (precipitation)
 
     ! Outputs
     character(len=*), intent(out) :: &
