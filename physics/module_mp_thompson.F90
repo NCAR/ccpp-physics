@@ -1921,12 +1921,12 @@ MODULE module_mp_thompson
 
       DOUBLE PRECISION, PARAMETER:: zeroD0 = 0.0d0
       REAL, PARAMETER :: decfl = 8.0
-      REAL :: dtcfl, rainsfc, grlesfc
+      REAL :: dtcfl, rainsfc
       INTEGER :: niter 
 
       REAL, DIMENSION(kts:kte):: temp, pres, qv
       REAL, DIMENSION(kts:kte):: rc, ri, rr, rs, rg, ni, nr, nc, nwfa, nifa
-      REAL, DIMENSION(kts:kte):: rr_tmp, nr_tmp, rg_tmp
+      REAL, DIMENSION(kts:kte):: rr_tmp, nr_tmp
       REAL, DIMENSION(kts:kte):: rho, rhof, rhof2
       REAL, DIMENSION(kts:kte):: qvs, qvsi, delQvs
       REAL, DIMENSION(kts:kte):: satw, sati, ssatw, ssati
@@ -1940,7 +1940,7 @@ MODULE module_mp_thompson
 
       REAL, DIMENSION(kts:kte):: sed_r, sed_s, sed_g, sed_i, sed_n,sed_c
 
-      REAL:: rgvm, delta_tp, orho, lfus2, orhodt
+      REAL:: rgvm, delta_tp, orho, lfus2
       REAL, DIMENSION(5):: onstep
       DOUBLE PRECISION:: N0_exp, N0_min, lam_exp, lamc, lamr, lamg
       DOUBLE PRECISION:: lami, ilami, ilamc
@@ -3956,9 +3956,8 @@ MODULE module_mp_thompson
           call nislfv_rain_ppm(kte,dzq,vtrk,rr,rainsfc,dtcfl,R1)
           call nislfv_rain_ppm(kte,dzq,vtnrk,nr,vtr,dtcfl,R2)
           do k = kts, kte
-            orhodt = 1./(rho(k)*dt)
-            qrten(k) = qrten(k) + (rr(k) - rr_tmp(k)) * orhodt 
-            nrten(k) = nrten(k) + (nr(k) - nr_tmp(k)) * orhodt
+            qrten(k) = qrten(k) + (rr(k) - rr_tmp(k))/rho(k)/dt
+            nrten(k) = nrten(k) + (nr(k) - nr_tmp(k))/rho(k)/dt
           enddo
           pptrain = pptrain + rainsfc
 
@@ -4071,62 +4070,27 @@ MODULE module_mp_thompson
 
       if (ANY(L_qg .eqv. .true.)) then
       nstep = NINT(1./onstep(4))
-      if(.not. sedi_semi) then
-        do n = 1, nstep
-           do k = kte, kts, -1
-              sed_g(k) = vtgk(k)*rg(k)
-           enddo
-           k = kte
-           odzq = 1./dzq(k)
-           orho = 1./rho(k)
-           qgten(k) = qgten(k) - sed_g(k)*odzq*onstep(4)*orho
-           rg(k) = MAX(R1, rg(k) - sed_g(k)*odzq*DT*onstep(4))
-           do k = ksed1(4), kts, -1
-              odzq = 1./dzq(k)
-              orho = 1./rho(k)
-              qgten(k) = qgten(k) + (sed_g(k+1)-sed_g(k))                 &
+      do n = 1, nstep
+         do k = kte, kts, -1
+            sed_g(k) = vtgk(k)*rg(k)
+         enddo
+         k = kte
+         odzq = 1./dzq(k)
+         orho = 1./rho(k)
+         qgten(k) = qgten(k) - sed_g(k)*odzq*onstep(4)*orho
+         rg(k) = MAX(R1, rg(k) - sed_g(k)*odzq*DT*onstep(4))
+         do k = ksed1(4), kts, -1
+            odzq = 1./dzq(k)
+            orho = 1./rho(k)
+            qgten(k) = qgten(k) + (sed_g(k+1)-sed_g(k))                 &
                                                *odzq*onstep(4)*orho
-              rg(k) = MAX(R1, rg(k) + (sed_g(k+1)-sed_g(k)) &
+            rg(k) = MAX(R1, rg(k) + (sed_g(k+1)-sed_g(k)) &
                                            *odzq*DT*onstep(4))
-           enddo
+         enddo
 
-           if (rg(kts).gt.R1*10.) &
-           pptgraul = pptgraul + sed_g(kts)*DT*onstep(4)
-        enddo
-      else ! if(.not. sedi_semi) then
-        niter = 1
-        dtcfl = dt
-        if(SEDI_SEMI_DECFL) then
-          niter = int(nstep/decfl) + 1
-          dtcfl = dt/niter
-        endif
-
-        do n = 1, niter
-          rg_tmp(:) = rg(:)
-          call nislfv_rain_ppm(kte,dzq,vtgk,rg,grlesfc,dtcfl,R1)
-          do k = kts, kte
-            orhodt = 1./(rho(k)*dt)
-            qgten(k) = qgten(k) + (rg(k) - rg_tmp(k))*orhodt
-          enddo
-          pptgraul = pptgraul + grlesfc
-          if(sedi_semi_update) then
-            do k = kte+1, kts, -1
-             vtgk(k) = 0.
-            enddo
-            do k = kte, kts, -1
-               vtg = 0.
-               if (rg(k).gt. R1) then
-                vtg = rhof(k)*av_g*cgg(6)*ogg3 * ilamg(k)**bv_g
-                if (temp(k).gt. T_0) then
-                 vtgk(k) = MAX(vtg, vtrk(k))
-                else
-                 vtgk(k) = vtg
-                endif
-               endif
-            enddo
-          endif
-        enddo
-      endif ! if(.not. sedi_semi) then
+         if (rg(kts).gt.R1*10.) &
+         pptgraul = pptgraul + sed_g(kts)*DT*onstep(4)
+      enddo
       endif
 
 !+---+-----------------------------------------------------------------+
