@@ -14,7 +14,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [levs]
   standard_name = vertical_layer_dimension
   long_name = vertical layer dimension
@@ -22,7 +21,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [flag_init]
   standard_name = flag_for_first_timestep
   long_name = flag signaling first time step for time integration loop
@@ -30,7 +28,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [flag_restart]
   standard_name = flag_for_restart
   long_name = flag for restart (warmstart) or coldstart
@@ -38,7 +35,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [qc]
   standard_name = cloud_liquid_water_mixing_ratio
   long_name = no condensates) ratio of mass of cloud water to mass of dry air plus vapor (without condensates)
@@ -47,7 +43,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [qi]
   standard_name = cloud_ice_mixing_ratio
   long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates)
@@ -56,7 +51,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [qc_save]
   standard_name = cloud_condensed_water_mixing_ratio_save
   long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates) before entering a physics scheme
@@ -65,7 +59,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [qi_save]
   standard_name = ice_water_mixing_ratio_save
   long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates) before entering a physics scheme
@@ -74,7 +67,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -83,7 +75,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -91,4 +82,3 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F

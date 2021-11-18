@@ -108,7 +108,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  icloud_bl, do_mynnsfclay,                          &
      &  imp_physics, imp_physics_gfdl,                     &
      &  imp_physics_thompson, imp_physics_wsm6,            &
-     &  ltaerosol, lprnt, errmsg, errflg  )
+     &  ltaerosol, lprnt, huge, errmsg, errflg  )
 
 ! should be moved to inside the mynn:
       use machine , only : kind_phys
@@ -178,13 +178,13 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                       & cliq, Cice, rcp, XLV, XLF, EP_1, EP_2
 
   real(kind=kind_phys) :: xlvcp, xlscp, ev, rd,             &
-       &     rk, svp11, p608, ep_3,tv0, tv1, gtr,g_inv
+       &     rk, svp11, p608, ep_3,tv0, tv1, gtr,g_inv, huge
 
   REAL, PARAMETER :: tref=300.0     !< reference temperature (K)
   REAL, PARAMETER :: TKmin=253.0    !< for total water conversion, Tripoli and Cotton (1981)
 
   REAL, PARAMETER :: zero=0.0d0, one=1.0d0
-  REAL, PARAMETER :: huge=9.9692099683868690E36 ! NetCDF float FillValue, same as in GFS_typedefs.F90
+! REAL, PARAMETER :: huge=9.9692099683868690E36 ! NetCDF float FillValue, same as in GFS_typedefs.F90
 
   character(len=*), intent(out) :: errmsg
   integer, intent(out) :: errflg
