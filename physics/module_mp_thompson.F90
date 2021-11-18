@@ -970,8 +970,7 @@ MODULE module_mp_thompson
                               nwfa, nifa, nwfa2d, nifa2d,             &
                               tt, th, pii,                            &
                               p, w, dz, dt_in, dt_inner,              &
-                              sedi_semi, sedi_semi_update,            &
-                              sedi_semi_decfl,                        &
+                              sedi_semi, decfl,                       &
                               RAINNC, RAINNCV,                        &
                               SNOWNC, SNOWNCV,                        &
                               ICENC, ICENCV,                          &
@@ -1049,7 +1048,8 @@ MODULE module_mp_thompson
                           vt_dbz_wt
       LOGICAL, INTENT(IN) :: first_time_step
       REAL, INTENT(IN):: dt_in, dt_inner
-      LOGICAL, INTENT(IN) :: sedi_semi, sedi_semi_update,  sedi_semi_decfl
+      LOGICAL, INTENT(IN) :: sedi_semi
+      INTEGER, INTENT(IN) :: decfl
       ! To support subcycling: current step and maximum number of steps
       INTEGER, INTENT (IN) :: istep, nsteps
       LOGICAL, INTENT (IN) :: reset_dBZ
@@ -1425,7 +1425,7 @@ MODULE module_mp_thompson
 #endif
                       rand1, rand2, rand3, &
                       kts, kte, dt, i, j, ext_diag,                    & 
-                      sedi_semi, sedi_semi_update,  sedi_semi_decfl,   &
+                      sedi_semi, decfl,                                &
                       !vtsk1, txri1, txrc1,                            &
                       prw_vcdc1, prw_vcde1,                            &
                       tpri_inu1, tpri_ide1_d, tpri_ide1_s, tprs_ide1,  &
@@ -1821,7 +1821,7 @@ MODULE module_mp_thompson
                           ! Extended diagnostics, most arrays only
                           ! allocated if ext_diag flag is .true.
                           ext_diag,                                        & 
-                          sedi_semi, sedi_semi_update, sedi_semi_decfl,    &
+                          sedi_semi, decfl,                                &
                           !vtsk1, txri1, txrc1,                            &
                           prw_vcdc1, prw_vcde1,                            &
                           tpri_inu1, tpri_ide1_d, tpri_ide1_s, tprs_ide1,  &
@@ -1851,7 +1851,8 @@ MODULE module_mp_thompson
       REAL, INTENT(IN):: rand1, rand2, rand3
       ! Extended diagnostics, most arrays only allocated if ext_diag is true
       LOGICAL, INTENT(IN) :: ext_diag
-      LOGICAL, INTENT(IN) :: sedi_semi, sedi_semi_update,  sedi_semi_decfl
+      LOGICAL, INTENT(IN) :: sedi_semi
+      INTEGER, INTENT(IN) :: decfl
       REAL, DIMENSION(:), INTENT(OUT):: &
                           !vtsk1, txri1, txrc1,                       &
                           prw_vcdc1,                                 &
@@ -1907,7 +1908,6 @@ MODULE module_mp_thompson
            prg_rcg, prg_ihm
 
       DOUBLE PRECISION, PARAMETER:: zeroD0 = 0.0d0
-      REAL, PARAMETER :: decfl = 8.0
       REAL :: dtcfl,rainsfc,graulsfc
       INTEGER :: niter 
 
@@ -3930,10 +3930,8 @@ MODULE module_mp_thompson
       else !if(.not. sedi_semi)
         niter = 1
         dtcfl = dt
-        if(sedi_semi_decfl) then
-          niter = int(nstep/decfl) + 1
-          dtcfl = dt/niter
-        endif 
+        niter = int(nstep/max(decfl,1)) + 1
+        dtcfl = dt/niter
         do n = 1, niter
           rr_tmp(:) = rr(:)
           nr_tmp(:) = nr(:)
@@ -3946,29 +3944,27 @@ MODULE module_mp_thompson
           enddo
           pptrain = pptrain + rainsfc
 
-          if(sedi_semi_update) then
-            do k = kte+1, kts, -1
-              vtrk(k) = 0.
-              vtnrk(k) = 0.
-            enddo
-            do k = kte, kts, -1
-              vtr = 0.
-              if (rr(k).gt. R1) then
-                lamr = (am_r*crg(3)*org2*nr(k)/rr(k))**obmr
-                vtr = rhof(k)*av_r*crg(6)*org3 * lamr**cre(3)           &
-                   *((lamr+fv_r)**(-cre(6)))
-                vtrk(k) = vtr
+          do k = kte+1, kts, -1
+            vtrk(k) = 0.
+            vtnrk(k) = 0.
+          enddo
+          do k = kte, kts, -1
+            vtr = 0.
+            if (rr(k).gt. R1) then
+              lamr = (am_r*crg(3)*org2*nr(k)/rr(k))**obmr
+              vtr = rhof(k)*av_r*crg(6)*org3 * lamr**cre(3)           &
+                 *((lamr+fv_r)**(-cre(6)))
+              vtrk(k) = vtr
  ! First below is technically correct:
  !         vtr = rhof(k)*av_r*crg(5)*org2 * lamr**cre(2)                &
  !                     *((lamr+fv_r)**(-cre(5)))
  ! Test: make number fall faster (but still slower than mass)
  ! Goal: less prominent size sorting
-                vtr = rhof(k)*av_r*crg(7)/crg(12) * lamr**cre(12)       &
-                     *((lamr+fv_r)**(-cre(7)))
-                vtnrk(k) = vtr
-              endif
-            enddo
-          endif ! if(sedi_semi_update)
+              vtr = rhof(k)*av_r*crg(7)/crg(12) * lamr**cre(12)       &
+                   *((lamr+fv_r)**(-cre(7)))
+              vtnrk(k) = vtr
+            endif
+          enddo
         enddo
       endif! if(.not. sedi_semi)
       endif
@@ -4080,10 +4076,8 @@ MODULE module_mp_thompson
       else ! if(.not. sedi_semi) then 
         niter = 1
         dtcfl = dt
-        if(SEDI_SEMI_DECFL) then
-          niter = int(nstep/decfl) + 1
-          dtcfl = dt/niter
-        endif
+        niter = int(nstep/max(decfl,1)) + 1
+        dtcfl = dt/niter
 
         do n = 1, niter
           rg_tmp(:) = rg(:)
@@ -4093,22 +4087,20 @@ MODULE module_mp_thompson
             qgten(k) = qgten(k) + (rg(k) - rg_tmp(k))*orhodt
           enddo
           pptgraul = pptgraul + graulsfc
-          if(sedi_semi_update) then
-            do k = kte+1, kts, -1
-             vtgk(k) = 0.
-            enddo
-            do k = kte, kts, -1
-               vtg = 0.
-               if (rg(k).gt. R1) then
-                vtg = rhof(k)*av_g*cgg(6)*ogg3 * ilamg(k)**bv_g
-                if (temp(k).gt. T_0) then
-                 vtgk(k) = MAX(vtg, vtrk(k))
-                else
-                 vtgk(k) = vtg
-                endif
-               endif
-            enddo
-          endif
+          do k = kte+1, kts, -1
+            vtgk(k) = 0.
+          enddo
+          do k = kte, kts, -1
+             vtg = 0.
+             if (rg(k).gt. R1) then
+              vtg = rhof(k)*av_g*cgg(6)*ogg3 * ilamg(k)**bv_g
+              if (temp(k).gt. T_0) then
+               vtgk(k) = MAX(vtg, vtrk(k))
+              else
+                vtgk(k) = vtg
+              endif
+             endif
+          enddo
         enddo
       endif ! if(.not. sedi_semi) then
       endif 
