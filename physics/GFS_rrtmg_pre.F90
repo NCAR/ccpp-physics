@@ -908,7 +908,7 @@
 
           do i =1, im
             cldfra1d(:) = 0.0
-            do k = 1, lmk-1
+            do k = 1, lmk
               qv1d(k) = qlyr(i,k)
               qc1d(k) = max(0.0, tracer1(i,k,ntcw))
               qi1d(k) = max(0.0, tracer1(i,k,ntiw))
@@ -920,8 +920,8 @@
 
             call cal_cldfra3(cldfra1d, qv1d, qc1d, qi1d, qs1d, dz1d,    &
      &                       p1d, t1d, xland(i), gridkm,                &
-     &                       .false., max_relh, 1, lmk-1, .false.)
-            do k = 1, lmk-1
+     &                       .false., max_relh, 1, lmk, .false.)
+            do k = 1, lmk
               cldcov(i,k) = cldfra1d(k)
             enddo
           enddo
