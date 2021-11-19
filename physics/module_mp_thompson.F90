@@ -1425,7 +1425,7 @@ MODULE module_mp_thompson
 #endif
                       rand1, rand2, rand3, &
                       kts, kte, dt, i, j, ext_diag,                    & 
-                      sedi_semi, decfl,                                &
+                      sedi_semi, decfl, &
                       !vtsk1, txri1, txrc1,                            &
                       prw_vcdc1, prw_vcde1,                            &
                       tpri_inu1, tpri_ide1_d, tpri_ide1_s, tprs_ide1,  &
@@ -1821,7 +1821,7 @@ MODULE module_mp_thompson
                           ! Extended diagnostics, most arrays only
                           ! allocated if ext_diag flag is .true.
                           ext_diag,                                        & 
-                          sedi_semi, decfl,                                &
+                          sedi_semi, decfl, &
                           !vtsk1, txri1, txrc1,                            &
                           prw_vcdc1, prw_vcde1,                            &
                           tpri_inu1, tpri_ide1_d, tpri_ide1_s, tprs_ide1,  &
