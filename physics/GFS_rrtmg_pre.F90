@@ -35,8 +35,8 @@
         gasvmr_o2, gasvmr_co, gasvmr_cfc11, gasvmr_cfc12, gasvmr_cfc22,        &
         gasvmr_ccl4,  gasvmr_cfc113, aerodp, clouds6, clouds7, clouds8,        &
         clouds9, cldsa, cldfra, cldfra2d, lwp_ex,iwp_ex, lwp_fc,iwp_fc,        &
-        faersw1, faersw2, faersw3,           &
-        faerlw1, faerlw2, faerlw3, alpha, errmsg, errflg)
+        faersw1, faersw2, faersw3, faerlw1, faerlw2, faerlw3,                  &
+        alpha, errmsg, errflg)
 
       use machine,                   only: kind_phys
 
@@ -653,7 +653,7 @@
           enddo
           ! for Thompson MP - prepare variables for calc_effr
           if_thompson: if (imp_physics == imp_physics_thompson .and. ltaerosol) then
-            do k=1,LM
+            do k=1,LMK
               do i=1,IM
                 qvs = qlyr(i,k)
                 qv_mp (i,k) = qvs/(1.-qvs)
@@ -668,7 +668,7 @@
               enddo
             enddo
           elseif (imp_physics == imp_physics_thompson) then
-            do k=1,LM
+            do k=1,LMK
               do i=1,IM
                 qvs = qlyr(i,k)
                 qv_mp (i,k) = qvs/(1.-qvs)
@@ -916,7 +916,7 @@
 
           do i =1, im
             cldfra1d(:) = 0.0
-            do k = 1, lm-1
+            do k = 1, lmk-1
               qv1d(k) = qlyr(i,k)
               qc1d(k) = max(0.0, tracer1(i,k,ntcw))
               qi1d(k) = max(0.0, tracer1(i,k,ntiw))
@@ -928,8 +928,8 @@
 
             call cal_cldfra3(cldfra1d, qv1d, qc1d, qi1d, qs1d, dz1d,    &
      &                       p1d, t1d, xland(i), gridkm,                &
-     &                       .false., max_relh, 1, lm-1, .false.)
-            do k = 1, lm-1
+     &                       .false., max_relh, 1, lmk-1, .false.)
+            do k = 1, lmk-1
               cldcov(i,k) = cldfra1d(k)
             enddo
           enddo
@@ -1062,8 +1062,8 @@
                          tracer1,xlat,xlon,slmsk,dz,delp,           &
                          ntrac-1, ntcw-1,ntiw-1,ntrw-1,             &
                          ntsw-1,ntgl-1,                             &
-                         im, lm, lmp, uni_cld, lmfshal, lmfdeep2,   &
-                         cldcov(:,1:LM), effrl_inout,               &
+                         im, lmk, lmp, uni_cld, lmfshal, lmfdeep2,  &
+                         cldcov(:,1:LMK), effrl_inout,              &
                          effri_inout, effrs_inout,                  &
                          lwp_ex, iwp_ex, lwp_fc, iwp_fc,            &
                          dzb, xlat_d, julian, yearlen, gridkm,      &
@@ -1099,7 +1099,7 @@
              enddo     ! end_do_i_loop
           enddo     ! end_do_k_loop
        endif
-       do k = 1, LM
+       do k = 1, LMK
          do i = 1, IM
             clouds1(i,k)  = clouds(i,k,1)
             clouds2(i,k)  = clouds(i,k,2)
@@ -1115,7 +1115,7 @@
        enddo
        do i = 1, IM
          cldfra2d(i) = 0.0
-         do k = 1, LM-1
+         do k = 1, LMK-1
            cldfra2d(i) = max(cldfra2d(i), cldfra(i,k))
          enddo
        enddo
