@@ -14,23 +14,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
-[lsm]
-  standard_name = control_for_land_surface_scheme 
-  long_name = flag for land surface model
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[lsm_noahmp]
-  standard_name = identifier_for_noahmp_land_surface_scheme
-  long_name = flag for NOAH MP land surface model
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [iter]
   standard_name = ccpp_loop_counter
   long_name = loop counter for subcycling loops in CCPP
@@ -38,7 +21,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [wind]
   standard_name = wind_speed_at_lowest_model_layer
   long_name = wind speed at lowest model level
@@ -47,7 +29,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [flag_guess]
   standard_name = flag_for_guess_run
   long_name = flag for guess run
@@ -55,7 +36,6 @@
   dimensions = (horizontal_loop_extent)
   type = logical
   intent = inout
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -64,7 +44,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -72,7 +51,6 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 
 ########################################################################
 [ccpp-table-properties]
@@ -91,23 +69,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
-[lsm]
-  standard_name = control_for_land_surface_scheme
-  long_name = flag for land surface model
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[lsm_noahmp]
-  standard_name = identifier_for_noahmp_land_surface_scheme
-  long_name = flag for NOAH MP land surface model
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [iter]
   standard_name = ccpp_loop_counter
   long_name = loop counter for subcycling loops in CCPP
@@ -115,7 +76,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [wind]
   standard_name = wind_speed_at_lowest_model_layer
   long_name = wind speed at lowest model level
@@ -124,7 +84,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [flag_guess]
   standard_name = flag_for_guess_run
   long_name = flag for guess run
@@ -132,7 +91,6 @@
   dimensions = (horizontal_loop_extent)
   type = logical
   intent = inout
-  optional = F
 [flag_iter]
   standard_name = flag_for_iteration
   long_name = flag for iteration
@@ -140,7 +98,6 @@
   dimensions = (horizontal_loop_extent)
   type = logical
   intent = inout
-  optional = F
 [dry]
   standard_name = flag_nonzero_land_surface_fraction
   long_name = flag indicating presence of some land surface area fraction
@@ -148,7 +105,6 @@
   dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
-  optional = F
 [wet]
   standard_name = flag_nonzero_wet_surface_fraction
   long_name = flag indicating presence of some ocean or lake surface area fraction
@@ -156,7 +112,6 @@
   dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
-  optional = F
 [icy]
   standard_name = flag_nonzero_sea_ice_surface_fraction
   long_name = flag indicating presence of some sea ice surface area fraction
@@ -164,7 +119,6 @@
   dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
-  optional = F
 [nstf_name1]
   standard_name = control_for_nsstm
   long_name = NSSTM flag: off/uncoupled/coupled=0/1/2
@@ -172,7 +126,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -181,7 +134,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -189,4 +141,3 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F

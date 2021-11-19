@@ -1407,19 +1407,20 @@ SUBROUTINE PEDOTRANSFER_SR2006(nsoil,sand,clay,orgm,parameters)
 ! ----------------------------------------------------------------------
 ! subroutine penman
 ! ----------------------------------------------------------------------
+      use machine, only: kind_phys
       implicit none
       logical, intent(in)     :: snowng, frzgra
-      real, intent(in)        :: ch, dqsdt2,fdown,prcp,ffrozp,          &
+      real(kind=kind_phys), intent(in)        :: ch, dqsdt2,fdown,prcp,ffrozp,          &
      &                           q2, q2sat,ssoil, sfcprs, sfctmp,       &
      &                           t2v, th2,emissi_in,sncovr
-      real, intent(out)       :: etp
-      real                    :: epsca,flx2,rch,rr,t24
-      real                    :: a, delta, fnet,rad,rho,emissi,elcp1,lvs
+      real(kind=kind_phys), intent(out)       :: etp
+      real(kind=kind_phys)                    :: epsca,flx2,rch,rr,t24
+      real(kind=kind_phys)                    :: a, delta, fnet,rad,rho,emissi,elcp1,lvs
 
-      real, parameter :: elcp = 2.4888e+3, lsubc = 2.501000e+6,cp = 1004.6
-      real, parameter :: lsubs = 2.83e+6, rd = 287.05, cph2o = 4.1855e+3
-      real, parameter :: cpice = 2.106e+3, lsubf   = 3.335e5  
-      real, parameter :: sigma = 5.6704e-8
+      real(kind=kind_phys), parameter :: elcp = 2.4888e+3, lsubc = 2.501000e+6,cp = 1004.6
+      real(kind=kind_phys), parameter :: lsubs = 2.83e+6, rd = 287.05, cph2o = 4.1855e+3
+      real(kind=kind_phys), parameter :: cpice = 2.106e+3, lsubf   = 3.335e5  
+      real(kind=kind_phys), parameter :: sigma = 5.6704e-8
 
 ! ----------------------------------------------------------------------
 ! executable code begins here:
