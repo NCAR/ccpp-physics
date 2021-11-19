@@ -33,7 +33,6 @@ module mp_thompson
       subroutine mp_thompson_init(ncol, nlev, con_g, con_rd, con_eps,   &
                                   restart, imp_physics,                 &
                                   imp_physics_thompson, convert_dry_rho,&
-                                  d0s, d0g,                             &
                                   spechum, qc, qr, qi, qs, qg, ni, nr,  &
                                   is_aerosol_aware, nc, nwfa2d, nifa2d, &
                                   nwfa, nifa, tgrs, prsl, phil, area,   &
@@ -52,8 +51,6 @@ module mp_thompson
          integer,                   intent(in   ) :: imp_physics_thompson
          ! Hydrometeors
          logical,                   intent(in   ) :: convert_dry_rho
-         real,                      intent(in   ) :: d0s
-         real,                      intent(in   ) :: d0g
          real(kind_phys),           intent(inout) :: spechum(:,:)
          real(kind_phys),           intent(inout) :: qc(:,:)
          real(kind_phys),           intent(inout) :: qr(:,:)
@@ -119,7 +116,7 @@ module mp_thompson
          end if
 
          ! Call Thompson init
-         call thompson_init(d0s=D0s, d0g=D0g,is_aerosol_aware_in=is_aerosol_aware, & 
+         call thompson_init(is_aerosol_aware_in=is_aerosol_aware, & 
                             mpicomm=mpicomm,                                       &
                             mpirank=mpirank, mpiroot=mpiroot, threads=threads,     &
                             errmsg=errmsg, errflg=errflg)
@@ -307,7 +304,7 @@ module mp_thompson
                               nwfa2d, nifa2d,                      &
                               tgrs, prsl, phii, omega,             &
                               sedi_semi, sedi_semi_update,         &
-                              sedi_semi_decfl, crt_sati, d0s, d0g, & 
+                              sedi_semi_decfl, crt_sati, & 
                               dtp, dt_inner,                       & 
                               first_time_step, istep, nsteps,      &
                               prcp, rain, graupel, ice, snow, sr,  &
@@ -367,8 +364,6 @@ module mp_thompson
          logical,                   intent(in)    :: sedi_semi_update
          logical,                   intent(in)    :: sedi_semi_decfl
          real,                      intent(in   ) :: crt_sati
-         real,                      intent(in   ) :: d0s
-         real,                      intent(in   ) :: d0g
          ! MPI and block information
          integer,                   intent(in)    :: blkno
          integer,                   intent(in)    :: mpicomm
@@ -628,7 +623,7 @@ module mp_thompson
                               tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtstep, dt_inner=dt_inner,  &
                               sedi_semi=sedi_semi, sedi_semi_update=sedi_semi_update,        &
                               sedi_semi_decfl=sedi_semi_decfl,                               & 
-                              crt_sati=crt_sati,  d0s=D0s, d0g=D0g,                          &
+                              crt_sati=crt_sati, &
                               rainnc=rain_mp, rainncv=delta_rain_mp,                         &
                               snownc=snow_mp, snowncv=delta_snow_mp,                         &
                               icenc=ice_mp, icencv=delta_ice_mp,                             &
@@ -669,7 +664,7 @@ module mp_thompson
                               tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtstep, dt_inner=dt_inner,  &
                               sedi_semi=sedi_semi, sedi_semi_update=sedi_semi_update,        &
                               sedi_semi_decfl=sedi_semi_decfl,                               &
-                              crt_sati=crt_sati,  d0s=D0s, d0g=D0g,                          &
+                              crt_sati=crt_sati, &
                               rainnc=rain_mp, rainncv=delta_rain_mp,                         &
                               snownc=snow_mp, snowncv=delta_snow_mp,                         &
                               icenc=ice_mp, icencv=delta_ice_mp,                             &
