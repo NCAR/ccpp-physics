@@ -250,7 +250,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [scmpsw]
   standard_name = components_of_surface_downward_shortwave_fluxes
   long_name = derived type for special components of surface downward shortwave fluxes

@@ -3086,7 +3086,7 @@
 
 !> - Compute cloud liquid/ice condensate path in \f$ g/m^2 \f$ .
 
-        do k = 1, NLAY-1
+        do k = 1, NLAY
           do i = 1, IX
             cwp(i,k) = max(0.0, clw(i,k,ntcw) * gfac * delp(i,k))
             cip(i,k) = max(0.0, clw(i,k,ntiw) * gfac * delp(i,k))
@@ -3103,7 +3103,7 @@
          iwp_ex(i) = 0.0
          lwp_fc(i) = 0.0
          iwp_fc(i) = 0.0
-         do k = 1, NLAY-1
+         do k = 1, NLAY
             lwp_ex(i) = lwp_ex(i) + cwp(i,k)
             iwp_ex(i) = iwp_ex(i) + cip(i,k) + csp(i,k)
          enddo
@@ -3123,7 +3123,7 @@
 !> - Calculate layer cloud fraction.
 
         clwmin = 0.0
-        do k = 1, NLAY-1
+        do k = 1, NLAY
         do i = 1, IX
           clwt = 1.0e-6 * (plyr(i,k)*0.001)
 
@@ -3262,7 +3262,7 @@
 
 ! =================   subprogram documentation block   ================ !
 !                                                                       !
-! subprogram:    progcld6    computes cloud related quantities using    !
+! subprogram:  progcld_thompson computes cloud related quantities using !
 !   Thompson/WSM6 cloud microphysics scheme.                            !
 !                                                                       !
 ! abstract:  this program computes cloud fractions from cloud           !
@@ -3272,7 +3272,7 @@
 !   top and base.  the three vertical cloud domains are set up in the   !
 !   initial subroutine "cld_init".                                      !
 !                                                                       !
-! usage:         call progcld6                                          !
+! usage:         call progcld_thompson                                  !
 !                                                                       !
 ! subprograms called:   gethml                                          !
 !                                                                       !
@@ -3440,7 +3440,7 @@
 !> - Since using Thompson MP, assume 25 percent of snow is actually in
 !!   ice sizes.
 
-      do k = 1, NLAY-1
+      do k = 1, NLAY
         do i = 1, IX
           cwp(i,k) = max(0.0, clw(i,k,ntcw) * dz(i,k)*1.E6)
           crp(i,k) = max(0.0, clw(i,k,ntrw) * dz(i,k)*1.E6)
@@ -3462,7 +3462,7 @@
       do i = 1, IX
          lwp_ex(i) = 0.0
          iwp_ex(i) = 0.0
-         do k = 1, NLAY-1
+         do k = 1, NLAY
             lwp_ex(i) = lwp_ex(i) + cwp(i,k)
             iwp_ex(i) = iwp_ex(i) + cip(i,k) + csp(i,k)
          enddo
@@ -3485,7 +3485,7 @@
          endif
 
          cldfra1d(:) = 0.0
-         do k = 1, NLAY-1
+         do k = 1, NLAY
             qv1d(k) = qlyr(i,k)
             qc1d(k) = max(0.0, clw(i,k,ntcw))
             qi1d(k) = max(0.0, clw(i,k,ntiw))
@@ -3497,9 +3497,9 @@
 
          call cal_cldfra3(cldfra1d, qv1d, qc1d, qi1d, qs1d, dz1d,       &
      &                    p1d, t1d, xland, gridkm,                      &
-     &                    .false., max_relh, 1, nlay-1, .false.)
+     &                    .false., max_relh, 1, nlay, .false.)
 
-         do k = 1, NLAY-1
+         do k = 1, NLAY
             cldtot(i,k) = cldfra1d(k)
             if (qc1d(k).gt.clwmin .and. cldfra1d(k).lt.ovcst) then
                cwp(i,k) = qc1d(k) * dz1d(k)*1000.
@@ -3539,7 +3539,7 @@
       do i = 1, IX
          lwp_fc(i) = 0.0
          iwp_fc(i) = 0.0
-         do k = 1, NLAY-1
+         do k = 1, NLAY
             lwp_fc(i) = lwp_fc(i) + cwp(i,k)
             iwp_fc(i) = iwp_fc(i) + cip(i,k) + csp(i,k)
          enddo
@@ -4570,8 +4570,8 @@
          endif
          if (cldfra(k).gt.0.0 .and. p(k).lt.7000.0) CLDFRA(K) = 0.0
          if (debug_flag .and. ndebug.lt.25) then
-          write(6,'(a,x,i3,x,f8.2,f7.1,f7.2,f6.1,x,f5.3,f12.7,f12.7,
-     &       f12.7)') ' DEBUG-GT: ', k, p(k)*0.01, dz(k), t(k)-273.15,  &
+      write(6,'(a,x,i3,x,f8.2,f7.1,f7.2,f6.1,x,f5.3,f12.7,f12.7,f12.7)')&
+     &        ' DEBUG-GT: ', k, p(k)*0.01, dz(k), t(k)-273.15,          &
      &       rh(k)*100., cldfra(k), qc(k)*1.E3, qi(k)*1.E3, qs(k)*1.E3
           if (k.eq.kte) ndebug = ndebug + 1
          endif

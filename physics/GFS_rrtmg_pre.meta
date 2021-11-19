@@ -978,7 +978,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [cldfra2d]
   standard_name = max_in_column_cloud_fraction
   long_name = instantaneous 2D (max-in-column) cloud fraction
@@ -987,7 +986,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [lwp_ex]
   standard_name = liq_water_path_from_microphysics
   long_name = total liquid water path from explicit microphysics
@@ -996,7 +994,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [iwp_ex]
   standard_name = ice_water_path_from_microphysics
   long_name = total ice water path from explicit microphysics
@@ -1005,7 +1002,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [lwp_fc]
   standard_name = liq_water_path_from_cloud_fraction
   long_name = total liquid water path from cloud fraction scheme
@@ -1014,7 +1010,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [iwp_fc]
   standard_name = ice_water_path_from_cloud_fraction
   long_name = total ice water path from cloud fraction scheme
