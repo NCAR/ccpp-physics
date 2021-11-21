@@ -690,14 +690,10 @@
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%tdoms       ',    Diag%tdoms)
                      ! CCPP/RUC only
                      if (Model%lsm == Model%lsm_ruc) then
-                       call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%wet1        ',  Sfcprop%wetness)
+                       call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%wetness  ',  Sfcprop%wetness)
                      else
                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%wet1        ',  Diag%wet1)
                      end if
-                     !call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%skebu_wts   ',    Diag%skebu_wts)
-                     !call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%skebv_wts   ',    Diag%skebv_wts)
-                     !call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%sppt_wts    ',    Diag%sppt_wts)
-                     !call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%shum_wts    ',    Diag%shum_wts)
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%zmtnblck    ',    Diag%zmtnblck)
                      if (Model%ldiag3d) then
                        !do itracer=2,Model%ntracp100
@@ -1307,7 +1303,7 @@
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%scmpsw%visdf        ', Interstitial%scmpsw%visdf            )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%semis_ice           ', Interstitial%semis_ice               )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%semis_land          ', Interstitial%semis_land              )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%semis_water         ', Interstitial%semis_water             )
+!                    call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%semis_water         ', Interstitial%semis_water             )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%sfcalb              ', Interstitial%sfcalb                  )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%sigma               ', Interstitial%sigma                   )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%sigmaf              ', Interstitial%sigmaf                  )
@@ -1393,12 +1389,6 @@
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%icemp               ', Interstitial%icemp                   )
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%rainmp              ', Interstitial%rainmp                  )
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%snowmp              ', Interstitial%snowmp                  )
-                     ! Ferrier-Aligo
-                     else if (Model%imp_physics == Model%imp_physics_fer_hires) then
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%f_ice               ', Interstitial%f_ice                   )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%f_rain              ', Interstitial%f_rain                  )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%f_rimef             ', Interstitial%f_rimef                 )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%cwm                 ', Interstitial%cwm                     )
                      ! Morrison-Gettelman
                      else if (Model%imp_physics == Model%imp_physics_mg) then
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%ncgl                ', Interstitial%ncgl                    )
@@ -1638,3 +1628,132 @@
 
       end subroutine GFS_checkland_run
     end module GFS_checkland
+
+    module GFS_checktracers
+
+      private
+
+      public GFS_checktracers_init, GFS_checktracers_timestep_init, GFS_checktracers_run
+
+      contains
+
+!> \section arg_table_GFS_checktracers_init Argument Table
+!! \htmlinclude GFS_checktracers_init.html
+!!
+      subroutine GFS_checktracers_init (me, master, im, levs, ntracer, kdt, qgrs, gq0, errmsg, errflg)
+
+         use machine, only: kind_phys
+
+         implicit none
+
+         ! Interface variables
+         integer,          intent(in   ) :: me
+         integer,          intent(in   ) :: master
+         integer,          intent(in   ) :: im
+         integer,          intent(in   ) :: levs
+         integer,          intent(in   ) :: ntracer
+         integer,          intent(in   ) :: kdt
+         real(kind_phys),  intent(in   ) :: qgrs(:,:,:)
+         real(kind_phys),  intent(in   ) :: gq0(:,:,:)
+         character(len=*), intent(  out) :: errmsg
+         integer,          intent(  out) :: errflg
+
+         call GFS_checktracers_timestep_init (me, master, im, levs, ntracer, kdt, qgrs, gq0, errmsg, errflg)
+
+      end subroutine GFS_checktracers_init
+
+!> \section arg_table_GFS_checktracers_timestep_init Argument Table
+!! \htmlinclude GFS_checktracers_timestep_init.html
+!!
+      subroutine GFS_checktracers_timestep_init (me, master, im, levs, ntracer, kdt, qgrs, gq0, errmsg, errflg)
+
+         use machine, only: kind_phys
+
+         implicit none
+
+         ! Interface variables
+         integer,          intent(in   ) :: me
+         integer,          intent(in   ) :: master
+         integer,          intent(in   ) :: im
+         integer,          intent(in   ) :: levs
+         integer,          intent(in   ) :: ntracer
+         integer,          intent(in   ) :: kdt
+         real(kind_phys),  intent(in   ) :: qgrs(:,:,:)
+         real(kind_phys),  intent(in   ) :: gq0(:,:,:)
+         character(len=*), intent(  out) :: errmsg
+         integer,          intent(  out) :: errflg
+
+         ! Local variables
+         integer :: i, k, n
+
+         errflg = 0
+         errmsg = ''
+
+         write(0,'(a,i5)')   'YYY: me           :', me
+         write(0,'(a,i5)')   'YYY: master       :', master
+         write(0,'(a,i5)')   'YYY: im           :', im
+         write(0,'(a,i5)')   'YYY: levs         :', levs
+         write(0,'(a,i5)')   'YYY: ntracer      :', ntracer
+         write(0,'(a,i5)')   'YYY: kdt          :', kdt
+
+         do n=1,ntracer
+           do i=1,im
+             do k=1,levs
+               if (qgrs(i,k,n)<0 .or. gq0(i,k,n)<0) then
+                 write(0,'(a,4i5,1x,2e16.7)') 'YYY: blk, n, i, k, qgrs, gq0 :', -999, n, i, k, qgrs(i,k,n), gq0(i,k,n)
+               end if
+             end do
+           end do
+         end do
+
+      end subroutine GFS_checktracers_timestep_init
+
+!> \section arg_table_GFS_checktracers_run Argument Table
+!! \htmlinclude GFS_checktracers_run.html
+!!
+      subroutine GFS_checktracers_run (me, master, blkno, im, levs, ntracer, kdt, qgrs, gq0, errmsg, errflg)
+
+         use machine, only: kind_phys
+
+         implicit none
+
+         ! Interface variables
+         integer,          intent(in   ) :: me
+         integer,          intent(in   ) :: master
+         integer,          intent(in   ) :: blkno
+         integer,          intent(in   ) :: im
+         integer,          intent(in   ) :: levs
+         integer,          intent(in   ) :: ntracer
+         integer,          intent(in   ) :: kdt
+         real(kind_phys),  intent(in   ) :: qgrs(:,:,:)
+         real(kind_phys),  intent(in   ) :: gq0(:,:,:)
+         character(len=*), intent(  out) :: errmsg
+         integer,          intent(  out) :: errflg
+
+         ! Local variables
+         integer :: i, k, n
+
+         errflg = 0
+         errmsg = ''
+
+         write(0,'(a,i5)')   'YYY: me           :', me
+         write(0,'(a,i5)')   'YYY: master       :', master
+         write(0,'(a,i5)')   'YYY: blkno        :', blkno
+         write(0,'(a,i5)')   'YYY: im           :', im
+         write(0,'(a,i5)')   'YYY: levs         :', levs
+         write(0,'(a,i5)')   'YYY: ntracer      :', ntracer
+         write(0,'(a,i5)')   'YYY: kdt          :', kdt
+
+         do n=1,ntracer
+           do i=1,im
+             do k=1,levs
+               if (qgrs(i,k,n)<0 .or. gq0(i,k,n)<0) then
+                 write(0,'(a,4i5,1x,2e16.7)') 'YYY: blk, n, i, k, qgrs, gq0 :', blkno, n, i, k, qgrs(i,k,n), gq0(i,k,n)
+               end if
+             end do
+           end do
+         end do
+
+      end subroutine GFS_checktracers_run
+
+    end module GFS_checktracers

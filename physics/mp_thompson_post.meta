@@ -15,7 +15,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -24,7 +23,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -32,7 +30,6 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 
 ########################################################################
 [ccpp-arg-table]
@@ -45,7 +42,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [nlev]
   standard_name = vertical_layer_dimension
   long_name = number of vertical levels
@@ -53,7 +49,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [tgrs_save]
   standard_name = air_temperature_save
   long_name = air temperature before entering a physics scheme
@@ -62,7 +57,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [tgrs]
   standard_name = air_temperature_of_new_state
   long_name = model layer mean temperature
@@ -71,7 +65,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [prslk]
   standard_name = dimensionless_exner_function
   long_name = dimensionless Exner function at model layer centers
@@ -80,7 +73,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [dtp]
   standard_name = timestep_for_physics
   long_name = physics timestep
@@ -89,7 +81,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [ttendlim]
   standard_name = max_tendency_of_air_potential_temperature_due_to_large_scale_precipitation
   long_name = temperature tendency limiter per physics time step
@@ -98,7 +89,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [kdt]
   standard_name = index_of_timestep
   long_name = current forecast iteration
@@ -106,7 +96,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [mpicomm]
   standard_name = mpi_communicator
   long_name = MPI communicator
@@ -114,7 +103,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [mpirank]
   standard_name = mpi_rank
   long_name = current MPI-rank
@@ -122,7 +110,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [mpiroot]
   standard_name = mpi_root
   long_name = master MPI-rank
@@ -130,7 +117,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -139,7 +125,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -147,7 +132,6 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 
 ########################################################################
 [ccpp-arg-table]
@@ -161,7 +145,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -169,4 +152,3 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
