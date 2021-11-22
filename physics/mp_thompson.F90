@@ -779,9 +779,7 @@ module mp_thompson
                                  re_cloud=re_cloud, re_ice=re_ice, re_snow=re_snow,             &
                                  has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
                                  rand_perturb_on=spp_mp, kme_stoch=kme_stoch,                   &
-                                 ! DH* 2020-06-05 not passing this optional argument, see
-                                 !       comment in module_mp_thompson.F90 / mp_gt_driver
-                                 !rand_pert=rand_pert,                                          &
+                                 rand_pert=spp_wts_mp,                                          &
                                  ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
                                  ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                                  its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
@@ -817,9 +815,7 @@ module mp_thompson
                                  diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
                                  has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
                                  rand_perturb_on=spp_mp, kme_stoch=kme_stoch,                   &
-                                 ! DH* 2020-06-05 not passing this optional argument, see
-                                 !       comment in module_mp_thompson.F90 / mp_gt_driver
-                                 !rand_pert=rand_pert,                                          &
+                                 rand_pert=spp_wts_mp,                                          &
                                  ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
                                  ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                                  its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &

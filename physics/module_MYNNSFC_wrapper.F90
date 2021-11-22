@@ -327,7 +327,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
              QGH=qgh,QSFC=qsfc,QSFC_RUC=qsfc_ruc,                             &
              U10=u10,V10=v10,TH2=th2,T2=t2,Q2=q2,                             &
              GZ1OZ0=GZ1OZ0,WSPD=wspd,wstar=wstar,                             &
-             spp_pbl=spp_pbl,pattern_spp_pbl=spp_wts_sfc,                     &
+             spp_pbl=spp_sfc,pattern_spp_pbl=spp_wts_sfc,                     &
              ids=1,ide=im, jds=1,jde=1, kds=1,kde=levs,                       &
              ims=1,ime=im, jms=1,jme=1, kms=1,kme=levs,                       &
              its=1,ite=im, jts=1,jte=1, kts=1,kte=levs                        )

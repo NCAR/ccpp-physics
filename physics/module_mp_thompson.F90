@@ -1119,23 +1119,13 @@ MODULE module_mp_thompson
 
       ! No need to test for every subcycling step
       test_only_once: if (first_time_step .and. istep==1) then
-         ! DH* 2020-06-05: The stochastic perturbations code was retrofitted
-         ! from a newer version of the Thompson MP scheme, but it has not been
-         ! tested yet.
-         if (rand_perturb_on .ne. 0) then
-           errmsg = 'Logic error in mp_gt_driver: the stochastic perturbations code ' // &
-                    'has not been tested yet with this version of the Thompson scheme'
+         ! Activate this code when removing the guard above
+         if (rand_perturb_on .ne. 0 .and. .not. present(rand_pert)) then
+           errmsg = 'Logic error in mp_gt_driver: random perturbations are on, ' // &
+                    'but optional argument rand_pert is not present'
            errflg = 1
            return
          end if
-         ! Activate this code when removing the guard above
-         !if (rand_perturb_on .ne. 0 .and. .not. present(rand_pert)) then
-         !  errmsg = 'Logic error in mp_gt_driver: random perturbations are on, ' // &
-         !           'but optional argument rand_pert is not present'
-         !  errflg = 1
-         !  return
-         !end if
-         ! *DH 2020-06-05
    
          if ( (present(tt) .and. (present(th) .or. present(pii))) .or. &
               (.not.present(tt) .and. .not.(present(th) .and. present(pii))) ) then
