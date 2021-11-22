@@ -3437,14 +3437,14 @@
       enddo
 
 !> - Compute cloud liquid/ice condensate path in \f$ g/m^2 \f$ .
-!> - Since using Thompson MP, assume 25 percent of snow is actually in
+!> - Since using Thompson MP, assume 20 percent of snow is actually in
 !!   ice sizes.
 
       do k = 1, NLAY-1
         do i = 1, IX
           cwp(i,k) = max(0.0, clw(i,k,ntcw) * dz(i,k)*1.E6)
           crp(i,k) = max(0.0, clw(i,k,ntrw) * dz(i,k)*1.E6)
-          snow_mass_factor = 0.75
+          snow_mass_factor = 0.80
           cip(i,k) = max(0.0, (clw(i,k,ntiw)                            &
      &             + (1.0-snow_mass_factor)*clw(i,k,ntsw))*dz(i,k)*1.E6)
           if (re_snow(i,k) .gt. snow_max_radius)then
@@ -4510,11 +4510,11 @@
       DO k = kts,kte
 
          delz = MAX(100., dz(k))
-         RH_00L = 0.63+MIN(0.36,SQRT(1./(50.0+gridkm*gridkm*delz*0.01)))
+         RH_00L = 0.68+MIN(0.31,SQRT(1./(50.0+gridkm*gridkm*delz*0.01)))
          RH_00O = 0.79+MIN(0.20,SQRT(1./(50.0+gridkm*gridkm*delz*0.01)))
          RHUM = rh(k)
 
-         if (qc(k).ge.1.E-8 .or. qi(k).ge.1.E-9                         &
+         if (qc(k).ge.1.E-7 .or. qi(k).ge.1.E-7                         &
      &                    .or. (qs(k).gt.1.E-6 .and. t(k).lt.273.)) then
             CLDFRA(K) = 1.0
          else
@@ -4569,9 +4569,10 @@
             CLDFRA(K) = MIN(0.99, 0.25*(10.0 + log10(qc(k)+qi(k))))
          endif
          if (cldfra(k).gt.0.0 .and. p(k).lt.7000.0) CLDFRA(K) = 0.0
+
          if (debug_flag .and. ndebug.lt.25) then
-          write(6,'(a,x,i3,x,f8.2,f7.1,f7.2,f6.1,x,f5.3,f12.7,f12.7,
-     &       f12.7)') ' DEBUG-GT: ', k, p(k)*0.01, dz(k), t(k)-273.15,  &
+          write(6,'(a,i3,f9.2,f7.1,f7.2,f6.1,f6.3,f12.7,f12.7,f12.7)')  &
+     &       ' DEBUG-GT: ', k, p(k)*0.01, dz(k), t(k)-273.15,           &
      &       rh(k)*100., cldfra(k), qc(k)*1.E3, qi(k)*1.E3, qs(k)*1.E3
           if (k.eq.kte) ndebug = ndebug + 1
          endif
