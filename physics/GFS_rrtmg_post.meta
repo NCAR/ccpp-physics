@@ -243,14 +243,6 @@
   dimensions = (horizontal_loop_extent)
   type = topfsw_type
   intent = in
-[total_albedo]
-  standard_name = total_sky_albedo
-  long_name = total sky albedo at toa
-  units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = out
 [scmpsw]
   standard_name = components_of_surface_downward_shortwave_fluxes
   long_name = derived type for special components of surface downward shortwave fluxes
@@ -263,6 +255,14 @@
   long_name = time-accumulated 2D radiation-related diagnostic fields
   units = various
   dimensions = (horizontal_loop_extent,number_of_diagnostics_variables_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = inout
+[total_albedo]
+  standard_name = total_sky_albedo
+  long_name = total sky albedo at toa
+  units = frac
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout

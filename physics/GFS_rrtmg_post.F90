@@ -43,7 +43,7 @@
       real(kind=kind_phys), dimension(im,lm+LTP), intent(in) :: clouds1
       real(kind=kind_phys), dimension(im,lm+LTP), intent(in) :: cldtausw
       real(kind=kind_phys), dimension(im,lm+LTP), intent(in) :: cldtaulw
-      real(kind=kind_phys), dimension(im),        intent(out) :: total_albedo
+      real(kind=kind_phys), dimension(im),        intent(inout) :: total_albedo
       
       type(sfcflw_type), dimension(im), intent(in) :: sfcflw
       type(sfcfsw_type), dimension(im), intent(in) :: sfcfsw
