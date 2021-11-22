@@ -149,8 +149,7 @@ MODULE module_mp_thompson
       REAL, PARAMETER, PRIVATE:: fv_s = 100.0
       REAL, PARAMETER, PRIVATE:: av_g = 442.0
       REAL, PARAMETER, PRIVATE:: bv_g = 0.89
-      !REAL, PARAMETER, PRIVATE:: av_i = 1847.5
-      REAL, PRIVATE:: av_i 
+      REAL, PARAMETER, PRIVATE:: av_i = 1493.9
       REAL, PARAMETER, PRIVATE:: bv_i = 1.0
       REAL, PARAMETER, PRIVATE:: av_c = 0.316946E8
       REAL, PARAMETER, PRIVATE:: bv_c = 2.0
@@ -438,7 +437,7 @@ MODULE module_mp_thompson
 !! lookup tables in Thomspson scheme.
 !>\section gen_thompson_init thompson_init General Algorithm
 !> @{
-      SUBROUTINE thompson_init(is_aerosol_aware_in,  &
+      SUBROUTINE thompson_init(is_aerosol_aware_in,       &
                                mpicomm, mpirank, mpiroot, &
                                threads, errmsg, errflg)
 
@@ -532,12 +531,6 @@ MODULE module_mp_thompson
       D0i = (xm0i/am_i)**(1./bm_i)
       xm0s = am_s * D0s**bm_s
       xm0g = am_g * D0g**bm_g
-!> - compute av_i based on D0s 
-      if(D0s == 200.e-6) then 
-        av_i = 1847.5
-      else 
-        av_i = av_s * D0s**(bv_s-bv_i) * exp(-fv_s*D0s)
-      endif 
 
 !> - Compute constants various exponents and gamma() associated with cloud,
 !! rain, snow, and graupel
@@ -897,7 +890,7 @@ MODULE module_mp_thompson
 !! between rain/snow and cloud water
       if (mpirank==mpiroot) write(0,*) '  creating qc collision eff tables'
       call table_Efrw
-      call table_Efsw ()
+      call table_Efsw 
 
 !>  - Call table_dropevap() to creat rain drop evaporation table
       if (mpirank==mpiroot) write(0,*) '  creating rain evap table'
@@ -905,7 +898,7 @@ MODULE module_mp_thompson
 
 !>  - Call qi_aut_qs() to create conversion of some ice mass into snow category
       if (mpirank==mpiroot) write(0,*) '  creating ice converting to snow table'
-      call qi_aut_qs()
+      call qi_aut_qs
 
       call cpu_time(etime)
       if (mpirank==mpiroot) print '("Calculating Thompson tables part 1 took ",f10.3," seconds.")', etime-stime
@@ -979,7 +972,6 @@ MODULE module_mp_thompson
                               p, w, dz, dt_in, dt_inner,              &
                               sedi_semi, sedi_semi_update,            &
                               sedi_semi_decfl,                        &
-                              crt_sati, &
                               RAINNC, RAINNCV,                        &
                               SNOWNC, SNOWNCV,                        &
                               ICENC, ICENCV,                          &
@@ -1058,7 +1050,6 @@ MODULE module_mp_thompson
       LOGICAL, INTENT(IN) :: first_time_step
       REAL, INTENT(IN):: dt_in, dt_inner
       LOGICAL, INTENT(IN) :: sedi_semi, sedi_semi_update,  sedi_semi_decfl
-      REAL, INTENT(IN) :: crt_sati
       ! To support subcycling: current step and maximum number of steps
       INTEGER, INTENT (IN) :: istep, nsteps
       LOGICAL, INTENT (IN) :: reset_dBZ
@@ -1435,7 +1426,6 @@ MODULE module_mp_thompson
                       rand1, rand2, rand3, &
                       kts, kte, dt, i, j, ext_diag,                    & 
                       sedi_semi, sedi_semi_update,  sedi_semi_decfl,   &
-                      crt_sati, & 
                       !vtsk1, txri1, txrc1,                            &
                       prw_vcdc1, prw_vcde1,                            &
                       tpri_inu1, tpri_ide1_d, tpri_ide1_s, tprs_ide1,  &
@@ -1832,7 +1822,6 @@ MODULE module_mp_thompson
                           ! allocated if ext_diag flag is .true.
                           ext_diag,                                        & 
                           sedi_semi, sedi_semi_update, sedi_semi_decfl,    &
-                          crt_sati, &
                           !vtsk1, txri1, txrc1,                            &
                           prw_vcdc1, prw_vcde1,                            &
                           tpri_inu1, tpri_ide1_d, tpri_ide1_s, tprs_ide1,  &
@@ -1863,7 +1852,6 @@ MODULE module_mp_thompson
       ! Extended diagnostics, most arrays only allocated if ext_diag is true
       LOGICAL, INTENT(IN) :: ext_diag
       LOGICAL, INTENT(IN) :: sedi_semi, sedi_semi_update,  sedi_semi_decfl
-      REAL, INTENT(IN) :: crt_sati
       REAL, DIMENSION(:), INTENT(OUT):: &
                           !vtsk1, txri1, txrc1,                       &
                           prw_vcdc1,                                 &
@@ -2897,7 +2885,7 @@ MODULE module_mp_thompson
 
 !>  - Deposition nucleation of dust/mineral from DeMott et al (2010)
 !! we may need to relax the temperature and ssati constraints.
-          if ( (ssati(k).ge. crt_sati) .or. (ssatw(k).gt. eps &
+          if ( (ssati(k).ge. 0.25) .or. (ssatw(k).gt. eps &
                                 .and. temp(k).lt.253.15) ) then
            if (dustyIce .AND. is_aerosol_aware) then
             xnc = iceDeMott(tempc,qv(k),qvs(k),qvsi(k),rho(k),nifa(k))
@@ -4898,7 +4886,7 @@ MODULE module_mp_thompson
 !! of ice depositional growth from diameter=0 to D0s.  Amount of
 !! ice depositional growth is this portion of distrib while larger
 !! diameters contribute to snow growth (as in Harrington et al. 1995).
-      subroutine qi_aut_qs()
+      subroutine qi_aut_qs
 
       implicit none
 
@@ -5011,7 +4999,7 @@ MODULE module_mp_thompson
 !! Variable collision efficiency for snow collecting cloud water using
 !! method of Wang and Ji, 2000 except equate melted snow diameter to
 !! their "effective collision cross-section."
-      subroutine table_Efsw ()
+      subroutine table_Efsw
 
       implicit none
 
