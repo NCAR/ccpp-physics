@@ -46,9 +46,9 @@
      &       sfcemis, dlwflx, sfcnsw, sfcdsw, srflag,                   &
      &       cm, ch, prsl1, prslki, prsik1, prslk1, wind,               &
      &       flag_iter, use_flake, lprnt, ipr, thsfc_loc,               &
-     &       hice, fice, tice, weasd, tskin, tprcp, tiice, ep,          & !  ---  input/outputs:
-     &       snwdph, qsurf, snowmt, gflux, cmm, chh, evap, hflx,        &
-     &       islmsk,                                                    &
+     &       hice, fice, tice, weasd, tsfc_wat, tprcp, tiice, ep,       & !  ---  input/outputs:
+     &       snwdph, qss_i, qss_w, snowmt, gflux, cmm, chh,             &
+     &       evapi, evapw, hflxi, hflxw, islmsk,                        &
      &       errmsg, errflg
      &     )
 
@@ -64,9 +64,10 @@
 !            cm, ch, prsl1, prslki, prsik1, prslk1, wind,               !
 !            flag_iter,                                                 !
 !       input/outputs:                                                  !
-!            hice, fice, tice, weasd, tskin, tprcp, tiice, ep,          !
+!            hice, fice, tice, weasd, tsfc_wat, tprcp, tiice, ep,       !
 !       outputs:                                                        !
-!            snwdph, qsurf, snowmt, gflux, cmm, chh, evap, hflx )       !
+!            snwdph, qsurf, snowmt, gflux, cmm, chh, evapi, evapw,      !
+!            hflxi, hflxw,  )                                           !
 !                                                                       !
 !  subprogram called:  ice3lay.                                         !
 !                                                                       !
@@ -170,26 +171,27 @@
 
 !  ---  input/outputs:
       real (kind=kind_phys), dimension(:), intent(inout) :: hice,       &
-     &       fice, tice, weasd, tskin, tprcp, ep
+     &       fice, tice, weasd, tsfc_wat, tprcp, ep
 
       real (kind=kind_phys), dimension(:,:), intent(inout) :: tiice
 
 !  ---  outputs:
       real (kind=kind_phys), dimension(:), intent(inout) :: snwdph,     &
-     &       qsurf, snowmt, gflux, cmm, chh, evap, hflx
+     &       snowmt, gflux, cmm, chh, evapi, evapw, hflxi, hflxw,       &
+     &       qss_i, qss_w
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
 !  ---  locals:
-      real (kind=kind_phys), dimension(im) :: ffw, evapi, evapw,        &
+      real (kind=kind_phys), dimension(im) :: ffw,                      &
      &       sneti, hfd, hfi,                                           &
 !    &       hflxi, hflxw, sneti, snetw, qssi, qssw, hfd, hfi, hfw,     &
      &       focn, snof,                                   rch, rho,    &
      &       snowd, theta1
 
       real (kind=kind_phys) :: t12, t14, tem, stsice(im,kice)
-     &,                        hflxi, hflxw, q0, qs1, qssi, qssw
+     &,                        q0, qs1, qssi, qssw
       real (kind=kind_phys) :: cpinv, hvapi, elocp, snetw
 !     real (kind=kind_phys) :: cpinv, hvapi, elocp, snetw, cimin
       logical do_sice
@@ -300,7 +302,6 @@
 
           evapi(i) = elocp * rch(i) * (qssi - q0)
           evapw(i) = elocp * rch(i) * (qssw - q0)
-!         evap(i)  = fice(i)*evapi(i) + ffw(i)*evapw(i)
 
           snetw    = sfcdsw(i) * (one - albfw)
           snetw    = min(3.0_kind_phys*sfcnsw(i)                        &
@@ -394,20 +395,25 @@
 !  --- ...  calculate sensible heat flux (& evap over sea ice)
 
           if(thsfc_loc) then ! Use local potential temperature
-            hflxi    = rch(i) * (tice(i) - theta1(i))
-            hflxw    = rch(i) * (tgice - theta1(i))
+            hflxi(i) = rch(i) * (tice(i) - theta1(i))
+            hflxw(i) = rch(i) * (tgice - theta1(i))
           else ! Use potential temperature referenced to 1000 hPa
-            hflxi    = rch(i) * (tice(i)/prsik1(i) - theta1(i))
-            hflxw    = rch(i) * (tgice / prsik1(i) - theta1(i))
+            tem = one / prsik1(i)
+            hflxi(i) = rch(i) * (tice(i)*tem - theta1(i))
+            hflxw(i) = rch(i) * (tgice*tem - theta1(i))
           endif
+          tsfc_wat(i) = tgice
 
-          hflx(i)  = fice(i)*hflxi    + ffw(i)*hflxw
-          evap(i)  = fice(i)*evapi(i) + ffw(i)*evapw(i)
-          tskin(i) = fice(i)*tice(i)  + ffw(i)*tgice
+!         hflx(i)  = fice(i)*hflxi    + ffw(i)*hflxw
+!         evap(i)  = fice(i)*evapi(i) + ffw(i)*evapw(i)
+!         tskin(i) = fice(i)*tice(i)  + ffw(i)*tgice
 !
 !  --- ...  the rest of the output
 
-          qsurf(i) = q1(i) + evap(i) / (elocp*rch(i))
+          qss_i(i) = q1(i) + evapi(i) / (elocp*rch(i))
+          qss_w(i) = q1(i) + evapw(i) / (elocp*rch(i))
+
+!         qsurf(i) = q1(i) + evap(i) / (elocp*rch(i))
 
 !  --- ...  convert snow depth back to mm of water equivalent
 
@@ -415,8 +421,13 @@
           snwdph(i) = weasd(i) * dsi             ! snow depth in mm
 
           tem     = one / rho(i)
-          hflx(i) = hflx(i) * tem * cpinv
-          evap(i) = evap(i) * tem * hvapi
+          hflxi(i) = hflxi(i) * tem * cpinv
+          hflxw(i) = hflxw(i) * tem * cpinv
+          evapi(i) = evapi(i) * tem * hvapi
+          evapw(i) = evapw(i) * tem * hvapi
+
+!         hflx(i) = hflx(i) * tem * cpinv
+!         evap(i) = evap(i) * tem * hvapi
         endif
       enddo
 !
