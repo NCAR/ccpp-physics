@@ -21,7 +21,7 @@
   type = integer
 [oz_pres]
   standard_name = natural_log_of_ozone_forcing_data_pressure_levels
-  long_name = natural log of ozone forcing data pressure levels
+  long_name = natural log of ozone forcing data pressure levels in Pa
   units = 1
   dimensions = (vertical_dimension_of_ozone_forcing_data)
   type = real
