@@ -135,7 +135,7 @@
 [mg_qcvar]
   standard_name = relative_variance_of_subgrid_cloud_condensate_distribution
   long_name = cloud water relative variance for MG microphysics
-  units = 
+  units = frac
   dimensions = ()
   type = real
   kind = kind_phys
@@ -151,7 +151,7 @@
 [mg_rhmini]
   standard_name = relative_humidity_threshold_for_ice_nucleation
   long_name = relative humidity threshold parameter for nucleating ice for MG microphysics
-  units = none
+  units = frac
   dimensions = ()
   type = real
   kind = kind_phys
