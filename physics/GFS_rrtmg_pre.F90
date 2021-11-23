@@ -35,8 +35,8 @@
         gasvmr_o2, gasvmr_co, gasvmr_cfc11, gasvmr_cfc12, gasvmr_cfc22,        &
         gasvmr_ccl4,  gasvmr_cfc113, aerodp, clouds6, clouds7, clouds8,        &
         clouds9, cldsa, cldfra, cldfra2d, lwp_ex,iwp_ex, lwp_fc,iwp_fc,        &
-        faersw1, faersw2, faersw3,           &
-        faerlw1, faerlw2, faerlw3, alpha, errmsg, errflg)
+        faersw1, faersw2, faersw3, faerlw1, faerlw2, faerlw3, alpha,           &
+        errmsg, errflg)
 
       use machine,                   only: kind_phys
 
@@ -653,7 +653,7 @@
           enddo
           ! for Thompson MP - prepare variables for calc_effr
           if_thompson: if (imp_physics == imp_physics_thompson .and. ltaerosol) then
-            do k=1,LM
+            do k=1,LMK
               do i=1,IM
                 qvs = qlyr(i,k)
                 qv_mp (i,k) = qvs/(1.-qvs)
@@ -668,7 +668,7 @@
               enddo
             enddo
           elseif (imp_physics == imp_physics_thompson) then
-            do k=1,LM
+            do k=1,LMK
               do i=1,IM
                 qvs = qlyr(i,k)
                 qv_mp (i,k) = qvs/(1.-qvs)
