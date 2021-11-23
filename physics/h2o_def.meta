@@ -21,8 +21,8 @@
   type = integer
 [h2o_pres]
   standard_name = natural_log_of_h2o_forcing_data_pressure_levels
-  long_name = natural log of h2o forcing data pressure levels
-  units = log(Pa)
+  long_name = natural log of h2o forcing data pressure levels in Pa
+  units = 1
   dimensions = (vertical_dimension_of_h2o_forcing_data)
   type = real
   kind = kind_phys
