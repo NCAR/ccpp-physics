@@ -193,9 +193,9 @@
                           effrl, effri, effrr, effrs, rho, orho, plyrpa
 
       ! for Thompson MP
-      real(kind=kind_phys), dimension(im,lm+LTP) ::         &
-                                  re_cloud, re_ice, re_snow, qv_mp, qc_mp, &
-                                  qi_mp, qs_mp, nc_mp, ni_mp, nwfa
+      real(kind=kind_phys), dimension(im,lm+LTP) ::           &
+                                  qv_mp, qc_mp, qi_mp, qs_mp, &
+                                  nc_mp, ni_mp, nwfa
       real (kind=kind_phys), dimension(lm) :: cldfra1d, qv1d,           &
      &                                 qc1d, qi1d, qs1d, dz1d, p1d, t1d
 
@@ -796,37 +796,25 @@
             !     it will raise the low limit from 5 to 10, but the high limit will remain 125.
             call calc_effectRad (tlyr(i,:), plyr(i,:)*100., qv_mp(i,:), qc_mp(i,:),   &
                                  nc_mp(i,:), qi_mp(i,:), ni_mp(i,:), qs_mp(i,:), &
-                                 re_cloud(i,:), re_ice(i,:), re_snow(i,:), 1, lm )
+                                 effrl(i,:), effri(i,:), effrs(i,:), 1, lm )
             do k=1,lm
-              re_cloud(i,k) = MAX(re_qc_min, MIN(re_cloud(i,k), re_qc_max))
-              re_ice(i,k)   = MAX(re_qi_min, MIN(re_ice(i,k),   re_qi_max))
-              re_snow(i,k)  = MAX(re_qs_min, MIN(re_snow(i,k),  re_qs_max))
+              effrl(i,k) = MAX(re_qc_min, MIN(effrl(i,k), re_qc_max))
+              effri(i,k) = MAX(re_qi_min, MIN(effri(i,k), re_qi_max))
+              effrr(i,k) = 1000. ! rrain_def=1000.
+              effrs(i,k) = MAX(re_qs_min, MIN(effrs(i,k), re_qs_max))
             end do
+            effrl(i,lmk) = re_qc_min
+            effri(i,lmk) = re_qi_min
+            effrr(i,lmk) = 1000. ! rrain_def=1000.
+            effrs(i,lmk) = re_qs_min
           end do
-          ! Scale Thompson's effective radii from meter to micron
-          do k=1,lm
-            do i=1,im
-              re_cloud(i,k) = re_cloud(i,k)*1.e6
-              re_ice(i,k)   = re_ice(i,k)*1.e6
-              re_snow(i,k)  = re_snow(i,k)*1.e6
-            end do
-          end do
+          ! Update global arrays, scale Thompson's effective radii from meter to micron
           do k=1,lm
             k1 = k + kd
             do i=1,im
-              effrl(i,k1) = re_cloud (i,k)
-              effri(i,k1) = re_ice (i,k)
-              effrr(i,k1) = 1000. ! rrain_def=1000.
-              effrs(i,k1) = re_snow(i,k)
-            enddo
-          enddo
-          ! Update global arrays
-          do k=1,lm
-            k1 = k + kd
-            do i=1,im
-              effrl_inout(i,k) = effrl(i,k1)
-              effri_inout(i,k) = effri(i,k1)
-              effrs_inout(i,k) = effrs(i,k1)
+              effrl_inout(i,k) = effrl(i,k1)*1.e6
+              effri_inout(i,k) = effri(i,k1)*1.e6
+              effrs_inout(i,k) = effrs(i,k1)*1.e6
             enddo
           enddo
         else                                                           ! all other cases
