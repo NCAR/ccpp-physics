@@ -890,7 +890,7 @@ MODULE module_mp_thompson
 !! between rain/snow and cloud water
       if (mpirank==mpiroot) write(0,*) '  creating qc collision eff tables'
       call table_Efrw
-      call table_Efsw 
+      call table_Efsw
 
 !>  - Call table_dropevap() to creat rain drop evaporation table
       if (mpirank==mpiroot) write(0,*) '  creating rain evap table'
