@@ -36,7 +36,6 @@ module mp_thompson
                                   spechum, qc, qr, qi, qs, qg, ni, nr,  &
                                   is_aerosol_aware, nc, nwfa2d, nifa2d, &
                                   nwfa, nifa, tgrs, prsl, phil, area,   &
-                                  re_cloud, re_ice, re_snow,            &
                                   mpicomm, mpirank, mpiroot,            &
                                   threads, ext_diag, diag3d,            &
                                   errmsg, errflg)
@@ -62,20 +61,16 @@ module mp_thompson
          real(kind_phys),           intent(inout) :: nr(:,:)
          ! Aerosols
          logical,                   intent(in   ) :: is_aerosol_aware
-         real(kind_phys), optional, intent(inout) :: nc(:,:)
-         real(kind_phys), optional, intent(inout) :: nwfa(:,:)
-         real(kind_phys), optional, intent(inout) :: nifa(:,:)
-         real(kind_phys), optional, intent(inout) :: nwfa2d(:)
-         real(kind_phys), optional, intent(inout) :: nifa2d(:)
+         real(kind_phys),           intent(inout) :: nc(:,:)
+         real(kind_phys),           intent(inout) :: nwfa(:,:)
+         real(kind_phys),           intent(inout) :: nifa(:,:)
+         real(kind_phys),           intent(inout) :: nwfa2d(:)
+         real(kind_phys),           intent(inout) :: nifa2d(:)
          ! State variables
          real(kind_phys),           intent(in   ) :: tgrs(:,:)
          real(kind_phys),           intent(in   ) :: prsl(:,:)
          real(kind_phys),           intent(in   ) :: phil(:,:)
          real(kind_phys),           intent(in   ) :: area(:)
-         ! Cloud effective radii
-         real(kind_phys), optional, intent(  out) :: re_cloud(:,:)
-         real(kind_phys), optional, intent(  out) :: re_ice(:,:)
-         real(kind_phys), optional, intent(  out) :: re_snow(:,:)
          ! MPI information
          integer,                   intent(in   ) :: mpicomm
          integer,                   intent(in   ) :: mpirank
@@ -274,34 +269,6 @@ module mp_thompson
 
          end if
 
-         ! Calculate initial cloud effective radii if requested
-         if (present(re_cloud) .and. present(re_ice) .and. present(re_snow)) then
-           ! Effective radii [m] are now intent(out), bounds applied in calc_effectRad
-           do i = 1, ncol
-             call calc_effectRad (tgrs(i,:), prsl(i,:), qv(i,:), qc(i,:),          &
-                                  nc_local(i,:), qi(i,:), ni(i,:), qs(i,:),        &
-                                  re_cloud(i,:), re_ice(i,:), re_snow(i,:), 1, nlev)
-             do k = 1, nlev
-               re_cloud(i,k) = MAX(re_qc_min, MIN(re_cloud(i,k), re_qc_max))
-               re_ice(i,k)   = MAX(re_qi_min, MIN(re_ice(i,k),   re_qi_max))
-               re_snow(i,k)  = MAX(re_qs_min, MIN(re_snow(i,k),  re_qs_max))
-             end do
-           end do
-           !! Convert to micron: required for bit-for-bit identical restarts;
-           !! otherwise entering mp_thompson_init and converting mu to m and
-           !! back (without updating re_*) introduces b4b differences.
-           !! If this code is used, change units in metadata from m to um!
-           !re_cloud = 1.0E6*re_cloud
-           !re_ice   = 1.0E6*re_ice
-           !re_snow  = 1.0E6*re_snow
-         else if (present(re_cloud) .or. present(re_ice) .or. present(re_snow)) then
-           write(errmsg,fmt='(*(a))') 'Logic error in mp_thompson_init:',  &
-                                      ' all or none of the following optional', &
-                                      ' arguments are required: re_cloud, re_ice, re_snow'
-           errflg = 1
-           return
-         end if
-
          if (convert_dry_rho) then
            !qc = qc/(1.0_kind_phys+qv)
            !qr = qr/(1.0_kind_phys+qv)
@@ -334,11 +301,11 @@ module mp_thompson
                               spechum, qc, qr, qi, qs, qg, ni, nr, &
                               is_aerosol_aware, nc, nwfa, nifa,    &
                               nwfa2d, nifa2d,                      &
-                              tgrs, prsl, phii, omega, dt_inner,   &
-                              dtp, first_time_step, istep, nsteps, &
+                              tgrs, prsl, phii, omega,             &
+                              sedi_semi, decfl, dtp, dt_inner,     & 
+                              first_time_step, istep, nsteps,      &
                               prcp, rain, graupel, ice, snow, sr,  &
                               refl_10cm, reset_dBZ, do_radar_ref,  &
-                              re_cloud, re_ice, re_snow,           &
                               mpicomm, mpirank, mpiroot, blkno,    &
                               ext_diag, diag3d, reset_diag3d,      &
                               spp_wts_mp, do_spp,                  &
@@ -380,6 +347,7 @@ module mp_thompson
          real(kind_phys),           intent(in   ) :: dtp
          logical,                   intent(in   ) :: first_time_step
          integer,                   intent(in   ) :: istep, nsteps
+         real,                      intent(in   ) :: dt_inner
          ! Precip/rain/snow/graupel fall amounts and fraction of frozen precip
          real(kind_phys),           intent(inout) :: prcp(:)
          real(kind_phys),           intent(inout) :: rain(:)
@@ -388,13 +356,10 @@ module mp_thompson
          real(kind_phys),           intent(inout) :: snow(:)
          real(kind_phys),           intent(  out) :: sr(:)
          ! Radar reflectivity
-         real(kind_phys),           intent(  out) :: refl_10cm(:,:)
-         logical,         optional, intent(in   ) :: do_radar_ref
-         real,                      intent(in   ) :: dt_inner
-         ! Cloud effective radii
-         real(kind_phys), optional, intent(  out) :: re_cloud(:,:)
-         real(kind_phys), optional, intent(  out) :: re_ice(:,:)
-         real(kind_phys), optional, intent(  out) :: re_snow(:,:)
+         real(kind_phys),           intent(inout) :: refl_10cm(:,:)
+         logical,                   intent(in   ) :: do_radar_ref
+         logical,                   intent(in)    :: sedi_semi
+         integer,                   intent(in)    :: decfl
          ! MPI and block information
          integer,                   intent(in)    :: blkno
          integer,                   intent(in)    :: mpicomm
@@ -432,27 +397,14 @@ module mp_thompson
          ! Radar reflectivity
          logical         :: diagflag                        ! must be true if do_radar_ref is true, not used otherwise
          integer         :: do_radar_ref_mp                 ! integer instead of logical do_radar_ref
-         ! Effective cloud radii
-         logical         :: do_effective_radii
-         integer         :: has_reqc
-         integer         :: has_reqi
-         integer         :: has_reqs
+         ! Effective cloud radii - turned off in CCPP (taken care off in radiation)
+         logical, parameter :: do_effective_radii = .false.
+         integer, parameter :: has_reqc = 0
+         integer, parameter :: has_reqi = 0
+         integer, parameter :: has_reqs = 0
          integer, parameter :: kme_stoch = 1
          logical,         intent(in   ) :: do_spp
          real(kind_phys), intent(in) :: spp_wts_mp(:,:)
-        !+---+-----------------------------------------------------------------+
-         !gthompsn 21Mar2018
-         ! Setting spp_mp to 1 gives graupel Y-intercept pertubations (2^0)
-         !                   2 gives cloud water distribution gamma shape parameter
-         !                   perturbations (2^1)
-         !                   4 gives CCN & IN activation perturbations (2^2)
-         !                   3 gives both 1+2
-         !                   5 gives both 1+4
-         !                   6 gives both 2+4
-         !                   7 gives all 1+2+4
-         ! For now (22Mar2018), standard deviation should be only 0.25 and cut-off at 1.5
-         ! in order to constrain the various perturbations from being too extreme.
-         !+---+-----------------------------------------------------------------+
          integer         :: spp_mp 
          ! Dimensions used in mp_gt_driver
          integer         :: ids,ide, jds,jde, kds,kde, &
@@ -599,28 +551,6 @@ module mp_thompson
              do_radar_ref_mp = 0
          end if
 
-         if (present(re_cloud) .and. present(re_ice) .and. present(re_snow)) then
-             do_effective_radii = .true.
-             has_reqc = 1
-             has_reqi = 1
-             has_reqs = 1
-             ! Initialize to zero, intent(out) variables
-             re_cloud = 0
-             re_ice   = 0
-             re_snow  = 0
-         else if (.not.present(re_cloud) .and. .not.present(re_ice) .and. .not.present(re_snow)) then
-             do_effective_radii = .false.
-             has_reqc = 0
-             has_reqi = 0
-             has_reqs = 0
-         else
-             write(errmsg,fmt='(*(a))') 'Logic error in mp_thompson_run:',  &
-                                        ' all or none of the following optional', &
-                                        ' arguments are required: re_cloud, re_ice, re_snow'
-             errflg = 1
-             return
-         end if
-
          ! Set internal dimensions
          ids = 1
          ims = 1
@@ -690,157 +620,80 @@ module mp_thompson
 
          !> - Call mp_gt_driver() with or without aerosols
          if (is_aerosol_aware) then
-            if (do_effective_radii) then
-               call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
-                                 nc=nc, nwfa=nwfa, nifa=nifa, nwfa2d=nwfa2d, nifa2d=nifa2d,     &
-                                 tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtstep, dt_inner=dt_inner,  &
-                                 rainnc=rain_mp, rainncv=delta_rain_mp,                         &
-                                 snownc=snow_mp, snowncv=delta_snow_mp,                         &
-                                 icenc=ice_mp, icencv=delta_ice_mp,                             &
-                                 graupelnc=graupel_mp, graupelncv=delta_graupel_mp, sr=sr,      &
-                                 refl_10cm=refl_10cm,                                           &
-                                 diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
-                                 re_cloud=re_cloud, re_ice=re_ice, re_snow=re_snow,             &
-                                 has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
-                                 rand_perturb_on=spp_mp, kme_stoch=kme_stoch,                   &
-                                 rand_pert=spp_wts_mp,                                          &
-                                 ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
-                                 ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
-                                 its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
-                                 reset_dBZ=reset_dBZ, istep=istep, nsteps=nsteps,               &
-                                 first_time_step=first_time_step, errmsg=errmsg, errflg=errflg, &
-                                 ! Extended diagnostics
-                                 ext_diag=ext_diag,                                             &
-                                 ! vts1=vts1, txri=txri, txrc=txrc,                             &
-                                 prw_vcdc=prw_vcdc,                                             &
-                                 prw_vcde=prw_vcde, tpri_inu=tpri_inu, tpri_ide_d=tpri_ide_d,   &
-                                 tpri_ide_s=tpri_ide_s, tprs_ide=tprs_ide,                      &
-                                 tprs_sde_d=tprs_sde_d,                                         &
-                                 tprs_sde_s=tprs_sde_s, tprg_gde_d=tprg_gde_d,                  &
-                                 tprg_gde_s=tprg_gde_s, tpri_iha=tpri_iha,                      &
-                                 tpri_wfz=tpri_wfz, tpri_rfz=tpri_rfz, tprg_rfz=tprg_rfz,       &
-                                 tprs_scw=tprs_scw, tprg_scw=tprg_scw, tprg_rcs=tprg_rcs,       &
-                                 tprs_rcs=tprs_rcs,                                             &
-                                 tprr_rci=tprr_rci, tprg_rcg=tprg_rcg, tprw_vcd_c=tprw_vcd_c,   &
-                                 tprw_vcd_e=tprw_vcd_e, tprr_sml=tprr_sml, tprr_gml=tprr_gml,   &
-                                 tprr_rcg=tprr_rcg, tprr_rcs=tprr_rcs,                          &
-                                 tprv_rev=tprv_rev, tten3=tten3,                                &
-                                 qvten3=qvten3, qrten3=qrten3, qsten3=qsten3, qgten3=qgten3,    &
-                                 qiten3=qiten3, niten3=niten3, nrten3=nrten3, ncten3=ncten3,    &
-                                 qcten3=qcten3)
-            else
-               call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
-                                 nc=nc, nwfa=nwfa, nifa=nifa, nwfa2d=nwfa2d, nifa2d=nifa2d,     &
-                                 tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtstep, dt_inner=dt_inner,  &
-                                 rainnc=rain_mp, rainncv=delta_rain_mp,                         &
-                                 snownc=snow_mp, snowncv=delta_snow_mp,                         &
-                                 icenc=ice_mp, icencv=delta_ice_mp,                             &
-                                 graupelnc=graupel_mp, graupelncv=delta_graupel_mp, sr=sr,      &
-                                 refl_10cm=refl_10cm,                                           &
-                                 diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
-                                 has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
-                                 rand_perturb_on=spp_mp, kme_stoch=kme_stoch,                   &
-                                 rand_pert=spp_wts_mp,                                          &
-                                 ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
-                                 ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
-                                 its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
-                                 reset_dBZ=reset_dBZ, istep=istep, nsteps=nsteps,               &
-                                 first_time_step=first_time_step, errmsg=errmsg, errflg=errflg, &
-                                 ! Extended diagnostics
-                                 ext_diag=ext_diag,                                             &
-                                 ! vts1=vts1, txri=txri, txrc=txrc,                             &
-                                 prw_vcdc=prw_vcdc,                                             &
-                                 prw_vcde=prw_vcde, tpri_inu=tpri_inu, tpri_ide_d=tpri_ide_d,   &
-                                 tpri_ide_s=tpri_ide_s, tprs_ide=tprs_ide,                      &
-                                 tprs_sde_d=tprs_sde_d,                                         &
-                                 tprs_sde_s=tprs_sde_s, tprg_gde_d=tprg_gde_d,                  &
-                                 tprg_gde_s=tprg_gde_s, tpri_iha=tpri_iha,                      &
-                                 tpri_wfz=tpri_wfz, tpri_rfz=tpri_rfz, tprg_rfz=tprg_rfz,       &
-                                 tprs_scw=tprs_scw, tprg_scw=tprg_scw, tprg_rcs=tprg_rcs,       &
-                                 tprs_rcs=tprs_rcs,                                             &
-                                 tprr_rci=tprr_rci, tprg_rcg=tprg_rcg, tprw_vcd_c=tprw_vcd_c,   &
-                                 tprw_vcd_e=tprw_vcd_e, tprr_sml=tprr_sml, tprr_gml=tprr_gml,   &
-                                 tprr_rcg=tprr_rcg, tprr_rcs=tprr_rcs,                          &
-                                 tprv_rev=tprv_rev, tten3=tten3,                                &
-                                 qvten3=qvten3, qrten3=qrten3, qsten3=qsten3, qgten3=qgten3,    &
-                                 qiten3=qiten3, niten3=niten3, nrten3=nrten3, ncten3=ncten3,    &
-                                 qcten3=qcten3)
-            end if
+            call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
+                              nc=nc, nwfa=nwfa, nifa=nifa, nwfa2d=nwfa2d, nifa2d=nifa2d,     &
+                              tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtstep, dt_inner=dt_inner,  &
+                              sedi_semi=sedi_semi, decfl=decfl,                              &
+                              rainnc=rain_mp, rainncv=delta_rain_mp,                         &
+                              snownc=snow_mp, snowncv=delta_snow_mp,                         &
+                              icenc=ice_mp, icencv=delta_ice_mp,                             &
+                              graupelnc=graupel_mp, graupelncv=delta_graupel_mp, sr=sr,      &
+                              refl_10cm=refl_10cm,                                           &
+                              diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
+                              has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
+                              rand_perturb_on=spp_mp, kme_stoch=kme_stoch,                   &
+                              rand_pert=spp_wts_mp,                                          &
+                              ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
+                              ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
+                              its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
+                              reset_dBZ=reset_dBZ, istep=istep, nsteps=nsteps,               &
+                              first_time_step=first_time_step, errmsg=errmsg, errflg=errflg, &
+                              ! Extended diagnostics
+                              ext_diag=ext_diag,                                             &
+                              ! vts1=vts1, txri=txri, txrc=txrc,                             &
+                              prw_vcdc=prw_vcdc,                                             &
+                              prw_vcde=prw_vcde, tpri_inu=tpri_inu, tpri_ide_d=tpri_ide_d,   &
+                              tpri_ide_s=tpri_ide_s, tprs_ide=tprs_ide,                      &
+                              tprs_sde_d=tprs_sde_d,                                         &
+                              tprs_sde_s=tprs_sde_s, tprg_gde_d=tprg_gde_d,                  &
+                              tprg_gde_s=tprg_gde_s, tpri_iha=tpri_iha,                      &
+                              tpri_wfz=tpri_wfz, tpri_rfz=tpri_rfz, tprg_rfz=tprg_rfz,       &
+                              tprs_scw=tprs_scw, tprg_scw=tprg_scw, tprg_rcs=tprg_rcs,       &
+                              tprs_rcs=tprs_rcs,                                             &
+                              tprr_rci=tprr_rci, tprg_rcg=tprg_rcg, tprw_vcd_c=tprw_vcd_c,   &
+                              tprw_vcd_e=tprw_vcd_e, tprr_sml=tprr_sml, tprr_gml=tprr_gml,   &
+                              tprr_rcg=tprr_rcg, tprr_rcs=tprr_rcs,                          &
+                              tprv_rev=tprv_rev, tten3=tten3,                                &
+                              qvten3=qvten3, qrten3=qrten3, qsten3=qsten3, qgten3=qgten3,    &
+                              qiten3=qiten3, niten3=niten3, nrten3=nrten3, ncten3=ncten3,    &
+                              qcten3=qcten3)
          else
-            if (do_effective_radii) then
-               call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
-                                 tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtstep, dt_inner=dt_inner,  &
-                                 rainnc=rain_mp, rainncv=delta_rain_mp,                         &
-                                 snownc=snow_mp, snowncv=delta_snow_mp,                         &
-                                 icenc=ice_mp, icencv=delta_ice_mp,                             &
-                                 graupelnc=graupel_mp, graupelncv=delta_graupel_mp, sr=sr,      &
-                                 refl_10cm=refl_10cm,                                           &
-                                 diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
-                                 re_cloud=re_cloud, re_ice=re_ice, re_snow=re_snow,             &
-                                 has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
-                                 rand_perturb_on=spp_mp, kme_stoch=kme_stoch,                   &
-                                 rand_pert=spp_wts_mp,                                          &
-                                 ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
-                                 ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
-                                 its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
-                                 reset_dBZ=reset_dBZ, istep=istep, nsteps=nsteps,               &
-                                 first_time_step=first_time_step, errmsg=errmsg, errflg=errflg, &
-                                 ! Extended diagnostics
-                                 ext_diag=ext_diag,                                             &
-                                 ! vts1=vts1, txri=txri, txrc=txrc,                             &
-                                 prw_vcdc=prw_vcdc,                                             &
-                                 prw_vcde=prw_vcde, tpri_inu=tpri_inu, tpri_ide_d=tpri_ide_d,   &
-                                 tpri_ide_s=tpri_ide_s, tprs_ide=tprs_ide,                      &
-                                 tprs_sde_d=tprs_sde_d,                                         &
-                                 tprs_sde_s=tprs_sde_s, tprg_gde_d=tprg_gde_d,                  &
-                                 tprg_gde_s=tprg_gde_s, tpri_iha=tpri_iha,                      &
-                                 tpri_wfz=tpri_wfz, tpri_rfz=tpri_rfz, tprg_rfz=tprg_rfz,       &
-                                 tprs_scw=tprs_scw, tprg_scw=tprg_scw, tprg_rcs=tprg_rcs,       &
-                                 tprs_rcs=tprs_rcs,                                             &
-                                 tprr_rci=tprr_rci, tprg_rcg=tprg_rcg, tprw_vcd_c=tprw_vcd_c,   &
-                                 tprw_vcd_e=tprw_vcd_e, tprr_sml=tprr_sml, tprr_gml=tprr_gml,   &
-                                 tprr_rcg=tprr_rcg, tprr_rcs=tprr_rcs,                          &
-                                 tprv_rev=tprv_rev, tten3=tten3,                                &
-                                 qvten3=qvten3, qrten3=qrten3, qsten3=qsten3, qgten3=qgten3,    &
-                                 qiten3=qiten3, niten3=niten3, nrten3=nrten3, ncten3=ncten3,    &
-                                 qcten3=qcten3)
-            else
-               call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
-                                 tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtstep, dt_inner=dt_inner,  &
-                                 rainnc=rain_mp, rainncv=delta_rain_mp,                         &
-                                 snownc=snow_mp, snowncv=delta_snow_mp,                         &
-                                 icenc=ice_mp, icencv=delta_ice_mp,                             &
-                                 graupelnc=graupel_mp, graupelncv=delta_graupel_mp, sr=sr,      &
-                                 refl_10cm=refl_10cm,                                           &
-                                 diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
-                                 has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
-                                 rand_perturb_on=spp_mp, kme_stoch=kme_stoch,                   &
-                                 rand_pert=spp_wts_mp,                                          &
-                                 ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
-                                 ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
-                                 its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
-                                 reset_dBZ=reset_dBZ, istep=istep, nsteps=nsteps,               &
-                                 first_time_step=first_time_step, errmsg=errmsg, errflg=errflg, &
-                                 ! Extended diagnostics
-                                 ext_diag=ext_diag,                                             &
-                                 ! vts1=vts1, txri=txri, txrc=txrc,                             &
-                                 prw_vcdc=prw_vcdc,                                             &
-                                 prw_vcde=prw_vcde, tpri_inu=tpri_inu, tpri_ide_d=tpri_ide_d,   &
-                                 tpri_ide_s=tpri_ide_s, tprs_ide=tprs_ide,                      &
-                                 tprs_sde_d=tprs_sde_d,                                         &
-                                 tprs_sde_s=tprs_sde_s, tprg_gde_d=tprg_gde_d,                  &
-                                 tprg_gde_s=tprg_gde_s, tpri_iha=tpri_iha,                      &
-                                 tpri_wfz=tpri_wfz, tpri_rfz=tpri_rfz, tprg_rfz=tprg_rfz,       &
-                                 tprs_scw=tprs_scw, tprg_scw=tprg_scw, tprg_rcs=tprg_rcs,       &
-                                 tprs_rcs=tprs_rcs,                                             &
-                                 tprr_rci=tprr_rci, tprg_rcg=tprg_rcg, tprw_vcd_c=tprw_vcd_c,   &
-                                 tprw_vcd_e=tprw_vcd_e, tprr_sml=tprr_sml, tprr_gml=tprr_gml,   &
-                                 tprr_rcg=tprr_rcg, tprr_rcs=tprr_rcs,                          &
-                                 tprv_rev=tprv_rev, tten3=tten3,                                &
-                                 qvten3=qvten3, qrten3=qrten3, qsten3=qsten3, qgten3=qgten3,    &
-                                 qiten3=qiten3, niten3=niten3, nrten3=nrten3, ncten3=ncten3,    &
-                                 qcten3=qcten3)
-            end if
+            call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
+                              tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtstep, dt_inner=dt_inner,  &
+                              sedi_semi=sedi_semi, decfl=decfl,                              &
+                              rainnc=rain_mp, rainncv=delta_rain_mp,                         &
+                              snownc=snow_mp, snowncv=delta_snow_mp,                         &
+                              icenc=ice_mp, icencv=delta_ice_mp,                             &
+                              graupelnc=graupel_mp, graupelncv=delta_graupel_mp, sr=sr,      &
+                              refl_10cm=refl_10cm,                                           &
+                              diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
+                              has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
+                              rand_perturb_on=spp_mp, kme_stoch=kme_stoch,                   &
+                              rand_pert=spp_wts_mp,                                          &
+                              ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
+                              ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
+                              its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
+                              reset_dBZ=reset_dBZ, istep=istep, nsteps=nsteps,               &
+                              first_time_step=first_time_step, errmsg=errmsg, errflg=errflg, &
+                              ! Extended diagnostics
+                              ext_diag=ext_diag,                                             &
+                              ! vts1=vts1, txri=txri, txrc=txrc,                             &
+                              prw_vcdc=prw_vcdc,                                             &
+                              prw_vcde=prw_vcde, tpri_inu=tpri_inu, tpri_ide_d=tpri_ide_d,   &
+                              tpri_ide_s=tpri_ide_s, tprs_ide=tprs_ide,                      &
+                              tprs_sde_d=tprs_sde_d,                                         &
+                              tprs_sde_s=tprs_sde_s, tprg_gde_d=tprg_gde_d,                  &
+                              tprg_gde_s=tprg_gde_s, tpri_iha=tpri_iha,                      &
+                              tpri_wfz=tpri_wfz, tpri_rfz=tpri_rfz, tprg_rfz=tprg_rfz,       &
+                              tprs_scw=tprs_scw, tprg_scw=tprg_scw, tprg_rcs=tprg_rcs,       &
+                              tprs_rcs=tprs_rcs,                                             &
+                              tprr_rci=tprr_rci, tprg_rcg=tprg_rcg, tprw_vcd_c=tprw_vcd_c,   &
+                              tprw_vcd_e=tprw_vcd_e, tprr_sml=tprr_sml, tprr_gml=tprr_gml,   &
+                              tprr_rcg=tprr_rcg, tprr_rcs=tprr_rcs,                          &
+                              tprv_rev=tprv_rev, tten3=tten3,                                &
+                              qvten3=qvten3, qrten3=qrten3, qsten3=qsten3, qgten3=qgten3,    &
+                              qiten3=qiten3, niten3=niten3, nrten3=nrten3, ncten3=ncten3,    &
+                              qcten3=qcten3)
          end if
          if (errflg/=0) return
 

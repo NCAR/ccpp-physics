@@ -14,7 +14,6 @@
   dimensions = ()
   type = GFS_control_type
   intent = in
-  optional = F
 [Data]
   standard_name = GFS_data_type_instance_all_blocks
   long_name = instance of derived type GFS_data_type
@@ -22,7 +21,6 @@
   dimensions = (ccpp_block_count)
   type = GFS_data_type
   intent = in
-  optional = F
 [Interstitial]
   standard_name = GFS_interstitial_type_instance_all_threads
   long_name = instance of derived type GFS_interstitial_type
@@ -30,7 +28,6 @@
   dimensions = (number_of_openmp_threads)
   type = GFS_interstitial_type
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -39,7 +36,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -47,7 +43,6 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 
 ########################################################################
 [ccpp-arg-table]
@@ -60,7 +55,6 @@
   dimensions = ()
   type = GFS_control_type
   intent = in
-  optional = F
 [Data]
   standard_name = GFS_data_type_instance_all_blocks
   long_name = instance of derived type GFS_data_type
@@ -68,7 +62,6 @@
   dimensions = (ccpp_block_count)
   type = GFS_data_type
   intent = in
-  optional = F
 [Interstitial]
   standard_name = GFS_interstitial_type_instance_all_threads
   long_name = instance of derived type GFS_interstitial_type
@@ -76,7 +69,6 @@
   dimensions = (number_of_openmp_threads)
   type = GFS_interstitial_type
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -85,7 +77,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -93,7 +84,6 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 
 ########################################################################
 [ccpp-arg-table]
@@ -106,7 +96,6 @@
   dimensions = ()
   type = GFS_control_type
   intent = in
-  optional = F
 [Statein]
   standard_name = GFS_statein_type_instance
   long_name = instance of derived type GFS_statein_type in FV3
@@ -114,7 +103,6 @@
   dimensions = ()
   type = GFS_statein_type
   intent = in
-  optional = F
 [Stateout]
   standard_name = GFS_stateout_type_instance
   long_name = instance of derived type GFS_stateout_type
@@ -122,7 +110,6 @@
   dimensions = ()
   type = GFS_stateout_type
   intent = in
-  optional = F
 [Sfcprop]
   standard_name = GFS_sfcprop_type_instance
   long_name = instance of type GFS_sfcprop_type in FV3
@@ -130,7 +117,6 @@
   dimensions = ()
   type = GFS_sfcprop_type
   intent = in
-  optional = F
 [Coupling]
   standard_name = GFS_coupling_type_instance
   long_name = instance of type GFS_coupling_type in FV3
@@ -138,7 +124,6 @@
   dimensions = ()
   type = GFS_coupling_type
   intent = in
-  optional = F
 [Grid]
   standard_name = GFS_grid_type_instance
   long_name = instance of type GFS_grid_type in FV3
@@ -146,7 +131,6 @@
   dimensions = ()
   type = GFS_grid_type
   intent = in
-  optional = F
 [Tbd]
   standard_name = GFS_tbd_type_instance
   long_name = instance of type GFS_tbd_type in FV3
@@ -154,7 +138,6 @@
   dimensions = ()
   type = GFS_tbd_type
   intent = in
-  optional = F
 [Cldprop]
   standard_name = GFS_cldprop_type_instance
   long_name = instance of type GFS_cldprop_type in FV3
@@ -162,7 +145,6 @@
   dimensions = ()
   type = GFS_cldprop_type
   intent = in
-  optional = F
 [Radtend]
   standard_name = GFS_radtend_type_instance
   long_name = instance of type GFS_radtend_type in FV3
@@ -170,7 +152,6 @@
   dimensions = ()
   type = GFS_radtend_type
   intent = in
-  optional = F
 [Diag]
   standard_name = GFS_diag_type_instance
   long_name = instance of type GFS_diag_type in FV3
@@ -178,7 +159,6 @@
   dimensions = ()
   type = GFS_diag_type
   intent = in
-  optional = F
 [Interstitial]
   standard_name = GFS_interstitial_type_instance
   long_name = instance of type GFS_interstitial_type in FV3
@@ -186,7 +166,6 @@
   dimensions = ()
   type = GFS_interstitial_type
   intent = in
-  optional = F
 [nthreads]
   standard_name = number_of_openmp_threads
   long_name = number of OpenMP threads or fast physics schemes
@@ -194,7 +173,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [blkno]
   standard_name = ccpp_block_number
   long_name = number of block for explicit data blocking in CCPP
@@ -202,7 +180,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -211,7 +188,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -219,7 +195,6 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 
 ########################################################################
 [ccpp-table-properties]
@@ -238,7 +213,6 @@
   dimensions = ()
   type = GFS_control_type
   intent = in
-  optional = F
 [Data]
   standard_name = GFS_data_type_instance_all_blocks
   long_name = instance of derived type GFS_data_type
@@ -246,7 +220,6 @@
   dimensions = (ccpp_block_count)
   type = GFS_data_type
   intent = in
-  optional = F
 [Interstitial]
   standard_name = GFS_interstitial_type_instance_all_threads
   long_name = instance of derived type GFS_interstitial_type
@@ -254,7 +227,6 @@
   dimensions = (number_of_openmp_threads)
   type = GFS_interstitial_type
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -263,7 +235,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -271,7 +242,6 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 
 ########################################################################
 [ccpp-arg-table]
@@ -284,7 +254,6 @@
   dimensions = ()
   type = GFS_control_type
   intent = in
-  optional = F
 [Data]
   standard_name = GFS_data_type_instance_all_blocks
   long_name = instance of derived type GFS_data_type
@@ -292,7 +261,6 @@
   dimensions = (ccpp_block_count)
   type = GFS_data_type
   intent = in
-  optional = F
 [Interstitial]
   standard_name = GFS_interstitial_type_instance_all_threads
   long_name = instance of derived type GFS_interstitial_type
@@ -300,7 +268,6 @@
   dimensions = (number_of_openmp_threads)
   type = GFS_interstitial_type
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -309,7 +276,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -317,7 +283,6 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 
 ########################################################################
 [ccpp-arg-table]
@@ -330,7 +295,6 @@
   dimensions = ()
   type = GFS_control_type
   intent = in
-  optional = F
 [Statein]
   standard_name = GFS_statein_type_instance
   long_name = instance of derived type GFS_statein_type
@@ -338,7 +302,6 @@
   dimensions = ()
   type = GFS_statein_type
   intent = in
-  optional = F
 [Stateout]
   standard_name = GFS_stateout_type_instance
   long_name = instance of derived type GFS_stateout_type
@@ -346,7 +309,6 @@
   dimensions = ()
   type = GFS_stateout_type
   intent = in
-  optional = F
 [Sfcprop]
   standard_name = GFS_sfcprop_type_instance
   long_name = instance of derived type GFS_sfcprop_type
@@ -354,7 +316,6 @@
   dimensions = ()
   type = GFS_sfcprop_type
   intent = in
-  optional = F
 [Coupling]
   standard_name = GFS_coupling_type_instance
   long_name = instance of derived type GFS_coupling_type
@@ -362,7 +323,6 @@
   dimensions = ()
   type = GFS_coupling_type
   intent = in
-  optional = F
 [Grid]
   standard_name = GFS_grid_type_instance
   long_name = instance of derived type GFS_grid_type
@@ -370,7 +330,6 @@
   dimensions = ()
   type = GFS_grid_type
   intent = in
-  optional = F
 [Tbd]
   standard_name = GFS_tbd_type_instance
   long_name = instance of derived type GFS_tbd_type
@@ -378,7 +337,6 @@
   dimensions = ()
   type = GFS_tbd_type
   intent = in
-  optional = F
 [Cldprop]
   standard_name = GFS_cldprop_type_instance
   long_name = instance of derived type GFS_cldprop_type
@@ -386,7 +344,6 @@
   dimensions = ()
   type = GFS_cldprop_type
   intent = in
-  optional = F
 [Radtend]
   standard_name = GFS_radtend_type_instance
   long_name = instance of derived type GFS_radtend_type
@@ -394,7 +351,6 @@
   dimensions = ()
   type = GFS_radtend_type
   intent = in
-  optional = F
 [Diag]
   standard_name = GFS_diag_type_instance
   long_name = instance of derived type GFS_diag_type
@@ -402,7 +358,6 @@
   dimensions = ()
   type = GFS_diag_type
   intent = in
-  optional = F
 [Interstitial]
   standard_name = GFS_interstitial_type_instance
   long_name = instance of derived type GFS_interstitial_type
@@ -410,7 +365,6 @@
   dimensions = ()
   type = GFS_interstitial_type
   intent = in
-  optional = F
 [nthreads]
   standard_name = number_of_openmp_threads
   long_name = number of OpenMP threads or fast physics schemes
@@ -418,7 +372,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [blkno]
   standard_name = ccpp_block_number
   long_name = number of block for explicit data blocking in CCPP
@@ -426,7 +379,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -435,7 +387,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -443,7 +394,6 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 
 ########################################################################
 [ccpp-table-properties]
@@ -462,7 +412,6 @@
   dimensions = ()
   type = GFS_control_type
   intent = in
-  optional = F
 [blkno]
   standard_name = ccpp_block_number
   long_name = number of block for explicit data blocking in CCPP
@@ -470,7 +419,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -479,7 +427,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -487,7 +434,6 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 
 ########################################################################
 [ccpp-table-properties]
@@ -506,7 +452,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [master]
   standard_name = mpi_root
   long_name = master MPI-rank
@@ -514,7 +459,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [blkno]
   standard_name = ccpp_block_number
   long_name = number of block for explicit data blocking in CCPP
@@ -522,7 +466,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [im]
   standard_name = horizontal_loop_extent
   long_name = horizontal loop extent
@@ -530,7 +473,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [kdt]
   standard_name = index_of_timestep
   long_name = current number of time steps
@@ -538,7 +480,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [iter]
   standard_name = ccpp_loop_counter
   long_name = loop counter for subcycling loops in CCPP
@@ -546,7 +487,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [flag_iter]
   standard_name = flag_for_iteration
   long_name = flag for iteration
@@ -554,7 +494,6 @@
   dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
-  optional = F
 [flag_guess]
   standard_name = flag_for_guess_run
   long_name = flag for guess run
@@ -562,7 +501,6 @@
   dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
-  optional = F
 [flag_init]
   standard_name = flag_for_first_timestep
   long_name = flag signaling first time step for time integration loop
@@ -570,7 +508,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [flag_restart]
   standard_name = flag_for_restart
   long_name = flag for restart (warmstart) or coldstart
@@ -578,7 +515,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [frac_grid]
   standard_name = flag_for_fractional_landmask
   long_name = flag for fractional grid
@@ -586,7 +522,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [isot]
   standard_name = control_for_soil_type_dataset
   long_name = soil type dataset choice
@@ -594,7 +529,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ivegsrc]
   standard_name = control_for_vegetation_dataset
   long_name = land use dataset choice
@@ -602,58 +536,27 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [stype]
-  standard_name = soil_type_classification_real
+  standard_name = soil_type_classification
   long_name = soil type for lsm
   units = index
   dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
+  type = integer
   intent = in
-  optional = F
 [vtype]
-  standard_name = vegetation_type_classification_real
+  standard_name = vegetation_type_classification
   long_name = vegetation type for lsm
   units = index
   dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
+  type = integer
   intent = in
-  optional = F
 [slope]
-  standard_name = surface_slope_classification_real
+  standard_name = surface_slope_classification
   long_name = sfc slope type for lsm
   units = index
   dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[soiltyp]
-  standard_name = soil_type_classification
-  long_name = soil type at each grid cell
-  units = index
-  dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
-  optional = F
-[vegtype]
-  standard_name = vegetation_type_classification
-  long_name = vegetation type at each grid cell
-  units = index
-  dimensions = (horizontal_loop_extent)
-  type = integer
-  intent = in
-  optional = F
-[slopetyp]
-  standard_name = surface_slope_classification
-  long_name = surface slope type at each grid cell
-  units = index
-  dimensions = (horizontal_loop_extent)
-  type = integer
-  intent = in
-  optional = F
 [dry]
   standard_name = flag_nonzero_land_surface_fraction
   long_name = flag indicating some land surface area fraction
@@ -661,7 +564,6 @@
   dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
-  optional = F
 [icy]
   standard_name = flag_nonzero_sea_ice_surface_fraction
   long_name = flag indicating some sea ice surface area fraction
@@ -669,7 +571,6 @@
   dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
-  optional = F
 [wet]
   standard_name = flag_nonzero_wet_surface_fraction
   long_name = flag indicating some ocean or lake surface area fraction
@@ -677,7 +578,6 @@
   dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
-  optional = F
 [lake]
   standard_name = flag_nonzero_lake_surface_fraction
   long_name = flag indicating some lake surface area fraction
@@ -685,7 +585,6 @@
   dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
-  optional = F
 [ocean]
   standard_name = flag_nonzero_ocean_surface_fraction
   long_name = flag indicating some ocean surface area fraction
@@ -693,7 +592,6 @@
   dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
-  optional = F
 [oceanfrac]
   standard_name = sea_area_fraction
   long_name = fraction of horizontal grid area occupied by ocean
@@ -702,7 +600,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [landfrac]
   standard_name = land_area_fraction
   long_name = fraction of horizontal grid area occupied by land
@@ -711,7 +608,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [lakefrac]
   standard_name = lake_area_fraction
   long_name = fraction of horizontal grid area occupied by lake
@@ -720,7 +616,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [slmsk]
   standard_name = area_type
   long_name = landmask: sea/land/ice=0/1/2
@@ -729,7 +624,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [islmsk]
   standard_name = sea_land_ice_mask
   long_name = sea/land/ice mask (=0/1/2)
@@ -737,7 +631,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
-  optional = F
 [zorl]
   standard_name = surface_roughness_length
   long_name = surface roughness length
@@ -746,7 +639,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [zorlw]
   standard_name = surface_roughness_length_over_water
   long_name = surface roughness length over water
@@ -755,7 +647,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [zorll]
   standard_name = surface_roughness_length_over_land
   long_name = surface roughness length over land
@@ -764,7 +655,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [zorli]
   standard_name = surface_roughness_length_over_ice
   long_name = surface roughness length over ice
@@ -773,7 +663,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [fice]
   standard_name = sea_ice_area_fraction_of_sea_area_fraction
   long_name = ice fraction over open water
@@ -782,7 +671,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -791,7 +679,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -799,4 +686,250 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
+
+########################################################################
+[ccpp-table-properties]
+  name = GFS_checktracers
+  type = scheme
+  dependencies = machine.F
+
+########################################################################
+[ccpp-arg-table]
+  name = GFS_checktracers_init
+  type = scheme
+[me]
+  standard_name = mpi_rank
+  long_name = current MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[master]
+  standard_name = mpi_root
+  long_name = master MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[im]
+  standard_name = horizontal_dimension
+  long_name = horizontal dimension
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[levs]
+  standard_name = vertical_layer_dimension
+  long_name = number of vertical levels
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[ntracer]
+  standard_name = number_of_tracers
+  long_name = number of tracers
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[kdt]
+  standard_name = index_of_timestep
+  long_name = current number of time steps
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[qgrs]
+  standard_name = tracer_concentration
+  long_name = model layer mean tracer concentration
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_layer_dimension,number_of_tracers)
+  type = real
+  kind = kind_phys
+  intent = in
+[gq0]
+  standard_name = tracer_concentration_of_new_state
+  long_name = tracer concentration updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_layer_dimension,number_of_tracers)
+  type = real
+  kind = kind_phys
+  intent = in
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+
+########################################################################
+[ccpp-arg-table]
+  name = GFS_checktracers_timestep_init
+  type = scheme
+[me]
+  standard_name = mpi_rank
+  long_name = current MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[master]
+  standard_name = mpi_root
+  long_name = master MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[im]
+  standard_name = horizontal_dimension
+  long_name = horizontal dimension
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[levs]
+  standard_name = vertical_layer_dimension
+  long_name = number of vertical levels
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[ntracer]
+  standard_name = number_of_tracers
+  long_name = number of tracers
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[kdt]
+  standard_name = index_of_timestep
+  long_name = current number of time steps
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[qgrs]
+  standard_name = tracer_concentration
+  long_name = model layer mean tracer concentration
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_layer_dimension,number_of_tracers)
+  type = real
+  kind = kind_phys
+  intent = in
+[gq0]
+  standard_name = tracer_concentration_of_new_state
+  long_name = tracer concentration updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_layer_dimension,number_of_tracers)
+  type = real
+  kind = kind_phys
+  intent = in
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+
+########################################################################
+[ccpp-arg-table]
+  name = GFS_checktracers_run
+  type = scheme
+[me]
+  standard_name = mpi_rank
+  long_name = current MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[master]
+  standard_name = mpi_root
+  long_name = master MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[blkno]
+  standard_name = ccpp_block_number
+  long_name = number of block for explicit data blocking in CCPP
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[im]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal loop extent
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[levs]
+  standard_name = vertical_layer_dimension
+  long_name = number of vertical levels
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[ntracer]
+  standard_name = number_of_tracers
+  long_name = number of tracers
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[kdt]
+  standard_name = index_of_timestep
+  long_name = current number of time steps
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[qgrs]
+  standard_name = tracer_concentration
+  long_name = model layer mean tracer concentration
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
+  type = real
+  kind = kind_phys
+  intent = in
+[gq0]
+  standard_name = tracer_concentration_of_new_state
+  long_name = tracer concentration updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
+  type = real
+  kind = kind_phys
+  intent = in
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
