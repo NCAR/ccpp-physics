@@ -488,14 +488,6 @@
   dimensions = ()
   type = logical
   intent = in
-[crt_sati]
-  standard_name = critical_over_saturation_for_ice_generation
-  long_name = critical over saturation for ice generation
-  units = none
-  dimensions = ()
-  type = real
-  intent = in
-  kind = kind_phys
 [dtp]
   standard_name = timestep_for_physics
   long_name = physics timestep

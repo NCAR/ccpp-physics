@@ -304,7 +304,7 @@ module mp_thompson
                               nwfa2d, nifa2d,                      &
                               tgrs, prsl, phii, omega,             &
                               sedi_semi, sedi_semi_update,         &
-                              sedi_semi_decfl, crt_sati, & 
+                              sedi_semi_decfl,                     &
                               dtp, dt_inner,                       & 
                               first_time_step, istep, nsteps,      &
                               prcp, rain, graupel, ice, snow, sr,  &
@@ -363,7 +363,6 @@ module mp_thompson
          logical,                   intent(in)    :: sedi_semi
          logical,                   intent(in)    :: sedi_semi_update
          logical,                   intent(in)    :: sedi_semi_decfl
-         real,                      intent(in   ) :: crt_sati
          ! MPI and block information
          integer,                   intent(in)    :: blkno
          integer,                   intent(in)    :: mpicomm
@@ -623,7 +622,6 @@ module mp_thompson
                               tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtstep, dt_inner=dt_inner,  &
                               sedi_semi=sedi_semi, sedi_semi_update=sedi_semi_update,        &
                               sedi_semi_decfl=sedi_semi_decfl,                               & 
-                              crt_sati=crt_sati,                                             &
                               rainnc=rain_mp, rainncv=delta_rain_mp,                         &
                               snownc=snow_mp, snowncv=delta_snow_mp,                         &
                               icenc=ice_mp, icencv=delta_ice_mp,                             &
@@ -664,7 +662,6 @@ module mp_thompson
                               tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtstep, dt_inner=dt_inner,  &
                               sedi_semi=sedi_semi, sedi_semi_update=sedi_semi_update,        &
                               sedi_semi_decfl=sedi_semi_decfl,                               &
-                              crt_sati=crt_sati,                                             &
                               rainnc=rain_mp, rainncv=delta_rain_mp,                         &
                               snownc=snow_mp, snowncv=delta_snow_mp,                         &
                               icenc=ice_mp, icencv=delta_ice_mp,                             &
