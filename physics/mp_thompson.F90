@@ -623,7 +623,7 @@ module mp_thompson
                               tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtstep, dt_inner=dt_inner,  &
                               sedi_semi=sedi_semi, sedi_semi_update=sedi_semi_update,        &
                               sedi_semi_decfl=sedi_semi_decfl,                               & 
-                              crt_sati=crt_sati, &
+                              crt_sati=crt_sati,                                             &
                               rainnc=rain_mp, rainncv=delta_rain_mp,                         &
                               snownc=snow_mp, snowncv=delta_snow_mp,                         &
                               icenc=ice_mp, icencv=delta_ice_mp,                             &
@@ -664,7 +664,7 @@ module mp_thompson
                               tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtstep, dt_inner=dt_inner,  &
                               sedi_semi=sedi_semi, sedi_semi_update=sedi_semi_update,        &
                               sedi_semi_decfl=sedi_semi_decfl,                               &
-                              crt_sati=crt_sati, &
+                              crt_sati=crt_sati,                                             &
                               rainnc=rain_mp, rainncv=delta_rain_mp,                         &
                               snownc=snow_mp, snowncv=delta_snow_mp,                         &
                               icenc=ice_mp, icencv=delta_ice_mp,                             &
