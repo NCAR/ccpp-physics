@@ -1264,7 +1264,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [spp_wts_pbl]
   standard_name = weights_for_stochastic_spp_pbl_perturbation
   long_name = weights for stochastic spp pbl perturbation
@@ -1273,7 +1272,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [do_spp]
   standard_name = flag_for_stochastic_spp_option
   long_name = flag for stochastic spp option
@@ -1281,7 +1279,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [lprnt]
   standard_name = flag_print
   long_name = control flag for diagnostic print out

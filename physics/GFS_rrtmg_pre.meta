@@ -1034,7 +1034,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [spp_wts_rad]
   standard_name = weights_for_stochastic_spp_rad_perturbation
   long_name = weights for stochastic spp rad perturbation
@@ -1043,7 +1042,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [do_spp]
   standard_name = flag_for_stochastic_spp_option
   long_name = flag for stochastic spp option
@@ -1051,7 +1049,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
