@@ -2665,7 +2665,7 @@
 
 !mz*      if (uni_cld) then     ! use unified sgs clouds generated outside
 !mz*  use unified sgs clouds generated outside
-      if (uni_cld .or. icloud == 3) then
+      if (uni_cld) then
         do k = 1, NLAY
           do i = 1, IX
             cldtot(i,k) = cldcov(i,k)
@@ -3385,14 +3385,10 @@
       real (kind=kind_phys), parameter :: max_relh = 1.5
       real (kind=kind_phys), parameter :: snow_max_radius = 130.0
 
-      integer :: i, k, id, nf, idx_rei
+      integer :: i, k, k2, id, nf, idx_rei
 !
 !===> ... begin here
 !
-
-      if (ivflip .ne. 1) then
-         STOP ' K must be bottom to top oriented by this point.'
-      endif
 
       clwmin = 1.0E-9
 
@@ -3485,21 +3481,35 @@
          endif
 
          cldfra1d(:) = 0.0
-         do k = 1, NLAY-1
-            qv1d(k) = qlyr(i,k)
-            qc1d(k) = max(0.0, clw(i,k,ntcw))
-            qi1d(k) = max(0.0, clw(i,k,ntiw))
-            qs1d(k) = max(0.0, clw(i,k,ntsw))
-            dz1d(k) = dz(i,k)*1.E3
-            p1d(k) = plyr(i,k)*100.0
-            t1d(k) = tlyr(i,k)
-         enddo
+
+         if (ivflip .eq. 1) then
+            do k = 1, NLAY
+               qv1d(k) = qlyr(i,k)
+               qc1d(k) = max(0.0, clw(i,k,ntcw))
+               qi1d(k) = max(0.0, clw(i,k,ntiw))
+               qs1d(k) = max(0.0, clw(i,k,ntsw))
+               dz1d(k) = dz(i,k)*1.E3
+               p1d(k) = plyr(i,k)*100.0
+               t1d(k) = tlyr(i,k)
+            enddo
+         else
+            do k = NLAY, 1, -1
+               k2 = NLAY - k + 1
+               qv1d(k2) = qlyr(i,k)
+               qc1d(k2) = max(0.0, clw(i,k,ntcw))
+               qi1d(k2) = max(0.0, clw(i,k,ntiw))
+               qs1d(k2) = max(0.0, clw(i,k,ntsw))
+               dz1d(k2) = dz(i,k)*1.E3
+               p1d(k2) = plyr(i,k)*100.0
+               t1d(k2) = tlyr(i,k)
+            enddo
+         endif
 
          call cal_cldfra3(cldfra1d, qv1d, qc1d, qi1d, qs1d, dz1d,       &
      &                    p1d, t1d, xland, gridkm,                      &
-     &                    .false., max_relh, 1, nlay-1, .false.)
+     &                    .false., max_relh, 1, nlay, .false.)
 
-         do k = 1, NLAY-1
+         do k = 1, NLAY
             cldtot(i,k) = cldfra1d(k)
             if (qc1d(k).gt.clwmin .and. cldfra1d(k).lt.ovcst) then
                cwp(i,k) = qc1d(k) * dz1d(k)*1000.
@@ -3539,7 +3549,7 @@
       do i = 1, IX
          lwp_fc(i) = 0.0
          iwp_fc(i) = 0.0
-         do k = 1, NLAY-1
+         do k = 1, NLAY
             lwp_fc(i) = lwp_fc(i) + cwp(i,k)
             iwp_fc(i) = iwp_fc(i) + cip(i,k) + csp(i,k)
          enddo

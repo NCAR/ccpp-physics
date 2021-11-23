@@ -953,7 +953,7 @@
 
           if(do_mynnedmf .or. imfdeepcnv == imfdeepcnv_gf ) then ! MYNN PBL or GF conv
 
-            if (icloud .eq. 3) then
+            if (icloud == 3) then
               call progcld_thompson (plyr,plvl,tlyr,qlyr,qstl,rhly, & !  --- inputs
                          tracer1,xlat,xlon,slmsk,dz,delp,           &
                          ntrac-1, ntcw-1,ntiw-1,ntrw-1,             &
@@ -987,7 +987,7 @@
           else
             ! MYNN PBL or GF convective are not used
 
-            if (icloud .eq. 3) then
+            if (icloud == 3) then
               call progcld_thompson (plyr,plvl,tlyr,qlyr,qstl,rhly, & !  --- inputs
                          tracer1,xlat,xlon,slmsk,dz,delp,           &
                          ntrac-1, ntcw-1,ntiw-1,ntrw-1,             &
