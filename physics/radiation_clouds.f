@@ -3262,8 +3262,8 @@
 
 ! =================   subprogram documentation block   ================ !
 !                                                                       !
-! subprogram:    progcld6    computes cloud related quantities using    !
-!   Thompson/WSM6 cloud microphysics scheme.                            !
+! subprogram:    progcld_thompson    computes cloud related quantities  !
+!   using Thompson cloud microphysics scheme.                           !
 !                                                                       !
 ! abstract:  this program computes cloud fractions from cloud           !
 !   condensates,                                                        !
@@ -3272,7 +3272,7 @@
 !   top and base.  the three vertical cloud domains are set up in the   !
 !   initial subroutine "cld_init".                                      !
 !                                                                       !
-! usage:         call progcld6                                          !
+! usage:         call progcld_thompson                                  !
 !                                                                       !
 ! subprograms called:   gethml                                          !
 !                                                                       !
