@@ -78,7 +78,7 @@
   standard_name = sigma_pressure_hybrid_coordinate_a_coefficient
   long_name = a parameter for sigma pressure level calculations
   units = Pa
-  dimensions = (vertical_interface_dimension_for_radiation)
+  dimensions = (vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -86,7 +86,7 @@
   standard_name = sigma_pressure_hybrid_coordinate_b_coefficient
   long_name = b parameter for sigma pressure level calculations
   units = none
-  dimensions = (vertical_interface_dimension_for_radiation)
+  dimensions = (vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = in
