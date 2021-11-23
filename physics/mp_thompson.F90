@@ -116,8 +116,7 @@ module mp_thompson
          end if
 
          ! Call Thompson init
-         call thompson_init(is_aerosol_aware_in=is_aerosol_aware, & 
-                            mpicomm=mpicomm,                                       &
+         call thompson_init(is_aerosol_aware_in=is_aerosol_aware, mpicomm=mpicomm, &
                             mpirank=mpirank, mpiroot=mpiroot, threads=threads,     &
                             errmsg=errmsg, errflg=errflg)
          if (errflg /= 0) return
@@ -304,8 +303,7 @@ module mp_thompson
                               nwfa2d, nifa2d,                      &
                               tgrs, prsl, phii, omega,             &
                               sedi_semi, sedi_semi_update,         &
-                              sedi_semi_decfl,                     &
-                              dtp, dt_inner,                       & 
+                              sedi_semi_decfl, dtp, dt_inner,      &
                               first_time_step, istep, nsteps,      &
                               prcp, rain, graupel, ice, snow, sr,  &
                               refl_10cm, reset_dBZ, do_radar_ref,  &
