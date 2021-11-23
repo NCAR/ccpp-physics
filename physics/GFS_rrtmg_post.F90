@@ -43,7 +43,7 @@
       real(kind=kind_phys), dimension(im,lm+LTP), intent(in) :: clouds1
       real(kind=kind_phys), dimension(im,lm+LTP), intent(in) :: cldtausw
       real(kind=kind_phys), dimension(im,lm+LTP), intent(in) :: cldtaulw
-      real(kind=kind_phys), dimension(im),        intent(out) :: total_albedo
+      real(kind=kind_phys), dimension(im),        intent(inout) :: total_albedo
       
       type(sfcflw_type), dimension(im), intent(in) :: sfcflw
       type(sfcfsw_type), dimension(im), intent(in) :: sfcfsw
@@ -199,10 +199,10 @@
       endif                                ! end_if_lssav
 
 !  ---  The total sky (with clouds) shortwave albedo
-
-        do i=1,im
-           total_albedo(i) = topfsw(i)%upfxc/topfsw(i)%dnfxc
-        enddo
+      total_albedo = 0.0
+      if (lsswr) then
+        where(topfsw(:)%dnfxc>0) total_albedo(:) = topfsw(:)%upfxc/topfsw(:)%dnfxc
+      endif
 !
       end subroutine GFS_rrtmg_post_run
 
