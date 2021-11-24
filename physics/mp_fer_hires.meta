@@ -274,7 +274,7 @@
 [rhgrd]
   standard_name = relative_humidity_threshold_for_condensation
   long_name = relative humidity threshold parameter for condensation for FA scheme
-  units = none
+  units = frac
   dimensions = ()
   type = real
   kind = kind_phys
