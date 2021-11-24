@@ -3164,6 +3164,18 @@
         enddo
       enddo
 
+      ! What portion of water and ice contents is associated with the partly cloudy boxes
+      do i = 1, IX
+         do k = 1, NLAY-1
+            if (cldtot(i,k).ge.climit .and. cldtot(i,k).lt.ovcst) then
+               lwp_fc(i) = lwp_fc(i) + cwp(i,k)
+               iwp_fc(i) = iwp_fc(i) + cip(i,k) + csp(i,k)
+            endif
+         enddo
+         lwp_fc(i) = lwp_fc(i)*1.E-3
+         iwp_fc(i) = iwp_fc(i)*1.E-3
+      enddo
+
       if ( lcnorm ) then
         do k = 1, NLAY
           do i = 1, IX
@@ -3439,7 +3451,7 @@
       do k = 1, NLAY-1
         do i = 1, IX
           cwp(i,k) = max(0.0, clw(i,k,ntcw) * dz(i,k)*1.E6)
-          crp(i,k) = max(0.0, clw(i,k,ntrw) * dz(i,k)*1.E6)
+          crp(i,k) = 0.0
           snow_mass_factor = 0.80
           cip(i,k) = max(0.0, (clw(i,k,ntiw)                            &
      &             + (1.0-snow_mass_factor)*clw(i,k,ntsw))*dz(i,k)*1.E6)
