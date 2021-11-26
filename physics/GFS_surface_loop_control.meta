@@ -83,6 +83,20 @@
   dimensions = ()
   type = integer
   intent = in
+[lsm]
+  standard_name = control_for_land_surface_scheme
+  long_name = flag for land surface model
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[lsm_noahmp]
+  standard_name = identifier_for_noahmp_land_surface_scheme
+  long_name = flag for NOAH MP land surface model
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
 [iter]
   standard_name = ccpp_loop_counter
   long_name = loop counter for subcycling loops in CCPP
