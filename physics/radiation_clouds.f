@@ -4536,9 +4536,12 @@
          RH_00O = 0.79+MIN(0.20,SQRT(1./(50.0+gridkm*gridkm*delz*0.01)))
          RHUM = rh(k)
 
-         if (qc(k).ge.1.E-7 .or. qi(k).ge.1.E-7                         &
+         if (qc(k).ge.1.E-6 .or. qi(k).ge.1.E-6                         &
      &                    .or. (qs(k).gt.1.E-6 .and. t(k).lt.273.)) then
             CLDFRA(K) = 1.0
+         elseif (((qc(k)+qi(k)).gt.1.E-10) .and.                        &
+     &                                    ((qc(k)+qi(k)).lt.1.E-6)) then
+            CLDFRA(K) = MIN(0.99, 0.25*(10.0 + log10(qc(k)+qi(k))))
          else
 
             IF ((XLAND-1.5).GT.0.) THEN                                  !--- Ocean
@@ -4571,6 +4574,7 @@
             if (CLDFRA(K).gt.0.) CLDFRA(K)=MAX(0.01,MIN(CLDFRA(K),0.99))
 
          endif
+         if (cldfra(k).gt.0.0 .and. p(k).lt.7000.0) CLDFRA(K) = 0.0
       ENDDO
 
       call find_cloudLayers(qvs, cldfra, T, P, Dz, entrmnt,             &
@@ -4581,24 +4585,14 @@
 
       call adjust_cloudFinal(cldfra, qc, qi, rhoa, dz, kts,kte)
 
-!..Last adjustment to cloud fraction already set to 1.0 when the explicit
-!.. clouds are present but extremely low mixing ratios.  Also, no way in this
-!.. world should we permit clouds above the 70 hPa level.
-
-      DO k = kts,kte
-         if (cldfra(k).eq.1.0 .and. ((qc(k)+qi(k)).gt.1.E-10) .and.     &
-     &                              ((qc(k)+qi(k)).lt.1.E-6)) then
-            CLDFRA(K) = MIN(0.99, 0.25*(10.0 + log10(qc(k)+qi(k))))
-         endif
-         if (cldfra(k).gt.0.0 .and. p(k).lt.7000.0) CLDFRA(K) = 0.0
-
-         if (debug_flag .and. ndebug.lt.25) then
+      if (debug_flag .and. ndebug.lt.25) then
+        do k = kts,kte
           write(6,'(a,i3,f9.2,f7.1,f7.2,f6.1,f6.3,f12.7,f12.7,f12.7)')  &
      &       ' DEBUG-GT: ', k, p(k)*0.01, dz(k), t(k)-273.15,           &
      &       rh(k)*100., cldfra(k), qc(k)*1.E3, qi(k)*1.E3, qs(k)*1.E3
-          if (k.eq.kte) ndebug = ndebug + 1
-         endif
-      ENDDO
+        enddo
+        ndebug = ndebug + 1
+      endif
 
 !..Intended for cold start model runs, we use modify_qvapor to ensure that cloudy
 !.. areas are actually saturated such that the inserted clouds do not evaporate a
