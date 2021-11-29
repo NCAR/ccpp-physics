@@ -722,7 +722,7 @@ do i = 1, im
           spec_humidity_forcing,sw_radiation_forcing ,precipitation_forcing,radiation_lw_forcing , &
           temperature_soil_bot ,forcing_height       ,snow_ice_frac_old    ,zsoil                , &
           thsfc_loc            ,prslkix              ,prsik1x              ,prslk1x              , &
-	  vegetation_frac.     ,area_grid            ,                                             &
+	  vegetation_frac      ,area_grid            ,                                             &
           snowfall             ,snow_water_equiv_old ,snow_albedo_old      ,                       &
           cm_noahmp            ,ch_noahmp            ,snow_levels          ,snow_water_equiv     , &
           soil_moisture_vol    ,interface_depth      ,snow_depth           ,snow_level_ice       , &
@@ -797,7 +797,7 @@ do i = 1, im
           ice_flag              ,surface_type          ,crop_type             , &
           eq_soil_water_vol     ,temperature_forcing   ,air_pressure_forcing  , &
           air_pressure_surface  ,uwind_forcing         ,vwind_forcing         , &
-          spec_humidity_forcing ,area_grid.            ,cloud_water_forcing   , &
+          spec_humidity_forcing ,area_grid             ,cloud_water_forcing   , &
           sw_radiation_forcing  ,radiation_lw_forcing  ,thsfc_loc             , &
           prslkix               ,prsik1x               ,prslk1x               , &
           precip_convective                                                   , &
