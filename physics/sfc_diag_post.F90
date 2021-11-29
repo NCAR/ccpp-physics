@@ -42,15 +42,6 @@
         errmsg = ''
         errflg = 0
 
-!       if (lsm == lsm_noahmp) then
-!         do i=1,im
-!           if(dry(i)) then
-!             t2m(i) = t2mmp(i)
-!             q2m(i) = q2mp(i)
-!           endif
-!         enddo
-!       endif
-
         if (lssav) then
           do i=1,im
             tmpmax(i)  = max(tmpmax(i),t2m(i))
