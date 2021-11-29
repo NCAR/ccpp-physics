@@ -3506,11 +3506,12 @@
      &       edir1, ec1, et1(nsoil), zsoil(nsoil)
 
 !  ---  input/outputs:
-      real (kind=kind_phys),  intent(inout) :: cmc, sh2o(nsoil)
+      real (kind=kind_phys),  intent(inout) :: cmc, sh2o(nsoil),        &
+     &       smc(nsoil)
 
 !  ---  outputs:
-      real (kind=kind_phys),  intent(out) :: smc(nsoil), runoff1,       &
-     &       runoff2, runoff3, drip
+      real (kind=kind_phys),  intent(out) :: runoff1, runoff2,          &
+     &       runoff3, drip
 
 !  ---  locals:
       real (kind=kind_phys) :: dummy, excess, pcpdrp, rhsct, trhsct,    &

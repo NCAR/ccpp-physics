@@ -108,7 +108,7 @@
     ( im, km, lsnowl, itime, ps, u1, v1, t1, q1, soiltyp,        &
       vegtype, sigmaf, dlwflx, dswsfc, snet, delt, tg3, cm, ch,  &
       prsl1, prslk1, prslki, prsik1, zf, dry, wind, slopetyp,    &
-      shdmin, shdmax, snoalb, sfalb, flag_iter,                  &
+      shdmin, shdmax, snoalb, sfalb, flag_iter,con_g,            &
       idveg, iopt_crs, iopt_btr, iopt_run, iopt_sfc, iopt_frz,   &
       iopt_inf, iopt_rad, iopt_alb, iopt_snf, iopt_tbot,         &
       iopt_stc, xlatin, xcoszin, iyrlen, julian, garea,          &
@@ -149,16 +149,16 @@
 
   implicit none
       
-  real(kind=kind_phys), parameter :: a2      = 17.2693882
-  real(kind=kind_phys), parameter :: a3      = 273.16
-  real(kind=kind_phys), parameter :: a4      = 35.86
-  real(kind=kind_phys), parameter :: a23m4   = a2*(a3-a4)
-  real(kind=kind_phys), parameter :: gravity = 9.81
+  real(kind=kind_phys), parameter  :: a2      = 17.2693882
+  real(kind=kind_phys), parameter  :: a3      = 273.16
+  real(kind=kind_phys), parameter  :: a4      = 35.86
+  real(kind=kind_phys), parameter  :: a23m4   = a2*(a3-a4)
+  real(kind=kind_phys), intent(in) :: con_g 
       
-  real, parameter                 :: undefined  =  9.99e20_kind_phys
+  real, parameter                  :: undefined  =  9.99e20_kind_phys
 
-  integer, parameter              :: nsoil   = 4   ! hardwired to Noah
-  integer, parameter              :: nsnow   = 3   ! max. snow layers
+  integer, parameter               :: nsoil   = 4   ! hardwired to Noah
+  integer, parameter               :: nsnow   = 3   ! max. snow layers
 
   real(kind=kind_phys), save  :: zsoil(nsoil)
   data zsoil  / -0.1, -0.4, -1.0, -2.0 /
@@ -981,10 +981,10 @@ do i = 1, im
             zvfun(i) = sqrt(tem1 * tem2)
             gdx=sqrt(garea(i))
 
-      call       stability                                                      &
+      call       stability                                                               &
         (zf(i), zvfun(i), gdx, virtual_temperature, vptemp,wind(i), z0_total, z0h_total, & 
-         tvs1, gravity,thsfc_loc,                                        &
-         rb1(i),fm1(i),fh1(i),fm101(i),fh21(i),cm(i),ch(i),stress1(i),ustar1(i))
+         tvs1, con_g, thsfc_loc,                                                         &
+         rb1(i), fm1(i), fh1(i), fm101(i), fh21(i), cm(i), ch(i), stress1(i), ustar1(i))
 
       cmxy(i) = cm(i)
       chxy(i) = ch(i)

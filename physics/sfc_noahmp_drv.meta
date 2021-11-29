@@ -332,6 +332,14 @@
   dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
+[con_g]
+  standard_name = gravitational_acceleration
+  long_name = gravitational acceleration
+  units = m s-2
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
 [idveg]
   standard_name = control_for_land_surface_scheme_dynamic_vegetation
   long_name = choice for dynamic vegetation option (see noahmp module for definition)

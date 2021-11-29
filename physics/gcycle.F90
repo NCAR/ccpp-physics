@@ -173,7 +173,7 @@ contains
       do ix=1,npts
         i_indx(ix) = imap(ix) + isc - 1
         j_indx(ix) = jmap(ix) + jsc - 1
-        
+
         if (lakefrac(ix) > 0.0_kind_phys) then
           min_ice(ix) = min_lakeice
         else
