@@ -275,7 +275,7 @@
 !! \htmlinclude GFS_surface_generic_post_run.html
 !!
       subroutine GFS_surface_generic_post_run (im, cplflx, cplchm, cplwav, lssav, dry, icy, wet,                                    &
-        dtf, ep1d, gflx, tgrs_1, qgrs_1, ugrs_1, vgrs_1,                                                                            &
+        lsm,lsm_noahmp, ep1d, gflx, tgrs_1, qgrs_1, ugrs_1, vgrs_1,                                                                 &
         adjsfcdlw, adjsfcdsw, adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd, adjsfculw, adjsfculw_wat, adjnirbmu, adjnirdfu,           &
         adjvisbmu, adjvisdfu,t2m, q2m, u10m, v10m, tsfc, tsfc_wat, pgr, xcosz, evbs, evcw, trans, sbsno, snowc, snohf,pah,pahi,     &
         epi, gfluxi, t1, q1, u1, v1, dlwsfci_cpl, dswsfci_cpl, dlwsfc_cpl, dswsfc_cpl, dnirbmi_cpl, dnirdfi_cpl, dvisbmi_cpl,       &
@@ -290,6 +290,7 @@
         integer,                                intent(in) :: im
         logical,                                intent(in) :: cplflx, cplchm, cplwav, lssav
         logical, dimension(:),                  intent(in) :: dry, icy, wet
+        integer,                                intent(in) :: lsm, lsm_noahmp
         real(kind=kind_phys),                   intent(in) :: dtf
 
         real(kind=kind_phys), dimension(:),  intent(in)  :: ep1d, gflx, tgrs_1, qgrs_1, ugrs_1, vgrs_1, adjsfcdlw, adjsfcdsw,  &
@@ -422,7 +423,6 @@
             snowca(i)  = snowca(i) + snowc(i) * dtf
             snohfa(i)  = snohfa(i) + snohf(i) * dtf
             ep(i)      = ep(i)     + ep1d(i)  * dtf
-            paha(i)    = paha(i)   + pah(i)   * dtf
 
 !  --- ...  total runoff is composed of drainage into water table and
 !           runoff at the surface and is accumulated in unit of meters
@@ -431,7 +431,10 @@
             tecan(i)   = tecan(i)   + ecan(i) * dtf
             tetran(i)   = tetran(i) + etran(i) * dtf
             tedir(i)   = tedir(i)   + edir(i) * dtf
-            twa(i) = waxy(i) 
+            if (lsm == lsm_noahmp) then
+             paha(i)    = paha(i)   + pah(i)   * dtf
+             twa(i) = waxy(i) 
+            endif
           enddo
         endif
 
