@@ -111,15 +111,15 @@
       shdmin, shdmax, snoalb, sfalb, flag_iter,                  &
       idveg, iopt_crs, iopt_btr, iopt_run, iopt_sfc, iopt_frz,   &
       iopt_inf, iopt_rad, iopt_alb, iopt_snf, iopt_tbot,         &
-      iopt_stc, xlatin, xcoszin, iyrlen, julian,garea,           &
+      iopt_stc, xlatin, xcoszin, iyrlen, julian, garea,          &
       rainn_mp, rainc_mp, snow_mp, graupel_mp, ice_mp,           &
       con_hvap, con_cp, con_jcal, rhoh2o, con_eps, con_epsm1,    &
-      con_fvirt, con_rd, con_hfus,thsfc_loc,                     &
+      con_fvirt, con_rd, con_hfus, thsfc_loc,                    &
 
 !  ---  in/outs:
       weasd, snwdph, tskin, tprcp, srflag, smc, stc, slc,        &
       canopy, trans, zorl,                                       &
-      rb1,fm1,fh1,ustar1,stress1,fm101,fh21,                     &
+      rb1, fm1, fh1, ustar1, stress1, fm101, fh21,               &
 
 ! --- Noah MP specific
 
@@ -132,7 +132,7 @@
 
 !  ---  outputs:
       sncovr1, qsurf, gflux, drain, evap, hflx, ep, runoff,      &
-      cmm, chh, evbs, evcw, sbsno, pah, ecan, etran, edir,snowc, &
+      cmm, chh, evbs, evcw, sbsno, pah, ecan, etran, edir, snowc,&
       stm, snohf,smcwlt2, smcref2, wet1, t2mmp, q2mp,zvfun,      &
       errmsg, errflg)     
 
@@ -142,10 +142,10 @@
   use sfc_diff,   only : stability
   use module_sf_noahmplsm
   use module_sf_noahmp_glacier
-  use noahmp_tables, only : isice_table, co2_table, o2_table,       &
-                            isurban_table,smcref_table,smcdry_table,   &
-                            smcmax_table,co2_table,o2_table,           &
-                            saim_table,laim_table
+  use noahmp_tables, only : isice_table, co2_table, o2_table,            &
+                            isurban_table, smcref_table, smcdry_table,   &
+                            smcmax_table, co2_table, o2_table,           &
+                            saim_table, laim_table
 
   implicit none
       
@@ -247,13 +247,13 @@
   real(kind=kind_phys), dimension(:)     , intent(inout) :: trans      ! total plant transpiration [m/s]
   real(kind=kind_phys), dimension(:)     , intent(inout) :: zorl       ! surface roughness [cm]
 
-  real(kind=kind_phys), dimension(:)      , intent(inout) :: rb1       ! bulk richardson #
-  real(kind=kind_phys), dimension(:)      , intent(inout) :: fm1       !  Monin_Obukhov_silarity_function for momentum
-  real(kind=kind_phys), dimension(:)      , intent(inout) :: fh1       !  Monin_Obukhov_silarity_function for heat
-  real(kind=kind_phys), dimension(:)      , intent(inout) :: ustar1    !  friction velocity m s-1
-  real(kind=kind_phys), dimension(:)      , intent(inout) :: stress1   ! Wind stress m2 S-2
-  real(kind=kind_phys), dimension(:)      , intent(inout) :: fm101     ! MOS function for momentum evaulated @ 10 m
-  real(kind=kind_phys), dimension(:)      , intent(inout) :: fh21      ! MOS function for heat evaulated @ 2m
+  real(kind=kind_phys), dimension(:)     , intent(inout) :: rb1        ! bulk richardson #
+  real(kind=kind_phys), dimension(:)     , intent(inout) :: fm1        !  Monin_Obukhov_silarity_function for momentum
+  real(kind=kind_phys), dimension(:)     , intent(inout) :: fh1        !  Monin_Obukhov_silarity_function for heat
+  real(kind=kind_phys), dimension(:)     , intent(inout) :: ustar1     !  friction velocity m s-1
+  real(kind=kind_phys), dimension(:)     , intent(inout) :: stress1    ! Wind stress m2 S-2
+  real(kind=kind_phys), dimension(:)     , intent(inout) :: fm101      ! MOS function for momentum evaulated @ 10 m
+  real(kind=kind_phys), dimension(:)     , intent(inout) :: fh21       ! MOS function for heat evaulated @ 2m
 
   real(kind=kind_phys), dimension(:)     , intent(inout) :: snowxy     ! actual no. of snow layers
   real(kind=kind_phys), dimension(:)     , intent(inout) :: tvxy       ! vegetation leaf temperature [K]
@@ -694,8 +694,8 @@ do i = 1, im
       slope_category      = slopetyp(i)
       soil_color_category = 4
 
-      call transfer_mp_parameters(vegetation_category,soil_category, &
-                        slope_category,soil_color_category,crop_type,parameters)
+      call transfer_mp_parameters(vegetation_category, soil_category, &
+                        slope_category, soil_color_category, crop_type,parameters)
 
       call noahmp_options(idveg ,iopt_crs, iopt_btr , iopt_run, iopt_sfc,  &
                                  iopt_frz, iopt_inf , iopt_rad, iopt_alb,  &
@@ -721,7 +721,8 @@ do i = 1, im
           temperature_forcing  ,air_pressure_forcing ,uwind_forcing        ,vwind_forcing        , &
           spec_humidity_forcing,sw_radiation_forcing ,precipitation_forcing,radiation_lw_forcing , &
           temperature_soil_bot ,forcing_height       ,snow_ice_frac_old    ,zsoil                , &
-          thsfc_loc,prslkix ,prsik1x ,prslk1x,vegetation_frac,area_grid                          , &
+          thsfc_loc            ,prslkix              ,prsik1x              ,prslk1x              , &
+	  vegetation_frac.     ,area_grid            ,                                             &
           snowfall             ,snow_water_equiv_old ,snow_albedo_old      ,                       &
           cm_noahmp            ,ch_noahmp            ,snow_levels          ,snow_water_equiv     , &
           soil_moisture_vol    ,interface_depth      ,snow_depth           ,snow_level_ice       , &
@@ -796,9 +797,9 @@ do i = 1, im
           ice_flag              ,surface_type          ,crop_type             , &
           eq_soil_water_vol     ,temperature_forcing   ,air_pressure_forcing  , &
           air_pressure_surface  ,uwind_forcing         ,vwind_forcing         , &
-          spec_humidity_forcing ,area_grid, cloud_water_forcing               , &
-          sw_radiation_forcing  ,radiation_lw_forcing                         , &
-          thsfc_loc, prslkix,prsik1x,prslk1x                                  , &
+          spec_humidity_forcing ,area_grid.            ,cloud_water_forcing   , &
+          sw_radiation_forcing  ,radiation_lw_forcing  ,thsfc_loc             , &
+          prslkix               ,prsik1x               ,prslk1x               , &
           precip_convective                                                   , &
           precip_non_convective ,precip_sh_convective  ,precip_snow           , &
           precip_graupel        ,precip_hail           ,temperature_soil_bot  , &
@@ -857,10 +858,10 @@ do i = 1, im
 
         latent_heat_total  = latent_heat_canopy + latent_heat_ground + transpiration_heat
 
-        t2mmp(i) = temperature_veg_2m   * vegetation_fraction + &
-                  temperature_bare_2m   * (1-vegetation_fraction) 
-         q2mp(i) = spec_humidity_veg_2m * vegetation_fraction + &
-                  spec_humidity_bare_2m * (1-vegetation_fraction)
+        t2mmp(i)  = temperature_veg_2m   * vegetation_fraction + &
+                   temperature_bare_2m   * (1-vegetation_fraction) 
+         q2mp(i)  = spec_humidity_veg_2m * vegetation_fraction + &
+                   spec_humidity_bare_2m * (1-vegetation_fraction)
 
          tskin(i) = surface_temperature
 
