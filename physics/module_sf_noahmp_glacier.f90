@@ -407,7 +407,7 @@ contains
                              tg        ,stc     ,snowh   ,sneqv   ,sneqvo  ,sh2o    , & !inout
                              smc       ,snice   ,snliq   ,albold  ,cm      ,ch      , & !inout
 #ifdef CCPP
-                             tauss     ,qsfc    ,errmsg  ,errflg. ,                   & !inout
+                             tauss     ,qsfc    ,errmsg  ,errflg  ,                   & !inout
 #else
                              tauss     ,qsfc    ,                                     & !inout
 #endif
@@ -2267,7 +2267,7 @@ end if   ! opt_gla == 1
                             isnow  ,snowh  ,sneqv   ,snice    ,snliq    ,stc    , & !inout
                             dzsnso ,sh2o   ,sice    ,ponding  ,zsnso    ,fsh    , & !inout
                             runsrf ,runsub ,qsnow   ,ponding1 ,ponding2 ,qsnbot , & !out
-			    fpice. ,esnow)                                          !out
+			    fpice  ,esnow)                                          !out
 ! ----------------------------------------------------------------------  
 ! code history:
 ! initial code: guo-yue niu, oct. 2007
