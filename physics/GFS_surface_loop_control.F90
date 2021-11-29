@@ -22,7 +22,7 @@
 !!  \section detailed Detailed Algorithm
 !!  @{
 
-      subroutine GFS_surface_loop_control_part1_run (im, lsm,lsm_noahmp, iter, &
+      subroutine GFS_surface_loop_control_part1_run (im, lsm, lsm_noahmp, iter, &
                                    wind, flag_guess, errmsg, errflg)
 
       use machine,           only: kind_phys
@@ -81,7 +81,7 @@
 !!  \section detailed Detailed Algorithm
 !!  @{
 
-      subroutine GFS_surface_loop_control_part2_run (im,lsm,lsm_noahmp, iter,&
+      subroutine GFS_surface_loop_control_part2_run (im, lsm, lsm_noahmp, iter,&
        wind, flag_guess, flag_iter, dry, wet, icy, nstf_name1, errmsg, errflg)
 
       use machine,           only: kind_phys
@@ -115,7 +115,7 @@
 
         if (iter == 1 .and. wind(i) < 2.0d0) then
           !if (dry(i) .or. (wet(i) .and. .not.icy(i) .and. nstf_name1 > 0)) then
-          if((dry(i).and.lsm /= lsm_noahmp) .or. (wet(i) .and. nstf_name1 > 0)) then
+          if((dry(i) .and. lsm /= lsm_noahmp) .or. (wet(i) .and. nstf_name1 > 0)) then
             flag_iter(i) = .true.
           endif
         endif
