@@ -275,7 +275,7 @@
 !! \htmlinclude GFS_surface_generic_post_run.html
 !!
       subroutine GFS_surface_generic_post_run (im, cplflx, cplchm, cplwav, lssav, dry, icy, wet,                                    &
-        lsm, lsm_noahmp, ep1d, gflx, tgrs_1, qgrs_1, ugrs_1, vgrs_1,                                                                &
+        lsm, lsm_noahmp, dtf, ep1d, gflx, tgrs_1, qgrs_1, ugrs_1, vgrs_1,                                                           &
         adjsfcdlw, adjsfcdsw, adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd, adjsfculw, adjsfculw_wat, adjnirbmu, adjnirdfu,           &
         adjvisbmu, adjvisdfu, t2m, q2m, u10m, v10m, tsfc, tsfc_wat, pgr, xcosz, evbs, evcw, trans, sbsno, snowc, snohf, pah, pahi,  &
         epi, gfluxi, t1, q1, u1, v1, dlwsfci_cpl, dswsfci_cpl, dlwsfc_cpl, dswsfc_cpl, dnirbmi_cpl, dnirdfi_cpl, dvisbmi_cpl,       &
