@@ -14,7 +14,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [flag_restart]
   standard_name = flag_for_restart
   long_name = flag for restart (warmstart) or coldstart
@@ -22,7 +21,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [kdt]
   standard_name = index_of_timestep
   long_name = current forecast iteration
@@ -30,7 +28,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [fhour]
   standard_name = forecast_time
   long_name = curent forecast time
@@ -39,7 +36,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [dtp]
   standard_name = timestep_for_physics
   long_name = physics timestep
@@ -48,7 +44,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [t]
   standard_name = air_temperature
   long_name = model layer mean temperature
@@ -57,7 +52,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [q]
   standard_name = specific_humidity
   long_name = water vapor specific humidity
@@ -66,7 +60,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [prevst]
   standard_name = air_temperature_on_previous_timestep
   long_name = temperature from previous time step
@@ -75,7 +68,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [prevsq]
   standard_name = specific_humidity_on_previous_timestep
   long_name = moisture from previous time step
@@ -84,7 +76,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [forcet]
   standard_name = tendency_of_air_temperature_due_to_nonphysics
   long_name = temperature tendency due to dynamics only
@@ -93,7 +84,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [forceq]
   standard_name = tendendy_of_specific_humidity_due_to_nonphysics
   long_name = moisture tendency due to dynamics only
@@ -102,7 +92,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [cactiv]
   standard_name = counter_for_grell_freitas_convection
   long_name = convective activity memory
@@ -110,7 +99,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = out
-  optional = F
 [cactiv_m]
   standard_name = counter_for_grell_freitas_mid_level_convection
   long_name = midlevel convective activity memory
@@ -118,7 +106,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = out
-  optional = F
 [conv_act]
   standard_name = consecutive_calls_for_grell_freitas_convection
   long_name = Memory counter for GF
@@ -127,7 +114,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [conv_act_m]
   standard_name = consecutive_calls_for_grell_freitas_mid_level_convection
   long_name = Memory counter for GF midlevel
@@ -136,7 +122,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -145,7 +130,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -153,4 +137,3 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F

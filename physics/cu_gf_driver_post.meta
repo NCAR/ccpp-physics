@@ -14,7 +14,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [t]
   standard_name = air_temperature_of_new_state
   long_name = temperature updated by physics
@@ -23,7 +22,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [q]
   standard_name = specific_humidity_of_new_state
   long_name = water vapor specific humidity updated by physics
@@ -32,7 +30,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [prevst]
   standard_name = air_temperature_on_previous_timestep
   long_name = temperature from previous time step
@@ -41,7 +38,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [prevsq]
   standard_name = specific_humidity_on_previous_timestep
   long_name = moisture from previous time step
@@ -50,7 +46,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [cactiv]
   standard_name = counter_for_grell_freitas_convection
   long_name = convective activity memory
@@ -58,7 +53,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
-  optional = F
 [cactiv_m]
   standard_name = counter_for_grell_freitas_mid_level_convection
   long_name = midlevel convective activity memory
@@ -66,7 +60,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
-  optional = F
 [conv_act]
   standard_name = consecutive_calls_for_grell_freitas_convection
   long_name = Memory counter for GF
@@ -75,7 +68,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [conv_act_m]
   standard_name = consecutive_calls_for_grell_freitas_mid_level_convection
   long_name = Memory counter for GF midlevel
@@ -84,7 +76,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -93,7 +84,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -101,4 +91,3 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
