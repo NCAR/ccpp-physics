@@ -600,6 +600,20 @@
   dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
+[lsm]
+  standard_name = control_for_land_surface_scheme
+  long_name = flag for land surface model
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[lsm_noahmp]
+  standard_name = identifier_for_noahmp_land_surface_scheme
+  long_name = flag for NOAH MP land surface model
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
 [dtf]
   standard_name = timestep_for_dynamics
   long_name = dynamics timestep
