@@ -82,7 +82,7 @@
 [po3]
   standard_name = natural_log_of_ozone_forcing_data_pressure_levels
   long_name = natural log of ozone forcing data pressure levels
-  units = log(Pa)
+  units = 1
   dimensions = (vertical_dimension_of_ozone_forcing_data)
   type = real
   kind = kind_phys
@@ -98,7 +98,7 @@
 [prdout]
   standard_name = ozone_forcing
   long_name = ozone forcing coefficients
-  units = various
+  units = mixed
   dimensions = (horizontal_loop_extent,vertical_dimension_of_ozone_forcing_data,number_of_coefficients_in_ozone_forcing_data)
   type = real
   kind = kind_phys
@@ -128,7 +128,7 @@
 [dtend]
   standard_name = cumulative_change_of_state_variables
   long_name = diagnostic tendencies for state variables
-  units = various
+  units = mixed
   dimensions = (horizontal_loop_extent,vertical_layer_dimension,cumulative_change_of_state_variables_outer_index_max)
   type = real
   kind = kind_phys
