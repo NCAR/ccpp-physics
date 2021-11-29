@@ -558,7 +558,7 @@
   standard_name = multiplicative_tunable_parameters_for_mountain_blocking_and_orographic_gravity_wave_drag
   long_name = multiplic. factors for (1) mountain blocking drag coeff. and (2) ref. level orographic gravity wave drag
   units = none
-  dimensions = (2)
+  dimensions = (4)
   type = real
   kind = kind_phys
   intent = in
