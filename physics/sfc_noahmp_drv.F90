@@ -783,6 +783,7 @@ do i = 1, im
         q2mp(i)                = spec_humidity_bare_2m
 
         tskin(i)               = temperature_ground
+        vegetation_fraction    = vegetation_frac
 
       else  ! not glacier
 
