@@ -737,7 +737,7 @@ do i = 1, im
 #ifdef CCPP
           albedo_direct        ,albedo_diffuse,       errmsg               ,errflg )
 #else
-          albedo_direct        ,albedo_diffuse,)
+          albedo_direct        ,albedo_diffuse)
 #endif
 
 #ifdef CCPP
