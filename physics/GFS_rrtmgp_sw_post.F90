@@ -149,7 +149,7 @@ contains
 
        ! #######################################################################################
        ! Save SW outputs
-       ! (Copy fluxes from RRTGMP types into model radiation types.)
+       ! (Copy fluxes from RRTMGP types into model radiation types.)
        ! #######################################################################################
 
        ! TOA fluxes
