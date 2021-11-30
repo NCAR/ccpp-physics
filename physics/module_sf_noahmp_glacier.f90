@@ -2534,8 +2534,10 @@ end if   ! opt_gla == 1
 
    if(isnow /= 0) then
        sneqv = 0.
+       snowh = 0.
        do iz = isnow+1,0
              sneqv = sneqv + snice(iz) + snliq(iz)
+             snowh = snowh + dzsnso(iz)
        enddo
    end if
 
