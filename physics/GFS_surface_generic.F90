@@ -335,7 +335,9 @@
         do i=1,im
           epi(i)    = ep1d(i)
           gfluxi(i) = gflx(i)
-          pahi(i)   = pah(i)
+          if (lsm == lsm_noahmp) then
+            pahi(i)   = pah(i)
+          endif
           t1(i)     = tgrs_1(i)
           q1(i)     = qgrs_1(i)
           u1(i)     = ugrs_1(i)
