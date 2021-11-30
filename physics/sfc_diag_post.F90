@@ -16,7 +16,7 @@
 !!
 #endif
       subroutine sfc_diag_post_run (im, lsm, lsm_noahmp, dry, lssav, dtf, con_eps, con_epsm1, pgr,&
-                         t2mmp, q2mp, t2m, q2m, u10m, v10m, tmpmin, tmpmax, spfhmin, spfhmax,&
+                         t2m, q2m, u10m, v10m, tmpmin, tmpmax, spfhmin, spfhmax,                  &
                          wind10mmax, u10mmax, v10mmax, dpt2m, errmsg, errflg)
 
         use machine,               only: kind_phys
@@ -28,7 +28,6 @@
         real(kind=kind_phys),                 intent(in) :: dtf, con_eps, con_epsm1
         logical             , dimension(:),  intent(in) :: dry
         real(kind=kind_phys), dimension(:),  intent(in) :: pgr, u10m, v10m
-        real(kind=kind_phys), dimension(:) ,  intent(in) :: t2mmp, q2mp
         real(kind=kind_phys), dimension(:),  intent(inout) :: t2m, q2m, tmpmin, tmpmax, spfhmin, spfhmax
         real(kind=kind_phys), dimension(:),  intent(inout) :: wind10mmax, u10mmax, v10mmax, dpt2m
 
