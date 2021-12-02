@@ -600,6 +600,20 @@
   dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
+[lsm]
+  standard_name = control_for_land_surface_scheme
+  long_name = flag for land surface model
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[lsm_noahmp]
+  standard_name = identifier_for_noahmp_land_surface_scheme
+  long_name = flag for NOAH MP land surface model
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
 [dtf]
   standard_name = timestep_for_dynamics
   long_name = dynamics timestep
@@ -859,6 +873,22 @@
 [snohf]
   standard_name = snow_freezing_rain_upward_latent_heat_flux
   long_name = latent heat flux due to snow and frz rain
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[pah]
+  standard_name = total_precipitation_advected_heat
+  long_name = precipitation advected heat - total
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[pahi]
+  standard_name = instantaneous_total_precipitation_advected_heat
+  long_name = instantaneous precipitation advected heat - total
   units = W m-2
   dimensions = (horizontal_loop_extent)
   type = real
@@ -1208,6 +1238,14 @@
   type = real
   kind = kind_phys
   intent = inout
+[paha]
+  standard_name = cumulative_precipitation_advected_heat_flux_multiplied_by_timestep
+  long_name = cumulative precipitation advected heat flux multiplied by timestep
+  units = W m-2 s
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
 [ep]
   standard_name = cumulative_surface_upward_potential_latent_heat_flux_multiplied_by_timestep
   long_name = cumulative surface upward potential latent heat flux multiplied by timestep
@@ -1216,6 +1254,38 @@
   type = real
   kind = kind_phys
   intent = inout
+[ecan]
+  standard_name = evaporation_of_intercepted_water
+  long_name = evaporation of intercepted water
+  units = kg m-2 s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[etran]
+  standard_name = transpiration_rate
+  long_name = transpiration rate
+  units = kg m-2 s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[edir]
+  standard_name = soil_surface_evaporation_rate
+  long_name = soil surface evaporation rate
+  units = kg m-2 s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[waxy]
+  standard_name = water_storage_in_aquifer
+  long_name = water storage in aquifer
+  units = mm
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
 [runoff]
   standard_name = total_runoff
   long_name = total water runoff
@@ -1248,6 +1318,38 @@
   type = real
   kind = kind_phys
   intent = in
+[tecan]
+  standard_name = total_evaporation_of_intercepted_water
+  long_name = total evaporation of intercepted water
+  units = kg m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[tetran]
+  standard_name = total_transpiration_rate
+  long_name = total transpiration rate
+  units = kg m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[tedir]
+  standard_name = total_soil_surface_evaporation_rate
+  long_name = total soil surface evaporation rate
+  units = kg m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[twa]
+  standard_name = total_water_storage_in_aquifer
+  long_name = total water storage in aquifer
+  units = kg m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
 [lheatstrg]
   standard_name = flag_for_canopy_heat_storage_in_land_surface_scheme
   long_name = flag for canopy heat storage parameterization
