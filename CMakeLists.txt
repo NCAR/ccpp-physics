@@ -1,13 +1,8 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.3)
 
 project(ccpp_physics
         VERSION 5.0.0
         LANGUAGES Fortran)
-
-# CMP0057: Support new IN_LIST if() operator
-if(POLICY CMP0057)
-    cmake_policy(SET CMP0057 NEW)
-endif(POLICY CMP0057)
 
 #------------------------------------------------------------------------------
 set(PACKAGE "ccpp-physics")
@@ -42,10 +37,10 @@ option(BUILD_SHARED_LIBS "Build a shared library" OFF)
 # Set the sources: physics type definitions
 set(TYPEDEFS $ENV{CCPP_TYPEDEFS})
 if(TYPEDEFS)
-  message(STATUS "Got CCPP TYPEDEFS from environment variable: ${TYPEDEFS}")
+  message(STATUS "Got CCPP TYPEDEFS from environment variable")
 else(TYPEDEFS)
   include(${CMAKE_CURRENT_BINARY_DIR}/CCPP_TYPEDEFS.cmake)
-  message(STATUS "Got CCPP TYPEDEFS from cmakefile include file: ${TYPEDEFS}")
+  message(STATUS "Got CCPP TYPEDEFS from cmakefile include file")
 endif(TYPEDEFS)
 
 # Generate list of Fortran modules from the CCPP type
@@ -58,19 +53,19 @@ endforeach()
 # Set the sources: physics schemes
 set(SCHEMES $ENV{CCPP_SCHEMES})
 if(SCHEMES)
-  message(STATUS "Got CCPP SCHEMES from environment variable: ${SCHEMES}")
+  message(STATUS "Got CCPP SCHEMES from environment variable")
 else(SCHEMES)
   include(${CMAKE_CURRENT_BINARY_DIR}/CCPP_SCHEMES.cmake)
-  message(STATUS "Got CCPP SCHEMES from cmakefile include file: ${SCHEMES}")
+  message(STATUS "Got CCPP SCHEMES from cmakefile include file")
 endif(SCHEMES)
 
 # Set the sources: physics scheme caps
 set(CAPS $ENV{CCPP_CAPS})
 if(CAPS)
-  message(STATUS "Got CCPP CAPS from environment variable: ${CAPS}")
+  message(STATUS "Got CCPP CAPS from environment variable")
 else(CAPS)
   include(${CMAKE_CURRENT_BINARY_DIR}/CCPP_CAPS.cmake)
-  message(STATUS "Got CCPP CAPS from cmakefile include file: ${CAPS}")
+  message(STATUS "Got CCPP CAPS from cmakefile include file")
 endif(CAPS)
 
 # Schemes and caps from the CCPP code generator use full paths with symlinks
