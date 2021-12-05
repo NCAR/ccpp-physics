@@ -30,10 +30,8 @@ contains
    subroutine GFS_surface_composites_pre_run (im, flag_init, flag_restart, lkm, frac_grid,                                &
                                  flag_cice, cplflx, cplice, cplwav2atm, landfrac, lakefrac, lakedepth, oceanfrac, frland, &
                                  dry, icy, lake, use_flake, wet, hice, cice, zorlo, zorll, zorli,                         &
-                                 snowd,            snowd_lnd, snowd_ice, tprcp, tprcp_wat,                                &
-                                 tprcp_lnd, tprcp_ice, uustar, uustar_wat, uustar_lnd, uustar_ice,                        &
-                                 weasd,            weasd_lnd, weasd_ice, ep1d_ice, tsfc, tsfco, tsfcl, tsfc_wat,          &
-                                           tisfc, tsurf_wat, tsurf_lnd, tsurf_ice,                                        &
+                                 tprcp, tprcp_wat, tprcp_lnd, tprcp_ice, uustar, uustar_wat, uustar_lnd, uustar_ice,      &
+                                 ep1d_ice, tsfc, tsfco, tsfcl, tsfc_wat, tisfc, tsurf_wat, tsurf_lnd, tsurf_ice,          &
                                  gflx_ice, tgice, islmsk, islmsk_cice, slmsk, qss, qss_wat, qss_lnd, qss_ice,             &
                                  min_lakeice, min_seaice, kdt, huge, errmsg, errflg)
 
@@ -47,12 +45,12 @@ contains
       real(kind=kind_phys), dimension(:), intent(in   )  :: landfrac, lakefrac, lakedepth, oceanfrac
       real(kind=kind_phys), dimension(:), intent(inout)  :: cice, hice
       real(kind=kind_phys), dimension(:), intent(  out)  :: frland
-      real(kind=kind_phys), dimension(:), intent(in   )  :: snowd, tprcp, uustar, weasd, qss
+      real(kind=kind_phys), dimension(:), intent(in   )  :: tprcp, uustar, qss
 
       real(kind=kind_phys), dimension(:), intent(inout)  :: tsfc, tsfco, tsfcl, tisfc
-      real(kind=kind_phys), dimension(:), intent(inout)  :: snowd_lnd, snowd_ice, tprcp_wat,            &
+      real(kind=kind_phys), dimension(:), intent(inout)  :: tprcp_wat,                                  &
                     tprcp_lnd, tprcp_ice, tsfc_wat, tsurf_wat,tsurf_lnd, tsurf_ice,                     &
-                    uustar_wat, uustar_lnd, uustar_ice, weasd_lnd, weasd_ice,                           &
+                    uustar_wat, uustar_lnd, uustar_ice,                                                 &
                     qss_wat, qss_lnd, qss_ice, ep1d_ice, gflx_ice
       real(kind=kind_phys),                intent(in   ) :: tgice
       integer,              dimension(:), intent(inout)  :: islmsk, islmsk_cice
@@ -218,7 +216,6 @@ contains
         endif
         if (dry(i)) then                   ! Land
           uustar_lnd(i) = uustar(i)
-           weasd_lnd(i) = weasd(i)
            tsurf_lnd(i) = tsfcl(i)
         ! DH*
         else
@@ -229,7 +226,6 @@ contains
         endif
         if (icy(i)) then                   ! Ice
           uustar_ice(i) = uustar(i)
-           weasd_ice(i) = weasd(i)
            tsurf_ice(i) = tisfc(i)
             ep1d_ice(i) = zero
             gflx_ice(i) = zero
@@ -256,43 +252,6 @@ contains
         endif
       enddo
 !
-      if (.not. cplflx .or. kdt == 1) then
-        if (frac_grid) then
-          do i=1,im
-            if (dry(i)) then
-              if (icy(i)) then
-                tem = one / (cice(i)*(one-frland(i)))
-                snowd_ice(i) = max(zero, (snowd(i) - snowd_lnd(i)*frland(i)) * tem)
-                weasd_ice(i) = max(zero, (weasd(i) - weasd_lnd(i)*frland(i)) * tem)
-              endif
-            elseif (icy(i)) then
-              tem = one / cice(i)
-              snowd_lnd(i) = zero
-              snowd_ice(i) = snowd(i) * tem
-              weasd_lnd(i) = zero
-              weasd_ice(i) = weasd(i) * tem
-            endif
-          enddo
-        else
-          do i=1,im
-            if (dry(i)) then
-              snowd_lnd(i) = snowd(i)
-              weasd_lnd(i) = weasd(i)
-              snowd_ice(i) = zero
-              weasd_ice(i) = zero
-            elseif (icy(i)) then
-              snowd_lnd(i) = zero
-              weasd_lnd(i) = zero
-              tem = one / cice(i)
-              snowd_ice(i) = snowd(i) * tem
-              weasd_ice(i) = weasd(i) * tem
-            endif
-          enddo
-        endif
-      endif
-
-!     write(0,*)' minmax of ice snow=',minval(snowd_ice),maxval(snowd_ice)
-
    end subroutine GFS_surface_composites_pre_run
 
 end module GFS_surface_composites_pre

@@ -185,30 +185,6 @@
   type = real
   kind = kind_phys
   intent = inout
-[snowd]
-  standard_name = lwe_surface_snow
-  long_name = water equivalent snow depth
-  units = mm
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-[snowd_lnd]
-  standard_name = surface_snow_thickness_water_equivalent_over_land
-  long_name = water equivalent snow depth over land
-  units = mm
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-[snowd_ice]
-  standard_name = surface_snow_thickness_water_equivalent_over_ice
-  long_name = water equivalent snow depth over ice
-  units = mm
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
 [tprcp]
   standard_name = nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep
   long_name = total precipitation amount in each time step
@@ -269,30 +245,6 @@
   standard_name = surface_friction_velocity_over_ice
   long_name = surface friction velocity over ice
   units = m s-1
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-[weasd]
-  standard_name = lwe_thickness_of_surface_snow_amount
-  long_name = water equiv of acc snow depth over land and sea ice
-  units = mm
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-[weasd_lnd]
-  standard_name = water_equivalent_accumulated_snow_depth_over_land
-  long_name = water equiv of acc snow depth over land
-  units = mm
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-[weasd_ice]
-  standard_name = water_equivalent_accumulated_snow_depth_over_ice
-  long_name = water equiv of acc snow depth over ice
-  units = mm
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
