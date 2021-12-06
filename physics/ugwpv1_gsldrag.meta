@@ -595,8 +595,8 @@
   kind = kind_phys
   intent = in
 [rain]
-  standard_name = lwe_thickness_of_precipitation_amount_on_dynamics_timestep
-  long_name = total rain at this time step
+  standard_name = nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep
+  long_name = total precipitation amount in each time step
   units = m
   dimensions = (horizontal_loop_extent)
   type = real
@@ -716,7 +716,7 @@
 [tau_amf]
   standard_name = absolute_momentum_flux_due_to_nonorographic_gravity_wave_drag
   long_name = ngw_absolute_momentum_flux
-  units = various
+  units = mixed
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys  
@@ -1021,7 +1021,7 @@
 [dtend]
   standard_name = cumulative_change_of_state_variables
   long_name = diagnostic tendencies for state variables
-  units = various
+  units = mixed
   dimensions = (horizontal_loop_extent,vertical_layer_dimension,cumulative_change_of_state_variables_outer_index_max)
   type = real
   kind = kind_phys

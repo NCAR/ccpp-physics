@@ -970,8 +970,7 @@ MODULE module_mp_thompson
                               nwfa, nifa, nwfa2d, nifa2d,             &
                               tt, th, pii,                            &
                               p, w, dz, dt_in, dt_inner,              &
-                              sedi_semi, sedi_semi_update,            &
-                              sedi_semi_decfl,                        &
+                              sedi_semi, decfl,                       &
                               RAINNC, RAINNCV,                        &
                               SNOWNC, SNOWNCV,                        &
                               ICENC, ICENCV,                          &
@@ -1049,7 +1048,8 @@ MODULE module_mp_thompson
                           vt_dbz_wt
       LOGICAL, INTENT(IN) :: first_time_step
       REAL, INTENT(IN):: dt_in, dt_inner
-      LOGICAL, INTENT(IN) :: sedi_semi, sedi_semi_update,  sedi_semi_decfl
+      LOGICAL, INTENT(IN) :: sedi_semi
+      INTEGER, INTENT(IN) :: decfl
       ! To support subcycling: current step and maximum number of steps
       INTEGER, INTENT (IN) :: istep, nsteps
       LOGICAL, INTENT (IN) :: reset_dBZ
@@ -1415,7 +1415,7 @@ MODULE module_mp_thompson
 #endif
                       rand1, rand2, rand3, &
                       kts, kte, dt, i, j, ext_diag,                    & 
-                      sedi_semi, sedi_semi_update,  sedi_semi_decfl,   &
+                      sedi_semi, decfl,                                &
                       !vtsk1, txri1, txrc1,                            &
                       prw_vcdc1, prw_vcde1,                            &
                       tpri_inu1, tpri_ide1_d, tpri_ide1_s, tprs_ide1,  &
@@ -1811,7 +1811,7 @@ MODULE module_mp_thompson
                           ! Extended diagnostics, most arrays only
                           ! allocated if ext_diag flag is .true.
                           ext_diag,                                        & 
-                          sedi_semi, sedi_semi_update, sedi_semi_decfl,    &
+                          sedi_semi, decfl,                                &
                           !vtsk1, txri1, txrc1,                            &
                           prw_vcdc1, prw_vcde1,                            &
                           tpri_inu1, tpri_ide1_d, tpri_ide1_s, tprs_ide1,  &
@@ -1841,7 +1841,8 @@ MODULE module_mp_thompson
       REAL, INTENT(IN):: rand1, rand2, rand3
       ! Extended diagnostics, most arrays only allocated if ext_diag is true
       LOGICAL, INTENT(IN) :: ext_diag
-      LOGICAL, INTENT(IN) :: sedi_semi, sedi_semi_update,  sedi_semi_decfl
+      LOGICAL, INTENT(IN) :: sedi_semi
+      INTEGER, INTENT(IN) :: decfl
       REAL, DIMENSION(:), INTENT(OUT):: &
                           !vtsk1, txri1, txrc1,                       &
                           prw_vcdc1,                                 &
@@ -1897,13 +1898,12 @@ MODULE module_mp_thompson
            prg_rcg, prg_ihm
 
       DOUBLE PRECISION, PARAMETER:: zeroD0 = 0.0d0
-      REAL, PARAMETER :: decfl = 8.0
-      REAL :: dtcfl,rainsfc
+      REAL :: dtcfl,rainsfc,graulsfc
       INTEGER :: niter 
 
       REAL, DIMENSION(kts:kte):: temp, pres, qv
       REAL, DIMENSION(kts:kte):: rc, ri, rr, rs, rg, ni, nr, nc, nwfa, nifa
-      REAL, DIMENSION(kts:kte):: rr_tmp,nr_tmp
+      REAL, DIMENSION(kts:kte):: rr_tmp, nr_tmp, rg_tmp
       REAL, DIMENSION(kts:kte):: rho, rhof, rhof2
       REAL, DIMENSION(kts:kte):: qvs, qvsi, delQvs
       REAL, DIMENSION(kts:kte):: satw, sati, ssatw, ssati
@@ -1917,7 +1917,7 @@ MODULE module_mp_thompson
 
       REAL, DIMENSION(kts:kte):: sed_r, sed_s, sed_g, sed_i, sed_n,sed_c
 
-      REAL:: rgvm, delta_tp, orho, lfus2
+      REAL:: rgvm, delta_tp, orho, lfus2, orhodt 
       REAL, DIMENSION(5):: onstep
       DOUBLE PRECISION:: N0_exp, N0_min, lam_exp, lamc, lamr, lamg
       DOUBLE PRECISION:: lami, ilami, ilamc
@@ -3920,44 +3920,41 @@ MODULE module_mp_thompson
       else !if(.not. sedi_semi)
         niter = 1
         dtcfl = dt
-        if(sedi_semi_decfl) then
-          niter = int(nstep/decfl) + 1
-          dtcfl = dt/niter
-        endif 
+        niter = int(nstep/max(decfl,1)) + 1
+        dtcfl = dt/niter
         do n = 1, niter
           rr_tmp(:) = rr(:)
           nr_tmp(:) = nr(:)
-          call nislfv_rain_ppm(kte,dzq,vtrk,rr,rainsfc,dtcfl,R1)
-          call nislfv_rain_ppm(kte,dzq,vtnrk,nr,vtr,dtcfl,R2)
+          call semi_lagrange_sedim(kte,dzq,vtrk,rr,rainsfc,dtcfl,R1)
+          call semi_lagrange_sedim(kte,dzq,vtnrk,nr,vtr,dtcfl,R2)
           do k = kts, kte
-            qrten(k) = qrten(k) + (rr(k) - rr_tmp(k))/rho(k)/dt
-            nrten(k) = nrten(k) + (nr(k) - nr_tmp(k))/rho(k)/dt
+            orhodt = 1./(rho(k)*dt)
+            qrten(k) = qrten(k) + (rr(k) - rr_tmp(k)) * orhodt
+            nrten(k) = nrten(k) + (nr(k) - nr_tmp(k)) * orhodt
           enddo
           pptrain = pptrain + rainsfc
 
-          if(sedi_semi_update) then
-            do k = kte+1, kts, -1
-              vtrk(k) = 0.
-              vtnrk(k) = 0.
-            enddo
-            do k = kte, kts, -1
-              vtr = 0.
-              if (rr(k).gt. R1) then
-                lamr = (am_r*crg(3)*org2*nr(k)/rr(k))**obmr
-                vtr = rhof(k)*av_r*crg(6)*org3 * lamr**cre(3)           &
-                   *((lamr+fv_r)**(-cre(6)))
-                vtrk(k) = vtr
+          do k = kte+1, kts, -1
+            vtrk(k) = 0.
+            vtnrk(k) = 0.
+          enddo
+          do k = kte, kts, -1
+            vtr = 0.
+            if (rr(k).gt. R1) then
+              lamr = (am_r*crg(3)*org2*nr(k)/rr(k))**obmr
+              vtr = rhof(k)*av_r*crg(6)*org3 * lamr**cre(3)           &
+                 *((lamr+fv_r)**(-cre(6)))
+              vtrk(k) = vtr
  ! First below is technically correct:
  !         vtr = rhof(k)*av_r*crg(5)*org2 * lamr**cre(2)                &
  !                     *((lamr+fv_r)**(-cre(5)))
  ! Test: make number fall faster (but still slower than mass)
  ! Goal: less prominent size sorting
-                vtr = rhof(k)*av_r*crg(7)/crg(12) * lamr**cre(12)       &
-                     *((lamr+fv_r)**(-cre(7)))
-                vtnrk(k) = vtr
-              endif
-            enddo
-          endif ! if(sedi_semi_update)
+              vtr = rhof(k)*av_r*crg(7)/crg(12) * lamr**cre(12)       &
+                   *((lamr+fv_r)**(-cre(7)))
+              vtnrk(k) = vtr
+            endif
+          enddo
         enddo
       endif! if(.not. sedi_semi)
       endif
@@ -4044,28 +4041,59 @@ MODULE module_mp_thompson
 
       if (ANY(L_qg .eqv. .true.)) then
       nstep = NINT(1./onstep(4))
-      do n = 1, nstep
-         do k = kte, kts, -1
-            sed_g(k) = vtgk(k)*rg(k)
-         enddo
-         k = kte
-         odzq = 1./dzq(k)
-         orho = 1./rho(k)
-         qgten(k) = qgten(k) - sed_g(k)*odzq*onstep(4)*orho
-         rg(k) = MAX(R1, rg(k) - sed_g(k)*odzq*DT*onstep(4))
-         do k = ksed1(4), kts, -1
-            odzq = 1./dzq(k)
-            orho = 1./rho(k)
-            qgten(k) = qgten(k) + (sed_g(k+1)-sed_g(k))                 &
-                                               *odzq*onstep(4)*orho
-            rg(k) = MAX(R1, rg(k) + (sed_g(k+1)-sed_g(k)) &
+      if(.not. sedi_semi) then 
+        do n = 1, nstep
+           do k = kte, kts, -1
+              sed_g(k) = vtgk(k)*rg(k)
+           enddo
+           k = kte
+           odzq = 1./dzq(k)
+           orho = 1./rho(k)
+           qgten(k) = qgten(k) - sed_g(k)*odzq*onstep(4)*orho
+           rg(k) = MAX(R1, rg(k) - sed_g(k)*odzq*DT*onstep(4))
+           do k = ksed1(4), kts, -1
+              odzq = 1./dzq(k)
+              orho = 1./rho(k)
+              qgten(k) = qgten(k) + (sed_g(k+1)-sed_g(k))                 &
+                                          *odzq*onstep(4)*orho
+              rg(k) = MAX(R1, rg(k) + (sed_g(k+1)-sed_g(k)) &
                                            *odzq*DT*onstep(4))
-         enddo
+           enddo
 
-         if (rg(kts).gt.R1*10.) &
-         pptgraul = pptgraul + sed_g(kts)*DT*onstep(4)
-      enddo
-      endif
+           if (rg(kts).gt.R1*10.) &
+           pptgraul = pptgraul + sed_g(kts)*DT*onstep(4)
+        enddo
+      else ! if(.not. sedi_semi) then 
+        niter = 1
+        dtcfl = dt
+        niter = int(nstep/max(decfl,1)) + 1
+        dtcfl = dt/niter
+
+        do n = 1, niter
+          rg_tmp(:) = rg(:)
+          call semi_lagrange_sedim(kte,dzq,vtgk,rg,graulsfc,dtcfl,R1)
+          do k = kts, kte
+            orhodt = 1./(rho(k)*dt)
+            qgten(k) = qgten(k) + (rg(k) - rg_tmp(k))*orhodt
+          enddo
+          pptgraul = pptgraul + graulsfc
+          do k = kte+1, kts, -1
+            vtgk(k) = 0.
+          enddo
+          do k = kte, kts, -1
+             vtg = 0.
+             if (rg(k).gt. R1) then
+              vtg = rhof(k)*av_g*cgg(6)*ogg3 * ilamg(k)**bv_g
+              if (temp(k).gt. T_0) then
+               vtgk(k) = MAX(vtg, vtrk(k))
+              else
+                vtgk(k) = vtg
+              endif
+             endif
+          enddo
+        enddo
+      endif ! if(.not. sedi_semi) then
+      endif 
 
 !+---+-----------------------------------------------------------------+
 !> - Instantly melt any cloud ice into cloud water if above 0C and
@@ -6092,13 +6120,13 @@ MODULE module_mp_thompson
       end subroutine calc_refl10cm
 !
 !-------------------------------------------------------------------
-      SUBROUTINE nislfv_rain_ppm(km,dzl,wwl,rql,precip,dt,R1)
+      SUBROUTINE semi_lagrange_sedim(km,dzl,wwl,rql,precip,dt,R1)
 !-------------------------------------------------------------------
 !
-! for non-iteration semi-Lagrangain forward advection for cloud
+! This routine is a semi-Lagrangain forward advection for hydrometeors
 ! with mass conservation and positive definite advection
-! 2nd order interpolation with monotonic piecewise parabolic method
-! this routine is under assumption of decfl < 1 for semi_Lagrangian
+! 2nd order interpolation with monotonic piecewise parabolic method is used.
+! This routine is under assumption of decfl < 1 for semi_Lagrangian
 !
 ! dzl    depth of model layer in meter
 ! wwl    terminal velocity at model layer m/s
@@ -6108,6 +6136,9 @@ MODULE module_mp_thompson
 !
 ! author: hann-ming henry juang <henry.juang@noaa.gov>
 !         implemented by song-you hong
+! reference: Juang, H.-M., and S.-Y. Hong, 2010: Forward semi-Lagrangian advection
+!         with mass conservation and positive definiteness for falling
+!         hydrometeors. *Mon.  Wea. Rev.*, *138*, 1778-1791
 !
       implicit none
 
@@ -6310,7 +6341,7 @@ MODULE module_mp_thompson
 !
 ! ----------------------------------
 !
-  END SUBROUTINE nislfv_rain_ppm
+  END SUBROUTINE semi_lagrange_sedim
 !+---+-----------------------------------------------------------------+
 !+---+-----------------------------------------------------------------+
 !+---+-----------------------------------------------------------------+

@@ -2665,7 +2665,7 @@
 
 !mz*      if (uni_cld) then     ! use unified sgs clouds generated outside
 !mz*  use unified sgs clouds generated outside
-      if (uni_cld .or. icloud == 3) then
+      if (uni_cld) then
         do k = 1, NLAY
           do i = 1, IX
             cldtot(i,k) = cldcov(i,k)
@@ -2881,7 +2881,7 @@
      &       xlat,xlon,slmsk,dz,delp,                                   &
      &       ntrac,ntcw,ntiw,ntrw,ntsw,ntgl,                            &
      &       IX, NLAY, NLP1,                                            &
-     &       uni_cld, lmfshal, lmfdeep2, cldcov,                        &
+     &       uni_cld, lmfshal, lmfdeep2, cldcov, cnvw,                  &
      &       re_cloud,re_ice,re_snow,                                   &
      &       lwp_ex, iwp_ex, lwp_fc, iwp_fc,                            &
      &       dzlay, latdeg, julian, yearlen,                            &
@@ -2976,7 +2976,7 @@
 
       real (kind=kind_phys), dimension(:,:), intent(in) :: plvl, plyr,  &
      &       tlyr, qlyr, qstl, rhly, cldcov, delp, dz, dzlay,           &
-     &       re_cloud, re_ice, re_snow
+     &       re_cloud, re_ice, re_snow, cnvw
       real (kind=kind_phys), dimension(:), intent(inout) ::             &
      &       lwp_ex, iwp_ex, lwp_fc, iwp_fc
 
@@ -3010,8 +3010,8 @@
       integer :: i, k, id, nf
 
 !  ---  constant values
-!     real (kind=kind_phys), parameter :: xrc3 = 200.
-      real (kind=kind_phys), parameter :: xrc3 = 100.
+      real (kind=kind_phys), parameter :: xrc3 = 200.
+!     real (kind=kind_phys), parameter :: xrc3 = 100.
 
 !
 !===> ... begin here
@@ -3065,6 +3065,7 @@
         do k = 1, NLAY
           do i = 1, IX
             clwf(i,k) = clw(i,k,ntcw) +  clw(i,k,ntiw) + clw(i,k,ntsw)
+     &      +clw(i,k,ntrw) + cnvw(i,k)
           enddo
         enddo
 !> - Find top pressure for each cloud domain for given latitude.
@@ -3091,8 +3092,9 @@
             cwp(i,k) = max(0.0, clw(i,k,ntcw) * gfac * delp(i,k))
             cip(i,k) = max(0.0, clw(i,k,ntiw) * gfac * delp(i,k))
             crp(i,k) = max(0.0, clw(i,k,ntrw) * gfac * delp(i,k))
-            csp(i,k) = max(0.0, (clw(i,k,ntsw)+clw(i,k,ntgl)) *         &
-     &                  gfac * delp(i,k))
+!           csp(i,k) = max(0.0, (clw(i,k,ntsw)+clw(i,k,ntgl)) *         &
+!    &                  gfac * delp(i,k))
+            csp(i,k) = max(0.0, clw(i,k,ntsw) * gfac * delp(i,k))
           enddo
         enddo
 
@@ -3125,27 +3127,36 @@
         clwmin = 0.0
         do k = 1, NLAY-1
         do i = 1, IX
-          clwt = 1.0e-6 * (plyr(i,k)*0.001)
+!         clwt = 1.0e-6 * (plyr(i,k)*0.001)
+!         clwt = 2.0e-6 * (plyr(i,k)*0.001)
+          clwt = 1.0e-10 * (plyr(i,k)*0.001)
 
           if (clwf(i,k) > clwt) then
-            onemrh= max( 1.e-10, 1.0-rhly(i,k) )
-            clwm  = clwmin / max( 0.01, plyr(i,k)*0.001 )
-
-            if (.not. lmfshal) then
-              tem1  = min(max(sqrt(sqrt(onemrh*qstl(i,k))),0.0001),1.0)
-              tem1  = 2000.0 / tem1
+            if(rhly(i,k) > 1.) then
+              cldtot(i,k) = 1.
             else
-              tem1  = min(max((onemrh*qstl(i,k))**0.49,0.0001),1.0)  !jhan
-              if (lmfdeep2) then
-                tem1  = xrc3 / tem1
+              onemrh= max( 1.e-10, 1.0-rhly(i,k) )
+              clwm  = clwmin / max( 0.01, plyr(i,k)*0.001 )
+
+              if (.not. lmfshal) then
+                tem1 = min(max(sqrt(sqrt(onemrh*qstl(i,k))),0.0001),1.0)
+                tem1 = 2000.0 / tem1
               else
-                tem1  = 100.0 / tem1
+                tem1 = min(max((onemrh*qstl(i,k))**0.49,0.0001),1.0)  !jhan
+                if (lmfdeep2) then
+                  tem1  = xrc3 / tem1
+                else
+                  tem1  = 100.0 / tem1
+                endif
+!
+                value = max( min( tem1*(clwf(i,k)-clwm), 50.0 ), 0.0 )
+                tem2  = sqrt( sqrt(rhly(i,k)) )
+  
+                cldtot(i,k) = max( tem2*(1.0-exp(-value)), 0.0 )
               endif
             endif
-
-            value = max( min( tem1*(clwf(i,k)-clwm), 50.0 ), 0.0 )
-            tem2  = sqrt( sqrt(rhly(i,k)) )
-            cldtot(i,k) = max( tem2*(1.0-exp(-value)), 0.0 )
+          else 
+            cldtot(i,k) = 0.0
           endif
         enddo
         enddo
@@ -3162,6 +3173,18 @@
             csp(i,k)    = 0.0
           endif
         enddo
+      enddo
+
+      ! What portion of water and ice contents is associated with the partly cloudy boxes
+      do i = 1, IX
+         do k = 1, NLAY-1
+            if (cldtot(i,k).ge.climit .and. cldtot(i,k).lt.ovcst) then
+               lwp_fc(i) = lwp_fc(i) + cwp(i,k)
+               iwp_fc(i) = iwp_fc(i) + cip(i,k) + csp(i,k)
+            endif
+         enddo
+         lwp_fc(i) = lwp_fc(i)*1.E-3
+         iwp_fc(i) = iwp_fc(i)*1.E-3
       enddo
 
       if ( lcnorm ) then
@@ -3385,14 +3408,10 @@
       real (kind=kind_phys), parameter :: max_relh = 1.5
       real (kind=kind_phys), parameter :: snow_max_radius = 130.0
 
-      integer :: i, k, id, nf, idx_rei
+      integer :: i, k, k2, id, nf, idx_rei
 !
 !===> ... begin here
 !
-
-      if (ivflip .ne. 1) then
-         STOP ' K must be bottom to top oriented by this point.'
-      endif
 
       clwmin = 1.0E-9
 
@@ -3443,7 +3462,7 @@
       do k = 1, NLAY-1
         do i = 1, IX
           cwp(i,k) = max(0.0, clw(i,k,ntcw) * dz(i,k)*1.E6)
-          crp(i,k) = max(0.0, clw(i,k,ntrw) * dz(i,k)*1.E6)
+          crp(i,k) = 0.0
           snow_mass_factor = 0.80
           cip(i,k) = max(0.0, (clw(i,k,ntiw)                            &
      &             + (1.0-snow_mass_factor)*clw(i,k,ntsw))*dz(i,k)*1.E6)
@@ -3485,21 +3504,35 @@
          endif
 
          cldfra1d(:) = 0.0
-         do k = 1, NLAY-1
-            qv1d(k) = qlyr(i,k)
-            qc1d(k) = max(0.0, clw(i,k,ntcw))
-            qi1d(k) = max(0.0, clw(i,k,ntiw))
-            qs1d(k) = max(0.0, clw(i,k,ntsw))
-            dz1d(k) = dz(i,k)*1.E3
-            p1d(k) = plyr(i,k)*100.0
-            t1d(k) = tlyr(i,k)
-         enddo
+
+         if (ivflip .eq. 1) then
+            do k = 1, NLAY
+               qv1d(k) = qlyr(i,k)
+               qc1d(k) = max(0.0, clw(i,k,ntcw))
+               qi1d(k) = max(0.0, clw(i,k,ntiw))
+               qs1d(k) = max(0.0, clw(i,k,ntsw))
+               dz1d(k) = dz(i,k)*1.E3
+               p1d(k) = plyr(i,k)*100.0
+               t1d(k) = tlyr(i,k)
+            enddo
+         else
+            do k = NLAY, 1, -1
+               k2 = NLAY - k + 1
+               qv1d(k2) = qlyr(i,k)
+               qc1d(k2) = max(0.0, clw(i,k,ntcw))
+               qi1d(k2) = max(0.0, clw(i,k,ntiw))
+               qs1d(k2) = max(0.0, clw(i,k,ntsw))
+               dz1d(k2) = dz(i,k)*1.E3
+               p1d(k2) = plyr(i,k)*100.0
+               t1d(k2) = tlyr(i,k)
+            enddo
+         endif
 
          call cal_cldfra3(cldfra1d, qv1d, qc1d, qi1d, qs1d, dz1d,       &
      &                    p1d, t1d, xland, gridkm,                      &
-     &                    .false., max_relh, 1, nlay-1, .false.)
+     &                    .false., max_relh, 1, nlay, .false.)
 
-         do k = 1, NLAY-1
+         do k = 1, NLAY
             cldtot(i,k) = cldfra1d(k)
             if (qc1d(k).gt.clwmin .and. cldfra1d(k).lt.ovcst) then
                cwp(i,k) = qc1d(k) * dz1d(k)*1000.
@@ -3539,7 +3572,7 @@
       do i = 1, IX
          lwp_fc(i) = 0.0
          iwp_fc(i) = 0.0
-         do k = 1, NLAY-1
+         do k = 1, NLAY
             lwp_fc(i) = lwp_fc(i) + cwp(i,k)
             iwp_fc(i) = iwp_fc(i) + cip(i,k) + csp(i,k)
          enddo
@@ -4514,9 +4547,12 @@
          RH_00O = 0.79+MIN(0.20,SQRT(1./(50.0+gridkm*gridkm*delz*0.01)))
          RHUM = rh(k)
 
-         if (qc(k).ge.1.E-7 .or. qi(k).ge.1.E-7                         &
+         if (qc(k).ge.1.E-6 .or. qi(k).ge.1.E-6                         &
      &                    .or. (qs(k).gt.1.E-6 .and. t(k).lt.273.)) then
             CLDFRA(K) = 1.0
+         elseif (((qc(k)+qi(k)).gt.1.E-10) .and.                        &
+     &                                    ((qc(k)+qi(k)).lt.1.E-6)) then
+            CLDFRA(K) = MIN(0.99, 0.25*(10.0 + log10(qc(k)+qi(k))))
          else
 
             IF ((XLAND-1.5).GT.0.) THEN                                  !--- Ocean
@@ -4549,6 +4585,7 @@
             if (CLDFRA(K).gt.0.) CLDFRA(K)=MAX(0.01,MIN(CLDFRA(K),0.99))
 
          endif
+         if (cldfra(k).gt.0.0 .and. p(k).lt.7000.0) CLDFRA(K) = 0.0
       ENDDO
 
       call find_cloudLayers(qvs, cldfra, T, P, Dz, entrmnt,             &
@@ -4559,24 +4596,14 @@
 
       call adjust_cloudFinal(cldfra, qc, qi, rhoa, dz, kts,kte)
 
-!..Last adjustment to cloud fraction already set to 1.0 when the explicit
-!.. clouds are present but extremely low mixing ratios.  Also, no way in this
-!.. world should we permit clouds above the 70 hPa level.
-
-      DO k = kts,kte
-         if (cldfra(k).eq.1.0 .and. ((qc(k)+qi(k)).gt.1.E-10) .and.     &
-     &                              ((qc(k)+qi(k)).lt.1.E-6)) then
-            CLDFRA(K) = MIN(0.99, 0.25*(10.0 + log10(qc(k)+qi(k))))
-         endif
-         if (cldfra(k).gt.0.0 .and. p(k).lt.7000.0) CLDFRA(K) = 0.0
-
-         if (debug_flag .and. ndebug.lt.25) then
+      if (debug_flag .and. ndebug.lt.25) then
+        do k = kts,kte
           write(6,'(a,i3,f9.2,f7.1,f7.2,f6.1,f6.3,f12.7,f12.7,f12.7)')  &
      &       ' DEBUG-GT: ', k, p(k)*0.01, dz(k), t(k)-273.15,           &
      &       rh(k)*100., cldfra(k), qc(k)*1.E3, qi(k)*1.E3, qs(k)*1.E3
-          if (k.eq.kte) ndebug = ndebug + 1
-         endif
-      ENDDO
+        enddo
+        ndebug = ndebug + 1
+      endif
 
 !..Intended for cold start model runs, we use modify_qvapor to ensure that cloudy
 !.. areas are actually saturated such that the inserted clouds do not evaporate a
