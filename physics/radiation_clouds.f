@@ -3139,10 +3139,10 @@
               clwm  = clwmin / max( 0.01, plyr(i,k)*0.001 )
 
               if (.not. lmfshal) then
-                tem1  = min(max(sqrt(sqrt(onemrh*qstl(i,k))),0.0001),1.0)
-                tem1  = 2000.0 / tem1
+                tem1 = min(max(sqrt(sqrt(onemrh*qstl(i,k))),0.0001),1.0)
+                tem1 = 2000.0 / tem1
               else
-                tem1  = min(max((onemrh*qstl(i,k))**0.49,0.0001),1.0)  !jhan
+                tem1 = min(max((onemrh*qstl(i,k))**0.49,0.0001),1.0)  !jhan
                 if (lmfdeep2) then
                   tem1  = xrc3 / tem1
                 else
