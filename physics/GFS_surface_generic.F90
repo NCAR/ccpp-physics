@@ -275,14 +275,14 @@
 !! \htmlinclude GFS_surface_generic_post_run.html
 !!
       subroutine GFS_surface_generic_post_run (im, cplflx, cplchm, cplwav, lssav, dry, icy, wet,                                    &
-        dtf, ep1d, gflx, tgrs_1, qgrs_1, ugrs_1, vgrs_1,                                                                            &
+        lsm, lsm_noahmp, dtf, ep1d, gflx, tgrs_1, qgrs_1, ugrs_1, vgrs_1,                                                           &
         adjsfcdlw, adjsfcdsw, adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd, adjsfculw, adjsfculw_wat, adjnirbmu, adjnirdfu,           &
-        adjvisbmu, adjvisdfu,t2m, q2m, u10m, v10m, tsfc, tsfc_wat, pgr, xcosz, evbs, evcw, trans, sbsno, snowc, snohf,              &
+        adjvisbmu, adjvisdfu, t2m, q2m, u10m, v10m, tsfc, tsfc_wat, pgr, xcosz, evbs, evcw, trans, sbsno, snowc, snohf, pah, pahi,  &
         epi, gfluxi, t1, q1, u1, v1, dlwsfci_cpl, dswsfci_cpl, dlwsfc_cpl, dswsfc_cpl, dnirbmi_cpl, dnirdfi_cpl, dvisbmi_cpl,       &
         dvisdfi_cpl, dnirbm_cpl, dnirdf_cpl, dvisbm_cpl, dvisdf_cpl, nlwsfci_cpl, nlwsfc_cpl, t2mi_cpl, q2mi_cpl, u10mi_cpl,        &
         v10mi_cpl, tsfci_cpl, psurfi_cpl, nnirbmi_cpl, nnirdfi_cpl, nvisbmi_cpl, nvisdfi_cpl, nswsfci_cpl, nswsfc_cpl, nnirbm_cpl,  &
-        nnirdf_cpl, nvisbm_cpl, nvisdf_cpl, gflux, evbsa, evcwa, transa, sbsnoa, snowca, snohfa, ep,                                &
-        runoff, srunoff, runof, drain, lheatstrg, h0facu, h0facs, zvfun, hflx, evap, hflxq, hffac,                                  &
+        nnirdf_cpl, nvisbm_cpl, nvisdf_cpl, gflux, evbsa, evcwa, transa, sbsnoa, snowca, snohfa, paha, ep, ecan, etran, edir, waxy, &
+        runoff, srunoff, runof, drain, tecan, tetran, tedir, twa, lheatstrg, h0facu, h0facs, zvfun, hflx, evap, hflxq, hffac,       &
         isot, ivegsrc, islmsk, vtype, stype, slope, vtype_save, stype_save, slope_save, errmsg, errflg)
 
         implicit none
@@ -290,17 +290,19 @@
         integer,                                intent(in) :: im
         logical,                                intent(in) :: cplflx, cplchm, cplwav, lssav
         logical, dimension(:),                  intent(in) :: dry, icy, wet
+        integer,                                intent(in) :: lsm, lsm_noahmp
         real(kind=kind_phys),                   intent(in) :: dtf
 
         real(kind=kind_phys), dimension(:),  intent(in)  :: ep1d, gflx, tgrs_1, qgrs_1, ugrs_1, vgrs_1, adjsfcdlw, adjsfcdsw,  &
           adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd, adjsfculw, adjsfculw_wat, adjnirbmu, adjnirdfu, adjvisbmu, adjvisdfu,    &
-          t2m, q2m, u10m, v10m, tsfc, tsfc_wat, pgr, xcosz, evbs, evcw, trans, sbsno, snowc, snohf
+          t2m, q2m, u10m, v10m, tsfc, tsfc_wat, pgr, xcosz, evbs, evcw, trans, sbsno, snowc, snohf, pah, ecan, etran, edir,    &
+          waxy
 
         real(kind=kind_phys), dimension(:),  intent(inout) :: epi, gfluxi, t1, q1, u1, v1, dlwsfci_cpl, dswsfci_cpl, dlwsfc_cpl, &
           dswsfc_cpl, dnirbmi_cpl, dnirdfi_cpl, dvisbmi_cpl, dvisdfi_cpl, dnirbm_cpl, dnirdf_cpl, dvisbm_cpl, dvisdf_cpl,        &
           nlwsfci_cpl, nlwsfc_cpl, t2mi_cpl, q2mi_cpl, u10mi_cpl, v10mi_cpl, tsfci_cpl, psurfi_cpl, nnirbmi_cpl, nnirdfi_cpl,    &
           nvisbmi_cpl, nvisdfi_cpl, nswsfci_cpl, nswsfc_cpl, nnirbm_cpl, nnirdf_cpl, nvisbm_cpl, nvisdf_cpl, gflux, evbsa,       &
-          evcwa, transa, sbsnoa, snowca, snohfa, ep
+          evcwa, transa, sbsnoa, snowca, snohfa, ep, paha, tecan, tetran, tedir, twa, pahi
 
         real(kind=kind_phys), dimension(:), intent(inout) :: runoff, srunoff
         real(kind=kind_phys), dimension(:), intent(in)    :: drain, runof
@@ -333,6 +335,9 @@
         do i=1,im
           epi(i)    = ep1d(i)
           gfluxi(i) = gflx(i)
+          if (lsm == lsm_noahmp) then
+            pahi(i)   = pah(i)
+          endif
           t1(i)     = tgrs_1(i)
           q1(i)     = qgrs_1(i)
           u1(i)     = ugrs_1(i)
@@ -426,6 +431,13 @@
 !           runoff at the surface and is accumulated in unit of meters
             runoff(i)  = runoff(i)  + (drain(i)+runof(i)) * dtf
             srunoff(i) = srunoff(i) + runof(i) * dtf
+            tecan(i)   = tecan(i)   + ecan(i) * dtf
+            tetran(i)  = tetran(i)  + etran(i) * dtf
+            tedir(i)   = tedir(i)   + edir(i) * dtf
+            if (lsm == lsm_noahmp) then
+             paha(i)    = paha(i)    + pah(i)   * dtf
+             twa(i)     = waxy(i) 
+            endif
           enddo
         endif
 
