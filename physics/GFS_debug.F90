@@ -545,6 +545,8 @@
                      end if
                      ! Revised surface albedo and emissivity calculation
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d,    'Sfcprop%emis_lnd',      Sfcprop%emis_lnd)
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d,    'Sfcprop%emis_ice',      Sfcprop%emis_ice)
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d,    'Sfcprop%emis_wat',      Sfcprop%emis_wat)
                      ! NoahMP and RUC
                      if (Model%lsm == Model%lsm_ruc .or. Model%lsm == Model%lsm_noahmp) then
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%albdirvis_lnd', Sfcprop%albdirvis_lnd)
@@ -554,7 +556,6 @@
                      end if
                      ! RUC only
                      if (Model%lsm == Model%lsm_ruc) then
-                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%emis_ice',      Sfcprop%emis_ice)
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%albdirvis_ice', Sfcprop%albdirvis_ice)
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%albdifvis_ice', Sfcprop%albdifvis_ice)
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%albdirnir_ice', Sfcprop%albdirnir_ice)
