@@ -66,6 +66,20 @@ foreach(typedef_module ${TYPEDEFS})
     list(APPEND MODULES_F90 ${CMAKE_CURRENT_BINARY_DIR}/${typedef_module})
 endforeach()
 
+# This is a hack because I don't know how to get the pre_build to add these
+# modules to the install list --PAR
+if (PROJECT STREQUAL "CCPP-NEPTUNE")
+    # added for CCPP 5: ozne_def.mod, h2o_def.mod, module_radiation_surface.mod
+    list(APPEND MODULES_F90 ${CMAKE_CURRENT_BINARY_DIR}/namelist_soilveg.mod
+                            ${CMAKE_CURRENT_BINARY_DIR}/set_soilveg_mod.mod
+                            ${CMAKE_CURRENT_BINARY_DIR}/physcons.mod
+                            ${CMAKE_CURRENT_BINARY_DIR}/funcphys.mod
+                            ${CMAKE_CURRENT_BINARY_DIR}/ozne_def.mod
+                            ${CMAKE_CURRENT_BINARY_DIR}/h2o_def.mod
+                            ${CMAKE_CURRENT_BINARY_DIR}/module_radiation_surface.mod
+        )
+endif (PROJECT STREQUAL "CCPP-NEPTUNE")
+
 #------------------------------------------------------------------------------
 # Set the sources: physics schemes
 set(SCHEMES $ENV{CCPP_SCHEMES})
@@ -263,7 +277,7 @@ target_include_directories(ccpp_physics PUBLIC
 
 target_link_libraries(ccpp_physics PUBLIC w3nco::w3nco_d NetCDF::NetCDF_Fortran)
 
-if (PROJECT STREQUAL "CCPP-FV3")
+if (PROJECT STREQUAL "CCPP-FV3" OR PROJECT STREQUAL "CCPP-NEPTUNE")
   # Define where to install the library
   install(TARGETS ccpp_physics
           EXPORT ccpp_physics-targets
@@ -279,4 +293,4 @@ if (PROJECT STREQUAL "CCPP-FV3")
   # Define where to install the C headers and Fortran modules
   #install(FILES ${HEADERS_C} DESTINATION include)
   install(FILES ${MODULES_F90} DESTINATION include)
-endif (PROJECT STREQUAL "CCPP-FV3")
+endif (PROJECT STREQUAL "CCPP-FV3" OR PROJECT STREQUAL "CCPP-NEPTUNE")

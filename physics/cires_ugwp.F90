@@ -19,6 +19,10 @@ module cires_ugwp
 
     use gwdps, only: gwdps_run
 
+    use mod_cires_ugwp_triggers
+
+    use mod_ugwp_driver_v0
+
     implicit none
 
     private

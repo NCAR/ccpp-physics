@@ -1616,6 +1616,13 @@ c
                 ktcon1(i) = k
                 flg(i) = .false.
               endif
+!NRL MNM: Limit overshooting not to be deeper than the actual cloud
+              tem  = zi(i,ktcon(i))-zi(i,kbcon(i))
+              tem1 = zi(i,ktcon1(i))-zi(i,ktcon(i))
+              if(tem1.ge.tem) then
+                ktcon1(i) = k
+                flg(i) = .false.
+              endif
             endif
           endif
         enddo
@@ -2950,6 +2957,9 @@ c
               dellat = (dellah(i,k) - hvap * dellaq(i,k)) / cp
               t1(i,k) = t1(i,k) + tem2 * dellat
               q1(i,k) = q1(i,k) + tem2 * dellaq(i,k)
+! NRL MNM: Limit q1
+              val = epsilon(1.0_kind_phys)
+              q1(i,k) = max(q1(i,k), val  )
 !             tem = tem2 / rcs(i)
 !             u1(i,k) = u1(i,k) + dellau(i,k) * tem
 !             v1(i,k) = v1(i,k) + dellav(i,k) * tem

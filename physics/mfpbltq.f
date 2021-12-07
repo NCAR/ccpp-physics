@@ -1,3 +1,5 @@
+      module mod_mfpbltq
+      contains
 !>\file mfpbltq.f
 !! This file contains the subroutine that calculates mass flux and
 !! updraft parcel properties for thermals driven by surface heating 
@@ -468,3 +470,4 @@ c  local variables and arrays
       return
       end
 !> @}
+      end module mod_mfpbltq

@@ -7,6 +7,7 @@
       use machine,          only: kind_phys
       use set_soilveg_mod,  only: set_soilveg
       use namelist_soilveg
+      use mod_sflx
 
       implicit none
 

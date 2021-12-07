@@ -1,3 +1,5 @@
+      module mod_sflx
+      contains
 !>\file sflx.f
 !! This file is the entity of GFS Noah LSM Model(Version 2.7).
 
@@ -906,7 +908,14 @@
         eta = etp
       endif
 
-      beta = eta / etp
+!      beta = eta / etp
+!  guard against div zero (from WRF, JM 20211104)
+      IF (ETP == 0.0) THEN
+        BETA = 0.0
+      ELSE
+        BETA = ETA/ETP
+      ENDIF
+
 
 !>  - Convert the sign of soil heat flux so that:
 !!   -  ssoil>0: warm the surface  (night time)
@@ -5801,3 +5810,4 @@ c ----------------------------------------------------------------------
       end subroutine gfssflx
 !! @}
 !-----------------------------------
+      end module mod_sflx

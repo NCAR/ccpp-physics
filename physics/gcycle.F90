@@ -209,6 +209,7 @@ contains
 !
       enddo
 !
+#if 0
 #ifndef INTERNAL_FILE_NML
       inquire (file=trim(Model%fn_nml),exist=exists)
       if (.not. exists) then
@@ -218,6 +219,7 @@ contains
         open (unit=Model%nlunit, file=trim(Model%fn_nml), action='READ', status='OLD', iostat=ios)
         rewind (Model%nlunit)
       endif
+#endif
 #endif
       CALL SFCCYCLE (9998, npts, max(lsoil,lsoil_lsm), sig1t, fhcyc, &
                      idate(4), idate(2), idate(3), idate(1),         &
@@ -232,8 +234,10 @@ contains
                      nlunit, size(input_nml_file), input_nml_file,   &
                      min_ice, ialb, isot, ivegsrc,                   &
                      trim(tile_num_ch), i_indx, j_indx)
+#if 0
 #ifndef INTERNAL_FILE_NML
       close (Model%nlunit)
+#endif
 #endif
 !
       if ( nsst > 0 ) then

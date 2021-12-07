@@ -1,3 +1,6 @@
+      module mod_ugwp_driver_v0
+      use mod_cires_orowam2017
+      contains
 !>\file ugwp_driver_v0.F
 
 !
@@ -1336,7 +1339,7 @@
               else
                 kzw2 = zero
               endif
-              if ( kzw2 > zero ) then
+              if ( kzw2 > zero .and. cdf2 > zero ) then  ! JM, should always be case but ...  20211020
                 v_kzw = sqrt(kzw2)
 !	       
 !linsatdis:  kzw2, kzw3, kdsat, c2f2,  cdf2, cdf1
@@ -1484,4 +1487,4 @@
        return
        end subroutine fv3_ugwp_solv2_v0
 
-      
+       end module mod_ugwp_driver_v0

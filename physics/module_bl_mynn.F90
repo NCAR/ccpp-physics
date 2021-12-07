@@ -950,7 +950,7 @@ CONTAINS
         alp2 = 0.65
         alp3 = 3.0
         alp4 = 20.
-        alp5 = 0.4
+        alp5 = 1.2
 
         ! Impose limits on the height integration for elt and the transition layer depth
         zi2=MAX(zi,minzi)
@@ -1045,7 +1045,7 @@ CONTAINS
         alp2 = 0.30 + 0.3*MIN(MAX((dx - 3000.)/10000., 0.0), 1.0)
         alp3 = 2.0
         alp4 = 20.  !10.
-        alp5 = alp2 !like alp2, but for free atmosphere
+        alp5 = 2.0*alp2 !like alp2, but for free atmosphere
         alp6 = 50.0 !used for MF mixing length
 
         ! Impose limits on the height integration for elt and the transition layer depth
@@ -1056,13 +1056,15 @@ CONTAINS
         h2=h1*0.5                ! 1/4 transition layer depth
 
         qtke(kts)=MAX(0.5*qke(kts),0.01) !tke at full sigma levels
+        thetaw(kts)=theta(kts)           !theta at full-sigma levels
         qkw(kts) = SQRT(MAX(qke(kts),1.0e-10))
 
         DO k = kts+1,kte
            afk = dz(k)/( dz(k)+dz(k-1) )
            abk = 1.0 -afk
            qkw(k) = SQRT(MAX(qke(k)*abk+qke(k-1)*afk,1.0e-3))
-           qtke(k) = 0.5*qkw(k)  ! qkw -> TKE
+           qtke(k) = 0.5*qkw(k)**2  ! qkw -> TKE
+           thetaw(k)= theta(k)*abk + theta(k-1)*afk
         END DO
 
         elt = 1.0e-5
@@ -1089,6 +1091,9 @@ CONTAINS
         el(kts) = 0.0
         zwk1    = zw(kts+1)
 
+        ! COMPUTE BouLac mixing length
+        CALL boulac_length(kts,kte,zw,dz,qtke,thetaw,elBLmin,elBLavg)
+
         DO k = kts+1,kte
            zwk = zw(k)              !full-sigma levels
            cldavg = 0.5*(cldfra_bl1D(k-1)+cldfra_bl1D(k))
@@ -1102,7 +1107,9 @@ CONTAINS
                   & alp6*edmf_a1(k)*edmf_w1(k)) / bv  &
                   &  *( 1.0 + alp3*SQRT( vsc/( bv*elt ) ) )
               elb = MIN(alp5*qkw(k)/bv, zwk)
-              elf = elb/(1. + (elb/600.))  !bound free-atmos mixing length to < 600 m.
+              !elf = elb/(1. + (elb/600.))  !bound free-atmos mixing length to < 600 m.
+              elf = max(600.0,dz(k))
+              elf = elf*tanh(elb/elf)  !bound free-atmos mixing length to < 600 m.
               !IF (zwk > zi .AND. elf > 400.) THEN
               !   ! COMPUTE BouLac mixing length
               !   !CALL boulac_length0(k,kts,kte,zw,dz,qtke,thetaw,elBLmin0,elBLavg0)
@@ -1124,10 +1131,10 @@ CONTAINS
               tau_cloud = MIN(MAX(0.5*zi/((gtr*zi*MAX(flt,1.0e-4))**onethird),50.),150.)
               !minimize influence of surface heat flux on tau far away from the PBLH.
               wt=.5*TANH((zwk - (zi2+h1))/h2) + .5
-              tau_cloud = tau_cloud*(1.-wt) + 50.*wt
+              tau_cloud = tau_cloud*(1.-wt) + 300.*wt
 
               elb = MIN(tau_cloud*SQRT(MIN(qtke(k),30.)), zwk)
-              elf = elb
+              elf = MIN(MAX(elb,dz(k)),zwk)
               elb_mf = elb
          END IF
 
@@ -1148,7 +1155,8 @@ CONTAINS
          ! "el_unstab" = blended els-elt
          el_unstab = els/(1. + (els1/elt))
          el(k) = MIN(el_unstab, elb_mf)
-         el(k) = el(k)*(1.-wt) + elf*wt
+         !el(k) = el(k)*(1.-wt) + elf*wt
+         el(k) = el(k)*(1.-wt) + alp5*elBLmin(k)*wt
 
          ! include scale-awareness. For now, use simple asymptotic kz -> 12 m.
          el_les= MIN(els/(1. + (els1/12.)), elb_mf)
@@ -1476,6 +1484,8 @@ CONTAINS
         !lb2(iz) = 0.5*(dlu(iz)+dld(iz))   !average
 
         !Apply soft limit (only impacts very large lb; lb=100 by 5%, lb=500 by 20%).
+        !lb1(iz) = lb1(iz)*tanh(lb1(iz)/Lmax)
+        !lb2(iz) = lb2(iz)*tanh(lb2(iz)/Lmax)
         lb1(iz) = lb1(iz)/(1. + (lb1(iz)/Lmax))
         lb2(iz) = lb2(iz)/(1. + (lb2(iz)/Lmax))
  
@@ -2511,7 +2521,7 @@ CONTAINS
            !CLOUD FRACTION. rr2 = 1/SQRT(2) = 0.707
            cldfra_bl1D(k) = 0.5*( 1.0+erf( q1(k)*rr2 ) )
 
-           eq1  = rrp*EXP( -0.5*q1k*q1k )
+           eq1  = rrp*EXP( -0.5*q1k*q1k )  ! TODO q1k is used before defined, 20211112 JM
            qll  = MAX( cldfra_bl1D(k)*q1k + eq1, 0.0 )
            !ESTIMATED LIQUID WATER CONTENT (UNNORMALIZED)
            ql(k) = alp(k)*sgm(k)*qll

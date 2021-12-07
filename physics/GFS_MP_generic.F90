@@ -96,6 +96,7 @@
         errmsg, errflg)
 !
       use machine, only: kind_phys
+      use mod_calpreciptype
 
       implicit none
 

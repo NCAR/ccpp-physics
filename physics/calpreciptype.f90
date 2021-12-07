@@ -1,3 +1,5 @@
+      module mod_calpreciptype
+      contains
 !>\file calpreciptype.f90
 !! This file contains the subroutines that calculates dominant precipitation type.
 
@@ -1377,3 +1379,4 @@
       return
       end
 !! @}
+      end module mod_calpreciptype

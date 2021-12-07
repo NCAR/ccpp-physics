@@ -7,6 +7,34 @@
 [ccpp-arg-table]
   name = GFS_rad_time_vary_timestep_init
   type = scheme
+[nthrds]
+  standard_name = omp_threads
+  long_name = number of OpenMP threads available for physics schemes
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[blksz]
+  standard_name = ccpp_block_sizes
+  long_name = for explicit data blocking: block sizes of all blocks
+  units = count
+  dimensions = (ccpp_block_count)
+  type = integer
+  intent = in
+[lrseeds]
+  standard_name = flag_for_model_specific_random_seeds
+  long_name = flag for model specific random seeds
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[rseeds]
+  standard_name = model_specific_random_seeds
+  long_name = model specific random seeds
+  units = none
+  dimensions = (horizontal_dimension,number_of_random_streams)
+  type = integer
+  intent = in
 [lslwr]
   standard_name = flag_for_calling_longwave_radiation
   long_name = logical flags for lw radiation calls
@@ -207,4 +235,3 @@
   dimensions = ()
   type = integer
   intent = out
-

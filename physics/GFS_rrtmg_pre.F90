@@ -16,7 +16,7 @@
 !!
       ! Attention - the output arguments lm, im, lmk, lmp must not be set
       ! in the CCPP version - they are defined in the interstitial_create routine
-      subroutine GFS_rrtmg_pre_run (im, levs, lm, lmk, lmp, n_var_lndp,        &
+      subroutine GFS_rrtmg_pre_run (im, levs, lm, lmk, lmp, lextop, ltp, n_var_lndp,        &
         imfdeepcnv, imfdeepcnv_gf, me, ncnd, ntrac, num_p3d, npdf3d, ncnvcld3d,&
         ntqv, ntcw,ntiw, ntlnc, ntinc, ntrw, ntsw, ntgl, ntwa, ntoz,           &
         ntclamt, nleffr, nieffr, nseffr, lndp_type, kdt, imp_physics,          &
@@ -37,11 +37,10 @@
         clouds9, cldsa, cldfra, faersw1, faersw2, faersw3, faerlw1, faerlw2,   &
         faerlw3, alpha, errmsg, errflg)
 
-      use machine,                   only: kind_phys
+      use machine,                   only: kind_phys, r8=>kind_dbl_prec
 
       use physparam
-
-      use radcons,                   only: itsfc,ltp, lextop, qmin,  &
+      use radcons,                   only: itsfc, qmin,  &
                                            qme5, qme6, epsq, prsmin
       use funcphys,                  only: fpvs
 
@@ -79,7 +78,7 @@
 
       implicit none
 
-      integer,              intent(in)  :: im, levs, lm, lmk, lmp, n_var_lndp, &
+      integer,              intent(in)  :: im, levs, lm, lmk, lmp, ltp, n_var_lndp, &
                                            imfdeepcnv,                         &
                                            imfdeepcnv_gf, me, ncnd, ntrac,     &
                                            num_p3d, npdf3d, ncnvcld3d, ntqv,   &
@@ -98,7 +97,7 @@
 
       character(len=3), dimension(:), intent(in) :: lndp_var_list
 
-      logical,              intent(in) :: lsswr, lslwr, ltaerosol, lgfdlmprad, &
+      logical,              intent(in) :: lextop, lsswr, lslwr, ltaerosol, lgfdlmprad, &
                                           uni_cld, effr_in, do_mynnedmf,       &
                                           lmfshal, lmfdeep2, pert_clds
 
@@ -295,6 +294,8 @@
           plyr(i,k1)    = prsl(i,k2)    * 0.01   ! pa to mb (hpa)
           tlyr(i,k1)    = tgrs(i,k2)
           prslk1(i,k1)  = prslk(i,k2)
+          rho(i,k1)     = prsl(i,k2)/(con_rd*tlyr(i,k1))
+          orho(i,k1)    = 1.0/rho(i,k1)
 
 !>  - Compute relative humidity.
           es  = min( prsl(i,k2),  fpvs( tgrs(i,k2) ) )  ! fpvs and prsl in pa
@@ -351,6 +352,8 @@
           plyr(i,lyb)   = 0.5 * plvl(i,lla)
           tlyr(i,lyb)   = tlyr(i,lya)
           prslk1(i,lyb) = (plyr(i,lyb)*0.001) ** rocp ! plyr in hPa
+          rho(i,lyb)    = plyr(i,lyb) *100.0/(con_rd*tlyr(i,lyb))
+          orho(i,lyb)   = 1.0/rho(i,lyb)
           rhly(i,lyb)   = rhly(i,lya)
           qstl(i,lyb)   = qstl(i,lya)
         enddo

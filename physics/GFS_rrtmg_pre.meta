@@ -44,6 +44,18 @@
   dimensions = ()
   type = integer
   intent = in
+[lextop]
+  standard_name = flag_for_extra_top_layer_for_radiation_calculations
+  long_name = flag for extra top layer for radiation calculations
+  units = flag
+  dimensions = ()
+  type = logical
+[ltp]
+  standard_name = extra_top_layer
+  long_name = extra top layer
+  units = count
+  dimensions = ()
+  type = integer
 [n_var_lndp]
   standard_name = number_of_perturbed_land_surface_variables
   long_name = number of land surface variables perturbed
