@@ -149,7 +149,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ntsnc]
   standard_name = index_of_mass_number_concentration_of_snow_in_tracer_concentration_array
   long_name = tracer index for snow   number concentration
@@ -157,7 +156,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ntrw]
   standard_name = index_of_rain_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for rain water
@@ -186,7 +184,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ntccn]
   standard_name = index_of_cloud_condensation_nuclei_number_concentration_in_tracer_concentration_array
   long_name = tracer index for cloud condensation nuclei number concentration
@@ -194,7 +191,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ntwa]
   standard_name = index_of_mass_number_concentration_of_hygroscopic_aerosols_in_tracer_concentration_array
   long_name = tracer index for water friendly aerosol
@@ -216,7 +212,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [nssl_invertccn]
   standard_name = nssl_invertccn
   long_name = flag to invert CCN in NSSL micro
@@ -224,7 +219,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [ntclamt]
   standard_name = index_of_cloud_area_fraction_in_atmosphere_layer_in_tracer_concentration_array
   long_name = tracer index for cloud amount integer
@@ -267,7 +261,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [imp_physics]
   standard_name = control_for_microphysics_scheme
   long_name = choice of microphysics scheme
@@ -275,22 +268,6 @@
   dimensions = ()
   type = integer
   intent = in
-[imp_physics_nssl2m]
-  standard_name = flag_for_nssl2m_microphysics_scheme
-  long_name = choice of NSSL 2-moment microphysics scheme
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[imp_physics_nssl2mccn]
-  standard_name = flag_for_nssl2mccn_microphysics_scheme
-  long_name = choice of NSSL 2-moment microphysics scheme with CCN
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [imp_physics_nssl]
   standard_name = identifier_for_nssl_microphysics_scheme
   long_name = choice of NSSL 2-moment microphysics scheme
@@ -298,7 +275,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [imp_physics_thompson]
   standard_name = identifier_for_thompson_microphysics_scheme
   long_name = choice of Thompson microphysics scheme
@@ -1122,4 +1098,3 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F

@@ -344,7 +344,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [prsl]
   standard_name = air_pressure
   long_name = mean layer pressure
@@ -1011,7 +1010,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [flag_for_pbl_generic_tend]
   standard_name = flag_for_generic_tendency_due_to_planetary_boundary_layer
   long_name = true if GFS_PBL_generic should calculate tendencies
@@ -1282,7 +1280,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [nssl_ccn_on]
   standard_name = nssl_ccn_on
   long_name = CCN activation flag in NSSL micro
@@ -1290,7 +1287,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [ltaerosol]
   standard_name = flag_for_aerosol_physics
   long_name = flag for aerosol physics

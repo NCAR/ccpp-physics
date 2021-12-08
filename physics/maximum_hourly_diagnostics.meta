@@ -70,7 +70,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [con_g]
   standard_name = gravitational_acceleration
   long_name = gravitational acceleration

@@ -619,7 +619,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [do_mynnsfclay]
   standard_name = flag_for_mellor_yamada_nakanishi_niino_surface_layer_scheme
   long_name = flag to activate MYNN surface layer

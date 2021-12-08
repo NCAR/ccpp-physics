@@ -189,7 +189,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [nthl]
   standard_name = index_of_hail_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for hail
@@ -197,7 +196,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [nthnc]
   standard_name = index_of_mass_number_concentration_of_hail_in_tracer_concentration_array
   long_name = tracer index for hail number concentration
@@ -205,7 +203,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ntgv]
   standard_name = index_of_graupel_volume_in_tracer_concentration_array
   long_name = tracer index for graupel particle volume
@@ -213,7 +210,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [nthv]
   standard_name = index_of_hail_volume_in_tracer_concentration_array
   long_name = tracer index for hail particle volume
@@ -221,7 +217,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [imp_physics]
   standard_name = control_for_microphysics_scheme
   long_name = choice of microphysics scheme
@@ -278,7 +273,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ltaerosol]
   standard_name = flag_for_aerosol_physics
   long_name = flag for aerosol physics
@@ -293,7 +287,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [nssl_hail_on]
   standard_name = nssl_hail_on
   long_name = hail activation flag in NSSL micro
@@ -301,7 +294,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [hybedmf]
   standard_name = flag_for_hybrid_edmf_pbl_scheme
   long_name = flag for hybrid edmf pbl scheme (moninedmf)
@@ -624,7 +616,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [nthl]
   standard_name = index_of_hail_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for hail
@@ -632,7 +623,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [nthnc]
   standard_name = index_of_mass_number_concentration_of_hail_in_tracer_concentration_array
   long_name = tracer index for hail number concentration
@@ -640,7 +630,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ntgv]
   standard_name = index_of_graupel_volume_in_tracer_concentration_array
   long_name = tracer index for graupel particle volume
@@ -648,7 +637,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [nthv]
   standard_name = index_of_hail_volume_in_tracer_concentration_array
   long_name = tracer index for hail particle volume
@@ -656,7 +644,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [imp_physics]
   standard_name = control_for_microphysics_scheme
   long_name = choice of microphysics scheme
@@ -713,7 +700,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ltaerosol]
   standard_name = flag_for_aerosol_physics
   long_name = flag for aerosol physics
@@ -728,7 +714,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [nssl_hail_on]
   standard_name = nssl_hail_on
   long_name = hail activation flag in NSSL micro
@@ -736,7 +721,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [cplflx]
   standard_name = flag_for_surface_flux_coupling
   long_name = flag controlling cplflx collection (default off)

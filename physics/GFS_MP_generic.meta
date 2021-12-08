@@ -220,7 +220,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [cal_pre]
   standard_name = flag_for_dominant_precipitation_type_partition
   long_name = flag controls precip type algorithm
