@@ -6278,10 +6278,10 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
         if((ws-a).lt.0.12)then
            diffu(K)=0.
         else
-           H=max(0.,(soilmoism(K)+qmin-a)/(max(1.e-8,(dqm-a))))
+           H=max(0.,(soilmoism(K)+qmin-a)/(max(1.e-8,(ws-a)))) 
            facd=1.
         if(a.ne.0.)facd=1.-a/max(1.e-8,soilmoism(K))
-          ame=max(1.e-8,dqm-riw*soilicem(K))
+          ame=max(1.e-8,ws-riw*soilicem(K))
 !--- DIFFU is diffusional conductivity of soil water
           diffu(K)=-BCLH*KSAT*PSIS/ame*                             &
                   (ws/ame)**3.                                     &
