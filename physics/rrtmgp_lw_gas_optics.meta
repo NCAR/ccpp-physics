@@ -165,21 +165,13 @@
   type = real
   kind = kind_phys
   intent = in
-[active_gases_array]
-  standard_name = list_of_active_gases_used_by_RRTMGP
-  long_name = list of active gases used by RRTMGP
-  units = none
-  dimensions =  (number_of_active_gases_used_by_RRTMGP)
-  type = character
-  kind = len=*
-  intent = in
 [gas_concentrations]
   standard_name = Gas_concentrations_for_RRTMGP_suite
   long_name = DDT containing gas concentrations for RRTMGP radiation scheme
   units = DDT
   dimensions = ()
   type = ty_gas_concs
-  intent = inout
+  intent = in
 [lw_optical_props_clrsky]
   standard_name = longwave_optical_properties_for_clear_sky
   long_name = Fortran DDT containing RRTMGP optical properties
