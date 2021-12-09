@@ -14,7 +14,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [imfshalcnv_gf]
   standard_name = identifier_for_grell_freitas_shallow_convection
   long_name = flag for Grell-Freitas shallow convection scheme
@@ -22,7 +21,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [imfdeepcnv]
   standard_name = control_for_deep_convection_scheme
   long_name = flag for mass-flux deep convection scheme
@@ -30,7 +28,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [imfdeepcnv_gf]
   standard_name = identifier_for_grell_freitas_deep_convection
   long_name = flag for Grell-Freitas deep convection scheme
@@ -38,7 +35,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [mpirank]
   standard_name = mpi_rank
   long_name = current MPI-rank
@@ -46,7 +42,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [mpiroot]
   standard_name = mpi_root
   long_name = master MPI-rank
@@ -54,7 +49,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -63,7 +57,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -71,7 +64,6 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 
 ########################################################################
 [ccpp-arg-table]
@@ -84,7 +76,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [garea]
   standard_name = cell_area
   long_name = grid cell area
@@ -93,7 +84,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [im]
   standard_name = horizontal_loop_extent
   long_name = horizontal loop extent
@@ -101,7 +91,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [km]
   standard_name = vertical_layer_dimension
   long_name = vertical layer dimension
@@ -109,7 +98,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [dt]
   standard_name = timestep_for_physics
   long_name = physics time step
@@ -118,7 +106,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [cactiv]
   standard_name = counter_for_grell_freitas_convection
   long_name = convective activity memory
@@ -126,7 +113,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = inout
-  optional = F
 [g]
   standard_name = gravitational_acceleration
   long_name = gravitational acceleration
@@ -135,7 +121,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [cp]
   standard_name = specific_heat_of_dry_air_at_constant_pressure
   long_name = specific heat !of dry air at constant pressure
@@ -144,7 +129,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [xlv]
   standard_name = latent_heat_of_vaporization_of_water_at_0C
   long_name = latent heat of evaporation/sublimation
@@ -153,7 +137,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [r_v]
   standard_name = gas_constant_water_vapor
   long_name = ideal gas constant for water vapor
@@ -162,7 +145,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [forcet]
   standard_name = tendency_of_air_temperature_due_to_nonphysics
   long_name = temperature tendency due to dynamics only
@@ -171,7 +153,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [forceqv_spechum]
   standard_name = tendendy_of_specific_humidity_due_to_nonphysics
   long_name = moisture tendency due to dynamics only
@@ -180,7 +161,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [phil]
   standard_name = geopotential
   long_name = layer geopotential
@@ -189,7 +169,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [raincv]
   standard_name = lwe_thickness_of_deep_convective_precipitation_amount
   long_name = deep convective rainfall amount on physics timestep
@@ -198,7 +177,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [qv_spechum]
   standard_name = specific_humidity_of_new_state
   long_name = water vapor specific humidity updated by physics
@@ -207,7 +185,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [t]
   standard_name = air_temperature_of_new_state
   long_name = updated temperature
@@ -216,7 +193,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [cld1d]
   standard_name = cloud_work_function
   long_name = cloud work function
@@ -225,7 +201,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [us]
   standard_name = x_wind_of_new_state
   long_name = updated x-direction wind
@@ -234,7 +209,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [vs]
   standard_name = y_wind_of_new_state
   long_name = updated y-direction wind
@@ -243,7 +217,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [t2di]
   standard_name = air_temperature
   long_name = mid-layer temperature
@@ -252,7 +225,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [w]
   standard_name = lagrangian_tendency_of_air_pressure
   long_name = layer mean vertical velocity
@@ -261,7 +233,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [qv2di_spechum]
   standard_name = specific_humidity
   long_name = water vapor specific humidity
@@ -270,7 +241,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [p2di]
   standard_name = air_pressure
   long_name = mean layer pressure
@@ -279,7 +249,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [psuri]
   standard_name = surface_air_pressure
   long_name = surface pressure
@@ -288,7 +257,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [hbot]
   standard_name = vertical_index_at_cloud_base
   long_name = index for cloud base
@@ -296,7 +264,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = out
-  optional = F
 [htop]
   standard_name = vertical_index_at_cloud_top
   long_name = index for cloud top
@@ -304,7 +271,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = out
-  optional = F
 [kcnv]
   standard_name = flag_deep_convection
   long_name = deep convection: 0=no, 1=yes
@@ -312,7 +278,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = out
-  optional = F
 [xland]
   standard_name = sea_land_ice_mask
   long_name = landmask: sea/land/ice=0/1/2
@@ -320,7 +285,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
-  optional = F
 [hfx2]
   standard_name = kinematic_surface_upward_sensible_heat_flux_reduced_by_surface_roughness_and_vegetation
   long_name = kinematic surface upward sensible heat flux reduced by surface roughness and vegetation
@@ -329,7 +293,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [qfx2]
   standard_name = surface_upward_specific_humidity_flux
   long_name = kinematic surface upward latent heat flux
@@ -338,7 +301,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [cliw]
   standard_name = ice_water_mixing_ratio_convective_transport_tracer
   long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates) in the convectively transported tracer array
@@ -347,7 +309,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [clcw]
   standard_name = cloud_condensed_water_mixing_ratio_convective_transport_tracer
   long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates) in the convectively transported tracer array
@@ -356,7 +317,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [pbl]
   standard_name = atmosphere_boundary_layer_thickness
   long_name = PBL thickness
@@ -365,7 +325,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [ud_mf]
   standard_name = instantaneous_atmosphere_updraft_convective_mass_flux
   long_name = (updraft mass flux) * delt
@@ -374,7 +333,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [dd_mf]
   standard_name = instantaneous_atmosphere_downdraft_convective_mass_flux
   long_name = (downdraft mass flux) * delt
@@ -383,7 +341,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [dt_mf]
   standard_name = instantaneous_atmosphere_detrainment_convective_mass_flux
   long_name = (detrainment mass flux) * delt
@@ -392,7 +349,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [cnvw_moist]
   standard_name = convective_cloud_water_mixing_ratio
   long_name = moist convective cloud water mixing ratio
@@ -401,7 +357,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [cnvc]
   standard_name = convective_cloud_cover
   long_name = convective cloud cover
@@ -410,7 +365,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [imfshalcnv]
   standard_name = control_for_shallow_convection_scheme
   long_name = flag for mass-flux shallow convection scheme
@@ -418,7 +372,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [flag_for_scnv_generic_tend]
   standard_name = flag_for_generic_tendency_due_to_shallow_convection
   long_name = true if GFS_SCNV_generic should calculate tendencies
@@ -426,7 +379,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [flag_for_dcnv_generic_tend]
   standard_name = flag_for_generic_tendency_due_to_deep_convection
   long_name = true if GFS_DCNV_generic should calculate tendencies
@@ -434,16 +386,14 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [dtend]
   standard_name = cumulative_change_of_state_variables
   long_name = diagnostic tendencies for state variables
-  units = various
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_cumulative_change_processes)
+  units = mixed
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,cumulative_change_of_state_variables_outer_index_max)
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [dtidx]
   standard_name = cumulative_change_of_state_variables_outer_index
   long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
@@ -451,7 +401,6 @@
   dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
   type = integer
   intent = in
-  optional = F
 [ntqv]
   standard_name = index_of_specific_humidity_in_tracer_concentration_array
   long_name = tracer index for water vapor (specific humidity)
@@ -459,7 +408,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ntcw]
   standard_name = index_of_cloud_liquid_water_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for cloud condensate (or liquid water)
@@ -467,7 +415,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ntiw]
   standard_name = index_of_cloud_ice_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for  ice water
@@ -475,7 +422,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [index_of_temperature]
   standard_name = index_of_temperature_in_cumulative_change_index
   long_name = index of temperature in first dimension of array cumulative change index
@@ -483,7 +429,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [index_of_x_wind]
   standard_name = index_of_x_wind_in_cumulative_change_index
   long_name = index of x-wind in first dimension of array cumulative change index
@@ -491,7 +436,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [index_of_y_wind]
   standard_name = index_of_y_wind_in_cumulative_change_index
   long_name = index of x-wind in first dimension of array cumulative change index
@@ -499,7 +443,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [index_of_process_scnv]
   standard_name = index_of_shallow_convection_process_process_in_cumulative_change_index
   long_name = index of shallow convection process in second dimension of array cumulative change index
@@ -507,7 +450,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [index_of_process_dcnv]
   standard_name = index_of_deep_convection_process_process_in_cumulative_change_index
   long_name = index of deep convection process in second dimension of array cumulative change index
@@ -515,7 +457,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ldiag3d]
   standard_name = flag_for_diagnostics_3D
   long_name = flag for 3d diagnostic fields
@@ -523,7 +464,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [qci_conv]
   standard_name = convective_cloud_condesate_after_rainout
   long_name = convective cloud condesate after rainout
@@ -532,7 +472,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -541,7 +480,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -549,4 +487,3 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F

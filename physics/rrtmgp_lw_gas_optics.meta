@@ -14,7 +14,6 @@
   dimensions =  ()
   type = character
   intent = in
-  optional = F
   kind = len=128
 [rrtmgp_lw_file_gas]
   standard_name = filename_of_rrtmgp_longwave_k_distribution
@@ -23,16 +22,7 @@
   dimensions =  ()
   type = character
   intent = in
-  optional = F
   kind = len=128
-[gas_concentrations]
-  standard_name = Gas_concentrations_for_RRTMGP_suite
-  long_name = DDT containing gas concentrations for RRTMGP radiation scheme
-  units = DDT
-  dimensions = ()
-  type = ty_gas_concs
-  intent = inout
-  optional = F
 [mpirank]
   standard_name = mpi_rank
   long_name = current MPI rank
@@ -40,7 +30,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [mpiroot]
   standard_name = mpi_root
   long_name = master MPI rank
@@ -48,7 +37,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [mpicomm]
   standard_name = mpi_communicator
   long_name = MPI communicator
@@ -56,24 +44,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
-[errmsg]
-  standard_name = ccpp_error_message
-  long_name = error message for error handling in CCPP
-  units = none
-  dimensions = ()
-  type = character
-  kind = len=*
-  intent = out
-  optional = F
-[errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = out
-  optional = F
 [minGPpres]
   standard_name = minimum_pressure_in_RRTMGP
   long_name = minimum pressure allowed in RRTMGP
@@ -82,7 +52,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [maxGPpres]
   standard_name = maximum_pressure_in_RRTMGP
   long_name = maximum pressure allowed in RRTMGP
@@ -91,7 +60,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [minGPtemp]
   standard_name = minimum_temperature_in_RRTMGP
   long_name = minimum temperature allowed in RRTMGP
@@ -100,7 +68,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [maxGPtemp]
   standard_name = maximum_temperature_in_RRTMGP
   long_name = maximum temperature allowed in RRTMGP
@@ -109,7 +76,29 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
+[active_gases_array]
+  standard_name = list_of_active_gases_used_by_RRTMGP
+  long_name = list of active gases used by RRTMGP
+  units = none
+  dimensions =  (number_of_active_gases_used_by_RRTMGP)
+  type = character
+  kind = len=*
+  intent = in
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
 
 ########################################################################
 [ccpp-arg-table]
@@ -122,7 +111,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [ncol]
   standard_name = horizontal_loop_extent
   long_name = horizontal dimension
@@ -130,7 +118,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [nLev]
   standard_name = vertical_layer_dimension
   long_name = number of vertical levels
@@ -138,7 +125,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [p_lay]
   standard_name = air_pressure_at_layer_for_RRTMGP
   long_name = air pressure layer
@@ -147,7 +133,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [p_lev]
   standard_name = air_pressure_at_interface_for_RRTMGP
   long_name = air pressure level
@@ -156,7 +141,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [t_lay]
   standard_name = air_temperature_at_layer_for_RRTMGP
   long_name = air temperature layer
@@ -165,7 +149,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [t_lev]
   standard_name = air_temperature_at_interface_for_RRTMGP
   long_name = air temperature level
@@ -174,7 +157,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [tsfg]
   standard_name = surface_ground_temperature_for_radiation
   long_name = surface ground temperature for radiation
@@ -183,15 +165,21 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
+[active_gases_array]
+  standard_name = list_of_active_gases_used_by_RRTMGP
+  long_name = list of active gases used by RRTMGP
+  units = none
+  dimensions =  (number_of_active_gases_used_by_RRTMGP)
+  type = character
+  kind = len=*
+  intent = in
 [gas_concentrations]
   standard_name = Gas_concentrations_for_RRTMGP_suite
   long_name = DDT containing gas concentrations for RRTMGP radiation scheme
   units = DDT
   dimensions = ()
   type = ty_gas_concs
-  intent = in
-  optional = F
+  intent = inout
 [lw_optical_props_clrsky]
   standard_name = longwave_optical_properties_for_clear_sky
   long_name = Fortran DDT containing RRTMGP optical properties
@@ -199,7 +187,6 @@
   dimensions = ()
   type = ty_optical_props_1scl
   intent = inout
-  optional = F
 [sources]
   standard_name = longwave_source_function
   long_name = Fortran DDT containing RRTMGP source functions
@@ -207,7 +194,6 @@
   dimensions = ()
   type = ty_source_func_lw
   intent = inout
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -216,7 +202,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -224,4 +209,3 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F

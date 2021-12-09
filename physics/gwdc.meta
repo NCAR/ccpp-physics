@@ -14,7 +14,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [cgwf]
   standard_name = tunable_parameters_for_convective_gravity_wave_drag
   long_name = multiplication factors for convective gravity wave drag
@@ -23,7 +22,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [dx]
   standard_name = characteristic_grid_lengthscale
   long_name = grid size in zonal direction
@@ -32,7 +30,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [work1]
   standard_name = grid_size_related_coefficient_used_in_scale_sensitive_schemes
   long_name = grid size related coefficient used in scale-sensitive schemes
@@ -41,7 +38,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [work2]
   standard_name = grid_size_related_coefficient_used_in_scale_sensitive_schemes_complement
   long_name = complement to work1
@@ -50,7 +46,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [dlength]
   standard_name = characteristic_grid_length_scale
   long_name = representative horizontal length scale of grid box
@@ -59,7 +54,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [cldf]
   standard_name = cloud_area_fraction
   long_name = fraction of grid box area in which updrafts occur
@@ -68,7 +62,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [levs]
   standard_name = vertical_layer_dimension
   long_name = number of vertical layers
@@ -76,7 +69,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [kbot]
   standard_name = vertical_index_at_cloud_base
   long_name = vertical index at cloud base
@@ -84,7 +76,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
-  optional = F
 [ktop]
   standard_name = vertical_index_at_cloud_top
   long_name = vertical index at cloud top
@@ -92,7 +83,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
-  optional = F
 [dtp]
   standard_name = timestep_for_physics
   long_name = physics time step
@@ -101,7 +91,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [gt0]
   standard_name = air_temperature_of_new_state
   long_name = updated air temperature
@@ -110,7 +99,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [gt0_init]
   standard_name = air_temperature_save
   long_name = air temperature before entering convection scheme
@@ -119,7 +107,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [del]
   standard_name = air_pressure_difference_between_midlayers
   long_name = difference between mid-layer pressures
@@ -128,7 +115,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [cumabs]
   standard_name = maximum_column_heating_rate
   long_name = maximum heating rate in column
@@ -137,7 +123,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -146,7 +131,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -154,7 +138,6 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 
 ########################################################################
 [ccpp-table-properties]
@@ -173,7 +156,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -182,7 +164,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -190,7 +171,6 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 
 ########################################################################
 [ccpp-arg-table]
@@ -203,7 +183,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [km]
   standard_name = vertical_layer_dimension
   long_name = number of vertical layers
@@ -211,7 +190,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [lat]
   standard_name = latitude_index_in_debug_printouts
   long_name = latitude index in debug printouts
@@ -219,7 +197,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [u1]
   standard_name = x_wind
   long_name = zonal wind
@@ -228,7 +205,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [v1]
   standard_name = y_wind
   long_name = meridional wind
@@ -237,7 +213,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [t1]
   standard_name = air_temperature
   long_name = mid-layer temperature
@@ -246,7 +221,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [q1]
   standard_name = specific_humidity
   long_name = mid-layer specific humidity of water vapor
@@ -255,7 +229,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [deltim]
   standard_name = timestep_for_physics
   long_name = physics time step
@@ -264,7 +237,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [pmid1]
   standard_name = air_pressure
   long_name = mid-layer pressure
@@ -273,7 +245,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [pint1]
   standard_name = air_pressure_at_interface
   long_name = interface pressure
@@ -282,7 +253,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [dpmid1]
   standard_name = air_pressure_difference_between_midlayers
   long_name = difference between mid-layer pressures
@@ -291,7 +261,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [qmax]
   standard_name = maximum_column_heating_rate
   long_name = maximum heating rate in column
@@ -300,7 +269,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [ktop]
   standard_name = vertical_index_at_cloud_top
   long_name = vertical index at cloud top
@@ -308,7 +276,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
-  optional = F
 [kbot]
   standard_name = vertical_index_at_cloud_base
   long_name = vertical index at cloud base
@@ -316,7 +283,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
-  optional = F
 [kcnv]
   standard_name = flag_deep_convection
   long_name = flag indicating whether convection occurs in column (0 or 1)
@@ -324,7 +290,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
-  optional = F
 [cldf]
   standard_name = cloud_area_fraction
   long_name = fraction of grid box area in which updrafts occur
@@ -333,7 +298,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [grav]
   standard_name = gravitational_acceleration
   long_name = gravitational acceleration
@@ -342,7 +306,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [cp]
   standard_name = specific_heat_of_dry_air_at_constant_pressure
   long_name = specific heat of dry air at constant pressure
@@ -351,7 +314,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [rd]
   standard_name = gas_constant_of_dry_air
   long_name = ideal gas constant for dry air
@@ -360,7 +322,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [fv]
   standard_name = ratio_of_vapor_to_dry_air_gas_constants_minus_one
   long_name = rv/rd - 1 (rv = ideal gas constant for water vapor)
@@ -369,7 +330,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [pi]
   standard_name = pi
   long_name = ratio of a circle's circumference to its diameter
@@ -378,7 +338,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [dlength]
   standard_name = characteristic_grid_length_scale
   long_name = representative horizontal length scale of grid box
@@ -387,7 +346,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [lprnt]
   standard_name = flag_print
   long_name = flag for debugging printouts
@@ -395,7 +353,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [ipr]
   standard_name = horizontal_index_of_printed_column
   long_name = horizontal index of column used in debugging printouts
@@ -403,7 +360,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [fhour]
   standard_name = forecast_time
   long_name = forecast hour
@@ -412,7 +368,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [utgwc]
   standard_name = tendency_of_x_wind_due_to_convective_gravity_wave_drag
   long_name = zonal wind tendency due to convective gravity wave drag
@@ -421,7 +376,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [vtgwc]
   standard_name = tendency_of_y_wind_due_to_convective_gravity_wave_drag
   long_name = meridional wind tendency due to convective gravity wave drag
@@ -430,7 +384,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [tauctx]
   standard_name = instantaneous_x_stress_due_to_gravity_wave_drag
   long_name = zonal stress at cloud top due to convective gravity wave drag
@@ -439,7 +392,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [taucty]
   standard_name = instantaneous_y_stress_due_to_gravity_wave_drag
   long_name = meridional stress at cloud top due to convective gravity wave drag
@@ -448,7 +400,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -457,7 +408,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -465,7 +415,6 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 
 ########################################################################
 [ccpp-table-properties]
@@ -484,7 +433,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [levs]
   standard_name = vertical_layer_dimension
   long_name = number of vertical layers
@@ -492,7 +440,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [lssav]
   standard_name = flag_for_diagnostics
   long_name = flag for calculating diagnostic fields
@@ -500,7 +447,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [ldiag3d]
   standard_name = flag_for_diagnostics_3D
   long_name = flag for calculating 3-D diagnostic fields
@@ -508,7 +454,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [dtf]
   standard_name = timestep_for_dynamics
   long_name = dynamics time step
@@ -517,7 +462,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [dtp]
   standard_name = timestep_for_physics
   long_name = physics time step
@@ -526,7 +470,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [con_cp]
   standard_name = specific_heat_of_dry_air_at_constant_pressure
   long_name = specific heat of dry air at constant pressure
@@ -535,7 +478,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [tauctx]
   standard_name = instantaneous_x_stress_due_to_gravity_wave_drag
   long_name = zonal stress at cloud top due to convective gravity wave drag
@@ -544,7 +486,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [taucty]
   standard_name = instantaneous_y_stress_due_to_gravity_wave_drag
   long_name = meridional stress at cloud top due to convective gravity wave drag
@@ -553,7 +494,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [gwdcu]
   standard_name = tendency_of_x_wind_due_to_convective_gravity_wave_drag
   long_name = zonal wind tendency due to convective gravity wave drag
@@ -562,7 +502,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [gwdcv]
   standard_name = tendency_of_y_wind_due_to_convective_gravity_wave_drag
   long_name = meridional wind tendency due to convective gravity wave drag
@@ -571,7 +510,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [dugwd]
   standard_name = time_integral_of_x_stress_due_to_gravity_wave_drag
   long_name = integral over time of zonal stress due to gravity wave drag
@@ -580,7 +518,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [dvgwd]
   standard_name = time_integral_of_y_stress_due_to_gravity_wave_drag
   long_name = integral over time of meridional stress due to gravity wave drag
@@ -589,17 +526,15 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [dtend]
   standard_name = cumulative_change_of_state_variables
   long_name = diagnostic tendencies for state variables
-  units = various
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_cumulative_change_processes)
+  units = mixed
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,cumulative_change_of_state_variables_outer_index_max)
   type = real
   kind = kind_phys
   active = (flag_for_diagnostics_3D)
   intent = inout
-  optional = F
 [dtidx]
   standard_name = cumulative_change_of_state_variables_outer_index
   long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
@@ -607,7 +542,6 @@
   dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
   type = integer
   intent = in
-  optional = F
 [index_of_x_wind]
   standard_name = index_of_x_wind_in_cumulative_change_index
   long_name = index of x-wind in first dimension of array cumulative change index
@@ -615,7 +549,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [index_of_y_wind]
   standard_name = index_of_y_wind_in_cumulative_change_index
   long_name = index of x-wind in first dimension of array cumulative change index
@@ -623,7 +556,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [index_of_process_nonorographic_gwd]
   standard_name = index_of_nonorographic_gravity_wave_drag_process_in_cumulative_change_index
   long_name = index of nonorographic gravity wave drag process in second dimension of array cumulative change index
@@ -631,7 +563,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [gu0]
   standard_name = x_wind_of_new_state
   long_name = updated zonal wind
@@ -640,7 +571,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [gv0]
   standard_name = y_wind_of_new_state
   long_name = updated meridional wind
@@ -649,7 +579,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [gt0]
   standard_name = air_temperature_of_new_state
   long_name = updated air temperature
@@ -658,7 +587,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -667,7 +595,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -675,4 +602,3 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F

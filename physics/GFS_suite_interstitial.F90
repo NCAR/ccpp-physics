@@ -772,6 +772,20 @@
       errmsg = ''
       errflg = 0
 
+      ! This code was previously in GFS_SCNV_generic_post, but it really belongs
+      ! here, because it fixes the convective transportable_tracers mess for Zhao-Carr
+      ! and GFDL MP from GFS_suite_interstitial_3. This whole code around clw(:,:,2)
+      ! being set to -999 for Zhao-Carr MP (which doesn't have cloud ice) and GFDL-MP
+      ! (which does have cloud ice, but for some reason it was decided to code it up
+      ! in the same way as for Zhao-Carr, nowadays unnecessary and confusing) needs
+      ! to be cleaned up. The convection schemes doing something different internally
+      ! based on clw(i,k,2) being -999.0 or not is not a good idea.
+      do k=1,levs
+        do i=1,im
+          if (clw(i,k,2) <= -999.0) clw(i,k,2) = 0.0
+        enddo
+      enddo
+
       if(ldiag3d) then
          if(ntk>0 .and. ntk<=size(clw,3)) then
             idtend=dtidx(100+ntke,index_of_process_conv_trans)
