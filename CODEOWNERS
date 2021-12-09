@@ -10,5 +10,8 @@
 # will be requested to review.
 #*.js    @octocat @github/js
 
+testfile1 @SamuelTrahanNOAA @ligiabernardet
+physics/testfile2 @SamuelTrahanNOAA
+
 # You can also use email addresses if you prefer.
 #docs/*  docs@example.com
