@@ -3,7 +3,6 @@
 
 # These owners will be the default owners for everything in the repo.
 #*       @defunkt
-*       @climbfuji @llpcarson @grantfirl @mzhangw @panll @mkavulich
 
 # Order is important. The last matching pattern has the most precedence.
 # So if a pull request only touches javascript files, only these owners
@@ -12,3 +11,107 @@
 
 # You can also use email addresses if you prefer.
 #docs/*  docs@example.com
+
+########################################################################
+
+# CODEOWNERS RULES
+
+# Default codeowners for files that don't have specific owners:
+*       @climbfuji @SamuelTrahanNOAA @grantfirl @mzhangw @panll @mkavulich
+
+
+# The following lines are from the CCPP Primary Schemes Points of Contact
+#   https://docs.google.com/spreadsheets/d/14y0Th_sSpCqlssEMNfSZ_Ni9wrpPqfpPY0kRG7jCZB8/edit#gid=0
+# (Internal NOAA document.)
+
+physics/cs_conv_aw_adj.*                       @AnningCheng-NOAA
+physics/cs_conv.*                              @AnningCheng-NOAA
+physics/cu_gf*                                 @hannahcbarnes @haiqinli
+physics/sascnvn.*                              @JongilHan66
+physics/cu_ntiedtke*                           @ChunxiZhang-NOAA
+physics/rascnv.*                               @SMoorthi-emc
+
+physics/samfdeepcnv.*                          @JongilHan66
+physics/samfshalcnv.*                          @JongilHan66
+physics/samfaerosols.*                         @JongilHan66
+
+physics/shalcnv.*                              @JongilHan66
+physics/unified_ugwp*                          @mdtoyNOAA
+physics/cires_ugwp*                            @mdtoyNOAA @ValeryYudin-NOAA
+physics/drag_suite.*                           @mdtoyNOAA
+physics/gwdc.*                                 @Songyou184
+physics/gwdps.*                                @Songyou184
+
+physics/gfdl_fv_sat_adj.*                      @RuiyuSun
+physics/gfdl_cloud_microphys.*                 @RuiyuSun
+physics/module_gfdl_cloud_microphys.*          @RuiyuSun
+
+physics/mp_fer_hires.*                         @ericaligo-NOAA
+physics/module_MP_FER_HIRES.*                  @ericaligo-NOAA
+
+physics/module_mp_thompson*                    @gthompsnWRF @RuiyuSun
+physics/mp_thompson*                           @gthompsnWRF @RuiyuSun
+
+physics/precpd.*                               @RuiyuSun
+physics/gscond.*                               @RuiyuSun
+
+physics/m_micro*                               @AnningCheng-NOAA @andrewgettelman
+physics/micro_mg*                              @AnningCheng-NOAA @andrewgettelman
+
+physics/ozphys*                                @AlexBelochitski-NOAA
+
+physics/satmedmfvdif.*                         @JongilHan66
+physics/satmedmfvdifq.*                        @JongilHan66
+
+physics/shinhongvdif.*                         @ChunxiZhang-NOAA
+physics/ysuvdif.*                              @ChunxiZhang-NOAA
+
+physics/moninedmf.*                            @JongilHan66 @WeiguoWang-NOAA
+
+physics/module_BL_MYJPBL.*                     @Qingfu-Liu
+physics/module_MYJPBL_wrapper.*                @Qingfu-Liu
+
+physics/module_bl_mynn.*                       @joeolson42
+physics/module_MYNNPBL_wrapper.*               @joeolson42
+
+physics/gcm_shoc.*                             @AlexBelochitski-NOAA
+physics/moninshoc.*                            @AlexBelochitski-NOAA
+
+
+
+physics/rte-rrtmgp                             @dustinswales @Qingfu-Liu
+physics/radiation_tools.*                      @dustinswales @Qingfu-Liu
+physics/rrtmgp_lw_rte.met*                     @dustinswales @Qingfu-Liu
+physics/radsw_param.f                          @dustinswales @Qingfu-Liu
+physics/rrtmgp_sw_rte.met*                     @dustinswales @Qingfu-Liu
+
+physics/radsw_datatb.*                         @mjiacono @Qingfu-Liu
+physics/radsw_param.*                          @mjiacono @Qingfu-Liu
+physics/radsw_main.*                           @mjiacono @Qingfu-Liu
+
+physics/rayleigh_damp.*                        @yangfanglin
+physics/GFS_stochastics.*                      @pjpegion @lisa-bengtsson
+physics/flake*                                 @YihuaWu-NOAA
+
+# FIXME: Need github contacts for: Mike Barlage (EMC) and Cenlin He (NCAR)
+
+physics/sfc_drv.*                              @HelinWei-NOAA
+physics/set_soilveg.*                          @HelinWei-NOAA
+physics/surface_perturbation.*                 @HelinWei-NOAA
+
+physics/namelist_soilveg_ruc.*                 @tanyasmirnova
+physics/set_soilveg_ruc.*                      @tanyasmirnova
+physics/module_sf_ruclsm.*                     @tanyasmirnova
+physics/module_soil_pre.*                      @tanyasmirnova
+physics/sfc_drv_ruc.*                          @tanyasmirnova
+
+physics/*nst*                                  @XuLi-NOAA
+physics/sfc_ocean.*                            @HelinWei-NOAA
+physics/sfc_diff.*                             @JongilHan66
+
+physics/h2ophys.*                              @AlexBelochitski-NOAA
+
+# Need github contacts for these:
+# physics/sfc_sice.*                           @    Xingren Wu (EMC)
+# physics/sfc_cice.*                           @    Xingren Wu (EMC)
+# physics/*noahmp*                             @    Mike Barlage (EMC) and Cenlin He (NCAR)
