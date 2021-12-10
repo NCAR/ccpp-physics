@@ -5,7 +5,7 @@ module rrtmgp_sw_cloud_optics
   use mo_optical_props,         only: ty_optical_props_2str
   use mo_rrtmg_sw_cloud_optics, only: rrtmg_sw_cloud_optics   
   use rrtmgp_sw_gas_optics,     only: sw_gas_props
-  use radiation_tools,               only: check_error_msg
+  use radiation_tools,          only: check_error_msg
   use netcdf
 #ifdef MPI
   use mpi
@@ -534,7 +534,7 @@ contains
                   tau_cld,    ssa_cld,    asy_cld,                         &
                   tau_precip, ssa_precip, asy_precip)
 
-            ! Cloud-optics (Need to reorder from G->GP band conventions)
+             ! Cloud-optics (Need to reorder from G->GP band conventions)
              sw_optical_props_cloudsByBand%tau(:,:,1) = tau_cld(:,:,sw_gas_props%get_nband())
              sw_optical_props_cloudsByBand%ssa(:,:,1) = ssa_cld(:,:,sw_gas_props%get_nband())
              sw_optical_props_cloudsByBand%g(:,:,1)   = asy_cld(:,:,sw_gas_props%get_nband())

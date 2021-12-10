@@ -1,10 +1,6 @@
 module GFS_rrtmgp_lw_post
   use machine,                   only: kind_phys
-  use module_radiation_aerosols, only: NSPC1
-  use module_radlw_parameters,   only: topflw_type, sfcflw_type, proflw_type
-  ! RRTMGP DDT's
-  use mo_gas_optics_rrtmgp,      only: ty_gas_optics_rrtmgp
-  use mo_fluxes_byband,          only: ty_fluxes_byband
+  use module_radlw_parameters,   only: topflw_type, sfcflw_type
   use mo_heating_rates,          only: compute_heating_rate
   use radiation_tools,           only: check_error_msg
   implicit none
@@ -25,15 +21,17 @@ contains
 !! \htmlinclude GFS_rrtmgp_lw_post.html
 !!
   subroutine GFS_rrtmgp_lw_post_run (nCol, nLev, lslwr, do_lw_clrsky_hr, save_diag, fhlwr, &
-       p_lev, t_lay, tsfa, fluxlwUP_allsky, fluxlwDOWN_allsky, fluxlwUP_clrsky,            &
-       fluxlwDOWN_clrsky, raddt, aerodp, cldsa, mtopa, mbota, cld_frac, cldtaulw, fluxr,   &
-       sfcdlw, sfculw, sfcflw, tsflw, htrlw, topflw, flxprf_lw, htrlwc, errmsg, errflg)
+       p_lev, t_lay, tsfa, fluxlwUP_allsky, fluxlwDOWN_allsky, fluxlwUP_clrsky, iSFC, iTOA,&
+       fluxlwDOWN_clrsky, raddt, cldsa, mtopa, mbota, cld_frac, cldtaulw, fluxr, sfcdlw,   &
+       sfculw, sfcflw, tsflw, htrlw, htrlwu, topflw, htrlwc, errmsg, errflg)
 
     ! Inputs
     integer, intent(in) ::  &
          nCol,              & ! Horizontal loop extent 
-         nLev                 ! Number of vertical layers
-    logical, intent(in) ::  &
+         nLev,              & ! Number of vertical layers
+         iSFC,              & ! Vertical index for surface level
+         iTOA                 ! Vertical index for TOA level
+    logical, intent(in) :: & 
          lslwr,             & ! Logical flags for lw radiation calls
          do_lw_clrsky_hr,   & ! Output clear-sky SW heating-rate?
          save_diag            ! Output radiation diagnostics?
@@ -51,8 +49,6 @@ contains
          fluxlwDOWN_clrsky    ! RRTMGP longwave clear-sky flux (W/m2)
     real(kind_phys), intent(in) :: &
          raddt                ! Radiation time step
-    real(kind_phys), dimension(nCol,NSPC1), intent(in) :: &
-         aerodp               ! Vertical integrated optical depth for various aerosol species
     real(kind_phys), dimension(nCol,5), intent(in) :: &
          cldsa                ! Fraction of clouds for low, middle, high, total and BL
     integer,         dimension(nCol,3), intent(in) ::&
@@ -72,7 +68,8 @@ contains
     type(sfcflw_type), dimension(nCol), intent(inout) :: &
          sfcflw               ! LW radiation fluxes at sfc
     real(kind_phys), dimension(nCol,nLev), intent(inout) :: &
-         htrlw                ! LW all-sky heating rate
+         htrlw,             & ! LW all-sky heating rate
+         htrlwu               ! Heating-rate updated in-between radiation calls.
     type(topflw_type), dimension(nCol), intent(out) :: &
          topflw               ! lw_fluxes_top_atmosphere
     character(len=*), intent(out) :: &
@@ -81,18 +78,11 @@ contains
          errflg
 
     ! Outputs (optional)
-    type(proflw_type), dimension(nCol, nLev+1), optional, intent(inout) :: &
-         flxprf_lw            ! 2D radiative fluxes, components:
-                              ! upfxc - total sky upward flux (W/m2)
-                              ! dnfxc - total sky dnward flux (W/m2)
-                              ! upfx0 - clear sky upward flux (W/m2)
-                              ! dnfx0 - clear sky dnward flux (W/m2)
     real(kind_phys),dimension(nCol, nLev),intent(inout),optional  :: &
          htrlwc               ! Longwave clear-sky heating-rate (K/sec)
 
     ! Local variables
-    integer :: i, j, k, iSFC, iTOA, itop, ibtc
-    logical :: l_fluxeslw2d, top_at_1
+    integer :: i, j, k, itop, ibtc
     real(kind_phys) :: tem0d, tem1, tem2
     real(kind_phys),dimension(nCol,nLev) :: hlwc
 
@@ -101,22 +91,6 @@ contains
     errflg = 0
 
     if (.not. lslwr) return
-
-    ! Are any optional outputs requested?
-    l_fluxeslw2d    = present(flxprf_lw)
-
-    ! #######################################################################################
-    ! What is vertical ordering?
-    ! #######################################################################################
-    top_at_1 = (p_lev(1,1) .lt. p_lev(1, nLev))
-    if (top_at_1) then 
-       iSFC = nLev+1
-       iTOA = 1
-    else
-       iSFC = 1
-       iTOA = nLev+1
-    endif
-
     ! #######################################################################################
     ! Compute LW heating-rates.
     ! #######################################################################################
@@ -138,23 +112,17 @@ contains
 
     ! #######################################################################################
     ! Save LW outputs.
+    ! (Copy fluxes from RRTMGP types into model radiation types.)
     ! #######################################################################################
-    ! Copy fluxes from RRTGMP types into model radiation types.
-    ! Mandatory outputs
+    ! TOA fluxes
     topflw(:)%upfxc = fluxlwUP_allsky(:,iTOA)
     topflw(:)%upfx0 = fluxlwUP_clrsky(:,iTOA)
+
+    ! Surface fluxes
     sfcflw(:)%upfxc = fluxlwUP_allsky(:,iSFC)
     sfcflw(:)%upfx0 = fluxlwUP_clrsky(:,iSFC)
     sfcflw(:)%dnfxc = fluxlwDOWN_allsky(:,iSFC)
     sfcflw(:)%dnfx0 = fluxlwDOWN_clrsky(:,iSFC)
-
-    ! Optional outputs
-    if(l_fluxeslw2d) then
-        flxprf_lw%upfxc = fluxlwUP_allsky
-        flxprf_lw%dnfxc = fluxlwDOWN_allsky
-        flxprf_lw%upfx0 = fluxlwUP_clrsky
-        flxprf_lw%dnfx0 = fluxlwDOWN_clrsky
-    endif
 
     ! Save surface air temp for diurnal adjustment at model t-steps
     tsflw (:) = tsfa(:)
@@ -162,6 +130,9 @@ contains
     ! Radiation fluxes for other physics processes
     sfcdlw(:) = sfcflw(:)%dnfxc
     sfculw(:) = sfcflw(:)%upfxc
+
+    ! Heating-rate at radiation timestep, used for adjustment between radiation calls.
+    htrlwu = htrlw
 
     ! #######################################################################################
     ! Save LW diagnostics
@@ -192,7 +163,7 @@ contains
           ! the fluxr output. save interface pressure (pa) of top/bot
           do j = 1, 3
              do i = 1, nCol
-!               tem0d = raddt * cldsa(i,j)
+                tem0d = raddt * cldsa(i,j)
 !               itop  = mtopa(i,j)
 !               ibtc  = mbota(i,j)
 !               fluxr(i, 8-j) = fluxr(i, 8-j) + tem0d
