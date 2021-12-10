@@ -247,10 +247,12 @@
           if ( me == 0 ) then
             print *,' - Using Varying Surface Emissivity for lw'
             print *,'   Requested data file "',semis_file,'" not found!'
-            print *,'   Change to fixed surface emissivity = 1.0 !'
           endif
+         errmsg = 'module_radiation_surface: surface emissivity
+     & file not provided'
+         errflg = 1
+         return
 
-          iemslw = 0
         else
           close(NIRADSF)
           open (NIRADSF,file=semis_file,form='formatted',status='old')
