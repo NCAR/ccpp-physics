@@ -1,22 +1,9 @@
-# Lines starting with '#' are comments.
-# Each line is a file pattern followed by one or more owners.
-
-# These owners will be the default owners for everything in the repo.
-#*       @defunkt
-
-# Order is important. The last matching pattern has the most precedence.
-# So if a pull request only touches javascript files, only these owners
-# will be requested to review.
-#*.js    @octocat @github/js
-
-# You can also use email addresses if you prefer.
-#docs/*  docs@example.com
-
 ########################################################################
 
-# CODEOWNERS RULES
+# CODEOWNERS RULES  (syntax guide is at end of file)
 
 # Default codeowners for files that don't have specific owners:
+
 *       @climbfuji @SamuelTrahanNOAA @grantfirl @mzhangw @panll @mkavulich
 
 
@@ -37,34 +24,50 @@ physics/samfaerosols.*                         @JongilHan66
 
 physics/shalcnv.*                              @JongilHan66
 physics/unified_ugwp*                          @mdtoyNOAA
+physics/ugwp_driver_v0.F                       @mdtoyNOAA
 physics/cires_ugwp*                            @mdtoyNOAA @ValeryYudin-NOAA
 physics/drag_suite.*                           @mdtoyNOAA
+
 physics/gwdc.*                                 @Songyou184
 physics/gwdps.*                                @Songyou184
 
 physics/gfdl_fv_sat_adj.*                      @RuiyuSun
 physics/gfdl_cloud_microphys.*                 @RuiyuSun
+
 physics/module_gfdl_cloud_microphys.*          @RuiyuSun
+physics/multi_gases.F90                        @RuiyuSun
 
 physics/mp_fer_hires.*                         @ericaligo-NOAA
 physics/module_MP_FER_HIRES.*                  @ericaligo-NOAA
 
 physics/module_mp_thompson*                    @gthompsnWRF @RuiyuSun
+physics/module_mp_radar.*                      @gthompsnWRF @RuiyuSun
 physics/mp_thompson*                           @gthompsnWRF @RuiyuSun
 
 physics/precpd.*                               @RuiyuSun
 physics/gscond.*                               @RuiyuSun
 
 physics/m_micro*                               @AnningCheng-NOAA @andrewgettelman
+physics/aer_cloud.F                            @AnningCheng-NOAA @andrewgettelman
+physics/aerclm_def.F                           @AnningCheng-NOAA @andrewgettelman
+physics/cldmacro.F                             @AnningCheng-NOAA @andrewgettelman
+physics/cldwat2m_micro.F                       @AnningCheng-NOAA @andrewgettelman
+physics/wv_saturation.F                        @AnningCheng-NOAA @andrewgettelman
 physics/micro_mg*                              @AnningCheng-NOAA @andrewgettelman
 
 physics/ozphys*                                @AlexBelochitski-NOAA
 
 physics/satmedmfvdif.*                         @JongilHan66
 physics/satmedmfvdifq.*                        @JongilHan66
+physics/mfpbl.f                                @JongilHan66
+physics/mfscu.f                                @JongilHan66
+physics/mfpbltq.f                              @JongilHan66
+physics/mfscuq.f                               @JongilHan66
 
 physics/shinhongvdif.*                         @ChunxiZhang-NOAA
 physics/ysuvdif.*                              @ChunxiZhang-NOAA
+
+physics/tridi.f                                @JongilHan66 @ChunxiZhang-NOAA @JongilHan66 @WeiguoWang-NOAA @AlexBelochitski-NOAA 
 
 physics/moninedmf.*                            @JongilHan66 @WeiguoWang-NOAA
 
@@ -77,27 +80,32 @@ physics/module_MYNNPBL_wrapper.*               @joeolson42
 physics/gcm_shoc.*                             @AlexBelochitski-NOAA
 physics/moninshoc.*                            @AlexBelochitski-NOAA
 
-
-
 physics/rte-rrtmgp                             @dustinswales @Qingfu-Liu
 physics/radiation_tools.*                      @dustinswales @Qingfu-Liu
 physics/rrtmgp_lw_rte.met*                     @dustinswales @Qingfu-Liu
-physics/radsw_param.f                          @dustinswales @Qingfu-Liu
 physics/rrtmgp_sw_rte.met*                     @dustinswales @Qingfu-Liu
 
+physics/radlw_main.*                           @mjiacono @Qingfu-Liu
+physics/HWRF_mcica_random_numbers.F90          @mjiacono @Qingfu-Liu
+physics/HWRF_mersenne_twister.F90              @mjiacono @Qingfu-Liu
+physics/radlw_datatb.f                         @mjiacono @Qingfu-Liu
 physics/radsw_datatb.*                         @mjiacono @Qingfu-Liu
-physics/radsw_param.*                          @mjiacono @Qingfu-Liu
 physics/radsw_main.*                           @mjiacono @Qingfu-Liu
+
+physics/radsw_param.f                          @dustinswales @Qingfu-Liu @mjiacono
 
 physics/rayleigh_damp.*                        @yangfanglin
 physics/GFS_stochastics.*                      @pjpegion @lisa-bengtsson
 physics/flake*                                 @YihuaWu-NOAA
 
-# FIXME: Need github contacts for: Mike Barlage (EMC) and Cenlin He (NCAR)
-
 physics/sfc_drv.*                              @HelinWei-NOAA
-physics/set_soilveg.*                          @HelinWei-NOAA
+physics/sflx.f                                 @HelinWei-NOAA
 physics/surface_perturbation.*                 @HelinWei-NOAA
+
+physics/*noahmp*                               @barlage @cenlinhe
+
+physics/set_soilveg.*                          @HelinWei-NOAA @barlage @cenlinhe
+physics/namelist_soilveg.*                     @HelinWei-NOAA @barlage @cenlinhe
 
 physics/namelist_soilveg_ruc.*                 @tanyasmirnova
 physics/set_soilveg_ruc.*                      @tanyasmirnova
@@ -105,13 +113,29 @@ physics/module_sf_ruclsm.*                     @tanyasmirnova
 physics/module_soil_pre.*                      @tanyasmirnova
 physics/sfc_drv_ruc.*                          @tanyasmirnova
 
+physics/date_def.f                             @XuLi-NOAA
 physics/*nst*                                  @XuLi-NOAA
+
 physics/sfc_ocean.*                            @HelinWei-NOAA
 physics/sfc_diff.*                             @JongilHan66
 
 physics/h2ophys.*                              @AlexBelochitski-NOAA
 
-# Need github contacts for these:
-# physics/sfc_sice.*                           @    Xingren Wu (EMC)
-# physics/sfc_cice.*                           @    Xingren Wu (EMC)
-# physics/*noahmp*                             @    Mike Barlage (EMC) and Cenlin He (NCAR)
+physics/sfc_sice.*                             @wd20xw
+physics/sfc_cice.*                             @wd20xw
+
+########################################################################
+
+# Lines starting with '#' are comments.
+# Each line is a file pattern followed by one or more owners.
+
+# These owners will be the default owners for everything in the repo.
+#*       @defunkt
+
+# Order is important. The last matching pattern has the most precedence.
+# So if a pull request only touches javascript files, only these owners
+# will be requested to review.
+#*.js    @octocat @github/js
+
+# You can also use email addresses if you prefer.
+#docs/*  docs@example.com
