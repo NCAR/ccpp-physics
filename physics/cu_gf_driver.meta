@@ -323,7 +323,7 @@
   kind = kind_phys
   intent = in
 [aod_gf]
-  standard_name = aod_gf_deep
+  standard_name = aerosol_optical_depth_for_grell_freitas_deep_convection
   long_name = aerosol optical depth used in Grell-Freitas Convective Parameterization
   units = none
   dimensions = (horizontal_loop_extent)

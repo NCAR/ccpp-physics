@@ -742,31 +742,33 @@
             enddo
           endif
         elseif (imp_physics == imp_physics_gfdl) then            ! GFDL MP
-          if (do_mynnedmf .and. kdt>1) THEN
-            do k=1,lm
-              k1 = k + kd
-              do i=1,im
-                if (tracer1(i,k1,ntrw)>1.0e-7 .OR. tracer1(i,k1,ntsw)>1.0e-7) then
-                ! GFDL cloud fraction
-                  cldcov(i,k1) = tracer1(i,k1,ntclamt)
-                else
-                ! MYNN sub-grid cloud fraction
+          if ((imfdeepcnv==imfdeepcnv_gf .or. do_mynnedmf) .and. kdt>1) then
+            if (do_mynnedmf) then
+              do k=1,lm
+                k1 = k + kd
+                do i=1,im
+                  if (tracer1(i,k1,ntrw)>1.0e-7 .OR. tracer1(i,k1,ntsw)>1.0e-7) then
+                  ! GFDL cloud fraction
+                    cldcov(i,k1) = tracer1(i,k1,ntclamt)
+                  else
+                  ! MYNN sub-grid cloud fraction
+                    cldcov(i,k1) = clouds1(i,k1)
+                  endif
+                enddo
+              enddo
+            else ! imfdeepcnv==imfdeepcnv_gf
+              do k=1,lm
+                k1 = k + kd
+                do i=1,im
+                if (qci_conv(i,k)>0.) then
+                  ! GF sub-grid cloud fraction
                   cldcov(i,k1) = clouds1(i,k1)
+                else
+                  cldcov(i,k1) = tracer1(i,k1,ntclamt)
                 endif
+                enddo
               enddo
-            enddo
-          elseif (imfdeepcnv == imfdeepcnv_gf .and. kdt>1) THEN
-            do k=1,lm
-              k1 = k + kd
-              do i=1,im
-              if (qci_conv(i,k)>0.) then
-                ! GF sub-grid cloud fraction
-                cldcov(i,k1) = clouds1(i,k1)
-              else
-                cldcov(i,k1) = tracer1(i,k1,ntclamt)
-              endif
-              enddo
-            enddo
+            endif
           else
             ! GFDL cloud fraction
             cldcov(1:IM,1+kd:LM+kd) = tracer1(1:IM,1:LM,ntclamt)
