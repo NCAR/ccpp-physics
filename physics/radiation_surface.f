@@ -248,10 +248,10 @@
             print *,' - Using Varying Surface Emissivity for lw'
             print *,'   Requested data file "',semis_file,'" not found!'
           endif
-         errmsg = 'module_radiation_surface: surface emissivity
+          errmsg = 'module_radiation_surface: surface emissivity
      & file not provided'
-         errflg = 1
-         return
+          errflg = 1
+          return
 
         else
           close(NIRADSF)
