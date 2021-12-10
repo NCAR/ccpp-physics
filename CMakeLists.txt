@@ -195,6 +195,13 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
       list(APPEND SCHEMES_SFX_OPT ${LOCAL_CURRENT_SOURCE_DIR}/physics/module_sf_mynn.F90)
     endif()
 
+    if (${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rrtmgp/kernels/mo_gas_optics_kernels.F90 IN_LIST SCHEMES)
+      # Reduce optimization for mo_gas_optics_kernels.F90 (to avoid an apparent compiler bug with Intel 19+)
+      SET_SOURCE_FILES_PROPERTIES(${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rrtmgp/kernels/mo_gas_optics_kernels.F90
+                                  PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_OPT} -O1")
+      list(APPEND SCHEMES_SFX_OPT ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rrtmgp/kernels/mo_gas_optics_kernels.F90)
+    endif()
+
     # Remove files with special compiler flags from list of files with standard compiler flags
     if (SCHEMES_SFX_OPT)
       list(REMOVE_ITEM SCHEMES ${SCHEMES_SFX_OPT})

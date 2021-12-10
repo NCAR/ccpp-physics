@@ -570,7 +570,7 @@
   intent = in
 [sppt_amp]
   standard_name = total_amplitude_of_sppt_perturbation
-  long_name = toal ampltidue of stochastic sppt perturbation
+  long_name = total ampltidue of stochastic sppt perturbation
   units = none
   dimensions = ()
   type = real
@@ -983,6 +983,46 @@
   long_name = instantaneous 3D cloud fraction for all MPs
   units = frac
   dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = out
+[cldfra2d]
+  standard_name = max_in_column_cloud_fraction
+  long_name = instantaneous 2D (max-in-column) cloud fraction
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[lwp_ex]
+  standard_name = liq_water_path_from_microphysics
+  long_name = total liquid water path from explicit microphysics
+  units = kg m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[iwp_ex]
+  standard_name = ice_water_path_from_microphysics
+  long_name = total ice water path from explicit microphysics
+  units = kg m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[lwp_fc]
+  standard_name = liq_water_path_from_cloud_fraction
+  long_name = total liquid water path from cloud fraction scheme
+  units = kg m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[iwp_fc]
+  standard_name = ice_water_path_from_cloud_fraction
+  long_name = total ice water path from cloud fraction scheme
+  units = kg m-2
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
