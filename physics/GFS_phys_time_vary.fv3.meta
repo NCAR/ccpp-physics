@@ -127,7 +127,7 @@
 [ozpl]
   standard_name = ozone_forcing
   long_name = ozone forcing data
-  units = various
+  units = mixed
   dimensions = (horizontal_dimension,vertical_dimension_of_ozone_forcing_data,number_of_coefficients_in_ozone_forcing_data)
   type = real
   kind = kind_phys
@@ -157,11 +157,19 @@
 [h2opl]
   standard_name = stratospheric_water_vapor_forcing
   long_name = water forcing data
-  units = various
+  units = mixed
   dimensions = (horizontal_dimension,vertical_dimension_of_h2o_forcing_data,number_of_coefficients_in_h2o_forcing_data)
   type = real
   kind = kind_phys
   intent = in
+[fhour]
+  standard_name = forecast_time
+  long_name = current forecast time 
+  units = h
+  dimensions = () 
+  type = real 
+  kind = kind_phys
+  intent = in 
 [jindx1_aer]
   standard_name = lower_latitude_index_of_aerosol_forcing_for_interpolation
   long_name = interpolation low index for prescribed aerosols in the y direction
@@ -1116,7 +1124,7 @@
 [ozpl]
   standard_name = ozone_forcing
   long_name = ozone forcing data
-  units = various
+  units = mixed
   dimensions = (horizontal_dimension,vertical_dimension_of_ozone_forcing_data,number_of_coefficients_in_ozone_forcing_data)
   type = real
   kind = kind_phys
@@ -1146,11 +1154,18 @@
 [h2opl]
   standard_name = stratospheric_water_vapor_forcing
   long_name = water forcing data
-  units = various
+  units = mixed
   dimensions = (horizontal_dimension,vertical_dimension_of_h2o_forcing_data,number_of_coefficients_in_h2o_forcing_data)
   type = real
   kind = kind_phys
   intent = inout
+[iflip]
+  standard_name = control_for_vertical_index_direction
+  long_name = iflip - is not the same as flipv
+  units = flag 
+  dimensions = () 
+  type = integer
+  intent = in 
 [jindx1_aer]
   standard_name = lower_latitude_index_of_aerosol_forcing_for_interpolation
   long_name = interpolation low index for prescribed aerosols in the y direction
@@ -1826,7 +1841,7 @@
 [tau_amf]
   standard_name = absolute_momentum_flux_due_to_nonorographic_gravity_wave_drag
   long_name = ngw_absolute_momentum_flux
-  units = various
+  units = mixed
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys

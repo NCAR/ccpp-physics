@@ -186,6 +186,13 @@
   type = real
   kind = kind_phys
   intent = in
+[top_at_1]
+  standard_name = flag_for_vertical_ordering_in_RRTMGP
+  long_name = flag for vertical ordering in RRTMGP
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [de_lgth]
   standard_name = cloud_decorrelation_length
   long_name = cloud decorrelation length

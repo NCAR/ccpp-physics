@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = rrtmgp_lw_cloud_sampling
   type = scheme
-  dependencies = machine.F,mersenne_twister.f,physparam.f,rrtmgp_sampling.F90,radiation_tools.F90
+  dependencies = machine.F,mersenne_twister.f,rrtmgp_sampling.F90,radiation_tools.F90
 
 ######################################################
 [ccpp-arg-table]

@@ -195,7 +195,7 @@
   standard_name = total_cloud_fraction
   long_name = layer total cloud fraction
   units = frac
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = in
@@ -253,8 +253,16 @@
 [fluxr]
   standard_name = cumulative_radiation_diagnostic
   long_name = time-accumulated 2D radiation-related diagnostic fields
-  units = various
+  units = mixed
   dimensions = (horizontal_loop_extent,number_of_diagnostics_variables_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = inout
+[total_albedo]
+  standard_name = total_sky_albedo
+  long_name = total sky albedo at toa
+  units = frac
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout

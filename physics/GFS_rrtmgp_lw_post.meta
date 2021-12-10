@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = GFS_rrtmgp_lw_post
   type = scheme
-  dependencies = iounitdef.f,machine.F,radiation_aerosols.f,radlw_param.f,rte-rrtmgp/extensions/mo_fluxes_byband.F90,rte-rrtmgp/extensions/mo_fluxes_byband_kernels.F90,radiation_tools.F90,rte-rrtmgp/rte/mo_fluxes.F90,rte-rrtmgp/rte/kernels/mo_fluxes_broadband_kernels.F90,rte-rrtmgp/extensions/mo_heating_rates.F90
+  dependencies = iounitdef.f,machine.F,radiation_aerosols.f,radlw_param.f,rte-rrtmgp/extensions/mo_fluxes_byband.F90,radiation_tools.F90,rte-rrtmgp/rte/mo_fluxes.F90,rte-rrtmgp/rte/kernels/mo_fluxes_broadband_kernels.F90,rte-rrtmgp/extensions/mo_heating_rates.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -18,6 +18,20 @@
   standard_name = vertical_layer_dimension
   long_name = number of vertical levels
   units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[iSFC]
+  standard_name = vertical_index_for_surface_in_RRTMGP
+  long_name = index for surface layer in RRTMGP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[iTOA]
+  standard_name = vertical_index_for_TOA_in_RRTMGP
+  long_name = index for TOA layer in RRTMGP
+  units = flag
   dimensions = ()
   type = integer
   intent = in
@@ -114,14 +128,6 @@
   type = real
   kind = kind_phys
   intent = in
-[aerodp]
-  standard_name = atmosphere_optical_thickness_due_to_ambient_aerosol_particles
-  long_name = vertical integrated optical depth for various aerosol species
-  units = none
-  dimensions = (horizontal_loop_extent,number_of_species_for_aerosol_optical_depth)
-  type = real
-  kind = kind_phys
-  intent = in
 [cldsa]
   standard_name = cloud_area_fraction_for_radiation
   long_name = fraction of clouds for low, middle, high, total and BL
@@ -163,7 +169,7 @@
 [fluxr]
   standard_name = cumulative_radiation_diagnostic
   long_name = time-accumulated 2D radiation-related diagnostic fields
-  units = various
+  units = mixed
   dimensions = (horizontal_loop_extent,number_of_diagnostics_variables_for_radiation)
   type = real
   kind = kind_phys
@@ -207,6 +213,14 @@
   type = real
   kind = kind_phys
   intent = inout  
+[htrlwu]
+  standard_name = updated_tendency_of_air_temperature_due_to_longwave_heating_on_physics_timestep
+  long_name = total sky longwave heating rate on physics time step
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
 [topflw]
   standard_name = lw_fluxes_top_atmosphere
   long_name = lw radiation fluxes at top

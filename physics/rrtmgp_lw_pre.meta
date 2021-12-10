@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = rrtmgp_lw_pre
   type = scheme
-  dependencies = iounitdef.f,machine.F,physparam.f
+  dependencies = iounitdef.f,machine.F
 
 ########################################################################
 [ccpp-arg-table]

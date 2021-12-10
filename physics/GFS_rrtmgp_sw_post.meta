@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = GFS_rrtmgp_sw_post
   type = scheme
-  dependencies = iounitdef.f,machine.F,radiation_aerosols.f,radsw_param.f,rte-rrtmgp/extensions/mo_fluxes_byband.F90,rte-rrtmgp/extensions/mo_fluxes_byband_kernels.F90
+  dependencies = iounitdef.f,machine.F,radiation_aerosols.f,radsw_param.f,rte-rrtmgp/extensions/mo_fluxes_byband.F90
   dependencies = rte-rrtmgp/rte/mo_fluxes.F90,rte-rrtmgp/rte/kernels/mo_fluxes_broadband_kernels.F90,rte-rrtmgp/extensions/mo_heating_rates.F90,radiation_tools.F90
 
 ########################################################################
@@ -19,6 +19,20 @@
   standard_name = vertical_layer_dimension
   long_name = number of vertical levels
   units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[iSFC]
+  standard_name = vertical_index_for_surface_in_RRTMGP
+  long_name = index for surface layer in RRTMGP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[iTOA]
+  standard_name = vertical_index_for_TOA_in_RRTMGP
+  long_name = index for TOA layer in RRTMGP
+  units = flag
   dimensions = ()
   type = integer
   intent = in
@@ -114,7 +128,7 @@
   kind = kind_phys
   intent = in
 [sfc_alb_uvvis_dir]
-  standard_name =  surface_albedo_uvvis_dir
+  standard_name =  surface_albedo_uvvis_direct
   long_name = UVVIS (direct) surface albedo (sfc_alb_uvvis_dir)
   units = none
   dimensions = (number_of_shortwave_bands,horizontal_loop_extent)
@@ -122,7 +136,7 @@
   kind = kind_phys
   intent = in
 [sfc_alb_uvvis_dif]
-  standard_name =  surface_albedo_uvvis_dif
+  standard_name =  surface_albedo_uvvis_diffuse
   long_name = UVVIS (diffuse) surface albedo (sfc_alb_uvvis_dif)
   units = none
   dimensions = (number_of_shortwave_bands,horizontal_loop_extent)
@@ -218,7 +232,7 @@
 [fluxr]
   standard_name = cumulative_radiation_diagnostic
   long_name = time-accumulated 2D radiation-related diagnostic fields
-  units = various
+  units = mixed
   dimensions = (horizontal_loop_extent,number_of_diagnostics_variables_for_radiation)
   type = real
   kind = kind_phys

@@ -194,7 +194,7 @@
 [rh02max]
   standard_name = maximum_relative_humidity_at_2m_over_maximum_hourly_time_interval
   long_name = maximum relative humidity at 2m over maximum hourly time interval
-  units = %
+  units = frac
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
@@ -202,7 +202,7 @@
 [rh02min]
   standard_name = minimum_relative_humidity_at_2m_over_maximum_hourly_time_interval
   long_name = minumum relative humidity at 2m over maximum hourly time interval
-  units = %
+  units = frac
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
