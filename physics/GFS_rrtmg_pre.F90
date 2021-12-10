@@ -864,14 +864,6 @@
           enddo
         endif
 
-        if(imp_physics == imp_physics_thompson) then
-          do k=1,lm
-            k1 = k + kd
-            do i=1,im
-              cnvw  (i,k1) = cnvw_in(i,k)
-            enddo
-          enddo
-        endif
 
         if (imp_physics == imp_physics_zhao_carr) then
           ccnd(1:IM,1:LMK,1) = ccnd(1:IM,1:LMK,1) + cnvw(1:IM,1:LMK)
@@ -1001,7 +993,7 @@
                          ntrac-1, ntcw-1,ntiw-1,ntrw-1,             &
                          ntsw-1,ntgl-1,                             &
                          im, lmk, lmp, uni_cld, lmfshal, lmfdeep2,  &
-                         cldcov(:,1:LMK), cnvw, effrl_inout,        &
+                         cldcov(:,1:LMK), effrl_inout,              &
                          effri_inout, effrs_inout,                  &
                          lwp_ex, iwp_ex, lwp_fc, iwp_fc,            &
                          dzb, xlat_d, julian, yearlen,              &
