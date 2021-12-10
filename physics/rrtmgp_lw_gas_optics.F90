@@ -466,8 +466,7 @@ contains
 !! \htmlinclude rrtmgp_lw_gas_optics_run.html
 !!
   subroutine rrtmgp_lw_gas_optics_run(doLWrad, nCol, nLev, p_lay, p_lev, t_lay, t_lev, tsfg, &
-       active_gases_array, gas_concentrations, lw_optical_props_clrsky, sources,             &
-       errmsg, errflg)
+       gas_concentrations, lw_optical_props_clrsky, sources, errmsg, errflg)
 
     ! Inputs
     logical, intent(in) :: &
@@ -483,10 +482,8 @@ contains
          t_lev                   ! Temperature @ model levels
     real(kind_phys), dimension(ncol), intent(in) :: &
          tsfg                    ! Surface ground temperature (K)
-    type(ty_gas_concs),intent(inout) :: &
+    type(ty_gas_concs),intent(in) :: &
          gas_concentrations      ! RRTMGP DDT: trace gas concentrations (vmr)
-    character(len=*), dimension(:), intent(in) :: &
-         active_gases_array ! List of active gases from namelist as array
 
     ! Output
     character(len=*), intent(out) :: &
@@ -506,8 +503,6 @@ contains
     errflg = 0
 
     if (.not. doLWrad) return
-
-    gas_concentrations%gas_name(:) = active_gases_array(:)
 
     ! Copy spectral information into GP DDTs.
     lw_optical_props_clrsky%band2gpt      = lw_gas_props%get_band_lims_gpoint()

@@ -3463,7 +3463,7 @@
         do i = 1, IX
           cwp(i,k) = max(0.0, clw(i,k,ntcw) * dz(i,k)*1.E6)
           crp(i,k) = 0.0
-          snow_mass_factor = 0.80
+          snow_mass_factor = 0.85
           cip(i,k) = max(0.0, (clw(i,k,ntiw)                            &
      &             + (1.0-snow_mass_factor)*clw(i,k,ntsw))*dz(i,k)*1.E6)
           if (re_snow(i,k) .gt. snow_max_radius)then
@@ -4543,16 +4543,16 @@
       DO k = kts,kte
 
          delz = MAX(100., dz(k))
-         RH_00L = 0.68+MIN(0.31,SQRT(1./(50.0+gridkm*gridkm*delz*0.01)))
-         RH_00O = 0.79+MIN(0.20,SQRT(1./(50.0+gridkm*gridkm*delz*0.01)))
+         RH_00L = 0.74+MIN(0.25,SQRT(1./(50.0+gridkm*gridkm*delz*0.01)))
+         RH_00O = 0.82+MIN(0.17,SQRT(1./(50.0+gridkm*gridkm*delz*0.01)))
          RHUM = rh(k)
 
-         if (qc(k).ge.1.E-6 .or. qi(k).ge.1.E-6                         &
-     &                    .or. (qs(k).gt.1.E-6 .and. t(k).lt.273.)) then
+         if (qc(k).ge.1.E-5 .or. qi(k).ge.1.E-5                         &
+     &                    .or. (qs(k).gt.1.E-5 .and. t(k).lt.273.)) then
             CLDFRA(K) = 1.0
          elseif (((qc(k)+qi(k)).gt.1.E-10) .and.                        &
-     &                                    ((qc(k)+qi(k)).lt.1.E-6)) then
-            CLDFRA(K) = MIN(0.99, 0.25*(10.0 + log10(qc(k)+qi(k))))
+     &                                    ((qc(k)+qi(k)).lt.1.E-5)) then
+            CLDFRA(K) = MIN(0.99, 0.20*(10.0 + log10(qc(k)+qi(k))))
          else
 
             IF ((XLAND-1.5).GT.0.) THEN                                  !--- Ocean

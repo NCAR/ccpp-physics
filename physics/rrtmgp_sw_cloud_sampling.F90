@@ -31,13 +31,13 @@ contains
          nCol,                            & ! Number of horizontal gridpoints
          nDay,                            & ! Number of daylit points.
          nLev,                            & ! Number of vertical layers
-         iovr,                            & ! Choice of cloud-overlap method                                                                                                                 
-         iovr_max,                        & ! Flag for maximum cloud overlap method                                                                                                          
-         iovr_maxrand,                    & ! Flag for maximum-random cloud overlap method                                                                                                   
-         iovr_rand,                       & ! Flag for random cloud overlap method                                                                                                           
-         iovr_dcorr,                      & ! Flag for decorrelation-length cloud overlap method                                                                                             
-         iovr_exp,                        & ! Flag for exponential cloud overlap method                                                                                                      
-         iovr_exprand,                    & ! Flag for exponential-random cloud overlap method 
+         iovr,                            & ! Choice of cloud-overlap method
+         iovr_max,                        & ! Flag for maximum cloud overlap method
+         iovr_maxrand,                    & ! Flag for maximum-random cloud overlap method
+         iovr_rand,                       & ! Flag for random cloud overlap method
+         iovr_dcorr,                      & ! Flag for decorrelation-length cloud overlap method
+         iovr_exp,                        & ! Flag for exponential cloud overlap method
+         iovr_exprand,                    & ! Flag for exponential-random cloud overlap method
          isubc_sw
     integer,intent(in),dimension(ncol) :: &
          idxday                             ! Indices for daylit points.
@@ -54,7 +54,7 @@ contains
          precip_overlap_param               ! Precipitation overlap parameter
     type(ty_optical_props_2str),intent(in) :: &
          sw_optical_props_cloudsByBand,   & ! RRTMGP DDT: Shortwave optical properties in each band (clouds)
-         sw_optical_props_precipByBand      ! RRTMGP DDT: Shortwave optical properties in each band (precipitation)    
+         sw_optical_props_precipByBand      ! RRTMGP DDT: Shortwave optical properties in each band (precipitation)
 
     ! Outputs
     character(len=*), intent(out) :: &
@@ -88,9 +88,6 @@ contains
        ! Allocate space RRTMGP DDTs [nday,nLev,nGpt]
        call check_error_msg('rrtmgp_sw_cloud_sampling_run', & 
             sw_optical_props_clouds%alloc_2str(nday, nLev, sw_gas_props))
-       sw_optical_props_clouds%tau(:,:,:) = 0._kind_phys
-       sw_optical_props_clouds%ssa(:,:,:) = 1._kind_phys
-       sw_optical_props_clouds%g(:,:,:)   = 0._kind_phys
  
        ! Change random number seed value for each radiation invocation (isubc_sw =1 or 2).
        if(isubc_sw == 1) then      ! advance prescribed permutation seed
@@ -99,7 +96,7 @@ contains
           enddo
        elseif (isubc_sw == 2) then ! use input array of permutaion seeds
           do iday = 1, nday
-             ipseed_sw(iday) = icseed_sw(iday)
+             ipseed_sw(iday) = icseed_sw(idxday(iday))
           enddo
        endif
 
@@ -119,12 +116,6 @@ contains
                 rng3D(:,iLay,iday) = rng1D
              enddo
           endif
-       enddo
-
-       do iday=1,nday
-          call random_setseed(ipseed_sw(iday),rng_stat)
-          call random_number(rng2D,rng_stat)
-          rng3D(:,:,iday) = reshape(source = rng2D,shape=[sw_gas_props%get_ngpt(),nLev])
        enddo
 
        ! Cloud overlap.
@@ -164,26 +155,6 @@ contains
        ! Allocate space RRTMGP DDTs [nday,nLev,nGpt]
        call check_error_msg('rrtmgp_sw_cloud_sampling_run', &
            sw_optical_props_precip%alloc_2str( nday, nLev, sw_gas_props))
- 
-       ! Change random number seed value for each radiation invocation (isubc_sw =1 or 2).
-       if(isubc_sw == 1) then      ! advance prescribed permutation seed
-          do iday = 1, nday
-             ipseed_sw(iday) = sw_gas_props%get_ngpt() + iday
-          enddo
-       elseif (isubc_sw == 2) then ! use input array of permutaion seeds
-          do iday = 1, nday
-             ipseed_sw(iday) = icseed_sw(iday)
-          enddo
-       endif
-
-       ! No need to call RNG second time for now, just use the same seeds for precip as clouds.
-       !! Call RNG. Mersennse Twister accepts 1D array, so loop over columns and collapse along G-points 
-       !! and layers. ([nGpts,nLev,nDay]-> [nGpts*nLev]*nDay)
-       !do iday=1,nday
-       !   call random_setseed(ipseed_sw(iday),rng_stat)
-       !   call random_number(rng1D,rng_stat)
-       !   rng3D(:,:,iday) = reshape(source = rng1D,shape=[sw_gas_props%get_ngpt(),nLev])
-       !enddo
 
        ! Precipitation overlap
        ! Maximum-random, random or maximum precipitation overlap
@@ -192,12 +163,6 @@ contains
        endif
        ! Exponential decorrelation length overlap
        if (iovr == iovr_dcorr) then
-          !! Generate second RNG
-          !do iday=1,nday
-          !   call random_setseed(ipseed_sw(iday),rng_stat)
-          !   call random_number(rng1D,rng_stat)
-          !   rng3D2(:,:,iday) = reshape(source = rng1D,shape=[sw_gas_props%get_ngpt(),nLev])
-          !enddo
           call sampled_mask(rng3D, precip_frac(idxday(1:nDay),:), precipfracSAMP,         & 
                             overlap_param = precip_overlap_param(idxday(1:nDay),1:nLev-1),& 
                             randoms2 = rng3D2)

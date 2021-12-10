@@ -79,17 +79,14 @@ contains
 !! \section arg_table_rrtmgp_sw_gas_optics_init
 !! \htmlinclude rrtmgp_sw_gas_optics.html
 !!
-  subroutine rrtmgp_sw_gas_optics_init(nCol, nLev, nThreads, rrtmgp_root_dir,               &
-       rrtmgp_sw_file_gas, active_gases_array, mpicomm, mpirank, mpiroot, errmsg, errflg)
+  subroutine rrtmgp_sw_gas_optics_init(rrtmgp_root_dir, rrtmgp_sw_file_gas,                 &
+       active_gases_array, mpicomm, mpirank, mpiroot, errmsg, errflg)
 
     ! Inputs
     character(len=128),intent(in) :: &
          rrtmgp_root_dir,  & ! RTE-RRTMGP root directory
          rrtmgp_sw_file_gas  ! RRTMGP file containing coefficients used to compute gaseous optical properties
     integer,intent(in) :: &
-         nCol,             & ! Number of horizontal gridpoints.
-         nLev,             & ! Number of vertical levels.
-         nThreads,         & ! Number of openMP threads
          mpicomm,          & ! MPI communicator
          mpirank,          & ! Current MPI rank
          mpiroot             ! Master MPI rank
@@ -543,7 +540,6 @@ contains
 
     toa_src_sw(:,:) = 0._kind_phys
     if (nDay .gt. 0) then
-       !active_gases = gas_concentrations%get_gas_names()
        ! Allocate space
        call check_error_msg('rrtmgp_sw_gas_optics_run_alloc_2str',&
             sw_optical_props_clrsky%alloc_2str(nday, nLev, sw_gas_props))
