@@ -924,6 +924,7 @@
             tavel(k) = tlyr(j1,kk)
             delp (k) = delpin(j1,kk)
             dz   (k) = dzlyr (j1,kk)
+            if (iovr == 4 .or. iovr == 5) alph(k) = alpha(j1,k) ! alpha decorrelation
 
 !> -# Set absorber and gas column amount, convert from volume mixing
 !!    ratio to molec/cm2 based on coldry (scaled to 1.0e-20)
@@ -1014,6 +1015,7 @@
             tavel(k) = tlyr(j1,k)
             delp (k) = delpin(j1,k)
             dz   (k) = dzlyr (j1,k)
+            if (iovr == 4 .or. iovr == 5) alph(k) = alpha(j1,k)   ! alpha decorrelation
 
 !  --- ...  set absorber amount
 !test use
