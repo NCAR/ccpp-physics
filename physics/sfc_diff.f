@@ -305,12 +305,12 @@
             tem2  = tem1 * tem1
             tem1  = one  - tem2
 
-            if( ivegsrc == 1 ) then
-
-              z0max = exp( tem2*log01 + tem1*log(z0max) )
-            elseif (ivegsrc == 2 ) then
-              z0max = exp( tem2*log01 + tem1*log(z0max) )
-            endif
+!wz         if( ivegsrc == 1 ) then
+!wz
+!wz           z0max = exp( tem2*log01 + tem1*log(z0max) )
+!wz         elseif (ivegsrc == 2 ) then
+!wz           z0max = exp( tem2*log01 + tem1*log(z0max) )
+!wz         endif
 
             z0max = max(z0max, zmin)
 
