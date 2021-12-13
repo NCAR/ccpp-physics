@@ -3452,7 +3452,7 @@
         do i = 1, IX
           cwp(i,k) = max(0.0, clw(i,k,ntcw) * dz(i,k)*1.E6)
           crp(i,k) = 0.0
-          snow_mass_factor = 0.85
+          snow_mass_factor = 0.90
           cip(i,k) = max(0.0, (clw(i,k,ntiw)                            &
      &             + (1.0-snow_mass_factor)*clw(i,k,ntsw))*dz(i,k)*1.E6)
           if (re_snow(i,k) .gt. snow_max_radius)then
@@ -4532,8 +4532,8 @@
       DO k = kts,kte
 
          delz = MAX(100., dz(k))
-         RH_00L = 0.74+MIN(0.25,SQRT(1./(50.0+gridkm*gridkm*delz*0.01)))
-         RH_00O = 0.82+MIN(0.17,SQRT(1./(50.0+gridkm*gridkm*delz*0.01)))
+         RH_00L = 0.77+MIN(0.22,SQRT(1./(50.0+gridkm*gridkm*delz*0.01)))
+         RH_00O = 0.85+MIN(0.14,SQRT(1./(50.0+gridkm*gridkm*delz*0.01)))
          RHUM = rh(k)
 
          if (qc(k).ge.1.E-5 .or. qi(k).ge.1.E-5                         &
@@ -4550,7 +4550,7 @@
                RH_00 = RH_00L
             ENDIF
 
-            tc = t(k) - 273.15
+            tc = MAX(-80.0, t(k) - 273.15)
             if (tc .lt. -12.0) RH_00 = RH_00L
 
             if (tc .gt. 20.0) then
@@ -4562,12 +4562,12 @@
                if (max_relh.gt.1.12 .or. (.NOT.(modify_qvapor)) ) then
 !..For HRRR model, the following look OK.
                   RHUM = MIN(rh(k), 1.45)
-                  RH_00 = RH_00 + (1.45-RH_00)*(-12.0-tc)/(-12.0+112.)
+                  RH_00 = RH_00 + (1.45-RH_00)*(-12.0-tc)/(-12.0+85.)
                   CLDFRA(K) = MAX(0.,1.0-SQRT((1.46-RHUM)/(1.46-RH_00)))
                else
 !..but for the GFS model, RH is way lower.
                   RHUM = MIN(rh(k), 1.05)
-                  RH_00 = RH_00 + (1.05-RH_00)*(-12.0-tc)/(-12.0+112.)
+                  RH_00 = RH_00 + (1.05-RH_00)*(-12.0-tc)/(-12.0+85.)
                   CLDFRA(K) = MAX(0.,1.0-SQRT((1.06-RHUM)/(1.06-RH_00)))
                endif
             endif
