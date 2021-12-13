@@ -245,7 +245,7 @@ contains
         xz(i,k)=zo(i,k)
         qrco(i,k)=0.
         pwo(i,k)=0.
-        cd(i,k)=.1*entr_rate(i)
+        cd(i,k)=.75*entr_rate(i)
         dellaqc(i,k)=0.
         cupclw(i,k)=0.
       enddo
@@ -415,7 +415,7 @@ contains
             do k=kts,ktf
                frh = 2.*min(qo_cup(i,k)/qeso_cup(i,k),1.)
                entr_rate_2d(i,k)=entr_rate(i) !*(2.3-frh)
-               cd(i,k)=.1*entr_rate_2d(i,k)
+               cd(i,k)=.75*entr_rate_2d(i,k)
             enddo
 !
 ! first estimate for shallow convection
@@ -576,14 +576,11 @@ contains
           if(qco(i,k)>=trash ) then 
               dz=z_cup(i,k)-z_cup(i,k-1)
               ! cloud liquid water
-!              qrco(i,k)= (qco(i,k)-trash)/(1.+c0_shal*dz)
-!              qrco(i,k)= (qco(i,k)-trash)/(1.+(c0_shal+c1_shal)*dz)
-              qrco(i,k)= (qco(i,k)-trash)/(1.+c0_shal*dz)
-              c1d(i,k-1)=10.*up_massdetr(i,k-1)*.5*(qrco(i,k-1)+qrco(i,k))
-              qrco(i,k)= qrco(i,k)-c1d(i,k-1)*dz*qrco(i,k)
+              c1d(i,k)=.02*up_massdetr(i,k-1)
+              qrco(i,k)= (qco(i,k)-trash)/(1.+(c0_shal+c1d(i,k))*dz)
               if(qrco(i,k).lt.0.)then  ! hli new test 02/12/19
                  qrco(i,k)=0.
-                 c1d(i,k-1)=1./dz
+                 c1d(i,k)=0.
               endif
               pwo(i,k)=c0_shal*dz*qrco(i,k)*zuo(i,k)
               ! cloud water vapor 
