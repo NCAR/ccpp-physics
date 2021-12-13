@@ -2,7 +2,7 @@ module rrtmgp_lw_aerosol_optics
   use machine,                   only: kind_phys
   use mo_gas_optics_rrtmgp,      only: ty_gas_optics_rrtmgp
   use mo_optical_props,          only: ty_optical_props_1scl
-  use radiation_tools,                only: check_error_msg
+  use radiation_tools,           only: check_error_msg
   use rrtmgp_sw_gas_optics,      only: sw_gas_props
   use rrtmgp_lw_gas_optics,      only: lw_gas_props
   use module_radiation_aerosols, only: &
@@ -30,9 +30,9 @@ contains
 !! \section arg_table_rrtmgp_lw_aerosol_optics_run
 !! \htmlinclude rrtmgp_lw_aerosol_optics.html
 !!
-  subroutine rrtmgp_lw_aerosol_optics_run(doLWrad, nCol, nLev, nTracer, nTracerAer,&
-       p_lev, p_lay, p_lk, tv_lay, relhum, lsmask, tracer, aerfld, lon, lat,       &
-       aerodp, lw_optical_props_aerosol, errmsg, errflg)
+  subroutine rrtmgp_lw_aerosol_optics_run(doLWrad, nCol, nLev, nspc, nTracer, nTracerAer,   &
+       p_lev, p_lay, p_lk, tv_lay, relhum, lsmask, tracer, aerfld, lon, lat,                &
+       lw_optical_props_aerosol, errmsg, errflg)
     
     ! Inputs
     logical, intent(in) :: &
@@ -40,6 +40,7 @@ contains
     integer, intent(in) :: &
          nCol,                  & ! Number of horizontal grid points
          nLev,                  & ! Number of vertical layers
+         nspc,                  & ! Number of aerosol optical-depths
          nTracer,               & ! Number of tracers
          nTracerAer               ! Number of aerosol tracers
     real(kind_phys), dimension(:), intent(in) :: &
@@ -59,8 +60,6 @@ contains
          p_lev                    ! Pressure @ layer-interfaces (Pa)
 
     ! Outputs
-    real(kind_phys), dimension(:,:), intent(inout) :: &
-         aerodp                   ! Vertical integrated optical depth for various aerosol species 
     type(ty_optical_props_1scl),intent(inout) :: &
          lw_optical_props_aerosol ! RRTMGP DDT: Longwave aerosol optical properties (tau)
     integer, intent(out) :: &
@@ -73,6 +72,7 @@ contains
          aerosolslw            !
     real(kind_phys), dimension(nCol, nLev, sw_gas_props%get_nband(), NF_AESW) :: &
          aerosolssw
+    real(kind_phys), dimension(nCol,nspc) :: aerodp
     integer :: iBand
 
     ! Initialize CCPP error handling variables

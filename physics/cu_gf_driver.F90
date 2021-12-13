@@ -7,7 +7,7 @@ module cu_gf_driver
    ! DH* TODO: replace constants with arguments to cu_gf_driver_run
    !use physcons  , g => con_g, cp => con_cp, xlv => con_hvap, r_v => con_rv
    use machine   , only: kind_phys
-   use cu_gf_deep, only: cu_gf_deep_run,neg_check,autoconv,aeroevap,fct1d3
+   use cu_gf_deep, only: cu_gf_deep_run,neg_check,fct1d3
    use cu_gf_sh  , only: cu_gf_sh_run
 
    implicit none
@@ -27,18 +27,18 @@ contains
                           imfdeepcnv_gf,mpirank, mpiroot, errmsg, errflg)
 
          implicit none
-         
+
          integer,                   intent(in) :: imfshalcnv, imfshalcnv_gf
-         integer,                   intent(in) :: imfdeepcnv, imfdeepcnv_gf       
+         integer,                   intent(in) :: imfdeepcnv, imfdeepcnv_gf
          integer,                   intent(in)    :: mpirank
          integer,                   intent(in)    :: mpiroot
          character(len=*),          intent(  out) :: errmsg
          integer,                   intent(  out) :: errflg
-         
+
          ! initialize ccpp error handling variables
          errmsg = ''
          errflg = 0
-         
+
          ! DH* temporary
          if (mpirank==mpiroot) then
             write(0,*) ' -----------------------------------------------------------------------------------------------------------------------------'
@@ -75,10 +75,10 @@ contains
 !!
 !>\section gen_gf_driver GSD GF Cumulus Scheme General Algorithm
 !> @{
-      subroutine cu_gf_driver_run(ntracer,garea,im,km,dt,cactiv,g,cp,xlv,r_v,   &
-               forcet,forceqv_spechum,phil,raincv,qv_spechum,t,cld1d,           &
-               us,vs,t2di,w,qv2di_spechum,p2di,psuri,                           &
-               hbot,htop,kcnv,xland,hfx2,qfx2,cliw,clcw,                        &
+      subroutine cu_gf_driver_run(ntracer,garea,im,km,dt,flag_init,flag_restart,&
+               cactiv,cactiv_m,g,cp,xlv,r_v,forcet,forceqv_spechum,phil,raincv, &
+               qv_spechum,t,cld1d,us,vs,t2di,w,qv2di_spechum,p2di,psuri,        &
+               hbot,htop,kcnv,xland,hfx2,qfx2,aod_gf,cliw,clcw,                 &
                pbl,ud_mf,dd_mf,dt_mf,cnvw_moist,cnvc,imfshalcnv,                &
                flag_for_scnv_generic_tend,flag_for_dcnv_generic_tend,           &
                dtend,dtidx,ntqv,ntiw,ntcw,index_of_temperature,index_of_x_wind, &
@@ -97,14 +97,17 @@ contains
      !integer, parameter :: ichoicem=5	! 0 2 5 13
       integer, parameter :: ichoicem=13	! 0 2 5 13
       integer, parameter :: ichoice_s=3	! 0 1 2 3
-      real(kind=kind_phys), parameter :: aodccn=0.1
+
+      real(kind=kind_phys), parameter :: aodc0=0.14
+      real(kind=kind_phys), parameter :: aodreturn=30.
       real(kind=kind_phys) :: dts,fpi,fp
       integer, parameter :: dicycle=0 ! diurnal cycle flag
       integer, parameter :: dicycle_m=0 !- diurnal cycle flag
       integer            :: ishallow_g3 ! depend on imfshalcnv
 !-------------------------------------------------------------
-   integer      :: its,ite, jts,jte, kts,kte 
+   integer      :: its,ite, jts,jte, kts,kte
    integer, intent(in   ) :: im,km,ntracer
+   logical, intent(in   ) :: flag_init, flag_restart
    logical, intent(in   ) :: flag_for_scnv_generic_tend,flag_for_dcnv_generic_tend
    real (kind=kind_phys), intent(in) :: g,cp,xlv,r_v
    logical, intent(in   ) :: ldiag3d
@@ -113,7 +116,7 @@ contains
    integer, intent(in)                                      :: dtidx(:,:), &
         index_of_x_wind, index_of_y_wind, index_of_temperature,            &
         index_of_process_scnv, index_of_process_dcnv, ntqv, ntcw, ntiw
-   
+
    real(kind=kind_phys),  dimension( : , : ), intent(in    ) :: forcet,forceqv_spechum,w,phil
    real(kind=kind_phys),  dimension( : , : ), intent(inout ) :: t,us,vs
    real(kind=kind_phys),  dimension( : , : ), intent(inout ) :: qci_conv
@@ -134,14 +137,15 @@ contains
    ! Specific humidity from FV3
    real(kind=kind_phys), dimension (:,:), intent(in) :: qv2di_spechum
    real(kind=kind_phys), dimension (:,:), intent(inout) :: qv_spechum
+   real(kind=kind_phys), dimension (:), intent(inout) :: aod_gf
    ! Local water vapor mixing ratios and cloud water mixing ratios
    real(kind=kind_phys), dimension (im,km) :: qv2di, qv, forceqv, cnvw
    !
    real(kind=kind_phys), dimension(:),intent(in) :: garea
-   real(kind=kind_phys), intent(in   ) :: dt 
+   real(kind=kind_phys), intent(in   ) :: dt
 
    integer, intent(in   ) :: imfshalcnv
-   integer, dimension(:), intent(inout) :: cactiv
+   integer, dimension(:), intent(inout) :: cactiv,cactiv_m
 
    character(len=*), intent(out) :: errmsg
    integer,          intent(out) :: errflg
@@ -152,7 +156,10 @@ contains
    real(kind=kind_phys), dimension (im,4)  :: rand_clos
    real(kind=kind_phys), dimension (im,km,11) :: gdc,gdc2
    real(kind=kind_phys), dimension (im)    :: ht
+   real(kind=kind_phys), dimension (im)    :: ccn_gf,ccn_m
+   real(kind=kind_phys) :: ccnclean
    real(kind=kind_phys), dimension (im)    :: dx
+   real(kind=kind_phys), dimension (im)    :: frhm,frhd
    real(kind=kind_phys), dimension (im,km) :: outt,outq,outqc,phh,subm,cupclw,cupclws
    real(kind=kind_phys), dimension (im,km) :: dhdt,zu,zus,zd,phf,zum,zdm,outum,outvm
    real(kind=kind_phys), dimension (im,km) :: outts,outqs,outqcs,outu,outv,outus,outvs
@@ -180,9 +187,9 @@ contains
 ! omega (omeg), windspeed (us,vs), and a flag (ierr) to turn off
 ! convection for this call only and at that particular gridpoint
 !
-   real(kind=kind_phys), dimension (im,km) :: qcheck,zo,t2d,q2d,po,p2d,rhoi
+   real(kind=kind_phys), dimension (im,km) :: qcheck,zo,t2d,q2d,po,p2d,rhoi,clw_ten
    real(kind=kind_phys), dimension (im,km) :: tn,qo,tshall,qshall,dz8w,omeg
-   real(kind=kind_phys), dimension (im)    :: ccn,z1,psur,cuten,cutens,cutenm
+   real(kind=kind_phys), dimension (im)    :: z1,psur,cuten,cutens,cutenm
    real(kind=kind_phys), dimension (im)    :: umean,vmean,pmean
    real(kind=kind_phys), dimension (im)    :: xmbs,xmbs2,xmb,xmbm,xmb_dumm,mconv
 
@@ -191,14 +198,14 @@ contains
    integer :: high_resolution
    real(kind=kind_phys)    :: clwtot,clwtot1,excess,tcrit,tscl_kf,dp,dq,sub_spread,subcenter
    real(kind=kind_phys)    :: dsubclw,dsubclws,dsubclwm,dtime_max,ztm,ztq,hfm,qfm,rkbcon,rktop
-   real(kind=kind_phys), dimension(km)   :: massflx,trcflx_in1,clw_in1,clw_ten1,po_cup
+   real(kind=kind_phys), dimension(km)   :: massflx,trcflx_in1,clw_in1,po_cup
 !  real(kind=kind_phys), dimension(km)   :: trcflx_in2,clw_in2,clw_ten2
    real(kind=kind_phys), dimension (im)  :: flux_tun,tun_rad_mid,tun_rad_shall,tun_rad_deep
    character*50 :: ierrc(im),ierrcm(im)
    character*50 :: ierrcs(im)
 !  ruc variable
 !  hfx2 -- sensible heat flux (k m/s), positive upward from sfc
-!  qfx2 -- latent heat flux (kg/kg m/s), positive upward from sfc 
+!  qfx2 -- latent heat flux (kg/kg m/s), positive upward from sfc
 !  gf needs them in w/m2. define hfx and qfx after simple unit conversion
    real(kind=kind_phys), dimension (im)  :: hfx,qfx
    real(kind=kind_phys) tem,tem1,tf,tcr,tcrf
@@ -251,6 +258,7 @@ contains
 ! these should be coming in from outside
 !
 !    cactiv(:)      = 0
+!    cactiv_m(:)    = 0
      rand_mom(:)    = 0.
      rand_vmas(:)   = 0.
      rand_clos(:,:) = 0.
@@ -264,25 +272,24 @@ contains
      kts=1
      kte=km
      ktf=kte-1
-! 
+!
      tropics(:)=0
 !
 !> - Set tuning constants for radiation coupling
 !
-     tun_rad_shall(:)=.02
-     tun_rad_mid(:)=.15
-     tun_rad_deep(:)=.13
+     tun_rad_shall(:)=.01
+     tun_rad_mid(:)=.3 !.02
+     tun_rad_deep(:)=.3 !.065
      edt(:)=0.
      edtm(:)=0.
      edtd(:)=0.
      zdd(:,:)=0.
      flux_tun(:)=5.
-! 10/11/2016 dx and tscl_kf are replaced with input dx(i), is dlength. 
+! 10/11/2016 dx and tscl_kf are replaced with input dx(i), is dlength.
 ! dx for scale awareness
 !    dx=40075000./float(lonf)
 !    tscl_kf=dx/25000.
-     ccn(its:ite)=150.
-  
+
      if (imfshalcnv == 3) then
       ishallow_g3 = 1
      else
@@ -336,13 +343,30 @@ contains
      do i= its,itf
       forcing(i,:)=0.
       forcing2(i,:)=0.
-      ccn(i)=100.
+      ccn_gf(i) = 0.
+      ccn_m(i) = 0.
+
+      ! set aod and ccn
+      if (flag_init .and. .not.flag_restart) then
+        aod_gf(i)=aodc0
+      else
+        if((cactiv(i).eq.0) .and. (cactiv_m(i).eq.0))then
+          if(aodc0>aod_gf(i)) aod_gf(i)=aod_gf(i)+((aodc0-aod_gf(i))*(dt/(aodreturn*60)))
+          if(aod_gf(i)>aodc0) aod_gf(i)=aodc0
+        endif
+      endif
+
+      ccn_gf(i)=max(5., (aod_gf(i)/0.0027)**(1/0.640))
+      ccn_m(i)=ccn_gf(i)
+
+      ccnclean=max(5., (aodc0/0.0027)**(1/0.640))
+
       hbot(i)  =kte
       htop(i)  =kts
       raincv(i)=0.
       xlandi(i)=real(xland(i))
-!     if(abs(xlandi(i)-1.).le.1.e-3) tun_rad_shall(i)=.15     
-!     if(abs(xlandi(i)-1.).le.1.e-3) flux_tun(i)=1.5     
+!     if(abs(xlandi(i)-1.).le.1.e-3) tun_rad_shall(i)=.15
+!     if(abs(xlandi(i)-1.).le.1.e-3) flux_tun(i)=1.5
      enddo
      do i= its,itf
       mconv(i)=0.
@@ -420,6 +444,7 @@ contains
 
      cnvwt(:,:)=0.
      cnvwts(:,:)=0.
+     cnvwtm(:,:)=0.
 
      hco(:,:)=0.
      hcom(:,:)=0.
@@ -448,7 +473,7 @@ contains
 
      subm(:,:)=0.
      dhdt(:,:)=0.
-     
+
      do k=kts,ktf
       do i=its,itf
         p2d(i,k)=0.01*p2di(i,k)
@@ -483,7 +508,7 @@ contains
 
      do i=its,itf
       do k=kts,kpbli(i)
-       tn(i,k)=t(i,k) 
+       tn(i,k)=t(i,k)
        qo(i,k)=max(1.e-16,qv(i,k))
       enddo
      enddo
@@ -491,10 +516,10 @@ contains
      nend=0
      do i=its,itf
       do k=kts,kpbli(i)
-       dhdt(i,k)=cp*(forcet(i,k)+(t(i,k)-t2di(i,k))/dt) +  & 
-                 xlv*(forceqv(i,k)+(qv(i,k)-qv2di(i,k))/dt) 
-!      tshall(i,k)=t(i,k) 
-!      qshall(i,k)=qv(i,k) 
+       dhdt(i,k)=cp*(forcet(i,k)+(t(i,k)-t2di(i,k))/dt) +  &
+                 xlv*(forceqv(i,k)+(qv(i,k)-qv2di(i,k))/dt)
+!      tshall(i,k)=t(i,k)
+!      qshall(i,k)=qv(i,k)
       enddo
      enddo
      do k=  kts+1,ktf-1
@@ -559,7 +584,8 @@ contains
               ,dicycle_m       &
               ,ichoicem       &
               ,ipr           &
-              ,ccn           &
+              ,ccn_m         &
+              ,ccnclean      &
               ,dt            &
               ,imid_gf       &
               ,kpbli         &
@@ -584,7 +610,7 @@ contains
               ,mconv         &
               ,omeg          &
 
-              ,cactiv        &
+              ,cactiv_m      &
               ,cnvwtm        &
               ,zum           &
               ,zdm           & ! hli
@@ -603,6 +629,7 @@ contains
               ,kbconm        &
               ,ktopm         &
               ,cupclwm       &
+              ,frhm          &
               ,ierrm         &
               ,ierrcm        &
 !    the following should be set to zero if not available
@@ -610,7 +637,7 @@ contains
               ,rand_vmas     & ! for stochastics vertmass, if temporal and spatial patterns exist
               ,rand_clos     & ! for stochastics closures, if temporal and spatial patterns exist
               ,0             & ! flag to what you want perturbed
-                               ! 1 = momentum transport 
+                               ! 1 = momentum transport
                                ! 2 = normalized vertical mass flux profile
                                ! 3 = closures
                                ! more is possible, talk to developer or
@@ -639,7 +666,8 @@ contains
               ,dicycle       &
               ,ichoice       &
               ,ipr           &
-              ,ccn           &
+              ,ccn_gf        &
+              ,ccnclean      &
               ,dt            &
               ,0             &
 
@@ -684,6 +712,7 @@ contains
               ,kbcon        &
               ,ktop         &
               ,cupclw       &
+              ,frhd         &
               ,ierr         &
               ,ierrc        &
 !    the following should be set to zero if not available
@@ -691,7 +720,7 @@ contains
               ,rand_vmas     & ! for stochastics vertmass, if temporal and spatial patterns exist
               ,rand_clos     & ! for stochastics closures, if temporal and spatial patterns exist
               ,0             & ! flag to what you want perturbed
-                               ! 1 = momentum transport 
+                               ! 1 = momentum transport
                                ! 2 = normalized vertical mass flux profile
                                ! 3 = closures
                                ! more is possible, talk to developer or
@@ -715,19 +744,19 @@ contains
 !
       endif
 !            do i=its,itf
-!              kcnv(i)=0  
+!              kcnv(i)=0
 !              if(pret(i).gt.0.)then
 !                 cuten(i)=1.
-!                 kcnv(i)= 1 !jmin(i) 
-!              else 
+!                 kcnv(i)= 1 !jmin(i)
+!              else
 !                 kbcon(i)=0
 !                 ktop(i)=0
 !                 cuten(i)=0.
 !              endif   ! pret > 0
 !              if(pretm(i).gt.0.)then
-!                 kcnv(i)= 1 !jmin(i)  
+!                 kcnv(i)= 1 !jmin(i)
 !                 cutenm(i)=1.
-!              else 
+!              else
 !                 kbconm(i)=0
 !                 ktopm(i)=0
 !                 cutenm(i)=0.
@@ -736,7 +765,7 @@ contains
             do i=its,itf
               kcnv(i)=0
               if(pretm(i).gt.0.)then
-                 kcnv(i)= 1 !jmin(i)  
+                 kcnv(i)= 1 !jmin(i)
                  cutenm(i)=1.
               else
                  kbconm(i)=0
@@ -748,7 +777,7 @@ contains
                  cuten(i)=1.
                  cutenm(i)=0.
                  pretm(i)=0.
-                 kcnv(i)= 1 !jmin(i) 
+                 kcnv(i)= 1 !jmin(i)
                  ktopm(i)=0
                  kbconm(i)=0
               else
@@ -762,7 +791,9 @@ contains
             massflx(:)=0.
             trcflx_in1(:)=0.
             clw_in1(:)=0.
-            clw_ten1(:)=0.
+            do k=kts,ktf
+              clw_ten(i, k)=0.
+            enddo
             po_cup(:)=0.
             kstop=kts
             if(ktopm(i).gt.kts .or. ktop(i).gt.kts)kstop=max(ktopm(i),ktop(i))
@@ -790,14 +821,16 @@ contains
                vs(i,k)=vs(i,k)+outv(i,k)*cuten(i)*dt +outvm(i,k)*cutenm(i)*dt +outvs(i,k)*cutens(i)*dt
 
                gdc(i,k,1)= max(0.,tun_rad_shall(i)*cupclws(i,k)*cutens(i))      ! my mod
-               gdc2(i,k,1)=max(0.,tun_rad_deep(i)*(cupclwm(i,k)*cutenm(i)+cupclw(i,k)*cuten(i)))
+               !gdc2(i,k,1)=max(0.,tun_rad_deep(i)*(cupclwm(i,k)*cutenm(i)+cupclw(i,k)*cuten(i)))
+               !gdc2(i,k,1)=max(0.,tun_rad_mid(i)*cupclwm(i,k)*cutenm(i)+tun_rad_deep(i)*cupclw(i,k)*cuten(i)+tun_rad_shall(i)*cupclws(i,k)*cutens(i))
+               gdc2(i,k,1) = min(0.1, max(0.01, tun_rad_mid(i)*frhm(i)))*cupclwm(i,k)*cutenm(i) + min(0.1, max(0.01, tun_rad_deep(i)*(frhd(i))))*cupclw(i,k)*cuten(i) + tun_rad_shall(i)*cupclws(i,k)*cutens(i)
                qci_conv(i,k)=gdc2(i,k,1)
                gdc(i,k,2)=(outt(i,k))*86400.
-               gdc(i,k,3)=(outtm(i,k))*86400. 
+               gdc(i,k,3)=(outtm(i,k))*86400.
                gdc(i,k,4)=(outts(i,k))*86400.
                gdc(i,k,7)=-(gdc(i,k,7)-sqrt(us(i,k)**2 +vs(i,k)**2))/dt
               !gdc(i,k,8)=(outq(i,k))*86400.*xlv/cp
-               gdc(i,k,8)=(outqm(i,k)+outqs(i,k)+outq(i,k))*86400.*xlv/cp 
+               gdc(i,k,8)=(outqm(i,k)+outqs(i,k)+outq(i,k))*86400.*xlv/cp
                gdc(i,k,9)=gdc(i,k,2)+gdc(i,k,3)+gdc(i,k,4)
 !
 !> - Calculate subsidence effect on clw
@@ -814,9 +847,9 @@ contains
 !                 dsubclwm=((-edtm(i)*zdm(i,k+1)+zum(i,k+1))*clwtot1   &
 !                      -(-edtm(i)*zdm(i,k)  +zum(i,k))  *clwtot  )*g/dp
 !                 dsubclws=(zus(i,k+1)*clwtot1-zus(i,k)*clwtot)*g/dp
-!                 dsubclw=dsubclw+(zu(i,k+1)*clwtot1-zu(i,k)*clwtot)*g/dp 
-!                 dsubclwm=dsubclwm+(zum(i,k+1)*clwtot1-zum(i,k)*clwtot)*g/dp 
-!                 dsubclws=dsubclws+(zus(i,k+1)*clwtot1-zus(i,k)*clwtot)*g/dp 
+!                 dsubclw=dsubclw+(zu(i,k+1)*clwtot1-zu(i,k)*clwtot)*g/dp
+!                 dsubclwm=dsubclwm+(zum(i,k+1)*clwtot1-zum(i,k)*clwtot)*g/dp
+!                 dsubclws=dsubclws+(zus(i,k+1)*clwtot1-zus(i,k)*clwtot)*g/dp
 !              endif
 !              tem  = dt*(outqcs(i,k)*cutens(i)+outqc(i,k)*cuten(i)       &
 !                    +outqcm(i,k)*cutenm(i)                           &
@@ -852,12 +885,12 @@ contains
              massflx   (1)=0.
              trcflx_in1(1)=0.
              call fct1d3 (kstop,kte,dtime_max,po_cup,                  &
-                            clw_in1,massflx,trcflx_in1,clw_ten1,g)
+                            clw_in1,massflx,trcflx_in1,clw_ten(i,:),g)
 
              do k=1,kstop
                tem  = dt*(outqcs(i,k)*cutens(i)+outqc(i,k)*cuten(i)    &
                       +outqcm(i,k)*cutenm(i)                           &
-                      +clw_ten1(k)                                     &
+                      +clw_ten(i,k)                                    &
                          )
                tem1 = max(0.0, min(1.0, (tcr-t(i,k))*tcrf))
                if (clcw(i,k) .gt. -999.0) then
@@ -894,6 +927,29 @@ contains
                  cactiv(i)=0
                  if(pretm(i).gt.0)raincv(i)=.001*cutenm(i)*pretm(i)*dt
               endif   ! pret > 0
+
+              if(pretm(i).gt.0)then
+                 cactiv_m(i)=1
+              else
+                 cactiv_m(i)=0
+              endif
+
+              ! Unify ccn
+              if(ccn_m(i).lt.ccn_gf(i))then
+                ccn_gf(i)=ccn_m(i)
+              endif
+
+              if(ccn_gf(i)<0) ccn_gf(i)=0
+
+              ! Convert ccn back to aod
+              aod_gf(i)=0.0027*(ccn_gf(i)**0.64)
+              if(aod_gf(i)<0.007)then
+                aod_gf(i)=0.007
+                ccn_gf(i)=(aod_gf(i)/0.0027)**(1/0.640)
+              elseif(aod_gf(i)>aodc0)then
+                aod_gf(i)=aodc0
+                ccn_gf(i)=(aod_gf(i)/0.0027)**(1/0.640)
+              endif
             enddo
  100    continue
 !
@@ -970,14 +1026,14 @@ contains
             do k=kts,ktf
               do i=its,itf
                 tem_shal = dt*(outqcs(i,k)*cutens(i)+outqcm(i,k)*cutenm(i))
-                tem_deep = dt*(outqc(i,k)*cuten(i)+clw_ten1(k))
+                tem_deep = dt*(outqc(i,k)*cuten(i)+clw_ten(i,k))
                 tem  = tem_shal+tem_deep
                 tem1 = max(0.0, min(1.0, (tcr-t(i,k))*tcrf))
                 weight_sum = abs(tem_shal)+abs(tem_deep)
                 if(weight_sum<1e-12) then
                   cycle
                 endif
-                
+
                 if (clcw_save(i,k) .gt. -999.0) then
                   cliw_both = max(0.,cliw_save(i,k) + tem * tem1) - cliw_save(i,k)
                   clcw_both = max(0.,clcw_save(i,k) + tem) - clcw_save(i,k)
