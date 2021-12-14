@@ -4789,9 +4789,9 @@
       max_iwc = ABS(qvs(k2)-qvs(k1))
 
       do k = k1, k2
-         max_iwc = MAX(1.E-5, max_iwc - (qi(k)+qs(k)))
+         max_iwc = MAX(1.E-6, max_iwc - (qi(k)+qs(k)))
       enddo
-      max_iwc = MIN(2.E-3, max_iwc)
+      max_iwc = MIN(1.E-4, max_iwc)
 
       this_dz = 0.0
       do k = k1, k2
@@ -4801,7 +4801,7 @@
             this_dz = this_dz + dz(k)
          endif
          this_iwc = max_iwc*this_dz/tdz
-         iwc = MAX(5.E-6, this_iwc*(1.-entr))
+         iwc = MAX(1.E-6, this_iwc*(1.-entr))
          if (cfr(k).gt.0.0.and.cfr(k).lt.1.0.and.T(k).ge.203.16) then
             qi(k) = qi(k) + cfr(k)*cfr(k)*iwc
          endif
@@ -4830,9 +4830,9 @@
 !     print*, ' max_lwc = ', max_lwc, ' over DZ=',tdz
 
       do k = k1, k2
-         max_lwc = MAX(1.E-5, max_lwc - qc(k))
+         max_lwc = MAX(1.E-6, max_lwc - qc(k))
       enddo
-      max_lwc = MIN(2.E-3, max_lwc)
+      max_lwc = MIN(1.E-4, max_lwc)
 
       this_dz = 0.0
       do k = k1, k2
@@ -4842,7 +4842,7 @@
             this_dz = this_dz + dz(k)
          endif
          this_lwc = max_lwc*this_dz/tdz
-         lwc = MAX(5.E-6, this_lwc*(1.-entr))
+         lwc = MAX(1.E-6, this_lwc*(1.-entr))
          if (cfr(k).gt.0.0.and.cfr(k).lt.1.0.and.T(k).ge.253.16) then
             qc(k) = qc(k) + cfr(k)*cfr(k)*lwc
          endif
