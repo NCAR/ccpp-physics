@@ -4,7 +4,7 @@
 
 !>\ingroup gsd_mynn_edmf
 !> The following references best describe the code within
-!!    Olson et al. (2018, NOAA Technical Memorandum)
+!!    Olson et al. (2019, NOAA Technical Memorandum)
 !!    Nakanishi and Niino (2009 ) \cite NAKANISHI_2009
       MODULE mynnedmf_wrapper
 
@@ -103,7 +103,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  grav_settling, bl_mynn_tkebudget, bl_mynn_tkeadvect, &
      &  bl_mynn_cloudpdf, bl_mynn_mixlength,               &
      &  bl_mynn_edmf, bl_mynn_edmf_mom, bl_mynn_edmf_tke,  &
-     &  bl_mynn_edmf_part, bl_mynn_cloudmix, bl_mynn_mixqt,&
+     &  bl_mynn_cloudmix, bl_mynn_mixqt,                   &
      &  bl_mynn_output,                                    &
      &  icloud_bl, do_mynnsfclay,                          &
      &  imp_physics, imp_physics_gfdl,                     &
@@ -203,7 +203,6 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &       bl_mynn_edmf,                                  &
      &       bl_mynn_edmf_mom,                              &
      &       bl_mynn_edmf_tke,                              &
-     &       bl_mynn_edmf_part,                             &
      &       bl_mynn_cloudmix,                              &
      &       bl_mynn_mixqt,                                 &
      &       bl_mynn_tkebudget,                             &
@@ -222,8 +221,9 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 !MISC CONFIGURATION OPTIONS
       INTEGER, PARAMETER ::                                 &
      &       spp_pbl=0,                                     &
-     &       bl_mynn_mixscalars=1,                          &
-     &       levflag=2
+     &       bl_mynn_mixscalars=1
+      REAL, PARAMETER ::                                    &
+     &       closure=2.6   !2.5, 2.6 or 3.0
       LOGICAL ::                                            &
      &       FLAG_QI, FLAG_QNI, FLAG_QC, FLAG_QNC,          &
      &       FLAG_QNWFA, FLAG_QNIFA
@@ -569,11 +569,6 @@ SUBROUTINE mynnedmf_wrapper_run(        &
            else
              rmol(i)=ABS(rb(i))*1./(dz(i,1)*0.5)
            endif
-           !if (rb(i) .ge. 0.)then
-           !  rmol(i)=rb(i)*8./(dz(i,1)*0.5)
-           !else
-           !  rmol(i)=MAX(rb(i)*5.,-10.)/(dz(i,1)*0.5)
-           !endif
          endif
          ts(i)=tsurf(i)/exner(i,1)  !theta
 !        qsfc(i)=qss(i)
@@ -626,7 +621,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
          print*,"bl_mynn_tkebudget=",bl_mynn_tkebudget," bl_mynn_tkeadvect=",bl_mynn_tkeadvect
          print*,"bl_mynn_cloudpdf=",bl_mynn_cloudpdf," bl_mynn_mixlength=",bl_mynn_mixlength
          print*,"bl_mynn_edmf=",bl_mynn_edmf," bl_mynn_edmf_mom=",bl_mynn_edmf_mom
-         print*,"bl_mynn_edmf_tke=",bl_mynn_edmf_tke," bl_mynn_edmf_part=",bl_mynn_edmf_part
+         print*,"bl_mynn_edmf_tke=",bl_mynn_edmf_tke
          print*,"bl_mynn_cloudmix=",bl_mynn_cloudmix," bl_mynn_mixqt=",bl_mynn_mixqt
          print*,"icloud_bl=",icloud_bl
          print*,"T:",t3d(1,1),t3d(1,2),t3d(1,levs)
@@ -695,7 +690,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &             ,bl_mynn_mixlength=bl_mynn_mixlength                & !input parameter
      &             ,icloud_bl=icloud_bl                                & !input parameter
      &             ,qc_bl=qc_bl,qi_bl=qi_bl,cldfra_bl=cldfra_bl        & !output
-     &             ,levflag=levflag,bl_mynn_edmf=bl_mynn_edmf          & !input parameter
+     &             ,closure=closure,bl_mynn_edmf=bl_mynn_edmf          & !input parameter
      &             ,bl_mynn_edmf_mom=bl_mynn_edmf_mom                  & !input parameter
      &             ,bl_mynn_edmf_tke=bl_mynn_edmf_tke                  & !input parameter
      &             ,bl_mynn_mixscalars=bl_mynn_mixscalars              & !input parameter

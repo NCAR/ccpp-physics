@@ -143,6 +143,14 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = in
+[landfrac]
+  standard_name = land_area_fraction
+  long_name = fraction of horizontal grid area occupied by land
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
 [q1]
   standard_name = specific_humidity_at_surface_adjacent_layer
   long_name = water vapor specific humidity at lowest model layer
@@ -470,7 +478,7 @@
   dimensions = (horizontal_dimension,vertical_dimension_of_sea_ice)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [pores]
   standard_name = maximum_soil_moisture_content_for_land_surface_model
   long_name = maximum soil moisture for a given soil type for land surface model
@@ -640,6 +648,22 @@
   dimensions = ()
   type = logical
   intent = in
+[xlat_d]
+  standard_name = latitude_in_degree
+  long_name = latitude in degree north
+  units = degree_north
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[xlon_d]
+  standard_name = longitude_in_degree
+  long_name = longitude in degree east
+  units = degree_east
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
 [zs]
   standard_name = depth_of_soil_layers
   long_name = depth of soil levels for land surface model
@@ -748,7 +772,7 @@
   dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
-[lake]
+[use_lake]
   standard_name = flag_for_using_flake
   long_name = flag indicating lake points using flake model
   units = flag

@@ -613,6 +613,11 @@
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Tbd%in_nm'           , Tbd%in_nm)
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Tbd%ccn_nm'          , Tbd%ccn_nm)
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Tbd%aer_nm'          , Tbd%aer_nm)
+                     if (Model%imfdeepcnv == Model%imfdeepcnv_gf) then
+                       call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Tbd%cactiv'        , Tbd%cactiv)
+                       call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Tbd%cactiv_m'      , Tbd%cactiv_m)
+                       call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Tbd%aod_gf'        , Tbd%aod_gf)
+                     end if
                      ! Diag
                      !call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%fluxr       ',    Diag%fluxr)
                      !do n=1,size(Diag%fluxr(1,:))
@@ -896,8 +901,6 @@
                      end if
                      if (Model%do_RRTMGP) then
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Coupling%fluxlwUP_jac',      Coupling%fluxlwUP_jac)
-                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Coupling%fluxlwUP_allsky',   Coupling%fluxlwUP_allsky)
-                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Coupling%fluxlwDOWN_allsky', Coupling%fluxlwDOWN_allsky)
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Coupling%htrlw',             Coupling%htrlw)
                      end if
                      !
@@ -1427,8 +1430,8 @@
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%cld_rwp             ', Interstitial%cld_rwp                 )
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%cld_rerain          ', Interstitial%cld_rerain              )
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%precip_frac         ', Interstitial%precip_frac             )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%icseed_lw           ', Interstitial%icseed_lw               )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%icseed_sw           ', Interstitial%icseed_sw               )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%fluxlwUP_allsky     ', Interstitial%fluxlwUP_allsky         )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%fluxlwDOWN_allsky   ', Interstitial%fluxlwDOWN_allsky       )
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%fluxlwUP_clrsky     ', Interstitial%fluxlwUP_clrsky         )
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%fluxlwDOWN_clrsky   ', Interstitial%fluxlwDOWN_clrsky       )
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%fluxswUP_allsky     ', Interstitial%fluxswUP_allsky         )
