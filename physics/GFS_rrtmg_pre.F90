@@ -34,8 +34,9 @@
         plvl, plyr, tlvl, tlyr, qlyr, olyr, gasvmr_co2, gasvmr_n2o, gasvmr_ch4,&
         gasvmr_o2, gasvmr_co, gasvmr_cfc11, gasvmr_cfc12, gasvmr_cfc22,        &
         gasvmr_ccl4,  gasvmr_cfc113, aerodp, clouds6, clouds7, clouds8,        &
-        clouds9, cldsa, cldfra, faersw1, faersw2, faersw3, faerlw1, faerlw2,   &
-        faerlw3, alpha, errmsg, errflg)
+        clouds9, cldsa, cldfra, cldfra2d, lwp_ex,iwp_ex, lwp_fc,iwp_fc,        &
+        faersw1, faersw2, faersw3, faerlw1, faerlw2, faerlw3, alpha,           &
+        errmsg, errflg)
 
       use machine,                   only: kind_phys
 
@@ -54,6 +55,7 @@
      &                                     progcld2,                 &
      &                                     progcld4, progcld5,       &
      &                                     progcld6,                 &
+     &                                     progcld_thompson,         &
      &                                     progclduni,               &
      &                                     cal_cldfra3,              &
      &                                     find_cloudLayers,         &
@@ -125,7 +127,9 @@
       real(kind=kind_phys), dimension(:,:), intent(inout) :: clouds1,          &
                                                              clouds2, clouds3, &
                                                              clouds4, clouds5
-      real(kind=kind_phys), dimension(:,:), intent(in) :: qci_conv
+      real(kind=kind_phys), dimension(:,:), intent(in)  :: qci_conv
+      real(kind=kind_phys), dimension(:),   intent(out) :: lwp_ex,iwp_ex, &
+                                                           lwp_fc,iwp_fc
 
       integer,                              intent(out) :: kd, kt, kb
 
@@ -159,6 +163,7 @@
                                                            clouds8,   &
                                                            clouds9,   &
                                                            cldfra
+      real(kind=kind_phys), dimension(:), intent(out) :: cldfra2d
       real(kind=kind_phys), dimension(:,:), intent(out) :: cldsa
 
       real(kind=kind_phys), dimension(:,:,:), intent(out) :: faersw1,&
@@ -192,9 +197,10 @@
       real(kind=kind_phys), dimension(im,lm+LTP) ::         &
                                   re_cloud, re_ice, re_snow, qv_mp, qc_mp, &
                                   qi_mp, qs_mp, nc_mp, ni_mp, nwfa
+      real (kind=kind_phys), dimension(lm) :: cldfra1d, qv1d,           &
+     &                                 qc1d, qi1d, qs1d, dz1d, p1d, t1d
 
       ! for F-A MP
-      real(kind=kind_phys), dimension(im,lm+LTP)   :: qc_save, qi_save, qs_save
       real(kind=kind_phys), dimension(im,lm+LTP+1) :: tem2db, hz
 
       real(kind=kind_phys), dimension(im,lm+LTP,min(4,ncnd))   :: ccnd
@@ -207,6 +213,7 @@
       ! for stochastic cloud perturbations
       real(kind=kind_phys), dimension(im) :: cldp1d
       real (kind=kind_phys) :: alpha0,beta0,m,s,cldtmp,tmp_wt,cdfz
+      real (kind=kind_phys) :: max_relh
       integer  :: iflag
 
       integer :: ids, ide, jds, jde, kds, kde, &
@@ -228,6 +235,21 @@
 
       LP1 = LM + 1               ! num of in/out levels
 
+
+      gridkm = sqrt(2.0)*sqrt(dx(1)*0.001*dx(1)*0.001)
+
+      if (imp_physics == imp_physics_thompson) then
+         max_relh = 1.5
+      else
+         max_relh = 1.1
+      endif
+
+      do i = 1, IM
+         lwp_ex(i) = 0.0
+         iwp_ex(i) = 0.0
+         lwp_fc(i) = 0.0
+         iwp_fc(i) = 0.0
+      enddo
 
 !  --- ...  set local /level/layer indexes corresponding to in/out
 !  variables
@@ -720,31 +742,33 @@
             enddo
           endif
         elseif (imp_physics == imp_physics_gfdl) then            ! GFDL MP
-          if (do_mynnedmf .and. kdt>1) THEN
-            do k=1,lm
-              k1 = k + kd
-              do i=1,im
-                if (tracer1(i,k1,ntrw)>1.0e-7 .OR. tracer1(i,k1,ntsw)>1.0e-7) then
-                ! GFDL cloud fraction
-                  cldcov(i,k1) = tracer1(i,k1,ntclamt)
-                else
-                ! MYNN sub-grid cloud fraction
+          if ((imfdeepcnv==imfdeepcnv_gf .or. do_mynnedmf) .and. kdt>1) then
+            if (do_mynnedmf) then
+              do k=1,lm
+                k1 = k + kd
+                do i=1,im
+                  if (tracer1(i,k1,ntrw)>1.0e-7 .OR. tracer1(i,k1,ntsw)>1.0e-7) then
+                  ! GFDL cloud fraction
+                    cldcov(i,k1) = tracer1(i,k1,ntclamt)
+                  else
+                  ! MYNN sub-grid cloud fraction
+                    cldcov(i,k1) = clouds1(i,k1)
+                  endif
+                enddo
+              enddo
+            else ! imfdeepcnv==imfdeepcnv_gf
+              do k=1,lm
+                k1 = k + kd
+                do i=1,im
+                if (qci_conv(i,k)>0.) then
+                  ! GF sub-grid cloud fraction
                   cldcov(i,k1) = clouds1(i,k1)
+                else
+                  cldcov(i,k1) = tracer1(i,k1,ntclamt)
                 endif
+                enddo
               enddo
-            enddo
-          elseif (imfdeepcnv == imfdeepcnv_gf .and. kdt>1) THEN
-            do k=1,lm
-              k1 = k + kd
-              do i=1,im
-              if (qci_conv(i,k)>0.) then
-                ! GF sub-grid cloud fraction
-                cldcov(i,k1) = clouds1(i,k1)
-              else
-                cldcov(i,k1) = tracer1(i,k1,ntclamt)
-              endif
-              enddo
-            enddo
+            endif
           else
             ! GFDL cloud fraction
             cldcov(1:IM,1+kd:LM+kd) = tracer1(1:IM,1:LM,ntclamt)
@@ -867,88 +891,6 @@
           enddo
         endif
 
-        !mz HWRF physics: icloud=3
-        if(icloud == 3) then
-
-          ! Set internal dimensions
-          ids = 1
-          ims = 1
-          its = 1
-          ide = size(xlon,1)
-          ime = size(xlon,1)
-          ite = size(xlon,1)
-          jds = 1
-          jms = 1
-          jts = 1
-          jde = 1
-          jme = 1
-          jte = 1
-          kds = 1
-          kms = 1
-          kts = 1
-          kde = lm+LTP ! should this be lmk instead of lm? no, or?
-          kme = lm+LTP
-          kte = lm+LTP
-
-          do k = 1, LMK
-            do i = 1, IM
-              rho(i,k)=plyr(i,k)*100./(con_rd*tlyr(i,k))
-              plyrpa(i,k)=plyr(i,k)*100.    !hPa->Pa
-            end do
-          end do
-
-          do i=1,im
-            if (slmsk(i)==1. .or. slmsk(i)==2.) then ! sea/land/ice mask (=0/1/2) in FV3
-               xland(i)=1.0                          ! but land/water = (1/2) in HWRF
-            else
-               xland(i)=2.0
-            endif
-          enddo
-
-          gridkm = sqrt(2.0)*sqrt(dx(1)*0.001*dx(1)*0.001)
-
-          do i =1, im
-            do k =1, lmk
-               qc_save(i,k) = ccnd(i,k,1)
-               qi_save(i,k) = ccnd(i,k,2)
-               qs_save(i,k) = ccnd(i,k,4)
-            enddo
-          enddo
-
-
-          call cal_cldfra3(cldcov,qlyr,ccnd(:,:,1),ccnd(:,:,2),      &
-                           ccnd(:,:,4),plyrpa,tlyr,rho,xland,gridkm, &
-                           ids,ide,jds,jde,kds,kde,                  &
-                           ims,ime,jms,jme,kms,kme,                  &
-                           its,ite,jts,jte,kts,kte)
-
-          !mz* back to micro-only qc  qi,qs
-          do i =1, im
-            do k =1, lmk
-              ccnd(i,k,1) = qc_save(i,k)
-              ccnd(i,k,2) = qi_save(i,k)
-              ccnd(i,k,4) = qs_save(i,k)
-            enddo
-          enddo
-
-        endif ! icloud == 3
-
-        if (lextop) then
-          do i=1,im
-            cldcov(i,lyb) = cldcov(i,lya)
-            deltaq(i,lyb) = deltaq(i,lya)
-            cnvw  (i,lyb) = cnvw  (i,lya)
-            cnvc  (i,lyb) = cnvc  (i,lya)
-          enddo
-          if (effr_in) then
-            do i=1,im
-              effrl(i,lyb) = effrl(i,lya)
-              effri(i,lyb) = effri(i,lya)
-              effrr(i,lyb) = effrr(i,lya)
-              effrs(i,lyb) = effrs(i,lya)
-            enddo
-          endif
-        endif
 
         if (imp_physics == imp_physics_zhao_carr) then
           ccnd(1:IM,1:LMK,1) = ccnd(1:IM,1:LMK,1) + cnvw(1:IM,1:LMK)
@@ -1025,6 +967,20 @@
         elseif(imp_physics == imp_physics_thompson) then                              ! Thompson MP
 
           if(do_mynnedmf .or. imfdeepcnv == imfdeepcnv_gf ) then ! MYNN PBL or GF conv
+
+            if (icloud == 3) then
+              call progcld_thompson (plyr,plvl,tlyr,qlyr,qstl,rhly, & !  --- inputs
+                         tracer1,xlat,xlon,slmsk,dz,delp,           &
+                         ntrac-1, ntcw-1,ntiw-1,ntrw-1,             &
+                         ntsw-1,ntgl-1,                             &
+                         im, lm, lmp, uni_cld, lmfshal, lmfdeep2,   &
+                         cldcov(:,1:LM), effrl_inout,               &
+                         effri_inout, effrs_inout,                  &
+                         lwp_ex, iwp_ex, lwp_fc, iwp_fc,            &
+                         dzb, xlat_d, julian, yearlen, gridkm,      &
+                         clouds, cldsa, mtopa ,mbota, de_lgth, alpha) !  --- outputs
+            else
+
               !-- MYNN PBL or convective GF
               !-- use cloud fractions with SGS clouds
               do k=1,lmk
@@ -1041,18 +997,35 @@
                          effrl, effri, effrr, effrs, effr_in ,          &
                          dzb, xlat_d, julian, yearlen,                  &
                          clouds, cldsa, mtopa, mbota, de_lgth, alpha)     !  ---  outputs
+            endif
 
           else
             ! MYNN PBL or GF convective are not used
-            call progcld6 (plyr,plvl,tlyr,qlyr,qstl,rhly,tracer1,   & !  --- inputs
-                         xlat,xlon,slmsk,dz,delp,                   &
+
+            if (icloud == 3) then
+              call progcld_thompson (plyr,plvl,tlyr,qlyr,qstl,rhly, & !  --- inputs
+                         tracer1,xlat,xlon,slmsk,dz,delp,           &
+                         ntrac-1, ntcw-1,ntiw-1,ntrw-1,             &
+                         ntsw-1,ntgl-1,                             &
+                         im, lm, lmp, uni_cld, lmfshal, lmfdeep2,   &
+                         cldcov(:,1:LM), effrl_inout,               &
+                         effri_inout, effrs_inout,                  &
+                         lwp_ex, iwp_ex, lwp_fc, iwp_fc,            &
+                         dzb, xlat_d, julian, yearlen, gridkm,      &
+                         clouds, cldsa, mtopa ,mbota, de_lgth, alpha) !  --- outputs
+
+            else
+              call progcld6 (plyr,plvl,tlyr,qlyr,qstl,rhly,         & !  --- inputs
+                         tracer1,xlat,xlon,slmsk,dz,delp,           &
                          ntrac-1, ntcw-1,ntiw-1,ntrw-1,             &
                          ntsw-1,ntgl-1,                             &
                          im, lmk, lmp, uni_cld, lmfshal, lmfdeep2,  &
-                         cldcov(:,1:LMK), effrl_inout(:,:),         &
-                         effri_inout(:,:), effrs_inout(:,:),        &
+                         cldcov(:,1:LMK), effrl_inout,              &
+                         effri_inout, effrs_inout,                  &
+                         lwp_ex, iwp_ex, lwp_fc, iwp_fc,            &
                          dzb, xlat_d, julian, yearlen,              &
                          clouds, cldsa, mtopa ,mbota, de_lgth, alpha) !  --- outputs
+            endif
           endif ! MYNN PBL or GF
 
         endif                            ! end if_imp_physics
@@ -1084,7 +1057,7 @@
              enddo     ! end_do_i_loop
           enddo     ! end_do_k_loop
        endif
-       do k = 1, LMK
+       do k = 1, LM
          do i = 1, IM
             clouds1(i,k)  = clouds(i,k,1)
             clouds2(i,k)  = clouds(i,k,2)
@@ -1096,6 +1069,12 @@
             clouds8(i,k)  = clouds(i,k,8)
             clouds9(i,k)  = clouds(i,k,9)
             cldfra(i,k)   = clouds(i,k,1)
+         enddo
+       enddo
+       do i = 1, IM
+         cldfra2d(i) = 0.0
+         do k = 1, LM-1
+           cldfra2d(i) = max(cldfra2d(i), cldfra(i,k))
          enddo
        enddo
 

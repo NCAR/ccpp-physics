@@ -2454,9 +2454,9 @@ contains
             if(aeroevap.gt.1)then
                aeroadd=0.
                if((psumh(i)>0.).and.(psum2(i)>0.))then
-               aeroadd=((1.e-2*ccnclean)**beta3)*((psumh(i)*1.e0)**(alpha3-1))
+               aeroadd=((1.e-2*ccnclean)**beta3)*(psumh(i)**(alpha3-1))
                prop_c=.5*(pefb+pef)/aeroadd
-               aeroadd=((1.e-2*ccn(i))**beta3)*((psum2(i)*1.e0)**(alpha3-1))
+               aeroadd=((1.e-2*ccn(i))**beta3)*(psum2(i)**(alpha3-1))
                aeroadd=prop_c*aeroadd
                pefc=aeroadd
 

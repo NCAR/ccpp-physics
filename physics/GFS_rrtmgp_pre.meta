@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = GFS_rrtmgp_pre
   type = scheme
-  dependencies = funcphys.f90,iounitdef.f,machine.F,module_bfmicrophysics.f,physcons.F90,physparam.f,radcons.f90,radiation_aerosols.f
+  dependencies = funcphys.f90,iounitdef.f,machine.F,module_bfmicrophysics.f,physcons.F90,radcons.f90,radiation_aerosols.f
   dependencies = radiation_astronomy.f,radiation_clouds.f,radiation_gases.f,radiation_tools.F90,rrtmg_lw_cloud_optics.F90
 
 ########################################################################
@@ -51,6 +51,13 @@
 [ccpp-arg-table]
   name = GFS_rrtmgp_pre_run
   type = scheme
+[me]
+  standard_name = mpi_rank
+  long_name = current MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
 [ncol]
   standard_name = horizontal_loop_extent
   long_name = horizontal dimension
@@ -124,6 +131,30 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys  
+  intent = in
+[coslat]
+  standard_name = cosine_of_latitude
+  long_name = cosine of latitude
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[sinlat]
+  standard_name = sine_of_latitude
+  long_name = sine of latitude
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[solhr]
+  standard_name = forecast_utc_hour
+  long_name = time in hours after 00z at the current timestep
+  units = h
+  dimensions = ()
+  type = real
+  kind = kind_phys
   intent = in
 [prsi]
   standard_name = air_pressure_at_interface
@@ -277,6 +308,27 @@
   type = real
   kind = kind_phys
   intent = inout
+[top_at_1]
+  standard_name = flag_for_vertical_ordering_in_RRTMGP
+  long_name = flag for vertical ordering in RRTMGP
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = out
+[iSFC]
+  standard_name = vertical_index_for_surface_in_RRTMGP
+  long_name = index for	surface	layer in RRTMGP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+[iTOA]
+  standard_name = vertical_index_for_TOA_in_RRTMGP
+  long_name = index for TOA layer in RRTMGP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
 [tsfc_radtime]
   standard_name = surface_skin_temperature_on_radiation_timestep
   long_name = surface skin temperature on radiation timestep
@@ -284,7 +336,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
 [tsfg]
   standard_name = surface_ground_temperature_for_radiation
   long_name = surface ground temperature for radiation
@@ -328,7 +380,7 @@
 [q_lay]
   standard_name = water_vapor_mixing_ratio
   long_name = water vaport mixing ratio
-  units = kg/kg
+  units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
@@ -355,6 +407,22 @@
   units = DDT
   dimensions = ()
   type = ty_gas_concs
+  intent = inout
+[coszdg]
+  standard_name = cosine_of_solar_zenith_angle_on_radiation_timestep
+  long_name = daytime mean cosz over rad call period
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[coszen]
+  standard_name = cosine_of_solar_zenith_angle_for_daytime_points_on_radiation_timestep
+  long_name = mean cos of zenith angle over rad call period
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
   intent = inout
 [errmsg]
   standard_name = ccpp_error_message

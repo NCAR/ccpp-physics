@@ -2,7 +2,7 @@ module rrtmgp_sw_aerosol_optics
   use machine,                   only: kind_phys
   use mo_gas_optics_rrtmgp,      only: ty_gas_optics_rrtmgp
   use mo_optical_props,          only: ty_optical_props_2str
-  use radiation_tools,                only: check_error_msg
+  use radiation_tools,           only: check_error_msg
   use rrtmgp_sw_gas_optics,      only: sw_gas_props
   use rrtmgp_lw_gas_optics,      only: lw_gas_props
   use module_radiation_aerosols, only: &
@@ -62,7 +62,7 @@ contains
          p_lev                    ! Pressure @ layer-interfaces (Pa)
 
     ! Outputs
-    real(kind_phys), dimension(:,:), intent(inout) :: &
+    real(kind_phys), dimension(:,:), intent(out) :: &
          aerodp                   ! Vertical integrated optical depth for various aerosol species 
     type(ty_optical_props_2str),intent(out) :: &
          sw_optical_props_aerosol ! RRTMGP DDT: Longwave aerosol optical properties (tau)
@@ -82,12 +82,12 @@ contains
     errflg = 0
 
     if (.not. doSWrad) return
+
+    ! Call module_radiation_aerosols::setaer(),to setup aerosols property profile
+    call setaer(p_lev/100., p_lay/100., p_lk, tv_lay, relhum, lsmask, tracer, aerfld, lon, lat, nCol, nLev, &
+         nLev+1, .true., .true., aerosolssw2, aerosolslw, aerodp)
+
     if (nDay .gt. 0) then
-
-       ! Call module_radiation_aerosols::setaer(),to setup aerosols property profile
-       call setaer(p_lev/100., p_lay/100., p_lk, tv_lay, relhum, lsmask, tracer, aerfld, lon, lat, nCol, nLev, &
-            nLev+1, .true., .true., aerosolssw2, aerosolslw, aerodp)
-
        ! Store aerosol optical properties
        ! SW. 
        ! For RRTMGP SW the bands are now ordered from [IR(band) -> nIR -> UV], in RRTMG the 

@@ -474,19 +474,12 @@
   dimensions = ()
   type = logical
   intent = in
-[sedi_semi_update]
-  standard_name = flag_for_v_update_in_semi_Lagrangian_sedi
-  long_name = flag for v update in semi Lagrangian sedi of rain
-  units = flag
+[decfl]
+  standard_name = deformed_CFL_factor
+  long_name = deformed CFL factor
+  units = count 
   dimensions = ()
-  type = logical
-  intent = in
-[sedi_semi_decfl]
-  standard_name = flag_for_iteration_with_semi_Lagrangian_sedi
-  long_name = flag for interation with semi Lagrangian sedi of rain
-  units = flag
-  dimensions = ()
-  type = logical
+  type = integer
   intent = in
 [dtp]
   standard_name = timestep_for_physics

@@ -519,7 +519,7 @@ CONTAINS
     INTEGER :: k,l,lmax
     REAL :: phm,vkz,elq,elv,b1l,b2l,pmz=1.,phh=1.,flt=0.,flq=0.,tmpq
     REAL :: zi
-      REAL, DIMENSION(kts:kte) :: theta,thetav,thlsg,qwsg
+    REAL, DIMENSION(kts:kte) :: theta,thetav,thlsg,qwsg
 
     REAL, DIMENSION(kts:kte) :: rstoch_col
     INTEGER ::spp_pbl
