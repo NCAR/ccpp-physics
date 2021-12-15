@@ -861,7 +861,7 @@
 !      for zhao/moorthi's (imp_phys=99) &
 !          ferrier's (imp_phys=5) microphysics schemes
 
-        if ((num_p3d == 4) .and. (npdf3d == 3)) then       ! same as imp_physics = 98
+        if ((num_p3d == 4) .and. (npdf3d == 3)) then       ! same as imp_physics = imp_physics_zhao_carr_pdf
           do k=1,lm
             k1 = k + kd
             do i=1,im
@@ -872,7 +872,7 @@
               cnvc  (i,k1) = cnvc_in(i,k)
             enddo
           enddo
-        elseif ((npdf3d == 0) .and. (ncnvcld3d == 1)) then ! same as imp_physics=99
+        elseif ((npdf3d == 0) .and. (ncnvcld3d == 1)) then ! all other microphysics with pdfcld = .false. and cnvcld = .true.
           do k=1,lm
             k1 = k + kd
             do i=1,im
@@ -887,15 +887,6 @@
               deltaq(i,k) = 0.0
               cnvw  (i,k) = 0.0
               cnvc  (i,k) = 0.0
-            enddo
-          enddo
-        endif
-
-        if(imp_physics == imp_physics_thompson) then
-          do k=1,lm
-            k1 = k + kd
-            do i=1,im
-              cnvw  (i,k1) = cnvw_in(i,k)
             enddo
           enddo
         endif

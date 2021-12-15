@@ -40,7 +40,7 @@
 !                                                                      !
 !       'progcld3'           --- zhao/moorthi prognostic cloud + pdfcld!
 !          inputs:                                                     !
-!           (plyr,plvl,tlyr,tvly,qlyr,qstl,rhly,clw, cnvw,cnvc,        !
+!           (plyr,plvl,tlyr,tvly,qlyr,qstl,rhly,clw,cnvw,cnvc,         !
 !            xlat,xlon,slmsk, dz, delp,                                !
 !            ix, nlay, nlp1,                                           !
 !            deltaq,sup,kdt,me,                                        !
@@ -3065,7 +3065,7 @@
         do k = 1, NLAY
           do i = 1, IX
             clwf(i,k) = clw(i,k,ntcw) +  clw(i,k,ntiw) + clw(i,k,ntsw)
-     &      +clw(i,k,ntrw) + cnvw(i,k)
+     &      + clw(i,k,ntrw) + cnvw(i,k)
           enddo
         enddo
 !> - Find top pressure for each cloud domain for given latitude.
