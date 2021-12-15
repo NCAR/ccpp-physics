@@ -40,8 +40,8 @@
 !!  in Zeng et al. (1998) \cite zeng_et_al_1998).
 !! - Calculate Zeng's momentum roughness length formulation over land and sea ice.
 !! - Calculate the new vegetation-dependent formulation of thermal roughness length
-!! (Zheng et al.(2009) \cite zheng_et_al_2009).
-!! Zheng et al. (2009) \cite zheng_et_al_2009 proposed a new formulation on
+!! (Zheng et al.(2012) \cite zheng_et_al_2012).
+!! Zheng et al. (2012) \cite zheng_et_al_2012 proposed a new formulation on
 !! \f$ln(Z_{0m}^,/Z_{0t})\f$ as follows:
 !! \f[
 !!  ln(Z_{0m}^,/Z_{0t})=(1-GVF)^2C_{zil}k(u*Z_{0g}/\nu)^{0.5}
@@ -305,6 +305,8 @@
             tem2  = tem1 * tem1
             tem1  = one  - tem2
 
+! Removed the following lines by W. Zheng, for effective z0m (z0max) is applied only
+! for land.
 !wz         if( ivegsrc == 1 ) then
 !wz
 !wz           z0max = exp( tem2*log01 + tem1*log(z0max) )
