@@ -20,7 +20,7 @@ module cu_gf_driver_post
 !> \section arg_table_cu_gf_driver_post_run Argument Table
 !! \htmlinclude cu_gf_driver_post_run.html
 !!
-   subroutine cu_gf_driver_post_run (im, t, q, prevst, prevsq, cactiv, conv_act, errmsg, errflg)
+   subroutine cu_gf_driver_post_run (im, t, q, prevst, prevsq, cactiv, cactiv_m, conv_act, conv_act_m, errmsg, errflg)
 
       use machine, only: kind_phys
 
@@ -33,7 +33,9 @@ module cu_gf_driver_post
       real(kind_phys),  intent(out) :: prevst(:,:)
       real(kind_phys),  intent(out) :: prevsq(:,:)
       integer,          intent(in)  :: cactiv(:)
+      integer,          intent(in)  :: cactiv_m(:)
       real(kind_phys),  intent(out) :: conv_act(:)
+      real(kind_phys),  intent(out) :: conv_act_m(:)
       character(len=*), intent(out) :: errmsg
       integer, intent(out)          :: errflg
 
@@ -52,6 +54,11 @@ module cu_gf_driver_post
           conv_act(i) = conv_act(i)+1.0
         else
           conv_act(i)=0.0
+        endif
+        if (cactiv_m(i).gt.0) then
+          conv_act_m(i) = conv_act_m(i)+1.0
+        else
+          conv_act_m(i)=0.0
         endif
       enddo
 

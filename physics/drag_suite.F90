@@ -984,7 +984,7 @@ IF ( do_gsl_drag_ss ) THEN
                               MAX(0.,beta_ss*(varss(i)-varmax_ss))
                 ! Note:  This is a semi-implicit treatment of the time differencing
                 var_temp2 = 0.5*XNBV*xlinv(i)*(2.*var_temp)**2*ro(i,kvar)  ! this is greater than zero
-                tauwavex0=-var_temp2*u1(i,kvar)/(1.+var_temp2*deltim)
+                tauwavex0=var_temp2*u1(i,kvar)/(1.+var_temp2*deltim)
                 tauwavex0=tauwavex0*ss_taper(i)
               else
                 tauwavex0=0.
@@ -999,7 +999,7 @@ IF ( do_gsl_drag_ss ) THEN
                               MAX(0.,beta_ss*(varss(i)-varmax_ss))
                 ! Note:  This is a semi-implicit treatment of the time differencing
                 var_temp2 = 0.5*XNBV*xlinv(i)*(2.*var_temp)**2*ro(i,kvar)  ! this is greater than zero
-                tauwavey0=-var_temp2*v1(i,kvar)/(1.+var_temp2*deltim)
+                tauwavey0=var_temp2*v1(i,kvar)/(1.+var_temp2*deltim)
                 tauwavey0=tauwavey0*ss_taper(i)
               else
                 tauwavey0=0.

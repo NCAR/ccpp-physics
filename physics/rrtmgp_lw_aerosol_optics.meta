@@ -28,6 +28,13 @@
   dimensions = ()
   type = integer
   intent = in
+[nspc]
+  standard_name = number_of_species_for_aerosol_optical_depth
+  long_name = number of species for output aerosol optical depth plus total
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
 [nTracer]
   standard_name = number_of_tracers
   long_name = number of tracers
@@ -122,14 +129,6 @@
   type = real
   kind = kind_phys
   intent = in
-[aerodp]
-  standard_name = atmosphere_optical_thickness_due_to_ambient_aerosol_particles
-  long_name = vertical integrated optical depth for various aerosol species
-  units = none
-  dimensions = (horizontal_loop_extent,number_of_species_for_aerosol_optical_depth)
-  type = real
-  kind = kind_phys
-  intent = inout
 [lw_optical_props_aerosol]
   standard_name = longwave_optical_properties_for_aerosols
   long_name = Fortran DDT containing RRTMGP optical properties

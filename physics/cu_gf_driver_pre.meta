@@ -99,9 +99,24 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = out
+[cactiv_m]
+  standard_name = counter_for_grell_freitas_mid_level_convection
+  long_name = midlevel convective activity memory
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = out
 [conv_act]
   standard_name = consecutive_calls_for_grell_freitas_convection
   long_name = Memory counter for GF
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[conv_act_m]
+  standard_name = consecutive_calls_for_grell_freitas_mid_level_convection
+  long_name = Memory counter for GF midlevel
   units = none
   dimensions = (horizontal_loop_extent)
   type = real
