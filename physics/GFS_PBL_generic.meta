@@ -1224,6 +1224,32 @@
   kind = kind_phys
   intent = in
   optional = F
+[use_med_flux]
+  standard_name = flag_for_mediator_atmosphere_ocean_fluxes
+  long_name = flag for using atmosphere-ocean fluxes form mediator
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[dqsfc_med]
+  standard_name = surface_upward_latent_heat_flux_over_ocean_from_coupled_process
+  long_name = sfc latent heat flux input over ocean for coupling
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[dtsfc_med]
+  standard_name = surface_upward_sensible_heat_flux_over_ocean_from_coupled_process
+  long_name = sfc sensible heat flux input over ocean for coupling
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [wet]
   standard_name = flag_nonzero_wet_surface_fraction
   long_name = flag indicating presence of some ocean or lake surface area fraction
