@@ -216,7 +216,6 @@
       real (kind=kind_phys) :: max_relh
       integer  :: iflag
 
-      integer :: ii_half
       integer :: ids, ide, jds, jde, kds, kde, &
                  ims, ime, jms, jme, kms, kme, &
                  its, ite, jts, jte, kts, kte
@@ -237,8 +236,7 @@
       LP1 = LM + 1               ! num of in/out levels
 
 
-      ii_half = nint(0.5*IM)
-      gridkm = sqrt(dx(1)*0.001*dx(ii_half)*0.001)
+      gridkm = dx(nint(0.5*IM))*0.001
 
       if (imp_physics == imp_physics_thompson) then
          max_relh = 1.5
