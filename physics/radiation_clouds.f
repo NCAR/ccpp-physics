@@ -3311,7 +3311,7 @@
 !   slmsk (IX)      : sea/land mask array (sea:0,land:1,sea-ice:2)      !
 !   dz    (ix,nlay) : layer thickness (km)                              !
 !   delp  (ix,nlay) : model layer pressure thickness in mb (100Pa)      !
-!   gridkm          : grid length in km                                 !
+!   gridkm (ix)     : grid length in km                                 !
 !   IX              : horizontal dimention                              !
 !   NLAY,NLP1       : vertical layer/level dimensions                   !
 !   uni_cld         : logical - true for cloud fraction from shoc       !
@@ -3370,8 +3370,8 @@
       real (kind=kind_phys), dimension(:),   intent(in) :: xlat, xlon,  &
      &       slmsk
 
-      real(kind=kind_phys), dimension(:), intent(in) :: latdeg
-      real(kind=kind_phys), intent(in) :: julian, gridkm
+      real(kind=kind_phys), dimension(:), intent(in) :: latdeg, gridkm
+      real(kind=kind_phys), intent(in) :: julian
       integer, intent(in)              :: yearlen
 
 !  ---  outputs
@@ -3518,7 +3518,7 @@
          endif
 
          call cal_cldfra3(cldfra1d, qv1d, qc1d, qi1d, qs1d, dz1d,       &
-     &                    p1d, t1d, xland, gridkm,                      &
+     &                    p1d, t1d, xland, gridkm(i),                   &
      &                    .false., max_relh, 1, nlay, .false.)
 
          do k = 1, NLAY
