@@ -3011,12 +3011,10 @@
 
 !  ---  constant values
       real (kind=kind_phys), parameter :: xrc3 = 200.
-!     real (kind=kind_phys), parameter :: xrc3 = 100.
 
 !
 !===> ... begin here
 
-!
       do nf=1,nf_clds
         do k=1,nlay
           do i=1,ix
@@ -3092,8 +3090,6 @@
             cwp(i,k) = max(0.0, clw(i,k,ntcw) * gfac * delp(i,k))
             cip(i,k) = max(0.0, clw(i,k,ntiw) * gfac * delp(i,k))
             crp(i,k) = max(0.0, clw(i,k,ntrw) * gfac * delp(i,k))
-!           csp(i,k) = max(0.0, (clw(i,k,ntsw)+clw(i,k,ntgl)) *         &
-!    &                  gfac * delp(i,k))
             csp(i,k) = max(0.0, clw(i,k,ntsw) * gfac * delp(i,k))
           enddo
         enddo
@@ -3125,37 +3121,56 @@
 !> - Calculate layer cloud fraction.
 
         clwmin = 0.0
-        do k = 1, NLAY-1
-        do i = 1, IX
-!         clwt = 1.0e-6 * (plyr(i,k)*0.001)
-!         clwt = 2.0e-6 * (plyr(i,k)*0.001)
-          clwt = 1.0e-10 * (plyr(i,k)*0.001)
+        if (.not. lmfshal) then
+          do k = 1, NLAY
+          do i = 1, IX
+            clwt = 1.0e-6 * (plyr(i,k)*0.001)
 
-          if (clwf(i,k) > clwt) then
-            if(rhly(i,k) > 1.) then
-              cldtot(i,k) = 1.
-            else
+            if (clwf(i,k) > clwt) then
+
               onemrh= max( 1.e-10, 1.0-rhly(i,k) )
               clwm  = clwmin / max( 0.01, plyr(i,k)*0.001 )
-!
-              tem1  = min(max((onemrh*qstl(i,k))**0.49,0.0001),1.0)  !jhan
-              if (lmfdeep2) then
-                tem1  = xrc3 / tem1
-              else
-                tem1  = 100.0 / tem1
-              endif
-!
+
+              tem1  = min(max(sqrt(sqrt(onemrh*qstl(i,k))),0.0001),1.0)
+              tem1  = 2000.0 / tem1
+
               value = max( min( tem1*(clwf(i,k)-clwm), 50.0 ), 0.0 )
               tem2  = sqrt( sqrt(rhly(i,k)) )
-  
-              cldtot(i,k) = max( tem2*(1.0-exp(-value)), 0.0 )
-            endif 
-          else 
-            cldtot(i,k) = 0.0 
-          endif
-        enddo
-        enddo
 
+              cldtot(i,k) = max( tem2*(1.0-exp(-value)), 0.0 )
+            endif
+          enddo
+          enddo
+        else
+          do k = 1, NLAY-1
+          do i = 1, IX
+            clwt = 1.0e-10 * (plyr(i,k)*0.001)
+  
+            if (clwf(i,k) > clwt) then
+              if(rhly(i,k) > 0.99) then
+                cldtot(i,k) = 1.
+              else
+                onemrh= max( 1.e-10, 1.0-rhly(i,k) )
+                clwm  = clwmin / max( 0.01, plyr(i,k)*0.001 )
+  
+                tem1  = min(max((onemrh*qstl(i,k))**0.49,0.0001),1.0)  !jhan
+                if (lmfdeep2) then
+                  tem1  = xrc3 / tem1
+                else
+                  tem1  = 100.0 / tem1
+                endif
+  
+                value = max( min( tem1*(clwf(i,k)-clwm), 50.0 ), 0.0 )
+                tem2  = sqrt( sqrt(rhly(i,k)) )
+  
+                cldtot(i,k) = max( tem2*(1.0-exp(-value)), 0.0 )
+              endif 
+            else 
+              cldtot(i,k) = 0.0 
+            endif
+          enddo
+          enddo
+        endif 
       endif                                ! if (uni_cld) then
 
       do k = 1, NLAY
@@ -3196,7 +3211,6 @@
         enddo
       endif
 
-!
       do k = 1, NLAY
         do i = 1, IX
           clouds(i,k,1) = cldtot(i,k)
@@ -3247,7 +3261,6 @@
      &       clds, mtop, mbot                                           &
      &     )
 
-!
       return
 
 !............................................
