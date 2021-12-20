@@ -2657,7 +2657,7 @@ end if   ! opt_gla == 1
    real (kind=kind_phys), parameter     :: c4 = 0.04     !< [1/k]
    real (kind=kind_phys), parameter     :: c5 = 2.0      !<
    real (kind=kind_phys), parameter     :: dm = 100.0    !< upper limit on destructive metamorphism compaction [kg/m3]
-   real (kind=kind_phys), parameter     :: eta0 = 0.8e+6 !< viscosity coefficient [kg-s/m2] 
+   real (kind=kind_phys), parameter     :: eta0 = 1.8e+6 !< viscosity coefficient [kg-s/m2] 
                                         !according to anderson, it is between 0.52e6~1.38e6
    real (kind=kind_phys) :: burden !< pressure of overlying snow [kg/m2]
    real (kind=kind_phys) :: ddz1   !< rate of settling of snow pack due to destructive metamorphism.
