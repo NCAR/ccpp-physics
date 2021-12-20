@@ -861,7 +861,7 @@
 !      for zhao/moorthi's (imp_phys=99) &
 !          ferrier's (imp_phys=5) microphysics schemes
 
-        if ((num_p3d == 4) .and. (npdf3d == 3)) then       ! same as imp_physics = 98
+        if ((num_p3d == 4) .and. (npdf3d == 3)) then       ! same as imp_physics = imp_physics_zhao_carr_pdf
           do k=1,lm
             k1 = k + kd
             do i=1,im
@@ -872,7 +872,7 @@
               cnvc  (i,k1) = cnvc_in(i,k)
             enddo
           enddo
-        elseif ((npdf3d == 0) .and. (ncnvcld3d == 1)) then ! same as imp_physics=99
+        elseif ((npdf3d == 0) .and. (ncnvcld3d == 1)) then ! all other microphysics with pdfcld = .false. and cnvcld = .true.
           do k=1,lm
             k1 = k + kd
             do i=1,im
@@ -890,7 +890,6 @@
             enddo
           enddo
         endif
-
 
         if (imp_physics == imp_physics_zhao_carr) then
           ccnd(1:IM,1:LMK,1) = ccnd(1:IM,1:LMK,1) + cnvw(1:IM,1:LMK)
@@ -1020,7 +1019,7 @@
                          ntrac-1, ntcw-1,ntiw-1,ntrw-1,             &
                          ntsw-1,ntgl-1,                             &
                          im, lmk, lmp, uni_cld, lmfshal, lmfdeep2,  &
-                         cldcov(:,1:LMK), effrl_inout,              &
+                         cldcov(:,1:LMK), cnvw, effrl_inout,        &
                          effri_inout, effrs_inout,                  &
                          lwp_ex, iwp_ex, lwp_fc, iwp_fc,            &
                          dzb, xlat_d, julian, yearlen,              &
