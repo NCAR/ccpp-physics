@@ -501,6 +501,44 @@
   type = real
   kind = kind_phys
   intent = inout
+[fhour]
+  standard_name = forecast_time
+  long_name = current forecast time
+  units = h
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[fh_dfi_radar]
+  standard_name = times_at_which_dfi_radar_tten_is_available
+  long_name = times at which dfi_radar_tten is available
+  units = h
+  dimensions = (5)
+  type = real
+  kind = kind_phys
+  intent = in
+[ix_dfi_radar]
+  standard_name = time_indices_in_dfi_radar_tten
+  long_name = time indices in dfi radar tten
+  units = index
+  dimensions = (4)
+  type = integer
+  intent = in
+[num_dfi_radar]
+  standard_name = num_dfi_radar
+  long_name = number of time ranges with dfi radar tendencies
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[dfi_radar_tten]
+  standard_name = dfi_radar_tten
+  long_name = prescribed microphysics temperature tendency from radar data
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,num_dfi_radar)
+  type = real
+  kind = kind_phys
+  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
