@@ -6,7 +6,7 @@
 !! aerosol, IN&CCN and surface properties updates.
 !> @{
    module GFS_phys_time_vary
-     
+
       use machine, only : kind_phys
 
       use mersenne_twister, only: random_setseed, random_number
@@ -313,7 +313,7 @@
 
          !--- if sncovr does not exist in the restart, need to create it
          if (all(sncovr < zero)) then
-           if (me == master ) write(0,'(a)') 'GFS_phys_time_vary_init: compute sncovr from weasd and soil vegetation parameters'
+           if (me == master ) write(*,'(a)') 'GFS_phys_time_vary_init: compute sncovr from weasd and soil vegetation parameters'
            !--- compute sncovr from existing variables
            !--- code taken directly from read_fix.f
            sncovr(:) = zero
@@ -334,7 +334,7 @@
          !--- For RUC LSM: create sncovr_ice from sncovr
          if (lsm == lsm_ruc) then
            if (all(sncovr_ice < zero)) then
-             if (me == master ) write(0,'(a)') 'GFS_phys_time_vary_init: fill sncovr_ice with sncovr for RUC LSM'
+             if (me == master ) write(*,'(a)') 'GFS_phys_time_vary_init: fill sncovr_ice with sncovr for RUC LSM'
              sncovr_ice(:) = sncovr(:)
            endif
          endif
@@ -351,7 +351,7 @@
          !--- land and ice - not for restart runs
          lsm_init: if (.not.flag_restart) then
            if (lsm == lsm_noahmp .or. lsm == lsm_ruc) then
-             if (me == master ) write(0,'(a)') 'GFS_phys_time_vary_init: initialize albedo for land and ice' 
+             if (me == master ) write(*,'(a)') 'GFS_phys_time_vary_init: initialize albedo for land and ice'
              do ix=1,im
                albdvis_lnd(ix)  = 0.2_kind_phys
                albdnir_lnd(ix)  = 0.2_kind_phys
