@@ -180,9 +180,9 @@
      &       sfcnirbmd,sfcnirdfd,sfcvisbmd,sfcvisdfd,                   &
      &       im, levs, deltim, fhswr,                                   &
      &       dry, icy, wet, damp_LW_fluxadj, lfnc_k, lfnc_p0,           &
-     &       use_LW_jacobian, sfculw, fluxlwUP_jac,                     &
-     &       t_lay, p_lay, p_lev, flux2D_lwUP, flux2D_lwDOWN,           &
-     &       pert_radtend, do_sppt,ca_global, tsfc_radtime,             &
+     &       use_LW_jacobian, sfculw, use_med_flux, sfculw_wat,         &
+     &       fluxlwUP_jac, t_lay, p_lay, p_lev, flux2D_lwUP,            &
+     &       flux2D_lwDOWN,pert_radtend,do_sppt,ca_global,tsfc_radtime, &
 !    &       dry, icy, wet, lprnt, ipr,                                 &
 !  ---  input/output:
      &       dtdt,dtdtnp,htrlw,                                         &
@@ -213,14 +213,14 @@
 !     logical lprnt
       logical, dimension(:), intent(in) :: dry, icy, wet
       logical, intent(in) :: use_LW_jacobian, damp_LW_fluxadj,          &
-     &     pert_radtend
+     &     pert_radtend, use_med_flux
       logical, intent(in) :: do_sppt,ca_global
       real(kind=kind_phys),   intent(in) :: solhr, slag, cdec, sdec,    &
      &     deltim, fhswr, lfnc_k, lfnc_p0
 
       real(kind=kind_phys), dimension(:), intent(in) ::                 &
      &      sinlat, coslat, xlon, coszen, tf, tsflw, sfcdlw,            &
-     &      sfcdsw, sfcnsw, sfculw, tsfc, tsfc_radtime
+     &      sfcdsw, sfcnsw, sfculw, sfculw_wat, tsfc, tsfc_radtime
 
       real(kind=kind_phys), dimension(:), intent(in) ::                 &
      &                         tsfc_lnd, tsfc_ice, tsfc_wat,            &
@@ -344,9 +344,15 @@
      &                        + (one - sfcemis_ice(i)) * adjsfcdlw(i)
          endif
          if (wet(i)) then
-            tem2 = tsfc_wat(i) * tsfc_wat(i)
-            adjsfculw_wat(i) =  sfcemis_wat(i) * con_sbc * tem2 * tem2
-     &                        + (one - sfcemis_wat(i)) * adjsfcdlw(i)
+            if (use_med_flux) then
+!>  - use upward longwave flux provided by the mediator
+               adjsfculw_wat(i) = sfculw_wat(i) 
+            else
+               tem2 = tsfc_wat(i) * tsfc_wat(i)
+               adjsfculw_wat(i) =  sfcemis_wat(i) * con_sbc * 
+     &                           tem2 * tem2
+     &                           + (one - sfcemis_wat(i)) * adjsfcdlw(i)
+            end if
          endif
 
 !     if (lprnt .and. i == ipr) write(0,*)' in dcyc3: dry==',dry(i)
