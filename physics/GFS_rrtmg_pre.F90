@@ -829,7 +829,9 @@
           end do
           do k=1,lm
             k1 = k + kd
-            effrr(i,k1) = 1000. ! rrain_def=1000.
+            do i=1,im
+              effrr(i,k1) = 1000. ! rrain_def=1000.
+            end do
           end do
           ! Update global arrays, scale Thompson's effective radii from meter to micron
           do k=1,lm
