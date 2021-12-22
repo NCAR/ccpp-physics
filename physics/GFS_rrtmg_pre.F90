@@ -821,13 +821,15 @@
             do k=1,lm
               effrl(i,k) = MAX(re_qc_min, MIN(effrl(i,k), re_qc_max))
               effri(i,k) = MAX(re_qi_min, MIN(effri(i,k), re_qi_max))
-              effrr(i,k) = 1000. ! rrain_def=1000.
               effrs(i,k) = MAX(re_qs_min, MIN(effrs(i,k), re_qs_max))
             end do
             effrl(i,lmk) = re_qc_min
             effri(i,lmk) = re_qi_min
-            effrr(i,lmk) = 1000. ! rrain_def=1000.
             effrs(i,lmk) = re_qs_min
+          end do
+          do k=1,lm
+            k1 = k + kd
+            effrr(i,k1) = 1000. ! rrain_def=1000.
           end do
           ! Update global arrays, scale Thompson's effective radii from meter to micron
           do k=1,lm
