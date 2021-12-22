@@ -154,23 +154,14 @@ contains
              fluxr(i,33) = fluxr(i,33) + fhlwr * fluxlwUP_clrsky(  i,iSFC)   ! clear sky sfc lw up
           enddo
 
-!         do i=1,nCol
-!            fluxr(i,17) = fluxr(i,17) + raddt * cldsa(i,4)
-!            fluxr(i,18) = fluxr(i,18) + raddt * cldsa(i,5)
-!         enddo
-
           ! Save cld frac,toplyr,botlyr and top temp, note that the order of h,m,l cloud is reversed for 
           ! the fluxr output. save interface pressure (pa) of top/bot
           do j = 1, 3
              do i = 1, nCol
                 tem0d = raddt * cldsa(i,j)
-!               itop  = mtopa(i,j)
-!               ibtc  = mbota(i,j)
-!               fluxr(i, 8-j) = fluxr(i, 8-j) + tem0d
-!               fluxr(i,11-j) = fluxr(i,11-j) + tem0d * p_lev(i,itop)
-!               fluxr(i,14-j) = fluxr(i,14-j) + tem0d * p_lev(i,ibtc)
-!               fluxr(i,17-j) = fluxr(i,17-j) + tem0d * t_lay(i,itop)
-
+                itop  = mtopa(i,j)
+                ibtc  = mbota(i,j)
+                
                 ! Add optical depth and emissivity output
                 tem2 = 0.
                 do k=ibtc,itop
