@@ -29,7 +29,7 @@
         prsi, prsl, prslk, tgrs, sfc_wts, mg_cld, effrr_in, pert_clds,         &
         sppt_wts, sppt_amp, cnvw_in, cnvc_in, qgrs, aer_nm, dx, icloud,        & !inputs from here and above
         coszen, coszdg, effrl_inout, effri_inout, effrs_inout,                 &
-        clouds1, clouds2, clouds3, clouds4, clouds5,                           & !in/out from here and above
+        clouds1, clouds2, clouds3, clouds4, clouds5, qci_conv,                 & !in/out from here and above
         kd, kt, kb, mtopa, mbota, raddt, tsfg, tsfa, de_lgth, alb1d, delp, dz, & !output from here and below
         plvl, plyr, tlvl, tlyr, qlyr, olyr, gasvmr_co2, gasvmr_n2o, gasvmr_ch4,&
         gasvmr_o2, gasvmr_co, gasvmr_cfc11, gasvmr_cfc12, gasvmr_cfc22,        &
@@ -127,8 +127,9 @@
       real(kind=kind_phys), dimension(:,:), intent(inout) :: clouds1,          &
                                                              clouds2, clouds3, &
                                                              clouds4, clouds5
-      real(kind=kind_phys), dimension(:), intent(out) :: lwp_ex,iwp_ex, &
-     &                                                   lwp_fc,iwp_fc
+      real(kind=kind_phys), dimension(:,:), intent(in)  :: qci_conv
+      real(kind=kind_phys), dimension(:),   intent(out) :: lwp_ex,iwp_ex, &
+                                                           lwp_fc,iwp_fc
 
       integer,                              intent(out) :: kd, kt, kb
 
@@ -741,19 +742,33 @@
             enddo
           endif
         elseif (imp_physics == imp_physics_gfdl) then            ! GFDL MP
-          if (do_mynnedmf .and. kdt>1) THEN
-            do k=1,lm
-              k1 = k + kd
-              do i=1,im
-                if (tracer1(i,k1,ntrw)>1.0e-7 .OR. tracer1(i,k1,ntsw)>1.0e-7) then
-                ! GFDL cloud fraction
-                  cldcov(i,k1) = tracer1(I,k1,ntclamt)
-                else
-                ! MYNN sub-grid cloud fraction
-                  cldcov(i,k1) = clouds1(i,k1)
-                endif
+          if ((imfdeepcnv==imfdeepcnv_gf .or. do_mynnedmf) .and. kdt>1) then
+            if (do_mynnedmf) then
+              do k=1,lm
+                k1 = k + kd
+                do i=1,im
+                  if (tracer1(i,k1,ntrw)>1.0e-7 .OR. tracer1(i,k1,ntsw)>1.0e-7) then
+                  ! GFDL cloud fraction
+                    cldcov(i,k1) = tracer1(i,k1,ntclamt)
+                  else
+                  ! MYNN sub-grid cloud fraction
+                    cldcov(i,k1) = clouds1(i,k1)
+                  endif
+                enddo
               enddo
-            enddo
+            else ! imfdeepcnv==imfdeepcnv_gf
+              do k=1,lm
+                k1 = k + kd
+                do i=1,im
+                if (qci_conv(i,k)>0.) then
+                  ! GF sub-grid cloud fraction
+                  cldcov(i,k1) = clouds1(i,k1)
+                else
+                  cldcov(i,k1) = tracer1(i,k1,ntclamt)
+                endif
+                enddo
+              enddo
+            endif
           else
             ! GFDL cloud fraction
             cldcov(1:IM,1+kd:LM+kd) = tracer1(1:IM,1:LM,ntclamt)
@@ -834,7 +849,7 @@
 !      for zhao/moorthi's (imp_phys=99) &
 !          ferrier's (imp_phys=5) microphysics schemes
 
-        if ((num_p3d == 4) .and. (npdf3d == 3)) then       ! same as imp_physics = 98
+        if ((num_p3d == 4) .and. (npdf3d == 3)) then       ! same as imp_physics = imp_physics_zhao_carr_pdf
           do k=1,lm
             k1 = k + kd
             do i=1,im
@@ -845,7 +860,7 @@
               cnvc  (i,k1) = cnvc_in(i,k)
             enddo
           enddo
-        elseif ((npdf3d == 0) .and. (ncnvcld3d == 1)) then ! same as imp_physics=99
+        elseif ((npdf3d == 0) .and. (ncnvcld3d == 1)) then ! all other microphysics with pdfcld = .false. and cnvcld = .true.
           do k=1,lm
             k1 = k + kd
             do i=1,im
@@ -863,7 +878,6 @@
             enddo
           enddo
         endif
-
 
         if (imp_physics == imp_physics_zhao_carr) then
           ccnd(1:IM,1:LMK,1) = ccnd(1:IM,1:LMK,1) + cnvw(1:IM,1:LMK)
@@ -993,7 +1007,7 @@
                          ntrac-1, ntcw-1,ntiw-1,ntrw-1,             &
                          ntsw-1,ntgl-1,                             &
                          im, lmk, lmp, uni_cld, lmfshal, lmfdeep2,  &
-                         cldcov(:,1:LMK), effrl_inout,              &
+                         cldcov(:,1:LMK), cnvw, effrl_inout,        &
                          effri_inout, effrs_inout,                  &
                          lwp_ex, iwp_ex, lwp_fc, iwp_fc,            &
                          dzb, xlat_d, julian, yearlen,              &
