@@ -209,6 +209,7 @@ contains
           uustar_wat(i) = uustar(i)
             tsfc_wat(i) = tsfco(i)
            tsurf_wat(i) = tsfco(i)
+          zorlo(i) = max(1.0e-5, min(one, zorlo(i)))
         ! DH*
         else
           zorlo(i) = huge
@@ -229,6 +230,7 @@ contains
            tsurf_ice(i) = tisfc(i)
             ep1d_ice(i) = zero
             gflx_ice(i) = zero
+            zorli(i) = max(1.0e-5, min(one, zorli(i)))
         ! DH*
         else
           zorli(i) = huge
