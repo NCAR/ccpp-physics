@@ -162,6 +162,14 @@
   type = real
   kind = kind_phys
   intent = in
+[fhour]
+  standard_name = forecast_time
+  long_name = current forecast time 
+  units = h
+  dimensions = () 
+  type = real 
+  kind = kind_phys
+  intent = in 
 [jindx1_aer]
   standard_name = lower_latitude_index_of_aerosol_forcing_for_interpolation
   long_name = interpolation low index for prescribed aerosols in the y direction
@@ -1144,6 +1152,13 @@
   type = real
   kind = kind_phys
   intent = inout
+[iflip]
+  standard_name = control_for_vertical_index_direction
+  long_name = iflip - is not the same as flipv
+  units = flag 
+  dimensions = () 
+  type = integer
+  intent = in 
 [jindx1_aer]
   standard_name = lower_latitude_index_of_aerosol_forcing_for_interpolation
   long_name = interpolation low index for prescribed aerosols in the y direction
