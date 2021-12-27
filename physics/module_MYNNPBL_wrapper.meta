@@ -1187,13 +1187,6 @@
   dimensions = ()
   type = integer
   intent = in
-[bl_mynn_edmf_part]
-  standard_name = control_for_edmf_partitioning_in_mellor_yamada_nakanishi_niino_pbl_scheme
-  long_name = flag to partitioning of the MF and ED areas
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
 [bl_mynn_cloudmix]
   standard_name = control_for_cloud_species_mixing_in_mellor_yamada_nakanishi_niino_pbl_scheme
   long_name = flag to activate mixing of cloud species

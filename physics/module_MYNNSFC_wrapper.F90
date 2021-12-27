@@ -57,7 +57,7 @@
 !###===================================================================
 SUBROUTINE mynnsfc_wrapper_run(            &
      &  im,levs,                           &
-     &  itimestep,iter,                    &
+     &  itimestep,iter,flag_iter,          &
      &  flag_init,flag_restart,lsm,lsm_ruc,&
      &  sigmaf,vegtype,shdmax,ivegsrc,     &  !intent(in)
      &  z0pert,ztpert,                     &  !intent(in)
@@ -112,6 +112,15 @@ SUBROUTINE mynnsfc_wrapper_run(            &
 !     &                     EP_2   => con_eps
 
 !      USE module_sf_mynn, only : SFCLAY_mynn 
+!tgs - info on iterations: 
+!     flag_iter- logical, execution or not (im)
+!                when iter = 1, flag_iter = .true. for all grids   im   !
+!                when iter = 2, flag_iter = .true. when wind < 2   im   !
+!                for both land and ocean (when nstf_name1 > 0)     im   !
+!     flag_guess-logical, .true.=  guess step to get CD et al      im   !
+!                when iter = 1, flag_guess = .true. when wind < 2  im   !
+!                when iter = 2, flag_guess = .false. for all grids im   !
+
 
 !------------------------------------------------------------------- 
       implicit none
@@ -141,6 +150,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
 
       integer, intent(in) :: im, levs
       integer, intent(in) :: iter, itimestep, lsm, lsm_ruc
+      logical, dimension(:), intent(in) :: flag_iter
       logical, intent(in) :: flag_init,flag_restart,lprnt
       integer, intent(in) :: ivegsrc
       integer, intent(in) :: sfc_z0_type ! option for calculating surface roughness length over ocean
@@ -197,7 +207,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
       real, dimension(im) ::                                &
      &        hfx, znt, psim, psih,                         &
      &        chs, ck, cd, mavail, xland, GZ1OZ0,           &
-     &        cpm, qgh, qfx, qsfc_ruc, snowh_wat
+     &        cpm, qgh, qfx, snowh_wat
 
      real(kind=kind_phys), dimension(im,levs) ::            &
     &        dz, th, qv
@@ -255,10 +265,9 @@ SUBROUTINE mynnsfc_wrapper_run(            &
       where (icy) znt_ice=znt_ice*0.01
 
       ! qsfc ruc
-      qsfc_ruc = 0.0
       if (lsm==lsm_ruc) then
-        where (dry) qsfc_ruc = qsfc_lnd_ruc
-        where (icy) qsfc_ruc = qsfc_ice_ruc
+        where (dry) qsfc_lnd = qsfc_lnd_ruc/(1.+qsfc_lnd_ruc) ! spec. hum
+        where (icy) qsfc_ice = qsfc_ice_ruc/(1.+qsfc_ice_ruc) ! spec. hum.
       end if
 
 !      if (lprnt) then
@@ -297,12 +306,12 @@ SUBROUTINE mynnsfc_wrapper_run(            &
              CP=cp,G=g,ROVCP=rcp,R=r_d,XLV=xlv,                               &
              SVP1=svp1,SVP2=svp2,SVP3=svp3,SVPT0=svpt0,                       &
              EP1=ep_1,EP2=ep_2,KARMAN=karman,                                 &
-             ISFFLX=isfflx,isftcflx=isftcflx,LSM=lsm,                         &
+             ISFFLX=isfflx,isftcflx=isftcflx,LSM=lsm,LSM_RUC=lsm_ruc,         &
              iz0tlnd=iz0tlnd,psi_opt=psi_opt,                                 &
     &        sigmaf=sigmaf,vegtype=vegtype,shdmax=shdmax,ivegsrc=ivegsrc,     & !intent(in)
     &        z0pert=z0pert,ztpert=ztpert,                                     & !intent(in)
     &        redrag=redrag,sfc_z0_type=sfc_z0_type,                           & !intent(in)
-             itimestep=itimestep,iter=iter,                                   &
+             itimestep=itimestep,iter=iter,flag_iter=flag_iter,               &
                          wet=wet,              dry=dry,              icy=icy, &  !intent(in)
              tskin_wat=tskin_wat,  tskin_lnd=tskin_lnd,  tskin_ice=tskin_ice, &  !intent(in)
              tsurf_wat=tsurf_wat,  tsurf_lnd=tsurf_lnd,  tsurf_ice=tsurf_ice, &  !intent(in)
@@ -324,7 +333,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
              ZNT=znt,USTM=ustm,ZOL=zol,MOL=mol,RMOL=rmol,                     &
              psim=psim,psih=psih,                                             &
              HFLX=hflx,HFX=hfx,QFLX=qflx,QFX=qfx,LH=lh,FLHC=flhc,FLQC=flqc,   &
-             QGH=qgh,QSFC=qsfc,QSFC_RUC=qsfc_ruc,                             &
+             QGH=qgh,QSFC=qsfc,   &
              U10=u10,V10=v10,TH2=th2,T2=t2,Q2=q2,                             &
              GZ1OZ0=GZ1OZ0,WSPD=wspd,wstar=wstar,                             &
              spp_pbl=spp_sfc,pattern_spp_pbl=spp_wts_sfc,                     &
