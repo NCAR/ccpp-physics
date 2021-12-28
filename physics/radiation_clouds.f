@@ -2753,63 +2753,6 @@
           enddo
         enddo
       endif
-!mz
-      if (icloud .ne. 0) then
-!     assign/calculate efective radii for cloud water, ice, rain, snow
-
-        do k = 1, NLAY
-          do i = 1, IX
-            rew(i,k) = reliq_def            ! default liq  radius to 10  micron
-            rei(i,k) = reice_def            ! default ice  radius to 50  micron
-            rer(i,k) = rrain_def            ! default rain radius to 1000 micron
-            res(i,k) = rsnow_def            ! default snow radius to 250 micron
-          enddo
-        enddo
-!> -# Compute effective liquid cloud droplet radius over land.
-        do i = 1, IX
-          if (nint(slmsk(i)) == 1) then
-            do k = 1, NLAY
-              tem1     = min(1.0, max(0.0, (con_ttp-tlyr(i,k))*0.05))
-              rew(i,k) = 5.0 + 5.0 * tem1
-            enddo
-          endif
-        enddo
-
-!> -# Compute effective ice cloud droplet radius following Heymsfield
-!!    and McFarquhar (1996) \cite heymsfield_and_mcfarquhar_1996.
-
-        do k = 1, NLAY
-          do i = 1, IX
-            tem2 = tlyr(i,k) - con_ttp
-
-            if (cip(i,k) > 0.0) then
-              tem3 = gord * cip(i,k) * plyr(i,k) / (delp(i,k)*tvly(i,k))
-
-              if (tem2 < -50.0) then
-                rei(i,k) = (1250.0/9.917) * tem3 ** 0.109
-              elseif (tem2 < -40.0) then
-                rei(i,k) = (1250.0/9.337) * tem3 ** 0.08
-              elseif (tem2 < -30.0) then
-                rei(i,k) = (1250.0/9.208) * tem3 ** 0.055
-              else
-                rei(i,k) = (1250.0/9.387) * tem3 ** 0.031
-              endif
-              rei(i,k) = max(25.,rei(i,k))       !mz* HWRF
-            endif
-            rei(i,k) = min(rei(i,k), 135.72)      !- 1.0315*rei<= 140 microns
-          enddo
-        enddo
-
-!mz
-!> -# Compute effective snow cloud droplet radius
-        do k = 1, NLAY
-          do i = 1, IX
-           res(i,k) = 10.0
-          enddo
-        enddo
-
-      endif ! end icloud
-!mz end
       do k = 1, NLAY
         do i = 1, IX
           clouds(i,k,1) = cldtot(i,k)

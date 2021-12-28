@@ -959,7 +959,6 @@
           call progcld5 (plyr,plvl,tlyr,tvly,qlyr,qstl,rhly,tracer1,       &  !  --- inputs
                          xlat,xlon,slmsk,dz,delp,                          &
                          ntrac-1, ntcw-1,ntiw-1,ntrw-1,                    &
-!mz                       ntsw-1,ntgl-1,                                   &
                          im, lmk, lmp, icloud, uni_cld, lmfshal, lmfdeep2, &
                          cldcov(:,1:LMK),effrl_inout(:,:),                 &
                          effri_inout(:,:), effrs_inout(:,:),               &
