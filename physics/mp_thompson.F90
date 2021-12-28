@@ -373,6 +373,10 @@ module mp_thompson
          ! CCPP error handling
          character(len=*),          intent(  out) :: errmsg
          integer,                   intent(  out) :: errflg
+         
+         ! SPP
+         logical,                   intent(in) :: do_spp
+         real(kind_phys),           intent(in) :: spp_wts_mp(:,:)
 
          ! Local variables
 
@@ -403,8 +407,6 @@ module mp_thompson
          integer, parameter :: has_reqi = 0
          integer, parameter :: has_reqs = 0
          integer, parameter :: kme_stoch = 1
-         logical,         intent(in   ) :: do_spp
-         real(kind_phys), intent(in) :: spp_wts_mp(:,:)
          integer         :: spp_mp 
          ! Dimensions used in mp_gt_driver
          integer         :: ids,ide, jds,jde, kds,kde, &

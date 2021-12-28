@@ -104,7 +104,7 @@
                                           uni_cld, effr_in, do_mynnedmf,       &
                                           lmfshal, lmfdeep2, pert_clds
 
-      logical,    optional, intent(in) :: do_spp
+      logical,    intent(in) :: do_spp
       real(kind_phys),              intent(in) :: spp_wts_rad(:,:)
 
       real(kind=kind_phys), intent(in) :: fhswr, fhlwr, solhr, sup, julian, sppt_amp
