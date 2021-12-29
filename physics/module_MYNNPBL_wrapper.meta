@@ -1004,7 +1004,7 @@
 [dtend]
   standard_name = cumulative_change_of_state_variables
   long_name = diagnostic tendencies for state variables
-  units = various
+  units = mixed
   dimensions = (horizontal_loop_extent,vertical_layer_dimension,cumulative_change_of_state_variables_outer_index_max)
   type = real
   kind = kind_phys
@@ -1183,13 +1183,6 @@
 [bl_mynn_edmf_tke]
   standard_name = control_for_edmf_tke_transport_in_mellor_yamada_nakanishi_niino_pbl_scheme
   long_name = flag to activate the transport of TKE
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-[bl_mynn_edmf_part]
-  standard_name = control_for_edmf_partitioning_in_mellor_yamada_nakanishi_niino_pbl_scheme
-  long_name = flag to partitioning of the MF and ED areas
   units = flag
   dimensions = ()
   type = integer
