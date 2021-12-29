@@ -40,7 +40,7 @@
 !                                                                      !
 !       'progcld3'           --- zhao/moorthi prognostic cloud + pdfcld!
 !          inputs:                                                     !
-!           (plyr,plvl,tlyr,tvly,qlyr,qstl,rhly,clw, cnvw,cnvc,        !
+!           (plyr,plvl,tlyr,tvly,qlyr,qstl,rhly,clw,cnvw,cnvc,         !
 !            xlat,xlon,slmsk, dz, delp,                                !
 !            ix, nlay, nlp1,                                           !
 !            deltaq,sup,kdt,me,                                        !
@@ -2753,63 +2753,6 @@
           enddo
         enddo
       endif
-!mz
-      if (icloud .ne. 0) then
-!     assign/calculate efective radii for cloud water, ice, rain, snow
-
-        do k = 1, NLAY
-          do i = 1, IX
-            rew(i,k) = reliq_def            ! default liq  radius to 10  micron
-            rei(i,k) = reice_def            ! default ice  radius to 50  micron
-            rer(i,k) = rrain_def            ! default rain radius to 1000 micron
-            res(i,k) = rsnow_def            ! default snow radius to 250 micron
-          enddo
-        enddo
-!> -# Compute effective liquid cloud droplet radius over land.
-        do i = 1, IX
-          if (nint(slmsk(i)) == 1) then
-            do k = 1, NLAY
-              tem1     = min(1.0, max(0.0, (con_ttp-tlyr(i,k))*0.05))
-              rew(i,k) = 5.0 + 5.0 * tem1
-            enddo
-          endif
-        enddo
-
-!> -# Compute effective ice cloud droplet radius following Heymsfield
-!!    and McFarquhar (1996) \cite heymsfield_and_mcfarquhar_1996.
-
-        do k = 1, NLAY
-          do i = 1, IX
-            tem2 = tlyr(i,k) - con_ttp
-
-            if (cip(i,k) > 0.0) then
-              tem3 = gord * cip(i,k) * plyr(i,k) / (delp(i,k)*tvly(i,k))
-
-              if (tem2 < -50.0) then
-                rei(i,k) = (1250.0/9.917) * tem3 ** 0.109
-              elseif (tem2 < -40.0) then
-                rei(i,k) = (1250.0/9.337) * tem3 ** 0.08
-              elseif (tem2 < -30.0) then
-                rei(i,k) = (1250.0/9.208) * tem3 ** 0.055
-              else
-                rei(i,k) = (1250.0/9.387) * tem3 ** 0.031
-              endif
-              rei(i,k) = max(25.,rei(i,k))       !mz* HWRF
-            endif
-            rei(i,k) = min(rei(i,k), 135.72)      !- 1.0315*rei<= 140 microns
-          enddo
-        enddo
-
-!mz
-!> -# Compute effective snow cloud droplet radius
-        do k = 1, NLAY
-          do i = 1, IX
-           res(i,k) = 10.0
-          enddo
-        enddo
-
-      endif ! end icloud
-!mz end
       do k = 1, NLAY
         do i = 1, IX
           clouds(i,k,1) = cldtot(i,k)
@@ -2881,7 +2824,7 @@
      &       xlat,xlon,slmsk,dz,delp,                                   &
      &       ntrac,ntcw,ntiw,ntrw,ntsw,ntgl,                            &
      &       IX, NLAY, NLP1,                                            &
-     &       uni_cld, lmfshal, lmfdeep2, cldcov,                        &
+     &       uni_cld, lmfshal, lmfdeep2, cldcov, cnvw,                  &
      &       re_cloud,re_ice,re_snow,                                   &
      &       lwp_ex, iwp_ex, lwp_fc, iwp_fc,                            &
      &       dzlay, latdeg, julian, yearlen,                            &
@@ -2976,7 +2919,7 @@
 
       real (kind=kind_phys), dimension(:,:), intent(in) :: plvl, plyr,  &
      &       tlyr, qlyr, qstl, rhly, cldcov, delp, dz, dzlay,           &
-     &       re_cloud, re_ice, re_snow
+     &       re_cloud, re_ice, re_snow, cnvw
       real (kind=kind_phys), dimension(:), intent(inout) ::             &
      &       lwp_ex, iwp_ex, lwp_fc, iwp_fc
 
@@ -3010,13 +2953,11 @@
       integer :: i, k, id, nf
 
 !  ---  constant values
-!     real (kind=kind_phys), parameter :: xrc3 = 200.
-      real (kind=kind_phys), parameter :: xrc3 = 100.
+      real (kind=kind_phys), parameter :: xrc3 = 200.
 
 !
 !===> ... begin here
 
-!
       do nf=1,nf_clds
         do k=1,nlay
           do i=1,ix
@@ -3065,6 +3006,7 @@
         do k = 1, NLAY
           do i = 1, IX
             clwf(i,k) = clw(i,k,ntcw) +  clw(i,k,ntiw) + clw(i,k,ntsw)
+     &      + clw(i,k,ntrw) + cnvw(i,k)
           enddo
         enddo
 !> - Find top pressure for each cloud domain for given latitude.
@@ -3091,8 +3033,7 @@
             cwp(i,k) = max(0.0, clw(i,k,ntcw) * gfac * delp(i,k))
             cip(i,k) = max(0.0, clw(i,k,ntiw) * gfac * delp(i,k))
             crp(i,k) = max(0.0, clw(i,k,ntrw) * gfac * delp(i,k))
-            csp(i,k) = max(0.0, (clw(i,k,ntsw)+clw(i,k,ntgl)) *         &
-     &                  gfac * delp(i,k))
+            csp(i,k) = max(0.0, clw(i,k,ntsw) * gfac * delp(i,k))
           enddo
         enddo
 
@@ -3123,33 +3064,56 @@
 !> - Calculate layer cloud fraction.
 
         clwmin = 0.0
-        do k = 1, NLAY-1
-        do i = 1, IX
-          clwt = 1.0e-6 * (plyr(i,k)*0.001)
+        if (.not. lmfshal) then
+          do k = 1, NLAY
+          do i = 1, IX
+            clwt = 1.0e-6 * (plyr(i,k)*0.001)
 
-          if (clwf(i,k) > clwt) then
-            onemrh= max( 1.e-10, 1.0-rhly(i,k) )
-            clwm  = clwmin / max( 0.01, plyr(i,k)*0.001 )
+            if (clwf(i,k) > clwt) then
 
-            if (.not. lmfshal) then
+              onemrh= max( 1.e-10, 1.0-rhly(i,k) )
+              clwm  = clwmin / max( 0.01, plyr(i,k)*0.001 )
+
               tem1  = min(max(sqrt(sqrt(onemrh*qstl(i,k))),0.0001),1.0)
               tem1  = 2000.0 / tem1
-            else
-              tem1  = min(max((onemrh*qstl(i,k))**0.49,0.0001),1.0)  !jhan
-              if (lmfdeep2) then
-                tem1  = xrc3 / tem1
-              else
-                tem1  = 100.0 / tem1
-              endif
+
+              value = max( min( tem1*(clwf(i,k)-clwm), 50.0 ), 0.0 )
+              tem2  = sqrt( sqrt(rhly(i,k)) )
+
+              cldtot(i,k) = max( tem2*(1.0-exp(-value)), 0.0 )
             endif
-
-            value = max( min( tem1*(clwf(i,k)-clwm), 50.0 ), 0.0 )
-            tem2  = sqrt( sqrt(rhly(i,k)) )
-            cldtot(i,k) = max( tem2*(1.0-exp(-value)), 0.0 )
-          endif
-        enddo
-        enddo
-
+          enddo
+          enddo
+        else
+          do k = 1, NLAY-1
+          do i = 1, IX
+            clwt = 1.0e-10 * (plyr(i,k)*0.001)
+  
+            if (clwf(i,k) > clwt) then
+              if(rhly(i,k) > 0.99) then
+                cldtot(i,k) = 1.
+              else
+                onemrh= max( 1.e-10, 1.0-rhly(i,k) )
+                clwm  = clwmin / max( 0.01, plyr(i,k)*0.001 )
+  
+                tem1  = min(max((onemrh*qstl(i,k))**0.49,0.0001),1.0)  !jhan
+                if (lmfdeep2) then
+                  tem1  = xrc3 / tem1
+                else
+                  tem1  = 100.0 / tem1
+                endif
+  
+                value = max( min( tem1*(clwf(i,k)-clwm), 50.0 ), 0.0 )
+                tem2  = sqrt( sqrt(rhly(i,k)) )
+  
+                cldtot(i,k) = max( tem2*(1.0-exp(-value)), 0.0 )
+              endif 
+            else 
+              cldtot(i,k) = 0.0 
+            endif
+          enddo
+          enddo
+        endif 
       endif                                ! if (uni_cld) then
 
       do k = 1, NLAY
@@ -3190,7 +3154,6 @@
         enddo
       endif
 
-!
       do k = 1, NLAY
         do i = 1, IX
           clouds(i,k,1) = cldtot(i,k)
@@ -3241,7 +3204,6 @@
      &       clds, mtop, mbot                                           &
      &     )
 
-!
       return
 
 !............................................
