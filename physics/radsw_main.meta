@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = rrtmg_sw
   type = scheme
-  dependencies = mersenne_twister.f,physcons.F90,physparam.f,radsw_datatb.f,radsw_param.f,HWRF_mcica_random_numbers.F90,HWRF_mersenne_twister.F90
+  dependencies = mersenne_twister.f,physcons.F90,physparam.f,radsw_datatb.f,radsw_param.f
 
 ########################################################################
 [ccpp-arg-table]
