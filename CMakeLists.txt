@@ -80,7 +80,6 @@ set(SCHEMES_OPENMP_OFF ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rrtmgp/mo_
                        ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rrtmgp/mo_rrtmgp_constants.F90
                        ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rrtmgp/mo_rrtmgp_util_reorder.F90
                        ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rrtmgp/mo_gas_concentrations.F90
-                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rrtmgp/kernels-openacc/mo_gas_optics_kernels.F90
                        ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rrtmgp/mo_rrtmgp_util_string.F90
                        ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rrtmgp/kernels/mo_gas_optics_kernels.F90
                        ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rrtmgp/kernels/mo_rrtmgp_util_reorder_kernels.F90
@@ -108,8 +107,6 @@ set(SCHEMES_OPENMP_OFF ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rrtmgp/mo_
                        ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rte/mo_rte_sw.F90
                        ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rte/mo_fluxes.F90
                        ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rte/mo_rte_lw.F90
-                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rte/kernels-openacc/mo_rte_solver_kernels.F90
-                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rte/kernels-openacc/mo_optical_props_kernels.F90
                        ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rte/mo_rte_util_array.F90
                        ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rte/kernels/mo_rte_solver_kernels.F90
                        ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rte/kernels/mo_optical_props_kernels.F90
