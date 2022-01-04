@@ -93,7 +93,7 @@
         graupel0, del, rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp, srflag, sr, cnvprcp, totprcp, totice,   &
         totsnw, totgrp, cnvprcpb, totprcpb, toticeb, totsnwb, totgrpb, rain_cpl, rainc_cpl, snow_cpl, pwat,               &
         drain_cpl, dsnow_cpl, lsm, lsm_ruc, lsm_noahmp, raincprv, rainncprv, iceprv, snowprv,                             &
-        graupelprv, draincprv, drainncprv, diceprv, dsnowprv, dgraupelprv, dtp,                                           &
+        graupelprv, draincprv, drainncprv, diceprv, dsnowprv, dgraupelprv, dtp, dfi_radar_max_intervals,                  &
         dtend, dtidx, index_of_temperature, index_of_process_mp,ldiag3d, qdiag3d, lssav, num_dfi_radar, fh_dfi_radar,     &
         index_of_process_dfi_radar, ix_dfi_radar, dfi_radar_tten, radar_tten_limits, fhour, errmsg, errflg)
 !
@@ -106,9 +106,10 @@
       logical, intent(in) :: cal_pre, lssav, ldiag3d, qdiag3d, cplflx, cplchm
       integer, intent(in) :: index_of_temperature,index_of_process_mp
 
-      real(kind=kind_phys),                           intent(in)    :: fh_dfi_radar(5), fhour
+      integer                                                       :: dfi_radar_max_intervals
+      real(kind=kind_phys),                           intent(in)    :: fh_dfi_radar(dfi_radar_max_intervals+1), fhour
       real(kind=kind_phys),                           intent(in)    :: radar_tten_limits(2)
-      integer                                                       :: ix_dfi_radar(4)
+      integer                                                       :: ix_dfi_radar(dfi_radar_max_intervals)
       real(kind=kind_phys), dimension(im,levs),       intent(inout) :: gt0
 
       real(kind=kind_phys),                    intent(in)    :: dtf, frain, con_g, rainmin
@@ -260,11 +261,8 @@
          exit
       enddo
       if_radar: if(itime<=num_dfi_radar) then
-         radar_k: do k=3,levs-2
+         radar_k: do k=3,levs-2 ! Avoid model top and bottom in case DA forgets to
             radar_i: do i=1,im
-               ! if(dfi_radar_tten(i,k,itime)>-19) then
-               !    gt0(i,k) = save_t(i,k) + dfi_radar_tten(i,k,itime)
-               ! endif
               ttend = dfi_radar_tten(i,k,itime)
               if_active: if (ttend>-19) then
                  ttend = max(ttend,radar_tten_limits(1))
@@ -283,7 +281,7 @@
               if(idtend_mp>0) then
                  dtend(:,1:2,idtend_mp) = dtend(:,1:2,idtend_mp) + (gt0(:,1:2)-save_t(:,1:2))*frain
               endif
-              do k=3,levs-2
+              do k=3,levs-2 ! Avoid model top and bottom in case DA forgets to
                  do i=1,im
                     ttend = dfi_radar_tten(i,k,itime)
                     if (ttend>-19) then

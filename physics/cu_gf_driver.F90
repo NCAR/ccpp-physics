@@ -83,8 +83,9 @@ contains
                flag_for_scnv_generic_tend,flag_for_dcnv_generic_tend,           &
                dtend,dtidx,ntqv,ntiw,ntcw,index_of_temperature,index_of_x_wind, &
                index_of_y_wind,index_of_process_scnv,index_of_process_dcnv,     &
-               fhour,fh_dfi_radar,ix_dfi_radar,num_dfi_radar,dfi_radar_tten,    &
-               ldiag3d,qci_conv,errmsg,errflg)
+               fhour,fh_dfi_radar,ix_dfi_radar,num_dfi_radar,cap_suppress,      &
+               dfi_radar_max_intervals,ldiag3d,qci_conv,do_cap_suppress,        &
+               errmsg,errflg)
 !-------------------------------------------------------------
       implicit none
       integer, parameter :: maxiens=1
@@ -99,6 +100,7 @@ contains
       integer, parameter :: ichoicem=13	! 0 2 5 13
       integer, parameter :: ichoice_s=3	! 0 1 2 3
 
+      logical, intent(in) :: do_cap_suppress
       real(kind=kind_phys), parameter :: aodc0=0.14
       real(kind=kind_phys), parameter :: aodreturn=30.
       real(kind=kind_phys) :: dts,fpi,fp
@@ -126,9 +128,10 @@ contains
 
    real(kind=kind_phys), allocatable :: clcw_save(:,:), cliw_save(:,:)
 
-   real(kind=kind_phys), intent(in) :: fhour, fh_dfi_radar(5)
-   integer, intent(in) :: num_dfi_radar, ix_dfi_radar(4)
-   real(kind=kind_phys), intent(in), pointer :: dfi_radar_tten(:,:,:)
+   integer, intent(in) :: dfi_radar_max_intervals
+   real(kind=kind_phys), intent(in) :: fhour, fh_dfi_radar(dfi_radar_max_intervals+1)
+   integer, intent(in) :: num_dfi_radar, ix_dfi_radar(dfi_radar_max_intervals)
+   real(kind=kind_phys), intent(in), pointer :: cap_suppress(:,:)
 
    integer, dimension (:), intent(out) :: hbot,htop,kcnv
    integer, dimension (:), intent(in)  :: xland
@@ -219,7 +222,7 @@ contains
    integer :: cliw_deep_idx, clcw_deep_idx, cliw_shal_idx, clcw_shal_idx
 
    real(kind=kind_phys) :: cap_suppress_j(im)
-   integer :: itime, do_cap_suppress
+   integer :: itime, do_cap_suppress_here
 
   !parameter (tf=243.16, tcr=270.16, tcrf=1.0/(tcr-tf)) ! FV3 original
   !parameter (tf=263.16, tcr=273.16, tcrf=1.0/(tcr-tf))
@@ -229,19 +232,21 @@ contains
      errmsg = ''
      errflg = 0
 
-     do itime=1,num_dfi_radar
-        if(ix_dfi_radar(itime)<1) cycle
-        if(fhour<fh_dfi_radar(itime)) cycle
-        if(fhour>=fh_dfi_radar(itime+1)) cycle
-        exit
-     enddo
-     if_radar: if(itime<=num_dfi_radar) then
-        do_cap_suppress = 1
-        cap_suppress_j = dfi_radar_tten(:,1,itime)
+     if(do_cap_suppress) then
+       do itime=1,num_dfi_radar
+         if(ix_dfi_radar(itime)<1) cycle
+         if(fhour<fh_dfi_radar(itime)) cycle
+         if(fhour>=fh_dfi_radar(itime+1)) cycle
+         exit
+       enddo
+     endif
+     if(do_cap_suppress .and. itime<=num_dfi_radar) then
+        do_cap_suppress_here = 1
+        cap_suppress_j = cap_suppress(:,itime)
      else
-        do_cap_suppress = 0
+        do_cap_suppress_here = 0
         cap_suppress_j = 0
-     endif if_radar
+     endif
 
      if(ldiag3d) then
        if(flag_for_dcnv_generic_tend) then
@@ -665,7 +670,7 @@ contains
                                ! more is possible, talk to developer or
                                ! implement yourself. pattern is expected to be
                                ! betwee -1 and +1
-              ,do_cap_suppress,cap_suppress_j &
+              ,do_cap_suppress_here,cap_suppress_j &
               ,k22m          &
               ,jminm,tropics)
 
@@ -746,7 +751,7 @@ contains
                                ! more is possible, talk to developer or
                                ! implement yourself. pattern is expected to be
                                ! betwee -1 and +1
-              ,do_cap_suppress,cap_suppress_j &
+              ,do_cap_suppress_here,cap_suppress_j &
               ,k22          &
               ,jmin,tropics)
           jpr=0

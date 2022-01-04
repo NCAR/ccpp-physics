@@ -96,8 +96,8 @@
   kind = kind_phys
   intent = inout
 [num_dfi_radar]
-  standard_name = num_dfi_radar
-  long_name = number of time ranges with dfi radar tendencies
+  standard_name = number_of_radar_derived_temperature_or_convection_suppression_intervals
+  long_name = number of time ranges with radar-derived microphysics temperature tendencies or radar-derived convection suppression
   units = count
   dimensions = ()
   type = integer
@@ -734,33 +734,40 @@
   type = real
   kind = kind_phys
   intent = in
+[dfi_radar_max_intervals]
+  standard_name = maximum_number_of_radar_derived_temperature_or_convection_suppression_intervals
+  long_name = maximum allowed number of time ranges with radar-derived microphysics temperature tendencies or radar-derived convection suppression
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
 [num_dfi_radar]
-  standard_name = num_dfi_radar
-  long_name = number of time ranges with dfi radar tendencies
+  standard_name = number_of_radar_derived_temperature_or_convection_suppression_intervals
+  long_name = number of time ranges with radar-derived microphysics temperature tendencies or radar-derived convection suppression
   units = count
   dimensions = ()
   type = integer
   intent = in
 [fh_dfi_radar]
-  standard_name = times_at_which_dfi_radar_tten_is_available
-  long_name = times at which dfi_radar_tten is available
+  standard_name = forecast_lead_times_bounding_radar_derived_temperature_or_convection_suppression_intervals
+  long_name = forecast lead times bounding radar derived temperature or convection suppression intervals
   units = h
-  dimensions = (5)
+  dimensions = (maximum_number_of_radar_derived_temperature_or_convection_suppression_intervals_plus_one)
   type = real
   kind = kind_phys
   intent = in
 [ix_dfi_radar]
-  standard_name = time_indices_in_dfi_radar_tten
-  long_name = time indices in dfi radar tten
+  standard_name = indices_with_radar_derived_temperature_or_convection_suppression_data
+  long_name = indices with radar derived temperature or convection suppression data
   units = index
-  dimensions = (4)
+  dimensions = (maximum_number_of_radar_derived_temperature_or_convection_suppression_intervals)
   type = integer
   intent = in
 [dfi_radar_tten]
-  standard_name = dfi_radar_tten
-  long_name = prescribed microphysics temperature tendency from radar data
-  units = K s-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension,num_dfi_radar)
+  standard_name = radar_derived_microphysics_temperature_tendency
+  long_name = radar-derived microphysics temperature tendency
+  units = unitless
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_radar_derived_temperature_or_convection_suppression_intervals)
   type = real
   kind = kind_phys
   intent = in
@@ -775,14 +782,14 @@
 [radar_tten_limits]
   standard_name = allowed_bounds_of_radar_prescribed_tendencies
   long_name = allowed bounds of prescribed microphysics temperature tendencies
-  units = K
+  units = K s-1
   dimensions = (2)
   type = real
   kind = kind_phys
   intent = in
 [index_of_process_dfi_radar]
-  standard_name = index_of_radar_mp_temperature_forcing_in_cumulative_change_index
-  long_name = index of radar mp temperature forcing in second dimension of array cumulative change index
+  standard_name = index_of_radar_derived_microphysics_temperature_forcing_in_cumulative_change_index
+  long_name = index of radar-derived microphysics temperature forcing in second dimension of array cumulative change index
   units = index
   dimensions = ()
   type = integer
