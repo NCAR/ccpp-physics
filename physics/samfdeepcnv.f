@@ -2975,11 +2975,12 @@ c
         tsump(i) = 0.
         rtnp(i) = 1.
       enddo
-      do k = 1,km
+      do k = 1,km1
         do i = 1,im
           if(cnvflg(i) .and. k <= ktcon(i)) then
-            if(q1(i,k) < 0.) tsumn(i) = tsumn(i) + q1(i,k)
-            if(q1(i,k) > 0.) tsump(i) = tsump(i) + q1(i,k)
+            tem = q1(i,k) * delp(i,k) / grav
+            if(q1(i,k) < 0.) tsumn(i) = tsumn(i) + tem
+            if(q1(i,k) > 0.) tsump(i) = tsump(i) + tem
           endif
         enddo
       enddo
@@ -2994,7 +2995,7 @@ c
           endif
         endif
       enddo
-      do k = 1,km
+      do k = 1,km1
         do i = 1,im
           if(cnvflg(i) .and. k <= ktcon(i)) then
             if(rtnp(i) < 0.) then
@@ -3011,6 +3012,7 @@ c
       enddo
 !
       if (.not.hwrf_samfdeep) then
+       indx = ntk - 2
        do n = 1, ntr
 !
         do k = 1, km
@@ -3033,11 +3035,21 @@ c
           tsump(i) = 0.
           rtnp(i) = 1.
         enddo
-        do k = 1,km
+        do k = 1,km1
           do i = 1,im
             if(cnvflg(i) .and. k <= ktcon(i)) then
-              if(ctr(i,k,n) < 0.) tsumn(i) = tsumn(i) + ctr(i,k,n)
-              if(ctr(i,k,n) > 0.) tsump(i) = tsump(i) + ctr(i,k,n)
+              if(n == indx) then
+                if(k > 1) then
+                  dz = zi(i,k) - zi(i,k-1)
+                else
+                  dz = zi(i,k)
+                endif
+                tem = ctr(i,k,n) * dz
+              else
+                tem = ctr(i,k,n) * delp(i,k) / grav
+              endif
+              if(ctr(i,k,n) < 0.) tsumn(i) = tsumn(i) + tem
+              if(ctr(i,k,n) > 0.) tsump(i) = tsump(i) + tem
             endif
           enddo
         enddo
@@ -3052,7 +3064,7 @@ c
             endif
           endif
         enddo
-        do k = 1,km
+        do k = 1,km1
           do i = 1,im
             if(cnvflg(i) .and. k <= ktcon(i)) then
               if(rtnp(i) < 0.) then
