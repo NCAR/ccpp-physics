@@ -766,7 +766,7 @@
 [dfi_radar_tten]
   standard_name = radar_derived_microphysics_temperature_tendency
   long_name = radar-derived microphysics temperature tendency
-  units = unitless
+  units = K s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_radar_derived_temperature_or_convection_suppression_intervals)
   type = real
   kind = kind_phys
