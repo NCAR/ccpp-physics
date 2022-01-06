@@ -258,34 +258,37 @@ contains
         endif
       enddo
 !
-      if (.not. cplflx .or. kdt == 1) then
-        if (frac_grid) then
-          do i=1,im
-            if (dry(i)) then
-              if (icy(i)) then
+      if (frac_grid) then
+        do i=1,im
+          if (dry(i)) then
+            if (icy(i)) then
+              if (kdt == 1 .or. (.not. cplflx .and. lakefrac(i) > zero)) then 
                 tem = one / (cice(i)*(one-frland(i)))
                 snowd_ice(i) = max(zero, (snowd(i) - snowd_lnd(i)*frland(i)) * tem)
                 weasd_ice(i) = max(zero, (weasd(i) - weasd_lnd(i)*frland(i)) * tem)
               endif
-            elseif (icy(i)) then
+            endif
+          elseif (icy(i)) then
+            if (kdt == 1 .or. (.not. cplflx .and. lakefrac(i) > zero)) then 
               tem = one / cice(i)
               snowd_lnd(i) = zero
               snowd_ice(i) = snowd(i) * tem
               weasd_lnd(i) = zero
               weasd_ice(i) = weasd(i) * tem
             endif
-          enddo
-        else
-          do i=1,im
-            if (icy(i)) then
+          endif
+        enddo
+        do i=1,im
+          if (icy(i)) then
+            if (kdt == 1 .or. (.not. cplflx .and. lakefrac(i) > zero)) then
               snowd_lnd(i) = zero
               weasd_lnd(i) = zero
               tem = one / cice(i)
               snowd_ice(i) = snowd(i) * tem
               weasd_ice(i) = weasd(i) * tem
             endif
-          enddo
-        endif
+          endif
+        enddo
       endif
 
 !     write(0,*)' minmax of ice snow=',minval(snowd_ice),maxval(snowd_ice)
