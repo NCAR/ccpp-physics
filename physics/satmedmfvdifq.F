@@ -1515,8 +1515,10 @@ c
           endif
           if((pcnvflg(i) .or. scuflg(i)) .and.
      &       (k >= kbx .and. k <= kmx)) then
-            if(f1(i,k) < 0.) tsumn(i) = tsumn(i) + f1(i,k)
-            if(f1(i,k) > 0.) tsump(i) = tsump(i) + f1(i,k)
+            dz = zi(i,k+1) - zi(i,k)
+            tem = f1(i,k) * dz
+            if(f1(i,k) < 0.) tsumn(i) = tsumn(i) + tem
+            if(f1(i,k) > 0.) tsump(i) = tsump(i) + tem
           endif
         enddo
       enddo
@@ -1569,8 +1571,10 @@ c
       enddo
       do k = 1,km
         do i = 1,im
-          if(f1(i,k) < 0.) tsumn(i) = tsumn(i) + f1(i,k)
-          if(f1(i,k) > 0.) tsump(i) = tsump(i) + f1(i,k)
+          dz = zi(i,k+1) - zi(i,k)
+          tem = f1(i,k) * dz
+          if(f1(i,k) < 0.) tsumn(i) = tsumn(i) + tem
+          if(f1(i,k) > 0.) tsump(i) = tsump(i) + tem
         enddo
       enddo
       do i = 1,im
@@ -1760,8 +1764,9 @@ c
           endif
           if((pcnvflg(i) .or. scuflg(i)) .and.
      &       (k >= kbx .and. k <= kmx)) then
-            if(f2(i,k) < 0.) tsumn(i) = tsumn(i) + f2(i,k)
-            if(f2(i,k) > 0.) tsump(i) = tsump(i) + f2(i,k)
+            tem = f2(i,k) * del(i,k) / grav
+            if(f2(i,k) < 0.) tsumn(i) = tsumn(i) + tem
+            if(f2(i,k) > 0.) tsump(i) = tsump(i) + tem
           endif
         enddo
       enddo
@@ -1815,8 +1820,9 @@ c
       enddo
       do k = 1,km
         do i = 1,im
-          if(f2(i,k) < 0.) tsumn(i) = tsumn(i) + f2(i,k)
-          if(f2(i,k) > 0.) tsump(i) = tsump(i) + f2(i,k)
+          tem = f2(i,k) * del(i,k) / grav
+          if(f2(i,k) < 0.) tsumn(i) = tsumn(i) + tem
+          if(f2(i,k) > 0.) tsump(i) = tsump(i) + tem
         enddo
       enddo
       do i = 1,im
@@ -1943,8 +1949,9 @@ c
               endif
               if((pcnvflg(i) .or. scuflg(i)) .and.
      &           (k >= kbx .and. k <= kmx)) then
-                if(f2(i,k+is) < 0.) tsumn(i) = tsumn(i) + f2(i,k+is)
-                if(f2(i,k+is) > 0.) tsump(i) = tsump(i) + f2(i,k+is)
+                tem = f2(i,k+is) * del(i,k) / grav
+                if(f2(i,k+is) < 0.) tsumn(i) = tsumn(i) + tem
+                if(f2(i,k+is) > 0.) tsump(i) = tsump(i) + tem
               endif
             enddo
           enddo
@@ -1998,8 +2005,9 @@ c
           enddo
           do k = 1,km
             do i = 1,im
-              if(f2(i,k+is) < 0.) tsumn(i) = tsumn(i) + f2(i,k+is)
-              if(f2(i,k+is) > 0.) tsump(i) = tsump(i) + f2(i,k+is)
+              tem = f2(i,k+is) * del(i,k) / grav
+              if(f2(i,k+is) < 0.) tsumn(i) = tsumn(i) + tem
+              if(f2(i,k+is) > 0.) tsump(i) = tsump(i) + tem
             enddo
           enddo
           do i = 1,im
