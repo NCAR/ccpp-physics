@@ -21,7 +21,8 @@ module cu_gf_driver_pre
 !! \htmlinclude cu_gf_driver_pre_run.html
 !!
    subroutine cu_gf_driver_pre_run (flag_init, flag_restart, kdt, fhour, dtp, t, q, prevst, prevsq, &
-                                    forcet, forceq, cactiv, conv_act, errmsg, errflg)
+                                    forcet, forceq, cactiv, cactiv_m, conv_act, conv_act_m,         &
+                                    errmsg, errflg)
 
       use machine, only: kind_phys
 
@@ -39,7 +40,9 @@ module cu_gf_driver_pre
       real(kind_phys),  intent(out) :: forcet(:,:)
       real(kind_phys),  intent(out) :: forceq(:,:)
       integer,          intent(out) :: cactiv(:)
+      integer,          intent(out) :: cactiv_m(:)
       real(kind_phys),  intent(in)  :: conv_act(:)
+      real(kind_phys),  intent(in)  :: conv_act_m(:)
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
@@ -68,6 +71,7 @@ module cu_gf_driver_pre
       endif
 
       cactiv(:)=nint(conv_act(:))
+      cactiv_m(:)=nint(conv_act_m(:))
 
    end subroutine cu_gf_driver_pre_run
 

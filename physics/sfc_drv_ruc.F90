@@ -33,7 +33,7 @@ module lsm_ruc
       subroutine lsm_ruc_init (me, master, isot, ivegsrc, nlunit,               &
                                flag_restart, flag_init, con_fvirt, con_rd,      &
                                im, lsoil_ruc, lsoil, kice, nlev,                & ! in
-                               lsm_ruc, lsm, slmsk, stype, vtype,               & ! in 
+                               lsm_ruc, lsm, slmsk, stype, vtype, landfrac,     & ! in 
                                q1, prsl1, tsfc_lnd, tsfc_ice, tsfc_wat,         & ! in
                                tg3, smc, slc, stc, fice, min_seaice,            & ! in
                                sncovr_lnd, sncovr_ice, snoalb,                  & ! in
@@ -64,6 +64,7 @@ module lsm_ruc
       real (kind=kind_phys), dimension(:), intent(in) :: slmsk
       integer,               dimension(:), intent(in) :: stype
       integer,               dimension(:), intent(in) :: vtype
+      real (kind=kind_phys), dimension(:), intent(in) :: landfrac
       real (kind=kind_phys), dimension(:), intent(in) :: q1
       real (kind=kind_phys), dimension(:), intent(in) :: prsl1
       real (kind=kind_phys), dimension(:), intent(in) :: tsfc_lnd
@@ -99,7 +100,7 @@ module lsm_ruc
 !  ---  out
       real (kind=kind_phys), dimension(:),   intent(out) :: zs
       real (kind=kind_phys), dimension(:),   intent(inout) :: sfalb_lnd_bck
-      real (kind=kind_phys), dimension(:,:), intent(out) :: tsice
+      real (kind=kind_phys), dimension(:,:), intent(inout) :: tsice
       real (kind=kind_phys), dimension(:),   intent(out) :: semisbase
       real (kind=kind_phys), dimension(:),   intent(out) :: pores, resid
 
@@ -199,16 +200,17 @@ module lsm_ruc
 
       enddo ! i
 
-        call init_soil_depth_3 ( zs , dzs , lsoil_ruc )
+      call init_soil_depth_3 ( zs , dzs , lsoil_ruc )
 
-        call rucinit   (flag_restart, im, lsoil_ruc, lsoil, nlev,   & ! in
-                        me, master, lsm_ruc, lsm, slmsk,            & ! in
-                        stype, vtype,                               & ! in
-                        tsfc_lnd, tsfc_wat, tg3,                    & ! in
-                        zs, dzs, smc, slc, stc,                     & ! in
-                        sh2o, smfrkeep, tslb, smois,                & ! out
-                        wetness, errmsg, errflg)
+      call rucinit (flag_restart, im, lsoil_ruc, lsoil, nlev,   & ! in
+                    me, master, lsm_ruc, lsm, slmsk,            & ! in
+                    stype, vtype, landfrac, fice,               & ! in
+                    min_seaice, tsfc_lnd, tsfc_wat, tg3,        & ! in
+                    zs, dzs, smc, slc, stc,                     & ! in
+                    sh2o, smfrkeep, tslb, smois,                & ! out
+                    wetness, errmsg, errflg)
 
+      if (.not.flag_restart) then
         do i  = 1, im ! i - horizontal loop
           do k = 1, min(kice,lsoil_ruc)
           ! - at initial time set sea ice T (tsice) 
@@ -216,6 +218,7 @@ module lsm_ruc
              tsice   (i,k) = tslb(i,k)
           enddo
         enddo ! i
+      endif ! .not. restart
 
       !-- end of initialization
 
@@ -246,7 +249,7 @@ module lsm_ruc
 
 ! ===================================================================== !
 !  lsm_ruc_run:                                                         !
-!  RUC Surface Model - WRF4.0 version                                   ! 
+!  RUC Surface Model - WRF4.0 version                                   !
 !  program history log:                                                 !
 !    may  2018  -- tanya smirnova                                       !
 !                                                                       !
@@ -320,9 +323,9 @@ module lsm_ruc
       subroutine lsm_ruc_run                                            & ! inputs
      &     ( iter, me, master, delt, kdt, im, nlev, lsm_ruc, lsm,       &
      &       imp_physics, imp_physics_gfdl, imp_physics_thompson,       &
-     &       do_mynnsfclay, lsoil_ruc, lsoil, rdlai, zs,                &
+     &       do_mynnsfclay, lsoil_ruc, lsoil, rdlai, xlat_d, xlon_d, zs,&
      &       t1, q1, qc, stype, vtype, sigmaf, laixy,                   &
-     &       dlwflx, dswsfc, tg3, coszen, land, icy, lake,              &
+     &       dlwflx, dswsfc, tg3, coszen, land, icy, use_lake,          &
      &       rainnc, rainc, ice, snow, graupel,                         &
      &       prsl1, zf, wind, shdmin, shdmax,                           &
      &       srflag, sfalb_lnd_bck, snoalb,                             &
@@ -331,8 +334,6 @@ module lsm_ruc
      ! --- constants
      &       con_cp, con_rd, con_rv, con_g, con_pi, con_hvap,           &
      &       con_fvirt,                                                 &
-     ! for water
-     &       ch_wat, tskin_wat,                                         &
      ! --- in/outs for ice and land
      &       semisbase, semis_lnd, semis_ice, sfalb_lnd, sfalb_ice,     &
      &       sncovr1_lnd, weasd_lnd, snwdph_lnd, tskin_lnd,             &
@@ -348,7 +349,7 @@ module lsm_ruc
      &       albdvis_lnd, albdnir_lnd,  albivis_lnd,  albinir_lnd,      & 
      ! for ice
      &       sfcqc_ice, sfcqv_ice,                                      &
-     &       tice, tsurf_ice, tsnow_ice, z0rl_ice,                      &
+     &       tsurf_ice, tsnow_ice, z0rl_ice,                            &
      &       qsurf_ice, gflux_ice, evap_ice, ep1d_ice, hflx_ice,        &
      &       cm_ice, ch_ice, snowfallac_ice,                            &
      &       albdvis_ice, albdnir_ice,  albivis_ice,  albinir_ice,      &
@@ -365,13 +366,13 @@ module lsm_ruc
 !  ---  constant parameters:
       real(kind=kind_phys), parameter :: rhoh2o  = 1000.0
       real(kind=kind_phys), parameter :: stbolt  = 5.670400e-8
-      real(kind=kind_phys), parameter :: con_tice = 271.2
 
 !  ---  input:
       integer, intent(in) :: me, master
       integer, intent(in) :: im, nlev, iter, lsoil_ruc, lsoil, kdt, isot, ivegsrc
       integer, intent(in) :: lsm_ruc, lsm
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson
+      real (kind=kind_phys), dimension(:), intent(in) :: xlat_d, xlon_d
 
       real (kind=kind_phys), dimension(:), intent(in) ::          &
      &       t1, sigmaf, laixy, dlwflx, dswsfc, tg3,              &
@@ -380,7 +381,7 @@ module lsm_ruc
      ! for land
      &       cm_lnd, ch_lnd,                                      &
      ! for water
-     &       ch_wat, tskin_wat, oceanfrac,                        &
+     &       oceanfrac,                                           &
      ! for ice
      &       cm_ice, ch_ice
 
@@ -390,7 +391,7 @@ module lsm_ruc
                                             con_hvap, con_fvirt
 
       logical, dimension(:),  intent(in) :: flag_iter, flag_guess
-      logical, dimension(:),  intent(in) :: land, icy, lake
+      logical, dimension(:),  intent(in) :: land, icy, use_lake
       logical, dimension(:),  intent(in) :: flag_cice
       logical,                intent(in) :: frac_grid
       logical,                intent(in) :: do_mynnsfclay
@@ -411,7 +412,7 @@ module lsm_ruc
      ! for ice
      &       weasd_ice, snwdph_ice, tskin_ice,                           &
      &       tsurf_ice, z0rl_ice, tsnow_ice,                             &
-     &       sfcqc_ice, sfcqv_ice, fice, tice
+     &       sfcqc_ice, sfcqv_ice, fice
 
 !  ---  in
       real (kind=kind_phys), dimension(:), intent(in) ::                 &
@@ -442,6 +443,10 @@ module lsm_ruc
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
+!  --- SPP - should be INTENT(IN)
+      integer :: spp_lsm
+      real(kind=kind_phys), dimension(im,nlev) :: pattern_spp
+
 !  ---  locals:
       real (kind=kind_phys), dimension(im) :: rho,                      &
      &       q0, qs1, albbcksol,                                        &
@@ -457,6 +462,8 @@ module lsm_ruc
      &       sfcqv_ice_old, sfcqc_ice_old, z0rl_ice_old,                &
      &       sncovr1_ice_old
 
+      !-- local spp pattern array
+      real (kind=kind_phys), dimension(im,lsoil_ruc,1) :: pattern_spp_lsm
 
       real (kind=kind_phys), dimension(lsoil_ruc) :: et
 
@@ -470,7 +477,7 @@ module lsm_ruc
      &       keepfr_old, smfrkeep_old
 
       real (kind=kind_phys),dimension (im,1,1)      ::                  &
-     &     conflx2, sfcprs, sfctmp, q2, qcatm, rho2 
+     &     conflx2, sfcprs, sfctmp, q2, qcatm, rho2
       real (kind=kind_phys),dimension (im,1)        ::                  &
      &     albbck_lnd, alb_lnd, chs_lnd, flhc_lnd, flqc_lnd,            &
      &     wet, wet_ice, smmax, cmc, drip,  ec, edir, ett,              &
@@ -521,12 +528,20 @@ module lsm_ruc
       logical :: flag(im), flag_ice(im), flag_ice_uncoupled(im)
       logical :: rdlai2d, myj, frpcpn
       logical :: debug_print
+
+      !-- diagnostic point
+      real (kind=kind_phys) :: testptlat, testptlon
 !
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
 
       ipr = 10
+ 
+      !--
+      testptlat = 74.12 !29.5 
+      testptlon = 164.0 !283.0 
+      !--
 
       debug_print=.false.
 
@@ -534,7 +549,7 @@ module lsm_ruc
 
       do i  = 1, im ! i - horizontal loop
         flag_ice(i) = .false.
-        if (icy(i) .and. .not. flag_cice(i)) then
+        if (icy(i) .and. .not. flag_cice(i)) then ! flag_cice(i)=.true. when coupled to CICE
         ! - uncoupled ice model
           if (oceanfrac(i) > zero) then
             cimin(i) = min_seaice
@@ -548,7 +563,7 @@ module lsm_ruc
         endif
         ! - Set flag for ice points for uncoupled model (islmsk(i) == 4 when coupled to CICE)
         ! - Exclude ice on the lakes if the lake model is turned on.
-        flag_ice_uncoupled(i) = (flag_ice(i) .and. .not.  lake(i))
+        flag_ice_uncoupled(i) = (flag_ice(i) .and. .not. use_lake(i))
         !> - Set flag for land and ice points.
         !- 10may19 - ice points are turned off.
         flag(i) = land(i) .or. flag_ice_uncoupled(i)
@@ -576,7 +591,7 @@ module lsm_ruc
         write (0,*)'flag_init =',flag_init
         write (0,*)'flag_restart =',flag_restart
       endif
- 
+
       ims = 1
       its = 1
       ime = 1
@@ -599,7 +614,13 @@ module lsm_ruc
       landusef (:,:,:) = 0.0
       soilctop (:,:,:) = 0.0
 
-      !> -- number of soil categories          
+      !-- spp
+      spp_lsm = 0 ! so far (10May2021)
+      if(spp_lsm == 0) then
+        pattern_spp (:,:) = 0.0
+      endif
+
+      !> -- number of soil categories
       !if(isot == 1) then
       !nscat = 19 ! stasgo
       !else
@@ -742,13 +763,13 @@ module lsm_ruc
         endif ! flag_iter & flag
       enddo ! i
 
-!> - Prepare variables to run RUC LSM: 
+!> - Prepare variables to run RUC LSM:
 !!  -   1. configuration information (c):
 !!\n  \a ffrozp  - fraction of frozen precipitation
 !!\n  \a frpcpn  - .true. if mixed phase precipitation available
 !!\n  \a 1:im - horizontal_loop_extent
 !!\n  \a fice    - fraction of sea-ice in the grid cell
-!!\n  \a delt    - timestep (sec) (dt should not exceed 3600 secs) 
+!!\n  \a delt    - timestep (sec) (dt should not exceed 3600 secs)
 !!\n  \a conflx2 - height (\f$m\f$) above ground of atmospheric forcing variables
 !!\n  \a lsoil_ruc - number of soil layers (= 6 or 9)
 !!\n  \a zs      - the depth of each soil level (\f$m\f$)
@@ -821,6 +842,26 @@ module lsm_ruc
         rainncv(i,j)    = rhoh2o * rainnc(i)                   ! total time-step explicit precip 
         graupelncv(i,j) = rhoh2o * graupel(i)
         snowncv(i,j)    = rhoh2o * snow(i)
+        if (debug_print) then
+        !-- diagnostics for a test point with known lat/lon
+        if (abs(xlat_d(i)-testptlat).lt.2.5 .and.   &
+            abs(xlon_d(i)-testptlon).lt.6.5)then
+          if(weasd_lnd(i) > 0.) &
+            print 100,'(ruc_lsm_drv)  i=',i,          &
+            '  lat,lon=',xlat_d(i),xlon_d(i),         &
+            'rainc',rainc(i),'rainnc',rainnc(i),      &
+            'graupel',graupel(i),'qc',qc(i),'sfcqv_lnd',sfcqv_lnd(i),&
+            'dlwflx',dlwflx(i),'dswsfc',dswsfc(i),    &
+            'sncovr1_lnd',sncovr1_lnd(i),'sfalb_lnd_bck',sfalb_lnd_bck(i),&
+            'prsl1',prsl1(i),'t1',t1(i),              &
+            !'snow',snow(i), 'snowncv',snowncv(i,j),   &
+            'srflag',srflag(i),'weasd_lnd',weasd_lnd(i), &
+            'tsurf_lnd',tsurf_lnd(i),'tslb(i,1)',tslb(i,1)
+        endif
+        endif
+ 100      format (";;; ",a,i4,a,2f9.2/(4(a10,'='es9.2)))
+        !--
+
         ! ice precipitation is not used
         ! precipfr(i,j)   = rainncv(i,j) * ffrozp(i,j)
 
@@ -828,11 +869,6 @@ module lsm_ruc
         ! precipfr(i,j)   = rainncv(i,j) * ffrozp(i,j)
         !acsn(i,j)         = acsnow(i)
         acsn(i,j) = 0.0
-
-        ! --- units %
-        shdfac(i,j) = sigmaf(i)*100.
-        shdmin1d(i,j) = shdmin(i)*100.
-        shdmax1d(i,j) = shdmax(i)*100.
 
         tbot(i,j) = tg3(i)
 
@@ -878,6 +914,10 @@ module lsm_ruc
         endif
 
         semis_bck(i,j)   = semisbase(i)
+        ! --- units %
+        shdfac(i,j)   = sigmaf(i)*100.
+        shdmin1d(i,j) = shdmin(i)*100.
+        shdmax1d(i,j) = shdmax(i)*100.
 
    if (land(i)) then ! at least some land in the grid cell
 
@@ -924,6 +964,27 @@ module lsm_ruc
 
         snoalb1d_lnd(i,j) = snoalb(i)
         albbck_lnd(i,j)   = albbcksol(i) !sfalb_lnd_bck(i)
+
+
+        !-- spp_lsm
+        if (spp_lsm == 1) then
+          !-- spp for LSM is dimentioned as (1:lsoil_ruc)
+          do k = 1, lsoil_ruc
+            pattern_spp_lsm (i,k,j) = pattern_spp(i,k)
+          enddo
+          !-- stochastic perturbation of snow-free albedo, emissivity and veg.
+          !-- fraction
+          albbck_lnd(i,j) = min(albbck_lnd(i,j) * (1. + 0.4*pattern_spp_lsm(i,1,j)), 1.)
+          sfcems_lnd(i,j) = min(sfcems_lnd(i,j) * (1. + 0.1*pattern_spp_lsm(i,1,j)), 1.)
+          shdfac(i,j) = min(0.01*shdfac(i,j) * (1. + 0.33*pattern_spp_lsm(i,1,j)),1.)*100.
+          if (kdt == 2) then
+          !-- stochastic perturbation of soil moisture at time step 2
+            do k = 1, lsoil_ruc
+              smois(i,k) = smois(i,k)*(1+1.5*pattern_spp_lsm(i,k,j))
+            enddo
+          endif
+        endif
+
         alb_lnd(i,j) = albbck_lnd(i,j) * (1.-sncovr_lnd(i,j)) + snoalb(i) * sncovr_lnd(i,j) ! sfalb_lnd(i)
         solnet_lnd(i,j) = dswsfc(i)*(1.-alb_lnd(i,j)) !..net sw rad flx (dn-up) at sfc in w/m2
 
@@ -950,7 +1011,7 @@ module lsm_ruc
           wet(i,j) = max(0.0001,smsoil(i,1,j)/0.3)
         endif
 
-        chs_lnd (i,j)   = ch_lnd(i) * wind(i) ! compute conductance 
+        chs_lnd (i,j)   = ch_lnd(i) * wind(i) ! compute conductance
         flhc_lnd(i,j)   = chs_lnd(i,j) * rho(i) * con_cp ! * (1. + 0.84*q2(i,1,j))
         flqc_lnd(i,j)   = chs_lnd(i,j) * rho(i) * wet(i,j)
         ! for output
@@ -962,11 +1023,11 @@ module lsm_ruc
         snfallac_lnd(i,j) = snowfallac_lnd(i)
         !> -- sanity checks on sneqv and snowh
         if (sneqv_lnd(i,j) /= 0.0 .and. snowh_lnd(i,j) == 0.0) then
-          snowh_lnd(i,j) = 0.003 * sneqv_lnd(i,j) ! snow density ~300 kg m-3 
+          snowh_lnd(i,j) = 0.003 * sneqv_lnd(i,j) ! snow density ~300 kg m-3
         endif
 
         if (snowh_lnd(i,j) /= 0.0 .and. sneqv_lnd(i,j) == 0.0) then
-          sneqv_lnd(i,j) = 300. * snowh_lnd(i,j) ! snow density ~300 kg m-3 
+          sneqv_lnd(i,j) = 300. * snowh_lnd(i,j) ! snow density ~300 kg m-3
         endif
 
         if (sneqv_lnd(i,j) > 0. .and. snowh_lnd(i,j) > 0.) then
@@ -1035,7 +1096,7 @@ module lsm_ruc
           endif
         endif
 
-!> - Call RUC LSM lsmruc() for land. 
+!> - Call RUC LSM lsmruc() for land.
       call lsmruc(                                                           &
      &          delt, flag_init, flag_restart, kdt, iter, nsoil,             &
      &          graupelncv(i,j), snowncv(i,j), rainncv(i,j), raincv(i,j),    &
@@ -1053,7 +1114,7 @@ module lsm_ruc
      &          z0_lnd(i,j), snoalb1d_lnd(i,j), albbck_lnd(i,j),             &
      &          xlai(i,j), landusef(i,:,j), nlcat,                           &
 !  --- mosaic_lu and mosaic_soil are moved to the namelist
-!     &          mosaic_lu, mosaic_soil,                                      &
+!    &          mosaic_lu, mosaic_soil,                                      &
      &          soilctop(i,:,j), nscat,                                      &
      &          qsfc_lnd(i,j), qsg_lnd(i,j), qvg_lnd(i,j), qcg_lnd(i,j),     &
      &          dew_lnd(i,j), soilt1_lnd(i,j),                               &
@@ -1149,11 +1210,12 @@ module lsm_ruc
         !snohf(i) = snoh(i,j)
 
         ! Interstitial
-        evap_lnd(i)   = qfx_lnd(i,j) / rho(i)           ! kinematic
-        hflx_lnd(i)   = hfx_lnd(i,j) / (con_cp*rho(i))  ! kinematic
-        gflux_lnd(i)  = ssoil_lnd(i,j)
+        evap_lnd(i)    = qfx_lnd(i,j) / rho(i)           ! kinematic
+        hflx_lnd(i)    = hfx_lnd(i,j) / (con_cp*rho(i))  ! kinematic
+        gflux_lnd(i)   = ssoil_lnd(i,j)
         qsurf_lnd(i)   = qsfc_lnd(i,j)
         tsurf_lnd(i)   = soilt_lnd(i,j)
+        tsnow_lnd(i)   = soilt1_lnd(i,j)
         stm(i)         = soilm(i,j) * 1.e-3 ! convert to [m]
 
         runof (i)  = runoff1(i,j)
@@ -1164,7 +1226,7 @@ module lsm_ruc
         ! tsnow(i)   = soilt1(i,j)
         sfcqv_lnd(i)  = qvg_lnd(i,j)
         sfcqc_lnd(i)  = qcg_lnd(i,j)
-        !  --- ...  units [m/s] = [g m-2 s-1] 
+        !  --- ...  units [m/s] = [g m-2 s-1]
         rhosnf(i) = rhosnfr(i,j)
         !acsnow(i) = acsn(i,j)     ! kg m-2
 
@@ -1212,6 +1274,25 @@ module lsm_ruc
    if (flag_ice_uncoupled(i)) then ! at least some ice in the grid cell
    !-- ice point
 
+      if (debug_print) then
+        if (abs(xlat_d(i)-testptlat).lt.2.5 .and.   &
+            abs(xlon_d(i)-testptlon).lt.6.5)then
+          if(weasd_lnd(i) > 0.) &
+            print 101,'(ruc_lsm_drv ice)  i=',i,      &
+            '  lat,lon=',xlat_d(i),xlon_d(i),'flag_ice',flag_ice(i),&
+            !'rainc',rainc(i),'rainnc',rainnc(i),      &
+            'sfcqv_ice',sfcqv_ice(i),&
+            !'dlwflx',dlwflx(i),'dswsfc',dswsfc(i),    &
+            'sncovr1_ice',sncovr1_ice(i),'sfalb_ice',sfalb_ice(i),&
+            'sfcqc_ice',sfcqc_ice(i),'tsnow_ice',tsnow_ice(i), &
+            'prsl1',prsl1(i),'t1',t1(i),              &
+            !'snow',snow(i), 'snowncv',snowncv(i,j),   &
+            'srflag',srflag(i),'weasd_ice',weasd_ice(i), &
+            'tsurf_ice',tsurf_ice(i),'tslb(i,1)',tslb(i,1)
+        endif
+      endif
+ 101      format (";;; ",a,i4,a,2f9.2/(4(a10,'='es9.2)))
+
         sncovr_ice(i,j)   = sncovr1_ice(i)
         !-- alb_ice* is computed in setalb called from rrtmg_sw_pre.
         snoalb1d_ice(i,j) = 0.75 !alb_ice_snow(i) !0.75 is RAP value for max snow alb on ice
@@ -1246,7 +1327,7 @@ module lsm_ruc
 
         wet_ice(i,j) = 1.
 
-        chs_ice (i,j)   = ch_ice(i) * wind(i) ! compute conductance 
+        chs_ice (i,j)   = ch_ice(i) * wind(i) ! compute conductance
         flhc_ice(i,j)   = chs_ice(i,j) * rho(i) * con_cp ! * (1. + 0.84*q2(i,1,j))
         flqc_ice(i,j)   = chs_ice(i,j) * rho(i) * wet_ice(i,j)
         ! for output
@@ -1264,7 +1345,7 @@ module lsm_ruc
         endif
 
         if (snowh_ice(i,j) /= 0.0 .and. sneqv_ice(i,j) == 0.0) then
-          sneqv_ice(i,j) = 300. * snowh_ice(i,j) ! snow density ~300 kg m-3 
+          sneqv_ice(i,j) = 300. * snowh_ice(i,j) ! snow density ~300 kg m-3
         endif
 
         if (sneqv_ice(i,j) > 0. .and. snowh_ice(i,j) > 0.) then
@@ -1276,7 +1357,7 @@ module lsm_ruc
         z0_ice(i,j)  = z0rl_ice(i)/100.
         znt_ice(i,j) = z0rl_ice(i)/100.
 
-!> - Call RUC LSM lsmruc() for ice. 
+!> - Call RUC LSM lsmruc() for ice.
       call lsmruc(                                                           &
      &          delt, flag_init, flag_restart, kdt, iter, nsoil,             &
      &          graupelncv(i,j), snowncv(i,j), rainncv(i,j), raincv(i,j),    &
@@ -1322,6 +1403,7 @@ module lsm_ruc
 
         qsurf_ice(i)   = qsfc_ice(i,j)
         tsurf_ice(i)   = soilt_ice(i,j)
+        tsnow_ice(i)   = soilt1_ice(i,j)
 
         sfcqv_ice(i)  = qvg_ice(i,j)
         sfcqc_ice(i)  = qcg_ice(i,j)
@@ -1364,42 +1446,6 @@ module lsm_ruc
         endif   ! end if_flag_iter_and_flag
       enddo   ! j
       enddo   ! i
-
-      !-- Take care of fractional sea ice for uncoupled run with frac_grid=.false.
-      !-- When frac_grid=.true. GFS_surface_composite will take care of this.
-      do i  = 1, im   ! i - horizontal loop
-        if ( flag_iter(i) .and. flag(i) ) then
-        ! Do this only when the fractional grid is not turned on!
-        ! Compute composite for a fractional sea ice: fice(i) < 1.
-        ! This is needed for the 2-way coupling 
-        ! in the upcoupled case (when sfc_cice is not used).
-          if(.not. frac_grid) then
-            if( flag_ice_uncoupled(i) .and. fice(i) < 1.) then
-              !write (0,*)'Fractional sea ice at i', i, fice(i)
-              fwat =  1.0 - fice(i)
-             ! Check if ice fraction is below the minimum value: 15% in GFS
-             ! physics.
-              if (fice(i) < cimin(i)) then ! cimin - minimal ice fraction
-                        write (0,*)'warning: ice fraction is low:', fice(i)
-                fice(i) = cimin(i)
-                fwat    = 1.0 - cimin(i)
-                write (0,*)'fix ice fraction: reset it to:', fice(i), tskin_wat(i)
-              endif
-
-            ! Compute the composite of ice and open water for 2-way coupling in the
-            ! uncoupled sea-ice model. Use ice variables for the composite.
-              tsurf_ice(i) = tsurf_ice(i) * fice(i) + min(con_tice,tskin_wat(i)) * fwat
-              chh_ice(i)   = chh_ice(i) * fice(i) + ch_wat(i) * wind(i) * rho(i) * fwat
-              hfxw         = ch_wat(i) * wind(i) * (min(con_tice,tskin_wat(i)) - t1(i))
-              hflx_ice(i)  = hflx_ice(i) * fice(i) + hfxw * fwat
-              qsw          = rslf(prsl1(i),min(con_tice,tskin_wat(i)))
-              evapw        = ch_wat(i) * wind(i) * (qsw - q0(i))
-              evap_ice(i)  = evap_ice(i) * fice(i) + evapw * fwat
-              qsurf_ice(i) = q1(i) + evap_ice(i) * rho(i) / chh_ice(i) 
-            endif ! flag_ice_uncoupled(i) .and. fice(i) < 1.
-          endif ! flag_iter, icy, not frac_grid
-        endif
-      enddo ! i
 
 !> - Restore land-related prognostic fields for guess run.
       do j  = 1, 1
@@ -1445,7 +1491,6 @@ module lsm_ruc
             if(debug_print) write (0,*)'iter run', i,j, tskin_ice(i),tsurf_ice(i)
             tskin_lnd(i) = tsurf_lnd(i)
             tskin_ice(i) = tsurf_ice(i)
-            tice(i)      = tsurf_ice(i)
           endif ! flag_guess
         endif ! flag
       enddo  ! i
@@ -1463,8 +1508,8 @@ module lsm_ruc
 !! This subroutine contains RUC LSM initialization.
       subroutine rucinit        (restart, im, lsoil_ruc, lsoil, nlev,   & ! in
                                  me, master, lsm_ruc, lsm, slmsk,       & ! in
-                                 stype, vtype,                          & ! in
-                                 tskin_lnd, tskin_wat, tg3,             & ! !in
+                                 stype, vtype, landfrac, fice,          & ! in
+                                 min_seaice, tskin_lnd, tskin_wat, tg3, & ! in
                                  zs, dzs, smc, slc, stc,                & ! in
                                  sh2o, smfrkeep, tslb, smois,           & ! out
                                  wetness, errmsg, errflg)
@@ -1477,7 +1522,10 @@ module lsm_ruc
       integer,                                        intent(in   ) :: im, nlev
       integer,                                        intent(in   ) :: lsoil_ruc
       integer,                                        intent(in   ) :: lsoil
+      real (kind=kind_phys),                          intent(in   ) :: min_seaice
       real (kind=kind_phys), dimension(im),           intent(in   ) :: slmsk
+      real (kind=kind_phys), dimension(im),           intent(in   ) :: landfrac
+      real (kind=kind_phys), dimension(im),           intent(in   ) :: fice
       real (kind=kind_phys), dimension(im),           intent(in   ) :: tskin_lnd, tskin_wat
       real (kind=kind_phys), dimension(im),           intent(in   ) :: tg3
       real (kind=kind_phys), dimension(1:lsoil_ruc),  intent(in   ) :: zs
@@ -1566,7 +1614,7 @@ module lsm_ruc
       jds = 1
       jms = 1
       jts = 1
-      jde = 1 
+      jde = 1
       jme = 1
       jte = 1
       kds = 1
@@ -1634,14 +1682,14 @@ module lsm_ruc
             tbot(i,j) = tg3(i)
             ivgtyp(i,j) = vtype(i)
             isltyp(i,j) = stype(i)
-          if (slmsk(i) == 0.) then
-          !-- water
-            tsk(i,j) = tskin_wat(i)
-            landmask(i,j)=0.
-          else
+          if (landfrac(i) > 0. .or. fice(i) > 0.) then
           !-- land or ice
             tsk(i,j) = tskin_lnd(i)
             landmask(i,j)=1.
+          else
+          !-- water
+            tsk(i,j) = tskin_wat(i)
+            landmask(i,j)=0.
           endif ! land(i)
 
         enddo
@@ -1656,7 +1704,7 @@ module lsm_ruc
           sm_input(i,1,j)=0.
 
           !--- initialize smcwlt2 and smcref2 with Noah values
-          if(slmsk(i) == 1.) then
+          if(landfrac(i) > 0.) then
             smcref2 (i) = REFSMCnoah(stype(i))
             smcwlt2 (i) = WLTSMCnoah(stype(i))
           else
@@ -1667,7 +1715,7 @@ module lsm_ruc
           do k=1,lsoil
              st_input(i,k+1,j)=stc(i,k)
              ! convert volumetric soil moisture to SWI (soil wetness index)
-             if(slmsk(i) == 1. .and. swi_init) then
+             if(landfrac(i) > 0. .and. swi_init) then
                sm_input(i,k+1,j)=min(1.,max(0.,(smc(i,k) - smcwlt2(i))/  &
                                  (smcref2(i) - smcwlt2(i))))
              else
@@ -1702,7 +1750,7 @@ module lsm_ruc
 
         do j=jts,jte
         do i=its,ite
-         if (slmsk(i) == 1.) then
+         if (landfrac(i) == 1.) then
          !-- land
            do k=1,lsoil_ruc
            ! convert from SWI to RUC volumetric soil moisture
@@ -1743,13 +1791,13 @@ module lsm_ruc
           do j=jts,jte
           do i=its,ite
 
-           if (slmsk(i) == 1.) then
+           if (landfrac(i) > 0.) then
 
             ! initialize factor
             do k=1,lsoil_ruc
                factorsm(k)=1.
             enddo
-          
+
             ! RUC soil moisture bucket
             smtotr(i,j)=0.
             do k=1,lsoil_ruc -1
@@ -1757,7 +1805,7 @@ module lsm_ruc
             enddo
             ! Noah soil moisture bucket 
             smtotn(i,j)=smc(i,1)*0.1 + smc(i,2)*0.2 + smc(i,3)*0.7 + smc(i,4)*1.
-            
+
             if(debug_print) then
               if(i==ipr) then
               write (0,*)'from Noah to RUC: RUC bucket and Noah bucket at',    &
@@ -1765,12 +1813,12 @@ module lsm_ruc
               write (0,*)'before smois=',i,j,soilm(i,:,j)
               endif
             endif
-          
+
             ! RUC soil moisture correction to match Noah soil moisture bucket
             do k=1,lsoil_ruc-1
               soilm(i,k,j) = max(0.02,soilm(i,k,j)*smtotn(i,j)/(0.9*smtotr(i,j)))
             enddo
-          
+
             if( soilm(i,2,j) > soilm(i,1,j) .and. soilm(i,3,j) > soilm(i,2,j)) then
             ! typical for daytime, no recent precip
               factorsm(1) = 0.75
@@ -1820,7 +1868,7 @@ module lsm_ruc
       ! and soil temperature, and also soil moisture availability in the top
       ! layer
 
-      call ruclsminit( debug_print, slmsk,                            &
+      call ruclsminit( debug_print, landfrac, fice, min_seaice,       &
                  lsoil_ruc, isltyp, ivgtyp, mavail,                   &
                  soilh2o, smfr, soiltemp, soilm,                      &
                  ims,ime, jms,jme, kms,kme,                           &

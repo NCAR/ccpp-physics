@@ -13,7 +13,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [do_ca]
   standard_name = flag_for_cellular_automata
   long_name = cellular automata main switch
@@ -21,7 +20,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [ca_global]
   standard_name = flag_for_global_cellular_automata
   long_name = switch for global ca
@@ -29,16 +27,14 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [si]
   standard_name = sigma_pressure_hybrid_vertical_coordinate
   long_name = vertical sigma coordinate for radiation initialization
   units = none
-  dimensions = (vertical_interface_dimension_for_radiation)
+  dimensions = (vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [vfact_ca]
   standard_name = cellular_automata_vertical_weight
   long_name = vertical weight for ca
@@ -47,7 +43,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -56,7 +51,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -64,7 +58,6 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 ########################################################################
 [ccpp-arg-table]
   name = GFS_stochastics_run
@@ -76,7 +69,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [km]
   standard_name = vertical_layer_dimension
   long_name = number of vertical levels
@@ -84,7 +76,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [kdt]
   standard_name = index_of_timestep
   long_name = current forecast iteration
@@ -92,7 +83,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [delt]
   standard_name = timestep_for_physics
   long_name = physics timestep
@@ -101,7 +91,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [do_sppt]
   standard_name = flag_for_stochastic_physics_perturbations
   long_name = flag for stochastic physics perturbations
@@ -109,7 +98,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [pert_mp]
   standard_name = flag_for_stochastic_microphysics_perturbations
   long_name = flag for stochastic microphysics physics perturbations
@@ -117,7 +105,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [use_zmtnblck]
   standard_name = flag_for_mountain_blocking_for_sppt
   long_name = flag for mountain blocking
@@ -125,7 +112,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [do_shum]
   standard_name = flag_for_stochastic_shum_option
   long_name = flag for stochastic shum option
@@ -133,7 +119,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [do_skeb]
   standard_name = flag_for_stochastic_skeb_option
   long_name = flag for stochastic skeb option
@@ -141,7 +126,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [do_ca]
   standard_name = flag_for_cellular_automata
   long_name = cellular automata main switch
@@ -149,7 +133,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [ca_global]
   standard_name = flag_for_global_cellular_automata
   long_name = switch for global ca
@@ -157,7 +140,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [ca1]
   standard_name = cellular_automata_global_pattern_from_coupled_process
   long_name = cellular automata global pattern
@@ -166,7 +148,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [vfact_ca]
   standard_name = cellular_automata_vertical_weight
   long_name = vertical weight for ca
@@ -175,7 +156,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [zmtnblck]
   standard_name = level_of_dividing_streamline
   long_name = level of the dividing streamline
@@ -184,7 +164,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [sppt_wts]
   standard_name = sppt_weights_from_coupled_process
   long_name = weights for stochastic sppt perturbation
@@ -193,7 +172,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [skebu_wts]
   standard_name = skeb_x_wind_weights_from_coupled_process
   long_name = weights for stochastic skeb perturbation of x wind
@@ -202,7 +180,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [skebv_wts]
   standard_name = skeb_y_wind_weights_from_coupled_process
   long_name = weights for stochastic skeb perturbation of y wind
@@ -211,7 +188,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [shum_wts]
   standard_name = shum_weights_from_coupled_process
   long_name = weights for stochastic shum perturbation
@@ -220,7 +196,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [diss_est]
   standard_name = dissipation_estimate_of_air_temperature_at_model_layers
   long_name = dissipation estimate model layer mean temperature
@@ -229,7 +204,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [ugrs]
   standard_name = x_wind
   long_name = zonal wind
@@ -238,7 +212,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [vgrs]
   standard_name = y_wind
   long_name = meridional wind
@@ -247,7 +220,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [tgrs]
   standard_name = air_temperature
   long_name = model layer mean temperature
@@ -256,7 +228,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [qgrs_wv]
   standard_name = specific_humidity
   long_name = water vapor specific humidity
@@ -265,7 +236,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [qgrs_cw]
   standard_name = cloud_liquid_water_mixing_ratio
   long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates)
@@ -274,7 +244,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [qgrs_rw]
   standard_name = rain_mixing_ratio
   long_name = moist mixing ratio of rain
@@ -283,7 +252,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [qgrs_sw]
   standard_name = snow_mixing_ratio
   long_name = moist mixing ratio of snow
@@ -292,7 +260,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [qgrs_iw]
   standard_name = cloud_ice_mixing_ratio
   long_name = moist mixing ratio of cloud ice
@@ -301,7 +268,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [qgrs_gl]
   standard_name = graupel_mixing_ratio
   long_name = moist ratio of mass of graupel to mass of dry air plus vapor (without condensates) 
@@ -310,7 +276,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [gu0]
   standard_name = x_wind_of_new_state
   long_name = zonal wind updated by physics
@@ -319,7 +284,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [gv0]
   standard_name = y_wind_of_new_state
   long_name = meridional wind updated by physics
@@ -328,7 +292,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [gt0]
   standard_name = air_temperature_of_new_state
   long_name = temperature updated by physics
@@ -337,7 +300,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [gq0_wv]
   standard_name = specific_humidity_of_new_state
   long_name = water vapor specific humidity updated by physics
@@ -346,7 +308,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [dtdtnp]
   standard_name = tendency_of_air_temperature_to_withold_from_sppt
   long_name = temp. change from physics that should not be perturbed by sppt
@@ -355,7 +316,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [gq0_cw]
   standard_name = cloud_liquid_water_mixing_ratio_of_new_state
   long_name = cloud condensed water mixing ratio updated by physics
@@ -364,7 +324,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [gq0_rw]
   standard_name = rain_mixing_ratio_of_new_state
   long_name = moist mixing ratio of rain updated by physics
@@ -373,7 +332,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [gq0_sw]
   standard_name = snow_mixing_ratio_of_new_state
   long_name = moist mixing ratio of snow updated by physics
@@ -382,7 +340,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [gq0_iw]
   standard_name = cloud_ice_mixing_ratio_of_new_state
   long_name = moist mixing ratio of cloud ice updated by physics
@@ -391,7 +348,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [gq0_gl]
   standard_name = graupel_mixing_ratio_of_new_state
   long_name = moist ratio of mass of graupel to mass of dry air plus vapor (without condensates) updated by physics
@@ -400,7 +356,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [rain]
   standard_name = lwe_thickness_of_precipitation_amount_on_dynamics_timestep
   long_name = total rain at this time step
@@ -409,7 +364,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [rainc]
   standard_name = lwe_thickness_of_convective_precipitation_amount_on_dynamics_timestep
   long_name = convective rain at this time step
@@ -418,7 +372,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [tprcp]
   standard_name = nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep
   long_name = total precipitation amount in each time step
@@ -427,7 +380,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [totprcp]
   standard_name = accumulated_lwe_thickness_of_precipitation_amount
   long_name = accumulated total precipitation
@@ -436,7 +388,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [cnvprcp]
   standard_name = cumulative_lwe_thickness_of_convective_precipitation_amount
   long_name = cumulative convective precipitation
@@ -445,7 +396,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [totprcpb]
   standard_name = accumulated_lwe_thickness_of_precipitation_amount_in_bucket
   long_name = accumulated total precipitation in bucket
@@ -454,7 +404,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [cnvprcpb]
   standard_name = cumulative_lwe_thickness_of_convective_precipitation_amount_in_bucket
   long_name = cumulative convective precipitation in bucket
@@ -463,7 +412,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [cplflx]
   standard_name = flag_for_surface_flux_coupling
   long_name = flag controlling cplflx collection (default off)
@@ -471,7 +419,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [rain_cpl]
   standard_name = cumulative_lwe_thickness_of_precipitation_amount_for_coupling
   long_name = total rain precipitation
@@ -480,7 +427,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [snow_cpl]
   standard_name = cumulative_lwe_thickness_of_snow_amount_for_coupling
   long_name = total snow precipitation
@@ -489,7 +435,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [drain_cpl]
   standard_name = tendency_of_lwe_thickness_of_rain_amount_on_dynamics_timestep_for_coupling
   long_name = change in rain_cpl (coupling_type)
@@ -498,7 +443,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [dsnow_cpl]
   standard_name = tendency_of_lwe_thickness_of_snowfall_amount_on_dynamics_timestep_for_coupling
   long_name = change in show_cpl (coupling_type)
@@ -507,7 +451,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [ntcw]
   standard_name = index_of_cloud_liquid_water_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for cloud condensate (or liquid water)
@@ -515,7 +458,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ntrw]
   standard_name = index_of_rain_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for rain water
@@ -523,7 +465,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ntsw]
   standard_name = index_of_snow_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for snow water
@@ -531,14 +472,12 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ntiw]
   standard_name = index_of_cloud_ice_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for  ice water
   units = index
   dimensions = ()
   intent = in
-  optional = F
   type = integer
 [ntgl]
   standard_name = index_of_graupel_mixing_ratio_in_tracer_concentration_array
@@ -547,7 +486,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -556,7 +494,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -564,4 +501,3 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F

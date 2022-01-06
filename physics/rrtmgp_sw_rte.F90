@@ -1,14 +1,10 @@
 module rrtmgp_sw_rte
   use machine,                 only: kind_phys
-  use mo_rte_kind,             only: wl
-  use mo_gas_optics_rrtmgp,    only: ty_gas_optics_rrtmgp
-  use mo_cloud_optics,         only: ty_cloud_optics
   use mo_optical_props,        only: ty_optical_props_2str
   use mo_rte_sw,               only: rte_sw
-  use mo_gas_concentrations,   only: ty_gas_concs
   use mo_fluxes_byband,        only: ty_fluxes_byband
   use module_radsw_parameters, only: cmpfsw_type
-  use radiation_tools,              only: check_error_msg
+  use radiation_tools,         only: check_error_msg
   use rrtmgp_sw_gas_optics,    only: sw_gas_props
   implicit none
 
@@ -29,19 +25,21 @@ contains
 !! \htmlinclude rrtmgp_sw_rte.html
 !!
   subroutine rrtmgp_sw_rte_run(doSWrad, doSWclrsky, nCol, nLev, nDay, idxday, coszen, p_lay, &
-       t_lay, p_lev, sw_optical_props_clrsky, sfc_alb_nir_dir, sfc_alb_nir_dif,              &
+       t_lay, top_at_1, iSFC, sw_optical_props_clrsky, sfc_alb_nir_dir, sfc_alb_nir_dif,     &
        sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, toa_src_sw, sw_optical_props_clouds,            &
        sw_optical_props_aerosol, scmpsw, fluxswUP_allsky, fluxswDOWN_allsky, fluxswUP_clrsky,&
        fluxswDOWN_clrsky, errmsg, errflg)
 
     ! Inputs
     logical, intent(in) :: &
+         top_at_1,                & ! Vertical ordering flag
          doSWrad,                 & ! Flag to calculate SW irradiances
          doSWclrsky                 ! Compute clear-sky fluxes?
     integer, intent(in) :: &
          nCol,                    & ! Number of horizontal gridpoints
          nday,                    & ! Number of daytime points
-         nLev                       ! Number of vertical levels
+         nLev,                    & ! Number of vertical levels
+         iSFC                       ! Vertical index for surface-level
     integer, intent(in), dimension(ncol) :: &
          idxday                     ! Index array for daytime points
     real(kind_phys),intent(in), dimension(ncol) :: &
@@ -49,8 +47,6 @@ contains
     real(kind_phys), dimension(ncol,NLev), intent(in) :: &
          p_lay,                   & ! Pressure @ model layer-centers (Pa)
          t_lay                      ! Temperature (K)
-    real(kind_phys), dimension(ncol,NLev+1), intent(in) :: &
-         p_lev                      ! Pressure @ model layer-interfaces (Pa)
     type(ty_optical_props_2str),intent(inout) :: &
          sw_optical_props_clrsky    ! RRTMGP DDT: shortwave clear-sky radiative properties 
    type(ty_optical_props_2str),intent(in) :: &
@@ -74,9 +70,7 @@ contains
          fluxswDOWN_allsky,       & ! RRTMGP downward all-sky flux profiles (W/m2)
          fluxswUP_clrsky,         & ! RRTMGP upward clear-sky flux profiles (W/m2)
          fluxswDOWN_clrsky          ! RRTMGP downward clear-sky flux profiles (W/m2)
-
-    ! Outputs (optional)
-    type(cmpfsw_type), dimension(ncol), intent(inout),optional :: &
+    type(cmpfsw_type), dimension(ncol), intent(inout) :: &
          scmpsw                     ! 2D surface fluxes, components:
                                     ! uvbfc - total sky downward uv-b flux (W/m2)
                                     ! uvbf0 - clear sky downward uv-b flux (W/m2)
@@ -94,8 +88,7 @@ contains
     real(kind_phys), dimension(nday,NLev+1,sw_gas_props%get_nband()),target :: &
          fluxSW_up_allsky, fluxSW_up_clrsky, fluxSW_dn_allsky, fluxSW_dn_clrsky, fluxSW_dn_dir_allsky
     real(kind_phys), dimension(ncol,NLev) :: vmrTemp
-    logical :: l_scmpsw=.false., top_at_1
-    integer :: iGas,iSFC,iTOA,iBand
+    integer :: iBand
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -103,36 +96,9 @@ contains
 
     if (.not. doSWrad) return
 
-    ! Initialize output fluxes
-    fluxswUP_allsky(:,:)   = 0._kind_phys
-    fluxswDOWN_allsky(:,:) = 0._kind_phys
-    fluxswUP_clrsky(:,:)   = 0._kind_phys
-    fluxswDOWN_clrsky(:,:) = 0._kind_phys
-
     if (nDay .gt. 0) then
 
-       ! Vertical ordering?
-       top_at_1 = (p_lev(1,1) .lt. p_lev(1, NLev))
-       if (top_at_1) then 
-          iSFC = NLev+1
-          iTOA = 1
-       else
-          iSFC = 1
-          iTOA = NLev+1
-       endif
-       
-       ! Are any optional outputs requested? Need to know now to compute correct fluxes.
-       l_scmpsw           = present(scmpsw)
-       if ( l_scmpsw ) then
-          scmpsw = cmpfsw_type (0., 0., 0., 0., 0., 0.)
-       endif
-       
        ! Initialize RRTMGP DDT containing 2D(3D) fluxes
-       fluxSW_up_allsky(:,:,:)     = 0._kind_phys
-       fluxSW_dn_allsky(:,:,:)     = 0._kind_phys
-       fluxSW_dn_dir_allsky(:,:,:) = 0._kind_phys
-       fluxSW_up_clrsky(:,:,:)     = 0._kind_phys
-       fluxSW_dn_clrsky(:,:,:)     = 0._kind_phys
        flux_allsky%bnd_flux_up     => fluxSW_up_allsky
        flux_allsky%bnd_flux_dn     => fluxSW_dn_allsky
        flux_allsky%bnd_flux_dn_dir => fluxSW_dn_dir_allsky
@@ -190,11 +156,15 @@ contains
        ! Store fluxes
        fluxswUP_allsky(idxday(1:nday),:)   = sum(flux_allsky%bnd_flux_up,dim=3)
        fluxswDOWN_allsky(idxday(1:nday),:) = sum(flux_allsky%bnd_flux_dn,dim=3)
-       if ( l_scmpsw ) then
-          scmpsw(idxday(1:nday))%nirbm = sum(flux_allsky%bnd_flux_dn_dir(1:nday,iSFC,:),dim=2)
-          scmpsw(idxday(1:nday))%nirdf = sum(flux_allsky%bnd_flux_dn(1:nday,iSFC,:),dim=2)  - &
-               sum(flux_allsky%bnd_flux_dn_dir(1:nday,iSFC,:),dim=2)
-       endif
+       scmpsw(idxday(1:nday))%nirbm        = sum(flux_allsky%bnd_flux_dn_dir(1:nday,iSFC,:),dim=2)
+       scmpsw(idxday(1:nday))%nirdf        = sum(flux_allsky%bnd_flux_dn(    1:nday,iSFC,:),dim=2) - &
+                                             sum(flux_allsky%bnd_flux_dn_dir(1:nday,iSFC,:),dim=2)
+    else
+       fluxswUP_allsky(:,:)   = 0._kind_phys
+       fluxswDOWN_allsky(:,:) = 0._kind_phys
+       fluxswUP_clrsky(:,:)   = 0._kind_phys
+       fluxswDOWN_clrsky(:,:) = 0._kind_phys
+       scmpsw                 = cmpfsw_type( 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 )       
     endif
   end subroutine rrtmgp_sw_rte_run
   

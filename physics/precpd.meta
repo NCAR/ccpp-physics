@@ -14,7 +14,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [imp_physics_zhao_carr]
   standard_name = identifier_for_zhao_carr_microphysics_scheme
   long_name = choice of Zhao-Carr microphysics scheme
@@ -22,7 +21,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [imp_physics_zhao_carr_pdf]
   standard_name = identifier_for_zhao_carr_pdf_microphysics_scheme
   long_name = choice of Zhao-Carr microphysics scheme with PDF clouds
@@ -30,7 +28,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -39,7 +36,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -47,7 +43,6 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 
 ########################################################################
 [ccpp-arg-table]
@@ -60,7 +55,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [km]
   standard_name = vertical_layer_dimension
   long_name = vertical layer dimension
@@ -68,7 +62,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [dt]
   standard_name = timestep_for_physics
   long_name = physics time step
@@ -77,7 +70,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [del]
   standard_name = air_pressure_difference_between_midlayers
   long_name = pressure level thickness
@@ -86,7 +78,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [prsl]
   standard_name = air_pressure
   long_name = layer mean pressure
@@ -95,7 +86,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [q]
   standard_name = specific_humidity_of_new_state
   long_name = water vapor specific humidity
@@ -104,7 +94,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [cwm]
   standard_name = cloud_liquid_water_mixing_ratio_of_new_state
   long_name = moist cloud condensed water mixing ratio
@@ -113,7 +102,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [t]
   standard_name = air_temperature_of_new_state
   long_name = layer mean air temperature
@@ -122,7 +110,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [rn]
   standard_name = lwe_thickness_of_explicit_precipitation_amount
   long_name = explicit precipitation amount on physics timestep
@@ -131,7 +118,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [grav]
   standard_name = gravitational_acceleration
   long_name = gravitational acceleration
@@ -140,7 +126,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [hvap]
   standard_name = latent_heat_of_vaporization_of_water_at_0C
   long_name = latent heat of evaporation/sublimation
@@ -149,7 +134,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [hfus]
   standard_name = latent_heat_of_fusion_of_water_at_0C
   long_name = latent heat of fusion
@@ -158,7 +142,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [ttp]
   standard_name = triple_point_temperature_of_water
   long_name = triple point temperature of water
@@ -167,7 +150,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [cp]
   standard_name = specific_heat_of_dry_air_at_constant_pressure
   long_name = specific heat of dry air at constant pressure
@@ -176,7 +158,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [eps]
   standard_name = ratio_of_dry_air_to_water_vapor_gas_constants
   long_name = rd/rv
@@ -185,7 +166,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [epsm1]
   standard_name = ratio_of_dry_air_to_water_vapor_gas_constants_minus_one
   long_name = (rd/rv) - 1
@@ -194,7 +174,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [sr]
   standard_name = ratio_of_snowfall_to_rainfall
   long_name = ratio of snowfall to large-scale rainfall
@@ -203,7 +182,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [rainp]
   standard_name = tendency_of_rain_water_mixing_ratio_due_to_microphysics
   long_name = tendency of rain water mixing ratio due to microphysics
@@ -212,7 +190,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [u00k]
   standard_name = critical_relative_humidity
   long_name = critical relative humidity
@@ -221,7 +198,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [psautco]
   standard_name = autoconversion_to_snow_coefficient
   long_name = conversion coefficient from cloud ice to snow
@@ -230,7 +206,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [prautco]
   standard_name = autoconversion_to_rain_coefficient
   long_name = conversion coefficient from cloud water to rain
@@ -239,7 +214,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [evpco]
   standard_name = precipitation_evaporation_coefficient
   long_name = coefficient for evaporation of rainfall
@@ -248,7 +222,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [wminco]
   standard_name = cloud_condensate_autoconversion_threshold_coefficient
   long_name = conversion coefficient from cloud liquid and ice to precipitation
@@ -257,7 +230,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [wk1]
   standard_name = grid_size_related_coefficient_used_in_scale_sensitive_schemes
   long_name = grid size related coefficient used in scale-sensitive schemes
@@ -266,7 +238,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [lprnt]
   standard_name = flag_print
   long_name = flag for printing diagnostics to output
@@ -274,7 +245,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [jpr]
   standard_name = horizontal_index_of_printed_column
   long_name = horizontal index of printed column
@@ -282,7 +252,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -291,7 +260,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -299,5 +267,4 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 

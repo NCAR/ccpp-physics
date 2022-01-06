@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = noahmpdrv
   type = scheme
-  dependencies = funcphys.f90,machine.F,module_sf_noahmp_glacier.f90,module_sf_noahmplsm.f90,noahmp_tables.f90,set_soilveg.f
+  dependencies = funcphys.f90,machine.F,sfc_diff.f,module_sf_noahmp_glacier.f90,module_sf_noahmplsm.f90,noahmp_tables.f90,set_soilveg.f
 
 ########################################################################
 [ccpp-arg-table]
@@ -14,7 +14,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [lsm_noahmp]
   standard_name = identifier_for_noahmp_land_surface_scheme
   long_name = flag for NOAH MP land surface model
@@ -22,7 +21,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [me]
   standard_name = mpi_rank
   long_name = current MPI-rank
@@ -30,7 +28,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [isot]
   standard_name = control_for_soil_type_dataset
   long_name = soil type dataset choice
@@ -38,7 +35,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ivegsrc]
   standard_name = control_for_vegetation_dataset
   long_name = land use dataset choice
@@ -46,7 +42,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [nlunit]
   standard_name = iounit_of_namelist
   long_name = fortran unit number for file opens
@@ -54,7 +49,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [pores]
   standard_name = maximum_soil_moisture_content_for_land_surface_model
   long_name = maximum soil moisture for a given soil type for land surface model
@@ -79,7 +73,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -87,7 +80,6 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 
 ########################################################################
 [ccpp-arg-table]
@@ -100,7 +92,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [km]
   standard_name = vertical_dimension_of_soil
   long_name = soil vertical layer dimension
@@ -108,7 +99,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [lsnowl]
   standard_name = lower_bound_of_vertical_dimension_of_surface_snow
   long_name = lower bound of of snow-related arrays for land surface model
@@ -116,7 +106,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [itime]
   standard_name = index_of_timestep
   long_name = current forecast iteration
@@ -124,7 +113,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ps]
   standard_name = surface_air_pressure
   long_name = surface pressure
@@ -133,7 +121,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [u1]
   standard_name = x_wind_at_surface_adjacent_layer
   long_name = zonal wind at lowest model layer
@@ -142,7 +129,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [v1]
   standard_name = y_wind_at_surface_adjacent_layer
   long_name = meridional wind at lowest model layer
@@ -151,7 +137,6 @@
   type = real
   kind = kind_phys
   intent= in
-  optional = F
 [t1]
   standard_name = air_temperature_at_surface_adjacent_layer
   long_name = mean temperature at lowest model layer
@@ -160,7 +145,6 @@
   type = real
   kind = kind_phys
   intent= in
-  optional = F
 [q1]
   standard_name = specific_humidity_at_surface_adjacent_layer
   long_name = water vapor specific humidity at lowest model layer
@@ -169,7 +153,6 @@
   type = real
   kind = kind_phys
   intent= in
-  optional = F
 [soiltyp]
   standard_name = soil_type_classification
   long_name = soil type at each grid cell
@@ -177,7 +160,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent= in
-  optional = F
 [vegtype]
   standard_name = vegetation_type_classification
   long_name = vegetation type at each grid cell
@@ -185,7 +167,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent= in
-  optional = F
 [sigmaf]
   standard_name = bounded_vegetation_area_fraction
   long_name = areal fractional cover of green vegetation bounded on the bottom
@@ -194,7 +175,6 @@
   type = real
   kind = kind_phys
   intent= in
-  optional = F
 [dlwflx]
   standard_name = surface_downwelling_longwave_flux
   long_name = surface downwelling longwave flux at current time
@@ -203,7 +183,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [dswsfc]
   standard_name = surface_downwelling_shortwave_flux
   long_name = surface downwelling shortwave flux at current time
@@ -212,7 +191,6 @@
   type = real
   kind = kind_phys
   intent= in
-  optional = F
 [snet]
   standard_name = surface_net_downwelling_shortwave_flux
   long_name = surface net downwelling shortwave flux at current time
@@ -221,7 +199,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [delt]
   standard_name = timestep_for_dynamics
   long_name = dynamics timestep
@@ -230,7 +207,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [tg3]
   standard_name = deep_soil_temperature
   long_name = deep soil temperature
@@ -239,7 +215,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [cm]
   standard_name = surface_drag_coefficient_for_momentum_in_air_over_land
   long_name = surface exchange coeff for momentum over land
@@ -247,8 +222,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
-  optional = F
+  intent = inout
 [ch]
   standard_name = surface_drag_coefficient_for_heat_and_moisture_in_air_over_land
   long_name = surface exchange coeff heat & moisture over land
@@ -256,8 +230,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
-  optional = F
+  intent = inout
 [prsl1]
   standard_name = air_pressure_at_surface_adjacent_layer
   long_name = mean pressure at lowest model layer
@@ -266,7 +239,14 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
+[prslk1]
+  standard_name = dimensionless_exner_function_at_surface_adjacent_layer
+  long_name = dimensionless Exner function at the lowest model layer
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
 [prslki]
   standard_name = ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer
   long_name = Exner function ratio bt midlayer and interface at 1st layer
@@ -275,7 +255,14 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
+[prsik1]
+  standard_name = surface_dimensionless_exner_function
+  long_name = dimensionless Exner function at the ground surface
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
 [zf]
   standard_name = height_above_ground_at_lowest_model_layer
   long_name = layer 1 height above ground (not MSL)
@@ -284,7 +271,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [dry]
   standard_name = flag_nonzero_land_surface_fraction
   long_name = flag indicating presence of some land surface area fraction
@@ -292,7 +278,6 @@
   dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
-  optional = F
 [wind]
   standard_name = wind_speed_at_lowest_model_layer
   long_name = wind speed at lowest model level
@@ -301,7 +286,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [slopetyp]
   standard_name = surface_slope_classification
   long_name = surface slope type at each grid cell
@@ -309,7 +293,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
-  optional = F
 [shdmin]
   standard_name = min_vegetation_area_fraction
   long_name = min fractional coverage of green vegetation
@@ -318,7 +301,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [shdmax]
   standard_name = max_vegetation_area_fraction
   long_name = max fractional coverage of green vegetation
@@ -327,7 +309,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [snoalb]
   standard_name = upper_bound_of_max_albedo_assuming_deep_snow
   long_name = maximum snow albedo
@@ -336,7 +317,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [sfalb]
   standard_name = surface_albedo_for_diffused_shortwave_on_radiation_timestep
   long_name = mean surface diffused sw albedo
@@ -345,7 +325,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [flag_iter]
   standard_name = flag_for_iteration
   long_name = flag for iteration
@@ -353,15 +332,14 @@
   dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
-  optional = F
-[flag_guess]
-  standard_name = flag_for_guess_run
-  long_name = flag for guess run
-  units = flag
-  dimensions = (horizontal_loop_extent)
-  type = logical
+[con_g]
+  standard_name = gravitational_acceleration
+  long_name = gravitational acceleration
+  units = m s-2
+  dimensions = ()
+  type = real
+  kind = kind_phys
   intent = in
-  optional = F
 [idveg]
   standard_name = control_for_land_surface_scheme_dynamic_vegetation
   long_name = choice for dynamic vegetation option (see noahmp module for definition)
@@ -369,7 +347,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [iopt_crs]
   standard_name = control_for_land_surface_scheme_canopy_stomatal_resistance
   long_name = choice for canopy stomatal resistance option (see noahmp module for definition)
@@ -377,7 +354,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [iopt_btr]
   standard_name = control_for_land_surface_scheme_soil_moisture_factor_stomatal_resistance
   long_name = choice for soil moisture factor for canopy stomatal resistance option (see noahmp module for definition)
@@ -385,7 +361,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [iopt_run]
   standard_name = control_for_land_surface_scheme_runoff_and_groundwater
   long_name = choice for runoff and groundwater option (see noahmp module for definition)
@@ -393,7 +368,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [iopt_sfc]
   standard_name = control_for_land_surface_scheme_surface_layer_drag_coefficient
   long_name = choice for surface layer drag coefficient option (see noahmp module for definition)
@@ -401,7 +375,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [iopt_frz]
   standard_name = control_for_land_surface_scheme_supercooled_liquid_water
   long_name = choice for supercooled liquid water option (see noahmp module for definition)
@@ -409,7 +382,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [iopt_inf]
   standard_name = control_for_land_surface_scheme_frozen_soil_permeability
   long_name = choice for frozen soil permeability option (see noahmp module for definition)
@@ -417,7 +389,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [iopt_rad]
   standard_name = control_for_land_surface_scheme_radiative_transfer
   long_name = choice for radiation transfer option (see noahmp module for definition)
@@ -425,7 +396,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [iopt_alb]
   standard_name = control_for_land_surface_scheme_surface_snow_albedo
   long_name = choice for ground snow surface albedo option (see noahmp module for definition)
@@ -433,7 +403,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [iopt_snf]
   standard_name = control_for_land_surface_scheme_precipitation_type_partition
   long_name = choice for precipitation partition option (see noahmp module for definition)
@@ -441,7 +410,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [iopt_tbot]
   standard_name = control_for_land_surface_scheme_lower_boundary_soil_temperature
   long_name = choice for lower boundary soil temperature option (see noahmp module for definition)
@@ -449,7 +417,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [iopt_stc]
   standard_name = control_for_land_surface_scheme_soil_and_snow_temperature_time_integration
   long_name = choice for soil and snow temperature time stepping option (see noahmp module for definition)
@@ -457,7 +424,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [xlatin]
   standard_name = latitude
   long_name = latitude
@@ -466,7 +432,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [xcoszin]
   standard_name = instantaneous_cosine_of_zenith_angle
   long_name = cosine of zenith angle at current time
@@ -475,7 +440,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [iyrlen]
   standard_name = number_of_days_in_current_year
   long_name = number of days in a year
@@ -483,7 +447,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [julian]
   standard_name = forecast_julian_day
   long_name = julian day
@@ -492,7 +455,14 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
+[garea]
+  standard_name = cell_area
+  long_name = area of the grid cell
+  units = m2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
 [rainn_mp]
   standard_name = explicit_precipitation_rate_on_previous_timestep
   long_name = explicit rainfall rate previous timestep
@@ -501,7 +471,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [rainc_mp]
   standard_name = convective_precipitation_rate_on_previous_timestep
   long_name = convective precipitation rate from previous timestep
@@ -510,7 +479,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [snow_mp]
   standard_name = snowfall_rate_on_previous_timestep
   long_name = snow precipitation rate from previous timestep
@@ -519,7 +487,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [graupel_mp]
   standard_name = graupel_precipitation_rate_on_previous_timestep
   long_name = graupel precipitation rate from previous timestep
@@ -528,7 +495,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [ice_mp]
   standard_name = ice_precipitation_rate_on_previous_timestep
   long_name = ice precipitation rate from previous timestep
@@ -537,7 +503,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [con_hvap]
   standard_name = latent_heat_of_vaporization_of_water_at_0C
   long_name = latent heat of evaporation/sublimation
@@ -546,7 +511,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [con_cp]
   standard_name = specific_heat_of_dry_air_at_constant_pressure
   long_name = specific heat of dry air at constant pressure
@@ -555,7 +519,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [con_jcal]
   standard_name = joules_per_calorie_constant
   long_name = joules per calorie constant
@@ -564,7 +527,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [rhoh2o]
   standard_name = fresh_liquid_water_density_at_0c
   long_name = density of liquid water
@@ -573,7 +535,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [con_eps]
   standard_name = ratio_of_dry_air_to_water_vapor_gas_constants
   long_name = rd/rv
@@ -582,7 +543,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [con_epsm1]
   standard_name = ratio_of_dry_air_to_water_vapor_gas_constants_minus_one
   long_name = (rd/rv) - 1
@@ -591,7 +551,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [con_fvirt]
   standard_name = ratio_of_vapor_to_dry_air_gas_constants_minus_one
   long_name = (rv/rd) - 1 (rv = ideal gas constant for water vapor)
@@ -600,7 +559,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [con_rd]
   standard_name = gas_constant_of_dry_air
   long_name = ideal gas constant for dry air
@@ -609,7 +567,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [con_hfus]
   standard_name = latent_heat_of_fusion_of_water_at_0C
   long_name = latent heat of fusion
@@ -618,7 +575,13 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
+[thsfc_loc]
+  standard_name = flag_for_reference_pressure_theta
+  long_name = flag for reference pressure in theta calculation
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [weasd]
   standard_name = water_equivalent_accumulated_snow_depth_over_land
   long_name = water equiv of acc snow depth over land
@@ -627,7 +590,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [snwdph]
   standard_name = surface_snow_thickness_water_equivalent_over_land
   long_name = water equivalent snow depth over land
@@ -636,7 +598,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [tskin]
   standard_name = surface_skin_temperature_over_land
   long_name = surface skin temperature over land
@@ -645,7 +606,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [tprcp]
   standard_name = nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep_over_land
   long_name = total precipitation amount in each time step over land
@@ -654,7 +614,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [srflag]
   standard_name = precipitation_type
   long_name = snow/rain flag for precipitation
@@ -663,7 +622,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [smc]
   standard_name = volume_fraction_of_condensed_water_in_soil
   long_name = total soil moisture
@@ -672,7 +630,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [stc]
   standard_name = soil_temperature
   long_name = soil temperature
@@ -681,7 +638,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [slc]
   standard_name = volume_fraction_of_unfrozen_water_in_soil
   long_name = liquid soil moisture
@@ -690,7 +646,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [canopy]
   standard_name = canopy_water_amount
   long_name = canopy water amount
@@ -699,7 +654,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [trans]
   standard_name = transpiration_flux
   long_name = total plant transpiration rate
@@ -708,7 +662,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [tsurf]
   standard_name = surface_skin_temperature_after_iteration_over_land
   long_name = surface skin temperature after iteration over land
@@ -717,7 +670,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [zorl]
   standard_name = surface_roughness_length_over_land
   long_name = surface roughness length over land  (temporary use as interstitial)
@@ -726,7 +678,62 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
+[rb1]
+  standard_name = bulk_richardson_number_at_lowest_model_level_over_land
+  long_name = bulk Richardson number at the surface over land
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[fm1]
+  standard_name = Monin_Obukhov_similarity_function_for_momentum_over_land
+  long_name = Monin-Obukhov similarity function for momentum over land
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[fh1]
+  standard_name = Monin_Obukhov_similarity_function_for_heat_over_land
+  long_name = Monin-Obukhov similarity function for heat over land
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[ustar1]
+  standard_name = surface_friction_velocity_over_land
+  long_name = surface friction velocity over land
+  units = m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[stress1]
+  standard_name = surface_wind_stress_over_land
+  long_name = surface wind stress over land
+  units = m2 s-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[fm101]
+  standard_name = Monin_Obukhov_similarity_function_for_momentum_at_10m_over_land
+  long_name = Monin-Obukhov similarity parameter for momentum at 10m over land
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[fh21]
+  standard_name = Monin_Obukhov_similarity_function_for_heat_at_2m_over_land
+  long_name = Monin-Obukhov similarity parameter for heat at 2m over land
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
 [snowxy]
   standard_name = number_of_snow_layers
   long_name = number of snow layers
@@ -735,7 +742,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [tvxy]
   standard_name = canopy_temperature
   long_name = vegetation temperature
@@ -744,7 +750,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [tgxy]
   standard_name = ground_temperature
   long_name = ground temperature for noahmp
@@ -753,7 +758,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [canicexy]
   standard_name = canopy_intercepted_ice_mass
   long_name = canopy intercepted ice mass
@@ -762,7 +766,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [canliqxy]
   standard_name = canopy_intercepted_liquid_water
   long_name = canopy intercepted liquid water
@@ -771,7 +774,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [eahxy]
   standard_name = air_vapor_pressure_in_canopy
   long_name = canopy air vapor pressure
@@ -780,7 +782,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [tahxy]
   standard_name = air_temperature_in_canopy
   long_name = canopy air temperature
@@ -789,7 +790,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [cmxy]
   standard_name = surface_drag_coefficient_for_momentum_for_noahmp
   long_name = surface drag coefficient for momentum for noahmp
@@ -798,7 +798,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [chxy]
   standard_name = surface_drag_coefficient_for_heat_and_moisture_for_noahmp
   long_name = surface exchange coeff heat & moisture for noahmp
@@ -807,7 +806,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [fwetxy]
   standard_name = wet_canopy_area_fraction
   long_name = area fraction of canopy that is wetted/snowed
@@ -816,7 +814,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [sneqvoxy]
   standard_name = lwe_thickness_of_snowfall_amount_on_previous_timestep
   long_name = snow mass at previous time step
@@ -825,7 +822,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [alboldxy]
   standard_name = surface_albedo_assuming_deep_snow_on_previous_timestep
   long_name = snow albedo at previous time step
@@ -834,7 +830,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [qsnowxy]
   standard_name = lwe_snowfall_rate
   long_name = snow precipitation rate at surface
@@ -843,7 +838,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [wslakexy]
   standard_name = water_storage_in_lake
   long_name = lake water storage
@@ -852,7 +846,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [zwtxy]
   standard_name = water_table_depth
   long_name = water table depth
@@ -861,7 +854,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [waxy]
   standard_name = water_storage_in_aquifer
   long_name = water storage in aquifer
@@ -870,7 +862,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [wtxy]
   standard_name = water_storage_in_aquifer_and_saturated_soil
   long_name = water storage in aquifer and saturated soil
@@ -879,7 +870,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [tsnoxy]
   standard_name = temperature_in_surface_snow
   long_name = temperature_in_surface_snow
@@ -888,7 +878,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [zsnsoxy]
   standard_name = depth_from_snow_surface_at_bottom_interface
   long_name = depth from the top of the snow surface at the bottom of the layer
@@ -897,7 +886,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [snicexy]
   standard_name = lwe_thickness_of_ice_in_surface_snow
   long_name = lwe_thickness_of_ice_in_surface_snow
@@ -906,7 +894,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [snliqxy]
   standard_name = lwe_thickness_of_liquid_water_in_surface_snow
   long_name = snow layer liquid water
@@ -915,7 +902,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [lfmassxy]
   standard_name = leaf_mass_content
   long_name = leaf mass
@@ -924,7 +910,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [rtmassxy]
   standard_name = fine_root_mass_content
   long_name = fine root mass
@@ -933,7 +918,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [stmassxy]
   standard_name = stem_mass_content
   long_name = stem mass
@@ -942,7 +926,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [woodxy]
   standard_name = wood_mass_content
   long_name = wood mass including woody roots
@@ -951,7 +934,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [stblcpxy]
   standard_name = slow_soil_pool_mass_content_of_carbon
   long_name = stable carbon in deep soil
@@ -960,7 +942,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [fastcpxy]
   standard_name = fast_soil_pool_mass_content_of_carbon
   long_name = short-lived carbon in shallow soil
@@ -969,7 +950,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [xlaixy]
   standard_name = leaf_area_index
   long_name = leaf area index 
@@ -978,7 +958,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [xsaixy]
   standard_name = stem_area_index
   long_name = stem area index 
@@ -987,7 +966,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [taussxy]
   standard_name = dimensionless_age_of_surface_snow
   long_name = non-dimensional snow age
@@ -996,7 +974,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [smoiseq]
   standard_name = volumetric_equilibrium_soil_moisture
   long_name = equilibrium soil water content
@@ -1005,7 +982,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [smcwtdxy]
   standard_name = volumetric_soil_moisture_between_soil_bottom_and_water_table
   long_name = soil water content between the bottom of the soil and the water table
@@ -1014,7 +990,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [deeprechxy]
   standard_name = water_table_recharge_assuming_deep
   long_name = recharge to or from the water table when deep
@@ -1023,7 +998,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [rechxy]
   standard_name = water_table_recharge_assuming_shallow
   long_name = recharge to or from the water table when shallow
@@ -1032,7 +1006,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [albdvis]
   standard_name = surface_albedo_direct_visible_over_land
   long_name = direct surface albedo visible band over land
@@ -1041,7 +1014,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [albdnir]
   standard_name = surface_albedo_direct_NIR_over_land
   long_name = direct surface albedo NIR band over land
@@ -1050,7 +1022,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [albivis]
   standard_name = surface_albedo_diffuse_visible_over_land
   long_name = diffuse surface albedo visible band over land
@@ -1059,7 +1030,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [albinir]
   standard_name = surface_albedo_diffuse_NIR_over_land
   long_name = diffuse surface albedo NIR band over land
@@ -1068,7 +1038,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [emiss]
   standard_name = surface_longwave_emissivity_over_land
   long_name = surface lw emissivity in fraction over land
@@ -1077,7 +1046,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [sncovr1]
   standard_name = surface_snow_area_fraction_over_land
   long_name = surface snow area fraction
@@ -1086,7 +1054,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [qsurf]
   standard_name = surface_specific_humidity_over_land
   long_name = surface air saturation specific humidity over land
@@ -1095,7 +1062,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [gflux]
   standard_name = upward_heat_flux_in_soil_over_land
   long_name = soil heat flux over land
@@ -1104,7 +1070,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [drain]
   standard_name = subsurface_runoff_flux
   long_name = subsurface runoff flux
@@ -1113,7 +1078,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [evap]
   standard_name = kinematic_surface_upward_latent_heat_flux_over_land
   long_name = kinematic surface upward latent heat flux over land
@@ -1122,7 +1086,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [hflx]
   standard_name = kinematic_surface_upward_sensible_heat_flux_over_land
   long_name = kinematic surface upward sensible heat flux over land
@@ -1131,7 +1094,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [ep]
   standard_name = surface_upward_potential_latent_heat_flux_over_land
   long_name = surface upward potential latent heat flux over land
@@ -1140,7 +1102,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [runoff]
   standard_name = surface_runoff_flux
   long_name = surface runoff flux
@@ -1149,7 +1110,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [cmm]
   standard_name = surface_drag_wind_speed_for_momentum_in_air_over_land
   long_name = momentum exchange coefficient over land
@@ -1158,7 +1118,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [chh]
   standard_name = surface_drag_mass_flux_for_heat_and_moisture_in_air_over_land
   long_name = thermal exchange coefficient over land
@@ -1167,7 +1126,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [evbs]
   standard_name = soil_upward_latent_heat_flux
   long_name = soil upward latent heat flux
@@ -1176,7 +1134,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [evcw]
   standard_name = canopy_upward_latent_heat_flux
   long_name = canopy upward latent heat flux
@@ -1185,7 +1142,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [sbsno]
   standard_name = snow_deposition_sublimation_upward_latent_heat_flux
   long_name = latent heat flux from snow depo/subl
@@ -1194,7 +1150,38 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
+[pah]
+  standard_name = total_precipitation_advected_heat
+  long_name = precipitation advected heat - total
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[ecan]
+  standard_name = evaporation_of_intercepted_water
+  long_name = evaporation of intercepted water
+  units = kg m-2 s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[etran]
+  standard_name = transpiration_rate
+  long_name = transpiration rate
+  units = kg m-2 s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[edir]
+  standard_name = soil_surface_evaporation_rate
+  long_name = soil surface evaporation rate
+  units = kg m-2 s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
 [snowc]
   standard_name = surface_snow_area_fraction
   long_name = surface snow area fraction
@@ -1203,7 +1190,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [stm]
   standard_name = soil_moisture_content
   long_name = soil moisture
@@ -1212,7 +1198,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [snohf]
   standard_name = snow_freezing_rain_upward_latent_heat_flux
   long_name = latent heat flux due to snow and frz rain
@@ -1221,7 +1206,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [smcwlt2]
   standard_name = volume_fraction_of_condensed_water_in_soil_at_wilting_point
   long_name = wilting point (volumetric)
@@ -1230,7 +1214,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [smcref2]
   standard_name = threshold_volume_fraction_of_condensed_water_in_soil
   long_name = soil moisture threshold (volumetric)
@@ -1239,7 +1222,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [wet1]
   standard_name = normalized_soil_wetness
   long_name = normalized soil wetness
@@ -1248,7 +1230,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [t2mmp]
   standard_name = temperature_at_2m_from_noahmp
   long_name = 2 meter temperature from noahmp
@@ -1257,7 +1238,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [q2mp]
   standard_name = specific_humidity_at_2m_from_noahmp
   long_name = 2 meter specific humidity from noahmp
@@ -1266,7 +1246,14 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
+[zvfun]
+  standard_name = function_of_surface_roughness_length_and_green_vegetation_fraction
+  long_name = function of surface roughness length and green vegetation fraction
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -1275,7 +1262,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -1283,4 +1269,3 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F

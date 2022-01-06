@@ -1,37 +1,7 @@
 [ccpp-table-properties]
   name = rrtmgp_lw_cloud_sampling
   type = scheme
-  dependencies = machine.F,mersenne_twister.f,physparam.f,rrtmgp_sampling.F90,radiation_tools.F90
-
-########################################################################
-[ccpp-arg-table]
-  name = rrtmgp_lw_cloud_sampling_init
-  type = scheme
-[ipsdlw0]
-  standard_name = initial_permutation_seed_lw
-  long_name = initial seed for McICA LW
-  units = none
-  dimensions = ()
-  type = integer
-  intent = out
-  optional = F
-[errmsg]
-  standard_name = ccpp_error_message
-  long_name = error message for error handling in CCPP
-  units = none
-  dimensions = ()
-  type = character
-  kind = len=*
-  intent = out
-  optional = F
-[errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = out
-  optional = F
+  dependencies = machine.F,mersenne_twister.f,rrtmgp_sampling.F90,radiation_tools.F90
 
 ######################################################
 [ccpp-arg-table]
@@ -44,15 +14,13 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [doGP_lwscat] 
   standard_name = flag_to_include_longwave_scattering_in_cloud_optics
   long_name = logical flag to control the addition of LW scattering in RRTMGP 
   units = flag
   dimensions = ()
-  type = logical  
+  type = logical
   intent = in
-  optional = F    
 [ncol]
   standard_name = horizontal_loop_extent
   long_name = horizontal dimension
@@ -60,7 +28,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [nLev]
   standard_name = vertical_layer_dimension
   long_name = number of vertical levels
@@ -68,7 +35,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [isubc_lw]
   standard_name = flag_for_lw_clouds_sub_grid_approximation
   long_name = flag for lw clouds sub-grid approximation
@@ -76,15 +42,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
-[ipsdlw0]
-  standard_name = initial_permutation_seed_lw
-  long_name = initial seed for McICA LW
-  units = none
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [iovr]
   standard_name = flag_for_cloud_overlap_method_for_radiation
   long_name = max-random overlap clouds
@@ -92,7 +49,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [iovr_maxrand]
   standard_name = flag_for_maximum_random_cloud_overlap_method
   long_name = choice of maximum-random cloud overlap method
@@ -100,7 +56,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [iovr_dcorr]
   standard_name = flag_for_decorrelation_length_cloud_overlap_method
   long_name = choice of decorrelation-length cloud overlap method
@@ -108,7 +63,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [iovr_exp]
   standard_name = flag_for_exponential_cloud_overlap_method
   long_name = choice of exponential cloud overlap method
@@ -116,7 +70,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [iovr_exprand]
   standard_name = flag_for_exponential_random_cloud_overlap_method
   long_name = choice of exponential-random cloud overlap method
@@ -124,7 +77,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [iovr_rand]
   standard_name = flag_for_random_cloud_overlap_method
   long_name = choice of random cloud overlap method
@@ -132,7 +84,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [iovr_max]
   standard_name = flag_for_maximum_cloud_overlap_method
   long_name = choice of maximum cloud overlap method
@@ -140,7 +91,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [icseed_lw]
   standard_name = random_number_seed_for_mcica_longwave
   long_name = seed for random number generation for longwave radiation
@@ -148,7 +98,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
-  optional = F
 [cld_frac]
   standard_name = total_cloud_fraction
   long_name = layer total cloud fraction
@@ -157,7 +106,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [precip_frac]
   standard_name = precipitation_fraction_by_layer
   long_name = precipitation fraction in each layer
@@ -166,7 +114,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F   
 [cloud_overlap_param]
   standard_name = cloud_overlap_param
   long_name = cloud overlap parameter
@@ -175,7 +122,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [precip_overlap_param]
   standard_name = precip_overlap_param
   long_name = precipitation overlap parameter
@@ -184,7 +130,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [lw_optical_props_cloudsByBand]
   standard_name = longwave_optical_properties_for_cloudy_atmosphere_by_band
   long_name = Fortran DDT containing RRTMGP optical properties
@@ -192,7 +137,6 @@
   dimensions = ()
   type = ty_optical_props_2str
   intent = in
-  optional = F
 [lw_optical_props_precipByBand]
   standard_name = longwave_optical_properties_for_precipitation_by_band
   long_name = Fortran DDT containing RRTMGP optical properties
@@ -200,7 +144,6 @@
   dimensions = ()
   type = ty_optical_props_2str
   intent = in
-  optional = F    
 [lw_optical_props_clouds]
   standard_name = longwave_optical_properties_for_cloudy_atmosphere
   long_name = Fortran DDT containing RRTMGP optical properties
@@ -208,7 +151,6 @@
   dimensions = ()
   type = ty_optical_props_2str
   intent = inout
-  optional = F
 [lw_optical_props_precip]
   standard_name = longwave_optical_properties_for_precipitation
   long_name = Fortran DDT containing RRTMGP optical properties
@@ -216,7 +158,6 @@
   dimensions = ()
   type = ty_optical_props_2str
   intent = inout
-  optional = F    
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -225,7 +166,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -233,4 +173,3 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F

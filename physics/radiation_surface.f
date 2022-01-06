@@ -20,18 +20,22 @@
 !                                                                      !
 !      'setalb'     -- set up four-component surface albedoes          !
 !         inputs:                                                      !
-!           (slmsk,snowf,sncovr,snoalb,zorlf,coszf,tsknf,tairf,hprif,  !
+!           (slmsk,snodi,sncovr,snoalb,zorlf,coszf,tsknf,tairf,hprif,  !
 !            alvsf,alnsf,alvwf,alnwf,facsf,facwf,fice,tisfc            !
 !            IMAX)                                                     !
 !         outputs:                                                     !
 !           (sfcalb)                                                   !
 !                                                                      !
 !      'setemis'    -- set up surface emissivity for lw radiation      !
-!         inputs:                                                      !
-!           (xlon,xlat,slmsk,snowf,sncovr,zorlf,tsknf,tairf,hprif,     !
-!            IMAX)                                                     !
-!         outputs:                                                     !
-!           (sfcemis)                                                  !
+!          ( lsm,lsm_noahmp,lsm_ruc,frac_grid,cplice,use_flake,        !
+!  ---  inputs:
+!            lakefrac,xlon,xlat,slmsk,snodl,snodi,sncovr,sncovr_ice,   !
+!            zorlf,tsknf,tairf,hprif,                                  !
+!            semis_lnd,semis_ice,semis_wat,IMAX,fracl,fraco,fraci,icy, !
+!
+!  ---  outputs:
+!            semisbase, sfcemis                                        !
+!
 !                                                                      !
 !    external modules referenced:                                      !
 !                                                                      !
@@ -96,9 +100,9 @@
 !!
 !!\version NCEP-Radiation_surface   v5.1  Nov 2012
 
-!> This module sets up surface albedo for SW radiation and surface  
+!> This module sets up surface albedo for SW radiation and surface
 !! emissivity for LW radiation.  
-      module module_radiation_surface   
+      module module_radiation_surface
 !
 !! \section arg_table_module_radiation_surface
 !! \htmlinclude module_radiation_surface.html
@@ -120,12 +124,12 @@
 
 !  ---  constant parameters
       integer, parameter, public :: NF_ALBD = 4     !< number of surface albedo components
-      integer, parameter, public :: IMXEMS = 360    !< number of longtitude points in global emis-type map
-      integer, parameter, public :: JMXEMS = 180    !< number of latitude points in global emis-type map
+      integer, parameter, public :: IMXEMS  = 360   !< number of longtitude points in global emis-type map
+      integer, parameter, public :: JMXEMS  = 180   !< number of latitude points in global emis-type map
       real (kind=kind_phys), parameter :: f_zero = 0.0
       real (kind=kind_phys), parameter :: f_one  = 1.0
       real (kind=kind_phys), parameter :: epsln  = 1.0e-6
-      real (kind=kind_phys), parameter :: rad2dg= 180.0 / con_pi
+      real (kind=kind_phys), parameter :: rad2dg = 180.0 / con_pi
       integer, allocatable  ::  idxems(:,:)         !< global surface emissivity index array
       integer :: iemslw = 1                         !< global surface emissivity control flag set up in 'sfc_init'
 !
@@ -243,10 +247,12 @@
           if ( me == 0 ) then
             print *,' - Using Varying Surface Emissivity for lw'
             print *,'   Requested data file "',semis_file,'" not found!'
-            print *,'   Change to fixed surface emissivity = 1.0 !'
           endif
+          errmsg = 'module_radiation_surface: surface emissivity
+     & file not provided'
+          errflg = 1
+          return
 
-          iemslw = 0
         else
           close(NIRADSF)
           open (NIRADSF,file=semis_file,form='formatted',status='old')
@@ -298,7 +304,7 @@
 !! \n 1) climatological surface albedo scheme (\cite briegleb_1992)
 !! \n 2) MODIS retrieval based scheme from Boston univ.
 !!\param slmsk      (IMAX), sea(0),land(1),ice(2) mask on fcst model grid
-!!\param snowf      (IMAX), snow depth water equivalent in mm
+!!\param snodi      (IMAX), snow depth water equivalent in mm over ice
 !!\param sncovr     (IMAX), snow cover over land
 !!\param snoalb     (IMAX), maximum snow albedo over land (for deep snow)
 !!\param zorlf      (IMAX), surface roughness in cm
@@ -332,10 +338,9 @@
 !! @{
 !-----------------------------------
       subroutine setalb                                                 &
-     &     ( slmsk,lsm,lsm_noahmp,lsm_ruc,use_cice_alb,snowf,           & !  ---  inputs:
+     &     ( slmsk,lsm,lsm_noahmp,lsm_ruc,use_cice_alb,snodi,           & !  ---  inputs:
      &       sncovr,sncovr_ice,snoalb,zorlf,coszf,                      &
-     &       tsknf,tairf,hprif,frac_grid, lakefrac,                     & 
-!    &       tsknf,tairf,hprif,frac_grid,min_seaice,                    & 
+     &       tsknf,tairf,hprif,frac_grid, lakefrac,                     &
      &       alvsf,alnsf,alvwf,alnwf,facsf,facwf,fice,tisfc,            &
      &       lsmalbdvis, lsmalbdnir, lsmalbivis, lsmalbinir,            &
      &       icealbdvis, icealbdnir, icealbivis, icealbinir,            &
@@ -359,7 +364,7 @@
 !                                                                       !
 !  inputs:                                                              !
 !     slmsk (IMAX)  - sea(0),land(1),ice(2) mask on fcst model grid     !
-!     snowf (IMAX)  - snow depth water equivalent in mm                 !
+!     snodi (IMAX)  - snow depth water equivalent in mm over ice        !
 !     sncovr(IMAX)  - ialgflg=0: not used                               !
 !                     ialgflg=1: snow cover over land in fraction       !
 !     sncovr_ice(IMAX)  - ialgflg=0: not used                           !
@@ -411,12 +416,11 @@
 
       real (kind=kind_phys), dimension(:), intent(in) ::                &
      &       lakefrac,                                                  &
-     &       slmsk, snowf, zorlf, coszf, tsknf, tairf, hprif,           &
+     &       slmsk, snodi, zorlf, coszf, tsknf, tairf, hprif,           &
      &       alvsf, alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc,     &
      &       icealbdvis, icealbdnir, icealbivis, icealbinir,            &
      &       sncovr, sncovr_ice, snoalb, albPpert           ! sfc-perts, mgehne
       real (kind=kind_phys),  intent(in) :: pertalb         ! sfc-perts, mgehne
-!     real (kind=kind_phys),  intent(in) :: min_seaice
       real (kind=kind_phys), dimension(:), intent(in) ::                &
      &       fracl, fraco, fraci
       real (kind=kind_phys), dimension(:),intent(inout) ::              &
@@ -480,7 +484,7 @@
               asevb_ice = icealbdvis(i)
               asenb_ice = icealbdnir(i)
             else
-              asnow = 0.02*snowf(i)
+              asnow = 0.02*snodi(i)
               argh  = min(0.50, max(.025, 0.01*zorlf(i)))
               hrgh  = min(f_one,max(0.20,1.0577-1.1538e-3*hprif(i)))
               fsno0 = asnow / (argh + asnow) * hrgh ! snow fraction on ice
@@ -616,7 +620,7 @@
               asenb_ice = icealbdnir(i)
             else
             !-- Computation of ice albedo
-              asnow = 0.02*snowf(i)
+              asnow = 0.02*snodi(i)
               argh  = min(0.50, max(.025, 0.01*zorlf(i)))
               hrgh  = min(f_one,max(0.20,1.0577-1.1538e-3*hprif(i)))
               fsno0 = asnow / (argh + asnow) * hrgh
@@ -633,7 +637,7 @@
               ! direct
               asevb_ice = asevd_ice
               asenb_ice = asend_ice
-  
+
               if (fsno0 > f_zero) then 
               ! Snow on ice
                 dtgd = max(f_zero, min(5.0, (con_ttp-tisfc(i)) ))
@@ -649,7 +653,7 @@
                   asnvb = asnvd
                   asnnb = asnnd
                 endif
-  
+
                 ! composite ice and snow albedos
                 asevd_ice = asevd_ice * (1. - fsno0) + asnvd * fsno0
                 asend_ice = asend_ice * (1. - fsno0) + asnnd * fsno0
@@ -714,7 +718,8 @@
 !!                  or -pi -> +pi ranges
 !!\param xlat      (IMAX), latitude  in radiance, default to pi/2 ->
 !!                  -pi/2 range, otherwise see in-line comment
-!!\param snowf     (IMAX), snow depth water equivalent in mm
+!!\param snodl     (IMAX), snow depth water equivalent in mm land
+!!\param snodi     (IMAX), snow depth water equivalent in mm ice
 !!\param sncovr    (IMAX), snow cover over land
 !!\param zorlf     (IMAX), surface roughness in cm
 !!\param tsknf     (IMAX), ground surface temperature in K
@@ -726,11 +731,10 @@
 !! @{
 !-----------------------------------
       subroutine setemis                                                &
-     &     ( lsm,lsm_noahmp,lsm_ruc,frac_grid,                          &  !  ---  inputs:
-     &                  xlon,xlat,slmsk,snowf,sncovr,sncovr_ice,        &
-!    &       min_seaice,xlon,xlat,slmsk,snowf,sncovr,sncovr_ice,        &
+     &     ( lsm,lsm_noahmp,lsm_ruc,frac_grid,cplice,use_flake,         &  !  ---  inputs:
+     &       lakefrac,xlon,xlat,slmsk,snodl,snodi,sncovr,sncovr_ice,    &
      &       zorlf,tsknf,tairf,hprif,                                   &
-     &       semis_lnd,semis_ice,IMAX,fracl,fraco,fraci,icy,            &
+     &       semis_lnd,semis_ice,semis_wat,IMAX,fracl,fraco,fraci,icy,  &
      &       semisbase, sfcemis                                         &  !  ---  outputs:
      &     )
 
@@ -745,20 +749,26 @@
 !  ====================  defination of variables  ====================  !
 !                                                                       !
 !  inputs:                                                              !
+!     cplice        - logical, ".true." when coupled to an ice model    !
 !     xlon  (IMAX)  - longitude in radiance, ok for both 0->2pi or      !
 !                     -pi -> +pi ranges                                 !
 !     xlat  (IMAX)  - latitude  in radiance, default to pi/2 -> -pi/2   !
 !                     range, otherwise see in-line comment              !
 !     slmsk (IMAX)  - sea(0),land(1),ice(2) mask on fcst model grid     !
-!     snowf (IMAX)  - snow depth water equivalent in mm                 !
+!     snodl (IMAX)  - snow depth water equivalent in mm over land       !
+!     snodi (IMAX)  - snow depth water equivalent in mm over ice        !
 !     sncovr(IMAX)  - ialbflg=1: snow cover over land in fraction       !
 !     sncovr_ice(IMAX) - snow cover over ice in fraction                !
 !     zorlf (IMAX)  - surface roughness in cm                           !
 !     tsknf (IMAX)  - ground surface temperature in k                   !
 !     tairf (IMAX)  - lowest model layer air temperature in k           !
 !     hprif (IMAX)  - topographic sdv in m                              !
-!     semis_lnd (IMAX) - emissivity from lsm                            !
 !     IMAX          - array horizontal dimension                        !
+!                                                                       !
+!  inputs/outputs:                                                      !
+!     semis_lnd (IMAX) - land emissivity                                !
+!     semis_ice (IMAX) - ice emissivity                                 !
+!     semis_wat (IMAX) - water emissivity                               !
 !                                                                       !
 !  outputs:                                                             !
 !     sfcemis(IMAX)   - surface emissivity                              !
@@ -783,14 +793,17 @@
 !  ---  inputs
       integer, intent(in) :: IMAX
       integer, intent(in) :: lsm, lsm_noahmp, lsm_ruc
-      logical, intent(in) :: frac_grid
-!     real (kind=kind_phys), intent(in) :: min_seaice
+      logical, intent(in) :: frac_grid, cplice
+      logical, dimension(:), intent(in) :: use_flake
+      real (kind=kind_phys), dimension(:), intent(in) :: lakefrac
 
       real (kind=kind_phys), dimension(:), intent(in) ::                &
-     &       xlon,xlat, slmsk, snowf,sncovr, sncovr_ice,                &
-     &       zorlf, tsknf, tairf, hprif, semis_lnd, semis_ice
+     &       xlon,xlat, slmsk, snodl, snodi, sncovr, sncovr_ice,        &
+     &       zorlf, tsknf, tairf, hprif
       real (kind=kind_phys), dimension(:), intent(in) ::                &
      &       fracl, fraco, fraci
+      real (kind=kind_phys), dimension(:), intent(inout) ::             &
+     &      semis_lnd, semis_ice, semis_wat
       logical, dimension(:), intent(in) ::                              &
      &       icy
 
@@ -817,6 +830,8 @@
 !===> ...  begin here
 !
 !> -# Set emissivity by surface type and conditions
+
+      semis_wat = emsref(1)
       if ( iemslw == 1 ) then
 
         dltg = 360.0 / float(IMXEMS)
@@ -828,14 +843,17 @@
 
         lab_do_IMAX : do i = 1, IMAX
 
+          if (.not. cplice .or. lakefrac(i) > f_zero) then
+            semis_ice(i) = emsref(7)
+          endif
           if (fracl(i) < epsln) then                    ! no land
             if ( abs(fraco(i)-f_one) < epsln ) then     ! open water point
               sfcemis(i) = emsref(1)
-            elseif ( abs(fraci(i)-f_one) > epsln ) then ! complete sea/lake ice
-              sfcemis(i) = emsref(7)
+            elseif ( abs(fraci(i)-f_one) < epsln ) then ! complete sea/lake ice
+              sfcemis(i) = semis_ice(i)
             else
             !-- fractional sea ice
-              sfcemis(i) = fraco(i)*emsref(1) + fraci(i)*emsref(7)
+              sfcemis(i) = fraco(i)*emsref(1) + fraci(i)*semis_ice(i)
             endif
 
           else                                     ! land or fractional grid
@@ -874,31 +892,45 @@
             if (abs(fracl(i)-f_one) < epsln) then
               sfcemis(i) = emsref(idx)
             else
-              sfcemis(i) = fracl(i)*emsref(idx) + fraco(i)*emsref(1)          &
-     &                                       + fraci(i)*emsref(7)
+              sfcemis(i) = fracl(i)*emsref(idx) + fraco(i)*emsref(1)    &
+     &                                          + fraci(i)*emsref(7)
             endif
             semisbase(i) = sfcemis(i)
+            semis_lnd(i) = emsref(idx)
 
-          endif   ! end if_slmsk_block
+          endif
 
 !> - Check for snow covered area.
-          if ( sncovr(i) > f_zero ) then ! input land/ice area snow cover
+!> it is assume here that "sncovr" is the fraction of land covered by snow
+!>                  and "sncovr_ice" is the fraction of ice coverd by snow
 
-            fsno = sncovr(i)
-            sfcemis(i) = sfcemis(i)*(f_one - fsno) + emsref(8)*fsno
-
-          else                                           ! compute snow cover from snow depth
-            if ( snowf(i) > f_zero ) then
-              asnow = 0.02*snowf(i)
+          if (fracl(i) > epsln) then
+            if (sncovr(i) > f_zero) then
+              semis_lnd(i) = semis_lnd(i) * (f_one - sncovr(i))         &
+     &                     + emsref(8)    * sncovr(i)
+            elseif (snodl(i) > f_zero) then
+              asnow = 0.02*snodl(i)
               argh  = min(0.50, max(.025, 0.01*zorlf(i)))
               hrgh  = min(f_one, max(0.20, 1.0577-1.1538e-3*hprif(i) ) )
-              fsno = asnow / (argh + asnow) * hrgh
-
-              if (abs(fraco(i)-f_one) < epsln) fsno = f_zero         ! no snow over open water
-              sfcemis(i) = sfcemis(i)*(f_one - fsno) + emsref(8)*fsno
+              fsno  = min(f_one, max(f_zero, asnow/(argh+asnow) * hrgh))
+              semis_lnd(i) = semis_lnd(i)*(f_one-fsno) + emsref(8)*fsno
             endif
-
-          endif                                          ! end if_ialbflg
+          endif
+          if (fraci(i) > epsln .and.                                    &
+     &       (lakefrac(i) > f_zero .or. .not.  cplice)) then
+            if (sncovr_ice(i) > f_zero) then
+              semis_ice(i) = semis_ice(i) * (f_one - sncovr_ice(i))     &
+     &                     + emsref(8)    * sncovr_ice(i)
+            elseif (snodi(i) > f_zero) then
+              asnow = 0.02*snodi(i)
+              argh  = min(0.50, max(.025, 0.01*zorlf(i)))
+              hrgh  = min(f_one, max(0.20, 1.0577-1.1538e-3*hprif(i) ) )
+              fsno  = min(f_one, max(f_zero, asnow/(argh+asnow) * hrgh))
+              semis_ice(i) = semis_ice(i)*(f_one-fsno) + emsref(8)*fsno
+            endif
+          endif
+          sfcemis(i) = fracl(i)*semis_lnd(i) + fraco(i)*emsref(1)       &
+     &                                       + fraci(i)*semis_ice(i)
 
         enddo  lab_do_IMAX
 
@@ -906,21 +938,42 @@
 
         do i = 1, IMAX
 
-          !-- ice emissivity
           sfcemis_ice = emsref(7)
+          if ( icy(i) ) then                !-- ice emissivity
 
-          if ( icy(i) ) then 
           !-- complete or fractional ice
             if (lsm == lsm_noahmp) then
-              if ( snowf(i) > f_zero ) then
-                asnow = 0.02*snowf(i)
-                argh  = min(0.50, max(.025,0.01*zorlf(i)))
-                hrgh  = min(f_one,max(0.20,1.0577-1.1538e-3*hprif(i)))
-                fsno  = asnow / (argh + asnow) * hrgh
-                sfcemis_ice = sfcemis_ice*(f_one-fsno)+emsref(8)*fsno
+              if (.not. cplice .or. lakefrac(i) > f_zero) then
+                if (sncovr_ice(i) > f_zero) then
+                  sfcemis_ice = emsref(7) * (f_one-sncovr_ice(i))       &
+     &                        + emsref(8) * sncovr_ice(i)
+                elseif (snodi(i) > f_zero) then
+                  asnow = 0.02*snodi(i)
+                  argh  = min(0.50, max(.025,0.01*zorlf(i)))
+                  hrgh  = min(f_one,max(0.20,1.0577-1.1538e-3*hprif(i)))
+                  fsno  = asnow / (argh + asnow) * hrgh
+                  sfcemis_ice = emsref(7)*(f_one-fsno) + emsref(8)*fsno
+                endif
+                semis_ice(i) = sfcemis_ice
+              else
+                sfcemis_ice = semis_ice(i) ! output from CICE
               endif
             elseif (lsm == lsm_ruc) then
-              sfcemis_ice = semis_ice(i) ! output from lsm (with snow effect)
+              if (use_flake(i)) then
+                if (sncovr_ice(i) > f_zero) then
+                  sfcemis_ice = emsref(7) * (f_one-sncovr_ice(i))       &
+     &                        + emsref(8) * sncovr_ice(i)
+                elseif (snodi(i) > f_zero) then
+                  asnow = 0.02*snodi(i)
+                  argh  = min(0.50, max(.025,0.01*zorlf(i)))
+                  hrgh  = min(f_one,max(0.20,1.0577-1.1538e-3*hprif(i)))
+                  fsno  = asnow / (argh + asnow) * hrgh
+                  sfcemis_ice = emsref(7)*(f_one-fsno) + emsref(8)*fsno
+                endif
+                semis_ice(i) = sfcemis_ice
+              else
+                sfcemis_ice = semis_ice(i) ! output from CICE or from RUC lsm (with snow effect)
+              endif
             endif ! lsm check
           endif ! icy
 
@@ -929,7 +982,7 @@
           sfcemis_land = semis_lnd(i) ! albedo with snow effect from LSM
 
           !-- Composite emissivity from land, water and ice fractions.
-          sfcemis(i) = fracl(i)*sfcemis_land + fraco(i)*emsref(1)             &
+          sfcemis(i) = fracl(i)*sfcemis_land + fraco(i)*emsref(1)       &
      &                                       + fraci(i)*sfcemis_ice
 
          enddo  ! i

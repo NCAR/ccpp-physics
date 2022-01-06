@@ -12,11 +12,10 @@
   standard_name = sigma_pressure_hybrid_vertical_coordinate
   long_name = vertical sigma coordinate for radiation initialization
   units = none
-  dimensions = (vertical_interface_dimension_for_radiation)
+  dimensions = (vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [levr]
   standard_name = vertical_dimension_for_radiation
   long_name = number of vertical levels for radiation calculations
@@ -24,7 +23,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ictm]
   standard_name = flag_for_initial_time_date_control
   long_name = flag for initial conditions and forcing
@@ -32,7 +30,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [isol]
   standard_name = control_for_solar_constant
   long_name = use prescribed solar constant
@@ -40,7 +37,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ico2]
   standard_name = control_for_co2
   long_name = prescribed global mean value (old opernl)
@@ -48,7 +44,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [iaer]
   standard_name = control_for_shortwave_radiation_aerosols
   long_name = default aerosol effect in sw only
@@ -56,7 +51,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ntcw]
   standard_name = index_of_cloud_liquid_water_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for cloud condensate (or liquid water)
@@ -64,7 +58,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [num_p3d]
   standard_name = number_of_microphysics_variables_in_xyz_dimensioned_restart_array
   long_name = number of 3D arrays needed for microphysics
@@ -72,7 +65,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [npdf3d]
   standard_name = number_of_pdf_based_variables_in_xyz_dimensioned_restart_array
   long_name = number of 3d arrays associated with pdf based clouds/mp
@@ -80,7 +72,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ntoz]
   standard_name = index_of_ozone_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for ozone mixing ratio
@@ -88,7 +79,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [iovr]
   standard_name = flag_for_cloud_overlap_method_for_radiation
   long_name = max-random overlap clouds
@@ -96,7 +86,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [isubc_sw]
   standard_name = flag_for_sw_clouds_grid_approximation
   long_name = flag for sw clouds sub-grid approximation
@@ -104,7 +93,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [isubc_lw]
   standard_name = flag_for_lw_clouds_sub_grid_approximation
   long_name = flag for lw clouds sub-grid approximation
@@ -112,7 +100,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [icliq_sw]
   standard_name = control_for_shortwave_radiation_liquid_clouds
   long_name = sw optical property for liquid clouds
@@ -120,7 +107,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [crick_proof]
   standard_name = flag_for_CRICK_proof_cloud_water
   long_name = flag for CRICK-Proof cloud water
@@ -128,7 +114,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [ccnorm]
   standard_name = flag_for_in_cloud_condensate
   long_name = flag for cloud condensate normalized by cloud cover
@@ -136,7 +121,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [imp_physics]
   standard_name = control_for_microphysics_scheme
   long_name = choice of microphysics scheme
@@ -144,7 +128,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [norad_precip]
   standard_name = flag_for_turning_off_precipitation_radiative_effect
   long_name = radiation precip flag for Ferrier/Moorthi
@@ -152,7 +135,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [idate]
   standard_name = date_and_time_at_model_initialization_in_united_states_order
   long_name = initialization date and time
@@ -160,7 +142,6 @@
   dimensions = (4)
   type = integer
   intent = in
-  optional = F
 [iflip]
   standard_name = control_for_vertical_index_direction
   long_name = flag for vertical index direction control
@@ -168,7 +149,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [do_RRTMGP]
   standard_name = flag_for_rrtmgp_radiation_scheme
   long_name = flag for RRTMGP scheme
@@ -176,42 +156,6 @@
   dimensions =  ()
   type = logical
   intent = in
-  optional = F
-[im]
-  standard_name = horizontal_dimension
-  long_name = horizontal dimension
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[faerlw]
-  standard_name = aerosol_optical_properties_for_longwave_bands_01_16
-  long_name = optical properties for longwave bands 01-16
-  units = various
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation,number_of_aerosol_bands_for_longwave_radiation,number_of_aerosol_output_fields_for_longwave_radiation)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[faersw]
-  standard_name = aerosol_optical_properties_for_shortwave_bands_01_16
-  long_name = aerosol optical properties for shortwave bands 01-16
-  units = various
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation,number_of_aerosol_bands_for_shortwave_radiation,number_of_aerosol_output_fields_for_shortwave_radiation)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[aerodp]
-  standard_name = atmosphere_optical_thickness_due_to_ambient_aerosol_particles
-  long_name = vertical integrated optical depth for various aerosol species
-  units = none
-  dimensions = (horizontal_dimension,number_of_species_for_aerosol_optical_depth)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [me]
   standard_name = mpi_rank
   long_name = current MPI-rank
@@ -219,7 +163,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -228,7 +171,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -236,7 +178,6 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 
 ########################################################################
 [ccpp-arg-table]
@@ -249,7 +190,6 @@
   dimensions = (8)
   type = integer
   intent = in
-  optional = F
 [jdate]
   standard_name = date_and_time_of_forecast_in_united_states_order
   long_name = current forecast date and time
@@ -257,7 +197,6 @@
   dimensions = (8)
   type = integer
   intent = in
-  optional = F
 [deltsw]
   standard_name = period_of_shortwave_radiation_calls
   long_name = frequency for shortwave radiation
@@ -266,7 +205,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [deltim]
   standard_name = timestep_for_dynamics
   long_name = dynamics timestep
@@ -275,7 +213,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [lsswr]
   standard_name = flag_for_calling_shortwave_radiation
   long_name = logical flags for sw radiation calls
@@ -283,7 +220,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [me]
   standard_name = mpi_rank
   long_name = current MPI-rank
@@ -291,7 +227,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [slag]
   standard_name = equation_of_time
   long_name = equation of time (radian)
@@ -300,7 +235,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [sdec]
   standard_name = sine_of_solar_declination_angle
   long_name = sin of the solar declination angle
@@ -309,7 +243,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [cdec]
   standard_name = cosine_of_solar_declination_angle
   long_name = cos of the solar declination angle
@@ -318,7 +251,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [solcon]
   standard_name = solar_constant
   long_name = solar constant (sun-earth distant adjusted)
@@ -327,7 +259,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -336,7 +267,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -344,7 +274,6 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 
 ########################################################################
 [ccpp-arg-table]
@@ -358,7 +287,6 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
   standard_name = ccpp_error_flag
   long_name = error flag for error handling in CCPP
@@ -366,4 +294,3 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
