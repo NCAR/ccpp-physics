@@ -414,6 +414,9 @@ CONTAINS
       IF (itimestep==1 .AND. iter==1) THEN
          DO i=its,ite
             !Everything here is used before calculated
+            UST_WAT(i)=MAX(0.04*SQRT(U1D(i)*U1D(i) + V1D(i)*V1D(i)),0.001)
+            UST_LND(i)=MAX(0.04*SQRT(U1D(i)*U1D(i) + V1D(i)*V1D(i)),0.001)
+            UST_ICE(i)=MAX(0.04*SQRT(U1D(i)*U1D(i) + V1D(i)*V1D(i)),0.001)
             MOL(i)=0.0
             QFLX(i)=0.
             HFLX(i)=0.
