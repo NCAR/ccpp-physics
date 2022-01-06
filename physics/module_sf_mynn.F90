@@ -164,7 +164,8 @@ CONTAINS
               spp_pbl,pattern_spp_pbl,               &
               ids,ide, jds,jde, kds,kde,             &
               ims,ime, jms,jme, kms,kme,             &
-              its,ite, jts,jte, kts,kte              )
+              its,ite, jts,jte, kts,kte,             &
+              errmsg, errflg                         )
 !-------------------------------------------------------------------
       IMPLICIT NONE
 !-------------------------------------------------------------------
@@ -258,6 +259,8 @@ CONTAINS
 !-- jte         end index for j in tile
 !-- kts         start index for k in tile
 !-- kte         end index for k in tile
+!-- errmsg      CCPP error message
+!-- errflg      CCPP error code
 !=================================================================
 ! SCALARS
 !===================================
@@ -352,9 +355,13 @@ CONTAINS
      &                     QFLX_wat,  QFLX_lnd,  QFLX_ice,         &
      &                     qsfc_wat,  qsfc_lnd,  qsfc_ice
 
+! CCPP error handling
+      character(len=*), intent(inout) :: errmsg
+      integer,          intent(inout) :: errflg
+
 !ADDITIONAL OUTPUT
 !JOE-begin
-      REAL,     DIMENSION( ims:ime )    ::   qstar
+      REAL,     DIMENSION( ims:ime ) :: qstar
 !JOE-end
 !===================================
 ! 1D LOCAL ARRAYS
@@ -401,6 +408,7 @@ CONTAINS
          else
             rstoch1D(i)=0.0
          endif
+         qstar(i)=0.0
       ENDDO
 
       IF (itimestep==1 .AND. iter==1) THEN
@@ -410,9 +418,6 @@ CONTAINS
             UST_LND(i)=MAX(0.04*SQRT(U1D(i)*U1D(i) + V1D(i)*V1D(i)),0.001)
             UST_ICE(i)=MAX(0.04*SQRT(U1D(i)*U1D(i) + V1D(i)*V1D(i)),0.001)
             MOL(i)=0.0
-            qstar(i)=0.0
-            QFX(i)=0.
-            HFX(i)=0.
             QFLX(i)=0.
             HFLX(i)=0.
             if ( LSM == LSM_RUC ) then
@@ -461,12 +466,12 @@ CONTAINS
            PSIM,PSIH,                                           &
            HFLX,HFX,QFLX,QFX,LH,FLHC,FLQC,                      &
            QGH,QSFC,U10,V10,TH2,T2,Q2,                          &
-           GZ1OZ0,WSPD,wstar,                                   &
+           GZ1OZ0,WSPD,wstar,qstar,                             &
            spp_pbl,rstoch1D,                                    &
            ids,ide, jds,jde, kds,kde,                           &
            ims,ime, jms,jme, kms,kme,                           &
-           its,ite, jts,jte, kts,kte                            &
-                                                                )
+           its,ite, jts,jte, kts,kte,                           &
+           errmsg, errflg                                       )
 
     END SUBROUTINE SFCLAY_MYNN
 
@@ -509,12 +514,12 @@ CONTAINS
              HFLX,HFX,QFLX,QFX,LH,FLHC,FLQC,                      &
              QGH,QSFC,                                            &
              U10,V10,TH2,T2,Q2,                                   &
-             GZ1OZ0,WSPD,wstar,                                   &
+             GZ1OZ0,WSPD,wstar,qstar,                             &
              spp_pbl,rstoch1D,                                    &
              ids,ide, jds,jde, kds,kde,                           &
              ims,ime, jms,jme, kms,kme,                           &
-             its,ite, jts,jte, kts,kte                            &
-                                                                  )
+             its,ite, jts,jte, kts,kte,                           &
+             errmsg, errflg                                       )
 
 !-------------------------------------------------------------------
       IMPLICIT NONE
@@ -563,9 +568,10 @@ CONTAINS
                                                            dz8w1d, &
                                                            dz2w1d
 
-      REAL,     DIMENSION( ims:ime ), INTENT(INOUT) ::   HFLX,HFX, &
-                                                      QFLX,QFX,LH, &
-                                                         MOL,RMOL, &
+      REAL,     DIMENSION( ims:ime ), INTENT(OUT)   ::    QFX,HFX, &
+                                                             RMOL
+      REAL,     DIMENSION( ims:ime ), INTENT(INOUT) ::  HFLX,QFLX, &
+                                                           LH,MOL, &
                                                          QGH,QSFC, &
                                                               ZNT, &
                                                               ZOL, &
@@ -610,8 +616,13 @@ CONTAINS
 
 !--------------------------------------------
 !JOE-additinal output
-      REAL,     DIMENSION( ims:ime ) ::                wstar,qstar
+      REAL,     DIMENSION( ims:ime ), INTENT(OUT)   :: wstar,qstar
 !JOE-end
+
+! CCPP error handling
+      character(len=*), intent(inout) :: errmsg
+      integer,          intent(inout) :: errflg
+
 !----------------------------------------------------------------
 ! LOCAL VARS
 !----------------------------------------------------------------
@@ -661,8 +672,8 @@ CONTAINS
 !-------------------------------------------------------------------
       DO I=its,ite
 
-        ! PSFC ( in cmb) is used later in saturation checks
-        PSFC(I)=PSFCPA(I)/1000.
+         ! PSFC ( in cmb) is used later in saturation checks
+         PSFC(I)=PSFCPA(I)/1000.
          !tgs - do computations if flag_iter(i) = .true.
          if ( flag_iter(i) ) then
 
@@ -1224,6 +1235,11 @@ CONTAINS
                 CALL zilitinkevich_1995(ZNTstoch_lnd(i),ZT_lnd(i),ZQ_lnd(i),restar,&
                       UST_lnd(I),KARMAN,1.0,IZ0TLND,spp_pbl,rstoch1D(i))
              ELSEIF ( IZ0TLND .EQ. 2 ) THEN
+                ! DH note - at this point, qstar is either not initialized
+                ! or initialized to zero, but certainly not set correctly
+                errmsg = 'Logic error: qstar is not set correctly when calling Yang_2008'
+                errflg = 1
+                return
                 CALL Yang_2008(ZNTSTOCH_lnd(i),ZT_lnd(i),ZQ_lnd(i),UST_lnd(i),MOL(I),&
                               qstar(I),restar,visc)
              ELSEIF ( IZ0TLND .EQ. 3 ) THEN
