@@ -262,14 +262,14 @@ contains
         do i=1,im
           if (dry(i)) then
             if (icy(i)) then
-              if (kdt == 1 .or. (.not. cplflx .and. lakefrac(i) > zero)) then 
+              if (kdt == 1 .or. (.not. cplflx .or. lakefrac(i) > zero)) then 
                 tem = one / (cice(i)*(one-frland(i)))
                 snowd_ice(i) = max(zero, (snowd(i) - snowd_lnd(i)*frland(i)) * tem)
                 weasd_ice(i) = max(zero, (weasd(i) - weasd_lnd(i)*frland(i)) * tem)
               endif
             endif
           elseif (icy(i)) then
-            if (kdt == 1 .or. (.not. cplflx .and. lakefrac(i) > zero)) then 
+            if (kdt == 1 .or. (.not. cplflx .or. lakefrac(i) > zero)) then 
               tem = one / cice(i)
               snowd_lnd(i) = zero
               snowd_ice(i) = snowd(i) * tem
@@ -280,7 +280,7 @@ contains
         enddo
         do i=1,im
           if (icy(i)) then
-            if (kdt == 1 .or. (.not. cplflx .and. lakefrac(i) > zero)) then
+            if (kdt == 1 .or. (.not. cplflx .or. lakefrac(i) > zero)) then
               snowd_lnd(i) = zero
               weasd_lnd(i) = zero
               tem = one / cice(i)
