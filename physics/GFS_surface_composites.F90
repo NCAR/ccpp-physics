@@ -35,12 +35,12 @@ contains
                                  weasd,            weasd_lnd, weasd_ice, ep1d_ice, tsfc, tsfco, tsfcl, tsfc_wat,          &
                                            tisfc, tsurf_wat, tsurf_lnd, tsurf_ice,                                        &
                                  gflx_ice, tgice, islmsk, islmsk_cice, slmsk, qss, qss_wat, qss_lnd, qss_ice,             &
-                                 min_lakeice, min_seaice, huge, errmsg, errflg)
+                                 min_lakeice, min_seaice, kdt, huge, errmsg, errflg)
 
       implicit none
 
       ! Interface variables
-      integer,                             intent(in   ) :: im, lkm
+      integer,                             intent(in   ) :: im, lkm, kdt
       logical,                             intent(in   ) :: flag_init, flag_restart, frac_grid, cplflx, cplice, cplwav2atm
       logical, dimension(:),              intent(inout)  :: flag_cice
       logical,              dimension(:), intent(inout)  :: dry, icy, lake, use_flake, wet
@@ -64,7 +64,6 @@ contains
       real(kind=kind_phys), parameter :: timin = 173.0_kind_phys  ! minimum temperature allowed for snow/ice
 
       real(kind=kind_phys) :: tem
-      logical              :: icy_old(im)
 
       ! CCPP error handling
       character(len=*), intent(out) :: errmsg
@@ -77,9 +76,6 @@ contains
       errmsg = ''
       errflg = 0
 
-      do i=1,im
-        icy_old(i) = icy(i)
-      enddo
       if (frac_grid) then  ! cice is ice fraction wrt water area
         do i=1,im
           frland(i) = landfrac(i)
@@ -262,32 +258,34 @@ contains
         endif
       enddo
 !
-      if (frac_grid) then
-        do i=1,im
-          if (dry(i)) then
-            if (icy(i) .and. .not. icy_old(i)) then
-              tem = one / (cice(i)*(one-frland(i)))
-              snowd_ice(i) = max(zero, (snowd(i) - snowd_lnd(i)*frland(i)) * tem)
-              weasd_ice(i) = max(zero, (weasd(i) - weasd_lnd(i)*frland(i)) * tem)
+      if (.not. cplflx .or. kdt == 1) then
+        if (frac_grid) then
+          do i=1,im
+            if (dry(i)) then
+              if (icy(i)) then
+                tem = one / (cice(i)*(one-frland(i)))
+                snowd_ice(i) = max(zero, (snowd(i) - snowd_lnd(i)*frland(i)) * tem)
+                weasd_ice(i) = max(zero, (weasd(i) - weasd_lnd(i)*frland(i)) * tem)
+              endif
+            elseif (icy(i)) then
+              tem = one / cice(i)
+              snowd_lnd(i) = zero
+              snowd_ice(i) = snowd(i) * tem
+              weasd_lnd(i) = zero
+              weasd_ice(i) = weasd(i) * tem
             endif
-          elseif (icy(i) .and. .not. icy_old(i)) then
-            tem = one / cice(i)
-            snowd_lnd(i) = zero
-            snowd_ice(i) = snowd(i) * tem
-            weasd_lnd(i) = zero
-            weasd_ice(i) = weasd(i) * tem
-          endif
-        enddo
-      else
-        do i=1,im
-          if (icy(i) .and. .not. icy_old(i)) then
-            snowd_lnd(i) = zero
-            weasd_lnd(i) = zero
-            tem = one / cice(i)
-            snowd_ice(i) = snowd(i) * tem
-            weasd_ice(i) = weasd(i) * tem
-          endif
-        enddo
+          enddo
+        else
+          do i=1,im
+            if (icy(i)) then
+              snowd_lnd(i) = zero
+              weasd_lnd(i) = zero
+              tem = one / cice(i)
+              snowd_ice(i) = snowd(i) * tem
+              weasd_ice(i) = weasd(i) * tem
+            endif
+          enddo
+        endif
       endif
 
 !     write(0,*)' minmax of ice snow=',minval(snowd_ice),maxval(snowd_ice)
