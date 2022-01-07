@@ -121,7 +121,7 @@
       real(kind=kind_phys), dimension(:,:),    intent(in)    :: prsi, phii
       real(kind=kind_phys), dimension(:,:,:),  intent(in)    :: gq0, save_q
 
-      real(kind=kind_phys), dimension(:,:,:), pointer, intent(in)   :: dfi_radar_tten
+      real(kind=kind_phys), dimension(:,:,:),  intent(in)    :: dfi_radar_tten
 
       real(kind=kind_phys), dimension(:),      intent(in   ) :: sr
       real(kind=kind_phys), dimension(:),      intent(inout) :: rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp,  &
