@@ -129,9 +129,9 @@ contains
    real(kind=kind_phys), allocatable :: clcw_save(:,:), cliw_save(:,:)
 
    integer, intent(in) :: dfi_radar_max_intervals
-   real(kind=kind_phys), intent(in) :: fhour, fh_dfi_radar(dfi_radar_max_intervals+1)
-   integer, intent(in) :: num_dfi_radar, ix_dfi_radar(dfi_radar_max_intervals)
-   real(kind=kind_phys), intent(in), pointer :: cap_suppress(:,:)
+   real(kind=kind_phys), intent(in) :: fhour, fh_dfi_radar(:)
+   integer, intent(in) :: num_dfi_radar, ix_dfi_radar(:)
+   real(kind=kind_phys), intent(in) :: cap_suppress(:,:)
 
    integer, dimension (:), intent(out) :: hbot,htop,kcnv
    integer, dimension (:), intent(in)  :: xland

@@ -106,11 +106,11 @@
       logical, intent(in) :: cal_pre, lssav, ldiag3d, qdiag3d, cplflx, cplchm
       integer, intent(in) :: index_of_temperature,index_of_process_mp
 
-      integer                                                       :: dfi_radar_max_intervals
-      real(kind=kind_phys),                           intent(in)    :: fh_dfi_radar(dfi_radar_max_intervals+1), fhour
-      real(kind=kind_phys),                           intent(in)    :: radar_tten_limits(2)
-      integer                                                       :: ix_dfi_radar(dfi_radar_max_intervals)
-      real(kind=kind_phys), dimension(im,levs),       intent(inout) :: gt0
+      integer                                                :: dfi_radar_max_intervals
+      real(kind=kind_phys),                    intent(in)    :: fh_dfi_radar(:), fhour
+      real(kind=kind_phys),                    intent(in)    :: radar_tten_limits(:)
+      integer                                                :: ix_dfi_radar(:)
+      real(kind=kind_phys), dimension(:,:),    intent(inout) :: gt0
 
       real(kind=kind_phys),                    intent(in)    :: dtf, frain, con_g, rainmin
       real(kind=kind_phys), dimension(:),      intent(in)    :: rain1, xlat, xlon, tsfc
