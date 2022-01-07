@@ -278,6 +278,7 @@ contains
             endif
           endif
         enddo
+      else
         do i=1,im
           if (icy(i)) then
             if (kdt == 1 .or. (.not. cplflx .or. lakefrac(i) > zero)) then
