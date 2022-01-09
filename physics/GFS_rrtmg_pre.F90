@@ -818,28 +818,24 @@
             call calc_effectRad (tlyr(i,:), plyr(i,:)*100., qv_mp(i,:), qc_mp(i,:),   &
                                  nc_mp(i,:), qi_mp(i,:), ni_mp(i,:), qs_mp(i,:), &
                                  effrl(i,:), effri(i,:), effrs(i,:), 1, lm )
+            ! Scale Thompson's effective radii from meter to micron
             do k=1,lm
-              effrl(i,k) = MAX(re_qc_min, MIN(effrl(i,k), re_qc_max))
-              effri(i,k) = MAX(re_qi_min, MIN(effri(i,k), re_qi_max))
-              effrs(i,k) = MAX(re_qs_min, MIN(effrs(i,k), re_qs_max))
+              effrl(i,k) = MAX(re_qc_min, MIN(effrl(i,k), re_qc_max))*1.e6
+              effri(i,k) = MAX(re_qi_min, MIN(effri(i,k), re_qi_max))*1.e6
+              effrs(i,k) = MAX(re_qs_min, MIN(effrs(i,k), re_qs_max))*1.e6
             end do
-            effrl(i,lmk) = re_qc_min
-            effri(i,lmk) = re_qi_min
-            effrs(i,lmk) = re_qs_min
+            effrl(i,lmk) = re_qc_min*1.e6
+            effri(i,lmk) = re_qi_min*1.e6
+            effrs(i,lmk) = re_qs_min*1.e6
           end do
+          effrr(:,:) = 1000. ! rrain_def=1000.
+          ! Update global arrays
           do k=1,lm
             k1 = k + kd
             do i=1,im
-              effrr(i,k1) = 1000. ! rrain_def=1000.
-            end do
-          end do
-          ! Update global arrays, scale Thompson's effective radii from meter to micron
-          do k=1,lm
-            k1 = k + kd
-            do i=1,im
-              effrl_inout(i,k) = effrl(i,k1)*1.e6
-              effri_inout(i,k) = effri(i,k1)*1.e6
-              effrs_inout(i,k) = effrs(i,k1)*1.e6
+              effrl_inout(i,k) = effrl(i,k1)
+              effri_inout(i,k) = effri(i,k1)
+              effrs_inout(i,k) = effrs(i,k1)
             enddo
           enddo
         else                                                           ! all other cases
@@ -964,8 +960,7 @@
                          ntrac-1, ntcw-1,ntiw-1,ntrw-1,             &
                          ntsw-1,ntgl-1,                             &
                          im, lm, lmp, uni_cld, lmfshal, lmfdeep2,   &
-                         cldcov(:,1:LM), effrl_inout,               &
-                         effri_inout, effrs_inout,                  &
+                         cldcov(:,1:LM), effrl, effri, effrs,       &
                          lwp_ex, iwp_ex, lwp_fc, iwp_fc,            &
                          dzb, xlat_d, julian, yearlen, gridkm,      &
                          clouds, cldsa, mtopa ,mbota, de_lgth, alpha) !  --- outputs
@@ -998,8 +993,7 @@
                          ntrac-1, ntcw-1,ntiw-1,ntrw-1,             &
                          ntsw-1,ntgl-1,                             &
                          im, lm, lmp, uni_cld, lmfshal, lmfdeep2,   &
-                         cldcov(:,1:LM), effrl_inout,               &
-                         effri_inout, effrs_inout,                  &
+                         cldcov(:,1:LM), effrl, effri, effrs,       &
                          lwp_ex, iwp_ex, lwp_fc, iwp_fc,            &
                          dzb, xlat_d, julian, yearlen, gridkm,      &
                          clouds, cldsa, mtopa ,mbota, de_lgth, alpha) !  --- outputs
@@ -1010,8 +1004,7 @@
                          ntrac-1, ntcw-1,ntiw-1,ntrw-1,             &
                          ntsw-1,ntgl-1,                             &
                          im, lmk, lmp, uni_cld, lmfshal, lmfdeep2,  &
-                         cldcov(:,1:LMK), cnvw, effrl_inout,        &
-                         effri_inout, effrs_inout,                  &
+                         cldcov(:,1:LMK), cnvw, effrl, effri, effrs,&
                          lwp_ex, iwp_ex, lwp_fc, iwp_fc,            &
                          dzb, xlat_d, julian, yearlen,              &
                          clouds, cldsa, mtopa ,mbota, de_lgth, alpha) !  --- outputs
