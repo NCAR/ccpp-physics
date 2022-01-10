@@ -1103,6 +1103,22 @@
   type = real
   kind = kind_phys
   intent = in
+[dusfc_med]
+  standard_name = surface_x_momentum_flux_over_ocean_from_coupled_process
+  long_name = sfc x momentum flux over ocean for coupling
+  units = Pa
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[dvsfc_med]
+  standard_name = surface_y_momentum_flux_over_ocean_from_coupled_process
+  long_name = sfc y momentum flux over ocean for coupling
+  units = Pa
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
 [wet]
   standard_name = flag_nonzero_wet_surface_fraction
   long_name = flag indicating presence of some ocean or lake surface area fraction

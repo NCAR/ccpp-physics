@@ -335,8 +335,8 @@
         index_of_process_pbl, dqsfc_cpl, dusfci_cpl, dvsfci_cpl, dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag,   &
         dqsfc_diag, dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag,                                                        &
         rd, cp, fvirt, hvap, t1, q1, prsl, hflx, ushfsfci, oceanfrac, kdt, dusfc_cice, dvsfc_cice,                             &
-        dtsfc_cice, dqsfc_cice, use_med_flux, dtsfc_med, dqsfc_med, wet, dry, icy, wind, stress_wat, hflx_wat,                 &
-        evap_wat, ugrs1, vgrs1, hffac, ugrs, vgrs, tgrs, qgrs, save_u, save_v, save_t, save_q, huge, errmsg, errflg)
+        dtsfc_cice, dqsfc_cice, use_med_flux, dtsfc_med, dqsfc_med, dusfc_med, dvsfc_med, wet, dry, icy, wind, stress_wat,     &
+        hflx_wat, evap_wat, ugrs1, vgrs1, hffac, ugrs, vgrs, tgrs, qgrs, save_u, save_v, save_t, save_q, huge, errmsg, errflg)
 
       use machine,                only : kind_phys
       use GFS_PBL_generic_common, only : set_aerosol_tracer_index
@@ -361,7 +361,7 @@
       real(kind=kind_phys), dimension(:), intent(in) :: t1, q1, hflx, oceanfrac
       real(kind=kind_phys), dimension(:,:), intent(in) :: prsl
       real(kind=kind_phys), dimension(:), intent(in) :: dusfc_cice, dvsfc_cice, dtsfc_cice, dqsfc_cice, &
-          dtsfc_med, dqsfc_med, wind, stress_wat, hflx_wat, evap_wat, ugrs1, vgrs1
+          dtsfc_med, dqsfc_med, dusfc_med, dvsfc_med, wind, stress_wat, hflx_wat, evap_wat, ugrs1, vgrs1
 
       real(kind=kind_phys), dimension(:,:, :), intent(in) :: qgrs
       real(kind=kind_phys), dimension(:,:), intent(in) :: ugrs, vgrs, tgrs
@@ -581,8 +581,8 @@
               dqsfci_cpl(i) = hvap * rho * evap_wat(i) ! latent heat flux over open ocean
             else                                       ! 100% open ocean
               if (use_med_flux .and. kdt > 1) then ! use results from CMEPS mediator
-                dusfci_cpl(i) = dusfc1(i) !dusfc_med(i)
-                dvsfci_cpl(i) = dvsfc1(i) !dvsfc_med(i)
+                dusfci_cpl(i) = dusfc_med(i)
+                dvsfci_cpl(i) = dvsfc_med(i)
                 dtsfci_cpl(i) = dtsfc_med(i)
                 dqsfci_cpl(i) = dqsfc_med(i)
               else                                 ! use results from PBL scheme
