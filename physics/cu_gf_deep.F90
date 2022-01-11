@@ -111,9 +111,7 @@ contains
                                 !! more is possible, talk to developer or
                                 !! implement yourself. pattern is expected to be
                                 !! betwee -1 and +1
-#if ( wrf_dfi_radar == 1 )
               ,do_capsuppress,cap_suppress_j    &    !         
-#endif
               ,k22                              &    !
               ,jmin,tropics)                         !
 
@@ -129,16 +127,8 @@ contains
      real(kind=kind_phys),  dimension (its:ite)                   &
         ,intent (in  )                   ::  rand_mom,rand_vmas
 
-#if ( wrf_dfi_radar == 1 )
-!
-!  option of cap suppress:
-!        do_capsuppress = 1   do
-!        do_capsuppress = other   don't
-!
-!
-   integer,      intent(in   ) ,optional   :: do_capsuppress
-   real(kind=kind_phys), dimension( its:ite ) :: cap_suppress_j
-#endif
+     integer, intent(in) :: do_capsuppress
+     real(kind=kind_phys), intent(in), optional, dimension(:) :: cap_suppress_j
   !
   ! 
   !
@@ -457,6 +447,16 @@ contains
       if(use_excess == 0 )then
        ztexec(:)=0
        zqexec(:)=0
+      endif
+      if(do_capsuppress == 1) then
+         do i=its,itf
+            cap_max(i)=cap_maxs
+            if (abs(cap_suppress_j(i) - 1.0 ) < 0.1 ) then
+               cap_max(i)=cap_maxs+75.
+            elseif (abs(cap_suppress_j(i) - 0.0 ) < 0.1 ) then
+               cap_max(i)=10.0
+            endif
+         enddo
       endif
 !
 !--- initial entrainment rate (these may be changed later on in the
