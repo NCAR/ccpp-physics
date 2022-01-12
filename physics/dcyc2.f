@@ -344,8 +344,8 @@
      &                        + (one - sfcemis_ice(i)) * adjsfcdlw(i)
          endif
          if (wet(i)) then
-            if (use_med_flux) then
-!>  - use upward longwave flux provided by the mediator
+            if (use_med_flux .and. sfculw_wat(i) > f_eps) then
+!>  - use upward longwave flux provided by the mediator (zero over lakes)
                adjsfculw_wat(i) = sfculw_wat(i) 
             else
                tem2 = tsfc_wat(i) * tsfc_wat(i)
