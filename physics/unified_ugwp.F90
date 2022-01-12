@@ -218,7 +218,7 @@ contains
          index_of_process_orographic_gwd, index_of_process_nonorographic_gwd,          &
          ldiag3d, lssav, flag_for_gwd_generic_tend, do_ugwp_v0, do_ugwp_v0_orog_only,  &
          do_ugwp_v0_nst_only, do_gsl_drag_ls_bl, do_gsl_drag_ss, do_gsl_drag_tofd,     &
-         gwd_opt, spp_wts_gwd, do_spp, errmsg, errflg)
+         gwd_opt, spp_wts_gwd, spp_gwd, errmsg, errflg)
 
     implicit none
 
@@ -297,7 +297,7 @@ contains
                                          do_gsl_drag_tofd
 
     real(kind=kind_phys), intent(in) :: spp_wts_gwd(:,:)
-    logical, intent(in) :: do_spp
+    integer, intent(in) :: spp_gwd
 
     character(len=*),        intent(out) :: errmsg
     integer,                 intent(out) :: errflg
@@ -346,7 +346,7 @@ contains
                  do_gsl_drag_ls_bl,do_gsl_drag_ss,do_gsl_drag_tofd,  &
                  dtend, dtidx, index_of_process_orographic_gwd,      &
                  index_of_temperature, index_of_x_wind,              &
-                 index_of_y_wind, ldiag3d, spp_wts_gwd,do_spp,       &
+                 index_of_y_wind, ldiag3d, spp_wts_gwd, spp_gwd,     &
                  errmsg, errflg)
 !
 ! put zeros due to xy GSL-drag style: dtaux2d_bl,dtauy2d_bl,dtaux2d_ss.......dusfc_ls,dvsfc_ls

@@ -308,7 +308,7 @@ module mp_thompson
                               refl_10cm, reset_dBZ, do_radar_ref,  &
                               mpicomm, mpirank, mpiroot, blkno,    &
                               ext_diag, diag3d, reset_diag3d,      &
-                              spp_wts_mp, do_spp,                  &
+                              spp_wts_mp, spp_mp,                  &
                               errmsg, errflg)
 
          implicit none
@@ -375,7 +375,7 @@ module mp_thompson
          integer,                   intent(  out) :: errflg
          
          ! SPP
-         logical,                   intent(in) :: do_spp
+         integer,                   intent(in) :: spp_mp
          real(kind_phys),           intent(in) :: spp_wts_mp(:,:)
 
          ! Local variables
@@ -407,7 +407,7 @@ module mp_thompson
          integer, parameter :: has_reqi = 0
          integer, parameter :: has_reqs = 0
          integer, parameter :: kme_stoch = 1
-         integer         :: spp_mp 
+         integer         :: spp_mp_opt 
          ! Dimensions used in mp_gt_driver
          integer         :: ids,ide, jds,jde, kds,kde, &
                             ims,ime, jms,jme, kms,kme, &
@@ -466,10 +466,10 @@ module mp_thompson
          end if
 
          ! Set stochastic physics selection to apply all perturbations
-         if ( do_spp ) then
-            spp_mp=7
+         if ( spp_mp ) then
+            spp_mp_opt=7
          else
-            spp_mp=0
+            spp_mp_opt=0
          endif
 
          ! Set reduced time step if subcycling is used
@@ -633,7 +633,7 @@ module mp_thompson
                               refl_10cm=refl_10cm,                                           &
                               diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
                               has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
-                              rand_perturb_on=spp_mp, kme_stoch=kme_stoch,                   &
+                              rand_perturb_on=spp_mp_opt, kme_stoch=kme_stoch,               &
                               rand_pert=spp_wts_mp,                                          &
                               ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
                               ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
@@ -670,7 +670,7 @@ module mp_thompson
                               refl_10cm=refl_10cm,                                           &
                               diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
                               has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
-                              rand_perturb_on=spp_mp, kme_stoch=kme_stoch,                   &
+                              rand_perturb_on=spp_mp_opt, kme_stoch=kme_stoch,               &
                               rand_pert=spp_wts_mp,                                          &
                               ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
                               ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &

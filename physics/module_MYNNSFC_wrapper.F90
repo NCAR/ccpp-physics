@@ -88,7 +88,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
      &  FLHC, FLQC,                        &
      &  U10, V10, TH2, T2, Q2,             &
      &  wstar, CHS2, CQS2,                 &
-     &  spp_wts_sfc, do_spp,               &
+     &  spp_wts_sfc, spp_sfc,               &
 !     &  CP, G, ROVCP, R, XLV,           &
 !     &  SVP1, SVP2, SVP3, SVPT0,        &
 !     &  EP1,EP2,KARMAN,                 &
@@ -155,7 +155,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
       integer, intent(in) :: ivegsrc
       integer, intent(in) :: sfc_z0_type ! option for calculating surface roughness length over ocean
       logical, intent(in) :: redrag ! reduced drag coeff. flag for high wind over sea (j.han)
-      logical, intent(in) :: do_spp ! flag for using SPP perturbations
+      integer, intent(in) :: spp_sfc ! flag for using SPP perturbations
 
       real(kind=kind_phys), intent(in) :: delt
 
@@ -213,7 +213,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
     &        dz, th, qv
 
 !MYNN-1D
-      INTEGER :: k, i, spp_sfc
+      INTEGER :: k, i
       INTEGER :: IDS,IDE,JDS,JDE,KDS,KDE,                   &
      &            IMS,IME,JMS,JME,KMS,KME,                  &
      &            ITS,ITE,JTS,JTE,KTS,KTE
@@ -239,9 +239,6 @@ SUBROUTINE mynnsfc_wrapper_run(            &
            qv(i,k)=qvsh(i,k)/(1.0 - qvsh(i,k))
         enddo
       enddo
-      if ( do_spp ) then
-         spp_sfc=1
-      endif
 
       do i=1,im
           if (slmsk(i)==1. .or. slmsk(i)==2.)then !sea/land/ice mask (=0/1/2) in FV3
@@ -336,7 +333,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
              QGH=qgh,QSFC=qsfc,   &
              U10=u10,V10=v10,TH2=th2,T2=t2,Q2=q2,                             &
              GZ1OZ0=GZ1OZ0,WSPD=wspd,wstar=wstar,                             &
-             spp_pbl=spp_sfc,pattern_spp_pbl=spp_wts_sfc,                     &
+             spp_sfc=spp_sfc,pattern_spp_sfc=spp_wts_sfc,                     &
              ids=1,ide=im, jds=1,jde=1, kds=1,kde=levs,                       &
              ims=1,ime=im, jms=1,jme=1, kms=1,kme=levs,                       &
              its=1,ite=im, jts=1,jte=1, kts=1,kte=levs                        )

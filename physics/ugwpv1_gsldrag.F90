@@ -321,7 +321,7 @@ contains
           zogw,  zlwb,  zobl,  zngw,   dusfcg, dvsfcg,  dudt, dvdt, dtdt, rdxzb,        &
           dtend, dtidx, index_of_x_wind, index_of_y_wind, index_of_temperature,         &
           index_of_process_orographic_gwd, index_of_process_nonorographic_gwd,          &
-          lprnt, ipr, spp_wts_gwd, do_spp, errmsg, errflg)
+          lprnt, ipr, spp_wts_gwd, spp_gwd, errmsg, errflg)
 
 !
 !########################################################################
@@ -438,7 +438,7 @@ contains
     real(kind=kind_phys),    intent(out), dimension(:)      :: rdxzb     ! for stoch phys. mtb-level
 
     real(kind=kind_phys), intent(in) :: spp_wts_gwd(:,:)
-    logical, intent(in) :: do_spp
+    logical, intent(in) :: spp_gwd
 
     character(len=*),        intent(out) :: errmsg
     integer,                 intent(out) :: errflg
@@ -562,7 +562,7 @@ contains
                  do_gsl_drag_ls_bl,do_gsl_drag_ss,do_gsl_drag_tofd,  &
                  dtend, dtidx, index_of_process_orographic_gwd,      &
                  index_of_temperature, index_of_x_wind,              &
-                 index_of_y_wind, ldiag3d, spp_wts_gwd,do_spp,       &
+                 index_of_y_wind, ldiag3d, spp_wts_gwd, spp_gwd,     &
                  errmsg, errflg)
 !
 ! dusfcg = du_ogwcol + du_oblcol + du_osscol + du_ofdcol

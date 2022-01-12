@@ -1290,7 +1290,7 @@ MODULE module_mp_thompson
 !+---+-----------------------------------------------------------------+
 !..Introduce stochastic parameter perturbations by creating as many scalar rand1, rand2, ...
 !.. variables as needed to perturb different pieces of microphysics. gthompsn  21Mar2018
-! Setting spp_mp to 1 gives graupel Y-intercept pertubations (2^0)
+! Setting spp_mp_opt to 1 gives graupel Y-intercept pertubations (2^0)
 !                   2 gives cloud water distribution gamma shape parameter perturbations (2^1)
 !                   4 gives CCN & IN activation perturbations (2^2)
 !                   3 gives both 1+2

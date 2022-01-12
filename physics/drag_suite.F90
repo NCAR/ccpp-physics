@@ -219,7 +219,7 @@
      &           dtend, dtidx, index_of_process_orographic_gwd,         &
      &           index_of_temperature, index_of_x_wind,                 &
      &           index_of_y_wind, ldiag3d,                              &
-     &           spp_wts_gwd, do_spp, errmsg, errflg)
+     &           spp_wts_gwd, spp_gwd, errmsg, errflg)
 
 !   ********************************************************************
 ! ----->  I M P L E M E N T A T I O N    V E R S I O N   <----------
@@ -369,7 +369,7 @@
    real(kind=kind_phys), dimension(im) :: var_stoch, varss_stoch, &
                                        varmax_ss_stoch, varmax_fd_stoch
    real(kind=kind_phys), intent(in) :: spp_wts_gwd(:,:)
-   logical, intent(in) :: do_spp
+   integer, intent(in) :: spp_gwd
 
    real(kind=kind_phys), dimension(im)              :: rstoch
 
@@ -601,8 +601,8 @@ do i=1,im
    endif
 enddo
 
-! SPP, if do_spp is false, no perturbations are applied.
-if ( do_spp ) then
+! SPP, if spp_gwd is 0, no perturbations are applied.
+if ( spp_gwd==1 ) then
   do i = its,im
     var_stoch(i)   = var(i)   + var(i)*0.75*spp_wts_gwd(i,1)
     varss_stoch(i) = varss(i) + varss(i)*0.75*spp_wts_gwd(i,1)

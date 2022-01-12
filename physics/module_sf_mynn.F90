@@ -161,7 +161,7 @@ CONTAINS
               QGH,QSFC,                              &
               U10,V10,TH2,T2,Q2,                     &
               GZ1OZ0,WSPD,WSTAR,                     &
-              spp_pbl,pattern_spp_pbl,               &
+              spp_sfc,pattern_spp_sfc,               &
               ids,ide, jds,jde, kds,kde,             &
               ims,ime, jms,jme, kms,kme,             &
               its,ite, jts,jte, kts,kte              )
@@ -271,7 +271,7 @@ CONTAINS
 !NAMELIST/CONFIGURATION OPTIONS:
       INTEGER,  INTENT(IN)   ::        ISFFLX, LSM, LSM_RUC
       INTEGER,  OPTIONAL,  INTENT(IN)   :: ISFTCFLX, IZ0TLND
-      INTEGER,  OPTIONAL,  INTENT(IN)   :: spp_pbl, psi_opt
+      INTEGER,  OPTIONAL,  INTENT(IN)   :: spp_sfc, psi_opt
       integer, intent(in) :: ivegsrc
       integer, intent(in) :: sfc_z0_type ! option for calculating surface roughness length over ocean
       logical, intent(in) :: redrag ! reduced drag coeff. flag for high wind over sea (j.han)
@@ -293,7 +293,7 @@ CONTAINS
                                                         th3d,pi3d
 
       REAL, DIMENSION( ims:ime, kms:kme), OPTIONAL,                &
-                INTENT(IN) ::                      pattern_spp_pbl
+                INTENT(IN) ::                      pattern_spp_sfc
 !===================================
 ! 2D VARIABLES
 !===================================
@@ -396,8 +396,8 @@ CONTAINS
          QC1D(i)=QC3D(i,kts)
          P1D(i) =P3D(i,kts)
          T1D(i) =T3D(i,kts)
-         if (spp_pbl==1) then
-            rstoch1D(i)=pattern_spp_pbl(i,kts)
+         if (spp_sfc==1) then
+            rstoch1D(i)=pattern_spp_sfc(i,kts)
          else
             rstoch1D(i)=0.0
          endif
@@ -462,7 +462,7 @@ CONTAINS
            HFLX,HFX,QFLX,QFX,LH,FLHC,FLQC,                      &
            QGH,QSFC,U10,V10,TH2,T2,Q2,                          &
            GZ1OZ0,WSPD,wstar,                                   &
-           spp_pbl,rstoch1D,                                    &
+           spp_sfc,rstoch1D,                                    &
            ids,ide, jds,jde, kds,kde,                           &
            ims,ime, jms,jme, kms,kme,                           &
            its,ite, jts,jte, kts,kte                            &
@@ -510,7 +510,7 @@ CONTAINS
              QGH,QSFC,                                            &
              U10,V10,TH2,T2,Q2,                                   &
              GZ1OZ0,WSPD,wstar,                                   &
-             spp_pbl,rstoch1D,                                    &
+             spp_sfc,rstoch1D,                                    &
              ids,ide, jds,jde, kds,kde,                           &
              ims,ime, jms,jme, kms,kme,                           &
              its,ite, jts,jte, kts,kte                            &
@@ -537,7 +537,7 @@ CONTAINS
 !-----------------------------
       INTEGER,  INTENT(IN) :: ISFFLX
       INTEGER,  OPTIONAL,  INTENT(IN )   ::     ISFTCFLX, IZ0TLND
-      INTEGER,    INTENT(IN)             ::     spp_pbl, psi_opt
+      INTEGER,    INTENT(IN)             ::     spp_sfc, psi_opt
       integer, intent(in) :: ivegsrc
       integer, intent(in) :: sfc_z0_type ! option for calculating surface roughness length over ocean
       logical, intent(in) :: redrag ! reduced drag coeff. flag for high wind over sea (j.han)
@@ -1111,7 +1111,7 @@ CONTAINS
        endif !-end wave model check
 
        ! add stochastic perturbation of ZNT
-       if (spp_pbl==1) then
+       if (spp_sfc==1) then
           ZNTstoch_wat(I)  = MAX(ZNT_wat(I) + ZNT_wat(I)*1.0*rstoch1D(i), 1e-6)
        else
           ZNTstoch_wat(I)  = ZNT_wat(I)
@@ -1140,29 +1140,29 @@ CONTAINS
           IF ( ISFTCFLX .EQ. 0 ) THEN
              IF (COARE_OPT .EQ. 3.0) THEN
                 CALL fairall_etal_2003(ZT_wat(i),ZQ_wat(i),restar,UST_wat(i),visc,&
-                                       rstoch1D(i),spp_pbl)
+                                       rstoch1D(i),spp_sfc)
              ELSE
                 !presumably, this will be published soon, but hasn't yet
                 CALL fairall_etal_2014(ZT_wat(i),ZQ_wat(i),restar,UST_wat(i),visc,&
-                                       rstoch1D(i),spp_pbl)
+                                       rstoch1D(i),spp_sfc)
              ENDIF
           ELSEIF ( ISFTCFLX .EQ. 1 ) THEN
              IF (COARE_OPT .EQ. 3.0) THEN
                 CALL fairall_etal_2003(ZT_wat(i),ZQ_wat(i),restar,UST_wat(i),visc,&
-                                       rstoch1D(i),spp_pbl)
+                                       rstoch1D(i),spp_sfc)
              ELSE
                 CALL fairall_etal_2014(ZT_wat(i),ZQ_wat(i),restar,UST_wat(i),visc,&
-                                       rstoch1D(i),spp_pbl)
+                                       rstoch1D(i),spp_sfc)
              ENDIF
           ELSEIF ( ISFTCFLX .EQ. 2 ) THEN
              CALL garratt_1992(ZT_wat(i),ZQ_wat(i),ZNTstoch_wat(i),restar,2.0)
           ELSEIF ( ISFTCFLX .EQ. 3 ) THEN
              IF (COARE_OPT .EQ. 3.0) THEN
                 CALL fairall_etal_2003(ZT_wat(i),ZQ_wat(i),restar,UST_wat(i),visc,&
-                                       rstoch1D(i),spp_pbl)
+                                       rstoch1D(i),spp_sfc)
              ELSE
                 CALL fairall_etal_2014(ZT_wat(i),ZQ_wat(i),restar,UST_wat(i),visc,&
-                                       rstoch1D(i),spp_pbl)
+                                       rstoch1D(i),spp_sfc)
              ENDIF
           ELSEIF ( ISFTCFLX .EQ. 4 ) THEN
              !GFS zt formulation
@@ -1173,10 +1173,10 @@ CONTAINS
           !DEFAULT TO COARE 3.0/3.5
           IF (COARE_OPT .EQ. 3.0) THEN
              CALL fairall_etal_2003(ZT_wat(i),ZQ_wat(i),restar,UST_wat(i),visc,&
-                                    rstoch1D(i),spp_pbl)
+                                    rstoch1D(i),spp_sfc)
           ELSE
              CALL fairall_etal_2014(ZT_wat(i),ZQ_wat(i),restar,UST_wat(i),visc,&
-                                    rstoch1D(i),spp_pbl)
+                                    rstoch1D(i),spp_sfc)
           ENDIF
        ENDIF
        IF (debug_code > 1) THEN
@@ -1201,7 +1201,7 @@ CONTAINS
        endif
 
        ! add stochastic perturbaction of ZNT
-       if (spp_pbl==1) then
+       if (spp_sfc==1) then
           ZNTstoch_lnd(I)  = MAX(ZNT_lnd(I) + ZNT_lnd(I)*1.0*rstoch1D(i), 1e-6)
        else
           ZNTstoch_lnd(I)  = ZNT_lnd(I)
@@ -1222,7 +1222,7 @@ CONTAINS
           IF ( PRESENT(IZ0TLND) ) THEN
              IF ( IZ0TLND .LE. 1 ) THEN
                 CALL zilitinkevich_1995(ZNTstoch_lnd(i),ZT_lnd(i),ZQ_lnd(i),restar,&
-                      UST_lnd(I),KARMAN,1.0,IZ0TLND,spp_pbl,rstoch1D(i))
+                      UST_lnd(I),KARMAN,1.0,IZ0TLND,spp_sfc,rstoch1D(i))
              ELSEIF ( IZ0TLND .EQ. 2 ) THEN
                 CALL Yang_2008(ZNTSTOCH_lnd(i),ZT_lnd(i),ZQ_lnd(i),UST_lnd(i),MOL(I),&
                               qstar(I),restar,visc)
@@ -1237,7 +1237,7 @@ CONTAINS
           ELSE
              !DEFAULT TO ZILITINKEVICH
              CALL zilitinkevich_1995(ZNTSTOCH_lnd(i),ZT_lnd(i),ZQ_lnd(i),restar,&
-                         UST_lnd(I),KARMAN,1.0,0,spp_pbl,rstoch1D(i))
+                         UST_lnd(I),KARMAN,1.0,0,spp_sfc,rstoch1D(i))
           ENDIF
        ENDIF
        IF (ZNTstoch_lnd(i) < 1E-8 .OR. Zt_lnd(i) < 1E-10) THEN 
@@ -1263,7 +1263,7 @@ CONTAINS
     IF (icy(I)) THEN
 
        ! add stochastic perturbaction of ZNT
-       if (spp_pbl==1) then
+       if (spp_sfc==1) then
           ZNTstoch_ice(I)  = MAX(ZNT_ice(I) + ZNT_ice(I)*1.0*rstoch1D(i), 1e-6)
        else
           ZNTstoch_ice(I)  = ZNT_ice(I)
@@ -2246,7 +2246,7 @@ END SUBROUTINE SFCLAY1D_mynn
 !!            to work with the Noah LSM and may be specific for that
 !!            LSM only. Tests with RUC LSM showed no improvements. 
   SUBROUTINE zilitinkevich_1995(Z_0,Zt,Zq,restar,ustar,KARMAN,&
-        & landsea,IZ0TLND2,spp_pbl,rstoch)
+        & landsea,IZ0TLND2,spp_sfc,rstoch)
 
        IMPLICIT NONE
        REAL, INTENT(IN) :: Z_0,restar,ustar,KARMAN,landsea
@@ -2255,7 +2255,7 @@ END SUBROUTINE SFCLAY1D_mynn
        REAL :: CZIL  !=0.100 in Chen et al. (1997)
                      !=0.075 in Zilitinkevich (1995)
                      !=0.500 in Lemone et al. (2008)
-       INTEGER,  INTENT(IN)  ::    spp_pbl
+       INTEGER,  INTENT(IN)  ::    spp_sfc
        REAL,     INTENT(IN)  ::    rstoch
 
 
@@ -2296,7 +2296,7 @@ END SUBROUTINE SFCLAY1D_mynn
 
 ! stochastically perturb thermal and moisture roughness length.
 ! currently set to half the amplitude: 
-          if (spp_pbl==1) then
+          if (spp_sfc==1) then
              Zt = Zt + Zt * 0.5 * rstoch
              Zt = MAX(Zt, 0.0001)
              Zq = Zt
@@ -2461,11 +2461,11 @@ END SUBROUTINE SFCLAY1D_mynn
 !!(1992, p. 102), is available for flows with Ren < 2.
 !!
 !!This is for use over water only.
-    SUBROUTINE fairall_etal_2003(Zt,Zq,Ren,ustar,visc,rstoch,spp_pbl)
+    SUBROUTINE fairall_etal_2003(Zt,Zq,Ren,ustar,visc,rstoch,spp_sfc)
 
        IMPLICIT NONE
        REAL, INTENT(IN)   :: Ren,ustar,visc,rstoch
-       INTEGER, INTENT(IN):: spp_pbl
+       INTEGER, INTENT(IN):: spp_sfc
        REAL, INTENT(OUT)  :: Zt,Zq
 
        IF (Ren .le. 2.) then
@@ -2484,7 +2484,7 @@ END SUBROUTINE SFCLAY1D_mynn
 
        ENDIF
 
-       if (spp_pbl==1) then
+       if (spp_sfc==1) then
           Zt = Zt + Zt * 0.5 * rstoch
           Zq = Zt
        endif
@@ -2505,18 +2505,18 @@ END SUBROUTINE SFCLAY1D_mynn
 !! COARE 3.5/4.0 formulation, empirically derived from COARE and HEXMAX data
 !! [Fairall et al. (2014? coming soon, not yet published as of July 2014)].
 !! This is for use over water only.
-    SUBROUTINE fairall_etal_2014(Zt,Zq,Ren,ustar,visc,rstoch,spp_pbl)
+    SUBROUTINE fairall_etal_2014(Zt,Zq,Ren,ustar,visc,rstoch,spp_sfc)
 
        IMPLICIT NONE
        REAL, INTENT(IN)  :: Ren,ustar,visc,rstoch
-       INTEGER, INTENT(IN):: spp_pbl
+       INTEGER, INTENT(IN):: spp_sfc
        REAL, INTENT(OUT) :: Zt,Zq
 
        !Zt = (5.5e-5)*(Ren**(-0.60))
        Zt = MIN(1.6E-4, 5.8E-5/(Ren**0.72))
        Zq = Zt
 
-       IF (spp_pbl ==1) THEN
+       IF (spp_sfc ==1) THEN
           Zt = MAX(Zt + Zt*0.5*rstoch,2.0e-9)
           Zq = MAX(Zt + Zt*0.5*rstoch,2.0e-9)
        ELSE

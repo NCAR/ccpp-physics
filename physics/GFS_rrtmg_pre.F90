@@ -36,7 +36,7 @@
         gasvmr_ccl4,  gasvmr_cfc113, aerodp, clouds6, clouds7, clouds8,        &
         clouds9, cldsa, cldfra, cldfra2d, lwp_ex,iwp_ex, lwp_fc,iwp_fc,        &
         faersw1, faersw2, faersw3, faerlw1, faerlw2, faerlw3, alpha,           &
-        spp_wts_rad, do_spp, errmsg, errflg)
+        spp_wts_rad, spp_rad, errmsg, errflg)
 
       use machine,                   only: kind_phys
 
@@ -104,7 +104,7 @@
                                           uni_cld, effr_in, do_mynnedmf,       &
                                           lmfshal, lmfdeep2, pert_clds
 
-      logical,    intent(in) :: do_spp
+      integer,    intent(in) :: spp_rad
       real(kind_phys),              intent(in) :: spp_wts_rad(:,:)
 
       real(kind=kind_phys), intent(in) :: fhswr, fhlwr, solhr, sup, julian, sppt_amp
@@ -1080,7 +1080,7 @@
        enddo
 
 ! --- add spp
-      if ( do_spp .ne. 0 ) then
+      if ( spp_rad==1 ) then
 
       do k=1,lm
         if (k < levs) then

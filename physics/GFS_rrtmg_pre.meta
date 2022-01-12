@@ -1083,19 +1083,19 @@
   kind = kind_phys
   intent = out
 [spp_wts_rad]
-  standard_name = weights_for_stochastic_spp_rad_perturbation
-  long_name = weights for stochastic spp rad perturbation
+  standard_name = weights_for_stochastic_spp_rad_perturbations
+  long_name = weights for stochastic spp rad perturbations
   units = none
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
-[do_spp]
-  standard_name = flag_for_stochastic_spp_option
-  long_name = flag for stochastic spp option
-  units = flag
+[spp_rad]
+  standard_name = control_for_radiation_spp_perturbations
+  long_name = control for radiation spp perturbations
+  units = count
   dimensions = ()
-  type = logical
+  type = integer
   intent = in
 [errmsg]
   standard_name = ccpp_error_message

@@ -108,7 +108,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  icloud_bl, do_mynnsfclay,                          &
      &  imp_physics, imp_physics_gfdl,                     &
      &  imp_physics_thompson, imp_physics_wsm6,            &
-     &  ltaerosol, spp_wts_pbl, do_spp, lprnt, huge, errmsg, errflg  )
+     &  ltaerosol, spp_wts_pbl, spp_pbl, lprnt, huge, errmsg, errflg  )
 
 ! should be moved to inside the mynn:
       use machine , only : kind_phys
@@ -195,7 +195,6 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 ! NAMELIST OPTIONS (INPUT):
       LOGICAL, INTENT(IN) :: bl_mynn_tkeadvect, ltaerosol,  &
                              lprnt, do_mynnsfclay,          &
-                             do_spp,                        &
                              flag_for_pbl_generic_tend
       INTEGER, INTENT(IN) ::                                &
      &       bl_mynn_cloudpdf,                              &
@@ -210,7 +209,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &       bl_mynn_output,                                &
      &       grav_settling,                                 &
      &       imp_physics, imp_physics_wsm6,                 &
-     &       imp_physics_thompson, imp_physics_gfdl
+     &       imp_physics_thompson, imp_physics_gfdl,        &
+     &       spp_pbl
 
 !TENDENCY DIAGNOSTICS
       real(kind=kind_phys), intent(inout), optional :: dtend(:,:,:)
@@ -232,7 +232,6 @@ SUBROUTINE mynnedmf_wrapper_run(        &
       LOGICAL, PARAMETER :: cycling = .false.
       INTEGER, PARAMETER :: param_first_scalar = 1
       INTEGER ::                                            &
-     &      spp_pbl,                                        &
      &      p_qc, p_qr, p_qi, p_qs, p_qg, p_qnc, p_qni
 
 !MYNN-1D
@@ -277,7 +276,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
     &        Tsq, Qsq, Cov, exch_h, exch_m
      real(kind=kind_phys), dimension(:), intent(in) :: xmu
      real(kind=kind_phys), dimension(:,:), intent(in) :: htrsw, htrlw
-    ! spp_wts_pbl only allocated if do_spp == .true.
+    ! spp_wts_pbl only allocated if spp_pbl == 1
     real(kind_phys), dimension(:,:),       intent(in) :: spp_wts_pbl
 
      !LOCAL
@@ -531,9 +530,6 @@ SUBROUTINE mynnedmf_wrapper_run(        &
              w(i,k) = -omega(i,k)/(rho(i,k)*g)
          enddo
       enddo
-      if ( do_spp ) then
-         spp_pbl=1
-      endif
 
       do i=1,im
          if (slmsk(i)==1. .or. slmsk(i)==2.) then !sea/land/ice mask (=0/1/2) in FV3
