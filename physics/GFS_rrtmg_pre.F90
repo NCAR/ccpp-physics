@@ -1080,24 +1080,22 @@
        enddo
 
 ! --- add spp
-      if ( spp_rad==1 ) then
-
-      do k=1,lm
-        if (k < levs) then
-          do i=1,im
-            effrl_inout(i,k) = effrl_inout(i,k) - spp_wts_rad(i,k) * effrl_inout(i,k)
-            effri_inout(i,k) = effri_inout(i,k) - spp_wts_rad(i,k) * effri_inout(i,k)
-            effrs_inout(i,k) = effrs_inout(i,k) - spp_wts_rad(i,k) * effrs_inout(i,k)
-          enddo
-        else
-          do i=1,im
-            effrl_inout(i,k) = effrl_inout(i,k) - spp_wts_rad(i,levs) * effrl_inout(i,k)
-            effri_inout(i,k) = effri_inout(i,k) - spp_wts_rad(i,levs) * effri_inout(i,k)
-            effrs_inout(i,k) = effrs_inout(i,k) - spp_wts_rad(i,levs) * effrs_inout(i,k)
-          enddo
-        endif
-      enddo
-
+      if ( spp_rad == 1 ) then
+        do k=1,lm
+          if (k < levs) then
+            do i=1,im
+              effrl_inout(i,k) = effrl_inout(i,k) - spp_wts_rad(i,k) * effrl_inout(i,k)
+              effri_inout(i,k) = effri_inout(i,k) - spp_wts_rad(i,k) * effri_inout(i,k)
+              effrs_inout(i,k) = effrs_inout(i,k) - spp_wts_rad(i,k) * effrs_inout(i,k)
+            enddo
+          else
+            do i=1,im
+              effrl_inout(i,k) = effrl_inout(i,k) - spp_wts_rad(i,levs) * effrl_inout(i,k)
+              effri_inout(i,k) = effri_inout(i,k) - spp_wts_rad(i,levs) * effri_inout(i,k)
+              effrs_inout(i,k) = effrs_inout(i,k) - spp_wts_rad(i,levs) * effrs_inout(i,k)
+            enddo
+          endif
+        enddo
       endif
 
 ! mg, sfc-perts
