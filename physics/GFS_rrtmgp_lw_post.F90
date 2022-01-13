@@ -1,14 +1,10 @@
-module GFS_rrtmgp_lw_post 
+module GFS_rrtmgp_lw_post
   use machine,                   only: kind_phys
-  use module_radiation_aerosols, only: NSPC1
-  use module_radlw_parameters,   only: topflw_type, sfcflw_type, proflw_type
-  ! RRTMGP DDT's
-  use mo_gas_optics_rrtmgp,      only: ty_gas_optics_rrtmgp
-  use mo_fluxes_byband,          only: ty_fluxes_byband
+  use module_radlw_parameters,   only: topflw_type, sfcflw_type
   use mo_heating_rates,          only: compute_heating_rate
-  use radiation_tools,                only: check_error_msg
+  use radiation_tools,           only: check_error_msg
   implicit none
-  
+
   public GFS_rrtmgp_lw_post_init,GFS_rrtmgp_lw_post_run,GFS_rrtmgp_lw_post_finalize
 
 contains
@@ -25,20 +21,22 @@ contains
 !! \htmlinclude GFS_rrtmgp_lw_post.html
 !!
   subroutine GFS_rrtmgp_lw_post_run (nCol, nLev, lslwr, do_lw_clrsky_hr, save_diag, fhlwr, &
-       p_lev, t_lay, tsfa, fluxlwUP_allsky, fluxlwDOWN_allsky, fluxlwUP_clrsky,            &
-       fluxlwDOWN_clrsky, raddt, aerodp, cldsa, mtopa, mbota, cld_frac, cldtaulw, fluxr,   &
-       sfcdlw, sfculw, sfcflw, tsflw, htrlw, topflw, flxprf_lw, htrlwc, errmsg, errflg)
+       p_lev, t_lay, tsfa, fluxlwUP_allsky, fluxlwDOWN_allsky, fluxlwUP_clrsky, iSFC, iTOA,&
+       fluxlwDOWN_clrsky, raddt, cldsa, mtopa, mbota, cld_frac, cldtaulw, fluxr, sfcdlw,   &
+       sfculw, sfcflw, tsflw, htrlw, htrlwu, topflw, htrlwc, errmsg, errflg)
 
-    ! Inputs                    
-    integer, intent(in) :: &
+    ! Inputs
+    integer, intent(in) ::  &
          nCol,              & ! Horizontal loop extent 
-         nLev                 ! Number of vertical layers
+         nLev,              & ! Number of vertical layers
+         iSFC,              & ! Vertical index for surface level
+         iTOA                 ! Vertical index for TOA level
     logical, intent(in) :: & 
          lslwr,             & ! Logical flags for lw radiation calls
-         do_lw_clrsky_hr,   & ! Output clear-sky SW heating-rate?         
-    	 save_diag            ! Output radiation diagnostics?
+         do_lw_clrsky_hr,   & ! Output clear-sky SW heating-rate?
+         save_diag            ! Output radiation diagnostics?
     real(kind_phys), intent(in) :: &
-         fhlwr                ! Frequency for SW radiation    	 
+         fhlwr                ! Frequency for SW radiation
     real(kind_phys), dimension(nCol), intent(in) ::  &
          tsfa                 ! Lowest model layer air temperature for radiation (K)
     real(kind_phys), dimension(nCol, nLev), intent(in) :: &
@@ -51,48 +49,40 @@ contains
          fluxlwDOWN_clrsky    ! RRTMGP longwave clear-sky flux (W/m2)
     real(kind_phys), intent(in) :: &
          raddt                ! Radiation time step
-    real(kind_phys), dimension(nCol,NSPC1), intent(in) :: &
-         aerodp               ! Vertical integrated optical depth for various aerosol species  
     real(kind_phys), dimension(nCol,5), intent(in) :: &
-         cldsa                ! Fraction of clouds for low, middle, high, total and BL 
+         cldsa                ! Fraction of clouds for low, middle, high, total and BL
     integer,         dimension(nCol,3), intent(in) ::&
          mbota,             & ! vertical indices for low, middle and high cloud tops 
          mtopa                ! vertical indices for low, middle and high cloud bases
     real(kind_phys), dimension(nCol,nLev), intent(in) :: &
          cld_frac,          & ! Total cloud fraction in each layer
-         cldtaulw             ! approx 10.mu band layer cloud optical depth  
-    
+         cldtaulw             ! approx 10.mu band layer cloud optical depth
+
     real(kind=kind_phys), dimension(:,:), intent(inout) :: fluxr
-    
+
     ! Outputs (mandatory)
     real(kind_phys), dimension(nCol), intent(inout) :: &
          sfcdlw,            & ! Total sky sfc downward lw flux (W/m2)
          sfculw,            & ! Total sky sfc upward lw flux (W/m2)
          tsflw                ! surface air temp during lw calculation (K)
     type(sfcflw_type), dimension(nCol), intent(inout) :: &
-         sfcflw               ! LW radiation fluxes at sfc    
+         sfcflw               ! LW radiation fluxes at sfc
     real(kind_phys), dimension(nCol,nLev), intent(inout) :: &
-         htrlw                ! LW all-sky heating rate
+         htrlw,             & ! LW all-sky heating rate
+         htrlwu               ! Heating-rate updated in-between radiation calls.
     type(topflw_type), dimension(nCol), intent(out) :: &
          topflw               ! lw_fluxes_top_atmosphere
     character(len=*), intent(out) :: &
          errmsg
     integer, intent(out) :: &
          errflg
-                  
+
     ! Outputs (optional)
-    type(proflw_type), dimension(nCol, nLev+1), optional, intent(inout) :: &
-         flxprf_lw            ! 2D radiative fluxes, components:
-                              ! upfxc - total sky upward flux (W/m2)
-                              ! dnfxc - total sky dnward flux (W/m2)
-                              ! upfx0 - clear sky upward flux (W/m2)
-                              ! dnfx0 - clear sky dnward flux (W/m2)
     real(kind_phys),dimension(nCol, nLev),intent(inout),optional  :: &
          htrlwc               ! Longwave clear-sky heating-rate (K/sec)
-         
+
     ! Local variables
-    integer :: i, j, k, iSFC, iTOA, itop, ibtc
-    logical :: l_fluxeslw2d, top_at_1
+    integer :: i, j, k, itop, ibtc
     real(kind_phys) :: tem0d, tem1, tem2
     real(kind_phys),dimension(nCol,nLev) :: hlwc
 
@@ -101,24 +91,8 @@ contains
     errflg = 0
 
     if (.not. lslwr) return
-
-    ! Are any optional outputs requested?
-    l_fluxeslw2d    = present(flxprf_lw)
-
     ! #######################################################################################
-    ! What is vertical ordering?
-    ! #######################################################################################
-    top_at_1 = (p_lev(1,1) .lt. p_lev(1, nLev))
-    if (top_at_1) then 
-       iSFC = nLev+1
-       iTOA = 1
-    else
-       iSFC = 1
-       iTOA = nLev+1
-    endif
-
-    ! #######################################################################################
-    ! Compute LW heating-rates. 
+    ! Compute LW heating-rates.
     ! #######################################################################################
     ! Clear-sky heating-rate (optional)
     if (do_lw_clrsky_hr) then
@@ -128,7 +102,7 @@ contains
             p_lev,             & ! IN  - Pressure @ layer-interfaces (Pa)
             htrlwc))               ! OUT - Longwave clear-sky heating rate (K/sec)
     endif
-    
+
     ! All-sky heating-rate (mandatory)
     call check_error_msg('GFS_rrtmgp_post',compute_heating_rate(     &
         fluxlwUP_allsky,      & ! IN  - RRTMGP upward longwave all-sky flux profiles (W/m2)
@@ -138,24 +112,18 @@ contains
 
     ! #######################################################################################
     ! Save LW outputs.
+    ! (Copy fluxes from RRTMGP types into model radiation types.)
     ! #######################################################################################
-    ! Copy fluxes from RRTGMP types into model radiation types.
-    ! Mandatory outputs
+    ! TOA fluxes
     topflw(:)%upfxc = fluxlwUP_allsky(:,iTOA)
     topflw(:)%upfx0 = fluxlwUP_clrsky(:,iTOA)
+
+    ! Surface fluxes
     sfcflw(:)%upfxc = fluxlwUP_allsky(:,iSFC)
     sfcflw(:)%upfx0 = fluxlwUP_clrsky(:,iSFC)
     sfcflw(:)%dnfxc = fluxlwDOWN_allsky(:,iSFC)
     sfcflw(:)%dnfx0 = fluxlwDOWN_clrsky(:,iSFC)
-       
-    ! Optional outputs
-    if(l_fluxeslw2d) then
-        flxprf_lw%upfxc = fluxlwUP_allsky
-        flxprf_lw%dnfxc = fluxlwDOWN_allsky
-        flxprf_lw%upfx0 = fluxlwUP_clrsky
-        flxprf_lw%dnfx0 = fluxlwDOWN_clrsky
-    endif
-    
+
     ! Save surface air temp for diurnal adjustment at model t-steps
     tsflw (:) = tsfa(:)
 
@@ -163,10 +131,13 @@ contains
     sfcdlw(:) = sfcflw(:)%dnfxc
     sfculw(:) = sfcflw(:)%upfxc
 
+    ! Heating-rate at radiation timestep, used for adjustment between radiation calls.
+    htrlwu = htrlw
+
     ! #######################################################################################
     ! Save LW diagnostics
-    ! - For time averaged output quantities (including total-sky and clear-sky SW and LW 
-    !   fluxes at TOA and surface; conventional 3-domain cloud amount, cloud top and base 
+    ! - For time averaged output quantities (including total-sky and clear-sky SW and LW
+    !   fluxes at TOA and surface; conventional 3-domain cloud amount, cloud top and base
     !   pressure, and cloud top temperature; aerosols AOD, etc.), store computed results in
     !   corresponding slots of array fluxr with appropriate time weights.
     ! - Collect the fluxr data for wrtsfc
@@ -182,11 +153,6 @@ contains
              fluxr(i,30) = fluxr(i,30) + fhlwr * fluxlwDOWN_clrsky(i,iSFC)   ! clear sky sfc lw dn
              fluxr(i,33) = fluxr(i,33) + fhlwr * fluxlwUP_clrsky(  i,iSFC)   ! clear sky sfc lw up
           enddo
-          
-          do i=1,nCol
-             fluxr(i,17) = fluxr(i,17) + raddt * cldsa(i,4)
-             fluxr(i,18) = fluxr(i,18) + raddt * cldsa(i,5)
-          enddo
 
           ! Save cld frac,toplyr,botlyr and top temp, note that the order of h,m,l cloud is reversed for 
           ! the fluxr output. save interface pressure (pa) of top/bot
@@ -195,10 +161,6 @@ contains
                 tem0d = raddt * cldsa(i,j)
                 itop  = mtopa(i,j)
                 ibtc  = mbota(i,j)
-                fluxr(i, 8-j) = fluxr(i, 8-j) + tem0d
-                fluxr(i,11-j) = fluxr(i,11-j) + tem0d * p_lev(i,itop)
-                fluxr(i,14-j) = fluxr(i,14-j) + tem0d * p_lev(i,ibtc)
-                fluxr(i,17-j) = fluxr(i,17-j) + tem0d * t_lay(i,itop)
                 
                 ! Add optical depth and emissivity output
                 tem2 = 0.

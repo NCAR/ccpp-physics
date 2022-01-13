@@ -738,10 +738,10 @@ contains
 ! thermal conductivity of snow
 
   do iz = isnow+1, 0
-     tksno(iz) = 3.2217e-6*bdsnoi(iz)**2.           ! stieglitz(yen,1965)
+!     tksno(iz) = 3.2217e-6*bdsnoi(iz)**2.           ! stieglitz(yen,1965)
 !    tksno(iz) = 2e-2+2.5e-6*bdsnoi(iz)*bdsnoi(iz)   ! anderson, 1976
 !    tksno(iz) = 0.35                                ! constant
-!    tksno(iz) = 2.576e-6*bdsnoi(iz)**2. + 0.074    ! verseghy (1991)
+    tksno(iz) = 2.576e-6*bdsnoi(iz)**2. + 0.074    ! verseghy (1991)
 !    tksno(iz) = 2.22*(bdsnoi(iz)/1000.)**1.88      ! douvill(yen, 1981)
   enddo
 
@@ -2657,7 +2657,7 @@ end if   ! opt_gla == 1
    real (kind=kind_phys), parameter     :: c4 = 0.04     !< [1/k]
    real (kind=kind_phys), parameter     :: c5 = 2.0      !<
    real (kind=kind_phys), parameter     :: dm = 100.0    !< upper limit on destructive metamorphism compaction [kg/m3]
-   real (kind=kind_phys), parameter     :: eta0 = 0.8e+6 !< viscosity coefficient [kg-s/m2] 
+   real (kind=kind_phys), parameter     :: eta0 = 1.8e+6 !< viscosity coefficient [kg-s/m2] 
                                         !according to anderson, it is between 0.52e6~1.38e6
    real (kind=kind_phys) :: burden !< pressure of overlying snow [kg/m2]
    real (kind=kind_phys) :: ddz1   !< rate of settling of snow pack due to destructive metamorphism.
