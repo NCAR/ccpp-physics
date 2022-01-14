@@ -438,7 +438,7 @@ contains
     real(kind=kind_phys),    intent(out), dimension(:)      :: rdxzb     ! for stoch phys. mtb-level
 
     real(kind=kind_phys), intent(in) :: spp_wts_gwd(:,:)
-    logical, intent(in) :: spp_gwd
+    integer, intent(in) :: spp_gwd
 
     character(len=*),        intent(out) :: errmsg
     integer,                 intent(out) :: errflg
