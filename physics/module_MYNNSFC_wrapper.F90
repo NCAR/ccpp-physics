@@ -231,7 +231,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
 !      endif
 
       ! prep MYNN-only variables
-      pattern_spp_pbl(:,:) = 0
+      pattern_spp_sfc(:,:) = 0
       dz(:,:) = 0
       th(:,:) = 0
       qv(:,:) = 0
