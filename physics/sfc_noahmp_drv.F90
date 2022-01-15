@@ -118,7 +118,7 @@
 
 !  ---  in/outs:
       weasd, snwdph, tskin, tprcp, srflag, smc, stc, slc,        &
-      canopy, trans, zorl,                                       &
+      canopy, trans, tsurf, zorl,                                &
       rb1, fm1, fh1, ustar1, stress1, fm101, fh21,               &
 
 ! --- Noah MP specific
@@ -245,6 +245,7 @@
   real(kind=kind_phys), dimension(:,:)   , intent(inout) :: slc        ! liquid soil moisture [m3/m3]
   real(kind=kind_phys), dimension(:)     , intent(inout) :: canopy     ! canopy moisture content [mm]
   real(kind=kind_phys), dimension(:)     , intent(inout) :: trans      ! total plant transpiration [m/s]
+  real(kind=kind_phys), dimension(:)     , intent(inout) :: tsurf      ! surface skin temperature [K]
   real(kind=kind_phys), dimension(:)     , intent(inout) :: zorl       ! surface roughness [cm]
 
   real(kind=kind_phys), dimension(:)     , intent(inout) :: rb1        ! bulk richardson #
@@ -921,6 +922,7 @@ do i = 1, im
       sncovr1   (i)   = snow_cover_fraction
 
 !     qsurf     (i)   = spec_humidity_surface
+      tsurf     (i)   = tskin(i)
 
       tvxy      (i)   = temperature_leaf
       tgxy      (i)   = temperature_ground
