@@ -98,7 +98,6 @@ contains
     real(kind_phys), dimension(nCol, nLev, min(4,ncnd)) :: cld_condensate
     integer :: iCol,iLay,l,ncndl
     real(kind_phys), dimension(nCol,nLev) :: deltaP,deltaZ
-    logical :: top_at_1
 
     if (.not. (doSWrad .or. doLWrad)) return
     
