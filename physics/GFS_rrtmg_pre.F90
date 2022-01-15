@@ -1018,8 +1018,9 @@
                          ntrac-1, ntcw-1,ntiw-1,ntrw-1,             &
                          ntsw-1,ntgl-1,                             &
                          im, lmk, lmp, uni_cld, lmfshal, lmfdeep2,  &
-                         cldcov(:,1:LMK), effrl_inout(:,:),         &
-                         effri_inout(:,:), effrs_inout(:,:),        &
+                         cldcov(:,1:LMK), cnvw, effrl_inout,        &
+                         effri_inout, effrs_inout,                  &
+                         lwp_ex, iwp_ex, lwp_fc, iwp_fc,            &
                          dzb, xlat_d, julian, yearlen,              &
                          clouds, cldsa, mtopa ,mbota, de_lgth, alpha) !  --- outputs
           endif ! MYNN PBL or GF
