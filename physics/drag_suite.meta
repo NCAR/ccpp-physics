@@ -625,9 +625,9 @@
   type = logical
   intent = in
 [spp_wts_gwd]
-  standard_name = weights_for_stochastic_spp_gwd_perturbations
-  long_name = weights for stochastic spp gwd perturbations
-  units = none
+  standard_name = spp_weights_for_gravity_wave_drag_scheme
+  long_name = spp weights for gravity wave drag scheme
+  units = 1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys

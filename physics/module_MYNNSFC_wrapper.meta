@@ -835,9 +835,9 @@
   kind = kind_phys
   intent = inout
 [spp_wts_sfc]
-  standard_name = weights_for_stochastic_spp_sfc_perturbations
-  long_name = weights for stochastic spp sfc perturbations
-  units = none
+  standard_name = spp_weights_for_surface_layer_scheme
+  long_name = spp weights for surface layer scheme
+  units = 1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys

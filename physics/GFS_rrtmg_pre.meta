@@ -1083,9 +1083,9 @@
   kind = kind_phys
   intent = out
 [spp_wts_rad]
-  standard_name = weights_for_stochastic_spp_rad_perturbations
-  long_name = weights for stochastic spp rad perturbations
-  units = none
+  standard_name = spp_weights_for_radiation_scheme
+  long_name = spp weights for radiation scheme
+  units = 1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys

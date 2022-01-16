@@ -1258,16 +1258,16 @@
   type = logical
   intent = in
 [spp_wts_pbl]
-  standard_name = weights_for_stochastic_spp_pbl_perturbations
-  long_name = weights for stochastic spp pbl perturbations
-  units = none
+  standard_name = spp_weights_for_pbl_scheme
+  long_name = spp weights for pbl scheme
+  units = 1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
 [spp_pbl]
-  standard_name = control_for_planetary_boundary_layer_spp_perturbations
-  long_name = control for planetary boundary layer spp perturbations
+  standard_name = control_for_pbl_spp_perturbations
+  long_name = control for pbl spp perturbations
   units = count
   dimensions = ()
   type = integer

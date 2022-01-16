@@ -639,9 +639,9 @@
   type = logical
   intent = in
 [spp_wts_mp]
-  standard_name = weights_for_stochastic_spp_mp_perturbations
-  long_name = weights for stochastic spp mp perturbations
-  units = none
+  standard_name = spp_weights_for_microphysics_scheme
+  long_name = spp weights for microphysics scheme
+  units = 1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
