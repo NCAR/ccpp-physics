@@ -13,12 +13,12 @@
 !! \htmlinclude GFS_MP_generic_pre_run.html
 !!
       subroutine GFS_MP_generic_pre_run(im, levs, ldiag3d, qdiag3d, do_aw, ntcw, nncl, &
-                                        ntrac, gt0, gq0, save_t, save_q, errmsg, errflg)
+                                        ntrac, gt0, gq0, save_t, save_q, num_dfi_radar, errmsg, errflg)
 !
       use machine,               only: kind_phys
 
       implicit none
-      integer,                                intent(in) :: im, levs, ntcw, nncl, ntrac
+      integer,                                intent(in) :: im, levs, ntcw, nncl, ntrac, num_dfi_radar
       logical,                                intent(in) :: ldiag3d, qdiag3d, do_aw
       real(kind=kind_phys), dimension(:,:),   intent(in) :: gt0
       real(kind=kind_phys), dimension(:,:,:), intent(in) :: gq0
@@ -35,12 +35,14 @@
       errmsg = ''
       errflg = 0
 
-      if (ldiag3d .or. do_aw) then
+      if (ldiag3d .or. do_aw .or. num_dfi_radar>0) then
         do k=1,levs
           do i=1,im
             save_t(i,k) = gt0(i,k)
           enddo
         enddo
+      endif
+      if (ldiag3d .or. do_aw) then
         if(qdiag3d) then
            do n=1,ntrac
               do k=1,levs
@@ -91,27 +93,35 @@
         graupel0, del, rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp, srflag, sr, cnvprcp, totprcp, totice,   &
         totsnw, totgrp, cnvprcpb, totprcpb, toticeb, totsnwb, totgrpb, rain_cpl, rainc_cpl, snow_cpl, pwat,               &
         drain_cpl, dsnow_cpl, lsm, lsm_ruc, lsm_noahmp, raincprv, rainncprv, iceprv, snowprv,                             &
-        graupelprv, draincprv, drainncprv, diceprv, dsnowprv, dgraupelprv, dtp,                                           &
-        dtend, dtidx, index_of_temperature, index_of_process_mp,ldiag3d, qdiag3d, lssav,                                  &
-        errmsg, errflg)
+        graupelprv, draincprv, drainncprv, diceprv, dsnowprv, dgraupelprv, dtp, dfi_radar_max_intervals,                  &
+        dtend, dtidx, index_of_temperature, index_of_process_mp,ldiag3d, qdiag3d, lssav, num_dfi_radar, fh_dfi_radar,     &
+        index_of_process_dfi_radar, ix_dfi_radar, dfi_radar_tten, radar_tten_limits, fhour, errmsg, errflg)
 !
       use machine, only: kind_phys
 
       implicit none
 
-      integer, intent(in) :: im, levs, kdt, nrcm, nncl, ntcw, ntrac
+      integer, intent(in) :: im, levs, kdt, nrcm, nncl, ntcw, ntrac, num_dfi_radar, index_of_process_dfi_radar
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_mg, imp_physics_fer_hires
       logical, intent(in) :: cal_pre, lssav, ldiag3d, qdiag3d, cplflx, cplchm
       integer, intent(in) :: index_of_temperature,index_of_process_mp
+
+      integer                                                :: dfi_radar_max_intervals
+      real(kind=kind_phys),                    intent(in)    :: fh_dfi_radar(:), fhour
+      real(kind=kind_phys),                    intent(in)    :: radar_tten_limits(:)
+      integer                                                :: ix_dfi_radar(:)
+      real(kind=kind_phys), dimension(:,:),    intent(inout) :: gt0
 
       real(kind=kind_phys),                    intent(in)    :: dtf, frain, con_g, rainmin
       real(kind=kind_phys), dimension(:),      intent(in)    :: rain1, xlat, xlon, tsfc
       real(kind=kind_phys), dimension(:),      intent(inout) :: ice, snow, graupel, rainc
       real(kind=kind_phys), dimension(:),      intent(in)    :: rain0, ice0, snow0, graupel0
       real(kind=kind_phys), dimension(:,:),    intent(in)    :: rann
-      real(kind=kind_phys), dimension(:,:),    intent(in)    :: gt0, prsl, save_t, del
+      real(kind=kind_phys), dimension(:,:),    intent(in)    :: prsl, save_t, del
       real(kind=kind_phys), dimension(:,:),    intent(in)    :: prsi, phii
       real(kind=kind_phys), dimension(:,:,:),  intent(in)    :: gq0, save_q
+
+      real(kind=kind_phys), dimension(:,:,:),  intent(in)    :: dfi_radar_tten
 
       real(kind=kind_phys), dimension(:),      intent(in   ) :: sr
       real(kind=kind_phys), dimension(:),      intent(inout) :: rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp,  &
@@ -150,10 +160,10 @@
       real(kind=kind_phys), parameter :: p850    = 85000.0_kind_phys
       ! *DH
 
-      integer :: i, k, ic, itrac, idtend
+      integer :: i, k, ic, itrac, idtend, itime, idtend_radar, idtend_mp
 
       real(kind=kind_phys), parameter :: zero = 0.0_kind_phys, one = 1.0_kind_phys
-      real(kind=kind_phys) :: crain, csnow, onebg, tem, total_precip, tem1, tem2
+      real(kind=kind_phys) :: crain, csnow, onebg, tem, total_precip, tem1, tem2, ttend
       real(kind=kind_phys), dimension(im) :: domr, domzr, domip, doms, t850, work1
 
       ! Initialize CCPP error handling variables
@@ -243,6 +253,52 @@
         endif
 
       endif
+
+      do itime=1,num_dfi_radar
+         if(ix_dfi_radar(itime)<1) cycle
+         if(fhour<fh_dfi_radar(itime)) cycle
+         if(fhour>=fh_dfi_radar(itime+1)) cycle
+         exit
+      enddo
+      if_radar: if(itime<=num_dfi_radar) then
+         radar_k: do k=3,levs-2 ! Avoid model top and bottom in case DA forgets to
+            radar_i: do i=1,im
+              ttend = dfi_radar_tten(i,k,itime)
+              if_active: if (ttend>-19) then
+                 ttend = max(ttend,radar_tten_limits(1))
+                 ttend = min(ttend,radar_tten_limits(2))
+
+                 ! add radar temp tendency
+                 ! there is radar coverage
+                 gt0(i,k) = save_t(i,k) + ttend*dtp
+              end if if_active
+           end do radar_i
+        end do radar_k
+        if(ldiag3d) then
+           idtend_radar = dtidx(index_of_temperature,index_of_process_dfi_radar)
+           idtend_mp = dtidx(index_of_temperature,index_of_process_mp)
+           if(idtend_radar>0 .or. idtend_mp>0) then
+              if(idtend_mp>0) then
+                 dtend(:,1:2,idtend_mp) = dtend(:,1:2,idtend_mp) + (gt0(:,1:2)-save_t(:,1:2))*frain
+              endif
+              do k=3,levs-2 ! Avoid model top and bottom in case DA forgets to
+                 do i=1,im
+                    ttend = dfi_radar_tten(i,k,itime)
+                    if (ttend>-19) then
+                       if(idtend_radar>0) then
+                          dtend(i,k,idtend_radar) = dtend(i,k,idtend_radar) + (gt0(i,k)-save_t(i,k)) * frain
+                       endif
+                    else if(idtend_mp>0) then
+                       dtend(i,k,idtend_mp) = dtend(i,k,idtend_mp) + (gt0(i,k)-save_t(i,k)) * frain
+                    endif
+                 enddo
+              enddo
+              if(idtend_mp>0) then
+                 dtend(:,levs-1:levs,idtend_mp) = dtend(:,levs-1:levs,idtend_mp) + (gt0(:,levs-1:levs)-save_t(:,levs-1:levs))*frain
+              endif
+           endif
+        endif
+      endif if_radar
 
       t850(1:im) = gt0(1:im,1)
 
