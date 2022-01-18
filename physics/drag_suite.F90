@@ -606,8 +606,8 @@ if ( spp_gwd==1 ) then
   do i = its,im
     var_stoch(i)   = var(i)   + var(i)*0.75*spp_wts_gwd(i,1)
     varss_stoch(i) = varss(i) + varss(i)*0.75*spp_wts_gwd(i,1)
-    varmax_ss_stoch(i) = varmax_ss + varmax_ss*0.75*spp_wts_gwd(i,1)
-    varmax_fd_stoch(i) = varmax_fd + varmax_fd*0.75*spp_wts_gwd(i,1)
+    varmax_ss_stoch = varmax_ss + varmax_ss*0.75*spp_wts_gwd(i,1)
+    varmax_fd_stoch = varmax_fd + varmax_fd*0.75*spp_wts_gwd(i,1)
   enddo
 else
   var_stoch   = var
@@ -1001,8 +1001,8 @@ IF ( do_gsl_drag_ss ) THEN
                 !tauwavex0=0.5*XNBV*xlinv(i)*(2*MIN(varss(i),75.))**2*ro(i,kts)*u1(i,kpbl(i))
                 !tauwavex0=0.5*XNBV*xlinv(i)*(2.*MIN(varss(i),40.))**2*ro(i,kts)*u1(i,kpbl2)
                 !tauwavex0=0.5*XNBV*xlinv(i)*(2.*MIN(varss(i),40.))**2*ro(i,kts)*u1(i,3)
-                var_temp = MIN(varss_stoch(i),varmax_ss_stoch(i)) +                       &
-                              MAX(0.,beta_ss*(varss_stoch(i)-varmax_ss_stoch(i)))
+                var_temp = MIN(varss_stoch(i),varmax_ss_stoch) +                       &
+                              MAX(0.,beta_ss*(varss_stoch(i)-varmax_ss_stoch))
                 ! Note:  This is a semi-implicit treatment of the time differencing
                 var_temp2 = 0.5*XNBV*xlinv(i)*(2.*var_temp)**2*ro(i,kvar)  ! this is greater than zero
                 tauwavex0=var_temp2*u1(i,kvar)/(1.+var_temp2*deltim)
@@ -1016,8 +1016,8 @@ IF ( do_gsl_drag_ss ) THEN
                 !tauwavey0=0.5*XNBV*xlinv(i)*(2*MIN(varss(i),75.))**2*ro(i,kts)*v1(i,kpbl(i))
                 !tauwavey0=0.5*XNBV*xlinv(i)*(2.*MIN(varss(i),40.))**2*ro(i,kts)*v1(i,kpbl2)
                 !tauwavey0=0.5*XNBV*xlinv(i)*(2.*MIN(varss(i),40.))**2*ro(i,kts)*v1(i,3)
-                var_temp = MIN(varss_stoch(i),varmax_ss_stoch(i)) +                       &
-                              MAX(0.,beta_ss*(varss_stoch(i)-varmax_ss_stoch(i)))
+                var_temp = MIN(varss_stoch(i),varmax_ss_stoch) +                       &
+                              MAX(0.,beta_ss*(varss_stoch(i)-varmax_ss_stoch))
                 ! Note:  This is a semi-implicit treatment of the time differencing
                 var_temp2 = 0.5*XNBV*xlinv(i)*(2.*var_temp)**2*ro(i,kvar)  ! this is greater than zero
                 tauwavey0=var_temp2*v1(i,kvar)/(1.+var_temp2*deltim)
@@ -1081,8 +1081,8 @@ IF ( do_gsl_drag_tofd ) THEN
 
          IF ((xland(i)-1.5) .le. 0.) then
             !(IH*kflt**n1)**-1 = (0.00102*0.00035**-1.9)**-1 = 0.00026615161
-            var_temp = MIN(varss_stoch(i),varmax_fd_stoch(i)) +                           &
-                       MAX(0.,beta_fd*(varss_stoch(i)-varmax_fd_stoch(i)))
+            var_temp = MIN(varss_stoch(i),varmax_fd_stoch) +                           &
+                       MAX(0.,beta_fd*(varss_stoch(i)-varmax_fd_stoch))
             var_temp = MIN(var_temp, 250.)
             a1=0.00026615161*var_temp**2
 !           a1=0.00026615161*MIN(varss(i),varmax)**2
