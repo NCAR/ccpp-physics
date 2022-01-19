@@ -91,7 +91,7 @@ module mp_thompson
          real(kind_phys) :: orho(1:ncol,1:nlev)     ! m3 kg-1
          real(kind_phys) :: nc_local(1:ncol,1:nlev) ! needed because nc is only allocated if is_aerosol_aware is true
          !
-         real (kind=kind_phys) :: h_01, airmass, niIN3, niCCN3
+         real (kind=kind_phys) :: h_01, z1, niIN3, niCCN3
          integer :: i, k
 
          ! Initialize the CCPP error handling variables
@@ -192,8 +192,8 @@ module mp_thompson
                endif
                niCCN3 = -1.0*ALOG(naCCN1/naCCN0)/h_01
                nwfa(i,1) = naCCN1+naCCN0*exp(-((hgt(i,2)-hgt(i,1))/1000.)*niCCN3)
-               airmass = 1./orho(i,1) * (hgt(i,2)-hgt(i,1))*area(i) ! kg
-               nwfa2d(i) = nwfa(i,1) * 0.000196 * (airmass*5.E-11)
+               z1 = hgt(i,2)-hgt(i,1)
+               nwfa2d(i) = nwfa(i,1) * 0.000196 * (50./z1)
                do k = 2, nlev
                  nwfa(i,k) = naCCN1+naCCN0*exp(-((hgt(i,k)-hgt(i,1))/1000.)*niCCN3)
                enddo
@@ -212,8 +212,8 @@ module mp_thompson
                !+---+-----------------------------------------------------------------+
                if (mpirank==mpiroot) write(*,*) ' Apparently there are no initial CCN aerosol surface emission rates.'
                do i = 1, ncol
-                  airmass = 1./orho(i,1) * (hgt(i,2)-hgt(i,1))*area(i) ! kg
-                  nwfa2d(i) = nwfa(i,1) * 0.000196 * (airmass*5.E-11)
+                  z1 = hgt(i,2)-hgt(i,1)
+                  nwfa2d(i) = nwfa(i,1) * 0.000196 * (50./z1)
                enddo
              else
                 if (mpirank==mpiroot) write(*,*) ' Apparently initial CCN aerosol surface emission rates are present.'
