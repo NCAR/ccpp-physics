@@ -882,7 +882,7 @@
       if (iovr == 5) then
         do k = 2, nLay
           do i = 1, ix
-            if (clouds(i,k,1) == 0.0) .and. clouds(i,k-1,1) > 0.0) then
+            if (clouds(i,k,1) == 0.0 .and. clouds(i,k-1,1) > 0.0) then
               alpha(i,k) = 0.0
             endif
           enddo
@@ -1291,7 +1291,7 @@
       if (iovr == 5) then
         do k = 2, nLay
           do i = 1, ix
-            if (clouds(i,k,1) == 0.0) .and. clouds(i,k-1,1) > 0.0) then
+            if (clouds(i,k,1) == 0.0 .and. clouds(i,k-1,1) > 0.0) then
               alpha(i,k) = 0.0
             endif
           enddo
@@ -1731,7 +1731,7 @@
       if (iovr == 5) then
         do k = 2, nLay
           do i = 1, ix
-            if (clouds(i,k,1) == 0.0) .and. clouds(i,k-1,1) > 0.0) then
+            if (clouds(i,k,1) == 0.0 .and. clouds(i,k-1,1) > 0.0) then
               alpha(i,k) = 0.0
             endif
           enddo
@@ -2107,7 +2107,7 @@
       if (iovr == 5) then
         do k = 2, nLay
           do i = 1, ix
-            if (clouds(i,k,1) == 0.0) .and. clouds(i,k-1,1) > 0.0) then
+            if (clouds(i,k,1) == 0.0 .and. clouds(i,k-1,1) > 0.0) then
               alpha(i,k) = 0.0
             endif
           enddo
@@ -2474,7 +2474,7 @@
       if (iovr == 5) then
         do k = 2, nLay
           do i = 1, ix
-            if (clouds(i,k,1) == 0.0) .and. clouds(i,k-1,1) > 0.0) then
+            if (clouds(i,k,1) == 0.0 .and. clouds(i,k-1,1) > 0.0) then
               alpha(i,k) = 0.0
             endif
           enddo
@@ -2863,7 +2863,7 @@
       if (iovr == 5) then
         do k = 2, nLay
           do i = 1, ix
-            if (clouds(i,k,1) == 0.0) .and. clouds(i,k-1,1) > 0.0) then
+            if (clouds(i,k,1) == 0.0 .and. clouds(i,k-1,1) > 0.0) then
               alpha(i,k) = 0.0
             endif
           enddo
@@ -3271,7 +3271,7 @@
       if (iovr == 5) then
         do k = 2, nLay
           do i = 1, ix
-            if (clouds(i,k,1) == 0.0) .and. clouds(i,k-1,1) > 0.0) then
+            if (clouds(i,k,1) == 0.0 .and. clouds(i,k-1,1) > 0.0) then
               alpha(i,k) = 0.0
             endif
           enddo
@@ -3651,7 +3651,7 @@
       if (iovr == 5) then
         do k = 2, nLay
           do i = 1, ix
-            if (clouds(i,k,1) == 0.0) .and. clouds(i,k-1,1) > 0.0) then
+            if (clouds(i,k,1) == 0.0 .and. clouds(i,k-1,1) > 0.0) then
               alpha(i,k) = 0.0
             endif
           enddo
@@ -4061,7 +4061,7 @@
       if (iovr == 5) then
         do k = 2, nLay
           do i = 1, ix
-            if (clouds(i,k,1) == 0.0) .and. clouds(i,k-1,1) > 0.0) then
+            if (clouds(i,k,1) == 0.0 .and. clouds(i,k-1,1) > 0.0) then
               alpha(i,k) = 0.0
             endif
           enddo
