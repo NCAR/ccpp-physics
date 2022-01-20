@@ -1252,16 +1252,6 @@ MODULE module_mp_thompson
       ndt = max(nint(dt_in/dt_inner),1)
       dt = dt_in/ndt
       if(dt_in .le. dt_inner) dt= dt_in
-      if(nsteps>1 .and. ndt>1) then
-         if (present(errmsg) .and. present(errflg)) then
-            write(errmsg, '(a)') 'Logic error in mp_gt_driver: inner loop cannot be used with subcycling'
-            errflg = 1
-            return
-         else
-            write(*,'(a)') 'Warning: inner loop cannot be used with subcycling, resetting ndt=1'
-            ndt = 1
-         endif
-      endif
 
       do it = 1, ndt
 
