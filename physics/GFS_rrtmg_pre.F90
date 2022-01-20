@@ -186,7 +186,8 @@
 
       integer :: i, j, k, k1, k2, lsk, lv, n, itop, ibtc, LP1, lla, llb, lya,lyb
 
-      real(kind=kind_phys) :: es, qs, delt, tem0d, gridkm, pfac
+      real(kind=kind_phys) :: es, qs, delt, tem0d, pfac
+      real(kind=kind_phys), dimension(im) :: gridkm
 
       real(kind=kind_phys), dimension(im) :: cvt1, cvb1, tem1d, tskn, xland
 
@@ -238,9 +239,6 @@
 
       LP1 = LM + 1               ! num of in/out levels
 
-
-      gridkm = sqrt(2.0)*sqrt(dx(1)*0.001*dx(1)*0.001)
-
       if (imp_physics == imp_physics_thompson) then
          max_relh = 1.5
       else
@@ -248,6 +246,7 @@
       endif
 
       do i = 1, IM
+         gridkm(i) = dx(i)*0.001
          lwp_ex(i) = 0.0
          iwp_ex(i) = 0.0
          lwp_fc(i) = 0.0

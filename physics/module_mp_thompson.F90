@@ -2178,7 +2178,7 @@ MODULE module_mp_thompson
             ni(k) = MAX(R2, ni1d(k)*rho(k))
             if (ni(k).le. R2) then
                lami = cie(2)/5.E-6
-               ni(k) = MIN(999.D3, cig(1)*oig2*ri(k)/am_i*lami**bm_i)
+               ni(k) = MIN(499.D3, cig(1)*oig2*ri(k)/am_i*lami**bm_i)
             endif
             L_qi(k) = .true.
             lami = (am_i*cig(2)*oig1*ni(k)/ri(k))**obmi
@@ -2186,7 +2186,7 @@ MODULE module_mp_thompson
             xDi = (bm_i + mu_i + 1.) * ilami
             if (xDi.lt. 5.E-6) then
              lami = cie(2)/5.E-6
-             ni(k) = MIN(999.D3, cig(1)*oig2*ri(k)/am_i*lami**bm_i)
+             ni(k) = MIN(499.D3, cig(1)*oig2*ri(k)/am_i*lami**bm_i)
             elseif (xDi.gt. 300.E-6) then
              lami = cie(2)/300.E-6
              ni(k) = cig(1)*oig2*ri(k)/am_i*lami**bm_i
@@ -2891,7 +2891,7 @@ MODULE module_mp_thompson
 
 !>  - Freezing of aqueous aerosols based on Koop et al (2001, Nature)
           xni = smo0(k)+ni(k) + (pni_rfz(k)+pni_wfz(k)+pni_inu(k))*dtsave
-          if (is_aerosol_aware .AND. homogIce .AND. (xni.le.999.E3)     &
+          if (is_aerosol_aware .AND. homogIce .AND. (xni.le.499.E3)     &
      &                .AND.(temp(k).lt.238).AND.(ssati(k).ge.0.4) ) then
             xnc = iceKoop(temp(k),qv(k),qvs(k),nwfa(k), dtsave)
             pni_iha(k) = xnc*odts
@@ -3227,7 +3227,7 @@ MODULE module_mp_thompson
            xDi = (bm_i + mu_i + 1.) * ilami
            if (xDi.lt. 5.E-6) then
             lami = cie(2)/5.E-6
-            xni = MIN(999.D3, cig(1)*oig2*xri/am_i*lami**bm_i)
+            xni = MIN(499.D3, cig(1)*oig2*xri/am_i*lami**bm_i)
             niten(k) = (xni-ni1d(k)*rho(k))*odts*orho
            elseif (xDi.gt. 300.E-6) then
             lami = cie(2)/300.E-6
@@ -3238,8 +3238,8 @@ MODULE module_mp_thompson
           niten(k) = -ni1d(k)*odts
          endif
          xni=MAX(0.,(ni1d(k) + niten(k)*dtsave)*rho(k))
-         if (xni.gt.999.E3) &
-                niten(k) = (999.E3-ni1d(k)*rho(k))*odts*orho
+         if (xni.gt.499.E3) &
+                niten(k) = (499.E3-ni1d(k)*rho(k))*odts*orho
 
 !>  - Rain tendency
          qrten(k) = qrten(k) + (prr_wau(k) + prr_rcw(k) &
@@ -4177,7 +4177,7 @@ MODULE module_mp_thompson
             lami = cie(2)/300.E-6
            endif
            ni1d(k) = MIN(cig(1)*oig2*qi1d(k)/am_i*lami**bm_i,           &
-                         999.D3/rho(k))
+                         499.D3/rho(k))
          endif
          qr1d(k) = qr1d(k) + qrten(k)*DT
          nr1d(k) = MAX(R2/rho(k), nr1d(k) + nrten(k)*DT)
