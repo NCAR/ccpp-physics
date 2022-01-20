@@ -610,7 +610,7 @@ if ( spp_gwd==1 ) then
     varmax_fd_stoch(i) = varmax_fd + varmax_fd*0.75*spp_wts_gwd(i,1)
   enddo
 else
-  do i=its,im
+  do i = its,im
     var_stoch(i)   = var(i)
     varss_stoch(i) = varss(i)
     varmax_ss_stoch(i) = varmax_ss
@@ -1083,8 +1083,8 @@ IF ( do_gsl_drag_tofd ) THEN
 
          IF ((xland(i)-1.5) .le. 0.) then
             !(IH*kflt**n1)**-1 = (0.00102*0.00035**-1.9)**-1 = 0.00026615161
-            var_temp = MIN(varss_stoch(i),varmax_fd_stoch) +                           &
-                       MAX(0.,beta_fd*(varss_stoch(i)-varmax_fd_stoch))
+            var_temp = MIN(varss_stoch(i),varmax_fd_stoch(i)) +                           &
+                       MAX(0.,beta_fd*(varss_stoch(i)-varmax_fd_stoch(i)))
             var_temp = MIN(var_temp, 250.)
             a1=0.00026615161*var_temp**2
 !           a1=0.00026615161*MIN(varss(i),varmax)**2
