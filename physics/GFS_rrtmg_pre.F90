@@ -18,7 +18,8 @@
       ! in the CCPP version - they are defined in the interstitial_create routine
       subroutine GFS_rrtmg_pre_run (im, levs, lm, lmk, lmp, n_var_lndp,        &
         imfdeepcnv, imfdeepcnv_gf, me, ncnd, ntrac, num_p3d, npdf3d, ncnvcld3d,&
-        ntqv, ntcw,ntiw, ntlnc, ntinc, ntrnc, ntsnc, ntccn, ntrw, ntsw, ntgl, nthl, ntwa, ntoz, &
+        ntqv, ntcw,ntiw, ntlnc, ntinc, ntrnc, ntsnc, ntccn,                    & 
+        ntrw, ntsw, ntgl, nthl, ntwa, ntoz,                                    &
         ntclamt, nleffr, nieffr, nseffr, lndp_type, kdt,                       &
         imp_physics,imp_physics_nssl, nssl_ccn_on, nssl_invertccn,             &
         imp_physics_thompson, imp_physics_gfdl, imp_physics_zhao_carr,         &
@@ -120,7 +121,6 @@
                                                           mg_cld, effrr_in,    &
                                                           cnvw_in, cnvc_in,    &
                                                           sppt_wts
-
 
       real(kind=kind_phys), dimension(:,:,:), intent(in) :: qgrs, aer_nm
 
@@ -655,7 +655,6 @@
               ccnd(i,k,1) = tracer1(i,k,ntcw)                     ! liquid water
               ccnd(i,k,2) = tracer1(i,k,ntiw)                     ! ice water
               ccnd(i,k,3) = tracer1(i,k,ntrw)                     ! rain water
-
               if (imp_physics == imp_physics_fer_hires ) then
                   ccnd(i,k,4) = 0.0
               else
@@ -1146,5 +1145,4 @@
       end subroutine GFS_rrtmg_pre_finalize
 
 !! @}
-
       end module GFS_rrtmg_pre

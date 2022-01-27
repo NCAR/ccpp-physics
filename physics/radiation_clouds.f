@@ -391,7 +391,7 @@
             print *,'   --- MG cloud microphysics'
           elseif (imp_physics == 15) then
             print *,'   --- Ferrier-Aligo cloud microphysics'
-          elseif (imp_physics == 17 .or. imp_physics == 18) then
+          elseif (imp_physics == 17) then
             print *,'   --- NSSL cloud microphysics'
           else
             print *,'  !!! ERROR in cloud microphysc specification!!!', &
