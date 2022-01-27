@@ -284,7 +284,6 @@
      &                             con_amw, con_amo3
       use mersenne_twister, only : random_setseed, random_number,       &
      &                             random_stat
-!mz
       use machine,          only : kind_phys,                           &
      &                             im => kind_io4, rb => kind_phys
 
@@ -635,31 +634,6 @@
       real (kind=kind_phys), dimension(:,:,:),intent(in)::              &
      &       aeraod, aerssa
 
-!mz* HWRF -- OUTPUT from mcica_subcol_lw
-      real(kind=kind_phys),dimension(ngptlw,npts,nlay)  :: cldfmcl     ! Cloud fraction
-                                                      !    Dimensions: (ngptlw,ncol,nlay)
-      real(kind=kind_phys),dimension(ngptlw,npts,nlay)  :: ciwpmcl     ! In-cloud ice water path (g/m2)
-                                                      !    Dimensions: (ngptlw,ncol,nlay)
-      real(kind=kind_phys),dimension(ngptlw,npts,nlay)  :: clwpmcl     ! In-cloud liquid water path (g/m2)
-                                                      !    Dimensions: (ngptlw,ncol,nlay)
-      real(kind=kind_phys),dimension(ngptlw,npts,nlay)  :: cswpmcl     ! In-cloud snow   water path (g/m2)
-                                                      !    Dimensions: (ngptlw,ncol,nlay)
-      real(kind=kind_phys),dimension(npts,nlay) :: relqmcl   ! Cloud water drop  effective radius (microns)
-                                                      !    Dimensions: (ncol,nlay)
-      real(kind=kind_phys),dimension(npts,nlay) :: reicmcl   ! Cloud ice  effective size (microns)
-                                                      !    Dimensions: (ncol,nlay)
-      real(kind=kind_phys),dimension(npts,nlay) :: resnmcl   ! Snow effective size (microns)
-                                                      !    Dimensions: (ncol,nlay)
-      real(kind=kind_phys),dimension(ngptlw,npts,nlay) :: taucmcl     ! In-cloud optical depth
-                                                      !    Dimensions: (ngptlw,ncol,nlay)
-!      real(kind=kind_phys),dimension(npts,nlay,nbands) :: tauaer      ! Aerosol optical  depth
-!                                                      !    Dimensions: (ncol,nlay,nbndlw)
-!mz* output from cldprmc
-      integer :: ncbands        ! number of cloud  spectral bands
-      real(kind=kind_phys),dimension(ngptlw,nlay) :: taucmc     ! cloud optical depth [mcica]        
-                                                      !    Dimensions: (ngptlw,nlayers)    
-!mz
-
 !  ---  outputs:
       real (kind=kind_phys), dimension(:,:), intent(inout) :: hlwc
       real (kind=kind_phys), dimension(:,:), intent(inout) ::           &
@@ -681,11 +655,6 @@
       logical, intent(in) :: lslwr
 
 !  ---  locals:
-! mz* - Add height of each layer for exponential-random cloud overlap
-! This will be derived below from the dzlyr in each layer
-      real (kind=kind_phys), dimension( npts,nlay )  ::   hgt
-      real (kind=kind_phys) :: dzsum
-
       real (kind=kind_phys), dimension(0:nlp1) :: cldfrc
 
       real (kind=kind_phys), dimension(0:nlay) :: totuflux, totdflux,   &
@@ -699,11 +668,6 @@
      &       selffac, selffrac, forfac, forfrac, minorfrac, scaleminor, &
      &       scaleminorn2, temcol, dz
 
-!mz*
-      real(kind=rb),dimension(0:nlay,nbands) :: planklay,planklev 
-      real(kind=rb),dimension(0:nlay) :: pz 
-
-!      real(kind=rb) :: plankbnd(nbndlw)
       real (kind=kind_phys), dimension(nbands,0:nlay) :: pklev, pklay
 
       real (kind=kind_phys), dimension(nlay,nbands) :: htrb
@@ -711,26 +675,7 @@
       real (kind=kind_phys), dimension(nbands,npts,nlay) :: taucld3
       real (kind=kind_phys), dimension(ngptlw,nlay) :: fracs, tautot
       real (kind=kind_phys), dimension(nlay,ngptlw) :: fracs_r
-!mz rtrnmc_mcica
-      real (kind=kind_phys), dimension(nlay,ngptlw) :: taut 
-!mz* Atmosphere/clouds - cldprop
-      real(kind=kind_phys), dimension(ngptlw,nlay) :: cldfmc,    &
-     &                                                cldfmc_save  ! cloud fraction [mcica]
-                                                                   !    Dimensions: (ngptlw,nlay)
-      real(kind=kind_phys), dimension(ngptlw,nlay) :: ciwpmc       ! in-cloud ice water path [mcica]
-                                                                   !    Dimensions: (ngptlw,nlay)
-      real(kind=kind_phys), dimension(ngptlw,nlay) :: clwpmc       ! in-cloud liquid water path [mcica]
-                                                                   !    Dimensions: (ngptlw,nlay)
-      real(kind=kind_phys), dimension(ngptlw,nlay) :: cswpmc       ! in-cloud snow path [mcica]
-                                                                   !    Dimensions: (ngptlw,nlay)
-      real(kind=kind_phys), dimension(nlay) :: relqmc              ! liquid particle effective radius (microns)
-                                                                   !    Dimensions: (nlay)
-      real(kind=kind_phys), dimension(nlay) :: reicmc              ! ice particle effective size (microns)
-                                                                   !    Dimensions: (nlay)
-      real(kind=kind_phys), dimension(nlay) :: resnmc              ! snow effective size (microns)
-                                                                   !    Dimensions: (nlay)
-
-
+      real(kind=kind_phys), dimension(ngptlw,nlay) :: cldfmc
       real (kind=kind_phys), dimension(nbands) :: semiss, secdiff
 
 !  ---  column amount of absorbing gases:
@@ -752,8 +697,7 @@
       integer, dimension(npts) :: ipseed
       integer, dimension(nlay) :: jp, jt, jt1, indself, indfor, indminor
       integer                  :: laytrop, iplon, i, j, k, k1
-      ! mz* added local arrays for RRTMG
-      integer                  :: irng, permuteseed,ig
+      integer                  :: ig
       integer                  :: inflglw, iceflglw, liqflglw
       logical :: lcf1
       integer :: istart              ! beginning band of calculation
@@ -849,43 +793,6 @@
 
         stemp = sfgtmp(iplon)          ! surface ground temp
         if (iovr == 3) delgth= de_lgth(iplon)    ! clouds decorr-length
-
-! mz*: HWRF
-        if (iovr == 4 ) then
-
-!Add layer height needed for exponential (icld=4) and
-! exponential-random (icld=5) overlap options  
-
-         !iplon = 1
-         irng = 0
-         permuteseed = 150
-
-!mz* Derive height 
-         dzsum =0.0
-         do k = 1,nlay
-         hgt(iplon,k)= dzsum+0.5*dzlyr(iplon,k)*1000.   !km->m
-         dzsum =  dzsum+ dzlyr(iplon,k)*1000.   
-         enddo
-
-! Zero out cloud optical properties here; not used when passing physical properties
-! to radiation and taucld is calculated in radiation 
-            do k = 1, nlay 
-               do j = 1, nbands
-                  taucld3(j,iplon,k) = 0.0
-               enddo
-            enddo
-
-          call mcica_subcol_lw(1, iplon, nlay, iovr, permuteseed,       &
-     &                 irng, plyr, hgt,                                 &
-     &                 cld_cf, cld_iwp, cld_lwp,cld_swp,                &
-     &                 cld_ref_ice, cld_ref_liq,                        &
-     &                 cld_ref_snow, taucld3,                           &
-     &                 cldfmcl,                                         &  !--output
-     &                 ciwpmcl, clwpmcl, cswpmcl, reicmcl, relqmcl,     &
-     &                 resnmcl, taucmcl)     
-
-       endif
-!mz* end
 
 !> -# Prepare atmospheric profile for use in rrtm.
 !           the vertical index of internal array is from surface to top
@@ -987,23 +894,6 @@
               cda3(k)  = cld_swp(iplon,k1)
               cda4(k)  = cld_ref_snow(iplon,k1)
             enddo
-            ! HWRF RRMTG
-            if (iovr == 4) then   !mz  HWRF 
-               do k = 1, nlay
-                  k1 = nlp1 - k
-               do ig = 1, ngptlw
-                   cldfmc(ig,k) = cldfmcl(ig,iplon,k1)
-                   taucmc(ig,k) = taucmcl(ig,iplon,k1)
-                   ciwpmc(ig,k) = ciwpmcl(ig,iplon,k1)
-                   clwpmc(ig,k) = clwpmcl(ig,iplon,k1)
-              !mz     cswpmc(ig,k) = cswpmcl(ig,iplon,k1)
-                   cswpmc(ig,k) = 0.0
-               enddo
-                   reicmc(k) = reicmcl(iplon,k1)
-                   relqmc(k) = relqmcl(iplon,k1)
-                   resnmc(k) = resnmcl(iplon,k1)
-               enddo
-            endif
           else                       ! use diagnostic cloud method
             do k = 1, nlay
               k1 = nlp1 - k
@@ -1111,24 +1001,6 @@
               cda3(k)  = cld_swp(iplon,k)
               cda4(k)  = cld_ref_snow(iplon,k)
             enddo
-            if (iovr == 4) then
-!mz* Move incoming GCM cloud arrays to RRTMG cloud arrays.
-!For GCM input, incoming reicmcl is defined based on selected 
-!ice parameterization (inflglw)
-            do k = 1, nlay
-            do ig = 1, ngptlw
-               cldfmc(ig,k) = cldfmcl(ig,iplon,k)
-               taucmc(ig,k) = taucmcl(ig,iplon,k)
-               ciwpmc(ig,k) = ciwpmcl(ig,iplon,k)
-               clwpmc(ig,k) = clwpmcl(ig,iplon,k)
-              !mz cswpmc(ig,k) = cswpmcl(ig,iplon,k)
-               cswpmc(ig,k) = 0.0
-            enddo
-               reicmc(k) = reicmcl(iplon,k)
-               relqmc(k) = relqmcl(iplon,k)
-               resnmc(k) = resnmcl(iplon,k)
-            enddo
-            endif
           else                       ! use diagnostic cloud method
             do k = 1, nlay
               cldfrc(k)= cld_cf(iplon,k)
@@ -1204,15 +1076,6 @@
 
         if ( lcf1 ) then
 
-          !mz* for HWRF, save cldfmc with mcica
-          if (iovr == 4) then
-               do k = 1, nlay
-               do ig = 1, ngptlw
-                  cldfmc_save(ig,k)=cldfmc (ig,k)
-               enddo
-               enddo
-          endif
-
           call cldprop                                                  &
 !  ---  inputs:
      &     ( cldfrc,clwp,relw,ciwp,reiw,cda1,cda2,cda3,cda4,            &
@@ -1220,15 +1083,6 @@
 !  ---  outputs:
      &       cldfmc, taucld                                             &
      &     )
-
-          if (iovr == 4) then
-          !mz for HWRF, still using mcica cldfmc
-               do k = 1, nlay
-               do ig = 1, ngptlw
-                  cldfmc(ig,k)=cldfmc_save(ig,k)
-               enddo
-               enddo
-          endif
 
 !  --- ...  save computed layer cloud optical depth for output
 !           rrtm band-7 is apprx 10mu channel (or use spectral mean of bands 6-8)
@@ -1247,16 +1101,6 @@
         else
           cldfmc = f_zero
           taucld = f_zero
-        endif
-
-!mz* HWRF: calculate taucmc with mcica
-        if (iovr == 4) then
-          call cldprmc(nlay, inflglw, iceflglw, liqflglw,               &
-     &                 cldfmc, ciwpmc,                                  &
-     &                 clwpmc, cswpmc, reicmc, relqmc, resnmc,          &
-     &                 ncbands, taucmc, errmsg, errflg)
-          ! return immediately if cldprmc throws an error
-          if (errflg/=0) return
         endif
 
 !     if (lprnt) then
@@ -1992,8 +1836,6 @@
 
 !  --- ...  call sub-column cloud generator
 
-!mz*
-      if (iovr .ne. 4) then
         call mcica_subcol                                               &
 !  ---  inputs:
      &     ( cldf, nlay, ipseed, dz, de_lgth, alpha,                    &
@@ -2010,7 +1852,6 @@
             endif
           enddo
         enddo
-      endif  !iovr
 
       endif   ! end if_isubclw_block
 
@@ -2243,39 +2084,39 @@
 
 !  ---  setup 2 sets of random numbers
 
-          call random_number ( rand2d, stat )
+!          call random_number ( rand2d, stat )
 
-          k1 = 0
-          do k = 1, nlay
-            do n = 1, ngptlw
-              k1 = k1 + 1
-              cdfunc(n,k) = rand2d(k1)
-            enddo
-          enddo
+!          k1 = 0
+!          do k = 1, nlay
+!            do n = 1, ngptlw
+!              k1 = k1 + 1
+!              cdfunc(n,k) = rand2d(k1)
+!            enddo
+!          enddo
 
-          call random_number ( rand2d, stat )
+!          call random_number ( rand2d, stat )
 
-          k1 = 0
-          do k = 1, nlay
-            do n = 1, ngptlw
-              k1 = k1 + 1
-              cdfun2(n,k) = rand2d(k1)
-            enddo
-          enddo
+!          k1 = 0
+!          do k = 1, nlay
+!            do n = 1, ngptlw
+!              k1 = k1 + 1
+!              cdfun2(n,k) = rand2d(k1)
+!            enddo
+!          enddo
 
 !  ---  then working upward from the surface:
 !       if a random number (from an independent set: cdfun2) is smaller than 
 !       alpha, then use the previous layer's number, otherwise use a new random
 !       number (keep the originally assigned one in cdfunc for that layer).
 
-          do k = 2, nlay
-            k1 = k - 1
-            do n = 1, ngptlw
-              if ( cdfun2(n,k) < alpha(k) ) then
-                   cdfunc(n,k) = cdfunc(n,k1)
-              endif
-            enddo
-          enddo
+!          do k = 2, nlay
+!            k1 = k - 1
+!            do n = 1, ngptlw
+!              if ( cdfun2(n,k) < alpha(k) ) then
+!                   cdfunc(n,k) = cdfunc(n,k1)
+!              endif
+!            enddo
+!          enddo
 
       end select
 
@@ -7040,1023 +6881,6 @@
 ! ..................................
       end subroutine taumol
 !! @}
-!-----------------------------------
-
-!mz* exponential cloud overlapping subroutines
-!------------------------------------------------------------------
-! Public subroutines
-!------------------------------------------------------------------
-! mz* - Add height needed for exponential and exponential-random cloud overlap methods (icld=4 and 5, respectively)
-      subroutine mcica_subcol_lw(iplon, ncol, nlay, icld, permuteseed,  &
-     &                 irng, play, hgt,                                 &
-     &                 cldfrac, ciwp, clwp, cswp, rei, rel, res, tauc,  &
-     &                 cldfmcl,                                         &
-     &                 ciwpmcl, clwpmcl, cswpmcl, reicmcl, relqmcl,     &
-     &                 resnmcl, taucmcl)
-
-      use machine, only : im => kind_io4, rb => kind_phys
-! ----- Input -----
-! Control
-      integer(kind=im), intent(in) :: iplon           ! column/longitude index
-      integer(kind=im), intent(in) :: ncol            ! number of  columns
-      integer(kind=im), intent(in) :: nlay            ! number of model layers
-      integer(kind=im), intent(in) :: icld            ! clear/cloud, cloud overlap flag
-      integer(kind=im), intent(in) :: permuteseed     ! if the cloud generator is called multiple times, 
-                                                      ! permute the seed between each call.
-                                                      ! between calls for LW and SW, recommended
-                                                      ! permuteseed differes by 'ngpt'
-      integer(kind=im), intent(inout) :: irng         ! flag for random number generator
-                                                      !  0 = kissvec
-                                                      !  1 = Mersenne
-                                                      !  Twister
-
-! Atmosphere
-      real(kind=rb), intent(in) :: play(:,:)          ! layer pressures (mb) 
-                                                      !    Dimensions: (ncol,nlay)
-
-! mji - Add height
-      real(kind=rb), intent(in) :: hgt(:,:)           ! layer height (m)
-                                                      !    Dimensions: (ncol,nlay)
-
-! Atmosphere/clouds - cldprop
-      real(kind=rb), intent(in) :: cldfrac(:,:)       ! layer cloud fraction
-                                                      !    Dimensions: (ncol,nlay)
-      real(kind=rb), intent(in) :: tauc(:,:,:)        ! in-cloud optical depth
-                                                      !    Dimensions: (nbndlw,ncol,nlay)
-!      real(kind=rb), intent(in) :: ssac(:,:,:)       ! in-cloud single scattering albedo
-                                                      !    Dimensions: (nbndlw,ncol,nlay)
-!      real(kind=rb), intent(in) :: asmc(:,:,:)       ! in-cloud asymmetry parameter
-                                                      !    Dimensions: (nbndlw,ncol,nlay)
-      real(kind=rb), intent(in) :: ciwp(:,:)          ! in-cloud ice water path
-                                                      !    Dimensions: (ncol,nlay)
-      real(kind=rb), intent(in) :: clwp(:,:)          ! in-cloud liquid water path
-                                                      !    Dimensions: (ncol,nlay)
-      real(kind=rb), intent(in) :: cswp(:,:)          ! in-cloud snow path
-                                                      !    Dimensions: (ncol,nlay)
-      real(kind=rb), intent(in) :: rei(:,:)           ! cloud ice particle size
-                                                      !    Dimensions: (ncol,nlay)
-      real(kind=rb), intent(in) :: rel(:,:)           ! cloud liquid particle size
-                                                      !    Dimensions: (ncol,nlay)
-      real(kind=rb), intent(in) :: res(:,:)           ! snow particle size
-                                                      !    Dimensions: (ncol,nlay)
-
-! ----- Output -----                                                                                                          
-! Atmosphere/clouds - cldprmc [mcica]                                                                                                
-      real(kind=rb), intent(out) :: cldfmcl(:,:,:)    ! cloud fraction [mcica]
-                                                      !    Dimensions: (ngptlw,ncol,nlay)
-      real(kind=rb), intent(out) :: ciwpmcl(:,:,:)    ! in-cloud ice water path [mcica]
-                                                      !    Dimensions: (ngptlw,ncol,nlay)
-      real(kind=rb), intent(out) :: clwpmcl(:,:,:)    ! in-cloud liquid water path [mcica]
-                                                      !    Dimensions: (ngptlw,ncol,nlay)
-      real(kind=rb), intent(out) :: cswpmcl(:,:,:)    ! in-cloud snow path [mcica]
-                                                      !    Dimensions: (ngptlw,ncol,nlay)
-      real(kind=rb), intent(out) :: relqmcl(:,:)      ! liquid particle size (microns)
-                                                      !    Dimensions: (ncol,nlay)
-      real(kind=rb), intent(out) :: reicmcl(:,:)      ! ice partcle size (microns)
-                                                      !    Dimensions: (ncol,nlay)
-      real(kind=rb), intent(out) :: resnmcl(:,:)      ! snow partcle size (microns)
-                                                      !    Dimensions: (ncol,nlay)
-      real(kind=rb), intent(out) :: taucmcl(:,:,:)    ! in-cloud optical depth [mcica]
-!mz*
-                                                      !    Dimensions: (ngptlw,ncol,nlay)
-!      real(kind=rb), intent(out) :: ssacmcl(:,:,:)   ! in-cloud single scattering albedo [mcica]
-                                                      !    Dimensions: (ngptlw,ncol,nlay)
-!      real(kind=rb), intent(out) :: asmcmcl(:,:,:)   ! in-cloud asymmetry parameter [mcica]
-                                                      !    Dimensions: (ngptlw,ncol,nlay)
-! ----- Local -----
-
-! Stochastic cloud generator variables [mcica]
-      integer(kind=im), parameter :: nsubclw = ngptlw ! number of sub-columns (g-point intervals)
-      integer(kind=im) :: ilev                        ! loop index
-
-      real(kind=rb) :: pmid(ncol, nlay)               ! layer pressures (Pa)
-!      real(kind=rb) :: pdel(ncol, nlay)              ! layer pressure thickness (Pa)
-!      real(kind=rb) :: qi(ncol, nlay)                ! ice water (specific humidity)
-!      real(kind=rb) :: ql(ncol, nlay)                ! liq water (specific humidity)
-
-! Return if clear sky
-      if (icld.eq.0) return
-
-! NOTE: For GCM mode, permuteseed must be offset between LW and SW by at least the number of subcolumns
-
-
-! Pass particle sizes to new arrays, no subcolumns for these properties yet
-! Convert pressures from mb to Pa
-
-      reicmcl(:ncol,:nlay) = rei(:ncol,:nlay)
-      relqmcl(:ncol,:nlay) = rel(:ncol,:nlay)
-      resnmcl(:ncol,:nlay) = res(:ncol,:nlay)
-      pmid(:ncol,:nlay) = play(:ncol,:nlay)*1.e2_rb
-
-!  Generate the stochastic subcolumns of cloud optical properties for
-!  the longwave
-      call generate_stochastic_clouds (ncol, nlay, nsubclw, icld, irng, &
-     &                      pmid, hgt, cldfrac, clwp, ciwp, cswp, tauc, &
-     &                         cldfmcl, clwpmcl, ciwpmcl, cswpmcl,      &
-     &                         taucmcl, permuteseed)
-
-      end subroutine mcica_subcol_lw
-!-------------------------------------------------------------------------------------------------
-      subroutine generate_stochastic_clouds(ncol, nlay, nsubcol, icld,  &
-     &                    irng, pmid, hgt, cld, clwp, ciwp, cswp, tauc, &
-     &                             cld_stoch, clwp_stoch, ciwp_stoch,   &
-     &                              cswp_stoch, tauc_stoch, changeSeed)  
-!-------------------------------------------------------------------------------------------------
-!-------------------------------------------------------------------------------------------------
-! Contact: Cecile Hannay (hannay@ucar.edu)
-!
-! Original code: Based on Raisanen et al., QJRMS, 2004.
-!
-! Modifications:
-!   1) Generalized for use with RRTMG and added Mersenne Twister as the default
-!   random number generator, which can be changed to the optional kissvec random number generator
-!   with flag 'irng'. Some extra functionality has been commented or removed.
-!   Michael J. Iacono, AER, Inc., February 2007
-!   2) Activated exponential and exponential/random cloud overlap method
-!   Michael J. Iacono, AER, November 2017
-!
-! Given a profile of cloud fraction, cloud water and cloud ice, we produce a set of subcolumns.
-! Each layer within each subcolumn is homogeneous, with cloud fraction equal to zero or one
-! and uniform cloud liquid and cloud ice concentration.
-! The ensemble as a whole reproduces the probability function of cloud liquid and ice within each layer
-! and obeys an overlap assumption in the vertical.
-!
-! Overlap assumption:
-!  The cloud are consistent with 5 overlap assumptions: random, maximum, maximum-random, exponential and exponential random.
-!  The default option is maximum-random (option 2)
-!  The options are: 1=random overlap, 2=max/random, 3=maximum overlap, 4=exponential overlap, 5=exp/random 
-!  This is set with the variable "overlap"
-!  The exponential overlap uses also a length scale, Zo. (real,  parameter  :: Zo = 2500. )
-!
-! Seed:
-!  If the stochastic cloud generator is called several times during the same timestep,
-!  one should change the seed between the call to insure that the
-!  subcolumns are different.                                        
-!  This is done by changing the argument 'changeSeed'                                                                              
-!  For example, if one wants to create a set of columns for the
-!  shortwave and another set for the longwave ,
-!  use 'changeSeed = 1' for the first call and'changeSeed = 2' for the second call
-
-! PDF assumption:
-!  We can use arbitrary complicated PDFS.
-!  In the present version, we produce homogeneuous clouds (the simplest case).
-!  Future developments include using the PDF scheme of Ben Johnson.
-!
-! History file:
-!  Option to add diagnostics variables in the history file. (using FINCL in the namelist)
-!  nsubcol = number of subcolumns
-!  overlap = overlap type (1-3)
-!  Zo = length scale                                               
-!  CLOUD_S = mean of the subcolumn cloud fraction ('_S" means Stochastic)  
-!  CLDLIQ_S = mean of the subcolumn cloud water
-!  CLDICE_S = mean of the subcolumn cloud ice
-!
-! Note:
-!   Here: we force that the cloud condensate to be consistent with the cloud fraction
-!   i.e we only have cloud condensate when the cell is cloudy.
-!   In CAM: The cloud condensate and the cloud fraction are obtained from 2 different equations
-!   and the 2 quantities can be inconsistent (i.e. CAM can produce cloud fraction
-!   without cloud condensate or the opposite).
-!-----------------------------------------------------------------
-
-      use mcica_random_numbers
-! The Mersenne Twister random number engine
-      use MersenneTwister, only: randomNumberSequence,                  &
-     &                    new_RandomNumberSequence, getRandomReal
-      use machine ,only : im => kind_io4, rb => kind_phys
-
-      type(randomNumberSequence) :: randomNumbers
-
-! -- Arguments
-
-      integer(kind=im), intent(in) :: ncol            ! number of columns
-      integer(kind=im), intent(in) :: nlay            ! number of layers
-      integer(kind=im), intent(in) :: icld            ! clear/cloud, cloud overlap flag
-      integer(kind=im), intent(inout) :: irng         ! flag for random number generator
-                                                      !  0 = kissvec
-                                                      !  1 = Mersenne Twister
-      integer(kind=im), intent(in) :: nsubcol         ! number of sub-columns (g-point intervals)
-      integer(kind=im), optional, intent(in) :: changeSeed     ! allows permuting seed 
-
-! Column state (cloud fraction, cloud water, cloud ice) + variables needed to read physics state
-      real(kind=rb), intent(in) :: pmid(:,:)          ! layer pressure (Pa)
-                                                      !    Dimensions: (ncol,nlay)
-
-      real(kind=rb), intent(in) :: hgt(:,:)           ! layer height (m)
-                                                      !    Dimensions: (ncol,nlay)
-      real(kind=rb), intent(in) :: cld(:,:)           ! cloud fraction
-                                                      !    Dimensions: (ncol,nlay)
-      real(kind=rb), intent(in) :: clwp(:,:)          ! in-cloud liquid water path
-                                                      !    Dimensions: (ncol,nlay)
-      real(kind=rb), intent(in) :: ciwp(:,:)          ! in-cloud ice water path
-                                                      !    Dimensions: (ncol,nlay)
-      real(kind=rb), intent(in) :: cswp(:,:)          ! in-cloud snow path
-                                                      !    Dimensions: (ncol,nlay)
-      real(kind=rb), intent(in) :: tauc(:,:,:)        ! in-cloud optical depth
-                                                      !    Dimensions:(nbndlw,ncol,nlay)
-!      real(kind=rb), intent(in) :: ssac(:,:,:)       ! in-cloud single scattering albedo
-                                                      !    Dimensions: (nbndlw,ncol,nlay)
-                                                      !   inactive - for future expansion
-!      real(kind=rb), intent(in) :: asmc(:,:,:)       ! in-cloud asymmetry parameter
-                                                      !    Dimensions: (nbndlw,ncol,nlay)
-                                                      !   inactive - for future expansion
-
-      real(kind=rb), intent(out) :: cld_stoch(:,:,:)  ! subcolumn cloud fraction
-                                                      !    Dimensions: (ngptlw,ncol,nlay)
-      real(kind=rb), intent(out) :: clwp_stoch(:,:,:) ! subcolumn in-cloud liquid water path
-                                                      !    Dimensions: (ngptlw,ncol,nlay)
-      real(kind=rb), intent(out) :: ciwp_stoch(:,:,:) ! subcolumn in-cloud ice water path
-                                                      !    Dimensions: (ngptlw,ncol,nlay)
-      real(kind=rb), intent(out) :: cswp_stoch(:,:,:) ! subcolumn in-cloud snow path
-                                                      !    Dimensions: (ngptlw,ncol,nlay)
-      real(kind=rb), intent(out) :: tauc_stoch(:,:,:) ! subcolumn in-cloud optical depth
-                                                      !    Dimensions: (ngptlw,ncol,nlay)
-!      real(kind=rb), intent(out) :: ssac_stoch(:,:,:)! subcolumn in-cloud single scattering albedo
-                                                      !    Dimensions: (ngptlw,ncol,nlay)
-                                                      !   inactive - for future expansion
-!      real(kind=rb), intent(out) :: asmc_stoch(:,:,:)! subcolumn in-cloud asymmetry parameter
-                                                      !    Dimensions: (ngptlw,ncol,nlay)
-                                                      !   inactive - for future expansion
-
-! -- Local variables
-      real(kind=rb) :: cldf(ncol,nlay)                ! cloud fraction
-
-! Mean over the subcolumns (cloud fraction, cloud water , cloud ice) - inactive
-!      real(kind=rb) :: mean_cld_stoch(ncol, nlay)    ! cloud fraction
-!      real(kind=rb) :: mean_clwp_stoch(ncol, nlay)   ! cloud water
-!      real(kind=rb) :: mean_ciwp_stoch(ncol, nlay)   ! cloud ice
-!      real(kind=rb) :: mean_tauc_stoch(ncol, nlay)   ! cloud optical depth
-!      real(kind=rb) :: mean_ssac_stoch(ncol, nlay)   ! cloud single scattering albedo 
-!      real(kind=rb) :: mean_asmc_stoch(ncol, nlay)   ! cloud asymmetry parameter 
-
-! Set overlap
-      integer(kind=im) :: overlap                     ! 1 = random overlap, 2 = maximum-random,
-                                                      ! 3 = maximum overlap, 4 = exponential, 
-                                                      ! 5 = exponential-random
-      real(kind=rb), parameter  :: Zo = 2500._rb      ! length scale (m)
-      real(kind=rb), dimension(ncol,nlay) :: alpha    ! overlap parameter
-
-! Constants (min value for cloud fraction and cloud water and ice)
-      real(kind=rb), parameter :: cldmin = 1.0e-20_rb ! min cloud fraction
-!      real(kind=rb), parameter :: qmin   = 1.0e-10_rb   ! min cloud water and cloud ice (not used)
-
-! Variables related to random number and seed
-      real(kind=rb), dimension(nsubcol, ncol, nlay) :: CDF, CDF2      !random numbers
-      integer(kind=im), dimension(ncol) :: seed1, seed2, seed3, seed4 !seed to create random number (kissvec)
-      real(kind=rb), dimension(ncol) :: rand_num      ! random number (kissvec)
-      integer(kind=im) :: iseed                       ! seed to create random number (Mersenne Teister)
-      real(kind=rb) :: rand_num_mt                    ! random number (Mersenne Twister)
-
-! Flag to identify cloud fraction in subcolumns
-      logical,  dimension(nsubcol, ncol, nlay) :: iscloudy   ! flag that says whether a gridbox is cloudy
-
-! Indices
-      integer(kind=im) :: ilev, isubcol, i, n         ! indices
-
-!-------------------------------------------------------------------
-
-! Check that irng is in bounds; if not, set to default
-      if (irng .ne. 0) irng = 1
-
-! Pass input cloud overlap setting to local variable
-      overlap = icld
-
-! Ensure that cloud fractions are in bounds
-      do ilev = 1, nlay
-         do i = 1, ncol
-            cldf(i,ilev) = cld(i,ilev)
-            if (cldf(i,ilev) < cldmin) then
-               cldf(i,ilev) = 0._rb
-            endif
-         enddo
-      enddo
-
-! ----- Create seed  --------
-
-! Advance randum number generator by changeseed values
-      if (irng.eq.0) then 
-! For kissvec, create a seed that depends on the state of the columns. Maybe not the best way, but it works.
-! Must use pmid from bottom four layers.
-         do i=1,ncol
-            if (pmid(i,1).lt.pmid(i,2)) then
-               stop 'MCICA_SUBCOL: KISSVEC SEED GENERATOR REQUIRES PMID &
-     &               FROM BOTTOM FOUR LAYERS.'
-            endif
-            seed1(i) = (pmid(i,1) - int(pmid(i,1)))  * 1000000000_im
-            seed2(i) = (pmid(i,2) - int(pmid(i,2)))  * 1000000000_im
-            seed3(i) = (pmid(i,3) - int(pmid(i,3)))  * 1000000000_im
-            seed4(i) = (pmid(i,4) - int(pmid(i,4)))  * 1000000000_im
-          enddo
-         do i=1,changeSeed
-            call kissvec(seed1, seed2, seed3, seed4, rand_num)
-         enddo
-      elseif (irng.eq.1) then
-         randomNumbers = new_RandomNumberSequence(seed = changeSeed)
-      endif
-
-! ------ Apply overlap assumption --------
-
-! generate the random numbers
-
-      select case (overlap) 
-
-      case(1)
-! Random overlap
-! i) pick a random value at every level
-
-         if (irng.eq.0) then
-            do isubcol = 1,nsubcol
-               do ilev = 1,nlay
-                  call kissvec(seed1, seed2, seed3, seed4, rand_num)  ! we get different random number for each level
-                  CDF(isubcol,:,ilev) = rand_num
-               enddo    
-            enddo
-         elseif (irng.eq.1) then
-            do isubcol = 1, nsubcol
-               do i = 1, ncol
-                  do ilev = 1, nlay
-                     rand_num_mt = getRandomReal(randomNumbers)
-                     CDF(isubcol,i,ilev) = rand_num_mt
-                  enddo
-               enddo
-             enddo
-         endif
-
-      case(2)
-! Maximum-Random overlap 
-! i) pick a random number for top layer.
-! ii) walk down the column:
-!    - if the layer above is cloudy, we use the same random number than in the layer above
-!    - if the layer above is clear, we use a new random number
-
-         if (irng.eq.0) then
-            do isubcol = 1,nsubcol
-               do ilev = 1,nlay
-                  call kissvec(seed1, seed2, seed3, seed4, rand_num)
-                  CDF(isubcol,:,ilev) = rand_num
-               enddo
-            enddo
-         elseif (irng.eq.1) then
-            do isubcol = 1, nsubcol
-               do i = 1, ncol
-                  do ilev = 1, nlay
-                     rand_num_mt = getRandomReal(randomNumbers)
-                     CDF(isubcol,i,ilev) = rand_num_mt
-                  enddo
-               enddo
-             enddo
-         endif
-
-         do ilev = 2,nlay
-            do i = 1, ncol
-               do isubcol = 1, nsubcol
-                  if (CDF(isubcol, i, ilev-1) > 1._rb - cldf(i,ilev-1) )&
-     &             then
-                     CDF(isubcol,i,ilev) = CDF(isubcol,i,ilev-1)
-                  else
-                     CDF(isubcol,i,ilev) = CDF(isubcol,i,ilev) * (1._rb &
-     &               - cldf(i,ilev-1))
-                  endif
-               enddo
-            enddo
-         enddo
-
-      case(3)
-! Maximum overlap
-! i) pick the same random numebr at every level
-
-         if (irng.eq.0) then
-            do isubcol = 1,nsubcol
-               call kissvec(seed1, seed2, seed3, seed4, rand_num)
-               do ilev = 1,nlay
-                  CDF(isubcol,:,ilev) = rand_num
-               enddo
-            enddo
-         elseif (irng.eq.1) then
-            do isubcol = 1, nsubcol
-               do i = 1, ncol
-                  rand_num_mt = getRandomReal(randomNumbers)
-                  do ilev = 1, nlay
-                     CDF(isubcol,i,ilev) = rand_num_mt
-                  enddo
-               enddo
-             enddo
-         endif
-
-! mji - Activate exponential cloud overlap option
-         case(4)
-            ! Exponential overlap: weighting between maximum and random overlap increases with the distance.
-            ! The random numbers for exponential overlap verify:
-            ! j=1   RAN(j)=RND1
-            ! j>1   if RND1 < alpha(j,j-1) => RAN(j) = RAN(j-1)
-            !                                 RAN(j) = RND2
-            ! alpha is obtained from the equation
-            ! alpha = exp(-(Z(j)-Z(j-1))/Zo) where Zo is a characteristic length scale
-
-            ! compute alpha
-            do i = 1, ncol
-               alpha(i, 1) = 0._rb
-               do ilev = 2,nlay
-                  alpha(i, ilev) = exp( -( hgt (i, ilev) -              &
-     &                  hgt (i, ilev-1)) / Zo)
-               enddo
-            enddo
-
-            ! generate 2 streams of random numbers
-            if (irng.eq.0) then
-               do isubcol = 1,nsubcol
-                  do ilev = 1,nlay
-                     call kissvec(seed1, seed2, seed3, seed4, rand_num)
-                     CDF(isubcol, :, ilev) = rand_num
-                     call kissvec(seed1, seed2, seed3, seed4, rand_num)
-                     CDF2(isubcol, :, ilev) = rand_num
-                  enddo
-               enddo
-            elseif (irng.eq.1) then
-               do isubcol = 1, nsubcol
-                  do i = 1, ncol
-                     do ilev = 1, nlay
-                        rand_num_mt = getRandomReal(randomNumbers)
-                        CDF(isubcol,i,ilev) = rand_num_mt
-                        rand_num_mt = getRandomReal(randomNumbers)
-                        CDF2(isubcol,i,ilev) = rand_num_mt
-                     enddo
-                  enddo
-               enddo
-            endif
-
-            ! generate random numbers
-            do ilev = 2,nlay
-               where (CDF2(:, :, ilev) < spread(alpha (:,ilev),         &
-     &               dim=1,nCopies=nsubcol) )
-                  CDF(:,:,ilev) = CDF(:,:,ilev-1)
-               end where
-            end do
-
-! Activate exponential-random cloud overlap option
-         case(5)
-            ! Exponential-random overlap:
-!mz*            call wrf_error_fatal("Cloud Overlap case 5: ER has not yet  &
-!                            been implemented. Stopping...")
-
-      end select
-
-! -- generate subcolumns for homogeneous clouds ----- 
-      do ilev = 1,nlay 
-         iscloudy(:,:,ilev) = (CDF(:,:,ilev) >= 1._rb -                 &
-     &        spread(cldf(:,ilev), dim=1, nCopies=nsubcol) ) 
-      enddo
-
-! where the subcolumn is cloudy, the subcolumn cloud fraction is 1;
-! where the subcolumn is not cloudy, the subcolumn cloud fraction is 0;
-! where there is a cloud, define the subcolumn cloud properties,
-! otherwise set these to zero
-
-      do ilev = 1,nlay
-         do i = 1, ncol
-            do isubcol = 1, nsubcol
-               if (iscloudy(isubcol,i,ilev) ) then
-                  cld_stoch(isubcol,i,ilev) = 1._rb
-                  clwp_stoch(isubcol,i,ilev) = clwp(i,ilev)
-                  ciwp_stoch(isubcol,i,ilev) = ciwp(i,ilev)
-!mz  
-!                  cswp_stoch(isubcol,i,ilev) = cswp(i,ilev)
-                   cswp_stoch(isubcol,i,ilev) = 0._rb
-                  n = ngb(isubcol)
-                  tauc_stoch(isubcol,i,ilev) = tauc(n,i,ilev)
-!                  ssac_stoch(isubcol,i,ilev) = ssac(n,i,ilev)
-!                  asmc_stoch(isubcol,i,ilev) = asmc(n,i,ilev)
-               else
-                  cld_stoch(isubcol,i,ilev) = 0._rb
-                  clwp_stoch(isubcol,i,ilev) = 0._rb
-                  ciwp_stoch(isubcol,i,ilev) = 0._rb
-                  cswp_stoch(isubcol,i,ilev) = 0._rb
-                  tauc_stoch(isubcol,i,ilev) = 0._rb
-!                  ssac_stoch(isubcol,i,ilev) = 1._rb
-!                  asmc_stoch(isubcol,i,ilev) = 1._rb
-               endif
-            enddo
-         enddo
-      enddo
-
-! -- compute the means of the subcolumns ---
-!      mean_cld_stoch(:,:) = 0._rb
-!      mean_clwp_stoch(:,:) = 0._rb
-!      mean_ciwp_stoch(:,:) = 0._rb
-!      mean_tauc_stoch(:,:) = 0._rb
-!      mean_ssac_stoch(:,:) = 0._rb
-!      mean_asmc_stoch(:,:) = 0._rb
-!      do i = 1, nsubcol
-!         mean_cld_stoch(:,:) =  cld_stoch(i,:,:) + mean_cld_stoch(:,:) 
-!         mean_clwp_stoch(:,:) =  clwp_stoch( i,:,:) + mean_clwp_stoch(:,:)
-!         mean_ciwp_stoch(:,:) =  ciwp_stoch( i,:,:) + mean_ciwp_stoch(:,:)
-!         mean_tauc_stoch(:,:) =  tauc_stoch( i,:,:) + mean_tauc_stoch(:,:)
-!         mean_ssac_stoch(:,:) =  ssac_stoch( i,:,:) + mean_ssac_stoch(:,:)
-!         mean_asmc_stoch(:,:) =  asmc_stoch( i,:,:) + mean_asmc_stoch(:,:)
-!      end do 
-!      mean_cld_stoch(:,:) = mean_cld_stoch(:,:) / nsubcol
-!      mean_clwp_stoch(:,:) = mean_clwp_stoch(:,:) / nsubcol
-!      mean_ciwp_stoch(:,:) = mean_ciwp_stoch(:,:) / nsubcol
-!      mean_tauc_stoch(:,:) = mean_tauc_stoch(:,:) / nsubcol
-!      mean_ssac_stoch(:,:) = mean_ssac_stoch(:,:) / nsubcol
-!      mean_asmc_stoch(:,:) = mean_asmc_stoch(:,:) / nsubcol
-
-      end subroutine generate_stochastic_clouds
-
-!------------------------------------------------------------------
-! Private subroutines
-!------------------------------------------------------------------  
-
-!----------------------------------------------------------------- 
-      subroutine kissvec(seed1,seed2,seed3,seed4,ran_arr) 
-!----------------------------------------------------------------
-
-! public domain code
-! made available from http://www.fortran.com/
-! downloaded by pjr on 03/16/04 for NCAR CAM
-! converted to vector form, functions inlined by pjr,mvr on 05/10/2004
-
-! The  KISS (Keep It Simple Stupid) random number generator. Combines:
-! (1) The congruential generator x(n)=69069*x(n-1)+1327217885, period 2^32.
-! (2) A 3-shift shift-register generator, period 2^32-1,
-! (3) Two 16-bit multiply-with-carry generators, period 597273182964842497>2^59  
-!  Overall period>2^123;                                                                                                             
-      real(kind=rb), dimension(:), intent(inout)  :: ran_arr
-      integer(kind=im), dimension(:), intent(inout) :: seed1,seed2,seed3&
-     &                                                 ,seed4
-      integer(kind=im) :: i,sz,kiss
-      integer(kind=im) :: m, k, n
-
-! inline function  
-      m(k, n) = ieor (k, ishft (k, n) )
-
-      sz = size(ran_arr)
-      do i = 1, sz 
-         seed1(i) = 69069_im * seed1(i) + 1327217885_im
-         seed2(i) = m (m (m (seed2(i), 13_im), - 17_im), 5_im)
-         seed3(i) = 18000_im * iand (seed3(i), 65535_im) +              &
-     &              ishft (seed3(i), - 16_im)
-         seed4(i) = 30903_im * iand (seed4(i), 65535_im) +              &
-     &              ishft (seed4(i), - 16_im)
-         kiss = seed1(i) + seed2(i) + ishft (seed3(i), 16_im) + seed4(i)
-         ran_arr(i) = kiss*2.328306e-10_rb + 0.5_rb
-      end do 
-
-      end subroutine kissvec
-!
-      subroutine rtrnmc_mcica(nlayers, istart, iend, iout, pz, semiss,  &
-     &       ncbands,  cldfmc, taucmc, planklay, planklev,              &!plankbnd,    &
-     &       pwvcm, fracs, taut,                                        &
-     &                   totuflux, totdflux,  htr,                      &
-     &                   totuclfl, totdclfl,  htrc )
-!---------------------------------------------------------------
-!
-!  Original version:   E. J. Mlawer, et al. RRTM_V3.0
-!  Revision for GCMs:  Michael J. Iacono; October, 2002
-!  Revision for F90:  Michael J. Iacono; June, 2006
-!
-!  This program calculates the upward fluxes, downward fluxes, and
-!  heating rates for an arbitrary clear or cloudy atmosphere.  The input
-!  to this program is the atmospheric profile, all Planck function
-!  information, and the cloud fraction by layer.  A variable diffusivity 
-!  angle (SECDIFF) is used for the angle integration.  Bands 2-3 and 5-9 
-!  use a value for SECDIFF that varies from 1.50 to 1.80 as a function of 
-!  the column water vapor, and other bands use a value of 1.66.  The Gaussian 
-!  weight appropriate to this angle (WTDIFF=0.5) is applied here.  Note that 
-!  use of the emissivity angle for the flux integration can cause errors of 
-!  1 to 4 W/m2 within cloudy layers.  
-!  Clouds are treated with the McICA stochastic approach and maximum-random               
-!  cloud overlap.                                                                         
-!***************************************************************************              
-                                                                                          
-! ------- Declarations -------                                                            
-                                                                                          
-! ----- Input -----                                                                       
-      integer(kind=im), intent(in) :: nlayers         ! total number of layers            
-      integer(kind=im), intent(in) :: istart          ! beginning band of calculation     
-      integer(kind=im), intent(in) :: iend            ! ending band of calculation        
-      integer(kind=im), intent(in) :: iout            ! output option flag                
-                                                                                          
-! Atmosphere                                                                              
-      real(kind=rb), intent(in) :: pz(0:)             ! level (interface) pressures (hPa, mb)
-                                                      !    Dimensions: (0:nlayers)        
-      real(kind=rb), intent(in) :: pwvcm              ! precipitable water vapor (cm)     
-      real(kind=rb), intent(in) :: semiss(:)          ! lw surface emissivity             
-                                                      !    Dimensions: (nbndlw)           
-!mz
-      real(kind=rb), intent(in) :: planklay(0:,:)      !                                   
-                                                      !    Dimensions: (nlayers,nbndlw)   
-      real(kind=rb), intent(in) :: planklev(0:,:)     !                                   
-                                                      !    Dimensions: (0:nlayers,nbndlw) 
-!      real(kind=rb), intent(in) :: plankbnd(:)        !                                   
-                                                      !    Dimensions: (nbndlw)           
-      real(kind=rb), intent(in) :: fracs(:,:)         !                                   
-                                                      !    Dimensions: (nlayers,ngptw)    
-      real(kind=rb), intent(in) :: taut(:,:)          ! gaseous + aerosol optical depths  
-                                                      !    Dimensions: (nlayers,ngptlw)   
-                                                                                          
-! Clouds                                                                                  
-      integer(kind=im), intent(in) :: ncbands         ! number of cloud spectral bands    
-      real(kind=rb), intent(in) :: cldfmc(:,:)        ! layer cloud fraction [mcica]      
-                                                      !    Dimensions: (ngptlw,nlayers)   
-      real(kind=rb), intent(in) :: taucmc(:,:)        ! layer cloud optical depth [mcica] 
-                                                      !    Dimensions: (ngptlw,nlayers)   
-                                                                                          
-! ----- Output -----                                                                      
-      real(kind=rb), intent(out) :: totuflux(0:)      ! upward longwave flux (w/m2)       
-                                                      !    Dimensions: (0:nlayers)        
-      real(kind=rb), intent(out) :: totdflux(0:)      ! downward longwave flux (w/m2)     
-                                                      !    Dimensions: (0:nlayers)        
-!mz* real(kind=rb), intent(out) :: fnet(0:)          ! net longwave flux (w/m2)          
-                                                      !    Dimensions: (0:nlayers)        
-         real(kind=rb), intent(out) :: htr(:)
-!mz      real(kind=rb), intent(out) :: htr(0:)           ! longwave heating rate (k/day)     
-                                                      !    Dimensions: (0:nlayers)        
-      real(kind=rb), intent(out) :: totuclfl(0:)      ! clear sky upward longwave flux (w/m2)
-                                                      !    Dimensions: (0:nlayers)        
-      real(kind=rb), intent(out) :: totdclfl(0:)      ! clear sky downward longwave flux (w/m2)
-                                                      !    Dimensions: (0:nlayers)        
-!mz*real(kind=rb), intent(out) :: fnetc(0:)         ! clear sky net longwave flux (w/m2)
-                                                      !    Dimensions: (0:nlayers)        
-       real(kind=rb), intent(out) :: htrc(:) 
-!      real(kind=rb), intent(out) :: htrc(0:)          ! clear sky longwave heating rate (k/day)
-                                                      !    Dimensions: (0:nlayers)        
-                                                                                          
-! ----- Local -----                                                                       
-! Declarations for radiative transfer                                                     
-      real (kind=kind_phys), dimension(0:nlayers) :: fnet, fnetc
-      real(kind=rb) :: abscld(nlayers,ngptlw)                                             
-      real(kind=rb) :: atot(nlayers)                                                      
-      real(kind=rb) :: atrans(nlayers)                                                    
-      real(kind=rb) :: bbugas(nlayers)                                                    
-      real(kind=rb) :: bbutot(nlayers)                                                    
-      real(kind=rb) :: clrurad(0:nlayers)                                                 
-      real(kind=rb) :: clrdrad(0:nlayers)                                                 
-      real(kind=rb) :: efclfrac(nlayers,ngptlw)                                           
-      real(kind=rb) :: uflux(0:nlayers)                                                   
-      real(kind=rb) :: dflux(0:nlayers)                                                   
-      real(kind=rb) :: urad(0:nlayers)                                                    
-      real(kind=rb) :: drad(0:nlayers)                                                    
-      real(kind=rb) :: uclfl(0:nlayers)                                                   
-      real(kind=rb) :: dclfl(0:nlayers)                                                   
-      real(kind=rb) :: odcld(nlayers,ngptlw)                                              
-                                                                                          
-                                                                                          
-      real(kind=rb) :: secdiff(nbands)                 ! secant of diffusivity angle      
-      real(kind=rb) :: transcld, radld, radclrd, plfrac, blay, dplankup,&
-     &                 dplankdn         
-      real(kind=rb) :: odepth, odtot, odepth_rec, odtot_rec, gassrc                       
-      real(kind=rb) :: tblind, tfactot, bbd, bbdtot, tfacgas, transc,   &
-     &                 tausfac             
-      real(kind=rb) :: rad0, reflect, radlu, radclru                                      
-                                                                                          
-      integer(kind=im) :: icldlyr(nlayers)                  ! flag for cloud in layer     
-      integer(kind=im) :: ibnd, ib, iband, lay, lev, l, ig  ! loop indices                
-      integer(kind=im) :: igc                               ! g-point interval counter    
-      integer(kind=im) :: iclddn                            ! flag for cloud in down path 
-      integer(kind=im) :: ittot, itgas, itr                 ! lookup table indices        
-!mz*
-      real (kind=kind_phys), parameter :: rec_6 = 0.166667
-      ! The cumulative sum of new g-points for each band
-      integer(kind=im) :: ngs(nbands)
-      ngs(:) = (/10,22,38,52,68,76,88,96,108,114,122,130,134,136,138,   &
-     &          140/)
-                                                                                          
-! ------- Definitions -------                                                             
-! input                                                                                   
-!    nlayers                      ! number of model layers                                
-!    ngptlw                       ! total number of g-point subintervals                  
-!    nbndlw                       ! number of longwave spectral bands                     
-!    ncbands                      ! number of spectral bands for clouds                   
-!    secdiff                      ! diffusivity angle                                     
-!    wtdiff                       ! weight for radiance to flux conversion                
-!    pavel                        ! layer pressures (mb)                                  
-!    pz                           ! level (interface) pressures (mb)                      
-!    tavel                        ! layer temperatures (k)                                
-!    tz                           ! level (interface) temperatures(mb)                    
-!    tbound                       ! surface temperature (k)                               
-!    cldfrac                      ! layer cloud fraction                                  
-!    taucloud                     ! layer cloud optical depth                             
-!    itr                          ! integer look-up table index                           
-!    icldlyr                      ! flag for cloudy layers                                
-!    iclddn                       ! flag for cloud in column at any layer                 
-!    semiss                       ! surface emissivities for each band                    
-!    reflect                      ! surface reflectance                                   
-!    bpade                        ! 1/(pade constant)                                     
-!    tau_tbl                      ! clear sky optical depth look-up table                 
-!    exp_tbl                      ! exponential look-up table for transmittance           
-!    tfn_tbl                      ! tau transition function look-up table                 
-                                                                                          
-! local                                                                                   
-!    atrans                       ! gaseous absorptivity                                  
-!    abscld                       ! cloud absorptivity                                    
-!    atot                         ! combined gaseous and cloud absorptivity               
-!    odclr                        ! clear sky (gaseous) optical depth                     
-!    odcld                        ! cloud optical depth                                   
-!    odtot                        ! optical depth of gas and cloud                        
-!    tfacgas                      ! gas-only pade factor, used for planck fn              
-!    tfactot                      ! gas and cloud pade factor, used for planck fn         
-!    bbdgas                       ! gas-only planck function for downward rt              
-!    bbugas                       ! gas-only planck function for upward rt                
-!    bbdtot                       ! gas and cloud planck function for downward rt         
-!    bbutot                       ! gas and cloud planck function for upward calc.        
-!    gassrc                       ! source radiance due to gas only                       
-!    efclfrac                     ! effective cloud fraction                              
-!    radlu                        ! spectrally summed upward radiance                     
-!    radclru                      ! spectrally summed clear sky upward radiance           
-!    urad                         ! upward radiance by layer                              
-!    clrurad                      ! clear sky upward radiance by layer                    
-!    radld                        ! spectrally summed downward radiance                   
-!    radclrd                      ! spectrally summed clear sky downward radiance         
-!    drad                         ! downward radiance by layer                            
-!    clrdrad                      ! clear sky downward radiance by layer                  
-                                                                                          
-                                                                                          
-! output                                                                                  
-!    totuflux                     ! upward longwave flux (w/m2)                           
-!    totdflux                     ! downward longwave flux (w/m2)                         
-!    fnet                         ! net longwave flux (w/m2)                              
-!    htr                          ! longwave heating rate (k/day)                         
-!    totuclfl                     ! clear sky upward longwave flux (w/m2)                 
-!    totdclfl                     ! clear sky downward longwave flux (w/m2)               
-!    fnetc                        ! clear sky net longwave flux (w/m2)                    
-!    htrc                         ! clear sky longwave heating rate (k/day)               
-                                                                                          
-                                                                                          
-!jm not thread safe      hvrrtc = '$Revision: 1.3 $'                                      
-                                                                                          
-      do ibnd = 1,nbands!mz*nbndlw                                                                  
-         if (ibnd.eq.1 .or. ibnd.eq.4 .or. ibnd.ge.10) then                               
-           secdiff(ibnd) = 1.66_rb                                                        
-         else                                                                             
-           secdiff(ibnd) = a0(ibnd) + a1(ibnd)*exp(a2(ibnd)*pwvcm)                        
-           if (secdiff(ibnd) .gt. 1.80_rb) secdiff(ibnd) = 1.80_rb                        
-           if (secdiff(ibnd) .lt. 1.50_rb) secdiff(ibnd) = 1.50_rb                        
-         endif                                                                            
-      enddo                                                                               
-                                                                                          
-      urad(0) = 0.0_rb                                                                    
-      drad(0) = 0.0_rb                                                                    
-      totuflux(0) = 0.0_rb                                                                
-      totdflux(0) = 0.0_rb                                                                
-      clrurad(0) = 0.0_rb                                                                 
-      clrdrad(0) = 0.0_rb                                                                 
-      totuclfl(0) = 0.0_rb                                                                
-      totdclfl(0) = 0.0_rb                                                                
-                                                                                          
-      do lay = 1, nlayers                                                                 
-         urad(lay) = 0.0_rb                                                               
-         drad(lay) = 0.0_rb                                                               
-         totuflux(lay) = 0.0_rb                                                           
-         totdflux(lay) = 0.0_rb                                                           
-         clrurad(lay) = 0.0_rb                                                            
-         clrdrad(lay) = 0.0_rb                                                            
-         totuclfl(lay) = 0.0_rb                                                           
-         totdclfl(lay) = 0.0_rb                                                           
-         icldlyr(lay) = 0                                                                 
-                                                                 
-! Change to band loop?                                                                    
-         do ig = 1, ngptlw                                                                
-            if (cldfmc(ig,lay) .eq. 1._rb) then                                           
-               ib = ngb(ig)                                                               
-               odcld(lay,ig) = secdiff(ib) * taucmc(ig,lay)                               
-               transcld = exp(-odcld(lay,ig))                                             
-               abscld(lay,ig) = 1._rb - transcld                                          
-               efclfrac(lay,ig) = abscld(lay,ig) * cldfmc(ig,lay)                         
-               icldlyr(lay) = 1                                                           
-            else                                                                          
-               odcld(lay,ig) = 0.0_rb                                                     
-               abscld(lay,ig) = 0.0_rb                                                    
-               efclfrac(lay,ig) = 0.0_rb                                                  
-            endif                                                                         
-         enddo                                                                            
-                                                                                          
-      enddo                                                                               
-                                                                                          
-      igc = 1                                                                             
-! Loop over frequency bands.                                                              
-      do iband = istart, iend                                                             
-                                                                                          
-! Reinitialize g-point counter for each band if output for each band is requested.        
-         if (iout.gt.0.and.iband.ge.2) igc = ngs(iband-1)+1                               
-                                                                                          
-! Loop over g-channels.                                                                   
- 1000    continue                                                                         
-                                                                                          
-! Radiative transfer starts here.                                                         
-         radld = 0._rb                                                                    
-         radclrd = 0._rb                                                                  
-         iclddn = 0                                                                       
-                                                                                          
-! Downward radiative transfer loop.                                                       
-                                                                                          
-         do lev = nlayers, 1, -1                                                          
-               plfrac = fracs(lev,igc)                                                    
-               blay = planklay(lev,iband)                                                 
-               dplankup = planklev(lev,iband) - blay                                      
-               dplankdn = planklev(lev-1,iband) - blay                                    
-               odepth = secdiff(iband) * taut(lev,igc)                                    
-               if (odepth .lt. 0.0_rb) odepth = 0.0_rb              
-!  Cloudy layer                                                                  
-               if (icldlyr(lev).eq.1) then  
-                  iclddn = 1              
-                  odtot = odepth + odcld(lev,igc) 
-                  if (odtot .lt. 0.06_rb) then            
-                     atrans(lev) = odepth - 0.5_rb*odepth*odepth                          
-                     odepth_rec = rec_6*odepth
-                 gassrc = plfrac*(blay+dplankdn*odepth_rec)*atrans(lev)               
-                                                                                          
-                     atot(lev) =  odtot - 0.5_rb*odtot*odtot                              
-                     odtot_rec = rec_6*odtot                                              
-                     bbdtot =  plfrac * (blay+dplankdn*odtot_rec)                         
-                     bbd = plfrac*(blay+dplankdn*odepth_rec)                              
-                     radld = radld - radld * (atrans(lev) +             &
-     &                    efclfrac(lev,igc) * (1. - atrans(lev))) +     &
-     &                    gassrc + cldfmc(igc,lev) *                    &
-     &                    (bbdtot * atot(lev) - gassrc)                                    
-                     drad(lev-1) = drad(lev-1) + radld                                    
-                                                                                          
-                     bbugas(lev) =  plfrac * (blay+dplankup*odepth_rec)                   
-                     bbutot(lev) =  plfrac * (blay+dplankup*odtot_rec)                    
-                                                                                          
-                  elseif (odepth .le. 0.06_rb) then                                       
-                     atrans(lev) = odepth - 0.5_rb*odepth*odepth                          
-                     odepth_rec = rec_6*odepth                                            
-                 gassrc = plfrac*(blay+dplankdn*odepth_rec)*atrans(lev)               
-                                                                                          
-                     odtot = odepth + odcld(lev,igc)                                      
-                     tblind = odtot/(bpade+odtot)                                         
-                     ittot = tblint*tblind + 0.5_rb                                       
-                     tfactot = tfn_tbl(ittot)                                             
-                     bbdtot = plfrac * (blay + tfactot*dplankdn)                          
-                     bbd = plfrac*(blay+dplankdn*odepth_rec)                              
-                     atot(lev) = 1. - exp_tbl(ittot)                                      
-                                                                                          
-                     radld = radld - radld * (atrans(lev) +             &
-     &                   efclfrac(lev,igc) * (1._rb - atrans(lev))) +   &
-     &                   gassrc + cldfmc(igc,lev) *                     &
-     &                   (bbdtot * atot(lev) - gassrc)             
-                     drad(lev-1) = drad(lev-1) + radld                                    
-                                                                                          
-                     bbugas(lev) = plfrac * (blay + dplankup*odepth_rec)                  
-                     bbutot(lev) = plfrac * (blay + tfactot * dplankup)                   
-                                                                                          
-                  else                                                                    
-                                                                                          
-                     tblind = odepth/(bpade+odepth)                                       
-                     itgas = tblint*tblind+0.5_rb                                         
-                     odepth = tau_tbl(itgas)                                              
-                     atrans(lev) = 1._rb - exp_tbl(itgas)                                 
-                     tfacgas = tfn_tbl(itgas)                                             
-              gassrc = atrans(lev) * plfrac * (blay + tfacgas*dplankdn)            
-                                                                                          
-                     odtot = odepth + odcld(lev,igc)                                      
-                     tblind = odtot/(bpade+odtot)                                         
-                     ittot = tblint*tblind + 0.5_rb                                       
-                     tfactot = tfn_tbl(ittot)                                             
-                     bbdtot = plfrac * (blay + tfactot*dplankdn)                          
-                     bbd = plfrac*(blay+tfacgas*dplankdn)                                 
-                     atot(lev) = 1._rb - exp_tbl(ittot)                                   
-                                                                                          
-                  radld = radld - radld * (atrans(lev) +                &
-     &               efclfrac(lev,igc) * (1._rb - atrans(lev))) +       &
-     &               gassrc + cldfmc(igc,lev) *                         &
-     &               (bbdtot * atot(lev) - gassrc)                                         
-                  drad(lev-1) = drad(lev-1) + radld                                       
-                  bbugas(lev) = plfrac * (blay + tfacgas * dplankup)                      
-                  bbutot(lev) = plfrac * (blay + tfactot * dplankup)                      
-                  endif                                                                   
-!  Clear layer                                                                            
-               else                                                                       
-                  if (odepth .le. 0.06_rb) then                                           
-                     atrans(lev) = odepth-0.5_rb*odepth*odepth                            
-                     odepth = rec_6*odepth                                                
-                     bbd = plfrac*(blay+dplankdn*odepth)                                  
-                     bbugas(lev) = plfrac*(blay+dplankup*odepth)                          
-                  else                                                                    
-                     tblind = odepth/(bpade+odepth)                                       
-                     itr = tblint*tblind+0.5_rb                                           
-                     transc = exp_tbl(itr)                                                
-                     atrans(lev) = 1._rb-transc                                           
-                     tausfac = tfn_tbl(itr)                                               
-                     bbd = plfrac*(blay+tausfac*dplankdn)                                 
-                     bbugas(lev) = plfrac * (blay + tausfac * dplankup)                   
-                  endif                                                                   
-                  radld = radld + (bbd-radld)*atrans(lev)                                 
-                  drad(lev-1) = drad(lev-1) + radld                                       
-               endif                                                                      
-!  Set clear sky stream to total sky stream as long as layers                             
-!  remain clear.  Streams diverge when a cloud is reached (iclddn=1),                     
-!  and clear sky stream must be computed separately from that point.                      
-                  if (iclddn.eq.1) then                                                   
-                     radclrd = radclrd + (bbd-radclrd) * atrans(lev)                      
-                     clrdrad(lev-1) = clrdrad(lev-1) + radclrd                            
-                  else                                                                    
-                     radclrd = radld                                                      
-                     clrdrad(lev-1) = drad(lev-1)                                         
-                  endif                                                                   
-            enddo                                                                         
-                                                                                          
-! Spectral emissivity & reflectance                                                       
-!  Include the contribution of spectrally varying longwave emissivity                     
-!  and reflection from the surface to the upward radiative transfer.                      
-!  Note: Spectral and Lambertian reflection are identical for the                         
-!  diffusivity angle flux integration used here.                                          
-                                                                                          
-!mz*
-!         rad0 = fracs(1,igc) * plankbnd(iband)                                            
-          rad0 = semiss(iband) * fracs(1,igc) * planklay(0,iband)
-!mz
-!  Add in specular reflection of surface downward radiance.                               
-         reflect = 1._rb - semiss(iband)                                                  
-         radlu = rad0 + reflect * radld                                                   
-         radclru = rad0 + reflect * radclrd                                               
-                                                                                          
-                                                                                          
-! Upward radiative transfer loop.                                                         
-         urad(0) = urad(0) + radlu                                                        
-         clrurad(0) = clrurad(0) + radclru                                                
-                                                                                          
-         do lev = 1, nlayers                                                              
-!  Cloudy layer                                                                           
-            if (icldlyr(lev) .eq. 1) then 
-               gassrc = bbugas(lev) * atrans(lev)
-               radlu = radlu - radlu * (atrans(lev) +                   &
-     &             efclfrac(lev,igc) * (1._rb - atrans(lev))) +         &
-     &              gassrc + cldfmc(igc,lev) *                          &
-     &              (bbutot(lev) * atot(lev) - gassrc)                                     
-               urad(lev) = urad(lev) + radlu                                              
-!  Clear layer                                                                            
-            else                                                                          
-               radlu = radlu + (bbugas(lev)-radlu)*atrans(lev)                            
-               urad(lev) = urad(lev) + radlu                                              
-            endif                                                                         
-!  Set clear sky stream to total sky stream as long as all layers                         
-!  are clear (iclddn=0).  Streams must be calculated separately at                        
-!  all layers when a cloud is present (ICLDDN=1), because surface                         
-!  reflectance is different for each stream.                         
-               if (iclddn.eq.1) then                                                      
-                  radclru = radclru + (bbugas(lev)-radclru)*atrans(lev)                   
-                  clrurad(lev) = clrurad(lev) + radclru                                   
-               else                                                                       
-                  radclru = radlu                                                         
-                  clrurad(lev) = urad(lev)                                                
-               endif                                                                      
-         enddo                                                                            
-                                                                                          
-! Increment g-point counter                                                               
-         igc = igc + 1                                                                    
-! Return to continue radiative transfer for all g-channels in present band                
-         if (igc .le. ngs(iband)) go to 1000                                              
-                                                                                          
-! Process longwave output from band for total and clear streams.                          
-! Calculate upward, downward, and net flux.                                               
-         do lev = nlayers, 0, -1                                                          
-            uflux(lev) = urad(lev)*wtdiff                                                 
-            dflux(lev) = drad(lev)*wtdiff                                                 
-            urad(lev) = 0.0_rb                                                            
-            drad(lev) = 0.0_rb                                                            
-            totuflux(lev) = totuflux(lev) + uflux(lev) * delwave(iband)                   
-            totdflux(lev) = totdflux(lev) + dflux(lev) * delwave(iband)                   
-            uclfl(lev) = clrurad(lev)*wtdiff                                              
-            dclfl(lev) = clrdrad(lev)*wtdiff                                              
-            clrurad(lev) = 0.0_rb                                                         
-            clrdrad(lev) = 0.0_rb                                                         
-            totuclfl(lev) = totuclfl(lev) + uclfl(lev) * delwave(iband)                   
-            totdclfl(lev) = totdclfl(lev) + dclfl(lev) * delwave(iband)                   
-         enddo                                                                            
-                                                                                          
-! End spectral band loop                                                                  
-      enddo                                                                               
-                                                                                          
-! Calculate fluxes at surface                                                             
-      totuflux(0) = totuflux(0) * fluxfac                                                 
-      totdflux(0) = totdflux(0) * fluxfac                                                 
-      fnet(0) = totuflux(0) - totdflux(0)                                                 
-      totuclfl(0) = totuclfl(0) * fluxfac                                                 
-      totdclfl(0) = totdclfl(0) * fluxfac                                                 
-      fnetc(0) = totuclfl(0) - totdclfl(0)                                                
-                                                                                          
-! Calculate fluxes at model levels                                                        
-      do lev = 1, nlayers                                                                 
-         totuflux(lev) = totuflux(lev) * fluxfac                                          
-         totdflux(lev) = totdflux(lev) * fluxfac                                          
-         fnet(lev) = totuflux(lev) - totdflux(lev)                                        
-         totuclfl(lev) = totuclfl(lev) * fluxfac                                          
-         totdclfl(lev) = totdclfl(lev) * fluxfac                                          
-         fnetc(lev) = totuclfl(lev) - totdclfl(lev)                                       
-         l = lev - 1                                                                      
-                                                                          
-! Calculate heating rates at model layers                                                 
-         htr(l)=heatfac*(fnet(l)-fnet(lev))/(pz(l)-pz(lev))                               
-         htrc(l)=heatfac*(fnetc(l)-fnetc(lev))/(pz(l)-pz(lev))                            
-      enddo                                                                               
-                                                                                          
-! Set heating rate to zero in top layer                                                   
-      htr(nlayers) = 0.0_rb                                                               
-      htrc(nlayers) = 0.0_rb                                                              
-                                                                                          
-      end subroutine rtrnmc_mcica             
 
 ! ------------------------------------------------------------------------------
       subroutine cldprmc(nlayers, inflag, iceflag, liqflag, cldfmc,     &

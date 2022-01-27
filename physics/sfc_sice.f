@@ -579,10 +579,10 @@
 !
 !===> ...  begin here
 !
-      dt2  =  delt + delt
-      dt4  =  dt2  + dt2
-      dt6  =  dt2  + dt4
-      dt2i = one / dt2
+      dt2  = delt + delt
+      dt4  = dt2  + dt2
+      dt6  = dt2  + dt4
+      dt2i = one  / dt2
 
       do i = 1, im
         if (flag(i)) then
