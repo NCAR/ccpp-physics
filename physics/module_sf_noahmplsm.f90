@@ -159,6 +159,11 @@ use sfc_diff, only   : stability
                       ! **0 -> no crop model, will run default dynamic vegetation
                       !   1 -> liu, et al. 2016
 
+  integer :: opt_trs  !< options for thermal roughness scheme
+                      ! **1 -> z0h=z0 
+                      !   2 -> czil 
+                      !   3 -> ec style 
+                      !   4 -> kb inversed
 !------------------------------------------------------------------------------------------!
 ! physical constants:                                                                      !
 !------------------------------------------------------------------------------------------!
@@ -2241,6 +2246,21 @@ endif   ! croptype == 0
         q1    = fveg * (eah*0.622/(sfcprs - 0.378*eah)) + (1.0 - fveg)*qsfc
         q2e   = fveg * q2v       + (1.0 - fveg) * q2b
 
+     if (opt_trs == 1) then
+        z0wrf  = fveg * z0m      + (1.0 - fveg) * z0mg
+        z0hwrf = z0wrf
+     elseif (opt_trs == 2) then
+        z0wrf  = fveg * z0m      + (1.0 - fveg) * z0mg
+        z0hwrf = fveg * z0m*exp(-parameters%czil*0.4*258.2*sqrt(ustarx*z0m))  &
+            +(1.0 - fveg) * z0mg*exp(-parameters%czil*0.4*258.2*sqrt(ustarx*z0mg))
+     elseif (opt_trs == 3) then
+        z0wrf  = fveg * z0m      + (1.0 - fveg) * z0mg
+        if (vegtyp.le.5) then
+          z0hwrf = fveg * z0m    + (1.0 - fveg) * z0mg*0.1
+        else
+         z0hwrf = fveg * z0m*0.01 + (1.0 - fveg) * z0mg*0.1
+        endif
+     elseif (opt_trs == 4) then
         coeffa     = (csigmaf0 - csigmaf1)/(1.0 - exp(-1.0*aone))
         coeffb     = csigmaf0 - coeffa
         csigmafveg = coeffa * exp(-1.0*aone*fveg) + coeffb
@@ -2259,6 +2279,9 @@ endif   ! croptype == 0
 
         kbsigmafveg = csigmafveg/log((zlvl-ezpd)/z0wrf) - log((zlvl-ezpd)/z0wrf)
         z0hwrf = z0wrf/exp(kbsigmafveg)
+! place holder doe other roughness scheme
+!     elseif (opt_trs == x) then
+      endif
 
     else
         taux  = tauxb
@@ -2283,7 +2306,19 @@ endif   ! croptype == 0
         chv   = chb
 	z0wrf = z0mg
 
+     if (opt_trs == 1) then
+        z0hwrf = z0wrf
+     elseif (opt_trs == 2) then
+        z0hwrf = z0wrf*exp(-parameters%czil*0.4*258.2*sqrt(ustarx*z0wrf))
+     elseif (opt_trs == 3) then
+      if (vegtyp.le.5) then
+        z0hwrf = z0wrf
+      else
+        z0hwrf = z0wrf*0.01
+      endif
+     elseif (opt_trs == 4) then
         z0hwrf =z0wrf/exp( csigmaf0/log((zlvl-ezpd)/z0wrf) - log((zlvl-ezpd)/z0wrf) )
+     endif
 
     end if
 
@@ -3965,11 +4000,22 @@ endif   ! croptype == 0
         cir = (2.-emv*(1.-emg))*emv*sb
 ! ---------------------------------------------------------------------------------------------
 
+     if (opt_trs == 1) then
+         z0h       = z0m
+     elseif (opt_trs == 2) then
+         z0h = z0m*exp(-parameters%czil*0.4*258.2*sqrt(fv*z0m))
+     elseif (opt_trs == 3) then
+        if (vegtyp.le.5) then
+         z0h = z0m
+        else
+         z0h = z0m*0.01
+        endif
+     elseif (opt_trs == 4) then
          sigmaa    = 1.0 - (0.5/(0.5+vaie))*exp(-vaie**2/8.0)
          kbsigmaf1 = 16.4*(sigmaa*vaie**3)**(-0.25)*sqrt(dlf*ur/log((zlvl-zpd)/z0m))
          z0h       = z0m/exp(kbsigmaf1)
          csigmaf1  = log((zlvl-zpd)/z0m)*(log((zlvl-zpd)/z0m)+kbsigmaf1) ! for output for interpolation
-
+     endif
 ! --
             tem1 = (z0m - z0lo) / (z0up - z0lo)
             tem1 = min(max(tem1, 0.0_kind_phys), 1.0_kind_phys)
@@ -4582,7 +4628,19 @@ endif   ! croptype == 0
 
         csigmaf0 = log((zlvl-zpd)/z0m)*(log((zlvl-zpd)/z0m) + kbsigmaf0)
 
-        z0h = max(z0m/exp(kbsigmaf0),1.0e-6)
+        if (opt_trs == 1) then
+            z0h       = z0m
+        elseif (opt_trs == 2) then
+            z0h = z0m*exp(-parameters%czil*0.4*258.2*sqrt(fv*z0m))
+        elseif (opt_trs == 3) then
+         if (vegtyp.le.5) then
+            z0h = z0m
+         else
+            z0h = z0m*0.01
+         endif
+        elseif (opt_trs == 4) then
+           z0h = max(z0m/exp(kbsigmaf0),1.0e-6)
+        endif
 !
 ! for sfcdiff3; maybe should move to inside the option
 !
@@ -9782,7 +9840,7 @@ end subroutine psn_crop
 !>\ingroup NoahMP_LSM
   subroutine noahmp_options(idveg     ,iopt_crs  ,iopt_btr  ,iopt_run  ,iopt_sfc  ,iopt_frz , & 
                              iopt_inf  ,iopt_rad  ,iopt_alb  ,iopt_snf  ,iopt_tbot, iopt_stc, &
-			     iopt_rsf , iopt_soil, iopt_pedo, iopt_crop )
+			     iopt_rsf , iopt_soil, iopt_pedo, iopt_crop ,iopt_trs )
 
   implicit none
 
@@ -9804,6 +9862,7 @@ end subroutine psn_crop
   integer,  intent(in) :: iopt_soil !soil parameters set-up option
   integer,  intent(in) :: iopt_pedo !pedo-transfer function (1->saxton and rawls)
   integer,  intent(in) :: iopt_crop !crop model option (0->none; 1->liu et al.)
+  integer,  intent(in) :: iopt_trs  !thermal roughness scheme option (1->z0h=z0; 2->rb reversed)
 
 ! -------------------------------------------------------------------------------------------------
 
@@ -9824,6 +9883,7 @@ end subroutine psn_crop
   opt_soil = iopt_soil
   opt_pedo = iopt_pedo
   opt_crop = iopt_crop
+  opt_trs  = iopt_trs
   
   end subroutine noahmp_options
 
