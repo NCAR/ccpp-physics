@@ -1044,7 +1044,7 @@
   standard_name = flag_convective_tracer_transport_interstitial
   long_name = flag for interstitial tracer transport
   units = flag
-  dimensions = (number_of_tracers_plus_one)
+  dimensions = (number_of_tracers)
   type = logical
   intent = in
 [im]
@@ -1854,7 +1854,7 @@
   standard_name = flag_convective_tracer_transport_interstitial
   long_name = flag for interstitial tracer transport
   units = flag
-  dimensions = (number_of_tracers_plus_one)
+  dimensions = (number_of_tracers)
   type = logical
   intent = in
 [errmsg]
