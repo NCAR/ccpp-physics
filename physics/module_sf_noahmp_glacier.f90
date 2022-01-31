@@ -1133,7 +1133,7 @@ contains
   real (kind=kind_phys) :: czil        !< calculate roughness length of heat
 
   tdc(t)   = min( 50., max(-50.,(t-tfrz)) )
-        czil=0.5
+        czil=0.1
 
 ! -----------------------------------------------------------------
 ! initialization variables that do not depend on stability iteration
@@ -1163,7 +1163,7 @@ contains
         elseif (opt_trs == 2) then
            z0h = z0m*exp(-czil*0.4*258.2*sqrt(fv*z0m))
         elseif (opt_trs == 3) then
-           z0h = z0m*0.0001
+           z0h = z0m*0.1
         elseif (opt_trs == 4) then
          if (reyni .gt. 2.0) then 
              z0h = z0m/exp(2.46*(reyni)**0.25 - log(7.4))  !Brutsaert 1982 

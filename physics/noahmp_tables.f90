@@ -735,7 +735,7 @@ module noahmp_tables
     real :: refkdt_table = 3.0         !< parameter in the surface runoff parameterization
     real :: frzk_table  =0.15          !< frozen ground parameter
     real :: zbot_table  =  -8.0        !< depth [m] of lower boundary soil temperature
-    real :: czil_table = 0.5           !< parameter used in the calculation of the roughness length for heat
+    real :: czil_table = 0.1           !< parameter used in the calculation of the roughness length for heat
 
 ! mptable.tbl radiation parameters
 
