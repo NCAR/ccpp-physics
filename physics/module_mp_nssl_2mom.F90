@@ -417,10 +417,10 @@ MODULE module_mp_nssl_2mom
   real   , private :: esi0 = 0.1              ! linear factor in snow-ice collection efficiency
   real   , private :: ehs0 = 0.1, ehs1 = 0.1  ! graupel-snow coll. eff. parameters: ehs0*exp(ehs1*min(temcg(mgs),0.0))
                                      ! set ehs1 = 0 to get a constant value of ehs0
-  real   , private :: ess0 = 1.0, ess1 = 0.05 ! snow aggregation coefficients: ess0*exp(ess1*min(temcg(mgs),0.0))
+  real   , private :: ess0 = 0.5, ess1 = 0.05 ! snow aggregation coefficients: ess0*exp(ess1*min(temcg(mgs),0.0))
                                      ! set ess1 = 0 to get a constant value of ess0
-  real   , private :: esstem1 = -25.  ! lower temperature where snow aggregation turns on
-  real   , private :: esstem2 = -20.  ! higher temperature for linear ramp of ess from zero at esstem1 to formula value at esstem2
+  real   , private :: esstem1 = -15.  ! lower temperature where snow aggregation turns on
+  real   , private :: esstem2 = -10.  ! higher temperature for linear ramp of ess from zero at esstem1 to formula value at esstem2
   real   , private :: essrmax = 0.02  ! maximum snow radius (meters) for csacs
   real   , private :: essfrac1 = 0.5  ! snow mass fraction 1 for aggregation roll-off
   real   , private :: essfrac2 = 0.75 ! snow mass fraction 2 for aggregation roll-off
