@@ -340,7 +340,7 @@
   standard_name = cloud_condensation_nuclei_number_concentration
   long_name = number concentration of cloud condensation nuclei
   units = kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -1006,7 +1006,7 @@
   standard_name = tendency_of_cloud_condensation_nuclei_number_concentration_due_to_model_physics
   long_name = number concentration of cloud condensation nuclei tendency due to model physics
   units = kg-1 s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
