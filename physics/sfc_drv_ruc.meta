@@ -42,7 +42,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [lsm_cold_start]
   standard_name = do_lsm_cold_start
   long_name = flag to signify LSM is cold-started
@@ -1567,7 +1566,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [lsm_cold_start]
   standard_name = do_lsm_cold_start
   long_name = flag to signify LSM is cold-started

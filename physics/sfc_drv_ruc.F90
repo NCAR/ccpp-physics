@@ -1,4 +1,4 @@
-+!>\file sfc_drv_ruc.F90 
+!>\file sfc_drv_ruc.F90 
 !!  This file contains the RUC land surface scheme driver.
 
 module lsm_ruc
@@ -210,7 +210,7 @@ module lsm_ruc
                     sh2o, smfrkeep, tslb, smois,                & ! out
                     wetness, errmsg, errflg)
 
-      if (.not.flag_restart) then
+      if (lsm_cold_start) then
         do i  = 1, im ! i - horizontal loop
           do k = 1, min(kice,lsoil_ruc)
           ! - at initial time set sea ice T (tsice) 
