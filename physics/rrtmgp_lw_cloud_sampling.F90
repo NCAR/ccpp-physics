@@ -4,7 +4,7 @@ module rrtmgp_lw_cloud_sampling
   use mo_optical_props,         only: ty_optical_props_2str
   use rrtmgp_sampling,          only: sampled_mask, draw_samples
   use mersenne_twister,         only: random_setseed, random_number, random_stat  
-  use radiation_tools,               only: check_error_msg
+  use radiation_tools,          only: check_error_msg
   use rrtmgp_lw_gas_optics,     only: lw_gas_props
   use netcdf
 
@@ -13,36 +13,12 @@ module rrtmgp_lw_cloud_sampling
 contains
 
   ! #########################################################################################
-  ! SUBROUTINE rrtmgp_lw_cloud_sampling_init()
-  ! #########################################################################################
-!! \section arg_table_rrtmgp_lw_cloud_sampling_init
-!! \htmlinclude rrtmgp_lw_cloud_sampling_init.html
-!!
-  subroutine rrtmgp_lw_cloud_sampling_init(ipsdlw0, errmsg, errflg)
-    ! Outputs
-    integer, intent(out) :: &
-         ipsdlw0      ! Initial permutation seed for McICA
-    character(len=*), intent(out) :: &
-         errmsg       ! Error message
-    integer,          intent(out) :: &
-         errflg       ! Error flag
-
-    ! Initialize CCPP error handling variables
-    errmsg = ''
-    errflg = 0
-
-    ! Set initial permutation seed for McICA, initially set to number of G-points
-    ipsdlw0 = lw_gas_props%get_ngpt()
-
-  end subroutine rrtmgp_lw_cloud_sampling_init
-
-  ! #########################################################################################
   ! SUBROTUINE rrtmgp_lw_cloud_sampling_run()
   ! #########################################################################################
 !! \section arg_table_rrtmgp_lw_cloud_sampling_run
 !! \htmlinclude rrtmgp_lw_cloud_sampling_run.html
 !!
-  subroutine rrtmgp_lw_cloud_sampling_run(doLWrad, nCol, nLev, ipsdlw0, icseed_lw, iovr,    &
+  subroutine rrtmgp_lw_cloud_sampling_run(doLWrad, nCol, nLev, icseed_lw, iovr,             &
        iovr_max, iovr_maxrand, iovr_rand, iovr_dcorr, iovr_exp, iovr_exprand, isubc_lw,     &
        cld_frac, precip_frac, cloud_overlap_param, precip_overlap_param,                    &
        doGP_lwscat, lw_optical_props_cloudsByBand, lw_optical_props_precipByBand,           &
@@ -62,7 +38,6 @@ contains
          iovr_dcorr,                       & ! Flag for decorrelation-length cloud overlap method
          iovr_exp,                         & ! Flag for exponential cloud overlap method
          iovr_exprand,                     & ! Flag for exponential-random cloud overlap method
-         ipsdlw0,                          & ! Initial permutation seed for McICA
          isubc_lw 
     integer,intent(in),dimension(ncol) :: &
          icseed_lw                           ! auxiliary special cloud related array when module 
@@ -115,7 +90,7 @@ contains
     ! Change random number seed value for each radiation invocation (isubc_lw =1 or 2).
     if(isubc_lw == 1) then      ! advance prescribed permutation seed
        do iCol = 1, ncol
-          ipseed_lw(iCol) = ipsdlw0 + iCol
+          ipseed_lw(iCol) = lw_gas_props%get_ngpt() + iCol
        enddo
     elseif (isubc_lw == 2) then ! use input array of permutaion seeds
        do iCol = 1, ncol
@@ -174,32 +149,13 @@ contains
 
     ! ####################################################################################
     ! Next sample the precipitation...
+    ! (Use same RNGs as was used by the clouds.)
     ! ####################################################################################
     lw_optical_props_precip%band2gpt      = lw_gas_props%get_band_lims_gpoint()
     lw_optical_props_precip%band_lims_wvn = lw_gas_props%get_band_lims_wavenumber()
     do iBand=1,lw_gas_props%get_nband()
        lw_optical_props_precip%gpt2band(lw_optical_props_precip%band2gpt(1,iBand):lw_optical_props_precip%band2gpt(2,iBand)) = iBand
     end do    
-
-    ! Change random number seed value for each radiation invocation (isubc_lw =1 or 2).
-    if(isubc_lw == 1) then      ! advance prescribed permutation seed
-       do iCol = 1, ncol
-          ipseed_lw(iCol) = ipsdlw0 + iCol
-       enddo
-    elseif (isubc_lw == 2) then ! use input array of permutaion seeds
-       do iCol = 1, ncol
-          ipseed_lw(iCol) = icseed_lw(iCol)
-       enddo
-    endif
-    
-    ! No need to call RNG second time for now, just use the same seeds for precip as clouds.
-    !! Call RNG. Mersennse Twister accepts 1D array, so loop over columns and collapse along G-points 
-    !! and layers. ([nGpts,nLev,nColumn]-> [nGpts*nLev]*nColumn)
-    !do iCol=1,ncol
-    !   call random_setseed(ipseed_lw(icol),rng_stat)
-    !   call random_number(rng1D,rng_stat)
-    !   rng3D(:,:,iCol) = reshape(source = rng1D,shape=[lw_gas_props%get_ngpt(),nLev])
-    !enddo
 
     ! Precipitation overlap.
     ! Maximum-random, random or maximum.
@@ -208,13 +164,6 @@ contains
     endif 
     !  Exponential decorrelation length overlap
     if (iovr == iovr_dcorr) then
-       ! No need to call RNG second time for now, just use the same seeds for precip as clouds.
-       !! Generate second RNG
-       !do iCol=1,ncol
-       !   call random_setseed(ipseed_lw(icol),rng_stat)
-       !   call random_number(rng1D,rng_stat)
-       !   rng3D2(:,:,iCol) = reshape(source = rng1D,shape=[lw_gas_props%get_ngpt(),nLev])
-       !enddo
        call sampled_mask(rng3D, precip_frac, precipfracSAMP,               &
                          overlap_param = precip_overlap_param(:,1:nLev-1), &
                          randoms2      = rng3D2)

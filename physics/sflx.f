@@ -1432,9 +1432,9 @@
      &       zsoil, slope, frzx, bexp, dksat, dwsat, shdfac,            &
      &       edir1, ec1, et1,                                           &
 !  ---  input/outputs:
-     &       cmc, sh2o,                                                 &
+     &       cmc, sh2o, smc,                                            &
 !  ---  outputs:
-     &       smc, runoff1, runoff2, runoff3, drip                       &
+     &       runoff1, runoff2, runoff3, drip                            &
      &     )
 
       else
@@ -1455,9 +1455,9 @@
      &       zsoil, slope, frzx, bexp, dksat, dwsat, shdfac,            &
      &       edir1, ec1, et1,                                           &
 !  ---  input/outputs:
-     &       cmc, sh2o,                                                 &
+     &       cmc, sh2o, smc,                                            &
 !  ---  outputs:
-     &       smc, runoff1, runoff2, runoff3, drip                       &
+     &       runoff1, runoff2, runoff3, drip                            &
      &     )
 
       endif   ! end if_etp_block
@@ -2722,9 +2722,9 @@
      &       zsoil, slope, frzx, bexp, dksat, dwsat, shdfac,              &
      &       edir1, ec1, et1,                                             &
 !  ---  input/outputs:
-     &       cmc, sh2o,                                                   &
+     &       cmc, sh2o, smc,                                              &
 !  ---  outputs:
-     &       smc, runoff1, runoff2, runoff3, drip                         &
+     &       runoff1, runoff2, runoff3, drip                              &
      &     )
 
       endif
@@ -3447,9 +3447,9 @@
      &       zsoil, slope, frzx, bexp, dksat, dwsat, shdfac,              &
      &       edir1, ec1, et1,                                             &
 !  ---  input/outputs:
-     &       cmc, sh2o,                                                   &
+     &       cmc, sh2o, smc,                                              &
 !  ---  outputs:
-     &       smc, runoff1, runoff2, runoff3, drip                         &
+     &       runoff1, runoff2, runoff3, drip                              &
      &     )
 
 ! ===================================================================== !
@@ -3488,9 +3488,9 @@
 !  input/outputs:                                                       !
 !     cmc      - real, canopy moisture content                     1    !
 !     sh2o     - real, unfrozen soil moisture                    nsoil  !
+!     smc      - real, total soil moisture                       nsoil  !
 !                                                                       !
 !  outputs:                                                             !
-!     smc      - real, total soil moisture                       nsoil  !
 !     runoff1  - real, surface runoff not infiltrating sfc         1    !
 !     runoff2  - real, sub surface runoff (baseflow)               1    !
 !     runoff3  - real, excess of porosity                          1    !
@@ -3506,11 +3506,12 @@
      &       edir1, ec1, et1(nsoil), zsoil(nsoil)
 
 !  ---  input/outputs:
-      real (kind=kind_phys),  intent(inout) :: cmc, sh2o(nsoil)
+      real (kind=kind_phys),  intent(inout) :: cmc, sh2o(nsoil),        &
+     &       smc(nsoil)
 
 !  ---  outputs:
-      real (kind=kind_phys),  intent(out) :: smc(nsoil), runoff1,       &
-     &       runoff2, runoff3, drip
+      real (kind=kind_phys),  intent(out) :: runoff1, runoff2,          &
+     &       runoff3, drip
 
 !  ---  locals:
       real (kind=kind_phys) :: dummy, excess, pcpdrp, rhsct, trhsct,    &
@@ -3994,8 +3995,8 @@
           do while ( (nlog < 10) .and. (kcount == 0) )
             nlog = nlog + 1
 
-            df = alog( (psis*gs2/lsubf) * ( (1.0 + ck*swl)**2.0 )       &
-     &         * (smcmax/(smc-swl))**bx ) - alog(-(tkelv-tfreez)/tkelv)
+            df = log( (psis*gs2/lsubf) * ( (1.0 + ck*swl)**2.0 )        &
+     &         * (smcmax/(smc-swl))**bx ) - log(-(tkelv-tfreez)/tkelv)
 
             denom = 2.0*ck/(1.0 + ck*swl) + bx/(smc - swl)
             swlk  = swl - df/denom

@@ -14,7 +14,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [levs]
   standard_name = vertical_layer_dimension
   long_name = vertical layer dimension
@@ -22,7 +21,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [nmtvr]
   standard_name = number_of_statistical_measures_of_subgrid_orography
   long_name = number of statistical measures of subgrid height_above_mean_sea_level
@@ -30,16 +28,14 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [mntvar]
   standard_name = statistical_measures_of_subgrid_orography_collection_array
   long_name = array of statistical measures of subgrid height_above_mean_sea_level
-  units = various
+  units = mixed
   dimensions = (horizontal_loop_extent,number_of_statistical_measures_of_subgrid_orography)
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [oc]
   standard_name = convexity_of_subgrid_orography
   long_name = convexity of subgrid height_above_mean_sea_level
@@ -48,7 +44,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [oa4]
   standard_name = asymmetry_of_subgrid_orography
   long_name = asymmetry of subgrid height_above_mean_sea_level
@@ -57,7 +52,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [clx]
   standard_name = fraction_of_grid_box_with_subgrid_orography_higher_than_critical_height
   long_name = horizontal fraction of grid box covered by subgrid height_above_mean_sea_level higher than critical height
@@ -66,7 +60,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [theta]
   standard_name = angle_from_east_of_maximum_subgrid_orographic_variations
   long_name = angle with_respect to east of maximum subgrid orographic variations
@@ -75,7 +68,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [varss]
   standard_name = standard_deviation_of_subgrid_orography_small_scale
   long_name = standard deviation of subgrid height_above_mean_sea_level small scale
@@ -84,7 +76,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [ocss]
   standard_name = convexity_of_subgrid_orography_small_scale
   long_name = convexity of subgrid height_above_mean_sea_level small scale
@@ -93,7 +84,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [oa4ss]
   standard_name = asymmetry_of_subgrid_orography_small_scale
   long_name = asymmetry of subgrid height_above_mean_sea_level small scale
@@ -102,7 +92,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [clxss]
   standard_name = fraction_of_grid_box_with_subgrid_orography_higher_than_critical_height_small_scale
   long_name = horizontal fraction of grid box covered by subgrid height_above_mean_sea_level higher than critical height small scale
@@ -111,7 +100,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [sigma]
   standard_name = slope_of_subgrid_orography
   long_name = slope of subgrid height_above_mean_sea_level
@@ -120,7 +108,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [gamma]
   standard_name = anisotropy_of_subgrid_orography
   long_name = anisotropy of subgrid height_above_mean_sea_level
@@ -129,7 +116,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [elvmax]
   standard_name = maximum_subgrid_orography
   long_name = maximum of subgrid height_above_mean_sea_level
@@ -138,7 +124,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [lssav]
   standard_name = flag_for_diagnostics
   long_name = logical flag for storing diagnostics
@@ -146,7 +131,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [ldiag3d]
   standard_name = flag_for_diagnostics_3D
   long_name = flag for 3d diagnostic fields
@@ -154,7 +138,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [dudt]
   standard_name = process_split_cumulative_tendency_of_x_wind
   long_name = zonal wind tendency due to model physics
@@ -163,7 +146,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [dvdt]
   standard_name = process_split_cumulative_tendency_of_y_wind
   long_name = meridional wind tendency due to model physics
@@ -172,7 +154,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [dtdt]
   standard_name = process_split_cumulative_tendency_of_air_temperature
   long_name = updated tendency of the temperature
@@ -181,16 +162,14 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [dtend]
   standard_name = cumulative_change_of_state_variables
   long_name = diagnostic tendencies for state variables
-  units = various
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_cumulative_change_processes)
+  units = mixed
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,cumulative_change_of_state_variables_outer_index_max)
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [dtidx]
   standard_name = cumulative_change_of_state_variables_outer_index
   long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
@@ -198,7 +177,6 @@
   dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
   type = integer
   intent = in
-  optional = F
 [index_of_temperature]
   standard_name = index_of_temperature_in_cumulative_change_index
   long_name = index of temperature in first dimension of array cumulative change index
@@ -206,7 +184,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [index_of_x_wind]
   standard_name = index_of_x_wind_in_cumulative_change_index
   long_name = index of x-wind in first dimension of array cumulative change index
@@ -214,7 +191,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [index_of_y_wind]
   standard_name = index_of_y_wind_in_cumulative_change_index
   long_name = index of x-wind in first dimension of array cumulative change index
@@ -222,7 +198,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [index_of_process_orographic_gwd]
   standard_name = index_of_orographic_gravity_wave_drag_process_in_cumulative_change_index
   long_name = index of orographic gravity wave drag process in second dimension of array cumulative change index
@@ -230,7 +205,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [dtf]
   standard_name = timestep_for_dynamics
   long_name = dynamics timestep
@@ -239,7 +213,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [flag_for_gwd_generic_tend]
   standard_name = flag_for_generic_tendency_due_to_gravity_wave_drag
   long_name = true if GFS_GWD_generic should calculate tendencies
@@ -247,7 +220,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -256,15 +228,13 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 
 ########################################################################
 [ccpp-table-properties]
@@ -283,7 +253,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [ldiag3d]
   standard_name = flag_for_diagnostics_3D
   long_name = flag for calculating 3-D diagnostic fields
@@ -291,7 +260,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [dtf]
   standard_name = timestep_for_dynamics
   long_name = dynamics time step
@@ -300,7 +268,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [dusfcg]
   standard_name = instantaneous_x_stress_due_to_gravity_wave_drag
   long_name = zonal surface stress due to orographic gravity wave drag
@@ -309,7 +276,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [dvsfcg]
   standard_name = instantaneous_y_stress_due_to_gravity_wave_drag
   long_name = meridional surface stress due to orographic gravity wave drag
@@ -318,7 +284,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [dudt]
   standard_name = process_split_cumulative_tendency_of_x_wind
   long_name = zonal wind tendency due to model physics
@@ -327,7 +292,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [dvdt]
   standard_name = process_split_cumulative_tendency_of_y_wind
   long_name = meridional wind tendency due to model physics
@@ -336,7 +300,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [dtdt]
   standard_name = process_split_cumulative_tendency_of_air_temperature
   long_name = air temperature tendency due to model physics
@@ -345,7 +308,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [dugwd]
   standard_name = time_integral_of_x_stress_due_to_gravity_wave_drag
   long_name = integral over time of zonal stress due to gravity wave drag
@@ -354,7 +316,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [dvgwd]
   standard_name = time_integral_of_y_stress_due_to_gravity_wave_drag
   long_name = integral over time of meridional stress due to gravity wave drag
@@ -363,16 +324,14 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [dtend]
   standard_name = cumulative_change_of_state_variables
   long_name = diagnostic tendencies for state variables
-  units = various
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_cumulative_change_processes)
+  units = mixed
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,cumulative_change_of_state_variables_outer_index_max)
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [dtidx]
   standard_name = cumulative_change_of_state_variables_outer_index
   long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
@@ -380,7 +339,6 @@
   dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
   type = integer
   intent = in
-  optional = F
 [index_of_temperature]
   standard_name = index_of_temperature_in_cumulative_change_index
   long_name = index of temperature in first dimension of array cumulative change index
@@ -388,7 +346,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [index_of_x_wind]
   standard_name = index_of_x_wind_in_cumulative_change_index
   long_name = index of x-wind in first dimension of array cumulative change index
@@ -396,7 +353,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [index_of_y_wind]
   standard_name = index_of_y_wind_in_cumulative_change_index
   long_name = index of x-wind in first dimension of array cumulative change index
@@ -404,7 +360,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [index_of_process_orographic_gwd]
   standard_name = index_of_orographic_gravity_wave_drag_process_in_cumulative_change_index
   long_name = index of orographic gravity wave drag process in second dimension of array cumulative change index
@@ -412,7 +367,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [flag_for_gwd_generic_tend]
   standard_name = flag_for_generic_tendency_due_to_gravity_wave_drag
   long_name = true if GFS_GWD_generic should calculate tendencies
@@ -420,7 +374,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -429,12 +382,10 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out
-  optional = F

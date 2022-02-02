@@ -14,7 +14,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [imp_physics_mg]
   standard_name = identifier_for_morrison_gettelman_microphysics_scheme
   long_name = choice of Morrison-Gettelman microphysics scheme
@@ -22,7 +21,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [fprcp]
   standard_name = number_of_frozen_precipitation_species
   long_name = number of frozen precipitation species
@@ -30,7 +28,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [gravit]
   standard_name = gravitational_acceleration
   long_name = gravitational acceleration
@@ -39,7 +36,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [rair]
   standard_name = gas_constant_of_dry_air
   long_name = ideal gas constant for dry air
@@ -48,7 +44,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [rh2o]
   standard_name = gas_constant_water_vapor
   long_name = ideal gas constant for water vapor
@@ -57,7 +52,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [cpair]
   standard_name = specific_heat_of_dry_air_at_constant_pressure
   long_name = specific heat of dry air at constant pressure
@@ -66,7 +60,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [eps_in]
   standard_name = ratio_of_dry_air_to_water_vapor_gas_constants
   long_name = rd/rv
@@ -75,7 +68,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [epsm1_in]
   standard_name = ratio_of_dry_air_to_water_vapor_gas_constants_minus_one
   long_name = (rd/rv) - 1
@@ -84,7 +76,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [tmelt]
   standard_name = triple_point_temperature_of_water
   long_name = triple point temperature of water
@@ -93,7 +84,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [latvap]
   standard_name = latent_heat_of_vaporization_of_water_at_0C
   long_name = latent heat of evaporation/sublimation
@@ -102,7 +92,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [latice]
   standard_name = latent_heat_of_fusion_of_water_at_0C
   long_name = latent heat of fusion
@@ -111,7 +100,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [pi_in]
   standard_name = pi
   long_name = ratio of a circle's circumference to its diameter
@@ -120,7 +108,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [tice_in]
   standard_name = temperature_at_zero_celsius
   long_name = temperature at 0 degree Celsius
@@ -129,7 +116,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [VIREPS_in]
   standard_name = ratio_of_vapor_to_dry_air_gas_constants_minus_one
   long_name = (rv/rd) - 1 (rv = ideal gas constant for water vapor)
@@ -138,7 +124,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [mg_dcs]
   standard_name = autoconverion_to_snow_size_threshold
   long_name = autoconversion size threshold for cloud ice to snow for MG microphysics
@@ -147,16 +132,14 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [mg_qcvar]
   standard_name = relative_variance_of_subgrid_cloud_condensate_distribution
   long_name = cloud water relative variance for MG microphysics
-  units = 
+  units = frac
   dimensions = ()
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [mg_ts_auto_ice]
   standard_name = timescale_for_autoconversion_to_snow
   long_name = autoconversion time scale for ice for MG microphysics
@@ -165,16 +148,14 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [mg_rhmini]
   standard_name = relative_humidity_threshold_for_ice_nucleation
   long_name = relative humidity threshold parameter for nucleating ice for MG microphysics
-  units = none
+  units = frac
   dimensions = ()
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [microp_uniform]
   standard_name = flag_for_uniform_subcolumns
   long_name = flag for uniform subcolumns for MG microphysics
@@ -182,7 +163,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [do_cldice]
   standard_name = flag_for_cloud_ice_processes
   long_name = flag for cloud ice processes for MG microphysics
@@ -190,7 +170,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [hetfrz_classnuc]
   standard_name = flag_for_heterogeneous_nucleation
   long_name = flag for heterogeneous freezing for MG microphysics
@@ -198,7 +177,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [mg_precip_frac_method]
   standard_name = control_for_precipitation_area_fraction_method
   long_name = type of precip fraction method for MG microphysics (in_cloud or max_overlap)
@@ -207,7 +185,6 @@
   type = character
   kind = len=16
   intent = in
-  optional = F
 [mg_berg_eff_factor]
   standard_name = bergeron_findeisen_process_efficiency_factor
   long_name = bergeron efficiency factor for MG microphysics
@@ -216,7 +193,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [sed_supersat]
   standard_name = flag_for_allowance_of_supersaturation_after_sedimentation
   long_name = allow supersaturation after sedimentation for MG microphysics
@@ -224,7 +200,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [do_sb_physics]
   standard_name = flag_for_seifert_and_beheng_2001_autoconversion
   long_name = flag for SB 2001 autoconversion or accretion for MG microphysics
@@ -232,7 +207,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [mg_do_hail]
   standard_name = flag_for_hail_instead_of_graupel
   long_name = flag for hail for MG microphysics (graupel possible if false)
@@ -240,7 +214,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [mg_do_graupel]
   standard_name = flag_for_graupel_instead_of_hail
   long_name = flag for graupel for MG microphysics (hail possible if false)
@@ -248,7 +221,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [mg_nccons]
   standard_name = flag_for_prescribed_cloud_droplet_number_concentration
   long_name = flag for constant droplet concentration for MG microphysics
@@ -256,7 +228,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [mg_nicons]
   standard_name = flag_for_prescribed_cloud_ice_number_concentration
   long_name = flag for constant ice concentration for MG microphysics
@@ -264,7 +235,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [mg_ngcons]
   standard_name = flag_for_prescribed_graupel_number_concentration
   long_name = flag for constant graupel concentration for MG microphysics
@@ -272,7 +242,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [mg_ncnst]
   standard_name = prescribed_cloud_droplet_number_concentration
   long_name = droplet concentration constant for MG microphysics
@@ -281,7 +250,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [mg_ninst]
   standard_name = prescribed_cloud_ice_number_concentration
   long_name = ice concentration constant for MG microphysics
@@ -290,7 +258,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [mg_ngnst]
   standard_name = prescribed_graupel_number_concentration
   long_name = graupel concentration constant for MG microphysics
@@ -299,7 +266,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [mg_do_ice_gmao]
   standard_name = flag_for_gmao_autoconversion_to_snow
   long_name = flag for gmao ice formulation
@@ -307,7 +273,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [mg_do_liq_liu]
   standard_name = flag_for_liu_autoconversion_to_rain
   long_name = flag for liu liquid treatment
@@ -315,7 +280,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -324,15 +288,13 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 
 ########################################################################
 [ccpp-arg-table]
@@ -345,7 +307,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [lm]
   standard_name = vertical_layer_dimension
   long_name = vertical layer dimension
@@ -353,7 +314,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [rainmin]
   standard_name = lwe_thickness_of_minimum_rain_amount
   long_name = minimum rain amount
@@ -362,7 +322,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [flipv]
   standard_name = flag_flip
   long_name = vertical flip logical
@@ -370,7 +329,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [dt_i]
   standard_name = timestep_for_physics
   long_name = physics time step
@@ -379,7 +337,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [prsl_i]
   standard_name = air_pressure
   long_name = layer mean pressure
@@ -388,7 +345,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [prsi_i]
   standard_name = air_pressure_at_interface
   long_name = air pressure at model layer interfaces
@@ -397,7 +353,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [phil]
   standard_name = geopotential
   long_name = geopotential at model layer centers
@@ -406,7 +361,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [phii]
   standard_name = geopotential_at_interface
   long_name = geopotential at model layer interfaces
@@ -415,7 +369,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [omega_i]
   standard_name = lagrangian_tendency_of_air_pressure
   long_name = layer mean vertical velocity
@@ -424,7 +377,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [qlls_i]
   standard_name = cloud_condensed_water_mixing_ratio_convective_transport_tracer
   long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates) in the convectively transported tracer array
@@ -433,7 +385,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [qlcn_i]
   standard_name = mass_fraction_of_convective_cloud_liquid_water
   long_name = mass fraction of convective cloud liquid water
@@ -442,7 +393,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [qils_i]
   standard_name = ice_water_mixing_ratio_convective_transport_tracer
   long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates) in the convectively transported tracer array
@@ -451,7 +401,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [qicn_i]
   standard_name = mass_fraction_of_convective_cloud_ice
   long_name = mass fraction of convective cloud ice water
@@ -460,7 +409,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [lwheat_i]
   standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_timestep
   long_name = total sky lw heating rate
@@ -469,7 +417,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [swheat_i]
   standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_timestep
   long_name = total sky sw heating rate
@@ -478,7 +425,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [w_upi]
   standard_name = vertical_velocity_for_updraft
   long_name = vertical velocity for updraft
@@ -487,7 +433,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [cf_upi]
   standard_name = convective_cloud_fraction_for_microphysics
   long_name = convective cloud fraction for microphysics
@@ -496,7 +441,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [frland]
   standard_name = land_area_fraction_for_microphysics
   long_name = land area fraction used in microphysics schemes
@@ -505,7 +449,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [zpbl]
   standard_name = atmosphere_boundary_layer_thickness
   long_name = pbl height
@@ -514,7 +457,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [cnv_mfd_i]
   standard_name = detrained_mass_flux
   long_name = detrained mass flux
@@ -523,7 +465,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [cnv_dqldt_i]
   standard_name = tendency_of_cloud_water_due_to_convective_microphysics
   long_name = tendency of cloud water due to convective microphysics
@@ -532,7 +473,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [clcn_i]
   standard_name = convective_cloud_volume_fraction
   long_name = convective cloud volume fraction
@@ -541,7 +481,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [u_i]
   standard_name = x_wind_of_new_state
   long_name = zonal wind updated by physics
@@ -550,7 +489,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [v_i]
   standard_name = y_wind_of_new_state
   long_name = meridional wind updated by physics
@@ -559,7 +497,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [taugwx]
   standard_name = cumulative_surface_x_momentum_flux_for_diag_multiplied_by_timestep
   long_name = cumulative sfc x momentum flux multiplied by timestep
@@ -568,7 +505,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [taugwy]
   standard_name = cumulative_surface_y_momentum_flux_for_diag_multiplied_by_timestep
   long_name = cumulative sfc y momentum flux multiplied by timestep
@@ -577,7 +513,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [tauorox]
   standard_name = instantaneous_surface_x_momentum_flux
   long_name = x momentum flux
@@ -586,7 +521,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [tauoroy]
   standard_name = instantaneous_surface_y_momentum_flux
   long_name = y momentum flux
@@ -595,7 +529,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [cnv_fice_i]
   standard_name = ice_fraction_in_convective_tower
   long_name = ice fraction in convective tower
@@ -604,7 +537,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [cnv_ndrop_i]
   standard_name = number_concentration_of_cloud_liquid_water_particles_for_detrainment
   long_name = droplet number concentration in convective detrainment
@@ -613,7 +545,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [cnv_nice_i]
   standard_name = number_concentration_of_ice_crystals_for_detrainment
   long_name = crystal number concentration in convective detrainment
@@ -622,7 +553,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [q_io]
   standard_name = specific_humidity_of_new_state
   long_name = water vapor specific humidity updated by physics
@@ -631,7 +561,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [lwm_o]
   standard_name = cloud_liquid_water_mixing_ratio_of_new_state
   long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates) updated by physics
@@ -640,7 +569,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [qi_o]
   standard_name = cloud_ice_mixing_ratio_of_new_state
   long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates) updated by physics
@@ -649,7 +577,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [t_io]
   standard_name = air_temperature_of_new_state
   long_name = temperature updated by physics
@@ -658,7 +585,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [rn_o]
   standard_name = lwe_thickness_of_explicit_precipitation_amount
   long_name = explicit precipitation (rain, ice, snow, graupel, ...) on physics timestep
@@ -667,7 +593,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [sr_o]
   standard_name = ratio_of_snowfall_to_rainfall
   long_name = snow ratio: ratio of snow to total precipitation
@@ -676,7 +601,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [ncpl_io]
   standard_name = mass_number_concentration_of_cloud_liquid_water_particles_in_air_of_new_state
   long_name = number concentration of cloud droplets updated by physics
@@ -685,7 +609,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [ncpi_io]
   standard_name = mass_number_concentration_of_cloud_ice_water_crystals_in_air_of_new_state
   long_name = number concentration of ice updated by physics
@@ -694,7 +617,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [fprcp]
   standard_name = number_of_frozen_precipitation_species
   long_name = number of frozen precipitation species
@@ -702,7 +624,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [rnw_io]
   standard_name = local_rain_water_mixing_ratio
   long_name = ratio of mass of rain water to mass of dry air plus vapor (without condensates) local to physics
@@ -711,7 +632,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [snw_io]
   standard_name = local_snow_water_mixing_ratio
   long_name = ratio of mass of snow water to mass of dry air plus vapor (without condensates) local to physics
@@ -720,7 +640,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [qgl_io]
   standard_name = local_graupel_mixing_ratio
   long_name = ratio of mass of graupel to mass of dry air plus vapor (without condensates) local to physics
@@ -729,7 +648,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [ncpr_io]
   standard_name = local_rain_number_concentration
   long_name = number concentration of rain local to physics
@@ -738,7 +656,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [ncps_io]
   standard_name = local_snow_number_concentration
   long_name = number concentration of snow local to physics
@@ -747,7 +664,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [ncgl_io]
   standard_name = local_graupel_number_concentration
   long_name = number concentration of graupel local to physics
@@ -756,7 +672,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [clls_io]
   standard_name = cloud_fraction_for_MG
   long_name = cloud fraction used by Morrison-Gettelman MP
@@ -765,7 +680,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [kcbl]
   standard_name = vertical_index_at_cloud_base
   long_name = vertical index at cloud base
@@ -773,7 +687,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = inout
-  optional = F
 [cldreffl]
   standard_name = effective_radius_of_stratiform_cloud_liquid_water_particle
   long_name = effective radius of cloud liquid water particle in micrometer
@@ -782,7 +695,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [cldreffi]
   standard_name = effective_radius_of_stratiform_cloud_ice_particle
   long_name = effective radius of cloud ice water particle in micrometers
@@ -791,7 +703,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [cldreffr]
   standard_name = effective_radius_of_stratiform_cloud_rain_particle
   long_name = effective radius of cloud rain particle in micrometers
@@ -800,7 +711,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [cldreffs]
   standard_name = effective_radius_of_stratiform_cloud_snow_particle
   long_name = effective radius of cloud snow particle in micrometers
@@ -809,7 +719,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [cldreffg]
   standard_name = effective_radius_of_stratiform_cloud_graupel_particle
   long_name = effective radius of cloud graupel particle in micrometers
@@ -818,7 +727,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [ntrcaer]
   standard_name = number_of_aerosol_tracers_MG
   long_name = number of aerosol tracers for Morrison Gettelman MP
@@ -826,7 +734,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [aerfld_i]
   standard_name = mass_number_concentration_of_aerosol_from_gocart_climatology
   long_name = GOCART aerosol climatology number concentration
@@ -835,7 +742,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [naai_i]
   standard_name = ice_nucleation_number_from_climatology
   long_name = ice nucleation number in MG MP
@@ -844,7 +750,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [npccn_i]
   standard_name = tendency_of_activated_cloud_condensation_nuclei_from_climatology
   long_name = tendency of ccn activated number
@@ -853,7 +758,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [iccn]
   standard_name = control_for_ice_cloud_condensation_nuclei_forcing
   long_name = flag for IN and CCN forcing for morrison gettelman microphysics
@@ -861,7 +765,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [skip_macro]
   standard_name = flag_skip_macro
   long_name = flag to skip cloud macrophysics in Morrison scheme
@@ -869,7 +772,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [alf_fac]
   standard_name = alpha_tuning_coefficient_for_morrison_gettelman_microphysics_scheme
   long_name = tuning factor for alphas (alpha = 1 - critical relative humidity)
@@ -878,7 +780,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [qc_min]
   standard_name = minimum_cloud_condensate_mixing_ratio_threshold
   long_name = minimum cloud condensed water and ice mixing ratio in MG macro clouds
@@ -887,7 +788,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [pdfflag]
   standard_name = control_for_pdf_shape_for_microphysics
   long_name = pdf flag for MG macrophysics
@@ -895,7 +795,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [kdt]
   standard_name = index_of_timestep
   long_name = current forecast iteration
@@ -903,7 +802,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [xlat]
   standard_name = latitude
   long_name = latitude
@@ -912,7 +810,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [xlon]
   standard_name = longitude
   long_name = longitude
@@ -921,7 +818,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [rhc_i]
   standard_name = critical_relative_humidity
   long_name = critical relative humidity
@@ -930,7 +826,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -939,12 +834,10 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out
-  optional = F

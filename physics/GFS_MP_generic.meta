@@ -14,7 +14,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [levs]
   standard_name = vertical_layer_dimension
   long_name = vertical layer dimension
@@ -22,7 +21,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ldiag3d]
   standard_name = flag_for_diagnostics_3D
   long_name = logical flag for 3D diagnostics
@@ -30,7 +28,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [qdiag3d]
   standard_name = flag_for_tracer_diagnostics_3D
   long_name = logical flag for 3D tracer diagnostics
@@ -38,7 +35,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [do_aw]
   standard_name = flag_for_Arakawa_Wu_adjustment
   long_name = flag for Arakawa Wu scale-aware adjustment
@@ -46,7 +42,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [ntcw]
   standard_name = index_of_cloud_liquid_water_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for cloud condensate (or liquid water)
@@ -54,7 +49,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [nncl]
   standard_name = number_of_condensate_species
   long_name = number of cloud condensate types
@@ -62,7 +56,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ntrac]
   standard_name = number_of_tracers
   long_name = number of tracers
@@ -70,7 +63,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [gt0]
   standard_name = air_temperature_of_new_state
   long_name = temperature updated by physics
@@ -79,7 +71,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [gq0]
   standard_name = tracer_concentration_of_new_state
   long_name = tracer concentration updated by physics
@@ -88,7 +79,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [save_t]
   standard_name = air_temperature_save
   long_name = air temperature before entering a physics scheme
@@ -97,7 +87,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [save_q]
   standard_name = tracer_concentration_save
   long_name = tracer concentration before entering a physics scheme
@@ -106,7 +95,13 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
+[num_dfi_radar]
+  standard_name = number_of_radar_derived_temperature_or_convection_suppression_intervals
+  long_name = number of time ranges with radar-derived microphysics temperature tendencies or radar-derived convection suppression
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -115,15 +110,13 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 
 ########################################################################
 [ccpp-table-properties]
@@ -142,7 +135,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [levs]
   standard_name = vertical_layer_dimension
   long_name = vertical layer dimension
@@ -150,7 +142,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [kdt]
   standard_name = index_of_timestep
   long_name = current time step index
@@ -158,7 +149,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [rainmin]
   standard_name = lwe_thickness_of_minimum_rain_amount
   long_name = minimum rain amount
@@ -167,7 +157,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [nrcm]
   standard_name = number_of_random_numbers
   long_name = second dimension of random number stream for RAS
@@ -175,7 +164,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [nncl]
   standard_name = number_of_condensate_species
   long_name = number of cloud condensate types
@@ -183,7 +171,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ntcw]
   standard_name = index_of_cloud_liquid_water_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for cloud condensate (or liquid water)
@@ -191,7 +178,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ntrac]
   standard_name = number_of_tracers
   long_name = number of tracers
@@ -199,7 +185,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [imp_physics]
   standard_name = control_for_microphysics_scheme
   long_name = choice of microphysics scheme
@@ -207,7 +192,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [imp_physics_gfdl]
   standard_name = identifier_for_gfdl_microphysics_scheme
   long_name = choice of GFDL microphysics scheme
@@ -215,7 +199,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [imp_physics_thompson]
   standard_name = identifier_for_thompson_microphysics_scheme
   long_name = choice of Thompson microphysics scheme
@@ -223,7 +206,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [imp_physics_mg]
   standard_name = identifier_for_morrison_gettelman_microphysics_scheme
   long_name = choice of Morrison-Gettelman microphysics scheme
@@ -231,7 +213,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [imp_physics_fer_hires]
   standard_name = identifier_for_fer_hires_microphysics_scheme
   long_name = choice of Ferrier-Aligo microphysics scheme
@@ -239,7 +220,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [cal_pre]
   standard_name = flag_for_dominant_precipitation_type_partition
   long_name = flag controls precip type algorithm
@@ -247,7 +227,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [cplflx]
   standard_name = flag_for_surface_flux_coupling
   long_name = flag controlling cplflx collection (default off)
@@ -255,7 +234,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [cplchm]
   standard_name = flag_for_chemistry_coupling
   long_name = flag controlling cplchm collection (default off)
@@ -263,7 +241,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [con_g]
   standard_name = gravitational_acceleration
   long_name = gravitational acceleration
@@ -272,7 +249,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [dtf]
   standard_name = timestep_for_dynamics
   long_name = dynamics timestep
@@ -281,7 +257,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [frain]
   standard_name = dynamics_to_physics_timestep_ratio
   long_name = ratio of dynamics timestep to physics timestep
@@ -290,7 +265,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [rainc]
   standard_name = lwe_thickness_of_convective_precipitation_amount_on_dynamics_timestep
   long_name = convective rain at this time step
@@ -299,7 +273,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [rain1]
   standard_name = lwe_thickness_of_explicit_precipitation_amount
   long_name = explicit rainfall amount on physics timestep
@@ -308,7 +281,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [rann]
   standard_name = random_number
   long_name = random number array (0-1)
@@ -317,7 +289,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [xlat]
   standard_name = latitude
   long_name = latitude
@@ -326,7 +297,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [xlon]
   standard_name = longitude
   long_name = longitude
@@ -335,7 +305,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [gt0]
   standard_name = air_temperature_of_new_state
   long_name = temperature updated by physics
@@ -344,7 +313,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [gq0]
   standard_name = tracer_concentration_of_new_state
   long_name = tracer concentration updated by physics
@@ -353,7 +321,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [prsl]
   standard_name = air_pressure
   long_name = layer mean pressure
@@ -362,7 +329,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [prsi]
   standard_name = air_pressure_at_interface
   long_name = pressure at layer interface
@@ -371,7 +337,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [phii]
   standard_name = geopotential_at_interface
   long_name = geopotential at model layer interfaces
@@ -380,7 +345,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [tsfc]
   standard_name = surface_skin_temperature
   long_name = surface skin temperature
@@ -389,7 +353,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [ice]
   standard_name = lwe_thickness_of_ice_amount_on_dynamics_timestep
   long_name = ice fall at this time step
@@ -398,7 +361,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [snow]
   standard_name = lwe_thickness_of_snow_amount_on_dynamics_timestep
   long_name = snow fall at this time step
@@ -407,7 +369,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [graupel]
   standard_name = lwe_thickness_of_graupel_amount_on_dynamics_timestep
   long_name = graupel fall at this time step
@@ -416,7 +377,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [save_t]
   standard_name = air_temperature_save
   long_name = air temperature before entering a physics scheme
@@ -425,7 +385,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [save_q]
   standard_name = tracer_concentration_save
   long_name = tracer concentration before entering a physics scheme
@@ -434,7 +393,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [rain0]
   standard_name = lwe_thickness_of_explicit_rain_amount
   long_name = explicit rain on physics timestep
@@ -443,7 +401,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [ice0]
   standard_name = lwe_thickness_of_ice_amount
   long_name = ice fall on physics timestep
@@ -452,7 +409,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [snow0]
   standard_name = lwe_thickness_of_snow_amount
   long_name = snow fall on physics timestep
@@ -461,7 +417,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [graupel0]
   standard_name = lwe_thickness_of_graupel_amount
   long_name = graupel fall on physics timestep
@@ -470,7 +425,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [del]
   standard_name = air_pressure_difference_between_midlayers
   long_name = air pressure difference between midlayers
@@ -479,7 +433,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [rain]
   standard_name = lwe_thickness_of_precipitation_amount_on_dynamics_timestep
   long_name = total rain at this time step
@@ -488,7 +441,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [domr_diag]
   standard_name = dominant_rain_type
   long_name = dominant rain type
@@ -497,7 +449,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [domzr_diag]
   standard_name = dominant_freezing_rain_type
   long_name = dominant freezing rain type
@@ -506,7 +457,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [domip_diag]
   standard_name = dominant_sleet_type
   long_name = dominant sleet type
@@ -515,7 +465,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [doms_diag]
   standard_name = dominant_snow_type
   long_name = dominant snow type
@@ -524,7 +473,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [tprcp]
   standard_name = nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep
   long_name = total precipitation amount in each time step
@@ -533,7 +481,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [srflag]
   standard_name = precipitation_type
   long_name = snow/rain flag for precipitation
@@ -542,7 +489,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [sr]
   standard_name = ratio_of_snowfall_to_rainfall
   long_name = snow ratio: ratio of snow to total precipitation
@@ -551,7 +497,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [cnvprcp]
   standard_name = cumulative_lwe_thickness_of_convective_precipitation_amount
   long_name = cumulative convective precipitation
@@ -560,7 +505,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [totprcp]
   standard_name = accumulated_lwe_thickness_of_precipitation_amount
   long_name = accumulated total precipitation
@@ -569,7 +513,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [totice]
   standard_name = accumulated_lwe_thickness_of_ice_amount
   long_name = accumulated ice precipitation
@@ -578,7 +521,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [totsnw]
   standard_name = accumulated_lwe_thickness_of_snow_amount
   long_name = accumulated snow precipitation
@@ -587,7 +529,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [totgrp]
   standard_name = accumulated_lwe_thickness_of_graupel_amount
   long_name = accumulated graupel precipitation
@@ -596,7 +537,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [cnvprcpb]
   standard_name = cumulative_lwe_thickness_of_convective_precipitation_amount_in_bucket
   long_name = cumulative convective precipitation in bucket
@@ -605,7 +545,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [totprcpb]
   standard_name = accumulated_lwe_thickness_of_precipitation_amount_in_bucket
   long_name = accumulated total precipitation in bucket
@@ -614,7 +553,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [toticeb]
   standard_name = accumulated_lwe_thickness_of_ice_amount_in_bucket
   long_name = accumulated ice precipitation in bucket
@@ -623,7 +561,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [totsnwb]
   standard_name = accumulated_lwe_thickness_of_snow_amount_in_bucket
   long_name = accumulated snow precipitation in bucket
@@ -632,7 +569,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [totgrpb]
   standard_name = accumulated_lwe_thickness_of_graupel_amount_in_bucket
   long_name = accumulated graupel precipitation in bucket
@@ -641,7 +577,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [rain_cpl]
   standard_name = cumulative_lwe_thickness_of_precipitation_amount_for_coupling
   long_name = total rain precipitation
@@ -650,7 +585,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [rainc_cpl]
   standard_name = cumulative_lwe_thickness_of_convective_precipitation_amount_for_coupling
   long_name = total convective precipitation
@@ -659,7 +593,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [snow_cpl]
   standard_name = cumulative_lwe_thickness_of_snow_amount_for_coupling
   long_name = total snow precipitation
@@ -668,7 +601,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [pwat]
   standard_name = column_precipitable_water
   long_name = precipitable water
@@ -677,7 +609,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [drain_cpl]
   standard_name = tendency_of_lwe_thickness_of_rain_amount_on_dynamics_timestep_for_coupling
   long_name = change in rain_cpl (coupling_type)
@@ -686,7 +617,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [dsnow_cpl]
   standard_name = tendency_of_lwe_thickness_of_snowfall_amount_on_dynamics_timestep_for_coupling
   long_name = change in show_cpl (coupling_type)
@@ -695,7 +625,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [lsm]
   standard_name = control_for_land_surface_scheme
   long_name = flag for land surface model
@@ -703,7 +632,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [lsm_ruc]
   standard_name = identifier_for_ruc_land_surface_scheme
   long_name = flag for RUC land surface model
@@ -711,7 +639,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [lsm_noahmp]
   standard_name = identifier_for_noahmp_land_surface_scheme
   long_name = flag for NOAH MP land surface model
@@ -719,7 +646,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [raincprv]
   standard_name = lwe_thickness_of_convective_precipitation_amount_on_previous_timestep
   long_name = convective_precipitation_amount from previous timestep
@@ -728,7 +654,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [rainncprv]
   standard_name = lwe_thickness_of_explicit_precipitation_amount_on_previous_timestep
   long_name = explicit rainfall from previous timestep
@@ -737,7 +662,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [iceprv]
   standard_name = lwe_thickness_of_ice_precipitation_amount_on_previous_timestep
   long_name = ice amount from previous timestep
@@ -746,7 +670,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [snowprv]
   standard_name = snow_mass_on_previous_timestep
   long_name = snow amount from previous timestep
@@ -755,7 +678,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [graupelprv]
   standard_name = lwe_thickness_of_graupel_amount_on_previous_timestep
   long_name = graupel amount from previous timestep
@@ -764,7 +686,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [draincprv]
   standard_name = convective_precipitation_rate_on_previous_timestep
   long_name = convective precipitation rate from previous timestep
@@ -773,7 +694,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [drainncprv]
   standard_name = explicit_precipitation_rate_on_previous_timestep
   long_name = explicit rainfall rate previous timestep
@@ -782,7 +702,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [diceprv]
   standard_name = ice_precipitation_rate_on_previous_timestep
   long_name = ice precipitation rate from previous timestep
@@ -791,7 +710,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [dsnowprv]
   standard_name = snowfall_rate_on_previous_timestep
   long_name = snow precipitation rate from previous timestep
@@ -800,7 +718,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [dgraupelprv]
   standard_name = graupel_precipitation_rate_on_previous_timestep
   long_name = graupel precipitation rate from previous timestep
@@ -809,7 +726,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [dtp]
   standard_name = timestep_for_physics
   long_name = physics timestep
@@ -818,16 +734,74 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
+[dfi_radar_max_intervals]
+  standard_name = maximum_number_of_radar_derived_temperature_or_convection_suppression_intervals
+  long_name = maximum allowed number of time ranges with radar-derived microphysics temperature tendencies or radar-derived convection suppression
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[num_dfi_radar]
+  standard_name = number_of_radar_derived_temperature_or_convection_suppression_intervals
+  long_name = number of time ranges with radar-derived microphysics temperature tendencies or radar-derived convection suppression
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[fh_dfi_radar]
+  standard_name = forecast_lead_times_bounding_radar_derived_temperature_or_convection_suppression_intervals
+  long_name = forecast lead times bounding radar derived temperature or convection suppression intervals
+  units = h
+  dimensions = (maximum_number_of_radar_derived_temperature_or_convection_suppression_intervals_plus_one)
+  type = real
+  kind = kind_phys
+  intent = in
+[ix_dfi_radar]
+  standard_name = indices_with_radar_derived_temperature_or_convection_suppression_data
+  long_name = indices with radar derived temperature or convection suppression data
+  units = index
+  dimensions = (maximum_number_of_radar_derived_temperature_or_convection_suppression_intervals)
+  type = integer
+  intent = in
+[dfi_radar_tten]
+  standard_name = radar_derived_microphysics_temperature_tendency
+  long_name = radar-derived microphysics temperature tendency
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_radar_derived_temperature_or_convection_suppression_intervals)
+  type = real
+  kind = kind_phys
+  intent = in
+[fhour]
+  standard_name = forecast_time
+  long_name = current forecast time
+  units = h
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[radar_tten_limits]
+  standard_name = allowed_bounds_of_radar_prescribed_tendencies
+  long_name = allowed bounds of prescribed microphysics temperature tendencies
+  units = K s-1
+  dimensions = (2)
+  type = real
+  kind = kind_phys
+  intent = in
+[index_of_process_dfi_radar]
+  standard_name = index_of_radar_derived_microphysics_temperature_forcing_in_cumulative_change_index
+  long_name = index of radar-derived microphysics temperature forcing in second dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
 [dtend]
   standard_name = cumulative_change_of_state_variables
   long_name = diagnostic tendencies for state variables
-  units = various
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_cumulative_change_processes)
+  units = mixed
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,cumulative_change_of_state_variables_outer_index_max)
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [dtidx]
   standard_name = cumulative_change_of_state_variables_outer_index
   long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
@@ -835,7 +809,6 @@
   dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
   type = integer
   intent = in
-  optional = F
 [index_of_temperature]
   standard_name = index_of_temperature_in_cumulative_change_index
   long_name = index of temperature in first dimension of array cumulative change index
@@ -843,7 +816,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [index_of_process_mp]
   standard_name = index_of_microphysics_process_process_in_cumulative_change_index
   long_name = index of microphysics transport process in second dimension of array cumulative change index
@@ -851,7 +823,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ldiag3d]
   standard_name = flag_for_diagnostics_3D
   long_name = flag for 3d diagnostic fields
@@ -859,7 +830,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [qdiag3d]
   standard_name = flag_for_tracer_diagnostics_3D
   long_name = logical flag for 3D tracer diagnostics
@@ -867,7 +837,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [lssav]
   standard_name = flag_for_diagnostics
   long_name = logical flag for storing diagnostics
@@ -875,7 +844,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -884,13 +852,11 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 

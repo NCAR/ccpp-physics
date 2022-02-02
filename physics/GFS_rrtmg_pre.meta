@@ -16,7 +16,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [levs]
   standard_name = vertical_layer_dimension
   long_name = number of vertical levels
@@ -24,7 +23,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [lm]
   standard_name = vertical_dimension_for_radiation
   long_name = number of vertical layers for radiation calculation
@@ -32,7 +30,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [lmk]
   standard_name = adjusted_vertical_layer_dimension_for_radiation
   long_name = number of vertical layers for radiation
@@ -40,7 +37,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [lmp]
   standard_name = adjusted_vertical_level_dimension_for_radiation
   long_name = number of vertical levels for radiation
@@ -48,7 +44,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [n_var_lndp]
   standard_name = number_of_perturbed_land_surface_variables
   long_name = number of land surface variables perturbed
@@ -56,7 +51,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [imfdeepcnv]
   standard_name = control_for_deep_convection_scheme
   long_name = flag for mass-flux deep convection scheme
@@ -64,7 +58,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [imfdeepcnv_gf]
   standard_name = identifier_for_grell_freitas_deep_convection
   long_name = flag for Grell-Freitas deep convection scheme
@@ -72,7 +65,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [me]
   standard_name = mpi_rank
   long_name = current MPI-rank
@@ -80,7 +72,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ncnd]
   standard_name = number_of_condensate_species
   long_name = number of cloud condensate types
@@ -88,7 +79,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ntrac]
   standard_name = number_of_tracers
   long_name = number of tracers
@@ -96,7 +86,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [num_p3d]
   standard_name = number_of_microphysics_variables_in_xyz_dimensioned_restart_array
   long_name = number of 3D arrays needed for microphysics
@@ -104,7 +93,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [npdf3d]
   standard_name = number_of_pdf_based_variables_in_xyz_dimensioned_restart_array
   long_name = number of 3d arrays associated with pdf based clouds/mp
@@ -112,7 +100,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ncnvcld3d]
   standard_name = number_of_convective_cloud_variables_in_xyz_dimensioned_restart_array
   long_name = number of convective 3d clouds fields
@@ -120,7 +107,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ntqv]
   standard_name = index_of_specific_humidity_in_tracer_concentration_array
   long_name = tracer index for water vapor (specific humidity)
@@ -128,7 +114,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ntcw]
   standard_name = index_of_cloud_liquid_water_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for cloud condensate (or liquid water)
@@ -136,7 +121,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ntiw]
   standard_name = index_of_cloud_ice_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for  ice water
@@ -144,7 +128,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ntlnc]
   standard_name = index_of_mass_number_concentration_of_cloud_droplets_in_tracer_concentration_array
   long_name = tracer index for liquid number concentration
@@ -152,7 +135,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ntinc]
   standard_name = index_of_mass_number_concentration_of_cloud_ice_in_tracer_concentration_array
   long_name = tracer index for ice    number concentration
@@ -160,7 +142,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ntrw]
   standard_name = index_of_rain_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for rain water
@@ -168,7 +149,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ntsw]
   standard_name = index_of_snow_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for snow water
@@ -176,7 +156,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ntgl]
   standard_name = index_of_graupel_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for graupel
@@ -184,7 +163,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ntwa]
   standard_name = index_of_mass_number_concentration_of_hygroscopic_aerosols_in_tracer_concentration_array
   long_name = tracer index for water friendly aerosol
@@ -192,7 +170,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ntoz]
   standard_name = index_of_ozone_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for ozone mixing ratio
@@ -200,7 +177,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ntclamt]
   standard_name = index_of_cloud_area_fraction_in_atmosphere_layer_in_tracer_concentration_array
   long_name = tracer index for cloud amount integer
@@ -208,7 +184,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [nleffr]
   standard_name = index_of_cloud_liquid_water_effective_radius_in_xyz_dimensioned_restart_array
   long_name = the index of cloud liquid water effective radius in phy_f3d
@@ -216,7 +191,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [nieffr]
   standard_name = index_of_cloud_ice_effective_radius_in_xyz_dimensioned_restart_array
   long_name = the index of ice effective radius in phy_f3d
@@ -224,7 +198,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [nseffr]
   standard_name = index_of_snow_effective_radius_in_xyz_dimensioned_restart_array
   long_name = the index of snow effective radius in phy_f3d
@@ -232,7 +205,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [lndp_type]
   standard_name = control_for_stochastic_land_surface_perturbation
   long_name = index for stochastic land surface perturbations type
@@ -240,7 +212,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [kdt]
   standard_name = index_of_timestep
   long_name = current forecast iteration
@@ -248,7 +219,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [imp_physics]
   standard_name = control_for_microphysics_scheme
   long_name = choice of microphysics scheme
@@ -256,7 +226,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [imp_physics_thompson]
   standard_name = identifier_for_thompson_microphysics_scheme
   long_name = choice of Thompson microphysics scheme
@@ -264,7 +233,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [imp_physics_gfdl]
   standard_name = identifier_for_gfdl_microphysics_scheme
   long_name = choice of GFDL microphysics scheme
@@ -272,7 +240,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [imp_physics_zhao_carr]
   standard_name = identifier_for_zhao_carr_microphysics_scheme
   long_name = choice of Zhao-Carr microphysics scheme
@@ -280,7 +247,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [imp_physics_zhao_carr_pdf]
   standard_name = identifier_for_zhao_carr_pdf_microphysics_scheme
   long_name = choice of Zhao-Carr microphysics scheme with PDF clouds
@@ -288,7 +254,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [imp_physics_mg]
   standard_name = identifier_for_morrison_gettelman_microphysics_scheme
   long_name = choice of Morrison-Gettelman microphysics scheme
@@ -296,7 +261,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [imp_physics_wsm6]
   standard_name = identifier_for_wsm6_microphysics_scheme
   long_name = choice of WSM6 microphysics scheme
@@ -304,7 +268,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [imp_physics_fer_hires]
   standard_name = identifier_for_fer_hires_microphysics_scheme
   long_name = choice of Ferrier-Aligo microphysics scheme
@@ -312,7 +275,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [julian]
   standard_name = forecast_julian_day
   long_name = julian day
@@ -321,7 +283,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [yearlen]
   standard_name = number_of_days_in_current_year
   long_name = number of days in a year
@@ -329,7 +290,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [lndp_var_list]
   standard_name = land_surface_perturbation_variables
   long_name = variables to be perturbed for landperts
@@ -338,7 +298,6 @@
   type = character
   kind = len=3
   intent = in
-  optional = F
 [lsswr]
   standard_name = flag_for_calling_shortwave_radiation
   long_name = logical flags for sw radiation calls
@@ -346,7 +305,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [lslwr]
   standard_name = flag_for_calling_longwave_radiation
   long_name = logical flags for lw radiation calls
@@ -354,7 +312,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [ltaerosol]
   standard_name = flag_for_aerosol_physics
   long_name = flag for aerosol physics
@@ -362,7 +319,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [lgfdlmprad]
   standard_name = flag_for_GFDL_microphysics_radiation_interaction
   long_name = flag for GFDL microphysics-radiation interaction
@@ -370,7 +326,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [uni_cld]
   standard_name = flag_for_shoc_cloud_area_fraction_for_radiation
   long_name = flag for uni_cld
@@ -378,7 +333,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [effr_in]
   standard_name = flag_for_cloud_effective_radii
   long_name = flag for cloud effective radii calculations in GFDL microphysics
@@ -386,7 +340,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [do_mynnedmf]
   standard_name = flag_for_mellor_yamada_nakanishi_niino_pbl_scheme
   long_name = flag to activate MYNN-EDMF
@@ -394,7 +347,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [lmfshal]
   standard_name = flag_for_cloud_area_fraction_option_for_radiation
   long_name = flag for lmfshal
@@ -402,7 +354,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [lmfdeep2]
   standard_name = flag_for_scale_aware_mass_flux_deep_convection_for_radiation
   long_name = flag for some scale-aware mass-flux convection scheme active
@@ -410,7 +361,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [fhswr]
   standard_name = period_of_shortwave_radiation_calls
   long_name = frequency for shortwave radiation
@@ -419,7 +369,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [fhlwr]
   standard_name = period_of_longwave_radiation_calls
   long_name = frequency for longwave radiation
@@ -428,7 +377,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [solhr]
   standard_name = forecast_utc_hour
   long_name = time in hours after 00z at the current timestep
@@ -437,7 +385,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [sup]
   standard_name = tunable_parameter_for_ice_supersaturation
   long_name = ice supersaturation parameter for PDF clouds
@@ -446,7 +393,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [con_eps]
   standard_name = ratio_of_dry_air_to_water_vapor_gas_constants
   long_name = rd/rv
@@ -455,7 +401,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [epsm1]
   standard_name = ratio_of_dry_air_to_water_vapor_gas_constants_minus_one
   long_name = (rd/rv) - 1
@@ -464,7 +409,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [fvirt]
   standard_name = ratio_of_vapor_to_dry_air_gas_constants_minus_one
   long_name = (rv/rd) - 1 (rv = ideal gas constant for water vapor)
@@ -473,7 +417,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [rog]
   standard_name = ratio_of_gas_constant_dry_air_to_gravitational_acceleration
   long_name = (rd/g)
@@ -482,7 +425,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [rocp]
   standard_name = ratio_of_gas_constant_dry_air_to_specific_heat_of_dry_air_at_constant_pressure
   long_name = (rd/cp)
@@ -491,7 +433,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [con_rd]
   standard_name = gas_constant_of_dry_air
   long_name = ideal gas constant for dry air
@@ -500,7 +441,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [xlat_d]
   standard_name = latitude_in_degree
   long_name = latitude in degree north
@@ -509,7 +449,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [xlat]
   standard_name = latitude
   long_name = latitude
@@ -518,7 +457,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [xlon]
   standard_name = longitude
   long_name = longitude
@@ -527,7 +465,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [coslat]
   standard_name = cosine_of_latitude
   long_name = cosine of latitude
@@ -536,7 +473,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [sinlat]
   standard_name = sine_of_latitude
   long_name = sine of latitude
@@ -545,7 +481,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [tsfc]
   standard_name = surface_skin_temperature
   long_name = surface skin temperature
@@ -554,7 +489,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [slmsk]
   standard_name = area_type
   long_name = landmask: sea/land/ice=0/1/2
@@ -563,7 +497,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [prsi]
   standard_name = air_pressure_at_interface
   long_name = air pressure at model layer interfaces
@@ -572,7 +505,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [prsl]
   standard_name = air_pressure
   long_name = mean layer pressure
@@ -581,7 +513,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [prslk]
   standard_name = dimensionless_exner_function
   long_name = dimensionless Exner function at model layer centers
@@ -590,7 +521,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [tgrs]
   standard_name = air_temperature
   long_name = model layer mean temperature
@@ -599,7 +529,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [sfc_wts]
   standard_name = surface_stochastic_weights_from_coupled_process
   long_name = weights for stochastic surface physics perturbation
@@ -608,7 +537,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [mg_cld]
   standard_name = cloud_fraction_for_MG
   long_name = cloud fraction used by Morrison-Gettelman MP
@@ -617,7 +545,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [effrr_in]
   standard_name = effective_radius_of_stratiform_cloud_rain_particle
   long_name = effective radius of cloud rain particle in micrometers
@@ -626,7 +553,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [pert_clds]
   standard_name = flag_for_stochastic_cloud_fraction_perturbations
   long_name = flag for stochastic cloud fraction physics perturbations
@@ -634,7 +560,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [sppt_wts]
   standard_name = sppt_weights_from_coupled_process
   long_name = weights for stochastic sppt perturbation
@@ -643,16 +568,14 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [sppt_amp]
   standard_name = total_amplitude_of_sppt_perturbation
-  long_name = toal ampltidue of stochastic sppt perturbation
+  long_name = total ampltidue of stochastic sppt perturbation
   units = none
   dimensions = ()
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [cnvw_in]
   standard_name = convective_cloud_condensate_mixing_ratio
   long_name = convective cloud water mixing ratio in the phy_f3d array
@@ -661,7 +584,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [cnvc_in]
   standard_name = convective_cloud_area_fraction
   long_name = convective cloud cover in the phy_f3d array
@@ -670,7 +592,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [qgrs]
   standard_name = tracer_concentration
   long_name = model layer mean tracer concentration
@@ -679,7 +600,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [aer_nm]
   standard_name = mass_number_concentration_of_aerosol_from_gocart_climatology
   long_name = GOCART aerosol climatology number concentration
@@ -688,7 +608,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [dx]
   standard_name = characteristic_grid_lengthscale
   long_name = relative dx for the grid cell
@@ -697,7 +616,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [icloud]
   standard_name = control_for_cloud_area_fraction_option
   long_name = cloud effect to the optical depth and cloud fraction in radiation
@@ -705,7 +623,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [coszen]
   standard_name = cosine_of_solar_zenith_angle_for_daytime_points_on_radiation_timestep
   long_name = mean cos of zenith angle over rad call period
@@ -714,7 +631,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [coszdg]
   standard_name = cosine_of_solar_zenith_angle_on_radiation_timestep
   long_name = daytime mean cosz over rad call period
@@ -723,7 +639,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [effrl_inout]
   standard_name = effective_radius_of_stratiform_cloud_liquid_water_particle
   long_name = eff. radius of cloud liquid water particle in micrometer
@@ -732,7 +647,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [effri_inout]
   standard_name = effective_radius_of_stratiform_cloud_ice_particle
   long_name = eff. radius of cloud ice water particle in micrometer
@@ -741,7 +655,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [effrs_inout]
   standard_name = effective_radius_of_stratiform_cloud_snow_particle
   long_name = effective radius of cloud snow particle in micrometers
@@ -750,7 +663,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [clouds1]
   standard_name = total_cloud_fraction
   long_name = layer total cloud fraction
@@ -759,7 +671,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [clouds2]
   standard_name = cloud_liquid_water_path
   long_name = layer cloud liquid water path
@@ -768,7 +679,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [clouds3]
   standard_name = mean_effective_radius_for_liquid_cloud
   long_name = mean effective radius for liquid cloud
@@ -777,7 +687,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [clouds4]
   standard_name = cloud_ice_water_path
   long_name = layer cloud ice water path
@@ -786,7 +695,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [clouds5]
   standard_name = mean_effective_radius_for_ice_cloud
   long_name = mean effective radius for ice cloud
@@ -795,7 +703,14 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
+[qci_conv]
+  standard_name = convective_cloud_condesate_after_rainout
+  long_name = convective cloud condesate after rainout
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
 [kd]
   standard_name = vertical_index_difference_between_inout_and_local
   long_name = vertical index difference between in/out and local
@@ -803,7 +718,6 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 [kt]
   standard_name = vertical_index_difference_between_layer_and_upper_bound
   long_name = vertical index difference between layer and upper bound
@@ -811,7 +725,6 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 [kb]
   standard_name = vertical_index_difference_between_layer_and_lower_bound
   long_name = vertical index difference between layer and lower bound
@@ -819,7 +732,6 @@
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 [mtopa]
   standard_name = model_layer_number_at_cloud_top
   long_name = vertical indices for low, middle and high cloud tops
@@ -827,7 +739,6 @@
   dimensions = (horizontal_loop_extent,3)
   type = integer
   intent = out
-  optional = F
 [mbota]
   standard_name = model_layer_number_at_cloud_base
   long_name = vertical indices for low, middle and high cloud bases
@@ -835,7 +746,6 @@
   dimensions = (horizontal_loop_extent,3)
   type = integer
   intent = out
-  optional = F
 [raddt]
   standard_name = time_step_for_radiation
   long_name = radiation time step
@@ -844,7 +754,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [tsfg]
   standard_name = surface_ground_temperature_for_radiation
   long_name = surface ground temperature for radiation
@@ -853,7 +762,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [tsfa]
   standard_name = surface_air_temperature_for_radiation
   long_name = lowest model layer air temperature for radiation
@@ -862,7 +770,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [de_lgth]
   standard_name = cloud_decorrelation_length
   long_name = cloud decorrelation length
@@ -871,7 +778,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [alb1d]
   standard_name = surface_albedo_perturbation
   long_name = surface albedo perturbation
@@ -880,7 +786,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [delp]
   standard_name = layer_pressure_thickness_for_radiation
   long_name = layer pressure thickness on radiation levels
@@ -889,7 +794,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [dz]
   standard_name = layer_thickness_for_radiation
   long_name = layer thickness on radiation levels
@@ -898,7 +802,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [plvl]
   standard_name = air_pressure_at_interface_for_radiation_in_hPa
   long_name = air pressure at vertical interface for radiation calculation
@@ -907,7 +810,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [plyr]
   standard_name = air_pressure_at_layer_for_radiation_in_hPa
   long_name = air pressure at vertical layer for radiation calculation
@@ -916,7 +818,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [tlvl]
   standard_name = air_temperature_at_interface_for_radiation
   long_name = air temperature at vertical interface for radiation calculation
@@ -925,7 +826,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [tlyr]
   standard_name = air_temperature_at_layer_for_radiation
   long_name = air temperature at vertical layer for radiation calculation
@@ -934,7 +834,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [qlyr]
   standard_name = water_vapor_specific_humidity_at_layer_for_radiation
   long_name = water vapor specific humidity at vertical layer for radiation calculation
@@ -943,7 +842,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [olyr]
   standard_name = ozone_concentration_at_layer_for_radiation
   long_name = ozone concentration
@@ -952,7 +850,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [gasvmr_co2]
   standard_name = volume_mixing_ratio_of_co2
   long_name = CO2 volume mixing ratio
@@ -961,7 +858,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [gasvmr_n2o]
   standard_name = volume_mixing_ratio_of_n2o
   long_name = N2O volume mixing ratio
@@ -970,7 +866,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [gasvmr_ch4]
   standard_name = volume_mixing_ratio_of_ch4
   long_name = CH4 volume mixing ratio
@@ -979,7 +874,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [gasvmr_o2]
   standard_name = volume_mixing_ratio_of_o2
   long_name = O2 volume mixing ratio
@@ -988,7 +882,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [gasvmr_co]
   standard_name = volume_mixing_ratio_of_co
   long_name = CO volume mixing ratio
@@ -997,7 +890,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [gasvmr_cfc11]
   standard_name = volume_mixing_ratio_of_cfc11
   long_name = CFC11 volume mixing ratio
@@ -1006,7 +898,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [gasvmr_cfc12]
   standard_name = volume_mixing_ratio_of_cfc12
   long_name = CFC12 volume mixing ratio
@@ -1015,7 +906,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [gasvmr_cfc22]
   standard_name = volume_mixing_ratio_of_cfc22
   long_name = CFC22 volume mixing ratio
@@ -1024,7 +914,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [gasvmr_ccl4]
   standard_name = volume_mixing_ratio_of_ccl4
   long_name = CCL4 volume mixing ratio
@@ -1033,7 +922,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [gasvmr_cfc113]
   standard_name = volume_mixing_ratio_of_cfc113
   long_name = CFC113 volume mixing ratio
@@ -1042,7 +930,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [aerodp]
   standard_name = atmosphere_optical_thickness_due_to_ambient_aerosol_particles
   long_name = vertical integrated optical depth for various aerosol species
@@ -1051,7 +938,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [clouds6]
   standard_name = cloud_rain_water_path
   long_name = cloud rain water path
@@ -1060,7 +946,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [clouds7]
   standard_name = mean_effective_radius_for_rain_drop
   long_name = mean effective radius for rain drop
@@ -1069,7 +954,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [clouds8]
   standard_name = cloud_snow_water_path
   long_name = cloud snow water path
@@ -1078,7 +962,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [clouds9]
   standard_name = mean_effective_radius_for_snow_flake
   long_name = mean effective radius for snow flake
@@ -1087,7 +970,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [cldsa]
   standard_name = cloud_area_fraction_for_radiation
   long_name = fraction of clouds for low, middle,high, total and BL
@@ -1096,7 +978,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [cldfra]
   standard_name = instantaneous_3d_cloud_fraction
   long_name = instantaneous 3D cloud fraction for all MPs
@@ -1105,7 +986,46 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
+[cldfra2d]
+  standard_name = max_in_column_cloud_fraction
+  long_name = instantaneous 2D (max-in-column) cloud fraction
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[lwp_ex]
+  standard_name = liq_water_path_from_microphysics
+  long_name = total liquid water path from explicit microphysics
+  units = kg m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[iwp_ex]
+  standard_name = ice_water_path_from_microphysics
+  long_name = total ice water path from explicit microphysics
+  units = kg m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[lwp_fc]
+  standard_name = liq_water_path_from_cloud_fraction
+  long_name = total liquid water path from cloud fraction scheme
+  units = kg m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[iwp_fc]
+  standard_name = ice_water_path_from_cloud_fraction
+  long_name = total ice water path from cloud fraction scheme
+  units = kg m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
 [faersw1]
   standard_name = aerosol_optical_depth_for_shortwave_bands_01_16
   long_name = aerosol optical depth for shortwave bands 01-16
@@ -1114,7 +1034,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [faersw2]
   standard_name = aerosol_single_scattering_albedo_for_shortwave_bands_01_16
   long_name = aerosol single scattering albedo for shortwave bands 01-16
@@ -1123,7 +1042,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [faersw3]
   standard_name = aerosol_asymmetry_parameter_for_shortwave_bands_01_16
   long_name = aerosol asymmetry parameter for shortwave bands 01-16
@@ -1132,7 +1050,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [faerlw1]
   standard_name = aerosol_optical_depth_for_longwave_bands_01_16
   long_name = aerosol optical depth for longwave bands 01-16
@@ -1141,7 +1058,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [faerlw2]
   standard_name = aerosol_single_scattering_albedo_for_longwave_bands_01_16
   long_name = aerosol single scattering albedo for longwave bands 01-16
@@ -1150,7 +1066,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [faerlw3]
   standard_name = aerosol_asymmetry_parameter_for_longwave_bands_01_16
   long_name = aerosol asymmetry parameter for longwave bands 01-16
@@ -1159,7 +1074,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [alpha]
   standard_name = cloud_overlap_decorrelation_parameter
   long_name = cloud overlap decorrelation parameter
@@ -1168,7 +1082,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -1177,12 +1090,10 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out
-  optional = F

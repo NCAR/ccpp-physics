@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = rrtmgp_lw_pre
   type = scheme
-  dependencies = iounitdef.f,machine.F,physparam.f
+  dependencies = iounitdef.f,machine.F
 
 ########################################################################
 [ccpp-arg-table]
@@ -14,7 +14,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [semis]
   standard_name = surface_longwave_emissivity
   long_name = surface lw emissivity in fraction
@@ -23,7 +22,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [sfc_emiss_byband]
   standard_name = surface_emissivity_in_each_RRTMGP_LW_band
   long_name = surface emissivity in each RRTMGP LW band
@@ -32,7 +30,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -41,12 +38,10 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out
-  optional = F

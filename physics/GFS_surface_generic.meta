@@ -14,7 +14,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [im]
   standard_name = horizontal_dimension
   long_name = horizontal dimension
@@ -22,7 +21,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [slmsk]
   standard_name = area_type
   long_name = landmask: sea/land/ice=0/1/2
@@ -31,7 +29,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [isot]
   standard_name = control_for_soil_type_dataset
   long_name = soil type dataset choice
@@ -39,7 +36,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ivegsrc]
   standard_name = control_for_vegetation_dataset
   long_name = land use dataset choice
@@ -47,7 +43,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [stype]
   standard_name = soil_type_classification
   long_name = soil type for lsm
@@ -55,7 +50,6 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = inout
-  optional = F
 [vtype]
   standard_name = vegetation_type_classification
   long_name = vegetation type for lsm
@@ -63,7 +57,6 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = inout
-  optional = F
 [slope]
   standard_name = surface_slope_classification
   long_name = sfc slope type for lsm
@@ -71,7 +64,6 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = inout
-  optional = F
 [stype_save]
   standard_name = soil_type_classification_save
   long_name = soil type for lsm save
@@ -79,7 +71,6 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = out
-  optional = F
 [vtype_save]
   standard_name = vegetation_type_classification_save
   long_name = vegetation type for lsm save
@@ -87,7 +78,6 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = out
-  optional = F
 [slope_save]
   standard_name = surface_slope_classification_save
   long_name = sfc slope type for lsm save
@@ -95,7 +85,6 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = out
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -104,15 +93,13 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 
 ########################################################################
 [ccpp-arg-table]
@@ -125,7 +112,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [im]
   standard_name = horizontal_loop_extent
   long_name = horizontal loop extent
@@ -133,7 +119,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [levs]
   standard_name = vertical_layer_dimension
   long_name = number of vertical levels
@@ -141,7 +126,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [vfrac]
   standard_name = vegetation_area_fraction
   long_name = areal fractional cover of green vegetation
@@ -150,7 +134,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [islmsk]
   standard_name = sea_land_ice_mask
   long_name = landmask: sea/land/ice=0/1/2
@@ -158,7 +141,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
-  optional = F
 [isot]
   standard_name = control_for_soil_type_dataset
   long_name = soil type dataset choice
@@ -166,7 +148,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ivegsrc]
   standard_name = control_for_vegetation_dataset
   long_name = land use dataset choice
@@ -174,7 +155,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [stype]
   standard_name = soil_type_classification
   long_name = soil type for lsm
@@ -182,7 +162,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = inout
-  optional = F
 [vtype]
   standard_name = vegetation_type_classification
   long_name = vegetation type for lsm
@@ -190,7 +169,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = inout
-  optional = F
 [slope]
   standard_name = surface_slope_classification
   long_name = sfc slope type for lsm
@@ -198,7 +176,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = inout
-  optional = F
 [vtype_save]
   standard_name = vegetation_type_classification_save
   long_name = vegetation type for lsm save
@@ -206,7 +183,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = out
-  optional = F
 [stype_save]
   standard_name = soil_type_classification_save
   long_name = soil type for lsm save
@@ -214,7 +190,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = out
-  optional = F
 [slope_save]
   standard_name = surface_slope_classification_save
   long_name = sfc slope type for lsm save
@@ -222,7 +197,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = out
-  optional = F
 [prsik_1]
   standard_name = surface_dimensionless_exner_function
   long_name = dimensionless Exner function at lowest model interface
@@ -231,7 +205,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [prslk_1]
   standard_name = dimensionless_exner_function_at_surface_adjacent_layer
   long_name = dimensionless Exner function at lowest model layer
@@ -240,7 +213,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [tsfc]
   standard_name = surface_skin_temperature
   long_name = surface skin temperature
@@ -249,7 +221,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [phil]
   standard_name = geopotential
   long_name = geopotential at model layer centers
@@ -258,7 +229,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [con_g]
   standard_name = gravitational_acceleration
   long_name = gravitational acceleration
@@ -267,7 +237,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [sigmaf]
   standard_name = bounded_vegetation_area_fraction
   long_name = areal fractional cover of green vegetation bounded on the bottom
@@ -276,7 +245,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [work3]
   standard_name = ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer
   long_name = Exner function ratio bt midlayer and interface at 1st layer
@@ -285,7 +253,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [zlvl]
   standard_name = height_above_ground_at_lowest_model_layer
   long_name = layer 1 height above ground (not MSL)
@@ -294,7 +261,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [drain_cpl]
   standard_name = tendency_of_lwe_thickness_of_rain_amount_on_dynamics_timestep_for_coupling
   long_name = change in rain_cpl (coupling_type)
@@ -303,7 +269,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [dsnow_cpl]
   standard_name = tendency_of_lwe_thickness_of_snowfall_amount_on_dynamics_timestep_for_coupling
   long_name = change in show_cpl (coupling_type)
@@ -312,7 +277,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [rain_cpl]
   standard_name = cumulative_lwe_thickness_of_precipitation_amount_for_coupling
   long_name = total rain precipitation
@@ -321,7 +285,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [snow_cpl]
   standard_name = cumulative_lwe_thickness_of_snow_amount_for_coupling
   long_name = total snow precipitation
@@ -330,7 +293,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [lndp_type]
   standard_name = control_for_stochastic_land_surface_perturbation
   long_name = index for stochastic land surface perturbations type
@@ -338,7 +300,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [n_var_lndp]
   standard_name = number_of_perturbed_land_surface_variables
   long_name = number of land surface variables perturbed
@@ -346,7 +307,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [sfc_wts]
   standard_name = surface_stochastic_weights_from_coupled_process
   long_name = weights for stochastic surface physics perturbation
@@ -355,7 +315,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [lndp_var_list]
   standard_name = land_surface_perturbation_variables
   long_name = variables to be perturbed for landperts
@@ -364,7 +323,6 @@
   type = character
   kind = len=3
   intent = in 
-  optional = F
 [lndp_prt_list]
   standard_name =land_surface_perturbation_magnitudes
   long_name = magnitude of perturbations for landperts
@@ -373,7 +331,6 @@
   type = real
   kind = kind_phys
   intent = in 
-  optional = F
 [z01d]
   standard_name = perturbation_of_momentum_roughness_length
   long_name = perturbation of momentum roughness length
@@ -382,7 +339,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [zt1d]
   standard_name = perturbation_of_heat_to_momentum_roughness_length_ratio
   long_name = perturbation of heat to momentum roughness length ratio
@@ -391,7 +347,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [bexp1d]
   standard_name = perturbation_of_soil_type_b_parameter
   long_name = perturbation of soil type "b" parameter
@@ -400,7 +355,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [xlai1d]
   standard_name = perturbation_of_leaf_area_index
   long_name = perturbation of leaf area index
@@ -409,7 +363,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [vegf1d]
   standard_name = perturbation_of_vegetation_fraction
   long_name = perturbation of vegetation fraction
@@ -418,7 +371,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [lndp_vgf]
   standard_name = magnitude_of_perturbation_of_vegetation_fraction
   long_name = magnitude of perturbation of vegetation fraction
@@ -427,7 +379,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [cplflx]
   standard_name = flag_for_surface_flux_coupling
   long_name = flag controlling cplflx collection (default off)
@@ -435,7 +386,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [flag_cice]
   standard_name = flag_for_cice
   long_name = flag for cice
@@ -443,7 +393,6 @@
   dimensions = (horizontal_loop_extent)
   type = logical
   intent = inout
-  optional = F
 [islmsk_cice]
   standard_name = sea_land_ice_mask_cice
   long_name = sea/land/ice mask cice (=0/1/2)
@@ -451,7 +400,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = out
-  optional = F
 [slimskin_cpl]
   standard_name = area_type_from_coupled_process
   long_name = sea/land/ice mask input (=0/1/2)
@@ -460,7 +408,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [wind]
   standard_name = wind_speed_at_lowest_model_layer
   long_name = wind speed at lowest model level
@@ -469,7 +416,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [u1]
   standard_name = x_wind_at_surface_adjacent_layer
   long_name = zonal wind at lowest model layer
@@ -478,7 +424,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [v1]
   standard_name = y_wind_at_surface_adjacent_layer
   long_name = meridional wind at lowest model layer
@@ -487,7 +432,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [cnvwind]
   standard_name = enhancement_to_wind_speed_at_surface_adjacent_layer_due_to_convection
   long_name = surface wind enhancement due to convection
@@ -496,7 +440,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [smcwlt2]
   standard_name = volume_fraction_of_condensed_water_in_soil_at_wilting_point
   long_name = wilting point (volumetric)
@@ -505,7 +448,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [smcref2]
   standard_name = threshold_volume_fraction_of_condensed_water_in_soil
   long_name = soil moisture threshold (volumetric)
@@ -514,7 +456,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -523,15 +464,13 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 
 ########################################################################
 [ccpp-table-properties]
@@ -550,7 +489,6 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = out
-  optional = F
 [stype]
   standard_name = soil_type_classification
   long_name = soil type for lsm
@@ -558,7 +496,6 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = out
-  optional = F
 [slope]
   standard_name = surface_slope_classification
   long_name = sfc slope type for lsm
@@ -566,7 +503,6 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = out
-  optional = F
 [vtype_save]
   standard_name = vegetation_type_classification_save
   long_name = vegetation type for lsm save
@@ -574,7 +510,6 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = in
-  optional = F
 [stype_save]
   standard_name = soil_type_classification_save
   long_name = soil type for lsm save
@@ -582,7 +517,6 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = in
-  optional = F
 [slope_save]
   standard_name = surface_slope_classification_save
   long_name = sfc slope type for lsm save
@@ -590,7 +524,6 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -599,15 +532,13 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 
 ########################################################################
 [ccpp-arg-table]
@@ -620,7 +551,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [cplflx]
   standard_name = flag_for_surface_flux_coupling
   long_name = flag controlling cplflx collection (default off)
@@ -628,7 +558,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [cplchm]
   standard_name = flag_for_chemistry_coupling
   long_name = flag controlling cplchm collection (default off)
@@ -636,7 +565,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [cplwav]
   standard_name = flag_for_ocean_wave_coupling
   long_name = flag controlling cplwav collection (default off)
@@ -644,7 +572,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [lssav]
   standard_name = flag_for_diagnostics
   long_name = logical flag for storing diagnostics
@@ -652,7 +579,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [dry]
   standard_name = flag_nonzero_land_surface_fraction
   long_name = flag indicating presence of some land surface area fraction
@@ -660,7 +586,6 @@
   dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
-  optional = F
 [icy]
   standard_name = flag_nonzero_sea_ice_surface_fraction
   long_name = flag indicating presence of some sea ice surface area fraction
@@ -668,7 +593,6 @@
   dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
-  optional = F
 [wet]
   standard_name = flag_nonzero_wet_surface_fraction
   long_name = flag indicating presence of some ocean or lake surface area fraction
@@ -676,7 +600,20 @@
   dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
-  optional = F
+[lsm]
+  standard_name = control_for_land_surface_scheme
+  long_name = flag for land surface model
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[lsm_noahmp]
+  standard_name = identifier_for_noahmp_land_surface_scheme
+  long_name = flag for NOAH MP land surface model
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
 [dtf]
   standard_name = timestep_for_dynamics
   long_name = dynamics timestep
@@ -685,7 +622,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [ep1d]
   standard_name = surface_upward_potential_latent_heat_flux
   long_name = surface upward potential latent heat flux
@@ -694,7 +630,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [gflx]
   standard_name = upward_heat_flux_in_soil
   long_name = upward soil heat flux
@@ -703,7 +638,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [tgrs_1]
   standard_name = air_temperature_at_surface_adjacent_layer
   long_name = mean temperature at lowest model layer
@@ -712,7 +646,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [qgrs_1]
   standard_name = specific_humidity_at_surface_adjacent_layer
   long_name = specific humidity at lowest model layer
@@ -721,7 +654,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [ugrs_1]
   standard_name = x_wind_at_surface_adjacent_layer
   long_name = zonal wind at lowest model layer
@@ -730,7 +662,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [vgrs_1]
   standard_name = y_wind_at_surface_adjacent_layer
   long_name = meridional wind at lowest model layer
@@ -739,7 +670,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [adjsfcdlw]
   standard_name = surface_downwelling_longwave_flux
   long_name = surface downwelling longwave flux at current time
@@ -748,7 +678,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [adjsfcdsw]
   standard_name = surface_downwelling_shortwave_flux
   long_name = surface downwelling shortwave flux at current time
@@ -757,7 +686,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [adjnirbmd]
   standard_name = surface_downwelling_direct_near_infrared_shortwave_flux
   long_name = surface downwelling beam near-infrared shortwave flux at current time
@@ -766,7 +694,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [adjnirdfd]
   standard_name = surface_downwelling_diffuse_near_infrared_shortwave_flux
   long_name = surface downwelling diffuse near-infrared shortwave flux at current time
@@ -775,7 +702,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [adjvisbmd]
   standard_name = surface_downwelling_direct_ultraviolet_and_visible_shortwave_flux
   long_name = surface downwelling beam ultraviolet plus visible shortwave flux at current time
@@ -784,7 +710,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [adjvisdfd]
   standard_name = surface_downwelling_diffuse_ultraviolet_and_visible_shortwave_flux
   long_name = surface downwelling diffuse ultraviolet plus visible shortwave flux at current time
@@ -793,7 +718,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [adjsfculw]
   standard_name = surface_upwelling_longwave_flux
   long_name = surface upwelling longwave flux at current time
@@ -802,7 +726,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [adjsfculw_wat]
   standard_name = surface_upwelling_longwave_flux_over_water
   long_name = surface upwelling longwave flux at current time over water
@@ -811,7 +734,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [adjnirbmu]
   standard_name = surface_upwelling_direct_near_infrared_shortwave_flux
   long_name = surface upwelling beam near-infrared shortwave flux at current time
@@ -820,7 +742,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [adjnirdfu]
   standard_name = surface_upwelling_diffuse_near_infrared_shortwave_flux
   long_name = surface upwelling diffuse near-infrared shortwave flux at current time
@@ -829,7 +750,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [adjvisbmu]
   standard_name = surface_upwelling_direct_ultraviolet_and_visible_shortwave_flux
   long_name = surface upwelling beam ultraviolet plus visible shortwave flux at current time
@@ -838,7 +758,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [adjvisdfu]
   standard_name = surface_upwelling_diffuse_ultraviolet_and_visible_shortwave_flux
   long_name = surface upwelling diffuse ultraviolet plus visible shortwave flux at current time
@@ -847,7 +766,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [t2m]
   standard_name = air_temperature_at_2m
   long_name = 2 meter temperature
@@ -856,7 +774,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [q2m]
   standard_name = specific_humidity_at_2m
   long_name = 2 meter specific humidity
@@ -865,7 +782,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [u10m]
   standard_name = x_wind_at_10m
   long_name = 10 meter u wind speed
@@ -874,7 +790,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [v10m]
   standard_name = y_wind_at_10m
   long_name = 10 meter v wind speed
@@ -883,7 +798,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [tsfc]
   standard_name = surface_skin_temperature
   long_name = surface skin temperature
@@ -892,7 +806,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [tsfc_wat]
   standard_name = surface_skin_temperature_over_water
   long_name = surface skin temperature over water
@@ -901,7 +814,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [pgr]
   standard_name = surface_air_pressure
   long_name = surface pressure
@@ -910,7 +822,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [xcosz]
   standard_name = instantaneous_cosine_of_zenith_angle
   long_name = cosine of zenith angle at current time
@@ -919,7 +830,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [evbs]
   standard_name = soil_upward_latent_heat_flux
   long_name = soil upward latent heat flux
@@ -928,7 +838,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [evcw]
   standard_name = canopy_upward_latent_heat_flux
   long_name = canopy upward latent heat flux
@@ -937,7 +846,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [trans]
   standard_name = transpiration_flux
   long_name = total plant transpiration rate
@@ -946,7 +854,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [sbsno]
   standard_name = snow_deposition_sublimation_upward_latent_heat_flux
   long_name = latent heat flux from snow depo/subl
@@ -955,7 +862,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [snowc]
   standard_name = surface_snow_area_fraction
   long_name = surface snow area fraction
@@ -964,7 +870,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [snohf]
   standard_name = snow_freezing_rain_upward_latent_heat_flux
   long_name = latent heat flux due to snow and frz rain
@@ -973,7 +878,22 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
+[pah]
+  standard_name = total_precipitation_advected_heat
+  long_name = precipitation advected heat - total
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[pahi]
+  standard_name = instantaneous_total_precipitation_advected_heat
+  long_name = instantaneous precipitation advected heat - total
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
 [epi]
   standard_name = instantaneous_surface_potential_evaporation
   long_name = instantaneous sfc potential evaporation
@@ -982,7 +902,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [gfluxi]
   standard_name = instantaneous_surface_ground_heat_flux
   long_name = instantaneous sfc ground heat flux
@@ -991,7 +910,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [t1]
   standard_name = air_temperature_at_lowest_model_layer_for_diag
   long_name = layer 1 temperature for diag
@@ -1000,7 +918,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [q1]
   standard_name = water_vapor_specific_humidity_at_lowest_model_layer_for_diag
   long_name = layer 1 specific humidity for diag
@@ -1009,7 +926,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [u1]
   standard_name = x_wind_at_lowest_model_layer_for_diag
   long_name = layer 1 x wind for diag
@@ -1018,7 +934,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [v1]
   standard_name = y_wind_at_lowest_model_layer_for_diag
   long_name = layer 1 y wind for diag
@@ -1027,7 +942,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [dlwsfci_cpl]
   standard_name = surface_downwelling_longwave_flux_for_coupling
   long_name = instantaneous sfc downward lw flux
@@ -1036,7 +950,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [dswsfci_cpl]
   standard_name = surface_downwelling_shortwave_flux_for_coupling
   long_name = instantaneous sfc downward sw flux
@@ -1045,7 +958,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [dlwsfc_cpl]
   standard_name = cumulative_surface_downwelling_longwave_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative sfc downward lw flux mulitplied by timestep
@@ -1054,7 +966,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [dswsfc_cpl]
   standard_name = cumulative_surface_downwelling_shortwave_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative sfc downward sw flux multiplied by timestep
@@ -1063,7 +974,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [dnirbmi_cpl]
   standard_name = surface_downwelling_direct_nir_shortwave_flux_for_coupling
   long_name = instantaneous sfc nir beam downward sw flux
@@ -1072,7 +982,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [dnirdfi_cpl]
   standard_name = surface_downwelling_diffuse_nir_shortwave_flux_for_coupling
   long_name = instantaneous sfc nir diff downward sw flux
@@ -1081,7 +990,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [dvisbmi_cpl]
   standard_name = surface_downwelling_direct_uv_and_vis_shortwave_flux_for_coupling
   long_name = instantaneous sfc uv+vis beam downward sw flux
@@ -1090,7 +998,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [dvisdfi_cpl]
   standard_name = surface_downwelling_diffuse_uv_and_vis_shortwave_flux_for_coupling
   long_name = instantaneous sfc uv+vis diff downward sw flux
@@ -1099,7 +1006,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [dnirbm_cpl]
   standard_name = cumulative_surface_downwelling_direct_nir_shortwave_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative sfc nir beam downward sw flux multiplied by timestep
@@ -1108,7 +1014,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [dnirdf_cpl]
   standard_name = cumulative_surface_downwelling_diffuse_nir_shortwave_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative sfc nir diff downward sw flux multiplied by timestep
@@ -1117,7 +1022,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [dvisbm_cpl]
   standard_name = cumulative_surface_downwelling_direct_uv_and_vis_shortwave_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative sfc uv+vis beam dnwd sw flux multiplied by timestep
@@ -1126,7 +1030,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [dvisdf_cpl]
   standard_name = cumulative_surface_downwelling_diffuse_uv_and_vis_shortwave_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative sfc uv+vis diff dnwd sw flux multiplied by timestep
@@ -1135,7 +1038,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [nlwsfci_cpl]
   standard_name = surface_net_downwelling_longwave_flux_for_coupling
   long_name = instantaneous net sfc downward lw flux
@@ -1144,7 +1046,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [nlwsfc_cpl]
   standard_name = cumulative_surface_net_downwelling_longwave_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative net downward lw flux multiplied by timestep
@@ -1153,7 +1054,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [t2mi_cpl]
   standard_name = temperature_at_2m_for_coupling
   long_name = instantaneous T2m
@@ -1162,7 +1062,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [q2mi_cpl]
   standard_name = specific_humidity_at_2m_for_coupling
   long_name = instantaneous Q2m
@@ -1171,7 +1070,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [u10mi_cpl]
   standard_name = x_wind_at_10m_for_coupling
   long_name = instantaneous U10m
@@ -1180,7 +1078,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [v10mi_cpl]
   standard_name = y_wind_at_10m_for_coupling
   long_name = instantaneous V10m
@@ -1189,7 +1086,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [tsfci_cpl]
   standard_name = surface_skin_temperature_for_coupling
   long_name = instantaneous sfc temperature
@@ -1198,7 +1094,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [psurfi_cpl]
   standard_name = surface_air_pressure_for_coupling
   long_name = instantaneous sfc pressure
@@ -1207,7 +1102,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [nnirbmi_cpl]
   standard_name = surface_net_downwelling_direct_nir_shortwave_flux_for_coupling
   long_name = instantaneous net nir beam sfc downward sw flux
@@ -1216,7 +1110,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [nnirdfi_cpl]
   standard_name = surface_net_downwelling_diffuse_nir_shortwave_flux_for_coupling
   long_name = instantaneous net nir diff sfc downward sw flux
@@ -1225,7 +1118,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [nvisbmi_cpl]
   standard_name = surface_net_downwelling_direct_uv_and_vis_shortwave_flux_for_coupling
   long_name = instantaneous net uv+vis beam downward sw flux
@@ -1234,7 +1126,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [nvisdfi_cpl]
   standard_name = surface_net_downwelling_diffuse_uv_and_vis_shortwave_flux_for_coupling
   long_name = instantaneous net uv+vis diff downward sw flux
@@ -1243,7 +1134,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [nswsfci_cpl]
   standard_name = surface_net_downwelling_shortwave_flux_for_coupling
   long_name = instantaneous net sfc downward sw flux
@@ -1252,7 +1142,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [nswsfc_cpl]
   standard_name = cumulative_surface_net_downwelling_shortwave_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative net downward sw flux multiplied by timestep
@@ -1261,7 +1150,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [nnirbm_cpl]
   standard_name = cumulative_surface_net_downwelling_direct_nir_shortwave_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative net nir beam downward sw flux multiplied by timestep
@@ -1270,7 +1158,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [nnirdf_cpl]
   standard_name = cumulative_surface_net_downwellling_diffuse_nir_shortwave_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative net nir diff downward sw flux multiplied by timestep
@@ -1279,7 +1166,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [nvisbm_cpl]
   standard_name = cumulative_surface_net_downwelling_direct_uv_and_vis_shortwave_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative net uv+vis beam downward sw rad flux multiplied by timestep
@@ -1288,7 +1174,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [nvisdf_cpl]
   standard_name = cumulative_surface_net_downwelling_diffuse_uv_and_vis_shortwave_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative net uv+vis diff downward sw rad flux multiplied by timestep
@@ -1297,7 +1182,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [gflux]
   standard_name = cumulative_surface_ground_heat_flux_multiplied_by_timestep
   long_name = cumulative groud conductive heat flux multiplied by timestep
@@ -1306,7 +1190,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [evbsa]
   standard_name = cumulative_soil_upward_latent_heat_flux_multiplied_by_timestep
   long_name = cumulative soil upward latent heat flux multiplied by timestep
@@ -1315,7 +1198,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [evcwa]
   standard_name = cumulative_canopy_upward_latent_heat_flu_multiplied_by_timestep
   long_name = cumulative canopy upward latent heat flux multiplied by timestep
@@ -1324,7 +1206,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [transa]
   standard_name = cumulative_transpiration_flux_multiplied_by_timestep
   long_name = cumulative total plant transpiration rate multiplied by timestep
@@ -1333,7 +1214,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [sbsnoa]
   standard_name = cumulative_snow_deposition_sublimation_upward_latent_heat_flux_multiplied_by_timestep
   long_name = cumulative latent heat flux from snow depo/subl multiplied by timestep
@@ -1342,7 +1222,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [snowca]
   standard_name = cumulative_surface_snow_area_fraction_multiplied_by_timestep
   long_name = cumulative surface snow area fraction multiplied by timestep
@@ -1351,7 +1230,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [snohfa]
   standard_name = cumulative_snow_freezing_rain_upward_latent_heat_flux_multiplied_by_timestep
   long_name = cumulative latent heat flux due to snow and frz rain multiplied by timestep
@@ -1360,7 +1238,14 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
+[paha]
+  standard_name = cumulative_precipitation_advected_heat_flux_multiplied_by_timestep
+  long_name = cumulative precipitation advected heat flux multiplied by timestep
+  units = W m-2 s
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
 [ep]
   standard_name = cumulative_surface_upward_potential_latent_heat_flux_multiplied_by_timestep
   long_name = cumulative surface upward potential latent heat flux multiplied by timestep
@@ -1369,7 +1254,38 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
+[ecan]
+  standard_name = evaporation_of_intercepted_water
+  long_name = evaporation of intercepted water
+  units = kg m-2 s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[etran]
+  standard_name = transpiration_rate
+  long_name = transpiration rate
+  units = kg m-2 s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[edir]
+  standard_name = soil_surface_evaporation_rate
+  long_name = soil surface evaporation rate
+  units = kg m-2 s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[waxy]
+  standard_name = water_storage_in_aquifer
+  long_name = water storage in aquifer
+  units = mm
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
 [runoff]
   standard_name = total_runoff
   long_name = total water runoff
@@ -1378,7 +1294,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [srunoff]
   standard_name = surface_runoff
   long_name = surface water runoff (from lsm)
@@ -1387,7 +1302,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [runof]
   standard_name = surface_runoff_flux
   long_name = surface runoff flux
@@ -1396,7 +1310,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [drain]
   standard_name = subsurface_runoff_flux
   long_name = subsurface runoff flux
@@ -1405,7 +1318,38 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
+[tecan]
+  standard_name = total_evaporation_of_intercepted_water
+  long_name = total evaporation of intercepted water
+  units = kg m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[tetran]
+  standard_name = total_transpiration_rate
+  long_name = total transpiration rate
+  units = kg m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[tedir]
+  standard_name = total_soil_surface_evaporation_rate
+  long_name = total soil surface evaporation rate
+  units = kg m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[twa]
+  standard_name = total_water_storage_in_aquifer
+  long_name = total water storage in aquifer
+  units = kg m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
 [lheatstrg]
   standard_name = flag_for_canopy_heat_storage_in_land_surface_scheme
   long_name = flag for canopy heat storage parameterization
@@ -1413,7 +1357,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [h0facu]
   standard_name = multiplicative_tuning_parameter_for_reduced_surface_heat_fluxes_due_to_canopy_heat_storage
   long_name = canopy heat storage factor for sensible heat flux in unstable surface layer
@@ -1422,7 +1365,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [h0facs]
   standard_name = multiplicative_tuning_parameter_for_reduced_latent_heat_flux_due_to_canopy_heat_storage
   long_name = canopy heat storage factor for sensible heat flux in stable surface layer
@@ -1431,7 +1373,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [hflx]
   standard_name = surface_upward_temperature_flux
   long_name = kinematic surface upward sensible heat flux
@@ -1440,7 +1381,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [evap]
   standard_name = surface_upward_specific_humidity_flux
   long_name = kinematic surface upward latent heat flux
@@ -1449,7 +1389,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [hflxq]
   standard_name = kinematic_surface_upward_sensible_heat_flux_reduced_by_surface_roughness_and_vegetation
   long_name = kinematic surface upward sensible heat flux reduced by surface roughness and vegetation
@@ -1458,7 +1397,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [zvfun]
   standard_name = function_of_surface_roughness_length_and_green_vegetation_fraction
   long_name = function of surface roughness length and green vegetation fraction
@@ -1467,7 +1405,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [hffac]
   standard_name = surface_upward_sensible_heat_flux_reduction_factor
   long_name = surface upward sensible heat flux reduction factor from canopy heat storage
@@ -1476,7 +1413,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [isot]
   standard_name = control_for_soil_type_dataset
   long_name = soil type dataset choice
@@ -1484,7 +1420,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ivegsrc]
   standard_name = control_for_vegetation_dataset
   long_name = land use dataset choice
@@ -1492,7 +1427,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [islmsk]
   standard_name = sea_land_ice_mask
   long_name = landmask: sea/land/ice=0/1/2
@@ -1500,7 +1434,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
-  optional = F
 [vtype]
   standard_name = vegetation_type_classification
   long_name = vegetation type for lsm
@@ -1508,7 +1441,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = out
-  optional = F
 [stype]
   standard_name = soil_type_classification
   long_name = soil type for lsm
@@ -1516,7 +1448,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = out
-  optional = F
 [slope]
   standard_name = surface_slope_classification
   long_name = sfc slope type for lsm
@@ -1524,7 +1455,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = out
-  optional = F
 [vtype_save]
   standard_name = vegetation_type_classification_save
   long_name = vegetation type for lsm save
@@ -1532,7 +1462,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
-  optional = F
 [stype_save]
   standard_name = soil_type_classification_save
   long_name = soil type for lsm save
@@ -1540,7 +1469,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
-  optional = F
 [slope_save]
   standard_name = surface_slope_classification_save
   long_name = sfc slope type for lsm save
@@ -1548,7 +1476,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -1557,12 +1484,10 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out
-  optional = F

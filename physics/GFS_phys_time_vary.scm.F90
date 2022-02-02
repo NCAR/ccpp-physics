@@ -6,7 +6,7 @@
 !! aerosol, IN&CCN and surface properties updates.
 !> @{
    module GFS_phys_time_vary
-     
+
       use machine, only : kind_phys
 
       use mersenne_twister, only: random_setseed, random_number
@@ -17,7 +17,7 @@
       use h2o_def,   only : levh2o, h2o_coeff, h2o_lat, h2o_pres, h2o_time, h2oplin
       use h2ointerp, only : read_h2odata, setindxh2o, h2ointerpol
 
-      use aerclm_def, only : aerin, aer_pres, ntrcaer, ntrcaerm
+      use aerclm_def, only : aerin, aer_pres, ntrcaer, ntrcaerm, iamin, iamax, jamin, jamax
       use aerinterp,  only : read_aerdata, setindxaer, aerinterpol, read_aerdataf
 
       use iccn_def,   only : ciplin, ccnin, ci_pres
@@ -62,7 +62,7 @@
 !! @{
       subroutine GFS_phys_time_vary_init (                                                         &
               me, master, ntoz, h2o_phys, iaerclm, iccn, iflip, im, nx, ny, idate, xlat_d, xlon_d, &
-              jindx1_o3, jindx2_o3, ddy_o3, ozpl, jindx1_h, jindx2_h, ddy_h, h2opl,                &
+              jindx1_o3, jindx2_o3, ddy_o3, ozpl, jindx1_h, jindx2_h, ddy_h, h2opl,fhour,          &
               jindx1_aer, jindx2_aer, ddy_aer, iindx1_aer, iindx2_aer, ddx_aer, aer_nm,            &
               jindx1_ci, jindx2_ci, ddy_ci, iindx1_ci, iindx2_ci, ddx_ci, imap, jmap,              &
               do_ugwp_v1, jindx1_tau, jindx2_tau, ddy_j1tau, ddy_j2tau,                            &
@@ -82,6 +82,7 @@
          integer,              intent(in)    :: me, master, ntoz, iccn, iflip, im, nx, ny
          logical,              intent(in)    :: h2o_phys, iaerclm, lsm_cold_start
          integer,              intent(in)    :: idate(:)
+         real(kind_phys),      intent(in)    :: fhour
          real(kind_phys),      intent(in)    :: xlat_d(:), xlon_d(:)
 
          integer,              intent(inout) :: jindx1_o3(:), jindx2_o3(:), jindx1_h(:), jindx2_h(:)
@@ -99,10 +100,9 @@
 
          integer,              intent(in)    :: isot, ivegsrc, nlunit
          real(kind_phys),      intent(inout) :: sncovr(:), sncovr_ice(:)
-         integer,              intent(in)    :: lsm, lsm_noahmp, lsm_ruc
+         integer,              intent(in)    :: lsm, lsm_noahmp, lsm_ruc, vtype(:)
          real(kind_phys),      intent(in)    :: min_seaice, fice(:)
          real(kind_phys),      intent(in)    :: landfrac(:)
-         integer,              intent(in)    :: vtype(:)
          real(kind_phys),      intent(inout) :: weasd(:)
 
          ! NoahMP - only allocated when NoahMP is used
@@ -168,7 +168,7 @@
          integer,              intent(out)   :: errflg
 
          ! Local variables
-         integer :: i, j, ix, vegtyp, iamin, iamax, jamin, jamax
+         integer :: i, j, ix, vegtyp
          real(kind_phys) :: rsnow
 
          !--- Noah MP
@@ -313,7 +313,7 @@
 
          !--- if sncovr does not exist in the restart, need to create it
          if (all(sncovr < zero)) then
-           if (me == master ) write(0,'(a)') 'GFS_phys_time_vary_init: compute sncovr from weasd and soil vegetation parameters'
+           if (me == master ) write(*,'(a)') 'GFS_phys_time_vary_init: compute sncovr from weasd and soil vegetation parameters'
            !--- compute sncovr from existing variables
            !--- code taken directly from read_fix.f
            sncovr(:) = zero
@@ -334,7 +334,7 @@
          !--- For RUC LSM: create sncovr_ice from sncovr
          if (lsm == lsm_ruc) then
            if (all(sncovr_ice < zero)) then
-             if (me == master ) write(0,'(a)') 'GFS_phys_time_vary_init: fill sncovr_ice with sncovr for RUC LSM'
+             if (me == master ) write(*,'(a)') 'GFS_phys_time_vary_init: fill sncovr_ice with sncovr for RUC LSM'
              sncovr_ice(:) = sncovr(:)
            endif
          endif
@@ -342,8 +342,7 @@
          if (errflg/=0) return
 
          if (iaerclm) then
-           call read_aerdataf (iamin, iamax, jamin, jamax, me, master, iflip, &
-                               idate, errmsg, errflg)
+           call read_aerdataf (me, master, iflip, idate, fhour, errmsg, errflg)
            if (errflg/=0) return
          end if
 
@@ -351,7 +350,7 @@
          !--- land and ice - not for restart runs
          lsm_init: if (lsm_cold_start) then
            if (lsm == lsm_noahmp .or. lsm == lsm_ruc) then
-             if (me == master ) write(0,'(a)') 'GFS_phys_time_vary_init: initialize albedo for land and ice' 
+             if (me == master ) write(*,'(a)') 'GFS_phys_time_vary_init: initialize albedo for land and ice'
              do ix=1,im
                albdvis_lnd(ix)  = 0.2_kind_phys
                albdnir_lnd(ix)  = 0.2_kind_phys
@@ -654,7 +653,7 @@
       subroutine GFS_phys_time_vary_timestep_init (                                                 &
             me, master, cnx, cny, isc, jsc, nrcm, im, levs, kdt, idate, nsswr, fhswr, lsswr, fhour, &
             imfdeepcnv, cal_pre, random_clds,        ntoz, h2o_phys, iaerclm, iccn, clstp,          &
-            jindx1_o3, jindx2_o3, ddy_o3, ozpl, jindx1_h, jindx2_h, ddy_h, h2opl,                   &
+            jindx1_o3, jindx2_o3, ddy_o3, ozpl, jindx1_h, jindx2_h, ddy_h, h2opl, iflip,            &
             jindx1_aer, jindx2_aer, ddy_aer, iindx1_aer, iindx2_aer, ddx_aer, aer_nm,               &
             jindx1_ci, jindx2_ci, ddy_ci, iindx1_ci, iindx2_ci, ddx_ci, in_nm, ccn_nm,              &
             imap, jmap, prsl, seed0, rann, do_ugwp_v1, jindx1_tau, jindx2_tau, ddy_j1tau, ddy_j2tau,&
@@ -664,7 +663,7 @@
 
          ! Interface variables
          integer,              intent(in)    :: me, master, cnx, cny, isc, jsc, nrcm, im, levs, kdt, &
-                                                nsswr, imfdeepcnv, iccn, ntoz
+                                                nsswr, imfdeepcnv, iccn, ntoz, iflip
          integer,              intent(in)    :: idate(:)
          real(kind_phys),      intent(in)    :: fhswr, fhour
          logical,              intent(in)    :: lsswr, cal_pre, random_clds, h2o_phys, iaerclm
@@ -784,7 +783,7 @@
            ! aerinterpol is using threading inside, don't
            ! move into OpenMP parallel section above
            call aerinterpol (me, master, nthrds, im, idate, &
-                              fhour, jindx1_aer, jindx2_aer,&
+                             fhour, iflip, jindx1_aer, jindx2_aer, &
                              ddy_aer, iindx1_aer,           &
                              iindx2_aer, ddx_aer,           &
                              levs, prsl, aer_nm)

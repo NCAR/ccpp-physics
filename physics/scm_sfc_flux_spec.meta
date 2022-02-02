@@ -14,7 +14,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -23,15 +22,13 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 
 #################################
 [ccpp-arg-table]
@@ -45,7 +42,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [v1]
   standard_name = y_wind_at_surface_adjacent_layer
   long_name = y component of 1st model layer wind
@@ -54,7 +50,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [z1]
   standard_name = height_above_ground_at_lowest_model_layer
   long_name = height above ground at 1st model layer
@@ -63,7 +58,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [t1]
   standard_name = air_temperature_at_surface_adjacent_layer
   long_name = 1st model layer air temperature
@@ -72,7 +66,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [q1]
   standard_name = specific_humidity_at_surface_adjacent_layer
   long_name = 1st model layer specific humidity
@@ -81,7 +74,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [p1]
   standard_name = air_pressure_at_surface_adjacent_layer
   long_name = Model layer 1 mean pressure
@@ -90,7 +82,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [roughness_length]
   standard_name = surface_roughness_length
   long_name = surface roughness length
@@ -99,7 +90,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [spec_sh_flux]
   standard_name = specified_surface_upward_temperature_flux
   long_name = specified kinematic surface upward sensible heat flux
@@ -108,7 +98,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [spec_lh_flux]
   standard_name = specified_surface_upward_specific_humidity_flux
   long_name = specified kinematic surface upward latent heat flux
@@ -117,7 +106,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [exner_inverse]
   standard_name = ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer
   long_name = Exner function ratio bt midlayer and interface at 1st layer
@@ -126,7 +114,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [T_surf]
   standard_name = surface_skin_temperature
   long_name = surface skin temperature
@@ -135,7 +122,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [cp]
   standard_name = specific_heat_of_dry_air_at_constant_pressure
   long_name = specific heat of dry air at constant pressure
@@ -144,7 +130,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [grav]
   standard_name = gravitational_acceleration
   long_name = gravitational acceleration
@@ -153,7 +138,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [hvap]
   standard_name = latent_heat_of_vaporization_of_water_at_0C
   long_name = latent heat of vaporization of water at 0C
@@ -162,7 +146,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [rd]
   standard_name = gas_constant_of_dry_air
   long_name = ideal gas constant for dry air
@@ -171,7 +154,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [fvirt]
   standard_name = ratio_of_vapor_to_dry_air_gas_constants_minus_one
   long_name = rv/rd - 1 (rv = ideal gas constant for water vapor)
@@ -180,7 +162,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [vonKarman]
   standard_name = von_karman_constant
   long_name = Von Karman constant
@@ -189,7 +170,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [sh_flux]
   standard_name = surface_upward_temperature_flux
   long_name = surface upward sensible heat flux
@@ -198,7 +178,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [lh_flux]
   standard_name = surface_upward_specific_humidity_flux
   long_name = surface upward evaporation flux
@@ -207,7 +186,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [sh_flux_chs]
   standard_name = kinematic_surface_upward_sensible_heat_flux_reduced_by_surface_roughness_and_vegetation
   long_name = kinematic surface upward sensible heat flux reduced by surface roughness and vegetation
@@ -216,7 +194,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [u_star]
   standard_name = surface_friction_velocity
   long_name = boundary layer parameter
@@ -225,7 +202,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [sfc_stress]
   standard_name = surface_wind_stress
   long_name = surface wind stress
@@ -234,7 +210,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [cm]
   standard_name = surface_drag_coefficient_for_momentum_in_air
   long_name = surface exchange coeff for momentum
@@ -243,7 +218,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [ch]
   standard_name = surface_drag_coefficient_for_heat_and_moisture_in_air
   long_name = surface exchange coeff heat & moisture
@@ -252,7 +226,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [fm]
   standard_name = Monin_Obukhov_similarity_function_for_momentum
   long_name = Monin-Obukhov similarity function for momentum
@@ -261,7 +234,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [fh]
   standard_name = Monin_Obukhov_similarity_function_for_heat
   long_name = Monin-Obukhov similarity function for heat
@@ -270,7 +242,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [rb]
   standard_name = bulk_richardson_number_at_lowest_model_level
   long_name = bulk Richardson number at the surface
@@ -279,7 +250,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [u10m]
   standard_name = x_wind_at_10m
   long_name = 10 meter u wind speed
@@ -288,7 +258,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [v10m]
   standard_name = y_wind_at_10m
   long_name = 10 meter v wind speed
@@ -297,7 +266,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [wind1]
   standard_name = wind_speed_at_lowest_model_layer
   long_name = wind speed at lowest model level
@@ -306,7 +274,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [qss]
   standard_name = surface_specific_humidity
   long_name = surface air saturation specific humidity
@@ -315,7 +282,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [t2m]
   standard_name = air_temperature_at_2m
   long_name = 2 meter temperature
@@ -324,7 +290,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [q2m]
   standard_name = specific_humidity_at_2m
   long_name = 2 meter specific humidity
@@ -333,7 +298,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -342,12 +306,10 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out
-  optional = F

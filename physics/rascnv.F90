@@ -353,11 +353,11 @@
      &,                                                   cnv_dqldt, clcn        &
      &,                                                   cnv_fice, cnv_ndrop    &
      &,                                                   cnv_nice, cf_upi
-      real(kind=kind_phys), dimension(:)  , intent(in) :: area,  cdrag
+      real(kind=kind_phys), dimension(:)  , intent(in)  :: area,  cdrag
       real(kind=kind_phys), dimension(:)  , intent(out) :: rainc, ddvel
-      real(kind=kind_phys), dimension(:,:), intent(in) :: rannum
+      real(kind=kind_phys), dimension(:,:), intent(in)  :: rannum
       real(kind=kind_phys), intent(inout) :: ccin(:,:,:)
-      real(kind=kind_phys), intent(in)  :: dt, dtf
+      real(kind=kind_phys), intent(in)    :: dt, dtf
 !
 !     Added for aerosol scavenging for GOCART
 !
@@ -373,7 +373,8 @@
       real(kind=kind_phys), dimension(k)   :: toi,    qoi, tcu, qcu     &
      &,                                       pcu,    clw, cli, qii, qli&
      &,                                       phi_l,  prsm,psjm         &
-     &,                                       alfinq, alfind, rhc_l     &
+     &,                                               alfind, rhc_l     &
+!    &,                                       alfinq, alfind, rhc_l     &
      &,                                       qoi_l, qli_l, qii_l
       real(kind=kind_phys), dimension(k+1) :: prs, psj, phi_h, flx, flxd
 

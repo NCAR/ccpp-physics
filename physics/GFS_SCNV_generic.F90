@@ -117,7 +117,7 @@
       real(kind=kind_phys), intent(inout) :: dtend(:,:,:)
       integer, intent(in) :: dtidx(:,:)
       integer, intent(in) :: index_of_temperature, index_of_x_wind, index_of_y_wind, index_of_process_scnv
-      real(kind=kind_phys), dimension(:,:,:), intent(inout) :: clw
+      real(kind=kind_phys), dimension(:,:,:), intent(in) :: clw
 
       ! Post code for SAS/SAMF
       integer, intent(in) :: npdf3d, num_p3d, ncnvcld3d
@@ -208,12 +208,6 @@
           endif
         endif
       endif
-!
-      do k=1,levs
-        do i=1,im
-          if (clw(i,k,2) <= -999.0) clw(i,k,2) = 0.0
-        enddo
-      enddo
 
       end subroutine GFS_SCNV_generic_post_run
 

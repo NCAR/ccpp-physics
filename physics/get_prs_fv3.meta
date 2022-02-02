@@ -14,7 +14,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [levs]
   standard_name = vertical_layer_dimension
   long_name = number of vertical layers
@@ -22,7 +21,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [con_fvirt]
   standard_name = ratio_of_vapor_to_dry_air_gas_constants_minus_one
   long_name = rv/rd - 1 (rv = ideal gas constant for water vapor)
@@ -31,7 +29,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [phii]
   standard_name = geopotential_at_interface
   long_name = interface geopotential
@@ -40,7 +37,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [prsi]
   standard_name = air_pressure_at_interface
   long_name = interface pressure
@@ -49,7 +45,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [tgrs]
   standard_name = air_temperature
   long_name = mid-layer temperature
@@ -58,7 +53,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [qgrs1]
   standard_name = specific_humidity
   long_name = mid-layer specific humidity of water vapor
@@ -67,7 +61,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [del]
   standard_name = air_pressure_difference_between_midlayers
   long_name = difference between mid-layer pressures
@@ -76,7 +69,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [del_gz]
   standard_name = geopotential_difference_between_midlayers_divided_by_midlayer_virtual_temperature
   long_name = difference between mid-layer geopotentials divided by mid-layer virtual temperature
@@ -85,7 +77,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -94,15 +85,13 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 
 ########################################################################
 [ccpp-table-properties]
@@ -121,7 +110,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [levs]
   standard_name = vertical_layer_dimension
   long_name = number of vertical layers
@@ -129,7 +117,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [con_fvirt]
   standard_name = ratio_of_vapor_to_dry_air_gas_constants_minus_one
   long_name = rv/rd - 1 (rv = ideal gas constant for water vapor)
@@ -138,7 +125,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [gt0]
   standard_name = air_temperature_of_new_state
   long_name = updated air temperature
@@ -147,7 +133,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [gq01]
   standard_name = specific_humidity_of_new_state
   long_name = mid-layer specific humidity of water vapor
@@ -156,7 +141,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [del_gz]
   standard_name = geopotential_difference_between_midlayers_divided_by_midlayer_virtual_temperature
   long_name = difference between mid-layer geopotentials divided by mid-layer virtual temperature
@@ -165,7 +149,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [phii]
   standard_name = geopotential_at_interface
   long_name = interface geopotential
@@ -174,7 +157,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [phil]
   standard_name = geopotential
   long_name = mid-layer geopotential
@@ -183,7 +165,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -192,13 +173,11 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 
