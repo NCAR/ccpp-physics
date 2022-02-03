@@ -1,3 +1,5 @@
+! TESTING CODEOWNERS DO NOT MERGE
+
 !>  \file radsw_param.f
 !!  This file contains SW band parameters setup.
 

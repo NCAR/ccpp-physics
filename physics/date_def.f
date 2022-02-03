@@ -1,3 +1,5 @@
+! TESTING CODEOWNERS DO NOT MERGE
+
       module date_def
       use machine,   ONLY: kind_evod
       implicit none

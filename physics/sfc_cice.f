@@ -1,3 +1,5 @@
+! TESTING CODEOWNERS DO NOT MERGE
+
 !>  \file sfc_cice.f
 !!  This file contains the sfc_sice for coupling to CICE
 

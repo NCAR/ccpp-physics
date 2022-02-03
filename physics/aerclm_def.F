@@ -1,3 +1,5 @@
+! TESTING CODEOWNERS DO NOT MERGE
+
       module aerclm_def
       use machine , only : kind_phys, kind_io4
       implicit none
