@@ -1,3 +1,5 @@
+! TESTING CODEOWNERS DO NOT MERGE
+
 !>\file sfc_ocean.F
 !! This file contains an alternative GFS near-surface sea temperature
 !! scheme when the model is initialized from GRIB2 data.
