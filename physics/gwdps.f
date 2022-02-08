@@ -323,7 +323,7 @@
       real(kind=kind_phys) wk(IM)
       real(kind=kind_phys) bnv2lm(IM,KM),PE(IM),EK(IM),ZBK(IM),UP(IM)
       real(kind=kind_phys) DB(IM,KM),ANG(IM,KM),UDS(IM,KM)
-      real(kind=kind_phys) ZLEN, DBTMP, Rtrm, PHIANG, CDmb, DBIM, ZR
+      real(kind=kind_phys) ZLEN, Rtrm, PHIANG, CDmb, DBIM, ZR, cdmbo4
       real(kind=kind_phys) ENG0, ENG1
 !
 !     Some constants
@@ -382,13 +382,13 @@
       real(kind=kind_phys) BNV2(IM,KM),  TAUP(IM,KM+1), ri_n(IM,KM)     &
      &,                    TAUD(IM,KM),  RO(IM,KM),     VTK(IM,KM)      &
      &,                    VTJ(IM,KM),   SCOR(IM),      VELCO(IM,KM-1)  &
-     &,                    bnv2bar(im)
+     &,                    bnv2bar(im),  cdsigohp(im)
 !
 !     real(kind=kind_phys) VELKO(KM-1)
       integer   kref(IM), kint(im), iwk(im), ipt(im)
 ! for lm mtn blocking
       integer   iwklm(im)
-!      integer   kreflm(IM), iwklm(im)
+!     integer   kreflm(IM), iwklm(im)
       integer   idxzb(im), ktrial, klevm1
 !
       real(kind=kind_phys) gor,    gocp,  fv,    gr2,  bnv,  fr         &
@@ -397,7 +397,7 @@
      &,                    rdelks, efact, coefm, gfobnv, onebg          &
      &,                    scork,  rscor, hd,    fro,   rim,  sira      &
      &,                    dtaux,  dtauy, pkp1log, pklog                &
-     &,                    cosang, sinang, cos2a, sin2a
+     &,                    cosang, sinang, cos2a, sin2a, oneocpdt
 !
       integer kmm1, kmm2, lcap, lcapp1, kbps, kbpsp1,kbpsm1             &
      &, kmps, idir, nwd, i, j, k, klcap, kp1, kmpbl, npt, npr, kmll
@@ -413,11 +413,12 @@
 !     cdmb = 192.0/float(IMX)
       cdmb = 4.0 * 192.0/float(IMX)
       if (cdmbgwd(1) >= 0.0) cdmb = cdmb * cdmbgwd(1)
+      cdmbo4 = 0.25 * cdmb
 !
       npr = 0
       DO I = 1, IM
-         DUSFC(I) = 0.
-         DVSFC(I) = 0.
+        DUSFC(I) = 0.
+        DVSFC(I) = 0.
       ENDDO
 !
       DO K = 1, KM
@@ -428,12 +429,13 @@
         ENDDO
       ENDDO
 !
-      RDI    = 1.0 / RD
-      onebg  = 1.0 / g
-      GOR    = G/RD
-      GR2    = G*GOR
-      GOCP   = G/CP
-      FV     = RV/RD - 1
+      RDI      = 1.0 / RD
+      onebg    = 1.0 / g
+      GOR      = G/RD
+      GR2      = G*GOR
+      GOCP     = G/CP
+      FV       = RV/RD - 1
+      oneocpdt = 1.0 / (cp*deltim)
 !
 !     NCNT   = 0
       KMM1   = KM - 1
@@ -441,17 +443,17 @@
       LCAP   = KM
       LCAPP1 = LCAP + 1
 !
+      RDXZB(:)  = 0 
 !
       IF ( NMTVR == 14) then 
 ! ----  for lm and gwd calculation points
-        RDXZB(:)  = 0 
         ipt = 0
         npt = 0
         DO I = 1,IM
           IF (elvmax(i) > HMINMT .and. hprime(i) > hpmin)  then
-             npt      = npt + 1
-             ipt(npt) = i
-             if (ipr == i) npr = npt
+            npt      = npt + 1
+            ipt(npt) = i
+!           if (lprnt .and. ipr == i) npr = npt
           ENDIF
         ENDDO
         IF (npt == 0) RETURN     ! No gwd/mb calculation done!
@@ -488,7 +490,8 @@
 !
           DO I = 1, npt
             j = ipt(i)
-            ELVMAX(J) = min (ELVMAX(J) + sigfac * hprime(j), hncrit)
+            ELVMAX(J)   = min (ELVMAX(J) + sigfac * hprime(j), hncrit)
+            cdsigohp(i) = cdmbo4 * sigma(j) / hprime(j)
           ENDDO
 !
         DO K = 1,KMLL
@@ -626,8 +629,8 @@
 ! --- Wind projected on the line perpendicular to mtn range, U(Zb(K)).
 ! --- kenetic energy is at the layer Zb
 ! --- THETA ranges from -+90deg |_ to the mtn "largest topo variations"
-              UP(I)  =  UDS(I,K) * cos(ANG(I,K))
-              EK(I)  = 0.5 *  UP(I) * UP(I)
+              UP(I) = UDS(I,K) * cos(ANG(I,K))
+              EK(I) = 0.5 *  UP(I) * UP(I)
 
 ! --- Dividing Stream lime  is found when PE =exceeds EK.
               IF (PE(I) >= EK(I)) THEN
@@ -732,9 +735,8 @@
 !! where \f$C_{d}\f$ is a specified constant, \f$\sigma\f$ is the
 !! orographic slope.
 
-                DBTMP = 0.25 *  CDmb * ZR * sigma(J) *
-     &                  MAX(cosANG, gamma(J)*sinANG) * ZLEN / hprime(J)
-                DB(I,K) =  DBTMP * UDS(I,K)
+                DB(i,k) = CDsigohp(i) * ZR * RO(i,k) * ZLEN
+     &                  * MAX(cosANG, gamma(J)*sinANG) * uds(i,k)
 !
 !               if(lprnt .and. i .eq. npr) then
 !                 print *,' in gwdps_lmi.f 10 npt=',npt,i,j,idxzb(i)
@@ -770,7 +772,6 @@
 !
         do i=1,npt
           IDXZB(i) = 0
-          RDXZB(i) = 0.
         enddo
       ENDIF
 !
@@ -884,9 +885,9 @@
 !
             ROLL(I)    = ROLL(I)  + RDELKS * RO(I,K)   ! Mean RO below kref
             if (k < kref(i)-1) then
-              RDELKS     = (PRSL(J,K)-PRSL(J,K+1)) * DELKS(I)
+              RDELKS   = (PRSL(J,K)-PRSL(J,K+1)) * DELKS(I)
             else
-              RDELKS     = (PRSL(J,K)-PRSI(J,K+1)) * DELKS(I)
+              RDELKS   = (PRSL(J,K)-PRSI(J,K+1)) * DELKS(I)
             endif
             BNV2bar(I) = BNV2bar(I) + BNV2(I,K) * RDELKS
           ENDIF
@@ -1126,9 +1127,9 @@
 !!\f]
 !! see eq.(4.6) in Kim and Arakawa (1995) \cite kim_and_arakawa_1995.
 
-              TEM2   = SQRT(ri_n(I,K))
-              TEM    = 1. + TEM2 * FRO
-              RIM    = ri_n(I,K) * (1.-FRO) / (TEM * TEM)
+              TEM2 = SQRT(ri_n(I,K))
+              TEM  = 1. + TEM2 * FRO
+              RIM  = ri_n(I,K) * (1.-FRO) / (TEM * TEM)
 !
 !    CHECK STABILITY TO EMPLOY THE 'SATURATION HYPOTHESIS'
 !    OF LINDZEN (1981) EXCEPT AT TROPOSPHERIC DOWNSTREAM REGIONS
@@ -1168,7 +1169,7 @@
 !       taup(i,km+1) = taup(i,km)
 !     ENDDO
 !
-      IF(LCAP .LE. KM) THEN
+      IF(LCAP <= KM) THEN
          DO KLCAP = LCAPP1, KM+1
             DO I = 1,npt
               SIRA          = PRSI(ipt(I),KLCAP) / PRSI(ipt(I),LCAP)
@@ -1209,7 +1210,7 @@
         ENDDO
       ENDDO
 !
-!     if(lprnt .and. npr .gt. 0) then
+!     if(lprnt .and. npr > 0) then
 !       print *,' before  A=',A(npr,:)
 !       print *,' before  B=',B(npr,:)
 !     endif
@@ -1218,6 +1219,7 @@
 !!  - Below the dividing streamline height (k < idxzb), mountain
 !!    blocking(\f$D_{b}\f$) is applied.
 !!  - Otherwise (k>= idxzb), orographic GWD (\f$\tau\f$) is applied.
+
       DO K = 1,KM
         DO I = 1,npt
           J         = ipt(i)
@@ -1225,30 +1227,35 @@
           DTAUX     = TAUD(I,K) * XN(I)
           DTAUY     = TAUD(I,K) * YN(I)
           ENG0      = 0.5*(U1(j,K)*U1(j,K)+V1(J,K)*V1(J,K))
-! ---  lm mb (*j*)  changes overwrite GWD
-          if ( K < IDXZB(I) .AND. IDXZB(I) /= 0 ) then
-            DBIM    =   DB(I,K) / (1.+DB(I,K)*DELTIM)
-            A(J,K)  = - DBIM * V1(J,K) + A(J,K)
-            B(J,K)  = - DBIM * U1(J,K) + B(J,K)
-            ENG1    = ENG0*(1.0-DBIM*DELTIM)*(1.0-DBIM*DELTIM)
-!          if ( ABS(DBIM * U1(J,K)) .gt. .01 )
+
+          if (K < IDXZB(I)) then                       ! ---  lm mb (*j*)  changes overwrite GWD
+                                                       ! ---------------------------------------
+            DBIM     =   DB(I,K) / (1.+DB(I,K)*DELTIM)
+            A(J,K)   = - DBIM * V1(J,K) + A(J,K)
+            B(J,K)   = - DBIM * U1(J,K) + B(J,K)
+            ENG1     = ENG0*(1.0-DBIM*DELTIM)*(1.0-DBIM*DELTIM)
+
+!          if ( ABS(DBIM * U1(J,K)) > .01 )
 !    & print *,' in gwdps_lmi.f KDT=',KDT,I,K,DB(I,K),
 !    &                      dbim,idxzb(I),U1(J,K),V1(J,K),me
-            DUSFC(J) = DUSFC(J) - DBIM * U1(J,K) * DEL(J,K)
-            DVSFC(J) = DVSFC(J) - DBIM * V1(J,K) * DEL(J,K)
-          else
-!
-            A(J,K)   = DTAUY     + A(J,K)
-            B(J,K)   = DTAUX     + B(J,K)
-            ENG1     = 0.5*(
-     &                 (U1(J,K)+DTAUX*DELTIM)*(U1(J,K)+DTAUX*DELTIM)
-     &               + (V1(J,K)+DTAUY*DELTIM)*(V1(J,K)+DTAUY*DELTIM))
-            DUSFC(J) = DUSFC(J)  + DTAUX * DEL(J,K)
-            DVSFC(J) = DVSFC(J)  + DTAUY * DEL(J,K)
+
+            tem1     = DBIM * DEL(J,K)
+            DUSFC(J) = DUSFC(J) - tem1 * U1(J,K)
+            DVSFC(J) = DVSFC(J) - tem1 * V1(J,K)
+          else                                         ! orographic GWD applied
+                                                       ! ----------------------
+            A(J,K)   = DTAUY + A(J,K)
+            B(J,K)   = DTAUX + B(J,K)
+            tem1     = U1(J,K) + DTAUX*DELTIM
+            tem2     = V1(J,K) + DTAUY*DELTIM
+            ENG1     = 0.5 * (tem1*tem1+tem2*tem2)
+            DUSFC(J) = DUSFC(J) + DTAUX * DEL(J,K)
+            DVSFC(J) = DVSFC(J) + DTAUY * DEL(J,K)
           endif
-          C(J,K) = C(J,K) + max(ENG0-ENG1,0.)/CP/DELTIM
+          C(J,K) = C(J,K) + max(ENG0-ENG1,0.) * oneocpdt
         ENDDO
       ENDDO
+
 !     if (lprnt) then
 !       print *,' in gwdps_lm.f after  A=',A(ipr,:)
 !       print *,' in gwdps_lm.f after  B=',B(ipr,:)
@@ -1256,8 +1263,8 @@
 !     endif
 
       DO I = 1,npt
-        J          = ipt(i)
-!       TEM    = (-1.E3/G)
+        J        = ipt(i)
+!       TEM      = (-1.E3/G)
         DUSFC(J) = - onebg * DUSFC(J)
         DVSFC(J) = - onebg * DVSFC(J)
       ENDDO
