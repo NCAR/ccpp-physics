@@ -1,3 +1,5 @@
+! TESTING CODEOWNERS DO NOT MERGE
+
 !> \defgroup SASHAL Mass-Flux Shallow Convection
 !! @{
 !!  \brief The Mass-Flux shallow convection scheme parameterizes the effect of shallow convection on the environment much like the \ref SAS scheme with a few key modifications. Perhaps most importantly, no quasi-equilibrium assumption is necessary since the shallow cloud base mass flux is parameterized from the surface buoyancy flux. Further, there are no convective downdrafts, the entrainment rate is greater than for deep convection, and the shallow convection is limited to not extend over the level where \f$p=0.7p_{sfc}\f$.

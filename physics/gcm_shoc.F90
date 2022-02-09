@@ -1,3 +1,5 @@
+! TESTING CODEOWNERS DO NOT MERGE
+
 !> \file gcm_shoc.F90
 !!  Contains the Simplified Higher-Order Closure (SHOC) scheme.
 

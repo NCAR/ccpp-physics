@@ -1,3 +1,5 @@
+! TESTING CODEOWNERS DO NOT MERGE
+
 !> \defgroup SAS Simplified Arakawa-Schubert Deep Convection
 !! @{
 !!  \brief The Simplified Arakawa-Schubert scheme parameterizes the effect of deep convection on the environment (represented by the model state variables) in the following way. First, a simple cloud model is used to determine the change in model state variables due to one entraining/detraining cloud type, per unit cloud-base mass flux. Next, the total change in state variables is retrieved by determining the actual cloud base mass flux using the quasi-equilibrium assumption, whereby convection is assumed to be steady-state. This implies that the generation of the cloud work function (interpreted as entrainment-moderated convective available potential energy (CAPE)) by the large scale dynamics is in balance with the consumption of the cloud work function by the convection.

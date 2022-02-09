@@ -1,3 +1,5 @@
+! TESTING CODEOWNERS DO NOT MERGE
+
 !>\file rayleigh_damp.f
 !! This file contains the Rayleigh friction calculation with total
 !! energy conservation.
