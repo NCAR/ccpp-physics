@@ -1,19 +1,18 @@
-*                                      @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
-cs_conv_aw_adj.*                       @AnningCheng-NOAA                    @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
-cs_conv.*                              @AnningCheng-NOAA                    @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
-cu_gf*                                 @hannahcbarnes @haiqinli             @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
-sascnvn.*                              @JongilHan66                         @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
-cu_ntiedtke*                           @ChunxiZhang-NOAA                    @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
-rascnv.*                               @SMoorthi-emc                        @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
-samfdeepcnv.*                          @JongilHan66                         @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
-samfshalcnv.*                          @JongilHan66                         @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
-samfaerosols.*                         @JongilHan66                         @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
-shalcnv.*                              @JongilHan66                         @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
-unified_ugwp*                                                     @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
-ugwp_driver_v0.F                                                  @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
-cires_ugwp*                             @ValeryYudin-NOAA         @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
-drag_suite.*                                                      @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
-gwdc.*                                 @Songyou184                          @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
-gwdps.*                                @Songyou184                          @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
-gfdl_fv_sat_adj.*                      @RuiyuSun                            @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
-gfdl_cloud_microphys.*                 @RuiyuSun                            @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
+cs_conv_aw_adj.*                       @AnningCheng-NOAA
+cs_conv.*                              @AnningCheng-NOAA
+cu_gf*                                 @hannahcbarnes @haiqinli
+sascnvn.*                              @JongilHan66
+cu_ntiedtke*                           @ChunxiZhang-NOAA
+rascnv.*                               @SMoorthi-emc
+samfdeepcnv.*                          @JongilHan66
+samfshalcnv.*                          @JongilHan66
+samfaerosols.*                         @JongilHan66
+shalcnv.*                              @JongilHan66
+unified_ugwp*                                                     
+ugwp_driver_v0.F                                                  
+cires_ugwp*                             @ValeryYudin-NOAA
+drag_suite.*                                                      
+gwdc.*                                 @Songyou184
+gwdps.*                                @Songyou184
+gfdl_fv_sat_adj.*                      @RuiyuSun
+gfdl_cloud_microphys.*                 @RuiyuSun
