@@ -17,25 +17,3 @@ gwdc.*                                 @Songyou184                          @mka
 gwdps.*                                @Songyou184                          @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
 gfdl_fv_sat_adj.*                      @RuiyuSun                            @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
 gfdl_cloud_microphys.*                 @RuiyuSun                            @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
-module_gfdl_cloud_microphys.*          @RuiyuSun                            @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
-multi_gases.F90                        @RuiyuSun                            @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
-mp_fer_hires.*                         @ericaligo-NOAA                      @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
-module_MP_FER_HIRES.*                  @ericaligo-NOAA                      @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
-module_mp_thompson*                    @gthompsnWRF @RuiyuSun               @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
-module_mp_radar.*                      @gthompsnWRF @RuiyuSun               @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
-mp_thompson*                           @gthompsnWRF @RuiyuSun               @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
-precpd.*                               @RuiyuSun                            @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
-gscond.*                               @RuiyuSun                            @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
-m_micro*                               @AnningCheng-NOAA    @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
-aer_cloud.F                            @AnningCheng-NOAA    @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
-aerclm_def.F                           @AnningCheng-NOAA    @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
-cldmacro.F                             @AnningCheng-NOAA    @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
-cldwat2m_micro.F                       @AnningCheng-NOAA    @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
-wv_saturation.F                        @AnningCheng-NOAA    @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
-micro_mg*                              @AnningCheng-NOAA    @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
-ozphys*                                                @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
-satmedmfvdif.*                         @JongilHan66                         @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
-satmedmfvdifq.*                        @JongilHan66                         @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
-mfpbl.f                                @JongilHan66                         @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
-mfscu.f                                @JongilHan66                         @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
-mfpbltq.f                              @JongilHan66                         @mkavulich @panll @mzhangw @grantfirl @SamuelTrahanNOAA @climbfuji
