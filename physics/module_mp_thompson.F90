@@ -1,5 +1,3 @@
-! TESTING CODEOWNERS DO NOT MERGE
-
 !>\file module_mp_thompson.F90
 !! This file contains the entity of GSD Thompson MP scheme.
 

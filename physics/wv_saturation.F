@@ -1,5 +1,3 @@
-! TESTING CODEOWNERS DO NOT MERGE
-
 !>\file wv_saturation.F
 !!This file contains common block and statement functions for saturation vapor pressure
 !! look-up procedure, J. J. Hack, February 1990

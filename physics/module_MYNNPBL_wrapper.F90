@@ -1,5 +1,3 @@
-! TESTING CODEOWNERS DO NOT MERGE
-
 !> \file module_MYNNPBL_wrapper.F90
 !!  This file contains all of the code related to running the MYNN 
 !! eddy-diffusivity mass-flux scheme. 

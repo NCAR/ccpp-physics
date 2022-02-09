@@ -1,5 +1,3 @@
-! TESTING CODEOWNERS DO NOT MERGE
-
 !>  \file cs_conv_aw_adj.F90
 !! This file contains a subroutine to adjusts surface rainrate for conservation for CSAW.  
 

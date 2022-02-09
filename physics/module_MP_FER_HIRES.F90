@@ -1,5 +1,3 @@
-! TESTING CODEOWNERS DO NOT MERGE
-
 !>\file module_MP_FER_HIRES.F90
 !! "Modified" fer_hires microphysics - 11 July 2016 version
 !!

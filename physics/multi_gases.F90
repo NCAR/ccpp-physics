@@ -1,5 +1,3 @@
-! TESTING CODEOWNERS DO NOT MERGE
-
 !***********************************************************************
 !*                   GNU Lesser General Public License                 
 !*

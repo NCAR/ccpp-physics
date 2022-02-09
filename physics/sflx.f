@@ -1,5 +1,3 @@
-! TESTING CODEOWNERS DO NOT MERGE
-
 !>\file sflx.f
 !! This file is the entity of GFS Noah LSM Model(Version 2.7).
 

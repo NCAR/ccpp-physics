@@ -1,5 +1,3 @@
-! TESTING CODEOWNERS DO NOT MERGE
-
 !>\file module_sf_ruclsm.F90
 !! This file is the entity of NOAA/ESRL/GSD RUC LSM Model(WRF version 4.0).
 

@@ -1,5 +1,3 @@
-! TESTING CODEOWNERS DO NOT MERGE
-
 !>  \file cs_conv.F90
 !!  This file contains the Chikira-Sugiyama Convection scheme.
 

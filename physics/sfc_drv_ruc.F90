@@ -1,5 +1,3 @@
-! TESTING CODEOWNERS DO NOT MERGE
-
 !>\file sfc_drv_ruc.F90 
 !!  This file contains the RUC land surface scheme driver.
 

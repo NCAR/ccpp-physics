@@ -1,5 +1,3 @@
-! TESTING CODEOWNERS DO NOT MERGE
-
 !>\file micro_mg2_0.F90
 !! This file contains Morrison-Gettelman MP version 2.0 - update of MG
 !! microphysics with prognostic precipitation.

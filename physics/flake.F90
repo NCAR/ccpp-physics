@@ -1,5 +1,3 @@
-! TESTING CODEOWNERS DO NOT MERGE
-
 
 !=======================================================================
 ! Current Code Owner: DWD, Ulrich Schaettler

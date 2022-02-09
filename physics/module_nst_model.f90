@@ -1,5 +1,3 @@
-! TESTING CODEOWNERS DO NOT MERGE
-
 !>\file module_nst_model.f90
 !! This file contains the diurnal thermocline layer model (DTM) of 
 !! the GFS NSST scheme.

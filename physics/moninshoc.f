@@ -1,5 +1,3 @@
-! TESTING CODEOWNERS DO NOT MERGE
-
 !> \file moninshoc.f
 !!  Contains most of the SHOC PBL/shallow convection scheme.
 

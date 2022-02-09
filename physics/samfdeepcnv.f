@@ -1,5 +1,3 @@
-! TESTING CODEOWNERS DO NOT MERGE
-
 !>  \file samfdeepcnv.f
 !!  This file contains the entire scale-aware mass-flux (SAMF)
 !! deep convection scheme.

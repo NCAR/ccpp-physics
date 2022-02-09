@@ -1,5 +1,3 @@
-! TESTING CODEOWNERS DO NOT MERGE
-
 !> \file precpd.f
 !! This file contains the subroutine that calculates precipitation
 !! processes from suspended cloud water/ice.

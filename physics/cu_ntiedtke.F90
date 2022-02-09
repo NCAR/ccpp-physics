@@ -1,5 +1,3 @@
-! TESTING CODEOWNERS DO NOT MERGE
-
 !> \file cu_ntiedtke.F90
 !! This file contains the CCPP-compliant new Tiedtke scheme which parameterize
 !! Shallow, deep, and mid-level convections in the model

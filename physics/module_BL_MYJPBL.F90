@@ -1,5 +1,3 @@
-! TESTING CODEOWNERS DO NOT MERGE
-
 !-----------------------------------------------------------------------
 !
       MODULE MODULE_BL_MYJPBL

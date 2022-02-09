@@ -1,5 +1,3 @@
-! TESTING CODEOWNERS DO NOT MERGE
-
 !>  \file rascnv.F90
 !!  This file contains the entire Relaxed Arakawa-Schubert convection
 !!  parameteriztion

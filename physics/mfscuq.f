@@ -1,5 +1,3 @@
-! TESTING CODEOWNERS DO NOT MERGE
-
 !>\file mfscuq.f
 !! This file contains the mass flux and downdraft parcel preperties
 !! parameterization for stratocumulus-top-driven turbulence (updated version).

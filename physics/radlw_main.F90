@@ -1,5 +1,3 @@
-! TESTING CODEOWNERS DO NOT MERGE
-
 !>  \file radlw_main.f
 !!  This file contains NCEP's modifications of the rrtmg-lw radiation
 !!  code from AER.

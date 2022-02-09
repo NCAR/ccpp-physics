@@ -1,5 +1,3 @@
-! TESTING CODEOWNERS DO NOT MERGE
-
 !>\file module_bl_mynn.F90
 !! This file contains the entity of MYNN-EDMF PBL scheme.
 !WRF:MODEL_LAYER:PHYSICS

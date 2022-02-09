@@ -1,5 +1,3 @@
-! TESTING CODEOWNERS DO NOT MERGE
-
 !>\file cu_gf_deep.F90 
 !! This file is the Grell-Freitas deep convection scheme.
 

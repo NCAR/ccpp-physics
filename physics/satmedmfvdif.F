@@ -1,5 +1,3 @@
-! TESTING CODEOWNERS DO NOT MERGE
-
 !> \file satmedmfvdif.F
 !! This file  contains the CCPP-compliant SATMEDMF scheme which computes
 !! subgrid vertical turbulence mixing using scale-aware TKE-based moist

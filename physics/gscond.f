@@ -1,5 +1,3 @@
-! TESTING CODEOWNERS DO NOT MERGE
-
 !> \file gscond.f
 !! This file contains the subroutine that calculates grid-scale
 !! condensation and evaporation for use in Zhao and Carr (1997)

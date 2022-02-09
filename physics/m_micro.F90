@@ -1,5 +1,3 @@
-! TESTING CODEOWNERS DO NOT MERGE
-
 !> \file m_micro.F90
 !! This file contains the subroutine that call Morrison-Gettelman microphysics (MG1, MG2 and MG3)
 !! MG1 forecasts cloud ice and cloud liquid and their number

@@ -1,5 +1,3 @@
-! TESTING CODEOWNERS DO NOT MERGE
-
 !> \file gwdps.f
 !! This file is the  parameterization of orographic gravity wave
 !! drag and mountain blocking.

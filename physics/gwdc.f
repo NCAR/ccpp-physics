@@ -1,5 +1,3 @@
-! TESTING CODEOWNERS DO NOT MERGE
-
 !> \file gwdc.f This file is the original code for parameterization of
 !! stationary convection forced gravity wave drag based on
 !! Chun and Baik (1998) \cite chun_and_baik_1998.

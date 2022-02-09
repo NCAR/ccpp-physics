@@ -1,5 +1,3 @@
-! TESTING CODEOWNERS DO NOT MERGE
-
 !>  \file unified_ugwp_post.F90
 !! This file contains
 module unified_ugwp_post

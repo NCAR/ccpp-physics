@@ -1,5 +1,3 @@
-! TESTING CODEOWNERS DO NOT MERGE
-
 !>  \file sfc_drv.f
 !!  This file contains the Noah land surface scheme driver.
 
