@@ -1,18 +1,1 @@
-cs_conv_aw_adj.*                       @AnningCheng-NOAA
-cs_conv.*                              @AnningCheng-NOAA
-cu_gf*                                 @hannahcbarnes @haiqinli
-sascnvn.*                              @JongilHan66
-cu_ntiedtke*                           @ChunxiZhang-NOAA
-rascnv.*                               @SMoorthi-emc
-samfdeepcnv.*                          @JongilHan66
-samfshalcnv.*                          @JongilHan66
-samfaerosols.*                         @JongilHan66
-shalcnv.*                              @JongilHan66
-unified_ugwp*                                                     
-ugwp_driver_v0.F                                                  
-cires_ugwp*                             @ValeryYudin-NOAA
-drag_suite.*                                                      
-gwdc.*                                 @Songyou184
-gwdps.*                                @Songyou184
-gfdl_fv_sat_adj.*                      @RuiyuSun
-gfdl_cloud_microphys.*                 @RuiyuSun
+*                       @AnningCheng-NOAA
