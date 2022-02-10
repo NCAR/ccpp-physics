@@ -795,7 +795,7 @@ CONTAINS
           ENDDO
        ENDDO
 
-       IF ( bl_mynn_tkebudget == .true.) THEN
+       IF ( bl_mynn_tkebudget ) THEN
           DO k=KTS,KTE
              DO i=ITS,ITF
                 qWT(i,k)=0.
@@ -969,7 +969,7 @@ CONTAINS
     DO i=ITS,ITF
        DO k=KTS,KTE !KTF
             !JOE-TKE BUDGET
-             IF ( bl_mynn_tkebudget == .true.) THEN
+             IF ( bl_mynn_tkebudget ) THEN
                 dqke(i,k)=qke(i,k)
              END IF
              IF (icloud_bl > 0) THEN
@@ -1519,7 +1519,7 @@ CONTAINS
 
           ENDDO !end-k
 
-          IF ( bl_mynn_tkebudget == .true.) THEN
+          IF ( bl_mynn_tkebudget ) THEN
              !! TKE budget is now given in m**2/s**-3 (Puhales, 2020)
              !! Lower boundary condtions (using similarity relationships such as the prognostic equation for Qke)
              k=kts
@@ -3279,7 +3279,7 @@ CONTAINS
        dfq(k) =     dfm(k)
 !  Modified: Dec/22/2005, up to here
 
-   IF ( bl_mynn_tkebudget == .true.) THEN
+   IF ( bl_mynn_tkebudget ) THEN
        !TKE BUDGET
 !       dudz = ( u(k)-u(k-1) )/dzk
 !       dvdz = ( v(k)-v(k-1) )/dzk
@@ -3565,7 +3565,7 @@ CONTAINS
       
    
 !!  TKE budget  (Puhales, 2020, WRF 4.2.1)  << EOB 
-    IF (bl_mynn_tkebudget == .true.) THEN
+    IF (bl_mynn_tkebudget) THEN
        !! TKE Vertical transport << EOBvt
         tke_up=0.5*qke
         dzinv=1./dz
