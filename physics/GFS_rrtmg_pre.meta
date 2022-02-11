@@ -532,7 +532,7 @@
 [sfc_wts]
   standard_name = surface_stochastic_weights_from_coupled_process
   long_name = weights for stochastic surface physics perturbation
-  units = none
+  units = 1
   dimensions = (horizontal_loop_extent,number_of_perturbed_land_surface_variables)
   type = real
   kind = kind_phys
