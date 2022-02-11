@@ -285,7 +285,7 @@ module mp_nssl
                             its,ite, jts,jte, kts,kte, i,j,k
          integer :: itimestep ! timestep counter
          integer :: ntmul, n
-         real, parameter    :: dtpmax = 150. ! 300. ! 600. ! 120.
+         real, parameter    :: dtpmax = 60. ! allow up to dt=75 (1.25*60)
          real(kind_phys)    :: dtptmp
          integer, parameter :: ndebug = 0
          logical :: invertccn
@@ -480,8 +480,8 @@ module mp_nssl
 
        IF ( ndebug >= 1 )  write(0,*) 'call nssl_2mom_driver'
 
-        IF ( dtp > 1.5*dtpmax ) THEN
-           ntmul = Nint( dtp/dtpmax )
+        IF ( dtp > 1.25001*dtpmax ) THEN
+           ntmul = Max(2, Nint( dtp/dtpmax ) )
            dtptmp = dtp/ntmul
         ELSE
            dtptmp = dtp
