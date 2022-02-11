@@ -1363,7 +1363,8 @@
 !           =1: maximum/random overlapping clouds                       !
 !           =2: maximum overlap cloud (isubcol>0 only)                  !
 !           =3: decorrelation-length overlap (for isubclw>0 only)       !
-!           =4: exponential overlap cloud
+!           =4: exponential cloud overlap (AER)                         !
+!           =5: exponential-random cloud overlap (AER)                  !
 !                                                                       !
 !  *******************************************************************  !
 !  original code description                                            !
@@ -1407,7 +1408,7 @@
 !
 !===> ... begin here
 !
-      if ( iovr<0 .or. iovr>4 ) then
+      if ( iovr<0 .or. iovr>5 ) then
         print *,'  *** Error in specification of cloud overlap flag',   &
      &          ' IOVR=',iovr,' in RLWINIT !!'
         stop
@@ -1896,6 +1897,7 @@
 !  other control flags from module variables:                           !
 !     iovr    : control flag for cloud overlapping method               !
 !                 =0:random; =1:maximum/random: =2:maximum; =3:decorr   !
+!                 =4:exponential; =5:exponential-random                 !
 !                                                                       !
 !  =====================    end of definitions    ====================  !
 
@@ -2084,39 +2086,39 @@
 
 !  ---  setup 2 sets of random numbers
 
-!          call random_number ( rand2d, stat )
+          call random_number ( rand2d, stat )
 
-!          k1 = 0
-!          do k = 1, nlay
-!            do n = 1, ngptlw
-!              k1 = k1 + 1
-!              cdfunc(n,k) = rand2d(k1)
-!            enddo
-!          enddo
+          k1 = 0
+          do k = 1, nlay
+            do n = 1, ngptlw
+              k1 = k1 + 1
+              cdfunc(n,k) = rand2d(k1)
+            enddo
+          enddo
 
-!          call random_number ( rand2d, stat )
+          call random_number ( rand2d, stat )
 
-!          k1 = 0
-!          do k = 1, nlay
-!            do n = 1, ngptlw
-!              k1 = k1 + 1
-!              cdfun2(n,k) = rand2d(k1)
-!            enddo
-!          enddo
+          k1 = 0
+          do k = 1, nlay
+            do n = 1, ngptlw
+              k1 = k1 + 1
+              cdfun2(n,k) = rand2d(k1)
+            enddo
+          enddo
 
 !  ---  then working upward from the surface:
 !       if a random number (from an independent set: cdfun2) is smaller than 
 !       alpha, then use the previous layer's number, otherwise use a new random
 !       number (keep the originally assigned one in cdfunc for that layer).
 
-!          do k = 2, nlay
-!            k1 = k - 1
-!            do n = 1, ngptlw
-!              if ( cdfun2(n,k) < alpha(k) ) then
-!                   cdfunc(n,k) = cdfunc(n,k1)
-!              endif
-!            enddo
-!          enddo
+          do k = 2, nlay
+            k1 = k - 1
+            do n = 1, ngptlw
+              if ( cdfun2(n,k) < alpha(k) ) then
+                   cdfunc(n,k) = cdfunc(n,k1)
+              endif
+            enddo
+          enddo
 
       end select
 
