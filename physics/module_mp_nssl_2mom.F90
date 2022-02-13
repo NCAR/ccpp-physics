@@ -261,7 +261,7 @@ MODULE module_mp_nssl_2mom
   logical, private :: do_accurate_sedimentation = .true. ! if true, recalculate fall speeds on sub time steps; (more expensive)
                                                          ! if false, reuse fall speeds on multiple steps (can have a noticeable speedup)
                                                          ! Mainly is an issue for small dz near the surface. 
-  integer, private :: interval_sedi_vt = 1 ! interval for recalculating Vt in sedimentation subloop (only when do_accurate_sedimentation = .true.)
+  integer, private :: interval_sedi_vt = 2 ! interval for recalculating Vt in sedimentation subloop (only when do_accurate_sedimentation = .true.)
   integer, private :: infall = 4   ! 0 -> uses number-wgt for N; NO correction applied (results in excessive size sorting)
                           ! 1 -> uses mass-weighted fallspeed for N ALWAYS
                           ! 2 -> uses number-wgt for N and mass-weighted correction for N (Method II in Mansell, 2010 JAS)
@@ -1251,7 +1251,7 @@ MODULE module_mp_nssl_2mom
       IF ( present ( myrank ) .and. present ( mpiroot ) ) THEN
         IF ( myrank == mpiroot ) THEN
          IF ( istat /= 0 ) THEN
-           write(0,*) 'READ_NAMELIST: PROBLEM WITH NSSL_MP_PARAMS namelist: not found or bad token'
+           write(0,*) 'NSSL_2MOM_INIT: PROBLEM WITH NSSL_MP_PARAMS namelist: not found or bad token'
          ENDIF
 
 !         write(0,*) 'iusewetsnow = ',iusewetsnow
