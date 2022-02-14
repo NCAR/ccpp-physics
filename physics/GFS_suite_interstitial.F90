@@ -715,13 +715,11 @@
       ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, ntccn, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,  &
       imp_physics_nssl, nssl_invertccn, nssl_ccn_on,                                                  &
       imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, convert_dry_rho, dtf, save_qc, save_qi, con_pi, dtidx, dtend,&
-      index_of_process_conv_trans, gq0, clw, prsl, save_tcp, con_rd, con_eps, nwfa, spechum, ldiag3d,                &
+      index_of_process_conv_trans, gq0, clw, prsl, save_tcp, con_rd, con_eps, nssl_cccn, nwfa, spechum, ldiag3d,     &
       qdiag3d, save_lnc, save_inc, ntk, ntke, otsptflag, errmsg, errflg)
 
       use machine,               only: kind_phys
-      use module_mp_nssl_2mom,   only: qccn
       use module_mp_thompson_make_number_concentrations, only: make_IceNumber, make_DropletNumber
-
 
       implicit none
 
@@ -749,7 +747,7 @@
       real(kind=kind_phys), dimension(:,:,:), intent(inout) :: gq0
       real(kind=kind_phys), dimension(:,:,:), intent(inout) :: clw
       real(kind=kind_phys), dimension(:,:),   intent(in) :: prsl
-      real(kind=kind_phys),                   intent(in) :: con_rd, con_eps
+      real(kind=kind_phys),                   intent(in) :: con_rd, con_eps, nssl_cccn
       real(kind=kind_phys), dimension(:,:),   intent(in) :: nwfa, save_tcp
       real(kind=kind_phys), dimension(:,:),   intent(in) :: spechum
 
@@ -759,7 +757,7 @@
       ! local variables
       real(kind=kind_phys), parameter :: zero = 0.0_kind_phys, one = 1.0_kind_phys
       integer :: i,k,n,tracers,idtend
-      real(kind=kind_phys) :: liqm, icem, xccn, xcwmas, xccw, xcimas ! , qccn
+      real(kind=kind_phys) :: liqm, icem, xccn, xcwmas, xccw, xcimas, qccn
 
       real(kind=kind_phys) :: rho, orho
       real(kind=kind_phys), dimension(im,levs) :: qv_mp !< kg kg-1 (dry mixing ratio)
@@ -869,7 +867,7 @@
           if ( imp_physics == imp_physics_nssl ) then
               liqm =  con_pi/6.*1.e3*(18.e-6)**3  ! 4./3.*con_pi*1.e-12
               icem =  con_pi/6.*1.e3*(120.e-6)**3 ! 4./3.*con_pi*3.2768*1.e-14*890.
-              ! qccn = nssl_cccn/1.225
+              qccn = nssl_cccn/1.225 !1.225 is a reference air density and should match what is used in module_mp_nssl_2mom.F90 (rho00)
               do k=1,levs
                 do i=1,im
                    ! check number of available ccn
@@ -1043,4 +1041,3 @@
     end subroutine GFS_suite_interstitial_5_run
 
   end module GFS_suite_interstitial_5
-

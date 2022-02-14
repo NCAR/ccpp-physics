@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = GFS_suite_interstitial_rad_reset
   type = scheme
-  dependencies = machine.F,module_mp_thompson_make_number_concentrations.F90,module_mp_nssl_2mom.F90
+  dependencies = machine.F,module_mp_thompson_make_number_concentrations.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -1677,14 +1677,14 @@
 [nssl_ccn_on]
   standard_name = nssl_ccn_on
   long_name = CCN activation flag in NSSL micro
-  units = none
+  units = flag
   dimensions = ()
   type = logical
   intent = in
 [nssl_invertccn]
   standard_name = nssl_invertccn
   long_name = flag to invert CCN in NSSL micro
-  units = none
+  units = flag
   dimensions = ()
   type = logical
   intent = in
@@ -1780,6 +1780,14 @@
   standard_name = ratio_of_dry_air_to_water_vapor_gas_constants
   long_name = rd/rv
   units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[nssl_cccn]
+  standard_name = nssl_ccn_concentration
+  long_name = CCN concentration
+  units = m-3
   dimensions = ()
   type = real
   kind = kind_phys
