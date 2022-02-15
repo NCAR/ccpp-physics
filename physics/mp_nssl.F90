@@ -168,39 +168,39 @@ module mp_nssl
          integer,                   intent(in)    :: mpirank
          ! Hydrometeors
          logical,                   intent(in   ) :: convert_dry_rho
-         real(kind_phys),           intent(inout) :: spechum(1:ncol,1:nlev)
-         real(kind_phys),           intent(inout) :: cccn(:,:) ! (1:ncol,1:nlev)
-         real(kind_phys),           intent(inout) :: cccna(:,:) ! (1:ncol,1:nlev)
-         real(kind_phys),           intent(inout) :: qc(1:ncol,1:nlev)
-         real(kind_phys),           intent(inout) :: qr(1:ncol,1:nlev)
-         real(kind_phys),           intent(inout) :: qi(1:ncol,1:nlev)
-         real(kind_phys),           intent(inout) :: qs(1:ncol,1:nlev)
-         real(kind_phys),           intent(inout) :: qh(1:ncol,1:nlev)  ! graupel
-         real(kind_phys),           intent(inout) :: qhl(:,:) ! (1:ncol,1:nlev) ! hail
-         real(kind_phys),           intent(inout) :: ccw(1:ncol,1:nlev)
-         real(kind_phys),           intent(inout) :: crw(1:ncol,1:nlev)
-         real(kind_phys),           intent(inout) :: cci(1:ncol,1:nlev)
-         real(kind_phys),           intent(inout) :: csw(1:ncol,1:nlev)
-         real(kind_phys),           intent(inout) :: chw(1:ncol,1:nlev) ! graupel number
-         real(kind_phys),           intent(inout) :: chl(:,:) ! (1:ncol,1:nlev) ! hail number
-         real(kind_phys),           intent(inout) :: vh(1:ncol,1:nlev)  ! graupel volume
-         real(kind_phys),           intent(inout) :: vhl(:,:) ! (1:ncol,1:nlev) ! hail volume
+         real(kind_phys),           intent(inout) :: spechum(:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout) :: cccn(:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout) :: cccna(:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout) :: qc (:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout) :: qr (:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout) :: qi (:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout) :: qs (:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout) :: qh (:,:) !(1:ncol,1:nlev) graupel
+         real(kind_phys),           intent(inout) :: qhl(:,:) !(1:ncol,1:nlev) hail
+         real(kind_phys),           intent(inout) :: ccw(:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout) :: crw(:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout) :: cci(:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout) :: csw(:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout) :: chw(:,:) !(1:ncol,1:nlev) graupel number 
+         real(kind_phys),           intent(inout) :: chl(:,:) !(1:ncol,1:nlev) hail number
+         real(kind_phys),           intent(inout) :: vh (:,:) !(1:ncol,1:nlev) graupel volume 
+         real(kind_phys),           intent(inout) :: vhl(:,:) !(1:ncol,1:nlev) hail volume
          ! State variables and timestep information
-         real(kind_phys),           intent(inout) :: tgrs(1:ncol,1:nlev)
-         real(kind_phys),           intent(in   ) :: prsl(1:ncol,1:nlev)
-         real(kind_phys),           intent(in   ) :: prslk(1:ncol,1:nlev)
-         real(kind_phys),           intent(in   ) :: phii(1:ncol,1:nlev+1)
-         real(kind_phys),           intent(in   ) :: omega(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout) :: tgrs (:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(in   ) :: prsl (:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(in   ) :: prslk(:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(in   ) :: phii (:,:) !(1:ncol,1:nlev+1)
+         real(kind_phys),           intent(in   ) :: omega(:,:) !(1:ncol,1:nlev)
          real(kind_phys),           intent(in   ) :: dtp
          ! Precip/rain/snow/graupel fall amounts and fraction of frozen precip
-         real(kind_phys),           intent(  out) :: prcp(1:ncol)
-         real(kind_phys),           intent(  out) :: rain(1:ncol)
-         real(kind_phys),           intent(  out) :: graupel(1:ncol)
-         real(kind_phys),           intent(  out) :: ice(1:ncol)
-         real(kind_phys),           intent(  out) :: snow(1:ncol)
-         real(kind_phys),           intent(  out) :: sr(1:ncol)
+         real(kind_phys),           intent(  out) :: prcp   (:) !(1:ncol)
+         real(kind_phys),           intent(  out) :: rain   (:) !(1:ncol)
+         real(kind_phys),           intent(  out) :: graupel(:) !(1:ncol)
+         real(kind_phys),           intent(  out) :: ice    (:) !(1:ncol)
+         real(kind_phys),           intent(  out) :: snow   (:) !(1:ncol)
+         real(kind_phys),           intent(  out) :: sr     (:) !(1:ncol)
          ! Radar reflectivity
-         real(kind_phys),           intent(inout) :: refl_10cm(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout) :: refl_10cm(:,:) !(1:ncol,1:nlev)
          logical,                   intent(in   ) :: do_radar_ref, first_time_step
          ! Cloud effective radii
          real(kind_phys),  intent(inout) :: re_cloud(:,:) ! (1:ncol,1:nlev)

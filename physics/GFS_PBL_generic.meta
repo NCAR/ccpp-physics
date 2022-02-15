@@ -283,14 +283,14 @@
 [nssl_ccn_on]
   standard_name = nssl_ccn_on
   long_name = CCN activation flag in NSSL micro
-  units = none
+  units = flag
   dimensions = ()
   type = logical
   intent = in
 [nssl_hail_on]
   standard_name = nssl_hail_on
   long_name = hail activation flag in NSSL micro
-  units = none
+  units = flag
   dimensions = ()
   type = logical
   intent = in
@@ -710,14 +710,14 @@
 [nssl_ccn_on]
   standard_name = nssl_ccn_on
   long_name = CCN activation flag in NSSL micro
-  units = none
+  units = flag
   dimensions = ()
   type = logical
   intent = in
 [nssl_hail_on]
   standard_name = nssl_hail_on
   long_name = hail activation flag in NSSL micro
-  units = none
+  units = flag
   dimensions = ()
   type = logical
   intent = in
