@@ -1895,6 +1895,7 @@ endif   ! croptype == 0
   real (kind=kind_phys)                                  :: csigmaf0
   real (kind=kind_phys)                                  :: csigmaf1
   real (kind=kind_phys)                                  :: csigmafveg
+  real (kind=kind_phys)                                  :: czil1
 
   real (kind=kind_phys)                                  :: cdmnv
   real (kind=kind_phys)                                  :: ezpdv
@@ -2251,8 +2252,11 @@ endif   ! croptype == 0
         z0hwrf = z0wrf
      elseif (opt_trs == 2) then
         z0wrf  = fveg * z0m      + (1.0 - fveg) * z0mg
-        z0hwrf = fveg * z0m*exp(-parameters%czil*0.4*258.2*sqrt(ustarx*z0m))  &
-            +(1.0 - fveg) * z0mg*exp(-parameters%czil*0.4*258.2*sqrt(ustarx*z0mg))
+!       z0hwrf = fveg * z0m*exp(-parameters%czil*0.4*258.2*sqrt(ustarx*z0m))  &
+!           +(1.0 - fveg) * z0mg*exp(-parameters%czil*0.4*258.2*sqrt(ustarx*z0mg))
+        czil1=10.0 ** (- (0.40/0.07) * parameters%hvt)
+        z0hwrf = fveg * z0m*exp(-czil1*0.4*258.2*sqrt(ustarx*z0m))  &
+            +(1.0 - fveg) * z0mg*exp(-czil1*0.4*258.2*sqrt(ustarx*z0mg))
      elseif (opt_trs == 3) then
         z0wrf  = fveg * z0m      + (1.0 - fveg) * z0mg
         if (vegtyp.le.5) then
@@ -2309,7 +2313,9 @@ endif   ! croptype == 0
      if (opt_trs == 1) then
         z0hwrf = z0wrf
      elseif (opt_trs == 2) then
-        z0hwrf = z0wrf*exp(-parameters%czil*0.4*258.2*sqrt(ustarx*z0wrf))
+!       z0hwrf = z0wrf*exp(-parameters%czil*0.4*258.2*sqrt(ustarx*z0wrf))
+        czil1=10.0 ** (- (0.40/0.07) * parameters%hvt)
+        z0hwrf = z0wrf*exp(-czil1*0.4*258.2*sqrt(ustarx*z0wrf))
      elseif (opt_trs == 3) then
       if (vegtyp.le.5) then
         z0hwrf = z0wrf
@@ -3866,7 +3872,7 @@ endif   ! croptype == 0
   real (kind=kind_phys) :: laisune      !sunlit leaf area index, one-sided (m2/m2),effective
   real (kind=kind_phys) :: laishae      !shaded leaf area index, one-sided (m2/m2),effective
 
-  real(kind=kind_phys) ::  tem1,tem2,zvfun1,gdx
+  real(kind=kind_phys) ::  tem1,tem2,zvfun1,gdx,czil1
   real(kind=kind_phys), parameter :: z0lo=0.1, z0up=1.0
 
   integer :: k         !index
@@ -4003,7 +4009,9 @@ endif   ! croptype == 0
      if (opt_trs == 1) then
          z0h       = z0m
      elseif (opt_trs == 2) then
-         z0h = z0m*exp(-parameters%czil*0.4*258.2*sqrt(fv*z0m))
+!        z0h = z0m*exp(-parameters%czil*0.4*258.2*sqrt(fv*z0m))
+          czil1= 10.0 ** (- (0.40/0.07) * hcan)
+         z0h = z0m*exp(-czil1*0.4*258.2*sqrt(fv*z0m))
      elseif (opt_trs == 3) then
         if (vegtyp.le.5) then
          z0h = z0m
@@ -4581,7 +4589,7 @@ endif   ! croptype == 0
   real (kind=kind_phys) :: fh2          !monin-obukhov heat adjustment at 2m
   real (kind=kind_phys) :: ch2          !surface exchange at 2m
 
-  real(kind=kind_phys) ::  tem1,tem2,zvfun1,gdx
+  real(kind=kind_phys) ::  tem1,tem2,zvfun1,gdx,czil1
   real(kind=kind_phys), parameter :: z0lo=0.1, z0up=1.0
 
   integer :: iter    !iteration index
@@ -4631,7 +4639,9 @@ endif   ! croptype == 0
         if (opt_trs == 1) then
             z0h       = z0m
         elseif (opt_trs == 2) then
-            z0h = z0m*exp(-parameters%czil*0.4*258.2*sqrt(fv*z0m))
+!           z0h = z0m*exp(-parameters%czil*0.4*258.2*sqrt(fv*z0m))
+            czil1= 10.0 ** (- (0.40/0.07) * parameters%hvt)
+            z0h = z0m*exp(-czil1*0.4*258.2*sqrt(fv*z0m))
         elseif (opt_trs == 3) then
          if (vegtyp.le.5) then
             z0h = z0m
