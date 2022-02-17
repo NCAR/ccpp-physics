@@ -495,7 +495,7 @@ module mp_thompson
          end if
 
          ! Set stochastic physics selection to apply all perturbations
-         if ( spp_mp ) then
+         if ( spp_mp==7 ) then
             spp_mp_opt=7
          else
             spp_mp_opt=0
