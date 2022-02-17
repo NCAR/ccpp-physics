@@ -879,6 +879,19 @@
          alpha(:,:) = 0.
       endif
 
+      ! Revise alpha for exponential-random cloud overlap
+      ! Decorrelate layers when a clear layer follows a cloudy layer to enforce
+      ! random correlation between non-adjacent blocks of cloudy layers
+      if (iovr == 5) then
+        do k = 2, nLay
+          do i = 1, ix
+            if (clouds(i,k,1) == 0.0 .and. clouds(i,k-1,1) > 0.0) then
+              alpha(i,k) = 0.0
+            endif
+          enddo
+        enddo
+      endif
+
 !> - Call gethml() to compute low,mid,high,total, and boundary layer
 !!    cloud fractions and clouds top/bottom layer indices for low, mid,
 !!    and high clouds. The three cloud domain boundaries are defined by
@@ -1273,6 +1286,19 @@
       else
          de_lgth(:) = 0.
          alpha(:,:) = 0.
+      endif
+
+      ! Revise alpha for exponential-random cloud overlap
+      ! Decorrelate layers when a clear layer follows a cloudy layer to enforce
+      ! random correlation between non-adjacent blocks of cloudy layers
+      if (iovr == 5) then
+        do k = 2, nLay
+          do i = 1, ix
+            if (clouds(i,k,1) == 0.0 .and. clouds(i,k-1,1) > 0.0) then
+              alpha(i,k) = 0.0
+            endif
+          enddo
+        enddo
       endif
 
 !> - Call gethml() to compute low,mid,high,total, and boundary layer
@@ -1702,6 +1728,19 @@
          alpha(:,:) = 0.
       endif
 
+      ! Revise alpha for exponential-random cloud overlap
+      ! Decorrelate layers when a clear layer follows a cloudy layer to enforce
+      ! random correlation between non-adjacent blocks of cloudy layers
+      if (iovr == 5) then
+        do k = 2, nLay
+          do i = 1, ix
+            if (clouds(i,k,1) == 0.0 .and. clouds(i,k-1,1) > 0.0) then
+              alpha(i,k) = 0.0
+            endif
+          enddo
+        enddo
+      endif
+
 !> -# Call gethml() to compute low,mid,high,total, and boundary layer
 !! cloud fractions and clouds top/bottom layer indices for low, mid,
 !! and high clouds.
@@ -2065,6 +2104,19 @@
          alpha(:,:) = 0.
       endif
 
+      ! Revise alpha for exponential-random cloud overlap
+      ! Decorrelate layers when a clear layer follows a cloudy layer to enforce
+      ! random correlation between non-adjacent blocks of cloudy layers
+      if (iovr == 5) then
+        do k = 2, nLay
+          do i = 1, ix
+            if (clouds(i,k,1) == 0.0 .and. clouds(i,k-1,1) > 0.0) then
+              alpha(i,k) = 0.0
+            endif
+          enddo
+        enddo
+      endif
+
 !  ---  compute low, mid, high, total, and boundary layer cloud fractions
 !       and clouds top/bottom layer indices for low, mid, and high clouds.
 !       The three cloud domain boundaries are defined by ptopc.  The cloud
@@ -2417,6 +2469,19 @@
       else
          de_lgth(:) = 0.
          alpha(:,:) = 0.
+      endif
+
+      ! Revise alpha for exponential-random cloud overlap
+      ! Decorrelate layers when a clear layer follows a cloudy layer to enforce
+      ! random correlation between non-adjacent blocks of cloudy layers
+      if (iovr == 5) then
+        do k = 2, nLay
+          do i = 1, ix
+            if (clouds(i,k,1) == 0.0 .and. clouds(i,k-1,1) > 0.0) then
+              alpha(i,k) = 0.0
+            endif
+          enddo
+        enddo
       endif
 
 !> - Call gethml() to compute low, mid, high, total, and boundary layer cloud fractions
@@ -2793,6 +2858,19 @@
       else
          de_lgth(:) = 0.
          alpha(:,:) = 0.
+      endif
+
+      ! Revise alpha for exponential-random cloud overlap
+      ! Decorrelate layers when a clear layer follows a cloudy layer to enforce
+      ! random correlation between non-adjacent blocks of cloudy layers
+      if (iovr == 5) then
+        do k = 2, nLay
+          do i = 1, ix
+            if (clouds(i,k,1) == 0.0 .and. clouds(i,k-1,1) > 0.0) then
+              alpha(i,k) = 0.0
+            endif
+          enddo
+        enddo
       endif
 
 !> - Call gethml() to compute low,mid,high,total, and boundary layer
@@ -3191,6 +3269,19 @@
          alpha(:,:) = 0.
       endif
 
+      ! Revise alpha for exponential-random cloud overlap
+      ! Decorrelate layers when a clear layer follows a cloudy layer to enforce
+      ! random correlation between non-adjacent blocks of cloudy layers
+      if (iovr == 5) then
+        do k = 2, nLay
+          do i = 1, ix
+            if (clouds(i,k,1) == 0.0 .and. clouds(i,k-1,1) > 0.0) then
+              alpha(i,k) = 0.0
+            endif
+          enddo
+        enddo
+      endif
+
 !> - Call gethml() to compute low,mid,high,total, and boundary layer
 !!    cloud fractions and clouds top/bottom layer indices for low, mid,
 !!    and high clouds.
@@ -3556,6 +3647,19 @@
       else
          de_lgth(:) = 0.
          alpha(:,:) = 0.
+      endif
+
+      ! Revise alpha for exponential-random cloud overlap
+      ! Decorrelate layers when a clear layer follows a cloudy layer to enforce
+      ! random correlation between non-adjacent blocks of cloudy layers
+      if (iovr == 5) then
+        do k = 2, nLay
+          do i = 1, ix
+            if (clouds(i,k,1) == 0.0 .and. clouds(i,k-1,1) > 0.0) then
+              alpha(i,k) = 0.0
+            endif
+          enddo
+        enddo
       endif
 
 !> - Call gethml() to compute low,mid,high,total, and boundary layer
@@ -3953,6 +4057,19 @@
       else
          de_lgth(:) = 0.
          alpha(:,:) = 0.
+      endif
+
+      ! Revise alpha for exponential-random cloud overlap
+      ! Decorrelate layers when a clear layer follows a cloudy layer to enforce
+      ! random correlation between non-adjacent blocks of cloudy layers
+      if (iovr == 5) then
+        do k = 2, nLay
+          do i = 1, ix
+            if (clouds(i,k,1) == 0.0 .and. clouds(i,k-1,1) > 0.0) then
+              alpha(i,k) = 0.0
+            endif
+          enddo
+        enddo
       endif
 
 !> - Call gethml() to compute low,mid,high,total, and boundary layer
