@@ -1026,7 +1026,7 @@ MODULE module_mp_thompson
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(INOUT):: &
                           re_cloud, re_ice, re_snow
       INTEGER, INTENT(IN) :: rand_perturb_on, kme_stoch
-      REAL, DIMENSION(ims:ime,kms:kme_stoch,jms:jme), INTENT(IN), OPTIONAL:: &
+      REAL, DIMENSION(:,:), INTENT(IN) :: &
                           rand_pert
 
       INTEGER, INTENT(IN):: has_reqc, has_reqi, has_reqs
@@ -1123,12 +1123,6 @@ MODULE module_mp_thompson
       ! No need to test for every subcycling step
       test_only_once: if (first_time_step .and. istep==1) then
          ! Activate this code when removing the guard above
-         if (rand_perturb_on .ne. 0 .and. .not. present(rand_pert)) then
-           errmsg = 'Logic error in mp_gt_driver: random perturbations are on, ' // &
-                    'but optional argument rand_pert is not present'
-           errflg = 1
-           return
-         end if
    
          if ( (present(tt) .and. (present(th) .or. present(pii))) .or. &
               (.not.present(tt) .and. .not.(present(th) .and. present(pii))) ) then
@@ -1294,11 +1288,11 @@ MODULE module_mp_thompson
          rand2 = 0.0
          rand3 = 0.0
          if (rand_perturb_on .ne. 0) then
-            if (MOD(rand_perturb_on,2) .ne. 0) rand1 = rand_pert(i,1,j)
+            if (MOD(rand_perturb_on,2) .ne. 0) rand1 = rand_pert(i,1)
             m = RSHIFT(ABS(rand_perturb_on),1)
-            if (MOD(m,2) .ne. 0) rand2 = rand_pert(i,1,j)*2.
+            if (MOD(m,2) .ne. 0) rand2 = rand_pert(i,1)*2.
             m = RSHIFT(ABS(rand_perturb_on),2)
-            if (MOD(m,2) .ne. 0) rand3 = 0.25*(rand_pert(i,1,j)+ABS(min_rand))
+            if (MOD(m,2) .ne. 0) rand3 = 0.25*(rand_pert(i,1)+ABS(min_rand))
             m = RSHIFT(ABS(rand_perturb_on),3)
          endif
 !+---+-----------------------------------------------------------------+
