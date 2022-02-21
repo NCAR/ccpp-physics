@@ -1288,11 +1288,11 @@ MODULE module_mp_thompson
          rand2 = 0.0
          rand3 = 0.0
          if (rand_perturb_on .ne. 0) then
-            if (MOD(rand_perturb_on,2) .ne. 0) rand1 = rand_pert(i,1)
+            if (MOD(rand_perturb_on,2) .ne. 0) rand1 = rand_pert(i,j)
             m = RSHIFT(ABS(rand_perturb_on),1)
-            if (MOD(m,2) .ne. 0) rand2 = rand_pert(i,1)*2.
+            if (MOD(m,2) .ne. 0) rand2 = rand_pert(i,j)*2.
             m = RSHIFT(ABS(rand_perturb_on),2)
-            if (MOD(m,2) .ne. 0) rand3 = 0.25*(rand_pert(i,1)+ABS(min_rand))
+            if (MOD(m,2) .ne. 0) rand3 = 0.25*(rand_pert(i,j)+ABS(min_rand))
             m = RSHIFT(ABS(rand_perturb_on),3)
          endif
 !+---+-----------------------------------------------------------------+
