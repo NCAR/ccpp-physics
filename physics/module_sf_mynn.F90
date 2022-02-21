@@ -295,7 +295,8 @@ CONTAINS
                                                           U3D,V3D, &
                                                         th3d,pi3d
 
-      REAL, DIMENSION( ims:ime, kms:kme), OPTIONAL,                &
+      !GJF: This array must be assumed-shape since it is conditionally-allocated
+      REAL, DIMENSION( :,: ),                                      &
                 INTENT(IN) ::                      pattern_spp_sfc
 !===================================
 ! 2D VARIABLES
@@ -3765,4 +3766,3 @@ END SUBROUTINE SFCLAY1D_mynn
 !========================================================================
 
 END MODULE module_sf_mynn
-
