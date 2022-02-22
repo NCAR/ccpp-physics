@@ -5,7 +5,7 @@
 module GFS_rrtmgp_gfdlmp_pre
   use machine,      only: kind_phys
   use radiation_tools,   only: check_error_msg
-  use module_radiation_cloud_overlap, only: cmp_dcorr_lgth, get_alpha_exp  
+  use module_radiation_cloud_overlap, only: cmp_dcorr_lgth, get_alpha_exper  
   use rrtmgp_lw_cloud_optics, only: radliq_lwr => radliq_lwrLW, radliq_upr => radliq_uprLW,&
                                     radice_lwr => radice_lwrLW, radice_upr => radice_uprLW
 

@@ -4,7 +4,7 @@
 module GFS_rrtmgp_cloud_overlap_pre
   use machine,      only: kind_phys
   use radiation_tools,   only: check_error_msg
-  use module_radiation_cloud_overlap, only: cmp_dcorr_lgth, get_alpha_exp  
+  use module_radiation_cloud_overlap, only: cmp_dcorr_lgth, get_alpha_exper  
 
   public GFS_rrtmgp_cloud_overlap_pre_init, GFS_rrtmgp_cloud_overlap_pre_run, GFS_rrtmgp_cloud_overlap_pre_finalize
 
@@ -149,24 +149,25 @@ contains
     ! Cloud overlap parameter
     !
     if (iovr == iovr_dcorr .or. iovr == iovr_exp .or. iovr == iovr_exprand) then
-       call get_alpha_exp(nCol, nLev, deltaZc, de_lgth, cloud_overlap_param)
+       call get_alpha_exper(nCol, nLev, iovr, iovr_exprand, deltaZc,        &
+                            de_lgth, cld_frac, cloud_overlap_param)
     else
        de_lgth(:)               = 0.
        cloud_overlap_param(:,:) = 0.
     endif
 
-    ! For exponential random overlap...
-    ! Decorrelate layers when a clear layer follows a cloudy layer to enforce
-    ! random correlation between non-adjacent blocks of cloudy layers
-    if (iovr == iovr_exprand) then
-       do iLay = 1, nLev
-          do iCol = 1, nCol
-             if (cld_frac(iCol,iLay) .eq. 0. .and. cld_frac(iCol,iLay-1) .gt. 0.) then
-                cloud_overlap_param(iCol,iLay) = 0._kind_phys
-             endif
-          enddo
-       enddo
-    endif
+!    ! For exponential random overlap...
+!    ! Decorrelate layers when a clear layer follows a cloudy layer to enforce
+!    ! random correlation between non-adjacent blocks of cloudy layers
+!    if (iovr == iovr_exprand) then
+!       do iLay = 1, nLev
+!          do iCol = 1, nCol
+!             if (cld_frac(iCol,iLay) .eq. 0. .and. cld_frac(iCol,iLay-1) .gt. 0.) then
+!                cloud_overlap_param(iCol,iLay) = 0._kind_phys
+!             endif
+!          enddo
+!       enddo
+!    endif
 
     ! 
     ! Compute precipitation overlap parameter (Hack. Using same as cloud for now)
