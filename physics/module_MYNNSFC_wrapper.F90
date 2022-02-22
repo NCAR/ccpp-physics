@@ -201,7 +201,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
      &        CHS2, CQS2, rmol, zol, mol, ch,               &
      &        lh, wstar
      !LOCAL
-      real, dimension(im) ::                                &
+      real(kind=kind_phys), dimension(im) ::                &
      &        hfx, znt, psim, psih,                         &
      &        chs, ck, cd, mavail, xland, GZ1OZ0,           &
      &        cpm, qgh, qfx, snowh_wat
@@ -228,13 +228,19 @@ SUBROUTINE mynnsfc_wrapper_run(            &
 !      endif
 
       ! prep MYNN-only variables
+      pattern_spp_pbl(:,:) = 0
+      dz(:,:) = 0
+      th(:,:) = 0
+      qv(:,:) = 0
+      hfx(:)  = 0
+      qfx(:)  = 0
+      rmol(:) = 0
       do k=1,2 !levs
         do i=1,im
            dz(i,k)=(phii(i,k+1) - phii(i,k))*g_inv
            th(i,k)=t3d(i,k)/exner(i,k)
            !qc(i,k)=MAX(qgrs(i,k,ntcw),0.0)
            qv(i,k)=qvsh(i,k)/(1.0 - qvsh(i,k))
-           pattern_spp_pbl(i,k)=0.0
         enddo
       enddo
       do i=1,im
@@ -333,8 +339,9 @@ SUBROUTINE mynnsfc_wrapper_run(            &
              spp_pbl=spp_pbl,pattern_spp_pbl=pattern_spp_pbl,                 &
              ids=1,ide=im, jds=1,jde=1, kds=1,kde=levs,                       &
              ims=1,ime=im, jms=1,jme=1, kms=1,kme=levs,                       &
-             its=1,ite=im, jts=1,jte=1, kts=1,kte=levs                        )
-
+             its=1,ite=im, jts=1,jte=1, kts=1,kte=levs,                       &
+             errmsg=errmsg, errflg=errflg                                     )
+        if (errflg/=0) return
 
         !! POST MYNN SURFACE LAYER (INTERSTITIAL) WORK:
         !do i = 1, im

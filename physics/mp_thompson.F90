@@ -91,7 +91,7 @@ module mp_thompson
          real(kind_phys) :: orho(1:ncol,1:nlev)     ! m3 kg-1
          real(kind_phys) :: nc_local(1:ncol,1:nlev) ! needed because nc is only allocated if is_aerosol_aware is true
          !
-         real (kind=kind_phys) :: h_01, airmass, niIN3, niCCN3
+         real (kind=kind_phys) :: h_01, z1, niIN3, niCCN3
          integer :: i, k
 
          ! Initialize the CCPP error handling variables
@@ -192,8 +192,8 @@ module mp_thompson
                endif
                niCCN3 = -1.0*ALOG(naCCN1/naCCN0)/h_01
                nwfa(i,1) = naCCN1+naCCN0*exp(-((hgt(i,2)-hgt(i,1))/1000.)*niCCN3)
-               airmass = 1./orho(i,1) * (hgt(i,2)-hgt(i,1))*area(i) ! kg
-               nwfa2d(i) = nwfa(i,1) * 0.000196 * (airmass*5.E-11)
+               z1 = hgt(i,2)-hgt(i,1)
+               nwfa2d(i) = nwfa(i,1) * 0.000196 * (50./z1)
                do k = 2, nlev
                  nwfa(i,k) = naCCN1+naCCN0*exp(-((hgt(i,k)-hgt(i,1))/1000.)*niCCN3)
                enddo
@@ -212,8 +212,8 @@ module mp_thompson
                !+---+-----------------------------------------------------------------+
                if (mpirank==mpiroot) write(*,*) ' Apparently there are no initial CCN aerosol surface emission rates.'
                do i = 1, ncol
-                  airmass = 1./orho(i,1) * (hgt(i,2)-hgt(i,1))*area(i) ! kg
-                  nwfa2d(i) = nwfa(i,1) * 0.000196 * (airmass*5.E-11)
+                  z1 = hgt(i,2)-hgt(i,1)
+                  nwfa2d(i) = nwfa(i,1) * 0.000196 * (50./z1)
                enddo
              else
                 if (mpirank==mpiroot) write(*,*) ' Apparently initial CCN aerosol surface emission rates are present.'
@@ -377,6 +377,7 @@ module mp_thompson
 
          ! Reduced time step if subcycling is used
          real(kind_phys) :: dtstep
+         integer         :: ndt
          ! Air density
          real(kind_phys) :: rho(1:ncol,1:nlev)              !< kg m-3
          ! Water vapor mixing ratio (instead of specific humidity)
@@ -456,11 +457,39 @@ module mp_thompson
          errmsg = ''
          errflg = 0
 
-         ! Check initialization state
-         if (.not.is_initialized) then
-            write(errmsg, fmt='((a))') 'mp_thompson_run called before mp_thompson_init'
-            errflg = 1
-            return
+         if (first_time_step .and. istep==1 .and. blkno==1) then
+            ! Check initialization state
+            if (.not.is_initialized) then
+               write(errmsg, fmt='((a))') 'mp_thompson_run called before mp_thompson_init'
+               errflg = 1
+               return
+            end if
+            ! Check forr optional arguments of aerosol-aware microphysics
+            if (is_aerosol_aware .and. .not. (present(nc)     .and. &
+                                              present(nwfa)   .and. &
+                                              present(nifa)   .and. &
+                                              present(nwfa2d) .and. &
+                                              present(nifa2d)       )) then
+               write(errmsg,fmt='(*(a))') 'Logic error in mp_thompson_run:',  &
+                                          ' aerosol-aware microphysics require all of the', &
+                                          ' following optional arguments:', &
+                                          ' nc, nwfa, nifa, nwfa2d, nifa2d'
+               errflg = 1
+               return
+            end if
+            ! Consistency cheecks - subcycling and inner loop at the same time are not supported
+            if (nsteps>1 .and. dt_inner < dtp) then
+               write(errmsg,'(*(a))') "Logic error: Subcycling and inner loop cannot be used at the same time"
+               errflg = 1
+               return
+            else if (mpirank==mpiroot .and. nsteps>1) then
+               write(*,'(a,i0,a,a,f6.2,a)') 'Thompson MP is using ', nsteps, ' substep(s) per time step with an ', &
+                                            'effective time step of ', dtp/real(nsteps, kind=kind_phys), ' seconds'
+            else if (mpirank==mpiroot .and. dt_inner < dtp) then
+               ndt = max(nint(dtp/dt_inner),1)
+               write(*,'(a,i0,a,a,f6.2,a)') 'Thompson MP is using ', ndt, ' inner loops per time step with an ', &
+                                            'effective time step of ', dtp/real(ndt, kind=kind_phys), ' seconds'
+            end if
          end if
 
          ! Set reduced time step if subcycling is used
@@ -468,25 +497,6 @@ module mp_thompson
             dtstep = dtp/real(nsteps, kind=kind_phys)
          else
             dtstep = dtp
-         end if
-         if (first_time_step .and. istep==1 .and. mpirank==mpiroot .and. blkno==1) then
-            write(*,'(a,i0,a,a,f8.2,a)') 'Thompson MP is using ', nsteps, ' substep(s) per time step', &
-                                         ' with an effective time step of ', dtstep, ' seconds'
-         end if
-
-         if (first_time_step .and. istep==1) then
-           if (is_aerosol_aware .and. .not. (present(nc)     .and. &
-                                             present(nwfa)   .and. &
-                                             present(nifa)   .and. &
-                                             present(nwfa2d) .and. &
-                                             present(nifa2d)       )) then
-              write(errmsg,fmt='(*(a))') 'Logic error in mp_thompson_run:',  &
-                                         ' aerosol-aware microphysics require all of the', &
-                                         ' following optional arguments:', &
-                                         ' nc, nwfa, nifa, nwfa2d, nifa2d'
-              errflg = 1
-              return
-           end if
          end if
 
          !> - Convert specific humidity to water vapor mixing ratio.
