@@ -98,7 +98,7 @@ contains
          dcorr_lgth  ! Decorrelation length (km)
     real(kind_phys), dimension(nCol,nLay), intent(in) :: &
          dzlay       !
-    real(kind_phys), dimension(:,:), intent(in) ::  &
+    real(kind_phys), dimension(nCol,nLay), intent(in) ::  &
          cld_frac
     
     ! Outputs
