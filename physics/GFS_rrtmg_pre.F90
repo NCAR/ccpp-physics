@@ -36,7 +36,7 @@
         gasvmr_ccl4,  gasvmr_cfc113, aerodp, clouds6, clouds7, clouds8,        &
         clouds9, cldsa, cldfra, cldfra2d, lwp_ex,iwp_ex, lwp_fc,iwp_fc,        &
         faersw1, faersw2, faersw3, faerlw1, faerlw2, faerlw3, alpha,           &
-        errmsg, errflg)
+        spp_wts_rad, spp_rad, errmsg, errflg)
 
       use machine,                   only: kind_phys
 
@@ -103,6 +103,9 @@
       logical,              intent(in) :: lsswr, lslwr, ltaerosol, lgfdlmprad, &
                                           uni_cld, effr_in, do_mynnedmf,       &
                                           lmfshal, lmfdeep2, pert_clds
+
+      integer,    intent(in) :: spp_rad
+      real(kind_phys),              intent(in) :: spp_wts_rad(:,:)
 
       real(kind=kind_phys), intent(in) :: fhswr, fhlwr, solhr, sup, julian, sppt_amp
       real(kind=kind_phys), intent(in) :: con_eps, epsm1, fvirt, rog, rocp, con_rd
@@ -1059,6 +1062,24 @@
            cldfra2d(i) = max(cldfra2d(i), cldfra(i,k))
          enddo
        enddo
+
+      if ( spp_rad == 1 ) then
+        do k=1,lm
+          if (k < levs) then
+            do i=1,im
+              clouds3(i,k) = clouds3(i,k) - spp_wts_rad(i,k) * clouds3(i,k)
+              clouds5(i,k) = clouds5(i,k) - spp_wts_rad(i,k) * clouds5(i,k)
+              clouds9(i,k) = clouds9(i,k) - spp_wts_rad(i,k) * clouds9(i,k)
+            enddo
+          else
+            do i=1,im
+              clouds3(i,k) = clouds3(i,k) - spp_wts_rad(i,k) * clouds3(i,k)
+              clouds5(i,k) = clouds5(i,k) - spp_wts_rad(i,k) * clouds5(i,k)
+              clouds9(i,k) = clouds9(i,k) - spp_wts_rad(i,k) * clouds9(i,k)
+            enddo
+          endif
+        enddo
+      endif
 
 ! mg, sfc-perts
 !  ---  scale random patterns for surface perturbations with
