@@ -638,6 +638,21 @@
   dimensions = ()
   type = logical
   intent = in
+[spp_wts_mp]
+  standard_name = spp_weights_for_microphysics_scheme
+  long_name = spp weights for microphysics scheme
+  units = 1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[spp_mp]
+  standard_name = control_for_microphysics_spp_perturbations
+  long_name = control for microphysics spp perturbations
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
