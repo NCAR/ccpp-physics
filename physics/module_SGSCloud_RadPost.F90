@@ -21,8 +21,8 @@
       subroutine sgscloud_radpost_run( &
            im,levs,                    &
            flag_init,flag_restart,     &
-           qc,qi,                      &
-           qc_save,qi_save,            &
+           qc,qi,qs,                   &
+           qc_save,qi_save,qs_save,    &
            errmsg,errflg               )
 
 ! should be moved to inside the mynn:
@@ -34,8 +34,8 @@
 
       integer, intent(in)  :: im, levs
       logical,          intent(in)  :: flag_init, flag_restart
-      real(kind=kind_phys), dimension(:,:), intent(inout) :: qc, qi
-      real(kind=kind_phys), dimension(:,:), intent(in)    :: qc_save, qi_save
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: qc, qi, qs
+      real(kind=kind_phys), dimension(:,:), intent(in)    :: qc_save, qi_save, qs_save
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
       ! Local variable
@@ -58,6 +58,7 @@
         do i = 1, im
           qc(i,k) = qc_save(i,k)
           qi(i,k) = qi_save(i,k)
+          qs(i,k) = qs_save(i,k)
         enddo
       enddo
 
