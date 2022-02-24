@@ -8,7 +8,7 @@
 
 
 !---------------------------------------------------------------------
-! code snapshot: "Oct 29 2021" at "19:44:39"
+! code snapshot: "Feb 24 2022" at "14:27:57"
 !---------------------------------------------------------------------
 !---------------------------------------------------------------------
 ! IMPORTANT: Best results are attained using the 5th-order WENO (Weighted Essentially Non-Oscillatory) advection option (4) for scalars:
@@ -25,35 +25,39 @@
 !
 ! WENO references: Jiang and Shu, 1996, J. Comp. Phys. v. 126, 202-223; Shu 2003, Int. J. Comp. Fluid Dyn. v. 17 107-118;
 !
-! This module provides a 2-moment bulk microphysics scheme originally 
-! developed by Conrad Ziegler (Zeigler, 1985, JAS) and modified/upgraded in 
-! in Mansell, Zeigler, and Bruning (2010, JAS).  Two-moment adaptive sedimentation 
-! follows Mansell (2010, JAS), using parameter infall = 4.
-!
-! Added info on graupel density and soaking is in Mansell and Ziegler (2013, JAS)
-!
-! Average graupel particle density is predicted, which affects fall speed as well. 
-! Hail density prediction is by default disabled in this version, but may be enabled
-! at some point if there is interest.
-!
-! Maintainer: Ted Mansell, National Severe Storms Laboratory <ted.mansell@noaa.gov>
-!
-! Microphysics References:
-!
-! Mansell, E. R., C. L. Ziegler, and E. C. Bruning, 2010: Simulated electrification of a small 
-!   thunderstorm with two-moment bulk microphysics. J. Atmos. Sci., 67, 171-194, doi:10. 1175/2009JAS2965.1.
-!
-!  Mansell, E. R. and C. L. Ziegler, 2013: Aerosol effects on simulated storm electrification and 
-!     precipitation in a two-moment bulk microphysics model. J. Atmos. Sci., 70 (7), 2032-2050, 
-!     doi:10.1175/JAS-D-12-0264.1.
-!
-! Ziegler, C. L., 1985: Retrieval of thermal and microphysical variables in observed convective storms. 
-!    Part I: Model development and preliminary testing. J. Atmos. Sci., 42, 1487-1509.
-!
-! Sedimentation reference:
-!
-! Mansell, E. R., 2010: On sedimentation and advection in multimoment bulk microphysics. 
-!    J. Atmos. Sci., 67, 3084-3094, doi:10.1175/2010JAS3341.1.
+!>\ingroup mod_mp_nssl2m
+!! This module provides a 2-moment bulk microphysics scheme described by 
+!! Mansell, Zeigler, and Bruning (2010, JAS) 
+!!
+!! This module provides a 2-moment bulk microphysics scheme based on a combination of 
+!! Straka and Mansell (2005, JAM) and Zeigler (1985, JAS) and modified/upgraded in 
+!! in Mansell, Zeigler, and Bruning (2010, JAS).  Two-moment adaptive sedimentation 
+!! follows Mansell (2010, JAS), using parameter infall = 4.
+!!
+!! Added info on graupel density and soaking is in Mansell and Ziegler (2013, JAS)
+!!
+!! Average graupel particle density is predicted, which affects fall speed as well. 
+!! Hail density prediction is by default disabled in this version, but may be enabled
+!! at some point if there is interest.
+!!
+!! Maintainer: Ted Mansell, National Severe Storms Laboratory <ted.mansell@noaa.gov>
+!!
+!! Microphysics References:
+!!
+!! Mansell, E. R., C. L. Ziegler, and E. C. Bruning, 2010: Simulated electrification of a small 
+!!   thunderstorm with two-moment bulk microphysics. J. Atmos. Sci., 67, 171-194, doi:10. 1175/2009JAS2965.1.
+!!
+!!  Mansell, E. R. and C. L. Ziegler, 2013: Aerosol effects on simulated storm electrification and 
+!!     precipitation in a two-moment bulk microphysics model. J. Atmos. Sci., 70 (7), 2032-2050, 
+!!     doi:10.1175/JAS-D-12-0264.1.
+!!
+!! Ziegler, C. L., 1985: Retrieval of thermal and microphysical variables in observed convective storms. 
+!!    Part I: Model development and preliminary testing. J. Atmos. Sci., 42, 1487-1509.
+!!
+!! Sedimentation reference:
+!!
+!! Mansell, E. R., 2010: On sedimentation and advection in multimoment bulk microphysics. 
+!!    J. Atmos. Sci., 67, 3084-3094, doi:10.1175/2010JAS3341.1.
 !
 ! Possible parameters to adjust:
 !
@@ -77,7 +81,8 @@
 !---------------------------------------------------------------------
 ! Sept. 2021:
 ! Fixes:
-!   Restored previous formulation of snow reflectivity, as it was realized that the last change incorrectly assumed a fixed density independent of size. Generally low reflectivity values as a result (no effect on microphysics)
+!   Restored previous formulation of snow reflectivity, as it was realized that the last change incorrectly assumed a fixed 
+!     density independent of size. Generally lower snow reflectivity values as a result (no effect on microphysics)
 ! Other:
 !   Generic fall speed coeffecients (axx,bxx) to accomodate future frozen drops category (no effect)
 !   Reordered collection coefficients (dab1lh) to be consistent (no effect)
@@ -168,6 +173,9 @@
 
 
 
+!>\defgroup mod_nsslmp NSSL 2-moment microphysics modules
+!!\ingroup nsslmp testphrase one
+!! Module for NSSL cloud physics
 MODULE module_mp_nssl_2mom
   IMPLICIT NONE
   
@@ -561,6 +569,7 @@ MODULE module_mp_nssl_2mom
 
   integer :: ivhmltsoak = 1   ! 0=off, 1=on : flag to simulate soaking (graupel/hail) during melting 
                          ! when liquid fraction is not predicted
+  logical :: iwetsoak = .true. ! soak and freeze during wet growth or not
   integer, private :: ioldlimiter = 0 ! test switch for new(=0) or old(=1) size limiter at the end of GS for 3-moment categories
   integer, private :: isnowfall = 2   ! Option for choosing between snow fall speed parameters
                          ! 1 = original Zrnic et al. (Mansell et al. 2010)
@@ -606,6 +615,7 @@ MODULE module_mp_nssl_2mom
                             ! 3 = only add 1.5*cxmin to number concentration (allow max size to apply)
                             ! 4 = add droplets with minimum radius of 20 microns
   real    :: maxsupersat = 1.9 ! maximum supersaturation ratio, above which a saturation adustment is done
+  real    :: maxlowtempss = 1.08 ! Sat. ratio threshold for allowing droplet nucleation at T < tfrh
   real    :: ssmxuf = 4.0 ! supersaturation at which to start using "ultrafine" CCN (if ccnuf > 0.)
   
 
@@ -1088,7 +1098,6 @@ MODULE module_mp_nssl_2mom
                         delta_alphamlr, &
                         iqvsopt,     &
                         maxsupersat, &
-                        charging_border, &
                         do_accurate_sedimentation, interval_sedi_vt
 ! #####################################################################
 ! #####################################################################
@@ -1099,12 +1108,16 @@ MODULE module_mp_nssl_2mom
 ! #####################################################################
 
 
+!>\ingroup mod_nsslmp
+!! This function is for saturation vapor pressure with respect to liquid water
  REAL FUNCTION fqvs(t)
   implicit none
   real :: t
   fqvs = exp(caw*(t-273.15)/(t-cbw))
  END FUNCTION fqvs
 
+!>\ingroup mod_nsslmp
+!! This function is for saturation vapor pressure with respect to ice
  REAL FUNCTION fqis(t)
   implicit none
   real :: t
@@ -1118,6 +1131,8 @@ MODULE module_mp_nssl_2mom
 ! #####################################################################
 
 
+!>\ingroup mod_nsslmp
+!! NSSL MP subroutine to initialize physical constants provided by host model
        SUBROUTINE nssl_2mom_init_const(  &
          con_g, con_rd, con_cp, con_rv, con_t0c, con_cliq, con_csol, con_eps )
          
@@ -1145,8 +1160,8 @@ MODULE module_mp_nssl_2mom
        END SUBROUTINE nssl_2mom_init_const
 ! #####################################################################
 ! #####################################################################
-
-
+!>\ingroup mod_nsslmp
+!! NSSL MP setup routine (sets local options and array indices)
        SUBROUTINE nssl_2mom_init(  &
      & ims,ime, jms,jme, kms,kme, nssl_params, ipctmp, mixphase,ihvol,idoniconlytmp, &
      & nssl_graupelfallfac, &
@@ -1241,6 +1256,7 @@ MODULE module_mp_nssl_2mom
       ENDIF
 
       
+
 
 
       IF ( .false. ) THEN ! set to true to enable internal namelist read
@@ -2016,6 +2032,8 @@ END SUBROUTINE nssl_2mom_init
 ! #####################################################################
 ! #####################################################################
 
+!>\ingroup mod_nsslmp
+!! Driver subroutine that copies state data to local 2D arrays for microphysics calls
 SUBROUTINE nssl_2mom_driver(qv, qc, qr, qi, qs, qh, qhl, ccw, crw, cci, csw, chw, chl,  &
                               cn, vhw, vhl, cna, cni, f_cn, f_cna, f_cina,               &
                               zrw, zhw, zhl,                                            &
@@ -2034,7 +2052,7 @@ SUBROUTINE nssl_2mom_driver(qv, qc, qr, qi, qs, qh, qhl, ccw, crw, cci, csw, chw
                               rscghis_2d,rscghis_2dp,rscghis_2dn,                       &
                               scr,scw,sci,scs,sch,schl,sctot,                           &
                               elec_physics,                                             &
-                              induc,elec,scion,sciona,                                  &
+                              induc,elecz,scion,sciona,                                 &
                               noninduc,noninducp,noninducn,                             &
                               pcc2, pre2, depsubr,      &
                               mnucf2, melr2, ctr2,     &
@@ -2090,7 +2108,7 @@ SUBROUTINE nssl_2mom_driver(qv, qc, qr, qi, qs, qh, qhl, ccw, crw, cci, csw, chw
                             scr,scw,sci,scs,sch,schl,sciona,sctot  ! space charge
       real, dimension(ims:ime, kms:kme, jms:jme),  optional, intent(inout)::                   &
                             induc,noninduc,noninducp,noninducn  ! charging rates: inductive, noninductive (all, positive, negative to graupel)
-      real, dimension(ims:ime, kms:kme, jms:jme),  optional, intent(in) :: elec ! elecsave = Ez     
+      real, dimension(ims:ime, kms:kme, jms:jme),  optional, intent(in) :: elecz ! elecsave = Ez     
       real, dimension(ims:ime, kms:kme, jms:jme,2),optional, intent(inout) :: scion  
       real, dimension(ims:ime, kms:kme, jms:jme), intent(in)::  p,w,dz,dn
 
@@ -2194,7 +2212,7 @@ SUBROUTINE nssl_2mom_driver(qv, qc, qr, qi, qs, qh, qhl, ccw, crw, cci, csw, chw
       double precision :: grmass1,grmass2
       double precision :: hlmass1,hlmass2
       double precision :: wvol5,wvol10
-      real :: tmp,dv,dv1
+      real :: tmp,dv,dv1,tmpchg
       real :: rdt
       
       double precision :: dt1,dt2
@@ -2209,6 +2227,8 @@ SUBROUTINE nssl_2mom_driver(qv, qc, qr, qi, qs, qh, qhl, ccw, crw, cci, csw, chw
 
       real :: ycent, y, emissrate, emissrate0, emissrate1, z, fac, factot
       real :: fach(kts:kte)
+      
+      logical, parameter :: debugdriver = .false.
 
 #ifdef MPI
 
@@ -2227,7 +2247,7 @@ SUBROUTINE nssl_2mom_driver(qv, qc, qr, qi, qs, qh, qhl, ccw, crw, cci, csw, chw
 
       rdt = 1.0/dtp
       
-!      write(0,*) 'N2M: entering routine'
+     IF ( debugdriver ) write(0,*) 'N2M: entering routine'
 
      flag_qndrop = .false.
      flag_qnifa = .false.
@@ -2283,7 +2303,7 @@ SUBROUTINE nssl_2mom_driver(qv, qc, qr, qi, qs, qh, qhl, ccw, crw, cci, csw, chw
       makediag = diagflag .or. itimestep == 1
      ENDIF
 
-!     write(0,*) 'N2M: makediag = ',makediag
+     IF ( debugdriver ) write(0,*) 'N2M: makediag = ',makediag
      
      
      nx = ite-its+1
@@ -2346,7 +2366,7 @@ SUBROUTINE nssl_2mom_driver(qv, qc, qr, qi, qs, qh, qhl, ccw, crw, cci, csw, chw
 
 
 
-!     write(0,*) 'N2M: jy loop 1, lhl,na = ',lhl,na,present(qhl)
+     IF ( debugdriver ) write(0,*) 'N2M: jy loop 1, lhl,na = ',lhl,na,present(qhl)
 
           ancuten(its:ite,1,kts:kte,:) = 0.0
           thproclocal(:,:) = 0.0
@@ -2626,7 +2646,7 @@ SUBROUTINE nssl_2mom_driver(qv, qc, qr, qi, qs, qh, qhl, ccw, crw, cci, csw, chw
 
 ! copy xfall to appropriate places...
 
-!     write(0,*) 'N2M: end sediment, jy = ',jy
+     IF ( debugdriver ) write(0,*) 'N2M: end sediment, jy = ',jy
 
        DO ix = its,ite
          IF ( lhl > 1 ) THEN
@@ -2686,7 +2706,7 @@ SUBROUTINE nssl_2mom_driver(qv, qc, qr, qi, qs, qh, qhl, ccw, crw, cci, csw, chw
       IF ( isedonly /= 1 ) THEN
    ! call nssl_2mom_gs: main gather-scatter routine to calculate microphysics
 
-!     write(0,*) 'N2M: gs, jy = ',jy
+     IF ( debugdriver ) write(0,*) 'N2M: gs, jy = ',jy
 !      IF ( isedonly /= 2 ) THEN
 
 
@@ -2922,6 +2942,8 @@ END SUBROUTINE nssl_2mom_driver
 ! #####################################################################
 ! #####################################################################
 
+!>\ingroup mod_nsslmp
+!! Single-precision complete gamma function
       REAL FUNCTION GAMMA_SP(xx)
 
       implicit none
@@ -2960,6 +2982,8 @@ END SUBROUTINE nssl_2mom_driver
 
 ! #####################################################################
 
+!>\ingroup mod_nsslmp
+!! Douple-precision complete gamma function (single precision input)
       DOUBLE PRECISION FUNCTION GAMMA_DPR(x)
       ! dp gamma with real input
         implicit none
@@ -2978,6 +3002,8 @@ END SUBROUTINE nssl_2mom_driver
 
 ! #####################################################################
 
+!>\ingroup mod_nsslmp
+!! single-precision incomplete gamma function (single precision args)
         real function GAMXINF(A1,X1)
 
 !       ===================================================
@@ -3036,6 +3062,8 @@ END SUBROUTINE nssl_2mom_driver
 
 ! #####################################################################
 
+!>\ingroup mod_nsslmp
+!! Double-precision incomplete gamma function (single precision args)
         double precision function GAMXINFDP(A1,X1)
 
 !       ===================================================
@@ -3097,7 +3125,8 @@ END SUBROUTINE nssl_2mom_driver
 
 ! #####################################################################
 
-! #ifdef Z3MOM
+!>\ingroup mod_nsslmp
+!! Function to interpolate from a table of incomplete gamma function values
       real function gaminterp(ratio, alp, luindex, ilh)
       
       implicit none
@@ -3141,7 +3170,6 @@ END SUBROUTINE nssl_2mom_driver
 !           ENDIF
            
         END FUNCTION gaminterp
-! #endif /* Z3MOM */
 ! #####################################################################
 
 !**************************** GAML02 *********************** 
@@ -3149,6 +3177,8 @@ END SUBROUTINE nssl_2mom_driver
 !   It is used for qiacr with the gamma of volume to calculate what 
 !   fraction of drops exceed a certain size (this version is for 40 micron drops)
 ! **********************************************************
+!>\ingroup mod_nsslmp
+!! Function calculates Gamma(0.2,x)/Gamma[0.2] for 40 micro drops ( imurain == 3 )
       real FUNCTION GAML02(x) 
       implicit none
       integer ig, i, ii, n, np
@@ -3191,7 +3221,9 @@ END SUBROUTINE nssl_2mom_driver
 !   It is used for qiacr with the gamma of volume to calculate what 
 !   fraction of drops exceed a certain size (this version is for 300 micron drops) (see zieglerstuff.nb)
 ! **********************************************************
-      real FUNCTION GAML02d300(x) 
+!>\ingroup mod_nsslmp
+!! Function calculates fraction of drops larger than 300 microns ( imurain == 3 )
+     real FUNCTION GAML02d300(x) 
       implicit none
       integer ig, i, ii, n, np
       real x
@@ -3237,6 +3269,8 @@ END SUBROUTINE nssl_2mom_driver
 !   It is used for qiacr with the gamma of volume to calculate what 
 !   fraction of drops exceed a certain size (this version is for 500 micron drops) (see zieglerstuff.nb)
 ! **********************************************************
+!>\ingroup mod_nsslmp
+!! Function calculates Gamma(0.2,x)/Gamma[0.2] for 500 micro drops ( imurain == 3 )
       real FUNCTION GAML02d500(x) 
       implicit none
       integer ig, i, ii, n, np
@@ -3307,6 +3341,8 @@ END SUBROUTINE nssl_2mom_driver
 ! #####################################################################
 ! #####################################################################
 
+!>\ingroup mod_nsslmp
+!! Douple-precision complete gamma function (double precision argument)
       DOUBLE PRECISION FUNCTION GAMMA_DP(xx)
 
       implicit none
@@ -3340,6 +3376,8 @@ END SUBROUTINE nssl_2mom_driver
       END function gamma_dp
 ! #####################################################################
 
+!>\ingroup mod_nsslmp
+!! Double-precision complete gamma function subroutine (used by beta function routine)
         SUBROUTINE GAMMADP(X,GA)
 !
 !       ==================================================
@@ -3411,6 +3449,8 @@ END SUBROUTINE nssl_2mom_driver
 !
 !
 ! #####################################################################
+!>\ingroup mod_nsslmp
+!! Function calculates collection coefficients following Siefert (2006)
       Function delbk(bb,nu,mu,k)
 !   
 !  Purpose: Caluculates collection coefficients following Siefert (2006)
@@ -3466,6 +3506,8 @@ END SUBROUTINE nssl_2mom_driver
 !
 ! #####################################################################
 ! Equation (91) in Seifert and Beheng (2006) ("a" collecting "b")
+!>\ingroup mod_nsslmp
+!! Function calculates collection coefficients following Siefert (2006)
       Function delabk(ba,bb,nua,nub,mua,mub,k)
       
       implicit none
@@ -3524,25 +3566,9 @@ END SUBROUTINE nssl_2mom_driver
       END Function delabk
       
 
-! #####################################################################
-!
-! #####################################################################
-!--------------------------------------------------------------------------
-      subroutine cld_cpu(string)
-
-      implicit none
-      character( LEN = * ) string
-      
-      return
-      
-      end subroutine cld_cpu
-
-!
-!--------------------------------------------------------------------------
-!
-!--------------------------------------------------------------------------
-!
-      subroutine sediment1d(dtp,nx,ny,nz,an,na,nor,norz,xfall,dn,dz3d,dz3dinv, &
+!>\ingroup mod_nsslmp
+!! Sedimentation driver subroutine. Calls fallout column by column
+     subroutine sediment1d(dtp,nx,ny,nz,an,na,nor,norz,xfall,dn,dz3d,dz3dinv, &
      &                    t0,t7,infdo,jslab,its,jts,  &
      &   timesed1,timesed2,timesed3,zmaxsed,timesetvt) ! used for timing
 !
@@ -3958,6 +3984,8 @@ END SUBROUTINE nssl_2mom_driver
 !
 !--------------------------------------------------------------------------
 !
+!>\ingroup mod_nsslmp
+!! Column sedimentation fallout subroutine
       subroutine fallout1d(nx,ny,nz,nor,na,dtp,dtfrac,jgs,vt,   &
      &  a,db1,ia,id,xfall,dtz1,ixcol)
 !
@@ -4070,6 +4098,8 @@ END SUBROUTINE nssl_2mom_driver
 ! ##############################################################################
 ! ##############################################################################
 
+!>\ingroup mod_nsslmp
+!! Calculates temporary reflectivity moment for adaptive size-sorting limiter
       subroutine calczgr1d(nx,ny,nz,nor,na,a,ixe,kze,              &
      &    z,db,jgs,ipconc, alpha, l,ln, qmin, xvmn,xvmx, lvol, rho_qx, ixcol)
 
@@ -4188,6 +4218,8 @@ END SUBROUTINE nssl_2mom_driver
 !  Calculation is in a slab (constant jgs)
 !
 
+!>\ingroup mod_nsslmp
+!! Subroutine to correct number concentration to prevent reflectivity growth
       subroutine calcnfromz1d(nx,ny,nz,nor,na,a,t0,ixe,kze,    &
      &    z0,db,jgs,ipconc, alpha, l,ln, qmin, xvmn,xvmx,t1, &
      &    lvol, rho_qx, infall, ixcol)
@@ -4381,6 +4413,8 @@ END SUBROUTINE nssl_2mom_driver
 !
 ! 10.27.2015: Added hail calculation
 !
+!>\ingroup mod_nsslmp
+!! Subroutine to calculate number concentrations from initial state that has only mixing ratio.
       subroutine calcnfromq(nx,ny,nz,an,na,nor,norz,dn, &
      &  qcw,qci,qsw,qrw,qhw,qhl, &
      &  ccw,cci,csw,crw,chw,chl, &
@@ -4726,6 +4760,8 @@ END SUBROUTINE nssl_2mom_driver
 !
 ! 10.27.2015: Added hail calculation
 !
+!>\ingroup mod_nsslmp
+!! Subroutine to calculate number concentrations from convection parameterization rates that have only mixing ratio.
       subroutine calcnfromcuten(nx,ny,nz,an,anold,na,nor,norz,dn)
 
       
@@ -4915,6 +4951,8 @@ END SUBROUTINE nssl_2mom_driver
 ! #####################################################################
 ! #####################################################################
 
+!>\ingroup mod_nsslmp
+!! Subroutine to calculate effective radii for use by radiation routines
    SUBROUTINE calc_eff_radius    &
      &  (nx,ny,nz,na,jyslab & 
      &  ,nor,norz & 
@@ -5096,6 +5134,8 @@ END SUBROUTINE nssl_2mom_driver
 ! #####################################################################
 ! #####################################################################
 
+!>\ingroup mod_nsslmp
+!! Subroutine that returns the maximum possible condensation
       SUBROUTINE QVEXCESS(ngs,mgs,qwvp0,qv0,qcw1,pres,thetap0,theta0, &
      &    qvex,pi0,tabqvs,nqsat,fqsat,cbw,fcqv1,felvcp,ss1,pk,ngscnt)
       
@@ -5255,6 +5295,8 @@ END SUBROUTINE nssl_2mom_driver
 !
 ! ##############################################################################
 !
+!>\ingroup mod_nsslmp
+!! Mean hydrometeor size and fall speed calculations
       SUBROUTINE setvtz(ngscnt,qx,qxmin,qxw,cx,rho0,rhovt,xdia,cno,cnostmp, &
      &                 xmas,vtxbar,xdn,xvmn0,xvmx0,xv,cdx,cdxgs,            &
      &                 ipconc1,ndebug1,ngs,nz,kgs,fadvisc,   &
@@ -6497,7 +6539,6 @@ END SUBROUTINE nssl_2mom_driver
                      aax = ax(il)
                      vtxbar(mgs,il,2) =  rhovt(mgs)*ax(il)*(xdia(mgs,il,1)**bx(il)*x)/y
                    ENDIF
-
 !                  vtxbar(mgs,il,2) =  &
 !     &               rhovt(mgs)*(xdn(mgs,il)/400.)*(75.715*xdia(mgs,il,1)**0.6* &
 !     &               x)/y
@@ -6519,7 +6560,7 @@ END SUBROUTINE nssl_2mom_driver
                    vtxbar(mgs,il,3) = rhovt(mgs)*                 &
      &                (aax*(xdia(mgs,il,1) )**bbx *  &
      &                 x)/y
-!     &                 Gamma(7.0 + alpha(mgs,il) + bbx))/Gamma(7. + alpha(mgs,il))
+!     &                 Gamma(7.0 + alpha(mgs,il) + bbx)/Gamma(7. + alpha(mgs,il))
           IF ( .not. (vtxbar(mgs,il,1) > -1. .and. vtxbar(mgs,il,1) < 200. ) .or. &
                .not. (vtxbar(mgs,il,3) > -1. .and. vtxbar(mgs,il,3) < 200. ) ) THEN
            write(0,*) 'Setvtz: problem with vtxbar1/3: ',il,vtxbar(mgs,il,1),vtxbar(mgs,il,3),aax,bbx,x,y
@@ -6637,6 +6678,8 @@ END SUBROUTINE nssl_2mom_driver
 !  subroutine to calculate fall speeds of hydrometeors
 !
 
+!>\ingroup mod_nsslmp
+!! Column-wise front end to setvtz for sedimentation
       subroutine ziegfall1d(nx,ny,nz,nor,norz,na,dtp,jgs,ixcol, &
      &  xvt, rhovtzx,                                           &
      &  an,dn,ipconc0,t0,t7,cwmasn,cwmasx,       &
@@ -7145,6 +7188,8 @@ END SUBROUTINE nssl_2mom_driver
 ! #####################################################################
 
 ! ##############################################################################
+!>\ingroup mod_nsslmp
+!! Radar reflectivity calculation. Assumes ideal Rayleigh scattering.
       subroutine radardd02(nx,ny,nz,nor,na,an,temk,         &
      &    dbz,db,nzdbz,cnoh0t,hwdn1t,ipconc,ke_diag, iunit)
 !
@@ -7775,7 +7820,7 @@ END SUBROUTINE nssl_2mom_driver
              ksq = 0.189 ! Smith (1984, JAMC) for equiv. ice sphere
              IF ( an(ix,jy,kz,lns) .gt. 1.e-7 ) THEN
      !          IF ( .true. ) THEN
-               IF ( qxw > qsmin .or. iusewetsnow >= 2) THEN ! old version
+               IF ( qxw > qsmin .or. iusewetsnow >= 2 ) THEN ! old version
 !                gtmp(ix,kz) = 3.6e18*(snu+2.)*( 0.224*an(ix,jy,kz,ls) + 0.776*qxw)*an(ix,jy,kz,ls)/ &
 !     &              (an(ix,jy,kz,lns)*(snu+1.)*rwdn**2)*db(ix,jy,kz)**2
                 gtmp(ix,kz) = 3.6e18*(snu+2.)*( 0.224*(an(ix,jy,kz,ls)+qxw1) + 0.776*qxw)*(an(ix,jy,kz,ls)+qxw1)/ &
@@ -8144,6 +8189,8 @@ END SUBROUTINE nssl_2mom_driver
 ! ##############################################################################
 
 
+!>\ingroup mod_nsslmp
+!! Droplet nucleation routine. Explicit condensation/evaporation. Tiny mixing ratio cleanup.
 ! #####################################################################
 ! #####################################################################
 !
@@ -8474,7 +8521,7 @@ END SUBROUTINE nssl_2mom_driver
       if ( temg(1) .lt. tfr ) then
       end if
 !
-      if ( (temg(1) .gt. tfrh .or. an(ix,jy,kz,lv)/qvs(1) > maxsupersat ) .and.  &
+      if ( (temg(1) .gt. tfrh .or. an(ix,jy,kz,lv)/qvs(1) > maxlowtempss ) .and.  &
      &   ( an(ix,jy,kz,lv)  .gt. qss(1) .or. &
      &     an(ix,jy,kz,lc)  .gt. qxmin(lc)   .or.  &
      &     ( an(ix,jy,kz,lr)  .gt. qxmin(lr) .and. rcond == 2 )  &
@@ -8806,7 +8853,9 @@ END SUBROUTINE nssl_2mom_driver
 
       DO mgs=1,ngscnt
         dcloud = 0.0
-        IF ( temg(mgs) .le. tfrh .and. qx(mgs,lv)/qvs(mgs) < maxsupersat ) THEN
+        ! Skip points at low temperature if SS stays less than 1.08, 
+        ! otherwise allow nucleation at low temp (will freeze at next time step)
+        IF ( temg(mgs) .le. tfrh .and. qx(mgs,lv)/qvs(mgs) < maxlowtempss ) THEN 
          CYCLE
         ENDIF
 
@@ -10266,6 +10315,8 @@ END SUBROUTINE nssl_2mom_driver
 
 ! #####################################################################
 ! #####################################################################
+!>\ingroup mod_nsslmp
+!! Main microphysical processes routine
 
 
 
@@ -10743,6 +10794,7 @@ END SUBROUTINE nssl_2mom_driver
       real ::  vtxbar(ngs,lc:lhab,3)
       real ::  xmas(ngs,lc:lhab)
       real ::  xdn(ngs,lc:lhab)
+      real ::  xdntmp(ngs,lc:lhab)
       real ::  cdxgs(ngs,lc:lhab)
       real ::  xdia(ngs,lc:lhab,3)
       real ::  vtwtdia(ngs,lr:lhab) ! sweep-out volume weighted diameter
@@ -12187,6 +12239,7 @@ END SUBROUTINE nssl_2mom_driver
         IF ( lhl .gt. 1 ) THEN
 
           xdn(mgs,lhl) = xdn0(lhl)
+          xdntmp(mgs,lhl) = xdn0(lhl)
 
           IF ( lvol(lhl) .gt. 1 ) THEN
            IF ( vx(mgs,lhl) .gt. 0.0 .and. qx(mgs,lhl) .gt. qxmin(lhl) ) THEN
@@ -12198,6 +12251,7 @@ END SUBROUTINE nssl_2mom_driver
 
              xdn(mgs,lhl) = Min( dnmx, Max( xdnmn(lhl), rho0(mgs)*qx(mgs,lhl)/vx(mgs,lhl) ) )
              vx(mgs,lhl) = rho0(mgs)*qx(mgs,lhl)/xdn(mgs,lhl)
+             xdntmp(mgs,lhl) = xdn(mgs,lhl)
          
            ELSEIF ( vx(mgs,lhl) == 0.0 .and. qx(mgs,lhl) .gt. qxmin(lhl) ) THEN ! if volume is zero, need to initialize the default value
 
@@ -14422,7 +14476,7 @@ END SUBROUTINE nssl_2mom_driver
          cautn(mgs) = Min(ccmxd(mgs),   &
      &      ((alpha(mgs,lc)+2.)/(alpha(mgs,lc)+1.))*aa1*cx(mgs,lc)**2*xv(mgs,lc)**2)
          cautn(mgs) = Max( 0.0d0, cautn(mgs) )
-         IF ( rb(mgs) .le. 7.51d-6 ) THEN
+         IF ( rb(mgs) .le. 7.51d-6 .or. dmrauto == -1) THEN
            t2s = 1.d30
 !           cautn(mgs) = 0.0
          ELSE
@@ -16508,6 +16562,8 @@ END SUBROUTINE nssl_2mom_driver
 
         IF ( lvol(lh) .gt. 1 .and. .not. mixedphase) THEN
         ! rescale volumes to maximum density
+         IF ( iwetsoak ) THEN 
+
          rimdn(mgs,lh) = xdnmx(lh)
          raindn(mgs,lh) = xdnmx(lh)
          vhacw(mgs) = qhacw(mgs)*rho0(mgs)/rimdn(mgs,lh)
@@ -16521,7 +16577,10 @@ END SUBROUTINE nssl_2mom_driver
            v2 = rho0(mgs)*qhwet(mgs)/xdnmx(lh)  ! volume of frozen accretion
            
            vhsoak(mgs) = Min(v1,v2)
+
            
+         ENDIF
+         
          ENDIF
 
          vhshdr(mgs) = Min(0.0, rho0(mgs)*qhwet(mgs)/xdnmx(lh) - vhacw(mgs) - vhacr(mgs) )
@@ -16577,6 +16636,8 @@ END SUBROUTINE nssl_2mom_driver
         IF ( lvol(lhl) .gt. 1  .and. .not. mixedphase ) THEN
 !        IF ( lvol(lhl) .gt. 1 .and. wetgrowthhl(mgs) ) THEN
 
+         IF ( iwetsoak ) THEN 
+
          rimdn(mgs,lhl) = xdnmx(lhl) 
          raindn(mgs,lhl) = xdnmx(lhl) 
          vhlacw(mgs) = qhlacw(mgs)*rho0(mgs)/rimdn(mgs,lhl)
@@ -16599,6 +16660,8 @@ END SUBROUTINE nssl_2mom_driver
            vhlsoak(mgs) = 0.0
 !           vhlacw(mgs) = 0.0
 !           vhlacr(mgs) = rho0(mgs)*qhlwet(mgs)/raindn(mgs,lhl)
+         
+         ENDIF
          
          ENDIF
 

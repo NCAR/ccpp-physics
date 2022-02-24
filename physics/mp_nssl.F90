@@ -2,8 +2,8 @@
 !! This file contains NSSL 2-moment MP scheme.
 
 
-!>\defgroup aanssl NSSL MP Module
-!! This module contains the NSSL microphysics scheme.
+!>\defgroup nsslmp NSSL MP Module
+!! This module contains the front end to NSSL microphysics scheme.
 module mp_nssl
 
     use machine, only : kind_phys, kind_real
@@ -19,8 +19,11 @@ module mp_nssl
 
     contains
 
+!>\ingroup nsslmp
 !> This subroutine is a wrapper around the nssl_2mom_init().
 !! \section arg_table_mp_nssl_init Argument Table
+!>@{
+!> \section arg_table_mp_nssl_init Argument Table
 !! \htmlinclude mp_nssl_init.html
 !!
     subroutine mp_nssl_init(ncol, nlev, errflg, errmsg, threads, restart, &
@@ -138,9 +141,10 @@ module mp_nssl
          return
 
     end subroutine mp_nssl_init
+!>@}
 
-!>\ingroup aanssl
-!>\section gen_nssl NSSL MP General Algorithm
+!>\ingroup nsslmp
+!>\section gen_nssl NSSL MP General Algorithm: interface to driver
 !>@{
 !> \section arg_table_mp_nssl_run Argument Table
 !! \htmlinclude mp_nssl_run.html
@@ -390,7 +394,7 @@ module mp_nssl
          !> - Convert omega in Pa s-1 to vertical velocity w in m s-1
          w = -omega/(rho*con_g)
 
-         !> - Layer width in m from geopotential in m2 s-2
+         !> - Layer thickness in m from geopotential in m2 s-2
          dz = (phii(:,2:nlev+1) - phii(:,1:nlev)) / con_g
 
          ! Accumulated values inside scheme, not used;
