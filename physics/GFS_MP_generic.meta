@@ -95,6 +95,13 @@
   type = real
   kind = kind_phys
   intent = inout
+[num_dfi_radar]
+  standard_name = number_of_radar_derived_temperature_or_convection_suppression_intervals
+  long_name = number of time ranges with radar-derived microphysics temperature tendencies or radar-derived convection suppression
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -104,9 +111,9 @@
   kind = len=*
   intent = out
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out
@@ -727,6 +734,66 @@
   type = real
   kind = kind_phys
   intent = in
+[dfi_radar_max_intervals]
+  standard_name = maximum_number_of_radar_derived_temperature_or_convection_suppression_intervals
+  long_name = maximum allowed number of time ranges with radar-derived microphysics temperature tendencies or radar-derived convection suppression
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[num_dfi_radar]
+  standard_name = number_of_radar_derived_temperature_or_convection_suppression_intervals
+  long_name = number of time ranges with radar-derived microphysics temperature tendencies or radar-derived convection suppression
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[fh_dfi_radar]
+  standard_name = forecast_lead_times_bounding_radar_derived_temperature_or_convection_suppression_intervals
+  long_name = forecast lead times bounding radar derived temperature or convection suppression intervals
+  units = h
+  dimensions = (maximum_number_of_radar_derived_temperature_or_convection_suppression_intervals_plus_one)
+  type = real
+  kind = kind_phys
+  intent = in
+[ix_dfi_radar]
+  standard_name = indices_with_radar_derived_temperature_or_convection_suppression_data
+  long_name = indices with radar derived temperature or convection suppression data
+  units = index
+  dimensions = (maximum_number_of_radar_derived_temperature_or_convection_suppression_intervals)
+  type = integer
+  intent = in
+[dfi_radar_tten]
+  standard_name = radar_derived_microphysics_temperature_tendency
+  long_name = radar-derived microphysics temperature tendency
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_radar_derived_temperature_or_convection_suppression_intervals)
+  type = real
+  kind = kind_phys
+  intent = in
+[fhour]
+  standard_name = forecast_time
+  long_name = current forecast time
+  units = h
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[radar_tten_limits]
+  standard_name = allowed_bounds_of_radar_prescribed_tendencies
+  long_name = allowed bounds of prescribed microphysics temperature tendencies
+  units = K s-1
+  dimensions = (2)
+  type = real
+  kind = kind_phys
+  intent = in
+[index_of_process_dfi_radar]
+  standard_name = index_of_radar_derived_microphysics_temperature_forcing_in_cumulative_change_index
+  long_name = index of radar-derived microphysics temperature forcing in second dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
 [dtend]
   standard_name = cumulative_change_of_state_variables
   long_name = diagnostic tendencies for state variables
@@ -786,9 +853,9 @@
   kind = len=*
   intent = out
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out

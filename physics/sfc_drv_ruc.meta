@@ -42,9 +42,9 @@
   dimensions = ()
   type = integer
   intent = in
-[flag_restart]
-  standard_name = flag_for_restart
-  long_name = flag for restart (warmstart) or coldstart
+[lsm_cold_start]
+  standard_name = do_lsm_cold_start
+  long_name = flag to signify LSM is cold-started
   units = flag
   dimensions = ()
   type = logical
@@ -504,9 +504,9 @@
   kind = len=*
   intent = out
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out
@@ -524,9 +524,9 @@
   kind = len=*
   intent = out
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out
@@ -1566,9 +1566,9 @@
   dimensions = ()
   type = logical
   intent = in
-[flag_restart]
-  standard_name = flag_for_restart
-  long_name = flag for restart (warmstart) or coldstart
+[lsm_cold_start]
+  standard_name = do_lsm_cold_start
+  long_name = flag to signify LSM is cold-started
   units = flag
   dimensions = ()
   type = logical
@@ -1596,9 +1596,9 @@
   kind = len=*
   intent = out
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out

@@ -162,6 +162,14 @@
   type = real
   kind = kind_phys
   intent = in
+[fhour]
+  standard_name = forecast_time
+  long_name = current forecast time 
+  units = h
+  dimensions = () 
+  type = real 
+  kind = kind_phys
+  intent = in 
 [jindx1_aer]
   standard_name = lower_latitude_index_of_aerosol_forcing_for_interpolation
   long_name = interpolation low index for prescribed aerosols in the y direction
@@ -866,9 +874,9 @@
   type = real
   kind = kind_phys
   intent = in
-[flag_restart]
-  standard_name = flag_for_restart
-  long_name = flag for restart (warmstart) or coldstart
+[lsm_cold_start]
+  standard_name = do_lsm_cold_start
+  long_name = flag to signify LSM is cold-started
   units = flag
   dimensions = ()
   type = logical
@@ -889,9 +897,9 @@
   kind = len=*
   intent = out
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out
@@ -909,9 +917,9 @@
   kind = len=*
   intent = out
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out
@@ -1144,6 +1152,13 @@
   type = real
   kind = kind_phys
   intent = inout
+[iflip]
+  standard_name = control_for_vertical_index_direction
+  long_name = iflip - is not the same as flipv
+  units = flag 
+  dimensions = () 
+  type = integer
+  intent = in 
 [jindx1_aer]
   standard_name = lower_latitude_index_of_aerosol_forcing_for_interpolation
   long_name = interpolation low index for prescribed aerosols in the y direction
@@ -1354,9 +1369,9 @@
   kind = len=*
   intent = out
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out
@@ -1374,9 +1389,9 @@
   kind = len=*
   intent = out
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out
