@@ -164,7 +164,7 @@ contains
 
           ! Allocate space RRTMGP DDTs [nday,nLev,nGpt]
           call check_error_msg('rrtmgp_sw_cnvcloud_sampling_run', &
-               sw_optical_props_precip%alloc_2str( nday, nLev, sw_gas_props))
+               sw_optical_props_cnvclouds%alloc_2str( nday, nLev, sw_gas_props))
 
           ! Maximum-random, random or maximum overlap
           if (iovr_convcld == iovr_maxrand .or. iovr_convcld == iovr_max .or. iovr_convcld == iovr_rand) then

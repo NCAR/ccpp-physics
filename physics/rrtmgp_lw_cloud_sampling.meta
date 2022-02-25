@@ -14,13 +14,6 @@
   dimensions = ()
   type = logical
   intent = in
-[doGP_lwscat] 
-  standard_name = flag_to_include_longwave_scattering_in_cloud_optics
-  long_name = logical flag to control the addition of LW scattering in RRTMGP 
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
 [doGP_convcld]
   standard_name = flag_to_include_convective_cloud_in_RRTMGP
   long_name = logical flag to control convective cloud in RRTMGP
@@ -121,8 +114,8 @@
   kind = kind_phys
   intent = in
 [cnv_cldfrac]
-  standard_name = convective_cloud_area_fraction
-  long_name = convective cloud cover in the phy_f3d array
+  standard_name = convective_cloud_fraction_for_RRTMGP
+  long_name = layer convective cloud fraction
   units = frac
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real

@@ -136,8 +136,8 @@
   kind = kind_phys
   intent = in
 [cnv_cldfrac]
-  standard_name = convective_cloud_area_fraction
-  long_name = convective cloud cover in the phy_f3d array
+  standard_name = convective_cloud_fraction_for_RRTMGP
+  long_name = layer convective cloud fraction
   units = frac
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real

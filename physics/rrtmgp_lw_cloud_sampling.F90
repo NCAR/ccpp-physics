@@ -21,7 +21,7 @@ contains
   subroutine rrtmgp_lw_cloud_sampling_run(doLWrad, nCol, nLev, icseed_lw, iovr,iovr_convcld,&
        iovr_max, iovr_maxrand, iovr_rand, iovr_dcorr, iovr_exp, iovr_exprand, isubc_lw,     &
        cld_frac, precip_frac, cloud_overlap_param, precip_overlap_param, cnv_cldfrac,       &
-       cnv_cloud_overlap_param, doGP_lwscat, doGP_convcld, lw_optical_props_cloudsByBand,   &
+       cnv_cloud_overlap_param, doGP_convcld, lw_optical_props_cloudsByBand,                &
        lw_optical_props_cnvcloudsByBand, lw_optical_props_precipByBand,                     &
        lw_optical_props_clouds, lw_optical_props_cnvclouds, lw_optical_props_precip,        &
        errmsg, errflg)
@@ -29,7 +29,6 @@ contains
     ! Inputs
     logical, intent(in) :: &
          doLWrad,                          & ! Logical flag for shortwave radiation call
-         doGP_lwscat,                      & ! Include scattering in LW cloud-optics?
          doGP_convcld
     integer, intent(in) :: &
          nCol,                             & ! Number of horizontal gridpoints
@@ -151,7 +150,7 @@ contains
     ! Sampling. Map band optical depth to each g-point using McICA
     !
     call check_error_msg('rrtmgp_lw_cloud_sampling_run_draw_samples',&
-         draw_samples(maskMCICA, doGP_lwscat,                        &
+         draw_samples(maskMCICA, .true.,                             &
                       lw_optical_props_cloudsByBand,                 &
                       lw_optical_props_clouds))
 
@@ -188,7 +187,7 @@ contains
        ! Sampling. Map band optical depth to each g-point using McICA
        !
        call check_error_msg('rrtmgp_lw_cnvcloud_sampling_run_draw_samples',&
-            draw_samples(maskMCICA, doGP_lwscat,                           &
+            draw_samples(maskMCICA, .true.,                                &
                          lw_optical_props_cnvcloudsByBand,                 &
                          lw_optical_props_cnvclouds))
     endif
@@ -224,7 +223,7 @@ contains
     ! Sampling. Map band optical depth to each g-point using McICA
     !
     call check_error_msg('rrtmgp_lw_precip_sampling_run_draw_samples',&
-         draw_samples(maskMCICA, doGP_lwscat,                         &
+         draw_samples(maskMCICA, .true.,                              &
                       lw_optical_props_precipByBand,                  &
                       lw_optical_props_precip))
 

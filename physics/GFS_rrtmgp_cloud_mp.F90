@@ -102,7 +102,6 @@ contains
          relhum,                    & ! Relative humidity
          p_lay,                     & ! Pressure at model-layers (Pa)
          cnv_mixratio,              & ! Convective cloud mixing-ratio (kg/kg)
-         cnv_cldfrac,               & ! Convective cloud-fraction (1)
          qci_conv                     !
     real(kind_phys), dimension(:,:), intent(inout) :: &
          effrin_cldliq,             & ! Effective radius for stratiform liquid cloud-particles (microns)
@@ -132,6 +131,7 @@ contains
          cld_rwp,                   & ! Cloud rain water path
          cld_rerain,                & ! Cloud rain effective radius
          precip_frac,               & ! Precipitation fraction
+         cnv_cldfrac,               & ! Convective cloud-fraction (1)
          cnv_cld_lwp,               & ! Water path for       convective liquid cloud-particles (microns) 
          cnv_cld_reliq,             & ! Effective radius for convective liquid cloud-particles (microns)
          cnv_cld_iwp,               & ! Water path for       convective ice cloud-particles (microns)
@@ -214,9 +214,9 @@ contains
           else
              !
              if (doGP_convcld) then
-                call cloud_mp_convective(nCol, nLev, t_lay, p_lev, cnv_mixratio,        &
-                     cnv_cldfrac, con_ttp, con_g, cnv_cld_lwp, cnv_cld_reliq,           &
-                     cnv_cld_iwp, cnv_cld_reice)
+                call cloud_mp_convective(nCol, nLev, t_lay, p_lev, p_lay, qs_lay,       &
+                     relhum, cnv_mixratio, con_ttp, con_g, cnv_cld_lwp, cnv_cld_reliq,  &
+                     cnv_cld_iwp, cnv_cld_reice, cnv_cldfrac)
              endif
              !
              call cloud_mp_thompson(nCol, nLev, nTracers, ncnd, i_cldliq, i_cldice,     &
@@ -250,8 +250,9 @@ contains
 
   ! ######################################################################################
   ! ######################################################################################
-  subroutine cloud_mp_convective(nCol, nLev, t_lay, p_lev, cnv_mixratio, cnv_cldfrac,    &
-       con_ttp, con_g, cnv_cld_lwp, cnv_cld_reliq, cnv_cld_iwp, cnv_cld_reice)
+  subroutine cloud_mp_convective(nCol, nLev, t_lay, p_lev, p_lay, qs_lay, relhum,        &
+       cnv_mixratio, con_ttp, con_g, cnv_cld_lwp, cnv_cld_reliq, cnv_cld_iwp,            &
+       cnv_cld_reice, cnv_cldfrac)
     ! Inputs
     integer, intent(in)    :: &
          nCol,          & ! Number of horizontal grid points
@@ -262,17 +263,29 @@ contains
     real(kind_phys), dimension(:,:),intent(in) :: &
          t_lay,         & ! Temperature at layer centers (K)
          p_lev,         & ! Pressure at layer interfaces (Pa)
-         cnv_mixratio,  & ! Convective cloud mixing-ratio (kg/kg)
-         cnv_cldfrac      ! Convective cloud-fraction (1)
+         p_lay,         & !
+         qs_lay,        & !
+         relhum,        & !
+         cnv_mixratio     ! Convective cloud mixing-ratio (kg/kg)
     ! Outputs
     real(kind_phys), dimension(:,:),intent(inout) :: &
          cnv_cld_lwp,   & ! Convective cloud liquid water path
          cnv_cld_reliq, & ! Convective cloud liquid effective radius
          cnv_cld_iwp,   & ! Convective cloud ice water path
-         cnv_cld_reice    ! Convective cloud ice effecive radius
+         cnv_cld_reice, & ! Convective cloud ice effecive radius
+         cnv_cldfrac      ! Convective cloud-fraction (1)
     ! Local
     integer :: iCol, iLay
     real(kind_phys) :: tem1, deltaP, clwc
+    real(kind_phys), parameter :: alpha0=200
+
+    ! Xu-Randall (1996) cloud-fraction.
+    do iLay = 1, nLev
+       do iCol = 1, nCol
+          cnv_cldfrac(iCol,iLay) = cld_frac_XuRandall(p_lay(iCol,iLay),            &
+               qs_lay(iCol,iLay), relhum(iCol,iLay), cnv_mixratio(iCol,iLay), alpha0)
+       enddo
+    enddo
 
     do iLay = 1, nLev
        do iCol = 1, nCol

@@ -357,21 +357,21 @@
   kind = kind_phys
   intent = in
 [cnv_mixratio]
-  standard_name = convective_cloud_condensate_mixing_ratio
-  long_name = convective cloud water mixing ratio in the phy_f3d array
+  standard_name = convective_cloud_water_mixing_ratio
+  long_name = moist convective cloud water mixing ratio
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
 [cnv_cldfrac]
-  standard_name = convective_cloud_area_fraction
-  long_name = convective cloud cover in the phy_f3d array
+  standard_name = convective_cloud_fraction_for_RRTMGP
+  long_name = layer convective cloud fraction
   units = frac
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
 [qci_conv]
   standard_name = convective_cloud_condesate_after_rainout
   long_name = convective cloud condesate after rainout
