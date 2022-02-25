@@ -1,4 +1,4 @@
-! ########################################################################################
+! ###########update_#############################################################################
 ! ########################################################################################
 module GFS_rrtmgp_cloud_mp
   use machine,      only: kind_phys
@@ -39,11 +39,13 @@ contains
        imfdeepcnv, imfdeepcnv_gf, doSWrad, doLWrad, effr_in, lmfshal, ltaerosol, icloud, &
        imp_physics, imp_physics_thompson, imp_physics_gfdl, imp_physics_zhao_carr,       &
        imp_physics_zhao_carr_pdf, imp_physics_mg, imp_physics_wsm6, lgfdlmprad,          &
-       imp_physics_fer_hires, do_mynnedmf, uni_cld, lmfdeep2, p_lev, p_lay, t_lay, qs_lay, q_lay, relhum,   &
-       lsmask, tv_lay, effrin_cldliq, effrin_cldice, effrin_cldrain, effrin_cldsnow, tracer, cnv_mixratio, cnv_cldfrac, qci_conv,   &
-       con_g, con_rd, con_eps, con_ttp, doGP_cldoptics_PADE, doGP_cldoptics_LUT,                  &
+       imp_physics_fer_hires, do_mynnedmf, uni_cld, lmfdeep2, doGP_convcld, p_lev,       &
+       p_lay, t_lay, qs_lay, q_lay, relhum, lsmask, tv_lay, effrin_cldliq, effrin_cldice,&
+       effrin_cldrain, effrin_cldsnow, tracer, cnv_mixratio, cnv_cldfrac, qci_conv,      &
+       con_g, con_rd, con_eps, con_ttp, doGP_cldoptics_PADE, doGP_cldoptics_LUT,         &
        cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp,   &
-       cld_rerain, precip_frac, cnv_cld_lwp, cnv_cld_reliq, cnv_cld_iwp, cnv_cld_reice,  lwp_ex, iwp_ex, lwp_fc, iwp_fc, errmsg, errflg)
+       cld_rerain, precip_frac, cnv_cld_lwp, cnv_cld_reliq, cnv_cld_iwp, cnv_cld_reice,  &
+       lwp_ex, iwp_ex, lwp_fc, iwp_fc, errmsg, errflg)
 
     ! Inputs   
     integer, intent(in)    :: &
@@ -82,6 +84,7 @@ contains
          do_mynnedmf,               & ! Flag to activate MYNN-EDMF 
          uni_cld,                   & ! Flag for unified cloud scheme
          lmfdeep2,                  & ! Flag for mass flux deep convection 
+         doGP_convcld,              & ! Treat convective clouds seperately?
          doGP_cldoptics_LUT,        & ! Flag to do GP cloud-optics (LUTs)
          doGP_cldoptics_PADE          !                            (PADE approximation)
     real(kind_phys), intent(in) :: &
@@ -147,6 +150,9 @@ contains
     errmsg = ''
     errflg = 0
 
+    ! ###################################################################################
+    ! GFDL Microphysics
+    ! ###################################################################################
     if (imp_physics == imp_physics_gfdl) then
        if (.not. lgfdlmprad) then
           ! Call progcld_gfdl_lin
@@ -171,19 +177,22 @@ contains
              enddo
           enddo
 
-          call cloud_mp_uni(nCol, nLev, nTracers, ncnd, i_cldliq, i_cldice, i_cldrain,         &
-               i_cldsnow, i_cldgrpl, i_cldtot,  effr_in, kdt, lsmask, p_lev, p_lay, t_lay,     &
-               tv_lay, effrin_cldliq, effrin_cldice, effrin_cldsnow, tracer, con_g, con_rd,    &
-               con_ttp, cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, &
-               cld_rwp, cld_rerain, effrin_cldrain=effrin_cldrain)
+          call cloud_mp_uni(nCol, nLev, nTracers, ncnd, i_cldliq, i_cldice, i_cldrain,  &
+               i_cldsnow, i_cldgrpl, i_cldtot,  effr_in, kdt, lsmask, p_lev, p_lay,     &
+               t_lay, tv_lay, effrin_cldliq, effrin_cldice, effrin_cldsnow, tracer,     &
+               con_g, con_rd, con_ttp, cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice,&
+               cld_swp, cld_resnow, cld_rwp, cld_rerain, effrin_cldrain=effrin_cldrain)
        end if
     endif
-    !
+
+    ! ###################################################################################
+    ! Thompson Microphysics
+    ! ###################################################################################
     if (imp_physics == imp_physics_thompson) then
        ! Update particle size using modified mixing-ratios.
-       call update_reff(nLev, nCol, i_cldliq, i_cldice, i_cldsnow, i_cldice_nc, i_cldliq_nc,   &
-            i_twa, q_lay, p_lay, t_lay, tracer, con_eps, con_rd, ltaerosol, effrin_cldliq,     &
-            effrin_cldice, effrin_cldsnow)
+       call cmp_reff_Thompson(nLev, nCol, i_cldliq, i_cldice, i_cldsnow, i_cldice_nc,   &
+            i_cldliq_nc, i_twa, q_lay, p_lay, t_lay, tracer, con_eps, con_rd, ltaerosol,&
+            effrin_cldliq, effrin_cldice, effrin_cldsnow)
        cld_reliq  = effrin_cldliq
        cld_reice  = effrin_cldice
        cld_resnow = effrin_cldsnow
@@ -192,25 +201,30 @@ contains
           if (icloud == 3) then
              ! Call progcld_thompson
           else
-             call cloud_mp_uni(nCol, nLev, nTracers, ncnd, i_cldliq, i_cldice, i_cldrain,      &
-                  i_cldsnow, i_cldgrpl, i_cldtot,  effr_in, kdt, lsmask, p_lev, p_lay, t_lay,  &
-                  tv_lay, effrin_cldliq, effrin_cldice, effrin_cldsnow, tracer, con_g, con_rd, &
-                  con_ttp, cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_swp,          &
-                  cld_resnow, cld_rwp, cld_rerain)
+             call cloud_mp_uni(nCol, nLev, nTracers, ncnd, i_cldliq, i_cldice,          &
+                  i_cldrain, i_cldsnow, i_cldgrpl, i_cldtot,  effr_in, kdt, lsmask,     &
+                  p_lev, p_lay, t_lay, tv_lay, effrin_cldliq, effrin_cldice,            &
+                  effrin_cldsnow, tracer, con_g, con_rd, con_ttp, cld_frac, cld_lwp,    &
+                  cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp,          &
+                  cld_rerain)
           endif
        else
           if (icloud == 3) then
              ! Call progcld_thompson
           else
              !
-             call cloud_mp_convective(nCol, nLev, t_lay, p_lev, cnv_mixratio, cnv_cldfrac,     &
-                  con_ttp, con_g, cnv_cld_lwp, cnv_cld_reliq, cnv_cld_iwp, cnv_cld_reice)
+             if (doGP_convcld) then
+                call cloud_mp_convective(nCol, nLev, t_lay, p_lev, cnv_mixratio,        &
+                     cnv_cldfrac, con_ttp, con_g, cnv_cld_lwp, cnv_cld_reliq,           &
+                     cnv_cld_iwp, cnv_cld_reice)
+             endif
              !
-             call cloud_mp_thompson(nCol, nLev, nTracers, ncnd, i_cldliq, i_cldice, i_cldrain, &
-                  i_cldsnow, i_cldgrpl, i_cldtot, i_cldliq_nc, i_cldice_nc, i_twa, p_lev,      &
-                  p_lay, tv_lay, t_lay, tracer, qs_lay, q_lay, relhum, con_g, con_rd, con_eps, &
-                  lmfshal, ltaerosol, imfdeepcnv, imfdeepcnv_gf, uni_cld, lmfdeep2,            &
-                  lwp_ex, iwp_ex, lwp_fc, iwp_fc, cld_frac, cld_lwp, cld_iwp, cld_swp, cld_rwp)
+             call cloud_mp_thompson(nCol, nLev, nTracers, ncnd, i_cldliq, i_cldice,     &
+                  i_cldrain, i_cldsnow, i_cldgrpl, i_cldtot, i_cldliq_nc, i_cldice_nc,  &
+                  i_twa, p_lev, p_lay, tv_lay, t_lay, tracer, qs_lay, q_lay, relhum,    &
+                  con_g, con_rd, con_eps, lmfshal, ltaerosol, imfdeepcnv, imfdeepcnv_gf,&
+                  uni_cld, lmfdeep2, lwp_ex, iwp_ex, lwp_fc, iwp_fc, cld_frac, cld_lwp, &
+                  cld_iwp, cld_swp, cld_rwp)
           endif
        endif
     endif
@@ -596,7 +610,7 @@ contains
 
   ! ######################################################################################
   ! ######################################################################################
-  subroutine update_reff(nLev, nCol, i_cldliq, i_cldice, i_cldsnow, i_cldice_nc,         &
+  subroutine cmp_reff_Thompson(nLev, nCol, i_cldliq, i_cldice, i_cldsnow, i_cldice_nc,   &
        i_cldliq_nc, i_twa, q_lay, p_lay, t_lay, tracer, con_eps, con_rd, ltaerosol,      &
        effrin_cldliq, effrin_cldice, effrin_cldsnow)
 
@@ -666,6 +680,6 @@ contains
        enddo
     enddo
 
-  end subroutine update_reff
+  end subroutine cmp_reff_Thompson
 
 end module GFS_rrtmgp_cloud_mp

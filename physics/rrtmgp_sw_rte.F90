@@ -24,41 +24,45 @@ contains
 !! \section arg_table_rrtmgp_sw_rte_run
 !! \htmlinclude rrtmgp_sw_rte.html
 !!
-  subroutine rrtmgp_sw_rte_run(doSWrad, doSWclrsky, nCol, nLev, nDay, idxday, coszen, p_lay, &
-       t_lay, top_at_1, iSFC, sw_optical_props_clrsky, sfc_alb_nir_dir, sfc_alb_nir_dif,     &
-       sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, toa_src_sw, sw_optical_props_clouds,            &
-       sw_optical_props_aerosol, scmpsw, fluxswUP_allsky, fluxswDOWN_allsky, fluxswUP_clrsky,&
-       fluxswDOWN_clrsky, errmsg, errflg)
+  subroutine rrtmgp_sw_rte_run(doSWrad, doSWclrsky, nCol, nLev, nDay, idxday, coszen, p_lay,&
+       t_lay, top_at_1, doGP_convcld, iSFC, sfc_alb_nir_dir, sfc_alb_nir_dif,               &
+       sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, toa_src_sw, sw_optical_props_clrsky,           &
+       sw_optical_props_clouds, sw_optical_props_precip, sw_optical_props_cnvclouds,        &
+       sw_optical_props_aerosol, scmpsw, fluxswUP_allsky, fluxswDOWN_allsky,                &
+       fluxswUP_clrsky, fluxswDOWN_clrsky, errmsg, errflg)
 
     ! Inputs
     logical, intent(in) :: &
-         top_at_1,                & ! Vertical ordering flag
-         doSWrad,                 & ! Flag to calculate SW irradiances
-         doSWclrsky                 ! Compute clear-sky fluxes?
+         top_at_1,                   & ! Vertical ordering flag
+         doGP_convcld,               & ! Flag to include convective cloud
+         doSWrad,                    & ! Flag to calculate SW irradiances
+         doSWclrsky                    ! Compute clear-sky fluxes?
     integer, intent(in) :: &
-         nCol,                    & ! Number of horizontal gridpoints
-         nday,                    & ! Number of daytime points
-         nLev,                    & ! Number of vertical levels
-         iSFC                       ! Vertical index for surface-level
+         nCol,                       & ! Number of horizontal gridpoints
+         nday,                       & ! Number of daytime points
+         nLev,                       & ! Number of vertical levels
+         iSFC                          ! Vertical index for surface-level
     integer, intent(in), dimension(ncol) :: &
-         idxday                     ! Index array for daytime points
+         idxday                        ! Index array for daytime points
     real(kind_phys),intent(in), dimension(ncol) :: &
-         coszen                     ! Cosize of SZA
+         coszen                        ! Cosize of SZA
     real(kind_phys), dimension(ncol,NLev), intent(in) :: &
-         p_lay,                   & ! Pressure @ model layer-centers (Pa)
-         t_lay                      ! Temperature (K)
+         p_lay,                      & ! Pressure @ model layer-centers (Pa)
+         t_lay                         ! Temperature (K)
     type(ty_optical_props_2str),intent(inout) :: &
-         sw_optical_props_clrsky    ! RRTMGP DDT: shortwave clear-sky radiative properties 
+         sw_optical_props_clrsky       ! RRTMGP DDT: shortwave clear-sky radiative properties 
    type(ty_optical_props_2str),intent(in) :: &
-         sw_optical_props_clouds, & ! RRTMGP DDT: shortwave cloud radiative properties 
-         sw_optical_props_aerosol   ! RRTMGP DDT: shortwave aerosol radiative properties
+         sw_optical_props_clouds,    & ! RRTMGP DDT: shortwave cloud radiative properties 
+         sw_optical_props_cnvclouds, & ! RRTMGP DDT: shortwave convecive cloud radiative properties
+         sw_optical_props_precip,    & ! RRTMGP DDT: shortwave precipitation radiative properties
+         sw_optical_props_aerosol      ! RRTMGP DDT: shortwave aerosol radiative properties
     real(kind_phys), dimension(sw_gas_props%get_nband(),ncol), intent(in) :: &
-         sfc_alb_nir_dir,         & ! Surface albedo (direct) 
-         sfc_alb_nir_dif,         & ! Surface albedo (diffuse)
-         sfc_alb_uvvis_dir,       & ! Surface albedo (direct)
-         sfc_alb_uvvis_dif          ! Surface albedo (diffuse)
+         sfc_alb_nir_dir,            & ! Surface albedo (direct) 
+         sfc_alb_nir_dif,            & ! Surface albedo (diffuse)
+         sfc_alb_uvvis_dir,          & ! Surface albedo (direct)
+         sfc_alb_uvvis_dif             ! Surface albedo (diffuse)
     real(kind_phys), dimension(ncol,sw_gas_props%get_ngpt()), intent(in) :: &
-         toa_src_sw                 ! TOA incident spectral flux (W/m2)
+         toa_src_sw                    ! TOA incident spectral flux (W/m2)
 
     ! Outputs
     character(len=*), intent(out) :: &
@@ -121,7 +125,10 @@ contains
           endif
        enddo
 
+       !
        ! Compute clear-sky fluxes (if requested)
+       !
+
        ! Clear-sky fluxes (gas+aerosol)
        call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_aerosol%increment(sw_optical_props_clrsky))
        ! Delta-scale optical properties
@@ -139,10 +146,20 @@ contains
           fluxswUP_clrsky(idxday(1:nday),:)   = sum(flux_clrsky%bnd_flux_up,dim=3)
           fluxswDOWN_clrsky(idxday(1:nday),:) = sum(flux_clrsky%bnd_flux_dn,dim=3)
        endif
-       
+
+       !
        ! Compute all-sky fluxes
-       ! All-sky fluxes (clear-sky + clouds)
+       !
+
+       ! Include convective cloud?
+       if (doGP_convcld) then
+          call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_cnvclouds%increment(sw_optical_props_clrsky))
+       endif
+
+       ! All-sky fluxes (clear-sky + clouds + precipitation)
+       call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_precip%increment(sw_optical_props_clrsky))
        call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_clouds%increment(sw_optical_props_clrsky))
+
        ! Delta-scale optical properties
        call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_clrsky%delta_scale())
        call check_error_msg('rrtmgp_sw_rte_run',rte_sw(     &

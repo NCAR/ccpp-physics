@@ -383,10 +383,11 @@ contains
 !! \htmlinclude rrtmgp_lw_cloud_optics.html
 !!
   subroutine rrtmgp_lw_cloud_optics_run(doLWrad, doG_cldoptics, icliq_lw, icice_lw,      &
-       doGP_cldoptics_PADE, doGP_cldoptics_LUT, doGP_lwscat, nCol, nLev, nbndsGPlw,      &
-       p_lay, cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow,     &
-       cld_rwp, cld_rerain, precip_frac, lon, lat, cldtaulw,                             &
-       lw_optical_props_cloudsByBand, lw_optical_props_precipByBand, errmsg, errflg)
+       doGP_cldoptics_PADE, doGP_cldoptics_LUT, doGP_lwscat, doGP_convcld, nCol, nLev,   &
+       nbndsGPlw , p_lay, cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_swp,     &
+       cld_resnow, cld_rwp, cld_rerain, precip_frac, cnv_cld_lwp, cnv_cld_reliq,         &
+       cnv_cld_iwp, cnv_cld_reice, lon, lat, cldtaulw, lw_optical_props_cloudsByBand,    &
+       lw_optical_props_cnvcloudsByBand, lw_optical_props_precipByBand, errmsg, errflg)
     
     ! Inputs
     logical, intent(in) :: &
@@ -394,9 +395,10 @@ contains
          doG_cldoptics,       & ! Use legacy RRTMG cloud-optics?
          doGP_cldoptics_PADE, & ! Use RRTMGP cloud-optics: PADE approximation?
          doGP_cldoptics_LUT,  & ! Use RRTMGP cloud-optics: LUTs?
-         doGP_lwscat            ! Include scattering in LW cloud-optics?
+         doGP_lwscat,         & ! Include scattering in LW cloud-optics?
+         doGP_convcld           !
     integer, intent(in) ::    &
-         nbndsGPlw,           & ! Number of longwave bands
+         nbndsGPlw,           & !
          nCol,                & ! Number of horizontal gridpoints
          nLev,                & ! Number of vertical levels
          icliq_lw,            & ! Choice of treatment of liquid cloud optical properties (RRTMG legacy)
@@ -415,7 +417,11 @@ contains
          cld_resnow,          & ! Cloud snow effective radius 
          cld_rwp,             & ! Cloud rain water path      
          cld_rerain,          & ! Cloud rain effective radius 
-         precip_frac            ! Precipitation fraction by layer.
+         precip_frac,         & ! Precipitation fraction by layer.
+         cnv_cld_lwp,         & ! Water path for       convective liquid cloud-particles (microns) 
+         cnv_cld_reliq,       & ! Effective radius for convective liquid cloud-particles (microns)
+         cnv_cld_iwp,         & ! Water path for       convective ice cloud-particles (microns)
+         cnv_cld_reice          ! Effective radius for convective ice cloud-particles (microns) 
  
     ! Outputs
     character(len=*), intent(out) :: &
@@ -423,8 +429,9 @@ contains
     integer, intent(out) :: &
          errflg                             ! CCPP error flag
     type(ty_optical_props_2str),intent(inout) :: &
-         lw_optical_props_cloudsByBand,   & ! RRTMGP DDT: Longwave optical properties in each band (clouds)
-         lw_optical_props_precipByBand      ! RRTMGP DDT: Longwave optical properties in each band (precipitation)
+         lw_optical_props_cloudsByBand,    & ! RRTMGP DDT: Longwave optical properties in each band (clouds)
+         lw_optical_props_cnvcloudsByBand, & ! RRTMGP DDT: Longwave optical properties in each band (convective cloud)
+         lw_optical_props_precipByBand       ! RRTMGP DDT: Longwave optical properties in each band (precipitation)
     real(kind_phys), dimension(ncol,nLev), intent(inout) :: &
          cldtaulw                           ! Approx 10.mu band layer cloud optical depth  
          
@@ -444,27 +451,41 @@ contains
 
     if (.not. doLWrad) return
 
-    lw_optical_props_cloudsByBand%band_lims_wvn = lw_gas_props%get_band_lims_wavenumber()
-    lw_optical_props_precipByBand%band_lims_wvn = lw_gas_props%get_band_lims_wavenumber()
+    lw_optical_props_cloudsByBand%band_lims_wvn    = lw_gas_props%get_band_lims_wavenumber()
+    lw_optical_props_cnvcloudsByBand%band_lims_wvn = lw_gas_props%get_band_lims_wavenumber()
+    lw_optical_props_precipByBand%band_lims_wvn    = lw_gas_props%get_band_lims_wavenumber()
     do iBand=1,lw_gas_props%get_nband()
-       lw_optical_props_cloudsByBand%band2gpt(1:2,iBand) = iBand
-       lw_optical_props_cloudsByBand%band2gpt(1:2,iBand) = iBand
-       lw_optical_props_precipByBand%gpt2band(iBand)     = iBand
-       lw_optical_props_precipByBand%gpt2band(iBand)     = iBand
+       lw_optical_props_cloudsByBand%band2gpt(1:2,iBand)    = iBand
+       lw_optical_props_cnvcloudsByBand%band2gpt(1:2,iBand) = iBand
+       lw_optical_props_precipByBand%band2gpt(1:2,iBand)    = iBand
+       lw_optical_props_cloudsByBand%gpt2band(iBand)        = iBand
+       lw_optical_props_cnvcloudsByBand%gpt2band(iBand)     = iBand
+       lw_optical_props_precipByBand%gpt2band(iBand)        = iBand
     end do
 
     ! Compute cloud-optics for RTE.
     if (doGP_cldoptics_PADE .or. doGP_cldoptics_LUT) then
        
-       ! i) RRTMGP cloud-optics.
-       call check_error_msg('rrtmgp_lw_cloud_optics_run',lw_cloud_props%cloud_optics(&
-            cld_lwp,                       & ! IN  - Cloud liquid water path (g/m2)
-            cld_iwp,                       & ! IN  - Cloud ice water path (g/m2)
-            cld_reliq,                     & ! IN  - Cloud liquid effective radius (microns)
-            cld_reice,                     & ! IN  - Cloud ice effective radius (microns)
-            lw_optical_props_cloudsByBand))  ! OUT - RRTMGP DDT containing cloud radiative properties
-                                             !       in each band
-       ! Add in rain and snow(+groupel) 
+       ! i) Cloud-optics.
+       call check_error_msg('rrtmgp_lw_cloud_optics_run - clouds',lw_cloud_props%cloud_optics(&
+            cld_lwp,                           & ! IN  - Cloud liquid water path (g/m2)
+            cld_iwp,                           & ! IN  - Cloud ice water path (g/m2)
+            cld_reliq,                         & ! IN  - Cloud liquid effective radius (microns)
+            cld_reice,                         & ! IN  - Cloud ice effective radius (microns)
+            lw_optical_props_cloudsByBand))      ! OUT - RRTMGP DDT containing cloud radiative properties
+                                                 !       in each band
+       ! ii) Convective cloud-optics
+       if (doGP_convcld) then
+          call check_error_msg('rrtmgp_lw_cnvcloud_optics_run - convective cloud',lw_cloud_props%cloud_optics(&
+               cnv_cld_lwp,                       & ! IN  - Convective cloud liquid water path (g/m2)
+               cnv_cld_iwp,                       & ! IN  - Convective cloud ice water path (g/m2)
+               cnv_cld_reliq,                     & ! IN  - Convective cloud liquid effective radius (microns)
+               cnv_cld_reice,                     & ! IN  - Convective cloud ice effective radius (microns)
+               lw_optical_props_cnvcloudsByBand))   ! OUT - RRTMGP DDT containing convective cloud radiative properties
+                                                    !       in each band
+       endif
+
+       ! iii) Cloud precipitation optics: rain and snow(+groupel)   
        do iCol=1,nCol
           do iLay=1,nLev                                      
              if (cld_frac(iCol,iLay) .gt. 0.) then

@@ -1,11 +1,11 @@
 [ccpp-table-properties]
-  name = GFS_rrtmgp_cloud_overlap_pre
+  name = GFS_rrtmgp_cloud_overlap
   type = scheme
   dependencies = radiation_tools.F90, radiation_cloud_overlap.F90
 
 ########################################################################
 [ccpp-arg-table]
-  name = GFS_rrtmgp_cloud_overlap_pre_run
+  name = GFS_rrtmgp_cloud_overlap_run
   type = scheme
 [nCol]
   standard_name = horizontal_loop_extent
@@ -136,6 +136,13 @@
   dimensions = ()
   type = integer
   intent = in
+[iovr_convcld]
+  standard_name = flag_for_convective_cloud_overlap_method_for_radiation
+  long_name = flag for convective cloud overlap method
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
 [iovr_dcorr]
   standard_name = flag_for_decorrelation_length_cloud_overlap_method
   long_name = choice of decorrelation-length cloud overlap method
@@ -186,9 +193,24 @@
   type = real
   kind = kind_phys
   intent = in
+[cnv_cldfrac]
+  standard_name = convective_cloud_area_fraction
+  long_name = convective cloud cover in the phy_f3d array
+  units = frac
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
 [top_at_1]
   standard_name = flag_for_vertical_ordering_in_RRTMGP
   long_name = flag for vertical ordering in RRTMGP
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[doGP_convcld]
+  standard_name = flag_to_include_convective_cloud_in_RRTMGP
+  long_name = logical flag to control convective cloud in RRTMGP
   units = flag
   dimensions = ()
   type = logical
@@ -212,6 +234,14 @@
 [precip_overlap_param]
   standard_name = precip_overlap_param
   long_name = precipitation overlap parameter
+  units = km
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[cnv_cloud_overlap_param]
+  standard_name = convective_cloud_overlap_param
+  long_name = convective cloud overlap parameter
   units = km
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real

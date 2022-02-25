@@ -36,6 +36,13 @@
   dimensions = ()
   type = logical  
   intent = in
+[doGP_convcld]
+  standard_name = flag_to_include_convective_cloud_in_RRTMGP
+  long_name = logical flag to control convective cloud in RRTMGP
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [ncol]
   standard_name = horizontal_loop_extent
   long_name = horizontal dimension
@@ -81,6 +88,20 @@
   intent = inout
 [lw_optical_props_clouds]
   standard_name = longwave_optical_properties_for_cloudy_atmosphere
+  long_name = Fortran DDT containing RRTMGP optical properties
+  units = DDT
+  dimensions = ()
+  type = ty_optical_props_2str
+  intent = inout
+[lw_optical_props_precip]
+  standard_name = longwave_optical_properties_for_precipitation
+  long_name = Fortran DDT containing RRTMGP optical properties
+  units = DDT
+  dimensions = ()
+  type = ty_optical_props_2str
+  intent = inout
+[lw_optical_props_cnvclouds]
+  standard_name = longwave_optical_properties_for_convective_cloudy_atmosphere
   long_name = Fortran DDT containing RRTMGP optical properties
   units = DDT
   dimensions = ()

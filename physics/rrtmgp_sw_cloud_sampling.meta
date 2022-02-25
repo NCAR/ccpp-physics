@@ -14,6 +14,20 @@
   dimensions = ()
   type = logical
   intent = in
+[doGP_convcld]
+  standard_name = flag_to_include_convective_cloud_in_RRTMGP
+  long_name = logical flag to control convective cloud in RRTMGP
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[iovr_convcld]
+  standard_name = flag_for_convective_cloud_overlap_method_for_radiation
+  long_name = flag for convective cloud overlap method
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
 [ncol]
   standard_name = horizontal_loop_extent
   long_name = horizontal dimension
@@ -121,6 +135,22 @@
   type = real
   kind = kind_phys
   intent = in
+[cnv_cldfrac]
+  standard_name = convective_cloud_area_fraction
+  long_name = convective cloud cover in the phy_f3d array
+  units = frac
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[cnv_cloud_overlap_param]
+  standard_name = convective_cloud_overlap_param
+  long_name = convective cloud overlap parameter
+  units = km
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
 [cloud_overlap_param]
   standard_name = cloud_overlap_param
   long_name = cloud overlap parameter
@@ -144,6 +174,13 @@
   dimensions = ()
   type = ty_optical_props_2str
   intent = in
+[sw_optical_props_cnvcloudsByBand]
+  standard_name = shortwave_optical_properties_for_convective_cloudy_atmosphere_by_band
+  long_name = Fortran DDT containing RRTMGP optical properties
+  units = DDT
+  dimensions = ()
+  type = ty_optical_props_2str
+  intent = in
 [sw_optical_props_precipByBand]
   standard_name = shortwave_optical_properties_for_precipitation_by_band
   long_name = Fortran DDT containing RRTMGP optical properties
@@ -153,6 +190,13 @@
   intent = in
 [sw_optical_props_clouds]
   standard_name = shortwave_optical_properties_for_cloudy_atmosphere
+  long_name = Fortran DDT containing RRTMGP optical properties
+  units = DDT
+  dimensions = ()
+  type = ty_optical_props_2str
+  intent = out
+[sw_optical_props_cnvclouds]
+  standard_name = shortwave_optical_properties_for_convective_cloudy_atmosphere
   long_name = Fortran DDT containing RRTMGP optical properties
   units = DDT
   dimensions = ()

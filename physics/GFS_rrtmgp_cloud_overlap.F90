@@ -1,29 +1,30 @@
 ! ########################################################################################
 !
 ! ########################################################################################
-module GFS_rrtmgp_cloud_overlap_pre
+module GFS_rrtmgp_cloud_overlap
   use machine,      only: kind_phys
   use radiation_tools,   only: check_error_msg
   use module_radiation_cloud_overlap, only: cmp_dcorr_lgth, get_alpha_exp  
 
-  public GFS_rrtmgp_cloud_overlap_pre_init, GFS_rrtmgp_cloud_overlap_pre_run, GFS_rrtmgp_cloud_overlap_pre_finalize
+  public GFS_rrtmgp_cloud_overlap_init, GFS_rrtmgp_cloud_overlap_run, GFS_rrtmgp_cloud_overlap_finalize
 
 contains  
   ! ######################################################################################
   ! ######################################################################################
-  subroutine GFS_rrtmgp_cloud_overlap_pre_init()
-  end subroutine GFS_rrtmgp_cloud_overlap_pre_init
+  subroutine GFS_rrtmgp_cloud_overlap_init()
+  end subroutine GFS_rrtmgp_cloud_overlap_init
 
   ! ######################################################################################
   ! ######################################################################################
-!! \section arg_table_GFS_rrtmgp_cloud_overlap_pre_run
-!! \htmlinclude GFS_rrtmgp_cloud_overlap_pre_run.html
+!! \section arg_table_GFS_rrtmgp_cloud_overlap_run
+!! \htmlinclude GFS_rrtmgp_cloud_overlap_run.html
 !!  
-  subroutine GFS_rrtmgp_cloud_overlap_pre_run(nCol, nLev, yearlen, doSWrad, doLWrad,     &
+  subroutine GFS_rrtmgp_cloud_overlap_run(nCol, nLev, yearlen, doSWrad, doLWrad,         &
        julian, lat, p_lev, p_lay, tv_lay, con_pi, con_g, con_rd, con_epsq, dcorr_con,    &
        idcor, iovr, iovr_dcorr, iovr_exp, iovr_exprand, idcor_con, idcor_hogan,          &
-       idcor_oreopoulos, cld_frac, top_at_1,                                             &
-       de_lgth, cloud_overlap_param, precip_overlap_param, deltaZc, errmsg, errflg)
+       idcor_oreopoulos, cld_frac, cnv_cldfrac, iovr_convcld, top_at_1, doGP_convcld,    &
+       de_lgth, cloud_overlap_param, cnv_cloud_overlap_param, precip_overlap_param,      &
+       deltaZc, errmsg, errflg)
     implicit none
     
     ! Inputs   
@@ -32,6 +33,7 @@ contains
          nLev,                 & ! Number of vertical layers
          yearlen,              & ! Length of current year (365/366) WTF?
          iovr,                 & ! Choice of cloud-overlap method
+         iovr_convcld,         & ! Choice of convective cloud-overlap method
          iovr_dcorr,           & ! Flag for decorrelation-length cloud overlap method
          iovr_exp,             & ! Flag for exponential cloud overlap method
          iovr_exprand,         & ! Flag for exponential-random cloud overlap method
@@ -41,6 +43,7 @@ contains
          idcor_oreopoulos        ! Flag for decorrelation-length. (10.5194/acp-12-9097-2012) 
     logical, intent(in)     :: &
          top_at_1,             & ! Vertical ordering flag
+         doGP_convcld,         & ! Compute overlap parameter for convective cloud?
     	 doSWrad,              & ! Call SW radiation?
     	 doLWrad                 ! Call LW radiation
     real(kind_phys), intent(in) :: &
@@ -55,21 +58,23 @@ contains
     real(kind_phys), dimension(:,:), intent(in) :: &         
          tv_lay,               & ! Virtual temperature (K)
          p_lay,                & ! Pressure at model-layers (Pa)
-         cld_frac                ! Total cloud fraction
+         cld_frac,             & ! Total cloud fraction
+         cnv_cldfrac             ! Convective cloud-fraction
     real(kind_phys), dimension(:,:), intent(in) :: &         
          p_lev                   ! Pressure at model-level interfaces (Pa) 
     
     ! Outputs     
     real(kind_phys), dimension(:),intent(out) :: &
-         de_lgth                 ! Decorrelation length     
+         de_lgth                   ! Decorrelation length
     real(kind_phys), dimension(:,:),intent(out) :: &
-         cloud_overlap_param,  & ! Cloud-overlap parameter
-         precip_overlap_param, & ! Precipitation overlap parameter  
-         deltaZc                 ! Layer thickness (from layer-centers)(km)          
+         cloud_overlap_param,    & ! Cloud-overlap parameter
+         cnv_cloud_overlap_param,& ! Convective cloud-overlap parameter
+         precip_overlap_param,   & ! Precipitation overlap parameter
+         deltaZc                   ! Layer thickness (from layer-centers)(km)
     character(len=*), intent(out) :: &
-         errmsg                  ! Error message
-    integer, intent(out) :: &  
-         errflg                  ! Error flag
+         errmsg                    ! Error message
+    integer, intent(out) :: &
+         errflg                    ! Error flag
     
     ! Local variables
     real(kind_phys) :: tem1,pfac
@@ -168,15 +173,36 @@ contains
        enddo
     endif
 
+    !
+    ! Convective cloud overlap parameter
+    !
+    if (doGP_convcld) then
+       if (iovr_convcld == iovr_dcorr .or. iovr_convcld == iovr_exp .or. iovr_convcld == iovr_exprand) then
+          call get_alpha_exp(nCol, nLev, deltaZc, de_lgth, cnv_cloud_overlap_param)
+       else
+          de_lgth(:)                   = 0.
+          cnv_cloud_overlap_param(:,:) = 0.
+       endif
+       if (iovr_convcld == iovr_exprand) then
+          do iLay = 1, nLev
+             do iCol = 1, nCol
+                if (cnv_cldfrac(iCol,iLay) .eq. 0. .and. cnv_cldfrac(iCol,iLay-1) .gt. 0.) then
+                   cnv_cloud_overlap_param(iCol,iLay) = 0._kind_phys
+                endif
+             enddo
+          enddo
+       endif
+    endif
+
     ! 
     ! Compute precipitation overlap parameter (Hack. Using same as cloud for now)
     !
     precip_overlap_param = cloud_overlap_param    
     
-  end subroutine GFS_rrtmgp_cloud_overlap_pre_run
+  end subroutine GFS_rrtmgp_cloud_overlap_run
   
   ! #########################################################################################
   ! #########################################################################################
-  subroutine GFS_rrtmgp_cloud_overlap_pre_finalize()
-  end subroutine GFS_rrtmgp_cloud_overlap_pre_finalize
-end module GFS_rrtmgp_cloud_overlap_pre
+  subroutine GFS_rrtmgp_cloud_overlap_finalize()
+  end subroutine GFS_rrtmgp_cloud_overlap_finalize
+end module GFS_rrtmgp_cloud_overlap

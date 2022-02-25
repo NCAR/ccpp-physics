@@ -26,10 +26,11 @@ contains
 !! \htmlinclude rrtmgp_lw_rte_run.html
 !!
   subroutine rrtmgp_lw_rte_run(doLWrad, doLWclrsky, use_LW_jacobian, doGP_lwscat, nCol,     &
-       nLev, top_at_1, sfc_emiss_byband, sources, lw_optical_props_clrsky,                  &
-       lw_optical_props_clouds, lw_optical_props_aerosol, nGauss_angles, fluxlwUP_allsky,   &
-       fluxlwDOWN_allsky, fluxlwUP_clrsky, fluxlwDOWN_clrsky, fluxlwUP_jac,                 &
-       fluxlwUP_radtime, fluxlwDOWN_radtime, errmsg, errflg)
+       nLev, top_at_1, doGP_convcld, sfc_emiss_byband, sources, lw_optical_props_clrsky,    &
+       lw_optical_props_clouds, lw_optical_props_precip, lw_optical_props_cnvclouds,        &
+       lw_optical_props_aerosol, nGauss_angles, fluxlwUP_allsky, fluxlwDOWN_allsky,         &
+       fluxlwUP_clrsky, fluxlwDOWN_clrsky, fluxlwUP_jac, fluxlwUP_radtime,                  &
+       fluxlwDOWN_radtime, errmsg, errflg)
 
     ! Inputs
     logical, intent(in) :: &
@@ -37,6 +38,7 @@ contains
          doLWrad,                 & ! Logical flag for longwave radiation call
          doLWclrsky,              & ! Compute clear-sky fluxes for clear-sky heating-rate?
          use_LW_jacobian,         & ! Compute Jacobian of LW to update radiative fluxes between radiation calls?
+         doGP_convcld,            & ! Flag to include convective cloud
          doGP_lwscat                ! Include scattering in LW cloud-optics?
     integer, intent(in) :: &
          nCol,                    & ! Number of horizontal gridpoints
@@ -50,8 +52,9 @@ contains
          lw_optical_props_aerosol, &! RRTMGP DDT: longwave aerosol radiative properties
          lw_optical_props_clrsky    ! RRTMGP DDT: longwave clear-sky radiative properties 
     type(ty_optical_props_2str),intent(inout) :: &
-         lw_optical_props_clouds    ! RRTMGP DDT: longwave cloud radiative properties          
-         
+         lw_optical_props_clouds,  &! RRTMGP DDT: longwave cloud radiative properties
+         lw_optical_props_precip,  &! RRTMGP DDT: longwave precipitation radiative properties
+         lw_optical_props_cnvclouds ! RRTMGP DDT: longwave convective cloud radiative properties
     ! Outputs
     real(kind_phys), dimension(ncol,nLev+1), intent(inout) :: &
          fluxlwUP_jac,             & ! Jacobian of upwelling LW surface radiation (W/m2/K) 
@@ -121,8 +124,16 @@ contains
     endif
     
     !
-    ! All-sky fluxes
+    ! All-sky fluxes (clear-sky + clouds + precipitation)
     !
+
+    ! Include convective cloud?
+    if (doGP_convcld) then
+       call check_error_msg('rrtmgp_lw_rte_run',lw_optical_props_cnvclouds%increment(lw_optical_props_clrsky))
+    endif
+
+    ! Add in precipitation
+    call check_error_msg('rrtmgp_lw_rte_run',lw_optical_props_precip%increment(lw_optical_props_clouds))
 
     ! Include LW cloud-scattering?
     if (doGP_lwscat) then 

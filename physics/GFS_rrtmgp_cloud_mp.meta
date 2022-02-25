@@ -245,6 +245,13 @@
   dimensions = ()
   type = logical
   intent = in
+[doGP_convcld]
+  standard_name = flag_to_include_convective_cloud_in_RRTMGP
+  long_name = logical flag to control convective cloud in RRTMGP
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [lsmask]
   standard_name = area_type
   long_name = landmask: sea/land/ice=0/1/2
