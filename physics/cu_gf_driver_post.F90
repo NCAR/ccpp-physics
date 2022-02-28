@@ -37,6 +37,7 @@ module cu_gf_driver_post
       real(kind_phys),  intent(out) :: conv_act(:)
       real(kind_phys),  intent(out) :: conv_act_m(:)
       character(len=*), intent(out) :: errmsg
+!$acc declare copyin(t,q,cactiv,cactiv_m) copyout(prevst,prevsq,conv_act,conv_act_m)
       integer, intent(out)          :: errflg
 
       ! Local variables
@@ -46,6 +47,7 @@ module cu_gf_driver_post
       errmsg = ''
       errflg = 0
 
+!$acc kernels
       prevst(:,:) = t(:,:)
       prevsq(:,:) = q(:,:)
 
@@ -61,6 +63,7 @@ module cu_gf_driver_post
           conv_act_m(i)=0.0
         endif
       enddo
+!$acc end kernels
 
    end subroutine cu_gf_driver_post_run
 

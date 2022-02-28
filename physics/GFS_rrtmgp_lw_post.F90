@@ -1,10 +1,10 @@
-module GFS_rrtmgp_lw_post 
+module GFS_rrtmgp_lw_post
   use machine,                   only: kind_phys
   use module_radlw_parameters,   only: topflw_type, sfcflw_type
   use mo_heating_rates,          only: compute_heating_rate
   use radiation_tools,           only: check_error_msg
   implicit none
-  
+
   public GFS_rrtmgp_lw_post_init,GFS_rrtmgp_lw_post_run,GFS_rrtmgp_lw_post_finalize
 
 contains
@@ -25,18 +25,18 @@ contains
        fluxlwDOWN_clrsky, raddt, cldsa, mtopa, mbota, cld_frac, cldtaulw, fluxr, sfcdlw,   &
        sfculw, sfcflw, tsflw, htrlw, htrlwu, topflw, htrlwc, errmsg, errflg)
 
-    ! Inputs                    
-    integer, intent(in) :: &
+    ! Inputs
+    integer, intent(in) ::  &
          nCol,              & ! Horizontal loop extent 
          nLev,              & ! Number of vertical layers
          iSFC,              & ! Vertical index for surface level
          iTOA                 ! Vertical index for TOA level
     logical, intent(in) :: & 
          lslwr,             & ! Logical flags for lw radiation calls
-         do_lw_clrsky_hr,   & ! Output clear-sky SW heating-rate?         
-    	 save_diag            ! Output radiation diagnostics?
+         do_lw_clrsky_hr,   & ! Output clear-sky SW heating-rate?
+         save_diag            ! Output radiation diagnostics?
     real(kind_phys), intent(in) :: &
-         fhlwr                ! Frequency for SW radiation    	 
+         fhlwr                ! Frequency for SW radiation
     real(kind_phys), dimension(nCol), intent(in) ::  &
          tsfa                 ! Lowest model layer air temperature for radiation (K)
     real(kind_phys), dimension(nCol, nLev), intent(in) :: &
@@ -50,23 +50,23 @@ contains
     real(kind_phys), intent(in) :: &
          raddt                ! Radiation time step
     real(kind_phys), dimension(nCol,5), intent(in) :: &
-         cldsa                ! Fraction of clouds for low, middle, high, total and BL 
+         cldsa                ! Fraction of clouds for low, middle, high, total and BL
     integer,         dimension(nCol,3), intent(in) ::&
          mbota,             & ! vertical indices for low, middle and high cloud tops 
          mtopa                ! vertical indices for low, middle and high cloud bases
     real(kind_phys), dimension(nCol,nLev), intent(in) :: &
          cld_frac,          & ! Total cloud fraction in each layer
-         cldtaulw             ! approx 10.mu band layer cloud optical depth  
-    
+         cldtaulw             ! approx 10.mu band layer cloud optical depth
+
     real(kind=kind_phys), dimension(:,:), intent(inout) :: fluxr
-    
+
     ! Outputs (mandatory)
     real(kind_phys), dimension(nCol), intent(inout) :: &
          sfcdlw,            & ! Total sky sfc downward lw flux (W/m2)
          sfculw,            & ! Total sky sfc upward lw flux (W/m2)
          tsflw                ! surface air temp during lw calculation (K)
     type(sfcflw_type), dimension(nCol), intent(inout) :: &
-         sfcflw               ! LW radiation fluxes at sfc    
+         sfcflw               ! LW radiation fluxes at sfc
     real(kind_phys), dimension(nCol,nLev), intent(inout) :: &
          htrlw,             & ! LW all-sky heating rate
          htrlwu               ! Heating-rate updated in-between radiation calls.
@@ -80,7 +80,7 @@ contains
     ! Outputs (optional)
     real(kind_phys),dimension(nCol, nLev),intent(inout),optional  :: &
          htrlwc               ! Longwave clear-sky heating-rate (K/sec)
-         
+
     ! Local variables
     integer :: i, j, k, itop, ibtc
     real(kind_phys) :: tem0d, tem1, tem2
@@ -92,7 +92,7 @@ contains
 
     if (.not. lslwr) return
     ! #######################################################################################
-    ! Compute LW heating-rates. 
+    ! Compute LW heating-rates.
     ! #######################################################################################
     ! Clear-sky heating-rate (optional)
     if (do_lw_clrsky_hr) then
@@ -102,7 +102,7 @@ contains
             p_lev,             & ! IN  - Pressure @ layer-interfaces (Pa)
             htrlwc))               ! OUT - Longwave clear-sky heating rate (K/sec)
     endif
-    
+
     ! All-sky heating-rate (mandatory)
     call check_error_msg('GFS_rrtmgp_post',compute_heating_rate(     &
         fluxlwUP_allsky,      & ! IN  - RRTMGP upward longwave all-sky flux profiles (W/m2)
@@ -136,8 +136,8 @@ contains
 
     ! #######################################################################################
     ! Save LW diagnostics
-    ! - For time averaged output quantities (including total-sky and clear-sky SW and LW 
-    !   fluxes at TOA and surface; conventional 3-domain cloud amount, cloud top and base 
+    ! - For time averaged output quantities (including total-sky and clear-sky SW and LW
+    !   fluxes at TOA and surface; conventional 3-domain cloud amount, cloud top and base
     !   pressure, and cloud top temperature; aerosols AOD, etc.), store computed results in
     !   corresponding slots of array fluxr with appropriate time weights.
     ! - Collect the fluxr data for wrtsfc

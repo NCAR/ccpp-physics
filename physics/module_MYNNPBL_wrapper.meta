@@ -30,9 +30,9 @@
   kind = len=*
   intent = out
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out
@@ -1257,6 +1257,21 @@
   dimensions = ()
   type = logical
   intent = in
+[spp_wts_pbl]
+  standard_name = spp_weights_for_pbl_scheme
+  long_name = spp weights for pbl scheme
+  units = 1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[spp_pbl]
+  standard_name = control_for_pbl_spp_perturbations
+  long_name = control for pbl spp perturbations
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
 [lprnt]
   standard_name = flag_print
   long_name = control flag for diagnostic print out
@@ -1281,9 +1296,9 @@
   kind = len=*
   intent = out
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out

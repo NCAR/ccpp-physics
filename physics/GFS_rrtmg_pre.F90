@@ -36,7 +36,7 @@
         gasvmr_ccl4,  gasvmr_cfc113, aerodp, clouds6, clouds7, clouds8,        &
         clouds9, cldsa, cldfra, cldfra2d, lwp_ex,iwp_ex, lwp_fc,iwp_fc,        &
         faersw1, faersw2, faersw3, faerlw1, faerlw2, faerlw3, alpha,           &
-        errmsg, errflg)
+        spp_wts_rad, spp_rad, errmsg, errflg)
 
       use machine,                   only: kind_phys
 
@@ -103,6 +103,9 @@
       logical,              intent(in) :: lsswr, lslwr, ltaerosol, lgfdlmprad, &
                                           uni_cld, effr_in, do_mynnedmf,       &
                                           lmfshal, lmfdeep2, pert_clds
+
+      integer,    intent(in) :: spp_rad
+      real(kind_phys),              intent(in) :: spp_wts_rad(:,:)
 
       real(kind=kind_phys), intent(in) :: fhswr, fhlwr, solhr, sup, julian, sppt_amp
       real(kind=kind_phys), intent(in) :: con_eps, epsm1, fvirt, rog, rocp, con_rd
@@ -183,7 +186,8 @@
 
       integer :: i, j, k, k1, k2, lsk, lv, n, itop, ibtc, LP1, lla, llb, lya,lyb
 
-      real(kind=kind_phys) :: es, qs, delt, tem0d, gridkm, pfac
+      real(kind=kind_phys) :: es, qs, delt, tem0d, pfac
+      real(kind=kind_phys), dimension(im) :: gridkm
 
       real(kind=kind_phys), dimension(im) :: cvt1, cvb1, tem1d, tskn, xland
 
@@ -194,9 +198,9 @@
                           effrl, effri, effrr, effrs, rho, orho, plyrpa
 
       ! for Thompson MP
-      real(kind=kind_phys), dimension(im,lm+LTP) ::         &
-                                  re_cloud, re_ice, re_snow, qv_mp, qc_mp, &
-                                  qi_mp, qs_mp, nc_mp, ni_mp, nwfa
+      real(kind=kind_phys), dimension(im,lm+LTP) ::           &
+                                  qv_mp, qc_mp, qi_mp, qs_mp, &
+                                  nc_mp, ni_mp, nwfa
       real (kind=kind_phys), dimension(lm) :: cldfra1d, qv1d,           &
      &                                 qc1d, qi1d, qs1d, dz1d, p1d, t1d
 
@@ -235,9 +239,6 @@
 
       LP1 = LM + 1               ! num of in/out levels
 
-
-      gridkm = sqrt(2.0)*sqrt(dx(1)*0.001*dx(1)*0.001)
-
       if (imp_physics == imp_physics_thompson) then
          max_relh = 1.5
       else
@@ -245,6 +246,7 @@
       endif
 
       do i = 1, IM
+         gridkm(i) = dx(i)*0.001
          lwp_ex(i) = 0.0
          iwp_ex(i) = 0.0
          lwp_fc(i) = 0.0
@@ -817,30 +819,18 @@
             !     it will raise the low limit from 5 to 10, but the high limit will remain 125.
             call calc_effectRad (tlyr(i,:), plyr(i,:)*100., qv_mp(i,:), qc_mp(i,:),   &
                                  nc_mp(i,:), qi_mp(i,:), ni_mp(i,:), qs_mp(i,:), &
-                                 re_cloud(i,:), re_ice(i,:), re_snow(i,:), 1, lm )
+                                 effrl(i,:), effri(i,:), effrs(i,:), 1, lm )
+            ! Scale Thompson's effective radii from meter to micron
             do k=1,lm
-              re_cloud(i,k) = MAX(re_qc_min, MIN(re_cloud(i,k), re_qc_max))
-              re_ice(i,k)   = MAX(re_qi_min, MIN(re_ice(i,k),   re_qi_max))
-              re_snow(i,k)  = MAX(re_qs_min, MIN(re_snow(i,k),  re_qs_max))
+              effrl(i,k) = MAX(re_qc_min, MIN(effrl(i,k), re_qc_max))*1.e6
+              effri(i,k) = MAX(re_qi_min, MIN(effri(i,k), re_qi_max))*1.e6
+              effrs(i,k) = MAX(re_qs_min, MIN(effrs(i,k), re_qs_max))*1.e6
             end do
+            effrl(i,lmk) = re_qc_min*1.e6
+            effri(i,lmk) = re_qi_min*1.e6
+            effrs(i,lmk) = re_qs_min*1.e6
           end do
-          ! Scale Thompson's effective radii from meter to micron
-          do k=1,lm
-            do i=1,im
-              re_cloud(i,k) = re_cloud(i,k)*1.e6
-              re_ice(i,k)   = re_ice(i,k)*1.e6
-              re_snow(i,k)  = re_snow(i,k)*1.e6
-            end do
-          end do
-          do k=1,lm
-            k1 = k + kd
-            do i=1,im
-              effrl(i,k1) = re_cloud (i,k)
-              effri(i,k1) = re_ice (i,k)
-              effrr(i,k1) = 1000. ! rrain_def=1000.
-              effrs(i,k1) = re_snow(i,k)
-            enddo
-          enddo
+          effrr(:,:) = 1000. ! rrain_def=1000.
           ! Update global arrays
           do k=1,lm
             k1 = k + kd
@@ -956,7 +946,6 @@
           call progcld5 (plyr,plvl,tlyr,tvly,qlyr,qstl,rhly,tracer1,       &  !  --- inputs
                          xlat,xlon,slmsk,dz,delp,                          &
                          ntrac-1, ntcw-1,ntiw-1,ntrw-1,                    &
-!mz                       ntsw-1,ntgl-1,                                   &
                          im, lmk, lmp, icloud, uni_cld, lmfshal, lmfdeep2, &
                          cldcov(:,1:LMK),effrl_inout(:,:),                 &
                          effri_inout(:,:), effrs_inout(:,:),               &
@@ -973,8 +962,7 @@
                          ntrac-1, ntcw-1,ntiw-1,ntrw-1,             &
                          ntsw-1,ntgl-1,                             &
                          im, lm, lmp, uni_cld, lmfshal, lmfdeep2,   &
-                         cldcov(:,1:LM), effrl_inout,               &
-                         effri_inout, effrs_inout,                  &
+                         cldcov(:,1:LM), effrl, effri, effrs,       &
                          lwp_ex, iwp_ex, lwp_fc, iwp_fc,            &
                          dzb, xlat_d, julian, yearlen, gridkm,      &
                          clouds, cldsa, mtopa ,mbota, de_lgth, alpha) !  --- outputs
@@ -1007,8 +995,7 @@
                          ntrac-1, ntcw-1,ntiw-1,ntrw-1,             &
                          ntsw-1,ntgl-1,                             &
                          im, lm, lmp, uni_cld, lmfshal, lmfdeep2,   &
-                         cldcov(:,1:LM), effrl_inout,               &
-                         effri_inout, effrs_inout,                  &
+                         cldcov(:,1:LM), effrl, effri, effrs,       &
                          lwp_ex, iwp_ex, lwp_fc, iwp_fc,            &
                          dzb, xlat_d, julian, yearlen, gridkm,      &
                          clouds, cldsa, mtopa ,mbota, de_lgth, alpha) !  --- outputs
@@ -1019,8 +1006,7 @@
                          ntrac-1, ntcw-1,ntiw-1,ntrw-1,             &
                          ntsw-1,ntgl-1,                             &
                          im, lmk, lmp, uni_cld, lmfshal, lmfdeep2,  &
-                         cldcov(:,1:LMK), cnvw, effrl_inout,        &
-                         effri_inout, effrs_inout,                  &
+                         cldcov(:,1:LMK), cnvw, effrl, effri, effrs,&
                          lwp_ex, iwp_ex, lwp_fc, iwp_fc,            &
                          dzb, xlat_d, julian, yearlen,              &
                          clouds, cldsa, mtopa ,mbota, de_lgth, alpha) !  --- outputs
@@ -1076,6 +1062,24 @@
            cldfra2d(i) = max(cldfra2d(i), cldfra(i,k))
          enddo
        enddo
+
+      if ( spp_rad == 1 ) then
+        do k=1,lm
+          if (k < levs) then
+            do i=1,im
+              clouds3(i,k) = clouds3(i,k) - spp_wts_rad(i,k) * clouds3(i,k)
+              clouds5(i,k) = clouds5(i,k) - spp_wts_rad(i,k) * clouds5(i,k)
+              clouds9(i,k) = clouds9(i,k) - spp_wts_rad(i,k) * clouds9(i,k)
+            enddo
+          else
+            do i=1,im
+              clouds3(i,k) = clouds3(i,k) - spp_wts_rad(i,k) * clouds3(i,k)
+              clouds5(i,k) = clouds5(i,k) - spp_wts_rad(i,k) * clouds5(i,k)
+              clouds9(i,k) = clouds9(i,k) - spp_wts_rad(i,k) * clouds9(i,k)
+            enddo
+          endif
+        enddo
+      endif
 
 ! mg, sfc-perts
 !  ---  scale random patterns for surface perturbations with
