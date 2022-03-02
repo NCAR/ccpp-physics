@@ -20,11 +20,11 @@ contains
 !! \htmlinclude GFS_rrtmgp_cloud_overlap_run.html
 !!  
   subroutine GFS_rrtmgp_cloud_overlap_run(nCol, nLev, yearlen, doSWrad, doLWrad,         &
-       julian, lat, p_lev, p_lay, tv_lay, con_pi, con_g, con_rd, con_epsq, dcorr_con,    &
-       idcor, iovr, iovr_dcorr, iovr_exp, iovr_exprand, idcor_con, idcor_hogan,          &
-       idcor_oreopoulos, cld_frac, cnv_cldfrac, iovr_convcld, top_at_1, doGP_convcld,    &
-       de_lgth, cloud_overlap_param, cnv_cloud_overlap_param, precip_overlap_param,      &
-       deltaZc, errmsg, errflg)
+       julian, lat, p_lev, p_lay, tv_lay, deltaZc, con_pi, con_g, con_rd, con_epsq,      &
+       dcorr_con, idcor, iovr, iovr_dcorr, iovr_exp, iovr_exprand, idcor_con,            &
+       idcor_hogan, idcor_oreopoulos, cld_frac, cnv_cldfrac, iovr_convcld, top_at_1,     &
+       doGP_convcld, de_lgth, cloud_overlap_param, cnv_cloud_overlap_param,              &
+       precip_overlap_param, errmsg, errflg)
     implicit none
     
     ! Inputs   
@@ -61,7 +61,8 @@ contains
          cld_frac,             & ! Total cloud fraction
          cnv_cldfrac             ! Convective cloud-fraction
     real(kind_phys), dimension(:,:), intent(in) :: &         
-         p_lev                   ! Pressure at model-level interfaces (Pa) 
+         p_lev,                & ! Pressure at model-level interfaces (Pa)
+         deltaZc                 ! Layer thickness (from layer-centers)(m)
     
     ! Outputs     
     real(kind_phys), dimension(:),intent(out) :: &
@@ -69,73 +70,20 @@ contains
     real(kind_phys), dimension(:,:),intent(out) :: &
          cloud_overlap_param,    & ! Cloud-overlap parameter
          cnv_cloud_overlap_param,& ! Convective cloud-overlap parameter
-         precip_overlap_param,   & ! Precipitation overlap parameter
-         deltaZc                   ! Layer thickness (from layer-centers)(km)
+         precip_overlap_param      ! Precipitation overlap parameter
     character(len=*), intent(out) :: &
          errmsg                    ! Error message
     integer, intent(out) :: &
          errflg                    ! Error flag
     
     ! Local variables
-    real(kind_phys) :: tem1,pfac
-    real(kind_phys), dimension(nLev+1) :: hgtb
-    real(kind_phys), dimension(nLev)   :: hgtc
-    integer :: iCol,iLay,l
-    real(kind_phys), dimension(nCol,nLev) :: deltaZ
+    integer :: iCol,iLay
 
     ! Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0
 
     if (.not. (doSWrad .or. doLWrad)) return
-
-    !
-    ! Compute layer-thickness between layer boundaries (deltaZ) and layer centers (deltaZc)
-    !
-    do iCol=1,nCol 
-       if (top_at_1) then
-          ! Layer thickness (km)
-          do iLay=1,nLev
-             deltaZ(iCol,iLay) = ((con_rd/con_g)*0.001) * abs(log(p_lev(iCol,iLay+1)) - log(p_lev(iCol,iLay))) * tv_lay(iCol,iLay)
-          enddo
-          ! Height at layer boundaries
-          hgtb(nLev+1) = 0._kind_phys
-          do iLay=nLev,1,-1
-             hgtb(iLay)= hgtb(iLay+1) + deltaZ(iCol,iLay)
-          enddo
-          ! Height at layer centers
-          do iLay = nLev, 1, -1
-             pfac = abs(log(p_lev(iCol,iLay+1)) - log(p_lay(iCol,iLay))) /  &
-                  abs(log(p_lev(iCol,iLay+1)) - log(p_lev(iCol,iLay)))
-             hgtc(iLay) = hgtb(iLay+1) + pfac * (hgtb(iLay) - hgtb(iLay+1))
-          enddo
-          ! Layer thickness between centers
-          do iLay = nLev-1, 1, -1
-             deltaZc(iCol,iLay) = hgtc(iLay) - hgtc(iLay+1)
-          enddo
-          deltaZc(iCol,nLev) = hgtc(nLev) - hgtb(nLev+1)
-       else
-          do iLay=nLev,1,-1
-             deltaZ(iCol,iLay) = ((con_rd/con_g)*0.001) * abs(log(p_lev(iCol,iLay))  - log(p_lev(iCol,iLay+1))) * tv_lay(iCol,iLay)
-          enddo
-          ! Height at layer boundaries
-          hgtb(1) = 0._kind_phys
-          do iLay=1,nLev
-             hgtb(iLay+1)= hgtb(iLay) + deltaZ(iCol,iLay)
-          enddo
-          ! Height at layer centers
-          do iLay = 1, nLev
-             pfac = abs(log(p_lev(iCol,iLay)) - log(p_lay(iCol,iLay)  )) /  &
-                  abs(log(p_lev(iCol,iLay)) - log(p_lev(iCol,iLay+1)))
-             hgtc(iLay) = hgtb(iLay) + pfac * (hgtb(iLay+1) - hgtb(iLay))
-          enddo
-          ! Layer thickness between centers
-          do iLay = 2, nLev
-             deltaZc(iCol,iLay) = hgtc(iLay) - hgtc(iLay-1)
-          enddo
-          deltaZc(iCol,1) = hgtc(1) - hgtb(1)
-       endif
-    enddo
 
     !
     ! Cloud decorrelation length
@@ -154,7 +102,7 @@ contains
     ! Cloud overlap parameter
     !
     if (iovr == iovr_dcorr .or. iovr == iovr_exp .or. iovr == iovr_exprand) then
-       call get_alpha_exp(nCol, nLev, deltaZc, de_lgth, cloud_overlap_param)
+       call get_alpha_exp(nCol, nLev, deltaZc*0.001, de_lgth, cloud_overlap_param)
     else
        de_lgth(:)               = 0.
        cloud_overlap_param(:,:) = 0.
@@ -178,7 +126,7 @@ contains
     !
     if (doGP_convcld) then
        if (iovr_convcld == iovr_dcorr .or. iovr_convcld == iovr_exp .or. iovr_convcld == iovr_exprand) then
-          call get_alpha_exp(nCol, nLev, deltaZc, de_lgth, cnv_cloud_overlap_param)
+          call get_alpha_exp(nCol, nLev, deltaZc*0.001, de_lgth, cnv_cloud_overlap_param)
        else
           de_lgth(:)                   = 0.
           cnv_cloud_overlap_param(:,:) = 0.

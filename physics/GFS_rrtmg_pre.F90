@@ -22,7 +22,9 @@
         ntclamt, nleffr, nieffr, nseffr, lndp_type, kdt, imp_physics,          &
         imp_physics_thompson, imp_physics_gfdl, imp_physics_zhao_carr,         &
         imp_physics_zhao_carr_pdf, imp_physics_mg, imp_physics_wsm6,           &
-        imp_physics_fer_hires, julian, yearlen, lndp_var_list, lsswr, lslwr,   &
+        imp_physics_fer_hires, iovr_rand, iovr_maxrand, iovr_max, iovr_dcorr,  &
+        iovr_exp, iovr_exprand, idcor_con, idcor_hogan, idcor_oreopoulos,      & 
+        julian, yearlen, lndp_var_list, lsswr, lslwr,                          &
         ltaerosol, lgfdlmprad, uni_cld, effr_in, do_mynnedmf, lmfshal,         &
         lmfdeep2, fhswr, fhlwr, solhr, sup, con_eps, epsm1, fvirt,             &
         rog, rocp, con_rd, xlat_d, xlat, xlon, coslat, sinlat, tsfc, slmsk,    &
@@ -51,12 +53,7 @@
       use module_radiation_aerosols, only: NF_AESW, NF_AELW, setaer, & ! aer_init, aer_update,
      &                                     NSPC1
       use module_radiation_clouds,   only: NF_CLDS,                  & ! cld_init
-     &                                     progcld1, progcld3,       &
-     &                                     progcld2,                 &
-     &                                     progcld4, progcld5,       &
-     &                                     progcld6,                 &
-     &                                     progcld_thompson,         &
-     &                                     progclduni,               &
+     &                                     radiation_clouds_prop,    &
      &                                     cal_cldfra3,              &
      &                                     find_cloudLayers,         &
      &                                     adjust_cloudIce,          &
@@ -97,6 +94,17 @@
                                            imp_physics_mg, imp_physics_wsm6,   &
                                            imp_physics_fer_hires,              &
                                            yearlen, icloud
+
+      integer,              intent(in)  ::                                     &
+         iovr_rand,                        & ! Flag for random cloud overlap method
+         iovr_maxrand,                     & ! Flag for maximum-random cloud overlap method
+         iovr_max,                         & ! Flag for maximum cloud overlap method
+         iovr_dcorr,                       & ! Flag for decorrelation-length cloud overlap method
+         iovr_exp,                         & ! Flag for exponential cloud overlap method
+         iovr_exprand,                     & ! Flag for exponential-random cloud overlap method
+         idcor_con,                        &
+         idcor_hogan,                      &
+         idcor_oreopoulos                            
 
       character(len=3), dimension(:), intent(in) :: lndp_var_list
 
@@ -209,7 +217,9 @@
 
       real(kind=kind_phys), dimension(im,lm+LTP,min(4,ncnd))   :: ccnd
       real(kind=kind_phys), dimension(im,lm+LTP,2:ntrac)       :: tracer1
-      real(kind=kind_phys), dimension(im,lm+LTP,NF_CLDS)       :: clouds
+      real(kind=kind_phys), dimension(im,lm+LTP)               ::        &
+     &   cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice,               &
+     &   cld_rwp, cld_rerain, cld_swp, cld_resnow
       real(kind=kind_phys), dimension(im,lm+LTP,NF_VGAS)       :: gasvmr
       real(kind=kind_phys), dimension(im,lm+LTP,NBDSW,NF_AESW) :: faersw
       real(kind=kind_phys), dimension(im,lm+LTP,NBDLW,NF_AELW) :: faerlw
@@ -616,9 +626,9 @@
 !!    (clouds,cldsa,mtopa,mbota)
 !!\n   for  prognostic cloud:
 !!    - For Zhao/Moorthi's prognostic cloud scheme,
-!!      call module_radiation_clouds::progcld1()
+!!      call module_radiation_clouds::progcld_zhao_carr()
 !!    - For Zhao/Moorthi's prognostic cloud+pdfcld,
-!!      call module_radiation_clouds::progcld3()
+!!      call module_radiation_clouds::progcld_zhao_carr_pdf()
 !!      call module_radiation_clouds::progclduni() for unified cloud and ncnd>=2
 
 !  --- ...  obtain cloud information for radiation calculations
@@ -885,135 +895,29 @@
           ccnd(1:IM,1:LMK,1) = ccnd(1:IM,1:LMK,1) + cnvw(1:IM,1:LMK)
         endif
 
-        if (imp_physics == imp_physics_zhao_carr .or. imp_physics == imp_physics_mg) then ! zhao/moorthi's prognostic cloud scheme
-                                         ! or unified cloud and/or with MG microphysics
+        call radiation_clouds_prop                                      &
+     &     ( plyr, plvl, tlyr, tvly, qlyr, qstl, rhly,                  &    !  ---  inputs:
+     &       ccnd, ncndl, cnvw, cnvc, tracer1,                          &
+     &       xlat, xlon, slmsk, dz, delp, IM, LM, LMK, LMP,             &
+     &       deltaq, sup, me, icloud, kdt,                              &
+     &       ntrac, ntcw, ntiw, ntrw, ntsw, ntgl, ntclamt,              &
+     &       imp_physics, imp_physics_fer_hires,imp_physics_gfdl,       &
+     &       imp_physics_thompson, imp_physics_wsm6,                    &
+     &       imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,          &
+     &       imp_physics_mg, iovr_rand, iovr_maxrand, iovr_max,         &
+     &       iovr_dcorr, iovr_exp, iovr_exprand, idcor_con,             &
+     &       idcor_hogan, idcor_oreopoulos,                             &
+     &       imfdeepcnv, imfdeepcnv_gf, do_mynnedmf, lgfdlmprad,        &
+     &       uni_cld, lmfshal, lmfdeep2, cldcov, clouds1,               &
+     &       effrl, effri, effrr, effrs, effr_in,                       &
+     &       effrl_inout, effri_inout, effrs_inout,                     &
+     &       lwp_ex, iwp_ex, lwp_fc, iwp_fc,                            &
+     &       dzb, xlat_d, julian, yearlen, gridkm,                      &
+     &       cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice,          &    !  ---  outputs:
+     &       cld_rwp, cld_rerain, cld_swp, cld_resnow,                  &    !  ---  outputs:
+     &       cldsa, mtopa, mbota, de_lgth, alpha                        &    !  ---  outputs:
+     &      )
 
-          if (uni_cld .and. ncndl >= 2) then
-            call progclduni (plyr, plvl, tlyr, tvly, ccnd, ncndl,         & !  ---  inputs
-                             xlat, xlon, slmsk, dz, delp,                 &
-                             IM, LMK, LMP, cldcov,                        &
-                             effrl, effri, effrr, effrs, effr_in,         &
-                             dzb, xlat_d, julian, yearlen,                &
-                             clouds, cldsa, mtopa, mbota, de_lgth, alpha)   !  ---  outputs
-          else
-            call progcld1 (plyr ,plvl, tlyr, tvly, qlyr, qstl, rhly,      & !  ---  inputs
-                           ccnd(1:IM,1:LMK,1), xlat, xlon, slmsk, dz,     &
-                           delp, IM, LMK, LMP, uni_cld, lmfshal, lmfdeep2,&
-                           cldcov, effrl, effri, effrr, effrs, effr_in,   &
-                           dzb, xlat_d, julian, yearlen,                  &
-                           clouds, cldsa, mtopa, mbota, de_lgth, alpha)     !  ---  outputs
-          endif
-
-        elseif(imp_physics == imp_physics_zhao_carr_pdf) then      ! zhao/moorthi's prognostic cloud+pdfcld
-
-          call progcld3 (plyr, plvl, tlyr, tvly, qlyr, qstl, rhly,        &  !  ---  inputs
-                         ccnd(1:IM,1:LMK,1), cnvw, cnvc, xlat, xlon,      &
-                         slmsk, dz, delp, im, lmk, lmp, deltaq, sup, kdt, &
-                         me, dzb, xlat_d, julian, yearlen,                &
-                         clouds, cldsa, mtopa, mbota, de_lgth, alpha)        !  ---  outputs
-
-        elseif (imp_physics == imp_physics_gfdl) then           ! GFDL cloud scheme
-
-          if (.not. lgfdlmprad) then
-            call progcld4 (plyr, plvl, tlyr, tvly, qlyr, qstl, rhly,      &    !  ---  inputs
-                           ccnd(1:IM,1:LMK,1), cnvw, cnvc, xlat, xlon,    &
-                           slmsk, cldcov, dz, delp, im, lmk, lmp,         &
-                           dzb, xlat_d, julian, yearlen,                  &
-                           clouds, cldsa, mtopa, mbota, de_lgth, alpha)        !  ---  outputs
-          else
-
-            call progclduni (plyr, plvl, tlyr, tvly, ccnd, ncndl, xlat,   &    !  ---  inputs
-                            xlon, slmsk, dz,delp, IM, LMK, LMP, cldcov,   &
-                            effrl, effri, effrr, effrs, effr_in,          &
-                            dzb, xlat_d, julian, yearlen,                 &
-                            clouds, cldsa, mtopa, mbota, de_lgth, alpha)       !  ---  outputs
-!           call progcld4o (plyr, plvl, tlyr, tvly, qlyr, qstl, rhly,       &   !  ---  inputs
-!                           tracer1, xlat, xlon, slmsk, dz, delp,           &
-!                           ntrac-1, ntcw-1,ntiw-1,ntrw-1,                  &
-!                           ntsw-1,ntgl-1,ntclamt-1,                        &
-!                           im, lmk, lmp,                                   &
-!                           dzb, xlat_d, julian, yearlen,                   &
-!                           clouds, cldsa, mtopa, mbota, de_lgth, alpha)        !  ---  outputs
-          endif
-
-        elseif(imp_physics == imp_physics_fer_hires) then
-          if (kdt == 1) then
-            effrl_inout(:,:) = 10.
-            effri_inout(:,:) = 50.
-            effrs_inout(:,:) = 250.
-          endif
-
-          call progcld5 (plyr,plvl,tlyr,tvly,qlyr,qstl,rhly,tracer1,       &  !  --- inputs
-                         xlat,xlon,slmsk,dz,delp,                          &
-                         ntrac-1, ntcw-1,ntiw-1,ntrw-1,                    &
-                         im, lmk, lmp, icloud, uni_cld, lmfshal, lmfdeep2, &
-                         cldcov(:,1:LMK),effrl_inout(:,:),                 &
-                         effri_inout(:,:), effrs_inout(:,:),               &
-                         dzb, xlat_d, julian, yearlen,                     &
-                         clouds,cldsa,mtopa,mbota, de_lgth, alpha)            !  --- outputs
-
-        elseif(imp_physics == imp_physics_thompson) then                              ! Thompson MP
-
-          if(do_mynnedmf .or. imfdeepcnv == imfdeepcnv_gf ) then ! MYNN PBL or GF conv
-
-            if (icloud == 3) then
-              call progcld_thompson (plyr,plvl,tlyr,qlyr,qstl,rhly, & !  --- inputs
-                         tracer1,xlat,xlon,slmsk,dz,delp,           &
-                         ntrac-1, ntcw-1,ntiw-1,ntrw-1,             &
-                         ntsw-1,ntgl-1,                             &
-                         im, lm, lmp, uni_cld, lmfshal, lmfdeep2,   &
-                         cldcov(:,1:LM), effrl, effri, effrs,       &
-                         lwp_ex, iwp_ex, lwp_fc, iwp_fc,            &
-                         dzb, xlat_d, julian, yearlen, gridkm,      &
-                         clouds, cldsa, mtopa ,mbota, de_lgth, alpha) !  --- outputs
-            else
-
-              !-- MYNN PBL or convective GF
-              !-- use cloud fractions with SGS clouds
-              do k=1,lmk
-                do i=1,im
-                  clouds(i,k,1)  = clouds1(i,k)
-                enddo
-              enddo
-
-                ! --- use clduni as with the GFDL microphysics.
-                ! --- make sure that effr_in=.true. in the input.nml!
-                call progclduni (plyr, plvl, tlyr, tvly, ccnd, ncndl,   & !  ---  inputs
-                         xlat, xlon, slmsk, dz, delp, IM, LMK, LMP,     &
-                         clouds(:,1:LMK,1),                             &
-                         effrl, effri, effrr, effrs, effr_in ,          &
-                         dzb, xlat_d, julian, yearlen,                  &
-                         clouds, cldsa, mtopa, mbota, de_lgth, alpha)     !  ---  outputs
-            endif
-
-          else
-            ! MYNN PBL or GF convective are not used
-
-            if (icloud == 3) then
-              call progcld_thompson (plyr,plvl,tlyr,qlyr,qstl,rhly, & !  --- inputs
-                         tracer1,xlat,xlon,slmsk,dz,delp,           &
-                         ntrac-1, ntcw-1,ntiw-1,ntrw-1,             &
-                         ntsw-1,ntgl-1,                             &
-                         im, lm, lmp, uni_cld, lmfshal, lmfdeep2,   &
-                         cldcov(:,1:LM), effrl, effri, effrs,       &
-                         lwp_ex, iwp_ex, lwp_fc, iwp_fc,            &
-                         dzb, xlat_d, julian, yearlen, gridkm,      &
-                         clouds, cldsa, mtopa ,mbota, de_lgth, alpha) !  --- outputs
-
-            else
-              call progcld6 (plyr,plvl,tlyr,qlyr,qstl,rhly,         & !  --- inputs
-                         tracer1,xlat,xlon,slmsk,dz,delp,           &
-                         ntrac-1, ntcw-1,ntiw-1,ntrw-1,             &
-                         ntsw-1,ntgl-1,                             &
-                         im, lmk, lmp, uni_cld, lmfshal, lmfdeep2,  &
-                         cldcov(:,1:LMK), cnvw, effrl, effri, effrs,&
-                         lwp_ex, iwp_ex, lwp_fc, iwp_fc,            &
-                         dzb, xlat_d, julian, yearlen,              &
-                         clouds, cldsa, mtopa ,mbota, de_lgth, alpha) !  --- outputs
-            endif
-          endif ! MYNN PBL or GF
-
-        endif                            ! end if_imp_physics
 
 !      endif                             ! end_if_ntcw
 
@@ -1027,7 +931,7 @@
           do k = 1, LMK
              do i = 1, IM
                 ! compute beta distribution parameters
-                m = clouds(i,k,1)
+                m = cld_frac(i,k)
                 if (m<0.99 .AND. m > 0.01) then
                    s = sppt_amp*m*(1.-m)
                    alpha0 = m*m*(1.-m)/(s*s)-m
@@ -1035,25 +939,25 @@
            ! compute beta distribution value corresponding
            ! to the given percentile albPpert to use as new albedo
                    call ppfbet(cldp1d(i),alpha0,beta0,iflag,cldtmp)
-                   clouds(i,k,1) = cldtmp
+                   cld_frac(i,k) = cldtmp
                 else
-                   clouds(i,k,1) = m
+                   cld_frac(i,k) = m
                 endif
              enddo     ! end_do_i_loop
           enddo     ! end_do_k_loop
        endif
        do k = 1, LM
          do i = 1, IM
-            clouds1(i,k)  = clouds(i,k,1)
-            clouds2(i,k)  = clouds(i,k,2)
-            clouds3(i,k)  = clouds(i,k,3)
-            clouds4(i,k)  = clouds(i,k,4)
-            clouds5(i,k)  = clouds(i,k,5)
-            clouds6(i,k)  = clouds(i,k,6)
-            clouds7(i,k)  = clouds(i,k,7)
-            clouds8(i,k)  = clouds(i,k,8)
-            clouds9(i,k)  = clouds(i,k,9)
-            cldfra(i,k)   = clouds(i,k,1)
+            clouds1(i,k)  = cld_frac(i,k)
+            clouds2(i,k)  = cld_lwp(i,k)
+            clouds3(i,k)  = cld_reliq(i,k)
+            clouds4(i,k)  = cld_iwp(i,k)
+            clouds5(i,k)  = cld_reice(i,k)
+            clouds6(i,k)  = cld_rwp(i,k)
+            clouds7(i,k)  = cld_rerain(i,k)
+            clouds8(i,k)  = cld_swp(i,k)
+            clouds9(i,k)  = cld_resnow(i,k)
+            cldfra(i,k)   = cld_frac(i,k)
          enddo
        enddo
        do i = 1, IM

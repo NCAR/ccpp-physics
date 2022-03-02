@@ -84,16 +84,22 @@ contains
   ! ######################################################################################
   !
   ! ######################################################################################
-  subroutine get_alpha_exp(nCol, nLay, dzlay, dcorr_lgth, alpha)
+  subroutine get_alpha_exper(nCol, nLay, iovr, iovr_exprand, dzlay,    &
+                             dcorr_lgth, cld_frac, alpha)
     
     ! Inputs
     integer, intent(in) :: &
          nCol,     & ! Number of horizontal grid points
          nLay        ! Number of vertical grid points
+    integer, intent(in) :: &
+         iovr,     &
+         iovr_exprand
     real(kind_phys), dimension(nCol), intent(in) :: &
          dcorr_lgth  ! Decorrelation length (km)
     real(kind_phys), dimension(nCol,nLay), intent(in) :: &
          dzlay       !
+    real(kind_phys), dimension(nCol,nLay), intent(in) ::  &
+         cld_frac
     
     ! Outputs
     real(kind_phys), dimension(nCol,nLay) :: &
@@ -108,9 +114,22 @@ contains
           alpha(iCol,iLay) = exp( -(dzlay(iCol,iLay)) / dcorr_lgth(iCol))
        enddo
     enddo
-    
+   
+    ! Revise alpha for exponential-random cloud overlap
+    ! Decorrelate layers when a clear layer follows a cloudy layer to enforce
+    ! random correlation between non-adjacent blocks of cloudy layers
+    if (iovr == iovr_exprand) then
+      do iLay = 2, nLay
+        do iCol = 1, nCol
+          if (cld_frac(iCol,iLay) == 0.0 .and. cld_frac(iCol,iLay-1) > 0.0) then
+            alpha(iCol,iLay) = 0.0
+          endif
+        enddo
+      enddo
+    endif
+ 
     return
     
-  end subroutine get_alpha_exp
+  end subroutine get_alpha_exper
   
 end module module_radiation_cloud_overlap
