@@ -43,8 +43,8 @@ contains
        imp_physics_fer_hires, do_mynnedmf, uni_cld, lmfdeep2, doGP_convcld, p_lev,       &
        p_lay, t_lay, qs_lay, q_lay, relhum, lsmask, xlon, xlat, dx, tv_lay,              &
        effrin_cldliq, effrin_cldice, effrin_cldrain, effrin_cldsnow, tracer,             &
-       cnv_mixratio, cnv_cldfrac, qci_conv, deltaZ, deltaZc, deltaP,      &
-       con_g, con_rd, con_eps, con_ttp, doGP_cldoptics_PADE, doGP_cldoptics_LUT,         &
+       cnv_mixratio, cnv_cldfrac, qci_conv, deltaZ, deltaZc, deltaP, con_g, con_rd,      &
+       con_eps, con_ttp, doGP_cldoptics_PADE, doGP_cldoptics_LUT,                        &
        cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp,   &
        cld_rerain, precip_frac, cnv_cld_lwp, cnv_cld_reliq, cnv_cld_iwp, cnv_cld_reice,  &
        lwp_ex, iwp_ex, lwp_fc, iwp_fc, errmsg, errflg)
@@ -98,7 +98,7 @@ contains
          lsmask,                    & ! Land/Sea mask
          xlon,                      & ! Longitude
          xlat,                      & ! Latitude 
-         dx                           !
+         dx                           ! Characteristic grid lengthscale (m)
     real(kind_phys), dimension(:,:), intent(in) :: &         
          tv_lay,                    & ! Virtual temperature (K)
          t_lay,                     & ! Temperature (K)
@@ -107,10 +107,10 @@ contains
          relhum,                    & ! Relative humidity
          p_lay,                     & ! Pressure at model-layers (Pa)
          cnv_mixratio,              & ! Convective cloud mixing-ratio (kg/kg)
-         qci_conv,                  & !
-         deltaZ,                    & !
-         deltaZc,                   & !
-         deltaP                       !
+         qci_conv,                  & ! Convective cloud condesate after rainout (kg/kg)
+         deltaZ,                    & ! Layer-thickness (m)
+         deltaZc,                   & ! Layer-thickness, from layer centers (m)
+         deltaP                       ! Layer-thickness (Pa)
     real(kind_phys), dimension(:,:), intent(inout) :: &
          effrin_cldliq,             & ! Effective radius for stratiform liquid cloud-particles (microns)
          effrin_cldice,             & ! Effective radius for stratiform ice cloud-particles (microns)
@@ -163,23 +163,38 @@ contains
     ! GFDL Microphysics
     ! ###################################################################################
     if (imp_physics == imp_physics_gfdl) then
+       ! GFDL-Lin
        if (.not. lgfdlmprad) then
-          ! Call progcld_gfdl_lin
+          errflg = 1
+          errmsg = "ERROR: MP choice not available with RRTMGP"
+          return
+       ! GFDL-EMC
        else
 
-          ! The cloud-fraction used for the radiation is conditional on other mp choices.
+          ! "cld_frac" is modified prior to include subgrid scale cloudiness, see 
+          ! module_SGSCloud_RadPre.F90.
           do iLay = 1, nLev
              do iCol = 1, nCol
+                ! 
+                ! SGS clouds present, use cloud-fraction modified to include sgs clouds.
+                !
                 if ((imfdeepcnv==imfdeepcnv_gf .or. do_mynnedmf) .and. kdt>1) then
+                   ! MYNN sub-grid cloud fraction.
                    if (do_mynnedmf) then
+                      ! If rain/snow present, use GFDL MP cloud-fraction...
                       if (tracer(iCol,iLay,i_cldrain)>1.0e-7 .OR. tracer(iCol,iLay,i_cldsnow)>1.0e-7) then
                          cld_frac(iCol,iLay) = tracer(iCol,iLay,i_cldtot)
                       endif
+                   ! GF sub-grid cloud fraction.
                    else
+                      ! If no convective cloud condensate present, use GFDL MP cloud-fraction....
                       if (qci_conv(iCol,iLay) <= 0.) then
                          cld_frac(iCol,iLay) = tracer(iCol,iLay,i_cldtot)
                       endif
                    endif
+                !
+                ! No SGS clouds, use GFDL MP cloud-fraction...
+                !
                 else
                    cld_frac(iCol,iLay) = tracer(iCol,iLay,i_cldtot)
                 endif
@@ -206,9 +221,13 @@ contains
        cld_reice  = effrin_cldice
        cld_resnow = effrin_cldsnow
 
+       !
+       ! SGS clouds present, use cloud-fraction modified to include sgs clouds.
+       !
        if(do_mynnedmf .or. imfdeepcnv == imfdeepcnv_gf ) then
           if (icloud == 3) then
              ! Call progcld_thompson
+             ! *NOTE* This routine is under active development
              call progcld_thompson(p_lay, p_lev, t_lay, q_lay, qs_lay, relhum, tracer,  &
                   xlat, xlon, lsmask, deltaZ*0.001, deltaP, ncnd, i_cldliq, i_cldice,   &
                   i_cldrain, i_cldsnow, i_cldgrpl, nCol, nLev, nLev+1, uni_cld, lmfshal,&
@@ -221,9 +240,7 @@ contains
                   cld_swp, cld_resnow)
 
           else
-             ! MYNN PBL or convective GF. Use cloud fractions with SGS clouds.
-             ! cld_frac, cld_lwp, and  cld_iwp, are modified prior to include subgrid-
-             ! scale cloudiness, in module_SGSCloud_RadPre.F90.
+             ! MYNN PBL or convective GF.
              call cloud_mp_uni(nCol, nLev, nTracers, ncnd, i_cldliq, i_cldice,          &
                   i_cldrain, i_cldsnow, i_cldgrpl, i_cldtot,  effr_in, kdt, lsmask,     &
                   p_lev, p_lay, t_lay, tv_lay, effrin_cldliq, effrin_cldice,            &
@@ -231,11 +248,25 @@ contains
                   cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp,          &
                   cld_rerain)
           endif
+       !
+       ! No SGS clouds
+       !
        else
           if (icloud == 3) then
              ! Call progcld_thompson
+             ! *NOTE* This routine is under active development
+             call progcld_thompson(p_lay, p_lev, t_lay, q_lay, qs_lay, relhum, tracer,  &
+                  xlat, xlon, lsmask, deltaZ*0.001, deltaP, ncnd, i_cldliq, i_cldice,   &
+                  i_cldrain, i_cldsnow, i_cldgrpl, nCol, nLev, nLev+1, uni_cld, lmfshal,&
+                  lmfdeep2, &
+                  cldcov, & ! This is an input, but not used...
+                  effrin_cldliq, effrin_cldice, effrin_cldsnow, lwp_ex, iwp_ex, lwp_fc, &
+                  iwp_fc, deltaZc*0.001, dx*0.001, &
+                  cldtot, cldcnv, & ! These are local variables, no intent given...
+                  cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_rwp, cld_rerain,&
+                  cld_swp, cld_resnow)
           else
-             !
+             ! 
              if (doGP_convcld) then
                 call cloud_mp_convective(nCol, nLev, t_lay, p_lev, p_lay, qs_lay,       &
                      relhum, cnv_mixratio, con_ttp, con_g, cnv_cld_lwp, cnv_cld_reliq,  &
