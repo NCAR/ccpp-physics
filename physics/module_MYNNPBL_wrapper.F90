@@ -281,7 +281,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &        dz, w, p, rho, th, qv, delp,                               &
      &        RUBLTEN, RVBLTEN, RTHBLTEN, RQVBLTEN,                      &
      &        RQCBLTEN, RQNCBLTEN, RQIBLTEN, RQNIBLTEN,                  &
-     &        RQNWFABLTEN, RQNIFABLTEN,                                  &
+     &        RQNWFABLTEN, RQNIFABLTEN
       real(kind=kind_phys), allocatable :: old_ozone(:,:)
 
 !smoke/chem arrays

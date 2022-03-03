@@ -7,68 +7,6 @@
 [ccpp-arg-table]
   name = mynnedmf_wrapper_init
   type = scheme
-[do_mynnedmf]
-  standard_name = flag_for_mellor_yamada_nakanishi_niino_pbl_scheme
-  long_name = flag to activate MYNN-EDMF
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[lheatstrg]
-  standard_name = flag_for_canopy_heat_storage_in_land_surface_scheme
-  long_name = flag for canopy heat storage parameterization
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[errmsg]
-  standard_name = ccpp_error_message
-  long_name = error message for error handling in CCPP
-  units = none
-  dimensions = ()
-  type = character
-  kind = len=*
-  intent = out
-[errflg]
-  standard_name = ccpp_error_code
-  long_name = error code for error handling in CCPP
-  units = 1
-  dimensions = ()
-  type = integer
-  intent = out
-
-#####################################################################
-[ccpp-arg-table]
-  name = mynnedmf_wrapper_run
-  type = scheme
-[im]
-  standard_name = horizontal_loop_extent
-  long_name = horizontal loop extent
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-[levs]
-  standard_name = vertical_layer_dimension
-  long_name = vertical layer dimension
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-[flag_init]
-  standard_name = flag_for_first_timestep
-  long_name = flag signaling first time step for time integration loop
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[flag_restart]
-  standard_name = flag_for_restart
-  long_name = flag for restart (warmstart) or coldstart
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
 [con_cp]
   standard_name = specific_heat_of_dry_air_at_constant_pressure
   long_name = specific heat of dry air at constant pressure
@@ -204,8 +142,8 @@
   intent = out
 [errflg]
   standard_name = ccpp_error_code
-  long_name = error flag for error handling in CCPP
-  units = flag
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out
