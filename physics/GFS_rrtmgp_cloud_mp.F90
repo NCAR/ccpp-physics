@@ -1,8 +1,9 @@
-! ###########update_#############################################################################
+! ########################################################################################
 ! ########################################################################################
 module GFS_rrtmgp_cloud_mp
   use machine,      only: kind_phys
   use radiation_tools,   only: check_error_msg
+  use module_radiation_clouds, only: progcld_thompson
   use rrtmgp_lw_cloud_optics, only: &
        radliq_lwr => radliq_lwrLW, radliq_upr => radliq_uprLW,&
        radice_lwr => radice_lwrLW, radice_upr => radice_uprLW  
@@ -40,8 +41,9 @@ contains
        imp_physics, imp_physics_thompson, imp_physics_gfdl, imp_physics_zhao_carr,       &
        imp_physics_zhao_carr_pdf, imp_physics_mg, imp_physics_wsm6, lgfdlmprad,          &
        imp_physics_fer_hires, do_mynnedmf, uni_cld, lmfdeep2, doGP_convcld, p_lev,       &
-       p_lay, t_lay, qs_lay, q_lay, relhum, lsmask, tv_lay, effrin_cldliq, effrin_cldice,&
-       effrin_cldrain, effrin_cldsnow, tracer, cnv_mixratio, cnv_cldfrac, qci_conv,      &
+       p_lay, t_lay, qs_lay, q_lay, relhum, lsmask, xlon, xlat, dx, tv_lay,              &
+       effrin_cldliq, effrin_cldice, effrin_cldrain, effrin_cldsnow, tracer,             &
+       cnv_mixratio, cnv_cldfrac, qci_conv, deltaZ, deltaZc, deltaP,      &
        con_g, con_rd, con_eps, con_ttp, doGP_cldoptics_PADE, doGP_cldoptics_LUT,         &
        cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp,   &
        cld_rerain, precip_frac, cnv_cld_lwp, cnv_cld_reliq, cnv_cld_iwp, cnv_cld_reice,  &
@@ -93,7 +95,10 @@ contains
          con_ttp,                   & ! Triple point temperature of water (K)  
          con_eps                      ! Physical constant: gas constant air / gas constant H2O
     real(kind_phys), dimension(:), intent(in) :: &
-         lsmask                       ! Land/Sea mask
+         lsmask,                    & ! Land/Sea mask
+         xlon,                      & ! Longitude
+         xlat,                      & ! Latitude 
+         dx                           !
     real(kind_phys), dimension(:,:), intent(in) :: &         
          tv_lay,                    & ! Virtual temperature (K)
          t_lay,                     & ! Temperature (K)
@@ -102,7 +107,10 @@ contains
          relhum,                    & ! Relative humidity
          p_lay,                     & ! Pressure at model-layers (Pa)
          cnv_mixratio,              & ! Convective cloud mixing-ratio (kg/kg)
-         qci_conv                     !
+         qci_conv,                  & !
+         deltaZ,                    & !
+         deltaZc,                   & !
+         deltaP                       !
     real(kind_phys), dimension(:,:), intent(inout) :: &
          effrin_cldliq,             & ! Effective radius for stratiform liquid cloud-particles (microns)
          effrin_cldice,             & ! Effective radius for stratiform ice cloud-particles (microns)
@@ -143,6 +151,7 @@ contains
 
     ! Local
     integer :: iCol, iLay
+    real (kind=kind_phys), dimension(nCol,nLev) :: cldcov, cldtot, cldcnv
 
     if (.not. (doSWrad .or. doLWrad)) return
 
@@ -200,7 +209,21 @@ contains
        if(do_mynnedmf .or. imfdeepcnv == imfdeepcnv_gf ) then
           if (icloud == 3) then
              ! Call progcld_thompson
+             call progcld_thompson(p_lay, p_lev, t_lay, q_lay, qs_lay, relhum, tracer,  &
+                  xlat, xlon, lsmask, deltaZ*0.001, deltaP, ncnd, i_cldliq, i_cldice,   &
+                  i_cldrain, i_cldsnow, i_cldgrpl, nCol, nLev, nLev+1, uni_cld, lmfshal,&
+                  lmfdeep2, &
+                  cldcov, & ! This is an input, but not used...
+                  effrin_cldliq, effrin_cldice, effrin_cldsnow, lwp_ex, iwp_ex, lwp_fc, &
+                  iwp_fc, deltaZc*0.001, dx*0.001, &
+                  cldtot, cldcnv, & ! These are local variables, no intent given....
+                  cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_rwp, cld_rerain,&
+                  cld_swp, cld_resnow)
+
           else
+             ! MYNN PBL or convective GF. Use cloud fractions with SGS clouds.
+             ! cld_frac, cld_lwp, and  cld_iwp, are modified prior to include subgrid-
+             ! scale cloudiness, in module_SGSCloud_RadPre.F90.
              call cloud_mp_uni(nCol, nLev, nTracers, ncnd, i_cldliq, i_cldice,          &
                   i_cldrain, i_cldsnow, i_cldgrpl, i_cldtot,  effr_in, kdt, lsmask,     &
                   p_lev, p_lay, t_lay, tv_lay, effrin_cldliq, effrin_cldice,            &
@@ -399,7 +422,7 @@ contains
     ! Particle size
     do iLay = 1, nLev
        do iCol = 1, nCol
-          ! Use radii provided from the macrophysics        
+          ! Use radii provided from the macrophysics
           if (effr_in) then
              cld_reliq(iCol,iLay)  = effrin_cldliq(iCol,iLay)
              cld_reice(iCol,iLay)  = max(reice_min, min(reice_max,effrin_cldice(iCol,iLay)))

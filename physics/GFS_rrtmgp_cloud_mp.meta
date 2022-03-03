@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = GFS_rrtmgp_cloud_mp
   type = scheme
-  dependencies = radiation_tools.F90, radiation_cloud_overlap.F90, module_mp_thompson_make_number_concentrations.F90, module_mp_thompson.F90, rrtmgp_lw_cloud_optics.F90
+  dependencies = radiation_tools.F90, radiation_clouds.f, module_mp_thompson_make_number_concentrations.F90, module_mp_thompson.F90, rrtmgp_lw_cloud_optics.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -260,6 +260,30 @@
   type = real
   kind = kind_phys
   intent = in
+[xlat]
+  standard_name = latitude
+  long_name = latitude
+  units = radian
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[xlon]
+  standard_name = longitude
+  long_name = longitude
+  units = radian
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[dx]
+  standard_name = characteristic_grid_lengthscale
+  long_name = relative dx for the grid cell
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
 [p_lev]
   standard_name = air_pressure_at_interface_for_RRTMGP
   long_name = air pressure at vertical interface for radiation calculation
@@ -376,6 +400,30 @@
   standard_name = convective_cloud_condesate_after_rainout
   long_name = convective cloud condesate after rainout
   units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[deltaZ]
+  standard_name = layer_thickness
+  long_name = layer_thickness
+  units = m
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[deltaZc]
+  standard_name = layer_thickness_from_layer_center
+  long_name = layer_thickness
+  units = m
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[deltaP]
+  standard_name = layer_thickness_in_Pa
+  long_name = layer_thickness_in_Pa
+  units = Pa
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys

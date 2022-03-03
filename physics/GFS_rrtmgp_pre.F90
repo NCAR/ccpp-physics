@@ -99,9 +99,9 @@ contains
 !! \htmlinclude GFS_rrtmgp_pre_run.html
 !!
   subroutine GFS_rrtmgp_pre_run(me, nCol, nLev, nTracers, i_o3, lsswr, lslwr, fhswr, fhlwr, &
-       xlat, xlon,  prsl, tgrs, prslk, prsi, qgrs, tsfc, coslat, sinlat, con_eps, con_epsm1,&
+       xlat, xlon,  prsl, tgrs, prslk, prsi, qgrs, tsfc, coslat, sinlat, con_g, con_rd, con_eps, con_epsm1,&
        con_fvirt, con_epsqs, solhr, minGPpres, maxGPpres, minGPtemp, maxGPtemp, raddt,      &
-       p_lay, t_lay, p_lev, t_lev, tsfg, tsfa, qs_lay, q_lay, tv_lay, relhum, tracer,       &
+       p_lay, t_lay, p_lev, t_lev, tsfg, tsfa, qs_lay, q_lay, tv_lay, relhum, tracer, deltaZ, deltaZc, deltaP, &
        active_gases_array, gas_concentrations, tsfc_radtime, coszen, coszdg, top_at_1, iSFC,&
        iTOA, errmsg, errflg)
     
@@ -122,6 +122,8 @@ contains
          fhswr,             & ! Frequency of SW radiation call.
          fhlwr                ! Frequency of LW radiation call.
     real(kind_phys), intent(in) :: &
+         con_g,             & ! Physical constant: gravitational constant
+         con_rd,            & ! Physical constant: gas-constant for dry air
          con_eps,           & ! Physical constant: Epsilon (Rd/Rv)
          con_epsm1,         & ! Physical constant: Epsilon (Rd/Rv) minus one
          con_fvirt,         & ! Physical constant: Inverse of epsilon minus one
@@ -163,7 +165,10 @@ contains
          q_lay,             & ! Water-vapor mixing ratio (kg/kg)
          tv_lay,            & ! Virtual temperature at model-layers 
          relhum,            & ! Relative-humidity at model-layers   
-         qs_lay               ! Saturation vapor pressure at model-layers
+         qs_lay,            & ! Saturation vapor pressure at model-layers
+         deltaZ,            & ! Layer thickness (m)
+         deltaZc,           & ! Layer thickness (m) (between layer centers)
+         deltaP               ! Layer thickness (Pa)
     real(kind_phys), dimension(nCol,nLev+1), intent(inout) :: &
          p_lev,             & ! Pressure at model-interface
          t_lev                ! Temperature at model-interface
@@ -180,7 +185,9 @@ contains
     ! Local variables
     integer :: i, j, iCol, iBand, iLay
     real(kind_phys),dimension(nCol,nLev) :: vmr_o3, vmr_h2o
-    real(kind_phys) :: es, tem1, tem2
+    real(kind_phys) :: es, tem1, tem2, pfac
+    real(kind_phys), dimension(nLev+1) :: hgtb
+    real(kind_phys), dimension(nLev)   :: hgtc
     real(kind_phys), dimension(nCol,nLev) :: o3_lay
     real(kind_phys), dimension(nCol,nLev, NF_VGAS) :: gas_vmr
 
@@ -254,6 +261,56 @@ contains
           relhum(iCol,iLay) = max( 0._kind_phys, min( 1._kind_phys, max(con_epsqs, q_lay(iCol,iLay))/qs_lay(iCol,iLay) ) )
           tv_lay(iCol,iLay) = t_lay(iCol,iLay) * (1._kind_phys + con_fvirt*q_lay(iCol,iLay)) 
        enddo
+    enddo
+
+    !
+    ! Compute layer-thickness between layer boundaries (deltaZ) and layer centers (deltaZc)
+    !
+    deltaP = abs(p_lev(:,2:nLev+1)-p_lev(:,1:nLev))
+    do iCol=1,nCol 
+       if (top_at_1) then
+          ! Layer thickness (m)
+          do iLay=1,nLev
+             deltaZ(iCol,iLay) = ((con_rd/con_g)) * abs(log(p_lev(iCol,iLay+1)) - log(p_lev(iCol,iLay))) * tv_lay(iCol,iLay)
+          enddo
+          ! Height at layer boundaries
+          hgtb(nLev+1) = 0._kind_phys
+          do iLay=nLev,1,-1
+             hgtb(iLay)= hgtb(iLay+1) + deltaZ(iCol,iLay)
+          enddo
+          ! Height at layer centers
+          do iLay = nLev, 1, -1
+             pfac = abs(log(p_lev(iCol,iLay+1)) - log(p_lay(iCol,iLay))) /  &
+                  abs(log(p_lev(iCol,iLay+1)) - log(p_lev(iCol,iLay)))
+             hgtc(iLay) = hgtb(iLay+1) + pfac * (hgtb(iLay) - hgtb(iLay+1))
+          enddo
+          ! Layer thickness between centers
+          do iLay = nLev-1, 1, -1
+             deltaZc(iCol,iLay) = hgtc(iLay) - hgtc(iLay+1)
+          enddo
+          deltaZc(iCol,nLev) = hgtc(nLev) - hgtb(nLev+1)
+       else
+          ! Layer thickness (m)
+          do iLay=nLev,1,-1
+             deltaZ(iCol,iLay) = ((con_rd/con_g)) * abs(log(p_lev(iCol,iLay))  - log(p_lev(iCol,iLay+1))) * tv_lay(iCol,iLay)
+          enddo
+          ! Height at layer boundaries
+          hgtb(1) = 0._kind_phys
+          do iLay=1,nLev
+             hgtb(iLay+1)= hgtb(iLay) + deltaZ(iCol,iLay)
+          enddo
+          ! Height at layer centers
+          do iLay = 1, nLev
+             pfac = abs(log(p_lev(iCol,iLay)) - log(p_lay(iCol,iLay)  )) /  &
+                  abs(log(p_lev(iCol,iLay)) - log(p_lev(iCol,iLay+1)))
+             hgtc(iLay) = hgtb(iLay) + pfac * (hgtb(iLay+1) - hgtb(iLay))
+          enddo
+          ! Layer thickness between centers
+          do iLay = 2, nLev
+             deltaZc(iCol,iLay) = hgtc(iLay) - hgtc(iLay-1)
+          enddo
+          deltaZc(iCol,1) = hgtc(1) - hgtb(1)
+       endif
     enddo
 
     ! #######################################################################################
