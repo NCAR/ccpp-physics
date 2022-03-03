@@ -148,14 +148,27 @@ SET_PROPERTY(SOURCE ${SCHEMES} ${CAPS}
 if((CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "Bitforbit") AND
     ${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
   # Define a list of schemes that need lower optimization with Intel in Release mode
-  set(SCHEME_NAMES_LOWER_OPTIMIZATION GFS_typedefs.F90
-                                      module_sf_mynn.F90)
+  set(SCHEME_NAMES_LOWER_OPTIMIZATION module_sf_mynn.F90)
   foreach(SCHEME_NAME IN LISTS SCHEME_NAMES_LOWER_OPTIMIZATION)
     set(SCHEMES_TMP ${SCHEMES})
     # Need to determine the name of the scheme with its path
     list(FILTER SCHEMES_TMP INCLUDE REGEX ".*${SCHEME_NAME}$")
     SET_SOURCE_FILES_PROPERTIES(${SCHEMES_TMP}
                                 APPEND_STRING PROPERTY COMPILE_FLAGS " ${CMAKE_Fortran_FLAGS_PHYSICS} ${OpenMP_Fortran_FLAGS} -O1")
+  endforeach()
+endif()
+
+# No optimization for certain schemes when compiling with Intel in Release mode
+if((CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "Bitforbit") AND
+    ${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
+  # Define a list of schemes that can't be optimized with Intel in Release mode
+  set(SCHEME_NAMES_NO_OPTIMIZATION GFS_typedefs.F90)
+  foreach(SCHEME_NAME IN LISTS SCHEME_NAMES_NO_OPTIMIZATION)
+    set(SCHEMES_TMP ${SCHEMES})
+    # Need to determine the name of the scheme with its path
+    list(FILTER SCHEMES_TMP INCLUDE REGEX ".*${SCHEME_NAME}$")
+    SET_SOURCE_FILES_PROPERTIES(${SCHEMES_TMP}
+                                APPEND_STRING PROPERTY COMPILE_FLAGS " ${CMAKE_Fortran_FLAGS_PHYSICS} ${OpenMP_Fortran_FLAGS} -O0")
   endforeach()
 endif()
 
