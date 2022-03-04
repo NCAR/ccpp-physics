@@ -60,15 +60,15 @@ module scm_sfc_flux_spec
 
     use machine,             only: kind_phys
     
-    integer, intent(in) :: im, lkm
+    integer, intent(in)    :: im, lkm
     integer, intent(inout) :: islmsk(:)
-    logical, intent(in) :: cplflx, cplice
+    logical, intent(in)    :: cplflx, cplice
     logical, intent(inout) :: dry(:), icy(:), flag_cice(:), wet(:), use_flake(:)
-    real(kind=kind_phys), intent(in) :: u1(:), v1(:), z1(:), t1(:), q1(:), p1(:), roughness_length(:), &
+    real(kind=kind_phys), intent(in)    :: cp, grav, hvap, rd, fvirt, vonKarman, min_seaice, tgice, min_lakeice
+    real(kind=kind_phys), intent(in)    :: u1(:), v1(:), z1(:), t1(:), q1(:), p1(:), roughness_length(:), &
       spec_sh_flux(:), spec_lh_flux(:), exner_inverse(:), T_surf(:), oceanfrac(:), lakefrac(:), lakedepth(:)
-    real(kind=kind_phys), intent(in) :: cp, grav, hvap, rd, fvirt, vonKarman, min_seaice, tgice, min_lakeice
     real(kind=kind_phys), intent(inout) :: cice(:), tisfc(:), tsfcl(:), tsfc_wat(:), slmsk(:)
-    real(kind=kind_phys), intent(out) :: sh_flux(:), lh_flux(:), u_star(:), sfc_stress(:), &
+    real(kind=kind_phys), intent(out)   :: sh_flux(:), lh_flux(:), u_star(:), sfc_stress(:), &
       cm(:), ch(:), fm(:), fh(:), rb(:), u10m(:), v10m(:), wind1(:), qss(:), t2m(:), q2m(:), &
       sh_flux_chs(:), frland(:)
 
