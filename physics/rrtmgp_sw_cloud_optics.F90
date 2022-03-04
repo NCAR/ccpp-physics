@@ -395,11 +395,12 @@ contains
 !! \htmlinclude rrtmgp_sw_cloud_optics.html
 !!
   subroutine rrtmgp_sw_cloud_optics_run(doSWrad, doG_cldoptics, icliq_sw, icice_sw,         &
-       doGP_cldoptics_PADE, doGP_cldoptics_LUT, doGP_convcld, nCol, nLev, nDay, nbndsGPsw,  &
-       idxday, cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow,       &
-       cld_rwp, cld_rerain, precip_frac, cnv_cld_lwp, cnv_cld_reliq, cnv_cld_iwp,           &
-       cnv_cld_reice, sw_optical_props_cloudsByBand, sw_optical_props_cnvcloudsByBand,      &
-       sw_optical_props_precipByBand, cldtausw, errmsg, errflg)
+       doGP_cldoptics_PADE, doGP_cldoptics_LUT, imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_samf, &
+       nCol, nLev, nDay, nbndsGPsw, idxday, cld_frac, cld_lwp, cld_reliq, cld_iwp,          &
+       cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain, precip_frac, cnv_cld_lwp,       &
+       cnv_cld_reliq, cnv_cld_iwp, cnv_cld_reice, sw_optical_props_cloudsByBand,            &
+       sw_optical_props_cnvcloudsByBand, sw_optical_props_precipByBand, cldtausw,           &
+       errmsg, errflg)
     
     ! Inputs
     logical, intent(in) :: &
@@ -407,7 +408,9 @@ contains
          doG_cldoptics,       & ! Use legacy RRTMG cloud-optics?
          doGP_cldoptics_PADE, & ! Use RRTMGP cloud-optics: PADE approximation?
          doGP_cldoptics_LUT,  & ! Use RRTMGP cloud-optics: LUTs?
-         doGP_convcld           !
+         imfdeepcnv,          & !
+         imfdeepcnv_gf,       & !
+         imfdeepcnv_samf        !
     integer, intent(in) :: &
          nbndsGPsw,           & ! Number of shortwave bands
          nCol,                & ! Number of horizontal gridpoints
@@ -489,7 +492,7 @@ contains
                sw_optical_props_cloudsByBand))     ! OUT - RRTMGP DDT: Shortwave optical properties, 
                                                    !       in each band (tau,ssa,g)
           ! ii) Convective cloud-optics
-          if (doGP_convcld) then
+          if (imfdeepcnv == imfdeepcnv_samf .or. imfdeepcnv == imfdeepcnv_gf) then
              call check_error_msg('rrtmgp_sw_cloud_optics_run - convective clouds',sw_cloud_props%cloud_optics(&
                   cnv_cld_lwp(idxday(1:nday),:),    & ! IN  - Convective cloud liquid water path
                   cnv_cld_iwp(idxday(1:nday),:),    & ! IN  - Convective cloud ice water path

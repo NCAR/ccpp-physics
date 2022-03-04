@@ -26,11 +26,11 @@ contains
 !! \htmlinclude rrtmgp_lw_rte_run.html
 !!
   subroutine rrtmgp_lw_rte_run(doLWrad, doLWclrsky, use_LW_jacobian, doGP_lwscat, nCol,     &
-       nLev, top_at_1, doGP_convcld, sfc_emiss_byband, sources, lw_optical_props_clrsky,    &
-       lw_optical_props_clouds, lw_optical_props_precip, lw_optical_props_cnvclouds,        &
-       lw_optical_props_aerosol, nGauss_angles, fluxlwUP_allsky, fluxlwDOWN_allsky,         &
-       fluxlwUP_clrsky, fluxlwDOWN_clrsky, fluxlwUP_jac, fluxlwUP_radtime,                  &
-       fluxlwDOWN_radtime, errmsg, errflg)
+       nLev, top_at_1, imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_samf, sfc_emiss_byband,        &
+       sources, lw_optical_props_clrsky, lw_optical_props_clouds, lw_optical_props_precip,  &
+       lw_optical_props_cnvclouds, lw_optical_props_aerosol, nGauss_angles, fluxlwUP_allsky,&
+       fluxlwDOWN_allsky, fluxlwUP_clrsky, fluxlwDOWN_clrsky, fluxlwUP_jac,                 &
+       fluxlwUP_radtime, fluxlwDOWN_radtime, errmsg, errflg)
 
     ! Inputs
     logical, intent(in) :: &
@@ -38,7 +38,9 @@ contains
          doLWrad,                 & ! Logical flag for longwave radiation call
          doLWclrsky,              & ! Compute clear-sky fluxes for clear-sky heating-rate?
          use_LW_jacobian,         & ! Compute Jacobian of LW to update radiative fluxes between radiation calls?
-         doGP_convcld,            & ! Flag to include convective cloud
+         imfdeepcnv,              & !
+         imfdeepcnv_gf,           & !
+         imfdeepcnv_samf,         & !
          doGP_lwscat                ! Include scattering in LW cloud-optics?
     integer, intent(in) :: &
          nCol,                    & ! Number of horizontal gridpoints
@@ -128,7 +130,7 @@ contains
     !
 
     ! Include convective cloud?
-    if (doGP_convcld) then
+    if (imfdeepcnv == imfdeepcnv_samf .or. imfdeepcnv == imfdeepcnv_gf) then
        call check_error_msg('rrtmgp_lw_rte_run',lw_optical_props_cnvclouds%increment(lw_optical_props_clrsky))
     endif
 

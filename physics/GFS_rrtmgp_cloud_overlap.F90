@@ -23,8 +23,8 @@ contains
        julian, lat, p_lev, p_lay, tv_lay, deltaZc, con_pi, con_g, con_rd, con_epsq,      &
        dcorr_con, idcor, iovr, iovr_dcorr, iovr_exp, iovr_exprand, idcor_con,            &
        idcor_hogan, idcor_oreopoulos, cld_frac, cnv_cldfrac, iovr_convcld, top_at_1,     &
-       doGP_convcld, de_lgth, cloud_overlap_param, cnv_cloud_overlap_param,              &
-       precip_overlap_param, errmsg, errflg)
+       imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_samf, de_lgth, cloud_overlap_param,         &
+       cnv_cloud_overlap_param, precip_overlap_param, errmsg, errflg)
     implicit none
     
     ! Inputs   
@@ -43,7 +43,9 @@ contains
          idcor_oreopoulos        ! Flag for decorrelation-length. (10.5194/acp-12-9097-2012) 
     logical, intent(in)     :: &
          top_at_1,             & ! Vertical ordering flag
-         doGP_convcld,         & ! Compute overlap parameter for convective cloud?
+         imfdeepcnv,           & !
+         imfdeepcnv_gf,        & !
+         imfdeepcnv_samf,      & !
     	 doSWrad,              & ! Call SW radiation?
     	 doLWrad                 ! Call LW radiation
     real(kind_phys), intent(in) :: &
@@ -111,7 +113,7 @@ contains
     !
     ! Convective cloud overlap parameter
     !
-    if (doGP_convcld) then
+    if (imfdeepcnv == imfdeepcnv_samf .or. imfdeepcnv == imfdeepcnv_gf) then
        if (iovr_convcld == iovr_dcorr .or. iovr_convcld == iovr_exp .or. iovr_convcld == iovr_exprand) then
           call get_alpha_exper(nCol, nLev, iovr_convcld, iovr_exprand, deltaZc*0.001, de_lgth, cnv_cldfrac, cnv_cloud_overlap_param)
        else

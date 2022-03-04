@@ -37,17 +37,17 @@ contains
   ! ######################################################################################
   subroutine GFS_rrtmgp_cloud_mp_run(nCol, nLev, nTracers, ncnd, i_cldliq, i_cldice,     &
        i_cldrain, i_cldsnow, i_cldgrpl, i_cldtot, i_cldliq_nc, i_cldice_nc, i_twa, kdt,  &
-       imfdeepcnv, imfdeepcnv_gf, doSWrad, doLWrad, effr_in, lmfshal, ltaerosol, icloud, &
-       imp_physics, imp_physics_thompson, imp_physics_gfdl, imp_physics_zhao_carr,       &
-       imp_physics_zhao_carr_pdf, imp_physics_mg, imp_physics_wsm6, lgfdlmprad,          &
-       imp_physics_fer_hires, do_mynnedmf, uni_cld, lmfdeep2, doGP_convcld, p_lev,       &
-       p_lay, t_lay, qs_lay, q_lay, relhum, lsmask, xlon, xlat, dx, tv_lay,              &
-       effrin_cldliq, effrin_cldice, effrin_cldrain, effrin_cldsnow, tracer,             &
-       cnv_mixratio, cnv_cldfrac, qci_conv, deltaZ, deltaZc, deltaP, con_g, con_rd,      &
+       imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_samf, doSWrad, doLWrad, effr_in, lmfshal,   &
+       ltaerosol, icloud, imp_physics, imp_physics_thompson, imp_physics_gfdl,           &
+       lgfdlmprad, do_mynnedmf, uni_cld, lmfdeep2, p_lev, p_lay, t_lay,    &
+       qs_lay, q_lay, relhum, lsmask, xlon, xlat, dx, tv_lay, effrin_cldliq,             &
+       effrin_cldice, effrin_cldrain, effrin_cldsnow, tracer, cnv_mixratio, cld_cnv_frac,&
+       qci_conv, deltaZ, deltaZc, deltaP, qc_mynn, qi_mynn, cld_mynn_frac, con_g, con_rd,&
        con_eps, con_ttp, doGP_cldoptics_PADE, doGP_cldoptics_LUT,                        &
        cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp,   &
-       cld_rerain, precip_frac, cnv_cld_lwp, cnv_cld_reliq, cnv_cld_iwp, cnv_cld_reice,  &
-       lwp_ex, iwp_ex, lwp_fc, iwp_fc, errmsg, errflg)
+       cld_rerain, precip_frac, cld_cnv_lwp, cld_cnv_reliq, cld_cnv_iwp, cld_cnv_reice,  &
+       cld_mynn_lwp, cld_mynn_reliq, cld_mynn_iwp, cld_mynn_reice, lwp_ex, iwp_ex,       &
+       lwp_fc, iwp_fc, errmsg, errflg)
 
     ! Inputs   
     integer, intent(in)    :: &
@@ -66,15 +66,11 @@ contains
          i_twa,                     & !                             water friendly aerosol.
          imfdeepcnv,                & ! Choice of mass-flux deep convection scheme
          imfdeepcnv_gf,             & ! Flag for Grell-Freitas deep convection scheme
+         imfdeepcnv_samf,           & ! Flag for scale awware mass flux convection scheme
          kdt,                       & ! Current forecast iteration
          imp_physics,               & ! Choice of microphysics scheme
          imp_physics_thompson,      & ! Choice of Thompson
          imp_physics_gfdl,          & ! Choice of GFDL
-         imp_physics_zhao_carr,     & ! Choice of Zhao-Carr
-         imp_physics_zhao_carr_pdf, & ! Choice of Zhao-Carr + PDF clouds
-         imp_physics_mg,            & ! Choice of Morrison-Gettelman
-         imp_physics_wsm6,          & ! Choice of WSM6
-         imp_physics_fer_hires,     & ! Choice of Ferrier-Aligo
          icloud                       ! Control for cloud are fraction option
     logical, intent(in) :: &
          doSWrad,                   & ! Call SW radiation?
@@ -86,7 +82,6 @@ contains
          do_mynnedmf,               & ! Flag to activate MYNN-EDMF 
          uni_cld,                   & ! Flag for unified cloud scheme
          lmfdeep2,                  & ! Flag for mass flux deep convection 
-         doGP_convcld,              & ! Treat convective clouds seperately?
          doGP_cldoptics_LUT,        & ! Flag to do GP cloud-optics (LUTs)
          doGP_cldoptics_PADE          !                            (PADE approximation)
     real(kind_phys), intent(in) :: &
@@ -110,7 +105,10 @@ contains
          qci_conv,                  & ! Convective cloud condesate after rainout (kg/kg)
          deltaZ,                    & ! Layer-thickness (m)
          deltaZc,                   & ! Layer-thickness, from layer centers (m)
-         deltaP                       ! Layer-thickness (Pa)
+         deltaP,                    & ! Layer-thickness (Pa)
+         qc_mynn,                   & !
+         qi_mynn,                   & !
+         cld_mynn_frac                !
     real(kind_phys), dimension(:,:), intent(inout) :: &
          effrin_cldliq,             & ! Effective radius for stratiform liquid cloud-particles (microns)
          effrin_cldice,             & ! Effective radius for stratiform ice cloud-particles (microns)
@@ -129,21 +127,25 @@ contains
          lwp_fc,                    & ! Total liquid water path from cloud fraction scheme
          iwp_fc                       ! Total ice    water path from cloud fraction scheme
     real(kind_phys), dimension(:,:),intent(inout) :: &
-         cld_frac,                  & ! Total cloud fraction
-         cld_lwp,                   & ! Cloud liquid water path
-         cld_reliq,                 & ! Cloud liquid effective radius
-         cld_iwp,                   & ! Cloud ice water path
-         cld_reice,                 & ! Cloud ice effecive radius
-         cld_swp,                   & ! Cloud snow water path
-         cld_resnow,                & ! Cloud snow effective radius
-         cld_rwp,                   & ! Cloud rain water path
-         cld_rerain,                & ! Cloud rain effective radius
+         cld_frac,                  & ! Cloud-fraction for   stratiform   clouds
+         cld_lwp,                   & ! Water path for       stratiform   liquid cloud-particles
+         cld_reliq,                 & ! Effective radius for stratiform   liquid cloud-particles
+         cld_iwp,                   & ! Water path for       stratiform   ice    cloud-particles
+         cld_reice,                 & ! Effective radius for stratiform   ice    cloud-particles
+         cld_swp,                   & ! Water path for                    snow   hydrometeors
+         cld_resnow,                & ! Effective radius for              snow   hydrometeors
+         cld_rwp,                   & ! Water path for                    rain   hydrometeors
+         cld_rerain,                & ! Effective radius for              rain   hydrometeors
          precip_frac,               & ! Precipitation fraction
-         cnv_cldfrac,               & ! Convective cloud-fraction (1)
-         cnv_cld_lwp,               & ! Water path for       convective liquid cloud-particles (microns) 
-         cnv_cld_reliq,             & ! Effective radius for convective liquid cloud-particles (microns)
-         cnv_cld_iwp,               & ! Water path for       convective ice cloud-particles (microns)
-         cnv_cld_reice                ! Effective radius for convective ice cloud-particles (microns) 
+         cld_cnv_frac,              & ! Cloud-fraction for   convective clouds
+         cld_cnv_lwp,               & ! Water path for       convective   liquid cloud-particles
+         cld_cnv_reliq,             & ! Effective radius for convective   liquid cloud-particles
+         cld_cnv_iwp,               & ! Water path for       convective   ice    cloud-particles
+         cld_cnv_reice,             & ! Effective radius for convective   ice    cloud-particles
+         cld_mynn_lwp,              & ! Water path for       MYNN SGS PBL liquid cloud-particles
+         cld_mynn_reliq,            & ! Effective radius for MYNN SGS PBL liquid cloud-particles
+         cld_mynn_iwp,              & ! Water path for       MYNN SGS PBL ice    cloud-particles
+         cld_mynn_reice               ! Effective radius for MYNN SGS PBL ice    cloud-particles
     character(len=*), intent(out) :: &
          errmsg                       ! Error message
     integer, intent(out) :: &  
@@ -151,7 +153,8 @@ contains
 
     ! Local
     integer :: iCol, iLay
-    real (kind=kind_phys), dimension(nCol,nLev) :: cldcov, cldtot, cldcnv
+    real(kind_phys) :: alpha0
+    real(kind_phys), dimension(nCol,nLev) :: cldcov, cldtot, cldcnv
 
     if (.not. (doSWrad .or. doLWrad)) return
 
@@ -213,7 +216,29 @@ contains
     ! Thompson Microphysics
     ! ###################################################################################
     if (imp_physics == imp_physics_thompson) then
-       ! Update particle size using modified mixing-ratios.
+
+       ! MYNN-EDMF PBL clouds?
+       if(do_mynnedmf) then
+          call cloud_mp_MYNN(nCol, nLev, lsmask, t_lay, p_lev, p_lay, qs_lay, relhum,   &
+               qc_mynn, qi_mynn, con_ttp, con_g,                                        &
+               cld_mynn_lwp, cld_mynn_reliq, cld_mynn_iwp, cld_mynn_reice, cld_mynn_frac)
+       endif
+
+       ! Grell-Freitas convective clouds?
+       if (imfdeepcnv == imfdeepcnv_gf) then
+          call cloud_mp_GF(nCol, nLev, lsmask, t_lay, p_lev, p_lay, qs_lay, relhum,     &
+               qci_conv, con_ttp, con_g,                                                &
+               cld_cnv_lwp, cld_cnv_reliq, cld_cnv_iwp, cld_cnv_reice, cld_cnv_frac)
+       endif
+
+       ! SAMF scale & aerosol-aware mass-flux convective clouds?
+       if (imfdeepcnv == imfdeepcnv_samf) then
+          call cloud_mp_SAMF(nCol, nLev, t_lay, p_lev, p_lay, qs_lay, relhum,           &
+               cnv_mixratio, con_ttp, con_g,                                            &
+               cld_cnv_lwp, cld_cnv_reliq, cld_cnv_iwp, cld_cnv_reice, cld_cnv_frac)
+       endif
+
+       ! Update particle size using modified mixing-ratios from Thompson.
        call cmp_reff_Thompson(nLev, nCol, i_cldliq, i_cldice, i_cldsnow, i_cldice_nc,   &
             i_cldliq_nc, i_twa, q_lay, p_lay, t_lay, tracer, con_eps, con_rd, ltaerosol,&
             effrin_cldliq, effrin_cldice, effrin_cldsnow)
@@ -221,66 +246,12 @@ contains
        cld_reice  = effrin_cldice
        cld_resnow = effrin_cldsnow
 
-       !
-       ! SGS clouds present, use cloud-fraction modified to include sgs clouds.
-       !
-       if(do_mynnedmf .or. imfdeepcnv == imfdeepcnv_gf ) then
-          if (icloud == 3) then
-             ! Call progcld_thompson
-             ! *NOTE* This routine is under active development
-             call progcld_thompson(p_lay, p_lev, t_lay, q_lay, qs_lay, relhum, tracer,  &
-                  xlat, xlon, lsmask, deltaZ*0.001, deltaP, ncnd, i_cldliq, i_cldice,   &
-                  i_cldrain, i_cldsnow, i_cldgrpl, nCol, nLev, nLev+1, uni_cld, lmfshal,&
-                  lmfdeep2, &
-                  cldcov, & ! This is an input, but not used...
-                  effrin_cldliq, effrin_cldice, effrin_cldsnow, lwp_ex, iwp_ex, lwp_fc, &
-                  iwp_fc, deltaZc*0.001, dx*0.001, &
-                  cldtot, cldcnv, & ! These are local variables, no intent given....
-                  cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_rwp, cld_rerain,&
-                  cld_swp, cld_resnow)
-
-          else
-             ! MYNN PBL or convective GF.
-             call cloud_mp_uni(nCol, nLev, nTracers, ncnd, i_cldliq, i_cldice,          &
-                  i_cldrain, i_cldsnow, i_cldgrpl, i_cldtot,  effr_in, kdt, lsmask,     &
-                  p_lev, p_lay, t_lay, tv_lay, effrin_cldliq, effrin_cldice,            &
-                  effrin_cldsnow, tracer, con_g, con_rd, con_ttp, cld_frac, cld_lwp,    &
-                  cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp,          &
-                  cld_rerain)
-          endif
-       !
-       ! No SGS clouds
-       !
-       else
-          if (icloud == 3) then
-             ! Call progcld_thompson
-             ! *NOTE* This routine is under active development
-             call progcld_thompson(p_lay, p_lev, t_lay, q_lay, qs_lay, relhum, tracer,  &
-                  xlat, xlon, lsmask, deltaZ*0.001, deltaP, ncnd, i_cldliq, i_cldice,   &
-                  i_cldrain, i_cldsnow, i_cldgrpl, nCol, nLev, nLev+1, uni_cld, lmfshal,&
-                  lmfdeep2, &
-                  cldcov, & ! This is an input, but not used...
-                  effrin_cldliq, effrin_cldice, effrin_cldsnow, lwp_ex, iwp_ex, lwp_fc, &
-                  iwp_fc, deltaZc*0.001, dx*0.001, &
-                  cldtot, cldcnv, & ! These are local variables, no intent given...
-                  cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_rwp, cld_rerain,&
-                  cld_swp, cld_resnow)
-          else
-             ! 
-             if (doGP_convcld) then
-                call cloud_mp_convective(nCol, nLev, t_lay, p_lev, p_lay, qs_lay,       &
-                     relhum, cnv_mixratio, con_ttp, con_g, cnv_cld_lwp, cnv_cld_reliq,  &
-                     cnv_cld_iwp, cnv_cld_reice, cnv_cldfrac)
-             endif
-             !
-             call cloud_mp_thompson(nCol, nLev, nTracers, ncnd, i_cldliq, i_cldice,     &
-                  i_cldrain, i_cldsnow, i_cldgrpl, i_cldtot, i_cldliq_nc, i_cldice_nc,  &
-                  i_twa, p_lev, p_lay, tv_lay, t_lay, tracer, qs_lay, q_lay, relhum,    &
-                  con_g, con_rd, con_eps, lmfshal, ltaerosol, imfdeepcnv, imfdeepcnv_gf,&
-                  uni_cld, lmfdeep2, lwp_ex, iwp_ex, lwp_fc, iwp_fc, cld_frac, cld_lwp, &
-                  cld_iwp, cld_swp, cld_rwp)
-          endif
-       endif
+       ! Thomson MP using modified Xu-Randall cloud-fraction (additionally conditioned on RH)
+       alpha0 = 200.
+       call cloud_mp_thompson(nCol, nLev, nTracers, ncnd, i_cldliq, i_cldice, i_cldrain,&
+            i_cldsnow, i_cldgrpl, p_lev, p_lay, tv_lay, t_lay, tracer, qs_lay, q_lay,   &
+            relhum, con_g, con_rd, con_eps, alpha0, lwp_ex, iwp_ex, lwp_fc, iwp_fc,     &
+            cld_frac, cld_lwp, cld_iwp, cld_swp, cld_rwp)
     endif
 
     ! Bound effective radii for RRTMGP, LUT's for cloud-optics go from
@@ -303,10 +274,145 @@ contains
   end subroutine GFS_rrtmgp_cloud_mp_finalize
 
   ! ######################################################################################
+  ! Compute cloud radiative properties for Grell-Freitas convective cloud scheme
+  !
+  ! - The total convective cloud condensate is partitoned by phase, using temperature, into
+  !   liquid/ice convective cloud mixing-ratios. Compute convective cloud LWP and IWP's.
+  !
+  ! - The liquid and ice cloud effective particle sizes are assigned reference values*.
+  !   *TODO* Find references, include DOIs, parameterize magic numbers, etc...
+  !
+  ! - The convective cloud-fraction is computed using  Xu-Randall (1996).
+  !
   ! ######################################################################################
-  subroutine cloud_mp_convective(nCol, nLev, t_lay, p_lev, p_lay, qs_lay, relhum,        &
-       cnv_mixratio, con_ttp, con_g, cnv_cld_lwp, cnv_cld_reliq, cnv_cld_iwp,            &
-       cnv_cld_reice, cnv_cldfrac)
+  subroutine cloud_mp_GF(nCol, nLev, lsmask, t_lay, p_lev, p_lay, qs_lay, relhum,        &
+       qci_conv, con_ttp, con_g, cld_cnv_lwp, cld_cnv_reliq, cld_cnv_iwp, cld_cnv_reice, &
+       cld_cnv_frac)
+    ! Inputs
+    integer, intent(in)    :: &
+         nCol,          & ! Number of horizontal grid points
+         nLev             ! Number of vertical layers
+    real(kind_phys), dimension(:), intent(in) :: &
+         lsmask           ! Land/Sea mask
+    real(kind_phys), intent(in) :: &
+         con_g,         & ! Physical constant: gravitational constant 
+         con_ttp          ! Triple point temperature of water (K)
+    real(kind_phys), dimension(:,:),intent(in) :: &
+         t_lay,         & ! Temperature at layer centers (K)
+         p_lev,         & ! Pressure at layer interfaces (Pa)
+         p_lay,         & !
+         qs_lay,        & !
+         relhum,        & !
+         qci_conv         !
+    ! Outputs
+    real(kind_phys), dimension(:,:),intent(inout) :: &
+         cld_cnv_lwp,   & ! Convective cloud liquid water path
+         cld_cnv_reliq, & ! Convective cloud liquid effective radius
+         cld_cnv_iwp,   & ! Convective cloud ice water path
+         cld_cnv_reice, & ! Convective cloud ice effecive radius
+         cld_cnv_frac     ! Convective cloud-fraction (1)
+    ! Local
+    integer :: iCol, iLay
+    real(kind_phys) :: tem1, deltaP, clwc, qc, qi
+    real(kind_phys), parameter :: alpha0=100
+
+    do iLay = 1, nLev
+       do iCol = 1, nCol
+          if (qci_conv(iCol,iLay) > 0.) then
+             ! Partition the convective clouds by phase.
+             qc = qci_conv(iCol,iLay)*(     min(1., max(0., (t_lay(iCol,iLay)-244.)/25.)))
+             qi = qci_conv(iCol,iLay)*(1. - min(1., max(0., (t_lay(iCol,iLay)-244.)/25.)))
+
+             ! Compute LWP/IWP
+             deltaP = abs(p_lev(iCol,iLay+1)-p_lev(iCol,iLay))/100.
+             tem1   = (1.0e5/con_g) * deltaP
+             cld_cnv_lwp(iCol,iLay) = max(0., qc * tem1)
+             cld_cnv_iwp(iCol,iLay) = max(0., qi * tem1)
+
+             ! Particle sizes
+             if (nint(lsmask(iCol)) == 1) then !land
+                if(qc > 1.E-8) cld_cnv_reliq(iCol,iLay) = 5.4
+             else
+                !eff radius cloud water (microns), from Miles et al. 
+                if(qc > 1.E-8) cld_cnv_reliq(iCol,iLay) = 9.6
+             endif
+             !eff radius cloud ice (microns), from Mishra et al. (2014, JGR Atmos, fig 6b) 
+             if(qi > 1.E-8) cld_cnv_reice(iCol,iLay) = max(173.45 + 2.14*(t_lay(iCol,iLay)-273.15), 20.)
+      
+             ! Xu-Randall (1996) cloud-fraction.
+             cld_cnv_frac(iCol,iLay) = cld_frac_XuRandall(p_lay(iCol,iLay),            &
+                  qs_lay(iCol,iLay), relhum(iCol,iLay), qc+qi, alpha0)
+          endif
+       enddo
+    enddo
+  end subroutine cloud_mp_GF
+
+  ! ######################################################################################
+  ! ######################################################################################
+  subroutine cloud_mp_MYNN(nCol, nLev, lsmask, t_lay, p_lev, p_lay, qs_lay, relhum,      &
+       qc_mynn, qi_mynn, con_ttp, con_g, cld_mynn_lwp, cld_mynn_reliq, cld_mynn_iwp,     &
+       cld_mynn_reice, cld_mynn_frac)
+    ! Inputs
+    integer, intent(in)    :: &
+         nCol,          & ! Number of horizontal grid points
+         nLev             ! Number of vertical layers
+    real(kind_phys), dimension(:), intent(in) :: &
+         lsmask           ! Land/Sea mask
+    real(kind_phys), intent(in) :: &
+         con_g,         & ! Physical constant: gravitational constant 
+         con_ttp          ! Triple point temperature of water (K)
+    real(kind_phys), dimension(:,:),intent(in) :: &
+         t_lay,         & ! Temperature at layer centers (K)
+         p_lev,         & ! Pressure at layer interfaces (Pa)
+         p_lay,         & !
+         qs_lay,        & !
+         relhum,        & !
+         qc_mynn,       & ! Liquid cloud mixing-ratio (MYNN PBL cloud)
+         qi_mynn,       & ! Ice cloud mixing-ratio (MYNN PBL cloud)
+         cld_mynn_frac    ! Cloud-fraction (MYNN PBL cloud)
+    ! Outputs
+    real(kind_phys), dimension(:,:),intent(inout) :: &
+         cld_mynn_lwp,   & ! Convective cloud liquid water path
+         cld_mynn_reliq, & ! Convective cloud liquid effective radius
+         cld_mynn_iwp,   & ! Convective cloud ice water path
+         cld_mynn_reice    ! Convective cloud ice effecive radius
+    
+    ! Local
+    integer :: iCol, iLay
+    real(kind_phys) :: tem1, qc, qi, deltaP
+
+    do iLay = 1, nLev
+       do iCol = 1, nCol
+          if (cld_mynn_frac(iCol,iLay) > cld_limit_lower) then
+             ! Cloud mixing-ratios
+             qc = qc_mynn(i,k)*cld_mynn_frac(iCol,iLay)
+             qi = qi_mynn(i,k)*cld_mynn_frac(iCol,iLay)
+
+             ! LWP/IWP
+             deltaP = abs(p_lev(iCol,iLay+1)-p_lev(iCol,iLay))/100.
+             tem1   = (1.0e5/con_g) * deltaP
+             cld_mynn_lwp(iCol,iLay) = max(0., qc * tem1)
+             cld_mynn_iwp(iCol,iLay) = max(0., qi * tem1)
+
+             ! Particle sizes
+             if (nint(lsmask(iCol)) == 1) then
+                if(qc > 1.E-8) cld_mynn_reliq(iCol,iLay) = 5.4
+             else
+                ! Cloud water (microns), from Miles et al.
+                if(qc > 1.E-8) cld_mynn_reliq(iCol,iLay) = 9.6
+             endif
+             ! Cloud ice (microns), from Mishra et al. (2014, JGR Atmos, fig 6b) 
+             if(qi > 1.E-8) cld_mynn_reice(iCol,iLay) = max(173.45 + 2.14*(t_lay(iCol,iLay)-273.15), 20.)
+          endif
+       enddo
+    enddo
+  end subroutine cloud_mp_MYNN
+
+  ! ######################################################################################
+  ! ######################################################################################
+  subroutine cloud_mp_SAMF(nCol, nLev, t_lay, p_lev, p_lay, qs_lay, relhum,              &
+       cnv_mixratio, con_ttp, con_g, cld_cnv_lwp, cld_cnv_reliq, cld_cnv_iwp,            &
+       cld_cnv_reice, cld_cnv_frac)
     ! Inputs
     integer, intent(in)    :: &
          nCol,          & ! Number of horizontal grid points
@@ -323,44 +429,35 @@ contains
          cnv_mixratio     ! Convective cloud mixing-ratio (kg/kg)
     ! Outputs
     real(kind_phys), dimension(:,:),intent(inout) :: &
-         cnv_cld_lwp,   & ! Convective cloud liquid water path
-         cnv_cld_reliq, & ! Convective cloud liquid effective radius
-         cnv_cld_iwp,   & ! Convective cloud ice water path
-         cnv_cld_reice, & ! Convective cloud ice effecive radius
-         cnv_cldfrac      ! Convective cloud-fraction (1)
+         cld_cnv_lwp,   & ! Convective cloud liquid water path
+         cld_cnv_reliq, & ! Convective cloud liquid effective radius
+         cld_cnv_iwp,   & ! Convective cloud ice water path
+         cld_cnv_reice, & ! Convective cloud ice effecive radius
+         cld_cnv_frac     ! Convective cloud-fraction (1)
     ! Local
     integer :: iCol, iLay
     real(kind_phys) :: tem1, deltaP, clwc
     real(kind_phys), parameter :: alpha0=200
 
-    ! Xu-Randall (1996) cloud-fraction.
     do iLay = 1, nLev
        do iCol = 1, nCol
-          cnv_cldfrac(iCol,iLay) = cld_frac_XuRandall(p_lay(iCol,iLay),            &
-               qs_lay(iCol,iLay), relhum(iCol,iLay), cnv_mixratio(iCol,iLay), alpha0)
-       enddo
-    enddo
-
-    do iLay = 1, nLev
-       do iCol = 1, nCol
-          if (cnv_cldfrac(iCol,iLay) > cld_limit_lower) then
+          if (cnv_mixratio(iCol,iLay) > 0._kind_phys) then
              tem1   = min(1.0, max(0.0, (con_ttp-t_lay(iCol,iLay))*0.05))
              deltaP = abs(p_lev(iCol,iLay+1)-p_lev(iCol,iLay))/100.
              clwc   = max(0.0, cnv_mixratio(iCol,iLay)) * con_g * deltaP
-             cnv_cld_iwp(iCol,iLay) = clwc * tem1
-             cnv_cld_lwp(iCol,iLay) = clwc - cnv_cld_iwp(iCol,iLay)
-             cnv_cld_reliq(iCol,iLay) = reliq_def
-             cnv_cld_reice(iCol,iLay) = reice_def
-        else
-             cnv_cld_iwp(iCol,iLay)   = 0._kind_phys
-             cnv_cld_lwp(iCol,iLay)   = 0._kind_phys
-             cnv_cld_reliq(iCol,iLay) = 0._kind_phys
-             cnv_cld_reice(iCol,iLay) = 0._kind_phys
+             cld_cnv_iwp(iCol,iLay) = clwc * tem1
+             cld_cnv_lwp(iCol,iLay) = clwc - cld_cnv_iwp(iCol,iLay)
+             cld_cnv_reliq(iCol,iLay) = reliq_def
+             cld_cnv_reice(iCol,iLay) = reice_def
+
+             ! Xu-Randall (1996) cloud-fraction.
+             cld_cnv_frac(iCol,iLay) = cld_frac_XuRandall(p_lay(iCol,iLay),            &
+               qs_lay(iCol,iLay), relhum(iCol,iLay), cnv_mixratio(iCol,iLay), alpha0)
           endif
        enddo
     enddo
 
-  end subroutine cloud_mp_convective
+  end subroutine cloud_mp_SAMF
 
   ! ######################################################################################
   ! ######################################################################################
@@ -419,10 +516,9 @@ contains
          cld_rerain              ! Cloud rain effective radius       
 
     ! Local variables
-    real(kind_phys) :: tem1,tem2,tem3,pfac
+    real(kind_phys) :: tem1,tem2,tem3,pfac,deltaP
     real(kind_phys), dimension(nCol, nLev, min(4,ncnd)) :: cld_condensate
     integer :: iCol,iLay,l,ncndl
-    real(kind_phys), dimension(nCol,nLev) :: deltaP
 
     ! Cloud condensate
     cld_condensate(1:nCol,1:nLev,1) = tracer(1:nCol,1:nLev,i_cldliq)        ! -liquid water
@@ -434,12 +530,12 @@ contains
     endif
 
     ! Cloud water path (g/m2)
-    deltaP = abs(p_lev(:,2:nLev+1)-p_lev(:,1:nLev))/100.  
     do iLay = 1, nLev
        do iCol = 1, nCol
           ! Compute liquid/ice condensate path from mixing ratios (kg/kg)->(g/m2)   
           if (cld_frac(iCol,iLay) > cld_limit_lower) then
-             tem1                = (1.0e5/con_g) * deltaP(iCol,iLay)
+             deltaP = abs(p_lev(iCol,iLay+1)-p_lev(iCol,iLay))/100.
+             tem1                = (1.0e5/con_g) * deltaP
              cld_lwp(iCol,iLay)  = max(0., cld_condensate(iCol,iLay,1) * tem1)
              cld_iwp(iCol,iLay)  = max(0., cld_condensate(iCol,iLay,2) * tem1)
              if (ncnd > 2) then
@@ -472,7 +568,8 @@ contains
              ! and McFarquhar (1996) \cite heymsfield_and_mcfarquhar_1996.
              tem2 = t_lay(iCol,iLay) - con_ttp
              if (cld_iwp(iCol,iLay) > 0.0) then
-                tem3 = (con_g/con_rd ) * cld_iwp(iCol,iLay) * (0.01*p_lay(iCol,iLay)) / (deltaP(iCol,iLay)*tv_lay(iCol,iLay))
+                deltaP = abs(p_lev(iCol,iLay+1)-p_lev(iCol,iLay))/100.
+                tem3 = (con_g/con_rd ) * cld_iwp(iCol,iLay) * (0.01*p_lay(iCol,iLay)) / (deltaP*tv_lay(iCol,iLay))
                 if (tem2 < -50.0) then
                    cld_reice(iCol,iLay) = (1250.0/9.917) * tem3 ** 0.109
                 elseif (tem2 < -40.0) then
@@ -492,11 +589,9 @@ contains
   ! ######################################################################################
   ! ######################################################################################
   subroutine cloud_mp_thompson(nCol, nLev, nTracers, ncnd, i_cldliq, i_cldice, i_cldrain,&
-       i_cldsnow, i_cldgrpl, i_cldtot, i_cldliq_nc, i_cldice_nc, i_twa, p_lev,  &
-       p_lay, tv_lay, t_lay, tracer,       &
-       qs_lay, q_lay, relhum, con_g, con_rd, con_eps, lmfshal, ltaerosol, imfdeepcnv,    &
-       imfdeepcnv_gf, uni_cld, lmfdeep2,                                                 &
-       lwp_ex, iwp_ex, lwp_fc, iwp_fc, cld_frac, cld_lwp, cld_iwp, cld_swp, cld_rwp)
+       i_cldsnow, i_cldgrpl, p_lev, p_lay, tv_lay, t_lay, tracer, qs_lay, q_lay, relhum, &
+       con_g, con_rd, con_eps, alpha0, lwp_ex, iwp_ex, lwp_fc, iwp_fc, cld_frac, cld_lwp,&
+       cld_iwp, cld_swp, cld_rwp)
     implicit none
 
     ! Inputs
@@ -509,23 +604,12 @@ contains
          i_cldice,          & !                             cloud ice amount.
          i_cldrain,         & !                             cloud rain amount.
          i_cldsnow,         & !                             cloud snow amount.
-         i_cldgrpl,         & !                             cloud groupel amount.
-         i_cldtot,          & !                             cloud total amount.
-         i_cldliq_nc,       & !                             cloud liquid number concentration.
-         i_cldice_nc,       & !                             cloud ice number concentration.
-         i_twa,             & !                             water friendly aerosol.
-         imfdeepcnv,        & ! Choice of mass-flux deep convection scheme
-         imfdeepcnv_gf        ! Flag for Grell-Freitas deep convection scheme
-    logical, intent(in) :: &
-         uni_cld,           & ! Flag for unified cloud scheme
-         lmfshal,           & ! Flag for mass-flux shallow convection scheme used by Xu-Randall
-         ltaerosol,         & ! Flag for aerosol option
-         lmfdeep2             ! Flag for mass flux deep convection 
+         i_cldgrpl            !                             cloud groupel amount.
     real(kind_phys), intent(in) :: &
          con_g,             & ! Physical constant: gravitational constant
          con_rd,            & ! Physical constant: gas-constant for dry air
-         con_eps              ! Physical constant: gas constant air / gas constant H2O
-
+         con_eps,           & ! Physical constant: gas constant air / gas constant H2O
+         alpha0               !
     real(kind_phys), dimension(:,:), intent(in) :: &
          tv_lay,            & ! Virtual temperature (K)
          t_lay,             & ! Temperature (K)
@@ -552,10 +636,9 @@ contains
          cld_rwp              ! Cloud rain water path
 
     ! Local variables
-    real(kind_phys) :: alpha0, pfac, tem1, cld_mr
+    real(kind_phys) :: pfac, tem1, cld_mr, deltaP
     real(kind_phys), dimension(nCol, nLev, min(4,ncnd)) :: cld_condensate
     integer :: iCol,iLay,l
-    real(kind_phys), dimension(nCol,nLev) :: deltaP
 
     ! Cloud condensate
     cld_condensate(1:nCol,1:nLev,1) = tracer(1:nCol,1:nLev,i_cldliq)     ! -liquid water
@@ -565,47 +648,31 @@ contains
                                       tracer(1:nCol,1:nLev,i_cldgrpl)
 
     ! Cloud water path (g/m2)
-    deltaP = abs(p_lev(:,2:nLev+1)-p_lev(:,1:nLev))/100.
     do iLay = 1, nLev
        do iCol = 1, nCol
           ! Compute liquid/ice condensate path from mixing ratios (kg/kg)->(g/m2)
-          tem1                = (1.0e5/con_g) * deltaP(iCol,iLay)
+          deltaP              = abs(p_lev(iCol,iLay+1)-p_lev(iCol,iLay))/100.
+          tem1                = (1.0e5/con_g) * deltaP
           cld_lwp(iCol,iLay)  = max(0., cld_condensate(iCol,iLay,1) * tem1)
           cld_iwp(iCol,iLay)  = max(0., cld_condensate(iCol,iLay,2) * tem1)
           cld_rwp(iCol,iLay)  = max(0., cld_condensate(iCol,iLay,3) * tem1)
           cld_swp(iCol,iLay)  = max(0., cld_condensate(iCol,iLay,4) * tem1)
        enddo
     enddo
-
-    ! Compute cloud-fraction. Only if not pre-computed
-    if(.not. uni_cld) then
-       ! Cloud-fraction
-       if(.not. lmfshal) then
-          alpha0 = 2000. ! Default (from GATE simulations)
-       else
-          if (lmfdeep2) then
-             alpha0 = 200
-          else 
-             alpha0 = 100
-          endif
-       endif
        
-       ! Xu-Randall (1996) cloud-fraction. Conditioned on relative-humidity
-       do iLay = 1, nLev
-          do iCol = 1, nCol
-             if (relhum(iCol,iLay) > 0.99) then
-                cld_frac(iCol,iLay) = 1._kind_phys
-             else
-                cld_mr = cld_condensate(iCol,iLay,1) + cld_condensate(iCol,iLay,2) +  &
-                     cld_condensate(iCol,iLay,4)
-                cld_frac(iCol,iLay) = cld_frac_XuRandall(p_lay(iCol,iLay),            &
-                     qs_lay(iCol,iLay), relhum(iCol,iLay), cld_mr, alpha0)
-             endif
-          enddo
+    ! Xu-Randall (1996) cloud-fraction. **Additionally, Conditioned on relative-humidity**
+    do iLay = 1, nLev
+       do iCol = 1, nCol
+          if (relhum(iCol,iLay) > 0.99) then
+             cld_frac(iCol,iLay) = 1._kind_phys
+          else
+             cld_mr = cld_condensate(iCol,iLay,1) + cld_condensate(iCol,iLay,2) +  &
+                  cld_condensate(iCol,iLay,4)
+             cld_frac(iCol,iLay) = cld_frac_XuRandall(p_lay(iCol,iLay),            &
+                  qs_lay(iCol,iLay), relhum(iCol,iLay), cld_mr, alpha0)
+          endif
        enddo
-    else
-       cld_frac = tracer(:,:,i_cldtot)
-    endif
+    enddo
 
     ! Sum the liquid water and ice paths that come from explicit micro 
     ! What portion of water and ice contents is associated with the partly cloudy boxes?

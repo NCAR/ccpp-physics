@@ -21,15 +21,17 @@ contains
   subroutine rrtmgp_lw_cloud_sampling_run(doLWrad, nCol, nLev, icseed_lw, iovr,iovr_convcld,&
        iovr_max, iovr_maxrand, iovr_rand, iovr_dcorr, iovr_exp, iovr_exprand, isubc_lw,     &
        cld_frac, precip_frac, cloud_overlap_param, precip_overlap_param, cnv_cldfrac,       &
-       cnv_cloud_overlap_param, doGP_convcld, lw_optical_props_cloudsByBand,                &
-       lw_optical_props_cnvcloudsByBand, lw_optical_props_precipByBand,                     &
-       lw_optical_props_clouds, lw_optical_props_cnvclouds, lw_optical_props_precip,        &
-       errmsg, errflg)
+       cnv_cloud_overlap_param, imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_samf,                 &
+       lw_optical_props_cloudsByBand, lw_optical_props_cnvcloudsByBand,                     &
+       lw_optical_props_precipByBand, lw_optical_props_clouds, lw_optical_props_cnvclouds,  &
+       lw_optical_props_precip, errmsg, errflg)
     
     ! Inputs
     logical, intent(in) :: &
          doLWrad,                          & ! Logical flag for shortwave radiation call
-         doGP_convcld
+         imfdeepcnv,                       & !
+         imfdeepcnv_gf,                    & !
+         imfdeepcnv_samf                     !
     integer, intent(in) :: &
          nCol,                             & ! Number of horizontal gridpoints
          nLev,                             & ! Number of vertical layers
@@ -158,7 +160,7 @@ contains
     ! Convective cloud ...
     ! (Use same RNGs as was used by the clouds.)
     ! ####################################################################################
-    if (doGP_convcld) then
+    if (imfdeepcnv == imfdeepcnv_samf .or. imfdeepcnv == imfdeepcnv_gf) then
        lw_optical_props_cnvclouds%band2gpt      = lw_gas_props%get_band_lims_gpoint()
        lw_optical_props_cnvclouds%band_lims_wvn = lw_gas_props%get_band_lims_wavenumber()
        do iBand=1,lw_gas_props%get_nband()

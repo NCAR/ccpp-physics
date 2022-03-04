@@ -216,12 +216,26 @@
   dimensions = ()
   type = logical
   intent = in
-[doGP_convcld]
-  standard_name = flag_to_include_convective_cloud_in_RRTMGP
-  long_name = logical flag to control convective cloud in RRTMGP
+[imfdeepcnv]
+  standard_name = control_for_deep_convection_scheme
+  long_name = flag for mass-flux deep convection scheme
   units = flag
   dimensions = ()
-  type = logical
+  type = integer
+  intent = in
+[imfdeepcnv_gf]
+  standard_name = identifier_for_grell_freitas_deep_convection
+  long_name = flag for Grell-Freitas deep convection scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[imfdeepcnv_samf]
+  standard_name = identifer_for_scale_aware_mass_flux_deep_convection
+  long_name = flag for SAMF deep convection scheme
+  units = flag
+  dimensions = ()
+  type = integer
   intent = in
 [de_lgth]
   standard_name = cloud_decorrelation_length

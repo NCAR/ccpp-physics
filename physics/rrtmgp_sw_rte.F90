@@ -25,16 +25,18 @@ contains
 !! \htmlinclude rrtmgp_sw_rte.html
 !!
   subroutine rrtmgp_sw_rte_run(doSWrad, doSWclrsky, nCol, nLev, nDay, idxday, coszen, p_lay,&
-       t_lay, top_at_1, doGP_convcld, iSFC, sfc_alb_nir_dir, sfc_alb_nir_dif,               &
-       sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, toa_src_sw, sw_optical_props_clrsky,           &
-       sw_optical_props_clouds, sw_optical_props_precip, sw_optical_props_cnvclouds,        &
-       sw_optical_props_aerosol, scmpsw, fluxswUP_allsky, fluxswDOWN_allsky,                &
-       fluxswUP_clrsky, fluxswDOWN_clrsky, errmsg, errflg)
+       t_lay, top_at_1, imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_samf, iSFC, sfc_alb_nir_dir,  &
+       sfc_alb_nir_dif, sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, toa_src_sw,                   &
+       sw_optical_props_clrsky, sw_optical_props_clouds, sw_optical_props_precip,           &
+       sw_optical_props_cnvclouds, sw_optical_props_aerosol, scmpsw, fluxswUP_allsky,       &
+       fluxswDOWN_allsky, fluxswUP_clrsky, fluxswDOWN_clrsky, errmsg, errflg)
 
     ! Inputs
     logical, intent(in) :: &
          top_at_1,                   & ! Vertical ordering flag
-         doGP_convcld,               & ! Flag to include convective cloud
+         imfdeepcnv,                 & !
+         imfdeepcnv_gf,              & !
+         imfdeepcnv_samf,            & !
          doSWrad,                    & ! Flag to calculate SW irradiances
          doSWclrsky                    ! Compute clear-sky fluxes?
     integer, intent(in) :: &
@@ -152,7 +154,7 @@ contains
        !
 
        ! Include convective cloud?
-       if (doGP_convcld) then
+       if (imfdeepcnv == imfdeepcnv_samf .or. imfdeepcnv == imfdeepcnv_gf) then
           call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_cnvclouds%increment(sw_optical_props_clrsky))
        endif
 

@@ -383,11 +383,12 @@ contains
 !! \htmlinclude rrtmgp_lw_cloud_optics.html
 !!
   subroutine rrtmgp_lw_cloud_optics_run(doLWrad, doG_cldoptics, icliq_lw, icice_lw,      &
-       doGP_cldoptics_PADE, doGP_cldoptics_LUT, doGP_lwscat, doGP_convcld, nCol, nLev,   &
-       nbndsGPlw , p_lay, cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_swp,     &
-       cld_resnow, cld_rwp, cld_rerain, precip_frac, cnv_cld_lwp, cnv_cld_reliq,         &
-       cnv_cld_iwp, cnv_cld_reice, lon, lat, cldtaulw, lw_optical_props_cloudsByBand,    &
-       lw_optical_props_cnvcloudsByBand, lw_optical_props_precipByBand, errmsg, errflg)
+       doGP_cldoptics_PADE, doGP_cldoptics_LUT, doGP_lwscat, imfdeepcnv, imfdeepcnv_gf,  &
+       imfdeepcnv_samf, nCol, nLev, nbndsGPlw , p_lay, cld_frac, cld_lwp, cld_reliq,     &
+       cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain, precip_frac,        &
+       cnv_cld_lwp, cnv_cld_reliq, cnv_cld_iwp, cnv_cld_reice, lon, lat, cldtaulw,       &
+       lw_optical_props_cloudsByBand, lw_optical_props_cnvcloudsByBand,                  &
+       lw_optical_props_precipByBand, errmsg, errflg)
     
     ! Inputs
     logical, intent(in) :: &
@@ -396,7 +397,9 @@ contains
          doGP_cldoptics_PADE, & ! Use RRTMGP cloud-optics: PADE approximation?
          doGP_cldoptics_LUT,  & ! Use RRTMGP cloud-optics: LUTs?
          doGP_lwscat,         & ! Include scattering in LW cloud-optics?
-         doGP_convcld           !
+         imfdeepcnv,          & !
+         imfdeepcnv_gf,       & !
+         imfdeepcnv_samf        !
     integer, intent(in) ::    &
          nbndsGPlw,           & !
          nCol,                & ! Number of horizontal gridpoints
@@ -475,7 +478,7 @@ contains
             lw_optical_props_cloudsByBand))      ! OUT - RRTMGP DDT containing cloud radiative properties
                                                  !       in each band
        ! ii) Convective cloud-optics
-       if (doGP_convcld) then
+       if (imfdeepcnv == imfdeepcnv_samf .or. imfdeepcnv == imfdeepcnv_gf) then
           call check_error_msg('rrtmgp_lw_cnvcloud_optics_run - convective cloud',lw_cloud_props%cloud_optics(&
                cnv_cld_lwp,                       & ! IN  - Convective cloud liquid water path (g/m2)
                cnv_cld_iwp,                       & ! IN  - Convective cloud ice water path (g/m2)
