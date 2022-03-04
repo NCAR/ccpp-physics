@@ -323,6 +323,7 @@ module lsm_ruc
       subroutine lsm_ruc_run                                            & ! inputs
      &     ( iter, me, master, delt, kdt, im, nlev, lsm_ruc, lsm,       &
      &       imp_physics, imp_physics_gfdl, imp_physics_thompson,       &
+     &       imp_physics_nssl,                                          &
      &       do_mynnsfclay, lsoil_ruc, lsoil, rdlai, xlat_d, xlon_d, zs,&
      &       t1, q1, qc, stype, vtype, sigmaf, laixy,                   &
      &       dlwflx, dswsfc, tg3, coszen, land, icy, use_lake,          &
@@ -371,7 +372,8 @@ module lsm_ruc
       integer, intent(in) :: me, master
       integer, intent(in) :: im, nlev, iter, lsoil_ruc, lsoil, kdt, isot, ivegsrc
       integer, intent(in) :: lsm_ruc, lsm
-      integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson
+      integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, &
+                             imp_physics_nssl
       real (kind=kind_phys), dimension(:), intent(in) :: xlat_d, xlon_d
 
       real (kind=kind_phys), dimension(:), intent(in) ::          &
@@ -776,7 +778,8 @@ module lsm_ruc
 
       ! Set flag for mixed phase precipitation depending on microphysics scheme.
       ! For GFDL and Thompson, srflag is fraction of frozen precip for convective+explicit precip.
-      if (imp_physics==imp_physics_gfdl .or. imp_physics==imp_physics_thompson) then
+      if (imp_physics==imp_physics_gfdl .or. imp_physics==imp_physics_thompson .or. &
+          imp_physics == imp_physics_nssl) then
         frpcpn = .true.
       else
         frpcpn = .false.

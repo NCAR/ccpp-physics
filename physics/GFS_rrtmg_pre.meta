@@ -142,6 +142,20 @@
   dimensions = ()
   type = integer
   intent = in
+[ntrnc]
+  standard_name = index_of_mass_number_concentration_of_rain_in_tracer_concentration_array
+  long_name = tracer index for rain   number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ntsnc]
+  standard_name = index_of_mass_number_concentration_of_snow_in_tracer_concentration_array
+  long_name = tracer index for snow   number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
 [ntrw]
   standard_name = index_of_rain_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for rain water
@@ -163,6 +177,20 @@
   dimensions = ()
   type = integer
   intent = in
+[nthl]
+  standard_name = index_of_hail_mixing_ratio_in_tracer_concentration_array
+  long_name = tracer index for hail
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ntccn]
+  standard_name = index_of_cloud_condensation_nuclei_number_concentration_in_tracer_concentration_array
+  long_name = tracer index for cloud condensation nuclei number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
 [ntwa]
   standard_name = index_of_mass_number_concentration_of_hygroscopic_aerosols_in_tracer_concentration_array
   long_name = tracer index for water friendly aerosol
@@ -176,6 +204,20 @@
   units = index
   dimensions = ()
   type = integer
+  intent = in
+[nssl_ccn_on]
+  standard_name = nssl_ccn_on
+  long_name = CCN activation flag in NSSL micro
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[nssl_invertccn]
+  standard_name = nssl_invertccn
+  long_name = flag to invert CCN in NSSL micro
+  units = flag
+  dimensions = ()
+  type = logical
   intent = in
 [ntclamt]
   standard_name = index_of_cloud_area_fraction_in_atmosphere_layer_in_tracer_concentration_array
@@ -222,6 +264,13 @@
 [imp_physics]
   standard_name = control_for_microphysics_scheme
   long_name = choice of microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[imp_physics_nssl]
+  standard_name = identifier_for_nssl_microphysics_scheme
+  long_name = choice of NSSL 2-moment microphysics scheme
   units = flag
   dimensions = ()
   type = integer

@@ -18,8 +18,10 @@
       ! in the CCPP version - they are defined in the interstitial_create routine
       subroutine GFS_rrtmg_pre_run (im, levs, lm, lmk, lmp, n_var_lndp,        &
         imfdeepcnv, imfdeepcnv_gf, me, ncnd, ntrac, num_p3d, npdf3d, ncnvcld3d,&
-        ntqv, ntcw,ntiw, ntlnc, ntinc, ntrw, ntsw, ntgl, ntwa, ntoz,           &
-        ntclamt, nleffr, nieffr, nseffr, lndp_type, kdt, imp_physics,          &
+        ntqv, ntcw,ntiw, ntlnc, ntinc, ntrnc, ntsnc, ntccn,                    & 
+        ntrw, ntsw, ntgl, nthl, ntwa, ntoz,                                    &
+        ntclamt, nleffr, nieffr, nseffr, lndp_type, kdt,                       &
+        imp_physics,imp_physics_nssl, nssl_ccn_on, nssl_invertccn,             &
         imp_physics_thompson, imp_physics_gfdl, imp_physics_zhao_carr,         &
         imp_physics_zhao_carr_pdf, imp_physics_mg, imp_physics_wsm6,           &
         imp_physics_fer_hires, julian, yearlen, lndp_var_list, lsswr, lslwr,   &
@@ -86,7 +88,8 @@
                                            imfdeepcnv_gf, me, ncnd, ntrac,     &
                                            num_p3d, npdf3d, ncnvcld3d, ntqv,   &
                                            ntcw, ntiw, ntlnc, ntinc,           &
-                                           ntrw, ntsw, ntgl, ntwa, ntoz,       &
+                                           ntrnc, ntsnc,ntccn,                 &
+                                           ntrw, ntsw, ntgl, nthl, ntwa, ntoz, &
                                            ntclamt, nleffr, nieffr, nseffr,    &
                                            lndp_type,                          &
                                            kdt, imp_physics,                   &
@@ -95,6 +98,7 @@
                                            imp_physics_zhao_carr,              &
                                            imp_physics_zhao_carr_pdf,          &
                                            imp_physics_mg, imp_physics_wsm6,   &
+                                           imp_physics_nssl,                   &
                                            imp_physics_fer_hires,              &
                                            yearlen, icloud
 
@@ -104,6 +108,7 @@
                                           uni_cld, effr_in, do_mynnedmf,       &
                                           lmfshal, lmfdeep2, pert_clds
 
+      logical,              intent(in) :: nssl_ccn_on, nssl_invertccn
       integer,    intent(in) :: spp_rad
       real(kind_phys),              intent(in) :: spp_wts_rad(:,:)
 
@@ -647,7 +652,7 @@
               ccnd(i,k,4) = tracer1(i,k,ntsw)                     ! snow water
             enddo
           enddo
-        elseif (ncnd == 5) then                         ! GFDL MP, Thompson, MG3, FA
+        elseif ( ncnd == 5 .or. ncnd == 6) then        ! GFDL MP, Thompson, MG3, NSSL
           do k=1,LMK
             do i=1,IM
               ccnd(i,k,1) = tracer1(i,k,ntcw)                     ! liquid water
@@ -656,7 +661,11 @@
               if (imp_physics == imp_physics_fer_hires ) then
                   ccnd(i,k,4) = 0.0
               else
+                IF ( ncnd == 5 ) THEN
                   ccnd(i,k,4) = tracer1(i,k,ntsw) + tracer1(i,k,ntgl) ! snow + graupel
+                ELSEIF ( ncnd == 6 ) THEN
+                  ccnd(i,k,4) = tracer1(i,k,ntsw) + tracer1(i,k,ntgl) + tracer1(i,k,nthl) ! snow + graupel + hail
+                ENDIF
               endif
             enddo
           enddo
@@ -796,7 +805,25 @@
               enddo
             enddo
           endif
-        elseif (imp_physics == imp_physics_thompson) then       !  Thompson MP
+
+        elseif (imp_physics == imp_physics_nssl ) then                          ! NSSL MP
+          cldcov = 0.0
+          if(effr_in) then
+           do k=1,lm
+             k1 = k + kd
+             do i=1,im
+               effrl(i,k1) = effrl_inout(i,k)! re_cloud (i,k)
+               effri(i,k1) = effri_inout(i,k)! re_ice (i,k)
+               effrr(i,k1) = effrr_in(i,k)
+               effrs(i,k1) = effrs_inout(i,k) ! re_snow(i,k)
+             enddo
+           enddo
+          else
+           ! not used yet -- effr_in should always be true for now
+          endif
+
+        elseif (imp_physics == imp_physics_thompson) then                     !  Thompson MP
+
           !
           ! Compute effective radii for QC, QI, QS with (GF, MYNN) or without (all others) sub-grid clouds
           !
@@ -951,6 +978,41 @@
                          effri_inout(:,:), effrs_inout(:,:),               &
                          dzb, xlat_d, julian, yearlen,                     &
                          clouds,cldsa,mtopa,mbota, de_lgth, alpha)            !  --- outputs
+        
+        elseif ( imp_physics == imp_physics_nssl ) then                              ! NSSL MP
+
+          if(do_mynnedmf .or. imfdeepcnv == imfdeepcnv_gf ) then ! MYNN PBL or GF conv
+              !-- MYNN PBL or convective GF
+              !-- use cloud fractions with SGS clouds
+              do k=1,lmk
+                do i=1,im
+                  clouds(i,k,1)  = clouds1(i,k)
+                enddo
+              enddo
+
+                ! --- use clduni with the NSSL microphysics.
+                ! --- make sure that effr_in=.true. in the input.nml!
+                call progclduni (plyr, plvl, tlyr, tvly, ccnd, ncndl,   & !  ---  inputs
+                         xlat, xlon, slmsk, dz, delp, IM, LMK, LMP,     &
+                         clouds(:,1:LMK,1),                             &
+                         effrl, effri, effrr, effrs, effr_in ,          &
+                         dzb, xlat_d, julian, yearlen,                  &
+                         clouds, cldsa, mtopa, mbota, de_lgth, alpha)     !  ---  outputs
+
+          else
+            ! MYNN PBL or GF convective are not used
+            call progcld6 (plyr,plvl,tlyr,qlyr,qstl,rhly,tracer1,   & !  --- inputs
+                         xlat,xlon,slmsk,dz,delp,                   &
+                         ntrac-1, ntcw-1,ntiw-1,ntrw-1,             &
+                         ntsw-1,ntgl-1,                             &
+                         im, lmk, lmp, uni_cld, lmfshal, lmfdeep2,  &
+                         cldcov(:,1:LMK), cnvw, effrl_inout,        &
+                         effri_inout, effrs_inout,                  &
+                         lwp_ex, iwp_ex, lwp_fc, iwp_fc,            &
+                         dzb, xlat_d, julian, yearlen,              &
+                         clouds, cldsa, mtopa ,mbota, de_lgth, alpha) !  --- outputs
+          endif ! MYNN PBL or GF
+
 
         elseif(imp_physics == imp_physics_thompson) then                              ! Thompson MP
 

@@ -232,6 +232,34 @@
   dimensions = ()
   type = integer
   intent = in
+[nthl]
+  standard_name = index_of_hail_mixing_ratio_in_tracer_concentration_array
+  long_name = tracer index for hail
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[nthnc]
+  standard_name = index_of_mass_number_concentration_of_hail_in_tracer_concentration_array
+  long_name = tracer index for hail number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ntgv]
+  standard_name = index_of_graupel_volume_in_tracer_concentration_array
+  long_name = tracer index for graupel particle volume
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[nthv]
+  standard_name = index_of_hail_volume_in_tracer_concentration_array
+  long_name = tracer index for hail particle volume
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
 [clw]
   standard_name = convective_transportable_tracers
   long_name = array to contain cloud water and other convective trans. tracers
@@ -680,6 +708,34 @@
 [ntgnc]
   standard_name = index_of_mass_number_concentration_of_graupel_in_tracer_concentration_array
   long_name = tracer index for graupel number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[nthl]
+  standard_name = index_of_hail_mixing_ratio_in_tracer_concentration_array
+  long_name = tracer index for hail
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[nthnc]
+  standard_name = index_of_mass_number_concentration_of_hail_in_tracer_concentration_array
+  long_name = tracer index for hail number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ntgv]
+  standard_name = index_of_graupel_volume_in_tracer_concentration_array
+  long_name = tracer index for graupel particle volume
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[nthv]
+  standard_name = index_of_hail_volume_in_tracer_concentration_array
+  long_name = tracer index for hail particle volume
   units = index
   dimensions = ()
   type = integer
