@@ -149,7 +149,7 @@
   type = real
   kind = kind_phys
   intent = in
-[cnv_cldfrac]
+[cld_cnv_frac]
   standard_name = convective_cloud_fraction_for_RRTMGP
   long_name = layer convective cloud fraction
   units = frac

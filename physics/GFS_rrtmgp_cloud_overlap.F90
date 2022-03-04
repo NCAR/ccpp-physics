@@ -22,7 +22,7 @@ contains
   subroutine GFS_rrtmgp_cloud_overlap_run(nCol, nLev, yearlen, doSWrad, doLWrad,         &
        julian, lat, p_lev, p_lay, tv_lay, deltaZc, con_pi, con_g, con_rd, con_epsq,      &
        dcorr_con, idcor, iovr, iovr_dcorr, iovr_exp, iovr_exprand, idcor_con,            &
-       idcor_hogan, idcor_oreopoulos, cld_frac, cnv_cldfrac, iovr_convcld, top_at_1,     &
+       idcor_hogan, idcor_oreopoulos, cld_frac, cld_cnv_frac, iovr_convcld, top_at_1,    &
        imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_samf, de_lgth, cloud_overlap_param,         &
        cnv_cloud_overlap_param, precip_overlap_param, errmsg, errflg)
     implicit none
@@ -32,6 +32,9 @@ contains
          nCol,                 & ! Number of horizontal grid points
          nLev,                 & ! Number of vertical layers
          yearlen,              & ! Length of current year (365/366) WTF?
+         imfdeepcnv,           & !
+         imfdeepcnv_gf,        & !
+         imfdeepcnv_samf,      & !
          iovr,                 & ! Choice of cloud-overlap method
          iovr_convcld,         & ! Choice of convective cloud-overlap method
          iovr_dcorr,           & ! Flag for decorrelation-length cloud overlap method
@@ -43,9 +46,6 @@ contains
          idcor_oreopoulos        ! Flag for decorrelation-length. (10.5194/acp-12-9097-2012) 
     logical, intent(in)     :: &
          top_at_1,             & ! Vertical ordering flag
-         imfdeepcnv,           & !
-         imfdeepcnv_gf,        & !
-         imfdeepcnv_samf,      & !
     	 doSWrad,              & ! Call SW radiation?
     	 doLWrad                 ! Call LW radiation
     real(kind_phys), intent(in) :: &
@@ -61,7 +61,7 @@ contains
          tv_lay,               & ! Virtual temperature (K)
          p_lay,                & ! Pressure at model-layers (Pa)
          cld_frac,             & ! Total cloud fraction
-         cnv_cldfrac             ! Convective cloud-fraction
+         cld_cnv_frac            ! Convective cloud-fraction
     real(kind_phys), dimension(:,:), intent(in) :: &         
          p_lev,                & ! Pressure at model-level interfaces (Pa)
          deltaZc                 ! Layer thickness (from layer-centers)(m)
@@ -115,7 +115,7 @@ contains
     !
     if (imfdeepcnv == imfdeepcnv_samf .or. imfdeepcnv == imfdeepcnv_gf) then
        if (iovr_convcld == iovr_dcorr .or. iovr_convcld == iovr_exp .or. iovr_convcld == iovr_exprand) then
-          call get_alpha_exper(nCol, nLev, iovr_convcld, iovr_exprand, deltaZc*0.001, de_lgth, cnv_cldfrac, cnv_cloud_overlap_param)
+          call get_alpha_exper(nCol, nLev, iovr_convcld, iovr_exprand, deltaZc*0.001, de_lgth, cld_cnv_frac, cnv_cloud_overlap_param)
        else
           de_lgth(:)                   = 0.
           cnv_cloud_overlap_param(:,:) = 0.

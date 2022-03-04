@@ -20,7 +20,7 @@ contains
 !!
   subroutine rrtmgp_lw_cloud_sampling_run(doLWrad, nCol, nLev, icseed_lw, iovr,iovr_convcld,&
        iovr_max, iovr_maxrand, iovr_rand, iovr_dcorr, iovr_exp, iovr_exprand, isubc_lw,     &
-       cld_frac, precip_frac, cloud_overlap_param, precip_overlap_param, cnv_cldfrac,       &
+       cld_frac, precip_frac, cloud_overlap_param, precip_overlap_param, cld_cnv_frac,      &
        cnv_cloud_overlap_param, imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_samf,                 &
        lw_optical_props_cloudsByBand, lw_optical_props_cnvcloudsByBand,                     &
        lw_optical_props_precipByBand, lw_optical_props_clouds, lw_optical_props_cnvclouds,  &
@@ -28,13 +28,13 @@ contains
     
     ! Inputs
     logical, intent(in) :: &
-         doLWrad,                          & ! Logical flag for shortwave radiation call
-         imfdeepcnv,                       & !
-         imfdeepcnv_gf,                    & !
-         imfdeepcnv_samf                     !
+         doLWrad                             ! Logical flag for shortwave radiation call
     integer, intent(in) :: &
          nCol,                             & ! Number of horizontal gridpoints
          nLev,                             & ! Number of vertical layers
+         imfdeepcnv,                       & !
+         imfdeepcnv_gf,                    & !
+         imfdeepcnv_samf,                  & !
          iovr,                             & ! Choice of cloud-overlap method
          iovr_convcld,                     & ! Choice of convective cloud-overlap
          iovr_max,                         & ! Flag for maximum cloud overlap method
@@ -51,7 +51,7 @@ contains
                                              ! random numbers. when isubc_lw /=2, it will not be used.
     real(kind_phys), dimension(ncol,nLev),intent(in) :: &
          cld_frac,                         & ! Total cloud fraction by layer
-         cnv_cldfrac,                      & ! Convective cloud fraction by layer 
+         cld_cnv_frac,                     & ! Convective cloud fraction by layer 
          precip_frac                         ! Precipitation fraction by layer
     real(kind_phys), dimension(ncol,nLev), intent(in)  :: &
          cloud_overlap_param,              & ! Cloud overlap parameter
@@ -171,17 +171,17 @@ contains
        ! Convective cloud overlap
        ! Maximum-random, random or maximum.
        if (iovr_convcld == iovr_maxrand .or. iovr_convcld == iovr_rand .or. iovr_convcld == iovr_max) then
-          call sampled_mask(rng3D, cnv_cldfrac, maskMCICA)
+          call sampled_mask(rng3D, cld_cnv_frac, maskMCICA)
        endif
        ! Exponential decorrelation length overlap
        if (iovr_convcld == iovr_dcorr) then
-          call sampled_mask(rng3D, cnv_cldfrac, maskMCICA,                       &
+          call sampled_mask(rng3D, cld_cnv_frac, maskMCICA,                       &
                             overlap_param = cnv_cloud_overlap_param(:,1:nLev-1), &
                             randoms2      = rng3D2)
        endif
        ! Exponential or Exponential-random 
        if (iovr_convcld == iovr_exp .or. iovr_convcld == iovr_exprand) then
-          call sampled_mask(rng3D, cnv_cldfrac, maskMCICA,                    &
+          call sampled_mask(rng3D, cld_cnv_frac, maskMCICA,                    &
                             overlap_param = cnv_cloud_overlap_param(:,1:nLev-1))
        endif
 

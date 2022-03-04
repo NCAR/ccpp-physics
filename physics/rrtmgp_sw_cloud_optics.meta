@@ -147,6 +147,13 @@
   dimensions = ()
   type = logical
   intent = in
+[do_mynnedmf]
+  standard_name = flag_for_mellor_yamada_nakanishi_niino_pbl_scheme
+  long_name = flag to activate MYNN-EDMF
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [imfdeepcnv]
   standard_name = control_for_deep_convection_scheme
   long_name = flag for mass-flux deep convection scheme
@@ -248,7 +255,7 @@
   type = real
   kind = kind_phys
   intent = in
-[cnv_cld_lwp]
+[cld_cnv_lwp]
   standard_name = convective_cloud_liquid_water_path
   long_name = layer convective cloud liquid water path
   units = g m-2
@@ -256,7 +263,7 @@
   type = real
   kind = kind_phys
   intent = in
-[cnv_cld_iwp]
+[cld_cnv_iwp]
   standard_name = convective_cloud_ice_water_path
   long_name = layer convective cloud ice water path
   units = g m-2
@@ -264,7 +271,7 @@
   type = real
   kind = kind_phys
   intent = in
-[cnv_cld_reliq]
+[cld_cnv_reliq]
   standard_name = mean_effective_radius_for_liquid_convective_cloud
   long_name = mean effective radius for liquid convective cloud
   units = um
@@ -272,9 +279,41 @@
   type = real
   kind = kind_phys
   intent = in
-[cnv_cld_reice]
+[cld_cnv_reice]
   standard_name = mean_effective_radius_for_ice_convective_cloud
   long_name = mean effective radius for ice convective cloud
+  units = um
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[cld_mynn_lwp]
+  standard_name = MYNN_SGS_cloud_liquid_water_path
+  long_name = layer convective cloud liquid water path
+  units = g m-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[cld_mynn_iwp]
+  standard_name = MYNN_SGS_cloud_ice_water_path
+  long_name = layer convective cloud ice water path
+  units = g m-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[cld_mynn_reliq]
+  standard_name = mean_effective_radius_for_liquid_MYNN_SGS_cloud
+  long_name = mean effective radius for liquid MYNN_SGS cloud
+  units = um
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[cld_mynn_reice]
+  standard_name = mean_effective_radius_for_ice_MYNN_SGS_cloud
+  long_name = mean effective radius for ice MYNN_SGS cloud
   units = um
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -317,6 +356,13 @@
   intent = out
 [sw_optical_props_precipByBand]
   standard_name = shortwave_optical_properties_for_precipitation_by_band
+  long_name = Fortran DDT containing RRTMGP optical properties
+  units = DDT
+  dimensions = ()
+  type = ty_optical_props_2str
+  intent = out
+[sw_optical_props_MYNNcloudsByBand]
+  standard_name = shortwave_optical_properties_for_MYNN_EDMF_PBL_cloudy_atmosphere_by_band
   long_name = Fortran DDT containing RRTMGP optical properties
   units = DDT
   dimensions = ()

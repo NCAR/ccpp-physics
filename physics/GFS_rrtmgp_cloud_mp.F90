@@ -262,6 +262,18 @@ contains
        where(cld_reliq .gt. radliq_upr) cld_reliq = radliq_upr
        where(cld_reice .lt. radice_lwr) cld_reice = radice_lwr
        where(cld_reice .gt. radice_upr) cld_reice = radice_upr
+       if (imfdeepcnv == imfdeepcnv_samf .or. imfdeepcnv == imfdeepcnv_gf) then
+          where(cld_cnv_reliq .lt. radliq_lwr) cld_cnv_reliq = radliq_lwr
+          where(cld_cnv_reliq .gt. radliq_upr) cld_cnv_reliq = radliq_upr
+          where(cld_cnv_reice .lt. radice_lwr) cld_cnv_reice = radice_lwr
+          where(cld_cnv_reice .gt. radice_upr) cld_cnv_reice = radice_upr
+       endif
+       if (do_mynnedmf) then
+          where(cld_mynn_reliq .lt. radliq_lwr) cld_mynn_reliq = radliq_lwr
+          where(cld_mynn_reliq .gt. radliq_upr) cld_mynn_reliq = radliq_upr
+          where(cld_mynn_reice .lt. radice_lwr) cld_mynn_reice = radice_lwr
+          where(cld_mynn_reice .gt. radice_upr) cld_mynn_reice = radice_upr
+       endif
     endif
 
     precip_frac(1:nCol,1:nLev) = cld_frac(1:nCol,1:nLev)

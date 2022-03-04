@@ -395,12 +395,13 @@ contains
 !! \htmlinclude rrtmgp_sw_cloud_optics.html
 !!
   subroutine rrtmgp_sw_cloud_optics_run(doSWrad, doG_cldoptics, icliq_sw, icice_sw,         &
-       doGP_cldoptics_PADE, doGP_cldoptics_LUT, imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_samf, &
-       nCol, nLev, nDay, nbndsGPsw, idxday, cld_frac, cld_lwp, cld_reliq, cld_iwp,          &
-       cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain, precip_frac, cnv_cld_lwp,       &
-       cnv_cld_reliq, cnv_cld_iwp, cnv_cld_reice, sw_optical_props_cloudsByBand,            &
-       sw_optical_props_cnvcloudsByBand, sw_optical_props_precipByBand, cldtausw,           &
-       errmsg, errflg)
+       doGP_cldoptics_PADE, doGP_cldoptics_LUT, do_mynnedmf, imfdeepcnv, imfdeepcnv_gf,     &
+       imfdeepcnv_samf, nCol, nLev, nDay, nbndsGPsw, idxday, cld_frac, cld_lwp, cld_reliq,  &
+       cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain, precip_frac,           &
+       cld_cnv_lwp, cld_cnv_reliq, cld_cnv_iwp, cld_cnv_reice, cld_mynn_lwp, cld_mynn_reliq,&
+       cld_mynn_iwp, cld_mynn_reice, sw_optical_props_cloudsByBand,                         &
+       sw_optical_props_cnvcloudsByBand, sw_optical_props_precipByBand,                     &
+       sw_optical_props_MYNNcloudsByBand, cldtausw,  errmsg, errflg)
     
     ! Inputs
     logical, intent(in) :: &
@@ -408,16 +409,17 @@ contains
          doG_cldoptics,       & ! Use legacy RRTMG cloud-optics?
          doGP_cldoptics_PADE, & ! Use RRTMGP cloud-optics: PADE approximation?
          doGP_cldoptics_LUT,  & ! Use RRTMGP cloud-optics: LUTs?
-         imfdeepcnv,          & !
-         imfdeepcnv_gf,       & !
-         imfdeepcnv_samf        !
+         do_mynnedmf            !
     integer, intent(in) :: &
          nbndsGPsw,           & ! Number of shortwave bands
          nCol,                & ! Number of horizontal gridpoints
          nLev,                & ! Number of vertical levels
          nday,                & ! Number of daylit points.
          icliq_sw,            & ! Choice of treatment of liquid cloud optical properties (RRTMG legacy)
-         icice_sw               ! Choice of treatment of ice cloud optical properties (RRTMG legacy) 
+         icice_sw,            & ! Choice of treatment of ice cloud optical properties (RRTMG legacy) 
+         imfdeepcnv,          & ! 
+         imfdeepcnv_gf,       & ! 
+         imfdeepcnv_samf        !
     integer,intent(in),dimension(ncol) :: &
          idxday                 ! Indices for daylit points.
     real(kind_phys), dimension(ncol,nLev),intent(in) :: &
@@ -431,10 +433,14 @@ contains
          cld_rwp,             & ! Cloud rain water path
          cld_rerain,          & ! Cloud rain effective radius
          precip_frac,         & ! Precipitation fraction by layer
-         cnv_cld_lwp,         & ! Water path for       convective liquid cloud-particles (microns) 
-         cnv_cld_reliq,       & ! Effective radius for convective liquid cloud-particles (microns)
-         cnv_cld_iwp,         & ! Water path for       convective ice cloud-particles (microns)
-         cnv_cld_reice          ! Effective radius for convective ice cloud-particles (microns)
+         cld_cnv_lwp,         & ! Water path for       convective liquid cloud-particles (microns) 
+         cld_cnv_reliq,       & ! Effective radius for convective liquid cloud-particles (microns)
+         cld_cnv_iwp,         & ! Water path for       convective ice cloud-particles (microns)
+         cld_cnv_reice,       & ! Effective radius for convective ice cloud-particles (microns)
+         cld_mynn_lwp,        &
+         cld_mynn_reliq,      &
+         cld_mynn_iwp,        &
+         cld_mynn_reice
     ! Outputs
     character(len=*), intent(out) :: &
          errmsg                              ! CCPP error message
@@ -442,7 +448,8 @@ contains
          errflg                              ! CCPP error flag
     type(ty_optical_props_2str),intent(out) :: &
          sw_optical_props_cloudsByBand,    & ! RRTMGP DDT: Shortwave optical properties in each band (clouds)
-         sw_optical_props_cnvcloudsByBand, & ! RRTMGP DDT: Shortwave optical properties in each band (convectivecloud) 
+         sw_optical_props_cnvcloudsByBand, & ! RRTMGP DDT: Shortwave optical properties in each band (convective cloud)
+         sw_optical_props_MYNNcloudsByBand,& ! RRTMGP DDT: Shortwave optical properties in each band (MYNN PBL cloud)
          sw_optical_props_precipByBand       ! RRTMGP DDT: Shortwave optical properties in each band (cloud precipitation)
     real(kind_phys), dimension(ncol,NLev), intent(out) :: &
          cldtausw                            ! Approx 10.mu band layer cloud optical depth  
@@ -471,11 +478,6 @@ contains
           sw_optical_props_cloudsByBand%tau(:,:,:) = 0._kind_phys
           sw_optical_props_cloudsByBand%ssa(:,:,:) = 1._kind_phys
           sw_optical_props_cloudsByBand%g(:,:,:)   = 0._kind_phys
-          call check_error_msg('rrtmgp_sw_cloud_optics_run - sw_optical_props_cnvcloudsByBand',&
-               sw_optical_props_cnvcloudsByBand%alloc_2str(nday, nLev, sw_cloud_props%get_band_lims_wavenumber()))
-          sw_optical_props_cnvcloudsByBand%tau(:,:,:) = 0._kind_phys
-          sw_optical_props_cnvcloudsByBand%ssa(:,:,:) = 1._kind_phys
-          sw_optical_props_cnvcloudsByBand%g(:,:,:)   = 0._kind_phys
 
           call check_error_msg('rrtmgp_sw_cloud_optics_run - sw_optical_props_precipByBand',&
                sw_optical_props_precipByBand%alloc_2str(nday, nLev, sw_cloud_props%get_band_lims_wavenumber()))
@@ -493,11 +495,17 @@ contains
                                                    !       in each band (tau,ssa,g)
           ! ii) Convective cloud-optics
           if (imfdeepcnv == imfdeepcnv_samf .or. imfdeepcnv == imfdeepcnv_gf) then
+             call check_error_msg('rrtmgp_sw_cloud_optics_run - sw_optical_props_cnvcloudsByBand',&
+                  sw_optical_props_cnvcloudsByBand%alloc_2str(nday, nLev, sw_cloud_props%get_band_lims_wavenumber()))
+             sw_optical_props_cnvcloudsByBand%tau(:,:,:) = 0._kind_phys
+             sw_optical_props_cnvcloudsByBand%ssa(:,:,:) = 1._kind_phys
+             sw_optical_props_cnvcloudsByBand%g(:,:,:)   = 0._kind_phys
+
              call check_error_msg('rrtmgp_sw_cloud_optics_run - convective clouds',sw_cloud_props%cloud_optics(&
-                  cnv_cld_lwp(idxday(1:nday),:),    & ! IN  - Convective cloud liquid water path
-                  cnv_cld_iwp(idxday(1:nday),:),    & ! IN  - Convective cloud ice water path
-                  cnv_cld_reliq(idxday(1:nday),:),  & ! IN  - Convective cloud liquid effective radius
-                  cnv_cld_reice(idxday(1:nday),:),  & ! IN  - Convective cloud ice effective radius
+                  cld_cnv_lwp(idxday(1:nday),:),    & ! IN  - Convective cloud liquid water path
+                  cld_cnv_iwp(idxday(1:nday),:),    & ! IN  - Convective cloud ice water path
+                  cld_cnv_reliq(idxday(1:nday),:),  & ! IN  - Convective cloud liquid effective radius
+                  cld_cnv_reice(idxday(1:nday),:),  & ! IN  - Convective cloud ice effective radius
                   sw_optical_props_cnvcloudsByBand))  ! OUT - RRTMGP DDT: Shortwave optical properties, 
                                                       !       in each band (tau,ssa,g)
           endif

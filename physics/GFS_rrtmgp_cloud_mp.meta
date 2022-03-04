@@ -409,14 +409,6 @@
   type = real
   kind = kind_phys
   intent = in
-[cld_mynn_frac]
-  standard_name = subgrid_scale_cloud_area_fraction_in_atmosphere_layer
-  long_name = subgrid cloud fraction from PBL scheme
-  units = frac
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
 [con_g]
   standard_name = gravitational_acceleration
   long_name = gravitational acceleration
@@ -575,6 +567,14 @@
   type = real
   kind = kind_phys
   intent = inout
+[cld_mynn_frac]
+  standard_name = subgrid_scale_cloud_area_fraction_in_atmosphere_layer
+  long_name = subgrid cloud fraction from PBL scheme
+  units = frac
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
 [cld_mynn_lwp]
   standard_name = MYNN_SGS_cloud_liquid_water_path
   long_name = layer convective cloud liquid water path

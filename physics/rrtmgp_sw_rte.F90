@@ -34,15 +34,15 @@ contains
     ! Inputs
     logical, intent(in) :: &
          top_at_1,                   & ! Vertical ordering flag
-         imfdeepcnv,                 & !
-         imfdeepcnv_gf,              & !
-         imfdeepcnv_samf,            & !
          doSWrad,                    & ! Flag to calculate SW irradiances
          doSWclrsky                    ! Compute clear-sky fluxes?
     integer, intent(in) :: &
          nCol,                       & ! Number of horizontal gridpoints
          nday,                       & ! Number of daytime points
          nLev,                       & ! Number of vertical levels
+         imfdeepcnv,                 & !
+         imfdeepcnv_gf,              & !
+         imfdeepcnv_samf,            & !
          iSFC                          ! Vertical index for surface-level
     integer, intent(in), dimension(ncol) :: &
          idxday                        ! Index array for daytime points

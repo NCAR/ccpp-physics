@@ -38,13 +38,13 @@ contains
          doLWrad,                 & ! Logical flag for longwave radiation call
          doLWclrsky,              & ! Compute clear-sky fluxes for clear-sky heating-rate?
          use_LW_jacobian,         & ! Compute Jacobian of LW to update radiative fluxes between radiation calls?
-         imfdeepcnv,              & !
-         imfdeepcnv_gf,           & !
-         imfdeepcnv_samf,         & !
          doGP_lwscat                ! Include scattering in LW cloud-optics?
     integer, intent(in) :: &
          nCol,                    & ! Number of horizontal gridpoints
          nLev,                    & ! Number of vertical levels
+         imfdeepcnv,              & !
+         imfdeepcnv_gf,           & !
+         imfdeepcnv_samf,         & !
          nGauss_angles              ! Number of angles used in Gaussian quadrature
     real(kind_phys), dimension(lw_gas_props%get_nband(),ncol), intent(in) :: &
          sfc_emiss_byband           ! Surface emissivity in each band
