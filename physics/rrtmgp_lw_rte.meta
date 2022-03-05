@@ -57,6 +57,13 @@
   dimensions = ()
   type = integer
   intent = in
+[do_mynnedmf]
+  standard_name = flag_for_mellor_yamada_nakanishi_niino_pbl_scheme
+  long_name = flag to activate MYNN-EDMF
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [ncol]
   standard_name = horizontal_loop_extent
   long_name = horizontal dimension
@@ -116,6 +123,13 @@
   intent = inout
 [lw_optical_props_cnvclouds]
   standard_name = longwave_optical_properties_for_convective_cloudy_atmosphere
+  long_name = Fortran DDT containing RRTMGP optical properties
+  units = DDT
+  dimensions = ()
+  type = ty_optical_props_2str
+  intent = inout
+[lw_optical_props_MYNNcloudsByBand]
+  standard_name = longwave_optical_properties_for_MYNN_EDMF_PBL_cloudy_atmosphere_by_band
   long_name = Fortran DDT containing RRTMGP optical properties
   units = DDT
   dimensions = ()

@@ -440,7 +440,7 @@ contains
     type(ty_optical_props_2str),intent(inout) :: &
          lw_optical_props_cloudsByBand,     & ! RRTMGP DDT: Longwave optical properties in each band (clouds)
          lw_optical_props_cnvcloudsByBand,  & ! RRTMGP DDT: Longwave optical properties in each band (convective cloud)
-         lw_optical_props_MYNNcloudsByBand, & ! RRTMGP DDT: Longwave optical properties in each band  (MYNN-PBL cloud)
+         lw_optical_props_MYNNcloudsByBand, & ! RRTMGP DDT: Longwave optical properties in each band (MYNN-PBL cloud)
          lw_optical_props_precipByBand        ! RRTMGP DDT: Longwave optical properties in each band (precipitation)
     real(kind_phys), dimension(ncol,nLev), intent(inout) :: &
          cldtaulw                           ! Approx 10.mu band layer cloud optical depth  
@@ -461,16 +461,19 @@ contains
 
     if (.not. doLWrad) return
 
-    lw_optical_props_cloudsByBand%band_lims_wvn    = lw_gas_props%get_band_lims_wavenumber()
-    lw_optical_props_cnvcloudsByBand%band_lims_wvn = lw_gas_props%get_band_lims_wavenumber()
-    lw_optical_props_precipByBand%band_lims_wvn    = lw_gas_props%get_band_lims_wavenumber()
+    lw_optical_props_cloudsByBand%band_lims_wvn     = lw_gas_props%get_band_lims_wavenumber()
+    lw_optical_props_cnvcloudsByBand%band_lims_wvn  = lw_gas_props%get_band_lims_wavenumber()
+    lw_optical_props_MYNNcloudsByBand%band_lims_wvn = lw_gas_props%get_band_lims_wavenumber()
+    lw_optical_props_precipByBand%band_lims_wvn     = lw_gas_props%get_band_lims_wavenumber()
     do iBand=1,lw_gas_props%get_nband()
-       lw_optical_props_cloudsByBand%band2gpt(1:2,iBand)    = iBand
-       lw_optical_props_cnvcloudsByBand%band2gpt(1:2,iBand) = iBand
-       lw_optical_props_precipByBand%band2gpt(1:2,iBand)    = iBand
-       lw_optical_props_cloudsByBand%gpt2band(iBand)        = iBand
-       lw_optical_props_cnvcloudsByBand%gpt2band(iBand)     = iBand
-       lw_optical_props_precipByBand%gpt2band(iBand)        = iBand
+       lw_optical_props_cloudsByBand%band2gpt(1:2,iBand)     = iBand
+       lw_optical_props_cnvcloudsByBand%band2gpt(1:2,iBand)  = iBand
+       lw_optical_props_MYNNcloudsByBand%band2gpt(1:2,iBand) = iBand
+       lw_optical_props_precipByBand%band2gpt(1:2,iBand)     = iBand
+       lw_optical_props_cloudsByBand%gpt2band(iBand)         = iBand
+       lw_optical_props_cnvcloudsByBand%gpt2band(iBand)      = iBand
+       lw_optical_props_MYNNcloudsByBand%gpt2band(iBand)     = iBand
+       lw_optical_props_precipByBand%gpt2band(iBand)         = iBand
     end do
 
     ! Compute cloud-optics for RTE.
@@ -493,6 +496,17 @@ contains
                cld_cnv_reice,                     & ! IN  - Convective cloud ice effective radius (microns)
                lw_optical_props_cnvcloudsByBand))   ! OUT - RRTMGP DDT containing convective cloud radiative properties
                                                     !       in each band
+       endif
+
+       ! iii) MYNN cloud-optics
+       if (do_mynnedmf) then
+          call check_error_msg('rrtmgp_lw_MYNNcloud_optics_run - MYNN-EDMF cloud',lw_cloud_props%cloud_optics(&
+               cld_mynn_lwp,                       & ! IN  - MYNN-EDMF PBL cloud liquid water path (g/m2)
+               cld_mynn_iwp,                       & ! IN  - MYNN-EDMF PBL cloud ice water path (g/m2)
+               cld_mynn_reliq,                     & ! IN  - MYNN-EDMF PBL cloud liquid effective radius (microns)
+               cld_mynn_reice,                     & ! IN  - MYNN-EDMF PBL cloud ice effective radius (microns)
+               lw_optical_props_MYNNcloudsByBand))   ! OUT - RRTMGP DDT containing MYNN-EDMF PBL  cloud radiative properties
+                                                     !       in each band
        endif
 
        ! iii) Cloud precipitation optics: rain and snow(+groupel)   

@@ -25,46 +25,49 @@ contains
 !! \htmlinclude rrtmgp_sw_rte.html
 !!
   subroutine rrtmgp_sw_rte_run(doSWrad, doSWclrsky, nCol, nLev, nDay, idxday, coszen, p_lay,&
-       t_lay, top_at_1, imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_samf, iSFC, sfc_alb_nir_dir,  &
-       sfc_alb_nir_dif, sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, toa_src_sw,                   &
+       t_lay, top_at_1, do_mynnedmf, imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_samf, iSFC,      &
+       sfc_alb_nir_dir, sfc_alb_nir_dif, sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, toa_src_sw,  &
        sw_optical_props_clrsky, sw_optical_props_clouds, sw_optical_props_precip,           &
-       sw_optical_props_cnvclouds, sw_optical_props_aerosol, scmpsw, fluxswUP_allsky,       &
-       fluxswDOWN_allsky, fluxswUP_clrsky, fluxswDOWN_clrsky, errmsg, errflg)
+       sw_optical_props_cnvclouds, sw_optical_props_MYNNcloudsByBand,                       &
+       sw_optical_props_aerosol, scmpsw, fluxswUP_allsky, fluxswDOWN_allsky,                &
+       fluxswUP_clrsky, fluxswDOWN_clrsky, errmsg, errflg)
 
     ! Inputs
     logical, intent(in) :: &
-         top_at_1,                   & ! Vertical ordering flag
-         doSWrad,                    & ! Flag to calculate SW irradiances
-         doSWclrsky                    ! Compute clear-sky fluxes?
+         top_at_1,                          & ! Vertical ordering flag
+         do_mynnedmf,                       & ! Flag for MYNN-EDMG PBL cloud scheme
+         doSWrad,                           & ! Flag to calculate SW irradiances
+         doSWclrsky                           ! Compute clear-sky fluxes?
     integer, intent(in) :: &
-         nCol,                       & ! Number of horizontal gridpoints
-         nday,                       & ! Number of daytime points
-         nLev,                       & ! Number of vertical levels
-         imfdeepcnv,                 & !
-         imfdeepcnv_gf,              & !
-         imfdeepcnv_samf,            & !
-         iSFC                          ! Vertical index for surface-level
+         nCol,                              & ! Number of horizontal gridpoints
+         nday,                              & ! Number of daytime points
+         nLev,                              & ! Number of vertical levels
+         imfdeepcnv,                        & !
+         imfdeepcnv_gf,                     & !
+         imfdeepcnv_samf,                   & !
+         iSFC                                 ! Vertical index for surface-level
     integer, intent(in), dimension(ncol) :: &
-         idxday                        ! Index array for daytime points
+         idxday                               ! Index array for daytime points
     real(kind_phys),intent(in), dimension(ncol) :: &
-         coszen                        ! Cosize of SZA
+         coszen                               ! Cosize of SZA
     real(kind_phys), dimension(ncol,NLev), intent(in) :: &
-         p_lay,                      & ! Pressure @ model layer-centers (Pa)
-         t_lay                         ! Temperature (K)
+         p_lay,                             & ! Pressure @ model layer-centers (Pa)
+         t_lay                                ! Temperature (K)
     type(ty_optical_props_2str),intent(inout) :: &
-         sw_optical_props_clrsky       ! RRTMGP DDT: shortwave clear-sky radiative properties 
+         sw_optical_props_clrsky              ! RRTMGP DDT: shortwave clear-sky radiative properties 
    type(ty_optical_props_2str),intent(in) :: &
-         sw_optical_props_clouds,    & ! RRTMGP DDT: shortwave cloud radiative properties 
-         sw_optical_props_cnvclouds, & ! RRTMGP DDT: shortwave convecive cloud radiative properties
-         sw_optical_props_precip,    & ! RRTMGP DDT: shortwave precipitation radiative properties
-         sw_optical_props_aerosol      ! RRTMGP DDT: shortwave aerosol radiative properties
+         sw_optical_props_clouds,           & ! RRTMGP DDT: shortwave cloud optical properties 
+         sw_optical_props_cnvclouds,        & ! RRTMGP DDT: shortwave convecive cloud optical properties
+         sw_optical_props_MYNNcloudsByBand, & ! RRTMGP DDT: shortwave MYNN-EDMF PBL cloud optical properties
+         sw_optical_props_precip,           & ! RRTMGP DDT: shortwave precipitation optical properties
+         sw_optical_props_aerosol             ! RRTMGP DDT: shortwave aerosol optical properties
     real(kind_phys), dimension(sw_gas_props%get_nband(),ncol), intent(in) :: &
-         sfc_alb_nir_dir,            & ! Surface albedo (direct) 
-         sfc_alb_nir_dif,            & ! Surface albedo (diffuse)
-         sfc_alb_uvvis_dir,          & ! Surface albedo (direct)
-         sfc_alb_uvvis_dif             ! Surface albedo (diffuse)
+         sfc_alb_nir_dir,                   & ! Surface albedo (direct) 
+         sfc_alb_nir_dif,                   & ! Surface albedo (diffuse)
+         sfc_alb_uvvis_dir,                 & ! Surface albedo (direct)
+         sfc_alb_uvvis_dif                    ! Surface albedo (diffuse)
     real(kind_phys), dimension(ncol,sw_gas_props%get_ngpt()), intent(in) :: &
-         toa_src_sw                    ! TOA incident spectral flux (W/m2)
+         toa_src_sw                           ! TOA incident spectral flux (W/m2)
 
     ! Outputs
     character(len=*), intent(out) :: &
@@ -156,6 +159,11 @@ contains
        ! Include convective cloud?
        if (imfdeepcnv == imfdeepcnv_samf .or. imfdeepcnv == imfdeepcnv_gf) then
           call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_cnvclouds%increment(sw_optical_props_clrsky))
+       endif
+
+       ! Include MYNN-EDMF PBL cloud?
+       if (do_mynnedmf) then
+          call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_MYNNcloudsByBand%increment(sw_optical_props_clrsky))
        endif
 
        ! All-sky fluxes (clear-sky + clouds + precipitation)

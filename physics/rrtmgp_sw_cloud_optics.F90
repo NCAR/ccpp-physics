@@ -473,44 +473,50 @@ contains
        
        ! Compute cloud/precipitation optics.
        if (doGP_cldoptics_PADE .or. doGP_cldoptics_LUT) then
+          ! i) Cloud-optics.
           call check_error_msg('rrtmgp_sw_cloud_optics_run - sw_optical_props_cloudsByBand',&
                sw_optical_props_cloudsByBand%alloc_2str(nday, nLev, sw_cloud_props%get_band_lims_wavenumber()))
-          sw_optical_props_cloudsByBand%tau(:,:,:) = 0._kind_phys
-          sw_optical_props_cloudsByBand%ssa(:,:,:) = 1._kind_phys
-          sw_optical_props_cloudsByBand%g(:,:,:)   = 0._kind_phys
 
-          call check_error_msg('rrtmgp_sw_cloud_optics_run - sw_optical_props_precipByBand',&
-               sw_optical_props_precipByBand%alloc_2str(nday, nLev, sw_cloud_props%get_band_lims_wavenumber()))
-          sw_optical_props_precipByBand%tau(:,:,:) = 0._kind_phys
-          sw_optical_props_precipByBand%ssa(:,:,:) = 1._kind_phys
-          sw_optical_props_precipByBand%g(:,:,:)   = 0._kind_phys
-
-          ! i) Cloud-optics.
           call check_error_msg('rrtmgp_sw_cloud_optics_run - clouds',sw_cloud_props%cloud_optics(&
-               cld_lwp(idxday(1:nday),:),        & ! IN  - Cloud liquid water path
-               cld_iwp(idxday(1:nday),:),        & ! IN  - Cloud ice water path
-               cld_reliq(idxday(1:nday),:),      & ! IN  - Cloud liquid effective radius
-               cld_reice(idxday(1:nday),:),      & ! IN  - Cloud ice effective radius
-               sw_optical_props_cloudsByBand))     ! OUT - RRTMGP DDT: Shortwave optical properties, 
-                                                   !       in each band (tau,ssa,g)
+               cld_lwp(idxday(1:nday),:),            & ! IN  - Cloud liquid water path
+               cld_iwp(idxday(1:nday),:),            & ! IN  - Cloud ice water path
+               cld_reliq(idxday(1:nday),:),          & ! IN  - Cloud liquid effective radius
+               cld_reice(idxday(1:nday),:),          & ! IN  - Cloud ice effective radius
+               sw_optical_props_cloudsByBand))         ! OUT - RRTMGP DDT: Shortwave optical properties, 
+                                                       !       in each band (tau,ssa,g)
+
           ! ii) Convective cloud-optics
           if (imfdeepcnv == imfdeepcnv_samf .or. imfdeepcnv == imfdeepcnv_gf) then
              call check_error_msg('rrtmgp_sw_cloud_optics_run - sw_optical_props_cnvcloudsByBand',&
                   sw_optical_props_cnvcloudsByBand%alloc_2str(nday, nLev, sw_cloud_props%get_band_lims_wavenumber()))
-             sw_optical_props_cnvcloudsByBand%tau(:,:,:) = 0._kind_phys
-             sw_optical_props_cnvcloudsByBand%ssa(:,:,:) = 1._kind_phys
-             sw_optical_props_cnvcloudsByBand%g(:,:,:)   = 0._kind_phys
 
              call check_error_msg('rrtmgp_sw_cloud_optics_run - convective clouds',sw_cloud_props%cloud_optics(&
-                  cld_cnv_lwp(idxday(1:nday),:),    & ! IN  - Convective cloud liquid water path
-                  cld_cnv_iwp(idxday(1:nday),:),    & ! IN  - Convective cloud ice water path
-                  cld_cnv_reliq(idxday(1:nday),:),  & ! IN  - Convective cloud liquid effective radius
-                  cld_cnv_reice(idxday(1:nday),:),  & ! IN  - Convective cloud ice effective radius
-                  sw_optical_props_cnvcloudsByBand))  ! OUT - RRTMGP DDT: Shortwave optical properties, 
-                                                      !       in each band (tau,ssa,g)
+                  cld_cnv_lwp(idxday(1:nday),:),     & ! IN  - Convective cloud liquid water path
+                  cld_cnv_iwp(idxday(1:nday),:),     & ! IN  - Convective cloud ice water path
+                  cld_cnv_reliq(idxday(1:nday),:),   & ! IN  - Convective cloud liquid effective radius
+                  cld_cnv_reice(idxday(1:nday),:),   & ! IN  - Convective cloud ice effective radius
+                  sw_optical_props_cnvcloudsByBand))   ! OUT - RRTMGP DDT: Shortwave optical properties, 
+                                                       !       in each band (tau,ssa,g)
           endif
 
-          ! iii) Cloud precipitation optics: rain and snow(+groupel) 
+          ! iii) MYNN cloud-optics
+          if (do_mynnedmf) then
+             call check_error_msg('rrtmgp_sw_cloud_optics_run - sw_optical_props_MYNNcloudsByBand',&
+                  sw_optical_props_MYNNcloudsByBand%alloc_2str(nday, nLev, sw_cloud_props%get_band_lims_wavenumber()))
+
+             call check_error_msg('rrtmgp_sw_MYNNcloud_optics_run - MYNN-EDMF cloud',sw_cloud_props%cloud_optics(&
+                  cld_mynn_lwp(idxday(1:nday),:),     & ! IN  - MYNN-EDMF PBL cloud liquid water path (g/m2)
+                  cld_mynn_iwp(idxday(1:nday),:),     & ! IN  - MYNN-EDMF PBL cloud ice water path (g/m2)
+                  cld_mynn_reliq(idxday(1:nday),:),   & ! IN  - MYNN-EDMF PBL cloud liquid effective radius (microns)
+                  cld_mynn_reice(idxday(1:nday),:),   & ! IN  - MYNN-EDMF PBL cloud ice effective radius (microns)
+                  sw_optical_props_MYNNcloudsByBand))  ! OUT - RRTMGP DDT containing MYNN-EDMF PBL  cloud radiative properties
+                                                       !       in each band
+          endif
+       
+          ! iv) Cloud precipitation optics: rain and snow(+groupel)
+          call check_error_msg('rrtmgp_sw_cloud_optics_run - sw_optical_props_precipByBand',&
+               sw_optical_props_precipByBand%alloc_2str(nday, nLev, sw_cloud_props%get_band_lims_wavenumber()))
+
           do iDay=1,nDay
              do iLay=1,nLev                                      
                 if (cld_frac(idxday(iDay),iLay) .gt. 1.e-12_kind_phys) then
@@ -548,14 +554,8 @@ contains
        if (doG_cldoptics) then
           call check_error_msg('rrtmgp_sw_cloud_optics_run',sw_optical_props_cloudsByBand%alloc_2str(&
                nday, nLev, sw_gas_props%get_band_lims_wavenumber()))
-          sw_optical_props_cloudsByBand%tau(:,:,:) = 0._kind_phys
-          sw_optical_props_cloudsByBand%ssa(:,:,:) = 1._kind_phys
-          sw_optical_props_cloudsByBand%g(:,:,:)   = 0._kind_phys
           call check_error_msg('rrtmgp_sw_cloud_optics_run',sw_optical_props_precipByBand%alloc_2str(&
                nday, nLev, sw_gas_props%get_band_lims_wavenumber()))
-          sw_optical_props_precipByBand%tau(:,:,:) = 0._kind_phys
-          sw_optical_props_precipByBand%ssa(:,:,:) = 1._kind_phys
-          sw_optical_props_precipByBand%g(:,:,:)   = 0._kind_phys
 
           ! RRTMG cloud(+precipitation) optics
           if (any(cld_frac .gt. 0)) then

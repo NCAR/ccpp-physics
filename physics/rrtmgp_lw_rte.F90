@@ -26,10 +26,11 @@ contains
 !! \htmlinclude rrtmgp_lw_rte_run.html
 !!
   subroutine rrtmgp_lw_rte_run(doLWrad, doLWclrsky, use_LW_jacobian, doGP_lwscat, nCol,     &
-       nLev, top_at_1, imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_samf, sfc_emiss_byband,        &
-       sources, lw_optical_props_clrsky, lw_optical_props_clouds, lw_optical_props_precip,  &
-       lw_optical_props_cnvclouds, lw_optical_props_aerosol, nGauss_angles, fluxlwUP_allsky,&
-       fluxlwDOWN_allsky, fluxlwUP_clrsky, fluxlwDOWN_clrsky, fluxlwUP_jac,                 &
+       nLev, top_at_1, do_mynnedmf, imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_samf,             &
+       sfc_emiss_byband, sources, lw_optical_props_clrsky, lw_optical_props_clouds,         &
+       lw_optical_props_precip, lw_optical_props_cnvclouds,                                 &
+       lw_optical_props_MYNNcloudsByBand, lw_optical_props_aerosol, nGauss_angles,          &
+       fluxlwUP_allsky, fluxlwDOWN_allsky, fluxlwUP_clrsky, fluxlwDOWN_clrsky, fluxlwUP_jac,&
        fluxlwUP_radtime, fluxlwDOWN_radtime, errmsg, errflg)
 
     ! Inputs
@@ -38,6 +39,7 @@ contains
          doLWrad,                 & ! Logical flag for longwave radiation call
          doLWclrsky,              & ! Compute clear-sky fluxes for clear-sky heating-rate?
          use_LW_jacobian,         & ! Compute Jacobian of LW to update radiative fluxes between radiation calls?
+         do_mynnedmf,             & ! Flag for MYNN-EDMF PBL cloud scheme
          doGP_lwscat                ! Include scattering in LW cloud-optics?
     integer, intent(in) :: &
          nCol,                    & ! Number of horizontal gridpoints
@@ -47,16 +49,17 @@ contains
          imfdeepcnv_samf,         & !
          nGauss_angles              ! Number of angles used in Gaussian quadrature
     real(kind_phys), dimension(lw_gas_props%get_nband(),ncol), intent(in) :: &
-         sfc_emiss_byband           ! Surface emissivity in each band
+         sfc_emiss_byband                    ! Surface emissivity in each band
     type(ty_source_func_lw),intent(in) :: &
-         sources                    ! RRTMGP DDT: longwave source functions
+         sources                             ! RRTMGP DDT: longwave source functions
     type(ty_optical_props_1scl),intent(inout) :: &
-         lw_optical_props_aerosol, &! RRTMGP DDT: longwave aerosol radiative properties
-         lw_optical_props_clrsky    ! RRTMGP DDT: longwave clear-sky radiative properties 
+         lw_optical_props_aerosol,          &! RRTMGP DDT: longwave aerosol optical properties
+         lw_optical_props_clrsky             ! RRTMGP DDT: longwave clear-sky optical properties 
     type(ty_optical_props_2str),intent(inout) :: &
-         lw_optical_props_clouds,  &! RRTMGP DDT: longwave cloud radiative properties
-         lw_optical_props_precip,  &! RRTMGP DDT: longwave precipitation radiative properties
-         lw_optical_props_cnvclouds ! RRTMGP DDT: longwave convective cloud radiative properties
+         lw_optical_props_clouds,          & ! RRTMGP DDT: longwave cloud optical properties
+         lw_optical_props_precip,          & ! RRTMGP DDT: longwave precipitation optical properties
+         lw_optical_props_cnvclouds,       & ! RRTMGP DDT: longwave convective cloud optical properties
+         lw_optical_props_MYNNcloudsByBand   ! RRTMGP DDT: longwave MYNN-EDMF PBL cloud optical properties
     ! Outputs
     real(kind_phys), dimension(ncol,nLev+1), intent(inout) :: &
          fluxlwUP_jac,             & ! Jacobian of upwelling LW surface radiation (W/m2/K) 
@@ -132,6 +135,11 @@ contains
     ! Include convective cloud?
     if (imfdeepcnv == imfdeepcnv_samf .or. imfdeepcnv == imfdeepcnv_gf) then
        call check_error_msg('rrtmgp_lw_rte_run',lw_optical_props_cnvclouds%increment(lw_optical_props_clrsky))
+    endif
+
+    ! Include MYNN-EDMF PBL clouds?
+    if (do_mynnedmf) then
+        call check_error_msg('rrtmgp_lw_rte_run',lw_optical_props_MYNNcloudsByBand%increment(lw_optical_props_clrsky))
     endif
 
     ! Add in precipitation
