@@ -397,8 +397,8 @@ contains
        do iCol = 1, nCol
           if (cld_mynn_frac(iCol,iLay) > cld_limit_lower) then
              ! Cloud mixing-ratios
-             qc = qc_mynn(i,k)*cld_mynn_frac(iCol,iLay)
-             qi = qi_mynn(i,k)*cld_mynn_frac(iCol,iLay)
+             qc = qc_mynn(iCol,iLay)*cld_mynn_frac(iCol,iLay)
+             qi = qi_mynn(iCol,iLay)*cld_mynn_frac(iCol,iLay)
 
              ! LWP/IWP
              deltaP = abs(p_lev(iCol,iLay+1)-p_lev(iCol,iLay))/100.
