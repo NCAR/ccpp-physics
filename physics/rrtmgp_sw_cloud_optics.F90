@@ -551,40 +551,6 @@ contains
              enddo
           enddo
        endif
-       if (doG_cldoptics) then
-          call check_error_msg('rrtmgp_sw_cloud_optics_run',sw_optical_props_cloudsByBand%alloc_2str(&
-               nday, nLev, sw_gas_props%get_band_lims_wavenumber()))
-          call check_error_msg('rrtmgp_sw_cloud_optics_run',sw_optical_props_precipByBand%alloc_2str(&
-               nday, nLev, sw_gas_props%get_band_lims_wavenumber()))
-
-          ! RRTMG cloud(+precipitation) optics
-          if (any(cld_frac .gt. 0)) then
-             call rrtmg_sw_cloud_optics(nday, nLev, sw_gas_props%get_nband(), &
-                  cld_lwp(idxday(1:nday),:), cld_reliq(idxday(1:nday),:),  &
-                  cld_iwp(idxday(1:nday),:), cld_reice(idxday(1:nday),:),  &
-                  cld_rwp(idxday(1:nday),:), cld_rerain(idxday(1:nday),:), &
-                  cld_swp(idxday(1:nday),:), cld_resnow(idxday(1:nday),:), &
-                  cld_frac(idxday(1:nday),:), icliq_sw, icice_sw,          &
-                  tau_cld,    ssa_cld,    asy_cld,                         &
-                  tau_precip, ssa_precip, asy_precip)
-
-             ! Cloud-optics (Need to reorder from G->GP band conventions)
-             sw_optical_props_cloudsByBand%tau(:,:,1) = tau_cld(:,:,sw_gas_props%get_nband())
-             sw_optical_props_cloudsByBand%ssa(:,:,1) = ssa_cld(:,:,sw_gas_props%get_nband())
-             sw_optical_props_cloudsByBand%g(:,:,1)   = asy_cld(:,:,sw_gas_props%get_nband())
-             sw_optical_props_cloudsByBand%tau(:,:,2:sw_gas_props%get_nband()) = tau_cld(:,:,1:sw_gas_props%get_nband()-1)
-             sw_optical_props_cloudsByBand%ssa(:,:,2:sw_gas_props%get_nband()) = ssa_cld(:,:,1:sw_gas_props%get_nband()-1)
-             sw_optical_props_cloudsByBand%g(:,:,2:sw_gas_props%get_nband())   = asy_cld(:,:,1:sw_gas_props%get_nband()-1)
-             ! Precipitation-optics (Need to reorder from G->GP band conventions)
-             sw_optical_props_precipByBand%tau(:,:,1) = tau_precip(:,:,sw_gas_props%get_nband())
-             sw_optical_props_precipByBand%ssa(:,:,1) = ssa_precip(:,:,sw_gas_props%get_nband())
-             sw_optical_props_precipByBand%g(:,:,1)   = asy_precip(:,:,sw_gas_props%get_nband())
-             sw_optical_props_precipByBand%tau(:,:,2:sw_gas_props%get_nband()) = tau_precip(:,:,1:sw_gas_props%get_nband()-1)
-             sw_optical_props_precipByBand%ssa(:,:,2:sw_gas_props%get_nband()) = ssa_precip(:,:,1:sw_gas_props%get_nband()-1)
-             sw_optical_props_precipByBand%g(:,:,2:sw_gas_props%get_nband())   = asy_precip(:,:,1:sw_gas_props%get_nband()-1)
-          
-          endif
-       endif
        
        ! All-sky SW optical depth ~0.55microns (DJS asks: Move to cloud diagnostics?)
        cldtausw(idxday(1:nDay),:) = sw_optical_props_cloudsByBand%tau(:,:,11)    

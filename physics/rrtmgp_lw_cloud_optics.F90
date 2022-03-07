@@ -461,25 +461,15 @@ contains
 
     if (.not. doLWrad) return
 
-    lw_optical_props_cloudsByBand%band_lims_wvn     = lw_gas_props%get_band_lims_wavenumber()
-    lw_optical_props_cnvcloudsByBand%band_lims_wvn  = lw_gas_props%get_band_lims_wavenumber()
-    lw_optical_props_MYNNcloudsByBand%band_lims_wvn = lw_gas_props%get_band_lims_wavenumber()
-    lw_optical_props_precipByBand%band_lims_wvn     = lw_gas_props%get_band_lims_wavenumber()
-    do iBand=1,lw_gas_props%get_nband()
-       lw_optical_props_cloudsByBand%band2gpt(1:2,iBand)     = iBand
-       lw_optical_props_cnvcloudsByBand%band2gpt(1:2,iBand)  = iBand
-       lw_optical_props_MYNNcloudsByBand%band2gpt(1:2,iBand) = iBand
-       lw_optical_props_precipByBand%band2gpt(1:2,iBand)     = iBand
-       lw_optical_props_cloudsByBand%gpt2band(iBand)         = iBand
-       lw_optical_props_cnvcloudsByBand%gpt2band(iBand)      = iBand
-       lw_optical_props_MYNNcloudsByBand%gpt2band(iBand)     = iBand
-       lw_optical_props_precipByBand%gpt2band(iBand)         = iBand
-    end do
-
     ! Compute cloud-optics for RTE.
     if (doGP_cldoptics_PADE .or. doGP_cldoptics_LUT) then
        
        ! i) Cloud-optics.
+       lw_optical_props_cloudsByBand%band_lims_wvn     = lw_gas_props%get_band_lims_wavenumber()
+       do iBand=1,lw_gas_props%get_nband()
+          lw_optical_props_cloudsByBand%band2gpt(1:2,iBand)     = iBand
+          lw_optical_props_cloudsByBand%gpt2band(iBand)         = iBand
+       end do
        call check_error_msg('rrtmgp_lw_cloud_optics_run - clouds',lw_cloud_props%cloud_optics(&
             cld_lwp,                           & ! IN  - Cloud liquid water path (g/m2)
             cld_iwp,                           & ! IN  - Cloud ice water path (g/m2)
@@ -489,6 +479,11 @@ contains
                                                  !       in each band
        ! ii) Convective cloud-optics
        if (imfdeepcnv == imfdeepcnv_samf .or. imfdeepcnv == imfdeepcnv_gf) then
+          lw_optical_props_cnvcloudsByBand%band_lims_wvn = lw_gas_props%get_band_lims_wavenumber()
+          do iBand=1,lw_gas_props%get_nband()
+             lw_optical_props_cnvcloudsByBand%band2gpt(1:2,iBand) = iBand
+             lw_optical_props_cnvcloudsByBand%gpt2band(iBand)     = iBand
+          end do
           call check_error_msg('rrtmgp_lw_cnvcloud_optics_run - convective cloud',lw_cloud_props%cloud_optics(&
                cld_cnv_lwp,                       & ! IN  - Convective cloud liquid water path (g/m2)
                cld_cnv_iwp,                       & ! IN  - Convective cloud ice water path (g/m2)
@@ -500,6 +495,11 @@ contains
 
        ! iii) MYNN cloud-optics
        if (do_mynnedmf) then
+          lw_optical_props_MYNNcloudsByBand%band_lims_wvn = lw_gas_props%get_band_lims_wavenumber()
+          do iBand=1,lw_gas_props%get_nband()
+             lw_optical_props_MYNNcloudsByBand%band2gpt(1:2,iBand) = iBand
+             lw_optical_props_MYNNcloudsByBand%gpt2band(iBand)     = iBand
+          end do
           call check_error_msg('rrtmgp_lw_MYNNcloud_optics_run - MYNN-EDMF cloud',lw_cloud_props%cloud_optics(&
                cld_mynn_lwp,                       & ! IN  - MYNN-EDMF PBL cloud liquid water path (g/m2)
                cld_mynn_iwp,                       & ! IN  - MYNN-EDMF PBL cloud ice water path (g/m2)
@@ -509,7 +509,12 @@ contains
                                                      !       in each band
        endif
 
-       ! iii) Cloud precipitation optics: rain and snow(+groupel)   
+       ! iv) Cloud precipitation optics: rain and snow(+groupel)   
+       lw_optical_props_precipByBand%band_lims_wvn     = lw_gas_props%get_band_lims_wavenumber()
+       do iBand=1,lw_gas_props%get_nband()
+          lw_optical_props_precipByBand%band2gpt(1:2,iBand)     = iBand
+          lw_optical_props_precipByBand%gpt2band(iBand)         = iBand
+       end do
        do iCol=1,nCol
           do iLay=1,nLev                                      
              if (cld_frac(iCol,iLay) .gt. 0.) then
@@ -529,17 +534,7 @@ contains
           enddo
        enddo
     endif
-    if (doG_cldoptics) then
-       ! ii) RRTMG cloud-optics.
-       if (any(cld_frac .gt. 0)) then
-          call rrtmg_lw_cloud_optics(ncol, nLev, nbndsGPlw, cld_lwp, cld_reliq, cld_iwp,&
-               cld_reice, cld_rwp, cld_rerain, cld_swp, cld_resnow, cld_frac, icliq_lw, &
-               icice_lw, tau_cld, tau_precip)
-          lw_optical_props_cloudsByBand%tau = tau_cld
-          lw_optical_props_precipByBand%tau = tau_precip
-        endif
-    endif
-    
+
     ! All-sky LW optical depth ~10microns (DJS asks: Same as SW, move to cloud-diagnostics?)
     cldtaulw = lw_optical_props_cloudsByBand%tau(:,:,7)
         
