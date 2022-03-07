@@ -1152,7 +1152,8 @@ contains
 ! the following only applies to opt_sfc =3, opt_sfc = 1 still done its old way
 
         snwd      = snowh*1000.0
-        zlvli     = zlvl - zpd
+!       zlvli     = zlvl - zpd
+        zlvli     = zlvl 
 
 !       fv     = ustarx                                   ! the input maybe too high for glacial
         fv     = ur*vkc/log(zlvli/z0m)

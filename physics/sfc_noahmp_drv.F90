@@ -923,7 +923,7 @@ do i = 1, im
       snowc     (i)   = snow_cover_fraction
       sncovr1   (i)   = snow_cover_fraction
 
-!     qsurf     (i)   = spec_humidity_surface
+      qsurf     (i)   = spec_humidity_surface
       tsurf     (i)   = tskin(i)
 
       tvxy      (i)   = temperature_leaf
@@ -998,7 +998,7 @@ do i = 1, im
       cmm       (i)   = cmxy(i)  * wind(i)
 
       snwdph    (i)   = snow_depth * 1000.0       ! convert from m to mm; wait after the stability call
-      qsurf     (i)   = q1(i) + evap(i)/(con_hvap*density*ch(i)*wind(i))
+!     qsurf     (i)   = q1(i) + evap(i)/(con_hvap*density*ch(i)*wind(i))
 
 !      
 !  --- change units for output

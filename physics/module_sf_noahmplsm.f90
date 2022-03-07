@@ -678,18 +678,21 @@ contains
   real (kind=kind_phys)                                 :: latheag !< latent heat vap./sublimation (j/kg)
   logical                             :: frozen_ground !< used to define latent heat pathway
   logical                             :: frozen_canopy !< used to define latent heat pathway
-  LOGICAL                             :: dveg_active !< flag to run dynamic vegetation
-  LOGICAL                             :: crop_active !< flag to run crop model
+  logical                             :: dveg_active !< flag to run dynamic vegetation
+  logical                             :: crop_active !< flag to run crop model
+! add canopy heat storage (C.He added based on GY Niu's communication)
+  real                                :: canhs ! canopy heat storage change w/m2
   
   ! intent (out) variables need to be assigned a value.  these normally get assigned values
   ! only if dveg == 2.
   nee = 0.0
   npp = 0.0
   gpp = 0.0
-      pahv  = 0.
-      pahg  = 0.
-      pahb  = 0.
-      pah  = 0.
+  pahv  = 0.
+  pahg  = 0.
+  pahb  = 0.
+  pah  = 0.
+  canhs = 0.
 
 ! --------------------------------------------------------------------------------------------------
 ! re-process atmospheric forcing
@@ -774,7 +777,7 @@ contains
                  co2air ,o2air  ,solad  ,solai  ,cosz   ,igs    , & !in
                  eair   ,tbot   ,zsnso  ,zsoil  , & !in
                  elai   ,esai   ,fwet   ,foln   ,         & !in
-                 fveg   ,pahv   ,pahg   ,pahb   ,                 & !in
+                 fveg   ,shdfac, pahv   ,pahg   ,pahb   ,             & !in
                  qsnow  ,dzsnso ,lat    ,canliq ,canice ,iloc, jloc , & !in
                  thsfc_loc, prslkix,prsik1x,prslk1x,garea1,       & !in
 		 z0wrf  ,z0hwrf ,                                 & !out
@@ -797,7 +800,7 @@ contains
                  t2mv   ,t2mb  ,fsrv   , &
                  fsrg   ,rssun   ,rssha ,albd  ,albi ,albsnd,albsni, bgap  ,wgap, tgv,tgb,&
                  q1     ,q2v    ,q2b    ,q2e    ,chv   ,chb     , & !out
-                 emissi ,pah    ,                                 &
+                 emissi ,pah    ,canhs,                           &
 		     shg,shc,shb,evg,evb,ghv,ghb,irg,irc,irb,tr,evc,chleaf,chuc,chv2,chb2 )                                            !out
 
                  qsfc = q1                         !
@@ -868,9 +871,9 @@ contains
                  nsnow  ,ist    ,errwat ,iloc   , jloc  ,fveg   , &
                  sav    ,sag    ,fsrv   ,fsrg   ,zwt    ,pah    , &
 #ifdef CCPP
-                 pahv   ,pahg   ,pahb   ,errmsg, errflg)   !in ( except errwat [out] and errmsg, errflg [inout] )
+                 pahv   ,pahg   ,pahb   ,canhs,errmsg, errflg)   !in ( except errwat [out] and errmsg, errflg [inout] )
 #else
-                 pahv   ,pahg   ,pahb   )   !in ( except errwat, which is out )
+                 pahv   ,pahg   ,pahb,   canhs )   !in ( except errwat, which is out )
 #endif
 
 #ifdef CCPP
@@ -1405,9 +1408,9 @@ endif   ! croptype == 0
                     nsnow  ,ist    ,errwat, iloc   ,jloc   ,fveg   , &
                     sav    ,sag    ,fsrv   ,fsrg   ,zwt    ,pah    , &
 #ifdef CCPP
-                    pahv   ,pahg   ,pahb   ,errmsg, errflg)
+                    pahv   ,pahg   ,pahb   ,canhs,errmsg, errflg)
 #else
-                    pahv   ,pahg   ,pahb   )
+                    pahv   ,pahg   ,pahb   ,canhs)
 #endif
 ! --------------------------------------------------------------------------------------------------
 ! check surface energy balance and water balance
@@ -1456,6 +1459,7 @@ endif   ! croptype == 0
   real (kind=kind_phys), intent(in)   :: pahv    !precipitation advected heat - total (w/m2)
   real (kind=kind_phys), intent(in)   :: pahg    !precipitation advected heat - total (w/m2)
   real (kind=kind_phys), intent(in)   :: pahb    !precipitation advected heat - total (w/m2)
+  real (kind=kind_phys), intent(in)   :: canhs   !canopy heat storage change (w/m2) C.He added based on GY Niu's communication
 
 #ifdef CCPP
   character(len=*)               , intent(inout) :: errmsg
@@ -1501,7 +1505,7 @@ endif   ! croptype == 0
 #endif
    end if
 
-   erreng = sav+sag-(fira+fsh+fcev+fgev+fctr+ssoil) +pah
+   erreng = sav+sag-(fira+fsh+fcev+fgev+fctr+ssoil+canhs) +pah
 !   erreng = fveg*sav+sag-(fira+fsh+fcev+fgev+fctr+ssoil)
    if(abs(erreng) > 0.01) then
       write(message,*) 'erreng =',erreng,' at i,j: ',iloc,jloc
@@ -1547,6 +1551,12 @@ endif   ! croptype == 0
       call wrf_message(trim(message))
 #endif
       write(message,'(a17,f10.4)') "total ground:    ",ssoil
+#ifdef CCPP
+      errmsg = trim(errmsg)//NEW_LINE('A')//trim(message)
+#else
+      call wrf_message(trim(message))
+#endif
+      write(message,'(a17,f10.4)') "canopy heat storage:  ",canhs
 #ifdef CCPP
       errmsg = trim(errmsg)//NEW_LINE('A')//trim(message)
 #else
@@ -1605,7 +1615,7 @@ endif   ! croptype == 0
                      co2air ,o2air  ,solad  ,solai  ,cosz   ,igs    , & !in
                      eair   ,tbot   ,zsnso  ,zsoil  , & !in
                      elai   ,esai   ,fwet   ,foln   ,         & !in
-                     fveg   ,pahv   ,pahg   ,pahb   ,                 & !in
+                     fveg   ,shdfac, pahv   ,pahg   ,pahb   ,               & !in
                      qsnow  ,dzsnso ,lat    ,canliq ,canice ,iloc   , jloc, & !in
                      thsfc_loc, prslkix,prsik1x,prslk1x,garea1,       & !in
 		     z0wrf  ,z0hwrf ,                                 & !out
@@ -1627,7 +1637,7 @@ endif   ! croptype == 0
                      qc     ,qsfc   ,psfc   , & !in 
                      t2mv   ,t2mb   ,fsrv   , &
                      fsrg   ,rssun  ,rssha  ,albd  ,albi,albsnd  ,albsni,bgap   ,wgap,tgv,tgb,&
-                     q1     ,q2v    ,q2b    ,q2e    ,chv  ,chb, emissi,pah  ,&
+                     q1     ,q2v    ,q2b    ,q2e    ,chv  ,chb, emissi,pah,canhs,&
 		     shg,shc,shb,evg,evb,ghv,ghb,irg,irc,irb,tr,evc,chleaf,chuc,chv2,chb2 )   !out 
 !jref:end                            
 
@@ -1701,6 +1711,7 @@ endif   ! croptype == 0
   real (kind=kind_phys)                              , intent(in)    :: esai   !lai adjusted for burying by snow
   real (kind=kind_phys)                              , intent(in)    :: fwet   !fraction of canopy that is wet [-]
   real (kind=kind_phys)                              , intent(in)    :: fveg   !greeness vegetation fraction (-)
+  real (kind=kind_phys)                              , intent(in)    :: shdfac !< green vegetation fraction [0.0-1.0]
   real (kind=kind_phys)                              , intent(in)    :: lat    !latitude (radians)
   real (kind=kind_phys)                              , intent(in)    :: canliq !canopy-intercepted liquid water (mm)
   real (kind=kind_phys)                              , intent(in)    :: canice !canopy-intercepted ice mass (mm)
@@ -1774,6 +1785,7 @@ endif   ! croptype == 0
   real (kind=kind_phys)                              , intent(out)   :: t2mb   !2-m air temperature over bare ground part [k]
   real (kind=kind_phys)                              , intent(out)   :: bgap
   real (kind=kind_phys)                              , intent(out)   :: wgap
+  real (kind=kind_phys)                              , intent(out)   :: canhs   !canopy heat storage change (w/m2) 
   real (kind=kind_phys), dimension(1:2)              , intent(out)   :: albd !albedo (direct)
   real (kind=kind_phys), dimension(1:2)              , intent(out)   :: albi !albedo (diffuse)
   real (kind=kind_phys), dimension(1:2)              , intent(out)   :: albsnd   !snow albedo (direct)
@@ -2032,7 +2044,7 @@ endif   ! croptype == 0
   call thermoprop (parameters,nsoil   ,nsnow   ,isnow   ,ist     ,dzsnso  , & !in
                    dt      ,snowh   ,snice   ,snliq   , & !in
                    smc     ,sh2o    ,tg      ,stc     ,ur      , & !in
-                   lat     ,z0m     ,zlvl    ,vegtyp  , & !in
+                   lat     ,z0m     ,zlvl    ,vegtyp  , fveg, & !in
                    df      ,hcpct   ,snicev  ,snliqv  ,epore   , & !out
                    fact    )                              !out
 
@@ -2157,7 +2169,7 @@ endif   ! croptype == 0
                     uu      ,vv      ,sfctmp  ,thair   ,qair    , & !in
                     eair    ,rhoair  ,snowh   ,vai     ,gammav   ,gammag   , & !in
                     fwet    ,laisun  ,laisha  ,cwp     ,dzsnso  , & !in
-                    zlvl    ,zpd     ,z0m     ,fveg    , & !in
+                    zlvl    ,zpd     ,z0m     ,fveg    ,shdfac, & !in
                     z0mg    ,emv     ,emg     ,canliq  ,fsno, & !in
                     canice  ,stc     ,df      ,rssun   ,rssha   , & !in
                     rsurf   ,latheav ,latheag ,parsun  ,parsha  ,igs     , & !in
@@ -2172,7 +2184,7 @@ endif   ! croptype == 0
 #endif
                     tauxv   ,tauyv   ,irg     ,irc     ,shg     , & !out
                     shc     ,evg     ,evc     ,tr      ,ghv     , & !out
-                    t2mv    ,psnsun  ,psnsha  ,csigmaf1,          & !out
+                    t2mv    ,psnsun  ,psnsha  ,csigmaf1,canhs,    & !out
 !jref:start
                     qc      ,qsfc    ,psfc    , & !in
                     q2v     ,chv2, chleaf, chuc)               !inout 
@@ -2196,7 +2208,7 @@ endif   ! croptype == 0
                     dzsnso  ,zlvl    ,zpdg    ,z0mg    ,fsno, & !in
                     emg     ,stc     ,df      ,rsurf   ,latheag  , & !in
                     gammag   ,rhsur   ,iloc    ,jloc    ,q2      ,pahb  , & !in
-                    thsfc_loc, prslkix,prsik1x,prslk1x,fveg,garea1,       & !in
+                    thsfc_loc, prslkix,prsik1x,prslk1x,fveg,shdfac,garea1, & !in
 #ifdef CCPP
                     tgb     ,cmb     ,chb, ustarx,errmsg  ,errflg   , & !inout
 #else
@@ -2415,7 +2427,7 @@ endif   ! croptype == 0
   subroutine thermoprop (parameters,nsoil   ,nsnow   ,isnow   ,ist     ,dzsnso  , & !in
                          dt      ,snowh   ,snice   ,snliq   , & !in
                          smc     ,sh2o    ,tg      ,stc     ,ur      , & !in
-                         lat     ,z0m     ,zlvl    ,vegtyp  , & !in
+                         lat     ,z0m     ,zlvl    ,vegtyp  , fveg,& !in
                          df      ,hcpct   ,snicev  ,snliqv  ,epore   , & !out
                          fact    )                                       !out
 ! ------------------------------------------------------------------------------------------------- 
@@ -2441,6 +2453,7 @@ endif   ! croptype == 0
   real (kind=kind_phys),                            intent(in)  :: z0m     !roughness length (m)
   real (kind=kind_phys),                            intent(in)  :: zlvl    !reference height (m)
   integer                        , intent(in)  :: vegtyp  !vegtyp type
+  real (kind=kind_phys),                            intent(in)  :: fveg   !green vegetation fraction [0.0-1.0]
 
 ! outputs
   real (kind=kind_phys), dimension(-nsnow+1:nsoil), intent(out) :: df      !thermal conductivity [w/m/k]
@@ -2456,6 +2469,7 @@ endif   ! croptype == 0
   real (kind=kind_phys), dimension(-nsnow+1:    0)              :: cvsno   !volumetric specific heat (j/m3/k)
   real (kind=kind_phys), dimension(-nsnow+1:    0)              :: tksno   !snow thermal conductivity (j/m3/k)
   real (kind=kind_phys), dimension(       1:nsoil)              :: sice    !soil ice content
+  real (kind=kind_phys), parameter :: sbeta = -2.0
 ! --------------------------------------------------------------------------------------------------
 
 ! compute snow thermal conductivity and heat capacity
@@ -2488,6 +2502,7 @@ endif   ! croptype == 0
 ! not in use because of the separation of the canopy layer from the ground.
 ! but this may represent the effects of leaf litter (niu comments)
 !       df1 = df1 * exp (sbeta * shdfac)
+        df = df * exp (sbeta * fveg)
 
 ! compute lake thermal properties 
 ! (no consideration of turbulent mixing for this version)
@@ -3634,7 +3649,7 @@ endif   ! croptype == 0
                        uu      ,vv      ,sfctmp  ,thair   ,qair    , & !in
                        eair    ,rhoair  ,snowh   ,vai     ,gammav   ,gammag,  & !in
                        fwet    ,laisun  ,laisha  ,cwp     ,dzsnso  , & !in
-                       zlvl    ,zpd     ,z0m     ,fveg,     & !in
+                       zlvl    ,zpd     ,z0m     ,fveg    ,shdfac,  & !in
                        z0mg    ,emv     ,emg     ,canliq  ,fsno,          & !in
                        canice  ,stc     ,df      ,rssun   ,rssha   , & !in
                        rsurf   ,latheav ,latheag  ,parsun  ,parsha  ,igs     , & !in
@@ -3649,7 +3664,7 @@ endif   ! croptype == 0
 #endif
                        tauxv   ,tauyv   ,irg     ,irc     ,shg     , & !out
                        shc     ,evg     ,evc     ,tr      ,gh      , & !out
-                       t2mv    ,psnsun  ,psnsha  ,csigmaf1,          & !out
+                       t2mv    ,psnsun  ,psnsha  ,csigmaf1,canhs,    & !out
                        qc      ,qsfc    ,psfc    ,                   & !in
                        q2v     ,cah2    ,chleaf  ,chuc    )            !inout 
 
@@ -3658,7 +3673,7 @@ endif   ! croptype == 0
 ! ground (tg) temperatures that balance the surface energy budgets
 
 ! vegetated:
-! -sav + irc[tv] + shc[tv] + evc[tv] + tr[tv] = 0
+! -sav + irc[tv] + shc[tv] + evc[tv] + tr[tv] + canhs(tv) = 0
 ! -sag + irg[tg] + shg[tg] + evg[tg] + gh[tg] = 0
 ! --------------------------------------------------------------------------------------------------
   implicit none
@@ -3673,6 +3688,7 @@ endif   ! croptype == 0
   integer,                         intent(in) :: isnow  !actual no. of snow layers
   integer,                         intent(in) :: vegtyp !vegetation physiology type
   real (kind=kind_phys),                            intent(in) :: fveg   !greeness vegetation fraction (-)
+  real (kind=kind_phys),                            intent(in) :: shdfac !greeness vegetation fraction (-)
   real (kind=kind_phys),                            intent(in) :: sav    !solar rad absorbed by veg (w/m2)
   real (kind=kind_phys),                            intent(in) :: sag    !solar rad absorbed by ground (w/m2)
   real (kind=kind_phys),                            intent(in) :: lwdn   !atmospheric longwave radiation (w/m2)
@@ -3753,7 +3769,7 @@ endif   ! croptype == 0
 #endif
 
 ! output
-! -fsa + fira + fsh + (fcev + fctr + fgev) + fcst + ssoil = 0
+! -fsa + fira + fsh + (fcev + fctr + fgev) + fcst + ssoil + canhs = 0
   real (kind=kind_phys),                           intent(out) :: tauxv  !wind stress: e-w (n/m2)
   real (kind=kind_phys),                           intent(out) :: tauyv  !wind stress: n-s (n/m2)
   real (kind=kind_phys),                           intent(out) :: irc    !net longwave radiation (w/m2) [+= to atm]
@@ -3770,6 +3786,7 @@ endif   ! croptype == 0
   real (kind=kind_phys),                           intent(out) :: csigmaf1
   real (kind=kind_phys),                           intent(out) :: chleaf !leaf exchange coefficient
   real (kind=kind_phys),                           intent(out) :: chuc   !under canopy exchange coefficient
+  real (kind=kind_phys),                           intent(out) :: canhs  !canopy heat storage change (w/m2)
 
   real (kind=kind_phys),                           intent(out) :: q2v
   real (kind=kind_phys) :: cah    !sensible heat conductance, canopy air to zlvl air (m/s)
@@ -3864,8 +3881,9 @@ endif   ! croptype == 0
   real (kind=kind_phys) :: ch2v         !exchange coefficient for 2m over vegetation. 
   real (kind=kind_phys) :: cq2v         !exchange coefficient for 2m over vegetation. 
   real (kind=kind_phys) :: eah2         !2m vapor pressure over canopy
-  real (kind=kind_phys) :: qfx        !moisture flux
+  real (kind=kind_phys) :: qfx          !moisture flux
   real (kind=kind_phys) :: e1           
+  real (kind=kind_phys) :: hcv          !canopy heat capacity j/m2/k, C.He added 
 
 
   real (kind=kind_phys) :: vaie         !total leaf area index + stem area index,effective
@@ -3929,7 +3947,8 @@ endif   ! croptype == 0
 ! for sfcdiff3
 
         snwd      = snowh*1000.0
-        zlvlv     = zlvl - zpd
+!       zlvlv     = zlvl - zpd
+        zlvlv     = zlvl
 
         virtfacv  = 1.0 +  0.61 * max(qair, 1.e-8)
         tv1v      = sfctmp * virtfacv
@@ -4027,7 +4046,7 @@ endif   ! croptype == 0
 ! --
             tem1 = (z0m - z0lo) / (z0up - z0lo)
             tem1 = min(max(tem1, 0.0_kind_phys), 1.0_kind_phys)
-            tem2 = max(fveg, 0.1_kind_phys)
+            tem2 = max(shdfac, 0.1_kind_phys)
             zvfun1= sqrt(tem1 * tem2)
             gdx=sqrt(garea1)
       if(opt_sfc == 1 .or. opt_sfc == 2) then
@@ -4156,14 +4175,19 @@ endif   ! croptype == 0
           evc = min(canice*latheav/dt,evc)
 	end if
 
+! canopy heat capacity
+        hcv = 0.02*vaie*cwat + canliq*cwat/denh2o + canice*cice/denice !j/m2/k
+
         b   = sav-irc-shc-evc-tr+pahv                          !additional w/m2
-        a   = fveg*(4.*cir*tv**3 + csh + (cev+ctr)*destv) !volumetric heat capacity
+!       a   = fveg*(4.*cir*tv**3 + csh + (cev+ctr)*destv) !volumetric heat capacity
+        a   = fveg*(4.*cir*tv**3 + csh + (cev+ctr)*destv) + hcv/dt !volumetric heat capacity
         dtv = b/a
 
         irc = irc + fveg*4.*cir*tv**3*dtv
         shc = shc + fveg*csh*dtv
         evc = evc + fveg*cev*destv*dtv
         tr  = tr  + fveg*ctr*destv*dtv                               
+        canhs = dtv*hcv/dt
 
 ! update vegetation surface temperature
         tv  = tv + dtv
@@ -4413,7 +4437,7 @@ endif   ! croptype == 0
                         dzsnso  ,zlvl    ,zpd     ,z0m     ,fsno    , & !in
                         emg     ,stc     ,df      ,rsurf   ,lathea  , & !in
                         gamma   ,rhsur   ,iloc    ,jloc    ,q2      ,pahb  , & !in
-                        thsfc_loc, prslkix,prsik1x,prslk1x,fveg,garea1,      & !in
+                        thsfc_loc, prslkix,prsik1x,prslk1x,fveg,shdfac,garea1,  & !in
 #ifdef CCPP
                         tgb     ,cm      ,ch,ustarx,errmsg  ,errflg  , & !inout
 #else
@@ -4470,6 +4494,7 @@ endif   ! croptype == 0
   real (kind=kind_phys)                           , intent(in) :: prsik1x ! in exner function
   real (kind=kind_phys)                           , intent(in) :: prslk1x ! in exner function
   real (kind=kind_phys)                           , intent(in) :: fveg 
+  real (kind=kind_phys)                           , intent(in) :: shdfac 
   real (kind=kind_phys)                           , intent(in) :: garea1 
 
 !jref:start; in 
@@ -4655,7 +4680,8 @@ endif   ! croptype == 0
 ! for sfcdiff3; maybe should move to inside the option
 !
         snwd     = snowh*1000.0
-        zlvlb    = zlvl - zpd
+!       zlvlb    = zlvl - zpd
+        zlvlb    = zlvl
 
         virtfacb = 1.0 +  0.61 * max(qair, 1.e-8)
         tv1b     = sfctmp * virtfacb
@@ -4672,7 +4698,7 @@ endif   ! croptype == 0
 ! -----------------------------------------------------------------
             tem1 = (z0m - z0lo) / (z0up - z0lo)
             tem1 = min(max(tem1, 0.0_kind_phys), 1.0_kind_phys)
-            tem2 = max(fveg, 0.1_kind_phys)
+            tem2 = max(shdfac, 0.1_kind_phys)
             zvfun1= sqrt(tem1 * tem2)
             gdx=sqrt(garea1)
 
