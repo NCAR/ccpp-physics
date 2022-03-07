@@ -4017,7 +4017,7 @@ endif   ! croptype == 0
        if(opt_sfc == 3) then
          call sfcdif3(parameters,iloc    ,jloc    ,iter    ,sfctmp  ,qair    ,ur      , & !in 
                         zlvl    ,tah     ,thsfc_loc,prslkix,prsik1x ,prslk1x ,z0m     , & !in 
-                        zpd     ,snowh   ,fveg    ,garea1  ,.true.  ,vaie    ,          & !in 
+                        zpd     ,snowh   ,shdfac  ,garea1  ,.true.  ,vaie    ,          & !in 
                         ustarx  ,fm      ,fh      ,fm2     ,fh2     ,                   & !inout 
                         z0h     ,fv      ,csigmaf1,cm      ,ch       )                    !out 
 
