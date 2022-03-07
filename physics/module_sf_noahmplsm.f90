@@ -3887,6 +3887,7 @@ endif   ! croptype == 0
   real (kind=kind_phys), intent(in   ) :: shdfac      ! greeness vegetation fraction (-)
   real (kind=kind_phys), intent(inout) :: ustarx      ! friction velocity
   real (kind=kind_phys), intent(  out) :: csigmaf1    !
+  real (kind=kind_phys)                :: czil1       ! canopy based czil
 
   real (kind=kind_phys) :: t, tdc       !kelvin to degree celsius with limit -50 to +50
 
