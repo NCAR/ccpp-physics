@@ -3986,6 +3986,19 @@ endif   ! croptype == 0
             z0hg = z0mg   !* exp(-czil*0.4*258.2*sqrt(fv*z0mg))
        end if
 
+       if (opt_trs == 1) then
+         z0h       = z0m
+       elseif (opt_trs == 2) then
+         czil1= 10.0 ** (- (0.40/0.07) * parameters%hvt)
+         z0h = z0m*exp(-czil1*0.4*258.2*sqrt(fv*z0m))
+       elseif (opt_trs == 3) then
+         if (vegtyp.le.5) then
+           z0h = z0m
+         else
+           z0h = z0m*0.01
+         endif
+       endif
+    
 ! aerodyn resistances between heights zlvl and d+z0v
 
        if(opt_sfc == 1) then
@@ -4017,7 +4030,7 @@ endif   ! croptype == 0
        if(opt_sfc == 3) then
          call sfcdif3(parameters,iloc    ,jloc    ,iter    ,sfctmp  ,qair    ,ur      , & !in 
                         zlvl    ,tah     ,thsfc_loc,prslkix,prsik1x ,prslk1x ,z0m     , & !in 
-                        zpd     ,snowh   ,shdfac  ,garea1  ,.true.  ,vaie    ,          & !in 
+                        zpd     ,snowh   ,shdfac  ,garea1  ,.true.  ,vaie    ,vegtyp  , & !in 
                         ustarx  ,fm      ,fh      ,fm2     ,fh2     ,                   & !inout 
                         z0h     ,fv      ,csigmaf1,cm      ,ch       )                    !out 
 
@@ -4477,7 +4490,7 @@ endif   ! croptype == 0
         if(opt_sfc == 3) then
           call sfcdif3(parameters,iloc    ,jloc    ,iter    ,sfctmp  ,qair    ,ur      , & !in 
                          zlvl    ,tgb     ,thsfc_loc,prslkix,prsik1x ,prslk1x ,z0m     , & !in 
-                         zpd     ,snowh   ,shdfac  ,garea1  ,.false. ,0.0     ,          & !in 
+                         zpd     ,snowh   ,shdfac  ,garea1  ,.false. ,0.0     ,ivgtyp  , & !in 
                          ustarx  ,fm      ,fh      ,fm2     ,fh2     ,                   & !inout 
                          z0h     ,fv      ,csigmaf0,cm      ,ch       )                    !out 
 
@@ -5080,7 +5093,7 @@ endif   ! croptype == 0
 !! compute surface drag coefficient cm for momentum and ch for heat.
   subroutine sfcdif3(parameters,iloc    ,jloc    ,iter    ,sfctmp  ,qair    ,ur      , & !in 
                        zlvl    ,tgb     ,thsfc_loc,prslkix,prsik1x ,prslk1x ,z0m     , & !in 
-                       zpd     ,snowh   ,fveg    ,garea1  ,vegetated,vaie   ,          & !in 
+                       zpd     ,snowh   ,fveg    ,garea1  ,vegetated,vaie   ,vegtyp  , & !in 
                        ustarx  ,fm      ,fh      ,fm2     ,fh2     ,                   & !inout 
                        z0h     ,fv      ,csigmaf ,cm      ,ch       )                    !out 
   
@@ -5111,6 +5124,7 @@ endif   ! croptype == 0
     real (kind=kind_phys), intent(in   ) :: garea1    ! grid area [km2]
     logical,               intent(in   ) :: vegetated ! .true. if vegetated
     real (kind=kind_phys), intent(in   ) :: vaie      ! vegetation area index [m2/m2]
+    integer              , intent(in   ) :: vegtyp    ! vegetation category
     real (kind=kind_phys), intent(inout) :: ustarx    ! friction velocity [m/s]
     real (kind=kind_phys), intent(inout) :: fm        ! momentum stability correction, weighted by prior iters
     real (kind=kind_phys), intent(inout) :: fh        ! sen heat stability correction, weighted by prior iters
@@ -5132,8 +5146,8 @@ endif   ! croptype == 0
     real (kind=kind_phys) :: tvs                      ! virtural surface temperature [K]
     real (kind=kind_phys) :: rb1                      ! bulk Richardson - stability output
     real (kind=kind_phys) :: stress1                  ! stress - stability output
+    real (kind=kind_phys) :: czil1                    ! canopy based czil
     real (kind=kind_phys) :: fm10                     ! 10-m stability adjustment - stability output
-    real (kind=kind_phys) :: dlf                      ! leaf dimension
     real (kind=kind_phys) :: sigmaa                   ! momentum partition parameter
     real (kind=kind_phys) :: tem1,tem2,zvfun1,gdx
     real (kind=kind_phys), parameter :: z0lo=0.1, z0up=1.0
@@ -5145,11 +5159,23 @@ endif   ! croptype == 0
 
     if(vegetated) then 
 
-      dlf      = parameters%dleaf
-      sigmaa   = 1.0 - (0.5/(0.5+vaie)) * exp(-vaie**2/8.0)
-      kbsigmaf = 16.4*(sigmaa*vaie**3)**(-0.25)*sqrt(dlf*ur/log((zlvl-zpd)/z0m))
-      z0h      = z0m/exp(kbsigmaf)
-      csigmaf  = log((zlvl-zpd)/z0m)*(log((zlvl-zpd)/z0m) + kbsigmaf) ! for output for interpolation
+      if (opt_trs == 1) then
+        z0h       = z0m
+      elseif (opt_trs == 2) then
+        czil1= 10.0 ** (- (0.40/0.07) * parameters%hvt)
+        z0h = z0m*exp(-czil1*0.4*258.2*sqrt(fv*z0m))
+      elseif (opt_trs == 3) then
+        if (vegtyp.le.5) then
+          z0h = z0m
+        else
+          z0h = z0m*0.01
+        endif
+      elseif (opt_trs == 4) then
+        sigmaa    = 1.0 - (0.5/(0.5+vaie))*exp(-vaie**2/8.0)
+        kbsigmaf = 16.4*(sigmaa*vaie**3)**(-0.25)*sqrt(parameters%dleaf*ur/log((zlvl-zpd)/z0m))
+        z0h       = z0m/exp(kbsigmaf)
+        csigmaf  = log((zlvl-zpd)/z0m)*(log((zlvl-zpd)/z0m)+kbsigmaf) ! for output for interpolation
+      endif
     
     else
 
