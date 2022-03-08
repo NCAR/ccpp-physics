@@ -16,20 +16,20 @@
 !!  This version:https://svn-ccsm-models.cgd.ucar.edu/cam1/branch_tags/mg3_tags/mg3_33_cam5_4_153/
 !!
 !! \version 2 history: Sep 2011: Development begun.
-!!\n                    Feb 2013: Added of prognostic precipitation.
-!!\n                    Aug 2015: Published and released version
+!!\n                   Feb 2013: Added of prognostic precipitation.
+!!\n                   Aug 2015: Published and released version
 !!
 !! Contributions from:  Sean Santos, Peter Caldwell, Xiaohong Liu and Steve Ghan
 !!
 !! - Anning Cheng adopted mg2 for FV3GFS 9/29/2017
-!!\n             add GMAO ice conversion and Liu et. al liquid water
+!!\n              add GMAO ice conversion and Liu et. al liquid water
 !!\n              conversion in 10/12/2017
 !!
 !! - Anning showed promising results for FV3GFS on 10/15/2017
 !! - S. Moorthi - Oct/Nov 2017 - optimized the MG2 code
 !! - S. Moorthi - Nov 2017     - made the sedimentation quasi-implicit
 !! - S. Moorthi - Feb 2018     - updated to MG3 - modified graupel sedimentation
-!!                             other modifications to eliminate blowup.
+!!                               other modifications to eliminate blowup.
 !! - S. Moorthi - Mar 2018     - fixed a few bugs and added option to run as MG2
 !! - S. Moorthi - Oct,29,2018  - change nlb from nlev/3 to levels with p/ps < 0.05 (nlball)
 !!
@@ -1162,7 +1162,7 @@ subroutine micro_mg_tend (                                       &
         qsfm(i,k)  = qsatfac(i,k)
       enddo
     enddo
-  end if
+  endif
 
 ! if (lprnt) write(0,*)' cldm=',cldm(1,nlev-20:nlev)
 ! if (lprnt) write(0,*)' liqcldf=',liqcldf(1,nlev-20:nlev)
@@ -1234,8 +1234,8 @@ subroutine micro_mg_tend (                                       &
 !       esl(i,k) = qsfm(i,k) * esl(i,k)
 
         relhum(i,k) = max(zero, min(q(i,k)/max(qvl(i,k), qsmall), two))
-     end do
-  end do
+     enddo
+  enddo
 
   !===============================================
 
@@ -1590,7 +1590,7 @@ subroutine micro_mg_tend (                                       &
         mnuccd = zero
      end where
 
-  end if
+  endif
 
 
   !=============================================================================
@@ -1628,11 +1628,11 @@ subroutine micro_mg_tend (                                       &
               ns(i,k) = max(ns(i,k) - ninstsm(i,k), zero)
               qr(i,k) = max(qr(i,k) + minstsm(i,k), zero)
               nr(i,k) = max(nr(i,k) + ninstsm(i,k), zero)
-           end if
-        end if
+           endif
+        endif
 
-     end do
-  end do 
+     enddo
+  enddo 
 ! if (lprnt) write(0,*)' tlat1=',tlat(1,:)*deltat
 ! if (lprnt) write(0,*)' qg1=',qg(1,:)
 
@@ -1670,11 +1670,11 @@ subroutine micro_mg_tend (                                       &
             ng(i,k) = max(ng(i,k) - ninstgm(i,k), zero)
             qr(i,k) = max(qr(i,k) + minstgm(i,k), zero)
             nr(i,k) = max(nr(i,k) + ninstgm(i,k), zero)
-          end if
-        end if
+          endif
+        endif
 
-      end do
-    end do
+      enddo
+    enddo
   endif
 
 ! if (lprnt) write(0,*)' tlat1g=',tlat(1,:)*deltat
@@ -1719,10 +1719,10 @@ subroutine micro_mg_tend (                                       &
               end if
 !--ag
 
-           end if
-        end if
-     end do
-  end do 
+           endif
+        endif
+     enddo
+  enddo 
 
 ! if (lprnt) then
 !  write(0,*)' tlat2=',tlat(1,:)*deltat
@@ -1750,11 +1750,11 @@ subroutine micro_mg_tend (                                       &
            ! specify droplet concentration
            if (nccons) then
               ncic(i,k) = ncnst * rhoinv(i,k)
-           end if
+           endif
         else
            qcic(i,k) = zero
            ncic(i,k) = zero
-        end if
+        endif
 
 !       if (qi(i,k) >= qsmall .and. icldm(i,k) > mincld) then
         if (qi(i,k) >= qsmall) then
@@ -1766,14 +1766,14 @@ subroutine micro_mg_tend (                                       &
            ! switch for specification of cloud ice number
            if (nicons) then
               niic(i,k) = ninst * rhoinv(i,k)
-           end if
+           endif
         else
            qiic(i,k) = zero
            niic(i,k) = zero
-        end if
+        endif
 
-    end do
-  end do
+    enddo
+  enddo
 
   !========================================================================
 
@@ -1802,12 +1802,12 @@ subroutine micro_mg_tend (                                       &
         ! then leave precip_frac as cloud fraction at current level
         if (k /= 1) then
 !++ag
-!           where (qr(:,k-1) >= qsmall .or. qs(:,k-1) >= qsmall .or. qg(:,k-1) >= qsmall)
+!          where (qr(:,k-1) >= qsmall .or. qs(:,k-1) >= qsmall .or. qg(:,k-1) >= qsmall)
 !--ag
            where (qr(:,k-1) >= qsmall .or. qs(:,k-1) >= qsmall)
               precip_frac(:,k) = max(precip_frac(:,k-1), precip_frac(:,k))
            end where
-        end if
+        endif
 
      endif
 
@@ -1916,13 +1916,13 @@ subroutine micro_mg_tend (                                       &
         else
           call ice_autoconversion(t(:,k), qiic(:,k), lami(:,k), n0i(:,k),           &
                          dcs, ts_au_loc(:), prci(:,k), nprci(:,k), mgncol)
-        end if
+        endif
      !else
         ! Add in the particles that we have already converted to snow, and
         ! don't do any further autoconversion of ice.
         !prci(:,k)  = tnd_qsnow(:,k) / cldm(:,k)
         !nprci(:,k) = tnd_nsnow(:,k) / cldm(:,k)
-     end if
+     endif
 
      ! note, currently we don't have this
      ! inside the do_cldice block, should be changed later
@@ -2125,7 +2125,7 @@ subroutine micro_mg_tend (                                       &
               !mnudep(:,k) = zero
            !end where
 
-       end if
+       endif
 
      else
        do i=1,mgncol
@@ -2136,7 +2136,7 @@ subroutine micro_mg_tend (                                       &
          mnudep(i,k) = zero
          nnudep(i,k) = zero
        enddo
-     end if
+     endif
 
      call snow_self_aggregation(t(:,k), rho(:,k), asn(:,k), rhosn, qsic(:,k), nsic(:,k), &
           nsagg(:,k), mgncol)
@@ -2150,7 +2150,7 @@ subroutine micro_mg_tend (                                       &
      else
         nsacwi(:,k) = zero
         msacwi(:,k) = zero
-     end if
+     endif
 
      call accrete_rain_snow(t(:,k), rho(:,k), umr(:,k), ums(:,k), unr(:,k), uns(:,k), &
           qric(:,k), qsic(:,k), lamr(:,k), n0r(:,k), lams(:,k), n0s(:,k), &
@@ -2175,7 +2175,7 @@ subroutine micro_mg_tend (                                       &
      else
         prai(:,k)  = zero
         nprai(:,k) = zero
-     end if
+     endif
 
 !++ag Moved below graupel conditional, now two different versions
 !    if (.not. (do_hail .or. do_graupel))  then
@@ -2223,9 +2223,9 @@ subroutine micro_mg_tend (                                       &
         ! all ql is removed (which is handled elsewhere)
         !in fact, nothing in this entire file makes nsubc nonzero.
           nsubc(i,k) = zero
-        end do
+        enddo
 
-     end if !do_cldice
+     endif !do_cldice
      !---PMC 12/3/12
 
 !++ag Process rate calls for graupel here.
@@ -2337,7 +2337,7 @@ subroutine micro_mg_tend (                                       &
           pre(:,k), prds(:,k), am_evp_st(:,k), mgncol)
 
 
-     end if ! end do_graupel/hail loop
+     endif ! end do_graupel/hail loop
 !--ag
 
      do i=1,mgncol
@@ -2382,7 +2382,7 @@ subroutine micro_mg_tend (                                       &
            qcrat(i,k)  = ratio
         else
            qcrat(i,k) = one
-        end if
+        endif
 
 !     if(lprnt) write(0,*)' bergs2=',bergs(1,k),' k=',k,' ratio=',ratio
 
@@ -2391,9 +2391,9 @@ subroutine micro_mg_tend (                                       &
         !deposition for the remaining frac of the timestep.
         if (qc(i,k) >= qsmall) then
            vap_dep(i,k) = vap_dep(i,k) * (one-qcrat(i,k))
-        end if
+        endif
 
-     end do
+     enddo
 
      do i=1,mgncol
 
@@ -2419,10 +2419,10 @@ subroutine micro_mg_tend (                                       &
               dum1 = mnuccd(i,k) / (vap_dep(i,k)+mnuccd(i,k))
               mnuccd(i,k)  = dum*dum1
               vap_dep(i,k) = dum - mnuccd(i,k)
-           end if
-        end if
+           endif
+        endif
 
-     end do
+     enddo
 
      do i=1,mgncol
 
@@ -2492,9 +2492,9 @@ subroutine micro_mg_tend (                                       &
            pracs(i,k)   = ratio * pracs(i,k)
            mnuccr(i,k)  = ratio * mnuccr(i,k)
            mnuccri(i,k) = ratio * mnuccri(i,k)
-        end if
+        endif
 
-     end do
+     enddo
 
      do i=1,mgncol
 
@@ -2507,9 +2507,9 @@ subroutine micro_mg_tend (                                       &
            nsubr(i,k) = dum*nr(i,k) * oneodt
         else
            nsubr(i,k) = zero
-        end if
+        endif
 
-     end do
+     enddo
 
      do i=1,mgncol
 
@@ -2535,9 +2535,9 @@ subroutine micro_mg_tend (                                       &
            nnuccr(i,k)  = ratio * nnuccr(i,k)
            nsubr(i,k)   = ratio * nsubr(i,k)
            nnuccri(i,k) = ratio * nnuccri(i,k)
-        end if
+        endif
 
-     end do
+     enddo
 
      if (do_cldice) then
 
@@ -2569,11 +2569,11 @@ subroutine micro_mg_tend (                                       &
               prci(i,k)       = ratio * prci(i,k)
               prai(i,k)       = ratio * prai(i,k)
               ice_sublim(i,k) = ratio * ice_sublim(i,k)
-           end if
+           endif
 
-        end do
+        enddo
 
-     end if
+     endif
 
      if (do_cldice) then
 
@@ -2585,7 +2585,7 @@ subroutine micro_mg_tend (                                       &
               tmpfrz = nnuccc(i,k)
            else
               tmpfrz = zero
-           end if
+           endif
 !++ag
            dum1 = (nprci(i,k)+nprai(i,k)-nsubi(i,k))*icldm(i,k)
 !          dum2 = nnuccd(i,k)+(nnucct(i,k)+tmpfrz+nnudep(i,k)+nsacwi(i,k))*lcldm(i,k) &
@@ -2601,11 +2601,11 @@ subroutine micro_mg_tend (                                       &
               nprci(i,k) = ratio * nprci(i,k)
               nprai(i,k) = ratio * nprai(i,k)
               nsubi(i,k) = ratio * nsubi(i,k)
-           end if
+           endif
 
-        end do
+        enddo
 
-     end if
+     endif
 
      do i=1,mgncol
 
@@ -2648,9 +2648,9 @@ subroutine micro_mg_tend (                                       &
 !          ratio = (qs(i,k)*oneodt + dum2) / dum1 * omsm
 
 !          prds(i,k) = ratio * prds(i,k)
-!       end if
+!       endif
 
-     end do
+     enddo
 
      do i=1,mgncol
 
@@ -2678,7 +2678,7 @@ subroutine micro_mg_tend (                                       &
            ratio = (ns(i,k)*oneodt + dum2) / dum1 * omsm
            nscng(i,k)  = ratio * nscng(i,k)
            ngracs(i,k) = ratio * ngracs(i,k)
-         end if
+         endif
 
        else
          dum1 = precip_frac(i,k)* (-nsubs(i,k)-nsagg(i,k))
@@ -2692,7 +2692,7 @@ subroutine micro_mg_tend (                                       &
        nsubs(i,k) = ratio * nsubs(i,k)
        nsagg(i,k) = ratio * nsagg(i,k)
 
-     end do
+     enddo
 
 !++ag Graupel Conservation Checks
 !-------------------------------------------------------------------
@@ -2714,13 +2714,13 @@ subroutine micro_mg_tend (                                       &
 
            prdg(i,k) = ratio * prdg(i,k)
 
-         end if
+         endif
 
-       end do
+       enddo
 
 ! conservation of graupel number: not needed, no sinks
 !-------------------------------------------------------------------
-     end if
+     endif
 !--ag
 
 
@@ -2801,10 +2801,10 @@ subroutine micro_mg_tend (                                       &
               dum1 = one - dum1 - dum2 - dum3
 !--ag
               ice_sublim(i,k) = dum*dum1*oneodt
-           end if
-        end if
+           endif
+        endif
 
-     end do
+     enddo
 
      ! Big "administration" loop enforces conservation, updates variables
      ! that accumulate over substeps, and sets output variables.
@@ -2902,7 +2902,7 @@ subroutine micro_mg_tend (                                       &
            qstend(i,k) = qstend(i,k) + (prai(i,k)+prci(i,k))*icldm(i,k)+(psacws(i,k)+bergs(i,k))*lcldm(i,k) &
                                      + (prds(i,k)+pracs(i,k)+mnuccr(i,k))*precip_frac(i,k)
 
-        end if
+        endif
 !--ag
 
 
@@ -2938,7 +2938,7 @@ subroutine micro_mg_tend (                                       &
         else
            prodsnow(i,k) = (prai(i,k)+prci(i,k))*icldm(i,k)+(psacws(i,k)+bergs(i,k))*lcldm(i,k)+ &
                            (pracs(i,k)+mnuccr(i,k))*precip_frac(i,k)
-        end if
+        endif
 
         ! following are used to calculate 1st order conversion rate of cloud water
         !    to rain and snow (1/s), for later use in aerosol wet removal routine
@@ -3013,7 +3013,7 @@ subroutine micro_mg_tend (                                       &
                +  (nnucct(i,k)+tmpfrz+nnudep(i,k)+nsacwi(i,k)+nmultg(i,k))*lcldm(i,k) &
                + (nsubi(i,k)-nprci(i,k)-nprai(i,k))*icldm(i,k)                        &
                + (nnuccri(i,k)+nmultrg(i,k))*precip_frac(i,k)
-        end if
+        endif
 
         if(do_graupel.or.do_hail) then
 !       nstend(i,k) = nstend(i,k) + (nsubs(i,k)+nsagg(i,k)+nnuccr(i,k))*precip_frac(i,k) &
@@ -3030,7 +3030,7 @@ subroutine micro_mg_tend (                                       &
            nstend(i,k) = nstend(i,k) + (nsubs(i,k)+nsagg(i,k)+nnuccr(i,k))*precip_frac(i,k) &
                                      + nprci(i,k)*icldm(i,k)
 
-        end if
+        endif
 
 !       nrtend(i,k) = nrtend(i,k) + nprc(i,k)*lcldm(i,k)+(nsubr(i,k)-npracs(i,k)-nnuccr(i,k) &
 !                                 - nnuccri(i,k)+nragg(i,k))*precip_frac(i,k)
@@ -3047,9 +3047,9 @@ subroutine micro_mg_tend (                                       &
 
         if (do_cldice .and. nitend(i,k) > zero .and. ni(i,k)+nitend(i,k)*deltat > nimax(i,k)) then
            nitend(i,k) = max(zero, (nimax(i,k)-ni(i,k))*oneodt)
-        end if
+        endif
 
-     end do
+     enddo
 
      ! End of "administration" loop
 
@@ -3298,7 +3298,7 @@ subroutine micro_mg_tend (                                       &
         else
            fi(i,k) = zero
            fni(i,k)= zero
-        end if
+        endif
 
         ! fallspeed for rain
 
@@ -3318,7 +3318,7 @@ subroutine micro_mg_tend (                                       &
         else
            fr(i,k)  = zero
            fnr(i,k) = zero
-        end if
+        endif
 
         ! fallspeed for snow
 
@@ -3337,7 +3337,7 @@ subroutine micro_mg_tend (                                       &
         else
            fs(i,k)  = zero
            fns(i,k) = zero
-        end if
+        endif
 
         if (do_graupel .or. do_hail) then
 !++ag
@@ -3359,7 +3359,7 @@ subroutine micro_mg_tend (                                       &
           else
             fg(i,k)  = zero
             fng(i,k) = zero
-          end if
+          endif
         endif
 
         ! redefine dummy variables - sedimentation is calculated over grid-scale
@@ -3386,7 +3386,7 @@ subroutine micro_mg_tend (                                       &
         if (dumg(i,k) < qsmall) dumng(i,k) = zero
 
      enddo
-  end do       !!! vertical loop
+  enddo       !!! vertical loop
 
   do k=1,nlev
      do i=1,mgncol
@@ -3488,8 +3488,8 @@ subroutine micro_mg_tend (                                       &
           prect(i) = prect(i) + falouti(nlev) * (tx3*0.001_r8)
           preci(i) = preci(i) + falouti(nlev) * (tx3*0.001_r8)
 
-       end do
-     end if
+       enddo
+     endif
 
 ! if (lprnt) write(0,*)' tlat4=',tlat(1,:)*deltat
      ! calculate number of split time steps to ensure courant stability criteria
@@ -3559,7 +3559,7 @@ subroutine micro_mg_tend (                                       &
           tlat(i,k)     = tlat(i,k)    - dum2 * xxlv
 
           lflx(i,k+1)   = lflx(i,k+1) + faloutc(k) * tx3     ! Liquid condensate flux here
-        end do
+        enddo
 
         prect(i) = prect(i) + faloutc(nlev) * (tx3*0.001_r8)
 
@@ -3629,11 +3629,11 @@ subroutine micro_mg_tend (                                       &
           faloutnr(k)   = fnr(i,k) * dumnr(i,k)
 
           rflx(i,k+1)   = rflx(i,k+1) + faloutr(k) * tx3 ! Rain Flux
-        end do
+        enddo
 
         prect(i) = prect(i) + faloutr(nlev) * (tx3*0.001_r8)
 
-     end do
+     enddo
 
 !    if (lprnt) write(0,*)' prectaftrain=',prect(i),' preci=',preci(i)
 
@@ -3698,7 +3698,7 @@ subroutine micro_mg_tend (                                       &
         prect(i) = prect(i) + falouts(nlev) * (tx3*0.001_r8)
         preci(i) = preci(i) + falouts(nlev) * (tx3*0.001_r8)
 
-     end do   !! nstep loop
+     enddo   !! nstep loop
 
 !    if (lprnt) write(0,*)' prectaftssno=',prect(i),' preci=',preci(i)
 !    if (lprnt) write(0,*)' qgtnd1=',qgtend(1,:)
@@ -3761,7 +3761,7 @@ subroutine micro_mg_tend (                                       &
              faloutng(k)   = fng(i,k) * dumng(i,k)
 
              gflx(i,k+1)   = gflx(i,k+1) + faloutg(k) * tx3           ! Ice flux
-          end do
+          enddo
 
         ! units below are m/s
         ! sedimentation flux at surface is added to precip flux at surface
@@ -3770,7 +3770,7 @@ subroutine micro_mg_tend (                                       &
           prect(i) = prect(i) + faloutg(nlev) * (tx3*0.001_r8)
           preci(i) = preci(i) + faloutg(nlev) * (tx3*0.001_r8)
 
-       end do   !! nstep loop
+       enddo   !! nstep loop
      endif
 !  if (lprnt) write(0,*)' qgtnds=',qgtend(1,:)
 !--ag
@@ -3813,18 +3813,18 @@ subroutine micro_mg_tend (                                       &
         ! switch for specification of droplet and crystal number
         if (nccons) then
            dumnc(i,k) = ncnst*rhoinv(i,k)*lcldm(i,k)
-        end if
+        endif
 
         ! switch for specification of cloud ice number
         if (nicons) then
            dumni(i,k) = ninst*rhoinv(i,k)*icldm(i,k)
-        end if
+        endif
 
 !++ag
         ! switch for specification of graupel number
         if (ngcons) then
            dumng(i,k) = ngnst*rhoinv(i,k)*precip_frac(i,k)
-        end if
+        endif
 !--ag
 
         if (dumc(i,k) < qsmall) dumnc(i,k) = zero
@@ -3868,8 +3868,8 @@ subroutine micro_mg_tend (                                       &
               dum1 = - xlf * tx2 * dums(i,k)
               tlat(i,k)       = dum1 + tlat(i,k)
               meltsdttot(i,k) = dum1 + meltsdttot(i,k)
-           end if
-        end if
+           endif
+        endif
      enddo
   enddo
 
@@ -3904,8 +3904,8 @@ subroutine micro_mg_tend (                                       &
              dum1 = - xlf*tx2*dumg(i,k)
              tlat(i,k)       = dum1 + tlat(i,k)
              meltsdttot(i,k) = dum1 + meltsdttot(i,k)
-          end if
-        end if
+          endif
+        endif
       enddo
     enddo
 
@@ -3957,8 +3957,8 @@ subroutine micro_mg_tend (                                       &
              frzrdttot(i,k) = dum1 + frzrdttot(i,k)
              tlat(i,k)      = dum1 + tlat(i,k)
 
-          end if
-       end if
+          endif
+       endif
 
      enddo
   enddo
@@ -3992,8 +3992,8 @@ subroutine micro_mg_tend (                                       &
                  qitend(i,k) = ((one-dum)*dumi(i,k)-qi(i,k))  * oneodt
                  nitend(i,k) = ((one-dum)*dumni(i,k)-ni(i,k)) * oneodt
                  tlat(i,k)   = tlat(i,k) - xlf*tx2*dumi(i,k)
-              end if
-           end if
+              endif
+           endif
         enddo
      enddo
 
@@ -4029,8 +4029,8 @@ subroutine micro_mg_tend (                                       &
                  qctend(i,k) = ((one-dum)*dumc(i,k)-qc(i,k))  * oneodt
                  nctend(i,k) = ((one-dum)*dumnc(i,k)-nc(i,k)) * oneodt
                  tlat(i,k)   = tlat(i,k) + xlf*tx2
-              end if
-           end if
+              endif
+           endif
         enddo 
      enddo 
      ! remove any excess over-saturation, which is possible due to non-linearity when adding
@@ -4077,10 +4077,10 @@ subroutine micro_mg_tend (                                       &
               ! for output
               qvres(i,k)    = -dum
               tlat(i,k)     = tlat(i,k) + dum*tx1
-           end if
+           endif
         enddo 
      enddo 
-  end if
+  endif
 
 ! if (lprnt) write(0,*)' tlat7=',tlat(1,:)*deltat
 
@@ -4249,7 +4249,7 @@ subroutine micro_mg_tend (                                       &
            lamcrad(i,k) = zero
            pgamrad(i,k) = zero
            effc_fn(i,k) = ten
-        end if
+        endif
      enddo
   enddo
   ! recalculate 'final' rain size distribution parameters
@@ -4266,9 +4266,9 @@ subroutine micro_mg_tend (                                       &
            if (dum /= dumnr(i,k)) then
               ! adjust number conc if needed to keep mean size in reasonable range
               nrtend(i,k) = (dumnr(i,k)*precip_frac(i,k)-nr(i,k)) *oneodt
-           end if
+           endif
 
-        end if
+        endif
      enddo
   enddo
   ! recalculate 'final' snow size distribution parameters
@@ -4290,10 +4290,10 @@ subroutine micro_mg_tend (                                       &
            tx1 = (two*pi*1.e-2_r8) / (lams(i,k)*lams(i,k)*lams(i,k))
            sadsnow(i,k) = tx1*dumns0*rho(i,k)             ! m2/m3 -> cm2/cm3
 
-        end if
+        endif
 
 
-     end do ! vertical k loop
+     enddo ! vertical k loop
   enddo
   do k=1,nlev
      do i=1,mgncol
@@ -4307,9 +4307,9 @@ subroutine micro_mg_tend (                                       &
         if (qg(i,k)+qgtend(i,k)*deltat < qsmall)                 ngtend(i,k) = -ng(i,k) * oneodt
 !--ag
 
-     end do
+     enddo
 
-  end do
+  enddo
 
   ! DO STUFF FOR OUTPUT:
   !==================================================
@@ -4459,10 +4459,10 @@ subroutine micro_mg_tend (                                       &
         else
            acsrfl(i,k) = zero
            fcsrfl(i,k) = zero
-        end if
+        endif
 
-     end do
-  end do
+     enddo
+  enddo
 
   do k=1,nlev
      do i = 1,mgncol
@@ -4520,7 +4520,7 @@ subroutine calc_rercld(lamr, n0r, lamc, pgam, qric, qcic, ncic, rercld, mgncol,n
 
       if (Atmp > zero) then
         rercld(i,k) = rercld(i,k) + three *(qric(i,k) + qcic(i,k)) / (four * rhow * Atmp)
-      end if
+      endif
     enddo
   enddo
 end subroutine calc_rercld
