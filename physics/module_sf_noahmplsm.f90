@@ -7621,8 +7621,10 @@ endif   ! croptype == 0
     if ( parameters%urban_flag ) fcr(1)= 0.95
 
     if(opt_run == 1) then
-       fff = 6.0
-       fsat   = parameters%fsatmx*exp(-0.5*fff*(zwt-2.0))
+!       fff = 6.0
+       fff   = parameters%bexp(1) / 3.0    ! calibratable, c.he changed based on gy niu's update
+!       fsat   = parameters%fsatmx*exp(-0.5*fff*(zwt-2.0))
+       fsat   = parameters%fsatmx*exp(-0.5*fff*zwt)  ! c.he changed based on gy niu's update
        if(qinsur > 0.) then
          runsrf = qinsur * ( (1.0-fcr(1))*fsat + fcr(1) )
          pddum  = qinsur - runsrf                          ! m/s 
@@ -8337,8 +8339,9 @@ endif   ! croptype == 0
   real (kind=kind_phys)                                        :: watmin!minimum soil vol soil moisture [m3/m3]
   real (kind=kind_phys)                                        :: xs    !excessive water above saturation [mm]
   real (kind=kind_phys), parameter                             :: rous = 0.2    !specific yield [-]
-  real (kind=kind_phys), parameter                             :: cmic = 0.20   !microprore content (0.0-1.0)
+!  real (kind=kind_phys), parameter                             :: cmic = 0.20   !microprore content (0.0-1.0)
                                                                !0.0-close to free drainage
+  real (kind=kind_phys), parameter                             :: cmic = 0.80 ! calibratable, c.he changed based on gy niu's update
 ! -------------------------------------------------------------
       qdis      = 0.0
       qin       = 0.0
@@ -8380,8 +8383,10 @@ endif   ! croptype == 0
 
 ! groundwater discharge [mm/s]
 
-      fff   = 6.0
-      rsbmx = 5.0
+!      fff   = 6.0
+!      rsbmx = 5.0
+      fff   = parameters%bexp(iwt) / 3.0 ! calibratable, c.he changed based on gy niu's update
+      rsbmx = hk(iwt) * 1.0e3 * exp(3.0) ! mm/s, calibratable, c.he changed based on gy niu's update
 
       qdis = (1.0-fcrmax)*rsbmx*exp(-parameters%timean)*exp(-fff*(zwt-2.0))
 
