@@ -2503,7 +2503,7 @@ endif   ! croptype == 0
 ! not in use because of the separation of the canopy layer from the ground.
 ! but this may represent the effects of leaf litter (niu comments)
 !       df1 = df1 * exp (sbeta * shdfac)
-        df = df * exp (sbeta * fveg)
+        df(1) = df(1) * exp (sbeta * fveg)
 
 ! compute lake thermal properties 
 ! (no consideration of turbulent mixing for this version)
