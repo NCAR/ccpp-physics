@@ -1952,26 +1952,21 @@ endif   ! croptype == 0
     chv2      = 0.
     rb        = 0.
 
-!
-    cdmnv     = 0.
-    ezpdv     = 0.
-
-    cdmng     = 0.
-    ezpdg     = 0.
-
-    cdmn      = 0.
-    ezpd      = 0.
-
-    gsigma    = 0.
-
-    z0hwrf    = 0.
-    csigmaf1  = 0.
-    csigmaf0  = 0.
-    csigmafveg= 0.
-    kbsigmafveg = 0.
-    aone      = 0.
-    coeffa    = 0.
-    coeffb    = 0.
+    cdmnv     = 0.0
+    ezpdv     = 0.0
+    cdmng     = 0.0
+    ezpdg     = 0.0
+    cdmn      = 0.0
+    ezpd      = 0.0
+    gsigma    = 0.0
+    z0hwrf    = 0.0
+    csigmaf1  = 0.0
+    csigmaf0  = 0.0
+    csigmafveg= 0.0
+    kbsigmafveg = 0.0
+    aone      = 0.0
+    coeffa    = 0.0
+    coeffb    = 0.0
 
 !
 
@@ -2190,9 +2185,11 @@ endif   ! croptype == 0
                     qc      ,qsfc    ,psfc    , & !in
                     q2v     ,chv2, chleaf, chuc)               !inout 
 
-                    cdmnv = 0.4*0.4/log((zlvl-zpd)/z0m)**2
-                    aone = 2.6*(10.0*parameters%hvt/(zlvl-zpd))**0.355
-                    ezpdv =  zpd*fveg                            !for the grid
+! new coupling code
+
+    cdmnv = 0.4*0.4/log((zlvl-zpd)/z0m)**2
+    aone = 2.6*(10.0*parameters%hvt/(zlvl-zpd))**0.355
+    ezpdv =  zpd*fveg                            !for the grid
 
 !jref:end
 #ifdef CCPP
@@ -2221,18 +2218,20 @@ endif   ! croptype == 0
                     qc      ,qsfc    ,psfc    , & !in
                     sfcprs  ,q2b,   chb2)                          !in 
 
-                    cdmng = 0.4*0.4/log((zlvl-zpdg)/z0mg)**2
-                    ezpdg  = zpdg
+! new coupling code
+
+    cdmng = 0.4*0.4/log((zlvl-zpdg)/z0mg)**2
+    ezpdg  = zpdg
 !
 ! vegetation is optional; use the larger one
 !
-               if (ezpdv .ge. ezpdg ) then
-                  ezpd  = ezpdv
-               elseif (ezpdv .gt. 0.0 .and. ezpdv .lt. ezpdg) then
-                  ezpd = (1.0 -fveg)*ezpdg
-               else
-                  ezpd = ezpdg
-               endif
+    if (ezpdv .ge. ezpdg ) then
+      ezpd  = ezpdv
+    elseif (ezpdv .gt. 0.0 .and. ezpdv .lt. ezpdg) then
+      ezpd = (1.0 -fveg)*ezpdg
+    else
+      ezpd = ezpdg
+    endif
 
 !jref:end
 #ifdef CCPP
@@ -2259,6 +2258,8 @@ endif   ! croptype == 0
         ch    = fveg * chv       + (1.0 - fveg) * chb
         q1    = fveg * (eah*0.622/(sfcprs - 0.378*eah)) + (1.0 - fveg)*qsfc
         q2e   = fveg * q2v       + (1.0 - fveg) * q2b
+
+! new coupling code
 
      if (opt_trs == 1) then
         z0wrf  = fveg * z0m      + (1.0 - fveg) * z0mg
