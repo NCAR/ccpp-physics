@@ -329,7 +329,7 @@
         trans_aero, ntchs, ntchm,                                                                                              &
         imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, imp_physics_zhao_carr, imp_physics_mg,          &
         imp_physics_fer_hires,                                                                                                 &
-        ltaerosol, cplflx, cplchm, lssav, flag_for_pbl_generic_tend, ldiag3d, lsidea, hybedmf, do_shoc, satmedmf,              &
+        ltaerosol, cplflx, cplaqm, cplchm, lssav, flag_for_pbl_generic_tend, ldiag3d, lsidea, hybedmf, do_shoc, satmedmf,      &
         shinhong, do_ysu, dvdftra, dusfc1, dvsfc1, dtsfc1, dqsfc1, dtf, dudt, dvdt, dtdt, htrsw, htrlw, xmu,                   &
         dqdt, dusfc_cpl, dvsfc_cpl, dtsfc_cpl, dtend, dtidx, index_of_temperature, index_of_x_wind, index_of_y_wind,           &
         index_of_process_pbl, dqsfc_cpl, dusfci_cpl, dvsfci_cpl, dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag,   &
@@ -349,7 +349,7 @@
       logical, intent(in) :: trans_aero
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
       integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires
-      logical, intent(in) :: ltaerosol, cplflx, cplchm, lssav, ldiag3d, lsidea
+      logical, intent(in) :: ltaerosol, cplflx, cplaqm, cplchm, lssav, ldiag3d, lsidea
       logical, intent(in) :: hybedmf, do_shoc, satmedmf, shinhong, do_ysu
 
       logical, intent(in) :: flag_for_pbl_generic_tend      
@@ -617,6 +617,29 @@
             ushfsfci(i) = cp * rho * hflx(i)
           end do
         end if
+      end if
+
+      if (cplaqm .and. .not.cplflx) then
+        do i=1,im
+          if (oceanfrac(i) > zero) then      ! Ocean only, NO LAKES
+            if ( .not. wet(i)) then ! no open water
+              if (kdt > 1) then              !use results from CICE
+                dtsfci_cpl(i) = dtsfc_cice(i)
+                dqsfci_cpl(i) = dqsfc_cice(i)
+              else                           !use PBL fluxes when CICE fluxes is unavailable
+                dtsfci_cpl(i) = dtsfc1(i)*hffac(i)
+                dqsfci_cpl(i) = dqsfc1(i)
+              end if
+            elseif (icy(i) .or. dry(i)) then ! use stress_ocean from sfc_diff for opw component at mixed point
+              rho = prsl(i,1) / (rd*t1(i)*(one+fvirt*max(q1(i), qmin)))
+              dtsfci_cpl(i) = cp   * rho * hflx_wat(i) ! sensible heat flux over open ocean
+              dqsfci_cpl(i) = hvap * rho * evap_wat(i) ! latent heat flux over open ocean
+            else                                       ! use results from PBL scheme for 100% open ocean
+              dtsfci_cpl(i) = dtsfc1(i)*hffac(i)
+              dqsfci_cpl(i) = dqsfc1(i)
+            endif
+          endif ! Ocean only, NO LAKES
+        enddo
       end if
 
 !-------------------------------------------------------lssav if loop ----------
