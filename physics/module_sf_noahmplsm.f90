@@ -5194,7 +5194,7 @@ endif   ! croptype == 0
     end if
 
     snwd    = snowh*1000.0
-    zlvlb   = zlvl! - zpd
+    zlvlb   = zlvl - zpd
 
     virtfac = 1.0 +  0.61 * max(qair, 1.0e-8)
     tv1     = sfctmp * virtfac
