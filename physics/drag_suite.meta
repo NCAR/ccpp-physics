@@ -624,6 +624,21 @@
   dimensions = ()
   type = logical
   intent = in
+[spp_wts_gwd]
+  standard_name = spp_weights_for_gravity_wave_drag_scheme
+  long_name = spp weights for gravity wave drag scheme
+  units = 1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[spp_gwd]
+  standard_name = control_for_gravity_wave_drag_spp_perturbations
+  long_name = control for gravity wave drag spp perturbations
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

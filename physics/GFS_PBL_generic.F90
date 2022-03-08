@@ -14,15 +14,16 @@
       subroutine set_aerosol_tracer_index(imp_physics, imp_physics_wsm6,          &
                                           imp_physics_thompson, ltaerosol,        &
                                           imp_physics_mg, ntgl, imp_physics_gfdl, &
-                                          imp_physics_zhao_carr, kk,              &
+                                          imp_physics_zhao_carr, imp_physics_nssl,&
+                                          nssl_hail_on, nssl_ccn_on, kk,          &
                                           errmsg, errflg)
       implicit none
       !
       integer, intent(in )          :: imp_physics, imp_physics_wsm6,          &
                                        imp_physics_thompson,                   &
                                        imp_physics_mg, ntgl, imp_physics_gfdl, &
-                                       imp_physics_zhao_carr
-      logical, intent(in )          :: ltaerosol
+                                       imp_physics_zhao_carr,imp_physics_nssl
+      logical, intent(in )          :: ltaerosol, nssl_hail_on, nssl_ccn_on
       integer, intent(out)          :: kk
       character(len=*), intent(out) :: errmsg
       integer, intent(out)          :: errflg
@@ -53,6 +54,13 @@
       elseif (imp_physics == imp_physics_zhao_carr) then
 ! Zhao/Carr/Sundqvist
         kk = 3
+      elseif (imp_physics == imp_physics_nssl) then
+        IF ( nssl_hail_on ) THEN
+          kk = 16
+        ELSE
+          kk = 13
+        ENDIF
+        IF ( nssl_ccn_on ) kk = kk + 1
       else
         write(errmsg,'(*(a))') 'Logic error: unknown microphysics option in set_aerosol_tracer_index'
         kk = -999
@@ -82,8 +90,10 @@
       subroutine GFS_PBL_generic_pre_run (im, levs, nvdiff, ntrac, rtg_ozone_index,      &
         ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc,                 &
         ntwa, ntia, ntgl, ntoz, ntke, ntkev, nqrimef, trans_aero, ntchs, ntchm,          &
+        ntccn, nthl, nthnc, ntgv, nthv,                                                  &
         imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,           &
-        imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires, ltaerosol, &
+        imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires, imp_physics_nssl, &
+        ltaerosol, nssl_ccn_on, nssl_hail_on,  &
         hybedmf, do_shoc, satmedmf, qgrs, vdftra, save_u, save_v, save_t, save_q,        &
         flag_for_pbl_generic_tend, ldiag3d, qdiag3d, lssav, ugrs, vgrs, tgrs, errmsg, errflg)
         
@@ -97,10 +107,13 @@
       integer, intent(in) :: im, levs, nvdiff, ntrac
       integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc
       integer, intent(in) :: ntwa, ntia, ntgl, ntoz, ntke, ntkev, nqrimef,ntchs, ntchm
+      integer, intent(in) :: ntccn, nthl, nthnc, ntgv, nthv
       logical, intent(in) :: trans_aero, ldiag3d, qdiag3d, lssav
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
       integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires
       logical, intent(in) :: ltaerosol, hybedmf, do_shoc, satmedmf, flag_for_pbl_generic_tend
+      integer, intent(in) :: imp_physics_nssl
+      logical, intent(in) :: nssl_hail_on, nssl_ccn_on
 
       real(kind=kind_phys), dimension(:,:,:), intent(in) :: qgrs
       real(kind=kind_phys), dimension(:,:), intent(in) :: ugrs, vgrs, tgrs
@@ -250,13 +263,67 @@
             enddo
           enddo
           rtg_ozone_index = 3
+        elseif (imp_physics == imp_physics_nssl ) then
+  ! nssl
+            IF ( nssl_hail_on ) THEN
+            do k=1,levs
+              do i=1,im
+                vdftra(i,k,1)  = qgrs(i,k,ntqv)
+                vdftra(i,k,2)  = qgrs(i,k,ntcw)
+                vdftra(i,k,3)  = qgrs(i,k,ntiw)
+                vdftra(i,k,4)  = qgrs(i,k,ntrw)
+                vdftra(i,k,5)  = qgrs(i,k,ntsw)
+                vdftra(i,k,6)  = qgrs(i,k,ntgl)
+                vdftra(i,k,7)  = qgrs(i,k,nthl)
+                vdftra(i,k,8)  = qgrs(i,k,ntlnc)
+                vdftra(i,k,9)  = qgrs(i,k,ntinc)
+                vdftra(i,k,10)  = qgrs(i,k,ntrnc)
+                vdftra(i,k,11)  = qgrs(i,k,ntsnc)
+                vdftra(i,k,12)  = qgrs(i,k,ntgnc)
+                vdftra(i,k,13)  = qgrs(i,k,nthnc)
+                vdftra(i,k,14)  = qgrs(i,k,ntgv)
+                vdftra(i,k,15)  = qgrs(i,k,nthv)
+                vdftra(i,k,16)  = qgrs(i,k,ntoz)
+                IF ( nssl_ccn_on ) THEN
+                 vdftra(i,k,17)  = qgrs(i,k,ntccn)
+                ENDIF
+              enddo
+            enddo
+            
+            ELSE
+            ! no hail
+            do k=1,levs
+              do i=1,im
+                vdftra(i,k,1)  = qgrs(i,k,ntqv)
+                vdftra(i,k,2)  = qgrs(i,k,ntcw)
+                vdftra(i,k,3)  = qgrs(i,k,ntiw)
+                vdftra(i,k,4)  = qgrs(i,k,ntrw)
+                vdftra(i,k,5)  = qgrs(i,k,ntsw)
+                vdftra(i,k,6)  = qgrs(i,k,ntgl)
+                vdftra(i,k,7)  = qgrs(i,k,ntlnc)
+                vdftra(i,k,8)  = qgrs(i,k,ntinc)
+                vdftra(i,k,9)  = qgrs(i,k,ntrnc)
+                vdftra(i,k,10)  = qgrs(i,k,ntsnc)
+                vdftra(i,k,11)  = qgrs(i,k,ntgnc)
+                vdftra(i,k,12)  = qgrs(i,k,ntgv)
+                vdftra(i,k,13)  = qgrs(i,k,ntoz)
+                IF ( nssl_ccn_on ) THEN
+                 vdftra(i,k,14)  = qgrs(i,k,ntccn)
+                ENDIF
+              enddo
+            enddo
+            
+            ENDIF
+
+
         endif
 !
         if (trans_aero) then
           call set_aerosol_tracer_index(imp_physics, imp_physics_wsm6,          &
                                         imp_physics_thompson, ltaerosol,        &
                                         imp_physics_mg, ntgl, imp_physics_gfdl, &
-                                        imp_physics_zhao_carr, kk,              &
+                                        imp_physics_zhao_carr, imp_physics_nssl,&
+                                        nssl_hail_on, nssl_ccn_on, kk,          &
                                         errmsg, errflg)
           if (errflg /= 0) return
           !
@@ -326,10 +393,10 @@
 !!
       subroutine GFS_PBL_generic_post_run (im, levs, nvdiff, ntrac,                                                            &
         ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev,nqrimef,          &
-        trans_aero, ntchs, ntchm,                                                                                              &
+        trans_aero, ntchs, ntchm, ntccn, nthl, nthnc, ntgv, nthv,                                                              &
         imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, imp_physics_zhao_carr, imp_physics_mg,          &
-        imp_physics_fer_hires,                                                                                                 &
-        ltaerosol, cplflx, cplaqm, cplchm, lssav, flag_for_pbl_generic_tend, ldiag3d, lsidea, hybedmf, do_shoc, satmedmf,      &
+        imp_physics_fer_hires, imp_physics_nssl, nssl_ccn_on, ltaerosol, nssl_hail_on,                                         &
+        cplflx, cplaqm, cplchm, lssav, flag_for_pbl_generic_tend, ldiag3d, lsidea, hybedmf, do_shoc, satmedmf,                 &
         shinhong, do_ysu, dvdftra, dusfc1, dvsfc1, dtsfc1, dqsfc1, dtf, dudt, dvdt, dtdt, htrsw, htrlw, xmu,                   &
         dqdt, dusfc_cpl, dvsfc_cpl, dtsfc_cpl, dtend, dtidx, index_of_temperature, index_of_x_wind, index_of_y_wind,           &
         index_of_process_pbl, dqsfc_cpl, dusfci_cpl, dvsfci_cpl, dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag,   &
@@ -346,9 +413,12 @@
       integer, parameter  :: kp = kind_phys
       integer, intent(in) :: im, levs, nvdiff, ntrac, ntchs, ntchm, kdt
       integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev, nqrimef
+      integer, intent(in) :: ntccn, nthl, nthnc, ntgv, nthv
       logical, intent(in) :: trans_aero
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
       integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires
+      integer, intent(in) :: imp_physics_nssl
+      logical, intent(in) :: nssl_ccn_on, nssl_hail_on
       logical, intent(in) :: ltaerosol, cplflx, cplaqm, cplchm, lssav, ldiag3d, lsidea
       logical, intent(in) :: hybedmf, do_shoc, satmedmf, shinhong, do_ysu
 
@@ -419,7 +489,8 @@
           call set_aerosol_tracer_index(imp_physics, imp_physics_wsm6,          &
                                         imp_physics_thompson, ltaerosol,        &
                                         imp_physics_mg, ntgl, imp_physics_gfdl, &
-                                        imp_physics_zhao_carr, kk,              &
+                                        imp_physics_zhao_carr, imp_physics_nssl,&
+                                        nssl_hail_on, nssl_ccn_on, kk,          &
                                         errmsg, errflg)
           if (errflg /= 0) return
           !
@@ -546,6 +617,57 @@
               dqdt(i,k,ntoz) = dvdftra(i,k,3)
             enddo
           enddo
+        elseif (imp_physics == imp_physics_nssl ) then
+  ! nssl
+            IF ( nssl_hail_on ) THEN
+            do k=1,levs
+              do i=1,im
+               dqdt(i,k,ntqv) = dvdftra(i,k,1)  
+               dqdt(i,k,ntcw) = dvdftra(i,k,2)  
+               dqdt(i,k,ntiw) = dvdftra(i,k,3)  
+               dqdt(i,k,ntrw) = dvdftra(i,k,4)  
+               dqdt(i,k,ntsw) = dvdftra(i,k,5)  
+               dqdt(i,k,ntgl) = dvdftra(i,k,6)  
+               dqdt(i,k,nthl) = dvdftra(i,k,7)  
+               dqdt(i,k,ntlnc) = dvdftra(i,k,8) 
+               dqdt(i,k,ntinc) = dvdftra(i,k,9) 
+               dqdt(i,k,ntrnc) = dvdftra(i,k,10)
+               dqdt(i,k,ntsnc) = dvdftra(i,k,11)
+               dqdt(i,k,ntgnc) = dvdftra(i,k,12)
+               dqdt(i,k,nthnc) = dvdftra(i,k,13)
+               dqdt(i,k,ntgv) = dvdftra(i,k,14) 
+               dqdt(i,k,nthv) = dvdftra(i,k,15) 
+               dqdt(i,k,ntoz) = dvdftra(i,k,16) 
+               IF ( nssl_ccn_on ) THEN
+               dqdt(i,k,ntccn) = dvdftra(i,k,17)
+               ENDIF
+              enddo
+            enddo
+            
+            ELSE
+            
+            do k=1,levs
+              do i=1,im
+               dqdt(i,k,ntqv) = dvdftra(i,k,1)  
+               dqdt(i,k,ntcw) = dvdftra(i,k,2)  
+               dqdt(i,k,ntiw) = dvdftra(i,k,3)  
+               dqdt(i,k,ntrw) = dvdftra(i,k,4)  
+               dqdt(i,k,ntsw) = dvdftra(i,k,5)  
+               dqdt(i,k,ntgl) = dvdftra(i,k,6)  
+               dqdt(i,k,ntlnc) = dvdftra(i,k,7) 
+               dqdt(i,k,ntinc) = dvdftra(i,k,8) 
+               dqdt(i,k,ntrnc) = dvdftra(i,k,9)
+               dqdt(i,k,ntsnc) = dvdftra(i,k,10)
+               dqdt(i,k,ntgnc) = dvdftra(i,k,11)
+               dqdt(i,k,ntgv) = dvdftra(i,k,12) 
+               dqdt(i,k,ntoz) = dvdftra(i,k,13) 
+               IF ( nssl_ccn_on ) THEN
+               dqdt(i,k,ntccn) = dvdftra(i,k,14)
+               ENDIF
+              enddo
+            enddo
+            
+            ENDIF
         endif
 
       endif ! nvdiff == ntrac
