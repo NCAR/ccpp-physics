@@ -2184,7 +2184,8 @@ endif   ! croptype == 0
 #endif
                     tauxv   ,tauyv   ,irg     ,irc     ,shg     , & !out
                     shc     ,evg     ,evc     ,tr      ,ghv     , & !out
-                    t2mv    ,psnsun  ,psnsha  ,csigmaf1,canhs,    & !out
+                    t2mv    ,psnsun  ,psnsha  ,canhs   ,          & !out
+                    csigmaf1,                                     & !out
 !jref:start
                     qc      ,qsfc    ,psfc    , & !in
                     q2v     ,chv2, chleaf, chuc)               !inout 
@@ -3664,7 +3665,8 @@ endif   ! croptype == 0
 #endif
                        tauxv   ,tauyv   ,irg     ,irc     ,shg     , & !out
                        shc     ,evg     ,evc     ,tr      ,gh      , & !out
-                       t2mv    ,psnsun  ,psnsha  ,csigmaf1,canhs,    & !out
+                       t2mv    ,psnsun  ,psnsha  ,canhs   ,          & !out
+                       csigmaf1,                                     & !out
                        qc      ,qsfc    ,psfc    ,                   & !in
                        q2v     ,cah2    ,chleaf  ,chuc    )            !inout 
 
@@ -3673,7 +3675,7 @@ endif   ! croptype == 0
 ! ground (tg) temperatures that balance the surface energy budgets
 
 ! vegetated:
-! -sav + irc[tv] + shc[tv] + evc[tv] + tr[tv] + canhs(tv) = 0
+! -sav + irc[tv] + shc[tv] + evc[tv] + tr[tv] + canhs[tv] = 0
 ! -sag + irg[tg] + shg[tg] + evg[tg] + gh[tg] = 0
 ! --------------------------------------------------------------------------------------------------
   implicit none
@@ -3688,7 +3690,6 @@ endif   ! croptype == 0
   integer,                         intent(in) :: isnow  !actual no. of snow layers
   integer,                         intent(in) :: vegtyp !vegetation physiology type
   real (kind=kind_phys),                            intent(in) :: fveg   !greeness vegetation fraction (-)
-  real (kind=kind_phys),                            intent(in) :: shdfac !greeness vegetation fraction (-)
   real (kind=kind_phys),                            intent(in) :: sav    !solar rad absorbed by veg (w/m2)
   real (kind=kind_phys),                            intent(in) :: sag    !solar rad absorbed by ground (w/m2)
   real (kind=kind_phys),                            intent(in) :: lwdn   !atmospheric longwave radiation (w/m2)
@@ -3702,12 +3703,6 @@ endif   ! croptype == 0
   real (kind=kind_phys),                            intent(in) :: rhoair !density air (kg/m**3)
   real (kind=kind_phys),                            intent(in) :: dt     !time step (s)
   real (kind=kind_phys),                            intent(in) :: fsno     !snow fraction
-
-  logical                                         , intent(in) :: thsfc_loc
-  real (kind=kind_phys)                           , intent(in) :: prslkix ! in exner function
-  real (kind=kind_phys)                           , intent(in) :: prsik1x ! in exner function
-  real (kind=kind_phys)                           , intent(in) :: prslk1x ! in exner function
-  real (kind=kind_phys)                           , intent(in) :: garea1  ! 
 
   real (kind=kind_phys),                            intent(in) :: snowh  !actual snow depth [m]
   real (kind=kind_phys),                            intent(in) :: fwet   !wetted fraction of canopy
@@ -3761,7 +3756,6 @@ endif   ! croptype == 0
   real (kind=kind_phys),                         intent(inout) :: tg     !ground temperature (k)
   real (kind=kind_phys),                         intent(inout) :: cm     !momentum drag coefficient
   real (kind=kind_phys),                         intent(inout) :: ch     !sensible heat exchange coefficient
-  real (kind=kind_phys),                         intent(inout) :: ustarx !< friction velocity
 
 #ifdef CCPP
   character(len=*),             intent(inout) :: errmsg
@@ -3783,11 +3777,9 @@ endif   ! croptype == 0
   real (kind=kind_phys),                           intent(out) :: t2mv   !2 m height air temperature (k)
   real (kind=kind_phys),                           intent(out) :: psnsun !sunlit leaf photosynthesis (umolco2/m2/s)
   real (kind=kind_phys),                           intent(out) :: psnsha !shaded leaf photosynthesis (umolco2/m2/s)
-  real (kind=kind_phys),                           intent(out) :: csigmaf1
   real (kind=kind_phys),                           intent(out) :: chleaf !leaf exchange coefficient
   real (kind=kind_phys),                           intent(out) :: chuc   !under canopy exchange coefficient
   real (kind=kind_phys),                           intent(out) :: canhs  !canopy heat storage change (w/m2)
-
   real (kind=kind_phys),                           intent(out) :: q2v
   real (kind=kind_phys) :: cah    !sensible heat conductance, canopy air to zlvl air (m/s)
   real (kind=kind_phys) :: u10v    !10 m wind speed in eastward dir (m/s) 
@@ -3857,22 +3849,6 @@ endif   ! croptype == 0
   real (kind=kind_phys) :: ch2          !surface exchange at 2m
   real (kind=kind_phys) :: thstar          !surface exchange at 2m
 
-  real (kind=kind_phys) :: dlf          ! leaf dimension
-  real(kind=kind_phys)  :: sigmaa       !  momentum partition parameter
-  real(kind=kind_phys)  :: kbsigmaf1    !  kb^-1 for fully convered by vegetation
-  real(kind=kind_phys)  :: kbsigmafc    !  kb^-1 under canopy ground
-
-  real (kind=kind_phys) :: fm10         !monin-obukhov momentum adjustment at 10m
-  real (kind=kind_phys) :: rb1v         !Bulk Richardson # over vegetation
-  real (kind=kind_phys) :: stress1v     !Stress over vegetation
-  real (kind=kind_phys) :: snwd
-  real (kind=kind_phys) :: virtfacv
-  real (kind=kind_phys) :: thv1v
-  real (kind=kind_phys) :: tvsv
-  real (kind=kind_phys) :: tv1v
-  real (kind=kind_phys) :: zlvlv
-
-
   real (kind=kind_phys) :: thvair
   real (kind=kind_phys) :: thah 
   real (kind=kind_phys) :: rahc2        !aerodynamic resistance for sensible heat (s/m)
@@ -3885,13 +3861,9 @@ endif   ! croptype == 0
   real (kind=kind_phys) :: e1           
   real (kind=kind_phys) :: hcv          !canopy heat capacity j/m2/k, C.He added 
 
-
   real (kind=kind_phys) :: vaie         !total leaf area index + stem area index,effective
   real (kind=kind_phys) :: laisune      !sunlit leaf area index, one-sided (m2/m2),effective
   real (kind=kind_phys) :: laishae      !shaded leaf area index, one-sided (m2/m2),effective
-
-  real(kind=kind_phys) ::  tem1,tem2,zvfun1,gdx,czil1
-  real(kind=kind_phys), parameter :: z0lo=0.1, z0up=1.0
 
   integer :: k         !index
   integer :: iter      !iteration index
@@ -3905,8 +3877,17 @@ endif   ! croptype == 0
 
   integer :: liter     !last iteration
 
-  integer :: niter     !for sfcdiff3
+! New variables for sfcdif3
 
+  logical              , intent(in   ) :: thsfc_loc
+  real (kind=kind_phys), intent(in   ) :: prslkix     ! in exner function
+  real (kind=kind_phys), intent(in   ) :: prsik1x     ! in exner function
+  real (kind=kind_phys), intent(in   ) :: prslk1x     ! in exner function
+  real (kind=kind_phys), intent(in   ) :: garea1 
+  real (kind=kind_phys), intent(in   ) :: shdfac      ! greeness vegetation fraction (-)
+  real (kind=kind_phys), intent(inout) :: ustarx      ! friction velocity
+  real (kind=kind_phys), intent(  out) :: csigmaf1    !
+  real (kind=kind_phys)                :: czil1       ! canopy based czil
 
   real (kind=kind_phys) :: t, tdc       !kelvin to degree celsius with limit -50 to +50
 
@@ -3917,11 +3898,6 @@ endif   ! croptype == 0
 
         mpe = 1e-6
         liter = 0
-
-        fv = ustarx
-
-        niter = 1
-        if (ur < 2.0) niter = 2
 
 ! ---------------------------------------------------------------------------------------------
 ! initialization variables that do not depend on stability iteration
@@ -3936,30 +3912,11 @@ endif   ! croptype == 0
         h      = 0.
         qfx    = 0.
 
-        csigmaf1 = 0.
-
 ! limit lai
 
         vaie    = min(6.,vai   )
         laisune = min(6.,laisun)
         laishae = min(6.,laisha)
-
-! for sfcdiff3
-
-        snwd      = snowh*1000.0
-!       zlvlv     = zlvl - zpd
-        zlvlv     = zlvl
-
-        virtfacv  = 1.0 +  0.61 * max(qair, 1.e-8)
-        tv1v      = sfctmp * virtfacv
-
-        if(thsfc_loc) then ! Use local potential temperature
-            thv1v  = sfctmp * prslkix * virtfacv
-        else ! Use potential temperature reference to 1000 hPa
-            thv1v    = sfctmp / prslk1x * virtfacv
-        endif
-!
-
 
 ! saturation vapor pressure at ground temperature
 
@@ -3974,8 +3931,6 @@ endif   ! croptype == 0
 !jref - consistent surface specific humidity for sfcdif3 and sfcdif4
 
         qsfc = 0.622*eair/(psfc-0.378*eair)  
-
-        dlf   =  parameters%dleaf                         !leaf dimension
 
 ! canopy height
 
@@ -4024,36 +3979,7 @@ endif   ! croptype == 0
         air = -emv*(1.+(1.-emv)*(1.-emg))*lwdn - emv*emg*sb*tg**4  
         cir = (2.-emv*(1.-emg))*emv*sb
 ! ---------------------------------------------------------------------------------------------
-
-     if (opt_trs == 1) then
-         z0h       = z0m
-     elseif (opt_trs == 2) then
-!        z0h = z0m*exp(-parameters%czil*0.4*258.2*sqrt(fv*z0m))
-          czil1= 10.0 ** (- (0.40/0.07) * hcan)
-         z0h = z0m*exp(-czil1*0.4*258.2*sqrt(fv*z0m))
-     elseif (opt_trs == 3) then
-        if (vegtyp.le.5) then
-         z0h = z0m
-        else
-         z0h = z0m*0.01
-        endif
-     elseif (opt_trs == 4) then
-         sigmaa    = 1.0 - (0.5/(0.5+vaie))*exp(-vaie**2/8.0)
-         kbsigmaf1 = 16.4*(sigmaa*vaie**3)**(-0.25)*sqrt(dlf*ur/log((zlvl-zpd)/z0m))
-         z0h       = z0m/exp(kbsigmaf1)
-         csigmaf1  = log((zlvl-zpd)/z0m)*(log((zlvl-zpd)/z0m)+kbsigmaf1) ! for output for interpolation
-     endif
-! --
-            tem1 = (z0m - z0lo) / (z0up - z0lo)
-            tem1 = min(max(tem1, 0.0_kind_phys), 1.0_kind_phys)
-            tem2 = max(shdfac, 0.1_kind_phys)
-            zvfun1= sqrt(tem1 * tem2)
-            gdx=sqrt(garea1)
-      if(opt_sfc == 1 .or. opt_sfc == 2) then
-
       loop1: do iter = 1, niterc    !  begin stability iteration
-
-! use newly derived z0m/z0h
 
        if(iter == 1) then
             z0hg = z0mg
@@ -4061,6 +3987,19 @@ endif   ! croptype == 0
             z0hg = z0mg   !* exp(-czil*0.4*258.2*sqrt(fv*z0mg))
        end if
 
+       if (opt_trs == 1) then
+         z0h       = z0m
+       elseif (opt_trs == 2) then
+         czil1= 10.0 ** (- (0.40/0.07) * parameters%hvt)
+         z0h = z0m*exp(-czil1*0.4*258.2*sqrt(fv*z0m))
+       elseif (opt_trs == 3) then
+         if (vegtyp.le.5) then
+           z0h = z0m
+         else
+           z0h = z0m*0.01
+         endif
+       endif
+    
 ! aerodyn resistances between heights zlvl and d+z0v
 
        if(opt_sfc == 1) then
@@ -4087,6 +4026,15 @@ endif   ! croptype == 0
           ! applies to exchange coefficients ch and cm:
           ch = ch / ur
           cm = cm / ur
+       endif
+
+       if(opt_sfc == 3) then
+         call sfcdif3(parameters,iloc    ,jloc    ,iter    ,sfctmp  ,qair    ,ur      , & !in 
+                        zlvl    ,tah     ,thsfc_loc,prslkix,prsik1x ,prslk1x ,z0m     , & !in 
+                        zpd     ,snowh   ,shdfac  ,garea1  ,.true.  ,vaie    ,vegtyp  , & !in 
+                        ustarx  ,fm      ,fh      ,fm2     ,fh2     ,                   & !inout 
+                        z0h     ,fv      ,csigmaf1,cm      ,ch       )                    !out 
+
        endif
 
        ramc = max(1.,1./(cm*ur))
@@ -4209,135 +4157,6 @@ endif   ! croptype == 0
 
      end do loop1 ! end stability iteration
 
-    endif         !opt_sfc 1 or 2
-!
-!   sfcdiff3
-!
-         if (opt_sfc == 3) then
-
-            z0hg = z0mg
-
-           do iter = 1, niter                                   !1 or 2; depending on ur
-
-            if(thsfc_loc) then ! Use local potential temperature
-              tvsv   = tah * virtfacv
-            else ! Use potential temperature referenced to 1000 hPa
-              tvsv   = tah/prsik1x * virtfacv
-            endif
-
-          call       stability                                                &
-        (zlvlv, zvfun1, gdx,tv1v,thv1v, ur, z0m, z0h, tvsv, grav,thsfc_loc,   &
-         rb1v, fm,fh,fm10,fh2,cm,ch,stress1v,fv)
-
-       ramc = max(1.,1./(cm*ur))
-       rahc = max(1.,1./(ch*ur))
-       rawc = rahc
-
-! aerodyn resistance between heights z0g and d+z0v, rag, and leaf
-! boundary layer resistance, rb
-       
-       call ragrb(parameters,iter   ,vaie   ,rhoair ,hg     ,tah    , & !in
-                  zpd    ,z0mg   ,z0hg   ,hcan   ,uc     , & !in
-                  z0h    ,fv     ,cwp    ,vegtyp ,mpe    , & !in
-                  tv     ,mozg   ,fhg    ,iloc   ,jloc   , & !inout
-                  ramg   ,rahg   ,rawg   ,rb     )           !out
-
-! es and d(es)/dt evaluated at tv
-
-       t = tdc(tv)
-       call esat(t, esatw, esati, dsatw, dsati)
-       if (t .gt. 0.) then
-          estv  = esatw
-          destv = dsatw
-       else
-          estv  = esati
-          destv = dsati
-       end if
-
-! stomatal resistance
-        
-     if(iter == 1) then
-        if (opt_crs == 1) then  ! ball-berry
-         call stomata (parameters,vegtyp,mpe   ,parsun ,foln  ,iloc  , jloc , & !in       
-                       tv    ,estv  ,eah    ,sfctmp,sfcprs, & !in
-                       o2air ,co2air,igs    ,btran ,rb    , & !in
-                       rssun ,psnsun)                         !out
-
-         call stomata (parameters,vegtyp,mpe   ,parsha ,foln  ,iloc  , jloc , & !in
-                       tv    ,estv  ,eah    ,sfctmp,sfcprs, & !in
-                       o2air ,co2air,igs    ,btran ,rb    , & !in
-                       rssha ,psnsha)                         !out
-        end if
-
-        if (opt_crs == 2) then  ! jarvis
-         call  canres (parameters,parsun,tv    ,btran ,eah    ,sfcprs, & !in
-                       rssun ,psnsun,iloc  ,jloc   )          !out
-
-         call  canres (parameters,parsha,tv    ,btran ,eah    ,sfcprs, & !in
-                       rssha ,psnsha,iloc  ,jloc   )          !out
-        end if
-     end if
-
-! prepare for sensible heat flux above veg.
-
-        cah  = 1./rahc
-        cvh  = 2.*vaie/rb
-        cgh  = 1./rahg
-        cond = cah + cvh + cgh
-        ata  = (sfctmp*cah + tg*cgh) / cond
-        bta  = cvh/cond
-        csh  = (1.-bta)*rhoair*cpair*cvh
-
-! prepare for latent heat flux above veg.
-
-        caw  = 1./rawc
-        cew  = fwet*vaie/rb
-        ctw  = (1.-fwet)*(laisune/(rb+rssun) + laishae/(rb+rssha))
-        cgw  = 1./(rawg+rsurf)
-        cond = caw + cew + ctw + cgw
-        aea  = (eair*caw + estg*cgw) / cond
-        bea  = (cew+ctw)/cond
-        cev  = (1.-bea)*cew*rhoair*cpair/gammav   ! barlage: change to vegetation v3.6
-        ctr  = (1.-bea)*ctw*rhoair*cpair/gammav
-
-! evaluate surface fluxes with current temperature and solve for dts
-
-        tah = ata + bta*tv               ! canopy air t.
-        eah = aea + bea*estv             ! canopy air e
-
-        irc = fveg*(air + cir*tv**4)
-        shc = fveg*rhoair*cpair*cvh * (  tv-tah)
-        evc = fveg*rhoair*cpair*cew * (estv-eah) / gammav ! barlage: change to v in v3.6
-        tr  = fveg*rhoair*cpair*ctw * (estv-eah) / gammav
-	if (tv > tfrz) then
-          evc = min(canliq*latheav/dt,evc)    ! barlage: add if block for canice in v3.6
-	else
-          evc = min(canice*latheav/dt,evc)
-	end if
-
-        b   = sav-irc-shc-evc-tr+pahv                          !additional w/m2
-        a   = fveg*(4.*cir*tv**3 + csh + (cev+ctr)*destv) !volumetric heat capacity
-        dtv = b/a
-
-        irc = irc + fveg*4.*cir*tv**3*dtv
-        shc = shc + fveg*csh*dtv
-        evc = evc + fveg*cev*destv*dtv
-        tr  = tr  + fveg*ctr*destv*dtv                               
-
-! update vegetation surface temperature
-        tv  = tv + dtv
-!        tah = ata + bta*tv               ! canopy air t; update here for consistency
-
-! for computing m-o length in the next iteration
-        h  = rhoair*cpair*(tah - sfctmp) /rahc        
-        hg = rhoair*cpair*(tg  - tah)   /rahg
-
-! consistent specific humidity from canopy air vapor pressure
-        qsfc = (0.622*eah)/(sfcprs-0.378*eah)
-
-     enddo      ! iteration
-    endif       ! sfcdiff3
-
 ! under-canopy fluxes and tg
 
         air = - emg*(1.-emv)*lwdn - emg*emv*sb*tv**4
@@ -4443,7 +4262,8 @@ endif   ! croptype == 0
 #else
                         tgb     ,cm      ,ch,ustarx,          & !inout
 #endif
-                        tauxb   ,tauyb   ,irb     ,shb     ,evb,csigmaf0,& !out
+                        tauxb   ,tauyb   ,irb     ,shb     ,evb     , & !out
+                        csigmaf0,                                     & !out
                         ghb     ,t2mb    ,dx      ,dz8w    ,ivgtyp  , & !out
                         qc      ,qsfc    ,psfc    ,                   & !in
                         sfcprs  ,q2b     ,ehb2    )                     !in 
@@ -4489,14 +4309,6 @@ endif   ! croptype == 0
   real (kind=kind_phys),                            intent(in) :: rhsur  !raltive humidity in surface soil/snow air space (-)
   real (kind=kind_phys),                            intent(in) :: fsno     !snow fraction
 
-  logical                                         , intent(in) :: thsfc_loc
-  real (kind=kind_phys)                           , intent(in) :: prslkix ! in exner function
-  real (kind=kind_phys)                           , intent(in) :: prsik1x ! in exner function
-  real (kind=kind_phys)                           , intent(in) :: prslk1x ! in exner function
-  real (kind=kind_phys)                           , intent(in) :: fveg 
-  real (kind=kind_phys)                           , intent(in) :: shdfac 
-  real (kind=kind_phys)                           , intent(in) :: garea1 
-
 !jref:start; in 
   integer                        , intent(in) :: ivgtyp
   real (kind=kind_phys)                           , intent(in) :: qc     !cloud water mixing ratio
@@ -4513,7 +4325,6 @@ endif   ! croptype == 0
   real (kind=kind_phys),                         intent(inout) :: tgb    !ground temperature (k)
   real (kind=kind_phys),                         intent(inout) :: cm     !momentum drag coefficient
   real (kind=kind_phys),                         intent(inout) :: ch     !sensible heat exchange coefficient
-  real (kind=kind_phys),                         intent(inout) :: ustarx !friction velocity
 #ifdef CCPP
   character(len=*),             intent(inout) :: errmsg
   integer,                      intent(inout) :: errflg
@@ -4529,7 +4340,6 @@ endif   ! croptype == 0
   real (kind=kind_phys),                           intent(out) :: evb    !latent heat flux (w/m2)   [+ to atm]
   real (kind=kind_phys),                           intent(out) :: ghb    !ground heat flux (w/m2)  [+ to soil]
   real (kind=kind_phys),                           intent(out) :: t2mb   !2 m height air temperature (k)
-  real (kind=kind_phys),                           intent(out) :: csigmaf0  !
 !jref:start
   real (kind=kind_phys),                           intent(out) :: q2b    !bare ground heat conductance
   real (kind=kind_phys) :: ehb    !bare ground heat conductance
@@ -4539,17 +4349,6 @@ endif   ! croptype == 0
 !jref:end
 
 ! local variables 
-
-  real (kind=kind_phys) :: rb1b         !Bulk Richardson # over bare soil
-  real (kind=kind_phys) :: stress1b     !Stress over bare soil
-  real (kind=kind_phys) :: snwd
-  real (kind=kind_phys) :: virtfacb
-  real (kind=kind_phys) :: thv1b
-  real (kind=kind_phys) :: tvsb
-  real (kind=kind_phys) :: tv1b
-  real (kind=kind_phys) :: zlvlb
-
-  real (kind=kind_phys) :: fm10
 
   real (kind=kind_phys) :: taux       !wind stress: e-w (n/m2)
   real (kind=kind_phys) :: tauy       !wind stress: n-s (n/m2)
@@ -4576,9 +4375,6 @@ endif   ! croptype == 0
   real (kind=kind_phys) :: csh        !coefficients for sh as function of ts
   real (kind=kind_phys) :: cev        !coefficients for ev as function of esat[ts]
   real (kind=kind_phys) :: cgh        !coefficients for st as function of ts
-
-  real(kind=kind_phys)  :: kbsigmaf0
-  real(kind=kind_phys)  :: reynb
 
 !jref:start
   real (kind=kind_phys) :: rahb2      !aerodynamic resistance for sensible heat 2m (s/m)
@@ -4614,18 +4410,26 @@ endif   ! croptype == 0
   real (kind=kind_phys) :: fh2          !monin-obukhov heat adjustment at 2m
   real (kind=kind_phys) :: ch2          !surface exchange at 2m
 
-  real(kind=kind_phys) ::  tem1,tem2,zvfun1,gdx,czil1
-  real(kind=kind_phys), parameter :: z0lo=0.1, z0up=1.0
-
   integer :: iter    !iteration index
   integer :: niterb  !number of iterations for surface temperature
-  integer :: niter
-
   real (kind=kind_phys)    :: mpe     !prevents overflow error if division by zero
 !jref:start
 !  data niterb /3/
   data niterb /5/
   save niterb
+
+! New variables for sfcdif3
+
+  logical              , intent(in   ) :: thsfc_loc
+  real (kind=kind_phys), intent(in   ) :: prslkix ! in exner function
+  real (kind=kind_phys), intent(in   ) :: prsik1x ! in exner function
+  real (kind=kind_phys), intent(in   ) :: prslk1x ! in exner function
+  real (kind=kind_phys), intent(in   ) :: fveg 
+  real (kind=kind_phys), intent(in   ) :: shdfac 
+  real (kind=kind_phys), intent(in   ) :: garea1 
+  real (kind=kind_phys), intent(inout) :: ustarx    !friction velocity
+  real (kind=kind_phys), intent(  out) :: csigmaf0  !
+
   real (kind=kind_phys) :: t, tdc     !kelvin to degree celsius with limit -50 to +50
   tdc(t)   = min( 50., max(-50.,(t-tfrz)) )
 
@@ -4641,69 +4445,10 @@ endif   ! croptype == 0
         h      = 0.
         qfx    = 0.
 
-        csigmaf0  = 0.
-        kbsigmaf0 = 0.
-
-        niter = 1
-        if (ur < 2.0) niter = 2
-
-        fv        = ustarx
-
-!       fv        = ur*vkc/log((zlvl-zpd)/z0m)
-
-        reynb = fv*z0m/(1.5e-05)
-
-        if (reynb .gt. 2.0) then
-           kbsigmaf0 = 2.46*reynb**0.25 - log(7.4)
-        else
-           kbsigmaf0 = - log(0.397)
-        endif
-
-        csigmaf0 = log((zlvl-zpd)/z0m)*(log((zlvl-zpd)/z0m) + kbsigmaf0)
-
-        if (opt_trs == 1) then
-            z0h       = z0m
-        elseif (opt_trs == 2) then
-!           z0h = z0m*exp(-parameters%czil*0.4*258.2*sqrt(fv*z0m))
-            czil1= 10.0 ** (- (0.40/0.07) * parameters%hvt)
-            z0h = z0m*exp(-czil1*0.4*258.2*sqrt(fv*z0m))
-        elseif (opt_trs == 3) then
-         if (vegtyp.le.5) then
-            z0h = z0m
-         else
-            z0h = z0m*0.01
-         endif
-        elseif (opt_trs == 4) then
-           z0h = max(z0m/exp(kbsigmaf0),1.0e-6)
-        endif
-!
-! for sfcdiff3; maybe should move to inside the option
-!
-        snwd     = snowh*1000.0
-!       zlvlb    = zlvl - zpd
-        zlvlb    = zlvl
-
-        virtfacb = 1.0 +  0.61 * max(qair, 1.e-8)
-        tv1b     = sfctmp * virtfacb
-
-        if(thsfc_loc) then ! Use local potential temperature
-            thv1b  = sfctmp * prslkix * virtfacb
-         else ! Use potential temperature reference to 1000 hPa
-            thv1b    = sfctmp / prslk1x * virtfacb
-        endif
-
         cir = emg*sb
         cgh = 2.*df(isnow+1)/dzsnso(isnow+1)
 
 ! -----------------------------------------------------------------
-            tem1 = (z0m - z0lo) / (z0up - z0lo)
-            tem1 = min(max(tem1, 0.0_kind_phys), 1.0_kind_phys)
-            tem2 = max(shdfac, 0.1_kind_phys)
-            zvfun1= sqrt(tem1 * tem2)
-            gdx=sqrt(garea1)
-
-      if (opt_sfc == 1 .or. opt_sfc == 2) then
-
       loop3: do iter = 1, niterb  ! begin stability iteration
 
 !       if(iter == 1) then
@@ -4740,6 +4485,15 @@ endif   ! croptype == 0
              cm = min(0.01,cm)   ! cm & ch are too large, causing
              ch = min(0.01,ch)   ! computational instability
           end if
+
+        endif
+
+        if(opt_sfc == 3) then
+          call sfcdif3(parameters,iloc    ,jloc    ,iter    ,sfctmp  ,qair    ,ur      , & !in 
+                         zlvl    ,tgb     ,thsfc_loc,prslkix,prsik1x ,prslk1x ,z0m     , & !in 
+                         zpd     ,snowh   ,shdfac  ,garea1  ,.false. ,0.0     ,ivgtyp  , & !in 
+                         ustarx  ,fm      ,fh      ,fm2     ,fh2     ,                   & !inout 
+                         z0h     ,fv      ,csigmaf0,cm      ,ch       )                    !out 
 
         endif
 
@@ -4800,82 +4554,7 @@ endif   ! croptype == 0
         qfx = (qsfc-qair)*cev*gamma/cpair
 
      end do loop3 ! end stability iteration
-    endif         ! opt_sfc 1/2
 ! -----------------------------------------------------------------
-
-        if (opt_sfc == 3) then
-
-         do iter = 1, niter                                   !1 or 2; depending on ur
-
-            if(thsfc_loc) then ! Use local potential temperature
-              tvsb   = tgb * virtfacb
-            else ! Use potential temperature referenced to 1000 hPa
-              tvsb   = tgb/prsik1x * virtfacb
-            endif
-
-          call       stability                                               &
-        (zlvlb, zvfun1, gdx,tv1b,thv1b, ur, z0m, z0h, tvsb, grav,thsfc_loc,  &
-         rb1b, fm,fh,fm10,fh2,cm,ch,stress1b,fv)
-
-
-        ramb = max(1.,1./(cm*ur))
-        rahb = max(1.,1./(ch*ur))
-        rawb = rahb
-
-!jref - variables for diagnostics         
-        emb = 1./ramb
-        ehb = 1./rahb
-
-! es and d(es)/dt evaluated at tg
-
-        t = tdc(tgb)
-        call esat(t, esatw, esati, dsatw, dsati)
-        if (t .gt. 0.) then
-            estg  = esatw
-            destg = dsatw
-        else
-            estg  = esati
-            destg = dsati
-        end if
-
-        csh = rhoair*cpair/rahb
-        cev = rhoair*cpair/gamma/(rsurf+rawb)
-
-! surface fluxes and dtg
-
-        irb   = cir * tgb**4 - emg*lwdn
-        shb   = csh * (tgb        - sfctmp      )
-        evb   = cev * (estg*rhsur - eair        )
-        ghb   = cgh * (tgb        - stc(isnow+1))
-
-        b     = sag-irb-shb-evb-ghb+pahb
-        a     = 4.*cir*tgb**3 + csh + cev*destg + cgh
-        dtg   = b/a
-
-        irb = irb + 4.*cir*tgb**3*dtg
-        shb = shb + csh*dtg
-        evb = evb + cev*destg*dtg
-        ghb = ghb + cgh*dtg
-
-! update ground surface temperature
-        tgb = tgb + dtg
-
-! for m-o length
-!       h = csh * (tgb - sfctmp)
-
-        t = tdc(tgb)
-        call esat(t, esatw, esati, dsatw, dsati)
-        if (t .gt. 0.) then
-            estg  = esatw
-        else
-            estg  = esati
-        end if
-        qsfc = 0.622*(estg*rhsur)/(psfc-0.378*(estg*rhsur))
-
-        qfx = (qsfc-qair)*cev*gamma/cpair
-
-     end do ! end stability iteration
-    endif   ! sfcdiff3
 
 ! if snow on ground and tg > tfrz: reset tg = tfrz. reevaluate ground fluxes.
 
@@ -5408,6 +5087,139 @@ endif   ! croptype == 0
 !    end do
 ! ----------------------------------------------------------------------
   end subroutine sfcdif2
+
+!== begin sfcdif3 ==================================================================================
+
+!>\ingroup NoahMP_LSM
+!! compute surface drag coefficient cm for momentum and ch for heat.
+  subroutine sfcdif3(parameters,iloc    ,jloc    ,iter    ,sfctmp  ,qair    ,ur      , & !in 
+                       zlvl    ,tgb     ,thsfc_loc,prslkix,prsik1x ,prslk1x ,z0m     , & !in 
+                       zpd     ,snowh   ,fveg    ,garea1  ,vegetated,vaie   ,vegtyp  , & !in 
+                       ustarx  ,fm      ,fh      ,fm2     ,fh2     ,                   & !inout 
+                       z0h     ,fv      ,csigmaf ,cm      ,ch       )                    !out 
+  
+! -------------------------------------------------------------------------------------------------
+! computing surface drag coefficient cm for momentum and ch for heat
+! -------------------------------------------------------------------------------------------------
+    implicit none
+! -------------------------------------------------------------------------------------------------
+! inputs
+    
+  type (noahmp_parameters), intent(in) :: parameters
+    integer,               intent(in   ) :: iloc      ! grid index
+    integer,               intent(in   ) :: jloc      ! grid index
+    integer,               intent(in   ) :: iter      ! iteration index
+    real (kind=kind_phys), intent(in   ) :: sfctmp    ! temperature at reference height [K]
+    real (kind=kind_phys), intent(in   ) :: qair      ! specific humidity at reference height [kg/kg]
+    real (kind=kind_phys), intent(in   ) :: ur        ! wind speed [m/s]
+    real (kind=kind_phys), intent(in   ) :: zlvl      ! reference height  [m]
+    real (kind=kind_phys), intent(in   ) :: tgb       ! ground temperature [K]
+    logical,               intent(in   ) :: thsfc_loc ! flag for using sfc-based theta
+    real (kind=kind_phys), intent(in   ) :: prslkix   ! in exner function
+    real (kind=kind_phys), intent(in   ) :: prsik1x   ! in exner function
+    real (kind=kind_phys), intent(in   ) :: prslk1x   ! in exner function
+    real (kind=kind_phys), intent(in   ) :: z0m       ! roughness length, momentum, ground [m]
+    real (kind=kind_phys), intent(in   ) :: zpd       ! zero plane displacement [m]
+    real (kind=kind_phys), intent(in   ) :: snowh     ! snow depth [m]
+    real (kind=kind_phys), intent(in   ) :: fveg      ! fractional vegetation cover
+    real (kind=kind_phys), intent(in   ) :: garea1    ! grid area [km2]
+    logical,               intent(in   ) :: vegetated ! .true. if vegetated
+    real (kind=kind_phys), intent(in   ) :: vaie      ! vegetation area index [m2/m2]
+    integer              , intent(in   ) :: vegtyp    ! vegetation category
+    real (kind=kind_phys), intent(inout) :: ustarx    ! friction velocity [m/s]
+    real (kind=kind_phys), intent(inout) :: fm        ! momentum stability correction, weighted by prior iters
+    real (kind=kind_phys), intent(inout) :: fh        ! sen heat stability correction, weighted by prior iters
+    real (kind=kind_phys), intent(inout) :: fm2       ! sen heat stability correction, weighted by prior iters
+    real (kind=kind_phys), intent(inout) :: fh2       ! sen heat stability correction, weighted by prior iters
+    real (kind=kind_phys), intent(  out) :: z0h       ! roughness length, sensible heat, ground [m]
+    real (kind=kind_phys), intent(  out) :: fv        ! friction velocity (m/s)
+    real (kind=kind_phys), intent(  out) :: csigmaf   ! 
+    real (kind=kind_phys), intent(  out) :: cm        ! drag coefficient for momentum
+    real (kind=kind_phys), intent(  out) :: ch        ! drag coefficient for heat
+
+    real (kind=kind_phys) :: reyn                     ! reynolds number
+    real (kind=kind_phys) :: kbsigmaf                 ! kb factor
+    real (kind=kind_phys) :: snwd                     ! snow depth [mm]
+    real (kind=kind_phys) :: zlvlb                    ! reference height - zpd [m]
+    real (kind=kind_phys) :: virtfac                  ! virtual temperature factor [-]
+    real (kind=kind_phys) :: tv1                      ! virtual temperature at reference [K]
+    real (kind=kind_phys) :: thv1                     ! virtual theta at reference [K]
+    real (kind=kind_phys) :: tvs                      ! virtural surface temperature [K]
+    real (kind=kind_phys) :: rb1                      ! bulk Richardson - stability output
+    real (kind=kind_phys) :: stress1                  ! stress - stability output
+    real (kind=kind_phys) :: czil1                    ! canopy based czil
+    real (kind=kind_phys) :: fm10                     ! 10-m stability adjustment - stability output
+    real (kind=kind_phys) :: sigmaa                   ! momentum partition parameter
+    real (kind=kind_phys) :: tem1,tem2,zvfun1,gdx
+    real (kind=kind_phys), parameter :: z0lo=0.1, z0up=1.0
+
+! -------------------------------------------------------------------------------------------------
+
+    fv        = ustarx
+!   fv        = ur*vkc/log((zlvl-zpd)/z0m)
+
+    if(vegetated) then 
+
+      if (opt_trs == 1) then
+        z0h       = z0m
+      elseif (opt_trs == 2) then
+        czil1= 10.0 ** (- (0.40/0.07) * parameters%hvt)
+        z0h = z0m*exp(-czil1*0.4*258.2*sqrt(fv*z0m))
+      elseif (opt_trs == 3) then
+        if (vegtyp.le.5) then
+          z0h = z0m
+        else
+          z0h = z0m*0.01
+        endif
+      elseif (opt_trs == 4) then
+        sigmaa    = 1.0 - (0.5/(0.5+vaie))*exp(-vaie**2/8.0)
+        kbsigmaf = 16.4*(sigmaa*vaie**3)**(-0.25)*sqrt(parameters%dleaf*ur/log((zlvl-zpd)/z0m))
+        z0h       = z0m/exp(kbsigmaf)
+        csigmaf  = log((zlvl-zpd)/z0m)*(log((zlvl-zpd)/z0m)+kbsigmaf) ! for output for interpolation
+      endif
+    
+    else
+
+      reyn = fv*z0m/(1.5e-05)
+      if (reyn .gt. 2.0) then
+        kbsigmaf = 2.46*reyn**0.25 - log(7.4)
+      else
+        kbsigmaf = - log(0.397)
+      endif
+
+      z0h = max(z0m/exp(kbsigmaf),1.0e-6)
+      csigmaf = log((zlvl-zpd)/z0m)*(log((zlvl-zpd)/z0m) + kbsigmaf)
+
+    end if
+
+    snwd    = snowh*1000.0
+    zlvlb   = zlvl! - zpd
+
+    virtfac = 1.0 +  0.61 * max(qair, 1.0e-8)
+    tv1     = sfctmp * virtfac
+
+    if(thsfc_loc) then                         ! Use local potential temperature
+       thv1 = sfctmp * prslkix * virtfac
+    else                                       ! Use potential temperature reference to 1000 hPa
+       thv1 = sfctmp / prslk1x * virtfac
+    endif
+
+    tem1   = (z0m - z0lo) / (z0up - z0lo)
+    tem1   = min(max(tem1, 0.0_kind_phys), 1.0_kind_phys)
+    tem2   = max(fveg, 0.1_kind_phys)
+    zvfun1 = sqrt(tem1 * tem2)
+    gdx    = sqrt(garea1)
+
+    if(thsfc_loc) then            ! Use local potential temperature
+      tvs   = tgb * virtfac
+    else                          ! Use potential temperature referenced to 1000 hPa
+      tvs   = tgb/prsik1x * virtfac
+    endif
+
+    call stability (zlvlb, zvfun1, gdx, tv1, thv1, ur, z0m, z0h, tvs, grav, thsfc_loc,  &
+         rb1, fm,fh,fm10,fh2,cm,ch,stress1,fv)
+
+  end subroutine sfcdif3
 
 !== begin esat =====================================================================================
 
