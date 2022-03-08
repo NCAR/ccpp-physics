@@ -25,7 +25,7 @@ contains
 !! \htmlinclude rrtmgp_sw_rte.html
 !!
   subroutine rrtmgp_sw_rte_run(doSWrad, doSWclrsky, nCol, nLev, nDay, idxday, coszen, p_lay,&
-       t_lay, top_at_1, do_mynnedmf, imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_samf, iSFC,      &
+       t_lay, top_at_1, doGP_sgs_cnv, doGP_sgs_mynn, iSFC,      &
        sfc_alb_nir_dir, sfc_alb_nir_dif, sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, toa_src_sw,  &
        sw_optical_props_clrsky, sw_optical_props_clouds, sw_optical_props_precip,           &
        sw_optical_props_cnvclouds, sw_optical_props_MYNNcloudsByBand,                       &
@@ -35,16 +35,14 @@ contains
     ! Inputs
     logical, intent(in) :: &
          top_at_1,                          & ! Vertical ordering flag
-         do_mynnedmf,                       & ! Flag for MYNN-EDMG PBL cloud scheme
+         doGP_sgs_mynn,                     & ! Flag for MYNN-EDMF PBL cloud scheme
+         doGP_sgs_cnv,                      & ! Flag for sgs convective clouds scheme
          doSWrad,                           & ! Flag to calculate SW irradiances
          doSWclrsky                           ! Compute clear-sky fluxes?
     integer, intent(in) :: &
          nCol,                              & ! Number of horizontal gridpoints
          nday,                              & ! Number of daytime points
          nLev,                              & ! Number of vertical levels
-         imfdeepcnv,                        & !
-         imfdeepcnv_gf,                     & !
-         imfdeepcnv_samf,                   & !
          iSFC                                 ! Vertical index for surface-level
     integer, intent(in), dimension(ncol) :: &
          idxday                               ! Index array for daytime points
@@ -157,12 +155,12 @@ contains
        !
 
        ! Include convective cloud?
-       if (imfdeepcnv == imfdeepcnv_samf .or. imfdeepcnv == imfdeepcnv_gf) then
+       if (doGP_sgs_cnv) then
           call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_cnvclouds%increment(sw_optical_props_clrsky))
        endif
 
        ! Include MYNN-EDMF PBL cloud?
-       if (do_mynnedmf) then
+       if (doGP_sgs_mynn) then
           call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_MYNNcloudsByBand%increment(sw_optical_props_clrsky))
        endif
 

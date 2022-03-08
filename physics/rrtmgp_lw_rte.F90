@@ -26,7 +26,7 @@ contains
 !! \htmlinclude rrtmgp_lw_rte_run.html
 !!
   subroutine rrtmgp_lw_rte_run(doLWrad, doLWclrsky, use_LW_jacobian, doGP_lwscat, nCol,     &
-       nLev, top_at_1, do_mynnedmf, imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_samf,             &
+       nLev, top_at_1, doGP_sgs_cnv, doGP_sgs_mynn, &
        sfc_emiss_byband, sources, lw_optical_props_clrsky, lw_optical_props_clouds,         &
        lw_optical_props_precip, lw_optical_props_cnvclouds,                                 &
        lw_optical_props_MYNNcloudsByBand, lw_optical_props_aerosol, nGauss_angles,          &
@@ -39,14 +39,12 @@ contains
          doLWrad,                 & ! Logical flag for longwave radiation call
          doLWclrsky,              & ! Compute clear-sky fluxes for clear-sky heating-rate?
          use_LW_jacobian,         & ! Compute Jacobian of LW to update radiative fluxes between radiation calls?
-         do_mynnedmf,             & ! Flag for MYNN-EDMF PBL cloud scheme
+         doGP_sgs_mynn,           & ! Flag for sgs MYNN-EDMF PBL cloud scheme
+         doGP_sgs_cnv,            & ! Flagg for sgs convective cloud scheme
          doGP_lwscat                ! Include scattering in LW cloud-optics?
     integer, intent(in) :: &
          nCol,                    & ! Number of horizontal gridpoints
          nLev,                    & ! Number of vertical levels
-         imfdeepcnv,              & !
-         imfdeepcnv_gf,           & !
-         imfdeepcnv_samf,         & !
          nGauss_angles              ! Number of angles used in Gaussian quadrature
     real(kind_phys), dimension(lw_gas_props%get_nband(),ncol), intent(in) :: &
          sfc_emiss_byband                    ! Surface emissivity in each band
@@ -133,12 +131,12 @@ contains
     !
 
     ! Include convective cloud?
-    if (imfdeepcnv == imfdeepcnv_samf .or. imfdeepcnv == imfdeepcnv_gf) then
+    if (doGP_sgs_cnv) then
        call check_error_msg('rrtmgp_lw_rte_run',lw_optical_props_cnvclouds%increment(lw_optical_props_clrsky))
     endif
 
     ! Include MYNN-EDMF PBL clouds?
-    if (do_mynnedmf) then
+    if (doGP_sgs_mynn) then
         call check_error_msg('rrtmgp_lw_rte_run',lw_optical_props_MYNNcloudsByBand%increment(lw_optical_props_clrsky))
     endif
 
