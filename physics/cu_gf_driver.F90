@@ -50,14 +50,14 @@ contains
          ! end if
          ! *DH temporary
 
-         ! Consistency checks
-         if (.not. (imfshalcnv == imfshalcnv_gf .or.                       &
-        &        imfdeepcnv == imfdeepcnv_gf)) then
-           write(errmsg,'(*(a))') 'Logic error: namelist choice of',       &
-        &    ' convection is different from Grell-Freitas scheme'
-           errflg = 1
-           return
-         end if
+       !  ! Consistency checks
+       !  if (.not. (imfshalcnv == imfshalcnv_gf .or.                       &
+       ! &        imfdeepcnv == imfdeepcnv_gf)) then
+       !    write(errmsg,'(*(a))') 'Logic error: namelist choice of',       &
+       ! &    ' convection is different from Grell-Freitas scheme'
+       !    errflg = 1
+       !    return
+       !  end if
 
       end subroutine cu_gf_driver_init
 
