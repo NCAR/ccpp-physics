@@ -34,7 +34,8 @@
       integer, parameter :: kpdalf(2)=(/214,217/)
 !
       real (kind=kind_io8), parameter :: ten=10.0, one=1.0, zero=0.0
-      integer, parameter :: xdata=5000, ydata=2500, mdata=xdata*ydata
+!     integer, parameter :: xdata=5000, ydata=2500, mdata=xdata*ydata
+      integer, parameter :: xdata=7200, ydata=3600, mdata=xdata*ydata
       integer            :: veg_type_landice
       integer            :: soil_type_landice
       integer            :: num_threads
