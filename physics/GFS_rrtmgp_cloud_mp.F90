@@ -253,10 +253,14 @@ contains
 
        ! Thomson MP using modified Xu-Randall cloud-fraction (additionally conditioned on RH)
        alpha0 = 2000.
+       if (lmfshal) then
+          alpha0 = 100.
+          if (lmfdeep2) alpha0 = 200.
+       endif
        call cloud_mp_thompson(nCol, nLev, nTracers, ncnd, i_cldliq, i_cldice, i_cldrain,&
             i_cldsnow, i_cldgrpl, p_lev, p_lay, tv_lay, t_lay, tracer, qs_lay, q_lay,   &
             relhum, con_g, con_rd, con_eps, alpha0, lwp_ex, iwp_ex, lwp_fc, iwp_fc,     &
-            cld_frac, cld_lwp, cld_iwp, cld_swp, cld_rwp)
+            cld_frac, cld_lwp, cld_iwp, cld_swp, cld_rwp, cond_cfrac_onRH = .true.)
     endif
 
     ! Bound effective radii for RRTMGP, LUT's for cloud-optics go from
@@ -656,10 +660,12 @@ contains
   subroutine cloud_mp_thompson(nCol, nLev, nTracers, ncnd, i_cldliq, i_cldice, i_cldrain,&
        i_cldsnow, i_cldgrpl, p_lev, p_lay, tv_lay, t_lay, tracer, qs_lay, q_lay, relhum, &
        con_g, con_rd, con_eps, alpha0, lwp_ex, iwp_ex, lwp_fc, iwp_fc, cld_frac, cld_lwp,&
-       cld_iwp, cld_swp, cld_rwp)
+       cld_iwp, cld_swp, cld_rwp, cond_cfrac_onRH)
     implicit none
 
     ! Inputs
+    logical, intent(in), optional :: &
+         cond_cfrac_onRH
     integer, intent(in)    :: &
          nCol,              & ! Number of horizontal grid points
          nLev,              & ! Number of vertical layers
@@ -728,7 +734,7 @@ contains
           cld_swp(iCol,iLay)  = max(0., cld_condensate(iCol,iLay,4) * tem1)
        
           ! Xu-Randall (1996) cloud-fraction. **Additionally, Conditioned on relative-humidity**
-          if (relhum(iCol,iLay) > 0.99) then
+          if (present(cond_cfrac_onRH) .and. relhum(iCol,iLay) > 0.99) then
              cld_frac(iCol,iLay) = 1._kind_phys
           else
              cld_mr = cld_condensate(iCol,iLay,1) + cld_condensate(iCol,iLay,2) +  &
