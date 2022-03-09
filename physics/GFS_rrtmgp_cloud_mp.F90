@@ -42,11 +42,11 @@ contains
        lgfdlmprad, do_mynnedmf, uni_cld, lmfdeep2, p_lev, p_lay, t_lay, qs_lay, q_lay,   &
        relhum, lsmask, xlon, xlat, dx, tv_lay, effrin_cldliq, effrin_cldice,             &
        effrin_cldrain, effrin_cldsnow, tracer, cnv_mixratio, cld_cnv_frac, qci_conv,     &
-       deltaZ, deltaZc, deltaP, qc_mynn, qi_mynn, cld_mynn_frac, con_g, con_rd, con_eps, &
+       deltaZ, deltaZc, deltaP, qc_mynn, qi_mynn, cld_pbl_frac, con_g, con_rd, con_eps,  &
        con_ttp, doGP_cldoptics_PADE, doGP_cldoptics_LUT, cld_frac, cld_lwp, cld_reliq,   &
        cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain, precip_frac,        &
-       cld_cnv_lwp, cld_cnv_reliq, cld_cnv_iwp, cld_cnv_reice, cld_mynn_lwp,             &
-       cld_mynn_reliq, cld_mynn_iwp, cld_mynn_reice, lwp_ex, iwp_ex, lwp_fc, iwp_fc,     &
+       cld_cnv_lwp, cld_cnv_reliq, cld_cnv_iwp, cld_cnv_reice, cld_pbl_lwp,              &
+       cld_pbl_reliq, cld_pbl_iwp, cld_pbl_reice, lwp_ex, iwp_ex, lwp_fc, iwp_fc,        &
        errmsg, errflg)
     implicit none
 
@@ -109,7 +109,7 @@ contains
          deltaP,                    & ! Layer-thickness (Pa)
          qc_mynn,                   & !
          qi_mynn,                   & !
-         cld_mynn_frac                !
+         cld_pbl_frac                 !
     real(kind_phys), dimension(:,:), intent(inout) :: &
          effrin_cldliq,             & ! Effective radius for stratiform liquid cloud-particles (microns)
          effrin_cldice,             & ! Effective radius for stratiform ice cloud-particles (microns)
@@ -143,10 +143,10 @@ contains
          cld_cnv_reliq,             & ! Effective radius for convective   liquid cloud-particles
          cld_cnv_iwp,               & ! Water path for       convective   ice    cloud-particles
          cld_cnv_reice,             & ! Effective radius for convective   ice    cloud-particles
-         cld_mynn_lwp,              & ! Water path for       MYNN SGS PBL liquid cloud-particles
-         cld_mynn_reliq,            & ! Effective radius for MYNN SGS PBL liquid cloud-particles
-         cld_mynn_iwp,              & ! Water path for       MYNN SGS PBL ice    cloud-particles
-         cld_mynn_reice               ! Effective radius for MYNN SGS PBL ice    cloud-particles
+         cld_pbl_lwp,               & ! Water path for       SGS PBL liquid cloud-particles
+         cld_pbl_reliq,             & ! Effective radius for SGS PBL liquid cloud-particles
+         cld_pbl_iwp,               & ! Water path for       SGS PBL ice    cloud-particles
+         cld_pbl_reice                ! Effective radius for SGS PBL ice    cloud-particles
     character(len=*), intent(out) :: &
          errmsg                       ! Error message
     integer, intent(out) :: &  
@@ -224,7 +224,7 @@ contains
        if(do_mynnedmf) then
           call cloud_mp_MYNN(nCol, nLev, lsmask, t_lay, p_lev, p_lay, qs_lay, relhum,   &
                qc_mynn, qi_mynn, con_ttp, con_g,                                        &
-               cld_mynn_lwp, cld_mynn_reliq, cld_mynn_iwp, cld_mynn_reice, cld_mynn_frac)
+               cld_pbl_lwp, cld_pbl_reliq, cld_pbl_iwp, cld_pbl_reice, cld_pbl_frac)
        endif
 
        ! Grell-Freitas convective clouds?
@@ -274,10 +274,10 @@ contains
           where(cld_cnv_reice .gt. radice_upr) cld_cnv_reice = radice_upr
        endif
        if (do_mynnedmf) then
-          where(cld_mynn_reliq .lt. radliq_lwr) cld_mynn_reliq = radliq_lwr
-          where(cld_mynn_reliq .gt. radliq_upr) cld_mynn_reliq = radliq_upr
-          where(cld_mynn_reice .lt. radice_lwr) cld_mynn_reice = radice_lwr
-          where(cld_mynn_reice .gt. radice_upr) cld_mynn_reice = radice_upr
+          where(cld_pbl_reliq .lt. radliq_lwr) cld_pbl_reliq = radliq_lwr
+          where(cld_pbl_reliq .gt. radliq_upr) cld_pbl_reliq = radliq_upr
+          where(cld_pbl_reice .lt. radice_lwr) cld_pbl_reice = radice_lwr
+          where(cld_pbl_reice .gt. radice_upr) cld_pbl_reice = radice_upr
        endif
     endif
 
@@ -382,8 +382,8 @@ contains
   !
   ! ######################################################################################
   subroutine cloud_mp_MYNN(nCol, nLev, lsmask, t_lay, p_lev, p_lay, qs_lay, relhum,      &
-       qc_mynn, qi_mynn, con_ttp, con_g, cld_mynn_lwp, cld_mynn_reliq, cld_mynn_iwp,     &
-       cld_mynn_reice, cld_mynn_frac)
+       qc_mynn, qi_mynn, con_ttp, con_g, cld_pbl_lwp, cld_pbl_reliq, cld_pbl_iwp,     &
+       cld_pbl_reice, cld_pbl_frac)
     implicit none
 
     ! Inputs
@@ -403,13 +403,13 @@ contains
          relhum,        & !
          qc_mynn,       & ! Liquid cloud mixing-ratio (MYNN PBL cloud)
          qi_mynn,       & ! Ice cloud mixing-ratio (MYNN PBL cloud)
-         cld_mynn_frac    ! Cloud-fraction (MYNN PBL cloud)
+         cld_pbl_frac    ! Cloud-fraction (MYNN PBL cloud)
     ! Outputs
     real(kind_phys), dimension(:,:),intent(inout) :: &
-         cld_mynn_lwp,   & ! Convective cloud liquid water path
-         cld_mynn_reliq, & ! Convective cloud liquid effective radius
-         cld_mynn_iwp,   & ! Convective cloud ice water path
-         cld_mynn_reice    ! Convective cloud ice effecive radius
+         cld_pbl_lwp,   & ! Convective cloud liquid water path
+         cld_pbl_reliq, & ! Convective cloud liquid effective radius
+         cld_pbl_iwp,   & ! Convective cloud ice water path
+         cld_pbl_reice    ! Convective cloud ice effecive radius
     
     ! Local
     integer :: iCol, iLay
@@ -417,26 +417,26 @@ contains
 
     do iLay = 1, nLev
        do iCol = 1, nCol
-          if (cld_mynn_frac(iCol,iLay) > cld_limit_lower) then
+          if (cld_pbl_frac(iCol,iLay) > cld_limit_lower) then
              ! Cloud mixing-ratios (DJS asks: Why is this done?)
-             qc = qc_mynn(iCol,iLay)*cld_mynn_frac(iCol,iLay)
-             qi = qi_mynn(iCol,iLay)*cld_mynn_frac(iCol,iLay)
+             qc = qc_mynn(iCol,iLay)*cld_pbl_frac(iCol,iLay)
+             qi = qi_mynn(iCol,iLay)*cld_pbl_frac(iCol,iLay)
 
              ! LWP/IWP
              deltaP = abs(p_lev(iCol,iLay+1)-p_lev(iCol,iLay))/100.
              tem1   = (1.0e5/con_g) * deltaP
-             cld_mynn_lwp(iCol,iLay) = max(0., qc * tem1)
-             cld_mynn_iwp(iCol,iLay) = max(0., qi * tem1)
+             cld_pbl_lwp(iCol,iLay) = max(0., qc * tem1)
+             cld_pbl_iwp(iCol,iLay) = max(0., qi * tem1)
 
              ! Particle sizes
              if (nint(lsmask(iCol)) == 1) then
-                if(qc > 1.E-8) cld_mynn_reliq(iCol,iLay) = 5.4
+                if(qc > 1.E-8) cld_pbl_reliq(iCol,iLay) = 5.4
              else
                 ! Cloud water (microns), from Miles et al.
-                if(qc > 1.E-8) cld_mynn_reliq(iCol,iLay) = 9.6
+                if(qc > 1.E-8) cld_pbl_reliq(iCol,iLay) = 9.6
              endif
              ! Cloud ice (microns), from Mishra et al. (2014, JGR Atmos, fig 6b) 
-             if(qi > 1.E-8) cld_mynn_reice(iCol,iLay) = max(173.45 + 2.14*(t_lay(iCol,iLay)-273.15), 20.)
+             if(qi > 1.E-8) cld_pbl_reice(iCol,iLay) = max(173.45 + 2.14*(t_lay(iCol,iLay)-273.15), 20.)
           endif
        enddo
     enddo

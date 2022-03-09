@@ -398,8 +398,8 @@ contains
        doGP_cldoptics_PADE, doGP_cldoptics_LUT, do_mynnedmf, imfdeepcnv, imfdeepcnv_gf,     &
        imfdeepcnv_samf, nCol, nLev, nDay, nbndsGPsw, idxday, cld_frac, cld_lwp, cld_reliq,  &
        cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain, precip_frac,           &
-       cld_cnv_lwp, cld_cnv_reliq, cld_cnv_iwp, cld_cnv_reice, cld_mynn_lwp, cld_mynn_reliq,&
-       cld_mynn_iwp, cld_mynn_reice, sw_optical_props_cloudsByBand,                         &
+       cld_cnv_lwp, cld_cnv_reliq, cld_cnv_iwp, cld_cnv_reice, cld_pbl_lwp, cld_pbl_reliq,  &
+       cld_pbl_iwp, cld_pbl_reice, sw_optical_props_cloudsByBand,                           &
        sw_optical_props_cnvcloudsByBand, sw_optical_props_precipByBand,                     &
        sw_optical_props_MYNNcloudsByBand, cldtausw,  errmsg, errflg)
     
@@ -437,10 +437,10 @@ contains
          cld_cnv_reliq,       & ! Effective radius for convective liquid cloud-particles (microns)
          cld_cnv_iwp,         & ! Water path for       convective ice cloud-particles (microns)
          cld_cnv_reice,       & ! Effective radius for convective ice cloud-particles (microns)
-         cld_mynn_lwp,        &
-         cld_mynn_reliq,      &
-         cld_mynn_iwp,        &
-         cld_mynn_reice
+         cld_pbl_lwp,         & ! Water path for       SGS PBL liquid cloud-particles
+         cld_pbl_reliq,       & ! Effective radius for SGS PBL liquid cloud-particles
+         cld_pbl_iwp,         & ! Water path for       SGS PBL ice    cloud-particles
+         cld_pbl_reice          ! Effective radius for SGS PBL ice    cloud-particles
     ! Outputs
     character(len=*), intent(out) :: &
          errmsg                              ! CCPP error message
@@ -505,10 +505,10 @@ contains
                   sw_optical_props_MYNNcloudsByBand%alloc_2str(nday, nLev, sw_cloud_props%get_band_lims_wavenumber()))
 
              call check_error_msg('rrtmgp_sw_MYNNcloud_optics_run - MYNN-EDMF cloud',sw_cloud_props%cloud_optics(&
-                  cld_mynn_lwp(idxday(1:nday),:),     & ! IN  - MYNN-EDMF PBL cloud liquid water path (g/m2)
-                  cld_mynn_iwp(idxday(1:nday),:),     & ! IN  - MYNN-EDMF PBL cloud ice water path (g/m2)
-                  cld_mynn_reliq(idxday(1:nday),:),   & ! IN  - MYNN-EDMF PBL cloud liquid effective radius (microns)
-                  cld_mynn_reice(idxday(1:nday),:),   & ! IN  - MYNN-EDMF PBL cloud ice effective radius (microns)
+                  cld_pbl_lwp(idxday(1:nday),:),     & ! IN  - MYNN-EDMF PBL cloud liquid water path (g/m2)
+                  cld_pbl_iwp(idxday(1:nday),:),     & ! IN  - MYNN-EDMF PBL cloud ice water path (g/m2)
+                  cld_pbl_reliq(idxday(1:nday),:),   & ! IN  - MYNN-EDMF PBL cloud liquid effective radius (microns)
+                  cld_pbl_reice(idxday(1:nday),:),   & ! IN  - MYNN-EDMF PBL cloud ice effective radius (microns)
                   sw_optical_props_MYNNcloudsByBand))  ! OUT - RRTMGP DDT containing MYNN-EDMF PBL  cloud radiative properties
                                                        !       in each band
           endif

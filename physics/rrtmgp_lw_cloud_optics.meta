@@ -295,7 +295,7 @@
   type = real
   kind = kind_phys
   intent = in
-[cld_mynn_lwp]
+[cld_pbl_lwp]
   standard_name = MYNN_SGS_cloud_liquid_water_path
   long_name = layer convective cloud liquid water path
   units = g m-2
@@ -303,7 +303,7 @@
   type = real
   kind = kind_phys
   intent = in
-[cld_mynn_iwp]
+[cld_pbl_iwp]
   standard_name = MYNN_SGS_cloud_ice_water_path
   long_name = layer convective cloud ice water path
   units = g m-2
@@ -311,7 +311,7 @@
   type = real
   kind = kind_phys
   intent = in
-[cld_mynn_reliq]
+[cld_pbl_reliq]
   standard_name = mean_effective_radius_for_liquid_MYNN_SGS_cloud
   long_name = mean effective radius for liquid MYNN_SGS cloud
   units = um
@@ -319,7 +319,7 @@
   type = real
   kind = kind_phys
   intent = in
-[cld_mynn_reice]
+[cld_pbl_reice]
   standard_name = mean_effective_radius_for_ice_MYNN_SGS_cloud
   long_name = mean effective radius for ice MYNN_SGS cloud
   units = um
