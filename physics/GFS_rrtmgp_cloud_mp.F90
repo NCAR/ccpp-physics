@@ -713,7 +713,11 @@ contains
                                       tracer(1:nCol,1:nLev,i_cldgrpl)
 
     ! Cloud water path (g/m2)
-    do iLay = 1, nLev
+    cld_lwp(:,:) = 0.0
+    cld_iwp(:,:) = 0.0
+    cld_rwp(:,:) = 0.0
+    cld_swp(:,:) = 0.0
+    do iLay = 1, nLev-1
        do iCol = 1, nCol
           ! Compute liquid/ice condensate path from mixing ratios (kg/kg)->(g/m2)
           deltaP              = abs(p_lev(iCol,iLay+1)-p_lev(iCol,iLay))/100.
@@ -726,7 +730,8 @@ contains
     enddo
        
     ! Xu-Randall (1996) cloud-fraction. **Additionally, Conditioned on relative-humidity**
-    do iLay = 1, nLev
+    cld_frac(:,:) = 0.0
+    do iLay = 1, nLev-1
        do iCol = 1, nCol
           if (relhum(iCol,iLay) > 0.99) then
              cld_frac(iCol,iLay) = 1._kind_phys
