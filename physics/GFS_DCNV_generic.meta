@@ -232,6 +232,34 @@
   dimensions = ()
   type = integer
   intent = in
+[nthl]
+  standard_name = index_of_hail_mixing_ratio_in_tracer_concentration_array
+  long_name = tracer index for hail
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[nthnc]
+  standard_name = index_of_mass_number_concentration_of_hail_in_tracer_concentration_array
+  long_name = tracer index for hail number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ntgv]
+  standard_name = index_of_graupel_volume_in_tracer_concentration_array
+  long_name = tracer index for graupel particle volume
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[nthv]
+  standard_name = index_of_hail_volume_in_tracer_concentration_array
+  long_name = tracer index for hail particle volume
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
 [clw]
   standard_name = convective_transportable_tracers
   long_name = array to contain cloud water and other convective trans. tracers
@@ -256,9 +284,9 @@
   kind = len=*
   intent = out
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out
@@ -684,6 +712,34 @@
   dimensions = ()
   type = integer
   intent = in
+[nthl]
+  standard_name = index_of_hail_mixing_ratio_in_tracer_concentration_array
+  long_name = tracer index for hail
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[nthnc]
+  standard_name = index_of_mass_number_concentration_of_hail_in_tracer_concentration_array
+  long_name = tracer index for hail number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ntgv]
+  standard_name = index_of_graupel_volume_in_tracer_concentration_array
+  long_name = tracer index for graupel particle volume
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[nthv]
+  standard_name = index_of_hail_volume_in_tracer_concentration_array
+  long_name = tracer index for hail particle volume
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
 [clw]
   standard_name = convective_transportable_tracers
   long_name = array to contain cloud water and other convective trans. tracers
@@ -708,9 +764,9 @@
   kind = len=*
   intent = out
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out

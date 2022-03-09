@@ -30,9 +30,9 @@
   kind = len=*
   intent = out
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out
@@ -336,6 +336,14 @@
   type = real
   kind = kind_phys
   intent = in
+[qgrs_cccn]
+  standard_name = cloud_condensation_nuclei_number_concentration
+  long_name = number concentration of cloud condensation nuclei
+  units = kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
 [prsl]
   standard_name = air_pressure
   long_name = mean layer pressure
@@ -994,6 +1002,14 @@
   type = real
   kind = kind_phys
   intent = inout
+[dqdt_cccn]
+  standard_name = tendency_of_cloud_condensation_nuclei_number_concentration_due_to_model_physics
+  long_name = number concentration of cloud condensation nuclei tendency due to model physics
+  units = kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
 [flag_for_pbl_generic_tend]
   standard_name = flag_for_generic_tendency_due_to_planetary_boundary_layer
   long_name = true if GFS_PBL_generic should calculate tendencies
@@ -1250,12 +1266,41 @@
   dimensions = ()
   type = integer
   intent = in
+[imp_physics_nssl]
+  standard_name = identifier_for_nssl_microphysics_scheme
+  long_name = choice of NSSL 2-moment microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[nssl_ccn_on]
+  standard_name = nssl_ccn_on
+  long_name = CCN activation flag in NSSL micro
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [ltaerosol]
   standard_name = flag_for_aerosol_physics
   long_name = flag for aerosol physics
   units = flag
   dimensions = ()
   type = logical
+  intent = in
+[spp_wts_pbl]
+  standard_name = spp_weights_for_pbl_scheme
+  long_name = spp weights for pbl scheme
+  units = 1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[spp_pbl]
+  standard_name = control_for_pbl_spp_perturbations
+  long_name = control for pbl spp perturbations
+  units = count
+  dimensions = ()
+  type = integer
   intent = in
 [lprnt]
   standard_name = flag_print
@@ -1281,9 +1326,9 @@
   kind = len=*
   intent = out
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out

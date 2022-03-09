@@ -300,6 +300,7 @@
 !!\n                     =6:  WSM6 microphysics
 !!\n                     =10: MG microphysics
 !!\n                     =15: Ferrier-Aligo microphysics
+!!\n                     =17/18: NSSL microphysics
 !!\param me              print control flag
 !>\section gen_cld_init cld_init General Algorithm
 !! @{
@@ -390,6 +391,8 @@
             print *,'   --- MG cloud microphysics'
           elseif (imp_physics == 15) then
             print *,'   --- Ferrier-Aligo cloud microphysics'
+          elseif (imp_physics == 17) then
+            print *,'   --- NSSL cloud microphysics'
           else
             print *,'  !!! ERROR in cloud microphysc specification!!!', &
      &              '  imp_physics (NP3D) =',imp_physics
@@ -876,6 +879,19 @@
          alpha(:,:) = 0.
       endif
 
+      ! Revise alpha for exponential-random cloud overlap
+      ! Decorrelate layers when a clear layer follows a cloudy layer to enforce
+      ! random correlation between non-adjacent blocks of cloudy layers
+      if (iovr == 5) then
+        do k = 2, nLay
+          do i = 1, ix
+            if (clouds(i,k,1) == 0.0 .and. clouds(i,k-1,1) > 0.0) then
+              alpha(i,k) = 0.0
+            endif
+          enddo
+        enddo
+      endif
+
 !> - Call gethml() to compute low,mid,high,total, and boundary layer
 !!    cloud fractions and clouds top/bottom layer indices for low, mid,
 !!    and high clouds. The three cloud domain boundaries are defined by
@@ -1270,6 +1286,19 @@
       else
          de_lgth(:) = 0.
          alpha(:,:) = 0.
+      endif
+
+      ! Revise alpha for exponential-random cloud overlap
+      ! Decorrelate layers when a clear layer follows a cloudy layer to enforce
+      ! random correlation between non-adjacent blocks of cloudy layers
+      if (iovr == 5) then
+        do k = 2, nLay
+          do i = 1, ix
+            if (clouds(i,k,1) == 0.0 .and. clouds(i,k-1,1) > 0.0) then
+              alpha(i,k) = 0.0
+            endif
+          enddo
+        enddo
       endif
 
 !> - Call gethml() to compute low,mid,high,total, and boundary layer
@@ -1699,6 +1728,19 @@
          alpha(:,:) = 0.
       endif
 
+      ! Revise alpha for exponential-random cloud overlap
+      ! Decorrelate layers when a clear layer follows a cloudy layer to enforce
+      ! random correlation between non-adjacent blocks of cloudy layers
+      if (iovr == 5) then
+        do k = 2, nLay
+          do i = 1, ix
+            if (clouds(i,k,1) == 0.0 .and. clouds(i,k-1,1) > 0.0) then
+              alpha(i,k) = 0.0
+            endif
+          enddo
+        enddo
+      endif
+
 !> -# Call gethml() to compute low,mid,high,total, and boundary layer
 !! cloud fractions and clouds top/bottom layer indices for low, mid,
 !! and high clouds.
@@ -2062,6 +2104,19 @@
          alpha(:,:) = 0.
       endif
 
+      ! Revise alpha for exponential-random cloud overlap
+      ! Decorrelate layers when a clear layer follows a cloudy layer to enforce
+      ! random correlation between non-adjacent blocks of cloudy layers
+      if (iovr == 5) then
+        do k = 2, nLay
+          do i = 1, ix
+            if (clouds(i,k,1) == 0.0 .and. clouds(i,k-1,1) > 0.0) then
+              alpha(i,k) = 0.0
+            endif
+          enddo
+        enddo
+      endif
+
 !  ---  compute low, mid, high, total, and boundary layer cloud fractions
 !       and clouds top/bottom layer indices for low, mid, and high clouds.
 !       The three cloud domain boundaries are defined by ptopc.  The cloud
@@ -2416,6 +2471,19 @@
          alpha(:,:) = 0.
       endif
 
+      ! Revise alpha for exponential-random cloud overlap
+      ! Decorrelate layers when a clear layer follows a cloudy layer to enforce
+      ! random correlation between non-adjacent blocks of cloudy layers
+      if (iovr == 5) then
+        do k = 2, nLay
+          do i = 1, ix
+            if (clouds(i,k,1) == 0.0 .and. clouds(i,k-1,1) > 0.0) then
+              alpha(i,k) = 0.0
+            endif
+          enddo
+        enddo
+      endif
+
 !> - Call gethml() to compute low, mid, high, total, and boundary layer cloud fractions
 !! and clouds top/bottom layer indices for low, mid, and high clouds.
 !! The three cloud domain boundaries are defined by ptopc.  The cloud
@@ -2753,63 +2821,6 @@
           enddo
         enddo
       endif
-!mz
-      if (icloud .ne. 0) then
-!     assign/calculate efective radii for cloud water, ice, rain, snow
-
-        do k = 1, NLAY
-          do i = 1, IX
-            rew(i,k) = reliq_def            ! default liq  radius to 10  micron
-            rei(i,k) = reice_def            ! default ice  radius to 50  micron
-            rer(i,k) = rrain_def            ! default rain radius to 1000 micron
-            res(i,k) = rsnow_def            ! default snow radius to 250 micron
-          enddo
-        enddo
-!> -# Compute effective liquid cloud droplet radius over land.
-        do i = 1, IX
-          if (nint(slmsk(i)) == 1) then
-            do k = 1, NLAY
-              tem1     = min(1.0, max(0.0, (con_ttp-tlyr(i,k))*0.05))
-              rew(i,k) = 5.0 + 5.0 * tem1
-            enddo
-          endif
-        enddo
-
-!> -# Compute effective ice cloud droplet radius following Heymsfield
-!!    and McFarquhar (1996) \cite heymsfield_and_mcfarquhar_1996.
-
-        do k = 1, NLAY
-          do i = 1, IX
-            tem2 = tlyr(i,k) - con_ttp
-
-            if (cip(i,k) > 0.0) then
-              tem3 = gord * cip(i,k) * plyr(i,k) / (delp(i,k)*tvly(i,k))
-
-              if (tem2 < -50.0) then
-                rei(i,k) = (1250.0/9.917) * tem3 ** 0.109
-              elseif (tem2 < -40.0) then
-                rei(i,k) = (1250.0/9.337) * tem3 ** 0.08
-              elseif (tem2 < -30.0) then
-                rei(i,k) = (1250.0/9.208) * tem3 ** 0.055
-              else
-                rei(i,k) = (1250.0/9.387) * tem3 ** 0.031
-              endif
-              rei(i,k) = max(25.,rei(i,k))       !mz* HWRF
-            endif
-            rei(i,k) = min(rei(i,k), 135.72)      !- 1.0315*rei<= 140 microns
-          enddo
-        enddo
-
-!mz
-!> -# Compute effective snow cloud droplet radius
-        do k = 1, NLAY
-          do i = 1, IX
-           res(i,k) = 10.0
-          enddo
-        enddo
-
-      endif ! end icloud
-!mz end
       do k = 1, NLAY
         do i = 1, IX
           clouds(i,k,1) = cldtot(i,k)
@@ -2849,6 +2860,19 @@
          alpha(:,:) = 0.
       endif
 
+      ! Revise alpha for exponential-random cloud overlap
+      ! Decorrelate layers when a clear layer follows a cloudy layer to enforce
+      ! random correlation between non-adjacent blocks of cloudy layers
+      if (iovr == 5) then
+        do k = 2, nLay
+          do i = 1, ix
+            if (clouds(i,k,1) == 0.0 .and. clouds(i,k-1,1) > 0.0) then
+              alpha(i,k) = 0.0
+            endif
+          enddo
+        enddo
+      endif
+
 !> - Call gethml() to compute low,mid,high,total, and boundary layer
 !! cloud fractions and clouds top/bottom layer indices for low, mid,
 !! and high clouds.
@@ -2875,7 +2899,7 @@
 
 
 !mz: this is the original progcld5 for Thompson MP (and WSM6),
-! to be replaced by the GSL version of progcld6 for Thompson MP
+! to be replaced by the GSL version of progcld6 for Thompson MP and NSSL
       subroutine progcld6                                               &
      &     ( plyr,plvl,tlyr,qlyr,qstl,rhly,clw,                         &    !  ---  inputs:
      &       xlat,xlon,slmsk,dz,delp,                                   &
@@ -2891,7 +2915,7 @@
 ! =================   subprogram documentation block   ================ !
 !                                                                       !
 ! subprogram:    progcld6    computes cloud related quantities using    !
-!   Thompson/WSM6 cloud microphysics scheme.                            !
+!   Thompson/WSM6/NSSL cloud microphysics scheme.                            !
 !                                                                       !
 ! abstract:  this program computes cloud fractions from cloud           !
 !   condensates,                                                        !
@@ -3185,7 +3209,8 @@
         enddo
       enddo
 
-      ! What portion of water and ice contents is associated with the partly cloudy boxes
+      ! What portion of water and ice contents is associated with the
+      ! partly cloudy boxes
       do i = 1, IX
          do k = 1, NLAY-1
             if (cldtot(i,k).ge.climit .and. cldtot(i,k).lt.ovcst) then
@@ -3242,6 +3267,19 @@
       else
          de_lgth(:) = 0.
          alpha(:,:) = 0.
+      endif
+
+      ! Revise alpha for exponential-random cloud overlap
+      ! Decorrelate layers when a clear layer follows a cloudy layer to enforce
+      ! random correlation between non-adjacent blocks of cloudy layers
+      if (iovr == 5) then
+        do k = 2, nLay
+          do i = 1, ix
+            if (clouds(i,k,1) == 0.0 .and. clouds(i,k-1,1) > 0.0) then
+              alpha(i,k) = 0.0
+            endif
+          enddo
+        enddo
       endif
 
 !> - Call gethml() to compute low,mid,high,total, and boundary layer
@@ -3330,7 +3368,7 @@
 !   slmsk (IX)      : sea/land mask array (sea:0,land:1,sea-ice:2)      !
 !   dz    (ix,nlay) : layer thickness (km)                              !
 !   delp  (ix,nlay) : model layer pressure thickness in mb (100Pa)      !
-!   gridkm          : grid length in km                                 !
+!   gridkm (IX)     : grid length in km                                 !
 !   IX              : horizontal dimention                              !
 !   NLAY,NLP1       : vertical layer/level dimensions                   !
 !   uni_cld         : logical - true for cloud fraction from shoc       !
@@ -3389,8 +3427,8 @@
       real (kind=kind_phys), dimension(:),   intent(in) :: xlat, xlon,  &
      &       slmsk
 
-      real(kind=kind_phys), dimension(:), intent(in) :: latdeg
-      real(kind=kind_phys), intent(in) :: julian, gridkm
+      real(kind=kind_phys), dimension(:), intent(in) :: latdeg, gridkm
+      real(kind=kind_phys), intent(in) :: julian
       integer, intent(in)              :: yearlen
 
 !  ---  outputs
@@ -3464,14 +3502,14 @@
       enddo
 
 !> - Compute cloud liquid/ice condensate path in \f$ g/m^2 \f$ .
-!> - Since using Thompson MP, assume 20 percent of snow is actually in
+!> - Since using Thompson MP, assume 1 percent of snow is actually in
 !!   ice sizes.
 
       do k = 1, NLAY-1
         do i = 1, IX
           cwp(i,k) = max(0.0, clw(i,k,ntcw) * dz(i,k)*1.E6)
           crp(i,k) = 0.0
-          snow_mass_factor = 0.85
+          snow_mass_factor = 0.99
           cip(i,k) = max(0.0, (clw(i,k,ntiw)                            &
      &             + (1.0-snow_mass_factor)*clw(i,k,ntsw))*dz(i,k)*1.E6)
           if (re_snow(i,k) .gt. snow_max_radius)then
@@ -3537,7 +3575,7 @@
          endif
 
          call cal_cldfra3(cldfra1d, qv1d, qc1d, qi1d, qs1d, dz1d,       &
-     &                    p1d, t1d, xland, gridkm,                      &
+     &                    p1d, t1d, xland, gridkm(i),                   &
      &                    .false., max_relh, 1, nlay, .false.)
 
          do k = 1, NLAY
@@ -3609,6 +3647,19 @@
       else
          de_lgth(:) = 0.
          alpha(:,:) = 0.
+      endif
+
+      ! Revise alpha for exponential-random cloud overlap
+      ! Decorrelate layers when a clear layer follows a cloudy layer to enforce
+      ! random correlation between non-adjacent blocks of cloudy layers
+      if (iovr == 5) then
+        do k = 2, nLay
+          do i = 1, ix
+            if (clouds(i,k,1) == 0.0 .and. clouds(i,k-1,1) > 0.0) then
+              alpha(i,k) = 0.0
+            endif
+          enddo
+        enddo
       endif
 
 !> - Call gethml() to compute low,mid,high,total, and boundary layer
@@ -4006,6 +4057,19 @@
       else
          de_lgth(:) = 0.
          alpha(:,:) = 0.
+      endif
+
+      ! Revise alpha for exponential-random cloud overlap
+      ! Decorrelate layers when a clear layer follows a cloudy layer to enforce
+      ! random correlation between non-adjacent blocks of cloudy layers
+      if (iovr == 5) then
+        do k = 2, nLay
+          do i = 1, ix
+            if (clouds(i,k,1) == 0.0 .and. clouds(i,k-1,1) > 0.0) then
+              alpha(i,k) = 0.0
+            endif
+          enddo
+        enddo
       endif
 
 !> - Call gethml() to compute low,mid,high,total, and boundary layer
@@ -4551,16 +4615,16 @@
       DO k = kts,kte
 
          delz = MAX(100., dz(k))
-         RH_00L = 0.74+MIN(0.25,SQRT(1./(50.0+gridkm*gridkm*delz*0.01)))
-         RH_00O = 0.82+MIN(0.17,SQRT(1./(50.0+gridkm*gridkm*delz*0.01)))
+         RH_00L = 0.77+MIN(0.22,SQRT(1./(50.0+gridkm*gridkm*delz*0.01)))
+         RH_00O = 0.85+MIN(0.14,SQRT(1./(50.0+gridkm*gridkm*delz*0.01)))
          RHUM = rh(k)
 
-         if (qc(k).ge.1.E-5 .or. qi(k).ge.1.E-5                         &
-     &                    .or. (qs(k).gt.1.E-5 .and. t(k).lt.273.)) then
+         if (qc(k).ge.1.E-6 .or. qi(k).ge.1.E-7                         &
+     &                    .or. (qs(k).gt.1.E-6 .and. t(k).lt.273.)) then
             CLDFRA(K) = 1.0
          elseif (((qc(k)+qi(k)).gt.1.E-10) .and.                        &
-     &                                    ((qc(k)+qi(k)).lt.1.E-5)) then
-            CLDFRA(K) = MIN(0.99, 0.20*(10.0 + log10(qc(k)+qi(k))))
+     &                                    ((qc(k)+qi(k)).lt.1.E-6)) then
+            CLDFRA(K) = MIN(0.99, 0.1*(11.0 + log10(qc(k)+qi(k))))
          else
 
             IF ((XLAND-1.5).GT.0.) THEN                                  !--- Ocean
@@ -4569,7 +4633,7 @@
                RH_00 = RH_00L
             ENDIF
 
-            tc = t(k) - 273.15
+            tc = MAX(-80.0, t(k) - 273.15)
             if (tc .lt. -12.0) RH_00 = RH_00L
 
             if (tc .gt. 20.0) then
@@ -4581,12 +4645,12 @@
                if (max_relh.gt.1.12 .or. (.NOT.(modify_qvapor)) ) then
 !..For HRRR model, the following look OK.
                   RHUM = MIN(rh(k), 1.45)
-                  RH_00 = RH_00 + (1.45-RH_00)*(-12.0-tc)/(-12.0+112.)
+                  RH_00 = RH_00 + (1.45-RH_00)*(-12.0-tc)/(-12.0+85.)
                   CLDFRA(K) = MAX(0.,1.0-SQRT((1.46-RHUM)/(1.46-RH_00)))
                else
 !..but for the GFS model, RH is way lower.
                   RHUM = MIN(rh(k), 1.05)
-                  RH_00 = RH_00 + (1.05-RH_00)*(-12.0-tc)/(-12.0+112.)
+                  RH_00 = RH_00 + (1.05-RH_00)*(-12.0-tc)/(-12.0+85.)
                   CLDFRA(K) = MAX(0.,1.0-SQRT((1.06-RHUM)/(1.06-RH_00)))
                endif
             endif
@@ -4603,15 +4667,6 @@
 !.. LWP/IWP for multiple cloud decks.
 
       call adjust_cloudFinal(cldfra, qc, qi, rhoa, dz, kts,kte)
-
-      if (debug_flag .and. ndebug.lt.25) then
-        do k = kts,kte
-          write(6,'(a,i3,f9.2,f7.1,f7.2,f6.1,f6.3,f12.7,f12.7,f12.7)')  &
-     &       ' DEBUG-GT: ', k, p(k)*0.01, dz(k), t(k)-273.15,           &
-     &       rh(k)*100., cldfra(k), qc(k)*1.E3, qi(k)*1.E3, qs(k)*1.E3
-        enddo
-        ndebug = ndebug + 1
-      endif
 
 !..Intended for cold start model runs, we use modify_qvapor to ensure that cloudy
 !.. areas are actually saturated such that the inserted clouds do not evaporate a
@@ -4754,9 +4809,9 @@
          k = k - 1
       ENDDO
 
-      k_cldb = k_m12C + 5
+      k_cldb = k_m12C + 3
       in_cloud = .false.
-      k = k_m12C + 4
+      k = k_m12C + 2
       DO WHILE (.not. in_cloud .AND. k.gt.kbot)
          k_cldt = 0
          if (cfr1d(k).ge.0.01) then
@@ -4805,12 +4860,13 @@
       do k = k1, k2
          tdz = tdz + dz(k)
       enddo
-      max_iwc = ABS(qvs(k2)-qvs(k1))
+!     max_iwc = ABS(qvs(k2)-qvs(k1))
+      max_iwc = MAX(0.0, qvs(k1)-qvs(k2))
 
       do k = k1, k2
-         max_iwc = MAX(1.E-5, max_iwc - (qi(k)+qs(k)))
+         max_iwc = MAX(1.E-6, max_iwc - (qi(k)+qs(k)))
       enddo
-      max_iwc = MIN(2.E-3, max_iwc)
+      max_iwc = MIN(1.E-4, max_iwc)
 
       this_dz = 0.0
       do k = k1, k2
@@ -4820,7 +4876,7 @@
             this_dz = this_dz + dz(k)
          endif
          this_iwc = max_iwc*this_dz/tdz
-         iwc = MAX(5.E-6, this_iwc*(1.-entr))
+         iwc = MAX(1.E-6, this_iwc*(1.-entr))
          if (cfr(k).gt.0.0.and.cfr(k).lt.1.0.and.T(k).ge.203.16) then
             qi(k) = qi(k) + cfr(k)*cfr(k)*iwc
          endif
@@ -4845,13 +4901,14 @@
       do k = k1, k2
          tdz = tdz + dz(k)
       enddo
-      max_lwc = ABS(qvs(k2)-qvs(k1))
+!     max_lwc = ABS(qvs(k2)-qvs(k1))
+      max_lwc = MAX(0.0, qvs(k1)-qvs(k2))
 !     print*, ' max_lwc = ', max_lwc, ' over DZ=',tdz
 
       do k = k1, k2
-         max_lwc = MAX(1.E-5, max_lwc - qc(k))
+         max_lwc = MAX(1.E-6, max_lwc - qc(k))
       enddo
-      max_lwc = MIN(2.E-3, max_lwc)
+      max_lwc = MIN(1.E-4, max_lwc)
 
       this_dz = 0.0
       do k = k1, k2
@@ -4861,8 +4918,8 @@
             this_dz = this_dz + dz(k)
          endif
          this_lwc = max_lwc*this_dz/tdz
-         lwc = MAX(5.E-6, this_lwc*(1.-entr))
-         if (cfr(k).gt.0.0.and.cfr(k).lt.1.0.and.T(k).ge.253.16) then
+         lwc = MAX(1.E-6, this_lwc*(1.-entr))
+         if (cfr(k).gt.0.0.and.cfr(k).lt.1.0.and.T(k).ge.258.16) then
             qc(k) = qc(k) + cfr(k)*cfr(k)*lwc
          endif
       enddo
@@ -4914,6 +4971,6 @@
       END SUBROUTINE adjust_cloudFinal
 
 !........................................!
-      end module module_radiation_clouds !
+      end module module_radiation_clouds
 !! @}
 !========================================!

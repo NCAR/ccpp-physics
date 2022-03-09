@@ -4669,9 +4669,10 @@ ENDIF
     LOGICAL :: INITIALIZE_QKE
 
 ! Stochastic fields 
-     INTEGER,  INTENT(IN)                                     ::spp_pbl
-     REAL, DIMENSION( ims:ime, kms:kme), INTENT(IN),OPTIONAL  ::pattern_spp_pbl
-     REAL, DIMENSION(KTS:KTE)                         ::    rstoch_col
+     INTEGER,  INTENT(IN)                             :: spp_pbl
+     !GJF: this array must be assumed-shape since it's conditionally-allocated
+     REAL, DIMENSION(:,:), INTENT(IN)                 :: pattern_spp_pbl
+     REAL, DIMENSION(KTS:KTE)                         :: rstoch_col
 
 ! Substepping TKE
      INTEGER :: nsub

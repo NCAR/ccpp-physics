@@ -241,54 +241,54 @@ contains
     ! wrap everything in a do_ugwp 'if test' in order not to break the namelist functionality
     if (do_ugwp) then                       ! calling revised old GFS gravity wave drag
 
-     ! topo paras
-     ! w/ orographic effects
-     if(nmtvr == 14)then
-       ! calculate sgh30 for TOFD
-       sgh30 = abs(oro - oro_uf)
-     ! w/o orographic effects
-     else
-       sgh30   = 0.
-     endif
-
-     zlwb(:)   = 0.
-
-     call GWDPS_V0(im, levs, lonr, do_tofd, Pdvdt, Pdudt, Pdtdt, Pkdis,          &
-          ugrs, vgrs, tgrs, qgrs(:,:,1), kpbl, prsi,del,prsl, prslk, phii, phil, &
-          dtp, kdt, sgh30, hprime, oc, oa4, clx, theta, sigma, gamma, elvmax,    &
-          dusfcg, dvsfcg, xlat_d, sinlat, coslat, area, cdmbgwd(1:2),            &
-          me, master, rdxzb, con_g, con_omega, zmtb, zogw, tau_mtb, tau_ogw,     &
-          tau_tofd, dudt_mtb, dudt_ogw, dudt_tms)
-
-    else                                    ! calling old GFS gravity wave drag as is
-
-      do k=1,levs
-        do i=1,im
-          Pdvdt(i,k) = 0.0
-          Pdudt(i,k) = 0.0
-          Pdtdt(i,k) = 0.0
-          Pkdis(i,k) = 0.0
-        enddo
-      enddo
-
-      if (cdmbgwd(1) > 0.0 .or. cdmbgwd(2) > 0.0) then
-        call gwdps_run(im, levs, Pdvdt, Pdudt, Pdtdt,                  &
-                   ugrs, vgrs, tgrs, qgrs(:,:,1),                      &
-                   kpbl, prsi, del, prsl, prslk, phii, phil, dtp, kdt, &
-                   hprime, oc, oa4, clx, theta, sigma, gamma,          &
-                   elvmax, dusfcg, dvsfcg,                             &
-                   con_g,  con_cp, con_rd, con_rv, lonr,               &
-                   nmtvr, cdmbgwd, me, lprnt, ipr, rdxzb,              &
-                   errmsg, errflg)
-        if (errflg/=0) return
+      ! topo paras
+      ! w/ orographic effects
+      if(nmtvr == 14)then
+        ! calculate sgh30 for TOFD
+        sgh30 = abs(oro - oro_uf)
+       ! w/o orographic effects
+      else
+        sgh30   = 0.
       endif
 
-      tau_mtb   = 0.0  ; tau_ogw   = 0.0 ;  tau_tofd = 0.0
-      if (ldiag_ugwp) then
-        du3dt_mtb = 0.0  ; du3dt_ogw = 0.0 ;  du3dt_tms= 0.0
-      end if
+      zlwb(:)   = 0.
 
-    endif ! do_ugwp
+      call GWDPS_V0(im, levs, lonr, do_tofd, Pdvdt, Pdudt, Pdtdt, Pkdis,          &
+           ugrs, vgrs, tgrs, qgrs(:,:,1), kpbl, prsi,del,prsl, prslk, phii, phil, &
+           dtp, kdt, sgh30, hprime, oc, oa4, clx, theta, sigma, gamma, elvmax,    &
+           dusfcg, dvsfcg, xlat_d, sinlat, coslat, area, cdmbgwd(1:2),            &
+           me, master, rdxzb, con_g, con_omega, zmtb, zogw, tau_mtb, tau_ogw,     &
+           tau_tofd, dudt_mtb, dudt_ogw, dudt_tms)
+
+     else                                    ! calling old GFS gravity wave drag as is
+
+       do k=1,levs
+         do i=1,im
+           Pdvdt(i,k) = 0.0
+           Pdudt(i,k) = 0.0
+           Pdtdt(i,k) = 0.0
+           Pkdis(i,k) = 0.0
+         enddo
+       enddo
+
+       if (cdmbgwd(1) > 0.0 .or. cdmbgwd(2) > 0.0) then
+         call gwdps_run(im, levs, Pdvdt, Pdudt, Pdtdt,                  &
+                    ugrs, vgrs, tgrs, qgrs(:,:,1),                      &
+                    kpbl, prsi, del, prsl, prslk, phii, phil, dtp, kdt, &
+                    hprime, oc, oa4, clx, theta, sigma, gamma,          &
+                    elvmax, dusfcg, dvsfcg,                             &
+                    con_g,  con_cp, con_rd, con_rv, lonr,               &
+                    nmtvr, cdmbgwd, me, lprnt, ipr, rdxzb,              &
+                    errmsg, errflg)
+         if (errflg/=0) return
+       endif
+
+       tau_mtb   = 0.0  ; tau_ogw   = 0.0 ;  tau_tofd = 0.0
+       if (ldiag_ugwp) then
+         du3dt_mtb = 0.0  ; du3dt_ogw = 0.0 ;  du3dt_tms= 0.0
+       endif
+
+     endif ! do_ugwp
 
 
     if(ldiag3d .and. lssav .and. .not. flag_for_gwd_generic_tend) then
@@ -348,19 +348,20 @@ contains
       endif
 
       call fv3_ugwp_solv2_v0(im, levs, dtp, tgrs, ugrs, vgrs,qgrs(:,:,1), &
-           prsl, prsi, phil, xlat_d, sinlat, coslat, gw_dudt, gw_dvdt, gw_dtdt, gw_kdis, &
-           tau_ngw, me, master, kdt)
+                             prsl, prsi, phil, xlat_d, sinlat, coslat,    &
+                             gw_dudt, gw_dvdt, gw_dtdt, gw_kdis, tau_ngw, &
+                             me, master, kdt)
 
       do k=1,levs
         do i=1,im
-          gw_dtdt(i,k) = pngw*gw_dtdt(i,k)+ pogw*Pdtdt(i,k)
-          gw_dudt(i,k) = pngw*gw_dudt(i,k)+ pogw*Pdudt(i,k)
-          gw_dvdt(i,k) = pngw*gw_dvdt(i,k)+ pogw*Pdvdt(i,k)
-          gw_kdis(i,k) = pngw*gw_kdis(i,k)+ pogw*Pkdis(i,k)
+          gw_dtdt(i,k) = pngw*gw_dtdt(i,k) + pogw*Pdtdt(i,k)
+          gw_dudt(i,k) = pngw*gw_dudt(i,k) + pogw*Pdudt(i,k)
+          gw_dvdt(i,k) = pngw*gw_dvdt(i,k) + pogw*Pdvdt(i,k)
+          gw_kdis(i,k) = pngw*gw_kdis(i,k) + pogw*Pkdis(i,k)
           ! accumulation of tendencies for CCPP to replicate EMC-physics updates (!! removed in latest code commit to VLAB)
-          !dudt(i,k) = dudt(i,k) +gw_dudt(i,k)
-          !dvdt(i,k) = dvdt(i,k) +gw_dvdt(i,k)
-          !dtdt(i,k) = dtdt(i,k) +gw_dtdt(i,k)
+          !dudt(i,k) = dudt(i,k) + gw_dudt(i,k)
+          !dvdt(i,k) = dvdt(i,k) + gw_dvdt(i,k)
+          !dtdt(i,k) = dtdt(i,k) + gw_dtdt(i,k)
         enddo
       enddo
 

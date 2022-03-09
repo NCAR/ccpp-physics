@@ -31,7 +31,7 @@ module lsm_ruc
 !! \htmlinclude lsm_ruc_init.html
 !!
       subroutine lsm_ruc_init (me, master, isot, ivegsrc, nlunit,               &
-                               flag_restart, flag_init, con_fvirt, con_rd,      &
+                               lsm_cold_start, flag_init, con_fvirt, con_rd,    &
                                im, lsoil_ruc, lsoil, kice, nlev,                & ! in
                                lsm_ruc, lsm, slmsk, stype, vtype, landfrac,     & ! in 
                                q1, prsl1, tsfc_lnd, tsfc_ice, tsfc_wat,         & ! in
@@ -49,7 +49,7 @@ module lsm_ruc
       implicit none
 !  ---  in
       integer,              intent(in)  :: me, master, isot, ivegsrc, nlunit
-      logical,              intent(in)  :: flag_restart
+      logical,              intent(in)  :: lsm_cold_start
       logical,              intent(in)  :: flag_init
       integer,              intent(in)  :: im
       integer,              intent(in)  :: lsoil_ruc
@@ -155,7 +155,7 @@ module lsm_ruc
         write (0,*) 'tg3=',tg3(ipr)
         write (0,*) 'slmsk=',slmsk(ipr)
         write (0,*) 'flag_init =',flag_init
-        write (0,*) 'flag_restart =',flag_restart
+        write (0,*) 'lsm_cold_start =',lsm_cold_start
       endif
 
       !--- initialize soil vegetation
@@ -169,7 +169,7 @@ module lsm_ruc
         !-- initialize background emissivity
         semisbase(i) = lemitbl(vtype(i)) ! no snow effect
 
-        if (.not.flag_restart) then
+        if (lsm_cold_start) then
           !-- land
           semis_lnd(i) = semisbase(i) * (1.-sncovr_lnd(i))  &
                        + 0.99 * sncovr_lnd(i)
@@ -196,13 +196,13 @@ module lsm_ruc
           sfcqv_lnd(i) = q0
           qs1 = rslf(prsl1(i),tsfc_ice(i))
           sfcqv_ice(i) = qs1
-        endif ! .not. restart
+        endif ! lsm_cold_start
 
       enddo ! i
 
       call init_soil_depth_3 ( zs , dzs , lsoil_ruc )
 
-      call rucinit (flag_restart, im, lsoil_ruc, lsoil, nlev,   & ! in
+      call rucinit (lsm_cold_start, im, lsoil_ruc, lsoil, nlev, & ! in
                     me, master, lsm_ruc, lsm, slmsk,            & ! in
                     stype, vtype, landfrac, fice,               & ! in
                     min_seaice, tsfc_lnd, tsfc_wat, tg3,        & ! in
@@ -210,7 +210,7 @@ module lsm_ruc
                     sh2o, smfrkeep, tslb, smois,                & ! out
                     wetness, errmsg, errflg)
 
-      if (.not.flag_restart) then
+      if (lsm_cold_start) then
         do i  = 1, im ! i - horizontal loop
           do k = 1, min(kice,lsoil_ruc)
           ! - at initial time set sea ice T (tsice) 
@@ -323,6 +323,7 @@ module lsm_ruc
       subroutine lsm_ruc_run                                            & ! inputs
      &     ( iter, me, master, delt, kdt, im, nlev, lsm_ruc, lsm,       &
      &       imp_physics, imp_physics_gfdl, imp_physics_thompson,       &
+     &       imp_physics_nssl,                                          &
      &       do_mynnsfclay, lsoil_ruc, lsoil, rdlai, xlat_d, xlon_d, zs,&
      &       t1, q1, qc, stype, vtype, sigmaf, laixy,                   &
      &       dlwflx, dswsfc, tg3, coszen, land, icy, use_lake,          &
@@ -357,7 +358,7 @@ module lsm_ruc
      &       rhosnf, sbsno,                                             &
      &       cmm_lnd, chh_lnd, cmm_ice, chh_ice,                        &
      !
-     &       flag_iter, flag_guess, flag_init, flag_restart,            &
+     &       flag_iter, flag_guess, flag_init, lsm_cold_start,          &
      &       flag_cice, frac_grid, errmsg, errflg                       &
      &     )
 
@@ -371,7 +372,8 @@ module lsm_ruc
       integer, intent(in) :: me, master
       integer, intent(in) :: im, nlev, iter, lsoil_ruc, lsoil, kdt, isot, ivegsrc
       integer, intent(in) :: lsm_ruc, lsm
-      integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson
+      integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, &
+                             imp_physics_nssl
       real (kind=kind_phys), dimension(:), intent(in) :: xlat_d, xlon_d
 
       real (kind=kind_phys), dimension(:), intent(in) ::          &
@@ -439,7 +441,7 @@ module lsm_ruc
      &       albdvis_lnd, albdnir_lnd,  albivis_lnd,  albinir_lnd,       &
      &       albdvis_ice, albdnir_ice,  albivis_ice,  albinir_ice
 
-      logical,          intent(in)  :: flag_init, flag_restart
+      logical,          intent(in)  :: flag_init, lsm_cold_start
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
@@ -589,7 +591,7 @@ module lsm_ruc
         write (0,*)'vtype=',ipr,vtype(ipr)
         write (0,*)'kdt, iter =',kdt,iter
         write (0,*)'flag_init =',flag_init
-        write (0,*)'flag_restart =',flag_restart
+        write (0,*)'lsm_cold_start =',lsm_cold_start
       endif
 
       ims = 1
@@ -776,7 +778,8 @@ module lsm_ruc
 
       ! Set flag for mixed phase precipitation depending on microphysics scheme.
       ! For GFDL and Thompson, srflag is fraction of frozen precip for convective+explicit precip.
-      if (imp_physics==imp_physics_gfdl .or. imp_physics==imp_physics_thompson) then
+      if (imp_physics==imp_physics_gfdl .or. imp_physics==imp_physics_thompson .or. &
+          imp_physics == imp_physics_nssl) then
         frpcpn = .true.
       else
         frpcpn = .false.
@@ -1098,7 +1101,7 @@ module lsm_ruc
 
 !> - Call RUC LSM lsmruc() for land.
       call lsmruc(                                                           &
-     &          delt, flag_init, flag_restart, kdt, iter, nsoil,             &
+     &          delt, flag_init, lsm_cold_start, kdt, iter, nsoil,           &
      &          graupelncv(i,j), snowncv(i,j), rainncv(i,j), raincv(i,j),    &
      &          zs, prcp(i,j), sneqv_lnd(i,j), snowh_lnd(i,j),               &
      &          sncovr_lnd(i,j),                                             &
@@ -1359,7 +1362,7 @@ module lsm_ruc
 
 !> - Call RUC LSM lsmruc() for ice.
       call lsmruc(                                                           &
-     &          delt, flag_init, flag_restart, kdt, iter, nsoil,             &
+     &          delt, flag_init, lsm_cold_start, kdt, iter, nsoil,           &
      &          graupelncv(i,j), snowncv(i,j), rainncv(i,j), raincv(i,j),    &
      &          zs, prcp(i,j), sneqv_ice(i,j), snowh_ice(i,j),               &
      &          sncovr_ice(i,j),                                             &
@@ -1506,17 +1509,17 @@ module lsm_ruc
 
 !>\ingroup lsm_ruc_group
 !! This subroutine contains RUC LSM initialization.
-      subroutine rucinit        (restart, im, lsoil_ruc, lsoil, nlev,   & ! in
-                                 me, master, lsm_ruc, lsm, slmsk,       & ! in
+      subroutine rucinit        (lsm_cold_start, im, lsoil_ruc, lsoil,  & ! in
+                                 nlev, me, master, lsm_ruc, lsm, slmsk, & ! in
                                  stype, vtype, landfrac, fice,          & ! in
-                                 min_seaice, tskin_lnd, tskin_wat, tg3, & ! in
+                                 min_seaice, tskin_lnd, tskin_wat, tg3, & ! in 
                                  zs, dzs, smc, slc, stc,                & ! in
                                  sh2o, smfrkeep, tslb, smois,           & ! out
                                  wetness, errmsg, errflg)
 
       implicit none
 
-      logical,                                        intent(in   ) :: restart
+      logical,                                        intent(in   ) :: lsm_cold_start
       integer,                                        intent(in   ) :: lsm
       integer,                                        intent(in   ) :: lsm_ruc
       integer,                                        intent(in   ) :: im, nlev
@@ -1599,7 +1602,7 @@ module lsm_ruc
       else if (debug_print) then
         write (0,*) 'Start of RUC LSM initialization'
         write (0,*)'lsoil, lsoil_ruc =',lsoil, lsoil_ruc
-        write (0,*)'restart = ',restart
+        write (0,*)'lsm_cold_start = ',lsm_cold_start
       endif
 
       ipr = 10
@@ -1627,7 +1630,7 @@ module lsm_ruc
       !! Check if RUC soil data (tslb, ...) is provided or not
       !if (minval(tslb)==maxval(tslb)) then
       ! For restart runs, can assume that RUC soil data is provided
-      if (.not.restart) then
+      if (lsm_cold_start) then
 
         flag_sst = 0
 
