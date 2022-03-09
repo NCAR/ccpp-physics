@@ -14,6 +14,22 @@
   dimensions = ()
   type = integer
   intent = in
+[xlat_d]
+  standard_name = latitude_in_degree
+  long_name = latitude in degree north
+  units = degree_north
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[xlon_d]
+  standard_name = longitude_in_degree
+  long_name = longitude in degree east
+  units = degree_east
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
 [flag_init]
   standard_name = flag_for_first_timestep
   long_name = flag signaling first time step for time integration loop
@@ -69,6 +85,20 @@
   units = flag
   dimensions = ()
   type = logical
+  intent = in
+[lsm]
+  standard_name = control_for_land_surface_scheme
+  long_name = flag for land surface model
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[lsm_ruc]
+  standard_name = identifier_for_ruc_land_surface_scheme
+  long_name = flag for RUC land surface model
+  units = flag
+  dimensions = ()
+  type = integer
   intent = in
 [landfrac]
   standard_name = land_area_fraction
@@ -761,6 +791,20 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
+  intent = in
+[lsm]
+  standard_name = control_for_land_surface_scheme
+  long_name = flag for land surface model
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[lsm_ruc]
+  standard_name = identifier_for_ruc_land_surface_scheme
+  long_name = flag for RUC land surface model
+  units = flag
+  dimensions = ()
+  type = integer
   intent = in
 [landfrac]
   standard_name = land_area_fraction

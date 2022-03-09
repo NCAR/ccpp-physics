@@ -27,8 +27,9 @@ contains
 !> \section arg_table_GFS_surface_composites_pre_run Argument Table
 !! \htmlinclude GFS_surface_composites_pre_run.html
 !!
-   subroutine GFS_surface_composites_pre_run (im, flag_init, flag_restart, lkm, frac_grid,                                &
-                                 flag_cice, cplflx, cplice, cplwav2atm, landfrac, lakefrac, lakedepth, oceanfrac, frland, &
+   subroutine GFS_surface_composites_pre_run (im, xlat_d, xlon_d, flag_init, flag_restart, lkm, frac_grid,                &
+                                 flag_cice, cplflx, cplice, cplwav2atm, lsm, lsm_ruc,                                     &
+                                 landfrac, lakefrac, lakedepth, oceanfrac, frland,                                        &
                                  dry, icy, lake, use_flake, wet, hice, cice, zorlo, zorll, zorli,                         &
                                  snowd,            snowd_lnd, snowd_ice, tprcp, tprcp_wat,                                &
                                  tprcp_lnd, tprcp_ice, uustar, uustar_wat, uustar_lnd, uustar_ice,                        &
@@ -40,10 +41,11 @@ contains
       implicit none
 
       ! Interface variables
-      integer,                             intent(in   ) :: im, lkm, kdt
+      integer,                             intent(in   ) :: im, lkm, kdt, lsm, lsm_ruc
       logical,                             intent(in   ) :: flag_init, flag_restart, frac_grid, cplflx, cplice, cplwav2atm
       logical, dimension(:),              intent(inout)  :: flag_cice
       logical,              dimension(:), intent(inout)  :: dry, icy, lake, use_flake, wet
+      real(kind=kind_phys), dimension(:), intent(in   )  :: xlat_d, xlon_d
       real(kind=kind_phys), dimension(:), intent(in   )  :: landfrac, lakefrac, lakedepth, oceanfrac
       real(kind=kind_phys), dimension(:), intent(inout)  :: cice, hice
       real(kind=kind_phys), dimension(:), intent(  out)  :: frland
@@ -201,12 +203,17 @@ contains
             endif
           endif
         enddo
-      endif
+      endif ! frac_grid
 
       do i=1,im
         tprcp_wat(i) = tprcp(i)
         tprcp_lnd(i) = tprcp(i)
         tprcp_ice(i) = tprcp(i)
+        !if ( (xlon_d(i) > 298.6) .and.  (xlon_d(i) < 298.7) .and. &
+        !   (xlat_d(i) >  68.6 ) .and.  (xlat_d(i) < 68.7 )) then
+        !  print *,'Composit weasd_ice(i),snowd_ice',kdt,i,xlat_d(i),xlon_d(i),weasd_ice(i),snowd_ice(i)
+        !endif
+
         if (wet(i)) then                   ! Water
           uustar_wat(i) = uustar(i)
             tsfc_wat(i) = tsfco(i)
@@ -219,7 +226,6 @@ contains
         endif
         if (dry(i)) then                   ! Land
           uustar_lnd(i) = uustar(i)
-           weasd_lnd(i) = weasd(i)
            tsurf_lnd(i) = tsfcl(i)
         ! DH*
         else
@@ -230,7 +236,6 @@ contains
         endif
         if (icy(i)) then                   ! Ice
           uustar_ice(i) = uustar(i)
-           weasd_ice(i) = weasd(i)
            tsurf_ice(i) = tisfc(i)
             ep1d_ice(i) = zero
             gflx_ice(i) = zero
@@ -262,14 +267,18 @@ contains
         do i=1,im
           if (dry(i)) then
             if (icy(i)) then
-              if (kdt == 1 .or. (.not. cplflx .or. lakefrac(i) > zero)) then 
+              if ((kdt == 1 .and. .not. flag_restart) .and. (cplflx .or. lsm == lsm_ruc .or. lakefrac(i) > zero)) then
+              !-- if coupled to ice model, or use RUC ice model or use lake
+              !   model and it is not restart, then initialize snow at kdt=1
                 tem = one / (cice(i)*(one-frland(i)))
                 snowd_ice(i) = max(zero, (snowd(i) - snowd_lnd(i)*frland(i)) * tem)
                 weasd_ice(i) = max(zero, (weasd(i) - weasd_lnd(i)*frland(i)) * tem)
               endif
             endif
           elseif (icy(i)) then
-            if (kdt == 1 .or. (.not. cplflx .or. lakefrac(i) > zero)) then 
+            if ((kdt == 1 .and. .not. flag_restart) .and. (cplflx .or. lsm == lsm_ruc .or. lakefrac(i) > zero)) then
+            !-- if coupled to ice model, or use RUC ice model or use lake
+            !   model and it is not restart, then initialize snow at kdt=1
               tem = one / cice(i)
               snowd_lnd(i) = zero
               snowd_ice(i) = snowd(i) * tem
@@ -280,8 +289,15 @@ contains
         enddo
       else
         do i=1,im
+          !if ( (xlon_d(i) > 298.6) .and.  (xlon_d(i) < 298.7) .and. &
+          !  (xlat_d(i) >  68.6 ) .and.  (xlat_d(i) < 68.7 )) then
+          !   print *,'Composit2
+          !   weasd_ice(i),snowd_ice',kdt,i,xlat_d(i),xlon_d(i),weasd_ice(i),snowd_ice(i)
+          !endif
           if (icy(i)) then
-            if (kdt == 1 .or. (.not. cplflx .or. lakefrac(i) > zero)) then
+            if ((kdt == 1 .and. .not. flag_restart) .and. (cplflx .or. lsm == lsm_ruc .or. lakefrac(i) > zero)) then
+            !-- if coupled to ice model, or use RUC ice model or use lake
+            !   model and it is not restart, then initialize snow at kdt=1
               snowd_lnd(i) = zero
               weasd_lnd(i) = zero
               tem = one / cice(i)
@@ -289,6 +305,11 @@ contains
               weasd_ice(i) = weasd(i) * tem
             endif
           endif
+          !if ( (xlon_d(i) > 298.6) .and.  (xlon_d(i) < 298.7) .and. &
+          !  (xlat_d(i) >  68.6 ) .and.  (xlat_d(i) < 68.7 )) then
+          !  print *,'Composit3
+          !  weasd_ice(i),snowd_ice',kdt,i,xlat_d(i),xlon_d(i),weasd_ice(i),snowd_ice(i)
+          !endif
         enddo
       endif
 
@@ -403,8 +424,8 @@ contains
 !! \htmlinclude GFS_surface_composites_post_run.html
 !!
    subroutine GFS_surface_composites_post_run (                                                                                   &
-      im, kice, km, rd, rvrdm1, cplflx, cplwav2atm, frac_grid, flag_cice, thsfc_loc, islmsk, dry, wet, icy, wind, t1, q1, prsl1,  &
-      landfrac, lakefrac, oceanfrac, zorl, zorlo, zorll, zorli, garea,                                                            &
+      im, kice, km, rd, rvrdm1, cplflx, cplwav2atm, lsm, lsm_ruc, frac_grid, flag_cice, thsfc_loc, islmsk, dry, wet, icy,         &
+      wind, t1, q1, prsl1, landfrac, lakefrac, oceanfrac, zorl, zorlo, zorll, zorli, garea,                                       &
       cd, cd_wat, cd_lnd, cd_ice, cdq, cdq_wat, cdq_lnd, cdq_ice, rb, rb_wat, rb_lnd, rb_ice, stress, stress_wat, stress_lnd,     &
       stress_ice, ffmm, ffmm_wat, ffmm_lnd, ffmm_ice, ffhh, ffhh_wat, ffhh_lnd, ffhh_ice, uustar, uustar_wat, uustar_lnd,         &
       uustar_ice, fm10, fm10_wat, fm10_lnd, fm10_ice, fh2, fh2_wat, fh2_lnd, fh2_ice, tsurf_wat, tsurf_lnd, tsurf_ice,            &
@@ -417,7 +438,7 @@ contains
 
       implicit none
 
-      integer,                              intent(in) :: im, kice, km
+      integer,                              intent(in) :: im, kice, km, lsm, lsm_ruc
       logical,                              intent(in) :: cplflx, frac_grid, cplwav2atm
       logical,                              intent(in) :: lheatstrg
       logical, dimension(:),                intent(in) :: flag_cice, dry, wet, icy
@@ -544,6 +565,8 @@ contains
             cdq(i)    = cdq_lnd(i)
             stress(i) = stress_lnd(i)
             uustar(i) = uustar_lnd(i)
+            weasd(i)  = weasd_lnd(i)
+            snowd(i)  = snowd_lnd(i)
           elseif(txo == one) then ! 100% open water
             rb(i)     = rb_wat(i)
             ffmm(i)   = ffmm_wat(i)
@@ -554,6 +577,8 @@ contains
             cdq(i)    = cdq_wat(i)
             stress(i) = stress_wat(i)
             uustar(i) = uustar_wat(i)
+            weasd(i)  = zero
+            snowd(i)  = zero
           elseif(txi == one) then ! 100% ice
             rb(i)     = rb_ice(i)
             ffmm(i)   = ffmm_ice(i)
@@ -564,6 +589,14 @@ contains
             cdq(i)    = cdq_ice(i)
             stress(i) = stress_ice(i)
             uustar(i) = uustar_ice(i)
+            if(lsm /= lsm_ruc) then
+              weasd(i)  = weasd_ice(i) * cice(i)
+              snowd(i)  = snowd_ice(i) * cice(i)
+            else
+              weasd(i)  = weasd_ice(i)
+              snowd(i)  = snowd_ice(i)
+            endif
+
           else ! Mix of multiple surface types (land, water, and/or ice)
 !
 ! re-compute zvfun with composite surface roughness & green vegetation fraction
@@ -644,6 +677,7 @@ contains
 
         do i=1,im
           if (islmsk(i) == 1) then
+          !-- land
             zorl(i)   = zorll(i)
             cd(i)     = cd_lnd(i)
             cdq(i)    = cdq_lnd(i)
@@ -669,6 +703,7 @@ contains
             hice(i)   = zero
             cice(i)   = zero
           elseif (islmsk(i) == 0) then
+          !-- water
             zorl(i)   = zorlo(i)
             cd(i)     = cd_wat(i)
             cdq(i)    = cdq_wat(i)
@@ -695,6 +730,7 @@ contains
             hice(i)   = zero
             cice(i)   = zero
           else ! islmsk(i) == 2
+          !-- ice
             zorl(i)   = zorli(i)
             cd(i)     = cd_ice(i)
             cdq(i)    = cdq_ice(i)
@@ -709,8 +745,13 @@ contains
             chh(i)    = chh_ice(i)
             gflx(i)   = gflx_ice(i)
             ep1d(i)   = ep1d_ice(i)
-            weasd(i)  = weasd_ice(i) * cice(i)
-            snowd(i)  = snowd_ice(i) * cice(i)
+            if(lsm /= lsm_ruc) then
+              weasd(i)  = weasd_ice(i) * cice(i)
+              snowd(i)  = snowd_ice(i) * cice(i)
+            else
+              weasd(i)  = weasd_ice(i)
+              snowd(i)  = snowd_ice(i)
+            endif
             qss(i)    = qss_ice(i)
             evap(i)   = evap_ice(i)
             hflx(i)   = hflx_ice(i)
