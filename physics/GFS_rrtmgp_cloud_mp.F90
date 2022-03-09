@@ -712,11 +712,11 @@ contains
     cld_condensate(1:nCol,1:nLev,4) = tracer(1:nCol,1:nLev,i_cldsnow) + &! -snow + grapuel
                                       tracer(1:nCol,1:nLev,i_cldgrpl)
 
-    ! Cloud water path (g/m2)
     cld_lwp(:,:) = 0.0
     cld_iwp(:,:) = 0.0
     cld_rwp(:,:) = 0.0
     cld_swp(:,:) = 0.0
+    cld_frac(:,:) = 0.0
     do iLay = 1, nLev-1
        do iCol = 1, nCol
           ! Compute liquid/ice condensate path from mixing ratios (kg/kg)->(g/m2)
@@ -726,13 +726,8 @@ contains
           cld_iwp(iCol,iLay)  = max(0., cld_condensate(iCol,iLay,2) * tem1)
           cld_rwp(iCol,iLay)  = max(0., cld_condensate(iCol,iLay,3) * tem1)
           cld_swp(iCol,iLay)  = max(0., cld_condensate(iCol,iLay,4) * tem1)
-       enddo
-    enddo
        
-    ! Xu-Randall (1996) cloud-fraction. **Additionally, Conditioned on relative-humidity**
-    cld_frac(:,:) = 0.0
-    do iLay = 1, nLev-1
-       do iCol = 1, nCol
+          ! Xu-Randall (1996) cloud-fraction. **Additionally, Conditioned on relative-humidity**
           if (relhum(iCol,iLay) > 0.99) then
              cld_frac(iCol,iLay) = 1._kind_phys
           else
