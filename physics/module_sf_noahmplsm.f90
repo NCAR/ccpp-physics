@@ -2507,8 +2507,12 @@ endif   ! croptype == 0
 ! not in use because of the separation of the canopy layer from the ground.
 ! but this may represent the effects of leaf litter (niu comments)
 !       df1 = df1 * exp (sbeta * shdfac)
-        laimax = maxval(parameters%laim)
-        df(1) = df(1) * exp (sbeta * elai/laimax)
+        if(elai.gt.0.) then
+         laimax = maxval(parameters%laim)
+         laimax = min(laimax, 0.1)
+         
+         df(1) = df(1) * exp (sbeta * elai/laimax)
+        endif
 
 ! compute lake thermal properties 
 ! (no consideration of turbulent mixing for this version)
@@ -5165,6 +5169,9 @@ endif   ! croptype == 0
     fv        = ustarx
     laimax = maxval(parameters%laim)
     saimax = maxval(parameters%saim)
+    laimax = min(laimax, 0.1)
+    saimax = min(saimax, 0.1)
+
 !   fv        = ur*vkc/log((zlvl-zpd)/z0m)
 
     if(vegetated) then 
