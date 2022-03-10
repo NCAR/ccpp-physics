@@ -187,7 +187,7 @@ contains
     real(kind_phys), dimension(nLev)   :: hgtc
     real(kind_phys), dimension(nCol,nLev) :: o3_lay
     real(kind_phys), dimension(nCol,nLev, NF_VGAS) :: gas_vmr
-    real(kind_phys), parameter :: con_rdog = con_rd/con_g
+    real(kind_phys) :: con_rdog
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -265,6 +265,7 @@ contains
     ! Compute layer-thickness between layer boundaries (deltaZ) and layer centers (deltaZc)
     !
     deltaP = abs(p_lev(:,2:nLev+1)-p_lev(:,1:nLev))
+    con_rdog = con_rd/con_g
     do iCol=1,nCol 
        if (top_at_1) then
           ! Layer thickness (m)

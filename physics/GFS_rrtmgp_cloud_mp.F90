@@ -333,8 +333,8 @@ contains
     ! Local
     integer :: iCol, iLay
     real(kind_phys) :: tem1, deltaP, clwc, qc, qi
-    real(kind_phys), parameter :: tem1 = 1.0e5/con_g
 
+    tem1 = 1.0e5/con_g
     do iLay = 1, nLev
        do iCol = 1, nCol
           if (qci_conv(iCol,iLay) > 0.) then
@@ -344,8 +344,8 @@ contains
 
              ! Compute LWP/IWP
              deltaP = abs(p_lev(iCol,iLay+1)-p_lev(iCol,iLay))*0.01
-             cld_cnv_lwp(iCol,iLay) = max(0., qc * tem1*deltaP)
-             cld_cnv_iwp(iCol,iLay) = max(0., qi * tem1*deltaP)
+             cld_cnv_lwp(iCol,iLay) = max(0., qc * tem1 * deltaP)
+             cld_cnv_iwp(iCol,iLay) = max(0., qi * tem1 * deltaP)
 
              ! Particle sizes
              if (nint(lsmask(iCol)) == 1) then !land
@@ -409,8 +409,8 @@ contains
     ! Local
     integer :: iCol, iLay
     real(kind_phys) :: tem1, qc, qi, deltaP
-    real(kind_phys), parameter :: tem1 = 1.0e5/con_g
 
+    tem1 = 1.0e5/con_g
     do iLay = 1, nLev
        do iCol = 1, nCol
           if (cld_pbl_frac(iCol,iLay) > cld_limit_lower) then
@@ -565,9 +565,8 @@ contains
          cld_rerain              ! Cloud rain effective radius       
 
     ! Local variables
-    real(kind_phys) :: tem2,tem3,pfac,deltaP
+    real(kind_phys) :: tem1,tem2,tem3,pfac,deltaP
     real(kind_phys), dimension(nCol, nLev, min(4,ncnd)) :: cld_condensate
-    real(kind_phys), parameter :: tem1 = 1.0e5/con_g
     integer :: iCol,iLay,l,ncndl
 
     ! Cloud condensate
@@ -580,6 +579,7 @@ contains
     endif
 
     ! Cloud water path (g/m2)
+    tem1 = 1.0e5/con_g
     do iLay = 1, nLev
        do iCol = 1, nCol
           ! Compute liquid/ice condensate path from mixing ratios (kg/kg)->(g/m2)   
@@ -698,9 +698,8 @@ contains
          cld_rwp              ! Cloud rain water path
 
     ! Local variables
-    real(kind_phys) :: pfac, cld_mr, deltaP
+    real(kind_phys) :: tem1, pfac, cld_mr, deltaP
     real(kind_phys), dimension(nCol, nLev, min(4,ncnd)) :: cld_condensate
-    real(kind_phys), parameter :: tem1 = 1.0e5/con_g
     integer :: iCol,iLay,l
 
     ! Cloud condensate
@@ -715,6 +714,7 @@ contains
     cld_rwp(:,:) = 0.0
     cld_swp(:,:) = 0.0
     cld_frac(:,:) = 0.0
+    tem1 = 1.0e5/con_g
     do iLay = 1, nLev-1
        do iCol = 1, nCol
           ! Compute liquid/ice condensate path from mixing ratios (kg/kg)->(g/m2)
