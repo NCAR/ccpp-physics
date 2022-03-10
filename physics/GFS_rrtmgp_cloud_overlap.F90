@@ -11,11 +11,6 @@ module GFS_rrtmgp_cloud_overlap
 contains  
   ! ######################################################################################
   ! ######################################################################################
-  subroutine GFS_rrtmgp_cloud_overlap_init()
-  end subroutine GFS_rrtmgp_cloud_overlap_init
-
-  ! ######################################################################################
-  ! ######################################################################################
 !! \section arg_table_GFS_rrtmgp_cloud_overlap_run
 !! \htmlinclude GFS_rrtmgp_cloud_overlap_run.html
 !!  
@@ -128,9 +123,4 @@ contains
     precip_overlap_param = cloud_overlap_param    
     
   end subroutine GFS_rrtmgp_cloud_overlap_run
-  
-  ! #########################################################################################
-  ! #########################################################################################
-  subroutine GFS_rrtmgp_cloud_overlap_finalize()
-  end subroutine GFS_rrtmgp_cloud_overlap_finalize
 end module GFS_rrtmgp_cloud_overlap

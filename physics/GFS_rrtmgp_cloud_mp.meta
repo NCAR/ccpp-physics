@@ -423,7 +423,7 @@
   units = J kg-1 K-1
   dimensions = ()
   type = real
-  kind = kind_phys      
+  kind = kind_phys
   intent = in
 [con_eps]
   standard_name = ratio_of_dry_air_to_water_vapor_gas_constants

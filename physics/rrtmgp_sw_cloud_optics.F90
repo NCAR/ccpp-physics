@@ -420,9 +420,9 @@ contains
          imfdeepcnv,          & ! 
          imfdeepcnv_gf,       & ! 
          imfdeepcnv_samf        !
-    integer,intent(in),dimension(ncol) :: &
+    integer,intent(in),dimension(:) :: &
          idxday                 ! Indices for daylit points.
-    real(kind_phys), dimension(ncol,nLev),intent(in) :: &
+    real(kind_phys), dimension(:,:),intent(in) :: &
          cld_frac,            & ! Total cloud fraction by layer
          cld_lwp,             & ! Cloud liquid water path
          cld_reliq,           & ! Cloud liquid effective radius
@@ -451,7 +451,7 @@ contains
          sw_optical_props_cnvcloudsByBand, & ! RRTMGP DDT: Shortwave optical properties in each band (convective cloud)
          sw_optical_props_MYNNcloudsByBand,& ! RRTMGP DDT: Shortwave optical properties in each band (MYNN PBL cloud)
          sw_optical_props_precipByBand       ! RRTMGP DDT: Shortwave optical properties in each band (cloud precipitation)
-    real(kind_phys), dimension(ncol,NLev), intent(out) :: &
+    real(kind_phys), dimension(:,:), intent(out) :: &
          cldtausw                            ! Approx 10.mu band layer cloud optical depth  
     
     ! Local variables

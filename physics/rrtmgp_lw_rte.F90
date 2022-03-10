@@ -46,7 +46,7 @@ contains
          nCol,                    & ! Number of horizontal gridpoints
          nLev,                    & ! Number of vertical levels
          nGauss_angles              ! Number of angles used in Gaussian quadrature
-    real(kind_phys), dimension(lw_gas_props%get_nband(),ncol), intent(in) :: &
+    real(kind_phys), dimension(:,:), intent(in) :: &
          sfc_emiss_byband                    ! Surface emissivity in each band
     type(ty_source_func_lw),intent(in) :: &
          sources                             ! RRTMGP DDT: longwave source functions
@@ -59,7 +59,7 @@ contains
          lw_optical_props_cnvclouds,       & ! RRTMGP DDT: longwave convective cloud optical properties
          lw_optical_props_MYNNcloudsByBand   ! RRTMGP DDT: longwave MYNN-EDMF PBL cloud optical properties
     ! Outputs
-    real(kind_phys), dimension(ncol,nLev+1), intent(inout) :: &
+    real(kind_phys), dimension(:,:), intent(inout) :: &
          fluxlwUP_jac,             & ! Jacobian of upwelling LW surface radiation (W/m2/K) 
          fluxlwUP_allsky,          & ! All-sky flux (W/m2)
          fluxlwDOWN_allsky,        & ! All-sky flux (W/m2)

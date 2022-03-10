@@ -25,10 +25,6 @@ module GFS_rrtmgp_cloud_mp
   public GFS_rrtmgp_cloud_mp_init, GFS_rrtmgp_cloud_mp_run, GFS_rrtmgp_cloud_mp_finalize
 
 contains  
-  ! ######################################################################################
-  ! ######################################################################################
-  subroutine GFS_rrtmgp_cloud_mp_init()
-  end subroutine GFS_rrtmgp_cloud_mp_init
 
 !! \section arg_table_GFS_rrtmgp_cloud_mp_run
 !! \htmlinclude GFS_rrtmgp_cloud_mp_run_html
@@ -290,11 +286,6 @@ contains
   end subroutine GFS_rrtmgp_cloud_mp_run
 
   ! ######################################################################################
-  ! ######################################################################################
-  subroutine GFS_rrtmgp_cloud_mp_finalize()
-  end subroutine GFS_rrtmgp_cloud_mp_finalize
-
-  ! ######################################################################################
   ! Compute cloud radiative properties for Grell-Freitas convective cloud scheme.
   !                    (Adopted from module_SGSCloud_RadPre)
   !
@@ -342,19 +333,19 @@ contains
     ! Local
     integer :: iCol, iLay
     real(kind_phys) :: tem1, deltaP, clwc, qc, qi
+    real(kind_phys), parameter :: tem1 = 1.0e5/con_g
 
     do iLay = 1, nLev
        do iCol = 1, nCol
           if (qci_conv(iCol,iLay) > 0.) then
              ! Partition the convective clouds by phase.
-             qc = qci_conv(iCol,iLay)*(     min(1., max(0., (t_lay(iCol,iLay)-244.)/25.)))
-             qi = qci_conv(iCol,iLay)*(1. - min(1., max(0., (t_lay(iCol,iLay)-244.)/25.)))
+             qc = qci_conv(iCol,iLay)*(     min(1., max(0., (t_lay(iCol,iLay)-244.)*0.04)))
+             qi = qci_conv(iCol,iLay)*(1. - min(1., max(0., (t_lay(iCol,iLay)-244.)*0.04)))
 
              ! Compute LWP/IWP
-             deltaP = abs(p_lev(iCol,iLay+1)-p_lev(iCol,iLay))/100.
-             tem1   = (1.0e5/con_g) * deltaP
-             cld_cnv_lwp(iCol,iLay) = max(0., qc * tem1)
-             cld_cnv_iwp(iCol,iLay) = max(0., qi * tem1)
+             deltaP = abs(p_lev(iCol,iLay+1)-p_lev(iCol,iLay))*0.01
+             cld_cnv_lwp(iCol,iLay) = max(0., qc * tem1*deltaP)
+             cld_cnv_iwp(iCol,iLay) = max(0., qi * tem1*deltaP)
 
              ! Particle sizes
              if (nint(lsmask(iCol)) == 1) then !land
@@ -418,6 +409,7 @@ contains
     ! Local
     integer :: iCol, iLay
     real(kind_phys) :: tem1, qc, qi, deltaP
+    real(kind_phys), parameter :: tem1 = 1.0e5/con_g
 
     do iLay = 1, nLev
        do iCol = 1, nCol
@@ -427,10 +419,9 @@ contains
              qi = qi_mynn(iCol,iLay)*cld_pbl_frac(iCol,iLay)
 
              ! LWP/IWP
-             deltaP = abs(p_lev(iCol,iLay+1)-p_lev(iCol,iLay))/100.
-             tem1   = (1.0e5/con_g) * deltaP
-             cld_pbl_lwp(iCol,iLay) = max(0., qc * tem1)
-             cld_pbl_iwp(iCol,iLay) = max(0., qi * tem1)
+             deltaP = abs(p_lev(iCol,iLay+1)-p_lev(iCol,iLay))
+             cld_pbl_lwp(iCol,iLay) = max(0., qc * tem1 * deltaP)
+             cld_pbl_iwp(iCol,iLay) = max(0., qi * tem1 * deltaP)
 
              ! Particle sizes
              if (nint(lsmask(iCol)) == 1) then
@@ -493,7 +484,7 @@ contains
        do iCol = 1, nCol
           if (cnv_mixratio(iCol,iLay) > 0._kind_phys) then
              tem1   = min(1.0, max(0.0, (con_ttp-t_lay(iCol,iLay))*0.05))
-             deltaP = abs(p_lev(iCol,iLay+1)-p_lev(iCol,iLay))/100.
+             deltaP = abs(p_lev(iCol,iLay+1)-p_lev(iCol,iLay))*0.01
              clwc   = max(0.0, cnv_mixratio(iCol,iLay)) * con_g * deltaP
              cld_cnv_iwp(iCol,iLay) = clwc * tem1
              cld_cnv_lwp(iCol,iLay) = clwc - cld_cnv_iwp(iCol,iLay)
@@ -574,8 +565,9 @@ contains
          cld_rerain              ! Cloud rain effective radius       
 
     ! Local variables
-    real(kind_phys) :: tem1,tem2,tem3,pfac,deltaP
+    real(kind_phys) :: tem2,tem3,pfac,deltaP
     real(kind_phys), dimension(nCol, nLev, min(4,ncnd)) :: cld_condensate
+    real(kind_phys), parameter :: tem1 = 1.0e5/con_g
     integer :: iCol,iLay,l,ncndl
 
     ! Cloud condensate
@@ -592,13 +584,12 @@ contains
        do iCol = 1, nCol
           ! Compute liquid/ice condensate path from mixing ratios (kg/kg)->(g/m2)   
           if (cld_frac(iCol,iLay) > cld_limit_lower) then
-             deltaP = abs(p_lev(iCol,iLay+1)-p_lev(iCol,iLay))/100.
-             tem1                = (1.0e5/con_g) * deltaP
-             cld_lwp(iCol,iLay)  = max(0., cld_condensate(iCol,iLay,1) * tem1)
-             cld_iwp(iCol,iLay)  = max(0., cld_condensate(iCol,iLay,2) * tem1)
+             deltaP = abs(p_lev(iCol,iLay+1)-p_lev(iCol,iLay))*0.01
+             cld_lwp(iCol,iLay)  = max(0., cld_condensate(iCol,iLay,1) * tem1 * deltaP)
+             cld_iwp(iCol,iLay)  = max(0., cld_condensate(iCol,iLay,2) * tem1 * deltaP)
              if (ncnd > 2) then
-                cld_rwp(iCol,iLay)  = max(0., cld_condensate(iCol,iLay,3) * tem1)
-                cld_swp(iCol,iLay)  = max(0., cld_condensate(iCol,iLay,4) * tem1) 
+                cld_rwp(iCol,iLay)  = max(0., cld_condensate(iCol,iLay,3) * tem1 * deltaP)
+                cld_swp(iCol,iLay)  = max(0., cld_condensate(iCol,iLay,4) * tem1 * deltaP)
              endif
           endif
        enddo
@@ -626,7 +617,7 @@ contains
              ! and McFarquhar (1996) \cite heymsfield_and_mcfarquhar_1996.
              tem2 = t_lay(iCol,iLay) - con_ttp
              if (cld_iwp(iCol,iLay) > 0.0) then
-                deltaP = abs(p_lev(iCol,iLay+1)-p_lev(iCol,iLay))/100.
+                deltaP = abs(p_lev(iCol,iLay+1)-p_lev(iCol,iLay))*0.01
                 tem3 = (con_g/con_rd ) * cld_iwp(iCol,iLay) * (0.01*p_lay(iCol,iLay)) / (deltaP*tv_lay(iCol,iLay))
                 if (tem2 < -50.0) then
                    cld_reice(iCol,iLay) = (1250.0/9.917) * tem3 ** 0.109
@@ -707,8 +698,9 @@ contains
          cld_rwp              ! Cloud rain water path
 
     ! Local variables
-    real(kind_phys) :: pfac, tem1, cld_mr, deltaP
+    real(kind_phys) :: pfac, cld_mr, deltaP
     real(kind_phys), dimension(nCol, nLev, min(4,ncnd)) :: cld_condensate
+    real(kind_phys), parameter :: tem1 = 1.0e5/con_g
     integer :: iCol,iLay,l
 
     ! Cloud condensate
@@ -726,12 +718,11 @@ contains
     do iLay = 1, nLev-1
        do iCol = 1, nCol
           ! Compute liquid/ice condensate path from mixing ratios (kg/kg)->(g/m2)
-          deltaP              = abs(p_lev(iCol,iLay+1)-p_lev(iCol,iLay))/100.
-          tem1                = (1.0e5/con_g) * deltaP
-          cld_lwp(iCol,iLay)  = max(0., cld_condensate(iCol,iLay,1) * tem1)
-          cld_iwp(iCol,iLay)  = max(0., cld_condensate(iCol,iLay,2) * tem1)
-          cld_rwp(iCol,iLay)  = max(0., cld_condensate(iCol,iLay,3) * tem1)
-          cld_swp(iCol,iLay)  = max(0., cld_condensate(iCol,iLay,4) * tem1)
+          deltaP              = abs(p_lev(iCol,iLay+1)-p_lev(iCol,iLay))*0.01
+          cld_lwp(iCol,iLay)  = max(0., cld_condensate(iCol,iLay,1) * tem1 * deltaP)
+          cld_iwp(iCol,iLay)  = max(0., cld_condensate(iCol,iLay,2) * tem1 * deltaP)
+          cld_rwp(iCol,iLay)  = max(0., cld_condensate(iCol,iLay,3) * tem1 * deltaP)
+          cld_swp(iCol,iLay)  = max(0., cld_condensate(iCol,iLay,4) * tem1 * deltaP)
        
           ! Xu-Randall (1996) cloud-fraction. **Additionally, Conditioned on relative-humidity**
           if (present(cond_cfrac_onRH) .and. relhum(iCol,iLay) > 0.99) then

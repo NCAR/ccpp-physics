@@ -408,10 +408,10 @@ contains
          imfdeepcnv,          & ! 
          imfdeepcnv_gf,       & ! 
          imfdeepcnv_samf        ! 
-    real(kind_phys), dimension(nCol), intent(in) :: &
+    real(kind_phys), dimension(:), intent(in) :: &
          lon,                 & ! Longitude
          lat                    ! Latitude
-    real(kind_phys), dimension(ncol,nLev),intent(in) :: &
+    real(kind_phys), dimension(:,:),intent(in) :: &
          p_lay,               & ! Layer pressure (Pa)
          cld_frac,            & ! Total cloud fraction by layer
          cld_lwp,             & ! Cloud liquid water path
@@ -442,7 +442,7 @@ contains
          lw_optical_props_cnvcloudsByBand,  & ! RRTMGP DDT: Longwave optical properties in each band (convective cloud)
          lw_optical_props_MYNNcloudsByBand, & ! RRTMGP DDT: Longwave optical properties in each band (MYNN-PBL cloud)
          lw_optical_props_precipByBand        ! RRTMGP DDT: Longwave optical properties in each band (precipitation)
-    real(kind_phys), dimension(ncol,nLev), intent(inout) :: &
+    real(kind_phys), dimension(:,:), intent(inout) :: &
          cldtaulw                           ! Approx 10.mu band layer cloud optical depth  
          
     ! Local variables

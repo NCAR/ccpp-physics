@@ -45,18 +45,18 @@ contains
          iovr_exp,                        & ! Flag for exponential cloud overlap method
          iovr_exprand,                    & ! Flag for exponential-random cloud overlap method
          isubc_sw
-    integer,intent(in),dimension(ncol) :: &
+    integer,intent(in),dimension(:) :: &
          idxday                             ! Indices for daylit points.
-    integer,intent(in),dimension(ncol) :: &
+    integer,intent(in),dimension(:) :: &
          icseed_sw                          ! auxiliary special cloud related array when module 
                                             ! variable isubc_sw=2, it provides permutation seed 
                                             ! for each column profile that are used for generating 
                                             ! random numbers. when isubc_sw /=2, it will not be used.
-    real(kind_phys), dimension(ncol,nLev),intent(in) :: &
+    real(kind_phys), dimension(:,:),intent(in) :: &
          cld_frac,                        & ! Total cloud fraction by layer
          cld_cnv_frac,                    & ! Convective cloud fraction by layer
          precip_frac                        ! Precipitation fraction by layer
-    real(kind_phys), dimension(ncol,nLev), intent(in)  :: &
+    real(kind_phys), dimension(:,:), intent(in)  :: &
          cloud_overlap_param,             & ! Cloud overlap parameter
          cnv_cloud_overlap_param,         & ! Convective cloud overlap parameter
          precip_overlap_param               ! Precipitation overlap parameter

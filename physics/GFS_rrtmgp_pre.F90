@@ -99,11 +99,11 @@ contains
 !! \htmlinclude GFS_rrtmgp_pre_run.html
 !!
   subroutine GFS_rrtmgp_pre_run(me, nCol, nLev, nTracers, i_o3, lsswr, lslwr, fhswr, fhlwr, &
-       xlat, xlon,  prsl, tgrs, prslk, prsi, qgrs, tsfc, coslat, sinlat, con_g, con_rd, con_eps, con_epsm1,&
-       con_fvirt, con_epsqs, solhr, minGPpres, maxGPpres, minGPtemp, maxGPtemp, raddt,      &
-       p_lay, t_lay, p_lev, t_lev, tsfg, tsfa, qs_lay, q_lay, tv_lay, relhum, tracer, deltaZ, deltaZc, deltaP, &
-       active_gases_array, gas_concentrations, tsfc_radtime, coszen, coszdg, top_at_1, iSFC,&
-       iTOA, errmsg, errflg)
+       xlat, xlon,  prsl, tgrs, prslk, prsi, qgrs, tsfc, coslat, sinlat, con_g, con_rd,     &
+       con_eps, con_epsm1, con_fvirt, con_epsqs, solhr, minGPpres, maxGPpres, minGPtemp,    &
+       maxGPtemp, raddt, p_lay, t_lay, p_lev, t_lev, tsfg, tsfa, qs_lay, q_lay, tv_lay,     &
+       relhum, tracer, deltaZ, deltaZc, deltaP, active_gases_array, gas_concentrations,     &
+       tsfc_radtime, coszen, coszdg, top_at_1, iSFC, iTOA, errmsg, errflg)
     
     ! Inputs   
     integer, intent(in)    :: &
@@ -129,20 +129,21 @@ contains
          con_fvirt,         & ! Physical constant: Inverse of epsilon minus one
          con_epsqs,         & ! Physical constant: Minimum saturation mixing-ratio (kg/kg)
          solhr                ! Time in hours after 00z at the current timestep 
-    real(kind_phys), dimension(nCol), intent(in) :: & 
+    real(kind_phys), dimension(:), intent(in) :: & 
     	 xlon,              & ! Longitude
     	 xlat,              & ! Latitude
     	 tsfc,              & ! Surface skin temperature (K)
          coslat,            & ! Cosine(latitude)
          sinlat               ! Sine(latitude) 
-    real(kind_phys), dimension(nCol,nLev), intent(in) :: & 
+    real(kind_phys), dimension(:,:), intent(in) :: & 
          prsl,              & ! Pressure at model-layer centers (Pa)
          tgrs,              & ! Temperature at model-layer centers (K)
-         prslk                ! Exner function at model layer centers (1)
-    real(kind_phys), dimension(nCol,nLev+1), intent(in) :: & 
+         prslk,             & ! Exner function at model layer centers (1)
          prsi                 ! Pressure at model-interfaces (Pa)
-    real(kind_phys), dimension(nCol,nLev,nTracers), intent(in) :: & 
+    real(kind_phys), dimension(:,:,:), intent(in) :: & 
          qgrs                 ! Tracer concentrations (kg/kg)
+    character(len=*), dimension(:), intent(in) :: &
+         active_gases_array   ! List of active gases from namelist as array
 
     ! Outputs
     character(len=*), intent(out) :: &
@@ -155,11 +156,13 @@ contains
          top_at_1             ! Vertical ordering flag
     real(kind_phys), intent(inout) :: &
          raddt                ! Radiation time-step
-    real(kind_phys), dimension(ncol), intent(inout) :: &
+    real(kind_phys), dimension(:), intent(inout) :: &
          tsfg,              & ! Ground temperature
          tsfa,              & ! Skin temperature    
-         tsfc_radtime         ! Surface temperature at radiation timestep
-    real(kind_phys), dimension(nCol,nLev), intent(inout) :: &
+         tsfc_radtime,      & ! Surface temperature at radiation timestep
+         coszen,            & ! Cosine of SZA
+         coszdg               ! Cosine of SZA, daytime
+    real(kind_phys), dimension(:,:), intent(inout) :: &
          p_lay,             & ! Pressure at model-layer
          t_lay,             & ! Temperature at model layer
          q_lay,             & ! Water-vapor mixing ratio (kg/kg)
@@ -168,20 +171,14 @@ contains
          qs_lay,            & ! Saturation vapor pressure at model-layers
          deltaZ,            & ! Layer thickness (m)
          deltaZc,           & ! Layer thickness (m) (between layer centers)
-         deltaP               ! Layer thickness (Pa)
-    real(kind_phys), dimension(nCol,nLev+1), intent(inout) :: &
+         deltaP,            & ! Layer thickness (Pa)
          p_lev,             & ! Pressure at model-interface
          t_lev                ! Temperature at model-interface
-    real(kind_phys), dimension(nCol, nLev, nTracers),intent(inout) :: &
+    real(kind_phys), dimension(:,:,:),intent(inout) :: &
          tracer               ! Array containing trace gases
-    character(len=*), dimension(:), intent(in) :: &
-         active_gases_array   ! List of active gases from namelist as array
     type(ty_gas_concs), intent(inout) :: &
          gas_concentrations   ! RRTMGP DDT: gas volumne mixing ratios
-    real(kind_phys), dimension(:), intent(inout) :: &
-         coszen,            & ! Cosine of SZA
-         coszdg               ! Cosine of SZA, daytime
-         
+
     ! Local variables
     integer :: i, j, iCol, iBand, iLay
     real(kind_phys),dimension(nCol,nLev) :: vmr_o3, vmr_h2o
@@ -190,6 +187,7 @@ contains
     real(kind_phys), dimension(nLev)   :: hgtc
     real(kind_phys), dimension(nCol,nLev) :: o3_lay
     real(kind_phys), dimension(nCol,nLev, NF_VGAS) :: gas_vmr
+    real(kind_phys), parameter :: con_rdog = con_rd/con_g
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -271,7 +269,7 @@ contains
        if (top_at_1) then
           ! Layer thickness (m)
           do iLay=1,nLev
-             deltaZ(iCol,iLay) = ((con_rd/con_g)) * abs(log(p_lev(iCol,iLay+1)) - log(p_lev(iCol,iLay))) * tv_lay(iCol,iLay)
+             deltaZ(iCol,iLay) = con_rdog * abs(log(p_lev(iCol,iLay+1)) - log(p_lev(iCol,iLay))) * tv_lay(iCol,iLay)
           enddo
           ! Height at layer boundaries
           hgtb(nLev+1) = 0._kind_phys
@@ -292,7 +290,7 @@ contains
        else
           ! Layer thickness (m)
           do iLay=nLev,1,-1
-             deltaZ(iCol,iLay) = ((con_rd/con_g)) * abs(log(p_lev(iCol,iLay))  - log(p_lev(iCol,iLay+1))) * tv_lay(iCol,iLay)
+             deltaZ(iCol,iLay) = con_rdog * abs(log(p_lev(iCol,iLay))  - log(p_lev(iCol,iLay+1))) * tv_lay(iCol,iLay)
           enddo
           ! Height at layer boundaries
           hgtb(1) = 0._kind_phys
