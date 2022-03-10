@@ -683,8 +683,6 @@ contains
 ! add canopy heat storage (C.He added based on GY Niu's communication)
   real                                :: canhs ! canopy heat storage change w/m2
 ! maximum lai/sai used for some parameterizations based on plant growthi  
-  real (kind=kind_phys)                                   :: saimax !< monthly maximum stem area index, one-sided
-  real (kind=kind_phys)                                   :: laimax !< monthly maximum leaf area index, one-sided
 
   
   ! intent (out) variables need to be assigned a value.  these normally get assigned values
@@ -736,7 +734,7 @@ contains
 ! vegetation phenology
 
      call phenology (parameters,vegtyp ,croptype, snowh  , tv     , lat   , yearlen , julian , & !in
-                     lai  , sai  , laimax, saimax, troot  , elai    , esai   ,igs, pgs)
+                     lai  , sai  , troot  , elai    , esai   ,igs, pgs)
 
 !input gvf should be consistent with lai
      if(dveg == 1 .or. dveg == 6 .or. dveg == 7) then
@@ -780,7 +778,7 @@ contains
                  sfctmp ,thair  ,lwdn   ,uu     ,vv     ,zlvl   , & !in
                  co2air ,o2air  ,solad  ,solai  ,cosz   ,igs    , & !in
                  eair   ,tbot   ,zsnso  ,zsoil  , & !in
-                 elai   ,esai   ,laimax, saimax, fwet   ,foln   ,     & !in
+                 elai   ,esai   ,fwet   ,foln   ,     & !in
                  fveg   ,shdfac, pahv   ,pahg   ,pahb   ,             & !in
                  qsnow  ,dzsnso ,lat    ,canliq ,canice ,iloc, jloc , & !in
                  thsfc_loc, prslkix,prsik1x,prslk1x,garea1,       & !in
@@ -1059,7 +1057,7 @@ contains
 !!vegetation phenology considering vegetation canopy being buried by snow and
 !!evolution in time.
   subroutine phenology (parameters,vegtyp ,croptype, snowh  , tv     , lat   , yearlen , julian , & !in
-                        lai , sai , laimax, saimax, troot  , elai    , esai   , igs, pgs)
+                        lai , sai , troot  , elai    , esai   , igs, pgs)
 
 ! --------------------------------------------------------------------------------------------------
 ! vegetation phenology considering vegeation canopy being buries by snow and evolution in time
@@ -1080,8 +1078,6 @@ contains
   real (kind=kind_phys)                   , intent(inout) :: sai    !sai, unadjusted for burying by snow
 
 ! outputs
-  real (kind=kind_phys)                   , intent(out  ) :: saimax !< monthly maximum stem area index, one-sided
-  real (kind=kind_phys)                   , intent(out  ) :: laimax !< monthly maximum leaf area index, one-sided
   real (kind=kind_phys)                   , intent(out  ) :: elai   !leaf area index, after burying by snow
   real (kind=kind_phys)                   , intent(out  ) :: esai   !stem area index, after burying by snow
   real (kind=kind_phys)                   , intent(out  ) :: igs    !growing season index (0=off, 1=on)
@@ -1101,23 +1097,6 @@ contains
   real (kind=kind_phys)                                   :: t       !current month (1.00, ..., 12.00)
 ! --------------------------------------------------------------------------------------------------
 
-! derive monthly maximum lai and sai from monthly lai
-
-     laimax=parameters%laim(1)
-     saimax=parameters%saim(1)
-
-     do k=1,12
-
-      if(parameters%laim(k).ge.laimax)then
-        laimax=parameters%laim(k)
-      endif
-
-      if(parameters%saim(k).ge.saimax)then
-        saimax=parameters%saim(k)
-      endif
-
-     enddo
-       
 if (croptype == 0) then
 
   if ( dveg == 1 .or. dveg == 3 .or. dveg == 4 ) then
@@ -1637,7 +1616,7 @@ endif   ! croptype == 0
                      sfctmp ,thair  ,lwdn   ,uu     ,vv     ,zref   , & !in
                      co2air ,o2air  ,solad  ,solai  ,cosz   ,igs    , & !in
                      eair   ,tbot   ,zsnso  ,zsoil  , & !in
-                     elai   ,esai   ,laimax, saimax, fwet   ,foln   ,       & !in
+                     elai   ,esai   ,fwet   ,foln   ,       & !in
                      fveg   ,shdfac, pahv   ,pahg   ,pahb   ,               & !in
                      qsnow  ,dzsnso ,lat    ,canliq ,canice ,iloc   , jloc, & !in
                      thsfc_loc, prslkix,prsik1x,prslk1x,garea1,       & !in
@@ -1732,8 +1711,6 @@ endif   ! croptype == 0
   real (kind=kind_phys)                              , intent(in)    :: cosz   !cosine solar zenith angle (0-1)
   real (kind=kind_phys)                              , intent(in)    :: elai   !lai adjusted for burying by snow
   real (kind=kind_phys)                              , intent(in)    :: esai   !lai adjusted for burying by snow
-  real (kind=kind_phys)                              , intent(in)    :: saimax !< monthly maximum stem area index, one-sided
-  real (kind=kind_phys)                              , intent(in)    :: laimax !< monthly maximum leaf area index, one-sided
   real (kind=kind_phys)                              , intent(in)    :: fwet   !fraction of canopy that is wet [-]
   real (kind=kind_phys)                              , intent(in)    :: fveg   !greeness vegetation fraction (-)
   real (kind=kind_phys)                              , intent(in)    :: shdfac !< green vegetation fraction [0.0-1.0]
@@ -2064,7 +2041,7 @@ endif   ! croptype == 0
   call thermoprop (parameters,nsoil   ,nsnow   ,isnow   ,ist     ,dzsnso  , & !in
                    dt      ,snowh   ,snice   ,snliq   , & !in
                    smc     ,sh2o    ,tg      ,stc     ,ur      , & !in
-                   lat     ,z0m     ,zlvl    ,vegtyp  , elai,laimax, & !in
+                   lat     ,z0m     ,zlvl    ,vegtyp  , elai, & !in
                    df      ,hcpct   ,snicev  ,snliqv  ,epore   , & !out
                    fact    )                              !out
 
@@ -2188,7 +2165,7 @@ endif   ! croptype == 0
                     dt      ,sav     ,sag     ,lwdn    ,ur      , & !in
                     uu      ,vv      ,sfctmp  ,thair   ,qair    , & !in
                     eair    ,rhoair  ,snowh   ,vai     ,gammav   ,gammag   , & !in
-                    laimax, saimax,fwet    ,laisun  ,laisha  ,cwp     ,dzsnso  , & !in
+                    fwet    ,laisun  ,laisha  ,cwp     ,dzsnso  , & !in
                     zlvl    ,zpd     ,z0m     ,fveg    ,shdfac, & !in
                     z0mg    ,emv     ,emg     ,canliq  ,fsno, & !in
                     canice  ,stc     ,df      ,rssun   ,rssha   , & !in
@@ -2454,7 +2431,7 @@ endif   ! croptype == 0
   subroutine thermoprop (parameters,nsoil   ,nsnow   ,isnow   ,ist     ,dzsnso  , & !in
                          dt      ,snowh   ,snice   ,snliq   , & !in
                          smc     ,sh2o    ,tg      ,stc     ,ur      , & !in
-                         lat     ,z0m     ,zlvl    ,vegtyp  , elai, laimax,& !in
+                         lat     ,z0m     ,zlvl    ,vegtyp  , elai, & !in
                          df      ,hcpct   ,snicev  ,snliqv  ,epore   , & !out
                          fact    )                                       !out
 ! ------------------------------------------------------------------------------------------------- 
@@ -2480,7 +2457,6 @@ endif   ! croptype == 0
   real (kind=kind_phys),                            intent(in)  :: z0m     !roughness length (m)
   real (kind=kind_phys),                            intent(in)  :: zlvl    !reference height (m)
   real (kind=kind_phys),                            intent(in)  :: elai    !lai adjusted for burying by snow
-  real (kind=kind_phys),                            intent(in)  :: laimax  !< monthly maximum leaf area index, one-sided
   integer              ,                            intent(in)  :: vegtyp  !vegtyp type
 
 ! outputs
@@ -2498,6 +2474,7 @@ endif   ! croptype == 0
   real (kind=kind_phys), dimension(-nsnow+1:    0)              :: tksno   !snow thermal conductivity (j/m3/k)
   real (kind=kind_phys), dimension(       1:nsoil)              :: sice    !soil ice content
   real (kind=kind_phys), parameter :: sbeta = -2.0
+  real (kind=kind_phys)                                         :: laimax  !< monthly maximum leaf area index, one-sided
 ! --------------------------------------------------------------------------------------------------
 
 ! compute snow thermal conductivity and heat capacity
@@ -2530,6 +2507,7 @@ endif   ! croptype == 0
 ! not in use because of the separation of the canopy layer from the ground.
 ! but this may represent the effects of leaf litter (niu comments)
 !       df1 = df1 * exp (sbeta * shdfac)
+        laimax = maxval(parameters%laim)
         df(1) = df(1) * exp (sbeta * elai/laimax)
 
 ! compute lake thermal properties 
@@ -3676,7 +3654,7 @@ endif   ! croptype == 0
                        dt      ,sav     ,sag     ,lwdn    ,ur      , & !in
                        uu      ,vv      ,sfctmp  ,thair   ,qair    , & !in
                        eair    ,rhoair  ,snowh   ,vai     ,gammav   ,gammag,  & !in
-                       laimax, saimax,fwet    ,laisun  ,laisha  ,cwp  ,dzsnso  , & !in
+                       fwet    ,laisun  ,laisha  ,cwp  ,dzsnso  , & !in
                        zlvl    ,zpd     ,z0m     ,fveg    ,shdfac,  & !in
                        z0mg    ,emv     ,emg     ,canliq  ,fsno,          & !in
                        canice  ,stc     ,df      ,rssun   ,rssha   , & !in
@@ -3732,8 +3710,6 @@ endif   ! croptype == 0
   real (kind=kind_phys),                            intent(in) :: fsno     !snow fraction
 
   real (kind=kind_phys),                            intent(in) :: snowh  !actual snow depth [m]
-  real (kind=kind_phys),                            intent(in) :: saimax !< monthly maximum stem area index, one-sided
-  real (kind=kind_phys),                            intent(in) :: laimax !< monthly maximum leaf area index, one-sided
   real (kind=kind_phys),                            intent(in) :: fwet   !wetted fraction of canopy
   real (kind=kind_phys),                            intent(in) :: cwp    !canopy wind parameter
 
@@ -4060,7 +4036,7 @@ endif   ! croptype == 0
        if(opt_sfc == 3) then
          call sfcdif3(parameters,iloc    ,jloc    ,iter    ,sfctmp  ,qair    ,ur      , & !in 
                         zlvl    ,tah     ,thsfc_loc,prslkix,prsik1x ,prslk1x ,z0m     , & !in 
-                        zpd ,snowh ,shdfac ,garea1 ,.true. ,vaie ,laimax,saimax,vegtyp, & !in 
+                        zpd ,snowh ,shdfac ,garea1 ,.true. ,vaie ,vegtyp, & !in 
                         ustarx  ,fm      ,fh      ,fm2     ,fh2     ,                   & !inout 
                         z0h     ,fv      ,csigmaf1,cm      ,ch       )                    !out 
 
@@ -4520,7 +4496,7 @@ endif   ! croptype == 0
         if(opt_sfc == 3) then
           call sfcdif3(parameters,iloc    ,jloc    ,iter    ,sfctmp  ,qair    ,ur      , & !in 
                          zlvl    ,tgb     ,thsfc_loc,prslkix,prsik1x ,prslk1x ,z0m     , & !in 
-                         zpd  ,snowh,shdfac ,garea1  ,.false. ,0.0,4.5,1.4,ivgtyp ,      & !in 
+                         zpd  ,snowh,shdfac ,garea1  ,.false. ,0.0,ivgtyp ,      & !in 
                          ustarx  ,fm      ,fh      ,fm2     ,fh2     ,                   & !inout 
                          z0h     ,fv      ,csigmaf0,cm      ,ch       )                    !out 
 
@@ -5123,7 +5099,7 @@ endif   ! croptype == 0
 !! compute surface drag coefficient cm for momentum and ch for heat.
   subroutine sfcdif3(parameters,iloc    ,jloc    ,iter    ,sfctmp  ,qair    ,ur      , & !in 
                        zlvl    ,tgb     ,thsfc_loc,prslkix,prsik1x ,prslk1x ,z0m     , & !in 
-                       zpd ,snowh ,fveg ,garea1 ,vegetated,vaie,laimax,saimax,vegtyp , & !in 
+                       zpd ,snowh ,fveg ,garea1 ,vegetated,vaie,vegtyp , & !in 
                        ustarx  ,fm      ,fh      ,fm2     ,fh2     ,                   & !inout 
                        z0h     ,fv      ,csigmaf ,cm      ,ch       )                    !out 
   
@@ -5154,8 +5130,6 @@ endif   ! croptype == 0
     real (kind=kind_phys), intent(in   ) :: garea1    ! grid area [km2]
     logical,               intent(in   ) :: vegetated ! .true. if vegetated
     real (kind=kind_phys), intent(in   ) :: vaie      ! vegetation area index [m2/m2]
-    real (kind=kind_phys), intent(in   ) :: saimax !< monthly maximum stem area index, one-sided
-    real (kind=kind_phys), intent(in   ) :: laimax !< monthly maximum leaf area index, one-sided
     integer              , intent(in   ) :: vegtyp    ! vegetation category
     real (kind=kind_phys), intent(inout) :: ustarx    ! friction velocity [m/s]
     real (kind=kind_phys), intent(inout) :: fm        ! momentum stability correction, weighted by prior iters
@@ -5183,10 +5157,14 @@ endif   ! croptype == 0
     real (kind=kind_phys) :: sigmaa                   ! momentum partition parameter
     real (kind=kind_phys) :: tem1,tem2,zvfun1,gdx
     real (kind=kind_phys), parameter :: z0lo=0.1, z0up=1.0
+    real (kind=kind_phys)  :: saimax !< monthly maximum stem area index, one-sided
+    real (kind=kind_phys)  :: laimax !< monthly maximum leaf area index, one-sided
 
 ! -------------------------------------------------------------------------------------------------
 
     fv        = ustarx
+    laimax = maxval(parameters%laim)
+    saimax = maxval(parameters%saim)
 !   fv        = ur*vkc/log((zlvl-zpd)/z0m)
 
     if(vegetated) then 
