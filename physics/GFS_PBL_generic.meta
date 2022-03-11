@@ -182,6 +182,41 @@
   dimensions = ()
   type = integer
   intent = in
+[ntccn]
+  standard_name = index_of_cloud_condensation_nuclei_number_concentration_in_tracer_concentration_array
+  long_name = tracer index for cloud condensation nuclei number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[nthl]
+  standard_name = index_of_hail_mixing_ratio_in_tracer_concentration_array
+  long_name = tracer index for hail
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[nthnc]
+  standard_name = index_of_mass_number_concentration_of_hail_in_tracer_concentration_array
+  long_name = tracer index for hail number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ntgv]
+  standard_name = index_of_graupel_volume_in_tracer_concentration_array
+  long_name = tracer index for graupel particle volume
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[nthv]
+  standard_name = index_of_hail_volume_in_tracer_concentration_array
+  long_name = tracer index for hail particle volume
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
 [imp_physics]
   standard_name = control_for_microphysics_scheme
   long_name = choice of microphysics scheme
@@ -231,9 +266,30 @@
   dimensions = ()
   type = integer
   intent = in
+[imp_physics_nssl]
+  standard_name = identifier_for_nssl_microphysics_scheme
+  long_name = choice of NSSL 2-moment microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
 [ltaerosol]
   standard_name = flag_for_aerosol_physics
   long_name = flag for aerosol physics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[nssl_ccn_on]
+  standard_name = nssl_ccn_on
+  long_name = CCN activation flag in NSSL micro
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[nssl_hail_on]
+  standard_name = nssl_hail_on
+  long_name = hail activation flag in NSSL micro
   units = flag
   dimensions = ()
   type = logical
@@ -553,6 +609,41 @@
   dimensions = ()
   type = integer
   intent = in
+[ntccn]
+  standard_name = index_of_cloud_condensation_nuclei_number_concentration_in_tracer_concentration_array
+  long_name = tracer index for cloud condensation nuclei number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[nthl]
+  standard_name = index_of_hail_mixing_ratio_in_tracer_concentration_array
+  long_name = tracer index for hail
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[nthnc]
+  standard_name = index_of_mass_number_concentration_of_hail_in_tracer_concentration_array
+  long_name = tracer index for hail number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ntgv]
+  standard_name = index_of_graupel_volume_in_tracer_concentration_array
+  long_name = tracer index for graupel particle volume
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[nthv]
+  standard_name = index_of_hail_volume_in_tracer_concentration_array
+  long_name = tracer index for hail particle volume
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
 [imp_physics]
   standard_name = control_for_microphysics_scheme
   long_name = choice of microphysics scheme
@@ -602,9 +693,30 @@
   dimensions = ()
   type = integer
   intent = in
+[imp_physics_nssl]
+  standard_name = identifier_for_nssl_microphysics_scheme
+  long_name = choice of NSSL 2-moment microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
 [ltaerosol]
   standard_name = flag_for_aerosol_physics
   long_name = flag for aerosol physics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[nssl_ccn_on]
+  standard_name = nssl_ccn_on
+  long_name = CCN activation flag in NSSL micro
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[nssl_hail_on]
+  standard_name = nssl_hail_on
+  long_name = hail activation flag in NSSL micro
   units = flag
   dimensions = ()
   type = logical

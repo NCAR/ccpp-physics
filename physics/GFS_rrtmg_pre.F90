@@ -115,6 +115,7 @@
       logical,              intent(in) :: lsswr, lslwr, ltaerosol, lgfdlmprad, &
                                           uni_cld, effr_in, do_mynnedmf,       &
                                           lmfshal, lmfdeep2, pert_clds
+
       logical,              intent(in) :: nssl_ccn_on, nssl_invertccn
       integer,              intent(in) :: spp_rad
       real(kind_phys),      intent(in) :: spp_wts_rad(:,:)
@@ -942,7 +943,6 @@
      &       cld_rwp, cld_rerain, cld_swp, cld_resnow,                  &    !  ---  outputs:
      &       cldsa, mtopa, mbota, de_lgth, alpha                        &    !  ---  outputs:
      &      )
-
 
 !      endif                             ! end_if_ntcw
 
