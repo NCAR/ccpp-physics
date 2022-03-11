@@ -300,6 +300,7 @@
 !!\n                     =6:  WSM6 microphysics
 !!\n                     =10: MG microphysics
 !!\n                     =15: Ferrier-Aligo microphysics
+!!\n                     =17/18: NSSL microphysics
 !!\param me              print control flag
 !>\section gen_cld_init cld_init General Algorithm
 !! @{
@@ -390,6 +391,8 @@
             print *,'   --- MG cloud microphysics'
           elseif (imp_physics == 15) then
             print *,'   --- Ferrier-Aligo cloud microphysics'
+          elseif (imp_physics == 17) then
+            print *,'   --- NSSL cloud microphysics'
           else
             print *,'  !!! ERROR in cloud microphysc specification!!!', &
      &              '  imp_physics (NP3D) =',imp_physics
@@ -2896,7 +2899,7 @@
 
 
 !mz: this is the original progcld5 for Thompson MP (and WSM6),
-! to be replaced by the GSL version of progcld6 for Thompson MP
+! to be replaced by the GSL version of progcld6 for Thompson MP and NSSL
       subroutine progcld6                                               &
      &     ( plyr,plvl,tlyr,qlyr,qstl,rhly,clw,                         &    !  ---  inputs:
      &       xlat,xlon,slmsk,dz,delp,                                   &
@@ -2912,7 +2915,7 @@
 ! =================   subprogram documentation block   ================ !
 !                                                                       !
 ! subprogram:    progcld6    computes cloud related quantities using    !
-!   Thompson/WSM6 cloud microphysics scheme.                            !
+!   Thompson/WSM6/NSSL cloud microphysics scheme.                            !
 !                                                                       !
 ! abstract:  this program computes cloud fractions from cloud           !
 !   condensates,                                                        !

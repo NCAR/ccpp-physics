@@ -129,7 +129,7 @@ contains
       ENDDO
  
       RETURN
-      END
+      END SUBROUTINE setindxoz
 !
 !**********************************************************************
 !
@@ -206,6 +206,6 @@ contains
       enddo
 !
       RETURN
-      END
+      END SUBROUTINE ozinterpol
 
 end module ozinterp
