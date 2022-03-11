@@ -2041,7 +2041,7 @@ endif   ! croptype == 0
   call thermoprop (parameters,nsoil   ,nsnow   ,isnow   ,ist     ,dzsnso  , & !in
                    dt      ,snowh   ,snice   ,snliq   , & !in
                    smc     ,sh2o    ,tg      ,stc     ,ur      , & !in
-                   lat     ,z0m     ,zlvl    ,vegtyp  , elai, & !in
+                   lat     ,z0m     ,zlvl    ,vegtyp  ,  & !in
                    df      ,hcpct   ,snicev  ,snliqv  ,epore   , & !out
                    fact    )                              !out
 
@@ -2431,7 +2431,7 @@ endif   ! croptype == 0
   subroutine thermoprop (parameters,nsoil   ,nsnow   ,isnow   ,ist     ,dzsnso  , & !in
                          dt      ,snowh   ,snice   ,snliq   , & !in
                          smc     ,sh2o    ,tg      ,stc     ,ur      , & !in
-                         lat     ,z0m     ,zlvl    ,vegtyp  , elai, & !in
+                         lat     ,z0m     ,zlvl    ,vegtyp  , & !in
                          df      ,hcpct   ,snicev  ,snliqv  ,epore   , & !out
                          fact    )                                       !out
 ! ------------------------------------------------------------------------------------------------- 
@@ -2456,7 +2456,6 @@ endif   ! croptype == 0
   real (kind=kind_phys),                            intent(in)  :: lat     !latitude (radians)
   real (kind=kind_phys),                            intent(in)  :: z0m     !roughness length (m)
   real (kind=kind_phys),                            intent(in)  :: zlvl    !reference height (m)
-  real (kind=kind_phys),                            intent(in)  :: elai    !lai adjusted for burying by snow
   integer              ,                            intent(in)  :: vegtyp  !vegtyp type
 
 ! outputs
@@ -2474,7 +2473,6 @@ endif   ! croptype == 0
   real (kind=kind_phys), dimension(-nsnow+1:    0)              :: tksno   !snow thermal conductivity (j/m3/k)
   real (kind=kind_phys), dimension(       1:nsoil)              :: sice    !soil ice content
   real (kind=kind_phys), parameter :: sbeta = -2.0
-  real (kind=kind_phys)                                         :: laimax  !< monthly maximum leaf area index, one-sided
 ! --------------------------------------------------------------------------------------------------
 
 ! compute snow thermal conductivity and heat capacity
@@ -2507,12 +2505,6 @@ endif   ! croptype == 0
 ! not in use because of the separation of the canopy layer from the ground.
 ! but this may represent the effects of leaf litter (niu comments)
 !       df1 = df1 * exp (sbeta * shdfac)
-        if(elai.gt.0.) then
-         laimax = maxval(parameters%laim)
-         laimax = min(laimax, 0.1)
-         
-         df(1) = df(1) * exp (sbeta * elai/laimax)
-        endif
 
 ! compute lake thermal properties 
 ! (no consideration of turbulent mixing for this version)
