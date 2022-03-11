@@ -1002,9 +1002,9 @@
             enddo
           else
             do i=1,im
-              clouds3(i,k) = clouds3(i,k) - spp_wts_rad(i,k) * clouds3(i,k)
-              clouds5(i,k) = clouds5(i,k) - spp_wts_rad(i,k) * clouds5(i,k)
-              clouds9(i,k) = clouds9(i,k) - spp_wts_rad(i,k) * clouds9(i,k)
+              clouds3(i,k) = clouds3(i,k) - spp_wts_rad(i,levs) * clouds3(i,k)
+              clouds5(i,k) = clouds5(i,k) - spp_wts_rad(i,levs) * clouds5(i,k)
+              clouds9(i,k) = clouds9(i,k) - spp_wts_rad(i,levs) * clouds9(i,k)
             enddo
           endif
         enddo
