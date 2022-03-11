@@ -26,8 +26,8 @@
 !            xlat,xlon,slmsk,dz,delp, IX, LM, NLAY, NLP1,              !
 !            deltaq, sup, me, icloud, kdt,                             !
 !            ntrac, ntcw, ntiw, ntrw, ntsw, ntgl, ntclamt,             !
-!            imp_physics, imp_physics_fer_hires,imp_physics_gfdl,      !
-!            imp_physics_thompson, imp_physics_wsm6,                   !
+!            imp_physics, imp_physics_nssl, imp_physics_fer_hires,     !
+!            imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, !
 !            imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,         !
 !            imp_physics_mg, iovr_rand, iovr_maxrand, iovr_max,        !
 !            iovr_dcorr, iovr_exp, iovr_exprand, idcor_con,            !
@@ -273,6 +273,7 @@
 !!\n                     =6:  WSM6 microphysics
 !!\n                     =10: MG microphysics
 !!\n                     =15: Ferrier-Aligo microphysics
+!!\n                     =17/18: NSSL microphysics
 !!\param me              print control flag
 !>\section cld_init General Algorithm
 !! @{
@@ -363,6 +364,8 @@
             print *,'   --- MG cloud microphysics'
           elseif (imp_physics == 15) then
             print *,'   --- Ferrier-Aligo cloud microphysics'
+          elseif (imp_physics == 17) then
+            print *,'   --- NSSL cloud microphysics'
           else
             print *,'  !!! ERROR in cloud microphysc specification!!!', &
      &              '  imp_physics (NP3D) =',imp_physics
@@ -409,8 +412,8 @@
      &       xlat, xlon, slmsk, dz, delp, IX, LM, NLAY, NLP1,           &
      &       deltaq, sup, me, icloud, kdt,                              &
      &       ntrac, ntcw, ntiw, ntrw, ntsw, ntgl, ntclamt,              &
-     &       imp_physics, imp_physics_fer_hires,imp_physics_gfdl,       &
-     &       imp_physics_thompson, imp_physics_wsm6,                    &
+     &       imp_physics, imp_physics_nssl, imp_physics_fer_hires,      &
+     &       imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,  &
      &       imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,          &
      &       imp_physics_mg, iovr_rand, iovr_maxrand, iovr_max,         &
      &       iovr_dcorr, iovr_exp, iovr_exprand, idcor_con,             &
@@ -495,6 +498,7 @@
 !   ntgl      tracer index for graupel (Model%ntgl)                     !
 !   ntclamt   tracer index for cloud amount (Model%ntclamt)             !
 !   imp_physics               : cloud microphysics scheme control flag  !
+!   imp_physics_nssl          : NSSL microphysics                       !
 !   imp_physics_fer_hires     : Ferrier-Aligo microphysics scheme       !
 !   imp_physics_gfdl          : GFDL microphysics scheme                !
 !   imp_physics_thompson      : Thompson microphysics scheme            !
@@ -579,6 +583,7 @@
       integer,  intent(in) :: kdt, imfdeepcnv, imfdeepcnv_gf
       integer,  intent(in) ::                                           &
      &     imp_physics,                 ! Flag for MP scheme
+     &     imp_physics_nssl,            ! Flag for NSSL scheme
      &     imp_physics_fer_hires,       ! Flag for fer-hires scheme
      &     imp_physics_gfdl,            ! Flag for gfdl scheme
      &     imp_physics_thompson,        ! Flag for thompsonscheme
@@ -759,6 +764,45 @@
      &                    cld_frac, cld_lwp, cld_reliq, cld_iwp,        & !  ---  outputs
      &                    cld_reice,cld_rwp, cld_rerain,cld_swp,        & 
      &                    cld_resnow)
+
+        elseif ( imp_physics == imp_physics_nssl ) then                              ! NSSL MP
+
+          if(do_mynnedmf .or. imfdeepcnv == imfdeepcnv_gf ) then ! MYNN PBL or GF conv
+              !-- MYNN PBL or convective GF
+              !-- use cloud fractions with SGS clouds
+              do k=1,NLAY
+                do i=1,IX
+                  cld_frac(i,k)  = clouds1(i,k)
+                enddo
+              enddo
+
+                ! --- use clduni with the NSSL microphysics.
+                ! --- make sure that effr_in=.true. in the input.nml!
+                call progclduni (plyr, plvl, tlyr, tvly, ccnd, ncndl,   & !  ---  inputs
+     &                   xlat, xlon, slmsk, dz, delp, IX, NLAY, NLP1,   &
+     &                   cld_frac,                                      &
+     &                   effrl, effri, effrr, effrs, effr_in ,          &
+     &                   dzlay,                                         &
+     &                   cldtot, cldcnv,                                &  ! inout
+     &                   cld_frac, cld_lwp, cld_reliq, cld_iwp,         & !  ---  outputs
+     &                   cld_reice,cld_rwp, cld_rerain,cld_swp,         &
+     &                   cld_resnow)
+          else
+            ! MYNN PBL or GF convective are not used
+              call progcld_thompson_wsm6 (plyr,plvl,tlyr,qlyr,qstl,     & !  --- inputs
+     &                   rhly,tracer1,xlat,xlon,slmsk,dz,delp,          &
+     &                   ntrac-1, ntcw-1,ntiw-1,ntrw-1,                 &
+     &                   ntsw-1,ntgl-1,                                 &
+     &                   IX, NLAY, NLP1, uni_cld, lmfshal, lmfdeep2,    &
+     &                   cldcov(:,1:NLAY), cnvw, effrl_inout,           &
+     &                   effri_inout, effrs_inout,                      &
+     &                   lwp_ex, iwp_ex, lwp_fc, iwp_fc,                &
+     &                   dzlay,                                         &
+     &                   cldtot, cldcnv,                                &  ! inout
+     &                   cld_frac, cld_lwp, cld_reliq, cld_iwp,         & !  ---  outputs
+     &                   cld_reice,cld_rwp, cld_rerain,cld_swp,         &
+     &                   cld_resnow)
+          endif ! MYNN PBL or GF
 
         elseif(imp_physics == imp_physics_thompson) then                              ! Thompson MP
 
@@ -2014,7 +2058,7 @@
 !...................................
 
 
-! This subroutine is used by Thompson/wsm6 cloud microphysics (EMC)
+! This subroutine is used by Thompson/WSM6/NSSL cloud microphysics (EMC)
       subroutine progcld_thompson_wsm6                                  &
      &     ( plyr,plvl,tlyr,qlyr,qstl,rhly,clw,                         &    !  ---  inputs:
      &       xlat,xlon,slmsk,dz,delp,                                   &
@@ -2030,8 +2074,9 @@
 
 ! =================   subprogram documentation block   ================ !
 !                                                                       !
-! subprogram:    progcld_thompson_wsm6    computes cloud related quantities using    !
-!   Thompson/WSM6 cloud microphysics scheme.                            !
+! subprogram:    progcld_thompson_wsm6                                  !
+!   computes cloud related quantities using                             !
+!   Thompson/WSM6/NSSL cloud microphysics scheme.                       !
 !                                                                       !
 ! abstract:  this program computes cloud fractions from cloud           !
 !   condensates,                                                        !
