@@ -5151,7 +5151,7 @@ endif   ! croptype == 0
     real (kind=kind_phys) :: czil1                    ! canopy based czil
     real (kind=kind_phys) :: fm10                     ! 10-m stability adjustment - stability output
     real (kind=kind_phys) :: sigmaa                   ! momentum partition parameter
-    real (kind=kind_phys) :: tem1,tem2,zvfun1,gdx
+    real (kind=kind_phys) :: tem1,tem2,zvfun1,gdx,slaifrac
     real (kind=kind_phys), parameter :: z0lo=0.1, z0up=1.0
     real (kind=kind_phys)  :: saimax !< monthly maximum stem area index, one-sided
     real (kind=kind_phys)  :: laimax !< monthly maximum leaf area index, one-sided
@@ -5161,8 +5161,12 @@ endif   ! croptype == 0
     fv        = ustarx
     laimax = maxval(parameters%laim)
     saimax = maxval(parameters%saim)
-    laimax = min(laimax, 0.1)
-    saimax = min(saimax, 0.1)
+
+     if(laimax+saimax .gt. 0) then
+      slaifrac=vaie/(laimax+saimax)
+      else
+      slaifrac=0.1_kind_phys
+     endif
 
 !   fv        = ur*vkc/log((zlvl-zpd)/z0m)
 
@@ -5214,7 +5218,7 @@ endif   ! croptype == 0
 
     tem1   = (z0m - z0lo) / (z0up - z0lo)
     tem1   = min(max(tem1, 0.0_kind_phys), 1.0_kind_phys)
-    tem2   = max(vaie/(laimax+saimax), 0.1_kind_phys)
+    tem2   = max(slaifrac, 0.1_kind_phys)
     zvfun1 = sqrt(tem1 * tem2)
     gdx    = sqrt(garea1)
 
