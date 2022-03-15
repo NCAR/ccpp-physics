@@ -5164,6 +5164,8 @@ endif   ! croptype == 0
 
      if(laimax+saimax .gt. 0) then
       slaifrac=vaie/(laimax+saimax)
+      slaifrac=min(slaifrac,1.)
+      slaifrac=fveg*slaifrac
       else
       slaifrac=0.1_kind_phys
      endif
