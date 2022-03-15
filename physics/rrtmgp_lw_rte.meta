@@ -100,15 +100,15 @@
   dimensions = ()
   type = ty_optical_props_2str
   intent = inout
-[lw_optical_props_precip]
-  standard_name = longwave_optical_properties_for_precipitation
+[lw_optical_props_precipByBand]
+  standard_name = longwave_optical_properties_for_precipitation_by_band
   long_name = Fortran DDT containing RRTMGP optical properties
   units = DDT
   dimensions = ()
   type = ty_optical_props_2str
   intent = inout
-[lw_optical_props_cnvclouds]
-  standard_name = longwave_optical_properties_for_convective_cloudy_atmosphere
+[lw_optical_props_cnvcloudsByBand]
+  standard_name = longwave_optical_properties_for_convective_cloudy_atmosphere_by_band
   long_name = Fortran DDT containing RRTMGP optical properties
   units = DDT
   dimensions = ()

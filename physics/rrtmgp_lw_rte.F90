@@ -26,12 +26,12 @@ contains
 !! \htmlinclude rrtmgp_lw_rte_run.html
 !!
   subroutine rrtmgp_lw_rte_run(doLWrad, doLWclrsky, use_LW_jacobian, doGP_lwscat, nCol,     &
-       nLev, top_at_1, doGP_sgs_cnv, doGP_sgs_mynn, &
-       sfc_emiss_byband, sources, lw_optical_props_clrsky, lw_optical_props_clouds,         &
-       lw_optical_props_precip, lw_optical_props_cnvclouds,                                 &
-       lw_optical_props_MYNNcloudsByBand, lw_optical_props_aerosol, nGauss_angles,          &
-       fluxlwUP_allsky, fluxlwDOWN_allsky, fluxlwUP_clrsky, fluxlwDOWN_clrsky, fluxlwUP_jac,&
-       fluxlwUP_radtime, fluxlwDOWN_radtime, errmsg, errflg)
+       nLev, top_at_1, doGP_sgs_cnv, doGP_sgs_mynn, sfc_emiss_byband, sources,              &
+       lw_optical_props_clrsky, lw_optical_props_clouds, lw_optical_props_precipByBand,     &
+       lw_optical_props_cnvcloudsByBand, lw_optical_props_MYNNcloudsByBand,                 &
+       lw_optical_props_aerosol, nGauss_angles, fluxlwUP_allsky, fluxlwDOWN_allsky,         &
+       fluxlwUP_clrsky, fluxlwDOWN_clrsky, fluxlwUP_jac, fluxlwUP_radtime,                  &
+       fluxlwDOWN_radtime, errmsg, errflg)
 
     ! Inputs
     logical, intent(in) :: &
@@ -55,8 +55,8 @@ contains
          lw_optical_props_clrsky             ! RRTMGP DDT: longwave clear-sky optical properties 
     type(ty_optical_props_2str),intent(inout) :: &
          lw_optical_props_clouds,          & ! RRTMGP DDT: longwave cloud optical properties
-         lw_optical_props_precip,          & ! RRTMGP DDT: longwave precipitation optical properties
-         lw_optical_props_cnvclouds,       & ! RRTMGP DDT: longwave convective cloud optical properties
+         lw_optical_props_precipByBand,    & ! RRTMGP DDT: longwave precipitation optical properties
+         lw_optical_props_cnvcloudsByBand, & ! RRTMGP DDT: longwave convective cloud optical properties
          lw_optical_props_MYNNcloudsByBand   ! RRTMGP DDT: longwave MYNN-EDMF PBL cloud optical properties
     ! Outputs
     real(kind_phys), dimension(:,:), intent(inout) :: &
@@ -132,7 +132,7 @@ contains
 
     ! Include convective cloud?
     if (doGP_sgs_cnv) then
-       call check_error_msg('rrtmgp_lw_rte_run',lw_optical_props_cnvclouds%increment(lw_optical_props_clrsky))
+       call check_error_msg('rrtmgp_lw_rte_run',lw_optical_props_cnvcloudsByBand%increment(lw_optical_props_clrsky))
     endif
 
     ! Include MYNN-EDMF PBL clouds?
@@ -141,7 +141,7 @@ contains
     endif
 
     ! Add in precipitation
-    call check_error_msg('rrtmgp_lw_rte_run',lw_optical_props_precip%increment(lw_optical_props_clouds))
+    call check_error_msg('rrtmgp_lw_rte_run',lw_optical_props_precipByBand%increment(lw_optical_props_clouds))
 
     ! Include LW cloud-scattering?
     if (doGP_lwscat) then 

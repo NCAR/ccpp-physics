@@ -25,10 +25,10 @@ contains
 !! \htmlinclude rrtmgp_sw_rte.html
 !!
   subroutine rrtmgp_sw_rte_run(doSWrad, doSWclrsky, nCol, nLev, nDay, idxday, coszen, p_lay,&
-       t_lay, top_at_1, doGP_sgs_cnv, doGP_sgs_mynn, iSFC,      &
-       sfc_alb_nir_dir, sfc_alb_nir_dif, sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, toa_src_sw,  &
-       sw_optical_props_clrsky, sw_optical_props_clouds, sw_optical_props_precip,           &
-       sw_optical_props_cnvclouds, sw_optical_props_MYNNcloudsByBand,                       &
+       t_lay, top_at_1, doGP_sgs_cnv, doGP_sgs_mynn, iSFC, sfc_alb_nir_dir, sfc_alb_nir_dif,&
+       sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, toa_src_sw, sw_optical_props_clrsky,           &
+       sw_optical_props_clouds, sw_optical_props_precipByBand,                              &
+       sw_optical_props_cnvcloudsByBand, sw_optical_props_MYNNcloudsByBand,                 &
        sw_optical_props_aerosol, scmpsw, fluxswUP_allsky, fluxswDOWN_allsky,                &
        fluxswUP_clrsky, fluxswDOWN_clrsky, errmsg, errflg)
 
@@ -55,9 +55,9 @@ contains
          sw_optical_props_clrsky              ! RRTMGP DDT: shortwave clear-sky radiative properties 
    type(ty_optical_props_2str),intent(in) :: &
          sw_optical_props_clouds,           & ! RRTMGP DDT: shortwave cloud optical properties 
-         sw_optical_props_cnvclouds,        & ! RRTMGP DDT: shortwave convecive cloud optical properties
+         sw_optical_props_cnvcloudsByBand,  & ! RRTMGP DDT: shortwave convecive cloud optical properties
          sw_optical_props_MYNNcloudsByBand, & ! RRTMGP DDT: shortwave MYNN-EDMF PBL cloud optical properties
-         sw_optical_props_precip,           & ! RRTMGP DDT: shortwave precipitation optical properties
+         sw_optical_props_precipByBand,     & ! RRTMGP DDT: shortwave precipitation optical properties
          sw_optical_props_aerosol             ! RRTMGP DDT: shortwave aerosol optical properties
     real(kind_phys), dimension(:,:), intent(in) :: &
          sfc_alb_nir_dir,                   & ! Surface albedo (direct) 
@@ -155,7 +155,7 @@ contains
 
        ! Include convective cloud?
        if (doGP_sgs_cnv) then
-          call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_cnvclouds%increment(sw_optical_props_clrsky))
+          call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_cnvcloudsByBand%increment(sw_optical_props_clrsky))
        endif
 
        ! Include MYNN-EDMF PBL cloud?
@@ -164,7 +164,7 @@ contains
        endif
 
        ! All-sky fluxes (clear-sky + clouds + precipitation)
-       call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_precip%increment(sw_optical_props_clrsky))
+       call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_precipByBand%increment(sw_optical_props_clrsky))
        call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_clouds%increment(sw_optical_props_clrsky))
 
        ! Delta-scale optical properties

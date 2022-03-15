@@ -516,6 +516,9 @@ contains
           ! iv) Cloud precipitation optics: rain and snow(+groupel)
           call check_error_msg('rrtmgp_sw_cloud_optics_run - sw_optical_props_precipByBand',&
                sw_optical_props_precipByBand%alloc_2str(nday, nLev, sw_cloud_props%get_band_lims_wavenumber()))
+          sw_optical_props_precipByBand%tau(:,:,:) = 0._kind_phys
+          sw_optical_props_precipByBand%ssa(:,:,:) = 1._kind_phys
+          sw_optical_props_precipByBand%g(:,:,:)   = 0._kind_phys
 
           do iDay=1,nDay
              do iLay=1,nLev                                      
