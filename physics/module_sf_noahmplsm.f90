@@ -4032,7 +4032,7 @@ endif   ! croptype == 0
        if(opt_sfc == 3) then
          call sfcdif3(parameters,iloc    ,jloc    ,iter    ,sfctmp  ,qair    ,ur      , & !in 
                         zlvl    ,tah     ,thsfc_loc,prslkix,prsik1x ,prslk1x ,z0m     , & !in 
-                        zpd ,snowh ,shdfac ,garea1 ,.true. ,vaie ,vegtyp, & !in 
+                        zpd ,snowh ,fveg ,garea1 ,.true. ,vaie ,vegtyp, & !in 
                         ustarx  ,fm      ,fh      ,fm2     ,fh2     ,                   & !inout 
                         z0h     ,fv      ,csigmaf1,cm      ,ch       )                    !out 
 
@@ -4492,7 +4492,7 @@ endif   ! croptype == 0
         if(opt_sfc == 3) then
           call sfcdif3(parameters,iloc    ,jloc    ,iter    ,sfctmp  ,qair    ,ur      , & !in 
                          zlvl    ,tgb     ,thsfc_loc,prslkix,prsik1x ,prslk1x ,z0m     , & !in 
-                         zpd  ,snowh,shdfac ,garea1  ,.false. ,0.0,ivgtyp ,      & !in 
+                         zpd  ,snowh,fveg ,garea1  ,.false. ,0.0,ivgtyp ,      & !in 
                          ustarx  ,fm      ,fh      ,fm2     ,fh2     ,                   & !inout 
                          z0h     ,fv      ,csigmaf0,cm      ,ch       )                    !out 
 
@@ -5161,14 +5161,17 @@ endif   ! croptype == 0
     fv        = ustarx
     laimax = maxval(parameters%laim)
     saimax = maxval(parameters%saim)
-
-     if(laimax+saimax .gt. 0) then
+    if(dveg.eq.4 .or. dveg.eq.5) then
+     if(laimax+saimax .gt. 0 .and. fveg .gt. 0) then
       slaifrac=vaie/(laimax+saimax)
       slaifrac=min(slaifrac,1.)
       slaifrac=fveg*slaifrac
       else
       slaifrac=0.1_kind_phys
      endif
+    else
+      slaifrac=fveg
+    endif
 
 !   fv        = ur*vkc/log((zlvl-zpd)/z0m)
 
