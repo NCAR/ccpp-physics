@@ -375,7 +375,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [lgfdlmprad]
   standard_name = flag_for_GFDL_microphysics_radiation_interaction
   long_name = flag for GFDL microphysics-radiation interaction

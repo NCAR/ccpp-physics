@@ -1309,7 +1309,6 @@
   dimensions = ()
   type = integer
   intent = in
->>>>>>> upstream/main
 [lprnt]
   standard_name = flag_print
   long_name = control flag for diagnostic print out
