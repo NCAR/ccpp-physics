@@ -131,11 +131,12 @@ CONTAINS
               PSFCPA,PBLH,MAVAIL,XLAND,DX,           & !in
               CP,G,ROVCP,R,XLV,                      & !in
               SVP1,SVP2,SVP3,SVPT0,EP1,EP2,KARMAN,   & !in
-              ISFFLX,isftcflx,lsm,iz0tlnd,psi_opt,   & !in
+              ISFFLX,isftcflx,lsm,lsm_ruc,           & !in
+              iz0tlnd,psi_opt,                       & !in
      &        sigmaf,vegtype,shdmax,ivegsrc,         & !intent(in)
      &        z0pert,ztpert,                         & !intent(in)
      &        redrag,sfc_z0_type,                    & !intent(in)
-              itimestep,iter,                        & !in
+              itimestep,iter,flag_iter,              & !in
                     wet,       dry,       icy,       & !intent(in)
               tskin_wat, tskin_lnd, tskin_ice,       & !intent(in)
               tsurf_wat, tsurf_lnd, tsurf_ice,       & !intent(in)
@@ -157,13 +158,14 @@ CONTAINS
               ZNT,USTM,ZOL,MOL,RMOL,                 &
               PSIM,PSIH,                             &
               HFLX,HFX,QFLX,QFX,LH,FLHC,FLQC,        &
-              QGH,QSFC,QSFC_RUC,                     &
+              QGH,QSFC,                              &
               U10,V10,TH2,T2,Q2,                     &
               GZ1OZ0,WSPD,WSTAR,                     &
-              spp_pbl,pattern_spp_pbl,               &
+              spp_sfc,pattern_spp_sfc,               &
               ids,ide, jds,jde, kds,kde,             &
               ims,ime, jms,jme, kms,kme,             &
-              its,ite, jts,jte, kts,kte              )
+              its,ite, jts,jte, kts,kte,             &
+              errmsg, errflg                         )
 !-------------------------------------------------------------------
       IMPLICIT NONE
 !-------------------------------------------------------------------
@@ -257,6 +259,8 @@ CONTAINS
 !-- jte         end index for j in tile
 !-- kts         start index for k in tile
 !-- kte         end index for k in tile
+!-- errmsg      CCPP error message
+!-- errflg      CCPP error code
 !=================================================================
 ! SCALARS
 !===================================
@@ -268,9 +272,9 @@ CONTAINS
       REAL,     INTENT(IN)   ::        EP1,EP2,KARMAN
       REAL,     INTENT(IN)   ::        CP,G,ROVCP,R,XLV !,DX
 !NAMELIST/CONFIGURATION OPTIONS:
-      INTEGER,  INTENT(IN)   ::        ISFFLX, LSM
+      INTEGER,  INTENT(IN)   ::        ISFFLX, LSM, LSM_RUC
       INTEGER,  OPTIONAL,  INTENT(IN)   :: ISFTCFLX, IZ0TLND
-      INTEGER,  OPTIONAL,  INTENT(IN)   :: spp_pbl, psi_opt
+      INTEGER,  OPTIONAL,  INTENT(IN)   :: spp_sfc, psi_opt
       integer, intent(in) :: ivegsrc
       integer, intent(in) :: sfc_z0_type ! option for calculating surface roughness length over ocean
       logical, intent(in) :: redrag ! reduced drag coeff. flag for high wind over sea (j.han)
@@ -291,8 +295,9 @@ CONTAINS
                                                           U3D,V3D, &
                                                         th3d,pi3d
 
-      REAL, DIMENSION( ims:ime, kms:kme), OPTIONAL,                &
-                INTENT(IN) ::                      pattern_spp_pbl
+      !GJF: This array must be assumed-shape since it is conditionally-allocated
+      REAL, DIMENSION( :,: ),                                      &
+                INTENT(IN) ::                      pattern_spp_sfc
 !===================================
 ! 2D VARIABLES
 !===================================
@@ -329,13 +334,12 @@ CONTAINS
                                                             WSTAR
 
       LOGICAL, DIMENSION( ims:ime ), INTENT(IN)    ::              &
-     &                          wet,       dry,       icy
+&                             wet,  dry,  icy,  flag_iter
 
       REAL, DIMENSION( ims:ime ), INTENT(IN)    ::                 &
      &                    tskin_wat, tskin_lnd, tskin_ice,         &
      &                    tsurf_wat, tsurf_lnd, tsurf_ice,         &
-     &                    snowh_wat, snowh_lnd, snowh_ice,         &
-     &                    qsfc_ruc
+     &                    snowh_wat, snowh_lnd, snowh_ice
 
       REAL, DIMENSION( ims:ime), INTENT(INOUT) ::                  &
      &                      ZNT_wat,   ZNT_lnd,   ZNT_ice,         &
@@ -352,9 +356,13 @@ CONTAINS
      &                     QFLX_wat,  QFLX_lnd,  QFLX_ice,         &
      &                     qsfc_wat,  qsfc_lnd,  qsfc_ice
 
+! CCPP error handling
+      character(len=*), intent(inout) :: errmsg
+      integer,          intent(inout) :: errflg
+
 !ADDITIONAL OUTPUT
 !JOE-begin
-      REAL,     DIMENSION( ims:ime )    ::   qstar
+      REAL,     DIMENSION( ims:ime ) :: qstar
 !JOE-end
 !===================================
 ! 1D LOCAL ARRAYS
@@ -396,11 +404,12 @@ CONTAINS
          QC1D(i)=QC3D(i,kts)
          P1D(i) =P3D(i,kts)
          T1D(i) =T3D(i,kts)
-         if (spp_pbl==1) then
-            rstoch1D(i)=pattern_spp_pbl(i,kts)
+         if (spp_sfc==1) then
+            rstoch1D(i)=pattern_spp_sfc(i,kts)
          else
             rstoch1D(i)=0.0
          endif
+         qstar(i)=0.0
       ENDDO
 
       IF (itimestep==1 .AND. iter==1) THEN
@@ -410,25 +419,22 @@ CONTAINS
             UST_LND(i)=MAX(0.04*SQRT(U1D(i)*U1D(i) + V1D(i)*V1D(i)),0.001)
             UST_ICE(i)=MAX(0.04*SQRT(U1D(i)*U1D(i) + V1D(i)*V1D(i)),0.001)
             MOL(i)=0.0
-            QSFC(i)=QV3D(i,kts)/(1.+QV3D(i,kts))
-            QSFC_WAT(i)=QSFC(i)
-            QSFC_LND(i)=QSFC(i)
-            QSFC_ICE(i)=QSFC(i)
-            qstar(i)=0.0
-            QFX(i)=0.
-            HFX(i)=0.
             QFLX(i)=0.
             HFLX(i)=0.
+            if ( LSM == LSM_RUC ) then
+            !- qsfc_lnd and qsfc_ice are already available
+               QSFC(i)=QV3D(i,kts)/(1.+QV3D(i,kts))
+               QSFC_WAT(i)=QSFC(i)
+            else
+               QSFC(i)=QV3D(i,kts)/(1.+QV3D(i,kts))
+               QSFC_WAT(i)=QSFC(i)
+               QSFC_LND(i)=QSFC(i)
+               QSFC_ICE(i)=QSFC(i)
+            endif ! lsm==lsm_ruc
          ENDDO
-      ELSE
-         IF (LSM == 3) THEN
-            DO i=its,ite
-               QSFC_LND(i)=QSFC_RUC(i)
-            ENDDO
-         ENDIF
       ENDIF
 
-      CALL SFCLAY1D_mynn(                                       &
+      CALL SFCLAY1D_mynn(flag_iter,                             &
            J,U1D,V1D,T1D,QV1D,P1D,dz8w1d,                       &
            U1D2,V1D2,dz2w1d,                                    &
            PSFCPA,PBLH,MAVAIL,XLAND,DX,                         &
@@ -438,7 +444,7 @@ CONTAINS
            sigmaf,vegtype,shdmax,ivegsrc,                       &  !intent(in)
            z0pert,ztpert,                                       &  !intent(in)
            redrag,sfc_z0_type,                                  &  !intent(in)
-           itimestep,iter,                                      &
+           itimestep,iter,lsm,lsm_ruc,                          &
                   wet,          dry,          icy,              &  !intent(in)
             tskin_wat,    tskin_lnd,    tskin_ice,              &  !intent(in)
             tsurf_wat,    tsurf_lnd,    tsurf_ice,              &  !intent(in)
@@ -461,12 +467,12 @@ CONTAINS
            PSIM,PSIH,                                           &
            HFLX,HFX,QFLX,QFX,LH,FLHC,FLQC,                      &
            QGH,QSFC,U10,V10,TH2,T2,Q2,                          &
-           GZ1OZ0,WSPD,wstar,                                   &
-           spp_pbl,rstoch1D,                                    &
+           GZ1OZ0,WSPD,wstar,qstar,                             &
+           spp_sfc,rstoch1D,                                    &
            ids,ide, jds,jde, kds,kde,                           &
            ims,ime, jms,jme, kms,kme,                           &
-           its,ite, jts,jte, kts,kte                            &
-                                                                )
+           its,ite, jts,jte, kts,kte,                           &
+           errmsg, errflg                                       )
 
     END SUBROUTINE SFCLAY_MYNN
 
@@ -476,7 +482,7 @@ CONTAINS
 !! which are passed to subsequent scheme to calculate the fluxes.
 !! This scheme has options to calculate the fluxes and near-surface
 !! diagnostics, as was needed in WRF, but these are skipped for FV3.
-   SUBROUTINE SFCLAY1D_mynn(                                      &
+   SUBROUTINE SFCLAY1D_mynn(flag_iter,                            &
              J,U1D,V1D,T1D,QV1D,P1D,dz8w1d,U1D2,V1D2,dz2w1d,      &
              PSFCPA,PBLH,MAVAIL,XLAND,DX,                         &
              CP,G,ROVCP,R,XLV,SVP1,SVP2,SVP3,SVPT0,               &
@@ -485,7 +491,7 @@ CONTAINS
              sigmaf,vegtype,shdmax,ivegsrc,                       &  !intent(in)
              z0pert,ztpert,                                       &  !intent(in)
              redrag,sfc_z0_type,                                  &  !intent(in)
-             itimestep,iter,                                      &
+             itimestep,iter,lsm,lsm_ruc,                          &
                     wet,          dry,          icy,              &  !intent(in)
               tskin_wat,    tskin_lnd,    tskin_ice,              &  !intent(in)
               tsurf_wat,    tsurf_lnd,    tsurf_ice,              &  !intent(in)
@@ -509,12 +515,12 @@ CONTAINS
              HFLX,HFX,QFLX,QFX,LH,FLHC,FLQC,                      &
              QGH,QSFC,                                            &
              U10,V10,TH2,T2,Q2,                                   &
-             GZ1OZ0,WSPD,wstar,                                   &
-             spp_pbl,rstoch1D,                                    &
+             GZ1OZ0,WSPD,wstar,qstar,                             &
+             spp_sfc,rstoch1D,                                    &
              ids,ide, jds,jde, kds,kde,                           &
              ims,ime, jms,jme, kms,kme,                           &
-             its,ite, jts,jte, kts,kte                            &
-                                                                  )
+             its,ite, jts,jte, kts,kte,                           &
+             errmsg, errflg                                       )
 
 !-------------------------------------------------------------------
       IMPLICIT NONE
@@ -524,7 +530,7 @@ CONTAINS
       INTEGER,  INTENT(IN) ::        ids,ide, jds,jde, kds,kde, &
                                      ims,ime, jms,jme, kms,kme, &
                                      its,ite, jts,jte, kts,kte, &
-                                     J, itimestep, iter
+                                     J, itimestep, iter, lsm, lsm_ruc
 
       REAL,     PARAMETER  :: XKA=2.4E-5   !molecular diffusivity
       REAL,     PARAMETER  :: PRT=1.       !prandlt number
@@ -537,7 +543,7 @@ CONTAINS
 !-----------------------------
       INTEGER,  INTENT(IN) :: ISFFLX
       INTEGER,  OPTIONAL,  INTENT(IN )   ::     ISFTCFLX, IZ0TLND
-      INTEGER,    INTENT(IN)             ::     spp_pbl, psi_opt
+      INTEGER,    INTENT(IN)             ::     spp_sfc, psi_opt
       integer, intent(in) :: ivegsrc
       integer, intent(in) :: sfc_z0_type ! option for calculating surface roughness length over ocean
       logical, intent(in) :: redrag ! reduced drag coeff. flag for high wind over sea (j.han)
@@ -563,9 +569,10 @@ CONTAINS
                                                            dz8w1d, &
                                                            dz2w1d
 
-      REAL,     DIMENSION( ims:ime ), INTENT(INOUT) ::   HFLX,HFX, &
-                                                      QFLX,QFX,LH, &
-                                                         MOL,RMOL, &
+      REAL,     DIMENSION( ims:ime ), INTENT(OUT)   ::    QFX,HFX, &
+                                                             RMOL
+      REAL,     DIMENSION( ims:ime ), INTENT(INOUT) ::  HFLX,QFLX, &
+                                                           LH,MOL, &
                                                          QGH,QSFC, &
                                                               ZNT, &
                                                               ZOL, &
@@ -580,7 +587,7 @@ CONTAINS
                                                              USTM
 
       LOGICAL, DIMENSION( ims:ime ), INTENT(IN)    ::              &
-     &                          wet,       dry,       icy
+     &                wet,     dry,     icy,    flag_iter
 
       REAL,     DIMENSION( ims:ime ), INTENT(in)    ::             &
      &                    tskin_wat, tskin_lnd, tskin_ice,         &
@@ -610,8 +617,13 @@ CONTAINS
 
 !--------------------------------------------
 !JOE-additinal output
-      REAL,     DIMENSION( ims:ime ) ::                wstar,qstar
+      REAL,     DIMENSION( ims:ime ), INTENT(OUT)   :: wstar,qstar
 !JOE-end
+
+! CCPP error handling
+      character(len=*), intent(inout) :: errmsg
+      integer,          intent(inout) :: errflg
+
 !----------------------------------------------------------------
 ! LOCAL VARS
 !----------------------------------------------------------------
@@ -659,6 +671,118 @@ CONTAINS
       REAL    ::  restar,VISC,DQG,OLDUST,OLDTST
 
 !-------------------------------------------------------------------
+      DO I=its,ite
+
+         ! PSFC ( in cmb) is used later in saturation checks
+         PSFC(I)=PSFCPA(I)/1000.
+         !tgs - do computations if flag_iter(i) = .true.
+         if ( flag_iter(i) ) then
+
+         IF (ITIMESTEP == 1) THEN
+         !initialize surface specific humidity and mixing ratios for land, ice and water
+            IF (wet(i)) THEN
+               TSK_wat(I) = tskin_wat(i)
+               IF (TSK_wat(I) .LT. 273.15) THEN
+                  !SATURATION VAPOR PRESSURE WRT ICE (SVP1=.6112; 10*mb)
+                  E1=SVP1*EXP(4648*(1./273.15 - 1./TSK_wat(I)) - &
+                    & 11.64*LOG(273.15/TSK_wat(I)) + 0.02265*(273.15 - TSK_wat(I)))
+               ELSE
+                  !SATURATION VAPOR PRESSURE WRT WATER (Bolton 1980)
+                  E1=SVP1*EXP(SVP2*(TSK_wat(I)-SVPT0)/(TSK_wat(i)-SVP3))
+               ENDIF
+               QSFC_wat(I)=EP2*E1/(PSFC(I)-ep_3*E1)             !specific humidity    
+               QSFCMR_wat(I)=EP2*E1/(PSFC(I)-E1)                !mixing ratio 
+               IF(QSFC_wat(I)>1..or.QSFC_wat(I)<0.) print *,' QSFC_wat(I)',itimestep,i,QSFC_wat(I),TSK_wat(i)
+            ENDIF
+            IF (dry(i)) THEN
+              TSK_lnd(I) = tskin_lnd(i)
+              if( lsm == lsm_ruc) then
+                QSFCMR_lnd(I)=QSFC_lnd(I)/(1.-QSFC_lnd(I))       !mixing ratio 
+              else
+               TABS = 0.5*(TSK_lnd(I) + T1D(I))
+               IF (TABS .LT. 273.15) THEN
+                  !SATURATION VAPOR PRESSURE WRT ICE (SVP1=.6112; 10*mb)
+                  E1=SVP1*EXP(4648*(1./273.15 - 1./TABS) - &
+                    & 11.64*LOG(273.15/TABS) + 0.02265*(273.15 - TABS))
+               ELSE
+                  !SATURATION VAPOR PRESSURE WRT WATER (Bolton 1980)
+                  E1=SVP1*EXP(SVP2*(TABS-SVPT0)/(TABS-SVP3))
+               ENDIF
+                 QSFC_lnd(I)=EP2*E1/(PSFC(I)-ep_3*E1)             !specific humidity
+                 QSFC_lnd(I)=0.5*(QSFC_lnd(I) + QSFC(I))
+                 QSFCMR_lnd(I)=QSFC_lnd(I)/(1.-QSFC_lnd(I))       !mixing ratio
+              endif ! lsm
+              IF(QSFC_lnd(I)>1..or.QSFC_lnd(I)<0.) print *,' QSFC_lnd(I)',itimestep,i,QSFC_lnd(I),Tskin_lnd(i),tsurf_lnd(i),qsfc(i)
+            ENDIF
+            IF (icy(i)) THEN
+              TSK_ice(I) = tskin_ice(i)
+              if( lsm == lsm_ruc) then
+                QSFCMR_ice(I)=QSFC_ice(I)/(1.-QSFC_ice(I))       !mixing ratio 
+              else
+               IF (TSK_ice(I) .LT. 273.15) THEN
+                  !SATURATION VAPOR PRESSURE WRT ICE (SVP1=.6112; 10*mb)
+                  E1=SVP1*EXP(4648*(1./273.15 - 1./TSK_ice(I)) - &
+                    & 11.64*LOG(273.15/TSK_ice(I)) + 0.02265*(273.15 - TSK_ice(I)))
+               ELSE
+                  !SATURATION VAPOR PRESSURE WRT WATER (Bolton 1980)
+                  E1=SVP1*EXP(SVP2*(TSK_ice(I)-SVPT0)/(TSK_ice(i)-SVP3))
+               ENDIF
+                 QSFC_ice(I)=EP2*E1/(PSFC(I)-ep_3*E1)             !specific humidity
+                 QSFCMR_ice(I)=EP2*E1/(PSFC(I)-E1)                !mixing ratio
+              endif ! lsm
+              IF(QSFC_ice(I)>1..or.QSFC_ice(I)<0.) print *,' QSFC_ice(I)',itimestep,i,QSFC_ice(I),TSK_ice(i)
+            ENDIF
+
+         ELSE
+
+            ! Use what comes out of the NST, LSM, SICE after check
+            IF (wet(i)) then
+               TSK_wat(I) = tskin_wat(i)
+               IF (TSK_wat(I) .LT. 273.15) THEN
+                  !SATURATION VAPOR PRESSURE WRT ICE (SVP1=.6112; 10*mb)
+                  E1=SVP1*EXP(4648*(1./273.15 - 1./TSK_wat(I)) - &
+                    & 11.64*LOG(273.15/TSK_wat(I)) + 0.02265*(273.15 - TSK_wat(I)))
+               ELSE
+                  !SATURATION VAPOR PRESSURE WRT WATER (Bolton 1980)
+                  E1=SVP1*EXP(SVP2*(TSK_wat(I)-SVPT0)/(TSK_wat(i)-SVP3))
+               ENDIF
+               QSFC_wat(I)=EP2*E1/(PSFC(I)-ep_3*E1)             !specific humidity    
+            ENDIF
+            IF (dry(i).and.(QSFC_lnd(I)>1..or.QSFC_lnd(I)<0.)) then
+               !print *,'bad QSFC_lnd(I)',itimestep,iter,i,QSFC_lnd(I),TSKin_lnd(I)
+               TABS = 0.5*(TSKin_lnd(I) + T1D(I))
+               IF (TABS .LT. 273.15) THEN
+                  !SATURATION VAPOR PRESSURE WRT ICE (SVP1=.6112; 10*mb)
+                  E1=SVP1*EXP(4648*(1./273.15 - 1./TABS) - &
+                    & 11.64*LOG(273.15/TABS) + 0.02265*(273.15 - TABS))
+               ELSE
+                  !SATURATION VAPOR PRESSURE WRT WATER (Bolton 1980)
+                  E1=SVP1*EXP(SVP2*(TABS-SVPT0)/(TABS-SVP3))
+               ENDIF
+                 QSFC_lnd(I)=EP2*E1/(PSFC(I)-ep_3*E1)             !specific humidity
+                 QSFC_lnd(I)=0.5*(QSFC_lnd(I) + QSFC(I))
+            ENDIF
+            IF (icy(i).and.(QSFC_ice(I)>1..or.QSFC_ice(I)<0.)) then
+               !print *,'bad QSFC_ice(I)',itimestep,iter,i,QSFC_ice(I),TSKin_ice(I)
+               IF (TSKin_ice(I) .LT. 273.15) THEN
+                  !SATURATION VAPOR PRESSURE WRT ICE (SVP1=.6112; 10*mb)
+                  E1=SVP1*EXP(4648*(1./273.15 - 1./TSKin_ice(I)) - &
+                    & 11.64*LOG(273.15/TSKin_ice(I)) + 0.02265*(273.15 - TSKin_ice(I)))
+               ELSE
+                  !SATURATION VAPOR PRESSURE WRT WATER (Bolton 1980)
+                  E1=SVP1*EXP(SVP2*(TSKin_ice(I)-SVPT0)/(TSKin_ice(i)-SVP3))
+               ENDIF
+                 QSFC_ice(I)=EP2*E1/(PSFC(I)-ep_3*E1)             !specific humidity
+            ENDIF
+
+            IF (wet(i)) QSFCMR_wat(I)=QSFC_wat(I)/(1.-QSFC_wat(I))
+            IF (dry(i)) QSFCMR_lnd(I)=QSFC_lnd(I)/(1.-QSFC_lnd(I))
+            IF (icy(i)) QSFCMR_ice(I)=QSFC_ice(I)/(1.-QSFC_ice(I))
+
+         ENDIF
+       endif ! flag_iter
+      ENDDO
+
       IF (debug_code >= 1) THEN
         write(0,*)"ITIMESTEP=",ITIMESTEP," iter=",iter
         DO I=its,ite
@@ -687,26 +811,38 @@ CONTAINS
       DO I=its,ite
          ! PSFC ( in cmb) is used later in saturation checks
          PSFC(I)=PSFCPA(I)/1000.
-         ! DEFINE SKIN TEMPERATURES FOR LAND/WATER/ICE
-         TSK_lnd(I) = 0.5 * (tsurf_lnd(i)+tskin_lnd(i))
-         TSK_ice(I) = 0.5 * (tsurf_ice(i)+tskin_ice(i))
-         TSK_wat(I) = 0.5 * (tsurf_wat(i)+tskin_wat(i))
          QVSH(I)=QV1D(I)/(1.+QV1D(I))        !CONVERT TO SPEC HUM (kg/kg)
          THCON(I)=(100000./PSFCPA(I))**ROVCP
-      ENDDO
-
-      DO I=its,ite
-         ! CONVERT SKIN TEMPERATURES TO POTENTIAL TEMPERATURE: 
-         THSK_lnd(I) = TSK_lnd(I)*THCON(I)   !(K)
-         THSK_ice(I) = TSK_ice(I)*THCON(I)   !(K)
-         THSK_wat(I) = TSK_wat(I)*THCON(I)   !(K)
-      ENDDO
-
-      DO I=its,ite
-         ! CONVERT SKIN POTENTIAL TEMPERATURES TO VIRTUAL POTENTIAL TEMPERATURE:
-         THVSK_lnd(I) = THSK_lnd(I)*(1.+EP1*QVSH(I))   !(K)
-         THVSK_ice(I) = THSK_ice(I)*(1.+EP1*QVSH(I))   !(K)
-         THVSK_wat(I) = THSK_wat(I)*(1.+EP1*QVSH(I))   !(K)
+        if( flag_iter(i) ) then
+         ! DEFINE SKIN TEMPERATURES FOR LAND/WATER/ICE
+         if(dry(i)) then
+           TSK_lnd(I) = tskin_lnd(i)
+           !TSK_lnd(I) = 0.5 * (tsurf_lnd(i)+tskin_lnd(i))
+           ! CONVERT SKIN TEMPERATURES TO POTENTIAL TEMPERATURE: 
+           THSK_lnd(I) = TSK_lnd(I)*THCON(I)   !(K)
+           THVSK_lnd(I) = THSK_lnd(I)*(1.+EP1*qsfc_lnd(I))
+           if(THVSK_lnd(I) < 170. .or. THVSK_lnd(I) > 360.) &
+           print *,'THVSK_lnd(I)',itimestep,i,THVSK_lnd(I),THSK_lnd(i),tsurf_lnd(i),tskin_lnd(i),qsfc_lnd(i)
+         endif
+         if(icy(i)) then
+           TSK_ice(I) = tskin_ice(i)
+           !TSK_ice(I) = 0.5 * (tsurf_ice(i)+tskin_ice(i))
+           ! CONVERT SKIN TEMPERATURES TO POTENTIAL TEMPERATURE: 
+           THSK_ice(I) = TSK_ice(I)*THCON(I)   !(K)
+           THVSK_ice(I) = THSK_ice(I)*(1.+EP1*qsfc_ice(I))   !(K)
+           if(THVSK_ice(I) < 170. .or. THVSK_ice(I) > 360.) &
+           print *,'THVSK_ice(I)',itimestep,i,THVSK_ice(I),THSK_ice(i),tsurf_ice(i),tskin_ice(i),qsfc_ice(i)
+         endif
+         if(wet(i)) then
+           TSK_wat(I) = tskin_wat(i)
+           !TSK_wat(I) = 0.5 * (tsurf_wat(i)+tskin_wat(i))
+           ! CONVERT SKIN TEMPERATURES TO POTENTIAL TEMPERATURE: 
+           THSK_wat(I) = TSK_wat(I)*THCON(I)   !(K)
+           THVSK_wat(I) = THSK_wat(I)*(1.+EP1*QVSH(I))   !(K)
+           if(THVSK_wat(I) < 170. .or. THVSK_wat(I) > 360.) &
+           print *,'THVSK_wat(I)',i,THVSK_wat(I),THSK_wat(i),tsurf_wat(i),tskin_wat(i),qsfc_wat(i)
+         endif
+        endif ! flag_iter
       ENDDO
 
       DO I=its,ite
@@ -728,6 +864,7 @@ CONTAINS
          GOVRTH(I)=G/TH1D(I)
       ENDDO
 
+      !tgs - should QFX and HFX be separate for land, ice and water?
       DO I=its,ite
          QFX(i)=QFLX(i)*RHO1D(I)
          HFX(i)=HFLX(i)*RHO1D(I)*cp
@@ -747,56 +884,6 @@ CONTAINS
       ENDIF
 
       DO I=its,ite
-
-         IF (ITIMESTEP == 1) THEN
-            IF (wet(i)) THEN
-               IF (TSK_wat(I) .LT. 273.15) THEN
-                  !SATURATION VAPOR PRESSURE WRT ICE (SVP1=.6112; 10*mb)
-                  E1=SVP1*EXP(4648*(1./273.15 - 1./TSK_wat(I)) - &
-                    & 11.64*LOG(273.15/TSK_wat(I)) + 0.02265*(273.15 - TSK_wat(I)))
-               ELSE
-                  !SATURATION VAPOR PRESSURE WRT WATER (Bolton 1980)
-                  E1=SVP1*EXP(SVP2*(TSK_wat(I)-SVPT0)/(TSK_wat(i)-SVP3))
-               ENDIF
-               QSFC_wat(I)=EP2*E1/(PSFC(I)-ep_3*E1)             !specific humidity    
-               QSFCMR_wat(I)=EP2*E1/(PSFC(I)-E1)                !mixing ratio 
-            ENDIF
-            IF (dry(i)) THEN
-               TABS = 0.5*(TSK_lnd(I) + T1D(I))
-               IF (TABS .LT. 273.15) THEN
-                  !SATURATION VAPOR PRESSURE WRT ICE (SVP1=.6112; 10*mb)
-                  E1=SVP1*EXP(4648*(1./273.15 - 1./TABS) - &
-                    & 11.64*LOG(273.15/TABS) + 0.02265*(273.15 - TABS))
-               ELSE
-                  !SATURATION VAPOR PRESSURE WRT WATER (Bolton 1980)
-                  E1=SVP1*EXP(SVP2*(TABS-SVPT0)/(TABS-SVP3))
-               ENDIF
-               QSFC_lnd(I)=EP2*E1/(PSFC(I)-ep_3*E1)             !specific humidity
-               QSFC_lnd(I)=0.5*(QSFC_lnd(I) + QSFC(I))
-               QSFCMR_lnd(I)=QSFC_lnd(I)/(1.-QSFC_lnd(I))       !mixing ratio
-            ENDIF
-            IF (icy(i)) THEN
-               IF (TSK_ice(I) .LT. 273.15) THEN
-                  !SATURATION VAPOR PRESSURE WRT ICE (SVP1=.6112; 10*mb)
-                  E1=SVP1*EXP(4648*(1./273.15 - 1./TSK_ice(I)) - &
-                    & 11.64*LOG(273.15/TSK_ice(I)) + 0.02265*(273.15 - TSK_ice(I)))
-               ELSE
-                  !SATURATION VAPOR PRESSURE WRT WATER (Bolton 1980)
-                  E1=SVP1*EXP(SVP2*(TSK_ice(I)-SVPT0)/(TSK_ice(i)-SVP3))
-               ENDIF
-               QSFC_ice(I)=EP2*E1/(PSFC(I)-ep_3*E1)             !specific humidity
-               QSFCMR_ice(I)=EP2*E1/(PSFC(I)-E1)                !mixing ratio
-            ENDIF
-
-         ELSE
-
-            ! Use what comes out of the LSM, NST, and CICE
-            IF (wet(i)) QSFCMR_wat(I)=QSFC_wat(I)/(1.-QSFC_wat(I))
-            IF (dry(i)) QSFCMR_lnd(I)=QSFC_lnd(I)/(1.-QSFC_lnd(I))
-            IF (icy(i)) QSFCMR_ice(I)=QSFC_ice(I)/(1.-QSFC_ice(I))
-
-         ENDIF
-
          ! QGH CHANGED TO USE LOWEST-LEVEL AIR TEMP
          ! Q2SAT = QGH IN LSM
          IF (T1D(I) .LT. 273.15) THEN
@@ -832,6 +919,7 @@ CONTAINS
       ENDIF
 
       DO I=its,ite
+        if( flag_iter(i) ) then
          ! DH* 20200401 - note. A weird bug in Intel 18 on hera prevents using the
          ! normal -O2 optimization in REPRO and PROD mode for this file. Not reproducible
          ! by every user, the bug manifests itself in the resulting wind speed WSPD(I)
@@ -848,6 +936,9 @@ CONTAINS
             ! subgrid-scale velocity (VSGD) following Beljaars (1995, QJRMS) 
             ! and Mahrt and Sun (1995, MWR), respectively
             !-------------------------------------------------------
+            !tgs - the line below could be used when hflx_wat,qflx_wat are moved from
+            !      Interstitial to Sfcprop
+            !fluxc = max(hflx_wat(i) + ep1*THVSK_wat(I)*qflx_wat(i),0.)
             fluxc = max(hfx(i)/RHO1D(i)/cp                    &
             &    + ep1*THVSK_wat(I)*qfx(i)/RHO1D(i),0.)
             !WSTAR(I) = vconvc*(g/TSK(i)*pblh(i)*fluxc)**onethird
@@ -880,6 +971,9 @@ CONTAINS
             ! subgrid-scale velocity (VSGD) following Beljaars (1995, QJRMS)
             ! and Mahrt and Sun (1995, MWR), respectively
             !-------------------------------------------------------
+            !tgs - the line below could be used when hflx_lnd,qflx_wat are moved from
+            !      Interstitial to Sfcprop
+            !fluxc = max(hflx_lnd(i) + ep1*THVSK_lnd(I)*qflx_lnd(i),0.)
             fluxc = max(hfx(i)/RHO1D(i)/cp                    &
             &    + ep1*THVSK_lnd(I)*qfx(i)/RHO1D(i),0.)
             ! WSTAR(I) = vconvc*(g/TSK(i)*pblh(i)*fluxc)**onethird
@@ -920,6 +1014,9 @@ CONTAINS
             ! subgrid-scale velocity (VSGD) following Beljaars (1995, QJRMS)
             ! and Mahrt and Sun (1995, MWR), respectively
             !-------------------------------------------------------
+            !tgs - the line below could be used when hflx_ice,qflx_ice are moved from
+            !      Interstitial to Sfcprop
+            !fluxc = max(hflx_ice(i) + ep1*THVSK_ice(I)*qflx_ice(i)/RHO1D(i),0.)
             fluxc = max(hfx(i)/RHO1D(i)/cp                    &
             &    + ep1*THVSK_ice(I)*qfx(i)/RHO1D(i),0.)
             ! WSTAR(I) = vconvc*(g/TSK(i)*pblh(i)*fluxc)**onethird
@@ -965,6 +1062,7 @@ CONTAINS
          !    IF(MOL(I).LT.0.)BR(I)=MIN(BR(I),0.0)
          !ENDIF
      
+        endif ! flag_iter
       ENDDO
 
  1006   format(A,F7.3,A,f9.4,A,f9.5,A,f9.4)
@@ -977,6 +1075,7 @@ CONTAINS
 !--------------------------------------------------------------------
 
  DO I=its,ite
+   if( flag_iter(i) ) then
 
     !COMPUTE KINEMATIC VISCOSITY (m2/s) Andreas (1989) CRREL Rep. 89-11
     !valid between -173 and 277 degrees C.
@@ -1024,7 +1123,7 @@ CONTAINS
        endif !-end wave model check
 
        ! add stochastic perturbation of ZNT
-       if (spp_pbl==1) then
+       if (spp_sfc==1) then
           ZNTstoch_wat(I)  = MAX(ZNT_wat(I) + ZNT_wat(I)*1.0*rstoch1D(i), 1e-6)
        else
           ZNTstoch_wat(I)  = ZNT_wat(I)
@@ -1053,29 +1152,29 @@ CONTAINS
           IF ( ISFTCFLX .EQ. 0 ) THEN
              IF (COARE_OPT .EQ. 3.0) THEN
                 CALL fairall_etal_2003(ZT_wat(i),ZQ_wat(i),restar,UST_wat(i),visc,&
-                                       rstoch1D(i),spp_pbl)
+                                       rstoch1D(i),spp_sfc)
              ELSE
                 !presumably, this will be published soon, but hasn't yet
                 CALL fairall_etal_2014(ZT_wat(i),ZQ_wat(i),restar,UST_wat(i),visc,&
-                                       rstoch1D(i),spp_pbl)
+                                       rstoch1D(i),spp_sfc)
              ENDIF
           ELSEIF ( ISFTCFLX .EQ. 1 ) THEN
              IF (COARE_OPT .EQ. 3.0) THEN
                 CALL fairall_etal_2003(ZT_wat(i),ZQ_wat(i),restar,UST_wat(i),visc,&
-                                       rstoch1D(i),spp_pbl)
+                                       rstoch1D(i),spp_sfc)
              ELSE
                 CALL fairall_etal_2014(ZT_wat(i),ZQ_wat(i),restar,UST_wat(i),visc,&
-                                       rstoch1D(i),spp_pbl)
+                                       rstoch1D(i),spp_sfc)
              ENDIF
           ELSEIF ( ISFTCFLX .EQ. 2 ) THEN
              CALL garratt_1992(ZT_wat(i),ZQ_wat(i),ZNTstoch_wat(i),restar,2.0)
           ELSEIF ( ISFTCFLX .EQ. 3 ) THEN
              IF (COARE_OPT .EQ. 3.0) THEN
                 CALL fairall_etal_2003(ZT_wat(i),ZQ_wat(i),restar,UST_wat(i),visc,&
-                                       rstoch1D(i),spp_pbl)
+                                       rstoch1D(i),spp_sfc)
              ELSE
                 CALL fairall_etal_2014(ZT_wat(i),ZQ_wat(i),restar,UST_wat(i),visc,&
-                                       rstoch1D(i),spp_pbl)
+                                       rstoch1D(i),spp_sfc)
              ENDIF
           ELSEIF ( ISFTCFLX .EQ. 4 ) THEN
              !GFS zt formulation
@@ -1086,10 +1185,10 @@ CONTAINS
           !DEFAULT TO COARE 3.0/3.5
           IF (COARE_OPT .EQ. 3.0) THEN
              CALL fairall_etal_2003(ZT_wat(i),ZQ_wat(i),restar,UST_wat(i),visc,&
-                                    rstoch1D(i),spp_pbl)
+                                    rstoch1D(i),spp_sfc)
           ELSE
              CALL fairall_etal_2014(ZT_wat(i),ZQ_wat(i),restar,UST_wat(i),visc,&
-                                    rstoch1D(i),spp_pbl)
+                                    rstoch1D(i),spp_sfc)
           ENDIF
        ENDIF
        IF (debug_code > 1) THEN
@@ -1114,7 +1213,7 @@ CONTAINS
        endif
 
        ! add stochastic perturbaction of ZNT
-       if (spp_pbl==1) then
+       if (spp_sfc==1) then
           ZNTstoch_lnd(I)  = MAX(ZNT_lnd(I) + ZNT_lnd(I)*1.0*rstoch1D(i), 1e-6)
        else
           ZNTstoch_lnd(I)  = ZNT_lnd(I)
@@ -1135,8 +1234,13 @@ CONTAINS
           IF ( PRESENT(IZ0TLND) ) THEN
              IF ( IZ0TLND .LE. 1 ) THEN
                 CALL zilitinkevich_1995(ZNTstoch_lnd(i),ZT_lnd(i),ZQ_lnd(i),restar,&
-                      UST_lnd(I),KARMAN,1.0,IZ0TLND,spp_pbl,rstoch1D(i))
+                      UST_lnd(I),KARMAN,1.0,IZ0TLND,spp_sfc,rstoch1D(i))
              ELSEIF ( IZ0TLND .EQ. 2 ) THEN
+                ! DH note - at this point, qstar is either not initialized
+                ! or initialized to zero, but certainly not set correctly
+                errmsg = 'Logic error: qstar is not set correctly when calling Yang_2008'
+                errflg = 1
+                return
                 CALL Yang_2008(ZNTSTOCH_lnd(i),ZT_lnd(i),ZQ_lnd(i),UST_lnd(i),MOL(I),&
                               qstar(I),restar,visc)
              ELSEIF ( IZ0TLND .EQ. 3 ) THEN
@@ -1150,9 +1254,18 @@ CONTAINS
           ELSE
              !DEFAULT TO ZILITINKEVICH
              CALL zilitinkevich_1995(ZNTSTOCH_lnd(i),ZT_lnd(i),ZQ_lnd(i),restar,&
-                         UST_lnd(I),KARMAN,1.0,0,spp_pbl,rstoch1D(i))
+                         UST_lnd(I),KARMAN,1.0,0,spp_sfc,rstoch1D(i))
           ENDIF
        ENDIF
+       IF (ZNTstoch_lnd(i) < 1E-8 .OR. Zt_lnd(i) < 1E-10) THEN 
+         write(0,*)"===(land) capture bad input in mynn sfc layer, i=:",i
+         write(0,*)" ZNT=", ZNTstoch_lnd(i)," ZT=",Zt_lnd(i) 
+         write(0,*)" tsk=", tskin_lnd(i)," restar=",restar,&
+         " tsurf=", tsurf_lnd(i)," qsfc=", qsfc_lnd(i)," znt=", znt_lnd(i),&
+         " ust=", ust_lnd(i)," snowh=", snowh_lnd(i),"psfcpa=",PSFCPA(i), &
+         " dz=",dz8w1d(i)," qflx=",qflx_lnd(i)," hflx=",hflx_lnd(i)," hpbl=",pblh(i)
+       ENDIF
+
 
        GZ1OZ0_lnd(I)= LOG((ZA(I)+ZNTstoch_lnd(I))/ZNTstoch_lnd(I))
        GZ1OZt_lnd(I)= LOG((ZA(I)+ZNTstoch_lnd(i))/ZT_lnd(i))
@@ -1167,7 +1280,7 @@ CONTAINS
     IF (icy(I)) THEN
 
        ! add stochastic perturbaction of ZNT
-       if (spp_pbl==1) then
+       if (spp_sfc==1) then
           ZNTstoch_ice(I)  = MAX(ZNT_ice(I) + ZNT_ice(I)*1.0*rstoch1D(i), 1e-6)
        else
           ZNTstoch_ice(I)  = ZNT_ice(I)
@@ -1194,6 +1307,7 @@ CONTAINS
     ENDIF  !end ice point
 
     !Capture a representative ZNT
+    !tgs - should this be changed for fractional grid or fractional sea ice?
     IF (dry(i)) THEN
        ZNT(i)=ZNTstoch_lnd(I)
     ELSEIF (wet(i)) THEN
@@ -1616,6 +1730,7 @@ CONTAINS
 
        ! Compute u* without vconv for use in HFX calc when isftcflx > 0           
        WSPDI(I)=MAX(SQRT(U1D(I)*U1D(I)+V1D(I)*V1D(I)), wmin)
+       !tgs - should USTM be separater for dry, icy, wet?
        USTM(I)=0.5*USTM(I)+0.5*KARMAN*WSPDI(I)/PSIX_wat(I)
 
        ! for possible future changes in sea-ice fraction from 0 to >0:
@@ -1638,6 +1753,7 @@ CONTAINS
        stress_lnd(i)=ust_lnd(i)**2
 
        !set ustm = ust over land.
+       !tgs - should USTM be separater for dry, icy, wet?
        USTM(I)=UST_lnd(I)
     ENDIF ! end water points
 
@@ -1651,9 +1767,11 @@ CONTAINS
        stress_ice(i)=ust_ice(i)**2
 
        !Set ustm = ust over ice.
+       !tgs - should USTM be separate for for dry, icy, wet?
        USTM(I)=UST_ice(I)
 
        ! for possible future changes in sea-ice fraction from 1 to <1:
+       !tgs - sea ice can be <1 now
        if (.not. wet(i)) ust_wat(i)=ust_ice(i)
     ENDIF ! end ice points
 
@@ -1662,6 +1780,7 @@ CONTAINS
     !----AND COMPUTE THE MOISTURE SCALE (or q*)
     !----------------------------------------------------
 
+    !tgs - should we have MOL and qstar separate for dry, icy and wet?
     IF (wet(I)) THEN
        DTG=THV1D(I)-THVSK_wat(I)
        OLDTST=MOL(I)
@@ -1695,6 +1814,7 @@ CONTAINS
        qstar(I)=KARMAN*DQG/PSIQ_ice(I)/PRT
     ENDIF
 
+   endif ! flag_iter
  ENDDO   ! end i-loop
 
  IF (debug_code == 2) THEN
@@ -1722,6 +1842,7 @@ CONTAINS
    !  COMPUTE SURFACE HEAT AND MOISTURE FLUXES
    !----------------------------------------------------------
  DO I=its,ite
+  if( flag_iter(i) ) then
 
     IF (ISFFLX .LT. 1) THEN                            
 
@@ -1750,6 +1871,7 @@ CONTAINS
          ! CALCULATE THE EXCHANGE COEFFICIENTS FOR HEAT (FLHC)
          ! AND MOISTURE (FLQC)
          !------------------------------------------
+         !tgs - should FLQC, FLHC be separate for dry, icy and wet?
          FLQC(I)=RHO1D(I)*MAVAIL(I)*UST_lnd(I)*KARMAN/PSIQ_lnd(i)
          FLHC(I)=RHO1D(I)*CPM(I)*UST_lnd(I)*KARMAN/PSIT_lnd(I)
 
@@ -1757,8 +1879,8 @@ CONTAINS
             !----------------------------------
             ! COMPUTE SURFACE MOISTURE FLUX:
             !----------------------------------
-            !QFX(I)=FLQC(I)*(QSFCMR_lnd(I)-QV1D(I))
-            QFX(I)=FLQC(I)*(QSFC_lnd(I)-QV1D(I))
+            QFX(I)=FLQC(I)*(QSFCMR_lnd(I)-QV1D(I))
+            !QFX(I)=FLQC(I)*(QSFC_lnd(I)-QV1D(I))
             QFX(I)=MAX(QFX(I),-0.02)      !allows small neg QFX
             LH(i)=XLV*QFX(i)
             ! BWG, 2020-06-17: Mod next 2 lines for fractional
@@ -1778,6 +1900,8 @@ CONTAINS
          !TRANSFER COEFF FOR SOME LSMs:
          !CHS(I)=UST(I)*KARMAN/(ALOG(KARMAN*UST(I)*ZA(I) &
          !       /XKA+ZA(I)/ZL)-PSIH(I))
+
+         !tgs - should QSFC, CHS, CHS2 and CQS2 be separate for dry, icy and wet?
          CHS(I)=UST_lnd(I)*KARMAN/PSIT_lnd(I)
 
          !THESE ARE USED FOR 2-M DIAGNOSTICS ONLY
@@ -1799,8 +1923,8 @@ CONTAINS
             !----------------------------------
             ! COMPUTE SURFACE MOISTURE FLUX:
             !----------------------------------
-            !QFX(I)=FLQC(I)*(QSFCMR_wat(I)-QV1D(I))
-            QFX(I)=FLQC(I)*(QSFC_wat(I)-QV1D(I))
+            QFX(I)=FLQC(I)*(QSFCMR_wat(I)-QV1D(I))
+            !QFX(I)=FLQC(I)*(QSFC_wat(I)-QV1D(I))
             QFX(I)=MAX(QFX(I),-0.02)      !allows small neg QFX
             LH(I)=XLV*QFX(I)
             ! BWG, 2020-06-17: Mod next 2 lines for fractional
@@ -1846,8 +1970,8 @@ CONTAINS
             !----------------------------------
             ! COMPUTE SURFACE MOISTURE FLUX:   
             !----------------------------------
-            !QFX(I)=FLQC(I)*(QSFCMR_ice(I)-QV1D(I))
-            QFX(I)=FLQC(I)*(QSFC_ice(I)-QV1D(I))
+            QFX(I)=FLQC(I)*(QSFCMR_ice(I)-QV1D(I))
+            !QFX(I)=FLQC(I)*(QSFC_ice(I)-QV1D(I))
             QFX(I)=MAX(QFX(I),-0.02)      !allows small neg QFX
             LH(I)=XLF*QFX(I)
             ! BWG, 2020-06-17: Mod next 2 lines for fractional
@@ -1905,10 +2029,12 @@ CONTAINS
       ENDIF
 
    ENDIF !end ISFFLX option
+  endif ! flag_iter
 ENDDO ! end i-loop
 
 IF (compute_diag) then
    DO I=its,ite
+     if( flag_iter(i) ) then
       !-----------------------------------------------------
       !COMPUTE DIAGNOSTICS
       !-----------------------------------------------------
@@ -2013,6 +2139,7 @@ IF (compute_diag) then
          Q2(I)= MAX(Q2(I), MIN(QSFC_ice(I), QV1D(I)))
          Q2(I)= MIN(Q2(I), 1.05*QV1D(I))
       ENDIF
+     endif ! flag_iter
    ENDDO
 ENDIF ! end compute_diag
 
@@ -2136,7 +2263,7 @@ END SUBROUTINE SFCLAY1D_mynn
 !!            to work with the Noah LSM and may be specific for that
 !!            LSM only. Tests with RUC LSM showed no improvements. 
   SUBROUTINE zilitinkevich_1995(Z_0,Zt,Zq,restar,ustar,KARMAN,&
-        & landsea,IZ0TLND2,spp_pbl,rstoch)
+        & landsea,IZ0TLND2,spp_sfc,rstoch)
 
        IMPLICIT NONE
        REAL, INTENT(IN) :: Z_0,restar,ustar,KARMAN,landsea
@@ -2145,7 +2272,7 @@ END SUBROUTINE SFCLAY1D_mynn
        REAL :: CZIL  !=0.100 in Chen et al. (1997)
                      !=0.075 in Zilitinkevich (1995)
                      !=0.500 in Lemone et al. (2008)
-       INTEGER,  INTENT(IN)  ::    spp_pbl
+       INTEGER,  INTENT(IN)  ::    spp_sfc
        REAL,     INTENT(IN)  ::    rstoch
 
 
@@ -2186,7 +2313,7 @@ END SUBROUTINE SFCLAY1D_mynn
 
 ! stochastically perturb thermal and moisture roughness length.
 ! currently set to half the amplitude: 
-          if (spp_pbl==1) then
+          if (spp_sfc==1) then
              Zt = Zt + Zt * 0.5 * rstoch
              Zt = MAX(Zt, 0.0001)
              Zq = Zt
@@ -2351,11 +2478,11 @@ END SUBROUTINE SFCLAY1D_mynn
 !!(1992, p. 102), is available for flows with Ren < 2.
 !!
 !!This is for use over water only.
-    SUBROUTINE fairall_etal_2003(Zt,Zq,Ren,ustar,visc,rstoch,spp_pbl)
+    SUBROUTINE fairall_etal_2003(Zt,Zq,Ren,ustar,visc,rstoch,spp_sfc)
 
        IMPLICIT NONE
        REAL, INTENT(IN)   :: Ren,ustar,visc,rstoch
-       INTEGER, INTENT(IN):: spp_pbl
+       INTEGER, INTENT(IN):: spp_sfc
        REAL, INTENT(OUT)  :: Zt,Zq
 
        IF (Ren .le. 2.) then
@@ -2374,7 +2501,7 @@ END SUBROUTINE SFCLAY1D_mynn
 
        ENDIF
 
-       if (spp_pbl==1) then
+       if (spp_sfc==1) then
           Zt = Zt + Zt * 0.5 * rstoch
           Zq = Zt
        endif
@@ -2395,18 +2522,18 @@ END SUBROUTINE SFCLAY1D_mynn
 !! COARE 3.5/4.0 formulation, empirically derived from COARE and HEXMAX data
 !! [Fairall et al. (2014? coming soon, not yet published as of July 2014)].
 !! This is for use over water only.
-    SUBROUTINE fairall_etal_2014(Zt,Zq,Ren,ustar,visc,rstoch,spp_pbl)
+    SUBROUTINE fairall_etal_2014(Zt,Zq,Ren,ustar,visc,rstoch,spp_sfc)
 
        IMPLICIT NONE
        REAL, INTENT(IN)  :: Ren,ustar,visc,rstoch
-       INTEGER, INTENT(IN):: spp_pbl
+       INTEGER, INTENT(IN):: spp_sfc
        REAL, INTENT(OUT) :: Zt,Zq
 
        !Zt = (5.5e-5)*(Ren**(-0.60))
        Zt = MIN(1.6E-4, 5.8E-5/(Ren**0.72))
        Zq = Zt
 
-       IF (spp_pbl ==1) THEN
+       IF (spp_sfc ==1) THEN
           Zt = MAX(Zt + Zt*0.5*rstoch,2.0e-9)
           Zq = MAX(Zt + Zt*0.5*rstoch,2.0e-9)
        ELSE
@@ -3639,4 +3766,3 @@ END SUBROUTINE SFCLAY1D_mynn
 !========================================================================
 
 END MODULE module_sf_mynn
-

@@ -98,7 +98,6 @@ contains
     real(kind_phys), dimension(nCol, nLev, min(4,ncnd)) :: cld_condensate
     integer :: iCol,iLay,l,ncndl
     real(kind_phys), dimension(nCol,nLev) :: deltaP,deltaZ
-    logical :: top_at_1
 
     if (.not. (doSWrad .or. doLWrad)) return
     
@@ -107,7 +106,7 @@ contains
     errflg = 0
     
     ! Test inputs
-    if (ncnd .ne. 5) then
+    if (ncnd .ne. 5 .and. ncnd .ne. 6 ) then
        errmsg = 'Incorrect number of cloud condensates provided'
        errflg = 1
        call check_error_msg('GFS_rrtmgp_gfdlmp_pre_run',errmsg)

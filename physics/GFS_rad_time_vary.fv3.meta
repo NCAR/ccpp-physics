@@ -14,7 +14,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [lsswr]
   standard_name = flag_for_calling_shortwave_radiation
   long_name = logical flags for sw radiation calls
@@ -22,7 +21,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [isubc_lw]
   standard_name = flag_for_lw_clouds_sub_grid_approximation
   long_name = flag for lw clouds sub-grid approximation
@@ -30,7 +28,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [isubc_sw]
   standard_name = flag_for_sw_clouds_grid_approximation
   long_name = flag for sw clouds sub-grid approximation
@@ -38,7 +35,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [icsdsw]
   standard_name = random_number_seed_for_mcica_shortwave
   long_name = random seeds for sub-column cloud generators sw
@@ -46,7 +42,6 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = inout
-  optional = F
 [icsdlw]
   standard_name = random_number_seed_for_mcica_longwave
   long_name = random seeds for sub-column cloud generators lw
@@ -54,7 +49,6 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = inout
-  optional = F
 [cnx]
   standard_name = number_of_x_points_for_current_cubed_sphere_tile
   long_name = number of points in x direction for this cubed sphere face
@@ -62,7 +56,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [cny]
   standard_name = number_of_y_points_for_current_cubed_sphere_tile
   long_name = number of points in y direction for this cubed sphere face
@@ -70,7 +63,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [isc]
   standard_name = starting_x_index_for_this_MPI_rank
   long_name = starting index in the x direction for this MPI rank
@@ -78,7 +70,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [jsc]
   standard_name = starting_y_index_for_this_MPI_rank
   long_name = starting index in the y direction for this MPI rank
@@ -86,7 +77,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [imap]
   standard_name = map_of_block_column_number_to_global_i_index
   long_name = map of local index ix to global index i for this block
@@ -94,7 +84,6 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = in
-  optional = F
 [jmap]
   standard_name = map_of_block_column_number_to_global_j_index
   long_name = map of local index ix to global index j for this block
@@ -102,7 +91,6 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = in
-  optional = F
 [sec]
   standard_name = forecast_time_in_seconds
   long_name = seconds elapsed since model initialization
@@ -111,7 +99,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [kdt]
   standard_name = index_of_timestep
   long_name = current forecast iteration
@@ -119,7 +106,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [imp_physics]
   standard_name = control_for_microphysics_scheme
   long_name = choice of microphysics scheme
@@ -127,7 +113,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [imp_physics_zhao_carr]
   standard_name = identifier_for_zhao_carr_microphysics_scheme
   long_name = choice of Zhao-Carr microphysics scheme
@@ -135,7 +120,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ps_2delt]
   standard_name = surface_air_pressure_two_timesteps_back
   long_name = surface air pressure two timesteps back
@@ -144,7 +128,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [ps_1delt]
   standard_name = surface_air_pressure_on_previous_timestep
   long_name = surface air pressure at previous timestep
@@ -153,7 +136,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [t_2delt]
   standard_name = air_temperature_two_timesteps_back
   long_name = air temperature two timesteps back
@@ -162,7 +144,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [t_1delt]
   standard_name = air_temperature_on_previous_timestep_in_xyz_dimensioned_restart_array
   long_name = air temperature at previous timestep
@@ -171,7 +152,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [qv_2delt]
   standard_name = specific_humidity_two_timesteps_back
   long_name = water vapor specific humidity two timesteps back
@@ -180,7 +160,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [qv_1delt]
   standard_name = specific_humidity_on_previous_timestep_in_xyz_dimensioned_restart_array
   long_name = water vapor specific humidity at previous timestep
@@ -189,7 +168,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [t]
   standard_name = air_temperature
   long_name = model layer mean temperature
@@ -198,7 +176,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [qv]
   standard_name = specific_humidity
   long_name = water vapor specific humidity
@@ -207,7 +184,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [ps]
   standard_name = air_pressure_at_lowest_model_interface
   long_name = air pressure at lowest model interface
@@ -216,7 +192,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -225,13 +200,11 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 

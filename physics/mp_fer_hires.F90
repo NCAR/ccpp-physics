@@ -32,9 +32,7 @@ module mp_fer_hires
 !! \htmlinclude mp_fer_hires_init.html
 !!
      subroutine mp_fer_hires_init(ncol, nlev, dtp, imp_physics,         &
-                                  imp_physics_fer_hires,                &
-                                  restart,                              &
-                                  f_ice,f_rain,f_rimef,                 &
+                                  imp_physics_fer_hires, restart,       &
                                   mpicomm, mpirank,mpiroot,             &
                                   threads, errmsg, errflg)
 
@@ -54,10 +52,6 @@ module mp_fer_hires
       logical,                        intent(in)    :: restart
       character(len=*),               intent(out)   :: errmsg
       integer,                        intent(out)   :: errflg
-      real(kind_phys),                intent(out)   :: f_ice(:,:)
-      real(kind_phys),                intent(out)   :: f_rain(:,:)
-      real(kind_phys),                intent(out)   :: f_rimef(:,:)
-
 
       ! Local variables
       integer                                       :: ims, ime, lm,i,k
@@ -91,17 +85,6 @@ module mp_fer_hires
           return
        end if
 
-     !MZ: fer_hires_init() in HWRF
-        if (mpirank==mpiroot) write (0,*) 'F-A: F_ICE, F_RAIN AND F_RIMEF ARE REINITIALIZED'
-        DO K = 1,lm
-        DO I= ims,ime
-          F_ICE(i,k)=0.
-          F_RAIN(i,k)=0.
-          F_RIMEF(i,k)=1.
-        ENDDO
-        ENDDO
-      !MZ: fer_hires_init() in HWRF
-
         if (mpirank==mpiroot) write (0,*) 'F-A: calling FERRIER_INIT_HR ...'
        CALL FERRIER_INIT_HR(dtp,mpicomm,mpirank,mpiroot,threads,errmsg,errflg)
 
@@ -109,7 +92,6 @@ module mp_fer_hires
        if (errflg /= 0 ) return
 
        is_initialized = .true.
-
 
      end subroutine mp_fer_hires_init
 
@@ -121,9 +103,8 @@ module mp_fer_hires
        SUBROUTINE mp_fer_hires_run(NCOL, NLEV, DT ,SPEC_ADV             &
                          ,SLMSK                                         &
                          ,PRSI,P_PHY                                    &
-                         ,T,Q,CWM                                       &
+                         ,T,Q                                           &
                          ,TRAIN,SR                                      &
-                         ,F_ICE,F_RAIN,F_RIMEF                          &
                          ,QC,QR,QI,QG                                   &
                          ,PREC                                          &
                          ,mpirank, mpiroot, threads                     &
@@ -158,12 +139,8 @@ module mp_fer_hires
       real(kind_phys),   intent(in   ) :: epsq,r_d,p608,cp,g
       real(kind_phys),   intent(inout) :: t(:,:)
       real(kind_phys),   intent(inout) :: q(:,:)
-      real(kind_phys),   intent(inout) :: cwm(:,:)
       real(kind_phys),   intent(inout) :: train(:,:)
       real(kind_phys),   intent(out  ) :: sr(:)
-      real(kind_phys),   intent(out  ) :: f_ice(:,:)
-      real(kind_phys),   intent(out  ) :: f_rain(:,:) 
-      real(kind_phys),   intent(out  ) :: f_rimef(:,:)
       real(kind_phys),   intent(inout) :: qc(:,:)
       real(kind_phys),   intent(inout) :: qr(:,:)
       real(kind_phys),   intent(inout) :: qi(:,:)
@@ -189,6 +166,10 @@ module mp_fer_hires
       real(kind_phys)    :: snownc(1:ncol),snowncv(1:ncol)
       real(kind_phys)    :: graupelncv(1:ncol)
       real(kind_phys)    :: train_phy(1:ncol,1:nlev)
+      real(kind_phys)    :: f_ice(1:ncol,1:nlev)
+      real(kind_phys)    :: f_rain(1:ncol,1:nlev)
+      real(kind_phys)    :: f_rimef(1:ncol,1:nlev)
+      real(kind_phys)    :: cwm(1:ncol,1:nlev)
 
 ! Dimension
       integer            :: ims, ime, lm

@@ -14,7 +14,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [kmp]
   standard_name = top_layer_index_for_fast_physics
   long_name = top_layer_inder_for_gfdl_mp
@@ -22,7 +21,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [nwat]
   standard_name = number_of_water_species
   long_name = number of water species
@@ -30,7 +28,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ngas]
   standard_name = number_of_gases_for_multi_gases_physics
   long_name = number of gases for multi gases physics
@@ -38,7 +35,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [rilist]
   standard_name = gas_constants_for_multi_gases_physics
   long_name = gas constants for multi gases physics
@@ -47,7 +43,6 @@
   type = real
   kind = kind_dyn
   intent = in
-  optional = F
 [cpilist]
   standard_name = specific_heat_capacities_for_multi_gases_physics
   long_name = specific heat capacities for multi gases physics
@@ -56,7 +51,6 @@
   type = real
   kind = kind_dyn
   intent = in
-  optional = F
 [mpirank]
   standard_name = mpi_rank_for_fast_physics
   long_name = current MPI-rank for fast physics schemes
@@ -64,7 +58,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [mpiroot]
   standard_name = mpi_root_for_fast_physics
   long_name = master MPI-rank for fast physics schemes
@@ -72,7 +65,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -81,15 +73,13 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 
 ########################################################################
 [ccpp-arg-table]
@@ -103,15 +93,13 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 
 ########################################################################
 [ccpp-arg-table]
@@ -125,7 +113,6 @@
   type = real
   kind = kind_dyn
   intent = in
-  optional = F
 [zvir]
   standard_name = ratio_of_vapor_to_dry_air_gas_constants_minus_one_default_kind
   long_name = zvir=rv/rd-1.0
@@ -134,7 +121,6 @@
   type = real
   kind = kind_dyn
   intent = in
-  optional = F
 [is]
   standard_name = starting_x_direction_index
   long_name = starting X direction index
@@ -142,7 +128,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ie]
   standard_name = ending_x_direction_index
   long_name = ending X direction index
@@ -150,7 +135,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [isd]
   standard_name = starting_x_direction_index_domain
   long_name = starting X direction index for domain
@@ -158,7 +142,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ied]
   standard_name = ending_x_direction_index_domain
   long_name = ending X direction index for domain
@@ -166,7 +149,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [kmp]
   standard_name = top_layer_index_for_fast_physics
   long_name = top layer index for GFDL mp
@@ -174,7 +156,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [km]
   standard_name = vertical_dimension_for_fast_physics
   long_name = number of vertical levels
@@ -182,7 +163,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [kmdelz]
   standard_name = vertical_dimension_for_thickness_at_Lagrangian_surface
   long_name = vertical dimension for thickness at Lagrangian surface
@@ -190,7 +170,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [js]
   standard_name = starting_y_direction_index
   long_name = starting Y direction index
@@ -198,7 +177,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [je]
   standard_name = ending_y_direction_index
   long_name = ending Y direction index
@@ -206,7 +184,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [jsd]
   standard_name = starting_y_direction_index_domain
   long_name = starting X direction index for domain
@@ -214,7 +191,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [jed]
   standard_name = ending_y_direction_index_domain
   long_name = ending X direction index for domain
@@ -222,7 +198,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ng]
   standard_name = number_of_ghost_zones
   long_name = number of ghost zones defined in fv_mp
@@ -230,7 +205,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [hydrostatic]
   standard_name = flag_for_hydrostatic_solver_for_fast_physics
   long_name = flag for use the hydrostatic or nonhydrostatic solver
@@ -238,7 +212,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [fast_mp_consv]
   standard_name = flag_for_fast_microphysics_energy_conservation
   long_name = flag for fast microphysics energy conservation
@@ -246,7 +219,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [te0_2d]
   standard_name = atmosphere_energy_content_in_column
   long_name = atmosphere total energy in columns
@@ -255,7 +227,6 @@
   type = real
   kind = kind_dyn
   intent = inout
-  optional = F
 [te0]
   standard_name = atmosphere_energy_content_at_Lagrangian_surface
   long_name = atmosphere total energy at Lagrangian surface
@@ -264,7 +235,6 @@
   type = real
   kind = kind_dyn
   intent = out
-  optional = F
 [ngas]
   standard_name = number_of_gases_for_multi_gases_physics
   long_name = number of gases for multi gases physics
@@ -272,7 +242,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [qvi]
   standard_name = gas_tracers_for_multi_gas_physics_at_Lagrangian_surface
   long_name = gas tracers for multi gas physics at Lagrangian surface
@@ -281,7 +250,6 @@
   type = real
   kind = kind_dyn
   intent = inout
-  optional = F
 [qv]
   standard_name = water_vapor_specific_humidity_at_Lagrangian_surface
   long_name = water vapor specific humidity updated by fast physics at Lagrangian surface
@@ -290,7 +258,6 @@
   type = real
   kind = kind_dyn
   intent = inout
-  optional = F
 [ql]
   standard_name = cloud_liquid_water_specific_humidity_at_Lagrangian_surface
   long_name = cloud liquid water specific humidity updated by fast physics at Lagrangian surface
@@ -299,7 +266,6 @@
   type = real
   kind = kind_dyn
   intent = inout
-  optional = F
 [qi]
   standard_name = cloud_ice_specific_humidity_at_Lagrangian_surface
   long_name = cloud ice specific humidity updated by fast physics at Lagrangian surface
@@ -308,7 +274,6 @@
   type = real
   kind = kind_dyn
   intent = inout
-  optional = F
 [qr]
   standard_name = cloud_rain_specific_humidity_at_Lagrangian_surface
   long_name = cloud rain specific humidity updated by fast physics at Lagrangian surface
@@ -317,7 +282,6 @@
   type = real
   kind = kind_dyn
   intent = inout
-  optional = F
 [qs]
   standard_name = cloud_snow_specific_humidity_at_Lagrangian_surface
   long_name = cloud snow specific humidity updated by fast physics at Lagrangian surface
@@ -326,7 +290,6 @@
   type = real
   kind = kind_dyn
   intent = inout
-  optional = F
 [qg]
   standard_name = cloud_graupel_specific_humidity_at_Lagrangian_surface
   long_name = cloud graupel specific humidity updated by fast physics at Lagrangian surface
@@ -335,7 +298,6 @@
   type = real
   kind = kind_dyn
   intent = inout
-  optional = F
 [hs]
   standard_name = surface_geopotential_at_Lagrangian_surface
   long_name = surface geopotential  at Lagrangian surface
@@ -344,7 +306,6 @@
   type = real
   kind = kind_dyn
   intent = in
-  optional = F
 [peln]
   standard_name = log_pressure_at_Lagrangian_surface
   long_name = logarithm of pressure at Lagrangian surface
@@ -353,7 +314,6 @@
   type = real
   kind = kind_dyn
   intent = in
-  optional = F
 [delz]
   standard_name = thickness_at_Lagrangian_surface
   long_name = thickness at Lagrangian_surface
@@ -362,7 +322,6 @@
   type = real
   kind = kind_dyn
   intent = in
-  optional = F
 [delp]
   standard_name = pressure_thickness_at_Lagrangian_surface
   long_name = pressure thickness at Lagrangian surface
@@ -371,7 +330,6 @@
   type = real
   kind = kind_dyn
   intent = in
-  optional = F
 [pt]
   standard_name = virtual_temperature_at_Lagrangian_surface
   long_name = virtual temperature at Lagrangian surface
@@ -380,16 +338,14 @@
   type = real
   kind = kind_dyn
   intent = inout
-  optional = F
 [pkz]
   standard_name = finite_volume_mean_edge_pressure_raised_to_the_power_of_kappa
-  long_name = finite-volume mean edge pressure raised to the power of kappa
-  units = Pa**kappa
+  long_name = finite-volume mean edge pressure in Pa raised to the power of kappa
+  units = 1
   dimensions = (starting_x_direction_index:ending_x_direction_index,starting_y_direction_index:ending_y_direction_index,1:vertical_dimension_for_fast_physics)
   type = real
   kind = kind_dyn
   intent = inout
-  optional = F
 [q_con]
   standard_name = cloud_condensed_water_specific_humidity_at_Lagrangian_surface
   long_name = cloud condensed water specific humidity updated by fast physics at Lagrangian surface
@@ -398,7 +354,6 @@
   type = real
   kind = kind_dyn
   intent = inout
-  optional = F
 [akap]
   standard_name = kappa_dry_for_fast_physics
   long_name = modified kappa for dry air, fast physics
@@ -407,7 +362,6 @@
   type = real
   kind = kind_dyn
   intent = in
-  optional = F
 [cappa]
   standard_name = cappa_moist_gas_constant_at_Lagrangian_surface
   long_name = cappa(i,j,k) = rdgas / ( rdgas +  cvm(i)/(1.+r_vir*q(i,j,k,sphum)) )
@@ -416,7 +370,6 @@
   type = real
   kind = kind_dyn
   intent = inout
-  optional = F
 [area]
   standard_name = cell_area_for_fast_physics
   long_name = area of the grid cell for fast physics
@@ -425,7 +378,6 @@
   type = real
   kind = kind_grid
   intent = in
-  optional = F
 [dtdt]
   standard_name = tendency_of_air_temperature_at_Lagrangian_surface
   long_name = air temperature tendency due to fast physics at Lagrangian surface
@@ -434,7 +386,6 @@
   type = real
   kind = kind_dyn
   intent = inout
-  optional = F
 [out_dt]
   standard_name = flag_for_tendency_of_air_temperature_at_Lagrangian_surface
   long_name = flag for calculating tendency of air temperature due to fast physics
@@ -442,7 +393,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [last_step]
   standard_name = flag_for_the_last_step_of_k_split_remapping
   long_name = flag for the last step of k-split remapping
@@ -450,7 +400,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [do_qa]
   standard_name = flag_for_inline_cloud_fraction_calculation
   long_name = flag for the inline cloud fraction calculation
@@ -458,7 +407,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [qa]
   standard_name = cloud_fraction_at_Lagrangian_surface
   long_name = cloud fraction at Lagrangian surface
@@ -467,7 +415,6 @@
   type = real
   kind = kind_dyn
   intent = out
-  optional = F
 [nthreads]
   standard_name = omp_threads_for_fast_physics
   long_name = number of OpenMP threads available for fast physics schemes
@@ -475,7 +422,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -484,12 +430,10 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out
-  optional = F

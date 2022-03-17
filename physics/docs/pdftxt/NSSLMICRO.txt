@@ -1,0 +1,35 @@
+/**
+\page NSSLMICRO NSSL 2-moment Microphysics Scheme
+\section nssl2m_descrp Description
+
+The NSSL two-moment bulk microphysical parameterization scheme that describes form and phase changes among a range of liquid and ice hydrometeors, as described in Mansell et al. (2010) \cite Mansell_etal_2010 and Mansell and Ziegler (2013) \cite Mansell_2013. The microphysical parameterization predicts the mass mixing ratio and number concentration of cloud droplets, raindrops, cloud ice crystals (columns), snow particles (including large crystals and aggregates), graupel, and (optionally) hail.  
+
+The graupel and hail particle densities are also calculated by predicting the total particle volume. The graupel category therefore emulates a range of characteristics from high-density frozen drops (includes small hail) to low-density graupel (from rimed ice crystals/snow) in its size and density spectrum. The hail category is designed to simulate larger hail sizes. Hail is only produced from higher-density large graupel.
+
+Hydrometeor size distributions are assumed to follow a gamma functional form. Microphysical processes include cloud droplet and cloud ice nucleation, condensation, deposition, evaporation, sublimation, collection–coalescence, variable-density riming, shedding, ice multiplication, cloud ice aggregation, freezing and melting, and conversions between hydrometeor categories. 
+
+CCN concentration is predicted as in Mansell et al. (2010) with a bulk activation spectrum approximating small aerosols. The model tracks the number of unactivated CCN, and the local CCN concentration is depleted as droplets are activated, either at cloud base or in cloud. The CCN are subjected to advection and subgrid turbulent mixing but have no other interactions with hydrometeors; for example, scavenging by raindrops is omitted. CCN are restored by droplet evaporation and by a gradual regeneration when no hydrometeors are present. Aerosol sensitivity is enhanced by explicitly treating droplet condensation instead of using a saturation adjustment. Supersaturation (within reason) is allowed to persist in updraft with low droplet concentration.
+
+Excessive size sorting (common in 2-moment schemes) is effectively controlled by an adaptive breakup method that prevents reflectivity growth by sedimentation (Mansell 2010 \cite Mansell_2010). 
+
+The NSSL scheme is designed with deep (severe) convection in mind at grid spacings of 4km or smaller, but can also be run at larger grid spacing as needed for nesting etc. It is also able to capture non-severe and winter weather.
+
+Namelist parameters:
+- \b nssl_hail_on: (logical: .true./.false.) Turns the hail category (3 variables: mass, number, and volume)  Default value is .false. Field table variables: hailwat, hail_nc, hail_vol
+
+- \b nssl_ccn_on: (logical: .true./.false.) Turns prediction on/off for simple CCN number concentration.  Default value is .true. Field table variable: ccn_nc
+
+- \b nssl_cccn: (real) Background CCN concentration at STP. CCN are initialized as a constant number mixing ratio (nssl_cccn/1.225). The default value is 0.6e9 m-3
+
+- \b nssl_alphah, nssl_alphahl: (real) Shape parameters for graupel (h) and hail (hl). Default values are 0.0 and 1.0.
+
+
+
+\section intra_nssl2m Intraphysics Communication
+\ref arg_table_mp_nssl_run
+
+\section gen_nssl2m  General Algorithm
+- \ref gen_nssl2m_init
+- \ref gen_nssl2m_driver
+
+*/

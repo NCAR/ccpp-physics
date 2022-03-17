@@ -2019,14 +2019,14 @@
 !    *,' tsffcs=',tsffcs(iprnt),' slianl=',slianl(iprnt)
 
       do i=1,len
-       if (nint(slmskl(i)) /= 1) then
-        if (sicanl(i) >= min_ice(i)) then
-          slianl(i) = 2.0_kind_io8
-        else
-          slianl(i) = zero
-          sicanl(i) = zero
+        if (nint(slmskl(i)) /= 1) then
+          if (sicanl(i) >= min_ice(i)) then
+            slianl(i) = 2.0_kind_io8
+          else
+            slianl(i) = zero
+            sicanl(i) = zero
+          endif
         endif
-       endif
       enddo
 
       if (fh-deltsfc > -0.001 ) then
@@ -5753,63 +5753,63 @@
         per = float(kmaxl)/float(len)*100.
         print 9002,fldlmx,kmaxl,per
  9002   format(' bare land max check. modified to ',f8.1,               &
-     &         ' at ',i5,' points ',f4.1,'percent')
+     &         ' at ',i5,' points ',f5.1,'percent')
         if(per.gt.permax) permax=per
       endif
       if(kmino > 0) then
         per = float(kmino)/float(len)*100.
         print 9003,fldomn,kmino,per
  9003   format(' open ocean min check.  modified to ',f8.1,             &
-     &         ' at ',i5,' points ',f4.1,'percent')
+     &         ' at ',i5,' points ',f5.1,'percent')
         if(per.gt.permax) permax=per
       endif
       if(kmaxo > 0) then
         per = float(kmaxo)/float(len)*100.
         print 9004,fldomx,kmaxo,per
  9004   format(' open sea max check. modified to ',f8.1,                &
-     &         ' at ',i5,' points ',f4.1,'percent')
+     &         ' at ',i5,' points ',f5.1,'percent')
         if(per.gt.permax) permax=per
       endif
       if(kmins >.0) then
         per = float(kmins)/float(len)*100.
         print 9009,fldsmn,kmins,per
  9009   format(' snow covered land min check. modified to ',f8.1,       &
-     &         ' at ',i5,' points ',f4.1,'percent')
+     &         ' at ',i5,' points ',f5.1,'percent')
         if(per.gt.permax) permax=per
       endif
       if(kmaxs > 0) then
         per = float(kmaxs)/float(len)*100.
         print 9010,fldsmx,kmaxs,per
  9010   format(' snow covered land max check. modified to ',f8.1,       &
-     &         ' at ',i5,' points ',f4.1,'percent')
+     &         ' at ',i5,' points ',f5.1,'percent')
         if(per.gt.permax) permax=per
       endif
       if(kmini > 0) then
         per = float(kmini)/float(len)*100.
         print 9005,fldimn,kmini,per
  9005   format(' bare ice min check.  modified to ',f8.1,               &
-     &         ' at ',i5,' points ',f4.1,'percent')
+     &         ' at ',i5,' points ',f5.1,'percent')
         if(per.gt.permax) permax=per
       endif
       if(kmaxi > 0) then
         per = float(kmaxi)/float(len)*100.
         print 9006,fldimx,kmaxi,per
  9006   format(' bare ice max check. modified to ',f8.1,                &
-     &         ' at ',i5,' points ',f4.1,'percent')
+     &         ' at ',i5,' points ',f5.1,'percent')
         if(per > permax) permax=per
       endif
       if(kminj > 0) then
         per = float(kminj)/float(len)*100.
         print 9007,fldjmn,kminj,per
  9007   format(' snow covered ice min check.  modified to ',f8.1,       &
-     &         ' at ',i5,' points ',f4.1,'percent')
+     &         ' at ',i5,' points ',f5.1,'percent')
         if(per.gt.permax) permax=per
       endif
       if(kmaxj > 0) then
         per = float(kmaxj)/float(len)*100.
         print 9008,fldjmx,kmaxj,per
  9008   format(' snow covered ice max check. modified to ',f8.1,        &
-     &         ' at ',i5,' points ',f4.1,'percent')
+     &         ' at ',i5,' points ',f5.1,'percent')
         if(per > permax) permax=per
       endif
 !     commented on 06/30/99  -- moorthi

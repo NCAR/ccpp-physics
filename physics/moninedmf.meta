@@ -14,7 +14,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [moninq_fac]
   standard_name = multiplicative_tuning_parameter_for_atmosphere_diffusivity
   long_name = multiplicative constant for atmospheric diffusivities
@@ -23,7 +22,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -32,15 +30,13 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 
 ########################################################################
 [ccpp-arg-table]
@@ -53,7 +49,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [km]
   standard_name = vertical_layer_dimension
   long_name = vertical layer dimension
@@ -61,7 +56,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ntrac]
   standard_name = number_of_vertical_diffusion_tracers
   long_name = number of tracers to diffuse vertically
@@ -69,7 +63,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ntcw]
   standard_name = index_of_cloud_liquid_water_mixing_ratio_in_tracer_concentration_array
   long_name = cloud condensate index in tracer array
@@ -77,7 +70,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [dv]
   standard_name = process_split_cumulative_tendency_of_y_wind
   long_name = updated tendency of the y wind
@@ -86,7 +78,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [du]
   standard_name = process_split_cumulative_tendency_of_x_wind
   long_name = updated tendency of the x wind
@@ -95,7 +86,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [tau]
   standard_name = process_split_cumulative_tendency_of_air_temperature
   long_name = updated tendency of the temperature
@@ -104,7 +94,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [rtg]
   standard_name = tendency_of_vertically_diffused_tracer_concentration
   long_name = updated tendency of the tracers due to vertical diffusion in PBL scheme
@@ -113,7 +102,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [u1]
   standard_name = x_wind
   long_name = x component of layer wind
@@ -122,7 +110,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [v1]
   standard_name = y_wind
   long_name = y component of layer wind
@@ -131,7 +118,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [t1]
   standard_name = air_temperature
   long_name = layer mean air temperature
@@ -140,7 +126,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [q1]
   standard_name = vertically_diffused_tracer_concentration
   long_name = tracer concentration diffused by PBL scheme
@@ -149,7 +134,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [swh]
   standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_timestep
   long_name = total sky shortwave heating rate
@@ -158,7 +142,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [hlw]
   standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_timestep
   long_name = total sky longwave heating rate
@@ -167,7 +150,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [xmu]
   standard_name = zenith_angle_temporal_adjustment_factor_for_shortwave_fluxes
   long_name = zenith angle temporal adjustment factor for shortwave
@@ -176,7 +158,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [psk]
   standard_name = surface_dimensionless_exner_function
   long_name = dimensionless Exner function at the surface interface
@@ -185,7 +166,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [rbsoil]
   standard_name = bulk_richardson_number_at_lowest_model_level
   long_name = bulk Richardson number at the surface
@@ -194,7 +174,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [zorl]
   standard_name = surface_roughness_length
   long_name = surface roughness length in cm
@@ -203,7 +182,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [u10m]
   standard_name = x_wind_at_10m
   long_name = x component of wind at 10 m
@@ -212,7 +190,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [v10m]
   standard_name = y_wind_at_10m
   long_name = y component of wind at 10 m
@@ -221,7 +198,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [fm]
   standard_name = Monin_Obukhov_similarity_function_for_momentum
   long_name = Monin-Obukhov similarity function for momentum
@@ -230,7 +206,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [fh]
   standard_name = Monin_Obukhov_similarity_function_for_heat
   long_name = Monin-Obukhov similarity function for heat
@@ -239,7 +214,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [tsea]
   standard_name = surface_skin_temperature
   long_name = surface skin temperature
@@ -248,7 +222,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [heat]
   standard_name = kinematic_surface_upward_sensible_heat_flux_reduced_by_surface_roughness_and_vegetation
   long_name = kinematic surface upward sensible heat flux reduced by surface roughness and vegetation
@@ -257,7 +230,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [evap]
   standard_name = surface_upward_specific_humidity_flux
   long_name = kinematic surface upward latent heat flux
@@ -266,7 +238,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [stress]
   standard_name = surface_wind_stress
   long_name = surface wind stress
@@ -275,7 +246,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [spd1]
   standard_name = wind_speed_at_lowest_model_layer
   long_name = wind speed at lowest model level
@@ -284,7 +254,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [kpbl]
   standard_name = vertical_index_at_top_of_atmosphere_boundary_layer
   long_name = PBL top model level index
@@ -292,7 +261,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = out
-  optional = F
 [prsi]
   standard_name = air_pressure_at_interface
   long_name = air pressure at model layer interfaces
@@ -301,7 +269,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [del]
   standard_name = air_pressure_difference_between_midlayers
   long_name = pres(k) - pres(k+1)
@@ -310,7 +277,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [prsl]
   standard_name = air_pressure
   long_name = mean layer pressure
@@ -319,7 +285,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [prslk]
   standard_name = dimensionless_exner_function
   long_name = Exner function at layers
@@ -328,7 +293,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [phii]
   standard_name = geopotential_at_interface
   long_name = geopotential at model layer interfaces
@@ -337,7 +301,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [phil]
   standard_name = geopotential
   long_name = geopotential at model layer centers
@@ -346,7 +309,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [delt]
   standard_name = timestep_for_physics
   long_name = time step for physics
@@ -355,7 +317,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [dspheat]
   standard_name = flag_TKE_dissipation_heating
   long_name = flag for using TKE dissipation heating
@@ -363,7 +324,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [dusfc]
   standard_name = instantaneous_surface_x_momentum_flux
   long_name = x momentum flux
@@ -372,7 +332,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [dvsfc]
   standard_name = instantaneous_surface_y_momentum_flux
   long_name = y momentum flux
@@ -381,7 +340,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [dtsfc]
   standard_name = instantaneous_surface_upward_sensible_heat_flux
   long_name = surface upward sensible heat flux
@@ -390,7 +348,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [dqsfc]
   standard_name = instantaneous_surface_upward_latent_heat_flux
   long_name = surface upward latent heat flux
@@ -399,7 +356,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [hpbl]
   standard_name = atmosphere_boundary_layer_thickness
   long_name = PBL thickness
@@ -408,7 +364,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [hgamt]
   standard_name = countergradient_mixing_term_for_temperature
   long_name = countergradient mixing term for temperature
@@ -417,7 +372,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [hgamq]
   standard_name = countergradient_mixing_term_for_water_vapor
   long_name = countergradient mixing term for water vapor
@@ -426,7 +380,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [dkt]
   standard_name = atmosphere_heat_diffusivity
   long_name = atmospheric heat diffusivity
@@ -435,7 +388,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [dku]
   standard_name = atmosphere_momentum_diffusivity
   long_name = atmospheric momentum diffusivity
@@ -444,7 +396,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [kinver]
   standard_name = index_of_highest_temperature_inversion
   long_name = index of highest temperature inversion
@@ -452,7 +403,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
-  optional = F
 [xkzm_m]
   standard_name = atmosphere_momentum_diffusivity_due_to_background
   long_name = background value of momentum diffusivity
@@ -461,7 +411,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [xkzm_h]
   standard_name = atmosphere_heat_diffusivity_due_to_background
   long_name = background value of heat diffusivity
@@ -470,7 +419,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [xkzm_s]
   standard_name = sigma_pressure_threshold_at_upper_extent_of_background_diffusion
   long_name = sigma level threshold for background diffusivity
@@ -479,7 +427,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [lprnt]
   standard_name = flag_print
   long_name = flag for printing diagnostics to output
@@ -487,7 +434,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [ipr]
   standard_name = horizontal_index_of_printed_column
   long_name = horizontal index of printed column
@@ -495,7 +441,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [xkzminv]
   standard_name = max_atmosphere_heat_diffusivity_due_to_background
   long_name = maximum background value of heat diffusivity
@@ -504,7 +449,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [moninq_fac]
   standard_name = multiplicative_tuning_parameter_for_atmosphere_diffusivity
   long_name = multiplicative constant for atmospheric diffusivities
@@ -513,7 +457,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [hurr_pbl]
   standard_name = flag_hurricane_PBL
   long_name = flag for hurricane-specific options in PBL scheme
@@ -521,7 +464,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [islimsk]
   standard_name = sea_land_ice_mask
   long_name = sea/land/ice mask (=0/1/2)
@@ -529,7 +471,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
-  optional = F
 [var_ric]
   standard_name = control_for_variable_bulk_richardson_number
   long_name = flag for calculating variable bulk richardson number for hurricane PBL
@@ -538,7 +479,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [coef_ric_l]
   standard_name = coefficient_for_variable_bulk_richardson_number_over_land
   long_name = coefficient for calculating variable bulk richardson number for hurricane PBL over land
@@ -547,7 +487,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [coef_ric_s]
   standard_name = coefficient_for_variable_bulk_richardson_number_over_water
   long_name = coefficient for calculating variable bulk richardson number for hurricane PBL over water
@@ -556,7 +495,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [ldiag3d]
   standard_name = flag_for_diagnostics_3D
   long_name = flag for 3d diagnostic fields
@@ -564,7 +502,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [ntqv]
   standard_name = index_of_specific_humidity_in_tracer_concentration_array
   long_name = tracer index for water vapor (specific humidity)
@@ -572,7 +509,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [rtg_ozone_index]
   standard_name = vertically_diffused_tracer_index_of_ozone
   long_name = number of tracers
@@ -580,7 +516,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ntoz]
   standard_name = index_of_ozone_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for ozone mixing ratio
@@ -588,17 +523,15 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [dtend]
   standard_name = cumulative_change_of_state_variables
   long_name = diagnostic tendencies for state variables
-  units = various
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_cumulative_change_processes)
+  units = mixed
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,cumulative_change_of_state_variables_outer_index_max)
   type = real
   kind = kind_phys
   active = (flag_for_diagnostics_3D)
   intent = inout
-  optional = F
 [dtidx]
   standard_name = cumulative_change_of_state_variables_outer_index
   long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
@@ -606,7 +539,6 @@
   dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
   type = integer
   intent = in
-  optional = F
 [index_of_process_pbl]
   standard_name = index_of_subgrid_scale_vertical_mixing_process_in_cumulative_change_index
   long_name = index of subgrid scale vertical mixing process in second dimension of array cumulative change index
@@ -614,7 +546,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [index_of_x_wind]
   standard_name = index_of_x_wind_in_cumulative_change_index
   long_name = index of x-wind in first dimension of array cumulative change index
@@ -622,7 +553,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [index_of_y_wind]
   standard_name = index_of_y_wind_in_cumulative_change_index
   long_name = index of x-wind in first dimension of array cumulative change index
@@ -630,7 +560,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [index_of_temperature]
   standard_name = index_of_temperature_in_cumulative_change_index
   long_name = index of temperature in first dimension of array cumulative change index
@@ -638,7 +567,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [flag_for_pbl_generic_tend]
   standard_name = flag_for_generic_tendency_due_to_planetary_boundary_layer
   long_name = true if GFS_PBL_generic should calculate tendencies
@@ -646,7 +574,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -655,12 +582,10 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out
-  optional = F

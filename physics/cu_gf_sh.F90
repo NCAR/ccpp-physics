@@ -91,6 +91,7 @@ contains
      real(kind=kind_phys),    dimension (its:ite,kts:kte)                              &
         ,intent (inout  )                 ::                           &
         cnvwt,outt,outq,outqc,cupclw,zuo,outu,outv
+!$acc declare copy(cnvwt,outt,outq,outqc,cupclw,zuo,outu,outv)
      real(kind=kind_phys),    dimension (its:ite)                                      &
         ,intent (out  )                   ::                           &
         xmb_out
@@ -103,6 +104,7 @@ contains
      integer,    dimension (its:ite)                                   &
         ,intent (in  )                    ::                           &
         kpbl,tropics
+!$acc declare copyout(xmb_out,kbcon,ktop,k22) copyin(kpbl,tropics) copy(ierr)
   !
   ! basic environmental input includes a flag (ierr) to turn off
   ! convection for this call only and at that particular gridpoint
@@ -120,6 +122,7 @@ contains
      real(kind=kind_phys)                                                              &
         ,intent (in   )                   ::                           &
         dtime,tcrit
+!$acc declare copyin(t,po,tn,dhdt,rho,us,vs) copy(q,qo) copyin(xland,z1,psur,hfx,qfx) copyin(dtime,tcrit)
   !
   !***************** the following are your basic environmental
   !                  variables. they carry a "_cup" if they are
@@ -179,6 +182,19 @@ contains
 
         cd,dellah,dellaq,dellat,dellaqc,uc,vc,dellu,dellv,u_cup,v_cup
 
+!$acc declare create( &
+!$acc        entr_rate_2d,he,hes,qes,z,                                     &
+!$acc        heo,heso,qeso,zo,                                              &
+!$acc        xhe,xhes,xqes,xz,xt,xq,                                        &
+!$acc        qes_cup,q_cup,he_cup,hes_cup,z_cup,p_cup,gamma_cup,t_cup,      &
+!$acc        qeso_cup,qo_cup,heo_cup,heso_cup,zo_cup,po_cup,gammao_cup,     &
+!$acc        tn_cup,                                                        &
+!$acc        xqes_cup,xq_cup,xhe_cup,xhes_cup,xz_cup,                       &
+!$acc        xt_cup,dby,hc,zu,                                              &
+!$acc        dbyo,qco,pwo,hco,qrco,                                         &
+!$acc        dbyt,xdby,xhc,xzu,            &
+!$acc        cd,dellah,dellaq,dellat,dellaqc,uc,vc,dellu,dellv,u_cup,v_cup)
+
   ! aa0 cloud work function for downdraft
   ! aa0     = cloud work function without forcing effects
   ! aa1     = cloud work function with forcing effects
@@ -192,6 +208,13 @@ contains
        cap_max_increment,lambau
      integer,    dimension (its:ite)      ::                           &
        kstabi,xland1,kbmax,ktopx
+!$acc declare create( &
+!$acc       zws,ztexec,zqexec,pre,aa1,aa0,xaa0,hkb,                         &
+!$acc       flux_tun,hkbo,xhkb,                                             &
+!$acc       rand_vmas,xmbmax,xmb,                                           &
+!$acc       cap_max,entr_rate,                                              &
+!$acc       cap_max_increment,lambau,                                       &
+!$acc       kstabi,xland1,kbmax,ktopx)
 
      integer                              ::                           &
        kstart,i,k,ki
@@ -205,15 +228,24 @@ contains
      character*50 :: ierrc(its:ite)
      real(kind=kind_phys),    dimension (its:ite,kts:kte) ::                           &
        up_massentr,up_massdetr,up_massentro,up_massdetro,up_massentru,up_massdetru
+!$acc declare create(up_massentr,up_massdetr,up_massentro,up_massdetro,up_massentru,up_massdetru)
      real(kind=kind_phys) :: c_up,x_add,qaver,dts,fp,fpi
      real(kind=kind_phys),    dimension (its:ite,kts:kte) :: c1d,dtempdz
      integer, dimension (its:ite,kts:kte) ::  k_inv_layers 
      integer, dimension (its:ite) ::  start_level, pmin_lev
+!$acc declare create(c1d,dtempdz,k_inv_layers,start_level, pmin_lev)
+
+     real(kind=kind_phys), parameter :: zero = 0
+
+!$acc kernels
      start_level(:)=0
      rand_vmas(:)=0.
-     flux_tun=fluxtune
+     flux_tun(:)=fluxtune
      lambau(:)=2.
      c1d(:,:)=0.
+!$acc end kernels
+
+!$acc kernels
       do i=its,itf
         xland1(i)=int(xland(i)+.001) ! 1.
         ktopx(i)=0
@@ -224,8 +256,12 @@ contains
         pre(i)=0.
         xmb_out(i)=0.
         cap_max_increment(i)=25.
-        ierrc(i)=" "
         entr_rate(i) = 1.e-3 !9.e-5 ! 1.75e-3 ! 1.2e-3 ! .2/50.
+      enddo
+!$acc end kernels
+
+      do i=its,itf
+        ierrc(i)=" "
       enddo
 !
 !--- initial entrainment rate (these may be changed later on in the
@@ -235,6 +271,7 @@ contains
 !
 !--- initial detrainmentrates
 !
+!$acc kernels
       do k=kts,ktf
       do i=its,itf
         up_massentro(i,k)=0.
@@ -245,11 +282,12 @@ contains
         xz(i,k)=zo(i,k)
         qrco(i,k)=0.
         pwo(i,k)=0.
-        cd(i,k)=.1*entr_rate(i)
+        cd(i,k)=.75*entr_rate(i)
         dellaqc(i,k)=0.
         cupclw(i,k)=0.
       enddo
       enddo
+!$acc end kernels
 !
 !--- max/min allowed value for epsilon (ratio downdraft base mass flux/updraft
 !
@@ -259,6 +297,7 @@ contains
 !--- maximum depth (mb) of capping 
 !--- inversion (larger cap = no convection)
 !
+!$acc kernels
       cap_maxs=175.
       do i=its,itf
         kbmax(i)=1
@@ -292,7 +331,7 @@ contains
        zws(i) = zws(i)*rho(i,kpbl(i)) !check if zrho is correct
 
       enddo
-
+!$acc end kernels
 !
 !> - Determin max height(m) above ground where updraft air can originate
 !
@@ -322,6 +361,8 @@ contains
            ierr,z1,                                                &
            itf,ktf,                                                &
            its,ite, kts,kte)
+
+!$acc kernels
       do i=its,itf
         if(ierr(i).eq.0)then
           u_cup(i,kts)=us(i,kts)
@@ -336,6 +377,7 @@ contains
       do i=its,itf
         if(ierr(i).eq.0)then
 !
+!$acc loop seq
       do k=kts,ktf
         if(zo_cup(i,k).gt.zkbmax+z1(i))then
           kbmax(i)=k
@@ -347,12 +389,14 @@ contains
       kbmax(i)=min(kbmax(i),ktf/2)
       endif
       enddo
+!$acc end kernels
 
 !
 !
 !
 !> - Determine level with highest moist static energy content (\p k22)
 !
+!$acc parallel loop
        do 36 i=its,itf
          if(kpbl(i).gt.3)cap_max(i)=po_cup(i,kpbl(i))
          if(ierr(i) == 0)then
@@ -360,17 +404,21 @@ contains
           k22(i)=max(2,k22(i))
           if(k22(i).gt.kbmax(i))then
            ierr(i)=2
+#ifndef _OPENACC
            ierrc(i)="could not find k22"
+#endif
            ktop(i)=0
            k22(i)=0
            kbcon(i)=0
          endif
          endif
  36   continue
+!$acc end parallel
 !
 !> - Call get_cloud_bc() and cup_kbcon() to determine the level of 
 !! convective cloud base (\p kbcon)
 !
+!$acc parallel loop private(x_add)
       do i=its,itf
        if(ierr(i).eq.0)then
              x_add = xlv*zqexec(i)+cp*ztexec(i)
@@ -378,13 +426,17 @@ contains
              call get_cloud_bc(kte,heo_cup(i,1:kte),hkbo(i),k22(i),x_add)
        endif ! ierr
       enddo
+!$acc end parallel
 
 !joe-georg and saulo's new idea:
+
+!$acc kernels
       do i=its,itf
       do k=kts,ktf
           dbyo(i,k)= 0. !hkbo(i)-heso_cup(i,k)
       enddo
       enddo
+!$acc end kernels
 
 
       call cup_kbcon(ierrc,cap_max_increment,5,k22,kbcon,heo_cup,heso_cup, &
@@ -403,6 +455,7 @@ contains
                            kbcon,kstabi,dtempdz,itf,ktf,its,ite, kts,kte)
 !
 !
+!$acc parallel loop private(frh,kstart,x_add)
       do i=its,itf
          entr_rate_2d(i,:)=entr_rate(i)
          if(ierr(i) == 0)then
@@ -415,7 +468,7 @@ contains
             do k=kts,ktf
                frh = 2.*min(qo_cup(i,k)/qeso_cup(i,k),1.)
                entr_rate_2d(i,k)=entr_rate(i) !*(2.3-frh)
-               cd(i,k)=.1*entr_rate_2d(i,k)
+               cd(i,k)=.75*entr_rate_2d(i,k)
             enddo
 !
 ! first estimate for shallow convection
@@ -438,9 +491,11 @@ contains
             endif
          endif
       enddo
+!$acc end parallel
 !> - Call rates_up_pdf() to get normalized mass flux profile
       call rates_up_pdf(rand_vmas,ipr,'shallow',ktop,ierr,po_cup,entr_rate_2d,hkbo,heo,heso_cup,zo_cup, &
            xland1,kstabi,k22,kbcon,its,ite,itf,kts,kte,ktf,zuo,kpbl,ktopx,kbcon,pmin_lev)
+!$acc kernels
       do i=its,itf
         if(ierr(i).eq.0)then
 !           do k=maxloc(zuo(i,:),1),1,-1 ! ktop(i)-1,1,-1
@@ -451,22 +506,26 @@ contains
 !             endif
 !           enddo
            if(k22(i).gt.1)then
+!$acc loop independent
              do k=1,k22(i)-1
               zuo(i,k)=0.
               zu (i,k)=0.
               xzu(i,k)=0.
              enddo
            endif
+!$acc loop seq
            do k=maxloc(zuo(i,:),1),ktop(i)
              if(zuo(i,k).lt.1.e-6)then
                ktop(i)=k-1
                exit
              endif
            enddo
+!$acc loop independent
            do k=k22(i),ktop(i)
              xzu(i,k)= zuo(i,k)
               zu(i,k)= zuo(i,k)
            enddo
+!$acc loop independent
            do k=ktop(i)+1,ktf
              zuo(i,k)=0.
              zu (i,k)=0.
@@ -475,14 +534,15 @@ contains
            k22(i)=max(2,k22(i))
         endif
       enddo
+!$acc end kernels
 !
 !> - Call get_lateral_massflux() to calculate mass entrainment and detrainment
 !
       call get_lateral_massflux(itf,ktf, its,ite, kts,kte                             &
                                 ,ierr,ktop,zo_cup,zuo,cd,entr_rate_2d                 &
                                 ,up_massentro, up_massdetro ,up_massentr, up_massdetr &
-                                ,'shallow',kbcon,k22,up_massentru,up_massdetru,lambau)
-
+                                ,2,kbcon,k22,up_massentru,up_massdetru,lambau)
+!$acc kernels
       do k=kts,ktf
       do i=its,itf
          hc(i,k)=0.
@@ -507,11 +567,15 @@ contains
          hc(i,k)=hkb(i)
          hco(i,k)=hkbo(i)
       enddo
+!$acc end kernels
 !
 !
+
+!$acc parallel loop private(ki,qaver,k,trash,trash2,dz,dp)
       do 42 i=its,itf
         dbyt(i,:)=0.
         if(ierr(i) /= 0) cycle
+!$acc loop seq
          do k=start_level(i)+1,ktop(i)
           hc(i,k)=(hc(i,k-1)*zu(i,k-1)-.5*up_massdetr(i,k-1)*hc(i,k-1)+      &
                          up_massentr(i,k-1)*he(i,k-1))   /                   &
@@ -547,16 +611,20 @@ contains
 
          if(ktop(i).lt.kbcon(i)+1)then
             ierr(i)=5
+#ifndef _OPENACC
             ierrc(i)='ktop is less than kbcon+1'
+#endif
              go to 42
          endif
          if(ktop(i).gt.ktf-2)then
              ierr(i)=5
+#ifndef _OPENACC
              ierrc(i)="ktop is larger than ktf-2"
+#endif
              go to 42
          endif
 !
-         call get_cloud_bc(kte,qo_cup (i,1:kte),qaver,k22(i))
+         call get_cloud_bc(kte,qo_cup (i,1:kte),qaver,k22(i),zero)
          qaver = qaver + zqexec(i)
          do k=1,start_level(i)-1
            qco (i,k)= qo_cup(i,k)
@@ -564,6 +632,7 @@ contains
          k=start_level(i)
          qco (i,k)= qaver 
 !
+!$acc loop seq
          do k=start_level(i)+1,ktop(i)
           trash=qeso_cup(i,k)+(1./xlv)*(gammao_cup(i,k)                &
                 /(1.+gammao_cup(i,k)))*dbyo(i,k)
@@ -576,14 +645,11 @@ contains
           if(qco(i,k)>=trash ) then 
               dz=z_cup(i,k)-z_cup(i,k-1)
               ! cloud liquid water
-!              qrco(i,k)= (qco(i,k)-trash)/(1.+c0_shal*dz)
-!              qrco(i,k)= (qco(i,k)-trash)/(1.+(c0_shal+c1_shal)*dz)
-              qrco(i,k)= (qco(i,k)-trash)/(1.+c0_shal*dz)
-              c1d(i,k-1)=10.*up_massdetr(i,k-1)*.5*(qrco(i,k-1)+qrco(i,k))
-              qrco(i,k)= qrco(i,k)-c1d(i,k-1)*dz*qrco(i,k)
+              c1d(i,k)=.02*up_massdetr(i,k-1)
+              qrco(i,k)= (qco(i,k)-trash)/(1.+(c0_shal+c1d(i,k))*dz)
               if(qrco(i,k).lt.0.)then  ! hli new test 02/12/19
                  qrco(i,k)=0.
-                 c1d(i,k-1)=1./dz
+                 c1d(i,k)=0.
               endif
               pwo(i,k)=c0_shal*dz*qrco(i,k)*zuo(i,k)
               ! cloud water vapor 
@@ -596,15 +662,21 @@ contains
          enddo
          trash=0.
          trash2=0.
+!$acc loop independent
          do k=k22(i)+1,ktop(i)
           dp=100.*(po_cup(i,k)-po_cup(i,k+1))
           cnvwt(i,k)=zuo(i,k)*cupclw(i,k)*g/dp
+!$acc atomic
           trash2=trash2+entr_rate_2d(i,k)
+!$acc atomic
           qco(i,k)=qco(i,k)-qrco(i,k)
          enddo
+!$acc loop independent
          do k=k22(i)+1,max(kbcon(i),k22(i)+1)
+!$acc atomic
           trash=trash+entr_rate_2d(i,k)
          enddo
+!$acc loop independent
          do k=ktop(i)+1,ktf-1
            hc  (i,k)=hes_cup (i,k)
            hco (i,k)=heso_cup(i,k)
@@ -619,6 +691,7 @@ contains
            zuo (i,k)=0.
          enddo
  42 continue
+!$acc end parallel
 !
 !--- calculate workfunctions for updrafts
 !
@@ -629,14 +702,18 @@ contains
         call cup_up_aa0(aa1,zo,zuo,dbyo,gammao_cup,tn_cup, &
             kbcon,ktop,ierr,                               &
             itf,ktf, its,ite, kts,kte)
+!$acc kernels
         do i=its,itf
           if(ierr(i) == 0)then
            if(aa1(i) <= 0.)then
                ierr(i)=17
+#ifndef _OPENACC
                ierrc(i)="cloud work function zero"
+#endif
            endif
          endif
        enddo
+!$acc end kernels
       endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -646,6 +723,7 @@ contains
 !
 !--- 1. in bottom layer
 !
+!$acc kernels
       do k=kts,kte
        do i=its,itf
         dellah(i,k)=0.
@@ -655,6 +733,7 @@ contains
         dellv  (i,k)=0.
        enddo
       enddo
+!$acc end kernels
 !
 !----------------------------------------------  cloud level ktop
 !
@@ -695,6 +774,8 @@ contains
 !
 !- - - - - - - - - - - - - - - - - - - - - - - - model level 1
       trash2=0.
+!$acc kernels
+!$acc loop independent
       do i=its,itf
         if(ierr(i).eq.0)then
          dp=100.*(po_cup(i,1)-po_cup(i,2))
@@ -709,10 +790,12 @@ contains
             entup=up_massentro(i,k)
             detup=up_massdetro(i,k)
             totmas=detup-entup+zuo(i,k+1)-zuo(i,k)
+#ifndef _OPENACC
             if(abs(totmas).gt.1.e-6)then
                write(0,*)'*********************',i,k,totmas
                write(0,*)k22(i),kbcon(i),ktop(i)
             endif
+#endif
             dp=100.*(po_cup(i,k)-po_cup(i,k+1))
             dellah(i,k) =-(zuo(i,k+1)*(hco(i,k+1)-heo_cup(i,k+1) )-     &
                            zuo(i,k  )*(hco(i,k  )-heo_cup(i,k  ) ))*g/dp
@@ -744,12 +827,13 @@ contains
           enddo
         endif
       enddo
+!$acc end kernels
 
 !
 !--- using dellas, calculate changed environmental profiles
 !
       mbdt=.5 !3.e-4
-
+!$acc kernels
       do k=kts,ktf
        do i=its,itf
          dellat(i,k)=0.
@@ -770,6 +854,7 @@ contains
         xt(i,ktf)=tn(i,ktf)
        endif
       enddo
+!$acc end kernels
 !
 !
      if(make_calc_for_xk) then
@@ -791,12 +876,16 @@ contains
 !
 !
 !**************************** static control
+!$acc kernels
       do k=kts,ktf
       do i=its,itf
          xhc(i,k)=0.
          xdby(i,k)=0.
       enddo
       enddo
+!$acc end kernels
+
+!$acc parallel loop private(x_add)
       do i=its,itf
         if(ierr(i).eq.0)then
          x_add = xlv*zqexec(i)+cp*ztexec(i)
@@ -808,17 +897,21 @@ contains
          xhc(i,k)=xhkb(i)
         endif !ierr
       enddo
+!$acc end parallel
 !
 !
+!$acc kernels
       do i=its,itf
        if(ierr(i).eq.0)then
         xzu(i,1:ktf)=zuo(i,1:ktf)
+!$acc loop seq
         do k=start_level(i)+1,ktop(i)
          xhc(i,k)=(xhc(i,k-1)*xzu(i,k-1)-.5*up_massdetro(i,k-1)*xhc(i,k-1)+ &
                           up_massentro(i,k-1)*xhe(i,k-1))   /               &
                           (xzu(i,k-1)-.5*up_massdetro(i,k-1)+up_massentro(i,k-1))
          xdby(i,k)=xhc(i,k)-xhes_cup(i,k)
         enddo
+!$acc loop independent
         do k=ktop(i)+1,ktf
            xhc (i,k)=xhes_cup(i,k)
            xdby(i,k)=0.
@@ -826,6 +919,7 @@ contains
         enddo
        endif
       enddo
+!$acc end kernels
 
 !
 !--- workfunctions for updraft
@@ -840,6 +934,8 @@ contains
 !
 ! now for shallow forcing
 !
+!$acc kernels
+!$acc loop private(xff_shal)
        do i=its,itf
         xmb(i)=0.
         xff_shal(1:3)=0.
@@ -873,7 +969,9 @@ contains
           if(ichoice > 0)xmb(i)=min(xmbmax(i),xff_shal(ichoice))
           if(xmb(i) <= 0.)then
              ierr(i)=21
+#ifndef _OPENACC
              ierrc(i)="21"
+#endif
           endif
         endif
         if(ierr(i).ne.0)then
@@ -892,10 +990,12 @@ contains
 ! final tendencies
 !
           pre(i)=0.
+!$acc loop independent
           do k=2,ktop(i)
            outt (i,k)= dellat (i,k)*xmb(i)
            outq (i,k)= dellaq (i,k)*xmb(i)
            outqc(i,k)= dellaqc(i,k)*xmb(i)
+!$acc atomic
            pre  (i)  = pre(i)+pwo(i,k)*xmb(i)
           enddo
           outt (i,1)= dellat (i,1)*xmb(i)
@@ -931,6 +1031,7 @@ contains
              endif
           endif
       enddo
+!$acc end kernels
 !      
 ! done shallow
 !--------------------------done------------------------------

@@ -218,7 +218,8 @@
      &           do_gsl_drag_ls_bl, do_gsl_drag_ss, do_gsl_drag_tofd,   &
      &           dtend, dtidx, index_of_process_orographic_gwd,         &
      &           index_of_temperature, index_of_x_wind,                 &
-     &           index_of_y_wind, ldiag3d, errmsg, errflg)
+     &           index_of_y_wind, ldiag3d,                              &
+     &           spp_wts_gwd, spp_gwd, errmsg, errflg)
 
 !   ********************************************************************
 ! ----->  I M P L E M E N T A T I O N    V E R S I O N   <----------
@@ -365,6 +366,11 @@
    real(kind=kind_phys), dimension(im,km)           ::     zl      ! = PHIL/g
 
 !SPP
+   real(kind=kind_phys), dimension(im) :: var_stoch, varss_stoch, &
+                                       varmax_ss_stoch, varmax_fd_stoch
+   real(kind=kind_phys), intent(in) :: spp_wts_gwd(:,:)
+   integer, intent(in) :: spp_gwd
+
    real(kind=kind_phys), dimension(im)              :: rstoch
 
 !Output:
@@ -595,6 +601,23 @@ do i=1,im
    endif
 enddo
 
+! SPP, if spp_gwd is 0, no perturbations are applied.
+if ( spp_gwd==1 ) then
+  do i = its,im
+    var_stoch(i)   = var(i)   + var(i)*0.75*spp_wts_gwd(i,1)
+    varss_stoch(i) = varss(i) + varss(i)*0.75*spp_wts_gwd(i,1)
+    varmax_ss_stoch(i) = varmax_ss + varmax_ss*0.75*spp_wts_gwd(i,1)
+    varmax_fd_stoch(i) = varmax_fd + varmax_fd*0.75*spp_wts_gwd(i,1)
+  enddo
+else
+  do i = its,im
+    var_stoch(i)   = var(i)
+    varss_stoch(i) = varss(i)
+    varmax_ss_stoch(i) = varmax_ss
+    varmax_fd_stoch(i) = varmax_fd
+  enddo
+endif
+
 !--- calculate length of grid for flow-blocking drag
 !
 do i=1,im
@@ -711,7 +734,7 @@ enddo
 !  determine reference level: maximum of 2*var and pbl heights
 !
    do i = its,im
-     zlowtop(i) = 2. * var(i)
+     zlowtop(i) = 2. * var_stoch(i)
    enddo
 !
    do i = its,im
@@ -867,7 +890,7 @@ IF ( (do_gsl_drag_ls_bl).and.                            &
 !
          ldrag(i) = ldrag(i) .or. bnv2(i,1).le.0.0
          ldrag(i) = ldrag(i) .or. ulow(i).eq.1.0
-         ldrag(i) = ldrag(i) .or. var(i) .le. 0.0
+         ldrag(i) = ldrag(i) .or. var_stoch(i) .le. 0.0
 !
 !  set all ri low level values to the low level value
 !
@@ -877,7 +900,7 @@ IF ( (do_gsl_drag_ls_bl).and.                            &
 !
          if (.not.ldrag(i))   then
             bnv(i) = sqrt( bnv2(i,1) )
-            fr(i) = bnv(i)  * rulow(i) * 2. * var(i) * od(i)
+            fr(i) = bnv(i)  * rulow(i) * 2. * var_stoch(i) * od(i)
             fr(i) = min(fr(i),frmax)
             xn(i)  = ubar(i) * rulow(i)
             yn(i)  = vbar(i) * rulow(i)
@@ -961,7 +984,7 @@ IF ( do_gsl_drag_ss ) THEN
                exit
             ENDIF
          enddo
-         if((xland(i)-1.5).le.0. .and. 2.*varss(i).le.hpbl(i))then
+         if((xland(i)-1.5).le.0. .and. 2.*varss_stoch(i).le.hpbl(i))then
             if(br1(i).gt.0. .and. thvx(i,kpbl2)-thvx(i,kts) > 0.)then
               cleff_ss    = sqrt(dxy(i)**2 + dxyp(i)**2)   ! WRF
 !              cleff_ss    = 3. * max(dx(i),cleff_ss)
@@ -980,11 +1003,11 @@ IF ( do_gsl_drag_ss ) THEN
                 !tauwavex0=0.5*XNBV*xlinv(i)*(2*MIN(varss(i),75.))**2*ro(i,kts)*u1(i,kpbl(i))
                 !tauwavex0=0.5*XNBV*xlinv(i)*(2.*MIN(varss(i),40.))**2*ro(i,kts)*u1(i,kpbl2)
                 !tauwavex0=0.5*XNBV*xlinv(i)*(2.*MIN(varss(i),40.))**2*ro(i,kts)*u1(i,3)
-                var_temp = MIN(varss(i),varmax_ss) +                       &
-                              MAX(0.,beta_ss*(varss(i)-varmax_ss))
+                var_temp = MIN(varss_stoch(i),varmax_ss_stoch(i)) +                       &
+                              MAX(0.,beta_ss*(varss_stoch(i)-varmax_ss_stoch(i)))
                 ! Note:  This is a semi-implicit treatment of the time differencing
                 var_temp2 = 0.5*XNBV*xlinv(i)*(2.*var_temp)**2*ro(i,kvar)  ! this is greater than zero
-                tauwavex0=-var_temp2*u1(i,kvar)/(1.+var_temp2*deltim)
+                tauwavex0=var_temp2*u1(i,kvar)/(1.+var_temp2*deltim)
                 tauwavex0=tauwavex0*ss_taper(i)
               else
                 tauwavex0=0.
@@ -995,11 +1018,11 @@ IF ( do_gsl_drag_ss ) THEN
                 !tauwavey0=0.5*XNBV*xlinv(i)*(2*MIN(varss(i),75.))**2*ro(i,kts)*v1(i,kpbl(i))
                 !tauwavey0=0.5*XNBV*xlinv(i)*(2.*MIN(varss(i),40.))**2*ro(i,kts)*v1(i,kpbl2)
                 !tauwavey0=0.5*XNBV*xlinv(i)*(2.*MIN(varss(i),40.))**2*ro(i,kts)*v1(i,3)
-                var_temp = MIN(varss(i),varmax_ss) +                       &
-                              MAX(0.,beta_ss*(varss(i)-varmax_ss))
+                var_temp = MIN(varss_stoch(i),varmax_ss_stoch(i)) +                       &
+                              MAX(0.,beta_ss*(varss_stoch(i)-varmax_ss_stoch(i)))
                 ! Note:  This is a semi-implicit treatment of the time differencing
                 var_temp2 = 0.5*XNBV*xlinv(i)*(2.*var_temp)**2*ro(i,kvar)  ! this is greater than zero
-                tauwavey0=-var_temp2*v1(i,kvar)/(1.+var_temp2*deltim)
+                tauwavey0=var_temp2*v1(i,kvar)/(1.+var_temp2*deltim)
                 tauwavey0=tauwavey0*ss_taper(i)
               else
                 tauwavey0=0.
@@ -1060,8 +1083,8 @@ IF ( do_gsl_drag_tofd ) THEN
 
          IF ((xland(i)-1.5) .le. 0.) then
             !(IH*kflt**n1)**-1 = (0.00102*0.00035**-1.9)**-1 = 0.00026615161
-            var_temp = MIN(varss(i),varmax_fd) +                           &
-                       MAX(0.,beta_fd*(varss(i)-varmax_fd))
+            var_temp = MIN(varss_stoch(i),varmax_fd_stoch(i)) +                           &
+                       MAX(0.,beta_fd*(varss_stoch(i)-varmax_fd_stoch(i)))
             var_temp = MIN(var_temp, 250.)
             a1=0.00026615161*var_temp**2
 !           a1=0.00026615161*MIN(varss(i),varmax)**2
@@ -1069,7 +1092,7 @@ IF ( do_gsl_drag_tofd ) THEN
            ! k1**(n1-n2) = 0.003**(-1.9 - -2.8) = 0.003**0.9 = 0.005363
             a2=a1*0.005363
            ! Revise e-folding height based on PBL height and topographic std. dev. -- M. Toy 3/12/2018
-            H_efold = max(2*varss(i),hpbl(i))
+            H_efold = max(2*varss_stoch(i),hpbl(i))
             H_efold = min(H_efold,1500.)
             DO k=kts,km
                wsp=SQRT(u1(i,k)**2 + v1(i,k)**2)

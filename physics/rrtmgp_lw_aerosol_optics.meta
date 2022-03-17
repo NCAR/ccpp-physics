@@ -14,7 +14,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [ncol]
   standard_name = horizontal_loop_extent
   long_name = horizontal dimension
@@ -22,7 +21,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [nLev]
   standard_name = vertical_layer_dimension
   long_name = number of vertical levels
@@ -30,7 +28,13 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
+[nspc]
+  standard_name = number_of_species_for_aerosol_optical_depth
+  long_name = number of species for output aerosol optical depth plus total
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
 [nTracer]
   standard_name = number_of_tracers
   long_name = number of tracers
@@ -38,7 +42,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [nTracerAer]
   standard_name = number_of_aerosol_tracers_MG
   long_name = number of aerosol tracers for Morrison Gettelman MP
@@ -46,7 +49,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [p_lev]
   standard_name = air_pressure_at_interface_for_RRTMGP
   long_name = air pressure at vertical interface for radiation calculation
@@ -55,7 +57,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [p_lay]
   standard_name = air_pressure_at_layer_for_RRTMGP
   long_name = air pressure at vertical layer for radiation calculation
@@ -64,7 +65,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [p_lk]
   standard_name = dimensionless_exner_function
   long_name = dimensionless Exner function at model layer centers
@@ -73,7 +73,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [tv_lay]
   standard_name = virtual_temperature
   long_name = layer virtual temperature
@@ -82,7 +81,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [relhum]
   standard_name = relative_humidity
   long_name = layer relative humidity
@@ -91,7 +89,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [lsmask]
   standard_name = area_type
   long_name = landmask: sea/land/ice=0/1/2
@@ -100,7 +97,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [tracer]
   standard_name = chemical_tracers
   long_name = chemical tracers
@@ -109,7 +105,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [aerfld]
   standard_name = mass_number_concentration_of_aerosol_from_gocart_climatology
   long_name = GOCART aerosol climatology number concentration
@@ -118,7 +113,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [lon]
   standard_name = longitude
   long_name = longitude
@@ -127,7 +121,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [lat]
   standard_name = latitude
   long_name = latitude
@@ -136,16 +129,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
-[aerodp]
-  standard_name = atmosphere_optical_thickness_due_to_ambient_aerosol_particles
-  long_name = vertical integrated optical depth for various aerosol species
-  units = none
-  dimensions = (horizontal_loop_extent,number_of_species_for_aerosol_optical_depth)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
 [lw_optical_props_aerosol]
   standard_name = longwave_optical_properties_for_aerosols
   long_name = Fortran DDT containing RRTMGP optical properties
@@ -153,7 +136,6 @@
   dimensions = ()
   type = ty_optical_props_1scl
   intent = inout
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -162,12 +144,10 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out
-  optional = F

@@ -14,7 +14,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [grav]
   standard_name = gravitational_acceleration
   long_name = gravitational acceleration
@@ -23,7 +22,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [cp]
   standard_name = specific_heat_of_dry_air_at_constant_pressure
   long_name = specific heat of dry air at constant pressure
@@ -32,7 +30,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [eps]
   standard_name = ratio_of_dry_air_to_water_vapor_gas_constants
   long_name = rd/rv
@@ -41,7 +38,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [epsm1]
   standard_name = ratio_of_dry_air_to_water_vapor_gas_constants_minus_one
   long_name = (rd/rv) - 1
@@ -50,7 +46,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [ps]
   standard_name = surface_air_pressure
   long_name = surface pressure
@@ -59,7 +54,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [u1]
   standard_name = x_wind_of_new_state_at_surface_adjacent_layer
   long_name = x component of 1st model layer wind
@@ -68,7 +62,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [v1]
   standard_name = y_wind_of_new_state_at_surface_adjacent_layer
   long_name = y component of 1st model layer wind
@@ -77,7 +70,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [t1]
   standard_name = air_temperature_of_new_state_at_surface_adjacent_layer
   long_name = 1st model layer air temperature
@@ -86,7 +78,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [q1]
   standard_name = specific_humidity_of_new_state_at_surface_adjacent_layer
   long_name = 1st model layer specific humidity
@@ -95,7 +86,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [prslki]
   standard_name = ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer
   long_name = Exner function ratio bt midlayer and interface at 1st layer
@@ -104,7 +94,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [evap]
   standard_name = surface_upward_specific_humidity_flux
   long_name = surface upward evaporation flux
@@ -113,7 +102,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [fm]
   standard_name = Monin_Obukhov_similarity_function_for_momentum
   long_name = Monin-Obukhov similarity parameter for momentum
@@ -122,7 +110,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [fh]
   standard_name = Monin_Obukhov_similarity_function_for_heat
   long_name = Monin-Obukhov similarity parameter for heat
@@ -131,7 +118,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [fm10]
   standard_name = Monin_Obukhov_similarity_function_for_momentum_at_10m
   long_name = Monin-Obukhov similarity parameter for momentum
@@ -140,7 +126,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [fh2]
   standard_name = Monin_Obukhov_similarity_function_for_heat_at_2m
   long_name = Monin-Obukhov similarity parameter for heat
@@ -149,7 +134,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [tskin]
   standard_name = surface_skin_temperature
   long_name = surface skin temperature
@@ -158,7 +142,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [qsurf]
   standard_name = surface_specific_humidity
   long_name = surface specific humidity
@@ -167,7 +150,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [thsfc_loc]
   standard_name = flag_for_reference_pressure_theta
   long_name = flag for reference pressure in theta calculation
@@ -175,7 +157,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [f10m]
   standard_name = ratio_of_wind_at_surface_adjacent_layer_to_wind_at_10m
   long_name = ratio of fm10 and fm
@@ -184,7 +165,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [u10m]
   standard_name = x_wind_at_10m
   long_name = x component of wind at 10 m
@@ -193,7 +173,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [v10m]
   standard_name = y_wind_at_10m
   long_name = y component of wind at 10 m
@@ -202,7 +181,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [t2m]
   standard_name = air_temperature_at_2m
   long_name = temperature at 2 m
@@ -211,7 +189,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [q2m]
   standard_name = specific_humidity_at_2m
   long_name = specific humidity at 2 m
@@ -220,7 +197,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -229,12 +205,10 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out
-  optional = F

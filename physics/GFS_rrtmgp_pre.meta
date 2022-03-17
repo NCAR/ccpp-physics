@@ -1,13 +1,20 @@
 [ccpp-table-properties]
   name = GFS_rrtmgp_pre
   type = scheme
-  dependencies = funcphys.f90,iounitdef.f,machine.F,module_bfmicrophysics.f,physcons.F90,physparam.f,radcons.f90,radiation_aerosols.f
+  dependencies = funcphys.f90,iounitdef.f,machine.F,module_bfmicrophysics.f,physcons.F90,radcons.f90,radiation_aerosols.f
   dependencies = radiation_astronomy.f,radiation_clouds.f,radiation_gases.f,radiation_tools.F90,rrtmg_lw_cloud_optics.F90
 
 ########################################################################
 [ccpp-arg-table]
   name = GFS_rrtmgp_pre_init
   type = scheme
+[nGases]
+  standard_name = number_of_active_gases_used_by_RRTMGP
+  long_name = number of gases available used by RRTMGP (Model%nGases)
+  units = count
+  dimensions =  ()
+  type = integer  
+  intent = in
 [active_gases]
   standard_name = active_gases_used_by_RRTMGP
   long_name = active gases used by RRTMGP
@@ -16,15 +23,14 @@
   type = character
   kind = len=128
   intent = in
-  optional = F  
-[nGases]
-  standard_name = number_of_active_gases_used_by_RRTMGP
-  long_name = number of gases available used by RRTMGP (Model%nGases)
-  units = count
-  dimensions =  ()
-  type = integer  
-  intent = in
-  optional = F  
+[active_gases_array]
+  standard_name = list_of_active_gases_used_by_RRTMGP
+  long_name = list of active gases used by RRTMGP
+  units = none
+  dimensions = (number_of_active_gases_used_by_RRTMGP)
+  type = character
+  kind = len=128
+  intent = out
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -33,20 +39,25 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 
 ########################################################################
 [ccpp-arg-table]
   name = GFS_rrtmgp_pre_run
   type = scheme
+[me]
+  standard_name = mpi_rank
+  long_name = current MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
 [ncol]
   standard_name = horizontal_loop_extent
   long_name = horizontal dimension
@@ -54,7 +65,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [nLev]
   standard_name = vertical_layer_dimension
   long_name = number of vertical levels
@@ -62,7 +72,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [nTracers]
   standard_name = number_of_tracers
   long_name = number of tracers
@@ -70,7 +79,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [lsswr]
   standard_name = flag_for_calling_shortwave_radiation
   long_name = logical flags for sw radiation calls
@@ -78,7 +86,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [lslwr]
   standard_name = flag_for_calling_longwave_radiation
   long_name = logical flags for lw radiation calls
@@ -86,7 +93,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [i_o3]
   standard_name = index_of_ozone_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for ozone mixing ratio
@@ -94,7 +100,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F 
 [fhswr]
   standard_name = period_of_shortwave_radiation_calls
   long_name = frequency for shortwave radiation
@@ -103,7 +108,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F 
 [fhlwr]
   standard_name = period_of_longwave_radiation_calls
   long_name = frequency for longwave radiation
@@ -112,7 +116,6 @@
   type = real
   kind = kind_phys  
   intent = in
-  optional = F 
 [xlat]
   standard_name = latitude
   long_name = latitude
@@ -121,7 +124,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F   
 [xlon]
   standard_name = longitude
   long_name = longitude
@@ -130,7 +132,30 @@
   type = real
   kind = kind_phys  
   intent = in
-  optional = F   
+[coslat]
+  standard_name = cosine_of_latitude
+  long_name = cosine of latitude
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[sinlat]
+  standard_name = sine_of_latitude
+  long_name = sine of latitude
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[solhr]
+  standard_name = forecast_utc_hour
+  long_name = time in hours after 00z at the current timestep
+  units = h
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
 [prsi]
   standard_name = air_pressure_at_interface
   long_name = air pressure at model layer interfaces
@@ -139,7 +164,6 @@
   type = real
   kind = kind_phys  
   intent = in
-  optional = F   
 [prslk]
   standard_name = dimensionless_exner_function
   long_name = dimensionless Exner function at model layer centers
@@ -148,7 +172,6 @@
   type = real
   kind = kind_phys    
   intent = in
-  optional = F  
 [prsl]
   standard_name = air_pressure
   long_name = mean layer pressure
@@ -157,7 +180,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F  
 [tgrs]
   standard_name = air_temperature
   long_name = model layer mean temperature
@@ -166,7 +188,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F   
 [qgrs]
   standard_name = tracer_concentration
   long_name = model layer mean tracer concentration
@@ -175,7 +196,6 @@
   type = real
   kind = kind_phys  
   intent = in
-  optional = F   
 [tsfc]
   standard_name = surface_skin_temperature
   long_name = surface skin temperature
@@ -184,7 +204,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [con_eps]
   standard_name = ratio_of_dry_air_to_water_vapor_gas_constants
   long_name = rd/rv
@@ -193,7 +212,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [con_epsm1]
   standard_name = ratio_of_dry_air_to_water_vapor_gas_constants_minus_one
   long_name = (rd/rv) - 1
@@ -202,7 +220,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [con_fvirt]
   standard_name = ratio_of_vapor_to_dry_air_gas_constants_minus_one
   long_name = (rv/rd) - 1 (rv = ideal gas constant for water vapor)
@@ -211,7 +228,6 @@
   type = real
   kind = kind_phys  
   intent = in
-  optional = F    
 [con_epsqs]
   standard_name = minimum_value_of_saturation_mixing_ratio
   long_name = floor value for saturation mixing ratio
@@ -220,7 +236,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [minGPpres]
   standard_name = minimum_pressure_in_RRTMGP
   long_name = minimum pressure allowed in RRTMGP
@@ -229,7 +244,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [maxGPpres]
   standard_name = maximum_pressure_in_RRTMGP
   long_name = maximum pressure allowed in RRTMGP
@@ -238,7 +252,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [minGPtemp]
   standard_name = minimum_temperature_in_RRTMGP
   long_name = minimum temperature allowed in RRTMGP
@@ -247,7 +260,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [maxGPtemp]
   standard_name = maximum_temperature_in_RRTMGP
   long_name = maximum temperature allowed in RRTMGP
@@ -256,7 +268,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [raddt]
   standard_name = time_step_for_radiation
   long_name = radiation time step
@@ -265,7 +276,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [p_lay]
   standard_name = air_pressure_at_layer_for_RRTMGP
   long_name = air pressure at vertical layer for radiation calculation
@@ -274,7 +284,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [p_lev]
   standard_name = air_pressure_at_interface_for_RRTMGP
   long_name = air pressure at vertical interface for radiation calculation
@@ -283,7 +292,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [t_lay]
   standard_name = air_temperature_at_layer_for_RRTMGP
   long_name = air temperature at vertical layer for radiation calculation
@@ -292,7 +300,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [t_lev]
   standard_name = air_temperature_at_interface_for_RRTMGP
   long_name = air temperature  at vertical interface for radiation calculation
@@ -301,7 +308,27 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
+[top_at_1]
+  standard_name = flag_for_vertical_ordering_in_RRTMGP
+  long_name = flag for vertical ordering in RRTMGP
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = out
+[iSFC]
+  standard_name = vertical_index_for_surface_in_RRTMGP
+  long_name = index for	surface	layer in RRTMGP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+[iTOA]
+  standard_name = vertical_index_for_TOA_in_RRTMGP
+  long_name = index for TOA layer in RRTMGP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
 [tsfc_radtime]
   standard_name = surface_skin_temperature_on_radiation_timestep
   long_name = surface skin temperature on radiation timestep
@@ -309,8 +336,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
-  optional = F
+  intent = inout
 [tsfg]
   standard_name = surface_ground_temperature_for_radiation
   long_name = surface ground temperature for radiation
@@ -319,7 +345,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [tsfa]
   standard_name = surface_air_temperature_for_radiation
   long_name = lowest model layer air temperature for radiation
@@ -328,7 +353,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [tv_lay]
   standard_name = virtual_temperature
   long_name = layer virtual temperature
@@ -337,7 +361,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [relhum]
   standard_name = relative_humidity
   long_name = layer relative humidity
@@ -346,7 +369,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [qs_lay]
   standard_name = saturation_vapor_pressure
   long_name = saturation vapor pressure
@@ -355,16 +377,14 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [q_lay]
   standard_name = water_vapor_mixing_ratio
   long_name = water vaport mixing ratio
-  units = kg/kg
+  units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
-  optional = F 
 [tracer]
   standard_name = chemical_tracers
   long_name = chemical tracers
@@ -373,7 +393,14 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
+[active_gases_array]
+  standard_name = list_of_active_gases_used_by_RRTMGP
+  long_name = list of active gases used by RRTMGP
+  units = none
+  dimensions =  (number_of_active_gases_used_by_RRTMGP)
+  type = character
+  kind = len=*
+  intent = in
 [gas_concentrations]
   standard_name = Gas_concentrations_for_RRTMGP_suite
   long_name = DDT containing gas concentrations for RRTMGP radiation scheme
@@ -381,7 +408,22 @@
   dimensions = ()
   type = ty_gas_concs
   intent = inout
-  optional = F
+[coszdg]
+  standard_name = cosine_of_solar_zenith_angle_on_radiation_timestep
+  long_name = daytime mean cosz over rad call period
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[coszen]
+  standard_name = cosine_of_solar_zenith_angle_for_daytime_points_on_radiation_timestep
+  long_name = mean cos of zenith angle over rad call period
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -390,12 +432,10 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out
-  optional = F

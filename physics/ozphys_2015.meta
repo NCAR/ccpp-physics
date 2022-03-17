@@ -14,7 +14,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -23,15 +22,13 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out
-  optional = F
 
 ########################################################################
 [ccpp-arg-table]
@@ -44,7 +41,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [levs]
   standard_name = vertical_layer_dimension
   long_name = number of vertical layers
@@ -52,7 +48,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ko3]
   standard_name = vertical_dimension_of_ozone_forcing_data
   long_name = number of vertical layers in ozone forcing data
@@ -60,7 +55,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [dt]
   standard_name = timestep_for_physics
   long_name = physics time step
@@ -69,7 +63,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [oz]
   standard_name = ozone_concentration_of_new_state
   long_name = ozone concentration updated by physics
@@ -78,7 +71,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [tin]
   standard_name = air_temperature_of_new_state
   long_name = updated air temperature
@@ -87,16 +79,14 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [po3]
   standard_name = natural_log_of_ozone_forcing_data_pressure_levels
   long_name = natural log of ozone forcing data pressure levels
-  units = log(Pa)
+  units = 1
   dimensions = (vertical_dimension_of_ozone_forcing_data)
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [prsl]
   standard_name = air_pressure
   long_name = mid-layer pressure
@@ -105,16 +95,14 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [prdout]
   standard_name = ozone_forcing
   long_name = ozone forcing data
-  units = various
+  units = mixed
   dimensions = (horizontal_loop_extent,vertical_dimension_of_ozone_forcing_data,number_of_coefficients_in_ozone_forcing_data)
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [pl_coeff]
   standard_name = number_of_coefficients_in_ozone_forcing_data
   long_name = number of coefficients in ozone forcing data
@@ -122,7 +110,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [delp]
   standard_name = air_pressure_difference_between_midlayers
   long_name = difference between mid-layer pressures
@@ -131,7 +118,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [ldiag3d]
   standard_name = flag_for_diagnostics_3D
   long_name = flag for calculating 3-D diagnostic fields
@@ -139,16 +125,14 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [dtend]
   standard_name = cumulative_change_of_state_variables
   long_name = diagnostic tendencies for state variables
-  units = various
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_cumulative_change_processes)
+  units = mixed
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,cumulative_change_of_state_variables_outer_index_max)
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [dtidx]
   standard_name = cumulative_change_of_state_variables_outer_index
   long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
@@ -156,7 +140,6 @@
   dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
   type = integer
   intent = in
-  optional = F
 [ntoz]
   standard_name = index_of_ozone_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for ozone mixing ratio
@@ -164,7 +147,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [index_of_process_prod_loss]
   standard_name = index_of_production_and_loss_process_in_cumulative_change_index
   long_name = index of production and loss effect in photochemistry process in second dimension of array cumulative change index
@@ -172,7 +154,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [index_of_process_ozmix]
   standard_name = index_of_ozone_mixing_ratio_process_in_cumulative_change_index
   long_name = index of ozone mixing ratio effect in photochemistry process in second dimension of array cumulative change index
@@ -180,7 +161,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [index_of_process_temp]
   standard_name = index_of_temperature_process_in_cumulative_change_index
   long_name = index of temperature effect in photochemistry process in second dimension of array cumulative change index
@@ -188,7 +168,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [index_of_process_overhead_ozone]
   standard_name = index_of_overhead_process_in_cumulative_change_index
   long_name = index of overhead ozone effect in photochemistry process in second dimension of array cumulative change index
@@ -196,7 +175,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [con_g]
   standard_name = gravitational_acceleration
   long_name = gravitational acceleration
@@ -205,7 +183,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [me]
   standard_name = mpi_rank
   long_name = rank of the current MPI task
@@ -213,7 +190,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -222,12 +198,10 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out
-  optional = F

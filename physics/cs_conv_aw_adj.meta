@@ -14,7 +14,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [levs]
   standard_name = vertical_layer_dimension
   long_name = number of veritcal levels
@@ -22,7 +21,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [do_cscnv]
   standard_name = flag_for_Chikira_Sugiyama_deep_convection
   long_name = flag for Chikira-Sugiyama convection
@@ -30,7 +28,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [do_aw]
   standard_name = flag_for_Arakawa_Wu_adjustment
   long_name = flag for Arakawa Wu scale-aware adjustment
@@ -38,7 +35,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [do_shoc]
   standard_name = flag_for_shoc
   long_name = flag for SHOC
@@ -46,7 +42,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F
 [ntrac]
   standard_name = number_of_tracers
   long_name = number of tracers
@@ -54,7 +49,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ntcw]
   standard_name = index_of_cloud_liquid_water_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for cloud condensate (or liquid water)
@@ -62,7 +56,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [ntclamt]
   standard_name = index_of_cloud_area_fraction_in_atmosphere_layer_in_tracer_concentration_array
   long_name = tracer index for cloud amount integer
@@ -70,7 +63,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [nncl]
   standard_name = number_of_condensate_species
   long_name = number of cloud condensate types
@@ -78,7 +70,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [con_g]
   standard_name = gravitational_acceleration
   long_name = gravitational acceleration
@@ -87,7 +78,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [sigmafrac]
   standard_name = convective_updraft_area_fraction
   long_name = convective updraft area fraction
@@ -96,7 +86,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [gt0]
   standard_name = air_temperature_of_new_state
   long_name = temperature updated by physics
@@ -105,7 +94,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [gq0]
   standard_name = tracer_concentration_of_new_state
   long_name = tracer concentration updated by physics
@@ -114,7 +102,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [save_t]
   standard_name = air_temperature_save
   long_name = air temperature before entering a physics scheme
@@ -123,7 +110,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [save_q]
   standard_name = tracer_concentration_save
   long_name = tracer concentration before entering a physics scheme
@@ -132,7 +118,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [prsi]
   standard_name = air_pressure_at_interface
   long_name = air pressure at model layer interfaces
@@ -141,7 +126,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
 [cldfrac]
   standard_name = cloud_fraction_for_MG
   long_name = cloud fraction used by Morrison-Gettelman MP
@@ -150,7 +134,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [subcldfrac]
   standard_name = subgrid_scale_cloud_fraction_from_shoc
   long_name = subgrid-scale cloud fraction from the SHOC scheme
@@ -159,7 +142,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [prcp]
   standard_name = lwe_thickness_of_explicit_precipitation_amount
   long_name = explicit precipitation (rain, ice, snow, graupel, ...) on physics timestep
@@ -168,7 +150,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
 [imp_physics]
   standard_name = control_for_microphysics_scheme
   long_name = choice of microphysics scheme
@@ -176,7 +157,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [imp_physics_mg]
   standard_name = identifier_for_morrison_gettelman_microphysics_scheme
   long_name = choice of Morrison-Gettelman microphysics scheme
@@ -184,7 +164,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -193,12 +172,10 @@
   type = character
   kind = len=*
   intent = out
-  optional = F
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out
-  optional = F
