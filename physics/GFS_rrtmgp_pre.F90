@@ -1,3 +1,6 @@
+!> \file GFS_rrtmgp_pre.f90
+!! This file perpares model fields for use by the RRTMGP radiation scheme.
+
 module GFS_rrtmgp_pre
   use machine, only: &
        kind_phys                   ! Working type
@@ -26,7 +29,9 @@ module GFS_rrtmgp_pre
 
   public GFS_rrtmgp_pre_run,GFS_rrtmgp_pre_init,GFS_rrtmgp_pre_finalize  
 contains
-  
+!> \defgroup GFS_rrtmgp_pre GFS RRTMGP Scheme Pre
+!! @{
+
   ! #########################################################################################
   ! SUBROUTINE GFS_rrtmgp_pre_init
   ! #########################################################################################
@@ -378,4 +383,5 @@ contains
   ! #########################################################################################
   subroutine GFS_rrtmgp_pre_finalize ()
   end subroutine GFS_rrtmgp_pre_finalize
+!! @}
 end module GFS_rrtmgp_pre
