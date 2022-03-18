@@ -3828,6 +3828,7 @@ endif   ! croptype == 0
   real (kind=kind_phys) :: fm           !momentum stability correction, weighted by prior iters
   real (kind=kind_phys) :: fh           !sen heat stability correction, weighted by prior iters
   real (kind=kind_phys) :: fhg          !sen heat stability correction, ground
+  real (kind=kind_phys) :: fhgh         !sen heat stability correction, canopy
   real (kind=kind_phys) :: hcan         !canopy height (m) [note: hcan >= z0mg]
 
   real (kind=kind_phys) :: a            !temporary calculation
@@ -4048,7 +4049,7 @@ endif   ! croptype == 0
        call ragrb(parameters,iter   ,vaie   ,rhoair ,hg     ,tah    , & !in
                   zpd    ,z0mg   ,z0hg   ,hcan   ,uc     , & !in
                   z0h    ,fv     ,cwp    ,vegtyp ,mpe    , & !in
-                  tv     ,mozg   ,fhg    ,iloc   ,jloc   , & !inout
+                  tv     ,mozg   ,fhg    ,fhgh   ,iloc   ,jloc   , & !inout
                   ramg   ,rahg   ,rawg   ,rb     )           !out
 
 ! es and d(es)/dt evaluated at tv
@@ -4604,7 +4605,7 @@ endif   ! croptype == 0
   subroutine ragrb(parameters,iter   ,vai    ,rhoair ,hg     ,tah    , & !in
                    zpd    ,z0mg   ,z0hg   ,hcan   ,uc     , & !in
                    z0h    ,fv     ,cwp    ,vegtyp ,mpe    , & !in
-                   tv     ,mozg   ,fhg    ,iloc   ,jloc   , & !inout
+                   tv     ,mozg   ,fhg    ,fhgh   ,iloc   ,jloc   , & !inout
                    ramg   ,rahg   ,rawg   ,rb     )           !out
 ! --------------------------------------------------------------------------------------------------
 ! compute under-canopy aerodynamic resistance rag and leaf boundary layer
@@ -4638,6 +4639,7 @@ endif   ! croptype == 0
 
   real (kind=kind_phys),              intent(inout) :: mozg   !monin-obukhov stability parameter
   real (kind=kind_phys),              intent(inout) :: fhg    !stability correction
+  real (kind=kind_phys),              intent(inout) :: fhgh   !stability correction, canopy
 
 ! outputs
   real (kind=kind_phys)                             :: ramg   !aerodynamic resistance for momentum (s/m)
@@ -4652,29 +4654,36 @@ endif   ! croptype == 0
   real (kind=kind_phys) :: tmprah2      !temporary calculation for aerodynamic resistances
   real (kind=kind_phys) :: tmprb        !temporary calculation for rb
   real (kind=kind_phys) :: molg,fhgnew,cwpc
+  real (kind=kind_phys) :: mozgh, fhgnewh
 ! --------------------------------------------------------------------------------------------------
 ! stability correction to below canopy resistance
 
        mozg = 0.
        molg = 0.
+       mozgh = 0.
 
        if(iter > 1) then
         tmp1 = vkc * (grav/tah) * hg/(rhoair*cpair)
         if (abs(tmp1) .le. mpe) tmp1 = mpe
         molg = -1. * fv**3 / tmp1
         mozg = min( (zpd-z0mg)/molg, 1.)
+        mozgh = min( (hcan - zpd)/molg, 1.)
        end if
 
        if (mozg < 0.) then
           fhgnew  = (1. - 15.*mozg)**(-0.25)
+            fhgnewh  = 0.74 * (1. - 9.*mozg)**(-0.5)    ! PHIh
        else
           fhgnew  = 1.+ 4.7*mozg
+            fhgnewh  = 0.74 + 4.7*mozgh      ! PHIh
        endif
 
        if (iter == 1) then
           fhg = fhgnew
+            fhgh = fhgnewh
        else
           fhg = 0.5 * (fhg+fhgnew)
+            fhgh = 0.5 * (fhgh+fhgnewh)
        endif
 
        cwpc = (cwp * vai * hcan * fhg)**0.5
@@ -4686,7 +4695,7 @@ endif   ! croptype == 0
 
 ! aerodynamic resistances raw and rah between heights zpd+z0h and z0hg.
 
-       kh  = max ( vkc*fv*(hcan-zpd), mpe )
+       kh  = max ( vkc*fv*(hcan-zpd)/fhgh, mpe )
        ramg = 0.
        rahg = tmprah2 / kh
        rawg = rahg
