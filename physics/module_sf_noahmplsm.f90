@@ -4032,7 +4032,7 @@ endif   ! croptype == 0
        if(opt_sfc == 3) then
          call sfcdif3(parameters,iloc    ,jloc    ,iter    ,sfctmp  ,qair    ,ur      , & !in 
                         zlvl    ,tah     ,thsfc_loc,prslkix,prsik1x ,prslk1x ,z0m     , & !in 
-                        zpd ,snowh ,fveg ,garea1 ,.true. ,vaie ,vegtyp, & !in 
+                        zpd ,snowh ,shdfac ,garea1 ,.true. ,vaie ,vegtyp, & !in 
                         ustarx  ,fm      ,fh      ,fm2     ,fh2     ,                   & !inout 
                         z0h     ,fv      ,csigmaf1,cm      ,ch       )                    !out 
 
@@ -4492,7 +4492,7 @@ endif   ! croptype == 0
         if(opt_sfc == 3) then
           call sfcdif3(parameters,iloc    ,jloc    ,iter    ,sfctmp  ,qair    ,ur      , & !in 
                          zlvl    ,tgb     ,thsfc_loc,prslkix,prsik1x ,prslk1x ,z0m     , & !in 
-                         zpd  ,snowh,fveg ,garea1  ,.false. ,0.0,ivgtyp ,      & !in 
+                         zpd  ,snowh,shdfac ,garea1  ,.false. ,0.0,ivgtyp ,      & !in 
                          ustarx  ,fm      ,fh      ,fm2     ,fh2     ,                   & !inout 
                          z0h     ,fv      ,csigmaf0,cm      ,ch       )                    !out 
 
@@ -5151,28 +5151,12 @@ endif   ! croptype == 0
     real (kind=kind_phys) :: czil1                    ! canopy based czil
     real (kind=kind_phys) :: fm10                     ! 10-m stability adjustment - stability output
     real (kind=kind_phys) :: sigmaa                   ! momentum partition parameter
-    real (kind=kind_phys) :: tem1,tem2,zvfun1,gdx,slaifrac
+    real (kind=kind_phys) :: tem1,tem2,zvfun1,gdx
     real (kind=kind_phys), parameter :: z0lo=0.1, z0up=1.0
-    real (kind=kind_phys)  :: saimax !< monthly maximum stem area index, one-sided
-    real (kind=kind_phys)  :: laimax !< monthly maximum leaf area index, one-sided
 
 ! -------------------------------------------------------------------------------------------------
 
     fv        = ustarx
-    laimax = maxval(parameters%laim)
-    saimax = maxval(parameters%saim)
-    if(dveg.eq.4 .or. dveg.eq.5) then
-     if(laimax+saimax .gt. 0 .and. fveg .gt. 0) then
-      slaifrac=vaie/(laimax+saimax)
-      slaifrac=min(slaifrac,1.)
-      slaifrac=fveg*slaifrac
-      else
-      slaifrac=0.1_kind_phys
-     endif
-    else
-      slaifrac=fveg
-    endif
-
 !   fv        = ur*vkc/log((zlvl-zpd)/z0m)
 
     if(vegetated) then 
@@ -5223,7 +5207,7 @@ endif   ! croptype == 0
 
     tem1   = (z0m - z0lo) / (z0up - z0lo)
     tem1   = min(max(tem1, 0.0_kind_phys), 1.0_kind_phys)
-    tem2   = max(slaifrac, 0.1_kind_phys)
+    tem2   = max(fveg, 0.1_kind_phys)
     zvfun1 = sqrt(tem1 * tem2)
     gdx    = sqrt(garea1)
 
