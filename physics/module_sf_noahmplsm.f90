@@ -4695,7 +4695,7 @@ endif   ! croptype == 0
 
 ! aerodynamic resistances raw and rah between heights zpd+z0h and z0hg.
 
-       kh  = max ( vkc*fv*(hcan-zpd)/fhgh, mpe )
+       kh  = max ( 0.5*vkc*fv*(hcan-zpd)/fhgh, mpe )
        ramg = 0.
        rahg = tmprah2 / kh
        rawg = rahg
