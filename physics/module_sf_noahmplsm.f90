@@ -4672,18 +4672,18 @@ endif   ! croptype == 0
 
        if (mozg < 0.) then
           fhgnew  = (1. - 15.*mozg)**(-0.25)
-            fhgnewh  = 0.74 * (1. - 9.*mozg)**(-0.5)    ! PHIh
+          fhgnewh  = 0.74 * (1. - 9.*mozg)**(-0.5)    ! PHIh
        else
           fhgnew  = 1.+ 4.7*mozg
-            fhgnewh  = 0.74 + 4.7*mozgh      ! PHIh
+          fhgnewh  = 0.74 + 4.7*mozgh      ! PHIh
        endif
 
        if (iter == 1) then
           fhg = fhgnew
-            fhgh = fhgnewh
+          fhgh = fhgnewh
        else
           fhg = 0.5 * (fhg+fhgnew)
-            fhgh = 0.5 * (fhgh+fhgnewh)
+          fhgh = 0.5 * (fhgh+fhgnewh)
        endif
 
        cwpc = (cwp * vai * hcan * fhg)**0.5
