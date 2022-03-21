@@ -94,7 +94,9 @@ contains
     real(kind_phys), dimension(nday,NLev+1,sw_gas_props%get_nband()),target :: &
          fluxSW_up_allsky, fluxSW_up_clrsky, fluxSW_dn_allsky, fluxSW_dn_clrsky, fluxSW_dn_dir_allsky
     real(kind_phys), dimension(ncol,NLev) :: vmrTemp
-    integer :: iBand
+    integer :: iBand, iDay,ibd
+    real(kind_phys), dimension(2,sw_gas_props%get_nband()) :: bandlimits
+    real(kind_phys), dimension(2), parameter :: nIR_uvvis_bnd = (/12850,16000/)
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -111,17 +113,21 @@ contains
        flux_clrsky%bnd_flux_up     => fluxSW_up_clrsky
        flux_clrsky%bnd_flux_dn     => fluxSW_dn_clrsky
 
-       !  *Note* Legacy RRTMG code. May need to revisit
+       ! Use near-IR albedo for bands with wavenumbers extending to 12850cm-1
+       ! Use uv-vis albedo for bands with wavenumbers greater than 16000cm-1
+       ! For overlapping band, average near-IR and us-vis albedos.
+       bandlimits = sw_gas_props%get_band_lims_wavenumber()
        do iBand=1,sw_gas_props%get_nband()
-          if (iBand .lt. 10) then
+          if (bandlimits(1,iBand) .lt. nIR_uvvis_bnd(1)) then
              sfc_alb_dir(iBand,:) = sfc_alb_nir_dir(iBand,idxday(1:nday))
              sfc_alb_dif(iBand,:) = sfc_alb_nir_dif(iBand,idxday(1:nday))
           endif
-          if (iBand .eq. 10) then
+          if (bandlimits(1,iBand) .eq. nIR_uvvis_bnd(1)) then
              sfc_alb_dir(iBand,:) = 0.5_kind_phys*(sfc_alb_nir_dir(iBand,idxday(1:nday)) + sfc_alb_uvvis_dir(iBand,idxday(1:nday)))
              sfc_alb_dif(iBand,:) = 0.5_kind_phys*(sfc_alb_nir_dif(iBand,idxday(1:nday)) + sfc_alb_uvvis_dif(iBand,idxday(1:nday)))
+             ibd = iBand
           endif
-          if (iBand .gt. 10) then
+          if (bandlimits(1,iBand) .ge. nIR_uvvis_bnd(2)) then
              sfc_alb_dir(iBand,:) = sfc_alb_uvvis_dir(iBand,idxday(1:nday))
              sfc_alb_dif(iBand,:) = sfc_alb_uvvis_dif(iBand,idxday(1:nday))
           endif
@@ -177,12 +183,26 @@ contains
             sfc_alb_dir,                  & ! IN  - Shortwave surface albedo (direct)
             sfc_alb_dif,                  & ! IN  - Shortwave surface albedo (diffuse)
             flux_allsky))                   ! OUT - Fluxes, clear-sky, 3D (nCol,NLev,nBand) 
+
        ! Store fluxes
        fluxswUP_allsky(idxday(1:nday),:)   = sum(flux_allsky%bnd_flux_up,dim=3)
        fluxswDOWN_allsky(idxday(1:nday),:) = sum(flux_allsky%bnd_flux_dn,dim=3)
-       scmpsw(idxday(1:nday))%nirbm        = sum(flux_allsky%bnd_flux_dn_dir(1:nday,iSFC,:),dim=2)
-       scmpsw(idxday(1:nday))%nirdf        = sum(flux_allsky%bnd_flux_dn(    1:nday,iSFC,:),dim=2) - &
-                                             sum(flux_allsky%bnd_flux_dn_dir(1:nday,iSFC,:),dim=2)
+       do iDay=1,nDay
+          ! Near IR
+          scmpsw(idxday(iDay))%nirbm = sum(flux_allsky%bnd_flux_dn_dir(iDay,iSFC,1:ibd-1))  + &
+                                           flux_allsky%bnd_flux_dn_dir(iDay,iSFC,ibd)/2.
+          scmpsw(idxday(iDay))%nirdf = (sum(flux_allsky%bnd_flux_dn(iDay,iSFC,1:ibd-1))     + &
+                                            flux_allsky%bnd_flux_dn(iDay,iSFC,ibd)/2.)      - &
+                                       (sum(flux_allsky%bnd_flux_dn_dir(iDay,iSFC,1:ibd-1)) + &
+                                            flux_allsky%bnd_flux_dn_dir(iDay,iSFC,ibd)/2.)
+          ! UV-VIS
+          scmpsw(idxday(iDay))%visbm = sum(flux_allsky%bnd_flux_dn_dir(iDay,iSFC,ibd+1:sw_gas_props%get_nband()))  + &
+                                           flux_allsky%bnd_flux_dn_dir(iDay,iSFC,ibd)/2.
+          scmpsw(idxday(iDay))%visdf = (sum(flux_allsky%bnd_flux_dn(iDay,iSFC,ibd+1:sw_gas_props%get_nband()))     + &
+                                            flux_allsky%bnd_flux_dn(iDay,iSFC,ibd)/2. )                            - &
+                                       (sum(flux_allsky%bnd_flux_dn_dir(iDay,iSFC,ibd+1:sw_gas_props%get_nband())) + &
+                                            flux_allsky%bnd_flux_dn_dir(iDay,iSFC,ibd)/2.)
+       enddo
     else
        fluxswUP_allsky(:,:)   = 0._kind_phys
        fluxswDOWN_allsky(:,:) = 0._kind_phys
@@ -190,6 +210,7 @@ contains
        fluxswDOWN_clrsky(:,:) = 0._kind_phys
        scmpsw                 = cmpfsw_type( 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 )       
     endif
+
   end subroutine rrtmgp_sw_rte_run
   
   ! #########################################################################################
