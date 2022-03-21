@@ -4686,7 +4686,7 @@ endif   ! croptype == 0
             fhgh = 0.5 * (fhgh+fhgnewh)
        endif
 
-       cwpc = (0.5 * cwp * vai * hcan * fhg)**0.5
+       cwpc = (cwp * vai * hcan * fhg)**0.5
 !       cwpc = (cwp*fhg)**0.5
 
        tmp1 = exp( -cwpc*z0hg/hcan )
@@ -4695,7 +4695,7 @@ endif   ! croptype == 0
 
 ! aerodynamic resistances raw and rah between heights zpd+z0h and z0hg.
 
-       kh  = max ( vkc*fv*(hcan-zpd)/fhgh, mpe )
+       kh  = max ( vkc*fv*(hcan-zpd)/(max(fhgh,0.1), mpe )
        ramg = 0.
        rahg = tmprah2 / kh
        rawg = rahg
