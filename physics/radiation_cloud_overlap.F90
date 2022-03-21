@@ -21,10 +21,10 @@ contains
          nCol       ! Number of horizontal grid-points
     real(kind_phys), intent(in) :: &
          con_pi     ! Physical constant: Pi
-    real(kind_phys), dimension(nCol), intent(in) :: &
+    real(kind_phys), dimension(:), intent(in) :: &
          lat        ! Latitude  
     ! Outputs
-    real(kind_phys), dimension(nCol),intent(out) :: &
+    real(kind_phys), dimension(:),intent(out) :: &
          dcorr_lgth ! Decorrelation length  
     
     ! Local variables
@@ -52,11 +52,11 @@ contains
 
     real(kind_phys), intent(in) :: &
          juldat         ! Julian date
-    real(kind_phys), dimension(nCol), intent(in) :: &
+    real(kind_phys), dimension(:), intent(in) :: &
          lat            ! Latitude  
     
     ! Outputs
-    real(kind_phys), dimension(nCol),intent(out) :: &
+    real(kind_phys), dimension(:),intent(out) :: &
          dcorr_lgth    ! Decorrelation length (km)
     
     ! Parameters for the Gaussian fits per Eqs. (10) and (11) (See Table 1)
@@ -94,15 +94,15 @@ contains
     integer, intent(in) :: &
          iovr,     &
          iovr_exprand
-    real(kind_phys), dimension(nCol), intent(in) :: &
+    real(kind_phys), dimension(:), intent(in) :: &
          dcorr_lgth  ! Decorrelation length (km)
-    real(kind_phys), dimension(nCol,nLay), intent(in) :: &
+    real(kind_phys), dimension(:,:), intent(in) :: &
          dzlay       !
-    real(kind_phys), dimension(nCol,nLay), intent(in) ::  &
+    real(kind_phys), dimension(:,:), intent(in) ::  &
          cld_frac
     
     ! Outputs
-    real(kind_phys), dimension(nCol,nLay) :: &
+    real(kind_phys), dimension(:,:) :: &
          alpha       ! Cloud overlap parameter
     
     ! Local variables
