@@ -1,3 +1,14 @@
+! ######################################################################################
+!> \file GFS_rrtmgp_sw_post.F90
+!!
+!! This file computes the RRTMGP shortwave heating-rate(s), copies RRTMGP shortwave fluxes,
+!! to output DDTs, and output (optional) diagnsotics.
+!!
+!! /defgroup GFS_rrtmgp_sw_post
+!!
+!! /brief RRTMGP Shortwave post-processing routine.
+!!
+! ######################################################################################
 module GFS_rrtmgp_sw_post
   use machine,                   only: kind_phys
   use module_radiation_aerosols, only: NSPC1
@@ -7,22 +18,27 @@ module GFS_rrtmgp_sw_post
   use rrtmgp_sw_gas_optics,      only: sw_gas_props
   implicit none
 
-  public GFS_rrtmgp_sw_post_init,GFS_rrtmgp_sw_post_run,GFS_rrtmgp_sw_post_finalize
+  public GFS_rrtmgp_sw_post_run
 
 contains
-
-  ! #########################################################################################
-  ! SUBROUTINE GFS_rrtmgp_sw_post_init
-  ! #########################################################################################
-  subroutine GFS_rrtmgp_sw_post_init()
-  end subroutine GFS_rrtmgp_sw_post_init
-
-  ! #########################################################################################
-  ! SUBROUTINE GFS_rrtmgp_sw_post_run
   ! #########################################################################################
 !> \section arg_table_GFS_rrtmgp_sw_post_run
 !! \htmlinclude GFS_rrtmgp_sw_post_run.html
 !!
+!! \section GFS_rrtmgp_sw_post_run
+!! @{
+!!
+!! RRTMGP Shortwave post-processing routine.
+!!
+!! The all-sky shortwave radiation tendency is computed, the clear-sky tendency is computed
+!! if requested.
+!!
+!! RRTMGP surface and TOA fluxes are copied to fields that persist between radiation/physics
+!! calls.
+!!
+!! (optional) Save additional diagnostics.
+!!
+ ! #########################################################################################
   subroutine GFS_rrtmgp_sw_post_run (nCol, nLev, nDay, idxday, lsswr, do_sw_clrsky_hr,      &
        save_diag, fhswr,  coszen, coszdg, t_lay, p_lev, sfc_alb_nir_dir, sfc_alb_nir_dif,   &
        sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, fluxswUP_allsky,                               &
@@ -271,11 +287,5 @@ contains
        enddo
     endif
   end subroutine GFS_rrtmgp_sw_post_run
-
-  ! #########################################################################################
-  ! SUBROUTINE GFS_rrtmgp_sw_post_finalize
-  ! #########################################################################################
-  subroutine GFS_rrtmgp_sw_post_finalize ()
-  end subroutine GFS_rrtmgp_sw_post_finalize
-
+!! @}
 end module GFS_rrtmgp_sw_post

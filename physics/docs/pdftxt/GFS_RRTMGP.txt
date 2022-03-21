@@ -1,0 +1,32 @@
+/**
+\page GFS_RRTMG GFS RRTMG Shortwave/Longwave Radiation Scheme
+
+\section des_rrtmg Description
+ RRTMGP radiative fields from model outputs (\f$W m^{-2}\f$) include:
+
+- At surface total sky
+ - DLWRFsfc: Downward LW
+ - DSWRFsfc: Downward SW
+ - ULWRFsfc: Upward LW
+ - USWRFsfc: Upward SW
+ - NBDSFsfc: Near IR beam downward
+ - NDDSFsfc: Near IR diffuse downward
+ - VBDSFsfc: UV+Visible beam downward
+ - VDDSFsfc: UV+Visible diffuse downward
+ - DUVBsfc:  UV-B downward flux
+- At surface clear sky
+ - CSDLFsfc: Downward LW
+ - CSDSFsfc: Downward SW
+ - CSULFsfc: Upward LW
+ - CSULFsfc: Upward LW
+ - CSUSFsfc: Upward sw
+ - CDUVBsfc: UV-B downward flux
+- At TOA total sky
+ - DSWRFtoa: Downward SW
+ - ULWRFtoa: Upward LW
+ - USWRFtoa: Upward SW
+- At TOA clear sky:
+ - CSULFtoa: Upward LW
+ - CSUSFtoa: Upward SW
+
+*/
