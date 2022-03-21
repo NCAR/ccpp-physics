@@ -537,7 +537,7 @@
         imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,imp_physics_fer_hires,  &
         imp_physics_nssl, me, index_of_process_conv_trans
       integer,              intent(in   ), dimension(:)     :: islmsk, kpbl, kinver
-      logical,              intent(in   )                   :: cscnv, satmedmf, trans_trac, do_shoc, ras
+      logical,              intent(in   )                   :: cscnv, satmedmf, trans_trac, do_shoc, ltaerosol, ras
 
       integer,                                          intent(in) :: ntinc, ntlnc
       logical,                                          intent(in) :: ldiag3d, qdiag3d
@@ -661,11 +661,11 @@
             save_tcp(i,k) = gt0(i,k)
           enddo
         enddo
-        if (ntinc>0) then
+        if(ltaerosol) then
           save_qi(:,:) = clw(:,:,1)
-        end if
-        if (ntlnc>0) then
           save_qc(:,:) = clw(:,:,2)
+        else
+          save_qi(:,:) = clw(:,:,1)
         endif
       else if (imp_physics == imp_physics_nssl ) then
         do k=1,levs

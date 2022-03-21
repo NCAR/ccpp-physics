@@ -113,8 +113,8 @@
       logical, intent(in) :: trans_aero, ldiag3d, qdiag3d, lssav
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
       integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires
-      logical, intent(in) :: ltaerosol, hybedmf, do_shoc, satmedmf, flag_for_pbl_generic_tend
-      integer, intent(in) :: mraerosol, imp_physics_nssl
+      logical, intent(in) :: ltaerosol, hybedmf, do_shoc, satmedmf, flag_for_pbl_generic_tend, mraerosol
+      integer, intent(in) :: imp_physics_nssl
       logical, intent(in) :: nssl_hail_on, nssl_ccn_on
 
       real(kind=kind_phys), dimension(:,:,:), intent(in) :: qgrs
