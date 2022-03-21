@@ -31,7 +31,7 @@ contains
        sw_optical_props_cnvcloudsByBand, sw_optical_props_MYNNcloudsByBand,                 &
        sw_optical_props_aerosol, scmpsw, fluxswUP_allsky, fluxswDOWN_allsky,                &
        fluxswUP_clrsky, fluxswDOWN_clrsky, errmsg, errflg)
-
+    
     ! Inputs
     logical, intent(in) :: &
          top_at_1,                          & ! Vertical ordering flag
@@ -47,24 +47,23 @@ contains
     integer, intent(in), dimension(:) :: &
          idxday                               ! Index array for daytime points
     real(kind_phys),intent(in), dimension(:) :: &
+         sfc_alb_nir_dir,                   & ! Surface albedo (direct)
+         sfc_alb_nir_dif,                   & ! Surface albedo (diffuse)
+         sfc_alb_uvvis_dir,                 & ! Surface albedo (direct)
+         sfc_alb_uvvis_dif,                 & ! Surface albedo (diffuse)
          coszen                               ! Cosize of SZA
     real(kind_phys), dimension(:,:), intent(in) :: &
          p_lay,                             & ! Pressure @ model layer-centers (Pa)
-         t_lay                                ! Temperature (K)
+         t_lay,                             & ! Temperature (K)
+         toa_src_sw                           ! TOA incident spectral flux (W/m2)
     type(ty_optical_props_2str),intent(inout) :: &
          sw_optical_props_clrsky              ! RRTMGP DDT: shortwave clear-sky radiative properties 
-   type(ty_optical_props_2str),intent(in) :: &
+    type(ty_optical_props_2str),intent(in) :: &
          sw_optical_props_clouds,           & ! RRTMGP DDT: shortwave cloud optical properties 
          sw_optical_props_cnvcloudsByBand,  & ! RRTMGP DDT: shortwave convecive cloud optical properties
          sw_optical_props_MYNNcloudsByBand, & ! RRTMGP DDT: shortwave MYNN-EDMF PBL cloud optical properties
          sw_optical_props_precipByBand,     & ! RRTMGP DDT: shortwave precipitation optical properties
          sw_optical_props_aerosol             ! RRTMGP DDT: shortwave aerosol optical properties
-    real(kind_phys), dimension(:,:), intent(in) :: &
-         sfc_alb_nir_dir,                   & ! Surface albedo (direct) 
-         sfc_alb_nir_dif,                   & ! Surface albedo (diffuse)
-         sfc_alb_uvvis_dir,                 & ! Surface albedo (direct)
-         sfc_alb_uvvis_dif,                 & ! Surface albedo (diffuse)
-         toa_src_sw                           ! TOA incident spectral flux (W/m2)
 
     ! Outputs
     character(len=*), intent(out) :: &
@@ -119,17 +118,17 @@ contains
        bandlimits = sw_gas_props%get_band_lims_wavenumber()
        do iBand=1,sw_gas_props%get_nband()
           if (bandlimits(1,iBand) .lt. nIR_uvvis_bnd(1)) then
-             sfc_alb_dir(iBand,:) = sfc_alb_nir_dir(iBand,idxday(1:nday))
-             sfc_alb_dif(iBand,:) = sfc_alb_nir_dif(iBand,idxday(1:nday))
+             sfc_alb_dir(iBand,:) = sfc_alb_nir_dir(idxday(1:nday))
+             sfc_alb_dif(iBand,:) = sfc_alb_nir_dif(idxday(1:nday))
           endif
           if (bandlimits(1,iBand) .eq. nIR_uvvis_bnd(1)) then
-             sfc_alb_dir(iBand,:) = 0.5_kind_phys*(sfc_alb_nir_dir(iBand,idxday(1:nday)) + sfc_alb_uvvis_dir(iBand,idxday(1:nday)))
-             sfc_alb_dif(iBand,:) = 0.5_kind_phys*(sfc_alb_nir_dif(iBand,idxday(1:nday)) + sfc_alb_uvvis_dif(iBand,idxday(1:nday)))
+             sfc_alb_dir(iBand,:) = 0.5_kind_phys*(sfc_alb_nir_dir(idxday(1:nday)) + sfc_alb_uvvis_dir(idxday(1:nday)))
+             sfc_alb_dif(iBand,:) = 0.5_kind_phys*(sfc_alb_nir_dif(idxday(1:nday)) + sfc_alb_uvvis_dif(idxday(1:nday)))
              ibd = iBand
           endif
           if (bandlimits(1,iBand) .ge. nIR_uvvis_bnd(2)) then
-             sfc_alb_dir(iBand,:) = sfc_alb_uvvis_dir(iBand,idxday(1:nday))
-             sfc_alb_dif(iBand,:) = sfc_alb_uvvis_dif(iBand,idxday(1:nday))
+             sfc_alb_dir(iBand,:) = sfc_alb_uvvis_dir(idxday(1:nday))
+             sfc_alb_dif(iBand,:) = sfc_alb_uvvis_dif(idxday(1:nday))
           endif
        enddo
 
