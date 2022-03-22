@@ -24,7 +24,7 @@ contains
     ! Inputs
     integer,                      intent(in)    :: im
     logical,                      intent(in)    :: lsswr
-    realkind_phys), dimension(:), intent(in)    :: coszen
+    real(kind_phys), dimension(:), intent(in)   :: coszen
     
     ! Outputs
     integer,                      intent(out)   :: nday
