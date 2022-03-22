@@ -165,16 +165,9 @@ contains
        where(cld_reice .gt. radice_upr) cld_reice = radice_upr
     endif
     
-    ! Cloud-fraction. For mynnedmf, cld_frac is adjusted for precipitation here, otherwise
-    ! it passes through this interface. It is adjusted prior in sgscloudradpre. 
+    ! Cloud-fraction. For mynnedmf, cld_frac is already defined in sgscloudradpre. 
     if (do_mynnedmf .and. kdt .gt. 1) then
-       do iLay = 1, nLev
-          do iCol = 1, nCol
-             if (tracer(iCol,iLay,i_cldrain) > 1.0e-7 .OR. tracer(iCol,iLay,i_cldsnow)>1.0e-7) then
-                cld_frac(iCol,iLay) = tracer(iCol,iLay,i_cldtot)
-             endif
-          enddo
-       enddo
+       !already set in sgscloudradpre
     else
        cld_frac(1:nCol,1:nLev) = tracer(1:nCol,1:nLev,i_cldtot)
     endif
