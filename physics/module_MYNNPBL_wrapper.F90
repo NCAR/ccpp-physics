@@ -132,7 +132,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  dtsfc_cpl,dqsfc_cpl,            &
      &  recmol,                         &
      &  qke,qke_adv,Tsq,Qsq,Cov,        &
-     &  el_pbl,sh3d,exch_h,exch_m,      &
+     &  el_pbl,sh3d,sm3d,exch_h,exch_m, &
      &  dqke,qwt,qshear,qbuoy,qdiss,    &
      &  Pblh,kpbl,                      &
      &  qc_bl,qi_bl,cldfra_bl,          &
@@ -179,10 +179,10 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      logical, intent(in) :: cplflx
 
      !smoke/chem
-     !logical, intent(in) :: rrfs_smoke, rrfs_smoke, fire_turb
+     !logical, intent(in) :: mix_chem, fire_turb
      !integer, intent(in) :: nchem, ndvel, kdvel
      !for testing only:
-     logical, parameter :: rrfs_smoke=.false., mix_chem=.false., fire_turb=.false.
+     logical, parameter :: mix_chem=.false., fire_turb=.false.
      integer, parameter :: nchem=2, ndvel=2, kdvel=1
 
 ! NAMELIST OPTIONS (INPUT):
@@ -248,7 +248,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &        dqdt_cloud_droplet_num_conc, dqdt_ice_num_conc,            &
      &        dqdt_ozone, dqdt_water_aer_num_conc, dqdt_ice_aer_num_conc
       real(kind=kind_phys), dimension(:,:), intent(inout) ::             &
-     &        qke, qke_adv, EL_PBL, Sh3D,                                &
+     &        qke, qke_adv, EL_PBL, Sh3D, Sm3D,                          &
      &        qc_bl, qi_bl, cldfra_bl
      !These 10 arrays are only allocated when bl_mynn_output > 0
       real(kind=kind_phys), dimension(:,:), intent(inout) ::             &
@@ -366,7 +366,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
       FRP         = 0.
       EMIS_ANT_NO = 0.
       vdep = 0. ! hli for chem dry deposition, 0 temporarily
-      if (rrfs_smoke) then
+      if (mix_chem) then
          allocate ( chem3d(im,levs,nchem) )
          do k=1,levs
          do i=1,im
@@ -697,11 +697,10 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &             ust=ust,ch=ch,hfx=hfx,qfx=qfx,rmol=rmol,            &
      &             wspd=wspd,uoce=uoce,voce=voce,vdfg=vdfg,            & !input
      &             qke=QKE,qke_adv=qke_adv,                            & !output
-     &             bl_mynn_tkeadvect=bl_mynn_tkeadvect,sh3d=Sh3d,      &
+     &             sh3d=Sh3d,sm3d=Sm3d,                                &
 !chem/smoke
      &             nchem=nchem,kdvel=kdvel,ndvel=ndvel,                &
      &             Chem3d=chem3d,Vdep=vdep,                            &
-     &             rrfs_smoke=rrfs_smoke,                              &
      &             FRP=frp,EMIS_ANT_NO=emis_ant_no,                    &
      &             mix_chem=mix_chem,fire_turb=fire_turb,              &
 !-----
@@ -712,36 +711,37 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &             RQNIBLTEN=rqniblten,RQNWFABLTEN=RQNWFABLTEN,        & !output
      &             RQNIFABLTEN=RQNIFABLTEN,dozone=dqdt_ozone,          & !output
      &             EXCH_H=exch_h,EXCH_M=exch_m,                        & !output
-     &             pblh=pblh,KPBL=KPBL                                 & !output
-     &             ,el_pbl=el_pbl                                      & !output
-     &             ,dqke=dqke                                          & !output
-     &             ,qWT=qWT,qSHEAR=qSHEAR,qBUOY=qBUOY,qDISS=qDISS      & !output
-     &             ,bl_mynn_tkebudget=bl_mynn_tkebudget                & !input parameter
-     &             ,bl_mynn_cloudpdf=bl_mynn_cloudpdf                  & !input parameter
-     &             ,bl_mynn_mixlength=bl_mynn_mixlength                & !input parameter
-     &             ,icloud_bl=icloud_bl                                & !input parameter
-     &             ,qc_bl=qc_bl,qi_bl=qi_bl,cldfra_bl=cldfra_bl        & !output
-     &             ,closure=bl_mynn_closure,bl_mynn_edmf=bl_mynn_edmf  & !input parameter
-     &             ,bl_mynn_edmf_mom=bl_mynn_edmf_mom                  & !input parameter
-     &             ,bl_mynn_edmf_tke=bl_mynn_edmf_tke                  & !input parameter
-     &             ,bl_mynn_mixscalars=bl_mynn_mixscalars              & !input parameter
-     &             ,bl_mynn_output=bl_mynn_output                      & !input parameter
-     &             ,bl_mynn_cloudmix=bl_mynn_cloudmix                  & !input parameter
-     &             ,bl_mynn_mixqt=bl_mynn_mixqt                        & !input parameter
-     &             ,edmf_a=edmf_a,edmf_w=edmf_w,edmf_qt=edmf_qt        & !output
-     &             ,edmf_thl=edmf_thl,edmf_ent=edmf_ent,edmf_qc=edmf_qc &!output
-     &             ,sub_thl3D=sub_thl,sub_sqv3D=sub_sqv                &
-     &             ,det_thl3D=det_thl,det_sqv3D=det_sqv                &
-     &             ,nupdraft=nupdraft,maxMF=maxMF                      & !output
-     &             ,ktop_plume=ktop_plume                              & !output
-     &             ,spp_pbl=spp_pbl,pattern_spp_pbl=spp_wts_pbl        & !input
-     &             ,RTHRATEN=htrlw                                     & !input
-     &             ,FLAG_QI=flag_qi,FLAG_QNI=flag_qni                  & !input
-     &             ,FLAG_QC=flag_qc,FLAG_QNC=flag_qnc                  & !input
-     &             ,FLAG_QNWFA=FLAG_QNWFA,FLAG_QNIFA=FLAG_QNIFA        & !input
-     &             ,IDS=1,IDE=im,JDS=1,JDE=1,KDS=1,KDE=levs            & !input
-     &             ,IMS=1,IME=im,JMS=1,JME=1,KMS=1,KME=levs            & !input
-     &             ,ITS=1,ITE=im,JTS=1,JTE=1,KTS=1,KTE=levs)             !input
+     &             pblh=pblh,KPBL=KPBL,                                & !output
+     &             el_pbl=el_pbl,                                      & !output
+     &             dqke=dqke,                                          & !output
+     &             qWT=qWT,qSHEAR=qSHEAR,qBUOY=qBUOY,qDISS=qDISS,      & !output
+     &             bl_mynn_tkeadvect=bl_mynn_tkeadvect,                &
+     &             bl_mynn_tkebudget=bl_mynn_tkebudget,                & !input parameter
+     &             bl_mynn_cloudpdf=bl_mynn_cloudpdf,                  & !input parameter
+     &             bl_mynn_mixlength=bl_mynn_mixlength,                & !input parameter
+     &             icloud_bl=icloud_bl,                                & !input parameter
+     &             qc_bl=qc_bl,qi_bl=qi_bl,cldfra_bl=cldfra_bl,        & !output
+     &             closure=bl_mynn_closure,bl_mynn_edmf=bl_mynn_edmf,  & !input parameter
+     &             bl_mynn_edmf_mom=bl_mynn_edmf_mom,                  & !input parameter
+     &             bl_mynn_edmf_tke=bl_mynn_edmf_tke,                  & !input parameter
+     &             bl_mynn_mixscalars=bl_mynn_mixscalars,              & !input parameter
+     &             bl_mynn_output=bl_mynn_output,                      & !input parameter
+     &             bl_mynn_cloudmix=bl_mynn_cloudmix,                  & !input parameter
+     &             bl_mynn_mixqt=bl_mynn_mixqt,                        & !input parameter
+     &             edmf_a=edmf_a,edmf_w=edmf_w,edmf_qt=edmf_qt,        & !output
+     &             edmf_thl=edmf_thl,edmf_ent=edmf_ent,edmf_qc=edmf_qc,&!output
+     &             sub_thl3D=sub_thl,sub_sqv3D=sub_sqv,                &
+     &             det_thl3D=det_thl,det_sqv3D=det_sqv,                &
+     &             nupdraft=nupdraft,maxMF=maxMF,                      & !output
+     &             ktop_plume=ktop_plume,                              & !output
+     &             spp_pbl=spp_pbl,pattern_spp_pbl=spp_wts_pbl,        & !input
+     &             RTHRATEN=htrlw,                                     & !input
+     &             FLAG_QI=flag_qi,FLAG_QNI=flag_qni,                  & !input
+     &             FLAG_QC=flag_qc,FLAG_QNC=flag_qnc,                  & !input
+     &             FLAG_QNWFA=FLAG_QNWFA,FLAG_QNIFA=FLAG_QNIFA,        & !input
+     &             IDS=1,IDE=im,JDS=1,JDE=1,KDS=1,KDE=levs,            & !input
+     &             IMS=1,IME=im,JMS=1,JME=1,KMS=1,KME=levs,            & !input
+     &             ITS=1,ITE=im,JTS=1,JTE=1,KTS=1,KTE=levs)              !input
 
 
      ! POST MYNN (INTERSTITIAL) WORK:
