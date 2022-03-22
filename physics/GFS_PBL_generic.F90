@@ -37,9 +37,9 @@
       elseif (imp_physics == imp_physics_thompson) then
 ! Thompson
         if(ltaerosol) then
-          kk = 10
+          kk = 12
         else
-          kk = 7
+          kk = 9
         endif
 ! MG
       elseif (imp_physics == imp_physics_mg) then
