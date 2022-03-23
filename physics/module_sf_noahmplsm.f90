@@ -3967,6 +3967,10 @@ endif   ! croptype == 0
   real (kind=kind_phys), intent(inout) :: ustarx      ! friction velocity
   real (kind=kind_phys), intent(  out) :: csigmaf1    !
   real (kind=kind_phys)                :: czil1       ! canopy based czil
+  real (kind=kind_phys)                :: dlf          ! leaf dimension
+  real(kind=kind_phys)                 :: kbsigmaf1    !  kb^-1 for fully convered by vegetation
+  real(kind=kind_phys)                 :: sigmaa       !  kb^-1 for fully convered by vegetation
+
 
   real (kind=kind_phys) :: t, tdc       !kelvin to degree celsius with limit -50 to +50
 
@@ -4012,7 +4016,7 @@ endif   ! croptype == 0
         qsfc = 0.622*eair/(psfc-0.378*eair)  
 
 ! canopy height
-
+        dlf   =  parameters%dleaf                         !leaf dimension
         hcan = parameters%hvt
         uc = ur*log(hcan/z0m)/log(zlvl/z0m)
         uc = ur*log((hcan-zpd+z0m)/z0m)/log(zlvl/z0m)   ! mb: add zpd v3.7
@@ -4058,14 +4062,19 @@ endif   ! croptype == 0
         air = -emv*(1.+(1.-emv)*(1.-emg))*lwdn - emv*emg*sb*tg**4  
         cir = (2.-emv*(1.-emg))*emv*sb
 !
+       if(opt_sfc == 4) then
+
         gdx  = sqrt(garea1)
         snwd = snowh * 1000.0
+        fv   = ustarx                 !inout in sfcdif4
 
         if (snowh .gt. 0.1) then
           mnice = 1
         else
           mnice = 0
         endif
+
+       endif
 
 ! ---------------------------------------------------------------------------------------------
       loop1: do iter = 1, niterc    !  begin stability iteration
@@ -4087,6 +4096,10 @@ endif   ! croptype == 0
          else
            z0h = z0m*0.01
          endif
+        elseif (opt_trs == 4) then
+          sigmaa    = 1.0 - (0.5/(0.5+vaie))*exp(-vaie**2/8.0)
+          kbsigmaf1 = 16.4*(sigmaa*vaie**3)**(-0.25)*sqrt(dlf*ur/log((zlvl-zpd)/z0m))
+          z0h       = z0m/exp(kbsigmaf1)
        endif
     
 ! aerodyn resistances between heights zlvl and d+z0v
@@ -4525,6 +4538,10 @@ endif   ! croptype == 0
   real (kind=kind_phys) :: cev        !coefficients for ev as function of esat[ts]
   real (kind=kind_phys) :: cgh        !coefficients for st as function of ts
 
+  real(kind=kind_phys)  :: kbsigmaf0
+  real(kind=kind_phys)  :: reynb
+
+
 !jref:start
   real (kind=kind_phys) :: rahb2      !aerodynamic resistance for sensible heat 2m (s/m)
   real (kind=kind_phys) :: rawb2      !aerodynamic resistance for water vapor 2m (s/m)
@@ -4597,6 +4614,18 @@ endif   ! croptype == 0
         cir = emg*sb
         cgh = 2.*df(isnow+1)/dzsnso(isnow+1)
 
+        reynb = ustarx*z0m/(1.5e-05)
+
+        if (reynb .gt. 2.0) then
+           kbsigmaf0 = 2.46*reynb**0.25 - log(7.4)
+        else
+           kbsigmaf0 = - log(0.397)
+        endif
+
+        z0h = max(z0m/exp(kbsigmaf0),1.0e-6)
+
+     if (opt_sfc == 4) then
+         fv  = ustarx
          gdx = sqrt(garea1)
          snwd = snowh * 1000.0
 
@@ -4605,6 +4634,7 @@ endif   ! croptype == 0
          else
             mnice = 0
          endif
+      endif
 
 ! -----------------------------------------------------------------
       loop3: do iter = 1, niterb  ! begin stability iteration
@@ -4767,17 +4797,11 @@ endif   ! croptype == 0
 
 !jref:start; errors in original equation corrected.
 ! 2m air temperature
+
      if(opt_sfc == 1 .or. opt_sfc ==2 .or. opt_sfc == 3) then
        ehb2  = fv*vkc/log((2.+z0h)/z0h)
        ehb2  = fv*vkc/(log((2.+z0h)/z0h)-fh2)
        cq2b  = ehb2
-      endif
-
-      if(opt_sfc == 4) then
-        ehb2 = 1. /(max(1.,1./ch2b*wspdb))
-        cq2b = 1. /(max(1.,1./cq2b*wspdb))
-      endif
-
        if (ehb2.lt.1.e-5 ) then
          t2mb  = tgb
          q2b   = qsfc
@@ -4785,6 +4809,24 @@ endif   ! croptype == 0
          t2mb  = tgb - shb/(rhoair*cpair) * 1./ehb2
          q2b   = qsfc - evb/(lathea*rhoair)*(1./cq2b + rsurf)
        endif
+     end if
+
+    if(opt_sfc == 4) then ! consistent with veg
+
+         rahb2 = max(1.,1./(ch2b*wspdb))
+         ehb2 = 1./rahb2
+         cq2b = 1./max(1.,1./(cq2b*wspdb)) !
+
+      if (ehb2.lt.1.e-5 ) then
+         t2mb = tgb
+         q2b  = qsfc
+      else
+         t2mb = tgb - shb/(rhoair*cpair*ehb2)
+!       q2b  = qsfc - qfx/(rhoair*cq2b)
+        q2b   = qsfc - evb/(lathea*rhoair)*(1./cq2b + rsurf)
+     end if
+    endif ! 4
+
        if (parameters%urban_flag) q2b = qsfc
 
 ! update ch 

@@ -553,6 +553,7 @@
   real (kind=kind_phys)                            :: qfx
   real (kind=kind_phys)                            :: wspd1                 !  wind speed with all components
   real (kind=kind_phys)                            :: pblhx                 !  height of pbl
+   integer                                         :: mnice
 
   real (kind=kind_phys)                            :: rah_total             !
   real (kind=kind_phys)                            :: cah_total             !
@@ -736,6 +737,13 @@ do i = 1, im
         if(snow_level_ice(k) > 0.0 ) &
           snow_ice_frac_old(k) = snow_level_ice(k) /(snow_level_ice(k)+snow_level_liquid(k)) 
       end do
+
+
+       if (snow_depth .gt. 0.1 .or. vegetation_category  == isice_table ) then
+         mnice = 1
+       else    
+         mnice = 0
+       endif   
 
 !
 !  --- some outputs for atm model?
@@ -1067,7 +1075,7 @@ do i = 1, im
 
            call sfcdif4(i_location  ,j_location  ,uwind_forcing ,vwind_forcing ,           &
                         temperature_forcing, air_pressure_forcing ,air_pressure_surface  , &
-                        pblhx,gdx,z0_total,itime,snwdph(i),0,psi_opt,surface_temperature,  &
+                        pblhx,gdx,z0_total,itime,snwdph(i),mnice,psi_opt,surface_temperature,  &
                         spec_humidity_forcing,forcing_height,iz0tlnd,spec_humidity_surface,&
                         sensible_heat_total,qfx,cm(i),ch(i),ch2,cq2,rmol1(i),ustar1(i),    &
                         rb1(i),fm1(i),fh1(i),stress1(i),fm101(i),fh21(i),wspd1,flhc1(i),   &
