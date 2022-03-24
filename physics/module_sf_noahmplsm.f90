@@ -4688,6 +4688,7 @@ endif   ! croptype == 0
 
        cwpc = (cwp * vai * hcan * fhg)**0.5
 !       cwpc = (cwp*fhg)**0.5
+       cwpc = max(min(cwpc,5.0),1.0)
 
        tmp1 = exp( -cwpc*z0hg/hcan )
        tmp2 = exp( -cwpc*(z0h+zpd)/hcan )
