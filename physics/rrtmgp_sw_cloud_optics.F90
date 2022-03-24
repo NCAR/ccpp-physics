@@ -8,7 +8,7 @@ module rrtmgp_sw_cloud_optics
   use radiation_tools,          only: check_error_msg
   use netcdf
 #ifdef MPI
-  use mpi
+  use mpi_f08
 #endif
 
   implicit none
@@ -81,8 +81,9 @@ contains
          doGP_cldoptics_LUT     ! Use RRTMGP cloud-optics: LUTs?    
     integer, intent(inout) :: &
          nrghice               ! Number of ice-roughness categories
+    type(MPI_Comm), intent(in) :: &
+         mpicomm               ! MPI communicator
     integer, intent(in) :: &
-         mpicomm,            & ! MPI communicator
          mpirank,            & ! Current MPI rank
          mpiroot               ! Master MPI rank
     character(len=128),intent(in) :: &

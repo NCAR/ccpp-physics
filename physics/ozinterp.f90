@@ -149,8 +149,6 @@ contains
       real(kind=kind_phys) ozplout(npts,levozp,oz_coeff)
       real(kind=kind_phys) RINC(5), rjday
       integer jdow, jdoy, jday
-      real(4) rinc4(5)
-      integer w3kindreal,w3kindint
 !
       IDAT=0
       IDAT(1)=IDATE(4)
@@ -159,13 +157,7 @@ contains
       IDAT(5)=IDATE(1)
       RINC=0.
       RINC(2)=FHOUR
-      call w3kind(w3kindreal,w3kindint)
-      if(w3kindreal==4) then
-        rinc4=rinc
-        CALL W3MOVDAT(RINC4,IDAT,JDAT)
-      else
-        CALL W3MOVDAT(RINC,IDAT,JDAT)
-      endif
+      CALL W3MOVDAT(RINC,IDAT,JDAT)
 !
       jdow = 0
       jdoy = 0

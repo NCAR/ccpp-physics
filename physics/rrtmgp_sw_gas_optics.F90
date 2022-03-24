@@ -7,7 +7,7 @@ module rrtmgp_sw_gas_optics
   use mo_optical_props,       only: ty_optical_props_2str
   use netcdf
 #ifdef MPI
-  use mpi
+  use mpi_f08
 #endif
 
   implicit none
@@ -86,8 +86,9 @@ contains
     character(len=128),intent(in) :: &
          rrtmgp_root_dir,  & ! RTE-RRTMGP root directory
          rrtmgp_sw_file_gas  ! RRTMGP file containing coefficients used to compute gaseous optical properties
+    type(MPI_Comm),intent(in) :: &
+         mpicomm             ! MPI communicator
     integer,intent(in) :: &
-         mpicomm,          & ! MPI communicator
          mpirank,          & ! Current MPI rank
          mpiroot             ! Master MPI rank
     character(len=*), dimension(:), intent(in) :: &

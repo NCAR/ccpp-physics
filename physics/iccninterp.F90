@@ -23,6 +23,7 @@ contains
       integer, intent(in) :: me
       integer, intent(in) :: master
 !--- locals
+      integer :: ncerr
       integer :: i, n, k, ncid, varid,j,it
       real(kind=kind_phys), allocatable, dimension(:) :: hyam,hybm
       real(kind=4), allocatable, dimension(:,:,:) :: ci_ps
@@ -31,29 +32,29 @@ contains
       allocate (ciplin(lonscip,latscip,kcipl,timeci))
       allocate (ccnin(lonscip,latscip,kcipl,timeci))
       allocate (ci_pres(lonscip,latscip,kcipl,timeci))
-      call nf_open("cam5_4_143_NAAI_monclimo2.nc", NF90_NOWRITE, ncid)
-      call nf_inq_varid(ncid, "lat", varid)
-      call nf_get_var(ncid, varid, ci_lat)
-      call nf_inq_varid(ncid, "lon", varid)
-      call nf_get_var(ncid, varid, ci_lon)
-      call nf_inq_varid(ncid, "PS", varid)
-      call nf_get_var(ncid, varid, ci_ps)
-      call nf_inq_varid(ncid, "hyam", varid)
-      call nf_get_var(ncid, varid, hyam)
-      call nf_inq_varid(ncid, "hybm", varid)
-      call nf_get_var(ncid, varid, hybm)
-      call nf_inq_varid(ncid, "NAAI", varid)
-      call nf_get_var(ncid, varid, ciplin)
+      ncerr = nf90_open("cam5_4_143_NAAI_monclimo2.nc", NF90_NOWRITE, ncid)
+      ncerr = nf90_inq_varid(ncid, "lat", varid)
+      ncerr = nf90_get_var(ncid, varid, ci_lat)
+      ncerr = nf90_inq_varid(ncid, "lon", varid)
+      ncerr = nf90_get_var(ncid, varid, ci_lon)
+      ncerr = nf90_inq_varid(ncid, "PS", varid)
+      ncerr = nf90_get_var(ncid, varid, ci_ps)
+      ncerr = nf90_inq_varid(ncid, "hyam", varid)
+      ncerr = nf90_get_var(ncid, varid, hyam)
+      ncerr = nf90_inq_varid(ncid, "hybm", varid)
+      ncerr = nf90_get_var(ncid, varid, hybm)
+      ncerr = nf90_inq_varid(ncid, "NAAI", varid)
+      ncerr = nf90_get_var(ncid, varid, ciplin)
       do it = 1,timeci
         do k=1, kcipl
           ci_pres(:,:,k,it)=hyam(k)*1.e5+hybm(k)*ci_ps(:,:,it)
         end do
       end do
-      call nf_close(ncid)
-      call nf_open("cam5_4_143_NPCCN_monclimo2.nc", NF90_NOWRITE, ncid)
-      call nf_inq_varid(ncid, "NPCCN", varid)
-      call nf_get_var(ncid, varid, ccnin)
-      call nf_close(ncid)
+      ncerr = nf90_close(ncid)
+      ncerr = nf90_open("cam5_4_143_NPCCN_monclimo2.nc", NF90_NOWRITE, ncid)
+      ncerr = nf90_inq_varid(ncid, "NPCCN", varid)
+      ncerr = nf90_get_var(ncid, varid, ccnin)
+      ncerr = nf90_close(ncid)
 !---
       deallocate (hyam, hybm, ci_ps)
       if (me == master) then
@@ -145,8 +146,6 @@ contains
       real(kind=kind_phys) cipres(npts,kcipl), prsl(npts,lev)
       real(kind=kind_phys) RINC(5), rjday
       integer jdow, jdoy, jday
-      real(4) rinc4(5)
-      integer w3kindreal,w3kindint
 !
       IDAT=0
       IDAT(1)=IDATE(4)
@@ -155,13 +154,7 @@ contains
       IDAT(5)=IDATE(1)
       RINC=0.
       RINC(2)=FHOUR
-      call w3kind(w3kindreal,w3kindint)
-      if(w3kindreal==4) then
-        rinc4=rinc
-        CALL W3MOVDAT(RINC4,IDAT,JDAT)
-      else
-        CALL W3MOVDAT(RINC,IDAT,JDAT)
-      endif
+      CALL W3MOVDAT(RINC,IDAT,JDAT)
 !
       jdow = 0
       jdoy = 0

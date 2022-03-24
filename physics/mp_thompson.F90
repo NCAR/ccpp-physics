@@ -6,6 +6,7 @@
 !! This module contains the aerosol-aware Thompson microphysics scheme.
 module mp_thompson
 
+      use mpi_f08
       use machine, only : kind_phys
 
       use module_mp_thompson, only : thompson_init, mp_gt_driver, thompson_finalize, calc_effectRad
@@ -72,7 +73,7 @@ module mp_thompson
          real(kind_phys),           intent(in   ) :: phil(:,:)
          real(kind_phys),           intent(in   ) :: area(:)
          ! MPI information
-         integer,                   intent(in   ) :: mpicomm
+         type(MPI_Comm),            intent(in   ) :: mpicomm
          integer,                   intent(in   ) :: mpirank
          integer,                   intent(in   ) :: mpiroot
          ! Threading/blocking information
@@ -362,7 +363,7 @@ module mp_thompson
          integer,                   intent(in)    :: decfl
          ! MPI and block information
          integer,                   intent(in)    :: blkno
-         integer,                   intent(in)    :: mpicomm
+         type(MPI_Comm),            intent(in)    :: mpicomm
          integer,                   intent(in)    :: mpirank
          integer,                   intent(in)    :: mpiroot
          ! Extended diagnostic output

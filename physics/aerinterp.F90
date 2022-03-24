@@ -112,8 +112,6 @@ contains
       integer  IDAT(8),JDAT(8)
       real(kind=kind_phys) RINC(5), rjday
       integer jdow, jdoy, jday
-      real(4) rinc4(5)
-      integer w3kindreal,w3kindint      
 
       integer, allocatable  :: invardims(:)
 !
@@ -131,13 +129,7 @@ contains
       IDAT(5) = IDATE(1)
       RINC = 0.
       RINC(2) = FHOUR
-      call w3kind(w3kindreal,w3kindint)
-      if(w3kindreal == 4) then
-        rinc4 = rinc
-        CALL W3MOVDAT(RINC4,IDAT,JDAT)
-      else
-        CALL W3MOVDAT(RINC,IDAT,JDAT)
-      endif
+      CALL W3MOVDAT(RINC,IDAT,JDAT)
 !
       jdow = 0
       jdoy = 0
@@ -246,8 +238,6 @@ contains
       real(kind=kind_phys) prsl(npts,lev), aerpres(npts,levsaer)
       real(kind=kind_phys) RINC(5), rjday
       integer jdow, jdoy, jday
-      real(4) rinc4(5)
-      integer w3kindreal,w3kindint
 
 !
       IDAT = 0
@@ -257,13 +247,7 @@ contains
       IDAT(5) = IDATE(1)
       RINC = 0.
       RINC(2) = FHOUR
-      call w3kind(w3kindreal,w3kindint)
-      if(w3kindreal == 4) then
-        rinc4 = rinc
-        CALL W3MOVDAT(RINC4,IDAT,JDAT)
-      else
-        CALL W3MOVDAT(RINC,IDAT,JDAT)
-      endif
+      CALL W3MOVDAT(RINC,IDAT,JDAT)
 !
       jdow = 0
       jdoy = 0
@@ -393,6 +377,7 @@ contains
       use aerclm_def
       use netcdf
       integer, intent(in) :: iflip, nf, nt
+      integer      :: ncerr
       integer      :: ncid, varid, i,j,k,ii,klev
       character    :: fname*50, mn*2, vname*10
       real(kind=kind_io4),allocatable,dimension(:,:,:) :: buff
@@ -406,11 +391,11 @@ contains
 
       write(mn,'(i2.2)') nf 
       fname=trim("aeroclim.m"//mn//".nc")
-      call nf_open(fname , nf90_NOWRITE, ncid)
+      ncerr = nf90_open(fname , NF90_NOWRITE, ncid)
 
 ! ====> construct 3-d pressure array (Pa)
-      call nf_inq_varid(ncid, "DELP", varid)
-      call nf_get_var(ncid, varid, buff)
+      ncerr = nf90_inq_varid(ncid, "DELP", varid)
+      ncerr = nf90_get_var(ncid, varid, buff)
 
       do j = jamin, jamax
         do i = iamin, iamax
@@ -439,8 +424,8 @@ contains
 ! for GFS, iflip 0: toa to sfc; 1: sfc to toa
       DO ii = 1, ntrcaerm
         vname=trim(specname(ii))
-        call nf_inq_varid(ncid, vname, varid)
-        call nf_get_var(ncid, varid, buffx)
+        ncerr = nf90_inq_varid(ncid, vname, varid)
+        ncerr = nf90_get_var(ncid, varid, buffx)
 
         do j = jamin, jamax
           do k = 1, levsaer
@@ -462,7 +447,7 @@ contains
       ENDDO         ! ii-loop (ntracaerm)
 
 ! close the file
-      call nf_close(ncid)
+      ncerr = nf90_close(ncid)
       deallocate (buff, pres_tmp)
       deallocate (buffx)
       return

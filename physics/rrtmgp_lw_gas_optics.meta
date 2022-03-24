@@ -42,7 +42,7 @@
   long_name = MPI communicator
   units = index
   dimensions = ()
-  type = integer
+  type = MPI_Comm
   intent = in
 [minGPpres]
   standard_name = minimum_pressure_in_RRTMGP

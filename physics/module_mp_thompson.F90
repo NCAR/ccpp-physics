@@ -64,7 +64,7 @@ MODULE module_mp_thompson
       USE module_mp_radar
 
 #ifdef MPI
-      use mpi
+      use mpi_f08
 #endif
 
       IMPLICIT NONE
@@ -419,7 +419,7 @@ MODULE module_mp_thompson
       REAL:: t1_qs_me, t2_qs_me, t1_qg_me, t2_qg_me
 
 !..MPI communicator
-      INTEGER:: mpi_communicator
+      TYPE(MPI_Comm):: mpi_communicator
 
 !..Write tables with master MPI task after computing them in thompson_init
       LOGICAL:: thompson_table_writer
@@ -444,7 +444,8 @@ MODULE module_mp_thompson
       IMPLICIT NONE
 
       LOGICAL, INTENT(IN) :: is_aerosol_aware_in
-      INTEGER, INTENT(IN) :: mpicomm, mpirank, mpiroot
+      TYPE(MPI_Comm), INTENT(IN) :: mpicomm
+      INTEGER, INTENT(IN) :: mpirank, mpiroot
       INTEGER, INTENT(IN) :: threads
       CHARACTER(len=*), INTENT(INOUT) :: errmsg
       INTEGER,          INTENT(INOUT) :: errflg
@@ -1810,7 +1811,7 @@ MODULE module_mp_thompson
                           qgten1, qiten1, niten1, nrten1, ncten1, qcten1) 
 
 #ifdef MPI
-      use mpi
+      use mpi_f08
 #endif
       implicit none
 

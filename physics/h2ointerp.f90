@@ -146,8 +146,6 @@ contains
       real(kind=kind_phys) h2oplout(npts,levh2o,h2o_coeff)
       real(kind=kind_phys) rinc(5), rjday
       integer              jdow, jdoy, jday
-      real(4)              rinc4(5)
-      integer              w3kindreal, w3kindint
 !
       idat    = 0
       idat(1) = idate(4)
@@ -156,13 +154,7 @@ contains
       idat(5) = idate(1)
       rinc    = 0.
       rinc(2) = fhour
-      call w3kind(w3kindreal,w3kindint)
-      if(w3kindreal==4) then
-        rinc4 = rinc
-        CALL W3MOVDAT(RINC4,IDAT,JDAT)
-      else
-        CALL W3MOVDAT(RINC,IDAT,JDAT)
-      endif
+      CALL W3MOVDAT(RINC,IDAT,JDAT)
 !
       jdow = 0
       jdoy = 0

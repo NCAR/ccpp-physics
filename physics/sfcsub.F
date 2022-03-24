@@ -2740,7 +2740,7 @@
       use sfccyc_module, only : mdata
       implicit none
       integer lgrib,n,lskip,jret,j,ndata,lugi,jdim,idim,lugb,
-     &        iret, me,kpds5,kdata,i,w3kindreal,w3kindint
+     &        iret, me,kpds5,kdata,i
 !
       character*(*) fngrib
 !
@@ -2748,7 +2748,6 @@
       logical gaus
       real (kind=kind_io8) blno,blto
       real (kind=kind_io8), allocatable :: data8(:)
-      real (kind=kind_io4), allocatable :: data4(:)
 !
       logical*1, allocatable :: lbms(:)
 !
@@ -2807,20 +2806,8 @@
       jpds = kpds0
       lskip = -1
       kdata=idim*jdim
-      call w3kind(w3kindreal,w3kindint)
-      if (w3kindreal == 8) then
         call getgb(lugb,lugi,kdata,lskip,jpds,jgds,ndata,lskip,
      &             kpds,kgds,lbms,data8,jret)
-      else if (w3kindreal == 4) then
-        allocate(data4(1:idim*jdim))
-        call getgb(lugb,lugi,kdata,lskip,jpds,jgds,ndata,lskip,
-     &             kpds,kgds,lbms,data4,jret)
-        data8 = real(data4, kind=kind_io8)
-        deallocate(data4)
-      else
-        write(0,*)' FATAL ERROR: Invalid w3kindreal'
-        call abort
-      endif
 !
       if(jret == 0) then
         if(ndata.eq.0) then
@@ -7041,8 +7028,6 @@ cjfe
      &           196.5,227.5,258.0,288.5,319.0,349.5,380.5/
 !
       real (kind=kind_io8) fha(5)
-      real(4) fha4(5)
-      integer w3kindreal,w3kindint
       integer ida(8),jda(8),ivtyp, kpd7
 !
       real (kind=kind_io8), allocatable :: tsf(:,:),sno(:,:),
@@ -7134,13 +7119,7 @@ cjfe
           ida(2) = im
           ida(3) = id
           ida(5) = ih
-          call w3kind(w3kindreal,w3kindint)
-          if(w3kindreal == 4) then
-            fha4 = fha
-            call w3movdat(fha4,ida,jda)
-          else
-            call w3movdat(fha,ida,jda)
-          endif
+          call w3movdat(fha,ida,jda)
           jy = jda(1)
           jm = jda(2)
           jd = jda(3)
@@ -7210,13 +7189,7 @@ cjfe
       ida(2) = im
       ida(3) = id
       ida(5) = ih
-      call w3kind(w3kindreal,w3kindint)
-      if(w3kindreal == 4) then
-        fha4 = fha
-        call w3movdat(fha4,ida,jda)
-      else
-        call w3movdat(fha,ida,jda)
-      endif
+      call w3movdat(fha,ida,jda)
       jy     = jda(1)
       jm     = jda(2)
       jd     = jda(3)
@@ -8310,7 +8283,7 @@ cjfe
       implicit none
       integer imax,jmax,ijmax,i,j,n,jret,inttyp,iret,imsk,              &
      &        jmsk,len,lugb,kpds5,mon,lskip,lgrib,ndata,lugi,me,kmami   &
-     &,       jj,w3kindreal,w3kindint
+     &,       jj
       real (kind=kind_io8) wlon,elon,rnlat,dlat,dlon,rslat,blno,blto
 !
 !
@@ -8322,7 +8295,6 @@ cjfe
       real (kind=kind_io8) gdata(len), slmask(len)
       real (kind=kind_io8), allocatable :: data(:,:), rslmsk(:,:)
       real (kind=kind_io8), allocatable :: data8(:)
-      real (kind=kind_io4), allocatable :: data4(:)
       real (kind=kind_io8), allocatable :: rlngrb(:), rltgrb(:)
 !
       logical lmask, yr2kc, gaus, ijordr
@@ -8390,17 +8362,8 @@ cjfe
       jpds    = kpds0
       jpds(9) = mon
       if(jpds(9).eq.13) jpds(9) = 1
-      call w3kind(w3kindreal,w3kindint)
-      if (w3kindreal==8) then
-        call getgb(lugb,lugi,mdata,lskip,jpds,jgds,ndata,lskip,
-     &             kpds,kgds,lbms,data8,jret)
-      else if (w3kindreal==4) then
-        allocate(data4(1:mdata))
-        call getgb(lugb,lugi,mdata,lskip,jpds,jgds,ndata,lskip,
-     &             kpds,kgds,lbms,data4,jret)
-        data8 = real(data4, kind=kind_io8)
-        deallocate(data4)
-      endif
+      call getgb(lugb,lugi,mdata,lskip,jpds,jgds,ndata,lskip,
+     &           kpds,kgds,lbms,data8,jret)
       if (me .eq. 0) write(6,*) ' input grib file dates=',
      &              (kpds(i),i=8,11)
       if(jret.eq.0) then
@@ -8485,7 +8448,7 @@ cjfe
       integer nrepmx,nvalid,imo,iyr,idy,jret,ihr,nrept,lskip,lugi,      &
      &        lgrib,j,ndata,i,inttyp,jmax,imax,ijmax,ij,jday,len,iret,  &
      &        jmsk,imsk,ih,kpds5,lugb,iy,id,im,jh,jd,jdoy,jdow,jm,me,   &
-     &        monend,jy,iy4,kmami,iret2,jj,w3kindreal,w3kindint
+     &        monend,jy,iy4,kmami,iret2,jj
       real (kind=kind_io8) rnlat,rslat,wlon,elon,dlon,dlat,fh,blno,     &
      &                     rjday,blto
 !
@@ -8507,7 +8470,6 @@ cjfe
       real (kind=kind_io8) gdata(len), slmask(len)
       real (kind=kind_io8), allocatable :: data(:,:),rslmsk(:,:)
       real (kind=kind_io8), allocatable :: data8(:)
-      real (kind=kind_io4), allocatable :: data4(:)
       real (kind=kind_io8), allocatable :: rlngrb(:), rltgrb(:)
 !
       logical lmask, yr2kc, gaus, ijordr
@@ -8529,7 +8491,6 @@ cjfe
       data mjday/31,28,31,30,31,30,31,31,30,31,30,31/
 !
       real (kind=kind_io8) fha(5)
-      real(4) fha4(5)
       integer ida(8),jda(8)
 !
       allocate(data8(1:mdata))
@@ -8548,13 +8509,7 @@ cjfe
       ida(2)=im
       ida(3)=id
       ida(5)=ih
-      call w3kind(w3kindreal,w3kindint)
-      if(w3kindreal==4) then
-        fha4=fha
-        call w3movdat(fha4,ida,jda)
-      else
-        call w3movdat(fha,ida,jda)
-      endif
+      call w3movdat(fha,ida,jda)
       jy=jda(1)
       jm=jda(2)
       jd=jda(3)
@@ -8637,17 +8592,8 @@ cjfe
       jpds(10)=idy
 !     jpds(11)=ihr
       jpds(21)=(iyr-1)/100+1
-      call w3kind(w3kindreal,w3kindint)
-      if (w3kindreal == 8) then
-        call getgb(lugb,lugi,mdata,lskip,jpds,jgds,ndata,lskip,
-     &             kpds,kgds,lbms,data8,jret)
-      elseif (w3kindreal == 4) then
-        allocate (data4(1:mdata))
-        call getgb(lugb,lugi,mdata,lskip,jpds,jgds,ndata,lskip,
-     &             kpds,kgds,lbms,data4,jret)
-        data8 = real(data4, kind=kind_io8)
-        deallocate(data4)
-      endif
+      call getgb(lugb,lugi,mdata,lskip,jpds,jgds,ndata,lskip,
+     &           kpds,kgds,lbms,data8,jret)
       if (me .eq. 0) write(6,*) ' input grib file dates=',
      &              (kpds(i),i=8,11)
       if(jret.eq.0) then

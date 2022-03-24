@@ -1,5 +1,6 @@
 module mp_thompson_post
 
+   use mpi_f08
    use machine, only : kind_phys
 
    implicit none
@@ -66,7 +67,7 @@ contains
       real(kind_phys),                 intent(in)    :: ttendlim
       integer,                         intent(in)    :: kdt
       ! MPI information
-      integer,          intent(in   ) :: mpicomm
+      type(MPI_Comm),   intent(in   ) :: mpicomm
       integer,          intent(in   ) :: mpirank
       integer,          intent(in   ) :: mpiroot
       ! CCPP error handling

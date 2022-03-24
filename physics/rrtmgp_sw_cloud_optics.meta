@@ -70,7 +70,7 @@
   long_name = MPI communicator
   units = index
   dimensions = ()
-  type = integer
+  type = MPI_Comm
   intent = in
 [errmsg]
   standard_name = ccpp_error_message
