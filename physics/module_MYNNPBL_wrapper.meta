@@ -764,6 +764,14 @@
   type = real
   kind = kind_phys
   intent = inout
+[Sm3D]
+  standard_name = stability_function_for_momentum
+  long_name = stability function for momentum
+  units = none
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
 [exch_h]
   standard_name = atmosphere_heat_diffusivity_for_mynnpbl
   long_name = diffusivity for heat for MYNN PBL (defined for all mass levels)
