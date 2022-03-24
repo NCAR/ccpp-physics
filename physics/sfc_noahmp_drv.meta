@@ -65,20 +65,6 @@
   type = real
   intent = out
   kind = kind_phys
-[do_mynnsfclay]
-  standard_name = flag_for_mellor_yamada_nakanishi_niino_surface_layer_scheme
-  long_name = flag to activate MYNN surface layer
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[do_mynnedmf]
-  standard_name = flag_for_mellor_yamada_nakanishi_niino_pbl_scheme
-  long_name = flag to activate MYNN-EDMF
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -280,14 +266,6 @@
 [zf]
   standard_name = height_above_ground_at_lowest_model_layer
   long_name = layer 1 height above ground (not MSL)
-  units = m
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-[pblh]
-  standard_name = atmosphere_boundary_layer_thickness
-  long_name = PBL thickness
   units = m
   dimensions = (horizontal_loop_extent)
   type = real
@@ -763,37 +741,6 @@
   type = real
   kind = kind_phys
   intent = inout
-[rmol1]
-  standard_name = reciprocal_of_obukhov_length
-  long_name = one over obukhov length
-  units = m-1
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-[flhc1]
-  standard_name = surface_exchange_coefficient_for_heat
-  long_name = surface exchange coefficient for heat
-  units = W m-2 K-1
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-[flqc1]
-  standard_name = surface_exchange_coefficient_for_moisture
-  long_name = surface exchange coefficient for moisture
-  units = kg m-2 s-1
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-[do_mynnsfclay]
-  standard_name = flag_for_mellor_yamada_nakanishi_niino_surface_layer_scheme
-  long_name = flag to activate MYNN surface layer
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
 [snowxy]
   standard_name = number_of_snow_layers
   long_name = number of snow layers
