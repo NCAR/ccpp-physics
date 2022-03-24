@@ -112,7 +112,7 @@ MODULE module_sf_mynn
                                         !1: check input
                                         !2: everything - heavy I/O
   LOGICAL, PARAMETER :: compute_diag = .false.
-  LOGICAL, PARAMETER :: compute_flux = .false.  !shouldn't need compute 
+  LOGICAL, PARAMETER :: compute_flux = .true.  !shouldn't need compute 
                ! these in FV3. They will be written over anyway.
                ! Computing the fluxes here is leftover from the WRF world.
 

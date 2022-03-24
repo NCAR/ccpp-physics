@@ -2595,7 +2595,8 @@ endif
 ! 3feb21 - in RRFS testing (fv3-based), ref*0.5 gives too much direct
 !          evaporation. Therefore , it is replaced with ref*0.7.
         !fc=max(qmin,ref*0.5)
-        fc=max(qmin,ref*0.7)
+        !fc=max(qmin,ref*0.7)
+        fc=ref
         fex_fc=1.
       if((soilmois(1)+qmin) > fc .or. (qvatm-qvg) > 0.) then
         soilres = 1.

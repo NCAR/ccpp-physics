@@ -27,8 +27,9 @@ contains
 !> \section arg_table_GFS_surface_composites_pre_run Argument Table
 !! \htmlinclude GFS_surface_composites_pre_run.html
 !!
-   subroutine GFS_surface_composites_pre_run (im, flag_init, flag_restart, lkm, frac_grid,                                &
-                                 flag_cice, cplflx, cplice, cplwav2atm, landfrac, lakefrac, lakedepth, oceanfrac, frland, &
+   subroutine GFS_surface_composites_pre_run (im, xlat_d, xlon_d, flag_init, lsm_cold_start, lkm, frac_grid,                &
+                                 flag_cice, cplflx, cplice, cplwav2atm, lsm, lsm_ruc,                                     &
+                                 landfrac, lakefrac, lakedepth, oceanfrac, frland,                                        &
                                  dry, icy, lake, use_flake, wet, hice, cice, zorlo, zorll, zorli,                         &
                                  snowd,            snowd_lnd, snowd_ice, tprcp, tprcp_wat,                                &
                                  tprcp_lnd, tprcp_ice, uustar, uustar_wat, uustar_lnd, uustar_ice,                        &
@@ -40,10 +41,11 @@ contains
       implicit none
 
       ! Interface variables
-      integer,                             intent(in   ) :: im, lkm, kdt
-      logical,                             intent(in   ) :: flag_init, flag_restart, frac_grid, cplflx, cplice, cplwav2atm
+      integer,                             intent(in   ) :: im, lkm, kdt, lsm, lsm_ruc
+      logical,                             intent(in   ) :: flag_init, lsm_cold_start, frac_grid, cplflx, cplice, cplwav2atm
       logical, dimension(:),              intent(inout)  :: flag_cice
       logical,              dimension(:), intent(inout)  :: dry, icy, lake, use_flake, wet
+      real(kind=kind_phys), dimension(:), intent(in   )  :: xlat_d, xlon_d
       real(kind=kind_phys), dimension(:), intent(in   )  :: landfrac, lakefrac, lakedepth, oceanfrac
       real(kind=kind_phys), dimension(:), intent(inout)  :: cice, hice
       real(kind=kind_phys), dimension(:), intent(  out)  :: frland
@@ -201,12 +203,13 @@ contains
             endif
           endif
         enddo
-      endif
+      endif ! frac_grid
 
       do i=1,im
         tprcp_wat(i) = tprcp(i)
         tprcp_lnd(i) = tprcp(i)
         tprcp_ice(i) = tprcp(i)
+
         if (wet(i)) then                   ! Water
           uustar_wat(i) = uustar(i)
             tsfc_wat(i) = tsfco(i)
@@ -219,7 +222,7 @@ contains
         endif
         if (dry(i)) then                   ! Land
           uustar_lnd(i) = uustar(i)
-           weasd_lnd(i) = weasd(i)
+          if(lsm /= lsm_ruc) weasd_lnd(i) = weasd(i)
            tsurf_lnd(i) = tsfcl(i)
         ! DH*
         else
@@ -230,7 +233,7 @@ contains
         endif
         if (icy(i)) then                   ! Ice
           uustar_ice(i) = uustar(i)
-           weasd_ice(i) = weasd(i)
+          if(lsm /= lsm_ruc) weasd_ice(i) = weasd(i)
            tsurf_ice(i) = tisfc(i)
             ep1d_ice(i) = zero
             gflx_ice(i) = zero
@@ -279,7 +282,17 @@ contains
           endif
         enddo
       else
+       if(lsm /= lsm_ruc) then ! do not do snow initialization  with RUC lsm
         do i=1,im
+          !-- print ice point
+          !if ( (xlon_d(i) > 298.6) .and.  (xlon_d(i) < 298.7) .and. &
+          !   (xlat_d(i) >  68.6 ) .and.  (xlat_d(i) < 68.7 )) then
+          !  print *,'Composit weasd_ice(i),snowd_ice',kdt,i,xlat_d(i),xlon_d(i),weasd_ice(i),snowd_ice(i)
+          !endif
+          !if ( (xlon_d(i) > 284.35) .and.  (xlon_d(i) < 284.6) .and. &
+          ! (xlat_d(i) >  41.0 ) .and.  (xlat_d(i) < 41.2 )) then
+          !  print *,'Composit2  weasd_lnd(i),snowd_lnd',kdt,i,xlat_d(i),xlon_d(i),weasd_lnd(i),snowd_lnd(i)
+          !endif
           if (icy(i)) then
             if (kdt == 1 .or. (.not. cplflx .or. lakefrac(i) > zero)) then
               snowd_lnd(i) = zero
@@ -290,6 +303,7 @@ contains
             endif
           endif
         enddo
+       endif ! lsm/=lsm_ruc
       endif
 
 !     write(0,*)' minmax of ice snow=',minval(snowd_ice),maxval(snowd_ice)
@@ -644,6 +658,7 @@ contains
 
         do i=1,im
           if (islmsk(i) == 1) then
+          !-- land
             zorl(i)   = zorll(i)
             cd(i)     = cd_lnd(i)
             cdq(i)    = cdq_lnd(i)
@@ -669,6 +684,7 @@ contains
             hice(i)   = zero
             cice(i)   = zero
           elseif (islmsk(i) == 0) then
+          !-- water
             zorl(i)   = zorlo(i)
             cd(i)     = cd_wat(i)
             cdq(i)    = cdq_wat(i)
@@ -695,6 +711,7 @@ contains
             hice(i)   = zero
             cice(i)   = zero
           else ! islmsk(i) == 2
+          !-- ice
             zorl(i)   = zorli(i)
             cd(i)     = cd_ice(i)
             cdq(i)    = cdq_ice(i)
