@@ -157,6 +157,34 @@
   dimensions = ()
   type = integer
   intent = in
+[isftcflx]
+  standard_name = flag_for_thermal_roughness_lengths_over_water_in_mynnsfclay
+  long_name = flag for thermal roughness lengths over water in mynnsfclay
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[iz0tlnd]
+  standard_name = flag_for_thermal_roughness_lengths_over_land_in_mynnsfclay
+  long_name = flag for thermal roughness lengths over land in mynnsfclay
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[sfclay_compute_flux]
+  standard_name = flag_for_computing_surface_scalar_fluxes_in_mynnsfclay
+  long_name = flag for computing surface scalar fluxes in mynnsfclay
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[sfclay_compute_diag]
+  standard_name = flag_for_computing_surface_diagnostics_in_mynnsfclay
+  long_name = flag for computing surface diagnostics in mynnsfclay
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [delt]
   standard_name = timestep_for_physics
   long_name = time step for physics
