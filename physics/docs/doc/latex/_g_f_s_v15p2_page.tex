@@ -1,0 +1,287 @@
+\hypertarget{_g_f_s_v15p2_page_gfs1_suite_overview}{}\doxysubsection{Overview}\label{_g_f_s_v15p2_page_gfs1_suite_overview}
+Suite GFS\+\_\+v15p2 has the parameterizations used in the GFS v15 implemented operationally in June 2019.
+
+The GFS\+\_\+v15p2 physics suite uses the parameterizations in the following order\+:
+\begin{DoxyItemize}
+\item GFS\+\_\+\+RRTMG
+\item GFS\+\_\+\+SFCLYR
+\item GFS\+\_\+\+NSST
+\item GFS\+\_\+\+OCEAN
+\item GFS\+\_\+\+NOAH
+\item GFS\+\_\+\+SFCSICE
+\item GFS\+\_\+\+HEDMF
+\item GFS\+\_\+\+UGWP\+\_\+v0
+\item GFS\+\_\+\+RAYLEIGH
+\item GFS\+\_\+\+OZPHYS
+\item GFS\+\_\+\+H2\+OPHYS
+\item GFS\+\_\+\+SAMFdeep
+\item GFS\+\_\+\+SAMFshal
+\item GFDL\+\_\+cloud
+\end{DoxyItemize}\hypertarget{_g_f_s_v15p2_page_sdf_gfsv15p2}{}\doxysubsection{Suite Definition File}\label{_g_f_s_v15p2_page_sdf_gfsv15p2}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{<?xml version=\textcolor{stringliteral}{"{}1.0"{}} encoding=\textcolor{stringliteral}{"{}UTF-\/8"{}}?>}
+\DoxyCodeLine{}
+\DoxyCodeLine{<suite name=\textcolor{stringliteral}{"{}FV3\_GFS\_v15p2"{}} version=\textcolor{stringliteral}{"{}1"{}}>}
+\DoxyCodeLine{  <!-\/-\/ <init></init> -\/-\/>}
+\DoxyCodeLine{  <group name=\textcolor{stringliteral}{"{}fast\_physics"{}}>}
+\DoxyCodeLine{    <subcycle loop=\textcolor{stringliteral}{"{}1"{}}>}
+\DoxyCodeLine{      <scheme>fv\_sat\_adj</scheme>}
+\DoxyCodeLine{    </subcycle>}
+\DoxyCodeLine{  </group>}
+\DoxyCodeLine{  <group name=\textcolor{stringliteral}{"{}time\_vary"{}}>}
+\DoxyCodeLine{    <subcycle loop=\textcolor{stringliteral}{"{}1"{}}>}
+\DoxyCodeLine{      <scheme>GFS\_time\_vary\_pre</scheme>}
+\DoxyCodeLine{      <scheme>GFS\_rrtmg\_setup</scheme>}
+\DoxyCodeLine{      <scheme>GFS\_rad\_time\_vary</scheme>}
+\DoxyCodeLine{      <scheme>GFS\_phys\_time\_vary</scheme>}
+\DoxyCodeLine{    </subcycle>}
+\DoxyCodeLine{  </group>}
+\DoxyCodeLine{  <group name=\textcolor{stringliteral}{"{}radiation"{}}>}
+\DoxyCodeLine{    <subcycle loop=\textcolor{stringliteral}{"{}1"{}}>}
+\DoxyCodeLine{      <scheme>GFS\_suite\_interstitial\_rad\_reset</scheme>}
+\DoxyCodeLine{      <scheme>GFS\_rrtmg\_pre</scheme>}
+\DoxyCodeLine{      <scheme>rrtmg\_sw\_pre</scheme>}
+\DoxyCodeLine{      <scheme>rrtmg\_sw</scheme>}
+\DoxyCodeLine{      <scheme>rrtmg\_sw\_post</scheme>}
+\DoxyCodeLine{      <scheme>rrtmg\_lw\_pre</scheme>}
+\DoxyCodeLine{      <scheme>rrtmg\_lw</scheme>}
+\DoxyCodeLine{      <scheme>rrtmg\_lw\_post</scheme>}
+\DoxyCodeLine{      <scheme>GFS\_rrtmg\_post</scheme>}
+\DoxyCodeLine{    </subcycle>}
+\DoxyCodeLine{  </group>}
+\DoxyCodeLine{  <group name=\textcolor{stringliteral}{"{}physics"{}}>}
+\DoxyCodeLine{    <subcycle loop=\textcolor{stringliteral}{"{}1"{}}>}
+\DoxyCodeLine{      <scheme>GFS\_suite\_interstitial\_phys\_reset</scheme>}
+\DoxyCodeLine{      <scheme>GFS\_suite\_stateout\_reset</scheme>}
+\DoxyCodeLine{      <scheme>get\_prs\_fv3</scheme>}
+\DoxyCodeLine{      <scheme>GFS\_suite\_interstitial\_1</scheme>}
+\DoxyCodeLine{      <scheme>GFS\_surface\_generic\_pre</scheme>}
+\DoxyCodeLine{      <scheme>GFS\_surface\_composites\_pre</scheme>}
+\DoxyCodeLine{      <scheme>dcyc2t3</scheme>}
+\DoxyCodeLine{      <scheme>GFS\_surface\_composites\_inter</scheme>}
+\DoxyCodeLine{      <scheme>GFS\_suite\_interstitial\_2</scheme>}
+\DoxyCodeLine{    </subcycle>}
+\DoxyCodeLine{    <!-\/-\/ Surface iteration loop -\/-\/>}
+\DoxyCodeLine{    <subcycle loop=\textcolor{stringliteral}{"{}2"{}}>}
+\DoxyCodeLine{      <scheme>sfc\_diff</scheme>}
+\DoxyCodeLine{      <scheme>GFS\_surface\_loop\_control\_part1</scheme>}
+\DoxyCodeLine{      <scheme>sfc\_nst\_pre</scheme>}
+\DoxyCodeLine{      <scheme>sfc\_nst</scheme>}
+\DoxyCodeLine{      <scheme>sfc\_nst\_post</scheme>}
+\DoxyCodeLine{      <scheme>lsm\_noah</scheme>}
+\DoxyCodeLine{      <scheme>sfc\_sice</scheme>}
+\DoxyCodeLine{      <scheme>GFS\_surface\_loop\_control\_part2</scheme>}
+\DoxyCodeLine{    </subcycle>}
+\DoxyCodeLine{    <!-\/-\/ End of surface iteration loop -\/-\/>}
+\DoxyCodeLine{    <subcycle loop=\textcolor{stringliteral}{"{}1"{}}>                                                                          }
+\DoxyCodeLine{      <scheme>GFS\_surface\_composites\_post</scheme>                                               }
+\DoxyCodeLine{      <scheme>sfc\_diag</scheme>                                                                  }
+\DoxyCodeLine{      <scheme>sfc\_diag\_post</scheme>                                                             }
+\DoxyCodeLine{      <scheme>GFS\_surface\_generic\_post</scheme>                                                  }
+\DoxyCodeLine{      <scheme>GFS\_PBL\_generic\_pre</scheme>                                                       }
+\DoxyCodeLine{      <scheme>hedmf</scheme>                                                                     }
+\DoxyCodeLine{      <scheme>GFS\_PBL\_generic\_post</scheme>                                                      }
+\DoxyCodeLine{      <scheme>GFS\_GWD\_generic\_pre</scheme>                                                       }
+\DoxyCodeLine{      <scheme>cires\_ugwp</scheme>                                                                }
+\DoxyCodeLine{      <scheme>cires\_ugwp\_post</scheme>                                                           }
+\DoxyCodeLine{      <scheme>GFS\_GWD\_generic\_post</scheme>                                                      }
+\DoxyCodeLine{      <scheme>rayleigh\_damp</scheme>                                                             }
+\DoxyCodeLine{      <scheme>GFS\_suite\_stateout\_update</scheme>                                                 }
+\DoxyCodeLine{      <scheme>ozphys\_2015</scheme>                                                               }
+\DoxyCodeLine{      <scheme>h2ophys</scheme>                                                                   }
+\DoxyCodeLine{      <scheme>get\_phi\_fv3</scheme>                                                               }
+\DoxyCodeLine{      <scheme>GFS\_suite\_interstitial\_3</scheme>                                                  }
+\DoxyCodeLine{      <scheme>GFS\_DCNV\_generic\_pre</scheme>                                                      }
+\DoxyCodeLine{      <scheme>samfdeepcnv</scheme>                                                               }
+\DoxyCodeLine{      <scheme>GFS\_DCNV\_generic\_post</scheme>                                                     }
+\DoxyCodeLine{      <scheme>GFS\_SCNV\_generic\_pre</scheme>                                                      }
+\DoxyCodeLine{      <scheme>samfshalcnv</scheme>                                                               }
+\DoxyCodeLine{      <scheme>GFS\_SCNV\_generic\_post</scheme>                                                     }
+\DoxyCodeLine{      <scheme>GFS\_suite\_interstitial\_4</scheme>                                                  }
+\DoxyCodeLine{      <scheme>cnvc90</scheme>                                                                    }
+\DoxyCodeLine{      <scheme>GFS\_MP\_generic\_pre</scheme>                                                        }
+\DoxyCodeLine{      <scheme>gfdl\_cloud\_microphys</scheme>                                                      }
+\DoxyCodeLine{      <scheme>GFS\_MP\_generic\_post</scheme>                                                       }
+\DoxyCodeLine{      <scheme>maximum\_hourly\_diagnostics</scheme>                                                }
+\DoxyCodeLine{    </subcycle>                                                                                  }
+\DoxyCodeLine{  </group>                                                                                       }
+\DoxyCodeLine{  <group name=\textcolor{stringliteral}{"{}stochastics"{}}>                                                                     }
+\DoxyCodeLine{    <subcycle loop=\textcolor{stringliteral}{"{}1"{}}>                                                                          }
+\DoxyCodeLine{      <scheme>GFS\_stochastics</scheme>                                                           }
+\DoxyCodeLine{      <scheme>phys\_tend</scheme>                                                                 }
+\DoxyCodeLine{    </subcycle>                                                                                  }
+\DoxyCodeLine{  </group>                                                                                       }
+\DoxyCodeLine{  <!-\/-\/ <finalize></finalize> -\/-\/>                                                                 }
+\DoxyCodeLine{</suite>                                                                                         }
+
+\end{DoxyCode}
+\hypertarget{_g_f_s_v15p2_page_gfs15p2_nml_opt_des}{}\doxysubsection{Namelist}\label{_g_f_s_v15p2_page_gfs15p2_nml_opt_des}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\&gfs\_physics\_nml}
+\DoxyCodeLine{    cdmbgwd         = 3.5,0.25  }
+\DoxyCodeLine{    cal\_pre         = .false.}
+\DoxyCodeLine{    cnvcld          = .true.}
+\DoxyCodeLine{    cnvgwd          = .true.}
+\DoxyCodeLine{    debug           = .false.}
+\DoxyCodeLine{    do\_myjpbl       = .false.}
+\DoxyCodeLine{    do\_myjsfc       = .false.}
+\DoxyCodeLine{    do\_sfcperts     = .false.}
+\DoxyCodeLine{    do\_shum         = .false.}
+\DoxyCodeLine{    do\_skeb         = .false.}
+\DoxyCodeLine{    do\_sppt         = .false.}
+\DoxyCodeLine{    do\_tofd         = .false.}
+\DoxyCodeLine{    do\_ugwp         = .false.}
+\DoxyCodeLine{    do\_ysu          = .false.}
+\DoxyCodeLine{    dspheat         = .true.}
+\DoxyCodeLine{    effr\_in         = .true.}
+\DoxyCodeLine{    fhcyc           = 0.0}
+\DoxyCodeLine{    fhlwr           = 3600.0}
+\DoxyCodeLine{    fhswr           = 3600.0}
+\DoxyCodeLine{    fhzero          = 6.0}
+\DoxyCodeLine{    h2o\_phys        = .true.}
+\DoxyCodeLine{    hybedmf         = .true.}
+\DoxyCodeLine{    iaer            = 111}
+\DoxyCodeLine{    ialb            = 1}
+\DoxyCodeLine{    iau\_inc\_files   = \textcolor{stringliteral}{''}}
+\DoxyCodeLine{    ico2            = 2}
+\DoxyCodeLine{    iems            = 1}
+\DoxyCodeLine{    imfdeepcnv      = 2}
+\DoxyCodeLine{    imfshalcnv      = 2}
+\DoxyCodeLine{    imp\_physics     = 11}
+\DoxyCodeLine{    iopt\_alb        = 2}
+\DoxyCodeLine{    iopt\_btr        = 1}
+\DoxyCodeLine{    iopt\_crs        = 1}
+\DoxyCodeLine{    iopt\_dveg       = 2}
+\DoxyCodeLine{    iopt\_frz        = 1}
+\DoxyCodeLine{    iopt\_inf        = 1}
+\DoxyCodeLine{    iopt\_rad        = 1}
+\DoxyCodeLine{    iopt\_run        = 1}
+\DoxyCodeLine{    iopt\_sfc        = 1}
+\DoxyCodeLine{    iopt\_snf        = 4}
+\DoxyCodeLine{    iopt\_stc        = 1}
+\DoxyCodeLine{    iopt\_tbot       = 2}
+\DoxyCodeLine{    isol            = 2}
+\DoxyCodeLine{    isot            = 1}
+\DoxyCodeLine{    isubc\_lw        = 2}
+\DoxyCodeLine{    isubc\_sw        = 2}
+\DoxyCodeLine{    ivegsrc         = 1}
+\DoxyCodeLine{    ldiag3d         = .false.}
+\DoxyCodeLine{    ldiag\_ugwp      = .false.}
+\DoxyCodeLine{    lgfdlmprad      = .true.}
+\DoxyCodeLine{    lheatstrg       = .false.}
+\DoxyCodeLine{    lsm             = 1}
+\DoxyCodeLine{    lwhtr           = .true.}
+\DoxyCodeLine{    ncld            = 5}
+\DoxyCodeLine{    nsradar\_reset   = 3600}
+\DoxyCodeLine{    nst\_anl         = .true.}
+\DoxyCodeLine{    nstf\_name*      = 2, 1, 0, 0, 0 }
+\DoxyCodeLine{    oz\_phys         = .false.}
+\DoxyCodeLine{    oz\_phys\_2015    = .true.}
+\DoxyCodeLine{    pdfcld          = .false.}
+\DoxyCodeLine{    pre\_rad         = .false.}
+\DoxyCodeLine{    prslrd0         = 0.0}
+\DoxyCodeLine{    random\_clds     = .false.}
+\DoxyCodeLine{    redrag          = .true.}
+\DoxyCodeLine{    satmedmf        = .false.}
+\DoxyCodeLine{    shal\_cnv        = .true.}
+\DoxyCodeLine{    shinhong        = .false.}
+\DoxyCodeLine{    swhtr           = .true.}
+\DoxyCodeLine{    trans\_trac      = .true.}
+\DoxyCodeLine{    use\_ufo         = .true.}
+\DoxyCodeLine{    xkzm\_h          = 1.0}
+\DoxyCodeLine{    xkzm\_m          = 1.0                                                                                                    }
+\DoxyCodeLine{    xkzminv         = 0.3                                                                                                   }
+\DoxyCodeLine{/                                                              }
+\DoxyCodeLine{}
+\DoxyCodeLine{\&gfdl\_cloud\_microphysics\_nml}
+\DoxyCodeLine{     sedi\_transport = .true.}
+\DoxyCodeLine{     do\_sedi\_heat   = .false.}
+\DoxyCodeLine{     rad\_snow       = .true.}
+\DoxyCodeLine{     rad\_graupel    = .true.}
+\DoxyCodeLine{     rad\_rain       = .true.}
+\DoxyCodeLine{     const\_vi       = .F.}
+\DoxyCodeLine{     const\_vs       = .F.}
+\DoxyCodeLine{     const\_vg       = .F.}
+\DoxyCodeLine{     const\_vr       = .F.}
+\DoxyCodeLine{     vi\_max         = 1.}
+\DoxyCodeLine{     vs\_max         = 2.}
+\DoxyCodeLine{     vg\_max         = 12.}
+\DoxyCodeLine{     vr\_max         = 12.}
+\DoxyCodeLine{     qi\_lim         = 1.}
+\DoxyCodeLine{     prog\_ccn       = .false.}
+\DoxyCodeLine{     do\_qa          = .true.}
+\DoxyCodeLine{     fast\_sat\_adj   = .true.}
+\DoxyCodeLine{     tau\_l2v        = 225.}
+\DoxyCodeLine{     tau\_v2l        = 150.}
+\DoxyCodeLine{     tau\_g2v        = 900.}
+\DoxyCodeLine{     rthresh        = 1e-\/05 }
+\DoxyCodeLine{     dw\_land        = 0.16}
+\DoxyCodeLine{     dw\_ocean       = 0.10}
+\DoxyCodeLine{     ql\_gen         = 1.0e-\/3}
+\DoxyCodeLine{     ql\_mlt         = 1.0e-\/3}
+\DoxyCodeLine{     qi0\_crt        = 8.0E-\/5}
+\DoxyCodeLine{     qs0\_crt        = 1.0e-\/3}
+\DoxyCodeLine{     tau\_i2s        = 1000.}
+\DoxyCodeLine{     c\_psaci        = 0.05}
+\DoxyCodeLine{     c\_pgacs        = 0.01}
+\DoxyCodeLine{     rh\_inc         = 0.30}
+\DoxyCodeLine{     rh\_inr         = 0.30}
+\DoxyCodeLine{     rh\_ins         = 0.30}
+\DoxyCodeLine{     ccn\_l          = 300.}
+\DoxyCodeLine{     ccn\_o          = 100.}
+\DoxyCodeLine{     c\_paut         = 0.5}
+\DoxyCodeLine{     c\_cracw        = 0.8}
+\DoxyCodeLine{     use\_ppm        = .false.}
+\DoxyCodeLine{     use\_ccn        = .true.}
+\DoxyCodeLine{     mono\_prof      = .true.}
+\DoxyCodeLine{     z\_slope\_liq    = .true.}
+\DoxyCodeLine{     z\_slope\_ice    = .true.}
+\DoxyCodeLine{     de\_ice         = .false.}
+\DoxyCodeLine{     fix\_negative   = .true.}
+\DoxyCodeLine{     icloud\_f       = 1}
+\DoxyCodeLine{     mp\_time        = 90. }
+\DoxyCodeLine{}
+\DoxyCodeLine{/}
+\DoxyCodeLine{}
+\DoxyCodeLine{\&cires\_ugwp\_nml}
+\DoxyCodeLine{    knob\_ugwp\_azdir   = 2, 4, 4, 4}
+\DoxyCodeLine{    knob\_ugwp\_doaxyz  = 1}
+\DoxyCodeLine{    knob\_ugwp\_doheat  = 1}
+\DoxyCodeLine{    knob\_ugwp\_dokdis  = 1}
+\DoxyCodeLine{    knob\_ugwp\_effac   = 1, 1, 1, 1}
+\DoxyCodeLine{    knob\_ugwp\_ndx4lh  = 1}
+\DoxyCodeLine{    knob\_ugwp\_solver  = 2}
+\DoxyCodeLine{    knob\_ugwp\_source  = 1, 1, 0, 0}
+\DoxyCodeLine{    knob\_ugwp\_stoch   = 0, 0, 0, 0}
+\DoxyCodeLine{    knob\_ugwp\_version = 0}
+\DoxyCodeLine{    knob\_ugwp\_wvspec  = 1, 25, 25, 25}
+\DoxyCodeLine{    launch\_level      = 25}
+\DoxyCodeLine{/}
+\DoxyCodeLine{}
+\DoxyCodeLine{\&nam\_sfcperts}
+\DoxyCodeLine{    iseed\_sfc         = 0}
+\DoxyCodeLine{    nsfcpert          = 6}
+\DoxyCodeLine{    pertalb           = -\/999.0}
+\DoxyCodeLine{    pertlai           = -\/999.0}
+\DoxyCodeLine{    pertshc           = -\/999.0}
+\DoxyCodeLine{    pertvegf          = -\/999.0}
+\DoxyCodeLine{    pertz0            = -\/999.0}
+\DoxyCodeLine{    pertzt            = -\/999.0}
+\DoxyCodeLine{    sfc\_lscale        = 500000}
+\DoxyCodeLine{    sfc\_tau           = 21600}
+\DoxyCodeLine{    sppt\_land         = .false.}
+\DoxyCodeLine{/}
+
+\end{DoxyCode}
+
+
+
+\begin{DoxyItemize}
+\item nstf\+\_\+name = $[2,0,0,0,0]^1 [2,1,0,0,0]^2 $
+\begin{DoxyItemize}
+\item $^1$ NSST is on and coupled with spin up off
+\item $^2$ NSST is on and coupled with spin up on 
+\end{DoxyItemize}
+\end{DoxyItemize}

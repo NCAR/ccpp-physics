@@ -35,8 +35,6 @@ which facilitates model development and code maintenance. Additionally, we are l
    +  CCPP-compliant module: \ref samfdeepcnv
  - \subpage GFS_SAMFshal 
    +  CCPP-compliant module: \ref samfshalcnv
- - \subpage CSAW_scheme 
-   +  CCPP-compliant modules: cs_conv_pre / cs_conv / cs_conv_post / cs_conv_aw_adj
  - \subpage CU_GF 
    +  CCPP-compliant modules: \ref cu_gf_driver_pre / cu_gf_driver
 
@@ -47,6 +45,8 @@ which facilitates model development and code maintenance. Additionally, we are l
    +  CCPP-compliant modules: \ref m_micro_pre / m_micro / \ref m_micro_post
  - \subpage THOMPSON 
    +  CCPP-compliant modules: mp_thompson_pre / mp_thompson / mp_thompson_post
+ - \subpage NSSLMICRO
+   +  CCPP-compliant modules: \ref mp_nssl
 
 \b Ozone \b Photochemical \b Production \b and \b Loss
  - \subpage GFS_OZPHYS 
@@ -59,10 +59,15 @@ which facilitates model development and code maintenance. Additionally, we are l
 \b Gravity \b Wave \b Drag
  - \subpage GFS_UGWP_v0 
    +  CCPP-compliant modules: cires_ugwp / cires_ugwp_post
+ - \subpage GFS_UGWP_v1
+ - \subpage gsldrag
+ - \subpage drag_suite
 
 \b Surface \b Layer 
  - \subpage GFS_SFCLYR 
    +  CCPP-compliant module: sfc_diff
+ - \subpage SFC_MYNNSFL
+   +  CCPP-compliant module: mp_nssl
 
 \b Simplified \b Ocean \b and \b Sea \b Ice \b Representation
  - \subpage GFS_NSST 

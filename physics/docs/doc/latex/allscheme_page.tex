@@ -1,0 +1,184 @@
+\hypertarget{allscheme_page_allscheme_overview}{}\doxysubsection{Physical Parameterizations}\label{allscheme_page_allscheme_overview}
+In the CCPP, each parameterization is in its own modern Fortran module (i.\+e., CCPP-\/compliant; see rules for scheme to considered CCPP-\/compliant at \href{https://ccpp-techdoc.readthedocs.io/en/v5.0.0/CompliantPhysicsParams.html}{\texttt{ CCPP-\/\+Compliant Physics Parameterizations }}), which facilitates model development and code maintenance. Additionally, we are listing any pre-\/ and post-\/ interstitials that must accompany the scheme. While some individual parameterization can be invoked for the SCM, most host models will assemble the parameterizations in suites.
+
+{\bfseries{Radiation}} 
+\begin{DoxyItemize}
+\item GFS\+\_\+\+RRTMG
+\begin{DoxyItemize}
+\item CCPP-\/compliant modules\+: rrtmg\+\_\+sw\+\_\+pre / rrtmg\+\_\+sw / rrtmg\+\_\+sw\+\_\+post / rrtmg\+\_\+lw\+\_\+pre / rrtmg\+\_\+lw / rrtmg\+\_\+lw\+\_\+post / dcyc2t3 ~\newline
+
+\end{DoxyItemize}
+\item SGSCLOUD\+\_\+page
+\begin{DoxyItemize}
+\item CCPP-\/compliant module\+: sgscloud\+\_\+radpre
+\end{DoxyItemize}
+\end{DoxyItemize}
+
+{\bfseries{PBL}} {\bfseries{and}} {\bfseries{Turbulence}} 
+\begin{DoxyItemize}
+\item GFS\+\_\+\+HEDMF
+\begin{DoxyItemize}
+\item CCPP-\/compliant module\+: hedmf
+\end{DoxyItemize}
+\item GFS\+\_\+\+SATMEDMFVDIFQ
+\begin{DoxyItemize}
+\item CCPP-\/compliant module\+: satmedmfvdifq
+\end{DoxyItemize}
+\item MYNNEDMF
+\begin{DoxyItemize}
+\item CCPP-\/compliant module\+: mynnedmf\+\_\+wrapper
+\end{DoxyItemize}
+\end{DoxyItemize}
+
+{\bfseries{Land}} {\bfseries{Surface}} {\bfseries{Model}} 
+\begin{DoxyItemize}
+\item GFS\+\_\+\+NOAH
+\begin{DoxyItemize}
+\item CCPP-\/compliant module\+: lsm\+\_\+noah
+\end{DoxyItemize}
+\item RUCLSM
+\begin{DoxyItemize}
+\item CCPP-\/compliant module\+: lsm\+\_\+ruc
+\end{DoxyItemize}
+\item Noah\+MP
+\begin{DoxyItemize}
+\item CCPP-\/compliant module\+: noahmpdrv
+\end{DoxyItemize}
+\end{DoxyItemize}
+
+{\bfseries{Cumulus}} {\bfseries{Parameterizations}} 
+\begin{DoxyItemize}
+\item GFS\+\_\+\+SAMFdeep
+\begin{DoxyItemize}
+\item CCPP-\/compliant module\+: samfdeepcnv
+\end{DoxyItemize}
+\item GFS\+\_\+\+SAMFshal
+\begin{DoxyItemize}
+\item CCPP-\/compliant module\+: samfshalcnv
+\end{DoxyItemize}
+\item CU\+\_\+\+GF
+\begin{DoxyItemize}
+\item CCPP-\/compliant modules\+: cu\+\_\+gf\+\_\+driver\+\_\+pre / cu\+\_\+gf\+\_\+driver
+\end{DoxyItemize}
+\end{DoxyItemize}
+
+{\bfseries{Microphysics}} 
+\begin{DoxyItemize}
+\item GFDL\+\_\+cloud
+\begin{DoxyItemize}
+\item CCPP-\/compliant modules\+: fv\+\_\+sat\+\_\+adj / gfdl\+\_\+cloud\+\_\+microphys
+\end{DoxyItemize}
+\item CPT\+\_\+\+MG3
+\begin{DoxyItemize}
+\item CCPP-\/compliant modules\+: m\+\_\+micro\+\_\+pre / m\+\_\+micro / m\+\_\+micro\+\_\+post
+\end{DoxyItemize}
+\item THOMPSON
+\begin{DoxyItemize}
+\item CCPP-\/compliant modules\+: mp\+\_\+thompson\+\_\+pre / mp\+\_\+thompson / mp\+\_\+thompson\+\_\+post
+\end{DoxyItemize}
+\item NSSLMICRO
+\begin{DoxyItemize}
+\item CCPP-\/compliant modules\+: mp\+\_\+nssl
+\end{DoxyItemize}
+\end{DoxyItemize}
+
+{\bfseries{Ozone}} {\bfseries{Photochemical}} {\bfseries{Production}} {\bfseries{and}} {\bfseries{Loss}} 
+\begin{DoxyItemize}
+\item GFS\+\_\+\+OZPHYS
+\begin{DoxyItemize}
+\item CCPP-\/compliant module\+: ozphys\+\_\+2015
+\end{DoxyItemize}
+\end{DoxyItemize}
+
+{\bfseries{Water}} {\bfseries{Vapor}} {\bfseries{Photochemical}} {\bfseries{Production}} {\bfseries{and}} {\bfseries{Loss}} 
+\begin{DoxyItemize}
+\item GFS\+\_\+\+H2\+OPHYS
+\begin{DoxyItemize}
+\item CCPP-\/compliant module\+: h2ophys
+\end{DoxyItemize}
+\end{DoxyItemize}
+
+{\bfseries{Gravity}} {\bfseries{Wave}} {\bfseries{Drag}} 
+\begin{DoxyItemize}
+\item GFS\+\_\+\+UGWP\+\_\+v0
+\begin{DoxyItemize}
+\item CCPP-\/compliant modules\+: cires\+\_\+ugwp / cires\+\_\+ugwp\+\_\+post
+\end{DoxyItemize}
+\item GFS\+\_\+\+UGWP\+\_\+v1
+\item gsldrag
+\item drag\+\_\+suite
+\end{DoxyItemize}
+
+{\bfseries{Surface}} {\bfseries{Layer}} 
+\begin{DoxyItemize}
+\item GFS\+\_\+\+SFCLYR
+\begin{DoxyItemize}
+\item CCPP-\/compliant module\+: sfc\+\_\+diff
+\end{DoxyItemize}
+\item SFC\+\_\+\+MYNNSFL
+\begin{DoxyItemize}
+\item CCPP-\/compliant module\+: mp\+\_\+nssl
+\end{DoxyItemize}
+\end{DoxyItemize}
+
+{\bfseries{Simplified}} {\bfseries{Ocean}} {\bfseries{and}} {\bfseries{Sea}} {\bfseries{Ice}} {\bfseries{Representation}} 
+\begin{DoxyItemize}
+\item GFS\+\_\+\+NSST
+\begin{DoxyItemize}
+\item CCPP-\/compliant modules\+: sfc\+\_\+nst\+\_\+pre / sfc\+\_\+nst / sfc\+\_\+nst\+\_\+post
+\end{DoxyItemize}
+\item GFS\+\_\+\+OCEAN
+\begin{DoxyItemize}
+\item CCPP-\/compliant module\+: sfc\+\_\+ocean
+\end{DoxyItemize}
+\item GFS\+\_\+\+SFCSICE
+\begin{DoxyItemize}
+\item CCPP-\/compliant module\+: sfc\+\_\+sice
+\end{DoxyItemize}
+\end{DoxyItemize}
+
+{\bfseries{Others}} 
+\begin{DoxyItemize}
+\item GFS\+\_\+\+RAYLEIGH
+\begin{DoxyItemize}
+\item CCPP-\/compliant module\+: rayleigh\+\_\+damp
+\end{DoxyItemize}
+\end{DoxyItemize}
+
+The input information for the parameterizations includes the values of the gridbox mean prognostic variables (wind components, temperature, specific humidity, cloud fraction, water contents for cloud liquid, cloud ice, rain, snow, graupel, and ozone concentration), the provisional dynamical tendencies for the same variables and various surface fields, both fixed and variable.
+
+The time integration of the physics suites is based on the following\+:
+\begin{DoxyItemize}
+\item The tendencies from the different physical processes are computed by the parameterizations or derived in separate interstitial routines.
+\item The first part of the suite, comprised of the parameterizations for radiation, surface layer, surface (land, ocean, and sea ice), boundary layer, and Rayleigh damping, is computed using a hybrid of parallel and sequential splitting described in Donahue and Caldwell (2018) {\bfseries [donahue\+\_\+and\+\_\+caldwell\+\_\+2018]}, a method in which the various parameterizations use the same model state as input but are impacted by the preceding parameterizations. The tendencies from the various parameterizations are then added together and used to update the model state.
+\item The surface parameterizations (land, ocean and sea ice) are invoked twice in a subcycling loop, with the first time to create a guess, and the second time to produce the tendencies.
+\item The second part of the physics suite, comprised of the parameterizations of gravity wave physics, ozone, stratospheric water vapor, deep and shallow convection (if using), and microphysics, is computed using sequential splitting in the order listed above, in which the model state is updated between calls to the parameterization.
+\item If the in-\/core saturation adjustment is used ({\ttfamily do\+\_\+sat\+\_\+adj=}.true.), it is invoked at shorter timesteps along with the dynamical solver.
+\end{DoxyItemize}\hypertarget{allscheme_page_allsuite_overview}{}\doxysubsection{Physics Suites}\label{allscheme_page_allsuite_overview}
+There are two publicly supported host models that use CCPP v5\+: the UFS Weather Model used in the Short Range Weather Application (SRW App) and the CCPP Single Column Model (SCM). The SRW App supports the use of suites GFS\+\_\+v15p2 and RRFS\+\_\+v1alpha, while the SCM supports the use of suites GFS\+\_\+v15p2, GFS\+\_\+v16beta, RRFS\+\_\+v1alpha, csawmg and GSD\+\_\+v1. Suite GFS\+\_\+v15p2 is an operational suite that invokes the parameterizations used in the GFS v15 implemented operationally in June 2019. Other suites are experimental, and targeted for future UFS operational implementations. It should be noted that suite RRFS\+\_\+v1alpha does not include a convective parameterization scheme and is targeted for convective-\/allowing resolutions of 3-\/km grid spacing. The other suites are primarily targeted for medium-\/range weather and subseasonal-\/to-\/seasonal scales of grid spacing 13-\/km and coarser. The forcing datasets included in the CCPP SCM v5.\+0 public release were created by averaging observations and large-\/eddy simulations over seas that are too coarse to resolve convection. Therefore, best results will be obtained with be obtained with the CCPP SCM v5.\+0 when using suites that include parameterized convection.
+
+Table 1. Physics suite options included in this documentation.
+
+\tabulinesep=1mm
+\begin{longtabu}spread 0pt [c]{*{6}{|X[-1]}|}
+\hline
+\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ Physics suites   }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ GFS\+\_\+v15p2   }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ GFS\+\_\+v16beta   }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ csawmg   }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ GSD\+\_\+v1   }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ RRFS\+\_\+v1alpha    }\\\cline{1-6}
+\endfirsthead
+\hline
+\endfoot
+\hline
+\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ Physics suites   }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ GFS\+\_\+v15p2   }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ GFS\+\_\+v16beta   }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ csawmg   }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ GSD\+\_\+v1   }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ RRFS\+\_\+v1alpha    }\\\cline{1-6}
+\endhead
+HOST Model   &SCM, SRW   &SCM   &SCM   &SCM   &SCM, SRW    \\\cline{1-6}
+Deep Cu   &GFS\+\_\+\+SAMFdeep   &GFS\+\_\+\+SAMFdeep   &CSAW\+\_\+scheme   &CU\+\_\+\+GF   &{\itshape off}    \\\cline{1-6}
+Shallow Cu   &GFS\+\_\+\+SAMFshal   &GFS\+\_\+\+SAMFshal   &GFS\+\_\+\+SAMFshal   &MYNNEDMF and cu\+\_\+gf\+\_\+sh\+\_\+group   &MYNNEDMF    \\\cline{1-6}
+Microphysics   &GFDL\+\_\+cloud   &GFDL\+\_\+cloud   &CPT\+\_\+\+MG3   &THOMPSON   &THOMPSON    \\\cline{1-6}
+PBL/\+TURB   &GFS\+\_\+\+HEDMF   &GFS\+\_\+\+SATMEDMFVDIFQ   &GFS\+\_\+\+HEDMF   &MYNNEDMF   &MYNNEDMF    \\\cline{1-6}
+Radiation   &GFS\+\_\+\+RRTMG   &GFS\+\_\+\+RRTMG   &GFS\+\_\+\+RRTMG   &GFS\+\_\+\+RRTMG   &GFS\+\_\+\+RRTMG and SGSCLOUD\+\_\+page    \\\cline{1-6}
+Surface Layer   &GFS\+\_\+\+SFCLYR   &GFS\+\_\+\+SFCLYR   &GFS\+\_\+\+SFCLYR   &GFS\+\_\+\+SFCLYR   &GFS\+\_\+\+SFCLYR    \\\cline{1-6}
+Land   &GFS\+\_\+\+NOAH   &GFS\+\_\+\+NOAH   &GFS\+\_\+\+NOAH   &RUCLSM   &Noah\+MP    \\\cline{1-6}
+Gravity Wave Drag   &GFS\+\_\+\+UGWP\+\_\+v0   &GFS\+\_\+\+UGWP\+\_\+v0   &GFS\+\_\+\+UGWP\+\_\+v0   &GFS\+\_\+\+UGWP\+\_\+v0   &GFS\+\_\+\+UGWP\+\_\+v0    \\\cline{1-6}
+Ocean   &GFS\+\_\+\+NSST or GFS\+\_\+\+OCEAN   &GFS\+\_\+\+NSST or GFS\+\_\+\+OCEAN   &GFS\+\_\+\+NSST   &GFS\+\_\+\+NSST   &GFS\+\_\+\+NSST    \\\cline{1-6}
+Ozone   &GFS\+\_\+\+OZPHYS   &GFS\+\_\+\+OZPHYS   &GFS\+\_\+\+OZPHYS   &GFS\+\_\+\+OZPHYS   &GFS\+\_\+\+OZPHYS    \\\cline{1-6}
+Water Vapor   &GFS\+\_\+\+H2\+OPHYS   &GFS\+\_\+\+H2\+OPHYS   &GFS\+\_\+\+H2\+OPHYS   &GFS\+\_\+\+H2\+OPHYS   &GFS\+\_\+\+H2\+OPHYS   \\\cline{1-6}
+\end{longtabu}

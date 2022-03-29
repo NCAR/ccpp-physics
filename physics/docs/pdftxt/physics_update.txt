@@ -1,0 +1,7 @@
+
+#CCPP-Physics issue 881
+- Further updates in PBL and convection schemes for P8C physics
+  EMC: Jongil Han, Xiaqiong Zhou, Wei Li, Jiayi Peng, Fanglin Yang, Zhan Zhang, and Chunxi Zhang 
+  Overall features of updated PBL and convection schemes for P8C physics
+   - From the 3-km RRFS experiments, the current TKE-EDMF PBL scheme tends to overgrow PBL especially during late afternoon, producing unrealistic
+widespread popcorn-like precipitation. To reduce the PBL overgrowth
