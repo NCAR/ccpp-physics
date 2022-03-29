@@ -319,7 +319,7 @@ c  local variables and arrays
       do k = 1, kmpbl
         do i = 1, im
           if (cnvflg(i) .and. k < kpbl(i)) then
-             xmf(i,k) = sqrt(wu2(i,k))
+             xmf(i,k) = a1 * sqrt(wu2(i,k))
           endif
         enddo
       enddo
@@ -356,8 +356,7 @@ c  local variables and arrays
       do k = 1, kmpbl
         do i = 1, im
           if (cnvflg(i) .and. k < kpbl(i)) then
-             tem = max(a1, sigma(i))
-             xmf(i,k) = scaldfunc(i) * tem * xmf(i,k)
+             xmf(i,k) = scaldfunc(i) * xmf(i,k)
              dz   = zl(i,k+1) - zl(i,k)
              xmmx = dz / dt2
              xmf(i,k) = min(xmf(i,k),xmmx)

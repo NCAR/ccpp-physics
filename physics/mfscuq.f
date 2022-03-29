@@ -386,7 +386,7 @@ c
         do i = 1, im
           if(cnvflg(i) .and.
      &      (k >= mrad(i) .and. k < krad(i))) then
-              xmfd(i,k) = sqrt(wd2(i,k))
+              xmfd(i,k) = ra1(i) * sqrt(wd2(i,k))
           endif
         enddo
       enddo
@@ -424,8 +424,7 @@ c
         do i = 1, im
           if(cnvflg(i) .and.
      &       (k >= mrad(i) .and. k < krad(i))) then
-             tem = max(ra1(i), sigma(i))
-             xmfd(i,k) = scaldfunc(i) * tem * xmfd(i,k)
+             xmfd(i,k) = scaldfunc(i) * xmfd(i,k)
              dz   = zl(i,k+1) - zl(i,k)
              xmmx = dz / dt2
              xmfd(i,k) = min(xmfd(i,k),xmmx)

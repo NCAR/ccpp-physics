@@ -149,7 +149,6 @@
      &                     dh,      dhh,     dp,
      &                     dq,      dqsdp,   dqsdt,   dt,
      &                     dt2,     dtmax,   dtmin,
-!    &                     dxcrtas, dxcrtuf, dxcrtc0,
      &                     dxcrtas, dxcrtuf,
      &                     dv1h,    dv2h,    dv3h,
      &                     dz,      dz1,     e1,      edtmax,
@@ -165,7 +164,7 @@
      &                     w1,      w1l,     w1s,     w2,
      &                     w2l,     w2s,     w3,      w3l,
      &                     w3s,     w4,      w4l,     w4s,
-     &                     rho,     betaw,
+     &                     rho,     betaw,   tauadv,
      &                     xdby,    xpw,     xpwd,
 !    &                     xqrch,   mbdt,    tem,
      &                     xqrch,   tem,     tem1,    tem2,
@@ -179,8 +178,7 @@
 !     real(kind=kind_phys) aa1(im),     acrt(im),   acrtfct(im),
       real(kind=kind_phys) aa1(im),     tkemean(im),clamt(im),
      &                     ps(im),      del(im,km), prsl(im,km),
-!    &                     umean(im),   tauadv(im), gdx(im),
-     &                     gdx(im),
+     &                     umean(im),   advfac(im), gdx(im),
      &                     delhbar(im), delq(im),   delq2(im),
      &                     delqbar(im), delqev(im), deltbar(im),
      &                     deltv(im),   dtconv(im), edt(im),
@@ -236,7 +234,6 @@ c  physical parameters
       parameter(cinacrmx=-120.,cinacrmn=-80.)
       parameter(bet1=1.875,cd1=.506,f1=2.0,gam1=.5)
       parameter(betaw=.03,dxcrtas=8.e3,dxcrtuf=15.e3)
-!     parameter(dxcrtc0=9.e3)
 
 !
 !  local variables and arrays
@@ -254,7 +251,6 @@ c  variables for tracer wet deposition,
      &                     wc(im)
 !
 !  for updraft fraction & scale-aware function
-!     real(kind=kind_phys) scaldfunc(im), sigmagfm(im), xlamumean(im)
       real(kind=kind_phys) scaldfunc(im), sigmagfm(im)
 !
 c  cloud water
@@ -370,6 +366,7 @@ c
         xpwav(i)= 0.
         xpwev(i)= 0.
         vshear(i) = 0.
+        advfac(i) = 0.
         rainevap(i) = 0.
         gdx(i) = sqrt(garea(i))
       enddo
@@ -397,15 +394,6 @@ c
            c0(i) = c0s
         endif
       enddo
-!
-!>  - determine scale-aware rain conversion parameter decreasing with decreasing grid size
-!     do i=1,im
-!       if(gdx(i) < dxcrtc0) then
-!         tem = gdx(i) / dxcrtc0
-!         tem1 = tem**2
-!         c0(i) = c0(i) * tem1
-!       endif
-!     enddo
 !
 !>  - determine rain conversion parameter above the freezing level which exponentially decreases with decreasing temperature from Han et al.'s (2017) \cite han_et_al_2017 equation 8.
       do k = 1, km
@@ -1028,33 +1016,6 @@ c
        enddo
       enddo
       endif
-!
-! compute mean entrainment rate in subcloud layers below cloud base
-!
-!     do i= 1, im
-!       if(cnvflg(i)) then
-!         sumx(i) = 0.
-!         xlamumean(i) = 0.
-!       endif
-!     enddo
-!     do k = 1, km1
-!       do i = 1, im
-!         if(cnvflg(i)) then
-!           if(k >= kb(i) .and. k < kbcon(i)) then
-!             dz = zi(i,k+1) - zi(i,k)
-!             tem = 0.5 * (xlamue(i,k)+xlamue(i,k+1))
-!             xlamumean(i) = xlamumean(i) + tem * dz
-!             sumx(i) = sumx(i) + dz
-!           endif
-!         endif
-!       enddo
-!     enddo
-!
-!     do i= 1, im
-!       if(cnvflg(i)) then
-!         xlamumean(i) = xlamumean(i) / sumx(i)
-!       endif
-!     enddo
 c
 c  specify detrainment rate for the updrafts
 c
@@ -2796,42 +2757,40 @@ c
       endif
 !
 !> - Calculate advective time scale (tauadv) using a mean cloud layer wind speed.
-!     do i= 1, im
-!       if(cnvflg(i)) then
-!         sumx(i) = 0.
-!         umean(i) = 0.
-!       endif
-!     enddo
-!     do k = 2, km1
-!       do i = 1, im
-!         if(cnvflg(i)) then
-!           if(k >= kbcon1(i) .and. k < ktcon1(i)) then
-!             dz = zi(i,k) - zi(i,k-1)
-!             tem = sqrt(u1(i,k)*u1(i,k)+v1(i,k)*v1(i,k))
-!             umean(i) = umean(i) + tem * dz
-!             sumx(i) = sumx(i) + dz
-!           endif
-!         endif
-!       enddo
-!     enddo
-!     do i= 1, im
-!       if(cnvflg(i)) then
-!          umean(i) = umean(i) / sumx(i)
-!          umean(i) = max(umean(i), 1.)
-!          tauadv(i) = gdx(i) / umean(i)
-!       endif
-!     enddo
+      do i= 1, im
+        if(cnvflg(i)) then
+          sumx(i) = 0.
+          umean(i) = 0.
+        endif
+      enddo
+      do k = 2, km1
+        do i = 1, im
+          if(cnvflg(i)) then
+            if(k >= kbcon1(i) .and. k < ktcon1(i)) then
+              dz = zi(i,k) - zi(i,k-1)
+              tem = sqrt(u1(i,k)*u1(i,k)+v1(i,k)*v1(i,k))
+              umean(i) = umean(i) + tem * dz
+              sumx(i) = sumx(i) + dz
+            endif
+          endif
+        enddo
+      enddo
+      do i= 1, im
+        if(cnvflg(i)) then
+           umean(i) = umean(i) / sumx(i)
+           umean(i) = max(umean(i), 1.)
+           tauadv = gdx(i) / umean(i)
+           advfac(i) = tauadv / dtconv(i)
+           advfac(i) = min(advfac(i), 1.)
+        endif
+      enddo
 !> - From Han et al.'s (2017) \cite han_et_al_2017 equation 6, calculate cloud base mass flux as a function of the mean updraft velcoity for the grid sizes where the quasi-equilibrium assumption of Arakawa-Schubert is not valid any longer.
 !!  As discussed in Han et al. (2017) \cite han_et_al_2017 , when dtconv is larger than tauadv, the convective mixing is not fully conducted before the cumulus cloud is advected out of the grid cell. In this case, therefore, the cloud base mass flux is further reduced in proportion to the ratio of tauadv to dtconv.
       do i= 1, im
         if(cnvflg(i) .and. .not.asqecflg(i)) then
           k = kbcon(i)
           rho = po(i,k)*100. / (rd*to(i,k))
-!         tfac = tauadv(i) / dtconv(i)
-!         tfac = min(tfac, 1.)
-!         xmb(i) = tfac*betaw*rho*wc(i)
-!         xmb(i) = betaw*rho*wc(i)
-          xmb(i) = rho*wc(i)
+          xmb(i) = advfac(i)*betaw*rho*wc(i)
         endif
       enddo
 !> - For the cases where the quasi-equilibrium assumption of Arakawa-Schubert is valid, first calculate the large scale destabilization as in equation 5 of Pan and Wu (1995) \cite pan_and_wu_1995 :
@@ -2871,10 +2830,7 @@ c
 !!
 !!  Again when dtconv is larger than tauadv, the cloud base mass flux is further reduced in proportion to the ratio of tauadv to dtconv.
         if(asqecflg(i)) then
-!         tfac = tauadv(i) / dtconv(i)
-!         tfac = min(tfac, 1.)
-!         xmb(i) = -tfac * fld(i) / xk(i)
-          xmb(i) = -fld(i) / xk(i)
+          xmb(i) = -advfac(i) * fld(i) / xk(i)
         endif
       enddo
 !!
@@ -2888,19 +2844,6 @@ c
 !!
 !
 !> - For scale-aware parameterization, the updraft fraction (sigmagfm) is first computed as a function of the lateral entrainment rate at cloud base (see Han et al.'s (2017) \cite han_et_al_2017 equation 4 and 5), following the study by Grell and Freitas (2014) \cite grell_and_freitas_2014.
-      if(hwrf_samfdeep) then
-      do i = 1, im
-        if(cnvflg(i)) then
-          tem = min(max(xlamx(i), 7.e-5), 3.e-4)
-!         tem = min(max(xlamumean(i), 1.e-4), 1.e-3)
-          tem = 0.2 / tem
-          tem1 = 3.14 * tem * tem
-          sigmagfm(i) = tem1 / garea(i)
-          sigmagfm(i) = max(sigmagfm(i), 0.001)
-          sigmagfm(i) = min(sigmagfm(i), 0.999)
-        endif
-      enddo
-      else
       do i = 1, im
         if(cnvflg(i)) then
           tem = min(max(xlamue(i,kbcon(i)), 7.e-5), 3.e-4)
@@ -2911,7 +2854,6 @@ c
           sigmagfm(i) = min(sigmagfm(i), 0.999)
         endif
       enddo
-      endif
 !
 !> - Then, calculate the reduction factor (scaldfunc) of the vertical convective eddy transport of mass flux as a function of updraft fraction from the studies by Arakawa and Wu (2013) \cite arakawa_and_wu_2013 (also see Han et al.'s (2017) \cite han_et_al_2017 equation 1 and 2). The final cloud base mass flux with scale-aware parameterization is obtained from the mass flux when sigmagfm << 1, multiplied by the reduction factor (Han et al.'s (2017) \cite han_et_al_2017 equation 2).
       do i = 1, im
@@ -2922,12 +2864,7 @@ c
           else
             scaldfunc(i) = 1.0
           endif
-          if(asqecflg(i)) then
-            xmb(i) = xmb(i) * scaldfunc(i)
-          else
-            tem = max(betaw, sigmagfm(i))
-            xmb(i) = tem * xmb(i) * scaldfunc(i)
-          endif
+          xmb(i) = xmb(i) * scaldfunc(i)
           xmb(i) = min(xmb(i),xmbmax(i))
         endif
       enddo

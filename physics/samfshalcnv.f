@@ -111,7 +111,7 @@
      &                     es,      etah,    h1,      shevf,
 !    &                     evfact,  evfactl,
      &                     fact1,   fact2,   factor,  dthk,
-     &                     gamma,   pprime,  betaw,
+     &                     gamma,   pprime,  betaw,   tauadv,
      &                     qlk,     qrch,    qs,
      &                     rfact,   shear,   tfac,
      &                     val,     val1,    val2,
@@ -128,8 +128,7 @@
       real(kind=kind_phys) aa1(im),     cina(im),
      &                     tkemean(im), clamt(im),
      &                     ps(im),      del(im,km), prsl(im,km),
-!    &                     umean(im),   tauadv(im), gdx(im),
-     &                     gdx(im),
+     &                     umean(im),   advfac(im), gdx(im),
      &                     delhbar(im), delq(im),   delq2(im),
      &                     delqbar(im), delqev(im), deltbar(im),
 !    &                     deltv(im),   dtconv(im), edt(im),
@@ -180,7 +179,7 @@ c  physical parameters
       parameter(dthk=25.,sfclfac=0.2,rhcrt=0.75)
       parameter(cinpcrmx=180.,cinpcrmn=120.)
 !  shevf is an enhancing evaporation factor for shallow convection
-      parameter(cinacrmx=-120.,shevf=1.0)
+      parameter(cinacrmx=-120.,shevf=2.0)
       parameter(dtmax=10800.,dtmin=600.)
       parameter(bet1=1.875,cd1=.506,f1=2.0,gam1=.5)
       parameter(betaw=.03,dxcrt=15.e3,dxcrtc0=9.e3)
@@ -201,7 +200,6 @@ c  variables for tracer wet deposition,
      &                     wc(im)
 !
 !  for updraft fraction & scale-aware function
-!     real(kind=kind_phys) scaldfunc(im), sigmagfm(im), xlamumean(im)
       real(kind=kind_phys) scaldfunc(im), sigmagfm(im)
 !
 c  cloud water
@@ -296,6 +294,7 @@ c
         aa1(i)  = 0.
         cina(i) = 0.
 !       vshear(i) = 0.
+        advfac(i) = 0.
         gdx(i) = sqrt(garea(i))
         xmb(i) = 0.
           scaldfunc(i)=-1.0  ! wang initialized
@@ -904,33 +903,6 @@ c
         endif
       enddo
       endif    ! hwrf_samfshal
-!
-! compute mean entrainment rate in subcloud layers below cloud base
-!
-!     do i= 1, im
-!       if(cnvflg(i)) then
-!         sumx(i) = 0.
-!         xlamumean(i) = 0.
-!       endif
-!     enddo
-!     do k = 1, km1
-!       do i = 1, im
-!         if(cnvflg(i)) then
-!           if(k >= kb(i) .and. k < kbcon(i)) then
-!             dz = zi(i,k+1) - zi(i,k)
-!             tem = 0.5 * (xlamue(i,k)+xlamue(i,k+1))
-!             xlamumean(i) = xlamumean(i) + tem * dz
-!             sumx(i) = sumx(i) + dz
-!           endif
-!         endif
-!       enddo
-!     enddo
-!
-!     do i= 1, im
-!       if(cnvflg(i)) then
-!         xlamumean(i) = xlamumean(i) / sumx(i)
-!       endif
-!     enddo
 c
 c  determine updraft mass flux for the subcloud layers
 c
@@ -1821,31 +1793,33 @@ c
       enddo
 !
 !> - Calculate advective time scale (tauadv) using a mean cloud layer wind speed.
-!     do i= 1, im
-!       if(cnvflg(i)) then
-!         sumx(i) = 0.
-!         umean(i) = 0.
-!       endif
-!     enddo
-!     do k = 2, km1
-!       do i = 1, im
-!         if(cnvflg(i)) then
-!           if(k >= kbcon1(i) .and. k < ktcon1(i)) then
-!             dz = zi(i,k) - zi(i,k-1)
-!             tem = sqrt(u1(i,k)*u1(i,k)+v1(i,k)*v1(i,k))
-!             umean(i) = umean(i) + tem * dz
-!             sumx(i) = sumx(i) + dz
-!           endif
-!         endif
-!       enddo
-!     enddo
-!     do i= 1, im
-!       if(cnvflg(i)) then
-!          umean(i) = umean(i) / sumx(i)
-!          umean(i) = max(umean(i), 1.)
-!          tauadv(i) = gdx(i) / umean(i)
-!       endif
-!     enddo
+      do i= 1, im
+        if(cnvflg(i)) then
+          sumx(i) = 0.
+          umean(i) = 0.
+        endif
+      enddo
+      do k = 2, km1
+        do i = 1, im
+          if(cnvflg(i)) then
+            if(k >= kbcon1(i) .and. k < ktcon1(i)) then
+              dz = zi(i,k) - zi(i,k-1)
+              tem = sqrt(u1(i,k)*u1(i,k)+v1(i,k)*v1(i,k))
+              umean(i) = umean(i) + tem * dz
+              sumx(i) = sumx(i) + dz
+            endif
+          endif
+        enddo
+      enddo
+      do i= 1, im
+        if(cnvflg(i)) then
+           umean(i) = umean(i) / sumx(i)
+           umean(i) = max(umean(i), 1.)
+           tauadv = gdx(i) / umean(i)
+           advfac(i) = tauadv / dtconv(i)
+           advfac(i) = min(advfac(i), 1.)
+        endif
+      enddo
 c
 c  compute cloud base mass flux as a function of the mean
 c     updraft velcoity
@@ -1856,11 +1830,7 @@ c
         if(cnvflg(i)) then
           k = kbcon(i)
           rho = po(i,k)*100. / (rd*to(i,k))
-!         tfac = tauadv(i) / dtconv(i)
-!         tfac = min(tfac, 1.)
-!         xmb(i) = tfac*betaw*rho*wc(i)
-!         xmb(i) = betaw*rho*wc(i)
-          xmb(i) = rho*wc(i)
+          xmb(i) = advfac(i)*betaw*rho*wc(i)
         endif
       enddo
 !
@@ -1868,7 +1838,6 @@ c
       do i = 1, im
         if(cnvflg(i)) then
           tem = min(max(xlamue(i,kbcon(i)), 2.e-4), 6.e-4)
-!         tem = min(max(xlamumean(i), 2.e-4), 2.e-3)
           tem = 0.2 / tem
           tem1 = 3.14 * tem * tem
           sigmagfm(i) = tem1 / garea(i)
@@ -1886,8 +1855,7 @@ c
           else
             scaldfunc(i) = 1.0
           endif
-          tem = max(betaw, sigmagfm(i))
-          xmb(i) = tem * xmb(i) * scaldfunc(i)
+          xmb(i) = xmb(i) * scaldfunc(i)
           xmb(i) = min(xmb(i),xmbmax(i))
         endif
       enddo
