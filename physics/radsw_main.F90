@@ -1,4 +1,4 @@
-!>  \file radsw_main.f
+!>  \file radsw_main.F90
 !!  This file contains NCEP's modifications of the rrtmg-sw radiation
 !!  code from AER.
 

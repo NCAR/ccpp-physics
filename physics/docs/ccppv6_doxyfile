@@ -1,8 +1,9 @@
-# Doxyfile 1.8.11
+# Doxyfile 1.9.3
+
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = "CCPP Scientific Documentation"
-PROJECT_NUMBER         = ""
-PROJECT_BRIEF          = "v6.0.0"
+PROJECT_NUMBER         =
+PROJECT_BRIEF          = v6.0.0
 PROJECT_LOGO           = img/dtc_logo.png
 OUTPUT_DIRECTORY       = doc
 CREATE_SUBDIRS         = NO
@@ -18,22 +19,25 @@ STRIP_FROM_PATH        =
 STRIP_FROM_INC_PATH    =
 SHORT_NAMES            = NO
 JAVADOC_AUTOBRIEF      = NO
+JAVADOC_BANNER         = NO
 QT_AUTOBRIEF           = NO
 MULTILINE_CPP_IS_BRIEF = NO
+PYTHON_DOCSTRING       = YES
 INHERIT_DOCS           = YES
 SEPARATE_MEMBER_PAGES  = YES
 TAB_SIZE               = 4
 ALIASES                =
-TCL_SUBST              =
 OPTIMIZE_OUTPUT_FOR_C  = NO
 OPTIMIZE_OUTPUT_JAVA   = NO
 OPTIMIZE_FOR_FORTRAN   = YES
 OPTIMIZE_OUTPUT_VHDL   = NO
+OPTIMIZE_OUTPUT_SLICE  = NO
 EXTENSION_MAPPING      = .f=FortranFree \
                          .F=FortranFree \
-                         .F90=FortranFree  \
+                         .F90=FortranFree \
                          .f90=FortranFree
 MARKDOWN_SUPPORT       = YES
+TOC_INCLUDE_HEADINGS   = 5
 AUTOLINK_SUPPORT       = YES
 BUILTIN_STL_SUPPORT    = NO
 CPP_CLI_SUPPORT        = NO
@@ -46,35 +50,35 @@ INLINE_GROUPED_CLASSES = NO
 INLINE_SIMPLE_STRUCTS  = NO
 TYPEDEF_HIDES_STRUCT   = YES
 LOOKUP_CACHE_SIZE      = 0
+NUM_PROC_THREADS       = 1
+
+#---------------------------------------------------------------------------
+# Build related configuration options
+#---------------------------------------------------------------------------
+
 EXTRACT_ALL            = YES
 EXTRACT_PRIVATE        = YES
+EXTRACT_PRIV_VIRTUAL   = NO
 EXTRACT_PACKAGE        = YES
 EXTRACT_STATIC         = YES
 EXTRACT_LOCAL_CLASSES  = YES
 EXTRACT_LOCAL_METHODS  = YES
 EXTRACT_ANON_NSPACES   = YES
+RESOLVE_UNNAMED_PARAMS = YES
 HIDE_UNDOC_MEMBERS     = NO
 HIDE_UNDOC_CLASSES     = NO
 HIDE_FRIEND_COMPOUNDS  = NO
 HIDE_IN_BODY_DOCS      = NO
 INTERNAL_DOCS          = YES
-
 CASE_SENSE_NAMES       = NO
-
 HIDE_SCOPE_NAMES       = NO
-
 HIDE_COMPOUND_REFERENCE= NO
-
+SHOW_HEADERFILE        = YES
 SHOW_INCLUDE_FILES     = NO
-
 SHOW_GROUPED_MEMB_INC  = NO
-
 FORCE_LOCAL_INCLUDES   = NO
-
 INLINE_INFO            = YES
-
 SORT_MEMBER_DOCS       = NO
-
 SORT_BRIEF_DOCS        = NO
 SORT_MEMBERS_CTORS_1ST = NO
 SORT_GROUP_NAMES       = NO
@@ -85,70 +89,65 @@ GENERATE_TESTLIST      = YES
 GENERATE_BUGLIST       = YES
 GENERATE_DEPRECATEDLIST= YES
 ENABLED_SECTIONS       = YES
-MAX_INITIALIZER_LINES  = 30
+MAX_INITIALIZER_LINES  = 100
 SHOW_USED_FILES        = YES
 SHOW_FILES             = YES
 SHOW_NAMESPACES        = YES
 FILE_VERSION_FILTER    =
 LAYOUT_FILE            = ccpp_dox_layout.xml
 CITE_BIB_FILES         = library.bib
+
+#---------------------------------------------------------------------------
+# Configuration options related to warning and progress messages
+#---------------------------------------------------------------------------
 QUIET                  = NO
 WARNINGS               = YES
-WARN_IF_UNDOCUMENTED   = NO
+WARN_IF_UNDOCUMENTED   = YES
 WARN_IF_DOC_ERROR      = YES
+WARN_IF_INCOMPLETE_DOC = YES
 WARN_NO_PARAMDOC       = NO
 WARN_AS_ERROR          = NO
 WARN_FORMAT            =
-WARN_LOGFILE           =
+WARN_LOGFILE           = 
+
+#---------------------------------------------------------------------------
+# Configuration options related to the input files
+#---------------------------------------------------------------------------
+
 INPUT                  =  pdftxt/mainpage.txt     \
                           pdftxt/all_shemes_list.txt     \
-                          pdftxt/GFS_v16_suite.txt   \
-                          pdftxt/GFS_v16_p8_suite.txt   \
-                          pdftxt/RRFS_v1beta_suite.txt  \
-                          pdftxt/RRFS_v1nssl_suite.txt \
-                          pdftxt/RAP_suite.txt \
-                          pdftxt/HRRR_suite.txt    \
-###
+                          pdftxt/GFSv15p2_suite.txt \
+                          pdftxt/GFSv16beta_suite.txt \
+                          pdftxt/GSD_adv_suite.txt \
+#                          pdftxt/CPT_adv_suite.txt   \
+                          pdftxt/RRFS_v1alpha_suite.txt  \
                           pdftxt/RRFS_SGSCLOUD.txt   \
                           pdftxt/GFS_RRTMG.txt    \
-###Dustin                       pdftxt/GFS_RRTMGP.txt     \
                           pdftxt/GFS_SFCLYR.txt   \
                           pdftxt/MYNN_SFCLAYER.txt   \
                           pdftxt/GFS_NSST.txt     \
                           pdftxt/GFS_OCEAN.txt    \
                           pdftxt/GFS_NOAH.txt     \
                           pdftxt/GFS_SFCSICE.txt  \
-###????                          pdftxt/GFS_HEDMF.txt    \
+                          pdftxt/GFS_HEDMF.txt    \
                           pdftxt/GFS_SATMEDMFVDIFQ.txt    \
                           pdftxt/GFS_NOAHMP.txt    \
                           pdftxt/GFS_UGWPv0.txt   \
-#new
-#Toy                          pdftxt/GFS_UGWPv1.txt   \
-#Toy                          pdftxt/RAP_HRRR_DRAG.txt \
-#
-###UNSUPPORTED                          pdftxt/GFS_GWDPS.txt    \
+                          pdftxt/GFS_GWDPS.txt    \
                           pdftxt/GFS_OZPHYS.txt   \
                           pdftxt/GFS_H2OPHYS.txt  \
-####UNSUPPORTED                          pdftxt/GFS_RAYLEIGH.txt \
+                          pdftxt/GFS_RAYLEIGH.txt \
                           pdftxt/GFS_SAMFdeep.txt \
                           pdftxt/GFS_SAMFshal.txt \
-#Lisa                     pdftxt/CELLULAR_AUTOMATA.txt \
                           pdftxt/GFDL_cloud.txt   \
-###                          pdftxt/GFS_CALPRECIPTYPE.txt   \
-###                          pdftxt/rad_cld.txt             \
-##                          pdftxt/CPT_CSAW.txt            \
-###                          pdftxt/CPT_MG3.txt             \
+                          pdftxt/CPT_CSAW.txt            \
+                          pdftxt/CPT_MG3.txt             \
                           pdftxt/MYNN_EDMF.txt       \
                           pdftxt/CU_GF_deep.txt      \
                           pdftxt/RUCLSM.txt          \
                           pdftxt/THOMPSON.txt        \
-                          pdftxt/NSSLMICRO.txt      \
-###                          pdftxt/GFSphys_namelist.txt    \
-###                          pdftxt/GFS_STOCHY_PHYS.txt     \
                           pdftxt/suite_input.nml.txt    \
-### in-core MP
                         ../gfdl_fv_sat_adj.F90    \
-### time_vary
                         ../GFS_time_vary_pre.fv3.F90 \
                         ../GFS_rad_time_vary.fv3.F90  \
                         ../GFS_phys_time_vary.fv3.F90 \
@@ -160,19 +159,18 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../aerinterp.F90           \
                         ../iccn_def.F              \
                         ../iccninterp.F90          \
-                        ../sfcsub.F  \ 
+                        ../sfcsub.F  \
                         ../gcycle.F90  \
-### rrtmg
                         ../GFS_rrtmg_pre.F90             \
                         ../GFS_rrtmg_post.F90           \
                         ../GFS_rrtmg_setup.F90          \
                         ../rrtmg_sw_pre.F90              \
                         ../module_SGSCloud_RadPre.F90    \
                         ../module_SGSCloud_RadPost.F90   \
-                        ../radsw_main.f                  \
+                        ../radsw_main.F90                \
                         ../rrtmg_sw_post.F90             \
                         ../rrtmg_lw_pre.F90              \
-                        ../radlw_main.f                  \
+                        ../radlw_main.F90                  \
                         ../rrtmg_lw_post.F90             \
                         ../radiation_aerosols.f          \
                         ../radiation_astronomy.f         \
@@ -183,13 +181,31 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../radlw_datatb.f \
                         ../radsw_param.f  \
                         ../radsw_datatb.f  \
+                        ../GFS_rrtmgp_cloud_overlap_pre.F90       \
+                        ../GFS_rrtmgp_gfdlmp_pre.F90    \
+                        ../GFS_rrtmgp_lw_post.F90      \
+                        ../GFS_rrtmgp_pre.F90          \
+                        ../GFS_rrtmgp_setup.F90       \
+                        ../GFS_rrtmgp_sw_post.F90      \
+                        ../GFS_rrtmgp_sw_pre.F90       \
+#                        ../GFS_rrtmgp_thompsonmp_pre.F90      \
+#                        ../GFS_rrtmgp_zhaocarr_pre.F90     \
+                         ../rrtmgp_lw_aerosol_optics.F90    \
+                        ../rrtmgp_lw_cloud_optics.F90      \
+                        ../rrtmgp_lw_cloud_sampling.F90    \
+                        ../rrtmgp_lw_gas_optics.F90        \
+                        ../rrtmgp_lw_pre.F90              \
+                        ../rrtmgp_lw_rte.F90             \
+                        ../rrtmgp_sampling.F90           \
+                        ../rrtmgp_sw_aerosol_optics.F90    \
+                        ../rrtmgp_sw_cloud_optics.F90   \
+                        ../rrtmgp_sw_cloud_sampling.F90    \
+                        ../rrtmgp_sw_gas_optics.F90      \
+                        ../rrtmgp_sw_rte.F90        \
                         ../dcyc2.f        \
-### Land Surface
                         ../sfc_diff.f \
-#mynn-sfc
                         ../module_MYNNSFC_wrapper.F90 \
                         ../module_sf_mynn.F90         \
-
                         ../sfc_nst.f                  \
                         ../sfc_ocean.F                \
                         ../module_nst_model.f90       \
@@ -199,90 +215,51 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../sflx.f                     \
                         ../namelist_soilveg.f   \
                         ../set_soilveg.f        \
-                        ../sfc_noahmp_drv.f           \
+                        ../sfc_noahmp_drv.F90           \
                         ../module_sf_noahmplsm.f90    \
                         ../module_sf_noahmp_glacier.f90  \
                         ../noahmp_tables.f90          \
                         ../GFS_surface_generic.F90   \
-### Sea Ice Surface
                         ../sfc_sice.f \
-### PBL    ????
                         ../moninedmf.f \
                         ../mfpbl.f \
                         ../tridi.f \
-### satmedmf
-###                     ../satmedmfvdif.F \
                         ../satmedmfvdifq.F  \
                         ../mfpbltq.f         \
                         ../mfscuq.f          \
                         ../tridi.f          \
-### Orographic Gravity Wave
                         ../GFS_GWD_generic.F90 \
-#Unified_ugwp
-                        ../unified_ugwp.F90    \
-                        ../cires_ugwp_module.F90   \
-                        ../drag_suite.F90    \
-                        ../gwdps.f         \
-                 
-#UWGP1
-#                        ../ugwpv1_gsldrag.F90  \
-#                        ../cires_ugwpv1_initialize.F90     \
-#                        ../cires_ugwpv1_oro.F90        \
-#                        ../cires_ugwpv1_sporo.F90     \
-#                        ../cires_ugwpv1_module.F90     \
-#                        ../cires_ugwpv1_solv2.F90      \
-#                        ../cires_ugwpv1_triggers.F90    \
-#drag_suite for RAP/HRRR
-                        ../drag_suite.F90    \
-#UGWPv0
                         ../cires_ugwp.F90    \
+                        ../unified_ugwp.F90         \
+                        ../drag_suite.F90           \
+                        ../cires_tauamf_data.F90    \
+                        ../cires_ugwp.F90           \
+                        ../cires_ugwp.meta             \
+                        ../cires_ugwp_initialize.F90     \
+                        ../cires_ugwp_module.F90       \
+                        ../cires_ugwp_post.F90         \
+                        ../cires_ugwp_post.meta        \
+                        ../cires_ugwp_triggers.F90     \
+                        ../cires_ugwpv1_initialize.F90 \
+                        ../cires_ugwpv1_module.F90     \
+                        ../cires_ugwpv1_oro.F90        \
+                        ../cires_ugwpv1_solv2.F90      \
+                        ../cires_ugwpv1_sporo.F90      \
+                        ../cires_ugwpv1_triggers.F90   \
                         ../gwdps.f \
                         ../ugwp_driver_v0.F \
-                        ../cires_ugwp_triggers.F90 \
-                        ../cires_ugwp_module.F90 \
-                        ../cires_ugwp_utils.F90 \
-                        ../cires_ugwp_solvers.F90 \
-                        ../cires_ugwp_post.F90   \
-###                        ../cires_ugwp_initialize.F90 \
-                        ../cires_vert_wmsdis.F90 \
-                        ../cires_vert_orodis.F90 \
-                        ../cires_vert_lsatdis.F90  \
-### Rayleigh Dampling
-####                        ../rayleigh_damp.f  \
-### Prognostic Ozone
                         ../ozphys_2015.f \
-###                        ../ozphys.f  \
-### stratospheric h2o
                         ../h2ophys.f \
-### Deep Convection
                         ../samfdeepcnv.f \
-### Convective Gravity Wave
-###                        ../gwdc.f \
-### Shallow Convection
+                        ../gwdc.f \
                         ../samfshalcnv.f \
                         ../cnvc90.f \
                         ../module_bfmicrophysics.f \
-### GFDL cloud MP 
                         ../gfdl_cloud_microphys.F90 \
                         ../module_gfdl_cloud_microphys.F90 \
                         ../GFS_MP_generic.F90 \
                         ../calpreciptype.f90   \
-### stochy
                         ../GFS_stochastics.F90   \
-###                     ../surface_perturbation.F90 \
-###                     ../../stochastic_physics/stochastic_physics.F90  \
-### CPT
-#                        ../m_micro.F90       \
-#                        ../m_micro_interstitial.F90    \
-###                        ../micro_mg2_0.F90   \
-#                        ../micro_mg3_0.F90   \
-#                        ../micro_mg_utils.F90 \
-#                        ../cldmacro.F        \
-#                        ../aer_cloud.F       \
-#                        ../cldwat2m_micro.F  \
-#                        ../wv_saturation.F   \
-#                        ../cs_conv_aw_adj.F90 \
-#                        ../cs_conv.F90       \
                         ../cu_gf_driver.F90 \
                         ../cu_gf_driver_pre.F90 \
                         ../cu_gf_deep.F90   \
@@ -302,17 +279,12 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../module_mp_thompson.F90 \
                         ../module_mp_radar.F90 \
                         ../mp_thompson_post.F90  \
-#NSSL MP
-                        ../mp_nssl.F90    \
-                        ../module_mp_nssl_2mom.F90    \
-                     
-### utils
-                        ../phys_tend.F90    \
                         ../funcphys.f90     \
                         ../physparam.f      \
                         ../physcons.F90     \
                         ../radcons.f90      \
-                        ../mersenne_twister.f   
+                        ../mersenne_twister.f
+
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.f \
                          *.F \
@@ -334,8 +306,13 @@ FILTER_PATTERNS        =
 FILTER_SOURCE_FILES    = NO
 FILTER_SOURCE_PATTERNS =
 USE_MDFILE_AS_MAINPAGE =
+
+#---------------------------------------------------------------------------
+# Configuration options related to source browsing
+#---------------------------------------------------------------------------
+
 SOURCE_BROWSER         = NO
-INLINE_SOURCES         = NO
+INLINE_SOURCES         = YES
 STRIP_CODE_COMMENTS    = YES
 REFERENCED_BY_RELATION = YES
 REFERENCES_RELATION    = YES
@@ -343,11 +320,22 @@ REFERENCES_LINK_SOURCE = YES
 SOURCE_TOOLTIPS        = YES
 USE_HTAGS              = NO
 VERBATIM_HEADERS       = YES
-#CLANG_ASSISTED_PARSING = NO
-#CLANG_OPTIONS          =
+CLANG_ASSISTED_PARSING = NO
+CLANG_ADD_INC_PATHS    = YES
+CLANG_OPTIONS          =
+CLANG_DATABASE_PATH    =
+
+#---------------------------------------------------------------------------
+# Configuration options related to the alphabetical class index
+#---------------------------------------------------------------------------
+
 ALPHABETICAL_INDEX     = NO
-COLS_IN_ALPHA_INDEX    = 5
 IGNORE_PREFIX          =
+
+#---------------------------------------------------------------------------
+# Configuration options related to the HTML output
+#---------------------------------------------------------------------------
+
 GENERATE_HTML          = YES
 HTML_OUTPUT            = html
 HTML_FILE_EXTENSION    = .html
@@ -360,10 +348,12 @@ HTML_COLORSTYLE_HUE    = 220
 HTML_COLORSTYLE_SAT    = 100
 HTML_COLORSTYLE_GAMMA  = 80
 HTML_TIMESTAMP         = NO
+HTML_DYNAMIC_MENUS     = YES
 HTML_DYNAMIC_SECTIONS  = NO
 HTML_INDEX_NUM_ENTRIES = 100
 GENERATE_DOCSET        = NO
 DOCSET_FEEDNAME        = "Doxygen generated docs"
+DOCSET_FEEDURL         =
 DOCSET_BUNDLE_ID       = org.doxygen.Project
 DOCSET_PUBLISHER_ID    = org.doxygen.Publisher
 DOCSET_PUBLISHER_NAME  = Publisher
@@ -386,14 +376,20 @@ GENERATE_ECLIPSEHELP   = NO
 ECLIPSE_DOC_ID         = org.doxygen.Project
 DISABLE_INDEX          = YES
 GENERATE_TREEVIEW      = YES
+FULL_SIDEBAR           = NO
 ENUM_VALUES_PER_LINE   = 4
 TREEVIEW_WIDTH         = 250
 EXT_LINKS_IN_WINDOW    = NO
+OBFUSCATE_EMAILS       = YES
+HTML_FORMULA_FORMAT    = SVG
 FORMULA_FONTSIZE       = 10
 FORMULA_TRANSPARENT    = YES
+FORMULA_MACROFILE      =
 USE_MATHJAX            = YES
+MATHJAX_VERSION        = MathJax_2
 MATHJAX_FORMAT         = HTML-CSS
-MATHJAX_RELPATH        =  https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2
+#MATHJAX_RELPATH        = https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2
+MATHJAX_RELPATH        = https://cdn.jsdelivr.net/npm/mathjax@2
 MATHJAX_EXTENSIONS     =
 MATHJAX_CODEFILE       =
 SEARCHENGINE           = YES
@@ -403,51 +399,87 @@ SEARCHENGINE_URL       =
 SEARCHDATA_FILE        = searchdata.xml
 EXTERNAL_SEARCH_ID     =
 EXTRA_SEARCH_MAPPINGS  =
+
+#---------------------------------------------------------------------------
+# Configuration options related to the LaTeX output
+#---------------------------------------------------------------------------
+
 GENERATE_LATEX         = YES
 LATEX_OUTPUT           = latex
 LATEX_CMD_NAME         = latex
 MAKEINDEX_CMD_NAME     = makeindex
+LATEX_MAKEINDEX_CMD    = makeindex
 COMPACT_LATEX          = YES
 PAPER_TYPE             = a4
 EXTRA_PACKAGES         = amsmath
-LATEX_HEADER           = 
-LATEX_FOOTER           = 
-LATEX_EXTRA_STYLESHEET = 
+LATEX_HEADER           =
+LATEX_FOOTER           =
+LATEX_EXTRA_STYLESHEET =
 LATEX_EXTRA_FILES      =
 PDF_HYPERLINKS         = YES
 USE_PDFLATEX           = YES
 LATEX_BATCHMODE        = NO
 LATEX_HIDE_INDICES     = YES
-LATEX_SOURCE_CODE      = NO
-
 LATEX_BIB_STYLE        = plainnat
-
 LATEX_TIMESTAMP        = NO
+LATEX_EMOJI_DIRECTORY  =
+
+#---------------------------------------------------------------------------
+# Configuration options related to the RTF output
+#---------------------------------------------------------------------------
 
 GENERATE_RTF           = NO
-
 RTF_OUTPUT             = rtf
 COMPACT_RTF            = NO
 RTF_HYPERLINKS         = NO
 RTF_STYLESHEET_FILE    =
 RTF_EXTENSIONS_FILE    =
-RTF_SOURCE_CODE        = NO
+
+#---------------------------------------------------------------------------
+# Configuration options related to the man page output
+#---------------------------------------------------------------------------
+
 GENERATE_MAN           = NO
 MAN_OUTPUT             = man
 MAN_EXTENSION          = .3
 MAN_SUBDIR             =
 MAN_LINKS              = NO
+
+#---------------------------------------------------------------------------
+# Configuration options related to the XML output
+#---------------------------------------------------------------------------
+
 GENERATE_XML           = NO
 XML_OUTPUT             = xml
 XML_PROGRAMLISTING     = YES
+XML_NS_MEMB_FILE_SCOPE = NO
+
+#---------------------------------------------------------------------------
+# Configuration options related to the DOCBOOK output
+#---------------------------------------------------------------------------
+
 GENERATE_DOCBOOK       = NO
 DOCBOOK_OUTPUT         = docbook
-DOCBOOK_PROGRAMLISTING = NO
+
+#---------------------------------------------------------------------------
+# Configuration options for the AutoGen Definitions output
+#---------------------------------------------------------------------------
+
 GENERATE_AUTOGEN_DEF   = NO
+
+#---------------------------------------------------------------------------
+# Configuration options related to the Perl module output
+#---------------------------------------------------------------------------
+
 GENERATE_PERLMOD       = NO
 PERLMOD_LATEX          = NO
 PERLMOD_PRETTY         = YES
 PERLMOD_MAKEVAR_PREFIX =
+
+#---------------------------------------------------------------------------
+# Configuration options related to the preprocessor
+#---------------------------------------------------------------------------
+
 ENABLE_PREPROCESSING   = NO
 MACRO_EXPANSION        = NO
 EXPAND_ONLY_PREDEF     = NO
@@ -456,29 +488,38 @@ INCLUDE_PATH           =
 INCLUDE_FILE_PATTERNS  =
 PREDEFINED             = CCPP \
                          MULTI_GASES \
-                         0 
+                         0
 EXPAND_AS_DEFINED      =
 SKIP_FUNCTION_MACROS   = YES
+
+#---------------------------------------------------------------------------
+# Configuration options related to external references
+#---------------------------------------------------------------------------
+
 TAGFILES               =
 GENERATE_TAGFILE       =
 ALLEXTERNALS           = NO
 EXTERNAL_GROUPS        = YES
 EXTERNAL_PAGES         = YES
-PERL_PATH              = /usr/bin/perl
-CLASS_DIAGRAMS         = YES
-MSCGEN_PATH            =
+
+#---------------------------------------------------------------------------
+# Configuration options related to the dot tool
+#---------------------------------------------------------------------------
+
 DIA_PATH               =
-HIDE_UNDOC_RELATIONS   = NO 
+HIDE_UNDOC_RELATIONS   = NO
 HAVE_DOT               = YES
 DOT_NUM_THREADS        = 0
 DOT_FONTNAME           = Helvetica
-DOT_FONTSIZE           = 10
+DOT_FONTSIZE           = 12
 DOT_FONTPATH           =
 CLASS_GRAPH            = NO
 COLLABORATION_GRAPH    = NO
 GROUP_GRAPHS           = YES
 UML_LOOK               = YES
 UML_LIMIT_NUM_FIELDS   = 10
+DOT_UML_DETAILS        = NO
+DOT_WRAP_THRESHOLD     = 17
 TEMPLATE_RELATIONS     = NO
 INCLUDE_GRAPH          = YES
 INCLUDED_BY_GRAPH      = NO
@@ -486,17 +527,19 @@ CALL_GRAPH             = YES
 CALLER_GRAPH           = NO
 GRAPHICAL_HIERARCHY    = YES
 DIRECTORY_GRAPH        = YES
-DOT_IMAGE_FORMAT       = svg
-INTERACTIVE_SVG        = NO
+DIR_GRAPH_MAX_DEPTH    = 1
+DOT_IMAGE_FORMAT       = SVG
+INTERACTIVE_SVG        = YES
 DOT_PATH               =
 DOTFILE_DIRS           =
 MSCFILE_DIRS           =
 DIAFILE_DIRS           =
 PLANTUML_JAR_PATH      =
+PLANTUML_CFG_FILE      =
 PLANTUML_INCLUDE_PATH  =
-DOT_GRAPH_MAX_NODES    = 200
+DOT_GRAPH_MAX_NODES    = 1000
 MAX_DOT_GRAPH_DEPTH    = 0
 DOT_TRANSPARENT        = NO
-DOT_MULTI_TARGETS      = YES 
+DOT_MULTI_TARGETS      = YES
 GENERATE_LEGEND        = YES
 DOT_CLEANUP            = YES

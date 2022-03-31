@@ -1,4 +1,4 @@
-!>  \file radlw_main.f
+!>  \file radlw_main.F90
 !!  This file contains NCEP's modifications of the rrtmg-lw radiation
 !!  code from AER.
 
