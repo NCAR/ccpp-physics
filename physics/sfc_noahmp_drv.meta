@@ -424,6 +424,13 @@
   dimensions = ()
   type = integer
   intent = in
+[iopt_trs]
+  standard_name = control_for_land_surface_scheme_surface_thermal_roughness
+  long_name = choice for surface thermal roughness option (see noahmp module for definition)
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
 [xlatin]
   standard_name = latitude
   long_name = latitude
