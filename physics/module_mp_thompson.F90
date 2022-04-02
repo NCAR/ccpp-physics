@@ -1101,7 +1101,7 @@ MODULE module_mp_thompson
       REAL, DIMENSION(its:ite, jts:jte):: pcp_ra, pcp_sn, pcp_gr, pcp_ic
       REAL:: dt, pptrain, pptsnow, pptgraul, pptice
       REAL:: qc_max, qr_max, qs_max, qi_max, qg_max, ni_max, nr_max
-      REAL:: rand1, rand2, rand3, min_rand
+      REAL:: rand1, rand2, rand3, abs_min_rand
       INTEGER:: i, j, k, m
       INTEGER:: imax_qc,imax_qr,imax_qi,imax_qs,imax_qg,imax_ni,imax_nr
       INTEGER:: jmax_qc,jmax_qr,jmax_qi,jmax_qs,jmax_qg,jmax_ni,jmax_nr
@@ -1268,6 +1268,8 @@ MODULE module_mp_thompson
       kmax_ni = 0
       kmax_nr = 0
 
+      abs_min_rand = ABS(MINVAL(rand_pert(:,1)))
+
       j_loop:  do j = j_start, j_end
       i_loop:  do i = i_start, i_end
 
@@ -1292,7 +1294,7 @@ MODULE module_mp_thompson
             m = RSHIFT(ABS(rand_perturb_on),1)
             if (MOD(m,2) .ne. 0) rand2 = rand_pert(i,1)*2.
             m = RSHIFT(ABS(rand_perturb_on),2)
-            if (MOD(m,2) .ne. 0) rand3 = 0.25*(rand_pert(i,1)+ABS(min_rand))
+            if (MOD(m,2) .ne. 0) rand3 = 0.25*(rand_pert(i,1)+abs_min_rand)
             m = RSHIFT(ABS(rand_perturb_on),3)
          endif
 !+---+-----------------------------------------------------------------+
