@@ -274,7 +274,7 @@
 !> \section arg_table_GFS_surface_generic_post_run Argument Table
 !! \htmlinclude GFS_surface_generic_post_run.html
 !!
-      subroutine GFS_surface_generic_post_run (im, cplflx, cplchm, cplwav, lssav, dry, icy, wet,                                    &
+      subroutine GFS_surface_generic_post_run (im, cplflx, cplaqm, cplchm, cplwav, lssav, dry, icy, wet,                            &
         lsm, lsm_noahmp, dtf, ep1d, gflx, tgrs_1, qgrs_1, ugrs_1, vgrs_1,                                                           &
         adjsfcdlw, adjsfcdsw, adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd, adjsfculw, adjsfculw_wat, adjnirbmu, adjnirdfu,           &
         adjvisbmu, adjvisdfu, t2m, q2m, u10m, v10m, tsfc, tsfc_wat, pgr, xcosz, evbs, evcw, trans, sbsno, snowc, snohf, pah, pahi,  &
@@ -288,7 +288,7 @@
         implicit none
 
         integer,                                intent(in) :: im
-        logical,                                intent(in) :: cplflx, cplchm, cplwav, lssav
+        logical,                                intent(in) :: cplflx, cplaqm, cplchm, cplwav, lssav
         logical, dimension(:),                  intent(in) :: dry, icy, wet
         integer,                                intent(in) :: lsm, lsm_noahmp
         real(kind=kind_phys),                   intent(in) :: dtf
@@ -413,6 +413,34 @@
             nnirdf_cpl(i)  = nnirdf_cpl(i)  + nnirdfi_cpl(i)*dtf
             nvisbm_cpl(i)  = nvisbm_cpl(i)  + nvisbmi_cpl(i)*dtf
             nvisdf_cpl(i)  = nvisdf_cpl(i)  + nvisdfi_cpl(i)*dtf
+          enddo
+        endif
+
+        if (cplaqm .and. .not.cplflx) then
+          do i=1,im
+            t2mi_cpl    (i) = t2m(i)
+            q2mi_cpl    (i) = q2m(i)
+            psurfi_cpl  (i) = pgr(i)
+            if (wet(i)) then                    ! some open water
+!  ---  compute open water albedo
+              xcosz_loc = max( zero, min( one, xcosz(i) ))
+              ocalnirdf_cpl = 0.06_kind_phys
+              ocalnirbm_cpl = max(albdf, 0.026_kind_phys/(xcosz_loc**1.7_kind_phys+0.065_kind_phys)     &
+       &                       + 0.15_kind_phys * (xcosz_loc-0.1_kind_phys) * (xcosz_loc-0.5_kind_phys) &
+       &                       * (xcosz_loc-one))
+              ocalvisdf_cpl = 0.06_kind_phys
+              ocalvisbm_cpl = ocalnirbm_cpl
+
+              nswsfci_cpl(i) = adjnirbmd(i) * (one-ocalnirbm_cpl) + &
+                               adjnirdfd(i) * (one-ocalnirdf_cpl) + &
+                               adjvisbmd(i) * (one-ocalvisbm_cpl) + &
+                               adjvisdfd(i) * (one-ocalvisdf_cpl)
+            else
+              nswsfci_cpl(i) = adjnirbmd(i) - adjnirbmu(i) + &
+                               adjnirdfd(i) - adjnirdfu(i) + &
+                               adjvisbmd(i) - adjvisbmu(i) + &
+                               adjvisdfd(i) - adjvisdfu(i)
+            endif
           enddo
         endif
 
