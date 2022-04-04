@@ -674,7 +674,7 @@
                 IF ( ncnd == 5 ) THEN
                   ccnd(i,k,4) = tracer1(i,k,ntsw) + tracer1(i,k,ntgl) ! snow + graupel
                 ELSEIF ( ncnd == 6 ) THEN
-                  ccnd(i,k,4) = tracer1(i,k,ntsw) + tracer1(i,k,ntgl) + tracer1(i,k,nthl) ! snow + gr
+                  ccnd(i,k,4) = tracer1(i,k,ntsw) + tracer1(i,k,ntgl) + tracer1(i,k,nthl) ! snow + graupel + hail
                 ENDIF
               endif
             enddo

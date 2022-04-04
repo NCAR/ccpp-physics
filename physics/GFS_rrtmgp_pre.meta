@@ -394,7 +394,7 @@
   kind = kind_phys
   intent = inout
 [tv_lay]
-  standard_name = virtual_temperature
+  standard_name = model_layer_mean_virtual_temperature
   long_name = layer virtual temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -402,7 +402,7 @@
   kind = kind_phys
   intent = inout
 [relhum]
-  standard_name = relative_humidity
+  standard_name = model_layer_mean_relative_humidity
   long_name = layer relative humidity
   units = frac
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -410,16 +410,16 @@
   kind = kind_phys
   intent = inout
 [qs_lay]
-  standard_name = saturation_vapor_pressure
-  long_name = saturation vapor pressure
+  standard_name = model_layer_mean_saturation_vapor_pressure
+  long_name = layer saturation vapor pressure
   units = Pa
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
 [q_lay]
-  standard_name = water_vapor_mixing_ratio
-  long_name = water vaport mixing ratio
+  standard_name = model_layer_mean_water_vapor_mixing_ratio
+  long_name = layer water vaport mixing ratio
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
