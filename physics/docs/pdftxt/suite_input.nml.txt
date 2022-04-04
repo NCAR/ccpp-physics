@@ -74,17 +74,7 @@ show some variables in the namelist that must match the SDF.
                                                       <li> 2: cloud optical property scheme based on Hu and Stamnes (1993) \cite hu_and_stamnes_1993 - updated
                                                       </ul>
                                                       <td>1
-<tr><td>iovr_sw         <td>rrtmg_sw          <td>control flag for cloud overlap in SW radiation \n
-                                                      <ul>
-                                                      <li> 0: random overlapping clouds
-                                                      <li> 1: max/ran overlapping clouds
-                                                      <li> 2: maximum overlap clouds (mcica only)
-                                                      <li> 3: decorrelation-length overlap (mcica only)
-                                                      <li> 4: exponential overlapping method
-                                                      <li> 5: exponential-random overlapping method
-                                                      </ul>
-                                                      <td>1
-<tr><td>iovr_lw         <td>rrtmg_lw          <td>control flag for cloud overlap in LW radiation \n
+<tr><td>gfs_typedefs::gfs_control_type::iovr         <td>rrtmg_sw          <td>control flag for cloud overlap in SW & LW radiation \n
                                                       <ul>
                                                       <li> 0: random overlapping clouds
                                                       <li> 1: max/ran overlapping clouds
@@ -645,4 +635,6 @@ show some variables in the namelist that must match the SDF.
 <tr><td>z0fac           <td>GFS_surface_generic_post          <td>surface roughness fraction factor          <td>0.3
 <tr><td>e0fac           <td>GFS_surface_generic_post          <td>latent heat flux fraction factor relative to sensible heat flux,e.g., e0fac=0.5 indicates that canopy heat storage for latent heat flux is 50% of that for sensible heat flux  <td>0.5
 </table>
+
+
 */

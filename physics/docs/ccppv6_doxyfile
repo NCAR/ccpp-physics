@@ -115,11 +115,11 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 
 INPUT                  =  pdftxt/mainpage.txt     \
+                          pdftxt/rel_update.txt      \
                           pdftxt/all_shemes_list.txt     \
-                          pdftxt/GFSv15p2_suite.txt \
-                          pdftxt/GFSv16beta_suite.txt \
-                          pdftxt/GSD_adv_suite.txt \
-#                          pdftxt/CPT_adv_suite.txt   \
+                          pdftxt/GFS_v16_suite.txt \
+                          pdftxt/GFS_v17_p8_suite.txt \
+                          pdftxt/RAP_suite.txt \
                           pdftxt/RRFS_v1alpha_suite.txt  \
                           pdftxt/RRFS_SGSCLOUD.txt   \
                           pdftxt/GFS_RRTMG.txt    \
@@ -129,24 +129,22 @@ INPUT                  =  pdftxt/mainpage.txt     \
                           pdftxt/GFS_OCEAN.txt    \
                           pdftxt/GFS_NOAH.txt     \
                           pdftxt/GFS_SFCSICE.txt  \
-                          pdftxt/GFS_HEDMF.txt    \
                           pdftxt/GFS_SATMEDMFVDIFQ.txt    \
                           pdftxt/GFS_NOAHMP.txt    \
                           pdftxt/GFS_UGWPv0.txt   \
-                          pdftxt/GFS_GWDPS.txt    \
+                          pdftxt/GFS_unified_ugwp.txt  \
+                          pdftxt/GFS_drag_suite.txt    \
                           pdftxt/GFS_OZPHYS.txt   \
                           pdftxt/GFS_H2OPHYS.txt  \
-                          pdftxt/GFS_RAYLEIGH.txt \
                           pdftxt/GFS_SAMFdeep.txt \
                           pdftxt/GFS_SAMFshal.txt \
                           pdftxt/GFDL_cloud.txt   \
-                          pdftxt/CPT_CSAW.txt            \
-                          pdftxt/CPT_MG3.txt             \
                           pdftxt/MYNN_EDMF.txt       \
                           pdftxt/CU_GF_deep.txt      \
                           pdftxt/RUCLSM.txt          \
                           pdftxt/THOMPSON.txt        \
                           pdftxt/suite_input.nml.txt    \
+                        ../../../data/GFS_typedefs.F90    \
                         ../gfdl_fv_sat_adj.F90    \
                         ../GFS_time_vary_pre.fv3.F90 \
                         ../GFS_rad_time_vary.fv3.F90  \
@@ -246,9 +244,9 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../cires_ugwpv1_solv2.F90      \
                         ../cires_ugwpv1_sporo.F90      \
                         ../cires_ugwpv1_triggers.F90   \
-                        ../gwdps.f \
-                        ../ugwp_driver_v0.F \
-                        ../ozphys_2015.f \
+                        ../gwdps.f                     \
+                        ../ugwp_driver_v0.F            \
+                        ../ozphys_2015.f               \
                         ../h2ophys.f \
                         ../samfdeepcnv.f \
                         ../gwdc.f \
@@ -297,8 +295,8 @@ EXCLUDE                =
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       =
 EXCLUDE_SYMBOLS        =
-EXAMPLE_PATH           = ./
-EXAMPLE_PATTERNS       =
+EXAMPLE_PATH           = pdftxt/RE6
+EXAMPLE_PATTERNS       = 
 EXAMPLE_RECURSIVE      = NO
 IMAGE_PATH             = img
 INPUT_FILTER           =

@@ -1,0 +1,22 @@
+/**
+\page rap_suite_page  RAP Suite 
+
+\section rap_suite_overview Overview
+
+Suite RAP contains the parameterizations used in the NOAA operational Rapid Refresh (RAP)
+and High-Resolution Rapid Refresh (HRRR) models. These models runs at 13- and 3- km resolution,
+respectively.
+
+
+Additional Model Information Links: 
+- https://rapidrefresh.noaa.gov
+- https://rapidrefresh.noaa.gov/hrrr/
+
+
+\section sdf_gsdsuite Suite Definition File 
+\include suite_FV3_RAP.xml
+
+\section gsd_nml_option Namelist 
+\todo RAP nml due to change of drag_suite, mynnsfc
+
+*/
