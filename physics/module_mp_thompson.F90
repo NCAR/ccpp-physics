@@ -4067,7 +4067,14 @@ MODULE module_mp_thompson
           do k = kte, kts, -1
              vtg = 0.
              if (rg(k).gt. R1) then
-              vtg = rhof(k)*av_g*cgg(6)*ogg3 * ilamg(k)**bv_g
+              ygra1 = alog10(max(1.E-9, rg(k)))
+              zans1 = 3.0 + 2./7.*(ygra1+8.) + rand1
+              N0_exp = 10.**(zans1)
+              N0_exp = MAX(DBLE(gonv_min), MIN(N0_exp, DBLE(gonv_max)))
+              lam_exp = (N0_exp*am_g*cgg(1)/rg(k))**oge1
+              lamg = lam_exp * (cgg(3)*ogg2*ogg1)**obmg
+
+              vtg = rhof(k)*av_g*cgg(6)*ogg3 * (1./lamg)**bv_g
               if (temp(k).gt. T_0) then
                vtgk(k) = MAX(vtg, vtrk(k))
               else
