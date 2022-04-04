@@ -88,6 +88,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
      &  FLHC, FLQC,                        &
      &  U10, V10, TH2, T2, Q2,             &
      &  wstar, CHS2, CQS2,                 &
+     &  spp_wts_sfc, spp_sfc,               &
 !     &  CP, G, ROVCP, R, XLV,           &
 !     &  SVP1, SVP2, SVP3, SVPT0,        &
 !     &  EP1,EP2,KARMAN,                 &
@@ -143,7 +144,6 @@ SUBROUTINE mynnsfc_wrapper_run(            &
 
 !MISC CONFIGURATION OPTIONS
       INTEGER, PARAMETER ::       &
-     &       spp_pbl  = 0,        &
      &       isftcflx = 0,        & !control: 0
      &       iz0tlnd  = 0,        & !control: 0
      &       isfflx   = 1
@@ -155,12 +155,15 @@ SUBROUTINE mynnsfc_wrapper_run(            &
       integer, intent(in) :: ivegsrc
       integer, intent(in) :: sfc_z0_type ! option for calculating surface roughness length over ocean
       logical, intent(in) :: redrag ! reduced drag coeff. flag for high wind over sea (j.han)
+      integer, intent(in) :: spp_sfc ! flag for using SPP perturbations
+
       real(kind=kind_phys), intent(in) :: delt
 
 !Input data
       integer, dimension(:), intent(in) :: vegtype
       real(kind=kind_phys), dimension(:), intent(in)    ::  &
      &                    sigmaf,shdmax,z0pert,ztpert
+      real(kind_phys), dimension(:,:),    intent(in) :: spp_wts_sfc
 
       real(kind=kind_phys), dimension(:,:),                 &
      &      intent(in)  ::                  phii
@@ -207,7 +210,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
      &        cpm, qgh, qfx, snowh_wat
 
      real(kind=kind_phys), dimension(im,levs) ::            &
-    &        pattern_spp_pbl, dz, th, qv
+    &        dz, th, qv
 
 !MYNN-1D
       INTEGER :: k, i
@@ -228,7 +231,6 @@ SUBROUTINE mynnsfc_wrapper_run(            &
 !      endif
 
       ! prep MYNN-only variables
-      pattern_spp_pbl(:,:) = 0
       dz(:,:) = 0
       th(:,:) = 0
       qv(:,:) = 0
@@ -243,6 +245,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
            qv(i,k)=qvsh(i,k)/(1.0 - qvsh(i,k))
         enddo
       enddo
+
       do i=1,im
           if (slmsk(i)==1. .or. slmsk(i)==2.)then !sea/land/ice mask (=0/1/2) in FV3
             xland(i)=1.0                          !but land/water = (1/2) in SFCLAY_mynn
@@ -336,7 +339,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
              QGH=qgh,QSFC=qsfc,   &
              U10=u10,V10=v10,TH2=th2,T2=t2,Q2=q2,                             &
              GZ1OZ0=GZ1OZ0,WSPD=wspd,wstar=wstar,                             &
-             spp_pbl=spp_pbl,pattern_spp_pbl=pattern_spp_pbl,                 &
+             spp_sfc=spp_sfc,pattern_spp_sfc=spp_wts_sfc,                     &
              ids=1,ide=im, jds=1,jde=1, kds=1,kde=levs,                       &
              ims=1,ime=im, jms=1,jme=1, kms=1,kme=levs,                       &
              its=1,ite=im, jts=1,jte=1, kts=1,kte=levs,                       &

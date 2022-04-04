@@ -834,6 +834,21 @@
   type = real
   kind = kind_phys
   intent = inout
+[spp_wts_sfc]
+  standard_name = spp_weights_for_surface_layer_scheme
+  long_name = spp weights for surface layer scheme
+  units = 1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[spp_sfc]
+  standard_name = control_for_surface_layer_spp_perturbations
+  long_name = control for surface layer spp perturbations
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
 [lprnt]
   standard_name = flag_print
   long_name = control flag for diagnostic print out
