@@ -1,0 +1,20 @@
+/**
+\page RRFS_v1nssl_page  RRFS_v1nssl Suite 
+
+\section RRFS_v1nssl_suite_overview Overview
+
+Suite RRFS_v1nssl is one of the supported suites for use in the UFS Short-Range Weather Application
+(UFS SRW App). This suite is most applicable for runs at 3-km resolution since it does not parameterize
+deep convection.
+
+\section sdf_rrfsv1nssl_suite Suite Definition File 
+\include suite_FV3_RRFS_v1nssl.xml
+\todo replace noahmp with noah in WoFS
+
+\section rrfsv1nssl_nml_option Namelist 
+- General physics options
+\snippet RRFS_v1nssl_input.nml GFS_PHYSICS_NML
+- \ref GFS_UGWP_v0 related options
+\snippet RRFS_v1nssl_input.nml CIRES_UGWP_NML
+
+*/

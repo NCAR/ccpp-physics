@@ -36,7 +36,7 @@ Prediction System (NGGPS)- FV3-GSD suite. To specify surface characteristics, RU
 Modeling Systems (see Figure 2 in \ref GFS_NOAH )
 
 ## RUC LSM characteristics that differ from NOAH LSM:
-\image html ruc_lsm_veg_soil.png "Figure 1. RUC LSM Vegetation and Soil Model (Courtesy of T.G. Smirnova) " width=10cm
+\image html ruc_lsm_veg_soil.png "Figure 1. RUC LSM Vegetation and Soil Model (Courtesy of T.G. Smirnova) " width=900
 - \b Implicit \b solution of energy and moisture budgets in the layer spanning the ground surface
 - \b 9 \b soil \b levels with high vertical resolution near surface
 RUC LSM has more levels in oil than \ref GFS_NOAH model with higher resolution near the interface with the atmosphere
@@ -56,7 +56,7 @@ in the computation of such parameters as roughness length, emissivity, soil poro
 roughness between the mosaic and dominant category presented on figure 2 is positive from contribution of the forests, which helped to 
 reduce high biases of surface wind speeds in these regions. Roughness lenghth has also seasonal variability in the cropland regions,
 which again helped to improve the wind forecasts during the warm season.
-\image html  ruc_lsm_heterogeneity.png "Figure 2:  sub-grid scale heterogeneity of surface parameters in RUC LSM (Courtesy of T.G. Smirnova)" width=10cm
+\image html  ruc_lsm_heterogeneity.png "Figure 2:  sub-grid scale heterogeneity of surface parameters in RUC LSM (Courtesy of T.G. Smirnova)" width=900
 
 - New: simple irrigation in the cropland area
 - New: water/snow intercepted by canopy as function of vegetation fraction and leaf area index (LAI)
@@ -70,7 +70,7 @@ Snow forms additional two layers on top of soil in RUC LSM
   - Seperate treatment of energy and moisture budgets for snow-covered and snow-free portions of the grid cell
   - Aggregate solutions at the end of time step
   - Reduced cold bias for areas with thin snow
-\image html ruc_lsm_mosaic.png "Figure 3: recent development: mosaic approach for patchy snow (Courtesy of T.G. Smirnova) " width=10cm
+\image html ruc_lsm_mosaic.png "Figure 3: recent development: mosaic approach for patchy snow (Courtesy of T.G. Smirnova) " width=900
 - Iterative snow melting algorithm
 - Density of snow on the ground - a function of compaction parameter and snow depth and temperature
 - Snow albedo - a function of temperature and snow fraction
@@ -82,7 +82,7 @@ Snow forms additional two layers on top of soil in RUC LSM
  \rho_{fr}=\rho_{sn}*\alpha_{sn}+\rho_{gr}*\alpha_{gr}+\rho_{ice}*\alpha_{ice}
 \f]
 - The depth of new snow is defined from its liquid equivalent and \f$\rho_{fr}\f$
-\image html ruc_lsm_frozen_precip.png "Figure 4: HRRR 23-h forecasts of snow accumulation, valid 08 UTC, 29 Dec 2015 (Courtesy of T.G. Smirnova)" width=10cm
+\image html ruc_lsm_frozen_precip.png "Figure 4: HRRR 23-h forecasts of snow accumulation, valid 08 UTC, 29 Dec 2015 (Courtesy of T.G. Smirnova)" width=900
 
 snow accumulation with variable density is provided as an additional product in the model guidance. Figure 4 shows one example of this product
 from the 23-h HRRR forecast for snowstorm on 29 Dec 2015. This product is in the middle panel. The panel on the left uses traditional 10:1 ratio,

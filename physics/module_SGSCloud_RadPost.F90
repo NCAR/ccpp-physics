@@ -12,7 +12,7 @@
       subroutine sgscloud_radpost_finalize ()
       end subroutine sgscloud_radpost_finalize
 
-!>\defgroup sgscloud_radpost GSD sgscloud_radpost_run Module
+!>\defgroup sgscloud_radpost sgscloud_radpost_run Module
 !>\ingroup gsd_mynn_edmf
 !!  This interstitial code restores the original resolved-scale clouds (qc and qi).
 !! \section arg_table_sgscloud_radpost_run Argument Table

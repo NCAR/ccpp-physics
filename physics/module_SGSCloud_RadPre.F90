@@ -6,7 +6,7 @@
 !!       scale) qc, qi and cloud fraction coming from the microphysics scheme.
 !!    4) Recompute the diagnostic high, mid, low, total and bl clouds to be consistent with radiation
 
-!> \defgroup sgsrad_group GSD sgscloud_radpre_run Module
+!> \defgroup sgsrad_group sgscloud_radpre_run Module
       module sgscloud_radpre
 
       contains

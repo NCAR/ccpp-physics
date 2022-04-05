@@ -31,8 +31,8 @@ model components (i.e., radiation). A description of the changes to the MYNN sch
 \section intra_mynnpbl Intraphysics Communication
 - Cloud-Radiation Interaction
 
-\sa gsd_mynnrad_pre
-\sa gsd_mynnrad_post
+\sa sgscloud_radpost
+\sa sgsrad_group 
 
 The SGS clouds produced by the MYNN-EDMF scheme are coupled to the longwave and shortwave radiation schemes
 if the namelist parameter \p icloud_bl is set to 1. In this case, the SGS cloud fraction, \p CLDFRA_BL, and the SGS
@@ -67,10 +67,10 @@ The MYNN-EDMF CCPP-compliant interface:
 
 \section gen_mynnedmf_conv MYNN-EDMF Scheme  General Algorithm
 
-\image html  MYNN-EDMF_call_order.png "Figure 1.The order of subroutines within the MYNN-EDMF (Courtesy of J.B. Olson). The green rectangles within the main subroutine (mynn_bl_driver()) represent subroutine calls. The blue rectangles represent tasks coded within the main driver. A brief description is shown on the right " width=10cm
+\image html  MYNN-EDMF_call_order.png "Figure 1.The order of subroutines within the MYNN-EDMF (Courtesy of J.B. Olson). The green rectangles within the main subroutine (mynn_bl_driver()) represent subroutine calls. The blue rectangles represent tasks coded within the main driver. A brief description is shown on the right " width=600
 
 
-\ref gen_mynn_bl_driver
+\sa gen_mynn_bl_driver
 
 
 */

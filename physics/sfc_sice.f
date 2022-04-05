@@ -22,7 +22,7 @@
 !! the top of the ice or snow, \f$T_s\f$, is determined from the surface energy balance.
 !! The model consists of a zero-heat-capacity snow layer overlying two equally thick sea ice layers (Figure 1).
 !! The upper ice layer has a variable heat capacity to represent brine pockets.
-!! \image html GFS_sice_wonton2000_fig1.png "Fig.1  Schematic representation of the three-layer model" width=5cm
+!! \image html GFS_sice_wonton2000_fig1.png "Fig.1  Schematic representation of the three-layer model" width=900
 !!  The ice model main program ice3lay() performs two functions:
 !!  - \b Calculation \b of \b ice \b temperature
 !!\n The surface temperature is determined from the diagnostic balance between

@@ -114,15 +114,19 @@ WARN_LOGFILE           =
 # Configuration options related to the input files
 #---------------------------------------------------------------------------
 
-INPUT                  =  pdftxt/mainpage.txt     \
-                          pdftxt/rel_update.txt      \
+INPUT                  =  pdftxt/rel_update.txt            \
+                          pdftxt/mainpage.txt           \
+                          pdftxt/v6phys_enh.txt          \
                           pdftxt/all_shemes_list.txt     \
-                          pdftxt/GFS_v16_suite.txt \
-                          pdftxt/GFS_v17_p8_suite.txt \
-                          pdftxt/RAP_suite.txt \
-                          pdftxt/RRFS_v1alpha_suite.txt  \
-                          pdftxt/RRFS_SGSCLOUD.txt   \
-                          pdftxt/GFS_RRTMG.txt    \
+                          pdftxt/GFS_v16_suite.txt       \
+                          pdftxt/GFS_v17_p8_suite.txt    \
+                          pdftxt/RAP_suite.txt           \
+                          pdftxt/HRRR_suite.txt          \
+                          pdftxt/RE6/FV3_HRRR_input.nml  \
+                          pdftxt/RRFS_v1beta_suite.txt   \
+                          pdftxt/RRFS_v1nssl_suite.txt   \
+                          pdftxt/RRFS_SGSCLOUD.txt       \
+                          pdftxt/GFS_RRTMG.txt           \
                           pdftxt/GFS_SFCLYR.txt   \
                           pdftxt/MYNN_SFCLAYER.txt   \
                           pdftxt/GFS_NSST.txt     \
@@ -139,11 +143,13 @@ INPUT                  =  pdftxt/mainpage.txt     \
                           pdftxt/GFS_SAMFdeep.txt \
                           pdftxt/GFS_SAMFshal.txt \
                           pdftxt/GFDL_cloud.txt   \
+                          pdftxt/NSSLMICRO.txt      \
                           pdftxt/MYNN_EDMF.txt       \
                           pdftxt/CU_GF_deep.txt      \
                           pdftxt/RUCLSM.txt          \
                           pdftxt/THOMPSON.txt        \
                           pdftxt/suite_input.nml.txt    \
+                          pdftxt/RE6/FV3_RRFS_v1beta_input.nml \
                         ../../../data/GFS_typedefs.F90    \
                         ../gfdl_fv_sat_adj.F90    \
                         ../GFS_time_vary_pre.fv3.F90 \
@@ -179,27 +185,6 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../radlw_datatb.f \
                         ../radsw_param.f  \
                         ../radsw_datatb.f  \
-                        ../GFS_rrtmgp_cloud_overlap_pre.F90       \
-                        ../GFS_rrtmgp_gfdlmp_pre.F90    \
-                        ../GFS_rrtmgp_lw_post.F90      \
-                        ../GFS_rrtmgp_pre.F90          \
-                        ../GFS_rrtmgp_setup.F90       \
-                        ../GFS_rrtmgp_sw_post.F90      \
-                        ../GFS_rrtmgp_sw_pre.F90       \
-#                        ../GFS_rrtmgp_thompsonmp_pre.F90      \
-#                        ../GFS_rrtmgp_zhaocarr_pre.F90     \
-                         ../rrtmgp_lw_aerosol_optics.F90    \
-                        ../rrtmgp_lw_cloud_optics.F90      \
-                        ../rrtmgp_lw_cloud_sampling.F90    \
-                        ../rrtmgp_lw_gas_optics.F90        \
-                        ../rrtmgp_lw_pre.F90              \
-                        ../rrtmgp_lw_rte.F90             \
-                        ../rrtmgp_sampling.F90           \
-                        ../rrtmgp_sw_aerosol_optics.F90    \
-                        ../rrtmgp_sw_cloud_optics.F90   \
-                        ../rrtmgp_sw_cloud_sampling.F90    \
-                        ../rrtmgp_sw_gas_optics.F90      \
-                        ../rrtmgp_sw_rte.F90        \
                         ../dcyc2.f        \
                         ../sfc_diff.f \
                         ../module_MYNNSFC_wrapper.F90 \
@@ -277,6 +262,8 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../module_mp_thompson.F90 \
                         ../module_mp_radar.F90 \
                         ../mp_thompson_post.F90  \
+                        ../mp_nssl.F90        \
+                        ../module_mp_nssl_2mom.F90    \
                         ../funcphys.f90     \
                         ../physparam.f      \
                         ../physcons.F90     \
@@ -295,7 +282,8 @@ EXCLUDE                =
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       =
 EXCLUDE_SYMBOLS        =
-EXAMPLE_PATH           = pdftxt/RE6
+EXAMPLE_PATH           = pdftxt/RE6 \
+                         doc/html
 EXAMPLE_PATTERNS       = 
 EXAMPLE_RECURSIVE      = NO
 IMAGE_PATH             = img
@@ -522,7 +510,7 @@ TEMPLATE_RELATIONS     = NO
 INCLUDE_GRAPH          = YES
 INCLUDED_BY_GRAPH      = NO
 CALL_GRAPH             = YES
-CALLER_GRAPH           = NO
+CALLER_GRAPH           = YES
 GRAPHICAL_HIERARCHY    = YES
 DIRECTORY_GRAPH        = YES
 DIR_GRAPH_MAX_DEPTH    = 1

@@ -1,4 +1,4 @@
-!>  \file sfc_nst.f
+!>\file sfc_nst.f
 !!  This file contains the GFS NSST model.
 
 !> This module contains the CCPP-compliant GFS near-surface sea temperature scheme.
@@ -6,24 +6,22 @@
 
       contains
 
-! \brief This subroutine is empty since there are no procedures that need to be done to initialize the GFS NSST code.
-!! This subroutine is empty since there are no procedures that need to be done to initialize the GFS NSST code.
+!> This subroutine is empty since there are no procedures that need to be done to initialize the GFS NSST code.
 !!
       subroutine sfc_nst_init
       end subroutine sfc_nst_init
 
-! \brief This subroutine is empty since there are no procedures that need to be done to finalize the GFS NSST code.
-!! This subroutine is empty since there are no procedures that need to be done to finalize the GFS NSST code.
+!> This subroutine is empty since there are no procedures that need to be done to finalize the GFS NSST code.
 !!
       subroutine sfc_nst_finalize
       end subroutine sfc_nst_finalize
 
 !>\defgroup gfs_nst_main GFS Near-Surface Sea Temperature Scheme Module
-!> \brief This subroutine calls the Thermal Skin-layer and Diurnal Thermocline models to update the NSST profile.
-!! \section arg_table_sfc_nst_run Argument Table
+!>\brief This subroutine calls the Thermal Skin-layer and Diurnal Thermocline models to update the NSST profile.
+!> \section arg_table_sfc_nst_run Argument Table
 !! \htmlinclude sfc_nst_run.html
 !!
-!! \section NSST_general_algorithm GFS Near-Surface Sea Temperature Scheme General Algorithm
+!> \section NSST_general_algorithm GFS Near-Surface Sea Temperature Scheme General Algorithm
 !> @{
       subroutine sfc_nst_run                                            &
      &     ( im, hvap, cp, hfus, jcal, eps, epsm1, rvrdm1, rd, rhw0,    &  ! --- inputs:
@@ -712,7 +710,7 @@ cc
 
       contains
 
-! \defgroup GFS_NSST_PRE GFS Near-Surface Sea Temperature Pre
+!> \defgroup GFS_NSST_PRE GFS Near-Surface Sea Temperature Pre
 !!
 !! The NSST scheme is one of the three schemes used to represent the
 !! surface in the GFS physics suite. The other two are the Noah land

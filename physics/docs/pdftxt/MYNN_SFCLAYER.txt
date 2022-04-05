@@ -41,7 +41,7 @@ basic state variables): u*, z/L, surface heat and moisture fluxes.
 
 \section gen_mynnsfclay MYNN Surface Layer Scheme General Algorithm
 
-\image html  MYNN-SFCLAY_call_order.png "Figure 1.The order of operations within the MYNN surface layer scheme (Courtesy of J.B. Olson)." width=10cm
+\image html  MYNN-SFCLAY_call_order.png "Figure 1.The order of operations within the MYNN surface layer scheme (Courtesy of J.B. Olson)." width=900
 
 Within the MYNN surface layer scheme, there is a dependency check for the first timestep. If true, several arrays are initialized at every
 i point. This is done because (1) some variables are calculated in schemes called after the surface layer call and (2) some variables are used within

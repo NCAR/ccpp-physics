@@ -2,9 +2,9 @@
 \mainpage Introduction 
 
 Welcome to the scientific documentation for the parameterizations available in the Common 
-Community Physics Package (CCPP) v5.0.0 and the suites that can be configured using them.
+Community Physics Package (CCPP) v6.0.0 and the suites that can be configured using them.
 
-\image html  mesocam.png " " width=10cm
+\image html  mesocam.png " " width=800
 
 The CCPP-Physics is envisioned to contain parameterizations used in NOAA's Unified Forecast System (UFS) 
 applications for weather through seasonal prediction timescales, encompassing the current operational GFS schemes as well as 
