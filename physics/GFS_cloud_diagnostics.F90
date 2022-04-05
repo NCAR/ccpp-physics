@@ -70,7 +70,7 @@ contains
     real(kind_phys), dimension(:,:), intent(in) :: &
          p_lev                                       ! Pressure at model interfaces         
     real(kind_phys), dimension(:,:), intent(in) :: &
-    	 deltaZ,                                   & ! Layer thickness (m)
+    	 deltaZ,                                   & ! Layer thickness (km)
          cloud_overlap_param,                      & ! Cloud-overlap parameter
          precip_overlap_param                        ! Precipitation overlap parameter
     
@@ -113,7 +113,7 @@ contains
     ! layer indices for low, mid, and high clouds. The three cloud domain boundaries are 
     ! defined by ptopc. The cloud overlapping method is defined by control flag 'iovr', which may
     ! be different for lw and sw radiation programs.
-    call gethml(p_lay*0.01, ptop1, cld_frac, cldcnv, deltaZ, de_lgth, cloud_overlap_param,&
+    call gethml(p_lay/100., ptop1, cld_frac, cldcnv, deltaZ, de_lgth, cloud_overlap_param,&
          nCol, nLev, iovr_rand, iovr_maxrand, iovr_max, iovr_dcorr, iovr_exp,             &
          iovr_exprand, cldsa, mtopa, mbota)	
     

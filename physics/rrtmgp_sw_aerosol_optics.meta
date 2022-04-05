@@ -81,7 +81,7 @@
   kind = kind_phys
   intent = in
 [tv_lay]
-  standard_name = model_layer_mean_virtual_temperature
+  standard_name = virtual_temperature
   long_name = layer virtual temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -89,7 +89,7 @@
   kind = kind_phys
   intent = in
 [relhum]
-  standard_name = model_layer_mean_relative_humidity
+  standard_name = relative_humidity
   long_name = layer relative humidity
   units = frac
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)

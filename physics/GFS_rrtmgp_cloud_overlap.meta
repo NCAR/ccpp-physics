@@ -75,7 +75,7 @@
   kind = kind_phys
   intent = in
 [tv_lay]
-  standard_name = model_layer_mean_virtual_temperature
+  standard_name = virtual_temperature
   long_name = layer virtual temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
