@@ -376,7 +376,11 @@ module mp_thompson
          
          ! SPP
          integer,                   intent(in) :: spp_mp
+         integer,                   intent(in) :: n_var_spp
          real(kind_phys),           intent(in) :: spp_wts_mp(:,:)
+         real(kind_phys),           intent(in) :: spp_prt_list(:)
+         character(len=3),          intent(in) :: spp_var_list(:)
+         real(kind_phys),           intent(in) :: spp_stddev_cutoff(:)
 
          ! Local variables
 
@@ -644,7 +648,9 @@ module mp_thompson
                               diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
                               has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
                               rand_perturb_on=spp_mp_opt, kme_stoch=kme_stoch,               &
-                              rand_pert=spp_wts_mp,                                          &
+                              rand_pert=spp_wts_mp,spp_var_list=spp_var_list_out,            &
+                              spp_prt_list=spp_prt_list_out,n_var_spp=n_var_spp,             &
+                              spp_stddev_cutoff=spp_stddev_cutoff_out,                       &
                               ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
                               ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                               its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
@@ -681,7 +687,9 @@ module mp_thompson
                               diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
                               has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
                               rand_perturb_on=spp_mp_opt, kme_stoch=kme_stoch,               &
-                              rand_pert=spp_wts_mp,                                          &
+                              rand_pert=spp_wts_mp,spp_prt_list=spp_prt_list_out,            &
+                              spp_stddev_cutoff=spp_stddev_cutoff_out,n_var_spp=n_var_spp,   &
+                              spp_var_list=spp_var_list_out,                                 &
                               ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
                               ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                               its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &

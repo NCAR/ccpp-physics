@@ -984,7 +984,8 @@ MODULE module_mp_thompson
                               has_reqc, has_reqi, has_reqs,           &
                               rand_perturb_on,                        &
                               kme_stoch,                              &
-                              rand_pert,                              &
+                              rand_pert, spp_prt_list,spp_var_list    &
+                              spp_stddev_cutoff,n_var_spp             &
                               ids,ide, jds,jde, kds,kde,              &  ! domain dims
                               ims,ime, jms,jme, kms,kme,              &  ! memory dims
                               its,ite, jts,jte, kts,kte,              &  ! tile dims
@@ -1027,7 +1028,8 @@ MODULE module_mp_thompson
                           re_cloud, re_ice, re_snow
       INTEGER, INTENT(IN) :: rand_perturb_on, kme_stoch
       REAL, DIMENSION(:,:), INTENT(IN) :: &
-                          rand_pert
+                          rand_pert,spp_prt_list,spp_stddev_cutoff,n_var_spp, &
+                          spp_var_list
 
       INTEGER, INTENT(IN):: has_reqc, has_reqi, has_reqs
 #if ( WRF_CHEM == 1 )
@@ -1101,7 +1103,7 @@ MODULE module_mp_thompson
       REAL, DIMENSION(its:ite, jts:jte):: pcp_ra, pcp_sn, pcp_gr, pcp_ic
       REAL:: dt, pptrain, pptsnow, pptgraul, pptice
       REAL:: qc_max, qr_max, qs_max, qi_max, qg_max, ni_max, nr_max
-      REAL:: rand1, rand2, rand3, abs_min_rand
+      REAL:: rand1, rand2, rand3, spp_mp_mag_times_cutoff
       INTEGER:: i, j, k, m
       INTEGER:: imax_qc,imax_qr,imax_qi,imax_qs,imax_qg,imax_ni,imax_nr
       INTEGER:: jmax_qc,jmax_qr,jmax_qi,jmax_qs,jmax_qg,jmax_ni,jmax_nr
@@ -1268,7 +1270,18 @@ MODULE module_mp_thompson
       kmax_ni = 0
       kmax_nr = 0
 
-      abs_min_rand = ABS(MINVAL(rand_pert(:,1)))
+      !Get the Thompson MP SPP magnitude and standard deviation cutoff
+     
+      if (rand_perturb_on .ne. 0) then 
+        do k =1,n_var_spp
+          select case (spp_var_list(k))
+          case('mp')
+            spp_mp_mag_times_cutoff = spp_prt_list(k)*spp_stddev_cutoff(k)
+          end select
+        enddo
+      endif
+
+      print*, ' spp_mp_mag_times_cutoff is = ', spp_mp_mag_times_cutoff
 
       j_loop:  do j = j_start, j_end
       i_loop:  do i = i_start, i_end
@@ -1294,7 +1307,7 @@ MODULE module_mp_thompson
             m = RSHIFT(ABS(rand_perturb_on),1)
             if (MOD(m,2) .ne. 0) rand2 = rand_pert(i,1)*2.
             m = RSHIFT(ABS(rand_perturb_on),2)
-            if (MOD(m,2) .ne. 0) rand3 = 0.25*(rand_pert(i,1)+abs_min_rand)
+            if (MOD(m,2) .ne. 0) rand3 = 0.25*(rand_pert(i,1)+spp_mp_mag_times_cutoff)
             m = RSHIFT(ABS(rand_perturb_on),3)
          endif
 !+---+-----------------------------------------------------------------+
