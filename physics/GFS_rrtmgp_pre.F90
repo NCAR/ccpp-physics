@@ -227,8 +227,8 @@ contains
     t_lay(1:NCOL,:) = tgrs(1:NCOL,:)
 
     ! Bound temperature/pressure at layer centers.
-    do iCol=1,NCOL
-       do iLay=1,nLev
+    do iLay=1,nLev
+       do iCol=1,NCOL
           if (t_lay(iCol,iLay) .le. minGPtemp) then
              t_lay(iCol,iLay) = minGPtemp + epsilon(minGPtemp)
           endif
@@ -246,8 +246,8 @@ contains
 
     ! Temperature at layer-interfaces          
     call cmp_tlev(nCol,nLev,minGPpres,p_lay,t_lay,p_lev,tsfc,t_lev)
-    do iCol=1,nCol
-       do iLev=1,nLev+1
+    do iLev=1,nLev+1
+       do iCol=1,nCol
           if (t_lev(iCol,iLev) .le. minGPtemp) t_lev(iCol,iLev) = minGPtemp + epsilon(minGPtemp)
           if (t_lev(iCol,iLev) .ge. maxGPtemp) t_lev(iCol,iLev) = maxGPtemp - epsilon(maxGPtemp)
        enddo
@@ -260,8 +260,8 @@ contains
     ! Compute a bunch of thermodynamic fields needed by the cloud microphysics schemes. 
     ! Relative humidity, saturation mixing-ratio, vapor mixing-ratio, virtual temperature, 
     ! layer thickness,...
-    do iCol=1,NCOL
-       do iLay=1,nLev
+    do iLay=1,nLev
+       do iCol=1,NCOL
           es                = min( p_lay(iCol,iLay),  fpvs( t_lay(iCol,iLay) ) )  ! fpvs and prsl in pa
           qs_lay(iCol,iLay) = max( con_epsqs, con_eps * es / (p_lay(iCol,iLay) + con_epsm1*es) )
           relhum(iCol,iLay) = max( 0._kind_phys, min( 1._kind_phys, max(con_epsqs, q_lay(iCol,iLay))/qs_lay(iCol,iLay) ) )
