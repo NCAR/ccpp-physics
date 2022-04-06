@@ -180,7 +180,7 @@ contains
          gas_concentrations   ! RRTMGP DDT: gas volumne mixing ratios
 
     ! Local variables
-    integer :: i, j, iCol, iBand, iLay
+    integer :: i, j, iCol, iBand, iLay, iLev, iSFC_ilev
     real(kind_phys),dimension(nCol,nLev) :: vmr_o3, vmr_h2o
     real(kind_phys) :: es, tem1, tem2, pfac
     real(kind_phys), dimension(nLev+1) :: hgtb
@@ -202,9 +202,11 @@ contains
     if (top_at_1) then 
        iSFC = nLev
        iTOA = 1
+       iSFC_ilev = iSFC + 1
     else
        iSFC = 1
        iTOA = nLev
+       iSFC_ilev = 1
     endif
 
     ! #######################################################################################
@@ -244,6 +246,12 @@ contains
 
     ! Temperature at layer-interfaces          
     call cmp_tlev(nCol,nLev,minGPpres,p_lay,t_lay,p_lev,tsfc,t_lev)
+    do iCol=1,nCol
+       do iLev=1,nLev+1
+          if (t_lev(iCol,iLev) .le. minGPtemp) t_lev(iCol,iLev) = minGPtemp + epsilon(minGPtemp)
+          if (t_lev(iCol,iLev) .ge. maxGPtemp) t_lev(iCol,iLev) = maxGPtemp - epsilon(maxGPtemp)
+       enddo
+    enddo
 
     ! Save surface temperature at radiation time-step, used for LW flux adjustment betwen
     ! radiation calls.
@@ -361,7 +369,7 @@ contains
     ! #######################################################################################
     ! Setup surface ground temperature and ground/air skin temperature if required.
     ! #######################################################################################
-    tsfg(1:NCOL) = tsfc(1:NCOL)
+    tsfg(1:NCOL) = t_lev(1:NCOL,iSFC_ilev)
     tsfa(1:NCOL) = t_lay(1:NCOL,iSFC)
 
     ! #######################################################################################
