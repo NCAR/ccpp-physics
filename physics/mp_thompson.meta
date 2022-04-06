@@ -659,6 +659,7 @@
   units = count
   dimensions = ()
   type = integer
+  intent = in
 [spp_prt_list]
   standard_name = magnitude_of_spp_perturbations
   long_name = magnitude of spp perturbations
@@ -666,6 +667,7 @@
   dimensions = (number_of_spp_schemes_perturbed)
   type = real
   kind = kind_phys
+  intent = in
 [spp_stddev_cutoff]
   standard_name = magnitude_of_spp_standard_deviation_cutoff
   long_name = magnitude of spp standard deviation cutoff
@@ -673,6 +675,7 @@
   dimensions = (number_of_spp_schemes_perturbed)
   type = real
   kind = kind_phys
+  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
