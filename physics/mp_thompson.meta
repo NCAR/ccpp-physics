@@ -664,7 +664,7 @@
   standard_name = magnitude_of_spp_perturbations
   long_name = magnitude of spp perturbations
   units = 1
-  dimensions = (number_of_spp_schemes_perturbed)
+  dimensions = ()
   type = real
   kind = kind_phys
   intent = in
@@ -672,7 +672,7 @@
   standard_name = magnitude_of_spp_standard_deviation_cutoff
   long_name = magnitude of spp standard deviation cutoff
   units = 1
-  dimensions = (number_of_spp_schemes_perturbed)
+  dimensions = ()
   type = real
   kind = kind_phys
   intent = in
