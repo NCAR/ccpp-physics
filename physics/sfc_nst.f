@@ -22,7 +22,6 @@
 !! \htmlinclude sfc_nst_run.html
 !!
 !> \section NSST_general_algorithm GFS Near-Surface Sea Temperature Scheme General Algorithm
-!> @{
       subroutine sfc_nst_run                                            &
      &     ( im, hvap, cp, hfus, jcal, eps, epsm1, rvrdm1, rd, rhw0,    &  ! --- inputs:
      &       pi, tgice, sbc, ps, u1, v1, t1, q1, tref, cm, ch,          &
@@ -701,7 +700,6 @@ cc
 
       return
       end subroutine sfc_nst_run
-!> @}
       end module sfc_nst
 
 !> This module contains the CCPP-compliant GFS near-surface sea temperature pre
@@ -722,7 +720,7 @@ cc
       subroutine sfc_nst_pre_finalize
       end subroutine sfc_nst_pre_finalize
 
-!! \section arg_table_sfc_nst_pre_run Argument Table
+!> \section arg_table_sfc_nst_pre_run Argument Table
 !! \htmlinclude sfc_nst_pre_run.html
 !!
 !> \section NSST_general_pre_algorithm General Algorithm
@@ -814,8 +812,8 @@ cc
 
       contains
 
-! \defgroup GFS_NSST_POST GFS Near-Surface Sea Temperature Post
-!! \brief Brief description of the parameterization
+!> \defgroup GFS_NSST_POST_mod GFS Near-Surface Sea Temperature Post
+!! @{
 !!
       subroutine sfc_nst_post_init
       end subroutine sfc_nst_post_init
@@ -825,15 +823,11 @@ cc
       subroutine sfc_nst_post_finalize
       end subroutine sfc_nst_post_finalize
 
-!> \brief Brief description of the subroutine
-!!
-!! \section arg_table_sfc_nst_post_run Argument Table
+!> \section arg_table_sfc_nst_post_run Argument Table
 !! \htmlinclude sfc_nst_post_run.html
 !!
-! \section NSST_general_post_algorithm General Algorithm
-!
-! \section NSST_detailed_post_algorithm Detailed Algorithm
-! @{
+!! \section NSST_general_post_algorithm General Algorithm
+!!
       subroutine sfc_nst_post_run                                       &
      &     ( im, kdt, rlapse, tgice, wet, use_flake, icy, oro, oro_uf,  &
      &       nstf_name1,                                                &
@@ -908,5 +902,6 @@ cc
 
       return
       end subroutine sfc_nst_post_run
+
 
       end module sfc_nst_post

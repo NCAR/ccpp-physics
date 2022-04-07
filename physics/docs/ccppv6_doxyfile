@@ -121,6 +121,7 @@ INPUT                  =  pdftxt/rel_update.txt            \
                           pdftxt/GFS_v16_suite.txt       \
                           pdftxt/GFS_v17_p8_suite.txt    \
                           pdftxt/RAP_suite.txt           \
+                          pdftxt/FV3_RAP_input.nml       \
                           pdftxt/HRRR_suite.txt          \
                           pdftxt/RE6/FV3_HRRR_input.nml  \
                           pdftxt/RRFS_v1beta_suite.txt   \
@@ -249,6 +250,7 @@ INPUT                  =  pdftxt/rel_update.txt            \
                         ../cu_gf_driver_pre.F90 \
                         ../cu_gf_deep.F90   \
                         ../cu_gf_sh.F90     \
+                        ../cu_gf_driver_post.F90 \
                         ../module_MYNNPBL_wrapper.F90 \
                         ../module_bl_mynn.F90   \
                         ../module_MYNNSFC_wrapper.F90 \
@@ -270,7 +272,9 @@ INPUT                  =  pdftxt/rel_update.txt            \
                         ../physparam.f      \
                         ../physcons.F90     \
                         ../radcons.f90      \
-                        ../mersenne_twister.f
+                        ../mersenne_twister.f \
+                        ../maximum_hourly_diagnostics.F90   \
+                        ../phys_tend.F90  
 
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.f \
@@ -332,7 +336,7 @@ HTML_FOOTER            =
 HTML_STYLESHEET        =
 HTML_EXTRA_STYLESHEET  = ccpp_dox_extra_style.css
 HTML_EXTRA_FILES       =
-HTML_COLORSTYLE_HUE    = 220
+HTML_COLORSTYLE_HUE    = 240
 HTML_COLORSTYLE_SAT    = 100
 HTML_COLORSTYLE_GAMMA  = 80
 HTML_TIMESTAMP         = NO

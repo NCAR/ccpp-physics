@@ -16,7 +16,6 @@
     dycore_only = .false.
 /
 
-!> [CIRES_UGWP_NML]
 &cires_ugwp_nml
     knob_ugwp_azdir   = 2, 4, 4, 4
     knob_ugwp_doaxyz  = 1
@@ -31,7 +30,6 @@
     knob_ugwp_wvspec  = 1, 25, 25, 25
     launch_level      = 25
 /
-!! [CIRES_UGWP_NML]
 
 &diag_manager_nml
     prepend_date = .false.

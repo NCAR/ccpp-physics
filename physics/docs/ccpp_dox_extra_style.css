@@ -17,3 +17,6 @@ div.image img[src="schematic_Rad_mod.png"]{
 div.image img[src="GFS_Operational_Physics.png"]{
     width:16cm;
 }
+
+.link { color: #FF0000; } /* CSS link color (red) */
+.link:hover { color: #00FF00; } /* CSS link hover (green) */

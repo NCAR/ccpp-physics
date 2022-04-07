@@ -1,16 +1,18 @@
-!> \file GFS_stochastics.f90
+!> \file GFS_stochastics.F90
 !! This file contains code previously in GFS_stochastics_driver.
 
-!>\defgroup gfs_stoch GFS Stochastics Physics Module
-!! This module
     module GFS_stochastics
 
       contains
 
+!>\defgroup gfs_stoch_mod GFS Stochastics Physics Module
+!! @{
+!! This module
+!!
 !> \section arg_table_GFS_stochastics_init Argument Table
 !! \htmlinclude GFS_stochastics_init.html
 !!
-!>\section gfs_stochy_general GFS_stochastics_init General Algorithm
+!>\section gfs_stochyini_general GFS_stochastics_init General Algorithm
 !! This is the GFS stochastic physics initialization.
 !! -# define vertical tapering for CA global
       subroutine GFS_stochastics_init (si,vfact_ca,km,do_ca,ca_global, errmsg, errflg)
@@ -368,5 +370,5 @@
          endif
 
       end subroutine GFS_stochastics_run
-
+!! @}
     end module GFS_stochastics

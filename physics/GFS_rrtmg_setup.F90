@@ -1,7 +1,8 @@
-!> \file GFS_rrtmg_setup.f90
+!> \file GFS_rrtmg_setup.F90
 !! This file contains
 
 !> \defgroup GFS_rrtmg_setup_mod GFS RRTMG Scheme Setup
+!! @{
 module GFS_rrtmg_setup
 
    use physparam, only : isolar , ictmflg, ico2flg, ioznflg, iaerflg, &
@@ -729,5 +730,6 @@ module GFS_rrtmg_setup
 !...................................
       end subroutine radupdate
 !-----------------------------------
+!! @}
 
 end module GFS_rrtmg_setup

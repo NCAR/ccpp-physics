@@ -1,8 +1,8 @@
-!>\file rrtmg_sw_pre.f90
+!>\file rrtmg_sw_pre.F90
       module rrtmg_sw_pre
       contains
 
-!>\defgroup rrtmg_sw_pre GFS RRTMG scheme Pre
+!>\defgroup rrtmg_sw_pre_mod GFS RRTMG-SW scheme Pre
 !! @{
       subroutine rrtmg_sw_pre_init ()
       end subroutine rrtmg_sw_pre_init

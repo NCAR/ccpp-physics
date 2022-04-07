@@ -27,8 +27,7 @@
       end if        
       end subroutine drag_suite_init
 
-! \defgroup GFS_ogwd GFS Orographic Gravity Wave Drag
-!> \defgroup gfs_drag_suite GFS drag_suite Main
+!> \defgroup gfs_drag_suite_mod GFS drag_suite Main
 !! \brief This subroutine includes orographic gravity wave drag,  mountain
 !! blocking, and form drag.
 !!
