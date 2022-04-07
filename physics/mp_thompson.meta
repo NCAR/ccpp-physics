@@ -679,7 +679,7 @@
   standard_name = perturbed_spp_schemes
   long_name = perturbed spp schemes
   units = none
-  dimensions = (number_of_spp_schemes_perturbed)
+  dimensions = (number_of_perturbed_spp_schemes)
   type = character
   kind = len=3
   intent = in
