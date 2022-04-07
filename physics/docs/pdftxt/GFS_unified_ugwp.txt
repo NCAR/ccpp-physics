@@ -156,9 +156,10 @@ Hines 1997 \cite hines_1997) saturation theories.
 
 \section intra_unified Intraphysics Communication
 \ref arg_table_unified_ugwp_run
+\htmlinclude unified_ugwp_run.html
  
-\section g_thompson  General Algorithm
-- \ref 
+\section ga_unified_ugwp  General Algorithm
+\ref gen_unified_ugwp 
 
 
 */

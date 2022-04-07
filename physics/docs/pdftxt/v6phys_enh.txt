@@ -1,6 +1,21 @@
 /**
 \page v6phys_enh_page GFS Prototype 8 Physics Enhancements
 
+\section CA_p8 Cellular Automata in the ufs-weather-model
+\author Lisa Bengtsson (NOAA/PSL): Lisa.Bengtsson@noaa.gov
+
+\b Scientific \b background:
+
+Cumulus clouds in the atmosphere can organize into a variety of sizes, ranging from small fair‐weather cumulus clouds, rain showers and thunderstorms, to larger scale weather systems. In weather and climate models, such organization is traditionally not well-represented as the motions associated with cumulus clouds are generally too small to be resolved by the numerical model. In this scheme we use a stochastic cellular automaton (CA), a mathematical model often used to describe self‐organizing behavior in physical systems to represent the effects of convective organization. The scheme addresses the effect of convective organization in a bulk-plume cumulus convection parameterizations (saSAS), where this type of organization has to be represented in terms of how the resolved flow would “feel” convection if more coherent structures were present on the subgrid.  
+In addition, for longer range forecasts (seasonal, decadal, climate), the relevance of stochastic cumulus convection in numerical models can also be discussed in terms of noise induced forcing. As an example, on the time scale of organized convectively coupled waves, the small scale individual convective plumes grow and decay so rapidly that they are not predictable on time-scales longer than a few hours, whereas the organized larger scale convectively coupled wave envelope can have a deterministic limit of predictability of about two weeks. Thus, for longer range forecasts, individual convective plumes can be viewed as stochastic noise - they can have an impact on the convectively coupled waves (due to noise forcing), but they are not predictable on their own. By providing the CA with a stochastic initialization, the effect of stochastic cumulus convection is also represented by the scheme. 
+The scientific motivation for the scheme, the CA rulesets explored, and the impact on convectively coupled equatorial waves can be found in the following references; Bengtsson et al. 2011, Bengtsson et al. 2013, Bengtsson and Kornich (2016), Bengtsson et al 2019, and Bengtsson et al. 2021. 
+
+\b Technical \b remarks:
+
+The CA source code is located in the stochastic physics submodule in the ufs-weather-model: https://github.com/noaa-psd/stochastic_physics . The main call to the CA routines are made from FV3/stochastic_physics_driver.F90. 
+
+There are currently two options to evolve the CA (can be done simultaneously); (ca_global) a large scale global pattern which evolves the ruleset according to game of life with cell history, or (ca_sgs) a sub-grid scale pattern which is conditioned on a forcing from the atmospheric model. The two options are controlled by namelist (see below) and are evolved in cellular_automata_globa.F90 and cellular_automata_sgs.F90 respectively. Both approaches use the main CA module update_ca.F90 to evolve the CA in time. Since the CA needs to know about its neighborhood it uses the halo information to gather the state in adjacent MPI domains and/or adjacent cube sphere interfaces. 
+
 
 \section cumu_p8 P8 Physics Updates in GFS Cumulus Convection
 \author Jongil Han (NCEP/EMC): Jongil.Han@noaa.gov

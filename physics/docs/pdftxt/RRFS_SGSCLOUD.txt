@@ -6,6 +6,7 @@ This interstitial module adds the subgrid-scale cloud information to the resolve
 
 \section intra_rrfssgs Intraphysics Communication
 - sgscloud_radpre_run(): \ref arg_table_sgscloud_radpre_run 
+- sgscloud_radpost_run():\ref arg_table_sgscloud_radpost_run
 
 \section gen_rrfssgs SGSCLOUD Pre-radiation Interstitial General Algorithm
 

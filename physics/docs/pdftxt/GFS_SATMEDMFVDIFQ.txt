@@ -27,7 +27,7 @@ it was an eddy diffusion form)
 - For local turbulence mixing, a TKE closure model is used.
 
 \section intra_satmedmfvdifq Intraphysics Communication
-\ref arg_table_satmedmfvdifq_run
+\htmlinclude satmedmfvdifq_run.html
 
 \section gen_pbl_satmedmfvdifq  General Algorithm
 \ref gen_satmedmfvdifq

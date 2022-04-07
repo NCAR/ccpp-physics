@@ -76,7 +76,7 @@ for the model to provide useful guidance for aircraft icing forecasts
 \section intra_thompson Intraphysics Communication
 \ref arg_table_mp_thompson_run
 
-\section g_thompson  General Algorithm
+\section gal_thompson  General Algorithm
 - \ref gen_thompson_init
 - \ref gen_thompson_hrrr
 - \ref gen_mpgtdriver

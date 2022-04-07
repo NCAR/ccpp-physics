@@ -9,7 +9,6 @@
       contains
 
 !>\defgroup GFS_radiation_surface GFS radiation surface
-!! @{
 !> \section arg_table_GFS_radiation_surface_init Argument Table
 !! \htmlinclude GFS_radiation_surface_init.html
 !!
@@ -191,5 +190,4 @@
 
        subroutine GFS_radiation_surface_finalize ()
        end subroutine GFS_radiation_surface_finalize
-!! @}
        end module GFS_radiation_surface

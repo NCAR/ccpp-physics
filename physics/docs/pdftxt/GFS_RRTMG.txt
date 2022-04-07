@@ -71,8 +71,16 @@
  - CSUSFtoa: Upward SW
 
 \section  intraphysics_rrtmg Intraphysics Communication
- + For RRTMG-Longwave radiation parameterization (\ref arg_table_rrtmg_lw_run)
- + For RRTMG-Shortwave radiation parameterization (\ref arg_table_rrtmg_sw_run) 
++ \b GFS_suite_interstitial_rad_reset: \ref arg_table_GFS_suite_interstitial_rad_reset_run
++ \b gfs_rrtmg_pre: \ref arg_table_GFS_rrtmg_pre_run
++ \b GFS_radiation_surface:  \ref arg_table_GFS_radiation_surface_run
++ \b rrtmg_sw_pre: \ref arg_table_rrtmg_sw_pre_run
++ \b rrtmg_sw: \ref arg_table_rrtmg_sw_run
++ \b rrtmg_sw_post: \ref arg_table_rrtmg_sw_post_run
++ \b rrtmg_lw_pre: \ref arg_table_rrtmg_lw_pre_run
++ \b rrtmg_lw: \ref arg_table_rrtmg_lw_run
++ \b rrtmg_lw_post: \ref arg_table_rrtmg_lw_post_run
++ \b GFS_rrtmg_post: \ref arg_table_GFS_rrtmg_post_run
 
 \section  gen_al_rrtmg General Algorithm
  + \ref gen_lwrad

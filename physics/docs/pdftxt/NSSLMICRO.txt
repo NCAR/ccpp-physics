@@ -30,8 +30,6 @@ Namelist parameters:
 \htmlinclude mp_nssl_run.html
 
 \section gen_nssl2m  General Algorithm
-- \ref gen_nssl2m_init
-- \ref gen_nssl2m_driver
-- nssl_2mom_driver
+- \ref gen_nssl
 
 */

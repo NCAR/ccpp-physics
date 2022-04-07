@@ -26,9 +26,9 @@ which facilitates model development and code maintenance. Additionally, we are l
 
 \b Cumulus \b Parameterizations
  - \subpage GFS_SAMFdeep 
+  - \ref CA_p8
  - \subpage GFS_SAMFshal 
  - \subpage CU_GF 
- - \todo Cellular Automata Scheme page
 
 \b Microphysics
  - \subpage GFDL_cloud 
@@ -89,18 +89,16 @@ Table 1.  Physics suite options included in this documentation.
 \tableofcontents
 | Physics suites   |     GFS_v16        |   GFS_v17_p8            |       RAP        |    HRRR                     |   RRFS_v1beta      |      WoFS     |         
 |------------------|--------------------|-------------------------|------------------|-----------------------------|--------------------|---------------|
-|\b HOST Model     | SCM, SRW, MRW      |  SCM, MRW               |    SCM           |   SCM, SRW                  |  SCM, SRW          |  SCM, SRW     |
-|\b Deep Cu        | \ref GFS_SAMFdeep  |  \ref GFS_SAMFdeep + CA |  \ref CU_GF      | \a  off                     |   \a off           |   \a off      |
-|\b Shallow Cu     | \ref GFS_SAMFshal  |  \ref GFS_SAMFshal      |  \ref CU_GF      | \ref MYNNEDMF and \ref cu_gf_sh_group       |   \ref MYNNEDMF    |
-|\b Microphysics   | \ref GFDL_cloud    |  \ref THOMPSON w/o AA   |  \ref Thompson   | \ref THOMPSON               | \ref THOMPSON      |    \ref NSSLMICRO_page     |
-|\b PBL/TURB       | \ref GFS_GFS_SATMEDMFVDIFQ     |  \ref GFS_SATMEDMFVDIFQ  |  \ref MYNNEDMF     | \ref MYNNEDMF     | \ref MYNNEDMF   |   \ref MYNNEDMF    |
-|\b Radiation        | \ref GFS_RRTMG     |  \ref GFS_RRTMGP        |  \ref GFS_RRTMG  | \ref GFS_RRTMG              | \ref GFS_RRTMG     |   \ref GFS_RRTMG    |
-| Surface Layer    | \ref GFS_SFCLYR      |  \ref GFS_SFCLYR         |  \ref GFS_SFCLYR    | \ref GFS_SFCLYR                             |   \ref GFS_SFCLYR  |
-|\b Land             | \ref GFS_NOAH      |  \ref NoahMP           |  \ref RUCLSM      | \ref RUCLSM                  |   \ref NoahMP      | \ref GFS_NOAH   |
-| Gravity Wave Drag| \ref GFS_UGWP_v0     |  \ref GFS_UGWP_v0        |  \ref GFS_UGWP_v0   | \ref GFS_UGWP_v0                            |   \ref GFS_UGWP_v0   |
-| Ocean            | \ref GFS_NSST or \ref GFS_OCEAN       |  \ref GFS_NSST or \ref GFS_OCEAN          |  \ref GFS_NSST      | \ref GFS_NSST   |   \ref GFS_NSST      |  
-| Ozone            | \ref GFS_OZPHYS      |  \ref GFS_OZPHYS         |  \ref GFS_OZPHYS    | \ref GFS_OZPHYS                             |   \ref GFS_OZPHYS    |   
-| Water Vapor      | \ref GFS_H2OPHYS     |  \ref GFS_H2OPHYS        |  \ref GFS_H2OPHYS   | \ref GFS_H2OPHYS                            |   \ref GFS_H2OPHYS   |
+|\b HOST \b Model  | SCM, SRW, MRW      |  SCM, MRW               |    SCM           |   SCM, SRW                  |  SCM, SRW          |  SCM, SRW     |
+|\b Deep \b Cu     | \ref GFS_SAMFdeep  |  \ref GFS_SAMFdeep + \ref CA_p8 |  \ref CU_GF      | \a  off                     |   \a off           |   \a off      |
+|\b Shallow \b Cu  | \ref GFS_SAMFshal  |  \ref GFS_SAMFshal      |  \ref CU_GF      | \ref MYNNEDMF               | \ref MYNNEDMF      |  \ref MYNNEDMF |
+|\b Microphysics   | \ref GFDL_cloud    |  \ref THOMPSON w/o AA   |  \ref THOMPSON   | \ref THOMPSON               | \ref THOMPSON      | \ref NSSLMICRO_page     |
+|\b PBL/TURB       | \ref GFS_SATMEDMFVDIFQ     |  \ref GFS_SATMEDMFVDIFQ  |  \ref MYNNEDMF     | \ref MYNNEDMF    | \ref MYNNEDMF     |   \ref MYNNEDMF    |
+|\b Radiation      | \ref GFS_RRTMG     |  \ref GFS_RRTMGP        |  \ref GFS_RRTMG  | \ref GFS_RRTMG              | \ref GFS_RRTMG     |   \ref GFS_RRTMG    |
+|\b Surface \b Layer | \ref GFS_SFCLYR  |  \ref GFS_SFCLYR        | \ref SFC_MYNNSFL | \ref SFC_MYNNSFL            | \ref SFC_MYNNSFL   |   \ref SFC_MYNNSFL  |
+|\b LSM            | \ref GFS_NOAH      |  \ref NoahMP            |  \ref RUCLSM     | \ref RUCLSM                 |   \ref NoahMP      | \ref GFS_NOAH   |
+|\b Gravity \b Wave \b Drag| \ref GFS_UGWP_v0  |  \ref GFS_UNIFIED_UGWP |  \ref GFS_drag_suite  | \ref GFS_drag_suite | \ref  GFS_UGWP_v0  |   \ref GFS_UGWP_v0   |
+|\b Sea \b Ice     | \ref GFS_SFCSICE   | \ref GFS_SFCSICE        |  \ref RUCLSM     |  \ref RUCLSM                | \ref GFS_SFCSICE   |   \ref GFS_SFCSICE     |  
 \tableofcontents
 
 

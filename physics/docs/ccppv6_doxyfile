@@ -57,7 +57,7 @@ NUM_PROC_THREADS       = 1
 #---------------------------------------------------------------------------
 
 EXTRACT_ALL            = YES
-EXTRACT_PRIVATE        = YES
+EXTRACT_PRIVATE        = NO
 EXTRACT_PRIV_VIRTUAL   = NO
 EXTRACT_PACKAGE        = YES
 EXTRACT_STATIC         = YES
@@ -89,7 +89,7 @@ GENERATE_TESTLIST      = YES
 GENERATE_BUGLIST       = YES
 GENERATE_DEPRECATEDLIST= YES
 ENABLED_SECTIONS       = YES
-MAX_INITIALIZER_LINES  = 100
+MAX_INITIALIZER_LINES  = 30
 SHOW_USED_FILES        = YES
 SHOW_FILES             = YES
 SHOW_NAMESPACES        = YES
@@ -164,7 +164,9 @@ INPUT                  =  pdftxt/rel_update.txt            \
                         ../iccn_def.F              \
                         ../iccninterp.F90          \
                         ../sfcsub.F  \
-                        ../gcycle.F90  \
+                        ../gcycle.F90                  \
+                        ../GFS_suite_interstitial.F90    \
+                        ../GFS_radiation_surface.F90     \
                         ../GFS_rrtmg_pre.F90             \
                         ../GFS_rrtmg_post.F90           \
                         ../GFS_rrtmg_setup.F90          \
@@ -298,7 +300,7 @@ USE_MDFILE_AS_MAINPAGE =
 #---------------------------------------------------------------------------
 
 SOURCE_BROWSER         = NO
-INLINE_SOURCES         = YES
+INLINE_SOURCES         = NO
 STRIP_CODE_COMMENTS    = YES
 REFERENCED_BY_RELATION = YES
 REFERENCES_RELATION    = YES
@@ -493,7 +495,7 @@ EXTERNAL_PAGES         = YES
 #---------------------------------------------------------------------------
 
 DIA_PATH               =
-HIDE_UNDOC_RELATIONS   = NO
+HIDE_UNDOC_RELATIONS   = YES
 HAVE_DOT               = YES
 DOT_NUM_THREADS        = 0
 DOT_FONTNAME           = Helvetica
@@ -510,12 +512,12 @@ TEMPLATE_RELATIONS     = NO
 INCLUDE_GRAPH          = YES
 INCLUDED_BY_GRAPH      = NO
 CALL_GRAPH             = YES
-CALLER_GRAPH           = YES
+CALLER_GRAPH           = NO
 GRAPHICAL_HIERARCHY    = YES
 DIRECTORY_GRAPH        = YES
 DIR_GRAPH_MAX_DEPTH    = 1
 DOT_IMAGE_FORMAT       = SVG
-INTERACTIVE_SVG        = YES
+INTERACTIVE_SVG        = NO
 DOT_PATH               =
 DOTFILE_DIRS           =
 MSCFILE_DIRS           =

@@ -5,19 +5,15 @@
 
 Version 17 of the Global Forecast System (GFS) will be implemented operationally by the NOAA
 National Centers for Environmental Prediction (NCEP) in XXXX. GFS_v17_p8 is a prototype of 
-the GFS_v17 suite. The main difference between the GFS_v16 and GFS_v17 suites is 
-- \b Microphysics: The replacement of \ref GFDL_cloud with \ref thompson
-- \b Deep \b Cumulus: Automata Cellular in CU
+the GFS_v17 suite. The primary difference between the GFS_v16 and GFS_v17 suites is: 
+- \b Microphysics: The replacement of \ref GFDL_cloud with \ref THOMPSON 
+- \b Deep \b Cumulus: \ref CA_p8
 - \b Radiation : The replacement of \ref GFS_RRTMG with \ref GFS_RRTMGP
 - \b Gravity \b Wave \b Drag: The replacement of \ref GFS_UGWP_v0 with \ref GFS_UNIFIED_UGWP 
-- \b Land \b Surface \b Model: The replacement of \ref GFS_NOAH with \ref GFS_NOAHMP
+- \b Land \b Surface \b Model: The replacement of \ref GFS_NOAH with \ref NoahMP
 
-Besides the above mentioned new schemes, several physics enhancements is introduced since March 2021:
--
--
--
-
-
+Besides the above mentioned new schemes, several physics enhancements are introduced since March 2021:
+\sa \ref v6phys_enh_page
 
 \section sdf_gfsv17p8 Suite Definition File 
 \include suite_FV3_GFS_v17_p8.xml

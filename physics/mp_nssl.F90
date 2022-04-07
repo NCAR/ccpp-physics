@@ -21,7 +21,6 @@ module mp_nssl
 
 !>\ingroup nsslmp
 !> This subroutine is a wrapper around the nssl_2mom_init().
-!! \section arg_table_mp_nssl_init Argument Table
 !>@{
 !> \section arg_table_mp_nssl_init Argument Table
 !! \htmlinclude mp_nssl_init.html

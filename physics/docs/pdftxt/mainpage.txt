@@ -4,12 +4,11 @@
 Welcome to the scientific documentation for the parameterizations available in the Common 
 Community Physics Package (CCPP) v6.0.0 and the suites that can be configured using them.
 
-\image html  mesocam.png " " width=800
-
-The CCPP-Physics is envisioned to contain parameterizations used in NOAA's Unified Forecast System (UFS) 
+The CCPP-Physics is envisioned to contain parameterizations used in the 
+<a href="https://ufscommunity.org/about/what-is-ufs/">Unified Forecast System (UFS)</a>
 applications for weather through seasonal prediction timescales, encompassing the current operational GFS schemes as well as 
 developmental schemes under consideration for upcoming operational implementations. New in this release is 
-suite RRFS_v1alpha, which is being tested in the UFS Short-Range Weather Application for future use 
+suite \ref GFS_v16_page, \ref GFS_v17_p8_page, \ref RRFS_v1beta_page, which is being tested in the UFS Short-Range Weather Application for future use 
 in the convective-allowing Rapid Refresh Forecast System (RRFS), slated for operational implementation
 in 2023. Convection-allowing models allow us to begin to resolve the fine details within storm systems that are
 necessary for the accurate predition of high-impact events such as tornadoes, flash floods, and winter weather.
