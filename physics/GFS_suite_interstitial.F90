@@ -701,7 +701,7 @@
       ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,  &
       imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, convert_dry_rho, dtf, save_qc, save_qi, con_pi, dtidx, dtend,&
       index_of_process_conv_trans, gq0, clw, prsl, save_tcp, con_rd, con_eps, nwfa, spechum, ldiag3d,                &
-      qdiag3d, save_lnc, save_inc, ntk, ntke, errmsg, errflg)
+      qdiag3d, save_lnc, save_inc, ntk, ntke, rrfs_smoke, dqdti, errmsg, errflg)
 
       use machine,               only: kind_phys
       use module_mp_thompson_make_number_concentrations, only: make_IceNumber, make_DropletNumber
@@ -714,7 +714,7 @@
         ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,           &
         imp_physics_zhao_carr, imp_physics_zhao_carr_pdf
 
-      logical,                                  intent(in) :: ltaerosol, convert_dry_rho
+      logical,                                  intent(in) :: ltaerosol, convert_dry_rho, rrfs_smoke
 
       real(kind=kind_phys), intent(in   )                   :: con_pi, dtf
       real(kind=kind_phys), intent(in   ), dimension(:,:)   :: save_qc
@@ -733,6 +733,9 @@
       real(kind=kind_phys),                   intent(in) :: con_rd, con_eps
       real(kind=kind_phys), dimension(:,:),   intent(in) :: nwfa, save_tcp
       real(kind=kind_phys), dimension(:,:),   intent(in) :: spechum
+
+      ! dqdti may not be allocated
+      real(kind=kind_phys), dimension(:,:),   intent(inout) :: dqdti
 
       character(len=*),     intent(  out)                   :: errmsg
       integer,              intent(  out)                   :: errflg
@@ -918,6 +921,15 @@
           enddo
         enddo
       endif   ! end if_ntcw
+
+! dqdt_v : instaneous moisture tendency (kg/kg/sec)
+      if (rrfs_smoke) then
+        do k=1,levs
+          do i=1,im
+            dqdti(i,k) = dqdti(i,k) * (1.0 / dtf)
+          enddo
+        enddo
+      endif
 
     end subroutine GFS_suite_interstitial_4_run
 

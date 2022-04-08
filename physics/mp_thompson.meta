@@ -435,6 +435,13 @@
   type = real
   kind = kind_phys
   intent = in
+[aero_ind_fdb]
+  standard_name = rrfs_smoke_aero_ind_fdb_opt
+  long_name = flag for rrfs wfa ifa emission
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [tgrs]
   standard_name = air_temperature_of_new_state
   long_name = model layer mean temperature

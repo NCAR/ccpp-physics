@@ -1313,6 +1313,36 @@
   dimensions = ()
   type = integer
   intent = in
+[chem3d]
+  standard_name = chem3d_mynn_pbl_transport
+  long_name = mynn pbl transport of smoke and dust
+  units = various
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,2)
+  type = real
+  kind = kind_phys
+  intent = inout
+[frp]
+  standard_name = frp_hourly
+  long_name = hourly frp
+  units = mw
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[mix_chem]
+  standard_name = rrfs_smoke_mynn_tracer_mixing
+  long_name = flag for rrfs smoke mynn tracer mixing
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[fire_turb]
+  standard_name = rrfs_smoke_mynn_enh_vermix
+  long_name = flag for rrfs smoke mynn enh vermix
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [ltaerosol]
   standard_name = flag_for_aerosol_physics
   long_name = flag for aerosol physics

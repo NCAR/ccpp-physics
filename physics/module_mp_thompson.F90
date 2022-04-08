@@ -968,7 +968,7 @@ MODULE module_mp_thompson
 !> @{
       SUBROUTINE mp_gt_driver(qv, qc, qr, qi, qs, qg, ni, nr, nc,     &
                               nwfa, nifa, nwfa2d, nifa2d,             &
-                              tt, th, pii,                            &
+                              aero_ind_fdb, tt, th, pii,              &
                               p, w, dz, dt_in, dt_inner,              &
                               sedi_semi, decfl,                       &
                               RAINNC, RAINNCV,                        &
@@ -1023,6 +1023,7 @@ MODULE module_mp_thompson
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(INOUT):: &
                           nc, nwfa, nifa
       REAL, DIMENSION(ims:ime, jms:jme), OPTIONAL, INTENT(IN):: nwfa2d, nifa2d
+      LOGICAL, OPTIONAL, INTENT(IN):: aero_ind_fdb
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(INOUT):: &
                           re_cloud, re_ice, re_snow
       INTEGER, INTENT(IN) :: rand_perturb_on, kme_stoch
@@ -1446,8 +1447,10 @@ MODULE module_mp_thompson
 !.. Changed 13 May 2013 to fake emissions in which nwfa2d is aerosol
 !.. number tendency (number per kg per second).
          if (is_aerosol_aware) then
+            if ( .not. aero_ind_fdb) then
             nwfa1d(kts) = nwfa1d(kts) + nwfa2d(i,j)*dt
             nifa1d(kts) = nifa1d(kts) + nifa2d(i,j)*dt
+            endif
 
             do k = kts, kte
                nc(i,k,j) = nc1d(k)
