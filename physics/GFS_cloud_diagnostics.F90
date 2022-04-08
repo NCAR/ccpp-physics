@@ -39,43 +39,51 @@ contains
 !! \section arg_table_GFS_cloud_diagnostics_run
 !! \htmlinclude GFS_cloud_diagnostics_run.html
 !!  
-  subroutine GFS_cloud_diagnostics_run(nCol, nLev, lsswr, lslwr, lat, de_lgth, p_lay,    &
+  subroutine GFS_cloud_diagnostics_run(nCol, nLev, iovr_rand, iovr_maxrand, iovr_max,    & 
+       iovr_dcorr, iovr_exp, iovr_exprand, lsswr, lslwr, lat, de_lgth, p_lay,            &
        cld_frac, p_lev, deltaZ, cloud_overlap_param, precip_overlap_param, con_pi,       &
        mtopa, mbota, cldsa, errmsg, errflg)
     implicit none
      
     ! Inputs 
-    integer, intent(in) :: &
-         nCol,              & ! Number of horizontal grid-points
-         nLev                 ! Number of vertical-layers
+    integer, intent(in) ::                 &
+         nCol,                             & ! Number of horizontal grid-points
+         nLev                                ! Number of vertical-layers
+    integer, intent(in) ::                 &
+         iovr_rand,                        & ! Flag for random cloud overlap method
+         iovr_maxrand,                     & ! Flag for maximum-random cloud overlap method
+         iovr_max,                         & ! Flag for maximum cloud overlap method
+         iovr_dcorr,                       & ! Flag for decorrelation-length cloud overlap method
+         iovr_exp,                         & ! Flag for exponential cloud overlap method
+         iovr_exprand                        ! Flag for exponential-random cloud overlap method
     logical, intent(in) :: &
-    	 lsswr,             & ! Call SW radiation?
-    	 lslwr                ! Call LW radiation 
-    real(kind_phys), intent(in) :: &
-         con_pi               ! Physical constant: pi  
-    real(kind_phys), dimension(:), intent(in) :: &
-         lat,               & ! Latitude       
-         de_lgth              ! Decorrelation length     
+    	 lsswr,                            & ! Call SW radiation?
+    	 lslwr                               ! Call LW radiation 
+    real(kind_phys), intent(in) ::         &
+         con_pi                              ! Physical constant: pi  
+    real(kind_phys), dimension(:), intent(in) ::   &
+         lat,                                      & ! Latitude       
+         de_lgth                                     ! Decorrelation length     
     real(kind_phys), dimension(:,:), intent(in) :: &
-         p_lay,             & ! Pressure at model-layer
-         cld_frac             ! Total cloud fraction
+         p_lay,                                    & ! Pressure at model-layer
+         cld_frac                                    ! Total cloud fraction
     real(kind_phys), dimension(:,:), intent(in) :: &
-         p_lev                ! Pressure at model interfaces         
+         p_lev                                       ! Pressure at model interfaces         
     real(kind_phys), dimension(:,:), intent(in) :: &
-    	 deltaZ,              & ! Layer thickness (km)
-         cloud_overlap_param, & ! Cloud-overlap parameter
-         precip_overlap_param   ! Precipitation overlap parameter
+    	 deltaZ,                                   & ! Layer thickness (m)
+         cloud_overlap_param,                      & ! Cloud-overlap parameter
+         precip_overlap_param                        ! Precipitation overlap parameter
     
     ! Outputs
-    character(len=*), intent(out) :: &
-         errmsg                 ! Error message
-    integer, intent(out) :: &  
-         errflg                 ! Error flag
-    integer,dimension(:,:),intent(out) :: &
-         mbota,               & ! Vertical indices for cloud tops
-         mtopa                  ! Vertical indices for cloud bases
-    real(kind_phys), dimension(:,:), intent(out) :: &
-         cldsa                  ! Fraction of clouds for low, middle, high, total and BL 
+    character(len=*), intent(out) ::               &
+         errmsg                                      ! Error message
+    integer, intent(out) ::                        &  
+         errflg                                      ! Error flag
+    integer,dimension(:,:),intent(out) ::          &
+         mbota,                                    & ! Vertical indices for cloud tops
+         mtopa                                       ! Vertical indices for cloud bases
+    real(kind_phys),dimension(:,:), intent(out) :: &
+         cldsa                                       ! Fraction of clouds for low, middle, high, total and BL 
     
     ! Local variables
     integer i,id,iCol,iLay,icld
@@ -105,8 +113,9 @@ contains
     ! layer indices for low, mid, and high clouds. The three cloud domain boundaries are 
     ! defined by ptopc. The cloud overlapping method is defined by control flag 'iovr', which may
     ! be different for lw and sw radiation programs.
-    call gethml(p_lay/100., ptop1, cld_frac, cldcnv, deltaZ, de_lgth, cloud_overlap_param,&
-         nCol, nLev, cldsa, mtopa, mbota)	
+    call gethml(p_lay*0.01, ptop1, cld_frac, cldcnv, deltaZ, de_lgth, cloud_overlap_param,&
+         nCol, nLev, iovr_rand, iovr_maxrand, iovr_max, iovr_dcorr, iovr_exp,             &
+         iovr_exprand, cldsa, mtopa, mbota)	
     
   end subroutine GFS_cloud_diagnostics_run
   
@@ -116,76 +125,6 @@ contains
   end subroutine GFS_cloud_diagnostics_finalize
   
   ! ######################################################################################
-  ! Initialization routine for High/Mid/Low cloud diagnostics. 
+  ! Subroutine hml_cloud_diagnostics_initialize is removed (refer to GFS_rrtmgp_setup.F90) 
   ! ######################################################################################
-  subroutine hml_cloud_diagnostics_initialize(imp_physics, imp_physics_fer_hires,        &
-          imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,                      &
-          imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, imp_physics_mg, nLev,        &
-          mpi_rank, sigmainit, errflg)
-    implicit none
-    ! Inputs
-    integer, intent(in) :: &
-          imp_physics,               & ! Flag for MP scheme
-          imp_physics_fer_hires,     & ! Flag for fer-hires scheme
-          imp_physics_gfdl,          & ! Flag for gfdl scheme
-          imp_physics_thompson,      & ! Flag for thompsonscheme
-          imp_physics_wsm6,          & ! Flag for wsm6 scheme
-          imp_physics_zhao_carr,     & ! Flag for zhao-carr scheme
-          imp_physics_zhao_carr_pdf, & ! Flag for zhao-carr+PDF scheme
-          imp_physics_mg               ! Flag for MG scheme
-    integer, intent(in) :: &
-         nLev,        & ! Number of vertical-layers
-         mpi_rank 
-    real(kind_phys), dimension(:), intent(in) :: &
-         sigmainit
-    ! Outputs
-    integer, intent(out) :: &
-    	errflg
-    
-    ! Local variables
-    integer :: iLay, kl
- 
-    ! Initialize error flag
-    errflg = 0
-    
-    if (mpi_rank == 0) print *, VTAGCLD      !print out version tag
-    
-    if ( icldflg == 0 ) then
-       print *,' - Diagnostic Cloud Method has been discontinued'
-       errflg = 1
-    else
-       if (mpi_rank == 0) then
-          print *,' - Using Prognostic Cloud Method'
-          if (imp_physics == imp_physics_zhao_carr) then
-             print *,'   --- Zhao/Carr/Sundqvist microphysics'
-          elseif (imp_physics == imp_physics_zhao_carr_pdf) then
-             print *,'   --- zhao/carr/sundqvist + pdf cloud'
-          elseif (imp_physics == imp_physics_gfdl) then
-             print *,'   --- GFDL Lin cloud microphysics'
-          elseif (imp_physics == imp_physics_thompson) then
-             print *,'   --- Thompson cloud microphysics'
-          elseif (imp_physics == imp_physics_wsm6) then
-             print *,'   --- WSM6 cloud microphysics'
-          elseif (imp_physics == imp_physics_mg) then
-             print *,'   --- MG cloud microphysics'
-          elseif (imp_physics == imp_physics_fer_hires) then
-             print *,'   --- Ferrier-Aligo cloud microphysics'
-          else
-             print *,'  !!! ERROR in cloud microphysc specification!!!', &
-                  '  imp_physics (NP3D) =',imp_physics
-             errflg = 1
-          endif
-       endif
-    endif
-    
-    ! Compute the top of BL cld (llyr), which is the topmost non cld(low) layer for 
-    ! stratiform (at or above lowest 0.1 of the atmosphere).
-    lab_do_k0 : do iLay = nLev, 2, -1
-       kl = iLay
-       if (sigmainit(iLay) < 0.9e0) exit lab_do_k0
-    enddo  lab_do_k0
-    llyr = kl      
-    
-    return
-  end subroutine hml_cloud_diagnostics_initialize
 end module GFS_cloud_diagnostics
