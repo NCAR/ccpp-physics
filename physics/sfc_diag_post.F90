@@ -1,10 +1,12 @@
-!> \file GFS_surface_diag.F90
+!> \file sfc_diag_post.F90
 !!  Contains code related to the surface diagnostic scheme.
 
       module sfc_diag_post
 
       contains
 
+!>\defgroup sfc_diag_post_mod GFS SFC_DIAG Post Module
+!! @{
       subroutine sfc_diag_post_init ()
       end subroutine sfc_diag_post_init
 
@@ -73,5 +75,5 @@
         endif
 
       end subroutine sfc_diag_post_run
-
+!! @}
       end module sfc_diag_post

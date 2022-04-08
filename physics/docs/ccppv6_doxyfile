@@ -57,7 +57,7 @@ NUM_PROC_THREADS       = 1
 #---------------------------------------------------------------------------
 
 EXTRACT_ALL            = YES
-EXTRACT_PRIVATE        = NO
+EXTRACT_PRIVATE        = YES
 EXTRACT_PRIV_VIRTUAL   = NO
 EXTRACT_PACKAGE        = YES
 EXTRACT_STATIC         = YES
@@ -121,7 +121,7 @@ INPUT                  =  pdftxt/rel_update.txt            \
                           pdftxt/GFS_v16_suite.txt       \
                           pdftxt/GFS_v17_p8_suite.txt    \
                           pdftxt/RAP_suite.txt           \
-                          pdftxt/FV3_RAP_input.nml       \
+                          pdftxt/RE6/FV3_RAP_input.nml       \
                           pdftxt/HRRR_suite.txt          \
                           pdftxt/RE6/FV3_HRRR_input.nml  \
                           pdftxt/RRFS_v1beta_suite.txt   \
@@ -189,7 +189,9 @@ INPUT                  =  pdftxt/rel_update.txt            \
                         ../radsw_param.f  \
                         ../radsw_datatb.f  \
                         ../dcyc2.f        \
-                        ../sfc_diff.f \
+                        ../sfc_diff.f   \
+                        ../sfc_diag.f                \
+                        ../sfc_diag_post.F90          \
                         ../module_MYNNSFC_wrapper.F90 \
                         ../module_sf_mynn.F90         \
                         ../sfc_nst.f                  \
@@ -206,10 +208,9 @@ INPUT                  =  pdftxt/rel_update.txt            \
                         ../module_sf_noahmp_glacier.f90  \
                         ../noahmp_tables.f90          \
                         ../GFS_surface_generic.F90   \
+                        ../GFS_DCNV_generic.F90      \
+                        ../GFS_SCNV_generic.F90     \
                         ../sfc_sice.f \
-                        ../moninedmf.f \
-                        ../mfpbl.f \
-                        ../tridi.f \
                         ../satmedmfvdifq.F  \
                         ../mfpbltq.f         \
                         ../mfscuq.f          \
@@ -224,7 +225,6 @@ INPUT                  =  pdftxt/rel_update.txt            \
                         ../cires_ugwp_initialize.F90     \
                         ../cires_ugwp_module.F90       \
                         ../cires_ugwp_post.F90         \
-                        ../cires_ugwp_post.meta        \
                         ../cires_ugwp_triggers.F90     \
                         ../cires_ugwpv1_initialize.F90 \
                         ../cires_ugwpv1_module.F90     \
@@ -331,12 +331,12 @@ IGNORE_PREFIX          =
 GENERATE_HTML          = YES
 HTML_OUTPUT            = html
 HTML_FILE_EXTENSION    = .html
-HTML_HEADER            =
-HTML_FOOTER            =
+HTML_HEADER            = header.html
+HTML_FOOTER            = footer.html
 HTML_STYLESHEET        =
-HTML_EXTRA_STYLESHEET  = ccpp_dox_extra_style.css
+HTML_EXTRA_STYLESHEET  = customdoxygen.css
 HTML_EXTRA_FILES       =
-HTML_COLORSTYLE_HUE    = 240
+HTML_COLORSTYLE_HUE    = 250
 HTML_COLORSTYLE_SAT    = 100
 HTML_COLORSTYLE_GAMMA  = 80
 HTML_TIMESTAMP         = NO
@@ -505,8 +505,8 @@ DOT_NUM_THREADS        = 0
 DOT_FONTNAME           = Helvetica
 DOT_FONTSIZE           = 12
 DOT_FONTPATH           =
-CLASS_GRAPH            = NO
-COLLABORATION_GRAPH    = NO
+CLASS_GRAPH            = YES
+COLLABORATION_GRAPH    = YES
 GROUP_GRAPHS           = YES
 UML_LOOK               = YES
 UML_LIMIT_NUM_FIELDS   = 10
@@ -516,7 +516,7 @@ TEMPLATE_RELATIONS     = NO
 INCLUDE_GRAPH          = YES
 INCLUDED_BY_GRAPH      = NO
 CALL_GRAPH             = YES
-CALLER_GRAPH           = NO
+CALLER_GRAPH           = YES
 GRAPHICAL_HIERARCHY    = YES
 DIRECTORY_GRAPH        = YES
 DIR_GRAPH_MAX_DEPTH    = 1

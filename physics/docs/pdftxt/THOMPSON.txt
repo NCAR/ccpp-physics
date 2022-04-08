@@ -14,7 +14,7 @@ of number concentration, density, and ice mass from recent observational studies
 Thompson and Eidhammer (2014) \cite Thompson_2014 .
 
 The microphysical processes accounted for are shown in the graphic below:
-\image html gsd_thompson.png "Figure 1: Complex Microphysics Model in the RAP" width=900
+\image html gsd_thompson.png "Figure 1: Complex Microphysics Model in the RAP" width=500
 
 Descriptions of these preocesses follow:
 - \b Deposition: Diffusional growth of ice particles under conditions of vapor supersaturation with respect to ice. 

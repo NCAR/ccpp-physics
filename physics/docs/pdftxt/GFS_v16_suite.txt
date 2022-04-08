@@ -6,7 +6,7 @@
 Version 16 of the Global Forecast System (GFS) was implemented operationally by the NOAA
 National Centers for Environmental Prediction (NCEP) in 2021.
 
-The GFS_v16beta physics suite uses the parameterizations in the following order:
+The GFS_v16 physics suite uses the parameterizations in the following order:
  - \ref GFS_RRTMG
  - \ref GFS_SFCLYR
  - \ref GFS_NSST

@@ -5,6 +5,8 @@
 
       contains
 
+!>\defgroup dcnv_ge_pre_mod  GFS DCNV Generic Pre Module
+!! @{
       subroutine GFS_DCNV_generic_pre_init ()
       end subroutine GFS_DCNV_generic_pre_init
 
@@ -92,6 +94,7 @@
       endif
 
     end subroutine GFS_DCNV_generic_pre_run
+!! @}
 
     end module GFS_DCNV_generic_pre
 
@@ -99,6 +102,8 @@
 
     contains
 
+!>\defgroup GFS_DCNV_GE_post_mod  GFS DCNV Generic Post Module
+!! @{
     subroutine GFS_DCNV_generic_post_init ()
     end subroutine GFS_DCNV_generic_post_init
 
@@ -248,5 +253,5 @@
       endif ! if (lssav)
 
     end subroutine GFS_DCNV_generic_post_run
-
+!! @}
     end module GFS_DCNV_generic_post

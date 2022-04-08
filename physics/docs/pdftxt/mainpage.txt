@@ -7,20 +7,19 @@ Community Physics Package (CCPP) v6.0.0 and the suites that can be configured us
 The CCPP-Physics is envisioned to contain parameterizations used in the 
 <a href="https://ufscommunity.org/about/what-is-ufs/">Unified Forecast System (UFS)</a>
 applications for weather through seasonal prediction timescales, encompassing the current operational GFS schemes as well as 
-developmental schemes under consideration for upcoming operational implementations. New in this release is 
-suite \ref GFS_v16_page, \ref GFS_v17_p8_page, \ref RRFS_v1beta_page, which is being tested in the UFS Short-Range Weather Application for future use 
-in the convective-allowing Rapid Refresh Forecast System (RRFS), slated for operational implementation
-in 2023. Convection-allowing models allow us to begin to resolve the fine details within storm systems that are
-necessary for the accurate predition of high-impact events such as tornadoes, flash floods, and winter weather.
-Experience gained from the development of earlier operational and experimental convective-allowing models (CAMs),
-such as the High Resolution Rapid Refresh (HRRR) and HRRR Ensemble (HRRRE), the North American Mesoscale Forecast
-System (NAM) nests, the NSSL Experimental Warn-on-Forecast System for ensembles (NEWS-e), the NCAR experimental
-CAM ensemble, and GFDL's FV3-based CAM efforts, guide this process.
+developmental schemes under consideration for upcoming operational implementations. The UFS can be configured for multiple 
+applications, including the UFS Short-Range Weather (SRW) Application (available through https://github.com/ufs-community/ufs-srweather-app/), 
+which targets predictions of atmospheric behavior on a 
+limited spatial domain and on time scales from less than an hour out to several days, and the UFS Medium-Range Weather (MRW) 
+Application(available through https://github.com/ufs-community/ufs-mrweather-app/), which  targets predictions of global atmospheric 
+behavior out to about two weeks.
 
-The CCPP parameterizations are aggregated in suites by the host models. The CCPP Single Column Model (SCM), developed 
-by the Development Testbed Center, supports suites GFS_v15p2, GFS_v16beta, GSD_v1, csawmg, and RRFS_v1alpha, while the 
-UFS Short-Range Weather Application supports suites GFS_v15p2 and RRFS_v1alpha. The UFS Medium-Range Weather Application
-is not intended for use with CCPP v5.0.0.  
+
+The CCPP parameterizations are aggregated in suites by the host models. In this release, the CCPP Single Column Model (SCM), developed 
+by the Development Testbed Center, supports suites \ref GFS_v16_page, \ref GFS_v17_p8_page,\ref HRRR_suite_page, \ref RRFS_v1beta_page,
+\ref RRFS_v1nssl_page and \ref rap_suite_page, while the 
+UFS Short-Range Weather Application 2.0 supports suites \ref GFS_v16_page, \ref HRRR_suite_page, \ref RRFS_v1beta_page and 
+\ref RRFS_v1nssl_page. The UFS Medium-Range Weather Application 2.0 supports suite \ref GFS_v17_p8_page.
 
 In this website you will find documentation on various aspects of each 
 parameterization, including a high-level overview of its function, the input/output argument list, 

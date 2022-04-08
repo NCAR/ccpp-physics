@@ -1,12 +1,11 @@
 !>  \file sfc_diag.f
 !!  This file contains the land surface diagnose calculation scheme.
 
-!> \defgroup Sfc_diag Land Surface Diagnose Calculation
-!! @{
-
       module sfc_diag
       contains
-  
+
+!> \defgroup Sfc_diag Land Surface Diagnose Calculation
+!! @{
       subroutine sfc_diag_init
       end subroutine sfc_diag_init
       
@@ -20,7 +19,6 @@
 !!
 !!  \section general General Algorithm
 !!  \section detailed Detailed Algorithm
-!!  @{
       subroutine sfc_diag_run                                           &
      &                   (im,grav,cp,eps,epsm1,ps,u1,v1,t1,q1,prslki,   &
      &                    evap,fm,fh,fm10,fh2,tskin,qsurf,thsfc_loc,    &
@@ -96,7 +94,6 @@
 
       return
       end subroutine sfc_diag_run
-!> @}
+!! @}
 
       end module sfc_diag
-!> @}

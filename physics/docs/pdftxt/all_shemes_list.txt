@@ -4,7 +4,7 @@
 \section allscheme_overview Physical Parameterizations 
 
 In the CCPP, each parameterization is in its own modern Fortran module (i.e., CCPP-compliant; see rules for scheme to considered CCPP-compliant at 
-<a href="https://ccpp-techdoc.readthedocs.io/en/v6.0.0/CompliantPhysicsParams.html"> CCPP-Compliant Physics Parameterizations </a>), 
+<a href="https://ccpp-techdoc.readthedocs.io/en/v5.0.0/CompliantPhysicsParams.html"> CCPP-Compliant Physics Parameterizations </a>), 
 which facilitates model development and code maintenance. Additionally, we are listing any pre- and post- interstitials that must accompany the scheme. While some individual parameterization can be invoked for the SCM, most host models will assemble the parameterizations in suites. 
 
 
@@ -26,7 +26,7 @@ which facilitates model development and code maintenance. Additionally, we are l
 
 \b Cumulus \b Parameterizations
  - \subpage GFS_SAMFdeep 
-  - \ref CA_p8
+  - \ref CA_p8       \todo CA namelist
  - \subpage GFS_SAMFshal 
  - \subpage CU_GF 
 
@@ -75,21 +75,16 @@ to the parameterization.
 \section allsuite_overview Physics Suites
 
 There are three publicly supported host models that use CCPP v6: the UFS Weather Model used in the Short Range Weather Application (SRW App) and the Medium
-Range Weather Application (MRW), as well as the
-CCPP Single Column Model (SCM). The SRW App supports the use of suites GFS_v16, HRRR, RRFS_v1beta and WoFS, while the SCM supports the use of suites 
-GFS_v15p2, GFS_v16beta, RRFS_v1alpha, csawmg and GSD_v1. Suite GFS_v15p2 is an operational suite that invokes the parameterizations used in the GFS v15 
-implemented operationally in June 2019. Other suites are experimental, and targeted for future UFS operational implementations. It should be noted
-that suite RRFS_v1alpha does not include a convective parameterization scheme and is targeted for convective-allowing resolutions of 3-km grid
-spacing. The other suites are primarily targeted for medium-range weather and subseasonal-to-seasonal scales of grid spacing 13-km and coarser. 
-The forcing datasets included in the CCPP SCM v5.0 public release were created by averaging observations and large-eddy simulations over seas that are
-too coarse to resolve convection. Therefore, best results will be obtained with be obtained with the CCPP SCM v5.0 when using suites that include parameterized
+Range Weather Application (MRW), as well as the CCPP Single Column Model (SCM). 
+The forcing datasets included in the CCPP SCM v6.0.0 public release were created by averaging observations and large-eddy simulations over seas that are
+too coarse to resolve convection. Therefore, best results will be obtained with be obtained with the CCPP SCM v6.0 when using suites that include parameterized
 convection.
 
 Table 1.  Physics suite options included in this documentation. 
 \tableofcontents
 | Physics suites   |     GFS_v16        |   GFS_v17_p8            |       RAP        |    HRRR                     |   RRFS_v1beta      |      WoFS     |         
 |------------------|--------------------|-------------------------|------------------|-----------------------------|--------------------|---------------|
-|\b HOST \b Model  | SCM, SRW, MRW      |  SCM, MRW               |    SCM           |   SCM, SRW                  |  SCM, SRW          |  SCM, SRW     |
+|\b HOST \b Model  | SCM, SRW           |  SCM, MRW               |    SCM           |   SCM, SRW                  |  SCM, SRW          |  SCM, SRW     |
 |\b Deep \b Cu     | \ref GFS_SAMFdeep  |  \ref GFS_SAMFdeep + \ref CA_p8 |  \ref CU_GF      | \a  off                     |   \a off           |   \a off      |
 |\b Shallow \b Cu  | \ref GFS_SAMFshal  |  \ref GFS_SAMFshal      |  \ref CU_GF      | \ref MYNNEDMF               | \ref MYNNEDMF      |  \ref MYNNEDMF |
 |\b Microphysics   | \ref GFDL_cloud    |  \ref THOMPSON w/o AA   |  \ref THOMPSON   | \ref THOMPSON               | \ref THOMPSON      | \ref NSSLMICRO_page     |
