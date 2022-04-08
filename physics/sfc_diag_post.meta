@@ -74,6 +74,22 @@
   type = real
   kind = kind_phys
   intent = in
+[t2mmp]
+  standard_name = temperature_at_2m_from_noahmp
+  long_name = 2 meter temperature from noahmp
+  units = K
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[q2mp]
+  standard_name = specific_humidity_at_2m_from_noahmp
+  long_name = 2 meter specific humidity from noahmp
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
 [t2m]
   standard_name = air_temperature_at_2m
   long_name = 2 meter temperature
