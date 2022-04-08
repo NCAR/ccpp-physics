@@ -689,9 +689,9 @@ module mp_thompson
                               diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
                               has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
                               rand_perturb_on=spp_mp_opt, kme_stoch=kme_stoch,               &
-                              rand_pert=spp_wts_mp, spp_prt_list=spp_prt_list,               &
-                              spp_stddev_cutoff=spp_stddev_cutoff, n_var_spp=n_var_spp,      &
-                              spp_var_list=spp_var_list,                                     &
+                              rand_pert=spp_wts_mp, spp_var_list=spp_var_list,               &
+                              spp_prt_list=spp_prt_list, n_var_spp=n_var_spp,                &
+                              spp_stddev_cutoff=spp_stddev_cutoff,                           &
                               ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
                               ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                               its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
