@@ -1343,6 +1343,20 @@
   dimensions = ()
   type = logical
   intent = in
+[nchem]
+  standard_name = number_of_chemical_species_vertically_mixed
+  long_name = number of chemical vertically mixed
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[ndvel]
+  standard_name = number_of_chemical_species_deposited
+  long_name = number of chemical pbl deposited
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
 [ltaerosol]
   standard_name = flag_for_aerosol_physics
   long_name = flag for aerosol physics

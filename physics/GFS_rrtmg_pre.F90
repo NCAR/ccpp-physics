@@ -608,7 +608,7 @@
         do k = 1, LMK
           do i = 1, IM
             ! 550nm (~18000/cm)
-            faersw1(i,k,10) = faersw1(i,k,10) + MAX(4.,smoke_ext(i,k) + dust_ext(i,k))
+            faersw1(i,k,10) = faersw1(i,k,10) + MIN(4.,smoke_ext(i,k) + dust_ext(i,k))
           enddo
         enddo
       endif

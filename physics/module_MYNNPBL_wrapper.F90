@@ -159,7 +159,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  icloud_bl, do_mynnsfclay,                          &
      &  imp_physics, imp_physics_gfdl,                     &
      &  imp_physics_thompson, imp_physics_wsm6,            &
-     &  chem3d, frp, mix_chem, fire_turb,                  &
+     &  chem3d, frp, mix_chem, fire_turb, nchem, ndvel,    &
      &  ltaerosol, spp_wts_pbl, spp_pbl, lprnt, huge, errmsg, errflg  )
 
 ! should be moved to inside the mynn:
@@ -180,11 +180,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      logical, intent(in) :: cplflx
 
      !smoke/chem
-     !logical, intent(in) :: mix_chem, fire_turb
-     !integer, intent(in) :: nchem, ndvel, kdvel
-     !for testing only:
-     !logical, parameter :: mix_chem=.false., fire_turb=.false.
-     integer, parameter :: nchem=2, ndvel=2, kdvel=1
+     integer, intent(in) :: nchem, ndvel
+     integer, parameter  :: kdvel=1
 
 ! NAMELIST OPTIONS (INPUT):
      logical, intent(in) ::                                 &
@@ -286,19 +283,11 @@ SUBROUTINE mynnedmf_wrapper_run(        &
       real(kind=kind_phys), allocatable :: old_ozone(:,:)
 
 !smoke/chem arrays
-   !   real(kind=kind_phys), dimension(:,:), intent(inout), optional ::   &                                     
-   !  &         qgrs_smoke_conc, qgrs_dust_conc
       real(kind_phys), dimension(:), intent(inout) :: frp
       logical, intent(in) :: mix_chem, fire_turb
       real(kind=kind_phys), dimension(:,:,:), intent(inout) :: chem3d
       real(kind=kind_phys), dimension(im)   :: emis_ant_no
       real(kind=kind_phys), dimension(im,ndvel) :: vdep
-!for testing only
-!      real(kind=kind_phys), dimension(im,levs)                      ::   &
-!     &         qgrs_smoke_conc, qgrs_dust_conc
-!      real(kind=kind_phys), allocatable, dimension(:,:,:) :: chem3d
-!      real(kind=kind_phys), dimension(im,ndvel)      :: vdep    !not passed in yet???
-!      real(kind=kind_phys), dimension(im)            :: frp, emis_ant_no
 
 !MYNN-2D
       real(kind=kind_phys), dimension(:), intent(in) ::                  &
@@ -364,20 +353,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
       endif
 
       !initialize arrays for test
-      !qgrs_smoke_conc = 1.0
-      !qgrs_dust_conc  = 1.0
-      !FRP         = 0.
       EMIS_ANT_NO = 0.
       vdep = 0. ! hli for chem dry deposition, 0 temporarily
-      !if (mix_chem) then
-      !   allocate ( chem3d(im,levs,nchem) )
-      !   do k=1,levs
-      !   do i=1,im
-      !      chem3d(i,k,1)=qgrs_smoke_conc(i,k)
-      !      chem3d(i,k,2)=qgrs_dust_conc (i,k)
-      !   enddo
-      !   enddo
-      !endif
 
   ! Check incoming moist species to ensure non-negative values
   ! First, create height (dz) and pressure differences (delp) 
@@ -968,10 +945,6 @@ SUBROUTINE mynnedmf_wrapper_run(        &
          endif
          deallocate(save_qke_adv)
        endif
-
-!       if(allocated(chem3d))then
-!         deallocate(chem3d)
-!       endif
 
   CONTAINS
 

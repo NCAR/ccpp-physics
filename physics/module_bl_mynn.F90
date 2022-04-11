@@ -5363,26 +5363,6 @@ ENDIF
     rhoinv(kts)=1./rho(kts)
     khdz(kts)  =rhoz(kts)*dfh(kts)
 
-    khdz_old  = khdz(kts)
-    khdz_back = pblh * 0.15 / dz(kts)
-    !Enhance diffusion over fires
-    IF ( fire_turb ) THEN
-       IF ( pblh < pblh_threshold ) THEN
-          IF ( emis_ant_no > no_threshold ) THEN
-!             khdz(kts) = MAX(khdz(kts),khdz_back)
-              khdz(kts) = MAX(1.1*khdz(kts), sqrt((emis_ant_no / no_threshold))/dz(kts)*rhoz(kts))   ! JLS 12/21/21
-          ENDIF
-          IF ( frp > frp_threshold ) THEN
-              !kmaxfire = ceiling(log(curr_frp))  ! JLS 12/21/21  - need to bring in curr_frp
-              kmaxfire = ceiling(log(frp))
-              IF (k .le. kmaxfire) THEN    ! JLS
-!             khdz(kts) = MAX(khdz(kts),khdz_back)
-              khdz(kts) = MAX(1.1*khdz(kts),((log(frp))**2.- 2.*log(frp)) / dz(kts)*rhoz(kts)) ! JLS 12/21/21
-              ENDIF ! JLS
-          ENDIF
-       ENDIF
-    ENDIF
-
     DO k=kts+1,kte
        rhoz(k)  =(rho(k)*dz(k-1) + rho(k-1)*dz(k))/(dz(k-1)+dz(k))
        rhoz(k)  =  MAX(rhoz(k),1E-4)
