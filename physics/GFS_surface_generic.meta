@@ -558,6 +558,13 @@
   dimensions = ()
   type = logical
   intent = in
+[cplaqm]
+  standard_name = flag_for_air_quality_coupling
+  long_name = flag controlling cplaqm collection (default off)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [cplchm]
   standard_name = flag_for_chemistry_coupling
   long_name = flag controlling cplchm collection (default off)
