@@ -11,7 +11,7 @@
      &   cnvflg,zl,zm,q1,t1,u1,v1,plyr,pix,
      &   thlx,thvx,thlvx,gdx,thetae,
      &   krad,mrad,radmin,buo,xmfd,
-     &   tcdo,qcdo,ucdo,vcdo,xlamde,a1)
+     &   tcdo,qcdo,ucdo,vcdo,xlamdeq,a1)
 !
       use machine , only : kind_phys
       use funcphys , only : fpvs
@@ -39,7 +39,7 @@
      &                     buo(im,km), xmfd(im,km),
      &                     tcdo(im,km), qcdo(im,km,ntrac1),
      &                     ucdo(im,km), vcdo(im,km),
-     &                     xlamde(im,km-1)
+     &                     xlamdeq(im,km-1)
 !
 !  local variables and arrays
 !
@@ -47,7 +47,8 @@
       integer   i,j,indx, k, n, kk, ndc
       integer   krad1(im)
 !
-      real(kind=kind_phys) dt2,     dz,      ce0,     cm,
+      real(kind=kind_phys) dt2,     dz,      ce0,
+     &                     cm,      cq,
      &                     gocp,    factor,  g,       tau,
      &                     b1,      f1,      bb1,     bb2,
      &                     a1,      a2,
@@ -62,7 +63,7 @@
 !
       real(kind=kind_phys) wd2(im,km), thld(im,km),
      &                     qtx(im,km), qtd(im,km),
-     &                     thlvd(im),  hrad(im),
+     &                     thlvd(im),  hrad(im), xlamde(im,km-1),
      &                     xlamdem(im,km-1), ra1(im)
       real(kind=kind_phys) delz(im), xlamax(im)
 !
@@ -77,7 +78,7 @@ c  physical parameters
       parameter(g=grav)
       parameter(gocp=g/cp)
       parameter(elocp=hvap/cp,el2orc=hvap*hvap/(rv*cp))
-      parameter(ce0=0.4,cm=1.0,pgcon=0.55)
+      parameter(ce0=0.4,cm=1.0,cq=1.3,pgcon=0.55)
       parameter(qmin=1.e-8,qlmin=1.e-12)
       parameter(b1=0.45,f1=0.15)
       parameter(a2=0.5)
@@ -208,6 +209,7 @@ c  physical parameters
               xlamde(i,k) = xlamax(i)
             endif
 !
+            xlamdeq(i,k) = cq * xlamde(i,k)
             xlamdem(i,k) = cm * xlamde(i,k)
           endif
         enddo
@@ -224,6 +226,9 @@ c  physical parameters
 ! 
             thld(i,k) = ((1.-tem)*thld(i,k+1)+tem*
      &                     (thlx(i,k)+thlx(i,k+1)))/factor
+!
+            tem  = 0.5 * xlamdeq(i,k) * dz
+            factor = 1. + tem
             qtd(i,k) = ((1.-tem)*qtd(i,k+1)+tem*
      &                     (qtx(i,k)+qtx(i,k+1)))/factor
 !
@@ -347,6 +352,7 @@ c
               xlamde(i,k) = xlamax(i)
             endif
 !
+            xlamdeq(i,k) = cq * xlamde(i,k)
             xlamdem(i,k) = cm * xlamde(i,k)
           endif
         enddo
@@ -457,6 +463,9 @@ c
 !
             thld(i,k) = ((1.-tem)*thld(i,k+1)+tem*
      &                     (thlx(i,k)+thlx(i,k+1)))/factor
+!
+            tem  = 0.5 * xlamdeq(i,k) * dz
+            factor = 1. + tem
             qtd(i,k) = ((1.-tem)*qtd(i,k+1)+tem*
      &                     (qtx(i,k)+qtx(i,k+1)))/factor
 !
@@ -509,7 +518,7 @@ c
           if (cnvflg(i) .and. k < krad(i)) then
             if(k >= mrad(i)) then
               dz = zl(i,k+1) - zl(i,k)
-              tem  = 0.5 * xlamde(i,k) * dz
+              tem  = 0.5 * xlamdeq(i,k) * dz
               factor = 1. + tem
 ! 
               qcdo(i,k,n) = ((1.-tem)*qcdo(i,k+1,n)+tem*
@@ -532,7 +541,7 @@ c
           if (cnvflg(i) .and. k < krad(i)) then
             if(k >= mrad(i)) then
               dz = zl(i,k+1) - zl(i,k)
-              tem  = 0.5 * xlamde(i,k) * dz
+              tem  = 0.5 * xlamdeq(i,k) * dz
               factor = 1. + tem
 ! 
               qcdo(i,k,n) = ((1.-tem)*qcdo(i,k+1,n)+tem*

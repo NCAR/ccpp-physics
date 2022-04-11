@@ -1,7 +1,7 @@
-module rrtmgp_sw_aerosol_optics
+module rrtmgp_aerosol_optics
   use machine,                   only: kind_phys
   use mo_gas_optics_rrtmgp,      only: ty_gas_optics_rrtmgp
-  use mo_optical_props,          only: ty_optical_props_2str
+  use mo_optical_props,          only: ty_optical_props_2str, ty_optical_props_1scl
   use radiation_tools,           only: check_error_msg
   use rrtmgp_sw_gas_optics,      only: sw_gas_props
   use rrtmgp_lw_gas_optics,      only: lw_gas_props
@@ -14,29 +14,24 @@ module rrtmgp_sw_aerosol_optics
 
   implicit none
 
-  public rrtmgp_sw_aerosol_optics_init, rrtmgp_sw_aerosol_optics_run, rrtmgp_sw_aerosol_optics_finalize
+  public rrtmgp_aerosol_optics_run
 
 contains
 
   ! #########################################################################################
-  ! SUBROUTINE rrtmgp_sw_aerosol_optics_init()
+  ! SUBROUTINE rrtmgp_aerosol_optics_run()
   ! #########################################################################################
-  subroutine rrtmgp_sw_aerosol_optics_init()
-  end subroutine rrtmgp_sw_aerosol_optics_init
-
-  ! #########################################################################################
-  ! SUBROUTINE rrtmgp_sw_aerosol_optics_run()
-  ! #########################################################################################
-!! \section arg_table_rrtmgp_sw_aerosol_optics_run
-!! \htmlinclude rrtmgp_sw_aerosol_optics_run.html
+!! \section arg_table_rrtmgp_aerosol_optics_run
+!! \htmlinclude rrtmgp_aerosol_optics_run.html
 !!
-  subroutine rrtmgp_sw_aerosol_optics_run(doSWrad, nCol, nLev, nTracer, nTracerAer, nDay, &
-       idxday, p_lev, p_lay, p_lk, tv_lay, relhum, lsmask, tracer, aerfld, lon, lat,      &
-       aerodp, sw_optical_props_aerosol, errmsg, errflg       )
+  subroutine rrtmgp_aerosol_optics_run(doSWrad, doLWrad, nCol, nLev, nTracer, nTracerAer,   &
+       nDay, idxday, p_lev, p_lay, p_lk, tv_lay, relhum, lsmask, tracer, aerfld, lon, lat,  &
+       aerodp, sw_optical_props_aerosol, lw_optical_props_aerosol, errmsg, errflg       )
 
     ! Inputs
     logical, intent(in) :: &
-         doSWrad                  ! Logical flag for shortwave radiation call
+         doSWrad,               & ! Logical flag for shortwave radiation call
+         doLWrad                  ! Logical flag for longwave radiation call 
     integer, intent(in) :: &
          nCol,                  & ! Number of horizontal grid points
          nDay,                  & ! Number of daylit points
@@ -66,6 +61,8 @@ contains
          aerodp                   ! Vertical integrated optical depth for various aerosol species 
     type(ty_optical_props_2str),intent(out) :: &
          sw_optical_props_aerosol ! RRTMGP DDT: Longwave aerosol optical properties (tau)
+    type(ty_optical_props_1scl),intent(inout) :: &
+         lw_optical_props_aerosol ! RRTMGP DDT: Longwave aerosol optical properties (tau)
     integer, intent(out) :: &
          errflg                   ! CCPP error flag
     character(len=*), intent(out) :: &
@@ -76,6 +73,7 @@ contains
          aerosolslw            !
     real(kind_phys), dimension(nCol, nLev, sw_gas_props%get_nband(), NF_AESW) :: &
          aerosolssw, aerosolssw2
+    integer :: iBand
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -84,9 +82,10 @@ contains
     if (.not. doSWrad) return
 
     ! Call module_radiation_aerosols::setaer(),to setup aerosols property profile
-    call setaer(p_lev/100., p_lay/100., p_lk, tv_lay, relhum, lsmask, tracer, aerfld, lon, lat, nCol, nLev, &
+    call setaer(p_lev*0.01, p_lay*0.01, p_lk, tv_lay, relhum, lsmask, tracer, aerfld, lon, lat, nCol, nLev, &
          nLev+1, .true., .true., aerosolssw2, aerosolslw, aerodp)
 
+    ! Shortwave
     if (nDay .gt. 0) then
        ! Store aerosol optical properties
        ! SW. 
@@ -100,7 +99,7 @@ contains
        aerosolssw(1:nCol,:,2:sw_gas_props%get_nband(),3) = aerosolssw2(1:nCol,:,1:sw_gas_props%get_nband()-1,3)
        
        ! Allocate RRTMGP DDT: Aerosol optics [nCol,nlev,nBands]
-       call check_error_msg('rrtmgp_sw_aerosol_optics_run',sw_optical_props_aerosol%alloc_2str(      &
+       call check_error_msg('rrtmgp_aerosol_optics_run',sw_optical_props_aerosol%alloc_2str(      &
             nDay, nlev, sw_gas_props%get_band_lims_wavenumber()))
        
        ! Copy aerosol optical information to RRTMGP DDT
@@ -109,11 +108,16 @@ contains
        sw_optical_props_aerosol%g   = aerosolssw(idxday(1:nday),:,:,3)
     endif
 
-  end subroutine rrtmgp_sw_aerosol_optics_run
+    ! Longwave
+    if (.not. doLWrad) return
+    lw_optical_props_aerosol%tau = aerosolslw(:,:,:,1) * (1. - aerosolslw(:,:,:,2))
+
+    lw_optical_props_aerosol%band_lims_wvn = lw_gas_props%get_band_lims_wavenumber()
+    do iBand=1,lw_gas_props%get_nband()
+       lw_optical_props_aerosol%band2gpt(1:2,iBand) = iBand
+       lw_optical_props_aerosol%gpt2band(iBand)     = iBand
+    end do
+
+  end subroutine rrtmgp_aerosol_optics_run
   
-  ! #########################################################################################
-  ! SUBROUTINE rrtmgp_sw_aerosol_optics_finalize()
-  ! #########################################################################################
-  subroutine rrtmgp_sw_aerosol_optics_finalize()
-  end subroutine rrtmgp_sw_aerosol_optics_finalize
-end module rrtmgp_sw_aerosol_optics
+end module rrtmgp_aerosol_optics

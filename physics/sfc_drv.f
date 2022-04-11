@@ -196,6 +196,8 @@
 !     smcwlt2  - real, dry soil moisture threshold                 im   !
 !     smcref2  - real, soil moisture threshold                     im   !
 !     wet1     - real, normalized soil wetness                     im   !
+!     lai      - real, leaf area index (dimensionless)             im   !
+!     rca      - real, canopy resistance (s/m)                     im   !
 !                                                                       !
 !  ====================    end of description    =====================  !
 
@@ -225,7 +227,7 @@
 !  ---  outputs:
      &       sncovr1, qsurf, gflux, drain, evap, hflx, ep, runoff,      &
      &       cmm, chh, evbs, evcw, sbsno, snowc, stm, snohf,            &
-     &       smcwlt2, smcref2, wet1, errmsg, errflg                     &
+     &       smcwlt2, smcref2, wet1, lai, rca, errmsg, errflg           &
      &     )
 !
       !use machine , only : kind_phys
@@ -282,7 +284,7 @@
       real (kind=kind_phys), dimension(:), intent(inout) :: sncovr1,    &
      &       qsurf, gflux, drain, evap, hflx, ep, runoff, cmm, chh,     &
      &       evbs, evcw, sbsno, snowc, stm, snohf, smcwlt2, smcref2,    &
-     &       wet1
+     &       wet1, lai, rca
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -552,6 +554,8 @@
 !!\n  ssoil   - soil heat flux (\f$W m^{-2}\f$: negative if downward from surface)
 !!\n  runoff1 - surface runoff (\f$m s^{-1}\f$), not infiltrating the surface
 !!\n  runoff2 - subsurface runoff (\f$m s^{-1}\f$), drainage out bottom
+!!\n  xlai    - leaf area index (dimensionless)
+!!\n  rca     - canopy resistance (s/m)
 
           evap(i)  = eta
           hflx(i)  = sheat
@@ -590,6 +594,9 @@
 !  ---- ... outside sflx, roughness uses cm as unit (update after snow's effect)
           zorl(i) = z0*100.0_kind_phys
 
+          lai(i) = xlai
+          rca(i) = rc
+
 !>  - Do not return the following output fields to parent model:
 !!\n  ec      - canopy water evaporation (m s-1)
 !!\n  edir    - direct soil evaporation (m s-1)
@@ -610,7 +617,6 @@
 !!\n  rc      - canopy resistance (s m-1)
 !!\n  pc      - plant coefficient (unitless fraction, 0-1) where pc*etp
 !!              = actual transp
-!!\n  xlai    - leaf area index (dimensionless)
 !!\n  rsmin   - minimum canopy resistance (s m-1)
 !!\n  rcs     - incoming solar rc factor (dimensionless)
 !!\n  rct     - air temperature rc factor (dimensionless)

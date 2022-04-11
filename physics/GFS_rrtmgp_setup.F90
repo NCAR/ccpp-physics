@@ -5,7 +5,7 @@ module GFS_rrtmgp_setup
   use module_radiation_astronomy, only : sol_init, sol_update
   use module_radiation_aerosols,  only : aer_init, aer_update
   use module_radiation_gases,     only : gas_init, gas_update
-  use GFS_cloud_diagnostics,      only : hml_cloud_diagnostics_initialize
+  !  use GFS_cloud_diagnostics,      only : hml_cloud_diagnostics_initialize
   ! *NOTE* These parameters below are required radiation_****** modules. They are not
   !        directly used by the RRTMGP routines.
   use physparam,                  only : isolar,  ictmflg, ico2flg, ioznflg, iaerflg,    &
@@ -130,10 +130,10 @@ contains
     call sol_init ( me )
     call aer_init ( levr, me )
     call gas_init ( me )
-    call hml_cloud_diagnostics_initialize(imp_physics, imp_physics_fer_hires,           &
-         imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,                      &
-         imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, imp_physics_mg, levr, me, si,&
-         errflg)
+    !call hml_cloud_diagnostics_initialize(imp_physics, imp_physics_fer_hires,           &
+    !     imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,                      &
+    !     imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, imp_physics_mg, levr, me, si,&
+    !     errflg)
 
     if ( me == 0 ) then
        print *,' return from rad_initialize (GFS_rrtmgp_setup_init) - after calling radinit'
