@@ -110,13 +110,9 @@ contains
 
     ! Longwave
     if (.not. doLWrad) return
+    call check_error_msg('rrtmgp_aerosol_optics_run',lw_optical_props_aerosol%alloc_1scl(      &
+         nCol, nlev, lw_gas_props%get_band_lims_wavenumber()))
     lw_optical_props_aerosol%tau = aerosolslw(:,:,:,1) * (1. - aerosolslw(:,:,:,2))
-
-    lw_optical_props_aerosol%band_lims_wvn = lw_gas_props%get_band_lims_wavenumber()
-    do iBand=1,lw_gas_props%get_nband()
-       lw_optical_props_aerosol%band2gpt(1:2,iBand) = iBand
-       lw_optical_props_aerosol%gpt2band(iBand)     = iBand
-    end do
 
   end subroutine rrtmgp_aerosol_optics_run
   

@@ -87,11 +87,11 @@ contains
   subroutine rrtmgp_lw_main_run(doLWrad, doLWclrsky, top_at_1, doGP_lwscat, use_LW_jacobian,&
        doGP_sgs_cnv, doGP_sgs_pbl, nCol, nLay, nGases, nGauss_angles, i_o3, icseed_lw, iovr,&
        iovr_convcld, iovr_max, iovr_maxrand, iovr_rand, iovr_dcorr, iovr_exp, iovr_exprand, &
-       isubc_lw, tsfg, p_lay, p_lev, t_lay, t_lev, vmr_o2, vmr_h2o, vmr_o3, vmr_ch4,        &
+       isubc_lw, semis, tsfg, p_lay, p_lev, t_lay, t_lev, vmr_o2, vmr_h2o, vmr_o3, vmr_ch4, &
        vmr_n2o, vmr_co2, cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_swp,         &
        cld_resnow, cld_rwp, cld_rerain, precip_frac, cld_cnv_lwp, cld_cnv_reliq,            &
        cld_cnv_iwp, cld_cnv_reice, cld_pbl_lwp, cld_pbl_reliq, cld_pbl_iwp, cld_pbl_reice,  &
-       cloud_overlap_param, sfc_emiss_byband, active_gases_array, lw_optical_props_aerosol, &
+       cloud_overlap_param, active_gases_array, lw_optical_props_aerosol,                   &
        fluxlwUP_allsky, fluxlwDOWN_allsky, fluxlwUP_clrsky, fluxlwDOWN_clrsky, fluxlwUP_jac,&
        fluxlwUP_radtime, fluxlwDOWN_radtime, errmsg, errflg)
 
@@ -122,7 +122,8 @@ contains
     integer,intent(in),dimension(:) :: &
          icseed_lw              ! Seed for random number generation for longwave radiation
     real(kind_phys), dimension(:), intent(in) :: &
-         tsfg                   !
+         semis,              & ! Surface-emissivity
+         tsfg                  !
     real(kind_phys), dimension(:,:), intent(in) :: &
          p_lay,               & ! Pressure @ model layer-centers (Pa)
          t_lay,               & ! Temperature (K)
@@ -152,8 +153,7 @@ contains
          cld_pbl_reliq,       & ! Effective radius for SGS PBL liquid cloud-particles
          cld_pbl_iwp,         & ! Water path for       SGS PBL ice    cloud-particles
          cld_pbl_reice,       & ! Effective radius for SGS PBL ice    cloud-particles
-         cloud_overlap_param, & !
-         sfc_emiss_byband       ! Surface emissivity in each band
+         cloud_overlap_param
     character(len=*), dimension(:), intent(in) :: &
          active_gases_array     ! List of active gases from namelist as array
     type(ty_optical_props_1scl),intent(inout) :: &
@@ -199,6 +199,7 @@ contains
     real(kind_phys), dimension(1,nLay+1,lw_gas_props%get_nband()),target :: &
          fluxLW_up_allsky, fluxLW_up_clrsky, fluxLW_dn_allsky, fluxLW_dn_clrsky
     real(kind_phys), dimension(1,lw_gas_props%get_ngpt()) :: lw_Ds
+    real(kind_phys), dimension(lw_gas_props%get_nband(),1) :: sfc_emiss_byband
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -257,10 +258,13 @@ contains
     do iCol=1,nCol
        ! Initialize/reset
        lw_optical_props_clrsky%tau       = 0._kind_phys
+       lw_optical_props_precipByBand%tau = 0._kind_phys
+       lw_optical_props_cloudsByBand%tau = 0._kind_phys
        lw_optical_props_clouds%tau       = 0._kind_phys
        lw_optical_props_clouds%ssa       = 1._kind_phys
        lw_optical_props_clouds%g         = 0._kind_phys
-       lw_optical_props_precipByBand%tau = 0._kind_phys
+       if (doGP_sgs_cnv) lw_optical_props_cnvcloudsByBand%tau = 0._kind_phys
+       if (doGP_sgs_pbl) lw_optical_props_pblcloudsByBand%tau = 0._kind_phys
 
        ! ###################################################################################
        !
@@ -273,6 +277,20 @@ contains
        gas_concentrations%concs(istr_n2o)%conc(1,:)  = vmr_n2o(iCol,:)
        gas_concentrations%concs(istr_h2o)%conc(1,:)  = vmr_h2o(iCol,:)
        gas_concentrations%concs(istr_o3)%conc(1,:)   = vmr_o3(iCol,:)
+
+       ! ###################################################################################
+       !
+       ! Surface emissity in each band
+       !
+       ! ###################################################################################
+       ! Assign same emissivity to all band
+       if (semis(iCol) > 1e-6 .and. semis(iCol) <= 1.0) then
+          do iBand=1,lw_gas_props%get_nband()
+             sfc_emiss_byband(iBand,1) = semis(iCol)
+          enddo
+       else
+          sfc_emiss_byband(1:lw_gas_props%get_nband(),1) = 1.0
+       endif
 
        ! ###################################################################################
        !
@@ -316,7 +334,7 @@ contains
        endif
 
        ! MYNN PBL cloud-optics?
-       if (doGP_sgs_cnv) then
+       if (doGP_sgs_pbl) then
           call check_error_msg('rrtmgp_lw_main_pbl_cloud_optics',lw_cloud_props%cloud_optics(&
                cld_pbl_lwp(iCol:iCol,:),          & ! IN  - MYNN-EDMF PBL cloud liquid water path (g/m2)
                cld_pbl_iwp(iCol:iCol,:),          & ! IN  - MYNN-EDMF PBL cloud ice water path (g/m2)
@@ -417,7 +435,7 @@ contains
                   lw_optical_props_clrsky,         & ! IN  - optical-properties
                   top_at_1,                        & ! IN  - veritcal ordering flag
                   sources,                         & ! IN  - source function
-                  sfc_emiss_byband(:,iCol:iCol),   & ! IN  - surface emissivity in each LW band
+                  sfc_emiss_byband,                & ! IN  - surface emissivity in each LW band
                   flux_clrsky,                     & ! OUT - Fluxes
                   n_gauss_angles = nGauss_angles))   ! IN  - Number of angles in Gaussian quadrature
           else
@@ -425,7 +443,7 @@ contains
                   lw_optical_props_clrsky,         & ! IN  - optical-properties
                   top_at_1,                        & ! IN  - veritcal ordering flag
                   sources,                         & ! IN  - source function
-                  sfc_emiss_byband(:,iCol:iCol),   & ! IN  - surface emissivity in each LW band
+                  sfc_emiss_byband,                & ! IN  - surface emissivity in each LW band
                   flux_clrsky,                     & ! OUT - Fluxes
                   lw_Ds = lw_Ds))
           endif
@@ -472,7 +490,7 @@ contains
                   lw_optical_props_clouds,         & ! IN  - optical-properties
                   top_at_1,                        & ! IN  - veritcal ordering flag
                   sources,                         & ! IN  - source function
-                  sfc_emiss_byband(:,iCol:iCol),   & ! IN  - surface emissivity in each LW band
+                  sfc_emiss_byband,                & ! IN  - surface emissivity in each LW band
                   flux_allsky,                     & ! OUT - Flxues 
                   n_gauss_angles = nGauss_angles,  & ! IN  - Number of angles in Gaussian quadrature
                   flux_up_Jac    = fluxlwUP_jac))    ! OUT - surface temperature flux (upward) Jacobian (W/m2/K)
@@ -481,7 +499,7 @@ contains
                   lw_optical_props_clouds,         & ! IN  - optical-properties
                   top_at_1,                        & ! IN  - veritcal ordering flag
                   sources,                         & ! IN  - source function
-                  sfc_emiss_byband(:,iCol:iCol),   & ! IN  - surface emissivity in each LW band
+                  sfc_emiss_byband,                & ! IN  - surface emissivity in each LW band
                   flux_allsky,                     & ! OUT - Flxues 
                   n_gauss_angles = nGauss_angles))   ! IN  - Number of angles in Gaussian quadrature    
           end if
@@ -497,7 +515,7 @@ contains
                   lw_optical_props_clrsky,         & ! IN  - optical-properties
                   top_at_1,                        & ! IN  - veritcal ordering flag
                   sources,                         & ! IN  - source function
-                  sfc_emiss_byband(:,iCol:iCol),   & ! IN  - surface emissivity in each LW band
+                  sfc_emiss_byband,                & ! IN  - surface emissivity in each LW band
                   flux_allsky,                     & ! OUT - Flxues 
                   n_gauss_angles = nGauss_angles,  & ! IN  - Number of angles in Gaussian quadrature
                   flux_up_Jac    = fluxlwUP_jac))    ! OUT - surface temperature flux (upward) Jacobian (W/m2/K)
@@ -506,7 +524,7 @@ contains
                   lw_optical_props_clrsky,         & ! IN  - optical-properties
                   top_at_1,                        & ! IN  - veritcal ordering flag
                   sources,                         & ! IN  - source function
-                  sfc_emiss_byband(:,iCol:iCol),   & ! IN  - surface emissivity in each LW band
+                  sfc_emiss_byband,                & ! IN  - surface emissivity in each LW band
                   flux_allsky,                     & ! OUT - Flxues 
                   n_gauss_angles = nGauss_angles))   ! IN  - Number of angles in Gaussian quadrature    
           end if

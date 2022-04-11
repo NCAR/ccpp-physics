@@ -101,7 +101,8 @@ contains
        con_eps, con_epsm1, con_fvirt, con_epsqs, solhr, minGPpres, maxGPpres, minGPtemp,    &
        maxGPtemp, raddt, p_lay, t_lay, p_lev, t_lev, vmr_o2, vmr_h2o, vmr_o3, vmr_ch4,      &
        vmr_n2o, vmr_co2, tsfg, tsfa, qs_lay, q_lay, tv_lay, relhum, deltaZ, deltaZc, deltaP,&
-       active_gases_array, tsfc_radtime, coszen, coszdg, top_at_1, iSFC, iTOA, errmsg, errflg)
+       active_gases_array, tsfc_radtime, coszen, coszdg, top_at_1, iSFC, iTOA, nDay, idxday,&
+       errmsg, errflg)
     
     ! Inputs   
     integer, intent(in)    :: &
@@ -148,7 +149,8 @@ contains
     integer, intent(out) :: &  
          errflg,            & ! Error flag
          iSFC,              & ! Vertical index for surface
-         iTOA                 ! Vertical index for TOA
+         iTOA,              & ! Vertical index for TOA
+         nDay
     logical, intent(out) :: &
          top_at_1             ! Vertical ordering flag
     real(kind_phys), intent(inout) :: &
@@ -159,6 +161,8 @@ contains
          tsfc_radtime,      & ! Surface temperature at radiation timestep
          coszen,            & ! Cosine of SZA
          coszdg               ! Cosine of SZA, daytime
+    integer, dimension(:), intent(out) ::  &
+         idxday               ! Indices for daylit points 
     real(kind_phys), dimension(:,:), intent(inout) :: &
          p_lay,             & ! Pressure at model-layer
          t_lay,             & ! Temperature at model layer
@@ -357,6 +361,18 @@ contains
     ! #######################################################################################
     if (lsswr) then
        call coszmn (xlon, sinlat, coslat, solhr, nCol, me, coszen, coszdg)
+       ! For SW gather daylit points
+       nday   = 0
+       idxday = 0
+       do iCol = 1, nCol
+          if (coszen(iCol) >= 0.0001) then
+             nday = nday + 1
+             idxday(nday) = i
+          endif
+       enddo
+    else
+       nday   = 0
+       idxday = 0
     endif
 
   end subroutine GFS_rrtmgp_pre_run

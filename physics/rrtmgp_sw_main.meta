@@ -1,16 +1,16 @@
 [ccpp-table-properties]
-  name = rrtmgp_lw_main
+  name = rrtmgp_sw_main
   type = scheme
   dependencies = machine.F,radiation_tools.F90,GFS_rrtmgp_pre.F90,rte-rrtmgp/rrtmgp/mo_gas_optics_rrtmgp.F90
   dependencies = rte-rrtmgp/rte/mo_rte_kind.F90,rte-rrtmgp/rrtmgp/mo_gas_concentrations.F90,rte-rrtmgp/rte/mo_optical_props.F90
-  dependencies = rte-rrtmgp/rte/mo_source_functions.F90,rte-rrtmgp/rte/mo_rte_lw.F90,rte-rrtmgp/rte/mo_fluxes.F90
+  dependencies = rte-rrtmgp/rte/mo_rte_sw.F90,rte-rrtmgp/rte/mo_fluxes.F90
   dependencies = rte-rrtmgp/rte/kernels/mo_fluxes_broadband_kernels.F90, rte-rrtmgp/rte/kernels/mo_rte_solver_kernels.F90
   dependencies = mersenne_twister.f,rrtmgp_sampling.F90,rte-rrtmgp/extensions/mo_fluxes_byband.F90
-  dependencies = rrtmgp_lw_gas_optics.F90, rrtmgp_lw_cloud_optics.F90
+  dependencies = rrtmgp_sw_gas_optics.F90, rrtmgp_sw_cloud_optics.F90
 
 ########################################################################
 [ccpp-arg-table]
-  name = rrtmgp_lw_main_init
+  name = rrtmgp_sw_main_init
   type = scheme
 [rrtmgp_root_dir]
   standard_name = directory_for_rte_rrtmgp_source_code
@@ -20,17 +20,17 @@
   type = character
   intent = in
   kind = len=128
-[rrtmgp_lw_file_gas]
-  standard_name = filename_of_rrtmgp_longwave_k_distribution
-  long_name = file containing RRTMGP LW k-distribution
+[rrtmgp_sw_file_gas]
+  standard_name = filename_of_rrtmgp_shortwave_k_distribution
+  long_name = file containing RRTMGP SW k-distribution
   units = none
   dimensions =  ()
   type = character
   intent = in
   kind = len=128
-[rrtmgp_lw_file_clouds]
-  standard_name = filename_of_rrtmgp_longwave_cloud_optics_coefficients 
-  long_name = file containing coefficients for RRTMGP LW cloud optics
+[rrtmgp_sw_file_clouds]
+  standard_name = filename_of_rrtmgp_shortwave_cloud_optics_coefficients
+  long_name = file containing coefficients for RRTMGP SW cloud optics
   units = none
   dimensions =  ()
   type = character
@@ -85,38 +85,6 @@
   dimensions = ()
   type = integer
   intent = in
-[minGPpres]
-  standard_name = minimum_pressure_in_RRTMGP
-  long_name = minimum pressure allowed in RRTMGP
-  units = Pa
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = out
-[maxGPpres]
-  standard_name = maximum_pressure_in_RRTMGP
-  long_name = maximum pressure allowed in RRTMGP
-  units = Pa
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = out
-[minGPtemp]
-  standard_name = minimum_temperature_in_RRTMGP
-  long_name = minimum temperature allowed in RRTMGP
-  units = K
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = out
-[maxGPtemp]
-  standard_name = maximum_temperature_in_RRTMGP
-  long_name = maximum temperature allowed in RRTMGP
-  units = K
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = out
 [active_gases_array]
   standard_name = list_of_active_gases_used_by_RRTMGP
   long_name = list of active gases used by RRTMGP
@@ -143,18 +111,18 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = rrtmgp_lw_main_run
+  name = rrtmgp_sw_main_run
   type = scheme
-[doLWrad]
-  standard_name = flag_for_calling_longwave_radiation
-  long_name = logical flags for lw radiation calls
+[doSWrad]
+  standard_name = flag_for_calling_shortwave_radiation
+  long_name = logical flags for sw radiation calls
   units = flag
   dimensions = ()
   type = logical
   intent = in
-[doLWclrsky]
-  standard_name = flag_for_output_of_tendency_of_air_temperature_due_to_longwave_heating_on_radiation_timestep_assuming_clear_sky
-  long_name = flag to output lw heating rate (Radtend%lwhc)
+[doSWclrsky]
+  standard_name = flag_for_output_of_tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_timestep_assuming_clear_sky
+  long_name = flag to output sw heating rate (Radtend%swhc)
   units = flag
   dimensions = ()
   type = logical  
@@ -166,19 +134,12 @@
   dimensions = ()
   type = logical
   intent = in
-[use_LW_jacobian]
-  standard_name = flag_to_calc_RRTMGP_LW_jacobian
-  long_name = logical flag to control RRTMGP LW calculation
+[iSFC]
+  standard_name = vertical_index_for_surface_in_RRTMGP
+  long_name = index for surface layer in RRTMGP
   units = flag
   dimensions = ()
-  type = logical 
-  intent = in
-[doGP_lwscat] 
-  standard_name = flag_to_include_longwave_scattering_in_cloud_optics
-  long_name = logical flag to control the addition of LW scattering in RRTMGP 
-  units = flag
-  dimensions = ()
-  type = logical  
+  type = integer
   intent = in
 [doGP_sgs_cnv]
   standard_name = flag_to_include_sgs_convective_cloud_in_RRTMGP
@@ -208,12 +169,27 @@
   dimensions = ()
   type = integer
   intent = in
-[nGauss_angles]
-  standard_name = number_of_gaussian_quadrature_angles_for_radiation
-  long_name = Number of angles used in Gaussian quadrature
+[nday]
+  standard_name = daytime_points_dimension
+  long_name = daytime points dimension
   units = count
-  dimensions =  ()
+  dimensions = ()
   type = integer
+  intent = in
+[idxday]
+  standard_name = daytime_points
+  long_name = daytime points
+  units = index
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = in
+[coszen]
+  standard_name = cosine_of_solar_zenith_angle_for_daytime_points_on_radiation_timestep
+  long_name = mean cos of zenith angle over rad call period
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
   intent = in
 [nGases]
   standard_name = number_of_active_gases_used_by_RRTMGP
@@ -229,9 +205,9 @@
   dimensions = ()
   type = integer
   intent = in
-[isubc_lw]
-  standard_name = flag_for_lw_clouds_sub_grid_approximation
-  long_name = flag for lw clouds sub-grid approximation
+[isubc_sw]
+  standard_name = flag_for_sw_clouds_grid_approximation
+  long_name = flag for sw clouds sub-grid approximation
   units = flag
   dimensions = ()
   type = integer
@@ -292,28 +268,12 @@
   dimensions = ()
   type = integer
   intent = in
-[icseed_lw]
-  standard_name = random_number_seed_for_mcica_longwave
-  long_name = seed for random number generation for longwave radiation
+[icseed_sw]
+  standard_name = random_number_seed_for_mcica_shortwave
+  long_name = seed for random number generation for shortwave radiation
   units = none
   dimensions = (horizontal_loop_extent)
   type = integer
-  intent = in
-[semis]
-  standard_name = surface_longwave_emissivity
-  long_name = surface lw emissivity in fraction
-  units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-[tsfg]
-  standard_name = surface_ground_temperature_for_radiation
-  long_name = surface ground temperature for radiation
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
   intent = in
 [p_lay]
   standard_name = air_pressure_at_layer_for_RRTMGP
@@ -547,6 +507,38 @@
   type = real
   kind = kind_phys
   intent = in
+[sfc_alb_nir_dir]
+  standard_name = surface_albedo_due_to_near_IR_direct
+  long_name = surface albedo due to near IR direct beam
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[sfc_alb_nir_dif]
+  standard_name = surface_albedo_due_to_near_IR_diffused
+  long_name = surface albedo due to near IR diffused beam
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[sfc_alb_uvvis_dir]
+  standard_name = surface_albedo_due_to_UV_and_VIS_direct
+  long_name = surface albedo due to UV+VIS direct beam
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[sfc_alb_uvvis_dif]
+  standard_name = surface_albedo_due_to_UV_and_VIS_diffused
+  long_name = surface albedo due to UV+VIS diffused beam
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
 [active_gases_array]
   standard_name = list_of_active_gases_used_by_RRTMGP
   long_name = list of active gases used by RRTMGP
@@ -555,69 +547,60 @@
   type = character
   kind = len=*
   intent = in
-[lw_optical_props_aerosol]
-  standard_name = longwave_optical_properties_for_aerosols
+[sw_optical_props_aerosol]
+  standard_name = shortwave_optical_properties_for_aerosols
   long_name = Fortran DDT containing RRTMGP optical properties
   units = DDT
   dimensions = ()
-  type = ty_optical_props_1scl
+  type = ty_optical_props_2str
   intent = in
-[fluxlwUP_radtime]
-  standard_name = RRTMGP_lw_flux_profile_upward_allsky_on_radiation_timestep
-  long_name = RRTMGP upward longwave all-sky flux profile
+[scmpsw]
+  standard_name = components_of_surface_downward_shortwave_fluxes
+  long_name = derived type for special components of surface downward shortwave fluxes
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = cmpfsw_type
+  intent = inout
+[fluxswUP_allsky]
+  standard_name = RRTMGP_sw_flux_profile_upward_allsky
+  long_name = RRTMGP upward shortwave all-sky flux profile
   units = W m-2
   dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = inout
-[fluxlwDOWN_radtime]
-  standard_name = RRTMGP_lw_flux_profile_downward_allsky_on_radiation_timestep
-  long_name = RRTMGP downward longwave all-sky flux profile
+[fluxswDOWN_allsky]
+  standard_name = RRTMGP_sw_flux_profile_downward_allsky
+  long_name = RRTMGP downward shortwave all-sky flux profile
   units = W m-2
   dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = inout
-[fluxlwUP_allsky]
-  standard_name = RRTMGP_lw_flux_profile_upward_allsky
-  long_name = RRTMGP upward longwave all-sky flux profile
+[fluxswUP_clrsky]
+  standard_name = RRTMGP_sw_flux_profile_upward_clrsky
+  long_name = RRTMGP upward shortwave clr-sky flux profile
   units = W m-2
   dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = inout
-[fluxlwDOWN_allsky]
-  standard_name = RRTMGP_lw_flux_profile_downward_allsky
-  long_name = RRTMGP downward longwave all-sky flux profile
+[fluxswDOWN_clrsky]
+  standard_name = RRTMGP_sw_flux_profile_downward_clrsky
+  long_name = RRTMGP downward shortwave clr-sky flux profile
   units = W m-2
   dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = inout
-[fluxlwUP_clrsky]
-  standard_name = RRTMGP_lw_flux_profile_upward_clrsky
-  long_name = RRTMGP upward longwave clr-sky flux profile
-  units = W m-2
-  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
+[cldtausw]
+  standard_name = cloud_optical_depth_layers_at_0p55mu_band
+  long_name = approx .55mu band layer cloud optical depth
+  units = none
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
-[fluxlwDOWN_clrsky]
-  standard_name = RRTMGP_lw_flux_profile_downward_clrsky
-  long_name = RRTMGP downward longwave clr-sky flux profile
-  units = W m-2
-  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-[fluxlwUP_jac]
-  standard_name = RRTMGP_jacobian_of_lw_flux_upward
-  long_name = RRTMGP Jacobian upward longwave flux profile
-  units = W m-2 K-1
-  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
+  intent = out
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
