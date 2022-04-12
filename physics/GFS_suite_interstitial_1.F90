@@ -12,7 +12,7 @@
     subroutine GFS_suite_interstitial_1_run (im, levs, ntrac, dtf, dtp, slmsk, area, dxmin, dxinv, pgr, &
       islmsk, work1, work2, psurf, dudt, dvdt, dtdt, dqdt, errmsg, errflg)
 
-      use machine,               only: kind_phys
+      use machine, only: kind_phys
 
       implicit none
 

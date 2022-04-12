@@ -316,8 +316,8 @@
 !!
       subroutine GFS_diagtoscreen_init (Model, Data, Interstitial, errmsg, errflg)
 
-         use GFS_typedefs,          only: GFS_control_type, GFS_data_type, &
-                                          GFS_interstitial_type
+         use GFS_typedefs,  only: GFS_control_type, GFS_data_type
+         use CCPP_typedefs, only: GFS_interstitial_type
 
          implicit none
 
@@ -349,8 +349,8 @@
 !!
       subroutine GFS_diagtoscreen_timestep_init (Model, Data, Interstitial, errmsg, errflg)
 
-         use GFS_typedefs,          only: GFS_control_type, GFS_data_type, &
-                                          GFS_interstitial_type
+         use GFS_typedefs,  only: GFS_control_type, GFS_data_type
+         use CCPP_typedefs, only: GFS_interstitial_type
 
          implicit none
 
@@ -397,8 +397,8 @@
                                           GFS_stateout_type, GFS_sfcprop_type, &
                                           GFS_coupling_type, GFS_grid_type,    &
                                           GFS_tbd_type, GFS_cldprop_type,      &
-                                          GFS_radtend_type, GFS_diag_type,     &
-                                          GFS_interstitial_type
+                                          GFS_radtend_type, GFS_diag_type
+         use CCPP_typedefs,         only: GFS_interstitial_type
 
          implicit none
 
@@ -967,8 +967,8 @@
 !!
       subroutine GFS_interstitialtoscreen_init (Model, Data, Interstitial, errmsg, errflg)
 
-         use GFS_typedefs,          only: GFS_control_type, GFS_data_type, &
-                                          GFS_interstitial_type
+         use GFS_typedefs,  only: GFS_control_type, GFS_data_type
+         use CCPP_typedefs, only: GFS_interstitial_type
 
          implicit none
 
@@ -1001,8 +1001,8 @@
 !!
       subroutine GFS_interstitialtoscreen_timestep_init (Model, Data, Interstitial, errmsg, errflg)
 
-         use GFS_typedefs,          only: GFS_control_type, GFS_data_type, &
-                                          GFS_interstitial_type
+         use GFS_typedefs,  only: GFS_control_type, GFS_data_type
+         use CCPP_typedefs, only: GFS_interstitial_type
 
          implicit none
 
@@ -1051,8 +1051,8 @@
                                           GFS_stateout_type, GFS_sfcprop_type, &
                                           GFS_coupling_type, GFS_grid_type,    &
                                           GFS_tbd_type, GFS_cldprop_type,      &
-                                          GFS_radtend_type, GFS_diag_type,     &
-                                          GFS_interstitial_type
+                                          GFS_radtend_type, GFS_diag_type
+         use CCPP_typedefs,         only: GFS_interstitial_type
 
          implicit none
 

@@ -10,8 +10,9 @@
 !!
     subroutine GFS_suite_interstitial_phys_reset_run (Interstitial, Model, errmsg, errflg)
 
-      use machine,      only: kind_phys
-      use GFS_typedefs, only: GFS_control_type, GFS_interstitial_type
+      use machine,       only: kind_phys
+      use GFS_typedefs,  only: GFS_control_type
+      use CCPP_typedefs, only: GFS_interstitial_type
 
       implicit none
 
