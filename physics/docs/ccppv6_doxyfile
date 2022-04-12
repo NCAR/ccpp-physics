@@ -115,8 +115,8 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 
 INPUT                  =  pdftxt/rel_update.txt            \
-                          pdftxt/mainpage.txt           \
-                          pdftxt/v6phys_enh.txt          \
+                          pdftxt/mainpage.txt              \
+                          pdftxt/v6phys_enh.txt            \
                           pdftxt/all_shemes_list.txt     \
                           pdftxt/GFS_v16_suite.txt       \
                           pdftxt/GFS_v17_p8_suite.txt    \
@@ -171,7 +171,7 @@ INPUT                  =  pdftxt/rel_update.txt            \
                         ../GFS_rrtmg_pre.F90             \
                         ../GFS_rrtmg_post.F90           \
                         ../GFS_rrtmg_setup.F90          \
-                        ../rrtmg_sw_pre.F90              \
+                        ../rad_sw_pre.F90              \
                         ../module_SGSCloud_RadPre.F90    \
                         ../module_SGSCloud_RadPost.F90   \
                         ../radsw_main.F90                \
@@ -183,11 +183,24 @@ INPUT                  =  pdftxt/rel_update.txt            \
                         ../radiation_astronomy.f         \
                         ../radiation_clouds.f            \
                         ../radiation_gases.f             \
-                        ../radiation_surface.f \
+                        ../radiation_surface.f           \
                         ../radlw_param.f \
                         ../radlw_datatb.f \
                         ../radsw_param.f  \
                         ../radsw_datatb.f  \
+                        ../GFS_rrtmgp_pre.F90        \
+                        ../GFS_rrtmgp_setup.F90      \
+                        ../GFS_rrtmgp_cloud_mp.F90     \
+                        ../GFS_rrtmgp_cloud_overlap.F90   \
+                        ../GFS_cloud_diagnostics.F90     \
+                        ../rrtmgp_aerosol_optics.F90    \
+                        ../rrtmgp_sw_gas_optics.F90     \
+                        ../rrtmgp_sw_cloud_optics.F90    \
+                        ../rrtmgp_sw_cloud_sampling.F90    \
+                        ../rrtmgp_sw_rte.F90         \
+                        ../GFS_rrtmgp_sw_post.F90      \
+                        ../rrtmgp_lw_pre.F90          \
+                        ../rrtmgp_lw_gas_optics.F90       \
                         ../dcyc2.f        \
                         ../sfc_diff.f   \
                         ../sfc_diag.f                \

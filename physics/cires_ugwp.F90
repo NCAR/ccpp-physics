@@ -10,7 +10,7 @@
 !! 3. GW Effects: Unified representation of GW impacts on the "resolved" flow for all sources (energy-balanced schemes for momentum, heat and mixing).
 !! https://www.weather.gov/media/sti/nggps/Presentations%202017/02%20NGGPS_VYUDIN_2017_.pdf
 
-!>\defgroup cires_ugwp_run Unified Gravity Wave Physics General Algorithm
+
 module cires_ugwp
 
     use machine, only: kind_phys
@@ -32,6 +32,8 @@ contains
 ! ------------------------------------------------------------------------
 ! CCPP entry points for CIRES Unified Gravity Wave Physics (UGWP) scheme v0
 ! ------------------------------------------------------------------------
+!>\defgroup cires_ugwp_run_mod CIRES Unified Gravity Wave Physics v0 Module
+!! @{
 !>@brief The subroutine initializes the CIRES UGWP
 !> \section arg_table_cires_ugwp_init Argument Table
 !! \htmlinclude cires_ugwp_init.html
@@ -154,7 +156,6 @@ contains
 !! \htmlinclude cires_ugwp_run.html
 !!
 !> \section gen_cires_ugwp CIRES UGWP Scheme General Algorithm
-!! @{
      subroutine cires_ugwp_run(do_ugwp, me,  master, im,  levs, ntrac, dtp, kdt, lonr, &
          oro, oro_uf, hprime, nmtvr, oc, theta, sigma, gamma, elvmax, clx, oa4,        &
          do_tofd, ldiag_ugwp, cdmbgwd, xlat, xlat_d, sinlat, coslat, area,             &

@@ -104,7 +104,8 @@
 !!!!!  ==========================================================  !!!!!
 
 
-!> \defgroup module_radiation_gases RRTMG Gases Module
+!> \defgroup module_radiation_gases_mod Radiation Gases Module
+!! @{
 !> This module sets up ozone climatological profiles and other constant
 !! gas profiles, such as co2, ch4, n2o, o2, and those of cfc gases. All
 !! data are entered as mixing ratio by volume, except ozone which is
@@ -161,21 +162,21 @@
      &   VTAGGAS='NCEP-Radiation_gases     v5.1  Nov 2012 '
 !    &   VTAGGAS='NCEP-Radiation_gases     v5.0  Aug 2012 '
 
-      integer, parameter, public :: NF_VGAS = 10   !< number of gas species
-      integer, parameter         :: IMXCO2  = 24   !< input CO2 data longitude points
-      integer, parameter         :: JMXCO2  = 12   !< input CO2 data latitude points
-      integer, parameter         :: MINYEAR = 1957 !< earlist year 2D CO2 data available
+      integer, parameter, public :: NF_VGAS = 10   ! number of gas species
+      integer, parameter         :: IMXCO2  = 24   ! input CO2 data longitude points
+      integer, parameter         :: JMXCO2  = 12   ! input CO2 data latitude points
+      integer, parameter         :: MINYEAR = 1957 ! earlist year 2D CO2 data available
 
-      real (kind=kind_phys), parameter :: resco2=15.0            !< horizontal resolution in degree
-      real (kind=kind_phys), parameter :: raddeg=180.0/con_pi    !< rad->deg conversion
-      real (kind=kind_phys), parameter :: prsco2=788.0           !< pressure limitation for 2D CO2 (mb)
-      real (kind=kind_phys), parameter :: hfpi  =0.5*con_pi      !< half of pi
+      real (kind=kind_phys), parameter :: resco2=15.0            ! horizontal resolution in degree
+      real (kind=kind_phys), parameter :: raddeg=180.0/con_pi    ! rad->deg conversion
+      real (kind=kind_phys), parameter :: prsco2=788.0           ! pressure limitation for 2D CO2 (mb)
+      real (kind=kind_phys), parameter :: hfpi  =0.5*con_pi      ! half of pi
 
-      real (kind=kind_phys), parameter :: co2vmr_def = 350.0e-6  !< parameter constant for CO2 volume mixing ratio
-      real (kind=kind_phys), parameter :: n2ovmr_def = 0.31e-6   !< parameter constant for N2O volume mixing ratio
-      real (kind=kind_phys), parameter :: ch4vmr_def = 1.50e-6   !< parameter constant for CH4 volume mixing ratio
-      real (kind=kind_phys), parameter :: o2vmr_def  = 0.209     !< parameter constant for O2  volume mixing ratio
-      real (kind=kind_phys), parameter :: covmr_def  = 1.50e-8   !< parameter constant for CO  colume mixing ratio
+      real (kind=kind_phys), parameter :: co2vmr_def = 350.0e-6  ! parameter constant for CO2 volume mixing ratio
+      real (kind=kind_phys), parameter :: n2ovmr_def = 0.31e-6   ! parameter constant for N2O volume mixing ratio
+      real (kind=kind_phys), parameter :: ch4vmr_def = 1.50e-6   ! parameter constant for CH4 volume mixing ratio
+      real (kind=kind_phys), parameter :: o2vmr_def  = 0.209     ! parameter constant for O2  volume mixing ratio
+      real (kind=kind_phys), parameter :: covmr_def  = 1.50e-8   ! parameter constant for CO  colume mixing ratio
 ! aer 2003 value
       real (kind=kind_phys), parameter :: f11vmr_def = 3.520e-10
 ! aer 2003 value
@@ -224,12 +225,10 @@
       contains
 ! =================
 
-!> \ingroup module_radiation_gases
 !> This subroutine sets up ozone, co2, etc. parameters. If climatology
 !! ozone then read in monthly ozone data.
 !!\param me         print message control flag
 !>\section gas_init_gen gas_init General Algorithm
-!! @{
 !-----------------------------------
       subroutine gas_init                                               &
      &     ( me )!  ---  inputs:
@@ -514,10 +513,8 @@
 !
 !...................................
       end subroutine gas_init
-!! @}
 !-----------------------------------
 
-!> \ingroup module_radiation_gases
 !> This subroutine reads in 2-d monthly co2 data set for a specified
 !! year. Data are in a 15 degree lat/lon horizontal resolution.
 !!\param iyear      year of the requested data for fcst
@@ -528,7 +525,6 @@
 !!\param ldoco2     co2 update control flag
 !!\param me         print message control flag
 !>\section gen_gas_update gas_update General Algorithm
-!! @{
 !-----------------------------------
       subroutine gas_update                                             &
      &     ( iyear, imon, iday, ihour, loz1st, ldoco2, me )!  ---  inputs
@@ -899,9 +895,7 @@
 !...................................
       end subroutine gas_update
 !-----------------------------------
-!! @}
 
-!> \ingroup module_radiation_gases
 !> This subroutine sets up global distribution of radiation absorbing
 !! gases in volume mixing ratio. Currently only co2 has the options
 !! from observed values, all other gases are asigned to the
@@ -924,7 +918,6 @@
 !!\n                    (:,:,9)           - ccl4
 !!\n                    (:,:,10)          - cfc113
 !>\section gen_getgases getgases General Algorithm
-!!@{
 !-----------------------------------
       subroutine getgases                                               &
      &     ( plvl, xlon, xlat,                                          & ! ---  inputs
@@ -1065,10 +1058,8 @@
       return
 !...................................
       end subroutine getgases
-!! @}
 !-----------------------------------
 
-!> \ingroup module_radiation_gases
 !> This subroutine sets up climatological ozone profile for radiation
 !! calculation. This code is originally written by Shrinivas Moorthi.
 !!\param prslk       (IMAX,LM), exner function = \f$(p/p0)^{rocp}\f$
@@ -1078,7 +1069,6 @@
 !!\param o3mmr       (IMAX,LM), output ozone profile in mass mixing
 !!                   ratio (g/g)
 !>\section getozn_gen getozn General Algorithm
-!! @{
 !-----------------------------------
       subroutine getozn                                                 &
      &     ( prslk,xlat,                                                &                    !  ---  inputs
@@ -1184,10 +1174,10 @@
       return
 !...................................
       end subroutine getozn
-!! @}
 !-----------------------------------
 
 !
 !........................................!
       end module module_radiation_gases  !
+!! @}
 !========================================!

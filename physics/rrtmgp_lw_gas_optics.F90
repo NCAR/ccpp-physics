@@ -1,3 +1,6 @@
+!>\file rrtmgp_lw_gas_optics.F90
+!!
+
 module rrtmgp_lw_gas_optics
   use machine,               only: kind_phys
   use mo_rte_kind,           only: wl
@@ -71,7 +74,9 @@ contains
   ! #########################################################################################
   ! SUBROUTINE rrtmgp_lw_gas_optics_init
   ! #########################################################################################
-!! \section arg_table_rrtmgp_lw_gas_optics_init
+!>\defgroup rrtmgp_lw_gas_optics_mod GFS RRTMGP-LW Gas Optics Module
+!! @{
+!> \section arg_table_rrtmgp_lw_gas_optics_init
 !! \htmlinclude rrtmgp_lw_gas_optics_init.html
 !!
   subroutine rrtmgp_lw_gas_optics_init(rrtmgp_root_dir, rrtmgp_lw_file_gas, mpicomm,        &
@@ -462,7 +467,7 @@ contains
   ! #########################################################################################
   ! SUBROUTINE rrtmgp_lw_gas_optics_run
   ! #########################################################################################
-!! \section arg_table_rrtmgp_lw_gas_optics_run
+!> \section arg_table_rrtmgp_lw_gas_optics_run
 !! \htmlinclude rrtmgp_lw_gas_optics_run.html
 !!
   subroutine rrtmgp_lw_gas_optics_run(doLWrad, nCol, nLev, p_lay, p_lev, t_lay, t_lev, tsfg, &
@@ -532,5 +537,5 @@ contains
   ! #########################################################################################
   subroutine rrtmgp_lw_gas_optics_finalize()
   end subroutine rrtmgp_lw_gas_optics_finalize
-  
+!! @}  
 end module rrtmgp_lw_gas_optics

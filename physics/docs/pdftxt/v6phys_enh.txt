@@ -2,7 +2,7 @@
 \page v6phys_enh_page GFS Prototype 8 Physics Enhancements
 
 \section CA_p8 Cellular Automata in the ufs-weather-model
-\author Lisa Bengtsson (NOAA/PSL): Lisa.Bengtsson@noaa.gov
+\author Lisa Bengtsson (NOAA Physical Sciences Laboratory): Lisa.Bengtsson@noaa.gov
 
 \b Scientific \b background:
 
@@ -18,7 +18,7 @@ There are currently two options to evolve the CA (can be done simultaneously); (
 
 
 \section cumu_p8 P8 Physics Updates in GFS Cumulus Convection
-\author Jongil Han (NCEP/EMC): Jongil.Han@noaa.gov
+\author Jongil Han (NCEP Environmental Modeling Center): Jongil.Han@noaa.gov
 
 - To enhance the surface-based convective available potential energy (CAPE), more strict convection trigger conditions are applied.
 - Enhanced downdraft detrainments start from 60mb above the ground surface rather than from the cloud base.
@@ -29,7 +29,7 @@ There are currently two options to evolve the CA (can be done simultaneously); (
 
 
 \section pbl_p8 P8 Physics Updates in GFS PBL and Free Atmospheric Turbulence Mixing
-\author Jongil Han (NCEP/EMC): Jongil.Han@noaa.gov
+\author Jongil Han (NCEP Environmental Modeling Center): Jongil.Han@noaa.gov
 
 - Wind shear effect in characteristic mixing length calculation is included, which reduces the mixing length in a strong shear environment such as a hurricane.
 - To better predict surface inversion as well as capping inversion near the PBL top, background diffusivity in the inversion layers is reduced as a function of surface roughness and green vegetation fraction.
@@ -39,7 +39,7 @@ There are currently two options to evolve the CA (can be done simultaneously); (
 
 
 \section sfc_p8 P8 Physics Updates in GFS Surface Layer Physics
-\author Jongil Han (NCEP/EMC): Jongil.Han@noaa.gov
+\author Jongil Han (NCEP Environmental Modeling Center): Jongil.Han@noaa.gov
 
 - New canopy heat storage parameterization is implemented, which is achieved by reducing sensible heat flux into the PBL scheme as a function of surface roughness and vegetation fraction and helps to reduce nighttime cold and daytime warm 2-meter temperature biases over forested regions. 
 - A sea spray effect parameterization is included to enhance sensible and latent heat fluxes, especially for strong wind conditions.  
@@ -56,7 +56,7 @@ Han. J., F. Yang, R. Montuoro, W. Li, and R. Sun, 2022: Implementation of a posi
 
 
 \section  reeng_rcld Reengineering of Cloud Property Computation Routines
-\author Qingfu Liu (NCEP/EMC): Qingfu.Liu@noaa.gov
+\author Qingfu Liu (NCEP Environmental Modeling Center): Qingfu.Liu@noaa.gov
 
 Requests have been made by many physics developers and users to rewrite
 the cloud routines (progcldXXX) for radiation computation in the program

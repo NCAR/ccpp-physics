@@ -1,4 +1,4 @@
-!> \file GFS_rrtmgp_setup.f90
+!> \file GFS_rrtmgp_setup.F90
 !! This file contains
 module GFS_rrtmgp_setup
   use machine,                    only : kind_phys
@@ -34,7 +34,7 @@ contains
   ! #########################################################################################  
   ! SUBROUTINE GFS_rrtmgp_setup_init
   ! #########################################################################################  
-!> \defgroup GFS_rrtmgp_setup GFS RRTMGP Scheme Setup
+!> \defgroup GFS_rrtmgp_setup_mod GFS RRTMGP Scheme Setup Module
 !! @{
 !! \section arg_table_GFS_rrtmgp_setup_init
 !! \htmlinclude GFS_rrtmgp_setup_init.html
@@ -267,5 +267,5 @@ contains
     is_initialized = .false.
     
   end subroutine GFS_rrtmgp_setup_finalize
-
+!!@}
 end module GFS_rrtmgp_setup

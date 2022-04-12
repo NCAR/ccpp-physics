@@ -141,7 +141,7 @@
 !!!!!                       end descriptions                       !!!!!
 !!!!!  ==========================================================  !!!!!
 
-!> \defgroup module_radiation_clouds RRTMG Clouds Module
+!> \defgroup module_radiation_clouds Radiation Clouds Module
 !! @{
 !! \brief This module computes cloud related quantities for radiation
 !! computations.
@@ -175,7 +175,6 @@
 !!
 !!\version NCEP-Radiation_clouds    v5.1  Nov 2012
 !!
-!! @}
 
 !> This module computes cloud related quantities for radiation computations.
       module module_radiation_clouds
@@ -260,7 +259,6 @@
       contains
 ! =================
 
-!> \ingroup module_radiation_clouds
 !> This subroutine is an initialization program for cloud-radiation
 !! calculations and sets up boundary layer cloud top.
 !!\param si              model vertical sigma layer interface
@@ -276,7 +274,6 @@
 !!\n                     =17/18: NSSL microphysics
 !!\param me              print control flag
 !>\section cld_init General Algorithm
-!! @{
       subroutine cld_init                                               &
      &     ( si, NLAY, imp_physics, me ) !  ---  inputs
 !  ---  outputs:
@@ -398,14 +395,11 @@
       return
 !...................................
       end subroutine cld_init
-!! @}
 !-----------------------------------
 
-!> \ingroup module_radiation_clouds
 !> Subroutine radiation_clouds_prop computes cloud related quantities
 !! for different cloud microphysics schemes.
 !>\section radiation_clouds_prop General Algorithm
-!> @{
       subroutine radiation_clouds_prop                                  &
      &     ( plyr, plvl, tlyr, tvly, qlyr, qstl, rhly,                  &    !  ---  inputs:
      &       ccnd, ncndl, cnvw, cnvc, tracer1,                          &
@@ -940,11 +934,9 @@
 !...................................
       end subroutine radiation_clouds_prop
 
-!> \ingroup module_radiation_clouds
 !> This subroutine computes cloud related quantities using
 !! zhao/moorthi's prognostic cloud microphysics scheme.
 !>\section progcld_zhao_carr General Algorithm
-!> @{
       subroutine progcld_zhao_carr                                      &
      &     ( plyr,plvl,tlyr,tvly,qlyr,qstl,rhly,clw,                    &    !  ---  inputs:
      &       xlat,xlon,slmsk,dz,delp, IX, NLAY, NLP1,                   &
@@ -1244,14 +1236,11 @@
 !...................................
       end subroutine progcld_zhao_carr
 !-----------------------------------
-!> @}
 !-----------------------------------
 
-!> \ingroup module_radiation_clouds
 !> This subroutine computes cloud related quantities using
 !! zhao/moorthi's prognostic cloud microphysics scheme + pdfcld.
 !>\section progcld_zhao_carr_pdf General Algorithm
-!! @{
       subroutine progcld_zhao_carr_pdf                                  &
      &     ( plyr,plvl,tlyr,tvly,qlyr,qstl,rhly,clw,cnvw,cnvc,          &    !  ---  inputs:
      &       xlat,xlon,slmsk, dz, delp,                                 &
@@ -1546,16 +1535,13 @@
       return
 !...................................
       end subroutine progcld_zhao_carr_pdf
-!! @}
 !-----------------------------------
 
 
 !-----------------------------------
-!> \ingroup module_radiation_clouds
 !> This subroutine computes cloud related quantities using
 !! GFDL Lin MP prognostic cloud microphysics scheme.
 !>\section progcld_gfdl_lin General Algorithm
-!! @{
       subroutine progcld_gfdl_lin                                       &
      &     ( plyr,plvl,tlyr,tvly,qlyr,qstl,rhly,clw,cnvw,cnvc,          & !  ---  inputs:
      &       xlat,xlon,slmsk,cldtot, dz, delp,                          &
@@ -1798,11 +1784,9 @@
       return
 !...................................
       end subroutine progcld_gfdl_lin
-!! @}
 !-----------------------------------
 
 !-----------------------------------
-!> \ingroup module_radiation_clouds
 !! This subroutine computes cloud related quantities using
 !! Ferrier-Aligo cloud microphysics scheme.
       subroutine progcld_fer_hires                                      &
@@ -2638,11 +2622,9 @@
 !mz
 
 
-!> \ingroup module_radiation_clouds
 !> This subroutine computes cloud related quantities using
 !! for unified cloud microphysics scheme.
 !>\section progclduni General Algorithm
-!> @{
       subroutine progclduni                                             &
      &     ( plyr,plvl,tlyr,tvly,ccnd,ncnd,                             &    !  ---  inputs:
      &       xlat,xlon,slmsk,dz,delp, IX, NLAY, NLP1, cldtot,           &
@@ -2929,9 +2911,7 @@
 !...................................
       end subroutine progclduni
 !-----------------------------------
-!> @}
 
-!> \ingroup module_radiation_clouds
 !> This subroutine computes high, mid, low, total, and boundary cloud
 !! fractions and cloud top/bottom layer indices for model diagnostic
 !! output. The three cloud domain boundaries are defined by ptopc. The
@@ -2952,7 +2932,6 @@
 !> \param mbot   (IX,3),vertical indices for low, mid, hi cloud bases
 !!
 !>\section detail Detailed Algorithm
-!! @{
       subroutine gethml                                                 &
      &     ( plyr, ptop1, cldtot, cldcnv, dz, de_lgth, alpha,           &       !  ---  inputs:
      &       IX, NLAY, iovr_rand, iovr_maxrand, iovr_max,               &
@@ -3370,7 +3349,6 @@
 !...................................
       end subroutine gethml
 !-----------------------------------
-!! @}
 
 !+---+-----------------------------------------------------------------+
 !..Cloud fraction scheme by G. Thompson (NCAR-RAL), not intended for

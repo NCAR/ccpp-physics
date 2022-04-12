@@ -1,3 +1,6 @@
+!>\file rrtmgp_lw_pre.F90 
+!!
+
 module rrtmgp_lw_pre
   use machine, only: &
        kind_phys                   ! Working type
@@ -14,6 +17,8 @@ contains
   ! #########################################################################################
   ! SUBROUTINE rrtmgp_lw_pre_init
   ! #########################################################################################
+!>\defgroup rrtmgp_lw_pre_mode GFS RRTMGP-LW Pre Module
+!! @{
   subroutine rrtmgp_lw_pre_init ()
   end subroutine rrtmgp_lw_pre_init
 
@@ -60,5 +65,5 @@ contains
   ! #########################################################################################
   subroutine rrtmgp_lw_pre_finalize ()
   end subroutine rrtmgp_lw_pre_finalize
-
+!! @}
 end module rrtmgp_lw_pre

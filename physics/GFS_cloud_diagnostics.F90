@@ -1,7 +1,10 @@
+!>\file GFS_cloud_diagnostics.F90
+!!
+
 ! ########################################################################################
-! This module contains code to produce the UFS High/Mid/Low cloud-diagnostics. 
-! This was bundled together with the prognostic cloud modules within the RRTMG implementation.
-! For the RRTMGP implementation we propose to keep these diagnostics independent.
+!> This module contains code to produce the UFS High/Mid/Low cloud-diagnostics. 
+!! This was bundled together with the prognostic cloud modules within the RRTMG implementation.
+!! For the RRTMGP implementation we propose to keep these diagnostics independent.
 ! ########################################################################################
 module GFS_cloud_diagnostics
   use machine,                 only: kind_phys
@@ -31,12 +34,15 @@ module GFS_cloud_diagnostics
 contains
   ! ######################################################################################
   ! ######################################################################################
+
+!>\defgroup gfs_cloud_diagnostics_mod GFS Cloud Diagnostics Module
+!! @{
   subroutine GFS_cloud_diagnostics_init()
   end subroutine GFS_cloud_diagnostics_init
   
   ! ######################################################################################
   ! ######################################################################################
-!! \section arg_table_GFS_cloud_diagnostics_run
+!> \section arg_table_GFS_cloud_diagnostics_run
 !! \htmlinclude GFS_cloud_diagnostics_run.html
 !!  
   subroutine GFS_cloud_diagnostics_run(nCol, nLev, iovr_rand, iovr_maxrand, iovr_max,    & 
@@ -127,4 +133,5 @@ contains
   ! ######################################################################################
   ! Subroutine hml_cloud_diagnostics_initialize is removed (refer to GFS_rrtmgp_setup.F90) 
   ! ######################################################################################
+!! @}
 end module GFS_cloud_diagnostics

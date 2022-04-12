@@ -1,24 +1,27 @@
+!>\file GFS_rrtmgp_pre.F90
+!!
+
 module GFS_rrtmgp_pre
   use machine, only: &
-       kind_phys                   ! Working type
+       kind_phys                   !< Working type
   use funcphys, only:            &
-       fpvs                        ! Function ot compute sat. vapor pressure over liq.
+       fpvs                        !< Function ot compute sat. vapor pressure over liq.
   use module_radiation_astronomy, only: &
        coszmn 
   use module_radiation_gases,    only: &
-       NF_VGAS,                  & ! Number of active gas species
-       getgases,                 & ! Routine to setup trace gases
-       getozn                      ! Routine to setup ozone
+       NF_VGAS,                  & !< Number of active gas species
+       getgases,                 & !< Routine to setup trace gases
+       getozn                      !< Routine to setup ozone
   ! RRTMGP types
   use mo_gas_concentrations, only: ty_gas_concs
   use radiation_tools,       only: check_error_msg,cmp_tlev
 
   real(kind_phys), parameter :: &
-       amd   = 28.9644_kind_phys,  & ! Molecular weight of dry-air     (g/mol)
-       amw   = 18.0154_kind_phys,  & ! Molecular weight of water vapor (g/mol)
-       amo3  = 47.9982_kind_phys,  & ! Modelular weight of ozone       (g/mol)
-       amdw  = amd/amw,            & ! Molecular weight of dry air / water vapor
-       amdo3 = amd/amo3              ! Molecular weight of dry air / ozone
+       amd   = 28.9644_kind_phys,  & !< Molecular weight of dry-air     (g/mol)
+       amw   = 18.0154_kind_phys,  & !< Molecular weight of water vapor (g/mol)
+       amo3  = 47.9982_kind_phys,  & !< Modelular weight of ozone       (g/mol)
+       amdw  = amd/amw,            & !< Molecular weight of dry air / water vapor
+       amdo3 = amd/amo3              !< Molecular weight of dry air / ozone
 
   ! Save trace gas indices.
   integer :: iStr_h2o, iStr_co2, iStr_o3, iStr_n2o, iStr_ch4, iStr_o2, iStr_ccl4, &
@@ -30,6 +33,8 @@ contains
   ! #########################################################################################
   ! SUBROUTINE GFS_rrtmgp_pre_init
   ! #########################################################################################
+!>\defgroup gfs_rrtmgp_pre GFS RRTMGP Pre Module
+!! @{
 !! \section arg_table_GFS_rrtmgp_pre_init
 !! \htmlinclude GFS_rrtmgp_pre_init.html
 !!
@@ -386,4 +391,5 @@ contains
   ! #########################################################################################
   subroutine GFS_rrtmgp_pre_finalize ()
   end subroutine GFS_rrtmgp_pre_finalize
+!! @}
 end module GFS_rrtmgp_pre

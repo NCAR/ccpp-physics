@@ -1,3 +1,6 @@
+!>\file rrtmgp_sw_gas_optics.F90
+!!
+
 module rrtmgp_sw_gas_optics
   use machine,                only: kind_phys
   use mo_rte_kind,            only: wl
@@ -76,6 +79,9 @@ contains
   ! #########################################################################################
   ! SUBROUTINE sw_gas_optics_init
   ! #########################################################################################
+
+!>\defgroup rrtmgp_sw_gas_optics_mod GFS RRTMGP-SW Gas Optics Module
+!! @{
 !! \section arg_table_rrtmgp_sw_gas_optics_init
 !! \htmlinclude rrtmgp_sw_gas_optics.html
 !!
@@ -484,7 +490,7 @@ contains
   ! #########################################################################################
   ! SUBROUTINE rrtmgp_sw_gas_optics_run
   ! #########################################################################################
-!! \section arg_table_rrtmgp_sw_gas_optics_run
+!> \section arg_table_rrtmgp_sw_gas_optics_run
 !! \htmlinclude rrtmgp_sw_gas_optics.html
 !!
   subroutine rrtmgp_sw_gas_optics_run(doSWrad, nCol, nLev, ngptsGPsw, nday, idxday,  p_lay, &
@@ -586,6 +592,6 @@ contains
   ! #########################################################################################
   subroutine rrtmgp_sw_gas_optics_finalize()
   end subroutine rrtmgp_sw_gas_optics_finalize
-
+!! @}
 end module rrtmgp_sw_gas_optics
  

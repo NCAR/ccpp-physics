@@ -1,6 +1,6 @@
-! ########################################################################################
-!
-! ########################################################################################
+!>\file GFS_rrtmgp_cloud_overlap.F90
+!!
+
 module GFS_rrtmgp_cloud_overlap
   use machine,      only: kind_phys
   use radiation_tools,   only: check_error_msg
@@ -11,6 +11,9 @@ module GFS_rrtmgp_cloud_overlap
 contains  
   ! ######################################################################################
   ! ######################################################################################
+
+!>\defgroup gfs_rrtmgp_cloud_overlap_mod GFS RRTMGP Cloud Overlap Module
+!! @{
 !! \section arg_table_GFS_rrtmgp_cloud_overlap_run
 !! \htmlinclude GFS_rrtmgp_cloud_overlap_run.html
 !!  
@@ -123,4 +126,5 @@ contains
     precip_overlap_param = cloud_overlap_param    
     
   end subroutine GFS_rrtmgp_cloud_overlap_run
+!!@}
 end module GFS_rrtmgp_cloud_overlap

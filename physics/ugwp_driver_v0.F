@@ -6,7 +6,7 @@
 !ugwp-v0 subroutines: GWDPS_V0 and fv3_ugwp_solv2_v0	
 !
 !=====================================================================
-!>\ingroup cires_ugwp_run
+!>\ingroup cires_ugwp_run_mod
 !> @{
 !! <b>Note for the sub-grid scale orography scheme in UGWP-v0:</b> Due to degraded forecast
 !! scores of simulations with revised schemes for subgrid-scale orography effects in FV3GFS,
@@ -914,7 +914,7 @@
 !===============================================================================
 !23456==============================================================================
 
-!>\ingroup cires_ugwp_run
+!>\ingroup cires_ugwp_run_mod
 !> @{
 !! 
       subroutine fv3_ugwp_solv2_v0(klon, klev, dtime,

@@ -1,3 +1,6 @@
+!>\file rrtmgp_sw_rte.F90
+!!
+
 module rrtmgp_sw_rte
   use machine,                 only: kind_phys
   use mo_optical_props,        only: ty_optical_props_2str
@@ -15,13 +18,15 @@ contains
   ! #########################################################################################
   ! SUBROUTINE rrtmgp_sw_rte_init
   ! #########################################################################################
+!>\defgroup rrtmgp_sw_rte_mod GFS RRTMGP-SW RTE Module
+!! @{
   subroutine rrtmgp_sw_rte_init()
   end subroutine rrtmgp_sw_rte_init
 
   ! #########################################################################################
   ! SUBROUTINE rrtmgp_sw_rte_run
   ! #########################################################################################
-!! \section arg_table_rrtmgp_sw_rte_run
+!> \section arg_table_rrtmgp_sw_rte_run
 !! \htmlinclude rrtmgp_sw_rte.html
 !!
   subroutine rrtmgp_sw_rte_run(doSWrad, doSWclrsky, nCol, nLev, nDay, idxday, coszen, p_lay,&
@@ -217,5 +222,6 @@ contains
   ! #########################################################################################
   subroutine rrtmgp_sw_rte_finalize()
   end subroutine rrtmgp_sw_rte_finalize
+!!@}
 
 end module rrtmgp_sw_rte

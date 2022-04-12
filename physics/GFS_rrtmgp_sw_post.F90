@@ -1,3 +1,6 @@
+!>\file GFS_rrtmgp_sw_post.F90
+!!
+
 module GFS_rrtmgp_sw_post
   use machine,                   only: kind_phys
   use module_radiation_aerosols, only: NSPC1
@@ -14,6 +17,8 @@ contains
   ! #########################################################################################
   ! SUBROUTINE GFS_rrtmgp_sw_post_init
   ! #########################################################################################
+!>\defgroup gfs_rrtmgp_sw_post_mod GFS RRTMGP-SW Post Module
+!! @{
   subroutine GFS_rrtmgp_sw_post_init()
   end subroutine GFS_rrtmgp_sw_post_init
 
@@ -277,5 +282,5 @@ contains
   ! #########################################################################################
   subroutine GFS_rrtmgp_sw_post_finalize ()
   end subroutine GFS_rrtmgp_sw_post_finalize
-
+!! @}
 end module GFS_rrtmgp_sw_post

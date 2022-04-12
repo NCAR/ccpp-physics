@@ -80,8 +80,8 @@
 !!!!!  ==========================================================  !!!!!
 
 
-!>\ingroup RRTMG
-!> \defgroup module_radiation_surface RRTMG Surface Module
+!> \defgroup radiation_surface_mod Radiation Surface Module
+!! @{
 !> This module sets up surface albedo for SW radiation and surface
 !! emissivity for LW radiation.
 !!
@@ -123,15 +123,15 @@
 !    &   VTAGSFC='NCEP-Radiation_surface   v5.0  Aug 2012 '
 
 !  ---  constant parameters
-      integer, parameter, public :: NF_ALBD = 4     !< number of surface albedo components
-      integer, parameter, public :: IMXEMS  = 360   !< number of longtitude points in global emis-type map
-      integer, parameter, public :: JMXEMS  = 180   !< number of latitude points in global emis-type map
+      integer, parameter, public :: NF_ALBD = 4     ! number of surface albedo components
+      integer, parameter, public :: IMXEMS  = 360   ! number of longtitude points in global emis-type map
+      integer, parameter, public :: JMXEMS  = 180   ! number of latitude points in global emis-type map
       real (kind=kind_phys), parameter :: f_zero = 0.0
       real (kind=kind_phys), parameter :: f_one  = 1.0
       real (kind=kind_phys), parameter :: epsln  = 1.0e-6
       real (kind=kind_phys), parameter :: rad2dg = 180.0 / con_pi
-      integer, allocatable  ::  idxems(:,:)         !< global surface emissivity index array
-      integer :: iemslw = 1                         !< global surface emissivity control flag set up in 'sfc_init'
+      integer, allocatable  ::  idxems(:,:)         ! global surface emissivity index array
+      integer :: iemslw = 1                         ! global surface emissivity control flag set up in 'sfc_init'
 !
       public  sfc_init, setalb, setemis
       public  f_zero, f_one, epsln
@@ -140,12 +140,10 @@
       contains
 ! =================
 
-!> \ingroup module_radiation_surface
 !> This subroutine is the initialization program for surface radiation
 !! related quantities (albedo, emissivity, etc.)
 !!\param me       print control flag
 !>\section gen_sfc_init sfc_init General Algorithm
-!! @{
 !-----------------------------------
       subroutine sfc_init                                               &
      &     ( me, errmsg, errflg )!  ---  inputs/outputs:
@@ -296,9 +294,7 @@
 !...................................
       end subroutine sfc_init
 !-----------------------------------
-!! @}
 
-!> \ingroup module_radiation_surface
 !> This subroutine computes four components of surface albedos (i.e.,
 !! vis-nir, direct-diffused) according to control flag ialbflg.
 !! \n 1) climatological surface albedo scheme (\cite briegleb_1992)
@@ -335,7 +331,6 @@
 !!\n                    ( :, 3) -     uv+vis direct beam albedo
 !!\n                    ( :, 4) -     uv+vis diffused albedo
 !>\section general_setalb setalb General Algorithm
-!! @{
 !-----------------------------------
       subroutine setalb                                                 &
      &     ( slmsk,lsm,lsm_noahmp,lsm_ruc,use_cice_alb,snodi,           & !  ---  inputs:
@@ -710,9 +705,7 @@
 !...................................
       end subroutine setalb
 !-----------------------------------
-!! @}
 
-!> \ingroup module_radiation_surface
 !> This subroutine computes surface emissivity for LW radiation.
 !!\param xlon      (IMAX), longitude in radiance, ok for both 0->2pi
 !!                  or -pi -> +pi ranges
@@ -728,7 +721,6 @@
 !!\param IMAX       array horizontal dimension
 !!\param sfcemis  (IMAX), surface emissivity
 !>\section general_setemis setemis General Algorithm
-!! @{
 !-----------------------------------
       subroutine setemis                                                &
      &     ( lsm,lsm_noahmp,lsm_ruc,frac_grid,cplice,use_flake,         &  !  ---  inputs:
@@ -995,9 +987,9 @@
       return
 !...................................
       end subroutine setemis
-!! @}
 !-----------------------------------
 
 !.........................................!
       end module module_radiation_surface !
+!! @}
 !=========================================!

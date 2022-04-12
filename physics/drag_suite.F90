@@ -7,6 +7,8 @@
 
       contains
 
+!> \defgroup gfs_drag_suite_mod GFS drag_suite Module
+!! @{
       subroutine drag_suite_init(gwd_opt, errmsg, errflg)
 
       integer,          intent(in)  :: gwd_opt
@@ -27,8 +29,7 @@
       end if        
       end subroutine drag_suite_init
 
-!> \defgroup gfs_drag_suite_mod GFS drag_suite Main
-!! \brief This subroutine includes orographic gravity wave drag,  mountain
+!> \brief This subroutine includes orographic gravity wave drag,  mountain
 !! blocking, and form drag.
 !!
 !> The time tendencies of zonal and meridional wind are altered to
@@ -1378,5 +1379,6 @@ endif
 !
       subroutine drag_suite_finalize()
       end subroutine drag_suite_finalize
+!! @}
 
       end module drag_suite
