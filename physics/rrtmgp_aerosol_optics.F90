@@ -24,7 +24,7 @@ contains
 !! \section arg_table_rrtmgp_aerosol_optics_run
 !! \htmlinclude rrtmgp_aerosol_optics_run.html
 !!
-  subroutine rrtmgp_aerosol_optics_run(doSWrad, doLWrad, nCol, nLev, nTracer, nTracerAer,   &
+  subroutine rrtmgp_aerosol_optics_run(doSWrad, doLWrad, nCol, nLev, &
        nDay, idxday, p_lev, p_lay, p_lk, tv_lay, relhum, lsmask, tracer, aerfld, lon, lat,  &
        aerodp, sw_optical_props_aerosol, lw_optical_props_aerosol, errmsg, errflg       )
 
@@ -35,9 +35,7 @@ contains
     integer, intent(in) :: &
          nCol,                  & ! Number of horizontal grid points
          nDay,                  & ! Number of daylit points
-         nLev,                  & ! Number of vertical layers
-         nTracer,               & ! Number of tracers
-         nTracerAer               ! Number of aerosol tracers
+         nLev                     ! Number of vertical layers
     integer,dimension(:), intent(in) :: &
          idxday              ! Indices for daylit points.
     real(kind_phys), dimension(:), intent(in) :: &

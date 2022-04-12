@@ -209,14 +209,12 @@ contains
     errflg = 0
 
     if (.not. doSWrad) return
-    if (nDay .le. 0) then
-       fluxswUP_allsky(:,:)   = 0._kind_phys
-       fluxswDOWN_allsky(:,:) = 0._kind_phys
-       fluxswUP_clrsky(:,:)   = 0._kind_phys
-       fluxswDOWN_clrsky(:,:) = 0._kind_phys
-       scmpsw                 = cmpfsw_type( 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 )
-       return
-    endif
+    fluxswUP_allsky(:,:)   = 0._kind_phys
+    fluxswDOWN_allsky(:,:) = 0._kind_phys
+    fluxswUP_clrsky(:,:)   = 0._kind_phys
+    fluxswDOWN_clrsky(:,:) = 0._kind_phys
+    scmpsw                 = cmpfsw_type( 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 )
+    if (nDay .le. 0) return
 
     ! ######################################################################################
     !

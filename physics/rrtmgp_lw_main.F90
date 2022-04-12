@@ -284,13 +284,13 @@ contains
        !
        ! ###################################################################################
        ! Assign same emissivity to all band
-       if (semis(iCol) > 1e-6 .and. semis(iCol) <= 1.0) then
-          do iBand=1,lw_gas_props%get_nband()
-             sfc_emiss_byband(iBand,1) = semis(iCol)
-          enddo
-       else
-          sfc_emiss_byband(1:lw_gas_props%get_nband(),1) = 1.0
-       endif
+       !if (semis(iCol) > 1e-6 .and. semis(iCol) <= 1.0) then
+       do iBand=1,lw_gas_props%get_nband()
+          sfc_emiss_byband(iBand,1) = semis(iCol)
+       enddo
+       !else
+       !   sfc_emiss_byband(1:lw_gas_props%get_nband(),1) = 1.0
+       !endif
 
        ! ###################################################################################
        !
