@@ -22,7 +22,7 @@ module GFS_rrtmgp_pre
   integer :: iStr_h2o, iStr_co2, iStr_o3, iStr_n2o, iStr_ch4, iStr_o2, iStr_ccl4, &
        iStr_cfc11, iStr_cfc12, iStr_cfc22 
 
-  public GFS_rrtmgp_pre_run,GFS_rrtmgp_pre_init,GFS_rrtmgp_pre_finalize  
+  public GFS_rrtmgp_pre_run,GFS_rrtmgp_pre_init
 contains
   
   ! #########################################################################################
@@ -32,6 +32,7 @@ contains
 !! \htmlinclude GFS_rrtmgp_pre_init.html
 !!
   subroutine GFS_rrtmgp_pre_init(nGases, active_gases, active_gases_array, errmsg, errflg)
+    implicit none
     ! Inputs
     integer, intent(in) :: &
          nGases       ! Number of active gases in RRTMGP
@@ -103,9 +104,11 @@ contains
        vmr_n2o, vmr_co2, tsfg, tsfa, qs_lay, q_lay, tv_lay, relhum, deltaZ, deltaZc, deltaP,&
        active_gases_array, tsfc_radtime, coszen, coszdg, top_at_1, iSFC, iTOA, nDay, idxday,&
        errmsg, errflg)
-    
+    implicit none
+
     ! Inputs   
     integer, intent(in)    :: &
+         me,                & !
          nCol,              & ! Number of horizontal grid points
          nLev,              & ! Number of vertical layers
          i_o3                 ! Index into tracer array for ozone
@@ -191,7 +194,7 @@ contains
     errflg = 0
     
     if (.not. (lsswr .or. lslwr)) return
-        
+
     ! #######################################################################################
     ! What is vertical ordering?
     ! #######################################################################################
@@ -367,7 +370,7 @@ contains
        do iCol = 1, nCol
           if (coszen(iCol) >= 0.0001) then
              nday = nday + 1
-             idxday(nday) = i
+             idxday(nday) = iCol
           endif
        enddo
     else
@@ -376,10 +379,4 @@ contains
     endif
 
   end subroutine GFS_rrtmgp_pre_run
-  
-  ! #########################################################################################
-  ! SUBROUTINE GFS_rrtmgp_pre_finalize
-  ! #########################################################################################
-  subroutine GFS_rrtmgp_pre_finalize ()
-  end subroutine GFS_rrtmgp_pre_finalize
 end module GFS_rrtmgp_pre

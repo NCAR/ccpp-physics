@@ -176,7 +176,7 @@
   dimensions = ()
   type = integer
   intent = in
-[idxday]
+[idx]
   standard_name = daytime_points
   long_name = daytime points
   units = index

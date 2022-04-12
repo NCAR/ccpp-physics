@@ -38,7 +38,7 @@ contains
          nLev,                  & ! Number of vertical layers
          nTracer,               & ! Number of tracers
          nTracerAer               ! Number of aerosol tracers
-    integer,intent(in),dimension(:) :: &
+    integer,dimension(:), intent(in) :: &
          idxday              ! Indices for daylit points.
     real(kind_phys), dimension(:), intent(in) :: &
          lon,                   & ! Longitude
@@ -61,7 +61,7 @@ contains
          aerodp                   ! Vertical integrated optical depth for various aerosol species 
     type(ty_optical_props_2str),intent(out) :: &
          sw_optical_props_aerosol ! RRTMGP DDT: Longwave aerosol optical properties (tau)
-    type(ty_optical_props_1scl),intent(inout) :: &
+    type(ty_optical_props_1scl),intent(out) :: &
          lw_optical_props_aerosol ! RRTMGP DDT: Longwave aerosol optical properties (tau)
     integer, intent(out) :: &
          errflg                   ! CCPP error flag
@@ -79,14 +79,14 @@ contains
     errmsg = ''
     errflg = 0
 
-    if (.not. doSWrad) return
+    if (.not. (doSWrad .or. doLWrad)) return
 
     ! Call module_radiation_aerosols::setaer(),to setup aerosols property profile
     call setaer(p_lev*0.01, p_lay*0.01, p_lk, tv_lay, relhum, lsmask, tracer, aerfld, lon, lat, nCol, nLev, &
          nLev+1, .true., .true., aerosolssw2, aerosolslw, aerodp)
 
     ! Shortwave
-    if (nDay .gt. 0) then
+    if (doSWrad .and. (nDay .gt. 0)) then
        ! Store aerosol optical properties
        ! SW. 
        ! For RRTMGP SW the bands are now ordered from [IR(band) -> nIR -> UV], in RRTMG the 
@@ -109,10 +109,11 @@ contains
     endif
 
     ! Longwave
-    if (.not. doLWrad) return
-    call check_error_msg('rrtmgp_aerosol_optics_run',lw_optical_props_aerosol%alloc_1scl(      &
-         nCol, nlev, lw_gas_props%get_band_lims_wavenumber()))
-    lw_optical_props_aerosol%tau = aerosolslw(:,:,:,1) * (1. - aerosolslw(:,:,:,2))
+    if (doLWrad) then
+       call check_error_msg('rrtmgp_aerosol_optics_run',lw_optical_props_aerosol%alloc_1scl(      &
+            nCol, nlev, lw_gas_props%get_band_lims_wavenumber()))
+       lw_optical_props_aerosol%tau = aerosolslw(:,:,:,1) * (1. - aerosolslw(:,:,:,2))
+    endif
 
   end subroutine rrtmgp_aerosol_optics_run
   

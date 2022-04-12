@@ -164,7 +164,7 @@
   units = DDT
   dimensions = ()
   type = ty_optical_props_1scl
-  intent = inout
+  intent = out
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
