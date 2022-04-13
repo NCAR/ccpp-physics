@@ -2509,7 +2509,7 @@
         do i = 1, IX
           cwp(i,k) = max(0.0, clw(i,k,ntcw) * dz(i,k)*1.E6)
           crp(i,k) = 0.0
-          snow_mass_factor = 0.99
+          snow_mass_factor = 0.90
           cip(i,k) = max(0.0, (clw(i,k,ntiw)                            &
      &             + (1.0-snow_mass_factor)*clw(i,k,ntsw))*dz(i,k)*1.E6)
           if (re_snow(i,k) .gt. snow_max_radius)then
@@ -3476,24 +3476,24 @@
             ENDIF
 
             tc = MAX(-80.0, t(k) - 273.15)
-            if (tc .lt. -12.0) RH_00 = RH_00L
+            if (tc .lt. -24.0) RH_00 = RH_00L
 
             if (tc .gt. 20.0) then
                CLDFRA(K) = 0.0
-            elseif (tc .ge. -12.0) then
+            elseif (tc .ge. -24.0) then
                RHUM = MIN(rh(k), 1.0)
-               CLDFRA(K) = MAX(0., 1.0-SQRT((1.001-RHUM)/(1.001-RH_00)))
+               CLDFRA(K) = MAX(0., 1.0-SQRT(SQRT((1.001-RHUM)/(1.001-RH_00))))
             else
                if (max_relh.gt.1.12 .or. (.NOT.(modify_qvapor)) ) then
 !..For HRRR model, the following look OK.
                   RHUM = MIN(rh(k), 1.45)
-                  RH_00 = RH_00 + (1.45-RH_00)*(-12.0-tc)/(-12.0+85.)
-                  CLDFRA(K) = MAX(0.,1.0-SQRT((1.46-RHUM)/(1.46-RH_00)))
+                  RH_00 = RH_00 + (1.45-RH_00)*(-24.0-tc)/(-24.0+85.)
+                  CLDFRA(K) = MAX(0.,1.0-SQRT(SQRT((1.46-RHUM)/(1.46-RH_00))))
                else
 !..but for the GFS model, RH is way lower.
                   RHUM = MIN(rh(k), 1.05)
-                  RH_00 = RH_00 + (1.05-RH_00)*(-12.0-tc)/(-12.0+85.)
-                  CLDFRA(K) = MAX(0.,1.0-SQRT((1.06-RHUM)/(1.06-RH_00)))
+                  RH_00 = RH_00 + (1.05-RH_00)*(-24.0-tc)/(-24.0+85.)
+                  CLDFRA(K) = MAX(0.,1.0-SQRT(SQRT((1.06-RHUM)/(1.06-RH_00))))
                endif
             endif
             if (CLDFRA(K).gt.0.) CLDFRA(K)=MAX(0.01,MIN(CLDFRA(K),0.99))
@@ -3812,6 +3812,8 @@
 
       END SUBROUTINE adjust_cloudFinal
 
+!+---+-----------------------------------------------------------------+
+
       subroutine cloud_fraction_XuRandall                               &
      &     ( IX, NLAY, plyr, clwf, rhly, qstl,                          & !  ---  inputs
      &       cldtot )                                                   & !  ---  outputs
@@ -3836,7 +3838,6 @@
         do k = 1, NLAY
         do i = 1, IX
           clwt = 1.0e-6 * (plyr(i,k)*0.001)
-!         clwt = 2.0e-6 * (plyr(i,k)*0.001)
 
           if (clwf(i,k) > clwt) then
 
@@ -3845,8 +3846,6 @@
 
             tem1  = min(max(sqrt(sqrt(onemrh*qstl(i,k))),0.0001),1.0)
             tem1  = 2000.0 / tem1
-
-!           tem1  = 1000.0 / tem1
 
             value = max( min( tem1*(clwf(i,k)-clwm), 50.0 ), 0.0 )
             tem2  = sqrt( sqrt(rhly(i,k)) )
@@ -3857,6 +3856,8 @@
         enddo
 
       end subroutine cloud_fraction_XuRandall
+ 
+!+---+-----------------------------------------------------------------+
  
       subroutine cloud_fraction_mass_flx_1                              &
      &     ( IX, NLAY, lmfdeep2, xrc3, plyr, clwf, rhly, qstl,          & !  ---  inputs
@@ -3906,6 +3907,8 @@
         enddo
 
       end subroutine cloud_fraction_mass_flx_1
+ 
+!+---+-----------------------------------------------------------------+
  
       subroutine cloud_fraction_mass_flx_2                              &
      &     ( IX, NLAY, lmfdeep2, xrc3, plyr, clwf, rhly, qstl,          & !  ---  inputs
