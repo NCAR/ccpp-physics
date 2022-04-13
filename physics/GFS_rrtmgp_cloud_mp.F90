@@ -4,7 +4,7 @@
 !! This file contains the coupling of EMC's cloud microphysics to the RRTMGP radiation
 !! parameterization.
 !!
-!> \defgroup GFS_rrtmgp_cloud_mp GFS RRTMGP cloud coupling
+!> \defgroup GFS_rrtmgp_cloud_mp GFS_rrtmgp_cloud_mp.F90
 !!
 !! \brief This module contains the interface for ALL cloud microphysics assumptions and 
 !! the RRTMGP radiation scheme. Specific details below in subroutines.
@@ -40,13 +40,14 @@ contains
 !> \section arg_table_GFS_rrtmgp_cloud_mp_run
 !! \htmlinclude GFS_rrtmgp_cloud_mp_run_html
 !!
-!! \section GFS_rrtmgp_cloud_mp_run RRTMGP cloud-MP coupling
-!! @{ 
+!> \ingroup GFS_rrtmgp_cloud_mp
 !!
-!! Here the cloud-radiative properties (optical-path, particle-size and sometimes cloud-
+!! \brief Here the cloud-radiative properties (optical-path, particle-size and sometimes cloud-
 !! fraction) are computed for cloud producing physics schemes (e.g GFDL-MP, Thompson-MP,
 !! MYNN-EDMF-pbl, GF-convective, and SAMF-convective clouds).
 !!
+!! \section GFS_rrtmgp_cloud_mp_run Main driver
+!! @{ 
   ! ######################################################################################
   subroutine GFS_rrtmgp_cloud_mp_run(nCol, nLev, nTracers, ncnd, i_cldliq, i_cldice,     &
        i_cldrain, i_cldsnow, i_cldgrpl, i_cldtot, i_cldliq_nc, i_cldice_nc, i_twa, kdt,  &
@@ -932,5 +933,4 @@ contains
 
   end subroutine cmp_reff_Thompson
 !! @}
-
 end module GFS_rrtmgp_cloud_mp

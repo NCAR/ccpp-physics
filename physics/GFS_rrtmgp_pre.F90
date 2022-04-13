@@ -1,10 +1,9 @@
 ! ######################################################################################
-!> \file GFS_rrtmgp_pre.f90
+!> \file GFS_rrtmgp_pre.F90
 !!
-!! This file perpares model fields for use by the RRTMGP radiation scheme.
+!! This file perpares model fields for use by the RRTMGP radiation scheme.  
 !!
-!> \defgroup GFS_rrtmgp_pre GFS RRTMGP Scheme Pre
-!! @{
+!> \defgroup GFS_rrtmgp_pre GFS_rrtmgp_pre.F90
 !!
 ! ######################################################################################
 
@@ -41,11 +40,12 @@ contains
 !! \section arg_table_GFS_rrtmgp_pre_init
 !! \htmlinclude GFS_rrtmgp_pre_init.html
 !!
-!! \section GFS_rrtmgp_pre_init
-!! @{
+!> \ingroup GFS_rrtmgp_pre
 !!
 !! \brief Gas-names are read from namelist. Set to interstitial%active_gases.
 !!
+!!\section GFS_rrtmgp_pre_init Initalization routine
+!! @{
 ! #########################################################################################
   subroutine GFS_rrtmgp_pre_init(nGases, active_gases, active_gases_array, errmsg, errflg)
     ! Inputs
@@ -111,11 +111,12 @@ contains
 !> \section arg_table_GFS_rrtmgp_pre_run
 !! \htmlinclude GFS_rrtmgp_pre_run.html
 !!
-!! \section GFS_rrtmgp_pre_init 
-!! @{
+!> \ingroup GFS_rrtmgp_pre
 !!
 !! \brief Sanitize inputs for use in RRTMGP.
 !!
+!!\section GFS_rrtmgp_pre_run General Algorithm 
+!! @{
   ! ######################################################################################### 
   subroutine GFS_rrtmgp_pre_run(me, nCol, nLev, nTracers, i_o3, lsswr, lslwr, fhswr, fhlwr, &
        xlat, xlon,  prsl, tgrs, prslk, prsi, qgrs, tsfc, coslat, sinlat, con_g, con_rd,     &

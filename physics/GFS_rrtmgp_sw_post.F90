@@ -1,10 +1,7 @@
 ! ######################################################################################
 !> \file GFS_rrtmgp_sw_post.F90
 !!
-!! This file computes the RRTMGP shortwave heating-rate(s), copies RRTMGP shortwave fluxes,
-!! to output DDTs, and output (optional) diagnsotics.
-!!
-!! /defgroup GFS_rrtmgp_sw_post
+!> /defgroup GFS_rrtmgp_sw_post GFS_rrtmgp_sw_post.F90
 !!
 !! /brief RRTMGP Shortwave post-processing routine.
 !!
@@ -25,11 +22,10 @@ contains
 !> \section arg_table_GFS_rrtmgp_sw_post_run
 !! \htmlinclude GFS_rrtmgp_sw_post_run.html
 !!
-!! \section GFS_rrtmgp_sw_post_run
-!! @{
-!!
+!! /ingroup GFS_rrtmgp_sw_post
 !! RRTMGP Shortwave post-processing routine.
 !!
+!! /brief
 !! The all-sky shortwave radiation tendency is computed, the clear-sky tendency is computed
 !! if requested.
 !!
@@ -38,6 +34,8 @@ contains
 !!
 !! (optional) Save additional diagnostics.
 !!
+!! \section GFS_rrtmgp_sw_post_run
+!! @{
  ! #########################################################################################
   subroutine GFS_rrtmgp_sw_post_run (nCol, nLev, nDay, idxday, lsswr, do_sw_clrsky_hr,      &
        save_diag, fhswr,  coszen, coszdg, t_lay, p_lev, sfc_alb_nir_dir, sfc_alb_nir_dif,   &
