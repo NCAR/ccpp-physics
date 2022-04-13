@@ -1,4 +1,4 @@
-!>\file module_SGSCloud_RadPre.F90
+!>\file SGSCloud_RadPre.F90
 !!  Contains the preliminary (interstitial) work to the call to the radiation schemes:
 !!    1) Backs up the original qc & qi
 !!    2) Adds the partioning of convective condensate into liqice/ice for effective radii

@@ -1,4 +1,4 @@
-!> \file module_SGSCloud_RadPost.F90
+!> \file SGSCloud_RadPost.F90
 !!  Contains the post (interstitial) work after the call to the radiation schemes:
 !!    1) Restores the original qc & qi
 
