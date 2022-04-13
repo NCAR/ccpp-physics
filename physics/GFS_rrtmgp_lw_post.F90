@@ -1,3 +1,14 @@
+! ###################################################################################### 
+!> \file GFS_rrtmgp_lw_post.F90
+!!
+!! This file computes the RRTMGP longwave heating-rate(s), copies RRTMGP longwave fluxes
+!! to output DDTs, and output (optional) diagnsotics.
+!!
+!! /defgroup GFS_rrtmgp_lw_post
+!!
+!! /brief RRTMGP Longwave post-processing routine.
+!!
+! ######################################################################################
 module GFS_rrtmgp_lw_post
   use machine,                   only: kind_phys
   use module_radlw_parameters,   only: topflw_type, sfcflw_type
@@ -5,21 +16,28 @@ module GFS_rrtmgp_lw_post
   use radiation_tools,           only: check_error_msg
   implicit none
 
-  public GFS_rrtmgp_lw_post_init,GFS_rrtmgp_lw_post_run,GFS_rrtmgp_lw_post_finalize
+  public GFS_rrtmgp_lw_post_run
 
 contains
-  ! #########################################################################################
-  ! SUBROUTINE GFS_rrtmgp_lw_post_init
-  ! #########################################################################################
-  subroutine GFS_rrtmgp_lw_post_init()
-  end subroutine GFS_rrtmgp_lw_post_init
 
- ! #########################################################################################
-  ! SUBROUTINE GFS_rrtmgp_lw_post_run
   ! ########################################################################################
 !> \section arg_table_GFS_rrtmgp_lw_post_run
 !! \htmlinclude GFS_rrtmgp_lw_post.html
 !!
+!! \section GFS_rrtmgp_lw_post_run
+!! @{
+!! 
+!! RRTMGP Longwave post-processing routine.
+!!
+!! The all-sky longwave radiation tendency is computed, the clear-sky tendency is computed 
+!! if requested.
+!!
+!! RRTMGP surface and TOA fluxes are copied to fields that persist between radiation/physics
+!! calls.
+!! 
+!! (optional) Save additional diagnostics.
+!!
+ ! ######################################################################################## 
   subroutine GFS_rrtmgp_lw_post_run (nCol, nLev, lslwr, do_lw_clrsky_hr, save_diag, fhlwr, &
        p_lev, t_lay, tsfa, fluxlwUP_allsky, fluxlwDOWN_allsky, fluxlwUP_clrsky, iSFC, iTOA,&
        fluxlwDOWN_clrsky, raddt, cldsa, mtopa, mbota, cld_frac, cldtaulw, fluxr, sfcdlw,   &
@@ -173,11 +191,5 @@ contains
     endif
 
   end subroutine GFS_rrtmgp_lw_post_run
-
-  ! #########################################################################################
-  ! SUBROUTINE GFS_rrtmgp_lw_post_finalize
-  ! #########################################################################################
-  subroutine GFS_rrtmgp_lw_post_finalize ()
-  end subroutine GFS_rrtmgp_lw_post_finalize
-
+!! @}
 end module GFS_rrtmgp_lw_post
