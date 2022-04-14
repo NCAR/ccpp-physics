@@ -76,7 +76,7 @@
 
 
 !> \defgroup module_radiation_astronomy Radiation Astronomy Module
-!! @{
+!> @{
 !> \brief This module sets up astronomical quantities for solar radiation
 !!  calculations.
 !!
@@ -1024,5 +1024,5 @@
 !
 !...........................................!
       end module module_radiation_astronomy !
-!! @}
+!> @}
 !===========================================!

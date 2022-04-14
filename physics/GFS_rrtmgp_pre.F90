@@ -34,7 +34,7 @@ contains
   ! SUBROUTINE GFS_rrtmgp_pre_init
   ! #########################################################################################
 !>\defgroup gfs_rrtmgp_pre GFS RRTMGP Pre Module
-!! @{
+!> @{
 !! \section arg_table_GFS_rrtmgp_pre_init
 !! \htmlinclude GFS_rrtmgp_pre_init.html
 !!
@@ -391,5 +391,5 @@ contains
   ! #########################################################################################
   subroutine GFS_rrtmgp_pre_finalize ()
   end subroutine GFS_rrtmgp_pre_finalize
-!! @}
+!> @}
 end module GFS_rrtmgp_pre

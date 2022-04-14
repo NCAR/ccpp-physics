@@ -4454,7 +4454,7 @@ ENDIF
 !! encompassed the majority of the subroutines that comprise the 
 !! procedures that ultimately solve for tendencies of 
 !! \f$U, V, \theta, q_v, q_c, and q_i\f$.
-!!\section gen_mynn_bl_driver GSD mynn_bl_driver General Algorithm
+!!\section gen_mynn_bl_driver MYNN-EDMF PBL Driver General Algorithm
 !> @{
   SUBROUTINE mynn_bl_driver(            &
        &initflag,restart,cycling,       &

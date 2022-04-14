@@ -1,3 +1,6 @@
+!>\file rrtmgp_sw_cloud_sampling.F90
+!!
+
 module rrtmgp_lw_cloud_sampling
   use machine,                  only: kind_phys
   use mo_gas_optics_rrtmgp,     only: ty_gas_optics_rrtmgp
@@ -15,7 +18,9 @@ contains
   ! #########################################################################################
   ! SUBROTUINE rrtmgp_lw_cloud_sampling_run()
   ! #########################################################################################
-!! \section arg_table_rrtmgp_lw_cloud_sampling_run
+!>\defgroup rrtmgp_lw_cloud_sampling_mod GFS RRTMGP-LW Cloud Sampling Module
+!> @{
+!> \section arg_table_rrtmgp_lw_cloud_sampling_run
 !! \htmlinclude rrtmgp_lw_cloud_sampling_run.html
 !!
   subroutine rrtmgp_lw_cloud_sampling_run(doLWrad, nCol, nLev, icseed_lw, iovr,iovr_convcld,&
@@ -162,5 +167,6 @@ contains
   ! #########################################################################################  
   subroutine rrtmgp_lw_cloud_sampling_finalize()
   end subroutine rrtmgp_lw_cloud_sampling_finalize 
+!> @}
 
 end module rrtmgp_lw_cloud_sampling

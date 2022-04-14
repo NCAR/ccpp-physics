@@ -7,7 +7,7 @@
       contains
 
 !>\defgroup sgscloud_radpost_mod sgscloud_radpost_run Module
-!! @{
+!> @{
       subroutine sgscloud_radpost_init ()
       end subroutine sgscloud_radpost_init
 
@@ -67,5 +67,5 @@
       ! print*,"qc_save:",qc_save(1,1)," qc:",qc(1,1)
 
       end subroutine sgscloud_radpost_run
-!!@}
+!>@}
       end module sgscloud_radpost

@@ -81,7 +81,7 @@
 
 
 !> \defgroup radiation_surface_mod Radiation Surface Module
-!! @{
+!> @{
 !> This module sets up surface albedo for SW radiation and surface
 !! emissivity for LW radiation.
 !!
@@ -991,5 +991,5 @@
 
 !.........................................!
       end module module_radiation_surface !
-!! @}
+!> @}
 !=========================================!

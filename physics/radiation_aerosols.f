@@ -124,35 +124,6 @@
 !!!!!  ==========================================================  !!!!!
 
 
-
-!> \defgroup module_radiation_aerosols Radiation Aerosols Module
-!! @{
-!!  This module contains climatological atmospheric aerosol schemes for
-!!  radiation computations.
-!!
-!!\version NCEP-Radiation_aerosols  v5.2  Jan 2013
-!!
-!!\n This module has three externally callable subroutines:
-!! - aer_init() -- initialization; called at the start of run to set up
-!!                 module parameters
-!! - aer_update() -- updating aerosol data; called within the time loop
-!!                   to check and update data sets
-!! - setaer() -- mapping aeros profile, compute aeros opticals
-!!
-!!\n References:
-!! - OPAC climatological aerosols:
-!! Hou et al. 2002 \cite hou_et_al_2002; Hess et al. 1998
-!! \cite hess_et_al_1998
-!! - GOCART interactive aerosols:
-!! Chin et al., 2000 \cite chin_et_al_2000
-!! Colarco et al., 2010 - jgr, v115, D14207\cite colarco_et_al_2010
-!!
-!! - MERRA2 aerosol reanalysis:
-!! Randles et al., 2017 - jclim, v30, 6823-6850\cite randles_et_al_2017
-!! Buchard et al., 2017 - jclim, v30, 6851-6871\cite buchard_et_al_2017
-!!
-!! - Stratospheric volcanical aerosols:
-!! Sato et al. 1993 \cite sato_et_al_1993
 !========================================!
       module module_radiation_aerosols   !
 !........................................!
@@ -491,6 +462,35 @@
       contains
 ! =================
 
+!> \defgroup mod_radiation_aerosols Radiation Aerosols Module
+!> @{
+!>  This module contains climatological atmospheric aerosol schemes for
+!!  radiation computations.
+!!
+!!\version NCEP-Radiation_aerosols  v5.2  Jan 2013
+!!
+!!\n This module has three externally callable subroutines:
+!! - aer_init() -- initialization; called at the start of run to set up
+!!                 module parameters
+!! - aer_update() -- updating aerosol data; called within the time loop
+!!                   to check and update data sets
+!! - setaer() -- mapping aeros profile, compute aeros opticals
+!!
+!!\n References:
+!! - OPAC climatological aerosols:
+!! Hou et al. 2002 \cite hou_et_al_2002; Hess et al. 1998
+!! \cite hess_et_al_1998
+!! - GOCART interactive aerosols:
+!! Chin et al., 2000 \cite chin_et_al_2000
+!! Colarco et al., 2010 - jgr, v115, D14207\cite colarco_et_al_2010
+!!
+!! - MERRA2 aerosol reanalysis:
+!! Randles et al., 2017 - jclim, v30, 6823-6850\cite randles_et_al_2017
+!! Buchard et al., 2017 - jclim, v30, 6851-6871\cite buchard_et_al_2017
+!!
+!! - Stratospheric volcanical aerosols:
+!! Sato et al. 1993 \cite sato_et_al_1993
+!!
 !> The initialization program is to set up necessary parameters and
 !! working arrays.
 !!
@@ -4501,8 +4501,7 @@
 !-----------------------------------
 !
 ! =======================================================================
-
+!>@}
 !..........................................!
       end module module_radiation_aerosols !
-!! @}
 !==========================================!

@@ -33,7 +33,7 @@ contains
 ! CCPP entry points for CIRES Unified Gravity Wave Physics (UGWP) scheme v0
 ! ------------------------------------------------------------------------
 !>\defgroup cires_ugwp_run_mod CIRES Unified Gravity Wave Physics v0 Module
-!! @{
+!> @{
 !>@brief The subroutine initializes the CIRES UGWP
 !> \section arg_table_cires_ugwp_init Argument Table
 !! \htmlinclude cires_ugwp_init.html
@@ -400,5 +400,5 @@ contains
     endif
 
     end subroutine cires_ugwp_run
-!! @}
+!> @}
 end module cires_ugwp

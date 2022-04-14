@@ -28,7 +28,7 @@ module GFS_rrtmgp_cloud_mp
 contains  
 
 !>\defgroup gfs_rrtmgp_cloud_mp_mod GFS RRTMGP Cloud MP Module
-!! @{
+!> @{
 !! \section arg_table_GFS_rrtmgp_cloud_mp_run
 !! \htmlinclude GFS_rrtmgp_cloud_mp_run_html
 !!
@@ -880,5 +880,5 @@ contains
     enddo
 
   end subroutine cmp_reff_Thompson
-!! @}
+!> @}
 end module GFS_rrtmgp_cloud_mp

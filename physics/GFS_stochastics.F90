@@ -6,7 +6,7 @@
       contains
 
 !>\defgroup gfs_stoch_mod GFS Stochastics Physics Module
-!! @{
+!> @{
 !! This module
 !!
 !> \section arg_table_GFS_stochastics_init Argument Table
@@ -370,5 +370,5 @@
          endif
 
       end subroutine GFS_stochastics_run
-!! @}
+!> @}
     end module GFS_stochastics

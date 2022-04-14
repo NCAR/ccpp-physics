@@ -1,3 +1,6 @@
+!>\file rrtmgp_lw_cloud_optics.F90
+!!
+
 module rrtmgp_lw_cloud_optics
   use machine,                  only: kind_phys
   use mo_rte_kind,              only: wl
@@ -67,7 +70,9 @@ contains
   ! ######################################################################################
   ! SUBROUTINE rrtmgp_lw_cloud_optics_init()
   ! ######################################################################################
-!! \section arg_table_rrtmgp_lw_cloud_optics_init
+!>\defgroup rrtmgp_lw_cloud_optics_mod GFS RRTMGP-LW Cloud Optics Module
+!> @{
+!> \section arg_table_rrtmgp_lw_cloud_optics_init
 !! \htmlinclude rrtmgp_lw_cloud_optics.html
 !!
   subroutine rrtmgp_lw_cloud_optics_init(nrghice, mpicomm, mpirank, mpiroot,             &
@@ -379,7 +384,7 @@ contains
   ! ######################################################################################
   ! SUBROUTINE rrtmgp_lw_cloud_optics_run()
   ! ######################################################################################
-!! \section arg_table_rrtmgp_lw_cloud_optics_run
+!> \section arg_table_rrtmgp_lw_cloud_optics_run
 !! \htmlinclude rrtmgp_lw_cloud_optics.html
 !!
   subroutine rrtmgp_lw_cloud_optics_run(doLWrad, doG_cldoptics, icliq_lw, icice_lw,      &
@@ -543,10 +548,11 @@ contains
   ! #########################################################################################
   ! SUBROUTINE rrtmgp_lw_cloud_optics_finalize()
   ! #########################################################################################
-!! \section arg_table_rrtmgp_lw_cloud_optics_finalize
+!> \section arg_table_rrtmgp_lw_cloud_optics_finalize
 !! \htmlinclude rrtmgp_lw_cloud_optics.html
 !!
   subroutine rrtmgp_lw_cloud_optics_finalize()
   end subroutine rrtmgp_lw_cloud_optics_finalize
+!> @}
 
 end module rrtmgp_lw_cloud_optics

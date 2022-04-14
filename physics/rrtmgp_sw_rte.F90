@@ -19,7 +19,7 @@ contains
   ! SUBROUTINE rrtmgp_sw_rte_init
   ! #########################################################################################
 !>\defgroup rrtmgp_sw_rte_mod GFS RRTMGP-SW RTE Module
-!! @{
+!> @{
   subroutine rrtmgp_sw_rte_init()
   end subroutine rrtmgp_sw_rte_init
 
@@ -222,6 +222,6 @@ contains
   ! #########################################################################################
   subroutine rrtmgp_sw_rte_finalize()
   end subroutine rrtmgp_sw_rte_finalize
-!!@}
+!> @}
 
 end module rrtmgp_sw_rte

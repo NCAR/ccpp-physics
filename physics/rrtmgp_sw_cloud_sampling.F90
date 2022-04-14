@@ -20,7 +20,7 @@ contains
   ! #########################################################################################
 
 !>\defgroup rrtmgp_sw_cloud_sampling_mod GFS RRTMGP-SW Cloud Sampling Module
-!! @{
+!> @{
 !> \section arg_table_rrtmgp_sw_cloud_sampling_run
 !! \htmlinclude rrtmgp_sw_cloud_sampling.html
 !!
@@ -172,5 +172,5 @@ contains
   ! #########################################################################################  
   subroutine rrtmgp_sw_cloud_sampling_finalize()
   end subroutine rrtmgp_sw_cloud_sampling_finalize 
-!! @}
+!> @}
 end module rrtmgp_sw_cloud_sampling

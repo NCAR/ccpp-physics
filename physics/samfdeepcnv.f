@@ -33,7 +33,7 @@
       end subroutine samfdeepcnv_finalize
 
 !> \defgroup SAMFdeep GFS Scale-Aware Mass-Flux Deep Convection Scheme Module
-!! @{
+!> @{
 !>  \brief This subroutine contains the entirety of the SAMF deep convection
 !! scheme.
 !!
@@ -74,7 +74,6 @@
 !!  -# For the "feedback control", calculate updated values of the state variables by multiplying the cloud base mass flux and the tendencies calculated per unit cloud base mass flux from the static control.
 !!
 !!  \section samfdeep_detailed GFS samfdeepcnv Detailed Algorithm
-!!  @{
       subroutine samfdeepcnv_run (im,km,itc,ntc,cliq,cp,cvap,           &
      &    eps,epsm1,fv,grav,hvap,rd,rv,                                 &
      &    t0c,delt,ntk,ntr,delp,                                        &
@@ -3458,6 +3457,5 @@ c
       end subroutine samfdeepcnv_run
 
 !> @}
-!! @}
 
       end module samfdeepcnv

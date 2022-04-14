@@ -410,11 +410,12 @@
       contains
 ! =================
 
+!> \defgroup module_radsw_main GFS RRTMG-SW Main Module
+!> @{
       subroutine rrtmg_sw_init ()
       end subroutine rrtmg_sw_init
 
-!> \defgroup module_radsw_main GFS RRTMG Shortwave Module
-!! This module includes NCEP's modifications of the RRTMG-SW radiation
+!> This module includes NCEP's modifications of the RRTMG-SW radiation
 !! code from AER.
 !!
 !! The SW radiation model in the current NOAA Environmental Modeling
@@ -495,7 +496,6 @@
 !! \htmlinclude rrtmg_sw_run.html
 !!
 !> \section gen_swrad RRTMG Shortwave Radiation Scheme General Algorithm
-!> @{
 !-----------------------------------
       subroutine rrtmg_sw_run                                           &
      &     ( plyr,plvl,tlyr,tlvl,qlyr,olyr,                             &
@@ -1383,7 +1383,6 @@
 !...................................
       end subroutine rrtmg_sw_run
 !-----------------------------------
-!> @}
 
       subroutine rrtmg_sw_finalize ()
       end subroutine rrtmg_sw_finalize
@@ -1394,7 +1393,6 @@
 !! factors, and look-up tables.
 !!\param me             print control for parallel process
 !>\section rswinit_gen rswinit General Algorithm
-!! @{
 !-----------------------------------
       subroutine rswinit                                                &
      &     ( me ) !  ---  inputs:
@@ -1559,7 +1557,6 @@
       return
 !...................................
       end subroutine rswinit
-!! @}
 !-----------------------------------
 
 !>\ingroup module_radsw_main
@@ -1599,7 +1596,6 @@
 !!\param cldfrc         cloud fraction of grid mean value
 !!\param cldfmc         cloud fraction for each sub-column
 !!\section General_cldprop cldprop General Algorithm
-!> @{
 !-----------------------------------
       subroutine cldprop                                                &
      &     ( cfrac,cliqp,reliq,cicep,reice,cdat1,cdat2,cdat3,cdat4,     &   !  ---  inputs
@@ -1974,7 +1970,6 @@
 !...................................
       end subroutine cldprop
 !-----------------------------------
-!> @}
 
 !>\ingroup module_radsw_main
 !> This subroutine computes the sub-colum cloud profile flag array.
@@ -1986,7 +1981,6 @@
 !!\param alpha       EXP/ER cloud overlap decorrelation parameter
 !!\param lcloudy     sub-colum cloud profile flag array
 !!\section mcica_sw_gen mcica_subcol General Algorithm
-!> @{
 ! ----------------------------------
       subroutine mcica_subcol                                           &
      &    ( cldf, nlay, ipseed, dz, de_lgth, alpha,                     &       !  ---  inputs
@@ -2250,7 +2244,6 @@
       return
 ! ..................................
       end subroutine mcica_subcol
-!> @}
 ! ----------------------------------
 
 !>\ingroup module_radsw_main
@@ -2279,7 +2272,6 @@
 !!                       reference w.v. foreign-continuum data
 !!\param indfor          index of lower ref temp for forfac
 !>\section setcoef_gen_rw setcoef General Algorithm
-!! @{
 ! ----------------------------------
       subroutine setcoef                                                &
      &     ( pavel,tavel,h2ovmr, nlay,nlp1,                             &    !  ---  inputs
@@ -2429,7 +2421,6 @@
       return
 ! ..................................
       end subroutine setcoef
-!! @}
 ! ----------------------------------
 
 !>\ingroup module_radsw_main
@@ -2471,7 +2462,6 @@
 !!\param suvbfc           tot sky sfc dnwd uv-b flux
 !!\param suvbf0           clr sky sfc dnwd uv-b flux
 !>\section General_spcvrtc spcvrtc General Algorithm
-!! @{
 !-----------------------------------
       subroutine spcvrtc                                                &
      &     ( ssolar,cosz,sntz,albbm,albdf,sfluxzen,cldfrc,              &  !  ---  inputs
@@ -3226,7 +3216,6 @@
 !...................................
       end subroutine spcvrtc
 !-----------------------------------
-!> @}
 
 !>\ingroup module_radsw_main
 !> This subroutine computes the shortwave radiative fluxes using
@@ -3269,7 +3258,6 @@
 !!\param suvbfc        tot sky sfc dnwd uv-b flux
 !!\param suvbf0        clr sky sfc dnwd uv-b flux
 !>\section spcvrtm_gen spcvrtm General Algorithm
-!! @{
 !-----------------------------------
       subroutine spcvrtm                                                &
      &     ( ssolar,cosz,sntz,albbm,albdf,sfluxzen,cldfmc,              &   !  ---  inputs
@@ -3988,7 +3976,6 @@
       return
 !...................................
       end subroutine spcvrtm
-!! @}
 !-----------------------------------
 
 !>\ingroup module_radsw_main
@@ -4004,7 +3991,6 @@
 !!\param zfu             upward flux at layer interface
 !!\param zfd             downward flux at layer interface
 !!\section General_vrtqdr vrtqdr General Algorithm
-!> @{
 !-----------------------------------
       subroutine vrtqdr                                                 &
      &     ( zrefb,zrefd,ztrab,ztrad,zldbt,ztdbt,                       & ! inputs
@@ -4100,7 +4086,6 @@
 !...................................
       end subroutine vrtqdr
 !-----------------------------------
-!> @}
 
 !>\ingroup module_radsw_main
 !> This subroutine calculates optical depths for gaseous absorption and
@@ -4141,7 +4126,6 @@
 !!\param taug             spectral optical depth for gases
 !!\param taur             opt depth for rayleigh scattering
 !>\section gen_al_taumol taumol General Algorithm
-!! @{
 !-----------------------------------
       subroutine taumol                                                 &
      &     ( colamt,colmol,fac00,fac01,fac10,fac11,jp,jt,jt1,laytrop,   & !  ---  inputs
@@ -5625,6 +5609,7 @@
       end subroutine taumol
 !-----------------------------------
 
+!> @}
 !........................................!
       end module rrtmg_sw                !
 !========================================!

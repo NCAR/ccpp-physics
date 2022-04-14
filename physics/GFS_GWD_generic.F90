@@ -6,18 +6,18 @@ module GFS_GWD_generic_pre
 
 contains
 
-!! \section arg_table_GFS_GWD_generic_pre_init Argument Table
+!>\defgroup GFS_GWD_generic_pre_mod GFS GWD Generic Pre
+!> @{
+!> \section arg_table_GFS_GWD_generic_pre_init Argument Table
 !! \htmlinclude GFS_GWD_generic_pre_init.html
 !!
       subroutine GFS_GWD_generic_pre_init()
       end subroutine GFS_GWD_generic_pre_init
 
-!! \section arg_table_GFS_GWD_generic_pre_run Argument Table
+!> \section arg_table_GFS_GWD_generic_pre_run Argument Table
 !! \htmlinclude GFS_GWD_generic_pre_run.html
 !!
 !!  \section general General Algorithm
-!!  \section detailed Detailed Algorithm
-!!  @{
       subroutine GFS_GWD_generic_pre_run(                               &
      &           im, levs, nmtvr, mntvar,                               &
      &           oc, oa4, clx, theta,                                   &
@@ -142,14 +142,13 @@ contains
       endif
 
       end subroutine GFS_GWD_generic_pre_run
-!> @}
 
-!! \section arg_table_GFS_GWD_generic_pre_finalize Argument Table
+!> \section arg_table_GFS_GWD_generic_pre_finalize Argument Table
 !! \htmlinclude GFS_GWD_generic_pre_finalize.html
 !!
       subroutine GFS_GWD_generic_pre_finalize()
       end subroutine GFS_GWD_generic_pre_finalize
-
+!> @}
 end module GFS_GWD_generic_pre
 
 !> This module contains the CCPP-compliant orographic gravity wave drag post
@@ -158,16 +157,16 @@ module GFS_GWD_generic_post
 
 contains
 
+!>\defgroup GFS_gwd_generic_post_mod GFS GWD Generic_Post
+!> @{
 
       subroutine GFS_GWD_generic_post_init()
       end subroutine GFS_GWD_generic_post_init
 
-!! \section arg_table_GFS_GWD_generic_post_run Argument Table
+!> \section arg_table_GFS_GWD_generic_post_run Argument Table
 !! \htmlinclude GFS_GWD_generic_post_run.html
 !!
 !!  \section general General Algorithm
-!!  \section detailed Detailed Algorithm
-!!  @{
       subroutine GFS_GWD_generic_post_run(lssav, ldiag3d, dtf, dusfcg, dvsfcg, dudt, dvdt, dtdt,          &
       &  dugwd, dvgwd, flag_for_gwd_generic_tend, dtend, dtidx, index_of_temperature, index_of_x_wind,  &
       &  index_of_y_wind, index_of_process_orographic_gwd, errmsg, errflg)
@@ -220,12 +219,12 @@ contains
       endif
 
     end subroutine GFS_GWD_generic_post_run
-!> @}
     
-!! \section arg_table_GFS_GWD_generic_post_finalize Argument Table
+!> \section arg_table_GFS_GWD_generic_post_finalize Argument Table
 !! \htmlinclude GFS_GWD_generic_post_finalize.html
 !!
     subroutine GFS_GWD_generic_post_finalize()
     end subroutine GFS_GWD_generic_post_finalize
+!> @}
 
 end module GFS_GWD_generic_post

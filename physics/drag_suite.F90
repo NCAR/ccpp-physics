@@ -1,4 +1,4 @@
-!> \File drag_suite.F90
+!> \file drag_suite.F90
 !! This file is the  parameterization of orographic gravity wave
 !! drag, mountain blocking, and form drag.
 
@@ -8,7 +8,7 @@
       contains
 
 !> \defgroup gfs_drag_suite_mod GFS drag_suite Module
-!! @{
+!> @{
       subroutine drag_suite_init(gwd_opt, errmsg, errflg)
 
       integer,          intent(in)  :: gwd_opt
@@ -200,7 +200,6 @@
 !!  an independent process.  The next step is to test
 !!
 !> \section det_drag_suite GFS Orographic GWD Scheme Detailed Algorithm
-!> @{
    subroutine drag_suite_run(                                           &
      &           IM,KM,dvdt,dudt,dtdt,U1,V1,T1,Q1,KPBL,                 &
      &           PRSI,DEL,PRSL,PRSLK,PHII,PHIL,DELTIM,KDT,              &
@@ -1379,6 +1378,6 @@ endif
 !
       subroutine drag_suite_finalize()
       end subroutine drag_suite_finalize
-!! @}
+!> @}
 
       end module drag_suite

@@ -3,7 +3,7 @@
       contains
 
 !>\defgroup rrtmg_lw_pre GFS RRTMG-LW scheme pre
-!! @{
+!> @{
       subroutine rrtmg_lw_pre_init ()
       end subroutine rrtmg_lw_pre_init
 
@@ -25,5 +25,5 @@
 
       subroutine rrtmg_lw_pre_finalize ()
       end subroutine rrtmg_lw_pre_finalize
-!! @}
+!> @}
       end module rrtmg_lw_pre

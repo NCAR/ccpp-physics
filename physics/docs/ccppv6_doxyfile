@@ -1,7 +1,7 @@
 # Doxyfile 1.9.3
 
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = "CCPP Scientific Documentation"
+PROJECT_NAME           = "CCPP SciDoc"
 PROJECT_NUMBER         =
 PROJECT_BRIEF          = v6.0.0
 PROJECT_LOGO           = img/dtc_logo.png
@@ -102,7 +102,7 @@ CITE_BIB_FILES         = library.bib
 #---------------------------------------------------------------------------
 QUIET                  = NO
 WARNINGS               = YES
-WARN_IF_UNDOCUMENTED   = YES
+WARN_IF_UNDOCUMENTED   = NO
 WARN_IF_DOC_ERROR      = YES
 WARN_IF_INCOMPLETE_DOC = YES
 WARN_NO_PARAMDOC       = NO
@@ -201,6 +201,8 @@ INPUT                  =  pdftxt/rel_update.txt            \
                         ../GFS_rrtmgp_sw_post.F90      \
                         ../rrtmgp_lw_pre.F90          \
                         ../rrtmgp_lw_gas_optics.F90       \
+                        ../rrtmgp_lw_cloud_optics.F90        \
+                        ../rrtmgp_lw_cloud_sampling.F90      \
                         ../dcyc2.f        \
                         ../sfc_diff.f   \
                         ../sfc_diag.f                \
@@ -239,12 +241,6 @@ INPUT                  =  pdftxt/rel_update.txt            \
                         ../cires_ugwp_module.F90       \
                         ../cires_ugwp_post.F90         \
                         ../cires_ugwp_triggers.F90     \
-                        ../cires_ugwpv1_initialize.F90 \
-                        ../cires_ugwpv1_module.F90     \
-                        ../cires_ugwpv1_oro.F90        \
-                        ../cires_ugwpv1_solv2.F90      \
-                        ../cires_ugwpv1_sporo.F90      \
-                        ../cires_ugwpv1_triggers.F90   \
                         ../gwdps.f                     \
                         ../ugwp_driver_v0.F            \
                         ../ozphys_2015.f               \
@@ -344,14 +340,18 @@ IGNORE_PREFIX          =
 GENERATE_HTML          = YES
 HTML_OUTPUT            = html
 HTML_FILE_EXTENSION    = .html
-HTML_HEADER            = header.html
-HTML_FOOTER            = footer.html
-HTML_STYLESHEET        =
-HTML_EXTRA_STYLESHEET  = customdoxygen.css
-HTML_EXTRA_FILES       =
-HTML_COLORSTYLE_HUE    = 250
-HTML_COLORSTYLE_SAT    = 100
-HTML_COLORSTYLE_GAMMA  = 80
+HTML_HEADER            = _doxygen/header.html
+HTML_FOOTER            = _doxygen/footer.html
+HTML_STYLESHEET        = 
+HTML_EXTRA_STYLESHEET  = _doxygen/doxygen-awesome.css  \
+                         _doxygen/doxygen-awesome-sidebar-only.css \
+                         _doxygen/doxygen-awesome-sidebar-only-darkmode-toggle.css    \
+                         _doxygen/doxygen-awesome-ccpp.css 
+HTML_EXTRA_FILES       = _doxygen/doxygen-awesome-darkmode-toggle.js \
+                         _doxygen/doxygen-awesome-ccpp.js
+HTML_COLORSTYLE_HUE    = 209
+HTML_COLORSTYLE_SAT    = 255
+HTML_COLORSTYLE_GAMMA  = 113
 HTML_TIMESTAMP         = NO
 HTML_DYNAMIC_MENUS     = YES
 HTML_DYNAMIC_SECTIONS  = NO

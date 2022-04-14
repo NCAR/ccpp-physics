@@ -72,7 +72,7 @@ contains
   ! ######################################################################################
 
 !>\defgroup rrtmgp_sw_cloud_optics_mod GFS RRTMGP-SW Cloud Optics Module
-!! @{
+!> @{
 !> \section arg_table_rrtmgp_sw_cloud_optics_init
 !! \htmlinclude rrtmgp_lw_cloud_optics.html
 !!
@@ -572,5 +572,5 @@ contains
   ! #########################################################################################  
   subroutine rrtmgp_sw_cloud_optics_finalize()
   end subroutine rrtmgp_sw_cloud_optics_finalize 
-!! @}
+!> @}
 end module rrtmgp_sw_cloud_optics

@@ -30,9 +30,7 @@ model components (i.e., radiation). A description of the changes to the MYNN sch
 
 \section intra_mynnpbl Intraphysics Communication
 - Cloud-Radiation Interaction
-
-\sa sgscloud_radpost
-\sa sgsrad_group 
+\sa \ref SGSCLOUD_page
 
 The SGS clouds produced by the MYNN-EDMF scheme are coupled to the longwave and shortwave radiation schemes
 if the namelist parameter \p icloud_bl is set to 1. In this case, the SGS cloud fraction, \p CLDFRA_BL, and the SGS
@@ -63,7 +61,7 @@ values of \f$q_c, q_i\f$  and \p CLDFRA are restored, so the SGS clouds do not i
 
 
 The MYNN-EDMF CCPP-compliant interface:
-\htmlinclude mynnedmf_wrapper_run.html
+\ref arg_table_mynnedmf_wrapper_run
 
 \section gen_mynnedmf_conv MYNN-EDMF Scheme  General Algorithm
 

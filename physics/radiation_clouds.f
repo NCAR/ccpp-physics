@@ -142,7 +142,7 @@
 !!!!!  ==========================================================  !!!!!
 
 !> \defgroup module_radiation_clouds Radiation Clouds Module
-!! @{
+!> @{
 !! \brief This module computes cloud related quantities for radiation
 !! computations.
 !!
@@ -3940,5 +3940,5 @@
       end subroutine cloud_fraction_mass_flx_2 
 !........................................!
       end module module_radiation_clouds
-!! @}
+!> @}
 !========================================!

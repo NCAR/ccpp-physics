@@ -8,7 +8,7 @@
       contains
 
 !> \defgroup GFS_rrtmg_pre_mod GFS RRTMG Scheme Pre
-!! @{
+!> @{
       subroutine GFS_rrtmg_pre_init ()
       end subroutine GFS_rrtmg_pre_init
 
@@ -1032,6 +1032,6 @@
 
       subroutine GFS_rrtmg_pre_finalize ()
       end subroutine GFS_rrtmg_pre_finalize
-!! @}
+!> @}
 
       end module GFS_rrtmg_pre

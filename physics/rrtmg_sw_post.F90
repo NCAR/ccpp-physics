@@ -3,8 +3,8 @@
       module rrtmg_sw_post
       contains
 
-!>\defgroup rrtmg_sw_post GFS RRTMG scheme post
-!! @{
+!>\defgroup rrtmg_sw_post GFS RRTMG-SW scheme post
+!> @{
       subroutine rrtmg_sw_post_init ()
       end subroutine rrtmg_sw_post_init
 
@@ -131,5 +131,5 @@
  
       subroutine rrtmg_sw_post_finalize ()
       end subroutine rrtmg_sw_post_finalize
-!! @}
+!> @}
       end module rrtmg_sw_post

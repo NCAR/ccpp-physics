@@ -5,7 +5,8 @@
       module sfc_nst
 
       contains
-
+!>\defgroup gfs_nst_main_mod GFS NSST Scheme Module
+!> @{
 !> This subroutine is empty since there are no procedures that need to be done to initialize the GFS NSST code.
 !!
       subroutine sfc_nst_init
@@ -16,7 +17,6 @@
       subroutine sfc_nst_finalize
       end subroutine sfc_nst_finalize
 
-!>\defgroup gfs_nst_main GFS Near-Surface Sea Temperature Scheme Module
 !>\brief This subroutine calls the Thermal Skin-layer and Diurnal Thermocline models to update the NSST profile.
 !> \section arg_table_sfc_nst_run Argument Table
 !! \htmlinclude sfc_nst_run.html
@@ -700,6 +700,7 @@ cc
 
       return
       end subroutine sfc_nst_run
+!> @}
       end module sfc_nst
 
 !> This module contains the CCPP-compliant GFS near-surface sea temperature pre
@@ -708,8 +709,9 @@ cc
 
       contains
 
-!> \defgroup GFS_NSST_PRE GFS Near-Surface Sea Temperature Pre
-!!
+!> \defgroup GFS_NSST_PRE_mod GFS NSST Pre Module
+!>\ingroup gfs_nst_main_mod
+!> @{
 !! The NSST scheme is one of the three schemes used to represent the
 !! surface in the GFS physics suite. The other two are the Noah land
 !! surface model and the sice simplified ice model.
@@ -724,7 +726,6 @@ cc
 !! \htmlinclude sfc_nst_pre_run.html
 !!
 !> \section NSST_general_pre_algorithm General Algorithm
-!! @{
       subroutine sfc_nst_pre_run
      &    (im, wet, tgice, tsfco, tsurf_wat,
      &     tseal, xt, xz, dt_cool, z_c, tref, cplflx,
@@ -803,7 +804,7 @@ cc
 
       return
       end subroutine sfc_nst_pre_run
-!! @}
+!> @}
       end module sfc_nst_pre
 
 !> This module contains the CCPP-compliant GFS near-surface sea temperature post
@@ -812,8 +813,9 @@ cc
 
       contains
 
-!> \defgroup GFS_NSST_POST_mod GFS Near-Surface Sea Temperature Post
-!! @{
+!> \defgroup GFS_NSST_POST_mod GFS NSST Post Module
+!>\ingroup gfs_nst_main_mod
+!> @{
 !!
       subroutine sfc_nst_post_init
       end subroutine sfc_nst_post_init
@@ -902,6 +904,6 @@ cc
 
       return
       end subroutine sfc_nst_post_run
-
+!> @}
 
       end module sfc_nst_post

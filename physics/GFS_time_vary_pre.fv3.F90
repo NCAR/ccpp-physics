@@ -16,7 +16,7 @@
       contains
 
 !>\defgroup gfs_time_vary_pre_mod  GFS Time Vary Pre Module
-!! @{
+!> @{
 !> \section arg_table_GFS_time_vary_pre_init Argument Table
 !! \htmlinclude GFS_time_vary_pre_init.html
 !!
@@ -191,7 +191,5 @@
         endif
 
       end subroutine GFS_time_vary_pre_timestep_init
-
-!! @}
-
+!> @}
     end module GFS_time_vary_pre

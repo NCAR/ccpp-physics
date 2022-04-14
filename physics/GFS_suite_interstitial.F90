@@ -5,6 +5,8 @@
 
     contains
 
+!>\defgroup gfs_suite_inter_mod GFS Suite Interstitial Module
+!> @{
     subroutine GFS_suite_interstitial_rad_reset_init ()
     end subroutine GFS_suite_interstitial_rad_reset_init
 
@@ -1042,5 +1044,5 @@
       enddo
 
     end subroutine GFS_suite_interstitial_5_run
-
+!> @}
   end module GFS_suite_interstitial_5

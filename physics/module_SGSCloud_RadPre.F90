@@ -11,7 +11,7 @@
       contains
 
 !> \defgroup sgsradpre_group sgscloud_radpre_run Module
-!!@{
+!>@{
 !> \section arg_table_sgscloud_radpre_init Argument Table
 !! \htmlinclude sgscloud_radpre_init.html
 !!
@@ -38,8 +38,7 @@
 !!          clouds(:,:,4)  -  layer cloud ice water path                !
 !!          clouds(:,:,5)  -  mean effective radius for ice cloud       !
 !!
-!>\section sgscloud_radpre GSD SGS Scheme General Algorithm
-!> @{
+!>\section sgscloud_radpre_mod  SGS Cloud Scheme Pre General Algorithm
       subroutine sgscloud_radpre_run(    &
            im,levs,                      &
            flag_init,flag_restart,       &
@@ -299,5 +298,5 @@
       endif ! timestep > 1
 
       end subroutine sgscloud_radpre_run
-!! @}
+!> @}
       end module sgscloud_radpre

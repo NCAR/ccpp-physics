@@ -32,7 +32,7 @@
       end subroutine samfshalcnv_finalize
 
 !> \defgroup SAMF_shal GFS Scale-Aware Mass-Flux Shallow Convection Scheme Module
-!! @{
+!> @{
 !>  \brief This subroutine contains the entirety of the SAMF shallow convection
 !!  scheme.
 !!
@@ -54,7 +54,6 @@
 !!  -# Calculate the tendencies of the state variables (per unit cloud base mass flux) and the cloud base mass flux.
 !!  -# For the "feedback control", calculate updated values of the state variables by multiplying the cloud base mass flux and the tendencies calculated per unit cloud base mass flux from the static control.
 !!  \section det_samfshalcnv GFS samfshalcnv Detailed Algorithm
-!!  @{
       subroutine samfshalcnv_run(im,km,itc,ntc,cliq,cp,cvap,            &
      &     eps,epsm1,fv,grav,hvap,rd,rv,                                &
      &     t0c,delt,ntk,ntr,delp,                                       &
@@ -2342,6 +2341,5 @@ c
       return
       end subroutine samfshalcnv_run
 !> @}
-!! @}
       end module samfshalcnv
 

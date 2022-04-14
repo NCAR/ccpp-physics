@@ -1,3 +1,5 @@
+!>\file cires_ugwpv1_triggers.F90
+!!
 module cires_ugwpv1_triggers
 
         use machine,            only: kind_phys
@@ -8,9 +10,6 @@ contains
 !
 !      
 !>\ingroup cires_ugwp_run
-!> @{
-!!
-!!
       subroutine slat_geos5_tamp_v1(im, tau_amp, xlatdeg, tau_gw)
 !=================
 ! V1: GEOS-5 & MERRA-2 lat-dependent GW-source function  tau(z=Zlaunch) =rho*<u'w'>

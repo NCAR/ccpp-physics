@@ -18,7 +18,7 @@ contains
   ! SUBROUTINE GFS_rrtmgp_sw_post_init
   ! #########################################################################################
 !>\defgroup gfs_rrtmgp_sw_post_mod GFS RRTMGP-SW Post Module
-!! @{
+!> @{
   subroutine GFS_rrtmgp_sw_post_init()
   end subroutine GFS_rrtmgp_sw_post_init
 
@@ -282,5 +282,5 @@ contains
   ! #########################################################################################
   subroutine GFS_rrtmgp_sw_post_finalize ()
   end subroutine GFS_rrtmgp_sw_post_finalize
-!! @}
+!> @}
 end module GFS_rrtmgp_sw_post

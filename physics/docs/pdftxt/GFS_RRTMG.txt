@@ -10,7 +10,7 @@
  transformations.
 
  The schematic radiation module structure is shown in Figure 1.
- \image html schematic_Rad_mod.png "Figure 1: Schematic Radiation Module Structure" width=10cm
+ \image html schematic_Rad_mod.png "Figure 1: Schematic Radiation Module Structure"
 
  GFS radiation package is intended to provide a fast and accurate
  method of determining the total radiative flux at any given

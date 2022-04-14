@@ -6,7 +6,7 @@
       contains
 
 !>\defgroup sfc_diag_post_mod GFS SFC_DIAG Post Module
-!! @{
+!> @{
       subroutine sfc_diag_post_init ()
       end subroutine sfc_diag_post_init
 
@@ -75,5 +75,5 @@
         endif
 
       end subroutine sfc_diag_post_run
-!! @}
+!> @}
       end module sfc_diag_post

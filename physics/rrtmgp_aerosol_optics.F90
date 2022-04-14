@@ -26,7 +26,7 @@ contains
   ! #########################################################################################
 
 !>\defgroup rrtmgp_aerosol_optics_mod GFS RRTMGP Aerosol Optics Module
-!! @{
+!> @{
 !! \section arg_table_rrtmgp_aerosol_optics_run
 !! \htmlinclude rrtmgp_aerosol_optics_run.html
 !!
@@ -125,5 +125,5 @@ contains
     end do
 
   end subroutine rrtmgp_aerosol_optics_run
-!! @}  
+!> @}  
 end module rrtmgp_aerosol_optics

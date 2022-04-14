@@ -5,7 +5,7 @@
       contains
 
 !> \defgroup Sfc_diag Land Surface Diagnose Calculation
-!! @{
+!> @{
       subroutine sfc_diag_init
       end subroutine sfc_diag_init
       
@@ -94,6 +94,6 @@
 
       return
       end subroutine sfc_diag_run
-!! @}
+!> @}
 
       end module sfc_diag

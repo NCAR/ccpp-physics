@@ -75,7 +75,7 @@ contains
   ! SUBROUTINE rrtmgp_lw_gas_optics_init
   ! #########################################################################################
 !>\defgroup rrtmgp_lw_gas_optics_mod GFS RRTMGP-LW Gas Optics Module
-!! @{
+!> @{
 !> \section arg_table_rrtmgp_lw_gas_optics_init
 !! \htmlinclude rrtmgp_lw_gas_optics_init.html
 !!
@@ -537,5 +537,5 @@ contains
   ! #########################################################################################
   subroutine rrtmgp_lw_gas_optics_finalize()
   end subroutine rrtmgp_lw_gas_optics_finalize
-!! @}  
+!> @}  
 end module rrtmgp_lw_gas_optics

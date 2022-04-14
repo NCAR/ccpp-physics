@@ -5,12 +5,11 @@ module rad_sw_pre
 contains
 
 !> \defgroup rad_sw_pre GFS Radiation-SW Pre 
-!! @{
+!> @{
 !> \section arg_table_rad_sw_pre_run Argument Table
 !! \htmlinclude rad_sw_pre_run.html
 !!
-!! \section rad_sw_pre_run
-!! @{
+!! \section rad_sw_pre_run_gen GFS Radiation-SW Pre General Algorithm
   subroutine rad_sw_pre_run (im, lsswr, coszen, nday, idxday, errmsg, errflg)
     use machine,  only: kind_phys
     implicit none
@@ -49,5 +48,5 @@ contains
     endif
     
   end subroutine rad_sw_pre_run
-!! @}
+!> @}
 end module rad_sw_pre

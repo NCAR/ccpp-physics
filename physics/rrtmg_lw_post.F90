@@ -4,7 +4,7 @@
       contains
 
 !>\defgroup rrtmg_lw_post GFS RRTMG scheme post
-!! @{
+!> @{
       subroutine rrtmg_lw_post_init()
       end subroutine rrtmg_lw_post_init
 
@@ -80,5 +80,5 @@
       subroutine rrtmg_lw_post_finalize ()
       end subroutine rrtmg_lw_post_finalize
 
-!! @}
+!> @}
       end module rrtmg_lw_post

@@ -13,7 +13,7 @@ contains
   ! ######################################################################################
 
 !>\defgroup gfs_rrtmgp_cloud_overlap_mod GFS RRTMGP Cloud Overlap Module
-!! @{
+!> @{
 !! \section arg_table_GFS_rrtmgp_cloud_overlap_run
 !! \htmlinclude GFS_rrtmgp_cloud_overlap_run.html
 !!  
@@ -126,5 +126,5 @@ contains
     precip_overlap_param = cloud_overlap_param    
     
   end subroutine GFS_rrtmgp_cloud_overlap_run
-!!@}
+!>@}
 end module GFS_rrtmgp_cloud_overlap

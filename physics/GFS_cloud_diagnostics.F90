@@ -36,7 +36,7 @@ contains
   ! ######################################################################################
 
 !>\defgroup gfs_cloud_diagnostics_mod GFS Cloud Diagnostics Module
-!! @{
+!> @{
   subroutine GFS_cloud_diagnostics_init()
   end subroutine GFS_cloud_diagnostics_init
   
@@ -133,5 +133,5 @@ contains
   ! ######################################################################################
   ! Subroutine hml_cloud_diagnostics_initialize is removed (refer to GFS_rrtmgp_setup.F90) 
   ! ######################################################################################
-!! @}
+!> @}
 end module GFS_cloud_diagnostics

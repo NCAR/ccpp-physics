@@ -16,7 +16,7 @@
       contains
 
 !>\defgroup mod_GFS_surface_generic_pre GFS Surface Generic Pre module
-!! @{ 
+!> @{ 
 !> \section arg_table_GFS_surface_generic_pre_init Argument Table
 !! \htmlinclude GFS_surface_generic_pre_init.html
 !!
@@ -229,7 +229,7 @@
 
       end subroutine update_vegetation_soil_slope_type
 
-!! @}
+!> @}
 
       end module GFS_surface_generic_pre
 
@@ -249,7 +249,7 @@
       contains
 
 !>\defgroup gfs_sfc_gen_post_mode GFS Surface Generic Post Module
-!! @{
+!> @{
 !> \section arg_table_GFS_surface_generic_post_init Argument Table
 !! \htmlinclude GFS_surface_generic_post_init.html
 !!
@@ -505,5 +505,5 @@
         slope(:) = slope_save(:)
 
       end subroutine GFS_surface_generic_post_run
-!! @}
+!> @}
       end module GFS_surface_generic_post
