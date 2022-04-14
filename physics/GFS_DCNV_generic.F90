@@ -20,8 +20,7 @@
                                          save_u, save_v, save_t, save_q, clw,            &
                                          ntcw,ntiw,ntclamt,ntrw,ntsw,ntrnc,ntsnc,ntgl,   &
                                          ntgnc, cscnv, satmedmf, trans_trac, ras, ntrac, &
-                                         dtidx, index_of_process_dcnv,rrfs_smoke,dqdti,  &
-                                         errmsg, errflg)
+                                         dtidx, index_of_process_dcnv, errmsg, errflg)
 
       use machine, only: kind_phys
 
@@ -29,7 +28,7 @@
 
       integer, intent(in) :: im, levs, nsamftrac, ntqv, index_of_process_dcnv, dtidx(:,:), &
            ntcw,ntiw,ntclamt,ntrw,ntsw,ntrnc,ntsnc,ntgl,ntrac,ntgnc
-      logical, intent(in) :: ldiag3d, qdiag3d, do_cnvgwd, cplchm, rrfs_smoke
+      logical, intent(in) :: ldiag3d, qdiag3d, do_cnvgwd, cplchm
       real(kind=kind_phys), dimension(:,:),   intent(in)    :: gu0
       real(kind=kind_phys), dimension(:,:),   intent(in)    :: gv0
       real(kind=kind_phys), dimension(:,:),   intent(in)    :: gt0
@@ -38,8 +37,6 @@
       real(kind=kind_phys), dimension(:,:),   intent(inout) :: save_v
       real(kind=kind_phys), dimension(:,:),   intent(inout) :: save_t
       real(kind=kind_phys), dimension(:,:,:), intent(inout) :: save_q
-      ! dqdti only allocated if rrfs_smoke is .true.
-      real(kind=kind_phys), dimension(:,:),     intent(inout) :: dqdti
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
       logical, intent(in) :: cscnv, satmedmf, trans_trac, ras
@@ -89,10 +86,6 @@
             enddo
          endif ! end if_ras or cfscnv or samf
          save_q(:,:,ntqv) = gq0(:,:,ntqv)
-      endif
-
-      if (rrfs_smoke) then
-        dqdti = zero
       endif
 
     end subroutine GFS_DCNV_generic_pre_run

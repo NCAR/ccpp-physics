@@ -99,7 +99,7 @@
         index_of_process_scnv, ntqv, flag_for_scnv_generic_tend,                   &
         ntcw,ntiw,ntclamt,ntrw,ntsw,ntrnc,ntsnc,ntgl,ntgnc,                        &
         imfshalcnv, imfshalcnv_sas, imfshalcnv_samf, ntrac,                        &
-        cscnv, satmedmf, trans_trac, ras, rrfs_smoke, dqdti, errmsg, errflg)
+        cscnv, satmedmf, trans_trac, ras, errmsg, errflg)
 
       use machine,               only: kind_phys
 
@@ -107,14 +107,13 @@
 
       integer, intent(in) :: im, levs, nn, ntqv, nsamftrac
       integer, intent(in) :: ntcw,ntiw,ntclamt,ntrw,ntsw,ntrnc,ntsnc,ntgl,ntgnc,ntrac
-      logical, intent(in) :: lssav, ldiag3d, qdiag3d, flag_for_scnv_generic_tend, rrfs_smoke
+      logical, intent(in) :: lssav, ldiag3d, qdiag3d, flag_for_scnv_generic_tend
       real(kind=kind_phys),                     intent(in) :: frain
       real(kind=kind_phys), dimension(:,:), intent(in) :: gu0, gv0, gt0
       real(kind=kind_phys), dimension(:,:), intent(in) :: save_u, save_v, save_t
       real(kind=kind_phys), dimension(:,:,:),   intent(in) :: save_q, gq0
 
       ! dtend only allocated if ldiag3d == .true.
-            real(kind=kind_phys), dimension(:,:), intent(inout) :: dqdti
       real(kind=kind_phys), intent(inout) :: dtend(:,:,:)
       integer, intent(in) :: dtidx(:,:)
       integer, intent(in) :: index_of_temperature, index_of_x_wind, index_of_y_wind, index_of_process_scnv
@@ -208,15 +207,6 @@
              dtend(:,:,idtend) = dtend(:,:,idtend) + (gq0(:,:,ntqv) - save_q(:,:,ntqv)) * frain
           endif
         endif
-      endif
-
-      if (rrfs_smoke) then
-        do k=1,levs
-          do i=1,im
-            tem  = (gq0_water_vapor(i,k)-save_qv(i,k)) * frain
-            dqdti(i,k) = dqdti(i,k) + tem
-          enddo
-        enddo
       endif
 
       end subroutine GFS_SCNV_generic_post_run
