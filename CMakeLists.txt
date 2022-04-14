@@ -120,8 +120,8 @@ set(SCHEMES_OPENMP_OFF ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rrtmgp/mo_
 # List of files that need to be compiled with different precision
 set(SCHEMES_DYNAMICS)
 
-if(${LOCAL_CURRENT_SOURCE_DIR}/physics/gfdl_fv_sat_adj.F90 IN_LIST SCHEMES)
-  list(APPEND SCHEMES_DYNAMICS ${LOCAL_CURRENT_SOURCE_DIR}/physics/gfdl_fv_sat_adj.F90)
+if(${LOCAL_CURRENT_SOURCE_DIR}/physics/fv_sat_adj.F90 IN_LIST SCHEMES)
+  list(APPEND SCHEMES_DYNAMICS ${LOCAL_CURRENT_SOURCE_DIR}/physics/fv_sat_adj.F90)
 endif()
 
 # Remove files that need to be compiled with different precision
