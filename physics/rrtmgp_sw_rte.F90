@@ -23,13 +23,13 @@ contains
 !! \section arg_table_rrtmgp_sw_rte_run
 !! \htmlinclude rrtmgp_sw_rte.html
 !!
-!! \ingroup rrtmgp_sw_rte
+!> \ingroup rrtmgp_sw_rte
 !! 
 !! \brief This routine takes all of the shortwave optical properties ,ty_optical_props_2str,
 !! and computes the shortwave radiative fluxes for cloudy and clear-sky conditions.
 !!
 !! \section rrtmgp_sw_rte_run Main Driver
-!! @{
+!> @{
   ! ######################################################################################
   subroutine rrtmgp_sw_rte_run(doSWrad, doSWclrsky, nCol, nLev, nDay, idxday, coszen, p_lay,&
        t_lay, top_at_1, doGP_sgs_cnv, doGP_sgs_mynn, iSFC, sfc_alb_nir_dir, sfc_alb_nir_dif,&
@@ -218,5 +218,5 @@ contains
     endif
 
   end subroutine rrtmgp_sw_rte_run
-!! @}
+!> @}
 end module rrtmgp_sw_rte

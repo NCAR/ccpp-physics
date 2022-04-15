@@ -1,5 +1,11 @@
-! ###########################################################################################
-! ###########################################################################################
+! ######################################################################################
+!> \file rrtmgp_lw_rte.F90
+!!
+!> \defgroup rrtmgp_lw_rte rrtmgp_lw_rte.F90
+!!
+!! \brief This module contains the main rte longwave driver.
+!!
+! ###################################################################################### 
 module rrtmgp_lw_rte
   use machine,                only: kind_phys
   use mo_optical_props,       only: ty_optical_props_1scl, ty_optical_props_2str
@@ -10,21 +16,20 @@ module rrtmgp_lw_rte
   use rrtmgp_lw_gas_optics,   only: lw_gas_props
   implicit none
 
-  public rrtmgp_lw_rte_init, rrtmgp_lw_rte_run, rrtmgp_lw_rte_finalize
+  public rrtmgp_lw_rte_run
 contains
-
-  ! #########################################################################################
-  ! SUBROUTINE rrtmgp_lw_rte_init
-  ! #########################################################################################
-  subroutine rrtmgp_lw_rte_init()
-  end subroutine rrtmgp_lw_rte_init
-
-  ! #########################################################################################
-  ! SUBROUTINE rrtmgp_lw_rte_run
-  ! #########################################################################################
+  ! ######################################################################################
 !! \section arg_table_rrtmgp_lw_rte_run
 !! \htmlinclude rrtmgp_lw_rte_run.html
 !!
+!> \ingroup rrtmgp_lw_rte 
+!!
+!! \brief This routine takes all of the longwave optical properties ,ty_optical_props_1scl,
+!! and computes the longwave radiative fluxes for cloudy and clear-sky conditions.  
+!!
+!! \section rrtmgp_lw_rte_run
+!> @{
+  ! ######################################################################################
   subroutine rrtmgp_lw_rte_run(doLWrad, doLWclrsky, use_LW_jacobian, doGP_lwscat, nCol,     &
        nLev, top_at_1, doGP_sgs_cnv, doGP_sgs_mynn, sfc_emiss_byband, sources,              &
        lw_optical_props_clrsky, lw_optical_props_clouds, lw_optical_props_precipByBand,     &
@@ -202,12 +207,5 @@ contains
     fluxlwDOWN_radtime = fluxlwDOWN_allsky
 
   end subroutine rrtmgp_lw_rte_run
-  
-  ! #########################################################################################
-  ! SUBROUTINE rrtmgp_lw_rte_finalize
-  ! #########################################################################################
-  subroutine rrtmgp_lw_rte_finalize()
-  end subroutine rrtmgp_lw_rte_finalize
-
-
+!> @}
 end module rrtmgp_lw_rte

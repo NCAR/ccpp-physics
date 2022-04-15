@@ -1,12 +1,9 @@
 ! ###################################################################################### 
 !> \file GFS_rrtmgp_lw_post.F90
 !!
-!! This file computes the RRTMGP longwave heating-rate(s), copies RRTMGP longwave fluxes
-!! to output DDTs, and output (optional) diagnsotics.
+!> \defgroup GFS_rrtmgp_lw_post GFS_rrtmgp_lw_post.F90
 !!
-!! /defgroup GFS_rrtmgp_lw_post
-!!
-!! /brief RRTMGP Longwave post-processing routine.
+!! \brief RRTMGP Longwave post-processing routine.
 !!
 ! ######################################################################################
 module GFS_rrtmgp_lw_post
@@ -24,12 +21,9 @@ contains
 !> \section arg_table_GFS_rrtmgp_lw_post_run
 !! \htmlinclude GFS_rrtmgp_lw_post.html
 !!
-!! \section GFS_rrtmgp_lw_post_run
-!! @{
-!! 
-!! RRTMGP Longwave post-processing routine.
+!! \ingroup GFS_rrtmgp_lw_post
 !!
-!! The all-sky longwave radiation tendency is computed, the clear-sky tendency is computed 
+!! \brief The all-sky longwave radiation tendency is computed, the clear-sky tendency is computed 
 !! if requested.
 !!
 !! RRTMGP surface and TOA fluxes are copied to fields that persist between radiation/physics
@@ -37,6 +31,8 @@ contains
 !! 
 !! (optional) Save additional diagnostics.
 !!
+!! \section GFS_rrtmgp_lw_post_run
+!> @{
  ! ######################################################################################## 
   subroutine GFS_rrtmgp_lw_post_run (nCol, nLev, lslwr, do_lw_clrsky_hr, save_diag, fhlwr, &
        p_lev, t_lay, tsfa, fluxlwUP_allsky, fluxlwDOWN_allsky, fluxlwUP_clrsky, iSFC, iTOA,&
@@ -191,5 +187,5 @@ contains
     endif
 
   end subroutine GFS_rrtmgp_lw_post_run
-!! @}
+!> @}
 end module GFS_rrtmgp_lw_post

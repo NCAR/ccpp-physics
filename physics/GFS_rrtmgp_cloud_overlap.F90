@@ -1,14 +1,11 @@
 ! ########################################################################################
-!> \file GFS_rrtmgp_cloud_mp.F90
+!> \file GFS_rrtmgp_cloud_overlap.F90
 !! 
-!! This file contains EMC's interface to the different assumptions of vertical cloud 
-!! structuce, or cloud overlap, used by McICA for cloud sampling in the RRTMGP longwave
-!! and shortwave schemes.
-!!
 !> \defgroup GFS_rrtmgp_cloud_overlap GFS_rrtmgp_cloud_overlap.F90
 !!
-!! \brief This module contains the computation of the cloud overlap parameters, used
-!! by rrtmgp_lw_cloud_sampling.F90 and rrtmgp_sw_cloud_sampling.F90.
+!! \brief This module contains EMC's interface to the different assumptions of vertical cloud 
+!! structuce, cloud overlap, used by McICA for cloud sampling in the RRTMGP longwave
+!! and shortwave schemes.
 !!
 ! ########################################################################################
 module GFS_rrtmgp_cloud_overlap
@@ -20,13 +17,11 @@ module GFS_rrtmgp_cloud_overlap
 
 contains  
   ! ######################################################################################
-!>
 !! \section arg_table_GFS_rrtmgp_cloud_overlap_run
 !! \htmlinclude GFS_rrtmgp_cloud_overlap_run.html
 !!
 !> \ingroup GFS_rrtmgp_cloud_overlap
 !!
-!! \brief
 !! This is identical (shares common-code) to RRTMG. The motivation for RRTMGP to have
 !! its own scheme is both organizational and philosophical*.
 !!
@@ -34,8 +29,8 @@ contains
 !! rte-rrtmgp can accomodate multiple cloud-types. This module preservers this enhancement
 !! in the EMCs coupling to the RRTMGP scheme.
 !!
-!! \section GFS_rrtmgp_cloud_overlap_run RRTMGP cloud-overlap
-!! @{
+!! \section GFS_rrtmgp_cloud_overlap_run
+!> @{
   ! ###################################################################################### 
   subroutine GFS_rrtmgp_cloud_overlap_run(nCol, nLev, yearlen, doSWrad, doLWrad,         &
        julian, lat, p_lev, p_lay, tv_lay, deltaZc, con_pi, con_g, con_rd, con_epsq,      &

@@ -89,16 +89,16 @@ contains
 !! \section arg_table_rrtmgp_sw_gas_optics_init
 !! \htmlinclude rrtmgp_sw_gas_optics.html
 !!
-!! \ingroup rrtmgp_sw_gas_optics
+!> \ingroup rrtmgp_sw_gas_optics
 !!
-!! \brief RRTMGP relies heavility on derived-data-types, which contain type-bound procedures 
+!! RRTMGP relies heavility on derived-data-types, which contain type-bound procedures 
 !! that are referenced frequently throughout the RRTMGP shortwave scheme. The data needed
 !! for the correlated k-distribution is also contained within this type. Within this module,
 !! the full k-distribution data is read in, reduced by the "active gases" provided, and
 !! loaded into the RRTMGP DDT, ty_gas_optics_rrtmgp.
 !!
-!! \section rrtmgp_sw_gas_optics_init Initialization Routine
-!! @{ 
+!! \section rrtmgp_sw_gas_optics_init
+!> @{ 
   ! ######################################################################################  
   subroutine rrtmgp_sw_gas_optics_init(rrtmgp_root_dir, rrtmgp_sw_file_gas,                 &
        active_gases_array, mpicomm, mpirank, mpiroot, errmsg, errflg)
@@ -509,13 +509,13 @@ contains
 !! \section arg_table_rrtmgp_sw_gas_optics_run
 !! \htmlinclude rrtmgp_sw_gas_optics.html
 !!
-!! \ingroup rrtmgp_sw_gas_optics
+!> \ingroup rrtmgp_sw_gas_optics
 !!
-!! \brief Compute shortwave optical prperties (optical-depth, single-scattering albedo,
+!! Compute shortwave optical prperties (optical-depth, single-scattering albedo,
 !! asymmetry parameter) for clear-sky conditions.
 !!
-!! \section rrtmgp_sw_gas_optics_run Main driver
-!! @{
+!! \section rrtmgp_sw_gas_optics_run
+!> @{
   ! ###################################################################################### 
   subroutine rrtmgp_sw_gas_optics_run(doSWrad, nCol, nLev, ngptsGPsw, nday, idxday,  p_lay, &
        p_lev, toa_src_sw, t_lay, t_lev, active_gases_array, gas_concentrations, solcon,     &
@@ -610,6 +610,6 @@ contains
     endif
 
   end subroutine rrtmgp_sw_gas_optics_run
-!! @}
+!> @}
 end module rrtmgp_sw_gas_optics
  

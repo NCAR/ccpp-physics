@@ -1,3 +1,14 @@
+! ######################################################################################
+!> \file rrtmgp_lw_gas_optics.F90 
+!!
+!> \defgroup rrtmgp_lw_gas_optics rrtmgp_lw_gas_optics.F90 
+!!
+!! \brief This module contains two routines: One to initialize the k-distribution data
+!! and functions needed to compute the longwave gaseous optical properties in RRTMGP.
+!! The second routine is a ccpp scheme within the "radiation loop", where the longwave
+!! optical prperties (optical-depth) are computed for clear-sky conditions (no aerosols).
+!!                                                
+! ######################################################################################
 module rrtmgp_lw_gas_optics
   use machine,               only: kind_phys
   use mo_rte_kind,           only: wl
@@ -67,13 +78,21 @@ module rrtmgp_lw_gas_optics
        scale_by_complement_upperLW          ! Absorption is scaled by concentration of scaling_gas (F) or its complement (T)
 
 contains
-
-  ! #########################################################################################
-  ! SUBROUTINE rrtmgp_lw_gas_optics_init
-  ! #########################################################################################
+  ! ######################################################################################
 !! \section arg_table_rrtmgp_lw_gas_optics_init
-!! \htmlinclude rrtmgp_lw_gas_optics_init.html
+!! \htmlinclude rrtmgp_lw_gas_optics.html
 !!
+!> \ingroup rrtmgp_lw_gas_optics
+!!
+!! RRTMGP relies heavility on derived-data-types, which contain type-bound procedures
+!! that are referenced frequently throughout the RRTMGP longwave scheme. The data needed
+!! for the correlated k-distribution is also contained within this type. Within this module,
+!! the full k-distribution data is read in, reduced by the "active gases" provided, and
+!! loaded into the RRTMGP DDT, ty_gas_optics_rrtmgp.
+!!
+!! \section rrtmgp_lw_gas_optics_init
+!> @{
+  ! ######################################################################################
   subroutine rrtmgp_lw_gas_optics_init(rrtmgp_root_dir, rrtmgp_lw_file_gas, mpicomm,        &
        mpirank, mpiroot, minGPpres, maxGPpres, minGPtemp, maxGPtemp, active_gases_array,    &
        errmsg, errflg)
@@ -458,13 +477,18 @@ contains
     maxGPtemp = lw_gas_props%get_temp_max()
 
   end subroutine rrtmgp_lw_gas_optics_init
-
-  ! #########################################################################################
-  ! SUBROUTINE rrtmgp_lw_gas_optics_run
-  ! #########################################################################################
+!> @}
+  ! ######################################################################################
 !! \section arg_table_rrtmgp_lw_gas_optics_run
-!! \htmlinclude rrtmgp_lw_gas_optics_run.html
+!! \htmlinclude rrtmgp_lw_gas_optics.html
 !!
+!> \ingroup rrtmgp_lw_gas_optics
+!!
+!! Compute longwave optical prperties (optical-depth) for clear-sky conditions.
+!!
+!! \section rrtmgp_lw_gas_optics_run
+!> @{
+  ! ######################################################################################
   subroutine rrtmgp_lw_gas_optics_run(doLWrad, nCol, nLev, p_lay, p_lev, t_lay, t_lev, tsfg, &
        gas_concentrations, lw_optical_props_clrsky, sources, errmsg, errflg)
 
@@ -526,11 +550,5 @@ contains
          tlev=t_lev))               ! IN  - Temperature @ layer-interfaces (K) (optional)
 
   end subroutine rrtmgp_lw_gas_optics_run
-
-  ! #########################################################################################
-  ! SUBROUTINE rrtmgp_lw_gas_optics_finalize
-  ! #########################################################################################
-  subroutine rrtmgp_lw_gas_optics_finalize()
-  end subroutine rrtmgp_lw_gas_optics_finalize
-  
+!> @}
 end module rrtmgp_lw_gas_optics

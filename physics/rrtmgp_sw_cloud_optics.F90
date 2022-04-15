@@ -80,15 +80,15 @@ contains
 !! \section arg_table_rrtmgp_sw_cloud_optics_init
 !! \htmlinclude rrtmgp_lw_cloud_optics.html
 !!
-!! \ingroup rrtmgp_sw_cloud_optics
+!> \ingroup rrtmgp_sw_cloud_optics
 !!
-!! \brief RRTMGP relies heavily on derived-data-types, which contain type-bound procedures
+!! RRTMGP relies heavily on derived-data-types, which contain type-bound procedures
 !! that are referenced frequently throughout the RRTMGP shortwave scheme. The data needed
 !! to compute the shortwave cloud optical properties are initialized here and loaded into
 !! the RRTMGP DDT, ty_cloud_optics.
 !!
-!! \section rrtmgp_sw_cloud_optics_init Initialization Routine
-!! @{
+!! \section rrtmgp_sw_cloud_optics_init
+!> @{
   ! ######################################################################################
   subroutine rrtmgp_sw_cloud_optics_init(doG_cldoptics, doGP_cldoptics_PADE,             &
        doGP_cldoptics_LUT, nrghice, rrtmgp_root_dir, rrtmgp_sw_file_clouds, mpicomm,     &
@@ -407,18 +407,18 @@ contains
             0.970, 0.970,   0.970,   0.700, 0.700, 0.700, 0.700/)
 
   end subroutine rrtmgp_sw_cloud_optics_init
-!! @}
+!> @}
 
   ! ###################################################################################### 
 !! \section arg_table_rrtmgp_sw_cloud_optics_run
 !! \htmlinclude rrtmgp_sw_cloud_optics.html
 !!
-!! \ingroup rrtmgp_sw_cloud_optics
+!> \ingroup rrtmgp_sw_cloud_optics
 !!
-!! \brief Compute shortwave optical prperties (optical-depth, single-scattering albedo, 
+!! Compute shortwave optical prperties (optical-depth, single-scattering albedo, 
 !! asymmetry parameter) for ALL cloud types visible to RRTMGP. 
 !!
-!! \section rrtmgp_sw_gas_optics_run Main driver
+!! \section rrtmgp_sw_gas_optics_run
 !! @{
   ! ###################################################################################### 
   subroutine rrtmgp_sw_cloud_optics_run(doSWrad, doG_cldoptics, icliq_sw, icice_sw,         &
@@ -587,5 +587,5 @@ contains
     endif
  
   end subroutine rrtmgp_sw_cloud_optics_run
-!! @}
+!> @}
 end module rrtmgp_sw_cloud_optics

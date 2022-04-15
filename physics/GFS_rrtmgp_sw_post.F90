@@ -1,9 +1,9 @@
 ! ######################################################################################
 !> \file GFS_rrtmgp_sw_post.F90
 !!
-!> /defgroup GFS_rrtmgp_sw_post GFS_rrtmgp_sw_post.F90
+!> \defgroup GFS_rrtmgp_sw_post GFS_rrtmgp_sw_post.F90
 !!
-!! /brief RRTMGP Shortwave post-processing routine.
+!! \brief RRTMGP Shortwave post-processing routine.
 !!
 ! ######################################################################################
 module GFS_rrtmgp_sw_post
@@ -22,12 +22,11 @@ contains
 !> \section arg_table_GFS_rrtmgp_sw_post_run
 !! \htmlinclude GFS_rrtmgp_sw_post_run.html
 !!
-!! /ingroup GFS_rrtmgp_sw_post
+!> \ingroup GFS_rrtmgp_sw_post
 !! RRTMGP Shortwave post-processing routine.
 !!
-!! /brief
-!! The all-sky shortwave radiation tendency is computed, the clear-sky tendency is computed
-!! if requested.
+!! \brief The all-sky shortwave radiation tendency is computed, the clear-sky tendency is 
+!! computed if requested.
 !!
 !! RRTMGP surface and TOA fluxes are copied to fields that persist between radiation/physics
 !! calls.
@@ -35,7 +34,7 @@ contains
 !! (optional) Save additional diagnostics.
 !!
 !! \section GFS_rrtmgp_sw_post_run
-!! @{
+!> @{
  ! #########################################################################################
   subroutine GFS_rrtmgp_sw_post_run (nCol, nLev, nDay, idxday, lsswr, do_sw_clrsky_hr,      &
        save_diag, fhswr,  coszen, coszdg, t_lay, p_lev, sfc_alb_nir_dir, sfc_alb_nir_dif,   &
@@ -285,5 +284,5 @@ contains
        enddo
     endif
   end subroutine GFS_rrtmgp_sw_post_run
-!! @}
+!> @}
 end module GFS_rrtmgp_sw_post

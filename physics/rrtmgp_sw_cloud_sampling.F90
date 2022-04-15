@@ -24,13 +24,13 @@ contains
 !! \section arg_table_rrtmgp_sw_cloud_sampling_run
 !! \htmlinclude rrtmgp_sw_cloud_sampling.html
 !!
-!! \ingroup rrtmgp_sw_cloud_sampling
+!> \ingroup rrtmgp_sw_cloud_sampling
 !!
 !! \brief This routine performs the McICA cloud-sampling and maps the shortwave cloud-
 !! optical properties, defined for each spectral band, to each spectral point (g-point).
 !!
-!! \section rrtmgp_sw_cloud_sampling_run Main driver
-!! @{
+!! \section rrtmgp_sw_cloud_sampling_run
+!> @{
   ! ######################################################################################
   subroutine rrtmgp_sw_cloud_sampling_run(doSWrad, nCol, nDay, nLev, idxday, iovr,          &
        iovr_convcld, iovr_max, iovr_maxrand, iovr_rand, iovr_dcorr, iovr_exp, iovr_exprand, &
@@ -174,5 +174,5 @@ contains
     endif
 
   end subroutine rrtmgp_sw_cloud_sampling_run
-!! @}
+!> @}
 end module rrtmgp_sw_cloud_sampling
