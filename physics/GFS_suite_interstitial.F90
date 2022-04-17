@@ -16,8 +16,9 @@
 !!
     subroutine GFS_suite_interstitial_rad_reset_run (Interstitial, Model, errmsg, errflg)
 
-      use machine,      only: kind_phys
-      use GFS_typedefs, only: GFS_control_type, GFS_interstitial_type
+      use machine,       only: kind_phys
+      use GFS_typedefs,  only: GFS_control_type
+      use CCPP_typedefs, only: GFS_interstitial_type
 
       implicit none
 
@@ -52,8 +53,10 @@
 !!
     subroutine GFS_suite_interstitial_phys_reset_run (Interstitial, Model, errmsg, errflg)
 
-      use machine,      only: kind_phys
-      use GFS_typedefs, only: GFS_control_type, GFS_interstitial_type
+      use machine,       only: kind_phys
+      use GFS_typedefs,  only: GFS_control_type
+      use CCPP_typedefs, only: GFS_interstitial_type
+
 
       implicit none
 
@@ -89,7 +92,7 @@
     subroutine GFS_suite_interstitial_1_run (im, levs, ntrac, dtf, dtp, slmsk, area, dxmin, dxinv, pgr, &
       islmsk, work1, work2, psurf, dudt, dvdt, dtdt, dqdt, errmsg, errflg)
 
-      use machine,               only: kind_phys
+      use machine, only: kind_phys
 
       implicit none
 
