@@ -1,3 +1,6 @@
+!>\file GFS_rrtmgp_lw_post.F90
+!!
+
 module GFS_rrtmgp_lw_post
   use machine,                   only: kind_phys
   use module_radlw_parameters,   only: topflw_type, sfcflw_type
@@ -11,6 +14,8 @@ contains
   ! #########################################################################################
   ! SUBROUTINE GFS_rrtmgp_lw_post_init
   ! #########################################################################################
+!>\defgroup gfs_rrtmgp_lw_post_mod GFS RRTMGP-LW Post Module
+!> @{
   subroutine GFS_rrtmgp_lw_post_init()
   end subroutine GFS_rrtmgp_lw_post_init
 
@@ -179,5 +184,5 @@ contains
   ! #########################################################################################
   subroutine GFS_rrtmgp_lw_post_finalize ()
   end subroutine GFS_rrtmgp_lw_post_finalize
-
+!> @}
 end module GFS_rrtmgp_lw_post

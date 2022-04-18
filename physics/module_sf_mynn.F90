@@ -3,7 +3,7 @@
 !WRF:MODEL_LAYER:PHYSICS
 !
 !>\ingroup mynn_sfc
-!>\defgroup module_sf_mynn_mod GSD MYNN SFC Module
+!>\defgroup module_sf_mynn_mod MYNN Surface Layer Module
 MODULE module_sf_mynn
 
 !-------------------------------------------------------------------
@@ -2838,14 +2838,15 @@ END SUBROUTINE SFCLAY1D_mynn
       END SUBROUTINE znot_m_v6
 !--------------------------------------------------------------------
 !>\ingroup mynn_sfc
+!!
       SUBROUTINE znot_t_v6(uref, znott)
 
       IMPLICIT NONE
-! Calculate scalar roughness over water with input 10-m wind
-! For low-to-moderate winds, try to match the Ck-U10 relationship from COARE algorithm
-! For high winds, try to retain the Ck-U10 relationship of FY2015 HWRF
-!                                                  
-! Bin Liu, NOAA/NCEP/EMC 2017                      
+!> Calculate scalar roughness over water with input 10-m wind
+!! For low-to-moderate winds, try to match the Ck-U10 relationship from COARE algorithm
+!! For high winds, try to retain the Ck-U10 relationship of FY2015 HWRF
+!!                                                  
+!!\author Bin Liu, NOAA/NCEP/EMC 2017                      
 !                                                  
 ! uref(m/s)   :   wind speed at 10-m height        
 ! znott(meter):   scalar roughness scale over water
@@ -2903,15 +2904,16 @@ END SUBROUTINE SFCLAY1D_mynn
 
 !-------------------------------------------------------------------
 !>\ingroup mynn_sfc
+!!
       SUBROUTINE znot_m_v7(uref, znotm)
 
       IMPLICIT NONE
-! Calculate areodynamical roughness over water with input 10-m wind
-! For low-to-moderate winds, try to match the Cd-U10 relationship from COARE V3.5 (Edson et al. 2013)
-! For high winds, try to fit available observational data
-! Comparing to znot_t_v6, slightly decrease Cd for higher wind speed
-!                                          
-! Bin Liu, NOAA/NCEP/EMC 2018              
+!> Calculate areodynamical roughness over water with input 10-m wind
+!! For low-to-moderate winds, try to match the Cd-U10 relationship from COARE V3.5 (Edson et al. 2013)
+!! For high winds, try to fit available observational data
+!! Comparing to znot_t_v6, slightly decrease Cd for higher wind speed
+!!                                          
+!!\author Bin Liu, NOAA/NCEP/EMC 2018              
 !                                          
 ! uref(m/s)   :   wind speed at 10-m height
 ! znotm(meter):   areodynamical roughness scale over water
@@ -2951,15 +2953,16 @@ END SUBROUTINE SFCLAY1D_mynn
       END SUBROUTINE znot_m_v7
 !--------------------------------------------------------------------
 !>\ingroup mynn_sfc
+!!
       SUBROUTINE znot_t_v7(uref, znott)
 
       IMPLICIT NONE
-! Calculate scalar roughness over water with input 10-m wind
-! For low-to-moderate winds, try to match the Ck-U10 relationship from COARE algorithm
-! For high winds, try to retain the Ck-U10 relationship of FY2015 HWRF 
-! To be compatible with the slightly decreased Cd for higher wind speed
-!                            
-! Bin Liu, NOAA/NCEP/EMC 2018
+!> Calculate scalar roughness over water with input 10-m wind
+!! For low-to-moderate winds, try to match the Ck-U10 relationship from COARE algorithm
+!! For high winds, try to retain the Ck-U10 relationship of FY2015 HWRF 
+!! To be compatible with the slightly decreased Cd for higher wind speed
+!!                            
+!!\author Bin Liu, NOAA/NCEP/EMC 2018
 !
 ! uref(m/s)   :   wind speed at 10-m height        
 ! znott(meter):   scalar roughness scale over water
@@ -3350,13 +3353,14 @@ END SUBROUTINE SFCLAY1D_mynn
 
     END SUBROUTINE Li_etal_2010
 !-------------------------------------------------------------------
+!>\ingroup mynn_sfc
       REAL function zolri(ri,za,z0,zt,zol1,psi_opt)
 
-      ! This iterative algorithm was taken from the revised surface layer 
-      ! scheme in WRF-ARW, written by Pedro Jimenez and Jimy Dudhia and 
-      ! summarized in Jimenez et al. (2012, MWR). This function was adapted
-      ! to input the thermal roughness length, zt, (as well as z0) and use initial
-      ! estimate of z/L.
+      !> This iterative algorithm was taken from the revised surface layer 
+      !! scheme in WRF-ARW, written by Pedro Jimenez and Jimy Dudhia and 
+      !! summarized in Jimenez et al. (2012, MWR). This function was adapted
+      !! to input the thermal roughness length, zt, (as well as z0) and use initial
+      !! estimate of z/L.
 
       IMPLICIT NONE
       REAL, INTENT(IN) :: ri,za,z0,zt,zol1
@@ -3522,7 +3526,8 @@ END SUBROUTINE SFCLAY1D_mynn
       return
       end function
 !====================================================================
-
+!>\ingroup mynn_sfc
+!!
    SUBROUTINE psi_init(psi_opt,errmsg,errflg)
 
     integer                       :: N,psi_opt
@@ -3627,6 +3632,8 @@ END SUBROUTINE SFCLAY1D_mynn
 ! ==================================================================
 ! ... integrated similarity functions from GFS...
 !
+!>\ingroup mynn_sfc
+!!
    REAL function psim_stable_full_gfs(zolf)
         REAL :: zolf
         REAL, PARAMETER :: alpha4 = 20.
@@ -3638,6 +3645,8 @@ END SUBROUTINE SFCLAY1D_mynn
         return
    end function
 
+!>\ingroup mynn_sfc
+!!
    REAL function psih_stable_full_gfs(zolf)
         REAL :: zolf
         REAL, PARAMETER :: alpha4 = 20.
@@ -3649,6 +3658,8 @@ END SUBROUTINE SFCLAY1D_mynn
         return
    end function
 
+!>\ingroup mynn_sfc
+!!
    REAL function psim_unstable_full_gfs(zolf)
         REAL :: zolf
         REAL :: hl1,tem1
@@ -3667,6 +3678,8 @@ END SUBROUTINE SFCLAY1D_mynn
         return
    end function
 
+!>\ingroup mynn_sfc
+!!
    REAL function psih_unstable_full_gfs(zolf)
         REAL :: zolf
         REAL :: hl1,tem1
@@ -3685,9 +3698,8 @@ END SUBROUTINE SFCLAY1D_mynn
         return
    end function
 
-!=================================================================
-! look-up table functions - or, if beyond -10 < z/L < 10, recalculate
-!=================================================================
+!>\ingroup mynn_sfc
+!! look-up table functions - or, if beyond -10 < z/L < 10, recalculate
    REAL function psim_stable(zolf,psi_opt)
         integer :: nzol,psi_opt
         real    :: rzol,zolf
@@ -3707,6 +3719,7 @@ END SUBROUTINE SFCLAY1D_mynn
       return
    end function
 
+!>\ingroup mynn_sfc
    REAL function psih_stable(zolf,psi_opt)
         integer :: nzol,psi_opt
         real    :: rzol,zolf
@@ -3726,6 +3739,7 @@ END SUBROUTINE SFCLAY1D_mynn
       return
    end function
 
+!>\ingroup mynn_sfc
    REAL function psim_unstable(zolf,psi_opt)
         integer :: nzol,psi_opt
         real    :: rzol,zolf
@@ -3745,6 +3759,7 @@ END SUBROUTINE SFCLAY1D_mynn
       return
    end function
 
+!>\ingroup mynn_sfc
    REAL function psih_unstable(zolf,psi_opt)
         integer :: nzol,psi_opt
         real    :: rzol,zolf

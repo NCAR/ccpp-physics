@@ -17,7 +17,7 @@ contains
 !> \section arg_table_GFS_GWD_generic_pre_run Argument Table
 !! \htmlinclude GFS_GWD_generic_pre_run.html
 !!
-!!  \section general General Algorithm
+!!  \section gfs_gwd_ge_pre_ga General Algorithm
       subroutine GFS_GWD_generic_pre_run(                               &
      &           im, levs, nmtvr, mntvar,                               &
      &           oc, oa4, clx, theta,                                   &
@@ -166,7 +166,7 @@ contains
 !> \section arg_table_GFS_GWD_generic_post_run Argument Table
 !! \htmlinclude GFS_GWD_generic_post_run.html
 !!
-!!  \section general General Algorithm
+!!  \section gfs_gwd_gene_gen General Algorithm
       subroutine GFS_GWD_generic_post_run(lssav, ldiag3d, dtf, dusfcg, dvsfcg, dudt, dvdt, dtdt,          &
       &  dugwd, dvgwd, flag_for_gwd_generic_tend, dtend, dtidx, index_of_temperature, index_of_x_wind,  &
       &  index_of_y_wind, index_of_process_orographic_gwd, errmsg, errflg)
@@ -220,8 +220,8 @@ contains
 
     end subroutine GFS_GWD_generic_post_run
     
-!> \section arg_table_GFS_GWD_generic_post_finalize Argument Table
-!! \htmlinclude GFS_GWD_generic_post_finalize.html
+! \section arg_table_GFS_GWD_generic_post_finalize Argument Table
+! \htmlinclude GFS_GWD_generic_post_finalize.html
 !!
     subroutine GFS_GWD_generic_post_finalize()
     end subroutine GFS_GWD_generic_post_finalize

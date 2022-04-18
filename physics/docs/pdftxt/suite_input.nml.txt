@@ -292,13 +292,18 @@ show some variables in the namelist that must match the SDF.
                                                       </ul>
                                                       <td>1
 <tr><td colspan="4" align= center>\b Parameters \b related \b to \b surface \b perturbation \b options
-<tr><td>nsfcpert          <td>GFS_surface_generic_pre  <td>number of weights for stochastic surface perturbation  <td>0
-<tr><td>pertz0            <td>GFS_surface_generic_pre  <td>magnitude of perturbation of momentum roughness length <td>-999.
-<tr><td>pertzt            <td>GFS_surface_generic_pre  <td>magnitude of perturbation of heat to momentum roughness length ratio   <td>-999.
-<tr><td>pertshc           <td>GFS_surface_generic_pre  <td>magnitude of perturbation of soil hydraulic conductivity               <td>-999.
-<tr><td>pertlai           <td>GFS_surface_generic_pre  <td>magnitude of perturbation of leaf area index           <td>-999.
-<tr><td>pertalb           <td>GFS_surface_generic_pre  <td>magnitude of surface albedo perturbation               <td>-999.
-<tr><td>pertvegf          <td>GFS_surface_generic_pre  <td>magnitude of perturbation of vegetation fraction       <td>-999.
+<tr><td>nsfcpert          <td>\ref GFS_surface_generic_pre  <td>number of weights for stochastic surface perturbation  <td>0
+<tr><td>pertz0            <td>\ref GFS_surface_generic_pre  <td>magnitude of perturbation of momentum roughness length <td>-999.
+<tr><td>pertzt            <td>\ref GFS_surface_generic_pre  <td>magnitude of perturbation of heat to momentum roughness length ratio   <td>-999.
+<tr><td>pertshc           <td>\ref GFS_surface_generic_pre  <td>magnitude of perturbation of soil hydraulic conductivity               <td>-999.
+<tr><td>pertlai           <td>\ref GFS_surface_generic_pre  <td>magnitude of perturbation of leaf area index           <td>-999.
+<tr><td>pertalb           <td>\ref GFS_surface_generic_pre  <td>magnitude of surface albedo perturbation               <td>-999.
+<tr><td>pertvegf          <td>\ref GFS_surface_generic_pre  <td>magnitude of perturbation of vegetation fraction       <td>-999.
+<tr><td colspan="4" align= center>\b Parameters \b related \b to \b Cellular \b Automata \b options
+<tr><td>do_ca          <td>\ref samfdeepcnv,  \ref GFS_stochastics <td>cellular automata main switch  <td>.false.
+<tr><td>ca_closure     <td>\ref samfdeepcnv  <td>logical switch for CA on closure <td>.false
+<tr><td>ca_entr        <td>\ref samfdeepcnv  <td>logical swith for CA on entrainment   <td>.false
+<tr><td>ca_trigger     <td>\ref samfdeepcnv  <td>logical switch for CA on trigger               <td>.false.
 <tr><td colspan="4" align= center>\b Parameters \b related \b to \b microphysics \b scheme \b options
 <tr><td>lradar            <td>gfdl_cloud_microphys       <td>flag for computing radar reflectivity in Thompson MP scheme       <td>.false.
 <tr><td>sedi_transport    <td>gfdl_cloud_microphys       <td>flag for turning on horizontal momentum transport during sedimentation     <td>.true.

@@ -7,7 +7,7 @@
 !
 !=====================================================================
 !>\ingroup cires_ugwp_run_mod
-!> @{
+!>\defgroup ugwp_driverv0_mod GFS UGWP V0 Driver Module
 !! <b>Note for the sub-grid scale orography scheme in UGWP-v0:</b> Due to degraded forecast
 !! scores of simulations with revised schemes for subgrid-scale orography effects in FV3GFS,
 !! EMC reinstalled the original gwdps-code with updated efficiency factors for the mountain
@@ -17,7 +17,7 @@
 !! C768 resolutions and work in progress to introduce the optimal choice for the scale-aware
 !! representations of the efficiency factors that will reflect the better simulations of GW
 !! activity by FV3 dynamical core at higher horizontal resolutions. With the MERRA-2 VMF
-!! function for NGWs (\ref slat_geos5_tamp) and operational OGW drag scheme (\ref GFS_GWDPS),
+!! function for NGWs (\ref slat_geos5_tamp_v0) and operational OGW drag scheme (\ref GFS_GWDPS),
 !! FV3GFS simulations can successfully forecast the recent major mid-winter sudden stratospheric
 !! warming (SSW) events of 2018-02-12 and 2018-12-31 (10-14 days before the SSW onset;
 !! Yudin et al. 2019 \cite yudin_et_al_2019). The first multi-year (2015-2018) FV3GFS simulations
@@ -915,7 +915,6 @@
 !23456==============================================================================
 
 !>\ingroup cires_ugwp_run_mod
-!> @{
 !! 
       subroutine fv3_ugwp_solv2_v0(klon, klev, dtime,
      &           tm1 , um1, vm1, qm1,
@@ -1483,5 +1482,3 @@
 !--------------------------------------------------------------------------- 
        return
        end subroutine fv3_ugwp_solv2_v0
-
-      

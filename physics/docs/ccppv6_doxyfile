@@ -114,9 +114,7 @@ WARN_LOGFILE           =
 # Configuration options related to the input files
 #---------------------------------------------------------------------------
 
-INPUT                  =  pdftxt/rel_update.txt            \
-                          pdftxt/mainpage.txt              \
-                          pdftxt/v6phys_enh.txt            \
+INPUT                  =  pdftxt/mainpage.txt              \
                           pdftxt/all_shemes_list.txt     \
                           pdftxt/GFS_v16_suite.txt       \
                           pdftxt/GFS_v17_p8_suite.txt    \
@@ -139,6 +137,7 @@ INPUT                  =  pdftxt/rel_update.txt            \
                           pdftxt/GFS_UGWPv0.txt   \
                           pdftxt/GFS_unified_ugwp.txt  \
                           pdftxt/GFS_drag_suite.txt    \
+                          pdftxt/GFS_GWDPS.txt      \
                           pdftxt/GFS_OZPHYS.txt   \
                           pdftxt/GFS_H2OPHYS.txt  \
                           pdftxt/GFS_SAMFdeep.txt \
@@ -203,6 +202,8 @@ INPUT                  =  pdftxt/rel_update.txt            \
                         ../rrtmgp_lw_gas_optics.F90       \
                         ../rrtmgp_lw_cloud_optics.F90        \
                         ../rrtmgp_lw_cloud_sampling.F90      \
+                        ../rrtmgp_lw_rte.F90     \
+                        ../GFS_rrtmgp_lw_post.F90    \
                         ../dcyc2.f        \
                         ../sfc_diff.f   \
                         ../sfc_diag.f                \

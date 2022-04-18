@@ -1,5 +1,6 @@
-! ###########################################################################################
-! ###########################################################################################
+!>\file rrtmgp_lw_rte.F90
+!!
+
 module rrtmgp_lw_rte
   use machine,                only: kind_phys
   use mo_optical_props,       only: ty_optical_props_1scl, ty_optical_props_2str
@@ -16,13 +17,15 @@ contains
   ! #########################################################################################
   ! SUBROUTINE rrtmgp_lw_rte_init
   ! #########################################################################################
+!>\defgroup rrtmgp_lw_rte_mod GFS RRTMGP-LW RTE Module
+!> @{
   subroutine rrtmgp_lw_rte_init()
   end subroutine rrtmgp_lw_rte_init
 
   ! #########################################################################################
   ! SUBROUTINE rrtmgp_lw_rte_run
   ! #########################################################################################
-!! \section arg_table_rrtmgp_lw_rte_run
+!> \section arg_table_rrtmgp_lw_rte_run
 !! \htmlinclude rrtmgp_lw_rte_run.html
 !!
   subroutine rrtmgp_lw_rte_run(doLWrad, doLWclrsky, use_LW_jacobian, doGP_lwscat, nCol,     &
@@ -209,5 +212,6 @@ contains
   subroutine rrtmgp_lw_rte_finalize()
   end subroutine rrtmgp_lw_rte_finalize
 
+!> @}
 
 end module rrtmgp_lw_rte

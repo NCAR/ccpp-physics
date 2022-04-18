@@ -678,7 +678,10 @@ CONTAINS
 !!\param u      west-east component of the horizontal wind (\f$m s^{-1}\f$)
 !!\param v      south-north component of the horizontal wind (\f$m s^{-1}\f$)
 !!\param thl    liquid water potential temperature
+!!\param thetav  
 !!\param qw     total water content \f$Q_w\f$
+!!\param thlsg
+!!\param gwsg
 !!\param ql     liquid water content (\f$kg kg^{-1}\f$)
 !!\param vt
 !!\param vq
@@ -4075,12 +4078,14 @@ ENDIF
   END SUBROUTINE mynn_tendencies
 
 ! ==================================================================
+!>\ingroup gsd_mynn_edmf
+!!
   SUBROUTINE moisture_check(kte, delt, dp, exner, &
                             qv, qc, qi, th,       &
                             dqv, dqc, dqi, dth )
 
-  ! This subroutine was adopted from the CAM-UW ShCu scheme and 
-  ! adapted for use here.
+  !> This subroutine was adopted from the CAM-UW ShCu scheme and 
+  !! adapted for use here.
   !
   ! If qc < qcmin, qi < qimin, or qv < qvmin happens in any layer,
   ! force them to be larger than minimum value by (1) condensating 
@@ -4162,6 +4167,7 @@ ENDIF
 
 ! ==================================================================
 #if (WRF_CHEM == 1)
+!>\ingroup gsd_mynn_edmf
   SUBROUTINE mynn_mix_chem(kts,kte,i,     &
        grav_settling,                     &
        delt,dz,pblh,                      &
@@ -7005,10 +7011,9 @@ ENDIF !END Debugging
 END SUBROUTINE DMP_MF
 !=================================================================
 !>\ingroup gsd_mynn_edmf
-!! This subroutine 
 subroutine condensation_edmf(QT,THL,P,zagl,THV,QC)
 !
-! zero or one condensation for edmf: calculates THV and QC
+!> zero or one condensation for edmf: calculates THV and QC
 !
 real,intent(in)   :: QT,THL,P,zagl
 real,intent(out)  :: THV
@@ -7067,10 +7072,10 @@ end subroutine condensation_edmf
 
 !===============================================================
 
+!>\ingroup gsd_mynn_edmf
 subroutine condensation_edmf_r(QT,THL,P,zagl,THV,QC)
-!                                                                                                
-! zero or one condensation for edmf: calculates THL and QC                                       
-! similar to condensation_edmf but with different inputs                                         
+!> zero or one condensation for edmf: calculates THL and QC                                       
+!! similar to condensation_edmf but with different inputs                                         
 !                                                                                                
 real,intent(in)   :: QT,THV,P,zagl
 real,intent(out)  :: THL, QC
@@ -7104,11 +7109,11 @@ end subroutine condensation_edmf_r
 
 !===============================================================
 ! ===================================================================
-! This is the downdraft mass flux scheme - analogus to edmf_JPL but  
-! flipped updraft to downdraft. This scheme is currently only tested 
-! for Stratocumulus cloud conditions. For a detailed desctiption of the
-! model, see paper.
-
+!>\ingroup gsd_mynn_edmf
+!! This is the downdraft mass flux scheme - analogus to edmf_JPL but  
+!! flipped updraft to downdraft. This scheme is currently only tested 
+!! for Stratocumulus cloud conditions. For a detailed desctiption of the
+!! model, see paper.
 SUBROUTINE DDMF_JPL(kts,kte,dt,zw,dz,p,              &
               &u,v,th,thl,thv,tk,qt,qv,qc,           &
               &rho,exner,                            &
@@ -7469,14 +7474,14 @@ SUBROUTINE DDMF_JPL(kts,kte,dt,zw,dz,p,              &
 END SUBROUTINE DDMF_JPL
 !===============================================================
 
-
+!>\ingroup gsd_mynn_edmf
 SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
 
     !---------------------------------------------------------------
     !             NOTES ON SCALE-AWARE FORMULATION
     !
-    !JOE: add scale-aware factor (Psig) here, taken from Honnert et al. (2011,
-    !     JAS) and/or from Hyeyum Hailey Shin and Song-You Hong (2013, JAS)
+    !>JOE: add scale-aware factor (Psig) here, taken from Honnert et al. (2011,
+    !!     JAS) and/or from Hyeyum Hailey Shin and Song-You Hong (2013, JAS)
     !
     ! Psig_bl tapers local mixing
     ! Psig_shcu tapers nonlocal mixing
@@ -7644,14 +7649,14 @@ SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
   END FUNCTION xl_blend
 
 ! ===================================================================
-
+!>\ingroup gsd_mynn_edmf
   FUNCTION phim(zet)
-     ! New stability function parameters for momentum (Puhales, 2020, WRF 4.2.1)
-     ! The forms in unstable conditions (z/L < 0) use Grachev et al. (2000), which are a blend of 
-     ! the classical (Kansas) forms (i.e., Paulson 1970, Dyer and Hicks 1970), valid for weakly 
-     ! unstable conditions (-1 < z/L < 0). The stability functions for stable conditions use an
-     ! updated form taken from Cheng and Brutsaert (2005), which extends the validity into very
-     ! stable conditions [z/L ~ O(10)].
+     !> New stability function parameters for momentum (Puhales, 2020, WRF 4.2.1)
+     !! The forms in unstable conditions (z/L < 0) use Grachev et al. (2000), which are a blend of 
+     !! the classical (Kansas) forms (i.e., Paulson 1970, Dyer and Hicks 1970), valid for weakly 
+     !! unstable conditions (-1 < z/L < 0). The stability functions for stable conditions use an
+     !! updated form taken from Cheng and Brutsaert (2005), which extends the validity into very
+     !! stable conditions [z/L ~ O(10)].
       IMPLICIT NONE
 
       REAL, INTENT(IN):: zet
@@ -7696,14 +7701,14 @@ SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
 
   END FUNCTION phim
 ! ===================================================================
-
+!>\ingroup gsd_mynn_edmf
   FUNCTION phih(zet)
-    ! New stability function parameters for heat (Puhales, 2020, WRF 4.2.1)
-    ! The forms in unstable conditions (z/L < 0) use Grachev et al. (2000), which are a blend of
-    ! the classical (Kansas) forms (i.e., Paulson 1970, Dyer and Hicks 1970), valid for weakly
-    ! unstable conditions (-1 < z/L < 0). The stability functions for stable conditions use an
-    ! updated form taken from Cheng and Brutsaert (2005), which extends the validity into very
-    ! stable conditions [z/L ~ O(10)].
+    !> New stability function parameters for heat (Puhales, 2020, WRF 4.2.1)
+    !! The forms in unstable conditions (z/L < 0) use Grachev et al. (2000), which are a blend of
+    !! the classical (Kansas) forms (i.e., Paulson 1970, Dyer and Hicks 1970), valid for weakly
+    !! unstable conditions (-1 < z/L < 0). The stability functions for stable conditions use an
+    !! updated form taken from Cheng and Brutsaert (2005), which extends the validity into very
+    !! stable conditions [z/L ~ O(10)].
       IMPLICIT NONE
 
       REAL, INTENT(IN):: zet
@@ -7745,6 +7750,7 @@ SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
 
 END FUNCTION phih
 ! ==================================================================
+!>\ingroup gsd_mynn_edmf
  SUBROUTINE topdown_cloudrad(kts,kte,dz1,zw,xland,kpbl,PBLH,  &
                &sqc,sqi,sqw,thl,th1,ex1,p1,rho1,thetav,       &
                &cldfra_bl1D,rthraten,                         &

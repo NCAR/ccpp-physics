@@ -391,7 +391,7 @@
       integer, parameter :: KCM2 = 10
 !> num of gocart aerosols
       integer, parameter :: KCM  = KCM1 + KCM2
-
+!>
       real (kind=kind_phys), dimension(KRHLEV) :: rhlev_grt             &
       data  rhlev_grt (:)/ .00, .05, .10, .15, .20, .25, .30, .35,      &
      &      .40, .45, .50, .55, .60, .65, .70, .75, .80, .81, .82,      &
@@ -4498,10 +4498,10 @@
 
 !...................................
       end subroutine aer_property_gocart
+!> @}
 !-----------------------------------
 !
 ! =======================================================================
-!>@}
 !..........................................!
       end module module_radiation_aerosols !
 !==========================================!
