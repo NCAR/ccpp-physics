@@ -69,7 +69,7 @@
 !! @{
       subroutine satmedmfvdifq_run(im,km,ntrac,ntcw,ntrw,ntiw,ntke,     &
      &     grav,rd,cp,rv,hvap,hfus,fv,eps,epsm1,                        &
-     &     dv,du,tdt,rtg,u1,v1,t1,q1,swh,hlw,xmu,garea,zvfun,           &
+     &     dv,du,tdt,rtg,tmf,u1,v1,t1,q1,swh,hlw,xmu,garea,zvfun,       &
      &     psk,rbsoil,zorl,u10m,v10m,fm,fh,                             &
      &     tsea,heat,evap,stress,spd1,kpbl,                             &
      &     prsi,del,prsl,prslk,phii,phil,delt,                          &
@@ -121,7 +121,7 @@
       real(kind=kind_phys), intent(out) ::                              &
      &                     dusfc(:),     dvsfc(:),                      &
      &                     dtsfc(:),     dqsfc(:),                      &
-     &                     hpbl(:)
+     &                     hpbl(:),      tmf(:,:)
       real(kind=kind_phys), intent(out) ::                              &
      &                     dkt(:,:), dku(:,:)
 !
@@ -2114,6 +2114,7 @@ c
             qtend      = (f2(i,k)-q1(i,k,1))*rdt
             tdt(i,k)   = tdt(i,k)+ttend
             rtg(i,k,1) = rtg(i,k,1)+qtend
+            tmf(i,k)   = qtend
 !           dtsfc(i)   = dtsfc(i)+cont*del(i,k)*ttend
 !           dqsfc(i)   = dqsfc(i)+conq*del(i,k)*qtend
          enddo

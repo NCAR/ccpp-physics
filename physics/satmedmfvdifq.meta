@@ -201,6 +201,14 @@
   type = real
   kind = kind_phys
   intent = inout
+[tmf]
+  standard_name = turbulence_moisture_flux
+  long_name = turbulence_moisture_flux
+  units = kg kg-1 s-1
+  dimensions = (horizontal_dimension,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
 [u1]
   standard_name = x_wind
   long_name = x component of layer wind

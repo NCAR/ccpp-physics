@@ -12,12 +12,11 @@
 !!\section progsigma General Algorithm 
 !> @{ 
 
-      subroutine progsigma_calc (im,km,flag_init,flag_restart,flag_deep, &
+      subroutine progsigma_calc (im,km,flag_init,flag_restart,           &
            del,tmf,qmicro,dbyo1,zdqca,omega_u,zeta,hvap,delt,            &
            qgrs_dsave,q,kbcon1,ktcon,cnvflg,gdx,                         &
            do_ca, ca_closure, ca_entr, ca_trigger, nthresh, ca_deep,     &
-           ca_turb,ca_micro,ca_shal,ca_rad,convcount,ca1,ca2,ca3,ca4,    &
-           sigmain,sigmaout,sigmab,errmsg,errflg)
+           ca_micro,sigmain,sigmaout,sigmab,errmsg,errflg)
 !                                                           
 !                                                                                                                                             
       use machine,  only : kind_phys
@@ -31,12 +30,10 @@
       real,    intent(in)  :: qgrs_dsave(im,km), q(im,km),del(im,km),    &
            qmicro(im,km),tmf(im,km),dbyo1(im,km),zdqca(im,km),           &
            omega_u(im,km),zeta(im,km),gdx(im)
-      logical, intent(in)  :: flag_init,flag_restart,flag_deep,cnvflg(im)
+      logical, intent(in)  :: flag_init,flag_restart,cnvflg(im)
       real(kind=kind_phys), intent(in) :: nthresh
       real(kind=kind_phys), intent(in) :: ca_deep(im)
-      real(kind=kind_phys), intent(out):: ca_turb(im),                   &
-           ca_micro(im),ca_rad(im),ca_shal(im),convcount(im),ca1(im),    &
-           ca2(im),ca3(im),ca4(im)
+      real(kind=kind_phys), intent(out):: ca_micro(im)
       logical, intent(in)  :: do_ca,ca_closure,ca_entr,ca_trigger
 
       real(kind=kind_phys), intent(in) :: sigmain(im,km)
@@ -86,19 +83,6 @@
          zfdqa(i)=0.
          mcons(i)=0.
       enddo
-
-      !Temporary Initialization output:
-       do i = 1,im
-         if(flag_deep)then
-            !ca_turb(i)=0.
-            ca_shal(i)=0.
-         endif
-         if(.not. flag_deep)then
-            ca_rad(i)=0.
-            convcount(i)=0.
-            ca1(i)=0.
-         endif
-       enddo
 
       !Initial computations, place maximum sigmain in sigmab
 
@@ -232,15 +216,6 @@
                 sigmab(i)=MAX(sigmab(i),0.01)
              endif
              
-             if(flag_deep)then
-                !ca_turb(i)=ZCVG
-                ca_shal(i)=termC(i)
-             else
-                ca_rad(i)=ZCVG
-                ca1(i)=termC(i)
-             endif
-             !ca3(i)=sigmab(i)
-
           endif!cnvflg
        enddo
 

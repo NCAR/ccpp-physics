@@ -248,6 +248,13 @@
   dimensions = ()
   type = logical
   intent = in
+[progsigma]
+  standard_name = flag_for_prognostic_sigma
+  long_name = flag for prognostic sigma
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [con_g]
   standard_name = gravitational_acceleration
   long_name = gravitational acceleration
@@ -844,6 +851,22 @@
   dimensions = ()
   type = logical
   intent = in
+[dqdt_qmicro]
+  standard_name = instantanious_moisture_tendency_due_to_microphysics
+  long_name = moisture tendency due to microphysics
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[qgrs_dsave]
+  standard_name = tracer_concentration_dsave
+  long_name = model layer mean tracer concentration dsave
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
 [lssav]
   standard_name = flag_for_diagnostics
   long_name = logical flag for storing diagnostics
