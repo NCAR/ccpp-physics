@@ -121,9 +121,9 @@
       real(kind=kind_phys), intent(out) ::                              &
      &                     dusfc(:),     dvsfc(:),                      &
      &                     dtsfc(:),     dqsfc(:),                      &
-     &                     hpbl(:),      tmf(:,:)
+     &                     hpbl(:)
       real(kind=kind_phys), intent(out) ::                              &
-     &                     dkt(:,:), dku(:,:)
+     &                     dkt(:,:), dku(:,:), tmf(:,:)
 !
       logical, intent(in)  :: dspheat
       character(len=*), intent(out) :: errmsg
@@ -299,6 +299,7 @@
           xmfd(i,k) = 0.
           buou(i,k) = 0.
           buod(i,k) = 0.
+          tmf(i,k) = 0.
           ckz(i,k) = ck1
           chz(i,k) = ch1
           rlmnz(i,k) = rlmn0

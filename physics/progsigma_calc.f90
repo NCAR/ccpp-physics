@@ -1,7 +1,8 @@
 !>\file progsigma
 !! This file contains the subroutine that calculates the prognostic
 !! updraft area fraction that is used for closure computations in 
-!! saSAS deep and shallow convection.
+!! saSAS deep and shallow convection, based on a moisture budget
+!! as described in Bengtsson et al. 2022.
 
 !>\ingroup samfdeepcnv
 !! This subroutine computes a prognostic updraft area fraction
@@ -13,9 +14,8 @@
 !> @{ 
 
       subroutine progsigma_calc (im,km,flag_init,flag_restart,           &
-           del,tmf,qmicro,dbyo1,zdqca,omega_u,zeta,hvap,delt,            &
-           qgrs_dsave,q,kbcon1,ktcon,cnvflg,gdx,                         &
-           do_ca, ca_closure, ca_entr, ca_trigger, nthresh, ca_deep,     &
+           flag_shallow,del,tmf,qmicro,dbyo1,zdqca,omega_u,zeta,hvap,    &
+           delt,qgrs_dsave,q,kbcon1,ktcon,cnvflg,gdx,                    &
            ca_micro,sigmain,sigmaout,sigmab,errmsg,errflg)
 !                                                           
 !                                                                                                                                             
@@ -30,12 +30,8 @@
       real,    intent(in)  :: qgrs_dsave(im,km), q(im,km),del(im,km),    &
            qmicro(im,km),tmf(im,km),dbyo1(im,km),zdqca(im,km),           &
            omega_u(im,km),zeta(im,km),gdx(im)
-      logical, intent(in)  :: flag_init,flag_restart,cnvflg(im)
-      real(kind=kind_phys), intent(in) :: nthresh
-      real(kind=kind_phys), intent(in) :: ca_deep(im)
+      logical, intent(in)  :: flag_init,flag_restart,cnvflg(im),flag_shallow
       real(kind=kind_phys), intent(out):: ca_micro(im)
-      logical, intent(in)  :: do_ca,ca_closure,ca_entr,ca_trigger
-
       real(kind=kind_phys), intent(in) :: sigmain(im,km)
 
 !     intent out
@@ -47,28 +43,29 @@
 !     Local variables
       integer              :: i,k,km1
       real(kind=kind_phys) :: termA(im),termB(im),termC(im),termD(im),   &
-                          mcons(im),zfdqa(im),zform(im,km),              &
+                          mcons(im),fdqa(im),form(im,km),              &
                           qadv(im,km),sigmamax(im)                         
                           
 
-      real(kind=kind_phys) :: gcvalmx,ZEPS7,ZZ,ZCVG,mcon,buy2,   &
-                          zfdqb,dtdyn,dxlim,rmulacvg,dp,tem,     &
-                          alpha,DEN
+      real(kind=kind_phys) :: gcvalmx,epsilon,ZZ,cvg,mcon,buy2,   &
+                          fdqb,dtdyn,dxlim,rmulacvg,dp,tem,     &
+                          alpha,DEN,betascu
       integer :: inbu(im,km)  
 
      !Parameters
      gcvalmx = 0.1
      rmulacvg=10.
-     ZEPS7=1.E-11
+     epsilon=1.E-11
      km1=km-1
      alpha=7000.
+     betascu = 3.0
 
      !Initialization 2D
      do k = 1,km
         do i = 1,im
            sigmaout(i,k)=0.
            inbu(i,k)=0
-           zform(i,k)=0. 
+           form(i,k)=0. 
         enddo
      enddo
      
@@ -80,8 +77,9 @@
          termB(i)=0.
          termC(i)=0.
          termD(i)=0.
-         zfdqa(i)=0.
+         fdqa(i)=0.
          mcons(i)=0.
+         ca_micro(i)=0.
       enddo
 
       !Initial computations, place maximum sigmain in sigmab
@@ -94,9 +92,6 @@
              endif
           else
              if(cnvflg(i))then
-                !if(sigmain(i,k)<1.E-5)then
-                !   sigmain(i,k)=0.
-                !endif
                if(sigmain(i,k)>sigmab(i))then
                    sigmab(i)=sigmain(i,k)
                endif
@@ -107,7 +102,7 @@
 
       do i=1,im
          if(sigmab(i) < 1.E-5)then !after advection
-            sigmab(i)=0.                                                                                                             
+            sigmab(i)=0.                                  
          endif
       enddo
            
@@ -180,11 +175,11 @@
           do i = 1,im
              if(cnvflg(i))then
                 dp = 1000. * del(i,k)
-                zform(i,k)=-1.0*float(inbu(i,k))*(omega_u(i,k)*delt)
-                zfdqb=0.5*((zform(i,k)*zdqca(i,k)))
+                form(i,k)=-1.0*float(inbu(i,k))*(omega_u(i,k)*delt)
+                fdqb=0.5*((form(i,k)*zdqca(i,k)))
                 termC(i)=termC(i)+(float(inbu(i,k))*   &
-                     (zfdqb+zfdqa(i))*hvap*zeta(i,k))
-                zfdqa(i)=zfdqb
+                     (fdqb+fdqa(i))*hvap*zeta(i,k))
+                fdqa(i)=fdqb
              endif
          enddo
       enddo
@@ -193,29 +188,26 @@
        do i = 1,im                                                                                                                           
           if(cnvflg(i))then
 
-             DEN=MIN(termC(i)+termB(i),1.E8) !1.E8
-             !DEN=MAX(termC(i)+termB(i),1.E7) !1.E7
-
-             ZCVG=termD(i)*delt
-
+             DEN=MIN(termC(i)+termB(i),1.E8)
+             cvg=termD(i)*delt
              ZZ=MAX(0.0,SIGN(1.0,termA(i)))            &
                   *MAX(0.0,SIGN(1.0,termB(i)))         &
-                  *MAX(0.0,SIGN(1.0,termC(i)-ZEPS7))   
+                  *MAX(0.0,SIGN(1.0,termC(i)-epsilon))   
 
 
-             ZCVG=MAX(0.0,ZCVG)
+             cvg=MAX(0.0,cvg)
              
-             if(flag_init)then
+             if(flag_init .and. .not. flag_restart)then
                 sigmab(i)=0.03
              else
-                sigmab(i)=(ZZ*(termA(i)+ZCVG))/(DEN+(1.0-ZZ))
+                sigmab(i)=(ZZ*(termA(i)+cvg))/(DEN+(1.0-ZZ))
              endif
 
              if(sigmab(i)>0.)then
                 sigmab(i)=MIN(sigmab(i),sigmamax(i))  
                 sigmab(i)=MAX(sigmab(i),0.01)
              endif
-             
+             ca_micro(i)=sigmab(i)
           endif!cnvflg
        enddo
 
@@ -226,7 +218,20 @@
              endif
           enddo
        enddo
+
+       !Since updraft velocity is much lower in shallow cu region, termC becomes small in shallow cu application, thus the area fraction 
+       !in this regime becomes too large compared with the deep cu region. To address this simply apply a scaling factor for shallow cu 
+       !before computing the massflux to reduce the total strength of the SC MF:
      
+       if(flag_shallow)then
+          do i= 1, im
+             if(cnvflg(i)) then
+                sigmab(i)=sigmab(i)/betascu
+             endif
+          enddo
+       endif
+
+
      end subroutine progsigma_calc
 !> @}                            
 !! @} 

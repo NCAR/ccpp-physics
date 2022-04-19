@@ -216,7 +216,7 @@ cj
 !  parameters for prognostic sigma closure                                                                                                                                                      
       real(kind=kind_phys) omega_u(im,km),zdqca(im,km),qlks(im,km),
      &                    omegac(im),zeta(im,km),dbyo1(im,km),sigmab(im)
-
+      logical flag_shallow
 c  physical parameters
 !     parameter(grav=grav,asolfac=0.958)
 !     parameter(elocp=hvap/cp,el2orc=hvap*hvap/(rv*cp))
@@ -1729,7 +1729,7 @@ c
         enddo
       enddo
 
-      if(progsigma)then                                                                                                                                                                         
+      if(progsigma)then                                                                                                                                                                   
           do k = 2, km1
             do i = 1, im
                if (cnvflg(i)) then
@@ -1776,8 +1776,7 @@ c
 c
 
 !> - Calculate the mean updraft velocity within the cloud (wc),cast in pressure coordinates.                                                                                                                                  
-      if(progsigma)then 
-                                                                                                                                                                        
+      if(progsigma)then                                                                                                                                                            
          do i = 1, im
             omegac(i) = 0.
             sumx(i) = 0.
@@ -1861,17 +1860,19 @@ c
 c
 
 c store term needed for "termC" in prognostic area fraction closure
-      do k = 2, km1
-         do i = 1, im
-            dp = 1000. * del(i,k)
-            if (cnvflg(i)) then
-               if(k > kbcon(i) .and. k < ktcon(i)) then
-                  zdqca(i,k)=((qlks(i,k)-qlks(i,k-1)) +
-     &                 pwo(i,k)+dellal(i,k))
+      if(progsigma)then
+         do k = 2, km1
+            do i = 1, im
+               dp = 1000. * del(i,k)
+               if (cnvflg(i)) then
+                  if(k > kbcon(i) .and. k < ktcon(i)) then
+                     zdqca(i,k)=((qlks(i,k)-qlks(i,k-1)) +
+     &                    pwo(i,k)+dellal(i,k))
+                  endif
                endif
-            endif
+            enddo
          enddo
-      enddo
+      endif
 
 ccccc if(lat.==.latd.and.lon.==.lond.and.cnvflg(i)) then
 ccccc   print *, ' aa1(i) before dwndrft =', aa1(i)
@@ -2890,10 +2891,10 @@ c
 
 !> - From Bengtsson et al. (2022) Prognostic closure scheme, equation 8, compute updraft area fraction based on a moisture budget
       if(progsigma)then
-         call progsigma_calc(im,km,first_time_step,restart,
+         flag_shallow = .false.
+         call progsigma_calc(im,km,first_time_step,restart,flag_shallow,
      &        del,tmf,qmicro,dbyo1,zdqca,omega_u,zeta,hvap,delt,
      &        qgrs_dsave,q,kbcon1,ktcon,cnvflg,gdx,
-     &        do_ca, ca_closure, ca_entr, ca_trigger, nthresh, ca_deep,
      &        ca_micro,sigmain,sigmaout,sigmab,errmsg,errflg)
       endif
 

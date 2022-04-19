@@ -202,10 +202,10 @@
   kind = kind_phys
   intent = inout
 [tmf]
-  standard_name = turbulence_moisture_flux
-  long_name = turbulence_moisture_flux
+  standard_name = turbulence_moisture_flux_for_coupling_to_convection
+  long_name = turbulence_moisture_flux_for_coupling_to_convection
   units = kg kg-1 s-1
-  dimensions = (horizontal_dimension,vertical_layer_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = out

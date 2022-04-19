@@ -17,14 +17,14 @@
       subroutine GFS_SCNV_generic_pre_run (im, levs, ldiag3d, qdiag3d, gu0, gv0, gt0, gq0, &
         save_u, save_v, save_t, save_q, ntqv, nsamftrac, flag_for_scnv_generic_tend,       &
         dtidx, index_of_process_scnv, ntcw,ntiw,ntclamt,ntrw,ntsw,ntrnc,ntsnc,ntgl,ntgnc,  &
-        cscnv, satmedmf, trans_trac, ras, ntrac, clw, errmsg, errflg)
+        ntsigma, cscnv, satmedmf, trans_trac, ras, ntrac, clw, errmsg, errflg)
 
         use machine,               only: kind_phys
 
         implicit none
 
         integer, intent(in) :: im, levs, ntqv, nsamftrac, index_of_process_scnv, dtidx(:,:)
-        integer, intent(in) :: ntcw,ntiw,ntclamt,ntrw,ntsw,ntrnc,ntsnc,ntgl,ntgnc,ntrac
+        integer, intent(in) :: ntcw,ntiw,ntclamt,ntsigma,ntrw,ntsw,ntrnc,ntsnc,ntgl,ntgnc,ntrac
         logical, intent(in) :: ldiag3d, qdiag3d, flag_for_scnv_generic_tend
         real(kind=kind_phys), dimension(:,:),   intent(in) :: gu0, gv0, gt0
         real(kind=kind_phys), dimension(:,:,:), intent(in) :: gq0
@@ -55,7 +55,7 @@
                 do n=2,ntrac
                    if ( n /= ntcw  .and. n /= ntiw  .and. n /= ntclamt .and. &
                         n /= ntrw  .and. n /= ntsw  .and. n /= ntrnc   .and. &
-                        n /= ntsnc .and. n /= ntgl  .and. n /= ntgnc) then
+                        n /= ntsnc .and. n /= ntgl  .and. n /= ntgnc .and. n /= ntsigma) then
                       tracers = tracers + 1
                       if(dtidx(100+n,index_of_process_scnv)>0) then
                          save_q(:,:,n) = clw(:,:,tracers)
@@ -97,7 +97,7 @@
         rainc, cnvprcp, cnvprcpb, cnvw_phy_f3d, cnvc_phy_f3d,                      &
         dtend, dtidx, index_of_temperature, index_of_x_wind, index_of_y_wind,      &
         index_of_process_scnv, ntqv, flag_for_scnv_generic_tend,                   &
-        ntcw,ntiw,ntclamt,ntrw,ntsw,ntrnc,ntsnc,ntgl,ntgnc,                        &
+        ntcw,ntiw,ntclamt,ntsigma,ntrw,ntsw,ntrnc,ntsnc,ntgl,ntgnc,                &
         imfshalcnv, imfshalcnv_sas, imfshalcnv_samf, ntrac,                        &
         cscnv, satmedmf, trans_trac, ras, errmsg, errflg)
 
@@ -106,7 +106,7 @@
       implicit none
 
       integer, intent(in) :: im, levs, nn, ntqv, nsamftrac
-      integer, intent(in) :: ntcw,ntiw,ntclamt,ntrw,ntsw,ntrnc,ntsnc,ntgl,ntgnc,ntrac
+      integer, intent(in) :: ntcw,ntiw,ntclamt,ntsigma,ntrw,ntsw,ntrnc,ntsnc,ntgl,ntgnc,ntrac
       logical, intent(in) :: lssav, ldiag3d, qdiag3d, flag_for_scnv_generic_tend
       real(kind=kind_phys),                     intent(in) :: frain
       real(kind=kind_phys), dimension(:,:), intent(in) :: gu0, gv0, gt0
@@ -186,7 +186,7 @@
              do n=2,ntrac
                 if ( n /= ntcw  .and. n /= ntiw  .and. n /= ntclamt .and. &
                      n /= ntrw  .and. n /= ntsw  .and. n /= ntrnc   .and. &
-                     n /= ntsnc .and. n /= ntgl  .and. n /= ntgnc) then
+                     n /= ntsnc .and. n /= ntgl  .and. n /= ntgnc .and. n/= ntsigma) then
                    tracers = tracers + 1
                    idtend = dtidx(100+n,index_of_process_scnv)
                    if(idtend>0) then
