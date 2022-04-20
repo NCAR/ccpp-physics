@@ -466,14 +466,6 @@
   dimensions = ()
   type = logical
   intent = in
-[ca_micro]
-  standard_name = output_prognostic_sigma_two
-  long_name = output of prognostic area fraction two
-  units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = out
 [sigmain]
   standard_name = prognostic_updraft_area_fraction_in_convection
   long_name = convective updraft area fraction

@@ -63,7 +63,7 @@
      &     rn,kbot,ktop,kcnv,islimsk,garea,                             &
      &     dot,ncloud,hpbl,ud_mf,dt_mf,cnvw,cnvc,                       &
      &     clam,c0s,c1,evef,pgcon,asolfac,hwrf_samfshal,
-     &     ca_micro,sigmain,sigmaout,errmsg,errflg)
+     &     sigmain,sigmaout,errmsg,errflg)
 !
       use machine , only : kind_phys
       use funcphys , only : fpvs
@@ -86,7 +86,7 @@
      &   q1(:,:), t1(:,:), u1(:,:), v1(:,:)
 !
       integer, intent(out) :: kbot(:), ktop(:)
-      real(kind=kind_phys), intent(out) :: rn(:), ca_micro(:),          &
+      real(kind=kind_phys), intent(out) :: rn(:),                       &
      &   cnvw(:,:), cnvc(:,:), ud_mf(:,:), dt_mf(:,:), sigmaout(:,:)
 !
       real(kind=kind_phys), intent(in) :: clam,    c0s,     c1,         &
@@ -334,7 +334,6 @@ c
 !       vshear(i) = 0.
         gdx(i) = sqrt(garea(i))
         xmb(i) = 0.
-        ca_micro(i) = 0.
        enddo
       endif
 !!
@@ -1932,7 +1931,7 @@ c Prognostic closure
          call progsigma_calc(im,km,first_time_step,restart,flag_shallow,
      &        del,tmf,qmicro,dbyo1,zdqca,omega_u,zeta,hvap,delt,
      &        qgrs_dsave,q,kbcon1,ktcon,cnvflg,gdx,
-     &        ca_micro,sigmain,sigmaout,sigmab,errmsg,errflg)
+     &        sigmain,sigmaout,sigmab,errmsg,errflg)
       endif
 
 !> - From Han et al.'s (2017) \cite han_et_al_2017 equation 6, calculate cloud base mass flux as a function of the mean updraft velcoity.

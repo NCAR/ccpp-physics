@@ -16,7 +16,7 @@
       subroutine progsigma_calc (im,km,flag_init,flag_restart,           &
            flag_shallow,del,tmf,qmicro,dbyo1,zdqca,omega_u,zeta,hvap,    &
            delt,qgrs_dsave,q,kbcon1,ktcon,cnvflg,gdx,                    &
-           ca_micro,sigmain,sigmaout,sigmab,errmsg,errflg)
+           sigmain,sigmaout,sigmab,errmsg,errflg)
 !                                                           
 !                                                                                                                                             
       use machine,  only : kind_phys
@@ -31,7 +31,6 @@
            qmicro(im,km),tmf(im,km),dbyo1(im,km),zdqca(im,km),           &
            omega_u(im,km),zeta(im,km),gdx(im)
       logical, intent(in)  :: flag_init,flag_restart,cnvflg(im),flag_shallow
-      real(kind=kind_phys), intent(out):: ca_micro(im)
       real(kind=kind_phys), intent(in) :: sigmain(im,km)
 
 !     intent out
@@ -79,7 +78,6 @@
          termD(i)=0.
          fdqa(i)=0.
          mcons(i)=0.
-         ca_micro(i)=0.
       enddo
 
       !Initial computations, place maximum sigmain in sigmab
@@ -207,7 +205,6 @@
                 sigmab(i)=MIN(sigmab(i),sigmamax(i))  
                 sigmab(i)=MAX(sigmab(i),0.01)
              endif
-             ca_micro(i)=sigmab(i)
           endif!cnvflg
        enddo
 

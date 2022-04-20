@@ -86,7 +86,7 @@
      &    CNV_DQLDT,CLCN,CNV_FICE,CNV_NDROP,CNV_NICE,mp_phys,mp_phys_mg,&
      &    clam,c0s,c1,betal,betas,evef,pgcon,asolfac,                   &
      &    do_ca, ca_closure, ca_entr, ca_trigger, nthresh, ca_deep,     &
-     &    rainevap, sigmain, sigmaout, ca_micro,                        &
+     &    rainevap, sigmain, sigmaout,                                  &
      &    errmsg,errflg)
 !
       use machine , only : kind_phys
@@ -108,7 +108,7 @@
       real(kind=kind_phys), intent(in) :: ca_deep(:)
       real(kind=kind_phys), intent(in) :: sigmain(:,:),qmicro(:,:),     &
      &     tmf(:,:),q(:,:), qgrs_dsave(:,:)
-      real(kind=kind_phys), intent(out) :: rainevap(:),ca_micro(:)
+      real(kind=kind_phys), intent(out) :: rainevap(:)
       real(kind=kind_phys), intent(out) :: sigmaout(:,:)
       logical, intent(in)  :: do_ca,ca_closure,ca_entr,ca_trigger
 
@@ -919,8 +919,6 @@ c
       enddo
       if(totflg) return
 !!
-!
-!Lisa: at this point only trigger criteria is set
 
 ! turbulent entrainment rate assumed to be proportional
 !   to subcloud mean TKE
@@ -2895,7 +2893,7 @@ c
          call progsigma_calc(im,km,first_time_step,restart,flag_shallow,
      &        del,tmf,qmicro,dbyo1,zdqca,omega_u,zeta,hvap,delt,
      &        qgrs_dsave,q,kbcon1,ktcon,cnvflg,gdx,
-     &        ca_micro,sigmain,sigmaout,sigmab,errmsg,errflg)
+     &        sigmain,sigmaout,sigmab,errmsg,errflg)
       endif
 
 !> - From Han et al.'s (2017) \cite han_et_al_2017 equation 6, calculate cloud base mass flux as a function of the mean updraft velcoity for the grid sizes where the quasi-equilibrium assumption of Arakawa-Schubert is not valid any longer.

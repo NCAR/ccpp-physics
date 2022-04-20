@@ -326,14 +326,6 @@
   dimensions = ()
   type = logical
   intent = in
-[ca_micro]
-  standard_name = output_prognostic_sigma_two
-  long_name = output of prognostic area fraction two
-  units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = out
 [cldwrk]
   standard_name = cloud_work_function
   long_name = cloud work function
