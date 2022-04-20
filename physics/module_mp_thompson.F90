@@ -2376,7 +2376,7 @@ MODULE module_mp_thompson
 !+---+-----------------------------------------------------------------+
       do k = kte, kts, -1
          ygra1 = alog10(max(1.E-9, rg(k)))
-         zans1 = 3.0 + 2./7.*(ygra1+8.) + rand1
+         zans1 = 3.2 + 2./7.*(ygra1+8.) + rand1
          N0_exp = 10.**(zans1)
          N0_exp = MAX(DBLE(gonv_min), MIN(N0_exp, DBLE(gonv_max)))
          lam_exp = (N0_exp*am_g*cgg(1)/rg(k))**oge1
@@ -2404,12 +2404,9 @@ MODULE module_mp_thompson
       do k = kts, kte
 
 !>  - Rain self-collection follows Seifert, 1994 and drop break-up
-!! follows Verlinde and Cotton, 1993.                                        RAIN2M
+!! follows Verlinde and Cotton, 1993. Updated after Saleeby et al 2022.      RAIN2M
          if (L_qr(k) .and. mvd_r(k).gt. D0r) then
-!-GT      Ef_rr = 1.0
-!-GT      if (mvd_r(k) .gt. 1500.0E-6) then
-             Ef_rr = 1.0 - EXP(2300.0*(mvd_r(k)-1950.0E-6))
-!-GT      endif
+          Ef_rr = MAX(-0.1, 1.0 - EXP(2300.0*(mvd_r(k)-1950.0E-6)))
           pnr_rcr(k) = Ef_rr * 2.0*nr(k)*rr(k)
          endif
 
@@ -3452,7 +3449,7 @@ MODULE module_mp_thompson
 !+---+-----------------------------------------------------------------+
       do k = kte, kts, -1
          ygra1 = alog10(max(1.E-9, rg(k)))
-         zans1 = 3.0 + 2./7.*(ygra1+8.) + rand1
+         zans1 = 3.2 + 2./7.*(ygra1+8.) + rand1
          N0_exp = 10.**(zans1)
          N0_exp = MAX(DBLE(gonv_min), MIN(N0_exp, DBLE(gonv_max)))
          lam_exp = (N0_exp*am_g*cgg(1)/rg(k))**oge1
@@ -4068,7 +4065,7 @@ MODULE module_mp_thompson
              vtg = 0.
              if (rg(k).gt. R1) then
               ygra1 = alog10(max(1.E-9, rg(k)))
-              zans1 = 3.0 + 2./7.*(ygra1+8.) + rand1
+              zans1 = 3.2 + 2./7.*(ygra1+8.) + rand1
               N0_exp = 10.**(zans1)
               N0_exp = MAX(DBLE(gonv_min), MIN(N0_exp, DBLE(gonv_max)))
               lam_exp = (N0_exp*am_g*cgg(1)/rg(k))**oge1
@@ -5825,7 +5822,7 @@ MODULE module_mp_thompson
       REAL, DIMENSION(kts:kte):: ze_rain, ze_snow, ze_graupel
 
       DOUBLE PRECISION:: N0_exp, N0_min, lam_exp, lamr, lamg
-      REAL:: a_, b_, loga_, tc0
+      REAL:: a_, b_, loga_, tc0, SR
       DOUBLE PRECISION:: fmelt_s, fmelt_g
 
       INTEGER:: i, k, k_0, kbot, n
@@ -5848,7 +5845,7 @@ MODULE module_mp_thompson
       else
          do_vt_dBZ = .false.
          allow_wet_snow = .true.
-         allow_wet_graupel = .true.
+         allow_wet_graupel = .false.
       endif
 
       do k = kts, kte
@@ -5964,7 +5961,7 @@ MODULE module_mp_thompson
       if (ANY(L_qg .eqv. .true.)) then
       do k = kte, kts, -1
          ygra1 = alog10(max(1.E-9, rg(k)))
-         zans1 = 3.0 + 2./7.*(ygra1+8.) + rand1
+         zans1 = 3.2 + 2./7.*(ygra1+8.) + rand1
          N0_exp = 10.**(zans1)
          N0_exp = MAX(DBLE(gonv_min), MIN(N0_exp, DBLE(gonv_max)))
          lam_exp = (N0_exp*am_g*cgg(1)/rg(k))**oge1
@@ -6018,7 +6015,8 @@ MODULE module_mp_thompson
 
 !..Reflectivity contributed by melting snow
           if (allow_wet_snow .and. L_qs(k) .and. L_qs(k_0) ) then
-           fmelt_s = MAX(0.05d0, MIN(1.0d0-rs(k)/rs(k_0), 0.99d0))
+           SR = MAX(0.01, MIN(1.0 - rs(k)/(rs(k) + rr(k)), 0.99))
+           fmelt_s = DBLE(SR*SR)
            eta = 0.d0
            oM3 = 1./smoc(k)
            M0 = (smob(k)*oM3)
@@ -6041,7 +6039,8 @@ MODULE module_mp_thompson
 
 !..Reflectivity contributed by melting graupel
           if (allow_wet_graupel .and. L_qg(k) .and. L_qg(k_0) ) then
-           fmelt_g = MAX(0.05d0, MIN(1.0d0-rg(k)/rg(k_0), 0.99d0))
+           SR = MAX(0.01, MIN(1.0 - rg(k)/(rg(k) + rr(k)), 0.99))
+           fmelt_g = DBLE(SR*SR)
            eta = 0.d0
            lamg = 1./ilamg(k)
            do n = 1, nrbins
