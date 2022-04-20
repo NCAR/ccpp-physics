@@ -1,4 +1,4 @@
-!> \file gcm_shoc.F90
+!> \file shoc.F90
 !!  Contains the Simplified Higher-Order Closure (SHOC) scheme.
 
 !> This module contains the CCPP-compliant SHOC scheme.

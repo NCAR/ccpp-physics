@@ -1,15 +1,16 @@
-!> This module contains the CCPP-compliant orographic gravity wave drag post
+!> \file GFS_gwd_generic_post.F90 
+!! This file contains the CCPP-compliant orographic gravity wave drag post
 !! interstitial codes.
 module GFS_GWD_generic_post
 
 contains
 
-!! \section arg_table_GFS_GWD_generic_post_run Argument Table
+!> \section arg_table_GFS_GWD_generic_post_run Argument Table
 !! \htmlinclude GFS_GWD_generic_post_run.html
 !!
 !!  \section general General Algorithm
 !!  \section detailed Detailed Algorithm
-!!  @{
+!>  @{
       subroutine GFS_GWD_generic_post_run(lssav, ldiag3d, dtf, dusfcg, dvsfcg, dudt, dvdt, dtdt,          &
       &  dugwd, dvgwd, flag_for_gwd_generic_tend, dtend, dtidx, index_of_temperature, index_of_x_wind,  &
       &  index_of_y_wind, index_of_process_orographic_gwd, errmsg, errflg)

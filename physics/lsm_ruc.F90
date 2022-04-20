@@ -1,4 +1,4 @@
-!>\file sfc_drv_ruc.F90 
+!>\file lsm_ruc.F90 
 !!  This file contains the RUC land surface scheme driver.
 
 module lsm_ruc

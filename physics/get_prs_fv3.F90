@@ -1,3 +1,7 @@
+!>\file get_prs_fv3.F90
+!! This file contains a subroutine to "adjust the geopotential height hydrostatically in a way consistent with FV3 discretization," 
+!! according to SJ Lin.
+
 module get_prs_fv3
 
    use machine,  only: kind_phys

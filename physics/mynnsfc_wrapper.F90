@@ -1,4 +1,4 @@
-!> \file module_mynnsfc_wrapper.F90
+!> \file mynnsfc_wrapper.F90
 !!  Contains all of the code related to running the MYNN surface layer scheme 
 
       MODULE mynnsfc_wrapper

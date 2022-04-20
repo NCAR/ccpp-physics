@@ -1,4 +1,4 @@
-!> \file gscond.f
+!> \file zhaocarr_gscond.f
 !! This file contains the subroutine that calculates grid-scale
 !! condensation and evaporation for use in Zhao and Carr (1997)
 !! \cite zhao_and_carr_1997 scheme.

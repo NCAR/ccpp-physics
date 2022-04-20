@@ -1,3 +1,6 @@
+!>\file get_phi_fv3.F90
+!! This file contains a subroutine to calculate geopotential from within physics.
+
 module get_phi_fv3
 
    use machine,  only: kind_phys

@@ -1,4 +1,4 @@
-!>  \file sfc_drv.f
+!>  \file lsm_noah.f
 !!  This file contains the Noah land surface scheme driver.
 
 !> This module contains the CCPP-compliant Noah land surface scheme driver.

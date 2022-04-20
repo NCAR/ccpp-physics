@@ -1,4 +1,4 @@
-!> \file precpd.f
+!> \file zhaocarr_precpd.f
 !! This file contains the subroutine that calculates precipitation
 !! processes from suspended cloud water/ice.
 

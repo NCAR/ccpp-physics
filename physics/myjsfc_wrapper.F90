@@ -1,4 +1,4 @@
-!> \file module_myjsfc_wrapper.F90
+!> \file myjsfc_wrapper.F90
 !!  Contains all of the code related to running the MYJ surface layer scheme
 
       MODULE myjsfc_wrapper

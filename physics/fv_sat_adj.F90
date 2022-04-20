@@ -1,4 +1,4 @@
-!>\file gfdl_fv_sat_adj.F90
+!>\file fv_sat_adj.F90
 !! This file contains the GFDL in-core fast saturation adjustment.
 !! and it is an "intermediate physics" implemented in the remapping Lagrangian to 
 !! Eulerian loop of FV3 solver.
