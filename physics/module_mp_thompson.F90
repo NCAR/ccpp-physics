@@ -2376,7 +2376,7 @@ MODULE module_mp_thompson
 !+---+-----------------------------------------------------------------+
       do k = kte, kts, -1
          ygra1 = alog10(max(1.E-9, rg(k)))
-         zans1 = 3.2 + 2./7.*(ygra1+8.) + rand1
+         zans1 = 3.3 + 2./7.*(ygra1+8.) + rand1
          N0_exp = 10.**(zans1)
          N0_exp = MAX(DBLE(gonv_min), MIN(N0_exp, DBLE(gonv_max)))
          lam_exp = (N0_exp*am_g*cgg(1)/rg(k))**oge1
@@ -3449,7 +3449,7 @@ MODULE module_mp_thompson
 !+---+-----------------------------------------------------------------+
       do k = kte, kts, -1
          ygra1 = alog10(max(1.E-9, rg(k)))
-         zans1 = 3.2 + 2./7.*(ygra1+8.) + rand1
+         zans1 = 3.3 + 2./7.*(ygra1+8.) + rand1
          N0_exp = 10.**(zans1)
          N0_exp = MAX(DBLE(gonv_min), MIN(N0_exp, DBLE(gonv_max)))
          lam_exp = (N0_exp*am_g*cgg(1)/rg(k))**oge1
@@ -4065,7 +4065,7 @@ MODULE module_mp_thompson
              vtg = 0.
              if (rg(k).gt. R1) then
               ygra1 = alog10(max(1.E-9, rg(k)))
-              zans1 = 3.2 + 2./7.*(ygra1+8.) + rand1
+              zans1 = 3.3 + 2./7.*(ygra1+8.) + rand1
               N0_exp = 10.**(zans1)
               N0_exp = MAX(DBLE(gonv_min), MIN(N0_exp, DBLE(gonv_max)))
               lam_exp = (N0_exp*am_g*cgg(1)/rg(k))**oge1
@@ -5961,7 +5961,7 @@ MODULE module_mp_thompson
       if (ANY(L_qg .eqv. .true.)) then
       do k = kte, kts, -1
          ygra1 = alog10(max(1.E-9, rg(k)))
-         zans1 = 3.2 + 2./7.*(ygra1+8.) + rand1
+         zans1 = 3.3 + 2./7.*(ygra1+8.) + rand1
          N0_exp = 10.**(zans1)
          N0_exp = MAX(DBLE(gonv_min), MIN(N0_exp, DBLE(gonv_max)))
          lam_exp = (N0_exp*am_g*cgg(1)/rg(k))**oge1

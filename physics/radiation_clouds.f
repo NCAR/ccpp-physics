@@ -3406,7 +3406,7 @@
       REAL:: RH_00L, RH_00O, RH_00
       REAL:: entrmnt=0.5
       INTEGER:: k
-      REAL:: TC, qvsi, qvsw, RHUM, delz
+      REAL:: TC, qvsi, qvsw, RHUM, delz, var_temp
       REAL, DIMENSION(kts:kte):: qvs, rh, rhoa
       integer:: ndebug = 0
 
@@ -3466,7 +3466,8 @@
             CLDFRA(K) = 1.0
          elseif (((qc(k)+qi(k)).gt.1.E-10) .and.                        &
      &                                    ((qc(k)+qi(k)).lt.1.E-6)) then
-            CLDFRA(K) = MIN(0.99, 0.1*(11.0 + log10(qc(k)+qi(k))))
+            var_temp = MIN(0.99, 0.1*(11.0 + log10(qc(k)+qi(k))))
+            CLDFRA(K) = var_temp*var_temp
          else
 
             IF ((XLAND-1.5).GT.0.) THEN                                  !--- Ocean
