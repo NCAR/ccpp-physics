@@ -115,7 +115,7 @@ module mp_nssl
          nssl_params(10) = 100. ! nssl_rho_qs
          nssl_params(11) = 0 ! nssl_ipelec_tmp
          nssl_params(12) = 11 ! nssl_isaund
-         nssl_params(13) = 1 ! 0 ! 1= turn on cccna; 0 = turn off
+         nssl_params(13) = 0 ! 1= turn on cccna; 0 = turn off
          
          nssl_qccn = nssl_cccn/1.225
       !   if (mpirank==mpiroot) then
@@ -547,17 +547,13 @@ module mp_nssl
          IF ( invertccn ) THEN
 !            cn_mp = Max(0.0, nssl_qccn - Max(0.0,cccn))
 
-! 4/20/2022 test turning this off and just use cccn as cccna
-!               DO k = 1,nlev
-!                DO i = 1,ncol
-!                  cn_mp(i,k) = Max(0.0, nssl_qccn - Max(0.0, cccn_mp(i,k)) )
-! !                 cn_mp(i,k) = Min(nssl_qccn, nssl_qccn - cccn(i,k) ) 
-!                ENDDO
+!              DO k = 1,nlev
+!               DO i = 1,ncol
+                 cn_mp = Max(0.0, nssl_qccn - Max(0.0, cccn_mp) )
+!                 cn_mp(i,k) = Max(0.0, nssl_qccn - Max(0.0, cccn_mp(i,k)) )
+!                 cn_mp(i,k) = Min(nssl_qccn, nssl_qccn - cccn(i,k) ) 
 !               ENDDO
-           
-             cna_mp = cccn_mp
-             cn_mp = nssl_qccn
-           
+!              ENDDO
             !  DO k = 1,nlev
             !   DO i = 1,ncol
             !     cccn(i,k) = Max(0.0, nssl_qccn - cn_mp(i,k) )
@@ -605,8 +601,7 @@ module mp_nssl
                      VHL=vhl_mp,                     &
                      cn=cn_mp,                        &
 !                     cna=cna_mp, f_cna=( ntccna > 0 ),  & ! for future use
-!                      cna=cna_mp, f_cna=.false. ,           &
-                      cna=cna_mp, f_cna=invertccn ,           &
+                      cna=cna_mp, f_cna=.false. ,           &
                     PII=prslk,                         &
                      P=prsl,                                &
                      W=w,                                &
@@ -703,8 +698,7 @@ module mp_nssl
          IF ( nssl_ccn_on )  THEN
            IF ( invertccn ) THEN
               !cccn = Max(0.0, nssl_qccn - cn_mp )
-
-              cccn_mp = cna_mp
+                 cccn_mp = nssl_qccn - cn_mp
 !               DO k = 1,nlev
 !                DO i = 1,ncol
 ! !                 cccn(i,k) = Max(0.0, nssl_qccn - cn_mp(i,k) )
