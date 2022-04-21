@@ -3,11 +3,7 @@ module rrtmgp_lw_gas_optics
   use mo_rte_kind,           only: wl
   use mo_gas_optics_rrtmgp,  only: ty_gas_optics_rrtmgp
   use mo_gas_concentrations, only: ty_gas_concs  
-  use mo_source_functions,   only: ty_source_func_lw
-  use mo_optical_props,      only: ty_optical_props_1scl
   use radiation_tools,       only: check_error_msg
-  use GFS_rrtmgp_pre,         only: iStr_h2o, iStr_co2, iStr_o3, iStr_n2o, iStr_ch4,        &
-       iStr_o2, iStr_ccl4, iStr_cfc11, iStr_cfc12, iStr_cfc22
   use netcdf
 #ifdef MPI
   use mpi
@@ -73,9 +69,6 @@ contains
   ! #########################################################################################
   ! SUBROUTINE rrtmgp_lw_gas_optics_init
   ! #########################################################################################
-!! \section arg_table_rrtmgp_lw_gas_optics_init
-!! \htmlinclude rrtmgp_lw_gas_optics_init.html
-!!
   subroutine rrtmgp_lw_gas_optics_init(rrtmgp_root_dir, rrtmgp_lw_file_gas, mpicomm,        &
        mpirank, mpiroot, minGPpres, maxGPpres, minGPtemp, maxGPtemp, active_gases_array,    &
        errmsg, errflg)

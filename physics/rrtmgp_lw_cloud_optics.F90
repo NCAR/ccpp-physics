@@ -65,9 +65,6 @@ contains
   ! ######################################################################################
   ! SUBROUTINE rrtmgp_lw_cloud_optics_init()
   ! ######################################################################################
-!! \section arg_table_rrtmgp_lw_cloud_optics_init
-!! \htmlinclude rrtmgp_lw_cloud_optics.html
-!!
   subroutine rrtmgp_lw_cloud_optics_init(nrghice, mpicomm, mpirank, mpiroot,             &
        doG_cldoptics, doGP_cldoptics_PADE, doGP_cldoptics_LUT, rrtmgp_root_dir,          &
        rrtmgp_lw_file_clouds, errmsg, errflg)

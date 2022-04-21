@@ -191,20 +191,6 @@
   type = real
   kind = kind_phys
   intent = in
-[nGases]
-  standard_name = number_of_active_gases_used_by_RRTMGP
-  long_name = number of gases available used by RRTMGP (Model%nGases)
-  units = count
-  dimensions =  ()
-  type = integer
-  intent = in
-[i_o3]
-  standard_name = index_of_ozone_mixing_ratio_in_tracer_concentration_array
-  long_name = tracer index for ozone mixing ratio
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
 [isubc_sw]
   standard_name = flag_for_sw_clouds_grid_approximation
   long_name = flag for sw clouds sub-grid approximation
@@ -553,6 +539,21 @@
   units = DDT
   dimensions = ()
   type = ty_optical_props_2str
+  intent = in
+[gas_concentrations]
+  standard_name = Gas_concentrations_for_RRTMGP_suite
+  long_name = DDT containing gas concentrations for RRTMGP radiation scheme
+  units = DDT
+  dimensions = ()
+  type = ty_gas_concs
+  intent = in
+[solcon]
+  standard_name = solar_constant
+  long_name = solar constant
+  units = W m-2
+  dimensions = ()
+  type = real
+  kind = kind_phys
   intent = in
 [scmpsw]
   standard_name = components_of_surface_downward_shortwave_fluxes
