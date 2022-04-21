@@ -68,7 +68,7 @@
 \section v6_enh CCPP Physics Updates
 \version CCPP v6.0.0
 
-\subsection ca_page Celluler Automata in the ufs-weather-model
+\subsection ca_page Cellular Automata Stochastic Convective Organization Scheme 
 \author Lisa Bengtsson (NOAA Physical Sciences Laboratory): Lisa.Bengtsson@noaa.gov
 
 \b Scientific \b Background

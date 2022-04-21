@@ -2,8 +2,8 @@
 
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = "CCPP SciDoc"
-PROJECT_NUMBER         =
-PROJECT_BRIEF          = v6.0.0
+PROJECT_NUMBER         = "v6.0.0"
+PROJECT_BRIEF          = "Common Community Physics Package Developed at DTC"
 PROJECT_LOGO           = img/dtc_logo.png
 OUTPUT_DIRECTORY       = doc
 CREATE_SUBDIRS         = NO
@@ -155,6 +155,7 @@ INPUT                  =  pdftxt/mainpage.txt              \
                         ../GFS_time_vary_pre.fv3.F90 \
                         ../GFS_rad_time_vary.fv3.F90  \
                         ../GFS_phys_time_vary.fv3.F90 \
+                        ../get_prs_fv3.F90     \
                         ../ozne_def.f                 \
                         ../ozinterp.f90               \
                         ../h2o_def.f                 \
@@ -224,6 +225,7 @@ INPUT                  =  pdftxt/mainpage.txt              \
                         ../module_sf_noahmp_glacier.f90  \
                         ../noahmp_tables.f90          \
                         ../GFS_surface_generic.F90   \
+                        ../surface_perturbation.F90 \
                         ../GFS_DCNV_generic.F90      \
                         ../GFS_SCNV_generic.F90     \
                         ../sfc_sice.f \
@@ -384,7 +386,7 @@ DISABLE_INDEX          = YES
 GENERATE_TREEVIEW      = YES
 FULL_SIDEBAR           = NO
 ENUM_VALUES_PER_LINE   = 4
-TREEVIEW_WIDTH         = 250
+TREEVIEW_WIDTH         = 335
 EXT_LINKS_IN_WINDOW    = NO
 OBFUSCATE_EMAILS       = YES
 HTML_FORMULA_FORMAT    = SVG
@@ -516,8 +518,8 @@ DIA_PATH               =
 HIDE_UNDOC_RELATIONS   = YES
 HAVE_DOT               = YES
 DOT_NUM_THREADS        = 0
-DOT_FONTNAME           = Helvetica
-DOT_FONTSIZE           = 12
+DOT_FONTNAME           = Source Sans Pro
+DOT_FONTSIZE           = 16.0
 DOT_FONTPATH           =
 CLASS_GRAPH            = YES
 COLLABORATION_GRAPH    = YES
@@ -545,7 +547,7 @@ PLANTUML_CFG_FILE      =
 PLANTUML_INCLUDE_PATH  =
 DOT_GRAPH_MAX_NODES    = 1000
 MAX_DOT_GRAPH_DEPTH    = 0
-DOT_TRANSPARENT        = NO
+DOT_TRANSPARENT        = YES
 DOT_MULTI_TARGETS      = YES
 GENERATE_LEGEND        = YES
 DOT_CLEANUP            = YES

@@ -39,9 +39,10 @@ Recently, the land surface updates in 2017 GFS operational physics includes:
  \image html land_dataset.png "Figure 2: Land Data Sets Used in NCEP Modeling Systems" width=900
 
 \section intra_noah Intraphysics Communication
- +  GFS Noah LSM Driver (\ref arg_table_lsm_noah_run)
- +  GFS Noah LSM Model (gfssflx())
+- \ref GFS Noah LSM Driver (\ref arg_table_lsm_noah_run)
+-  GFS Noah LSM Model (gfssflx())
+
 \section gen_al_noah General Algorithm
-+ \ref general_noah_drv
-+ \ref general_sflx
+- \ref general_noah_drv
+- \ref general_sflx
 */

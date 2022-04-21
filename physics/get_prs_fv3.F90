@@ -1,3 +1,6 @@
+!>\file get_prs_fv3.F90
+!!
+
 module get_prs_fv3
 
    use machine,  only: kind_phys
@@ -15,7 +18,7 @@ contains
    subroutine get_prs_fv3_init()
    end subroutine get_prs_fv3_init
 
-!! \section arg_table_get_prs_fv3_run Argument Table
+!> \section arg_table_get_prs_fv3_run Argument Table
 !! \htmlinclude get_prs_fv3_run.html
 !!
    subroutine get_prs_fv3_run(ix, levs, con_fvirt, phii, prsi, tgrs, qgrs1, del, del_gz, errmsg, errflg)
@@ -77,7 +80,7 @@ contains
    subroutine get_phi_fv3_init()
    end subroutine get_phi_fv3_init
 
-!! \section arg_table_get_phi_fv3_run Argument Table
+!> \section arg_table_get_phi_fv3_run Argument Table
 !! \htmlinclude get_phi_fv3_run.html
 !!
    subroutine get_phi_fv3_run(ix, levs, con_fvirt, gt0, gq01, del_gz, phii, phil, errmsg, errflg)

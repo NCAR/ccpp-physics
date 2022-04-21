@@ -7,6 +7,19 @@ Suite RRFS_v1beta is one of the supported suites for use in the UFS Short-Range 
 (UFS SRW App). This suite is most applicable for runs at 3-km resolution since it does not parameterize
 deep convection.
 
+Suite RRFS_v1beta uses the parameterizations in the following order:
+ - \ref SGSCLOUD_page
+ - \ref GFS_RRTMG
+ - \ref SFC_MYNNSFL
+ - \ref GFS_NSST
+ - \ref NoahMP
+ - \ref GFS_SFCSICE
+ - \ref MYNNEDMF
+ - \ref GFS_UGWP_v0
+ - \ref GFS_OZPHYS
+ - \ref GFS_H2OPHYS
+ - \ref THOMPSON
+
 \section sdf_rrfsv1bsuite Suite Definition File 
 \include suite_FV3_RRFS_v1beta.xml
 

@@ -26,7 +26,7 @@ which facilitates model development and code maintenance. Additionally, we are l
 
 \b Cumulus \b Parameterizations
  - \subpage GFS_SAMFdeep 
-  - \ref CA_p8       \todo CA namelist
+  - \ref ca_page 
  - \subpage GFS_SAMFshal 
  - \subpage CU_GF 
 
@@ -85,7 +85,7 @@ Table 1.  Physics suite options included in this documentation.
 | Physics suites   |     GFS_v16        |   GFS_v17_p8            |       RAP        |    HRRR                     |   RRFS_v1beta      |      WoFS     |         
 |------------------|--------------------|-------------------------|------------------|-----------------------------|--------------------|---------------|
 |\b HOST \b Model  | SCM, SRW           |  SCM, MRW               |    SCM           |   SCM, SRW                  |  SCM, SRW          |  SCM, SRW     |
-|\b Deep \b Cu     | \ref GFS_SAMFdeep  |  \ref GFS_SAMFdeep + \ref CA_p8 |  \ref CU_GF      | \a  off                     |   \a off           |   \a off      |
+|\b Deep \b Cu     | \ref GFS_SAMFdeep  |  \ref GFS_SAMFdeep + \ref ca_page |  \ref CU_GF      | \a  off                     |   \a off           |   \a off      |
 |\b Shallow \b Cu  | \ref GFS_SAMFshal  |  \ref GFS_SAMFshal      |  \ref CU_GF      | \ref MYNNEDMF               | \ref MYNNEDMF      |  \ref MYNNEDMF |
 |\b Microphysics   | \ref GFDL_cloud    |  \ref THOMPSON w/o AA   |  \ref THOMPSON   | \ref THOMPSON               | \ref THOMPSON      | \ref NSSLMICRO_page     |
 |\b PBL/TURB       | \ref GFS_SATMEDMFVDIFQ     |  \ref GFS_SATMEDMFVDIFQ  |  \ref MYNNEDMF     | \ref MYNNEDMF    | \ref MYNNEDMF     |   \ref MYNNEDMF    |

@@ -31,7 +31,7 @@ Namelist parameters:
 \htmlinclude mp_nssl_run.html
 
 \section gen_nssl2m  General Algorithm
-- \ref gen_nssl
+\ref gen_nssl
 
 
 */

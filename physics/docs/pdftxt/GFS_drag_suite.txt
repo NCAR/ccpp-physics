@@ -12,9 +12,8 @@ The large-scale GWD and blocking schemes are explicitly tapered off from horizon
 
 
 \section instra_drag Intraphysics Communication
-- drag_suite::drag_suite_run
-\htmlinclude drag_suite_run.html 
+- \ref arg_table_drag_suite_run
 
 \section gen_drag General Algorithm
-+ \ref gen_drag_suite
+- \ref gen_drag_suite
 */

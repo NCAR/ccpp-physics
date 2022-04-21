@@ -92,9 +92,9 @@ precipitation had a high content of sleet. There is even larger improvement in t
 totally sleet. 
 
 \section intra_ruclsm Intraphysics Communication
-\ref arg_table_lsm_ruc_run
+- \ref arg_table_lsm_ruc_run
 
 \section gen_ruclsm General Algorithm
-\ref gen_lsmruc
+- \ref gen_lsmruc
 
 */

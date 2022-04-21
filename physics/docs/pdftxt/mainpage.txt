@@ -16,10 +16,22 @@ behavior out to about two weeks.
 
 
 The CCPP parameterizations are aggregated in suites by the host models. In this release, the CCPP Single Column Model (SCM), developed 
-by the Development Testbed Center, supports suites \ref GFS_v16_page, \ref GFS_v17_p8_page,\ref HRRR_suite_page, \ref RRFS_v1beta_page,
-\ref RRFS_v1nssl_page and \ref rap_suite_page, while the 
-UFS Short-Range Weather Application 2.0 supports suites \ref GFS_v16_page, \ref HRRR_suite_page, \ref RRFS_v1beta_page and 
+by the Development Testbed Center, supports suites: 
+- \ref GFS_v16_page
+- \ref GFS_v17_p8_page
+- \ref HRRR_suite_page
+- \ref RRFS_v1beta_page
+- \ref RRFS_v1nssl_page 
+- \ref rap_suite_page 
+
+while the UFS Short-Range Weather Application 2.0 supports suites \ref GFS_v16_page, \ref HRRR_suite_page, \ref RRFS_v1beta_page and 
 \ref RRFS_v1nssl_page. The UFS Medium-Range Weather Application 2.0 supports suite \ref GFS_v17_p8_page.
+
+New schemes added in this release:
+- \ref NSSLMICRO_page
+- \ref GFS_RRTMPG
+- \ref GFS_UNIFIED_UGWP
+- \ref ca_page
 
 In this website you will find documentation on various aspects of each 
 parameterization, including a high-level overview of its function, the input/output argument list, 

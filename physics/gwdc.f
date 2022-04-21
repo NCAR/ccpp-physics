@@ -10,9 +10,7 @@
       subroutine gwdc_pre_init()
       end subroutine gwdc_pre_init
 
-! \brief Brief description of the subroutine
-!!
-!! \section arg_table_gwdc_pre_run Argument Table
+!> \section arg_table_gwdc_pre_run Argument Table
 !! \htmlinclude gwdc_pre_run.html
 !!
       subroutine gwdc_pre_run (                                         &

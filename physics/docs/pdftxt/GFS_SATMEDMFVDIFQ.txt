@@ -48,9 +48,9 @@ and tracers and a method for removing negative tracer mixing ratio values have b
 \sa NCEP Office Note 505 \cite https://doi.org/10.25923/cybh-w893 and 506 \cite https://doi.org/10.25923/5051-3r70
 
 \section intra_satmedmfvdifq Intraphysics Communication
-\ref arg_table_satmedmfvdifq_run
+- \ref arg_table_satmedmfvdifq_run
 
 \section gen_pbl_satmedmfvdifq  General Algorithm
-\ref gen_satmedmfvdifq
+- \ref gen_satmedmfvdifq
 
 */
