@@ -115,7 +115,7 @@ module mp_nssl
          nssl_params(10) = 100. ! nssl_rho_qs
          nssl_params(11) = 0 ! nssl_ipelec_tmp
          nssl_params(12) = 11 ! nssl_isaund
-         nssl_params(13) = 0 ! 1= turn on cccna; 0 = turn off
+         nssl_params(13) = 1 ! 0 ! 1= turn on cccna; 0 = turn off
          
          nssl_qccn = nssl_cccn/1.225
       !   if (mpirank==mpiroot) then
