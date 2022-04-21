@@ -1082,6 +1082,29 @@
   type = real
   kind = kind_phys
   intent = out
+[aero_dir_fdb]
+  standard_name = rrfs_smoke_dust_rad_fdb_opt
+  long_name = flag for rrfs smoke dust rad feedback
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[smoke_ext]
+  standard_name = smoke_ext
+  long_name = smoke optical extinction
+  units = various
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[dust_ext]
+  standard_name = dust_ext
+  long_name = dust optical extinction
+  units = various
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
 [spp_wts_rad]
   standard_name = spp_weights_for_radiation_scheme
   long_name = spp weights for radiation scheme

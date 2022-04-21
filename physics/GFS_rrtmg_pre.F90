@@ -36,6 +36,7 @@
         gasvmr_ccl4,  gasvmr_cfc113, aerodp, clouds6, clouds7, clouds8,        &
         clouds9, cldsa, cldfra, cldfra2d, lwp_ex,iwp_ex, lwp_fc,iwp_fc,        &
         faersw1, faersw2, faersw3, faerlw1, faerlw2, faerlw3, alpha,           &
+        aero_dir_fdb, smoke_ext, dust_ext,                                     &
         spp_wts_rad, spp_rad, errmsg, errflg)
 
       use machine,                   only: kind_phys
@@ -103,6 +104,8 @@
       logical,              intent(in) :: lsswr, lslwr, ltaerosol, lgfdlmprad, &
                                           uni_cld, effr_in, do_mynnedmf,       &
                                           lmfshal, lmfdeep2, pert_clds
+      logical,              intent(in) :: aero_dir_fdb
+      real(kind=kind_phys), dimension(:,:), intent(in) :: smoke_ext, dust_ext
 
       integer,    intent(in) :: spp_rad
       real(kind_phys),              intent(in) :: spp_wts_rad(:,:)
@@ -600,6 +603,15 @@
           enddo
         enddo
        enddo
+
+      if(aero_dir_fdb) then ! add smoke/dust extinctions
+        do k = 1, LMK
+          do i = 1, IM
+            ! 550nm (~18000/cm)
+            faersw1(i,k,10) = faersw1(i,k,10) + MIN(4.,smoke_ext(i,k) + dust_ext(i,k))
+          enddo
+        enddo
+      endif
 
       do j = 1,NBDLW
         do k = 1, LMK

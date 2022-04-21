@@ -5348,7 +5348,7 @@ ENDIF
     REAL, DIMENSION(kts:kte) :: rhoinv
     REAL, DIMENSION(kts:kte+1) :: rhoz,khdz
     REAL, PARAMETER :: no_threshold    = 0.1
-    REAL, PARAMETER :: frp_threshold   = 1.0     ! JLS 12/21/21
+    REAL, PARAMETER :: frp_threshold   = 10.0     ! RAR 02/11/22: I increased the frp threshold to enhance mixing
     REAL, PARAMETER :: pblh_threshold  = 250.0
 
     dztop=.5*(dz(kte)+dz(kte-1))
@@ -5362,6 +5362,7 @@ ENDIF
     rhoz(kts)  =rho(kts)
     rhoinv(kts)=1./rho(kts)
     khdz(kts)  =rhoz(kts)*dfh(kts)
+
     DO k=kts+1,kte
        rhoz(k)  =(rho(k)*dz(k-1) + rho(k-1)*dz(k))/(dz(k-1)+dz(k))
        rhoz(k)  =  MAX(rhoz(k),1E-4)
