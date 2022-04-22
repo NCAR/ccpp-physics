@@ -79,7 +79,7 @@
      &    tmf,qmicro,itc,ntc,cliq,cp,cvap,                              &
      &    eps,epsm1,fv,grav,hvap,rd,rv,                                 &
      &    t0c,delt,ntk,ntr,delp,                                        &
-     &    prslp,psp,phil,qtr,qgrs_dsave,q,q1,t1,u1,v1,fscav,            &
+     &    prslp,psp,phil,qtr,prevsq,q,q1,t1,u1,v1,fscav,            &
      &    hwrf_samfdeep,progsigma,wclosureflg,cldwrk,rn,kbot,ktop,kcnv, &
      &    islimsk,garea,dot,ncloud,hpbl,ud_mf,dd_mf,dt_mf,cnvw,cnvc,    &
      &    QLCN, QICN, w_upi, cf_upi, CNV_MFD,                           &
@@ -107,7 +107,7 @@
       real(kind=kind_phys), intent(in) :: nthresh
       real(kind=kind_phys), intent(in) :: ca_deep(:)
       real(kind=kind_phys), intent(in) :: sigmain(:,:),qmicro(:,:),     &
-     &     tmf(:,:),q(:,:), qgrs_dsave(:,:)
+     &     tmf(:,:),q(:,:), prevsq(:,:)
       real(kind=kind_phys), intent(out) :: rainevap(:)
       real(kind=kind_phys), intent(out) :: sigmaout(:,:)
       logical, intent(in)  :: do_ca,ca_closure,ca_entr,ca_trigger
@@ -217,6 +217,7 @@ cj
       real(kind=kind_phys) omega_u(im,km),zdqca(im,km),qlks(im,km),
      &                    omegac(im),zeta(im,km),dbyo1(im,km),sigmab(im)
       logical flag_shallow
+      real(kind=kind_phys) gravinv
 c  physical parameters
 !     parameter(grav=grav,asolfac=0.958)
 !     parameter(elocp=hvap/cp,el2orc=hvap*hvap/(rv*cp))
@@ -309,6 +310,7 @@ c    &            .743,.813,.886,.947,1.138,1.377,1.896/
       errmsg = ''
       errflg = 0
 
+      gravinv = 1./grav
 
       elocp = hvap/cp
       el2orc = hvap*hvap/(rv*cp)
@@ -2892,7 +2894,7 @@ c
          flag_shallow = .false.
          call progsigma_calc(im,km,first_time_step,restart,flag_shallow,
      &        del,tmf,qmicro,dbyo1,zdqca,omega_u,zeta,hvap,delt,
-     &        qgrs_dsave,q,kbcon1,ktcon,cnvflg,gdx,
+     &        prevsq,q,kbcon1,ktcon,cnvflg,gdx,
      &        sigmain,sigmaout,sigmab,errmsg,errflg)
       endif
 
@@ -2903,7 +2905,7 @@ c
           k = kbcon(i)
           rho = po(i,k)*100. / (rd*to(i,k))
           if(progsigma)then
-             xmb(i) = sigmab(i)*((-1.0*omegac(i))/grav)
+             xmb(i) = advfac(i)*sigmab(i)*((-1.0*omegac(i))*gravinv)
           else
              xmb(i) = advfac(i)*betaw*rho*wc(i)
           endif

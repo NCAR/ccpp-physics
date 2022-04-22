@@ -59,7 +59,7 @@
      &     eps,epsm1,fv,grav,hvap,rd,rv,                                &
      &     t0c,delt,ntk,ntr,delp,first_time_step,restart,               & 
      &     tmf,qmicro,progsigma,                                        &
-     &     prslp,psp,phil,qtr,qgrs_dsave,q,q1,t1,u1,v1,fscav,           &
+     &     prslp,psp,phil,qtr,prevsq,q,q1,t1,u1,v1,fscav,           &
      &     rn,kbot,ktop,kcnv,islimsk,garea,                             &
      &     dot,ncloud,hpbl,ud_mf,dt_mf,cnvw,cnvc,                       &
      &     clam,c0s,c1,evef,pgcon,asolfac,hwrf_samfshal,
@@ -77,7 +77,7 @@
       real(kind=kind_phys), intent(in) ::  delt
       real(kind=kind_phys), intent(in) :: psp(:), delp(:,:),            &
      &   prslp(:,:), garea(:), hpbl(:), dot(:,:), phil(:,:),            &
-     &   qmicro(:,:),tmf(:,:),qgrs_dsave(:,:),q(:,:),sigmain(:,:)
+     &   qmicro(:,:),tmf(:,:),prevsq(:,:),q(:,:),sigmain(:,:)
 !
       real(kind=kind_phys), dimension(:), intent(in) :: fscav
       integer, intent(inout)  :: kcnv(:)
@@ -165,6 +165,7 @@ cc
      &                     omegac(im),zeta(im,km),dbyo1(im,km),
      &                     sigmab(im)
       logical flag_shallow
+      real(kind=kind_phys) gravinv
 
 c  physical parameters
 !     parameter(g=grav,asolfac=0.89)
@@ -248,6 +249,8 @@ c-----------------------------------------------------------------------
 ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+
+      gravinv = 1./grav
 
       elocp = hvap/cp
       el2orc = hvap*hvap/(rv*cp)
@@ -1601,7 +1604,6 @@ c
      
        do k = 2, km1
         do i = 1, im
-           dp = 1000. * del(i,k)
            if (cnvflg(i)) then
               if(k > kbcon(i) .and. k < ktcon(i)) then
                  zdqca(i,k)=((qlks(i,k)-qlks(i,k-1)) +
@@ -1930,7 +1932,7 @@ c Prognostic closure
          flag_shallow = .true.
          call progsigma_calc(im,km,first_time_step,restart,flag_shallow,
      &        del,tmf,qmicro,dbyo1,zdqca,omega_u,zeta,hvap,delt,
-     &        qgrs_dsave,q,kbcon1,ktcon,cnvflg,gdx,
+     &        prevsq,q,kbcon1,ktcon,cnvflg,gdx,
      &        sigmain,sigmaout,sigmab,errmsg,errflg)
       endif
 
@@ -1941,7 +1943,7 @@ c Prognostic closure
           k = kbcon(i)
           rho = po(i,k)*100. / (rd*to(i,k))
           if(progsigma)then
-             xmb(i) = sigmab(i)*((-1.0*omegac(i))/grav)
+             xmb(i) = advfac(i)*sigmab(i)*((-1.0*omegac(i))*gravinv)
           else
              xmb(i) = advfac(i)*betaw*rho*wc(i)
           endif

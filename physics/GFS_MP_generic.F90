@@ -95,7 +95,7 @@
         drain_cpl, dsnow_cpl, lsm, lsm_ruc, lsm_noahmp, raincprv, rainncprv, iceprv, snowprv,                             &
         graupelprv, draincprv, drainncprv, diceprv, dsnowprv, dgraupelprv, dtp, dfi_radar_max_intervals,                  &
         dtend, dtidx, index_of_temperature, index_of_process_mp,ldiag3d, qdiag3d,dqdt_qmicro, lssav, num_dfi_radar,       &
-        fh_dfi_radar,index_of_process_dfi_radar, ix_dfi_radar, dfi_radar_tten, radar_tten_limits, fhour, qgrs_dsave,      &
+        fh_dfi_radar,index_of_process_dfi_radar, ix_dfi_radar, dfi_radar_tten, radar_tten_limits, fhour, prevsq,      &
         errmsg, errflg)
 !
       use machine, only: kind_phys
@@ -150,7 +150,7 @@
       real(kind=kind_phys), dimension(:),      intent(inout) :: dsnowprv
       real(kind=kind_phys), dimension(:),      intent(inout) :: dgraupelprv
       real(kind=kind_phys), dimension(:,:),    intent(out)   :: dqdt_qmicro
-      real(kind=kind_phys), dimension(:,:),    intent(out)   :: qgrs_dsave
+      real(kind=kind_phys), dimension(:,:),    intent(out)   :: prevsq
       real(kind=kind_phys),                    intent(in)    :: dtp
 
       ! CCPP error handling
@@ -466,11 +466,13 @@
         pwat(i) = pwat(i) * onebg
       enddo
 
-      do k = 1, levs
-        do i=1, im
-           qgrs_dsave(i,k) = gq0(i,k,1)
-        enddo
-       enddo
+      if(progsigma)then      
+         do k = 1, levs
+            do i=1, im
+               prevsq(i,k) = gq0(i,k,1)
+            enddo
+         enddo
+      endif
 
       end subroutine GFS_MP_generic_post_run
 !> @}

@@ -70,8 +70,8 @@
   type = logical
   intent = in
 [tmf]
-  standard_name = turbulence_moisture_flux_for_coupling_to_convection
-  long_name = turbulence_moisture_flux_for_coupling_to_convection
+  standard_name = instantaneous_tendency_of_specific_humidity_due_to_PBL
+  long_name = instantaneous_tendency_of_specific_humidity_due_to_PBL
   units = kg kg-1 s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -249,9 +249,9 @@
   type = real
   kind = kind_phys
   intent = inout
-[qgrs_dsave]
-  standard_name = tracer_concentration_dsave
-  long_name = model layer mean tracer concentration dsave
+[prevsq]
+  standard_name = specific_humidity_on_previous_timestep
+  long_name = specific_humidity_on_previous_timestep
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -320,8 +320,8 @@
   type = logical
   intent = in
 [progsigma]
-  standard_name = flag_for_prognostic_sigma
-  long_name = flag for prognostic sigma
+  standard_name = do_prognostic_updraft_area_fraction
+  long_name = flag for prognostic sigma in cumuls scheme
   units = flag
   dimensions = ()
   type = logical

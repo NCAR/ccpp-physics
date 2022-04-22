@@ -202,8 +202,8 @@
   kind = kind_phys
   intent = inout
 [tmf]
-  standard_name = turbulence_moisture_flux_for_coupling_to_convection
-  long_name = turbulence_moisture_flux_for_coupling_to_convection
+  standard_name = instantaneous_tendency_of_specific_humidity_due_to_PBL
+  long_name = instantaneous_tendency_of_specific_humidity_due_to_PBL
   units = kg kg-1 s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
