@@ -102,15 +102,16 @@
      &                     c0l,     d0,
      &                     desdt,   dp,
      &                     dq,      dqsdp,   dqsdt,   dt,
-     &                     dt2,     dtmax,   dtmin,   dxcrt,
+     &                     dt2,     dtmax,   dtmin,
+     &                     dxcrt,   dxcrtc0,
      &                     dv1h,    dv2h,    dv3h,
-     &                     dv2q,
      &                     dz,      dz1,     e1,
-     &                     el2orc,  elocp,   aafac,   cm,
-     &                     es,      etah,    h1,
+     &                     el2orc,  elocp,   aafac,
+     &                     cm,      cq,
+     &                     es,      etah,    h1,      shevf,
 !    &                     evfact,  evfactl,
      &                     fact1,   fact2,   factor,  dthk,
-     &                     gamma,   pprime,  betaw,
+     &                     gamma,   pprime,  betaw,   tauadv,
      &                     qlk,     qrch,    qs,
      &                     rfact,   shear,   tfac,
      &                     val,     val1,    val2,
@@ -127,8 +128,7 @@
       real(kind=kind_phys) aa1(im),     cina(im),
      &                     tkemean(im), clamt(im),
      &                     ps(im),      del(im,km), prsl(im,km),
-!    &                     umean(im),   tauadv(im), gdx(im),
-     &                     gdx(im),
+     &                     umean(im),   advfac(im), gdx(im),
      &                     delhbar(im), delq(im),   delq2(im),
      &                     delqbar(im), delqev(im), deltbar(im),
 !    &                     deltv(im),   dtconv(im), edt(im),
@@ -172,16 +172,17 @@ c  physical parameters
 !      Until a realistic Nccn is provided, Nccns are assumed
 !      as Nccn=100 for sea and Nccn=1000 for land
 !
-      parameter(cm=1.0)
+      parameter(cm=1.0,cq=1.3)
 !     parameter(fact1=(cvap-cliq)/rv,fact2=hvap/rv-fact1*t0c)
       parameter(clamd=0.1,tkemx=0.65,tkemn=0.05)
       parameter(dtke=tkemx-tkemn)
       parameter(dthk=25.,sfclfac=0.2,rhcrt=0.75)
       parameter(cinpcrmx=180.,cinpcrmn=120.)
-      parameter(cinacrmx=-120.)
+!  shevf is an enhancing evaporation factor for shallow convection
+      parameter(cinacrmx=-120.,shevf=2.0)
       parameter(dtmax=10800.,dtmin=600.)
       parameter(bet1=1.875,cd1=.506,f1=2.0,gam1=.5)
-      parameter(betaw=.03,dxcrt=15.e3)
+      parameter(betaw=.03,dxcrt=15.e3,dxcrtc0=9.e3)
       parameter(h1=0.33333333)
 c  local variables and arrays
       real(kind=kind_phys) pfld(im,km),    to(im,km),     qo(im,km),
@@ -195,8 +196,11 @@ c  variables for tracer wet deposition,
       real(kind=kind_phys), parameter :: escav   = 0.8 ! wet scavenging efficiency
 !
 !  for updraft velocity calculation
-      real(kind=kind_phys) wu2(im,km),     buo(im,km),    drag(im,km)
-      real(kind=kind_phys) wc(im),         scaldfunc(im), sigmagfm(im)
+      real(kind=kind_phys) wu2(im,km),     buo(im,km),    drag(im,km),
+     &                     wc(im)
+!
+!  for updraft fraction & scale-aware function
+      real(kind=kind_phys) scaldfunc(im), sigmagfm(im)
 !
 c  cloud water
 !     real(kind=kind_phys) qlko_ktcon(im), dellal(im,km), tvo(im,km),
@@ -209,7 +213,7 @@ c  cloud water
      &                     dellau(im,km),  dellav(im,km), hcko(im,km),
      &                     ucko(im,km),    vcko(im,km),   qcko(im,km),
      &                     qrcko(im,km),   ecko(im,km,ntr),
-     &                     eta(im,km),
+     &                     ercko(im,km,ntr), eta(im,km),
      &                     zi(im,km),      pwo(im,km),    c0t(im,km),
      &                     sumx(im),       tx1(im),       cnvwt(im,km)
      &,                    rhbar(im)
@@ -290,6 +294,7 @@ c
         aa1(i)  = 0.
         cina(i) = 0.
 !       vshear(i) = 0.
+        advfac(i) = 0.
         gdx(i) = sqrt(garea(i))
         xmb(i) = 0.
           scaldfunc(i)=-1.0  ! wang initialized
@@ -334,6 +339,15 @@ c
            c0(i) = c0s*asolfac
         else
            c0(i) = c0s
+        endif
+      enddo
+!
+!>  - determine scale-aware rain conversion parameter decreasing with decreasing grid size
+      do i=1,im
+        if(gdx(i) < dxcrtc0) then
+          tem = gdx(i) / dxcrtc0 
+          tem1 = tem**3
+          c0(i) = c0(i) * tem1
         endif
       enddo
 !
@@ -496,6 +510,7 @@ c
               ctr(i,k,kk)  = qtr(i,k,n)
               ctro(i,k,kk) = qtr(i,k,n)
               ecko(i,k,kk) = 0.
+              ercko(i,k,kk) = 0.
             endif
           enddo
         enddo
@@ -950,6 +965,7 @@ c
           if(cnvflg(i)) then
             indx = kb(i)
             ecko(i,indx,n) = ctro(i,indx,n)
+            ercko(i,indx,n) = ctro(i,indx,n)
           endif
         enddo
       enddo
@@ -996,9 +1012,11 @@ c
             if(k > kb(i) .and. k < kmax(i)) then
               dz   = zi(i,k) - zi(i,k-1)
               tem  = 0.25 * (xlamue(i,k)+xlamue(i,k-1)) * dz
+              tem  = cq * tem
               factor = 1. + tem
               ecko(i,k,n) = ((1.-tem)*ecko(i,k-1,n)+tem*
      &                     (ctro(i,k,n)+ctro(i,k-1,n)))/factor
+              ercko(i,k,n) = ecko(i,k,n)
             endif
           endif
         enddo
@@ -1013,9 +1031,11 @@ c
                  if(k > kb(i) .and. k < kmax(i)) then
                    dz = zi(i,k) - zi(i,k-1)
                    tem  = 0.25 * (xlamue(i,k)+xlamue(i,k-1)) * dz
+                   tem  = cq * tem
                    factor = 1. + tem
                    ecko(i,k,kk) = ((1. - tem) * ecko(i,k-1,kk) + tem *
      &                     (ctro(i,k,kk) + ctro(i,k-1,kk))) / factor
+                   ercko(i,k,kk) = ecko(i,k,kk)
                    chem_c(i,k,n) = escav * fscav(n) * ecko(i,k,kk)
                    tem = chem_c(i,k,n) / (1. + c0t(i,k) * dz)
                    chem_pw(i,k,n) = c0t(i,k) * dz * tem * eta(i,k-1)
@@ -1192,10 +1212,10 @@ c
               qrch = qeso(i,k)
      &             + gamma * dbyo(i,k) / (hvap * (1. + gamma))
 cj
-              tem  = 0.5 * (xlamue(i,k)+xlamue(i,k-1)) * dz
-              tem1 = 0.5 * xlamud(i) * dz
-              factor = 1. + tem - tem1
-              qcko(i,k) = ((1.-tem1)*qcko(i,k-1)+tem*0.5*
+              tem  = 0.25 * (xlamue(i,k)+xlamue(i,k-1)) * dz
+              tem  = cq * tem
+              factor = 1. + tem
+              qcko(i,k) = ((1.-tem)*qcko(i,k-1)+tem*
      &                     (qo(i,k)+qo(i,k-1)))/factor
               qrcko(i,k) = qcko(i,k)
 cj
@@ -1358,10 +1378,10 @@ c
               qrch = qeso(i,k)
      &             + gamma * dbyo(i,k) / (hvap * (1. + gamma))
 cj
-              tem  = 0.5 * (xlamue(i,k)+xlamue(i,k-1)) * dz
-              tem1 = 0.5 * xlamud(i) * dz
-              factor = 1. + tem - tem1
-              qcko(i,k) = ((1.-tem1)*qcko(i,k-1)+tem*0.5*
+              tem  = 0.25 * (xlamue(i,k)+xlamue(i,k-1)) * dz
+              tem  = cq * tem
+              factor = 1. + tem
+              qcko(i,k) = ((1.-tem)*qcko(i,k-1)+tem*
      &                     (qo(i,k)+qo(i,k-1)))/factor
               qrcko(i,k) = qcko(i,k)
 cj
@@ -1565,7 +1585,6 @@ c
               dv1h = heo(i,k)
               dv2h = .5 * (heo(i,k) + heo(i,k-1))
               dv3h = heo(i,k-1)
-              dv2q = .5 * (qo(i,k) + qo(i,k-1))
 c
               tem  = 0.5 * (xlamue(i,k)+xlamue(i,k-1))
               tem1 = xlamud(i)
@@ -1578,10 +1597,9 @@ cj
      &    +  tem1*eta(i,k-1)*.5*(hcko(i,k)+hcko(i,k-1))*dz
      &         ) * factor
 cj
-              dellaq(i,k) = dellaq(i,k) +
-     &     ( - tem*eta(i,k-1)*dv2q*dz
-     &    +  tem1*eta(i,k-1)*.5*(qrcko(i,k)+qcko(i,k-1))*dz
-     &         ) * factor
+              tem1 = -eta(i,k) * qrcko(i,k)
+              tem2 = -eta(i,k-1) * qcko(i,k-1)
+              dellaq(i,k) = dellaq(i,k) + (tem1-tem2) * factor
 cj
               tem1=eta(i,k)*(uo(i,k)-ucko(i,k))
               tem2=eta(i,k-1)*(uo(i,k-1)-ucko(i,k-1))
@@ -1603,7 +1621,7 @@ cj
             if(k > kb(i) .and. k < ktcon(i)) then
               dp = 1000. * del(i,k)
 cj
-              tem1 = -eta(i,k) * ecko(i,k,n)
+              tem1 = -eta(i,k) * ercko(i,k,n)
               tem2 = -eta(i,k-1) * ecko(i,k-1,n)
               dellae(i,k,n) = dellae(i,k,n) + (tem1-tem2) * grav/dp
 cj
@@ -1775,31 +1793,33 @@ c
       enddo
 !
 !> - Calculate advective time scale (tauadv) using a mean cloud layer wind speed.
-!     do i= 1, im
-!       if(cnvflg(i)) then
-!         sumx(i) = 0.
-!         umean(i) = 0.
-!       endif
-!     enddo
-!     do k = 2, km1
-!       do i = 1, im
-!         if(cnvflg(i)) then
-!           if(k >= kbcon1(i) .and. k < ktcon1(i)) then
-!             dz = zi(i,k) - zi(i,k-1)
-!             tem = sqrt(u1(i,k)*u1(i,k)+v1(i,k)*v1(i,k))
-!             umean(i) = umean(i) + tem * dz
-!             sumx(i) = sumx(i) + dz
-!           endif
-!         endif
-!       enddo
-!     enddo
-!     do i= 1, im
-!       if(cnvflg(i)) then
-!          umean(i) = umean(i) / sumx(i)
-!          umean(i) = max(umean(i), 1.)
-!          tauadv(i) = gdx(i) / umean(i)
-!       endif
-!     enddo
+      do i= 1, im
+        if(cnvflg(i)) then
+          sumx(i) = 0.
+          umean(i) = 0.
+        endif
+      enddo
+      do k = 2, km1
+        do i = 1, im
+          if(cnvflg(i)) then
+            if(k >= kbcon1(i) .and. k < ktcon1(i)) then
+              dz = zi(i,k) - zi(i,k-1)
+              tem = sqrt(u1(i,k)*u1(i,k)+v1(i,k)*v1(i,k))
+              umean(i) = umean(i) + tem * dz
+              sumx(i) = sumx(i) + dz
+            endif
+          endif
+        enddo
+      enddo
+      do i= 1, im
+        if(cnvflg(i)) then
+           umean(i) = umean(i) / sumx(i)
+           umean(i) = max(umean(i), 1.)
+           tauadv = gdx(i) / umean(i)
+           advfac(i) = tauadv / dtconv(i)
+           advfac(i) = min(advfac(i), 1.)
+        endif
+      enddo
 c
 c  compute cloud base mass flux as a function of the mean
 c     updraft velcoity
@@ -1810,10 +1830,7 @@ c
         if(cnvflg(i)) then
           k = kbcon(i)
           rho = po(i,k)*100. / (rd*to(i,k))
-!         tfac = tauadv(i) / dtconv(i)
-!         tfac = min(tfac, 1.)
-!         xmb(i) = tfac*betaw*rho*wc(i)
-          xmb(i) = betaw*rho*wc(i)
+          xmb(i) = advfac(i)*betaw*rho*wc(i)
         endif
       enddo
 !
@@ -2145,7 +2162,7 @@ c
 !             evef = edt(i) * evfact
 !             if(islimsk(i) == 1) evef=edt(i) * evfactl
 !             if(islimsk(i) == 1) evef=.07
-              qcond(i) = evef * (q1(i,k) - qeso(i,k))
+              qcond(i) = shevf * evef * (q1(i,k) - qeso(i,k))
      &                 / (1. + el2orc * qeso(i,k) / t1(i,k)**2)
               dp = 1000. * del(i,k)
               factor = dp / grav

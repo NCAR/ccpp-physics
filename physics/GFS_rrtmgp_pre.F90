@@ -99,11 +99,11 @@ contains
 !! \htmlinclude GFS_rrtmgp_pre_run.html
 !!
   subroutine GFS_rrtmgp_pre_run(me, nCol, nLev, nTracers, i_o3, lsswr, lslwr, fhswr, fhlwr, &
-       xlat, xlon,  prsl, tgrs, prslk, prsi, qgrs, tsfc, coslat, sinlat, con_eps, con_epsm1,&
-       con_fvirt, con_epsqs, solhr, minGPpres, maxGPpres, minGPtemp, maxGPtemp, raddt,      &
-       p_lay, t_lay, p_lev, t_lev, tsfg, tsfa, qs_lay, q_lay, tv_lay, relhum, tracer,       &
-       active_gases_array, gas_concentrations, tsfc_radtime, coszen, coszdg, top_at_1, iSFC,&
-       iTOA, errmsg, errflg)
+       xlat, xlon,  prsl, tgrs, prslk, prsi, qgrs, tsfc, coslat, sinlat, con_g, con_rd,     &
+       con_eps, con_epsm1, con_fvirt, con_epsqs, solhr, minGPpres, maxGPpres, minGPtemp,    &
+       maxGPtemp, raddt, p_lay, t_lay, p_lev, t_lev, tsfg, tsfa, qs_lay, q_lay, tv_lay,     &
+       relhum, tracer, deltaZ, deltaZc, deltaP, active_gases_array, gas_concentrations,     &
+       tsfc_radtime, coszen, coszdg, top_at_1, iSFC, iTOA, errmsg, errflg)
     
     ! Inputs   
     integer, intent(in)    :: &
@@ -122,25 +122,28 @@ contains
          fhswr,             & ! Frequency of SW radiation call.
          fhlwr                ! Frequency of LW radiation call.
     real(kind_phys), intent(in) :: &
+         con_g,             & ! Physical constant: gravitational constant
+         con_rd,            & ! Physical constant: gas-constant for dry air
          con_eps,           & ! Physical constant: Epsilon (Rd/Rv)
          con_epsm1,         & ! Physical constant: Epsilon (Rd/Rv) minus one
          con_fvirt,         & ! Physical constant: Inverse of epsilon minus one
          con_epsqs,         & ! Physical constant: Minimum saturation mixing-ratio (kg/kg)
          solhr                ! Time in hours after 00z at the current timestep 
-    real(kind_phys), dimension(nCol), intent(in) :: & 
+    real(kind_phys), dimension(:), intent(in) :: & 
     	 xlon,              & ! Longitude
     	 xlat,              & ! Latitude
     	 tsfc,              & ! Surface skin temperature (K)
          coslat,            & ! Cosine(latitude)
          sinlat               ! Sine(latitude) 
-    real(kind_phys), dimension(nCol,nLev), intent(in) :: & 
+    real(kind_phys), dimension(:,:), intent(in) :: & 
          prsl,              & ! Pressure at model-layer centers (Pa)
          tgrs,              & ! Temperature at model-layer centers (K)
-         prslk                ! Exner function at model layer centers (1)
-    real(kind_phys), dimension(nCol,nLev+1), intent(in) :: & 
+         prslk,             & ! Exner function at model layer centers (1)
          prsi                 ! Pressure at model-interfaces (Pa)
-    real(kind_phys), dimension(nCol,nLev,nTracers), intent(in) :: & 
+    real(kind_phys), dimension(:,:,:), intent(in) :: & 
          qgrs                 ! Tracer concentrations (kg/kg)
+    character(len=*), dimension(:), intent(in) :: &
+         active_gases_array   ! List of active gases from namelist as array
 
     ! Outputs
     character(len=*), intent(out) :: &
@@ -153,36 +156,38 @@ contains
          top_at_1             ! Vertical ordering flag
     real(kind_phys), intent(inout) :: &
          raddt                ! Radiation time-step
-    real(kind_phys), dimension(ncol), intent(inout) :: &
+    real(kind_phys), dimension(:), intent(inout) :: &
          tsfg,              & ! Ground temperature
          tsfa,              & ! Skin temperature    
-         tsfc_radtime         ! Surface temperature at radiation timestep
-    real(kind_phys), dimension(nCol,nLev), intent(inout) :: &
+         tsfc_radtime,      & ! Surface temperature at radiation timestep
+         coszen,            & ! Cosine of SZA
+         coszdg               ! Cosine of SZA, daytime
+    real(kind_phys), dimension(:,:), intent(inout) :: &
          p_lay,             & ! Pressure at model-layer
          t_lay,             & ! Temperature at model layer
          q_lay,             & ! Water-vapor mixing ratio (kg/kg)
          tv_lay,            & ! Virtual temperature at model-layers 
          relhum,            & ! Relative-humidity at model-layers   
-         qs_lay               ! Saturation vapor pressure at model-layers
-    real(kind_phys), dimension(nCol,nLev+1), intent(inout) :: &
+         qs_lay,            & ! Saturation vapor pressure at model-layers
+         deltaZ,            & ! Layer thickness (m)
+         deltaZc,           & ! Layer thickness (m) (between layer centers)
+         deltaP,            & ! Layer thickness (Pa)
          p_lev,             & ! Pressure at model-interface
          t_lev                ! Temperature at model-interface
-    real(kind_phys), dimension(nCol, nLev, nTracers),intent(inout) :: &
+    real(kind_phys), dimension(:,:,:),intent(inout) :: &
          tracer               ! Array containing trace gases
-    character(len=*), dimension(:), intent(in) :: &
-         active_gases_array   ! List of active gases from namelist as array
     type(ty_gas_concs), intent(inout) :: &
          gas_concentrations   ! RRTMGP DDT: gas volumne mixing ratios
-    real(kind_phys), dimension(:), intent(inout) :: &
-         coszen,            & ! Cosine of SZA
-         coszdg               ! Cosine of SZA, daytime
-         
+
     ! Local variables
-    integer :: i, j, iCol, iBand, iLay
+    integer :: i, j, iCol, iBand, iLay, iLev, iSFC_ilev
     real(kind_phys),dimension(nCol,nLev) :: vmr_o3, vmr_h2o
-    real(kind_phys) :: es, tem1, tem2
+    real(kind_phys) :: es, tem1, tem2, pfac
+    real(kind_phys), dimension(nLev+1) :: hgtb
+    real(kind_phys), dimension(nLev)   :: hgtc
     real(kind_phys), dimension(nCol,nLev) :: o3_lay
     real(kind_phys), dimension(nCol,nLev, NF_VGAS) :: gas_vmr
+    real(kind_phys) :: con_rdog
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -197,9 +202,11 @@ contains
     if (top_at_1) then 
        iSFC = nLev
        iTOA = 1
+       iSFC_ilev = iSFC + 1
     else
        iSFC = 1
        iTOA = nLev
+       iSFC_ilev = 1
     endif
 
     ! #######################################################################################
@@ -220,8 +227,8 @@ contains
     t_lay(1:NCOL,:) = tgrs(1:NCOL,:)
 
     ! Bound temperature/pressure at layer centers.
-    do iCol=1,NCOL
-       do iLay=1,nLev
+    do iLay=1,nLev
+       do iCol=1,NCOL
           if (t_lay(iCol,iLay) .le. minGPtemp) then
              t_lay(iCol,iLay) = minGPtemp + epsilon(minGPtemp)
           endif
@@ -239,6 +246,12 @@ contains
 
     ! Temperature at layer-interfaces          
     call cmp_tlev(nCol,nLev,minGPpres,p_lay,t_lay,p_lev,tsfc,t_lev)
+    do iLev=1,nLev+1
+       do iCol=1,nCol
+          if (t_lev(iCol,iLev) .le. minGPtemp) t_lev(iCol,iLev) = minGPtemp + epsilon(minGPtemp)
+          if (t_lev(iCol,iLev) .ge. maxGPtemp) t_lev(iCol,iLev) = maxGPtemp - epsilon(maxGPtemp)
+       enddo
+    enddo
 
     ! Save surface temperature at radiation time-step, used for LW flux adjustment betwen
     ! radiation calls.
@@ -247,13 +260,64 @@ contains
     ! Compute a bunch of thermodynamic fields needed by the cloud microphysics schemes. 
     ! Relative humidity, saturation mixing-ratio, vapor mixing-ratio, virtual temperature, 
     ! layer thickness,...
-    do iCol=1,NCOL
-       do iLay=1,nLev
+    do iLay=1,nLev
+       do iCol=1,NCOL
           es                = min( p_lay(iCol,iLay),  fpvs( t_lay(iCol,iLay) ) )  ! fpvs and prsl in pa
           qs_lay(iCol,iLay) = max( con_epsqs, con_eps * es / (p_lay(iCol,iLay) + con_epsm1*es) )
           relhum(iCol,iLay) = max( 0._kind_phys, min( 1._kind_phys, max(con_epsqs, q_lay(iCol,iLay))/qs_lay(iCol,iLay) ) )
           tv_lay(iCol,iLay) = t_lay(iCol,iLay) * (1._kind_phys + con_fvirt*q_lay(iCol,iLay)) 
        enddo
+    enddo
+
+    !
+    ! Compute layer-thickness between layer boundaries (deltaZ) and layer centers (deltaZc)
+    !
+    deltaP = abs(p_lev(:,2:nLev+1)-p_lev(:,1:nLev))
+    con_rdog = con_rd/con_g
+    do iCol=1,nCol 
+       if (top_at_1) then
+          ! Layer thickness (m)
+          do iLay=1,nLev
+             deltaZ(iCol,iLay) = con_rdog * abs(log(p_lev(iCol,iLay+1)) - log(p_lev(iCol,iLay))) * tv_lay(iCol,iLay)
+          enddo
+          ! Height at layer boundaries
+          hgtb(nLev+1) = 0._kind_phys
+          do iLay=nLev,1,-1
+             hgtb(iLay)= hgtb(iLay+1) + deltaZ(iCol,iLay)
+          enddo
+          ! Height at layer centers
+          do iLay = nLev, 1, -1
+             pfac = abs(log(p_lev(iCol,iLay+1)) - log(p_lay(iCol,iLay))) /  &
+                  abs(log(p_lev(iCol,iLay+1)) - log(p_lev(iCol,iLay)))
+             hgtc(iLay) = hgtb(iLay+1) + pfac * (hgtb(iLay) - hgtb(iLay+1))
+          enddo
+          ! Layer thickness between centers
+          do iLay = nLev-1, 1, -1
+             deltaZc(iCol,iLay) = hgtc(iLay) - hgtc(iLay+1)
+          enddo
+          deltaZc(iCol,nLev) = hgtc(nLev) - hgtb(nLev+1)
+       else
+          ! Layer thickness (m)
+          do iLay=nLev,1,-1
+             deltaZ(iCol,iLay) = con_rdog * abs(log(p_lev(iCol,iLay))  - log(p_lev(iCol,iLay+1))) * tv_lay(iCol,iLay)
+          enddo
+          ! Height at layer boundaries
+          hgtb(1) = 0._kind_phys
+          do iLay=1,nLev
+             hgtb(iLay+1)= hgtb(iLay) + deltaZ(iCol,iLay)
+          enddo
+          ! Height at layer centers
+          do iLay = 1, nLev
+             pfac = abs(log(p_lev(iCol,iLay)) - log(p_lay(iCol,iLay)  )) /  &
+                  abs(log(p_lev(iCol,iLay)) - log(p_lev(iCol,iLay+1)))
+             hgtc(iLay) = hgtb(iLay) + pfac * (hgtb(iLay+1) - hgtb(iLay))
+          enddo
+          ! Layer thickness between centers
+          do iLay = 2, nLev
+             deltaZc(iCol,iLay) = hgtc(iLay) - hgtc(iLay-1)
+          enddo
+          deltaZc(iCol,1) = hgtc(1) - hgtb(1)
+       endif
     enddo
 
     ! #######################################################################################
@@ -305,7 +369,7 @@ contains
     ! #######################################################################################
     ! Setup surface ground temperature and ground/air skin temperature if required.
     ! #######################################################################################
-    tsfg(1:NCOL) = tsfc(1:NCOL)
+    tsfg(1:NCOL) = t_lev(1:NCOL,iSFC_ilev)
     tsfa(1:NCOL) = t_lay(1:NCOL,iSFC)
 
     ! #######################################################################################

@@ -531,7 +531,8 @@
 ! non-dim sub grid mtn drag Amp (*j*)
 !     cdmb = 1.0/float(IMX/192)
 !     cdmb = 192.0/float(IMX)
-      cdmb = 4.0 * 192.0/float(IMX)
+      ! New cdmbgwd addition for GSL blocking drag
+      cdmb = 1.0
       if (cdmbgwd(1) >= 0.0) cdmb = cdmb * cdmbgwd(1)
 
 !>-# Orographic Gravity Wave Drag Section
@@ -1225,7 +1226,8 @@ IF ( (do_gsl_drag_ls_bl) .and. (gwd_opt_bl .EQ. 1) ) THEN
 !--------- compute flow-blocking stress
 !
                cd = max(2.0-1.0/od(i),0.0)
-               taufb(i,kts) = 0.5 * roll(i) * coefm(i) /                   &
+               ! New cdmbgwd addition for GSL blocking drag
+               taufb(i,kts) = cdmb * 0.5 * roll(i) * coefm(i) /            &
                                  max(dxmax_ls,dxy(i))**2 * cd * dxyp(i) *  &
                                  olp(i) * zblk * ulow(i)**2
                tautem = taufb(i,kts)/float(kblk-kts)

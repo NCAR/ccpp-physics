@@ -42,6 +42,7 @@ else(TYPEDEFS)
   include(${CMAKE_CURRENT_BINARY_DIR}/CCPP_TYPEDEFS.cmake)
   message(STATUS "Got CCPP TYPEDEFS from cmakefile include file")
 endif(TYPEDEFS)
+list(REMOVE_DUPLICATES TYPEDEFS)
 
 # Generate list of Fortran modules from the CCPP type
 # definitions that need need to be installed
@@ -58,6 +59,7 @@ else(SCHEMES)
   include(${CMAKE_CURRENT_BINARY_DIR}/CCPP_SCHEMES.cmake)
   message(STATUS "Got CCPP SCHEMES from cmakefile include file")
 endif(SCHEMES)
+list(REMOVE_DUPLICATES SCHEMES)
 
 # Set the sources: physics scheme caps
 set(CAPS $ENV{CCPP_CAPS})
@@ -67,6 +69,7 @@ else(CAPS)
   include(${CMAKE_CURRENT_BINARY_DIR}/CCPP_CAPS.cmake)
   message(STATUS "Got CCPP CAPS from cmakefile include file")
 endif(CAPS)
+list(REMOVE_DUPLICATES CAPS)
 
 # Schemes and caps from the CCPP code generator use full paths with symlinks
 # resolved, we need to do the same here for the below logic to work
@@ -117,8 +120,8 @@ set(SCHEMES_OPENMP_OFF ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rrtmgp/mo_
 # List of files that need to be compiled with different precision
 set(SCHEMES_DYNAMICS)
 
-if(${LOCAL_CURRENT_SOURCE_DIR}/physics/gfdl_fv_sat_adj.F90 IN_LIST SCHEMES)
-  list(APPEND SCHEMES_DYNAMICS ${LOCAL_CURRENT_SOURCE_DIR}/physics/gfdl_fv_sat_adj.F90)
+if(${LOCAL_CURRENT_SOURCE_DIR}/physics/fv_sat_adj.F90 IN_LIST SCHEMES)
+  list(APPEND SCHEMES_DYNAMICS ${LOCAL_CURRENT_SOURCE_DIR}/physics/fv_sat_adj.F90)
 endif()
 
 # Remove files that need to be compiled with different precision
@@ -141,12 +144,32 @@ endif()
 SET_PROPERTY(SOURCE ${SCHEMES} ${CAPS}
              APPEND_STRING PROPERTY COMPILE_FLAGS " ${CMAKE_Fortran_FLAGS_PHYSICS} ${OpenMP_Fortran_FLAGS}")
 
-# Reduce optimization for module_sf_mynn.F90 (to avoid an apparent compiler bug with Intel 18 on Hera)
-if(${LOCAL_CURRENT_SOURCE_DIR}/physics/module_sf_mynn.F90 IN_LIST SCHEMES AND
-    (CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "Bitforbit") AND
+# Lower optimization for certain schemes when compiling with Intel in Release mode
+if((CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "Bitforbit") AND
     ${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
-  SET_SOURCE_FILES_PROPERTIES(${LOCAL_CURRENT_SOURCE_DIR}/physics/module_sf_mynn.F90
-                              APPEND_STRING PROPERTY COMPILE_FLAGS " ${CMAKE_Fortran_FLAGS_PHYSICS} ${OpenMP_Fortran_FLAGS} -O1")
+  # Define a list of schemes that need lower optimization with Intel in Release mode
+  set(SCHEME_NAMES_LOWER_OPTIMIZATION module_sf_mynn.F90)
+  foreach(SCHEME_NAME IN LISTS SCHEME_NAMES_LOWER_OPTIMIZATION)
+    set(SCHEMES_TMP ${SCHEMES})
+    # Need to determine the name of the scheme with its path
+    list(FILTER SCHEMES_TMP INCLUDE REGEX ".*${SCHEME_NAME}$")
+    SET_SOURCE_FILES_PROPERTIES(${SCHEMES_TMP}
+                                APPEND_STRING PROPERTY COMPILE_FLAGS " ${CMAKE_Fortran_FLAGS_PHYSICS} ${OpenMP_Fortran_FLAGS} -O1")
+  endforeach()
+endif()
+
+# No optimization for certain schemes when compiling with Intel in Release mode
+if((CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "Bitforbit") AND
+    ${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
+  # Define a list of schemes that can't be optimized with Intel in Release mode
+  set(SCHEME_NAMES_NO_OPTIMIZATION GFS_typedefs.F90)
+  foreach(SCHEME_NAME IN LISTS SCHEME_NAMES_NO_OPTIMIZATION)
+    set(SCHEMES_TMP ${SCHEMES})
+    # Need to determine the name of the scheme with its path
+    list(FILTER SCHEMES_TMP INCLUDE REGEX ".*${SCHEME_NAME}$")
+    SET_SOURCE_FILES_PROPERTIES(${SCHEMES_TMP}
+                                APPEND_STRING PROPERTY COMPILE_FLAGS " ${CMAKE_Fortran_FLAGS_PHYSICS} ${OpenMP_Fortran_FLAGS} -O0")
+  endforeach()
 endif()
 
 # Reduce optimization for mo_gas_optics_kernels.F90 (to avoid an apparent compiler bug with Intel 19+)
