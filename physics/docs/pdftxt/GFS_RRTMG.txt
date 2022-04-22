@@ -74,7 +74,7 @@
 + \b GFS_suite_interstitial_rad_reset: \ref arg_table_GFS_suite_interstitial_rad_reset_run
 + \b gfs_rrtmg_pre: \ref arg_table_GFS_rrtmg_pre_run
 + \b GFS_radiation_surface:  \ref arg_table_GFS_radiation_surface_run
-+ \b rrtmg_sw_pre: \ref arg_table_rrtmg_sw_pre_run
++ \b rad_sw_pre: \ref arg_table_rad_sw_pre_run
 + \b rrtmg_sw: \ref arg_table_rrtmg_sw_run
 + \b rrtmg_sw_post: \ref arg_table_rrtmg_sw_post_run
 + \b rrtmg_lw_pre: \ref arg_table_rrtmg_lw_pre_run

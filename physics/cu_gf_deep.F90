@@ -68,7 +68,7 @@ contains
       return
    end function my_maxloc1d
 
-!>\ingroup cu_gf_deep_group
+!>Driver for the deep or congestus GF routine.
 !> \section general_gf_deep GF Deep Convection General Algorithm
 !> @{
    subroutine cu_gf_deep_run(        &          
@@ -2308,9 +2308,9 @@ contains
    end subroutine cu_gf_deep_run
 !> @}
 
-!>\ingroup cu_gf_deep_group
 
-
+!> Calculates tracer fluxes due to subsidence, only up-stream differencing
+!! is currently used but flux corrected transport can be turn on.
    subroutine fct1d3 (ktop,n,dt,z,tracr,massflx,trflx_in,dellac,g)
 !$acc routine vector
 ! --- modify a 1-D array of tracer fluxes for the purpose of maintaining
@@ -2494,6 +2494,7 @@ contains
    return
    end subroutine fct1d3
 
+!> Calculates rain evaporation below cloud base.
    subroutine rain_evap_below_cloudbase(itf,ktf, its,ite, kts,kte,ierr,    &
                    kbcon,xmb,psur,xland,qo_cup,                            &
                    po_cup,qes_cup,pwavo,edto,pwevo,pre,outt,outq) !,outbuoy)
@@ -2583,8 +2584,8 @@ contains
 
    end subroutine rain_evap_below_cloudbase
 
-
-
+!> Calculates strength of downdraft based on windshear and/or
+!! aerosol content.
    subroutine cup_dd_edt(ierr,us,vs,z,ktop,kbcon,edt,p,pwav, &
               pw,ccn,ccnclean,pwev,edtmax,edtmin,edtc,psum2,psumh,    &
               rho,aeroevap,pefc,itf,ktf,                          &
@@ -2728,7 +2729,7 @@ contains
 
    end subroutine cup_dd_edt
 
-!>\ingroup cu_gf_deep_group
+!> Calcultes moisture properties of downdrafts.
    subroutine cup_dd_moisture(ierrc,zd,hcd,hes_cup,qcd,qes_cup,  &
               pwd,q_cup,z_cup,dd_massentr,dd_massdetr,jmin,ierr, &
               gamma_cup,pwev,bu,qrcd,                            &
@@ -2885,25 +2886,8 @@ contains
 
    end subroutine cup_dd_moisture
 
-!>\ingroup cu_gf_deep_group
-!!\param z   environmental heights
-!!\param qes environmental saturation mixing ratio
-!!\param he  environmental moist static energy
-!!\param hes environmental saturation moist static energy
-!!\param t   environmental temperature
-!!\param q   environmental mixing ratio
-!!\param p   environmental pressure
-!!\param z1  terrain elevation
-!!\param psur    surface pressure
-!!\param  ierr  error value, maybe modified in this routine
-!!\param tcrit   258.K
-!!\param itest
-!!\param itf
-!!\param ktf
-!!\param its
-!!\param ite
-!!\param kts
-!!\param kte
+!> Calculates environmental moist static energy, saturation
+!! moist static energy, heights, and saturation mixing ratio.
    subroutine cup_env(z,qes,he,hes,t,q,p,z1,                &
               psur,ierr,tcrit,itest,                        &
               itf,ktf,                                      &
@@ -3038,8 +3022,8 @@ contains
 
    end subroutine cup_env
 
-!>\ingroup cu_gf_deep_group
-!!\param   t      environmental temperature
+!> Calculates environmental values on cloud levels.
+!>\param   t      environmental temperature
 !!\param   qes    environmental saturation mixing ratio
 !!\param   q      environmental mixing ratio
 !!\param   he     environmental moist static energy
@@ -3143,7 +3127,8 @@ contains
 !$acc end kernels
    end subroutine cup_env_clev
 
-!>\ingroup cu_gf_deep_group
+!> Calculates an ensemble of closures and the resulting ensemble 
+!! average to determine cloud base mass-flux.
    subroutine cup_forcing_ens_3d(closure_n,xland,aa0,aa1,xaa0,mbdt,dtime,ierr,ierr2,ierr3,&
               xf_ens,axx,forcing,maxens3,mconv,rand_clos,             &
               p_cup,ktop,omeg,zd,zdm,k22,zu,pr_ens,edt,edtm,kbcon,    &
@@ -3538,7 +3523,7 @@ endif
 
    end subroutine cup_forcing_ens_3d
 
-!>\ingroup cu_gf_deep_group
+!> Calculates the level of convective cloud base.
    subroutine cup_kbcon(ierrc,cap_inc,iloop_in,k22,kbcon,he_cup,hes_cup, &
               hkb,ierr,kbmax,p_cup,cap_max,                              &
               ztexec,zqexec,                                             &
@@ -3697,7 +3682,8 @@ endif
 
    end subroutine cup_kbcon
 
-!>\ingroup cu_gf_deep_group
+!> Calculates the level at which the maximum value in an array
+!! occurs.
    subroutine cup_maximi(array,ks,ke,maxx,ierr,              &
               itf,ktf,                                       &
               its,ite, kts,kte                     )
@@ -3760,7 +3746,7 @@ endif
 
    end subroutine cup_maximi
 
-!>\ingroup cu_gf_deep_group
+!> Calculates the level at which the minimum value in an array occurs.
    subroutine cup_minimi(array,ks,kend,kt,ierr,              &
               itf,ktf,                                       &
               its,ite, kts,kte                     )
@@ -3818,7 +3804,7 @@ endif
 
    end subroutine cup_minimi
 
-!>\ingroup cu_gf_deep_group
+!> Calculates the cloud work functions for updrafts.
    subroutine cup_up_aa0(aa0,z,zu,dby,gamma_cup,t_cup,       &
               kbcon,ktop,ierr,                               &
               itf,ktf,                                       &
@@ -3895,7 +3881,9 @@ endif
    end subroutine cup_up_aa0
 
 !====================================================================
-!>\ingroup cu_gf_deep_group
+
+!> Checks for negative or excessive tendencies and corrects in a mass
+!! conversing way by adjusting the cloud base mass-flux.
    subroutine neg_check(name,j,dt,q,outq,outt,outu,outv,                      &
                         outqc,pret,its,ite,kts,kte,itf,ktf,ktop)
 
@@ -4010,9 +3998,8 @@ endif
 !$acc end kernels
    end subroutine neg_check
 
-!>\ingroup cu_gf_deep_group
-!> This subroutine calculates
-!\param
+!> This subroutine calculates final output fields including
+!! physical tendencies, precipitation, and mass-flux.
    subroutine cup_output_ens_3d(xff_mid,xf_ens,ierr,dellat,dellaq,dellaqc,  &
               outtem,outq,outqc,                                            &
               zu,pre,pw,xmb,ktop,                                           &
@@ -4267,7 +4254,7 @@ endif
 
    end subroutine cup_output_ens_3d
 !-------------------------------------------------------
-!>\ingroup cu_gf_deep_group
+!> Calculates moisture properties of the updraft.
    subroutine cup_up_moisture(name,ierr,z_cup,qc,qrc,pw,pwav,     &
               p_cup,kbcon,ktop,dby,clw_all,xland1,                &
               q,gamma_cup,zu,qes_cup,k22,qe_cup,c0,               &
@@ -4625,7 +4612,7 @@ endif
  end subroutine cup_up_moisture
 
 !--------------------------------------------------------------------
-!>\ingroup cu_gf_deep_group
+!> Calculates saturation vapor pressure.
  real function satvap(temp2)
 !$acc routine seq
       implicit none
@@ -4651,7 +4638,7 @@ endif
       end if
  end function
 !--------------------------------------------------------------------
-!>\ingroup cu_gf_deep_group
+!> Calculates the average value of a variable at the updraft originating level.
  subroutine get_cloud_bc(mzp,array,x_aver,k22,add)
 !$acc routine seq
     implicit none
@@ -4678,7 +4665,7 @@ endif
 
  end subroutine get_cloud_bc
  !========================================================================================
-!>\ingroup cu_gf_deep_group
+!> Driver for the normalized mass-flux routine.
  subroutine rates_up_pdf(rand_vmas,ipr,name,ktop,ierr,p_cup,entr_rate_2d,hkbo,heo,heso_cup,z_cup, &
                xland,kstabi,k22,kbcon,its,ite,itf,kts,kte,ktf,zuo,kpbl,ktopdby,csum,pmin_lev)
      implicit none
@@ -4809,7 +4796,7 @@ endif
 
   end subroutine rates_up_pdf
 !-------------------------------------------------------------------------
-!>\ingroup cu_gf_deep_group
+!> Calculates a normalized mass-flux profile for updrafts and downdrafts using the beta function.
  subroutine get_zu_zd_pdf_fim(kklev,p,rand_vmas,zubeg,ipr,xland,zuh2,draft,ierr,kb,kt,zu,kts,kte,ktf,max_mass,kpbli,csum,pmin_lev)
 !$acc routine vector
 
@@ -5072,8 +5059,7 @@ endif
   end subroutine get_zu_zd_pdf_fim
 
 !-------------------------------------------------------------------------
-!>\ingroup cu_gf_deep_group
-!> This subroutine calculates
+!> Calculates the cloud work function based on boundary layer forcing.
   subroutine cup_up_aa1bl(aa0,t,tn,q,qo,dtime,  &
               z_cup,zu,dby,gamma_cup,t_cup,         &
               kbcon,ktop,ierr,                  &
@@ -5143,8 +5129,7 @@ endif
 
  end subroutine cup_up_aa1bl
 !---------------------------------------------------------------------- 
-!>\ingroup cu_gf_deep_group
-!> This subroutine calculates
+!> Finds temperature inversions using the first and second derivative of temperature.
  subroutine get_inversion_layers(ierr,p_cup,t_cup,z_cup,qo_cup,qeso_cup,k_inv_layers,&           
                      kstart,kend,dtempdz,itf,ktf,its,ite, kts,kte)
                                     
@@ -5255,8 +5240,7 @@ endif
         
  end subroutine get_inversion_layers
 !-----------------------------------------------------------------------------------
-!>\ingroup cu_gf_deep_group
-!> This function calcualtes
+!> Evaluates first or second order derivatives.
  function deriv3(xx, xi, yi, ni, m)
 !$acc routine vector
     !============================================================================*/
@@ -5340,7 +5324,7 @@ endif
     end if
  end function deriv3
 !=============================================================================================
-!>\ingroup cu_gf_deep_group
+!> Calculates mass entranment and detrainment rates.
   subroutine get_lateral_massflux(itf,ktf, its,ite, kts,kte                             &
                                   ,ierr,ktop,zo_cup,zuo,cd,entr_rate_2d                 &
                                   ,up_massentro, up_massdetro ,up_massentr, up_massdetr &
@@ -5472,7 +5456,7 @@ endif
  end subroutine get_lateral_massflux
 !---meltglac-------------------------------------------------
 !------------------------------------------------------------------------------------
-!>\ingroup cu_gf_deep_group
+!> Calculates the partition between cloud water and cloud ice.
    subroutine get_partition_liq_ice(ierr,tn,po_cup, p_liq_ice,melting_layer           & 
                                    ,itf,ktf,its,ite, kts,kte, cumulus          )
      implicit none
@@ -5573,7 +5557,7 @@ endif
    end  subroutine get_partition_liq_ice
 
 !------------------------------------------------------------------------------------
-!>\ingroup cu_gf_deep_group
+!> Calculates the melting profile.
    subroutine get_melting_profile(ierr,tn_cup,po_cup, p_liq_ice,melting_layer,qrco    &
                                  ,pwo,edto,pwdo,melting                                &    
                                  ,itf,ktf,its,ite, kts,kte, cumulus              )
@@ -5651,7 +5635,7 @@ endif
    end  subroutine get_melting_profile
 !---meltglac-------------------------------------------------
 !-----srf-08aug2017-----begin
-!>\ingroup cu_gf_deep_group
+!> Calculates the cloud top height.
  subroutine get_cloud_top(name,ktop,ierr,p_cup,entr_rate_2d,hkbo,heo,heso_cup,z_cup, &
                          kstabi,k22,kbcon,its,ite,itf,kts,kte,ktf,zuo,kpbl,klcl,hcot)
      implicit none

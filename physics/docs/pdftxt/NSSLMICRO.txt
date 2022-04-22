@@ -14,7 +14,6 @@ Excessive size sorting (common in 2-moment schemes) is effectively controlled by
 
 The NSSL scheme is designed with deep (severe) convection in mind at grid spacings of 4km or smaller, but can also be run at larger grid spacing as needed for nesting etc. It is also able to capture non-severe and winter weather.
 
-\todo nssl NML
 Namelist parameters:
 - \b nssl_hail_on: (logical: .true./.false.) Turns the hail category (3 variables: mass, number, and volume)  Default value is .false. Field table variables: hailwat, hail_nc, hail_vol
 
@@ -27,11 +26,10 @@ Namelist parameters:
 
 
 \section intra_nssl2m Intraphysics Communication
-\ref arg_table_mp_nssl_run
-\htmlinclude mp_nssl_run.html
+- \ref arg_table_mp_nssl_run
 
 \section gen_nssl2m  General Algorithm
-\ref gen_nssl
+- \ref gen_nssl
 
 
 */

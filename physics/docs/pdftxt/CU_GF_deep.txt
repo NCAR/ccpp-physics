@@ -40,9 +40,9 @@ in the RAP.
 Additionally, the shallow convection and PBL schemes pass cloud information to the radiation scheme, which improved cloud/radiation
 interaction and retention of the inversion typically found above mixed layers.
 
-\ref arg_table_cu_gf_driver_run
+- \ref arg_table_cu_gf_driver_run
 
 \section gen_gfgsd  General Algorithm
-\ref gen_gf_driver
+- \ref gen_gf_driver
 
 */

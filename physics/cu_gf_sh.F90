@@ -59,7 +59,7 @@ contains
 !!\param    itf,ktf,its,ite, kts,kte are dimensions
 !!\param    ipr               horizontal index of printed column
 !!\param    tropics            =0
-!>\section gen_cu_gf_sh_run GSD cu_gf_sh_run General Algorithm
+!>\section gen_cu_gf_sh_run Grell-Freitas Shallow Convection General Algorithm
 !> @{
   subroutine cu_gf_sh_run (                                            &
                          us,vs,zo,t,q,z1,tn,qo,po,psur,dhdt,kpbl,rho,     & ! input variables, must be supplied

@@ -76,7 +76,7 @@ contains
 !! \section arg_table_cu_gf_driver_run Argument Table
 !! \htmlinclude cu_gf_driver_run.html
 !!
-!>\section gen_gf_driver GSD GF Cumulus Scheme General Algorithm
+!>\section gen_gf_driver Grell-Freitas Cumulus Scheme General Algorithm
 !> @{
       subroutine cu_gf_driver_run(ntracer,garea,im,km,dt,flag_init,flag_restart,&
                cactiv,cactiv_m,g,cp,xlv,r_v,forcet,forceqv_spechum,phil,raincv, &

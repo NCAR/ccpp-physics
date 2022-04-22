@@ -90,7 +90,7 @@ Two namelist variables control the usage of the semi-Lagrangian sedimentation, \
 Sedi-semi is set to ‘true’ to activate the method. Decfl is a parameter that needs to avoid deformation of the arriving grids, currently, "10". 
 
 \section intra_thompson Intraphysics Communication
-\ref arg_table_mp_thompson_run
+- \ref arg_table_mp_thompson_run
 
 \section gal_thompson  General Algorithm
 - \ref gen_thompson_init
