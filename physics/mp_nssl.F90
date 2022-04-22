@@ -545,25 +545,16 @@ module mp_nssl
          
        IF ( nssl_ccn_on ) THEN
          IF ( invertccn ) THEN
-!            cn_mp = Max(0.0, nssl_qccn - Max(0.0,cccn))
+            ! cn_mp = Max(0.0, nssl_qccn - Max(0.0,cccn_mp)) 
+           ! Flip CCN concentrations from 'activated' to 'unactivated' (allows BC condition to be zero) 
+               cn_mp = nssl_qccn - cccn_mp
+               cn_mp = Max(0.0_kind_phys, cn_mp) 
 
-!              DO k = 1,nlev
-!               DO i = 1,ncol
-                 cn_mp = Max(0.0, nssl_qccn - Max(0.0, cccn_mp) )
-!                 cn_mp(i,k) = Max(0.0, nssl_qccn - Max(0.0, cccn_mp(i,k)) )
-!                 cn_mp(i,k) = Min(nssl_qccn, nssl_qccn - cccn(i,k) ) 
-!               ENDDO
-!              ENDDO
-            !  DO k = 1,nlev
-            !   DO i = 1,ncol
-            !     cccn(i,k) = Max(0.0, nssl_qccn - cn_mp(i,k) )
-            !     cn_mp(i,k) = cccn(i,k)
-            !   ENDDO
-            !  ENDDO
          ELSE
             cn_mp = cccn_mp
          ENDIF
           IF ( ntccna > 0 ) THEN
+            ! not in use yet
 !         cna_mp = cccna
           ELSE 
             cna_mp = 0
@@ -697,18 +688,12 @@ module mp_nssl
 
          IF ( nssl_ccn_on )  THEN
            IF ( invertccn ) THEN
-              !cccn = Max(0.0, nssl_qccn - cn_mp )
-                 cccn_mp = nssl_qccn - cn_mp
-!               DO k = 1,nlev
-!                DO i = 1,ncol
-! !                 cccn(i,k) = Max(0.0, nssl_qccn - cn_mp(i,k) )
-!                  cccn_mp(i,k) = nssl_qccn - cn_mp(i,k) 
-!                ENDDO
-!               ENDDO
+              cccn_mp = Max(0.0_kind_phys, nssl_qccn - cn_mp )
+!              cccn_mp = nssl_qccn - cn_mp
            ELSE
               cccn_mp = cn_mp
            ENDIF
-!           cccna = cna_mp
+!           cccna = cna_mp ! cna not in use yet for ccpp
           ENDIF
           
 ! test code
