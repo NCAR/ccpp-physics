@@ -275,7 +275,7 @@ c  cloud water
      &                     dellae(im,km,ntr),
      &                     dellau(im,km),  dellav(im,km), hcko(im,km),
      &                     ucko(im,km),    vcko(im,km),   qcko(im,km),
-     &                     ecko(im,km,ntr),
+     &                     ecko(im,km,ntr),ercko(im,km,ntr),
      &                     eta(im,km),     etad(im,km),   zi(im,km),
      &                     qrcko(im,km),   qrcdo(im,km),
      &                     pwo(im,km),     pwdo(im,km),   c0t(im,km),
@@ -602,6 +602,7 @@ c
               ctr(i,k,kk)  = qtr(i,k,n)
               ctro(i,k,kk) = qtr(i,k,n)
               ecko(i,k,kk) = 0.
+              ercko(i,k,kk) = 0.
               ecdo(i,k,kk) = 0.
             endif
           enddo
@@ -1163,6 +1164,7 @@ c
           if(cnvflg(i)) then
             indx = kb(i)
             ecko(i,indx,n) = ctro(i,indx,n)
+            ercko(i,indx,n) = ctro(i,indx,n)
           endif
         enddo
        enddo
@@ -1214,6 +1216,7 @@ c
               factor = 1. + tem
               ecko(i,k,n) = ((1.-tem)*ecko(i,k-1,n)+tem*
      &                     (ctro(i,k,n)+ctro(i,k-1,n)))/factor
+              ercko(i,k,n) = ecko(i,k,n)
             endif
           endif
         enddo
@@ -1232,6 +1235,7 @@ c
                    factor = 1. + tem
                    ecko(i,k,kk) = ((1. - tem) * ecko(i,k-1,kk) + tem *
      &                     (ctro(i,k,kk) + ctro(i,k-1,kk))) / factor
+                   ercko(i,k,kk) = ecko(i,k,kk)
                    chem_c(i,k,n) = fscav(n) * ecko(i,k,kk)
                    tem = chem_c(i,k,n) / (1. + c0t(i,k) * dz)
                    chem_pw(i,k,n) = c0t(i,k) * dz * tem * eta(i,k-1)
@@ -1479,12 +1483,10 @@ c
               qrch = qeso(i,k)
      &             + gamma * dbyo(i,k) / (hvap * (1. + gamma))
 cj
-              tem  = 0.5 * (xlamue(i,k)+xlamue(i,k-1)) * dz
-              tem1 = 0.25 * (xlamud(i,k)+xlamud(i,k-1)) * dz
+              tem  = 0.25 * (xlamue(i,k)+xlamue(i,k-1)) * dz
               tem  = cq * tem
-              tem1 = cq * tem1
-              factor = 1. + tem - tem1
-              qcko(i,k) = ((1.-tem1)*qcko(i,k-1)+tem*0.5*
+              factor = 1. + tem
+              qcko(i,k) = ((1.-tem)*qcko(i,k-1)+tem*
      &                     (qo(i,k)+qo(i,k-1)))/factor
               qrcko(i,k) = qcko(i,k)
 cj
@@ -1658,12 +1660,10 @@ c
               qrch = qeso(i,k)
      &             + gamma * dbyo(i,k) / (hvap * (1. + gamma))
 cj
-              tem  = 0.5 * (xlamue(i,k)+xlamue(i,k-1)) * dz
-              tem1 = 0.25 * (xlamud(i,k)+xlamud(i,k-1)) * dz
+              tem  = 0.25 * (xlamue(i,k)+xlamue(i,k-1)) * dz
               tem  = cq * tem
-              tem1 = cq * tem1
-              factor = 1. + tem - tem1
-              qcko(i,k) = ((1.-tem1)*qcko(i,k-1)+tem*0.5*
+              factor = 1. + tem
+              qcko(i,k) = ((1.-tem)*qcko(i,k-1)+tem*
      &                     (qo(i,k)+qo(i,k-1)))/factor
               qrcko(i,k) = qcko(i,k)
 cj
@@ -2051,17 +2051,10 @@ c
 !             detad      = etad(i,k+1) - etad(i,k)
 cj
               dz = zi(i,k+1) - zi(i,k)
-              if(k >= kd94(i)) then
-                 tem  = xlamde * dz
-                 tem1 = 0.5 * xlamdd * dz
-              else
-                 tem  = xlamde * dz
-                 tem1 = 0.5 * (xlamd(i)+xlamdd) * dz
-              endif
+              tem  = 0.5 * xlamde * dz
               tem  = cq * tem
-              tem1 = cq * tem1
-              factor = 1. + tem - tem1
-              qcdo(i,k) = ((1.-tem1)*qrcdo(i,k+1)+tem*0.5*
+              factor = 1. + tem
+              qcdo(i,k) = ((1.-tem)*qrcdo(i,k+1)+tem*
      &                     (qo(i,k)+qo(i,k+1)))/factor
 cj
 !             pwdo(i,k)  = etad(i,k+1) * qcdo(i,k+1) -
@@ -2249,7 +2242,7 @@ cj
               if(k > jmin(i)) adw = 0.
               dp = 1000. * del(i,k)
 cj
-              tem1 = -eta(i,k) * ecko(i,k,n)
+              tem1 = -eta(i,k) * ercko(i,k,n)
               tem2 = -eta(i,k-1) * ecko(i,k-1,n)
               ptem1 = -etad(i,k) * ecdo(i,k,n)
               ptem2 = -etad(i,k-1) * ecdo(i,k-1,n)
@@ -2616,12 +2609,10 @@ c
               xqrch = qeso(i,k)
      &              + gamma * xdby / (hvap * (1. + gamma))
 cj
-              tem  = 0.5 * (xlamue(i,k)+xlamue(i,k-1)) * dz
-              tem1 = 0.25 * (xlamud(i,k)+xlamud(i,k-1)) * dz
+              tem  = 0.25 * (xlamue(i,k)+xlamue(i,k-1)) * dz
               tem  = cq * tem
-              tem1 = cq * tem1
-              factor = 1. + tem - tem1
-              qcko(i,k) = ((1.-tem1)*qcko(i,k-1)+tem*0.5*
+              factor = 1. + tem
+              qcko(i,k) = ((1.-tem)*qcko(i,k-1)+tem*
      &                     (qo(i,k)+qo(i,k-1)))/factor
 cj
               dq = eta(i,k) * (qcko(i,k) - xqrch)
@@ -2707,17 +2698,10 @@ cj
 !             detad    = etad(i,k+1) - etad(i,k)
 cj
               dz = zi(i,k+1) - zi(i,k)
-              if(k >= kd94(i)) then
-                 tem  = xlamde * dz
-                 tem1 = 0.5 * xlamdd * dz
-              else
-                 tem  = xlamde * dz
-                 tem1 = 0.5 * (xlamd(i)+xlamdd) * dz
-              endif
+              tem  = 0.5 * xlamde * dz
               tem  = cq * tem
-              tem1 = cq * tem1
-              factor = 1. + tem - tem1
-              qcdo(i,k) = ((1.-tem1)*qrcd(i,k+1)+tem*0.5*
+              factor = 1. + tem
+              qcdo(i,k) = ((1.-tem)*qrcd(i,k+1)+tem*
      &                     (qo(i,k)+qo(i,k+1)))/factor
 cj
 !             xpwd     = etad(i,k+1) * qcdo(i,k+1) -
