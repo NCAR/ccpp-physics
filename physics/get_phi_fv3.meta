@@ -1,11 +1,12 @@
+########################################################################
 [ccpp-table-properties]
-  name = get_prs_fv3
+  name = get_phi_fv3
   type = scheme
-  dependencies = machine.F
+  dependencies = machine.F,physcons.F90
 
 ########################################################################
 [ccpp-arg-table]
-  name = get_prs_fv3_run
+  name = get_phi_fv3_run
   type = scheme
 [ix]
   standard_name = horizontal_loop_extent
@@ -29,6 +30,30 @@
   type = real
   kind = kind_phys
   intent = in
+[gt0]
+  standard_name = air_temperature_of_new_state
+  long_name = updated air temperature
+  units = K
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[gq01]
+  standard_name = specific_humidity_of_new_state
+  long_name = mid-layer specific humidity of water vapor
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[del_gz]
+  standard_name = geopotential_difference_between_midlayers_divided_by_midlayer_virtual_temperature
+  long_name = difference between mid-layer geopotentials divided by mid-layer virtual temperature
+  units = m2 s-2 K-1
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
 [phii]
   standard_name = geopotential_at_interface
   long_name = interface geopotential
@@ -36,44 +61,12 @@
   dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
-  intent = in
-[prsi]
-  standard_name = air_pressure_at_interface
-  long_name = interface pressure
-  units = Pa
-  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-[tgrs]
-  standard_name = air_temperature
-  long_name = mid-layer temperature
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-[qgrs1]
-  standard_name = specific_humidity
-  long_name = mid-layer specific humidity of water vapor
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-[del]
-  standard_name = air_pressure_difference_between_midlayers
-  long_name = difference between mid-layer pressures
-  units = Pa
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
   intent = out
-[del_gz]
-  standard_name = geopotential_difference_between_midlayers_divided_by_midlayer_virtual_temperature
-  long_name = difference between mid-layer geopotentials divided by mid-layer virtual temperature
-  units = m2 s-2 K-1
-  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
+[phil]
+  standard_name = geopotential
+  long_name = mid-layer geopotential
+  units = m2 s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = out
