@@ -21,7 +21,7 @@ contains
 !> \section arg_table_GFS_surface_composites_pre_run Argument Table
 !! \htmlinclude GFS_surface_composites_pre_run.html
 !!
-   subroutine GFS_surface_composites_pre_run (im, xlat_d, xlon_d, flag_init, lsm_cold_start, lkm, frac_grid,                &
+   subroutine GFS_surface_composites_pre_run (im, xlat_d, xlon_d, lkm, frac_grid,                                         &
                                  flag_cice, cplflx, cplice, cplwav2atm, lsm, lsm_ruc,                                     &
                                  landfrac, lakefrac, lakedepth, oceanfrac, frland,                                        &
                                  dry, icy, lake, use_flake, wet, hice, cice, zorlo, zorll, zorli,                         &
@@ -35,9 +35,8 @@ contains
       implicit none
 
       ! Interface variables
-      integer,                             intent(in   ) :: im, lkm, kdt
       integer,                             intent(in   ) :: im, lkm, kdt, lsm, lsm_ruc
-      logical,                             intent(in   ) :: flag_init, lsm_cold_start, frac_grid, cplflx, cplice, cplwav2atm
+      logical,                             intent(in   ) :: cplflx, cplice, cplwav2atm, frac_grid
       logical, dimension(:),              intent(inout)  :: flag_cice
       logical,              dimension(:), intent(inout)  :: dry, icy, lake, use_flake, wet
       real(kind=kind_phys), dimension(:), intent(in   )  :: xlat_d, xlon_d

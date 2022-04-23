@@ -261,12 +261,11 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &        sub_thl,sub_sqv,det_thl,det_sqv
       real(kind=kind_phys), dimension(:,:), intent(inout) ::             &
      &        dqke,qWT,qSHEAR,qBUOY,qDISS
+      real(kind=kind_phys), dimension(:,:), intent(inout) ::             &
+     &        t3d,qgrs_water_vapor,qgrs_liquid_cloud,qgrs_ice_cloud
       real(kind=kind_phys), dimension(:,:), intent(in) ::                &
      &        u,v,omega,                                                 &
      &        exner,prsl,                                                &
-     &        qgrs_water_vapor,                                           &
-     &        qgrs_liquid_cloud,                                          &
-     &        qgrs_ice_cloud,                                             &
      &        qgrs_cloud_droplet_num_conc,                               &
      &        qgrs_cloud_ice_num_conc,                                   &
      &        qgrs_ozone,                                                &
