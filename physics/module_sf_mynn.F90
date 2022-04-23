@@ -111,10 +111,6 @@ MODULE module_sf_mynn
   INTEGER, PARAMETER :: debug_code = 0  !0: no extra ouput
                                         !1: check input
                                         !2: everything - heavy I/O
-  LOGICAL, PARAMETER :: compute_diag = .false.
-  LOGICAL, PARAMETER :: compute_flux = .true.  !shouldn't need compute 
-               ! these in FV3. They will be written over anyway.
-               ! Computing the fluxes here is leftover from the WRF world.
 
   REAL,   DIMENSION(0:1000 ),SAVE :: psim_stab,psim_unstab, &
                                      psih_stab,psih_unstab
@@ -132,10 +128,11 @@ CONTAINS
               CP,G,ROVCP,R,XLV,                      & !in
               SVP1,SVP2,SVP3,SVPT0,EP1,EP2,KARMAN,   & !in
               ISFFLX,isftcflx,lsm,lsm_ruc,           & !in
+              compute_flux,compute_diag,             & !in
               iz0tlnd,psi_opt,                       & !in
-     &        sigmaf,vegtype,shdmax,ivegsrc,         & !intent(in)
-     &        z0pert,ztpert,                         & !intent(in)
-     &        redrag,sfc_z0_type,                    & !intent(in)
+              sigmaf,vegtype,shdmax,ivegsrc,         & !intent(in)
+              z0pert,ztpert,                         & !intent(in)
+              redrag,sfc_z0_type,                    & !intent(in)
               itimestep,iter,flag_iter,              & !in
                     wet,       dry,       icy,       & !intent(in)
               tskin_wat, tskin_lnd, tskin_ice,       & !intent(in)
@@ -273,8 +270,9 @@ CONTAINS
       REAL,     INTENT(IN)   ::        CP,G,ROVCP,R,XLV !,DX
 !NAMELIST/CONFIGURATION OPTIONS:
       INTEGER,  INTENT(IN)   ::        ISFFLX, LSM, LSM_RUC
-      INTEGER,  OPTIONAL,  INTENT(IN)   :: ISFTCFLX, IZ0TLND
-      INTEGER,  OPTIONAL,  INTENT(IN)   :: spp_sfc, psi_opt
+      INTEGER,  OPTIONAL, INTENT(IN) :: ISFTCFLX, IZ0TLND
+      INTEGER,  OPTIONAL, INTENT(IN) :: spp_sfc, psi_opt
+      logical,  intent(in)   ::        compute_flux,compute_diag
       integer, intent(in) :: ivegsrc
       integer, intent(in) :: sfc_z0_type ! option for calculating surface roughness length over ocean
       logical, intent(in) :: redrag ! reduced drag coeff. flag for high wind over sea (j.han)
@@ -441,6 +439,7 @@ CONTAINS
            CP,G,ROVCP,R,XLV,SVP1,SVP2,SVP3,SVPT0,               &
            EP1,EP2,KARMAN,                                      &
            ISFFLX,isftcflx,iz0tlnd,psi_opt,                     &
+           compute_flux,compute_diag,                           &
            sigmaf,vegtype,shdmax,ivegsrc,                       &  !intent(in)
            z0pert,ztpert,                                       &  !intent(in)
            redrag,sfc_z0_type,                                  &  !intent(in)
@@ -488,6 +487,7 @@ CONTAINS
              CP,G,ROVCP,R,XLV,SVP1,SVP2,SVP3,SVPT0,               &
              EP1,EP2,KARMAN,                                      &
              ISFFLX,isftcflx,iz0tlnd,psi_opt,                     &
+             compute_flux,compute_diag,                           &
              sigmaf,vegtype,shdmax,ivegsrc,                       &  !intent(in)
              z0pert,ztpert,                                       &  !intent(in)
              redrag,sfc_z0_type,                                  &  !intent(in)
@@ -543,6 +543,7 @@ CONTAINS
 !-----------------------------
       INTEGER,  INTENT(IN) :: ISFFLX
       INTEGER,  OPTIONAL,  INTENT(IN )   ::     ISFTCFLX, IZ0TLND
+      logical, intent(in)                :: compute_flux,compute_diag
       INTEGER,    INTENT(IN)             ::     spp_sfc, psi_opt
       integer, intent(in) :: ivegsrc
       integer, intent(in) :: sfc_z0_type ! option for calculating surface roughness length over ocean
@@ -2418,7 +2419,7 @@ END SUBROUTINE SFCLAY1D_mynn
        REAL, INTENT(IN)  :: ustar, visc, wsp10, zu
        REAL, INTENT(OUT) :: Z_0
        REAL, PARAMETER   :: G=9.81
-       REAL, PARAMETER   :: m=0.017, b=-0.005
+       REAL, PARAMETER   :: m=0.0017, b=-0.005
        REAL              :: CZC    ! variable charnock "constant"
        REAL              :: wsp10m ! logarithmically calculated 10 m
 
