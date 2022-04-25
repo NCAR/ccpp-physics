@@ -10,26 +10,29 @@
 !!
       subroutine GFS_PBL_generic_post_run (im, levs, nvdiff, ntrac,                                                            &
         ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev,nqrimef,          &
-        trans_aero, ntchs, ntchm, ntccn, nthl, nthnc, ntgv, nthv,                                                              &
+        trans_aero, ntchs, ntchm, ntccn, nthl, nthnc, ntgv, nthv, ntdu1, ntdu2, ntdu3, ntdu4, ntdu5, ntss1, ntss2,             &
+        ntss3, ntss4, ntss5, ntsu, ntbcb, ntbcl, ntocb, ntocl,                                                                 &
         imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, imp_physics_zhao_carr, imp_physics_mg,          &
         imp_physics_fer_hires, imp_physics_nssl, nssl_ccn_on, ltaerosol, nssl_hail_on,                                         &
         cplflx, cplaqm, cplchm, lssav, flag_for_pbl_generic_tend, ldiag3d, lsidea, hybedmf, do_shoc, satmedmf,                 &
         shinhong, do_ysu, dvdftra, dusfc1, dvsfc1, dtsfc1, dqsfc1, dtf, dudt, dvdt, dtdt, htrsw, htrlw, xmu,                   &
         dqdt, dusfc_cpl, dvsfc_cpl, dtsfc_cpl, dtend, dtidx, index_of_temperature, index_of_x_wind, index_of_y_wind,           &
         index_of_process_pbl, dqsfc_cpl, dusfci_cpl, dvsfci_cpl, dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag,   &
-        dqsfc_diag, dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag,                                                        &
+        dqsfc_diag, dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag, aer_nm,                                                &
         rd, cp, fvirt, hvap, t1, q1, prsl, hflx, ushfsfci, oceanfrac, kdt, dusfc_cice, dvsfc_cice,                             &
         dtsfc_cice, dqsfc_cice, wet, dry, icy, wind, stress_wat, hflx_wat, evap_wat, ugrs1, vgrs1, hffac, &
         ugrs, vgrs, tgrs, qgrs, save_u, save_v, save_t, save_q, huge, errmsg, errflg)
 
       use machine,                only : kind_phys
       use GFS_PBL_generic_common, only : set_aerosol_tracer_index
+      use physparam,              only : iaermdl
 
       implicit none
 
       integer, parameter  :: kp = kind_phys
       integer, intent(in) :: im, levs, nvdiff, ntrac, ntchs, ntchm, kdt
       integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev, nqrimef
+      integer, intent(in) :: ntdu1, ntdu2, ntdu3, ntdu4, ntdu5, ntss1, ntss2, ntss3, ntss4, ntss5, ntsu, ntbcb, ntbcl, ntocb, ntocl
       integer, intent(in) :: ntccn, nthl, nthnc, ntgv, nthv
       logical, intent(in) :: trans_aero
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
@@ -42,7 +45,7 @@
       logical, intent(in) :: flag_for_pbl_generic_tend      
       real(kind=kind_phys), dimension(:,:), intent(in) :: save_u, save_v, save_t
       real(kind=kind_phys), dimension(:,:, :), intent(in) :: save_q
-
+      real(kind=kind_phys), dimension(:,:, :), intent(out) :: aer_nm
       real(kind=kind_phys), intent(in) :: dtf
       real(kind=kind_phys), intent(in) :: rd, cp, fvirt, hvap, huge
       real(kind=kind_phys), dimension(:), intent(in) :: t1, q1, hflx, oceanfrac
@@ -97,6 +100,28 @@
           do k=1,levs
             do i=1,im
               dqdt(i,k,ntke)  = dvdftra(i,k,ntkev)
+            enddo
+          enddo
+        endif
+
+        if (ntchm>0 .and. iaermdl==2) then
+          do k=1,levs
+            do i=1,im
+              aer_nm(i,k,1) = qgrs(i,k,ntdu1)*1.e-9_kind_phys
+              aer_nm(i,k,2) = qgrs(i,k,ntdu2)*1.e-9_kind_phys
+              aer_nm(i,k,3) = qgrs(i,k,ntdu3)*1.e-9_kind_phys
+              aer_nm(i,k,4) = qgrs(i,k,ntdu4)*1.e-9_kind_phys
+              aer_nm(i,k,5) = qgrs(i,k,ntdu5)*1.e-9_kind_phys
+              aer_nm(i,k,6) = qgrs(i,k,ntss1)*1.e-9_kind_phys
+              aer_nm(i,k,7) = qgrs(i,k,ntss2)*1.e-9_kind_phys
+              aer_nm(i,k,8) = qgrs(i,k,ntss3)*1.e-9_kind_phys
+              aer_nm(i,k,9) = qgrs(i,k,ntss4)*1.e-9_kind_phys
+              aer_nm(i,k,10) = qgrs(i,k,ntss5)*1.e-9_kind_phys
+              aer_nm(i,k,11) = qgrs(i,k,ntsu)*1.e-9_kind_phys
+              aer_nm(i,k,12) = qgrs(i,k,ntbcb)*1.e-9_kind_phys
+              aer_nm(i,k,13) = qgrs(i,k,ntbcl)*1.e-9_kind_phys
+              aer_nm(i,k,14) = qgrs(i,k,ntocb)*1.e-9_kind_phys
+              aer_nm(i,k,15) = qgrs(i,k,ntocl)*1.e-9_kind_phys
             enddo
           enddo
         endif
