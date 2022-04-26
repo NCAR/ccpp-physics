@@ -3483,18 +3483,21 @@
                CLDFRA(K) = 0.0
             elseif (tc .ge. -24.0) then
                RHUM = MIN(rh(k), 1.0)
-               CLDFRA(K) = MAX(0., 1.0-SQRT(SQRT((1.001-RHUM)/(1.001-RH_00))))
+               var_temp = SQRT(SQRT((1.001-RHUM)/(1.001-RH_00)))
+               CLDFRA(K) = MAX(0., 1.0-var_temp)
             else
                if (max_relh.gt.1.12 .or. (.NOT.(modify_qvapor)) ) then
 !..For HRRR model, the following look OK.
                   RHUM = MIN(rh(k), 1.45)
                   RH_00 = RH_00 + (1.45-RH_00)*(-24.0-tc)/(-24.0+85.)
-                  CLDFRA(K) = MAX(0.,1.0-SQRT(SQRT((1.46-RHUM)/(1.46-RH_00))))
+                  var_temp = SQRT(SQRT((1.46-RHUM)/(1.46-RH_00)))
+                  CLDFRA(K) = MAX(0., 1.0-var_temp)
                else
 !..but for the GFS model, RH is way lower.
                   RHUM = MIN(rh(k), 1.05)
                   RH_00 = RH_00 + (1.05-RH_00)*(-24.0-tc)/(-24.0+85.)
-                  CLDFRA(K) = MAX(0.,1.0-SQRT(SQRT((1.06-RHUM)/(1.06-RH_00))))
+                  var_temp = SQRT(SQRT((1.06-RHUM)/(1.06-RH_00)))
+                  CLDFRA(K) = MAX(0., 1.0-var_temp)
                endif
             endif
             if (CLDFRA(K).gt.0.) CLDFRA(K)=MAX(0.01,MIN(CLDFRA(K),0.99))
