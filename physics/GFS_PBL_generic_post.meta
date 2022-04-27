@@ -211,111 +211,6 @@
   dimensions = ()
   type = integer
   intent = in
-[ntdu1]
-  standard_name = index_for_dust_bin1
-  long_name = index for dust bin1
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[ntdu2]
-  standard_name = index_for_dust_bin2
-  long_name = index for dust bin2
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[ntdu3]
-  standard_name = index_for_dust_bin3
-  long_name = index for dust bin3
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[ntdu4]
-  standard_name = index_for_dust_bin4
-  long_name = index for dust bin4
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[ntdu5]
-  standard_name = index_for_dust_bin5
-  long_name = index for dust bin5
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[ntss1]
-  standard_name = index_for_seasalt_bin1
-  long_name = index for seasalt bin1
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[ntss2]
-  standard_name = index_for_seasalt_bin2
-  long_name = index for seasalt bin2
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[ntss3]
-  standard_name = index_for_seasalt_bin3
-  long_name = index for seasalt bin3
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[ntss4]
-  standard_name = index_for_seasalt_bin4
-  long_name = index for seasalt bin4
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[ntss5]
-  standard_name = index_for_seasalt_bin5
-  long_name = index for seasalt bin5
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[ntsu]
-  standard_name = index_for_sulfate
-  long_name = index for sulfate
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[ntbcb]
-  standard_name = index_for_bcphobic
-  long_name = index for bcphobic
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[ntbcl]
-  standard_name = index_for_bcphilic
-  long_name = index for bcphilic 
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[ntocb]
-  standard_name = index_for_ocphobic
-  long_name = index for ocphobic
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[ntocl]
-  standard_name = index_for_ocphilic
-  long_name = index for ocphilic 
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
 [imp_physics]
   standard_name = control_for_microphysics_scheme
   long_name = choice of microphysics scheme
@@ -752,14 +647,6 @@
   type = real
   kind = kind_phys
   intent = inout
-[aer_nm]
-  standard_name = mass_mixing_ratio_of_aerosol_from_gocart_or_merra2
-  long_name = mass mixing ratio of aerosol from gocart or merra2
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_aerosol_tracers_MG)
-  type = real
-  kind = kind_phys
-  intent = out
 [rd]
   standard_name = gas_constant_of_dry_air
   long_name = ideal gas constant for dry air
