@@ -59,7 +59,7 @@
      &     eps,epsm1,fv,grav,hvap,rd,rv,                                &
      &     t0c,delt,ntk,ntr,delp,first_time_step,restart,               & 
      &     tmf,qmicro,progsigma,                                        &
-     &     prslp,psp,phil,qtr,prevsq,q,q1,t1,u1,v1,fscav,           &
+     &     prslp,psp,phil,qtr,prevsq,q,q1,t1,u1,v1,fscav,               &
      &     rn,kbot,ktop,kcnv,islimsk,garea,                             &
      &     dot,ncloud,hpbl,ud_mf,dt_mf,cnvw,cnvc,                       &
      &     clam,c0s,c1,evef,pgcon,asolfac,hwrf_samfshal,

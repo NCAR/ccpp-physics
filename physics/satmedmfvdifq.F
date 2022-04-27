@@ -67,8 +67,8 @@
 !! (mfscuq.f).
 !! \section detail_satmedmfvidfq GFS satmedmfvdifq Detailed Algorithm 
 !! @{
-      subroutine satmedmfvdifq_run(im,km,ntrac,ntcw,ntrw,ntiw,ntke,     &
-     &     grav,rd,cp,rv,hvap,hfus,fv,eps,epsm1,                        &
+      subroutine satmedmfvdifq_run(im,km,progsigma,ntrac,ntcw,ntrw,     &
+     &     ntiw,ntke,grav,rd,cp,rv,hvap,hfus,fv,eps,epsm1,              &
      &     dv,du,tdt,rtg,tmf,u1,v1,t1,q1,swh,hlw,xmu,garea,zvfun,       &
      &     psk,rbsoil,zorl,u10m,v10m,fm,fh,                             &
      &     tsea,heat,evap,stress,spd1,kpbl,                             &
@@ -91,7 +91,7 @@
       integer, intent(in)  :: sfc_rlm
       integer, intent(in)  :: kinver(:)
       integer, intent(out) :: kpbl(:)
-      logical, intent(in)  :: gen_tend,ldiag3d
+      logical, intent(in)  :: gen_tend,ldiag3d,progsigma
 !
       real(kind=kind_phys), intent(in) :: grav,rd,cp,rv,hvap,hfus,fv,   &
      &                                    eps,epsm1
@@ -299,7 +299,6 @@
           xmfd(i,k) = 0.
           buou(i,k) = 0.
           buod(i,k) = 0.
-          tmf(i,k) = 0.
           ckz(i,k) = ck1
           chz(i,k) = ch1
           rlmnz(i,k) = rlmn0
@@ -313,6 +312,14 @@
           zm(i,k) = zi(i,k+1)
         enddo
       enddo
+!>  - Initialize variables needed for prognostic cumulus closure
+      if(progsigma)then
+         do k=1,km
+            do i=1,im
+               tmf(i,k) = 0.
+            enddo
+         enddo
+      endif
 !>  - Compute horizontal grid size (\p gdx)
       do i=1,im
         gdx(i) = sqrt(garea(i))
@@ -2115,11 +2122,19 @@ c
             qtend      = (f2(i,k)-q1(i,k,1))*rdt
             tdt(i,k)   = tdt(i,k)+ttend
             rtg(i,k,1) = rtg(i,k,1)+qtend
-            tmf(i,k)   = qtend
 !           dtsfc(i)   = dtsfc(i)+cont*del(i,k)*ttend
 !           dqsfc(i)   = dqsfc(i)+conq*del(i,k)*qtend
          enddo
       enddo
+
+      if(progsigma)then
+         do  k = 1,km
+            do i = 1,im
+               tmf(i,k)=(f2(i,k)-q1(i,k,1))*rdt
+            enddo
+         enddo
+      endif
+
       do i = 1,im
         dtsfc(i) = rho_a(i) * cp * heat(i)
         dqsfc(i) = rho_a(i) * hvap * evap(i)

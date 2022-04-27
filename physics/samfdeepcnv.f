@@ -79,7 +79,7 @@
      &    tmf,qmicro,itc,ntc,cliq,cp,cvap,                              &
      &    eps,epsm1,fv,grav,hvap,rd,rv,                                 &
      &    t0c,delt,ntk,ntr,delp,                                        &
-     &    prslp,psp,phil,qtr,prevsq,q,q1,t1,u1,v1,fscav,            &
+     &    prslp,psp,phil,qtr,prevsq,q,q1,t1,u1,v1,fscav,                &
      &    hwrf_samfdeep,progsigma,wclosureflg,cldwrk,rn,kbot,ktop,kcnv, &
      &    islimsk,garea,dot,ncloud,hpbl,ud_mf,dd_mf,dt_mf,cnvw,cnvc,    &
      &    QLCN, QICN, w_upi, cf_upi, CNV_MFD,                           &

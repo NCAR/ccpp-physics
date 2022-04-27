@@ -180,7 +180,7 @@
                 form(i,k)=-1.0*inbu(i,k)*(omega_u(i,k)*delt)
                 fdqb=0.5*((form(i,k)*zdqca(i,k)))
                 termC(i)=termC(i)+inbu(i,k)*   &
-                     (fdqb+fdqa(i))*hvap*zeta(i,k))
+                     (fdqb+fdqa(i))*hvap*zeta(i,k)
                 fdqa(i)=fdqb
              endif
          enddo
