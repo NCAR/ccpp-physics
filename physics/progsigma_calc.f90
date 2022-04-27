@@ -43,7 +43,7 @@
       integer              :: i,k,km1
       real(kind=kind_phys) :: termA(im),termB(im),termC(im),termD(im),   &
                           mcons(im),fdqa(im),form(im,km),              &
-                          qadv(im,km),sigmamax(im),dp(im),inbu(im,km)                         
+                          qadv(im,km),sigmamax(im),dp(im,km),inbu(im,km)                         
                           
 
       real(kind=kind_phys) :: gcvalmx,epsilon,ZZ,cvg,mcon,buy2,   &
@@ -82,7 +82,7 @@
       do k = 2,km1
           do i = 1,im
              if(cnvflg(i))then
-                dp(i) = 1000. * del(i,k)
+                dp(i,k) = 1000. * del(i,k)
              endif
           enddo
        enddo
@@ -128,7 +128,7 @@
             endif
          enddo
       enddo
-      
+
       !compute termD "The vertical integral of the latent heat convergence is limited to the                                        
       !buoyant layers with positive moisture convergence (accumulated from the surface).                                                       
       !Lowest level:                                                                                                               
@@ -140,7 +140,7 @@
        do k = 2,km1
           do i = 1,im
              if(cnvflg(i))then
-                mcon = (hvap*(qadv(i,k)+tmf(i,k)+qmicro(i,k))*dp(i))
+                mcon = (hvap*(qadv(i,k)+tmf(i,k)+qmicro(i,k))*dp(i,k))
                 buy2 = termD(i)+mcon+mcons(i)
 !               Do the integral over buoyant layers with positive mcon acc from surface
                 if(k > kbcon1(i) .and. k < ktcon(i) .and. buy2 > 0.)then
@@ -157,7 +157,7 @@
        do k = 2,km1
           do i = 1,im
              if(cnvflg(i))then
-                tem=(sigmab(i)*zeta(i,k)*inbu(i,k)*dbyo1(i,k))*dp(i)
+                tem=(sigmab(i)*zeta(i,k)*inbu(i,k)*dbyo1(i,k))*dp(i,k)
                 termA(i)=termA(i)+tem
              endif
           enddo
@@ -167,7 +167,7 @@
        do k = 2,km1
           do i = 1,im
              if(cnvflg(i))then
-                tem=(dbyo1(i,k)*inbu(i,k))*dp(i)
+                tem=(dbyo1(i,k)*inbu(i,k))*dp(i,k)
                 termB(i)=termB(i)+tem
              endif
           enddo

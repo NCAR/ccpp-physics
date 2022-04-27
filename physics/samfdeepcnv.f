@@ -80,13 +80,13 @@
      &    eps,epsm1,fv,grav,hvap,rd,rv,                                 &
      &    t0c,delt,ntk,ntr,delp,                                        &
      &    prslp,psp,phil,qtr,prevsq,q,q1,t1,u1,v1,fscav,                &
-     &    hwrf_samfdeep,progsigma,wclosureflg,cldwrk,rn,kbot,ktop,kcnv, &
+     &    hwrf_samfdeep,progsigma,cldwrk,rn,kbot,ktop,kcnv,             &
      &    islimsk,garea,dot,ncloud,hpbl,ud_mf,dd_mf,dt_mf,cnvw,cnvc,    &
      &    QLCN, QICN, w_upi, cf_upi, CNV_MFD,                           &
      &    CNV_DQLDT,CLCN,CNV_FICE,CNV_NDROP,CNV_NICE,mp_phys,mp_phys_mg,&
      &    clam,c0s,c1,betal,betas,evef,pgcon,asolfac,                   &
      &    do_ca, ca_closure, ca_entr, ca_trigger, nthresh, ca_deep,     &
-     &    rainevap, sigmain, sigmaout,                                  &
+     &    rainevap, sigmain, sigmaout, ca_micro,                        &
      &    errmsg,errflg)
 !
       use machine , only : kind_phys
@@ -103,12 +103,12 @@
      &   prslp(:,:),  garea(:), hpbl(:), dot(:,:), phil(:,:)
       real(kind=kind_phys), dimension(:), intent(in) :: fscav
       logical, intent(in)  :: first_time_step,restart,hwrf_samfdeep,    &
-     &     progsigma, wclosureflg
+     &     progsigma
       real(kind=kind_phys), intent(in) :: nthresh
       real(kind=kind_phys), intent(in) :: ca_deep(:)
       real(kind=kind_phys), intent(in) :: sigmain(:,:),qmicro(:,:),     &
      &     tmf(:,:),q(:,:), prevsq(:,:)
-      real(kind=kind_phys), intent(out) :: rainevap(:)
+      real(kind=kind_phys), intent(out) :: rainevap(:), ca_micro(:)
       real(kind=kind_phys), intent(out) :: sigmaout(:,:)
       logical, intent(in)  :: do_ca,ca_closure,ca_entr,ca_trigger
 
@@ -243,7 +243,7 @@ c  physical parameters
 !     parameter(cinacrmx=-120.,cinacrmn=-120.)
       parameter(cinacrmx=-120.,cinacrmn=-80.)
       parameter(bet1=1.875,cd1=.506,f1=2.0,gam1=.5)
-      parameter(betaw=.03,dxcrtas=8.e3,dxcrtuf=15.e3)
+      parameter(betaw=.03,dxcrtuf=15.e3)
 
 !
 !  local variables and arrays
@@ -380,6 +380,7 @@ c
         advfac(i) = 0.
         rainevap(i) = 0.
         omegac(i)=0.
+        ca_micro(i)=0.
         gdx(i) = sqrt(garea(i))
       enddo
 
@@ -2456,21 +2457,21 @@ c
 c
 c------- final changed variable per unit mass flux
 c
-!> - If grid size is less than a threshold value (dxcrtas: currently 8km), the quasi-equilibrium assumption of Arakawa-Schubert is not used any longer.
+!> - If grid size is less than a threshold value (dxcrtas: currently 8km if progsigma is not used and 30km if progsigma is used), the quasi-equilibrium assumption of Arakawa-Schubert is not used any longer.
 !
+      if(progsigma)then
+         dxcrtas=30.e3
+      else
+         dxcrtas=8.e3
+      endif
+
+
       do i = 1, im
          asqecflg(i) = cnvflg(i)
          if(asqecflg(i) .and. gdx(i) < dxcrtas) then
             asqecflg(i) = .false.
          endif
       enddo
-
-!> - If wclosureflg is true, then quasi-equilibrium closure of Arakawa-Schubert is not used any longer, regardless of resolution
-      if(wclosureflg)then
-         do i = 1, im
-            asqecflg(i) = .false.
-         enddo
-      endif
 
 !
 !> - If grid size is larger than the threshold value (i.e., asqecflg=.true.), the quasi-equilibrium assumption is used to obtain the cloud base mass flux. To begin with, calculate the change in the temperature and moisture profiles per unit cloud base mass flux.
@@ -2884,6 +2885,15 @@ c
 
 !> - From Han et al.'s (2017) \cite han_et_al_2017 equation 6, calculate cloud base mass flux as a function of the mean updraft velcoity for the grid sizes where the quasi-equilibrium assumption of Arakawa-Schubert is not valid any longer.
 !!  As discussed in Han et al. (2017) \cite han_et_al_2017 , when dtconv is larger than tauadv, the convective mixing is not fully conducted before the cumulus cloud is advected out of the grid cell. In this case, therefore, the cloud base mass flux is further reduced in proportion to the ratio of tauadv to dtconv.
+   
+      if(progsigma)then
+         do i= 1, im
+            if(cnvflg(i))then
+               ca_micro(i)=sigmab(i)
+            endif
+         enddo
+      endif
+      
       do i= 1, im
         if(cnvflg(i) .and. .not.asqecflg(i)) then
           k = kbcon(i)
