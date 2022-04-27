@@ -619,6 +619,7 @@
         enddo
        enddo
 
+      !> Aerosol direct feedback effect by smoke and dust
       if(aero_dir_fdb) then ! add smoke/dust extinctions
         do k = 1, LMK
           do i = 1, IM

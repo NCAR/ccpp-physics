@@ -1,4 +1,4 @@
-!> \file MYNNPBL_wrapper.F90
+!> \file mynnedmf_wrapper.F90
 !!  This file contains all of the code related to running the MYNN 
 !! eddy-diffusivity mass-flux scheme. 
 

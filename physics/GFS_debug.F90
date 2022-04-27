@@ -726,7 +726,7 @@
                      end if
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dkt         ',    Diag%dkt)
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dku         ',    Diag%dku)
-                     ! CCPP/MYNNPBL only
+                     ! CCPP/MYNNEDMF only
                      if (Model%do_mynnedmf) then
                        if (Model%bl_mynn_output .ne. 0) then
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%edmf_a      ',  Diag%edmf_a)
