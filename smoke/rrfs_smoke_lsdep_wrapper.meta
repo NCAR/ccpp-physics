@@ -5,16 +5,6 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = rrfs_smoke_lsdep_wrapper_init
-  type = scheme
-
-########################################################################
-[ccpp-arg-table]
-  name = rrfs_smoke_lsdep_wrapper_finalize
-  type = scheme
-
-########################################################################
-[ccpp-arg-table]
   name = rrfs_smoke_lsdep_wrapper_run
   type = scheme
 [im]

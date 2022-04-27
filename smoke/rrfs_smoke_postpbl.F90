@@ -11,21 +11,9 @@
 
    private
 
-   public :: rrfs_smoke_postpbl_init, rrfs_smoke_postpbl_run, rrfs_smoke_postpbl_finalize
+   public :: rrfs_smoke_postpbl_run
 
 contains
-
-!> \brief Brief description of the subroutine
-!!
-      subroutine rrfs_smoke_postpbl_init()
-      end subroutine rrfs_smoke_postpbl_init
-
-!> \brief Brief description of the subroutine
-!!
-!! \section arg_table_rrfs_smoke_postpbl_finalize Argument Table
-!!
-      subroutine rrfs_smoke_postpbl_finalize()
-      end subroutine rrfs_smoke_postpbl_finalize
 
 !> \defgroup gsd_chem_group GSD Chem emission driver Module
 !! This is the gsd chemistry

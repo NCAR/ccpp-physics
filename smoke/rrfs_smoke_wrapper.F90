@@ -20,21 +20,9 @@
 
    private
 
-   public :: rrfs_smoke_wrapper_init, rrfs_smoke_wrapper_run, rrfs_smoke_wrapper_finalize
+   public :: rrfs_smoke_wrapper_run
 
 contains
-
-!> \brief Brief description of the subroutine
-!!
-      subroutine rrfs_smoke_wrapper_init()
-      end subroutine rrfs_smoke_wrapper_init
-
-!> \brief Brief description of the subroutine
-!!
-!! \section arg_table_rrfs_smoke_wrapper_finalize Argument Table
-!!
-      subroutine rrfs_smoke_wrapper_finalize()
-      end subroutine rrfs_smoke_wrapper_finalize
 
 !> \defgroup gsd_chem_group GSD Chem emission driver Module
 !! This is the gsd chemistry

@@ -23,10 +23,13 @@
       subroutine sgscloud_radpre_finalize ()
       end subroutine sgscloud_radpre_finalize
 
-!> This interstitial code adds the subgrid clouds to the resolved-scale clouds 
-!! if there is no resolved-scale clouds in that particular grid box. It can also 
-!! specify a cloud fraction for resolved-scale clouds, using Xu-Randall (1996),
-!! if desired.
+!> This interstitial code adds the subgrid clouds to the resolved-scale clouds
+!! if there is no resolved-scale clouds in that particular grid box. It can also
+!! specify a cloud fraction for resolved-scale clouds as is done currently when
+!! using MYNN-EDMF. For clouds coming from the convection schemes (in this case
+!! only used by GF scheme), two cloud fraction options are available:
+!! Xu-Randall (XR1996) or Chaboureau and Bechtold (CB2005), chosen by the
+!! switch "conv_cf_opt" = 0: CB2005, 1: XR1996.
 !> \section arg_table_sgscloud_radpre_run Argument Table
 !! \htmlinclude sgscloud_radpre_run.html
 !!
