@@ -593,9 +593,9 @@
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Tbd%acvb'            , Tbd%acvb)
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Tbd%acvt'            , Tbd%acvt)
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Tbd%hpbl'            , Tbd%hpbl)
-                     if (Model%imfdeepcnv .ge. 0 .or. Model%imfshalcnv .ge. 0) then
+                     if(Model%imfdeepcnv>0 .or. Model%imfshalcnv>0) then
                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Tbd%ud_mf'         , Tbd%ud_mf)
-                     end if
+                     endif
                      if (Model%do_sppt) then
                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Tbd%dtdtnp'        , Tbd%dtdtnp)
                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Tbd%dtotprcp'      , Tbd%dtotprcp)

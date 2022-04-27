@@ -530,16 +530,16 @@
   kind = kind_phys
   intent = out
 [smoke_ext]
-  standard_name = smoke_ext
-  long_name = smoke optical extinction
+  standard_name = extinction_coefficient_in_air_due_to_smoke
+  long_name = extinction coefficient in air due to smoke
   units = various
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = out
 [dust_ext]
-  standard_name = dust_ext
-  long_name = dust optical extinction
+  standard_name = extinction_coefficient_in_air_due_to_dust
+  long_name = extinction coefficient in air due to dust
   units = various
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
