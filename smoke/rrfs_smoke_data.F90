@@ -1,3 +1,6 @@
+!>\file  rrfs_smoke_data.F90
+!! This file contains data for the RRFS-Smoke modules.
+
 module rrfs_smoke_data
   use machine ,        only : kind_phys
   implicit none

@@ -19,8 +19,6 @@
 
 contains
 
-!> \defgroup gsd_chem_group GSD Chem driver Module
-!! This is the gsd chemistry
 !>\defgroup rrfs_smoke_lsdep_wrapper GSD Chem driver Module  
 !> \ingroup gsd_chem_group
 !! This is the GSD Chem driver Module

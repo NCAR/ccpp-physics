@@ -1,3 +1,6 @@
+!>\file  module_plumerise1.F90
+!! This file is the fire plume rise driver.
+
  module module_plumerise1
 
   use rrfs_smoke_data

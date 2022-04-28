@@ -1,3 +1,6 @@
+!>\file  dep_simple_mod.F90
+!! This file contains the Wesely dry deposition module.
+
 module dep_simple_mod
 
   use rrfs_smoke_data

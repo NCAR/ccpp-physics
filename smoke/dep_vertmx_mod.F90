@@ -1,3 +1,6 @@
+!>\file  dep_vertmx_mod.F90
+!! This file calculates change in time of phi due to vertical mixing and dry deposition.
+
 MODULE dep_vertmx_mod
   use rrfs_smoke_data
   use machine , only : kind_phys

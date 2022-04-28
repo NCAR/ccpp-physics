@@ -1,3 +1,6 @@
+!>\file  dust_data_mod.F90
+!! This file contains the data for the dust flux schemes.
+
 module dust_data_mod
 
   use rrfs_smoke_data

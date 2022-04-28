@@ -1,3 +1,6 @@
+!>\file  dep_wet_ls_mod.F90
+!! This file contains aerosol wet deposition module.
+
 module dep_wet_ls_mod
   use rrfs_smoke_data
   use machine ,        only : kind_phys

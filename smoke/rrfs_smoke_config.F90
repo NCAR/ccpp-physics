@@ -1,8 +1,10 @@
+!>\file  rrfs_smoke_config.F90
+!! This file contains the configuration for RRFS-Smoke.
 !
 ! Haiqin.Li@noaa.gov  
 ! 06/2021
 ! constant parameters and chemistry configurations and tracers
-! (This will be splited into three subroutine for configuration, constant and tracers later)
+! (This will be splited into three subroutines for configuration, constant and tracers later)
 ! 06/2021 move configuration into chem nml
 !
 module rrfs_smoke_config

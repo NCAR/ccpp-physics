@@ -1,3 +1,6 @@
+!>\file  dust_fengsha_mod.F90
+!! This file contains the FENGSHA dust scheme.
+
 module dust_fengsha_mod
 !
 !  This module developed by Barry Baker (NOAA ARL)

@@ -1,3 +1,6 @@
+!>\file  plume_data_mod.F90
+!! This file contains data for the fire plume rise module.
+
 module plume_data_mod
 
   use machine , only : kind_phys

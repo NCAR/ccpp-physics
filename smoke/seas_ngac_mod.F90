@@ -1,3 +1,6 @@
+!>\file  seas_ngac_mod.F90
+!! This file contains the ngac sea-salt module.
+
 !-------------------------------------------------------------------------
 !         NASA/GSFC, Data Assimilation Office, Code 910.3, GEOS/DAS      !
 !         Adapted by NOAA/GSD/ESRL                                       !

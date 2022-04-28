@@ -1,3 +1,7 @@
+!>\file dep_dry_gocart_mod.F90
+!! This file is GOCART dry deposition module to calculate the dry deposition
+!! velocities of smoke and dust.
+
 module dep_dry_gocart_mod
 
   use machine ,        only : kind_phys

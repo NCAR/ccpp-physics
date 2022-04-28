@@ -1,3 +1,6 @@
+!>\file  seas_mod.F90
+!! This file contains the sea salt emission module.
+
 module seas_mod
 
   use machine ,         only : kind_phys

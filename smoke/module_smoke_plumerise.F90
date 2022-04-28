@@ -1,3 +1,6 @@
+!>\file  module_smoke_plumerise.F90
+!! This file contains the fire plume rise module.
+
 !-------------------------------------------------------------------------
 !- 12 April 2016
 !- Implementing the fire radiative power (FRP) methodology for biomass burning

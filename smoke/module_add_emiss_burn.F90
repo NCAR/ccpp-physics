@@ -1,3 +1,6 @@
+!>\file  module_add_emiss_burn.F90
+!! This file adds the biomass burning emissions to the smoke field.
+
 module module_add_emiss_burn
 !RAR: significantly modified for the new BB emissions
   use machine ,        only : kind_phys

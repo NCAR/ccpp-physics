@@ -1,3 +1,6 @@
+!>\file dep_dry_mod.F90
+!! This file is for the dry depostion driver.
+
 module dep_dry_mod
 
   use machine ,        only : kind_phys

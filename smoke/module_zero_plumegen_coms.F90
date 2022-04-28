@@ -1,3 +1,6 @@
+!>\file  module_zero_plumegen_coms.F90
+!! This module initilizes variables for the fire plume rise scheme.
+
 module module_zero_plumegen_coms
 
   use machine , only : kind_phys
