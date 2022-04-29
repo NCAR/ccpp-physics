@@ -1,6 +1,7 @@
-!>\file rrtmgp_sw_cloud_sampling.F90
+!> \file rrtmgp_sw_cloud_sampling.F90 
 !!
-
+!> \defgroup rrtmgp_sw_cloud_sampling rrtmgp_sw_cloud_sampling.F90
+!!
 module rrtmgp_sw_cloud_sampling
   use machine,                  only: kind_phys
   use mo_gas_optics_rrtmgp,     only: ty_gas_optics_rrtmgp
@@ -15,15 +16,17 @@ module rrtmgp_sw_cloud_sampling
 
 contains
 
-  ! #########################################################################################
-  ! SUBROTUINE rrtmgp_sw_cloud_sampling_run()
-  ! #########################################################################################
-
 !>\defgroup rrtmgp_sw_cloud_sampling_mod GFS RRTMGP-SW Cloud Sampling Module
 !> @{
 !> \section arg_table_rrtmgp_sw_cloud_sampling_run
 !! \htmlinclude rrtmgp_sw_cloud_sampling.html
 !!
+!> \ingroup rrtmgp_sw_cloud_sampling
+!!
+!! \brief This routine performs the McICA cloud-sampling and maps the shortwave cloud-
+!! optical properties, defined for each spectral band, to each spectral point (g-point).
+!!
+!! \section rrtmgp_sw_cloud_sampling_run
   subroutine rrtmgp_sw_cloud_sampling_run(doSWrad, nCol, nDay, nLev, idxday, iovr,          &
        iovr_convcld, iovr_max, iovr_maxrand, iovr_rand, iovr_dcorr, iovr_exp, iovr_exprand, &
        isubc_sw,icseed_sw, cld_frac, precip_frac, cloud_overlap_param, precip_overlap_param,&
@@ -167,10 +170,5 @@ contains
 
   end subroutine rrtmgp_sw_cloud_sampling_run
 
-  ! #########################################################################################
-  ! SUBROTUINE rrtmgp_sw_cloud_sampling_finalize()
-  ! #########################################################################################  
-  subroutine rrtmgp_sw_cloud_sampling_finalize()
-  end subroutine rrtmgp_sw_cloud_sampling_finalize 
 !> @}
 end module rrtmgp_sw_cloud_sampling

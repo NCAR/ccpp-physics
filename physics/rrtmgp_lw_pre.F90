@@ -1,6 +1,9 @@
-!>\file rrtmgp_lw_pre.F90 
+!> \file rrtmgp_lw_pre.F90
 !!
-
+!> \defgroup rrtmgp_lw_pre rrtmgp_lw_pre.F90
+!!
+!! \brief RRTMGP Longwave pre-processing routine.
+!!
 module rrtmgp_lw_pre
   use machine, only: &
        kind_phys                   ! Working type
@@ -10,24 +13,19 @@ module rrtmgp_lw_pre
 
   implicit none
 
-  public rrtmgp_lw_pre_run,rrtmgp_lw_pre_init,rrtmgp_lw_pre_finalize
+  public rrtmgp_lw_pre_run
 
 contains
 
-  ! #########################################################################################
-  ! SUBROUTINE rrtmgp_lw_pre_init
-  ! #########################################################################################
 !>\defgroup rrtmgp_lw_pre_mode GFS RRTMGP-LW Pre Module
-!> @{
-  subroutine rrtmgp_lw_pre_init ()
-  end subroutine rrtmgp_lw_pre_init
-
-  ! #########################################################################################
-  ! SUBROUTINE rrtmgp_lw_pre_run
-  ! #########################################################################################
 !> \section arg_table_rrtmgp_lw_pre_run
 !! \htmlinclude rrtmgp_lw_pre_run.html
 !!
+!> \ingroup rrtmgp_lw_pre
+!!
+!! \brief
+!!
+!! \section rrtmgp_lw_pre_run
   subroutine rrtmgp_lw_pre_run (doLWrad, semis, sfc_emiss_byband, errmsg, errflg)
 
     ! Inputs
@@ -60,10 +58,4 @@ contains
 
   end subroutine rrtmgp_lw_pre_run
   
-  ! #########################################################################################
-  ! SUBROUTINE rrtmgp_lw_pre_finalize
-  ! #########################################################################################
-  subroutine rrtmgp_lw_pre_finalize ()
-  end subroutine rrtmgp_lw_pre_finalize
-!> @}
 end module rrtmgp_lw_pre

@@ -1,6 +1,9 @@
-!>\file GFS_rrtmgp_pre.F90
+!> \file GFS_rrtmgp_pre.F90
 !!
-
+!> \defgroup GFS_rrtmgp_pre GFS_rrtmgp_pre.F90
+!!
+!! \brief This module contains code to prepare model fields for use by the RRTMGP 
+!! radiation scheme.  
 module GFS_rrtmgp_pre
   use machine, only: &
        kind_phys                   !< Working type
@@ -27,17 +30,18 @@ module GFS_rrtmgp_pre
   integer :: iStr_h2o, iStr_co2, iStr_o3, iStr_n2o, iStr_ch4, iStr_o2, iStr_ccl4, &
        iStr_cfc11, iStr_cfc12, iStr_cfc22 
 
-  public GFS_rrtmgp_pre_run,GFS_rrtmgp_pre_init,GFS_rrtmgp_pre_finalize  
+  public GFS_rrtmgp_pre_run,GFS_rrtmgp_pre_init
 contains
-  
-  ! #########################################################################################
-  ! SUBROUTINE GFS_rrtmgp_pre_init
-  ! #########################################################################################
+
 !>\defgroup gfs_rrtmgp_pre GFS RRTMGP Pre Module
-!> @{
 !! \section arg_table_GFS_rrtmgp_pre_init
 !! \htmlinclude GFS_rrtmgp_pre_init.html
 !!
+!> \ingroup GFS_rrtmgp_pre
+!!
+!! \brief Actuve gas-names are read from namelist. Set to interstitial%active_gases.
+!!
+!! \section GFS_rrtmgp_pre_init
   subroutine GFS_rrtmgp_pre_init(nGases, active_gases, active_gases_array, errmsg, errflg)
     ! Inputs
     integer, intent(in) :: &
@@ -98,11 +102,15 @@ contains
   end subroutine GFS_rrtmgp_pre_init
 
   ! #########################################################################################
-  ! SUBROUTINE GFS_rrtmgp_pre_run
-  ! #########################################################################################
 !> \section arg_table_GFS_rrtmgp_pre_run
 !! \htmlinclude GFS_rrtmgp_pre_run.html
 !!
+!> \ingroup GFS_rrtmgp_pre
+!!
+!! \brief Sanitize inputs for use in RRTMGP.
+!!
+!! \section GFS_rrtmgp_pre_run
+  ! ######################################################################################### 
   subroutine GFS_rrtmgp_pre_run(me, nCol, nLev, nTracers, i_o3, lsswr, lslwr, fhswr, fhlwr, &
        xlat, xlon,  prsl, tgrs, prslk, prsi, qgrs, tsfc, coslat, sinlat, con_g, con_rd,     &
        con_eps, con_epsm1, con_fvirt, con_epsqs, solhr, minGPpres, maxGPpres, minGPtemp,    &
@@ -386,10 +394,4 @@ contains
 
   end subroutine GFS_rrtmgp_pre_run
   
-  ! #########################################################################################
-  ! SUBROUTINE GFS_rrtmgp_pre_finalize
-  ! #########################################################################################
-  subroutine GFS_rrtmgp_pre_finalize ()
-  end subroutine GFS_rrtmgp_pre_finalize
-!> @}
 end module GFS_rrtmgp_pre

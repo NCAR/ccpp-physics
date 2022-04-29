@@ -1,6 +1,9 @@
-!>\file GFS_rrtmgp_sw_post.F90
+!> \file GFS_rrtmgp_sw_post.F90
 !!
-
+!> \defgroup GFS_rrtmgp_sw_post GFS_rrtmgp_sw_post.F90
+!!
+!! \brief RRTMGP Shortwave post-processing routine.
+!!
 module GFS_rrtmgp_sw_post
   use machine,                   only: kind_phys
   use module_radiation_aerosols, only: NSPC1
@@ -10,24 +13,27 @@ module GFS_rrtmgp_sw_post
   use rrtmgp_sw_gas_optics,      only: sw_gas_props
   implicit none
 
-  public GFS_rrtmgp_sw_post_init,GFS_rrtmgp_sw_post_run,GFS_rrtmgp_sw_post_finalize
+  public GFS_rrtmgp_sw_post_run
 
 contains
 
-  ! #########################################################################################
-  ! SUBROUTINE GFS_rrtmgp_sw_post_init
-  ! #########################################################################################
 !>\defgroup gfs_rrtmgp_sw_post_mod GFS RRTMGP-SW Post Module
-!> @{
-  subroutine GFS_rrtmgp_sw_post_init()
-  end subroutine GFS_rrtmgp_sw_post_init
-
-  ! #########################################################################################
-  ! SUBROUTINE GFS_rrtmgp_sw_post_run
-  ! #########################################################################################
 !> \section arg_table_GFS_rrtmgp_sw_post_run
 !! \htmlinclude GFS_rrtmgp_sw_post_run.html
 !!
+!> \ingroup GFS_rrtmgp_sw_post
+!! RRTMGP Shortwave post-processing routine.
+!!
+!! \brief The all-sky shortwave radiation tendency is computed, the clear-sky tendency is 
+!! computed if requested.
+!!
+!! RRTMGP surface and TOA fluxes are copied to fields that persist between radiation/physics
+!! calls.
+!!
+!! (optional) Save additional diagnostics.
+!!
+!! \section GFS_rrtmgp_sw_post_run
+ ! #########################################################################################
   subroutine GFS_rrtmgp_sw_post_run (nCol, nLev, nDay, idxday, lsswr, do_sw_clrsky_hr,      &
        save_diag, fhswr,  coszen, coszdg, t_lay, p_lev, sfc_alb_nir_dir, sfc_alb_nir_dif,   &
        sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, fluxswUP_allsky,                               &
@@ -277,10 +283,4 @@ contains
     endif
   end subroutine GFS_rrtmgp_sw_post_run
 
-  ! #########################################################################################
-  ! SUBROUTINE GFS_rrtmgp_sw_post_finalize
-  ! #########################################################################################
-  subroutine GFS_rrtmgp_sw_post_finalize ()
-  end subroutine GFS_rrtmgp_sw_post_finalize
-!> @}
 end module GFS_rrtmgp_sw_post

@@ -1,23 +1,30 @@
+! ######################################################################################
+!> \file GFS_rrtmgp_sw_pre.F90
+!!
+!! This file contains code to gather the sunlit points for the RRTMGP shortwave scheme.
+!!
+!> \defgroup GFS_rrtmgp_sw_pre RRTMGP Shortwave pre
+!!
+!! \brief *TODO* Combine with rrtmg_sw_pre.F90, maybe call sw_rad_pre.F90, use by both.
+!!
+! ######################################################################################
 module GFS_rrtmgp_sw_pre
   use machine,               only: kind_phys
   use mo_gas_optics_rrtmgp,  only: ty_gas_optics_rrtmgp
   use rrtmgp_sw_gas_optics,  only: sw_gas_props
-
-  public GFS_rrtmgp_sw_pre_run, GFS_rrtmgp_sw_pre_init, GFS_rrtmgp_sw_pre_finalize
+  public GFS_rrtmgp_sw_pre_run
 contains
 
-  ! #########################################################################################
-  ! SUBROUTINE GFS_rrtmgp_sw_pre_init
-  ! #########################################################################################
-  subroutine GFS_rrtmgp_sw_pre_init ()
-  end subroutine GFS_rrtmgp_sw_pre_init
-
-  ! #########################################################################################
-  ! SUBROUTINE GFS_rrtmgp_sw_pre_run
   ! #########################################################################################
 !> \section arg_table_GFS_rrtmgp_sw_pre_run
 !! \htmlinclude GFS_rrtmgp_sw_pre.html
 !!
+!! \section GFS_rrtmgp_sw_pre RRTMGP shortwave pre routine
+!! @{ 
+!! 
+!! Gather the sunlit points for shortwave radiation.
+!!
+ ! #########################################################################################  
   subroutine GFS_rrtmgp_sw_pre_run(nCol, doSWrad, coszen, nday, idxday, sfc_alb_nir_dir,    &
        sfc_alb_nir_dif, sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, sfc_alb_nir_dir_byband,       &
        sfc_alb_nir_dif_byband, sfc_alb_uvvis_dir_byband, sfc_alb_uvvis_dif_byband, errmsg,  &
@@ -88,11 +95,5 @@ contains
     endif
 
   end subroutine GFS_rrtmgp_sw_pre_run
-
-  ! #########################################################################################
-  ! SUBROUTINE GFS_rrtmgp_sw_pre_finalize
-  ! #########################################################################################
-  subroutine GFS_rrtmgp_sw_pre_finalize ()
-  end subroutine GFS_rrtmgp_sw_pre_finalize
-
+!> @}
 end module GFS_rrtmgp_sw_pre
