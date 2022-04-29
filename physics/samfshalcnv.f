@@ -513,7 +513,6 @@ c
         enddo
       enddo
 
-
       do i = 1,im
          omegac(i)=0.
       enddo
@@ -1551,12 +1550,16 @@ c
             endif
          enddo
 c     
-!     > - Calculate the mean updraft velocity within the cloud (omega). 
+c Compute zeta for prog closure
          do k = 2, km1
             do i = 1, im
                if (cnvflg(i)) then
                   if(k > kbcon1(i) .and. k < ktcon(i)) then
-                     zeta(i,k)=eta(i,k)*(omegac(i)/omega_u(i,k))
+                     if(omega_u(i,k) .ne. 0.)then
+                        zeta(i,k)=eta(i,k)*(omegac(i)/omega_u(i,k))
+                     else
+                        zeta(i,k)=0.
+                     endif
                      zeta(i,k)=MAX(0.,zeta(i,k))
                      zeta(i,k)=MIN(1.,zeta(i,k))
                   endif

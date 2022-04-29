@@ -26,8 +26,8 @@
 
 !     intent in
       integer, intent(in)  :: im,km,kbcon1(im),ktcon(im)
-      real,    intent(in)  :: hvap,delt
-      real,    intent(in)  :: prevsq(im,km), q(im,km),del(im,km),    &
+      real(kind=kind_phys), intent(in)  :: hvap,delt
+      real(kind=kind_phys), intent(in)  :: prevsq(im,km), q(im,km),del(im,km),    &
            qmicro(im,km),tmf(im,km),dbyo1(im,km),zdqca(im,km),           &
            omega_u(im,km),zeta(im,km),gdx(im)
       logical, intent(in)  :: flag_init,flag_restart,cnvflg(im),flag_shallow
@@ -63,7 +63,8 @@
          do i = 1,im
             sigmaout(i,k)=0.
             inbu(i,k)=0.
-            form(i,k)=0. 
+            form(i,k)=0.
+            dp(i,k)=0.
          enddo
       enddo
      
@@ -157,7 +158,7 @@
        do k = 2,km1
           do i = 1,im
              if(cnvflg(i))then
-                tem=(sigmab(i)*zeta(i,k)*inbu(i,k)*dbyo1(i,k))*dp(i,k)
+                tem=sigmab(i)*zeta(i,k)*inbu(i,k)*dbyo1(i,k)*dp(i,k)
                 termA(i)=termA(i)+tem
              endif
           enddo
@@ -167,7 +168,7 @@
        do k = 2,km1
           do i = 1,im
              if(cnvflg(i))then
-                tem=(dbyo1(i,k)*inbu(i,k))*dp(i,k)
+                tem=zeta(i,k)*dbyo1(i,k)*inbu(i,k)*dp(i,k)
                 termB(i)=termB(i)+tem
              endif
           enddo

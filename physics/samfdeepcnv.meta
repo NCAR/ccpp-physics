@@ -660,14 +660,6 @@
   type = real
   kind = kind_phys
   intent = out
-[ca_micro]
-  standard_name = output_prognostic_sigma_two
-  long_name = output of prognostic area fraction two
-  units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = out
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
