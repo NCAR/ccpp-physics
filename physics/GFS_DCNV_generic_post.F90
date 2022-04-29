@@ -148,5 +148,4 @@
       endif ! if (lssav)
 
     end subroutine GFS_DCNV_generic_post_run
-!> @}
     end module GFS_DCNV_generic_post

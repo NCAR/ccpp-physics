@@ -29,7 +29,7 @@ contains
         ! Interface variables
         integer,              intent(in) :: im, levs
         real(kind=kind_phys), intent(in) :: dtf
-        logical,              intent(in) :: ldiag_ugwp      !< flag for CIRES UGWP Diagnostics
+        logical,              intent(in) :: ldiag_ugwp      ! flag for CIRES UGWP Diagnostics
 
         real(kind=kind_phys), intent(in),    dimension(:)   :: zmtb, zlwb, zogw
         real(kind=kind_phys), intent(in),    dimension(:)   :: tau_mtb, tau_ogw, tau_tofd, tau_ngw

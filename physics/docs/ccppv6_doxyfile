@@ -133,6 +133,7 @@ INPUT                  =  pdftxt/mainpage.txt              \
                           pdftxt/GFS_NOAH.txt     \
                           pdftxt/GFS_SFCSICE.txt  \
                           pdftxt/GFS_SATMEDMFVDIFQ.txt    \
+                          pdftxt/GFS_HEDMF.txt    \
                           pdftxt/GFS_NOAHMP.txt    \
                           pdftxt/GFS_UGWPv0.txt   \
                           pdftxt/GFS_unified_ugwp.txt  \
@@ -150,12 +151,12 @@ INPUT                  =  pdftxt/mainpage.txt              \
                           pdftxt/THOMPSON.txt        \
                           pdftxt/suite_input.nml.txt    \
                           pdftxt/RE6/FV3_RRFS_v1beta_input.nml \
-                        ../../../data/GFS_typedefs.F90    \
-                        ../gfdl_fv_sat_adj.F90    \
+                        ../fv_sat_adj.F90    \
                         ../GFS_time_vary_pre.fv3.F90 \
                         ../GFS_rad_time_vary.fv3.F90  \
                         ../GFS_phys_time_vary.fv3.F90 \
                         ../get_prs_fv3.F90     \
+                        ../get_phi_fv3.F90        \
                         ../ozne_def.f                 \
                         ../ozinterp.f90               \
                         ../h2o_def.f                 \
@@ -166,14 +167,27 @@ INPUT                  =  pdftxt/mainpage.txt              \
                         ../iccninterp.F90          \
                         ../sfcsub.F  \
                         ../gcycle.F90                  \
-                        ../GFS_suite_interstitial.F90    \
+                        ../GFS_suite_interstitial_1.F90    \
+                        ../GFS_suite_interstitial_2.F90    \
+                        ../GFS_suite_interstitial_3.F90    \
+                        ../GFS_suite_interstitial_4.F90    \
+                        ../GFS_suite_interstitial_5.F90    \
+                        ../GFS_suite_interstitial_phys_reset.F90    \
+                        ../GFS_suite_interstitial_rad_reset.F90    \
+                        ../GFS_suite_stateout_reset.F90    \
+                        ../GFS_suite_stateout_update.F90     \
+                        ../GFS_surface_composites_inter.F90     \
+                        ../GFS_surface_composites_pre.F90      \
+                        ../GFS_surface_composites_post.F90      \
+                        ../GFS_surface_loop_control_part1.F90   \
+                        ../GFS_surface_loop_control_part2.F90   \
                         ../GFS_radiation_surface.F90     \
                         ../GFS_rrtmg_pre.F90             \
                         ../GFS_rrtmg_post.F90           \
                         ../GFS_rrtmg_setup.F90          \
                         ../rad_sw_pre.F90              \
-                        ../module_SGSCloud_RadPre.F90    \
-                        ../module_SGSCloud_RadPost.F90   \
+                        ../sgscloud_radpre.F90    \
+                        ../sgscloud_radpost.F90   \
                         ../radsw_main.F90                \
                         ../rrtmg_sw_post.F90             \
                         ../rrtmg_lw_pre.F90              \
@@ -182,6 +196,7 @@ INPUT                  =  pdftxt/mainpage.txt              \
                         ../radiation_aerosols.f          \
                         ../radiation_astronomy.f         \
                         ../radiation_clouds.f            \
+                        ../radiation_cloud_overlap.F90    \
                         ../radiation_gases.f             \
                         ../radiation_surface.f           \
                         ../radlw_param.f \
@@ -205,41 +220,43 @@ INPUT                  =  pdftxt/mainpage.txt              \
                         ../rrtmgp_lw_cloud_sampling.F90      \
                         ../rrtmgp_lw_rte.F90     \
                         ../GFS_rrtmgp_lw_post.F90    \
-                        ../dcyc2.f        \
+                        ../dcyc2t3.f        \
                         ../sfc_diff.f   \
                         ../sfc_diag.f                \
                         ../sfc_diag_post.F90          \
-                        ../module_MYNNSFC_wrapper.F90 \
-                        ../module_sf_mynn.F90         \
                         ../sfc_nst.f                  \
+                        ../sfc_nst_pre.f              \
+                        ../sfc_nst_post.f             \
                         ../sfc_ocean.F                \
                         ../module_nst_model.f90       \
                         ../module_nst_parameters.f90  \
                         ../module_nst_water_prop.f90  \
-                        ../sfc_drv.f                  \
+                        ../lsm_noah.f                  \
                         ../sflx.f                     \
                         ../namelist_soilveg.f   \
                         ../set_soilveg.f        \
-                        ../sfc_noahmp_drv.F90           \
+                        ../noahmpdrv.F90           \
                         ../module_sf_noahmplsm.f90    \
                         ../module_sf_noahmp_glacier.f90  \
                         ../noahmp_tables.f90          \
-                        ../GFS_surface_generic.F90   \
+                        ../GFS_surface_generic_pre.F90   \
+                        ../GFS_surface_generic_post.F90   \
                         ../surface_perturbation.F90 \
-                        ../GFS_DCNV_generic.F90      \
-                        ../GFS_SCNV_generic.F90     \
+                        ../GFS_DCNV_generic_pre.F90      \
+                        ../GFS_DCNV_generic_post.F90   \
+                        ../GFS_SCNV_generic_pre.F90     \
+                        ../GFS_SCNV_generic_post.F90     \
                         ../sfc_sice.f \
                         ../satmedmfvdifq.F  \
                         ../mfpbltq.f         \
                         ../mfscuq.f          \
                         ../tridi.f          \
-                        ../GFS_GWD_generic.F90 \
-                        ../cires_ugwp.F90    \
+                        ../GFS_GWD_generic_pre.F90 \
+                        ../GFS_GWD_generic_post.F90   \
                         ../unified_ugwp.F90         \
                         ../drag_suite.F90           \
                         ../cires_tauamf_data.F90    \
                         ../cires_ugwp.F90           \
-                        ../cires_ugwp.meta             \
                         ../cires_ugwp_initialize.F90     \
                         ../cires_ugwp_module.F90       \
                         ../cires_ugwp_post.F90         \
@@ -250,12 +267,18 @@ INPUT                  =  pdftxt/mainpage.txt              \
                         ../h2ophys.f \
                         ../samfdeepcnv.f \
                         ../gwdc.f \
+                        ../gwdc_pre.f    \
+                        ../gwdc_post.f         \
                         ../samfshalcnv.f \
                         ../cnvc90.f \
                         ../module_bfmicrophysics.f \
                         ../gfdl_cloud_microphys.F90 \
                         ../module_gfdl_cloud_microphys.F90 \
-                        ../GFS_MP_generic.F90 \
+                        ../GFS_MP_generic_pre.F90 \
+                        ../GFS_MP_generic_post.F90   \
+                        ../GFS_PBL_generic_common.F90    \
+                        ../GFS_PBL_generic_pre.F90      \
+                        ../GFS_PBL_generic_post.F90     \
                         ../calpreciptype.f90   \
                         ../GFS_stochastics.F90   \
                         ../cu_gf_driver.F90 \
@@ -263,11 +286,11 @@ INPUT                  =  pdftxt/mainpage.txt              \
                         ../cu_gf_deep.F90   \
                         ../cu_gf_sh.F90     \
                         ../cu_gf_driver_post.F90 \
-                        ../module_MYNNPBL_wrapper.F90 \
+                        ../mynnpbl_wrapper.F90 \
                         ../module_bl_mynn.F90   \
-                        ../module_MYNNSFC_wrapper.F90 \
+                        ../mynnsfc_wrapper.F90 \
                         ../module_sf_mynn.F90  \
-                        ../sfc_drv_ruc.F90   \
+                        ../lsm_ruc.F90   \
                         ../module_sf_ruclsm.F90    \
                         ../namelist_soilveg_ruc.F90 \
                         ../set_soilveg_ruc.F90   \
@@ -519,7 +542,7 @@ HIDE_UNDOC_RELATIONS   = YES
 HAVE_DOT               = YES
 DOT_NUM_THREADS        = 0
 DOT_FONTNAME           = Source Sans Pro
-DOT_FONTSIZE           = 16.0
+DOT_FONTSIZE           = 
 DOT_FONTPATH           =
 CLASS_GRAPH            = YES
 COLLABORATION_GRAPH    = YES

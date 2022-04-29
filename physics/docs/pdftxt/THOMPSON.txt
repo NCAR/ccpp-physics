@@ -76,8 +76,6 @@ for the model to provide useful guidance for aircraft icing forecasts
 
 \author Ruiyu Sun (NCEP Environmental Modeling Center): Ruiyu.Sun@noaa.gov and Greg Thompson
 
-\todo nml dt_inner/sedi-semi/decfl
-
 Three mechanisms are available improve the stability of the scheme for weather forecast applications: 
 \a inner \a loop, \a subcycle, and \a semi-Lagrangian \a sedimentation \a of \a rain \a and \a graupel. 
 The inner loop  and the subcycle are similar in that the physics time step is subdivided and the scheme 
@@ -86,7 +84,7 @@ With the inner loop method, namelist variable \b dt_inner is used to set the sho
 Conversely, the subcycle method is controlled by CCPP Framework through the "subcycle loop" in the suite definition file. 
 The two methods should be used exclusively. The Semi-Lagrangian sedimentation of rain and graupel (based on Juang and Hong 2010 \cite Henry_Juang_2010 ) 
 increases numerical stability by applying the subtime step only to sedimentation computation. 
-Two namelist variables control the usage of the semi-Lagrangian sedimentation, \b sedi-semi and \b decfl. 
+Two namelist variables control the usage of the semi-Lagrangian sedimentation, \b sedi_semi and \b decfl. 
 Sedi-semi is set to ‘true’ to activate the method. Decfl is a parameter that needs to avoid deformation of the arriving grids, currently, "10". 
 
 \section intra_thompson Intraphysics Communication

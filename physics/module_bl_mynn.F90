@@ -7011,9 +7011,8 @@ ENDIF !END Debugging
 END SUBROUTINE DMP_MF
 !=================================================================
 !>\ingroup gsd_mynn_edmf
-subroutine condensation_edmf(QT,THL,P,zagl,THV,QC)
-!
 !> zero or one condensation for edmf: calculates THV and QC
+subroutine condensation_edmf(QT,THL,P,zagl,THV,QC)
 !
 real,intent(in)   :: QT,THL,P,zagl
 real,intent(out)  :: THV

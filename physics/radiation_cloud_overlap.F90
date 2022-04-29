@@ -1,3 +1,7 @@
+!>\file radiation_cloud_overlap.F90
+!!
+
+!>\defgroup rad_cld_ovr_mod Radiation Cloud Overlap Module
 module module_radiation_cloud_overlap
   use physparam,        only : kind_phys
   implicit none
@@ -9,12 +13,14 @@ module module_radiation_cloud_overlap
   end interface
   
 contains
+
   ! ######################################################################################
   ! Hogan et al. (2010)
   ! "Effect of improving representation of horizontal and vertical cloud structure on the 
   ! Earth's global radiation budget. Part I: Review and parametrization"
   ! https://rmets.onlinelibrary.wiley.com/doi/full/10.1002/qj.647
   ! ######################################################################################
+!> see Shonk et al.(2010) \cite shonk_et_al_2010
   subroutine cmp_dcorr_lgth_hogan(nCol, lat, con_pi, dcorr_lgth)
     ! Inputs
     integer, intent(in) :: &
@@ -44,6 +50,7 @@ contains
   ! atmospheric General Circulation Model"
   ! 10.5194/acp-12-9097-2012
   ! ######################################################################################
+!>\see Oreopoulos et al.(2012) \cite Oreopoulos_2012
   subroutine cmp_dcorr_lgth_oreopoulos(nCol, lat, juldat, yearlength, dcorr_lgth)
     ! Inputs
     integer, intent(in) :: &
@@ -84,6 +91,7 @@ contains
   ! ######################################################################################
   !
   ! ######################################################################################
+!>This subroutine provides the alpha cloud overlap parameter for both RRTMG and RRTMGP
   subroutine get_alpha_exper(nCol, nLay, iovr, iovr_exprand, dzlay,    &
                              dcorr_lgth, cld_frac, alpha)
     

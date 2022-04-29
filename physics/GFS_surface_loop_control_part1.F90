@@ -12,8 +12,8 @@
 !! \section arg_table_GFS_surface_loop_control_part1_run Arguments
 !! \htmlinclude GFS_surface_loop_control_part1_run.html
 !!
-!!  \section general General Algorithm
-!!  \section detailed Detailed Algorithm
+!!  \section gen_loop1 General Algorithm
+!!  \section detailed_loop1 Detailed Algorithm
 !!  @{
 
       subroutine GFS_surface_loop_control_part1_run (im, iter,       &

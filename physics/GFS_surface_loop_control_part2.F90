@@ -2,7 +2,7 @@
 !!  This file contains the GFS_surface_loop_control_part2 scheme.
 
 !> \defgroup GFS_surface_loop_control GFS_surface_loop_control scheme
-!! @{
+!> @{
 
       module GFS_surface_loop_control_part2
       contains
@@ -16,7 +16,7 @@
 #endif
 !!  \section general General Algorithm
 !!  \section detailed Detailed Algorithm
-!!  @{
+!>  @{
 
       subroutine GFS_surface_loop_control_part2_run (im, lsm, lsm_noahmp, iter,&
        wind, flag_guess, flag_iter, dry, wet, icy, nstf_name1, errmsg, errflg)

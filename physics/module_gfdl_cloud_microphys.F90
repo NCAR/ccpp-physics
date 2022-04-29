@@ -4751,7 +4751,7 @@ end subroutine interpolate_z
 !> \ingroup mod_gfdl_cloud_mp
 !! The subroutine 'cloud_diagnosis' diagnoses the radius of cloud
 !! species.
-!>author Linjiong Zhoum, Shian-Jiann Lin
+!>\author Linjiong Zhoum, Shian-Jiann Lin
 ! =======================================================================
 subroutine cloud_diagnosis (is, ie, ks, ke, den, delp, lsm, qmw, qmi, qmr, qms, qmg, t, &
         rew, rei, rer, res, reg)

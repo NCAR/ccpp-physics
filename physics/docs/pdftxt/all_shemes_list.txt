@@ -9,9 +9,6 @@ which facilitates model development and code maintenance. Additionally, we are l
 
 
 \b Radiation
- - \todo GFS_RRTMGP scheme page 
-
-
  - \subpage GFS_RRTMG 
  - \subpage SGSCLOUD_page 
 
@@ -89,7 +86,7 @@ Table 1.  Physics suite options included in this documentation.
 |\b Shallow \b Cu  | \ref GFS_SAMFshal  |  \ref GFS_SAMFshal      |  \ref CU_GF      | \ref MYNNEDMF               | \ref MYNNEDMF      |  \ref MYNNEDMF |
 |\b Microphysics   | \ref GFDL_cloud    |  \ref THOMPSON w/o AA   |  \ref THOMPSON   | \ref THOMPSON               | \ref THOMPSON      | \ref NSSLMICRO_page     |
 |\b PBL/TURB       | \ref GFS_SATMEDMFVDIFQ     |  \ref GFS_SATMEDMFVDIFQ  |  \ref MYNNEDMF     | \ref MYNNEDMF    | \ref MYNNEDMF     |   \ref MYNNEDMF    |
-|\b Radiation      | \ref GFS_RRTMG     |  \ref GFS_RRTMGP        |  \ref GFS_RRTMG  | \ref GFS_RRTMG              | \ref GFS_RRTMG     |   \ref GFS_RRTMG    |
+|\b Radiation      | \ref GFS_RRTMG     |  \ref GFS_RRTMG        |  \ref GFS_RRTMG  | \ref GFS_RRTMG              | \ref GFS_RRTMG     |   \ref GFS_RRTMG    |
 |\b Surface \b Layer | \ref GFS_SFCLYR  |  \ref GFS_SFCLYR        | \ref SFC_MYNNSFL | \ref SFC_MYNNSFL            | \ref SFC_MYNNSFL   |   \ref SFC_MYNNSFL  |
 |\b LSM            | \ref GFS_NOAH      |  \ref NoahMP            |  \ref RUCLSM     | \ref RUCLSM                 |   \ref NoahMP      | \ref GFS_NOAH   |
 |\b Gravity \b Wave \b Drag| \ref GFS_UGWP_v0  |  \ref GFS_UNIFIED_UGWP |  \ref GFS_drag_suite  | \ref GFS_drag_suite | \ref  GFS_UGWP_v0  |   \ref GFS_UGWP_v0   |

@@ -154,12 +154,6 @@
 !! Forecast System (GFS) include (i) cloud liquid/ice water path; (ii)
 !! the fraction of clouds; (iii) effective radius of water/ice droplet:
 !!
-!! Cloud prediction model (namelist control parameter - \b NTCW, \b IMP_PHYSICS):
-!!\n NTCW=0: legacy diagnostic cloud scheme based on RH-table lookup table
-!!\n NTCW>0: prognostic cloud condensate
-!!\n IMP_PHYSICS =98/99: Zhao-Carr-Sundqvist MP - Xu-Randall diagnostic cloud fraction
-!!\n IMP_PHYSICS =11: GFDL MP - unified diagnostic cloud fraction provided by GFDL MP
-!!
 !! Cloud overlapping method (namelist control parameter - \b IOVR)
 !!\n IOVR=0: randomly overlapping vertical cloud layers
 !!\n IOVR=1: maximum-random overlapping vertical cloud layers

@@ -379,6 +379,11 @@ show some variables in the namelist that must match the SDF.
 <tr><td>mp_print          <td>gfdl_cloud_microphys       <td>\a .true. to turn on GFDL cloud microphysics debugging print out. (not supported in GFS physics)       <td>.false.
 <tr><td>ltaerosol       <td>mp_thompson               <td>flag for using aerosol climotology in Thompson MP scheme          <td>.false.
 <tr><td>ttendlim        <td>mp_thompson               <td>temperature tendency limiter per time step in K/s, set to < 0 to deactivate   <td>-999.0
+<tr><td>ext_diag_thompson   <td>mp_thompson           <td>flag for extended diagnostic output from Thompson MP           <td>.false.
+<tr><td>thompson_ext_ndiag3d  <td>mp_thompson         <td>number of 3d arrays for extended diagnostic output from Thompson MP   <td> 37      
+<tr><td>dt_inner        <td>mp_thompson               <td>time step for the inner loop in second                          <td>-999.0
+<tr><td>sedi_semi       <td>mp_thompson               <td>flag for semi Lagrangian sedi of rain                           <td>.false.
+<tr><td>decfl           <td>mp_thompson               <td>deformed CFL factor                                             <td>8
 <tr><td>effr_in         <td>gfdl_cloud_microphys, mp_thompson, m_micro          <td>flag for using input cloud effective radii calculation    <td>.false.
 <tr><td>cnvcld          <td>see \a GFS_typedefs.F90          <td>flag for convective cloud                      <td>.false.
 <tr><td>lgfdlmprad      <td>GFS_rrtmg_pre          <td>flag for GFDL mp scheme and radiation consistency     <td>.false.

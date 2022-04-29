@@ -8,12 +8,11 @@ National Centers for Environmental Prediction (NCEP) in XXXX. GFS_v17_p8 is a pr
 the GFS_v17 suite. The primary difference between the GFS_v16 and GFS_v17 suites is: 
 - \b Microphysics: The replacement of \ref GFDL_cloud with \ref THOMPSON 
 - \b Deep \b Cumulus: \ref ca_page
-- \b Radiation : The replacement of \ref GFS_RRTMG with \ref GFS_RRTMGP
 - \b Gravity \b Wave \b Drag: The replacement of \ref GFS_UGWP_v0 with \ref GFS_UNIFIED_UGWP 
 - \b Land \b Surface \b Model: The replacement of \ref GFS_NOAH with \ref NoahMP
 
 Suite GFS_v17_p8 uses the parameterizations in the following order:
- - \ref GFS_RRTMGP
+ - \ref GFS_RRTMG
  - \ref GFS_SFCLYR
  - \ref GFS_NSST
  - \ref NoahMP

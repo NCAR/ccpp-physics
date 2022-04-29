@@ -17,8 +17,8 @@
 !! \section arg_table_sfc_diag_run Arguments
 !! \htmlinclude sfc_diag_run.html
 !!
-!!  \section general General Algorithm
-!!  \section detailed Detailed Algorithm
+!!  \section gen_sfc_diag General Algorithm
+!!  \section detailed_sfc_diag Detailed Algorithm
       subroutine sfc_diag_run                                           &
      &                   (im,grav,cp,eps,epsm1,ps,u1,v1,t1,q1,prslki,   &
      &                    evap,fm,fh,fm10,fh2,tskin,qsurf,thsfc_loc,    &
