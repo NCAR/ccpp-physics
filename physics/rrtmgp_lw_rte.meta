@@ -36,6 +36,20 @@
   dimensions = ()
   type = logical  
   intent = in
+[doGP_sgs_cnv]
+  standard_name = flag_to_include_sgs_convective_cloud_in_RRTMGP
+  long_name = logical flag to control sgs convective cloud in RRTMGP
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[doGP_sgs_mynn]
+  standard_name = flag_to_include_sgs_MYNN_EDMF_cloud_in_RRTMGP
+  long_name = logical flag to control MYNN-EDMF PBL cloud in RRTMGP
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [ncol]
   standard_name = horizontal_loop_extent
   long_name = horizontal dimension
@@ -81,6 +95,27 @@
   intent = inout
 [lw_optical_props_clouds]
   standard_name = longwave_optical_properties_for_cloudy_atmosphere
+  long_name = Fortran DDT containing RRTMGP optical properties
+  units = DDT
+  dimensions = ()
+  type = ty_optical_props_2str
+  intent = inout
+[lw_optical_props_precipByBand]
+  standard_name = longwave_optical_properties_for_precipitation_by_band
+  long_name = Fortran DDT containing RRTMGP optical properties
+  units = DDT
+  dimensions = ()
+  type = ty_optical_props_2str
+  intent = inout
+[lw_optical_props_cnvcloudsByBand]
+  standard_name = longwave_optical_properties_for_convective_cloudy_atmosphere_by_band
+  long_name = Fortran DDT containing RRTMGP optical properties
+  units = DDT
+  dimensions = ()
+  type = ty_optical_props_2str
+  intent = inout
+[lw_optical_props_MYNNcloudsByBand]
+  standard_name = longwave_optical_properties_for_MYNN_EDMF_PBL_cloudy_atmosphere_by_band
   long_name = Fortran DDT containing RRTMGP optical properties
   units = DDT
   dimensions = ()
@@ -165,9 +200,9 @@
   kind = len=*
   intent = out
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out

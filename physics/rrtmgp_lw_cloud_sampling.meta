@@ -14,12 +14,33 @@
   dimensions = ()
   type = logical
   intent = in
-[doGP_lwscat] 
-  standard_name = flag_to_include_longwave_scattering_in_cloud_optics
-  long_name = logical flag to control the addition of LW scattering in RRTMGP 
+[imfdeepcnv]
+  standard_name = control_for_deep_convection_scheme
+  long_name = flag for mass-flux deep convection scheme
   units = flag
   dimensions = ()
-  type = logical
+  type = integer
+  intent = in
+[imfdeepcnv_gf]
+  standard_name = identifier_for_grell_freitas_deep_convection
+  long_name = flag for Grell-Freitas deep convection scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[imfdeepcnv_samf]
+  standard_name = identifer_for_scale_aware_mass_flux_deep_convection
+  long_name = flag for SAMF deep convection scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[iovr_convcld]
+  standard_name = flag_for_convective_cloud_overlap_method_for_radiation
+  long_name = flag for convective cloud overlap method
+  units = flag
+  dimensions = ()
+  type = integer
   intent = in
 [ncol]
   standard_name = horizontal_loop_extent
@@ -106,6 +127,14 @@
   type = real
   kind = kind_phys
   intent = in
+[cld_cnv_frac]
+  standard_name = convective_cloud_fraction_for_RRTMGP
+  long_name = layer convective cloud fraction
+  units = frac
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
 [precip_frac]
   standard_name = precipitation_fraction_by_layer
   long_name = precipitation fraction in each layer
@@ -122,6 +151,14 @@
   type = real
   kind = kind_phys
   intent = in
+[cnv_cloud_overlap_param]
+  standard_name = convective_cloud_overlap_param
+  long_name = convective cloud overlap parameter
+  units = km
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
 [precip_overlap_param]
   standard_name = precip_overlap_param
   long_name = precipitation overlap parameter
@@ -132,6 +169,13 @@
   intent = in
 [lw_optical_props_cloudsByBand]
   standard_name = longwave_optical_properties_for_cloudy_atmosphere_by_band
+  long_name = Fortran DDT containing RRTMGP optical properties
+  units = DDT
+  dimensions = ()
+  type = ty_optical_props_2str
+  intent = in
+[lw_optical_props_cnvcloudsByBand]
+  standard_name = longwave_optical_properties_for_convective_cloudy_atmosphere_by_band
   long_name = Fortran DDT containing RRTMGP optical properties
   units = DDT
   dimensions = ()
@@ -158,6 +202,13 @@
   dimensions = ()
   type = ty_optical_props_2str
   intent = inout
+[lw_optical_props_cnvclouds]
+  standard_name = longwave_optical_properties_for_convective_cloudy_atmosphere
+  long_name = Fortran DDT containing RRTMGP optical properties
+  units = DDT
+  dimensions = ()
+  type = ty_optical_props_2str
+  intent = inout
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -167,9 +218,9 @@
   kind = len=*
   intent = out
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out

@@ -984,7 +984,8 @@ MODULE module_mp_thompson
                               has_reqc, has_reqi, has_reqs,           &
                               rand_perturb_on,                        &
                               kme_stoch,                              &
-                              rand_pert,                              &
+                              rand_pert, spp_prt_list, spp_var_list,  &
+                              spp_stddev_cutoff, n_var_spp,           &
                               ids,ide, jds,jde, kds,kde,              &  ! domain dims
                               ims,ime, jms,jme, kms,kme,              &  ! memory dims
                               its,ite, jts,jte, kts,kte,              &  ! tile dims
@@ -1025,10 +1026,10 @@ MODULE module_mp_thompson
       REAL, DIMENSION(ims:ime, jms:jme), OPTIONAL, INTENT(IN):: nwfa2d, nifa2d
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(INOUT):: &
                           re_cloud, re_ice, re_snow
-      INTEGER, INTENT(IN) :: rand_perturb_on, kme_stoch
-      REAL, DIMENSION(ims:ime,kms:kme_stoch,jms:jme), INTENT(IN), OPTIONAL:: &
-                          rand_pert
-
+      INTEGER, INTENT(IN) :: rand_perturb_on, kme_stoch, n_var_spp
+      REAL, DIMENSION(:,:), INTENT(IN) :: rand_pert
+      REAL, DIMENSION(:), INTENT(IN) :: spp_prt_list, spp_stddev_cutoff
+      CHARACTER(len=3), DIMENSION(:), INTENT(IN) :: spp_var_list
       INTEGER, INTENT(IN):: has_reqc, has_reqi, has_reqs
 #if ( WRF_CHEM == 1 )
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT):: &
@@ -1101,7 +1102,7 @@ MODULE module_mp_thompson
       REAL, DIMENSION(its:ite, jts:jte):: pcp_ra, pcp_sn, pcp_gr, pcp_ic
       REAL:: dt, pptrain, pptsnow, pptgraul, pptice
       REAL:: qc_max, qr_max, qs_max, qi_max, qg_max, ni_max, nr_max
-      REAL:: rand1, rand2, rand3, min_rand
+      REAL:: rand1, rand2, rand3, rand_pert_max
       INTEGER:: i, j, k, m
       INTEGER:: imax_qc,imax_qr,imax_qi,imax_qs,imax_qg,imax_ni,imax_nr
       INTEGER:: jmax_qc,jmax_qr,jmax_qi,jmax_qs,jmax_qg,jmax_ni,jmax_nr
@@ -1122,23 +1123,7 @@ MODULE module_mp_thompson
 
       ! No need to test for every subcycling step
       test_only_once: if (first_time_step .and. istep==1) then
-         ! DH* 2020-06-05: The stochastic perturbations code was retrofitted
-         ! from a newer version of the Thompson MP scheme, but it has not been
-         ! tested yet.
-         if (rand_perturb_on .ne. 0) then
-           errmsg = 'Logic error in mp_gt_driver: the stochastic perturbations code ' // &
-                    'has not been tested yet with this version of the Thompson scheme'
-           errflg = 1
-           return
-         end if
          ! Activate this code when removing the guard above
-         !if (rand_perturb_on .ne. 0 .and. .not. present(rand_pert)) then
-         !  errmsg = 'Logic error in mp_gt_driver: random perturbations are on, ' // &
-         !           'but optional argument rand_pert is not present'
-         !  errflg = 1
-         !  return
-         !end if
-         ! *DH 2020-06-05
    
          if ( (present(tt) .and. (present(th) .or. present(pii))) .or. &
               (.not.present(tt) .and. .not.(present(th) .and. present(pii))) ) then
@@ -1249,18 +1234,21 @@ MODULE module_mp_thompson
       pcp_sn(:,:) = 0.0
       pcp_gr(:,:) = 0.0
       pcp_ic(:,:) = 0.0
+      rand_pert_max = 0.0
       ndt = max(nint(dt_in/dt_inner),1)
       dt = dt_in/ndt
       if(dt_in .le. dt_inner) dt= dt_in
-      if(nsteps>1 .and. ndt>1) then
-         if (present(errmsg) .and. present(errflg)) then
-            write(errmsg, '(a)') 'Logic error in mp_gt_driver: inner loop cannot be used with subcycling'
-            errflg = 1
-            return
-         else
-            write(*,'(a)') 'Warning: inner loop cannot be used with subcycling, resetting ndt=1'
-            ndt = 1
-         endif
+
+      !Get the Thompson MP SPP magnitude and standard deviation cutoff,
+      !then compute rand_pert_max
+
+      if (rand_perturb_on .ne. 0) then
+        do k =1,n_var_spp
+          select case (spp_var_list(k))
+          case('mp')
+            rand_pert_max = spp_prt_list(k)*spp_stddev_cutoff(k)
+          end select
+        enddo
       endif
 
       do it = 1, ndt
@@ -1300,7 +1288,7 @@ MODULE module_mp_thompson
 !+---+-----------------------------------------------------------------+
 !..Introduce stochastic parameter perturbations by creating as many scalar rand1, rand2, ...
 !.. variables as needed to perturb different pieces of microphysics. gthompsn  21Mar2018
-! Setting spp_mp to 1 gives graupel Y-intercept pertubations (2^0)
+! Setting spp_mp_opt to 1 gives graupel Y-intercept pertubations (2^0)
 !                   2 gives cloud water distribution gamma shape parameter perturbations (2^1)
 !                   4 gives CCN & IN activation perturbations (2^2)
 !                   3 gives both 1+2
@@ -1314,11 +1302,11 @@ MODULE module_mp_thompson
          rand2 = 0.0
          rand3 = 0.0
          if (rand_perturb_on .ne. 0) then
-            if (MOD(rand_perturb_on,2) .ne. 0) rand1 = rand_pert(i,1,j)
+            if (MOD(rand_perturb_on,2) .ne. 0) rand1 = rand_pert(i,1)
             m = RSHIFT(ABS(rand_perturb_on),1)
-            if (MOD(m,2) .ne. 0) rand2 = rand_pert(i,1,j)*2.
+            if (MOD(m,2) .ne. 0) rand2 = rand_pert(i,1)*2.
             m = RSHIFT(ABS(rand_perturb_on),2)
-            if (MOD(m,2) .ne. 0) rand3 = 0.25*(rand_pert(i,1,j)+ABS(min_rand))
+            if (MOD(m,2) .ne. 0) rand3 = 0.25*(rand_pert(i,1)+rand_pert_max)
             m = RSHIFT(ABS(rand_perturb_on),3)
          endif
 !+---+-----------------------------------------------------------------+
@@ -2188,7 +2176,7 @@ MODULE module_mp_thompson
             ni(k) = MAX(R2, ni1d(k)*rho(k))
             if (ni(k).le. R2) then
                lami = cie(2)/5.E-6
-               ni(k) = MIN(999.D3, cig(1)*oig2*ri(k)/am_i*lami**bm_i)
+               ni(k) = MIN(499.D3, cig(1)*oig2*ri(k)/am_i*lami**bm_i)
             endif
             L_qi(k) = .true.
             lami = (am_i*cig(2)*oig1*ni(k)/ri(k))**obmi
@@ -2196,7 +2184,7 @@ MODULE module_mp_thompson
             xDi = (bm_i + mu_i + 1.) * ilami
             if (xDi.lt. 5.E-6) then
              lami = cie(2)/5.E-6
-             ni(k) = MIN(999.D3, cig(1)*oig2*ri(k)/am_i*lami**bm_i)
+             ni(k) = MIN(499.D3, cig(1)*oig2*ri(k)/am_i*lami**bm_i)
             elseif (xDi.gt. 300.E-6) then
              lami = cie(2)/300.E-6
              ni(k) = cig(1)*oig2*ri(k)/am_i*lami**bm_i
@@ -2901,7 +2889,7 @@ MODULE module_mp_thompson
 
 !>  - Freezing of aqueous aerosols based on Koop et al (2001, Nature)
           xni = smo0(k)+ni(k) + (pni_rfz(k)+pni_wfz(k)+pni_inu(k))*dtsave
-          if (is_aerosol_aware .AND. homogIce .AND. (xni.le.999.E3)     &
+          if (is_aerosol_aware .AND. homogIce .AND. (xni.le.499.E3)     &
      &                .AND.(temp(k).lt.238).AND.(ssati(k).ge.0.4) ) then
             xnc = iceKoop(temp(k),qv(k),qvs(k),nwfa(k), dtsave)
             pni_iha(k) = xnc*odts
@@ -3237,7 +3225,7 @@ MODULE module_mp_thompson
            xDi = (bm_i + mu_i + 1.) * ilami
            if (xDi.lt. 5.E-6) then
             lami = cie(2)/5.E-6
-            xni = MIN(999.D3, cig(1)*oig2*xri/am_i*lami**bm_i)
+            xni = MIN(499.D3, cig(1)*oig2*xri/am_i*lami**bm_i)
             niten(k) = (xni-ni1d(k)*rho(k))*odts*orho
            elseif (xDi.gt. 300.E-6) then
             lami = cie(2)/300.E-6
@@ -3248,8 +3236,8 @@ MODULE module_mp_thompson
           niten(k) = -ni1d(k)*odts
          endif
          xni=MAX(0.,(ni1d(k) + niten(k)*dtsave)*rho(k))
-         if (xni.gt.999.E3) &
-                niten(k) = (999.E3-ni1d(k)*rho(k))*odts*orho
+         if (xni.gt.499.E3) &
+                niten(k) = (499.E3-ni1d(k)*rho(k))*odts*orho
 
 !>  - Rain tendency
          qrten(k) = qrten(k) + (prr_wau(k) + prr_rcw(k) &
@@ -4093,7 +4081,14 @@ MODULE module_mp_thompson
           do k = kte, kts, -1
              vtg = 0.
              if (rg(k).gt. R1) then
-              vtg = rhof(k)*av_g*cgg(6)*ogg3 * ilamg(k)**bv_g
+              ygra1 = alog10(max(1.E-9, rg(k)))
+              zans1 = 3.0 + 2./7.*(ygra1+8.) + rand1
+              N0_exp = 10.**(zans1)
+              N0_exp = MAX(DBLE(gonv_min), MIN(N0_exp, DBLE(gonv_max)))
+              lam_exp = (N0_exp*am_g*cgg(1)/rg(k))**oge1
+              lamg = lam_exp * (cgg(3)*ogg2*ogg1)**obmg
+
+              vtg = rhof(k)*av_g*cgg(6)*ogg3 * (1./lamg)**bv_g
               if (temp(k).gt. T_0) then
                vtgk(k) = MAX(vtg, vtrk(k))
               else
@@ -4187,7 +4182,7 @@ MODULE module_mp_thompson
             lami = cie(2)/300.E-6
            endif
            ni1d(k) = MIN(cig(1)*oig2*qi1d(k)/am_i*lami**bm_i,           &
-                         999.D3/rho(k))
+                         499.D3/rho(k))
          endif
          qr1d(k) = qr1d(k) + qrten(k)*DT
          nr1d(k) = MAX(R2/rho(k), nr1d(k) + nrten(k)*DT)

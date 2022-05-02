@@ -73,6 +73,20 @@
   dimensions = ()
   type = logical
   intent = in
+[doGP_sgs_cnv]
+  standard_name = flag_to_include_sgs_convective_cloud_in_RRTMGP
+  long_name = logical flag to control sgs convective cloud in RRTMGP
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[doGP_sgs_mynn]
+  standard_name = flag_to_include_sgs_MYNN_EDMF_cloud_in_RRTMGP
+  long_name = logical flag to control MYNN-EDMF PBL cloud in RRTMGP
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [iSFC]
   standard_name = vertical_index_for_surface_in_RRTMGP
   long_name = index for surface layer in RRTMGP
@@ -102,6 +116,27 @@
   dimensions = ()
   type = ty_optical_props_2str
   intent = in
+[sw_optical_props_precipByBand]
+  standard_name = shortwave_optical_properties_for_precipitation_by_band
+  long_name = Fortran DDT containing RRTMGP optical properties
+  units = DDT
+  dimensions = ()
+  type = ty_optical_props_2str
+  intent = in
+[sw_optical_props_cnvcloudsByBand]
+  standard_name = shortwave_optical_properties_for_convective_cloudy_atmosphere_by_band
+  long_name = Fortran DDT containing RRTMGP optical properties
+  units = DDT
+  dimensions = ()
+  type = ty_optical_props_2str
+  intent = in
+[sw_optical_props_MYNNcloudsByBand]
+  standard_name = shortwave_optical_properties_for_MYNN_EDMF_PBL_cloudy_atmosphere_by_band
+  long_name = Fortran DDT containing RRTMGP optical properties
+  units = DDT
+  dimensions = ()
+  type = ty_optical_props_2str
+  intent = in
 [sw_optical_props_aerosol]
   standard_name = shortwave_optical_properties_for_aerosols
   long_name = Fortran DDT containing RRTMGP optical properties
@@ -110,34 +145,34 @@
   type = ty_optical_props_2str
   intent = in
 [sfc_alb_nir_dir]
-  standard_name = surface_albedo_nearIR_direct
-  long_name = near-IR (direct) surface albedo (sfc_alb_nir_dir)
-  units = none
-  dimensions = (number_of_shortwave_bands,horizontal_loop_extent)
+  standard_name = surface_albedo_due_to_near_IR_direct
+  long_name = surface albedo due to near IR direct beam
+  units = frac
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
 [sfc_alb_nir_dif]
-  standard_name = surface_albedo_nearIR_diffuse
-  long_name = near-IR (diffuse) surface albedo (sfc_alb_nir_dif) 
-  units = none
-  dimensions = (number_of_shortwave_bands,horizontal_loop_extent)
+  standard_name = surface_albedo_due_to_near_IR_diffused
+  long_name = surface albedo due to near IR diffused beam
+  units = frac
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
 [sfc_alb_uvvis_dir]
-  standard_name =  surface_albedo_uvvis_direct
-  long_name = UVVIS (direct) surface albedo (sfc_alb_uvvis_dir)
-  units = none
-  dimensions = (number_of_shortwave_bands,horizontal_loop_extent)
+  standard_name = surface_albedo_due_to_UV_and_VIS_direct
+  long_name = surface albedo due to UV+VIS direct beam
+  units = frac
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
 [sfc_alb_uvvis_dif]
-  standard_name =  surface_albedo_uvvis_diffuse
-  long_name = UVVIS (diffuse) surface albedo (sfc_alb_uvvis_dif)
-  units = none
-  dimensions = (number_of_shortwave_bands,horizontal_loop_extent)
+  standard_name = surface_albedo_due_to_UV_and_VIS_diffused
+  long_name = surface albedo due to UV+VIS diffused beam
+  units = frac
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -197,9 +232,9 @@
   kind = len=*
   intent = out
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out

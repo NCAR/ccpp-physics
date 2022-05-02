@@ -1120,7 +1120,7 @@
             endif
           enddo
           zcf0 = zcf0 * zcf1
-        else if (iovr >= 2 .and. iovr /= 4) then
+        else if (iovr >= 2) then
           do k = 1, nlay
             zcf0 = min ( zcf0, f_one-cfrac(k) )  ! used only as clear/cloudy indicator
           enddo
@@ -1436,6 +1436,8 @@
 !           =1: maximum/random overlapping clouds                       !
 !           =2: maximum overlap cloud                                   !
 !           =3: decorrelation-length overlap clouds                     !
+!           =4: exponential cloud overlap (AER)                         !
+!           =5: exponential-random cloud overlap (AER)                  !
 !   iswmode - control flag for 2-stream transfer scheme                 !
 !           =1; delta-eddington    (joseph et al., 1976)                !
 !           =2: pifm               (zdunkowski et al., 1980)            !
@@ -1467,7 +1469,7 @@
 !
 !===> ... begin here
 !
-      if ( iovr<0 .or. iovr>4 ) then
+      if ( iovr<0 .or. iovr>5 ) then
         print *,'  *** Error in specification of cloud overlap flag',   &
      &          ' IOVR=',iovr,' in RSWINIT !!'
         stop
@@ -1939,7 +1941,7 @@
 !> -# if physparam::isubcsw > 0, call mcica_subcol() to distribute
 !!    cloud properties to each g-point.
 
-      if ( isubcsw > 0 .and. iovr /= 4 ) then      ! mcica sub-col clouds approx
+      if ( isubcsw > 0 ) then      ! mcica sub-col clouds approx
 
         cldf(:) = cfrac(:)
         where (cldf(:) < ftiny)
@@ -2200,7 +2202,7 @@
 !
 !       NOTE: The code below is identical for case (4) and (5) because the 
 !       distinction in the vertical correlation between EXP and ER is already 
-!       built into the specification of alpha (in subroutine get_alpha_exp). 
+!       built into the specification of alpha (in subroutine get_alpha_exper). 
 
 !  ---  setup 2 sets of random numbers
 

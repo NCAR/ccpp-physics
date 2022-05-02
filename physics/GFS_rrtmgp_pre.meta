@@ -40,9 +40,9 @@
   kind = len=*
   intent = out
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out
@@ -204,6 +204,22 @@
   type = real
   kind = kind_phys
   intent = in
+[con_g]
+  standard_name = gravitational_acceleration
+  long_name = gravitational acceleration
+  units = m s-2
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_rd]
+  standard_name = gas_constant_of_dry_air
+  long_name = ideal gas constant for dry air
+  units = J kg-1 K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
 [con_eps]
   standard_name = ratio_of_dry_air_to_water_vapor_gas_constants
   long_name = rd/rv
@@ -305,6 +321,30 @@
   long_name = air temperature  at vertical interface for radiation calculation
   units = K
   dimensions = (horizontal_loop_extent,vertical_interface_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[deltaZ]
+  standard_name = layer_thickness
+  long_name = layer_thickness
+  units = m
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[deltaZc]
+  standard_name = layer_thickness_from_layer_center
+  long_name = layer_thickness
+  units = m
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[deltaP]
+  standard_name = layer_thickness_in_Pa
+  long_name = layer_thickness_in_Pa
+  units = Pa
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -433,9 +473,9 @@
   kind = len=*
   intent = out
 [errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
   dimensions = ()
   type = integer
   intent = out
