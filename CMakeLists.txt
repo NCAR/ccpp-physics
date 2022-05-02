@@ -29,6 +29,13 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   add_definitions(-DDEBUG)
 endif()
 
+if(CCPP_SINGLE_PREC)
+  message(STATUS "CCPP Single Precision Mode activated.")
+  add_definitions(SINGLE_PREC)
+else(CCPP_SINGLE_PREC)
+  message(STATUS "CCPP Double Precision Mode activated.")
+endif(CCPP_SINGLE_PREC)
+
 #------------------------------------------------------------------------------
 # Request a static build
 option(BUILD_SHARED_LIBS "Build a shared library" OFF)
