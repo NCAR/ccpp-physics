@@ -819,13 +819,13 @@
       lflxprf= present ( flxprf )
       lfdncmp= present ( fdncmp )
 
-!> -# Compute solar constant adjustment factor (s0fac) according to solcon.
+!> - Compute solar constant adjustment factor (s0fac) according to solcon.
 !      ***  s0, the solar constant at toa in w/m**2, is hard-coded with
 !           each spectra band, the total flux is about 1368.22 w/m**2.
 
       s0fac = solcon / s0
 
-!> -# Initial output arrays (and optional) as zero.
+!> - Initial output arrays (and optional) as zero.
 
       hswc(:,:) = f_zero
       cldtau(:,:) = f_zero
@@ -875,7 +875,7 @@
         end if
       endif                    ! end if_iswcliq
 
-!> -# Change random number seed value for each radiation invocation
+!> - Change random number seed value for each radiation invocation
 !!    (isubcsw =1 or 2).
 
       if     ( isubcsw == 1 ) then     ! advance prescribed permutation seed
@@ -904,13 +904,13 @@
         ssolar = s0fac * cosz(j1)
         if (iovr == 3) delgth = de_lgth(j1) ! clouds decorr-length
 
-!> -# Prepare surface albedo: bm,df - dir,dif; 1,2 - nir,uvv.
+!> - Prepare surface albedo: bm,df - dir,dif; 1,2 - nir,uvv.
         albbm(1) = sfcalb_nir_dir(j1)
         albdf(1) = sfcalb_nir_dif(j1)
         albbm(2) = sfcalb_uvis_dir(j1)
         albdf(2) = sfcalb_uvis_dif(j1)
 
-!> -# Prepare atmospheric profile for use in rrtm.
+!> - Prepare atmospheric profile for use in rrtm.
 !           the vertical index of internal array is from surface to top
 
         if (ivflip == 0) then       ! input from toa to sfc
@@ -926,7 +926,7 @@
             dz   (k) = dzlyr (j1,kk)
             if (iovr == 4 .or. iovr == 5) alph(k) = alpha(j1,k) ! alpha decorrelation
 
-!> -# Set absorber and gas column amount, convert from volume mixing
+!> - Set absorber and gas column amount, convert from volume mixing
 !!    ratio to molec/cm2 based on coldry (scaled to 1.0e-20)
 !!    - colamt(nlay,maxgas):column amounts of absorbing gases 1 to
 !!      maxgas are for h2o,co2,o3,n2o,ch4,o2,co, respectively
@@ -970,7 +970,7 @@
             enddo
           endif
 
-!> -# Read aerosol optical properties from 'aerosols'.
+!> - Read aerosol optical properties from 'aerosols'.
 
           do k = 1, nlay
             kk = nlp1 - k
@@ -981,7 +981,7 @@
             enddo
           enddo
 
-!> -# Read cloud optical properties from 'clouds'.
+!> - Read cloud optical properties from 'clouds'.
           if (iswcliq > 0) then    ! use prognostic cloud method
             do k = 1, nlay
               kk = nlp1 - k
@@ -1099,7 +1099,7 @@
 
         endif                       ! if_ivflip
 
-!> -# Compute fractions of clear sky view:
+!> - Compute fractions of clear sky view:
 !!    - random overlapping
 !!    - max/ran overlapping
 !!    - maximum overlapping
@@ -1130,7 +1130,7 @@
         if (zcf0 > oneminus) zcf0 = f_one
         zcf1 = f_one - zcf0
 
-!> -# For cloudy sky column, call cldprop() to compute the cloud
+!> - For cloudy sky column, call cldprop() to compute the cloud
 !!    optical properties for each cloudy layer.
 
         if (zcf1 > f_zero) then     ! cloudy sky column
@@ -1169,7 +1169,7 @@
           enddo
         endif   ! end if_zcf1_block
 
-!> -# Call setcoef() to compute various coefficients needed in
+!> - Call setcoef() to compute various coefficients needed in
 !!    radiative transfer calculations.
         call setcoef                                                    &
 !  ---  inputs:
@@ -1179,7 +1179,7 @@
      &       selffac,selffrac,indself,forfac,forfrac,indfor             &
      &     )
 
-!> -# Call taumol() to calculate optical depths for gaseous absorption
+!> - Call taumol() to calculate optical depths for gaseous absorption
 !!    and rayleigh scattering
         call taumol                                                     &
 !  ---  inputs:
@@ -1189,7 +1189,7 @@
      &       sfluxzen, taug, taur                                       &
      &     )
 
-!> -# Call the 2-stream radiation transfer model:
+!> - Call the 2-stream radiation transfer model:
 !!    - if physparam::isubcsw .le.0, using standard cloud scheme,
 !!      call spcvrtc().
 !!    - if physparam::isubcsw .gt.0, using mcica cloud scheme,
@@ -1223,7 +1223,7 @@
 
         endif
 
-!> -# Save outputs.
+!> - Save outputs.
 !  --- ...  sum up total spectral fluxes for total-sky
 
         do k = 1, nlp1
@@ -1507,7 +1507,7 @@
         endif
       endif
 
-!> -# Check cloud flags for consistency.
+!> - Check cloud flags for consistency.
 
       if ((icldflg == 0 .and. iswcliq /= 0) .or.                        &
      &    (icldflg == 1 .and. iswcliq == 0)) then
@@ -1527,7 +1527,7 @@
         iovr = 1
       endif
 
-!> -# Setup constant factors for heating rate
+!> - Setup constant factors for heating rate
 !! the 1.0e-2 is to convert pressure from mb to \f$N/m^2\f$ .
 
       if (iswrate == 1) then
@@ -1538,7 +1538,7 @@
         heatfac = con_g * 1.0e-2 / con_cp           !   (in k/second)
       endif
 
-!> -# Define exponential lookup tables for transmittance. 
+!> - Define exponential lookup tables for transmittance. 
 !          tau is  computed as a function of the \a tau transition function, and
 !           transmittance is calculated as a function of tau.  all tables
 !           are computed at intervals of 0.0001.  the inverse of the
@@ -1725,7 +1725,7 @@
         enddo
       enddo
 
-!> -# Compute cloud radiative properties for a cloudy column.
+!> - Compute cloud radiative properties for a cloudy column.
 
       lab_if_iswcliq : if (iswcliq > 0) then
 
@@ -1930,7 +1930,7 @@
 
       endif  lab_if_iswcliq
 
-!> -# if physparam::isubcsw > 0, call mcica_subcol() to distribute
+!> - if isubcsw > 0, call mcica_subcol() to distribute
 !!    cloud properties to each g-point.
 
       if ( isubcsw > 0 ) then      ! mcica sub-col clouds approx
@@ -2037,7 +2037,7 @@
 !
 !===> ...  begin here
 !
-!> -# Advance randum number generator by ipseed values.
+!> - Advance randum number generator by ipseed values.
 
       call random_setseed                                               &
 !  ---  inputs:
@@ -2046,7 +2046,7 @@
      &      stat                                                        &
      &    )
 
-!> -# Sub-column set up according to overlapping assumption.
+!> - Sub-column set up according to overlapping assumption.
 
       select case ( iovr )
 
@@ -2231,7 +2231,7 @@
 
       end select
 
-!> -# Generate subcolumns for homogeneous clouds.
+!> - Generate subcolumns for homogeneous clouds.
 
       do k = 1, nlay
         tem1 = f_one - cldf(k)
@@ -2342,7 +2342,7 @@
 
         forfac(k) = pavel(k)*stpfac / (tavel(k)*(f_one + h2ovmr(k)))
 
-!> -# Find the two reference pressures on either side of the
+!> - Find the two reference pressures on either side of the
 !! layer pressure.  store them in jp and jp1.  store in fp the
 !! fraction of the difference (in ln(pressure)) between these
 !! two values that the layer pressure lies.
@@ -2352,7 +2352,7 @@
         jp1   = jp(k) + 1
         fp    = 5.0 * (preflog(jp(k)) - plog)
 
-!> -# Determine, for each reference pressure (jp and jp1), which
+!> - Determine, for each reference pressure (jp and jp1), which
 !! reference temperature (these are different for each reference
 !! pressure) is nearest the layer temperature but does not exceed it.
 !! store these indices in jt and jt1, resp. store in ft (resp. ft1)
@@ -2366,7 +2366,7 @@
         ft  = tem1 - float(jt (k) - 3)
         ft1 = tem2 - float(jt1(k) - 3)
 
-!> -# We have now isolated the layer ln pressure and temperature,
+!> - We have now isolated the layer ln pressure and temperature,
 !! between two reference pressures and two reference temperatures
 !! (for each reference pressure).  we multiply the pressure
 !! fraction fp with the appropriate temperature fractions to get
@@ -2379,21 +2379,21 @@
         fac11(k) = fp  * ft1
         fac01(k) = fp  * (f_one - ft1)
 
-!> -# If the pressure is less than ~100mb, perform a different
+!> - If the pressure is less than ~100mb, perform a different
 !! set of species interpolations.
 
         if ( plog > 4.56 ) then
 
           laytrop =  k
 
-!> -# Set up factors needed to separately include the water vapor
+!> - Set up factors needed to separately include the water vapor
 !! foreign-continuum in the calculation of absorption coefficient.
 
           tem1 = (332.0 - tavel(k)) / 36.0
           indfor (k) = min(2, max(1, int(tem1)))
           forfrac(k) = tem1 - float(indfor(k))
 
-!> -# Set up factors needed to separately include the water vapor
+!> - Set up factors needed to separately include the water vapor
 !! self-continuum in the calculation of absorption coefficient.
 
           tem2 = (tavel(k) - 188.0) / 7.2
@@ -2612,7 +2612,7 @@
 !
 !===> ...  begin here
 
-!> -# Initialize output fluxes.
+!> - Initialize output fluxes.
       do ib = 1, nbdsw
         do k = 1, nlp1
           fxdnc(k,ib) = f_zero
@@ -2644,7 +2644,7 @@
       sfdf0(1) = f_zero
       sfdf0(2) = f_zero
 
-!> -# Loop over all g-points in each band.
+!> - Loop over all g-points in each band.
 
       lab_do_jg : do jg = 1, ngptsw
 
@@ -2654,7 +2654,7 @@
 
         zsolar = ssolar * sfluxzen(jg)
 
-!> -# Set up toa direct beam and surface values (beam and diff).
+!> - Set up toa direct beam and surface values (beam and diff).
 
         ztdbt(nlp1) = f_one
         ztdbt0   = f_one
@@ -2670,7 +2670,7 @@
         ztrab(1) = f_zero
         ztrad(1) = f_zero
 
-!> -# Compute clear-sky optical parameters, layer reflectance and
+!> - Compute clear-sky optical parameters, layer reflectance and
 !!    transmittance.
 !    - Set up toa direct beam and surface values (beam and diff).
 !    - Delta scaling for clear-sky condition.
@@ -2863,7 +2863,7 @@
           ztdbt0 = zexp4 * ztdbt0
         enddo    ! end do_k_loop
 
-!> -# Call vrtqdr(), to compute the upward and downward radiation fluxes.
+!> - Call vrtqdr(), to compute the upward and downward radiation fluxes.
         call vrtqdr                                                     &
 !  ---  inputs:
      &     ( zrefb,zrefd,ztrab,ztrad,zldbt,ztdbt,                       &
@@ -2872,13 +2872,13 @@
      &       zfu, zfd                                                   &
      &     )
 
-!> -# Compute upward and downward fluxes at levels.
+!> - Compute upward and downward fluxes at levels.
         do k = 1, nlp1
           fxup0(k,ib) = fxup0(k,ib) + zsolar*zfu(k)
           fxdn0(k,ib) = fxdn0(k,ib) + zsolar*zfd(k)
         enddo
 
-!> -# Compute surface downward beam/diffused flux components.
+!> - Compute surface downward beam/diffused flux components.
         zb1 = zsolar*ztdbt0
         zb2 = zsolar*(zfd(1) - ztdbt0)
 
@@ -2896,7 +2896,7 @@
 !       sfbm0(ibd) = sfbm0(ibd) + zsolar*ztdbt0
 !       sfdf0(ibd) = sfdf0(ibd) + zsolar*(zfd(1) - ztdbt0)
 
-!> -# Compute total sky optical parameters, layer reflectance and
+!> - Compute total sky optical parameters, layer reflectance and
 !!    transmittance.
 !    - Set up toa direct beam and surface values (beam and diff)
 !    - Delta scaling for total-sky condition
@@ -3116,7 +3116,7 @@
             endif    ! end if_zc1_block
           enddo   ! end do_k_loop
 
-!> -# Call vrtqdr(), to compute the upward and downward radiation fluxes.
+!> - Call vrtqdr(), to compute the upward and downward radiation fluxes.
 
           call vrtqdr                                                   &
 !  ---  inputs:
@@ -3126,13 +3126,13 @@
      &       zfu, zfd                                                   &
      &     )
 
-!> -# Compute upward and downward fluxes at levels.
+!> - Compute upward and downward fluxes at levels.
           do k = 1, nlp1
             fxupc(k,ib) = fxupc(k,ib) + zsolar*zfu(k)
             fxdnc(k,ib) = fxdnc(k,ib) + zsolar*zfd(k)
           enddo
 
-!> -# Process and save outputs.
+!> - Process and save outputs.
 !!  - surface downward beam/diffused flux components
           zb1 = zsolar*ztdbt0
           zb2 = zsolar*(zfd(1) - ztdbt0)
@@ -3408,7 +3408,7 @@
 !
 !===> ...  begin here
 !
-!> -# Initialize output fluxes.
+!> - Initialize output fluxes.
 
       do ib = 1, nbdsw
         do k = 1, nlp1
@@ -3441,7 +3441,7 @@
       sfdf0(1) = f_zero
       sfdf0(2) = f_zero
 
-!> -# Loop over all g-points in each band.
+!> - Loop over all g-points in each band.
 
       lab_do_jg : do jg = 1, ngptsw
 
@@ -3451,7 +3451,7 @@
 
         zsolar = ssolar * sfluxzen(jg)
 
-!> -# Set up toa direct beam and surface values (beam and diff).
+!> - Set up toa direct beam and surface values (beam and diff).
 
         ztdbt(nlp1) = f_one
         ztdbt0   = f_one
@@ -3467,7 +3467,7 @@
         ztrab(1) = f_zero
         ztrad(1) = f_zero
 
-!> -# Compute clear-sky optical parameters, layer reflectance and
+!> - Compute clear-sky optical parameters, layer reflectance and
 !!    transmittance.
 !    - Set up toa direct beam and surface values (beam and diff)
 !    - Delta scaling for clear-sky condition
@@ -3658,7 +3658,7 @@
           ztdbt0 = zexp4 * ztdbt0
         enddo    ! end do_k_loop
 
-!> -# Call vrtqdr(), to compute the upward and downward radiation fluxes.
+!> - Call vrtqdr(), to compute the upward and downward radiation fluxes.
         call vrtqdr                                                     &
 !  ---  inputs:
      &     ( zrefb,zrefd,ztrab,ztrad,zldbt,ztdbt,                       &
@@ -3667,13 +3667,13 @@
      &       zfu, zfd                                                   &
      &     )
 
-!> -# Compute upward and downward fluxes at levels.
+!> - Compute upward and downward fluxes at levels.
         do k = 1, nlp1
           fxup0(k,ib) = fxup0(k,ib) + zsolar*zfu(k)
           fxdn0(k,ib) = fxdn0(k,ib) + zsolar*zfd(k)
         enddo
 
-!> -# Compute surface downward beam/diffuse flux components.
+!> - Compute surface downward beam/diffuse flux components.
         zb1 = zsolar*ztdbt0
         zb2 = zsolar*(zfd(1) - ztdbt0)
 
@@ -3691,7 +3691,7 @@
 !       sfbm0(ibd) = sfbm0(ibd) + zsolar*ztdbt0
 !       sfdf0(ibd) = sfdf0(ibd) + zsolar*(zfd(1) - ztdbt0)
 
-!> -# Compute total sky optical parameters, layer reflectance and
+!> - Compute total sky optical parameters, layer reflectance and
 !!    transmittance.
 !    - Set up toa direct beam and surface values (beam and diff)
 !    - Delta scaling for total-sky condition
@@ -3890,7 +3890,7 @@
             endif    ! end if_cldfmc_block
           enddo   ! end do_k_loop
 
-!> -# Call vrtqdr(), to  perform vertical quadrature
+!> - Call vrtqdr(), to  perform vertical quadrature
 
           call vrtqdr                                                   &
 !  ---  inputs:
@@ -3906,7 +3906,7 @@
             fxdnc(k,ib) = fxdnc(k,ib) + zsolar*zfd(k)
           enddo
 
-!> -# Process and save outputs.
+!> - Process and save outputs.
 !!  - surface downward beam/diffused flux components
           zb1 = zsolar*ztdbt0
           zb2 = zsolar*(zfd(1) - ztdbt0)
@@ -4043,11 +4043,11 @@
 !===> ... begin here
 !
 
-!> -# Link lowest layer with surface.
+!> - Link lowest layer with surface.
         zrupb(1) = zrefb(1)        ! direct beam
         zrupd(1) = zrefd(1)        ! diffused
 
-!> -# Pass from bottom to top.
+!> - Pass from bottom to top.
         do k = 1, nlay
           kp = k + 1
 
@@ -4058,13 +4058,13 @@
           zrupd(kp) = zrefd(kp) + ztrad(kp)*ztrad(kp)*zrupd(k)*zden1
         enddo
 
-!> -# Upper boundary conditions
+!> - Upper boundary conditions
         ztdn (nlp1) = f_one
         zrdnd(nlp1) = f_zero
         ztdn (nlay) = ztrab(nlp1)
         zrdnd(nlay) = zrefd(nlp1)
 
-!> -# Pass from top to bottom
+!> - Pass from top to bottom
         do k = nlay, 2, -1
           zden1 = f_one / (f_one - zrefd(k)*zrdnd(k))
           ztdn (k-1) = ztdbt(k)*ztrab(k) + ( ztrad(k) *                 &
@@ -4073,7 +4073,7 @@
           zrdnd(k-1) = zrefd(k) + ztrad(k)*ztrad(k)*zrdnd(k)*zden1
         enddo
 
-!> -# Up and down-welling fluxes at levels.
+!> - Up and down-welling fluxes at levels.
         do k = 1, nlp1
           zden1 = f_one / (f_one - zrdnd(k)*zrupd(k))
           zfu(k) = ( ztdbt(k)*zrupb(k) +                                &

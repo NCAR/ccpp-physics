@@ -1,4 +1,4 @@
-!>\file SGSCloud_RadPre.F90
+!>\file sgscloud_radpre.F90
 !!  Contains the preliminary (interstitial) work to the call to the radiation schemes:
 !!    1) Backs up the original qc & qi
 !!    2) Adds the partioning of convective condensate into liqice/ice for effective radii
@@ -11,19 +11,6 @@
       contains
 
 !> \defgroup sgsradpre_group sgscloud_radpre_run Module
-!>@{
-!> \section arg_table_sgscloud_radpre_init Argument Table
-!! \htmlinclude sgscloud_radpre_init.html
-!!
-      subroutine sgscloud_radpre_init ()
-      end subroutine sgscloud_radpre_init
-
-!> \section arg_table_sgscloud_radpre_finalize Argument Table
-!! \htmlinclude sgscloud_radpre_finalize.html
-!!
-      subroutine sgscloud_radpre_finalize ()
-      end subroutine sgscloud_radpre_finalize
-
 !> This interstitial code adds the subgrid clouds to the resolved-scale clouds 
 !! if there is no resolved-scale clouds in that particular grid box. It can also 
 !! specify a cloud fraction for resolved-scale clouds, using Xu-Randall (1996),
@@ -298,5 +285,4 @@
       endif ! timestep > 1
 
       end subroutine sgscloud_radpre_run
-!> @}
       end module sgscloud_radpre

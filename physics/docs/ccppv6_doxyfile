@@ -133,7 +133,6 @@ INPUT                  =  pdftxt/mainpage.txt              \
                           pdftxt/GFS_NOAH.txt     \
                           pdftxt/GFS_SFCSICE.txt  \
                           pdftxt/GFS_SATMEDMFVDIFQ.txt    \
-                          pdftxt/GFS_HEDMF.txt    \
                           pdftxt/GFS_NOAHMP.txt    \
                           pdftxt/GFS_UGWPv0.txt   \
                           pdftxt/GFS_unified_ugwp.txt  \
@@ -203,23 +202,7 @@ INPUT                  =  pdftxt/mainpage.txt              \
                         ../radlw_datatb.f \
                         ../radsw_param.f  \
                         ../radsw_datatb.f  \
-                        ../GFS_rrtmgp_pre.F90        \
-                        ../GFS_rrtmgp_setup.F90      \
-                        ../GFS_rrtmgp_cloud_mp.F90     \
-                        ../GFS_rrtmgp_cloud_overlap.F90   \
                         ../GFS_cloud_diagnostics.F90     \
-                        ../rrtmgp_aerosol_optics.F90    \
-                        ../rrtmgp_sw_gas_optics.F90     \
-                        ../rrtmgp_sw_cloud_optics.F90    \
-                        ../rrtmgp_sw_cloud_sampling.F90    \
-                        ../rrtmgp_sw_rte.F90         \
-                        ../GFS_rrtmgp_sw_post.F90      \
-                        ../rrtmgp_lw_pre.F90          \
-                        ../rrtmgp_lw_gas_optics.F90       \
-                        ../rrtmgp_lw_cloud_optics.F90        \
-                        ../rrtmgp_lw_cloud_sampling.F90      \
-                        ../rrtmgp_lw_rte.F90     \
-                        ../GFS_rrtmgp_lw_post.F90    \
                         ../dcyc2t3.f        \
                         ../sfc_diff.f   \
                         ../sfc_diag.f                \

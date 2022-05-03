@@ -54,6 +54,22 @@ Here \f$z\f$ is the height, \f$L\f$ is the Obukhov length, \f$z_{0M}\f$ is the m
 The pertinent features of the GFS stable surface layer parameterization scheme are described in the appendix of Zheng et al. (2017) 
 \cite zheng_et_al_2017.
 
+\section version_gfsslay_enh CCPP Physics Updates
+\version CCPP v6.0.0
+\author Jongil Han (NCEP Environmental Modeling Center): Jongil.Han@noaa.gov
+
+- New canopy heat storage parameterization is implemented, which is achieved by reducing sensible heat flux into the PBL scheme as a function of surface roughness and vegetation fraction and helps to reduce nighttime cold and daytime warm 2-meter temperature biases over forested regions.
+- A sea spray effect parameterization is included to enhance sensible and latent heat fluxes, especially for strong wind conditions.
+- To better represent sub-grid scale turbulence variability in the surface layer, a new parameterization for maximum surface layer stability parameter is developed as an inverse function of the background turbulent eddy diffusivity.
+- Thermal roughness length calculation over land has been modified.
+
+
+\b References
+
+Han. J., W. Li, F. Yang, E. Strobach, W. Zheng, and R. Sun, 2022: Updates in the NCEP GFS cumulus convection, vertical turbulent mixing, and surface layer physics. NCEP Office Note 505.
+
+Han. J., F. Yang, R. Montuoro, W. Li, and R. Sun, 2022: Implementation of a positive definite mass-flux scheme and a method for removing the negative tracers in the NCEP GFS planetary boundary layer and cumulus convection schemes. NCEP Office Note 506.
+
 \section intra_rough Intraphysics Communication
 \ref arg_table_sfc_diff_run
 

@@ -480,8 +480,7 @@ CONTAINS
 !
 !-------------------------------------------------------------------
 
-!>\ingroup gsd_mynn_edmf
-!! This subroutine initializes the mixing length, TKE, \f$\theta^{'2}\f$,
+!> This subroutine initializes the mixing length, TKE, \f$\theta^{'2}\f$,
 !! \f$q^{'2}\f$, and \f$\theta^{'}q^{'}\f$.
 !!\section gen_mym_ini GSD MYNN-EDMF mym_initialize General Algorithm 
 !> @{
@@ -668,8 +667,7 @@ CONTAINS
 !       These are defined on the walls of the grid boxes.
 !
 
-!>\ingroup gsd_mynn_edmf
-!! This subroutine calculates the level 2, non-dimensional wind shear
+!> This subroutine calculates the level 2, non-dimensional wind shear
 !! \f$G_M\f$ and vertical temperature gradient \f$G_H\f$ as well as 
 !! the level 2 stability funcitons \f$S_h\f$ and \f$S_m\f$.
 !!\param kts    horizontal dimension
@@ -827,8 +825,7 @@ CONTAINS
 !     NOTE: the mixing lengths are meant to be calculated at the full-
 !           sigmal levels (or interfaces beween the model layers).
 !
-!>\ingroup gsd_mynn_edmf
-!! This subroutine calculates the mixing lengths.
+!> This subroutine calculates the mixing lengths.
   SUBROUTINE  mym_length (                     & 
     &            kts,kte,                      &
     &            dz, dx, zw,                   &
@@ -1238,8 +1235,7 @@ CONTAINS
   END SUBROUTINE mym_length
 
 ! ==================================================================
-!>\ingroup gsd_mynn_edmf
-!! This subroutine was taken from the BouLac scheme in WRF-ARW and modified for
+!> This subroutine was taken from the BouLac scheme in WRF-ARW and modified for
 !! integration into the MYNN PBL scheme. WHILE loops were added to reduce the
 !! computational expense. This subroutine computes the length scales up and down
 !! and then computes the min, average of the up/down length scales, and also
@@ -1401,8 +1397,7 @@ CONTAINS
   END SUBROUTINE boulac_length0
 
 ! ==================================================================
-!>\ingroup gsd_mynn_edmf
-!! This subroutine was taken from the BouLac scheme in WRF-ARW
+!> This subroutine was taken from the BouLac scheme in WRF-ARW
 !! and modified for integration into the MYNN PBL scheme.
 !! WHILE loops were added to reduce the computational expense.
 !! This subroutine computes the length scales up and down
@@ -1592,8 +1587,7 @@ CONTAINS
 !     # dtl, dqw, dtv, gm and gh are allowed to share storage units with
 !       dfm, dfh, dfq, tcd and qcd, respectively, for saving memory.
 !
-!>\ingroup gsd_mynn_edmf
-!! This subroutine calculates the vertical diffusivity coefficients and the 
+!> This subroutine calculates the vertical diffusivity coefficients and the 
 !! production terms for the turbulent quantities.      
 !>\section gen_mym_turbulence GSD mym_turbulence General Algorithm
 !! Two subroutines mym_level2() and mym_length() are called within this
@@ -2174,8 +2168,7 @@ CONTAINS
 !       scheme (program).
 !
 !-------------------------------------------------------------------
-!>\ingroup gsd_mynn_edmf
-!! This subroutine predicts the turbulent quantities at the next step.
+!> This subroutine predicts the turbulent quantities at the next step.
   SUBROUTINE  mym_predict (kts,kte,                                     &
        &            closure,                                            &
        &            delt,                                               &
@@ -2578,8 +2571,7 @@ CONTAINS
 !       Set these values to those adopted by you.
 !
 !-------------------------------------------------------------------
-!>\ingroup gsd_mynn_edmf 
-!! This subroutine calculates the nonconvective component of the 
+!> This subroutine calculates the nonconvective component of the 
 !! subgrid cloud fraction and mixing ratio as well as the functions used to 
 !! calculate the buoyancy flux. Different cloud PDFs can be selected by
 !! use of the namelist parameter \p bl_mynn_cloudpdf .
@@ -3092,8 +3084,7 @@ CONTAINS
   END SUBROUTINE mym_condensation
 
 ! ==================================================================
-!>\ingroup gsd_mynn_edmf
-!! This subroutine solves for tendencies of U, V, \f$\theta\f$, qv,
+!> This subroutine solves for tendencies of U, V, \f$\theta\f$, qv,
 !! qc, and qi
   SUBROUTINE mynn_tendencies(kts,kte,      &
        &closure,grav_settling,             &
@@ -4077,16 +4068,12 @@ ENDIF
 
   END SUBROUTINE mynn_tendencies
 
-! ==================================================================
-!>\ingroup gsd_mynn_edmf
-!!
+!> This subroutine was adopted from the CAM-UW ShCu scheme and
+!! adapted for use here.
   SUBROUTINE moisture_check(kte, delt, dp, exner, &
                             qv, qc, qi, th,       &
                             dqv, dqc, dqi, dth )
 
-  !> This subroutine was adopted from the CAM-UW ShCu scheme and 
-  !! adapted for use here.
-  !
   ! If qc < qcmin, qi < qimin, or qv < qvmin happens in any layer,
   ! force them to be larger than minimum value by (1) condensating 
   ! water vapor into liquid or ice, and (2) by transporting water vapor 
@@ -4167,7 +4154,7 @@ ENDIF
 
 ! ==================================================================
 #if (WRF_CHEM == 1)
-!>\ingroup gsd_mynn_edmf
+!> THis subroutine
   SUBROUTINE mynn_mix_chem(kts,kte,i,     &
        grav_settling,                     &
        delt,dz,pblh,                      &
@@ -4315,7 +4302,7 @@ ENDIF
 #endif
 
 ! ==================================================================
-!>\ingroup gsd_mynn_edmf
+!> This subroutine retrives exchange coeffs km/kh. 
   SUBROUTINE retrieve_exchange_coeffs(kts,kte,&
        &dfm,dfh,dz,K_m,K_h)
 
@@ -4343,7 +4330,7 @@ ENDIF
   END SUBROUTINE retrieve_exchange_coeffs
 
 ! ==================================================================
-!>\ingroup gsd_mynn_edmf
+!> solve system of linear equs on tridiagnonal matrix ntime n.
   SUBROUTINE tridiag(n,a,b,c,d)
 
 !! to solve system of linear eqs on tridiagonal matrix n times n
@@ -4379,7 +4366,7 @@ ENDIF
   END SUBROUTINE tridiag
 
 ! ==================================================================
-!>\ingroup gsd_mynn_edmf
+!> This subroutine
       subroutine tridiag2(n,a,b,c,d,x)
       implicit none
 !      a - sub-diagonal (means it is the diagonal below the main diagonal)
@@ -4414,7 +4401,7 @@ ENDIF
 
     end subroutine tridiag2
 ! ==================================================================
-!>\ingroup gsd_mynn_edmf
+!> This subroutine solves inversion and resolution of a tridiagonal matrix.
        subroutine tridiag3(kte,a,b,c,d,x)
 
 !ccccccccccccccccccccccccccccccc                                                                   
@@ -4455,8 +4442,7 @@ ENDIF
         return
         end subroutine tridiag3
 ! ==================================================================
-!>\ingroup gsd_mynn_edmf
-!! This subroutine is the GSD MYNN-EDNF PBL driver routine,which
+!> This subroutine is the MYNN-EDNF PBL driver routine,which
 !! encompassed the majority of the subroutines that comprise the 
 !! procedures that ultimately solve for tendencies of 
 !! \f$U, V, \theta, q_v, q_c, and q_i\f$.
@@ -5630,7 +5616,7 @@ ENDIF
 !> @}
 
 ! ==================================================================
-!>\ingroup gsd_mynn_edmf
+!> This subroutine 
   SUBROUTINE mynn_bl_init_driver(                   &
        &RUBLTEN,RVBLTEN,RTHBLTEN,RQVBLTEN,          &
        &RQCBLTEN,RQIBLTEN & !,RQNIBLTEN,RQNCBLTEN   &
@@ -5686,8 +5672,7 @@ ENDIF
   END SUBROUTINE mynn_bl_init_driver
 
 ! ==================================================================
-!>\ingroup gsd_mynn_edmf
-!! This subroutine calculates hybrid diagnotic boundary-layer height (PBLH).
+!> This subroutine calculates hybrid diagnotic boundary-layer height (PBLH).
 !!
 !! NOTES ON THE PBLH FORMULATION: The 1.5-theta-increase method defines
 !!PBL heights as the level at.
@@ -5848,9 +5833,7 @@ ENDIF
   END SUBROUTINE GET_PBLH
 !> @}
   
-! ==================================================================
-!>\ingroup gsd_mynn_edmf
-!! This subroutine is the Dynamic Multi-Plume (DMP) Mass-Flux Scheme.
+!> This subroutine is the Dynamic Multi-Plume (DMP) Mass-Flux Scheme.
 !! 
 !! dmp_mf() calculates the nonlocal turbulent transport from the dynamic
 !! multiplume mass-flux scheme as well as the shallow-cumulus component of 
@@ -7010,7 +6993,6 @@ ENDIF !END Debugging
 
 END SUBROUTINE DMP_MF
 !=================================================================
-!>\ingroup gsd_mynn_edmf
 !> zero or one condensation for edmf: calculates THV and QC
 subroutine condensation_edmf(QT,THL,P,zagl,THV,QC)
 !
@@ -7071,7 +7053,6 @@ end subroutine condensation_edmf
 
 !===============================================================
 
-!>\ingroup gsd_mynn_edmf
 subroutine condensation_edmf_r(QT,THL,P,zagl,THV,QC)
 !> zero or one condensation for edmf: calculates THL and QC                                       
 !! similar to condensation_edmf but with different inputs                                         
@@ -7107,9 +7088,7 @@ real :: diff,exn,t,th,qs,qcold
 end subroutine condensation_edmf_r
 
 !===============================================================
-! ===================================================================
-!>\ingroup gsd_mynn_edmf
-!! This is the downdraft mass flux scheme - analogus to edmf_JPL but  
+!> This is the downdraft mass flux scheme - analogus to edmf_JPL but  
 !! flipped updraft to downdraft. This scheme is currently only tested 
 !! for Stratocumulus cloud conditions. For a detailed desctiption of the
 !! model, see paper.
@@ -7473,14 +7452,12 @@ SUBROUTINE DDMF_JPL(kts,kte,dt,zw,dz,p,              &
 END SUBROUTINE DDMF_JPL
 !===============================================================
 
-!>\ingroup gsd_mynn_edmf
+!> Add scale-aware factor (Psig) here, taken from Honnert et al. (2011) \cite Honnert_2011
+!! and/or from Shin and Hong (2013) \cite Shin_2013.
 SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
 
     !---------------------------------------------------------------
     !             NOTES ON SCALE-AWARE FORMULATION
-    !
-    !>JOE: add scale-aware factor (Psig) here, taken from Honnert et al. (2011,
-    !!     JAS) and/or from Hyeyum Hailey Shin and Song-You Hong (2013, JAS)
     !
     ! Psig_bl tapers local mixing
     ! Psig_shcu tapers nonlocal mixing
@@ -7548,8 +7525,7 @@ SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
   END SUBROUTINE SCALE_AWARE
 
 ! =====================================================================
-!>\ingroup gsd_mynn_edmf
-!! \author JAYMES- added 22 Apr 2015
+!> \author JAYMES- added 22 Apr 2015
 !! This function calculates saturation vapor pressure.  Separate ice and liquid functions
 !! are used (identical to those in module_mp_thompson.F, v3.6). Then, the
 !! final returned value is a temperature-dependant "blend". Because the final
@@ -7582,10 +7558,8 @@ SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
 
 ! ====================================================================
 
-!>\ingroup gsd_mynn_edmf
-!! This function extends function "esat" and returns a "blended"
+!> This function extends function "esat" and returns a "blended"
 !! saturation mixing ratio.
-!!\author JAYMES
   FUNCTION qsat_blend(t, P, waterice)
 
       IMPLICIT NONE
@@ -7622,8 +7596,7 @@ SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
 
 ! ===================================================================
 
-!>\ingroup gsd_mynn_edmf
-!! This function interpolates the latent heats of vaporization and sublimation into
+!> This function interpolates the latent heats of vaporization and sublimation into
 !! a single, temperature-dependent, "blended" value, following 
 !! Chaboureau and Bechtold (2002) \cite Chaboureau_2002, Appendix.
 !!\author JAYMES
@@ -7648,14 +7621,13 @@ SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
   END FUNCTION xl_blend
 
 ! ===================================================================
-!>\ingroup gsd_mynn_edmf
+!> New stability function parameters for momentum (Puhales, 2020, WRF 4.2.1)
+!! The forms in unstable conditions (z/L < 0) use Grachev et al. (2000), which are a blend of
+!! the classical (Kansas) forms (i.e., Paulson 1970, Dyer and Hicks 1970), valid for weakly
+!! unstable conditions (-1 < z/L < 0). The stability functions for stable conditions use an
+!! updated form taken from Cheng and Brutsaert (2005), which extends the validity into very
+!! stable conditions [z/L ~ O(10)].
   FUNCTION phim(zet)
-     !> New stability function parameters for momentum (Puhales, 2020, WRF 4.2.1)
-     !! The forms in unstable conditions (z/L < 0) use Grachev et al. (2000), which are a blend of 
-     !! the classical (Kansas) forms (i.e., Paulson 1970, Dyer and Hicks 1970), valid for weakly 
-     !! unstable conditions (-1 < z/L < 0). The stability functions for stable conditions use an
-     !! updated form taken from Cheng and Brutsaert (2005), which extends the validity into very
-     !! stable conditions [z/L ~ O(10)].
       IMPLICIT NONE
 
       REAL, INTENT(IN):: zet
@@ -7699,15 +7671,14 @@ SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
       phim = phi_m
 
   END FUNCTION phim
-! ===================================================================
-!>\ingroup gsd_mynn_edmf
+
+!> New stability function parameters for heat (Puhales, 2020, WRF 4.2.1)
+!! The forms in unstable conditions (z/L < 0) use Grachev et al. (2000), which are a blend of
+!! the classical (Kansas) forms (i.e., Paulson 1970, Dyer and Hicks 1970), valid for weakly
+!! unstable conditions (-1 < z/L < 0). The stability functions for stable conditions use an
+!! updated form taken from Cheng and Brutsaert (2005), which extends the validity into very
+!! stable conditions [z/L ~ O(10)].
   FUNCTION phih(zet)
-    !> New stability function parameters for heat (Puhales, 2020, WRF 4.2.1)
-    !! The forms in unstable conditions (z/L < 0) use Grachev et al. (2000), which are a blend of
-    !! the classical (Kansas) forms (i.e., Paulson 1970, Dyer and Hicks 1970), valid for weakly
-    !! unstable conditions (-1 < z/L < 0). The stability functions for stable conditions use an
-    !! updated form taken from Cheng and Brutsaert (2005), which extends the validity into very
-    !! stable conditions [z/L ~ O(10)].
       IMPLICIT NONE
 
       REAL, INTENT(IN):: zet
@@ -7749,7 +7720,7 @@ SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
 
 END FUNCTION phih
 ! ==================================================================
-!>\ingroup gsd_mynn_edmf
+!>
  SUBROUTINE topdown_cloudrad(kts,kte,dz1,zw,xland,kpbl,PBLH,  &
                &sqc,sqi,sqw,thl,th1,ex1,p1,rho1,thetav,       &
                &cldfra_bl1D,rthraten,                         &

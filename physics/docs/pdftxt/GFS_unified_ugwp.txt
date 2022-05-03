@@ -14,7 +14,7 @@ Finally, the non-stationary GWD scheme is that of the \ref GFS_UGWP_v0 scheme.
 
 \b Description \b of \b the \b GSL \b Drag \b Suite:
 
-The \ref GSL_drag_suite, developed by NOAA's Global Systems Laboratory, 
+The \ref GFS_drag_suite, developed by NOAA's Global Systems Laboratory, 
 is a set of subgrid-scale orographic drag parameterizations that 
 calculate momentum tendencies due to the effects of unresolved topography.
 The drag forces they represent are those due to: 1) large-scale gravity 

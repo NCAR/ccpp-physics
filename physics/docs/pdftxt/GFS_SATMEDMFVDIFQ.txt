@@ -2,10 +2,9 @@
 \page GFS_SATMEDMFVDIFQ GFS Scale-aware TKE-based Moist Eddy-Diffusion Mass-Flux (EDMF) PBL and Free Atmospheric Turbulence Scheme
 \section des_satmedmfvdifq Description
 
-The \ref GFS_HEDMF uses a hybrid EDMF parameterization for the convective PBL (Han et al. 2016 \cite Han_2016;
-Han et al. 2017 \cite han_et_al_2017), where the EDMF scheme is applied only for the strongly unstable PBL, while the eddy-diffusivity
-counter-gradient(EDCG) scheme is used for the weakly unstable PBL. The current operational GFS scale-aware TKE-EDMF PBL scheme
- is an extended version of \ref GFS_HEDMF  with below enhancement:
+The current operational GFS scale-aware TKE-EDMF PBL scheme
+ is an extended version of GFS Hybrid Eddy-Diffusivity Mass-Flux PBL and Free Atmospheric Turbulence
+scheme (Han et al. 2016 \cite Han_2016; Han et al. 2017 \cite han_et_al_2017)  with below enhancement:
 
 -# Eddy diffusivity (K) is now a function of TKE which is prognostically predicted
 
@@ -28,7 +27,7 @@ it was an eddy diffusion form)
 - For local turbulence mixing, a TKE closure model is used.
 
 
-\section v6_pbl_enh CCPP Physics updates
+\section v6_pbl_enh CCPP Physics Updates
 \version CCPP v6.0.0
 \author Jongil Han (NCEP Environmental Modeling Center): Jongil.Han@noaa.gov
 

@@ -62,7 +62,7 @@
       module module_radsw_parameters     !
 !........................................!
 
-!! \section arg_table_module_radsw_parameters
+!> \section arg_table_module_radsw_parameters Argument Table
 !! \htmlinclude module_radsw_parameters.html
 !!
 
@@ -73,7 +73,7 @@
       public
 !
 !> derived type for SW fluxes at TOA
-!! \section arg_table_topfsw_type
+!! \section arg_table_topfsw_type Argument Table
 !! \htmlinclude topfsw_type.html
 !!
       type topfsw_type
@@ -83,7 +83,7 @@
       end type topfsw_type
 !
 !> derived type for SW fluxes at surface
-!! \section arg_table_sfcfsw_type
+!! \section arg_table_sfcfsw_type Argument Table
 !! \htmlinclude sfcfsw_type.html
 !!
       type sfcfsw_type
@@ -94,7 +94,7 @@
       end type sfcfsw_type
 !
 !> derived type for SW fluxes' column profiles (at layer interfaces)
-!! \section arg_table_profsw_type
+!! \section arg_table_profsw_type Argument Table
 !! \htmlinclude profsw_type.html
 !!
       type profsw_type
@@ -105,7 +105,7 @@
       end type profsw_type
 !
 !> derived type for special components of surface SW fluxes
-!! \section arg_table_cmpfsw_type
+!! \section arg_table_cmpfsw_type Argument Table
 !! \htmlinclude cmpfsw_type.html
 !!
       type cmpfsw_type

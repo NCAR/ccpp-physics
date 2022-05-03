@@ -70,6 +70,43 @@
  - CSULFtoa: Upward LW
  - CSUSFtoa: Upward SW
 
+\section rrtmg_enh CCPP Physics Updates
+\version CCPP v6.0.0
+\author Qingfu Liu (NCEP Environmental Modeling Center): Qingfu.Liu@noaa.gov
+
+Requests have been made by many physics developers and users to rewrite
+the cloud routines (progcldXXX) for radiation computation in the program
+radiation_clouds.f. Those cloud subroutines are very similar, and
+have many lines of common code. We modified the radiation_clouds.f module,
+and includes all the calculations of the cloud properties to a new subroutine
+radiation_clouds_prop. We also moved the common code from subroutines
+progcldXXX to this new subroutine. Subroutine radiation_clouds_prop can be
+called by RRTMG and RRTMGP. A single call to the subroutine
+radiation_clouds_prop can connect to the calculations of the cloud
+radiation properties for all the microphysics schemes.
+
+Summary of the major changes:
+- radiation_clouds.f
+
+ A new subroutine “radiation_clouds_prop” is added in the program radiation_clouds.f. This new subroutine contains all the calculations of the cloud radiation properties for all the microphysics. Rename all the subroutines “progcldXXX” to new names based on the input variables imp_physics_XXX, and remove the inactive subroutines from file radiation_clouds.f
+ -       'progcld1'        --- > progcld_zhao_carr
+ -       'progcld3'        --- > progcld_zhao_carr_pdf
+ -       'progcld4'        --- > progcld_gfdl_lin
+ -       'progcld5'        --- > progcld_fer_hires
+ -       'progcld6'        --- > progcld_thompson_wsm6
+ -       'progclduni'      --- > progclduni
+ -       'progcld_thompson'--- > progcld_thompson
+
+- GFS_rrtmg_pre.F90
+
+Removed the “progcldXXX” subroutine calls, and replaced them with a single subroutine call to “radiation_clouds_prop”.
+
+- radiation_cloud_overlap.F90
+
+Replace the subroutine “get_alpha_exp” with “get_alpha_exper”. The new subroutine revises alpha for exponential random cloud overlap option. This new subroutine is used in programs GFS_rrtmgp_cloud_overlap_pre.F90 and GFS_rrtmgp_gfdlmp_pre.F90.
+
+- Subroutine getml() has been modified. The subroutine computes low, mid, high, total and boundary clouds, and is used in GFS_cloud_diagnostics.F90.
+
 \section  intraphysics_rrtmg Intraphysics Communication
 + \b GFS_suite_interstitial_rad_reset: \ref arg_table_GFS_suite_interstitial_rad_reset_run
 + \b gfs_rrtmg_pre: \ref arg_table_GFS_rrtmg_pre_run

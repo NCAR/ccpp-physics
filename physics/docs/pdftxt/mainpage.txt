@@ -4,7 +4,7 @@
 Welcome to the scientific documentation for the parameterizations available in the Common 
 Community Physics Package (CCPP) v6.0.0 and the suites that can be configured using them.
 
-The CCPP-Physics is envisioned to contain parameterizations used in the 
+The CCPP-Physics (available through https://github.com/NCAR/ccpp-physics/) is envisioned to contain parameterizations used in the 
 <a href="https://ufscommunity.org/about/what-is-ufs/">Unified Forecast System (UFS)</a>
 applications for weather through seasonal prediction timescales, encompassing the current operational GFS schemes as well as 
 developmental schemes under consideration for upcoming operational implementations. The UFS can be configured for multiple 
@@ -27,7 +27,7 @@ by the Development Testbed Center, supports suites:
 while the UFS Short-Range Weather Application 2.0 supports suites \ref GFS_v16_page, \ref HRRR_suite_page, \ref RRFS_v1beta_page and 
 \ref RRFS_v1nssl_page. The UFS Medium-Range Weather Application 2.0 supports suite \ref GFS_v17_p8_page.
 
-New schemes added in this release:
+New schemes and capability highlights in this release:
 - \ref NSSLMICRO_page
 - \ref GFS_UNIFIED_UGWP
 - \ref ca_page

@@ -91,9 +91,5 @@ Replace the subroutine “get_alpha_exp” with “get_alpha_exper”. The new s
 
 - Subroutine getml() has been modified. The subroutine computes low, mid, high, total and boundary clouds, and is used in GFS_cloud_diagnostics.F90.
 
-\todo P8 updates in Thompson MP
-\todo P8 updates in NOAHMP
-
-
 
 */

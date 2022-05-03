@@ -1,22 +1,12 @@
-!> \file SGSCloud_RadPost.F90
+!> \file sgscloud_radpost.F90
 !!  Contains the post (interstitial) work after the call to the radiation schemes:
 !!    1) Restores the original qc & qi
-
       module sgscloud_radpost
 
       contains
 
 !>\defgroup sgscloud_radpost_mod sgscloud_radpost_run Module
-!> @{
-      subroutine sgscloud_radpost_init ()
-      end subroutine sgscloud_radpost_init
-
-      subroutine sgscloud_radpost_finalize ()
-      end subroutine sgscloud_radpost_finalize
-
-!>\ingroup gsd_mynn_edmf
-!!  This interstitial code restores the original resolved-scale clouds (qc and qi).
-
+!>  This interstitial code restores the original resolved-scale clouds (qc and qi).
 !> \section arg_table_sgscloud_radpost_run Argument Table
 !! \htmlinclude sgscloud_radpost_run.html
 !!
@@ -67,5 +57,4 @@
       ! print*,"qc_save:",qc_save(1,1)," qc:",qc(1,1)
 
       end subroutine sgscloud_radpost_run
-!>@}
       end module sgscloud_radpost
