@@ -5,6 +5,8 @@ module module_soil_pre
 
 !tgs Initialize RUC LSM levels, soil temp/moisture
 
+      use machine, only: kind_phys
+
       implicit none
 
       private
@@ -26,8 +28,8 @@ contains
 
       INTEGER, INTENT(IN) :: num_soil_levels
 
-      REAL, DIMENSION(1:num_soil_levels), INTENT(OUT)  ::  zs, dzs
-      REAL, DIMENSION(1:num_soil_levels)  :: zs2
+      REAL(kind_phys), DIMENSION(1:num_soil_levels), INTENT(OUT)  ::  zs, dzs
+      REAL(kind_phys), DIMENSION(1:num_soil_levels)  :: zs2
 
       INTEGER                   ::      l
 
@@ -90,21 +92,21 @@ contains
       INTEGER , DIMENSION(1:num_st_levels_input) , INTENT(INOUT) :: st_levels_input
       INTEGER , DIMENSION(1:num_sm_levels_input) , INTENT(INOUT) :: sm_levels_input
 
-      REAL , DIMENSION(ims:ime,1:num_st_levels_alloc,jms:jme) , INTENT(INOUT) :: st_input
-      REAL , DIMENSION(ims:ime,1:num_sm_levels_alloc,jms:jme) , INTENT(INOUT) :: sm_input
-      REAL , DIMENSION(ims:ime,jms:jme) , INTENT(IN) :: landmask , sst
+      REAL(kind_phys) , DIMENSION(ims:ime,1:num_st_levels_alloc,jms:jme) , INTENT(INOUT) :: st_input
+      REAL(kind_phys) , DIMENSION(ims:ime,1:num_sm_levels_alloc,jms:jme) , INTENT(INOUT) :: sm_input
+      REAL(kind_phys) , DIMENSION(ims:ime,jms:jme) , INTENT(IN) :: landmask , sst
 
-      REAL , DIMENSION(ims:ime,jms:jme) , INTENT(IN) :: tmn
-      REAL , DIMENSION(ims:ime,jms:jme) , INTENT(INOUT) :: tsk
-      REAL , DIMENSION(num_soil_layers) :: zs , dzs
+      REAL(kind_phys) , DIMENSION(ims:ime,jms:jme) , INTENT(IN) :: tmn
+      REAL(kind_phys) , DIMENSION(ims:ime,jms:jme) , INTENT(INOUT) :: tsk
+      REAL(kind_phys) , DIMENSION(num_soil_layers) :: zs , dzs
 
-      REAL , DIMENSION(ims:ime,num_soil_layers,jms:jme) , INTENT(OUT) :: tslb , smois
+      REAL(kind_phys) , DIMENSION(ims:ime,num_soil_layers,jms:jme) , INTENT(OUT) :: tslb , smois
 
-      REAL , ALLOCATABLE , DIMENSION(:) :: zhave
+      REAL(kind_phys) , ALLOCATABLE , DIMENSION(:) :: zhave
 
       logical :: debug_print = .false.
       INTEGER :: i , j , l , lout , lin , lwant , lhave, k
-      REAL :: temp
+      REAL(kind_phys) :: temp
 
       !  Allocate the soil layer array used for interpolating.      
 

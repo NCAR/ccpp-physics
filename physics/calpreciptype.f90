@@ -509,7 +509,14 @@
       real(kind=kind_phys)    rhmax,twmax,ptop,dpdrh,twtop,rhtop,wgt1,wgt2,    &
               rhavg,dtavg,dpk,ptw,pbot
 !     real(kind=kind_phys) b,qtmp,rate,qc
-!     real(kind=kind_phys),external :: xmytw  (now inside the module)
+!
+      interface
+         function xmytw(t,td,p)
+           use machine , only : kind_phys
+           implicit none
+           real(kind=kind_phys)   t, td, p, xmytw
+         end function xmytw
+      end interface
 !
 !  initialize.
       icefrac = -9999.

@@ -224,7 +224,7 @@
                     qc_mp(i,k) = (clw(i,k,2)-save_qc(i,k)) / (one-spechum(i,k))
                     !> - Convert number concentration from moist to dry
                     nc_mp(i,k) = gq0(i,k,ntlnc) / (one-spechum(i,k))
-                    nc_mp(i,k) = max(zero, nc_mp(i,k) + make_DropletNumber(qc_mp(i,k) * rho, nwfa(i,k)*rho) * orho)
+                    nc_mp(i,k) = max(zero, nc_mp(i,k) + make_DropletNumber(real(qc_mp(i,k) * rho), real(nwfa(i,k)*rho)) * orho)
                     !> - Convert number concentrations from dry to moist
                     gq0(i,k,ntlnc) = nc_mp(i,k) / (one+qv_mp(i,k))
                   endif
@@ -233,7 +233,7 @@
                     qi_mp(i,k) = (clw(i,k,1)-save_qi(i,k)) / (one-spechum(i,k))
                     !> - Convert number concentration from moist to dry
                     ni_mp(i,k) = gq0(i,k,ntinc) / (one-spechum(i,k)) 
-                    ni_mp(i,k) = max(zero, ni_mp(i,k) + make_IceNumber(qi_mp(i,k) * rho, save_tcp(i,k)) * orho)
+                    ni_mp(i,k) = max(zero, ni_mp(i,k) + make_IceNumber(real(qi_mp(i,k) * rho), real(save_tcp(i,k)) * orho))
                     !> - Convert number concentrations from dry to moist
                     gq0(i,k,ntinc) = ni_mp(i,k) / (one+qv_mp(i,k))
                   endif
@@ -249,13 +249,13 @@
                     !> - Update cloud water mixing ratio
                     qc_mp(i,k) = (clw(i,k,2)-save_qc(i,k))
                     !> - Update cloud water number concentration
-                    gq0(i,k,ntlnc) = max(zero, gq0(i,k,ntlnc) + make_DropletNumber(qc_mp(i,k) * rho, nwfa(i,k)*rho) * orho)
+                    gq0(i,k,ntlnc) = max(zero, gq0(i,k,ntlnc) + make_DropletNumber(real(qc_mp(i,k) * rho), real(nwfa(i,k)*rho)) * orho)
                   endif
                   if (ntinc>0) then
                     !> - Update cloud ice mixing ratio
                     qi_mp(i,k) = (clw(i,k,1)-save_qi(i,k))
                     !> - Update cloud ice number concentration
-                    gq0(i,k,ntinc) = max(zero, gq0(i,k,ntinc) + make_IceNumber(qi_mp(i,k) * rho, save_tcp(i,k)) * orho)
+                    gq0(i,k,ntinc) = max(zero, gq0(i,k,ntinc) + make_IceNumber(real(qi_mp(i,k) * rho), real(save_tcp(i,k))) * orho)
                   endif
                 enddo
               enddo

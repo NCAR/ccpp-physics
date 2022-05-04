@@ -2040,7 +2040,7 @@
       real (kind=kind_phys) :: cdfunc(nlay,ngptsw), tem1,               &
      &                                            fac_lcf(nlay),        &
      &       cdfun2(nlay,ngptsw)
-      real (kind=kind_dbl_prec) :: rand2d(nlay*ngptsw), rand1d(ngptsw)
+      real (kind=kind_dbl_prec) :: rand2d(nlay*ngptsw), rand1d(ngptsw) ! must be default real kind to match mersenne twister code
 
       type (random_stat) :: stat          ! for thread safe random generator
 

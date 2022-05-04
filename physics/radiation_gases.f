@@ -371,7 +371,7 @@
         endif
 
         do k = 1, LOZ
-          pkstr(k) = fpkapx(pstr(k)*100.0)
+          pkstr(k) = fpkapx(pstr(k)*100.0_kind_phys)
         enddo
       endif   ! end if_ioznflg_block
 

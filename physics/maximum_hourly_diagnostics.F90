@@ -144,11 +144,11 @@ contains
       real (kind=kind_phys), intent(in) :: grav
       real (kind=kind_phys), intent(in),dimension(:,:)  :: phil,ref3D,tk
       integer               :: i,k,ll,ipt,kpt
-      real :: dbz1avg,zmidp1,zmidloc,refl,fact
-      real, dimension(im,levs) :: z
-      real, dimension(im) :: zintsfc
-      real, dimension(:), intent(inout) :: refd,refd263k
-      REAL :: dbz1(2),dbzk,dbzk1
+      real(kind_phys) :: dbz1avg,zmidp1,zmidloc,refl,fact
+      real(kind_phys), dimension(im,levs) :: z
+      real(kind_phys), dimension(im) :: zintsfc
+      real(kind_phys), dimension(:), intent(inout) :: refd,refd263k
+      REAL(kind_phys) :: dbz1(2),dbzk,dbzk1
       logical :: counter
       do i=1,im
          do k=1,levs
@@ -185,7 +185,7 @@ contains
          dbz1avg=dbz1(2)+(dbz1(2)-dbz1(1))*fact
 !-- Convert to dBZ (10*logZ) as the last step
          if (dbz1avg>0.01) then
-           dbz1avg=10.*alog10(dbz1avg)
+           dbz1avg=10.*log10(dbz1avg)
          else
            dbz1avg=-35.
          endif
@@ -214,7 +214,7 @@ contains
          dbz1avg=maxval(dbz1)
 !-- Convert to dBZ (10*logZ) as the last step
          if (dbz1avg>0.01) then
-           dbz1avg=10.*alog10(dbz1avg)
+           dbz1avg=10.*log10(dbz1avg)
          else
            dbz1avg=-35.
          endif
