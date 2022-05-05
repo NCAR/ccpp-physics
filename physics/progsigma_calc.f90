@@ -48,7 +48,7 @@
 
       real(kind=kind_phys) :: gcvalmx,epsilon,ZZ,cvg,mcon,buy2,   &
                           fdqb,dtdyn,dxlim,rmulacvg,tem,     &
-                          alpha,DEN,betascu,dp1
+                          alpha,DEN,betascu,dp1,invdelt
 
      !Parameters
       gcvalmx = 0.1
@@ -57,11 +57,11 @@
       km1=km-1
       alpha=7000.
       betascu = 3.0
+      invdelt = 1./delt
 
      !Initialization 2D
       do k = 1,km
          do i = 1,im
-            sigmaout(i,k)=0.
             inbu(i,k)=0.
             form(i,k)=0.
             dp(i,k)=0.
@@ -70,7 +70,9 @@
      
      !Initialization 1D
       do i=1,im
-         sigmab(i)=0.
+         if(cnvflg(i))then
+            sigmab(i)=0.
+         endif
          sigmamax(i)=0.95
          termA(i)=0.
          termB(i)=0.
@@ -89,24 +91,16 @@
        enddo
 
       !Initial computations, place maximum sigmain in sigmab
-       if(flag_init .and. .not. flag_restart)then
-          do i=1,im
-             if(cnvflg(i))then
-                sigmab(i)=0.03
-             endif
-          enddo
-       else
-          do i=1,im
-             if(cnvflg(i))then
-                do k=2,km
-                   if(sigmain(i,k)>sigmab(i))then
-                      sigmab(i)=sigmain(i,k)
-                   endif
-                enddo
-             endif
-          enddo
-       endif
-
+       do i=1,im
+          if(cnvflg(i))then
+             do k=2,km
+                if(sigmain(i,k)>sigmab(i))then
+                   sigmab(i)=sigmain(i,k)
+                endif
+             enddo
+          endif
+       enddo
+     
       do i=1,im
          if(sigmab(i) < 1.E-5)then !after advection
             sigmab(i)=0.                                  
@@ -120,15 +114,20 @@
       enddo
 
       !Initial computations, dynamic q-tendency
-      do k = 1,km
-         do i = 1,im
-            if(flag_init .and. .not.flag_restart)then
+      if(flag_init .and. .not.flag_restart)then
+         do k = 1,km
+            do i = 1,im
                qadv(i,k)=0.
-            else
-               qadv(i,k)=(q(i,k) - prevsq(i,k))/delt
-            endif
+            enddo
          enddo
-      enddo
+      else
+         do k = 1,km
+            do i = 1,im
+               qadv(i,k)=(q(i,k) - prevsq(i,k))*invdelt
+            enddo
+         enddo
+      endif
+
 
       !compute termD "The vertical integral of the latent heat convergence is limited to the                                        
       !buoyant layers with positive moisture convergence (accumulated from the surface).                                                       
@@ -173,7 +172,7 @@
              endif
           enddo
        enddo
-       
+
       !termC
        do k = 2,km1
           do i = 1,im
@@ -188,33 +187,38 @@
       enddo
 
       !sigmab
-       do i = 1,im                                                                                                                           
-          if(cnvflg(i))then
-             DEN=MIN(termC(i)+termB(i),1.E8)
-             cvg=termD(i)*delt
-             ZZ=MAX(0.0,SIGN(1.0,termA(i)))            &
-                  *MAX(0.0,SIGN(1.0,termB(i)))         &
-                  *MAX(0.0,SIGN(1.0,termC(i)-epsilon))
-             cvg=MAX(0.0,cvg)
-             if(flag_init .and. .not. flag_restart)then
-                sigmab(i)=0.03
-             else
-                sigmab(i)=(ZZ*(termA(i)+cvg))/(DEN+(1.0-ZZ))
-             endif
-             if(sigmab(i)>0.)then
-                sigmab(i)=MIN(sigmab(i),sigmamax(i))  
-                sigmab(i)=MAX(sigmab(i),0.01)
-             endif
-          endif!cnvflg
-       enddo
+      if(flag_init .and. .not. flag_restart)then
+         do i = 1,im
+            if(cnvflg(i))then
+               sigmab(i)=0.03
+            endif
+         enddo
+      else
+         do i = 1,im                                                                                                                           
+            if(cnvflg(i))then
+               DEN=MIN(termC(i)+termB(i),1.E8)
+               cvg=termD(i)*delt
+               ZZ=MAX(0.0,SIGN(1.0,termA(i)))            &
+                    *MAX(0.0,SIGN(1.0,termB(i)))         &
+                    *MAX(0.0,SIGN(1.0,termC(i)-epsilon))
+               cvg=MAX(0.0,cvg)
+               sigmab(i)=(ZZ*(termA(i)+cvg))/(DEN+(1.0-ZZ))
+               if(sigmab(i)>0.)then
+                  sigmab(i)=MIN(sigmab(i),sigmamax(i))  
+                  sigmab(i)=MAX(sigmab(i),0.01)
+               endif
+            endif!cnvflg
+         enddo
+      endif
 
-       do k=1,km
-          do i=1,im
-             if(cnvflg(i))then
-                sigmaout(i,k)=sigmab(i)
-             endif
-          enddo
-       enddo
+      do k=1,km
+         do i=1,im
+            if(cnvflg(i))then
+               sigmaout(i,k)=sigmab(i)
+            endif
+         enddo
+      enddo
+   
 
        !Since updraft velocity is much lower in shallow cu region, termC becomes small in shallow cu application, thus the area fraction 
        !in this regime becomes too large compared with the deep cu region. To address this simply apply a scaling factor for shallow cu 
