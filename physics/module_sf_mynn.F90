@@ -849,7 +849,7 @@ CONTAINS
       DO I=its,ite
          ! CONVERT LOWEST LAYER TEMPERATURE TO POTENTIAL TEMPERATURE:     
          TH1D(I)=T1D(I)**(100000./P1D(I))**ROVCP !(Theta, K)
-         TC1D(I)=T1D(I)-273.15                   !(T, Celsius)    
+         TC1D(I)=T1D(I)-273.15                   !(T, Celsius)
       ENDDO
 
       DO I=its,ite
