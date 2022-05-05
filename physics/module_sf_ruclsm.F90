@@ -7603,11 +7603,10 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 !>\ingroup lsm_ruc_group
 !> This function calculates the liquid saturation vapor mixing ratio as 
 !! a function of temperature and pressure (from Thompson scheme).
-      FUNCTION RSLF(P,T)
+      REAL FUNCTION RSLF(P,T)
 
       IMPLICIT NONE
-      REAL(kind_phys), INTENT(IN):: P, T
-      REAL(kind_phys) :: RSLF
+      REAL, INTENT(IN):: P, T
       REAL:: ESL,X
       REAL, PARAMETER:: C0= .611583699E03
       REAL, PARAMETER:: C1= .444606896E02

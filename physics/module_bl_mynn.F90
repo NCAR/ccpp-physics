@@ -1384,11 +1384,9 @@ CONTAINS
      dld = min(dld,zw(k+1))!not used in PBL anyway, only free atmos
      lb1 = min(dlu,dld)     !minimum
      !JOE-fight floating point errors
-#ifdef SINGLE_PREC
      !JM: keep up the fight, JOE
      dlu=MAX(0.1,MIN(dlu,1000.))
      dld=MAX(0.1,MIN(dld,1000.))
-#endif
      lb2 = sqrt(dlu*dld)    !average - biased towards smallest
      !lb2 = 0.5*(dlu+dld)   !average
 
@@ -1542,11 +1540,9 @@ CONTAINS
         dld(iz) = min(dld(iz),zw(iz+1))!not used in PBL anyway, only free atmos
         lb1(iz) = min(dlu(iz),dld(iz))     !minimum
         !JOE-fight floating point errors
-#ifdef SINGLE_PREC
         !JM: keep up the fight, JOE
         dlu(iz)=MAX(0.1,MIN(dlu(iz),1000.))
         dld(iz)=MAX(0.1,MIN(dld(iz),1000.))
-#endif
         lb2(iz) = sqrt(dlu(iz)*dld(iz))    !average - biased towards smallest
         !lb2(iz) = 0.5*(dlu(iz)+dld(iz))   !average
 
@@ -2955,8 +2951,12 @@ CONTAINS
            zagl = zagl + dz(k)
 
            !CLOUD WATER AND ICE
-           IF (q1k < 0.) THEN        !unstaurated
+           IF (q1k < 0.) THEN        !unsaturated
+#ifdef SINGLE_PREC
               ql_water = sgm(k)*EXP(1.2*q1k-1.)
+#else
+              ql_water = sgm(k)*EXP(1.2*q1k-1)
+#endif
               ql_ice   = sgm(k)*EXP(1.2*q1k-1.)
               !Reduce ice mixing ratios in the upper troposphere
 !              low_weight = MIN(MAX(p(k)-40000.0, 0.0),40000.0)/40000.0
@@ -7608,15 +7608,28 @@ SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
 
       IF ((t .GE. 273.16) .OR. (wrt .EQ. 'w')) THEN
           ESL  = J0+XC*(J1+XC*(J2+XC*(J3+XC*(J4+XC*(J5+XC*(J6+XC*(J7+XC*J8))))))) 
+#ifdef SINGLE_PREC
           qsat_blend = 0.622*ESL/max((P-ESL),1.0E-7_kind_phys)
+#else
+          qsat_blend = 0.622*ESL/(P-ESL)
+#endif
       ELSE IF (t .LE. 253.) THEN
           ESI  = K0+XC*(K1+XC*(K2+XC*(K3+XC*(K4+XC*(K5+XC*(K6+XC*(K7+XC*K8)))))))
+#ifdef SINGLE_PREC
           qsat_blend = 0.622*ESI/max((P-ESI),1.0E-7_kind_phys)
+#else
+          qsat_blend = 0.622*ESI/(P-ESI)
+#endif
       ELSE
           ESL  = J0+XC*(J1+XC*(J2+XC*(J3+XC*(J4+XC*(J5+XC*(J6+XC*(J7+XC*J8)))))))
           ESI  = K0+XC*(K1+XC*(K2+XC*(K3+XC*(K4+XC*(K5+XC*(K6+XC*(K7+XC*K8)))))))
+#ifdef SINGLE_PREC
           RSLF = 0.622*ESL/max((P-ESL),1.0E-7_kind_phys)
           RSIF = 0.622*ESI/max((P-ESI),1.0E-7_kind_phys)
+#else
+          RSLF = 0.622*ESL/(P-ESL)
+          RSIF = 0.622*ESI/(P-ESI)
+#endif
           chi  = (273.16-t)/20.16
           qsat_blend = (1.-chi)*RSLF + chi*RSIF
       END IF

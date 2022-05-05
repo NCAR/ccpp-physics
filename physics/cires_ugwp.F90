@@ -17,12 +17,8 @@ module cires_ugwp
 
     use cires_ugwpv0_module, only: knob_ugwp_version, cires_ugwpv0_mod_init, cires_ugwpv0_mod_finalize
     use ugwp_driver_v0
-
     use gwdps, only: gwdps_run
-
     use cires_ugwp_triggers
-
-    use ugwp_driver_v0
 
     implicit none
 

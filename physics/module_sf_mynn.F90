@@ -2804,8 +2804,8 @@ END SUBROUTINE SFCLAY1D_mynn
 ! znotm(meter):   areodynamical roughness scale over water
 !
 
-      REAL, INTENT(IN) :: uref
-      REAL, INTENT(OUT):: znotm
+      REAL(kind=kind_phys), INTENT(IN) :: uref
+      REAL(kind=kind_phys), INTENT(OUT):: znotm
       real(kind=kind_phys), parameter  :: p13 = -1.296521881682694e-02,&
      &      p12 =  2.855780863283819e-01, p11 = -1.597898515251717e+00,&
      &      p10 = -8.396975715683501e+00,                              &
