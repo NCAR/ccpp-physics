@@ -922,7 +922,7 @@ CONTAINS
       DO I=its,ite
         if( flag_iter(i) ) then
          ! DH* 20200401 - note. A weird bug in Intel 18 on hera prevents using the
-         ! normal -O2 optimization in REPRO and PROD mode for this file. Not reproducible
+         ! normal -O2 optimization in Release mode for this file. Not reproducible
          ! by every user, the bug manifests itself in the resulting wind speed WSPD(I)
          ! being -99.0 despite the assignments in lines 932 and 933. *DH
          WSPD(I)=SQRT(U1D(I)*U1D(I)+V1D(I)*V1D(I))
