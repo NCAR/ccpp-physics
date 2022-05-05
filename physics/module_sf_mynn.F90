@@ -848,8 +848,8 @@ CONTAINS
 
       DO I=its,ite
          ! CONVERT LOWEST LAYER TEMPERATURE TO POTENTIAL TEMPERATURE:     
-         TH1D(I)=T1D(I)*THCON(I)                !(Theta, K)
-         TC1D(I)=T1D(I)-273.15                  !(T, Celsius)    
+         TH1D(I)=T1D(I)**(100000./P1D(I))**ROVCP !(Theta, K)
+         TC1D(I)=T1D(I)-273.15                   !(T, Celsius)    
       ENDDO
 
       DO I=its,ite
@@ -859,7 +859,7 @@ CONTAINS
       ENDDO
 
       DO I=its,ite
-         RHO1D(I)=PSFCPA(I)/(R*TV1D(I))  !now using value calculated in sfc driver
+         RHO1D(I)=P1D(I)/(R*TV1D(I))     !now using value calculated in sfc driver
          ZA(I)=0.5*dz8w1d(I)             !height of first half-sigma level 
          ZA2(I)=dz8w1d(I) + 0.5*dz2w1d(I)    !height of 2nd half-sigma level
          GOVRTH(I)=G/TH1D(I)
@@ -1724,9 +1724,9 @@ CONTAINS
     IF (wet(I)) THEN
        ! TO PREVENT OSCILLATIONS AVERAGE WITH OLD VALUE 
        OLDUST = UST_wat(I)
-       UST_wat(I)=0.5*UST_wat(I)+0.5*KARMAN*WSPD(I)/PSIX_wat(I)
+       !UST_wat(I)=0.5*UST_wat(I)+0.5*KARMAN*WSPD(I)/PSIX_wat(I)
        !NON-AVERAGED: 
-       !UST_wat(I)=KARMAN*WSPD(I)/PSIX_wat(I)
+       UST_wat(I)=KARMAN*WSPD(I)/PSIX_wat(I)
        stress_wat(i)=ust_wat(i)**2
 
        ! Compute u* without vconv for use in HFX calc when isftcflx > 0           
@@ -1891,7 +1891,8 @@ CONTAINS
             !----------------------------------
             ! COMPUTE SURFACE HEAT FLUX:
             !----------------------------------
-            HFX(I)=FLHC(I)*(THSK_lnd(I)-TH1D(I))
+            !HFX(I)=FLHC(I)*(THSK_lnd(I)-TH1D(I))
+            HFX(I)=RHO1D(I)*CPM(I)*KARMAN*WSPD(i)/PSIX_lnd(I)*KARMAN/PSIT_lnd(I)*(THSK_lnd(I)-TH1D(i))
             HFX(I)=MAX(HFX(I),-250.)
             ! BWG, 2020-06-17: Mod next 2 lines for fractional
             HFLX_lnd(I)=HFX(I)/(RHO1D(I)*cpm(I))
@@ -1935,7 +1936,8 @@ CONTAINS
             !----------------------------------
             ! COMPUTE SURFACE HEAT FLUX:       
             !----------------------------------
-            HFX(I)=FLHC(I)*(THSK_wat(I)-TH1D(I))
+            !HFX(I)=FLHC(I)*(THSK_wat(I)-TH1D(I))
+            HFX(I)=RHO1D(I)*CPM(I)*KARMAN*WSPD(i)/PSIX_wat(I)*KARMAN/PSIT_wat(I)*(THSK_wat(I)-TH1D(i))
             IF ( PRESENT(ISFTCFLX) ) THEN
                IF ( ISFTCFLX.NE.0 ) THEN
                   ! AHW: add dissipative heating term
@@ -1982,7 +1984,8 @@ CONTAINS
             !----------------------------------
             ! COMPUTE SURFACE HEAT FLUX:
             !----------------------------------
-            HFX(I)=FLHC(I)*(THSK_ice(I)-TH1D(I))
+            !HFX(I)=FLHC(I)*(THSK_ice(I)-TH1D(I))
+            HFX(I)=RHO1D(I)*CPM(I)*KARMAN*WSPD(i)/PSIX_ice(I)*KARMAN/PSIT_ice(I)*(THSK_ice(I)-TH1D(i))
             HFX(I)=MAX(HFX(I),-250.)
             ! BWG, 2020-06-17: Mod next 2 lines for fractional
             HFLX_ice(I)=HFX(I)/(RHO1D(I)*cpm(I))
