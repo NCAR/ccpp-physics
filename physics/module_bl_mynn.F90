@@ -1384,8 +1384,11 @@ CONTAINS
      dld = min(dld,zw(k+1))!not used in PBL anyway, only free atmos
      lb1 = min(dlu,dld)     !minimum
      !JOE-fight floating point errors
+#ifdef SINGLE_PREC
+     !JM: keep up the fight, JOE
      dlu=MAX(0.1,MIN(dlu,1000.))
      dld=MAX(0.1,MIN(dld,1000.))
+#endif
      lb2 = sqrt(dlu*dld)    !average - biased towards smallest
      !lb2 = 0.5*(dlu+dld)   !average
 

@@ -1,6 +1,8 @@
 !>\file calpreciptype.f90
 !! This file contains the subroutines that calculates dominant precipitation type.
 
+module calpreciptype_mod
+contains
 !>\ingroup gfs_calpreciptype
 !! Foure algorithms are called to calculate dominant precipitation type, and the 
 !!tallies are sumed in calwxt_dominant().
@@ -510,13 +512,6 @@
               rhavg,dtavg,dpk,ptw,pbot
 !     real(kind=kind_phys) b,qtmp,rate,qc
 !
-      interface
-         function xmytw(t,td,p)
-           use machine , only : kind_phys
-           implicit none
-           real(kind=kind_phys)   t, td, p, xmytw
-         end function xmytw
-      end interface
 !
 !  initialize.
       icefrac = -9999.
@@ -1391,3 +1386,4 @@
       return
       end
 !! @}
+end module calpreciptype_mod
