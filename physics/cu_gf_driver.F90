@@ -39,26 +39,6 @@ contains
          errmsg = ''
          errflg = 0
 
-         ! DH* temporary
-         ! if (mpirank==mpiroot) then
-         !    write(0,*) ' ----------------------------------------------------------'//&
-         !                '-------------------------------------------------------------------'
-         !    write(0,*) ' --- WARNING --- the CCPP Grell Freitas convection scheme is'//&
-         !                ' currently under development, use at your own risk --- WARNING ---'
-         !    write(0,*) ' --------------------------------------------------------------------'//&
-         !                '---------------------------------------------------------'
-         ! end if
-         ! *DH temporary
-
-       !  ! Consistency checks
-       !  if (.not. (imfshalcnv == imfshalcnv_gf .or.                       &
-       ! &        imfdeepcnv == imfdeepcnv_gf)) then
-       !    write(errmsg,'(*(a))') 'Logic error: namelist choice of',       &
-       ! &    ' convection is different from Grell-Freitas scheme'
-       !    errflg = 1
-       !    return
-       !  end if
-
       end subroutine cu_gf_driver_init
 
       subroutine cu_gf_driver_finalize()
