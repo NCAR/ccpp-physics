@@ -45,11 +45,11 @@ contains
     integer, parameter :: ims=1,jms=1,jme=1, kms=1
     integer, parameter :: its=1,jts=1,jte=1, kts=1
 
-    real(kind_phys), dimension(im),     intent(in) :: rain_cpl, rainc_cpl
-    real(kind_phys), dimension(im,kme), intent(in) :: ph3d, pr3d
-    real(kind_phys), dimension(im,kte), intent(in) :: phl3d, prl3d, tk3d,        &
+    real(kind_phys), dimension(:),     intent(in) :: rain_cpl, rainc_cpl
+    real(kind_phys), dimension(:,:), intent(in) :: ph3d, pr3d
+    real(kind_phys), dimension(:,:), intent(in) :: phl3d, prl3d, tk3d,        &
                 us3d, vs3d, spechum, w, dqdt
-    real(kind_phys), dimension(im,kte,ntrac), intent(inout) :: gq0, qgrs
+    real(kind_phys), dimension(:,:,:), intent(inout) :: gq0, qgrs
     integer,           intent(in) :: wetdep_ls_opt_in
     character(len=*), intent(out) :: errmsg
     integer,          intent(out) :: errflg

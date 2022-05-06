@@ -59,27 +59,27 @@ contains
     integer, parameter :: ims=1,jms=1,jme=1, kms=1
     integer, parameter :: its=1,jts=1,jte=1, kts=1
 
-    integer, dimension(im), intent(in) :: land, vegtype, soiltyp        
-    real(kind_phys), dimension(im,nsoil), intent(in) :: smc
-    real(kind_phys), dimension(im,12, 5), intent(in) :: dust12m_in
-    real(kind_phys), dimension(im,24, 3), intent(in) :: smoke_GBBEPx
-    real(kind_phys), dimension(im,    1), intent(in) :: emi_in
-    real(kind_phys), dimension(im), intent(in) :: u10m, v10m, ustar, dswsfc,      &
+    integer, dimension(:), intent(in) :: land, vegtype, soiltyp
+    real(kind_phys), dimension(:,:), intent(in) :: smc
+    real(kind_phys), dimension(:,:,:), intent(in) :: dust12m_in
+    real(kind_phys), dimension(:,:,:), intent(in) :: smoke_GBBEPx
+    real(kind_phys), dimension(:,:), intent(in) :: emi_in
+    real(kind_phys), dimension(:), intent(in) :: u10m, v10m, ustar, dswsfc,      &
                 garea, rlat,rlon, tskin, pb2d, sigmaf, zorl, snow,                &
                 rain_cpl, rainc_cpl, hf2d, t2m, dpt2m
-    real(kind_phys), dimension(im,kme), intent(in) :: ph3d, pr3d
-    real(kind_phys), dimension(im,kte), intent(in) :: phl3d, prl3d, tk3d,         &
+    real(kind_phys), dimension(:,:), intent(in) :: ph3d, pr3d
+    real(kind_phys), dimension(:,:), intent(in) :: phl3d, prl3d, tk3d,         &
                 us3d, vs3d, spechum, exch, w
-    real(kind_phys), dimension(im,kte,ntrac), intent(inout) :: qgrs, gq0
-    real(kind_phys), dimension(im,kte,    2), intent(inout) :: chem3d
-    real(kind_phys), dimension(im), intent(inout) :: emdust, emseas, emanoc
-    real(kind_phys), dimension(im), intent(inout) :: ebb_smoke_hr, frp_hr, frp_std_hr
-    real(kind_phys), dimension(im    ), intent(inout) :: coef_bb, fhist
-    real(kind_phys), dimension(im,kte), intent(inout) :: ebu_smoke
-    real(kind_phys), dimension(im), intent(inout) :: max_fplume, min_fplume       
-    real(kind_phys), dimension(im), intent(  out) :: hwp
-    real(kind_phys), dimension(im,kte), intent(out) :: smoke_ext, dust_ext
-    real(kind_phys), dimension(im,kte), intent(inout) :: nwfa, nifa
+    real(kind_phys), dimension(:,:,:), intent(inout) :: qgrs, gq0
+    real(kind_phys), dimension(:,:,:), intent(inout) :: chem3d
+    real(kind_phys), dimension(:), intent(inout) :: emdust, emseas, emanoc
+    real(kind_phys), dimension(:), intent(inout) :: ebb_smoke_hr, frp_hr, frp_std_hr
+    real(kind_phys), dimension(:), intent(inout) :: coef_bb, fhist
+    real(kind_phys), dimension(:,:), intent(inout) :: ebu_smoke
+    real(kind_phys), dimension(:), intent(inout) :: max_fplume, min_fplume       
+    real(kind_phys), dimension(:), intent(  out) :: hwp
+    real(kind_phys), dimension(:,:), intent(out) :: smoke_ext, dust_ext
+    real(kind_phys), dimension(:,:), intent(inout) :: nwfa, nifa
     integer, intent(in   ) :: imp_physics, imp_physics_thompson
     integer,        intent(in) :: seas_opt_in, dust_opt_in, biomass_burn_opt_in,  &
                                   drydep_opt_in, plumerisefire_frq_in, addsmoke_flag_in
