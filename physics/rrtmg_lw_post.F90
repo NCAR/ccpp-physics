@@ -4,9 +4,8 @@
       contains
 
 !>\defgroup rrtmg_lw_post GFS RRTMG scheme post
+!! This module saves RRTMG-LW fluxes results.
 !> @{
-      subroutine rrtmg_lw_post_init()
-      end subroutine rrtmg_lw_post_init
 
 !> \section arg_table_rrtmg_lw_post_run Argument Table
 !! \htmlinclude rrtmg_lw_post_run.html
@@ -41,8 +40,8 @@
       errflg = 0
 
       if (lslwr) then
-!> -# Save calculation results
-!>  - Save surface air temp for diurnal adjustment at model t-steps
+! Save calculation results
+! Save surface air temp for diurnal adjustment at model t-steps
 
         tsflw (:) = tsfa(:)
 
@@ -76,9 +75,6 @@
       endif                                ! end_if_lslwr
 
       end subroutine rrtmg_lw_post_run
-
-      subroutine rrtmg_lw_post_finalize ()
-      end subroutine rrtmg_lw_post_finalize
 
 !> @}
       end module rrtmg_lw_post

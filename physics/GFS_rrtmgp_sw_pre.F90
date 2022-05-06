@@ -1,13 +1,10 @@
-! ######################################################################################
 !> \file GFS_rrtmgp_sw_pre.F90
-!!
 !! This file contains code to gather the sunlit points for the RRTMGP shortwave scheme.
 !!
 !> \defgroup GFS_rrtmgp_sw_pre RRTMGP Shortwave pre
 !!
 !! \brief *TODO* Combine with rrtmg_sw_pre.F90, maybe call sw_rad_pre.F90, use by both.
 !!
-! ######################################################################################
 module GFS_rrtmgp_sw_pre
   use machine,               only: kind_phys
   use mo_gas_optics_rrtmgp,  only: ty_gas_optics_rrtmgp
@@ -15,7 +12,6 @@ module GFS_rrtmgp_sw_pre
   public GFS_rrtmgp_sw_pre_run
 contains
 
-  ! #########################################################################################
 !> \section arg_table_GFS_rrtmgp_sw_pre_run
 !! \htmlinclude GFS_rrtmgp_sw_pre.html
 !!

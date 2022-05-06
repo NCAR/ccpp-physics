@@ -1,16 +1,20 @@
 !>\file GFS_rrtmg_post.F90
-!! This file contains
+!! This file contains the calculation of time averaged output quantities (including total-sky and
+!! clear-sky SW and LW fluxes at TOA and surface; conventional
+!! 3-domain cloud amount, cloud top and base pressure, and cloud top
+!! temperature; aerosols AOD, etc.), store computed results in
+!! corresponding slots of array fluxr with appropriate time weights. 
 
        module GFS_rrtmg_post
        contains
 
 !>\defgroup GFS_rrtmg_post_mod GFS RRTMG Scheme Post
+!! This module calculate time averaged output quantities (including total-sky and
+!! clear-sky SW and LW fluxes at TOA and surface; conventional
+!! 3-domain cloud amount, cloud top and base pressure, and cloud top
+!! temperature; aerosols AOD, etc.), store computed results in
+!! corresponding slots of array fluxr with appropriate time weights.
 !> @{
-!> \section arg_table_GFS_rrtmg_post_init Argument Table
-!!
-       subroutine GFS_rrtmg_post_init ()
-       end subroutine GFS_rrtmg_post_init
-
 !> \section arg_table_GFS_rrtmg_post_run Argument Table
 !! \htmlinclude GFS_rrtmg_post_run.html
 !!
@@ -67,11 +71,11 @@
 
       if (.not. (lsswr .or. lslwr)) return
 
-!>  - For time averaged output quantities (including total-sky and
-!!    clear-sky SW and LW fluxes at TOA and surface; conventional
-!!    3-domain cloud amount, cloud top and base pressure, and cloud top
-!!    temperature; aerosols AOD, etc.), store computed results in
-!!    corresponding slots of array fluxr with appropriate time weights.
+!  - For time averaged output quantities (including total-sky and
+!    clear-sky SW and LW fluxes at TOA and surface; conventional
+!    3-domain cloud amount, cloud top and base pressure, and cloud top
+!    temperature; aerosols AOD, etc.), store computed results in
+!    corresponding slots of array fluxr with appropriate time weights.
 
 !  --- ...  collect the fluxr data for wrtsfc
 
@@ -206,8 +210,5 @@
       endif
 !
       end subroutine GFS_rrtmg_post_run
-
-      subroutine GFS_rrtmg_post_finalize ()
-      end subroutine GFS_rrtmg_post_finalize
 !> @}
       end module GFS_rrtmg_post

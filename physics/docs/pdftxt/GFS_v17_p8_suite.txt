@@ -30,7 +30,10 @@ Suite GFS_v17_p8 uses the parameterizations in the following order:
 \include suite_FV3_GFS_v17_p8.xml
 
 \section gfs17_nml_opt_des Namelist 
-\todo GFS_v17_p8 NML
+- General physics options
+\snippet FV3_GFS_v17_p8_input.nml GFS_PHYSICS_NML
+- \ref GFS_UNIFIED_UGWP related options
+\snippet FV3_GFS_v17_p8_input.nml CIRES_UGWP_NML
 
 - nstf_name = \f$[2,0,0,0,0]^1 [2,1,0,0,0]^2\f$
  - \f$^1\f$ NSST is on and coupled with spin up off

@@ -30,7 +30,7 @@
       endif      
       end subroutine h2ophys_init
 
-!>\defgroup GFS_h2ophys GFS Water Vapor Photochemical Production and Loss Module
+!>\defgroup GFS_h2ophys GFS Water Vapor Photochemical Module
 !> This subroutine is NRL H2O physics for stratosphere and mesosphere.
 !! \section arg_table_h2ophys_run Argument Table
 !! \htmlinclude h2ophys_run.html

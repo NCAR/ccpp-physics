@@ -5,12 +5,10 @@ module cires_ugwp_post
 
 contains
 
-!>\defgroup cires_ugwp_post_mod CIRES UGWP Scheme Post
+!>\defgroup cires_ugwp_post_mod cires_ugwp_post Module
+!! This module contains code run cires_ugwp afterwards.
 !> @{
-    subroutine cires_ugwp_post_init ()
-    end subroutine cires_ugwp_post_init
-
-!>@brief The subroutine initializes the CIRES UGWP
+!> The subroutine initializes the CIRES UGWP
 !> \section arg_table_cires_ugwp_post_run Argument Table
 !! \htmlinclude cires_ugwp_post_run.html
 !!
@@ -69,8 +67,6 @@ contains
 
       end subroutine cires_ugwp_post_run
 
-      subroutine cires_ugwp_post_finalize ()
-      end subroutine cires_ugwp_post_finalize
 !> @}
 
 end module cires_ugwp_post

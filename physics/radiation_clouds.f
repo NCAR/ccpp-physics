@@ -142,9 +142,9 @@
 !!!!!  ==========================================================  !!!!!
 
 !> \defgroup module_radiation_clouds Radiation Clouds Module
-!> @{
-!! \brief This module computes cloud related quantities for radiation
+!! This module computes cloud related quantities for radiation
 !! computations.
+!>@{
 !!
 !! Knowledge of cloud properties and their vertical structure is
 !! important for meteorological studies due to their impact on both the

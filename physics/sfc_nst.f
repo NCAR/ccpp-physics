@@ -6,7 +6,7 @@
 
       contains
 
-!>\defgroup gfs_nst_main GFS Near-Surface Sea Temperature Scheme Module
+!>\defgroup gfs_nst_main GFS Near-Surface Sea Temperature Module
 !> \brief This subroutine calls the Thermal Skin-layer and Diurnal Thermocline models to update the NSST profile.
 !! \section arg_table_sfc_nst_run Argument Table
 !! \htmlinclude sfc_nst_run.html

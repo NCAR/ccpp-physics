@@ -4,21 +4,14 @@
       module sfc_diag
       contains
 
-!> \defgroup Sfc_diag Land Surface Diagnose Calculation
+!> \defgroup sfc_diag_mod GFS sfc_diag module
+!! This module contains the land surface diagose calculation.
 !> @{
-      subroutine sfc_diag_init
-      end subroutine sfc_diag_init
-      
-      subroutine sfc_diag_finalize
-      end subroutine sfc_diag_finalize
-      
 !> \brief Brief description of the subroutine
 !!
 !! \section arg_table_sfc_diag_run Arguments
 !! \htmlinclude sfc_diag_run.html
 !!
-!!  \section gen_sfc_diag General Algorithm
-!!  \section detailed_sfc_diag Detailed Algorithm
       subroutine sfc_diag_run                                           &
      &                   (im,grav,cp,eps,epsm1,ps,u1,v1,t1,q1,prslki,   &
      &                    evap,fm,fh,fm10,fh2,tskin,qsurf,thsfc_loc,    &

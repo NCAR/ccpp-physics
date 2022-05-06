@@ -1,5 +1,3 @@
-!>\file FV3_RRFS_v1beta_input.nml
-!! 
 &amip_interp_nml
     data_set = 'reynolds_oi'
     date_out_of_range = 'climo'

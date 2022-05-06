@@ -7,17 +7,12 @@
       module sfc_ocean
       implicit none
       private
-      public :: sfc_ocean_init, sfc_ocean_run, sfc_ocean_finalize
+      public :: sfc_ocean_run
 
       contains
 
-      subroutine sfc_ocean_init()
-      end subroutine sfc_ocean_init
 
-      subroutine sfc_ocean_finalize()
-      end subroutine sfc_ocean_finalize
-
-!>\defgroup gfs_ocean_main GFS Simple Ocean Scheme Module
+!>\defgroup gfs_ocean_main GFS Simple Ocean Module
 !! This subroutine calculates thermodynamical properties over
 !! open water.
 !! \section arg_table_sfc_ocean_run Argument Table

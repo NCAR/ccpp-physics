@@ -29,13 +29,10 @@
 
       end subroutine samfdeepcnv_init
 
-      subroutine samfdeepcnv_finalize()
-      end subroutine samfdeepcnv_finalize
-
-!> \defgroup SAMFdeep GFS Scale-Aware Mass-Flux Deep Convection Scheme Module
-!> @{
-!>  \brief This subroutine contains the entirety of the SAMF deep convection
+!> \defgroup SAMFdeep GFS saSAS Deep Convection Module
+!> This subroutine contains the entirety of the SAMF deep convection
 !! scheme.
+!> @{
 !!
 !! For grid sizes larger than threshold value, as in Grell (1993) \cite grell_1993 , the SAMF
 !! deep convection scheme can be described in terms of three types of

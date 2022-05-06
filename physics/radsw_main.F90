@@ -411,12 +411,9 @@
 ! =================
 
 !> \defgroup module_radsw_main GFS RRTMG-SW Main Module
-!> @{
-      subroutine rrtmg_sw_init ()
-      end subroutine rrtmg_sw_init
-
 !> This module includes NCEP's modifications of the RRTMG-SW radiation
 !! code from AER.
+!> @{
 !!
 !! The SW radiation model in the current NOAA Environmental Modeling
 !! System (NEMS) was adapted from the RRTM radiation model developed by

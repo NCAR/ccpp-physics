@@ -1,23 +1,18 @@
 !>  \file GFS_surface_loop_control_part2.F90
 !!  This file contains the GFS_surface_loop_control_part2 scheme.
 
-!> \defgroup GFS_surface_loop_control GFS_surface_loop_control scheme
+!> \defgroup GFS_surface_loop_control2 GFS_surface_loop_control_part2 Module
+!! This module contains the GFS_surface_loop_control_part2 scheme.
 !> @{
-
       module GFS_surface_loop_control_part2
       contains
 
-!> \brief Brief description of the subroutine
-!!
 #if 0
-!! \section arg_table_GFS_surface_loop_control_part2_run Arguments
+!> \section arg_table_GFS_surface_loop_control_part2_run Arguments
 !! \htmlinclude GFS_surface_loop_control_part2_run.html
 !!
 #endif
-!!  \section general General Algorithm
-!!  \section detailed Detailed Algorithm
-!>  @{
-
+!>  \section looptwo_general General Algorithm
       subroutine GFS_surface_loop_control_part2_run (im, lsm, lsm_noahmp, iter,&
        wind, flag_guess, flag_iter, dry, wet, icy, nstf_name1, errmsg, errflg)
 
@@ -60,7 +55,5 @@
       enddo
 
       end subroutine GFS_surface_loop_control_part2_run
-!> @}
-
       end module GFS_surface_loop_control_part2
 !> @}

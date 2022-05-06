@@ -2,6 +2,7 @@
 !!
 
 !>\defgroup rad_cld_ovr_mod Radiation Cloud Overlap Module
+!! This module contains the calculation of cloud overlap parameters for both RRTMG and RRTMGP. 
 module module_radiation_cloud_overlap
   use physparam,        only : kind_phys
   implicit none
@@ -14,6 +15,9 @@ module module_radiation_cloud_overlap
   
 contains
 
+!>\defgroup rad_cld_ovr_mod Radiation Cloud Overlap Module
+!! This module contains the calculation of cloud overlap parameters for both RRTMG and RRTMGP.
+!>@{
   ! ######################################################################################
   ! Hogan et al. (2010)
   ! "Effect of improving representation of horizontal and vertical cloud structure on the 
@@ -139,5 +143,5 @@ contains
     return
     
   end subroutine get_alpha_exper
-  
+!>@}  
 end module module_radiation_cloud_overlap

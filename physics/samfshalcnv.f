@@ -1,8 +1,6 @@
 !>  \file samfshalcnv.f
 !!  This file contains the Scale-Aware mass flux Shallow Convection scheme.
 
-!> This module contains the CCPP-compliant scale-aware mass-flux 
-!! shallow convection scheme.
       module samfshalcnv
 
       use samfcnv_aerosols, only : samfshalcnv_aerosols
@@ -28,14 +26,10 @@
       end if
       end subroutine samfshalcnv_init
 
-      subroutine samfshalcnv_finalize()
-      end subroutine samfshalcnv_finalize
-
-!> \defgroup SAMF_shal GFS Scale-Aware Mass-Flux Shallow Convection Scheme Module
-!> @{
-!>  \brief This subroutine contains the entirety of the SAMF shallow convection
+!> \defgroup SAMF_shal GFS saSAS Shallow Convection Module
+!>  This subroutine contains the entirety of the SAMF shallow convection
 !!  scheme.
-!!
+!> @{
 !!  This routine follows the \ref SAMFdeep quite closely, although it
 !!  can be interpreted as only having the "static" and "feedback" control
 !!  portions, since the "dynamic" control is not necessary to find the cloud

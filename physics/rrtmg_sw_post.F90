@@ -4,10 +4,9 @@
       contains
 
 !>\defgroup rrtmg_sw_post GFS RRTMG-SW scheme post
+!! This module  saves two spectral bands' surface downward and upward fluxes for
+!!  output.
 !> @{
-      subroutine rrtmg_sw_post_init ()
-      end subroutine rrtmg_sw_post_init
-
 !> \section arg_table_rrtmg_sw_post_run Argument Table
 !! \htmlinclude rrtmg_sw_post_run.html
 !!
@@ -78,8 +77,8 @@
           endif
 
 !  --- surface down and up spectral component fluxes
-!>  - Save two spectral bands' surface downward and upward fluxes for
-!!    output.
+!   Save two spectral bands' surface downward and upward fluxes for
+!    output.
 
           do i=1,im
             nirbmdi(i) = scmpsw(i)%nirbm
@@ -128,8 +127,5 @@
       endif                                ! end_if_lsswr
 
       end subroutine rrtmg_sw_post_run
- 
-      subroutine rrtmg_sw_post_finalize ()
-      end subroutine rrtmg_sw_post_finalize
 !> @}
       end module rrtmg_sw_post

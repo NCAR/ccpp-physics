@@ -10,6 +10,9 @@
       contains
 
 !>\defgroup GFS_radiation_surface_mod GFS Radiation Surface Module
+!! This module contains calls to module_radiation_surface::setemis() to set up
+!! surface emissivity for LW radiation and to module_radiation_surface::setalb()
+!! to set up surface albedo for SW radiation.
 !> @{
 !> \section arg_table_GFS_radiation_surface_init Argument Table
 !! \htmlinclude GFS_radiation_surface_init.html

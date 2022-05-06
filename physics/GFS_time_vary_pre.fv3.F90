@@ -16,6 +16,7 @@
       contains
 
 !>\defgroup gfs_time_vary_pre_mod  GFS Time Vary Pre Module
+!! This module contains code related to GFS physics suite setup.
 !> @{
 !> \section arg_table_GFS_time_vary_pre_init Argument Table
 !! \htmlinclude GFS_time_vary_pre_init.html

@@ -1,8 +1,6 @@
 !>\file cu_gf_sh.F90
 !! This file contains Grell-Freitas shallow convection scheme.
 
-!>\defgroup cu_gf_sh_group Grell-Freitas Shallow Convection Module
-!> \ingroup cu_gf_group
 module cu_gf_sh
     use machine , only : kind_phys
     !real(kind=kind_phys), parameter:: c1_shal=0.0015! .0005
@@ -16,7 +14,10 @@ module cu_gf_sh
 
 contains
 
-!>\ingroup cu_gf_sh_group
+!>\defgroup cu_gf_sh_group Grell-Freitas Shallow Convection Module
+!! This module contains Grell-Freitas shallow convection scheme.
+!>@{
+!> \ingroup cu_gf_group
 !> GF shallow convection as described in Grell and
 !! Freitas (2014) \cite grell_and_freitas_2014. input variables are:
 !!\param    us               x wind updated by physics
@@ -60,7 +61,6 @@ contains
 !!\param    ipr               horizontal index of printed column
 !!\param    tropics            =0
 !>\section gen_cu_gf_sh_run Grell-Freitas Shallow Convection General Algorithm
-!> @{
   subroutine cu_gf_sh_run (                                            &
                          us,vs,zo,t,q,z1,tn,qo,po,psur,dhdt,kpbl,rho,     & ! input variables, must be supplied
                          hfx,qfx,xland,ichoice,tcrit,dtime,         &

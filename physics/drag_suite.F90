@@ -2,12 +2,12 @@
 !! This file is the  parameterization of orographic gravity wave
 !! drag, mountain blocking, and form drag.
 
-!> This module contains the CCPP-compliant orographic gravity wave dray scheme.
       module drag_suite
 
       contains
 
 !> \defgroup gfs_drag_suite_mod GFS drag_suite Module
+!> This module contains the CCPP-compliant GSL orographic gravity wave dray scheme.
 !> @{
       subroutine drag_suite_init(gwd_opt, errmsg, errflg)
 
@@ -1376,8 +1376,6 @@ endif
    end subroutine drag_suite_run
 !-------------------------------------------------------------------
 !
-      subroutine drag_suite_finalize()
-      end subroutine drag_suite_finalize
 !> @}
 
       end module drag_suite

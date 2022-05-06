@@ -392,13 +392,9 @@
 
 
 !> \defgroup module_radlw_main GFS RRTMG-LW Main Module
-!> @{
-         subroutine rrtmg_lw_init ()
-         end subroutine rrtmg_lw_init
-
-!> \brief This module includes NCEP's modifications of the RRTMG-LW radiation
+!>  This module includes NCEP's modifications of the RRTMG-LW radiation
 !! code from AER.
-!!
+!> @{
 !! The RRTMG-LW package includes three files:
 !! - radlw_param.f, which contains:
 !!  - module_radlw_parameters: band parameters set up

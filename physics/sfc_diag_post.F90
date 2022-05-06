@@ -5,13 +5,9 @@
 
       contains
 
-!>\defgroup sfc_diag_post_mod GFS SFC_DIAG Post Module
+!>\defgroup sfc_diag_post_mod GFS sfc_diag_post Module
+!! This module contains code related to the surface diagnostic scheme.
 !> @{
-      subroutine sfc_diag_post_init ()
-      end subroutine sfc_diag_post_init
-
-      subroutine sfc_diag_post_finalize()
-      end subroutine sfc_diag_post_finalize
 #if 0
 !> \section arg_table_sfc_diag_post_run Argument Table
 !! \htmlinclude sfc_diag_post_run.html

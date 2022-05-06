@@ -3,7 +3,6 @@
 !WRF:MODEL_LAYER:PHYSICS
 !
 !>\ingroup mynn_sfc
-!>\defgroup module_sf_mynn_mod MYNN Surface Layer Module
 MODULE module_sf_mynn
 
 !-------------------------------------------------------------------

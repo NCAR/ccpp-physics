@@ -1,5 +1,5 @@
 /**
-\page allscheme_page  Parameterizations and Suites Overview
+\page allscheme_page  Physics Suites Overview
 
 \section allscheme_overview Physical Parameterizations 
 
@@ -10,11 +10,10 @@ which facilitates model development and code maintenance. Additionally, we are l
 
 \b Radiation
  - \subpage GFS_RRTMG 
- - \subpage SGSCLOUD_page 
 
 \b PBL \b and \b Turbulence
  - \subpage GFS_SATMEDMFVDIFQ 
- - \subpage MYNNEDMF 
+ - \subpage MYNNEDMF with \subpage SGSCLOUD_page
 
 \b Land \b Surface \b Model
  - \subpage GFS_NOAH 
@@ -52,6 +51,10 @@ which facilitates model development and code maintenance. Additionally, we are l
  - \subpage GFS_OCEAN 
  - \subpage GFS_SFCSICE 
 
+\b Others
+ - \ref ca_page
+ - \subpage GFS_SPP
+
 The input information for the parameterizations includes the values of the gridbox mean prognostic variables (wind components, temperature,
 specific humidity, cloud fraction, water contents for cloud liquid, cloud ice, rain, snow, graupel, and ozone concentration), the provisional
  dynamical tendencies for the same variables and various surface fields, both fixed and variable.
@@ -84,7 +87,7 @@ Table 1.  Physics suite options included in this documentation.
 |\b HOST \b Model  | SCM, SRW           |  SCM, MRW               |    SCM           |   SCM, SRW                  |  SCM, SRW          |  SCM, SRW     |
 |\b Deep \b Cu     | \ref GFS_SAMFdeep  |  \ref GFS_SAMFdeep + \ref ca_page |  \ref CU_GF      | \a  off                     |   \a off           |   \a off      |
 |\b Shallow \b Cu  | \ref GFS_SAMFshal  |  \ref GFS_SAMFshal      |  \ref CU_GF      | \ref MYNNEDMF               | \ref MYNNEDMF      |  \ref MYNNEDMF |
-|\b Microphysics   | \ref GFDL_cloud    |  \ref THOMPSON w/o AA   |  \ref THOMPSON   | \ref THOMPSON               | \ref THOMPSON      | \ref NSSLMICRO_page     |
+|\b Microphysics   | \ref GFDL_cloud    |  \ref THOMPSON w/o aerosol-aware   |  \ref THOMPSON   | \ref THOMPSON               | \ref THOMPSON      | \ref NSSLMICRO_page     |
 |\b PBL/TURB       | \ref GFS_SATMEDMFVDIFQ     |  \ref GFS_SATMEDMFVDIFQ  |  \ref MYNNEDMF     | \ref MYNNEDMF    | \ref MYNNEDMF     |   \ref MYNNEDMF    |
 |\b Radiation      | \ref GFS_RRTMG     |  \ref GFS_RRTMG        |  \ref GFS_RRTMG  | \ref GFS_RRTMG              | \ref GFS_RRTMG     |   \ref GFS_RRTMG    |
 |\b Surface \b Layer | \ref GFS_SFCLYR  |  \ref GFS_SFCLYR        | \ref SFC_MYNNSFL | \ref SFC_MYNNSFL            | \ref SFC_MYNNSFL   |   \ref SFC_MYNNSFL  |

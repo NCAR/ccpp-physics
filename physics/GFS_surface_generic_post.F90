@@ -15,7 +15,8 @@
 
       contains
 
-!>\defgroup gfs_sfc_gen_post_mode GFS Surface Generic Post Module
+!>\defgroup gfs_sfc_gen_post_mode GFS surface_generic_post Module
+!! This module contains code related to all GFS surface schemes to be run afterward.
 !> @{
 !> \section arg_table_GFS_surface_generic_post_init Argument Table
 !! \htmlinclude GFS_surface_generic_post_init.html

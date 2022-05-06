@@ -29,9 +29,9 @@ while the UFS Short-Range Weather Application 2.0 supports suites \ref GFS_v16_p
 
 New schemes and capability highlights in this release:
 - \ref NSSLMICRO_page
-- \ref GFS_UNIFIED_UGWP
+- \ref GFS_UNIFIED_UGWP and \ref GFS_drag_suite
 - \ref ca_page
-- \todo SPP
+- \ref GFS_SPP
 
 In this website you will find documentation on various aspects of each 
 parameterization, including a high-level overview of its function, the input/output argument list, 

@@ -1,12 +1,11 @@
 !>\file rrtmg_lw_pre.F90
+!!
       module rrtmg_lw_pre
       contains
 
 !>\defgroup rrtmg_lw_pre GFS RRTMG-LW scheme pre
+!! This module contains RRTMG-LW pre module.
 !> @{
-      subroutine rrtmg_lw_pre_init ()
-      end subroutine rrtmg_lw_pre_init
-
 !> \section arg_table_rrtmg_lw_pre_run Argument Table
 !! \htmlinclude rrtmg_lw_pre_run.html
 !!
@@ -23,7 +22,5 @@
 
       end subroutine rrtmg_lw_pre_run
 
-      subroutine rrtmg_lw_pre_finalize ()
-      end subroutine rrtmg_lw_pre_finalize
 !> @}
       end module rrtmg_lw_pre

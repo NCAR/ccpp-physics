@@ -1,5 +1,3 @@
-!>\file FV3_RAP_input.nml
-!! Suite RAP namelist for Single Column Model.
 &atmos_model_nml
   blocksize = 32
   chksum_debug = .false.
