@@ -1,9 +1,6 @@
 !>\file cu_gf_deep.F90 
 !! This file is the Grell-Freitas deep convection scheme.
 
-!>\defgroup cu_gf_deep_group Grell-Freitas Deep Convection Module
-!>\ingroup cu_gf_group
-!! This is Grell-Freitas deep convection scheme module
 module cu_gf_deep
      use machine , only : kind_phys
      real(kind=kind_phys), parameter::g=9.81
@@ -47,6 +44,10 @@ module cu_gf_deep
 
 contains
 
+!>\defgroup cu_gf_deep_group Grell-Freitas Deep Convection Module
+!>\ingroup cu_gf_group
+!! This is Grell-Freitas deep convection scheme module
+!> @{
    integer function my_maxloc1d(A,N,dir)
 !$acc routine vector
       implicit none
@@ -70,7 +71,6 @@ contains
 
 !>Driver for the deep or congestus GF routine.
 !> \section general_gf_deep GF Deep Convection General Algorithm
-!> @{
    subroutine cu_gf_deep_run(        &          
                itf,ktf,its,ite, kts,kte  &
               ,dicycle       &  ! diurnal cycle flag
@@ -2306,7 +2306,6 @@ contains
 !
 
    end subroutine cu_gf_deep_run
-!> @}
 
 
 !> Calculates tracer fluxes due to subsidence, only up-stream differencing
@@ -5722,5 +5721,5 @@ endif
 !$acc end parallel
   end subroutine get_cloud_top
 !------------------------------------------------------------------------------------
-
+!> @}
 end module cu_gf_deep

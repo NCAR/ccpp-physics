@@ -202,15 +202,15 @@
 !  ====================    end of description    =====================  !
 
 !>\defgroup Noah_LSM GFS Noah LSM Model
-!! \brief This is Noah LSM driver module, with the functionality of 
+!!  This is Noah LSM driver module, with the functionality of 
 !! preparing variables to run Noah LSM gfssflx(), calling Noah LSM and post-processing
 !! variables for return to the parent model suite including unit conversion, as well
 !! as diagnotics calculation.
+!> @{
 !! \section arg_table_lsm_noah_run Argument Table
 !! \htmlinclude lsm_noah_run.html
 !!
-!> \section general_noah_drv GFS sfc_drv General Algorithm
-!>  @{
+!> \section general_noah_drv Noah LSM General Algorithm
       subroutine lsm_noah_run                                           &
      &     ( im, km, grav, cp, hvap, rd, eps, epsm1, rvrdm1, ps,        & !  ---  inputs:
      &       t1, q1, soiltyp, vegtype, sigmaf,                          &
