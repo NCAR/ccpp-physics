@@ -41,7 +41,7 @@
         clouds9, cldsa, cldfra, cldfra2d, lwp_ex,iwp_ex, lwp_fc,iwp_fc,        &
         faersw1, faersw2, faersw3, faerlw1, faerlw2, faerlw3, alpha,           &
         aero_dir_fdb, smoke_ext, dust_ext,                                     &
-        spp_wts_rad, spp_rad, errmsg, errflg)
+        spp_wts_rad, spp_rad, rrfs_smoke_band, errmsg, errflg)
 
       use machine,                   only: kind_phys
 
@@ -109,7 +109,8 @@
          iovr_exprand,                     & ! Flag for exponential-random cloud overlap method
          idcor_con,                        &
          idcor_hogan,                      &
-         idcor_oreopoulos                            
+         idcor_oreopoulos,                 &
+         rrfs_smoke_band                     ! Band number for rrfs-smoke dust and smoke
 
       character(len=3), dimension(:), intent(in) :: lndp_var_list
 
@@ -624,7 +625,7 @@
         do k = 1, LMK
           do i = 1, IM
             ! 550nm (~18000/cm)
-            faersw1(i,k,10) = faersw1(i,k,10) + MIN(4.,smoke_ext(i,k) + dust_ext(i,k))
+            faersw1(i,k,rrfs_smoke_band) = faersw1(i,k,rrfs_smoke_band) + MIN(4.,smoke_ext(i,k) + dust_ext(i,k))
           enddo
         enddo
       endif

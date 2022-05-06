@@ -1232,6 +1232,13 @@
   dimensions = ()
   type = integer
   intent = in
+[rrfs_smoke_band]
+  standard_name = rrtmg_band_number_that_smoke_and_dust_should_affect
+  long_name = rrtmg band number that smoke and dust should affect
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
