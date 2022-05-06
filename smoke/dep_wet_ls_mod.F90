@@ -305,12 +305,12 @@ contains
    do nv=1, num_chem
 !  Loop over spatial indices
    do j = j1, j2
-    do i = i1, i2
+    big_i_loop: do i = i1, i2
 
 !    Check for total precipitation amount
 !    Assume no precip in column if precl+precc = 0
      pac = precl(i,j) + precc(i,j)
-     if(pac .le. 0.) goto 100
+     if(pac .le. 0.) cycle big_i_loop
      pls = precl(i,j)
      pcv = precc(i,j)
 
@@ -327,12 +327,10 @@ contains
      do k = k2, k1,-1 !lzhang
       if(dqcond(i,k,j) .lt. 0. .and. tmpu(i,k,j) .gt. 258.) then
        LH = k
-       goto 15
+       exit
       endif
      end do
- 15  continue
-     !if(LH .lt. 1) goto 100
-     if(LH .gt. k2) goto 100 !lzhang
+     if(LH .gt. k2) cycle big_i_loop !lzhang
 
 !    convert dqcond from kg water/kg air/s to kg water/m3/s and reverse
 !    sign so that dqcond < 0. (positive precip) means qls and qcv > 0.
@@ -392,11 +390,10 @@ contains
          if (Qls(kk).gt.0.) then
           Qmx = max(Qmx,Qls(kk))
          else
-          goto 333
+          exit
          end if
         end do
 
- 333    continue
         F = F0_ls / (1. + F0_ls*B0_ls*XL_ls/(Qmx*cdt/Td_ls))
         if (F.lt.0.01) F = 0.01
 !-----------------------------------------------------------------------------
@@ -474,11 +471,10 @@ contains
          if (Qcv(kk).gt.0.) then
           Qmx = max(Qmx,Qcv(kk))
          else
-          goto 444
+          exit
          end if
         end do
 
- 444    continue
         F = F0_cv / (1. + F0_cv*B0_cv*XL_cv/(Qmx*cdt/Td_cv))
         if (F.lt.0.01) F = 0.01
 !-----------------------------------------------------------------------------
@@ -554,8 +550,7 @@ contains
        var_rmv(i,j,nv) = var_rmv(i,j,nv)+Fd(k1,n)/cdt ! ug/m2/s
      end do
 
- 100 continue
-    end do   ! i
+    end do big_i_loop   ! i
    end do    ! j
    end do    !nv for num_chem
 

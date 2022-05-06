@@ -341,7 +341,8 @@ contains
                    plume_frp, min_fplume2, max_fplume2,                &   ! new approach
                    ids,ide, jds,jde, kds,kde,                          &
                    ims,ime, jms,jme, kms,kme,                          &
-                   its,ite, jts,jte, kts,kte                           )
+                   its,ite, jts,jte, kts,kte, errmsg, errflg           )
+        if(errflg/=0) return
     end if
 
     ! -- add biomass burning emissions at every timestep

@@ -41,7 +41,7 @@ subroutine ebu_driver (      data,flam_frac,ebb_smoke,ebu,           &
                              plume_frp, k_min, k_max,                &   ! RAR:
                              ids,ide, jds,jde, kds,kde,              &
                              ims,ime, jms,jme, kms,kme,              &
-                             its,ite, jts,jte, kts,kte               )
+                             its,ite, jts,jte, kts,kte, errmsg, errflg)
 
   use rrfs_smoke_config
   use physcons
@@ -56,7 +56,8 @@ subroutine ebu_driver (      data,flam_frac,ebb_smoke,ebu,           &
    real(kind=kind_phys), DIMENSION( ims:ime, jms:jme, 2 ), INTENT(IN ) :: plume_frp         ! RAR: FRP etc. array
 
 !   TYPE(grid_config_rec_type),  INTENT(IN )    :: config_flags
-
+   character(*), intent(inout) :: errmsg
+   integer, intent(inout) :: errflg
    INTEGER,      INTENT(IN   ) :: ktau,                                    &
                                   ids,ide, jds,jde, kds,kde,               &
                                   ims,ime, jms,jme, kms,kme,               &
@@ -187,8 +188,9 @@ subroutine ebu_driver (      data,flam_frac,ebb_smoke,ebu,           &
                               u_in, v_in, w_in, theta_in ,pi_in,    &
                               rho_phyin, qv_in, zmid, z_lev,        &
                               plume_frp(i,j,1), k_min(i,j),         & 
-                              k_max(i,j), ktau, dbg_opt )
+                              k_max(i,j), ktau, dbg_opt, errmsg, errflg )
                              !k_max(i,j), ktau, config_flags%debug_chem )
+               if(errflg/=0) return
 
                kp1= k_min(i,j)
                kp2= k_max(i,j)   
