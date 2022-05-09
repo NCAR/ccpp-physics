@@ -1283,7 +1283,7 @@
 [bl_mynn_closure]
   standard_name = control_for_closure_level_in_mellor_yamada_nakanishi_niino_pbl_scheme
   long_name = flag to determine the closure level for the mynn
-  units = flag
+  units = 1
   dimensions = ()
   type = real
   intent = in

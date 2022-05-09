@@ -610,7 +610,7 @@
   type = integer
   intent = in
 [addsmoke_flag_in]
-  standard_name = rrfs_smoke_addsmoke_flag
+  standard_name = control_for_smoke_biomass_burning_emissions
   long_name = rrfs smoke add smoke option
   units = index
   dimensions = ()

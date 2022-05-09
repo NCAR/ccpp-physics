@@ -45,7 +45,6 @@ subroutine ebu_driver (      data,flam_frac,ebb_smoke,ebu,           &
                              its,ite, jts,jte, kts,kte, errmsg, errflg)
 
   use rrfs_smoke_config
-  use physcons
   use plume_data_mod
   USE module_zero_plumegen_coms
   USE module_smoke_plumerise
