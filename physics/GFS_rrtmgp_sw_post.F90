@@ -52,7 +52,7 @@ contains
          coszdg               ! Cosine(SZA), daytime
     real(kind_phys), dimension(nCol, nLev+1), intent(in) :: &
          p_lev                ! Pressure @ model layer-interfaces    (Pa)
-    real(kind_phys), dimension(sw_gas_props%get_nband(),ncol), intent(in) :: &
+    real(kind_phys), dimension(ncol), intent(in) :: &
          sfc_alb_nir_dir,   & ! Surface albedo (direct) 
          sfc_alb_nir_dif,   & ! Surface albedo (diffuse)
          sfc_alb_uvvis_dir, & ! Surface albedo (direct)
@@ -170,10 +170,10 @@ contains
           nirdfdi(i) = scmpsw(i)%nirdf
           visbmdi(i) = scmpsw(i)%visbm
           visdfdi(i) = scmpsw(i)%visdf
-          nirbmui(i) = scmpsw(i)%nirbm * sfc_alb_nir_dir(1,i)
-          nirdfui(i) = scmpsw(i)%nirdf * sfc_alb_nir_dif(1,i)
-          visbmui(i) = scmpsw(i)%visbm * sfc_alb_uvvis_dir(1,i)
-          visdfui(i) = scmpsw(i)%visdf * sfc_alb_uvvis_dif(1,i)
+          nirbmui(i) = scmpsw(i)%nirbm * sfc_alb_nir_dir(i)
+          nirdfui(i) = scmpsw(i)%nirdf * sfc_alb_nir_dif(i)
+          visbmui(i) = scmpsw(i)%visbm * sfc_alb_uvvis_dir(i)
+          visdfui(i) = scmpsw(i)%visdf * sfc_alb_uvvis_dif(i)
        enddo
     else                   ! if_nday_block
        ! #######################################################################################

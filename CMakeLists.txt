@@ -6,7 +6,7 @@ project(ccpp_physics
 
 #------------------------------------------------------------------------------
 set(PACKAGE "ccpp-physics")
-set(AUTHORS "Grant Firl" "Dom Heinzeller" "Man Zhang" "Laurie Carson")
+set(AUTHORS "Grant Firl" "Dom Heinzeller" "Man Zhang" "Mike Kavulich" "Chunxi Zhang")
 
 #------------------------------------------------------------------------------
 # Set OpenMP flags for C/C++/Fortran
@@ -20,7 +20,7 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     message(STATUS "Setting build type to 'Release' as none was specified.")
     set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
     # Set the possible values of build type for cmake-gui
-    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Bitforbit" "Release" "Coverage")
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "Coverage")
 endif()
 
 #------------------------------------------------------------------------------
@@ -120,8 +120,8 @@ set(SCHEMES_OPENMP_OFF ${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rrtmgp/mo_
 # List of files that need to be compiled with different precision
 set(SCHEMES_DYNAMICS)
 
-if(${LOCAL_CURRENT_SOURCE_DIR}/physics/gfdl_fv_sat_adj.F90 IN_LIST SCHEMES)
-  list(APPEND SCHEMES_DYNAMICS ${LOCAL_CURRENT_SOURCE_DIR}/physics/gfdl_fv_sat_adj.F90)
+if(${LOCAL_CURRENT_SOURCE_DIR}/physics/fv_sat_adj.F90 IN_LIST SCHEMES)
+  list(APPEND SCHEMES_DYNAMICS ${LOCAL_CURRENT_SOURCE_DIR}/physics/fv_sat_adj.F90)
 endif()
 
 # Remove files that need to be compiled with different precision
@@ -145,8 +145,7 @@ SET_PROPERTY(SOURCE ${SCHEMES} ${CAPS}
              APPEND_STRING PROPERTY COMPILE_FLAGS " ${CMAKE_Fortran_FLAGS_PHYSICS} ${OpenMP_Fortran_FLAGS}")
 
 # Lower optimization for certain schemes when compiling with Intel in Release mode
-if((CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "Bitforbit") AND
-    ${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
+if(CMAKE_BUILD_TYPE STREQUAL "Release" AND ${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
   # Define a list of schemes that need lower optimization with Intel in Release mode
   set(SCHEME_NAMES_LOWER_OPTIMIZATION module_sf_mynn.F90)
   foreach(SCHEME_NAME IN LISTS SCHEME_NAMES_LOWER_OPTIMIZATION)
@@ -154,13 +153,13 @@ if((CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "Bitforbit"
     # Need to determine the name of the scheme with its path
     list(FILTER SCHEMES_TMP INCLUDE REGEX ".*${SCHEME_NAME}$")
     SET_SOURCE_FILES_PROPERTIES(${SCHEMES_TMP}
-                                APPEND_STRING PROPERTY COMPILE_FLAGS " ${CMAKE_Fortran_FLAGS_PHYSICS} ${OpenMP_Fortran_FLAGS} -O1")
+                                APPEND_STRING PROPERTY COMPILE_FLAGS
+                                " ${CMAKE_Fortran_FLAGS_PHYSICS} ${OpenMP_Fortran_FLAGS} -O1")
   endforeach()
 endif()
 
 # No optimization for certain schemes when compiling with Intel in Release mode
-if((CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "Bitforbit") AND
-    ${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
+if(CMAKE_BUILD_TYPE STREQUAL "Release" AND ${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
   # Define a list of schemes that can't be optimized with Intel in Release mode
   set(SCHEME_NAMES_NO_OPTIMIZATION GFS_typedefs.F90)
   foreach(SCHEME_NAME IN LISTS SCHEME_NAMES_NO_OPTIMIZATION)
@@ -174,8 +173,7 @@ endif()
 
 # Reduce optimization for mo_gas_optics_kernels.F90 (to avoid an apparent compiler bug with Intel 19+)
 if(${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rrtmgp/kernels/mo_gas_optics_kernels.F90 IN_LIST SCHEMES_OPENMP_OFF AND
-    (CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "Bitforbit") AND
-    ${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
+   CMAKE_BUILD_TYPE STREQUAL "Release" AND ${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
   SET_SOURCE_FILES_PROPERTIES(${LOCAL_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rrtmgp/kernels/mo_gas_optics_kernels.F90
                               APPEND_STRING PROPERTY COMPILE_FLAGS " ${CMAKE_Fortran_FLAGS_PHYSICS} -O1")
 endif()
