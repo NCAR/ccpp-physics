@@ -1353,21 +1353,21 @@
   intent = inout
 [frp]
   standard_name = frp_hourly
-  long_name = hourly frp
-  units = mw
+  long_name = hourly fire radiative power
+  units = MW
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
 [mix_chem]
-  standard_name = rrfs_smoke_mynn_tracer_mixing
+  standard_name = do_planetary_boundary_layer_smoke_mixing
   long_name = flag for rrfs smoke mynn tracer mixing
   units = flag
   dimensions = ()
   type = logical
   intent = in
 [fire_turb]
-  standard_name = rrfs_smoke_mynn_enh_vermix
+  standard_name = do_planetary_boundary_layer_fire_enhancement
   long_name = flag for rrfs smoke mynn enh vermix
   units = flag
   dimensions = ()

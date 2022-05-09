@@ -18,7 +18,6 @@
 
 !  use chem_comm_mod,  only : chem_comm_isroot
    use machine ,       only : kind_phys
-   use physcons,       only : pi=>con_pi
 
    implicit none
 
@@ -58,7 +57,7 @@ CONTAINS
 !
 ! !INTERFACE:
 !
-   subroutine SeasaltEmission ( rLow, rUp, method, w10m, ustar, &
+   subroutine SeasaltEmission ( rLow, rUp, method, w10m, ustar, pi, &
                                 memissions, nemissions, rc )
 
 ! !DESCRIPTION: Calculates the seasalt mass emission flux every timestep.
@@ -79,6 +78,7 @@ CONTAINS
    real(kind=kind_phys),    intent(in)           :: rLow, rUp   ! Dry particle bin edge radii [um]
    real(kind=kind_phys),    intent(in)           :: w10m        ! 10-m wind speed [m s-1]
    real(kind=kind_phys),    intent(in)           :: ustar       ! friction velocity [m s-1]
+   real(kind=kind_phys),    intent(in)           :: pi          ! ratio of a circle's circumference to its diameter
    integer, intent(in)           :: method      ! Algorithm to use
 
 ! !OUTPUT PARAMETERS:

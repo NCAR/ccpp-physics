@@ -5,7 +5,6 @@ module dep_wet_ls_mod
   use rrfs_smoke_data
   use machine ,        only : kind_phys
   use rrfs_smoke_config
-  use physcons,        only : grav => con_g
 !  use chem_tracers_mod
 !  use chem_rc_mod
 !  use chem_tracers_mod
@@ -206,7 +205,7 @@ contains
 
   subroutine WetRemovalGOCART ( data,i1, i2, j1, j2, k1, k2, n1, n2, cdt, &
                                 num_chem, var_rmv, chem, ple, tmpu,  &
-                                rhoa, dqcond, precc, precl,         &
+                                rhoa, dqcond, precc, precl, grav,        &
                                 ims, ime, jms, jme, kms, kme)
 !                                ims, ime, jms, jme, kms, kme, rc )
 
@@ -217,7 +216,7 @@ contains
 ! !INPUT PARAMETERS:
    integer, intent(in) :: i1, i2, j1, j2, k1, k2, n1, n2, num_chem, &
                           ims, ime, jms, jme, kms, kme
-   real(kind_phys), intent(in)    :: cdt
+   real(kind_phys), intent(in)    :: cdt, grav
    REAL(kind_phys),  DIMENSION( ims:ime , kms:kme , jms:jme ,1:num_chem),&
           INTENT(INOUT) :: chem
    REAL(kind_phys),  DIMENSION( ims:ime ,  jms:jme,num_chem ), &

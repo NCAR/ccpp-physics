@@ -5,6 +5,7 @@
 
   use rrfs_smoke_data
   use machine , only : kind_phys
+  real(kind=kind_phys),parameter :: p1000mb = 100000.  ! p at 1000mb (pascals)
 !- Implementing the fire radiative power (FRP) methodology for biomass burning
 !- emissions and convective energy estimation.
 !- Saulo Freitas, Gabriel Pereira (INPE/UFJS, Brazil)
@@ -37,7 +38,7 @@ CONTAINS
 subroutine ebu_driver (      data,flam_frac,ebb_smoke,ebu,           &
                              t_phy,q_vap,                            &   ! RAR: moist is replaced with q_vap
                              rho_phy,vvel,u_phy,v_phy,p_phy,         &
-                             z_at_w,z,ktau,                          &   ! scale_fire_emiss is part of config_flags
+                             z_at_w,z,ktau,g,con_cp,con_rd,          &   ! scale_fire_emiss is part of config_flags
                              plume_frp, k_min, k_max,                &   ! RAR:
                              ids,ide, jds,jde, kds,kde,              &
                              ims,ime, jms,jme, kms,kme,              &
@@ -66,6 +67,7 @@ subroutine ebu_driver (      data,flam_frac,ebb_smoke,ebu,           &
 !         INTENT(IN ) ::                                   moist
    real(kind=kind_phys), DIMENSION( ims:ime, kms:kme, jms:jme ), INTENT(INOUT ) ::  ebu
 
+   real(kind=kind_phys), INTENT(IN )  :: g, con_cp, con_rd
    real(kind=kind_phys), DIMENSION( ims:ime, jms:jme ), INTENT(IN )  :: ebb_smoke
    real(kind=kind_phys), DIMENSION( ims:ime, jms:jme ), INTENT(OUT ) :: flam_frac
 
@@ -87,7 +89,7 @@ subroutine ebu_driver (      data,flam_frac,ebb_smoke,ebu,           &
       !real(kind_phys), dimension (num_ebu) :: eburn_in
       !real(kind_phys), dimension (kte,num_ebu) :: eburn_out
       real(kind_phys), dimension (kte) :: u_in ,v_in ,w_in ,theta_in ,pi_in, rho_phyin ,qv_in ,zmid, z_lev
-      real(kind=kind_phys) :: dz_plume
+      real(kind=kind_phys) :: dz_plume, cpor, con_rocp
 
       !INTEGER, PARAMETER :: kfire_max=30  
 ! real(kind_phys), dimension(nveg_agreg) :: firesize,mean_fct
@@ -111,6 +113,8 @@ subroutine ebu_driver (      data,flam_frac,ebb_smoke,ebu,           &
 !                ebu(i,kts,j,p_ebu_pm10) = ebu_in(i,1,j,p_ebu_in_pm10)
 !            enddo
 !          enddo
+        cpor    =con_cp/con_rd
+        con_rocp=con_rd/con_cp
 
         IF ( dbg_opt .and. ktau<2000) then
            WRITE(*,*) 'module_plumerise1: its,ite,jts,jte ', its,ite,jts,jte
@@ -188,7 +192,8 @@ subroutine ebu_driver (      data,flam_frac,ebb_smoke,ebu,           &
                               u_in, v_in, w_in, theta_in ,pi_in,    &
                               rho_phyin, qv_in, zmid, z_lev,        &
                               plume_frp(i,j,1), k_min(i,j),         & 
-                              k_max(i,j), ktau, dbg_opt, errmsg, errflg )
+                              k_max(i,j), ktau, dbg_opt, g, con_cp, &
+                              con_rd, cpor, errmsg, errflg )
                              !k_max(i,j), ktau, config_flags%debug_chem )
                if(errflg/=0) return
 

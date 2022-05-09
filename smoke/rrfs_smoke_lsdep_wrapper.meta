@@ -59,6 +59,14 @@
   type = real
   kind = kind_phys
   intent = in
+[g]
+  standard_name = gravitational_acceleration
+  long_name = gravitational acceleration
+  units = m s-2
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
 [pr3d]
   standard_name = air_pressure_at_interface
   long_name = air pressure at model layer interfaces
@@ -147,14 +155,14 @@
   type = integer
   intent = in
 [ntsmoke]
-  standard_name = index_for_smoke
+  standard_name = index_for_smoke_in_tracer_concentration_array
   long_name = tracer index for smoke
   units = index
   dimensions = ()
   type = integer
   intent = in
 [ntdust]
-  standard_name = index_for_dust
+  standard_name = index_for_dust_in_tracer_concentration_array
   long_name = tracer index for dust
   units = index
   dimensions = ()
@@ -177,7 +185,7 @@
   kind = kind_phys
   intent = inout
 [wetdep_ls_opt_in]
-  standard_name = rrfs_smoke_wetdep_ls_opt
+  standard_name = control_for_smoke_wet_deposition
   long_name = rrfs smoke large scale wet deposition option
   units = index
   dimensions = ()

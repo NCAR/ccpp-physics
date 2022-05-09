@@ -317,6 +317,38 @@
   type = real
   kind = kind_phys
   intent = in
+[g]
+  standard_name = gravitational_acceleration
+  long_name = gravitational acceleration
+  units = m s-2
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[pi]
+  standard_name = pi
+  long_name = ratio of a circle's circumference to its diameter
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_cp]
+  standard_name = specific_heat_of_dry_air_at_constant_pressure
+  long_name = specific heat !of dry air at constant pressure
+  units = J kg-1 K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_rd]
+  standard_name = gas_constant_of_dry_air
+  long_name = ideal gas constant for dry air
+  units = J kg-1 K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
 [dust12m_in]
   standard_name = fengsha_dust12m_input
   long_name = fengsha dust input
@@ -380,14 +412,14 @@
   type = integer
   intent = in
 [ntsmoke]
-  standard_name = index_for_smoke
+  standard_name = index_for_smoke_in_tracer_concentration_array
   long_name = tracer index for smoke
   units = index
   dimensions = ()
   type = integer
   intent = in
 [ntdust]
-  standard_name = index_for_dust
+  standard_name = index_for_dust_in_tracer_concentration_array
   long_name = tracer index for dust
   units = index
   dimensions = ()
@@ -448,7 +480,7 @@
   kind = kind_phys
   intent = inout
 [ebb_smoke_hr]
-  standard_name = surfce_emission_of_smoke
+  standard_name = surface_smoke_emission
   long_name = emission of surface smoke
   units = ug m-2 s-1
   dimensions = (horizontal_loop_extent)
@@ -457,23 +489,23 @@
   intent = inout
 [frp_hr]
   standard_name = frp_hourly
-  long_name = hourly frp
-  units = mw
+  long_name = hourly fire radiative power
+  units = MW
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
 [frp_std_hr]
   standard_name = frp_std_hourly
-  long_name = hourly std frp
-  units = mw
+  long_name = hourly stdandard deviation of fire radiative power
+  units = MW
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
 [coef_bb]
   standard_name = coef_bb_dc
-  long_name = coef bb dc from plumerise
+  long_name = coef to estimate the fire emission
   units = none
   dimensions = (horizontal_loop_extent)
   type = real
@@ -481,38 +513,38 @@
   intent = inout
 [ebu_smoke]
   standard_name = ebu_smoke
-  long_name = smoke buffer of ebu
+  long_name = buffer of vertical fire emission
   units = various
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
 [fhist]
-  standard_name = fhist
-  long_name = fire hist
+  standard_name = fire_hist
+  long_name = coefficient to scale the fire activity depending on the fire duration
   units = none
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
 [min_fplume]
-  standard_name = min_fplume
-  long_name = miminum plume height
+  standard_name = minimum_fire_plume_sigma_pressure_level
+  long_name = minimum model level of fire plumerise
   units = none
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
 [max_fplume]
-  standard_name = max_fplume
-  long_name = maximum plume height
+  standard_name = maximum_fire_plume_sigma_pressure_level
+  long_name = maximum model level of fire plumerise
   units = none
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
 [hwp]
-  standard_name = rrfs_hwp
+  standard_name = hourly_wildfire_potential
   long_name = rrfs hourly fire weather potential
   units = none
   dimensions = (horizontal_loop_extent)
@@ -536,44 +568,44 @@
   kind = kind_phys
   intent = out
 [seas_opt_in]
-  standard_name = rrfs_smoke_sea_salt_opt
+  standard_name = control_for_smoke_sea_salt
   long_name = rrfs smoke sea salt emission option
   units = index
   dimensions = ()
   type = integer
   intent = in
 [dust_opt_in]
-  standard_name = rrfs_smoke_dust_opt
+  standard_name = control_for_smoke_dust
   long_name = rrfs smoke dust chem option
   units = index
   dimensions = ()
   type = integer
   intent = in
 [biomass_burn_opt_in]
-  standard_name = rrfs_smoke_biomass_burn_opt
+  standard_name = control_for_smoke_biomass_burn
   long_name = rrfs smoke biomass burning option
   units = index
   dimensions = ()
   type = integer
   intent = in
 [drydep_opt_in]
-  standard_name = rrfs_smoke_drydep_opt
+  standard_name = control_for_smoke_dry_deposition
   long_name = rrfs smoke dry deposition option
   units = index
   dimensions = ()
   type = integer
   intent = in
 [do_plumerise_in]
-  standard_name = rrfs_smoke_plumerise_flag
+  standard_name = do_smoke_plumerise
   long_name = rrfs smoke plumerise option
   units = index
   dimensions = ()
   type = logical
   intent = in
 [plumerisefire_frq_in]
-  standard_name = rrfs_smoke_plumerisefire_frq
+  standard_name = smoke_plumerise_frequency
   long_name = rrfs smoke add smoke option
-  units = index
+  units = min
   dimensions = ()
   type = integer
   intent = in
@@ -585,21 +617,21 @@
   type = integer
   intent = in
 [smoke_forecast_in]
-  standard_name = rrfs_smoke_smoke_forecast_opt
+  standard_name = do_smoke_forecast
   long_name = flag for rrfs smoke forecast
   units = flag
   dimensions = ()
   type = logical
   intent = in
 [aero_ind_fdb_in]
-  standard_name = rrfs_smoke_aero_ind_fdb_opt
+  standard_name = do_smoke_aerosol_indirect_feedback
   long_name = flag for rrfs wfa ifa emission
   units = flag
   dimensions = ()
   type = logical
   intent = in
 [dbg_opt_in]
-  standard_name = rrfs_smoke_plumerise_debug
+  standard_name = do_smoke_debug
   long_name = flag for rrfs smoke plumerise debug
   units = flag
   dimensions = ()

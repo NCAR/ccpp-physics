@@ -4,7 +4,6 @@
 
  module rrfs_smoke_wrapper
 
-   use physcons,        only : g => con_g, pi => con_pi
    use machine ,        only : kind_phys
    use rrfs_smoke_config
    use dust_data_mod
@@ -36,8 +35,8 @@ contains
                    u10m, v10m, ustar, rlat, rlon, tskin, pb2d, t2m, dpt2m,             &
                    pr3d, ph3d,phl3d, prl3d, tk3d, us3d, vs3d, spechum, w,              &
                    nsoil, smc, vegtype, soiltyp, sigmaf, dswsfc, zorl,snow,            &
-                   julian, idat, rain_cpl, rainc_cpl, exch, hf2d,                      &
-                   dust12m_in, emi_in, smoke_GBBEPx, ntrac, qgrs, gq0, chem3d, tile_num,       &
+                   julian, idat, rain_cpl, rainc_cpl, exch, hf2d, g, pi, con_cp, con_rd,   &
+                   dust12m_in, emi_in, smoke_GBBEPx, ntrac, qgrs, gq0, chem3d, tile_num,   &
                    ntsmoke, ntdust, imp_physics, imp_physics_thompson,                 &
                    nwfa, nifa, emanoc,                                                 &
                    emdust, emseas, ebb_smoke_hr, frp_hr, frp_std_hr,                   &
@@ -52,7 +51,7 @@ contains
 
     integer,        intent(in) :: im,kte,kme,ktau,nsoil,tile_num,jdate(8),idat(8)
     integer,        intent(in) :: ntrac, ntsmoke, ntdust
-    real(kind_phys),intent(in) :: dt, julian
+    real(kind_phys),intent(in) :: dt, julian, g, pi, con_cp, con_rd
     logical,        intent(in) :: smoke_forecast_in,aero_ind_fdb_in,dbg_opt_in
 
     integer, parameter :: ids=1,jds=1,jde=1, kds=1
@@ -138,8 +137,7 @@ contains
     real(kind_phys), parameter :: mean_diameter2= 1.E-6, sigma2=1.8
     real(kind_phys), parameter :: kappa_oc      = 0.2
     real(kind_phys), parameter :: kappa_dust    = 0.04
-    real(kind_phys), parameter :: fact_wfa = 1.e-9*6.0/pi*exp(4.5*log(sigma1)**2)/mean_diameter1**3
-    real(kind_phys), parameter :: fact_ifa = 1.e-9*6.0/pi*exp(4.5*log(sigma2)**2)/mean_diameter2**3
+    real(kind_phys) :: fact_wfa, fact_ifa
 !> -- aerosol density (kg/m3)
     real(kind_phys), parameter :: density_dust= 2.6e+3, density_sulfate=1.8e+3
     real(kind_phys), parameter :: density_oc  = 1.4e+3, density_seasalt=2.2e+3
@@ -243,7 +241,7 @@ contains
         pr3d,ph3d,phl3d,tk3d,prl3d,us3d,vs3d,spechum,exch,w,            &
         nsoil,smc,vegtype,soiltyp,sigmaf,dswsfc,zorl,                   &
         snow,dust12m_in,emi_in,smoke_GBBEPx,                            &
-        hf2d, pb2d,                                                     &
+        hf2d, pb2d, g, pi,                                              &
         u10,v10,ust,tsk,xland,xlat,xlong,dxy,                           &
         rri,t_phy,u_phy,v_phy,p_phy,rho_phy,dz8w,p8w,                   &
         t8w,exch_h,                                                     &
@@ -305,7 +303,7 @@ contains
     if (seas_opt >= SEAS_OPT_DEFAULT) then
     call gocart_seasalt_driver(ktau,dt,rri,t_phy,moist,                 &
         u_phy,v_phy,chem,rho_phy,dz8w,u10,v10,ust,p8w,tsk,              &
-        xland,xlat,xlong,dxy,g,emis_seas,                               &
+        xland,xlat,xlong,dxy,g,emis_seas,pi,                            &
         seashelp,num_emis_seas,num_moist,num_chem,seas_opt,             &
         ids,ide, jds,jde, kds,kde,                                      &
         ims,ime, jms,jme, kms,kme,                                      &
@@ -337,7 +335,7 @@ contains
                    data,flam_frac,ebu_in,ebu,                          &
                    t_phy,moist(:,:,:,p_qv),                            &
                    rho_phy,vvel,u_phy,v_phy,p_phy,                     &
-                   z_at_w,zmid,ktau,                                   &
+                   z_at_w,zmid,ktau,g,con_cp,con_rd,                   &
                    plume_frp, min_fplume2, max_fplume2,                &   ! new approach
                    ids,ide, jds,jde, kds,kde,                          &
                    ims,ime, jms,jme, kms,kme,                          &
@@ -432,6 +430,8 @@ contains
 !    WRITE(*,*) 'rrfs nwfa/nifa 2 at ktau= ',ktau
 !-- to provide real aerosol emission for Thompson MP
     if (imp_physics == imp_physics_thompson .and. aero_ind_fdb) then
+      fact_wfa = 1.e-9*6.0/pi*exp(4.5*log(sigma1)**2)/mean_diameter1**3
+      fact_ifa = 1.e-9*6.0/pi*exp(4.5*log(sigma2)**2)/mean_diameter2**3
 
       do i = its, ite
        do k = kts, kte
@@ -463,7 +463,7 @@ contains
         pr3d,ph3d,phl3d,tk3d,prl3d,us3d,vs3d,spechum,exch,w,            &
         nsoil,smc,vegtype,soiltyp,sigmaf,dswsfc,zorl,                   &
         snow_cpl,dust12m_in,emi_in,smoke_GBBEPx,                        &
-        hf2d, pb2d,                                                     &
+        hf2d, pb2d, g, pi,                                              &
         u10,v10,ust,tsk,xland,xlat,xlong,dxy,                           &
         rri,t_phy,u_phy,v_phy,p_phy,rho_phy,dz8w,p8w,                   &
         t8w,exch_h,                                                     &
@@ -488,6 +488,7 @@ contains
     integer, intent(in) :: nsoil
     integer, dimension(ims:ime), intent(in) :: land, vegtype, soiltyp
     integer, intent(in) :: ntrac
+    real(kind=kind_phys), intent(in) :: g, pi
     real(kind=kind_phys), dimension(ims:ime), intent(in) ::                & 
          u10m, v10m, ustar, garea, rlat, rlon, ts2d, sigmaf, dswsfc,       &
          zorl, snow_cpl, pb2d, hf2d

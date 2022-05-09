@@ -22,14 +22,14 @@
   type = integer
   intent = in
 [ntsmoke]
-  standard_name = index_for_smoke
+  standard_name = index_for_smoke_in_tracer_concentration_array
   long_name = tracer index for smoke
   units = index
   dimensions = ()
   type = integer
   intent = in
 [ntdust]
-  standard_name = index_for_dust
+  standard_name = index_for_dust_in_tracer_concentration_array
   long_name = tracer index for dust
   units = index
   dimensions = ()

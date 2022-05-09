@@ -16,16 +16,13 @@ module module_smoke_plumerise
   use machine , only : kind_phys
   use rrfs_smoke_data
   use rrfs_smoke_config, only : FIRE_OPT_GBBEPx, FIRE_OPT_MODIS
-  use physcons,        only : g => con_g, cp => con_cp, r_d => con_rd, r_v =>con_rv
   use plume_data_mod,  only : num_frp_plume, p_frp_hr, p_frp_std,                  &
                               !tropical_forest, boreal_forest, savannah, grassland,   &
                               wind_eff
   USE module_zero_plumegen_coms
 
-  real(kind=kind_phys),parameter :: p1000mb = 100000.  ! p at 1000mb (pascals)
-  real(kind=kind_phys),parameter :: rgas=r_d
-  real(kind=kind_phys),parameter :: cpor=cp/r_d
-  real(kind=kind_phys),parameter :: p00=p1000mb
+  !real(kind=kind_phys),parameter :: rgas=r_d
+  !real(kind=kind_phys),parameter :: cpor=cp/r_d
 CONTAINS
 
 ! RAR:
@@ -33,7 +30,8 @@ CONTAINS
 !                         firesize,mean_fct,                         &
                         ! nspecies,eburn_in,eburn_out,               &
                          up,vp,wp,theta,pp,dn0,rv,zt_rams,zm_rams,  &
-                         frp_inst,k1,k2, ktau, dbg_opt, errmsg, errflg   )
+                         frp_inst,k1,k2, ktau, dbg_opt, g, cp, rgas, &
+                         cpor,  errmsg, errflg   )
 
   implicit none
   type(smoke_data), intent(inout) :: data
@@ -44,6 +42,7 @@ CONTAINS
 
 !  integer, intent(in) :: PLUMERISE_flag
   real(kind=kind_phys) :: frp_inst   ! This is the instantenous FRP, at a given time step
+  real(kind=kind_phys) :: g, cp, rgas, cpor
 
   integer :: ng,m1,m2,m3,ia,iz,ja,jz,ibcon,mynum,i,j,k,imm,ixx,ispc !,nspecies
 
@@ -146,7 +145,7 @@ END IF
 !  enddo
 
          !- get envinronmental state (temp, water vapor mix ratio, ...)
-         call get_env_condition(coms,1,m1,kmt,wind_eff,ktau,errmsg,errflg)
+         call get_env_condition(coms,1,m1,kmt,wind_eff,ktau,g,cp,rgas,cpor,errmsg,errflg)
          if(errflg/=0) return
 
          !- loop over the four types of aggregate biomes with fires for plumerise version 1
@@ -221,13 +220,16 @@ END IF
 end subroutine plumerise
 !-------------------------------------------------------------------------
 
-subroutine get_env_condition(coms,k1,k2,kmt,wind_eff,ktau,errmsg,errflg)
+subroutine get_env_condition(coms,k1,k2,kmt,wind_eff,ktau,g,cp,rgas,cpor,errmsg,errflg)
 
 !se module_zero_plumegen_coms
 !use rconstants
 implicit none
 type(plumegen_coms), pointer :: coms
+real(kind=kind_phys) :: g,cp,rgas,cpor
 integer :: k1,k2,k,kcon,klcl,kmt,nk,nkmid,i
+real(kind=kind_phys),parameter :: p1000mb = 100000.  ! p at 1000mb (pascals)
+real(kind=kind_phys),parameter :: p00=p1000mb
 real(kind=kind_phys) :: znz,themax,tlll,plll,rlll,zlll,dzdd,dzlll,tlcl,plcl,dzlcl,dummy
 !integer :: n_setgrid = 0 
 integer :: wind_eff,ktau

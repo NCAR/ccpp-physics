@@ -4,7 +4,6 @@
 
  module rrfs_smoke_lsdep_wrapper
 
-   use physcons,        only : g => con_g, pi => con_pi
    use machine ,        only : kind_phys
    use rrfs_smoke_config
    use dep_wet_ls_mod
@@ -28,7 +27,7 @@ contains
 !>\section rrfs_smoke_lsdep_wrapper GSD Chemistry Scheme General Algorithm
 !> @{
     subroutine rrfs_smoke_lsdep_wrapper_run(im, kte, kme, ktau, dt,     &
-                   rain_cpl, rainc_cpl,                                 &
+                   rain_cpl, rainc_cpl, g,                              &
                    pr3d, ph3d,phl3d, prl3d, tk3d, us3d, vs3d, spechum,  &
                    w, dqdt, ntrac,ntsmoke,ntdust,                       &
                    gq0,qgrs,wetdep_ls_opt_in,                    &
@@ -39,7 +38,7 @@ contains
 
     integer,        intent(in) :: im,kte,kme,ktau
     integer,        intent(in) :: ntrac,ntsmoke,ntdust
-    real(kind_phys),intent(in) :: dt
+    real(kind_phys),intent(in) :: dt,g
 
     integer, parameter :: ids=1,jds=1,jde=1, kds=1
     integer, parameter :: ims=1,jms=1,jme=1, kms=1
@@ -119,7 +118,7 @@ contains
     call rrfs_smoke_prep_lsdep(data,ktau,dtstep,                        &
         pr3d,ph3d,phl3d,tk3d,prl3d,us3d,vs3d,spechum,w, dqdt,           &
         rri,t_phy,u_phy,v_phy,p_phy,rho_phy,dz8w,p8w,                   &
-        t8w,dqdti,z_at_w,vvel,                                          &
+        t8w,dqdti,z_at_w,vvel,g,                                        &
         ntsmoke,ntdust,                                                 &
         ntrac,gq0,num_chem, num_moist,                                  &
         ppm2ugkg,moist,chem,                                            &
@@ -138,7 +137,7 @@ contains
        case (WDLS_OPT_NGAC)
          call WetRemovalGOCART(data,its,ite, jts,jte, kts,kte, 1,1, dt, &
                                num_chem,var_rmv,chem,p_phy,t_phy,       &
-                               rho_phy,dqdti,rcav,rnav,                 &
+                               rho_phy,dqdti,rcav,rnav, g,              &
                                ims,ime, jms,jme, kms,kme)
          !if (chem_rc_check(localrc, msg="Failure in NGAC wet removal scheme", &
          !  file=__FILE__, line=__LINE__, rc=rc)) return
@@ -170,7 +169,7 @@ contains
   subroutine rrfs_smoke_prep_lsdep(data,ktau,dtstep,                        &
         pr3d,ph3d,phl3d,tk3d,prl3d,us3d,vs3d,spechum,w,dqdt,           &
         rri,t_phy,u_phy,v_phy,p_phy,rho_phy,dz8w,p8w,                  &
-        t8w,dqdti,z_at_w,vvel,                                         &
+        t8w,dqdti,z_at_w,vvel,g,                                       &
         ntsmoke,ntdust,                                                &
         ntrac,gq0,num_chem, num_moist,                                 &
         ppm2ugkg,moist,chem,                                           &
@@ -182,7 +181,7 @@ contains
 
     !Chem input configuration
     integer, intent(in) :: ktau
-    real(kind=kind_phys), intent(in) :: dtstep
+    real(kind=kind_phys), intent(in) :: dtstep,g
 
     !FV3 input variables
     integer, intent(in) :: ntrac,ntsmoke,ntdust

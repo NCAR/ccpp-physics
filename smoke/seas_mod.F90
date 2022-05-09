@@ -4,7 +4,6 @@
 module seas_mod
 
   use machine ,         only : kind_phys
-  use physcons,         only : pi=>con_pi
 ! use chem_rc_mod,      only : chem_rc_test
 !  use chem_tracers_mod, only : p_seas_1, p_seas_2, p_seas_3, p_seas_4, p_seas_5, &
 !                               p_eseas1, p_eseas2, p_eseas3, p_eseas4, p_eseas5, &
@@ -31,7 +30,7 @@ CONTAINS
 
   subroutine gocart_seasalt_driver(ktau,dt,alt,t_phy,moist,u_phy,  &
          v_phy,chem,rho_phy,dz8w,u10,v10,ustar,p8w,tsk,            &
-         xland,xlat,xlong,area,g,emis_seas, &
+         xland,xlat,xlong,area,g,emis_seas,pi, &
          seashelp,num_emis_seas,num_moist,num_chem,seas_opt,  &
          ids,ide, jds,jde, kds,kde,                                        &
          ims,ime, jms,jme, kms,kme,                                        &
@@ -65,7 +64,7 @@ CONTAINS
                                                        dz8w,p8w,             &
                                                 u_phy,v_phy,rho_phy
 
-    REAL(kind=kind_phys), INTENT(IN   ) :: dt,g
+    REAL(kind=kind_phys), INTENT(IN   ) :: dt,g,pi
 !
     integer, parameter :: p_seas_1=15
     integer, parameter :: p_seas_2=16
@@ -141,7 +140,7 @@ CONTAINS
               airmas1(1,1,1) = airmas(1,1)
               tc1(1,1,1,:) = tc
               bems1(1,1,:) = bems
-              call source_ss( imx, jmx, lmx, number_ss_bins, dt, tc1,ilwi, dxy, w10m, airmas1, bems1,ipr)
+              call source_ss( imx, jmx, lmx, number_ss_bins, dt, tc1, pi, ilwi, dxy, w10m, airmas1, bems1,ipr)
               tc = tc1(1,1,1,:)
               chem(i,kts,j,p_seas_1)=(tc(1)+.75*tc(2))*converi
               chem(i,kts,j,p_seas_2)=(tc(3)+.25*tc(2))*converi
@@ -179,7 +178,7 @@ CONTAINS
                   airmas1(1,1,1) = airmas(1,1)
                   tc1(1,1,1,:) = tc
                   bems1(1,1,:) = bems
-                  call source_ss( imx,jmx,lmx,number_ss_bins, dt, tc1, ilwi, dxy, w10m, airmas1, bems1,ipr)
+                  call source_ss( imx,jmx,lmx,number_ss_bins, dt, tc1, pi, ilwi, dxy, w10m, airmas1, bems1,ipr)
                   tc   = tc1(1,1,1,:)
                   bems = bems1(1,1,:)
 
@@ -232,7 +231,7 @@ CONTAINS
                     memissions = 0.
                     nemissions = 0.
                     call SeasaltEmission( ra(n), rb(n), emission_scheme, &
-                                          ws10m, ustar(i,j), memissions, nemissions, rc )
+                                          ws10m, ustar(i,j), pi, memissions, nemissions, rc )
 !                    if (chem_rc_test((rc /= 0), msg="Error in NGAC sea salt scheme", &
 !                      file=__FILE__, line=__LINE__)) return
 
@@ -267,7 +266,7 @@ CONTAINS
 
   end subroutine gocart_seasalt_driver
 
-  SUBROUTINE source_ss(imx,jmx,lmx,nmx, dt1, tc, &
+  SUBROUTINE source_ss(imx,jmx,lmx,nmx, dt1, tc, pi,  &
                        ilwi, dxy, w10m, airmas, &
                        bems,ipr)
 
@@ -308,7 +307,7 @@ CONTAINS
 
     INTEGER, INTENT(IN)    :: nmx,imx,jmx,lmx,ipr
     INTEGER, INTENT(IN)    :: ilwi(imx,jmx)
-    REAL(kind=kind_phys),    INTENT(IN)    :: dxy(jmx), w10m(imx,jmx)
+    REAL(kind=kind_phys),    INTENT(IN)    :: dxy(jmx), w10m(imx,jmx), pi
     REAL(kind=kind_phys),    INTENT(IN)    :: airmas(imx,jmx,lmx)
     REAL(kind=kind_phys),    INTENT(INOUT) :: tc(imx,jmx,lmx,nmx)
     REAL(kind=kind_phys),    INTENT(OUT)   :: bems(imx,jmx,nmx)
