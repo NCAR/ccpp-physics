@@ -116,8 +116,8 @@ In the UFS Weather Model, the main call to the CA routines are made
 from FV3/stochastic_physics_driver.F90. 
 
 There are currently two options to evolve the CA (can be done simultaneously); 
-(\b ca_global) a large scale global pattern which evolves the ruleset according 
-to game of life with cell history, or (\b ca_sgs) a sub-grid scale pattern 
+(\p ca_global) a large scale global pattern which evolves the ruleset according 
+to game of life with cell history, or (\p ca_sgs) a sub-grid scale pattern 
 which is conditioned on a forcing from the atmospheric model. The two options 
 are controlled by namelist and are evolved in cellular_automata_globa.F90 
 and cellular_automata_sgs.F90 respectively. Both approaches use the main 
@@ -125,7 +125,7 @@ CA module update_ca.F90 to evolve the CA in time. Since the CA needs to know
 about its neighborhood it uses the halo information to gather the state 
 in adjacent MPI domains and/or adjacent cube sphere interfaces. 
 
-\b The \b ca_sgs \b option - \b Coupled \b to \b saSAS \b cumulus \b convection \b scheme
+\b The \p ca_sgs \b option - \b Coupled \b to \b saSAS \b cumulus \b convection \b scheme
 
 The evolution of the CA is an extension to the automaton family known as “Generations,” 
 which in turn is based on the “Game of Life”(Chopard & Droz, 1998 \cite Chopard_1998)
@@ -154,7 +154,7 @@ organization may arise through convective cold-pools.
 
 The CA is evolved on a finer grid than the numerical prediction 
 host model (size controlled by namelist), and can be either coarse 
-grained back to the host model grid as a fraction, or (in case of nca_plumes = .true.) 
+grained back to the host model grid as a fraction, or (in case of \p nca_plumes = .true.) 
 give back the maximum number of connected “plumes” (represented by 
 connected CA cells), and their associated size within each numerical 
 prediction host model grid-box. nca_plumes is default true and the 
@@ -162,10 +162,10 @@ maximum cluster size is passed to the saSAS cumulus convection scheme
 in the Coupling%ca_deep container. 
 
 Depending on the activated namelist options, the CA can feed back to 
-the saSAS convection scheme via the entrainment (\b ca_entr), closure 
-(\b ca_closure) or convective initiation (\b ca_trigger) in the following way:
+the saSAS convection scheme via the entrainment (\p ca_entr), closure 
+(\p ca_closure) or convective initiation (\p ca_trigger) in the following way:
 
-- Entrainment (\b ca_entr): In entraining plume model bulk mass-flux schemes, 
+- Entrainment (\p ca_entr): In entraining plume model bulk mass-flux schemes, 
 the upward mass-flux is typically parameterized as a function of environmental 
 air being entrained into the rising plume (as well as parcel properties at 
 cloud base). The fractional entrainment is described as a function of the 
@@ -175,12 +175,12 @@ perimeters. In this scheme, the assumption is that subgrid organization will
 lead to a few larger plumes rather than several smaller plumes, such that 
 the grid-box average fractional entrainment is reduced. Thus, after 
 the CA is updated, we count the number of plumes, and their associated 
-size within each NWP grid-box (nca_plumes = true). If the largest 
+size within each NWP grid-box (\p nca_plumes = true). If the largest 
 cluster of cells found on the subgrid is larger than a set radius, then the 
 fractional entrainment rate is reduced at that grid-point by 30% 
 (selected based on experimentation)
 
-- Triggering (\b ca_trigger): In NWP models physical processes are parameterized 
+- Triggering (\p ca_trigger): In NWP models physical processes are parameterized 
 in columns, and the horizontal interaction between physical processes takes 
 place only through advection and diffusion. As the CA can organize clusters 
 across adjacent NWP model grid-boxes, the method offers a novel approach to 
@@ -197,7 +197,7 @@ CA's largest connecting plume exceeds a given threshold will be considered
 as candidates for convective activation, in addition to saSAS’s current 
 triggering criteria.
 
-- Closure (\b ca_closure): We assume that convection that organizes into 
+- Closure (\p ca_closure): We assume that convection that organizes into 
 plumes with larger radii tends to cover a larger area fraction of the 
 grid-box and thereby acts to enhance the cloud base mass flux. In this 
 coupling strategy, we again count the number of plumes (represented by 
@@ -226,8 +226,6 @@ increased by about 30%.
 scheme for moisture, hydrometeors and tracers and a method for removing negative tracer mixing ratio values have been implemented.
 
 \sa NCEP Office Note 505 \cite https://doi.org/10.25923/cybh-w893 and 506 \cite https://doi.org/10.25923/5051-3r70 
-
-
 \section intra_deep  Intraphysics Communication
 \ref arg_table_samfdeepcnv_run
 

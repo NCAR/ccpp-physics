@@ -30,6 +30,7 @@ while the UFS Short-Range Weather Application 2.0 supports suites \ref GFS_v16_p
 New schemes and capability highlights in this release:
 - \ref NSSLMICRO_page
 - \ref GFS_UNIFIED_UGWP and \ref GFS_drag_suite
+- \ref SFC_MYNNSFL
 - \ref ca_page
 - \ref GFS_SPP
 

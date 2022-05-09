@@ -27,10 +27,6 @@ been added to improve the representation of non-local mixing, the turbulence int
 model components (i.e., radiation). A description of the changes to the MYNN scheme are available in Olson et al.(2019) 
 \cite https://doi.org/10.25923/n9wm-be49.
 
-CCPP V6.0.0
-
-
-
 \section intra_mynnpbl Intraphysics Communication
 - Cloud-Radiation Interaction
 \sa \ref SGSCLOUD_page

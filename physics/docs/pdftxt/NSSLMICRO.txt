@@ -15,14 +15,13 @@ Excessive size sorting (common in 2-moment schemes) is effectively controlled by
 The NSSL scheme is designed with deep (severe) convection in mind at grid spacings of 4km or smaller, but can also be run at larger grid spacing as needed for nesting etc. It is also able to capture non-severe and winter weather.
 
 Namelist parameters:
-- \b nssl_hail_on: (logical: .true./.false.) Turns the hail category (3 variables: mass, number, and volume)  Default value is .false. Field table variables: hailwat, hail_nc, hail_vol
+- \p nssl_hail_on: (logical: .true./.false.) Turns the hail category (3 variables: mass, number, and volume)  Default value is .false. Field table variables: hailwat, hail_nc, hail_vol
 
-- \b nssl_ccn_on: (logical: .true./.false.) Turns prediction on/off for simple CCN number concentration.  Default value is .true. Field table variable: ccn_nc
+- \p nssl_ccn_on: (logical: .true./.false.) Turns prediction on/off for simple CCN number concentration.  Default value is .true. Field table variable: ccn_nc
 
-- \b nssl_cccn: (real) Background CCN concentration at STP. CCN are initialized as a constant number mixing ratio (nssl_cccn/1.225). The default value is 0.6e9 m-3
+- \p nssl_cccn: (real) Background CCN concentration at STP. CCN are initialized as a constant number mixing ratio (nssl_cccn/1.225). The default value is 0.6e9 m-3
 
-- \b nssl_alphah, nssl_alphahl: (real) Shape parameters for graupel (h) and hail (hl). Default values are 0.0 and 1.0.
-
+- \p nssl_alphah, and \p nssl_alphahl: (real) Shape parameters for graupel (h) and hail (hl). Default values are 0.0 and 1.0.
 
 
 \section intra_nssl2m Intraphysics Communication
