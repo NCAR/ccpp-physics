@@ -201,16 +201,16 @@
   dimensions = ()
   type = logical
   intent = in
-[dqsfc]
-  standard_name = surface_upward_latent_heat_flux_over_ocean_from_coupled_process
+[dqsfc_med]
+  standard_name = surface_upward_latent_heat_flux_over_ocean_from_mediator
   long_name = sfc latent heat flux input over ocean for coupling
   units = W m-2
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
-[dtsfc]
-  standard_name = surface_upward_sensible_heat_flux_over_ocean_from_coupled_process
+[dtsfc_med]
+  standard_name = surface_upward_sensible_heat_flux_over_ocean_from_mediator
   long_name = sfc sensible heat flux input over ocean for coupling
   units = W m-2
   dimensions = (horizontal_loop_extent)

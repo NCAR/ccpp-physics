@@ -391,8 +391,8 @@
   dimensions = ()
   type = logical
   intent = in
-[sfculw_wat]
-  standard_name = surface_upwelling_longwave_flux_over_ocean_from_coupled_process
+[sfculw_med]
+  standard_name = surface_upwelling_longwave_flux_over_ocean_from_mediator
   long_name = surface upwelling LW flux over ocean for coupling
   units = W m-2
   dimensions = (horizontal_loop_extent)

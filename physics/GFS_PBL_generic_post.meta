@@ -774,7 +774,7 @@
   type = logical
   intent = in
 [dqsfc_med]
-  standard_name = surface_upward_latent_heat_flux_over_ocean_from_coupled_process
+  standard_name = surface_upward_latent_heat_flux_over_ocean_from_mediator
   long_name = sfc latent heat flux input over ocean for coupling
   units = W m-2
   dimensions = (horizontal_loop_extent)
@@ -782,7 +782,7 @@
   kind = kind_phys
   intent = in
 [dtsfc_med]
-  standard_name = surface_upward_sensible_heat_flux_over_ocean_from_coupled_process
+  standard_name = surface_upward_sensible_heat_flux_over_ocean_from_mediator
   long_name = sfc sensible heat flux input over ocean for coupling
   units = W m-2
   dimensions = (horizontal_loop_extent)
@@ -790,7 +790,7 @@
   kind = kind_phys
   intent = in
 [dusfc_med]
-  standard_name = surface_x_momentum_flux_over_ocean_from_coupled_process
+  standard_name = surface_x_momentum_flux_over_ocean_from_mediator
   long_name = sfc x momentum flux over ocean for coupling
   units = Pa
   dimensions = (horizontal_loop_extent)
@@ -798,7 +798,7 @@
   kind = kind_phys
   intent = in
 [dvsfc_med]
-  standard_name = surface_y_momentum_flux_over_ocean_from_coupled_process
+  standard_name = surface_y_momentum_flux_over_ocean_from_mediator
   long_name = sfc y momentum flux over ocean for coupling
   units = Pa
   dimensions = (horizontal_loop_extent)

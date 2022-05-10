@@ -180,7 +180,7 @@
      &       sfcnirbmd,sfcnirdfd,sfcvisbmd,sfcvisdfd,                   &
      &       im, levs, deltim, fhswr,                                   &
      &       dry, icy, wet, damp_LW_fluxadj, lfnc_k, lfnc_p0,           &
-     &       use_LW_jacobian, sfculw, use_med_flux, sfculw_wat,         &
+     &       use_LW_jacobian, sfculw, use_med_flux, sfculw_med,         &
      &       fluxlwUP_jac, t_lay, p_lay, p_lev, flux2D_lwUP,            &
      &       flux2D_lwDOWN,pert_radtend,do_sppt,ca_global,tsfc_radtime, &
 !    &       dry, icy, wet, lprnt, ipr,                                 &
@@ -220,7 +220,7 @@
 
       real(kind=kind_phys), dimension(:), intent(in) ::                 &
      &      sinlat, coslat, xlon, coszen, tf, tsflw, sfcdlw,            &
-     &      sfcdsw, sfcnsw, sfculw, sfculw_wat, tsfc, tsfc_radtime
+     &      sfcdsw, sfcnsw, sfculw, sfculw_med, tsfc, tsfc_radtime
 
       real(kind=kind_phys), dimension(:), intent(in) ::                 &
      &                         tsfc_lnd, tsfc_ice, tsfc_wat,            &
@@ -344,9 +344,9 @@
      &                        + (one - sfcemis_ice(i)) * adjsfcdlw(i)
          endif
          if (wet(i)) then
-            if (use_med_flux .and. sfculw_wat(i) > f_eps) then
+            if (use_med_flux .and. sfculw_med(i) > f_eps) then
 !>  - use upward longwave flux provided by the mediator (zero over lakes)
-               adjsfculw_wat(i) = sfculw_wat(i) 
+               adjsfculw_wat(i) = sfculw_med(i) 
             else
                tem2 = tsfc_wat(i) * tsfc_wat(i)
                adjsfculw_wat(i) =  sfcemis_wat(i) * con_sbc * 

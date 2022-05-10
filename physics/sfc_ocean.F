@@ -29,7 +29,7 @@
      &     ( im, hvap, cp, rd, eps, epsm1, rvrdm1, ps, u1, v1, t1, q1,  &
      &       tskin, cm, ch, lseaspray, fm, fm10,                        &
      &       prsl1, prslki, wet, use_flake, wind,                       &,  ! --- inputs
-     &       flag_iter, use_med_flux, dqsfc, dtsfc,                     &
+     &       flag_iter, use_med_flux, dqsfc_med, dtsfc_med,             &
      &       qsurf, cmm, chh, gflux, evap, hflx, ep,                    &   ! --- outputs
      &       errmsg, errflg                                             &
      &     )
@@ -84,8 +84,8 @@
 !     wind     - real, wind speed (m/s)                            im   !
 !     flag_iter- logical,                                          im   !
 !     use_med_flux - logical, =T to use fluxes coming from med     1    !
-!     dqsfc    - real, latent heat flux                            im   !
-!     dtsfc    - real, sensible heat flux                          im   !
+!     dqsfc_med- real, latent heat flux                            im   !
+!     dtsfc_med- real, sensible heat flux                          im   !
 !                                                                       !
 !  outputs:                                                             !
 !     qsurf    - real, specific humidity at sfc                    im   !
@@ -123,7 +123,7 @@
 
 ! To receive fluxes from mediator
       real (kind=kind_phys), dimension(:), intent(in) ::                &
-     &       dqsfc, dtsfc
+     &       dqsfc_med, dtsfc_med
 
 !  ---  outputs:
       real (kind=kind_phys), dimension(:), intent(inout) :: qsurf,      &
@@ -180,10 +180,10 @@
             cmm(i)   = cm(i) * wind(i)
             chh(i)   = rho(i) * tem
 
-            hflx(i)  = dtsfc(i)
-            evap(i)  = dqsfc(i)
+            hflx(i)  = dtsfc_med(i)
+            evap(i)  = dqsfc_med(i)
 
-            qsurf(i) = q1(i) + dqsfc(i) / (hvap*chh(i))
+            qsurf(i) = q1(i) + dqsfc_med(i) / (hvap*chh(i))
             gflux(i) = zero
           else
             q0(i)    = max( q1(i), qmin )
