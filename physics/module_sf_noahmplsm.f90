@@ -2243,7 +2243,7 @@ endif   ! croptype == 0
                     dzsnso  ,zlvl    ,zpdg    ,z0mg    ,fsno, & !in
                     emg     ,stc     ,df      ,rsurf   ,latheag  , & !in
                     gammag   ,rhsur   ,iloc    ,jloc    ,q2      ,pahb  , & !in
-                    thsfc_loc, prslkix,prsik1x,prslk1x,fveg,shdfac,garea1, & !in
+                    thsfc_loc, prslkix,prsik1x,prslk1x,vegtyp,fveg,shdfac,garea1, & !in
                     pblhx   ,iz0tlnd ,itime   ,psi_opt ,          &
 #ifdef CCPP
                     tgb     ,cmb     ,chb, ustarx,errmsg  ,errflg   , & !inout
@@ -2251,7 +2251,7 @@ endif   ! croptype == 0
                     tgb     ,cmb     ,chb, ustarx,                   & !inout
 #endif
                     tauxb   ,tauyb   ,irb     ,shb     ,evb,csigmaf0,& !out
-                    ghb     ,t2mb    ,dx      ,dz8w    ,vegtyp  , & !out
+                    ghb     ,t2mb    ,dx      ,dz8w    , & !out
 !jref:start
                     qc      ,qsfc    ,psfc    , & !in
                     sfcprs  ,q2b,   chb2)                          !in 
@@ -4324,7 +4324,7 @@ endif   ! croptype == 0
                         dzsnso  ,zlvl    ,zpd     ,z0m     ,fsno    , & !in
                         emg     ,stc     ,df      ,rsurf   ,lathea  , & !in
                         gamma   ,rhsur   ,iloc    ,jloc    ,q2      ,pahb  , & !in
-                        thsfc_loc, prslkix,prsik1x,prslk1x,fveg,shdfac,garea1,  & !in
+                        thsfc_loc, prslkix,prsik1x,prslk1x,vegtyp,fveg,shdfac,garea1,  & !in
                         pblhx  , iz0tlnd , itime  ,psi_opt            ,&
 #ifdef CCPP
                         tgb     ,cm      ,ch,ustarx,errmsg  ,errflg  , & !inout
@@ -4333,7 +4333,7 @@ endif   ! croptype == 0
 #endif
                         tauxb   ,tauyb   ,irb     ,shb     ,evb     , & !out
                         csigmaf0,                                     & !out
-                        ghb     ,t2mb    ,dx      ,dz8w    ,ivgtyp  , & !out
+                        ghb     ,t2mb    ,dx      ,dz8w    ,          & !out
                         qc      ,qsfc    ,psfc    ,                   & !in
                         sfcprs  ,q2b     ,ehb2    )                     !in 
 
@@ -4385,7 +4385,6 @@ endif   ! croptype == 0
 
 
 !jref:start; in 
-  integer                        , intent(in) :: ivgtyp
   real (kind=kind_phys)                           , intent(in) :: qc     !cloud water mixing ratio
   real (kind=kind_phys)                           , intent(inout) :: qsfc   !mixing ratio at lowest model layer
   real (kind=kind_phys)                           , intent(in) :: psfc   !pressure at lowest model layer
@@ -4480,7 +4479,6 @@ endif   ! croptype == 0
   real (kind=kind_phys) :: emb        !momentum conductance
   real (kind=kind_phys) :: qfx        !moisture flux
   real (kind=kind_phys) :: estg2      !saturation vapor pressure at 2m (pa)
-  integer :: vegtyp     !vegetation type set to isbarren
   real (kind=kind_phys) :: e1
 !jref:end
 
@@ -4517,6 +4515,7 @@ endif   ! croptype == 0
   real (kind=kind_phys), intent(in   ) :: prslkix ! in exner function
   real (kind=kind_phys), intent(in   ) :: prsik1x ! in exner function
   real (kind=kind_phys), intent(in   ) :: prslk1x ! in exner function
+  integer (kind=kind_phys), intent(in   ) :: vegtyp 
   real (kind=kind_phys), intent(in   ) :: fveg 
   real (kind=kind_phys), intent(in   ) :: shdfac 
   real (kind=kind_phys), intent(in   ) :: garea1 
