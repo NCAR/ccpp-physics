@@ -1957,22 +1957,13 @@ endif   ! croptype == 0
 ! for new coupling
   real (kind=kind_phys)                                  :: csigmaf0
   real (kind=kind_phys)                                  :: csigmaf1
-  real (kind=kind_phys)                                  :: csigmafveg
-  real (kind=kind_phys)                                  :: czil1
 
   real (kind=kind_phys)                                  :: cdmnv
   real (kind=kind_phys)                                  :: ezpdv
   real (kind=kind_phys)                                  :: cdmng
   real (kind=kind_phys)                                  :: ezpdg
-
   real (kind=kind_phys)                                  :: ezpd
-  real (kind=kind_phys)                                  :: cdmn
-  real (kind=kind_phys)                                  :: gsigma
-
-  real (kind=kind_phys)                                  :: kbsigmafveg
   real (kind=kind_phys)                                  :: aone
-  real (kind=kind_phys)                                  :: coeffa
-  real (kind=kind_phys)                                  :: coeffb
 
 !jref:end  
 
@@ -2007,17 +1998,11 @@ endif   ! croptype == 0
     ezpdv     = 0.0
     cdmng     = 0.0
     ezpdg     = 0.0
-    cdmn      = 0.0
     ezpd      = 0.0
-    gsigma    = 0.0
     z0hwrf    = 0.0
     csigmaf1  = 0.0
     csigmaf0  = 0.0
-    csigmafveg= 0.0
-    kbsigmafveg = 0.0
     aone      = 0.0
-    coeffa    = 0.0
-    coeffb    = 0.0
 
 !
 
@@ -2319,46 +2304,9 @@ endif   ! croptype == 0
 
 ! new coupling code
 
-     if (opt_trs == 1) then
-        z0wrf  = fveg * z0m      + (1.0 - fveg) * z0mg
-        z0hwrf = z0wrf
-     elseif (opt_trs == 2) then
-        z0wrf  = fveg * z0m      + (1.0 - fveg) * z0mg
-!       z0hwrf = fveg * z0m*exp(-parameters%czil*0.4*258.2*sqrt(ustarx*z0m))  &
-!           +(1.0 - fveg) * z0mg*exp(-parameters%czil*0.4*258.2*sqrt(ustarx*z0mg))
-        czil1=10.0 ** (- (0.40/0.07) * parameters%hvt)
-        z0hwrf = fveg * z0m*exp(-czil1*0.4*258.2*sqrt(ustarx*z0m))  &
-            +(1.0 - fveg) * z0mg*exp(-czil1*0.4*258.2*sqrt(ustarx*z0mg))
-     elseif (opt_trs == 3) then
-        z0wrf  = fveg * z0m      + (1.0 - fveg) * z0mg
-        if (vegtyp.le.5) then
-          z0hwrf = fveg * z0m    + (1.0 - fveg) * z0mg*0.1
-        else
-         z0hwrf = fveg * z0m*0.01 + (1.0 - fveg) * z0mg*0.1
-        endif
-     elseif (opt_trs == 4) then
-        coeffa     = (csigmaf0 - csigmaf1)/(1.0 - exp(-1.0*aone))
-        coeffb     = csigmaf0 - coeffa
-        csigmafveg = coeffa * exp(-1.0*aone*fveg) + coeffb
-
-        gsigma = fveg**0.5 + fveg*(1.0-fveg)*1.0
-
-!
-! 0.5 ~ 1.0 for the 0.5 place; 0 ~ 1.0 for the 1.0 place, adjustable empirical
-! canopy roughness geometry parameter; currently fveg = 0.78 has the largest
-! momentum flux; can test the fveg-based average by setting 0.5 to 1.0 and 1.0
-! to 0.0 ! see Blumel; JAM,1998
-!
-
-        cdmn   = gsigma*cdmnv + (1.0-gsigma)*cdmng
-        z0wrf = (zlvl - ezpd)*exp(-0.4/sqrt(cdmn))
-
-        kbsigmafveg = csigmafveg/log((zlvl-ezpd)/z0wrf) - log((zlvl-ezpd)/z0wrf)
-        z0hwrf = z0wrf/exp(kbsigmafveg)
-! place holder doe other roughness scheme
-!     elseif (opt_trs == x) then
-      endif
-
+      call thermalz0(parameters,fveg,z0m,z0mg,zlvl,zpd,ezpd,ustarx,          & !in
+                       vegtyp,vai,ur,csigmaf0,csigmaf1,aone,cdmnv,cdmng,2, & !in
+                       z0wrf,z0hwrf)
     else
         taux  = tauxb
         tauy  = tauyb
@@ -2380,23 +2328,10 @@ endif   ! croptype == 0
         rssha = 0.0
         tgv   = tgb
         chv   = chb
-	z0wrf = z0mg
 
-     if (opt_trs == 1) then
-        z0hwrf = z0wrf
-     elseif (opt_trs == 2) then
-!       z0hwrf = z0wrf*exp(-parameters%czil*0.4*258.2*sqrt(ustarx*z0wrf))
-        czil1=10.0 ** (- (0.40/0.07) * parameters%hvt)
-        z0hwrf = z0wrf*exp(-czil1*0.4*258.2*sqrt(ustarx*z0wrf))
-     elseif (opt_trs == 3) then
-      if (vegtyp.le.5) then
-        z0hwrf = z0wrf
-      else
-        z0hwrf = z0wrf*0.01
-      endif
-     elseif (opt_trs == 4) then
-        z0hwrf =z0wrf/exp( csigmaf0/log((zlvl-ezpd)/z0wrf) - log((zlvl-ezpd)/z0wrf) )
-     endif
+      call thermalz0(parameters,fveg,z0m,z0mg,zlvl,zpd,ezpd,ustarx,          & !in
+                       vegtyp,vai,ur,csigmaf0,csigmaf1,aone,cdmnv,cdmng,0, & !in
+                       z0wrf,z0hwrf)
 
     end if
 
@@ -3858,6 +3793,7 @@ endif   ! croptype == 0
   real (kind=kind_phys) :: cw           !water vapor exchange coefficient
   real (kind=kind_phys) :: fv           !friction velocity (m/s)
   real (kind=kind_phys) :: wstar        !friction velocity n vertical direction (m/s) (only for sfcdif2)
+  real (kind=kind_phys) :: z0mo        !roughness length for intermediate output only (m)
   real (kind=kind_phys) :: z0h          !roughness length, sensible heat (m)
   real (kind=kind_phys) :: z0hg         !roughness length, sensible heat (m)
   real (kind=kind_phys) :: rb           !bulk leaf boundary layer resistance (s/m)
@@ -3965,9 +3901,9 @@ endif   ! croptype == 0
   real (kind=kind_phys), intent(in   ) :: shdfac      ! greeness vegetation fraction (-)
   real (kind=kind_phys), intent(inout) :: ustarx      ! friction velocity
   real (kind=kind_phys), intent(  out) :: csigmaf1    !
-  real (kind=kind_phys)                :: czil1       ! canopy based czil
-  real(kind=kind_phys)                 :: kbsigmaf1    !  kb^-1 for fully convered by vegetation
-  real(kind=kind_phys)                 :: sigmaa       !  kb^-1 for fully convered by vegetation
+  real (kind=kind_phys)                :: csigmaf0    !
+! dummy for thermal roughness scheme
+  real (kind=kind_phys)                :: temptrs    
 
 
   real (kind=kind_phys) :: t, tdc       !kelvin to degree celsius with limit -50 to +50
@@ -3979,6 +3915,7 @@ endif   ! croptype == 0
 
         mpe = 1e-6
         liter = 0
+        temptrs = 1.
 
         fv = ustarx
 ! ---------------------------------------------------------------------------------------------
@@ -4077,28 +4014,19 @@ endif   ! croptype == 0
 ! ---------------------------------------------------------------------------------------------
       loop1: do iter = 1, niterc    !  begin stability iteration
 
-       if(iter == 1) then
-            z0hg = z0mg
-       else
-            z0hg = z0mg   !* exp(-czil*0.4*258.2*sqrt(fv*z0mg))
-       end if
+!      if(iter == 1) then
+!           z0hg = z0mg
+!      else
+!           z0hg = z0mg   !* exp(-czil*0.4*258.2*sqrt(fv*z0mg))
+!      end if
 
-       if (opt_trs == 1) then
-         z0h       = z0m
-       elseif (opt_trs == 2) then
-         czil1= 10.0 ** (- (0.40/0.07) * parameters%hvt)
-         z0h = z0m*exp(-czil1*0.4*258.2*sqrt(fv*z0m))
-       elseif (opt_trs == 3) then
-         if (vegtyp.le.5) then
-           z0h = z0m
-         else
-           z0h = z0m*0.01
-         endif
-        elseif (opt_trs == 4) then
-          sigmaa    = 1.0 - (0.5/(0.5+vaie))*exp(-vaie**2/8.0)
-          kbsigmaf1 = 16.4*(sigmaa*vaie**3)**(-0.25)*sqrt(parameters%dleaf*ur/log((zlvl-zpd)/z0m))
-          z0h       = z0m/exp(kbsigmaf1)
-       endif
+      call thermalz0(parameters,fveg,z0m,z0mg,zlvl,zpd,zpd,ustarx,          & !in
+                       vegtyp,vaie,ur,csigmaf0,csigmaf1,temptrs,temptrs,temptrs,0, & !in
+                       z0mo,z0hg)
+
+      call thermalz0(parameters,fveg,z0m,z0mg,zlvl,zpd,zpd,ustarx,          & !in
+                       vegtyp,vaie,ur,csigmaf0,csigmaf1,temptrs,temptrs,temptrs,1, & !in
+                       z0mo,z0h)
     
 ! aerodyn resistances between heights zlvl and d+z0v
 
@@ -4131,9 +4059,9 @@ endif   ! croptype == 0
        if(opt_sfc == 3) then
          call sfcdif3(parameters,iloc    ,jloc    ,iter    ,sfctmp  ,qair    ,ur      , & !in 
                         zlvl    ,tah     ,thsfc_loc,prslkix,prsik1x ,prslk1x ,z0m     , & !in 
-                        zpd ,snowh ,shdfac ,garea1 ,.true. ,vaie ,vegtyp, & !in 
+                        z0h, zpd ,snowh ,shdfac ,garea1 ,                               & !in 
                         ustarx  ,fm      ,fh      ,fm2     ,fh2     ,                   & !inout 
-                        z0h     ,fv      ,csigmaf1,cm      ,ch       )                    !out 
+                        fv      ,cm      ,ch       )                                      !out 
 
        endif
 
@@ -4523,6 +4451,7 @@ endif   ! croptype == 0
   real (kind=kind_phys) :: cw         !water vapor exchange coefficient
   real (kind=kind_phys) :: fv         !friction velocity (m/s)
   real (kind=kind_phys) :: wstar      !friction velocity n vertical direction (m/s) (only for sfcdif2)
+  real (kind=kind_phys) :: z0mo       !roughness length for intermediate output only (m)
   real (kind=kind_phys) :: z0h        !roughness length, sensible heat, ground (m)
   real (kind=kind_phys) :: rb         !bulk leaf boundary layer resistance (s/m)
   real (kind=kind_phys) :: ramb       !aerodynamic resistance for momentum (s/m)
@@ -4593,6 +4522,9 @@ endif   ! croptype == 0
   real (kind=kind_phys), intent(in   ) :: garea1 
   real (kind=kind_phys), intent(inout) :: ustarx    !friction velocity
   real (kind=kind_phys), intent(  out) :: csigmaf0  !
+  real (kind=kind_phys)                :: csigmaf1  !
+! dummy for thermal roughness scheme
+  real (kind=kind_phys)                :: temptrs
 
   real (kind=kind_phys) :: t, tdc     !kelvin to degree celsius with limit -50 to +50
   tdc(t)   = min( 50., max(-50.,(t-tfrz)) )
@@ -4600,6 +4532,7 @@ endif   ! croptype == 0
 ! -----------------------------------------------------------------
 ! initialization variables that do not depend on stability iteration
 ! -----------------------------------------------------------------
+        temptrs = 1.
         mpe = 1e-6
         dtg = 0.
         moz    = 0.
@@ -4643,6 +4576,10 @@ endif   ! croptype == 0
 !           z0h = z0m !* exp(-czil*0.4*258.2*sqrt(fv*z0m))
 !       end if
 
+      call thermalz0(parameters,fveg,z0m,z0m,zlvl,zpd,zpd,ustarx,          & !in
+                       vegtyp,0.,ur,csigmaf0,csigmaf1,temptrs,temptrs,temptrs,0, & !in
+                       z0mo,z0h)
+
         if(opt_sfc == 1) then
           call sfcdif1(parameters,iter   ,sfctmp ,rhoair ,h      ,qair   , & !in
                        zlvl   ,zpd    ,z0m    ,z0h    ,ur     , & !in
@@ -4677,9 +4614,9 @@ endif   ! croptype == 0
         if(opt_sfc == 3) then
           call sfcdif3(parameters,iloc    ,jloc    ,iter    ,sfctmp  ,qair    ,ur      , & !in 
                          zlvl    ,tgb     ,thsfc_loc,prslkix,prsik1x ,prslk1x ,z0m     , & !in 
-                         zpd     ,snowh   ,shdfac  ,garea1  ,.false. ,0.0     ,ivgtyp  , & !in 
+                         z0h, zpd,snowh   ,shdfac  ,garea1  ,                            & !in 
                          ustarx  ,fm      ,fh      ,fm2     ,fh2     ,                   & !inout 
-                         z0h     ,fv      ,csigmaf0,cm      ,ch       )                    !out 
+                         fv      ,cm      ,ch       )                    !out 
 
         endif
 
@@ -5341,9 +5278,9 @@ endif   ! croptype == 0
 !! compute surface drag coefficient cm for momentum and ch for heat.
   subroutine sfcdif3(parameters,iloc    ,jloc    ,iter    ,sfctmp  ,qair    ,ur      , & !in 
                        zlvl    ,tgb     ,thsfc_loc,prslkix,prsik1x ,prslk1x ,z0m     , & !in 
-                       zpd     ,snowh   ,fveg    ,garea1  ,vegetated,vaie   ,vegtyp  , & !in 
+                       z0h,zpd ,snowh   ,fveg    ,garea1  ,                            & !in 
                        ustarx  ,fm      ,fh      ,fm2     ,fh2     ,                   & !inout 
-                       z0h     ,fv      ,csigmaf ,cm      ,ch       )                    !out 
+                       fv      ,cm      ,ch       )                    !out 
   
 ! -------------------------------------------------------------------------------------------------
 ! computing surface drag coefficient cm for momentum and ch for heat
@@ -5366,26 +5303,20 @@ endif   ! croptype == 0
     real (kind=kind_phys), intent(in   ) :: prsik1x   ! in exner function
     real (kind=kind_phys), intent(in   ) :: prslk1x   ! in exner function
     real (kind=kind_phys), intent(in   ) :: z0m       ! roughness length, momentum, ground [m]
+    real (kind=kind_phys), intent(in   ) :: z0h       ! roughness length, sensible heat, ground [m]
     real (kind=kind_phys), intent(in   ) :: zpd       ! zero plane displacement [m]
     real (kind=kind_phys), intent(in   ) :: snowh     ! snow depth [m]
     real (kind=kind_phys), intent(in   ) :: fveg      ! fractional vegetation cover
     real (kind=kind_phys), intent(in   ) :: garea1    ! grid area [km2]
-    logical,               intent(in   ) :: vegetated ! .true. if vegetated
-    real (kind=kind_phys), intent(in   ) :: vaie      ! vegetation area index [m2/m2]
-    integer              , intent(in   ) :: vegtyp    ! vegetation category
     real (kind=kind_phys), intent(inout) :: ustarx    ! friction velocity [m/s]
     real (kind=kind_phys), intent(inout) :: fm        ! momentum stability correction, weighted by prior iters
     real (kind=kind_phys), intent(inout) :: fh        ! sen heat stability correction, weighted by prior iters
     real (kind=kind_phys), intent(inout) :: fm2       ! sen heat stability correction, weighted by prior iters
     real (kind=kind_phys), intent(inout) :: fh2       ! sen heat stability correction, weighted by prior iters
-    real (kind=kind_phys), intent(  out) :: z0h       ! roughness length, sensible heat, ground [m]
     real (kind=kind_phys), intent(  out) :: fv        ! friction velocity (m/s)
-    real (kind=kind_phys), intent(  out) :: csigmaf   ! 
     real (kind=kind_phys), intent(  out) :: cm        ! drag coefficient for momentum
     real (kind=kind_phys), intent(  out) :: ch        ! drag coefficient for heat
 
-    real (kind=kind_phys) :: reyn                     ! reynolds number
-    real (kind=kind_phys) :: kbsigmaf                 ! kb factor
     real (kind=kind_phys) :: snwd                     ! snow depth [mm]
     real (kind=kind_phys) :: zlvlb                    ! reference height - zpd [m]
     real (kind=kind_phys) :: virtfac                  ! virtual temperature factor [-]
@@ -5394,9 +5325,7 @@ endif   ! croptype == 0
     real (kind=kind_phys) :: tvs                      ! virtural surface temperature [K]
     real (kind=kind_phys) :: rb1                      ! bulk Richardson - stability output
     real (kind=kind_phys) :: stress1                  ! stress - stability output
-    real (kind=kind_phys) :: czil1                    ! canopy based czil
     real (kind=kind_phys) :: fm10                     ! 10-m stability adjustment - stability output
-    real (kind=kind_phys) :: sigmaa                   ! momentum partition parameter
     real (kind=kind_phys) :: tem1,tem2,zvfun1,gdx
     real (kind=kind_phys), parameter :: z0lo=0.1, z0up=1.0
 
@@ -5404,40 +5333,6 @@ endif   ! croptype == 0
 
     fv        = ustarx
 !   fv        = ur*vkc/log((zlvl-zpd)/z0m)
-
-    if(vegetated) then 
-
-      if (opt_trs == 1) then
-        z0h       = z0m
-      elseif (opt_trs == 2) then
-        czil1= 10.0 ** (- (0.40/0.07) * parameters%hvt)
-        z0h = z0m*exp(-czil1*0.4*258.2*sqrt(fv*z0m))
-      elseif (opt_trs == 3) then
-        if (vegtyp.le.5) then
-          z0h = z0m
-        else
-          z0h = z0m*0.01
-        endif
-      elseif (opt_trs == 4) then
-        sigmaa    = 1.0 - (0.5/(0.5+vaie))*exp(-vaie**2/8.0)
-        kbsigmaf = 16.4*(sigmaa*vaie**3)**(-0.25)*sqrt(parameters%dleaf*ur/log((zlvl-zpd)/z0m))
-        z0h       = z0m/exp(kbsigmaf)
-        csigmaf  = log((zlvl-zpd)/z0m)*(log((zlvl-zpd)/z0m)+kbsigmaf) ! for output for interpolation
-      endif
-    
-    else
-
-      reyn = fv*z0m/(1.5e-05)
-      if (reyn .gt. 2.0) then
-        kbsigmaf = 2.46*reyn**0.25 - log(7.4)
-      else
-        kbsigmaf = - log(0.397)
-      endif
-
-      z0h = max(z0m/exp(kbsigmaf),1.0e-6)
-      csigmaf = log((zlvl-zpd)/z0m)*(log((zlvl-zpd)/z0m) + kbsigmaf)
-
-    end if
 
     snwd    = snowh*1000.0
     zlvlb   = zlvl - zpd
@@ -5467,6 +5362,151 @@ endif   ! croptype == 0
          rb1, fm,fh,fm10,fh2,cm,ch,stress1,fv)
 
   end subroutine sfcdif3
+
+!== begin thermalz0
+!==================================================================================
+
+!>\ingroup NoahMP_LSM
+! compute thermal roughness length based on option opt_trs.
+  subroutine thermalz0(parameters,fveg,z0m,z0mg,zlvl,zpd,ezpd,ustarx,          & !in
+                       vegtyp,vaie,ur,csigmaf0,csigmaf1,aone,cdmnv,cdmng,icom, & !in 
+                       z0mt,z0ht)                                                !out
+! compute thermal roughness length based on option opt_trs.
+! -------------------------------------------------------------------------------------------------
+    implicit none
+! -------------------------------------------------------------------------------------------------
+! inputs
+
+  type (noahmp_parameters), intent(in) :: parameters
+    integer (kind=kind_phys), intent(in   ) :: vegtyp      ! vegetation type
+    integer (kind=kind_phys), intent(in   ) :: icom        ! 0=bared 1=vege 2=composition
+    real (kind=kind_phys), intent(in   ) :: fveg      ! green vegetation fraction [0.0-1.0]
+    real (kind=kind_phys), intent(in   ) :: z0m       ! z0 momentum (m)
+    real (kind=kind_phys), intent(in   ) :: z0mg      ! z0 momentum, ground (m)
+    real (kind=kind_phys), intent(in   ) :: zlvl      ! reference height  [m]
+    real (kind=kind_phys), intent(in   ) :: zpd       ! zero plane displacement (m)
+    real (kind=kind_phys), intent(in   ) :: ezpd      ! zero plane displacement (m)
+    real (kind=kind_phys), intent(in   ) :: ustarx    ! friction velocity (m/s)
+    real (kind=kind_phys), intent(in   ) :: vaie      ! reference height  [m]
+    real (kind=kind_phys), intent(in   ) :: ur        ! wind speed [m/s]
+    real (kind=kind_phys), intent(inout) :: csigmaf0  ! 
+    real (kind=kind_phys), intent(inout) :: csigmaf1  ! 
+    real (kind=kind_phys), intent(in   ) :: aone      ! 
+    real (kind=kind_phys), intent(in   ) :: cdmnv     ! 
+    real (kind=kind_phys), intent(in   ) :: cdmng     ! 
+    real (kind=kind_phys), intent(out  ) :: z0mt      ! composited z0 momentum (m) 
+    real (kind=kind_phys), intent(out  ) :: z0ht      ! composited z0 momentum (m) 
+
+! local
+    real (kind=kind_phys)                :: czil1     ! canopy based czil
+    real (kind=kind_phys)                :: coeffa
+    real (kind=kind_phys)                :: coeffb
+    real (kind=kind_phys)                :: csigmafveg
+    real (kind=kind_phys)                :: gsigma
+    real (kind=kind_phys)                :: sigmaa
+    real (kind=kind_phys)                :: cdmn
+    real (kind=kind_phys)                :: kbsigmafveg
+    real (kind=kind_phys)                :: reyn
+    real (kind=kind_phys)                :: kbsigmaf0
+    real (kind=kind_phys)                :: kbsigmaf1
+
+! -------------------------------------------------------------------------------------------------
+    czil1     = 0.5
+    coeffa    = 0.0
+    coeffb    = 0.0
+    csigmafveg= 0.0
+    gsigma    = 0.0
+    cdmn      = 0.0
+    reyn      = 0.0
+    sigmaa    = 0.0
+    kbsigmafveg = 0.0
+    kbsigmaf0 = 0.0
+    kbsigmaf1 = 0.0
+    if( icom == 2 )then
+     if (opt_trs == 1) then
+        z0mt  = fveg * z0m      + (1.0 - fveg) * z0mg
+        z0ht = z0mt
+     elseif (opt_trs == 2) then
+        z0mt  = fveg * z0m      + (1.0 - fveg) * z0mg
+        czil1=10.0 ** (- (0.40/0.07) * parameters%hvt)
+        z0ht = fveg * z0m*exp(-czil1*0.4*258.2*sqrt(ustarx*z0m))  &
+            +(1.0 - fveg) * z0mg*exp(-czil1*0.4*258.2*sqrt(ustarx*z0mg))
+     elseif (opt_trs == 3) then
+        z0mt  = fveg * z0m      + (1.0 - fveg) * z0mg
+        if (vegtyp.le.5) then
+          z0ht = fveg * z0m    + (1.0 - fveg) * z0mg*0.1
+        else
+         z0ht = fveg * z0m*0.01 + (1.0 - fveg) * z0mg*0.1
+        endif
+     elseif (opt_trs == 4) then
+        coeffa     = (csigmaf0 - csigmaf1)/(1.0 - exp(-1.0*aone))
+        coeffb     = csigmaf0 - coeffa
+        csigmafveg = coeffa * exp(-1.0*aone*fveg) + coeffb
+
+        gsigma = fveg**0.5 + fveg*(1.0-fveg)*1.0
+!
+! 0.5 ~ 1.0 for the 0.5 place; 0 ~ 1.0 for the 1.0 place, adjustable empirical
+! canopy roughness geometry parameter; currently fveg = 0.78 has the largest
+! momentum flux; can test the fveg-based average by setting 0.5 to 1.0 and 1.0
+! to 0.0 ! see Blumel; JAM,1998
+!
+
+        cdmn   = gsigma*cdmnv + (1.0-gsigma)*cdmng
+        z0mt = (zlvl - ezpd)*exp(-0.4/sqrt(cdmn))
+
+        kbsigmafveg = csigmafveg/log((zlvl-ezpd)/z0mt) - log((zlvl-ezpd)/z0mt)
+        z0ht = z0mt/exp(kbsigmafveg)
+     endif
+
+    elseif( icom == 0 )then
+
+        z0mt = z0mg
+     if (opt_trs == 1) then
+        z0ht = z0mt
+     elseif (opt_trs == 2) then
+        czil1=10.0 ** (- (0.40/0.07) * parameters%hvt)
+        z0ht =z0mt*exp(-czil1*0.4*258.2*sqrt(ustarx*z0mt))
+     elseif (opt_trs == 3) then
+      if (vegtyp.le.5) then
+        z0ht = z0mt
+      else
+        z0ht = z0mt*0.01
+      endif
+     elseif (opt_trs == 4) then
+      reyn = ustarx*z0mt/(1.5e-05)
+      if (reyn .gt. 2.0) then
+        kbsigmaf0 = 2.46*reyn**0.25 - log(7.4)
+      else
+        kbsigmaf0 = - log(0.397)
+      endif
+
+      z0ht = max(z0mt/exp(kbsigmaf0),1.0e-6)
+      csigmaf0 = log((zlvl-zpd)/z0mt)*(log((zlvl-zpd)/z0mt) + kbsigmaf0)
+     endif
+
+    elseif( icom == 1 )then
+
+        z0mt = z0m
+       if (opt_trs == 1) then
+         z0ht    = z0mt
+       elseif (opt_trs == 2) then
+         czil1= 10.0 ** (- (0.40/0.07) * parameters%hvt)
+         z0ht = z0mt*exp(-czil1*0.4*258.2*sqrt(ustarx*z0mt))
+       elseif (opt_trs == 3) then
+         if (vegtyp.le.5) then
+           z0ht = z0mt
+         else
+           z0ht = z0mt*0.01
+         endif
+        elseif (opt_trs == 4) then
+          sigmaa    = 1.0 - (0.5/(0.5+vaie))*exp(-vaie**2/8.0)
+          kbsigmaf1 = 16.4*(sigmaa*vaie**3)**(-0.25)*sqrt(parameters%dleaf*ur/log((zlvl-zpd)/z0mt))
+          z0ht       = z0mt/exp(kbsigmaf1)
+          csigmaf1  = log((zlvl-zpd)/z0mt)*(log((zlvl-zpd)/z0mt)+kbsigmaf1) ! for output for interpolation
+        endif
+     endif
+
+  end subroutine thermalz0
 
 !== begin esat =====================================================================================
 
