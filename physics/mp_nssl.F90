@@ -132,7 +132,13 @@ module mp_nssl
          CALL nssl_2mom_init(ims,ime, jms,jme, kms,kme,nssl_params,ipctmp=5,mixphase=0, &
                      ihvol=ihailv,errmsg=errmsg,errflg=errflg,myrank=mpirank,mpiroot=mpiroot)
 
+         ! For restart runs, the init is done here
+         if (restart) then
+           is_initialized = .true.
+           return
+         end if
 
+!        Other initialization operation here....
 
          is_initialized = .true.
 
@@ -155,7 +161,7 @@ module mp_nssl
                              ccw, crw, cci, csw, chw, chl, vh, vhl,          &
                               tgrs, prslk, prsl, phii, omega, dtp,           &
                               prcp, rain, graupel, ice, snow, sr,            &
-                             refl_10cm, do_radar_ref, first_time_step,       &
+                             refl_10cm, do_radar_ref, first_time_step, restart, &
                              re_cloud, re_ice, re_snow, re_rain,             &
                              nleffr, nieffr, nseffr, nreffr,                 &
                              imp_physics, convert_dry_rho,                   &
@@ -206,6 +212,7 @@ module mp_nssl
          ! Radar reflectivity
          real(kind_phys),           intent(inout) :: refl_10cm(:,:) !(1:ncol,1:nlev)
          logical,                   intent(in   ) :: do_radar_ref, first_time_step
+         logical,                   intent(in)    :: restart
          ! Cloud effective radii
          real(kind_phys),  intent(inout) :: re_cloud(:,:) ! (1:ncol,1:nlev)
          real(kind_phys),  intent(inout) :: re_ice(:,:) ! (1:ncol,1:nlev)
@@ -492,7 +499,7 @@ module mp_nssl
            ntmul = 1
         ENDIF
         
-        IF ( first_time_step ) THEN
+        IF ( first_time_step .and. .not. restart ) THEN
           itimestep = 0 ! gets incremented to 1 in call loop
           IF ( nssl_ccn_on ) THEN
             IF ( invertccn ) THEN
@@ -538,23 +545,16 @@ module mp_nssl
          
        IF ( nssl_ccn_on ) THEN
          IF ( invertccn ) THEN
-!            cn_mp = Max(0.0, nssl_qccn - Max(0.0,cccn))
-              DO k = 1,nlev
-               DO i = 1,ncol
-                 cn_mp(i,k) = Max(0.0, nssl_qccn - Max(0.0, cccn_mp(i,k)) )
-!                 cn_mp(i,k) = Min(nssl_qccn, nssl_qccn - cccn(i,k) ) 
-               ENDDO
-              ENDDO
-            !  DO k = 1,nlev
-            !   DO i = 1,ncol
-            !     cccn(i,k) = Max(0.0, nssl_qccn - cn_mp(i,k) )
-            !     cn_mp(i,k) = cccn(i,k)
-            !   ENDDO
-            !  ENDDO
+            ! cn_mp = Max(0.0, nssl_qccn - Max(0.0,cccn_mp)) 
+           ! Flip CCN concentrations from 'activated' to 'unactivated' (allows BC condition to be zero) 
+               cn_mp = nssl_qccn - cccn_mp
+               cn_mp = Max(0.0_kind_phys, cn_mp) 
+
          ELSE
             cn_mp = cccn_mp
          ENDIF
           IF ( ntccna > 0 ) THEN
+            ! not in use yet
 !         cna_mp = cccna
           ELSE 
             cna_mp = 0
@@ -688,17 +688,12 @@ module mp_nssl
 
          IF ( nssl_ccn_on )  THEN
            IF ( invertccn ) THEN
-              !cccn = Max(0.0, nssl_qccn - cn_mp )
-              DO k = 1,nlev
-               DO i = 1,ncol
-!                 cccn(i,k) = Max(0.0, nssl_qccn - cn_mp(i,k) )
-                 cccn_mp(i,k) = nssl_qccn - cn_mp(i,k) 
-               ENDDO
-              ENDDO
+              cccn_mp = Max(0.0_kind_phys, nssl_qccn - cn_mp )
+!              cccn_mp = nssl_qccn - cn_mp
            ELSE
               cccn_mp = cn_mp
            ENDIF
-!           cccna = cna_mp
+!           cccna = cna_mp ! cna not in use yet for ccpp
           ENDIF
           
 ! test code
