@@ -850,6 +850,7 @@ do i = 1, im
         q2mp(i)                = spec_humidity_bare_2m
 
         tskin(i)               = temperature_ground
+        surface_temperature    = temperature_ground
         vegetation_fraction    = vegetation_frac
 
       else  ! not glacier
@@ -1052,7 +1053,8 @@ do i = 1, im
             zvfun(i) = sqrt(tem1 * tem2)
             gdx=sqrt(garea(i))
 
-       if ( .not. do_mynnsfclay) then   !GFS sfcdiff
+!      if ( .not. do_mynnsfclay) then   !GFS sfcdiff
+       if ( iopt_sfc .ne. 4 ) then   !GFS sfcdiff
 
       call       stability                                                               &
         (zf(i), zvfun(i), gdx, virtual_temperature, vptemp,wind(i), z0_total, z0h_total, & 
