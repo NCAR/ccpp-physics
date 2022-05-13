@@ -108,7 +108,7 @@
               enddo
             enddo
             rtg_ozone_index = 10
-          elsif(mraerosol) then
+          elseif(mraerosol) then
             do k=1,levs
               do i=1,im
                 vdftra(i,k,1)  = qgrs(i,k,ntqv)
@@ -258,7 +258,7 @@
 !
         if (trans_aero) then
           call set_aerosol_tracer_index(imp_physics, imp_physics_wsm6,          &
-                                        imp_physics_thompson, ltaerosol,,mraerosol, &
+                                        imp_physics_thompson, ltaerosol,mraerosol, &
                                         imp_physics_mg, ntgl, imp_physics_gfdl, &
                                         imp_physics_zhao_carr, imp_physics_nssl,&
                                         nssl_hail_on, nssl_ccn_on, kk,          &
