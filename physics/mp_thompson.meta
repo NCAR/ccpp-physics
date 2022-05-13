@@ -644,7 +644,6 @@
   units = 1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
-  kind = kind_phys
   intent = in
 [spp_mp]
   standard_name = control_for_microphysics_spp_perturbations
@@ -652,6 +651,37 @@
   units = count
   dimensions = ()
   type = integer
+  intent = in
+[n_var_spp]
+  standard_name = number_of_perturbed_spp_schemes
+  long_name = number of perturbed spp schemes
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[spp_prt_list]
+  standard_name = magnitude_of_spp_perturbations
+  long_name = magnitude of spp perturbations
+  units = 1
+  dimensions = (number_of_perturbed_spp_schemes)
+  type = real
+  kind = kind_phys
+  intent = in
+[spp_stddev_cutoff]
+  standard_name = magnitude_of_spp_standard_deviation_cutoff
+  long_name = magnitude of spp standard deviation cutoff
+  units = 1
+  dimensions = (number_of_perturbed_spp_schemes)
+  type = real
+  kind = kind_phys
+  intent = in
+[spp_var_list]
+  standard_name = perturbed_spp_schemes
+  long_name = perturbed spp schemes
+  units = none
+  dimensions = (number_of_perturbed_spp_schemes)
+  type = character
+  kind = len=3
   intent = in
 [errmsg]
   standard_name = ccpp_error_message
