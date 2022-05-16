@@ -430,7 +430,8 @@ CONTAINS
        &spp_pbl,pattern_spp_pbl,        &
        &RTHRATEN,                       &
        &FLAG_QC,FLAG_QI,FLAG_QNC,       &
-       &FLAG_QNI,FLAG_QNWFA,FLAG_QNIFA  &
+       &FLAG_QNI,FLAG_QNWFA,FLAG_QNIFA, &
+       &FLAG_OZONE                      &
        &,IDS,IDE,JDS,JDE,KDS,KDE        &
        &,IMS,IME,JMS,JME,KMS,KME        &
        &,ITS,ITE,JTS,JTE,KTS,KTE)
@@ -455,7 +456,7 @@ CONTAINS
     REAL,    INTENT(in) :: closure
 
     LOGICAL, INTENT(in) :: FLAG_QI,FLAG_QNI,FLAG_QC,FLAG_QNC,&
-                           FLAG_QNWFA,FLAG_QNIFA
+                           FLAG_QNWFA,FLAG_QNIFA,FLAG_OZONE
 
     LOGICAL, INTENT(IN) :: mix_chem,fire_turb,rrfs_smoke
 
@@ -474,61 +475,65 @@ CONTAINS
 !       closure       : <= 2.5;  Level 2.5
 !                  2.5< and <3;  Level 2.6
 !                        =   3;  Level 3
+
+! SGT: Changed this to use assumed shape arrays (dimension(:,:,:)) with no "optional" arguments
+!      to prevent a crash on Cheyenne. Do not change it back without testing if the code runs
+!      on Cheyenne with the GNU compiler.
     
     REAL, INTENT(in) :: delt
-    REAL, DIMENSION(IMS:IME), INTENT(in) :: dx
-    REAL, DIMENSION(IMS:IME,KMS:KME), INTENT(in) :: dz,      &
+    REAL, DIMENSION(:), INTENT(in) :: dx
+    REAL, DIMENSION(:,:), INTENT(in) :: dz,      &
          &u,v,w,th,sqv3D,p,exner,rho,T3D
-    REAL, DIMENSION(IMS:IME,KMS:KME), OPTIONAL, INTENT(in):: &
+    REAL, DIMENSION(:,:), INTENT(in):: &
          &sqc3D,sqi3D,qni,qnc,qnwfa,qnifa
-    REAL, DIMENSION(IMS:IME,KMS:KME), OPTIONAL, INTENT(in):: ozone
-    REAL, DIMENSION(IMS:IME), INTENT(in) :: xland,ust,       &
+    REAL, DIMENSION(:,:), INTENT(in):: ozone
+    REAL, DIMENSION(:), INTENT(in) :: xland,ust,       &
          &ch,ts,qsfc,ps,hfx,qfx,wspd,uoce,voce,vdfg,znt
 
-    REAL, DIMENSION(IMS:IME,KMS:KME), INTENT(inout) ::       &
+    REAL, DIMENSION(:,:), INTENT(inout) ::       &
          &Qke,Tsq,Qsq,Cov,qke_adv
 
-    REAL, DIMENSION(IMS:IME,KMS:KME), INTENT(inout) ::       &
+    REAL, DIMENSION(:,:), INTENT(inout) ::       &
          &RUBLTEN,RVBLTEN,RTHBLTEN,RQVBLTEN,RQCBLTEN,        &
          &RQIBLTEN,RQNIBLTEN,RQNCBLTEN,                      &
          &RQNWFABLTEN,RQNIFABLTEN
-    REAL, DIMENSION(IMS:IME,KMS:KME), INTENT(inout) :: DOZONE
+    REAL, DIMENSION(:,:), INTENT(inout) :: DOZONE
 
-    REAL, DIMENSION(IMS:IME,KMS:KME), INTENT(in)    :: RTHRATEN
+    REAL, DIMENSION(:,:), INTENT(in)    :: RTHRATEN
 
-    REAL, DIMENSION(IMS:IME,KMS:KME), INTENT(out)   ::       &
+    REAL, DIMENSION(:,:), INTENT(out)   ::       &
          &exch_h,exch_m
 
    !These 10 arrays are only allocated when bl_mynn_output > 0
-   REAL, DIMENSION(IMS:IME,KMS:KME), OPTIONAL, INTENT(inout) :: &
+   REAL, DIMENSION(:,:), INTENT(inout) :: &
          & edmf_a,edmf_w,edmf_qt,edmf_thl,edmf_ent,edmf_qc,  &
          & sub_thl3D,sub_sqv3D,det_thl3D,det_sqv3D
 
 !   REAL, DIMENSION(IMS:IME,KMS:KME)   :: &
 !         & edmf_a_dd,edmf_w_dd,edmf_qt_dd,edmf_thl_dd,edmf_ent_dd,edmf_qc_dd
 
-    REAL, DIMENSION(IMS:IME), INTENT(inout) :: Pblh,rmol
+    REAL, DIMENSION(:), INTENT(inout) :: Pblh,rmol
 
     REAL, DIMENSION(IMS:IME) :: Psig_bl,Psig_shcu
 
-    INTEGER,DIMENSION(IMS:IME),INTENT(INOUT) ::             &
+    INTEGER,DIMENSION(:),INTENT(INOUT) ::             &
          &KPBL,nupdraft,ktop_plume
 
-    REAL, DIMENSION(IMS:IME), INTENT(OUT) ::                &
+    REAL, DIMENSION(:), INTENT(OUT) ::                &
          &maxmf
 
-    REAL, DIMENSION(IMS:IME,KMS:KME), INTENT(inout) ::      &
+    REAL, DIMENSION(:,:), INTENT(inout) ::      &
          &el_pbl
 
-    REAL, DIMENSION(IMS:IME,KMS:KME), optional, INTENT(out) ::          &
+    REAL, DIMENSION(:,:), INTENT(out) ::          &
          &qWT,qSHEAR,qBUOY,qDISS,dqke
     ! 3D budget arrays are not allocated when bl_mynn_tkebudget == .false.
     ! 1D (local) budget arrays are used for passing between subroutines.
     REAL, DIMENSION(kts:kte) :: qWT1,qSHEAR1,qBUOY1,qDISS1,dqke1,diss_heat
 
-    REAL, DIMENSION(IMS:IME,KMS:KME), intent(out) :: Sh3D,Sm3D
+    REAL, DIMENSION(:,:), intent(out) :: Sh3D,Sm3D
 
-    REAL, DIMENSION(IMS:IME,KMS:KME), INTENT(inout) ::      &
+    REAL, DIMENSION(:,:), INTENT(inout) ::      &
          &qc_bl,qi_bl,cldfra_bl
     REAL, DIMENSION(KTS:KTE) :: qc_bl1D,qi_bl1D,cldfra_bl1D,&
                          qc_bl1D_old,qi_bl1D_old,cldfra_bl1D_old
@@ -586,7 +591,7 @@ CONTAINS
 
     ! Stochastic fields 
     INTEGER,  INTENT(IN)                                     ::spp_pbl
-    REAL, DIMENSION( ims:ime, kms:kme), INTENT(IN),OPTIONAL  ::pattern_spp_pbl
+    REAL, DIMENSION( :, :), INTENT(IN)                       ::pattern_spp_pbl
     REAL, DIMENSION(KTS:KTE)                                 ::rstoch_col
 
     ! Substepping TKE
@@ -736,7 +741,7 @@ CONTAINS
                    QC_BL1D(k)=QC_BL(i,k)
                    QI_BL1D(k)=QI_BL(i,k)
                 ENDIF
-                IF (PRESENT(sqi3D) .AND. FLAG_QI ) THEN
+                IF (FLAG_QI ) THEN
                    sqi(k)=sqi3D(i,k) !/(1.+qv(i,k))
                    sqw(k)=sqv(k)+sqc(k)+sqi(k)
                    thl(k)=th1(k) - xlvcp/ex1(k)*sqc(k) &
@@ -920,7 +925,7 @@ CONTAINS
              dqnwfa1(k)=0.0
              dqnifa1(k)=0.0
              dozone1(k)=0.0
-             IF(PRESENT(sqi3D) .AND. FLAG_QI)THEN
+             IF(FLAG_QI)THEN
                 sqi(k)= sqi3D(i,k) !/(1.+qv(i,k))
                 qi1(k)= sqi(k)/(1.-sqv(k))
                 sqw(k)= sqv(k)+sqc(k)+sqi(k)
@@ -963,27 +968,27 @@ CONTAINS
             thetav(k)=th1(k)*(1.+0.608*sqv(k))
             thvl(k)  =thlsg(k) *(1.+0.608*sqv(k))
 
-             IF (PRESENT(qni) .AND. FLAG_QNI ) THEN
+             IF (FLAG_QNI ) THEN
                 qni1(k)=qni(i,k)
              ELSE
                 qni1(k)=0.0
              ENDIF
-             IF (PRESENT(qnc) .AND. FLAG_QNC ) THEN
+             IF (FLAG_QNC ) THEN
                 qnc1(k)=qnc(i,k)
              ELSE
                 qnc1(k)=0.0
              ENDIF
-             IF (PRESENT(qnwfa) .AND. FLAG_QNWFA ) THEN
+             IF (FLAG_QNWFA ) THEN
                 qnwfa1(k)=qnwfa(i,k)
              ELSE
                 qnwfa1(k)=0.0
              ENDIF
-             IF (PRESENT(qnifa) .AND. FLAG_QNIFA ) THEN
+             IF (FLAG_QNIFA ) THEN
                 qnifa1(k)=qnifa(i,k)
              ELSE
                 qnifa1(k)=0.0
              ENDIF
-             IF (PRESENT(ozone)) THEN
+             IF (FLAG_OZONE) THEN
                 ozone1(k)=ozone(i,k)
              ELSE
                 ozone1(k)=0.0
@@ -1344,7 +1349,7 @@ CONTAINS
                &bl_mynn_mixscalars               )
 
 
-          IF ( mix_chem ) THEN
+          IF ( rrfs_smoke .and. mix_chem ) THEN
              CALL mynn_mix_chem(kts,kte,i,       &
                   &delt, dz1, pblh(i),           &
                   &nchem, kdvel, ndvel,          &
@@ -1357,13 +1362,11 @@ CONTAINS
                   &frp(i),                       &
                   &fire_turb                     )
 
-             IF ( rrfs_smoke ) THEN
-                DO ic = 1,nchem
-                   DO k = kts,kte
-                      chem3d(i,k,ic) = chem1(k,ic)
-                   ENDDO
+             DO ic = 1,nchem
+                DO k = kts,kte
+                   chem3d(i,k,ic) = chem1(k,ic)
                 ENDDO
-             ENDIF
+             ENDDO
           ENDIF
  
           CALL retrieve_exchange_coeffs(kts,kte,&
@@ -1378,22 +1381,22 @@ CONTAINS
              RTHBLTEN(i,k)=dth1(k)
              RQVBLTEN(i,k)=dqv1(k)
              IF(bl_mynn_cloudmix > 0)THEN
-               IF (PRESENT(sqc3D) .AND. FLAG_QC) RQCBLTEN(i,k)=dqc1(k)
-               IF (PRESENT(sqi3D) .AND. FLAG_QI) RQIBLTEN(i,k)=dqi1(k)
+               IF (FLAG_QC) RQCBLTEN(i,k)=dqc1(k)
+               IF (FLAG_QI) RQIBLTEN(i,k)=dqi1(k)
              ELSE
-               IF (PRESENT(sqc3D) .AND. FLAG_QC) RQCBLTEN(i,k)=0.
-               IF (PRESENT(sqi3D) .AND. FLAG_QI) RQIBLTEN(i,k)=0.
+               IF (FLAG_QC) RQCBLTEN(i,k)=0.
+               IF (FLAG_QI) RQIBLTEN(i,k)=0.
              ENDIF
              IF(bl_mynn_cloudmix > 0 .AND. bl_mynn_mixscalars > 0)THEN
-               IF (PRESENT(qnc) .AND. FLAG_QNC) RQNCBLTEN(i,k)=dqnc1(k)
-               IF (PRESENT(qni) .AND. FLAG_QNI) RQNIBLTEN(i,k)=dqni1(k)
-               IF (PRESENT(qnwfa) .AND. FLAG_QNWFA) RQNWFABLTEN(i,k)=dqnwfa1(k)
-               IF (PRESENT(qnifa) .AND. FLAG_QNIFA) RQNIFABLTEN(i,k)=dqnifa1(k)
+               IF (FLAG_QNC) RQNCBLTEN(i,k)=dqnc1(k)
+               IF (FLAG_QNI) RQNIBLTEN(i,k)=dqni1(k)
+               IF (FLAG_QNWFA) RQNWFABLTEN(i,k)=dqnwfa1(k)
+               IF (FLAG_QNIFA) RQNIFABLTEN(i,k)=dqnifa1(k)
              ELSE
-               IF (PRESENT(qnc) .AND. FLAG_QNC) RQNCBLTEN(i,k)=0.
-               IF (PRESENT(qni) .AND. FLAG_QNI) RQNIBLTEN(i,k)=0.
-               IF (PRESENT(qnwfa) .AND. FLAG_QNWFA) RQNWFABLTEN(i,k)=0.
-               IF (PRESENT(qnifa) .AND. FLAG_QNIFA) RQNIFABLTEN(i,k)=0.
+               IF (FLAG_QNC) RQNCBLTEN(i,k)=0.
+               IF (FLAG_QNI) RQNIBLTEN(i,k)=0.
+               IF (FLAG_QNWFA) RQNWFABLTEN(i,k)=0.
+               IF (FLAG_QNIFA) RQNIFABLTEN(i,k)=0.
              ENDIF
              DOZONE(i,k)=DOZONE1(k)
 

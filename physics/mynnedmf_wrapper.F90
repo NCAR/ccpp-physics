@@ -225,7 +225,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &       bl_mynn_mixscalars=1
       LOGICAL ::                                            &
      &       FLAG_QI, FLAG_QNI, FLAG_QC, FLAG_QNC,          &
-     &       FLAG_QNWFA, FLAG_QNIFA
+     &       FLAG_QNWFA, FLAG_QNIFA, FLAG_OZONE
       ! Define locally until needed from CCPP
       LOGICAL, PARAMETER :: cycling = .false.
       INTEGER, PARAMETER :: param_first_scalar = 1
@@ -388,6 +388,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                               qgrs_ice_cloud(i,:),   &
                               t3d(i,:)               )
       enddo
+
+      FLAG_OZONE = ntoz>0
 
   ! Assign variables for each microphysics scheme
         if (imp_physics == imp_physics_wsm6) then
@@ -757,6 +759,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &             FLAG_QI=flag_qi,FLAG_QNI=flag_qni,                  & !input
      &             FLAG_QC=flag_qc,FLAG_QNC=flag_qnc,                  & !input
      &             FLAG_QNWFA=FLAG_QNWFA,FLAG_QNIFA=FLAG_QNIFA,        & !input
+     &             FLAG_OZONE=FLAG_OZONE,                              & !input
      &             IDS=1,IDE=im,JDS=1,JDE=1,KDS=1,KDE=levs,            & !input
      &             IMS=1,IME=im,JMS=1,JME=1,KMS=1,KME=levs,            & !input
      &             ITS=1,ITE=im,JTS=1,JTE=1,KTS=1,KTE=levs)              !input
