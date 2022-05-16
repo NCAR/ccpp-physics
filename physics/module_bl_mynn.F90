@@ -397,7 +397,7 @@ CONTAINS
        &nchem,kdvel,ndvel,              & !Smoke/Chem variables
        &chem3d, vdep,                   &
        &frp,EMIS_ANT_NO,                & ! JLS/RAR to adjust exchange coeffs
-       &mix_chem,fire_turb,             & ! end smoke/chem variables
+       &mix_chem,fire_turb,rrfs_smoke,  & ! end smoke/chem variables
 
        &Tsq,Qsq,Cov,                    &
        &RUBLTEN,RVBLTEN,RTHBLTEN,       &
@@ -457,7 +457,7 @@ CONTAINS
     LOGICAL, INTENT(in) :: FLAG_QI,FLAG_QNI,FLAG_QC,FLAG_QNC,&
                            FLAG_QNWFA,FLAG_QNIFA
 
-    LOGICAL, INTENT(IN) :: mix_chem,fire_turb
+    LOGICAL, INTENT(IN) :: mix_chem,fire_turb,rrfs_smoke
 
     INTEGER, INTENT(in) :: &
          & IDS,IDE,JDS,JDE,KDS,KDE &
@@ -537,9 +537,9 @@ CONTAINS
     INTEGER, INTENT(IN   ) ::   nchem, kdvel, ndvel
 !    REAL,    DIMENSION( ims:ime, kms:kme, nchem ), INTENT(INOUT), optional :: chem3d
 !    REAL,    DIMENSION( ims:ime, kdvel, ndvel ), INTENT(IN), optional :: vdep
-    REAL,    DIMENSION(ims:ime, kms:kme, nchem), INTENT(INOUT), optional :: chem3d
-    REAL,    DIMENSION(ims:ime, ndvel),   INTENT(IN),    optional :: vdep
-    REAL,    DIMENSION(ims:ime),     INTENT(IN),    optional :: frp,EMIS_ANT_NO
+    REAL,    DIMENSION(:, :, :), INTENT(INOUT) :: chem3d
+    REAL,    DIMENSION(:, :),   INTENT(IN) :: vdep
+    REAL,    DIMENSION(:),     INTENT(IN) :: frp,EMIS_ANT_NO
     !local
     REAL,    DIMENSION(kts:kte  ,nchem) :: chem1
     REAL,    DIMENSION(kts:kte+1,nchem) :: s_awchem1
@@ -1047,7 +1047,7 @@ CONTAINS
           ENDDO ! end k
 
           !initialize smoke/chem arrays (if used):
-             IF  (mix_chem ) then
+             IF  ( rrfs_smoke .and. mix_chem ) then
                 do ic = 1,ndvel
                    vd1(ic) = vdep(i,ic) !is this correct????
                    chem1(kts,ic) = chem3d(i,kts,ic)
@@ -1357,7 +1357,7 @@ CONTAINS
                   &frp(i),                       &
                   &fire_turb                     )
 
-             IF ( PRESENT(chem3d) ) THEN
+             IF ( rrfs_smoke ) THEN
                 DO ic = 1,nchem
                    DO k = kts,kte
                       chem3d(i,k,ic) = chem1(k,ic)

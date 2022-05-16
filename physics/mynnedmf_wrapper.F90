@@ -161,7 +161,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  icloud_bl, do_mynnsfclay,                          &
      &  imp_physics, imp_physics_gfdl,                     &
      &  imp_physics_thompson, imp_physics_wsm6,            &
-     &  chem3d, frp, mix_chem, fire_turb, nchem, ndvel,    &
+     &  chem3d, frp, mix_chem, rrfs_smoke, fire_turb, nchem, ndvel, &
      &  imp_physics_nssl, nssl_ccn_on,                     &
      &  ltaerosol, spp_wts_pbl, spp_pbl, lprnt, huge, errmsg, errflg  )
 
@@ -290,7 +290,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 
 !smoke/chem arrays
       real(kind_phys), dimension(:), intent(inout) :: frp
-      logical, intent(in) :: mix_chem, fire_turb
+      logical, intent(in) :: mix_chem, fire_turb, rrfs_smoke
       real(kind=kind_phys), dimension(:,:,:), intent(inout) :: chem3d
       real(kind=kind_phys), dimension(im)   :: emis_ant_no
       real(kind=kind_phys), dimension(im,ndvel) :: vdep
@@ -720,6 +720,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &             Chem3d=chem3d,Vdep=vdep,                            &
      &             FRP=frp,EMIS_ANT_NO=emis_ant_no,                    &
      &             mix_chem=mix_chem,fire_turb=fire_turb,              &
+     &             rrfs_smoke=rrfs_smoke,                              &
 !-----
      &             Tsq=tsq,Qsq=qsq,Cov=cov,                            & !output
      &             RUBLTEN=RUBLTEN,RVBLTEN=RVBLTEN,RTHBLTEN=RTHBLTEN,  & !output
