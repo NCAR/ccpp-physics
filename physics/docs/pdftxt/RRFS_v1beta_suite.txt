@@ -3,11 +3,13 @@
 
 \section RRFS_v1beta_suite_overview Overview
 
-Suite RRFS_v1beta is one of the supported suites for use in the UFS Short-Range Weather Application
-(UFS SRW App). This suite is most applicable for runs at 3-km resolution since it does not parameterize
-deep convection.
+The RRFS_v1beta suite is the primary suite target for the upcoming operational implementation of
+  the Rapid Refresh Forecast System (RRFS), which is used in the UFS SRW App.  
+This suite is most applicable for runs at 3-km resolution since it does not parameterize
+deep convection. This suite is available for use with the UFS SRW App and with the
+CCPP SCM.
 
-Suite RRFS_v1beta uses the parameterizations in the following order:
+The RRFS_v1beta suite uses the parameterizations in the following order:
  - \ref SGSCLOUD_page
  - \ref GFS_RRTMG
  - \ref SFC_MYNNSFL

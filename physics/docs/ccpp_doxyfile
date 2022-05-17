@@ -240,11 +240,13 @@ INPUT                  =  pdftxt/mainpage.txt              \
                         ../unified_ugwp.F90         \
                         ../drag_suite.F90           \
                         ../cires_tauamf_data.F90    \
+                        ../cires_orowam2017.f     \
                         ../cires_ugwp.F90           \
                         ../cires_ugwp_initialize.F90     \
                         ../cires_ugwp_module.F90       \
                         ../cires_ugwp_post.F90         \
                         ../cires_ugwp_triggers.F90     \
+                        ../cires_ugwp_module.F90      \
                         ../gwdps.f                     \
                         ../ugwp_driver_v0.F            \
                         ../ozphys_2015.f               \

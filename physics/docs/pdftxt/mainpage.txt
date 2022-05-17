@@ -11,12 +11,12 @@ developmental schemes under consideration for upcoming operational implementatio
 applications, including the UFS Short-Range Weather (SRW) Application (available through https://github.com/ufs-community/ufs-srweather-app/), 
 which targets predictions of atmospheric behavior on a 
 limited spatial domain and on time scales from less than an hour out to several days, and the UFS Medium-Range Weather (MRW) 
-Application(available through https://github.com/ufs-community/ufs-mrweather-app/), which  targets predictions of global atmospheric 
+Application (available through https://github.com/ufs-community/ufs-mrweather-app/), which  targets predictions of global atmospheric 
 behavior out to about two weeks.
 
 
 The CCPP parameterizations are aggregated in suites by the host models. In this release, the CCPP Single Column Model (SCM), developed 
-by the Development Testbed Center, supports suites: 
+by the Development Testbed Center (DTC), supports suites: 
 - \ref GFS_v16_page
 - \ref GFS_v17_p8_page
 - \ref HRRR_suite_page
@@ -39,6 +39,19 @@ parameterization, including a high-level overview of its function, the input/out
 and a description of the algorithm. 
 More details about this and other CCPP releases may be found on the
 <a href="https://dtcenter.org/community-code/common-community-physics-package-ccpp"> CCPP website </a> hosted by
-the Developmental Testbed Center (DTC).
+DTC.
 
+
+## Acknowledgements
+
+We would like to express our deepest gratitude for UFS physics developers' contribution to the
+development of CCPP-Physics. We would also like to give special thanks to:   
+
+- \b NOAA \b Global \b Systems \b Laboratory: Hannah Barnes, Jeff Beck, George Grell, Joseph Olsen, Tanya Smirnova, Mike Toy
+- \b NOAA \b Physical \b Sciences \b Laboratory: Jian-Wen Bao, Lisa Bengtsson, Song-You Hong
+- \b NOAA \b National \b Severe \b Storms \b Laboratory: Ted Mansell
+- \b NOAA \b Environmental \b Modeling \b Center: Jongil Han, Qingfu Liu, Ruiyu Sun, Greg Thompson
+- \b Atmospheric \b and \b Environmental \b Research, \b Inc.: Mike Iacono
+
+for their contribution and support of this CCPP SciDoc.
 */

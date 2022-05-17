@@ -67,6 +67,7 @@ html {
     --page-font-size: 15.6px;
     --navigation-font-size: 14.4px;
     --code-font-size: 14px; /* affects code, fragment */
+    --table-font-size: 12.5px;
     --title-font-size: 22px;
 
     /* content text properties. These only affect the page content, not the navigation or any other ui elements */
@@ -313,7 +314,7 @@ h1, h2, h3, h4, h5 {
 }
 
 p, div, table, dl {
-    font-size: var(--page-font-size);
+    font-size: var(--table-font-size);
 }
 
 a:link, a:visited, a:hover, a:focus, a:active {

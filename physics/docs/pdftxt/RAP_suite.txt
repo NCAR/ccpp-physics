@@ -3,10 +3,11 @@
 
 \section rap_suite_overview Overview
 
-Suite RAP contains the parameterizations used in the NOAA operational Rapid Refresh (RAP)
-which runs at 13- km resolution. Currently, suite RAP is supported in SCM only.
+The RAP suite contains the parameterizations used in the NOAA operational Rapid Refresh (RAP) model
+which runs at 13-km resolution. Currently, suite RAP is supported in SCM only. For additional 
+information about the RAP model, visit: https://rapidrefresh.noaa.gov.
 
-Suite RAP uses the parameterizations in the following order:
+The RAP suite uses the parameterizations in the following order:
  - \ref SGSCLOUD_page
  - \ref GFS_RRTMG
  - \ref SFC_MYNNSFL
@@ -20,10 +21,6 @@ Suite RAP uses the parameterizations in the following order:
    - \ref cu_gf_deep_group
    - \ref cu_gf_sh_group
  - \ref THOMPSON
-
-
-Additional Model Information Links: 
-https://rapidrefresh.noaa.gov
 
 \section sdf_gsdsuite Suite Definition File 
 \include suite_FV3_RAP.xml  

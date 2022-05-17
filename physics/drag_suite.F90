@@ -6,7 +6,7 @@
 
       contains
 
-!> \defgroup gfs_drag_suite_mod GFS drag_suite Module
+!> \defgroup gfs_drag_suite_mod GSL drag_suite Module
 !> This module contains the CCPP-compliant GSL orographic gravity wave dray scheme.
 !> @{
       subroutine drag_suite_init(gwd_opt, errmsg, errflg)

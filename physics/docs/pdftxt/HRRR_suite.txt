@@ -3,14 +3,14 @@
 
 \section HRRR_suite_overview Overview
 
-Suite HRRR contains the parameterizations used in the NOAA operational 
-High-Resolution Rapid Refresh (HRRR) models. These models runs at 3- km resolution.
+The HRRR suite contains the parameterizations used in the NOAA operational 
+High-Resolution Rapid Refresh (HRRR) model, which runs at 3-km resolution.
+This suite is available for use with the UFS SRW App and with the CCPP SCM.
 
+For additional information about the HRRR model, visit: 
+https://rapidrefresh.noaa.gov/hrrr/.
 
-Additional Model Information Links: 
-- https://rapidrefresh.noaa.gov/hrrr/
-
-Suite HRRR uses the parameterizations in the following order:
+The HRRR suite uses the parameterizations in the following order:
  - \ref SGSCLOUD_page
  - \ref GFS_RRTMG
  - \ref SFC_MYNNSFL

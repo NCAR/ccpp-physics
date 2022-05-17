@@ -1,7 +1,8 @@
 /**
 \page CCPPsuite_nml_desp Supported Namelist Options
 
-The SCM and the UFS Atmosphere access runtime configurations from file \c input.nml. This file contains
+The SCM and the UFS Atmosphere, the atmospheric component of the UFS weather Model,
+ access runtime configurations from file \c input.nml. This file contains
 various namelists records that control aspects of the I/O, dynamics, physics etc. Most physics-related options are in
 records \b &gfs_physics_nml. Some schemes have their own namelist records as described below. 
 
@@ -15,7 +16,7 @@ module_gfdl_cloud_microphys.F90.
 
 - Namelist \b &nam_sfcperts specifies whether and how stochastic perturbations are used in the Noah Land Surface Model.
 
-- Namelist \b &nam_sppperts secifies options for the use of \ref GFS_SPP
+- Namelist \b &nam_sppperts specifies options for the use of \ref GFS_SPP
 
 Both the SDF and the input.nml contain information about how to specify the physics suite. Some
 of this information is redundant, and the user must make sure they are compatible.The safest 
@@ -376,7 +377,7 @@ show some variables in the namelist that must match the SDF.
 <tr><td>effr_in         <td>gfdl_cloud_microphys, mp_thompson          <td>flag for using input cloud effective radii calculation    <td>.false.
 <tr><td>cnvcld          <td>see \a GFS_typedefs.F90          <td>flag for convective cloud                      <td>.false.
 <tr><td>lgfdlmprad      <td>gfs_rrtmg_pre          <td>flag for GFDL mp scheme and radiation consistency     <td>.false.
-<tr><td>nssl_cccn       <td>mp_nssl          <td>CCN concentration (\f[m^{-3}\f])                  <td>0.6e9 
+<tr><td>nssl_cccn       <td>mp_nssl          <td>CCN concentration (m^-3)                  <td>0.6e9 
 <tr><td>nssl_alphah     <td>mp_nssl          <td>graupel shape parameter                         <td>0.0
 <tr><td>nssl_alphahl    <td>mp_nssl          <td>hail shape parameter                            <td>1.0
 <tr><td>nssl_hail_on    <td>mp_nssl          <td>NSSL flag to activate the hail category         <td>.false.

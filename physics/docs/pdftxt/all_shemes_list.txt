@@ -1,11 +1,11 @@
 /**
-\page allscheme_page  Physics Suites Overview
+\page allscheme_page Overview of Schemes and Suites
 
 \section allscheme_overview Physical Parameterizations 
 
-In the CCPP, each parameterization is in its own modern Fortran module (i.e., CCPP-compliant; see rules for scheme to considered CCPP-compliant at 
-<a href="https://ccpp-techdoc.readthedocs.io/en/v5.0.0/CompliantPhysicsParams.html"> CCPP-Compliant Physics Parameterizations </a>), 
-which facilitates model development and code maintenance. Additionally, we are listing any pre- and post- interstitials that must accompany the scheme. While some individual parameterization can be invoked for the SCM, most host models will assemble the parameterizations in suites. 
+In the CCPP, each parameterization is in its own modern Fortran module (see rules for a scheme to be considered CCPP-compliant at 
+<a href="https://ccpp-techdoc.readthedocs.io/en/v6.0.0/CompliantPhysicsParams.html"> CCPP-Compliant Physics Parameterizations </a>),
+which facilitates model development and code maintenance. While some individual parameterization can be invoked for the SCM, most host models will assemble the parameterizations in suites. 
 
 
 \b Radiation
@@ -74,20 +74,20 @@ to the parameterization.
 
 \section allsuite_overview Physics Suites
 
-There are three publicly supported host models that use CCPP v6: the UFS Weather Model used in the Short Range Weather Application (SRW App) and the Medium
-Range Weather Application (MRW), as well as the CCPP Single Column Model (SCM). 
+There are two publicly supported host models that use CCPP v6: the UFS Weather Model and the CCPP Single Column Model (SCM). 
+The UFS Weather Model is included in the UFS Short Range Weather Application (SRW App) v2 and the UFS Medium Range Weather Application (MRW App) v2.
 The forcing datasets included in the CCPP SCM v6.0.0 public release were created by averaging observations and large-eddy simulations over seas that are
-too coarse to resolve convection. Therefore, best results will be obtained with be obtained with the CCPP SCM v6.0 when using suites that include parameterized
+too coarse to resolve convection. Therefore, best results will be obtained with the CCPP SCM v6.0 when using suites that include parameterized
 convection.
 
-Table 1.  Physics suite options included in this documentation. 
+Table 1.  Physics suites and primary schemes supported in CCPP v6.0.0  
 \tableofcontents
 | Physics suites   |     GFS_v16        |   GFS_v17_p8            |       RAP        |    HRRR                     |   RRFS_v1beta      |      WoFS     |         
 |------------------|--------------------|-------------------------|------------------|-----------------------------|--------------------|---------------|
-|\b HOST \b Model  | SCM, SRW           |  SCM, MRW               |    SCM           |   SCM, SRW                  |  SCM, SRW          |  SCM, SRW     |
-|\b Deep \b Cu     | \ref GFS_SAMFdeep  |  \ref GFS_SAMFdeep + \ref ca_page |  \ref CU_GF      | \a  off                     |   \a off           |   \a off      |
+|\b Host  | SCM, SRWv2           |  SCM, MRWv2             |    SCM           |   SCM, SRWv2                  |  SCM, SRWv2          |  SCM, SRWv2     |
+|\b Deep \b Cu     | \ref GFS_SAMFdeep  |  \ref GFS_SAMFdeep + \ref ca_page |  \ref CU_GF      | \a  off           |   \a off           |   \a off      |
 |\b Shallow \b Cu  | \ref GFS_SAMFshal  |  \ref GFS_SAMFshal      |  \ref CU_GF      | \ref MYNNEDMF               | \ref MYNNEDMF      |  \ref MYNNEDMF |
-|\b Microphysics   | \ref GFDL_cloud    |  \ref THOMPSON w/o aerosol-aware   |  \ref THOMPSON   | \ref THOMPSON               | \ref THOMPSON      | \ref NSSLMICRO_page     |
+|\b Microphysics   | \ref GFDL_cloud    |  \ref THOMPSON w/o aerosol-aware   |  \ref THOMPSON   | \ref THOMPSON    | \ref THOMPSON      | \ref NSSLMICRO_page     |
 |\b PBL/TURB       | \ref GFS_SATMEDMFVDIFQ     |  \ref GFS_SATMEDMFVDIFQ  |  \ref MYNNEDMF     | \ref MYNNEDMF    | \ref MYNNEDMF     |   \ref MYNNEDMF    |
 |\b Radiation      | \ref GFS_RRTMG     |  \ref GFS_RRTMG        |  \ref GFS_RRTMG  | \ref GFS_RRTMG              | \ref GFS_RRTMG     |   \ref GFS_RRTMG    |
 |\b Surface \b Layer | \ref GFS_SFCLYR  |  \ref GFS_SFCLYR        | \ref SFC_MYNNSFL | \ref SFC_MYNNSFL            | \ref SFC_MYNNSFL   |   \ref SFC_MYNNSFL  |

@@ -70,7 +70,7 @@ contains
    end function my_maxloc1d
 
 !>Driver for the deep or congestus GF routine.
-!> \section general_gf_deep GF Deep Convection General Algorithm
+!> \section general_gf_deep Grell-Freitas Deep Convection General Algorithm
    subroutine cu_gf_deep_run(        &          
                itf,ktf,its,ite, kts,kte  &
               ,dicycle       &  ! diurnal cycle flag
@@ -779,7 +779,7 @@ contains
            its,ite, kts,kte,                                                    &
            z_cup,entr_rate,heo,imid)
 !
-!--- increase detrainment in stable layers
+!> - Call cup_minimi() to increase detrainment in stable layers
 !
       call cup_minimi(heso_cup,kbcon,kstabm,kstabi,ierr,                        &
            itf,ktf,                                                             &
@@ -805,7 +805,7 @@ contains
              endif
            enddo
 !
-! initial conditions for updraft
+!> - Call get_cloud_bc() to initial conditions for updraft
 !
             start_level(i)=k22(i)
             x_add = xlv*zqexec(i)+cp*ztexec(i)
@@ -815,7 +815,7 @@ contains
 !$acc end parallel
 
 !
-!--- get inversion layers for mid level cloud tops
+!> - Call get_inversion_layer() to get inversion layers for mid level cloud tops
 !
       if(imid.eq.1)then
       call get_inversion_layers(ierr,p_cup,t_cup,z_cup,q_cup,qes_cup,k_inv_layers, &
@@ -1007,7 +1007,7 @@ contains
 !$acc end kernels
 
 !
-!--- downdraft originating level - jmin
+!> - Call cup_minimi() to calculate downdraft originating level (\p jmin)
 !
       call cup_minimi(heso_cup,k22,kzdown,jmin,ierr, &
            itf,ktf, &
@@ -1395,7 +1395,7 @@ contains
 !!        enddo
 !
 !
-! downdraft moist static energy + moisture budget
+!> - Compute downdraft moist static energy + moisture budget
           do k=2,jmin(i)+1
            dd_massentru(i,k-1)=dd_massentro(i,k-1)+lambau(i)*dd_massdetro(i,k-1)
            dd_massdetru(i,k-1)=dd_massdetro(i,k-1)+lambau(i)*dd_massdetro(i,k-1)
@@ -1594,11 +1594,11 @@ contains
            endif 
           enddo
 !$acc end kernels
-          !--- calculate moist static energy, heights, qes, ... only by bl tendencies
+          !> - Call cup_env() to calculate moist static energy, heights, qes, ... only by bl tendencies
           call cup_env(zo,qeso_bl,heo_bl,heso_bl,tn_bl,qo_bl,po,z1,                              &
                      psur,ierr,tcrit,-1,                                                         &
                      itf,ktf, its,ite, kts,kte)
-          !--- environmental values on cloud levels only by bl tendencies
+          !> - Call cup_env_clev() to calculate environmental values on cloud levels only by bl tendencies
           call cup_env_clev(tn_bl,qeso_bl,qo_bl,heo_bl,heso_bl,zo,po,qeso_cup_bl,qo_cup_bl,      &
                               heo_cup_bl,heso_cup_bl,zo_cup,po_cup,gammao_cup_bl,tn_cup_bl,psur, &
                               ierr,z1,                                                           &
@@ -1642,7 +1642,7 @@ contains
             endif
           enddo
 !$acc end kernels
-          !--- calculate workfunctions for updrafts
+          !> - Call cup_ip_aa0() to calculate workfunctions for updrafts
           call cup_up_aa0(aa1_bl,zo,zuo,dbyo_bl,gammao_cup_bl,tn_cup_bl,        &
                         kbcon,ktop,ierr,                                        &
                         itf,ktf,its,ite, kts,kte)
@@ -1939,14 +1939,14 @@ contains
       enddo
 !$acc end kernels
 !
-!--- calculate moist static energy, heights, qes
+!> - Call cup_env() to calculate moist static energy, heights, qes
 !
       call cup_env(xz,xqes,xhe,xhes,xt,xq,po,z1,                   &
            psur,ierr,tcrit,-1,                                     &
            itf,ktf,                                                &
            its,ite, kts,kte)
 !
-!--- environmental values on cloud levels
+!> - Call cup_env_clev() to calculate environmental values on cloud levels
 !
       call cup_env_clev(xt,xqes,xq,xhe,xhes,xz,po,xqes_cup,xq_cup, &
            xhe_cup,xhes_cup,xz_cup,po_cup,gamma_cup,xt_cup,psur,   &
@@ -2010,7 +2010,7 @@ contains
       enddo
 !$acc end kernels
 !
-!--- workfunctions for updraft
+!> - Call cup_up_aa0() to calculate workfunctions for updraft
 !
       call cup_up_aa0(xaa0,xz,xzu,xdby,gamma_cup,xt_cup, &
            kbcon,ktop,ierr,                              &
@@ -2093,7 +2093,7 @@ contains
              its,ite, kts,kte,                                            &
              z_cup,entr_rate,heo,imid)
 !
-!--- calculate cloud base mass flux
+!> - Call cup_forcing_ens_3d() to calculate cloud base mass flux
 !
 !$acc kernels
       do i = its,itf
@@ -2170,7 +2170,7 @@ contains
             its,ite, kts,kte,                                            &
             dicycle,xf_dicycle )
 
-!---------------evap below cloud base
+!> - Call rain_evap_below_cloudbase() to calculate evaporation below cloud base
 
       call rain_evap_below_cloudbase(itf,ktf,its,ite,                    &
            kts,kte,ierr,kbcon,xmb,psur,xland,qo_cup,                     &
@@ -2277,7 +2277,7 @@ contains
 !$acc end kernels
 
 !
-! since kinetic energy is being dissipated, add heating accordingly (from ecmwf)
+!> - Since kinetic energy is being dissipated, add heating accordingly (from ecmwf)
 !
 !$acc kernels
       do i=its,itf

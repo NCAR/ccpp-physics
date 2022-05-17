@@ -16,8 +16,8 @@ contains
 
 !>\defgroup cu_gf_sh_group Grell-Freitas Shallow Convection Module
 !! This module contains Grell-Freitas shallow convection scheme.
-!>@{
 !> \ingroup cu_gf_group
+!> @{
 !> GF shallow convection as described in Grell and
 !! Freitas (2014) \cite grell_and_freitas_2014. input variables are:
 !!\param    us               x wind updated by physics
@@ -269,7 +269,7 @@ contains
 !
       
 !
-!--- initial detrainmentrates
+!> - Initial detrainmentrates
 !
 !$acc kernels
       do k=kts,ktf

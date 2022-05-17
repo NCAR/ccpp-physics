@@ -1,8 +1,0 @@
-/**
-\page rel_phys_update CCPP v6.0.0 Physics Update
-
-Release Date:  June 13, 2022
-- \subpage allscheme_page
-- \subpage v6phys_enh_page   
-
-*/

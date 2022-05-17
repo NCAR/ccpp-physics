@@ -7,7 +7,7 @@
 
 !>\defgroup gfs_stoch_mod GFS Stochastics Physics Module
 !> @{
-!! This module
+!! This is the GFS stochastics physics driver module.
 !!
 !> \section arg_table_GFS_stochastics_init Argument Table
 !! \htmlinclude GFS_stochastics_init.html
@@ -47,10 +47,6 @@
          vfact_ca(1)=0.0
       endif
       end subroutine GFS_stochastics_init
-
-      subroutine GFS_stochastics_finalize()
-      end subroutine GFS_stochastics_finalize
-
 
 !> \section arg_table_GFS_stochastics_run Argument Table
 !! \htmlinclude GFS_stochastics_run.html

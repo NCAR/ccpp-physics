@@ -69,7 +69,6 @@
 \version CCPP v6.0.0
 
 \subsection ca_page Cellular Automata Stochastic Convective Organization Scheme 
-\author Lisa Bengtsson (NOAA Physical Sciences Laboratory): Lisa.Bengtsson@noaa.gov
 
 \b Scientific \b Background
 
@@ -210,7 +209,6 @@ evolution of the updraft area fraction, and is in its current formulation
 not recommended. 
 
 \subsection gen_enh Physics Updates in GFS Cumulus Convection
-\author Jongil Han (NCEP Environmental Modeling Center): Jongil.Han@noaa.gov
 
 - To enhance the surface-based convective available potential energy (CAPE), 
 more strict convection trigger conditions are applied.

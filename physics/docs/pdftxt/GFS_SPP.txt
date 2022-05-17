@@ -1,9 +1,7 @@
 /**
-\page GFS_SPP Stochastically Perturbed Parameterizations (SPP)
+\page GFS_SPP Stochastically-Perturbed Parameterizations (SPP)
 
 \section des_spp Description
-
-\author Jeff Beck (NOAA/GSL and CIRA): Jeff.Beck@noaa.gov
 
 For both regional and global ensembles, sufficient initial condition and 
 physics uncertainty representation is critically important to ensemble 
@@ -13,11 +11,10 @@ outcomes.  To improve the effectiveness of the ensemble, stochastic
 physics can be employed.  Stochastically Perturbed Parameterizations 
 (SPP) provides one method through which unknown or uncertain physical 
 processes can be represented in ensemble forecasting. As it is currently 
-employed in CCPP, SPP can be applied to the following physics parameterizations: 
+employed in CCPP (Beck et al.(2022) \cite beck_et_al_2022), SPP can be applied to the following physics parameterizations: 
 \ref MYNNEDMF, \ref SFC_MYNNSFL, \ref GFS_RRTMG, \ref GFS_UNIFIED_UGWP,\ref GFS_drag_suite and 
 \ref THOMPSON (note that both \ref RUCLSM and \ref GFS_NOAH can also be 
-run with stochastic parameter perturbations, but those are described elsewhere 
-in the CCPP documentation).  A list of the parameters perturbed 
+run with stochastic parameter perturbations, i.e., \ref surf_pert).  A list of the parameters perturbed 
 within each scheme can be found below: 
 
 - \ref MYNNEDMF
@@ -41,17 +38,13 @@ within each scheme can be found below:
  - Vertical velocity used in CCN activation
  - Ice number concentration
 
-Magnitudes, time decorrelation lengths, and other namelist settings can 
-be modified to control the perturbations for each scheme; however, for now, 
-all parameters are perturbed identically within each scheme.  
-For detailed information on how to activate and modify SPP settings for 
-these schemes, the reader is referred to 
-<a href="https://github.com/ufs-community/ufs-srweather-app/tree/develop/docs/UsersGuide">the SRW App Users Guide</a>
+Magnitudes, time decorrelation lengths, and other namelist settings can be modified to control the perturbations for each scheme; however, for now, 
+all parameters are perturbed identically within each scheme. For detailed information on how to activate and modify SPP settings for 
+these schemes, the reader is referred to <a href="https://ufs-srweather-app.readthedocs.io/en/latest/index.html">the SRW App Users Guide</a>.
 
 Each parameter listed above was chosen through consultation with 
 physics experts, often the author of the parameterization, in order 
-to target fields that could benefit from the application of SPP.  
-However, there are many other parameters which could be effectively 
+to target fields that could benefit from the application of SPP. However, there are many other parameters which could be effectively 
 perturbed to improve uncertainty representation and ensemble spread generation. 
  In most of the perturbed parameterizations, the perturbation magnitudes 
 are multiplied by coefficients to generate reasonable parameter values; 
@@ -59,17 +52,19 @@ however, users should be careful when making changes to the magnitudes
 provided as a guideline in the SRW App documentation, since it is still 
 possible to generate unphysical parameter values.  Default magnitudes 
 and decorrelation lengths in the SRW App documentation were the result 
-of extensive testing with 3-km CONUS simulations.  If the user would 
+of extensive testing with 3-km CONUS simulations. If the user would 
 like to apply SPP at other resolutions, it is recommended that retrospective 
 simulations be conducted over the area of interest to ensure reasonable 
-application of the perturbations.
+application of the perturbations. 
 
+## GFS Surface Parameter Perturbation
 
-Reference
-1. Beck J., J. Wolff, L. Carson, W. Li, M. Harrold, W. Mayfield, K. Y. Wong, 
-J. Berner, P. Pegion, C.R. Alexander, J. R. Carley, 2022: Implementation and testing of
-stochastic physics within FV3-LAM and RRFS prototype ensembles using the Common Community
-Physics Package (CCPP). 7B.6, 12th Conference on Transition of Research to Operations,
-102nd AMS Annual Meeting.
+Land surface perturbation (Gehne et al. (2019) \cite Gehne_2019) has been recently introduced
+into UFS. This treatment is based on the hypothesis that one of the major
+causes of the insufficient spread in current global NWP model,especially near the surface, is a lack of treatment of
+uncertainty in the soil state and in the associated model parameters. It allows for land surface parameters such as surface albedo,
+vegetation fraction, soil hydraulic conductivity, leaf area index (LAI), surface roughness lengths for heat and momentom to vary in space.
+These parameters and variables have been shown to impact forecasts of 2m temperature, 10m wind and precipitation. Based on the parameter
+or variable,different strategies to perturb are necessary.
 
 */

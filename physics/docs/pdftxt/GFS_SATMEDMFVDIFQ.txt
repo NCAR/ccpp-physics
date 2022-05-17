@@ -29,7 +29,6 @@ it was an eddy diffusion form)
 
 \section v6_pbl_enh CCPP Physics Updates
 \version CCPP v6.0.0
-\author Jongil Han (NCEP Environmental Modeling Center): Jongil.Han@noaa.gov
 
 - Wind shear effect in characteristic mixing length calculation is included, which 
 reduces the mixing length in a strong shear environment such as a hurricane.

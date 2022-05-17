@@ -26,7 +26,7 @@ A paper describing the latest changes and modifications is in process and will b
 
 \section version_cugf_enh CCPP Physics Updates
 \version CCPP v6.0.0
-\author Hannah Barnes (NOAA/Global Systems Laboratories): Hannah.Barnes@noaa.gov
+
 - GPU capabilities have been added
 - Cap suppressing based on radar data assimilation has been added. This is used only for RAP suite and
 may be used for RRFS suite, since it needs radar data to be available

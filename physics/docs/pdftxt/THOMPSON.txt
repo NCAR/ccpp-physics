@@ -1,17 +1,16 @@
 /**
-\page THOMPSON Thompson Aerosol-Aware Microphysics Scheme
+\page THOMPSON Thompson Aerosol-Aware Cloud Microphysics Scheme
 \section thompson_descrp Description
-
-
-The RAP/HRRR microphysics implementation represents the most aggressive attempt to include explicit prediction of
-cloud and precipitation microphysical processes in the NCEP operational forecast model suite. The RAP and HRRR are
-important guidance to NWS aviation forecasts, and any microphysics improvements are aimed at least in part, to improve 
-that guidance. The scheme is particularly beneficial for aircraft icing forecasts.
 
 The scheme computes sources, sinks, and conversions for the mixing ratios of cloud water, rainwater, cloud ice, snow,
 and graupel. Number concentration for cloud ice (particles per cubic meter) is also forecast, based on statistical relationships
-of number concentration, density, and ice mass from recent observational studies. Since April 2014 (WRFv3.6), this is also the "aerosol-aware" scheme as described in
-Thompson and Eidhammer (2014) \cite Thompson_2014 .
+of number concentration, density, and ice mass from recent observational studies. Since April 2014 (WRFv3.6), this is also the "aerosol-aware" scheme as described in Thompson and Eidhammer (2014) \cite Thompson_2014 .
+
+The original RAP/HRRR microphysics implementation represents the most aggressive attempt to include explicit prediction of
+cloud and precipitation microphysical processes in the NCEP operational forecast model suite. The RAP and HRRR are
+important guidance to NWS aviation forecasts, and any microphysics improvements are aimed at least in part, to improve
+that guidance. The scheme is particularly beneficial for aircraft icing forecasts. Recently, this scheme is now being tested
+with a GFS_v17 prototype: the GFS_v17_p8 suite at Environmental Modeling Center (EMC) as a candidate for the next operational implementation. 
 
 The microphysical processes accounted for are shown in the graphic below:
 \image html gsd_thompson.png "Figure 1: Complex Microphysics Model in the RAP" width=500
@@ -73,8 +72,6 @@ for the model to provide useful guidance for aircraft icing forecasts
 
 \section v6_enh_thompson CCPP Physics Updates
 \version CCPP v6.0.0
-
-\author Ruiyu Sun (NCEP Environmental Modeling Center): Ruiyu.Sun@noaa.gov and Greg Thompson
 
 Three mechanisms are available improve the stability of the scheme for weather forecast applications: 
 \a inner \a loop, \a subcycle, and \a semi-Lagrangian \a sedimentation \a of \a rain \a and \a graupel. 
