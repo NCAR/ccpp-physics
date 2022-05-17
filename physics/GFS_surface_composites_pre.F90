@@ -21,8 +21,9 @@ contains
 !> \section arg_table_GFS_surface_composites_pre_run Argument Table
 !! \htmlinclude GFS_surface_composites_pre_run.html
 !!
-   subroutine GFS_surface_composites_pre_run (im, flag_init, flag_restart, lkm, frac_grid,                                &
-                                 flag_cice, cplflx, cplice, cplwav2atm, landfrac, lakefrac, lakedepth, oceanfrac, frland, &
+   subroutine GFS_surface_composites_pre_run (im, lkm, frac_grid,                                                         &
+                                 flag_cice, cplflx, cplice, cplwav2atm, lsm, lsm_ruc,                                     &
+                                 landfrac, lakefrac, lakedepth, oceanfrac, frland,                                        &
                                  dry, icy, lake, use_flake, wet, hice, cice, zorlo, zorll, zorli,                         &
                                  snowd,            snowd_lnd, snowd_ice, tprcp, tprcp_wat,                                &
                                  tprcp_lnd, tprcp_ice, uustar, uustar_wat, uustar_lnd, uustar_ice,                        &
@@ -34,8 +35,8 @@ contains
       implicit none
 
       ! Interface variables
-      integer,                             intent(in   ) :: im, lkm, kdt
-      logical,                             intent(in   ) :: flag_init, flag_restart, frac_grid, cplflx, cplice, cplwav2atm
+      integer,                             intent(in   ) :: im, lkm, kdt, lsm, lsm_ruc
+      logical,                             intent(in   ) :: cplflx, cplice, cplwav2atm, frac_grid
       logical, dimension(:),              intent(inout)  :: flag_cice
       logical,              dimension(:), intent(inout)  :: dry, icy, lake, use_flake, wet
       real(kind=kind_phys), dimension(:), intent(in   )  :: landfrac, lakefrac, lakedepth, oceanfrac
@@ -195,12 +196,13 @@ contains
             endif
           endif
         enddo
-      endif
+      endif ! frac_grid
 
       do i=1,im
         tprcp_wat(i) = tprcp(i)
         tprcp_lnd(i) = tprcp(i)
         tprcp_ice(i) = tprcp(i)
+
         if (wet(i)) then                   ! Water
           uustar_wat(i) = uustar(i)
             tsfc_wat(i) = tsfco(i)
@@ -213,7 +215,7 @@ contains
         endif
         if (dry(i)) then                   ! Land
           uustar_lnd(i) = uustar(i)
-           weasd_lnd(i) = weasd(i)
+           if(lsm /= lsm_ruc) weasd_lnd(i) = weasd(i)
            tsurf_lnd(i) = tsfcl(i)
         ! DH*
         else
@@ -224,7 +226,7 @@ contains
         endif
         if (icy(i)) then                   ! Ice
           uustar_ice(i) = uustar(i)
-           weasd_ice(i) = weasd(i)
+           if(lsm /= lsm_ruc) weasd_ice(i) = weasd(i)
            tsurf_ice(i) = tisfc(i)
             ep1d_ice(i) = zero
             gflx_ice(i) = zero
@@ -272,7 +274,7 @@ contains
             endif
           endif
         enddo
-      else
+      elseif(lsm /= lsm_ruc) then ! do not do snow initialization  with RUC lsm
         do i=1,im
           if (icy(i)) then
             if (kdt == 1 .or. (.not. cplflx .or. lakefrac(i) > zero)) then
