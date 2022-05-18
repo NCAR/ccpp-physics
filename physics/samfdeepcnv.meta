@@ -652,14 +652,6 @@
   type = real
   kind = kind_phys
   intent = in
-[ca_micro]
-  standard_name = output_prognostic_sigma_two
-  long_name = output of prognostic area fraction two
-  units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = out
 [rainevap]
   standard_name = physics_field_for_coupling
   long_name = physics_field_for_coupling

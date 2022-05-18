@@ -62,7 +62,7 @@
      &     prslp,psp,phil,qtr,prevsq,q,q1,t1,u1,v1,fscav,               &
      &     rn,kbot,ktop,kcnv,islimsk,garea,                             &
      &     dot,ncloud,hpbl,ud_mf,dt_mf,cnvw,cnvc,                       &
-     &     clam,c0s,c1,evef,pgcon,asolfac,hwrf_samfshal,
+     &     clam,c0s,c1,evef,pgcon,asolfac,hwrf_samfshal,                & 
      &     sigmain,sigmaout,errmsg,errflg)
 !
       use machine , only : kind_phys
@@ -77,7 +77,9 @@
       real(kind=kind_phys), intent(in) ::  delt
       real(kind=kind_phys), intent(in) :: psp(:), delp(:,:),            &
      &   prslp(:,:), garea(:), hpbl(:), dot(:,:), phil(:,:),            &
-     &   qmicro(:,:),tmf(:,:),prevsq(:,:),q(:,:),sigmain(:,:)
+     &   qmicro(:,:),tmf(:,:),prevsq(:,:),q(:,:)
+
+      real(kind=kind_phys), intent(in) :: sigmain(:,:)
 !
       real(kind=kind_phys), dimension(:), intent(in) :: fscav
       integer, intent(inout)  :: kcnv(:)
@@ -164,8 +166,7 @@ cc
       real(kind=kind_phys) omega_u(im,km),zdqca(im,km),qlks(im,km),
      &                     omegac(im),zeta(im,km),dbyo1(im,km),
      &                     sigmab(im)
-      logical flag_shallow
-      real(kind=kind_phys) gravinv
+      real(kind=kind_phys) gravinv,dxcrtas
 
 c  physical parameters
 !     parameter(g=grav,asolfac=0.89)
@@ -196,6 +197,8 @@ c  physical parameters
       parameter(bet1=1.875,cd1=.506,f1=2.0,gam1=.5)
       parameter(betaw=.03,dxcrt=15.e3,dxcrtc0=9.e3)
       parameter(h1=0.33333333)
+!  progsigma
+      parameter(dxcrtas=30.e3)
 c  local variables and arrays
       real(kind=kind_phys) pfld(im,km),    to(im,km),     qo(im,km),
      &                     uo(im,km),      vo(im,km),     qeso(im,km),
@@ -340,6 +343,7 @@ c
        enddo
       endif
 !!
+
 !>  - Return to the calling routine if deep convection is present or the surface buoyancy flux is negative.
       totflg = .true.
       do i=1,im
@@ -1932,20 +1936,20 @@ c     updraft velcoity
 c
 c Prognostic closure
       if(progsigma)then
-         flag_shallow = .true.
-         call progsigma_calc(im,km,first_time_step,restart,flag_shallow,
+         call progsigma_calc(im,km,first_time_step,restart,
      &        del,tmf,qmicro,dbyo1,zdqca,omega_u,zeta,hvap,delt,
-     &        prevsq,q,kbcon1,ktcon,cnvflg,gdx,
+     &        prevsq,q,kbcon1,ktcon,cnvflg,
      &        sigmain,sigmaout,sigmab,errmsg,errflg)
       endif
 
 !> - From Han et al.'s (2017) \cite han_et_al_2017 equation 6, calculate cloud base mass flux as a function of the mean updraft velcoity.
 !!  As discussed in Han et al. (2017) \cite han_et_al_2017 , when dtconv is larger than tauadv, the convective mixing is not fully conducted before the cumulus cloud is advected out of the grid cell. In this case, therefore, the cloud base mass flux is further reduced in proportion to the ratio of tauadv to dtconv.
+
       do i= 1, im
         if(cnvflg(i)) then
           k = kbcon(i)
           rho = po(i,k)*100. / (rd*to(i,k))
-          if(progsigma)then
+          if(progsigma .and. gdx(i) < dxcrtas)then
              xmb(i) = advfac(i)*sigmab(i)*((-1.0*omegac(i))*gravinv)
           else
              xmb(i) = advfac(i)*betaw*rho*wc(i)

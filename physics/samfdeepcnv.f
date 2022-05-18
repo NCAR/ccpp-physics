@@ -86,7 +86,7 @@
      &    CNV_DQLDT,CLCN,CNV_FICE,CNV_NDROP,CNV_NICE,mp_phys,mp_phys_mg,&
      &    clam,c0s,c1,betal,betas,evef,pgcon,asolfac,                   &
      &    do_ca, ca_closure, ca_entr, ca_trigger, nthresh,ca_deep,      &
-     &    ca_micro, rainevap, sigmain, sigmaout, errmsg,errflg)
+     &    rainevap,sigmain, sigmaout, errmsg,errflg)
 !
       use machine , only : kind_phys
       use funcphys , only : fpvs
@@ -107,7 +107,7 @@
       real(kind=kind_phys), intent(in) :: ca_deep(:)
       real(kind=kind_phys), intent(in) :: sigmain(:,:),qmicro(:,:),     &
      &     tmf(:,:),q(:,:), prevsq(:,:)
-      real(kind=kind_phys), intent(out) :: rainevap(:), ca_micro(:)
+      real(kind=kind_phys), intent(out) :: rainevap(:)
       real(kind=kind_phys), intent(out) :: sigmaout(:,:)
       logical, intent(in)  :: do_ca,ca_closure,ca_entr,ca_trigger
 
@@ -214,8 +214,7 @@ cj
 !
 !  parameters for prognostic sigma closure                                                                                                                                                      
       real(kind=kind_phys) omega_u(im,km),zdqca(im,km),qlks(im,km),
-     &                    omegac(im),zeta(im,km),dbyo1(im,km),sigmab(im)
-      logical flag_shallow
+     &     omegac(im),zeta(im,km),dbyo1(im,km),sigmab(im)
       real(kind=kind_phys) gravinv
 c  physical parameters
 !     parameter(grav=grav,asolfac=0.958)
@@ -2884,25 +2883,14 @@ c
 
 !> - From Bengtsson et al. (2022) Prognostic closure scheme, equation 8, compute updraft area fraction based on a moisture budget
       if(progsigma)then
-         flag_shallow = .false.
-         call progsigma_calc(im,km,first_time_step,restart,flag_shallow,
+         call progsigma_calc(im,km,first_time_step,restart,
      &        del,tmf,qmicro,dbyo1,zdqca,omega_u,zeta,hvap,delt,
-     &        prevsq,q,kbcon1,ktcon,cnvflg,gdx,
+     &        prevsq,q,kbcon1,ktcon,cnvflg,
      &        sigmain,sigmaout,sigmab,errmsg,errflg)
       endif
 
 !> - From Han et al.'s (2017) \cite han_et_al_2017 equation 6, calculate cloud base mass flux as a function of the mean updraft velcoity for the grid sizes where the quasi-equilibrium assumption of Arakawa-Schubert is not valid any longer.
 !!  As discussed in Han et al. (2017) \cite han_et_al_2017 , when dtconv is larger than tauadv, the convective mixing is not fully conducted before the cumulus cloud is advected out of the grid cell. In this case, therefore, the cloud base mass flux is further reduced in proportion to the ratio of tauadv to dtconv.
-   
-      do i=1,im
-         ca_micro(i)=0.
-      enddo
-
-      do i=1,im
-         if(cnvflg(i))then
-            ca_micro(i)=sigmab(i)
-         endif
-      enddo
 
       do i= 1, im
         if(cnvflg(i) .and. .not.asqecflg(i)) then

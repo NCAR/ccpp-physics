@@ -14,9 +14,9 @@
 !> @{ 
 
       subroutine progsigma_calc (im,km,flag_init,flag_restart,           &
-           flag_shallow,del,tmf,qmicro,dbyo1,zdqca,omega_u,zeta,hvap,    &
-           delt,prevsq,q,kbcon1,ktcon,cnvflg,gdx,                    &
-           sigmain,sigmaout,sigmab,errmsg,errflg)
+           del,tmf,qmicro,dbyo1,zdqca,omega_u,zeta,hvap,                 &
+           delt,prevsq,q,kbcon1,ktcon,cnvflg,sigmain,sigmaout,       &
+           sigmab,errmsg,errflg)
 !                                                           
 !                                                                                                                                             
       use machine,  only : kind_phys
@@ -29,8 +29,8 @@
       real(kind=kind_phys), intent(in)  :: hvap,delt
       real(kind=kind_phys), intent(in)  :: prevsq(im,km), q(im,km),del(im,km),    &
            qmicro(im,km),tmf(im,km),dbyo1(im,km),zdqca(im,km),           &
-           omega_u(im,km),zeta(im,km),gdx(im)
-      logical, intent(in)  :: flag_init,flag_restart,cnvflg(im),flag_shallow
+           omega_u(im,km),zeta(im,km)
+      logical, intent(in)  :: flag_init,flag_restart,cnvflg(im)
       real(kind=kind_phys), intent(in) :: sigmain(im,km)
 
 !     intent out
@@ -41,21 +41,20 @@
 
 !     Local variables
       integer              :: i,k,km1
-      real(kind=kind_phys) :: termA(im),termB(im),termC(im),termD(im),   &
-                          mcons(im),fdqa(im),form(im,km),              &
-                          qadv(im,km),sigmamax(im),dp(im,km),inbu(im,km)                         
+      real(kind=kind_phys) :: termA(im),termB(im),termC(im),termD(im)
+      real(kind=kind_phys) :: mcons(im),fdqa(im),form(im,km),              &
+           qadv(im,km),dp(im,km),inbu(im,km)                         
                           
 
       real(kind=kind_phys) :: gcvalmx,epsilon,ZZ,cvg,mcon,buy2,   &
                           fdqb,dtdyn,dxlim,rmulacvg,tem,     &
-                          alpha,DEN,betascu,dp1,invdelt
+                          DEN,betascu,dp1,invdelt
 
      !Parameters
       gcvalmx = 0.1
       rmulacvg=10.
       epsilon=1.E-11
       km1=km-1
-      alpha=7000.
       betascu = 3.0
       invdelt = 1./delt
 
@@ -70,10 +69,7 @@
      
      !Initialization 1D
       do i=1,im
-         if(cnvflg(i))then
-            sigmab(i)=0.
-         endif
-         sigmamax(i)=0.95
+         sigmab(i)=0.
          termA(i)=0.
          termB(i)=0.
          termC(i)=0.
@@ -82,6 +78,21 @@
          mcons(i)=0.
       enddo
 
+      !Initial computations, dynamic q-tendency
+      if(flag_init .and. .not.flag_restart)then
+         do k = 1,km
+            do i = 1,im
+               qadv(i,k)=0.
+            enddo
+         enddo
+      else
+         do k = 1,km
+            do i = 1,im
+               qadv(i,k)=(q(i,k) - prevsq(i,k))*invdelt
+            enddo
+         enddo
+      endif
+     
       do k = 2,km1
           do i = 1,im
              if(cnvflg(i))then
@@ -102,33 +113,13 @@
        enddo
      
       do i=1,im
-         if(sigmab(i) < 1.E-5)then !after advection
-            sigmab(i)=0.                                  
+         if(cnvflg(i))then
+            if(sigmab(i) < 1.E-5)then !after advection
+               sigmab(i)=0.                                  
+            endif
          endif
       enddo
-           
-      !Initial computations, sigmamax
-      do i=1,im
-         sigmamax(i)=alpha/gdx(i)
-         sigmamax(i)=MIN(0.95,sigmamax(i))
-      enddo
-
-      !Initial computations, dynamic q-tendency
-      if(flag_init .and. .not.flag_restart)then
-         do k = 1,km
-            do i = 1,im
-               qadv(i,k)=0.
-            enddo
-         enddo
-      else
-         do k = 1,km
-            do i = 1,im
-               qadv(i,k)=(q(i,k) - prevsq(i,k))*invdelt
-            enddo
-         enddo
-      endif
-
-
+          
       !compute termD "The vertical integral of the latent heat convergence is limited to the                                        
       !buoyant layers with positive moisture convergence (accumulated from the surface).                                                       
       !Lowest level:                                                                                                               
@@ -194,7 +185,7 @@
             endif
          enddo
       else
-         do i = 1,im                                                                                                                           
+         do i = 1,im
             if(cnvflg(i))then
                DEN=MIN(termC(i)+termB(i),1.E8)
                cvg=termD(i)*delt
@@ -204,7 +195,7 @@
                cvg=MAX(0.0,cvg)
                sigmab(i)=(ZZ*(termA(i)+cvg))/(DEN+(1.0-ZZ))
                if(sigmab(i)>0.)then
-                  sigmab(i)=MIN(sigmab(i),sigmamax(i))  
+                  sigmab(i)=MIN(sigmab(i),0.95)  
                   sigmab(i)=MAX(sigmab(i),0.01)
                endif
             endif!cnvflg
@@ -218,19 +209,15 @@
             endif
          enddo
       enddo
-   
 
-       !Since updraft velocity is much lower in shallow cu region, termC becomes small in shallow cu application, thus the area fraction 
-       !in this regime becomes too large compared with the deep cu region. To address this simply apply a scaling factor for shallow cu 
-       !before computing the massflux to reduce the total strength of the SC MF:
-     
-       if(flag_shallow)then
-          do i= 1, im
-             if(cnvflg(i)) then
-                sigmab(i)=sigmab(i)/betascu
-             endif
-          enddo
-       endif
+      !Reduce area fraction before coupling back to mass-flux computation. 
+      !This tuning could be addressed in updraft velocity equation instead.
+      do i= 1, im
+         if(cnvflg(i)) then
+            sigmab(i)=sigmab(i)/betascu
+         endif
+      enddo
+      
 
 
      end subroutine progsigma_calc
