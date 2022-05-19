@@ -147,7 +147,7 @@ contains
 ! -----------------------------------------------------------------------
 !  order = dry-adj=>conv=mp-aero=>radiation -sfc/land- chem -> vertdiff-> [rf-gws]=> ion-re
 ! -----------------------------------------------------------------------
-!>@brief These subroutines and modules execute the CIRES UGWP Version 0
+!>@brief These subroutines and modules execute the CIRES UGWP Version 0.
 !! The physics of Non-Orographic Gravity Waves (NGWs) in the UGWP framework 
 !!(Yudin et al. 2018 \cite yudin_et_al_2018) is represented by four GW-solvers, introduced in 
 !!Lindzen (1981) \cite lindzen_1981, Hines (1997) \cite hines_1997, Alexander 

@@ -40,4 +40,11 @@ The GFS_v17_p8 suite uses the parameterizations in the following order:
  - \f$^1\f$ NSST is on and coupled with spin up off
  - \f$^2\f$ NSST is on and coupled with spin up on
 
+- Grid-spacing dependency of \p cdmbgwd
+ - \b C48:  cdmbgwd="0.071,2.1,1.0,1.0"
+ - \b C96:  cdmbgwd="0.14,1.8,1.0,1.0"
+ - \b C192: cdmbgwd="0.23,1.5,1.0,1.0"
+ - \b C384: cdmbgwd="1.1,0.72,1.0,1.0"
+ - \b C768: cdmbgwd="4.0,0.15,1.0,1.0"
+
 */

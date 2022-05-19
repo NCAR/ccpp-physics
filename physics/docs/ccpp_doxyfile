@@ -90,8 +90,8 @@ GENERATE_BUGLIST       = YES
 GENERATE_DEPRECATEDLIST= YES
 ENABLED_SECTIONS       = YES
 MAX_INITIALIZER_LINES  = 30
-SHOW_USED_FILES        = YES
-SHOW_FILES             = YES
+SHOW_USED_FILES        = NO
+SHOW_FILES             = NO 
 SHOW_NAMESPACES        = YES
 FILE_VERSION_FILTER    =
 LAYOUT_FILE            = ccpp_dox_layout.xml
@@ -123,7 +123,7 @@ INPUT                  =  pdftxt/mainpage.txt              \
                           pdftxt/HRRR_suite.txt          \
                           pdftxt/RE6/FV3_HRRR_input.nml  \
                           pdftxt/RRFS_v1beta_suite.txt   \
-                          pdftxt/RRFS_v1nssl_suite.txt   \
+                          pdftxt/WoFS_v0_suite.txt   \
                           pdftxt/RRFS_SGSCLOUD.txt       \
                           pdftxt/GFS_RRTMG.txt           \
                           pdftxt/GFS_SFCLYR.txt   \
@@ -149,7 +149,6 @@ INPUT                  =  pdftxt/mainpage.txt              \
                           pdftxt/RUCLSM.txt          \
                           pdftxt/THOMPSON.txt        \
                           pdftxt/suite_input.nml.txt    \
-                          pdftxt/RE6/FV3_RRFS_v1beta_input.nml \
                           pdftxt/GFS_SPP.txt     \
                         ../fv_sat_adj.F90    \
                         ../GFS_time_vary_pre.fv3.F90 \
@@ -252,9 +251,6 @@ INPUT                  =  pdftxt/mainpage.txt              \
                         ../ozphys_2015.f               \
                         ../h2ophys.f \
                         ../samfdeepcnv.f \
-                        ../gwdc.f \
-                        ../gwdc_pre.f    \
-                        ../gwdc_post.f         \
                         ../samfshalcnv.f \
                         ../cnvc90.f \
                         ../module_bfmicrophysics.f \

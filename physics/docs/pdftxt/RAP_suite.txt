@@ -4,7 +4,7 @@
 \section rap_suite_overview Overview
 
 The RAP suite contains the parameterizations used in the NOAA operational Rapid Refresh (RAP) model
-which runs at 13-km resolution. Currently, suite RAP is supported in SCM only. For additional 
+which runs at 13-km resolution. Currently, the RAP suite is supported in SCM only. For additional 
 information about the RAP model, visit: https://rapidrefresh.noaa.gov.
 
 The RAP suite uses the parameterizations in the following order:

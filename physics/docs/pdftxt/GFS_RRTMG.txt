@@ -74,12 +74,12 @@
 \version CCPP v6.0.0
 
 Requests have been made by many physics developers and users to rewrite
-the cloud routines (routines progcld*) for radiation computation in the program
+the cloud routines (routines progcld) for radiation computation in the program
 radiation_clouds.f. Those cloud subroutines are very similar, and
 have many lines of common code. We modified the radiation_clouds.f module,
 and includes all the calculations of the cloud properties to a new subroutine
 radiation_clouds_prop. We also moved the common code from subroutines
-progcldXXX to this new subroutine. Subroutine radiation_clouds_prop can be
+progcld to this new subroutine. Subroutine radiation_clouds_prop can be
 called by RRTMG and RRTMGP. A single call to the subroutine
 radiation_clouds_prop can connect to the calculations of the cloud
 radiation properties for all the microphysics schemes.
@@ -87,7 +87,7 @@ radiation properties for all the microphysics schemes.
 Summary of the major changes:
 - radiation_clouds.f
 
- A new subroutine “radiation_clouds_prop” was added to radiation_clouds.f. This new subroutine calculates all cloud radiation properties for all the microphysics schemes. Subroutines "progcld*" were renamed based on the input variables \p imp_physics, and the inactive subroutines were removed from file radiation_clouds.f
+  A new subroutine “radiation_clouds_prop” was added to radiation_clouds.f. This new subroutine calculates all cloud radiation properties for all the microphysics schemes. Subroutines "progcld*" were renamed based on the input variables \p imp_physics, and the inactive subroutines were removed from file radiation_clouds.f
  -       'progcld1'        --- > progcld_zhao_carr
  -       'progcld3'        --- > progcld_zhao_carr_pdf
  -       'progcld4'        --- > progcld_gfdl_lin
@@ -98,11 +98,11 @@ Summary of the major changes:
 
 - GFS_rrtmg_pre.F90
 
-Removed the “progcldXXX” subroutine calls, and replaced them with a single subroutine call to “radiation_clouds_prop”.
+  Removed the “progcld” subroutine calls, and replaced them with a single subroutine call to “radiation_clouds_prop”.
 
 - radiation_cloud_overlap.F90
 
-Replaced subroutine “get_alpha_exp” with “get_alpha_exper”. The new subroutine revises alpha for exponential random cloud overlap option. This new subroutine is used in programs GFS_rrtmgp_cloud_overlap_pre.F90 and GFS_rrtmgp_gfdlmp_pre.F90.
+  Replaced subroutine “get_alpha_exp” with “get_alpha_exper”. The new subroutine revises alpha for exponential random cloud overlap option. This new subroutine is used in programs GFS_rrtmgp_cloud_overlap_pre.F90 and GFS_rrtmgp_gfdlmp_pre.F90.
 
 - Subroutine getml() has been modified. The subroutine computes low, mid, high, total and boundary clouds, and is used in GFS_cloud_diagnostics.F90.
 

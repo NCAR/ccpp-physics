@@ -6,7 +6,7 @@ Community Physics Package (CCPP) v6.0.0 and the suites that can be configured us
 
 The CCPP-Physics (available through https://github.com/NCAR/ccpp-physics/) is envisioned to contain parameterizations used in the 
 <a href="https://ufscommunity.org/about/what-is-ufs/">Unified Forecast System (UFS)</a>
-applications for weather through seasonal prediction timescales, encompassing the current operational GFS schemes as well as 
+applications for weather through seasonal prediction timescales, encompassing the current operational GFS schemes, as well as 
 developmental schemes under consideration for upcoming operational implementations. The UFS can be configured for multiple 
 applications, including the UFS Short-Range Weather (SRW) Application (available through https://github.com/ufs-community/ufs-srweather-app/), 
 which targets predictions of atmospheric behavior on a 
@@ -21,11 +21,11 @@ by the Development Testbed Center (DTC), supports suites:
 - \ref GFS_v17_p8_page
 - \ref HRRR_suite_page
 - \ref RRFS_v1beta_page
-- \ref RRFS_v1nssl_page 
+- \ref WoFS_v0_page 
 - \ref rap_suite_page 
 
 while the UFS Short-Range Weather Application 2.0 supports suites \ref GFS_v16_page, \ref HRRR_suite_page, \ref RRFS_v1beta_page and 
-\ref RRFS_v1nssl_page. The UFS Medium-Range Weather Application 2.0 supports suite \ref GFS_v17_p8_page.
+\ref WoFS_v0_page. The UFS Medium-Range Weather Application 2.0 supports suite \ref GFS_v17_p8_page.
 
 New schemes and capability highlights in this release:
 - \ref NSSLMICRO_page
@@ -44,14 +44,22 @@ DTC.
 
 ## Acknowledgements
 
-We would like to express our deepest gratitude for UFS physics developers' contribution to the
-development of CCPP-Physics. We would also like to give special thanks to:   
+CCPP team would like to express our deepest gratitude for UFS physics developers' contribution to the
+development of CCPP-Physics. 
+\n We would also like to give special thanks to:    
 
-- \b NOAA \b Global \b Systems \b Laboratory: Hannah Barnes, Jeff Beck, George Grell, Joseph Olsen, Tanya Smirnova, Mike Toy
+- \b NOAA \b Global \b Systems \b Laboratory: Hannah Barnes, Jeff Beck, Georg Grell, Joseph Olson, Tanya Smirnova, Michael Toy
 - \b NOAA \b Physical \b Sciences \b Laboratory: Jian-Wen Bao, Lisa Bengtsson, Song-You Hong
 - \b NOAA \b National \b Severe \b Storms \b Laboratory: Ted Mansell
 - \b NOAA \b Environmental \b Modeling \b Center: Jongil Han, Qingfu Liu, Ruiyu Sun, Greg Thompson
 - \b Atmospheric \b and \b Environmental \b Research, \b Inc.: Mike Iacono
+- \b Joint \b Center \b for \b Satellite \b Data \b Assimilation: Greg Thompson
+- \b NASA: Valery Yudin
 
-for their contribution and support of this CCPP SciDoc.
+as a whole for their support and contribution for this CCPP scientific documentation.
+
+
+Man Zhang, Ligia Bernardet, Grant Firl, Dom Heinzeller, and Weiwei Li
+\n Developmental Testbed Center
+
 */

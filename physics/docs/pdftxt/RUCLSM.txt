@@ -108,8 +108,8 @@ totally sleet.
 - Introduced solar angle dependence of albedo for snow-free land
 - Introduced a SPP option for stochastic perturbations for emissivity, albedo and vegetation fraction
 - Bug fix in hydraulic conductivity
-- Based on RRFS testing the coefficient in soil resistence formulation (Sakaguchi and Zeng (2009) \cite sakaguchi_and_zeng_2009)
-is increased from 0.5 to 0.7 to increase soil resistence to evaporation
+- Based on RRFS testing, the coefficient in the soil resistance formulation (Sakaguchi and Zeng (2009) \cite sakaguchi_and_zeng_2009)
+was increased from 0.5 to 0.7 to increase soil resistance to evaporation
 
 
 \section intra_ruclsm Intraphysics Communication

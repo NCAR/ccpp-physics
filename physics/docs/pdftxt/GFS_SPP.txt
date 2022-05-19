@@ -8,13 +8,13 @@ physics uncertainty representation is critically important to ensemble
 performance.  Otherwise, members may tend toward similar solutions, 
 resulting in forecasts not capturing the full envelope of possible 
 outcomes.  To improve the effectiveness of the ensemble, stochastic 
-physics can be employed.  Stochastically Perturbed Parameterizations 
+physics can be employed.  Stochastically-Perturbed Parameterizations 
 (SPP) provides one method through which unknown or uncertain physical 
 processes can be represented in ensemble forecasting. As it is currently 
 employed in CCPP (Beck et al.(2022) \cite beck_et_al_2022), SPP can be applied to the following physics parameterizations: 
 \ref MYNNEDMF, \ref SFC_MYNNSFL, \ref GFS_RRTMG, \ref GFS_UNIFIED_UGWP,\ref GFS_drag_suite and 
 \ref THOMPSON (note that both \ref RUCLSM and \ref GFS_NOAH can also be 
-run with stochastic parameter perturbations, i.e., \ref surf_pert).  A list of the parameters perturbed 
+run with stochastic parameter perturbations).  A list of the parameters perturbed 
 within each scheme can be found below: 
 
 - \ref MYNNEDMF

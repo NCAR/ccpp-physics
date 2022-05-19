@@ -110,7 +110,7 @@ including momentum deposition (also called GW drag), heat deposition, and mixing
 by eddy viscosity, conductivity and diffusion; however, note that the eddy 
 mixing effects induced by instability of GWs are not activated in this version.
 
-Namelist paramters control the number of directional azimuths in which 
+Namelist parameters control the number of directional azimuths in which 
 waves can propagate, number of waves in a single direction, and the level 
 above the surface at which NGWs can be launched. Among the input parameters, 
 the GW efficiency factors reflect intermittency of wave excitation. They 

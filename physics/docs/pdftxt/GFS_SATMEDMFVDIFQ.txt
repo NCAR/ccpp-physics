@@ -41,7 +41,7 @@ top of the surface layer rather than that at the model first layer is also used 
 the near-surface virtual potential temperature in the bulk-Richardson number 
 computation. This helps to largely suppress the unrealistic widespread popcorn-like precipitation.
 - Updraft entrainment rates for moisture, hydrometeors, and tracers are increased by about 30%.
-- A positive definite TVD mass-flux transport scheme for moisture, hydrometeors, 
+- A positive definite total variation diminishing (TVD) mass-flux transport scheme for moisture, hydrometeors, 
 and tracers and a method for removing negative tracer mixing ratio values have been implemented.
 
 \sa NCEP Office Note 505 \cite https://doi.org/10.25923/cybh-w893 and 506 \cite https://doi.org/10.25923/5051-3r70

@@ -40,9 +40,6 @@
 
       end subroutine mynnedmf_wrapper_init
 
-      subroutine mynnedmf_wrapper_finalize ()
-      end subroutine mynnedmf_wrapper_finalize
-
 ! \brief This scheme (1) performs pre-mynnedmf work, (2) runs the mynnedmf, and (3) performs post-mynnedmf work
 !> \section arg_table_mynnedmf_wrapper_run Argument Table
 !! \htmlinclude mynnedmf_wrapper_run.html

@@ -203,7 +203,7 @@
     lndp_each_step    = .true.
     lndp_type         = 0
     lradar            = .true.
-    lsm               = 2
+    lsm               = 1
     lsoil             = 4
     lsoil_lsm         = 4
     ltaerosol         = .true.

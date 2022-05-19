@@ -1,7 +1,7 @@
 /**
-\page CCPPsuite_nml_desp Supported Namelist Options
+\page CCPPsuite_nml_desp Namelist Options Description
 
-The SCM and the UFS Atmosphere, the atmospheric component of the UFS weather Model,
+The SCM and the UFS Atmosphere, the atmospheric component of the UFS Weather Model,
  access runtime configurations from file \c input.nml. This file contains
 various namelists records that control aspects of the I/O, dynamics, physics etc. Most physics-related options are in
 records \b &gfs_physics_nml. Some schemes have their own namelist records as described below. 
@@ -53,6 +53,8 @@ show some variables in the namelist that must match the SDF.
                                                       <li> 11: GFDL microphysics scheme 
                                                       <li> 8: Thompson microphysics scheme   
                                                       <li> 10: Morrison-Gettelman microphysics scheme
+                                                      <li> 17: NSSL microphysics scheme with background CCN
+                                                      <li> 18: NSSL microphysics scheme with predicted CCN (compatibility)
                                                       </ul>
                                                       <td>99
 <tr><td colspan="4" align= center>\b Parameters \b related \b to \b radiation \b scheme \b options
@@ -456,9 +458,8 @@ show some variables in the namelist that must match the SDF.
                                                    <li> [4]: TKE for future tests and applications
                                                    </ul>
                                                    <td>2.0,0.25,1.0,1.0
-<tr><td>do_cnvgwd         <td>gwdc                 <td>flag for convective GWD      <td>cnvgwd .and. maxval(cdmbgwd(3:4)) == 0.0
 <tr><td>nmtvr           <td>cires_ugwp             <td>number of topographic variables such as variance etc used in the GWD parameterization-10 more added if GSL orographic drag scheme is used <td>14
-<tr><td>cgwf            <td>cires_ugwp ,gwdc      <td>multiplication factor for convective GWD                     <td>0.5d0,0.05d0
+<tr><td>cgwf            <td>cires_ugwp, unified_ugwp      <td>multiplication factor for convective GWD                     <td>0.5d0,0.05d0
 <tr><td>do_gwd            <td>see \a GFS_typedefs.F90     <td>flag for gravity wave drag   <td>maxval(cdmbgwd) > 0.0 
 <tr><td>gwd_opt           <td>drag_suite     <td>flag for GWD scheme   \n
                                                    <ul>
@@ -620,7 +621,7 @@ show some variables in the namelist that must match the SDF.
 <tr><td>redrag          <td>sfc_diff          <td>flag for applying reduced drag coefficient for high wind over sea in GFS surface layer scheme  <td>.false.
 <tr><td>lheatstrg       <td>gfs_surface_generic_post          <td>flag for canopy heat storage parameterization    <td>.false.
 <tr><td>z0fac           <td>gfs_surface_generic_post          <td>surface roughness fraction factor          <td>0.3  
-<tr><td>e0fac           <td>gfs_surface_generic_post          <td>latent heat flux fraction factor relative to sensible heat flux,e.g., e0fac=0.5 indicates that canopy heat storage for latent heat flux is 50% of that for sensible heat flux  <td>0.5 <tr>
+<tr><td>e0fac           <td>gfs_surface_generic_post          <td>latent heat flux fraction factor relative to sensible heat flux,e.g., e0fac=0.5 indicates that canopy heat storage for latent heat flux is 50% of that for sensible heat flux  <td>0.5
 </table>
 
 

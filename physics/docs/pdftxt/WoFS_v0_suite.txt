@@ -1,9 +1,9 @@
 /**
-\page RRFS_v1nssl_page WoFS Suite 
+\page WoFS_v0_page WoFS_v0 Suite 
 
-\section RRFS_v1nssl_suite_overview Overview
+\section wofs_v0_suite_overview Overview
 
-The WoFS suite is targeted for use in the upcoming operational implementation
+The WoFS_v0 suite is targeted for use in the upcoming operational implementation
 of the NOAA's Warn-on-Forecast System (WoFS). This suite is available for use with the UFS SRW App and with
 the CCPP SCM. This suite is most applicable for runs at 3-km resolution since it does not parameterize
 deep convection.
@@ -13,7 +13,7 @@ The WoFS suite uses the parameterizations in the following order:
  - \ref GFS_RRTMG
  - \ref SFC_MYNNSFL
  - \ref GFS_NSST
- - \ref NoahMP
+ - \ref GFS_NOAH
  - \ref GFS_SFCSICE
  - \ref MYNNEDMF
  - \ref GFS_UGWP_v0
@@ -22,13 +22,12 @@ The WoFS suite uses the parameterizations in the following order:
  - \ref NSSLMICRO_page
 
 \section sdf_rrfsv1nssl_suite Suite Definition File 
-\include suite_FV3_RRFS_v1nssl.xml
-\todo replace noahmp with noah in WoFS
+\include suite_FV3_WoFS_v0.xml
 
 \section rrfsv1nssl_nml_option Namelist 
 - General physics options
-\snippet RRFS_v1nssl_input.nml GFS_PHYSICS_NML
+\snippet FV3_WoFS_v0_input.nml GFS_PHYSICS_NML
 - \ref GFS_UGWP_v0 related options
-\snippet RRFS_v1nssl_input.nml CIRES_UGWP_NML
+\snippet FV3_WoFS_v0_input.nml CIRES_UGWP_NML
 
 */
