@@ -81,8 +81,8 @@
       real(kind=kind_phys), dimension(:),      intent(inout) :: diceprv
       real(kind=kind_phys), dimension(:),      intent(inout) :: dsnowprv
       real(kind=kind_phys), dimension(:),      intent(inout) :: dgraupelprv
-      real(kind=kind_phys), dimension(:,:),    intent(out)   :: dqdt_qmicro
-      real(kind=kind_phys), dimension(:,:),    intent(out)   :: prevsq
+      real(kind=kind_phys), dimension(:,:),    intent(inout) :: dqdt_qmicro
+      real(kind=kind_phys), dimension(:,:),    intent(inout) :: prevsq
       real(kind=kind_phys),                    intent(in)    :: dtp
 
       ! CCPP error handling

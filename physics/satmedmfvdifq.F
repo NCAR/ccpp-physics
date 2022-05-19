@@ -99,7 +99,7 @@
       real(kind=kind_phys), intent(in) :: dspfac, bl_upfr, bl_dnfr
       real(kind=kind_phys), intent(in) :: rlmx, elmx
       real(kind=kind_phys), intent(inout) :: dv(:,:),     du(:,:),      &
-     &                     tdt(:,:),    rtg(:,:,:)
+     &                     tdt(:,:),    rtg(:,:,:), tmf(:,:)
       real(kind=kind_phys), intent(in) ::                               &
      &                     u1(:,:),     v1(:,:),                        &
      &                     t1(:,:),     q1(:,:,:),                      &
@@ -123,7 +123,7 @@
      &                     dtsfc(:),     dqsfc(:),                      &
      &                     hpbl(:)
       real(kind=kind_phys), intent(out) ::                              &
-     &                     dkt(:,:), dku(:,:), tmf(:,:)
+     &                     dkt(:,:), dku(:,:)
 !
       logical, intent(in)  :: dspheat
       character(len=*), intent(out) :: errmsg

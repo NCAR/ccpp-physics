@@ -738,7 +738,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [prevsq]
   standard_name = specific_humidity_on_previous_timestep
   long_name = specific_humidity_on_previous_timestep
@@ -746,7 +746,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [lssav]
   standard_name = flag_for_diagnostics
   long_name = logical flag for storing diagnostics
