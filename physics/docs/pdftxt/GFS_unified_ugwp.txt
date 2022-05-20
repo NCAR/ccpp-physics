@@ -44,7 +44,7 @@ Beljaars et al. (2004) \cite beljaars_et_al_2004.
 All four orographic GWD schemes require static input data files that 
 contain statistical information about the subgrid terrain within each 
 model grid cell, such as the standard deviation of the subgrid topography, 
-which comes from the high resolution USGS 30-second GMETED2010 dataset.  
+which comes from the high resolution USGS 30-second GMETED2010 dataset.
 These data files augment the usual "oro_data.tile*.nc" files, which contain 
 orographic height data and GWD static data for the GFSv16 GWD parameterizations. 
 The static data files for the large-scale GWD and blocking schemes are named 
