@@ -2,8 +2,8 @@
 \page CU_GF Grell-Freitas Scale and Aerosol Aware Convection Scheme
 \section gfcu_descrip  Description
 
-The Grell-Freitas (GF) scheme as described in Grell and Freitas (2014, GF1) \cite grell_and_freitas_2014 and 
-Freitas et al. (2018, FG) \cite freitas_et_al_2018, Freitas et al. (2021) \cite freitas_et_al_2021, and Lin et al. (2022) 
+The Grell-Freitas (GF) scheme, as described in Grell and Freitas (2014) \cite grell_and_freitas_2014,
+Freitas et al. (2018) \cite freitas_et_al_2018, Freitas et al. (2021) \cite freitas_et_al_2021, and Lin et al. (2022) 
 (under review) follow the mass flux approach published by Grell (1993) \cite grell_1993.
 Further developments by Grell and \f$D\acute{e}v\acute{e}nyi\f$ (2002) \cite Grell_2002 included implementing 
 stochastics through allowing parameter perturbations. In GF1 scale awareness, and the aerosol dependence through rain generation (following
