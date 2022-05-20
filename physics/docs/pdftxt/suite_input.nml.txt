@@ -183,7 +183,7 @@ show some variables in the namelist that must match the SDF.
                                                       <ul>
                                                       <li> 1:July 2010 version of mass-flux shallow convective scheme (operational as of 2016) 
                                                       <li> 2: scale- & aerosol-aware mass-flux shallow convective scheme (2017) 
-                                                      <li> 3: scale- & aerosol-aware Grell-Freitas scheme (GSD)
+                                                      <li> 3: scale- & aerosol-aware Grell-Freitas scheme
                                                       <li> 4: new Tiedtke scheme (CAPS)
                                                       <li> 0: modified Tiedtke's eddy-diffusion shallow convective scheme 
                                                       <li> -1: no shallow convection used 

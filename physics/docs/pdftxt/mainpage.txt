@@ -54,12 +54,12 @@ development of CCPP-Physics.
 - \b NOAA \b Environmental \b Modeling \b Center: Jongil Han, Qingfu Liu, Ruiyu Sun, Greg Thompson
 - \b Atmospheric \b and \b Environmental \b Research, \b Inc.: Michael Iacono
 - \b Joint \b Center \b for \b Satellite \b Data \b Assimilation: Greg Thompson
-- \b NASA Goddard Space Flight Center: Valery Yudin
+- \b NASA \b Goddard \b Space \b Flight \b Center: Valery Yudin
 
-as a whole for their support and contribution for this CCPP scientific documentation.
+as a whole for their support and contribution for this CCPP scientific documentation (SciDoc).
 
 
-Man Zhang, Ligia Bernardet, Grant Firl, Dom Heinzeller, and Weiwei Li
+\b CCPP \b SciDoc \b Team: Man Zhang, Ligia Bernardet, Grant Firl, Dom Heinzeller, and Weiwei Li
 \n Developmental Testbed Center
 
 */

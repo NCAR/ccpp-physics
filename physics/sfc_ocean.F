@@ -18,6 +18,7 @@
 !! \section arg_table_sfc_ocean_run Argument Table
 !! \htmlinclude sfc_ocean_run.html
 !!
+!!>\section gen_sfc_ocean GFS Simple Ocean scheme General Algorithm
       subroutine sfc_ocean_run                                          &
 !...................................
 !  ---  inputs:
@@ -147,10 +148,10 @@
       hvapi = one/hvap
       elocp = hvap/cp
 !
-!  --- ...  flag for open water
+!> - Flag for open water
       do i = 1, im
         flag(i) = (wet(i) .and. flag_iter(i) .and. .not. use_flake(i))
-!  --- ...  initialize variables. all units are supposedly m.k.s. unless specified
+!> - Initialize variables. all units are supposedly m.k.s. unless specified
 !           ps is in pascals, wind is wind speed,
 !           rho is density, qss is sat. hum. at surface
 
@@ -168,7 +169,7 @@
           cmm(i)   = cm(i) * wind(i)
           chh(i)   = rho(i) * tem
 
-!  --- ...  sensible and latent heat flux over open water
+!> - Calcualte sensible and latent heat flux over open water
 
           hflx(i)  = rch * (tskin(i) - t1(i) * prslki(i))
 
@@ -179,7 +180,7 @@
         endif
       enddo
 !
-!  include sea spray effects
+!> - Include sea spray effects
 !
       do i=1,im
         if(lseaspray .and. flag(i)) then

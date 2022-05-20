@@ -26,11 +26,7 @@ where:
 The GFS NSST scheme is used to forecast the NSST for two main purposes: supply SSTs to the atmospheric model for the calculation of air-sea heat and moisture fluxes and providing a sub-layer temperature profile forecast for use as a first guess in the Gridpoint Statistical Interpolator (GSI) data assimilation code. Atmospheric inputs include short- and long-wave radiation, surface pressure, surface layer winds, temperature and specific humidity, and rainfall. The NSST scheme and has shown positive impact on the analysis and prediction of the ocean and atmosphere in weather prediction time scale.
 
 \section intra_nst Intraphysics Communication
-- \ref GFS_NSST_PRE
-\htmlinclude sfc_nst_pre_run.html
-- \ref gfs_nst_main
-\htmlinclude sfc_nst_run.html
-
+- \ref arg_table_sfc_nst_run
 
 \section gen_nst General Algorithm
 \ref NSST_general_algorithm

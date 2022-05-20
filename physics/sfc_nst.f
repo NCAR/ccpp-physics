@@ -7,7 +7,9 @@
       contains
 
 !>\defgroup gfs_nst_main GFS Near-Surface Sea Temperature Module
-!> \brief This subroutine calls the Thermal Skin-layer and Diurnal Thermocline models to update the NSST profile.
+!! This module contains the CCPP-compliant GFS near-surface sea temperature scheme.
+!> @{
+!! This subroutine calls the Thermal Skin-layer and Diurnal Thermocline models to update the NSST profile.
 !! \section arg_table_sfc_nst_run Argument Table
 !! \htmlinclude sfc_nst_run.html
 !!
@@ -651,7 +653,7 @@ cc
         enddo
       endif                   ! if ( nstf_name1 > 1 ) then
 !
-!  include sea spray effects
+!> - Include sea spray effects
 !
       do i=1,im
         if(lseaspray .and. flag(i)) then
@@ -690,4 +692,5 @@ cc
 
       return
       end subroutine sfc_nst_run
+!> @}
       end module sfc_nst

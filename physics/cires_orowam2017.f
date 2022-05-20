@@ -1,7 +1,10 @@
 !>\file cires_orowam2017.f
 
 !>\defgroup cires_orowam2017_mod CIRES UGWP orowam2017 Module
-!>This is the OROGW-solver of WAM2017
+!>This is the OROGW-solver of WAM2017.
+!>@{
+
+!> This is the OROGW-solver os WAM2017.
       subroutine oro_wam_2017(im, levs,npt,ipt, kref,kdt,me,master,
      &   dtp,dxres, taub, u1, v1, t1, xn, yn, bn2, rho, prsi, prsL, 
      &   del, sigma, hprime, gamma, theta,
@@ -275,7 +278,7 @@
 !23456
       end subroutine oro_wam_2017
 
-!> This subroutine  defines mean flow  and dissipation for OGW-kx spectrum
+!> This subroutine  defines mean flow  and dissipation for OGW-kx spectrum.
       subroutine oro_meanflow_v0(nz, nzi, u1, v1, t1, pint, pmid,
      &           delp, rho, bn2, uzi, rhoi, ktur, kalp, dzi, xn, yn)
 
@@ -339,7 +342,7 @@
 
       end subroutine oro_meanflow_v0
       
-!> This subroutine calculates TOFD as in BELJAARS-2004
+!> This subroutine calculates TOFD as in BELJAARS-2004.
       subroutine ugwpv0_tofd1d(levs, sigflt, elvmax, zsurf, 
      &   zpbl, u, v,  zmid, utofd, vtofd, epstofd, krf_tofd)
        use machine ,      only : kind_phys 
@@ -386,3 +389,4 @@
       enddo
 !                
       end subroutine ugwpv0_tofd1d
+!>@}

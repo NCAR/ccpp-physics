@@ -34,12 +34,10 @@ contains
 ! ------------------------------------------------------------------------
 !>\defgroup cires_ugwp_run_mod CIRES Unified Gravity Wave Physics v0 Module
 !> @{
-!>@ The subroutine initializes the CIRES UGWP
+!>@ The subroutine initializes the CIRES UGWP V0.
 !> \section arg_table_cires_ugwp_init Argument Table
 !! \htmlinclude cires_ugwp_init.html
 !!
-! -----------------------------------------------------------------------
-!
     subroutine cires_ugwp_init (me, master, nlunit, input_nml_file, logunit, &
                 fn_nml2, lonr, latr, levs, ak, bk, dtp, cdmbgwd, cgwf,       &
                 pa_rf_in, tau_rf_in, con_p0, gwd_opt,do_ugwp, errmsg, errflg)
@@ -148,6 +146,7 @@ contains
 !  order = dry-adj=>conv=mp-aero=>radiation -sfc/land- chem -> vertdiff-> [rf-gws]=> ion-re
 ! -----------------------------------------------------------------------
 !>@brief These subroutines and modules execute the CIRES UGWP Version 0.
+!> \section gen_cires_ugwp CIRES UGWP V0 Scheme General Algorithm
 !! The physics of Non-Orographic Gravity Waves (NGWs) in the UGWP framework 
 !!(Yudin et al. 2018 \cite yudin_et_al_2018) is represented by four GW-solvers, introduced in 
 !!Lindzen (1981) \cite lindzen_1981, Hines (1997) \cite hines_1997, Alexander 
@@ -165,12 +164,34 @@ contains
 !!for selection of GW modes characterized by horizontal phase velocities, azimuthal 
 !!directions and magnitude of the vertical momentum flux (VMF).
 !!
-!! In UGWP-v0, the specification for the VMF function is adopted from the GEOS-5 global atmosphere model of GMAO NASA/GSFC, as described in Molod et al. (2015) \cite molod_et_al_2015 and employed in the MERRRA-2 reanalysis (Gelaro et al., 2017 \cite gelaro_et_al_2017). The Fortran subroutine \ref slat_geos5_tamp_v0 describes the latitudinal shape of VMF-function as displayed in Figure 3 of Molod et al. (2015) \cite molod_et_al_2015. It shows that the enhanced values of VMF in the equatorial region gives opportunity to simulate the QBO-like oscillations in the equatorial zonal winds and lead to more realistic simulations of the equatorial dynamics in GEOS-5 operational and MERRA-2 reanalysis products. For the first vertically extended version of FV3GFS in the stratosphere and mesosphere, this simplified function of VMF allows us to tune the model climate and to evaluate multi-year simulations of FV3GFS with the MERRA-2 and ERA-5 reanalysis products, along with temperature, ozone, and water vapor observations of current satellite missions. After delivery of the UGWP-code, the EMC group developed and tested approach to modulate the zonal mean NGW forcing by 3D-distributions of the total precipitation as a proxy for the excitation of NGWs by convection and the vertically-integrated  (surface - tropopause) Turbulent Kinetic Energy (TKE). The verification scores with updated NGW forcing, as reported elsewhere by EMC researchers, display noticeable improvements in the forecast scores produced by FV3GFS configuration extended into the mesosphere.
+!! In UGWP-v0, the specification for the VMF function is adopted from the 
+!! GEOS-5 global atmosphere model of GMAO NASA/GSFC, as described in 
+!! Molod et al. (2015) \cite molod_et_al_2015 and employed in the MERRRA-2 
+!! reanalysis (Gelaro et al., 2017 \cite gelaro_et_al_2017). The Fortran 
+!! subroutine \ref slat_geos5_tamp_v0 describes the latitudinal shape of 
+!! VMF-function as displayed in Figure 3 of Molod et al. (2015) 
+!! \cite molod_et_al_2015. It shows that the enhanced values of 
+!! VMF in the equatorial region gives opportunity to simulate the 
+!! QBO-like oscillations in the equatorial zonal winds and lead to more 
+!! realistic simulations of the equatorial dynamics in GEOS-5 operational 
+!! and MERRA-2 reanalysis products. For the first vertically extended 
+!! version of FV3GFS in the stratosphere and mesosphere, this simplified 
+!! function of VMF allows us to tune the model climate and to evaluate 
+!! multi-year simulations of FV3GFS with the MERRA-2 and ERA-5 reanalysis 
+!! products, along with temperature, ozone, and water vapor observations 
+!! of current satellite missions. After delivery of the UGWP-code, the 
+!! EMC group developed and tested approach to modulate the zonal mean 
+!! NGW forcing by 3D-distributions of the total precipitation as a proxy 
+!! for the excitation of NGWs by convection and the vertically-integrated  
+!! (surface - tropopause) Turbulent Kinetic Energy (TKE). The verification 
+!! scores with updated NGW forcing, as reported elsewhere by EMC researchers, 
+!! display noticeable improvements in the forecast scores produced by 
+!! FV3GFS configuration extended into the mesosphere.
 !!
 !> \section arg_table_cires_ugwp_run Argument Table
 !! \htmlinclude cires_ugwp_run.html
 !!
-!> \section gen_cires_ugwp CIRES UGWP Scheme General Algorithm
+! \section det_cires_ugwp CIRES UGWP V0 Scheme Detailed Algorithm
      subroutine cires_ugwp_run(do_ugwp, me,  master, im,  levs, ntrac, dtp, kdt, lonr, &
          oro, oro_uf, hprime, nmtvr, oc, theta, sigma, gamma, elvmax, clx, oa4,        &
          do_tofd, ldiag_ugwp, cdmbgwd, xlat, xlat_d, sinlat, coslat, area,             &

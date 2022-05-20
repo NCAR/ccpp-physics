@@ -7,9 +7,7 @@
 !> \defgroup sfc_diag_mod GFS sfc_diag module
 !! This module contains the land surface diagose calculation.
 !> @{
-!> \brief Brief description of the subroutine
-!!
-!! \section arg_table_sfc_diag_run Arguments
+!! \section arg_table_sfc_diag_run Argument Table
 !! \htmlinclude sfc_diag_run.html
 !!
       subroutine sfc_diag_run                                           &

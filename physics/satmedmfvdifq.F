@@ -21,8 +21,8 @@
 !> \section arg_table_satmedmfvdifq_init Argument Table
 !! \htmlinclude satmedmfvdifq_init.html
 !!
-      subroutine satmedmfvdifq_init (satmedmf,
-     &                               isatmedmf,isatmedmf_vdifq,
+      subroutine satmedmfvdifq_init (satmedmf,                          &
+     &                               isatmedmf,isatmedmf_vdifq,         &
      &                               errmsg,errflg)
 
       logical, intent(in   ) :: satmedmf

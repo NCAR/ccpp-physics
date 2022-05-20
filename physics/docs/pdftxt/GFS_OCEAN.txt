@@ -11,6 +11,8 @@ In some models, such as the UFS atmosphere, the SST can change if forcing toward
 \ref arg_table_sfc_ocean_run
 
 
+\section gen_gfs_sos General Algorithm
+\ref gen_sfc_ocean
 
 
 
