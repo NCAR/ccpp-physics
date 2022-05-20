@@ -1,5 +1,5 @@
 /**
-\page CCPPsuite_nml_desp Namelist Options Description
+\page CCPPsuite_nml_desp Supported Namelist Options
 
 The SCM and the UFS Atmosphere, the atmospheric component of the UFS Weather Model,
  access runtime configurations from file \c input.nml. This file contains

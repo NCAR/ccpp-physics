@@ -52,9 +52,9 @@ development of CCPP-Physics.
 - \b NOAA \b Physical \b Sciences \b Laboratory: Jian-Wen Bao, Lisa Bengtsson, Song-You Hong
 - \b NOAA \b National \b Severe \b Storms \b Laboratory: Ted Mansell
 - \b NOAA \b Environmental \b Modeling \b Center: Jongil Han, Qingfu Liu, Ruiyu Sun, Greg Thompson
-- \b Atmospheric \b and \b Environmental \b Research, \b Inc.: Mike Iacono
+- \b Atmospheric \b and \b Environmental \b Research, \b Inc.: Michael Iacono
 - \b Joint \b Center \b for \b Satellite \b Data \b Assimilation: Greg Thompson
-- \b NASA: Valery Yudin
+- \b NASA Goddard Space Flight Center: Valery Yudin
 
 as a whole for their support and contribution for this CCPP scientific documentation.
 

@@ -6,11 +6,11 @@
 The "unified_ugwp" scheme was the first "unification" of the  \ref GFS_drag_suite with the \ref GFS_UGWP_v0 orographic and 
 non-stationary gravity wave drag schemes.  It was coded as a testing platform
  to determine the optimal combination of schemes to use for future physics 
-prototypes.  For the large-scale orographic GWD and blocking scheme, the user 
+prototypes.  For the large-scale orographic gravity wave drag (OGW) and blocking scheme, the user 
 may specify either those of the \ref GFS_UGWP_v0 or those of the \ref GFS_drag_suite. 
 The GSL Drag Suite includes two new "small-scale" orographic drag schemes, which 
 may be used in combination with either "large-scale" orographic schemes. 
-Finally, the non-stationary GWD scheme is that of the \ref GFS_UGWP_v0 scheme.
+Finally, the non-stationary gravity wave drag (NGW) scheme is that of the \ref GFS_UGWP_v0 scheme.
 
 \b Description \b of \b the \b GSL \b Drag \b Suite:
 
