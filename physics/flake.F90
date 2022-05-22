@@ -36,6 +36,7 @@ MODULE data_parameters
 ! Description:
 !  Global parameters for the program are defined.
 !
+  USE, INTRINSIC :: iso_fortran_env
 
 IMPLICIT NONE
 
@@ -44,11 +45,11 @@ IMPLICIT NONE
 ! Parameters for the Program:
 
   INTEGER, PARAMETER       ::                                         &
-       ireals    = SELECTED_REAL_KIND (12,200),                       &
-                     ! number of desired significant digits for
-                     ! real variables
-                     ! corresponds to 8 byte real variables
-
+#ifdef SINGLE_PREC
+       ireals    = REAL32,                                            &
+#else
+       ireals    = REAL64,                                            &
+#endif
        iintegers = KIND  (1)
                      ! kind-type parameter of the integer values
                      ! corresponds to the default integers
