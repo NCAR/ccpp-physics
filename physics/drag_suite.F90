@@ -590,17 +590,8 @@ do i=1,im
    endif
 enddo
 
-do i=1,im
-   if ( dx(i) .ge. dxmax_ss ) then
-      ss_taper(i) = 1.
-   else
-      if ( dx(i) .le. dxmin_ss) then
-         ss_taper(i) = 0.
-      else
-         ss_taper(i) = dxmax_ss * (1. - dxmin_ss/dx(i))/(dxmax_ss-dxmin_ss)
-      endif
-   endif
-enddo
+! Remove ss_tapering
+ss_taper(:) = 1.
 
 ! SPP, if spp_gwd is 0, no perturbations are applied.
 if ( spp_gwd==1 ) then
@@ -987,13 +978,11 @@ IF ( do_gsl_drag_ss ) THEN
          enddo
          if((xland(i)-1.5).le.0. .and. 2.*varss_stoch(i).le.hpbl(i))then
             if(br1(i).gt.0. .and. thvx(i,kpbl2)-thvx(i,kts) > 0.)then
-              cleff_ss    = sqrt(dxy(i)**2 + dxyp(i)**2)   ! WRF
+              ! Modify xlinv to represent wave number of "typical" small-scale topography 
 !              cleff_ss    = 3. * max(dx(i),cleff_ss)
 !              cleff_ss    = 10. * max(dxmax_ss,cleff_ss)
-              cleff_ss    = 0.1 * max(dxmax_ss,cleff_ss)  ! WRF
 !               cleff_ss    = 0.1 * 12000.
-              coefm_ss(i) = (1. + olss(i)) ** (oass(i)+1.)
-              xlinv(i) = coefm_ss(i) / cleff_ss
+              xlinv(i) = 0.001*pi   ! 2km horizontal wavelength
               !govrth(i)=g/(0.5*(thvx(i,kpbl(i))+thvx(i,kts)))
               govrth(i)=g/(0.5*(thvx(i,kpbl2)+thvx(i,kts)))
               !XNBV=sqrt(govrth(i)*(thvx(i,kpbl(i))-thvx(i,kts))/hpbl(i))
@@ -1004,8 +993,8 @@ IF ( do_gsl_drag_ss ) THEN
                 !tauwavex0=0.5*XNBV*xlinv(i)*(2*MIN(varss(i),75.))**2*ro(i,kts)*u1(i,kpbl(i))
                 !tauwavex0=0.5*XNBV*xlinv(i)*(2.*MIN(varss(i),40.))**2*ro(i,kts)*u1(i,kpbl2)
                 !tauwavex0=0.5*XNBV*xlinv(i)*(2.*MIN(varss(i),40.))**2*ro(i,kts)*u1(i,3)
-                var_temp = MIN(varss_stoch(i),varmax_ss_stoch(i)) +                       &
-                              MAX(0.,beta_ss*(varss_stoch(i)-varmax_ss_stoch(i)))
+                ! Remove limit on varss_stoch
+                var_temp = varss_stoch(i)
                 ! Note:  This is a semi-implicit treatment of the time differencing
                 var_temp2 = 0.5*XNBV*xlinv(i)*(2.*var_temp)**2*ro(i,kvar)  ! this is greater than zero
                 tauwavex0=var_temp2*u1(i,kvar)/(1.+var_temp2*deltim)
@@ -1019,8 +1008,8 @@ IF ( do_gsl_drag_ss ) THEN
                 !tauwavey0=0.5*XNBV*xlinv(i)*(2*MIN(varss(i),75.))**2*ro(i,kts)*v1(i,kpbl(i))
                 !tauwavey0=0.5*XNBV*xlinv(i)*(2.*MIN(varss(i),40.))**2*ro(i,kts)*v1(i,kpbl2)
                 !tauwavey0=0.5*XNBV*xlinv(i)*(2.*MIN(varss(i),40.))**2*ro(i,kts)*v1(i,3)
-                var_temp = MIN(varss_stoch(i),varmax_ss_stoch(i)) +                       &
-                              MAX(0.,beta_ss*(varss_stoch(i)-varmax_ss_stoch(i)))
+                ! Remove limit on varss_stoch
+                var_temp = varss_stoch(i)
                 ! Note:  This is a semi-implicit treatment of the time differencing
                 var_temp2 = 0.5*XNBV*xlinv(i)*(2.*var_temp)**2*ro(i,kvar)  ! this is greater than zero
                 tauwavey0=var_temp2*v1(i,kvar)/(1.+var_temp2*deltim)
@@ -1084,17 +1073,16 @@ IF ( do_gsl_drag_tofd ) THEN
 
          IF ((xland(i)-1.5) .le. 0.) then
             !(IH*kflt**n1)**-1 = (0.00102*0.00035**-1.9)**-1 = 0.00026615161
-            var_temp = MIN(varss_stoch(i),varmax_fd_stoch(i)) +                           &
-                       MAX(0.,beta_fd*(varss_stoch(i)-varmax_fd_stoch(i)))
-            var_temp = MIN(var_temp, 250.)
+            ! Remove limit on varss_stoch
+            var_temp = varss_stoch(i)
+            !var_temp = MIN(var_temp, 250.)
             a1=0.00026615161*var_temp**2
 !           a1=0.00026615161*MIN(varss(i),varmax)**2
 !           a1=0.00026615161*(0.5*varss(i))**2
            ! k1**(n1-n2) = 0.003**(-1.9 - -2.8) = 0.003**0.9 = 0.005363
             a2=a1*0.005363
-           ! Revise e-folding height based on PBL height and topographic std. dev. -- M. Toy 3/12/2018
-            H_efold = max(2*varss_stoch(i),hpbl(i))
-            H_efold = min(H_efold,1500.)
+            ! Beljaars H_efold
+            H_efold = 1500.
             DO k=kts,km
                wsp=SQRT(u1(i,k)**2 + v1(i,k)**2)
                ! alpha*beta*Cmd*Ccorr*2.109 = 12.*1.*0.005*0.6*2.109 = 0.0759

@@ -2581,21 +2581,7 @@ endif
      ! print *,'alfa=',alfa, exp(G0_P*psit/r_v/SOILT)
 !      endif
         alfa=1.
-! field capacity
-! 20jun18 - beta in Eq. (5) is called soilres in the code - it limits soil evaporation
-! when soil moisture is below field capacity.  [Lee and Pielke, 1992]
-! This formulation agrees with obsevations when top layer is < 2 cm thick.
-! Soilres = 1 for snow, glaciers and wetland.
-!        fc=ref  - suggested in the paper
-!        fc=max(qmin,ref*0.5) ! used prior to 20jun18 change
-! Switch from ref*0.5 to ref*0.25 will reduce soil resistance, increase direct
-! evaporation, effects sparsely vegetated areas--> cooler during the day
-!        fc=max(qmin,ref*0.25)  ! 
-! For now we'll go back to ref*0.5
-! 3feb21 - in RRFS testing (fv3-based), ref*0.5 gives too much direct
-!          evaporation. Therefore , it is replaced with ref*0.7.
-        !fc=max(qmin,ref*0.5)
-        fc=max(qmin,ref*0.7)
+        fc=ref
         fex_fc=1.
       if((soilmois(1)+qmin) > fc .or. (qvatm-qvg) > 0.) then
         soilres = 1.
