@@ -14,20 +14,6 @@
   dimensions = ()
   type = integer
   intent = in
-[flag_init]
-  standard_name = flag_for_first_timestep
-  long_name = flag signaling first time step for time integration loop
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[flag_restart]
-  standard_name = flag_for_restart
-  long_name = flag for restart (warmstart) or coldstart
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
 [lkm]
   standard_name = control_for_lake_surface_scheme
   long_name = flag for lake surface model
@@ -69,6 +55,20 @@
   units = flag
   dimensions = ()
   type = logical
+  intent = in
+[lsm]
+  standard_name = control_for_land_surface_scheme
+  long_name = flag for land surface model
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[lsm_ruc]
+  standard_name = identifier_for_ruc_land_surface_scheme
+  long_name = flag for RUC land surface model
+  units = flag
+  dimensions = ()
+  type = integer
   intent = in
 [landfrac]
   standard_name = land_area_fraction

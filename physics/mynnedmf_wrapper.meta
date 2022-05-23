@@ -1,12 +1,123 @@
 [ccpp-table-properties]
   name = mynnedmf_wrapper
   type = scheme
-  dependencies = machine.F,module_bl_mynn.F90,physcons.F90
+  dependencies = machine.F,module_bl_mynn.F90,physcons.F90,bl_mynn_common.f90
 
 ########################################################################
 [ccpp-arg-table]
   name = mynnedmf_wrapper_init
   type = scheme
+[con_cp]
+  standard_name = specific_heat_of_dry_air_at_constant_pressure
+  long_name = specific heat of dry air at constant pressure
+  units = J kg-1 K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_grav]
+  standard_name = gravitational_acceleration
+  long_name = gravitational acceleration
+  units = m s-2
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_rd]
+  standard_name = gas_constant_of_dry_air
+  long_name = ideal gas constant for dry air
+  units = J kg-1 K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_rv]
+  standard_name = gas_constant_water_vapor
+  long_name = ideal gas constant for water vapor
+  units = J kg-1 K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_cpv]
+  standard_name = specific_heat_of_water_vapor_at_constant_pressure
+  long_name = specific heat of water vapor at constant pressure
+  units = J kg-1 K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_cliq]
+  standard_name = specific_heat_of_liquid_water_at_constant_pressure
+  long_name = specific heat of liquid water at constant pressure
+  units = J kg-1 K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_cice]
+  standard_name = specific_heat_of_ice_at_constant_pressure
+  long_name = specific heat of ice at constant pressure
+  units = J kg-1 K-1
+  dimensions = ()
+  type = real 
+  kind = kind_phys
+  intent = in
+[con_rcp]
+  standard_name = ratio_of_gas_constant_dry_air_to_specific_heat_of_dry_air_at_constant_pressure
+  long_name = (rd/cp)
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_xlv]
+  standard_name = latent_heat_of_vaporization_of_water_at_0C
+  long_name = latent heat of evaporation/sublimation
+  units = J kg-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_xlf]
+  standard_name = latent_heat_of_fusion_of_water_at_0C
+  long_name = latent heat of fusion
+  units = J kg-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_p608]
+  standard_name = ratio_of_vapor_to_dry_air_gas_constants_minus_one
+  long_name = (rv/rd) - 1 (rv = ideal gas constant for water vapor)
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_ep2]
+  standard_name = ratio_of_dry_air_to_water_vapor_gas_constants
+  long_name = rd/rv
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_karman]
+  standard_name = von_karman_constant
+  long_name = von karman constant
+  units = none
+  dimensions = ()
+  type = real
+  intent = in
+[con_t0c]
+  standard_name = temperature_at_zero_celsius
+  long_name = temperature at 0 degree Celsius
+  units = K
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
 [do_mynnedmf]
   standard_name = flag_for_mellor_yamada_nakanishi_niino_pbl_scheme
   long_name = flag to activate MYNN-EDMF
@@ -68,102 +179,6 @@
   units = flag
   dimensions = ()
   type = logical
-  intent = in
-[cp]
-  standard_name = specific_heat_of_dry_air_at_constant_pressure
-  long_name = specific heat of dry air at constant pressure
-  units = J kg-1 K-1
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[g]
-  standard_name = gravitational_acceleration
-  long_name = gravitational acceleration
-  units = m s-2
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[r_d]
-  standard_name = gas_constant_of_dry_air
-  long_name = ideal gas constant for dry air
-  units = J kg-1 K-1
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[r_v]
-  standard_name = gas_constant_water_vapor
-  long_name = ideal gas constant for water vapor
-  units = J kg-1 K-1
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[cpv]
-  standard_name = specific_heat_of_water_vapor_at_constant_pressure
-  long_name = specific heat of water vapor at constant pressure
-  units = J kg-1 K-1
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[cliq]
-  standard_name = specific_heat_of_liquid_water_at_constant_pressure
-  long_name = specific heat of liquid water at constant pressure
-  units = J kg-1 K-1
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[Cice]
-  standard_name = specific_heat_of_ice_at_constant_pressure
-  long_name = specific heat of ice at constant pressure
-  units = J kg-1 K-1
-  dimensions = ()
-  type = real 
-  kind = kind_phys
-  intent = in
-[rcp]
-  standard_name = ratio_of_gas_constant_dry_air_to_specific_heat_of_dry_air_at_constant_pressure
-  long_name = (rd/cp)
-  units = none
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[XLV]
-  standard_name = latent_heat_of_vaporization_of_water_at_0C
-  long_name = latent heat of evaporation/sublimation
-  units = J kg-1
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[XLF]
-  standard_name = latent_heat_of_fusion_of_water_at_0C
-  long_name = latent heat of fusion
-  units = J kg-1
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[EP_1]
-  standard_name = ratio_of_vapor_to_dry_air_gas_constants_minus_one
-  long_name = (rv/rd) - 1 (rv = ideal gas constant for water vapor)
-  units = none
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[EP_2]
-  standard_name = ratio_of_dry_air_to_water_vapor_gas_constants
-  long_name = rd/rv
-  units = none
-  dimensions = ()
-  type = real
-  kind = kind_phys
   intent = in
 [lssav]
   standard_name = flag_for_diagnostics
@@ -271,7 +286,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
 [qgrs_water_vapor]
   standard_name = specific_humidity
   long_name = water vapor specific humidity
@@ -279,7 +294,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
 [qgrs_liquid_cloud]
   standard_name = cloud_liquid_water_mixing_ratio
   long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates)
@@ -287,7 +302,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
 [qgrs_ice_cloud]
   standard_name = cloud_ice_mixing_ratio
   long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates)
@@ -295,7 +310,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
 [qgrs_cloud_droplet_num_conc]
   standard_name = mass_number_concentration_of_cloud_liquid_water_particles_in_air
   long_name = number concentration of cloud droplets (liquid)
@@ -757,8 +772,16 @@
   type = real
   kind = kind_phys
   intent = inout
+[Sm3D]
+  standard_name = stability_function_for_momentum
+  long_name = stability function for momentum
+  units = none
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
 [exch_h]
-  standard_name = atmosphere_heat_diffusivity_for_mynnpbl
+  standard_name = atmosphere_heat_diffusivity_for_mynnedmf
   long_name = diffusivity for heat for MYNN PBL (defined for all mass levels)
   units = m2 s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -766,9 +789,49 @@
   kind = kind_phys
   intent = out
 [exch_m]
-  standard_name = atmosphere_momentum_diffusivity_for_mynnpbl
+  standard_name = atmosphere_momentum_diffusivity_for_mynnedmf
   long_name = diffusivity for momentum for MYNN PBL (defined for all mass levels)
   units = m2 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[dqke]
+  standard_name = total_time_rate_of_change_of_tke
+  long_name = total tke tendency
+  units = m2 s-3
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[qwt]
+  standard_name = tke_tendency_due_to_vertical_transport
+  long_name = tke tendency due to vertical transport and diffusion
+  units = m2 s-3
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[qshear]
+  standard_name = tke_tendency_due_to_shear
+  long_name = tke tendency due to shear
+  units = m2 s-3
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[qbuoy]
+  standard_name = tke_tendency_due_to_buoyancy
+  long_name = tke tendency due to buoyancy production or consumption
+  units = m2 s-3
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[qdiss]
+  standard_name = tke_tendency_due_to_dissipation
+  long_name = tke tendency due to the dissipation of tke
+  units = m2 s-3
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
@@ -1147,19 +1210,12 @@
   type = real
   kind = kind_phys
   intent = in
-[grav_settling]
-  standard_name = control_for_gravitational_settling_of_cloud_droplets
-  long_name = flag to activate gravitational setting of fog
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
 [bl_mynn_tkebudget]
   standard_name = control_for_tke_budget_output
   long_name = flag for activating TKE budget
   units = flag
   dimensions = ()
-  type = integer
+  type = logical
   intent = in
 [bl_mynn_tkeadvect]
   standard_name = flag_for_tke_advection
@@ -1224,6 +1280,13 @@
   dimensions = ()
   type = integer
   intent = in
+[bl_mynn_closure]
+  standard_name = control_for_closure_level_in_mellor_yamada_nakanishi_niino_pbl_scheme
+  long_name = flag to determine the closure level for the mynn
+  units = 1
+  dimensions = ()
+  type = real
+  intent = in
 [icloud_bl]
   standard_name = control_for_sgs_cloud_radiation_coupling_in_mellor_yamamda_nakanishi_niino_pbl_scheme
   long_name = flag for coupling sgs clouds to radiation
@@ -1279,6 +1342,57 @@
   units = flag
   dimensions = ()
   type = logical
+  intent = in
+[chem3d]
+  standard_name = chem3d_mynn_pbl_transport
+  long_name = mynn pbl transport of smoke and dust
+  units = various
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,2)
+  type = real
+  kind = kind_phys
+  intent = inout
+[frp]
+  standard_name = frp_hourly
+  long_name = hourly fire radiative power
+  units = MW
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[rrfs_smoke]
+  standard_name = do_smoke_coupling
+  long_name = flag controlling rrfs_smoke collection (default off)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[mix_chem]
+  standard_name = do_planetary_boundary_layer_smoke_mixing
+  long_name = flag for rrfs smoke mynn tracer mixing
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[fire_turb]
+  standard_name = do_planetary_boundary_layer_fire_enhancement
+  long_name = flag for rrfs smoke mynn enh vermix
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[nchem]
+  standard_name = number_of_chemical_species_vertically_mixed
+  long_name = number of chemical vertically mixed
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[ndvel]
+  standard_name = number_of_chemical_species_deposited
+  long_name = number of chemical pbl deposited
+  units = count
+  dimensions = ()
+  type = integer
   intent = in
 [ltaerosol]
   standard_name = flag_for_aerosol_physics

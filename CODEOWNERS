@@ -11,6 +11,8 @@
 #   https://docs.google.com/spreadsheets/d/14y0Th_sSpCqlssEMNfSZ_Ni9wrpPqfpPY0kRG7jCZB8/edit#gid=0
 # (Internal NOAA document.)
 
+smoke/*                                        @haiqinli                            @climbfuji @SamuelTrahanNOAA @grantfirl @mzhangw @panll @mkavulich @ChunxiZhang-NOAA
+
 physics/cs_conv_aw_adj.*                       @AnningCheng-NOAA                    @climbfuji @SamuelTrahanNOAA @grantfirl @mzhangw @panll @mkavulich @ChunxiZhang-NOAA
 physics/cs_conv.*                              @AnningCheng-NOAA                    @climbfuji @SamuelTrahanNOAA @grantfirl @mzhangw @panll @mkavulich @ChunxiZhang-NOAA
 physics/cu_gf*                                 @hannahcbarnes @haiqinli             @climbfuji @SamuelTrahanNOAA @grantfirl @mzhangw @panll @mkavulich @ChunxiZhang-NOAA
