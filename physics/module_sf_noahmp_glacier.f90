@@ -2823,6 +2823,7 @@ end if   ! opt_gla == 1
            ! the change in dz due to compaction
 
            dzsnso(j) = dzsnso(j)*(1.+pdzdtc)
+           dzsnso(j) = min(max(dzsnso(j),(snliq(j)+snice(j))/500.0),(snliq(j)+snice(j))/50.0)  ! limit adjustment to a reasonable density
         end if
 
         ! pressure of overlying snow

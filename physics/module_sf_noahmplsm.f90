@@ -7619,7 +7619,7 @@ endif   ! croptype == 0
            ! the change in dz due to compaction
 
            dzsnso(j) = dzsnso(j)*(1.+pdzdtc)
-           dzsnso(j) = max(dzsnso(j),snice(j)/denice + snliq(j)/denh2o)
+           dzsnso(j) = min(max(dzsnso(j),(snliq(j)+snice(j))/500.0),(snliq(j)+snice(j))/50.0)  ! limit adjustment to a reasonable density
         end if
 
         ! pressure of overlying snow
@@ -7773,7 +7773,7 @@ endif   ! croptype == 0
    end do
 
    do j = isnow+1, 0
-     dzsnso(j) = max(dzsnso(j),snliq(j)/denh2o + snice(j)/denice)
+     dzsnso(j) = min(max(dzsnso(j),(snliq(j)+snice(j))/500.0),(snliq(j)+snice(j))/50.0)  ! limit adjustment to a reasonable density
    end do
 
 ! liquid water from snow bottom to soil
