@@ -6,7 +6,7 @@
 
       contains
 
-!>\defgroup gfs_nst_main GFS Near-Surface Sea Temperature Module
+!>\defgroup gfs_nst_main_mod GFS Near-Surface Sea Temperature Module
 !! This module contains the CCPP-compliant GFS near-surface sea temperature scheme.
 !> @{
 !! This subroutine calls the Thermal Skin-layer and Diurnal Thermocline models to update the NSST profile.

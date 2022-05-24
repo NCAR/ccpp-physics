@@ -62,7 +62,7 @@ values of \f$q_c, q_i\f$  and \p CLDFRA are restored, so the SGS clouds do not i
 The MYNN-EDMF CCPP-compliant interface:
 \ref arg_table_mynnedmf_wrapper_run
 
-\section gen_mynnedmf_conv MYNN-EDMF Scheme  General Algorithm
+\section gen_mynnedmf_conv General Algorithm
 
 \image html  MYNN-EDMF_call_order.png "Figure 1.The order of subroutines within the MYNN-EDMF (Courtesy of J.B. Olson). The green rectangles within the main subroutine (mynn_bl_driver()) represent subroutine calls. The blue rectangles represent tasks coded within the main driver. A brief description is shown on the right " width=600
 

@@ -116,6 +116,6 @@ was increased from 0.5 to 0.7 to increase soil resistance to evaporation
 - \ref arg_table_lsm_ruc_run
 
 \section gen_ruclsm General Algorithm
-- \ref gen_lsmruc
+- module_sf_ruclsm::lsmruc
 
 */

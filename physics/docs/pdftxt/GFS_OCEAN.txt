@@ -8,11 +8,11 @@ does not change the SST. Therefore, the SST stays constant throughout the foreca
 In some models, such as the UFS atmosphere, the SST can change if forcing towards the climatology is turned on.
 
 \section intra_sfcocean Intraphysics Communication
-\ref arg_table_sfc_ocean_run
+- \ref arg_table_sfc_ocean_run
 
 
 \section gen_gfs_sos General Algorithm
-\ref gen_sfc_ocean
+- \ref sfc_ocean::sfc_ocean_run
 
 
 

@@ -15,6 +15,7 @@
 !>\defgroup gfs_ocean_main GFS Simple Ocean Module
 !! This subroutine calculates thermodynamical properties over
 !! open water.
+!>@{
 !! \section arg_table_sfc_ocean_run Argument Table
 !! \htmlinclude sfc_ocean_run.html
 !!
@@ -221,4 +222,5 @@
 !...................................
       end subroutine sfc_ocean_run
 !-----------------------------------
+!>@}
       end module sfc_ocean

@@ -283,6 +283,11 @@ show some variables in the namelist that must match the SDF.
                                                       <li> 1: activate subgrid cloud coupling to radiation (highly suggested) 
                                                       </ul>
                                                       <td>1
+<tr><td>num_dfi_radar    <td>cu_gf_driver   <td>number of timespans with radar-prescried temperature tendencies  <td>0
+<tr><td>fh_dfi_radar     <td>cu_gf_driver   <td>begin+end of timespans to receive radar-prescribed temperature tendencies <td>-2e10
+<tr><td>do_cap_suppress  <td>cu_gf_driver   <td>enable convection suppression in GF scheme if fh_dfi_radar is specified   <td>.true.
+<tr><td>ix_dfi_radar   <td>cu_gf_driver  <td>index within dfi_radar_tten of each timespan (-1 means "none")           <td>-1
+<tr><td>dfi_radar_max_intervals    <td>cu_gf_driver  <td>number of radar-derived temperature tendency and/or convection suppression intervals   <td>4
 <tr><td colspan="4" align= center>\b Parameters \b related \b to \b surface \b perturbation \b options
 <tr><td>nsfcpert          <td>gfs_surface_generic_pre  <td>number of weights for stochastic surface perturbation  <td>0
 <tr><td>pertz0            <td>gfs_surface_generic_pre  <td>magnitude of perturbation of momentum roughness length <td>-999.
