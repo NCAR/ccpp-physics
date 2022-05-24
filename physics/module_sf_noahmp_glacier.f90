@@ -1290,11 +1290,10 @@ contains
 
          endif ! 4
 
-
-        ramb = max(1.,1./(cm*ur))
-        rahb = max(1.,1./(ch*ur))
-
-        if(opt_sfc == 4) then
+        if(opt_sfc == 1 .or.  opt_sfc == 2 .or.  opt_sfc == 3) then
+          ramb = max(1.,1./(cm*ur))
+          rahb = max(1.,1./(ch*ur))
+        elseif(opt_sfc == 4) then
           ramb = max(1.,1./(cm*wspd1i) )
           rahb = max(1.,1./(ch*wspd1i) )
         endif
