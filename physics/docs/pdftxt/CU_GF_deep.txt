@@ -29,7 +29,7 @@ A paper describing the latest changes and modifications is in process and will b
 
 - GPU capabilities have been added
 - Cap suppressing based on radar data assimilation has been added. This is used only for RAP suite and
-may be used for RRFS suite, since it needs radar data to be available
+may be included in the RRFS suite in the future.
 - Some fixed parameters have been made scale - aware
 - Updated coupling between radiation and convection has been implemented 
 
