@@ -435,6 +435,13 @@
   type = real
   kind = kind_phys
   intent = in
+[aero_ind_fdb]
+  standard_name = do_smoke_aerosol_indirect_feedback
+  long_name = flag for wfa ifa emission indirect feedback
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [tgrs]
   standard_name = air_temperature_of_new_state
   long_name = model layer mean temperature
@@ -644,7 +651,6 @@
   units = 1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
-  kind = kind_phys
   intent = in
 [spp_mp]
   standard_name = control_for_microphysics_spp_perturbations
@@ -652,6 +658,37 @@
   units = count
   dimensions = ()
   type = integer
+  intent = in
+[n_var_spp]
+  standard_name = number_of_perturbed_spp_schemes
+  long_name = number of perturbed spp schemes
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[spp_prt_list]
+  standard_name = magnitude_of_spp_perturbations
+  long_name = magnitude of spp perturbations
+  units = 1
+  dimensions = (number_of_perturbed_spp_schemes)
+  type = real
+  kind = kind_phys
+  intent = in
+[spp_stddev_cutoff]
+  standard_name = magnitude_of_spp_standard_deviation_cutoff
+  long_name = magnitude of spp standard deviation cutoff
+  units = 1
+  dimensions = (number_of_perturbed_spp_schemes)
+  type = real
+  kind = kind_phys
+  intent = in
+[spp_var_list]
+  standard_name = perturbed_spp_schemes
+  long_name = perturbed spp schemes
+  units = none
+  dimensions = (number_of_perturbed_spp_schemes)
+  type = character
+  kind = len=3
   intent = in
 [pfi_lsan]
   standard_name = ice_flux_due_to_large_scale_precipitation

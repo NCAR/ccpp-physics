@@ -968,7 +968,7 @@ MODULE module_mp_thompson
 !> @{
       SUBROUTINE mp_gt_driver(qv, qc, qr, qi, qs, qg, ni, nr, nc,     &
                               nwfa, nifa, nwfa2d, nifa2d,             &
-                              tt, th, pii,                            &
+                              aero_ind_fdb, tt, th, pii,              &
                               p, w, dz, dt_in, dt_inner,              &
                               sedi_semi, decfl,                       &
                               RAINNC, RAINNCV,                        &
@@ -984,7 +984,8 @@ MODULE module_mp_thompson
                               has_reqc, has_reqi, has_reqs,           &
                               rand_perturb_on,                        &
                               kme_stoch,                              &
-                              rand_pert,                              &
+                              rand_pert, spp_prt_list, spp_var_list,  &
+                              spp_stddev_cutoff, n_var_spp,           &
                               ids,ide, jds,jde, kds,kde,              &  ! domain dims
                               ims,ime, jms,jme, kms,kme,              &  ! memory dims
                               its,ite, jts,jte, kts,kte,              &  ! tile dims
@@ -1024,13 +1025,14 @@ MODULE module_mp_thompson
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(INOUT):: &
                           nc, nwfa, nifa
       REAL, DIMENSION(ims:ime, jms:jme), OPTIONAL, INTENT(IN):: nwfa2d, nifa2d
+      LOGICAL, OPTIONAL, INTENT(IN):: aero_ind_fdb
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(INOUT):: &
                           re_cloud, re_ice, re_snow
       REAL, DIMENSION(ims:ime, kms:kme), INTENT(OUT):: pfi_lsan, pfl_lsan
-      INTEGER, INTENT(IN) :: rand_perturb_on, kme_stoch
-      REAL, DIMENSION(:,:), INTENT(IN) :: &
-                          rand_pert
-
+      INTEGER, INTENT(IN) :: rand_perturb_on, kme_stoch, n_var_spp
+      REAL, DIMENSION(:,:), INTENT(IN) :: rand_pert
+      REAL, DIMENSION(:), INTENT(IN) :: spp_prt_list, spp_stddev_cutoff
+      CHARACTER(len=3), DIMENSION(:), INTENT(IN) :: spp_var_list
       INTEGER, INTENT(IN):: has_reqc, has_reqi, has_reqs
 #if ( WRF_CHEM == 1 )
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT):: &
@@ -1103,7 +1105,7 @@ MODULE module_mp_thompson
       REAL, DIMENSION(its:ite, jts:jte):: pcp_ra, pcp_sn, pcp_gr, pcp_ic
       REAL:: dt, pptrain, pptsnow, pptgraul, pptice
       REAL:: qc_max, qr_max, qs_max, qi_max, qg_max, ni_max, nr_max
-      REAL:: rand1, rand2, rand3, min_rand
+      REAL:: rand1, rand2, rand3, rand_pert_max
       INTEGER:: i, j, k, m
       INTEGER:: imax_qc,imax_qr,imax_qi,imax_qs,imax_qg,imax_ni,imax_nr
       INTEGER:: jmax_qc,jmax_qr,jmax_qi,jmax_qs,jmax_qg,jmax_ni,jmax_nr
@@ -1235,9 +1237,22 @@ MODULE module_mp_thompson
       pcp_sn(:,:) = 0.0
       pcp_gr(:,:) = 0.0
       pcp_ic(:,:) = 0.0
+      rand_pert_max = 0.0
       ndt = max(nint(dt_in/dt_inner),1)
       dt = dt_in/ndt
       if(dt_in .le. dt_inner) dt= dt_in
+
+      !Get the Thompson MP SPP magnitude and standard deviation cutoff,
+      !then compute rand_pert_max
+
+      if (rand_perturb_on .ne. 0) then
+        do k =1,n_var_spp
+          select case (spp_var_list(k))
+          case('mp')
+            rand_pert_max = spp_prt_list(k)*spp_stddev_cutoff(k)
+          end select
+        enddo
+      endif
 
       do it = 1, ndt
 
@@ -1294,7 +1309,7 @@ MODULE module_mp_thompson
             m = RSHIFT(ABS(rand_perturb_on),1)
             if (MOD(m,2) .ne. 0) rand2 = rand_pert(i,1)*2.
             m = RSHIFT(ABS(rand_perturb_on),2)
-            if (MOD(m,2) .ne. 0) rand3 = 0.25*(rand_pert(i,1)+ABS(min_rand))
+            if (MOD(m,2) .ne. 0) rand3 = 0.25*(rand_pert(i,1)+rand_pert_max)
             m = RSHIFT(ABS(rand_perturb_on),3)
          endif
 !+---+-----------------------------------------------------------------+
@@ -1449,8 +1464,10 @@ MODULE module_mp_thompson
 !.. Changed 13 May 2013 to fake emissions in which nwfa2d is aerosol
 !.. number tendency (number per kg per second).
          if (is_aerosol_aware) then
+            if ( .not. aero_ind_fdb) then
             nwfa1d(kts) = nwfa1d(kts) + nwfa2d(i,j)*dt
             nifa1d(kts) = nifa1d(kts) + nifa2d(i,j)*dt
+            endif
 
             do k = kts, kte
                nc(i,k,j) = nc1d(k)
@@ -1596,6 +1613,7 @@ MODULE module_mp_thompson
             nrten3(i,k,j)     = nrten3(i,k,j)     + nrten1(k)
             ncten3(i,k,j)     = ncten3(i,k,j)     + ncten1(k)
             qcten3(i,k,j)     = qcten3(i,k,j)     + qcten1(k)
+
            enddo
          endif assign_extended_diagnostics
 
@@ -1812,7 +1830,7 @@ MODULE module_mp_thompson
                           tprr_rcs1, tprv_rev1,                            &
                           tten1, qvten1, qrten1, qsten1,                   &
                           qgten1, qiten1, niten1, nrten1, ncten1, qcten1,  &
-                           pfil1, pfll1)
+                          pfil1, pfll1) 
 
 #ifdef MPI
       use mpi
@@ -4073,7 +4091,14 @@ MODULE module_mp_thompson
           do k = kte, kts, -1
              vtg = 0.
              if (rg(k).gt. R1) then
-              vtg = rhof(k)*av_g*cgg(6)*ogg3 * ilamg(k)**bv_g
+              ygra1 = alog10(max(1.E-9, rg(k)))
+              zans1 = 3.0 + 2./7.*(ygra1+8.) + rand1
+              N0_exp = 10.**(zans1)
+              N0_exp = MAX(DBLE(gonv_min), MIN(N0_exp, DBLE(gonv_max)))
+              lam_exp = (N0_exp*am_g*cgg(1)/rg(k))**oge1
+              lamg = lam_exp * (cgg(3)*ogg2*ogg1)**obmg
+
+              vtg = rhof(k)*av_g*cgg(6)*ogg3 * (1./lamg)**bv_g
               if (temp(k).gt. T_0) then
                vtgk(k) = MAX(vtg, vtrk(k))
               else
@@ -4190,6 +4215,7 @@ MODULE module_mp_thompson
          qg1d(k) = qg1d(k) + qgten(k)*DT
          if (qg1d(k) .le. R1) qg1d(k) = 0.0
       enddo
+      
       do k = kts, kte
         pfil1(k)=qiten(k)+qsten(k)
         pfll1(k)=qrten(k)

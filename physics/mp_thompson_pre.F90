@@ -41,6 +41,7 @@ module mp_thompson_pre
 
          ! Save current air temperature for tendency limiters in mp_thompson_post
          tgrs_save = tgrs
+
       end subroutine mp_thompson_pre_run
 
       subroutine mp_thompson_pre_finalize()
