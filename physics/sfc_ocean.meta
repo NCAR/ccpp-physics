@@ -195,7 +195,7 @@
   type = logical
   intent = in
 [use_med_flux]
-  standard_name = flag_for_mediator_atmosphere_ocean_fluxes
+  standard_name = do_mediator_atmosphere_ocean_fluxes
   long_name = flag for using atmosphere-ocean fluxes from mediator
   units = flag
   dimensions = ()
