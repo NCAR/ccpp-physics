@@ -790,6 +790,7 @@ do i = 1, im
           thsfc_loc            ,prslkix              ,prsik1x              ,prslk1x              , &
           air_pressure_surface ,pblhx                ,iz0tlnd              ,itime                , &
 	  vegetation_frac      ,area_grid            ,psi_opt                                    , &
+          con_fvirt            ,con_eps              ,con_cp                                     , &
           snowfall             ,snow_water_equiv_old ,snow_albedo_old      ,                       &
           cm_noahmp            ,ch_noahmp            ,snow_levels          ,snow_water_equiv     , &
           soil_moisture_vol    ,interface_depth      ,snow_depth           ,snow_level_ice       , &
@@ -875,8 +876,9 @@ do i = 1, im
           precip_non_convective ,precip_sh_convective  ,precip_snow           , &
           precip_graupel        ,precip_hail           ,temperature_soil_bot  , &
           co2_air               ,o2_air                ,foliage_nitrogen      , &
-          snow_ice_frac_old                                                   , &
-          forcing_height        ,snow_albedo_old       ,snow_water_equiv_old  , &
+          snow_ice_frac_old     ,forcing_height                               , &
+          con_fvirt             ,con_eps               ,con_cp                , &
+          snow_albedo_old       ,snow_water_equiv_old                         , &
           temperature_snow_soil ,soil_liquid_vol       ,soil_moisture_vol     , &
           temperature_canopy_air,vapor_pres_canopy_air ,canopy_wet_fraction   , &
           canopy_liquid         ,canopy_ice            ,temperature_leaf      , &
@@ -1077,7 +1079,8 @@ do i = 1, im
 
            call sfcdif4(i_location  ,j_location  ,uwind_forcing ,vwind_forcing ,           &
                         temperature_forcing, air_pressure_forcing ,air_pressure_surface  , &
-                        pblhx,gdx,z0_total,itime,snwdph(i),mnice,psi_opt,surface_temperature,  &
+                        pblhx,gdx,z0_total,con_fvirt,con_eps,con_cp,itime,snwdph(i),mnice, &
+                        psi_opt,surface_temperature,                                       &
                         spec_humidity_forcing,forcing_height,iz0tlnd,spec_humidity_surface,&
                         sensible_heat_total,qfx,cm(i),ch(i),ch2,cq2,rmol1(i),ustar1(i),    &
                         rb1(i),fm1(i),fh1(i),stress1(i),fm101(i),fh21(i),wspd1,flhc1(i),   &

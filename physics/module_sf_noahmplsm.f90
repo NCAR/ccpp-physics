@@ -10,15 +10,6 @@ module module_sf_noahmplsm
 use machine ,   only : kind_phys
 use sfc_diff, only   : stability
 
-       use physcons, only : rcp     => con_rocp,           &
-      &                     ep_1    => con_fvirt,          &
-      &                     ep_2    => con_eps,            &
-      &                     r_d     => con_rd,             &
-      &                     cp      => con_cp,             &
-      &                     g      => con_g,               &
-      &                     xlv    => con_hvap
-
-
   implicit none
 
   public  :: noahmp_options
@@ -182,7 +173,7 @@ use sfc_diff, only   : stability
 
   real (kind=kind_phys), parameter :: grav   = 9.80616   !< acceleration due to gravity (m/s2)
   real (kind=kind_phys), parameter :: sb     = 5.67e-08  !< stefan-boltzmann constant (w/m2/k4)
-  real (kind=kind_phys), parameter :: vkc    = 0.40      !< von karman constant
+  real (kind=kind_phys), parameter :: vkc    = 0.40      !< von vkc constant
   real (kind=kind_phys), parameter :: tfrz   = 273.16    !< freezing/melting point (k)
   real (kind=kind_phys), parameter :: hsub   = 2.8440e06 !< latent heat of sublimation (j/kg)
   real (kind=kind_phys), parameter :: hvap   = 2.5104e06 !< latent heat of vaporization (j/kg)
@@ -388,26 +379,23 @@ use sfc_diff, only   : stability
 !
 ! for sfcdif4 
 !
-   real,   parameter     :: prt=1.     !prandtl number
-   real,   parameter     :: p1000mb      = 100000.
+   real(kind=kind_phys),   parameter     :: prt=1.     !prandtl number
+   real(kind=kind_phys),   parameter     :: p1000mb      = 100000.
 
-   real,   parameter     :: svp1    = 0.6112
-   real,   parameter     :: svp2    = 17.67
-   real,   parameter     :: svp3    = 29.65
-   real,   parameter     :: svpt0   = 273.15
-   real,   parameter     :: ep_3=1.-ep_2
-   real,   parameter     :: ep2=ep_2
-   real,   parameter     :: onethird = 1./3.
-   real,   parameter     :: sqrt3 = 1.7320508075688773
-   real,   parameter     :: atan1 = 0.785398163397     !in radians
+   real(kind=kind_phys),   parameter     :: svp1    = 0.6112
+   real(kind=kind_phys),   parameter     :: svp2    = 17.67
+   real(kind=kind_phys),   parameter     :: svp3    = 29.65
+   real(kind=kind_phys),   parameter     :: svpt0   = 273.15
+   real(kind=kind_phys),   parameter     :: onethird = 1./3.
+   real(kind=kind_phys),   parameter     :: sqrt3 = 1.7320508075688773
+   real(kind=kind_phys),   parameter     :: atan1 = 0.785398163397     !in radians
 
-   real,   parameter     :: karman  = 0.4
-   real,   parameter     :: vconvc=1.25
+   real(kind=kind_phys),   parameter     :: vconvc=1.25
 
-   real,   parameter     :: snowz0 = 0.011
-   real,   parameter     :: wmin   = 0.1
+   real(kind=kind_phys),   parameter     :: snowz0 = 0.011
+   real(kind=kind_phys),   parameter     :: wmin   = 0.1
 
-   real,   dimension(0:1000 ),save :: psim_stab,psim_unstab, &
+   real(kind=kind_phys),   dimension(0:1000 ),save :: psim_stab,psim_unstab, &
                                       psih_stab,psih_unstab
 
 
@@ -426,6 +414,7 @@ contains
                    pblhx   , iz0tlnd , itime         ,psi_opt                 ,&
 	           prcpconv, prcpnonc, prcpshcv, prcpsnow, prcpgrpl, prcphail, & ! in : forcing
                    tbot    , co2air  , o2air   , foln    , ficeold , zlvl    , & ! in : forcing
+                   ep_1    , ep_2    , cp                                    , & ! in : constants
                    albold  , sneqvo  ,                                         & ! in/out : 
                    stc     , sh2o    , smc     , tah     , eah     , fwet    , & ! in/out : 
                    canliq  , canice  , tv      , tg      , qsfc, qsnow, qrain, & ! in/out : 
@@ -471,6 +460,9 @@ contains
   integer                        , intent(in)    :: nsoil  !< no. of soil layers        
   integer                        , intent(in)    :: iloc   !< grid index
   integer                        , intent(in)    :: jloc   !< grid index
+  real (kind=kind_phys)                           , intent(in)    :: ep_1
+  real (kind=kind_phys)                           , intent(in)    :: ep_2
+  real (kind=kind_phys)                           , intent(in)    :: cp
   real (kind=kind_phys)                           , intent(in)    :: dt     !< time step [sec]
   real (kind=kind_phys), dimension(       1:nsoil), intent(in)    :: zsoil  !< layer-bottom depth from soil surf (m)
   real (kind=kind_phys)                           , intent(in)    :: q2     !< mixing ratio (kg/kg) lowest model layer
@@ -824,7 +816,7 @@ contains
                  fveg   ,shdfac, pahv   ,pahg   ,pahb   ,             & !in
                  qsnow  ,dzsnso ,lat    ,canliq ,canice ,iloc, jloc , & !in
                  thsfc_loc, prslkix,prsik1x,prslk1x,garea1,       & !in
-                 pblhx  ,iz0tlnd, itime ,psi_opt,                 &
+                 pblhx  ,iz0tlnd, itime ,psi_opt, ep_1, ep_2, cp, &
 		 z0wrf  ,z0hwrf ,                                 & !out
                  imelt  ,snicev ,snliqv ,epore  ,t2m    ,fsno   , & !out
                  sav    ,sag    ,qmelt  ,fsa    ,fsr    ,taux   , & !out
@@ -1663,7 +1655,7 @@ endif   ! croptype == 0
                      fveg   ,shdfac, pahv   ,pahg   ,pahb   ,               & !in
                      qsnow  ,dzsnso ,lat    ,canliq ,canice ,iloc   , jloc, & !in
                      thsfc_loc, prslkix,prsik1x,prslk1x,garea1,       & !in
-                     pblhx  , iz0tlnd, itime,psi_opt,                 &
+                     pblhx  , iz0tlnd, itime,psi_opt,ep_1, ep_2, cp,  &
 		     z0wrf  ,z0hwrf ,                                 & !out
                      imelt  ,snicev ,snliqv ,epore  ,t2m    ,fsno   , & !out
                      sav    ,sag    ,qmelt  ,fsa    ,fsr    ,taux   , & !out
@@ -1745,6 +1737,9 @@ endif   ! croptype == 0
   real (kind=kind_phys)                              , intent(in)    :: garea1 
 
   real (kind=kind_phys)                              , intent(in)    :: pblhx  !  pbl height
+  real (kind=kind_phys)                              , intent(in)    :: ep_1
+  real (kind=kind_phys)                              , intent(in)    :: ep_2
+  real (kind=kind_phys)                              , intent(in)    :: cp
   integer                                            , intent(in)    :: iz0tlnd
   integer                                            , intent(in)    :: itime
   integer                                            , intent(in)    :: psi_opt
@@ -2207,7 +2202,7 @@ endif   ! croptype == 0
                     foln    ,co2air  ,o2air   ,btran   ,sfcprs  , & !in
                     rhsur   ,iloc    ,jloc    ,q2      ,pahv  ,pahg  , & !in
                     thsfc_loc, prslkix,prsik1x,prslk1x, garea1,        & !in
-                    pblhx   ,iz0tlnd ,itime   ,psi_opt ,          &
+                    pblhx   ,iz0tlnd ,itime   ,psi_opt ,ep_1, ep_2, cp, &
                     eah     ,tah     ,tv      ,tgv     ,cmv, ustarx , & !inout
 #ifdef CCPP
                     chv     ,dx      ,dz8w    ,errmsg  ,errflg  , & !inout
@@ -2244,7 +2239,7 @@ endif   ! croptype == 0
                     emg     ,stc     ,df      ,rsurf   ,latheag  , & !in
                     gammag   ,rhsur   ,iloc    ,jloc    ,q2      ,pahb  , & !in
                     thsfc_loc, prslkix,prsik1x,prslk1x,vegtyp,fveg,shdfac,garea1, & !in
-                    pblhx   ,iz0tlnd ,itime   ,psi_opt ,          &
+                    pblhx   ,iz0tlnd ,itime   ,psi_opt ,ep_1, ep_2, cp,      &
 #ifdef CCPP
                     tgb     ,cmb     ,chb, ustarx,errmsg  ,errflg   , & !inout
 #else
@@ -3649,7 +3644,7 @@ endif   ! croptype == 0
                        foln    ,co2air  ,o2air   ,btran   ,sfcprs  , & !in
                        rhsur   ,iloc    ,jloc    ,q2      ,pahv    ,pahg     , & !in
                        thsfc_loc, prslkix,prsik1x,prslk1x, garea1,      & !in
-                       pblhx   ,iz0tlnd ,itime   ,psi_opt ,          &
+                       pblhx   ,iz0tlnd ,itime   ,psi_opt ,ep_1, ep_2, cp,   &
                        eah     ,tah     ,tv      ,tg      ,cm,ustarx,& !inout
 #ifdef CCPP
                        ch      ,dx      ,dz8w    ,errmsg  ,errflg  , & !inout
@@ -3698,6 +3693,9 @@ endif   ! croptype == 0
   real (kind=kind_phys),                            intent(in) :: fsno     !snow fraction
 
   real (kind=kind_phys)                           , intent(in)    :: pblhx  !  pbl height
+  real (kind=kind_phys)                           , intent(in)    :: ep_1
+  real (kind=kind_phys)                           , intent(in)    :: ep_2
+  real (kind=kind_phys)                           , intent(in)    :: cp
   integer                                         , intent(in)    :: iz0tlnd
   integer                                         , intent(in)    :: itime
   integer                                         , intent(in)    :: psi_opt
@@ -4069,6 +4067,7 @@ endif   ! croptype == 0
 
           call sfcdif4(iloc  ,jloc  ,uu    ,vv    ,sfctmp , & 
                       sfcprs ,psfc  ,pblhx  ,gdx  ,z0m    , &
+                      ep_1, ep_2, cp,                      &
                       itime  ,snwd  ,mnice  ,psi_opt,      &
                       tah   ,qair   ,zlvl  ,iz0tlnd,qsfc ,  &
                       h     ,qfx    ,cm    ,ch     ,ch2v ,  &
@@ -4325,7 +4324,7 @@ endif   ! croptype == 0
                         emg     ,stc     ,df      ,rsurf   ,lathea  , & !in
                         gamma   ,rhsur   ,iloc    ,jloc    ,q2      ,pahb  , & !in
                         thsfc_loc, prslkix,prsik1x,prslk1x,vegtyp,fveg,shdfac,garea1,  & !in
-                        pblhx  , iz0tlnd , itime  ,psi_opt            ,&
+                        pblhx  , iz0tlnd , itime  ,psi_opt,ep_1,ep_2,cp     ,&
 #ifdef CCPP
                         tgb     ,cm      ,ch,ustarx,errmsg  ,errflg  , & !inout
 #else
@@ -4379,6 +4378,9 @@ endif   ! croptype == 0
   real (kind=kind_phys),                            intent(in) :: fsno     !snow fraction
 
   real (kind=kind_phys),                            intent(in) :: pblhx  !pbl height (m)
+  real (kind=kind_phys),                            intent(in) :: ep_1
+  real (kind=kind_phys),                            intent(in) :: ep_2
+  real (kind=kind_phys),                            intent(in) :: cp
   integer,                                          intent(in) :: iz0tlnd
   integer,                                          intent(in) :: itime 
   integer,                                          intent(in) :: psi_opt
@@ -4623,6 +4625,7 @@ endif   ! croptype == 0
 
           call sfcdif4(iloc  ,jloc  ,uu    ,vv    ,sfctmp , &
                       sfcprs ,psfc  ,pblhx  ,gdx   ,z0m   , &
+                      ep_1, ep_2, cp,                      &
                       itime  ,snwd  ,mnice     ,psi_opt   , &
                       tgb   ,qair   ,zlvl  ,iz0tlnd,qsfc  , &
                       h     ,qfx    ,cm    ,ch     ,ch2b ,  &
@@ -10028,6 +10031,7 @@ end subroutine psn_crop
 
    subroutine sfcdif4(iloc  ,jloc  ,ux    ,vx     ,t1d  , &
                       p1d   ,psfcpa,pblhx ,dx     ,znt  , &
+                      ep_1, ep_2, cp,                     &
                       itime ,snwh ,isice  ,psi_opt,       &
                       tsk   ,qx    ,zlvl  ,iz0tlnd,qsfc , &
                       hfx   ,qfx   ,cm    ,chs    ,chs2 , &
@@ -10051,46 +10055,49 @@ end subroutine psn_crop
 
    integer,  intent(in)  :: isice     ! for the glacier/snowh > 0.1m
                                                                                                                           
-   real,   intent(in )   :: pblhx      ! planetary boundary layer height                                                   
-   real,   intent(in )   :: tsk       ! skin temperature                                                                  
-   real,   intent(in )   :: psfcpa    ! pressure in pascal                                                                
-   real,   intent(in )   :: p1d       !lowest model layer pressure (pa)                                                      
-   real,   intent(in )   :: t1d       !lowest model layer temperature
-   real,   intent(in )   :: qx        !water vapor specific humidity (kg/kg) from input
-   real,   intent(in )   :: zlvl      ! thickness of lowest full level layer
-   real,   intent(in )   :: hfx       ! sensible heat flux
-   real,   intent(in )   :: qfx       ! moisture flux
-   real,   intent(in )   :: dx        ! horisontal grid spacing
-   real,   intent(in )   :: ux        ! u and v winds
-   real,   intent(in )   :: vx
-   real,   intent(in )   :: znt       ! z0m in m  or inout
-   real,   intent(in )   :: snwh     ! in mm                                                                                       
+   real(kind=kind_phys),   intent(in )   :: pblhx      ! planetary boundary layer height                                                   
+   real(kind=kind_phys),   intent(in )   :: tsk       ! skin temperature                                                                  
+   real(kind=kind_phys),   intent(in )   :: psfcpa    ! pressure in pascal                                                                
+   real(kind=kind_phys),   intent(in )   :: p1d       !lowest model layer pressure (pa)                                                      
+   real(kind=kind_phys),   intent(in )   :: t1d       !lowest model layer temperature
+   real(kind=kind_phys),   intent(in )   :: qx        !water vapor specific humidity (kg/kg) from input
+   real(kind=kind_phys),   intent(in )   :: zlvl      ! thickness of lowest full level layer
+   real(kind=kind_phys),   intent(in )   :: hfx       ! sensible heat flux
+   real(kind=kind_phys),   intent(in )   :: qfx       ! moisture flux
+   real(kind=kind_phys),   intent(in )   :: dx        ! horisontal grid spacing
+   real(kind=kind_phys),   intent(in )   :: ux        ! u and v winds
+   real(kind=kind_phys),   intent(in )   :: vx
+   real(kind=kind_phys),   intent(in )   :: znt       ! z0m in m  or inout
+   real(kind=kind_phys),   intent(in )   :: snwh     ! in mm                                                                                       
+   real(kind=kind_phys),   intent(in )   :: ep_1
+   real(kind=kind_phys),   intent(in )   :: ep_2
+   real(kind=kind_phys),   intent(in )   :: cp
 
 ! optional vars                                                                                                           
 
    integer,optional,intent(in ) :: iz0tlnd                                                                                
 
-   real,   intent(inout) :: qsfc
-   real,   intent(inout) :: ust                                                                                           
-   real,   intent(inout) :: chs                                                                                           
-   real,   intent(inout) :: chs2                                                                                           
-   real,   intent(inout) :: cqs2                                                                                           
-   real,   intent(inout) :: cm                
+   real(kind=kind_phys),   intent(inout) :: qsfc
+   real(kind=kind_phys),   intent(inout) :: ust                                                                                           
+   real(kind=kind_phys),   intent(inout) :: chs                                                                                           
+   real(kind=kind_phys),   intent(inout) :: chs2                                                                                           
+   real(kind=kind_phys),   intent(inout) :: cqs2                                                                                           
+   real(kind=kind_phys),   intent(inout) :: cm                
 
-   real,   intent(inout) :: rmolx                                                                                          
-   real,   intent(inout) :: rbx
-   real,   intent(inout) :: fmx
-   real,   intent(inout) :: fhx
-   real,   intent(inout) :: stressx
-   real,   intent(inout) :: fm10x
-   real,   intent(inout) :: fh2x
+   real(kind=kind_phys),   intent(inout) :: rmolx                                                                                          
+   real(kind=kind_phys),   intent(inout) :: rbx
+   real(kind=kind_phys),   intent(inout) :: fmx
+   real(kind=kind_phys),   intent(inout) :: fhx
+   real(kind=kind_phys),   intent(inout) :: stressx
+   real(kind=kind_phys),   intent(inout) :: fm10x
+   real(kind=kind_phys),   intent(inout) :: fh2x
 
-   real,   intent(inout) :: wspdx
-   real,   intent(inout) :: flhcx
-   real,   intent(inout) :: flqcx 
+   real(kind=kind_phys),   intent(inout) :: wspdx
+   real(kind=kind_phys),   intent(inout) :: flhcx
+   real(kind=kind_phys),   intent(inout) :: flqcx 
 
-   real                  :: zolx
-   real                  :: molx
+   real(kind=kind_phys)                  :: zolx
+   real(kind=kind_phys)                  :: molx
                                                                                                                           
 ! diagnostics out                                                                                                         
 !  real,   intent(out)   :: u10                                                                                           
@@ -10103,53 +10110,57 @@ end subroutine psn_crop
                                                                                                                           
 ! local                                                                                                                   
 
-   real    :: za      ! height of full-sigma level                                                                        
-   real    :: thvx    ! virtual potential temperature                                                                     
-   real    :: zqkl    ! height of upper half level                                                                        
-   real    :: zqklp1  ! height of lower half level (surface)                                                              
-   real    :: thx     ! potential temperature                                                                             
-   real    :: psih    ! similarity function for heat                                                                      
-   real    :: psih2   ! similarity function for heat 2m                                                                   
-   real    :: psih10  ! similarity function for heat 10m                                                                  
-   real    :: psim    ! similarity function for momentum                                                                  
-   real    :: psim2   ! similarity function for momentum 2m                                                               
-   real    :: psim10  ! similarity function for momentum 10m                                                              
+   real(kind=kind_phys)    :: za      ! height of full-sigma level                                                                        
+   real(kind=kind_phys)    :: thvx    ! virtual potential temperature                                                                     
+   real(kind=kind_phys)    :: zqkl    ! height of upper half level                                                                        
+   real(kind=kind_phys)    :: zqklp1  ! height of lower half level (surface)                                                              
+   real(kind=kind_phys)    :: thx     ! potential temperature                                                                             
+   real(kind=kind_phys)    :: psih    ! similarity function for heat                                                                      
+   real(kind=kind_phys)    :: psih2   ! similarity function for heat 2m                                                                   
+   real(kind=kind_phys)    :: psih10  ! similarity function for heat 10m                                                                  
+   real(kind=kind_phys)    :: psim    ! similarity function for momentum                                                                  
+   real(kind=kind_phys)    :: psim2   ! similarity function for momentum 2m                                                               
+   real(kind=kind_phys)    :: psim10  ! similarity function for momentum 10m                                                              
 
-   real    :: gz1oz0  ! log(za/z0)                                                                                        
-   real    :: gz2oz0  ! log(z2/z0)                                                                                        
-   real    :: gz10oz0 ! log(z10/z0)                                                                                       
+   real(kind=kind_phys)    :: gz1oz0  ! log(za/z0)                                                                                        
+   real(kind=kind_phys)    :: gz2oz0  ! log(z2/z0)                                                                                        
+   real(kind=kind_phys)    :: gz10oz0 ! log(z10/z0)                                                                                       
 
-   real    :: rhox    ! density                                                                                           
-   real    :: govrth  ! g/theta for stability l                                                                           
-   real    :: tgdsa   ! tsk                                                                                               
-   real    :: tvir    ! temporal variable src4 -> tvir                                                                                
-   real    :: thgb    ! potential temperature ground                                                                      
-   real    :: psfcx   ! surface pressure                                                                                  
-   real    :: cpm                                                                                           
-   real    :: qgh    
+   real(kind=kind_phys)    :: rhox    ! density                                                                                           
+   real(kind=kind_phys)    :: govrth  ! g/theta for stability l                                                                           
+   real(kind=kind_phys)    :: tgdsa   ! tsk                                                                                               
+   real(kind=kind_phys)    :: tvir    ! temporal variable src4 -> tvir                                                                                
+   real(kind=kind_phys)    :: thgb    ! potential temperature ground                                                                      
+   real(kind=kind_phys)    :: psfcx   ! surface pressure                                                                                  
+   real(kind=kind_phys)    :: cpm                                                                                           
+   real(kind=kind_phys)    :: qgh    
                                                                                                                           
    integer :: n,i,k,kk,l,nzol,nk,nzol2,nzol10                                                                             
 
-   real    :: zolzt, zolz0, zolza
-   real    :: gz1ozt,gz2ozt,gz10ozt
+   real(kind=kind_phys)    :: zolzt, zolz0, zolza
+   real(kind=kind_phys)    :: gz1ozt,gz2ozt,gz10ozt
 
                                                                                                                           
-   real    ::  pl,thcon,tvcon,e1                                                                                          
-   real    ::  zl,tskv,dthvdz,dthvm,vconv,rzol,rzol2,rzol10,zol2,zol10                                                    
-   real    ::  dtg,psix,dtthx,psix10,psit,psit2,psiq,psiq2,psiq10                                                         
-   real    ::  fluxc,vsgd,z0q,visc,restar,czil,restar2                                                                    
+   real(kind=kind_phys)    ::  pl,thcon,tvcon,e1                                                                                          
+   real(kind=kind_phys)    ::  zl,tskv,dthvdz,dthvm,vconv,rzol,rzol2,rzol10,zol2,zol10                                                    
+   real(kind=kind_phys)    ::  dtg,psix,dtthx,psix10,psit,psit2,psiq,psiq2,psiq10                                                         
+   real(kind=kind_phys)    ::  fluxc,vsgd,z0q,visc,restar,czil,restar2                                                                    
 
-   real    ::  dqg
-   real    ::  tabs
-   real    ::  qsfcmr
-   real    ::  t1dc
-   real    ::  zt
-   real    ::  zq
-   real    ::  zratio
-   real    ::  qstar
+   real(kind=kind_phys)    ::  dqg
+   real(kind=kind_phys)    ::  tabs
+   real(kind=kind_phys)    ::  qsfcmr
+   real(kind=kind_phys)    ::  t1dc
+   real(kind=kind_phys)    ::  zt
+   real(kind=kind_phys)    ::  zq
+   real(kind=kind_phys)    ::  zratio
+   real(kind=kind_phys)    ::  qstar
+   real(kind=kind_phys)    ::  ep2
+   real(kind=kind_phys)    ::  ep_3
 !-------------------------------------------------------------------                                                      
 
    psfcx=psfcpa/1000.     ! to kPa for saturation check                                                                                                 
+   ep2=ep_2
+   ep_3=1.-ep_2
                                                                                                                           
          if (itime == 1) then                               !init SP, MR
            if (isice == 0) then
@@ -10218,19 +10229,19 @@ end subroutine psn_crop
          endif                                     !done INIT if itime=1
 ! convert (tah or tgb = tsk) temperature to potential temperature.                                                                    
    tgdsa = tsk              
-   thgb  = tsk*(p1000mb/psfcpa)**rcp  !psfcpa is pa
+   thgb  = tsk*(p1000mb/psfcpa)**cpair  !psfcpa is pa
                                    
 ! store virtual, virtual potential and potential temperature
 
    pl    = p1d/1000.                                                                                                      
-   thx   = t1d*(p1000mb*0.001/pl)**rcp                                                                                        
+   thx   = t1d*(p1000mb*0.001/pl)**cpair                                                                                        
    t1dc  = t1d - 273.15
 
    thvx  = thx*(1.+ep_1*qx)           !qx is SH from input     
    tvir  = t1d*(1.+ep_1*qx)
 
-   rhox=psfcx*1000./(r_d*tvir)                                                                                             
-   govrth=g/thx                                                                                                           
+   rhox=psfcx*1000./(rair*tvir)                                                                                             
+   govrth=grav/thx                                                                                                           
    za = zlvl
    
    !za=0.5*dz8w                                                                                                   
@@ -10276,7 +10287,7 @@ end subroutine psn_crop
          fluxc = max(hfx/rhox/cp + ep_1*tskv*qfx/rhox,0.)   !hfx + qfx are fluxes units: wm^-2 and kg m^-2 s^-1                                                                                       
 ! vconv = vconvc*(g/tgdsa*pblh*fluxc)**.33                                                                                
 
-          vconv = vconvc*(g/tgdsa*min(1.5*pblhx,4000.0)*fluxc)**.33   !wstar                                                                             
+          vconv = vconvc*(grav/tgdsa*min(1.5*pblhx,4000.0)*fluxc)**.33   !wstar                                                                             
 !  vsgd = 0.32 * (max(dx/5000.-1.,0.))**.33                                                                               
 
           vsgd = min(0.32 * (max(dx/5000.-1.,0.))**.33,0.5)                                                                               
@@ -10314,7 +10325,7 @@ end subroutine psn_crop
           if ( present(iz0tlnd) ) then
              if ( iz0tlnd .le. 1 ) then
                 call zilitinkevich_1995(znt,zt,zq,restar,&
-                      ust,karman,1.0,iz0tlnd,0,0.0)
+                      ust,vkc,1.0,iz0tlnd,0,0.0)
              elseif ( iz0tlnd .eq. 2 ) then
                 call yang_2008(znt,zt,zq,ust,molx,&
                               qstar,restar,visc)
@@ -10329,7 +10340,7 @@ end subroutine psn_crop
 
              !default to zilitinkevich
              call zilitinkevich_1995(znt,zt,zq,restar,&
-                         ust,karman,1.0,0,0,0.0)
+                         ust,vkc,1.0,0,0,0.0)
           endif
        endif
 
@@ -10350,13 +10361,13 @@ end subroutine psn_crop
 
 ! vconv = 0.25*sqrt(g/tskv*pblh(i)*dthvm)                                                                                 
 !  if(mol.lt.0.) br=amin1(br,0.0)   -> check the input mol later
-!  rmol=-govrth*dthvdz*za*karman 
+!  rmol=-govrth*dthvdz*za*vkc 
 
        if (rbx .gt. 0.0) then
 
           !compute z/l first guess:
           call li_etal_2010(zolx,rbx,za/znt,zratio)
-          !zol=za*karman*g*mol/(thx*max(ust*ust,0.0001))
+          !zol=za*vkc*grav*mol/(thx*max(ust*ust,0.0001))
           zolx=max(zolx,0.0)
           zolx=min(zolx,20.)
 
@@ -10415,7 +10426,7 @@ end subroutine psn_crop
 
           call li_etal_2010(zolx,rbx,za/znt,zratio)
 
-          !zol=za*karman*g*mol/(th1d*max(ust_lnd*ust_lnd,0.001))
+          !zol=za*vkc*grav*mol/(th1d*max(ust_lnd*ust_lnd,0.001))
 
           zolx=max(zolx,-20.0)
           zolx=min(zolx,0.0)
@@ -10479,7 +10490,7 @@ end subroutine psn_crop
 
 !      oldust = ust
 
-       ust=0.5*ust+0.5*karman*wspdx/psix
+       ust=0.5*ust+0.5*vkc*wspdx/psix
        ust=max(ust,0.005)
 
 !      stress=ust**2
@@ -10498,7 +10509,7 @@ end subroutine psn_crop
 
 !      oldtst=mol
 
-       molx=karman*dtg/psit/prt !T*
+       molx=vkc*dtg/psit/prt !T*
 
        !t_star = -hfx/(ust*cpm*rho1d)
        !t_star = mol
@@ -10506,22 +10517,22 @@ end subroutine psn_crop
        ! dqg=(qvsh-qsfc)*1000.   !(kg/kg -> g/kg)
 
        dqg=(qx-qsfc)*1000.   !(kg/kg -> g/kg)
-       qstar=karman*dqg/psiq/prt
+       qstar=vkc*dqg/psiq/prt
 
-        cm = (karman/psix)*(karman/psix)*wspdx
+        cm = (vkc/psix)*(vkc/psix)*wspdx
 
-!       cm = (karman/psix)*(karman/psix)
-!       ch = (karman/psix)*(karman/psit)
+!       cm = (vkc/psix)*(vkc/psix)
+!       ch = (vkc/psix)*(vkc/psit)
 
-        chs=ust*karman/psit
-        cqs2=ust*karman/psiq2
-        chs2=ust*karman/psit2
+        chs=ust*vkc/psit
+        cqs2=ust*vkc/psiq2
+        chs2=ust*vkc/psit2
 
 !       u10=ux*psix10/psix                                                                                                     
 !       v10=vx*psix10/psix                                                                                                     
 
-        flhcx = rhox*cpm*ust*karman/psit
-        flqcx = rhox*1.0*ust*karman/psiq
+        flhcx = rhox*cpm*ust*vkc/psit
+        flqcx = rhox*1.0*ust*vkc/psiq
 
 !       ch = flhcx/(cpm*rhox)  !same chs
 
@@ -10536,11 +10547,11 @@ end subroutine psn_crop
 
    end subroutine sfcdif4                                                                                                 
 
-  subroutine zilitinkevich_1995(z_0,zt,zq,restar,ustar,karman,&
+  subroutine zilitinkevich_1995(z_0,zt,zq,restar,ustar,vkc,&
         & landsea,iz0tlnd2,spp_pbl,rstoch)
 
        implicit none
-       real, intent(in) :: z_0,restar,ustar,karman,landsea
+       real, intent(in) :: z_0,restar,ustar,vkc,landsea
        integer, optional, intent(in)::  iz0tlnd2
        real, intent(out) :: zt,zq
        real :: czil  !=0.100 in chen et al. (1997)
@@ -10555,17 +10566,17 @@ end subroutine psn_crop
           !this is based on zilitinkevich, grachev, and fairall (2001;
           !their equations 15 and 16).
           if (restar .lt. 0.1) then
-             zt = z_0*exp(karman*2.0)
+             zt = z_0*exp(vkc*2.0)
              zt = min( zt, 6.0e-5)
              zt = max( zt, 2.0e-9)
-             zq = z_0*exp(karman*3.0)
+             zq = z_0*exp(vkc*3.0)
              zq = min( zq, 6.0e-5)
              zq = max( zq, 2.0e-9)
           else
-             zt = z_0*exp(-karman*(4.0*sqrt(restar)-3.2))
+             zt = z_0*exp(-vkc*(4.0*sqrt(restar)-3.2))
              zt = min( zt, 6.0e-5)
              zt = max( zt, 2.0e-9)
-             zq = z_0*exp(-karman*(4.0*sqrt(restar)-4.2))
+             zq = z_0*exp(-vkc*(4.0*sqrt(restar)-4.2))
              zq = min( zt, 6.0e-5)
              zq = max( zt, 2.0e-9)
           endif
@@ -10579,10 +10590,10 @@ end subroutine psn_crop
              czil = 0.085 !0.075 !0.10
           end if
 
-          zt = z_0*exp(-karman*czil*sqrt(restar))
+          zt = z_0*exp(-vkc*czil*sqrt(restar))
           zt = min( zt, 0.75*z_0)
 
-          zq = z_0*exp(-karman*czil*sqrt(restar))
+          zq = z_0*exp(-vkc*czil*sqrt(restar))
           zq = min( zq, 0.75*z_0)
 
 ! stochastically perturb thermal and moisture roughness length.
