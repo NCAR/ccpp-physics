@@ -8,7 +8,8 @@
       
       integer, parameter :: kind_io4  = 4, kind_io8  = 8 , kind_ior = 8 &
      &,                     kind_evod = 8, kind_dbl_prec = 8            &
-     &,                     kind_sngl_prec = 4
+     &,                     kind_sngl_prec = 4, kind_INTEGER = 4        &
+     &,                     kind_LOGICAL = 4
 
 #ifdef SINGLE_PREC
       integer, parameter :: kind_rad  = kind_sngl_prec                  &
