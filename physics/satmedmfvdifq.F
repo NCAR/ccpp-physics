@@ -4,7 +4,9 @@
 !! eddy-diffusion mass-flux (TKE-EDMF) parameterization (by Jongil Han).
 
       module satmedmfvdifq
-
+      use mfpbltq_mod
+      use tridi_mod
+      use mfscuq_mod
       contains
 
 !> \defgroup satmedmfvdifq GFS Scale-aware TKE-based Moist Eddy-Diffusivity Mass-flux (TKE-EDMF, updated version) Scheme Module

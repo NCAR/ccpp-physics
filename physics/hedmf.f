@@ -6,6 +6,9 @@
 !! scheme.
       module hedmf
 
+      use tridi_mod
+      use mfpbl_mod
+
       contains
 
 !> \section arg_table_hedmf_init Argument Table

@@ -1,6 +1,8 @@
 !>\file calpreciptype.f90
 !! This file contains the subroutines that calculates dominant precipitation type.
 
+module calpreciptype_mod
+contains
 !>\ingroup gfs_calpreciptype
 !! Foure algorithms are called to calculate dominant precipitation type, and the 
 !!tallies are sumed in calwxt_dominant().
@@ -26,17 +28,18 @@
 !  --------------------------------------------------------------------
       use funcphys, only : fpvs,ftdp,fpkap,ftlcl,stma,fthe
       use physcons
+      use machine , only : kind_phys
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       implicit none
 !
-      real,   parameter :: pthresh = 0.0, oneog = 1.0/con_g
+      real(kind=kind_phys),   parameter :: pthresh = 0.0, oneog = 1.0/con_g
       integer,parameter :: nalg    = 5
 !     
 !     declare variables.
 !     
       integer,intent(in) :: kdt,nrcm,im,ix,lm,lp1
-      real,intent(in)    :: xlat(im),xlon(im)
-      real,intent(in)    :: randomno(ix,nrcm)
+      real(kind=kind_phys),intent(in)    :: xlat(im),xlon(im)
+      real(kind=kind_phys),intent(in)    :: randomno(ix,nrcm)
       real(kind=kind_phys),dimension(im),    intent(in)  :: prec,tskin
       real(kind=kind_phys),dimension(ix,lm), intent(in)  :: gt0,gq0,prsl
       real(kind=kind_phys),dimension(ix,lp1),intent(in)  :: prsi,phii
@@ -220,8 +223,9 @@
 !! This subroutine computes precipitation type using a decision tree approach that uses 
 !! variables such as integrated wet bulb temperatue below freezing and lowest layer 
 !! temperature (Baldwin et al. 1994 \cite baldwin_et_al_1994)
-       subroutine calwxt(lm,lp1,t,q,pmid,pint,              &
-                         d608,rog,epsq,zint,iwx,twet)
+      subroutine calwxt(lm,lp1,t,q,pmid,pint,              &
+                        d608,rog,epsq,zint,iwx,twet)
+      use machine , only : kind_phys
 ! 
 !     file: calwxt.f
 !     written: 11 november 1993, michael baldwin
@@ -247,10 +251,10 @@
 !      t,q,pmid,htm,lmh,zint
 !
       integer,intent(in)             :: lm,lp1
-      real,dimension(lm),intent(in)  :: t,q,pmid,twet
-      real,dimension(lp1),intent(in) :: zint,pint
+      real(kind=kind_phys),dimension(lm),intent(in)  :: t,q,pmid,twet
+      real(kind=kind_phys),dimension(lp1),intent(in) :: zint,pint
       integer,intent(out)            :: iwx
-      real,intent(in)                :: d608,rog,epsq
+      real(kind=kind_phys),intent(in)                :: d608,rog,epsq
 
 
 !    output:
@@ -264,10 +268,10 @@
 !
 !    internal:
 !
-!     real, allocatable :: twet(:)
-      real, parameter :: d00=0.0 
+!     real(kind=kind_phys), allocatable :: twet(:)
+      real(kind=kind_phys), parameter :: d00=0.0 
       integer karr,licee
-      real    tcold,twarm
+      real(kind=kind_phys)    tcold,twarm
 
 !    subroutines called:
 !     wetbulb
@@ -282,7 +286,7 @@
 !
 
       integer l,lice,iwrml,ifrzl
-      real    psfck,tdchk,a,tdkl,tdpre,tlmhk,twrmk,areas8,areap4,       &
+      real(kind=kind_phys)    psfck,tdchk,a,tdkl,tdpre,tlmhk,twrmk,areas8,areap4,       &
               surfw,surfc,dzkl,area1,pintk1,pintk2,pm150,pkl,tkl,qkl
 
 !      allocate ( twet(lm) )
@@ -486,27 +490,28 @@
 !      use params_mod
 !      use ctlblk_mod 
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      use machine , only : kind_phys
       implicit none
 !
-      real,parameter :: twice=266.55,rhprcp=0.80,deltag=1.02,             &
+      real(kind=kind_phys),parameter :: twice=266.55,rhprcp=0.80,deltag=1.02,             &
      &                  emelt=0.045,rlim=0.04,slim=0.85
-      real,parameter :: twmelt=273.15,tz=273.15,efac=1.0 ! specify in params now 
+      real(kind=kind_phys),parameter :: twmelt=273.15,tz=273.15,efac=1.0 ! specify in params now 
 !
       integer*4 i, k1, lll, k2, toodry
 !
-      real xxx ,mye, icefrac
+      real(kind=kind_phys) xxx ,mye, icefrac
       integer,            intent(in)  :: lm,lp1
-      real,dimension(lm), intent(in)  :: t,q,pmid,rh,td
-      real,dimension(lp1),intent(in)  :: pint
+      real(kind=kind_phys),dimension(lm), intent(in)  :: t,q,pmid,rh,td
+      real(kind=kind_phys),dimension(lp1),intent(in)  :: pint
       integer,            intent(out) :: ptyp
 !
-      real,dimension(lm)              :: tq,pq,rhq,twq
+      real(kind=kind_phys),dimension(lm)              :: tq,pq,rhq,twq
 !
       integer j,l,lev,ii
-      real    rhmax,twmax,ptop,dpdrh,twtop,rhtop,wgt1,wgt2,    &
+      real(kind=kind_phys)    rhmax,twmax,ptop,dpdrh,twtop,rhtop,wgt1,wgt2,    &
               rhavg,dtavg,dpk,ptw,pbot
-!     real b,qtmp,rate,qc
-      real,external :: xmytw
+!     real(kind=kind_phys) b,qtmp,rate,qc
+!
 !
 !  initialize.
       icefrac = -9999.
@@ -521,7 +526,7 @@
 !       causing problems later in this subroutine
 !        qtmp=max(h1m12,q(l))	
 !        rhqtmp(lev)=qtmp/qc
-	rhq(lev) = rh(l)
+        rhq(lev) = rh(l)
         pq(lev)  = pmid(l) * 0.01
         tq(lev)  = t(l)
       enddo
@@ -753,10 +758,11 @@
 !--------------------------------------------------------------------------
       function xmytw(t,td,p)
 !
+      use machine , only : kind_phys
       implicit none
 !
       integer*4 cflag, l
-      real   f, c0, c1, c2, k, kd, kw, ew, t, td, p, ed, fp, s,        &
+      real(kind=kind_phys)   f, c0, c1, c2, k, kd, kw, ew, t, td, p, ed, fp, s,        &
      &          de, xmytw
       data f, c0, c1, c2 /0.0006355, 26.66082, 0.0091379024, 6106.3960/
 !
@@ -877,19 +883,20 @@
 !! \cite bourgouin_2000.
 !of aes (canada) 1992
       subroutine calwxt_bourg(lm,lp1,rn,g,t,q,pmid,pint,zint,ptype)
+      use machine , only : kind_phys
       implicit none
 !
 !    input:
       integer,intent(in)              :: lm,lp1
-      real,intent(in)                 :: g,rn(2)
-      real,intent(in), dimension(lm)  :: t, q, pmid
-      real,intent(in), dimension(lp1) :: pint, zint
+      real(kind=kind_phys),intent(in)                 :: g,rn(2)
+      real(kind=kind_phys),intent(in), dimension(lm)  :: t, q, pmid
+      real(kind=kind_phys),intent(in), dimension(lp1) :: pint, zint
 !
 !    output:
       integer, intent(out)            :: ptype
 !
       integer ifrzl,iwrml,l,lhiwrm
-      real    pintk1,areane,tlmhk,areape,pintk2,surfw,area1,dzkl,psfck,r1,r2
+      real(kind=kind_phys)    pintk1,areane,tlmhk,areape,pintk2,surfw,area1,dzkl,psfck,r1,r2
 !
 !     initialize weather type array to zero (ie, off).
 !     we do this since we want ptype to represent the
@@ -1076,6 +1083,7 @@
 !     use params_mod
 !     use ctlblk_mod
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      use machine , only : kind_phys
       implicit none
 !
 !  list of variables needed
@@ -1087,9 +1095,9 @@
 !      t,q,pmid,htm,lmh,zint
 
       integer,intent(in)             :: lm,lp1
-      real,dimension(lm),intent(in)  ::  t,q,pmid,twet
-      real,dimension(lp1),intent(in) ::  pint,zint 
-      real,intent(in)                ::  d608,rog,epsq
+      real(kind=kind_phys),dimension(lm),intent(in)  ::  t,q,pmid,twet
+      real(kind=kind_phys),dimension(lp1),intent(in) ::  pint,zint 
+      real(kind=kind_phys),intent(in)                ::  d608,rog,epsq
 !    output:
 !      iwx - instantaneous weather type.
 !        acts like a 4 bit binary
@@ -1101,12 +1109,12 @@
       integer, intent(out) ::  iwx
 !    internal:
 !
-      real, parameter :: d00=0.0  
+      real(kind=kind_phys), parameter :: d00=0.0  
       integer karr,licee
-      real    tcold,twarm
+      real(kind=kind_phys)    tcold,twarm
 !
       integer l,lmhk,lice,iwrml,ifrzl
-      real    psfck,tdchk,a,tdkl,tdpre,tlmhk,twrmk,areas8,areap4,area1,   &
+      real(kind=kind_phys)    psfck,tdchk,a,tdkl,tdpre,tlmhk,twrmk,areas8,areap4,area1,   &
               surfw,surfc,dzkl,pintk1,pintk2,pm150,qkl,tkl,pkl,area0,areap0
 
 !    subroutines called:
@@ -1316,14 +1324,15 @@
 !       algorithms and sums them up to give a dominant type
 !
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      use machine , only : kind_phys
       implicit none
 !
 !    input:
       integer,intent(in)                 :: nalg
-      real,intent(out)                   :: doms,domr,domzr,domip
+      real(kind=kind_phys),intent(out)                   :: doms,domr,domzr,domip
       integer,dimension(nalg),intent(in) :: rain,snow,sleet,freezr
       integer l
-      real totsn,totip,totr,totzr
+      real(kind=kind_phys) totsn,totip,totr,totzr
 !--------------------------------------------------------------------------
 !      print* , 'into dominant'
       domr  = 0.
@@ -1377,3 +1386,4 @@
       return
       end
 !! @}
+end module calpreciptype_mod
