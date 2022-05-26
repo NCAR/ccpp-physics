@@ -126,6 +126,7 @@ contains
                    thsfc_loc ,prslkix ,prsik1x  ,prslk1x  ,                     &
                    psfc      ,pblhx  ,iz0tlnd   ,itime    ,                     &
                    sigmaf1 ,garea1   ,psi_opt   ,                               & ! in :
+                   ep_1      ,ep_2   ,cp        ,                               &
                    qsnow     ,sneqvo  ,albold   ,cm       ,ch      ,isnow     , & ! in/out : 
                    sneqv     ,smc     ,zsnso    ,snowh    ,snice   ,snliq     , & ! in/out :
                    tg        ,stc     ,sh2o     ,tauss    ,qsfc               , & ! in/out : 
@@ -174,6 +175,9 @@ contains
 
   real (kind=kind_phys)                           , intent(in)    :: psfc    !  surface pressure
   real (kind=kind_phys)                           , intent(in)    :: pblhx   !  pbl height
+  real (kind=kind_phys)                           , intent(in)    :: ep_1 
+  real (kind=kind_phys)                           , intent(in)    :: ep_2 
+  real (kind=kind_phys)                           , intent(in)    :: cp 
   integer                                         , intent(in)    :: iz0tlnd !  
   integer                                         , intent(in)    :: itime   !< timestep
 
@@ -286,6 +290,7 @@ contains
                          tbot      ,zbot    ,zsnso   ,dzsnso  ,sigmaf1 ,garea1  , & !in
                          thsfc_loc ,prslkix ,prsik1x ,prslk1x ,                   & !in
                          psfc      ,pblhx     ,iz0tlnd ,itime ,psi_opt ,          &
+                         ep_1, ep_2, cp,                                          & 
                          tg        ,stc     ,snowh   ,sneqv   ,sneqvo  ,sh2o    , & !inout
                          smc       ,snice   ,snliq   ,albold  ,cm      ,ch      , & !inout
 #ifdef CCPP
@@ -418,6 +423,7 @@ contains
                              tbot      ,zbot    ,zsnso   ,dzsnso  ,sigmaf1 ,garea1  , & !in
                              thsfc_loc ,prslkix ,prsik1x ,prslk1x ,                   & !in
                              psfc      ,pblhx   ,iz0tlnd ,itime   ,psi_opt          , &
+                             ep_1, ep_2, cp,                                          & 
                              tg        ,stc     ,snowh   ,sneqv   ,sneqvo  ,sh2o    , & !inout
                              smc       ,snice   ,snliq   ,albold  ,cm      ,ch      , & !inout
 #ifdef CCPP
@@ -469,6 +475,9 @@ contains
 
   real (kind=kind_phys)                              , intent(in)    :: pblhx   !< PBL height (m)
   real (kind=kind_phys)                              , intent(in)    :: psfc    !< surface pressure
+  real (kind=kind_phys)                              , intent(in)    :: ep_1 
+  real (kind=kind_phys)                              , intent(in)    :: ep_2 
+  real (kind=kind_phys)                              , intent(in)    :: cp 
   integer                                            , intent(in)    :: iz0tlnd !< z0t option
   integer                                            , intent(in)    :: itime   !< integration time
 
@@ -584,7 +593,7 @@ contains
                        eair      ,stc     ,sag     ,snowh   ,lathea  ,sh2o   ,       & !in
                        thsfc_loc ,prslkix ,prsik1x ,prslk1x ,                        &
                        psfc      ,pblhx   ,iz0tlnd ,itime   ,uu      ,vv     ,       &
-                       sigmaf1   ,garea1  ,psi_opt ,                                 & !in
+                       sigmaf1   ,garea1  ,psi_opt ,ep_1, ep_2, cp,                  & !in
 #ifdef CCPP
                        cm        ,ch      ,tg      ,qsfc    ,errmsg  ,errflg ,       & !inout
 #else
@@ -1022,7 +1031,7 @@ contains
                            eair      ,stc     ,sag     ,snowh   ,lathea  ,sh2o    ,       & !in
                            thsfc_loc ,prslkix ,prsik1x ,prslk1x ,                         &
                            psfc      ,pblhx   ,iz0tlnd ,itime   ,uu      ,vv     ,        &
-                           sigmaf1   ,garea1  ,psi_opt ,                                  & !in
+                           sigmaf1   ,garea1  ,psi_opt ,ep_1, ep_2, cp,                   & !in
 #ifdef CCPP
                            cm        ,ch      ,tgb     ,qsfc    ,errmsg  ,errflg  ,       & !inout
 #else
@@ -1078,6 +1087,9 @@ contains
 
   real (kind=kind_phys)                        , intent(in)    :: pblhx   !<
   real (kind=kind_phys)                        , intent(in)    :: psfc    !<
+  real (kind=kind_phys)                        , intent(in)    :: ep_1 
+  real (kind=kind_phys)                        , intent(in)    :: ep_2 
+  real (kind=kind_phys)                        , intent(in)    :: cp 
   integer                                      , intent(in)    :: iz0tlnd !<
   integer                                      , intent(in)    :: itime   !< integration time
   real (kind=kind_phys)                        , intent(in)    :: uu      !<
@@ -1266,6 +1278,7 @@ contains
 
           call sfcdif4(1  ,1  ,uu    ,vv    ,sfctmp ,       & !allow location for use in the driver
                       sfcprs ,psfc  ,pblhx  ,gdx   ,z0m  ,  &
+                      ep_1, ep_2, cp,                       &
                       itime  ,snwd  ,1      ,psi_opt,       &
                       tgb   ,qair   ,zlvl  ,iz0tlnd,qsfc ,  &  ! use zlvli?
                       h     ,qfx    ,cm    ,ch     ,ch2  ,  &  ! ch2 = cq2 most of times
