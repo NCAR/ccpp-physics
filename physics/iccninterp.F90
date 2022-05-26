@@ -143,8 +143,9 @@ contains
       real(kind=kind_phys) ciplout(npts,lev),cipm(npts,kcipl)
       real(kind=kind_phys) ccnout(npts,lev),ccnpm(npts,kcipl)
       real(kind=kind_phys) cipres(npts,kcipl), prsl(npts,lev)
-      real(kind=kind_phys) RINC(5), rjday
+      real(kind=kind_phys) rjday
       integer jdow, jdoy, jday
+      real(8) RINC(5)
       real(4) rinc4(5)
       integer w3kindreal,w3kindint
 !

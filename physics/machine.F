@@ -23,7 +23,7 @@
      &,                     kind_INTEGER = 4                             ! -,,-
 
 #else
-      integer, parameter :: kind_io4  = 4, kind_io8  = 8 , kind_ior = 8 &
+      integer, parameter :: kind_io4  = 4, kind_io8  = 4 , kind_ior = 8 &
      &,                     kind_evod = 4, kind_dbl_prec = 8            &
      &,                     kind_sngl_prec = 4
 # ifdef __PGI
