@@ -1,5 +1,5 @@
 /**
-\page GFS_UNIFIED_UGWP GFS Unified UGWP scheme
+\page GFS_UNIFIED_UGWP GFS Unified UGWP Scheme
 
 \section des_uugwp Description
 
