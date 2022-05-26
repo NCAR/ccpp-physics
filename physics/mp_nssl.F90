@@ -802,7 +802,7 @@ module mp_nssl
 !>@}
 
 #if 0
-!! \section arg_table_mp_nssl_finalize Argument Table
+!> \section arg_table_mp_nssl_finalize Argument Table
 !! \htmlinclude mp_nssl_finalize.html
 !!
 #endif

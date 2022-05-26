@@ -12,15 +12,9 @@
 
       private
 
-      public :: dcyc2t3_init, dcyc2t3_run, dcyc2t3_finalize
+      public :: dcyc2t3_run
 
       contains
-
-      subroutine dcyc2t3_init()
-      end subroutine dcyc2t3_init
-
-      subroutine dcyc2t3_finalize()
-      end subroutine dcyc2t3_finalize
 
 ! ===================================================================== !
 !  description:                                                         !

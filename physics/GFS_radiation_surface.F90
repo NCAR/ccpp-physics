@@ -193,7 +193,5 @@
 
       end subroutine GFS_radiation_surface_run
 
-       subroutine GFS_radiation_surface_finalize ()
-       end subroutine GFS_radiation_surface_finalize
 !> @}
        end module GFS_radiation_surface
