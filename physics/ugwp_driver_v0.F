@@ -1,5 +1,7 @@
 !>\file ugwp_driver_v0.F
-
+      module ugwp_driver_v0
+      use cires_orowam2017
+      contains
 !
 !=====================================================================
 !
@@ -1485,3 +1487,4 @@
        end subroutine fv3_ugwp_solv2_v0
 
       
+      end module ugwp_driver_v0

@@ -1194,6 +1194,29 @@
   type = real
   kind = kind_phys
   intent = out
+[aero_dir_fdb]
+  standard_name = do_smoke_aerosol_direct_feedback
+  long_name = flag for smoke and dust radiation feedback
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[smoke_ext]
+  standard_name = extinction_coefficient_in_air_due_to_smoke
+  long_name = extinction coefficient in air due to smoke
+  units = various
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[dust_ext]
+  standard_name = extinction_coefficient_in_air_due_to_dust
+  long_name = extinction coefficient in air due to dust
+  units = various
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
 [spp_wts_rad]
   standard_name = spp_weights_for_radiation_scheme
   long_name = spp weights for radiation scheme
@@ -1205,6 +1228,13 @@
 [spp_rad]
   standard_name = control_for_radiation_spp_perturbations
   long_name = control for radiation spp perturbations
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[rrfs_smoke_band]
+  standard_name = index_of_shortwave_band_affected_by_smoke
+  long_name = rrtmg band number that smoke and dust should affect
   units = count
   dimensions = ()
   type = integer
