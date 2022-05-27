@@ -1,3 +1,5 @@
+      module cires_orowam2017
+      contains
       subroutine oro_wam_2017(im, levs,npt,ipt, kref,kdt,me,master,
      &   dtp,dxres, taub, u1, v1, t1, xn, yn, bn2, rho, prsi, prsL, 
      &   del, sigma, hprime, gamma, theta,
@@ -384,3 +386,4 @@
       enddo
 !                
       end subroutine ugwpv0_tofd1d
+      end module cires_orowam2017
