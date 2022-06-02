@@ -30,7 +30,7 @@
         index_of_process_dfi_radar, ix_dfi_radar, dfi_radar_tten, radar_tten_limits, fhour, errmsg, errflg)
 !
       use machine, only: kind_phys
-
+      use calpreciptype_mod, only: calpreciptype
       implicit none
 
       integer, intent(in) :: im, levs, kdt, nrcm, nncl, ntcw, ntrac, num_dfi_radar, index_of_process_dfi_radar
