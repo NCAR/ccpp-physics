@@ -268,7 +268,7 @@ INPUT                  =  pdftxt/mainpage.txt              \
                         ../cu_gf_deep.F90   \
                         ../cu_gf_sh.F90     \
                         ../cu_gf_driver_post.F90 \
-                        ../mynnpbl_wrapper.F90 \
+                        ../mynnedmf_wrapper.F90 \
                         ../module_bl_mynn.F90   \
                         ../mynnsfc_wrapper.F90 \
                         ../module_sf_mynn.F90  \
