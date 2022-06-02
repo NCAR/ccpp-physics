@@ -28,8 +28,7 @@ A paper describing the latest changes and modifications is in process and will b
 \version CCPP v6.0.0
 
 - GPU capabilities have been added
-- Cap suppressing (\p do_cap_suppress) based on radar data assimilation has been added. This is used only for RAP suite and
-may be used for RRFS suite in the future
+- Cap suppressing (\p do_cap_suppress) based on radar data assimilation has been added. This is used only for the RAP suite
 - Some fixed parameters have been made scale-aware
 - Updated coupling between radiation and convection has been implemented 
 
