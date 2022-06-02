@@ -1,8 +1,6 @@
-! ########################################################################################
-! This module contains code to produce the UFS High/Mid/Low cloud-diagnostics. 
-! This was bundled together with the prognostic cloud modules within the RRTMG implementation.
-! For the RRTMGP implementation we propose to keep these diagnostics independent.
-! ########################################################################################
+!>\file GFS_cloud_diagnostics.F90
+!!
+
 module GFS_cloud_diagnostics
   use machine,                 only: kind_phys
   use physparam,               only: icldflg
@@ -29,14 +27,13 @@ module GFS_cloud_diagnostics
   public GFS_cloud_diagnostics_run, GFS_cloud_diagnostics_init,&
        GFS_cloud_diagnostics_finalize, hml_cloud_diagnostics_init
 contains
-  ! ######################################################################################
-  ! ######################################################################################
-  subroutine GFS_cloud_diagnostics_init()
-  end subroutine GFS_cloud_diagnostics_init
-  
-  ! ######################################################################################
-  ! ######################################################################################
-!! \section arg_table_GFS_cloud_diagnostics_run
+
+!>\defgroup gfs_cloud_diagnostics_mod GFS Cloud Diagnostics Module
+!> This module contains code to produce the UFS High/Mid/Low cloud-diagnostics.
+!! This was bundled together with the prognostic cloud modules within the RRTMG implementation.
+!! For the RRTMGP implementation we propose to keep these diagnostics independent.
+!> @{
+!> \section arg_table_GFS_cloud_diagnostics_run
 !! \htmlinclude GFS_cloud_diagnostics_run.html
 !!  
   subroutine GFS_cloud_diagnostics_run(nCol, nLev, iovr_rand, iovr_maxrand, iovr_max,    & 
@@ -118,13 +115,5 @@ contains
          iovr_exprand, cldsa, mtopa, mbota)	
     
   end subroutine GFS_cloud_diagnostics_run
-  
-  ! ######################################################################################
-  ! ######################################################################################
-  subroutine GFS_cloud_diagnostics_finalize()
-  end subroutine GFS_cloud_diagnostics_finalize
-  
-  ! ######################################################################################
-  ! Subroutine hml_cloud_diagnostics_initialize is removed (refer to GFS_rrtmgp_setup.F90) 
-  ! ######################################################################################
+!> @}
 end module GFS_cloud_diagnostics

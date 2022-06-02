@@ -8,13 +8,13 @@ and has been significantly improved over years at GFDL (Lord et al. (1984) \cite
 Krueger et al. (1995) \cite krueger_et_al_1995, Chen and Lin (2011) \cite chen_and_lin_2011, Chen and Lin (2013) \cite chen_and_lin_2013). 
 Physics processes of GFDL cloud MP are described in Figure 1 (also see warm_rain() and icloud()) and are feature with time-split between warm-rain (faster) and ice-phase (slower) processes (see 'conversion time scale' in gfdl_cloud_microphys.F90 for default values). 
 
-\image  html  gfdl_cloud_mp_diagram.png "Figure 1: GFDL MP at a glance (Courtesy of S.J. Lin at GFDL)" width=10cm
+\image  html  gfdl_cloud_mp_diagram.png "Figure 1: GFDL MP at a glance (Courtesy of S.J. Lin at GFDL)" width=900
 
 Some unique attributes of GFDL cloud microphysics include:
 
 # Precipitation and Cloud Effects on Dynamics
 
-\image html FV3_structure.png "Figure 1: FV3 structure; Yellow represents external API routines, called once per physics time step; Green are called once per remapping time step; Blue are called once per acoustic time step. " width=10cm
+\image html FV3_structure.png "Figure 1: FV3 structure; Yellow represents external API routines, called once per physics time step; Green are called once per remapping time step; Blue are called once per acoustic time step. " width=1200
 The leftmost column of Figure 1 shows the external API calls used during a typical process-split model integration procedure. First,
 the solver is called, which advances the solver a full "physics" time step. This updated state is then passed to the physical parameterization
 package, which then computes the physics tendencies over the same time interval. Finally, the tendencies are then used to update the 

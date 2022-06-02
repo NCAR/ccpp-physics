@@ -31,7 +31,7 @@
 
       end subroutine gwdc_init
 
-!> \defgroup GFS_gwdc_run GFS Convective Gravity Wave Drag Scheme Module
+!> \defgroup GFS_gwdc_run GFS Convective Gravity Wave Drag Module
 !! \brief This subroutine is the parameterization of convective gravity wave
 !! drag based on the theory given by Chun and Baik (1998)
 !! \cite chun_and_baik_1998 modified for implementation into the

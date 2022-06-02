@@ -29,14 +29,20 @@ Luo et al. 2003 \cite Luo_2003 ). The RUC LSM was also tested during the Snow Mo
 with emphasis on snow parameterizations for both grassland and forest locations in different parts of the world 
 (Etchevers et al. 2002, 2004 \cite Etchevers_2002 \cite Etchevers_2004; Essery et al. 2009 \cite Essery_2009 ; Rutter et al. 2009 \cite Rutter_2009 , 
 Krinner et al. 2018 \cite Krinner_2018 ). The analysis of RUC LSM performance over 10 reference sites in ESM-SnowMIP rated it on the 5th place 
-among the 26 participating models.
+among the 26 participating models. The results were published in Menard et al.(2021) \cite Menard_2021 and Essery et al. (2020) \cite essery_et_al_2020.
+RUC LSM received high rankings in ESM-SnowMIP experiement in terms of multi-year snow cover and surface temperature simulations
+for several sites located in different parts of the world (Menard et al.2021 \cite Menard_2021).
 
-In global application, RUC LSM is implemented in the Global Systems Division (GSD) physics suite for testing in the NOAA Next-Generation Global
-Prediction System (NGGPS)- FV3-GSD suite. To specify surface characteristics, RUC LSM uses the Land Data Sets provided by NCEP for Global
-Modeling Systems (see Figure 2 in \ref GFS_NOAH )
+RUC LSM is used in several weather prediction models around the world (Austria, New Zealand, Switzerland, RAP/HRRR in US). Recent RUC LSM implementation in the high-resolution model in the Swiss Alps led to some small modifications and adjustments to the snow model.
+These adjustments will be available in the next CCPP public release.
 
+
+Coupling of the RUC LSM to physically-based stochastic snow model (He et al.(2021) \cite he_et_al_2021) will be implemented in the next public release.
+
+The sensitivity of surface fluxes and turbine-height winds to the RUC LSM parameters has been explored by Geng Xia, NREL. This study
+will determine the uncertainty range for the selected parameters in the RUC LSM and will be described in the journal paper.
 ## RUC LSM characteristics that differ from NOAH LSM:
-\image html ruc_lsm_veg_soil.png "Figure 1. RUC LSM Vegetation and Soil Model (Courtesy of T.G. Smirnova) " width=10cm
+\image html ruc_lsm_veg_soil.png "Figure 1. RUC LSM Vegetation and Soil Model (Courtesy of T.G. Smirnova) " width=900
 - \b Implicit \b solution of energy and moisture budgets in the layer spanning the ground surface
 - \b 9 \b soil \b levels with high vertical resolution near surface
 RUC LSM has more levels in oil than \ref GFS_NOAH model with higher resolution near the interface with the atmosphere
@@ -56,7 +62,7 @@ in the computation of such parameters as roughness length, emissivity, soil poro
 roughness between the mosaic and dominant category presented on figure 2 is positive from contribution of the forests, which helped to 
 reduce high biases of surface wind speeds in these regions. Roughness lenghth has also seasonal variability in the cropland regions,
 which again helped to improve the wind forecasts during the warm season.
-\image html  ruc_lsm_heterogeneity.png "Figure 2:  sub-grid scale heterogeneity of surface parameters in RUC LSM (Courtesy of T.G. Smirnova)" width=10cm
+\image html  ruc_lsm_heterogeneity.png "Figure 2:  sub-grid scale heterogeneity of surface parameters in RUC LSM (Courtesy of T.G. Smirnova)" width=900
 
 - New: simple irrigation in the cropland area
 - New: water/snow intercepted by canopy as function of vegetation fraction and leaf area index (LAI)
@@ -70,7 +76,7 @@ Snow forms additional two layers on top of soil in RUC LSM
   - Seperate treatment of energy and moisture budgets for snow-covered and snow-free portions of the grid cell
   - Aggregate solutions at the end of time step
   - Reduced cold bias for areas with thin snow
-\image html ruc_lsm_mosaic.png "Figure 3: recent development: mosaic approach for patchy snow (Courtesy of T.G. Smirnova) " width=10cm
+\image html ruc_lsm_mosaic.png "Figure 3: recent development: mosaic approach for patchy snow (Courtesy of T.G. Smirnova) " width=900
 - Iterative snow melting algorithm
 - Density of snow on the ground - a function of compaction parameter and snow depth and temperature
 - Snow albedo - a function of temperature and snow fraction
@@ -82,7 +88,7 @@ Snow forms additional two layers on top of soil in RUC LSM
  \rho_{fr}=\rho_{sn}*\alpha_{sn}+\rho_{gr}*\alpha_{gr}+\rho_{ice}*\alpha_{ice}
 \f]
 - The depth of new snow is defined from its liquid equivalent and \f$\rho_{fr}\f$
-\image html ruc_lsm_frozen_precip.png "Figure 4: HRRR 23-h forecasts of snow accumulation, valid 08 UTC, 29 Dec 2015 (Courtesy of T.G. Smirnova)" width=10cm
+\image html ruc_lsm_frozen_precip.png "Figure 4: HRRR 23-h forecasts of snow accumulation, valid 08 UTC, 29 Dec 2015 (Courtesy of T.G. Smirnova)" width=900
 
 snow accumulation with variable density is provided as an additional product in the model guidance. Figure 4 shows one example of this product
 from the 23-h HRRR forecast for snowstorm on 29 Dec 2015. This product is in the middle panel. The panel on the left uses traditional 10:1 ratio,
@@ -91,10 +97,25 @@ snow accumulation, and high ammounts of snow in the product with 10:1 ratio are 
 precipitation had a high content of sleet. There is even larger improvement in the Chicago area, where observed and model precipitation were almost 
 totally sleet. 
 
+\section v6_updates_ruc Physics Updates
+\version CCPP V6.0.0
+- Initialization of land and ice emissivity with consideration of partial snow cover
+- Initialization of land and ice albedo with consideration of partial snow cover
+- Initialization of water vapor mixing ratio over land and ice
+- Changes in the computation of a flag for sea ice: it is set to true only if \p flag_cice = .false. (uncoupled sea ice model)
+- Introduced separate variables for sea ice, for example: \p showfallac is replaced with \p snowfallac_ice
+- Added accomodation of fractional surface grid (land and ice fractions are possible within the grid cell)
+- Introduced solar angle dependence of albedo for snow-free land
+- Introduced a SPP option for stochastic perturbations for emissivity, albedo and vegetation fraction
+- Bug fix in hydraulic conductivity
+- Based on RRFS testing, the coefficient in the soil resistance formulation (Sakaguchi and Zeng (2009) \cite sakaguchi_and_zeng_2009)
+was increased from 0.5 to 0.7 to increase soil resistance to evaporation
+
+
 \section intra_ruclsm Intraphysics Communication
-\ref arg_table_lsm_ruc_run
+- \ref arg_table_lsm_ruc_run
 
 \section gen_ruclsm General Algorithm
-\ref gen_lsmruc
+- module_sf_ruclsm::lsmruc
 
 */

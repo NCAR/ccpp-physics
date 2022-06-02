@@ -1,4 +1,4 @@
-!>  \file sfc_nst.f
+!>\file sfc_nst.f
 !!  This file contains the GFS NSST model.
 
 !> This module contains the CCPP-compliant GFS near-surface sea temperature scheme.
@@ -6,13 +6,14 @@
 
       contains
 
-!>\defgroup gfs_nst_main GFS Near-Surface Sea Temperature Scheme Module
-!> \brief This subroutine calls the Thermal Skin-layer and Diurnal Thermocline models to update the NSST profile.
+!>\defgroup gfs_nst_main_mod GFS Near-Surface Sea Temperature Module
+!! This module contains the CCPP-compliant GFS near-surface sea temperature scheme.
+!> @{
+!! This subroutine calls the Thermal Skin-layer and Diurnal Thermocline models to update the NSST profile.
 !! \section arg_table_sfc_nst_run Argument Table
 !! \htmlinclude sfc_nst_run.html
 !!
-!! \section NSST_general_algorithm GFS Near-Surface Sea Temperature Scheme General Algorithm
-!> @{
+!> \section NSST_general_algorithm GFS Near-Surface Sea Temperature Scheme General Algorithm
       subroutine sfc_nst_run                                            &
      &     ( im, hvap, cp, hfus, jcal, eps, epsm1, rvrdm1, rd, rhw0,    &  ! --- inputs:
      &       pi, tgice, sbc, ps, u1, v1, t1, q1, tref, cm, ch,          &
@@ -652,7 +653,7 @@ cc
         enddo
       endif                   ! if ( nstf_name1 > 1 ) then
 !
-!  include sea spray effects
+!> - Include sea spray effects
 !
       do i=1,im
         if(lseaspray .and. flag(i)) then

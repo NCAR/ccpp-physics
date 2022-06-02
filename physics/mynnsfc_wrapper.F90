@@ -11,9 +11,11 @@
 
       contains
 
+!>\defgroup mynn_sfc MYNN Surface Layer Module
+!> This scheme (1) performs pre-mynnsfc work, (2) runs the mynn sfc layer scheme, and (3) performs post-mynnsfc work
+!>@{
 !! \section arg_table_mynnsfc_wrapper_init Argument Table
 !! \htmlinclude mynnsfc_wrapper_init.html
-
 !!
       subroutine mynnsfc_wrapper_init(do_mynnsfclay, &
        &                             errmsg, errflg)
@@ -46,15 +48,9 @@
 
       end subroutine mynnsfc_wrapper_init
 
-      subroutine mynnsfc_wrapper_finalize ()
-      end subroutine mynnsfc_wrapper_finalize
-
-!>\defgroup mynn_sfc GSD MYNN Surface Layer Scheme Module
-!> \brief This scheme (1) performs pre-mynnsfc work, (2) runs the mynn sfc layer scheme, and (3) performs post-mynnsfc work
-!! \section arg_table_mynnsfc_wrapper_run Argument Table
+!> \section arg_table_mynnsfc_wrapper_run Argument Table
 !! \htmlinclude mynnsfc_wrapper_run.html
 !!
-!###===================================================================
 SUBROUTINE mynnsfc_wrapper_run(            &
      &  im,levs,                           &
      &  itimestep,iter,flag_iter,          &
@@ -398,6 +394,6 @@ SUBROUTINE mynnsfc_wrapper_run(            &
 
   END SUBROUTINE mynnsfc_wrapper_run
 
-!###=================================================================
+!>@}
 
 END MODULE mynnsfc_wrapper

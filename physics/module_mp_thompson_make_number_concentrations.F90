@@ -25,7 +25,11 @@ module module_mp_thompson_make_number_concentrations
 !+---+-----------------------------------------------------------------+ 
 
    contains
-
+!>\ingroup aathompson
+!!Table of lookup values of radiative effective radius of ice crystals
+!! as a function of Temperature from -94C to 0C.  Taken from WRF RRTMG
+!! radiation code where it is attributed to Jon Egill Kristjansson
+!! and coauthors.
       elemental real function make_IceNumber (Q_ice, temp)
 
       !IMPLICIT NONE
@@ -124,6 +128,8 @@ module module_mp_thompson_make_number_concentrations
 !+---+-----------------------------------------------------------------+ 
 !+---+-----------------------------------------------------------------+ 
 
+!>\ingroup aathompson
+!!
       elemental real function make_DropletNumber (Q_cloud, qnwfa)
 
       !IMPLICIT NONE
@@ -161,6 +167,8 @@ module module_mp_thompson_make_number_concentrations
 !+---+-----------------------------------------------------------------+ 
 !+---+-----------------------------------------------------------------+ 
 
+!>\ingroup aathompson
+!!
       elemental real function make_RainNumber (Q_rain, temp)
 
       IMPLICIT NONE

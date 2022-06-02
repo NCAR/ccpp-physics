@@ -1,15 +1,19 @@
-!>\file GFS_radiation_surface.f90
+!>\file GFS_radiation_surface.F90
 !! This file contains calls to module_radiation_surface::setemis() to set up
 !! surface emissivity for LW radiation and to module_radiation_surface::setalb()
 !! to set up surface albedo for SW radiation.
+
       module GFS_radiation_surface
 
       use machine,                   only: kind_phys
 
       contains
 
-!>\defgroup GFS_radiation_surface GFS radiation surface
-!! @{
+!>\defgroup GFS_radiation_surface_mod GFS Radiation Surface Module
+!! This module contains calls to module_radiation_surface::setemis() to set up
+!! surface emissivity for LW radiation and to module_radiation_surface::setalb()
+!! to set up surface albedo for SW radiation.
+!> @{
 !> \section arg_table_GFS_radiation_surface_init Argument Table
 !! \htmlinclude GFS_radiation_surface_init.html
 !!
@@ -189,7 +193,5 @@
 
       end subroutine GFS_radiation_surface_run
 
-       subroutine GFS_radiation_surface_finalize ()
-       end subroutine GFS_radiation_surface_finalize
-!! @}
+!> @}
        end module GFS_radiation_surface
