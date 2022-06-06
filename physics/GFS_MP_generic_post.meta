@@ -128,6 +128,13 @@
   dimensions = ()
   type = logical
   intent = in
+[progsigma]
+  standard_name = do_prognostic_updraft_area_fraction
+  long_name = flag for prognostic sigma in cumulus scheme
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [con_g]
   standard_name = gravitational_acceleration
   long_name = gravitational acceleration
@@ -724,6 +731,22 @@
   dimensions = ()
   type = logical
   intent = in
+[dqdt_qmicro]
+  standard_name = instantaneous_tendency_of_specific_humidity_due_to_microphysics
+  long_name = moisture tendency due to microphysics
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[prevsq]
+  standard_name = specific_humidity_on_previous_timestep
+  long_name = specific_humidity_on_previous_timestep
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
 [lssav]
   standard_name = flag_for_diagnostics
   long_name = logical flag for storing diagnostics
