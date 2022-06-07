@@ -383,7 +383,7 @@
 
 !  ---  public accessable subprograms
 
-      public rrtmg_lw_init, rrtmg_lw_run, rrtmg_lw_finalize, rlwinit
+      public rrtmg_lw_run, rrtmg_lw_finalize, rlwinit
 
 
 ! ================
