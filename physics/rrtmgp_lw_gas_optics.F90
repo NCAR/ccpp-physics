@@ -478,6 +478,7 @@ contains
 
 !> \section arg_table_rrtmgp_lw_gas_optics_run
 !! \htmlinclude rrtmgp_lw_gas_optics_run.html
+!! 
 !! Compute longwave optical prperties (optical-depth) for clear-sky conditions.
 !! \section rrtmgp_lw_gas_optics_run
   subroutine rrtmgp_lw_gas_optics_run(doLWrad, nCol, nLev, p_lay, p_lev, t_lay, t_lev, tsfg, &
