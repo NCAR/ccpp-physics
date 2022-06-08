@@ -404,7 +404,7 @@
 
 !  ---  public accessable subprograms
 
-      public rrtmg_sw_init, rrtmg_sw_run, rrtmg_sw_finalize, rswinit
+      public rrtmg_sw_run, rrtmg_sw_finalize, rswinit
 
 ! =================
       contains
