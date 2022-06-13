@@ -383,7 +383,7 @@
 
 !  ---  public accessable subprograms
 
-      public rrtmg_lw_run, rrtmg_lw_finalize, rlwinit
+      public rrtmg_lw_run, rlwinit
 
 
 ! ================
@@ -1303,10 +1303,6 @@
 !...................................
       end subroutine rrtmg_lw_run
 !-----------------------------------
-      subroutine rrtmg_lw_finalize ()
-      end subroutine rrtmg_lw_finalize 
-
-
 
 !> \ingroup module_radlw_main
 !> \brief This subroutine performs calculations necessary for the initialization
