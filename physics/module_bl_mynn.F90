@@ -3996,7 +3996,11 @@ CONTAINS
 
            !CLOUD WATER AND ICE
            IF (q1k < 0.) THEN        !unsaturated
+#ifdef SINGLE_PREC
+              ql_water = sgm(k)*EXP(1.2*q1k-1.)
+#else
               ql_water = sgm(k)*EXP(1.2*q1k-1)
+#endif
               ql_ice   = sgm(k)*EXP(1.2*q1k-1.)
            ELSE IF (q1k > 2.) THEN   !supersaturated
               ql_water = sgm(k)*q1k

@@ -384,6 +384,21 @@
   type = real
   kind = kind_phys
   intent = in
+[use_med_flux]
+  standard_name = do_mediator_atmosphere_ocean_fluxes
+  long_name = flag for using atmosphere-ocean fluxes from mediator
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[sfculw_med]
+  standard_name = surface_upwelling_longwave_flux_over_ocean_from_mediator
+  long_name = surface upwelling LW flux over ocean for coupling
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
 [fluxlwUP_jac]
   standard_name = RRTMGP_jacobian_of_lw_flux_upward
   long_name = RRTMGP Jacobian upward longwave flux profile

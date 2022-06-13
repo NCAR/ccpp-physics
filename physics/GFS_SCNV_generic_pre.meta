@@ -162,6 +162,13 @@
   dimensions = ()
   type = logical
   intent = in
+[ntsigma]
+  standard_name = index_of_updraft_area_fraction_in_tracer_concentration_array
+  long_name = tracer index of updraft_area_fraction
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
 [ntcw]
   standard_name = index_of_cloud_liquid_water_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for cloud condensate (or liquid water)
