@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = samfshalcnv
   type = scheme
-  dependencies = funcphys.f90,machine.F,samfaerosols.F
+  dependencies = funcphys.f90,machine.F,samfaerosols.F,progsigma_calc.f90
 
 ########################################################################
 [ccpp-arg-table]
@@ -54,6 +54,36 @@
   units = count
   dimensions = ()
   type = integer
+  intent = in
+[first_time_step]
+  standard_name = flag_for_first_timestep
+  long_name = flag for first time step for time integration loop (cold/warmstart)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[restart]
+  standard_name = flag_for_restart
+  long_name = flag for restart (warmstart) or coldstart
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[tmf]
+  standard_name = instantaneous_tendency_of_specific_humidity_due_to_PBL
+  long_name = instantaneous_tendency_of_specific_humidity_due_to_PBL
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[qmicro]
+  standard_name = instantaneous_tendency_of_specific_humidity_due_to_microphysics
+  long_name = moisture tendency due to microphysics
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
   intent = in
 [itc]
   standard_name = index_of_first_chemical_tracer_for_convection
@@ -219,6 +249,22 @@
   type = real
   kind = kind_phys
   intent = inout
+[prevsq]
+  standard_name = specific_humidity_on_previous_timestep
+  long_name = specific_humidity_on_previous_timestep
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[q]
+  standard_name = specific_humidity
+  long_name = water vapor specific humidity
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
 [q1]
   standard_name = specific_humidity_of_new_state
   long_name = updated vapor specific humidity
@@ -413,6 +459,29 @@
   dimensions = ()
   type = logical
   intent = in
+[progsigma]
+  standard_name = do_prognostic_updraft_area_fraction
+  long_name = flag for prognostic sigma in cumulus scheme
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[sigmain]
+  standard_name = prognostic_updraft_area_fraction_in_convection
+  long_name = convective updraft area fraction
+  units = frac
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[sigmaout]
+  standard_name = updraft_area_fraction_updated_by_physics
+  long_name = convective updraft area fraction updated by physics
+  units = frac
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

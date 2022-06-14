@@ -264,6 +264,7 @@ contains
 
         do i=1,im
           if (islmsk(i) == 1) then
+          !-- land
             zorl(i)   = zorll(i)
             cd(i)     = cd_lnd(i)
             cdq(i)    = cdq_lnd(i)
@@ -289,6 +290,7 @@ contains
             hice(i)   = zero
             cice(i)   = zero
           elseif (islmsk(i) == 0) then
+          !-- water
             zorl(i)   = zorlo(i)
             cd(i)     = cd_wat(i)
             cdq(i)    = cdq_wat(i)
@@ -315,6 +317,7 @@ contains
             hice(i)   = zero
             cice(i)   = zero
           else ! islmsk(i) == 2
+          !-- ice
             zorl(i)   = zorli(i)
             cd(i)     = cd_ice(i)
             cdq(i)    = cdq_ice(i)

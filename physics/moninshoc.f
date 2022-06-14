@@ -4,6 +4,9 @@
 !> This module contains the CCPP-compliant SHOC scheme.
       module moninshoc
 
+      use mfpbl_mod
+      use tridi_mod
+
       contains
 
       subroutine moninshoc_init (do_shoc, errmsg, errflg)

@@ -285,7 +285,8 @@
       use mersenne_twister, only : random_setseed, random_number,       &
      &                             random_stat
       use machine,          only : kind_phys,                           &
-     &                             im => kind_io4, rb => kind_phys
+     &                             im => kind_io4, rb => kind_phys,     &
+     &                             kind_dbl_prec
 
       use module_radlw_parameters
 !
@@ -1914,9 +1915,10 @@
       logical, dimension(ngptlw,nlay), intent(out) :: lcloudy
 
 !  ---  locals:
-      real (kind=kind_phys) :: cdfunc(ngptlw,nlay), rand1d(ngptlw),     &
-     &       rand2d(nlay*ngptlw), tem1, fac_lcf(nlay),                  &
+      real (kind=kind_phys) :: cdfunc(ngptlw,nlay),                     &
+     &                            tem1, fac_lcf(nlay),                  &
      &       cdfun2(ngptlw,nlay)
+      real (kind=kind_dbl_prec) rand2d(nlay*ngptlw), rand1d(ngptlw)
 
       type (random_stat) :: stat          ! for thread safe random generator
 

@@ -111,10 +111,6 @@ MODULE module_sf_mynn
   INTEGER, PARAMETER :: debug_code = 0  !0: no extra ouput
                                         !1: check input
                                         !2: everything - heavy I/O
-  LOGICAL, PARAMETER :: compute_diag = .false.
-  LOGICAL, PARAMETER :: compute_flux = .false.  !shouldn't need compute 
-               ! these in FV3. They will be written over anyway.
-               ! Computing the fluxes here is leftover from the WRF world.
 
   REAL,   DIMENSION(0:1000 ),SAVE :: psim_stab,psim_unstab, &
                                      psih_stab,psih_unstab
@@ -132,10 +128,11 @@ CONTAINS
               CP,G,ROVCP,R,XLV,                      & !in
               SVP1,SVP2,SVP3,SVPT0,EP1,EP2,KARMAN,   & !in
               ISFFLX,isftcflx,lsm,lsm_ruc,           & !in
+              compute_flux,compute_diag,             & !in
               iz0tlnd,psi_opt,                       & !in
-     &        sigmaf,vegtype,shdmax,ivegsrc,         & !intent(in)
-     &        z0pert,ztpert,                         & !intent(in)
-     &        redrag,sfc_z0_type,                    & !intent(in)
+              sigmaf,vegtype,shdmax,ivegsrc,         & !intent(in)
+              z0pert,ztpert,                         & !intent(in)
+              redrag,sfc_z0_type,                    & !intent(in)
               itimestep,iter,flag_iter,              & !in
                     wet,       dry,       icy,       & !intent(in)
               tskin_wat, tskin_lnd, tskin_ice,       & !intent(in)
@@ -273,8 +270,9 @@ CONTAINS
       REAL,     INTENT(IN)   ::        CP,G,ROVCP,R,XLV !,DX
 !NAMELIST/CONFIGURATION OPTIONS:
       INTEGER,  INTENT(IN)   ::        ISFFLX, LSM, LSM_RUC
-      INTEGER,  OPTIONAL,  INTENT(IN)   :: ISFTCFLX, IZ0TLND
-      INTEGER,  OPTIONAL,  INTENT(IN)   :: spp_sfc, psi_opt
+      INTEGER,  OPTIONAL, INTENT(IN) :: ISFTCFLX, IZ0TLND
+      INTEGER,  OPTIONAL, INTENT(IN) :: spp_sfc, psi_opt
+      logical,  intent(in)   ::        compute_flux,compute_diag
       integer, intent(in) :: ivegsrc
       integer, intent(in) :: sfc_z0_type ! option for calculating surface roughness length over ocean
       logical, intent(in) :: redrag ! reduced drag coeff. flag for high wind over sea (j.han)
@@ -441,6 +439,7 @@ CONTAINS
            CP,G,ROVCP,R,XLV,SVP1,SVP2,SVP3,SVPT0,               &
            EP1,EP2,KARMAN,                                      &
            ISFFLX,isftcflx,iz0tlnd,psi_opt,                     &
+           compute_flux,compute_diag,                           &
            sigmaf,vegtype,shdmax,ivegsrc,                       &  !intent(in)
            z0pert,ztpert,                                       &  !intent(in)
            redrag,sfc_z0_type,                                  &  !intent(in)
@@ -488,6 +487,7 @@ CONTAINS
              CP,G,ROVCP,R,XLV,SVP1,SVP2,SVP3,SVPT0,               &
              EP1,EP2,KARMAN,                                      &
              ISFFLX,isftcflx,iz0tlnd,psi_opt,                     &
+             compute_flux,compute_diag,                           &
              sigmaf,vegtype,shdmax,ivegsrc,                       &  !intent(in)
              z0pert,ztpert,                                       &  !intent(in)
              redrag,sfc_z0_type,                                  &  !intent(in)
@@ -543,6 +543,7 @@ CONTAINS
 !-----------------------------
       INTEGER,  INTENT(IN) :: ISFFLX
       INTEGER,  OPTIONAL,  INTENT(IN )   ::     ISFTCFLX, IZ0TLND
+      logical, intent(in)                :: compute_flux,compute_diag
       INTEGER,    INTENT(IN)             ::     spp_sfc, psi_opt
       integer, intent(in) :: ivegsrc
       integer, intent(in) :: sfc_z0_type ! option for calculating surface roughness length over ocean
@@ -847,8 +848,8 @@ CONTAINS
 
       DO I=its,ite
          ! CONVERT LOWEST LAYER TEMPERATURE TO POTENTIAL TEMPERATURE:     
-         TH1D(I)=T1D(I)*THCON(I)                !(Theta, K)
-         TC1D(I)=T1D(I)-273.15                  !(T, Celsius)    
+         TH1D(I)=T1D(I)*(100000./P1D(I))**ROVCP  !(Theta, K)
+         TC1D(I)=T1D(I)-273.15                   !(T, Celsius)
       ENDDO
 
       DO I=its,ite
@@ -858,7 +859,7 @@ CONTAINS
       ENDDO
 
       DO I=its,ite
-         RHO1D(I)=PSFCPA(I)/(R*TV1D(I))  !now using value calculated in sfc driver
+         RHO1D(I)=P1D(I)/(R*TV1D(I))     !now using value calculated in sfc driver
          ZA(I)=0.5*dz8w1d(I)             !height of first half-sigma level 
          ZA2(I)=dz8w1d(I) + 0.5*dz2w1d(I)    !height of 2nd half-sigma level
          GOVRTH(I)=G/TH1D(I)
@@ -1723,9 +1724,9 @@ CONTAINS
     IF (wet(I)) THEN
        ! TO PREVENT OSCILLATIONS AVERAGE WITH OLD VALUE 
        OLDUST = UST_wat(I)
-       UST_wat(I)=0.5*UST_wat(I)+0.5*KARMAN*WSPD(I)/PSIX_wat(I)
+       !UST_wat(I)=0.5*UST_wat(I)+0.5*KARMAN*WSPD(I)/PSIX_wat(I)
        !NON-AVERAGED: 
-       !UST_wat(I)=KARMAN*WSPD(I)/PSIX_wat(I)
+       UST_wat(I)=KARMAN*WSPD(I)/PSIX_wat(I)
        stress_wat(i)=ust_wat(i)**2
 
        ! Compute u* without vconv for use in HFX calc when isftcflx > 0           
@@ -1890,7 +1891,8 @@ CONTAINS
             !----------------------------------
             ! COMPUTE SURFACE HEAT FLUX:
             !----------------------------------
-            HFX(I)=FLHC(I)*(THSK_lnd(I)-TH1D(I))
+            !HFX(I)=FLHC(I)*(THSK_lnd(I)-TH1D(I))
+            HFX(I)=RHO1D(I)*CPM(I)*KARMAN*WSPD(i)/PSIX_lnd(I)*KARMAN/PSIT_lnd(I)*(THSK_lnd(I)-TH1D(i))
             HFX(I)=MAX(HFX(I),-250.)
             ! BWG, 2020-06-17: Mod next 2 lines for fractional
             HFLX_lnd(I)=HFX(I)/(RHO1D(I)*cpm(I))
@@ -1934,7 +1936,8 @@ CONTAINS
             !----------------------------------
             ! COMPUTE SURFACE HEAT FLUX:       
             !----------------------------------
-            HFX(I)=FLHC(I)*(THSK_wat(I)-TH1D(I))
+            !HFX(I)=FLHC(I)*(THSK_wat(I)-TH1D(I))
+            HFX(I)=RHO1D(I)*CPM(I)*KARMAN*WSPD(i)/PSIX_wat(I)*KARMAN/PSIT_wat(I)*(THSK_wat(I)-TH1D(i))
             IF ( PRESENT(ISFTCFLX) ) THEN
                IF ( ISFTCFLX.NE.0 ) THEN
                   ! AHW: add dissipative heating term
@@ -1981,7 +1984,8 @@ CONTAINS
             !----------------------------------
             ! COMPUTE SURFACE HEAT FLUX:
             !----------------------------------
-            HFX(I)=FLHC(I)*(THSK_ice(I)-TH1D(I))
+            !HFX(I)=FLHC(I)*(THSK_ice(I)-TH1D(I))
+            HFX(I)=RHO1D(I)*CPM(I)*KARMAN*WSPD(i)/PSIX_ice(I)*KARMAN/PSIT_ice(I)*(THSK_ice(I)-TH1D(i))
             HFX(I)=MAX(HFX(I),-250.)
             ! BWG, 2020-06-17: Mod next 2 lines for fractional
             HFLX_ice(I)=HFX(I)/(RHO1D(I)*cpm(I))
@@ -2418,7 +2422,7 @@ END SUBROUTINE SFCLAY1D_mynn
        REAL, INTENT(IN)  :: ustar, visc, wsp10, zu
        REAL, INTENT(OUT) :: Z_0
        REAL, PARAMETER   :: G=9.81
-       REAL, PARAMETER   :: m=0.017, b=-0.005
+       REAL, PARAMETER   :: m=0.0017, b=-0.005
        REAL              :: CZC    ! variable charnock "constant"
        REAL              :: wsp10m ! logarithmically calculated 10 m
 
