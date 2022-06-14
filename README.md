@@ -7,7 +7,7 @@ Please see more information about the CCPP at the locations below.
 - [CCPP website hosted by the Developmental Testbed Center (DTC)](https://dtcenter.org/ccpp)
 - [CCPP public release information](https://dtcenter.org/community-code/common-community-physics-package-ccpp/download)
 - [CCPP Technical Documentation](https://ccpp-techdoc.readthedocs.io/en/v6.0.0/)
-- [CCPP Scientific Documentation](https://dtcenter.ucar.edu/GMTB/v6.0.0p/sci_doc/html/)
+- [CCPP Scientific Documentation](https://dtcenter.ucar.edu/GMTB/v6.0.0/sci_doc/index.html)
 - [CCPP Physics GitHub wiki](https://github.com/NCAR/ccpp-physics/wiki)
 - [CCPP Framework GitHub wiki](https://github.com/NCAR/ccpp-framework/wiki)
 
