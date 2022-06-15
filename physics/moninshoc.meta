@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = moninshoc
   type = scheme
-  dependencies = funcphys.f90,machine.F,tridi.f
+  dependencies = funcphys.f90,machine.F,mfpbl.f,tridi.f
 
 ########################################################################
 [ccpp-arg-table]
