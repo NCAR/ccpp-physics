@@ -4517,7 +4517,7 @@ endif   ! croptype == 0
   real (kind=kind_phys), intent(in   ) :: prslkix ! in exner function
   real (kind=kind_phys), intent(in   ) :: prsik1x ! in exner function
   real (kind=kind_phys), intent(in   ) :: prslk1x ! in exner function
-  integer (kind=kind_phys), intent(in   ) :: vegtyp 
+  integer , intent(in   ) :: vegtyp 
   real (kind=kind_phys), intent(in   ) :: fveg 
   real (kind=kind_phys), intent(in   ) :: shdfac 
   real (kind=kind_phys), intent(in   ) :: garea1 
@@ -5380,8 +5380,8 @@ endif   ! croptype == 0
 ! inputs
 
   type (noahmp_parameters), intent(in) :: parameters
-    integer (kind=kind_phys), intent(in   ) :: vegtyp      ! vegetation type
-    integer (kind=kind_phys), intent(in   ) :: icom        ! 0=bared 1=vege 2=composition
+    integer , intent(in   ) :: vegtyp      ! vegetation type
+    integer , intent(in   ) :: icom        ! 0=bared 1=vege 2=composition
     real (kind=kind_phys), intent(in   ) :: fveg      ! green vegetation fraction [0.0-1.0]
     real (kind=kind_phys), intent(in   ) :: z0m       ! z0 momentum (m)
     real (kind=kind_phys), intent(in   ) :: z0mg      ! z0 momentum, ground (m)
