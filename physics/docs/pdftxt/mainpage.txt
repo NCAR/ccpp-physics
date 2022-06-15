@@ -25,7 +25,7 @@ by the Development Testbed Center (DTC), supports suites:
 - \ref rap_suite_page 
 
 while the UFS Short-Range Weather Application 2.0 supports suites \ref GFS_v16_page, \ref HRRR_suite_page, \ref RRFS_v1beta_page and 
-\ref WoFS_v0_page. The UFS Medium-Range Weather Application 2.0 supports suite \ref GFS_v17_p8_page.
+\ref WoFS_v0_page.
 
 New schemes and capability highlights in this release:
 - \ref NSSLMICRO_page

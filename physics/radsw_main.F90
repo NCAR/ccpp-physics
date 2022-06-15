@@ -1384,7 +1384,6 @@
       subroutine rrtmg_sw_finalize ()
       end subroutine rrtmg_sw_finalize
 
-
 !>\ingroup module_radsw_main
 !> This subroutine initializes non-varying module variables, conversion
 !! factors, and look-up tables.

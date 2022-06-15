@@ -1306,8 +1306,6 @@
       subroutine rrtmg_lw_finalize ()
       end subroutine rrtmg_lw_finalize 
 
-
-
 !> \ingroup module_radlw_main
 !> \brief This subroutine performs calculations necessary for the initialization
 !! of the longwave model, which includes non-varying model variables, conversion
