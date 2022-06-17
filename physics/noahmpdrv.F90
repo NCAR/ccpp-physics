@@ -780,7 +780,7 @@ do i = 1, im
 
         call noahmp_options_glacier(iopt_alb, iopt_snf, iopt_tbot, iopt_stc, iopt_gla, &
                                     iopt_sfc ,iopt_trs)
-
+        vegetation_frac = 0.0
         call noahmp_glacier (                                                                      &
           i_location           ,1                    ,cosine_zenith        ,nsnow                , &
           nsoil                ,timestep             ,                                             &
@@ -853,6 +853,8 @@ do i = 1, im
         tskin(i)               = temperature_ground
         surface_temperature    = temperature_ground
         vegetation_fraction    = vegetation_frac
+        ch_vegetated           = 0.0
+        ch_bare_ground         = ch_noahmp
 
       else  ! not glacier
 
@@ -1089,7 +1091,7 @@ do i = 1, im
               ch(i)=ch(i)/wspd1
               cm(i)=cm(i)/wspd1
 
-              ch(i) = ch_vegetated * vegetation_frac + ch_bare_ground*(1.0-vegetation_frac)
+              ch(i) = ch_vegetated * vegetation_fraction + ch_bare_ground*(1.0-vegetation_fraction)
 
           rah_total = max(1.0,1.0/( ch(i)*wind(i)) )
           cah_total = density * con_cp /rah_total

@@ -173,7 +173,7 @@ use sfc_diff, only   : stability
 
   real (kind=kind_phys), parameter :: grav   = 9.80616   !< acceleration due to gravity (m/s2)
   real (kind=kind_phys), parameter :: sb     = 5.67e-08  !< stefan-boltzmann constant (w/m2/k4)
-  real (kind=kind_phys), parameter :: vkc    = 0.40      !< von vkc constant
+  real (kind=kind_phys), parameter :: vkc    = 0.40      !< von karman constant
   real (kind=kind_phys), parameter :: tfrz   = 273.16    !< freezing/melting point (k)
   real (kind=kind_phys), parameter :: hsub   = 2.8440e06 !< latent heat of sublimation (j/kg)
   real (kind=kind_phys), parameter :: hvap   = 2.5104e06 !< latent heat of vaporization (j/kg)
@@ -717,7 +717,7 @@ contains
   logical                             :: dveg_active !< flag to run dynamic vegetation
   logical                             :: crop_active !< flag to run crop model
 ! add canopy heat storage (C.He added based on GY Niu's communication)
-  real                                :: canhs ! canopy heat storage change w/m2
+  real (kind=kind_phys)               :: canhs ! canopy heat storage change w/m2
   
   ! intent (out) variables need to be assigned a value.  these normally get assigned values
   ! only if dveg == 2.
@@ -4018,6 +4018,7 @@ endif   ! croptype == 0
 !           z0hg = z0mg   !* exp(-czil*0.4*258.2*sqrt(fv*z0mg))
 !      end if
 
+
       call thermalz0(parameters,fveg,z0m,z0mg,zlvl,zpd,zpd,ustarx,          & !in
                        vegtyp,vaie,ur,csigmaf0,csigmaf1,temptrs,temptrs,temptrs,0, & !in
                        z0mo,z0hg)
@@ -4576,7 +4577,6 @@ endif   ! croptype == 0
 !       else
 !           z0h = z0m !* exp(-czil*0.4*258.2*sqrt(fv*z0m))
 !       end if
-
       call thermalz0(parameters,fveg,z0m,z0m,zlvl,zpd,zpd,ustarx,          & !in
                        vegtyp,0.,ur,csigmaf0,csigmaf1,temptrs,temptrs,temptrs,0, & !in
                        z0mo,z0h)
@@ -7688,7 +7688,7 @@ endif   ! croptype == 0
    real (kind=kind_phys), dimension(-nsnow+1:0) :: epore     !effective porosity = porosity - vol_ice
    real (kind=kind_phys) :: propor, temp
    real (kind=kind_phys) :: ponding1, ponding2
-   REAL, PARAMETER :: max_liq_mass_fraction = 0.4
+   real (kind=kind_phys), parameter :: max_liq_mass_fraction = 0.4
 ! ----------------------------------------------------------------------
 
 !for the case when sneqv becomes '0' after 'combine'
@@ -10229,12 +10229,12 @@ end subroutine psn_crop
          endif                                     !done INIT if itime=1
 ! convert (tah or tgb = tsk) temperature to potential temperature.                                                                    
    tgdsa = tsk              
-   thgb  = tsk*(p1000mb/psfcpa)**cpair  !psfcpa is pa
+   thgb  = tsk*(p1000mb/psfcpa)**(rair/cpair)  !psfcpa is pa
                                    
 ! store virtual, virtual potential and potential temperature
 
    pl    = p1d/1000.                                                                                                      
-   thx   = t1d*(p1000mb*0.001/pl)**cpair                                                                                        
+   thx   = t1d*(p1000mb*0.001/pl)**(rair/cpair)                                                                                        
    t1dc  = t1d - 273.15
 
    thvx  = thx*(1.+ep_1*qx)           !qx is SH from input     
@@ -10348,6 +10348,7 @@ end subroutine psn_crop
 ! --------- 
 ! calculate bulk richardson no. of surface layer,                                                                         
 ! according to akb(1976), eq(12).                                                                                         
+
 
        gz1oz0= log((za+znt)/znt)
        gz1ozt= log((za+znt)/zt)
@@ -10551,14 +10552,14 @@ end subroutine psn_crop
         & landsea,iz0tlnd2,spp_pbl,rstoch)
 
        implicit none
-       real, intent(in) :: z_0,restar,ustar,vkc,landsea
+       real (kind=kind_phys), intent(in) :: z_0,restar,ustar,vkc,landsea
        integer, optional, intent(in)::  iz0tlnd2
-       real, intent(out) :: zt,zq
-       real :: czil  !=0.100 in chen et al. (1997)
+       real (kind=kind_phys), intent(out) :: zt,zq
+       real (kind=kind_phys) :: czil  !=0.100 in chen et al. (1997)
                      !=0.075 in zilitinkevich (1995)
                      !=0.500 in lemone et al. (2008)
        integer,  intent(in)  ::    spp_pbl
-       real,     intent(in)  ::    rstoch
+       real (kind=kind_phys),     intent(in)  ::    rstoch
 
 
        if (landsea-1.5 .gt. 0) then    !water
@@ -10596,6 +10597,7 @@ end subroutine psn_crop
           zq = z_0*exp(-vkc*czil*sqrt(restar))
           zq = min( zq, 0.75*z_0)
 
+
 ! stochastically perturb thermal and moisture roughness length.
 ! currently set to half the amplitude: 
           if (spp_pbl==1) then
@@ -10615,10 +10617,10 @@ end subroutine psn_crop
    subroutine garratt_1992(zt,zq,z_0,ren,landsea)
 
        implicit none
-       real, intent(in)  :: ren, z_0,landsea
-       real, intent(out) :: zt,zq
-       real :: rq
-       real, parameter  :: e=2.71828183
+       real (kind=kind_phys), intent(in)  :: ren, z_0,landsea
+       real (kind=kind_phys), intent(out) :: zt,zq
+       real (kind=kind_phys) :: rq
+       real (kind=kind_phys), parameter  :: e=2.71828183
 
        if (landsea-1.5 .gt. 0) then    !water
 
@@ -10665,14 +10667,14 @@ end subroutine psn_crop
        subroutine yang_2008(z_0,zt,zq,ustar,tstar,qst,ren,visc)
 
        implicit none
-       real, intent(in)  :: z_0, ren, ustar, tstar, qst, visc
-       real              :: ht,     &! roughness height at critical reynolds number
+       real (kind=kind_phys), intent(in)  :: z_0, ren, ustar, tstar, qst, visc
+       real (kind=kind_phys)              :: ht,     &! roughness height at critical reynolds number
                             tstar2, &! bounded t*, forced to be non-positive
                             qstar2, &! bounded q*, forced to be non-positive
                             z_02,   &! bounded z_0 for variable renc2 calc
                             renc2    ! variable renc, function of z_0
-       real, intent(out) :: zt,zq
-       real, parameter  :: renc=300., & !old constant renc
+       real (kind=kind_phys), intent(out) :: zt,zq
+       real (kind=kind_phys), parameter  :: renc=300., & !old constant renc
                            beta=1.5,  & !important for diurnal variation
                            m=170.,    & !slope for renc2 function
                            b=691.       !y-intercept for renc2 function
@@ -10703,15 +10705,15 @@ end subroutine psn_crop
     subroutine andreas_2002(z_0,bvisc,ustar,zt,zq)
 
        implicit none
-       real, intent(in)  :: z_0, bvisc, ustar
-       real, intent(out) :: zt, zq
-       real :: ren2, zntsno
+       real (kind=kind_phys), intent(in)  :: z_0, bvisc, ustar
+       real (kind=kind_phys), intent(out) :: zt, zq
+       real (kind=kind_phys):: ren2, zntsno
 
-       real, parameter  :: bt0_s=1.25,  bt0_t=0.149,  bt0_r=0.317,  &
+       real (kind=kind_phys), parameter  :: bt0_s=1.25,  bt0_t=0.149,  bt0_r=0.317,  &
                            bt1_s=0.0,   bt1_t=-0.55,  bt1_r=-0.565, &
                            bt2_s=0.0,   bt2_t=0.0,    bt2_r=-0.183
 
-       real, parameter  :: bq0_s=1.61,  bq0_t=0.351,  bq0_r=0.396,  &
+       real (kind=kind_phys), parameter  :: bq0_s=1.61,  bq0_t=0.351,  bq0_r=0.396,  &
                            bq1_s=0.0,   bq1_t=-0.628, bq1_r=-0.512, &
                            bq2_s=0.0,   bq2_t=0.0,    bq2_r=-0.180
 
@@ -10753,16 +10755,16 @@ end subroutine psn_crop
     subroutine li_etal_2010(zl, rib, zaz0, z0zt)
 
        implicit none
-       real, intent(out)  :: zl
-       real, intent(in) :: rib, zaz0, z0zt
-       real :: alfa, beta, zaz02, z0zt2
-       real, parameter  :: au11=0.045, bu11=0.003, bu12=0.0059, &
+       real (kind=kind_phys), intent(out)  :: zl
+       real (kind=kind_phys), intent(in) :: rib, zaz0, z0zt
+       real (kind=kind_phys) :: alfa, beta, zaz02, z0zt2
+       real (kind=kind_phys), parameter  :: au11=0.045, bu11=0.003, bu12=0.0059, &
                           &bu21=-0.0828, bu22=0.8845, bu31=0.1739, &
                           &bu32=-0.9213, bu33=-0.1057
-       real, parameter  :: aw11=0.5738, aw12=-0.4399, aw21=-4.901,&
+       real (kind=kind_phys), parameter  :: aw11=0.5738, aw12=-0.4399, aw21=-4.901,&
                           &aw22=52.50, bw11=-0.0539, bw12=1.540, &
                           &bw21=-0.669, bw22=-3.282
-       real, parameter  :: as11=0.7529, as21=14.94, bs11=0.1569,&
+       real (kind=kind_phys), parameter  :: as11=0.7529, as21=14.94, bs11=0.1569,&
                           &bs21=-0.3091, bs22=-1.303
           
        !set limits according to li et al (2010), p 157.
@@ -10807,7 +10809,7 @@ end subroutine psn_crop
 
     end subroutine li_etal_2010
 !-------------------------------------------------------------------
-      real function zolri(ri,za,z0,zt,zol1,psi_opt)
+      real*8 function zolri(ri,za,z0,zt,zol1,psi_opt)
 
       ! this iterative algorithm was taken from the revised surface layer 
       ! scheme in wrf-arw, written by pedro jimenez and jimy dudhia and 
@@ -10816,9 +10818,9 @@ end subroutine psn_crop
       ! estimate of z/l.
 
       implicit none
-      real, intent(in) :: ri,za,z0,zt,zol1
+      real (kind=kind_phys), intent(in) :: ri,za,z0,zt,zol1
       integer, intent(in) :: psi_opt
-      real :: x1,x2,fx1,fx2
+      real (kind=kind_phys) :: x1,x2,fx1,fx2
       integer :: n
       integer, parameter :: nmax = 20
       !real, dimension(nmax):: zlhux
@@ -10863,7 +10865,7 @@ end subroutine psn_crop
       return
       end function
 !-------------------------------------------------------------------
-      real function zolri2(zol2,ri2,za,z0,zt,psi_opt)
+      real*8 function zolri2(zol2,ri2,za,z0,zt,psi_opt)
 
       ! input: =================================
       ! zol2 - estimated z/l
@@ -10876,9 +10878,9 @@ end subroutine psn_crop
 
       implicit none
       integer, intent(in) :: psi_opt
-      real, intent(in) :: ri2,za,z0,zt
-      real, intent(inout) :: zol2
-      real :: zol20,zol3,psim1,psih1,psix2,psit2,zolt
+      real (kind=kind_phys), intent(in) :: ri2,za,z0,zt
+      real (kind=kind_phys), intent(inout) :: zol2
+      real (kind=kind_phys) :: zol20,zol3,psim1,psih1,psix2,psit2,zolt
 
 !     real :: psih_unstable,psim_unstable,psih_stable, psim_stable
 
@@ -10907,19 +10909,19 @@ end subroutine psn_crop
       end function
 !====================================================================
 
-      real function zolrib(ri,za,z0,zt,logz0,logzt,zol1,psi_opt)
+      real*8 function zolrib(ri,za,z0,zt,logz0,logzt,zol1,psi_opt)
 
       ! this iterative algorithm to compute z/l from bulk-ri
 
       implicit none
-      real, intent(in) :: ri,za,z0,zt,logz0,logzt
+      real (kind=kind_phys), intent(in) :: ri,za,z0,zt,logz0,logzt
       integer, intent(in) :: psi_opt
-      real, intent(inout) :: zol1
-      real :: zol20,zol3,zolt,zolold
+      real (kind=kind_phys), intent(inout) :: zol1
+      real (kind=kind_phys) :: zol20,zol3,zolt,zolold
       integer :: n
       integer, parameter :: nmax = 20
-      real, dimension(nmax):: zlhux
-      real :: psit2,psix2
+      real (kind=kind_phys), dimension(nmax):: zlhux
+      real (kind=kind_phys) :: psit2,psix2
 
 !     real    :: psim_unstable, psim_stable
 !     real    :: psih_unstable, psih_stable
@@ -10989,7 +10991,7 @@ end subroutine psn_crop
    subroutine psi_init(psi_opt,errmsg,errflg)
 
     integer                       :: n,psi_opt
-    real                          :: zolf
+    real (kind=kind_phys)         :: zolf
     character(len=*), intent(out) :: errmsg
     integer, intent(out)          :: errflg
 
@@ -11034,8 +11036,8 @@ end subroutine psn_crop
 ! ... integrated similarity functions from mynn...
 !
 !>\ingroup mynn_sfc
-   real function psim_stable_full(zolf)
-        real :: zolf   
+   real*8 function psim_stable_full(zolf)
+        real (kind=kind_phys) :: zolf   
 
         !psim_stable_full=-6.1*log(zolf+(1+zolf**2.5)**(1./2.5))
         psim_stable_full=-6.1*log(zolf+(1+zolf**2.5)**0.4) 
@@ -11044,8 +11046,8 @@ end subroutine psn_crop
    end function
 
 !>\ingroup mynn_sfc
-   real function psih_stable_full(zolf)
-        real :: zolf
+   real*8 function psih_stable_full(zolf)
+        real (kind=kind_phys) :: zolf
 
         !psih_stable_full=-5.3*log(zolf+(1+zolf**1.1)**(1./1.1))
         psih_stable_full=-5.3*log(zolf+(1+zolf**1.1)**0.9090909090909090909)
@@ -11054,8 +11056,8 @@ end subroutine psn_crop
    end function
 
 !>\ingroup mynn_sfc
-   real function psim_unstable_full(zolf)
-        real :: zolf,x,ym,psimc,psimk
+   real*8 function psim_unstable_full(zolf)
+        real (kind=kind_phys) :: zolf,x,ym,psimc,psimk
 
         x=(1.-16.*zolf)**.25
         !psimk=2*alog(0.5*(1+x))+alog(0.5*(1+x*x))-2.*atan(x)+2.*atan(1.)
@@ -11071,8 +11073,8 @@ end subroutine psn_crop
    end function
 
 !>\ingroup mynn_sfc
-   real function psih_unstable_full(zolf)
-        real :: zolf,y,yh,psihc,psihk
+   real*8 function psih_unstable_full(zolf)
+        real (kind=kind_phys) :: zolf,y,yh,psihc,psihk
 
         y=(1.-16.*zolf)**.5
         !psihk=2.*log((1+y)/2.)
@@ -11090,10 +11092,10 @@ end subroutine psn_crop
 ! ==================================================================
 ! ... integrated similarity functions from gfs...
 !
-   real function psim_stable_full_gfs(zolf)
-        real :: zolf
-        real, parameter :: alpha4 = 20.
-        real :: aa
+   real*8 function psim_stable_full_gfs(zolf)
+        real (kind=kind_phys) :: zolf
+        real (kind=kind_phys), parameter :: alpha4 = 20.
+        real (kind=kind_phys) :: aa
 
         aa     = sqrt(1. + alpha4 * zolf)
         psim_stable_full_gfs  = -1.*aa + log(aa + 1.)
@@ -11101,10 +11103,10 @@ end subroutine psn_crop
         return
    end function
 
-   real function psih_stable_full_gfs(zolf)
-        real :: zolf
-        real, parameter :: alpha4 = 20.
-        real :: bb
+   real*8 function psih_stable_full_gfs(zolf)
+        real (kind=kind_phys) :: zolf
+        real (kind=kind_phys), parameter :: alpha4 = 20.
+        real (kind=kind_phys) :: bb
 
         bb     = sqrt(1. + alpha4 * zolf)
         psih_stable_full_gfs  = -1.*bb + log(bb + 1.)
@@ -11112,10 +11114,10 @@ end subroutine psn_crop
         return
    end function
 
-   real function psim_unstable_full_gfs(zolf)
-        real :: zolf
-        real :: hl1,tem1
-        real, parameter :: a0=-3.975,  a1=12.32,  &
+   real*8 function psim_unstable_full_gfs(zolf)
+        real (kind=kind_phys) :: zolf
+        real (kind=kind_phys) :: hl1,tem1
+        real (kind=kind_phys), parameter :: a0=-3.975,  a1=12.32,  &
                            b1=-7.755,  b2=6.041
 
         if (zolf .ge. -0.5) then
@@ -11130,10 +11132,10 @@ end subroutine psn_crop
         return
    end function
 
-   real function psih_unstable_full_gfs(zolf)
-        real :: zolf
-        real :: hl1,tem1
-        real, parameter :: a0p=-7.941, a1p=24.75, &
+   real*8 function psih_unstable_full_gfs(zolf)
+        real (kind=kind_phys) :: zolf
+        real (kind=kind_phys) :: hl1,tem1
+        real (kind=kind_phys), parameter :: a0p=-7.941, a1p=24.75, &
                            b1p=-8.705, b2p=7.899
 
         if (zolf .ge. -0.5) then
@@ -11151,9 +11153,9 @@ end subroutine psn_crop
 !=================================================================
 ! look-up table functions - or, if beyond -10 < z/l < 10, recalculate
 !=================================================================
-   real function psim_stable(zolf,psi_opt)
+   real*8 function psim_stable(zolf,psi_opt)
         integer :: nzol,psi_opt
-        real    :: rzol,zolf
+        real (kind=kind_phys)    :: rzol,zolf
 
         nzol = int(zolf*100.)
         rzol = zolf*100. - nzol
@@ -11170,9 +11172,9 @@ end subroutine psn_crop
       return
    end function
 
-   real function psih_stable(zolf,psi_opt)
+   real*8 function psih_stable(zolf,psi_opt)
         integer :: nzol,psi_opt
-        real    :: rzol,zolf
+        real (kind=kind_phys)    :: rzol,zolf
 
         nzol = int(zolf*100.)
         rzol = zolf*100. - nzol
@@ -11189,9 +11191,9 @@ end subroutine psn_crop
       return
    end function
 
-   real function psim_unstable(zolf,psi_opt)
+   real*8 function psim_unstable(zolf,psi_opt)
         integer :: nzol,psi_opt
-        real    :: rzol,zolf
+        real (kind=kind_phys)    :: rzol,zolf
 
         nzol = int(-zolf*100.)
         rzol = -zolf*100. - nzol
@@ -11208,9 +11210,9 @@ end subroutine psn_crop
       return
    end function
 
-   real function psih_unstable(zolf,psi_opt)
+   real*8 function psih_unstable(zolf,psi_opt)
         integer :: nzol,psi_opt
-        real    :: rzol,zolf
+        real (kind=kind_phys)    :: rzol,zolf
 
         nzol = int(-zolf*100.)
         rzol = -zolf*100. - nzol
