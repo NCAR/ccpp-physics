@@ -35,23 +35,9 @@ MODULE data_parameters
 !
 ! Description:
 !  Global parameters for the program are defined.
+!  Actually, scratch that. We'll import them from machine.F instead.
 !
-
-IMPLICIT NONE
-
-!=======================================================================
-! Global (i.e. public) Declarations:
-! Parameters for the Program:
-
-  INTEGER, PARAMETER       ::                                         &
-       ireals    = SELECTED_REAL_KIND (12,200),                       &
-                     ! number of desired significant digits for
-                     ! real variables
-                     ! corresponds to 8 byte real variables
-
-       iintegers = KIND  (1)
-                     ! kind-type parameter of the integer values
-                     ! corresponds to the default integers
+  use machine, only: ireals=>kind_phys, iintegers=>kind_INTEGER
 
 !=======================================================================
 
