@@ -3144,6 +3144,8 @@ CONTAINS
             ENDIF
           ENDIF
 
+!   **  Level 3 : end  **
+
        ELSE
 !     **  At Level 2.5, qdiv is not reset.  **
           gamt = 0.0
