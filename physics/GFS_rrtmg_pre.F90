@@ -40,7 +40,8 @@
         gasvmr_ccl4,  gasvmr_cfc113, aerodp, clouds6, clouds7, clouds8,        &
         clouds9, cldsa, cldfra, cldfra2d, lwp_ex,iwp_ex, lwp_fc,iwp_fc,        &
         faersw1, faersw2, faersw3, faerlw1, faerlw2, faerlw3, alpha,           &
-        spp_wts_rad, spp_rad, errmsg, errflg)
+        aero_dir_fdb, smoke_ext, dust_ext,                                     &
+        spp_wts_rad, spp_rad, rrfs_smoke_band, errmsg, errflg)
 
       use machine,                   only: kind_phys
 
@@ -108,13 +109,16 @@
          iovr_exprand,                     & ! Flag for exponential-random cloud overlap method
          idcor_con,                        &
          idcor_hogan,                      &
-         idcor_oreopoulos                            
+         idcor_oreopoulos,                 &
+         rrfs_smoke_band                     ! Band number for rrfs-smoke dust and smoke
 
       character(len=3), dimension(:), intent(in) :: lndp_var_list
 
       logical,              intent(in) :: lsswr, lslwr, ltaerosol, lgfdlmprad, &
                                           uni_cld, effr_in, do_mynnedmf,       &
                                           lmfshal, lmfdeep2, pert_clds
+      logical,              intent(in) :: aero_dir_fdb
+      real(kind=kind_phys), dimension(:,:), intent(in) :: smoke_ext, dust_ext
 
       logical,              intent(in) :: nssl_ccn_on, nssl_invertccn
       integer,              intent(in) :: spp_rad
@@ -616,6 +620,16 @@
         enddo
        enddo
 
+      !> Aerosol direct feedback effect by smoke and dust
+      if(aero_dir_fdb) then ! add smoke/dust extinctions
+        do k = 1, LMK
+          do i = 1, IM
+            ! 550nm (~18000/cm)
+            faersw1(i,k,rrfs_smoke_band) = faersw1(i,k,rrfs_smoke_band) + MIN(4.,smoke_ext(i,k) + dust_ext(i,k))
+          enddo
+        enddo
+      endif
+
       do j = 1,NBDLW
         do k = 1, LMK
           do i = 1, IM
@@ -763,21 +777,7 @@
             enddo
           endif
         elseif (imp_physics == imp_physics_gfdl) then            ! GFDL MP
-          if ((imfdeepcnv==imfdeepcnv_gf .or. do_mynnedmf) .and. kdt>1) then
-            if (do_mynnedmf) then
-              do k=1,lm
-                k1 = k + kd
-                do i=1,im
-                  if (tracer1(i,k1,ntrw)>1.0e-7 .OR. tracer1(i,k1,ntsw)>1.0e-7) then
-                  ! GFDL cloud fraction
-                    cldcov(i,k1) = tracer1(i,k1,ntclamt)
-                  else
-                  ! MYNN sub-grid cloud fraction
-                    cldcov(i,k1) = clouds1(i,k1)
-                  endif
-                enddo
-              enddo
-            else ! imfdeepcnv==imfdeepcnv_gf
+          if ((imfdeepcnv==imfdeepcnv_gf) .and. kdt>1) then
               do k=1,lm
                 k1 = k + kd
                 do i=1,im
@@ -789,7 +789,6 @@
                 endif
                 enddo
               enddo
-            endif
           else
             ! GFDL cloud fraction
             cldcov(1:IM,1+kd:LM+kd) = tracer1(1:IM,1:LM,ntclamt)
