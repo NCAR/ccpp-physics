@@ -121,11 +121,19 @@
           do k=1,levs
             do i=1,im
               kk = max(10,kpbl(i))
+#ifdef SINGLE_PREC
+              if (k < kk) then
+                tem    = rhcbot - (rhcbot-rhcpbl) * (one-prslk(i,k)) / max(one-prslk(i,kk),1e-7)
+              else
+                tem    = rhcpbl - (rhcpbl-rhctop) * (prslk(i,kk)-prslk(i,k)) / max(prslk(i,kk),1e-7)
+              endif
+#else
               if (k < kk) then
                 tem    = rhcbot - (rhcbot-rhcpbl) * (one-prslk(i,k)) / (one-prslk(i,kk))
               else
                 tem    = rhcpbl - (rhcpbl-rhctop) * (prslk(i,kk)-prslk(i,k)) / prslk(i,kk)
               endif
+#endif
               tem      = rhcmax * work1(i) + tem * work2(i)
               rhc(i,k) = max(zero, min(one,tem))
             enddo
