@@ -7,7 +7,7 @@ module cu_gf_driver
    ! DH* TODO: replace constants with arguments to cu_gf_driver_run
    !use physcons  , g => con_g, cp => con_cp, xlv => con_hvap, r_v => con_rv
    use machine   , only: kind_phys
-   use cu_gf_deep, only: cu_gf_deep_run,neg_check,autoconv,aeroevap,fct1d3
+   use cu_gf_deep, only: cu_gf_deep_run,neg_check,fct1d3
    use cu_gf_sh  , only: cu_gf_sh_run
 
    implicit none
