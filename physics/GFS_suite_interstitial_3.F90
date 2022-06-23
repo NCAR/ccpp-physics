@@ -9,10 +9,13 @@
 !! \htmlinclude GFS_suite_interstitial_3_run.html
 !!
     subroutine GFS_suite_interstitial_3_run (otsptflag,                 &
-               im, levs, nn, cscnv,                                     &
+               im, levs, nn, cscnv,imfshalcnv, imfdeepcnv,              &
+               imfshalcnv_samf, imfdeepcnv_samf,progsigma,              &
+               first_time_step, restart,                                &
                satmedmf, trans_trac, do_shoc, ltaerosol, ntrac, ntcw,   &
                ntiw, ntclamt, ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc,    &
-               xlon, xlat, gt0, gq0, imp_physics, imp_physics_mg,       &
+               xlon, xlat, gt0, gq0, sigmain,sigmaout,qmicro,           &
+               imp_physics, imp_physics_mg,                             &
                imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,        &
                imp_physics_gfdl, imp_physics_thompson, dtidx, ntlnc,    &
                imp_physics_wsm6, imp_physics_fer_hires, prsi, ntinc,    &
@@ -33,8 +36,9 @@
         imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,imp_physics_fer_hires,  &
         imp_physics_nssl, me, index_of_process_conv_trans
       integer,              intent(in   ), dimension(:)     :: islmsk, kpbl, kinver
-      logical,              intent(in   )                   :: cscnv, satmedmf, trans_trac, do_shoc, ltaerosol, ras
-
+      logical,              intent(in   )                   :: cscnv, satmedmf, trans_trac, do_shoc, ltaerosol, ras, progsigma
+      logical,              intent(in   )                   :: first_time_step, restart
+      integer,              intent(in   )                   :: imfshalcnv, imfdeepcnv, imfshalcnv_samf,imfdeepcnv_samf 
       integer,                                          intent(in) :: ntinc, ntlnc
       logical,                                          intent(in) :: ldiag3d, qdiag3d
       integer,              dimension(:,:),             intent(in) :: dtidx
@@ -48,6 +52,8 @@
       real(kind=kind_phys), intent(in   ), dimension(:,:)   :: gt0
       real(kind=kind_phys), intent(in   ), dimension(:,:,:) :: gq0
 
+      real(kind=kind_phys), intent(inout   ), dimension(:,:)   :: sigmain
+      real(kind=kind_phys), intent(inout   ), dimension(:,:)   :: sigmaout,qmicro
       real(kind=kind_phys), intent(inout), dimension(:,:)   :: rhc, save_qc
       ! save_qi is not allocated for Zhao-Carr MP
       real(kind=kind_phys), intent(inout), dimension(:,:)   :: save_qi
@@ -72,6 +78,27 @@
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+
+      ! In case of using prognostic updraf area fraction, initialize area fraction here
+      ! since progsigma_calc is called from both deep and shallow schemes.
+      if(((imfshalcnv == imfshalcnv_samf) .or. (imfdeepcnv == imfdeepcnv_samf)) &
+           .and. progsigma)then
+         if(first_time_step .and. .not. restart)then
+            do k=1,levs
+               do i=1,im
+                  sigmain(i,k)=0.0
+                  sigmaout(i,k)=0.0
+                  qmicro(i,k)=0.0
+               enddo
+            enddo
+         endif
+         do k=1,levs
+            do i=1,im
+               sigmaout(i,k)=0.0
+            enddo
+         enddo
+      endif
+
 
       if (cscnv .or. satmedmf .or. trans_trac .or. ras) then
         tracers = 2
@@ -121,11 +148,19 @@
           do k=1,levs
             do i=1,im
               kk = max(10,kpbl(i))
+#ifdef SINGLE_PREC
+              if (k < kk) then
+                tem    = rhcbot - (rhcbot-rhcpbl) * (one-prslk(i,k)) / max(one-prslk(i,kk),1e-7)
+              else
+                tem    = rhcpbl - (rhcpbl-rhctop) * (prslk(i,kk)-prslk(i,k)) / max(prslk(i,kk),1e-7)
+              endif
+#else
               if (k < kk) then
                 tem    = rhcbot - (rhcbot-rhcpbl) * (one-prslk(i,k)) / (one-prslk(i,kk))
               else
                 tem    = rhcpbl - (rhcpbl-rhctop) * (prslk(i,kk)-prslk(i,k)) / prslk(i,kk)
               endif
+#endif
               tem      = rhcmax * work1(i) + tem * work2(i)
               rhc(i,k) = max(zero, min(one,tem))
             enddo

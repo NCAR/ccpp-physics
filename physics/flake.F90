@@ -35,10 +35,11 @@ MODULE data_parameters
 !
 ! Description:
 !  Global parameters for the program are defined.
+!  Actually, scratch that. We'll import them from machine.F instead.
 !
   use machine, only: ireals=>kind_phys, iintegers=>kind_INTEGER
 
-IMPLICIT NONE
+!=======================================================================
 
 END MODULE data_parameters
 
