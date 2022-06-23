@@ -1,9 +1,9 @@
 module rrtmgp_lw_cloud_sampling
-  use machine,                  only: kind_phys
+  use machine,                  only: kind_phys, kind_dbl_prec
   use mo_gas_optics_rrtmgp,     only: ty_gas_optics_rrtmgp
   use mo_optical_props,         only: ty_optical_props_2str
   use rrtmgp_sampling,          only: sampled_mask, draw_samples
-  use mersenne_twister,         only: random_setseed, random_number, random_stat  
+  use mersenne_twister,         only: random_setseed, random_number, random_stat
   use radiation_tools,          only: check_error_msg
   use rrtmgp_lw_gas_optics,     only: lw_gas_props
   use netcdf
@@ -75,9 +75,9 @@ contains
     integer :: iCol, iLay, iBand
     integer,dimension(ncol) :: ipseed_lw
     type(random_stat) :: rng_stat
-    real(kind_phys), dimension(lw_gas_props%get_ngpt(),nLev,ncol) :: rng3D,rng3D2
-    real(kind_phys), dimension(lw_gas_props%get_ngpt()*nLev) :: rng2D
-    real(kind_phys), dimension(lw_gas_props%get_ngpt()) :: rng1D
+    real(kind_dbl_prec), dimension(lw_gas_props%get_ngpt(),nLev,ncol) :: rng3D,rng3D2
+    real(kind_dbl_prec), dimension(lw_gas_props%get_ngpt()*nLev) :: rng2D
+    real(kind_dbl_prec), dimension(lw_gas_props%get_ngpt()) :: rng1D
     logical, dimension(ncol,nLev,lw_gas_props%get_ngpt()) :: maskMCICA
 
     ! Initialize CCPP error handling variables
@@ -127,7 +127,7 @@ contains
     ! Cloud-overlap.
     ! Maximum-random, random or maximum.
     if (iovr == iovr_maxrand .or. iovr == iovr_rand .or. iovr == iovr_max) then
-       call sampled_mask(rng3D, cld_frac, maskMCICA) 
+       call sampled_mask(real(rng3D, kind=kind_phys), cld_frac, maskMCICA) 
     endif
 	!  Exponential decorrelation length overlap
     if (iovr == iovr_dcorr) then
@@ -137,14 +137,14 @@ contains
           call random_number(rng2D,rng_stat)
           rng3D2(:,:,iCol) = reshape(source = rng2D,shape=[lw_gas_props%get_ngpt(),nLev])
        enddo
-       call sampled_mask(rng3D, cld_frac, maskMCICA,                    &
+       call sampled_mask(real(rng3D, kind=kind_phys), cld_frac, maskMCICA, &
                          overlap_param = cloud_overlap_param(:,1:nLev-1),  &
-                         randoms2      = rng3D2)
+                         randoms2      = real(rng3D2, kind=kind_phys))
     endif
     ! Exponential or Exponential-random
     if (iovr == iovr_exp .or. iovr == iovr_exprand) then
-       call sampled_mask(rng3D, cld_frac, maskMCICA,  &
-                         overlap_param = cloud_overlap_param(:,1:nLev-1))    
+       call sampled_mask(real(rng3D, kind=kind_phys), cld_frac, maskMCICA, &
+                         overlap_param = cloud_overlap_param(:,1:nLev-1))
     endif
 
     !

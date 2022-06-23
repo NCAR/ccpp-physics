@@ -1,5 +1,5 @@
 module rrtmgp_sw_cloud_sampling
-  use machine,                  only: kind_phys
+  use machine,                  only: kind_phys, kind_dbl_prec
   use mo_gas_optics_rrtmgp,     only: ty_gas_optics_rrtmgp
   use mo_optical_props,         only: ty_optical_props_2str
   use rrtmgp_sampling,          only: sampled_mask, draw_samples
@@ -80,9 +80,9 @@ contains
     integer,dimension(nday) :: ipseed_sw
     type(random_stat) :: rng_stat
     real(kind_phys) :: tauloc,asyloc,ssaloc
-    real(kind_phys), dimension(sw_gas_props%get_ngpt(),nLev,nday) :: rng3D,rng3D2
-    real(kind_phys), dimension(sw_gas_props%get_ngpt()*nLev) :: rng2D
-    real(kind_phys), dimension(sw_gas_props%get_ngpt()) :: rng1D
+    real(kind_dbl_prec), dimension(sw_gas_props%get_ngpt(),nLev,nday) :: rng3D,rng3D2
+    real(kind_dbl_prec), dimension(sw_gas_props%get_ngpt()*nLev) :: rng2D
+    real(kind_dbl_prec), dimension(sw_gas_props%get_ngpt()) :: rng1D
     logical, dimension(nday,nLev,sw_gas_props%get_ngpt()) :: maskMCICA
 
     ! Initialize CCPP error handling variables
@@ -131,7 +131,7 @@ contains
        ! Cloud overlap.
        ! Maximum-random, random, or maximum cloud overlap
        if (iovr == iovr_maxrand .or. iovr == iovr_max .or. iovr == iovr_rand) then
-          call sampled_mask(rng3D, cld_frac(idxday(1:nDay),:), maskMCICA)  
+          call sampled_mask(real(rng3D, kind=kind_phys), cld_frac(idxday(1:nDay),:), maskMCICA)  
        endif
        ! Decorrelation-length overlap
        if (iovr == iovr_dcorr) then
@@ -140,13 +140,13 @@ contains
              call random_number(rng2D,rng_stat)
              rng3D2(:,:,iday) = reshape(source = rng2D,shape=[sw_gas_props%get_ngpt(),nLev])
           enddo
-          call sampled_mask(rng3D, cld_frac(idxday(1:nDay),:), maskMCICA,             &
-	                        overlap_param = cloud_overlap_param(idxday(1:nDay),1:nLev-1),&
-	                        randoms2      = rng3D2)
+          call sampled_mask(real(rng3D, kind=kind_phys), cld_frac(idxday(1:nDay),:), maskMCICA, &
+	                        overlap_param = cloud_overlap_param(idxday(1:nDay),1:nLev-1),       &
+	                        randoms2      = real(rng3D2, kind=kind_phys))
        endif 
        ! Exponential or exponential-random cloud overlap
        if (iovr == iovr_exp .or. iovr == iovr_exprand) then
-          call sampled_mask(rng3D, cld_frac(idxday(1:nDay),:), maskMCICA, &
+          call sampled_mask(real(rng3D, kind=kind_phys), cld_frac(idxday(1:nDay),:), maskMCICA, &
                             overlap_param = cloud_overlap_param(idxday(1:nDay),1:nLev-1))
        endif
 
