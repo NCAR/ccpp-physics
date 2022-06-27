@@ -27,7 +27,7 @@ module cu_gf_deep
 !> flag to turn off or modify mom transport by downdrafts
      real(kind=kind_phys), parameter :: pgcd = 0.1
 !
-!> aerosol awareness, do not user yet!
+!> aerosol awareness, do not use yet!
      integer, parameter :: autoconv=2
      integer, parameter :: aeroevap=3
      real(kind=kind_phys), parameter :: scav_factor = 0.5
@@ -47,11 +47,11 @@ module cu_gf_deep
 
 contains
 
-   integer function my_maxloc1d(A,N,dir)
+   integer function my_maxloc1d(A,N)
 !$acc routine vector
       implicit none
       real(kind_phys), intent(in) :: A(:)
-      integer, intent(in) :: N,dir
+      integer, intent(in) :: N
 
       real(kind_phys) :: imaxval
       integer :: i
@@ -71,7 +71,7 @@ contains
 !>\ingroup cu_gf_deep_group
 !> \section general_gf_deep GF Deep Convection General Algorithm
 !> @{
-   subroutine cu_gf_deep_run(        &          
+   subroutine cu_gf_deep_run(        &
                itf,ktf,its,ite, kts,kte  &
               ,dicycle       &  ! diurnal cycle flag
               ,ichoice       &  ! choice of closure, use "0" for ensemble average
@@ -337,7 +337,7 @@ contains
      real(kind=kind_phys),    dimension (its:ite) ::                                     &
         axx,edtmax,edtmin,entr_rate
      integer,    dimension (its:ite) ::                                  &
-       kzdown,kdet,k22,jmin,kstabi,kstabm,k22x,xland1,                   &  
+       kzdown,kdet,k22,jmin,kstabi,kstabm,k22x,xland1,                   &
        ktopdby,kbconx,ierr2,ierr3,kbmax
 !$acc declare create(edt,edto,edtm,aa1,aa0,xaa0,hkb,                     &
 !$acc       hkbo,xhkb,                                                   &
@@ -345,7 +345,7 @@ contains
 !$acc       pwevo,bu,bud,cap_max,                                        &
 !$acc       cap_max_increment,closure_n,psum,psumh,sig,sigd,             &
 !$acc       axx,edtmax,edtmin,entr_rate,                                 &
-!$acc       kzdown,kdet,k22,jmin,kstabi,kstabm,k22x,xland1,              &  
+!$acc       kzdown,kdet,k22,jmin,kstabi,kstabm,k22x,xland1,              &
 !$acc       ktopdby,kbconx,ierr2,ierr3,kbmax)
 
      integer,  dimension (its:ite), intent(inout) :: ierr
@@ -353,11 +353,12 @@ contains
 !$acc declare copy(ierr) copyin(csum)
      integer                              ::                             &
        iloop,nens3,ki,kk,i,k
-     real(kind=kind_phys)                            ::                             &
-      dz,dzo,mbdt,radius,pefc,                                           &
+     real(kind=kind_phys)                 ::                             &
+      dz,dzo,mbdt,radius,                                                &
       zcutdown,depth_min,zkbmax,z_detr,zktop,                            &
       dh,cap_maxs,trash,trash2,frh,sig_thresh
-     real(kind=kind_phys) entdo,dp,subin,detdo,entup,                                    &
+     real(kind=kind_phys), dimension (its:ite) :: pefc
+     real(kind=kind_phys) entdo,dp,subin,detdo,entup,                    &
       detup,subdown,entdoj,entupk,detupk,totmas
 
      real(kind=kind_phys), dimension (its:ite) :: lambau,flux_tun,zws,ztexec,zqexec
@@ -2269,7 +2270,7 @@ contains
          if(ierr(i).eq.0) then
             if(aeroevap.gt.1)then
               ! aerosol scavagening
-              ccnloss(i)=ccn(i)*pefc*xmb(i) ! HCB
+              ccnloss(i)=ccn(i)*pefc(i)*xmb(i) ! HCB
               ccn(i) = ccn(i) - ccnloss(i)*scav_factor
             endif
          endif
@@ -2605,7 +2606,8 @@ contains
      real(kind=kind_phys),    dimension (its:ite,1)                          &
         ,intent (out  )                   ::                 &
         edtc
-     real(kind=kind_phys),    intent (out ) ::                 &
+     real(kind=kind_phys),    dimension (its:ite)                            &
+        ,intent (out )                    ::                 &
         pefc
      real(kind=kind_phys),    dimension (its:ite)                            &
         ,intent (out  )                   ::                 &
@@ -2639,7 +2641,7 @@ contains
      prop_c=0. !10.386
      alpha3 = 0.75
      beta3  = -0.15
-     pefc=0.
+     pefc(:)=0.
      pefb=0.
      pef=0.
 
@@ -2702,12 +2704,12 @@ contains
                prop_c=.5*(pefb+pef)/aeroadd
                aeroadd=((1.e-2*ccn(i))**beta3)*(psum2(i)**(alpha3-1))
                aeroadd=prop_c*aeroadd
-               pefc=aeroadd
+               pefc(i)=aeroadd
 
-               if(pefc.gt.0.9)pefc=0.9
-               if(pefc.lt.0.1)pefc=0.1
-               edt(i)=1.-pefc
-               if(aeroevap.eq.2)edt(i)=1.-.25*(pefb+pef+2.*pefc)
+               if(pefc(i).gt.0.9)pefc(i)=0.9
+               if(pefc(i).lt.0.1)pefc(i)=0.1
+               edt(i)=1.-pefc(i)
+               if(aeroevap.eq.2)edt(i)=1.-.25*(pefb+pef+2.*pefc(i))
                endif
             endif
 
@@ -4905,7 +4907,7 @@ endif
 
    if(zu(kpbli).gt.0.)  &
       zu(kts:min(ktf,kt-1))= zu(kts:min(ktf,kt-1))/zu(kpbli)
-     do k=my_maxloc1d(zu(:),kte,1),1,-1
+     do k=my_maxloc1d(zu(:),kte),1,-1
        if(zu(k).lt.1.e-6)then
          kb_adj=k+1
          exit
@@ -4964,7 +4966,7 @@ endif
 !      zu(kts:min(ktf,kt+1))= zu(kts:min(ktf,kt+1))/maxval(zu(kts:min(ktf,kt+1)))
    if(zu(kpbli).gt.0.)  &
       zu(kts:min(ktf,kt-1))= zu(kts:min(ktf,kt-1))/zu(kpbli)
-     do k=my_maxloc1d(zu(:),kte,1),1,-1
+     do k=my_maxloc1d(zu(:),kte),1,-1
        if(zu(k).lt.1.e-6)then
          kb_adj=k+1
          exit
@@ -5013,7 +5015,7 @@ endif
 
    if(zu(kpbli).gt.0.)  &
       zu(kts:min(ktf,kt-1))= zu(kts:min(ktf,kt-1))/zu(kpbli)
-     do k=my_maxloc1d(zu(:),kte,1),1,-1
+     do k=my_maxloc1d(zu(:),kte),1,-1
        if(zu(k).lt.1.e-6)then
          kb_adj=k+1
          exit
@@ -5255,90 +5257,92 @@ endif
         
  end subroutine get_inversion_layers
 !-----------------------------------------------------------------------------------
-!>\ingroup cu_gf_deep_group
-!> This function calcualtes
- function deriv3(xx, xi, yi, ni, m)
-!$acc routine vector
-    !============================================================================*/
-    ! evaluate first- or second-order derivatives 
-    ! using three-point lagrange interpolation 
-    ! written by: alex godunov (october 2009)
-    ! input ...
-    ! xx    - the abscissa at which the interpolation is to be evaluated
-    ! xi()  - the arrays of data abscissas
-    ! yi()  - the arrays of data ordinates
-    ! ni - size of the arrays xi() and yi()
-    ! m  - order of a derivative (1 or 2)
-    ! output ...
-    ! deriv3  - interpolated value
-    !============================================================================*/
-    
-    implicit none
-    integer, parameter :: n=3
-    integer ni, m,i, j, k, ix
-    real(kind=kind_phys):: deriv3, xx
-    real(kind=kind_phys):: xi(ni), yi(ni), x(n), f(n)
-
-    ! exit if too high-order derivative was needed,
-    if (m > 2) then
-      deriv3 = 0.0
-      return
-    end if
-
-    ! if x is ouside the xi(1)-xi(ni) interval set deriv3=0.0
-    if (xx < xi(1) .or. xx > xi(ni)) then
-      deriv3 = 0.0
-#ifndef _OPENACC
-      stop "problems with finding the 2nd derivative"
-#else
-      return
-#endif
-    end if
-
-    ! a binary (bisectional) search to find i so that xi(i-1) < x < xi(i)
-    i = 1
-    j = ni
-    do while (j > i+1)
-      k = (i+j)/2
-      if (xx < xi(k)) then
-        j = k
-      else
-        i = k
-      end if
-    end do
-
-    ! shift i that will correspond to n-th order of interpolation
-    ! the search point will be in the middle in x_i, x_i+1, x_i+2 ...
-      i = i + 1 - n/2
-
-    ! check boundaries: if i is ouside of the range [1, ... n] -> shift i
-    if (i < 1) i=1
-    if (i + n > ni) i=ni-n+1
-
-    !  old output to test i
-    !  write(*,100) xx, i
-    !  100 format (f10.5, i5)
-
-    ! just wanted to use index i
-    ix = i
-    ! initialization of f(n) and x(n)
-    do i=1,n
-      f(i) = yi(ix+i-1)
-      x(i) = xi(ix+i-1)
-    end do
-
-    ! calculate the first-order derivative using lagrange interpolation
-    if (m == 1) then
-        deriv3 =          (2.0*xx - (x(2)+x(3)))*f(1)/((x(1)-x(2))*(x(1)-x(3)))
-        deriv3 = deriv3 + (2.0*xx - (x(1)+x(3)))*f(2)/((x(2)-x(1))*(x(2)-x(3)))
-        deriv3 = deriv3 + (2.0*xx - (x(1)+x(2)))*f(3)/((x(3)-x(1))*(x(3)-x(2)))
-    ! calculate the second-order derivative using lagrange interpolation
-      else
-        deriv3 =          2.0*f(1)/((x(1)-x(2))*(x(1)-x(3)))
-        deriv3 = deriv3 + 2.0*f(2)/((x(2)-x(1))*(x(2)-x(3)))
-        deriv3 = deriv3 + 2.0*f(3)/((x(3)-x(1))*(x(3)-x(2)))
-    end if
- end function deriv3
+! DH* 20220604 - this isn't used at all
+!!!!>\ingroup cu_gf_deep_group
+!!!!> This function calcualtes
+!!! function deriv3(xx, xi, yi, ni, m)
+!!!!$acc routine vector
+!!!    !============================================================================*/
+!!!    ! evaluate first- or second-order derivatives 
+!!!    ! using three-point lagrange interpolation 
+!!!    ! written by: alex godunov (october 2009)
+!!!    ! input ...
+!!!    ! xx    - the abscissa at which the interpolation is to be evaluated
+!!!    ! xi()  - the arrays of data abscissas
+!!!    ! yi()  - the arrays of data ordinates
+!!!    ! ni - size of the arrays xi() and yi()
+!!!    ! m  - order of a derivative (1 or 2)
+!!!    ! output ...
+!!!    ! deriv3  - interpolated value
+!!!    !============================================================================*/
+!!!    
+!!!    implicit none
+!!!    integer, parameter :: n=3
+!!!    integer ni, m,i, j, k, ix
+!!!    real(kind=kind_phys):: deriv3, xx
+!!!    real(kind=kind_phys):: xi(ni), yi(ni), x(n), f(n)
+!!!
+!!!    ! exit if too high-order derivative was needed,
+!!!    if (m > 2) then
+!!!      deriv3 = 0.0
+!!!      return
+!!!    end if
+!!!
+!!!    ! if x is ouside the xi(1)-xi(ni) interval set deriv3=0.0
+!!!    if (xx < xi(1) .or. xx > xi(ni)) then
+!!!      deriv3 = 0.0
+!!!#ifndef _OPENACC
+!!!      stop "problems with finding the 2nd derivative"
+!!!#else
+!!!      return
+!!!#endif
+!!!    end if
+!!!
+!!!    ! a binary (bisectional) search to find i so that xi(i-1) < x < xi(i)
+!!!    i = 1
+!!!    j = ni
+!!!    do while (j > i+1)
+!!!      k = (i+j)/2
+!!!      if (xx < xi(k)) then
+!!!        j = k
+!!!      else
+!!!        i = k
+!!!      end if
+!!!    end do
+!!!
+!!!    ! shift i that will correspond to n-th order of interpolation
+!!!    ! the search point will be in the middle in x_i, x_i+1, x_i+2 ...
+!!!      i = i + 1 - n/2
+!!!
+!!!    ! check boundaries: if i is ouside of the range [1, ... n] -> shift i
+!!!    if (i < 1) i=1
+!!!    if (i + n > ni) i=ni-n+1
+!!!
+!!!    !  old output to test i
+!!!    !  write(*,100) xx, i
+!!!    !  100 format (f10.5, i5)
+!!!
+!!!    ! just wanted to use index i
+!!!    ix = i
+!!!    ! initialization of f(n) and x(n)
+!!!    do i=1,n
+!!!      f(i) = yi(ix+i-1)
+!!!      x(i) = xi(ix+i-1)
+!!!    end do
+!!!
+!!!    ! calculate the first-order derivative using lagrange interpolation
+!!!    if (m == 1) then
+!!!        deriv3 =          (2.0*xx - (x(2)+x(3)))*f(1)/((x(1)-x(2))*(x(1)-x(3)))
+!!!        deriv3 = deriv3 + (2.0*xx - (x(1)+x(3)))*f(2)/((x(2)-x(1))*(x(2)-x(3)))
+!!!        deriv3 = deriv3 + (2.0*xx - (x(1)+x(2)))*f(3)/((x(3)-x(1))*(x(3)-x(2)))
+!!!    ! calculate the second-order derivative using lagrange interpolation
+!!!      else
+!!!        deriv3 =          2.0*f(1)/((x(1)-x(2))*(x(1)-x(3)))
+!!!        deriv3 = deriv3 + 2.0*f(2)/((x(2)-x(1))*(x(2)-x(3)))
+!!!        deriv3 = deriv3 + 2.0*f(3)/((x(3)-x(1))*(x(3)-x(2)))
+!!!    end if
+!!! end function deriv3
+! *DH 20220604
 !=============================================================================================
 !>\ingroup cu_gf_deep_group
   subroutine get_lateral_massflux(itf,ktf, its,ite, kts,kte                             &
