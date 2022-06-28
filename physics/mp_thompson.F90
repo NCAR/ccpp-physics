@@ -311,7 +311,7 @@ module mp_thompson
                               spp_wts_mp, spp_mp, n_var_spp,       &
                               spp_prt_list, spp_var_list,          &
                               spp_stddev_cutoff,                   &
-                              pfi_lsan, pfl_lsan,                  &
+                              cplchm, pfi_lsan, pfl_lsan,          &
                               errmsg, errflg)
 
          implicit none
@@ -386,7 +386,8 @@ module mp_thompson
          character(len=3),          intent(in) :: spp_var_list(:)
          real(kind_phys),           intent(in) :: spp_stddev_cutoff(:)
 
-         ! Wet deposition for aerosols
+         logical, intent (in) :: cplchm
+         ! ice and liquid water 3d precipitation fluxes - only allocated if cplchm is .true.
          real(kind=kind_phys), intent(inout), dimension(:,:) :: pfi_lsan
          real(kind=kind_phys), intent(inout), dimension(:,:) :: pfl_lsan
 
@@ -770,8 +771,10 @@ module mp_thompson
          end if
 
          ! output instantaneous ice/snow and rain water 3d precipitation fluxes
-         pfi_lsan(:,:) = pfils(:,:,1)
-         pfl_lsan(:,:) = pflls(:,:,1)
+         if(cplchm) then
+           pfi_lsan(:,:) = pfils(:,:,1)
+           pfl_lsan(:,:) = pflls(:,:,1)
+         end if
 
          unset_extended_diagnostic_pointers: if (ext_diag) then
            !vts1       => null()
