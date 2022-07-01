@@ -598,8 +598,10 @@ module mp_thompson
          kde = nlev
          kme = nlev
          kte = nlev
-         pfi_lsan = 0.0
-         pfl_lsan = 0.0
+         if(cplchm) then
+           pfi_lsan = 0.0
+           pfl_lsan = 0.0
+         end if
 
          ! Set pointers for extended diagnostics
          set_extended_diagnostic_pointers: if (ext_diag) then
