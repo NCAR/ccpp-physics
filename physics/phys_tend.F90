@@ -1,3 +1,5 @@
+!>\file phys_tend.F90
+!!
 module phys_tend
 
    use machine, only: kind_phys

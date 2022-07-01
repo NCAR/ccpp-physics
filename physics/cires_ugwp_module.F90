@@ -1,4 +1,5 @@
-!
+!>\file cires_ugwp_module.F90
+
 module  cires_ugwpv0_module
 
 !
@@ -101,6 +102,7 @@ module  cires_ugwpv0_module
 ! init  of cires_ugwp   (_init)  called from GFS_driver.F90
 !
 ! -----------------------------------------------------------------------
+!>This subroutine initializes CIRES UGWP 
    subroutine cires_ugwpv0_mod_init (me, master, nlunit, input_nml_file, logunit, &
               fn_nml, lonr, latr, levs, ak, bk, pref, dtp, cdmvgwd, cgwf,    &
               pa_rf_in, tau_rf_in)
@@ -221,6 +223,7 @@ module  cires_ugwpv0_module
 ! finalize  of cires_ugwp   (_finalize)
 ! -----------------------------------------------------------------------
 
+!> This subroutine deallocate sources/spectra and some diagnostics.
   subroutine cires_ugwpv0_mod_finalize
 !
 ! deallocate sources/spectra & some diagnostics need to find where "deaalocate them"

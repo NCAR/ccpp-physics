@@ -1,7 +1,6 @@
 !> \file GFS_time_vary_pre.fv3.F90
 !!  Contains code related to GFS physics suite setup (generic part of time_vary_step)
 
-!>\defgroup gfs_time_vary_pre_mod  GFS Time Vary Pre Module
    module GFS_time_vary_pre
 
       use funcphys, only: gfuncphys
@@ -16,6 +15,9 @@
 
       contains
 
+!>\defgroup gfs_time_vary_pre_mod  GFS Time Vary Pre Module
+!! This module contains code related to GFS physics suite setup.
+!> @{
 !> \section arg_table_GFS_time_vary_pre_init Argument Table
 !! \htmlinclude GFS_time_vary_pre_init.html
 !!
@@ -190,5 +192,5 @@
         endif
 
       end subroutine GFS_time_vary_pre_timestep_init
-
+!> @}
     end module GFS_time_vary_pre

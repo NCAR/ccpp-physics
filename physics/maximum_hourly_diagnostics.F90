@@ -1,3 +1,4 @@
+!>\file maximum_hourly_diagnostics.F90
 module maximum_hourly_diagnostics
 
    use machine, only: kind_phys

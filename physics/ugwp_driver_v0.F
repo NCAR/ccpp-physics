@@ -8,9 +8,11 @@
 !ugwp-v0 subroutines: GWDPS_V0 and fv3_ugwp_solv2_v0	
 !
 !=====================================================================
-!>\ingroup cires_ugwp_run
-!> @{
-!! <b>Note for the sub-grid scale orography scheme in UGWP-v0:</b> Due to degraded forecast
+!>\ingroup cires_ugwp_run_mod
+!>\defgroup ugwp_driverv0_mod GFS UGWP V0 Driver Module
+!! This is the CIRES UGWP V0 driver module
+!!
+!! Note for the sub-grid scale orography scheme in UGWP-v0: Due to degraded forecast
 !! scores of simulations with revised schemes for subgrid-scale orography effects in FV3GFS,
 !! EMC reinstalled the original gwdps-code with updated efficiency factors for the mountain
 !! blocking and OGW drag. The GFS OGW is described in the separate section (\ref GFS_GWDPS)
@@ -19,12 +21,14 @@
 !! C768 resolutions and work in progress to introduce the optimal choice for the scale-aware
 !! representations of the efficiency factors that will reflect the better simulations of GW
 !! activity by FV3 dynamical core at higher horizontal resolutions. With the MERRA-2 VMF
-!! function for NGWs (\ref slat_geos5_tamp) and operational OGW drag scheme (\ref GFS_GWDPS),
+!! function for NGWs (\ref slat_geos5_tamp_v0) and operational OGW drag scheme (\ref GFS_GWDPS),
 !! FV3GFS simulations can successfully forecast the recent major mid-winter sudden stratospheric
 !! warming (SSW) events of 2018-02-12 and 2018-12-31 (10-14 days before the SSW onset;
 !! Yudin et al. 2019 \cite yudin_et_al_2019). The first multi-year (2015-2018) FV3GFS simulations
 !! with UGWP-v0 also produce the equatorial QBO-like oscillations in the zonal wind and temperature anomalies.
-!!
+
+!>Modified/revised version of gwdps.f with bug fixes, tofd, appropriate
+!! computation of reference level for OGW+COORDE diagnostics.
       SUBROUTINE GWDPS_V0(IM,  km,    imx, do_tofd,
      &    Pdvdt, Pdudt, Pdtdt, Pkdis, U1,V1,T1,Q1,KPBL,
      &    PRSI,DEL,PRSL,PRSLK,PHII, PHIL,DTP,KDT,
@@ -37,7 +41,7 @@
 ! ugwp_v0
 !
 ! modified/revised version of gwdps.f (with bug fixes, tofd, appropriate
-!   computation of kref for OGW + COORDE diagnostics
+!   computation of reference level for OGW + COORDE diagnostics
 !   all constants/parameters inside cires_ugwp_initialize.F90
 !---------------------------------------- 
 
@@ -916,9 +920,10 @@
 !===============================================================================
 !23456==============================================================================
 
-!>\ingroup cires_ugwp_run
-!> @{
-!! 
+!>\ingroup cires_ugwp_run_mod
+!! A modification of the Scinocca (2003) \cite scinocca_2003 algorithm for 
+!! NGWs with non-hydrostatic and rotational
+!!effects for GW propagations and background dissipation 
       subroutine fv3_ugwp_solv2_v0(klon, klev, dtime,
      &           tm1 , um1, vm1, qm1,
      &           prsl, prsi,   philg, xlatd, sinlat, coslat,
@@ -1485,6 +1490,5 @@
 !--------------------------------------------------------------------------- 
        return
        end subroutine fv3_ugwp_solv2_v0
-
       
       end module ugwp_driver_v0

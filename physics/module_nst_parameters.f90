@@ -3,7 +3,7 @@
 !! near surface sea temperature scheme.
 
 !>\defgroup nst_parameters GFS NSST Parameter Module
-!! \ingroup gfs_nst_main
+!! \ingroup gfs_nst_main_mod
 !! This module contains constants and parameters used in GFS
 !! near surface sea temperature scheme.
 !! history:

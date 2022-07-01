@@ -7,16 +7,11 @@ module cu_gf_driver_pre
 
    private
 
-   public :: cu_gf_driver_pre_init, cu_gf_driver_pre_run, cu_gf_driver_pre_finalize
+   public :: cu_gf_driver_pre_run
 
    contains
 
-   subroutine cu_gf_driver_pre_init ()
-   end subroutine cu_gf_driver_pre_init
-
-   subroutine cu_gf_driver_pre_finalize()
-   end subroutine cu_gf_driver_pre_finalize
-
+!>\ingroup cu_gf_group
 !> \section arg_table_cu_gf_driver_pre_run Argument Table
 !! \htmlinclude cu_gf_driver_pre_run.html
 !!

@@ -1,20 +1,19 @@
 /**
-\page THOMPSON Thompson Aerosol-Aware Microphysics Scheme
+\page THOMPSON Thompson Aerosol-Aware Cloud Microphysics Scheme
 \section thompson_descrp Description
-
-
-The RAP/HRRR microphysics implementation represents the most aggressive attempt to include explicit prediction of
-cloud and precipitation microphysical processes in the NCEP operational forecast model suite. The RAP and HRRR are
-important guidance to NWS aviation forecasts, and any microphysics improvements are aimed at least in part, to improve 
-that guidance. The scheme is particularly beneficial for aircraft icing forecasts.
 
 The scheme computes sources, sinks, and conversions for the mixing ratios of cloud water, rainwater, cloud ice, snow,
 and graupel. Number concentration for cloud ice (particles per cubic meter) is also forecast, based on statistical relationships
-of number concentration, density, and ice mass from recent observational studies. Since April 2014 (WRFv3.6), this is also the "aerosol-aware" scheme as described in
-Thompson and Eidhammer (2014) \cite Thompson_2014 .
+of number concentration, density, and ice mass from recent observational studies. Since April 2014 (WRFv3.6), this is also the "aerosol-aware" scheme as described in Thompson and Eidhammer (2014) \cite Thompson_2014 .
+
+The original RAP/HRRR microphysics implementation represents the most aggressive attempt to include explicit prediction of
+cloud and precipitation microphysical processes in the NCEP operational forecast model suite. The RAP and HRRR are
+important guidance to NWS aviation forecasts, and any microphysics improvements are aimed at least in part, to improve
+that guidance. The scheme is particularly beneficial for aircraft icing forecasts. Recently, this scheme is now being tested
+with a GFS_v17 prototype: the GFS_v17_p8 suite at Environmental Modeling Center (EMC) as a candidate for the next operational implementation. 
 
 The microphysical processes accounted for are shown in the graphic below:
-\image html gsd_thompson.png "Figure 1: Complex Microphysics Model in the RAP" width=10cm
+\image html gsd_thompson.png "Figure 1: Complex Microphysics Model in the RAP" width=500
 
 Descriptions of these preocesses follow:
 - \b Deposition: Diffusional growth of ice particles under conditions of vapor supersaturation with respect to ice. 
@@ -71,12 +70,24 @@ for the model to provide useful guidance for aircraft icing forecasts
 
 - Can account for cloud phase changes and provides a sound physical basis for diagnosing precipitation type reaching the ground
 
+\section v6_enh_thompson CCPP Physics Updates
+\version CCPP v6.0.0
 
+Three mechanisms are available improve the stability of the scheme for weather forecast applications: 
+\a inner \a loop, \a subcycle, and \a semi-Lagrangian \a sedimentation \a of \a rain \a and \a graupel. 
+The inner loop  and the subcycle are similar in that the physics time step is subdivided and the scheme 
+is activated more often than others in the physics suite. However, they differ in implementation. 
+With the inner loop method, namelist variable \b dt_inner is used to set the short step. 
+Conversely, the subcycle method is controlled by CCPP Framework through the "subcycle loop" in the suite definition file. 
+The two methods should be used exclusively. The Semi-Lagrangian sedimentation of rain and graupel (based on Juang and Hong 2010 \cite Henry_Juang_2010 ) 
+increases numerical stability by applying the subtime step only to sedimentation computation. 
+Two namelist variables control the usage of the semi-Lagrangian sedimentation, \b sedi_semi and \b decfl. 
+Sedi-semi is set to ‘true’ to activate the method. Decfl is a parameter that needs to avoid deformation of the arriving grids, currently, "10". 
 
 \section intra_thompson Intraphysics Communication
-\ref arg_table_mp_thompson_run
+- \ref arg_table_mp_thompson_run
 
-\section g_thompson  General Algorithm
+\section gal_thompson  General Algorithm
 - \ref gen_thompson_init
 - \ref gen_thompson_hrrr
 - \ref gen_mpgtdriver
