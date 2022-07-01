@@ -160,7 +160,7 @@ contains
 !!Shepherd (2009) \cite shaw_and_shepherd_2009). In the UGWP-v0 scheme, a modification of the 
 !!Scinocca (2003) \cite scinocca_2003 algorithm for NGWs with non-hydrostatic and rotational 
 !!effects for GW propagations and background dissipation is contained in the subroutine 
-!!\ref fv3_ugwp_solv2_v0. Future development plans for the UGWP scheme include additional GW-solvers 
+!!fv3_ugwp_solv2_v0. Future development plans for the UGWP scheme include additional GW-solvers 
 !!to be implemented along with physics-based triggering of waves and stochastic approaches 
 !!for selection of GW modes characterized by horizontal phase velocities, azimuthal 
 !!directions and magnitude of the vertical momentum flux (VMF).
@@ -169,7 +169,7 @@ contains
 !! GEOS-5 global atmosphere model of GMAO NASA/GSFC, as described in 
 !! Molod et al. (2015) \cite molod_et_al_2015 and employed in the MERRRA-2 
 !! reanalysis (Gelaro et al., 2017 \cite gelaro_et_al_2017). The Fortran 
-!! subroutine \ref slat_geos5_tamp_v0 describes the latitudinal shape of 
+!! subroutine slat_geos5_tamp_v0() describes the latitudinal shape of 
 !! VMF-function as displayed in Figure 3 of Molod et al. (2015) 
 !! \cite molod_et_al_2015. It shows that the enhanced values of 
 !! VMF in the equatorial region gives opportunity to simulate the 

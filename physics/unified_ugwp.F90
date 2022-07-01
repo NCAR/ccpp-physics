@@ -198,8 +198,8 @@ contains
 !> This subroutine executes the CIRES UGWP Version 0.
 !!
 !> \section gen_unified_ugwp GFS Unified GWP Scheme General Algorithm
-!! The physics of NGWs in the UGWP framework (Yudin et al. 2018 \cite 
-!! yudin_et_al_2018) is represented by four GW-solvers, which is introduced 
+!! The physics of NGWs in the UGWP framework (Yudin et al. 2018 
+!! \cite yudin_et_al_2018) is represented by four GW-solvers, which is introduced 
 !! in Lindzen (1981) \cite lindzen_1981, Hines (1997) \cite hines_1997, 
 !! Alexander and Dunkerton (1999) \cite alexander_and_dunkerton_1999, 
 !! and Scinocca (2003) \cite scinocca_2003. The major modification of 
@@ -213,7 +213,7 @@ contains
 !! the modification of Scinocca (2003) \cite scinocca_2003 scheme for 
 !! NGWs with non-hydrostatic and rotational effects for GW propagations
 !! and backgroufnd dissipation is represented by the subroutine 
-!! \ref fv3_ugwp_solv2_v0. In the next release of UGWP, additional 
+!! fv3_ugwp_solv2_v0. In the next release of UGWP, additional 
 !! GW-solvers will be implemented along with physics-based triggering 
 !! of waves and stochastic approaches for selection of GW modes 
 !! characterized by horizontal phase velocities, azimuthal directions 

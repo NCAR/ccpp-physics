@@ -119,7 +119,6 @@ INPUT                  =  pdftxt/mainpage.txt              \
                           pdftxt/GFS_v16_suite.txt       \
                           pdftxt/GFS_v17_p8_suite.txt    \
                           pdftxt/RAP_suite.txt           \
-                          pdftxt/RE6/FV3_RAP_input.nml       \
                           pdftxt/HRRR_suite.txt          \
                           pdftxt/RE6/FV3_HRRR_input.nml  \
                           pdftxt/RRFS_v1beta_suite.txt   \
@@ -543,7 +542,7 @@ DIRECTORY_GRAPH        = YES
 DIR_GRAPH_MAX_DEPTH    = 1
 DOT_IMAGE_FORMAT       = SVG
 INTERACTIVE_SVG        = NO
-DOT_PATH               =
+DOT_PATH               = 
 DOTFILE_DIRS           =
 MSCFILE_DIRS           =
 DIAFILE_DIRS           =
