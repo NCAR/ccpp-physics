@@ -21,6 +21,8 @@
         ntqv, ntcw,ntiw, ntlnc, ntinc, ntrnc, ntsnc, ntccn,                    &
         ntrw, ntsw, ntgl, nthl, ntwa, ntoz,                                    &
         ntclamt, nleffr, nieffr, nseffr, lndp_type, kdt,                       &
+        ntdu1, ntdu2, ntdu3, ntdu4, ntdu5, ntss1, ntss2,                       &
+        ntss3, ntss4, ntss5, ntsu, ntbcb, ntbcl, ntocb, ntocl, ntchm,          &
         imp_physics,imp_physics_nssl, nssl_ccn_on, nssl_invertccn,             &
         imp_physics_thompson, imp_physics_gfdl, imp_physics_zhao_carr,         &
         imp_physics_zhao_carr_pdf, imp_physics_mg, imp_physics_wsm6,           &
@@ -78,7 +80,7 @@
                                            make_IceNumber,           &
                                            make_DropletNumber,       &
                                            make_RainNumber
-
+      use physparam,              only : iaermdl
       implicit none
 
       integer,              intent(in)  :: im, levs, lm, lmk, lmp, n_var_lndp, &
@@ -112,6 +114,9 @@
          idcor_oreopoulos,                 &
          rrfs_smoke_band                     ! Band number for rrfs-smoke dust and smoke
 
+      integer, intent(in) :: ntdu1, ntdu2, ntdu3, ntdu4, ntdu5, ntss1, ntss2, ntss3,  &
+                             ntss4, ntss5, ntsu, ntbcb, ntbcl, ntocb, ntocl, ntchm
+
       character(len=3), dimension(:), intent(in) :: lndp_var_list
 
       logical,              intent(in) :: lsswr, lslwr, ltaerosol, lgfdlmprad, &
@@ -137,7 +142,8 @@
                                                           cnvw_in, cnvc_in,    &
                                                           sppt_wts
 
-      real(kind=kind_phys), dimension(:,:,:), intent(in) :: qgrs, aer_nm
+      real(kind=kind_phys), dimension(:,:,:), intent(in) :: qgrs
+      real(kind=kind_phys), dimension(:,:,:), intent(inout) :: aer_nm
 
       real(kind=kind_phys), dimension(:),   intent(inout) :: coszen, coszdg
 
@@ -602,6 +608,29 @@
 !! property profile for radiation.
 
 !check  print *,' in grrad : calling setaer '
+
+       if (ntchm>0 .and. iaermdl==2) then
+          do k=1,levs
+            do i=1,im
+              aer_nm(i,k,1) = qgrs(i,k,ntdu1)*1.e-9_kind_phys
+              aer_nm(i,k,2) = qgrs(i,k,ntdu2)*1.e-9_kind_phys
+              aer_nm(i,k,3) = qgrs(i,k,ntdu3)*1.e-9_kind_phys
+              aer_nm(i,k,4) = qgrs(i,k,ntdu4)*1.e-9_kind_phys
+              aer_nm(i,k,5) = qgrs(i,k,ntdu5)*1.e-9_kind_phys
+              aer_nm(i,k,6) = qgrs(i,k,ntss1)*1.e-9_kind_phys
+              aer_nm(i,k,7) = qgrs(i,k,ntss2)*1.e-9_kind_phys
+              aer_nm(i,k,8) = qgrs(i,k,ntss3)*1.e-9_kind_phys
+              aer_nm(i,k,9) = qgrs(i,k,ntss4)*1.e-9_kind_phys
+              aer_nm(i,k,10) = qgrs(i,k,ntss5)*1.e-9_kind_phys
+              aer_nm(i,k,11) = qgrs(i,k,ntsu)*1.e-9_kind_phys
+              aer_nm(i,k,12) = qgrs(i,k,ntbcb)*1.e-9_kind_phys
+              aer_nm(i,k,13) = qgrs(i,k,ntbcl)*1.e-9_kind_phys
+              aer_nm(i,k,14) = qgrs(i,k,ntocb)*1.e-9_kind_phys
+              aer_nm(i,k,15) = qgrs(i,k,ntocl)*1.e-9_kind_phys
+            enddo
+          enddo
+        endif
+
 
       call setaer (plvl, plyr, prslk1, tvly, rhly, slmsk,    & !  ---  inputs
                    tracer1, aer_nm, xlon, xlat, IM, LMK, LMP,&
