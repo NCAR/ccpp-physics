@@ -215,9 +215,9 @@
   kind = kind_phys
   intent = inout
 [aer_nm]
-  standard_name = mass_number_concentration_of_aerosol_from_gocart_climatology
-  long_name = GOCART aerosol climatology number concentration
-  units = kg-1
+  standard_name = mass_mixing_ratio_of_aerosol_from_gocart_or_merra2
+  long_name = mass mixing ratio of aerosol from gocart or merra2
+  units = kg kg-1
   dimensions = (horizontal_dimension,vertical_layer_dimension,number_of_aerosol_tracers_MG)
   type = real
   kind = kind_phys
@@ -1204,9 +1204,9 @@
   kind = kind_phys
   intent = in
 [aer_nm]
-  standard_name = mass_number_concentration_of_aerosol_from_gocart_climatology
-  long_name = GOCART aerosol climatology number concentration
-  units = kg-1
+  standard_name = mass_mixing_ratio_of_aerosol_from_gocart_or_merra2
+  long_name = mass mixing ratio of aerosol from gocart or merra2
+  units = kg kg-1
   dimensions = (horizontal_dimension,vertical_layer_dimension,number_of_aerosol_tracers_MG)
   type = real
   kind = kind_phys
