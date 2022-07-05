@@ -16,7 +16,7 @@
  method of determining the total radiative flux at any given
  location. These calculations provide both the total radiative flux
  at the ground surface, which is needed to establish the surface
- energy budget, and the vertical radiative flux divergence, which is
+ energy budget, and the vertical radiative net flux divergence, which is
  used to calculate the radiative heating and cooling rates of a given
  atmospheric layer. The magnitude of the terms in the surface energy
  budget can set the stage for moist deep convection and are crucial
@@ -28,7 +28,7 @@
  Since 2007, the longwave (LW) and the shortwave (SW) radiation
  parameterizations in NCEP's operational GFS are both modified and
  optimized versions of the Rapid Radiative Transfer Model for GCMs
- (RRTMG_LW v2.3 and RRTMG_SW v2.3, respectively) developed at AER \a inc.
+ (RRTMG_LW and RRTMG_SW, respectively) developed at AER \a inc.
  (Atmospheric and Environmental Research)
  (Iacono et al.(2008) \cite iacono_et_al_2008; Mlawer et al.(1997) \cite mlawer_et_al_1997; 
   Iacono et al.(2000) \cite iacono_et_al_2000; Clough et al. 2005 \cite clough_et_al_2005). The LW algorithm
@@ -41,7 +41,8 @@
  To represent statistically the unresolved subgrid cloud variability
  when dealing multi layered clouds, a Monte-Carlo Independent Column
  Approximation (\b McICA) method is used in the RRTMG radiative transfer.
- A maximum-random cloud overlap method is used in both LW and SW
+ Several cloud overlap methods, including maximum-random, exponential,
+ and exponential-random are available in both LW and SW
  radiation calculations. 
 
  Radiative fields from model outputs (\f$W m^{-2}\f$) include:
