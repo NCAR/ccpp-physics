@@ -10823,7 +10823,7 @@ end subroutine psn_crop
       real (kind=kind_phys) :: x1,x2,fx1,fx2
       integer :: n
       integer, parameter :: nmax = 20
-      real(kind=kind_phys) rphys_temp
+      real(kind=kind_phys) zolri_iteration
       !real, dimension(nmax):: zlhux
 !     real  :: zolri2
 
@@ -10856,9 +10856,9 @@ end subroutine psn_crop
 
       if (n==nmax .and. abs(x1 - x2) >= 0.01) then
          !if convergence fails, use approximate values:
-         rphys_temp = zolri
-         call li_etal_2010(rphys_temp, ri, za/z0, z0/zt)
-         zolri = rphys_temp
+         zolri_iteration= zolri
+         call li_etal_2010(zolri_iteration, ri, za/z0, z0/zt)
+         zolri = zolri_iteration
          !zlhux(n)=zolri
          !print*,"iter fail, n=",n," ri=",ri," z0=",z0
       else
@@ -10924,7 +10924,7 @@ end subroutine psn_crop
       integer :: n
       integer, parameter :: nmax = 20
       real (kind=kind_phys), dimension(nmax):: zlhux
-      real (kind=kind_phys) :: psit2,psix2,phys_temp
+      real (kind=kind_phys) :: psit2,psix2,zolrib_iteration
 
 !     real    :: psim_unstable, psim_stable
 !     real    :: psih_unstable, psih_stable
@@ -10975,9 +10975,9 @@ end subroutine psn_crop
       if (n==nmax .and. abs(zolold - zolrib) > 0.01 ) then
          !print*,"iter fail, n=",n," ri=",ri," z/l=",zolri
          !if convergence fails, use approximate values:
-         phys_temp = zolrib
-         call li_etal_2010(phys_temp, ri, za/z0, z0/zt)
-         zolrib = phys_temp
+         zolrib_iteration = zolrib
+         call li_etal_2010(zolrib_iteration, ri, za/z0, z0/zt)
+         zolrib = zolrib_iteration
          zlhux(n)=zolrib
          !print*,"failed, n=",n," ri=",ri," z0=",z0
          !print*,"z/l=",zlhux(1:nmax)
