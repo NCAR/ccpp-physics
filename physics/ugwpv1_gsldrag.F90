@@ -263,7 +263,6 @@ contains
 !> \section arg_table_ugwpv1_gsldrag_finalize Argument Table
 !! \htmlinclude ugwpv1_gsldrag_finalize.html
 !!
-
     subroutine ugwpv1_gsldrag_finalize(errmsg, errflg)
 
     implicit none

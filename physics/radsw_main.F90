@@ -404,7 +404,7 @@
 
 !  ---  public accessable subprograms
 
-      public rrtmg_sw_run, rrtmg_sw_finalize, rswinit
+      public rrtmg_sw_run, rswinit
 
 ! =================
       contains
@@ -1380,9 +1380,6 @@
 !...................................
       end subroutine rrtmg_sw_run
 !-----------------------------------
-
-      subroutine rrtmg_sw_finalize ()
-      end subroutine rrtmg_sw_finalize
 
 !>\ingroup module_radsw_main
 !> This subroutine initializes non-varying module variables, conversion

@@ -24,8 +24,8 @@ module GFS_cloud_diagnostics
   integer :: &
        llyr    = 2            ! Upper limit of boundary layer clouds
      
-  public GFS_cloud_diagnostics_run, GFS_cloud_diagnostics_init,&
-       GFS_cloud_diagnostics_finalize, hml_cloud_diagnostics_init
+  public GFS_cloud_diagnostics_run
+
 contains
 
 !>\defgroup gfs_cloud_diagnostics_mod GFS Cloud Diagnostics Module
