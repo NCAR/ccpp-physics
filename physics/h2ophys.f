@@ -8,7 +8,7 @@
 
       private
 
-      public :: h2ophys_init, h2ophys_run, h2ophys_finalize
+      public :: h2ophys_init, h2ophys_run
 
       contains
 
@@ -145,8 +145,5 @@
       return
       end subroutine h2ophys_run
 !> @}
-
-      subroutine h2ophys_finalize()
-      end subroutine h2ophys_finalize
 
       end module h2ophys

@@ -805,7 +805,7 @@ module mp_thompson
       end subroutine mp_thompson_run
 !>@}
 
-!! \section arg_table_mp_thompson_finalize Argument Table
+!> \section arg_table_mp_thompson_finalize Argument Table
 !! \htmlinclude mp_thompson_finalize.html
 !!
       subroutine mp_thompson_finalize(errmsg, errflg)

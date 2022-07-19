@@ -11,7 +11,7 @@ module GFS_rrtmgp_cloud_overlap
   use radiation_tools,   only: check_error_msg
   use module_radiation_cloud_overlap, only: cmp_dcorr_lgth, get_alpha_exper
 
-  public GFS_rrtmgp_cloud_overlap_init, GFS_rrtmgp_cloud_overlap_run, GFS_rrtmgp_cloud_overlap_finalize
+  public GFS_rrtmgp_cloud_overlap_run
 
 contains  
 

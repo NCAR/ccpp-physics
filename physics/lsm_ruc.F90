@@ -231,7 +231,7 @@ module lsm_ruc
 
       end subroutine lsm_ruc_init
 
-!! \section arg_table_lsm_ruc_finalize Argument Table
+!> \section arg_table_lsm_ruc_finalize Argument Table
 !! \htmlinclude lsm_ruc_finalize.html
 !!
       subroutine lsm_ruc_finalize (errmsg, errflg)

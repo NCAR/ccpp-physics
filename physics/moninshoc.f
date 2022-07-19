@@ -29,9 +29,6 @@
  
       end subroutine moninshoc_init
 
-      subroutine moninshoc_finalize ()
-      end subroutine moninshoc_finalize
-
 !!!!!  ==========================================================  !!!!!
 ! subroutine 'moninshoc' computes pbl height and applies vertical diffusion
 ! using the coefficient provided by the SHOC scheme (from previous step)

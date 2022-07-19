@@ -7,15 +7,9 @@ module cu_ntiedtke_pre
 
    private
 
-   public :: cu_ntiedtke_pre_init, cu_ntiedtke_pre_run, cu_ntiedtke_pre_finalize
+   public ::  cu_ntiedtke_pre_run
 
    contains
-
-   subroutine cu_ntiedtke_pre_init ()
-   end subroutine cu_ntiedtke_pre_init
-
-   subroutine cu_ntiedtke_pre_finalize()
-   end subroutine cu_ntiedtke_pre_finalize
 
 !> \section arg_table_cu_ntiedtke_pre_run Argument Table
 !! \htmlinclude cu_ntiedtke_pre_run.html

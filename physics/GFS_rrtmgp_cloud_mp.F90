@@ -27,7 +27,7 @@ module GFS_rrtmgp_cloud_mp
        reice_min  = 10.0,       & ! Minimum ice size allowed by GFDL MP scheme
        reice_max  = 150.0         ! Maximum ice size allowed by GFDL MP scheme  
   
-  public GFS_rrtmgp_cloud_mp_init, GFS_rrtmgp_cloud_mp_run, GFS_rrtmgp_cloud_mp_finalize
+  public GFS_rrtmgp_cloud_mp_run
 
 contains  
 

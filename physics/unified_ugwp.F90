@@ -62,8 +62,6 @@ contains
 !> \section arg_table_unified_ugwp_init Argument Table
 !! \htmlinclude unified_ugwp_init.html
 !!
-! -----------------------------------------------------------------------
-!
     subroutine unified_ugwp_init (me, master, nlunit, input_nml_file, logunit, &
                 fn_nml2, jdat, lonr, latr, levs, ak, bk, dtp, cdmbgwd, cgwf,   &
                 con_pi, con_rerth, pa_rf_in, tau_rf_in, con_p0, do_ugwp,       &
@@ -164,7 +162,6 @@ contains
 !> \section arg_table_unified_ugwp_finalize Argument Table
 !! \htmlinclude unified_ugwp_finalize.html
 !!
-
     subroutine unified_ugwp_finalize(do_ugwp_v0,do_ugwp_v0_nst_only,  &
                                      errmsg, errflg)
 

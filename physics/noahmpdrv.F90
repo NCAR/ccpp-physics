@@ -15,7 +15,7 @@
 
       private
 
-      public :: noahmpdrv_init, noahmpdrv_run, noahmpdrv_finalize
+      public :: noahmpdrv_init, noahmpdrv_run
 
       contains
 
@@ -75,9 +75,6 @@
         resid (:) = drysmc (:)
 
       end subroutine noahmpdrv_init
-
-      subroutine noahmpdrv_finalize
-      end subroutine noahmpdrv_finalize
 
 !> \ingroup NoahMP_LSM
 !! \brief This subroutine is the main CCPP entry point for the NoahMP LSM.

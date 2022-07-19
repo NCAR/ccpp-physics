@@ -11,7 +11,7 @@ module mp_nssl
 
     implicit none
 
-    public :: mp_nssl_init, mp_nssl_run, mp_nssl_finalize
+    public :: mp_nssl_init, mp_nssl_run
 
     private
     logical :: is_initialized = .False.
@@ -800,21 +800,5 @@ module mp_nssl
 
     end subroutine mp_nssl_run
 !>@}
-
-#if 0
-!> \section arg_table_mp_nssl_finalize Argument Table
-!! \htmlinclude mp_nssl_finalize.html
-!!
-#endif
-    subroutine mp_nssl_finalize(errflg, errmsg)
-        implicit none
-         character(len=*),          intent(  out) :: errmsg
-         integer,                   intent(  out) :: errflg
-
-        errflg = 0
-        errmsg = ''
-
-
-    end subroutine mp_nssl_finalize
 
 end module mp_nssl

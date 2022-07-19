@@ -8,15 +8,9 @@ module phys_tend
 
    private
 
-   public phys_tend_init, phys_tend_run, phys_tend_finalize
+   public  phys_tend_run
 
 contains
-
-   subroutine phys_tend_init()
-   end subroutine phys_tend_init
-
-   subroutine phys_tend_finalize()
-   end subroutine phys_tend_finalize
 
 !> \section arg_table_phys_tend_run Argument Table
 !! \htmlinclude phys_tend_run.html
