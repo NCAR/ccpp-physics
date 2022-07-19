@@ -72,7 +72,7 @@
                   nslwr, nhfrad, idate, debug, me, master, nscyc, sec, phour, zhour, fhour,      &
                   kdt, julian, yearlen, ipt, lprnt, lssav, lsswr, lslwr, solhr, errmsg, errflg)
 
-        use machine,               only: kind_phys
+        use machine,               only: kind_phys, kind_dbl_prec, kind_sngl_prec
 
         implicit none
 
@@ -94,8 +94,10 @@
 
         real(kind=kind_phys), parameter :: con_24  =   24.0_kind_phys
         real(kind=kind_phys), parameter :: con_hr  = 3600.0_kind_phys
-        real(kind=kind_phys) :: rinc(5)
+        real(kind=kind_sngl_prec) :: rinc4(5)
+        real(kind=kind_dbl_prec)  :: rinc8(5)
 
+        integer :: w3kindreal,w3kindint
         integer ::  iw3jdn
         integer :: jd0, jd1
         real    :: fjd
@@ -113,9 +115,19 @@
 
         !--- jdat is being updated directly inside of FV3GFS_cap.F90
         !--- update calendars and triggers
-        rinc(1:5)   = 0
-        call w3difdat(jdat,idat,4,rinc)
-        sec = rinc(4)
+        call w3kind(w3kindreal,w3kindint)
+        if (w3kindreal == 8) then
+           rinc8(1:5) = 0
+           call w3difdat(jdat,idat,4,rinc8)
+           sec = rinc8(4)
+        else if (w3kindreal == 4) then
+           rinc4(1:5) = 0
+           call w3difdat(jdat,idat,4,rinc4)
+           sec = rinc4(4)
+        else
+           write(0,*)' FATAL ERROR: Invalid w3kindreal'
+           call abort
+        endif
         phour = sec/con_hr
         !--- set current bucket hour
         zhour = phour

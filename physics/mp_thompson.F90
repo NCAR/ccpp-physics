@@ -311,6 +311,7 @@ module mp_thompson
                               spp_wts_mp, spp_mp, n_var_spp,       &
                               spp_prt_list, spp_var_list,          &
                               spp_stddev_cutoff,                   &
+                              cplchm, pfi_lsan, pfl_lsan,          &
                               errmsg, errflg)
 
          implicit none
@@ -385,6 +386,11 @@ module mp_thompson
          character(len=3),          intent(in) :: spp_var_list(:)
          real(kind_phys),           intent(in) :: spp_stddev_cutoff(:)
 
+         logical, intent (in) :: cplchm
+         ! ice and liquid water 3d precipitation fluxes - only allocated if cplchm is .true.
+         real(kind=kind_phys), intent(inout), dimension(:,:) :: pfi_lsan
+         real(kind=kind_phys), intent(inout), dimension(:,:) :: pfl_lsan
+
          ! Local variables
 
          ! Reduced time step if subcycling is used
@@ -406,6 +412,9 @@ module mp_thompson
          real(kind_phys) :: delta_graupel_mp(1:ncol)        ! mm
          real(kind_phys) :: delta_ice_mp(1:ncol)            ! mm
          real(kind_phys) :: delta_snow_mp(1:ncol)           ! mm
+
+         real(kind_phys) :: pfils(1:ncol,1:nlev,1)
+         real(kind_phys) :: pflls(1:ncol,1:nlev,1)
          ! Radar reflectivity
          logical         :: diagflag                        ! must be true if do_radar_ref is true, not used otherwise
          integer         :: do_radar_ref_mp                 ! integer instead of logical do_radar_ref
@@ -589,6 +598,10 @@ module mp_thompson
          kde = nlev
          kme = nlev
          kte = nlev
+         if(cplchm) then
+           pfi_lsan = 0.0
+           pfl_lsan = 0.0
+         end if
 
          ! Set pointers for extended diagnostics
          set_extended_diagnostic_pointers: if (ext_diag) then
@@ -678,7 +691,7 @@ module mp_thompson
                               tprv_rev=tprv_rev, tten3=tten3,                                &
                               qvten3=qvten3, qrten3=qrten3, qsten3=qsten3, qgten3=qgten3,    &
                               qiten3=qiten3, niten3=niten3, nrten3=nrten3, ncten3=ncten3,    &
-                              qcten3=qcten3)
+                              qcten3=qcten3, pfils=pfils, pflls=pflls)
          else
             call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
                               tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtstep, dt_inner=dt_inner,  &
@@ -717,7 +730,7 @@ module mp_thompson
                               tprv_rev=tprv_rev, tten3=tten3,                                &
                               qvten3=qvten3, qrten3=qrten3, qsten3=qsten3, qgten3=qgten3,    &
                               qiten3=qiten3, niten3=niten3, nrten3=nrten3, ncten3=ncten3,    &
-                              qcten3=qcten3)
+                              qcten3=qcten3, pfils=pfils, pflls=pflls)
          end if
          if (errflg/=0) return
 
@@ -757,6 +770,12 @@ module mp_thompson
          if (nsteps>1 .and. istep == nsteps) then
            ! Unlike inside mp_gt_driver, rain does not contain frozen precip
            sr = (snow + graupel + ice)/(rain + snow + graupel + ice +1.e-12)
+         end if
+
+         ! output instantaneous ice/snow and rain water 3d precipitation fluxes
+         if(cplchm) then
+           pfi_lsan(:,:) = pfils(:,:,1)
+           pfl_lsan(:,:) = pflls(:,:,1)
          end if
 
          unset_extended_diagnostic_pointers: if (ext_diag) then

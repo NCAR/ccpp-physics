@@ -34,6 +34,7 @@
       !--- variables needed for calculating 'sncovr'
       use namelist_soilveg, only: salp_data, snupx
       use set_soilveg_mod, only: set_soilveg
+      use physparam,              only : iaermdl
 
       ! --- needed for Noah MP init
       use noahmp_tables, only: laim_table,saim_table,sla_table,      &
@@ -66,7 +67,8 @@
 !>\section gen_GFS_phys_time_vary_init GFS_phys_time_vary_init General Algorithm
 !> @{
       subroutine GFS_phys_time_vary_init (                                                         &
-              me, master, ntoz, h2o_phys, iaerclm, iccn, iflip, im, nx, ny, idate, xlat_d, xlon_d, &
+              me, master, ntoz, h2o_phys, iaerclm, iccn, iflip, im, levs,                          &
+              nx, ny, idate, xlat_d, xlon_d,                                                       &
               jindx1_o3, jindx2_o3, ddy_o3, ozpl, jindx1_h, jindx2_h, ddy_h, h2opl,fhour,          &
               jindx1_aer, jindx2_aer, ddy_aer, iindx1_aer, iindx2_aer, ddx_aer, aer_nm,            &
               jindx1_ci, jindx2_ci, ddy_ci, iindx1_ci, iindx2_ci, ddx_ci, imap, jmap,              &
@@ -84,7 +86,7 @@
          implicit none
 
          ! Interface variables
-         integer,              intent(in)    :: me, master, ntoz, iccn, iflip, im, nx, ny
+         integer,              intent(in)    :: me, master, ntoz, iccn, iflip, im, nx, ny, levs
          logical,              intent(in)    :: h2o_phys, iaerclm, lsm_cold_start
          integer,              intent(in)    :: idate(:)
          real(kind_phys),      intent(in)    :: fhour
@@ -95,7 +97,7 @@
          real(kind_phys),      intent(in)    :: ozpl(:,:,:), h2opl(:,:,:)
          integer,              intent(inout) :: jindx1_aer(:), jindx2_aer(:), iindx1_aer(:), iindx2_aer(:)
          real(kind_phys),      intent(inout) :: ddy_aer(:), ddx_aer(:)
-         real(kind_phys),      intent(in)    :: aer_nm(:,:,:)
+         real(kind_phys),      intent(out)   :: aer_nm(:,:,:)
          integer,              intent(inout) :: jindx1_ci(:), jindx2_ci(:), iindx1_ci(:), iindx2_ci(:)
          real(kind_phys),      intent(inout) :: ddy_ci(:), ddx_ci(:)
          integer,              intent(inout) :: imap(:), jmap(:)
@@ -195,12 +197,12 @@
          jamax=-999
 
 !$OMP parallel num_threads(nthrds) default(none)                                    &
-!$OMP          shared (me,master,ntoz,h2o_phys,im,nx,ny,idate)                      &
+!$OMP          shared (me,master,ntoz,h2o_phys,im,nx,ny,levs,idate)                 &
 !$OMP          shared (xlat_d,xlon_d,imap,jmap,errmsg,errflg)                       &
 !$OMP          shared (levozp,oz_coeff,oz_pres,ozpl)                                &
 !$OMP          shared (levh2o,h2o_coeff,h2o_pres,h2opl)                             &
 !$OMP          shared (iamin, iamax, jamin, jamax)                                  &
-!$OMP          shared (iaerclm,ntrcaer,aer_nm,iflip,iccn)                           &
+!$OMP          shared (iaerclm,iaermdl,ntrcaer,aer_nm,iflip,iccn)                   &
 !$OMP          shared (jindx1_o3,jindx2_o3,ddy_o3,jindx1_h,jindx2_h,ddy_h)          &
 !$OMP          shared (jindx1_aer,jindx2_aer,ddy_aer,iindx1_aer,iindx2_aer,ddx_aer) &
 !$OMP          shared (jindx1_ci,jindx2_ci,ddy_ci,iindx1_ci,iindx2_ci,ddx_ci)       &
@@ -252,28 +254,22 @@
          end if
 
 !$OMP section
-!> - Call read_aerdata() to read aerosol climatology
+!> - Call read_aerdata() to read aerosol climatology, Anning added coupled
+!>  added coupled gocart and radiation option to initializing aer_nm
          if (iaerclm) then
-            ! Consistency check that the value for ntrcaerm set in GFS_typedefs.F90
-            ! and used to allocate aer_nm matches the value defined in aerclm_def
-            if (size(aer_nm, dim=3).ne.ntrcaerm) then
-               write(errmsg,'(2a,i0,a,i0)') "Value error in GFS_phys_time_vary_init: ",     &
-                     "ntrcaerm from aerclm_def does not match value in GFS_typedefs.F90: ", &
-                     ntrcaerm, " /= ", size(aer_nm, dim=3)
-               errflg = 1
-            else
-               ! Update the value of ntrcaer in aerclm_def with the value defined
-               ! in GFS_typedefs.F90 that is used to allocate the Tbd DDT.
-               ! If iaerclm is .true., then ntrcaer == ntrcaerm
-               ntrcaer = size(aer_nm, dim=3)
-               ! Read aerosol climatology
-               call read_aerdata (me,master,iflip,idate,errmsg,errflg)
-            endif
+           ntrcaer = ntrcaerm
+           call read_aerdata (me,master,iflip,idate,errmsg,errflg)
+         else if(iaermdl ==2 ) then
+           do ix=1,ntrcaerm
+             do j=1,levs
+               do i=1,im
+                 aer_nm(i,j,ix) = 1.e-20_kind_phys
+               end do
+             end do
+           end do
+           ntrcaer = ntrcaerm
          else
-            ! Update the value of ntrcaer in aerclm_def with the value defined
-            ! in GFS_typedefs.F90 that is used to allocate the Tbd DDT.
-            ! If iaerclm is .false., then ntrcaer == 1
-            ntrcaer = size(aer_nm, dim=3)
+           ntrcaer = 1
          endif
 
 !$OMP section

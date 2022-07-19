@@ -1007,7 +1007,8 @@ MODULE module_mp_thompson
                               tprr_gml, tprr_rcg,                     &
                               tprr_rcs, tprv_rev, tten3, qvten3,      &
                               qrten3, qsten3, qgten3, qiten3, niten3, &
-                              nrten3, ncten3, qcten3)
+                              nrten3, ncten3, qcten3,                 &
+                              pfils, pflls)
 
       implicit none
 
@@ -1027,6 +1028,7 @@ MODULE module_mp_thompson
       LOGICAL, OPTIONAL, INTENT(IN):: aero_ind_fdb
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(INOUT):: &
                           re_cloud, re_ice, re_snow
+      REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT):: pfils, pflls
       INTEGER, INTENT(IN) :: rand_perturb_on, kme_stoch, n_var_spp
       REAL, DIMENSION(:,:), INTENT(IN) :: rand_pert
       REAL, DIMENSION(:), INTENT(IN) :: spp_prt_list, spp_stddev_cutoff
@@ -1077,7 +1079,7 @@ MODULE module_mp_thompson
       REAL, DIMENSION(kts:kte):: &
                           qv1d, qc1d, qi1d, qr1d, qs1d, qg1d, ni1d,     &
                           nr1d, nc1d, nwfa1d, nifa1d,                   &
-                          t1d, p1d, w1d, dz1d, rho, dBZ
+                          t1d, p1d, w1d, dz1d, rho, dBZ, pfil1, pfll1
 !..Extended diagnostics, single column arrays
       REAL, DIMENSION(:), ALLOCATABLE::                              &
                           !vtsk1, txri1, txrc1,                       &
@@ -1235,6 +1237,8 @@ MODULE module_mp_thompson
       pcp_sn(:,:) = 0.0
       pcp_gr(:,:) = 0.0
       pcp_ic(:,:) = 0.0
+      pfils(:,:,:) = 0.0
+      pflls(:,:,:) = 0.0
       rand_pert_max = 0.0
       ndt = max(nint(dt_in/dt_inner),1)
       dt = dt_in/ndt
@@ -1426,7 +1430,8 @@ MODULE module_mp_thompson
                       tprw_vcd1_e, tprr_sml1, tprr_gml1, tprr_rcg1,    &
                       tprr_rcs1, tprv_rev1,                            &
                       tten1, qvten1, qrten1, qsten1,                   &
-                      qgten1, qiten1, niten1, nrten1, ncten1, qcten1)
+                      qgten1, qiten1, niten1, nrten1, ncten1, qcten1,  &
+                      pfil1, pfll1)
 
          pcp_ra(i,j) = pcp_ra(i,j) + pptrain
          pcp_sn(i,j) = pcp_sn(i,j) + pptsnow
@@ -1482,7 +1487,9 @@ MODULE module_mp_thompson
             qg(i,k,j) = qg1d(k)
             ni(i,k,j) = ni1d(k)
             nr(i,k,j) = nr1d(k)
-            if (present(tt)) then;
+            pfils(i,k,j) = pfils(i,k,j) + pfil1(k)
+            pflls(i,k,j) = pflls(i,k,j) + pfll1(k)
+            if (present(tt)) then
                tt(i,k,j) = t1d(k)
             else
                th(i,k,j) = t1d(k)/pii(i,k,j)
@@ -1693,6 +1700,15 @@ MODULE module_mp_thompson
 ! END DEBUG - GT
       enddo ! end of nt loop
 
+      do j = j_start, j_end
+        do k = kts, kte
+          do i = i_start, i_end
+            pfils(i,k,j) = pfils(i,k,j)/dt_in
+            pflls(i,k,j) = pflls(i,k,j)/dt_in
+          enddo
+        enddo 
+      enddo
+
       ! These are always allocated
       !deallocate (vtsk1)
       !deallocate (txri1)
@@ -1824,7 +1840,8 @@ MODULE module_mp_thompson
                           tprw_vcd1_e, tprr_sml1, tprr_gml1, tprr_rcg1,    &
                           tprr_rcs1, tprv_rev1,                            &
                           tten1, qvten1, qrten1, qsten1,                   &
-                          qgten1, qiten1, niten1, nrten1, ncten1, qcten1) 
+                          qgten1, qiten1, niten1, nrten1, ncten1, qcten1,  &
+                          pfil1, pfll1) 
 
 #ifdef MPI
       use mpi
@@ -1836,6 +1853,7 @@ MODULE module_mp_thompson
       REAL, DIMENSION(kts:kte), INTENT(INOUT):: &
                           qv1d, qc1d, qi1d, qr1d, qs1d, qg1d, ni1d, &
                           nr1d, nc1d, nwfa1d, nifa1d, t1d
+      REAL, DIMENSION(kts:kte), INTENT(OUT):: pfil1, pfll1
       REAL, DIMENSION(kts:kte), INTENT(IN):: p1d, w1d, dzq
       REAL, INTENT(INOUT):: pptrain, pptsnow, pptgraul, pptice
       REAL, INTENT(IN):: dt
@@ -1902,7 +1920,7 @@ MODULE module_mp_thompson
       REAL :: dtcfl,rainsfc,graulsfc
       INTEGER :: niter 
 
-      REAL, DIMENSION(kts:kte):: temp, pres, qv
+      REAL, DIMENSION(kts:kte):: temp, pres, qv, pfll, pfil, pdummy
       REAL, DIMENSION(kts:kte):: rc, ri, rr, rs, rg, ni, nr, nc, nwfa, nifa
       REAL, DIMENSION(kts:kte):: rr_tmp, nr_tmp, rg_tmp
       REAL, DIMENSION(kts:kte):: rho, rhof, rhof2
@@ -2063,6 +2081,12 @@ MODULE module_mp_thompson
          pnd_rcd(k) = 0.
          pnd_scd(k) = 0.
          pnd_gcd(k) = 0.
+
+         pfil1(k) = 0.
+         pfll1(k) = 0.
+         pfil(k) = 0.
+         pfll(k) = 0.
+         pdummy(k) = 0.
       enddo
 #if ( WRF_CHEM == 1 )
       do k = kts, kte
@@ -3902,6 +3926,7 @@ MODULE module_mp_thompson
           nrten(k) = nrten(k) - sed_n(k)*odzq*onstep(1)*orho
           rr(k) = MAX(R1, rr(k) - sed_r(k)*odzq*DT*onstep(1))
           nr(k) = MAX(R2, nr(k) - sed_n(k)*odzq*DT*onstep(1))
+          pfll1(k) = pfll1(k) + sed_r(k)*DT*onstep(1)
           do k = ksed1(1), kts, -1
              odzq = 1./dzq(k)
              orho = 1./rho(k)
@@ -3913,6 +3938,7 @@ MODULE module_mp_thompson
                                             *odzq*DT*onstep(1))
              nr(k) = MAX(R2, nr(k) + (sed_n(k+1)-sed_n(k)) &
                                             *odzq*DT*onstep(1))
+             pfll1(k) = pfll1(k) + sed_r(k)*DT*onstep(1)
           enddo
 
           if (rr(kts).gt.R1*10.) &
@@ -3926,12 +3952,13 @@ MODULE module_mp_thompson
         do n = 1, niter
           rr_tmp(:) = rr(:)
           nr_tmp(:) = nr(:)
-          call semi_lagrange_sedim(kte,dzq,vtrk,rr,rainsfc,dtcfl,R1)
-          call semi_lagrange_sedim(kte,dzq,vtnrk,nr,vtr,dtcfl,R2)
+          call semi_lagrange_sedim(kte,dzq,vtrk,rr,rainsfc,pfll,dtcfl,R1)
+          call semi_lagrange_sedim(kte,dzq,vtnrk,nr,vtr,pdummy,dtcfl,R2)
           do k = kts, kte
             orhodt = 1./(rho(k)*dt)
             qrten(k) = qrten(k) + (rr(k) - rr_tmp(k)) * orhodt
             nrten(k) = nrten(k) + (nr(k) - nr_tmp(k)) * orhodt
+            pfll1(k) = pfll1(k) + pfll(k)
           enddo
           pptrain = pptrain + rainsfc
 
@@ -3993,6 +4020,7 @@ MODULE module_mp_thompson
          niten(k) = niten(k) - sed_n(k)*odzq*onstep(2)*orho
          ri(k) = MAX(R1, ri(k) - sed_i(k)*odzq*DT*onstep(2))
          ni(k) = MAX(R2, ni(k) - sed_n(k)*odzq*DT*onstep(2))
+         pfil1(k) = pfil1(k) + sed_i(k)*DT*onstep(2)
          do k = ksed1(2), kts, -1
             odzq = 1./dzq(k)
             orho = 1./rho(k)
@@ -4004,6 +4032,7 @@ MODULE module_mp_thompson
                                            *odzq*DT*onstep(2))
             ni(k) = MAX(R2, ni(k) + (sed_n(k+1)-sed_n(k)) &
                                            *odzq*DT*onstep(2))
+            pfil1(k) = pfil1(k) + sed_i(k)*DT*onstep(2)
          enddo
 
          if (ri(kts).gt.R1*10.) &
@@ -4024,6 +4053,7 @@ MODULE module_mp_thompson
          orho = 1./rho(k)
          qsten(k) = qsten(k) - sed_s(k)*odzq*onstep(3)*orho
          rs(k) = MAX(R1, rs(k) - sed_s(k)*odzq*DT*onstep(3))
+         pfil1(k) = pfil1(k) + sed_s(k)*DT*onstep(3)
          do k = ksed1(3), kts, -1
             odzq = 1./dzq(k)
             orho = 1./rho(k)
@@ -4031,6 +4061,7 @@ MODULE module_mp_thompson
                                                *odzq*onstep(3)*orho
             rs(k) = MAX(R1, rs(k) + (sed_s(k+1)-sed_s(k)) &
                                            *odzq*DT*onstep(3))
+            pfil1(k) = pfil1(k) + sed_s(k)*DT*onstep(3)
          enddo
 
          if (rs(kts).gt.R1*10.) &
@@ -4052,6 +4083,7 @@ MODULE module_mp_thompson
            orho = 1./rho(k)
            qgten(k) = qgten(k) - sed_g(k)*odzq*onstep(4)*orho
            rg(k) = MAX(R1, rg(k) - sed_g(k)*odzq*DT*onstep(4))
+           pfil1(k) = pfil1(k) + sed_g(k)*DT*onstep(4)
            do k = ksed1(4), kts, -1
               odzq = 1./dzq(k)
               orho = 1./rho(k)
@@ -4059,6 +4091,7 @@ MODULE module_mp_thompson
                                           *odzq*onstep(4)*orho
               rg(k) = MAX(R1, rg(k) + (sed_g(k+1)-sed_g(k)) &
                                            *odzq*DT*onstep(4))
+              pfil1(k) = pfil1(k) + sed_g(k)*DT*onstep(4)
            enddo
 
            if (rg(kts).gt.R1*10.) &
@@ -4072,10 +4105,11 @@ MODULE module_mp_thompson
 
         do n = 1, niter
           rg_tmp(:) = rg(:)
-          call semi_lagrange_sedim(kte,dzq,vtgk,rg,graulsfc,dtcfl,R1)
+          call semi_lagrange_sedim(kte,dzq,vtgk,rg,graulsfc,pfil,dtcfl,R1)
           do k = kts, kte
             orhodt = 1./(rho(k)*dt)
             qgten(k) = qgten(k) + (rg(k) - rg_tmp(k))*orhodt
+            pfil1(k) = pfil1(k) + pfil(k)
           enddo
           pptgraul = pptgraul + graulsfc
           do k = kte+1, kts, -1
@@ -6128,7 +6162,7 @@ MODULE module_mp_thompson
       end subroutine calc_refl10cm
 !
 !-------------------------------------------------------------------
-      SUBROUTINE semi_lagrange_sedim(km,dzl,wwl,rql,precip,dt,R1)
+      SUBROUTINE semi_lagrange_sedim(km,dzl,wwl,rql,precip,pfsan,dt,R1)
 !-------------------------------------------------------------------
 !
 ! This routine is a semi-Lagrangain forward advection for hydrometeors
@@ -6155,6 +6189,7 @@ MODULE module_mp_thompson
       real, intent(in) :: dzl(km),wwl(km)
       real, intent(out) :: precip
       real, intent(inout) :: rql(km)
+      real, intent(out)  :: pfsan(km)
       integer  k,m,kk,kb,kt
       real  tl,tl2,qql,dql,qqd
       real  th,th2,qqh,dqh
@@ -6164,6 +6199,7 @@ MODULE module_mp_thompson
       real  wi(km+1), zi(km+1), za(km+2)    !hmhj
       real  qn(km)
       real  dza(km+1), qa(km+1), qmi(km+1), qpi(km+1)
+      real  net_flx(km)
 !
       precip = 0.0
       qa(:) = 0.0
@@ -6175,7 +6211,9 @@ MODULE module_mp_thompson
           qq(k) = rql(k) 
         else 
           ww(k) = 0.0 
-        endif 
+        endif
+        pfsan(k) = 0.0
+        net_flx(k) = 0.0
       enddo
 ! skip for no precipitation for all layers
       allold = 0.0
@@ -6330,6 +6368,7 @@ MODULE module_mp_thompson
                     if( za(k).lt.0.0 .and. za(k+1).le.0.0 ) then
 !hmhj
                       precip = precip + qa(k)*dza(k)
+                      net_flx(k) =  qa(k)*dza(k)
                       cycle sum_precip
                     else if ( za(k).lt.0.0 .and. za(k+1).gt.0.0 ) then
 !hmhj
@@ -6339,10 +6378,20 @@ MODULE module_mp_thompson
                       qqd = 0.5*(qpi(k)-qmi(k))             !hmhj
                       qqh = qqd*th2+qmi(k)*th               !hmhj
                       precip = precip + qqh*dza(k)    !hmhj
+                      net_flx(k) = qqh*dza(k)
                       exit sum_precip
                     endif
                     exit sum_precip
       enddo sum_precip
+
+! calculating precipitation fluxes
+      do k=km,1,-1
+         if(k == km) then
+           pfsan(k) = net_flx(k)
+         else
+           pfsan(k) = pfsan(k+1) + net_flx(k)
+         end if
+      enddo
 !
 ! replace the new values
       rql(:) = max(qn(:),R1)

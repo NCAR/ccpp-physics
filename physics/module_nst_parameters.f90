@@ -9,8 +9,7 @@
 !! history:
 !!  20210305: X.Li, reduce z_w_max from 30 m to 20 m
 module module_nst_parameters
-  use machine, only :  kind_phys &
-       ,kind_rad ! for astronomy (date) calculations
+  use machine, only :  kind_phys
   !
   ! air constants and coefficients from the atmospehric model
   use physcons, only: &
