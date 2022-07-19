@@ -98,7 +98,7 @@ contains
 !
 !**********************************************************************
       SUBROUTINE read_aerdataf ( me, master, iflip, idate, FHOUR, errmsg, errflg)
-      use machine, only: kind_phys, kind_io4, kind_io8
+      use machine, only: kind_phys, kind_dbl_prec
       use aerclm_def
 
 !--- in/out
@@ -111,7 +111,7 @@ contains
       logical      :: file_exist
       integer  IDAT(8),JDAT(8)
       real(kind=kind_phys) rjday
-      real(8) RINC(5)
+      real(kind=kind_dbl_prec) rinc(5)
       integer jdow, jdoy, jday
 
       integer, allocatable  :: invardims(:)
@@ -218,7 +218,7 @@ contains
       SUBROUTINE aerinterpol( me,master,nthrds,npts,IDATE,FHOUR,iflip, jindx1,jindx2, &
                              ddy,iindx1,iindx2,ddx,lev,prsl,aerout)
 !
-      use machine, only: kind_phys, kind_io4, kind_io8
+      use machine, only: kind_phys, kind_dbl_prec
       use aerclm_def
 
       implicit none
@@ -238,6 +238,7 @@ contains
       real(kind=kind_phys) aerpm(npts,levsaer,ntrcaer)
       real(kind=kind_phys) prsl(npts,lev), aerpres(npts,levsaer)
       real(kind=kind_phys) rjday
+      real(kind=kind_dbl_prec) rinc(5)
       integer jdow, jdoy, jday
 !
       IDAT = 0

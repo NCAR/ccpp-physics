@@ -2747,7 +2747,7 @@
       real (kind=kind_io8) gdata(idim*jdim)
       logical gaus
       real (kind=kind_io8) blno,blto
-      real (kind=kind_io8), allocatable :: data8(:)
+      real (kind=kind_dbl_prec), allocatable :: data8(:)
 !
       logical*1, allocatable :: lbms(:)
 !
@@ -6969,7 +6969,7 @@ cjfe
      &,                gaus, blno, blto, me,lprnt,iprnt, fnalbc2, ialb  &
      &,                tile_num_ch, i_index, j_index)
 !
-      use machine , only : kind_io8,kind_io4
+      use machine , only : kind_io8,kind_io4, kind_dbl_prec
       implicit none
       character(len=*), intent(in) :: tile_num_ch
       integer, intent(in) :: i_index(len), j_index(len)
@@ -7029,7 +7029,7 @@ cjfe
       data dayhf/ 15.5, 45.0, 74.5,105.0,135.5,166.0,
      &           196.5,227.5,258.0,288.5,319.0,349.5,380.5/
 !
-      real (kind=kind_io8) fha(5)
+      real (kind=kind_dbl_prec) fha(5)
       integer ida(8),jda(8),ivtyp, kpd7
 !
       real (kind=kind_io8), allocatable :: tsf(:,:),sno(:,:),
@@ -8296,7 +8296,7 @@ cjfe
 !
       real (kind=kind_io8) gdata(len), slmask(len)
       real (kind=kind_io8), allocatable :: data(:,:), rslmsk(:,:)
-      real (kind=kind_io8), allocatable :: data8(:)
+      real (kind=kind_dbl_prec), allocatable :: data8(:)
       real (kind=kind_io8), allocatable :: rlngrb(:), rltgrb(:)
 !
       logical lmask, yr2kc, gaus, ijordr
@@ -8471,7 +8471,7 @@ cjfe
 !
       real (kind=kind_io8) gdata(len), slmask(len)
       real (kind=kind_io8), allocatable :: data(:,:),rslmsk(:,:)
-      real (kind=kind_io8), allocatable :: data8(:)
+      real (kind=kind_dbl_prec), allocatable :: data8(:)
       real (kind=kind_io8), allocatable :: rlngrb(:), rltgrb(:)
 !
       logical lmask, yr2kc, gaus, ijordr
@@ -8492,7 +8492,7 @@ cjfe
       integer mjday(12)
       data mjday/31,28,31,30,31,30,31,31,30,31,30,31/
 !
-      real (kind=kind_io8) fha(5)
+      real (kind=kind_dbl_prec) fha(5)
       integer ida(8),jda(8)
 !
       allocate(data8(1:mdata))

@@ -135,7 +135,7 @@ contains
 !
       SUBROUTINE ozinterpol(me,npts,IDATE,FHOUR,jindx1,jindx2,ozplout,ddy)
 !
-      USE MACHINE,  ONLY : kind_phys
+      USE MACHINE,  ONLY : kind_phys, kind_dbl_prec
       USE OZNE_DEF
       implicit none
       integer             iday,j,j1,j2,l,npts,nc,n1,n2
@@ -148,6 +148,7 @@ contains
       real(kind=kind_phys) DDY(npts)
       real(kind=kind_phys) ozplout(npts,levozp,oz_coeff)
       real(kind=kind_phys) rjday
+      real(kind=kind_dbl_prec) rinc(5)
       integer jdow, jdoy, jday
 !
       IDAT=0

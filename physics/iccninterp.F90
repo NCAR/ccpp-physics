@@ -129,7 +129,7 @@ contains
       SUBROUTINE ciinterpol(me,npts,IDATE,FHOUR,jindx1,jindx2,ddy, &
                  iindx1,iindx2,ddx,lev, prsl, ciplout,ccnout)
 !
-      USE MACHINE,  ONLY : kind_phys
+      USE MACHINE,  ONLY : kind_phys, kind_dbl_prec
       use iccn_def
       implicit none
       integer   i1,i2, iday,j,j1,j2,l,npts,nc,n1,n2,lev,k,i
@@ -145,6 +145,7 @@ contains
       real(kind=kind_phys) ccnout(npts,lev),ccnpm(npts,kcipl)
       real(kind=kind_phys) cipres(npts,kcipl), prsl(npts,lev)
       real(kind=kind_phys) rjday
+      real(kind=kind_dbl_prec) rinc(5)
       integer jdow, jdoy, jday
 !
       IDAT=0

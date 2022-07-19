@@ -131,7 +131,7 @@ contains
 !
 ! May 2015 Shrinivas Moorthi - Prepare for H2O interpolation
 !
-      use machine , only : kind_phys
+      use machine , only : kind_phys, kind_dbl_prec
       use h2o_def
       implicit none
       integer             j,j1,j2,l,npts,nc,n1,n2
@@ -145,6 +145,7 @@ contains
       real(kind=kind_phys) ddy(npts)
       real(kind=kind_phys) h2oplout(npts,levh2o,h2o_coeff)
       real(kind=kind_phys) rjday
+      real(kind=kind_dbl_prec) rinc(5)
       integer              jdow, jdoy, jday
 !
       idat    = 0
