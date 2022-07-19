@@ -147,7 +147,7 @@ contains
 !
       real(kind=kind_phys) DDY(npts)
       real(kind=kind_phys) ozplout(npts,levozp,oz_coeff)
-      real(kind=kind_phys) RINC(5), rjday
+      real(kind=kind_phys) rjday
       integer jdow, jdoy, jday
 !
       IDAT=0

@@ -3477,7 +3477,8 @@
      & D_grid_bio, n_grid_bio, ijstop_bio, A_solo, n_iw, DSH,
      & Nhet_dep,Nhet_dhf,fdust_dep,P_ice, T_ice)
       implicit none
-      real, intent(IN):: SI, SIW, SW, A_solo,P_ice, T_ice
+      real, intent(IN):: SI, SIW, SW, A_solo
+      real*8, intent(IN):: P_ice, T_ice
       real, dimension(:), intent(IN):: D_grid_dust, n_grid_dust,
      & D_grid_soot, n_grid_soot, D_grid_bio, n_grid_bio
       integer, intent(IN):: ijstop_dust, ijstop_soot, ijstop_bio
@@ -3488,7 +3489,7 @@
      & num_ic_solo_imm
 
       real, intent (inout) :: DSH, n_iw
-      real, intent (out) :: Nhet_dep,Nhet_dhf,fdust_dep
+      real*8, intent (out) :: Nhet_dep,Nhet_dhf,fdust_dep
 
       real :: dn_in_dust, dn_in_soot, dn_in_bio, dn_in_solo, dNall,
      & dNaux, naux, SS_w, dH_frac_dust, dH_frac_soot, dH_frac_solo, aux,

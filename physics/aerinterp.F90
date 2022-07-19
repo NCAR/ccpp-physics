@@ -110,7 +110,8 @@ contains
       integer      :: i, j, k, n, ii, imon, klev, n1, n2
       logical      :: file_exist
       integer  IDAT(8),JDAT(8)
-      real(kind=kind_phys) RINC(5), rjday
+      real(kind=kind_phys) rjday
+      real(8) RINC(5)
       integer jdow, jdoy, jday
 
       integer, allocatable  :: invardims(:)
@@ -236,9 +237,8 @@ contains
       real(kind=kind_phys) aerout(npts,lev,ntrcaer)
       real(kind=kind_phys) aerpm(npts,levsaer,ntrcaer)
       real(kind=kind_phys) prsl(npts,lev), aerpres(npts,levsaer)
-      real(kind=kind_phys) RINC(5), rjday
+      real(kind=kind_phys) rjday
       integer jdow, jdoy, jday
-
 !
       IDAT = 0
       IDAT(1) = IDATE(4)

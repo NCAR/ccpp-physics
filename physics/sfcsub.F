@@ -2736,7 +2736,7 @@
 !>\ingroup mod_sfcsub
       subroutine fixrdg(lugb,idim,jdim,fngrib,                          &
      &                  kpds5,gdata,gaus,blno,blto,me)
-      use machine      , only : kind_io8,kind_io4
+      use machine      , only : kind_io8,kind_dbl_prec,kind_sngl_prec
       use sfccyc_module, only : mdata
       implicit none
       integer lgrib,n,lskip,jret,j,ndata,lugi,jdim,idim,lugb,
@@ -6152,7 +6152,7 @@
       subroutine setrmsk(kpds5,slmask,igaul,jgaul,wlon,rnlat,           &
      &                   data,imax,jmax,rlnout,rltout,lmask,rslmsk      &
      &,                  gaus,blno, blto, kgds1, kpds4, lbms)
-      use machine , only : kind_io8,kind_io4
+      use machine , only : kind_io8,kind_io4,kind_dbl_prec
       use sfccyc_module
       implicit none
       real (kind=kind_io8) blno,blto,wlon,rnlat,crit,data_max
@@ -6164,7 +6164,8 @@
       real (kind=kind_io8)    slmask(igaul,jgaul)
       real (kind=kind_io8)    data(imax,jmax),rslmsk(imax,jmax)
      &,                       rlnout(imax), rltout(jmax)
-      real (kind=kind_io8)    a(jmax), w(jmax), radi, dlat, dlon
+      real (kind=kind_io8)    radi, dlat, dlon
+      real (kind=kind_dbl_prec) a(jmax), w(jmax)
       logical lmask, gaus
 !
 !     set the longitude and latitudes for the grib file
@@ -6637,7 +6638,7 @@
 !! This subroutine interpolates from lat/lon grid to other lat/lon grid.
       subroutine ga2la(gauin,imxin,jmxin,regout,imxout,jmxout,          &
      &                 wlon,rnlat,rlnout,rltout,gaus,blno, blto)
-      use machine , only : kind_io8,kind_io4
+      use machine , only : kind_io8,kind_io4,kind_dbl_prec
       use sfccyc_module , only : num_threads
       implicit none
       integer i1,i2,j2,ishft,i,jj,j1,jtem,jmxout,imxin,jmxin,imxout,    &
@@ -6660,7 +6661,7 @@
       data    jmxsav/0/
       save    jmxsav, gaul, dlati
       real (kind=kind_io8) radi
-      real (kind=kind_io8) a(jmxin), w(jmxin)
+      real (kind=kind_dbl_prec) a(jmxin), w(jmxin)
 !
 !
       logical first
@@ -6904,11 +6905,12 @@ cjfe
 !>\ingroup mod_sfcsub
       subroutine gaulat(gaul,k)
 !
-      use machine , only : kind_io8,kind_io4
+      use machine , only : kind_io8,kind_io4,kind_dbl_prec
       implicit none
       integer n,k
       real (kind=kind_io8) radi
-      real (kind=kind_io8) a(k), w(k), gaul(k)
+      real (kind=kind_io8) gaul(k)
+      real (kind=kind_dbl_prec) a(k), w(k)
 !
       call splat(4, k, a, w)
 !
@@ -8278,7 +8280,7 @@ cjfe
      &                 gdata,len,iret                                   &
      &,                imsk, jmsk, slmskh, gaus,blno, blto              &
      &,                outlat, outlon, me)
-      use machine ,      only : kind_io8,kind_io4
+      use machine ,      only : kind_io8,kind_dbl_prec,kind_sngl_prec
       use sfccyc_module, only : mdata
       implicit none
       integer imax,jmax,ijmax,i,j,n,jret,inttyp,iret,imsk,              &
@@ -8442,7 +8444,7 @@ cjfe
      &                  iy,im,id,ih,fh,gdata,len,iret                   &
      &,                 imsk, jmsk, slmskh, gaus,blno, blto             &
      &,                 outlat, outlon, me)
-      use machine      , only : kind_io8,kind_io4
+      use machine      , only : kind_io8,kind_dbl_prec,kind_sngl_prec
       use sfccyc_module, only : mdata
       implicit none
       integer nrepmx,nvalid,imo,iyr,idy,jret,ihr,nrept,lskip,lugi,      &

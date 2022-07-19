@@ -144,7 +144,7 @@ contains
 !
       real(kind=kind_phys) ddy(npts)
       real(kind=kind_phys) h2oplout(npts,levh2o,h2o_coeff)
-      real(kind=kind_phys) rinc(5), rjday
+      real(kind=kind_phys) rjday
       integer              jdow, jdoy, jday
 !
       idat    = 0

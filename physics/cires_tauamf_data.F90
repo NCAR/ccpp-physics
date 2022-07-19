@@ -176,8 +176,9 @@ contains
 !
 !locals
 !
-      real(kind=kind_phys) :: rinc(5), rjday
+      real(kind=kind_phys) :: rjday
       integer              :: jdow, jdoy, jday
+      real(8)              :: rinc(5)
       real(4)              :: rinc4(5)
       
       integer ::  iw3jdn
