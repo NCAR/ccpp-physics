@@ -1549,13 +1549,13 @@ CONTAINS
 !> @}
 
 !=======================================================================
+!> This subroutine gives the closure constants and initializes the 
+!! turbulent qantities. 
 !     SUBROUTINE  mym_initialize:
 ! ==================================================================
-!> This subroutine was taken from the BouLac scheme in WRF-ARW and modified for
-!! integration into the MYNN PBL scheme. WHILE loops were added to reduce the
-!! computational expense. This subroutine computes the length scales up and down
-!! and then computes the min, average of the up/down length scales, and also
-!! considers the distance to the surface.
+! This subroutine computes the length scales up and down
+! and then computes the min, average of the up/down length scales, and also
+! considers the distance to the surface.
 !
 !     Input variables:
 !       iniflag         : <>0; turbulent quantities will be initialized
