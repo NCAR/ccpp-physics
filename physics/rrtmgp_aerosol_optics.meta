@@ -35,20 +35,6 @@
   dimensions = ()
   type = integer
   intent = in
-[nTracer]
-  standard_name = number_of_tracers
-  long_name = number of tracers
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-[nTracerAer]
-  standard_name = number_of_aerosol_tracers_MG
-  long_name = number of aerosol tracers for Morrison Gettelman MP
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
 [nday]
   standard_name = daytime_points_dimension
   long_name = daytime points dimension
@@ -112,9 +98,9 @@
   kind = kind_phys
   intent = in
 [tracer]
-  standard_name = chemical_tracers
-  long_name = chemical tracers
-  units = g g-1
+  standard_name = tracer_concentration
+  long_name = model layer mean tracer concentration
+  units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
   type = real
   kind = kind_phys
@@ -164,7 +150,7 @@
   units = DDT
   dimensions = ()
   type = ty_optical_props_1scl
-  intent = inout
+  intent = out
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

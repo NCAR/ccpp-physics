@@ -12,6 +12,7 @@ module GFS_rrtmgp_pre
   ! RRTMGP types
   use mo_gas_concentrations, only: ty_gas_concs
   use radiation_tools,       only: check_error_msg,cmp_tlev
+  use rrtmgp_lw_gas_optics,  only: lw_gas_props  
 
   real(kind_phys), parameter :: &
        amd   = 28.9644_kind_phys,  & ! Molecular weight of dry-air     (g/mol)
@@ -24,7 +25,7 @@ module GFS_rrtmgp_pre
   integer :: iStr_h2o, iStr_co2, iStr_o3, iStr_n2o, iStr_ch4, iStr_o2, iStr_ccl4, &
        iStr_cfc11, iStr_cfc12, iStr_cfc22 
 
-  public GFS_rrtmgp_pre_run,GFS_rrtmgp_pre_init,GFS_rrtmgp_pre_finalize  
+  public GFS_rrtmgp_pre_run,GFS_rrtmgp_pre_init
 contains
   
   ! #########################################################################################
@@ -103,7 +104,8 @@ contains
        con_eps, con_epsm1, con_fvirt, con_epsqs, solhr, minGPpres, maxGPpres, minGPtemp,    &
        maxGPtemp, raddt, p_lay, t_lay, p_lev, t_lev, tsfg, tsfa, qs_lay, q_lay, tv_lay,     &
        relhum, tracer, deltaZ, deltaZc, deltaP, active_gases_array, gas_concentrations,     &
-       tsfc_radtime, coszen, coszdg, top_at_1, iSFC, iTOA, errmsg, errflg)
+       tsfc_radtime, coszen, coszdg, top_at_1, iSFC, iTOA, semis, sfc_emiss_byband, errmsg, &
+       errflg)
     
     ! Inputs   
     integer, intent(in)    :: &
@@ -134,7 +136,8 @@ contains
     	 xlat,              & ! Latitude
     	 tsfc,              & ! Surface skin temperature (K)
          coslat,            & ! Cosine(latitude)
-         sinlat               ! Sine(latitude) 
+         sinlat,            & ! Sine(latitude) 
+         semis
     real(kind_phys), dimension(:,:), intent(in) :: & 
          prsl,              & ! Pressure at model-layer centers (Pa)
          tgrs,              & ! Temperature at model-layer centers (K)
@@ -173,6 +176,7 @@ contains
          deltaZc,           & ! Layer thickness (m) (between layer centers)
          deltaP,            & ! Layer thickness (Pa)
          p_lev,             & ! Pressure at model-interface
+         sfc_emiss_byband,  & !
          t_lev                ! Temperature at model-interface
     real(kind_phys), dimension(:,:,:),intent(inout) :: &
          tracer               ! Array containing trace gases
@@ -379,11 +383,13 @@ contains
        call coszmn (xlon, sinlat, coslat, solhr, nCol, me, coszen, coszdg)
     endif
 
+    ! #######################################################################################
+    ! Surface emissivity
+    ! #######################################################################################
+    do iBand=1,lw_gas_props%get_nband()
+       sfc_emiss_byband(iBand,:) = semis
+    enddo
+
   end subroutine GFS_rrtmgp_pre_run
   
-  ! #########################################################################################
-  ! SUBROUTINE GFS_rrtmgp_pre_finalize
-  ! #########################################################################################
-  subroutine GFS_rrtmgp_pre_finalize ()
-  end subroutine GFS_rrtmgp_pre_finalize
 end module GFS_rrtmgp_pre

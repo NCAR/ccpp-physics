@@ -464,6 +464,22 @@
   type = real
   kind = kind_phys
   intent = inout
+[semis]
+  standard_name = surface_longwave_emissivity
+  long_name = surface lw emissivity in fraction
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[sfc_emiss_byband]
+  standard_name = surface_emissivity_in_each_RRTMGP_LW_band
+  long_name = surface emissivity in each RRTMGP LW band
+  units = none
+  dimensions = (number_of_longwave_bands,horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

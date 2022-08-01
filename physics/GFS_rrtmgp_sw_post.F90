@@ -38,7 +38,7 @@ contains
          nDay,              & ! Number of daylit columns
          iSFC,              & ! Vertical index for surface level
          iTOA                 ! Vertical index for TOA level
-    integer, intent(in), dimension(nday) :: &
+    integer, intent(in), dimension(:) :: &
          idxday               ! Index array for daytime points
     logical, intent(in) ::  &
          lsswr,             & ! Call SW radiation?

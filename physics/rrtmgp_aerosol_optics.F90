@@ -24,7 +24,7 @@ contains
 !! \section arg_table_rrtmgp_aerosol_optics_run
 !! \htmlinclude rrtmgp_aerosol_optics_run.html
 !!
-  subroutine rrtmgp_aerosol_optics_run(doSWrad, doLWrad, nCol, nLev, nTracer, nTracerAer,   &
+  subroutine rrtmgp_aerosol_optics_run(doSWrad, doLWrad, nCol, nLev, &
        nDay, idxday, p_lev, p_lay, p_lk, tv_lay, relhum, lsmask, tracer, aerfld, lon, lat,  &
        aerodp, sw_optical_props_aerosol, lw_optical_props_aerosol, errmsg, errflg       )
 
@@ -35,10 +35,8 @@ contains
     integer, intent(in) :: &
          nCol,                  & ! Number of horizontal grid points
          nDay,                  & ! Number of daylit points
-         nLev,                  & ! Number of vertical layers
-         nTracer,               & ! Number of tracers
-         nTracerAer               ! Number of aerosol tracers
-    integer,intent(in),dimension(:) :: &
+         nLev                     ! Number of vertical layers
+    integer,dimension(:), intent(in) :: &
          idxday              ! Indices for daylit points.
     real(kind_phys), dimension(:), intent(in) :: &
          lon,                   & ! Longitude
@@ -61,7 +59,7 @@ contains
          aerodp                   ! Vertical integrated optical depth for various aerosol species 
     type(ty_optical_props_2str),intent(out) :: &
          sw_optical_props_aerosol ! RRTMGP DDT: Longwave aerosol optical properties (tau)
-    type(ty_optical_props_1scl),intent(inout) :: &
+    type(ty_optical_props_1scl),intent(out) :: &
          lw_optical_props_aerosol ! RRTMGP DDT: Longwave aerosol optical properties (tau)
     integer, intent(out) :: &
          errflg                   ! CCPP error flag
@@ -79,14 +77,14 @@ contains
     errmsg = ''
     errflg = 0
 
-    if (.not. doSWrad) return
+    if (.not. (doSWrad .or. doLWrad)) return
 
     ! Call module_radiation_aerosols::setaer(),to setup aerosols property profile
     call setaer(p_lev*0.01, p_lay*0.01, p_lk, tv_lay, relhum, lsmask, tracer, aerfld, lon, lat, nCol, nLev, &
          nLev+1, .true., .true., aerosolssw2, aerosolslw, aerodp)
 
     ! Shortwave
-    if (nDay .gt. 0) then
+    if (doSWrad .and. (nDay .gt. 0)) then
        ! Store aerosol optical properties
        ! SW. 
        ! For RRTMGP SW the bands are now ordered from [IR(band) -> nIR -> UV], in RRTMG the 
@@ -109,14 +107,11 @@ contains
     endif
 
     ! Longwave
-    if (.not. doLWrad) return
-    lw_optical_props_aerosol%tau = aerosolslw(:,:,:,1) * (1. - aerosolslw(:,:,:,2))
-
-    lw_optical_props_aerosol%band_lims_wvn = lw_gas_props%get_band_lims_wavenumber()
-    do iBand=1,lw_gas_props%get_nband()
-       lw_optical_props_aerosol%band2gpt(1:2,iBand) = iBand
-       lw_optical_props_aerosol%gpt2band(iBand)     = iBand
-    end do
+    if (doLWrad) then
+       call check_error_msg('rrtmgp_aerosol_optics_run',lw_optical_props_aerosol%alloc_1scl(      &
+            nCol, nlev, lw_gas_props%get_band_lims_wavenumber()))
+       lw_optical_props_aerosol%tau = aerosolslw(:,:,:,1) * (1. - aerosolslw(:,:,:,2))
+    endif
 
   end subroutine rrtmgp_aerosol_optics_run
   
