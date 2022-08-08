@@ -193,8 +193,8 @@
 ! For sea spray effect
       logical, intent(in) :: lseaspray
 !
-      logical, dimension(:), intent(in) :: flag_iter, flag_guess, wet,  &
-     &                                     use_flake 
+      logical, dimension(:), intent(in) :: flag_iter, flag_guess, wet
+      integer, dimension(:), intent(in) :: use_flake
 !    &,      icy
       logical,                intent(in) :: lprnt
       logical,                intent(in) :: thsfc_loc
@@ -276,7 +276,7 @@ cc
       do_nst = .false.
       do i = 1, im
 !       flag(i) = wet(i) .and. .not.icy(i) .and. flag_iter(i)
-        flag(i) = wet(i) .and. flag_iter(i) .and. .not. use_flake(i)
+        flag(i) = wet(i) .and. flag_iter(i) .and. use_flake(i)/=1
         do_nst  = do_nst .or. flag(i)
       enddo
       if (.not. do_nst) return
@@ -285,7 +285,7 @@ cc
 !
       do i=1, im
 !       if(wet(i) .and. .not.icy(i) .and. flag_guess(i)) then
-        if(wet(i) .and. flag_guess(i) .and. .not. use_flake(i)) then
+        if(wet(i) .and. flag_guess(i) .and. use_flake(i)/=1) then
           xt_old(i)      = xt(i)
           xs_old(i)      = xs(i)
           xu_old(i)      = xu(i)
@@ -604,7 +604,7 @@ cc
 ! restore nst-related prognostic fields for guess run
       do i=1, im
 !       if (wet(i) .and. .not.icy(i)) then
-        if (wet(i) .and. .not. use_flake(i)) then
+        if (wet(i) .and. use_flake(i)/=1) then
           if (flag_guess(i)) then    ! when it is guess of
             xt(i)      = xt_old(i)
             xs(i)      = xs_old(i)

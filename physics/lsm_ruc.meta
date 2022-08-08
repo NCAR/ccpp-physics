@@ -784,7 +784,7 @@
   long_name = flag indicating lake points using flake model
   units = flag
   dimensions = (horizontal_loop_extent)
-  type = logical
+  type = integer
   intent = in
 [rainnc]
   standard_name = lwe_thickness_of_explicit_precipitation_amount_on_previous_timestep

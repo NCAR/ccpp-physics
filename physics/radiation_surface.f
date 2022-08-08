@@ -794,7 +794,7 @@
       integer, intent(in) :: IMAX
       integer, intent(in) :: lsm, lsm_noahmp, lsm_ruc
       logical, intent(in) :: frac_grid, cplice
-      logical, dimension(:), intent(in) :: use_flake
+      integer, dimension(:), intent(in) :: use_flake
       real (kind=kind_phys), dimension(:), intent(in) :: lakefrac
 
       real (kind=kind_phys), dimension(:), intent(in) ::                &
@@ -959,7 +959,7 @@
                 sfcemis_ice = semis_ice(i) ! output from CICE
               endif
             elseif (lsm == lsm_ruc) then
-              if (use_flake(i)) then
+              if (use_flake(i)>0) then
                 if (sncovr_ice(i) > f_zero) then
                   sfcemis_ice = emsref(7) * (f_one-sncovr_ice(i))       &
      &                        + emsref(8) * sncovr_ice(i)

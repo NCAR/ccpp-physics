@@ -40,7 +40,8 @@ contains
       integer,                              intent(in) :: im, kice, km
       logical,                              intent(in) :: cplflx, frac_grid, cplwav2atm
       logical,                              intent(in) :: lheatstrg
-      logical, dimension(:),                intent(in) :: flag_cice, dry, wet, icy
+      logical, dimension(:),                intent(in) :: flag_cice, dry, icy
+      logical, dimension(:),             intent(inout) :: wet
       integer, dimension(:),                intent(in) :: islmsk
       real(kind=kind_phys), dimension(:),   intent(in) :: wind, t1, q1, prsl1, landfrac, lakefrac, oceanfrac,                   &
         cd_wat, cd_lnd, cd_ice, cdq_wat, cdq_lnd, cdq_ice, rb_wat, rb_lnd, rb_ice, stress_wat,                                  &
@@ -87,6 +88,11 @@ contains
       errflg = 0
 
       ! --- generate ocean/land/ice composites
+      do i=1, im
+         if(lakefrac(i)>0.0) then
+            wet(i) = .true.
+         endif
+      enddo
 
       if (frac_grid) then
 
@@ -263,7 +269,8 @@ contains
       else
 
         do i=1,im
-          if (islmsk(i) == 1) then
+!          if (islmsk(i) == 1) then
+          if (dry(i)) then
           !-- land
             zorl(i)   = zorll(i)
             cd(i)     = cd_lnd(i)
@@ -289,7 +296,8 @@ contains
             qss(i)    = qss_lnd(i)
             hice(i)   = zero
             cice(i)   = zero
-          elseif (islmsk(i) == 0) then
+!          elseif (islmsk(i) == 0) then
+          elseif (wet(i)) then
           !-- water
             zorl(i)   = zorlo(i)
             cd(i)     = cd_wat(i)
