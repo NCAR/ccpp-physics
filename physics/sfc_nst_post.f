@@ -30,7 +30,8 @@
 
 !  ---  inputs:
       integer, intent(in) :: im, kdt, nthreads
-      logical, dimension(:), intent(in) :: wet, icy, use_flake
+      logical, dimension(:), intent(in) :: wet, icy
+      integer, dimension(:), intent(in) :: use_flake
       real (kind=kind_phys), intent(in) :: rlapse, tgice
       real (kind=kind_phys), dimension(:), intent(in) :: oro, oro_uf
       integer, intent(in) :: nstf_name1, nstf_name4, nstf_name5
@@ -75,7 +76,7 @@
         do i = 1, im
 !         if (wet(i) .and. .not.icy(i)) then
 !         if (wet(i) .and. (frac_grid .or. .not. icy(i))) then
-          if (wet(i) .and. .not. use_flake(i)) then
+          if (wet(i) .and. use_flake(i) /=1) then
             tsfc_wat(i) = max(tgice, tref(i) + dtzm(i))
 !           tsfc_wat(i) = max(271.2, tref(i) + dtzm(i)) -  &
 !                           (oro(i)-oro_uf(i))*rlapse

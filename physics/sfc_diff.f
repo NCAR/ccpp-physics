@@ -84,7 +84,7 @@
      &                     fm10_wat,  fm10_lnd,  fm10_ice,              &  !intent(inout)
      &                      fh2_wat,   fh2_lnd,   fh2_ice,              &  !intent(inout)
      &                    ztmax_wat, ztmax_lnd, ztmax_ice,              &  !intent(inout)
-     &                    zvfun,                                        &  !intent(out)
+     &                    zvfun, use_flake,                             &  !intent(out)
      &                    errmsg, errflg)                                  !intent(out)
 !
       implicit none
@@ -94,9 +94,11 @@
       integer, intent(in) :: sfc_z0_type ! option for calculating surface roughness length over ocean
 
       integer, dimension(:), intent(in) :: vegtype
+      integer, dimension(:), intent(in) :: use_flake
 
       logical, intent(in) :: redrag ! reduced drag coeff. flag for high wind over sea (j.han)
-      logical, dimension(:), intent(in) :: flag_iter, wet, dry, icy
+      logical, dimension(:), intent(in) :: flag_iter, dry, icy
+      logical, dimension(:), intent(inout) :: wet
 
       logical, intent(in) :: thsfc_loc ! Flag for reference pressure in theta calculation
 
@@ -171,6 +173,9 @@
 !  ps is in pascals, wind is wind speed,
 !  surface roughness length is converted to m from cm
 !
+      do i=1,im
+        if(use_flake(i) > 0) wet(i) = .true.
+      enddo
 
 !       write(0,*)'in sfc_diff, sfc_z0_type=',sfc_z0_type
 

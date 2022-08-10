@@ -117,7 +117,8 @@
 ! For sea spray effect
       logical, intent(in) :: lseaspray
 !
-      logical, dimension(:), intent(in) :: flag_iter, wet, use_flake
+      logical, dimension(:), intent(in) :: flag_iter, wet
+      integer, dimension(:), intent(in) :: use_flake
 !
       logical, intent(in) :: use_med_flux
 
@@ -166,7 +167,7 @@
 !
 !  --- ...  flag for open water
       do i = 1, im
-        flag(i) = (wet(i) .and. flag_iter(i) .and. .not. use_flake(i))
+        flag(i) = (wet(i) .and. flag_iter(i) .and. use_flake(i) /=1)
 !  --- ...  initialize variables. all units are supposedly m.k.s. unless specified
 !           ps is in pascals, wind is wind speed,
 !           rho is density, qss is sat. hum. at surface

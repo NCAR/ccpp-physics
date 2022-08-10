@@ -895,6 +895,36 @@
   dimensions = ()
   type = integer
   intent = in
+[lkm]
+  standard_name = control_for_lake_surface_scheme
+  long_name = flag for lake surface model
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[use_flake]
+  standard_name = flag_for_using_flake
+  long_name = flag indicating lake points using flake model
+  units = flag
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = inout
+[lakefrac]
+  standard_name = lake_area_fraction
+  long_name = fraction of horizontal grid area occupied by lake
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[lakedepth]
+  standard_name = lake_depth
+  long_name = lake depth
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

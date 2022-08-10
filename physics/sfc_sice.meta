@@ -241,7 +241,7 @@
   long_name = flag indicating lake points using flake model
   units = flag
   dimensions = (horizontal_loop_extent)
-  type = logical
+  type = integer
   intent = in
 [lprnt]
   standard_name = flag_print

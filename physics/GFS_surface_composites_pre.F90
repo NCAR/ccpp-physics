@@ -38,7 +38,8 @@ contains
       integer,                             intent(in   ) :: im, lkm, kdt, lsm, lsm_ruc
       logical,                             intent(in   ) :: cplflx, cplice, cplwav2atm, frac_grid
       logical, dimension(:),              intent(inout)  :: flag_cice
-      logical,              dimension(:), intent(inout)  :: dry, icy, lake, use_flake, wet
+      logical,              dimension(:), intent(inout)  :: dry, icy, lake, wet
+      integer, dimension(:),              intent(inout)  :: use_flake
       real(kind=kind_phys), dimension(:), intent(in   )  :: landfrac, lakefrac, lakedepth, oceanfrac
       real(kind=kind_phys), dimension(:), intent(inout)  :: cice, hice
       real(kind=kind_phys), dimension(:), intent(  out)  :: frland
@@ -70,6 +71,12 @@ contains
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+
+      do i=1,im
+         if(use_flake(i) > 0.0) then
+             wet(i) = .true.
+         endif
+      enddo
 
       if (frac_grid) then  ! cice is ice fraction wrt water area
         do i=1,im
@@ -239,20 +246,6 @@ contains
         if (nint(slmsk(i)) /= 1) slmsk(i)  = islmsk(i)
       enddo
 
-! to prepare to separate lake from ocean under water category
-      do i = 1, im
-        if ((wet(i) .or. icy(i)) .and. lakefrac(i) > zero) then
-          lake(i) = .true.
-          if (lkm == 1 .and. lakefrac(i) >= 0.15 .and. lakedepth(i) > one) then
-            use_flake(i) = .true.
-          else
-            use_flake(i) = .false.
-          endif
-        else
-          lake(i) = .false.
-          use_flake(i) = .false.
-        endif
-      enddo
 !
       if (frac_grid) then
         do i=1,im
