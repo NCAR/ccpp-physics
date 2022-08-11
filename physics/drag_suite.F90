@@ -7,6 +7,11 @@
 
       contains
 
+!>\brief This subroutine initializes the GFS_ogwd GFS Orographic Gravity Wave Drag scheme.
+!!
+!> \section arg_table_drag_suite_init Argument Table
+!! \htmlinclude drag_suite_init.html
+!!
       subroutine drag_suite_init(gwd_opt, errmsg, errflg)
 
       integer,          intent(in)  :: gwd_opt
