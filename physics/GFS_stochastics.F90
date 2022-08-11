@@ -69,7 +69,7 @@
                                       gu0, gv0, gt0, gq0_wv, dtdtnp,                     &
                                       gq0_cw, gq0_rw, gq0_sw, gq0_iw, gq0_gl,            &
                                       rain, rainc, tprcp, totprcp, cnvprcp,              &
-                                      totprcpb, cnvprcpb, cplflx,                        &
+                                      totprcpb, cnvprcpb, cplflx, cpllnd,                &
                                       rain_cpl, snow_cpl, drain_cpl, dsnow_cpl,          &
                                       ntcw,ntrw,ntsw,ntiw,ntgl,                          &
                                       errmsg, errflg)
@@ -130,8 +130,10 @@
          real(kind_phys), dimension(:),         intent(inout) :: totprcpb
          real(kind_phys), dimension(:),         intent(inout) :: cnvprcpb
          logical,                               intent(in)    :: cplflx
-         ! rain_cpl, snow_cpl only allocated if cplflx == .true. or cplchm == .true.
+         logical,                               intent(in)    :: cpllnd
+         ! rain_cpl only allocated if cplflx == .true. or cplchm == .true. or cpllnd == .true.
          real(kind_phys), dimension(:),         intent(inout) :: rain_cpl
+         ! snow_cpl only allocated if cplflx == .true. or cplchm == .true.
          real(kind_phys), dimension(:),         intent(inout) :: snow_cpl
          ! drain_cpl, dsnow_cpl only allocated if cplflx == .true. or cplchm == .true.
          real(kind_phys), dimension(:),         intent(in)    :: drain_cpl
@@ -242,8 +244,10 @@
            totprcpb(:) = totprcpb(:) + (sppt_wts(:,15) - 1 )*rain(:)
            cnvprcpb(:) = cnvprcpb(:) + (sppt_wts(:,15) - 1 )*rainc(:)
 
-           if (cplflx) then
+           if (cplflx .or. cpllnd) then
                rain_cpl(:) = rain_cpl(:) + (sppt_wts(:,15) - 1.0)*drain_cpl(:)
+           endif
+           if (cplflx) then
                snow_cpl(:) = snow_cpl(:) + (sppt_wts(:,15) - 1.0)*dsnow_cpl(:)
            endif
            !zero out radiative heating tendency for next physics step
@@ -344,8 +348,10 @@
             totprcpb(:)      = totprcpb(:)      + (ca(:,15) - 1 )*rain(:)
             cnvprcpb(:)      = cnvprcpb(:)      + (ca(:,15) - 1 )*rainc(:)
             
-            if (cplflx) then
+            if (cplflx .or. cpllnd) then
                rain_cpl(:) = rain_cpl(:) + (ca(:,15) - 1.0)*drain_cpl(:)
+            endif
+            if (cplflx) then
                snow_cpl(:) = snow_cpl(:) + (ca(:,15) - 1.0)*dsnow_cpl(:)
             endif
             !zero out radiative heating tendency for next physics step

@@ -41,7 +41,7 @@
 !> \section arg_table_GFS_surface_generic_post_run Argument Table
 !! \htmlinclude GFS_surface_generic_post_run.html
 !!
-      subroutine GFS_surface_generic_post_run (im, cplflx, cplaqm, cplchm, cplwav, lssav, dry, icy, wet,                            &
+      subroutine GFS_surface_generic_post_run (im, cplflx, cplaqm, cplchm, cplwav, cpllnd, lssav, dry, icy, wet,                    &
         lsm, lsm_noahmp, dtf, ep1d, gflx, tgrs_1, qgrs_1, ugrs_1, vgrs_1,                                                           &
         adjsfcdlw, adjsfcdsw, adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd, adjsfculw, adjsfculw_wat, adjnirbmu, adjnirdfu,           &
         adjvisbmu, adjvisdfu, t2m, q2m, u10m, v10m, tsfc, tsfc_wat, pgr, xcosz, evbs, evcw, trans, sbsno, snowc, snohf, pah, pahi,  &
@@ -55,7 +55,7 @@
         implicit none
 
         integer,                                intent(in) :: im
-        logical,                                intent(in) :: cplflx, cplaqm, cplchm, cplwav, lssav
+        logical,                                intent(in) :: cplflx, cplaqm, cplchm, cplwav, cpllnd, lssav
         logical, dimension(:),                  intent(in) :: dry, icy, wet
         integer,                                intent(in) :: lsm, lsm_noahmp
         real(kind=kind_phys),                   intent(in) :: dtf
@@ -124,12 +124,17 @@
           enddo
         endif
 
+        if (cplflx .or. cpllnd) then
+          do i=1,im
+            dlwsfc_cpl  (i) = dlwsfc_cpl(i) + adjsfcdlw(i)*dtf
+            dswsfc_cpl  (i) = dswsfc_cpl(i) + adjsfcdsw(i)*dtf
+          enddo
+        endif
+
         if (cplflx) then
           do i=1,im
             dlwsfci_cpl (i) = adjsfcdlw(i)
             dswsfci_cpl (i) = adjsfcdsw(i)
-            dlwsfc_cpl  (i) = dlwsfc_cpl(i) + adjsfcdlw(i)*dtf
-            dswsfc_cpl  (i) = dswsfc_cpl(i) + adjsfcdsw(i)*dtf
             dnirbmi_cpl (i) = adjnirbmd(i)
             dnirdfi_cpl (i) = adjnirdfd(i)
             dvisbmi_cpl (i) = adjvisbmd(i)
