@@ -18,7 +18,7 @@ contains
 !!
    subroutine GFS_surface_composites_inter_run (im, dry, icy, wet, semis_wat, semis_lnd, semis_ice, &
                                                 adjsfcdlw, gabsbdlw_lnd, gabsbdlw_ice, gabsbdlw_wat,&
-                                                adjsfcusw, adjsfcdsw, adjsfcnsw, use_flake, errmsg, errflg)
+                                                adjsfcusw, adjsfcdsw, adjsfcnsw, use_lake_model, errmsg, errflg)
 
       implicit none
 
@@ -30,7 +30,7 @@ contains
                                                            adjsfcdlw, adjsfcdsw, adjsfcnsw
       real(kind=kind_phys), dimension(:), intent(inout) :: gabsbdlw_lnd, gabsbdlw_ice, gabsbdlw_wat
       real(kind=kind_phys), dimension(:), intent(out)   :: adjsfcusw
-      integer, dimension(:), intent(in) :: use_flake
+      integer, dimension(:), intent(in) :: use_lake_model
 
       ! CCPP error handling
       character(len=*), intent(out) :: errmsg
@@ -62,7 +62,7 @@ contains
 
       !  --- ...  define the downward lw flux absorbed by ground
       do i=1,im
-        if(use_flake(i)>0.0) wet(i)=.true.
+        if(use_lake_model(i)>0.0) wet(i)=.true.
         if (dry(i)) gabsbdlw_lnd(i) = semis_lnd(i) * adjsfcdlw(i)
         if (icy(i)) gabsbdlw_ice(i) = semis_ice(i) * adjsfcdlw(i)
         if (wet(i)) gabsbdlw_wat(i) = semis_wat(i) * adjsfcdlw(i)

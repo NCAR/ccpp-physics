@@ -84,7 +84,8 @@
      &                     fm10_wat,  fm10_lnd,  fm10_ice,              &  !intent(inout)
      &                      fh2_wat,   fh2_lnd,   fh2_ice,              &  !intent(inout)
      &                    ztmax_wat, ztmax_lnd, ztmax_ice,              &  !intent(inout)
-     &                    zvfun, use_flake,                             &  !intent(out)
+     &                    zvfun,                                        &  !intent(out)
+     &                    use_lake_model,                               &  !intent(in)
      &                    errmsg, errflg)                                  !intent(out)
 !
       implicit none
@@ -94,7 +95,7 @@
       integer, intent(in) :: sfc_z0_type ! option for calculating surface roughness length over ocean
 
       integer, dimension(:), intent(in) :: vegtype
-      integer, dimension(:), intent(in) :: use_flake
+      integer, dimension(:), intent(in) :: use_lake_model
 
       logical, intent(in) :: redrag ! reduced drag coeff. flag for high wind over sea (j.han)
       logical, dimension(:), intent(in) :: flag_iter, dry, icy
@@ -174,7 +175,7 @@
 !  surface roughness length is converted to m from cm
 !
       do i=1,im
-        if(use_flake(i) > 0) wet(i) = .true.
+        if(use_lake_model(i) > 0) wet(i) = .true.
       enddo
 
 !       write(0,*)'in sfc_diff, sfc_z0_type=',sfc_z0_type

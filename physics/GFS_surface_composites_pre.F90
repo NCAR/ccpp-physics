@@ -24,7 +24,7 @@ contains
    subroutine GFS_surface_composites_pre_run (im, lkm, frac_grid,                                                         &
                                  flag_cice, cplflx, cplice, cplwav2atm, lsm, lsm_ruc,                                     &
                                  landfrac, lakefrac, lakedepth, oceanfrac, frland,                                        &
-                                 dry, icy, lake, use_flake, wet, hice, cice, zorlo, zorll, zorli,                         &
+                                 dry, icy, lake, use_lake_model, wet, hice, cice, zorlo, zorll, zorli,                    &
                                  snowd,            snowd_lnd, snowd_ice, tprcp, tprcp_wat,                                &
                                  tprcp_lnd, tprcp_ice, uustar, uustar_wat, uustar_lnd, uustar_ice,                        &
                                  weasd,            weasd_lnd, weasd_ice, ep1d_ice, tsfc, tsfco, tsfcl, tsfc_wat,          &
@@ -39,7 +39,7 @@ contains
       logical,                             intent(in   ) :: cplflx, cplice, cplwav2atm, frac_grid
       logical, dimension(:),              intent(inout)  :: flag_cice
       logical,              dimension(:), intent(inout)  :: dry, icy, lake, wet
-      integer, dimension(:),              intent(inout)  :: use_flake
+      integer, dimension(:),              intent(inout)  :: use_lake_model
       real(kind=kind_phys), dimension(:), intent(in   )  :: landfrac, lakefrac, lakedepth, oceanfrac
       real(kind=kind_phys), dimension(:), intent(inout)  :: cice, hice
       real(kind=kind_phys), dimension(:), intent(  out)  :: frland
@@ -73,7 +73,7 @@ contains
       errflg = 0
 
       do i=1,im
-         if(use_flake(i) > 0.0) then
+         if(use_lake_model(i) > 0.0) then
              wet(i) = .true.
          endif
       enddo

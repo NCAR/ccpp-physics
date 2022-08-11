@@ -51,7 +51,7 @@
 ! ---- Inputs
             im, ps, t1, q1, wind, min_lakeice,               &
             dlwflx, dswsfc, lakedepth, lakefrac,             &
-            use_flake, snow, xlat, delt, zlvl, elev,         &
+            use_lake_model, snow, xlat, delt, zlvl, elev,    &
             wet, yearlen, julian, imon,                      &
             flag_iter, first_time_step, flag_restart,        &
             weasd,                                           &
@@ -103,7 +103,7 @@
       real (kind=kind_phys),  intent(in) :: julian
 
       logical, dimension(:), intent(in) :: flag_iter, wet
-      integer, dimension(:), intent(in) :: use_flake
+      integer, dimension(:), intent(in) :: use_lake_model
       logical,               intent(in) :: flag_restart, first_time_step
 
       character(len=*), intent(out) :: errmsg
@@ -223,7 +223,7 @@
 
       do_flake = .false.
       do i = 1, im
-            flag(i) = flag_iter(i) .and. use_flake(i) .gt. 0
+            flag(i) = flag_iter(i) .and. use_lake_model(i) .gt. 0
             do_flake  = flag(i) .or. do_flake
       enddo
       if (.not. do_flake) return
@@ -308,13 +308,13 @@
 !         w_extinc(i) = 3.0
 
 !     write(0,1002) julian,xlat(i),w_albedo(I),w_extinc(i),elev(i),tsurf(i),T_sfc(i),t_bot1(i)
-!     write(0,1003) use_flake(i),i,lakefrac(i),lakedepth(i), snwdph(i), hice(i), fice(i)        
+!     write(0,1003) use_lake_model(i),i,lakefrac(i),lakedepth(i), snwdph(i), hice(i), fice(i)        
 !     write(0,1004) ps(i), wind(i), t1(i), q1(i), dlwflx(i), dswsfc(i), zlvl(i)
 
         endif  !flag
       enddo
  1002 format ( 'julian=',F6.2,1x,F8.3,1x,2(E7.2,1x),E7.2,1x,3(E7.2,1x))
- 1003 format ( 'use_flake=',I2,1x,I3,1x,F6.4,1x,F9.4,1x,2(F8.4,1x),F7.4)
+ 1003 format ( 'use_lake_model=',I2,1x,I3,1x,F6.4,1x,F9.4,1x,2(F8.4,1x),F7.4)
  1004 format ( 'pressure',F12.2,1x,F6.2,1x,F7.2,1x,F7.4,1x,2(F8.2,1x),F8.4)
 !
 !  call lake interface
@@ -429,7 +429,7 @@
 !                fice(i) = 1.0
 !             endif
            enddo   !iter loop
-!           endif    !endif use_flake
+!           endif    !endif use_lake_model
 
          endif     !endif of flag
 
@@ -462,8 +462,8 @@ contains
 !> \section arg_table_flake_driver_post Argument Table
 !! \htmlinclude flake_driver_post.html
 !!
-subroutine flake_driver_post_run (im, use_flake, h_ML, T_wML, Tsurf,  &
-                           lakedepth, xz, zm, tref, tsfco,            &
+subroutine flake_driver_post_run (im, use_lake_model, h_ML, T_wML,  &
+                           Tsurf, lakedepth, xz, zm, tref, tsfco,   &
                            errmsg, errflg)
 
 !use machine , only : kind_phys
@@ -479,7 +479,7 @@ subroutine flake_driver_post_run (im, use_flake, h_ML, T_wML, Tsurf,  &
       real (kind=kind_phys),dimension(:),intent(inout) ::              &
      &           xz, zm, tref, tsfco   
 
-      integer, dimension(:), intent(in) :: use_flake
+      integer, dimension(:), intent(in) :: use_lake_model
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -490,8 +490,8 @@ subroutine flake_driver_post_run (im, use_flake, h_ML, T_wML, Tsurf,  &
       errflg = 0
 
       do I=1, im
-         if(use_flake(i).eq.2) then
-         write(0,*)'flake-post-use-flake= ',use_flake(i)
+         if(use_lake_model(i).eq.2) then
+         write(0,*)'flake-post-use-lake-model= ',use_lake_model(i)
             xz(i) = lakedepth(i)
             zm(i) = h_ML(i)
             tref(i) = tsurf(i)
