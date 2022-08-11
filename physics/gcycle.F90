@@ -15,7 +15,7 @@ contains
 !>\ingroup mod_GFS_phys_time_vary
 !! This subroutine repopulates specific time-varying surface properties for
 !! atmospheric forecast runs.
-  subroutine gcycle (me, nthrds, nx, ny, isc, jsc, nsst, tile_num, nlunit,         &
+  subroutine gcycle (me, nthrds, nx, ny, isc, jsc, nsst, tile_num, nlunit, fn_nml, &
       input_nml_file, lsoil, lsoil_lsm, kice, idate, ialb, isot, ivegsrc,          &
       use_ufo, nst_anl, fhcyc, phour, landfrac, lakefrac, min_seaice, min_lakeice, &
       frac_grid, smc, slc, stc, smois, sh2o, tslb, tiice, tg3, tref, tsfc,         &
@@ -31,6 +31,7 @@ contains
     integer,              intent(in)    :: me, nthrds, nx, ny, isc, jsc, nsst, &
                                            tile_num, nlunit, lsoil, lsoil_lsm, kice
     integer,              intent(in)    :: idate(:), ialb, isot, ivegsrc
+    character(len = 64), intent(in)     :: fn_nml
     character(len=*),     intent(in)    :: input_nml_file(:)
     logical,              intent(in)    :: use_ufo, nst_anl, frac_grid
     real(kind=kind_phys), intent(in)    :: fhcyc, phour, landfrac(:), lakefrac(:), &
@@ -210,13 +211,13 @@ contains
       enddo
 !
 #ifndef INTERNAL_FILE_NML
-      inquire (file=trim(Model%fn_nml),exist=exists)
+      inquire (file=trim(fn_nml),exist=exists)
       if (.not. exists) then
-        write(6,*) 'gcycle:: namelist file: ',trim(Model%fn_nml),' does not exist'
+        write(6,*) 'gcycle:: namelist file: ',trim(fn_nml),' does not exist'
         stop
       else
-        open (unit=Model%nlunit, file=trim(Model%fn_nml), action='READ', status='OLD', iostat=ios)
-        rewind (Model%nlunit)
+        open (unit=nlunit, file=trim(fn_nml), action='READ', status='OLD', iostat=ios)
+        rewind (nlunit)
       endif
 #endif
       CALL SFCCYCLE (9998, npts, max(lsoil,lsoil_lsm), sig1t, fhcyc, &
@@ -233,7 +234,7 @@ contains
                      min_ice, ialb, isot, ivegsrc,                   &
                      trim(tile_num_ch), i_indx, j_indx)
 #ifndef INTERNAL_FILE_NML
-      close (Model%nlunit)
+      close (nlunit)
 #endif
 !
       if ( nsst > 0 ) then
