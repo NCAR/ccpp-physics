@@ -20,7 +20,7 @@
               imap, jmap, sec, kdt, imp_physics, imp_physics_zhao_carr, ps_2delt,      &
               ps_1delt, t_2delt, t_1delt, qv_2delt, qv_1delt, t, qv, ps, errmsg, errflg)
 
-         use physparam,                 only: ipsd0, ipsdlim, iaerflg
+         use physparam,                 only: ipsd0, ipsdlim
          use mersenne_twister,          only: random_setseed, random_index, random_stat
          use machine,                   only: kind_phys
          use radcons,                   only: qmin, con_100

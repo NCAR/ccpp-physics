@@ -33,7 +33,8 @@
         lmfdeep2, fhswr, fhlwr, solhr, sup, con_eps, epsm1, fvirt,             &
         rog, rocp, con_rd, xlat_d, xlat, xlon, coslat, sinlat, tsfc, slmsk,    &
         prsi, prsl, prslk, tgrs, sfc_wts, mg_cld, effrr_in, pert_clds,         &
-        sppt_wts, sppt_amp, cnvw_in, cnvc_in, qgrs, aer_nm, dx, icloud,        & !inputs from here and above
+        sppt_wts, sppt_amp, cnvw_in, cnvc_in, qgrs, aer_nm, dx, icloud,        & 
+        iaermdl, iaerflg,                                                      & !inputs from here and above
         coszen, coszdg, effrl_inout, effri_inout, effrs_inout,                 &
         clouds1, clouds2, clouds3, clouds4, clouds5, qci_conv,                 & !in/out from here and above
         kd, kt, kb, mtopa, mbota, raddt, tsfg, tsfa, de_lgth, alb1d, delp, dz, & !output from here and below
@@ -43,7 +44,7 @@
         clouds9, cldsa, cldfra, cldfra2d, lwp_ex,iwp_ex, lwp_fc,iwp_fc,        &
         faersw1, faersw2, faersw3, faerlw1, faerlw2, faerlw3, alpha,           &
         aero_dir_fdb, smoke_ext, dust_ext,                                     &
-        spp_wts_rad, spp_rad, rrfs_smoke_band, errmsg, errflg)
+        spp_wts_rad, spp_rad, rrfs_smoke_band, top_at_1, errmsg, errflg)
 
       use machine,                   only: kind_phys
 
@@ -80,7 +81,6 @@
                                            make_IceNumber,           &
                                            make_DropletNumber,       &
                                            make_RainNumber
-      use physparam,              only : iaermdl
       implicit none
 
       integer,              intent(in)  :: im, levs, lm, lmk, lmp, n_var_lndp, &
@@ -100,7 +100,7 @@
                                            imp_physics_mg, imp_physics_wsm6,   &
                                            imp_physics_nssl,                   &
                                            imp_physics_fer_hires,              &
-                                           yearlen, icloud
+                                           yearlen, icloud, iaermdl, iaerflg
 
       integer,              intent(in)  ::                                     &
          iovr_rand,                        & ! Flag for random cloud overlap method
@@ -200,7 +200,7 @@
                                                              faerlw2,&
                                                              faerlw3
       real(kind=kind_phys), dimension(:,:),   intent(out) :: alpha
-
+      logical, intent(out) :: top_at_1
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
@@ -257,6 +257,9 @@
       errmsg = ''
       errflg = 0
 
+      ! Vertical ordering
+      top_at_1 = (prsi(1,1) .lt.  prsi(1, lm))
+      
       if (.not. (lsswr .or. lslwr)) return
 
       !--- set commonly used integers
@@ -634,8 +637,8 @@
 
       call setaer (plvl, plyr, prslk1, tvly, rhly, slmsk,    & !  ---  inputs
                    tracer1, aer_nm, xlon, xlat, IM, LMK, LMP,&
-                   lsswr,lslwr,                              &
-                   faersw,faerlw,aerodp)                       !  ---  outputs
+                   lsswr,lslwr,iaermdl,iaerflg,top_at_1,     &
+                   faersw,faerlw,aerodp,errflg,errmsg)         !  ---  outputs
 
 ! CCPP
       do j = 1,NBDSW

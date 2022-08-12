@@ -157,23 +157,6 @@
 !> \name  2.2 For module radiation_aerosols
 ! ............................................. !
 
-!> aerosol model scheme control flag
-!!\n =0:seasonal global distributed OPAC aerosol climatology
-!!\n =1:monthly global distributed GOCART aerosol climatology
-!!\n =2: GOCART prognostic aerosol model
-!!\n =5: OPAC climatoloy with new band mapping
-!!\n Opr GFS=0; Opr CFS=n/a
-      integer, save :: iaermdl = 0
-
-!> aerosol effect control flag
-!!\n 3-digit flag 'abc':
-!!\n a-stratospheric volcanic aerols
-!!\n b-tropospheric aerosols for LW
-!!\n c-tropospheric aerosols for SW
-!!\n =0:aerosol effect is not included; =1:aerosol effect is included
-!!\n Opr GFS/CFS =111; see IAER in run scripts
-      integer, save :: iaerflg = 0
-
 !> external aerosols data file: aerosol.dat
       character, save :: aeros_file*26
 !     data aeros_file   / 'climaeropac_global.txt    ' /

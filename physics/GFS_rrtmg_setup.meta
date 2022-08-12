@@ -163,6 +163,35 @@
   dimensions = ()
   type = integer
   intent = in
+[aeros_file]
+  standard_name = aerosol_data_file
+  long_name = aerosol data file
+  units = none
+  dimensions =  ()
+  type = character
+  kind = len=26
+  intent = in
+[lalw1bd]
+  standard_name = flag_for_longwave_aerosol_band_properties
+  long_name = flag for band or multiband longwave aerosol properties
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[iaermdl]
+  standard_name = flag_for_aerosol_radiation_scheme
+  long_name = flag for aerosol scheme to use in radiation
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+[iaerflg]
+  standard_name = flag_for_aerosol_effects_in_radiation
+  long_name = flag for aerosol effects to include in radiation
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -226,6 +255,28 @@
   units = index
   dimensions = ()
   type = integer
+  intent = in
+[iaermdl]
+  standard_name = flag_for_aerosol_radiation_scheme
+  long_name = flag for aerosol scheme to use in radiation
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[iaerflg]
+  standard_name = flag_for_aerosol_effects_in_radiation
+  long_name = flag for aerosol effects to include in radiation
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[aeros_file]
+  standard_name = aerosol_data_file
+  long_name = aerosol data file
+  units = none
+  dimensions =  ()
+  type = character
+  kind = len=26
   intent = in
 [slag]
   standard_name = equation_of_time

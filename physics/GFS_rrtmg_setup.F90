@@ -4,8 +4,8 @@
 !> \defgroup GFS_rrtmg_setup_mod GFS RRTMG Scheme Setup
 module GFS_rrtmg_setup
 
-   use physparam, only : isolar , ictmflg, ico2flg, ioznflg, iaerflg, &
-   &             iaermdl,                            icldflg,         &
+   use physparam, only : isolar , ictmflg, ico2flg, ioznflg, &
+   &                                         icldflg,                 &
    &             iovrRad=>iovr, lcrick , lcnorm , lnoprec,            &
    &             isubcsw, isubclw, ivflip , ipsd0,                    &
    &             iswcliq,                                             &
@@ -48,7 +48,8 @@ module GFS_rrtmg_setup
           icliq_sw, crick_proof, ccnorm,                      &
           imp_physics,                                        &
           norad_precip, idate, iflip,                         &
-          do_RRTMGP, me, errmsg, errflg)
+          do_RRTMGP, me, lalw1bd, iaermdl, iaerflg,           &
+          aeros_file, errmsg, errflg)
 ! =================   subprogram documentation block   ================ !
 !                                                                       !
 ! subprogram:   GFS_rrtmg_setup_init - a subprogram to initialize radiation !
@@ -167,10 +168,12 @@ module GFS_rrtmg_setup
       logical, intent(in) :: norad_precip
       integer, intent(in) :: idate(:)
       integer, intent(in) :: iflip
-      logical, intent(in) :: do_RRTMGP
+      logical, intent(in) :: do_RRTMGP, lalw1bd
       integer, intent(in) :: me
+      character(len=26), intent(in) :: aeros_file
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
+      integer,          intent(out) :: iaermdl, iaerflg
 
       ! Initialize the CCPP error handling variables
       errmsg = ''
@@ -241,7 +244,8 @@ module GFS_rrtmg_setup
 
       call radinit                                                      &
 !  ---  inputs:
-     &     ( si, levr, imp_physics, me )
+     &     ( si, levr, imp_physics, me, iaermdl, iaerflg, lalw1bd,      &
+     &       aeros_file, errmsg, errflg )
 !  ---  outputs:
 !          ( none )
 
@@ -261,8 +265,8 @@ module GFS_rrtmg_setup
 !! \htmlinclude GFS_rrtmg_setup_timestep_init.html
 !!
    subroutine GFS_rrtmg_setup_timestep_init (      &
-          idate, jdate, deltsw, deltim, lsswr, me, &
-          slag, sdec, cdec, solcon, errmsg, errflg)
+          idate, jdate, deltsw, deltim, lsswr, me, iaermdl, &
+          iaerflg, aeros_file, slag, sdec, cdec, solcon, errmsg, errflg)
 
       implicit none
 
@@ -273,6 +277,8 @@ module GFS_rrtmg_setup
       real(kind=kind_phys), intent(in)  :: deltim
       logical,              intent(in)  :: lsswr
       integer,              intent(in)  :: me
+      integer,              intent(in)  :: iaermdl, iaerflg
+      character(len=26),    intent(in)  :: aeros_file
       real(kind=kind_phys), intent(out) :: slag
       real(kind=kind_phys), intent(out) :: sdec
       real(kind=kind_phys), intent(out) :: cdec
@@ -291,8 +297,8 @@ module GFS_rrtmg_setup
       errmsg = ''
       errflg = 0
 
-      call radupdate(idate,jdate,deltsw,deltim,lsswr,me, &
-                     slag,sdec,cdec,solcon)
+      call radupdate(idate,jdate,deltsw,deltim,lsswr,me, iaermdl,&
+           iaerflg, aeros_file,  slag,sdec,cdec,solcon,errflg,errmsg)
 
    end subroutine GFS_rrtmg_setup_timestep_init
 
@@ -322,13 +328,14 @@ module GFS_rrtmg_setup
 ! Private functions
 
 
-   subroutine radinit( si, NLAY, imp_physics, me )
+   subroutine radinit( si, NLAY, imp_physics, me, iaermdl, iaerflg, lalw1bd, &
+        aeros_file, errmsg, errflg)
 !...................................
 
 !  ---  inputs:
-!     &     ( si, NLAY, imp_physics, me )
+!     &     ( si, NLAY, imp_physics, me, iaermdl, iaerflg)
 !  ---  outputs:
-!          ( none )
+!          ( errmsg, errflg )
 
 ! =================   subprogram documentation block   ================ !
 !                                                                       !
@@ -435,12 +442,14 @@ module GFS_rrtmg_setup
       implicit none
 
 !  ---  inputs:
-      integer, intent(in) :: NLAY, me, imp_physics 
-
+      integer, intent(in) :: NLAY, me, imp_physics, iaermdl, iaerflg
+      logical, intent(in) :: lalw1bd
       real (kind=kind_phys), intent(in) :: si(:)
+      character(len=26), intent(in) :: aeros_file
 
-!  ---  outputs: (none, to module variables)
-
+!  ---  outputs: (ccpp error handling)
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
 !  ---  locals:
 
 !
@@ -525,7 +534,7 @@ module GFS_rrtmg_setup
 
       call sol_init ( me )          !  --- ...  astronomy initialization routine
 
-      call aer_init ( NLAY, me )    !  --- ...  aerosols initialization routine
+      call aer_init ( NLAY, me, iaermdl, iaerflg, lalw1bd, aeros_file, errflg, errmsg)    !  --- ...  aerosols initialization routine
 
       call gas_init ( me )          !  --- ...  co2 and other gases initialization routine
 
@@ -561,8 +570,9 @@ module GFS_rrtmg_setup
 !> \section gen_radupdate General Algorithm
 !> @{
 !-----------------------------------
-      subroutine radupdate( idate,jdate,deltsw,deltim,lsswr, me,        &
-     &                      slag,sdec,cdec,solcon)
+      subroutine radupdate( idate,jdate,deltsw,deltim,lsswr,me, iaermdl,&
+     &                      iaerflg, aeros_file, slag,sdec,cdec,solcon, &
+     &                      errflg,errmsg)
 !...................................
 
 ! =================   subprogram documentation block   ================ !
@@ -630,13 +640,16 @@ module GFS_rrtmg_setup
       implicit none
 
 !  ---  inputs:
-      integer, intent(in) :: idate(:), jdate(:), me
+      integer, intent(in) :: idate(:), jdate(:), me, iaermdl, iaerflg
       logical, intent(in) :: lsswr
+      character(len=26),intent(in) :: aeros_file
 
       real (kind=kind_phys), intent(in) :: deltsw, deltim
 
 !  ---  outputs:
       real (kind=kind_phys), intent(out) :: slag, sdec, cdec, solcon
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
 
 !  ---  locals:
       integer :: iyear, imon, iday, ihour
@@ -648,6 +661,11 @@ module GFS_rrtmg_setup
 !
 !===> ...  begin here
 !
+
+      ! Initialize the CCPP error handling variables
+      errmsg = ''
+      errflg = 0
+
 !> -# Set up time stamp at fcst time and that for green house gases
 !! (currently co2 only)
 !  --- ...  time stamp at fcst time
@@ -703,7 +721,7 @@ module GFS_rrtmg_setup
 !> -# Call module_radiation_aerosols::aer_update(), monthly update, no
 !! time interpolation
       if ( lmon_chg ) then
-        call aer_update ( iyear, imon, me )
+        call aer_update ( iyear, imon, me, iaermdl, aeros_file, errflg, errmsg )
       endif
 
 !> -# Call co2 and other gases update routine:

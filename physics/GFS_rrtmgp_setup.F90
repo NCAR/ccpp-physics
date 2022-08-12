@@ -8,8 +8,7 @@ module GFS_rrtmgp_setup
   !  use GFS_cloud_diagnostics,      only : hml_cloud_diagnostics_initialize
   ! *NOTE* These parameters below are required radiation_****** modules. They are not
   !        directly used by the RRTMGP routines.
-  use physparam,                  only : isolar,  ictmflg, ico2flg, ioznflg, iaerflg,    &
-                                         iaermdl, ivflip
+  use physparam,                  only : isolar,  ictmflg, ico2flg, ioznflg, ivflip
   implicit none
   
   public GFS_rrtmgp_setup_init, GFS_rrtmgp_setup_timestep_init, GFS_rrtmgp_setup_finalize
@@ -43,7 +42,7 @@ contains
        imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, imp_physics_zhao_carr,  &
        imp_physics_zhao_carr_pdf, imp_physics_mg,  si, levr, ictm, isol, ico2, iaer,     &
        ntcw, num_p3d,  ntoz, iovr, isubc_sw, isubc_lw, icliq_sw, crick_proof, ccnorm,    &
-       norad_precip, idate, iflip, me, errmsg, errflg)
+       norad_precip, lalw1bd, idate, iflip, me, aeros_file, iaermdl, iaerflg, errmsg, errflg)
 
     ! Inputs
     logical, intent(in) :: do_RRTMGP
@@ -60,15 +59,17 @@ contains
          si
     integer, intent(in) :: levr, ictm, isol, ico2, iaer, & 
          ntcw, num_p3d, ntoz, iovr, isubc_sw, isubc_lw,  &
-         icliq_sw, iflip, me 
+         icliq_sw, iflip, me
     logical, intent(in) :: &
-         crick_proof, ccnorm, norad_precip
+         crick_proof, ccnorm, norad_precip, lalw1bd
     integer, intent(in), dimension(:) :: &
          idate
+    character(len=26),intent(in) :: aeros_file
 
     ! Outputs
     character(len=*), intent(out) :: errmsg
     integer,          intent(out) :: errflg
+    integer,          intent(out) :: iaermdl, iaerflg
     
     ! Initialize the CCPP error handling variables
     errmsg = ''
@@ -128,7 +129,7 @@ contains
 
     ! Call initialization routines..
     call sol_init ( me )
-    call aer_init ( levr, me )
+    call aer_init ( levr, me, iaermdl, iaerflg, lalw1bd, aeros_file, errflg, errmsg)
     call gas_init ( me )
     !call hml_cloud_diagnostics_initialize(imp_physics, imp_physics_fer_hires,           &
     !     imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,                      &
@@ -150,8 +151,8 @@ contains
 !> \section arg_table_GFS_rrtmgp_setup_timestep_init
 !! \htmlinclude GFS_rrtmgp_setup_timestep_init.html
 !!
-  subroutine GFS_rrtmgp_setup_timestep_init (idate, jdate, deltsw, deltim, lsswr, me, &
-                                             slag, sdec, cdec, solcon, errmsg, errflg)
+  subroutine GFS_rrtmgp_setup_timestep_init (idate, jdate, deltsw, deltim, lsswr, me, iaermdl,&
+       iaerflg, aeros_file, slag, sdec, cdec, solcon, errmsg, errflg)
      
     ! Inputs
     integer,         intent(in)  :: idate(:)
@@ -160,6 +161,8 @@ contains
     real(kind_phys), intent(in)  :: deltim
     logical,         intent(in)  :: lsswr
     integer,         intent(in)  :: me
+    integer,         intent(in)  :: iaermdl, iaerflg
+    character(len=26), intent(in) :: aeros_file
 
     ! Outputs
     real(kind_phys), intent(out) :: slag
@@ -230,7 +233,7 @@ contains
 
     ! Update aerosols...
     if ( lmon_chg ) then
-       call aer_update ( iyear, imon, me )
+       call aer_update ( iyear, imon, me, iaermdl, aeros_file, errflg, errmsg)
     endif
 
     ! Update trace gases (co2 only)...

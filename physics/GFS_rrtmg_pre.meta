@@ -2,7 +2,7 @@
   name = GFS_rrtmg_pre
   type = scheme
   dependencies = funcphys.f90,iounitdef.f,machine.F,module_bfmicrophysics.f,module_mp_radar.F90,module_mp_thompson.F90
-  dependencies = module_mp_thompson_make_number_concentrations.F90,physcons.F90,physparam.f,radcons.f90,radiation_aerosols.f
+  dependencies = module_mp_thompson_make_number_concentrations.F90,physparam.f,physcons.F90,radcons.f90,radiation_aerosols.f
   dependencies = radiation_astronomy.f,radiation_clouds.f,radiation_gases.f,radlw_param.f,radsw_param.f,surface_perturbation.F90,radiation_cloud_overlap.F90
 
 ########################################################################
@@ -202,6 +202,20 @@
   standard_name = index_of_ozone_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for ozone mixing ratio
   units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[iaermdl]
+  standard_name = flag_for_aerosol_radiation_scheme
+  long_name = flag for aerosol scheme to use in radiation
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[iaerflg]
+  standard_name = flag_for_aerosol_effects_in_radiation
+  long_name = flag for aerosol effects to include in radiation
+  units = flag
   dimensions = ()
   type = integer
   intent = in
@@ -1305,6 +1319,13 @@
   dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
+  intent = out
+[top_at_1]
+  standard_name = flag_for_vertical_ordering_in_RRTMGP
+  long_name = flag for vertical ordering in RRTMGP
+  units = flag
+  dimensions = ()
+  type = logical
   intent = out
 [aero_dir_fdb]
   standard_name = do_smoke_aerosol_direct_feedback

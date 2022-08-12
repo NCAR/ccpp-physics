@@ -185,6 +185,13 @@
   dimensions = ()
   type = logical
   intent = in
+[lalw1bd]
+  standard_name = flag_for_longwave_aerosol_band_properties
+  long_name = flag for band or multiband longwave aerosol properties
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [idate]
   standard_name = date_and_time_at_model_initialization_in_united_states_order
   long_name = initialization date and time
@@ -206,6 +213,28 @@
   dimensions = ()
   type = integer
   intent = in
+[aeros_file]
+  standard_name = aerosol_data_file
+  long_name = aerosol data file
+  units = none
+  dimensions =  ()
+  type = character
+  kind = len=26
+  intent = in
+[iaermdl]
+  standard_name = flag_for_aerosol_radiation_scheme
+  long_name = flag for aerosol scheme to use in radiation
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+[iaerflg]
+  standard_name = flag_for_aerosol_effects_in_radiation
+  long_name = flag for aerosol effects to include in radiation
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -267,6 +296,21 @@
   standard_name = mpi_rank
   long_name = current MPI-rank
   units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[aeros_file]
+  standard_name = aerosol_data_file
+  long_name = aerosol data file
+  units = none
+  dimensions =  ()
+  type = character
+  kind = len=26
+  intent = in
+[iaermdl]
+  standard_name = flag_for_aerosol_radiation_scheme
+  long_name = flag for aerosol scheme to use in radiation
+  units = flag
   dimensions = ()
   type = integer
   intent = in

@@ -21,6 +21,13 @@
   dimensions = ()
   type = logical
   intent = in
+[top_at_1]
+  standard_name = flag_for_vertical_ordering_in_RRTMGP
+  long_name = flag for vertical ordering in RRTMGP
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [ncol]
   standard_name = horizontal_loop_extent
   long_name = horizontal dimension
@@ -142,6 +149,20 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
+  intent = in
+[iaermdl]
+  standard_name = flag_for_aerosol_radiation_scheme
+  long_name = flag for aerosol scheme to use in radiation
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[iaerflg]
+  standard_name = flag_for_aerosol_effects_in_radiation
+  long_name = flag for aerosol effects to include in radiation
+  units = flag
+  dimensions = ()
+  type = integer
   intent = in
 [aerodp]
   standard_name = atmosphere_optical_thickness_due_to_ambient_aerosol_particles

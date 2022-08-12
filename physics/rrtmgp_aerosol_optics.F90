@@ -26,18 +26,22 @@ contains
 !!
   subroutine rrtmgp_aerosol_optics_run(doSWrad, doLWrad, nCol, nLev, nTracer, nTracerAer,   &
        nDay, idxday, p_lev, p_lay, p_lk, tv_lay, relhum, lsmask, tracer, aerfld, lon, lat,  &
-       aerodp, sw_optical_props_aerosol, lw_optical_props_aerosol, errmsg, errflg       )
+       iaermdl, iaerflg, top_at_1, aerodp, sw_optical_props_aerosol,                        &
+       lw_optical_props_aerosol, errmsg, errflg  )
 
     ! Inputs
     logical, intent(in) :: &
          doSWrad,               & ! Logical flag for shortwave radiation call
-         doLWrad                  ! Logical flag for longwave radiation call 
+         doLWrad,               & ! Logical flag for longwave radiation call 
+         top_at_1                 ! Logical flag for vertical grid direcetion
     integer, intent(in) :: &
          nCol,                  & ! Number of horizontal grid points
          nDay,                  & ! Number of daylit points
          nLev,                  & ! Number of vertical layers
          nTracer,               & ! Number of tracers
-         nTracerAer               ! Number of aerosol tracers
+         nTracerAer,            & ! Number of aerosol tracers
+         iaermdl,               & ! Aerosol model scheme flag
+         iaerflg                  ! Aerosol effects to include
     integer,intent(in),dimension(:) :: &
          idxday              ! Indices for daylit points.
     real(kind_phys), dimension(:), intent(in) :: &
@@ -83,7 +87,7 @@ contains
 
     ! Call module_radiation_aerosols::setaer(),to setup aerosols property profile
     call setaer(p_lev*0.01, p_lay*0.01, p_lk, tv_lay, relhum, lsmask, tracer, aerfld, lon, lat, nCol, nLev, &
-         nLev+1, .true., .true., aerosolssw2, aerosolslw, aerodp)
+         nLev+1, .true., .true., iaermdl, iaerflg, top_at_1, aerosolssw2, aerosolslw, aerodp, errflg, errmsg)
 
     ! Shortwave
     if (nDay .gt. 0) then
