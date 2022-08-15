@@ -540,9 +540,9 @@ module GFS_rrtmg_setup
       call aer_init ( NLAY, me, iaermdl, iaerflg, lalw1bd, aeros_file, con_pi, &
            con_t0c, con_c, con_boltz, con_plnk, errflg, errmsg)    !  --- ...  aerosols initialization routine
 
-      call gas_init ( me )          !  --- ...  co2 and other gases initialization routine
+      call gas_init ( me, errflg, errmsg )          !  --- ...  co2 and other gases initialization routine
 
-      call cld_init ( si, NLAY, imp_physics, me) !  --- ...  cloud initialization routine
+      call cld_init ( si, NLAY, imp_physics, me, errflg, errmsg) !  --- ...  cloud initialization routine
 
       call rlwinit ( me )           !  --- ...  lw radiation initialization routine
 
@@ -737,7 +737,7 @@ module GFS_rrtmg_setup
         lco2_chg = .false.
       endif
 
-      call gas_update ( kyear,kmon,kday,khour,loz1st,lco2_chg, me )
+      call gas_update ( kyear,kmon,kday,khour,loz1st,lco2_chg, me, errflg, errmsg )
 
       if ( loz1st ) loz1st = .false.
 

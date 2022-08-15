@@ -19,13 +19,13 @@
 !         input:                                                       !
 !           ( me )                                                     !
 !         output:                                                      !
-!           ( none )                                                   !
+!           ( errflg, errmsg )                                         !
 !                                                                      !
 !      'gas_update' -- read in data and update with time               !
 !         input:                                                       !
 !           ( iyear, imon, iday, ihour, loz1st, ldoco2, me )           !
 !         output:                                                      !
-!           ( none )                                                   !
+!           ( errflg, errmsg )                                         !
 !                                                                      !
 !      'getozn'     -- setup climatological ozone profile              !
 !         input:                                                       !
@@ -232,8 +232,7 @@
 !! @{
 !-----------------------------------
       subroutine gas_init                                               &
-     &     ( me )!  ---  inputs:
-!  ---  outputs: ( none )
+     &     ( me , errflg, errmsg)
 
 !  ===================================================================  !
 !                                                                       !
@@ -243,8 +242,8 @@
 !  inputs:                                               dimemsion      !
 !     me      - print message control flag                  1           !
 !                                                                       !
-!  outputs: (to the module variables)                                   !
-!    ( none )                                                           !
+!  outputs: (CCPP error handling)                                       !
+!    (errflg, errmsg)                                                   !
 !                                                                       !
 !  external module variables:  (in physparam)                           !
 !     ico2flg    - co2 data source control flag                         !
@@ -285,7 +284,9 @@
 !  ---  inputs:
       integer, intent(in) :: me
 
-!  ---  output: ( none )
+!  ---  output:
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
 
 !  ---  locals:
       real (kind=kind_phys), dimension(IMXCO2,JMXCO2) :: co2dat
@@ -301,6 +302,11 @@
 !
 !===>  ...  begin here
 !
+
+! Initialize the CCPP error handling variables
+      errmsg = ''
+      errflg = 0
+
       if ( me == 0 ) print *, VTAGGAS    ! print out version tag
 
       kyrsav  = 0
@@ -317,7 +323,10 @@
           print *,' - Using climatology ozone distribution'
           print *,' timeozc=',timeozc, ' is not monthly mean',          &
      &            ' - job aborting in subroutin gas_init!!!'
-          stop
+          errflg = 1
+          errmsg = 'ERROR(gas_init): Climatological o3 distribution '// &
+     &         'is not monthly mean'
+          return
         endif
 
         allocate (pkstr(LOZ), o3r(JMR,LOZ,12))
@@ -392,9 +401,10 @@
 
           inquire (file=co2usr_file, exist=file_exist)
           if ( .not. file_exist ) then
-            print *,'   Can not find user CO2 data file: ',co2usr_file, &
-     &              ' - Stopped in subroutine gas_init !!'
-            stop
+            print *,'   Can not find user CO2 data file: ',co2usr_file
+            errflg = 1
+            errmsg = 'ERROR(gas_init): Can not find user CO2 data file'
+            return
           else
             close (NICO2CN)
             open(NICO2CN,file=co2usr_file,form='formatted',status='old')
@@ -435,9 +445,10 @@
                 enddo
               endif
             else
-              print *,' ICO2=',ico2flg,' is not a valid selection',     &
-     &                ' - Stoped in subroutine gas_init!!!'
-              stop
+              print *,' ICO2=',ico2flg,' is not a valid selection'
+              errflg = 1
+              errmsg = 'ERROR(gas_init): ICO2 is not valid'
+              return
             endif    ! endif_ico2flg_block
 
             close (NICO2CN)
@@ -456,9 +467,10 @@
               print *,' - Using observed co2 monthly 2-d data'
             endif
           else
-            print *,' ICO2=',ico2flg,' is not a valid selection',       &
-     &              ' - Stoped in subroutine gas_init!!!'
-            stop
+            print *,' ICO2=',ico2flg,' is not a valid selection'
+            errflg = 1
+            errmsg = 'ERROR(gas_init): ICO2 is not valid'
+            return
           endif
 
           if ( ictmflg == -2 ) then
@@ -466,9 +478,12 @@
             if ( .not. file_exist ) then
               if ( me == 0 ) then
                 print *,'   Can not find seasonal cycle CO2 data: ',    &
-     &               co2cyc_file,' - Stopped in subroutine gas_init !!'
+     &               co2cyc_file
               endif
-              stop
+              errflg = 1
+              errmsg = 'ERROR(gas_init): Can not find seasonal cycle '//&
+     &             'CO2 data'
+              return
             else
               allocate( co2cyc_sav(IMXCO2,JMXCO2,12) )
 
@@ -531,8 +546,8 @@
 !! @{
 !-----------------------------------
       subroutine gas_update                                             &
-     &     ( iyear, imon, iday, ihour, loz1st, ldoco2, me )!  ---  inputs
-!  ---  outputs: ( none )
+     &     ( iyear, imon, iday, ihour, loz1st, ldoco2, me,              &
+     &     errflg, errmsg )
 
 !  ===================================================================  !
 !                                                                       !
@@ -549,7 +564,8 @@
 !     me      - print message control flag                  1           !
 !                                                                       !
 !  outputs: (to the module variables)                                   !
-!    ( none )                                                           !
+!    errflg   - CCPP error flag                                         !
+!    errmsg   - CCPP error message                                      !
 !                                                                       !
 !  external module variables:  (in physparam)                           !
 !     ico2flg    - co2 data source control flag                         !
@@ -597,7 +613,9 @@
 
       logical, intent(in) :: loz1st, ldoco2
 
-!  ---  output: ( none )
+!  ---  output:
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
 
 !  ---  locals:
       real (kind=kind_phys), dimension(IMXCO2,JMXCO2) :: co2dat, co2ann
@@ -614,6 +632,10 @@
 !
 !===>  ...  begin here
 !
+! Initialize the CCPP error handling variables
+      errmsg = ''
+      errflg = 0
+
 !> - Ozone data section
 
       if ( ioznflg == 0 ) then
@@ -684,8 +706,11 @@
         inquire (file=co2gbl_file, exist=file_exist)
         if ( .not. file_exist ) then
           print *,'   Requested co2 data file "',co2gbl_file,           &
-     &            '" not found - Stopped in subroutine gas_update!!'
-          stop
+     &            '" not found'
+          errflg = 1
+          errmsg = 'ERROR(gas_update): Requested co2 data file not '//  &
+     &         'found'
+          return
         else
           close(NICO2CN)
           open (NICO2CN,file=co2gbl_file,form='formatted',status='old')
@@ -752,9 +777,11 @@
             if ( me == 0 ) then
               print *,'   Specified co2 data for year',idyr,            &
      &               ' not found !!  Need to change namelist ICTM !!'
-              print *,'   *** Stopped in subroutine gas_update !!'
             endif
-            stop
+            errflg = 1
+            errmsg = 'ERROR(gas_update): Specified co2 data for year '//&
+     &           'not found'
+            return
           else Lab_if_ictm                        ! looking for latest available data
             if ( me == 0 ) then
               print *,'   Requested co2 data for year',idyr,            &
@@ -778,9 +805,11 @@
             if ( .not. file_exist ) then
               if ( me == 0 ) then
                 print *,'   Can not find co2 data source file'
-                print *,'   *** Stopped in subroutine gas_update !!'
               endif
-              stop
+              errflg = 1
+              errmsg = 'ERROR(gas_update): Can not find co2 data '//    &
+     &             'source file'
+              return
             endif
           endif  Lab_if_ictm
         endif   ! end if_file_exist_block

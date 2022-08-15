@@ -288,7 +288,7 @@
 
 !$OMP section
 !> - Initialize soil vegetation (needed for sncovr calculation further down)
-         call set_soilveg(me, isot, ivegsrc, nlunit)
+         call set_soilveg(me, isot, ivegsrc, nlunit, errmsg, errflg)
 
 !$OMP end sections
 

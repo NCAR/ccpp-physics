@@ -134,7 +134,7 @@ contains
     call sol_init ( me, isol, solar_file, con_solr_2008, con_solr_2002, con_pi )
     call aer_init ( levr, me, iaermdl, iaerflg, lalw1bd, aeros_file, con_pi, con_t0c,    &
          con_c, con_boltz, con_plnk, errflg, errmsg)
-    call gas_init ( me )
+    call gas_init ( me, errflg, errmsg )
     !call hml_cloud_diagnostics_initialize(imp_physics, imp_physics_fer_hires,           &
     !     imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,                      &
     !     imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, imp_physics_mg, levr, me, si,&
@@ -248,7 +248,7 @@ contains
     else
        lco2_chg = .false.
     endif
-    call gas_update (kyear, kmon, kday, khour, loz1st, lco2_chg, me )
+    call gas_update (kyear, kmon, kday, khour, loz1st, lco2_chg, me, errflg, errmsg )
     
     if ( loz1st ) loz1st = .false.
 

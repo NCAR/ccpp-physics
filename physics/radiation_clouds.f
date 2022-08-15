@@ -16,7 +16,7 @@
 !          inputs:                                                     !
 !           ( si, NLAY, imp_physics,  me )                             !
 !          outputs:                                                    !
-!           ( none )                                                   !
+!           ( errflg, errmsg )                                         !
 !                                                                      !
 !       'radiation_clouds_prop'         --- radiation cloud properties !
 !            obtained from various cloud schemes                       !
@@ -278,10 +278,7 @@
 !>\section cld_init General Algorithm
 !! @{
       subroutine cld_init                                               &
-     &     ( si, NLAY, imp_physics, me ) !  ---  inputs
-!  ---  outputs:
-!          ( none )
-
+     &     ( si, NLAY, imp_physics, me, errflg, errmsg )
 !  ===================================================================  !
 !                                                                       !
 ! abstract: cld_init is an initialization program for cloud-radiation   !
@@ -294,8 +291,9 @@
 !   imp_physics     : MP identifier                                     !
 !   me              : print control flag                                !
 !                                                                       !
-!  outputs: (none)                                                      !
-!           to module variables                                         !
+!  outputs:                                                             !
+!   errflg          : CCPP error flag                                   !
+!   errmsg          : CCPP error message                                !
 !                                                                       !
 !  external module variables: (in physparam)                            !
 !   icldflg         : cloud optical property scheme control flag        !
@@ -331,7 +329,9 @@
 
       real (kind=kind_phys), intent(in) :: si(:)
 
-!  ---  outputs: (none)
+!  ---  outputs:
+      integer,          intent(out) :: errflg
+      character(len=*), intent(out) :: errmsg
 
 !  ---  locals:
       integer :: k, kl, ier
@@ -339,14 +339,20 @@
 !
 !===> ...  begin here
 !
+! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
+
 !  ---  set up module variables
 
       if (me == 0) print *, VTAGCLD      !print out version tag
 
       if ( icldflg == 0 ) then
         print *,' - Diagnostic Cloud Method has been discontinued'
-        stop
-
+        errflg = 1
+        errmsg = 'ERROR(cld_init): Diagnostic Cloud Method has been '// &
+     &       'discontinued'
+        return
       else
         if (me == 0) then
           print *,' - Using Prognostic Cloud Method'
@@ -369,6 +375,10 @@
           else
             print *,'  !!! ERROR in cloud microphysc specification!!!', &
      &              '  imp_physics (NP3D) =',imp_physics
+            errflg = 1
+            errmsg = 'ERROR(cld_init): cloud mp specification is not'// &
+     &       ' valid'
+            return
             stop
           endif
         endif
