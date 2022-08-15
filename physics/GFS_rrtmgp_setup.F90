@@ -156,7 +156,7 @@ contains
 !! \htmlinclude GFS_rrtmgp_setup_timestep_init.html
 !!
   subroutine GFS_rrtmgp_setup_timestep_init (idate, jdate, deltsw, deltim, lsswr, me, iaermdl,&
-       iaerflg, aeros_file, slag, sdec, cdec, solcon, errmsg, errflg)
+       aeros_file, slag, sdec, cdec, solcon, errmsg, errflg)
      
     ! Inputs
     integer,         intent(in)  :: idate(:)
@@ -165,7 +165,7 @@ contains
     real(kind_phys), intent(in)  :: deltim
     logical,         intent(in)  :: lsswr
     integer,         intent(in)  :: me
-    integer,         intent(in)  :: iaermdl, iaerflg
+    integer,         intent(in)  :: iaermdl
     character(len=26), intent(in) :: aeros_file
 
     ! Outputs
