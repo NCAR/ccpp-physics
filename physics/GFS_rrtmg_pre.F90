@@ -34,7 +34,7 @@
         rog, rocp, con_rd, xlat_d, xlat, xlon, coslat, sinlat, tsfc, slmsk,    &
         prsi, prsl, prslk, tgrs, sfc_wts, mg_cld, effrr_in, pert_clds,         &
         sppt_wts, sppt_amp, cnvw_in, cnvc_in, qgrs, aer_nm, dx, icloud,        & 
-        iaermdl, iaerflg,                                                      & !inputs from here and above
+        iaermdl, iaerflg, con_pi, con_g,                                       & !inputs from here and above
         coszen, coszdg, effrl_inout, effri_inout, effrs_inout,                 &
         clouds1, clouds2, clouds3, clouds4, clouds5, qci_conv,                 & !in/out from here and above
         kd, kt, kb, mtopa, mbota, raddt, tsfg, tsfa, de_lgth, alb1d, delp, dz, & !output from here and below
@@ -47,8 +47,6 @@
         spp_wts_rad, spp_rad, rrfs_smoke_band, top_at_1, errmsg, errflg)
 
       use machine,                   only: kind_phys
-
-      use physparam
 
       use radcons,                   only: itsfc,ltp, lextop, qmin,  &
                                            qme5, qme6, epsq, prsmin
@@ -130,7 +128,7 @@
       real(kind_phys),      intent(in) :: spp_wts_rad(:,:)
 
       real(kind=kind_phys), intent(in) :: fhswr, fhlwr, solhr, sup, julian, sppt_amp
-      real(kind=kind_phys), intent(in) :: con_eps, epsm1, fvirt, rog, rocp, con_rd
+      real(kind=kind_phys), intent(in) :: con_eps, epsm1, fvirt, rog, rocp, con_rd, con_pi, con_g
 
       real(kind=kind_phys), dimension(:), intent(in) :: xlat_d, xlat, xlon,    &
                                                         coslat, sinlat, tsfc,  &
@@ -258,7 +256,7 @@
       errflg = 0
 
       ! Vertical ordering
-      top_at_1 = (prsi(1,1) .lt.  prsi(1, lm))
+      top_at_1 = (prsi(1,1) .lt.  prsi(1, LMP))
       
       if (.not. (lsswr .or. lslwr)) return
 
@@ -285,7 +283,7 @@
 !  variables
 
       if ( lextop ) then
-        if ( ivflip == 1 ) then    ! vertical from sfc upward
+        if (.not. top_at_1) then   ! vertical from sfc upward
           kd = 0                   ! index diff between in/out and local
           kt = 1                   ! index diff between lyr and upper bound
           kb = 0                   ! index diff between lyr and lower bound
@@ -301,16 +299,16 @@
           llb = 1                  ! local index at toa level
           lya = 2                  ! local index for the 2nd layer from top
           lyb = 1                  ! local index for the top layer
-        endif                      ! end if_ivflip_block
+        endif                      ! end if_top_at_1_block
       else
         kd = 0
-        if ( ivflip == 1 ) then    ! vertical from sfc upward
+        if (.not. top_at_1) then   ! vertical from sfc upward
           kt = 1                   ! index diff between lyr and upper bound
           kb = 0                   ! index diff between lyr and lower bound
         else                       ! vertical from toa downward
           kt = 0                   ! index diff between lyr and upper bound
           kb = 1                   ! index diff between lyr and lower bound
-        endif                      ! end if_ivflip_block
+        endif                      ! end if_top_at_1_block
       endif   ! end if_lextop_block
 
       raddt = min(fhswr, fhlwr)
@@ -337,7 +335,7 @@
 !
 
       lsk = 0
-      if (ivflip == 0 .and. lm < levs) lsk = levs - lm
+      if (top_at_1 .and. lm < levs) lsk = levs - lm
 
 !     convert pressure unit from pa to mb
       do k = 1, LM
@@ -366,7 +364,7 @@
         enddo
       enddo
 !
-      if (ivflip == 0) then                                ! input data from toa to sfc
+      if (top_at_1) then                                ! input data from toa to sfc
         if (lsk > 0) then
           k1 = 1 + kd
           k2 = k1 + kb
@@ -475,7 +473,7 @@
         enddo
       enddo
 
-      if (ivflip == 0) then              ! input data from toa to sfc
+      if (top_at_1) then              ! input data from toa to sfc
         do i = 1, IM
           tem1d (i)   = QME6
           tem2da(i,1) = log( plyr(i,1) )
@@ -605,7 +603,7 @@
           dzb(i,1) = hzb(i,1) - hz(i,1)
         enddo
 
-      endif                              ! end_if_ivflip
+      endif                              ! end_if_top_at_1
 
 !>  - Call module_radiation_aerosols::setaer(),to setup aerosols
 !! property profile for radiation.
@@ -637,8 +635,8 @@
 
       call setaer (plvl, plyr, prslk1, tvly, rhly, slmsk,    & !  ---  inputs
                    tracer1, aer_nm, xlon, xlat, IM, LMK, LMP,&
-                   lsswr,lslwr,iaermdl,iaerflg,top_at_1,     &
-                   faersw,faerlw,aerodp,errflg,errmsg)         !  ---  outputs
+                   lsswr, lslwr, iaermdl, iaerflg, top_at_1, con_pi,  &
+                   con_rd, con_g, faersw, faerlw, aerodp, errflg, errmsg)         !  ---  outputs
 
 ! CCPP
       do j = 1,NBDSW

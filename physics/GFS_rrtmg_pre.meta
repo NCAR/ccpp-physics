@@ -2,7 +2,7 @@
   name = GFS_rrtmg_pre
   type = scheme
   dependencies = funcphys.f90,iounitdef.f,machine.F,module_bfmicrophysics.f,module_mp_radar.F90,module_mp_thompson.F90
-  dependencies = module_mp_thompson_make_number_concentrations.F90,physparam.f,physcons.F90,radcons.f90,radiation_aerosols.f
+  dependencies = module_mp_thompson_make_number_concentrations.F90,radcons.f90,radiation_aerosols.f
   dependencies = radiation_astronomy.f,radiation_clouds.f,radiation_gases.f,radlw_param.f,radsw_param.f,surface_perturbation.F90,radiation_cloud_overlap.F90
 
 ########################################################################
@@ -639,6 +639,30 @@
   type = real
   kind = kind_phys
   intent = in
+[con_pi]
+  standard_name = pi
+  long_name = ratio of a circle's circumference to its diameter
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_rd]
+  standard_name = gas_constant_of_dry_air
+  long_name = ideal gas constant for dry air
+  units = J kg-1 K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_g]
+  standard_name = gravitational_acceleration
+  long_name = gravitational acceleration
+  units = m s-2
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
 [epsm1]
   standard_name = ratio_of_dry_air_to_water_vapor_gas_constants_minus_one
   long_name = (rd/rv) - 1
@@ -667,14 +691,6 @@
   standard_name = ratio_of_gas_constant_dry_air_to_specific_heat_of_dry_air_at_constant_pressure
   long_name = (rd/cp)
   units = none
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[con_rd]
-  standard_name = gas_constant_of_dry_air
-  long_name = ideal gas constant for dry air
-  units = J kg-1 K-1
   dimensions = ()
   type = real
   kind = kind_phys

@@ -26,7 +26,7 @@ contains
 !!
   subroutine rrtmgp_aerosol_optics_run(doSWrad, doLWrad, nCol, nLev, nTracer, nTracerAer,   &
        nDay, idxday, p_lev, p_lay, p_lk, tv_lay, relhum, lsmask, tracer, aerfld, lon, lat,  &
-       iaermdl, iaerflg, top_at_1, aerodp, sw_optical_props_aerosol,                        &
+       iaermdl, iaerflg, top_at_1, con_pi, con_rd, con_g, aerodp, sw_optical_props_aerosol, &
        lw_optical_props_aerosol, errmsg, errflg  )
 
     ! Inputs
@@ -43,7 +43,11 @@ contains
          iaermdl,               & ! Aerosol model scheme flag
          iaerflg                  ! Aerosol effects to include
     integer,intent(in),dimension(:) :: &
-         idxday              ! Indices for daylit points.
+         idxday                   ! Indices for daylit points.
+    real(kind_phys),intent(in) :: &
+         con_pi,                & ! Physical constant (pi)
+         con_rd,                & ! Physical constant (gas constant for dry-air)
+         con_g                    ! Physical constant (gravitational constant)
     real(kind_phys), dimension(:), intent(in) :: &
          lon,                   & ! Longitude
          lat,                   & ! Latitude
@@ -87,7 +91,7 @@ contains
 
     ! Call module_radiation_aerosols::setaer(),to setup aerosols property profile
     call setaer(p_lev*0.01, p_lay*0.01, p_lk, tv_lay, relhum, lsmask, tracer, aerfld, lon, lat, nCol, nLev, &
-         nLev+1, .true., .true., iaermdl, iaerflg, top_at_1, aerosolssw2, aerosolslw, aerodp, errflg, errmsg)
+         nLev+1, .true., .true., iaermdl, iaerflg, top_at_1, con_pi, con_rd, con_g, aerosolssw2, aerosolslw, aerodp, errflg, errmsg)
 
     ! Shortwave
     if (nDay .gt. 0) then

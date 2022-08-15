@@ -119,15 +119,6 @@
 !!      \cite fu_et_al_1998 method
       integer,save      :: ilwcice = 3
 
-! ............................................. !
-!>\name  1.3 Control flag for LW aerosol property
-
-!> selects 1 band or multi bands for LW aerosol properties
-!!\n =.true.:aerosol properties calculated in 1 broad LW band
-!!\n =.false.:aerosol properties calculated in all LW bands
-!!\n variable names diff in Opr CFS
-      logical,parameter :: lalw1bd =.false.
-
 !==================================================================================
 !  Section - 2 -
 !     values of control flags might be re-set in initialization subroutines
@@ -152,15 +143,6 @@
       character, save :: solar_file*26
 !     data solar_file   / 'solarconstantdata.txt     ' /
       data solar_file   / 'solarconstant_noaa_a0.txt ' /
-
-! ............................................. !
-!> \name  2.2 For module radiation_aerosols
-! ............................................. !
-
-!> external aerosols data file: aerosol.dat
-      character, save :: aeros_file*26
-!     data aeros_file   / 'climaeropac_global.txt    ' /
-      data aeros_file   / 'aerosol.dat               ' /
 
 ! ............................................. !
 !> \name  2.3 For module radiation_gases

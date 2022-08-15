@@ -4,13 +4,11 @@
 !> \defgroup GFS_rrtmg_setup_mod GFS RRTMG Scheme Setup
 module GFS_rrtmg_setup
 
-   use physparam, only : isolar , ictmflg, ico2flg, ioznflg, &
-   &                                         icldflg,                 &
+   use physparam, only : isolar , ictmflg, ico2flg, ioznflg, icldflg, &
    &             iovrRad=>iovr, lcrick , lcnorm , lnoprec,            &
    &             isubcsw, isubclw, ivflip , ipsd0,                    &
-   &             iswcliq,                                             &
-   &             kind_phys
-
+   &             iswcliq
+   use machine, only:  kind_phys
    use radcons, only: ltp, lextop
 
    implicit none
@@ -49,7 +47,8 @@ module GFS_rrtmg_setup
           imp_physics,                                        &
           norad_precip, idate, iflip,                         &
           do_RRTMGP, me, lalw1bd, iaermdl, iaerflg,           &
-          aeros_file, errmsg, errflg)
+          aeros_file, con_pi, con_t0c, con_c, con_boltz,      &
+          con_plnk, errmsg, errflg)
 ! =================   subprogram documentation block   ================ !
 !                                                                       !
 ! subprogram:   GFS_rrtmg_setup_init - a subprogram to initialize radiation !
@@ -170,7 +169,8 @@ module GFS_rrtmg_setup
       integer, intent(in) :: iflip
       logical, intent(in) :: do_RRTMGP, lalw1bd
       integer, intent(in) :: me
-      character(len=26), intent(in) :: aeros_file
+      character(len=26),intent(in)  :: aeros_file
+      real(kind_phys),  intent(in)  :: con_pi,con_t0c,con_c,con_boltz,con_plnk
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
       integer,          intent(out) :: iaermdl, iaerflg
@@ -245,7 +245,8 @@ module GFS_rrtmg_setup
       call radinit                                                      &
 !  ---  inputs:
      &     ( si, levr, imp_physics, me, iaermdl, iaerflg, lalw1bd,      &
-     &       aeros_file, errmsg, errflg )
+     &       aeros_file, con_pi, con_t0c, con_c, con_boltz, con_plnk,   &
+     &       errmsg, errflg )
 !  ---  outputs:
 !          ( none )
 
@@ -297,8 +298,8 @@ module GFS_rrtmg_setup
       errmsg = ''
       errflg = 0
 
-      call radupdate(idate,jdate,deltsw,deltim,lsswr,me, iaermdl,&
-           iaerflg, aeros_file,  slag,sdec,cdec,solcon,errflg,errmsg)
+      call radupdate(idate,jdate,deltsw,deltim,lsswr,me,iaermdl,&
+           iaerflg,aeros_file,slag,sdec,cdec,solcon,errflg,errmsg)
 
    end subroutine GFS_rrtmg_setup_timestep_init
 
@@ -329,7 +330,7 @@ module GFS_rrtmg_setup
 
 
    subroutine radinit( si, NLAY, imp_physics, me, iaermdl, iaerflg, lalw1bd, &
-        aeros_file, errmsg, errflg)
+        aeros_file, con_pi, con_t0c, con_c, con_boltz, con_plnk, errmsg, errflg)
 !...................................
 
 !  ---  inputs:
@@ -444,7 +445,7 @@ module GFS_rrtmg_setup
 !  ---  inputs:
       integer, intent(in) :: NLAY, me, imp_physics, iaermdl, iaerflg
       logical, intent(in) :: lalw1bd
-      real (kind=kind_phys), intent(in) :: si(:)
+      real (kind=kind_phys), intent(in) :: si(:), con_pi,con_t0c, con_c, con_boltz, con_plnk
       character(len=26), intent(in) :: aeros_file
 
 !  ---  outputs: (ccpp error handling)
@@ -534,7 +535,8 @@ module GFS_rrtmg_setup
 
       call sol_init ( me )          !  --- ...  astronomy initialization routine
 
-      call aer_init ( NLAY, me, iaermdl, iaerflg, lalw1bd, aeros_file, errflg, errmsg)    !  --- ...  aerosols initialization routine
+      call aer_init ( NLAY, me, iaermdl, iaerflg, lalw1bd, aeros_file, con_pi, &
+           con_t0c, con_c, con_boltz, con_plnk, errflg, errmsg)    !  --- ...  aerosols initialization routine
 
       call gas_init ( me )          !  --- ...  co2 and other gases initialization routine
 

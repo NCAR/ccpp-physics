@@ -42,7 +42,8 @@ contains
        imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, imp_physics_zhao_carr,  &
        imp_physics_zhao_carr_pdf, imp_physics_mg,  si, levr, ictm, isol, ico2, iaer,     &
        ntcw, num_p3d,  ntoz, iovr, isubc_sw, isubc_lw, icliq_sw, crick_proof, ccnorm,    &
-       norad_precip, lalw1bd, idate, iflip, me, aeros_file, iaermdl, iaerflg, errmsg, errflg)
+       norad_precip, lalw1bd, idate, iflip, me, aeros_file, iaermdl, iaerflg, con_pi,    &
+       con_t0c, con_c, con_boltz, con_plnk, errmsg, errflg)
 
     ! Inputs
     logical, intent(in) :: do_RRTMGP
@@ -55,6 +56,8 @@ contains
          imp_physics_zhao_carr,     & ! Flag for zhao-carr scheme
          imp_physics_zhao_carr_pdf, & ! Flag for zhao-carr+PDF scheme
          imp_physics_mg               ! Flag for MG scheme
+    real(kind_phys), intent(in) :: &
+         con_pi, con_t0c, con_c, con_boltz, con_plnk
     real(kind_phys), dimension(:), intent(in) :: &
          si
     integer, intent(in) :: levr, ictm, isol, ico2, iaer, & 
@@ -129,7 +132,8 @@ contains
 
     ! Call initialization routines..
     call sol_init ( me )
-    call aer_init ( levr, me, iaermdl, iaerflg, lalw1bd, aeros_file, errflg, errmsg)
+    call aer_init ( levr, me, iaermdl, iaerflg, lalw1bd, aeros_file, con_pi, con_t0c,    &
+         con_c, con_boltz, con_plnk, errflg, errmsg)
     call gas_init ( me )
     !call hml_cloud_diagnostics_initialize(imp_physics, imp_physics_fer_hires,           &
     !     imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,                      &
