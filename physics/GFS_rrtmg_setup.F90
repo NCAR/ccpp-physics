@@ -4,7 +4,7 @@
 !> \defgroup GFS_rrtmg_setup_mod GFS RRTMG Scheme Setup
 module GFS_rrtmg_setup
 
-   use physparam, only : isolar , ictmflg, ico2flg, ioznflg, icldflg, &
+   use physparam, only : ictmflg, ico2flg, ioznflg, icldflg, &
    &             iovrRad=>iovr, lcrick , lcnorm , lnoprec,            &
    &             isubcsw, isubclw, ivflip , ipsd0,                    &
    &             iswcliq
@@ -41,14 +41,14 @@ module GFS_rrtmg_setup
 !! \htmlinclude GFS_rrtmg_setup_init.html
 !!
    subroutine GFS_rrtmg_setup_init (                          &
-          si, levr, ictm, isol, ico2, iaer, ntcw,             &
+          si, levr, ictm, isol, solar_file, ico2, iaer, ntcw, &
           num_p3d, npdf3d, ntoz, iovr, isubc_sw, isubc_lw,    &
           icliq_sw, crick_proof, ccnorm,                      &
           imp_physics,                                        &
           norad_precip, idate, iflip,                         &
           do_RRTMGP, me, lalw1bd, iaermdl, iaerflg,           &
           aeros_file, con_pi, con_t0c, con_c, con_boltz,      &
-          con_plnk, errmsg, errflg)
+          con_plnk, con_solr_2008, con_solr_2002, errmsg, errflg)
 ! =================   subprogram documentation block   ================ !
 !                                                                       !
 ! subprogram:   GFS_rrtmg_setup_init - a subprogram to initialize radiation !
@@ -169,8 +169,8 @@ module GFS_rrtmg_setup
       integer, intent(in) :: iflip
       logical, intent(in) :: do_RRTMGP, lalw1bd
       integer, intent(in) :: me
-      character(len=26),intent(in)  :: aeros_file
-      real(kind_phys),  intent(in)  :: con_pi,con_t0c,con_c,con_boltz,con_plnk
+      character(len=26),intent(in)  :: aeros_file, solar_file
+      real(kind_phys),  intent(in)  :: con_pi,con_t0c,con_c,con_boltz,con_plnk,con_solr_2008,con_solr_2002
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
       integer,          intent(out) :: iaermdl, iaerflg
@@ -187,7 +187,6 @@ module GFS_rrtmg_setup
         return
       end if
 
-      isolar = isol                     ! solar constant control flag
       ictmflg= ictm                     ! data ic time/date control flag
       ico2flg= ico2                     ! co2 data source control flag
       ioznflg= ntoz                     ! ozone data source control flag
@@ -246,7 +245,7 @@ module GFS_rrtmg_setup
 !  ---  inputs:
      &     ( si, levr, imp_physics, me, iaermdl, iaerflg, lalw1bd,      &
      &       aeros_file, con_pi, con_t0c, con_c, con_boltz, con_plnk,   &
-     &       errmsg, errflg )
+     &       isol, solar_file, con_solr_2008, con_solr_2002, errmsg, errflg )
 !  ---  outputs:
 !          ( none )
 
@@ -267,7 +266,7 @@ module GFS_rrtmg_setup
 !!
    subroutine GFS_rrtmg_setup_timestep_init (      &
           idate, jdate, deltsw, deltim, lsswr, me, iaermdl, &
-          iaerflg, aeros_file, slag, sdec, cdec, solcon, errmsg, errflg)
+          iaerflg, isol, aeros_file, slag, sdec, cdec, solcon, con_pi, errmsg, errflg)
 
       implicit none
 
@@ -276,9 +275,10 @@ module GFS_rrtmg_setup
       integer,              intent(in)  :: jdate(:)
       real(kind=kind_phys), intent(in)  :: deltsw
       real(kind=kind_phys), intent(in)  :: deltim
+      real(kind=kind_phys), intent(in)  :: con_pi
       logical,              intent(in)  :: lsswr
       integer,              intent(in)  :: me
-      integer,              intent(in)  :: iaermdl, iaerflg
+      integer,              intent(in)  :: iaermdl, iaerflg, isol
       character(len=26),    intent(in)  :: aeros_file
       real(kind=kind_phys), intent(out) :: slag
       real(kind=kind_phys), intent(out) :: sdec
@@ -299,7 +299,7 @@ module GFS_rrtmg_setup
       errflg = 0
 
       call radupdate(idate,jdate,deltsw,deltim,lsswr,me,iaermdl,&
-           iaerflg,aeros_file,slag,sdec,cdec,solcon,errflg,errmsg)
+           iaerflg,isol,aeros_file,slag,sdec,cdec,solcon,con_pi,errflg,errmsg)
 
    end subroutine GFS_rrtmg_setup_timestep_init
 
@@ -330,7 +330,8 @@ module GFS_rrtmg_setup
 
 
    subroutine radinit( si, NLAY, imp_physics, me, iaermdl, iaerflg, lalw1bd, &
-        aeros_file, con_pi, con_t0c, con_c, con_boltz, con_plnk, errmsg, errflg)
+        aeros_file, con_pi, con_t0c, con_c, con_boltz, con_plnk, isol,       &
+        solar_file, con_solr_2008, con_solr_2002, errmsg, errflg)
 !...................................
 
 !  ---  inputs:
@@ -443,10 +444,11 @@ module GFS_rrtmg_setup
       implicit none
 
 !  ---  inputs:
-      integer, intent(in) :: NLAY, me, imp_physics, iaermdl, iaerflg
+      integer, intent(in) :: NLAY, me, imp_physics, iaermdl, iaerflg, isol
       logical, intent(in) :: lalw1bd
-      real (kind=kind_phys), intent(in) :: si(:), con_pi,con_t0c, con_c, con_boltz, con_plnk
-      character(len=26), intent(in) :: aeros_file
+      real (kind=kind_phys), intent(in) :: si(:), con_pi,con_t0c, con_c, &
+           con_boltz, con_plnk, con_solr_2008, con_solr_2002
+      character(len=26), intent(in) :: aeros_file, solar_file
 
 !  ---  outputs: (ccpp error handling)
       character(len=*),     intent(out) :: errmsg
@@ -469,7 +471,7 @@ module GFS_rrtmg_setup
      &          '  May 01 2007'
         print *, VTAGRAD                !print out version tag
         print *,' - Selected Control Flag settings: ICTMflg=',ictmflg,  &
-     &    ' ISOLar =',isolar, ' ICO2flg=',ico2flg,' IAERflg=',iaerflg,  &
+     &    ' ISOLar =',isol, ' ICO2flg=',ico2flg,' IAERflg=',iaerflg,  &
      &    ' ICLDflg=',icldflg,                                          &
      &    ' IMP_PHYSICS=',imp_physics,' IOZNflg=',ioznflg
         print *,' IVFLIP=',ivflip,' IOVR=',iovrRad,                     &
@@ -533,7 +535,7 @@ module GFS_rrtmg_setup
 !! call module_radsw_main::rswinit()
 !     Initialization
 
-      call sol_init ( me )          !  --- ...  astronomy initialization routine
+      call sol_init ( me, isol, solar_file, con_solr_2008, con_solr_2002, con_pi )          !  --- ...  astronomy initialization routine
 
       call aer_init ( NLAY, me, iaermdl, iaerflg, lalw1bd, aeros_file, con_pi, &
            con_t0c, con_c, con_boltz, con_plnk, errflg, errmsg)    !  --- ...  aerosols initialization routine
@@ -573,8 +575,8 @@ module GFS_rrtmg_setup
 !> @{
 !-----------------------------------
       subroutine radupdate( idate,jdate,deltsw,deltim,lsswr,me, iaermdl,&
-     &                      iaerflg, aeros_file, slag,sdec,cdec,solcon, &
-     &                      errflg,errmsg)
+     &                      iaerflg, isol, aeros_file, slag,sdec,cdec,solcon, &
+     &                      con_pi, errflg,errmsg)
 !...................................
 
 ! =================   subprogram documentation block   ================ !
@@ -607,7 +609,7 @@ module GFS_rrtmg_setup
 !   solcon         : sun-earth distance adjusted solar constant (w/m2)  !
 !                                                                       !
 !  external module variables:                                           !
-!   isolar   : solar constant cntrl  (in module physparam)              !
+!   iso   : solar constant cntrl  (in module physparam)                 !
 !              = 0: use the old fixed solar constant in "physcon"       !
 !              =10: use the new fixed solar constant in "physcon"       !
 !              = 1: use noaa ann-mean tsi tbl abs-scale with cycle apprx!
@@ -642,11 +644,11 @@ module GFS_rrtmg_setup
       implicit none
 
 !  ---  inputs:
-      integer, intent(in) :: idate(:), jdate(:), me, iaermdl, iaerflg
+      integer, intent(in) :: idate(:), jdate(:), me, iaermdl, iaerflg, isol
       logical, intent(in) :: lsswr
       character(len=26),intent(in) :: aeros_file
 
-      real (kind=kind_phys), intent(in) :: deltsw, deltim
+      real (kind=kind_phys), intent(in) :: deltsw, deltim, con_pi
 
 !  ---  outputs:
       real (kind=kind_phys), intent(out) :: slag, sdec, cdec, solcon
@@ -702,12 +704,12 @@ module GFS_rrtmg_setup
 !! time interpolation.
       if (lsswr) then
 
-        if ( isolar == 0 .or. isolar == 10 ) then
+        if ( isol == 0 .or. isol == 10 ) then
           lsol_chg = .false.
         elseif ( iyear0 /= iyear ) then
           lsol_chg = .true.
         else
-          lsol_chg = ( isolar==4 .and. lmon_chg )
+          lsol_chg = ( isol==4 .and. lmon_chg )
         endif
         iyear0 = iyear
 
@@ -715,7 +717,7 @@ module GFS_rrtmg_setup
 !  ---  inputs:
      &     ( jdate,kyear,deltsw,deltim,lsol_chg, me,                    &
 !  ---  outputs:
-     &       slag,sdec,cdec,solcon                                      &
+     &       slag,sdec,cdec,solcon,con_pi,errmsg,errflg                 &
      &     )
 
       endif  ! end_if_lsswr_block

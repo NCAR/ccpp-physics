@@ -101,6 +101,30 @@
   dimensions = ()
   type = integer
   intent = in
+[solar_file]
+  standard_name = solar_constant_file
+  long_name = external solar constant data table file
+  units = none
+  dimensions =  ()
+  type = character
+  kind = len=26
+  intent = in
+[con_solr_2008]
+  standard_name = solar_constant_2008
+  long_name = solar constant Tim 2008
+  units = W m-2
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_solr_2002]
+  standard_name = solar_constant_2002
+  long_name= solar constant Liu 2002
+  units = W m-2
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
 [ico2]
   standard_name = control_for_co2
   long_name = prescribed global mean value (old opernl)
@@ -353,6 +377,21 @@
   units = flag
   dimensions = ()
   type = integer
+  intent = in
+[isol]
+  standard_name = control_for_solar_constant
+  long_name = use prescribed solar constant
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[con_pi]
+  standard_name = pi
+  long_name = ratio of a circle's circumference to its diameter
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
   intent = in
 [slag]
   standard_name = equation_of_time

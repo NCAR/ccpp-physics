@@ -8,7 +8,7 @@ module GFS_rrtmgp_setup
   !  use GFS_cloud_diagnostics,      only : hml_cloud_diagnostics_initialize
   ! *NOTE* These parameters below are required radiation_****** modules. They are not
   !        directly used by the RRTMGP routines.
-  use physparam,                  only : isolar,  ictmflg, ico2flg, ioznflg, ivflip
+  use physparam,                  only : ictmflg, ico2flg, ioznflg, ivflip
   implicit none
   
   public GFS_rrtmgp_setup_init, GFS_rrtmgp_setup_timestep_init, GFS_rrtmgp_setup_finalize
@@ -43,7 +43,8 @@ contains
        imp_physics_zhao_carr_pdf, imp_physics_mg,  si, levr, ictm, isol, ico2, iaer,     &
        ntcw, num_p3d,  ntoz, iovr, isubc_sw, isubc_lw, icliq_sw, crick_proof, ccnorm,    &
        norad_precip, lalw1bd, idate, iflip, me, aeros_file, iaermdl, iaerflg, con_pi,    &
-       con_t0c, con_c, con_boltz, con_plnk, errmsg, errflg)
+       con_t0c, con_c, con_boltz, con_plnk, solar_file, con_solr_2008, con_solr_2002,    &
+       errmsg, errflg)
 
     ! Inputs
     logical, intent(in) :: do_RRTMGP
@@ -57,7 +58,7 @@ contains
          imp_physics_zhao_carr_pdf, & ! Flag for zhao-carr+PDF scheme
          imp_physics_mg               ! Flag for MG scheme
     real(kind_phys), intent(in) :: &
-         con_pi, con_t0c, con_c, con_boltz, con_plnk
+         con_pi, con_t0c, con_c, con_boltz, con_plnk, con_solr_2008, con_solr_2002
     real(kind_phys), dimension(:), intent(in) :: &
          si
     integer, intent(in) :: levr, ictm, isol, ico2, iaer, & 
@@ -67,7 +68,7 @@ contains
          crick_proof, ccnorm, norad_precip, lalw1bd
     integer, intent(in), dimension(:) :: &
          idate
-    character(len=26),intent(in) :: aeros_file
+    character(len=26),intent(in) :: aeros_file, solar_file
 
     ! Outputs
     character(len=*), intent(out) :: errmsg
@@ -88,7 +89,6 @@ contains
     end if
 
     ! Set radiation parameters
-    isolar  = isol                     ! solar constant control flag
     ictmflg = ictm                     ! data ic time/date control flag
     ico2flg = ico2                     ! co2 data source control flag
     ioznflg = ntoz                     ! ozone data source control flag
@@ -131,7 +131,7 @@ contains
     monthd = 0
 
     ! Call initialization routines..
-    call sol_init ( me )
+    call sol_init ( me, isol, solar_file, con_solr_2008, con_solr_2002, con_pi )
     call aer_init ( levr, me, iaermdl, iaerflg, lalw1bd, aeros_file, con_pi, con_t0c,    &
          con_c, con_boltz, con_plnk, errflg, errmsg)
     call gas_init ( me )
@@ -156,16 +156,17 @@ contains
 !! \htmlinclude GFS_rrtmgp_setup_timestep_init.html
 !!
   subroutine GFS_rrtmgp_setup_timestep_init (idate, jdate, deltsw, deltim, lsswr, me, iaermdl,&
-       aeros_file, slag, sdec, cdec, solcon, errmsg, errflg)
+       aeros_file, isol, slag, sdec, cdec, solcon, con_pi, errmsg, errflg)
      
     ! Inputs
     integer,         intent(in)  :: idate(:)
     integer,         intent(in)  :: jdate(:)
     real(kind_phys), intent(in)  :: deltsw
     real(kind_phys), intent(in)  :: deltim
+    real(kind_phys), intent(in)  :: con_pi
     logical,         intent(in)  :: lsswr
     integer,         intent(in)  :: me
-    integer,         intent(in)  :: iaermdl
+    integer,         intent(in)  :: iaermdl,isol
     character(len=26), intent(in) :: aeros_file
 
     ! Outputs
@@ -224,15 +225,15 @@ contains
 
     ! Update solar forcing...
     if (lsswr) then
-       if ( isolar == 0 .or. isolar == 10 ) then
+       if ( isol == 0 .or. isol == 10 ) then
           lsol_chg = .false.
        elseif ( iyear0 /= iyear ) then
           lsol_chg = .true.
        else
-          lsol_chg = ( isolar==4 .and. lmon_chg )
+          lsol_chg = ( isol==4 .and. lmon_chg )
        endif
        iyear0 = iyear
-       call sol_update(jdate, kyear, deltsw, deltim, lsol_chg, me, slag, sdec, cdec, solcon)
+       call sol_update(jdate, kyear, deltsw, deltim, lsol_chg, me, slag, sdec, cdec, solcon, con_pi, errmsg, errflg)
     endif
 
     ! Update aerosols...

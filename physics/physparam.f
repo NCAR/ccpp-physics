@@ -126,25 +126,6 @@
 !==================================================================================
 
 ! ............................................. !
-!>\name  2.1 For module radiation_astronomy
-! ............................................. !
-
-!> solar constant scheme control flag
-!!\n =0:fixed value=1366.0\f$W/m^2\f$(old standard)
-!!\n =10:fixed value=1360.8\f$W/m^2\f$(new standard)
-!!\n =1:NOAA ABS-scale TSI table (yearly) w 11-yr cycle approx
-!!\n =2:NOAA TIM-scale TSI table (yearly) w 11-yr cycle approx
-!!\n =3:CMIP5 TIM-scale TSI table (yearly) w 11-yr cycle approx
-!!\n =4:CMIP5 TIM-scale TSI table (monthly) w 11-yr cycle approx
-!!\n see ISOL in run scripts: Opr GFS=2; Opr CFS=1
-      integer, save :: isolar  = 0
-
-!> external solar constant data table,solarconstant_noaa_a0.txt
-      character, save :: solar_file*26
-!     data solar_file   / 'solarconstantdata.txt     ' /
-      data solar_file   / 'solarconstant_noaa_a0.txt ' /
-
-! ............................................. !
 !> \name  2.3 For module radiation_gases
 ! ............................................. !
 
