@@ -111,7 +111,6 @@
 !!\param[out] smcref      real, soil moisture threshold (volumetric)
 !!\param[out] smcmax      real, porosity (sat val of soil mois)
 !>\section general_sflx GFS Noah LSM General Algorithm
-!! @{
       subroutine gfssflx                                                &!  ---  inputs:
      &     ( nsoil, couple, icein, ffrozp, dt, zlvl, sldpth,            &
      &       swdn, swnet, lwdn, sfcems, sfcprs, sfctmp,                 &
@@ -5808,6 +5807,5 @@ c ----------------------------------------------------------------------
 
 !...................................
       end subroutine gfssflx
-!! @}
 !-----------------------------------
       end module sflx

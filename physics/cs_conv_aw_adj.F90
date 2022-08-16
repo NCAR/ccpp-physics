@@ -10,15 +10,9 @@ module cs_conv_aw_adj
 
    private
 
-   public :: cs_conv_aw_adj_init, cs_conv_aw_adj_run, cs_conv_aw_adj_finalize
+   public :: cs_conv_aw_adj_run
 
    contains
-
-   subroutine cs_conv_aw_adj_init()
-   end subroutine cs_conv_aw_adj_init
-
-   subroutine cs_conv_aw_adj_finalize()
-   end subroutine cs_conv_aw_adj_finalize
 
 !>\ingroup cs_scheme
 !> This subroutine adjusts surface rainrate for conservation.

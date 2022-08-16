@@ -7,8 +7,7 @@
       module zhaocarr_gscond
 
         implicit none
-        public :: zhaocarr_gscond_init, zhaocarr_gscond_run,            &
-     &            zhaocarr_gscond_finalize
+        public :: zhaocarr_gscond_init, zhaocarr_gscond_run
         private
         logical :: is_initialized = .False.
       contains      
@@ -51,12 +50,6 @@
          is_initialized = .true.
        end subroutine zhaocarr_gscond_init
 
-! \brief Brief description of the subroutine
-!
-!> \section arg_table_zhaocarr_gscond_finalize  Argument Table
-!!
-       subroutine zhaocarr_gscond_finalize
-       end subroutine zhaocarr_gscond_finalize
 
 !> \defgroup condense GFS gscond Main
 !> @{

@@ -26,7 +26,7 @@
  with arrows also represent positive feedbacks. The single horizontal
  gay-dotted line (no arrows) indicates the top of the PBL, and the seven
  small vertical dashed lines (no arrows) represent precipitation
- \image html Noah_LA_interaction.png "Figure 1: Local Land-atmosphere Interaction (courtesy of Michael Ek)" width=10cm
+ \image html Noah_LA_interaction.png "Figure 1: Local Land-atmosphere Interaction (courtesy of Michael Ek)" width=900
 Recently, the land surface updates in 2017 GFS operational physics includes:
  - IGBP 20-type 1-km land classification
  - STASGO 19-type 1-km soil classification
@@ -36,12 +36,11 @@ Recently, the land surface updates in 2017 GFS operational physics includes:
  - Unify snow cover, albedo between radiation and land surface model
  - Increase ground heat flux under deep snow
  - Upgrade surface layer parameterization scheme \ref GFS_SFCLYR to modify the roughness-length formulation and introduce a stability parameter constraint in the Monin-Obukhov similarity theory to prevent the land-atmosphere system from fully decoupling leading to excessive cooling of 2m temperature during sunset
- \image html land_dataset.png "Figure 2: Land Data Sets Used in NCEP Modeling Systems" width=10cm
+ \image html land_dataset.png "Figure 2: Land Data Sets Used in NCEP Modeling Systems" width=900
 
 \section intra_noah Intraphysics Communication
- +  GFS Noah LSM Driver (\ref arg_table_lsm_noah_run)
- +  GFS Noah LSM Model (gfssflx())
+- \ref arg_table_lsm_noah_run
+
 \section gen_al_noah General Algorithm
-+ \ref general_noah_drv
-+ \ref general_sflx
+- lsm_noah::lsm_noah_run
 */

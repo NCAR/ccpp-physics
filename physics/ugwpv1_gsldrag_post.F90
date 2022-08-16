@@ -6,10 +6,6 @@ contains
 
 !>\defgroup ugwpv1_gsldrag_post ugwpv1_gsldrag Scheme Post
 !! @{
-
-    subroutine ugwpv1_gsldrag_post_init ()
-    end subroutine ugwpv1_gsldrag_post_init
-
 !> \section arg_table_ugwpv1_gsldrag_post_run Argument Table
 !! \htmlinclude ugwpv1_gsldrag_post_run.html
 !!
@@ -94,9 +90,6 @@ contains
 ! 
 !=====================================================================
       end subroutine ugwpv1_gsldrag_post_run      
-
-      subroutine ugwpv1_gsldrag_post_finalize ()
-      end subroutine ugwpv1_gsldrag_post_finalize
 
 !! @}
 end module ugwpv1_gsldrag_post

@@ -1,7 +1,9 @@
-!> \file GFS_rrtmg_setup.f90
+!> \file GFS_rrtmg_setup.F90
 !! This file contains
 
 !> \defgroup GFS_rrtmg_setup_mod GFS RRTMG Scheme Setup
+!! This subroutine initializes RRTMG. 
+!> @{
 module GFS_rrtmg_setup
 
    use physparam, only : isolar , ictmflg, ico2flg, ioznflg, iaerflg, &
@@ -559,7 +561,6 @@ module GFS_rrtmg_setup
 !! \param sdec,cdec      sine and cosine of the solar declination angle
 !! \param solcon         solar constant adjusted by sun-earth distance \f$(W/m^2)\f$
 !> \section gen_radupdate General Algorithm
-!> @{
 !-----------------------------------
       subroutine radupdate( idate,jdate,deltsw,deltim,lsswr, me,        &
      &                      slag,sdec,cdec,solcon)
@@ -729,5 +730,6 @@ module GFS_rrtmg_setup
 !...................................
       end subroutine radupdate
 !-----------------------------------
+!> @}
 
 end module GFS_rrtmg_setup

@@ -31,9 +31,6 @@
 
       end subroutine ozphys_init
 
-      subroutine ozphys_finalize()
-      end subroutine ozphys_finalize
-
 !>\defgroup GFS_ozphys GFS ozphys Main
 !! \brief The operational GFS currently parameterizes ozone production and
 !! destruction based on monthly mean coefficients (\c global_o3prdlos.f77) provided by Naval

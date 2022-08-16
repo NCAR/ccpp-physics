@@ -1,3 +1,8 @@
+!> \file rrtmgp_sw_rte.F90 
+!!
+!> \defgroup rrtmgp_sw_rte rrtmgp_sw_rte.F90
+!!
+!! \brief This module contains the main rte shortwave driver.
 module rrtmgp_sw_rte
   use machine,                 only: kind_phys
   use mo_optical_props,        only: ty_optical_props_2str
@@ -8,22 +13,21 @@ module rrtmgp_sw_rte
   use rrtmgp_sw_gas_optics,    only: sw_gas_props
   implicit none
 
-  public rrtmgp_sw_rte_init, rrtmgp_sw_rte_run, rrtmgp_sw_rte_finalize
+  public rrtmgp_sw_rte_run
 
 contains
-
-  ! #########################################################################################
-  ! SUBROUTINE rrtmgp_sw_rte_init
-  ! #########################################################################################
-  subroutine rrtmgp_sw_rte_init()
-  end subroutine rrtmgp_sw_rte_init
-
-  ! #########################################################################################
-  ! SUBROUTINE rrtmgp_sw_rte_run
-  ! #########################################################################################
-!! \section arg_table_rrtmgp_sw_rte_run
+!>\defgroup rrtmgp_sw_rte_mod GFS RRTMGP-SW RTE Module
+!> \section arg_table_rrtmgp_sw_rte_run
 !! \htmlinclude rrtmgp_sw_rte.html
 !!
+!> \ingroup rrtmgp_sw_rte
+!! 
+!! \brief This routine takes all of the shortwave optical properties ,ty_optical_props_2str,
+!! and computes the shortwave radiative fluxes for cloudy and clear-sky conditions.
+!!
+!! \section rrtmgp_sw_rte_run Main Driver
+!> @{
+  ! ######################################################################################
   subroutine rrtmgp_sw_rte_run(doSWrad, doSWclrsky, nCol, nLev, nDay, idxday, coszen, p_lay,&
        t_lay, top_at_1, doGP_sgs_cnv, doGP_sgs_mynn, iSFC, sfc_alb_nir_dir, sfc_alb_nir_dif,&
        sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, toa_src_sw, sw_optical_props_clrsky,           &
@@ -211,11 +215,5 @@ contains
     endif
 
   end subroutine rrtmgp_sw_rte_run
-  
-  ! #########################################################################################
-  ! SUBROUTINE rrtmgp_sw_rte_finalize
-  ! #########################################################################################
-  subroutine rrtmgp_sw_rte_finalize()
-  end subroutine rrtmgp_sw_rte_finalize
-
+!> @}
 end module rrtmgp_sw_rte

@@ -220,5 +220,4 @@
 !-----------------------------------------------------------------------
       return
       end subroutine tridit
-!> @}
       end module tridi_mod

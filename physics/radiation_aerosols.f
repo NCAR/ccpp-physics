@@ -124,35 +124,6 @@
 !!!!!  ==========================================================  !!!!!
 
 
-
-!> \ingroup rad
-!! \defgroup module_radiation_aerosols module_radiation_aerosols
-!!  This module contains climatological atmospheric aerosol schemes for
-!!  radiation computations.
-!!
-!!\version NCEP-Radiation_aerosols  v5.2  Jan 2013
-!!
-!!\n This module has three externally callable subroutines:
-!! - aer_init() -- initialization; called at the start of run to set up
-!!                 module parameters
-!! - aer_update() -- updating aerosol data; called within the time loop
-!!                   to check and update data sets
-!! - setaer() -- mapping aeros profile, compute aeros opticals
-!!
-!!\n References:
-!! - OPAC climatological aerosols:
-!! Hou et al. 2002 \cite hou_et_al_2002; Hess et al. 1998
-!! \cite hess_et_al_1998
-!! - GOCART interactive aerosols:
-!! Chin et al., 2000 \cite chin_et_al_2000
-!! Colarco et al., 2010 - jgr, v115, D14207\cite colarco_et_al_2010
-!!
-!! - MERRA2 aerosol reanalysis:
-!! Randles et al., 2017 - jclim, v30, 6823-6850\cite randles_et_al_2017
-!! Buchard et al., 2017 - jclim, v30, 6851-6871\cite buchard_et_al_2017
-!!
-!! - Stratospheric volcanical aerosols:
-!! Sato et al. 1993 \cite sato_et_al_1993
 !========================================!
       module module_radiation_aerosols   !
 !........................................!
@@ -491,13 +462,40 @@
       contains
 ! =================
 
+!> \defgroup mod_radiation_aerosols Radiation Aerosols Module
+!>  This module contains climatological atmospheric aerosol schemes for
+!!  radiation computations.
+!!
+!!\version NCEP-Radiation_aerosols  v5.2  Jan 2013
+!!
+!!\n This module has three externally callable subroutines:
+!! - aer_init() -- initialization; called at the start of run to set up
+!!                 module parameters
+!! - aer_update() -- updating aerosol data; called within the time loop
+!!                   to check and update data sets
+!! - setaer() -- mapping aeros profile, compute aeros opticals
+!!
+!!\n References:
+!! - OPAC climatological aerosols:
+!! Hou et al. 2002 \cite hou_et_al_2002; Hess et al. 1998
+!! \cite hess_et_al_1998
+!! - GOCART interactive aerosols:
+!! Chin et al., 2000 \cite chin_et_al_2000
+!! Colarco et al., 2010 - jgr, v115, D14207\cite colarco_et_al_2010
+!!
+!! - MERRA2 aerosol reanalysis:
+!! Randles et al., 2017 - jclim, v30, 6823-6850\cite randles_et_al_2017
+!! Buchard et al., 2017 - jclim, v30, 6851-6871\cite buchard_et_al_2017
+!!
+!! - Stratospheric volcanical aerosols:
+!! Sato et al. 1993 \cite sato_et_al_1993
+!!
 !> The initialization program is to set up necessary parameters and
 !! working arrays.
 !!
 !>\param NLAY    number of model vertical layers (not used)
 !>\param me      print message control flag
 !>\section gen_al General Algorithm
-!! @{
 !-----------------------------------
       subroutine aer_init                                               &
      &     ( NLAY, me ) !  ---  inputs
@@ -899,7 +897,6 @@
 !...................................
       end subroutine aer_init
 !-----------------------------------
-!!@}
 
 
 !> This subroutine is the opac-climatology aerosol initialization
@@ -911,7 +908,6 @@
 !!\param me         print message control flag
 !!
 !!\section gen_clim_aerinit General Algorithm
-!!@{
       subroutine clim_aerinit                                           &
      &     ( solfwv, eirfwv, me                                         &          ! ---  inputs
      &     )                                                           !  ---  outputs
@@ -1001,7 +997,6 @@
 !! reads and maps the pre-tabulated aerosol optical spectral data onto
 !! corresponding SW radiation spectral bands.
 !!\section det_set_aercoef General Algorithm
-!! @{
 !--------------------------------
       subroutine set_aercoef
 !................................
@@ -1436,7 +1431,6 @@
 !................................
       end subroutine set_aercoef
 !--------------------------------
-!! @}
 
 !> This subroutine computes mean aerosols optical properties over each
 !! SW radiation spectral band for each of the species components. This
@@ -1699,7 +1693,6 @@
 !...................................
       end subroutine clim_aerinit
 !-----------------------------------
-!!@}
 
 
 !> This subroutine checks and updates time varying climatology aerosol
@@ -1709,7 +1702,6 @@
 !!\param imon     month of the year
 !!\param me       print message control flag
 !>\section gen_aer_upd General Algorithm
-!! @{
 !-----------------------------------
       subroutine aer_update                                             &
      &     ( iyear, imon, me ) !  ---  inputs:
@@ -2061,8 +2053,6 @@
 !...................................
       end subroutine aer_update
 !-----------------------------------
-!! @}
-
 
 !> This subroutine computes aerosols optical properties.
 !>\param prsi    (IMAX,NLP1), pressure at interface in mb
@@ -2089,7 +2079,6 @@
 !!\n                    (:,:,:,3): asymmetry parameter
 !!\param aerodp    (IMAX,NSPC1), vertically integrated optical depth
 !>\section general_setaer General Algorithm
-!> @{
 !-----------------------------------
       subroutine setaer                                                 &
      &     ( prsi,prsl,prslk,tvly,rhlay,slmsk,tracer,aerfld,xlon,xlat,  &   !  ---  inputs
@@ -2645,8 +2634,6 @@
 !...................................
       end subroutine setaer
 !-----------------------------------
-!> @}
-
 
 !> This subroutine maps the 5 degree global climatological aerosol data
 !! set onto model grids, and compute aerosol optical properties for SW
@@ -2675,7 +2662,6 @@
 !!\n                              (:,:,:,3): asymmetry parameter
 !!\param aerodp        (IMAX,NSPC+1), vertically integrated aer-opt-depth
 !!\section gel_aer_pro General Algorithm
-!> @{
 !-----------------------------------
       subroutine aer_property                                           &
      &     ( prsi,prsl,prslk,tvly,rhlay,dz,hz,tracer,                   &     !  ---  inputs:
@@ -3406,7 +3392,6 @@
       end subroutine aer_property
 !-----------------------------------
 
-!> @}
 !> This subroutine is the gocart aerosol initialization
 !! program to set up necessary parameters and working arrays.
 !>\param solfwv     (NWVTOT), solar flux for each individual wavenumber
@@ -3416,7 +3401,6 @@
 !!\param me         print message control flag
 !!
 !>\section gel_go_ini General Algorithm
-!! @{
 !-----------------------------------
       subroutine gocart_aerinit                                         &
      &     ( solfwv, eirfwv, me                                         &
@@ -4160,7 +4144,6 @@
 !...................................
       end subroutine gocart_aerinit
 !-----------------------------------
-!! @}
 
 !> This subroutine compute aerosol optical properties for SW
 !! and LW radiations.
@@ -4189,7 +4172,6 @@
 !!\n                              (:,:,:,3): asymmetry parameter
 !!\param aerodp        (IMAX,NSPC+1), vertically integrated aer-opt-depth
 !!\section gel_go_aer_pro General Algorithm
-!! @{
 !-----------------------------------
       subroutine aer_property_gocart                                    &
 !...................................
@@ -4516,10 +4498,8 @@
 !...................................
       end subroutine aer_property_gocart
 !-----------------------------------
-!! @}
 !
 ! =======================================================================
-
 !..........................................!
       end module module_radiation_aerosols !
 !==========================================!
