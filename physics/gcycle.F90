@@ -22,7 +22,7 @@ contains
       tsfco, tisfc, hice, fice, facsf, facwf, alvsf, alvwf, alnsf, alnwf,          &
       zorli, zorll, zorlo, weasd, slope, snoalb, canopy, vfrac, vtype,             &
       stype, shdmin, shdmax, snowd, cv, cvb, cvt, oro, oro_uf,                     &
-      xlat_d, xlon_d, slmsk, imap, jmap)
+      xlat_d, xlon_d, slmsk, imap, jmap, errmsg, errflg)
 !
 !
     use machine,      only: kind_phys, kind_io8
@@ -78,6 +78,9 @@ contains
                                            slope(:)
 
     integer,              intent(in)    :: imap(:), jmap(:)
+    character(len=*),     intent(out)   :: errmsg
+    integer,              intent(out)   :: errflg
+
 !
 !     Local variables
 !     ---------------
@@ -104,6 +107,11 @@ contains
     real(kind=kind_phys) :: sig1t
     integer              :: npts, nb, ix, jx, ls, ios, ll
     logical              :: exists
+
+    ! Initialize CCPP error handling variables
+    errmsg = ''
+    errflg = 0
+
 !
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 !
@@ -214,7 +222,9 @@ contains
       inquire (file=trim(fn_nml),exist=exists)
       if (.not. exists) then
         write(6,*) 'gcycle:: namelist file: ',trim(fn_nml),' does not exist'
-        stop
+        errflg = 1
+        errmsg = 'ERROR(gcycle): namelist file: ',trim(fn_nml),' does not exist.'
+        return
       else
         open (unit=nlunit, file=trim(fn_nml), action='READ', status='OLD', iostat=ios)
         rewind (nlunit)

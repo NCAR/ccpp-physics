@@ -1325,8 +1325,7 @@
 !!\section rlwinit_gen rlwinit General Algorithm
 !! @{
       subroutine rlwinit                                                &
-     &     ( me ) !  ---  inputs
-!  ---  outputs: (none)
+     &     ( me, errflg, errmsg )
 
 !  ===================  program usage description  ===================  !
 !                                                                       !
@@ -1397,7 +1396,9 @@
 !  ---  inputs:
       integer, intent(in) :: me
 
-!  ---  outputs: none
+!  ---  outputs:
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
 
 !  ---  locals:
       real (kind=kind_phys), parameter :: expeps = 1.e-20
@@ -1409,10 +1410,16 @@
 !
 !===> ... begin here
 !
+      ! Initialize error-handling
+      errflg = 0
+      errmsg = ''
+
       if ( iovr<0 .or. iovr>5 ) then
         print *,'  *** Error in specification of cloud overlap flag',   &
      &          ' IOVR=',iovr,' in RLWINIT !!'
-        stop
+        errflg = 1
+        errmsg = 'ERROR(rlwinit): cloud-overlap (iovr) scheme selected not valid.'
+        return
       elseif ( (iovr==2 .or. iovr==3) .and. isubclw==0 ) then
         if (me == 0) then
           print *,'  *** IOVR=',iovr,' is not available for',           &
@@ -1446,7 +1453,9 @@
         else
           print *,'  *** Error in specification of sub-column cloud ',  &
      &            ' control flag isubclw =',isubclw,' !!'
-          stop
+          errflg = 1
+          errmsg = 'ERROR(rlwinit): sub-column scheme (isubclw) selected not valid.'
+          return
         endif
       endif
 
@@ -1456,7 +1465,10 @@
      &    (icldflg == 1 .and. ilwcliq == 0)) then
         print *,'  *** Model cloud scheme inconsistent with LW',        &
      &          ' radiation cloud radiative property setup !!'
-        stop
+        errflg = 1
+        errmsg = 'ERROR(rlwinit): Model cloud scheme inconsistent with LW'//&
+     &          ' radiation cloud radiative property setup'
+        return
       endif
 
 !> -# Setup default surface emissivity for each band.
@@ -7668,7 +7680,9 @@
                return
 
             elseif(inflag .eq. 1) then
-                stop 'INFLAG = 1 OPTION NOT AVAILABLE WITH MCICA'
+                errflg = 1
+                errmsg = 'ERROR(rlwinit): INFLAG = 1 OPTION NOT AVAILABLE WITH MCICA'
+                return
 !               cwp = ciwpmc(ig,lay) + clwpmc(ig,lay)
 !               taucmc(ig,lay) = abscld1 * cwp
 

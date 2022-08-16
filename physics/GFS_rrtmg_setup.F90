@@ -199,7 +199,9 @@ module GFS_rrtmg_setup
       iaermdl = iaer/1000               ! control flag for aerosol scheme selection
       if ( iaermdl < 0 .or.  (iaermdl>2 .and. iaermdl/=5) ) then
          print *, ' Error -- IAER flag is incorrect, Abort'
-         stop 7777
+         errflg = 1
+         errmsg = 'ERROR(GFS_rrtmg_setup): IAER flag is incorrect'
+         return
       endif
 
 !     if ( ntcw > 0 ) then
@@ -496,7 +498,9 @@ module GFS_rrtmg_setup
         else
           print *,' - ERROR!!! ISUBCLW=',isubclw,' is not a ',          &
      &            'valid option '
-          stop
+          errflg = 1
+          errmsg = 'ERROR(GFS_rrtmg_setup): ISUBCLW flag is invalid'
+          return
         endif
 
         if ( isubcsw == 0 ) then
@@ -511,7 +515,9 @@ module GFS_rrtmg_setup
         else
           print *,' - ERROR!!! ISUBCSW=',isubcsw,' is not a ',          &
      &            'valid option '
-          stop
+          errflg = 1
+          errmsg = 'ERROR(GFS_rrtmg_setup): ISUBCSW flag is invalid'
+          return
         endif
 
         if ( isubcsw /= isubclw ) then
@@ -535,18 +541,14 @@ module GFS_rrtmg_setup
 !! call module_radsw_main::rswinit()
 !     Initialization
 
-      call sol_init ( me, isol, solar_file, con_solr_2008, con_solr_2002, con_pi )          !  --- ...  astronomy initialization routine
-
+      call sol_init ( me, isol, solar_file, con_solr_2008, con_solr_2002,&
+           con_pi )                                              ! astronomy initialization routine
       call aer_init ( NLAY, me, iaermdl, iaerflg, lalw1bd, aeros_file, con_pi, &
-           con_t0c, con_c, con_boltz, con_plnk, errflg, errmsg)    !  --- ...  aerosols initialization routine
-
-      call gas_init ( me, errflg, errmsg )          !  --- ...  co2 and other gases initialization routine
-
-      call cld_init ( si, NLAY, imp_physics, me, errflg, errmsg) !  --- ...  cloud initialization routine
-
-      call rlwinit ( me )           !  --- ...  lw radiation initialization routine
-
-      call rswinit ( me )           !  --- ...  sw radiation initialization routine
+           con_t0c, con_c, con_boltz, con_plnk, errflg, errmsg)  ! aerosols initialization routine
+      call gas_init ( me, errflg, errmsg )                       ! co2 and other gases initialization routine
+      call cld_init ( si, NLAY, imp_physics, me, errflg, errmsg) ! cloud initialization routine
+      call rlwinit ( me, errflg, errmsg )                        ! lw RRTMG initialization routine
+      call rswinit ( me, errflg, errmsg )                        ! sw RRTMG initialization routine
 !
       return
 !

@@ -901,7 +901,7 @@
                  tsfco, tisfc, hice, fice, facsf, facwf, alvsf, alvwf, alnsf, alnwf,         &
                  zorli, zorll, zorlo, weasd, slope, snoalb, canopy, vfrac, vtype,            &
                  stype, shdmin, shdmax, snowd, cv, cvb, cvt, oro, oro_uf,                    &
-                 xlat_d, xlon_d, slmsk, imap, jmap)
+                 xlat_d, xlon_d, slmsk, imap, jmap, errmsg, errflg)
            endif
          endif
 

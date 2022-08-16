@@ -17,9 +17,11 @@
 !>\ingroup lsm_ruc_group
 !! This subroutine specifies vegetation and soil parameters for a given
 !! soil and land-use classification.
-      subroutine set_soilveg_ruc(me,isot,ivet,nlunit)
+      subroutine set_soilveg_ruc(me,isot,ivet,nlunit,errmsg,errflg)
 
       integer, intent(in) :: isot,ivet,nlunit
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
       integer me
 
       integer i
@@ -34,6 +36,10 @@
      &  BB, DRYSMC, HC, MAXSMC, REFSMC, SATPSI, SATDK, SATDW,           &
      &  WLTSMC, QTZ, mosaic_soil, mosaic_lu,                            &
      &  REFSMCnoah, WLTSMCnoah, MAXSMCnoah
+
+      ! Initialize error-handling
+      errflg = 0
+      errmsg = ''
 
       if(ivet.eq.2) then
 ! Using umd veg classification
@@ -415,15 +421,21 @@
 
          IF (DEFINED_SOIL .GT. MAX_SOILTYP) THEN
             WRITE(0,*) 'Warning: DEFINED_SOIL too large in namelist'
-            STOP 222
+            errflg = 1
+            errmsg = 'ERROR(set_soilveg_ruc):  DEFINED_SOIL too large in namelist'
+            return
          ENDIF
          IF (DEFINED_VEG .GT. MAX_VEGTYP) THEN
             WRITE(0,*) 'Warning: DEFINED_VEG too large in namelist'
-            STOP 222
+            errflg = 1
+            errmsg = 'ERROR(set_soilveg_ruc):  DEFINED_VEG too large in namelist'
+            return
          ENDIF
          IF (DEFINED_SLOPE .GT. MAX_SLOPETYP) THEN
             WRITE(0,*) 'Warning: DEFINED_SLOPE too large in namelist'
-            STOP 222
+            errflg = 1
+            errmsg = 'ERROR(set_soilveg_ruc):  DEFINED_SLOPE too large in namelist'
+            return
          ENDIF
          
 !       if (me == 0) write(6,soil_veg_ruc)

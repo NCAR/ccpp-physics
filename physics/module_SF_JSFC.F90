@@ -122,7 +122,7 @@
      &               ,A1U,A1T,A1Q                                      &
      &               ,IDS,IDE,JDS,JDE,KDS,KDE                          &
      &               ,IMS,IME,JMS,JME,KMS,KME                          &
-     &               ,ITS,ITE,JTS,JTE,KTS,LM)
+     &               ,ITS,ITE,JTS,JTE,KTS,LM,errmsg,errflg)
 !
 !-----------------------------------------------------------------------
 !      SUBROUTINE JSFC(NTSD,EPSQ2,HT,DZ                                 &
@@ -182,6 +182,8 @@
       REAL(kind=kfpt),DIMENSION(IMS:IME,JMS:JME),INTENT(OUT) :: CM,CH,STRESS,FFM  &
      &                                              ,FFH,WIND,FM10,FH2 &
      &                                              ,A1U,A1T,A1Q
+      character(len=*),intent(out) :: errmsg
+      integer,         intent(out) :: errflg
 !
 !      REAL(kind=kfpt),DIMENSION(IMS:IME,JMS:JME),INTENT(OUT) :: CHS,CHS2,CQS2     &
 !     &                                              ,CPM,CT,FLHC,FLQC  &
@@ -215,6 +217,9 @@
 !
 !----------------------------------------------------------------------
 !**********************************************************************
+      ! Initialize error-handling
+      errflg = 0
+      errmsg = ''
 !----------------------------------------------------------------------
 !
 !***  MAKE PREPARATIONS
@@ -390,7 +395,8 @@
      &               ,A1U(I,J),A1T(I,J),A1Q(I,J)                       &
      &               ,IDS,IDE,JDS,JDE,KDS,KDE                          &
      &               ,IMS,IME,JMS,JME,KMS,KME                          &
-     &               ,ITS,ITE,JTS,JTE,KTS,LM,I,J,ZHK(LMH+1),RIB(I,J))   ! Added Bulk Richardson No.
+     &               ,ITS,ITE,JTS,JTE,KTS,LM,I,J,ZHK(LMH+1),RIB(I,J)   & ! Added Bulk Richardson No.
+     &               ,errmsg, errflg)
 !
 !***  REMOVE SUPERATURATION AT 2M AND 10M
 !
@@ -454,7 +460,8 @@
      &                 ,FFM,FFH,FM10,FH2,A1U,A1T,A1Q                   &
      &                 ,IDS,IDE,JDS,JDE,KDS,KDE                        &
      &                 ,IMS,IME,JMS,JME,KMS,KME                        &
-     &                 ,ITS,ITE,JTS,JTE,KTS,LM,I,J,ZSFC,RIB)            ! Added Bulk Richardson No.
+     &                 ,ITS,ITE,JTS,JTE,KTS,LM,I,J,ZSFC,RIB            & ! Added Bulk Richardson No.
+     &                 ,errmsg, errflg) 
 !     ****************************************************************
 !     *                                                              *
 !     *                       SURFACE LAYER                          *
@@ -481,6 +488,8 @@
       REAL(kind=kfpt),INTENT(OUT) :: FFM,FFH,FM10,FH2,A1U,A1T,A1Q
 !
       REAL(kind=kfpt),INTENT(INOUT) :: AKHS,AKMS,QZ0,THZ0,USTAR,UZ0,VZ0,Z0,QS
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
 !----------------------------------------------------------------------
 !***
 !***  LOCAL VARIABLES
@@ -507,6 +516,10 @@
 !----------------------------------------------------------------------
 !**********************************************************************
 !----------------------------------------------------------------------
+      ! Initialize error-handling
+      errflg = 0
+      errmsg = ''
+
       RDZ=1./ZSL
       CXCHL=EXCML*RDZ
       CXCHS=EXCMS*RDZ
@@ -701,7 +714,9 @@
               print*,'PSIH1(1,2),RDZT=',PSIH1(K+1),PSIH1(K+2),RDZT
               print*,'ZSLU,ZSLT,RLMO,ZU,ZT=',ZSLU,ZSLT,RLMO,ZU,ZT
               print*,'A,B,DTHV,DU2,RIB=',A,B,DTHV,DU2,RIB
-              stop
+              errflg = 1
+              errmsg = 'ERROR(SFCDIF): '
+              return
             end if
 
 

@@ -1397,7 +1397,7 @@
 !! @{
 !-----------------------------------
       subroutine rswinit                                                &
-     &     ( me ) !  ---  inputs:
+     &     ( me, errflg, errmsg ) !  ---  inputs:
 !  ---  outputs: (none)
 
 !  ===================  program usage description  ===================  !
@@ -1457,7 +1457,9 @@
 !  ---  inputs:
       integer, intent(in) :: me
 
-!  ---  outputs: none
+!  ---  outputs:
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
 
 !  ---  locals:
       real (kind=kind_phys), parameter :: expeps = 1.e-20
@@ -1469,10 +1471,16 @@
 !
 !===> ... begin here
 !
+      ! Initialize error-handling
+      errflg = 0
+      errmsg = ''
+
       if ( iovr<0 .or. iovr>5 ) then
         print *,'  *** Error in specification of cloud overlap flag',   &
      &          ' IOVR=',iovr,' in RSWINIT !!'
-        stop
+        errflg = 1
+        errmsg = 'ERROR(rswinit): cloud-overlap (iovr) scheme selected not valid.'
+        return
       endif
 
       if (me == 0) then
@@ -1505,7 +1513,9 @@
         else
           print *,'  *** Error in specification of sub-column cloud ',  &
      &            ' control flag isubcsw =',isubcsw,' !!'
-          stop
+          errflg = 1
+          errmsg = 'ERROR(rswinit): sub-column scheme (isubcsw) selected not valid.'
+          return
         endif
       endif
 
@@ -1515,7 +1525,10 @@
      &    (icldflg == 1 .and. iswcliq == 0)) then
         print *,'  *** Model cloud scheme inconsistent with SW',        &
      &          ' radiation cloud radiative property setup !!'
-        stop
+        errflg = 1
+        errmsg = 'ERROR(rswinit): Model cloud scheme inconsistent with SW'//&
+     &          ' radiation cloud radiative property setup'
+        return
       endif
 
       if ( isubcsw==0 .and. iovr>2 ) then

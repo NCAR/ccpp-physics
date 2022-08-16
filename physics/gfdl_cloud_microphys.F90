@@ -63,7 +63,7 @@ contains
            return
        endif
 
-       call gfdl_cloud_microphys_mod_init(me, master, nlunit, input_nml_file, logunit, fn_nml)
+       call gfdl_cloud_microphys_mod_init(me, master, nlunit, input_nml_file, logunit, fn_nml, errmsg, errflg)
 
        is_initialized = .true.
 

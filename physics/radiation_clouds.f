@@ -379,7 +379,6 @@
             errmsg = 'ERROR(cld_init): cloud mp specification is not'// &
      &       ' valid'
             return
-            stop
           endif
         endif
       endif

@@ -123,7 +123,9 @@ subroutine m_micro_init(imp_physics, imp_physics_mg, fprcp, gravit, rair, rh2o, 
                             mg_ngcons,      mg_ngnst)
     else
       write(0,*)' fprcp = ',fprcp,' is not a valid option - aborting'
-      stop
+      errflg = 1
+      errmsg = 'ERROR(m_micro_init): fprcp is not a valid option'
+      return
     endif
     call aer_cloud_init ()
 
