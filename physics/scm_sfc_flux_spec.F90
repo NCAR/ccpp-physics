@@ -10,7 +10,7 @@ module scm_sfc_flux_spec
 !----------------
 ! Public entities
 !----------------
-  public  scm_sfc_flux_spec_init, scm_sfc_flux_spec_run, scm_sfc_flux_spec_finalize
+  public  scm_sfc_flux_spec_init, scm_sfc_flux_spec_run
 
   CONTAINS
 !*******************************************************************************************
@@ -32,9 +32,6 @@ module scm_sfc_flux_spec
       return
     end if
   end subroutine scm_sfc_flux_spec_init
-
-  subroutine scm_sfc_flux_spec_finalize()
-  end subroutine scm_sfc_flux_spec_finalize
 
 !> \brief This routine calculates surface-related parameters given specified sensible and latent heat fluxes and a roughness length. Most of the calculation
 !! is "backing out" parameters that are calculated in sfc_dff.f from the known surface heat fluxes and roughness length.

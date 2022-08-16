@@ -1,17 +1,16 @@
-!> \File drag_suite.F90
+!> \file drag_suite.F90
 !! This file is the  parameterization of orographic gravity wave
 !! drag, mountain blocking, and form drag.
 
-!> This module contains the CCPP-compliant orographic gravity wave dray scheme.
       module drag_suite
 
       contains
 
-!>\brief This subroutine initializes the GFS_ogwd GFS Orographic Gravity Wave Drag scheme.
-!!
+!> \defgroup gfs_drag_suite_mod GSL drag_suite Module
+!> This module contains the CCPP-compliant GSL orographic gravity wave dray scheme.
+!> @{
 !> \section arg_table_drag_suite_init Argument Table
-!! \htmlinclude drag_suite_init.html
-!!
+!! \htmlinclude drag_suite_init.html 
       subroutine drag_suite_init(gwd_opt, errmsg, errflg)
 
       integer,          intent(in)  :: gwd_opt
@@ -32,9 +31,7 @@
       end if        
       end subroutine drag_suite_init
 
-! \defgroup GFS_ogwd GFS Orographic Gravity Wave Drag
-!> \defgroup gfs_drag_suite GFS drag_suite Main
-!! \brief This subroutine includes orographic gravity wave drag,  mountain
+!> \brief This subroutine includes orographic gravity wave drag,  mountain
 !! blocking, and form drag.
 !!
 !> The time tendencies of zonal and meridional wind are altered to
@@ -205,7 +202,6 @@
 !!  an independent process.  The next step is to test
 !!
 !> \section det_drag_suite GFS Orographic GWD Scheme Detailed Algorithm
-!> @{
    subroutine drag_suite_run(                                           &
      &           IM,KM,dvdt,dudt,dtdt,U1,V1,T1,Q1,KPBL,                 &
      &           PRSI,DEL,PRSL,PRSLK,PHII,PHIL,DELTIM,KDT,              &
@@ -1370,7 +1366,6 @@ endif
    end subroutine drag_suite_run
 !-------------------------------------------------------------------
 !
-      subroutine drag_suite_finalize()
-      end subroutine drag_suite_finalize
+!> @}
 
       end module drag_suite

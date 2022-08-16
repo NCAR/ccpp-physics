@@ -31,11 +31,10 @@
  fluxes and albedo are treated separately for the ice and the open water.
 
 \section intra_sice Intraphysics Communication
-+ GFS Sea Ice Driver (\ref arg_table_sfc_sice_run)
-+ Three-layer Thermodynamics Sea Ice Model (ice3lay()) \cite winton_2000
+- \ref arg_table_sfc_sice_run 
 
 \section gen_sice General Algorithm 
-+ \ref general_sice_run
-+ \ref gen_ice3lay
+- \ref general_sice_run
+- \ref gen_ice3lay
 
 */

@@ -1,4 +1,4 @@
-!>\file SGSCloud_RadPre.F90
+!>\file sgscloud_radpre.F90
 !!  Contains the preliminary (interstitial) work to the call to the radiation schemes:
 !!    1) Backs up the original qc & qi
 !!    2) Adds the partioning of convective condensate into liqice/ice for effective radii
@@ -6,30 +6,19 @@
 !!       scale) qc, qi and cloud fraction coming from the microphysics scheme.
 !!    4) Recompute the diagnostic high, mid, low, total and bl clouds to be consistent with radiation
 
-!> \defgroup sgsrad_group GSD sgscloud_radpre_run Module
       module sgscloud_radpre
 
       contains
 
-!> \section arg_table_sgscloud_radpre_init Argument Table
-!! \htmlinclude sgscloud_radpre_init.html
-!!
-      subroutine sgscloud_radpre_init ()
-      end subroutine sgscloud_radpre_init
-
-!> \section arg_table_sgscloud_radpre_finalize Argument Table
-!! \htmlinclude sgscloud_radpre_finalize.html
-!!
-      subroutine sgscloud_radpre_finalize ()
-      end subroutine sgscloud_radpre_finalize
-
-!> This interstitial code adds the subgrid clouds to the resolved-scale clouds
+!> \defgroup sgsradpre_group sgscloud_radpre_run Module
+!! This interstitial code adds the subgrid clouds to the resolved-scale clouds
 !! if there is no resolved-scale clouds in that particular grid box. It can also
 !! specify a cloud fraction for resolved-scale clouds as is done currently when
 !! using MYNN-EDMF. For clouds coming from the convection schemes (in this case
 !! only used by GF scheme), two cloud fraction options are available:
 !! Xu-Randall (XR1996) or Chaboureau and Bechtold (CB2005), chosen by the
 !! switch "conv_cf_opt" = 0: CB2005, 1: XR1996.
+!!
 !> \section arg_table_sgscloud_radpre_run Argument Table
 !! \htmlinclude sgscloud_radpre_run.html
 !!
@@ -44,8 +33,7 @@
 !!          clouds(:,:,8)  -  layer snow flake water path               !
 !!          clouds(:,:,9)  -  mean effective radius for snow flake
 !!
-!>\section sgscloud_radpre GSD SGS Scheme General Algorithm
-!> @{
+!>\section sgscloud_radpre_mod  SGS Cloud Scheme Pre General Algorithm
       subroutine sgscloud_radpre_run(    &
            im,dt,levs,                   &
            flag_init,flag_restart,       &
@@ -371,5 +359,4 @@
       endif ! timestep > 1
 
       end subroutine sgscloud_radpre_run
-
       end module sgscloud_radpre

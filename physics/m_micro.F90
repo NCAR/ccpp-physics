@@ -10,7 +10,7 @@ module m_micro
   use machine, only: kind_phys
 
   implicit none
-  public :: m_micro_init, m_micro_run, m_micro_finalize
+  public :: m_micro_init, m_micro_run
   private
   logical :: is_initialized = .False.
 
@@ -132,9 +132,6 @@ subroutine m_micro_init(imp_physics, imp_physics_mg, fprcp, gravit, rair, rh2o, 
     is_initialized = .true.
 
 end subroutine m_micro_init
-
-       subroutine m_micro_finalize
-       end subroutine m_micro_finalize
 
 !> \defgroup mg2mg3 Morrison-Gettelman MP Driver Module
 !! \brief This subroutine is the Morrison-Gettelman MP driver, which computes 

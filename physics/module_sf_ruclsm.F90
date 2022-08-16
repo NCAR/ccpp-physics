@@ -19,36 +19,28 @@ MODULE module_sf_ruclsm
    public :: lsmruc, ruclsminit, rslf
 
 !> CONSTANT PARAMETERS
-!! @{
       real (kind=kind_phys), parameter :: P1000mb = 100000.
       real (kind=kind_phys), parameter :: xls     = 2.85E6
       real (kind=kind_phys), parameter :: rhowater= 1000.
       real (kind=kind_phys), parameter :: piconst = 3.1415926535897931
       real (kind=kind_phys), parameter :: r_v     = 4.6150e+2
-!! @}
 
 !> VEGETATION PARAMETERS
-!! @{
         INTEGER :: LUCATS
         integer, PARAMETER :: NLUS=50
         CHARACTER*8 LUTYPE
-!! @}
 
 !> SOIL PARAMETERS
-!! @{
         INTEGER :: SLCATS
         INTEGER, PARAMETER :: NSLTYPE=30
         CHARACTER*8 SLTYPE
-!! @}
 
 !> LSM GENERAL PARAMETERS
-!! @{
         INTEGER :: SLPCATS
         INTEGER, PARAMETER :: NSLOPE=30
         REAL ::  SBETA_DATA,FXEXP_DATA,CSOIL_DATA,SALP_DATA,REFDK_DATA,    &
                  REFKDT_DATA,FRZK_DATA,ZBOT_DATA,  SMLOW_DATA,SMHIGH_DATA, &
                         CZIL_DATA
-!! @}
 
 
 CONTAINS
@@ -57,8 +49,7 @@ CONTAINS
 !>\ingroup lsm_ruc_group
 !> The RUN LSM model is described in Smirnova et al.(1997) 
 !! \cite Smirnova_1997 and Smirnova et al.(2000) \cite Smirnova_2000 
-!>\section gen_lsmruc GSD RUC LSM General Algorithm
-!! @{
+!>\section gen_lsmruc_ga RUC LSM General Algorithm
     SUBROUTINE LSMRUC(                                           &
                    DT,init,lsm_cold_start,KTAU,iter,NSL,         &
                    graupelncv,snowncv,rainncv,raincv,            &
@@ -1161,7 +1152,6 @@ endif
 
 !-----------------------------------------------------------------
    END SUBROUTINE LSMRUC
-!! @}
 !-----------------------------------------------------------------
 
 !>\ingroup lsm_ruc_group

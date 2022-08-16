@@ -8,7 +8,7 @@
 
       implicit none
 
-      public :: gfdl_sfc_layer_init, gfdl_sfc_layer_run, gfdl_sfc_layer_finalize
+      public :: gfdl_sfc_layer_init, gfdl_sfc_layer_run
 
       private
 
@@ -92,9 +92,6 @@
         !also initialize surface roughness length
 
       end subroutine gfdl_sfc_layer_init
-
-      subroutine gfdl_sfc_layer_finalize ()
-      end subroutine gfdl_sfc_layer_finalize
 
 !> \section arg_table_gfdl_sfc_layer_run Argument Table
 !! \htmlinclude gfdl_sfc_layer_run.html

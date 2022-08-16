@@ -61,7 +61,7 @@
       module module_radlw_parameters     !
 !........................................!
 
-!! \section arg_table_module_radlw_parameters
+!> \section arg_table_module_radlw_parameters Argument table
 !! \htmlinclude module_radlw_parameters.html
 !!
 
@@ -72,7 +72,7 @@
       public
 !
 !> derived type for LW fluxes at top of atmosphere
-!! \section arg_table_topflw_type
+!! \section arg_table_topflw_type Argument Table
 !! \htmlinclude topflw_type.html
 !!
       type topflw_type                      !< define type construct for radiation fluxes at toa
@@ -81,7 +81,7 @@
       end type topflw_type
 !
 !> derived type for LW fluxes at surface
-!! \section arg_table_sfcflw_type
+!! \section arg_table_sfcflw_type Argument Table
 !! \htmlinclude sfcflw_type.html
 !!
       type sfcflw_type                      !< define type construct for radiation fluxes at surface

@@ -231,7 +231,7 @@ module lsm_ruc
 
       end subroutine lsm_ruc_init
 
-!! \section arg_table_lsm_ruc_finalize Argument Table
+!> \section arg_table_lsm_ruc_finalize Argument Table
 !! \htmlinclude lsm_ruc_finalize.html
 !!
       subroutine lsm_ruc_finalize (errmsg, errflg)
@@ -313,13 +313,13 @@ module lsm_ruc
 !                                                                       !
 !  ====================    end of description    =====================  !
 
-!> \defgroup lsm_ruc_group GSD RUC LSM Model
-!! This module contains the RUC Land Surface Model developed by NOAA/GSD
+!> \defgroup lsm_ruc_group RUC LSM Model
+!! This module contains the RUC Land Surface Model developed by NOAA/GSL
 !! (Smirnova et al. 2016 \cite Smirnova_2016).
 !> \section arg_table_lsm_ruc_run Argument Table
 !! \htmlinclude lsm_ruc_run.html
 !!
-!>\section gen_lsmruc GSD RUC LSM General Algorithm
+!>\section gen_lsmruc RUC LSM General Algorithm
       subroutine lsm_ruc_run                                            & ! inputs
      &     ( iter, me, master, delt, kdt, im, nlev, lsm_ruc, lsm,       &
      &       imp_physics, imp_physics_gfdl, imp_physics_thompson,       &

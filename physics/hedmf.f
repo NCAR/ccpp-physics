@@ -41,10 +41,6 @@
          end if
       end subroutine hedmf_init
 
-      subroutine hedmf_finalize ()
-      end subroutine hedmf_finalize
-
-
 !> \defgroup HEDMF GFS Hybrid Eddy-Diffusivity Mass-Flux (HEDMF) Scheme Module
 !! @{
 !!  \brief  This subroutine contains all of logic for the

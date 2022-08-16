@@ -11,13 +11,6 @@
 
       contains
 
-      subroutine sfc_cice_init
-      end subroutine sfc_cice_init
-!
-      subroutine sfc_cice_finalize
-      end subroutine sfc_cice_finalize
-
-
 !> \defgroup sfc_sice for coupling to CICE
 !! @{
 !!  \section diagram Calling Hierarchy Diagram

@@ -1,10 +1,12 @@
-!===============================
-! cu-cires ugwp-scheme
+!>\file cires_ugwp_initialize.F90
+!! This file contains cu-cires ugwp initialization scheme.
 !  initialization of ugwp_common_v0
 !  init gw-solvers (1,2) .. no UFS-funds for (3,4) tests
 !  init gw-source specifications
 !  init gw-background dissipation
 !===============================    
+
+!> Define constants
     module ugwp_common_v0
 !
      use machine,  only: kind_phys
@@ -31,6 +33,7 @@
 !Part-1 init =>   wave dissipation + RFriction
 !
 !===================================================
+!> Initialization of wave dissipation and RFriction
      subroutine init_global_gwdis_v0(levs, zkm, pmb, kvg, ktg, krad, kion)
      implicit none
 

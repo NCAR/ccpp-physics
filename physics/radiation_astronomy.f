@@ -70,8 +70,8 @@
 
 
 
-! \ingroup RRTMG
-!> \defgroup module_radiation_astronomy RRTMG Astronomy Module
+!> \defgroup module_radiation_astronomy Radiation Astronomy Module
+!> @{
 !> \brief This module sets up astronomical quantities for solar radiation
 !!  calculations.
 !!
@@ -140,12 +140,10 @@
       contains
 ! =================
 
-!>\ingroup module_radiation_astronomy 
 !> This subroutine initializes astronomy process, and set up module
 !! constants.
 !!\param me         print message control flag
 !>\section sol_init_gen sol_init General Algorithm
-!! @{
       subroutine sol_init                                               &
      &     ( me, isolar, solar_file, con_solr, con_solr_old, con_pi ) !  ---  inputs
 !  ---  outputs: ( none )
@@ -309,10 +307,8 @@
       return
 !...................................
       end subroutine sol_init
-!! @}
 !-----------------------------------
 
-!>\ingroup module_radiation_astronomy
 !> This subroutine computes solar parameters at forecast time.
 !!\param jdate     ncep absolute date and time at fcst time
 !!                 (yr, mon, day, t-zone, hr, min, sec, mil-sec)
@@ -328,7 +324,6 @@
 !!\param solcon             sun-earth distance adjusted solar constant
 !!                           \f$(w/m^2)\f$
 !>\section gen_sol_update sol_update General Algorithm
-!! @{
 !-----------------------------------
       subroutine sol_update                                             &
      &     ( jdate,kyear,deltsw,deltim,lsol_chg, me,                    &     !  ---  inputs
@@ -650,9 +645,7 @@
 !...................................
       end subroutine sol_update
 !-----------------------------------
-!! @}
 
-!>\ingroup module_radiation_astronomy
 !> This subroutine computes radius vector, declination and right
 !! ascension of sun, and equation of time.
 !!\param[in] jd   julian day
@@ -661,7 +654,6 @@
 !!\param[out] dlt declination of sun in radians
 !!\param[out] alp right ascension of sun in radians
 !>\section solar_gen solar General Algorithm
-!! @{
 !-----------------------------------
       subroutine solar                                                  &
      &     ( jd, fjd, con_pi,                                           &       !  ---  inputs
@@ -816,10 +808,8 @@
       return
 !...................................
       end subroutine solar
-!! @}
 !-----------------------------------
 
-!>\ingroup module_radiation_astronomy
 !> This subroutine computes mean cos solar zenith angle over SW calling
 !! interval.
 !!\param xlon       grids' longitudes in radians, work both on
@@ -833,7 +823,6 @@
 !!                  interval
 !!\param coszdg     average of cosz over entire sw call interval
 !>\section coszmn_gen coszmn General Algorithm
-!! @{
 !-----------------------------------
       subroutine coszmn                                                 &
      &     ( xlon,sinlat,coslat,solhr, IM, me,                          &     !  ---  inputs
@@ -916,10 +905,8 @@
       return
 !...................................
       end subroutine coszmn
-!! @}
 !-----------------------------------
 
-!>\ingroup module_radiation_astronomy
 !> This subroutine prints out forecast date, time, and astronomy
 !! quantities.
 !!\param[in] jd    forecast julian day
@@ -929,7 +916,6 @@
 !!\param[in] r1    earth-sun radius vector in meter
 !!\param[in] solc  solar constant in \f$w/m^2\f$
 !>\section prtime_gen prtime General Algorithm
-!! @{
 !-----------------------------------
       subroutine prtime                                                 &
      &     ( jd, fjd, dlt, alp, r1, solc                                &    !  ---  inputs
@@ -1045,10 +1031,10 @@
       return
 !...................................
       end subroutine prtime
-!! @}
 !-----------------------------------
 
 !
 !...........................................!
       end module module_radiation_astronomy !
+!> @}
 !===========================================!

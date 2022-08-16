@@ -9,20 +9,22 @@
       use mfscuq_mod
       contains
 
-!> \defgroup satmedmfvdifq GFS Scale-aware TKE-based Moist Eddy-Diffusivity Mass-flux (TKE-EDMF, updated version) Scheme Module
-!! @{
+!> \defgroup module_satmedmfvdifq GFS TKE-EDMF PBL Module
+!! This file contains the CCPP-compliant SATMEDMF scheme (updated version) which
+!! computes subgrid vertical turbulence mixing using scale-aware TKE-based moist
+!! eddy-diffusion mass-flux (TKE-EDMF) parameterization (by Jongil Han).
+!> @{
 !! \brief This subroutine contains all of the logic for the
 !! scale-aware TKE-based moist eddy-diffusion mass-flux (TKE-EDMF, updated version) scheme.
 !! For local turbulence mixing, a TKE closure model is used.
 !! Updated version of satmedmfvdif.f (May 2019) to have better low level
 !! inversion, to reduce the cold bias in lower troposphere,
 !! and to reduce the negative wind speed bias in upper troposphere
-
 !> \section arg_table_satmedmfvdifq_init Argument Table
 !! \htmlinclude satmedmfvdifq_init.html
 !!
-      subroutine satmedmfvdifq_init (satmedmf,
-     &                               isatmedmf,isatmedmf_vdifq,
+      subroutine satmedmfvdifq_init (satmedmf,                          &
+     &                               isatmedmf,isatmedmf_vdifq,         &
      &                               errmsg,errflg)
 
       logical, intent(in   ) :: satmedmf
@@ -51,9 +53,6 @@
 
       end subroutine satmedmfvdifq_init
 
-      subroutine satmedmfvdifq_finalize ()
-      end subroutine satmedmfvdifq_finalize
-
 !> \section arg_table_satmedmfvdifq_run Argument Table
 !! \htmlinclude satmedmfvdifq_run.html
 !!
@@ -68,7 +67,6 @@
 !! -# A mass-flux approach is also used to represent the stratocumulus-top-induced turbulence
 !! (mfscuq.f).
 !! \section detail_satmedmfvidfq GFS satmedmfvdifq Detailed Algorithm 
-!! @{
       subroutine satmedmfvdifq_run(im,km,progsigma,ntrac,ntcw,ntrw,     &
      &     ntiw,ntke,grav,rd,cp,rv,hvap,hfus,fv,eps,epsm1,              &
      &     dv,du,tdt,rtg,tmf,u1,v1,t1,q1,swh,hlw,xmu,garea,zvfun,       &
@@ -2330,5 +2328,4 @@ c
       return
       end subroutine satmedmfvdifq_run
 !> @}
-!! @}
       end module satmedmfvdifq

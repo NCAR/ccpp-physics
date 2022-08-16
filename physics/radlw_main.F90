@@ -1,4 +1,4 @@
-!>  \file radlw_main.f
+!>  \file radlw_main.F90
 !!  This file contains NCEP's modifications of the rrtmg-lw radiation
 !!  code from AER.
 
@@ -384,20 +384,18 @@
 
 !  ---  public accessable subprograms
 
-      public rrtmg_lw_init, rrtmg_lw_run, rrtmg_lw_finalize, rlwinit
+      public rrtmg_lw_run, rlwinit
 
 
 ! ================
       contains
 ! ================
 
-         subroutine rrtmg_lw_init ()
-         end subroutine rrtmg_lw_init
 
-!> \defgroup module_radlw_main GFS RRTMG Longwave Module 
-!! \brief This module includes NCEP's modifications of the RRTMG-LW radiation
+!> \defgroup module_radlw_main GFS RRTMG-LW Main Module
+!>  This module includes NCEP's modifications of the RRTMG-LW radiation
 !! code from AER.
-!!
+!> @{
 !! The RRTMG-LW package includes three files:
 !! - radlw_param.f, which contains:
 !!  - module_radlw_parameters: band parameters set up
@@ -421,7 +419,6 @@
 !! \htmlinclude rrtmg_lw_run.html
 !!
 !> \section gen_lwrad RRTMG Longwave Radiation Scheme General Algorithm
-!> @{
       subroutine rrtmg_lw_run                                           &
      &     ( plyr,plvl,tlyr,tlvl,qlyr,olyr,gasvmr_co2, gasvmr_n2o,      &   !  ---  inputs
      &       gasvmr_ch4, gasvmr_o2, gasvmr_co, gasvmr_cfc11,            &
@@ -1307,11 +1304,6 @@
 !...................................
       end subroutine rrtmg_lw_run
 !-----------------------------------
-!> @}
-      subroutine rrtmg_lw_finalize ()
-      end subroutine rrtmg_lw_finalize 
-
-
 
 !> \ingroup module_radlw_main
 !> \brief This subroutine performs calculations necessary for the initialization
@@ -1323,7 +1315,6 @@
 !! spectral band are reduced from 256 g-point intervals to 140.
 !!\param me        print control for parallel process
 !!\section rlwinit_gen rlwinit General Algorithm
-!! @{
       subroutine rlwinit                                                &
      &     ( me, errflg, errmsg )
 
@@ -1532,7 +1523,6 @@
 
 !...................................
       end subroutine rlwinit
-!! @}
 !-----------------------------------
 
 
@@ -1567,7 +1557,6 @@
 !!\param cldfmc          cloud fraction for each sub-column
 !!\param taucld          cloud optical depth for bands (non-mcica)
 !!\section gen_cldprop cldprop General Algorithm
-!> @{
       subroutine cldprop                                                &
      &     ( cfrac,cliqp,reliq,cicep,reice,cdat1,cdat2,cdat3,cdat4,     & !  ---  inputs
      &       nlay, nlp1, ipseed, dz, de_lgth, iovr, alpha,              &
@@ -1873,7 +1862,6 @@
 ! ..................................
       end subroutine cldprop
 ! ----------------------------------
-!> @}
 
 !>\ingroup module_radlw_main
 !>\brief This suroutine computes sub-colum cloud profile flag array.
@@ -1885,7 +1873,6 @@
 !!\param alpha       EXP/ER cloud overlap decorrelation parameter
 !!\param lcloudy     sub-colum cloud profile flag array
 !!\section mcica_subcol_gen mcica_subcol General Algorithm
-!! @{
       subroutine mcica_subcol                                           &
      &    ( cldf, nlay, ipseed, dz, de_lgth, alpha,                     & !  ---  inputs
      &      lcloudy                                                     & !  ---  outputs
@@ -2149,7 +2136,6 @@
       return
 ! ..................................
       end subroutine mcica_subcol
-!! @}
 ! ----------------------------------
 
 !>\ingroup module_radlw_main
@@ -2193,7 +2179,6 @@
 !!\param scaleminor,scaleminorn2         scale factors for minor gases
 !!\param indminor        index of lower ref temp for minor gases
 !>\section setcoef_gen setcoef General Algorithm
-!> @{
       subroutine setcoef                                                &
      &     ( pavel,tavel,tz,stemp,h2ovmr,colamt,coldry,colbrd,          & !  ---  inputs:
      &       nlay, nlp1,                                                &
@@ -2450,7 +2435,6 @@
       return
 ! ..................................
       end subroutine setcoef
-!> @}
 ! ----------------------------------
 
 !>\ingroup module_radlw_main
@@ -2488,7 +2472,6 @@
 !!\param htrcl       clear sky heating rate (k/sec or k/day)
 !!\param htrb        spectral band lw heating rate (k/day)
 !>\section gen_rtrn rtrn General Algorithm
-!! @{
 ! ----------------------------------
       subroutine rtrn                                                   &
      &     ( semiss,delp,cldfrc,taucld,tautot,pklay,pklev,              & !  ---  inputs
@@ -2846,7 +2829,6 @@
 
 ! ..................................
       end subroutine rtrn
-!! @}
 ! ----------------------------------
 
 
@@ -2873,7 +2855,6 @@
 !!\param htrcl         clear sky heating rate (k/sec or k/day)
 !!\param htrb          spectral band lw heating rate (k/day)
 !!\section gen_rtrnmr rtrnmr General Algorithm
-!> @{
 ! ----------------------------------
       subroutine rtrnmr                                                 &
      &     ( semiss,delp,cldfrc,taucld,tautot,pklay,pklev,              &!  ---  inputs
@@ -3441,7 +3422,6 @@
 ! .................................
       end subroutine rtrnmr
 ! ---------------------------------
-!> @}
 
 !>\ingroup module_radlw_main
 !> \brief This subroutine computes the upward/downward radiative fluxes, and
@@ -3467,7 +3447,6 @@
 !!\param htrcl        clear sky heating rate (k/sec or k/day)
 !!\param htrb         spectral band lw heating rate (k/day)
 !!\section gen_rtrnmc rtrnmc General Algorithm
-!> @{
 ! ---------------------------------
       subroutine rtrnmc                                                 &
      &     ( semiss,delp,cldfmc,taucld,tautot,pklay,pklev,              & !  ---  inputs:
@@ -3836,7 +3815,6 @@
 ! ..................................
       end subroutine rtrnmc
 ! ----------------------------------
-!> @}
 
 !>\ingroup module_radlw_main
 !>\brief This subroutine contains optical depths developed for the rapid
@@ -3885,7 +3863,6 @@
 !!\param fracs            planck fractions
 !!\param tautot           total optical depth (gas+aerosols)
 !>\section taumol_gen taumol General Algorithm
-!! @{
 !! subprograms called:  taugb## (## = 01 -16) 
       subroutine taumol                                                 &
      &     ( laytrop,pavel,coldry,colamt,colbrd,wx,tauaer,              & !  ---  inputs
@@ -6896,7 +6873,6 @@
 
 ! ..................................
       end subroutine taumol
-!! @}
 
 ! ------------------------------------------------------------------------------
       subroutine cldprmc(nlayers, inflag, iceflag, liqflag, cldfmc,     &
@@ -7807,7 +7783,7 @@
                                                                                                  
       end subroutine cldprmc                                                                     
                                                                     
-
+!> @}
 !........................................!$
       end module rrtmg_lw                !$
 !========================================!$
