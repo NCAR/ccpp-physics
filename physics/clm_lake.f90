@@ -31,22 +31,18 @@ MODULE clm_lake
 
     implicit none 
 
-    logical, parameter :: LAKEDEBUG = .true. ! Enable lots of checks and debug prints
+    logical, parameter :: LAKEDEBUG = .true. ! Enable lots of checks and debug prints and errors
 
-    real(kind_phys), parameter :: zero_h2o = 1e-12
-
-    ! FIXME: REMOVE OR DOCUMENT PERGRO
     logical, parameter :: PERGRO = .false.
 
-    ! FIXME: REMOVE OR DOCUMENT ETALAKE
     logical, parameter :: USE_ETALAKE = .false.
     real, parameter :: ETALAKE = 1.1925*50**(-0.424) ! Set this to your desired value if USE_ETALAKE=.true.
 
-    real(kind_phys), parameter :: snow_bd = 250._kind_phys  !constant snow bulk density (only used in special case here) [kg/m^3]
-
+    ! Level counts must be consistent with model (GFS_Typedefs.F90)
     integer, parameter :: nlevsoil     =  10   ! number of soil layers
     integer, parameter :: nlevlake     =  10   ! number of lake layers
     integer, parameter :: nlevsnow     =   5   ! maximum number of snow layers
+    real(kind_phys), parameter :: scalez  = 0.025_kind_phys   ! Soil layer thickness discretization (m)
 
     integer,parameter  ::     lbp = 1                        ! pft-index bounds
     integer,parameter  ::     ubp = 1
@@ -73,70 +69,56 @@ MODULE clm_lake
     integer,parameter  ::     column    =1
     logical,parameter  ::     lakpoi(1) = .true.
    
-
-
-
-    !Initialize physical constants:
-    ! FIXME: GET THESE FROM THE MODEL
-    real(kind_phys), parameter :: vkc    = 0.4_kind_phys       !von Karman constant [-]
-    real(kind_phys), parameter :: pi     = 3.141592653589793_kind_phys ! pi
-    real(kind_phys), parameter :: grav   = 9.80616_kind_phys   !gravity constant [m/s2]
-    real(kind_phys), parameter :: sb     = 5.67e-8_kind_phys   !stefan-boltzmann constant  [W/m2/K4]
-    real(kind_phys), parameter :: tfrz   = 273.16_kind_phys    !freezing temperature [K]
-    real(kind_phys), parameter :: denh2o = 1.000e3_kind_phys   !density of liquid water [kg/m3]
-    real(kind_phys), parameter :: denice = 0.917e3_kind_phys   !density of ice [kg/m3]
-    real(kind_phys), parameter :: cpice  = 2.11727e3_kind_phys !Specific heat of ice [J/kg-K]
-    real(kind_phys), parameter :: cpliq  = 4.188e3_kind_phys   !Specific heat of water [J/kg-K]
-    real(kind_phys), parameter :: hfus   = 3.337e5_kind_phys   !Latent heat of fusion for ice [J/kg]
-    real(kind_phys), parameter :: hvap   = 2.501e6_kind_phys   !Latent heat of evap for water [J/kg]
-    real(kind_phys), parameter :: hsub   = 2.501e6_kind_phys+3.337e5_kind_phys !Latent heat of sublimation    [J/kg]
-    real(kind_phys), parameter :: rair   = 287.0423_kind_phys  !gas constant for dry air [J/kg/K]
-    real(kind_phys), parameter :: cpair  = 1.00464e3_kind_phys !specific heat of dry air [J/kg/K]
+    !Initialize physical constants not available from model:
     real(kind_phys), parameter :: tcrit  = 2.5          !critical temperature to determine rain or snow
     real(kind_phys), parameter :: tkwat  = 0.6          !thermal conductivity of water [W/m/k]
     real(kind_phys), parameter :: tkice  = 2.290        !thermal conductivity of ice   [W/m/k]
     real(kind_phys), parameter :: tkairc = 0.023        !thermal conductivity of air   [W/m/k]
-    real(kind_phys), parameter :: bdsno = 250.            !bulk density snow (kg/m**3)
+    real(kind_phys), parameter :: snow_bd = 250         !constant snow bulk density (only used in special case here) [kg/m^3]
+  
+    ! Constants that are copied from model values by clm_lake_init:
+    real(kind_phys) :: pi                   !ratio of the circumference of a circle to its diameter
+    real(kind_phys) :: vkc                  !von Karman constant [-]
+    real(kind_phys) :: grav                 !gravity constant [m/s2]
+    real(kind_phys) :: sb                   !stefan-boltzmann constant  [W/m2/K4]
+    real(kind_phys) :: tfrz                 !freezing temperature [K]
+    real(kind_phys) :: denh2o               !density of liquid water [kg/m3]
+    real(kind_phys) :: denice               !density of ice [kg/m3]
+    real(kind_phys) :: cpice                !Specific heat of ice [J/kg-K]
+    real(kind_phys) :: cpliq                !Specific heat of water [J/kg-K]
+    real(kind_phys) :: hfus                 !Latent heat of fusion for ice [J/kg]
+    real(kind_phys) :: hvap                 !Latent heat of evap for water [J/kg]
+    real(kind_phys) :: hsub                 !Latent heat of sublimation    [J/kg]
+    real(kind_phys) :: rair                 !gas constant for dry air [J/kg/K]
+    real(kind_phys) :: cpair                !specific heat of dry air [J/kg/K]
     
-    real(kind_phys), public, parameter :: spval = 1.e36  !special value for missing data (ocean)
-
-    real(kind_phys), parameter  ::     depth_c = 50.          ! below the level t_lake3d will be 277.0  !mchen
-
+    real(kind_phys), public, parameter :: spval = 1.e36 !special value for missing data (ocean)
+    real(kind_phys), parameter  ::     depth_c = 50.    !below the level t_lake3d will be 277.0  !mchen
+    real(kind_phys), parameter :: zero_h2o = 1e-12      !lower mixing ratio is is treated as zero
     
    ! These are tunable constants
     real(kind_phys), parameter :: wimp   = 0.05    !Water impermeable if porosity less than wimp
     real(kind_phys), parameter :: ssi    = 0.033   !Irreducible water saturation of snow
     real(kind_phys), parameter :: cnfac  = 0.5     !Crank Nicholson factor between 0 and 1
 
-
    ! Initialize water type constants
     integer,parameter :: istsoil = 1  !soil         "water" type
-    integer, private  :: i  ! loop index 
-    real(kind_phys) :: dtime                                    ! land model time step (sec)
 
+    ! percent sand
+    real(kind_phys), parameter :: sand(19) = &
+         (/92.,80.,66.,20.,5.,43.,60.,10.,32.,51., 6.,22.,39.7,0.,100.,54.,17.,100.,92./)
+
+    ! percent clay
+    real(kind_phys), parameter :: clay(19) = &
+         (/ 3., 5.,10.,15.,5.,18.,27.,33.,33.,41.,47.,58.,14.7,0., 0., 8.5,54.,  0., 3./)
+
+    ! These are initialized in clm_lake_init and are not modified elsewhere
     real(kind_phys) :: zlak(1:nlevlake)     !lake z  (layers)
     real(kind_phys) :: dzlak(1:nlevlake)    !lake dz (thickness)
     real(kind_phys) :: zsoi(1:nlevsoil)     !soil z  (layers)
     real(kind_phys) :: dzsoi(1:nlevsoil)    !soil dz (thickness)
     real(kind_phys) :: zisoi(0:nlevsoil)    !soil zi (interfaces)  
 
-
-    real(kind_phys) :: sand(19)                           ! percent sand
-    real(kind_phys) :: clay(19)                           ! percent clay
-
-    data(sand(i), i=1,19)/92.,80.,66.,20.,5.,43.,60.,&
-      10.,32.,51., 6.,22.,39.7,0.,100.,54.,17.,100.,92./
-
-    data(clay(i), i=1,19)/ 3., 5.,10.,15.,5.,18.,27.,&
-      33.,33.,41.,47.,58.,14.7,0., 0., 8.5,54.,  0., 3./
-
-
-  !  real(kind_phys) :: dtime                  ! land model time step (sec)
-    real(kind_phys) :: watsat(1,nlevsoil)      ! volumetric soil water at saturation (porosity)
-    real(kind_phys) :: tksatu(1,nlevsoil)      ! thermal conductivity, saturated soil [W/m-K]
-    real(kind_phys) :: tkmg(1,nlevsoil)        ! thermal conductivity, soil minerals  [W/m-K]
-    real(kind_phys) :: tkdry(1,nlevsoil)       ! thermal conductivity, dry soil (W/m/Kelvin)
-    real(kind_phys) :: csol(1,nlevsoil)        ! heat capacity, soil solids (J/m**3/Kelvin)
     CONTAINS
  
     !> \section arg_table_clm_lake_run Argument Table
@@ -155,7 +137,7 @@ MODULE clm_lake
                      h2osoi_ice3d ,t_grnd2d       ,t_soisno3d   ,t_lake3d        ,&
                      savedtke12d  ,lake_icefrac3d               ,use_lake_model  ,& 
                      iopt_lake    ,iopt_lake_clm                                 ,&
-                     con_cp                                                      ,&
+                     con_cp       ,icy                                           ,&
                      hflx         ,evap           ,grdflx       ,tsfc            ,&  !o
                      lake_t2m     ,lake_q2m       ,clm_lake_initialized          ,&
                                    isltyp         ,snow         ,use_lakedepth   ,&
@@ -165,7 +147,7 @@ MODULE clm_lake
                      weasd        ,snwdph         ,hice         ,tsurf           ,&
                      t_sfc        ,lflx           ,ustar        ,qsfc            ,&
                      ch           ,cm             ,chh          ,cmm             ,&
-                     T_snow       ,T_ice          ,tsurf_ice    ,wind            ,&
+                     lake_t_snow  ,tisfc          ,tsurf_ice    ,wind            ,&
 !
                      xlon_d       ,kdt            ,tg3                          ,&
                      me           ,master         ,errmsg       ,errflg )
@@ -185,8 +167,9 @@ MODULE clm_lake
     CHARACTER(*), INTENT(OUT) :: errmsg
     INTEGER , INTENT (IN) :: im,km,me,master
     LOGICAL, INTENT(IN) :: restart,use_lakedepth,first_time_step
-    INTEGER, INTENT(INOUT) :: clm_lake_initialized(:)
+    REAL(KIND_PHYS), INTENT(INOUT) :: clm_lake_initialized(:)
     REAL(KIND_PHYS),     INTENT(IN)  :: xice_threshold, con_rd,con_g,con_cp,lakedepth_default
+    logical, intent(inout) :: icy(:)
     REAL(KIND_PHYS), DIMENSION( : ), INTENT(INOUT)::   XICE
     REAL(KIND_PHYS), DIMENSION( : ), INTENT(IN):: tg3
     REAL(KIND_PHYS),    DIMENSION( : ), INTENT(IN)    :: SNOW, ZLVL
@@ -197,7 +180,7 @@ MODULE clm_lake
     REAL(KIND_PHYS),           DIMENSION( : ), INTENT(INOUT) :: &
                      weasd        ,snwdph         ,hice         ,tsurf           ,&
                      t_sfc        ,lflx           ,ustar        ,qsfc            ,&
-                     chh          ,cmm            ,T_snow       ,T_ice           ,&
+                     chh          ,cmm            ,lake_t_snow  ,tisfc           ,&
                      tsurf_ice    ,wind
     LOGICAL,                   DIMENSION(:),     INTENT(IN)  :: flag_iter
     REAL(KIND_PHYS),           DIMENSION( :, : ),INTENT(IN)  :: gt0
@@ -254,7 +237,7 @@ MODULE clm_lake
 
     !local variable:
 
-    REAL(kind_phys)     :: SFCTMP,PBOT,PSFC,Q2K,LWDN,PRCP,SOLDN,SOLNET
+    REAL(kind_phys)     :: SFCTMP,PBOT,PSFC,Q2K,LWDN,PRCP,SOLDN,SOLNET,dtime
     INTEGER  :: C,i,j,k
 
 
@@ -315,24 +298,49 @@ MODULE clm_lake
 
       real(kind_phys) :: discard1, discard2, discard3 ! for unused temporary data
 
+      real(kind_phys) :: watsat(1,nlevsoil)      ! volumetric soil water at saturation (porosity)
+      real(kind_phys) :: tksatu(1,nlevsoil)      ! thermal conductivity, saturated soil [W/m-K]
+      real(kind_phys) :: tkmg(1,nlevsoil)        ! thermal conductivity, soil minerals  [W/m-K]
+      real(kind_phys) :: tkdry(1,nlevsoil)       ! thermal conductivity, dry soil (W/m/Kelvin)
+      real(kind_phys) :: csol(1,nlevsoil)        ! heat capacity, soil solids (J/m**3/Kelvin)
+
       integer :: lake_points
       character*255 :: message
       logical, parameter :: feedback_to_atmosphere = .true. ! FIXME: REMOVE
+
+      ! Functionality to print extra values at problematic points specified by user
       logical :: was_unhappy,is_unhappy
 
+      ! Points come from this file
+      character(*), parameter :: unhappy_txt = "unhappy.txt"
+
+      ! Special values of the unhappy_count to indicate data is unavailable
       integer, parameter :: HAVE_NOT_READ_UNHAPPY_POINTS_YET = -1
       integer, parameter :: FAILED_TO_READ_UNHAPPY_POINTS = -2
 
+      ! These "save" variables are protected by an OMP CRITICAL to
+      ! ensure they're only initialized once.
+
+      ! Number of unhappy points
       integer, save :: unhappy_count = HAVE_NOT_READ_UNHAPPY_POINTS_YET
+
+      ! The latitude and longitude of unhappy points.
       real(kind_phys), allocatable, save :: unhappy_lat(:),unhappy_lon(:)
-      character(*), parameter :: unhappy_txt = "unhappy.txt"
 
       errmsg = ' '
       errflg = 0
 
+      dtime=dtp
+
       if(LAKEDEBUG) then
+        ! Have we read the unhappy points?
+        ! The first "if" ensures we don't initiate an OMP CRITICAL unless we have to.
          if(unhappy_count==HAVE_NOT_READ_UNHAPPY_POINTS_YET) then
             !$OMP CRITICAL
+
+            ! Check unhappy_count again since it probably changed
+            ! during the setup of the omp critical, when another
+            ! thread read in the unhappy points.
             if(unhappy_count==HAVE_NOT_READ_UNHAPPY_POINTS_YET) then
                call read_unhappy_points
                if(unhappy_count>0) then
@@ -346,16 +354,14 @@ MODULE clm_lake
             endif
             !$OMP END CRITICAL
          endif
-         if(unhappy_count==FAILED_TO_READ_UNHAPPY_POINTS) then
-            write(message,'(A)') "ERROR: Could not read unhappy points"
-            errmsg=message
-            errflg=1
-            return
+         ! At this point, at least one thread should have read in the unhappy points.
+         if(unhappy_count==FAILED_TO_READ_UNHAPPY_POINTS .and. kdt<2) then
+            write(0,'(A)') "ERROR: Could not read unhappy points"
          endif
       endif
 
         ! Still have some points to initialize
-        call lakeini(                ISLTYP,          gt0,             SNOW,           & !i
+        call lakeini(kdt,            ISLTYP,          gt0,             SNOW,           & !i
                                      restart,         lakedepth_default,               &
                      lakedepth2d,    savedtke12d,     snowdp2d,        h2osno2d,       & !o
                      snl2d,          t_grnd2d,        t_lake3d,        lake_icefrac3d, &
@@ -386,8 +392,6 @@ MODULE clm_lake
 
       lake_points=0
 
-      dtime = dtp
-
         lake_top_loop: DO I = 1,im
 
         if_lake_is_here: if (flag_iter(i) .and. use_lake_model(i)/=0) THEN
@@ -397,7 +401,7 @@ MODULE clm_lake
            PSFC    = prsi(i,1) 
            Q2K     = qvcurr(i)
            LWDN    = DLWSFCI(I)*EMISS(I)
-           PRCP    = RAIN(i)*1000.0_kind_phys/dtp      ! use physics timestep since PRCP comes from non-surface schemes
+           PRCP    = RAIN(i)*1000.0_kind_phys/dtime    ! use physics timestep since PRCP comes from non-surface schemes
            SOLDN   = DSWSFCI(I)                        ! SOLDN is total incoming solar
            SOLNET  = SOLDN*(1.-ALBEDO(I))              ! use mid-day albedo to determine net downward solar
                                                        ! (no solar zenith angle correction) 
@@ -472,7 +476,8 @@ MODULE clm_lake
                           savedtke1,lake_icefrac,                       &
                           eflx_lwrad_net,eflx_gnet,                     & !O 
                           eflx_sh_tot,eflx_lh_tot,                      &
-                          t_ref2m,q_ref2m,                              &
+                          t_ref2m,q_ref2m, dtime,                       &
+                          watsat, tksatu, tkmg, tkdry, csol,            &
                           taux,tauy,ram1,z0mg,ustar_out,errmsg,errflg,  &
                           xlat_d(i),xlon_d(i),is_unhappy)
             if(LAKEDEBUG) then
@@ -540,11 +545,12 @@ MODULE clm_lake
                 albedo(i)       = ( 0.6 * lake_icefrac3d(i,1) ) + ( (1.0-lake_icefrac3d(i,1)) * 0.08)  
                 xice(i)         = lake_icefrac3d(i,1)
 
-                if(xice(i)>0) then
+                if(xice(i)>xice_threshold) then
                   weasd(i)      = h2osno(c) ! water_equivalent_accumulated_snow_depth_over_ice
                   snwdph(i)     = h2osno(c)/snow_bd*1000 ! surface_snow_thickness_water_equivalent_over_ice
-                  T_ice(i)      = t_grnd(c) ! surface_skin_temperature_over_ice
+                  tisfc(i)      = t_grnd(c) ! surface_skin_temperature_over_ice
                   tsurf_ice(i)  = t_grnd(c) ! surface_skin_temperature_after_iteration_over_ice
+                  icy(i)=.true.
 
                   ! Assume that, if a layer has ice, the entire layer thickness is ice.
                   hice(I) = 0
@@ -556,13 +562,14 @@ MODULE clm_lake
                 else
                   weasd(i) = 0
                   snwdph(i) = 0
-                  T_ice(i) = tsurf(i)
-                  tsurf_ice(i) = T_ice(i)
+                  tisfc(i) = tsurf(i)
+                  tsurf_ice(i) = tisfc(i)
                   hice(i) = 0
                 endif
 
                 if(snl2d(i)>0) then
-                  T_snow(i) = t_grnd(c) ! temperature_of_snow_on_lake
+                  lake_t_snow(i) = t_grnd(c)
+                  tisfc(i) = lake_t_snow(i)
                 endif
 
                 ustar = ustar_out(1) ! surface_friction_velocity_over_water
@@ -661,8 +668,8 @@ MODULE clm_lake
           
 1001      continue ! Error handler, whether file was opened or not
           write(0,'(A)') message
-          errmsg=message
-          errflg=1
+          ! errmsg=message
+          ! errflg=1
           if(allocated(unhappy_lat)) deallocate(unhappy_lat)
           if(allocated(unhappy_lon)) deallocate(unhappy_lon)
           unhappy_count=FAILED_TO_READ_UNHAPPY_POINTS
@@ -682,7 +689,8 @@ MODULE clm_lake
                           savedtke1,lake_icefrac,                       &
                           eflx_lwrad_net,eflx_gnet,                     & !O 
                           eflx_sh_tot,eflx_lh_tot,                      &
-                          t_ref2m,q_ref2m,                              &
+                          t_ref2m,q_ref2m, dtime,                       &
+                          watsat, tksatu, tkmg, tkdry, csol,            &
                           taux,tauy,ram1,z0mg,ustar_out,errmsg,errflg, xlat_d,xlon_d,unhappy)
     implicit none
     !in: 
@@ -690,7 +698,8 @@ MODULE clm_lake
     logical :: unhappy
     integer, intent(inout) :: errflg
     character(*), intent(inout) :: errmsg
-    real(kind_phys),intent(in) :: xlat_d, xlon_d    ! grid location for debugging
+    real(kind_phys),intent(in) :: dtime              ! timestep
+    real(kind_phys),intent(in) :: xlat_d, xlon_d     ! grid location for debugging
     real(kind_phys),intent(in) :: forc_t(1)          ! atmospheric temperature (Kelvin)
     real(kind_phys),intent(in) :: forc_pbot(1)       ! atm bottom level pressure (Pa) 
     real(kind_phys),intent(in) :: forc_psrf(1)       ! atmospheric surface pressure (Pa)
@@ -714,6 +723,11 @@ MODULE clm_lake
    ! real(kind_phys), intent(in) :: watsat(1,1:nlevsoil)      ! volumetric soil water at saturation (porosity)
     !!!!!!!!!!!!!!!!hydro
     logical , intent(in) :: do_capsnow(1)     ! true => do snow capping
+    real(kind_phys), intent(in) :: watsat(1,nlevsoil)      ! volumetric soil water at saturation (porosity)
+    real(kind_phys), intent(in) :: tksatu(1,nlevsoil)      ! thermal conductivity, saturated soil [W/m-K]
+    real(kind_phys), intent(in) :: tkmg(1,nlevsoil)        ! thermal conductivity, soil minerals  [W/m-K]
+    real(kind_phys), intent(in) :: tkdry(1,nlevsoil)       ! thermal conductivity, dry soil (W/m/Kelvin)
+    real(kind_phys), intent(in) :: csol(1,nlevsoil)        ! heat capacity, soil solids (J/m**3/Kelvin)
    
 
 
@@ -830,7 +844,7 @@ MODULE clm_lake
                           eflx_lh_grnd,t_veg,t_ref2m,q_ref2m,taux,tauy,   &
                           ram1,ws,ks,eflx_gnet,z0mg,ustar_out,errmsg,errflg,xlat_d,xlon_d,unhappy)
     if(errflg/=0) then
-      !return ! State is invalid now, so pass error to caller.
+      return ! State is invalid now, so pass error to caller.
     endif
 
     CALL ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,             & !i
@@ -839,9 +853,10 @@ MODULE clm_lake
                                  eflx_sh_grnd,eflx_sh_tot,eflx_soil_grnd,    & !o
                                  t_lake,t_soisno,h2osoi_liq,                 &
                                  h2osoi_ice,savedtke1,                       &
+                                 watsat, tksatu, tkmg, tkdry, csol, dtime,   &
                                  frac_iceold,qflx_snomelt,imelt,errmsg,errflg)
     if(errflg/=0) then
-      !return ! State is invalid now, so pass error to caller.
+      return ! State is invalid now, so pass error to caller.
     endif
 
     CALL ShalLakeHydrology(dz_lake,forc_rain,forc_snow,                          & !i
@@ -858,9 +873,10 @@ MODULE clm_lake
                                qflx_evap_tot_col,soilalpha,zwt,fcov,             &
                                rootr_column,qflx_evap_grnd,qflx_sub_snow,        &
                                qflx_dew_snow,qflx_dew_grnd,qflx_rain_grnd_col,   &
-                               errmsg,errflg)
+                               watsat, tksatu, tkmg, tkdry, csol,                &
+                               dtime,errmsg,errflg)
     if(errflg/=0) then
-      !return ! State is invalid now, so pass error to caller.
+      return ! State is invalid now, so pass error to caller.
     endif
                        
     !==================================================================================
@@ -981,7 +997,6 @@ SUBROUTINE ShalLakeFluxes(forc_t,forc_pbot,forc_psrf,forc_hgt,forc_hgt_q,       
     integer  :: iter                    ! iteration index
     integer  :: nmozsgn(lbp:ubp)        ! number of times moz changes sign
     integer  :: jtop(lbc:ubc)           ! top level for each column (no longer all 1)
-    !    real(kind_phys) :: dtime                   ! land model time step (sec)
     real(kind_phys) :: ax                      ! used in iteration loop for calculating t_grnd (numerator of NR solution)
     real(kind_phys) :: bx                      ! used in iteration loop for calculating t_grnd (denomin. of NR solution)
     real(kind_phys) :: degdT                   ! d(eg)/dT
@@ -1043,8 +1058,6 @@ SUBROUTINE ShalLakeFluxes(forc_t,forc_pbot,forc_psrf,forc_hgt,forc_hgt_q,       
     !-----------------------------------------------------------------------
 
     unhappy=.false.    
-    
-    !    dtime = get_step_size()
     
     ! Begin calculations
     
@@ -1368,8 +1381,9 @@ SUBROUTINE ShalLakeFluxes(forc_t,forc_pbot,forc_psrf,forc_hgt,forc_hgt_q,       
               .or. abs(t_grnd(c)-288)>200 ) then
 840        format('CLM_Lake ShalLakeFluxes: t_grnd is out of range: eflx_sh_tot(p)=',G20.12,' eflx_lh_tot(p)=',G20.12,' t_grnd(c)=',G20.12,' at p=',I0,' c=',I0,' xlat_d=',F10.3,' xlon_d=',F10.3)
            write(message,840) eflx_sh_tot(p),eflx_lh_tot(p),t_grnd(c),p,c,xlat_d,xlon_d
-           errmsg=message
-           errflg=1
+           ! errmsg=message
+           ! errflg=1
+           write(0,'(A)') trim(message)
            unhappy = .true.
          endif
        endif
@@ -1433,6 +1447,7 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
                                  eflx_sh_grnd,eflx_sh_tot,eflx_soil_grnd,    & !o
                                  t_lake,t_soisno,h2osoi_liq,                 &
                                  h2osoi_ice,savedtke1,                       &
+                                 watsat, tksatu, tkmg, tkdry, csol, dtime,   &
                                  frac_iceold,qflx_snomelt,imelt,errmsg,errflg)
   !=======================================================================================================
   ! !DESCRIPTION:
@@ -1522,6 +1537,11 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
 
     !in:
     integer, intent(inout) :: errflg
+    real(kind_phys), intent(in) :: watsat(1,nlevsoil)      ! volumetric soil water at saturation (porosity)
+    real(kind_phys), intent(in) :: tksatu(1,nlevsoil)      ! thermal conductivity, saturated soil [W/m-K]
+    real(kind_phys), intent(in) :: tkmg(1,nlevsoil)        ! thermal conductivity, soil minerals  [W/m-K]
+    real(kind_phys), intent(in) :: tkdry(1,nlevsoil)       ! thermal conductivity, dry soil (W/m/Kelvin)
+    real(kind_phys), intent(in) :: csol(1,nlevsoil)        ! heat capacity, soil solids (J/m**3/Kelvin)
     character(*), intent(inout) :: errmsg
     real(kind_phys), intent(in) :: t_grnd(1)          ! ground temperature (Kelvin)
     real(kind_phys), intent(inout) :: h2osno(1)          ! snow water (mm H2O)
@@ -1541,6 +1561,7 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
     
    ! real(kind_phys), intent(in) :: watsat(1,nlevsoil)      ! volumetric soil water at saturation (porosity)
     real(kind_phys), intent(inout) :: snowdp(1)        !snow height (m)
+    real(kind_phys), intent(in) :: dtime               !timestep
     !out: 
 
     real(kind_phys), intent(out) :: eflx_sh_grnd(1)    ! sensible heat flux from ground (W/m**2) [+ to atm]
@@ -1565,7 +1586,6 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
     integer , parameter  :: islak = 2     ! index of lake, 1 = deep lake, 2 = shallow lake
     real(kind_phys), parameter  :: p0 = 1._kind_phys     ! neutral value of turbulent prandtl number
     integer  :: i,j,fc,fp,g,c,p         ! do loop or array index
-    !    real(kind_phys) :: dtime                   ! land model time step (sec)
     real(kind_phys) :: beta(2)                 ! fraction solar rad absorbed at surface: depends on lake type
     real(kind_phys) :: za(2)                   ! base of surface absorption layer (m): depends on lake type
     real(kind_phys) :: eta(2)                  ! light extinction coefficient (/m): depends on lake type
@@ -1647,8 +1667,6 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
     
     ! 1!) Initialization
     ! Determine step size
-
-    !    dtime = get_step_size()
 
     ! Initialize constants
     cwat = cpliq*denh2o ! water heat capacity per unit volume
@@ -1860,7 +1878,7 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
 
     ! For snow / soil
   call SoilThermProp_Lake (snl,dz,zi,z,t_soisno,h2osoi_liq,h2osoi_ice,    &
-                           tk, cv, tktopsoillay,errmsg,errflg)
+        watsat, tksatu, tkmg, tkdry, csol, tk, cv, tktopsoillay,errmsg,errflg)
   if(errflg/=0) then
     ! State is no longer valid, so return error to caller
     ! FIXME: PUT THIS BACK return
@@ -1903,8 +1921,9 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
              if(abs(t_soisno(c,j)-288) > 150)   then 
 48              format('WARNING: At c=',I0,' level=',I0,' extreme t_soisno = ',F15.10)
                 WRITE(message,48) c,j,t_soisno(c,j)
-                errmsg=trim(message)
-                errflg=1
+                ! errmsg=trim(message)
+                ! errflg=1
+                write(0,'(A)') trim(message)
              endif
           end if
        end do
@@ -2115,6 +2134,7 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
                                 column during Tridiagonal Solution,', 'error (W/m^2):', c, errsoi(c) 
              errmsg=trim(message)
              errflg=1
+             return
           end if
        end do
        ! This has to be done before convective mixing because the heat capacities for each layer
@@ -2176,6 +2196,7 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
                        c, errsoi(c)
              errmsg=trim(message)
              errflg=1
+             return
           end if
        end do
 
@@ -2194,6 +2215,7 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
                           'column, error (kg/m^2):', c, wsum_end(c)-wsum(c)
                 errmsg=trim(message)
                 errflg=1
+                return
              end if
           end if
        end do
@@ -2328,7 +2350,7 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
     ! For snow / soil
   !  call SoilThermProp_Lake(lbc, ubc, num_shlakec, filter_shlakec, tk, cv, tktopsoillay)
   call SoilThermProp_Lake (snl,dz,zi,z,t_soisno,h2osoi_liq,h2osoi_ice,    &
-                           tk, cv, tktopsoillay,errmsg,errflg)
+       watsat, tksatu, tkmg, tkdry, csol, tk, cv, tktopsoillay,errmsg,errflg)
 
 
     ! Do as above to sum energy content
@@ -2400,7 +2422,7 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
   !
   ! !INTERFACE:
   subroutine SoilThermProp_Lake (snl,dz,zi,z,t_soisno,h2osoi_liq,h2osoi_ice,    &
-                           tk, cv, tktopsoillay,errmsg,errflg)
+       watsat, tksatu, tkmg, tkdry, csol, tk, cv, tktopsoillay,errmsg,errflg)
 
     !
     ! !DESCRIPTION:
@@ -2428,11 +2450,11 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
     character(*), intent(inout) :: errmsg
     integer , intent(in) :: snl(1)           ! number of snow layers
     !    real(kind_phys), intent(in) :: h2osno(1)        ! snow water (mm H2O)
-   ! real(kind_phys), intent(in) :: watsat(1,nlevsoil)      ! volumetric soil water at saturation (porosity)
-   ! real(kind_phys), intent(in) :: tksatu(1,nlevsoil)      ! thermal conductivity, saturated soil [W/m-K]
-   ! real(kind_phys), intent(in) :: tkmg(1,nlevsoil)        ! thermal conductivity, soil minerals  [W/m-K]
-   ! real(kind_phys), intent(in) :: tkdry(1,nlevsoil)       ! thermal conductivity, dry soil (W/m/Kelvin)
-   ! real(kind_phys), intent(in) :: csol(1,nlevsoil)        ! heat capacity, soil solids (J/m**3/Kelvin)
+    real(kind_phys), intent(in) :: watsat(1,nlevsoil)      ! volumetric soil water at saturation (porosity)
+    real(kind_phys), intent(in) :: tksatu(1,nlevsoil)      ! thermal conductivity, saturated soil [W/m-K]
+    real(kind_phys), intent(in) :: tkmg(1,nlevsoil)        ! thermal conductivity, soil minerals  [W/m-K]
+    real(kind_phys), intent(in) :: tkdry(1,nlevsoil)       ! thermal conductivity, dry soil (W/m/Kelvin)
+    real(kind_phys), intent(in) :: csol(1,nlevsoil)        ! heat capacity, soil solids (J/m**3/Kelvin)
     real(kind_phys), intent(in) :: dz(1,-nlevsnow+1:nlevsoil)          ! layer thickness (m)
     real(kind_phys), intent(in) :: zi(1,-nlevsnow+0:nlevsoil)          ! interface level below a "z" level (m)
     real(kind_phys), intent(in) :: z(1,-nlevsnow+1:nlevsoil)           ! layer depth (m)
@@ -2500,8 +2522,9 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
                   !                satw = min(1._kind_phys, satw)
                   if (satw < 0.999_kind_phys) then
                     write(message,*)'WARNING: soil layer unsaturated in SoilThermProp_Lake, satw, j = ', satw, j
-                    errmsg=trim(message)
-                    errflg=1
+                    ! errmsg=trim(message)
+                    ! errflg=1
+                    write(0,'(A)') trim(message)
                   end if
           ! Could use denice because if it starts out frozen, the volume of water will go below sat.,
           ! since we're not yet doing excess ice.
@@ -2513,9 +2536,10 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
                       fl = h2osoi_liq(c,j)/denom
                    else
                       write(message,'(A,I0)') 'WARNING: zero h2osoi_ice+h2osoi_liq at j = ', j
-                      errmsg=trim(message)
-                      errflg=1
+                      ! errmsg=trim(message)
+                      ! errflg=1
                       fl = 0
+                      write(0,'(A)') trim(message)
                    endif
                    if (t_soisno(c,j) >= tfrz) then       ! Unfrozen soil
                       dke = max(0._kind_phys, log10(satw) + 1.0_kind_phys)
@@ -2675,15 +2699,12 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
 
     integer  :: j,c,g                              !do loop index
     integer  :: fc                                 !lake filtered column indices
-    !    real(kind_phys) :: dtime                              !land model time step (sec)
     real(kind_phys) :: heatavail                          !available energy for melting or freezing (J/m^2)
     real(kind_phys) :: heatrem                            !energy residual or loss after melting or freezing
     real(kind_phys) :: melt                               !actual melting (+) or freezing (-) [kg/m2]
     real(kind_phys), parameter :: smallnumber = 1.e-7_kind_phys  !to prevent tiny residuals from rounding error
     logical  :: dophasechangeflag
     !-----------------------------------------------------------------------
-    
-    !    dtime = get_step_size()
     
     ! Initialization
 
@@ -2846,7 +2867,8 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
                                qflx_evap_tot_col,soilalpha,zwt,fcov,             &
                                rootr_column,qflx_evap_grnd,qflx_sub_snow,        &
                                qflx_dew_snow,qflx_dew_grnd,qflx_rain_grnd_col,   &
-                               errmsg,errflg)
+                               watsat, tksatu, tkmg, tkdry, csol,                &
+                               dtime,errmsg,errflg)
                        
     !==================================================================================
     ! !DESCRIPTION:
@@ -2892,9 +2914,15 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
     integer, intent(inout) :: errflg
     character(*), intent(inout) :: errmsg
 
+    real(kind_phys) :: watsat(1,nlevsoil)      ! volumetric soil water at saturation (porosity)
+    real(kind_phys) :: tksatu(1,nlevsoil)      ! thermal conductivity, saturated soil [W/m-K]
+    real(kind_phys) :: tkmg(1,nlevsoil)        ! thermal conductivity, soil minerals  [W/m-K]
+    real(kind_phys) :: tkdry(1,nlevsoil)       ! thermal conductivity, dry soil (W/m/Kelvin)
+    real(kind_phys) :: csol(1,nlevsoil)        ! heat capacity, soil solids (J/m**3/Kelvin)
+
    ! integer , intent(in) :: clandunit(1)     ! column's landunit
    ! integer , intent(in) :: ityplun(1)       ! landunit type
-   ! real(kind_phys), intent(in) :: watsat(1,1:nlevsoil)      ! volumetric soil water at saturation (porosity)
+    real(kind_phys), intent(in) :: dtime      ! timestep
     real(kind_phys), intent(in) :: dz_lake(1,nlevlake)     ! layer thickness for lake (m)
     real(kind_phys), intent(in) :: forc_rain(1)     ! rain rate [mm/s]
     real(kind_phys), intent(in) :: forc_snow(1)     ! snow rate [mm/s]
@@ -2976,7 +3004,6 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
     integer  :: filter_shlakesnowc(ubc-lbc+1)    ! column filter for snow points
     integer  :: num_shlakenosnowc                ! number of column non-snow points
     integer  :: filter_shlakenosnowc(ubc-lbc+1)  ! column filter for non-snow points
-    !    real(kind_phys) :: dtime                      ! land model time step (sec)
     integer  :: newnode                      ! flag when new snow node is set, (1=yes, 0=no)
     real(kind_phys) :: dz_snowf                     ! layer thickness rate change due to precipitation [mm/s]
     real(kind_phys) :: bifall                       ! bulk density of newly fallen dry snow [kg/m3]
@@ -2997,8 +3024,6 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
     !-----------------------------------------------------------------------
 
     ! Determine step size
-
-    !    dtime = get_step_size()
 
     ! Add soil water to water balance.
     do j = 1, nlevsoil
@@ -3215,7 +3240,7 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
                    num_shlakenosnowc, filter_shlakenosnowc,               & !i 
                    snl,do_capsnow,qflx_snomelt,qflx_rain_grnd,            & !i 
                    qflx_sub_snow,qflx_evap_grnd,                          & !i   
-                   qflx_dew_snow,qflx_dew_grnd,dz,                        & !i   
+                   qflx_dew_snow,qflx_dew_grnd,dz,dtime,                  & !i   
                    h2osoi_ice,h2osoi_liq,                                 & !i&o 
                    qflx_top_soil)                                           !o                        
 
@@ -3249,7 +3274,7 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
 
        call SnowCompaction(lbc, ubc, num_shlakesnowc, filter_shlakesnowc,   &!i
                            snl,imelt,frac_iceold,t_soisno,                  &!i
-                           h2osoi_ice,h2osoi_liq,                           &!i
+                           h2osoi_ice,h2osoi_liq,dtime,                     &!i
                            dz)                                               !&o
 
        ! Combine thin snow elements
@@ -3457,9 +3482,9 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
             if(j == 0 .and. abs(snow_water(c)-h2osno(c))>1.e-7_kind_phys) then
               write(message,*)'h2osno does not equal sum of snow layers in ShalLakeHydrology:', &
                    'column, h2osno, sum of snow layers =', c, h2osno(c), snow_water(c)
-              errmsg=trim(message)
-              errflg=1
-              ! FIXME: PUT THIS BACK: return
+              ! errmsg=trim(message)
+              ! errflg=1
+              write(0,'(A)') trim(message)
             end if
           end if
         end do
@@ -3700,7 +3725,7 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
                    num_nosnowc, filter_nosnowc,               & !i 
                    snl,do_capsnow,qflx_snomelt,qflx_rain_grnd,            & !i
                    qflx_sub_snow,qflx_evap_grnd,                          & !i   
-                   qflx_dew_snow,qflx_dew_grnd,dz,                        & !i   
+                   qflx_dew_snow,qflx_dew_grnd,dz,dtime,                  & !i   
                    h2osoi_ice,h2osoi_liq,                                 & !i&o 
                    qflx_top_soil)                                           !o                        
     !===============================================================================
@@ -3736,6 +3761,7 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
 
     integer , intent(in) :: snl(1)              !number of snow layers
     logical , intent(in) :: do_capsnow(1)       !true => do snow capping
+    real(kind_phys), intent(in) :: dtime               !timestep
     real(kind_phys), intent(in) :: qflx_snomelt(1)     !snow melt (mm H2O /s)
     real(kind_phys), intent(in) :: qflx_rain_grnd(1)   !rain on ground after interception (mm H2O/s) [+]
     real(kind_phys), intent(in) :: qflx_sub_snow(1)    !sublimation rate from snow pack (mm H2O /s) [+]
@@ -3862,7 +3888,7 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
 
   subroutine SnowCompaction(lbc, ubc, num_snowc, filter_snowc,   &!i  
                            snl,imelt,frac_iceold,t_soisno,                  &!i  
-                           h2osoi_ice,h2osoi_liq,                           &!i  
+                           h2osoi_ice,h2osoi_liq,dtime,                     &!i  
                            dz)                                               !i&o   
 
     
@@ -3896,6 +3922,7 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
     integer, intent(in) :: filter_snowc(ubc-lbc+1) ! column filter for snow points
     integer,  intent(in) :: snl(1)             !number of snow layers
     integer,  intent(in) :: imelt(1,-nlevsnow+1:nlevsoil)        !flag for melting (=1), freezing (=2), Not=0
+    real(kind_phys), intent(in) :: dtime
     real(kind_phys), intent(in) :: frac_iceold(1,-nlevsnow+1:nlevsoil)  !fraction of ice relative to the tot water
     real(kind_phys), intent(in) :: t_soisno(1,-nlevsnow+1:nlevsoil)     !soil temperature (Kelvin)
     real(kind_phys), intent(in) :: h2osoi_ice(1,-nlevsnow+1:nlevsoil)   !ice lens (kg/m2)
@@ -4990,121 +5017,40 @@ if_pergro: if (PERGRO) then
 
   end subroutine MoninObukIni
 
-! Some fields in lakeini are not available until runtime, so this cannot be in a CCPP init routine.
- SUBROUTINE lakeini(                ISLTYP,          gt0,             SNOW,           & !i
-                                    restart,         lakedepth_default,               &
-                    lakedepth2d,    savedtke12d,     snowdp2d,        h2osno2d,       & !o
-                    snl2d,          t_grnd2d,        t_lake3d,        lake_icefrac3d, &
-                    z_lake3d,       dz_lake3d,       t_soisno3d,      h2osoi_ice3d,   &
-                    h2osoi_liq3d,   h2osoi_vol3d,    z3d,             dz3d,           &
-                    zi3d,           watsat3d,        csol3d,          tkmg3d,         &
-                                    xice,            xice_threshold,           tsfc,  &
-                    use_lake_model, use_lakedepth,   con_g,           con_rd,         &
-                    tkdry3d,        tksatu3d,        im,              prsi,           &
-                                                     clm_lake_initialized,            &
-                    sand3d,         clay3d,          tg3,                             &
-                    km,   me,       master,          errmsg,          errflg)
+  !> \section arg_table_clm_lake_init Argument Table
+  !! \htmlinclude clm_lake_init.html
+  !!
+  subroutine clm_lake_init(con_pi,karman,con_g,con_sbc,con_t0c,rhowater,con_csol,con_cliq, &
+                           con_hfus,con_hvap,con_rd,con_cp,rhoice,errmsg,errflg)
+    implicit none
+    real(kind_phys), intent(in) :: con_pi,karman,con_g,con_sbc,con_t0c, &
+         rhowater,con_csol,con_cliq, con_hfus,con_hvap,con_rd,con_cp,rhoice
+    INTEGER, INTENT(OUT) :: errflg
+    CHARACTER(*), INTENT(OUT) :: errmsg
+    integer :: i, j
 
-   !==============================================================================
-   ! This subroutine was first edited by Hongping Gu for coupling
-   ! 07/20/2010
-   ! Long after, in June 2022, Sam Trahan updated it for CCPP
-   !==============================================================================
+    if(LAKEDEBUG) then
+      write(0,*) 'clm_lake_init'
+    endif
 
-  implicit none
+    errflg=0
+    errmsg=''
 
-  INTEGER, INTENT(OUT) :: errflg
-  CHARACTER(*), INTENT(OUT) :: errmsg
+    pi = con_pi
+    vkc = karman
+    grav = con_g
+    sb = con_sbc
+    tfrz = con_t0c
+    denh2o = rhowater
+    denice = rhoice
+    cpice = con_csol
+    cpliq = con_cliq
+    hfus = con_hfus
+    hvap = con_hvap
+    hsub = con_hfus+con_hvap
+    rair = con_rd
+    cpair = con_cp
 
-  INTEGER , INTENT (IN)    :: im, me, master, km
-  REAL(KIND_PHYS),     INTENT(IN)  :: xice_threshold, con_g, con_rd
-  REAL(KIND_PHYS), DIMENSION(IM), INTENT(IN)::   XICE,TG3
-  REAL(KIND_PHYS), DIMENSION(IM), INTENT(IN)::     tsfc
-  INTEGER, DIMENSION(IM)  ,INTENT(INOUT)  :: clm_lake_initialized
-
-  integer, dimension(IM), intent(in) :: use_lake_model
-  !INTEGER , INTENT (IN) :: lakeflag
-  !INTEGER , INTENT (INOUT) :: lake_depth_flag
-  LOGICAL, INTENT (IN) ::   use_lakedepth
-
-  LOGICAL , INTENT(IN)      ::     restart
-  INTEGER, DIMENSION(IM), INTENT(IN)       :: ISLTYP
-  REAL(KIND_PHYS),    DIMENSION(IM), INTENT(IN)    :: SNOW
-  REAL(kind_phys),    DIMENSION(IM,KM), INTENT(IN)       :: gt0, prsi
-  real(kind_phys),    intent(in)                                      :: lakedepth_default
-
-  real(kind_phys),    dimension(IM),intent(inout)                      :: lakedepth2d
-  real(kind_phys),    dimension(IM),intent(out)                        :: savedtke12d
-  real(kind_phys),    dimension(IM),intent(out)                        :: snowdp2d,       &
-                                                                             h2osno2d,       &
-                                                                             snl2d,          &
-                                                                             t_grnd2d
-                                                                              
-  real(kind_phys),    dimension(IM,nlevlake),INTENT(out)                  :: t_lake3d,       &
-                                                                             lake_icefrac3d, &
-                                                                             z_lake3d,       &
-                                                                             dz_lake3d
-  real(kind_phys),    dimension(IM,-nlevsnow+1:nlevsoil ),INTENT(out)     :: t_soisno3d,     &
-                                                                             h2osoi_ice3d,   &
-                                                                             h2osoi_liq3d,   &
-                                                                             h2osoi_vol3d,   &
-                                                                             z3d,            &
-                                                                             dz3d
-  real(kind_phys),    dimension(IM,nlevsoil),INTENT(out)                  :: watsat3d,       &
-                                                                             csol3d,         &
-                                                                             tkmg3d,         &
-                                                                             tkdry3d,        &
-                                                                             tksatu3d
-  real(kind_phys),    dimension(IM,nlevsoil),INTENT(inout)                :: clay3d,   &
-                                                                             sand3d   
-
-  real(kind_phys),    dimension( IM,-nlevsnow+0:nlevsoil ),INTENT(out)   :: zi3d            
-
-  !LOGICAL, DIMENSION( : ),intent(out)                      :: lake
-  !REAL(KIND_PHYS), OPTIONAL,    DIMENSION( : ), INTENT(IN)    ::  lake_depth ! no separate variable for this in CCPP
-
-  real,   dimension( 1:im,1:nlevsoil )               :: bsw3d,    &
-                                                        bsw23d,   &
-                                                        psisat3d, &
-                                                        vwcsat3d, &
-                                                        watdry3d, &
-                                                        watopt3d, &
-                                                        hksat3d,  &
-                                                        sucsat3d
-  integer  :: n,i,j,k,ib,lev,bottom      ! indices
-  real(kind_phys),dimension(1:im )    :: bd2d               ! bulk density of dry soil material [kg/m^3]
-  real(kind_phys),dimension(1:im )    :: tkm2d              ! mineral conductivity
-  real(kind_phys),dimension(1:im )    :: xksat2d            ! maximum hydraulic conductivity of soil [mm/s]
-  real(kind_phys),dimension(1:im )    :: depthratio2d       ! ratio of lake depth to standard deep lake depth 
-  real(kind_phys),dimension(1:im )    :: clay2d             ! temporary
-  real(kind_phys),dimension(1:im )    :: sand2d             ! temporary
-
-  real(kind_phys),parameter       :: scalez  = 0.025_kind_phys   ! Soil layer thickness discretization (m)
-  logical,parameter        :: arbinit = .false.
-  real(kind_phys),parameter           :: defval  = -999.0
-  integer                  :: isl
-  integer                  :: numb_lak    ! for debug
-  character*256 :: message
-  real(kind_phys) :: ht
-
-  integer, parameter :: xcheck=38
-  integer, parameter :: ycheck=92
-
-  integer :: used_lakedepth_default, init_points
-
-  used_lakedepth_default=0
-
-  if(LAKEDEBUG .and. me==0) then
-    write(0,*) 'clm_lake_init'
-  endif
-
-  errmsg = ''
-  errflg = 0
-
-  !IF ( RESTART ) RETURN  <--- should be handled by clm_lake_initialized
-
-  init_const: if(sum(clm_lake_initialized(1:im))==0 .and. any(use_lake_model/=0)) then
-    
     !  dzlak(1) = 0.1_kind_phys
     !  dzlak(2) = 1._kind_phys
     !  dzlak(3) = 2._kind_phys
@@ -5165,12 +5111,136 @@ if_pergro: if (PERGRO) then
       zisoi(j) = 0.5_kind_phys*(zsoi(j)+zsoi(j+1))         !interface depths
    enddo
    zisoi(nlevsoil) = zsoi(nlevsoil) + 0.5_kind_phys*dzsoi(nlevsoil)
-  endif init_const
+
+  end subroutine clm_lake_init
+
+! Some fields in lakeini are not available until runtime, so this cannot be in a CCPP init routine.
+ SUBROUTINE lakeini(kdt,            ISLTYP,          gt0,             SNOW,           & !i
+                                    restart,         lakedepth_default,               &
+                    lakedepth2d,    savedtke12d,     snowdp2d,        h2osno2d,       & !o
+                    snl2d,          t_grnd2d,        t_lake3d,        lake_icefrac3d, &
+                    z_lake3d,       dz_lake3d,       t_soisno3d,      h2osoi_ice3d,   &
+                    h2osoi_liq3d,   h2osoi_vol3d,    z3d,             dz3d,           &
+                    zi3d,           watsat3d,        csol3d,          tkmg3d,         &
+                                    xice,            xice_threshold,           tsfc,  &
+                    use_lake_model, use_lakedepth,   con_g,           con_rd,         &
+                    tkdry3d,        tksatu3d,        im,              prsi,           &
+                                                     clm_lake_initialized,            &
+                    sand3d,         clay3d,          tg3,                             &
+                    km,   me,       master,          errmsg,          errflg)
+
+   !==============================================================================
+   ! This subroutine was first edited by Hongping Gu for coupling
+   ! 07/20/2010
+   ! Long after, in June 2022, Sam Trahan updated it for CCPP
+   !==============================================================================
+
+  implicit none
+
+  INTEGER, INTENT(OUT) :: errflg
+  CHARACTER(*), INTENT(OUT) :: errmsg
+
+  INTEGER , INTENT (IN)    :: im, me, master, km, kdt
+  REAL(KIND_PHYS),     INTENT(IN)  :: xice_threshold, con_g, con_rd
+  REAL(KIND_PHYS), DIMENSION(IM), INTENT(IN)::   XICE,TG3
+  REAL(KIND_PHYS), DIMENSION(IM), INTENT(IN)::     tsfc
+  REAL(KIND_PHYS), DIMENSION(IM)  ,INTENT(INOUT)  :: clm_lake_initialized
+
+  integer, dimension(IM), intent(in) :: use_lake_model
+  !INTEGER , INTENT (IN) :: lakeflag
+  !INTEGER , INTENT (INOUT) :: lake_depth_flag
+  LOGICAL, INTENT (IN) ::   use_lakedepth
+
+  LOGICAL , INTENT(IN)      ::     restart
+  INTEGER, DIMENSION(IM), INTENT(IN)       :: ISLTYP
+  REAL(KIND_PHYS),    DIMENSION(IM), INTENT(IN)    :: SNOW
+  REAL(kind_phys),    DIMENSION(IM,KM), INTENT(IN)       :: gt0, prsi
+  real(kind_phys),    intent(in)                                      :: lakedepth_default
+
+  real(kind_phys),    dimension(IM),intent(inout)                      :: lakedepth2d
+  real(kind_phys),    dimension(IM),intent(out)                        :: savedtke12d
+  real(kind_phys),    dimension(IM),intent(out)                        :: snowdp2d,       &
+                                                                             h2osno2d,       &
+                                                                             snl2d,          &
+                                                                             t_grnd2d
+                                                                              
+  real(kind_phys),    dimension(IM,nlevlake),INTENT(out)                  :: t_lake3d,       &
+                                                                             lake_icefrac3d, &
+                                                                             z_lake3d,       &
+                                                                             dz_lake3d
+  real(kind_phys),    dimension(IM,-nlevsnow+1:nlevsoil ),INTENT(out)     :: t_soisno3d,     &
+                                                                             h2osoi_ice3d,   &
+                                                                             h2osoi_liq3d,   &
+                                                                             h2osoi_vol3d,   &
+                                                                             z3d,            &
+                                                                             dz3d
+  real(kind_phys),    dimension(IM,nlevsoil),INTENT(out)                  :: watsat3d,       &
+                                                                             csol3d,         &
+                                                                             tkmg3d,         &
+                                                                             tkdry3d,        &
+                                                                             tksatu3d
+  real(kind_phys),    dimension(IM,nlevsoil),INTENT(inout)                :: clay3d,   &
+                                                                             sand3d   
+
+  real(kind_phys),    dimension( IM,-nlevsnow+0:nlevsoil ),INTENT(out)   :: zi3d            
+
+  !LOGICAL, DIMENSION( : ),intent(out)                      :: lake
+  !REAL(KIND_PHYS), OPTIONAL,    DIMENSION( : ), INTENT(IN)    ::  lake_depth ! no separate variable for this in CCPP
+
+  real,   dimension( 1:im,1:nlevsoil )               :: bsw3d,    &
+                                                        bsw23d,   &
+                                                        psisat3d, &
+                                                        vwcsat3d, &
+                                                        watdry3d, &
+                                                        watopt3d, &
+                                                        hksat3d,  &
+                                                        sucsat3d
+  integer  :: n,i,j,k,ib,lev,bottom      ! indices
+  real(kind_phys),dimension(1:im )    :: bd2d               ! bulk density of dry soil material [kg/m^3]
+  real(kind_phys),dimension(1:im )    :: tkm2d              ! mineral conductivity
+  real(kind_phys),dimension(1:im )    :: xksat2d            ! maximum hydraulic conductivity of soil [mm/s]
+  real(kind_phys),dimension(1:im )    :: depthratio2d       ! ratio of lake depth to standard deep lake depth 
+  real(kind_phys),dimension(1:im )    :: clay2d             ! temporary
+  real(kind_phys),dimension(1:im )    :: sand2d             ! temporary
+
+  logical,parameter        :: arbinit = .false.
+  real(kind_phys),parameter           :: defval  = -999.0
+  integer                  :: isl
+  integer                  :: numb_lak    ! for debug
+  character*256 :: message
+  real(kind_phys) :: ht
+
+  integer, parameter :: xcheck=38
+  integer, parameter :: ycheck=92
+
+  integer :: used_lakedepth_default, init_points
+
+  used_lakedepth_default=0
+
+  errmsg = ''
+  errflg = 0
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   DO i=1,im
-    if(use_lake_model(i)==0 .or. clm_lake_initialized(i)>0) then
+    if(use_lake_model(i)==0) then
+      cycle
+    endif
+
+    if(kdt<2) then
+      ! To handle restarts with bad lakedepth2d
+      if ( use_lakedepth ) then
+        if (lakedepth2d(i) <= 0.0) then 
+          lakedepth2d(i)   = lakedepth_default
+          used_lakedepth_default = used_lakedepth_default+1
+        endif
+      else
+        lakedepth2d(i)   = lakedepth_default
+        used_lakedepth_default = used_lakedepth_default+1
+      endif
+    endif
+    
+    if(clm_lake_initialized(i)>0) then
       cycle
     endif
 
@@ -5204,15 +5274,6 @@ if_pergro: if (PERGRO) then
     lake_icefrac3d(i,:)  = 0.0
     h2osoi_vol3d(i,:)    = 0.0
     snl2d(i)             = 0.0
-    if ( use_lakedepth ) then
-      if (lakedepth2d(i) <= 0.0) then 
-        lakedepth2d(i)   = lakedepth_default
-        used_lakedepth_default = used_lakedepth_default+1
-      endif
-    else
-      lakedepth2d(i)   = lakedepth_default
-      used_lakedepth_default = used_lakedepth_default+1
-    endif
 
   ENDDO
 
@@ -5238,6 +5299,8 @@ if_pergro: if (PERGRO) then
     do k = 1,nlevsoil
       sand3d(i,k)  = sand(isl)
       clay3d(i,k)  = clay(isl)
+
+      ! Cannot continue if either of these checks fail.
       if(clay3d(i,k)>0 .and. clay3d(i,k)<1) then
         write(message,*) 'bad clay3d ',clay3d(i,k)
         write(0,'(A)') trim(message)
@@ -5277,11 +5340,6 @@ if_pergro: if (PERGRO) then
       watopt3d(i,k) = watsat3d(i,k) * (158490._kind_phys/sucsat3d(i,k)) ** (-1._kind_phys/bsw3d(i,k))
     end do
     if (lakedepth2d(i) == spval) then
-       if(LAKEDEBUG) then
-          errmsg='should not get here: lakedepth2d is spval '
-          errflg=1
-          return
-       endif
       lakedepth2d(i) = zlak(nlevlake) + 0.5_kind_phys*dzlak(nlevlake)
       z_lake3d(i,1:nlevlake) = zlak(1:nlevlake)
       dz_lake3d(i,1:nlevlake) = dzlak(1:nlevlake)
@@ -5423,7 +5481,7 @@ if_pergro: if (PERGRO) then
 
     do k = -nlevsnow+1, 0
       if (k > snl2d(i)) then
-        h2osoi_ice3d(i,k) = dz3d(i,k)*bdsno
+        h2osoi_ice3d(i,k) = dz3d(i,k)*snow_bd
         h2osoi_liq3d(i,k) = 0._kind_phys
       end if
     end do
