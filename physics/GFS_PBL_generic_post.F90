@@ -369,13 +369,8 @@
         do i=1,im
           if (oceanfrac(i) > zero) then      ! Ocean only, NO LAKES
             if ( .not. wet(i)) then ! no open water
-              if (kdt > 1) then              !use results from CICE
-                dtsfci_cpl(i) = dtsfc_cice(i)
-                dqsfci_cpl(i) = dqsfc_cice(i)
-              else                           !use PBL fluxes when CICE fluxes is unavailable
-                dtsfci_cpl(i) = dtsfc1(i)*hffac(i)
-                dqsfci_cpl(i) = dqsfc1(i)
-              end if
+              dtsfci_cpl(i) = dtsfc1(i)*hffac(i)
+              dqsfci_cpl(i) = dqsfc1(i)
             elseif (icy(i) .or. dry(i)) then ! use stress_ocean from sfc_diff for opw component at mixed point
               rho = prsl(i,1) / (rd*t1(i)*(one+fvirt*max(q1(i), qmin)))
               dtsfci_cpl(i) = cp   * rho * hflx_wat(i) ! sensible heat flux over open ocean
