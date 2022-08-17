@@ -195,7 +195,7 @@ set_target_properties(ccpp_physics PROPERTIES VERSION ${PROJECT_VERSION}
 target_include_directories(ccpp_physics PUBLIC
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 
-target_link_libraries(ccpp_physics PUBLIC w3emc::w3emc_d NetCDF::NetCDF_Fortran)
+target_link_libraries(ccpp_physics PUBLIC w3nco::w3nco_d NetCDF::NetCDF_Fortran)
 
 # Define where to install the library
 install(TARGETS ccpp_physics

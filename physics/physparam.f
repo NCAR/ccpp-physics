@@ -212,25 +212,6 @@
       logical, save :: lsashal =.false.
 
 ! ............................................. !
-!>\name  2.5 For module radiation_surface
-! ............................................. !
-
-!> surface albedo scheme control flag
-!!\n =0:vegetation type based climatological albedo scheme
-!!\n =1:seasonal albedo derived from MODIS measurements
-      integer, save :: ialbflg = 0
-
-!> surface emissivity scheme control flag
-!!\n =0:black-body surface emissivity(=1.0)
-!!\n =1:vegetation type based climatology emissivity(<1.0)
-!!\n Opr GFS/CFS=1; see IEMS in run scripts
-      integer, save :: iemsflg = 0
-
-!> external sfc emissivity data table: sfc_emissivity_idx.txt
-      character, save :: semis_file*26
-      data semis_file   / 'sfc_emissivity_idx.txt    ' /
-
-! ............................................. !
 !> \name  2.6 general purpose
 ! ............................................. !
 

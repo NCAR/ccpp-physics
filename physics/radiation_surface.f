@@ -107,9 +107,7 @@
 !! \section arg_table_module_radiation_surface
 !! \htmlinclude module_radiation_surface.html
 !!
-      use physparam,         only : ialbflg, iemsflg, semis_file,       &
-     &                              kind_phys
-      use physcons,          only : con_t0c, con_ttp, con_pi, con_tice
+      use machine,           only : kind_phys
       use module_iounitdef,  only : NIRADSF
       use surface_perturbation, only : ppfbet
 !
@@ -129,7 +127,7 @@
       real (kind=kind_phys), parameter :: f_zero = 0.0
       real (kind=kind_phys), parameter :: f_one  = 1.0
       real (kind=kind_phys), parameter :: epsln  = 1.0e-6
-      real (kind=kind_phys), parameter :: rad2dg = 180.0 / con_pi
+      real (kind=kind_phys) :: rad2dg
       integer, allocatable  ::  idxems(:,:)         ! global surface emissivity index array
       integer :: iemslw = 1                         ! global surface emissivity control flag set up in 'sfc_init'
 !
@@ -146,7 +144,7 @@
 !>\section gen_sfc_init sfc_init General Algorithm
 !-----------------------------------
       subroutine sfc_init                                               &
-     &     ( me, errmsg, errflg )!  ---  inputs/outputs:
+     &     ( me, ialbflg, iemsflg, semis_file, con_pi, errmsg, errflg )!  ---  inputs/outputs:
 !
 !  ===================================================================  !
 !                                                                       !
@@ -160,11 +158,7 @@
 !  ====================  defination of variables  ====================  !
 !                                                                       !
 !  inputs:                                                              !
-!      me           - print control flag                                !
-!                                                                       !
-!  outputs: (none) to module variables only                             !
-!                                                                       !
-!  external module variables:                                           !
+!     me            - print control flag                                !
 !     ialbflg       - control flag for surface albedo schemes           !
 !                     =1: use modis based surface albedo                !
 !                     =2: use surface albedo from land model            !
@@ -174,13 +168,18 @@
 !                     b:=1 use varying climtology sfc emiss (veg based) !
 !                       =2 use surface emissivity from land model       !
 !                                                                       !
+!  outputs: (CCPP error handling)                                       !
+!     errmsg        - CCPP error message                                !
+!     errflg        - CCPP error flag                                   !
+!                                                                       !
 !  ====================    end of description    =====================  !
 !
       implicit none
 
 !  ---  inputs:
-      integer, intent(in) :: me
-
+      integer, intent(in) :: me, ialbflg, iemsflg
+      real(kind=kind_phys), intent(in) :: con_pi
+      character(len=26), intent(in) :: semis_file
 !  ---  outputs: ( none )
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -196,10 +195,13 @@
       errmsg = ''
       errflg = 0
 !
+      ! Module
+      rad2dg = 180.0 / con_pi
+
       if ( me == 0 ) print *, VTAGSFC   ! print out version tag
 
 !> - Initialization of surface albedo section
-!! \n physparam::ialbflg
+!! \n GFS_typedefs::ialbflg
 !!  - = 1: using MODIS based land surface albedo for SW
 !!  - = 2: using albedo from land model
 
@@ -224,7 +226,7 @@
       endif    ! end if_ialbflg_block
 
 !> - Initialization of surface emissivity section
-!! \n physparam::iemsflg
+!! \n GFS_typedefs::iemsflg
 !!  - = 1: input SFC emissivity type map from "semis_file"
 !!  - = 2: input SFC emissivity from land model
 
@@ -339,8 +341,8 @@
      &       alvsf,alnsf,alvwf,alnwf,facsf,facwf,fice,tisfc,            &
      &       lsmalbdvis, lsmalbdnir, lsmalbivis, lsmalbinir,            &
      &       icealbdvis, icealbdnir, icealbivis, icealbinir,            &
-     &       IMAX, albPpert, pertalb, fracl, fraco, fraci, icy,         &
-     &       sfcalb                                                     & !  ---  outputs:
+     &       IMAX, albPpert, pertalb, fracl, fraco, fraci, icy, ialbflg,&
+     &       con_ttp, sfcalb                                            & !  ---  outputs:
      &     )
 
 !  ===================================================================  !
@@ -387,6 +389,9 @@
 !     fice  (IMAX)  - sea-ice fraction                                  !
 !     tisfc (IMAX)  - sea-ice surface temperature                       !
 !     IMAX          - array horizontal dimension                        !
+!     ialbflg       - control flag for surface albedo schemes           !
+!                     =1: use modis based surface albedo                !
+!                     =2: use surface albedo from land model            !
 !                                                                       !
 !  outputs:                                                             !
 !     sfcalb(IMAX,NF_ALBD)                                              !
@@ -395,17 +400,12 @@
 !           ( :, 3) -     uv+vis direct beam albedo                     !
 !           ( :, 4) -     uv+vis diffused albedo                        !
 !                                                                       !
-!  module internal control variables:                                   !
-!     ialbflg       - =0 use the default climatology surface albedo     !
-!                     =1 use modis retrieved albedo and input snow cover!
-!                        for land areas                                 !
-!                                                                       !
 !  ====================    end of description    =====================  !
 !
       implicit none
 
 !  ---  inputs
-      integer, intent(in) :: IMAX
+      integer, intent(in) :: IMAX, ialbflg
       integer, intent(in) :: lsm, lsm_noahmp, lsm_ruc
       logical, intent(in) :: use_cice_alb, frac_grid
 
@@ -415,7 +415,7 @@
      &       alvsf, alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc,     &
      &       icealbdvis, icealbdnir, icealbivis, icealbinir,            &
      &       sncovr, sncovr_ice, snoalb, albPpert           ! sfc-perts, mgehne
-      real (kind=kind_phys),  intent(in) :: pertalb         ! sfc-perts, mgehne
+      real (kind=kind_phys),  intent(in) :: pertalb, con_ttp! sfc-perts, mgehne
       real (kind=kind_phys), dimension(:), intent(in) ::                &
      &       fracl, fraco, fraci
       real (kind=kind_phys), dimension(:),intent(inout) ::              &
