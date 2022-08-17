@@ -11,11 +11,12 @@
       contains
 
 !>\defgroup mod_GFS_rad_time_vary GFS Radiation Time Update
+!! This module contains code related to GFS radiation setup.
 !> @{
 !> \section arg_table_GFS_rad_time_vary_timestep_init Argument Table
 !! \htmlinclude GFS_rad_time_vary_timestep_init.html
 !!
-      subroutine GFS_rad_time_vary_timestep_init (                                     &
+      subroutine GFS_rad_time_vary_timestep_init (nthrds, blksz, lrseeds, rseeds,      &
               lslwr, lsswr, isubc_lw, isubc_sw, icsdsw, icsdlw, cnx, cny, isc, jsc,    &
               imap, jmap, sec, kdt, imp_physics, imp_physics_zhao_carr, ps_2delt,      &
               ps_1delt, t_2delt, t_1delt, qv_2delt, qv_1delt, t, qv, ps, errmsg, errflg)
@@ -28,6 +29,10 @@
          implicit none
 
          ! Interface variables
+         integer,                intent(in)    :: nthrds
+         integer,                intent(in)    :: blksz(:)
+         logical,                intent(in)    :: lrseeds
+         integer,                intent(in)    :: rseeds(:,:)
          integer,                intent(in)    :: isubc_lw, isubc_sw, cnx, cny, isc, jsc, kdt
          integer,                intent(in)    :: imp_physics, imp_physics_zhao_carr
          logical,                intent(in)    :: lslwr, lsswr
@@ -46,7 +51,7 @@
 
          ! Local variables
          type (random_stat) :: stat
-         integer :: ix, j, i, ipseed
+         integer :: ix, nb, j, i, nblks, ipseed
          integer :: numrdm(cnx*cny*2)
 
          ! Initialize CCPP error handling variables
@@ -54,22 +59,40 @@
          errflg = 0
 
          if (lsswr .or. lslwr) then
-
+           
+           nblks = size(blksz)
+           
            !--- call to GFS_radupdate_timestep_init is now in GFS_rrtmg_setup_timestep_init
 
            !--- set up random seed index in a reproducible way for entire cubed-sphere face (lat-lon grid)
            if ((isubc_lw==2) .or. (isubc_sw==2)) then
-             ipseed = mod(nint(con_100*sqrt(sec)), ipsdlim) + 1 + ipsd0
-             call random_setseed (ipseed, stat)
-             call random_index (ipsdlim, numrdm, stat)
+             !NRL If random seeds supplied by NEPTUNE
+             if(lrseeds) then
+               do nb=1,nblks
+                 do ix=1,blksz(nb)
+                   icsdsw(ix) = rseeds(ix,1)
+                   icsdlw(ix) = rseeds(ix,2)
+                 end do
+               enddo
+             else
 
-             do ix=1,size(jmap)
-               j = jmap(ix)
-               i = imap(ix)
-               !--- for testing purposes, replace numrdm with '100'
-               icsdsw(ix) = numrdm(i+isc-1 + (j+jsc-2)*cnx)
-               icsdlw(ix) = numrdm(i+isc-1 + (j+jsc-2)*cnx + cnx*cny)
-             enddo
+               ipseed = mod(nint(con_100*sqrt(sec)), ipsdlim) + 1 + ipsd0
+               call random_setseed (ipseed, stat)
+               call random_index (ipsdlim, numrdm, stat)
+
+
+
+               do nb=1,nblks
+                 do ix=1,blksz(nb)
+                   j = jmap(ix)
+                   i = imap(ix)
+                   !--- for testing purposes, replace numrdm with '100'
+                   icsdsw(ix) = numrdm(i+isc-1 + (j+jsc-2)*cnx)
+                   icsdlw(ix) = numrdm(i+isc-1 + (j+jsc-2)*cnx + cnx*cny)
+                 enddo
+               enddo
+
+             end if !lrseeds
 
            endif  ! isubc_lw and isubc_sw
 
@@ -77,8 +100,8 @@
              if (kdt == 1) then
                t_2delt  = t
                t_1delt  = t
-               qv_2delt = max(qmin,qv)
-               qv_1delt = max(qmin,qv)
+               qv_2delt = qv
+               qv_1delt = qv
                ps_2delt = ps
                ps_1delt = ps
              endif
