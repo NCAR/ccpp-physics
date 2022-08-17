@@ -195,6 +195,22 @@
   type = character
   kind = len=26
   intent = in
+[co2usr_file]
+  standard_name = co2_user_data_table_file
+  long_name =  co2 user defined data table file
+  units = none
+  dimensions =  ()
+  type = character
+  kind = len=26
+  intent = in
+[co2cyc_file]
+  standard_name = co2_clim_monthly_cycle_data_table_file
+  long_name = co2 climotological monthly cycle data table file
+  units = none
+  dimensions =  ()
+  type = character
+  kind = len=26
+  intent = in
 [con_pi]
   standard_name = pi
   long_name = ratio of a circle's circumference to its diameter
@@ -348,6 +364,43 @@
   dimensions =  ()
   type = character
   kind = len=26
+  intent = in
+[co2dat_file]
+  standard_name = co2_monthly_obs_data_table_file
+  long_name = co2 monthly observation data table
+  units = none
+  dimensions =  ()
+  type = character
+  kind = len=26
+  intent = in
+[co2gbl_file]
+  standard_name = co2_global_annual_mean_data_table_file
+  long_name = co2 global annual mean data file
+  units = none
+  dimensions =  ()
+  type = character
+  kind = len=26
+  intent = in
+[ictm]
+  standard_name = flag_for_initial_time_date_control
+  long_name = flag for initial conditions and forcing
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[ico2]
+  standard_name = control_for_co2
+  long_name = prescribed global mean value (old opernl)
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[ntoz]
+  standard_name = index_of_ozone_mixing_ratio_in_tracer_concentration_array
+  long_name = tracer index for ozone mixing ratio
+  units = index
+  dimensions = ()
+  type = integer
   intent = in
 [con_pi]
   standard_name = pi

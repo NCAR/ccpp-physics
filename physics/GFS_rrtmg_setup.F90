@@ -6,7 +6,7 @@
 !> @{
 module GFS_rrtmg_setup
 
-   use physparam, only : ictmflg, ico2flg, ioznflg, icldflg, &
+   use physparam, only : icldflg, &
    &             iovrRad=>iovr, lcrick , lcnorm , lnoprec,            &
    &             isubcsw, isubclw, ivflip , ipsd0,                    &
    &             iswcliq
@@ -34,7 +34,7 @@ module GFS_rrtmg_setup
 
    !> control flag for the first time of reading climatological ozone data
    !! (set/reset in subroutines radinit/radupdate, it is used only if the
-   !! control parameter ioznflg=0)
+   !! control parameter ntoz=0)
    logical :: loz1st = .true.
 
    contains
@@ -50,7 +50,8 @@ module GFS_rrtmg_setup
           norad_precip, idate, iflip,                         &
           do_RRTMGP, me, lalw1bd, iaermdl, iaerflg,           &
           aeros_file, con_pi, con_t0c, con_c, con_boltz,      &
-          con_plnk, con_solr_2008, con_solr_2002, errmsg, errflg)
+          con_plnk, con_solr_2008, con_solr_2002, co2usr_file,&
+          co2cyc_file, errmsg, errflg)
 ! =================   subprogram documentation block   ================ !
 !                                                                       !
 ! subprogram:   GFS_rrtmg_setup_init - a subprogram to initialize radiation !
@@ -171,7 +172,7 @@ module GFS_rrtmg_setup
       integer, intent(in) :: iflip
       logical, intent(in) :: do_RRTMGP, lalw1bd
       integer, intent(in) :: me
-      character(len=26),intent(in)  :: aeros_file, solar_file
+      character(len=26),intent(in)  :: aeros_file, solar_file, co2usr_file, co2cyc_file
       real(kind_phys),  intent(in)  :: con_pi,con_t0c,con_c,con_boltz,con_plnk,con_solr_2008,con_solr_2002
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -188,10 +189,6 @@ module GFS_rrtmg_setup
         errflg = 1
         return
       end if
-
-      ictmflg= ictm                     ! data ic time/date control flag
-      ico2flg= ico2                     ! co2 data source control flag
-      ioznflg= ntoz                     ! ozone data source control flag
 
       if ( ictm==0 .or. ictm==-2 ) then
         iaerflg = mod(iaer, 100)        ! no volcanic aerosols for clim hindcast
@@ -246,12 +243,11 @@ module GFS_rrtmg_setup
       endif
 
       call radinit                                                      &
-!  ---  inputs:
      &     ( si, levr, imp_physics, me, iaermdl, iaerflg, lalw1bd,      &
      &       aeros_file, con_pi, con_t0c, con_c, con_boltz, con_plnk,   &
-     &       isol, solar_file, con_solr_2008, con_solr_2002, errmsg, errflg )
-!  ---  outputs:
-!          ( none )
+     &       isol, solar_file, con_solr_2008, con_solr_2002,            &
+     &       co2usr_file, co2cyc_file, ico2, ictm, ntoz, errmsg, errflg )
+
 
       if ( me == 0 ) then
         print *,'  Radiation sub-cloud initial seed =',ipsd0,           &
@@ -268,9 +264,9 @@ module GFS_rrtmg_setup
 !> \section arg_table_GFS_rrtmg_setup_timestep_init Argument Table
 !! \htmlinclude GFS_rrtmg_setup_timestep_init.html
 !!
-   subroutine GFS_rrtmg_setup_timestep_init (      &
-          idate, jdate, deltsw, deltim, lsswr, me, iaermdl, &
-          iaerflg, isol, aeros_file, slag, sdec, cdec, solcon, con_pi, errmsg, errflg)
+   subroutine GFS_rrtmg_setup_timestep_init (idate, jdate, deltsw, deltim, &
+        lsswr, me, iaermdl, iaerflg, isol, aeros_file, slag, sdec, cdec,   &
+        solcon, con_pi, co2dat_file, co2gbl_file, ictm, ico2, ntoz, errmsg, errflg)
 
       implicit none
 
@@ -282,8 +278,8 @@ module GFS_rrtmg_setup
       real(kind=kind_phys), intent(in)  :: con_pi
       logical,              intent(in)  :: lsswr
       integer,              intent(in)  :: me
-      integer,              intent(in)  :: iaermdl, iaerflg, isol
-      character(len=26),    intent(in)  :: aeros_file
+      integer,              intent(in)  :: iaermdl, iaerflg, isol, ictm, ico2, ntoz
+      character(len=26),    intent(in)  :: aeros_file, co2dat_file, co2gbl_file
       real(kind=kind_phys), intent(out) :: slag
       real(kind=kind_phys), intent(out) :: sdec
       real(kind=kind_phys), intent(out) :: cdec
@@ -302,8 +298,8 @@ module GFS_rrtmg_setup
       errmsg = ''
       errflg = 0
 
-      call radupdate(idate,jdate,deltsw,deltim,lsswr,me,iaermdl,&
-           iaerflg,isol,aeros_file,slag,sdec,cdec,solcon,con_pi,errflg,errmsg)
+      call radupdate(idate,jdate,deltsw,deltim,lsswr,me,iaermdl, iaerflg,isol,aeros_file,&
+           slag,sdec,cdec,solcon,con_pi,co2dat_file,co2gbl_file,ictm,ico2,ntoz,errflg,errmsg)
 
    end subroutine GFS_rrtmg_setup_timestep_init
 
@@ -335,7 +331,8 @@ module GFS_rrtmg_setup
 
    subroutine radinit( si, NLAY, imp_physics, me, iaermdl, iaerflg, lalw1bd, &
         aeros_file, con_pi, con_t0c, con_c, con_boltz, con_plnk, isol,       &
-        solar_file, con_solr_2008, con_solr_2002, errmsg, errflg)
+        solar_file, con_solr_2008, con_solr_2002, co2usr_file, co2cyc_file,  &
+        ico2, ictm, ntoz, errmsg, errflg)
 !...................................
 
 !  ---  inputs:
@@ -379,11 +376,11 @@ module GFS_rrtmg_setup
 !                =2 compute tropspheric aero in multi bands for lw      !
 !              c:=0 no topospheric aerosol in sw radiation              !
 !                =1 include tropspheric aerosols for sw                 !
-!   ico2flg  : co2 data source control flag                             !
+!   ico2     : co2 data source control flag                             !
 !              =0: use prescribed global mean co2 (old  oper)           !
 !              =1: use observed co2 annual mean value only              !
 !              =2: use obs co2 monthly data with 2-d variation          !
-!   ictmflg  : =yyyy#, external data ic time/date control flag          !
+!   ictm     : =yyyy#, external data ic time/date control flag          !
 !              =   -2: same as 0, but superimpose seasonal cycle        !
 !                      from climatology data set.                       !
 !              =   -1: use user provided external data for the          !
@@ -448,11 +445,11 @@ module GFS_rrtmg_setup
       implicit none
 
 !  ---  inputs:
-      integer, intent(in) :: NLAY, me, imp_physics, iaermdl, iaerflg, isol
+      integer, intent(in) :: NLAY, me, imp_physics, iaermdl, iaerflg, isol, ico2, ictm, ntoz
       logical, intent(in) :: lalw1bd
       real (kind=kind_phys), intent(in) :: si(:), con_pi,con_t0c, con_c, &
            con_boltz, con_plnk, con_solr_2008, con_solr_2002
-      character(len=26), intent(in) :: aeros_file, solar_file
+      character(len=26), intent(in) :: aeros_file, solar_file,co2usr_file, co2cyc_file
 
 !  ---  outputs: (ccpp error handling)
       character(len=*),     intent(out) :: errmsg
@@ -464,7 +461,7 @@ module GFS_rrtmg_setup
 !
 !> -# Set up control variables and external module variables in
 !!    module physparam
-      loz1st = (ioznflg == 0)           ! first-time clim ozone data read flag
+      loz1st = (ntoz == 0)           ! first-time clim ozone data read flag
       month0 = 0
       iyear0 = 0
       monthd = 0
@@ -474,16 +471,16 @@ module GFS_rrtmg_setup
         print *,' NEW RADIATION PROGRAM STRUCTURES BECAME OPER. ',      &
      &          '  May 01 2007'
         print *, VTAGRAD                !print out version tag
-        print *,' - Selected Control Flag settings: ICTMflg=',ictmflg,  &
-     &    ' ISOLar =',isol, ' ICO2flg=',ico2flg,' IAERflg=',iaerflg,  &
+        print *,' - Selected Control Flag settings: ICTMflg=',ictm,     &
+     &    ' ISOLar =',isol, ' ICO2flg=',ico2,' IAERflg=',iaerflg,  &
      &    ' ICLDflg=',icldflg,                                          &
-     &    ' IMP_PHYSICS=',imp_physics,' IOZNflg=',ioznflg
+     &    ' IMP_PHYSICS=',imp_physics,' IOZNflg=',ntoz
         print *,' IVFLIP=',ivflip,' IOVR=',iovrRad,                     &
      &    ' ISUBCSW=',isubcsw,' ISUBCLW=',isubclw
         print *,' LCRICK=',lcrick,' LCNORM=',lcnorm,' LNOPREC=',lnoprec
         print *,' LTP =',ltp,', add extra top layer =',lextop
 
-        if ( ictmflg==0 .or. ictmflg==-2 ) then
+        if ( ictm==0 .or. ictm==-2 ) then
           print *,'   Data usage is limited by initial condition!'
           print *,'   No volcanic aerosols'
         endif
@@ -544,13 +541,14 @@ module GFS_rrtmg_setup
 !     Initialization
 
       call sol_init ( me, isol, solar_file, con_solr_2008, con_solr_2002,&
-           con_pi )                                              ! astronomy initialization routine
+           con_pi )                                               ! astronomy initialization routine
       call aer_init ( NLAY, me, iaermdl, iaerflg, lalw1bd, aeros_file, con_pi, &
-           con_t0c, con_c, con_boltz, con_plnk, errflg, errmsg)  ! aerosols initialization routine
-      call gas_init ( me, errflg, errmsg )                       ! co2 and other gases initialization routine
-      call cld_init ( si, NLAY, imp_physics, me, errflg, errmsg) ! cloud initialization routine
-      call rlwinit ( me, errflg, errmsg )                        ! lw RRTMG initialization routine
-      call rswinit ( me, errflg, errmsg )                        ! sw RRTMG initialization routine
+           con_t0c, con_c, con_boltz, con_plnk, errflg, errmsg)   ! aerosols initialization routine
+      call gas_init ( me, co2usr_file, co2cyc_file, ico2, ictm, ntoz, con_pi, &
+           errflg, errmsg)                                        ! co2 and other gases initialization routine
+      call cld_init ( si, NLAY, imp_physics, me, errflg, errmsg)  ! cloud initialization routine
+      call rlwinit ( me, errflg, errmsg )                         ! lw RRTMG initialization routine
+      call rswinit ( me, errflg, errmsg )                         ! sw RRTMG initialization routine
 !
       return
 !
@@ -578,8 +576,8 @@ module GFS_rrtmg_setup
 !> \section gen_radupdate General Algorithm
 !-----------------------------------
       subroutine radupdate( idate,jdate,deltsw,deltim,lsswr,me, iaermdl,&
-     &                      iaerflg, isol, aeros_file, slag,sdec,cdec,solcon, &
-     &                      con_pi, errflg,errmsg)
+           iaerflg, isol, aeros_file, slag,sdec,cdec,solcon, con_pi,    &
+           co2dat_file,co2gbl_file, ictm, ico2, ntoz, errflg, errmsg)
 !...................................
 
 ! =================   subprogram documentation block   ================ !
@@ -619,7 +617,7 @@ module GFS_rrtmg_setup
 !              = 2: use noaa ann-mean tsi tbl tim-scale with cycle apprx!
 !              = 3: use cmip5 ann-mean tsi tbl tim-scale with cycl apprx!
 !              = 4: use cmip5 mon-mean tsi tbl tim-scale with cycl apprx!
-!   ictmflg  : =yyyy#, external data ic time/date control flag          !
+!   ictm     : =yyyy#, external data ic time/date control flag          !
 !              =   -2: same as 0, but superimpose seasonal cycle        !
 !                      from climatology data set.                       !
 !              =   -1: use user provided external data for the          !
@@ -647,9 +645,9 @@ module GFS_rrtmg_setup
       implicit none
 
 !  ---  inputs:
-      integer, intent(in) :: idate(:), jdate(:), me, iaermdl, iaerflg, isol
+      integer, intent(in) :: idate(:), jdate(:), me, iaermdl, iaerflg, isol, ictm, ntoz, ico2
       logical, intent(in) :: lsswr
-      character(len=26),intent(in) :: aeros_file
+      character(len=26),intent(in) :: aeros_file,co2dat_file,co2gbl_file
 
       real (kind=kind_phys), intent(in) :: deltsw, deltim, con_pi
 
@@ -684,7 +682,7 @@ module GFS_rrtmg_setup
 
 !  --- ...  set up time stamp used for green house gases (** currently co2 only)
 
-      if ( ictmflg==0 .or. ictmflg==-2 ) then  ! get external data at initial condition time
+      if ( ictm==0 .or. ictm==-2 ) then  ! get external data at initial condition time
         kyear = idate(1)
         kmon  = idate(2)
         kday  = idate(3)
@@ -694,7 +692,7 @@ module GFS_rrtmg_setup
         kmon  = imon
         kday  = iday
         khour = ihour
-      endif   ! end if_ictmflg_block
+      endif   ! end if_ictm_block
 
       if ( month0 /= imon ) then
         lmon_chg = .true.
@@ -740,7 +738,8 @@ module GFS_rrtmg_setup
         lco2_chg = .false.
       endif
 
-      call gas_update ( kyear,kmon,kday,khour,loz1st,lco2_chg, me, errflg, errmsg )
+      call gas_update ( kyear,kmon,kday,khour,loz1st,lco2_chg, me, co2dat_file, &
+           co2gbl_file, ictm, ico2, ntoz, errflg, errmsg )
 
       if ( loz1st ) loz1st = .false.
 

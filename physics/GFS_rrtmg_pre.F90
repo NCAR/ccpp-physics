@@ -45,7 +45,7 @@
         clouds9, cldsa, cldfra, cldfra2d, lwp_ex,iwp_ex, lwp_fc,iwp_fc,        &
         faersw1, faersw2, faersw3, faerlw1, faerlw2, faerlw3, alpha,           &
         aero_dir_fdb, smoke_ext, dust_ext,                                     &
-        spp_wts_rad, spp_rad, rrfs_smoke_band, top_at_1, errmsg, errflg)
+        spp_wts_rad, spp_rad, rrfs_smoke_band, top_at_1, ico2, errmsg, errflg)
 
       use machine,                   only: kind_phys
 
@@ -111,7 +111,8 @@
          idcor_con,                        &
          idcor_hogan,                      &
          idcor_oreopoulos,                 &
-         rrfs_smoke_band                     ! Band number for rrfs-smoke dust and smoke
+         rrfs_smoke_band,                  & ! Band number for rrfs-smoke dust and smoke
+         ico2                                ! Flag for co2 source used in radiation
 
       integer, intent(in) :: ntdu1, ntdu2, ntdu3, ntdu4, ntdu5, ntss1, ntss2, ntss3,  &
                              ntss4, ntss5, ntsu, ntbcb, ntbcl, ntocb, ntocl, ntchm
@@ -422,8 +423,8 @@
           enddo
         enddo
       else                                ! climatological ozone
-        call getozn (prslk1, xlat, im, lmk,    &     !  ---  inputs
-                     olyr)                           !  ---  outputs
+        call getozn (prslk1, xlat, im, lmk, top_at_1,    &     !  ---  inputs
+                     olyr)                                     !  ---  outputs
       endif                               ! end_if_ntoz
 
 !> - Call coszmn(), to compute cosine of zenith angle (only when SW is called)
@@ -447,8 +448,8 @@
 
 !  --- ...  set up non-prognostic gas volume mixing ratioes
 
-      call getgases (plvl, xlon, xlat, IM, LMK, & !  --- inputs
-                     gasvmr)                      !  --- outputs
+      call getgases (plvl, xlon, xlat, IM, LMK, ico2, top_at_1,& !  --- inputs
+                     con_pi, gasvmr)                             !  --- outputs
 
 !CCPP: re-assign gasvmr(:,:,NF_VGAS) to gasvmr_X(:,:)
       do k = 1, LMK
