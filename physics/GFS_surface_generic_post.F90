@@ -128,6 +128,7 @@
           do i=1,im
             dlwsfc_cpl  (i) = dlwsfc_cpl(i) + adjsfcdlw(i)*dtf
             dswsfc_cpl  (i) = dswsfc_cpl(i) + adjsfcdsw(i)*dtf
+            psurfi_cpl  (i) = pgr(i)
           enddo
         endif
 
@@ -150,7 +151,6 @@
             nlwsfc_cpl  (i) = nlwsfc_cpl(i) + nlwsfci_cpl(i)*dtf
             t2mi_cpl    (i) = t2m(i)
             q2mi_cpl    (i) = q2m(i)
-            psurfi_cpl  (i) = pgr(i)
           enddo
 
 !  ---  estimate mean albedo for ocean point without ice cover and apply
