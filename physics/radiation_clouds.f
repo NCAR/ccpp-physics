@@ -173,7 +173,7 @@
 !> This module computes cloud related quantities for radiation computations.
       module module_radiation_clouds
 !
-      use physparam,           only : icldflg, iovr, idcor,             &
+      use physparam,           only : iovr, idcor,                      &
      &                                lcrick, lcnorm, lnoprec,          &
      &                                ivflip
       use physcons,            only : con_fvirt, con_ttp, con_rocp,     &
@@ -287,9 +287,6 @@
 !   errmsg          : CCPP error message                                !
 !                                                                       !
 !  external module variables: (in physparam)                            !
-!   icldflg         : cloud optical property scheme control flag        !
-!                     =0: abort! diagnostic cloud method discontinued   !
-!                     =1: model use prognostic cloud method             !
 !   imp_physics         : cloud microphysics scheme control flag        !
 !                     =99: zhao/carr/sundqvist microphysics cloud       !
 !                     =98: zhao/carr/sundqvist microphysics cloud+pdfcld!
@@ -334,44 +331,33 @@
       errmsg = ''
       errflg = 0
 
-!  ---  set up module variables
-
-      if (me == 0) print *, VTAGCLD      !print out version tag
-
-      if ( icldflg == 0 ) then
-        print *,' - Diagnostic Cloud Method has been discontinued'
-        errflg = 1
-        errmsg = 'ERROR(cld_init): Diagnostic Cloud Method has been '// &
-     &       'discontinued'
-        return
-      else
-        if (me == 0) then
-          print *,' - Using Prognostic Cloud Method'
-          if (imp_physics == 99) then
+      if (me == 0) then
+         print *, VTAGCLD       !print out version tag
+         print *,' - Using Prognostic Cloud Method'
+         if (imp_physics == 99) then
             print *,'   --- Zhao/Carr/Sundqvist microphysics'
-          elseif (imp_physics == 98) then
+         elseif (imp_physics == 98) then
             print *,'   --- zhao/carr/sundqvist + pdf cloud'
-          elseif (imp_physics == 11) then
+         elseif (imp_physics == 11) then
             print *,'   --- GFDL Lin cloud microphysics'
-          elseif (imp_physics == 8) then
+         elseif (imp_physics == 8) then
             print *,'   --- Thompson cloud microphysics'
-          elseif (imp_physics == 6) then
+         elseif (imp_physics == 6) then
             print *,'   --- WSM6 cloud microphysics'
-          elseif (imp_physics == 10) then
+         elseif (imp_physics == 10) then
             print *,'   --- MG cloud microphysics'
-          elseif (imp_physics == 15) then
+         elseif (imp_physics == 15) then
             print *,'   --- Ferrier-Aligo cloud microphysics'
-          elseif (imp_physics == 17) then
+         elseif (imp_physics == 17) then
             print *,'   --- NSSL cloud microphysics'
-          else
+         else
             print *,'  !!! ERROR in cloud microphysc specification!!!', &
      &              '  imp_physics (NP3D) =',imp_physics
             errflg = 1
             errmsg = 'ERROR(cld_init): cloud mp specification is not'// &
      &       ' valid'
             return
-          endif
-        endif
+         endif
       endif
 
 !> - Compute the top of BL cld (llyr), which is the topmost non

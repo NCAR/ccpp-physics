@@ -241,6 +241,48 @@
   dimensions = ()
   type = logical
   intent = in
+[top_at_1]
+  standard_name = flag_for_vertical_ordering_in_RRTMGP
+  long_name = flag for vertical ordering in RRTMGP
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[iovr]
+  standard_name = flag_for_cloud_overlap_method_for_radiation
+  long_name = flag for cloud overlap method
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[inc_minor_gas]
+  standard_name = flag_to_include_minor_gases_in_rrtmg
+  long_name = flag to include minor trace gases	in rrtmg
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[ilwcliq]
+  standard_name = flag_for_rrtmg_lw_cloud_optics
+  long_name = flag for rrtmg longwave cloud optics
+  units = flag
+  dimensions =  ()
+  type = integer
+  intent = in
+[ilwcice]
+  standard_name = flag_for_rrtmg_lw_ice_cloud_optics
+  long_name = flag for rrtmg longwave ice cloud optics
+  units = flag
+  dimensions =  ()
+  type = integer
+  intent = in
+[isubclw]
+  standard_name = flag_for_lw_clouds_sub_grid_approximation
+  long_name = flag for lw clouds sub-grid approximation
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
 [hlwc]
   standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step_and_radiation_levels
   long_name = longwave total sky heating rate

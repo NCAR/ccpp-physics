@@ -6,10 +6,9 @@
 !> @{
 module GFS_rrtmg_setup
 
-   use physparam, only : icldflg, &
-   &             iovrRad=>iovr, lcrick , lcnorm , lnoprec,            &
-   &             isubcsw, isubclw, ivflip , ipsd0,                    &
-   &             iswcliq
+   use physparam, only : lcrick , lcnorm , lnoprec,            &
+   &             ivflip , ipsd0,                    &
+   &             iswcliq,iovrRad=>iovr
    use machine, only:  kind_phys
    use radcons, only: ltp, lextop
 
@@ -44,14 +43,15 @@ module GFS_rrtmg_setup
 !!
    subroutine GFS_rrtmg_setup_init (                          &
           si, levr, ictm, isol, solar_file, ico2, iaer, ntcw, &
-          num_p3d, npdf3d, ntoz, iovr, isubc_sw, isubc_lw,    &
+          num_p3d, npdf3d, ntoz, iovr,                        &
           icliq_sw, crick_proof, ccnorm,                      &
           imp_physics,                                        &
           norad_precip, idate, iflip,                         &
           do_RRTMGP, me, lalw1bd, iaermdl, iaerflg,           &
           aeros_file, con_pi, con_t0c, con_c, con_boltz,      &
           con_plnk, con_solr_2008, con_solr_2002, co2usr_file,&
-          co2cyc_file, errmsg, errflg)
+          co2cyc_file, rad_hr_units, inc_minor_gas, ilwcliq,  &
+          iswcliq, isubcsw, isubclw, iswmode, errmsg, errflg)
 ! =================   subprogram documentation block   ================ !
 !                                                                       !
 ! subprogram:   GFS_rrtmg_setup_init - a subprogram to initialize radiation !
@@ -128,8 +128,8 @@ module GFS_rrtmg_setup
 !                     =1: max/ran overlapping clouds                    !
 !                     =2: maximum overlap clouds       (mcica only)     !
 !                     =3: decorrelation-length overlap (mcica only)     !
-!                     =4: exponential overlap clouds
-!   isubc_sw/isubc_lw: sub-column cloud approx control flag (sw/lw rad) !
+!                     =4: exponential overlap clouds                    !
+!   isubcsw/isubclw: sub-column cloud approx control flag (sw/lw rad)   !
 !                     =0: with out sub-column cloud approximation       !
 !                     =1: mcica sub-col approx. prescribed random seed  !
 !                     =2: mcica sub-col approx. provided random seed    !
@@ -161,8 +161,6 @@ module GFS_rrtmg_setup
       integer, intent(in) :: npdf3d
       integer, intent(in) :: ntoz
       integer, intent(in) :: iovr
-      integer, intent(in) :: isubc_sw
-      integer, intent(in) :: isubc_lw
       integer, intent(in) :: icliq_sw
       logical, intent(in) :: crick_proof
       logical, intent(in) :: ccnorm
@@ -170,10 +168,13 @@ module GFS_rrtmg_setup
       logical, intent(in) :: norad_precip
       integer, intent(in) :: idate(:)
       integer, intent(in) :: iflip
-      logical, intent(in) :: do_RRTMGP, lalw1bd
-      integer, intent(in) :: me
-      character(len=26),intent(in)  :: aeros_file, solar_file, co2usr_file, co2cyc_file
-      real(kind_phys),  intent(in)  :: con_pi,con_t0c,con_c,con_boltz,con_plnk,con_solr_2008,con_solr_2002
+      logical, intent(in) :: do_RRTMGP, lalw1bd, inc_minor_gas
+      integer, intent(in) :: me, rad_hr_units, ilwcliq, iswcliq, isubcsw,  &
+           isubclw, iswmode
+      character(len=26),intent(in)  :: aeros_file, solar_file, co2usr_file,&
+           co2cyc_file
+      real(kind_phys),  intent(in)  :: con_pi, con_t0c, con_c, con_boltz,  &
+           con_plnk, con_solr_2008, con_solr_2002
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
       integer,          intent(out) :: iaermdl, iaerflg
@@ -203,28 +204,14 @@ module GFS_rrtmg_setup
          return
       endif
 
-!     if ( ntcw > 0 ) then
-        icldflg = 1                     ! prognostic cloud optical prop scheme
-!     else
-!       icldflg = 0                     ! no support for diag cloud opt prop scheme
-!     endif
-
-      iswcliq = icliq_sw                ! optical property for liquid clouds for sw
-
-      ! iovr comes from the model. In the RRTMG implementation this is stored in phyrparam.f,
-      ! it comes in from the host-model and is set here. 
-      ! In GP, iovr is passed directly into the routines.
       iovrRAD = iovr
       lcrick  = crick_proof             ! control flag for eliminating CRICK 
       lcnorm  = ccnorm                  ! control flag for in-cld condensate 
       lnoprec = norad_precip            ! precip effect on radiation flag (ferrier microphysics)
-      isubcsw = isubc_sw                ! sub-column cloud approx flag in sw radiation
-      isubclw = isubc_lw                ! sub-column cloud approx flag in lw radiation
-
       ivflip = iflip                    ! vertical index direction control flag
 
 !  ---  assign initial permutation seed for mcica cloud-radiation
-      if ( isubc_sw>0 .or. isubc_lw>0 ) then
+      if ( isubcsw>0 .or. isubclw>0 ) then
 !       ipsd0 = 17*idate(1)+43*idate(2)+37*idate(3)+23*idate(4) + ipsd0
         ipsd0 = 17*idate(1)+43*idate(2)+37*idate(3)+23*idate(4)
       endif
@@ -235,8 +222,8 @@ module GFS_rrtmg_setup
         print *,' levr=',levr,' ictm=',ictm,' isol=',isol,' ico2=',ico2,&
      &          ' iaermdl=',iaermdl,' iaerflg=',iaerflg
         print *,' np3d=',num_p3d,' ntoz=',ntoz,                         &
-     &          ' iovr=',iovr,' isubc_sw=',isubc_sw,                    &
-     &          ' isubc_lw=',isubc_lw,' icliq_sw=',icliq_sw,            &
+     &          ' iovr=',iovr,' isubcsw=',isubcsw,                      &
+     &          ' isubclw=',isubclw,' icliq_sw=',icliq_sw,              &
      &          ' iflip=',iflip,'  me=',me
         print *,' crick_proof=',crick_proof,                            &
      &          ' ccnorm=',ccnorm,' norad_precip=',norad_precip
@@ -246,7 +233,9 @@ module GFS_rrtmg_setup
      &     ( si, levr, imp_physics, me, iaermdl, iaerflg, lalw1bd,      &
      &       aeros_file, con_pi, con_t0c, con_c, con_boltz, con_plnk,   &
      &       isol, solar_file, con_solr_2008, con_solr_2002,            &
-     &       co2usr_file, co2cyc_file, ico2, ictm, ntoz, errmsg, errflg )
+     &       co2usr_file, co2cyc_file, ico2, ictm, ntoz, rad_hr_units,  &
+     &       inc_minor_gas, ilwcliq, iswcliq, isubcsw, isubclw, iovr,   &
+     &       iswmode, errmsg, errflg )
 
 
       if ( me == 0 ) then
@@ -332,7 +321,8 @@ module GFS_rrtmg_setup
    subroutine radinit( si, NLAY, imp_physics, me, iaermdl, iaerflg, lalw1bd, &
         aeros_file, con_pi, con_t0c, con_c, con_boltz, con_plnk, isol,       &
         solar_file, con_solr_2008, con_solr_2002, co2usr_file, co2cyc_file,  &
-        ico2, ictm, ntoz, errmsg, errflg)
+        ico2, ictm, rad_hr_units, ntoz, inc_minor_gas, ilwcliq, iswcliq,     &
+        isubcsw, isubclw, iovr, iswmode, errmsg, errflg)
 !...................................
 
 !  ---  inputs:
@@ -396,9 +386,6 @@ module GFS_rrtmg_setup
 !   ioznflg  : ozone data source control flag                           !
 !              =0: use climatological ozone profile                     !
 !              =1: use interactive ozone profile                        !
-!   icldflg  : cloud optical property scheme control flag               !
-!              =0: use diagnostic cloud scheme                          !
-!              =1: use prognostic cloud scheme (default)                !
 !   imp_physics  : cloud microphysics scheme control flag               !
 !              =99 zhao/carr/sundqvist microphysics scheme              !
 !              =98 zhao/carr/sundqvist microphysics+pdf cloud&cnvc,cnvw !
@@ -445,8 +432,10 @@ module GFS_rrtmg_setup
       implicit none
 
 !  ---  inputs:
-      integer, intent(in) :: NLAY, me, imp_physics, iaermdl, iaerflg, isol, ico2, ictm, ntoz
-      logical, intent(in) :: lalw1bd
+      integer, intent(in) :: NLAY, me, imp_physics, iaermdl, iaerflg,    &
+           isol, ico2, ictm, ntoz, rad_hr_units, ilwcliq, iswcliq, isubcsw,&
+           isubclw, iovr, iswmode
+      logical, intent(in) :: lalw1bd, inc_minor_gas
       real (kind=kind_phys), intent(in) :: si(:), con_pi,con_t0c, con_c, &
            con_boltz, con_plnk, con_solr_2008, con_solr_2002
       character(len=26), intent(in) :: aeros_file, solar_file,co2usr_file, co2cyc_file
@@ -472,10 +461,9 @@ module GFS_rrtmg_setup
      &          '  May 01 2007'
         print *, VTAGRAD                !print out version tag
         print *,' - Selected Control Flag settings: ICTMflg=',ictm,     &
-     &    ' ISOLar =',isol, ' ICO2flg=',ico2,' IAERflg=',iaerflg,  &
-     &    ' ICLDflg=',icldflg,                                          &
+     &    ' ISOLar =',isol, ' ICO2flg=',ico2,' IAERflg=',iaerflg,       &
      &    ' IMP_PHYSICS=',imp_physics,' IOZNflg=',ntoz
-        print *,' IVFLIP=',ivflip,' IOVR=',iovrRad,                     &
+        print *,' IVFLIP=',ivflip,' IOVR=',iovr,                        &
      &    ' ISUBCSW=',isubcsw,' ISUBCLW=',isubclw
         print *,' LCRICK=',lcrick,' LCNORM=',lcnorm,' LNOPREC=',lnoprec
         print *,' LTP =',ltp,', add extra top layer =',lextop
@@ -547,8 +535,8 @@ module GFS_rrtmg_setup
       call gas_init ( me, co2usr_file, co2cyc_file, ico2, ictm, ntoz, con_pi, &
            errflg, errmsg)                                        ! co2 and other gases initialization routine
       call cld_init ( si, NLAY, imp_physics, me, errflg, errmsg)  ! cloud initialization routine
-      call rlwinit ( me, errflg, errmsg )                         ! lw RRTMG initialization routine
-      call rswinit ( me, errflg, errmsg )                         ! sw RRTMG initialization routine
+      call rlwinit ( me, rad_hr_units, inc_minor_gas, ilwcliq, isubcsw, iovr, errflg, errmsg )           ! lw RRTMG initialization routine
+      call rswinit ( me, rad_hr_units, inc_minor_gas, iswcliq, isubclw, iovr, iswmode, errflg, errmsg )  ! sw RRTMG initialization routine
 !
       return
 !

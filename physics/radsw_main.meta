@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = rrtmg_sw
   type = scheme
-  dependencies = machine.F,mersenne_twister.f,physcons.F90,physparam.f,radsw_datatb.f,radsw_param.f
+  dependencies = machine.F,mersenne_twister.f,physcons.F90,radsw_datatb.f,radsw_param.f
 
 ########################################################################
 [ccpp-arg-table]
@@ -279,6 +279,55 @@
   units = flag
   dimensions = ()
   type = logical
+  intent = in
+[inc_minor_gas]
+  standard_name = flag_to_include_minor_gases_in_rrtmg
+  long_name = flag to include minor trace gases in rrtmg
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[top_at_1]
+  standard_name = flag_for_vertical_ordering_in_RRTMGP
+  long_name = flag for vertical ordering in RRTMGP
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[iswcice]
+  standard_name = flag_for_rrtmg_sw_ice_cloud_optics
+  long_name = flag for rrtmg shortwave ice cloud optics
+  units = flag
+  dimensions =  ()
+  type = integer
+  intent = in
+[iswcliq]
+  standard_name = flag_for_rrtmg_sw_cloud_optics
+  long_name = flag for rrtmg shortwave cloud optics
+  units = flag
+  dimensions =  ()
+  type = integer
+  intent = in
+[isubcsw]
+  standard_name = flag_for_sw_clouds_grid_approximation
+  long_name = flag for sw clouds sub-grid approximation
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[iovr]
+  standard_name = flag_for_cloud_overlap_method_for_radiation
+  long_name = max-random overlap clouds
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[iswmode]
+  standard_name = flag_for_sw_scattering_choice
+  long_name = flag for rrtmg shortwave scattering choice
+  units = flag
+  dimensions = ()
+  type = integer
   intent = in
 [cld_cf]
   standard_name = total_cloud_fraction

@@ -90,7 +90,6 @@
 !                                                                          !
 !   external modules referenced:                                           !
 !                                                                          !
-!       'module physparam'                                                 !
 !       'module physcons'                                                  !
 !       'mersenne_twister'                                                 !
 !                                                                          !
@@ -304,9 +303,6 @@
 !! rrtmg-sw radiation code from aer inc.     
       module rrtmg_sw 
 !
-      use physparam,        only : iswrate, iswrgas, iswcliq, iswcice,  &
-     &                             isubcsw, icldflg, iovr,  ivflip,     &
-     &                             iswmode
       use physcons,         only : con_g, con_cp, con_avgd, con_amd,    &
      &                             con_amw, con_amo3
       use machine,          only : rb => kind_phys, im => kind_io4,     &
@@ -503,7 +499,8 @@
      &       sfcalb_uvis_dir, sfcalb_uvis_dif,                          &
      &       dzlyr,delpin,de_lgth,alpha,                                &
      &       cosz,solcon,NDAY,idxday,                                   &
-     &       npts, nlay, nlp1, lprnt,                                   &
+     &       npts, nlay, nlp1, lprnt, inc_minor_gas, iswcliq, iswcice,  &
+     &       isubcsw, iovr, top_at_1, iswmode,                          &
      &       cld_cf, lsswr,                                             &
      &       hswc,topflx,sfcflx,cldtau,                                 &   !  ---  outputs
      &       HSW0,HSWB,FLXPRF,FDNCMP,                                   &   ! ---  optional
@@ -570,6 +567,30 @@
 !   npts             : number of horizontal points                      !
 !   nlay,nlp1        : vertical layer/lavel numbers                     !
 !   lprnt            : logical check print flag                         !
+!   iswcliq - control flag for liq-cloud optical properties             !
+!           =0: input cloud optical depth, fixed ssa, asy               !
+!           =1: use hu and stamnes(1993) method for liq cld             !
+!           =2: use updated coeffs for hu and stamnes scheme            !
+!   iswcice - control flag for ice-cloud optical properties             !
+!           *** if iswcliq==0, iswcice is ignored                       !
+!           =1: use ebert and curry (1992) scheme for ice clouds        !
+!           =2: use streamer v3.0 (2001) method for ice clouds          !
+!           =3: use fu's method (1996) for ice clouds                   !
+!   iswmode - control flag for 2-stream transfer scheme                 !
+!           =1; delta-eddington    (joseph et al., 1976)                !
+!           =2: pifm               (zdunkowski et al., 1980)            !
+!           =3: discrete ordinates (liou, 1973)                         !
+!   isubcsw - sub-column cloud approximation control flag               !
+!           =0: no sub-col cld treatment, use grid-mean cld quantities  !
+!           =1: mcica sub-col, prescribed seeds to get random numbers   !
+!           =2: mcica sub-col, providing array icseed for random numbers!
+!   iovr    - cloud overlapping control flag                            !
+!           =0: random overlapping clouds                               !
+!           =1: maximum/random overlapping clouds                       !
+!           =2: maximum overlap cloud                                   !
+!           =3: decorrelation-length overlap clouds                     !
+!           =4: exponential cloud overlap (AER)                         !
+!           =5: exponential-random cloud overlap (AER)                  !   
 !                                                                       !
 !  output variables:                                                    !
 !   hswc  (npts,nlay): total sky heating rates (k/sec or k/day)         !
@@ -603,38 +624,6 @@
 !     nirdf            - downward surface nir diffused flux             !
 !     visbm            - downward surface uv+vis direct beam flux       !
 !     visdf            - downward surface uv+vis diffused flux          !
-!                                                                       !
-!  external module variables:  (in physparam)                           !
-!   iswrgas - control flag for rare gases (ch4,n2o,o2, etc.)            !
-!           =0: do not include rare gases                               !
-!           >0: include all rare gases                                  !
-!   iswcliq - control flag for liq-cloud optical properties             !
-!           =0: input cloud optical depth, fixed ssa, asy               !
-!           =1: use hu and stamnes(1993) method for liq cld             !
-!           =2: use updated coeffs for hu and stamnes scheme            !
-!   iswcice - control flag for ice-cloud optical properties             !
-!           *** if iswcliq==0, iswcice is ignored                       !
-!           =1: use ebert and curry (1992) scheme for ice clouds        !
-!           =2: use streamer v3.0 (2001) method for ice clouds          !
-!           =3: use fu's method (1996) for ice clouds                   !
-!   iswmode - control flag for 2-stream transfer scheme                 !
-!           =1; delta-eddington    (joseph et al., 1976)                !
-!           =2: pifm               (zdunkowski et al., 1980)            !
-!           =3: discrete ordinates (liou, 1973)                         !
-!   isubcsw - sub-column cloud approximation control flag               !
-!           =0: no sub-col cld treatment, use grid-mean cld quantities  !
-!           =1: mcica sub-col, prescribed seeds to get random numbers   !
-!           =2: mcica sub-col, providing array icseed for random numbers!
-!   iovr    - cloud overlapping control flag                            !
-!           =0: random overlapping clouds                               !
-!           =1: maximum/random overlapping clouds                       !
-!           =2: maximum overlap cloud                                   !
-!           =3: decorrelation-length overlap clouds                     !
-!           =4: exponential cloud overlap (AER)                         !
-!           =5: exponential-random cloud overlap (AER)                  !
-!   ivflip  - control flg for direction of vertical index               !
-!           =0: index from toa to surface                               !
-!           =1: index from surface to toa                               !
 !                                                                       !
 !  module parameters, control variables:                                !
 !     nblow,nbhgh      - lower and upper limits of spectral bands       !
@@ -690,11 +679,12 @@
 !  =====================    end of definitions    ====================  !
 
 !  ---  inputs:
-      integer, intent(in) :: npts, nlay, nlp1, NDAY
+      integer, intent(in) :: npts, nlay, nlp1, NDAY, iswcliq, iswcice,  &
+           isubcsw, iovr, iswmode
 
       integer, dimension(:), intent(in) :: idxday, icseed
 
-      logical, intent(in) :: lprnt, lsswr
+      logical, intent(in) :: lprnt, lsswr, inc_minor_gas, top_at_1
 
       real (kind=kind_phys), dimension(:,:), intent(in) ::              &
      &       plvl, tlvl
@@ -910,7 +900,7 @@
 !> - Prepare atmospheric profile for use in rrtm.
 !           the vertical index of internal array is from surface to top
 
-        if (ivflip == 0) then       ! input from toa to sfc
+        if (top_at_1) then       ! input from toa to sfc
 
           tem1 = 100.0 * con_g
           tem2 = 1.0e-20 * 1.0e3 * con_avgd
@@ -950,7 +940,7 @@
 !  --- ...  set up gas column amount, convert from volume mixing ratio
 !           to molec/cm2 based on coldry (scaled to 1.0e-20)
 
-          if (iswrgas > 0) then
+          if (inc_minor_gas) then
             do k = 1, nlay
               kk = nlp1 - k
              colamt(k,4) = max(temcol(k), coldry(k)*gasvmr_n2o(j1,kk)) ! n2o
@@ -1047,7 +1037,7 @@
 !  --- ...  set up gas column amount, convert from volume mixing ratio
 !           to molec/cm2 based on coldry (scaled to 1.0e-20)
 
-          if (iswrgas > 0) then
+          if (inc_minor_gas) then
             do k = 1, nlay
             colamt(k,4) = max(temcol(k), coldry(k)*gasvmr_n2o(j1,k))  ! n2o
             colamt(k,5) = max(temcol(k), coldry(k)*gasvmr_ch4(j1,k))  ! ch4
@@ -1094,7 +1084,7 @@
             enddo
           endif                    ! end if_iswcliq
 
-        endif                       ! if_ivflip
+        endif                       ! if_top_at_1
 
 !> - Compute fractions of clear sky view:
 !!    - random overlapping
@@ -1135,7 +1125,8 @@
           call cldprop                                                  &
 !  ---  inputs:
      &     ( cfrac,cliqp,reliq,cicep,reice,cdat1,cdat2,cdat3,cdat4,     &
-     &       zcf1, nlay, ipseed(j1), dz, delgth, alph,                  &
+     &       zcf1, nlay, ipseed(j1), dz, delgth, alph, iswcliq, iswcice,&
+     &       isubcsw, iovr,                                             &
 !  ---  outputs:
      &       taucw, ssacw, asycw, cldfrc, cldfmc                        &
      &     )
@@ -1143,7 +1134,7 @@
 !  --- ...  save computed layer cloud optical depth for output
 !           rrtm band 10 is approx to the 0.55 mu spectrum
 
-          if (ivflip == 0) then       ! input from toa to sfc
+          if (top_at_1) then       ! input from toa to sfc
             do k = 1, nlay
               kk = nlp1 - k
               cldtau(j1,kk) = taucw(k,10)
@@ -1152,7 +1143,7 @@
             do k = 1, nlay
               cldtau(j1,k) = taucw(k,10)
             enddo
-          endif                       ! end if_ivflip_block
+          endif                       ! end if_top_at_1_block
 
         else                        ! clear sky column
           cldfrc(:)  = f_zero
@@ -1187,9 +1178,9 @@
      &     )
 
 !> - Call the 2-stream radiation transfer model:
-!!    - if physparam::isubcsw .le.0, using standard cloud scheme,
+!!    - if GFS_typedefs::isubcsw .le.0, using standard cloud scheme,
 !!      call spcvrtc().
-!!    - if physparam::isubcsw .gt.0, using mcica cloud scheme,
+!!    - if GFS_typedefs::isubcsw .gt.0, using mcica cloud scheme,
 !!      call spcvrtm().
 
         if ( isubcsw <= 0 ) then     ! use standard cloud scheme
@@ -1198,7 +1189,7 @@
 !  ---  inputs:
      &     ( ssolar,cosz1,sntz1,albbm,albdf,sfluxzen,cldfrc,            &
      &       zcf1,zcf0,taug,taur,tauae,ssaae,asyae,taucw,ssacw,asycw,   &
-     &       nlay, nlp1,                                                &
+     &       nlay, nlp1, iswmode,                                       &
 !  ---  outputs:
      &       fxupc,fxdnc,fxup0,fxdn0,                                   &
      &       ftoauc,ftoau0,ftoadc,fsfcuc,fsfcu0,fsfcdc,fsfcd0,          &
@@ -1211,7 +1202,7 @@
 !  ---  inputs:
      &     ( ssolar,cosz1,sntz1,albbm,albdf,sfluxzen,cldfmc,            &
      &       zcf1,zcf0,taug,taur,tauae,ssaae,asyae,taucw,ssacw,asycw,   &
-     &       nlay, nlp1,                                                &
+     &       nlay, nlp1, iswmode,                                       &
 !  ---  outputs:
      &       fxupc,fxdnc,fxup0,fxdn0,                                   &
      &       ftoauc,ftoau0,ftoadc,fsfcuc,fsfcu0,fsfcdc,fsfcd0,          &
@@ -1276,7 +1267,7 @@
         sfcflx(j1)%upfx0 = fsfcu0
         sfcflx(j1)%dnfx0 = fsfcd0
 
-        if (ivflip == 0) then       ! output from toa to sfc
+        if (top_at_1) then       ! output from toa to sfc
 
 !  --- ...  compute heating rates
 
@@ -1372,7 +1363,7 @@
             enddo
           endif
 
-        endif                       ! if_ivflip
+        endif                       ! if_top_at_1
 
       enddo   lab_do_ipt
 
@@ -1387,9 +1378,8 @@
 !!\param me             print control for parallel process
 !>\section rswinit_gen rswinit General Algorithm
 !-----------------------------------
-      subroutine rswinit                                                &
-     &     ( me, errflg, errmsg ) !  ---  inputs:
-!  ---  outputs: (none)
+      subroutine rswinit( me, rad_hr_units, inc_minor_gas, iswcliq,     &
+           isubcsw, iovr, iswmode, errflg, errmsg )
 
 !  ===================  program usage description  ===================  !
 !                                                                       !
@@ -1401,17 +1391,8 @@
 !  ====================  defination of variables  ====================  !
 !                                                                       !
 !  inputs:                                                              !
-!    me       - print control for parallel process                      !
-!                                                                       !
-!  outputs: (none)                                                      !
-!                                                                       !
-!  external module variables:  (in physparam)                           !
-!   iswrate - heating rate unit selections                              !
-!           =1: output in k/day                                         !
-!           =2: output in k/second                                      !
-!   iswrgas - control flag for rare gases (ch4,n2o,o2, etc.)            !
-!           =0: do not include rare gases                               !
-!           >0: include all rare gases                                  !
+!   me           - print control for parallel process                   !
+!   rad_hr_units -                                                      !
 !   iswcliq - liquid cloud optical properties contrl flag               !
 !           =0: input cloud opt depth from diagnostic scheme            !
 !           >0: input cwp,rew, and other cloud content parameters       !
@@ -1419,9 +1400,6 @@
 !           =0: no sub-col cld treatment, use grid-mean cld quantities  !
 !           =1: mcica sub-col, prescribed seeds to get random numbers   !
 !           =2: mcica sub-col, providing array icseed for random numbers!
-!   icldflg - cloud scheme control flag                                 !
-!           =0: diagnostic scheme gives cloud tau, omiga, and g.        !
-!           =1: prognostic scheme gives cloud liq/ice path, etc.        !
 !   iovr    - clouds vertical overlapping control flag                  !
 !           =0: random overlapping clouds                               !
 !           =1: maximum/random overlapping clouds                       !
@@ -1434,6 +1412,9 @@
 !           =2: pifm               (zdunkowski et al., 1980)            !
 !           =3: discrete ordinates (liou, 1973)                         !
 !                                                                       !
+!  outputs:                                                             !
+!   errflg - error flag                                                 !
+!   errmsg - error message                                              !
 !  *******************************************************************  !
 !                                                                       !
 ! definitions:                                                          !
@@ -1446,8 +1427,9 @@
 !  ======================  end of description block  =================  !
 
 !  ---  inputs:
-      integer, intent(in) :: me
-
+      integer, intent(in) :: me, rad_hr_units, iswcliq, isubcsw, iovr,  &
+           iswmode
+      logical, intent(in) :: inc_minor_gas
 !  ---  outputs:
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -1466,14 +1448,6 @@
       errflg = 0
       errmsg = ''
 
-      if ( iovr<0 .or. iovr>5 ) then
-        print *,'  *** Error in specification of cloud overlap flag',   &
-     &          ' IOVR=',iovr,' in RSWINIT !!'
-        errflg = 1
-        errmsg = 'ERROR(rswinit): cloud-overlap (iovr) scheme selected not valid.'
-        return
-      endif
-
       if (me == 0) then
         print *,' - Using AER Shortwave Radiation, Version: ',VTAGSW
 
@@ -1485,7 +1459,7 @@
           print *,'   --- Discrete ordinates 2-stream transfer scheme'
         endif
 
-        if (iswrgas <= 0) then
+        if (.not. inc_minor_gas) then
           print *,'   --- Rare gases absorption is NOT included in SW'
         else
           print *,'   --- Include rare gases N2O, CH4, O2, absorptions',&
@@ -1501,42 +1475,13 @@
         elseif ( isubcsw == 2 ) then
           print *,'   --- Using MCICA sub-colum clouds approximation ', &
      &            'with provided input array of permutation seeds'
-        else
-          print *,'  *** Error in specification of sub-column cloud ',  &
-     &            ' control flag isubcsw =',isubcsw,' !!'
-          errflg = 1
-          errmsg = 'ERROR(rswinit): sub-column scheme (isubcsw) selected not valid.'
-          return
         endif
-      endif
-
-!> - Check cloud flags for consistency.
-
-      if ((icldflg == 0 .and. iswcliq /= 0) .or.                        &
-     &    (icldflg == 1 .and. iswcliq == 0)) then
-        print *,'  *** Model cloud scheme inconsistent with SW',        &
-     &          ' radiation cloud radiative property setup !!'
-        errflg = 1
-        errmsg = 'ERROR(rswinit): Model cloud scheme inconsistent with SW'//&
-     &          ' radiation cloud radiative property setup'
-        return
-      endif
-
-      if ( isubcsw==0 .and. iovr>2 ) then
-        if (me == 0) then
-          print *,'  *** IOVR=',iovr,' is not available for',           &
-     &            ' ISUBCSW=0 setting!!'
-          print *,'      The program will use maximum/random overlap',  &
-     &            ' instead.'
-        endif
-
-        iovr = 1
       endif
 
 !> - Setup constant factors for heating rate
 !! the 1.0e-2 is to convert pressure from mb to \f$N/m^2\f$ .
 
-      if (iswrate == 1) then
+      if (rad_hr_units == 1) then
 !       heatfac = 8.4391
 !       heatfac = con_g * 86400. * 1.0e-2 / con_cp  !   (in k/day)
         heatfac = con_g * 864.0 / con_cp            !   (in k/day)
@@ -1573,7 +1518,7 @@
 !> This subroutine computes the cloud optical properties for each
 !! cloudy layer and g-point interval.
 !!\param cfrac          layer cloud fraction
-!!\n for  physparam::iswcliq > 0 (prognostic cloud scheme)  - - -
+!!\n for  GFS_typedefs::iswcliq > 0 (prognostic cloud scheme)  - - -
 !!\param cliqp          layer in-cloud liq water path (\f$g/m^2\f$)
 !!\param reliq          mean eff radius for liq cloud (micron)
 !!\param cicep          layer in-cloud ice water path (\f$g/m^2\f$)
@@ -1582,7 +1527,7 @@
 !!\param cdat2          effective radius for rain drop (micron)
 !!\param cdat3          layer snow flake water path(\f$g/m^2\f$)
 !!\param cdat4          mean eff radius for snow flake(micron)
-!!\n for physparam::iswcliq = 0  (diagnostic cloud scheme)  - - -
+!!\n for GFS_typedefs::iswcliq = 0  (diagnostic cloud scheme)  - - -
 !!\param cliqp          not used
 !!\param cicep          not used
 !!\param reliq          not used
@@ -1609,8 +1554,8 @@
 !-----------------------------------
       subroutine cldprop                                                &
      &     ( cfrac,cliqp,reliq,cicep,reice,cdat1,cdat2,cdat3,cdat4,     &   !  ---  inputs
-     &       cf1, nlay, ipseed, dz, delgth, alpha,                      &
-     &       taucw, ssacw, asycw, cldfrc, cldfmc                        &   !  ---  output
+     &       cf1, nlay, ipseed, dz, delgth, alpha, iswcliq, iswcice,    &
+     &       isubcsw, iovr, taucw, ssacw, asycw, cldfrc, cldfmc         &   !  ---  output
      &     )
 
 !  ===================  program usage description  ===================  !
@@ -1661,7 +1606,7 @@
 !                                                                       !
 !                                                                       !
 !  explanation of the method for each value of iswcliq, and iswcice.    !
-!  set up in module "physparam"                                         !
+!  provided by host-model                                               !
 !                                                                       !
 !     iswcliq=0  : input cloud optical property (tau, ssa, asy).        !
 !                  (used for diagnostic cloud method)                   !
@@ -1696,7 +1641,8 @@
       use module_radsw_cldprtb
 
 !  ---  inputs:
-      integer, intent(in) :: nlay, ipseed
+      integer, intent(in) :: nlay, ipseed, iswcliq, iswcice, isubcsw,   &
+           iovr
       real (kind=kind_phys), intent(in) :: cf1, delgth
 
       real (kind=kind_phys), dimension(nlay), intent(in) :: cliqp,      &
@@ -1954,7 +1900,7 @@
 
         call mcica_subcol                                               &
 !  ---  inputs:
-     &     ( cldf, nlay, ipseed, dz, delgth, alpha,                     &
+     &     ( cldf, nlay, ipseed, dz, delgth, alpha, iovr,               &
 !  ---  outputs:
      &       lcloudy                                                    &
      &     )
@@ -1993,7 +1939,7 @@
 !!\section mcica_sw_gen mcica_subcol General Algorithm
 ! ----------------------------------
       subroutine mcica_subcol                                           &
-     &    ( cldf, nlay, ipseed, dz, de_lgth, alpha,                     &       !  ---  inputs
+     &    ( cldf, nlay, ipseed, dz, de_lgth, alpha, iovr,               &       !  ---  inputs
      &      lcloudy                                                     &       !  ---  outputs
      &    )
 
@@ -2006,15 +1952,10 @@
 !    ** note : if the cloud generator is called multiple times, need    !
 !              to permute the seed between each call; if between calls  !
 !              for lw and sw, use values differ by the number of g-pts. !
-!    dz    - real, layer thickness (km)                            nlay !
-!    de_lgth-real, layer cloud decorrelation length (km)            1   !
-!    alpha  - real, EXP/ER decorrelation parameter                 nlay !
-!                                                                       !
-!  output variables:                                                    !
-!   lcloudy - logical, sub-colum cloud profile flag array    nlay*ngptsw!
-!                                                                       !
-!  other control flags from module variables:                           !
-!     iovr      : control flag for cloud overlapping method             !
+!    dz      - real, layer thickness (km)                          nlay !
+!    de_lgth - real, layer cloud decorrelation length (km)          1   !
+!    alpha   - real, EXP/ER decorrelation parameter                nlay !
+!    iovr    - control flag for cloud overlapping method            1   !
 !                 =0: random                                            !
 !                 =1: maximum/random overlapping clouds                 !
 !                 =2: maximum overlap cloud                             !
@@ -2022,12 +1963,15 @@
 !                 =4: exponential cloud overlap method (AER)            !
 !                 =5: exponential-random cloud overlap method (AER)     !
 !                                                                       !
+!  output variables:                                                    !
+!   lcloudy - logical, sub-colum cloud profile flag array    nlay*ngptsw!
+!                                                                       !
 !  =====================    end of definitions    ====================  !
 
       implicit none
 
 !  ---  inputs:
-      integer, intent(in) :: nlay, ipseed
+      integer, intent(in) :: nlay, ipseed, iovr
 
       real (kind=kind_phys), dimension(nlay), intent(in) :: cldf, dz
       real (kind=kind_phys), intent(in) :: de_lgth
@@ -2477,7 +2421,7 @@
       subroutine spcvrtc                                                &
      &     ( ssolar,cosz,sntz,albbm,albdf,sfluxzen,cldfrc,              &  !  ---  inputs
      &       cf1,cf0,taug,taur,tauae,ssaae,asyae,taucw,ssacw,asycw,     &
-     &       nlay, nlp1,                                                &
+     &       nlay, nlp1, iswmode,                                       &
      &       fxupc,fxdnc,fxup0,fxdn0,                                   &  !  ---  outputs
      &       ftoauc,ftoau0,ftoadc,fsfcuc,fsfcu0,fsfcdc,fsfcd0,          &
      &       sfbmc,sfdfc,sfbm0,sfdf0,suvbfc,suvbf0                      &
@@ -2539,7 +2483,7 @@
 !    zldbt   - real, layer beam transmittance for clear/cloudy    nlp1  !
 !    ztdbt   - real, lev total beam transmittance for clr/cld     nlp1  !
 !                                                                       !
-!  control parameters in module "physparam"                             !
+!  control parameters in module "GFS_typedefs"                          !
 !    iswmode - control flag for 2-stream transfer schemes               !
 !              = 1 delta-eddington    (joseph et al., 1976)             !
 !              = 2 pifm               (zdunkowski et al., 1980)         !
@@ -2580,7 +2524,7 @@
       real (kind=kind_phys), parameter :: eps1  = 1.0e-8
 
 !  ---  inputs:
-      integer, intent(in) :: nlay, nlp1
+      integer, intent(in) :: nlay, nlp1, iswmode
 
       real (kind=kind_phys), dimension(nlay,ngptsw), intent(in) ::      &
      &       taug, taur
@@ -2685,7 +2629,7 @@
 !!    transmittance.
 !    - Set up toa direct beam and surface values (beam and diff).
 !    - Delta scaling for clear-sky condition.
-!    - General two-stream expressions for physparam::iswmode .
+!    - General two-stream expressions.
 !    - Compute homogeneous reflectance and transmittance for both
 !      conservative and non-conservative scattering.
 !    - Pre-delta-scaling clear and cloudy direct beam transmittance.
@@ -2717,7 +2661,7 @@
           zasy3 = 0.75 * zasy1
 
 !>  - Perform general two-stream expressions:
-!!\n  control parameters in module "physparam"                             
+!!\n  control parameters provided by host-model                             
 !!\n    iswmode - control flag for 2-stream transfer schemes               
 !!\n              = 1 delta-eddington    (joseph et al., 1976)             
 !!\n              = 2 pifm               (zdunkowski et al., 1980)         
@@ -2911,7 +2855,7 @@
 !!    transmittance.
 !    - Set up toa direct beam and surface values (beam and diff)
 !    - Delta scaling for total-sky condition
-!    - General two-stream expressions for physparam::iswmode
+!    - General two-stream expressions
 !    - Compute homogeneous reflectance and transmittance for
 !      conservative scattering and non-conservative scattering
 !    - Pre-delta-scaling clear and cloudy direct beam transmittance
@@ -2946,7 +2890,7 @@
               zasy3 = 0.75 * zasy1
 
 !>  - Perform general two-stream expressions:
-!!\n  control parameters in module "physparam"
+!!\n  control parameters provided by host-model
 !!\n    iswmode - control flag for 2-stream transfer schemes
 !!\n              = 1 delta-eddington    (joseph et al., 1976)
 !!\n              = 2 pifm               (zdunkowski et al., 1980)
@@ -3273,7 +3217,7 @@
       subroutine spcvrtm                                                &
      &     ( ssolar,cosz,sntz,albbm,albdf,sfluxzen,cldfmc,              &   !  ---  inputs
      &       cf1,cf0,taug,taur,tauae,ssaae,asyae,taucw,ssacw,asycw,     &
-     &       nlay, nlp1,                                                &
+     &       nlay, nlp1, iswmode,                                       &
      &       fxupc,fxdnc,fxup0,fxdn0,                                   &   !  ---  outputs
      &       ftoauc,ftoau0,ftoadc,fsfcuc,fsfcu0,fsfcdc,fsfcd0,          &
      &       sfbmc,sfdfc,sfbm0,sfdf0,suvbfc,suvbf0                      &
@@ -3309,6 +3253,10 @@
 !    ssacw   - real, weighted cloud single scat albedo       nlay*nbdsw !
 !    asycw   - real, weighted cloud asymmetry factor         nlay*nbdsw !
 !    nlay,nlp1 - integer,  number of layers/levels                 1    !
+!    iswmode - control flag for 2-stream transfer schemes               !
+!              = 1 delta-eddington    (joseph et al., 1976)             !
+!              = 2 pifm               (zdunkowski et al., 1980)         !
+!              = 3 discrete ordinates (liou, 1973)                      ! 
 !                                                                       !
 !  output variables:                                                    !
 !    fxupc   - real, tot sky upward flux                     nlp1*nbdsw !
@@ -3336,12 +3284,6 @@
 !    ztrad   - real, diffuse transmissivity for clear/cloudy      nlp1  !
 !    zldbt   - real, layer beam transmittance for clear/cloudy    nlp1  !
 !    ztdbt   - real, lev total beam transmittance for clr/cld     nlp1  !
-!                                                                       !
-!  control parameters in module "physparam"                             !
-!    iswmode - control flag for 2-stream transfer schemes               !
-!              = 1 delta-eddington    (joseph et al., 1976)             !
-!              = 2 pifm               (zdunkowski et al., 1980)         !
-!              = 3 discrete ordinates (liou, 1973)                      !
 !                                                                       !
 !  *******************************************************************  !
 !  original code description                                            !
@@ -3378,7 +3320,7 @@
       real (kind=kind_phys), parameter :: eps1  = 1.0e-8
 
 !  ---  inputs:
-      integer, intent(in) :: nlay, nlp1
+      integer, intent(in) :: nlay, nlp1, iswmode
 
       real (kind=kind_phys), dimension(nlay,ngptsw), intent(in) ::      &
      &       taug, taur, cldfmc
@@ -3482,7 +3424,7 @@
 !!    transmittance.
 !    - Set up toa direct beam and surface values (beam and diff)
 !    - Delta scaling for clear-sky condition
-!    - General two-stream expressions for physparam::iswmode
+!    - General two-stream expressions
 !    - Compute homogeneous reflectance and transmittance for both
 !      conservative and non-conservative scattering
 !    - Pre-delta-scaling clear and cloudy direct beam transmittance
@@ -3513,7 +3455,7 @@
           zasy3 = 0.75 * zasy1
 
 !>  - Perform general two-stream expressions:
-!!\n control parameters in module "physparam" 
+!!\n control parameters provided by host-model 
 !!\n iswmode - control flag for 2-stream transfer schemes 
 !!\n           = 1 delta-eddington (joseph et al., 1976) 
 !!\n           = 2 pifm (zdunkowski et al., 1980) 
@@ -3706,7 +3648,7 @@
 !!    transmittance.
 !    - Set up toa direct beam and surface values (beam and diff)
 !    - Delta scaling for total-sky condition
-!    - General two-stream expressions for physparam::iswmode
+!    - General two-stream expressions
 !    - Compute homogeneous reflectance and transmittance for
 !      conservative scattering and non-conservative scattering
 !    - Pre-delta-scaling clear and cloudy direct beam transmittance

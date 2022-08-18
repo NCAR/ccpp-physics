@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = GFS_radiation_surface
   type = scheme
-  dependencies = iounitdef.f,machine.F,physparam.f,radiation_surface.f,set_soilveg_ruc.F90,namelist_soilveg_ruc.F90
+  dependencies = iounitdef.f,machine.F,radiation_surface.f,set_soilveg_ruc.F90,namelist_soilveg_ruc.F90
 
 ########################################################################
 [ccpp-arg-table]
