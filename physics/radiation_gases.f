@@ -80,7 +80,7 @@
 !     nov 2008 - y-t hou     fix bugs in superimposing climatology     !
 !                  seasonal cycle calculations                         !
 !     aug 2011 - y-t hou     fix a bug in subr getgases doing vertical !
-!                  co2 mapping. (for iflip=0 case, not affact opr).    !
+!                  co2 mapping. (for top_at_1 case, not affact opr).   !
 !     aug 2012 - y-t hou     modified subr getozn.  moved the if-first !
 !                  block to subr gas_init to ensure threading safe in  !
 !                  climatology ozone applications. (not affect gfs)    !

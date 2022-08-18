@@ -21,6 +21,13 @@
   dimensions = ()
   type = integer
   intent = in
+[iovr]
+  standard_name = flag_for_cloud_overlap_method_for_radiation
+  long_name = max-random overlap clouds
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
 [iovr_rand]
   standard_name = flag_for_random_cloud_overlap_method
   long_name = choice of random cloud overlap method
@@ -146,6 +153,21 @@
   long_name = ratio of a circle's circumference to its diameter
   units = none
   dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[top_at_1]
+  standard_name = flag_for_vertical_ordering_in_RRTMGP
+  long_name = flag for vertical ordering in RRTMGP
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[si]
+  standard_name = sigma_pressure_hybrid_vertical_coordinate
+  long_name = vertical sigma coordinate for radiation initialization
+  units = none
+  dimensions = (vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = in

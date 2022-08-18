@@ -127,7 +127,6 @@ contains
        if (iovr_convcld == iovr_dcorr .or. iovr_convcld == iovr_exp .or. iovr_convcld == iovr_exprand) then
           call get_alpha_exper(nCol, nLev, iovr_convcld, iovr_exprand, deltaZc*0.001, de_lgth, cld_cnv_frac, cnv_cloud_overlap_param)
        else
-          de_lgth(:)                   = 0.
           cnv_cloud_overlap_param(:,:) = 0.
        endif
     endif

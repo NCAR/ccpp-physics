@@ -6,10 +6,6 @@ module GFS_rrtmgp_setup
   use module_radiation_astronomy, only : sol_init, sol_update
   use module_radiation_aerosols,  only : aer_init, aer_update
   use module_radiation_gases,     only : gas_init, gas_update
-  !  use GFS_cloud_diagnostics,      only : hml_cloud_diagnostics_initialize
-  ! *NOTE* These parameters below are required radiation_****** modules. They are not
-  !        directly used by the RRTMGP routines.
-  use physparam,                  only : ivflip
   implicit none
   
   public GFS_rrtmgp_setup_init, GFS_rrtmgp_setup_timestep_init, GFS_rrtmgp_setup_finalize
@@ -87,8 +83,6 @@ contains
     end if
 
     ! Set radiation parameters
-    ivflip  = iflip                    ! vertical index direction control flag
-    
     if ( ictm==0 .or. ictm==-2 ) then
        iaerflg = mod(iaer, 100)        ! no volcanic aerosols for clim hindcast
     else
@@ -125,23 +119,11 @@ contains
     iyear0 = 0
     monthd = 0
 
-!> -# Initialization
-!! - astronomy initialization routine:
-!! call module_radiation_astronomy::sol_init()
-!! - aerosols initialization routine:
-!! call module_radiation_aerosols::aer_init()
-!! - CO2 and other gases intialization routine:
-!! call module_radiation_gases::gas_init()
-
     ! Call initialization routines..
     call sol_init ( me, isol, solar_file, con_solr_2008, con_solr_2002, con_pi )
     call aer_init ( levr, me, iaermdl, iaerflg, lalw1bd, aeros_file, con_pi, con_t0c,    &
          con_c, con_boltz, con_plnk, errflg, errmsg)
-    call gas_init ( me, co2usr_file, co2cyc_file, ictm, ntoz, ico2, con_pi, errflg, errmsg )
-    !call hml_cloud_diagnostics_initialize(imp_physics, imp_physics_fer_hires,           &
-    !     imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,                      &
-    !     imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, imp_physics_mg, levr, me, si,&
-    !     errflg)
+    call gas_init ( me, co2usr_file, co2cyc_file, ico2, ntoz, ictm, con_pi, errflg, errmsg )
 
     if ( me == 0 ) then
        print *,' return from rad_initialize (GFS_rrtmgp_setup_init) - after calling radinit'

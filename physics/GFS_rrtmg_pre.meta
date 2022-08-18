@@ -450,6 +450,13 @@
   dimensions = ()
   type = integer
   intent = in
+[iovr]
+  standard_name = flag_for_cloud_overlap_method_for_radiation
+  long_name = max-random overlap clouds
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
 [iovr_rand]
   standard_name = flag_for_random_cloud_overlap_method
   long_name = choice of random cloud overlap method
@@ -489,6 +496,20 @@
   standard_name = flag_for_exponential_random_cloud_overlap_method
   long_name = choice of exponential-random cloud overlap method
   units     = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[dcorr_con]
+  standard_name = decorrelation_length_used_by_overlap_method
+  long_name = decorrelation length (default) used by cloud overlap method (iovr)
+  units = km
+  dimensions = ()
+  type = real
+  intent = in
+[idcor]
+  standard_name = flag_for_decorrelation_length_method
+  long_name = flag for decorrelation length method used in cloud overlap method (iovr)
+  units = flag
   dimensions = ()
   type = integer
   intent = in
@@ -599,6 +620,20 @@
   dimensions = ()
   type = logical
   intent = in
+[lcrick]
+  standard_name = flag_for_CRICK_proof_cloud_water
+  long_name = flag for CRICK-Proof cloud water
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[lcnorm]
+  standard_name = flag_for_in_cloud_condensate
+  long_name = flag for cloud condensate normalized by cloud cover
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [fhswr]
   standard_name = period_of_shortwave_radiation_calls
   long_name = frequency for shortwave radiation
@@ -659,6 +694,22 @@
   standard_name = gravitational_acceleration
   long_name = gravitational acceleration
   units = m s-2
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_ttp]
+  standard_name = triple_point_temperature_of_water
+  long_name = triple point temperature of water
+  units = K
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_thgni]
+  standard_name	= temperature_ice_nucleation_starts
+  long_name = temperature the H.G.Nuc. ice starts
+  units = K
   dimensions = ()
   type = real
   kind = kind_phys
@@ -1343,6 +1394,14 @@
   dimensions = ()
   type = logical
   intent = out
+[si]
+  standard_name = sigma_pressure_hybrid_vertical_coordinate
+  long_name = vertical sigma coordinate for radiation initialization
+  units = none
+  dimensions = (vertical_interface_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
 [ico2]
   standard_name = control_for_co2
   long_name = prescribed global mean value (old opernl)

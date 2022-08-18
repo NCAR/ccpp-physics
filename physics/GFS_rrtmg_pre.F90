@@ -27,15 +27,15 @@
         imp_physics,imp_physics_nssl, nssl_ccn_on, nssl_invertccn,             &
         imp_physics_thompson, imp_physics_gfdl, imp_physics_zhao_carr,         &
         imp_physics_zhao_carr_pdf, imp_physics_mg, imp_physics_wsm6,           &
-        imp_physics_fer_hires, iovr_rand, iovr_maxrand, iovr_max, iovr_dcorr,  &
-        iovr_exp, iovr_exprand, idcor_con, idcor_hogan, idcor_oreopoulos,      & 
-        julian, yearlen, lndp_var_list, lsswr, lslwr,                          &
-        ltaerosol, lgfdlmprad, uni_cld, effr_in, do_mynnedmf, lmfshal,         &
-        lmfdeep2, fhswr, fhlwr, solhr, sup, con_eps, epsm1, fvirt,             &
-        rog, rocp, con_rd, xlat_d, xlat, xlon, coslat, sinlat, tsfc, slmsk,    &
-        prsi, prsl, prslk, tgrs, sfc_wts, mg_cld, effrr_in, pert_clds,         &
+        imp_physics_fer_hires, iovr, iovr_rand, iovr_maxrand, iovr_max,        &
+        iovr_dcorr, iovr_exp, iovr_exprand, idcor, idcor_con, idcor_hogan,     &
+        idcor_oreopoulos, dcorr_con, julian, yearlen, lndp_var_list, lsswr,    &
+        lslwr, ltaerosol, lgfdlmprad, uni_cld, effr_in, do_mynnedmf, lmfshal,  &
+        lcnorm, lmfdeep2, lcrick, fhswr, fhlwr, solhr, sup, con_eps, epsm1,    &
+        fvirt, rog, rocp, con_rd, xlat_d, xlat, xlon, coslat, sinlat, tsfc,    &
+        slmsk, prsi, prsl, prslk, tgrs, sfc_wts, mg_cld, effrr_in, pert_clds,  &
         sppt_wts, sppt_amp, cnvw_in, cnvc_in, qgrs, aer_nm, dx, icloud,        & 
-        iaermdl, iaerflg, con_pi, con_g,                                       & !inputs from here and above
+        iaermdl, iaerflg, con_pi, con_g, con_ttp, con_thgni, si,               & !inputs from here and above
         coszen, coszdg, effrl_inout, effri_inout, effrs_inout,                 &
         clouds1, clouds2, clouds3, clouds4, clouds5, qci_conv,                 & !in/out from here and above
         kd, kt, kb, mtopa, mbota, raddt, tsfg, tsfa, de_lgth, alb1d, delp, dz, & !output from here and below
@@ -102,6 +102,7 @@
                                            yearlen, icloud, iaermdl, iaerflg
 
       integer,              intent(in)  ::                                     &
+         iovr,                             & ! choice of cloud-overlap method
          iovr_rand,                        & ! Flag for random cloud overlap method
          iovr_maxrand,                     & ! Flag for maximum-random cloud overlap method
          iovr_max,                         & ! Flag for maximum cloud overlap method
@@ -109,6 +110,7 @@
          iovr_exp,                         & ! Flag for exponential cloud overlap method
          iovr_exprand,                     & ! Flag for exponential-random cloud overlap method
          idcor_con,                        &
+         idcor,                            &
          idcor_hogan,                      &
          idcor_oreopoulos,                 &
          rrfs_smoke_band,                  & ! Band number for rrfs-smoke dust and smoke
@@ -121,7 +123,8 @@
 
       logical,              intent(in) :: lsswr, lslwr, ltaerosol, lgfdlmprad, &
                                           uni_cld, effr_in, do_mynnedmf,       &
-                                          lmfshal, lmfdeep2, pert_clds
+                                          lmfshal, lmfdeep2, pert_clds, lcrick,&
+                                          lcnorm
       logical,              intent(in) :: aero_dir_fdb
       real(kind=kind_phys), dimension(:,:), intent(in) :: smoke_ext, dust_ext
 
@@ -129,12 +132,12 @@
       integer,              intent(in) :: spp_rad
       real(kind_phys),      intent(in) :: spp_wts_rad(:,:)
 
-      real(kind=kind_phys), intent(in) :: fhswr, fhlwr, solhr, sup, julian, sppt_amp
-      real(kind=kind_phys), intent(in) :: con_eps, epsm1, fvirt, rog, rocp, con_rd, con_pi, con_g
+      real(kind=kind_phys), intent(in) :: fhswr, fhlwr, solhr, sup, julian, sppt_amp, dcorr_con
+      real(kind=kind_phys), intent(in) :: con_eps, epsm1, fvirt, rog, rocp, con_rd, con_pi, con_g, con_ttp, con_thgni
 
       real(kind=kind_phys), dimension(:), intent(in) :: xlat_d, xlat, xlon,    &
                                                         coslat, sinlat, tsfc,  &
-                                                        slmsk, dx
+                                                        slmsk, dx, si
 
       real(kind=kind_phys), dimension(:,:), intent(in) :: prsi, prsl, prslk,   &
                                                           tgrs, sfc_wts,       &
@@ -951,20 +954,21 @@
      &     ( plyr, plvl, tlyr, tvly, qlyr, qstl, rhly,                  &    !  ---  inputs:
      &       ccnd, ncndl, cnvw, cnvc, tracer1,                          &
      &       xlat, xlon, slmsk, dz, delp, IM, LM, LMK, LMP,             &
-     &       deltaq, sup, me, icloud, kdt,                              &
+     &       deltaq, sup, dcorr_con, me, icloud, kdt,                   &
      &       ntrac, ntcw, ntiw, ntrw, ntsw, ntgl, ntclamt,              &
      &       imp_physics, imp_physics_nssl, imp_physics_fer_hires,      &
      &       imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,  &
      &       imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,          &
-     &       imp_physics_mg, iovr_rand, iovr_maxrand, iovr_max,         &
-     &       iovr_dcorr, iovr_exp, iovr_exprand, idcor_con,             &
-     &       idcor_hogan, idcor_oreopoulos,                             &
+     &       imp_physics_mg, iovr, iovr_rand, iovr_maxrand, iovr_max,   &
+     &       iovr_dcorr, iovr_exp, iovr_exprand, idcor, idcor_con,      &
+     &       idcor_hogan, idcor_oreopoulos, lcrick, lcnorm,             &
      &       imfdeepcnv, imfdeepcnv_gf, do_mynnedmf, lgfdlmprad,        &
      &       uni_cld, lmfshal, lmfdeep2, cldcov, clouds1,               &
      &       effrl, effri, effrr, effrs, effr_in,                       &
      &       effrl_inout, effri_inout, effrs_inout,                     &
      &       lwp_ex, iwp_ex, lwp_fc, iwp_fc,                            &
-     &       dzb, xlat_d, julian, yearlen, gridkm,                      &
+     &       dzb, xlat_d, julian, yearlen, gridkm, top_at_1, si,        &
+     &       con_ttp, con_pi, con_g, con_rd, con_thgni,                 &
      &       cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice,          &    !  ---  outputs:
      &       cld_rwp, cld_rerain, cld_swp, cld_resnow,                  &    !  ---  outputs:
      &       cldsa, mtopa, mbota, de_lgth, alpha                        &    !  ---  outputs:
