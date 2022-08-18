@@ -13,8 +13,6 @@ module GFS_rrtmg_setup
    &             iswcliq,                                             &
    &             kind_phys
 
-   use radcons, only: ltp, lextop
-
    implicit none
 
    public GFS_rrtmg_setup_init, GFS_rrtmg_setup_timestep_init, GFS_rrtmg_setup_finalize
@@ -50,7 +48,7 @@ module GFS_rrtmg_setup
           icliq_sw, crick_proof, ccnorm,                      &
           imp_physics,                                        &
           norad_precip, idate, iflip,                         &
-          do_RRTMGP, me, errmsg, errflg)
+          do_RRTMGP, me, ltp, lextop, errmsg, errflg)
 ! =================   subprogram documentation block   ================ !
 !                                                                       !
 ! subprogram:   GFS_rrtmg_setup_init - a subprogram to initialize radiation !
@@ -141,6 +139,8 @@ module GFS_rrtmg_setup
 !                     =0: index from toa to surface                     !
 !                     =1: index from surface to toa                     !
 !   me               : print control flag                               !
+!   ltp              : number of radiation extra top layers             !
+!   lextop           : control flag to denote extra top layers are used !
 !                                                                       !
 !  subroutines called: radinit                                          !
 !                                                                       !
@@ -171,6 +171,8 @@ module GFS_rrtmg_setup
       integer, intent(in) :: iflip
       logical, intent(in) :: do_RRTMGP
       integer, intent(in) :: me
+      integer, intent(in) :: ltp
+      logical, intent(in) :: lextop
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
@@ -243,7 +245,7 @@ module GFS_rrtmg_setup
 
       call radinit                                                      &
 !  ---  inputs:
-     &     ( si, levr, imp_physics, me )
+     &     ( si, levr, imp_physics, me, ltp, lextop )
 !  ---  outputs:
 !          ( none )
 
@@ -324,7 +326,7 @@ module GFS_rrtmg_setup
 ! Private functions
 
 
-   subroutine radinit( si, NLAY, imp_physics, me )
+   subroutine radinit( si, NLAY, imp_physics, me, ltp, lextop )
 !...................................
 
 !  ---  inputs:
@@ -437,7 +439,8 @@ module GFS_rrtmg_setup
       implicit none
 
 !  ---  inputs:
-      integer, intent(in) :: NLAY, me, imp_physics 
+      integer, intent(in) :: NLAY, me, imp_physics, ltp
+      logical, intent(in) :: lextop 
 
       real (kind=kind_phys), intent(in) :: si(:)
 
