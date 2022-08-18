@@ -780,8 +780,8 @@
   type = logical
   intent = in
 [use_lake]
-  standard_name = flag_for_using_flake
-  long_name = flag indicating lake points using flake model
+  standard_name = flag_for_using_lake_model
+  long_name = flag indicating lake points using a lake model
   units = flag
   dimensions = (horizontal_loop_extent)
   type = integer
