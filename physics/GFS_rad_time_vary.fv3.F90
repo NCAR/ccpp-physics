@@ -66,7 +66,7 @@
            
 !$OMP parallel num_threads(nthrds) default(none)        &
 !$OMP          private (nb,ix,i,j)                      &
-!$OMP          shared (lrseeds,isubc_lw,isubc_sw,ipsdlim,ipsd0,ipseed) &
+!$OMP          shared (lrseeds,rseeds,isubc_lw,isubc_sw,ipsdlim,ipsd0,ipseed) &
 !$OMP          shared (cnx,cny,sec,numrdm,stat,nblks,isc,jsc)  &
 !$OMP          shared (blksz,icsdsw,icsdlw,jmap,imap)
 
