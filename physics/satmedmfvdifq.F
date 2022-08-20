@@ -17,7 +17,12 @@
 !! Updated version of satmedmfvdif.f (May 2019) to have better low level
 !! inversion, to reduce the cold bias in lower troposphere,
 !! and to reduce the negative wind speed bias in upper troposphere
-
+!!
+!! Incorporate the LES-based changes for TC simulation
+!! (Chen et al.,2022, https://doi.org/10.1175/WAF-D-21-0168.1)
+!! with additional improvements on MF working with Cu schemes
+!! Xiaomin Chen, 5/2/2022
+!!
 !> \section arg_table_satmedmfvdifq_init Argument Table
 !! \htmlinclude satmedmfvdifq_init.html
 !!
@@ -77,7 +82,7 @@
      &     prsi,del,prsl,prslk,phii,phil,delt,                          &
      &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,dkt,dku,                &
      &     kinver,xkzm_m,xkzm_h,xkzm_s,dspfac,bl_upfr,bl_dnfr,          &
-     &     rlmx,elmx,sfc_rlm,                                           &
+     &     rlmx,elmx,sfc_rlm,tc_pbl,                                    &
      &     ntqv,dtend,dtidx,index_of_temperature,index_of_x_wind,       &
      &     index_of_y_wind,index_of_process_pbl,gen_tend,ldiag3d,       &
      &     errmsg,errflg)
@@ -91,6 +96,7 @@
       integer, intent(in)  :: im, km, ntrac, ntcw, ntrw, ntiw,          &
      &                        ntke, ntqv
       integer, intent(in)  :: sfc_rlm
+      integer, intent(in)  :: tc_pbl
       integer, intent(in)  :: kinver(:)
       integer, intent(out) :: kpbl(:)
       logical, intent(in)  :: gen_tend,ldiag3d
@@ -244,6 +250,8 @@
       real(kind=kind_phys) qlcr, zstblmax, hcrinv
 !
       real(kind=kind_phys) h1
+
+      real(kind=kind_phys) bfac, mffac
 !!
       parameter(wfac=7.0,cfac=4.5)
       parameter(gamcrt=3.,gamcrq=0.,sfcfrac=0.1)
@@ -261,10 +269,19 @@
       parameter(qlcr=3.5e-5,zstblmax=2500.)
       parameter(xkinv1=0.15,xkinv2=0.3)
       parameter(h1=0.33333333,hcrinv=250.)
-      parameter(ck0=0.4,ck1=0.15,ch0=0.4,ch1=0.15)
-      parameter(ce0=0.4,cs0=0.2)
+      parameter(ck1=0.15,ch1=0.15)
+      parameter(cs0=0.2)
       parameter(rchck=1.5,ndt=20)
 
+      if (tc_pbl == 0) then
+        ck0=0.4
+        ch0=0.4
+        ce0=0.4
+      else if (tc_pbl == 1) then
+        ck0=0.55
+        ch0=0.55
+        ce0=0.12
+      endif
       gravi = 1.0 / grav
       g = grav
       gocp = g / cp
@@ -594,11 +611,19 @@
       do i = 1, im
         if(.not.flg(i)) then
           rbdn(i) = rbup(i)
-          spdk2   = max((u1(i,k)**2+v1(i,k)**2),1.)
-!         rbup(i) = (thvx(i,k)-thermal(i))*
-!    &              (g*zl(i,k)/thvx(i,1))/spdk2
-          rbup(i) = (thlvx(i,k)-thermal(i))*
-     &              (g*zl(i,k)/thlvx(i,1))/spdk2
+          if (tc_pbl == 0) then
+            spdk2   = max((u1(i,k)**2+v1(i,k)**2),1.)
+!           rbup(i) = (thvx(i,k)-thermal(i))*
+!    &                (g*zl(i,k)/thvx(i,1))/spdk2
+            rbup(i) = (thlvx(i,k)-thermal(i))*
+     &                (g*zl(i,k)/thlvx(i,1))/spdk2
+          else if (tc_pbl == 1) then
+            bfac = 100.0
+            spdk2   = max((u1(i,k)-u1(i,1))**2+(v1(i,k)-v1(i,1))**2,1.)
+     &                + bfac*ustar(i)**2
+            rbup(i) = (thlvx(i,k)-thermal(i))*
+     &                (g*(zl(i,k)-zl(i,1))/thlvx(i,1))/spdk2
+          endif
           kpblx(i) = k
           flg(i)  = rbup(i) > crb(i)
         endif
@@ -668,11 +693,19 @@
       do i = 1, im
         if(.not.flg(i) .and. k > kb1(i)) then
           rbdn(i) = rbup(i)
-          spdk2   = max((u1(i,k)**2+v1(i,k)**2),1.)
-!         rbup(i) = (thvx(i,k)-thermal(i))*
-!    &              (g*zl(i,k)/thvx(i,1))/spdk2
-          rbup(i) = (thlvx(i,k)-thermal(i))*
-     &              (g*zl(i,k)/thlvx(i,1))/spdk2
+          if (tc_pbl == 0) then
+            spdk2   = max((u1(i,k)**2+v1(i,k)**2),1.)
+!           rbup(i) = (thvx(i,k)-thermal(i))*
+!    &                (g*zl(i,k)/thvx(i,1))/spdk2
+            rbup(i) = (thlvx(i,k)-thermal(i))*
+     &                (g*zl(i,k)/thlvx(i,1))/spdk2
+          else if (tc_pbl == 1) then
+            bfac = 100.0
+            spdk2   = max((u1(i,k)-u1(i,1))**2+(v1(i,k)-v1(i,1))**2,1.)
+     &                + bfac*ustar(i)**2
+            rbup(i) = (thlvx(i,k)-thermal(i))*
+     &                (g*(zl(i,k)-zl(i,1))/thlvx(i,1))/spdk2
+          endif
           kpblx(i) = k
           flg(i)  = rbup(i) > crb(i)
         endif
@@ -790,9 +823,17 @@
       do i = 1, im
         if(.not.flg(i) .and. k > kb1(i)) then
           rbdn(i) = rbup(i)
-          spdk2   = max((u1(i,k)**2+v1(i,k)**2),1.)
-          rbup(i) = (thlvx(i,k)-thermal(i))*
-     &              (g*zl(i,k)/thlvx(i,1))/spdk2
+          if (tc_pbl == 0) then
+            spdk2   = max((u1(i,k)**2+v1(i,k)**2),1.)
+            rbup(i) = (thlvx(i,k)-thermal(i))*
+     &                (g*zl(i,k)/thlvx(i,1))/spdk2
+          else if (tc_pbl == 1) then
+            bfac = 100.
+            spdk2   = max((u1(i,k)-u1(i,1))**2+(v1(i,k)-v1(i,1))**2,1.)
+     &                + bfac*ustar(i)**2
+            rbup(i) = (thlvx(i,k)-thermal(i))*
+     &                (g*(zl(i,k)-zl(i,1))/thlvx(i,1))/spdk2
+          endif
           kpbl(i) = k
           flg(i)  = rbup(i) > crb(i)
         endif
@@ -923,6 +964,31 @@
      &    thlx,thvx,thlvx,gdx,thetae,
      &    krad,mrad,radmin,buod,xmfd,
      &    tcdo,qcdo,ucdo,vcdo,xlamde,bl_dnfr)
+
+      if (tc_pbl == 1) then
+!
+!>  - unify mass fluxes with Cu
+!
+      do i=1,im
+        if(zol(i) > -0.5) then
+          do k = 1, km
+            xmf(i,k)=0.0
+          end do
+        end if
+      end do
+!
+!>  - taper off MF in high-wind conditions
+!
+      do i = 1,im
+        tem = sqrt(u10m(i)**2+v10m(i)**2)
+        mffac=(1. - MIN(MAX(tem - 20.0, 0.0), 10.0)/10.)
+        do k = 1, km
+          xmf(i,k)=xmf(i,k)*mffac
+          xmfd(i,k)=xmfd(i,k)*mffac
+        enddo
+      enddo
+
+      endif
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -1007,10 +1073,15 @@
               tem3=((u1(i,n+1)-u1(i,n))/dz)**2
               tem3=tem3+((v1(i,n+1)-v1(i,n))/dz)**2
               tem3=cs0*sqrt(tem3)*sqrt(tke(i,k))
-              ptem = (gotvx(i,n)*(thvx(i,n+1)-thvx(i,k))+tem3)*dz
-!             ptem = (gotvx(i,n)*(thlvx(i,n+1)-thlvx(i,k)+tem3)*dz
-!             ptem = (gotvx(i,n)*(tem1-thvx(i,k))+tem3)*dz
-!!            ptem = (gotvx(i,n)*(tem1-thlvx(i,k)+tem3)*dz
+              if (tc_pbl == 0) then
+                ptem = (gotvx(i,n)*(thvx(i,n+1)-thvx(i,k))+tem3)*dz
+!               ptem = (gotvx(i,n)*(thlvx(i,n+1)-thlvx(i,k)+tem3)*dz
+!               ptem = (gotvx(i,n)*(tem1-thvx(i,k))+tem3)*dz
+!!              ptem = (gotvx(i,n)*(tem1-thlvx(i,k)+tem3)*dz
+              else if (tc_pbl == 1) then
+                tem1 = 0.5*(thvx(i,n+1)+thvx(i,n))
+                ptem = (gotvx(i,n)*(tem1-thvx(i,k))+tem3)*dz
+              endif
               bsum = bsum + ptem
               zlup = zlup + dz
               if(bsum >= tke(i,k)) then
@@ -1041,10 +1112,14 @@
                 tem3 = cs0*sqrt(tem3)*sqrt(tke(i,1))
               else
                 dz = zl(i,n) - zl(i,n-1)
-                tem1 = thvx(i,n-1)
-!               tem1 = thlvx(i,n-1)
-!               tem1 = 0.5 * (thvx(i,n-1) + thvx(i,n))
-!!              tem1 = 0.5 * (thlvx(i,n-1) + thlvx(i,n))
+                if (tc_pbl == 0) then
+                 tem1 = thvx(i,n-1)
+!                tem1 = thlvx(i,n-1)
+!                tem1 = 0.5 * (thvx(i,n-1) + thvx(i,n))
+!!               tem1 = 0.5 * (thlvx(i,n-1) + thlvx(i,n))
+                else if (tc_pbl == 1) then
+                  tem1 = 0.5*(thvx(i,n)+thvx(i,n-1))
+                endif
                 tem3 = ((u1(i,n)-u1(i,n-1))/dz)**2
                 tem3 = tem3+((v1(i,n)-v1(i,n-1))/dz)**2
                 tem3 = cs0*sqrt(tem3)*sqrt(tke(i,k))
@@ -1111,8 +1186,14 @@
           else
             ptem = 1. + 2.7 * zol(i)
             zk = tem / ptem
-          endif 
-          elm(i,k) = zk*rlam(i,k)/(rlam(i,k)+zk)
+          endif
+
+          if (tc_pbl == 0) then
+            elm(i,k) = zk*rlam(i,k)/(rlam(i,k)+zk)
+          else if (tc_pbl == 1) then
+            ! new blending method for mixing length
+            elm(i,k) = sqrt( 1.0/( 1.0/(zk**2)+1.0/(rlam(i,k)**2) ) )
+          endif
 
 !>  - If sfc_rlm=1, use zk for elm within surface layer
           if ( sfc_rlm == 1 ) then
@@ -1123,7 +1204,12 @@
           dz = zi(i,k+1) - zi(i,k)
           tem = max(gdx(i),dz)
           elm(i,k) = min(elm(i,k), tem)
-          ele(i,k) = min(ele(i,k), tem)
+
+          if (tc_pbl == 0) then
+            ele(i,k) = min(ele(i,k), tem)
+          else if (tc_pbl == 1) then
+            ele(i,k) = elm(i,k)
+          endif
 !
         enddo
       enddo
