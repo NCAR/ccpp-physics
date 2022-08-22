@@ -7,20 +7,6 @@
 [ccpp-arg-table]
   name = GFS_rad_time_vary_timestep_init
   type = scheme
-[nthrds]
-  standard_name = number_of_openmp_threads
-  long_name = number of OpenMP threads available for physics schemes
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-[blksz]
-  standard_name = ccpp_block_sizes
-  long_name = for explicit data blocking: block sizes of all blocks
-  units = count
-  dimensions = (ccpp_block_count)
-  type = integer
-  intent = in
 [lrseeds]
   standard_name = do_host_provided_random_seeds
   long_name = flag to use host-provided random seeds
