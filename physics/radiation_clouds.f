@@ -31,7 +31,7 @@
 !            imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,         !
 !            imp_physics_mg, iovr_rand, iovr_maxrand, iovr_max,        !
 !            iovr_dcorr, iovr_exp, iovr_exprand, idcor_con,            !
-!            idcor_hogan, idcor_oreopoulos,                            !
+!            idcor_hogan, idcor_oreopoulos, icond_condovron,           !
 !            imfdeepcnv, imfdeepcnv_gf, do_mynnedmf, lgfdlmprad,       !
 !            uni_cld, lmfshal, lmfdeep2, cldcov, clouds1,              !
 !            effrl, effri, effrr, effrs, effr_in,                      !
@@ -41,7 +41,7 @@
 !          outputs:                                                    !
 !            cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice,         !
 !            cld_rwp, cld_rerain, cld_swp, cld_resnow,                 !
-!            clds,mtop,mbot,de_lgth,alpha)                             !
+!            clds,mtop,mbot,de_lgth,alpha,beta)                        !
 !                                                                      !
 !    internal/external accessable subroutines:                                !
 !       'progcld_zhao_carr'      --- zhao/moorthi prognostic cloud scheme     !
@@ -173,7 +173,7 @@
 !> This module computes cloud related quantities for radiation computations.
       module module_radiation_clouds
 !
-      use physparam,           only : icldflg, iovr, idcor,             &
+      use physparam,           only : icldflg, iovr, idcor, icond,      &
      &                                lcrick, lcnorm, lnoprec,          &
      &                                ivflip
       use physcons,            only : con_fvirt, con_ttp, con_rocp,     &
@@ -182,7 +182,8 @@
       use module_microphysics, only : rsipath2
       use module_iounitdef,    only : NICLTUN
       use module_radiation_cloud_overlap, only: cmp_dcorr_lgth,         &
-     &                                          get_alpha_exper
+     &                                          get_alpha_exper,        &
+     &                                          get_beta_exper
       use machine,             only : kind_phys
 !
       implicit   none
@@ -405,7 +406,7 @@
      &       imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,          &
      &       imp_physics_mg, iovr_rand, iovr_maxrand, iovr_max,         &
      &       iovr_dcorr, iovr_exp, iovr_exprand, idcor_con,             &
-     &       idcor_hogan, idcor_oreopoulos,                             &
+     &       idcor_hogan, idcor_oreopoulos, icond_condovron,            &
      &       imfdeepcnv, imfdeepcnv_gf, do_mynnedmf, lgfdlmprad,        &
      &       uni_cld, lmfshal, lmfdeep2, cldcov, clouds1,               &
      &       effrl, effri, effrr, effrs, effr_in,                       &
@@ -414,7 +415,7 @@
      &       dzlay, latdeg, julian, yearlen, gridkm,                    &
      &       cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice,          &    !  ---  outputs:
      &       cld_rwp, cld_rerain, cld_swp, cld_resnow,                  &    
-     &       clds, mtop, mbot, de_lgth, alpha                           &    
+     &       clds, mtop, mbot, de_lgth, alpha, beta                     &    
      &      )
 
 ! =================   subprogram documentation block   ================ !
@@ -503,6 +504,7 @@
 !   idcor_con       :  choice for decorrelation-length: Use constant value (=0)
 !   idcor_hogan     :  choice for decorrelation-length: (=1)
 !   idcor_oreopoulos:  choice for decorrelation-length: (=2)
+!   icond_condovron :  apply cloud condensate vertical overlap: (=1)    !
 !   imfdeepcnv      :  flag for mass-flux deep convection scheme        !
 !   imfdeepcnv_gf   :  flag for scale- & aerosol-aware Grell-Freitas scheme (GSD)
 !   do_mynnedmf     :  flag for MYNN-EDMF                               !
@@ -545,8 +547,9 @@
 !   clds  (IX,5)    : fraction of clouds for low, mid, hi, tot, bl      !
 !   mtop  (IX,3)    : vertical indices for low, mid, hi cloud tops      !
 !   mbot  (IX,3)    : vertical indices for low, mid, hi cloud bases     !
-!   de_lgth(ix)     : clouds decorrelation length (km)                  !
-!   alpha(ix,nlay)  : alpha decorrelation parameter
+!   de_lgth(ix)     : cloud fraction decorrelation length (km)          !
+!   alpha(ix,nlay)  : cloud fraction decorrelation parameter            !
+!   beta(ix,nlay)   : cloud condensate decorrelation parameter          !
 !                                                                       !
 ! module variables:                                                     !
 !   ivflip          : control flag of vertical index direction          !
@@ -589,7 +592,8 @@
      &     iovr_exprand,                 ! Flag for exponential-random cloud overlap method
      &     idcor_con,                   
      &     idcor_hogan,                 
-     &     idcor_oreopoulos
+     &     idcor_oreopoulos,
+     &     icond_condovron
 
 
       logical, intent(in)  :: uni_cld, lmfshal, lmfdeep2, effr_in
@@ -618,14 +622,15 @@
 
 !  ---  outputs
 
-      real (kind=kind_phys), dimension(:,:),   intent(out) ::            &
+      real (kind=kind_phys), dimension(:,:), intent(out) ::              &
      &   cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice,               &
      &   cld_rwp, cld_rerain, cld_swp, cld_resnow
-      real (kind=kind_phys), dimension(:,:),   intent(out) :: clds
-      real (kind=kind_phys), dimension(:),     intent(out) :: de_lgth
-      real (kind=kind_phys), dimension(:,:),   intent(out) :: alpha
+      real (kind=kind_phys), dimension(:,:), intent(out) :: clds
+      real (kind=kind_phys), dimension(:),   intent(out) :: de_lgth
+      real (kind=kind_phys), dimension(:,:), intent(out) :: alpha
+      real (kind=kind_phys), dimension(:,:), intent(out) :: beta
 
-      integer,               dimension(:,:),   intent(out) :: mtop,mbot
+      integer,               dimension(:,:), intent(out) :: mtop,mbot
 
 !  ---  local variables:
       real (kind=kind_phys), dimension(IX,NLAY) :: cldtot, cldcnv,      &
@@ -635,6 +640,8 @@
 
       real (kind=kind_phys) :: clwmin, clwm, clwt, onemrh, value,       &
      &       tem1, tem2, tem3
+
+      real (kind=kind_phys), dimension(IX) :: de_lgth_cond
 
       integer :: i, k, id, nf
 
@@ -890,7 +897,8 @@
         call cmp_dcorr_lgth(ix, xlat, con_pi, de_lgth)
       endif
       if (idcor == idcor_oreopoulos) then
-        call cmp_dcorr_lgth(ix, latdeg, julian, yearlen, de_lgth)
+        call cmp_dcorr_lgth(ix, icond, latdeg, julian, yearlen,          &
+     &                      de_lgth, de_lgth_cond)
       endif
       if (idcor == idcor_con) then
          de_lgth(:) = decorr_con
@@ -904,6 +912,18 @@
       else
          de_lgth(:) = 0.
          alpha(:,:) = 0.
+      endif
+
+      ! Call subroutine get_beta_exper to define beta parameter for exponential cloud overlap options
+      ! if cloud condensate vertical overlap is requested (icond = 1)
+
+      if (icond == icond_condovron .and. iovr == iovr_exp .or.          &
+     &    iovr == iovr_exprand) then
+         call get_beta_exper(ix, nLay, iovr, iovr_exprand, dzlay,       &
+     &                       de_lgth_cond, cld_frac, beta)
+      else
+         de_lgth_cond(:) = 0.
+         beta(:,:) = 0.
       endif
 
 !> - Call gethml() to compute low,mid,high,total, and boundary layer

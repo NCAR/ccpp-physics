@@ -29,7 +29,7 @@
         imp_physics_zhao_carr_pdf, imp_physics_mg, imp_physics_wsm6,           &
         imp_physics_fer_hires, iovr_rand, iovr_maxrand, iovr_max, iovr_dcorr,  &
         iovr_exp, iovr_exprand, idcor_con, idcor_hogan, idcor_oreopoulos,      & 
-        julian, yearlen, lndp_var_list, lsswr, lslwr,                          &
+        icond_condovron, julian, yearlen, lndp_var_list, lsswr, lslwr,         &
         ltaerosol, lgfdlmprad, uni_cld, effr_in, do_mynnedmf, lmfshal,         &
         lmfdeep2, fhswr, fhlwr, solhr, sup, con_eps, epsm1, fvirt,             &
         rog, rocp, con_rd, xlat_d, xlat, xlon, coslat, sinlat, tsfc, slmsk,    &
@@ -42,7 +42,7 @@
         gasvmr_o2, gasvmr_co, gasvmr_cfc11, gasvmr_cfc12, gasvmr_cfc22,        &
         gasvmr_ccl4,  gasvmr_cfc113, aerodp, clouds6, clouds7, clouds8,        &
         clouds9, cldsa, cldfra, cldfra2d, lwp_ex,iwp_ex, lwp_fc,iwp_fc,        &
-        faersw1, faersw2, faersw3, faerlw1, faerlw2, faerlw3, alpha,           &
+        faersw1, faersw2, faersw3, faerlw1, faerlw2, faerlw3, alpha, beta,     &
         aero_dir_fdb, smoke_ext, dust_ext,                                     &
         spp_wts_rad, spp_rad, rrfs_smoke_band, errmsg, errflg)
 
@@ -113,6 +113,7 @@
          idcor_con,                        &
          idcor_hogan,                      &
          idcor_oreopoulos,                 &
+         icond_condovron,                  &
          rrfs_smoke_band                     ! Band number for rrfs-smoke dust and smoke
 
       integer, intent(in) :: ntdu1, ntdu2, ntdu3, ntdu4, ntdu5, ntss1, ntss2, ntss3,  &
@@ -200,7 +201,8 @@
       real(kind=kind_phys), dimension(:,:,:), intent(out) :: faerlw1,&
                                                              faerlw2,&
                                                              faerlw3
-      real(kind=kind_phys), dimension(:,:),   intent(out) :: alpha
+      real(kind=kind_phys), dimension(:,:),   intent(out) :: alpha,  &
+                                                             beta
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -956,7 +958,7 @@
      &       imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,          &
      &       imp_physics_mg, iovr_rand, iovr_maxrand, iovr_max,         &
      &       iovr_dcorr, iovr_exp, iovr_exprand, idcor_con,             &
-     &       idcor_hogan, idcor_oreopoulos,                             &
+     &       idcor_hogan, idcor_oreopoulos, icond_condovron,            &
      &       imfdeepcnv, imfdeepcnv_gf, do_mynnedmf, lgfdlmprad,        &
      &       uni_cld, lmfshal, lmfdeep2, cldcov, clouds1,               &
      &       effrl, effri, effrr, effrs, effr_in,                       &
@@ -965,7 +967,7 @@
      &       dzb, xlat_d, julian, yearlen, gridkm,                      &
      &       cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice,          &    !  ---  outputs:
      &       cld_rwp, cld_rerain, cld_swp, cld_resnow,                  &    !  ---  outputs:
-     &       cldsa, mtopa, mbota, de_lgth, alpha                        &    !  ---  outputs:
+     &       cldsa, mtopa, mbota, de_lgth, alpha, beta                  &    !  ---  outputs:
      &      )
 
 !      endif                             ! end_if_ntcw

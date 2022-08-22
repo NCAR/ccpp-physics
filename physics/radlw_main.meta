@@ -198,6 +198,14 @@
   type = real
   kind = kind_phys
   intent = in
+[beta]
+  standard_name = cloud_condensate_decorrelation_parameter
+  long_name = cloud condensate decorrelation parameter
+  units = frac
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
 [npts]
   standard_name = horizontal_loop_extent
   long_name = horizontal dimension

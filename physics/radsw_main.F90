@@ -295,6 +295,12 @@
 !                     use either a constant or a latitude-varying and      !
 !                     day-of-year varying decorrelation length selected    !
 !                     with parameter "idcor".                              !
+!       jun 2022,  m.j. iacono   -- added sub-grid cloud condensate        !
+!                     overlap capability for use with the AER exponential  !
+!                     and exponential-random cloud fractino overlap        !
+!                     options using the latitude-varying and day-of-year   !
+!                     varying rank decorrelation length of Oreopoulos,     !
+!                     et al. (2012); selected with parameter "icond".      !
 !                                                                          !
 !!!!!  ==============================================================  !!!!!
 !!!!!                         end descriptions                         !!!!!
@@ -305,8 +311,8 @@
       module rrtmg_sw 
 !
       use physparam,        only : iswrate, iswrgas, iswcliq, iswcice,  &
-     &                             isubcsw, icldflg, iovr,  ivflip,     &
-     &                             iswmode
+     &                             isubcsw, icldflg, iovr, icond,       &
+     &                             ivflip, iswmode
       use physcons,         only : con_g, con_cp, con_avgd, con_amd,    &
      &                             con_amw, con_amo3
       use machine,          only : rb => kind_phys, im => kind_io4,     &
@@ -501,7 +507,7 @@
      &       icseed, aeraod, aerssa, aerasy,                            &
      &       sfcalb_nir_dir, sfcalb_nir_dif,                            &
      &       sfcalb_uvis_dir, sfcalb_uvis_dif,                          &
-     &       dzlyr,delpin,de_lgth,alpha,                                &
+     &       dzlyr,delpin,de_lgth,alpha,beta,                           &
      &       cosz,solcon,NDAY,idxday,                                   &
      &       npts, nlay, nlp1, lprnt,                                   &
      &       cld_cf, lsswr,                                             &
@@ -563,6 +569,8 @@
 !   delpin(npts,nlay): layer pressure thickness (mb)                    !
 !   de_lgth(npts)    : clouds decorrelation length (km)                 !
 !   alpha(npts,nlay) : EXP/ER cloud overlap decorrelation parameter     !
+!   beta(npts,nlay)  : EXP/ER cloud condensate vertical overlap         !
+!                    : decorrelation parameter                          !
 !   cosz  (npts)     : cosine of solar zenith angle                     !
 !   solcon           : solar constant                      (w/m**2)     !
 !   NDAY             : num of daytime points                            !
@@ -632,6 +640,9 @@
 !           =3: decorrelation-length overlap clouds                     !
 !           =4: exponential cloud overlap (AER)                         !
 !           =5: exponential-random cloud overlap (AER)                  !
+!   icond - cloud condensate overlap control flag                       !
+!           =0: do not use cloud condensate overlap                     !
+!           =1: use cloud condensate overlap (mcica-only)               !
 !   ivflip  - control flg for direction of vertical index               !
 !           =0: index from toa to surface                               !
 !           =1: index from surface to toa                               !
@@ -729,6 +740,7 @@
       real (kind=kind_phys), intent(in) :: cosz(npts), solcon,          &
      &       de_lgth(npts)
       real (kind=kind_phys), dimension(npts,nlay), intent(in) :: alpha
+      real (kind=kind_phys), dimension(npts,nlay), intent(in) :: beta
 
 !  ---  outputs:
       real (kind=kind_phys), dimension(:,:), intent(inout) :: hswc
@@ -756,11 +768,15 @@
       real (kind=kind_phys), dimension(nlay,ngptsw) ::   cldfmc,        &
      &                                             cldfmc_save,         &
      &       taug, taur
+      real (kind=kind_phys), dimension(nlay,ngptsw) :: clwpmc,          &
+     &       ciwpmc, crwpmc, cswpmc
       real (kind=kind_phys), dimension(nlp1,nbdsw):: fxupc, fxdnc,      &
      &       fxup0, fxdn0
 
       real (kind=kind_phys), dimension(nlay,nbdsw)  ::                  &
      &       tauae, ssaae, asyae, taucw, ssacw, asycw
+      real (kind=kind_phys), dimension(nlay,ngptsw) ::                  &
+     &       taucmc, ssacmc, asycmc
 
       real (kind=kind_phys), dimension(ngptsw) :: sfluxzen
 
@@ -768,7 +784,9 @@
      &       pavel, tavel, coldry, colmol, h2ovmr, o3vmr, temcol,       &
      &       cliqp, reliq, cicep, reice, cdat1, cdat2, cdat3, cdat4,    &
      &       cfrac, fac00, fac01, fac10, fac11, forfac, forfrac,        &
-     &       selffac, selffrac, rfdelp, dz
+     &       selffac, selffrac, rfdelp, dz, cldf
+      real (kind=kind_phys), dimension(nlay,ngptsw) ::                  &
+     &       cdag1, cdag2, cdag3, cdag4
 
       real (kind=kind_phys), dimension(nlp1) :: fnet, flxdc, flxuc,     &
      &       flxd0, flxu0
@@ -779,7 +797,9 @@
       real (kind=kind_phys) :: cosz1, sntz1, tem0, tem1, tem2, s0fac,   &
      &       ssolar, zcf0, zcf1, ftoau0, ftoauc, ftoadc,                &
      &       fsfcu0, fsfcuc, fsfcd0, fsfcdc, suvbfc, suvbf0, delgth
-      real (kind=kind_phys), dimension(nlay) :: alph
+      real (kind=kind_phys), dimension(nlay) :: alphad, betad
+
+      logical, dimension(ngptsw,nlay) :: lcloudy
 
 !  ---  column amount of absorbing gases:
 !       (:,m) m = 1-h2o, 2-co2, 3-o3, 4-n2o, 5-ch4, 6-o2, 7-co
@@ -921,7 +941,8 @@
             tavel(k) = tlyr(j1,kk)
             delp (k) = delpin(j1,kk)
             dz   (k) = dzlyr (j1,kk)
-            if (iovr == 4 .or. iovr == 5) alph(k) = alpha(j1,k) ! alpha decorrelation
+            if (iovr == 4 .or. iovr == 5) alphad(k) = alpha(j1,k) ! alpha decorrelation
+            if (iovr == 4 .or. iovr == 5) betad(k) = beta(j1,k)   ! beta decorrelation
 
 !> - Set absorber and gas column amount, convert from volume mixing
 !!    ratio to molec/cm2 based on coldry (scaled to 1.0e-20)
@@ -1012,7 +1033,8 @@
             tavel(k) = tlyr(j1,k)
             delp (k) = delpin(j1,k)
             dz   (k) = dzlyr (j1,k)
-            if (iovr == 4 .or. iovr == 5) alph(k) = alpha(j1,k)   ! alpha decorrelation
+            if (iovr == 4 .or. iovr == 5) alphad(k) = alpha(j1,k)   ! alpha decorrelation
+            if (iovr == 4 .or. iovr == 5) betad(k) = beta(j1,k)     ! beta decorrelation
 
 !  --- ...  set absorber amount
 !test use
@@ -1132,13 +1154,82 @@
 
         if (zcf1 > f_zero) then     ! cloudy sky column
 
-          call cldprop                                                  &
+!> -# if physparam::isubcsw > 0, call mcica_subcol() to distribute
+!!    cloud properties to each g-point.
+
+          if ( isubcsw > 0 ) then      ! mcica sub-col clouds approx
+
+            cldf(:) = cfrac(:)
+            where (cldf(:) < ftiny)
+              cldf(:) = f_zero
+            end where
+
+!  --- ...  call sub-column cloud generator
+            call mcica_subcol                                               &
 !  ---  inputs:
-     &     ( cfrac,cliqp,reliq,cicep,reice,cdat1,cdat2,cdat3,cdat4,     &
-     &       zcf1, nlay, ipseed(j1), dz, delgth, alph,                  &
+     &         ( cldf, cliqp, cicep, cdat1, cdat2, cdat3, cdat4,            &
+     &           nlay, ipseed(j1), dz, delgth, alphad, betad,               &
 !  ---  outputs:
-     &       taucw, ssacw, asycw, cldfrc, cldfmc                        &
-     &     )
+     &           lcloudy,                                                   &
+     &           clwpmc, ciwpmc, crwpmc, cswpmc,                            &
+     &           taucmc, ssacmc, asycmc                                     &
+     &         )
+
+            do ig = 1, ngptsw
+              do k = 1, nlay
+                if ( lcloudy(k,ig) ) then
+                  cldfmc(k,ig) = f_one
+                else
+                  cldfmc(k,ig) = f_zero
+                endif
+              enddo
+            enddo
+
+            if (iswcliq > 0) then
+               do ig = 1, ngptsw
+                 do k = 1, nlay
+                    cdag1(k,ig) = crwpmc(k,ig)
+                    cdag2(k,ig) = cdat2(k)
+                    cdag3(k,ig) = cswpmc(k,ig)
+                    cdag4(k,ig) = cdat4(k)
+                 enddo
+              enddo
+            else
+               do ig = 1, ngptsw
+                 do k = 1, nlay
+                    cdag1(k,ig) = taucmc(k,ig)
+                    cdag2(k,ig) = ssacmc(k,ig)
+                    cdag3(k,ig) = asycmc(k,ig)
+                    cdag4(k,ig) = f_zero
+                 enddo
+              enddo
+            endif
+
+!  --- ...  derive cloud optical properties (mcica)
+            call cldprmc                                                &
+!  ---  inputs:
+     &       ( cfrac,clwpmc,reliq,ciwpmc,reice,cdag1,cdag2,cdag3,cdag4, &
+     &         nlay,                                                    &
+!  ---  outputs:
+     &         taucw, taucmc, ssacmc, asycmc                            &
+     &       )
+
+          else                         ! non-mcica, normalize cloud
+
+!  --- ...  derive cloud optical properties (non-mcica)
+            call cldprop                                                  &
+!  ---  inputs:
+     &       ( cfrac,cliqp,reliq,cicep,reice,cdat1,cdat2,cdat3,cdat4,     &
+     &         nlay,                                                      &
+!  ---  outputs:
+     &         taucw, ssacw, asycw                                        &
+     &       )
+
+            do k = 1, nlay
+              cldfrc(k) = cfrac(k) / zcf1
+            enddo
+
+          endif   ! end if_isubcsw_block
 
 !  --- ...  save computed layer cloud optical depth for output
 !           rrtm band 10 is approx to the 0.55 mu spectrum
@@ -1155,8 +1246,18 @@
           endif                       ! end if_ivflip_block
 
         else                        ! clear sky column
-          cldfrc(:)  = f_zero
-          cldfmc(:,:)= f_zero
+
+          do k = 1, nlay
+            cldfrc(k) = f_zero
+          enddo
+          do ig = 1, ngptsw
+            do k = 1, nlay
+              cldfmc(k,ig) = f_zero
+              taucmc(k,ig) = f_zero
+              ssacmc(k,ig) = f_zero
+              asycmc(k,ig) = f_zero
+            enddo
+          enddo
           do i = 1, nbdsw
             do k = 1, nlay
               taucw(k,i) = f_zero
@@ -1164,6 +1265,7 @@
               asycw(k,i) = f_zero
             enddo
           enddo
+
         endif   ! end if_zcf1_block
 
 !> - Call setcoef() to compute various coefficients needed in
@@ -1210,7 +1312,7 @@
           call spcvrtm                                                  &
 !  ---  inputs:
      &     ( ssolar,cosz1,sntz1,albbm,albdf,sfluxzen,cldfmc,            &
-     &       zcf1,zcf0,taug,taur,tauae,ssaae,asyae,taucw,ssacw,asycw,   &
+     &       zcf1,zcf0,taug,taur,tauae,ssaae,asyae,taucmc,ssacmc,asycmc,&
      &       nlay, nlp1,                                                &
 !  ---  outputs:
      &       fxupc,fxdnc,fxup0,fxdn0,                                   &
@@ -1558,7 +1660,7 @@
 
 !>\ingroup module_radsw_main
 !> This subroutine computes the cloud optical properties for each
-!! cloudy layer and g-point interval.
+!! cloudy layer and shortwave spectral band.
 !!\param cfrac          layer cloud fraction
 !!\n for  physparam::iswcliq > 0 (prognostic cloud scheme)  - - -
 !!\param cliqp          layer in-cloud liq water path (\f$g/m^2\f$)
@@ -1578,32 +1680,24 @@
 !!\param cdat2          layer cloud single scattering albedo
 !!\param cdat3          layer cloud asymmetry factor
 !!\param cdat4          optional use
-!!\param cf1            effective total cloud cover at surface
 !!\param nlay           vertical layer number
-!!\param ipseed         permutation seed for generating random numbers
-!!                      (isubcsw>0)
-!!\param dz             layer thickness (km)
-!!\param delgth         layer cloud decorrelation length (km)
-!!\param alpha          EXP/ER cloud overlap decorrelation parameter
 !!\param taucw          cloud optical depth, w/o delta scaled
 !!\param ssacw          weighted cloud single scattering albedo
 !!                      (ssa = ssacw / taucw)
 !!\param asycw          weighted cloud asymmetry factor
 !!                      (asy = asycw / ssacw)
-!!\param cldfrc         cloud fraction of grid mean value
-!!\param cldfmc         cloud fraction for each sub-column
 !!\section General_cldprop cldprop General Algorithm
 !-----------------------------------
       subroutine cldprop                                                &
      &     ( cfrac,cliqp,reliq,cicep,reice,cdat1,cdat2,cdat3,cdat4,     &   !  ---  inputs
-     &       cf1, nlay, ipseed, dz, delgth, alpha,                      &
-     &       taucw, ssacw, asycw, cldfrc, cldfmc                        &   !  ---  output
+     &       nlay,                                                      &
+     &       taucw, ssacw, asycw                                        &   !  ---  output
      &     )
 
 !  ===================  program usage description  ===================  !
 !                                                                       !
 ! Purpose: Compute the cloud optical properties for each cloudy layer   !
-! and g-point interval.                                                 !
+! and shortwave spectral band.                                                 !
 !                                                                       !
 ! subprograms called:  none                                             !
 !                                                                       !
@@ -1630,12 +1724,7 @@
 !    reliq - real, not used                                        nlay !
 !    reice - real, not used                                        nlay !
 !                                                                       !
-!    cf1   - real, effective total cloud cover at surface           1   !
 !    nlay  - integer, vertical layer number                         1   !
-!    ipseed- permutation seed for generating random numbers (isubcsw>0) !
-!    dz    - real, layer thickness (km)                            nlay !
-!    delgth- real, layer cloud decorrelation length (km)            1   !
-!    alpha - real, EXP/ER decorrelation parameter                  nlay !
 !                                                                       !
 !  outputs:                                                             !
 !    taucw  - real, cloud optical depth, w/o delta scaled    nlay*nbdsw !
@@ -1643,8 +1732,6 @@
 !                             (ssa = ssacw / taucw)                     !
 !    asycw  - real, weighted cloud asymmetry factor          nlay*nbdsw !
 !                             (asy = asycw / ssacw)                     !
-!    cldfrc - real, cloud fraction of grid mean value              nlay !
-!    cldfmc - real, cloud fraction for each sub-column       nlay*ngptsw!
 !                                                                       !
 !                                                                       !
 !  explanation of the method for each value of iswcliq, and iswcice.    !
@@ -1683,19 +1770,14 @@
       use module_radsw_cldprtb
 
 !  ---  inputs:
-      integer, intent(in) :: nlay, ipseed
-      real (kind=kind_phys), intent(in) :: cf1, delgth
+      integer, intent(in) :: nlay
 
       real (kind=kind_phys), dimension(nlay), intent(in) :: cliqp,      &
-     &       reliq, cicep, reice, cdat1, cdat2, cdat3, cdat4, cfrac, dz
-      real (kind=kind_phys), dimension(nlay), intent(in) :: alpha
+     &       reliq, cicep, reice, cdat1, cdat2, cdat3, cdat4, cfrac
 
 !  ---  outputs:
-      real (kind=kind_phys), dimension(nlay,ngptsw), intent(out) ::     &
-     &       cldfmc
       real (kind=kind_phys), dimension(nlay,nbdsw),  intent(out) ::     &
      &       taucw, ssacw, asycw
-      real (kind=kind_phys), dimension(nlay), intent(out) :: cldfrc
 
 !  ---  locals:
       real (kind=kind_phys), dimension(nblow:nbhgh) :: tauliq, tauice,  &
@@ -1927,42 +2009,6 @@
 
       endif  lab_if_iswcliq
 
-!> - if isubcsw > 0, call mcica_subcol() to distribute
-!!    cloud properties to each g-point.
-
-      if ( isubcsw > 0 ) then      ! mcica sub-col clouds approx
-
-        cldf(:) = cfrac(:)
-        where (cldf(:) < ftiny)
-          cldf(:) = f_zero
-        end where
-
-!  --- ...  call sub-column cloud generator
-
-        call mcica_subcol                                               &
-!  ---  inputs:
-     &     ( cldf, nlay, ipseed, dz, delgth, alpha,                     &
-!  ---  outputs:
-     &       lcloudy                                                    &
-     &     )
-
-        do ig = 1, ngptsw
-          do k = 1, nlay
-            if ( lcloudy(k,ig) ) then
-              cldfmc(k,ig) = f_one
-            else
-              cldfmc(k,ig) = f_zero
-            endif
-          enddo
-        enddo
-
-      else                         ! non-mcica, normalize cloud
-
-        do k = 1, nlay
-          cldfrc(k) = cfrac(k) / cf1
-        enddo
-      endif   ! end if_isubcsw_block
-
       return
 !...................................
       end subroutine cldprop
@@ -1971,23 +2017,64 @@
 !>\ingroup module_radsw_main
 !> This subroutine computes the sub-colum cloud profile flag array.
 !!\param cldf        layer cloud fraction
+!!\n     ---  for  ilwcliq > 0 (prognostic cloud scheme)  - - -
+!!\param clwp        layer cloud liquid water path
+!!\param ciwp        layer cloud ice water path
+!!\param cdat1       layer cloud rain water path
+!!\param cdat2       not currently used
+!!\param cdat3       layer cloud snow water path
+!!\param cdat4       not currently used
+!!\n     ---  for ilwcliq = 0  (diagnostic cloud scheme)  - - -
+!!\param clwp        not used
+!!\param ciwp        not used
+!!\param cdat1       layer cloud optical depth
+!!\param cdat2       layer cloud single scattering albedo
+!!\param cdat3       layer cloud asymmetry parameter
+!!\param cdat4       not used
 !!\param nlay        number of model vertical layers
 !!\param ipseed      permute seed for random num generator
 !!\param dz          layer thickness (km)
 !!\param de_lgth     layer cloud decorrelation length (km)
-!!\param alpha       EXP/ER cloud overlap decorrelation parameter
+!!\param alpha       EXP/ER cloud fraction overlap decorrelation parameter
+!!\param beta        EXP/ER cloud condensate overlap decorrelation parameter
 !!\param lcloudy     sub-colum cloud profile flag array
+!!\n     ---  for  ilwcliq > 0 (prognostic cloud scheme)  - - -
+!!\param clwpmc      cloud liquid water path g-point array (icond=1)
+!!\param ciwpmc      cloud ice water path g-point array (icond=1)
+!!\param crwpmc      cloud rain water path g-point array (icond=1)
+!!\param cswpmc      cloud snow water path g-point array (icond=1)
+!!\n     ---  for ilwcliq = 0  (diagnostic cloud scheme)  - - -
+!!\param taucmc      cloud optical depth g-point array (icond=1)
+!!\param ssacmc      cloud single scattering albedo g-point array (icond=1)
+!!\param asycmc      cloud asymmetry parameter g-point array (icond=1)
 !!\section mcica_sw_gen mcica_subcol General Algorithm
 ! ----------------------------------
       subroutine mcica_subcol                                           &
-     &    ( cldf, nlay, ipseed, dz, de_lgth, alpha,                     &       !  ---  inputs
-     &      lcloudy                                                     &       !  ---  outputs
+     &    ( cldf, clwp, ciwp, cdat1, cdat2, cdat3, cdat4,               &       !  ---  inputs
+     &      nlay, ipseed, dz, de_lgth, alpha, beta,                     &
+     &      lcloudy,                                                    &       !  ---  outputs
+     &      clwpmc, ciwpmc, crwpmc, cswpmc,                             &
+     &      taucmc, ssacmc, asycmc                                      &
      &    )
 
 !  ====================  defination of variables  ====================  !
 !                                                                       !
 !  input variables:                                                size !
 !   cldf    - real, layer cloud fraction                           nlay !
+!        ---  for  ilwcliq > 0 (prognostic cloud scheme)  - - -         !
+!   clwp    - real, layer cloud liquid water path                  nlay !
+!   ciwp    - real, layer cloud ice water path                     nlay !
+!   cdat1   - real, layer cloud rain water path                    nlay !
+!   cdat2   - not currently used                                        !
+!   cdat3   - real, layer cloud snow water path                    nlay !
+!   cdat4   - not currently used                                        !
+!        ---  for ilwcliq = 0  (diagnostic cloud scheme)  - - -         !
+!   clwp    - not used                                                  !
+!   ciwp    - not used                                                  !
+!   cdat1   - real, layer cloud optical depth                      nlay !
+!   cdat2   - real, layer cloud single scattering albedo           nlay !
+!   cdat3   - real, layer cloud asymmetry parameter                nlay !
+!   cdat4   - not used                                                  !
 !   nlay    - integer, number of model vertical layers               1  !
 !   ipseed  - integer, permute seed for random num generator         1  !
 !    ** note : if the cloud generator is called multiple times, need    !
@@ -1995,10 +2082,20 @@
 !              for lw and sw, use values differ by the number of g-pts. !
 !    dz    - real, layer thickness (km)                            nlay !
 !    de_lgth-real, layer cloud decorrelation length (km)            1   !
-!    alpha  - real, EXP/ER decorrelation parameter                 nlay !
+!    alpha  - real, EXP/ER cloud fraction decorrelation parameter  nlay !
+!    beta   - real, EXP/ER cloud condensate decorrelation param.   nlay !
 !                                                                       !
 !  output variables:                                                    !
 !   lcloudy - logical, sub-colum cloud profile flag array    nlay*ngptsw!
+!!\n     ---  for  ilwcliq > 0 (prognostic cloud scheme)  - - -
+!   clwpmc  - real, cloud liquid water path g-point array (icond=1)     !
+!   ciwpmc  - real, cloud ice water path g-point array (icond=1)        !
+!   crwpmc  - real, cloud rain water path g-point array (icond=1)       !
+!   cswpmc  - real, cloud snow water path g-point array (icond=1)       !
+!!\n     ---  for ilwcliq = 0  (diagnostic cloud scheme)  - - -
+!   taucmc  - real, cloud optical depth path g-point array (icond=1)    !
+!   ssacmc  - real, cloud single scat. alb. path g-point array (icond=1)!
+!   asycmc  - real, cloud asymmetry param. path g-point array (icond=1) !
 !                                                                       !
 !  other control flags from module variables:                           !
 !     iovr      : control flag for cloud overlapping method             !
@@ -2008,8 +2105,12 @@
 !                 =3: cloud decorrelation-length overlap method         !
 !                 =4: exponential cloud overlap method (AER)            !
 !                 =5: exponential-random cloud overlap method (AER)     !
+!     icond   : control flag for cloud condensate overlap               !
+!                 =0:inactive; =1:active                                !
 !                                                                       !
 !  =====================    end of definitions    ====================  !
+
+      use module_radsw_tabxcw
 
       implicit none
 
@@ -2017,17 +2118,27 @@
       integer, intent(in) :: nlay, ipseed
 
       real (kind=kind_phys), dimension(nlay), intent(in) :: cldf, dz
-      real (kind=kind_phys), intent(in) :: de_lgth
+      real (kind=kind_phys), dimension(nlay), intent(in) :: clwp, ciwp
+      real (kind=kind_phys), dimension(nlay), intent(in) :: cdat1, cdat2, cdat3, cdat4
+      real (kind=kind_phys),                  intent(in) :: de_lgth
       real (kind=kind_phys), dimension(nlay), intent(in) :: alpha
+      real (kind=kind_phys), dimension(nlay), intent(in) :: beta
 
 !  ---  outputs:
-      logical, dimension(nlay,ngptsw), intent(out):: lcloudy
+      logical,               dimension(nlay,ngptsw), intent(out) :: lcloudy
+      real (kind=kind_phys), dimension(nlay,ngptsw), intent(out) :: clwpmc, ciwpmc
+      real (kind=kind_phys), dimension(nlay,ngptsw), intent(out) :: crwpmc, cswpmc
+      real (kind=kind_phys), dimension(nlay,ngptsw), intent(out) :: taucmc, ssacmc, asycmc
 
 !  ---  locals:
       real (kind=kind_phys) :: cdfunc(nlay,ngptsw), tem1,               &
      &                                            fac_lcf(nlay),        &
-     &       cdfun2(nlay,ngptsw)
+     &       cdfun2(nlay,ngptsw), cdfun3(nlay,ngptsw)
       real (kind=kind_dbl_prec) :: rand2d(nlay*ngptsw), rand1d(ngptsw) ! must be default real kind to match mersenne twister code
+
+! inhomogeneous cloud condensate
+      integer :: ind1, ind2
+      real (kind=kind_phys) :: rind1, rind2, zcw, sigma_qcw
 
       type (random_stat) :: stat          ! for thread safe random generator
 
@@ -2238,6 +2349,143 @@
           lcloudy(k,n) = cdfunc(k,n) >= tem1
         enddo
       enddo
+
+! where the subcolumn is cloudy, the subcolumn cloud fraction is 1;
+! where the subcolumn is not cloudy, the subcolumn cloud fraction is 0;
+! where there is a cloud, define the subcolumn cloud properties,
+! otherwise set these to zero
+      select case ( iovr )
+
+        case( 0:3 )        ! random, maximum, maximum-random, decorrelation overlap
+
+           do k = 1, nlay
+              do n = 1, ngptsw
+                 if (lcloudy(k,n)) then
+                    if (iswcliq > 0) then 
+                       clwpmc(k,n) = clwp(k)
+                       ciwpmc(k,n) = ciwp(k)
+                       crwpmc(k,n) = cdat1(k)
+                       cswpmc(k,n) = cdat3(k)
+                    else
+                       taucmc(k,n) = cdat1(k)
+                       ssacmc(k,n) = cdat2(k)
+                       asycmc(k,n) = cdat3(k)
+                    endif
+                 else
+                    clwpmc(k,n) = f_zero
+                    ciwpmc(k,n) = f_zero
+                    crwpmc(k,n) = f_zero
+                    cswpmc(k,n) = f_zero
+                    taucmc(k,n) = f_zero
+                    ssacmc(k,n) = f_zero
+                    asycmc(k,n) = f_zero
+                 endif
+              enddo
+           enddo
+
+        case( 4:5 )        ! exponential, exponential-random overlap
+
+! Include cloud condensate inhomogeneity (icond=1) in cloudy sub-grid g-points;
+! otherwise apply homogeneous sub-grid cloud condensate
+           if (icond .eq. 1) then 
+
+!  ---  setup 2 sets of random numbers
+
+              call random_number ( rand2d, stat )
+
+              k1 = 0
+              do k = 1, nlay
+                do n = 1, ngptsw
+                  k1 = k1 + 1
+                  cdfun2(k,n) = rand2d(k1)
+                enddo
+              enddo
+
+              call random_number ( rand2d, stat )
+
+              k1 = 0
+              do k = 1, nlay
+                do n = 1, ngptsw
+                  k1 = k1 + 1
+                  cdfun3(k,n) = rand2d(k1)
+                enddo
+              enddo
+              ! generate vertical correlations of condensate in random number arrsys - bottom to top
+              do k = 2, nlay
+                k1 = k - 1
+                do n = 1, ngptsw
+                  if ( cdfun2(k,n) < beta(k) ) then
+                       cdfun3(k,n) = cdfun3(k1,n)
+                  endif
+                enddo
+              enddo
+      
+           endif
+
+           do k = 1, nlay
+              do n = 1, ngptsw
+                 if (lcloudy(k,n) .and. icond .eq. 1) then
+                    if (cldf(k) .gt. 0.99) then
+                       sigma_qcw = 0.50
+                    elseif (cldf(k) .ge. 0.90) then
+                       sigma_qcw = 0.707
+                    else
+                       sigma_qcw = 1.0
+                    endif
+! Horizontally variable clouds:
+! Determine zcw = ratio of cloud conensate mixing ratio for this cell to
+! its mean value for alal cloudy celss in this layer
+! Use bilinear interpolation of zcw tabulated in array xcw as a function of
+!     1) cumulative probability y (= cdfun3)
+!     2) relative standard deviation, sigma_qcw
+! Take care that the definition of rind2 is consistent with the values in 
+! subroutine tabulate_xcw
+                    rind1 = cdfun3(k,n) * (n1_beta-1) + 1.0
+                    ind1 = max(1, min(int(rind1), n1_beta-1))
+                    rind1 = rind1 - ind1
+                    rind2 = 40.0 * sigma_qcw - 3.0
+                    ind2 = max(1, min(int(rind2), n2_beta-1))
+                    rind2 = rind2 - ind2
+
+                    zcw = (1.0 - rind1) * (1.0 - rind2) * xcw(ind1,ind2) &
+     &                  + (1.0 - rind1) * rind2 * xcw(ind1,ind2+1)       &
+     &                  + rind1 * (1.0 - rind2) * xcw(ind1+1,ind2)       &
+     &                  + rind1 * rind2 * xcw(ind1+1,ind2+1)
+
+                    if (iswcliq > 0) then 
+                       clwpmc(k,n) = clwp(k) * zcw
+                       ciwpmc(k,n) = ciwp(k) * zcw
+                       crwpmc(k,n) = cdat1(k) * zcw
+                       cswpmc(k,n) = cdat3(k) * zcw
+                    else
+                       taucmc(k,n) = cdat1(k)
+                       ssacmc(k,n) = cdat2(k)
+                       asycmc(k,n) = cdat3(k)
+                    endif
+                 elseif (lcloudy(k,n)) then
+                    if (iswcliq > 0) then 
+                       clwpmc(k,n) = clwp(k)
+                       ciwpmc(k,n) = ciwp(k)
+                       crwpmc(k,n) = cdat1(k)
+                       cswpmc(k,n) = cdat3(k)
+                    else
+                       taucmc(k,n) = cdat1(k)
+                       ssacmc(k,n) = cdat2(k)
+                       asycmc(k,n) = cdat3(k)
+                    endif
+                 else
+                    clwpmc(k,n) = f_zero
+                    ciwpmc(k,n) = f_zero
+                    crwpmc(k,n) = f_zero
+                    cswpmc(k,n) = f_zero
+                    taucmc(k,n) = f_zero
+                    ssacmc(k,n) = f_zero
+                    asycmc(k,n) = f_zero
+                 endif
+              enddo
+           enddo
+
+      end select
 
       return
 ! ..................................
@@ -5605,6 +5853,376 @@
 
 !...................................
       end subroutine taumol
+!-----------------------------------
+
+!>\ingroup module_radsw_main
+!> This subroutine computes the cloud optical properties for each
+!! cloudy layer and g-point.
+!!\param cfrac          layer cloud fraction
+!!\n for  physparam::iswcliq > 0 (prognostic cloud scheme)  - - -
+!!\param clwpmc        layer in-cloud liq water path (\f$g/m^2\f$)
+!!\param reliq          mean eff radius for liq cloud (micron)
+!!\param ciwpmc         layer in-cloud ice water path (\f$g/m^2\f$)
+!!\param reice          mean eff radius for ice cloud (micron)
+!!\param cdag1          layer rain drop water path (\f$g/m^2\f$)
+!!\param cdag2          effective radius for rain drop (micron)
+!!\param cdag3          layer snow flake water path(\f$g/m^2\f$)
+!!\param cdag4          mean eff radius for snow flake(micron)
+!!\n for physparam::iswcliq = 0  (diagnostic cloud scheme)  - - -
+!!\param clwpmc         not used
+!!\param reliq          not used
+!!\param ciwpmc         not used
+!!\param reice          not used
+!!\param cdag1          layer cloud optical depth
+!!\param cdag2          layer cloud single scattering albedo
+!!\param cdag3          layer cloud asymmetry factor
+!!\param cdag4          optional use
+!!\param nlay           vertical layer number
+!!\param taucw          cloud optical depth, w/o delta scaled
+!!\param ssacw          weighted cloud single scattering albedo
+!!                      (ssa = ssacw / taucw)
+!!\param asycw          weighted cloud asymmetry factor
+!!                      (asy = asycw / ssacw)
+!!\section General_cldprop cldprop General Algorithm
+!> @{
+!-----------------------------------
+      subroutine cldprmc                                                &
+     &     ( cfrac,clwpmc,reliq,ciwpmc,reice,cdag1,cdag2,cdag3,cdag4,   &   !  ---  inputs
+     &       nlay,                                                      &
+     &       taucw, taucmc, ssacmc, asycmc                              &   !  ---  output
+     &     )
+
+!  ===================  program usage description  ===================  !
+!                                                                       !
+! Purpose: Compute the cloud optical properties for each cloudy layer   !
+! and g-point.                                                 !
+!                                                                       !
+! subprograms called:  none                                             !
+!                                                                       !
+!  ====================  defination of variables  ====================  !
+!                                                                       !
+!  inputs:                                                        size  !
+!    cfrac - real, layer cloud fraction                            nlay !
+!        .....  for  iswcliq > 0 (prognostic cloud scheme)  - - -       !
+!    clwpmc- real, layer in-cloud liq water path (g/m**2)   nlay,ngptsw !
+!    reliq - real, mean eff radius for liq cloud (micron)          nlay !
+!    ciwpmc- real, layer in-cloud ice water path (g/m**2)   nlay,ngptsw !
+!    reice - real, mean eff radius for ice cloud (micron)          nlay !
+!    cdag1 - real, layer rain drop water path (g/m**2)      nlay,ngptsw !
+!    cdag2 - real, effective radius for rain drop (micron)  nlay,ngptsw !
+!    cdag3 - real, layer snow flake water path(g/m**2)      nlay,ngptsw !
+!    cdag4 - real, mean eff radius for snow flake(micron)   nlay,ngptsw !
+!        .....  for iswcliq = 0  (diagnostic cloud scheme)  - - -       !
+!    clwpmc- real, not used                                 nlay,ngptsw !
+!    reliq - real, not used                                        nlay !
+!    ciwpmc- real, not used                                 nlay,ngptsw !
+!    reice - real, not used                                        nlay !
+!    cdag1 - real, layer cloud optical depth                nlay,ngptsw !
+!    cdag2 - real, layer cloud single scattering albedo     nlay,ngptsw !
+!    cdag3 - real, layer cloud asymmetry factor             nlay,ngptsw !
+!    cdag4 - real, optional use                             nlay,ngptsw !
+!                                                                       !
+!    nlay  - integer, vertical layer number                         1   !
+!                                                                       !
+!  outputs:                                                             !
+!    taucw  - real, cloud optical depth, w/o delta scaled    nlay*nbdsw !
+!    taucmc - real, cloud optical depth, w/o delta scaled    nlay*ngptsw!
+!    ssacmc - real, weighted cloud single scattering albedo  nlay*ngptsw!
+!                             (ssa = ssacw / taucw)                     !
+!    asycmc - real, weighted cloud asymmetry factor          nlay*ngptsw!
+!                             (asy = asycw / ssacw)                     !
+!                                                                       !
+!                                                                       !
+!  explanation of the method for each value of iswcliq, and iswcice.    !
+!  set up in module "physparam"                                         !
+!                                                                       !
+!     iswcliq=0  : input cloud optical property (tau, ssa, asy).        !
+!                  (used for diagnostic cloud method)                   !
+!     iswcliq>0  : input cloud liq/ice path and effective radius, also  !
+!                  require the user of 'iswcice' to specify the method  !
+!                  used to compute aborption due to water/ice parts.    !
+!  ...................................................................  !
+!                                                                       !
+!     iswcliq=1  : liquid water cloud optical properties are computed   !
+!                  as in hu and stamnes (1993), j. clim., 6, 728-742.   !
+!     iswcliq=2  : updated coeffs for hu and stamnes (1993) by aer      !
+!                  w v3.9-v4.0.                                         !
+!                                                                       !
+!     iswcice used only when iswcliq > 0                                !
+!                  the cloud ice path (g/m2) and ice effective radius   !
+!                  (microns) are inputs.                                !
+!     iswcice=1  : ice cloud optical properties are computed as in      !
+!                  ebert and curry (1992), jgr, 97, 3831-3836.          !
+!     iswcice=2  : ice cloud optical properties are computed as in      !
+!                  streamer v3.0 (2001), key, streamer user's guide,    !
+!                  cooperative institude for meteorological studies,95pp!
+!     iswcice=3  : ice cloud optical properties are computed as in      !
+!                  fu (1996), j. clim., 9.                              !
+!                                                                       !
+!  other cloud control module variables:                                !
+!     isubcsw =0: standard cloud scheme, no sub-col cloud approximation !
+!             >0: mcica sub-col cloud scheme using ipseed as permutation!
+!                 seed for generating rundom numbers                    !
+!                                                                       !
+!  ======================  end of description block  =================  !
+!
+      use module_radsw_cldprtb
+
+!  ---  inputs:
+      integer, intent(in) :: nlay
+
+      real (kind=kind_phys), dimension(nlay), intent(in) :: reliq,      &
+     &       reice, cfrac
+      real (kind=kind_phys), dimension(nlay,ngptsw), intent(in) ::      &
+     &       clwpmc, ciwpmc, cdag1, cdag2, cdag3, cdag4
+
+!  ---  outputs:
+      real (kind=kind_phys), dimension(nlay,nbdsw),  intent(out) ::     &
+     &       taucw
+      real (kind=kind_phys), dimension(nlay,ngptsw), intent(out) ::     &
+     &       taucmc, ssacmc, asycmc
+
+!  ---  locals:
+      real (kind=kind_phys), dimension(ngptsw) :: tauliq, tauice,       &
+     &       ssaliq, ssaice, ssaran, ssasnw, asyliq, asyice,            &
+     &       asyran, asysnw
+      real (kind=kind_phys), dimension(nlay)       :: cldf
+
+      real (kind=kind_phys) :: dgeice, factor, fint,                    &
+     &       refliq, refice, cldran, cldsnw, refsnw, dgesnw,            &
+     &       extcoliq, ssacoliq, asycoliq, extcoice, ssacoice, asycoice
+      real (kind=kind_phys), dimension(ngptsw) :: tauran, tausnw,       &
+     &       cldliq, cldice
+
+      logical :: lcloudy(nlay,ngptsw)
+      integer :: ia, ib, ig, jb, k, index
+
+!
+!===> ...  begin here
+!
+      do ig = 1, ngptsw
+        do k = 1, nlay
+          taucw (k,ig) = f_zero
+        enddo
+      enddo
+
+!> -# Compute cloud radiative properties for a cloudy column.
+
+      lab_if_iswcliq : if (iswcliq > 0) then
+
+        lab_do_k : do k = 1, nlay
+          lab_if_cld : if (cfrac(k) > ftiny) then
+
+!>  - Compute optical properties for rain and snow.
+!!\n    For rain: tauran/ssaran/asyran
+!!\n    For snow: tausnw/ssasnw/asysnw
+!>  - Calculation of absorption coefficients due to water clouds
+!!\n    For water clouds: tauliq/ssaliq/asyliq
+!>  - Calculation of absorption coefficients due to ice clouds
+!!\n    For ice clouds: tauice/ssaice/asyice
+!>  - For Prognostic cloud scheme: sum up the cloud optical property:
+!!\n     \f$ taucw=tauliq+tauice+tauran+tausnw \f$
+!!\n     \f$ ssacw=ssaliq+ssaice+ssaran+ssasnw \f$
+!!\n     \f$ asycw=asyliq+asyice+asyran+asysnw \f$
+
+           do ig = 1, ngptsw
+              cldran = cdag1(k,ig)
+!             refran = cdag2(k,ig)
+              cldsnw = cdag3(k,ig)
+              refsnw = cdag4(k,ig)
+              dgesnw = 1.0315 * refsnw        ! for fu's snow formula
+
+              tauran(ig) = cldran * a0r
+
+!>  - If use fu's formula it needs to be normalized by snow/ice density.
+!! not use snow density = 0.1 g/cm**3 = 0.1 g/(mu * m**2)
+!!\n use ice density = 0.9167 g/cm**3 = 0.9167 g/(mu * m**2)
+!!\n       1/0.9167 = 1.09087
+!!\n       factor 1.5396=8/(3*sqrt(3)) converts reff to generalized ice particle size
+!!       use newer factor value 1.0315
+              if (cldsnw>f_zero .and. refsnw>10.0_kind_phys) then
+!               tausnw = cldsnw * (a0s + a1s/refsnw)
+                tausnw(ig) = cldsnw*1.09087*(a0s + a1s/dgesnw)     ! fu's formula
+              else
+                tausnw(ig) = f_zero
+              endif
+
+!            do ib = nblow, nbhgh
+              ib = ngb(ig)
+              ssaran(ig) = tauran(ig) * (f_one - b0r(ib))
+              ssasnw(ig) = tausnw(ig) * (f_one - (b0s(ib)+b1s(ib)*dgesnw))
+              asyran(ig) = ssaran(ig) * c0r(ib)
+              asysnw(ig) = ssasnw(ig) * c0s(ib)
+!            enddo
+
+              cldliq(ig) = clwpmc(k,ig)
+              cldice(ig) = ciwpmc(k,ig)
+            enddo
+            refliq = reliq(k)
+            refice = reice(k)
+
+!>  - Calculation of absorption coefficients due to water clouds.
+
+            if ( maxval(cldliq) <= f_zero ) then
+              do ig = 1, ngptsw
+                tauliq(ig) = f_zero
+                ssaliq(ig) = f_zero
+                asyliq(ig) = f_zero
+              enddo
+            else
+                factor = refliq - 1.5
+                index  = max( 1, min( 57, int( factor ) ))
+                fint   = factor - float(index)
+
+              if ( iswcliq == 1 ) then
+                do ig = 1, ngptsw
+                  ib = ngb(ig)
+                  extcoliq = max(f_zero,            extliq1(index,ib)   &
+     &              + fint*(extliq1(index+1,ib)-extliq1(index,ib)) )
+                  ssacoliq = max(f_zero, min(f_one, ssaliq1(index,ib)   &
+     &              + fint*(ssaliq1(index+1,ib)-ssaliq1(index,ib)) ))
+
+                  asycoliq = max(f_zero, min(f_one, asyliq1(index,ib)   &
+     &              + fint*(asyliq1(index+1,ib)-asyliq1(index,ib)) ))
+!                 forcoliq = asycoliq * asycoliq
+
+                  tauliq(ig) = cldliq(ig) * extcoliq
+                  ssaliq(ig) = tauliq(ig) * ssacoliq
+                  asyliq(ig) = ssaliq(ig) * asycoliq
+                enddo
+              elseif ( iswcliq == 2 ) then   ! use updated coeffs
+                do ig = 1, ngptsw
+                  ib = ngb(ig)
+                  extcoliq = max(f_zero,            extliq2(index,ib)   &
+     &              + fint*(extliq2(index+1,ib)-extliq2(index,ib)) )
+                  ssacoliq = max(f_zero, min(f_one, ssaliq2(index,ib)   &
+     &              + fint*(ssaliq2(index+1,ib)-ssaliq2(index,ib)) ))
+
+                  asycoliq = max(f_zero, min(f_one, asyliq2(index,ib)   &
+     &              + fint*(asyliq2(index+1,ib)-asyliq2(index,ib)) ))
+!                 forcoliq = asycoliq * asycoliq
+
+                  tauliq(ig) = cldliq(ig) * extcoliq
+                  ssaliq(ig) = tauliq(ig) * ssacoliq
+                  asyliq(ig) = ssaliq(ig) * asycoliq
+                enddo
+              endif   ! end if_iswcliq_block
+            endif   ! end if_cldliq_block
+
+!>  - Calculation of absorption coefficients due to ice clouds.
+
+            if ( maxval(cldice) <= f_zero ) then
+              do ig = 1, ngptsw
+                tauice(ig) = f_zero
+                ssaice(ig) = f_zero
+                asyice(ig) = f_zero
+              enddo
+            else
+
+!>   - ebert and curry approach for all particle sizes though somewhat
+!! unjustified for large ice particles.
+
+              if ( iswcice == 1 ) then
+                refice = min(130.0_kind_phys,max(13.0_kind_phys,refice))
+
+                do ig = 1, ngptsw
+                  ib = ngb(ig)
+                  ia = idxebc(ib)           ! eb_&_c band index for ice cloud coeff
+
+                  extcoice = max(f_zero, abari(ia)+bbari(ia)/refice )
+                  ssacoice = max(f_zero, min(f_one,                     &
+     &                             f_one-cbari(ia)-dbari(ia)*refice ))
+                  asycoice = max(f_zero, min(f_one,                     &
+     &                                   ebari(ia)+fbari(ia)*refice ))
+!                 forcoice = asycoice * asycoice
+
+                  tauice(ig) = cldice(ig) * extcoice
+                  ssaice(ig) = tauice(ig) * ssacoice
+                  asyice(ig) = ssaice(ig) * asycoice
+                enddo
+
+!>   - streamer approach for ice effective radius between 5.0 and 131.0 microns.
+
+              elseif ( iswcice == 2 ) then
+                refice = min(131.0_kind_phys,max(5.0_kind_phys,refice))
+
+                factor = (refice - 2.0) / 3.0
+                index  = max( 1, min( 42, int( factor ) ))
+                fint   = factor - float(index)
+
+                do ig = 1, ngptsw
+                  ib = ngb(ig)
+                  extcoice = max(f_zero,            extice2(index,ib)   &
+     &                + fint*(extice2(index+1,ib)-extice2(index,ib)) )
+                  ssacoice = max(f_zero, min(f_one, ssaice2(index,ib)   &
+     &                + fint*(ssaice2(index+1,ib)-ssaice2(index,ib)) ))
+                  asycoice = max(f_zero, min(f_one, asyice2(index,ib)   &
+     &                + fint*(asyice2(index+1,ib)-asyice2(index,ib)) ))
+!                 forcoice = asycoice * asycoice
+
+                  tauice(ig) = cldice(ig) * extcoice
+                  ssaice(ig) = tauice(ig) * ssacoice
+                  asyice(ig) = ssaice(ig) * asycoice
+                enddo
+
+!>   - fu's approach for ice effective radius between 4.8 and 135 microns
+!! (generalized effective size from 5 to 140 microns).
+
+              elseif ( iswcice == 3 ) then
+                dgeice = max( 5.0, min( 140.0, 1.0315*refice ))
+
+                factor = (dgeice - 2.0) / 3.0
+                index  = max( 1, min( 45, int( factor ) ))
+                fint   = factor - float(index)
+
+                do ig = 1, ngptsw
+                  ib = ngb(ig)
+                  extcoice = max(f_zero,            extice3(index,ib)   &
+     &                + fint*(extice3(index+1,ib)-extice3(index,ib)) )
+                  ssacoice = max(f_zero, min(f_one, ssaice3(index,ib)   &
+     &                + fint*(ssaice3(index+1,ib)-ssaice3(index,ib)) ))
+                  asycoice = max(f_zero, min(f_one, asyice3(index,ib)   &
+     &                + fint*(asyice3(index+1,ib)-asyice3(index,ib)) ))
+!                 fdelta   = max(f_zero, min(f_one, fdlice3(index,ib)   &
+!    &                + fint*(fdlice3(index+1,ib)-fdlice3(index,ib)) ))
+!                 forcoice = min( asycoice, fdelta+0.5/ssacoice )           ! see fu 1996 p. 2067
+
+                  tauice(ig) = cldice(ig) * extcoice
+                  ssaice(ig) = tauice(ig) * ssacoice
+                  asyice(ig) = ssaice(ig) * asycoice
+                enddo
+
+              endif   ! end if_iswcice_block
+            endif   ! end if_cldice_block
+
+            do ig = 1, ngptsw
+              ib = ngb(ig)
+!              jb = nblow + ib - 1
+              taucw(k,ig) = tauliq(ig)+tauice(ig)+tauran(ig)+tausnw(ig)
+!              ssacw(k,ig) = ssaliq(ig)+ssaice(ig)+ssaran(ig)+ssasnw(ig)
+!              asycw(k,ig) = asyliq(ig)+asyice(ig)+asyran(ig)+asysnw(ig)
+            enddo
+
+          endif  lab_if_cld
+        enddo  lab_do_k
+
+      else  lab_if_iswcliq
+
+        do k = 1, nlay
+          if (cfrac(k) > ftiny) then
+            do ig = 1, ngptsw
+              taucw(k,ig) = cdag1(k,ig)
+!              ssacw(k,ig) = cdag1(k,ig) * cdag2(k,ig)
+!              asycw(k,ig) = ssacw(k,ig) * cdag3(k,ig)
+            enddo
+          endif
+        enddo
+
+      endif  lab_if_iswcliq
+
+      return
+!...................................
+      end subroutine cldprmc
 !-----------------------------------
 
 !> @}

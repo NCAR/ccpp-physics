@@ -499,6 +499,13 @@
   dimensions = ()
   type = integer
   intent = in
+[icond_condovron]
+  standard_name = flag_for_oreopoulos_cloud_condensate_overlap_method
+  long_name = choice of cloud condensate vertical overlap (oreopoulos)
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
 [julian]
   standard_name = forecast_julian_day
   long_name = julian day
@@ -1301,6 +1308,14 @@
 [alpha]
   standard_name = cloud_overlap_decorrelation_parameter
   long_name = cloud overlap decorrelation parameter
+  units = frac
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = out
+[beta]
+  standard_name = cloud_condensate_decorrelation_parameter
+  long_name = cloud condensate decorrelation parameter
   units = frac
   dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
   type = real
