@@ -1549,7 +1549,13 @@ CONTAINS
 !> @}
 
 !=======================================================================
+!> This subroutine gives the closure constants and initializes the 
+!! turbulent qantities. 
 !     SUBROUTINE  mym_initialize:
+! ==================================================================
+! This subroutine computes the length scales up and down
+! and then computes the min, average of the up/down length scales, and also
+! considers the distance to the surface.
 !
 !     Input variables:
 !       iniflag         : <>0; turbulent quantities will be initialized
@@ -1958,7 +1964,6 @@ CONTAINS
     &            zi,theta,                     &
     &            qkw,Psig_bl,cldfra_bl1D,bl_mynn_mixlength,&
     &            edmf_w1,edmf_a1,edmf_qc1,bl_mynn_edmf)
-    
 !-------------------------------------------------------------------
 
     INTEGER, INTENT(IN)   :: kts,kte
@@ -2749,7 +2754,6 @@ CONTAINS
     &            edmf_w1,edmf_a1,edmf_qc1,bl_mynn_edmf,       &
     &            TKEprodTD,                                   &
     &            spp_pbl,rstoch_col)
-
 !-------------------------------------------------------------------
 !
     INTEGER, INTENT(IN)   :: kts,kte
@@ -3321,7 +3325,6 @@ CONTAINS
        &            qke, tsq, qsq, cov,                                 &
        &            s_aw,s_awqke,bl_mynn_edmf_tke,                      &
        &            qWT1D, qDISS1D,bl_mynn_tkebudget)  !! TKE budget  (Puhales, 2020)
-
 !-------------------------------------------------------------------
     INTEGER, INTENT(IN) :: kts,kte    
 
@@ -4796,7 +4799,6 @@ ENDIF
 !!============================================
   IF (bl_mynn_cloudmix > 0 .AND. FLAG_QNC .AND. &
       bl_mynn_mixscalars > 0) THEN
-
     k=kts
 
     a(k)=  -dtz(k)*khdz(k)*rhoinv(k)
@@ -5520,6 +5522,7 @@ ENDIF
 ! ==================================================================
 
 !>\ingroup gsd_mynn_edmf
+!!
   SUBROUTINE mynn_bl_init_driver(                   &
        &RUBLTEN,RVBLTEN,RTHBLTEN,RQVBLTEN,          &
        &RQCBLTEN,RQIBLTEN & !,RQNIBLTEN,RQNCBLTEN   &
@@ -5737,7 +5740,6 @@ ENDIF
   END SUBROUTINE GET_PBLH
 !> @}
   
-! ==================================================================
 !>\ingroup gsd_mynn_edmf
 !! This subroutine is the Dynamic Multi-Plume (DMP) Mass-Flux Scheme.
 !! 
@@ -6878,10 +6880,8 @@ ENDIF !END Debugging
 END SUBROUTINE DMP_MF
 !=================================================================
 !>\ingroup gsd_mynn_edmf
-!! This subroutine 
+!! zero or one condensation for edmf: calculates THV and QC
 subroutine condensation_edmf(QT,THL,P,zagl,THV,QC)
-!
-! zero or one condensation for edmf: calculates THV and QC
 !
 real,intent(in)   :: QT,THL,P,zagl
 real,intent(out)  :: THV
@@ -6940,10 +6940,9 @@ end subroutine condensation_edmf
 
 !===============================================================
 
+!> zero or one condensation for edmf: calculates THL and QC                                       
+!! similar to condensation_edmf but with different inputs
 subroutine condensation_edmf_r(QT,THL,P,zagl,THV,QC)
-!                                                                                                
-! zero or one condensation for edmf: calculates THL and QC                                       
-! similar to condensation_edmf but with different inputs                                         
 !                                                                                                
 real,intent(in)   :: QT,THV,P,zagl
 real,intent(out)  :: THL, QC
@@ -6976,12 +6975,10 @@ real :: diff,exn,t,th,qs,qcold
 end subroutine condensation_edmf_r
 
 !===============================================================
-! ===================================================================
-! This is the downdraft mass flux scheme - analogus to edmf_JPL but  
-! flipped updraft to downdraft. This scheme is currently only tested 
-! for Stratocumulus cloud conditions. For a detailed desctiption of the
-! model, see paper.
-
+!> This is the downdraft mass flux scheme - analogus to edmf_JPL but  
+!! flipped updraft to downdraft. This scheme is currently only tested 
+!! for Stratocumulus cloud conditions. For a detailed desctiption of the
+!! model, see paper.
 SUBROUTINE DDMF_JPL(kts,kte,dt,zw,dz,p,              &
               &u,v,th,thl,thv,tk,qt,qv,qc,           &
               &rho,exner,                            &
@@ -7341,14 +7338,12 @@ SUBROUTINE DDMF_JPL(kts,kte,dt,zw,dz,p,              &
 END SUBROUTINE DDMF_JPL
 !===============================================================
 
-
+!> Add scale-aware factor (Psig) here, taken from Honnert et al. (2011) \cite Honnert_2011
+!! and/or from Shin and Hong (2013) \cite Shin_2013.
 SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
 
     !---------------------------------------------------------------
     !             NOTES ON SCALE-AWARE FORMULATION
-    !
-    !JOE: add scale-aware factor (Psig) here, taken from Honnert et al. (2011,
-    !     JAS) and/or from Hyeyum Hailey Shin and Song-You Hong (2013, JAS)
     !
     ! Psig_bl tapers local mixing
     ! Psig_shcu tapers nonlocal mixing
@@ -7520,14 +7515,13 @@ SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
   END FUNCTION xl_blend
 
 ! ===================================================================
-
+!> New stability function parameters for momentum (Puhales, 2020, WRF 4.2.1)
+!! The forms in unstable conditions (z/L < 0) use Grachev et al. (2000), which are a blend of
+!! the classical (Kansas) forms (i.e., Paulson 1970, Dyer and Hicks 1970), valid for weakly
+!! unstable conditions (-1 < z/L < 0). The stability functions for stable conditions use an
+!! updated form taken from Cheng and Brutsaert (2005), which extends the validity into very
+!! stable conditions [z/L ~ O(10)].
   FUNCTION phim(zet)
-     ! New stability function parameters for momentum (Puhales, 2020, WRF 4.2.1)
-     ! The forms in unstable conditions (z/L < 0) use Grachev et al. (2000), which are a blend of 
-     ! the classical (Kansas) forms (i.e., Paulson 1970, Dyer and Hicks 1970), valid for weakly 
-     ! unstable conditions (-1 < z/L < 0). The stability functions for stable conditions use an
-     ! updated form taken from Cheng and Brutsaert (2005), which extends the validity into very
-     ! stable conditions [z/L ~ O(10)].
       IMPLICIT NONE
 
       REAL, INTENT(IN):: zet
@@ -7571,15 +7565,14 @@ SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
       phim = phi_m
 
   END FUNCTION phim
-! ===================================================================
 
+!> New stability function parameters for heat (Puhales, 2020, WRF 4.2.1)
+!! The forms in unstable conditions (z/L < 0) use Grachev et al. (2000), which are a blend of
+!! the classical (Kansas) forms (i.e., Paulson 1970, Dyer and Hicks 1970), valid for weakly
+!! unstable conditions (-1 < z/L < 0). The stability functions for stable conditions use an
+!! updated form taken from Cheng and Brutsaert (2005), which extends the validity into very
+!! stable conditions [z/L ~ O(10)].
   FUNCTION phih(zet)
-    ! New stability function parameters for heat (Puhales, 2020, WRF 4.2.1)
-    ! The forms in unstable conditions (z/L < 0) use Grachev et al. (2000), which are a blend of
-    ! the classical (Kansas) forms (i.e., Paulson 1970, Dyer and Hicks 1970), valid for weakly
-    ! unstable conditions (-1 < z/L < 0). The stability functions for stable conditions use an
-    ! updated form taken from Cheng and Brutsaert (2005), which extends the validity into very
-    ! stable conditions [z/L ~ O(10)].
       IMPLICIT NONE
 
       REAL, INTENT(IN):: zet
@@ -7621,6 +7614,7 @@ SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
 
 END FUNCTION phih
 ! ==================================================================
+!>
  SUBROUTINE topdown_cloudrad(kts,kte,dz1,zw,xland,kpbl,PBLH,  &
                &sqc,sqi,sqw,thl,th1,ex1,p1,rho1,thetav,       &
                &cldfra_bl1D,rthraten,                         &

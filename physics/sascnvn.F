@@ -17,7 +17,7 @@
 
       private
 
-      public :: sascnvn_init, sascnvn_run, sascnvn_finalize
+      public :: sascnvn_init, sascnvn_run
 
       contains
 
@@ -43,9 +43,6 @@
       endif
 !
       end subroutine sascnvn_init
-
-      subroutine sascnvn_finalize()
-      end subroutine sascnvn_finalize
 
 !>  \brief This subroutine contains the entirety of the SAS deep convection scheme.
 !!

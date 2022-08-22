@@ -1,15 +1,13 @@
-!> \file GFS_surface_diag.F90
+!> \file sfc_diag_post.F90
 !!  Contains code related to the surface diagnostic scheme.
 
       module sfc_diag_post
 
       contains
 
-      subroutine sfc_diag_post_init ()
-      end subroutine sfc_diag_post_init
-
-      subroutine sfc_diag_post_finalize()
-      end subroutine sfc_diag_post_finalize
+!>\defgroup sfc_diag_post_mod GFS sfc_diag_post Module
+!! This module contains code related to the surface diagnostic scheme.
+!> @{
 #if 0
 !> \section arg_table_sfc_diag_post_run Argument Table
 !! \htmlinclude sfc_diag_post_run.html
@@ -42,14 +40,14 @@
         errmsg = ''
         errflg = 0
 
-        if (lsm == lsm_noahmp) then
-          do i=1,im
-            if(dry(i)) then
-              t2m(i) = t2mmp(i)
-              q2m(i) = q2mp(i)
-            endif
-          enddo
-        endif
+!       if (lsm == lsm_noahmp) then
+!         do i=1,im
+!           if(dry(i)) then
+!             t2m(i) = t2mmp(i)
+!             q2m(i) = q2mp(i)
+!           endif
+!         enddo
+!       endif
 
         if (lssav) then
           do i=1,im
@@ -74,5 +72,5 @@
         endif
 
       end subroutine sfc_diag_post_run
-
+!> @}
       end module sfc_diag_post

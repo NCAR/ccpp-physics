@@ -98,10 +98,9 @@ contains
 !>\defgroup gfdlmp  GFDL Cloud Microphysics Module
 !! This is cloud microphysics package for GFDL global cloud resolving model.
 !! The algorithms are originally derived from Lin et al. (1983) \cite lin_et_al_1983.
-!! most of the key elements have been simplified/improved. This code at this stage
-!! bears little to no similarity to the original Lin MP in zetac.
-!! therefore, it is best to be called GFDL microphysics (GFDL MP) .
-!>\author Shian-Jiann Lin, Linjiong Zhou
+!! Most of the key elements have been simplified/improved. This code at this stage
+!! bears little to no similarity to the original Lin MP.
+!! Therefore, it is best to be called GFDL microphysics (GFDL MP) .
 !!
 !>\brief The module contains the GFDL cloud
 !! microphysics (Chen and Lin (2013) \cite chen_and_lin_2013 ).

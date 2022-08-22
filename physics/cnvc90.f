@@ -127,9 +127,5 @@
       END SUBROUTINE cnvc90_run
 !> @}
 
-      subroutine cnvc90_finalize()
-      end subroutine cnvc90_finalize
-
-
       end module cnvc90
 

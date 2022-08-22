@@ -1,5 +1,5 @@
 !>\file GFS_rad_time_vary.fv3.F90
-!!  Contains code related to GFS physics suite setup (radiation part of time_vary_step)
+!!  Contains code related to GFS radiation suite setup (radiation part of time_vary_step)
    module GFS_rad_time_vary
 
       implicit none
@@ -11,6 +11,7 @@
       contains
 
 !>\defgroup mod_GFS_rad_time_vary GFS Radiation Time Update
+!! This module contains code related to GFS radiation setup.
 !> @{
 !> \section arg_table_GFS_rad_time_vary_timestep_init Argument Table
 !! \htmlinclude GFS_rad_time_vary_timestep_init.html
