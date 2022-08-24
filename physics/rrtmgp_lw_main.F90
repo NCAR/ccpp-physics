@@ -109,10 +109,9 @@ contains
        cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow,            &
        cld_rwp, cld_rerain, precip_frac, cld_cnv_lwp, cld_cnv_reliq, cld_cnv_iwp,        &
        cld_cnv_reice, cld_pbl_lwp, cld_pbl_reliq, cld_pbl_iwp, cld_pbl_reice,            &
-       cloud_overlap_param, active_gases_array,                        &
-       lw_optical_props_aerosol, fluxlwUP_allsky, fluxlwDOWN_allsky,                     &
-       fluxlwUP_clrsky, fluxlwDOWN_clrsky, fluxlwUP_jac, fluxlwUP_radtime,               &
-       fluxlwDOWN_radtime, errmsg, errflg)
+       cloud_overlap_param, active_gases_array, aerlw_tau, aerlw_ssa, aerlw_g,           &
+       fluxlwUP_allsky, fluxlwDOWN_allsky, fluxlwUP_clrsky, fluxlwDOWN_clrsky,           &
+       fluxlwUP_jac, fluxlwUP_radtime, fluxlwDOWN_radtime, errmsg, errflg)
 
     ! Inputs
     logical, intent(in) :: &
@@ -173,10 +172,12 @@ contains
          cld_pbl_iwp,         & ! Water path for       PBL          ice    cloud-particles
          cld_pbl_reice,       & ! Effective radius for PBL          ice    cloud-particles
          cloud_overlap_param    ! Cloud overlap parameter
+    real(kind_phys), dimension(:,:,:), intent(in) :: &
+          aerlw_tau,          & ! Aerosol optical depth
+          aerlw_ssa,          & ! Aerosol single scattering albedo
+          aerlw_g               ! Aerosol asymmetry paramter
     character(len=*), dimension(:), intent(in) :: &
          active_gases_array     ! List of active gases from namelist as array
-    type(ty_optical_props_1scl),intent(inout) :: &
-         lw_optical_props_aerosol ! RRTMGP DDT: Longwave aerosol optical properties (tau)
 
     ! Outputs
     real(kind_phys), dimension(:,:), intent(inout) :: &
@@ -482,7 +483,7 @@ contains
        !
        ! ###################################################################################
        ! Add aerosol optics to gas optics
-       lw_optical_props_aerosol_local%tau = lw_optical_props_aerosol%tau(iCol:iCol2,:,:)
+       lw_optical_props_aerosol_local%tau = aerlw_tau(iCol:iCol2,:,:)
        call check_error_msg('rrtmgp_lw_main_increment_aerosol_to_clrsky',&
             lw_optical_props_aerosol_local%increment(lw_optical_props_clrsky))
 

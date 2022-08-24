@@ -14,7 +14,6 @@ module rrtmgp_sw_gas_optics
   use mo_gas_optics_rrtmgp,   only: ty_gas_optics_rrtmgp
   use mo_gas_concentrations,  only: ty_gas_concs
   use radiation_tools,        only: check_error_msg
-  use mo_optical_props,       only: ty_optical_props_2str
   use netcdf
 #ifdef MPI
   use mpi
@@ -125,7 +124,6 @@ contains
     integer,dimension(:),allocatable :: temp1, temp2, temp3, temp4
     character(len=264) :: sw_gas_props_file
     type(ty_gas_concs) :: gas_concentrations  ! RRTMGP DDT containing active trace gases
-
 
     ! Initialize
     errmsg = ''
@@ -504,113 +502,6 @@ contains
          sb_defaultSW, rayl_lowerSW, rayl_upperSW))
 
   end subroutine rrtmgp_sw_gas_optics_init
-
-!> @}
-  ! ###################################################################################### 
-!> \section arg_table_rrtmgp_sw_gas_optics_run
-!! \htmlinclude rrtmgp_sw_gas_optics.html
-!!
-!> \ingroup rrtmgp_sw_gas_optics
-!!
-!! Compute shortwave optical prperties (optical-depth, single-scattering albedo,
-!! asymmetry parameter) for clear-sky conditions.
-!!
-!! \section rrtmgp_sw_gas_optics_run
-!> @{
-  ! ###################################################################################### 
-  subroutine rrtmgp_sw_gas_optics_run(doSWrad, nCol, nLev, ngptsGPsw, nday, idxday,  p_lay, &
-       p_lev, toa_src_sw, t_lay, t_lev, active_gases_array, gas_concentrations, solcon,     &
-       sw_optical_props_clrsky, errmsg, errflg)
-
-    ! Inputs
-    logical, intent(in) :: &
-         doSWrad                 ! Flag to calculate SW irradiances
-    integer,intent(in) :: &
-         ngptsGPsw,            & ! Number of spectral (g) points.
-         nDay,                 & ! Number of daylit points.
-         nCol,                 & ! Number of horizontal points
-         nLev                    ! Number of vertical levels
-    integer,intent(in),dimension(ncol) :: &
-         idxday                  ! Indices for daylit points.
-    real(kind_phys), dimension(ncol,nLev), intent(in) :: &
-         p_lay,                & ! Pressure @ model layer-centers (Pa)
-         t_lay                   ! Temperature (K)
-    real(kind_phys), dimension(ncol,nLev+1), intent(in) :: &
-         p_lev,                & ! Pressure @ model layer-interfaces (Pa)
-         t_lev                   ! Temperature @ model levels
-    type(ty_gas_concs),intent(inout) :: &
-         gas_concentrations      ! RRTMGP DDT: trace gas concentrations (vmr)
-    real(kind_phys), intent(in) :: &
-         solcon                  ! Solar constant
-
-    ! Output
-    character(len=*), intent(out) :: &
-         errmsg                  ! CCPP error message
-    integer,          intent(out) :: &
-         errflg                  ! CCPP error code
-    type(ty_optical_props_2str),intent(out) :: &
-         sw_optical_props_clrsky ! RRTMGP DDT: clear-sky shortwave optical properties, spectral (tau,ssa,g) 
-    real(kind_phys), dimension(nCol,ngptsGPsw), intent(out) :: &
-         toa_src_sw              ! TOA incident spectral flux (W/m2)
-    character(len=*), dimension(:), intent(in) :: &
-         active_gases_array ! List of active gases from namelist as array
-
-    ! Local variables
-    integer :: ij,iGas
-    real(kind_phys), dimension(ncol,nLev) :: vmrTemp
-    real(kind_phys), dimension(nday,ngptsGPsw) :: toa_src_sw_temp
-    type(ty_gas_concs)  ::  gas_concentrations_daylit
-
-    ! Initialize CCPP error handling variables
-    errmsg = ''
-    errflg = 0
-
-    if (.not. doSWrad) return
-
-    gas_concentrations%gas_name(:) = active_gases_array(:)
-
-    toa_src_sw(:,:) = 0._kind_phys
-    if (nDay .gt. 0) then
-       ! Allocate space
-       call check_error_msg('rrtmgp_sw_gas_optics_run_alloc_2str',&
-            sw_optical_props_clrsky%alloc_2str(nday, nLev, sw_gas_props))
-
-       gas_concentrations_daylit%ncol = nDay
-       gas_concentrations_daylit%nlay = nLev
-       allocate(gas_concentrations_daylit%gas_name(gas_concentrations%get_num_gases()))
-       allocate(gas_concentrations_daylit%concs(gas_concentrations%get_num_gases()))
-       do iGas=1,gas_concentrations%get_num_gases()
-          allocate(gas_concentrations_daylit%concs(iGas)%conc(nDay, nLev))
-       enddo
-       gas_concentrations_daylit%gas_name(:) = active_gases_array(:)
-
-       ! Subset the gas concentrations.
-       do iGas=1,gas_concentrations%get_num_gases()
-          call check_error_msg('rrtmgp_sw_gas_optics_run_get_vmr',&
-               gas_concentrations%get_vmr(trim(gas_concentrations_daylit%gas_name(iGas)),vmrTemp))
-          call check_error_msg('rrtmgp_sw_gas_optics_run_set_vmr',&
-               gas_concentrations_daylit%set_vmr(trim(gas_concentrations_daylit%gas_name(iGas)),vmrTemp(idxday(1:nday),:)))
-       enddo
-
-       ! Call SW gas-optics
-       call check_error_msg('rrtmgp_sw_gas_optics_run',sw_gas_props%gas_optics(&
-            p_lay(idxday(1:nday),:),          & ! IN  - Pressure @ layer-centers (Pa)
-            p_lev(idxday(1:nday),:),          & ! IN  - Pressure @ layer-interfaces (Pa)
-            t_lay(idxday(1:nday),:),          & ! IN  - Temperature @ layer-centers (K)
-            gas_concentrations_daylit,        & ! IN  - RRTMGP DDT: trace gas volumne mixing-ratios
-            sw_optical_props_clrsky,          & ! OUT - RRTMGP DDT: Shortwave optical properties, by
-                                                !                   spectral point (tau,ssa,g)
-            toa_src_sw_temp))                   ! OUT - TOA incident shortwave radiation (spectral)
-       toa_src_sw(idxday(1:nday),:) = toa_src_sw_temp
-
-       ! Scale incident flux
-       do ij=1,nday
-          toa_src_sw(idxday(ij),:) = toa_src_sw(idxday(ij),:)*solcon/ &
-                                     sum(toa_src_sw(idxday(ij),:))
-       enddo
-    endif
-
-  end subroutine rrtmgp_sw_gas_optics_run
 !> @}
 end module rrtmgp_sw_gas_optics
  

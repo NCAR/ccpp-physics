@@ -82,7 +82,7 @@ contains
        cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp,      &
        cld_rerain, precip_frac, cld_cnv_lwp, cld_cnv_reliq, cld_cnv_iwp, cld_cnv_reice,     &
        cld_pbl_lwp, cld_pbl_reliq, cld_pbl_iwp, cld_pbl_reice, cloud_overlap_param,         &
-       active_gases_array, sw_optical_props_aerosol, solcon, scmpsw,    &
+       active_gases_array, aersw_tau, aersw_ssa, aersw_g, solcon, scmpsw,                   &
        fluxswUP_allsky, fluxswDOWN_allsky, fluxswUP_clrsky, fluxswDOWN_clrsky, cldtausw,    &
        errmsg, errflg)
 
@@ -148,10 +148,12 @@ contains
          cld_pbl_iwp,         & ! Water path for       PBL          ice    cloud-particles
          cld_pbl_reice,       & ! Effective radius for PBL          ice    cloud-particles
          cloud_overlap_param    !
+    real(kind_phys), dimension(:,:,:), intent(in) :: &
+          aersw_tau,          & ! Aerosol optical depth
+          aersw_ssa,          & ! Aerosol single scattering albedo
+          aersw_g               ! Aerosol asymmetry paramter
     character(len=*), dimension(:), intent(in) :: &
          active_gases_array     ! List of active gases from namelist as array
-    type(ty_optical_props_2str),intent(in) :: &
-         sw_optical_props_aerosol ! RRTMGP DDT: Shortwave aerosol optical properties (tau,ssa,g)
     real(kind_phys), intent(in) :: &
          solcon                 ! Solar constant
 
@@ -279,9 +281,9 @@ contains
           sw_optical_props_precipByBand%tau       = 0._kind_phys
           sw_optical_props_precipByBand%ssa       = 0._kind_phys
           sw_optical_props_precipByBand%g         = 0._kind_phys
-          sw_optical_props_aerosol_local%tau      = 0._kind_phys
-          sw_optical_props_aerosol_local%ssa      = 0._kind_phys
-          sw_optical_props_aerosol_local%g        = 0._kind_phys
+          !sw_optical_props_aerosol_local%tau      = 0._kind_phys
+          !sw_optical_props_aerosol_local%ssa      = 0._kind_phys
+          !sw_optical_props_aerosol_local%g        = 0._kind_phys
           if (doGP_sgs_cnv) then
              sw_optical_props_cnvcloudsByBand%tau = 0._kind_phys
              sw_optical_props_cnvcloudsByBand%ssa = 0._kind_phys
@@ -502,9 +504,9 @@ contains
           !
           ! ###################################################################################
           ! Add aerosol optics to gaseous (clear-sky) optical properties
-          sw_optical_props_aerosol_local%tau = sw_optical_props_aerosol%tau(ix:ix2,:,:)
-          sw_optical_props_aerosol_local%ssa = sw_optical_props_aerosol%ssa(ix:ix2,:,:)
-          sw_optical_props_aerosol_local%g   = sw_optical_props_aerosol%g(ix:ix2,:,:)
+          sw_optical_props_aerosol_local%tau = aersw_tau(iCol:iCol+rrtmgp_phys_blksz-1,:,:)
+          sw_optical_props_aerosol_local%ssa = aersw_ssa(iCol:iCol+rrtmgp_phys_blksz-1,:,:)
+          sw_optical_props_aerosol_local%g   = aersw_g(iCol:iCol+rrtmgp_phys_blksz-1,:,:)
           call check_error_msg('rrtmgp_sw_main_increment_aerosol_to_clrsky', & 
                sw_optical_props_aerosol_local%increment(sw_optical_props_accum))
 
