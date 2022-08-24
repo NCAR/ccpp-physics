@@ -4,7 +4,9 @@
 !! eddy-diffusion mass-flux (TKE-EDMF) parameterization (by Jongil Han).
 
       module satmedmfvdif
-
+      use tridi_mod
+      use mfscu_mod
+      use mfpblt_mod
       contains
 
 !> \section arg_table_satmedmfvdif_init Argument Table
@@ -38,9 +40,6 @@
       end if
 
       end subroutine satmedmfvdif_init
-
-      subroutine satmedmfvdif_finalize ()
-      end subroutine satmedmfvdif_finalize
 
 !> \defgroup satmedmf GFS Scale-aware TKE-based Moist Eddy-Diffusivity Mass-flux (TKE-EDMF) Scheme Module 
 !! @{

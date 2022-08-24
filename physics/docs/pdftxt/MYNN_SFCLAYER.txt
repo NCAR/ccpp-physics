@@ -12,7 +12,7 @@ drag (Beljaars et al. 2004) \cite beljaars_et_al_2004 ], requires that surface l
 assumptions made across all model components are physically consistent.
 
 The MYNN surface layer scheme was originally developed for the Mellor-Yamada-Nakanishi-Niino (MYNN)-Eddy Diffusivity-Mass
-Flux (EDMF) scheme (Nakanishi and Niino 2009 \cite NAKANISHI_2009, Olson et al. 2019 \cite olson_et_al_2019) and has been used in NOAA's operational
+Flux (EDMF) scheme (Nakanishi and Niino 2009 \cite NAKANISHI_2009, Olson et al. 2019 \cite https://doi.org/10.25923/n9wm-be49) and has been used in NOAA's operational
 Rapid Refresh (RAP; Benjamin et al. 2016 \cite Benjamin_2016 ) and High-Resolution Rapid Refresh (HRRR) forecast systems since 2014. During this time, the scheme has undergone significant development in tandem with other components of the
 forecast systems. More recently, several new features have been added in order to accommodate different 
 capabilities in the Common Community Physics Package (CCPP) (Heinzeller et al. 2019). This updated version of the 
@@ -41,7 +41,7 @@ basic state variables): u*, z/L, surface heat and moisture fluxes.
 
 \section gen_mynnsfclay MYNN Surface Layer Scheme General Algorithm
 
-\image html  MYNN-SFCLAY_call_order.png "Figure 1.The order of operations within the MYNN surface layer scheme (Courtesy of J.B. Olson)." width=10cm
+\image html  MYNN-SFCLAY_call_order.png "Figure 1.The order of operations within the MYNN surface layer scheme (Courtesy of J.B. Olson)." width=900
 
 Within the MYNN surface layer scheme, there is a dependency check for the first timestep. If true, several arrays are initialized at every
 i point. This is done because (1) some variables are calculated in schemes called after the surface layer call and (2) some variables are used within

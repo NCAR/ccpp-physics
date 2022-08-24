@@ -1,5 +1,6 @@
-!> \file GFS_rrtmgp_setup.f90
-!! This file contains
+!> \file GFS_rrtmgp_setup.F90
+!! This file initializes the RRTMGP radiation scheme
+
 module GFS_rrtmgp_setup
   use machine,                    only : kind_phys
   use module_radiation_astronomy, only : sol_init, sol_update
@@ -31,11 +32,8 @@ module GFS_rrtmgp_setup
   logical :: loz1st = .true.
   
 contains
-  ! #########################################################################################  
-  ! SUBROUTINE GFS_rrtmgp_setup_init
-  ! #########################################################################################  
-!> \defgroup GFS_rrtmgp_setup GFS RRTMGP Scheme Setup
-!! @{
+
+!> \defgroup GFS_rrtmgp_setup_mod GFS RRTMGP Scheme Setup Module
 !! \section arg_table_GFS_rrtmgp_setup_init
 !! \htmlinclude GFS_rrtmgp_setup_init.html
 !!
@@ -125,6 +123,14 @@ contains
     month0 = 0
     iyear0 = 0
     monthd = 0
+
+!> -# Initialization
+!! - astronomy initialization routine:
+!! call module_radiation_astronomy::sol_init()
+!! - aerosols initialization routine:
+!! call module_radiation_aerosols::aer_init()
+!! - CO2 and other gases intialization routine:
+!! call module_radiation_gases::gas_init()
 
     ! Call initialization routines..
     call sol_init ( me )
@@ -267,5 +273,4 @@ contains
     is_initialized = .false.
     
   end subroutine GFS_rrtmgp_setup_finalize
-
 end module GFS_rrtmgp_setup

@@ -1,5 +1,8 @@
-module cires_ugwpv1_oro
+!>\file cires_ugwpv1_oro.F90
+!!
 
+module cires_ugwpv1_oro
+  use cires_ugwpv1_sporo
 contains
 
    subroutine orogw_v1 (im, km,  imx,   me,  master, dtp, kdt, do_tofd,   &

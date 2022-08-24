@@ -261,6 +261,118 @@
   dimensions = ()
   type = integer
   intent = in
+[ntdu1]
+  standard_name = index_for_dust_bin1
+  long_name = index for dust bin1
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ntdu2]
+  standard_name = index_for_dust_bin2
+  long_name = index for dust bin2
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ntdu3]
+  standard_name = index_for_dust_bin3
+  long_name = index for dust bin3
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ntdu4]
+  standard_name = index_for_dust_bin4
+  long_name = index for dust bin4
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ntdu5]
+  standard_name = index_for_dust_bin5
+  long_name = index for dust bin5
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ntss1]
+  standard_name = index_for_seasalt_bin1
+  long_name = index for seasalt bin1
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ntss2]
+  standard_name = index_for_seasalt_bin2
+  long_name = index for seasalt bin2
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ntss3]
+  standard_name = index_for_seasalt_bin3
+  long_name = index for seasalt bin3
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ntss4]
+  standard_name = index_for_seasalt_bin4
+  long_name = index for seasalt bin4
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ntss5]
+  standard_name = index_for_seasalt_bin5
+  long_name = index for seasalt bin5
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ntsu]
+  standard_name = index_for_sulfate
+  long_name = index for sulfate
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ntbcb]
+  standard_name = index_for_bcphobic
+  long_name = index for bcphobic
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ntbcl]
+  standard_name = index_for_bcphilic
+  long_name = index for bcphilic 
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ntocb]
+  standard_name = index_for_ocphobic
+  long_name = index for ocphobic
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ntocl]
+  standard_name = index_for_ocphilic
+  long_name = index for ocphilic 
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ntchm]
+  standard_name = number_of_chemical_tracers
+  long_name = number of chemical tracers
+  units = count
+  dimensions = () 
+  type = integer
+  intent = in 
 [imp_physics]
   standard_name = control_for_microphysics_scheme
   long_name = choice of microphysics scheme
@@ -720,13 +832,13 @@
   kind = kind_phys
   intent = in
 [aer_nm]
-  standard_name = mass_number_concentration_of_aerosol_from_gocart_climatology
-  long_name = GOCART aerosol climatology number concentration
-  units = kg-1
+  standard_name = mass_mixing_ratio_of_aerosol_from_gocart_or_merra2
+  long_name = mass mixing ratio of aerosol from gocart or merra2
+  units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_aerosol_tracers_MG)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
 [dx]
   standard_name = characteristic_grid_lengthscale
   long_name = relative dx for the grid cell
@@ -1201,6 +1313,29 @@
   type = real
   kind = kind_phys
   intent = out
+[aero_dir_fdb]
+  standard_name = do_smoke_aerosol_direct_feedback
+  long_name = flag for smoke and dust radiation feedback
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[smoke_ext]
+  standard_name = extinction_coefficient_in_air_due_to_smoke
+  long_name = extinction coefficient in air due to smoke
+  units = various
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[dust_ext]
+  standard_name = extinction_coefficient_in_air_due_to_dust
+  long_name = extinction coefficient in air due to dust
+  units = various
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
 [spp_wts_rad]
   standard_name = spp_weights_for_radiation_scheme
   long_name = spp weights for radiation scheme
@@ -1212,6 +1347,13 @@
 [spp_rad]
   standard_name = control_for_radiation_spp_perturbations
   long_name = control for radiation spp perturbations
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[rrfs_smoke_band]
+  standard_name = index_of_shortwave_band_affected_by_smoke
+  long_name = rrtmg band number that smoke and dust should affect
   units = count
   dimensions = ()
   type = integer

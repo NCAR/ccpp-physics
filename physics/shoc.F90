@@ -9,7 +9,7 @@ module shoc
 
   private
 
-  public shoc_run, shoc_init, shoc_finalize
+  public shoc_run, shoc_init
   integer, parameter :: kp = kind_phys
 
 contains
@@ -31,9 +31,6 @@ subroutine shoc_init (do_shoc, errmsg, errflg)
     return
   end if
 end subroutine shoc_init
-
-subroutine shoc_finalize ()
-end subroutine shoc_finalize
 
 !> \section arg_table_shoc_run Argument Table
 !! \htmlinclude shoc_run.html

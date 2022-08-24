@@ -11,9 +11,11 @@
 
       contains
 
+!>\defgroup mynn_sfc MYNN Surface Layer Module
+!> This scheme (1) performs pre-mynnsfc work, (2) runs the mynn sfc layer scheme, and (3) performs post-mynnsfc work
+!>@{
 !! \section arg_table_mynnsfc_wrapper_init Argument Table
 !! \htmlinclude mynnsfc_wrapper_init.html
-
 !!
       subroutine mynnsfc_wrapper_init(do_mynnsfclay, &
        &                             errmsg, errflg)
@@ -46,15 +48,9 @@
 
       end subroutine mynnsfc_wrapper_init
 
-      subroutine mynnsfc_wrapper_finalize ()
-      end subroutine mynnsfc_wrapper_finalize
-
-!>\defgroup mynn_sfc GSD MYNN Surface Layer Scheme Module
-!> \brief This scheme (1) performs pre-mynnsfc work, (2) runs the mynn sfc layer scheme, and (3) performs post-mynnsfc work
-!! \section arg_table_mynnsfc_wrapper_run Argument Table
+!> \section arg_table_mynnsfc_wrapper_run Argument Table
 !! \htmlinclude mynnsfc_wrapper_run.html
 !!
-!###===================================================================
 SUBROUTINE mynnsfc_wrapper_run(            &
      &  im,levs,                           &
      &  itimestep,iter,flag_iter,          &
@@ -62,6 +58,9 @@ SUBROUTINE mynnsfc_wrapper_run(            &
      &  sigmaf,vegtype,shdmax,ivegsrc,     &  !intent(in)
      &  z0pert,ztpert,                     &  !intent(in)
      &  redrag,sfc_z0_type,                &  !intent(in)
+     &  isftcflx,iz0tlnd,                  &  !intent(in)
+     &  sfclay_compute_flux,               &  !intent(in)
+     &  sfclay_compute_diag,               &  !intent(in)
      &  delt,dx,                           &
      &  u, v, t3d, qvsh, qc, prsl, phii,   &
      &  exner, ps, PBLH, slmsk,            &
@@ -98,19 +97,6 @@ SUBROUTINE mynnsfc_wrapper_run(            &
 ! should be moved to inside the mynn:
       use machine , only : kind_phys
 
-!      use physcons, only : cp     => con_cp,              &
-!     &                     g      => con_g,               &
-!     &                     r_d    => con_rd,              &
-!     &                     r_v    => con_rv,              &
-!     &                     cpv    => con_cvap,            &
-!     &                     cliq   => con_cliq,            &
-!     &                     Cice   => con_csol,            &
-!     &                     rcp    => con_rocp,            &
-!     &                     XLV    => con_hvap,            &
-!     &                     XLF    => con_hfus,            &
-!     &                     EP_1   => con_fvirt,           &
-!     &                     EP_2   => con_eps
-
 !      USE module_sf_mynn, only : SFCLAY_mynn 
 !tgs - info on iterations: 
 !     flag_iter- logical, execution or not (im)
@@ -143,11 +129,9 @@ SUBROUTINE mynnsfc_wrapper_run(            &
   integer, intent(out) :: errflg
 
 !MISC CONFIGURATION OPTIONS
-      INTEGER, PARAMETER ::       &
-     &       isftcflx = 0,        & !control: 0
-     &       iz0tlnd  = 0,        & !control: 0
-     &       isfflx   = 1
-
+      INTEGER, PARAMETER  :: isfflx   = 1
+      logical, intent(in) :: sfclay_compute_flux,sfclay_compute_diag
+      integer, intent(in) :: isftcflx,iz0tlnd
       integer, intent(in) :: im, levs
       integer, intent(in) :: iter, itimestep, lsm, lsm_ruc
       logical, dimension(:), intent(in) :: flag_iter
@@ -311,9 +295,10 @@ SUBROUTINE mynnsfc_wrapper_run(            &
              EP1=ep_1,EP2=ep_2,KARMAN=karman,                                 &
              ISFFLX=isfflx,isftcflx=isftcflx,LSM=lsm,LSM_RUC=lsm_ruc,         &
              iz0tlnd=iz0tlnd,psi_opt=psi_opt,                                 &
-    &        sigmaf=sigmaf,vegtype=vegtype,shdmax=shdmax,ivegsrc=ivegsrc,     & !intent(in)
-    &        z0pert=z0pert,ztpert=ztpert,                                     & !intent(in)
-    &        redrag=redrag,sfc_z0_type=sfc_z0_type,                           & !intent(in)
+             compute_flux=sfclay_compute_flux,compute_diag=sfclay_compute_diag,&
+             sigmaf=sigmaf,vegtype=vegtype,shdmax=shdmax,ivegsrc=ivegsrc,     & !intent(in)
+             z0pert=z0pert,ztpert=ztpert,                                     & !intent(in)
+             redrag=redrag,sfc_z0_type=sfc_z0_type,                           & !intent(in)
              itimestep=itimestep,iter=iter,flag_iter=flag_iter,               &
                          wet=wet,              dry=dry,              icy=icy, &  !intent(in)
              tskin_wat=tskin_wat,  tskin_lnd=tskin_lnd,  tskin_ice=tskin_ice, &  !intent(in)
@@ -398,6 +383,6 @@ SUBROUTINE mynnsfc_wrapper_run(            &
 
   END SUBROUTINE mynnsfc_wrapper_run
 
-!###=================================================================
+!>@}
 
 END MODULE mynnsfc_wrapper

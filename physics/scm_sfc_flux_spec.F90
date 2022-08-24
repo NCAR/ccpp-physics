@@ -10,7 +10,7 @@ module scm_sfc_flux_spec
 !----------------
 ! Public entities
 !----------------
-  public  scm_sfc_flux_spec_init, scm_sfc_flux_spec_run, scm_sfc_flux_spec_finalize
+  public  scm_sfc_flux_spec_init, scm_sfc_flux_spec_run
 
   CONTAINS
 !*******************************************************************************************
@@ -32,9 +32,6 @@ module scm_sfc_flux_spec
       return
     end if
   end subroutine scm_sfc_flux_spec_init
-
-  subroutine scm_sfc_flux_spec_finalize()
-  end subroutine scm_sfc_flux_spec_finalize
 
 !> \brief This routine calculates surface-related parameters given specified sensible and latent heat fluxes and a roughness length. Most of the calculation
 !! is "backing out" parameters that are calculated in sfc_dff.f from the known surface heat fluxes and roughness length.
@@ -153,14 +150,11 @@ module scm_sfc_flux_spec
       frland(i) = 1.0_kind_phys
       cice(i)   = 0.0_kind_phys
       icy(i)    = .false.
-      tsfcl(i)  = T_surf(i) !GJF
     else
       frland(i) = 0.0_kind_phys
       if (oceanfrac(i) > 0.0_kind_phys) then
         if (cice(i) >= min_seaice) then
           icy(i)   = .true.
-          tisfc(i) = T_surf(i) !GJF
-          tisfc(i) = max(timin, min(tisfc(i), tgice))
           ! This cplice namelist option was added to deal with the
           ! situation of the FV3ATM-HYCOM coupling without an active sea
           ! ice (e.g., CICE6) component. By default, the cplice is true
@@ -186,8 +180,6 @@ module scm_sfc_flux_spec
       else
         if (cice(i) >= min_lakeice) then
           icy(i) = .true.
-          tisfc(i) = T_surf(i) !GJF
-          tisfc(i) = max(timin, min(tisfc(i), tgice))
           islmsk(i) = 2
         else
           cice(i)   = 0.0_kind_phys
@@ -198,13 +190,23 @@ module scm_sfc_flux_spec
         if (cice(i) < 1.0_kind_phys) then
           wet(i) = .true. ! some open lake
         endif
-        if (wet(i)) then                   ! Water
-          tsfc_wat(i) = T_surf(i)
-        endif
       endif
     endif
     if (nint(slmsk(i)) /= 1) slmsk(i)  = islmsk(i)
   enddo
+  
+  do i = 1, im
+    if (wet(i)) then
+      tsfc_wat(i) = T_surf(i)
+    end if
+    if (dry(i)) then
+      tsfcl(i)  = T_surf(i)
+    end if
+    if (icy(i)) then
+      tisfc(i) = T_surf(i)
+      tisfc(i) = max(timin, min(tisfc(i), tgice))
+    end if
+  end do
 
 ! to prepare to separate lake from ocean under water category
   do i = 1, im

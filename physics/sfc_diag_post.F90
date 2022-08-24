@@ -1,15 +1,13 @@
-!> \file GFS_surface_diag.F90
+!> \file sfc_diag_post.F90
 !!  Contains code related to the surface diagnostic scheme.
 
       module sfc_diag_post
 
       contains
 
-      subroutine sfc_diag_post_init ()
-      end subroutine sfc_diag_post_init
-
-      subroutine sfc_diag_post_finalize()
-      end subroutine sfc_diag_post_finalize
+!>\defgroup sfc_diag_post_mod GFS sfc_diag_post Module
+!! This module contains code related to the surface diagnostic scheme.
+!> @{
 #if 0
 !> \section arg_table_sfc_diag_post_run Argument Table
 !! \htmlinclude sfc_diag_post_run.html
@@ -19,7 +17,7 @@
                  t2mmp,q2mp, t2m, q2m, u10m, v10m, tmpmin, tmpmax, spfhmin, spfhmax,                  &
                          wind10mmax, u10mmax, v10mmax, dpt2m, errmsg, errflg)
 
-        use machine,               only: kind_phys
+        use machine,               only: kind_phys, kind_dbl_prec
 
         implicit none
 
@@ -36,7 +34,7 @@
         integer,                              intent(out) :: errflg
 
         integer :: i
-        real(kind=kind_phys) :: tem
+        real(kind=kind_dbl_prec) :: tem    ! made dbl prec always, JM 20211104
 
         ! Initialize CCPP error handling variables
         errmsg = ''
@@ -67,11 +65,12 @@
                 v10mmax(i)    = v10m(i)
              endif
              ! Compute dew point, first using vapor pressure
-             tem = max(pgr(i) * q2m(i) / ( con_eps - con_epsm1 *q2m(i)), 1.e-8)
-             dpt2m(i) = 243.5 / ( ( 17.67 / log(tem/611.2) ) - 1.) + 273.14
+             tem = max(pgr(i) * q2m(i) / ( con_eps - con_epsm1 *q2m(i)), 1.d-8)
+             dpt2m(i) = 243.5_kind_dbl_prec / &
+                ( ( 17.67_kind_dbl_prec / log(tem/611.2_kind_dbl_prec) ) - 1.) + 273.14
           enddo
         endif
 
       end subroutine sfc_diag_post_run
-
+!> @}
       end module sfc_diag_post

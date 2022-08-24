@@ -307,7 +307,7 @@
 
       private
 
-      public GFS_diagtoscreen_init, GFS_diagtoscreen_timestep_init, GFS_diagtoscreen_run, GFS_diagtoscreen_finalize
+      public GFS_diagtoscreen_init, GFS_diagtoscreen_timestep_init, GFS_diagtoscreen_run
 
       contains
 
@@ -376,9 +376,6 @@
          end do
 
       end subroutine GFS_diagtoscreen_timestep_init
-
-      subroutine GFS_diagtoscreen_finalize ()
-      end subroutine GFS_diagtoscreen_finalize
 
 !> \section arg_table_GFS_diagtoscreen_run Argument Table
 !! \htmlinclude GFS_diagtoscreen_run.html
@@ -593,6 +590,9 @@
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Tbd%acvb'            , Tbd%acvb)
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Tbd%acvt'            , Tbd%acvt)
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Tbd%hpbl'            , Tbd%hpbl)
+                     if(Model%imfdeepcnv>0 .or. Model%imfshalcnv>0) then
+                       call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Tbd%ud_mf'         , Tbd%ud_mf)
+                     endif
                      if (Model%do_sppt) then
                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Tbd%dtdtnp'        , Tbd%dtdtnp)
                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Tbd%dtotprcp'      , Tbd%dtotprcp)
@@ -723,7 +723,7 @@
                      end if
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dkt         ',    Diag%dkt)
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dku         ',    Diag%dku)
-                     ! CCPP/MYNNPBL only
+                     ! CCPP/MYNNEDMF only
                      if (Model%do_mynnedmf) then
                        if (Model%bl_mynn_output .ne. 0) then
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%edmf_a      ',  Diag%edmf_a)
@@ -867,6 +867,13 @@
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Coupling%v10mi_cpl   ', Coupling%v10mi_cpl    )
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Coupling%tsfci_cpl   ', Coupling%tsfci_cpl    )
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Coupling%psurfi_cpl  ', Coupling%psurfi_cpl   )
+                        if (Model%use_med_flux) then
+                           call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Coupling%dusfcino_cpl ', Coupling%dusfcino_cpl  )
+                           call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Coupling%dvsfcino_cpl ', Coupling%dvsfcino_cpl  )
+                           call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Coupling%dtsfcino_cpl ', Coupling%dtsfcino_cpl  )
+                           call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Coupling%dqsfcino_cpl ', Coupling%dqsfcino_cpl  )
+                           call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Coupling%ulwsfcino_cpl', Coupling%ulwsfcino_cpl )
+                        end if
                      end if
                      if (Model%cplchm) then
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Coupling%rainc_cpl', Coupling%rainc_cpl)
@@ -958,7 +965,7 @@
 
       private
 
-      public GFS_interstitialtoscreen_init, GFS_interstitialtoscreen_timestep_init, GFS_interstitialtoscreen_run, GFS_interstitialtoscreen_finalize
+      public GFS_interstitialtoscreen_init, GFS_interstitialtoscreen_timestep_init, GFS_interstitialtoscreen_run
 
       contains
 
@@ -1029,9 +1036,6 @@
          end do
 
       end subroutine GFS_interstitialtoscreen_timestep_init
-
-      subroutine GFS_interstitialtoscreen_finalize ()
-      end subroutine GFS_interstitialtoscreen_finalize
 
 !> \section arg_table_GFS_interstitialtoscreen_run Argument Table
 !! \htmlinclude GFS_interstitialtoscreen_run.html
@@ -1331,7 +1335,6 @@
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tsurf_ice           ', Interstitial%tsurf_ice               )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tsurf_land          ', Interstitial%tsurf_land              )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tsurf_water         ', Interstitial%tsurf_water             )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%ud_mf               ', Interstitial%ud_mf                   )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%uustar_ice          ', Interstitial%uustar_ice              )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%uustar_land         ', Interstitial%uustar_land             )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%uustar_water        ', Interstitial%uustar_water            )
@@ -1475,15 +1478,9 @@
 
       private
 
-      public GFS_abort_init, GFS_abort_run, GFS_abort_finalize
+      public GFS_abort_run
 
       contains
-
-      subroutine GFS_abort_init ()
-      end subroutine GFS_abort_init
-
-      subroutine GFS_abort_finalize ()
-      end subroutine GFS_abort_finalize
 
 !> \section arg_table_GFS_abort_run Argument Table
 !! \htmlinclude GFS_abort_run.html
@@ -1519,15 +1516,9 @@
 
       private
 
-      public GFS_checkland_init, GFS_checkland_run, GFS_checkland_finalize
+      public  GFS_checkland_run
 
       contains
-
-      subroutine GFS_checkland_init ()
-      end subroutine GFS_checkland_init
-
-      subroutine GFS_checkland_finalize ()
-      end subroutine GFS_checkland_finalize
 
 !> \section arg_table_GFS_checkland_run Argument Table
 !! \htmlinclude GFS_checkland_run.html

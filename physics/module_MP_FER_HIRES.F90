@@ -2249,9 +2249,10 @@ ENDIF
 !--- Also uses the Asai (1965) algorithm, but uses a different target
 !      vapor pressure for the adjustment
 !
+        use machine, only: HIGH_PRES => kind_dbl_prec
       IMPLICIT NONE      
 !
-      INTEGER, PARAMETER :: HIGH_PRES=Selected_Real_Kind(15)
+      !INTEGER, PARAMETER :: HIGH_PRES=Selected_Real_Kind(15)
       REAL (KIND=HIGH_PRES), PARAMETER :: RHLIMIT=.001,                 &
      & RHLIMIT1=-RHLIMIT
       REAL (KIND=HIGH_PRES) :: DEP, SSAT

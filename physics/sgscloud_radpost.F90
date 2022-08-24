@@ -1,28 +1,20 @@
-!> \file SGSCloud_RadPost.F90
+!> \file sgscloud_radpost.F90
 !!  Contains the post (interstitial) work after the call to the radiation schemes:
 !!    1) Restores the original qc & qi
-
       module sgscloud_radpost
 
       contains
 
-      subroutine sgscloud_radpost_init ()
-      end subroutine sgscloud_radpost_init
-
-      subroutine sgscloud_radpost_finalize ()
-      end subroutine sgscloud_radpost_finalize
-
-!>\defgroup sgscloud_radpost GSD sgscloud_radpost_run Module
-!>\ingroup gsd_mynn_edmf
-!!  This interstitial code restores the original resolved-scale clouds (qc and qi).
-!! \section arg_table_sgscloud_radpost_run Argument Table
+!>\defgroup sgscloud_radpost_mod sgscloud_radpost_run Module
+!>  This interstitial code restores the original resolved-scale clouds (qc and qi).
+!> \section arg_table_sgscloud_radpost_run Argument Table
 !! \htmlinclude sgscloud_radpost_run.html
 !!
       subroutine sgscloud_radpost_run( &
            im,levs,                    &
            flag_init,flag_restart,     &
-           qc,qi,                      &
-           qc_save,qi_save,            &
+           qc,qi,qs,                   &
+           qc_save,qi_save,qs_save,    &
            errmsg,errflg               )
 
 ! should be moved to inside the mynn:
@@ -34,8 +26,8 @@
 
       integer, intent(in)  :: im, levs
       logical,          intent(in)  :: flag_init, flag_restart
-      real(kind=kind_phys), dimension(:,:), intent(inout) :: qc, qi
-      real(kind=kind_phys), dimension(:,:), intent(in)    :: qc_save, qi_save
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: qc, qi, qs
+      real(kind=kind_phys), dimension(:,:), intent(in)    :: qc_save, qi_save, qs_save
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
       ! Local variable
@@ -58,6 +50,7 @@
         do i = 1, im
           qc(i,k) = qc_save(i,k)
           qi(i,k) = qi_save(i,k)
+          qs(i,k) = qs_save(i,k)
         enddo
       enddo
 
@@ -65,5 +58,4 @@
       ! print*,"qc_save:",qc_save(1,1)," qc:",qc(1,1)
 
       end subroutine sgscloud_radpost_run
-
       end module sgscloud_radpost

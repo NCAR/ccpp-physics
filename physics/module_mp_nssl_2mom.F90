@@ -1,11 +1,4 @@
-! !>  \file module_mp_nssl_2mom.F90
-
-
-
-
-
-
-
+!!>  \file module_mp_nssl_2mom.F90
 
 !---------------------------------------------------------------------
 ! code snapshot: "Feb 24 2022" at "14:27:57"
@@ -2884,7 +2877,7 @@ SUBROUTINE nssl_2mom_driver(qv, qc, qr, qi, qs, qh, qhl, ccw, crw, cci, csw, chw
          IF ( lccn > 1 .and. is_aerosol_aware .and. flag_qnwfa ) THEN
            ! not used here
          ELSEIF ( present( cn ) .and. lccn > 1 .and. .not. flag_qndrop) THEN
-            IF ( lccna > 1 .and. .not. present( cna ) ) THEN
+            IF ( lccna > 1 .and. .not. ( present( cna ) .and. f_cnatmp ) ) THEN
               cn(ix,kz,jy) = Max(0.0, an(ix,1,kz,lccna) )
             ELSE
               cn(ix,kz,jy) = an(ix,1,kz,lccn)

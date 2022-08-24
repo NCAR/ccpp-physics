@@ -1,26 +1,29 @@
-!> \file GFS_rrtmg_pre.f90
-!! This file contains
+!> \file GFS_rrtmg_pre.F90
+!! This file contains cloud properties calcualtion for RRTMG.
+
       module GFS_rrtmg_pre
 
       public GFS_rrtmg_pre_run
 
       contains
 
-!> \defgroup GFS_rrtmg_pre GFS RRTMG Scheme Pre
-!! @{
-      subroutine GFS_rrtmg_pre_init ()
-      end subroutine GFS_rrtmg_pre_init
+!> \defgroup GFS_rrtmg_pre_mod GFS RRTMG Scheme Pre
+!! This module contains cloud properties calculation for RRTMG.
+!> @{
 
-!> \section arg_table_GFS_rrtmg_pre_run Argument Table
-!! \htmlinclude GFS_rrtmg_pre_run.html
-!!
       ! Attention - the output arguments lm, im, lmk, lmp must not be set
       ! in the CCPP version - they are defined in the interstitial_create routine
+!> \section arg_table_GFS_rrtmg_pre_run Argument Table
+!! \htmlinclude GFS_rrtmg_pre_run.html
+!!    
+!>\section rrtmg_pre_gen General Algorithm
       subroutine GFS_rrtmg_pre_run (im, levs, lm, lmk, lmp, n_var_lndp,        &
         imfdeepcnv, imfdeepcnv_gf, me, ncnd, ntrac, num_p3d, npdf3d, ncnvcld3d,&
         ntqv, ntcw,ntiw, ntlnc, ntinc, ntrnc, ntsnc, ntccn,                    &
         ntrw, ntsw, ntgl, nthl, ntwa, ntoz,                                    &
         ntclamt, nleffr, nieffr, nseffr, lndp_type, kdt,                       &
+        ntdu1, ntdu2, ntdu3, ntdu4, ntdu5, ntss1, ntss2,                       &
+        ntss3, ntss4, ntss5, ntsu, ntbcb, ntbcl, ntocb, ntocl, ntchm,          &
         imp_physics,imp_physics_nssl, nssl_ccn_on, nssl_invertccn,             &
         imp_physics_thompson, imp_physics_gfdl, imp_physics_zhao_carr,         &
         imp_physics_zhao_carr_pdf, imp_physics_mg, imp_physics_wsm6,           &
@@ -40,7 +43,8 @@
         gasvmr_ccl4,  gasvmr_cfc113, aerodp, clouds6, clouds7, clouds8,        &
         clouds9, cldsa, cldfra, cldfra2d, lwp_ex,iwp_ex, lwp_fc,iwp_fc,        &
         faersw1, faersw2, faersw3, faerlw1, faerlw2, faerlw3, alpha,           &
-        spp_wts_rad, spp_rad, errmsg, errflg)
+        aero_dir_fdb, smoke_ext, dust_ext,                                     &
+        spp_wts_rad, spp_rad, rrfs_smoke_band, errmsg, errflg)
 
       use machine,                   only: kind_phys
 
@@ -77,7 +81,7 @@
                                            make_IceNumber,           &
                                            make_DropletNumber,       &
                                            make_RainNumber
-
+      use physparam,              only : iaermdl
       implicit none
 
       integer,              intent(in)  :: im, levs, lm, lmk, lmp, n_var_lndp, &
@@ -108,13 +112,19 @@
          iovr_exprand,                     & ! Flag for exponential-random cloud overlap method
          idcor_con,                        &
          idcor_hogan,                      &
-         idcor_oreopoulos                            
+         idcor_oreopoulos,                 &
+         rrfs_smoke_band                     ! Band number for rrfs-smoke dust and smoke
+
+      integer, intent(in) :: ntdu1, ntdu2, ntdu3, ntdu4, ntdu5, ntss1, ntss2, ntss3,  &
+                             ntss4, ntss5, ntsu, ntbcb, ntbcl, ntocb, ntocl, ntchm
 
       character(len=3), dimension(:), intent(in) :: lndp_var_list
 
-      logical,              intent(in) :: lsswr, lslwr, ltaerosol, lgfdlmprad,   &
-                                          uni_cld, effr_in, do_mynnedmf,         &
+      logical,              intent(in) :: lsswr, lslwr, ltaerosol, lgfdlmprad, &
+                                          uni_cld, effr_in, do_mynnedmf,       &
                                           lmfshal, lmfdeep2, pert_clds,mraerosol
+      logical,              intent(in) :: aero_dir_fdb
+      real(kind=kind_phys), dimension(:,:), intent(in) :: smoke_ext, dust_ext
 
       logical,              intent(in) :: nssl_ccn_on, nssl_invertccn
       integer,              intent(in) :: spp_rad
@@ -133,7 +143,8 @@
                                                           cnvw_in, cnvc_in,    &
                                                           sppt_wts
 
-      real(kind=kind_phys), dimension(:,:,:), intent(in) :: qgrs, aer_nm
+      real(kind=kind_phys), dimension(:,:,:), intent(in) :: qgrs
+      real(kind=kind_phys), dimension(:,:,:), intent(inout) :: aer_nm
 
       real(kind=kind_phys), dimension(:),   intent(inout) :: coszen, coszdg
 
@@ -304,7 +315,7 @@
 !     print *,' in grrad : raddt=',raddt
 
 
-!> -# Setup surface ground temperature and ground/air skin temperature
+!> - Setup surface ground temperature and ground/air skin temperature
 !! if required.
 
       if ( itsfc == 0 ) then            ! use same sfc skin-air/ground temp
@@ -320,7 +331,7 @@
       endif
 
 
-!> -# Prepare atmospheric profiles for radiation input.
+!> - Prepare atmospheric profiles for radiation input.
 !
 
       lsk = 0
@@ -336,7 +347,7 @@
           tlyr(i,k1)    = tgrs(i,k2)
           prslk1(i,k1)  = prslk(i,k2)
 
-!>  - Compute relative humidity.
+!> - Compute relative humidity.
           es  = min( prsl(i,k2),  fpvs( tgrs(i,k2) ) )  ! fpvs and prsl in pa
           qs  = max( QMIN, con_eps * es / (prsl(i,k2) + epsm1*es) )
           rhly(i,k1) = max( 0.0, min( 1.0, max(QMIN, qgrs(i,k2,ntqv))/qs ) )
@@ -344,8 +355,8 @@
         enddo
       enddo
 
-      !--- recast remaining all tracers (except sphum) forcing them all to be positive
-      do j = 2, ntrac 
+!> - Recast remaining all tracers (except sphum) forcing them all to be positive.
+      do j = 2, ntrac
         do k = 1, LM
           k1 = k + kd
           k2 = k + lsk
@@ -400,7 +411,7 @@
       endif
 
 
-!>  - Get layer ozone mass mixing ratio (if use ozone climatology data,
+!> - Get layer ozone mass mixing ratio (if use ozone climatology data,
 !!    call getozn()).
 
       if (ntoz > 0) then            ! interactive ozone generation
@@ -414,13 +425,13 @@
                      olyr)                           !  ---  outputs
       endif                               ! end_if_ntoz
 
-!>  - Call coszmn(), to compute cosine of zenith angle (only when SW is called)
+!> - Call coszmn(), to compute cosine of zenith angle (only when SW is called)
       if (lsswr) then
         call coszmn (xlon,sinlat,coslat,solhr,im,me, &     !  ---  inputs
                      coszen, coszdg)                       !  ---  outputs
       endif
 
-!>  - Call getgases(), to set up non-prognostic gas volume mixing
+!> - Call getgases(), to set up non-prognostic gas volume mixing
 !!    ratioes (gasvmr).
 !  - gasvmr(:,:,1)  -  co2 volume mixing ratio
 !  - gasvmr(:,:,2)  -  n2o volume mixing ratio
@@ -454,7 +465,7 @@
          enddo
       enddo
 
-!>  - Get temperature at layer interface, and layer moisture.
+!> - Get temperature at layer interface, and layer moisture.
       do k = 2, LMK
         do i = 1, IM
           tem2da(i,k) = log( plyr(i,k) )
@@ -594,10 +605,33 @@
 
       endif                              ! end_if_ivflip
 
-!>  - Call module_radiation_aerosols::setaer(),to setup aerosols
+!> - Call module_radiation_aerosols::setaer(),to setup aerosols
 !! property profile for radiation.
 
 !check  print *,' in grrad : calling setaer '
+
+       if (ntchm>0 .and. iaermdl==2) then
+          do k=1,levs
+            do i=1,im
+              aer_nm(i,k,1) = qgrs(i,k,ntdu1)*1.e-9_kind_phys
+              aer_nm(i,k,2) = qgrs(i,k,ntdu2)*1.e-9_kind_phys
+              aer_nm(i,k,3) = qgrs(i,k,ntdu3)*1.e-9_kind_phys
+              aer_nm(i,k,4) = qgrs(i,k,ntdu4)*1.e-9_kind_phys
+              aer_nm(i,k,5) = qgrs(i,k,ntdu5)*1.e-9_kind_phys
+              aer_nm(i,k,6) = qgrs(i,k,ntss1)*1.e-9_kind_phys
+              aer_nm(i,k,7) = qgrs(i,k,ntss2)*1.e-9_kind_phys
+              aer_nm(i,k,8) = qgrs(i,k,ntss3)*1.e-9_kind_phys
+              aer_nm(i,k,9) = qgrs(i,k,ntss4)*1.e-9_kind_phys
+              aer_nm(i,k,10) = qgrs(i,k,ntss5)*1.e-9_kind_phys
+              aer_nm(i,k,11) = qgrs(i,k,ntsu)*1.e-9_kind_phys
+              aer_nm(i,k,12) = qgrs(i,k,ntbcb)*1.e-9_kind_phys
+              aer_nm(i,k,13) = qgrs(i,k,ntbcl)*1.e-9_kind_phys
+              aer_nm(i,k,14) = qgrs(i,k,ntocb)*1.e-9_kind_phys
+              aer_nm(i,k,15) = qgrs(i,k,ntocl)*1.e-9_kind_phys
+            enddo
+          enddo
+        endif
+
 
       call setaer (plvl, plyr, prslk1, tvly, rhly, slmsk,    & !  ---  inputs
                    tracer1, aer_nm, xlon, xlat, IM, LMK, LMP,&
@@ -616,6 +650,16 @@
         enddo
        enddo
 
+      !> Aerosol direct feedback effect by smoke and dust
+      if(aero_dir_fdb) then ! add smoke/dust extinctions
+        do k = 1, LMK
+          do i = 1, IM
+            ! 550nm (~18000/cm)
+            faersw1(i,k,rrfs_smoke_band) = faersw1(i,k,rrfs_smoke_band) + MIN(4.,smoke_ext(i,k) + dust_ext(i,k))
+          enddo
+        enddo
+      endif
+
       do j = 1,NBDLW
         do k = 1, LMK
           do i = 1, IM
@@ -627,14 +671,8 @@
         enddo
        enddo
 
-!>  - Obtain cloud information for radiation calculations
+!> - Obtain cloud information for radiation calculations
 !!    (clouds,cldsa,mtopa,mbota)
-!!\n   for  prognostic cloud:
-!!    - For Zhao/Moorthi's prognostic cloud scheme,
-!!      call module_radiation_clouds::progcld_zhao_carr()
-!!    - For Zhao/Moorthi's prognostic cloud+pdfcld,
-!!      call module_radiation_clouds::progcld_zhao_carr_pdf()
-!!      call module_radiation_clouds::progclduni() for unified cloud and ncnd>=2
 
 !  --- ...  obtain cloud information for radiation calculations
 
@@ -763,21 +801,7 @@
             enddo
           endif
         elseif (imp_physics == imp_physics_gfdl) then            ! GFDL MP
-          if ((imfdeepcnv==imfdeepcnv_gf .or. do_mynnedmf) .and. kdt>1) then
-            if (do_mynnedmf) then
-              do k=1,lm
-                k1 = k + kd
-                do i=1,im
-                  if (tracer1(i,k1,ntrw)>1.0e-7 .OR. tracer1(i,k1,ntsw)>1.0e-7) then
-                  ! GFDL cloud fraction
-                    cldcov(i,k1) = tracer1(i,k1,ntclamt)
-                  else
-                  ! MYNN sub-grid cloud fraction
-                    cldcov(i,k1) = clouds1(i,k1)
-                  endif
-                enddo
-              enddo
-            else ! imfdeepcnv==imfdeepcnv_gf
+          if ((imfdeepcnv==imfdeepcnv_gf) .and. kdt>1) then
               do k=1,lm
                 k1 = k + kd
                 do i=1,im
@@ -789,7 +813,6 @@
                 endif
                 enddo
               enddo
-            endif
           else
             ! GFDL cloud fraction
             cldcov(1:IM,1+kd:LM+kd) = tracer1(1:IM,1:LM,ntclamt)
@@ -847,7 +870,7 @@
               endif
             end do
           end do
-          ! Call Thompson's subroutine to compute effective radii
+          !> - Call Thompson's subroutine calc_effectRad() to compute effective radii
           do i=1,im
             ! Effective radii [m] are now intent(out), bounds applied in calc_effectRad
             !tgs: progclduni has different limits for ice radii (10.0-150.0) than
@@ -921,6 +944,7 @@
           ccnd(1:IM,1:LMK,1) = ccnd(1:IM,1:LMK,1) + cnvw(1:IM,1:LMK)
         endif
 
+!> - Call radiation_clouds_prop() to calculate cloud properties.
         call radiation_clouds_prop                                      &
      &     ( plyr, plvl, tlyr, tvly, qlyr, qstl, rhly,                  &    !  ---  inputs:
      &       ccnd, ncndl, cnvw, cnvc, tracer1,                          &
@@ -946,7 +970,7 @@
 
 !      endif                             ! end_if_ntcw
 
-! perturb cld cover
+!> - Call ppfbet() to perturb cld cover.
        if (pert_clds) then
           do i=1,im
              tmp_wt= -1*log( ( 2.0 / ( sppt_wts(i,38) ) ) - 1 )
@@ -1014,6 +1038,7 @@
 !  ---  scale random patterns for surface perturbations with
 !  perturbation size
 !  ---  turn vegetation fraction pattern into percentile pattern
+!> - Call cdfnor() to pert surface albedo.
       alb1d(:) = 0.
       if (lndp_type==1) then
           do k =1,n_var_lndp
@@ -1028,9 +1053,5 @@
 ! mg, sfc-perts
 
       end subroutine GFS_rrtmg_pre_run
-
-      subroutine GFS_rrtmg_pre_finalize ()
-      end subroutine GFS_rrtmg_pre_finalize
-
-!! @}
+!> @}
       end module GFS_rrtmg_pre

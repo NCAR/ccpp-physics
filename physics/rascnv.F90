@@ -7,7 +7,7 @@
 
       USE machine , ONLY : kind_phys
       implicit none
-      public :: rascnv_init, rascnv_run, rascnv_finalize
+      public :: rascnv_init, rascnv_run
       private
       logical :: is_initialized = .False.
 !
@@ -209,22 +209,6 @@
 !
       end subroutine rascnv_init
 !
-!! \section arg_table_rascnv_finalize Argument Table
-!! \htmlinclude rascnv_finalize.html
-!!
-      subroutine rascnv_finalize (errmsg, errflg)
-
-      implicit none
-
-      character(len=*), intent(out) :: errmsg
-      integer,          intent(out) :: errflg
-
-      ! Initialize CCPP error handling variables
-      errmsg = ''
-      errflg = 0
-
-      end subroutine rascnv_finalize
-!!
 !!
 !!===================================================================== !
 !! rascnv_run:                                                          !

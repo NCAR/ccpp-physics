@@ -7,11 +7,8 @@
 
       contains
 
-      subroutine gwdps_init()
-      end subroutine gwdps_init
-
-!> \defgroup gfs_gwdps GFS Orographic Gravity Wave Drag and Mountain Blocking Scheme Module
-!! \brief This subroutine includes orographic gravity wave drag and mountain
+!> \defgroup gfs_gwdps GFS gwdps Module
+!! This subroutine includes orographic gravity wave drag and mountain
 !! blocking.
 !!
 !> The time tendencies of zonal and meridional wind are altered to
@@ -1313,8 +1310,4 @@
       RETURN
       end subroutine gwdps_run
 !> @}
-
-      subroutine gwdps_finalize()
-      end subroutine gwdps_finalize
-
       end module gwdps

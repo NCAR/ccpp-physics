@@ -4,6 +4,9 @@
 !> This module contains the CCPP-compliant SHOC scheme.
       module moninshoc
 
+      use mfpbl_mod
+      use tridi_mod
+
       contains
 
       subroutine moninshoc_init (do_shoc, errmsg, errflg)
@@ -25,9 +28,6 @@
       end if
  
       end subroutine moninshoc_init
-
-      subroutine moninshoc_finalize ()
-      end subroutine moninshoc_finalize
 
 !!!!!  ==========================================================  !!!!!
 ! subroutine 'moninshoc' computes pbl height and applies vertical diffusion

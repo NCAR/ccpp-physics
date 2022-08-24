@@ -2736,7 +2736,7 @@
 !>\ingroup mod_sfcsub
       subroutine fixrdg(lugb,idim,jdim,fngrib,                          &
      &                  kpds5,gdata,gaus,blno,blto,me)
-      use machine      , only : kind_io8,kind_io4
+      use machine      , only : kind_io8,kind_dbl_prec,kind_sngl_prec
       use sfccyc_module, only : mdata
       implicit none
       integer lgrib,n,lskip,jret,j,ndata,lugi,jdim,idim,lugb,
@@ -2747,8 +2747,8 @@
       real (kind=kind_io8) gdata(idim*jdim)
       logical gaus
       real (kind=kind_io8) blno,blto
-      real (kind=kind_io8), allocatable :: data8(:)
-      real (kind=kind_io4), allocatable :: data4(:)
+      real (kind=kind_dbl_prec), allocatable :: data8(:)
+      real (kind=kind_sngl_prec), allocatable :: data4(:)
 !
       logical*1, allocatable :: lbms(:)
 !
@@ -2815,7 +2815,7 @@
         allocate(data4(1:idim*jdim))
         call getgb(lugb,lugi,kdata,lskip,jpds,jgds,ndata,lskip,
      &             kpds,kgds,lbms,data4,jret)
-        data8 = real(data4, kind=kind_io8)
+        data8(1:ndata) = real(data4(1:ndata), kind=kind_dbl_prec)
         deallocate(data4)
       else
         write(0,*)' FATAL ERROR: Invalid w3kindreal'
@@ -6165,7 +6165,7 @@
       subroutine setrmsk(kpds5,slmask,igaul,jgaul,wlon,rnlat,           &
      &                   data,imax,jmax,rlnout,rltout,lmask,rslmsk      &
      &,                  gaus,blno, blto, kgds1, kpds4, lbms)
-      use machine , only : kind_io8,kind_io4
+      use machine , only : kind_io8,kind_io4,kind_dbl_prec
       use sfccyc_module
       implicit none
       real (kind=kind_io8) blno,blto,wlon,rnlat,crit,data_max
@@ -6177,7 +6177,8 @@
       real (kind=kind_io8)    slmask(igaul,jgaul)
       real (kind=kind_io8)    data(imax,jmax),rslmsk(imax,jmax)
      &,                       rlnout(imax), rltout(jmax)
-      real (kind=kind_io8)    a(jmax), w(jmax), radi, dlat, dlon
+      real (kind=kind_io8)    radi, dlat, dlon
+      real (kind=kind_dbl_prec) a(jmax), w(jmax)
       logical lmask, gaus
 !
 !     set the longitude and latitudes for the grib file
@@ -6650,7 +6651,7 @@
 !! This subroutine interpolates from lat/lon grid to other lat/lon grid.
       subroutine ga2la(gauin,imxin,jmxin,regout,imxout,jmxout,          &
      &                 wlon,rnlat,rlnout,rltout,gaus,blno, blto)
-      use machine , only : kind_io8,kind_io4
+      use machine , only : kind_io8,kind_io4,kind_dbl_prec
       use sfccyc_module , only : num_threads
       implicit none
       integer i1,i2,j2,ishft,i,jj,j1,jtem,jmxout,imxin,jmxin,imxout,    &
@@ -6673,7 +6674,7 @@
       data    jmxsav/0/
       save    jmxsav, gaul, dlati
       real (kind=kind_io8) radi
-      real (kind=kind_io8) a(jmxin), w(jmxin)
+      real (kind=kind_dbl_prec) a(jmxin), w(jmxin)
 !
 !
       logical first
@@ -6917,11 +6918,12 @@ cjfe
 !>\ingroup mod_sfcsub
       subroutine gaulat(gaul,k)
 !
-      use machine , only : kind_io8,kind_io4
+      use machine , only : kind_io8,kind_io4,kind_dbl_prec
       implicit none
       integer n,k
       real (kind=kind_io8) radi
-      real (kind=kind_io8) a(k), w(k), gaul(k)
+      real (kind=kind_io8) gaul(k)
+      real (kind=kind_dbl_prec) a(k), w(k)
 !
       call splat(4, k, a, w)
 !
@@ -7040,7 +7042,7 @@ cjfe
       data dayhf/ 15.5, 45.0, 74.5,105.0,135.5,166.0,
      &           196.5,227.5,258.0,288.5,319.0,349.5,380.5/
 !
-      real (kind=kind_io8) fha(5)
+      real(8) fha(5)
       real(4) fha4(5)
       integer w3kindreal,w3kindint
       integer ida(8),jda(8),ivtyp, kpd7
@@ -8305,7 +8307,7 @@ cjfe
      &                 gdata,len,iret                                   &
      &,                imsk, jmsk, slmskh, gaus,blno, blto              &
      &,                outlat, outlon, me)
-      use machine ,      only : kind_io8,kind_io4
+      use machine ,      only : kind_io8,kind_dbl_prec,kind_sngl_prec
       use sfccyc_module, only : mdata
       implicit none
       integer imax,jmax,ijmax,i,j,n,jret,inttyp,iret,imsk,              &
@@ -8321,8 +8323,8 @@ cjfe
 !
       real (kind=kind_io8) gdata(len), slmask(len)
       real (kind=kind_io8), allocatable :: data(:,:), rslmsk(:,:)
-      real (kind=kind_io8), allocatable :: data8(:)
-      real (kind=kind_io4), allocatable :: data4(:)
+      real (kind=kind_dbl_prec), allocatable :: data8(:)
+      real (kind=kind_sngl_prec), allocatable :: data4(:)
       real (kind=kind_io8), allocatable :: rlngrb(:), rltgrb(:)
 !
       logical lmask, yr2kc, gaus, ijordr
@@ -8398,7 +8400,7 @@ cjfe
         allocate(data4(1:mdata))
         call getgb(lugb,lugi,mdata,lskip,jpds,jgds,ndata,lskip,
      &             kpds,kgds,lbms,data4,jret)
-        data8 = real(data4, kind=kind_io8)
+        data8(1:ndata) = real(data4(1:ndata), kind=kind_dbl_prec)
         deallocate(data4)
       endif
       if (me .eq. 0) write(6,*) ' input grib file dates=',
@@ -8479,7 +8481,7 @@ cjfe
      &                  iy,im,id,ih,fh,gdata,len,iret                   &
      &,                 imsk, jmsk, slmskh, gaus,blno, blto             &
      &,                 outlat, outlon, me)
-      use machine      , only : kind_io8,kind_io4
+      use machine      , only : kind_io8,kind_dbl_prec,kind_sngl_prec
       use sfccyc_module, only : mdata
       implicit none
       integer nrepmx,nvalid,imo,iyr,idy,jret,ihr,nrept,lskip,lugi,      &
@@ -8506,8 +8508,8 @@ cjfe
 !
       real (kind=kind_io8) gdata(len), slmask(len)
       real (kind=kind_io8), allocatable :: data(:,:),rslmsk(:,:)
-      real (kind=kind_io8), allocatable :: data8(:)
-      real (kind=kind_io4), allocatable :: data4(:)
+      real (kind=kind_dbl_prec), allocatable :: data8(:)
+      real (kind=kind_sngl_prec), allocatable :: data4(:)
       real (kind=kind_io8), allocatable :: rlngrb(:), rltgrb(:)
 !
       logical lmask, yr2kc, gaus, ijordr
@@ -8528,7 +8530,7 @@ cjfe
       integer mjday(12)
       data mjday/31,28,31,30,31,30,31,31,30,31,30,31/
 !
-      real (kind=kind_io8) fha(5)
+      real(8) fha(5)
       real(4) fha4(5)
       integer ida(8),jda(8)
 !
@@ -8645,7 +8647,7 @@ cjfe
         allocate (data4(1:mdata))
         call getgb(lugb,lugi,mdata,lskip,jpds,jgds,ndata,lskip,
      &             kpds,kgds,lbms,data4,jret)
-        data8 = real(data4, kind=kind_io8)
+        data8(1:ndata) = real(data4(1:ndata), kind=kind_dbl_prec)
         deallocate(data4)
       endif
       if (me .eq. 0) write(6,*) ' input grib file dates=',

@@ -1,3 +1,5 @@
+!>\file cires_ugwpv1_triggers.F90
+!!
 module cires_ugwpv1_triggers
 
         use machine,            only: kind_phys
@@ -6,15 +8,9 @@ contains
 
 !
 !
-!      
-!>\ingroup cires_ugwp_run
-!> @{
-!!
-!!
+!> V1: GEOS-5 & MERRA-2 lat-dependent GW-source function  tau(z=Zlaunch) =rho*<u'w'>      
       subroutine slat_geos5_tamp_v1(im, tau_amp, xlatdeg, tau_gw)
-!=================
-! V1: GEOS-5 & MERRA-2 lat-dependent GW-source function  tau(z=Zlaunch) =rho*<u'w'>
-!=================
+
       implicit none
       integer :: im     
       real(kind=kind_phys)    :: tau_amp, xlatdeg(im), tau_gw(im)
@@ -44,11 +40,10 @@ contains
 !      
       end subroutine slat_geos5_tamp_v1
 !      
+!> modified for FV3GFS-127L/C96 QBO-experiments
+!! GEOS-5 & MERRA-2 lat-dependent GW-source function  tau(z=Zlaunch)
       subroutine slat_geos5_2020(im, tau_amp, xlatdeg, tau_gw)
-!=================================================================
-! modified for FV3GFS-127L/C96 QBO-experiments
-! GEOS-5 & MERRA-2 lat-dependent GW-source function  tau(z=Zlaunch)
-!================================================================
+
       implicit none
       integer :: im     
       real(kind=kind_phys)    :: tau_amp, xlatdeg(im), tau_gw(im)
@@ -99,14 +94,9 @@ contains
 !      
       end subroutine slat_geos5_2020   
       
-           
+!>  WAM: GEOS-5 & MERRA-2 lat-dependent GW-source function  tau(z=Zlaunch) =rho*<u'w'>           
       subroutine slat_geos5(im, xlatdeg, tau_gw)
       
-!=================
-!
-! WAM: GEOS-5 & MERRA-2 lat-dependent GW-source function  tau(z=Zlaunch) =rho*<u'w'>
-! 
-!=================
       implicit none
       integer :: im     
       real(kind=kind_phys)  :: xlatdeg(im)          
@@ -142,13 +132,9 @@ contains
 !      
       end subroutine slat_geos5      
       
-!===============================================
-!
-!   Spontaneous GW triggers by dynamical inbalances (OKW, fronts/jets, and convection)
-!       not activated due to "limited" set of GFS-physics 
-!       statein-type ( needs horizontal gradients of winds and temperature, humodity)
-!
-!===============================================       
+!>   Spontaneous GW triggers by dynamical inbalances (OKW, fronts/jets, and convection)
+!!       not activated due to "limited" set of GFS-physics 
+!!       statein-type ( needs horizontal gradients of winds and temperature, humodity)
       subroutine get_spectra_tau_convgw &
       (nw, im, levs, dcheat,  scheat, precip, icld, xlatd, sinlat, coslat,taub, klev, if_src, nf_src)
 !
@@ -217,7 +203,8 @@ contains
 !   
 !      print *, '   get_spectra_tau_convgw '  
       end subroutine get_spectra_tau_convgw
-!
+
+!>
       subroutine get_spectra_tau_nstgw(nw, im, levs, trig_fgf, xlatd, sinlat, coslat, taub, klev, if_src, nf_src)
       integer                      :: nw, im, levs 
       real(kind=kind_phys), dimension(im, levs)    :: trig_fgf
@@ -278,6 +265,7 @@ contains
 !                 
       end subroutine get_spectra_tau_nstgw   
 ! 
+!>
       subroutine get_spectra_tau_okw(nw, im, levs,  trig_okw, xlatd, sinlat, coslat, taub, klev, if_src, nf_src)
       integer                      :: nw, im, levs 
       real(kind=kind_phys), dimension(im, levs)    :: trig_okw

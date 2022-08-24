@@ -6,9 +6,6 @@
       module rayleigh_damp
       contains
 
-      subroutine rayleigh_damp_init ()
-      end subroutine rayleigh_damp_init
-
 !>\defgroup rayleigh_main GFS Rayleigh Damping Module
 !!\brief This is the Rayleigh friction calculation with total energy conservation.
 !!
@@ -148,8 +145,4 @@
       RETURN
       end subroutine rayleigh_damp_run
 !> @}
-
-      subroutine rayleigh_damp_finalize ()
-      end subroutine rayleigh_damp_finalize
-
       end module rayleigh_damp

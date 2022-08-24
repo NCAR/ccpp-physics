@@ -194,6 +194,29 @@
   dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
+[use_med_flux]
+  standard_name = do_mediator_atmosphere_ocean_fluxes
+  long_name = flag for using atmosphere-ocean fluxes from mediator
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[dqsfc_med]
+  standard_name = surface_upward_latent_heat_flux_over_ocean_from_mediator
+  long_name = sfc latent heat flux input over ocean for coupling
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[dtsfc_med]
+  standard_name = surface_upward_sensible_heat_flux_over_ocean_from_mediator
+  long_name = sfc sensible heat flux input over ocean for coupling
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
 [qsurf]
   standard_name = surface_specific_humidity_over_water
   long_name = surface air saturation specific humidity over water

@@ -1,7 +1,6 @@
 !> \file GFS_surface_generic_pre.F90
 !!  Contains code related to running prior to all GFS surface schemes.
 
-!>\defgroup mod_GFS_surface_generic_pre GFS Surface Generic Pre module
       module GFS_surface_generic_pre
 
       use machine, only: kind_phys
@@ -16,6 +15,9 @@
 
       contains
 
+!>\defgroup mod_GFS_surface_generic_pre GFS surface_generic_pre module
+!! This module contains code related to running prior to all GFS surface schemes.
+!> @{
 !> \section arg_table_GFS_surface_generic_pre_init Argument Table
 !! \htmlinclude GFS_surface_generic_pre_init.html
 !!
@@ -224,5 +226,6 @@
 !$OMP end parallel do
 
       end subroutine update_vegetation_soil_slope_type
+!> @}
 
       end module GFS_surface_generic_pre

@@ -16,10 +16,10 @@ The \f$(P-L)_{0}\f$ and \f$\tau_*\f$ values were computed from perturbation expe
 The equilibrium profile \f$q_{0}\f$ is specified using a climatology based on a combination of reanalysis and satellite observations.
 
 \section intra_h2o  Intraphysics Communication
-\ref arg_table_h2ophys_run
+- \ref arg_table_h2ophys_run
 
 \section gen_h2o  General Algorithm
-\ref genal_h2ophys
+- \ref genal_h2ophys
 
 
 */

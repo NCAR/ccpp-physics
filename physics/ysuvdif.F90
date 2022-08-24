@@ -29,9 +29,6 @@
         end if
       end subroutine ysuvdif_init
 
-      subroutine ysuvdif_finalize ()
-      end subroutine ysuvdif_finalize
-
 !> \defgroup YSU FV3GFS ysuvdif_run Main
 !! \brief This subroutine contains all of the logic for the
 !! YSU scheme.

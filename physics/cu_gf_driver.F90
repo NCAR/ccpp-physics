@@ -7,18 +7,23 @@ module cu_gf_driver
    ! DH* TODO: replace constants with arguments to cu_gf_driver_run
    !use physcons  , g => con_g, cp => con_cp, xlv => con_hvap, r_v => con_rv
    use machine   , only: kind_phys
-   use cu_gf_deep, only: cu_gf_deep_run,neg_check,autoconv,aeroevap,fct1d3
+   use cu_gf_deep, only: cu_gf_deep_run,neg_check,fct1d3
    use cu_gf_sh  , only: cu_gf_sh_run
 
    implicit none
 
    private
 
-   public :: cu_gf_driver_init, cu_gf_driver_run, cu_gf_driver_finalize
+   public :: cu_gf_driver_init, cu_gf_driver_run
 
 contains
 
-!> \brief Brief description of the subroutine
+!> \defgroup cu_gf_group Grell-Freitas Convection Module
+!! This is the Grell-Freitas scale and aerosol aware scheme.
+!>@{
+!>\defgroup cu_gf_driver  Grell-Freitas Convection Driver Module
+!> \ingroup cu_gf_group
+!> This is Grell-Freitas cumulus scheme driver module.
 !!
 !! \section arg_table_cu_gf_driver_init Argument Table
 !! \htmlinclude cu_gf_driver_init.html
@@ -39,45 +44,18 @@ contains
          errmsg = ''
          errflg = 0
 
-         ! DH* temporary
-         ! if (mpirank==mpiroot) then
-         !    write(0,*) ' ----------------------------------------------------------'//&
-         !                '-------------------------------------------------------------------'
-         !    write(0,*) ' --- WARNING --- the CCPP Grell Freitas convection scheme is'//&
-         !                ' currently under development, use at your own risk --- WARNING ---'
-         !    write(0,*) ' --------------------------------------------------------------------'//&
-         !                '---------------------------------------------------------'
-         ! end if
-         ! *DH temporary
-
-         ! Consistency checks
-         if (.not. (imfshalcnv == imfshalcnv_gf .or.                       &
-        &        imfdeepcnv == imfdeepcnv_gf)) then
-           write(errmsg,'(*(a))') 'Logic error: namelist choice of',       &
-        &    ' convection is different from Grell-Freitas scheme'
-           errflg = 1
-           return
-         end if
-
       end subroutine cu_gf_driver_init
 
-      subroutine cu_gf_driver_finalize()
-      end subroutine cu_gf_driver_finalize
 !
 ! t2di is temp after advection, but before physics
 ! t = current temp (t2di + physics up to now)
 !===================
 
-!> \defgroup cu_gf_group Grell-Freitas Convection Scheme Module
-!! This is the Grell-Freitas scale and aerosol aware scheme.
-!>\defgroup cu_gf_driver  Grell-Freitas Convection Scheme Driver Module
-!> \ingroup cu_gf_group
-!! This is the Grell-Freitas convection scheme driver module.
+!> This is the Grell-Freitas convection scheme driver module.
 !! \section arg_table_cu_gf_driver_run Argument Table
 !! \htmlinclude cu_gf_driver_run.html
 !!
-!>\section gen_gf_driver GSD GF Cumulus Scheme General Algorithm
-!> @{
+!>\section gen_gf_driver Grell-Freitas Cumulus Scheme Driver General Algorithm
       subroutine cu_gf_driver_run(ntracer,garea,im,km,dt,flag_init,flag_restart,&
                cactiv,cactiv_m,g,cp,xlv,r_v,forcet,forceqv_spechum,phil,raincv, &
                qv_spechum,t,cld1d,us,vs,t2di,w,qv2di_spechum,p2di,psuri,        &
@@ -1178,5 +1156,5 @@ contains
           endif
         endif
    end subroutine cu_gf_driver_run
-!> @}
+!>@}
 end module cu_gf_driver
