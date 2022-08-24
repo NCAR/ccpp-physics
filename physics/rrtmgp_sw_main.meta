@@ -169,6 +169,20 @@
   dimensions = ()
   type = integer
   intent = in
+[rrtmgp_phys_blksz]
+  standard_name = number_of_columns_per_RRTMGP_block
+  long_name = number of columns to process ata time by RRTMGP
+  units = count
+  dimensions =  ()
+  type = integer
+  intent = in
+[nGases]
+  standard_name = number_of_active_gases_used_by_RRTMGP
+  long_name = number of gases available used by RRTMGP (Model%nGases)
+  units = count
+  dimensions =  ()
+  type = integer
+  intent = in
 [nday]
   standard_name = daytime_points_dimension
   long_name = daytime points dimension
@@ -539,13 +553,6 @@
   units = DDT
   dimensions = ()
   type = ty_optical_props_2str
-  intent = in
-[gas_concentrations]
-  standard_name = Gas_concentrations_for_RRTMGP_suite
-  long_name = DDT containing gas concentrations for RRTMGP radiation scheme
-  units = DDT
-  dimensions = ()
-  type = ty_gas_concs
   intent = in
 [solcon]
   standard_name = solar_constant
