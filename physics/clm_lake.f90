@@ -131,7 +131,7 @@ MODULE clm_lake
                      xlat_d       ,z_lake3d       ,dz_lake3d    ,lakedepth2d     ,&
                      watsat3d     ,csol3d         ,tkmg3d       ,tkdry3d         ,&
                      tksatu3d                     ,phii                          ,& 
-                              xice, xice_threshold              ,im,km           ,&
+                     fice         ,min_lakeice                  ,im,km           ,&
                      h2osno2d     ,snowdp2d       ,snl2d        ,z3d             ,&  !h
                      dz3d         ,zi3d           ,h2osoi_vol3d ,h2osoi_liq3d    ,&
                      h2osoi_ice3d ,t_grnd2d       ,t_soisno3d   ,t_lake3d        ,&
@@ -140,11 +140,11 @@ MODULE clm_lake
                      con_cp       ,icy                                           ,&
                      hflx         ,evap           ,grdflx       ,tsfc            ,&  !o
                      lake_t2m     ,lake_q2m       ,clm_lake_initialized          ,&
-                                   isltyp         ,snow         ,use_lakedepth   ,&
+                     weasd        ,isltyp         ,snowd        ,use_lakedepth   ,&
                      restart      ,lakedepth_default                             ,&
-                                                   sand3d       ,clay3d          ,&
+                     rainnc       ,rainc          ,sand3d       ,clay3d          ,&
 ! Flake output variables
-                     weasd        ,snwdph         ,hice         ,tsurf           ,&
+                     weasdi       ,snodi          ,hice         ,tsurf           ,&
                      t_sfc        ,lflx           ,ustar        ,qsfc            ,&
                      ch           ,cm             ,chh          ,cmm             ,&
                      lake_t_snow  ,tisfc          ,tsurf_ice    ,wind            ,&
@@ -168,17 +168,18 @@ MODULE clm_lake
     INTEGER , INTENT (IN) :: im,km,me,master
     LOGICAL, INTENT(IN) :: restart,use_lakedepth,first_time_step
     REAL(KIND_PHYS), INTENT(INOUT) :: clm_lake_initialized(:)
-    REAL(KIND_PHYS),     INTENT(IN)  :: xice_threshold, con_rd,con_g,con_cp,lakedepth_default
+    REAL(KIND_PHYS),     INTENT(IN)  :: min_lakeice, con_rd,con_g,con_cp,lakedepth_default
     logical, intent(inout) :: icy(:)
-    REAL(KIND_PHYS), DIMENSION( : ), INTENT(INOUT)::   XICE
+    REAL(KIND_PHYS), DIMENSION( : ), INTENT(INOUT)::   fice
+    REAL(KIND_PHYS), DIMENSION( : ), INTENT(IN) :: weasd, snowd
     REAL(KIND_PHYS), DIMENSION( : ), INTENT(IN):: tg3
-    REAL(KIND_PHYS),    DIMENSION( : ), INTENT(IN)    :: SNOW, ZLVL
+    REAL(KIND_PHYS),    DIMENSION( : ), INTENT(IN)    :: ZLVL, RAINC, RAINNC
 
     INTEGER, DIMENSION(:), INTENT(IN) :: use_lake_model
     real(kind_phys), dimension(:), intent(in)  :: rho0               ! air density at surface
 
     REAL(KIND_PHYS),           DIMENSION( : ), INTENT(INOUT) :: &
-                     weasd        ,snwdph         ,hice         ,tsurf           ,&
+                     weasdi       ,snodi          ,hice         ,tsurf           ,&
                      t_sfc        ,lflx           ,ustar        ,qsfc            ,&
                      chh          ,cmm            ,lake_t_snow  ,tisfc           ,&
                      tsurf_ice    ,wind
@@ -304,7 +305,7 @@ MODULE clm_lake
       real(kind_phys) :: tkdry(1,nlevsoil)       ! thermal conductivity, dry soil (W/m/Kelvin)
       real(kind_phys) :: csol(1,nlevsoil)        ! heat capacity, soil solids (J/m**3/Kelvin)
 
-      integer :: lake_points
+      integer :: lake_points, snow_points, ice_points
       character*255 :: message
       logical, parameter :: feedback_to_atmosphere = .true. ! FIXME: REMOVE
 
@@ -361,18 +362,18 @@ MODULE clm_lake
       endif
 
         ! Still have some points to initialize
-        call lakeini(kdt,            ISLTYP,          gt0,             SNOW,           & !i
-                                     restart,         lakedepth_default,               &
+        call lakeini(kdt,            ISLTYP,          gt0,             snowd,          & !i
+                     weasd,          restart,         lakedepth_default,               &
                      lakedepth2d,    savedtke12d,     snowdp2d,        h2osno2d,       & !o
                      snl2d,          t_grnd2d,        t_lake3d,        lake_icefrac3d, &
                      z_lake3d,       dz_lake3d,       t_soisno3d,      h2osoi_ice3d,   &
                      h2osoi_liq3d,   h2osoi_vol3d,    z3d,             dz3d,           &
                      zi3d,           watsat3d,        csol3d,          tkmg3d,         &
-                                     xice,            xice_threshold,           tsfc,  &
+                                     fice,            min_lakeice,     tsfc,           &
                      use_lake_model, use_lakedepth,   con_g,           con_rd,         &
                      tkdry3d,        tksatu3d,        im,              prsi,           &
                                                       clm_lake_initialized,            &
-                     sand3d,         clay3d,          tg3,                            &
+                     sand3d,         clay3d,          tg3,                             &
                      km, me,         master,          errmsg,          errflg)
         if(errflg/=0) then
           return
@@ -391,6 +392,8 @@ MODULE clm_lake
         endif
 
       lake_points=0
+      snow_points=0
+      ice_points=0
 
         lake_top_loop: DO I = 1,im
 
@@ -401,6 +404,7 @@ MODULE clm_lake
            PSFC    = prsi(i,1) 
            Q2K     = qvcurr(i)
            LWDN    = DLWSFCI(I)*EMISS(I)
+           PRCP    = denh2o * (rainc(i)+rainnc(i))*1000.0_kind_phys/dtime
            PRCP    = RAIN(i)*1000.0_kind_phys/dtime    ! use physics timestep since PRCP comes from non-surface schemes
            SOLDN   = DSWSFCI(I)                        ! SOLDN is total incoming solar
            SOLNET  = SOLDN*(1.-ALBEDO(I))              ! use mid-day albedo to determine net downward solar
@@ -543,14 +547,15 @@ MODULE clm_lake
                 !TH2(I)          = T2(I)*(1.E5/PSFC)**RCP   ! potential temperature (CCPP doesn't want this)
                 lake_q2m(I)     = q_ref2m(c)               ! [frac] specific humidity
                 albedo(i)       = ( 0.6 * lake_icefrac3d(i,1) ) + ( (1.0-lake_icefrac3d(i,1)) * 0.08)  
-                xice(i)         = lake_icefrac3d(i,1)
+                fice(i)         = lake_icefrac3d(i,1)
 
-                if(xice(i)>xice_threshold) then
-                  weasd(i)      = h2osno(c) ! water_equivalent_accumulated_snow_depth_over_ice
-                  snwdph(i)     = h2osno(c)/snow_bd*1000 ! surface_snow_thickness_water_equivalent_over_ice
+                if(fice(i)>=min_lakeice) then
+                  weasdi(i)     = h2osno(c) ! water_equivalent_accumulated_snow_depth_over_ice
+                  snodi(i)      = snowdp(c) ! surface_snow_thickness_water_equivalent_over_ice
                   tisfc(i)      = t_grnd(c) ! surface_skin_temperature_over_ice
                   tsurf_ice(i)  = t_grnd(c) ! surface_skin_temperature_after_iteration_over_ice
                   icy(i)=.true.
+                  ice_points = ice_points+1
 
                   ! Assume that, if a layer has ice, the entire layer thickness is ice.
                   hice(I) = 0
@@ -560,16 +565,19 @@ MODULE clm_lake
                     endif
                   end do
                 else
-                  weasd(i) = 0
-                  snwdph(i) = 0
+                  weasdi(i) = 0
+                  snodi(i) = 0
                   tisfc(i) = tsurf(i)
                   tsurf_ice(i) = tisfc(i)
                   hice(i) = 0
                 endif
 
-                if(snl2d(i)>0) then
+                if(snl2d(i)<0) then
                   lake_t_snow(i) = t_grnd(c)
                   tisfc(i) = lake_t_snow(i)
+                  snow_points = snow_points+1
+                else
+                  lake_t_snow(i) = -9999
                 endif
 
                 ustar = ustar_out(1) ! surface_friction_velocity_over_water
@@ -586,9 +594,9 @@ MODULE clm_lake
         endif if_lake_is_here
         ENDDO lake_top_loop
 
-        if(LAKEDEBUG .and. lake_points>0) then
-3082       format('lake points processed in timestep ',I0,' by rank ',I0,' = ',I0)
-           print 3082,kdt,me,lake_points
+        if(LAKEDEBUG .and. lake_points>0 .and. (kdt<3 .or. mod(kdt,30)==3)) then
+3082       format('lake points processed in timestep ',I0,' by rank ',I0,' = ',I0,' snow=',I0,' ice=',I0)
+           print 3082,kdt,me,lake_points,snow_points,ice_points
         endif
 
       CONTAINS
@@ -5115,14 +5123,14 @@ if_pergro: if (PERGRO) then
   end subroutine clm_lake_init
 
 ! Some fields in lakeini are not available until runtime, so this cannot be in a CCPP init routine.
- SUBROUTINE lakeini(kdt,            ISLTYP,          gt0,             SNOW,           & !i
-                                    restart,         lakedepth_default,               &
+ SUBROUTINE lakeini(kdt,            ISLTYP,          gt0,             snowd,          & !i
+                    weasd,          restart,         lakedepth_default,               &
                     lakedepth2d,    savedtke12d,     snowdp2d,        h2osno2d,       & !o
                     snl2d,          t_grnd2d,        t_lake3d,        lake_icefrac3d, &
                     z_lake3d,       dz_lake3d,       t_soisno3d,      h2osoi_ice3d,   &
                     h2osoi_liq3d,   h2osoi_vol3d,    z3d,             dz3d,           &
                     zi3d,           watsat3d,        csol3d,          tkmg3d,         &
-                                    xice,            xice_threshold,           tsfc,  &
+                                    fice,            min_lakeice,              tsfc,  &
                     use_lake_model, use_lakedepth,   con_g,           con_rd,         &
                     tkdry3d,        tksatu3d,        im,              prsi,           &
                                                      clm_lake_initialized,            &
@@ -5141,8 +5149,8 @@ if_pergro: if (PERGRO) then
   CHARACTER(*), INTENT(OUT) :: errmsg
 
   INTEGER , INTENT (IN)    :: im, me, master, km, kdt
-  REAL(KIND_PHYS),     INTENT(IN)  :: xice_threshold, con_g, con_rd
-  REAL(KIND_PHYS), DIMENSION(IM), INTENT(IN)::   XICE,TG3
+  REAL(KIND_PHYS),     INTENT(IN)  :: min_lakeice, con_g, con_rd
+  REAL(KIND_PHYS), DIMENSION(IM), INTENT(IN)::   FICE,TG3
   REAL(KIND_PHYS), DIMENSION(IM), INTENT(IN)::     tsfc
   REAL(KIND_PHYS), DIMENSION(IM)  ,INTENT(INOUT)  :: clm_lake_initialized
 
@@ -5153,7 +5161,7 @@ if_pergro: if (PERGRO) then
 
   LOGICAL , INTENT(IN)      ::     restart
   INTEGER, DIMENSION(IM), INTENT(IN)       :: ISLTYP
-  REAL(KIND_PHYS),    DIMENSION(IM), INTENT(IN)    :: SNOW
+  REAL(KIND_PHYS),    DIMENSION(IM), INTENT(IN)    :: snowd,weasd
   REAL(kind_phys),    DIMENSION(IM,KM), INTENT(IN)       :: gt0, prsi
   real(kind_phys),    intent(in)                                      :: lakedepth_default
 
@@ -5244,8 +5252,8 @@ if_pergro: if (PERGRO) then
       cycle
     endif
 
-    snowdp2d(i)         = snow(i)*0.005               ! SNOW in kg/m^2 and snowdp in m
-    h2osno2d(i)         = snow(i) ! mm 
+    snowdp2d(i)         = snowd(i) ! SNOW in kg/m^2 and snowdp in m
+    h2osno2d(i)         = weasd(i)   ! mm 
 
     snl2d(i)                   = defval
     do k = -nlevsnow+1,nlevsoil
@@ -5262,8 +5270,8 @@ if_pergro: if (PERGRO) then
         dz_lake3d(i,k)         = defval
     enddo
     
-    if(xice(i).gt.xice_threshold) then
-      lake_icefrac3d(i,1) = xice(i)
+    if(fice(i)>min_lakeice) then
+      lake_icefrac3d(i,1) = fice(i)
     endif
     
     z3d(i,:)             = 0.0

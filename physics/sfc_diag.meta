@@ -181,7 +181,7 @@
 [lake_t2m]
   standard_name =  temperature_at_2m_from_clm_lake
   long_name = temperature at 2m from clm lake
-  units = frac
+  units = K
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
@@ -193,6 +193,20 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
+  intent = in
+[kdt]
+  standard_name = index_of_timestep
+  long_name = current forecast iteration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[me]
+  standard_name = mpi_rank
+  long_name = current MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
   intent = in
 [f10m]
   standard_name = ratio_of_wind_at_surface_adjacent_layer_to_wind_at_10m

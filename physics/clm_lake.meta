@@ -7,6 +7,22 @@
 [ccpp-arg-table]
   name = clm_lake_run
   type = scheme
+[rainnc]
+  standard_name = lwe_thickness_of_explicit_precipitation_amount_on_previous_timestep
+  long_name = explicit rainfall from previous timestep
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[rainc]
+  standard_name = lwe_thickness_of_convective_precipitation_amount_on_previous_timestep
+  long_name = convective_precipitation_amount from previous timestep
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
 [tg3]
   standard_name = deep_soil_temperature
   long_name = deep soil temperature
@@ -236,7 +252,7 @@
   type = real
   kind = kind_phys
   intent = in
-[xice]
+[fice]
   standard_name = sea_ice_area_fraction_of_sea_area_fraction
   long_name = ice fraction over open water
   units = frac
@@ -244,7 +260,7 @@
   type = real
   kind = kind_phys
   intent = inout
-[xice_threshold]
+[min_lakeice]
   standard_name = min_lake_ice_area_fraction
   long_name = minimum lake ice value
   units = frac
@@ -421,7 +437,7 @@
 [lake_t2m]
   standard_name =  temperature_at_2m_from_clm_lake
   long_name = temperature at 2m from clm lake
-  units = frac
+  units = K
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
@@ -449,14 +465,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = inout
-[snow]
-  standard_name = surface_snow_thickness_water_equivalent_over_land
-  long_name = water equivalent snow depth over land
-  units = mm
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
 [use_lakedepth]
   standard_name = flag_for_initializing_clm_lake_depth_from_lake_depth
   long_name = flag for initializing clm lake depth from lake depth
@@ -515,14 +523,30 @@
   type = integer
   intent = inout
 [weasd]
+  standard_name = lwe_thickness_of_surface_snow_amount
+  long_name = water equiv of acc snow depth over land and sea ice
+  units = mm
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[snowd]
+  standard_name = lwe_surface_snow
+  long_name = water equivalent snow depth
+  units = mm
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[weasdi]
   standard_name = water_equivalent_accumulated_snow_depth_over_ice
-  long_name = water equiv of acc snow depth over ice
+  long_name = water equiv of acc snow depth over land
   units = mm
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
-[snwdph]
+[snodi]
   standard_name = surface_snow_thickness_water_equivalent_over_ice
   long_name = water equivalent snow depth over ice
   units = mm

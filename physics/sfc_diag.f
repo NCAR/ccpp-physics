@@ -5,8 +5,11 @@
 !! @{
 
       module sfc_diag
-      contains
+
+      logical, parameter :: LAKEDEBUG = .true.
   
+      contains
+
       subroutine sfc_diag_init
       end subroutine sfc_diag_init
       
@@ -25,7 +28,7 @@
      &                   (im,grav,cp,eps,epsm1,ps,u1,v1,t1,q1,prslki,   &
      &                    evap,fm,fh,fm10,fh2,tskin,qsurf,thsfc_loc,    &
      &                    use_lake_model,iopt_lake,iopt_lake_clm,       &
-     &                    lake_t2m,lake_q2m,                            &
+     &                    lake_t2m,lake_q2m,kdt,me,                     &
      &                    f10m,u10m,v10m,t2m,q2m,errmsg,errflg          &
      &                   )
 !
@@ -33,14 +36,15 @@
       use funcphys, only : fpvs
       implicit none
 !
-      integer, intent(in) :: im, iopt_lake, iopt_lake_clm
+      integer, intent(in) :: im, iopt_lake, iopt_lake_clm, kdt, me
       logical, intent(in) :: thsfc_loc  ! Flag for reference pot. temp.
       real(kind=kind_phys), intent(in) :: grav,cp,eps,epsm1
       real(kind=kind_phys), dimension(:), intent(in) ::                 &
      &                       ps, u1, v1, t1, q1, tskin,                 &
      &                       qsurf, prslki, evap, fm, fh, fm10, fh2
       real(kind=kind_phys), dimension(:), intent(out) ::                &
-     &                       f10m, u10m, v10m, t2m, q2m, lake_t2m,      &
+     &                       f10m, u10m, v10m, t2m, q2m
+      real(kind=kind_phys), dimension(:), intent(in) :: lake_t2m,       &
      &                       lake_q2m
       integer, dimension(:), intent(in) :: use_lake_model
       character(len=*), intent(out) :: errmsg
@@ -49,7 +53,7 @@
 !     locals
 !
       real(kind=kind_phys), parameter :: qmin=1.0e-8
-      integer :: k,i
+      integer :: k,i, clm_t2m_count
 !
       real(kind=kind_phys) :: fhi, qss, wrk
 
@@ -69,6 +73,7 @@
 !  ps is in pascals
 !
 !!
+      clm_t2m_count=0
       do i = 1, im
         f10m(i) = fm10(i) / fm(i)
 !       f10m(i) = min(f10m(i),1.)
@@ -77,6 +82,7 @@
         if(use_lake_model(i)>0 .and. iopt_lake==iopt_lake_clm) then
            t2m(i) = lake_t2m(i)
            q2m(i) = lake_q2m(i)
+           clm_t2m_count=clm_t2m_count+1
         else
            fhi     = fh2(i) / fh(i)
 !          t2m(i)  = tskin(i)*(1. - fhi) + t1(i) * prslki(i) * fhi
@@ -101,6 +107,12 @@
            q2m(i) = min(q2m(i),qss)
         endif
       enddo
+
+      if(LAKEDEBUG .and. clm_t2m_count>0 .and. kdt<5) then
+3082       format('lake 2m points processed in timestep ',I0,           &
+     &            ' by rank ',I0,' = ',I0)
+           print 3082,kdt,me,clm_t2m_count
+      endif
 
       return
       end subroutine sfc_diag_run
