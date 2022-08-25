@@ -799,7 +799,7 @@
      &       fsfcu0, fsfcuc, fsfcd0, fsfcdc, suvbfc, suvbf0, delgth
       real (kind=kind_phys), dimension(nlay) :: alphad, betad
 
-      logical, dimension(ngptsw,nlay) :: lcloudy
+      logical, dimension(nlay,ngptsw) :: lcloudy
 
 !  ---  column amount of absorbing gases:
 !       (:,m) m = 1-h2o, 2-co2, 3-o3, 4-n2o, 5-ch4, 6-o2, 7-co
@@ -6000,9 +6000,9 @@
 !
 !===> ...  begin here
 !
-      do ig = 1, ngptsw
+      do ib = 1, nbdsw
         do k = 1, nlay
-          taucw (k,ig) = f_zero
+          taucw (k,ib) = f_zero
         enddo
       enddo
 
@@ -6196,11 +6196,9 @@
             endif   ! end if_cldice_block
 
             do ig = 1, ngptsw
-              ib = ngb(ig)
-!              jb = nblow + ib - 1
-              taucw(k,ig) = tauliq(ig)+tauice(ig)+tauran(ig)+tausnw(ig)
-!              ssacw(k,ig) = ssaliq(ig)+ssaice(ig)+ssaran(ig)+ssasnw(ig)
-!              asycw(k,ig) = asyliq(ig)+asyice(ig)+asyran(ig)+asysnw(ig)
+              taucmc(k,ig) = tauliq(ig)+tauice(ig)+tauran(ig)+tausnw(ig)
+              ssacmc(k,ig) = ssaliq(ig)+ssaice(ig)+ssaran(ig)+ssasnw(ig)
+              asycmc(k,ig) = asyliq(ig)+asyice(ig)+asyran(ig)+asysnw(ig)
             enddo
 
           endif  lab_if_cld
@@ -6211,9 +6209,10 @@
         do k = 1, nlay
           if (cfrac(k) > ftiny) then
             do ig = 1, ngptsw
-              taucw(k,ig) = cdag1(k,ig)
-!              ssacw(k,ig) = cdag1(k,ig) * cdag2(k,ig)
-!              asycw(k,ig) = ssacw(k,ig) * cdag3(k,ig)
+              ib = ngb(ig)
+              taucw(k,ib) = cdag1(k,ig)
+!              ssacw(k,ib) = cdag1(k,ig) * cdag2(k,ig)
+!              asycw(k,ib) = ssacw(k,ig) * cdag3(k,ig)
             enddo
           endif
         enddo
