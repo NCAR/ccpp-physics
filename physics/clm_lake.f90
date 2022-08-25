@@ -5251,7 +5251,7 @@ if_pergro: if (PERGRO) then
       cycle
     endif
 
-    snowdp2d(i)         = snowd(i) ! SNOW in kg/m^2 and snowdp in m
+    snowdp2d(i)         = snowd(i)*1e-3   ! SNOW in kg/m^2 and snowdp in m
     h2osno2d(i)         = weasd(i)   ! mm 
 
     snl2d(i)                   = defval

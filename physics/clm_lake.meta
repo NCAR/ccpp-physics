@@ -277,7 +277,7 @@
 [snowdp2d]
   standard_name = actual_snow_depth_in_clm_lake_model
   long_name = actual acc snow depth over lake in clm lake model
-  units = mm
+  units = m
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
