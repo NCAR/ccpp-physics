@@ -404,7 +404,7 @@ MODULE clm_lake
            PSFC    = prsi(i,1) 
            Q2K     = qvcurr(i)
            LWDN    = DLWSFCI(I)*EMISS(I)
-           PRCP    = RAIN(i)*1000.0_kind_phys/dtime    ! use physics timestep since PRCP comes from non-surface schemes
+           PRCP    = RAIN(i)/dtime                     ! [mm/s] use physics timestep since PRCP comes from non-surface schemes
            SOLDN   = DSWSFCI(I)                        ! SOLDN is total incoming solar
            SOLNET  = SOLDN*(1.-ALBEDO(I))              ! use mid-day albedo to determine net downward solar
                                                        ! (no solar zenith angle correction) 
