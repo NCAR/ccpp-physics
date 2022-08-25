@@ -254,7 +254,7 @@ contains
        ! Update particle size using modified mixing-ratios from Thompson.
        call cmp_reff_Thompson(nLev, nCol, i_cldliq, i_cldice, i_cldsnow, i_cldice_nc,   &
             i_cldliq_nc, i_twa, q_lay, p_lay, t_lay, tracer, con_eps, con_rd, ltaerosol,&
-            mrserosol, effrin_cldliq, effrin_cldice, effrin_cldsnow)
+            mraerosol, effrin_cldliq, effrin_cldice, effrin_cldsnow)
        cld_reliq  = effrin_cldliq
        cld_reice  = effrin_cldice
        cld_resnow = effrin_cldsnow
