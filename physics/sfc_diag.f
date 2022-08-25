@@ -6,8 +6,6 @@
 
       module sfc_diag
 
-      logical, parameter :: LAKEDEBUG = .true.
-  
       contains
 
       subroutine sfc_diag_init
@@ -107,12 +105,6 @@
            q2m(i) = min(q2m(i),qss)
         endif
       enddo
-
-      if(LAKEDEBUG .and. clm_t2m_count>0 .and. kdt<5) then
-3082       format('lake 2m points processed in timestep ',I0,           &
-     &            ' by rank ',I0,' = ',I0)
-           print 3082,kdt,me,clm_t2m_count
-      endif
 
       return
       end subroutine sfc_diag_run

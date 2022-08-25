@@ -803,6 +803,14 @@
   type = real
   kind = kind_phys
   intent = in
+[clm_lake_debug]
+  standard_name = flag_for_verbose_debugging_in_clm_lake_model
+  long_name = flag for verbose debugging in clm lake model
+  units = flag
+  dimensions = ()
+  type = logical
+  active = (control_for_lake_model_selection == 3)
+  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

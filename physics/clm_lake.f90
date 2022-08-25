@@ -31,7 +31,7 @@ MODULE clm_lake
 
     implicit none 
 
-    logical, parameter :: LAKEDEBUG = .true. ! Enable lots of checks and debug prints and errors
+    logical :: LAKEDEBUG = .false. ! Enable lots of checks and debug prints and errors
 
     logical, parameter :: PERGRO = .false.
 
@@ -357,7 +357,7 @@ MODULE clm_lake
          endif
          ! At this point, at least one thread should have read in the unhappy points.
          if(unhappy_count==FAILED_TO_READ_UNHAPPY_POINTS .and. kdt<2) then
-            write(0,'(A)') "ERROR: Could not read unhappy points"
+            write(0,'(A)') "Could not read unhappy points. Will not print unhappy point data."
          endif
       endif
 
@@ -5028,14 +5028,16 @@ if_pergro: if (PERGRO) then
   !! \htmlinclude clm_lake_init.html
   !!
   subroutine clm_lake_init(con_pi,karman,con_g,con_sbc,con_t0c,rhowater,con_csol,con_cliq, &
-                           con_hfus,con_hvap,con_rd,con_cp,rhoice,errmsg,errflg)
+                           con_hfus,con_hvap,con_rd,con_cp,rhoice,clm_lake_debug,errmsg,errflg)
     implicit none
     real(kind_phys), intent(in) :: con_pi,karman,con_g,con_sbc,con_t0c, &
          rhowater,con_csol,con_cliq, con_hfus,con_hvap,con_rd,con_cp,rhoice
     INTEGER, INTENT(OUT) :: errflg
     CHARACTER(*), INTENT(OUT) :: errmsg
+    logical, intent(in) :: clm_lake_debug
     integer :: i, j
 
+    LAKEDEBUG = clm_lake_debug
     if(LAKEDEBUG) then
       write(0,*) 'clm_lake_init'
     endif
