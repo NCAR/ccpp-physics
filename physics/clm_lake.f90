@@ -142,7 +142,7 @@ MODULE clm_lake
                      lake_t2m     ,lake_q2m       ,clm_lake_initialized          ,&
                      weasd        ,isltyp         ,snowd        ,use_lakedepth   ,&
                      restart      ,lakedepth_default                             ,&
-                     rainnc       ,rainc          ,sand3d       ,clay3d          ,&
+                                                   sand3d       ,clay3d          ,&
 ! Flake output variables
                      weasdi       ,snodi          ,hice         ,tsurf           ,&
                      t_sfc        ,lflx           ,ustar        ,qsfc            ,&
@@ -173,7 +173,7 @@ MODULE clm_lake
     REAL(KIND_PHYS), DIMENSION( : ), INTENT(INOUT)::   fice
     REAL(KIND_PHYS), DIMENSION( : ), INTENT(IN) :: weasd, snowd
     REAL(KIND_PHYS), DIMENSION( : ), INTENT(IN):: tg3
-    REAL(KIND_PHYS),    DIMENSION( : ), INTENT(IN)    :: ZLVL, RAINC, RAINNC
+    REAL(KIND_PHYS),    DIMENSION( : ), INTENT(IN)    :: ZLVL
 
     INTEGER, DIMENSION(:), INTENT(IN) :: use_lake_model
     real(kind_phys), dimension(:), intent(in)  :: rho0               ! air density at surface
@@ -404,7 +404,6 @@ MODULE clm_lake
            PSFC    = prsi(i,1) 
            Q2K     = qvcurr(i)
            LWDN    = DLWSFCI(I)*EMISS(I)
-           PRCP    = denh2o * (rainc(i)+rainnc(i))*1000.0_kind_phys/dtime
            PRCP    = RAIN(i)*1000.0_kind_phys/dtime    ! use physics timestep since PRCP comes from non-surface schemes
            SOLDN   = DSWSFCI(I)                        ! SOLDN is total incoming solar
            SOLNET  = SOLDN*(1.-ALBEDO(I))              ! use mid-day albedo to determine net downward solar

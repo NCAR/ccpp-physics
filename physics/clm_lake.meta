@@ -7,22 +7,6 @@
 [ccpp-arg-table]
   name = clm_lake_run
   type = scheme
-[rainnc]
-  standard_name = lwe_thickness_of_explicit_precipitation_amount_on_previous_timestep
-  long_name = explicit rainfall from previous timestep
-  units = m
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-[rainc]
-  standard_name = lwe_thickness_of_convective_precipitation_amount_on_previous_timestep
-  long_name = convective_precipitation_amount from previous timestep
-  units = m
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
 [tg3]
   standard_name = deep_soil_temperature
   long_name = deep soil temperature
