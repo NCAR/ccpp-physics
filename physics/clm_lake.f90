@@ -231,10 +231,27 @@ MODULE clm_lake
       if (xlon_d.gt.-119.3.and. xlon_d.lt.-118.8) then  
          if(xlat_d.gt.37.9 .and. xlat_d.lt.38.2) then
             is_salty = .true.
-            print *,'Mono Lake, i,j',xlat_d,xlon_d
+            if(lakedebug) then
+               print *,'Salty Mono Lake, i,j',xlat_d,xlon_d
+            endif
          endif ! xlat_d
       endif ! xlon_d
-      !tgs --- end of special treatment for salty lakes
+
+      ! --- Caspian Sea and Dead Sea are salty too (Sam, Tanya)
+      if ( xlat_d>36.5_kind_phys .and. xlat_d<47.1_kind_phys .and. xlon_d>46.8_kind_phys .and. xlon_d<55.0_kind_phys ) then
+         if(lakedebug) then
+            print *,'Salty Caspian Sea ',xlat_d,xlon_d
+         endif
+         is_salty = .true.
+      end if 
+      if ( xlon_d>35.3 .and. xlon_d<35.6 .and. xlat_d>31.3 .and. xlat_d<31.8) then
+         if(lakedebug) then
+            print *,'Salty Dead Sea ',xlat_d,xlon_d
+         endif
+         is_salty = .true.
+      endif
+      
+     !tgs --- end of special treatment for salty lakes
     end function is_salty
  
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -317,7 +334,7 @@ MODULE clm_lake
     REAL(KIND_PHYS),           DIMENSION( : )         ,INTENT(IN)  :: rain
     REAL(KIND_PHYS),           DIMENSION( : )         ,INTENT(INOUT)  :: albedo
     INTEGER, DIMENSION( : ), INTENT(IN)       :: ISLTYP
-    INTEGER, DIMENSION( : ), INTENT(INOUT)       :: salty
+    INTEGER, DIMENSION( : ), INTENT(INOUT)    :: salty
     REAL(KIND_PHYS),                                                  INTENT(IN)  :: dtp
     REAL(KIND_PHYS),           DIMENSION( :,: ),INTENT(INOUT)  :: z_lake3d
     REAL(KIND_PHYS),           DIMENSION( :,: ),INTENT(INOUT)  :: dz_lake3d
@@ -492,7 +509,7 @@ MODULE clm_lake
                      use_lake_model, use_lakedepth,   con_g,           con_rd,         &
                      tkdry3d,        tksatu3d,        im,              prsi,           &
                      xlat_d,         xlon_d,          clm_lake_initialized,            &
-                     sand3d,         clay3d,          tg3,             salty,          &
+                     sand3d,         clay3d,          tg3,                             &
                      km, me,         master,          errmsg,          errflg)
         if(errflg/=0) then
           return
@@ -518,8 +535,11 @@ MODULE clm_lake
 
         if_lake_is_here: if (flag_iter(i) .and. use_lake_model(i)/=0) THEN
 
-
-              
+           if(is_salty(xlat_d(i),xlon_d(i))) then
+              salty(i) = 1
+           else
+              salty(i) = 0
+           endif
 
            SFCTMP  = gt0(i,1)
            PBOT    = prsi(i,2)
@@ -5263,7 +5283,7 @@ if_pergro: if (PERGRO) then
                     use_lake_model, use_lakedepth,   con_g,           con_rd,         &
                     tkdry3d,        tksatu3d,        im,              prsi,           &
                     xlat_d,         xlon_d,          clm_lake_initialized,            &
-                    sand3d,         clay3d,          tg3,             salty,          &
+                    sand3d,         clay3d,          tg3,                             &
                     km,   me,       master,          errmsg,          errflg)
 
    !==============================================================================
@@ -5282,7 +5302,6 @@ if_pergro: if (PERGRO) then
   REAL(KIND_PHYS), DIMENSION(IM), INTENT(IN)::   FICE,TG3, xlat_d, xlon_d
   REAL(KIND_PHYS), DIMENSION(IM), INTENT(IN)::     tsfc
   REAL(KIND_PHYS), DIMENSION(IM)  ,INTENT(INOUT)  :: clm_lake_initialized
-  INTEGER, DIMENSION(IM)  ,INTENT(INOUT)  :: salty  
   integer, dimension(IM), intent(in) :: use_lake_model
   !INTEGER , INTENT (IN) :: lakeflag
   !INTEGER , INTENT (INOUT) :: lake_depth_flag
@@ -5406,12 +5425,6 @@ if_pergro: if (PERGRO) then
     
     if(clm_lake_initialized(i)>0) then
       cycle
-    endif
-
-    if(is_salty(xlat_d(i),xlon_d(i))) then
-       salty(i) = 1
-    else
-       salty(i) = 0
     endif
 
     snowdp2d(i)         = snowd(i)*1e-3   ! SNOW in kg/m^2 and snowdp in m
