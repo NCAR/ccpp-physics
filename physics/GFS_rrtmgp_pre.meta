@@ -245,38 +245,6 @@
   type = real
   kind = kind_phys
   intent = in
-[minGPpres]
-  standard_name = minimum_pressure_in_RRTMGP
-  long_name = minimum pressure allowed in RRTMGP
-  units = Pa
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[maxGPpres]
-  standard_name = maximum_pressure_in_RRTMGP
-  long_name = maximum pressure allowed in RRTMGP
-  units = Pa
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[minGPtemp]
-  standard_name = minimum_temperature_in_RRTMGP
-  long_name = minimum temperature allowed in RRTMGP
-  units = K
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[maxGPtemp]
-  standard_name = maximum_temperature_in_RRTMGP
-  long_name = maximum temperature allowed in RRTMGP
-  units = K
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
 [raddt]
   standard_name = time_step_for_radiation
   long_name = radiation time step

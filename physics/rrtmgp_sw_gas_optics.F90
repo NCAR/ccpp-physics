@@ -2,11 +2,8 @@
 !!
 !> \defgroup rrtmgp_sw_gas_optics rrtmgp_sw_gas_optics.F90
 !!
-!! \brief This module contains two routines: One to initialize the k-distribution data
-!! and functions needed to compute the shortwave gaseous optical properties in RRTMGP.
-!! The second routine is a ccpp scheme within the "radiation loop", where the shortwave 
-!! optical prperties (optical-depth, single-scattering albedo, asymmetry parameter) are 
-!! computed for clear-sky conditions (no aerosols)
+!! \brief This module contains a routine to initialize the k-distribution data used
+!! by the RRTMGP shortwave radiation scheme.
 !!
 module rrtmgp_sw_gas_optics
   use machine,                only: kind_phys
@@ -82,7 +79,7 @@ module rrtmgp_sw_gas_optics
        scale_by_complement_upperSW          ! Absorption is scaled by concentration of scaling_gas (F) or its complement (T)
 contains
 
-
+  ! ######################################################################################
 !>\defgroup rrtmgp_sw_gas_optics_mod GFS RRTMGP-SW Gas Optics Module
 !> @{
 !! \section arg_table_rrtmgp_sw_gas_optics_init
@@ -99,19 +96,19 @@ contains
 !! \section rrtmgp_sw_gas_optics_init
 !> @{ 
   ! ######################################################################################  
-  subroutine rrtmgp_sw_gas_optics_init(rrtmgp_root_dir, rrtmgp_sw_file_gas,                 &
+  subroutine rrtmgp_sw_gas_optics_init(rrtmgp_root_dir, rrtmgp_sw_file_gas,              &
        active_gases_array, mpicomm, mpirank, mpiroot, errmsg, errflg)
 
     ! Inputs
     character(len=128),intent(in) :: &
          rrtmgp_root_dir,  & ! RTE-RRTMGP root directory
-         rrtmgp_sw_file_gas  ! RRTMGP file containing coefficients used to compute gaseous optical properties
+         rrtmgp_sw_file_gas  ! RRTMGP file containing K-distribution data
+    character(len=*), dimension(:), intent(in) :: &
+         active_gases_array  ! List of active gases from namelist as array
     integer,intent(in) :: &
          mpicomm,          & ! MPI communicator
          mpirank,          & ! Current MPI rank
          mpiroot             ! Master MPI rank
-    character(len=*), dimension(:), intent(in) :: &
-         active_gases_array ! List of active gases from namelist as array
 
     ! Outputs
     character(len=*), intent(out) :: &
@@ -120,10 +117,10 @@ contains
          errflg              ! CCPP error code
 
     ! Local variables
-    integer :: status, ncid, dimid, varID, iGas, mpierr, iChar
+    integer :: status, ncid, dimid, varID, mpierr, iChar
     integer,dimension(:),allocatable :: temp1, temp2, temp3, temp4
     character(len=264) :: sw_gas_props_file
-    type(ty_gas_concs) :: gas_concentrations  ! RRTMGP DDT containing active trace gases
+    type(ty_gas_concs) :: gas_concs  ! RRTMGP DDT containing active trace gases
 
     ! Initialize
     errmsg = ''
@@ -486,17 +483,14 @@ contains
     ! Initialize RRTMGP DDT's...
     !
     ! #######################################################################################
-    allocate(gas_concentrations%gas_name(1:size(active_gases_array)))
-    gas_concentrations%gas_name(:) = active_gases_array(:)
-    call check_error_msg('sw_gas_optics_init',sw_gas_props%load(gas_concentrations,         &
+    call check_error_msg('rrtmgp_sw_gas_optics_init_gas_concs',gas_concs%init(active_gases_array))
+    call check_error_msg('rrtmgp_sw_gas_optics_init_load',sw_gas_props%load(gas_concs,      &
          gas_namesSW, key_speciesSW, band2gptSW, band_limsSW, press_refSW, press_ref_tropSW,&
          temp_refSW, temp_ref_pSW, temp_ref_tSW, vmr_refSW, kmajorSW, kminor_lowerSW,       &
          kminor_upperSW, gas_minorSW, identifier_minorSW, minor_gases_lowerSW,              &
          minor_gases_upperSW, minor_limits_gpt_lowerSW, minor_limits_gpt_upperSW,           &
          minor_scales_with_density_lowerSW, minor_scales_with_density_upperSW,              &
          scaling_gas_lowerSW, scaling_gas_upperSW, scale_by_complement_lowerSW,             &
-
-
          scale_by_complement_upperSW, kminor_start_lowerSW, kminor_start_upperSW,           &
          solar_quietSW, solar_facularSW, solar_sunspotSW, tsi_defaultSW, mg_defaultSW,      &
          sb_defaultSW, rayl_lowerSW, rayl_upperSW))

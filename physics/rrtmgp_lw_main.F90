@@ -39,53 +39,46 @@ contains
 !! \section rrtmgp_lw_main_init
 !> @{
   ! ######################################################################################
-  subroutine rrtmgp_lw_main_init(rrtmgp_root_dir, rrtmgp_lw_file_gas, mpicomm, mpirank,  &
-       mpiroot, minGPpres, maxGPpres, minGPtemp, maxGPtemp, active_gases_array, nrghice, &
-       doG_cldoptics, doGP_cldoptics_PADE, doGP_cldoptics_LUT, rrtmgp_lw_file_clouds,    &
-       errmsg, errflg)
+  subroutine rrtmgp_lw_main_init(rrtmgp_root_dir, rrtmgp_lw_file_gas,                    &
+       rrtmgp_lw_file_clouds, active_gases_array, doGP_cldoptics_PADE,                   &
+       doGP_cldoptics_LUT, nrghice, mpicomm, mpirank, mpiroot, nrghice, errmsg, errflg)
 
     ! Inputs
+    character(len=128),intent(in) :: &
+         rrtmgp_root_dir,       & ! RTE-RRTMGP root directory
+         rrtmgp_lw_file_clouds, & ! RRTMGP file containing coefficients used to compute
+                                  ! clouds optical properties
+         rrtmgp_lw_file_gas       ! RRTMGP file containing coefficients used to compute
+                                  ! gaseous optical properties
+    character(len=*), dimension(:), intent(in) :: &
+         active_gases_array ! List of active gases from namelist as array)
     logical, intent(in) :: &
-         doG_cldoptics,         & ! Use legacy RRTMG cloud-optics?
          doGP_cldoptics_PADE,   & ! Use RRTMGP cloud-optics: PADE approximation?
          doGP_cldoptics_LUT       ! Use RRTMGP cloud-optics: LUTs?
     integer, intent(inout) :: &
          nrghice                  ! Number of ice-roughness categories
-    character(len=128),intent(in) :: &
-         rrtmgp_root_dir,       & ! RTE-RRTMGP root directory
-         rrtmgp_lw_file_clouds, & ! RRTMGP file containing coefficients used to compute 
-                                  ! clouds optical properties
-         rrtmgp_lw_file_gas       ! RRTMGP file containing coefficients used to compute 
-                                  ! gaseous optical properties
     integer,intent(in) :: &
          mpicomm,               & ! MPI communicator
          mpirank,               & ! Current MPI rank
          mpiroot                  ! Master MPI rank
-    character(len=*), dimension(:), intent(in) :: &
-         active_gases_array ! List of active gases from namelist as array)
+
     ! Outputs
     character(len=*), intent(out) :: &
          errmsg                   ! CCPP error message
     integer,          intent(out) :: &
          errflg                   ! CCPP error code
-    real(kind_phys), intent(out) :: &
-         minGPtemp,             & ! Minimum temperature allowed by RRTMGP.
-         maxGPtemp,             & ! Maximum ...
-         minGPpres,             & ! Minimum pressure allowed by RRTMGP. 
-         maxGPpres                ! Maximum pressure allowed by RRTMGP. 
 
     ! Initialize CCPP error handling variables 
     errmsg = ''
     errflg = 0
 
     ! RRTMGP longwave gas-optics (k-distribution) initialization
-    call rrtmgp_lw_gas_optics_init(rrtmgp_root_dir, rrtmgp_lw_file_gas, mpicomm, mpirank,&
-         mpiroot, minGPpres, maxGPpres, minGPtemp, maxGPtemp, active_gases_array, errmsg,&
-         errflg)
+    call rrtmgp_lw_gas_optics_init(rrtmgp_root_dir, rrtmgp_lw_file_gas,                  &
+         active_gases_array, mpicomm, mpirank, mpiroot, errmsg, errflg)
 
     ! RRTMGP longwave cloud-optics initialization
-    call  rrtmgp_lw_cloud_optics_init(nrghice, mpicomm, mpirank, mpiroot, doG_cldoptics, &
-         doGP_cldoptics_PADE, doGP_cldoptics_LUT, rrtmgp_root_dir, rrtmgp_lw_file_clouds,&
+    call rrtmgp_lw_cloud_optics_init(rrtmgp_root_dir, rrtmgp_lw_file_clouds,             &
+         doGP_cldoptics_PADE, doGP_cldoptics_LUT, nrghice, mpicomm, mpirank, mpiroot,    &
          errmsg, errflg)
 
   end subroutine rrtmgp_lw_main_init
@@ -226,14 +219,7 @@ contains
     ! ######################################################################################
 
     ! ty_gas_concs
-    gas_concs%ncol = rrtmgp_phys_blksz
-    gas_concs%nlay = nLay
-    allocate(gas_concs%gas_name(nGases))
-    allocate(gas_concs%concs(nGases))
-    do iGas=1,ngases
-       allocate(gas_concs%concs(iGas)%conc(rrtmgp_phys_blksz, nLay))
-    enddo
-    gas_concs%gas_name(:) = active_gases_array(:)
+    call check_error_msg('rrtmgp_lw_main_gas_concs_init',gas_concs%init(active_gases_array))
 
     ! ty_optical_props
     call check_error_msg('rrtmgp_lw_main_gas_optics_init',&
@@ -270,10 +256,6 @@ contains
        ! Initialize/reset
        !
        ! ###################################################################################
-       ! ty_gas_concs
-       do iGas=1,nGases
-          gas_concs%concs(iGas)%conc(:,:) = 0._kind_phys
-       end do
        ! ty_optical_props
        lw_optical_props_clrsky%tau       = 0._kind_phys
        lw_optical_props_precipByBand%tau = 0._kind_phys
@@ -307,12 +289,18 @@ contains
        ! Set gas-concentrations
        !
        ! ###################################################################################
-       gas_concs%concs(istr_o2)%conc(:,:)   = vmr_o2(iCol:iCol2,:)
-       gas_concs%concs(istr_co2)%conc(:,:)  = vmr_co2(iCol:iCol2,:)
-       gas_concs%concs(istr_ch4)%conc(:,:)  = vmr_ch4(iCol:iCol2,:)
-       gas_concs%concs(istr_n2o)%conc(:,:)  = vmr_n2o(iCol:iCol2,:)
-       gas_concs%concs(istr_h2o)%conc(:,:)  = vmr_h2o(iCol:iCol2,:)
-       gas_concs%concs(istr_o3)%conc(:,:)   = vmr_o3(iCol:iCol2,:)
+       call check_error_msg('rrtmgp_lw_main_set_vmr_o2',  &
+            gas_concs%set_vmr(trim(active_gases_array(istr_o2)), vmr_o2(iCol:iCol2,:)))
+       call check_error_msg('rrtmgp_lw_main_set_vmr_co2', &
+            gas_concs%set_vmr(trim(active_gases_array(istr_co2)),vmr_co2(iCol:iCol2,:)))
+       call check_error_msg('rrtmgp_lw_main_set_vmr_ch4', &
+            gas_concs%set_vmr(trim(active_gases_array(istr_ch4)),vmr_ch4(iCol:iCol2,:)))
+       call check_error_msg('rrtmgp_lw_main_set_vmr_n2o', &
+            gas_concs%set_vmr(trim(active_gases_array(istr_n2o)),vmr_n2o(iCol:iCol2,:)))
+       call check_error_msg('rrtmgp_lw_main_set_vmr_h2o', &
+            gas_concs%set_vmr(trim(active_gases_array(istr_h2o)),vmr_h2o(iCol:iCol2,:)))
+       call check_error_msg('rrtmgp_lw_main_set_vmr_o3',  &
+            gas_concs%set_vmr(trim(active_gases_array(istr_o3)), vmr_o3(iCol:iCol2,:)))
 
        ! ###################################################################################
        !
@@ -361,6 +349,7 @@ contains
                                                        !       in each band
           ! Include convective (subgrid scale) clouds?
           if (doGP_sgs_cnv) then
+             ! Compute
              call check_error_msg('rrtmgp_lw_main_cnv_cloud_optics',lw_cloud_props%cloud_optics(&
                   cld_cnv_lwp(iCol:iCol2,:),         & ! IN  - Convective cloud liquid water path (g/m2)
                   cld_cnv_iwp(iCol:iCol2,:),         & ! IN  - Convective cloud ice water path (g/m2)
@@ -368,12 +357,14 @@ contains
                   cld_cnv_reice(iCol:iCol2,:),       & ! IN  - Convective cloud ice effective radius (microns)
                   lw_optical_props_cnvcloudsByBand))   ! OUT - RRTMGP DDT containing convective cloud radiative properties
                                                        !       in each band
+             ! Increment
              call check_error_msg('rrtmgp_lw_main_increment_cnvclouds_to_clouds',&
                   lw_optical_props_cnvcloudsByBand%increment(lw_optical_props_cloudsByBand))
           endif
 
           ! Include PBL (subgrid scale) clouds?
           if (doGP_sgs_pbl) then
+             ! Compute
              call check_error_msg('rrtmgp_lw_main_pbl_cloud_optics',lw_cloud_props%cloud_optics(&
                   cld_pbl_lwp(iCol:iCol2,:),         & ! IN  - PBL cloud liquid water path (g/m2)
                   cld_pbl_iwp(iCol:iCol2,:),         & ! IN  - PBL cloud ice water path (g/m2)
@@ -381,6 +372,7 @@ contains
                   cld_pbl_reice(iCol:iCol2,:),       & ! IN  - PBL cloud ice effective radius (microns)
                   lw_optical_props_pblcloudsByBand))   ! OUT - RRTMGP DDT containing PBL cloud radiative properties
                                                        !       in each band
+             ! Increment
              call check_error_msg('rrtmgp_lw_main_increment_pblclouds_to_clouds',&
                   lw_optical_props_pblcloudsByBand%increment(lw_optical_props_cloudsByBand))
           endif
@@ -411,6 +403,7 @@ contains
              endif
           enddo
        enddo
+       ! Increment
        call check_error_msg('rrtmgp_lw_main_increment_precip_to_clouds',&
             lw_optical_props_precipByBand%increment(lw_optical_props_cloudsByBand))
 
@@ -482,7 +475,7 @@ contains
        ! Compute clear-sky fluxes (gaseous+aerosol) (optional)
        !
        ! ###################################################################################
-       ! Add aerosol optics to gas optics
+       ! Increment
        lw_optical_props_aerosol_local%tau = aerlw_tau(iCol:iCol2,:,:)
        call check_error_msg('rrtmgp_lw_main_increment_aerosol_to_clrsky',&
             lw_optical_props_aerosol_local%increment(lw_optical_props_clrsky))
@@ -534,7 +527,7 @@ contains
 
        ! Include LW cloud-scattering?
        if (doGP_lwscat) then 
-          ! Add clear-sky optics to cloud-optics (2-stream)
+          ! Increment
           call check_error_msg('rrtmgp_lw_main_increment_clrsky_to_clouds',&
                lw_optical_props_clrsky%increment(lw_optical_props_clouds))
           
@@ -559,7 +552,7 @@ contains
           end if
        ! No scattering in LW clouds.   
        else
-          ! Add cloud optics to clear-sky optics (scalar)
+          ! Increment
           call check_error_msg('rrtmgp_lw_main_increment_clouds_to_clrsky', &
                lw_optical_props_clouds%increment(lw_optical_props_clrsky))
           

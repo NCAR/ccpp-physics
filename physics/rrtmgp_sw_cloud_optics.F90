@@ -48,44 +48,41 @@ module rrtmgp_sw_cloud_optics
        pade_exticeSW,         & ! PADE coefficients for shortwave ice extinction
        pade_ssaiceSW,         & ! PADE coefficients for shortwave ice single scattering albedo
        pade_asyiceSW            ! PADE coefficients for shortwave ice asymmetry parameter
-
-  ! Parameters used for rain and snow(+groupel) RRTMGP cloud-optics
-  real(kind_phys),parameter :: &
-       a0r = 3.07e-3, & !
-       a0s = 0.0,     & !
-       a1s = 1.5        !  
-  real(kind_phys),dimension(:),allocatable :: b0r,b0s,b1s,c0r,c0s
   real(kind_phys) :: &
-       radliq_lwrSW,         & ! Liquid particle size lower bound for LUT interpolation   
-       radliq_uprSW,         & ! Liquid particle size upper bound for LUT interpolation
-       radice_lwrSW,         & ! Ice particle size upper bound for LUT interpolation  
-       radice_uprSW            ! Ice particle size lower bound for LUT interpolation
+       radliq_lwrSW,          & ! Liquid particle size lower bound for LUT interpolation
+       radliq_uprSW,          & ! Liquid particle size upper bound for LUT interpolation
+       radice_lwrSW,          & ! Ice particle    size upper bound for LUT interpolation
+       radice_uprSW             ! Ice particle    size lower bound for LUT interpolation
+
+  ! Parameters used for rain and snow(+groupel) RRTMGP cloud-optics. *NOTE* Same as in RRTMG
+  ! Need to document these magic numbers below.
+  real(kind_phys),parameter :: &
+       a0r = 3.07e-3,        & !
+       a0s = 0.0,            & !
+       a1s = 1.5               !  
+  real(kind_phys),dimension(:),allocatable :: b0r,b0s,b1s,c0r,c0s
 
 contains
   ! ######################################################################################
   ! SUBROUTINE sw_cloud_optics_init
   ! ######################################################################################
-!! \section arg_table_rrtmgp_sw_cloud_optics_init
-!! \htmlinclude rrtmgp_lw_cloud_optics.html
-!!
-  subroutine rrtmgp_sw_cloud_optics_init(doG_cldoptics, doGP_cldoptics_PADE,             &
-       doGP_cldoptics_LUT, nrghice, rrtmgp_root_dir, rrtmgp_sw_file_clouds, mpicomm,     &
-       mpirank, mpiroot, errmsg, errflg)
+  subroutine rrtmgp_sw_cloud_optics_init( rrtmgp_root_dir, rrtmgp_sw_file_clouds,        &
+       doGP_cldoptics_PADE, doGP_cldoptics_LUT, nrghice, mpicomm, mpirank, mpiroot,      &
+       errmsg, errflg)
 
     ! Inputs
+    character(len=128),intent(in) :: &
+         rrtmgp_root_dir,    & ! RTE-RRTMGP root directory
+         rrtmgp_sw_file_clouds ! RRTMGP file containing cloud-optic data
     logical, intent(in) :: &
-         doG_cldoptics,       & ! Use legacy RRTMG cloud-optics?
-         doGP_cldoptics_PADE, & ! Use RRTMGP cloud-optics: PADE approximation?
-         doGP_cldoptics_LUT     ! Use RRTMGP cloud-optics: LUTs?    
+         doGP_cldoptics_PADE,& ! Use RRTMGP cloud-optics: PADE approximation?
+         doGP_cldoptics_LUT    ! Use RRTMGP cloud-optics: LUTs?    
     integer, intent(inout) :: &
          nrghice               ! Number of ice-roughness categories
     integer, intent(in) :: &
          mpicomm,            & ! MPI communicator
          mpirank,            & ! Current MPI rank
          mpiroot               ! Master MPI rank
-    character(len=128),intent(in) :: &
-         rrtmgp_root_dir,    & ! RTE-RRTMGP root directory
-         rrtmgp_sw_file_clouds ! RRTMGP file containing coefficients used to compute clouds optical properties
 
     ! Outputs
     character(len=*), intent(out) :: &
@@ -100,8 +97,6 @@ contains
     ! Initialize
     errmsg = ''
     errflg = 0
-
-    if (doG_cldoptics) return
 
     ! Filenames are set in the physics_nml
     sw_cloud_props_file = trim(rrtmgp_root_dir)//trim(rrtmgp_sw_file_clouds)
@@ -161,7 +156,7 @@ contains
     call mpi_bcast(nPairsSW,           1, MPI_INTEGER, mpiroot, mpicomm, mpierr)
 #endif
     
-    ! Has the number of ice-roughnesses provided from the namelist?
+    ! Has the number of ice-roughnes categories been provided from the namelist?
     ! If so, override nrghice from cloud-optics file
     if (nrghice .ne. 0) nrghice_fromfileSW = nrghice
 #ifdef MPI

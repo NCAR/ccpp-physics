@@ -78,14 +78,15 @@ contains
   ! #########################################################################################
   ! SUBROUTINE rrtmgp_lw_gas_optics_init
   ! #########################################################################################
-  subroutine rrtmgp_lw_gas_optics_init(rrtmgp_root_dir, rrtmgp_lw_file_gas, mpicomm,        &
-       mpirank, mpiroot, minGPpres, maxGPpres, minGPtemp, maxGPtemp, active_gases_array,    &
-       errmsg, errflg)
+  subroutine rrtmgp_lw_gas_optics_init(rrtmgp_root_dir, rrtmgp_lw_file_gas,                 &
+       active_gases_array, mpicomm, mpirank, mpiroot, errmsg, errflg)
 
     ! Inputs
     character(len=128),intent(in) :: &
          rrtmgp_root_dir,  & ! RTE-RRTMGP root directory
-         rrtmgp_lw_file_gas  ! RRTMGP file containing coefficients used to compute gaseous optical properties
+         rrtmgp_lw_file_gas  ! RRTMGP file containing K-distribution data
+    character(len=*), dimension(:), intent(in) :: &
+         active_gases_array  ! List of active gases from namelist as array   
     integer,intent(in) :: &
          mpicomm,          & ! MPI communicator
          mpirank,          & ! Current MPI rank
@@ -96,20 +97,12 @@ contains
          errmsg              ! CCPP error message
     integer,          intent(out) :: &
          errflg              ! CCPP error code
-    real(kind_phys), intent(out) :: &
-         minGPtemp,        & ! Minimum temperature allowed by RRTMGP.
-         maxGPtemp,        & ! Maximum ...
-         minGPpres,        & ! Minimum pressure allowed by RRTMGP. 
-         maxGPpres           ! Maximum pressure allowed by RRTMGP. 
-    character(len=*), dimension(:), intent(in) :: &
-         active_gases_array ! List of active gases from namelist as array
 
     ! Local variables
-    integer :: ncid, dimID, varID, status, iGas, ierr, ii, mpierr, iChar
-    integer,dimension(:),allocatable :: temp1, temp2, temp3, temp4, &
-         temp_log_array1, temp_log_array2, temp_log_array3, temp_log_array4
+    integer :: ncid, dimID, varID, status, ii, mpierr, iChar
+    integer,dimension(:),allocatable :: temp1, temp2, temp3, temp4
     character(len=264) :: lw_gas_props_file
-    type(ty_gas_concs) :: gas_concentrations  ! RRTMGP DDT: trace gas concentrations (vmr)
+    type(ty_gas_concs) :: gas_concs  ! RRTMGP DDT: trace gas concentrations (vmr)
 
     ! Initialize
     errmsg = ''
@@ -442,9 +435,8 @@ contains
     ! Initialize RRTMGP DDT's...
     !
     ! #######################################################################################
-    allocate(gas_concentrations%gas_name(1:size(active_gases_array)))
-    gas_concentrations%gas_name(:) = active_gases_array(:)
-    call check_error_msg('rrtmgp_lw_gas_optics_init',lw_gas_props%load(gas_concentrations,  &
+    call check_error_msg('rrtmgp_lw_gas_optics_init_gas_concs',gas_concs%init(active_gases_array))
+    call check_error_msg('rrtmgp_lw_gas_optics_init_load',lw_gas_props%load(gas_concs,      &
          gas_namesLW, key_speciesLW, band2gptLW, band_limsLW, press_refLW, press_ref_tropLW,&
          temp_refLW,  temp_ref_pLW, temp_ref_tLW, vmr_refLW, kmajorLW, kminor_lowerLW,      &
          kminor_upperLW, gas_minorLW, identifier_minorLW, minor_gases_lowerLW,              &
@@ -454,13 +446,6 @@ contains
          scale_by_complement_upperLW, kminor_start_lowerLW, kminor_start_upperLW, totplnkLW,&
          planck_fracLW, rayl_lowerLW, rayl_upperLW, optimal_angle_fitLW))
     
-    ! The minimum pressure allowed in GP RTE calculations. Used to bound uppermost layer
-    ! temperature (GFS_rrtmgp_pre.F90)
-    minGPpres = lw_gas_props%get_press_min()
-    maxGPpres = lw_gas_props%get_press_max()
-    minGPtemp = lw_gas_props%get_temp_min() 
-    maxGPtemp = lw_gas_props%get_temp_max()
-
   end subroutine rrtmgp_lw_gas_optics_init
 
 end module rrtmgp_lw_gas_optics

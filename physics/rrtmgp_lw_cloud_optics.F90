@@ -75,43 +75,39 @@ contains
   ! ######################################################################################
   ! SUBROUTINE rrtmgp_lw_cloud_optics_init()
   ! ######################################################################################
-  subroutine rrtmgp_lw_cloud_optics_init(nrghice, mpicomm, mpirank, mpiroot,             &
-       doG_cldoptics, doGP_cldoptics_PADE, doGP_cldoptics_LUT, rrtmgp_root_dir,          &
-       rrtmgp_lw_file_clouds, errmsg, errflg)
+  subroutine rrtmgp_lw_cloud_optics_init(rrtmgp_root_dir, rrtmgp_lw_file_clouds,         &
+       doGP_cldoptics_PADE, doGP_cldoptics_LUT, nrghice, mpicomm, mpirank, mpiroot,      &
+       errmsg, errflg)
 
     ! Inputs
-    logical, intent(in) :: &
-         doG_cldoptics,                 & ! Use legacy RRTMG cloud-optics?
-         doGP_cldoptics_PADE,           & ! Use RRTMGP cloud-optics: PADE approximation?
-         doGP_cldoptics_LUT               ! Use RRTMGP cloud-optics: LUTs?
-    integer, intent(inout) :: &
-         nrghice                          ! Number of ice-roughness categories
-    integer, intent(in) :: & 
-         mpicomm,                       & ! MPI communicator
-         mpirank,                       & ! Current MPI rank
-         mpiroot                          ! Master MPI rank
     character(len=128),intent(in) :: &
-         rrtmgp_root_dir,               & ! RTE-RRTMGP root directory
-         rrtmgp_lw_file_clouds            ! RRTMGP file containing coefficients used to compute clouds optical properties
+         rrtmgp_root_dir,    & ! RTE-RRTMGP root directory
+         rrtmgp_lw_file_clouds ! RRTMGP file containing clouds optics data
+
+    logical, intent(in) :: &
+         doGP_cldoptics_PADE,& ! Use RRTMGP cloud-optics: PADE approximation?
+         doGP_cldoptics_LUT    ! Use RRTMGP cloud-optics: LUTs?
+    integer, intent(inout) :: &
+         nrghice               ! Number of ice-roughness categories
+    integer, intent(in) :: & 
+         mpicomm,            & ! MPI communicator
+         mpirank,            & ! Current MPI rank
+         mpiroot               ! Master MPI rank
 
     ! Outputs
     character(len=*), intent(out) :: &
-         errmsg                           ! Error message
+         errmsg                ! Error message
     integer,          intent(out) :: &
-         errflg                           ! Error code
+         errflg                ! Error code
 
     ! Local variables
     integer :: dimID,varID,status,ncid,mpierr
     character(len=264) :: lw_cloud_props_file
-    integer,parameter :: max_strlen=256, nrghice_default=2
 
     ! Initialize
     errmsg = ''
     errflg = 0
 
-    ! If not using RRTMGP cloud optics, return.
-    if (doG_cldoptics) return
-    
     ! Filenames are set in the physics_nml
     lw_cloud_props_file = trim(rrtmgp_root_dir)//trim(rrtmgp_lw_file_clouds)
 

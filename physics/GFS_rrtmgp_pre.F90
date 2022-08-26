@@ -113,8 +113,8 @@ contains
   ! ######################################################################################### 
   subroutine GFS_rrtmgp_pre_run(me, nCol, nLev, i_o3, doSWrad, doLWrad, fhswr, fhlwr,       &
        xlat, xlon,  prsl, tgrs, prslk, prsi, qgrs, tsfc, coslat, sinlat, con_g, con_rd,     &
-       con_eps, con_epsm1, con_fvirt, con_epsqs, solhr, minGPpres, maxGPpres, minGPtemp,    &
-       maxGPtemp, raddt, p_lay, t_lay, p_lev, t_lev, vmr_o2, vmr_h2o, vmr_o3, vmr_ch4,      &
+       con_eps, con_epsm1, con_fvirt, con_epsqs, solhr, raddt, p_lay, t_lay, p_lev, t_lev,  &
+       vmr_o2, vmr_h2o, vmr_o3, vmr_ch4,                                                    &
        vmr_n2o, vmr_co2, tsfg, tsfa, qs_lay, q_lay, tv_lay,                                 &
        relhum, deltaZ, deltaZc, deltaP, active_gases_array,                                 &
        tsfc_radtime, coszen, coszdg, top_at_1, iSFC, iTOA, nDay, idxday, semis,             &
@@ -130,10 +130,6 @@ contains
     	 doSWrad,           & ! Call SW radiation?
     	 doLWrad              ! Call LW radiation
     real(kind_phys), intent(in) :: &
-         minGPtemp,         & ! Minimum temperature allowed in RRTMGP.
-         maxGPtemp,         & ! Maximum ...
-         minGPpres,         & ! Minimum pressure allowed in RRTMGP.
-         maxGPpres,         & ! Maximum pressure allowed in RRTMGP. 
          fhswr,             & ! Frequency of SW radiation call.
          fhlwr                ! Frequency of LW radiation call.
     real(kind_phys), intent(in) :: &
@@ -245,27 +241,29 @@ contains
     ! Bound temperature/pressure at layer centers.
     do iLay=1,nLev
        do iCol=1,NCOL
-          if (t_lay(iCol,iLay) .le. minGPtemp) then
-             t_lay(iCol,iLay) = minGPtemp + epsilon(minGPtemp)
+          if (t_lay(iCol,iLay) .le. lw_gas_props%get_temp_min()) then
+             t_lay(iCol,iLay) = lw_gas_props%get_temp_min() + epsilon(lw_gas_props%get_temp_min())
           endif
-          if (p_lay(iCol,iLay) .le. minGPpres) then
-             p_lay(iCol,iLay) = minGPpres + epsilon(minGPpres)
+          if (p_lay(iCol,iLay) .le. lw_gas_props%get_press_min()) then
+             p_lay(iCol,iLay) = lw_gas_props%get_press_min() + epsilon(lw_gas_props%get_press_min())
           endif
-          if (t_lay(iCol,iLay) .ge. maxGPtemp) then
-             t_lay(iCol,iLay) = maxGPtemp - epsilon(maxGPtemp)
+          if (t_lay(iCol,iLay) .ge. lw_gas_props%get_temp_max()) then
+             t_lay(iCol,iLay) = lw_gas_props%get_temp_max() - epsilon(lw_gas_props%get_temp_max())
           endif
-          if (p_lay(iCol,iLay) .ge. maxGPpres) then
-             p_lay(iCol,iLay) = maxGPpres - epsilon(maxGPpres)
+          if (p_lay(iCol,iLay) .ge. lw_gas_props%get_press_max()) then
+             p_lay(iCol,iLay) = lw_gas_props%get_press_max() - epsilon(lw_gas_props%get_press_max())
           endif
        enddo
     enddo
 
     ! Temperature at layer-interfaces          
-    call cmp_tlev(nCol,nLev,minGPpres,p_lay,t_lay,p_lev,tsfc,t_lev)
+    call cmp_tlev(nCol,nLev,lw_gas_props%get_press_min(),p_lay,t_lay,p_lev,tsfc,t_lev)
     do iLev=1,nLev+1
        do iCol=1,nCol
-          if (t_lev(iCol,iLev) .le. minGPtemp) t_lev(iCol,iLev) = minGPtemp + epsilon(minGPtemp)
-          if (t_lev(iCol,iLev) .ge. maxGPtemp) t_lev(iCol,iLev) = maxGPtemp - epsilon(maxGPtemp)
+          if (t_lev(iCol,iLev) .le. lw_gas_props%get_temp_min()) t_lev(iCol,iLev) = &
+               lw_gas_props%get_temp_min() + epsilon(lw_gas_props%get_temp_min())
+          if (t_lev(iCol,iLev) .ge. lw_gas_props%get_temp_max()) t_lev(iCol,iLev) = &
+               lw_gas_props%get_temp_max() - epsilon(lw_gas_props%get_temp_max())
        enddo
     enddo
 
