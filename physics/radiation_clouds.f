@@ -31,7 +31,7 @@
 !            imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,         !
 !            imp_physics_mg, iovr_rand, iovr_maxrand, iovr_max,        !
 !            iovr_dcorr, iovr_exp, iovr_exprand, idcor_con,            !
-!            idcor_hogan, idcor_oreopoulos, icond_condovron,           !
+!            idcor_hogan, idcor_oreopoulos, icond,                     !
 !            imfdeepcnv, imfdeepcnv_gf, do_mynnedmf, lgfdlmprad,       !
 !            uni_cld, lmfshal, lmfdeep2, cldcov, clouds1,              !
 !            effrl, effri, effrr, effrs, effr_in,                      !
@@ -173,7 +173,7 @@
 !> This module computes cloud related quantities for radiation computations.
       module module_radiation_clouds
 !
-      use physparam,           only : icldflg, iovr, idcor, icond,      &
+      use physparam,           only : icldflg, iovr, idcor,             &
      &                                lcrick, lcnorm, lnoprec,          &
      &                                ivflip
       use physcons,            only : con_fvirt, con_ttp, con_rocp,     &
@@ -406,7 +406,7 @@
      &       imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,          &
      &       imp_physics_mg, iovr_rand, iovr_maxrand, iovr_max,         &
      &       iovr_dcorr, iovr_exp, iovr_exprand, idcor_con,             &
-     &       idcor_hogan, idcor_oreopoulos, icond_condovron,            &
+     &       idcor_hogan, idcor_oreopoulos, icond,                      &
      &       imfdeepcnv, imfdeepcnv_gf, do_mynnedmf, lgfdlmprad,        &
      &       uni_cld, lmfshal, lmfdeep2, cldcov, clouds1,               &
      &       effrl, effri, effrr, effrs, effr_in,                       &
@@ -504,7 +504,7 @@
 !   idcor_con       :  choice for decorrelation-length: Use constant value (=0)
 !   idcor_hogan     :  choice for decorrelation-length: (=1)
 !   idcor_oreopoulos:  choice for decorrelation-length: (=2)
-!   icond_condovron :  apply cloud condensate vertical overlap: (=1)    !
+!   icond           :  apply cloud condensate vertical overlap: (=true)    !
 !   imfdeepcnv      :  flag for mass-flux deep convection scheme        !
 !   imfdeepcnv_gf   :  flag for scale- & aerosol-aware Grell-Freitas scheme (GSD)
 !   do_mynnedmf     :  flag for MYNN-EDMF                               !
@@ -592,12 +592,11 @@
      &     iovr_exprand,                 ! Flag for exponential-random cloud overlap method
      &     idcor_con,                   
      &     idcor_hogan,                 
-     &     idcor_oreopoulos,
-     &     icond_condovron
+     &     idcor_oreopoulos
 
 
       logical, intent(in)  :: uni_cld, lmfshal, lmfdeep2, effr_in
-      logical, intent(in)  :: do_mynnedmf, lgfdlmprad
+      logical, intent(in)  :: do_mynnedmf, lgfdlmprad, icond
 
       real (kind=kind_phys), dimension(:,:,:), intent(in) :: ccnd,      &
      &                                                       tracer1
@@ -915,9 +914,9 @@
       endif
 
       ! Call subroutine get_beta_exper to define beta parameter for exponential cloud overlap options
-      ! if cloud condensate vertical overlap is requested (icond = 1)
+      ! if cloud condensate vertical overlap is requested (icond = true)
 
-      if (icond == icond_condovron .and. iovr == iovr_exp .or.          &
+      if (icond .and. iovr == iovr_exp .or.                             &
      &    iovr == iovr_exprand) then
          call get_beta_exper(ix, nLay, iovr, iovr_exprand, dzlay,       &
      &                       de_lgth_cond, cld_frac, beta)

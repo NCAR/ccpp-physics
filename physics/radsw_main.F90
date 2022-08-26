@@ -311,7 +311,7 @@
       module rrtmg_sw 
 !
       use physparam,        only : iswrate, iswrgas, iswcliq, iswcice,  &
-     &                             isubcsw, icldflg, iovr, icond,       &
+     &                             isubcsw, icldflg, iovr,              &
      &                             ivflip, iswmode
       use physcons,         only : con_g, con_cp, con_avgd, con_amd,    &
      &                             con_amw, con_amo3
@@ -510,7 +510,7 @@
      &       dzlyr,delpin,de_lgth,alpha,beta,                           &
      &       cosz,solcon,NDAY,idxday,                                   &
      &       npts, nlay, nlp1, lprnt,                                   &
-     &       cld_cf, lsswr,                                             &
+     &       cld_cf, lsswr, icond,                                      &
      &       hswc,topflx,sfcflx,cldtau,                                 &   !  ---  outputs
      &       HSW0,HSWB,FLXPRF,FDNCMP,                                   &   ! ---  optional
      &       cld_lwp, cld_ref_liq, cld_iwp, cld_ref_ice,                &
@@ -578,6 +578,7 @@
 !   npts             : number of horizontal points                      !
 !   nlay,nlp1        : vertical layer/lavel numbers                     !
 !   lprnt            : logical check print flag                         !
+!   icond           : cloud condensate overlap control flag (mcica-only)!
 !                                                                       !
 !  output variables:                                                    !
 !   hswc  (npts,nlay): total sky heating rates (k/sec or k/day)         !
@@ -640,9 +641,6 @@
 !           =3: decorrelation-length overlap clouds                     !
 !           =4: exponential cloud overlap (AER)                         !
 !           =5: exponential-random cloud overlap (AER)                  !
-!   icond - cloud condensate overlap control flag                       !
-!           =0: do not use cloud condensate overlap                     !
-!           =1: use cloud condensate overlap (mcica-only)               !
 !   ivflip  - control flg for direction of vertical index               !
 !           =0: index from toa to surface                               !
 !           =1: index from surface to toa                               !
@@ -705,7 +703,7 @@
 
       integer, dimension(:), intent(in) :: idxday, icseed
 
-      logical, intent(in) :: lprnt, lsswr
+      logical, intent(in) :: lprnt, lsswr, icond
 
       real (kind=kind_phys), dimension(:,:), intent(in) ::              &
      &       plvl, tlvl
@@ -1167,7 +1165,7 @@
 !  --- ...  call sub-column cloud generator
             call mcica_subcol                                               &
 !  ---  inputs:
-     &         ( cldf, cliqp, cicep, cdat1, cdat2, cdat3, cdat4,            &
+     &         ( icond, cldf, cliqp, cicep, cdat1, cdat2, cdat3, cdat4,     &
      &           nlay, ipseed(j1), dz, delgth, alphad, betad,               &
 !  ---  outputs:
      &           lcloudy,                                                   &
@@ -2039,18 +2037,18 @@
 !!\param beta        EXP/ER cloud condensate overlap decorrelation parameter
 !!\param lcloudy     sub-colum cloud profile flag array
 !!\n     ---  for  ilwcliq > 0 (prognostic cloud scheme)  - - -
-!!\param clwpmc      cloud liquid water path g-point array (icond=1)
-!!\param ciwpmc      cloud ice water path g-point array (icond=1)
-!!\param crwpmc      cloud rain water path g-point array (icond=1)
-!!\param cswpmc      cloud snow water path g-point array (icond=1)
+!!\param clwpmc      cloud liquid water path g-point array (icond=true)
+!!\param ciwpmc      cloud ice water path g-point array (icond=true)
+!!\param crwpmc      cloud rain water path g-point array (icond=true)
+!!\param cswpmc      cloud snow water path g-point array (icond=true)
 !!\n     ---  for ilwcliq = 0  (diagnostic cloud scheme)  - - -
-!!\param taucmc      cloud optical depth g-point array (icond=1)
-!!\param ssacmc      cloud single scattering albedo g-point array (icond=1)
-!!\param asycmc      cloud asymmetry parameter g-point array (icond=1)
+!!\param taucmc      cloud optical depth g-point array (icond=true)
+!!\param ssacmc      cloud single scattering albedo g-point array (icond=true)
+!!\param asycmc      cloud asymmetry parameter g-point array (icond=true)
 !!\section mcica_sw_gen mcica_subcol General Algorithm
 ! ----------------------------------
       subroutine mcica_subcol                                           &
-     &    ( cldf, clwp, ciwp, cdat1, cdat2, cdat3, cdat4,               &       !  ---  inputs
+     &    ( icond, cldf, clwp, ciwp, cdat1, cdat2, cdat3, cdat4,        &       !  ---  inputs
      &      nlay, ipseed, dz, de_lgth, alpha, beta,                     &
      &      lcloudy,                                                    &       !  ---  outputs
      &      clwpmc, ciwpmc, crwpmc, cswpmc,                             &
@@ -2060,6 +2058,7 @@
 !  ====================  defination of variables  ====================  !
 !                                                                       !
 !  input variables:                                                size !
+!   icond   - logical, control flag for cloud condensate overlap        !
 !   cldf    - real, layer cloud fraction                           nlay !
 !        ---  for  ilwcliq > 0 (prognostic cloud scheme)  - - -         !
 !   clwp    - real, layer cloud liquid water path                  nlay !
@@ -2088,14 +2087,14 @@
 !  output variables:                                                    !
 !   lcloudy - logical, sub-colum cloud profile flag array    nlay*ngptsw!
 !!\n     ---  for  ilwcliq > 0 (prognostic cloud scheme)  - - -
-!   clwpmc  - real, cloud liquid water path g-point array (icond=1)     !
-!   ciwpmc  - real, cloud ice water path g-point array (icond=1)        !
-!   crwpmc  - real, cloud rain water path g-point array (icond=1)       !
-!   cswpmc  - real, cloud snow water path g-point array (icond=1)       !
+!   clwpmc  - real, cloud liquid water path g-point array (icond=true)  !
+!   ciwpmc  - real, cloud ice water path g-point array (icond=true)     !
+!   crwpmc  - real, cloud rain water path g-point array (icond=true)    !
+!   cswpmc  - real, cloud snow water path g-point array (icond=true)    !
 !!\n     ---  for ilwcliq = 0  (diagnostic cloud scheme)  - - -
-!   taucmc  - real, cloud optical depth path g-point array (icond=1)    !
-!   ssacmc  - real, cloud single scat. alb. path g-point array (icond=1)!
-!   asycmc  - real, cloud asymmetry param. path g-point array (icond=1) !
+!   taucmc  - real, cloud optical depth path g-point array (icond=true) !
+!   ssacmc  - real, cloud single scat. alb. path g-point array (icond=true)!
+!   asycmc  - real, cloud asymmetry param. path g-point array (icond=true) !
 !                                                                       !
 !  other control flags from module variables:                           !
 !     iovr      : control flag for cloud overlapping method             !
@@ -2105,8 +2104,6 @@
 !                 =3: cloud decorrelation-length overlap method         !
 !                 =4: exponential cloud overlap method (AER)            !
 !                 =5: exponential-random cloud overlap method (AER)     !
-!     icond   : control flag for cloud condensate overlap               !
-!                 =0:inactive; =1:active                                !
 !                                                                       !
 !  =====================    end of definitions    ====================  !
 
@@ -2116,6 +2113,7 @@
 
 !  ---  inputs:
       integer, intent(in) :: nlay, ipseed
+      logical, intent(in) :: icond
 
       real (kind=kind_phys), dimension(nlay), intent(in) :: cldf, dz
       real (kind=kind_phys), dimension(nlay), intent(in) :: clwp, ciwp
@@ -2385,9 +2383,9 @@
 
         case( 4:5 )        ! exponential, exponential-random overlap
 
-! Include cloud condensate inhomogeneity (icond=1) in cloudy sub-grid g-points;
+! Include cloud condensate inhomogeneity (icond=true) in cloudy sub-grid g-points;
 ! otherwise apply homogeneous sub-grid cloud condensate
-           if (icond .eq. 1) then 
+           if (icond) then 
 
 !  ---  setup 2 sets of random numbers
 
@@ -2424,7 +2422,7 @@
 
            do k = 1, nlay
               do n = 1, ngptsw
-                 if (lcloudy(k,n) .and. icond .eq. 1) then
+                 if (lcloudy(k,n) .and. icond) then
                     if (cldf(k) .gt. 0.99) then
                        sigma_qcw = 0.50
                     elseif (cldf(k) .ge. 0.90) then

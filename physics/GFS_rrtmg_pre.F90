@@ -29,7 +29,7 @@
         imp_physics_zhao_carr_pdf, imp_physics_mg, imp_physics_wsm6,           &
         imp_physics_fer_hires, iovr_rand, iovr_maxrand, iovr_max, iovr_dcorr,  &
         iovr_exp, iovr_exprand, idcor_con, idcor_hogan, idcor_oreopoulos,      & 
-        icond_condovron, julian, yearlen, lndp_var_list, lsswr, lslwr,         &
+        icond, julian, yearlen, lndp_var_list, lsswr, lslwr,                   &
         ltaerosol, lgfdlmprad, uni_cld, effr_in, do_mynnedmf, lmfshal,         &
         lmfdeep2, fhswr, fhlwr, solhr, sup, con_eps, epsm1, fvirt,             &
         rog, rocp, con_rd, xlat_d, xlat, xlon, coslat, sinlat, tsfc, slmsk,    &
@@ -113,7 +113,6 @@
          idcor_con,                        &
          idcor_hogan,                      &
          idcor_oreopoulos,                 &
-         icond_condovron,                  &
          rrfs_smoke_band                     ! Band number for rrfs-smoke dust and smoke
 
       integer, intent(in) :: ntdu1, ntdu2, ntdu3, ntdu4, ntdu5, ntss1, ntss2, ntss3,  &
@@ -124,7 +123,7 @@
       logical,              intent(in) :: lsswr, lslwr, ltaerosol, lgfdlmprad, &
                                           uni_cld, effr_in, do_mynnedmf,       &
                                           lmfshal, lmfdeep2, pert_clds
-      logical,              intent(in) :: aero_dir_fdb
+      logical,              intent(in) :: aero_dir_fdb, icond
       real(kind=kind_phys), dimension(:,:), intent(in) :: smoke_ext, dust_ext
 
       logical,              intent(in) :: nssl_ccn_on, nssl_invertccn
@@ -958,7 +957,7 @@
      &       imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,          &
      &       imp_physics_mg, iovr_rand, iovr_maxrand, iovr_max,         &
      &       iovr_dcorr, iovr_exp, iovr_exprand, idcor_con,             &
-     &       idcor_hogan, idcor_oreopoulos, icond_condovron,            &
+     &       idcor_hogan, idcor_oreopoulos, icond,                      &
      &       imfdeepcnv, imfdeepcnv_gf, do_mynnedmf, lgfdlmprad,        &
      &       uni_cld, lmfshal, lmfdeep2, cldcov, clouds1,               &
      &       effrl, effri, effrr, effrs, effr_in,                       &

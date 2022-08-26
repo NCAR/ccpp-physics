@@ -303,6 +303,13 @@
   dimensions = ()
   type = logical
   intent = in
+[icond]
+  standard_name = do_cloud_condensate_vertical_overlap
+  long_name = flag for cloud condensate vertical overlap and spatial inhomogeneity
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [hswc]
   standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step_and_radiation_levels
   long_name = shortwave total sky heating rate

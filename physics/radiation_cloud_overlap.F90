@@ -61,10 +61,8 @@ contains
     ! Inputs
     integer, intent(in) :: &
          nCol,        & ! Number of horizontal grid-points
-         icond,       & ! Cloud condensate overlap flag
-                        ! 0 = Condensate vertical overlap off
-                        ! 1 = Condensate vertical overlap on
          yearlength     ! Number of days in year
+    logical, intent(in) :: icond ! Cloud condensate overlap flag (true=on)
 
     real(kind_phys), intent(in) :: &
          juldat         ! Julian date
@@ -105,7 +103,7 @@ contains
     enddo
     
     dcorr_lgth_cond(:nCol) = 0.0_kind_phys
-    if (icond == 1) then    
+    if (icond) then    
        do iCol = 1, nCol
           if (juldat .gt. 181._kind_phys) then
              bm3 = -4._kind_phys * bmr * (juldat - 272._kind_phys) / yearlength    ! (eq. 11a)

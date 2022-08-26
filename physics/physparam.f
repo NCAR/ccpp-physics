@@ -242,10 +242,6 @@
 !!\n =0:use constant decorrelation length defined by decorr_con (in module physcons)
 !!\n =1:use day-of-year and latitude-varying decorrelation length
       integer, save :: idcor = 1
-! !n Cloud condensate overlap control flag for radiation for iovr = 4 or 5
-! !n =0:do not use cloud condensate vertical overlap in radiaiton
-! !n =1:use cloud condensate vertical overlap in radiation
-      integer, save :: icond = 0
 
 !> sub-column cloud approx flag in SW radiation
 !!\n =0:no McICA approximation in SW radiation

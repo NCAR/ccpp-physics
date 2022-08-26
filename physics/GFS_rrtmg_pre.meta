@@ -499,12 +499,12 @@
   dimensions = ()
   type = integer
   intent = in
-[icond_condovron]
-  standard_name = flag_for_oreopoulos_cloud_condensate_overlap_method
-  long_name = choice of cloud condensate vertical overlap (oreopoulos)
+[icond]
+  standard_name = do_cloud_condensate_vertical_overlap
+  long_name = flag for cloud condensate vertical overlap and spatial inhomogeneity
   units = flag
   dimensions = ()
-  type = integer
+  type = logical
   intent = in
 [julian]
   standard_name = forecast_julian_day
