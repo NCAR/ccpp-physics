@@ -7,6 +7,28 @@
 [ccpp-arg-table]
   name = clm_lake_run
   type = scheme
+[fhour]
+  standard_name = forecast_time
+  long_name = current forecast time
+  units = h
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[idate]
+  standard_name = date_and_time_at_model_initialization_in_united_states_order
+  long_name = initial date with different size and ordering
+  units = none
+  dimensions = (4)
+  type = integer
+  intent = in
+[salty]
+  standard_name = clm_lake_is_salty
+  long_name = lake at this point is salty (1) or not (0)
+  units = 1
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = inout
 [tg3]
   standard_name = deep_soil_temperature
   long_name = deep soil temperature

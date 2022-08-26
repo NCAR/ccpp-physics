@@ -31,6 +31,10 @@ MODULE clm_lake
 
     implicit none 
 
+    private
+
+    public :: clm_lake_run, clm_lake_init, LAKEDEBUG
+
     logical :: LAKEDEBUG = .false. ! Enable lots of checks and debug prints and errors
 
     logical, parameter :: PERGRO = .false.
@@ -119,8 +123,122 @@ MODULE clm_lake
     real(kind_phys) :: dzsoi(1:nlevsoil)    !soil dz (thickness)
     real(kind_phys) :: zisoi(0:nlevsoil)    !soil zi (interfaces)  
 
+    real, parameter :: SaltLk_T(1:25) = (/0.5, 0.,-0.5, 3., 4., 7., 8., 12., 13., 16., 19., 21., &
+                                          23.5, 25.,26.,24.,23.,20.5,18.,15., 11.5, 8.,  4.,  1., 0.5/)
+    real, parameter :: julm(1:13) = (/0,31,59,90,120,151,181,212,243,273,304,334,365/)
+
     CONTAINS
+
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    subroutine get_month_and_day(IDATE,month,day_of_month,day_of_year,fhour)
+      implicit none
+      integer, intent(in) :: IDATE(4)
+      integer, intent(out) :: month,day_of_month,day_of_year
+      real(kind_phys), intent(in) :: fhour
+
+      integer :: idat(8),jdat(8), w3kindreal, w3kindint, jdow, jdoy, jday
+      real(8) :: rinc(5)
+      real(4) :: rinc4(5)
+
+      idat    = 0
+      idat(1) = idate(4)
+      idat(2) = idate(2)
+      idat(3) = idate(3)
+      idat(5) = idate(1)
+      rinc    = 0.
+      rinc(2) = fhour
+      call w3kind(w3kindreal,w3kindint)
+      if(w3kindreal==4) then
+        rinc4 = rinc
+        CALL W3MOVDAT(RINC4,IDAT,JDAT)
+      else
+        CALL W3MOVDAT(RINC,IDAT,JDAT)
+      endif
+!
+      jdow = 0
+      jdoy = 0
+      jday = 0
+      call w3doxdat(jdat,jdow,jdoy,jday)
+
+      day_of_year = jday
+      day_of_month = IDATE(3)
+      month = IDATE(2)
+    end subroutine get_month_and_day
+
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    logical function limit_temperature_by_climatology(xlat_d,xlon_positive)
+      implicit none
+      real(kind_phys), intent(in) :: xlat_d, xlon_positive
+      real(kind_phys) :: xlon_d
+
+      xlon_d = xlon_positive
+      if(xlon_d>180) xlon_d = xlon_d - 360
+
+      limit_temperature_by_climatology=.false.
+
+      !tgs  - 7nov19 - salinity effect on freezing point (Tanya, Stan, Trevor).
+      ! --- The Great Salt Lake (GSL), Utah lat/long (39.5-42.0,-111.5- -117.7).
+      ! --- THe GSL's salinity is 270 ppt above ~41.22 N with freezing point of -24 C, 
+      ! --- and 150 ppt south of ~41.22 N with freezing point -10 C (info from Trevor Alcott). 
+      ! --- The fresh-water Willard Bay should be excluded from the box around the Great Salt
+      ! --- Lake: lat/long 41.3539, -112.102, HRRR i,j = 494,667 (info from Stan and Trevor).
+      ! ---
+      ! --- 1jun2020: reset the GSL freezing point to be -5 C,
+      ! --- and add a check (after call to LakeMain) to keep the lake ice free for the whole year.
+      if ((xlon_d.gt.-117.7 .and. xlon_d.lt.-111.5) .and.    &
+                                ! excludes Willard Bay
+           .not. (xlon_d.gt.-112.104 .and. xlon_d.lt.-112.100))then
+
+         if(xlat_d.gt.39.5 .and. xlat_d.lt.41.22) then
+            if(lakedebug) then
+               print *,'The Great Salt Lake south of 41.22 N, lat,lon',xlat_d,xlon_d
+            endif
+            limit_temperature_by_climatology = .true.
+
+         elseif(( xlat_d.ge.41.22 .and. xlat_d.lt.42.) .and. .not. &
+                                ! excludes Willard Bay
+              (xlat_d.gt.41.352 .and. xlat_d.lt.41.354)) then
+            if(lakedebug) then
+               print *,'The Great Salt Lake north of 41.22 N xlat_d,xlon_d ',xlat_d,xlon_d
+            endif
+            !print *,'Ice fraction on the GSL ', i,j,lake_icefrac3d(i,:,j)
+            limit_temperature_by_climatology = .true.
+
+         endif ! xlat_d
+
+      endif ! xlon_d
+
+      !if(i==495.and.j==668) print *,'Willard Bay salty=',i,j,limit_temperature_by_climatology,xlat_d,xlon_d
+
+    end function limit_temperature_by_climatology
+
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    logical function is_salty(xlat_d,xlon_positive)
+      implicit none
+      real(kind_phys), intent(in) :: xlat_d, xlon_positive
+      real(kind_phys) :: xlon_d
+
+      xlon_d = xlon_positive
+      if(xlon_d>180) xlon_d = xlon_d - 360
+
+      is_salty=limit_temperature_by_climatology(xlat_d,xlon_d)
+
+      ! --- The Mono Lake in California, salinity is 75 ppt with freezing point at
+      ! --- -4.2 C (Stan). The Mono Lake lat/long (37.9-38.2, -119.3 - 118.8)
+      if (xlon_d.gt.-119.3.and. xlon_d.lt.-118.8) then  
+         if(xlat_d.gt.37.9 .and. xlat_d.lt.38.2) then
+            is_salty = .true.
+            print *,'Mono Lake, i,j',xlat_d,xlon_d
+         endif ! xlat_d
+      endif ! xlon_d
+      !tgs --- end of special treatment for salty lakes
+    end function is_salty
  
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
     !> \section arg_table_clm_lake_run Argument Table
     !! \htmlinclude clm_lake_run.html
     !!
@@ -136,8 +254,8 @@ MODULE clm_lake
                      dz3d         ,zi3d           ,h2osoi_vol3d ,h2osoi_liq3d    ,&
                      h2osoi_ice3d ,t_grnd2d       ,t_soisno3d   ,t_lake3d        ,&
                      savedtke12d  ,lake_icefrac3d               ,use_lake_model  ,& 
-                     iopt_lake    ,iopt_lake_clm                                 ,&
-                     con_cp       ,icy                                           ,&
+                     iopt_lake    ,iopt_lake_clm  ,fhour                         ,&
+                     con_cp       ,icy            ,IDATE                         ,&
                      hflx         ,evap           ,grdflx       ,tsfc            ,&  !o
                      lake_t2m     ,lake_q2m       ,clm_lake_initialized          ,&
                      weasd        ,isltyp         ,snowd        ,use_lakedepth   ,&
@@ -149,7 +267,7 @@ MODULE clm_lake
                      ch           ,cm             ,chh          ,cmm             ,&
                      lake_t_snow  ,tisfc          ,tsurf_ice    ,wind            ,&
 !
-                     xlon_d       ,kdt            ,tg3                          ,&
+                     xlon_d       ,kdt            ,tg3          ,salty          ,&
                      me           ,master         ,errmsg       ,errflg )
 
       !==============================================================================
@@ -162,13 +280,13 @@ MODULE clm_lake
     
     !in:
     
-    INTEGER, INTENT(IN) :: iopt_lake, iopt_lake_clm, kdt
+    INTEGER, INTENT(IN) :: iopt_lake, iopt_lake_clm, kdt, IDATE(4)
     INTEGER, INTENT(OUT) :: errflg
     CHARACTER(*), INTENT(OUT) :: errmsg
     INTEGER , INTENT (IN) :: im,km,me,master
     LOGICAL, INTENT(IN) :: restart,use_lakedepth,first_time_step
     REAL(KIND_PHYS), INTENT(INOUT) :: clm_lake_initialized(:)
-    REAL(KIND_PHYS),     INTENT(IN)  :: min_lakeice, con_rd,con_g,con_cp,lakedepth_default
+    REAL(KIND_PHYS),     INTENT(IN)  :: min_lakeice, con_rd,con_g,con_cp,lakedepth_default, fhour
     logical, intent(inout) :: icy(:)
     REAL(KIND_PHYS), DIMENSION( : ), INTENT(INOUT)::   fice
     REAL(KIND_PHYS), DIMENSION( : ), INTENT(IN) :: weasd, snowd
@@ -199,6 +317,7 @@ MODULE clm_lake
     REAL(KIND_PHYS),           DIMENSION( : )         ,INTENT(IN)  :: rain
     REAL(KIND_PHYS),           DIMENSION( : )         ,INTENT(INOUT)  :: albedo
     INTEGER, DIMENSION( : ), INTENT(IN)       :: ISLTYP
+    INTEGER, DIMENSION( : ), INTENT(INOUT)       :: salty
     REAL(KIND_PHYS),                                                  INTENT(IN)  :: dtp
     REAL(KIND_PHYS),           DIMENSION( :,: ),INTENT(INOUT)  :: z_lake3d
     REAL(KIND_PHYS),           DIMENSION( :,: ),INTENT(INOUT)  :: dz_lake3d
@@ -363,17 +482,17 @@ MODULE clm_lake
 
         ! Still have some points to initialize
         call lakeini(kdt,            ISLTYP,          gt0,             snowd,          & !i
-                     weasd,          restart,         lakedepth_default,               &
+                     weasd,          restart,         lakedepth_default,  fhour,       &
                      lakedepth2d,    savedtke12d,     snowdp2d,        h2osno2d,       & !o
                      snl2d,          t_grnd2d,        t_lake3d,        lake_icefrac3d, &
                      z_lake3d,       dz_lake3d,       t_soisno3d,      h2osoi_ice3d,   &
                      h2osoi_liq3d,   h2osoi_vol3d,    z3d,             dz3d,           &
                      zi3d,           watsat3d,        csol3d,          tkmg3d,         &
-                                     fice,            min_lakeice,     tsfc,           &
+                     IDATE,          fice,            min_lakeice,     tsfc,           &
                      use_lake_model, use_lakedepth,   con_g,           con_rd,         &
                      tkdry3d,        tksatu3d,        im,              prsi,           &
-                                                      clm_lake_initialized,            &
-                     sand3d,         clay3d,          tg3,                             &
+                     xlat_d,         xlon_d,          clm_lake_initialized,            &
+                     sand3d,         clay3d,          tg3,             salty,          &
                      km, me,         master,          errmsg,          errflg)
         if(errflg/=0) then
           return
@@ -398,6 +517,9 @@ MODULE clm_lake
         lake_top_loop: DO I = 1,im
 
         if_lake_is_here: if (flag_iter(i) .and. use_lake_model(i)/=0) THEN
+
+
+              
 
            SFCTMP  = gt0(i,1)
            PBOT    = prsi(i,2)
@@ -437,7 +559,13 @@ MODULE clm_lake
             t_grnd(c)              = t_grnd2d(i)
             do k = 1,nlevlake
                t_lake(c,k)        = t_lake3d(i,k)
-               lake_icefrac(c,k)  = lake_icefrac3d(i,k)
+               !-- If T of salty lakes is above the freezing point, keep them ice free
+               if(salty(i)==1 .and. t_lake(c,k) > tfrz .and.  lake_icefrac3d(i,k) > 0.) then
+                  lake_icefrac(c,k)  = 0.
+               else
+                  lake_icefrac(c,k)  = lake_icefrac3d(i,k)
+               endif
+               !lake_icefrac(c,k)  = lake_icefrac3d(i,k)
                z_lake(c,k)        = z_lake3d(i,k)
                dz_lake(c,k)       = dz_lake3d(i,k)
             enddo
@@ -5125,17 +5253,17 @@ if_pergro: if (PERGRO) then
 
 ! Some fields in lakeini are not available until runtime, so this cannot be in a CCPP init routine.
  SUBROUTINE lakeini(kdt,            ISLTYP,          gt0,             snowd,          & !i
-                    weasd,          restart,         lakedepth_default,               &
+                    weasd,          restart,         lakedepth_default,  fhour,       &
                     lakedepth2d,    savedtke12d,     snowdp2d,        h2osno2d,       & !o
                     snl2d,          t_grnd2d,        t_lake3d,        lake_icefrac3d, &
                     z_lake3d,       dz_lake3d,       t_soisno3d,      h2osoi_ice3d,   &
                     h2osoi_liq3d,   h2osoi_vol3d,    z3d,             dz3d,           &
                     zi3d,           watsat3d,        csol3d,          tkmg3d,         &
-                                    fice,            min_lakeice,              tsfc,  &
+                    IDATE,          fice,            min_lakeice,              tsfc,  &
                     use_lake_model, use_lakedepth,   con_g,           con_rd,         &
                     tkdry3d,        tksatu3d,        im,              prsi,           &
-                                                     clm_lake_initialized,            &
-                    sand3d,         clay3d,          tg3,                             &
+                    xlat_d,         xlon_d,          clm_lake_initialized,            &
+                    sand3d,         clay3d,          tg3,             salty,          &
                     km,   me,       master,          errmsg,          errflg)
 
    !==============================================================================
@@ -5149,12 +5277,12 @@ if_pergro: if (PERGRO) then
   INTEGER, INTENT(OUT) :: errflg
   CHARACTER(*), INTENT(OUT) :: errmsg
 
-  INTEGER , INTENT (IN)    :: im, me, master, km, kdt
-  REAL(KIND_PHYS),     INTENT(IN)  :: min_lakeice, con_g, con_rd
-  REAL(KIND_PHYS), DIMENSION(IM), INTENT(IN)::   FICE,TG3
+  INTEGER , INTENT (IN)    :: im, me, master, km, kdt, IDATE(4)
+  REAL(KIND_PHYS),     INTENT(IN)  :: min_lakeice, con_g, con_rd, fhour
+  REAL(KIND_PHYS), DIMENSION(IM), INTENT(IN)::   FICE,TG3, xlat_d, xlon_d
   REAL(KIND_PHYS), DIMENSION(IM), INTENT(IN)::     tsfc
   REAL(KIND_PHYS), DIMENSION(IM)  ,INTENT(INOUT)  :: clm_lake_initialized
-
+  INTEGER, DIMENSION(IM)  ,INTENT(INOUT)  :: salty  
   integer, dimension(IM), intent(in) :: use_lake_model
   !INTEGER , INTENT (IN) :: lakeflag
   !INTEGER , INTENT (INOUT) :: lake_depth_flag
@@ -5219,15 +5347,42 @@ if_pergro: if (PERGRO) then
   character*256 :: message
   real(kind_phys) :: ht
 
+  logical :: climatology_limits
+
   integer, parameter :: xcheck=38
   integer, parameter :: ycheck=92
 
-  integer :: used_lakedepth_default, init_points
+  integer :: used_lakedepth_default, init_points, month, julday
+  integer :: mon, iday, num2, num1, juld, day2, day1, wght1, wght2
+  real(kind_phys) :: Tclim
 
   used_lakedepth_default=0
 
   errmsg = ''
   errflg = 0
+
+  call get_month_and_day(IDATE,month,iday,julday,fhour)
+
+  !-- Compute weight for the current day
+  mon = month
+  if(iday > 15) mon=mon+1
+  if(mon == 1) mon=13
+
+  num2 = month * 2
+  if(iday > 15) num2=num2+1
+  if(num2 == 1) num2=25
+  num1 = num2 - 1
+
+  juld = julday
+  if (juld < 7) juld = juld + 365
+  day2 = julm(mon)+15
+  day1 = julm(mon)
+  wght1=(day2-julday)/float(day2-day1)
+  wght2=(julday-day1)/float(day2-day1)
+
+  if(LAKEDEBUG .and. me==0) then
+     print *,'month,num1,num2,day1,day2,wght1,wght2',month,num1,num2,day1,day2,wght1,wght2
+  endif
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -5253,6 +5408,12 @@ if_pergro: if (PERGRO) then
       cycle
     endif
 
+    if(is_salty(xlat_d(i),xlon_d(i))) then
+       salty(i) = 1
+    else
+       salty(i) = 0
+    endif
+
     snowdp2d(i)         = snowd(i)*1e-3   ! SNOW in kg/m^2 and snowdp in m
     h2osno2d(i)         = weasd(i)   ! mm 
 
@@ -5273,6 +5434,20 @@ if_pergro: if (PERGRO) then
     
     if(fice(i)>min_lakeice) then
       lake_icefrac3d(i,1) = fice(i)
+    endif
+
+    !-- Check on the Great Salt Lake (GSL) when the model is cycled
+    !-- Bound the GSL temperature with +/- 3 C from climatology
+    if(limit_temperature_by_climatology(xlat_d(i),xlon_d(i))) then
+       Tclim = tfrz + wght1*saltlk_t(num1)  &
+                    + wght2*saltlk_t(num2)
+       if(lakedebug) print *,'Tclim,tsfc,t_lake3d',i,Tclim,tsfc(i),t_lake3d(i,:),t_soisno3d(i,:)
+       t_grnd2d(i) = min(Tclim+3.0_kind_phys,(max(tsfc(i),Tclim-3.0_kind_phys)))
+       do k = 1,nlevlake
+          t_lake3d(i,k) = min(Tclim+3.0_kind_phys,(max(t_lake3d(i,k),Tclim-3.0_kind_phys)))
+       enddo
+       t_soisno3d(i,1) = min(Tclim+3.0_kind_phys,(max(t_soisno3d(i,1),Tclim-3.0_kind_phys)))
+       if(lakedebug) print *,'After Tclim,tsfc,t_lake3d',i,Tclim,tsfc(i),t_lake3d(i,:),t_soisno3d(i,:)
     endif
     
     z3d(i,:)             = 0.0
