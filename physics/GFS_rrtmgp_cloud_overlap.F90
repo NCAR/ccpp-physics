@@ -31,7 +31,7 @@ contains
 !! \section GFS_rrtmgp_cloud_overlap_run
   subroutine GFS_rrtmgp_cloud_overlap_run(nCol, nLev, yearlen, doSWrad, doLWrad,         &
        julian, lat, p_lev, p_lay, tv_lay, deltaZc, con_pi, con_g, con_rd, con_epsq,      &
-       dcorr_con, idcor, iovr, iovr_dcorr, iovr_exp, iovr_exprand, idcor_con,            &
+       dcorr_con, idcor, icond, iovr, iovr_dcorr, iovr_exp, iovr_exprand, idcor_con,     &
        idcor_hogan, idcor_oreopoulos, cld_frac, cld_cnv_frac, iovr_convcld, top_at_1,    &
        imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_samf, de_lgth, cloud_overlap_param,         &
        cnv_cloud_overlap_param, precip_overlap_param, errmsg, errflg)
@@ -56,8 +56,11 @@ contains
          idcor_oreopoulos        ! Flag for decorrelation-length. (10.5194/acp-12-9097-2012) 
     logical, intent(in)     :: &
          top_at_1,             & ! Vertical ordering flag
-    	 doSWrad,              & ! Call SW radiation?
-    	 doLWrad                 ! Call LW radiation
+         doSWrad,              & ! Call SW radiation?
+         doLWrad,              & ! Call LW radiation
+         icond                   ! Cloud condensate overlap flag (true=on)
+       
+       
     real(kind_phys), intent(in) :: &
          julian,               & ! Julian day 
          con_pi,               & ! Physical constant: pi
@@ -78,7 +81,7 @@ contains
     
     ! Outputs     
     real(kind_phys), dimension(:),intent(out) :: &
-         de_lgth                   ! Decorrelation length
+         de_lgth                 ! Cloud fraction decorrelation length (km)
     real(kind_phys), dimension(:,:),intent(out) :: &
          cloud_overlap_param,    & ! Cloud-overlap parameter
          cnv_cloud_overlap_param,& ! Convective cloud-overlap parameter
@@ -90,6 +93,7 @@ contains
     
     ! Local variables
     integer :: iCol,iLay
+    real(kind=kind_phys), dimension(nCol) :: de_lgth_cond
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -104,7 +108,7 @@ contains
        call cmp_dcorr_lgth(nCol, lat, con_pi, de_lgth)
     endif
     if (idcor == idcor_oreopoulos) then
-       call cmp_dcorr_lgth(nCol, lat*(180._kind_phys/con_pi), julian, yearlen, de_lgth)
+       call cmp_dcorr_lgth(nCol, icond, lat*(180._kind_phys/con_pi), julian, yearlen, de_lgth, de_lgth_cond)
     endif
     if (idcor == idcor_con) then
        de_lgth(:) = dcorr_con
