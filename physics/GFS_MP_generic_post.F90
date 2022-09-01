@@ -372,7 +372,7 @@
         enddo
       endif
 
-      if (cplchm) then
+      if (cplchm .or. cpllnd) then
         do i = 1, im
           rainc_cpl(i) = rainc_cpl(i) + rainc(i)
         enddo

@@ -118,7 +118,7 @@
           enddo
         endif
 
-        if (cplflx .or. cplchm) then
+        if (cplflx .or. cplchm .or. cpllnd) then
           do i=1,im
             tsfci_cpl(i) = tsfc(i)
           enddo
@@ -152,10 +152,12 @@
             t2mi_cpl    (i) = t2m(i)
             q2mi_cpl    (i) = q2m(i)
           enddo
+        endif
 
 !  ---  estimate mean albedo for ocean point without ice cover and apply
 !       them to net SW heat fluxes
 
+        if (cplflx .or. cpllnd) then
           do i=1,im
 !           if (Sfcprop%landfrac(i) < one) then ! Not 100% land
             if (wet(i)) then                    ! some open water

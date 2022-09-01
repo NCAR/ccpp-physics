@@ -85,7 +85,7 @@
      &                      fh2_wat,   fh2_lnd,   fh2_ice,              &  !intent(inout)
      &                    ztmax_wat, ztmax_lnd, ztmax_ice,              &  !intent(inout)
      &                    zvfun,                                        &  !intent(out)
-     &                    errmsg, errflg)                                  !intent(out)
+     &                    errmsg, errflg,naux2d, aux2d)                                  !intent(out)
 !
       implicit none
 !
@@ -127,6 +127,8 @@
 !
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
+      integer, intent(in) :: naux2d
+      real(kind_phys), intent(inout) :: aux2d(:,:)
 !
 !     locals
 !
@@ -167,6 +169,16 @@
       errmsg = ''
       errflg = 0
 
+      !aux2d(:,1) = ps
+      !aux2d(:,2) = t1
+      !aux2d(:,3) = q1
+      !aux2d(:,4) = z1
+      !aux2d(:,5) = wind
+      !aux2d(:,6) = prsl1
+      !aux2d(:,7) = prslki
+      !aux2d(:,8) = prsik1
+      !aux2d(:,9) = prslk1
+ 
 !  initialize variables. all units are supposedly m.k.s. unless specified
 !  ps is in pascals, wind is wind speed,
 !  surface roughness length is converted to m from cm
@@ -445,6 +457,18 @@
 !
         endif                ! end of if(flagiter) loop
       enddo
+
+      !aux2d(:,10) = tskin_lnd
+      !aux2d(:,11) = tsurf_lnd
+      !aux2d(:,12) = z0rl_lnd
+      !aux2d(:,13) = ustar_lnd
+      !aux2d(:,14) = cm_lnd
+      !aux2d(:,15) = ch_lnd
+      !aux2d(:,16) = rb_lnd
+      !aux2d(:,17) = stress_lnd
+      !aux2d(:,18) = fm_lnd
+      !aux2d(:,19) = fh_lnd
+      !aux2d(:,20) = fm10_lnd
 
       return
       end subroutine sfc_diff_run
