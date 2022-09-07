@@ -500,8 +500,8 @@
      &       dzlyr,delpin,de_lgth,alpha,                                &
      &       cosz,solcon,NDAY,idxday,                                   &
      &       npts, nlay, nlp1, lprnt, inc_minor_gas, iswcliq, iswcice,  &
-     &       isubcsw, iovr, top_at_1, iswmode,                          &
-     &       cld_cf, lsswr,                                             &
+     &       isubcsw, iovr, top_at_1, iswmode, cld_cf, lsswr, iovr_rand,&
+     &       iovr_maxrand, iovr_max, iovr_dcorr, iovr_exp, iovr_exprand,&
      &       hswc,topflx,sfcflx,cldtau,                                 &   !  ---  outputs
      &       HSW0,HSWB,FLXPRF,FDNCMP,                                   &   ! ---  optional
      &       cld_lwp, cld_ref_liq, cld_iwp, cld_ref_ice,                &
@@ -584,13 +584,19 @@
 !           =0: no sub-col cld treatment, use grid-mean cld quantities  !
 !           =1: mcica sub-col, prescribed seeds to get random numbers   !
 !           =2: mcica sub-col, providing array icseed for random numbers!
-!   iovr    - cloud overlapping control flag                            !
-!           =0: random overlapping clouds                               !
-!           =1: maximum/random overlapping clouds                       !
-!           =2: maximum overlap cloud                                   !
-!           =3: decorrelation-length overlap clouds                     !
-!           =4: exponential cloud overlap (AER)                         !
-!           =5: exponential-random cloud overlap (AER)                  !   
+!   iovr  - clouds vertical overlapping control flag                    !
+!           =iovr_rand                                                  !
+!           =iovr_maxrand                                               !
+!           =iovr_max                                                   !
+!           =iovr_dcorr                                                 !
+!           =iovr_exp                                                   !
+!           =iovr_exprand                                               !
+!   iovr_rand    - choice of cloud-overlap: random                      !
+!   iovr_maxrand - choice of cloud-overlap: maximum random              !
+!   iovr_max     - choice of cloud-overlap: maximum                     !
+!   iovr_dcorr   - choice of cloud-overlap: decorrelation length        !
+!   iovr_exp     - choice of cloud-overlap: exponential                 !
+!   iovr_exprand - choice of cloud-overlap: exponential random          !   
 !                                                                       !
 !  output variables:                                                    !
 !   hswc  (npts,nlay): total sky heating rates (k/sec or k/day)         !
@@ -680,7 +686,8 @@
 
 !  ---  inputs:
       integer, intent(in) :: npts, nlay, nlp1, NDAY, iswcliq, iswcice,  &
-           isubcsw, iovr, iswmode
+           isubcsw, iovr, iswmode, iovr_dcorr, iovr_exp, iovr_exprand,  &
+           iovr_rand, iovr_maxrand, iovr_max
 
       integer, dimension(:), intent(in) :: idxday, icseed
 
@@ -889,7 +896,7 @@
         cosz1  = cosz(j1)
         sntz1  = f_one / cosz(j1)
         ssolar = s0fac * cosz(j1)
-        if (iovr == 3) delgth = de_lgth(j1) ! clouds decorr-length
+        if (iovr == iovr_dcorr) delgth = de_lgth(j1) ! clouds decorr-length
 
 !> - Prepare surface albedo: bm,df - dir,dif; 1,2 - nir,uvv.
         albbm(1) = sfcalb_nir_dir(j1)
@@ -911,7 +918,7 @@
             tavel(k) = tlyr(j1,kk)
             delp (k) = delpin(j1,kk)
             dz   (k) = dzlyr (j1,kk)
-            if (iovr == 4 .or. iovr == 5) alph(k) = alpha(j1,k) ! alpha decorrelation
+            if (iovr == iovr_exp .or. iovr == iovr_exprand) alph(k) = alpha(j1,k) ! alpha decorrelation
 
 !> - Set absorber and gas column amount, convert from volume mixing
 !!    ratio to molec/cm2 based on coldry (scaled to 1.0e-20)
@@ -1002,7 +1009,7 @@
             tavel(k) = tlyr(j1,k)
             delp (k) = delpin(j1,k)
             dz   (k) = dzlyr (j1,k)
-            if (iovr == 4 .or. iovr == 5) alph(k) = alpha(j1,k)   ! alpha decorrelation
+            if (iovr == iovr_exp .or. iovr == iovr_exprand) alph(k) = alpha(j1,k)   ! alpha decorrelation
 
 !  --- ...  set absorber amount
 !test use
@@ -1093,11 +1100,11 @@
 
         zcf0   = f_one
         zcf1   = f_one
-        if (iovr == 0) then                    ! random overlapping
+        if (iovr == iovr_rand) then                    ! random overlapping
           do k = 1, nlay
             zcf0 = zcf0 * (f_one - cfrac(k))
           enddo
-        else if (iovr == 1) then ! max/ran/exp overlapping
+        else if (iovr == iovr_maxrand) then ! max/ran/exp overlapping
           do k = 1, nlay
             if (cfrac(k) > ftiny) then                ! cloudy layer
               zcf1 = min ( zcf1, f_one-cfrac(k) )
@@ -1379,7 +1386,8 @@
 !>\section rswinit_gen rswinit General Algorithm
 !-----------------------------------
       subroutine rswinit( me, rad_hr_units, inc_minor_gas, iswcliq,     &
-           isubcsw, iovr, iswmode, errflg, errmsg )
+           isubcsw, iovr, iovr_rand, iovr_maxrand, iovr_max, iovr_dcorr,&
+           iovr_exp, iovr_exprand, iswmode, errflg, errmsg )
 
 !  ===================  program usage description  ===================  !
 !                                                                       !
@@ -1400,13 +1408,19 @@
 !           =0: no sub-col cld treatment, use grid-mean cld quantities  !
 !           =1: mcica sub-col, prescribed seeds to get random numbers   !
 !           =2: mcica sub-col, providing array icseed for random numbers!
-!   iovr    - clouds vertical overlapping control flag                  !
-!           =0: random overlapping clouds                               !
-!           =1: maximum/random overlapping clouds                       !
-!           =2: maximum overlap cloud                                   !
-!           =3: decorrelation-length overlap clouds                     !
-!           =4: exponential cloud overlap (AER)                         !
-!           =5: exponential-random cloud overlap (AER)                  !
+!   iovr  - clouds vertical overlapping control flag                    !
+!           =iovr_rand                                                  !
+!           =iovr_maxrand                                               !
+!           =iovr_max                                                   !
+!           =iovr_dcorr                                                 !
+!           =iovr_exp                                                   !
+!           =iovr_exprand                                               !
+!   iovr_rand    - choice of cloud-overlap: random                      !
+!   iovr_maxrand - choice of cloud-overlap: maximum random              !
+!   iovr_max     - choice of cloud-overlap: maximum                     !
+!   iovr_dcorr   - choice of cloud-overlap: decorrelation length        !
+!   iovr_exp     - choice of cloud-overlap: exponential                 !
+!   iovr_exprand - choice of cloud-overlap: exponential random          !
 !   iswmode - control flag for 2-stream transfer scheme                 !
 !           =1; delta-eddington    (joseph et al., 1976)                !
 !           =2: pifm               (zdunkowski et al., 1980)            !
@@ -1428,7 +1442,8 @@
 
 !  ---  inputs:
       integer, intent(in) :: me, rad_hr_units, iswcliq, isubcsw, iovr,  &
-           iswmode
+           iswmode, iovr_rand, iovr_maxrand, iovr_max, iovr_dcorr,      &
+           iovr_exp, iovr_exprand
       logical, intent(in) :: inc_minor_gas
 !  ---  outputs:
       character(len=*), intent(out) :: errmsg
@@ -1447,6 +1462,13 @@
       ! Initialize error-handling
       errflg = 0
       errmsg = ''
+
+      if ((iovr .ne. iovr_rand) .and. (iovr .ne. iovr_maxrand) .and.    &
+          (iovr .ne. iovr_max)  .and. (iovr .ne. iovr_dcorr)   .and.    &
+          (iovr .ne. iovr_exp)  .and. (iovr .ne. iovr_exprand)) then
+         errflg = 1
+         errmsg = 'ERROR(rswinit): Error in specification of cloud overlap flag'
+      endif
 
       if (me == 0) then
         print *,' - Using AER Shortwave Radiation, Version: ',VTAGSW

@@ -39,12 +39,14 @@ module GFS_rrtmg_setup
 !! \htmlinclude GFS_rrtmg_setup_init.html
 !!
    subroutine GFS_rrtmg_setup_init ( si, levr, ictm, isol, solar_file, ico2, &
-        iaer, ntcw, num_p3d, npdf3d, ntoz, iovr, icliq_sw, lcrick, lcnorm,   &
-        imp_physics, lnoprec, idate, iflip, do_RRTMGP, me, lalw1bd, iaermdl, &
-        iaerflg, aeros_file, con_pi, con_t0c, con_c, con_boltz, con_plnk,    &
-        con_solr_2008, con_solr_2002, co2usr_file, co2cyc_file, rad_hr_units,&
-        inc_minor_gas, ilwcliq, iswcliq, isubcsw, isubclw, iswmode, ipsd0,   &
-        errmsg, errflg)
+        iaer, ntcw, num_p3d, npdf3d, ntoz, iovr, iovr_rand, iovr_maxrand,    &
+        iovr_max, iovr_dcorr, iovr_exp, iovr_exprand, icliq_sw, lcrick,      &
+        lcnorm, imp_physics, lnoprec, idate, iflip, do_RRTMGP, me, lalw1bd,  &
+        iaermdl, iaerflg, aeros_file, con_pi, con_t0c, con_c, con_boltz,     &
+        con_plnk, con_solr_2008, con_solr_2002, co2usr_file, co2cyc_file,    &
+        rad_hr_units, inc_minor_gas, ilwcliq, iswcliq, isubcsw, isubclw,     &
+        iswmode, ipsd0, errmsg, errflg)
+
 ! =================   subprogram documentation block   ================ !
 !                                                                       !
 ! subprogram:   GFS_rrtmg_setup_init - a subprogram to initialize radiation !
@@ -151,8 +153,10 @@ module GFS_rrtmg_setup
       ! interface variables
       real (kind=kind_phys), intent(in) :: si(:)
       integer, intent(in) :: levr, ictm, isol, ico2, iaer, ntcw, num_p3d, &
-           npdf3d, ntoz, iovr, icliq_sw, imp_physics, iflip,  me,         &
-           rad_hr_units, ilwcliq, iswcliq, isubcsw,  isubclw, iswmode
+           npdf3d, ntoz, iovr, iovr_rand, iovr_maxrand, iovr_max,         &
+           iovr_dcorr, iovr_exp, iovr_exprand, icliq_sw, imp_physics,     &
+           iflip, me, rad_hr_units, ilwcliq, iswcliq, isubcsw, isubclw,   &
+           iswmode
       integer, intent(in) :: idate(:)
       logical, intent(in) :: lcrick, lcnorm, lnoprec, do_RRTMGP, lalw1bd, &
            inc_minor_gas
@@ -197,32 +201,37 @@ module GFS_rrtmg_setup
       endif
 
       if ( me == 0 ) then
-        print *,'  In rad_initialize (GFS_rrtmg_setup_init), before calling radinit'
-        print *,' si =',si
-        print *,' levr=',levr,' ictm=',ictm,' isol=',isol,' ico2=',ico2,&
-     &          ' iaermdl=',iaermdl,' iaerflg=',iaerflg
-        print *,' np3d=',num_p3d,' ntoz=',ntoz,                         &
-     &          ' iovr=',iovr,' isubcsw=',isubcsw,                      &
-     &          ' isubclw=',isubclw,' icliq_sw=',icliq_sw,              &
-     &          ' iflip=',iflip,'  me=',me
-        print *,' lcrick=',lcrick,                            &
-     &          ' lcnorm=',lcnorm,' lnoprec=',lnoprec
+         print *,' In rad_initialize (GFS_rrtmg_setup_init), before calling RRTMG initialization'
+         print *,' si =',si
+         print *,' levr=',levr,' ictm=',ictm,' isol=',isol,' ico2=',ico2,&
+                 ' iaermdl=',iaermdl,' iaerflg=',iaerflg
+         print *,' np3d=',num_p3d,' ntoz=',ntoz,                         &
+                 ' iovr=',iovr,' isubcsw=',isubcsw,                      &
+                 ' isubclw=',isubclw,' icliq_sw=',icliq_sw,              &
+                 ' iflip=',iflip,'  me=',me
+         print *,' lcrick=',lcrick,                                      &
+                 ' lcnorm=',lcnorm,' lnoprec=',lnoprec
       endif
 
-      call sol_init ( me, isol, solar_file, con_solr_2008, con_solr_2002,&
-           con_pi )                                               ! astronomy initialization routine
-      call aer_init ( levr, me, iaermdl, iaerflg, lalw1bd, aeros_file, con_pi, &
-           con_t0c, con_c, con_boltz, con_plnk, errflg, errmsg)   ! aerosols initialization routine
-      call gas_init ( me, co2usr_file, co2cyc_file, ico2, ictm, ntoz, con_pi, &
-           errflg, errmsg)                                        ! co2 and other gases initialization routine
-      call cld_init ( si, levr, imp_physics, me, errflg, errmsg)  ! cloud initialization routine
-      call rlwinit ( me, rad_hr_units, inc_minor_gas, ilwcliq, isubcsw, iovr, errflg, errmsg )           ! lw RRTMG initialization routine
-      call rswinit ( me, rad_hr_units, inc_minor_gas, iswcliq, isubclw, iovr, iswmode, errflg, errmsg )  ! sw RRTMG initialization routine
+      ! Call initialization routines
+      call sol_init ( me, isol, solar_file, con_solr_2008,con_solr_2002,&
+           con_pi )
+      call aer_init ( levr, me, iaermdl, iaerflg, lalw1bd, aeros_file,  &
+           con_pi, con_t0c, con_c, con_boltz, con_plnk, errflg, errmsg)
+      call gas_init ( me, co2usr_file, co2cyc_file, ico2, ictm, ntoz,   &
+           con_pi, errflg, errmsg)
+      call cld_init ( si, levr, imp_physics, me, errflg, errmsg)
+      call rlwinit ( me, rad_hr_units, inc_minor_gas, ilwcliq, isubcsw, &
+           iovr, iovr_rand, iovr_maxrand, iovr_max, iovr_dcorr,         &
+           iovr_exp, iovr_exprand, errflg, errmsg )
+      call rswinit ( me, rad_hr_units, inc_minor_gas, iswcliq, isubclw, &
+           iovr, iovr_rand, iovr_maxrand, iovr_max, iovr_dcorr,         &
+           iovr_exp, iovr_exprand,iswmode, errflg, errmsg )
 
       if ( me == 0 ) then
         print *,'  Radiation sub-cloud initial seed =',ipsd0,           &
      &          ' IC-idate =',idate
-        print *,' return from rad_initialize (GFS_rrtmg_setup_init) - after calling radinit'
+        print *,' return from rad_initialize (GFS_rrtmg_setup_init) - after calling RRTMG initialization'
       endif
 !
       is_initialized = .true.

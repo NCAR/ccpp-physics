@@ -38,47 +38,47 @@ contains
     implicit none
      
     ! Inputs 
-    integer, intent(in) ::                 &
-         nCol,                             & ! Number of horizontal grid-points
-         nLev                                ! Number of vertical-layers
-    integer, intent(in) ::                 &
-         iovr,                             & !
-         iovr_rand,                        & ! Flag for random cloud overlap method
-         iovr_maxrand,                     & ! Flag for maximum-random cloud overlap method
-         iovr_max,                         & ! Flag for maximum cloud overlap method
-         iovr_dcorr,                       & ! Flag for decorrelation-length cloud overlap method
-         iovr_exp,                         & ! Flag for exponential cloud overlap method
-         iovr_exprand                        ! Flag for exponential-random cloud overlap method
-    logical, intent(in) :: &
-    	 lsswr,                            & ! Call SW radiation?
-    	 lslwr,                            & ! Call LW radiation 
-         top_at_1
-    real(kind_phys), intent(in) ::         &
-         con_pi                              ! Physical constant: pi  
+    integer, intent(in) ::     &
+         nCol,                 & ! Number of horizontal grid-points
+         nLev                    ! Number of vertical-layers
+    integer, intent(in) ::     &
+         iovr,                 & ! Choice of cloud-overlap method
+         iovr_rand,            & ! Flag for random cloud overlap method
+         iovr_maxrand,         & ! Flag for maximum-random cloud overlap method
+         iovr_max,             & ! Flag for maximum cloud overlap method
+         iovr_dcorr,           & ! Flag for decorrelation-length cloud overlap method
+         iovr_exp,             & ! Flag for exponential cloud overlap method
+         iovr_exprand            ! Flag for exponential-random cloud overlap method
+    logical, intent(in) ::     &
+    	 lsswr,                & ! Call SW radiation?
+    	 lslwr,                & ! Call LW radiation?
+         top_at_1                ! Vertical ordering flag
+    real(kind_phys), intent(in) :: &
+         con_pi                  ! Physical constant: pi
     real(kind_phys), dimension(:), intent(in) ::   &
-         lat,                                      & ! Latitude       
-         de_lgth,                                  & ! Decorrelation length     
-         si
+         lat,                  & ! Latitude
+         de_lgth,              & ! Decorrelation length
+         si                      ! Vertical sigma coordinate
     real(kind_phys), dimension(:,:), intent(in) :: &
-         p_lay,                                    & ! Pressure at model-layer
-         cld_frac                                    ! Total cloud fraction
+         p_lay,                & ! Pressure at model-layer
+         cld_frac                ! Total cloud fraction
     real(kind_phys), dimension(:,:), intent(in) :: &
-         p_lev                                       ! Pressure at model interfaces         
+         p_lev                   ! Pressure at model interfaces         
     real(kind_phys), dimension(:,:), intent(in) :: &
-    	 deltaZ,                                   & ! Layer thickness (m)
-         cloud_overlap_param,                      & ! Cloud-overlap parameter
-         precip_overlap_param                        ! Precipitation overlap parameter
+    	 deltaZ,               & ! Layer thickness (m)
+         cloud_overlap_param,  & ! Cloud-overlap parameter
+         precip_overlap_param    ! Precipitation overlap parameter
     
     ! Outputs
-    character(len=*), intent(out) ::               &
-         errmsg                                      ! Error message
-    integer, intent(out) ::                        &  
-         errflg                                      ! Error flag
-    integer,dimension(:,:),intent(out) ::          &
-         mbota,                                    & ! Vertical indices for cloud tops
-         mtopa                                       ! Vertical indices for cloud bases
+    character(len=*), intent(out) :: &
+         errmsg                  ! Error message
+    integer, intent(out) :: &  
+         errflg                  ! Error flag
+    integer,dimension(:,:),intent(out) :: &
+         mbota,                & ! Vertical indices for cloud tops
+         mtopa                   ! Vertical indices for cloud bases
     real(kind_phys),dimension(:,:), intent(out) :: &
-         cldsa                                       ! Fraction of clouds for low, middle, high, total and BL 
+         cldsa                   ! Fraction of clouds for low, middle, high, total and BL 
     
     ! Local variables
     integer i,id,iCol,iLay,icld
