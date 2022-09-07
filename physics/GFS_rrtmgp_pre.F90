@@ -25,6 +25,9 @@ module GFS_rrtmgp_pre
        amo3  = 47.9982_kind_phys,  & !< Modelular weight of ozone       (g/mol)
        amdw  = amd/amw,            & !< Molecular weight of dry air / water vapor
        amdo3 = amd/amo3              !< Molecular weight of dry air / ozone
+  real(kind_phys), parameter :: eps      = 1.0e-6_kind_phys
+  real(kind_phys), parameter :: oneminus = 1.0_kind_phys - eps
+  real(kind_phys), parameter :: ftiny    = 1.0e-12_kind_phys
 
   ! Save trace gas indices.
   integer :: iStr_h2o, iStr_co2, iStr_o3, iStr_n2o, iStr_ch4, iStr_o2, iStr_ccl4, &

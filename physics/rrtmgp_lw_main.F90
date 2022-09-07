@@ -1,11 +1,11 @@
-! ######################################################################################
+! ###########################################################################################
 !> \file rrtmgp_lw_main.F90
 !!
 !> \defgroup rrtmgp_lw_main rrtmgp_lw_main.F90
 !!
 !! \brief This module contains the longwave RRTMGP radiation scheme.
 !!
-! ######################################################################################
+! ###########################################################################################
 module rrtmgp_lw_main
   use machine,                only: kind_phys
   use mo_optical_props,       only: ty_optical_props_1scl, ty_optical_props_2str
@@ -17,18 +17,19 @@ module rrtmgp_lw_main
   use mo_source_functions,    only: ty_source_func_lw
   use radiation_tools,        only: check_error_msg
   use rrtmgp_lw_gas_optics,   only: lw_gas_props,rrtmgp_lw_gas_optics_init
-  use rrtmgp_lw_cloud_optics, only: lw_cloud_props, rrtmgp_lw_cloud_optics_init,         &
-                                    abssnow0, abssnow1, absrain
+  use rrtmgp_lw_cloud_optics, only: lw_cloud_props, rrtmgp_lw_cloud_optics_init, abssnow0,   &
+                                    abssnow1, absrain
   use module_radiation_gases, only: NF_VGAS, getgases, getozn
-  use GFS_rrtmgp_pre,         only: iStr_h2o, iStr_co2, iStr_o3, iStr_n2o, iStr_ch4,     &
-                                    iStr_o2, iStr_ccl4, iStr_cfc11, iStr_cfc12, iStr_cfc22 
+  use GFS_rrtmgp_pre,         only: iStr_h2o, iStr_co2, iStr_o3, iStr_n2o, iStr_ch4,         &
+                                    iStr_o2, iStr_ccl4, iStr_cfc11, iStr_cfc12, iStr_cfc22,  &
+                                    eps, oneminus, ftiny
   use mersenne_twister,       only: random_setseed, random_number, random_stat 
   use rrtmgp_sampling,        only: sampled_mask, draw_samples
   implicit none
 
   public rrtmgp_lw_main_init, rrtmgp_lw_main_run
 contains
-  ! ######################################################################################
+  ! #########################################################################################
 !! \section arg_table_rrtmgp_lw_main_init
 !! \htmlinclude rrtmgp_lw_main_int.html
 !!
@@ -38,10 +39,10 @@ contains
 !!
 !! \section rrtmgp_lw_main_init
 !> @{
-  ! ######################################################################################
-  subroutine rrtmgp_lw_main_init(rrtmgp_root_dir, rrtmgp_lw_file_gas,                    &
-       rrtmgp_lw_file_clouds, active_gases_array, doGP_cldoptics_PADE,                   &
-       doGP_cldoptics_LUT, nrghice, mpicomm, mpirank, mpiroot, nrghice, errmsg, errflg)
+  ! #########################################################################################
+  subroutine rrtmgp_lw_main_init(rrtmgp_root_dir, rrtmgp_lw_file_gas, rrtmgp_lw_file_clouds,&
+       active_gases_array, doGP_cldoptics_PADE, doGP_cldoptics_LUT, nrghice, mpicomm,       &
+       mpirank, mpiroot, errmsg, errflg)
 
     ! Inputs
     character(len=128),intent(in) :: &
@@ -189,14 +190,15 @@ contains
     ! Local variables
     type(ty_gas_concs)          :: gas_concs
     type(ty_optical_props_1scl) :: lw_optical_props_clrsky, lw_optical_props_aerosol_local
-    type(ty_optical_props_2str) :: lw_optical_props_clouds, lw_optical_props_cloudsByBand,  &
-         lw_optical_props_cnvcloudsByBand, lw_optical_props_pblcloudsByBand,                &
+    type(ty_optical_props_2str) :: lw_optical_props_clouds, lw_optical_props_cloudsByBand,&
+         lw_optical_props_cnvcloudsByBand, lw_optical_props_pblcloudsByBand,              &
          lw_optical_props_precipByBand
     type(ty_source_func_lw)     :: sources 
     type(ty_fluxes_byband)      :: flux_allsky, flux_clrsky
     integer :: iCol, iLay, iGas, iBand, iCol2, ix, iblck
     integer, dimension(rrtmgp_phys_blksz) :: ipseed_lw
     type(random_stat) :: rng_stat
+    real(kind_phys), dimension(rrtmgp_phys_blksz) :: zcf0, zcf1
     logical, dimension(rrtmgp_phys_blksz,nLay,lw_gas_props%get_ngpt()) :: maskMCICA
     real(kind_phys), dimension(rrtmgp_phys_blksz) :: tau_rain, tau_snow
     real(kind_phys), dimension(lw_gas_props%get_ngpt()) :: rng1D
@@ -206,6 +208,7 @@ contains
          fluxLW_up_allsky, fluxLW_up_clrsky, fluxLW_dn_allsky, fluxLW_dn_clrsky
     real(kind_phys), dimension(rrtmgp_phys_blksz,lw_gas_props%get_ngpt()) :: lw_Ds
     real(kind_phys), dimension(lw_gas_props%get_nband(),rrtmgp_phys_blksz) :: sfc_emiss_byband
+
     ! Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0
@@ -250,6 +253,18 @@ contains
     ! ###################################################################################### 
     do iCol=1,nCol,rrtmgp_phys_blksz
        iCol2 = iCol + rrtmgp_phys_blksz - 1
+
+       ! Create clear/cloudy indicator
+       zcf0(:) = 1._kind_phys
+       zcf1(:) = 1._kind_phys
+       do iblck = 1, rrtmgp_phys_blksz
+          do iLay=1,nLay
+             zcf0(iblck) = min(zcf0(iblck), 1._kind_phys - cld_frac(iCol+iblck-1,iLay))
+          enddo
+          if (zcf0(iblck) <= ftiny)   zcf0(iblck) = 0._kind_phys
+          if (zcf0(iblck) > oneminus) zcf0(iblck) = 1._kind_phys
+          zcf1(iblck) = 1._kind_phys - zcf0(iblck)
+       enddo
 
        ! ###################################################################################
        !
@@ -309,7 +324,7 @@ contains
        ! ###################################################################################
        ! Assign same emissivity to all band
        do iblck=1,rrtmgp_phys_blksz
-          if (semis(iCol+iblck-1) > 1e-6 .and. semis(iCol+iblck-1) <= 1.0) then
+          if (semis(iCol+iblck-1) > eps .and. semis(iCol+iblck-1) <= 1._kind_phys) then
              do iBand=1,lw_gas_props%get_nband()
                 sfc_emiss_byband(iBand,iblck) = semis(iCol+iblck-1)
              enddo
@@ -338,7 +353,7 @@ contains
        ! Compute cloud-optics...
        !
        ! ###################################################################################
-       if (any(cld_frac(iCol:iCol2,:) .gt. 0.)) then
+       if (any(zcf1 .gt. eps)) then
           ! Microphysical (gridmean) cloud optics
           call check_error_msg('rrtmgp_lw_main_cloud_optics',lw_cloud_props%cloud_optics(&
                cld_lwp(iCol:iCol2,:),                & ! IN  - Cloud liquid water path (g/m2)
@@ -387,7 +402,7 @@ contains
        tau_snow(:) = 0._kind_phys
        do ix=1,rrtmgp_phys_blksz
           do iLay=1,nLay
-             if (cld_frac(iCol+ix-1,iLay) .gt. 0.) then
+             if (cld_frac(iCol+ix-1,iLay) .gt. eps) then
                 ! Rain optical-depth (No band dependence)
                 tau_rain(ix) = absrain*cld_rwp(iCol+ix-1,iLay)
                 
@@ -413,7 +428,7 @@ contains
        ! *Note* All of the included cloud-types are sampled together, not independently.
        !
        ! ###################################################################################
-       if (any(cld_frac(iCol:iCol2,:) .gt. 0.)) then
+       if (any(zcf1 .gt. eps)) then
           ! Change random number seed value for each radiation invocation (isubc_lw =1 or 2).
           if(isubc_lw == 1) then      ! advance prescribed permutation seed
              do ix=1,rrtmgp_phys_blksz

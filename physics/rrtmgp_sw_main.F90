@@ -14,12 +14,14 @@ module rrtmgp_sw_main
   use rrtmgp_sw_cloud_optics, only: sw_cloud_props, rrtmgp_sw_cloud_optics_init, a0r, a0s,  &
                                     a1s, b0r, b0s, b1s, c0r, c0s
   use GFS_rrtmgp_pre,         only: iStr_h2o, iStr_co2, iStr_o3, iStr_n2o, iStr_ch4,        &
-                                    iStr_o2, iStr_ccl4, iStr_cfc11, iStr_cfc12, iStr_cfc22
+                                    iStr_o2, iStr_ccl4, iStr_cfc11, iStr_cfc12, iStr_cfc22, &
+                                    eps, oneminus, ftiny
   use mersenne_twister,       only: random_setseed, random_number, random_stat
   use rrtmgp_sampling,        only: sampled_mask, draw_samples
   implicit none
 
   public rrtmgp_sw_main_init, rrtmgp_sw_main_run
+
 contains
 
   ! #########################################################################################
@@ -189,6 +191,7 @@ contains
     type(ty_fluxes_byband)      :: flux_allsky, flux_clrsky
     real(kind_phys) :: tau_rain, tau_snow, ssa_rain, ssa_snow, asy_rain, asy_snow, &
          tau_prec, asy_prec, ssa_prec, asyw, ssaw, za1, za2, flux_dir, flux_dif
+    real(kind_phys), dimension(rrtmgp_phys_blksz) :: zcf0, zcf1
     real(kind_phys), dimension(sw_gas_props%get_ngpt()) :: rng1D
     real(kind_phys), dimension(sw_gas_props%get_ngpt(),nLay,rrtmgp_phys_blksz) :: rng3D,rng3D2
     real(kind_phys), dimension(sw_gas_props%get_ngpt()*nLay) :: rng2D
@@ -252,12 +255,32 @@ contains
        flux_clrsky%bnd_flux_up     => fluxSW_up_clrsky
        flux_clrsky%bnd_flux_dn     => fluxSW_dn_clrsky
        
+       ! ######################################################################################
+       !
        ! Loop over all (daylit) columns...
+       !
+       ! ######################################################################################
        do iCol=1,nDay,rrtmgp_phys_blksz
           ix  = idx(iCol)
           ix2 = idx(iCol + rrtmgp_phys_blksz - 1)
 
+          ! Create clear/cloudy indicator
+          zcf0(:) = 1._kind_phys
+          zcf1(:) = 1._kind_phys
+          do iblck = 1, rrtmgp_phys_blksz
+             do iLay=1,nLay
+                zcf0(iblck) = min(zcf0(iblck), 1._kind_phys - cld_frac(ix+iblck-1,iLay))
+             enddo
+             if (zcf0(iblck) <= ftiny)   zcf0(iblck) = 0._kind_phys
+             if (zcf0(iblck) > oneminus) zcf0(iblck) = 1._kind_phys
+             zcf1(iblck) = 1._kind_phys - zcf0(iblck)
+          enddo
+
+          ! ###################################################################################
+          !
           ! Initialize/reset
+          !
+          ! ###################################################################################
           fluxSW_up_allsky                        = 0._kind_phys
           fluxSW_dn_allsky                        = 0._kind_phys
           fluxSW_dn_dir_allsky                    = 0._kind_phys
@@ -308,37 +331,10 @@ contains
 
           ! ###################################################################################
           !
-          ! Set surface albedo
-          !
-          ! Use near-IR albedo for bands with wavenumbers extending to 12850cm-1
-          ! Use uv-vis albedo for bands with wavenumbers greater than 16000cm-1
-          ! For overlapping band, average near-IR and us-vis albedos.
+          ! Compute gas-optics
           !
           ! ###################################################################################
-          do iblck = 1, rrtmgp_phys_blksz
-             do iBand=1,sw_gas_props%get_nband()
-                if (bandlimits(1,iBand) .lt. nIR_uvvis_bnd(1)) then
-                   sfc_alb_dir(iBand,iblck) = sfc_alb_nir_dir(ix+iblck-1)
-                   sfc_alb_dif(iBand,iblck) = sfc_alb_nir_dif(ix+iblck-1)
-                endif
-                if (bandlimits(1,iBand) .eq. nIR_uvvis_bnd(1)) then
-                   sfc_alb_dir(iBand,iblck) = 0.5_kind_phys*(sfc_alb_nir_dir(ix+iblck-1) + sfc_alb_uvvis_dir(ix+iblck-1))
-                   sfc_alb_dif(iBand,iblck) = 0.5_kind_phys*(sfc_alb_nir_dif(ix+iblck-1) + sfc_alb_uvvis_dif(ix+iblck-1))
-                   ibd = iBand
-                endif
-                if (bandlimits(1,iBand) .ge. nIR_uvvis_bnd(2)) then
-                   sfc_alb_dir(iBand,iblck) = sfc_alb_uvvis_dir(ix+iblck-1)
-                   sfc_alb_dif(iBand,iblck) = sfc_alb_uvvis_dif(ix+iblck-1)
-                endif
-                if (bandlimits(1,iBand) .eq. uvb_bnd(1)) ibd_uv = iBand
-             enddo
-          enddo
-          
-          ! ###################################################################################
-          !
-          ! Compute gas-optics...
-          !
-          ! ###################################################################################
+
           call check_error_msg('rrtmgp_sw_main_gas_optics',sw_gas_props%gas_optics(&
                p_lay(ix:ix2,:),         & ! IN  - Pressure @ layer-centers (Pa)
                p_lev(ix:ix2,:),         & ! IN  - Pressure @ layer-interfaces (Pa)
@@ -354,10 +350,40 @@ contains
 
           ! ###################################################################################
           !
+          ! Set surface albedo
+          !
+          ! Use near-IR albedo for bands with wavenumbers extending to 12850cm-1
+          ! Use uv-vis albedo for bands with wavenumbers greater than 16000cm-1
+          ! For overlapping band, average near-IR and us-vis albedos.
+          !
+          ! ###################################################################################
+          do iblck = 1, rrtmgp_phys_blksz
+             do iBand=1,sw_gas_props%get_nband()
+                if (bandlimits(1,iBand) .lt. nIR_uvvis_bnd(1)) then
+                   sfc_alb_dir(iBand,iblck) = sfc_alb_nir_dir(ix+iblck-1)
+                   sfc_alb_dif(iBand,iblck) = sfc_alb_nir_dif(ix+iblck-1)
+                endif
+                if (bandlimits(1,iBand) .eq. nIR_uvvis_bnd(1)) then
+                   sfc_alb_dir(iBand,iblck) = 0.5_kind_phys*(sfc_alb_nir_dir(ix+iblck-1) +    &
+                                                             sfc_alb_uvvis_dir(ix+iblck-1))
+                   sfc_alb_dif(iBand,iblck) = 0.5_kind_phys*(sfc_alb_nir_dif(ix+iblck-1) +    &
+                                                             sfc_alb_uvvis_dif(ix+iblck-1))
+                   ibd = iBand
+                endif
+                if (bandlimits(1,iBand) .ge. nIR_uvvis_bnd(2)) then
+                   sfc_alb_dir(iBand,iblck) = sfc_alb_uvvis_dir(ix+iblck-1)
+                   sfc_alb_dif(iBand,iblck) = sfc_alb_uvvis_dif(ix+iblck-1)
+                endif
+                if (bandlimits(1,iBand) .eq. uvb_bnd(1)) ibd_uv = iBand
+             enddo
+          enddo
+
+          ! ###################################################################################
+          !
           ! Compute optics for cloud(s) and precipitation, sample clouds...
           !
           ! ###################################################################################
-          if (any(cld_frac(ix:ix2,:) .gt. 1.e-6_kind_phys)) then
+          if (any(zcf1 .gt. eps)) then
              ! Gridmean/mp-clouds
              call check_error_msg('rrtmgp_sw_main_cloud_optics',sw_cloud_props%cloud_optics(&
                   cld_lwp(ix:ix2,:),                    & ! IN  - Cloud liquid water path
@@ -401,7 +427,7 @@ contains
              ! Cloud precipitation optics: rain and snow(+groupel)
              do iblck = 1, rrtmgp_phys_blksz
                 do iLay=1,nLay
-                   if (cld_frac(ix+iblck-1,iLay) .gt. 1.e-12_kind_phys) then
+                   if (cld_frac(ix+iblck-1,iLay) .gt. ftiny) then
                       ! Rain/Snow optical depth (No band dependence)
                       tau_rain = cld_rwp(ix+iblck-1,iLay)*a0r
                       if (cld_swp(ix+iblck-1,iLay) .gt. 0. .and. cld_resnow(ix+iblck-1,iLay) .gt. 10._kind_phys) then
@@ -499,7 +525,7 @@ contains
 
           ! ###################################################################################
           !
-          ! Compute clear-sky fluxes (gaseous+aerosol) (optional)
+          ! Compute clear-sky fluxes (gaseous+aerosol)
           !
           ! ###################################################################################
           ! Increment
@@ -558,7 +584,7 @@ contains
           ! All-sky fluxes (clear-sky + clouds + precipitation)
           !
           ! ###################################################################################
-          if (any(cld_frac(ix:ix2,:) .gt. 1.e-6_kind_phys)) then
+          if (any(zcf1 .gt. eps)) then
              ! Delta scale
              !call check_error_msg('rrtmgp_sw_main_delta_scale',sw_optical_props_clouds%delta_scale())
 
@@ -607,7 +633,7 @@ contains
                    scmpsw_allsky(iblck)%uvbfc    = flux_allsky%bnd_flux_dn(iblck,iSFC,ibd_uv)
                 enddo
                 ! Store surface downward beam/diffused flux components
-                if (cld_frac(ix+iblck-1,iSFC) .gt. 1.e-6_kind_phys) then
+                if (zcf1(iblck) .gt. eps) then
                    scmpsw(ix+iblck-1)%nirbm = scmpsw_allsky(iblck)%nirbm
                    scmpsw(ix+iblck-1)%nirdf = scmpsw_allsky(iblck)%nirdf
                    scmpsw(ix+iblck-1)%visbm = scmpsw_allsky(iblck)%visbm
