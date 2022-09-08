@@ -1637,15 +1637,11 @@ c
 !             aa2(i) = aa2(i) +
 !!   &                 dz1 * eta(i,k) * grav * fv *
 !    &                 dz1 * grav * fv *
-!    &                 max(val,(qeso(i,k) - qo(i,k)))
-              if(aa2(i) < 0.) then
-                ktcon1(i) = k
-                flg(i) = .false.
-              endif
-!NRL MNM: Limit overshooting not to be deeper than the actual cloud              
-              tem  = zi(i,ktcon(i))-zi(i,kbcon(i))
-              tem1 = zi(i,ktcon1(i))-zi(i,ktcon(i))
-              if(tem1.ge.tem) then
+!    &                 max(val,(qeso(i,k) - qo(i,k)))        
+!NRL MNM: Limit overshooting not to be deeper than half the actual cloud              
+              tem  = 0.5 * (zi(i,ktcon(i))-zi(i,kbcon(i)))
+              tem1 = zi(i,k)-zi(i,ktcon(i))
+              if(aa2(i) < 0. .or. tem1 >= tem) then
                 ktcon1(i) = k
                 flg(i) = .false.
               endif
