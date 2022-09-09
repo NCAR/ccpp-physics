@@ -71,6 +71,7 @@ MODULE module_mp_thompson
 
       LOGICAL, PARAMETER, PRIVATE:: iiwarm = .false.
       LOGICAL, PRIVATE:: is_aerosol_aware = .false.
+      LOGICAL, PRIVATE:: merra2_aerosol_aware = .false.
       LOGICAL, PARAMETER, PRIVATE:: dustyIce = .true.
       LOGICAL, PARAMETER, PRIVATE:: homogIce = .true.
 
@@ -438,12 +439,14 @@ MODULE module_mp_thompson
 !>\section gen_thompson_init thompson_init General Algorithm
 !> @{
       SUBROUTINE thompson_init(is_aerosol_aware_in,       &
+                               merra2_aerosol_aware_in,   &
                                mpicomm, mpirank, mpiroot, &
                                threads, errmsg, errflg)
 
       IMPLICIT NONE
 
       LOGICAL, INTENT(IN) :: is_aerosol_aware_in
+      LOGICAL, INTENT(IN) :: merra2_aerosol_aware_in
       INTEGER, INTENT(IN) :: mpicomm, mpirank, mpiroot
       INTEGER, INTENT(IN) :: threads
       CHARACTER(len=*), INTENT(INOUT) :: errmsg
@@ -454,14 +457,23 @@ MODULE module_mp_thompson
       real :: stime, etime
       LOGICAL, PARAMETER :: precomputed_tables = .FALSE.
 
-! Set module variable is_aerosol_aware
+! Set module variable is_aerosol_aware/merra2_aerosol_aware
       is_aerosol_aware = is_aerosol_aware_in
+      merra2_aerosol_aware = merra2_aerosol_aware_in
+      if (is_aerosol_aware .and. merra2_aerosol_aware) then
+          errmsg = 'Logic error in thompson_init: only one of the two options can be true, ' // &
+                   'not both: is_aerosol_aware or merra2_aerosol_aware'
+          errflg = 1
+          return
+      end if
       if (mpirank==mpiroot) then
-         if (is_aerosol_aware) then
-            write (0,'(a)') 'Using aerosol-aware version of Thompson microphysics'
-        else
-            write (0,'(a)') 'Using non-aerosol-aware version of Thompson microphysics'
-        end if
+          if (is_aerosol_aware) then
+              write (0,'(a)') 'Using aerosol-aware version of Thompson microphysics'
+          else if(merra2_aerosol_aware) then
+              write (0,'(a)') 'Using merra2 aerosol-aware version of Thompson microphysics'
+          else
+              write (0,'(a)') 'Using non-aerosol-aware version of Thompson microphysics'
+          end if
       end if
 
       micro_init = .FALSE.
@@ -1142,6 +1154,8 @@ MODULE module_mp_thompson
                stop
             end if
          end if
+         if (is_aerosol_aware .and. merra2_aerosol_aware) then
+         end if
    
          if (is_aerosol_aware .and. (.not.present(nc)     .or. &
                                      .not.present(nwfa)   .or. &
@@ -1161,11 +1175,25 @@ MODULE module_mp_thompson
             else
                stop
             end if
-         else if (.not.is_aerosol_aware .and. (present(nwfa)   .or. &
-                                               present(nifa)   .or. &
-                                               present(nwfa2d) .or. &
-                                               present(nifa2d)      )) then
-            write(*,*) 'WARNING, nc/nwfa/nifa/nwfa2d/nifa2d present but is_aerosol_aware is FALSE'
+         else if (merra2_aerosol_aware .and. (.not.present(nc)   .or. &
+                                              .not.present(nwfa) .or. &
+                                              .not.present(nifa)      )) then
+            if (present(errmsg)) then
+               write(errmsg, '(*(a))') 'Logic error in mp_gt_driver: provide nc, nwfa, and nifa', &
+                                       ' for merra2 aerosol-aware version of Thompson microphysics'
+            else
+               write(*, '(*(a))') 'Logic error in mp_gt_driver: provide nc, nwfa, and nifa', &
+                                  ' for merra2 aerosol-aware version of Thompson microphysics'
+            end if
+            if (present(errflg)) then
+               errflg = 1
+               return
+            else
+               stop
+            end if
+         else if (.not.is_aerosol_aware .and. .not.merra2_aerosol_aware .and. &
+                  (present(nwfa) .or. present(nifa) .or. present(nwfa2d) .or. present(nifa2d))) then
+            write(*,*) 'WARNING, nc/nwfa/nifa/nwfa2d/nifa2d present but is_aerosol_aware/merra2_aerosol_aware are FALSE'
          end if
       end if test_only_once
 
@@ -1395,7 +1423,7 @@ MODULE module_mp_thompson
                qcten1(k) = 0.
             endif initialize_extended_diagnostics
          enddo
-         if (is_aerosol_aware) then
+         if (is_aerosol_aware .or. merra2_aerosol_aware) then
             do k = kts, kte
                nc1d(k) = nc(i,k,j)
                nwfa1d(k) = nwfa(i,k,j)
@@ -2188,7 +2216,7 @@ MODULE module_mp_thompson
             endif
             nc(k) = MIN( DBLE(Nt_c_max), ccg(1,nu_c)*ocg2(nu_c)*rc(k)   &
                   / am_r*lamc**bm_r)
-            if (.NOT. is_aerosol_aware) nc(k) = Nt_c
+            if (.NOT. (is_aerosol_aware .or. merra2_aerosol_aware)) nc(k) = Nt_c
          else
             qc1d(k) = 0.0
             nc1d(k) = 0.0
@@ -2854,7 +2882,7 @@ MODULE module_mp_thompson
 !! Implemented by T. Eidhammer and G. Thompson 2012Dec18
 !+---+-----------------------------------------------------------------+
 
-          if (dustyIce .AND. is_aerosol_aware) then
+          if (dustyIce .AND. (is_aerosol_aware .or. merra2_aerosol_aware)) then
            xni = iceDeMott(tempc,qvs(k),qvs(k),qvsi(k),rho(k),nifa(k))
           else
            xni = 1.0 *1000.                                               ! Default is 1.0 per Liter
@@ -2902,7 +2930,7 @@ MODULE module_mp_thompson
 !! we may need to relax the temperature and ssati constraints.
           if ( (ssati(k).ge. 0.25) .or. (ssatw(k).gt. eps &
                                 .and. temp(k).lt.253.15) ) then
-           if (dustyIce .AND. is_aerosol_aware) then
+           if (dustyIce .AND. (is_aerosol_aware .or. merra2_aerosol_aware)) then
             xnc = iceDeMott(tempc,qv(k),qvs(k),qvsi(k),rho(k),nifa(k))
             xnc = xnc*(1.0 + 50.*rand3)
            else
@@ -2916,7 +2944,7 @@ MODULE module_mp_thompson
 
 !>  - Freezing of aqueous aerosols based on Koop et al (2001, Nature)
           xni = smo0(k)+ni(k) + (pni_rfz(k)+pni_wfz(k)+pni_inu(k))*dtsave
-          if (is_aerosol_aware .AND. homogIce .AND. (xni.le.499.E3)     &
+          if ((is_aerosol_aware .or. merra2_aerosol_aware) .AND. homogIce .AND. (xni.le.999.E3)     &
      &                .AND.(temp(k).lt.238).AND.(ssati(k).ge.0.4) ) then
             xnc = iceKoop(temp(k),qv(k),qvs(k),nwfa(k), dtsave)
             pni_iha(k) = xnc*odts
@@ -3370,7 +3398,7 @@ MODULE module_mp_thompson
          if ((qc1d(k) + qcten(k)*DT) .gt. R1) then
             rc(k) = (qc1d(k) + qcten(k)*DT)*rho(k)
             nc(k) = MAX(2., MIN((nc1d(k)+ncten(k)*DT)*rho(k), Nt_c_max))
-            if (.NOT. is_aerosol_aware) nc(k) = Nt_c
+            if (.NOT. (is_aerosol_aware .or. merra2_aerosol_aware)) nc(k) = Nt_c
             L_qc(k) = .true.
          else
             rc(k) = R1
@@ -3538,7 +3566,7 @@ MODULE module_mp_thompson
            prw_vcd(k) = clap*odt
 !+---+-----------------------------------------------------------------+ !  DROPLET NUCLEATION
            if (clap .gt. eps) then
-            if (is_aerosol_aware) then
+            if (is_aerosol_aware .or. merra2_aerosol_aware) then
                xnc = MAX(2., activ_ncloud(temp(k), w1d(k)+rand3, nwfa(k)))
             else
                xnc = Nt_c
@@ -3546,7 +3574,8 @@ MODULE module_mp_thompson
             pnc_wcd(k) = 0.5*(xnc-nc(k) + abs(xnc-nc(k)))*odts*orho
 
 !+---+-----------------------------------------------------------------+ !  EVAPORATION
-           elseif (clap .lt. -eps .AND. ssatw(k).lt.-1.E-6 .AND. is_aerosol_aware) then
+           elseif (clap .lt. -eps .AND. ssatw(k).lt.-1.E-6 .AND.     &
+                  (is_aerosol_aware .or. merra2_aerosol_aware)) then  
             tempc = temp(k) - 273.15
             otemp = 1./temp(k)
             rvs = rho(k)*qvs(k)
@@ -3610,7 +3639,7 @@ MODULE module_mp_thompson
           rc(k) = MAX(R1, (qc1d(k) + DT*qcten(k))*rho(k))
           if (rc(k).eq.R1) L_qc(k) = .false.
           nc(k) = MAX(2., MIN((nc1d(k)+ncten(k)*DT)*rho(k), Nt_c_max))
-          if (.NOT. is_aerosol_aware) nc(k) = Nt_c
+          if (.NOT. (is_aerosol_aware .or. merra2_aerosol_aware)) nc(k) = Nt_c
           qv(k) = MAX(1.E-10, qv1d(k) + DT*qvten(k))
           temp(k) = t1d(k) + DT*tten(k)
           rho(k) = 0.622*pres(k)/(R*temp(k)*(qv(k)+0.622))
@@ -5760,7 +5789,7 @@ MODULE module_mp_thompson
          rho(k) = 0.622*p1d(k)/(R*t1d(k)*(qv1d(k)+0.622))
          rc(k) = MAX(R1, qc1d(k)*rho(k))
          nc(k) = MAX(2., MIN(nc1d(k)*rho(k), Nt_c_max))
-         if (.NOT. is_aerosol_aware) nc(k) = Nt_c
+         if (.NOT. (is_aerosol_aware .or. merra2_aerosol_aware)) nc(k) = Nt_c
          if (rc(k).gt.R1 .and. nc(k).gt.R2) has_qc = .true.
          ri(k) = MAX(R1, qi1d(k)*rho(k))
          ni(k) = MAX(R2, ni1d(k)*rho(k))

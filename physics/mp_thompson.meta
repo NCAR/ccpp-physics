@@ -144,6 +144,13 @@
   dimensions = ()
   type = logical
   intent = in
+[merra2_aerosol_aware]
+  standard_name = flag_for_merra2_aerosol_aware_for_thompson
+  long_name = flag for merra2 aerosol-aware physics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [nc]
   standard_name = mass_number_concentration_of_cloud_liquid_water_particles_in_air
   long_name = cloud droplet number concentration
@@ -213,6 +220,14 @@
   long_name = area of the grid cell
   units = m2
   dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[aerfld]
+  standard_name = mass_mixing_ratio_of_aerosol_from_gocart_or_merra2
+  long_name = mass mixing ratio of aerosol from gocart or merra2
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_layer_dimension,number_of_aerosol_tracers_MG)
   type = real
   kind = kind_phys
   intent = in
@@ -391,6 +406,13 @@
 [is_aerosol_aware]
   standard_name = flag_for_aerosol_physics
   long_name = flag for aerosol-aware physics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[merra2_aerosol_aware]
+  standard_name = flag_for_merra2_aerosol_aware_for_thompson
+  long_name = flag for merra2 aerosol-aware physics
   units = flag
   dimensions = ()
   type = logical
@@ -595,6 +617,14 @@
   dimensions = ()
   type = logical
   intent = in
+[aerfld]
+  standard_name = mass_mixing_ratio_of_aerosol_from_gocart_or_merra2
+  long_name = mass mixing ratio of aerosol from gocart or merra2
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_aerosol_tracers_MG)
+  type = real
+  kind = kind_phys
+  intent = in
 [mpicomm]
   standard_name = mpi_communicator
   long_name = MPI communicator
@@ -674,14 +704,6 @@
   type = real
   kind = kind_phys
   intent = in
-[spp_stddev_cutoff]
-  standard_name = magnitude_of_spp_standard_deviation_cutoff
-  long_name = magnitude of spp standard deviation cutoff
-  units = 1
-  dimensions = (number_of_perturbed_spp_schemes)
-  type = real
-  kind = kind_phys
-  intent = in
 [spp_var_list]
   standard_name = perturbed_spp_schemes
   long_name = perturbed spp schemes
@@ -689,6 +711,14 @@
   dimensions = (number_of_perturbed_spp_schemes)
   type = character
   kind = len=3
+  intent = in
+[spp_stddev_cutoff]
+  standard_name = magnitude_of_spp_standard_deviation_cutoff
+  long_name = magnitude of spp standard deviation cutoff
+  units = 1
+  dimensions = (number_of_perturbed_spp_schemes)
+  type = real
+  kind = kind_phys
   intent = in
 [cplchm]
   standard_name = flag_for_chemistry_coupling
