@@ -654,7 +654,6 @@ module mp_thompson
          if (is_aerosol_aware) then
             call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
                               nc=nc, nwfa=nwfa, nifa=nifa, nwfa2d=nwfa2d, nifa2d=nifa2d,     &
-                              aero_ind_fdb=aero_ind_fdb,                                     &
                               tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtstep, dt_inner=dt_inner,  &
                               sedi_semi=sedi_semi, decfl=decfl,                              &
                               rainnc=rain_mp, rainncv=delta_rain_mp,                         &
@@ -664,7 +663,8 @@ module mp_thompson
                               refl_10cm=refl_10cm,                                           &
                               diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
                               has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
-                              rand_perturb_on=spp_mp_opt, kme_stoch=kme_stoch,               &
+                              aero_ind_fdb=aero_ind_fdb, rand_perturb_on=spp_mp_opt,         &
+                              kme_stoch=kme_stoch,                                           &
                               rand_pert=spp_wts_mp, spp_var_list=spp_var_list,               &
                               spp_prt_list=spp_prt_list, n_var_spp=n_var_spp,                &
                               spp_stddev_cutoff=spp_stddev_cutoff,                           &

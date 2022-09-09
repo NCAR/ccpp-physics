@@ -968,7 +968,7 @@ MODULE module_mp_thompson
 !> @{
       SUBROUTINE mp_gt_driver(qv, qc, qr, qi, qs, qg, ni, nr, nc,     &
                               nwfa, nifa, nwfa2d, nifa2d,             &
-                              aero_ind_fdb, tt, th, pii,              &
+                              tt, th, pii,                            &
                               p, w, dz, dt_in, dt_inner,              &
                               sedi_semi, decfl,                       &
                               RAINNC, RAINNCV,                        &
@@ -982,7 +982,7 @@ MODULE module_mp_thompson
                               vt_dbz_wt, first_time_step,             &
                               re_cloud, re_ice, re_snow,              &
                               has_reqc, has_reqi, has_reqs,           &
-                              rand_perturb_on,                        &
+                              aero_ind_fdb, rand_perturb_on,          &
                               kme_stoch,                              &
                               rand_pert, spp_prt_list, spp_var_list,  &
                               spp_stddev_cutoff, n_var_spp,           &
@@ -1025,7 +1025,6 @@ MODULE module_mp_thompson
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(INOUT):: &
                           nc, nwfa, nifa
       REAL, DIMENSION(ims:ime, jms:jme), OPTIONAL, INTENT(IN):: nwfa2d, nifa2d
-      LOGICAL, OPTIONAL, INTENT(IN):: aero_ind_fdb
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(INOUT):: &
                           re_cloud, re_ice, re_snow
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT):: pfils, pflls
@@ -1059,6 +1058,7 @@ MODULE module_mp_thompson
       LOGICAL, INTENT (IN) :: reset_dBZ
       ! Extended diagnostics, array pointers only associated if ext_diag flag is .true.
       LOGICAL, INTENT (IN) :: ext_diag
+      LOGICAL, OPTIONAL, INTENT(IN):: aero_ind_fdb
       REAL, DIMENSION(:,:,:), INTENT(INOUT)::                     &
                           !vts1, txri, txrc,                       &
                           prw_vcdc,                               &
@@ -1466,10 +1466,15 @@ MODULE module_mp_thompson
 !.. Changed 13 May 2013 to fake emissions in which nwfa2d is aerosol
 !.. number tendency (number per kg per second).
          if (is_aerosol_aware) then
-            if ( .not. aero_ind_fdb) then
-            nwfa1d(kts) = nwfa1d(kts) + nwfa2d(i,j)*dt
-            nifa1d(kts) = nifa1d(kts) + nifa2d(i,j)*dt
-            endif
+            if ( PRESENT (aero_ind_fdb) ) then
+              if ( .not. aero_ind_fdb) then
+                nwfa1d(kts) = nwfa1d(kts) + nwfa2d(i,j)*dt
+                nifa1d(kts) = nifa1d(kts) + nifa2d(i,j)*dt
+              endif
+            else
+              nwfa1d(kts) = nwfa1d(kts) + nwfa2d(i,j)*dt
+              nifa1d(kts) = nifa1d(kts) + nifa2d(i,j)*dt
+            end if
 
             do k = kts, kte
                nc(i,k,j) = nc1d(k)
