@@ -295,17 +295,17 @@
   type = logical
   intent = in
 [iswcice]
-  standard_name = flag_for_rrtmg_sw_ice_cloud_optics
-  long_name = flag for rrtmg shortwave ice cloud optics
+  standard_name = flag_for_optical_property_for_ice_clouds_for_shortwave_radiation
+  long_name = sw optical property for ice clouds
   units = flag
-  dimensions =  ()
+  dimensions = ()
   type = integer
   intent = in
 [iswcliq]
-  standard_name = flag_for_rrtmg_sw_cloud_optics
-  long_name = flag for rrtmg shortwave cloud optics
+  standard_name = control_for_shortwave_radiation_liquid_clouds
+  long_name = sw optical property for liquid clouds
   units = flag
-  dimensions =  ()
+  dimensions = ()
   type = integer
   intent = in
 [isubcsw]

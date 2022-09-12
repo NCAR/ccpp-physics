@@ -44,8 +44,8 @@ module GFS_rrtmg_setup
         lcnorm, imp_physics, lnoprec, idate, iflip, do_RRTMGP, me, lalw1bd,  &
         iaermdl, iaerflg, aeros_file, con_pi, con_t0c, con_c, con_boltz,     &
         con_plnk, con_solr_2008, con_solr_2002, co2usr_file, co2cyc_file,    &
-        rad_hr_units, inc_minor_gas, ilwcliq, iswcliq, isubcsw, isubclw,     &
-        iswmode, ipsd0, errmsg, errflg)
+        rad_hr_units, inc_minor_gas, icliq_lw, isubcsw, isubclw, iswmode,    &
+        ipsd0, errmsg, errflg)
 
 ! =================   subprogram documentation block   ================ !
 !                                                                       !
@@ -155,8 +155,7 @@ module GFS_rrtmg_setup
       integer, intent(in) :: levr, ictm, isol, ico2, iaer, ntcw, num_p3d, &
            npdf3d, ntoz, iovr, iovr_rand, iovr_maxrand, iovr_max,         &
            iovr_dcorr, iovr_exp, iovr_exprand, icliq_sw, imp_physics,     &
-           iflip, me, rad_hr_units, ilwcliq, iswcliq, isubcsw, isubclw,   &
-           iswmode
+           iflip, me, rad_hr_units, icliq_lw, isubcsw, isubclw, iswmode
       integer, intent(in) :: idate(:)
       logical, intent(in) :: lcrick, lcnorm, lnoprec, do_RRTMGP, lalw1bd, &
            inc_minor_gas
@@ -221,10 +220,10 @@ module GFS_rrtmg_setup
       call gas_init ( me, co2usr_file, co2cyc_file, ico2, ictm, ntoz,   &
            con_pi, errflg, errmsg)
       call cld_init ( si, levr, imp_physics, me, errflg, errmsg)
-      call rlwinit ( me, rad_hr_units, inc_minor_gas, ilwcliq, isubcsw, &
+      call rlwinit ( me, rad_hr_units, inc_minor_gas, icliq_lw, isubcsw, &
            iovr, iovr_rand, iovr_maxrand, iovr_max, iovr_dcorr,         &
            iovr_exp, iovr_exprand, errflg, errmsg )
-      call rswinit ( me, rad_hr_units, inc_minor_gas, iswcliq, isubclw, &
+      call rswinit ( me, rad_hr_units, inc_minor_gas, icliq_sw, isubclw, &
            iovr, iovr_rand, iovr_maxrand, iovr_max, iovr_dcorr,         &
            iovr_exp, iovr_exprand,iswmode, errflg, errmsg )
 
