@@ -906,15 +906,11 @@
         eta = etp
       endif
 
-#ifdef SINGLE_PREC
-      IF (ETP == 0.0) THEN
-        BETA = 0.0
-      ELSE
-        BETA = ETA/ETP
-      ENDIF
-#else
-      beta = eta / etp
-#endif
+      if (etp == 0.0) then
+        beta = 0.0
+      else
+        beta = eta/etp
+      endif
 
 !>  - Convert the sign of soil heat flux so that:
 !!   -  ssoil>0: warm the surface  (night time)
