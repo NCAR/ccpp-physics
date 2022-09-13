@@ -85,7 +85,7 @@
      &                      fh2_wat,   fh2_lnd,   fh2_ice,              &  !intent(inout)
      &                    ztmax_wat, ztmax_lnd, ztmax_ice,              &  !intent(inout)
      &                    zvfun,                                        &  !intent(out)
-     &                    errmsg, errflg,naux2d, aux2d)                                  !intent(out)
+     &                    errmsg, errflg)                                  !intent(out)
 !
       implicit none
 !
@@ -127,8 +127,6 @@
 !
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
-      integer, intent(in) :: naux2d
-      real(kind_phys), intent(inout) :: aux2d(:,:)
 !
 !     locals
 !

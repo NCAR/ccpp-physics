@@ -166,7 +166,7 @@
       sncovr1, qsurf, gflux, drain, evap, hflx, ep, runoff,      &
       cmm, chh, evbs, evcw, sbsno, pah, ecan, etran, edir, snowc,&
       stm, snohf,smcwlt2, smcref2, wet1, t2mmp, q2mp,zvfun,      &
-      errmsg, errflg, naux2d, aux2d)
+      errmsg, errflg)
 
   use machine ,   only : kind_phys
   use funcphys,   only : fpvs
@@ -367,8 +367,6 @@
   real(kind=kind_phys), dimension(:)     , intent(out)   :: zvfun      ! 
   character(len=*)    ,                    intent(out)   :: errmsg
   integer             ,                    intent(out)   :: errflg
-  integer, intent(in) :: naux2d
-  real(kind_phys), intent(inout) :: aux2d(:,:)
 
 !
 !  ---  some new options, hard code for now
