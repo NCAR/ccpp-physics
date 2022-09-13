@@ -38,7 +38,7 @@
 [ltp]
   standard_name = extra_top_layer
   long_name = extra top layers
-  units = none
+  units = count
   dimensions = ()
   type = integer
   intent = in
