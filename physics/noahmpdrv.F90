@@ -677,7 +677,7 @@ do i = 1, im
       co2_air               = co2_table * air_pressure_forcing
       o2_air                = o2_table  * air_pressure_forcing
       foliage_nitrogen      = 1.0
-
+      
 !
 !  --- noah-mp inout variables
 !
