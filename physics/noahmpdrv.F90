@@ -166,7 +166,7 @@
       sncovr1, qsurf, gflux, drain, evap, hflx, ep, runoff,      &
       cmm, chh, evbs, evcw, sbsno, pah, ecan, etran, edir, snowc,&
       stm, snohf,smcwlt2, smcref2, wet1, t2mmp, q2mp,zvfun,      &
-      errmsg, errflg)
+      errmsg, errflg)     
 
   use machine ,   only : kind_phys
   use funcphys,   only : fpvs
@@ -677,6 +677,7 @@ do i = 1, im
       co2_air               = co2_table * air_pressure_forcing
       o2_air                = o2_table  * air_pressure_forcing
       foliage_nitrogen      = 1.0
+
 !
 !  --- noah-mp inout variables
 !
