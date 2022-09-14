@@ -160,7 +160,7 @@ cc
      &                     omegac(im),zeta(im,km),dbyo1(im,km),
      &                     sigmab(im)
       real(kind=kind_phys) gravinv,dxcrtas
-
+      logical flag_shallow
 c  physical parameters
 !     parameter(g=grav,asolfac=0.89)
 !     parameter(g=grav)
@@ -1929,7 +1929,8 @@ c     updraft velcoity
 c
 c Prognostic closure
       if(progsigma)then
-         call progsigma_calc(im,km,first_time_step,restart,
+         flag_shallow = .true.
+         call progsigma_calc(im,km,first_time_step,restart,flag_shallow,
      &        del,tmf,qmicro,dbyo1,zdqca,omega_u,zeta,hvap,delt,
      &        prevsq,q,kbcon1,ktcon,cnvflg,
      &        sigmain,sigmaout,sigmab,errmsg,errflg)
