@@ -44,7 +44,7 @@
   intent = in
 [progsigma]
   standard_name = do_prognostic_updraft_area_fraction
-  long_name = flag for prognostic sigma in cumuls scheme
+  long_name = flag for prognostic area fraction in cumulus convection
   units = flag
   dimensions = ()
   type = logical
