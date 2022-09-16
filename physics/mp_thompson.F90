@@ -63,11 +63,11 @@ module mp_thompson
          ! Aerosols
          logical,                   intent(in   ) :: is_aerosol_aware
          logical,                   intent(in   ) :: merra2_aerosol_aware
-         real(kind_phys), optional, intent(inout) :: nc(:,:)
-         real(kind_phys), optional, intent(inout) :: nwfa(:,:)
-         real(kind_phys), optional, intent(inout) :: nifa(:,:)
-         real(kind_phys), optional, intent(inout) :: nwfa2d(:)
-         real(kind_phys), optional, intent(inout) :: nifa2d(:)
+         real(kind_phys),           intent(inout) :: nc(:,:)
+         real(kind_phys),           intent(inout) :: nwfa(:,:)
+         real(kind_phys),           intent(inout) :: nifa(:,:)
+         real(kind_phys),           intent(inout) :: nwfa2d(:)
+         real(kind_phys),           intent(inout) :: nifa2d(:)
          real(kind_phys),           intent(in)    :: aerfld(:,:,:)
          ! State variables
          real(kind_phys),           intent(in   ) :: tgrs(:,:)
@@ -264,6 +264,7 @@ module mp_thompson
            ! Ensure we have 1st guess cloud droplet number where mass non-zero but no number.
            where(qc .LE. 0.0) nc=0.0
            where(qc .GT. 0 .and. nc .LE. 0.0) nc = make_DropletNumber(qc*rho, nwfa*rho) * orho
+           where(qc .EQ. 0.0 .and. nc .GT. 0.0) nc = 0.0
 
            ! Ensure non-negative aerosol number concentrations.
            where(nwfa .LE. 0.0) nwfa = 1.1E6
@@ -277,6 +278,7 @@ module mp_thompson
            ! Ensure we have 1st guess cloud droplet number where mass non-zero but no number.
            where(qc .LE. 0.0) nc=0.0
            where(qc .GT. 0 .and. nc .LE. 0.0) nc = make_DropletNumber(qc*rho, nwfa*rho) * orho
+           where(qc .EQ. 0.0 .and. nc .GT. 0.0) nc = 0.0
 
          else
 
@@ -287,11 +289,11 @@ module mp_thompson
          end if
 
          if (convert_dry_rho) then
-           qc = qc/(1.0_kind_phys+qv)
-           qr = qr/(1.0_kind_phys+qv)
-           qi = qi/(1.0_kind_phys+qv)
-           qs = qs/(1.0_kind_phys+qv)
-           qg = qg/(1.0_kind_phys+qv)
+           !qc = qc/(1.0_kind_phys+qv)
+           !qr = qr/(1.0_kind_phys+qv)
+           !qi = qi/(1.0_kind_phys+qv)
+           !qs = qs/(1.0_kind_phys+qv)
+           !qg = qg/(1.0_kind_phys+qv)
 
            ni = ni/(1.0_kind_phys+qv)
            nr = nr/(1.0_kind_phys+qv)
@@ -514,6 +516,14 @@ module mp_thompson
                                           ' nc, nwfa, nifa, nwfa2d, nifa2d'
                errflg = 1
                return
+            else if (merra2_aerosol_aware .and. .not. (present(nc)     .and. &
+                                                       present(nwfa)   .and. &
+                                                       present(nifa)         )) then
+              write(errmsg,fmt='(*(a))') 'Logic error in mp_thompson_run:', &
+                                         ' merra2 aerosol-aware microphysics require the', &
+                                         ' following optional arguments: nc, nwfa, nifa'
+              errflg = 1
+              return
             end if
             ! Consistency cheecks - subcycling and inner loop at the same time are not supported
             if (nsteps>1 .and. dt_inner < dtp) then
@@ -542,33 +552,6 @@ module mp_thompson
             dtstep = dtp/real(nsteps, kind=kind_phys)
          else
             dtstep = dtp
-         end if
-         if (first_time_step .and. istep==1 .and. mpirank==mpiroot .and. blkno==1) then
-            write(*,'(a,i0,a,a,f6.2,a)') 'Thompson MP is using ', nsteps, ' substep(s) per time step', &
-                                         ' with an effective time step of ', dtstep, ' seconds'
-         end if
-
-         if (first_time_step .and. istep==1) then
-           if (is_aerosol_aware .and. .not. (present(nc)     .and. &
-                                             present(nwfa)   .and. &
-                                             present(nifa)   .and. &
-                                             present(nwfa2d) .and. &
-                                             present(nifa2d)       )) then
-              write(errmsg,fmt='(*(a))') 'Logic error in mp_thompson_run:', &
-                                         ' aerosol-aware microphysics require all of the', &
-                                         ' following optional arguments:', &
-                                         ' nc, nwfa, nifa, nwfa2d, nifa2d'
-              errflg = 1
-              return
-           else if (merra2_aerosol_aware .and. .not. (present(nc) .and. &
-                                                  present(nwfa)   .and. &
-                                                  present(nifa)         )) then
-              write(errmsg,fmt='(*(a))') 'Logic error in mp_thompson_run:', &
-                                         ' merra2 aerosol-aware microphysics require the', &
-                                         ' following optional arguments: nc, nwfa, nifa'
-              errflg = 1
-              return
-           end if
          end if
 
          !> - Convert specific humidity to water vapor mixing ratio.

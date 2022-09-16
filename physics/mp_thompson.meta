@@ -704,14 +704,6 @@
   type = real
   kind = kind_phys
   intent = in
-[spp_var_list]
-  standard_name = perturbed_spp_schemes
-  long_name = perturbed spp schemes
-  units = none
-  dimensions = (number_of_perturbed_spp_schemes)
-  type = character
-  kind = len=3
-  intent = in
 [spp_stddev_cutoff]
   standard_name = magnitude_of_spp_standard_deviation_cutoff
   long_name = magnitude of spp standard deviation cutoff
@@ -719,6 +711,14 @@
   dimensions = (number_of_perturbed_spp_schemes)
   type = real
   kind = kind_phys
+  intent = in
+[spp_var_list]
+  standard_name = perturbed_spp_schemes
+  long_name = perturbed spp schemes
+  units = none
+  dimensions = (number_of_perturbed_spp_schemes)
+  type = character
+  kind = len=3
   intent = in
 [cplchm]
   standard_name = flag_for_chemistry_coupling

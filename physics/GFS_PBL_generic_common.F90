@@ -39,7 +39,7 @@
         if(ltaerosol) then
           kk = 12
         else if(mraerosol) then
-          kk = 8
+          kk = 10
         else
           kk = 9
         endif
