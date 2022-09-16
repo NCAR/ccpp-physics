@@ -52,7 +52,7 @@
      &  phy_myj_a1u, phy_myj_a1t, phy_myj_a1q,     &
      &  pblh, slmsk, zorl, ustar, rib,             &
      &  cm,ch,stress,ffm,ffh,fm10,fh2,             &
-     &  landfrac,lakefrac,oceanfrac,fice,          &
+     &  landfrac,         oceanfrac,fice,          &
      &  z0rl_wat,  z0rl_lnd,  z0rl_ice,            &   ! intent(inout)
      &  ustar_wat, ustar_lnd, ustar_ice,           &   ! intent(inout)
      &  cm_wat,    cm_lnd,    cm_ice,              &   ! intent(inout)
@@ -121,7 +121,7 @@
       real(kind=kind_phys),dimension(:),intent(inout)   ::   &
      &        cm, ch, stress, ffm, ffh, fm10, fh2
       real(kind=kind_phys), dimension(:), intent(inout) ::   &
-     &        landfrac, lakefrac, oceanfrac, fice
+     &        landfrac, oceanfrac, fice
       real(kind=kind_phys), dimension(:), intent(inout) ::   &
      &                    z0rl_wat,  z0rl_lnd,  z0rl_ice,    &
      &                   ustar_wat, ustar_lnd, ustar_ice,    &

@@ -77,11 +77,11 @@
 !       f10m(i) = min(f10m(i),1.)
         u10m(i) = f10m(i) * u1(i)
         v10m(i) = f10m(i) * v1(i)
-        if(use_lake_model(i)>0 .and. iopt_lake==iopt_lake_clm) then
-           t2m(i) = lake_t2m(i)
-           q2m(i) = lake_q2m(i)
-           clm_t2m_count=clm_t2m_count+1
-        else
+        ! use_clm_2m: if(use_lake_model(i)>0 .and. iopt_lake==iopt_lake_clm) then
+        !    t2m(i) = lake_t2m(i)
+        !    q2m(i) = lake_q2m(i)
+        !    clm_t2m_count=clm_t2m_count+1
+        ! else
            fhi     = fh2(i) / fh(i)
 !          t2m(i)  = tskin(i)*(1. - fhi) + t1(i) * prslki(i) * fhi
 !          sig2k   = 1. - (grav+grav) / (cp * t2m(i))
@@ -103,7 +103,7 @@
            qss    = fpvs(t2m(i))
            qss    = eps * qss / (ps(i) + epsm1 * qss)
            q2m(i) = min(q2m(i),qss)
-        endif
+        ! endif use_clm_2m
       enddo
 
       return

@@ -50,7 +50,7 @@
       SUBROUTINE flake_driver_run (                          &
 ! ---- Inputs
             im, ps, t1, q1, wind, min_lakeice,               &
-            dlwflx, dswsfc, lakedepth, lakefrac,             &
+            dlwflx, dswsfc, lakedepth,                       &
             use_lake_model, snow, xlat, delt, zlvl, elev,    &
             wet, yearlen, julian, imon,                      &
             flag_iter, first_time_step, flag_restart,        &
@@ -91,7 +91,7 @@
       real (kind=kind_phys),  intent(in) :: delt, min_lakeice
 
       real (kind=kind_phys), dimension(:), intent(in) ::               &
-     &           xlat, lakedepth, lakefrac, snow
+     &           xlat, lakedepth, snow
 
       real (kind=kind_phys), dimension(:), intent(in) :: weasd
 
@@ -308,7 +308,7 @@
 !         w_extinc(i) = 3.0
 
 !     write(0,1002) julian,xlat(i),w_albedo(I),w_extinc(i),elev(i),tsurf(i),T_sfc(i),t_bot1(i)
-!     write(0,1003) use_lake_model(i),i,lakefrac(i),lakedepth(i), snwdph(i), hice(i), fice(i)        
+!     write(0,1003) use_lake_model(i),i,lakedepth(i), snwdph(i), hice(i), fice(i)        
 !     write(0,1004) ps(i), wind(i), t1(i), q1(i), dlwflx(i), dswsfc(i), zlvl(i)
 
         endif  !flag

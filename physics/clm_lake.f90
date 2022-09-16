@@ -616,6 +616,19 @@ MODULE clm_lake
                 print *,'Unhappy point before LakeMain t_soilsno = ',t_soisno(1,:)
              endif
           endif
+
+          eflx_lwrad_net = -9999
+          eflx_gnet = -9999
+          eflx_sh_tot = -9999
+          eflx_lh_tot = -9999
+          t_ref2m = -9999
+          q_ref2m = -9999
+          taux = -9999
+          tauy = -9999
+          ram1 = -9999
+          z0mg = -9999
+          ustar_out = -9999
+
           is_unhappy=.false.
             CALL LakeMain(forc_t,forc_pbot,forc_psrf,forc_hgt,forc_hgt_q,   & !I  
                           forc_hgt_t,forc_hgt_u,forc_q, forc_u,         &
@@ -730,6 +743,10 @@ MODULE clm_lake
                 ustar = ustar_out(1) ! surface_friction_velocity_over_water
 
                 ! Calculate qsfc from t_grnd:        (surface_specific_humidity_over_water)
+                PSFC = prsi(i,1) 
+                discard1 = -9999
+                discard2 = -9999
+                discard3 = -9999
                 call QSat(t_grnd(c),psfc,discard1,discard2,qsfc(i),discard3)
 
                 ! From flake driver:
@@ -1191,7 +1208,6 @@ SUBROUTINE ShalLakeFluxes(forc_t,forc_pbot,forc_psrf,forc_hgt,forc_hgt_q,       
     !    real(kind_phys) :: z0mg(lbp:ubp)           ! roughness length over ground, momentum [m]
     real(kind_phys) :: z0hg(lbp:ubp)           ! roughness length over ground, sensible heat [m]
     real(kind_phys) :: z0qg(lbp:ubp)           ! roughness length over ground, latent heat [m]
-    real(kind_phys) :: beta(2)                 ! fraction solar rad absorbed at surface: depends on lake type
     real(kind_phys) :: u2m                     ! 2 m wind speed (m/s)
     real(kind_phys) :: u10(1)         ! 10-m wind (m/s) (for dust model)
     real(kind_phys) :: fv(1)          ! friction velocity (m/s) (for dust model)
@@ -1206,7 +1222,8 @@ SUBROUTINE ShalLakeFluxes(forc_t,forc_pbot,forc_psrf,forc_hgt,forc_hgt_q,       
     !
     ! Constants for lake temperature model
     !
-    data beta/0.4_kind_phys, 0.4_kind_phys/  ! (deep lake, shallow lake)
+    real(kind_phys), parameter :: beta(2) = & ! fraction solar rad absorbed at surface: depends on lake type
+         (/0.4_kind_phys, 0.4_kind_phys/)  ! (deep lake, shallow lake)
     ! This is the energy absorbed at the lake surface if no snow.
     !    data za  /0.6_kind_phys, 0.5_kind_phys/
     !    data eta /0.1_kind_phys, 0.5_kind_phys/
@@ -1741,8 +1758,6 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
     integer , parameter  :: islak = 2     ! index of lake, 1 = deep lake, 2 = shallow lake
     real(kind_phys), parameter  :: p0 = 1._kind_phys     ! neutral value of turbulent prandtl number
     integer  :: i,j,fc,fp,g,c,p         ! do loop or array index
-    real(kind_phys) :: beta(2)                 ! fraction solar rad absorbed at surface: depends on lake type
-    real(kind_phys) :: za(2)                   ! base of surface absorption layer (m): depends on lake type
     real(kind_phys) :: eta(2)                  ! light extinction coefficient (/m): depends on lake type
     real(kind_phys) :: cwat                    ! specific heat capacity of water (j/m**3/kelvin)
     real(kind_phys) :: cice_eff                ! effective heat capacity of ice (using density of
@@ -1810,8 +1825,10 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
     !
     ! Constants for lake temperature model
     !
-    data beta/0.4_kind_phys, 0.4_kind_phys/  ! (deep lake, shallow lake)
-    data za  /0.6_kind_phys, 0.6_kind_phys/
+    real(kind_phys), parameter :: beta(2) = & ! fraction solar rad absorbed at surface: depends on lake type
+         (/0.4_kind_phys, 0.4_kind_phys/)  ! (deep lake, shallow lake)
+    real(kind_phys), parameter :: za(2) = & ! base of surface absorption layer (m): depends on lake type
+         (/0.6_kind_phys, 0.6_kind_phys/)
     !   For now, keep beta and za for shallow lake the same as deep lake, until better data is found.
     !   It looks like eta is key and that larger values give better results for shallow lakes.  Use
     !   empirical expression from Hakanson (below). This is still a very unconstrained parameter
@@ -4229,9 +4246,8 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
     integer :: neibor                ! adjacent node selected for combination
     real(kind_phys):: zwice(lbc:ubc)        ! total ice mass in snow
     real(kind_phys):: zwliq (lbc:ubc)       ! total liquid water in snow
-    real(kind_phys):: dzmin(5)              ! minimum of top snow layer
-
-    data dzmin /0.010, 0.015, 0.025, 0.055, 0.115/
+    real(kind_phys), parameter :: dzmin(5) = & ! minimum of top snow layer
+         (/0.010, 0.015, 0.025, 0.055, 0.115/)
     !-----------------------------------------------------------------------
     
     ! Check the mass of ice lens of snow, when the total is less than a small value,
@@ -5374,30 +5390,13 @@ if_pergro: if (PERGRO) then
   integer :: used_lakedepth_default, init_points, month, julday
   integer :: mon, iday, num2, num1, juld, day2, day1, wght1, wght2
   real(kind_phys) :: Tclim
+  logical :: have_date
 
   used_lakedepth_default=0
+  have_date=.false.
 
   errmsg = ''
   errflg = 0
-
-  call get_month_and_day(IDATE,month,iday,julday,fhour)
-
-  !-- Compute weight for the current day
-  mon = month
-  if(iday > 15) mon=mon+1
-  if(mon == 1) mon=13
-
-  num2 = month * 2
-  if(iday > 15) num2=num2+1
-  if(num2 == 1) num2=25
-  num1 = num2 - 1
-
-  juld = julday
-  if (juld < 7) juld = juld + 365
-  day2 = julm(mon)+15
-  day1 = julm(mon)
-  wght1=(day2-julday)/float(day2-day1)
-  wght2=(julday-day1)/float(day2-day1)
 
   if(LAKEDEBUG .and. me==0) then
      print *,'month,num1,num2,day1,day2,wght1,wght2',month,num1,num2,day1,day2,wght1,wght2
@@ -5405,7 +5404,7 @@ if_pergro: if (PERGRO) then
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  DO i=1,im
+  do_init_part1: DO i=1,im
     if(use_lake_model(i)==0) then
       cycle
     endif
@@ -5425,6 +5424,31 @@ if_pergro: if (PERGRO) then
     
     if(clm_lake_initialized(i)>0) then
       cycle
+    endif
+
+    if(.not.have_date) then
+      !$OMP CRITICAL
+      call get_month_and_day(IDATE,month,iday,julday,fhour)
+      !$OMP END CRITICAL
+      
+      have_date = .true.
+  
+      !-- Compute weight for the current day
+      mon = month
+      if(iday > 15) mon=mon+1
+      if(mon == 1) mon=13
+      
+      num2 = month * 2
+      if(iday > 15) num2=num2+1
+      if(num2 == 1) num2=25
+      num1 = num2 - 1
+      
+      juld = julday
+      if (juld < 7) juld = juld + 365
+      day2 = julm(mon)+15
+      day1 = julm(mon)
+      wght1=(day2-julday)/float(day2-day1)
+      wght2=(julday-day1)/float(day2-day1)
     endif
 
     snowdp2d(i)         = snowd(i)*1e-3   ! SNOW in kg/m^2 and snowdp in m
@@ -5472,7 +5496,7 @@ if_pergro: if (PERGRO) then
     h2osoi_vol3d(i,:)    = 0.0
     snl2d(i)             = 0.0
 
-  ENDDO
+  ENDDO do_init_part1
 
   if(used_lakedepth_default>0) then
     print *,'used lakedepth_default: ',used_lakedepth_default
@@ -5481,7 +5505,7 @@ if_pergro: if (PERGRO) then
   !!!!!!!!!!!!!!!!!!begin to initialize lake variables!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   init_points=0
-  DO i = 1,im
+  do_init_part2: DO i = 1,im
  
     if(use_lake_model(i)==0 .or. clm_lake_initialized(i)>0) then
       cycle
@@ -5684,7 +5708,7 @@ if_pergro: if (PERGRO) then
     end do
 
     clm_lake_initialized(i) = 1
-  ENDDO
+  ENDDO do_init_part2
 
 
   if(LAKEDEBUG .and. init_points>0) then
