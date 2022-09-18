@@ -8,7 +8,6 @@ contains
 !!tallies are sumed in calwxt_dominant().
 !!
 !>\section gen_calp GFS calpreciptype General Algorithm
-!! @{
       subroutine calpreciptype(kdt,nrcm,im,ix,lm,lp1,randomno,      &
                                xlat,xlon,                           &
                                gt0,gq0,prsl,prsi,prec,              & !input
@@ -216,7 +215,6 @@ contains
       deallocate (twet,rh,td)        
       return
       end
-!! @}
 !
 !&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 !>\ingroup gfs_calpreciptype
@@ -1314,7 +1312,6 @@ contains
 !! different algorithms and sums them up to give a dominant type.
 !!
 !>\section gen_calwxt_dominant GFS calwxt_dominant General Algorithm
-!! @{
        subroutine calwxt_dominant(nalg,rain,freezr,sleet,snow, &
      &                            domr,domzr,domip,doms)
 !
@@ -1385,5 +1382,4 @@ contains
 !
       return
       end
-!! @}
 end module calpreciptype_mod

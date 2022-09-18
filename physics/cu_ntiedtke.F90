@@ -147,15 +147,11 @@ contains
          
       end subroutine cu_ntiedtke_init
 
-      subroutine cu_ntiedtke_finalize()
-      end subroutine cu_ntiedtke_finalize
-!
 ! Tiedtke cumulus scheme from WRF with small modifications
 ! This scheme includes both deep and shallow convections
 !===================
 !
-!!
-!! \section arg_table_cu_ntiedtke_run Argument Table
+!> \section arg_table_cu_ntiedtke_run Argument Table
 !! \htmlinclude cu_ntiedtke_run.html
 !!
 !-----------------------------------------------------------------------

@@ -1,22 +1,16 @@
-! ######################################################################################
-!>\file rad_sw_pre.f90
-!!
+!>\file rad_sw_pre.F90
 !! This file gathers the sunlit points for the shortwave radiation schemes.
-!!
-!> \defgroup rad_sw_pre GFS radiation pre routine.
-!! @{ 
-!!
-! ###################################################################################### 
+
 module rad_sw_pre
 contains
 
-  ! ###################################################################################
+!> \defgroup rad_sw_pre GFS Radiation-SW Pre 
+!! This module gathers the sunlit points for the shortwave radiation schemes.
+!> @{
 !> \section arg_table_rad_sw_pre_run Argument Table
 !! \htmlinclude rad_sw_pre_run.html
 !!
-!! \section rad_sw_pre_run
-!! @{
-  ! ###################################################################################
+!! \section rad_sw_pre_run_gen General Algorithm
   subroutine rad_sw_pre_run (im, lsswr, coszen, nday, idxday, errmsg, errflg)
     use machine,  only: kind_phys
     implicit none
@@ -55,5 +49,5 @@ contains
     endif
     
   end subroutine rad_sw_pre_run
-!! @}
+!> @}
 end module rad_sw_pre

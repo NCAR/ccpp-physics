@@ -6,12 +6,12 @@ Please see more information about the CCPP at the locations below.
 
 - [CCPP website hosted by the Developmental Testbed Center (DTC)](https://dtcenter.org/ccpp)
 - [CCPP public release information](https://dtcenter.org/community-code/common-community-physics-package-ccpp/download)
-- [CCPP Technical Documentation](https://ccpp-techdoc.readthedocs.io/en/latest)
-- [CCPP Scientific Documentation](https://dtcenter.ucar.edu/GMTB/v5.0.0/sci_doc)
+- [CCPP Technical Documentation](https://ccpp-techdoc.readthedocs.io/en/v6.0.0/)
+- [CCPP Scientific Documentation](https://dtcenter.ucar.edu/GMTB/v6.0.0/sci_doc/index.html)
 - [CCPP Physics GitHub wiki](https://github.com/NCAR/ccpp-physics/wiki)
 - [CCPP Framework GitHub wiki](https://github.com/NCAR/ccpp-framework/wiki)
 
-For the use of CCPP with its Single Column Model, see the [Single Column Model User's Guide](http://dtcenter.org/sites/default/files/paragraph/scm-ccpp-guide-v5.0.0.pdf).
+For the use of CCPP with its Single Column Model, see the [Single Column Model User's Guide](http://dtcenter.org/sites/default/files/paragraph/scm-ccpp-guide-v6.0.0.pdf).
 
 For the use of CCPP with NOAA's Unified Forecast System (UFS), see the [UFS Medium-Range Application User's Guide](https://ufs-mrweather-app.readthedocs.io/en/latest), the [UFS Short-Range Application User's Guide](https://ufs-srweather-app.readthedocs.io/en/latest) and the [UFS Weather Model User's Guide](https://ufs-weather-model.readthedocs.io/en/latest).
 
@@ -24,5 +24,3 @@ This revision of the CCPP physics library is compliant with [version 0.1.1 of th
 ## Licensing
 
 The Apache license will be in effect unless superseded by an existing license in specific files.
-
-### Last updated by Dom Heinzeller, 11/04/2021

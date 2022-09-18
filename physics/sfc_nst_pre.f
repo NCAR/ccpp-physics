@@ -5,18 +5,16 @@
 
       contains
 
-! \defgroup GFS_NSST_PRE GFS Near-Surface Sea Temperature Pre
+!> \defgroup GFS_NSST_PRE GFS Near-Surface Sea Temperature Pre
 !!
 !! The NSST scheme is one of the three schemes used to represent the
 !! surface in the GFS physics suite. The other two are the Noah land
 !! surface model and the sice simplified ice model.
 !!
-      
 !! \section arg_table_sfc_nst_pre_run Argument Table
 !! \htmlinclude sfc_nst_pre_run.html
 !!
 !> \section NSST_general_pre_algorithm General Algorithm
-!! @{
       subroutine sfc_nst_pre_run
      &    (im, wet, tgice, tsfco, tsurf_wat,
      &     tseal, xt, xz, dt_cool, z_c, tref, cplflx,
@@ -95,5 +93,4 @@
 
       return
       end subroutine sfc_nst_pre_run
-!! @}
       end module sfc_nst_pre

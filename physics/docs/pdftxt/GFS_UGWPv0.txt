@@ -109,9 +109,9 @@ and dynamical instability of waves described by the linear
 (Weinstock 1984 \cite weinstock_1984; Hines 1997 \cite hines_1997) saturation theories.
 
 \section intra_UGWPv0 Intraphysics Communication
-\ref arg_table_cires_ugwp_run
+- \ref arg_table_cires_ugwp_run
 
 \section gen_al_ugwpv0 General Algorithm
-\ref gen_cires_ugwp
+- \ref gen_cires_ugwp
 
 */

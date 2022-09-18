@@ -21,7 +21,8 @@ The CCPP interface to the NoahMP LSM is a driving software layer on top of the a
 Note that noahmp_glacer() and noahmp_sflx() are the actual NoahMP codes.
  
 \section intra_noahmp Intraphysics Communication
- +  GFS NoahMP LSM Driver (\ref arg_table_noahmpdrv_run)
-\section gen_al_noahmp General Algorithm of Driver
+ +  \ref arg_table_noahmpdrv_run
+
+\section gen_al_noahmp General Algorithm
 + \ref general_noahmpdrv
 */

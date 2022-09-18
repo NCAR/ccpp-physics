@@ -4,7 +4,6 @@
 !>\defgroup mod_GFS_phys_time_vary GFS Physics Time Update
 !! This module contains GFS physics time vary subroutines including ozone, stratospheric water vapor,
 !! aerosol, IN&CCN and surface properties updates.
-!> @{
    module GFS_phys_time_vary
 
 #ifdef _OPENMP
@@ -66,7 +65,7 @@
 !! \htmlinclude GFS_phys_time_vary_init.html
 !!
 !>\section gen_GFS_phys_time_vary_init GFS_phys_time_vary_init General Algorithm
-!! @{
+!> @{
       subroutine GFS_phys_time_vary_init (                                                         &
               me, master, ntoz, h2o_phys, iaerclm, iccn, iflip, im, levs,                          &
               nx, ny, idate, xlat_d, xlon_d,                                                       &
@@ -701,13 +700,13 @@
          end function find_eq_smc
 
       end subroutine GFS_phys_time_vary_init
-!! @}
+!> @}
 
 !> \section arg_table_GFS_phys_time_vary_timestep_init Argument Table
 !! \htmlinclude GFS_phys_time_vary_timestep_init.html
 !!
 !>\section gen_GFS_phys_time_vary_timestep_init GFS_phys_time_vary_timestep_init General Algorithm
-!! @{
+!> @{
       subroutine GFS_phys_time_vary_timestep_init (                                                 &
             me, master, cnx, cny, isc, jsc, nrcm, im, levs, kdt, idate, nsswr, fhswr, lsswr, fhour, &
             imfdeepcnv, cal_pre, random_clds, nscyc, ntoz, h2o_phys, iaerclm, iccn, clstp,          &
@@ -906,13 +905,13 @@
          endif
 
       end subroutine GFS_phys_time_vary_timestep_init
-!! @}
+!> @}
 
 !> \section arg_table_GFS_phys_time_vary_timestep_finalize Argument Table
 !! \htmlinclude GFS_phys_time_vary_timestep_finalize.html
 !!
 !>\section gen_GFS_phys_time_vary_timestep_finalize GFS_phys_time_vary_timestep_finalize General Algorithm
-!! @{
+!> @{
       subroutine GFS_phys_time_vary_timestep_finalize (errmsg, errflg)
 
          implicit none
@@ -926,7 +925,7 @@
          errflg = 0
 
       end subroutine GFS_phys_time_vary_timestep_finalize
-!! @}
+!> @}
 
 !> \section arg_table_GFS_phys_time_vary_finalize Argument Table
 !! \htmlinclude GFS_phys_time_vary_finalize.html
@@ -976,4 +975,3 @@
       end subroutine GFS_phys_time_vary_finalize
 
    end module GFS_phys_time_vary
-!> @}

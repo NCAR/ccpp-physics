@@ -29,13 +29,10 @@
 
       end subroutine samfdeepcnv_init
 
-      subroutine samfdeepcnv_finalize()
-      end subroutine samfdeepcnv_finalize
-
-!> \defgroup SAMFdeep GFS Scale-Aware Mass-Flux Deep Convection Scheme Module
-!! @{
-!>  \brief This subroutine contains the entirety of the SAMF deep convection
+!> \defgroup SAMFdeep GFS saSAS Deep Convection Module
+!> This subroutine contains the entirety of the SAMF deep convection
 !! scheme.
+!> @{
 !!
 !! For grid sizes larger than threshold value, as in Grell (1993) \cite grell_1993 , the SAMF
 !! deep convection scheme can be described in terms of three types of
@@ -74,7 +71,6 @@
 !!  -# For the "feedback control", calculate updated values of the state variables by multiplying the cloud base mass flux and the tendencies calculated per unit cloud base mass flux from the static control.
 !!
 !!  \section samfdeep_detailed GFS samfdeepcnv Detailed Algorithm
-!!  @{
       subroutine samfdeepcnv_run (im,km,first_time_step,restart,        &
      &    tmf,qmicro,itc,ntc,cliq,cp,cvap,                              &
      &    eps,epsm1,fv,grav,hvap,rd,rv,                                 &
@@ -1622,7 +1618,7 @@ c
 c
       do i = 1, im
         flg(i) = cnvflg(i)
-        ktcon1(i) = kmax(i)
+        ktcon1(i) = ktcon(i)
       enddo
       do k = 2, km1
         do i = 1, im
@@ -1641,8 +1637,11 @@ c
 !             aa2(i) = aa2(i) +
 !!   &                 dz1 * eta(i,k) * grav * fv *
 !    &                 dz1 * grav * fv *
-!    &                 max(val,(qeso(i,k) - qo(i,k)))
-              if(aa2(i) < 0.) then
+!    &                 max(val,(qeso(i,k) - qo(i,k)))        
+!NRL MNM: Limit overshooting not to be deeper than half the actual cloud              
+              tem  = 0.5 * (zi(i,ktcon(i))-zi(i,kbcon(i)))
+              tem1 = zi(i,k)-zi(i,ktcon(i))
+              if(aa2(i) < 0. .or. tem1 >= tem) then
                 ktcon1(i) = k
                 flg(i) = .false.
               endif
@@ -3562,6 +3561,5 @@ c
       end subroutine samfdeepcnv_run
 
 !> @}
-!! @}
 
       end module samfdeepcnv
