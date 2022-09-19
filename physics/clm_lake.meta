@@ -7,6 +7,22 @@
 [ccpp-arg-table]
   name = clm_lake_run
   type = scheme
+[zorlw]
+  standard_name = surface_roughness_length_over_water
+  long_name = surface roughness length over water
+  units = cm
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[zorli]
+  standard_name = surface_roughness_length_over_ice
+  long_name = surface roughness length over ice
+  units = cm
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
 [fhour]
   standard_name = forecast_time
   long_name = current forecast time

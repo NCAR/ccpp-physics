@@ -277,7 +277,7 @@ MODULE clm_lake
                      lake_t2m     ,lake_q2m       ,clm_lake_initialized          ,&
                      weasd        ,isltyp         ,snowd        ,use_lakedepth   ,&
                      restart      ,lakedepth_default                             ,&
-                                                   sand3d       ,clay3d          ,&
+                     zorlw        ,zorli          ,sand3d       ,clay3d          ,&
 ! Flake output variables
                      weasdi       ,snodi          ,hice         ,tsurf           ,&
                      t_sfc        ,lflx           ,ustar        ,qsfc            ,&
@@ -332,7 +332,7 @@ MODULE clm_lake
     REAL(KIND_PHYS),           DIMENSION( : )         ,INTENT(IN)  :: dswsfci
     REAL(KIND_PHYS),           DIMENSION( : )         ,INTENT(IN)  :: emiss
     REAL(KIND_PHYS),           DIMENSION( : )         ,INTENT(IN)  :: rain
-    REAL(KIND_PHYS),           DIMENSION( : )         ,INTENT(INOUT)  :: albedo
+    REAL(KIND_PHYS),           DIMENSION( : )         ,INTENT(INOUT)  :: albedo, zorlw, zorli
     INTEGER, DIMENSION( : ), INTENT(IN)       :: ISLTYP
     INTEGER, DIMENSION( : ), INTENT(INOUT)    :: salty
     REAL(KIND_PHYS),                                                  INTENT(IN)  :: dtp
@@ -717,6 +717,8 @@ MODULE clm_lake
                   icy(i)=.true.
                   ice_points = ice_points+1
 
+                  zorli(i) = z0mg(c)
+
                   ! Assume that, if a layer has ice, the entire layer thickness is ice.
                   hice(I) = 0
                   do k=1,nlevlake
@@ -725,6 +727,7 @@ MODULE clm_lake
                     endif
                   end do
                 else
+                  zorlw(i) = z0mg(c)
                   weasdi(i) = 0
                   snodi(i) = 0
                   tisfc(i) = tsurf(i)
