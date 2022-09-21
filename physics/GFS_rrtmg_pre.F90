@@ -19,7 +19,7 @@
 !>\section rrtmg_pre_gen General Algorithm
       subroutine GFS_rrtmg_pre_run (im, levs, lm, lmk, lmp, n_var_lndp,        &
         imfdeepcnv, imfdeepcnv_gf, me, ncnd, ntrac, num_p3d, npdf3d, ncnvcld3d,&
-        ntqv, ntcw,ntiw, ntlnc, ntinc, ntrnc, ntsnc, ntccn,                    &
+        ntqv, ntcw,ntiw, ntlnc, ntinc, ntrnc, ntsnc, ntccn, top_at_1,          &
         ntrw, ntsw, ntgl, nthl, ntwa, ntoz,                                    &
         ntclamt, nleffr, nieffr, nseffr, lndp_type, kdt,                       &
         ntdu1, ntdu2, ntdu3, ntdu4, ntdu5, ntss1, ntss2,                       &
@@ -45,7 +45,7 @@
         clouds9, cldsa, cldfra, cldfra2d, lwp_ex,iwp_ex, lwp_fc,iwp_fc,        &
         faersw1, faersw2, faersw3, faerlw1, faerlw2, faerlw3, alpha,           &
         aero_dir_fdb, smoke_ext, dust_ext,                                     &
-        spp_wts_rad, spp_rad, rrfs_smoke_band, top_at_1, ico2, errmsg, errflg)
+        spp_wts_rad, spp_rad, rrfs_smoke_band, ico2, errmsg, errflg)
 
       use machine,                   only: kind_phys
 
@@ -124,7 +124,7 @@
       logical,              intent(in) :: lsswr, lslwr, ltaerosol, lgfdlmprad, &
                                           uni_cld, effr_in, do_mynnedmf,       &
                                           lmfshal, lmfdeep2, pert_clds, lcrick,&
-                                          lcnorm
+                                          lcnorm, top_at_1
       logical,              intent(in) :: aero_dir_fdb
       real(kind=kind_phys), dimension(:,:), intent(in) :: smoke_ext, dust_ext
 
@@ -203,7 +203,6 @@
                                                              faerlw2,&
                                                              faerlw3
       real(kind=kind_phys), dimension(:,:),   intent(out) :: alpha
-      logical, intent(out) :: top_at_1
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
@@ -260,9 +259,6 @@
       errmsg = ''
       errflg = 0
 
-      ! Vertical ordering
-      top_at_1 = (prsi(1,1) .lt.  prsi(1, LMP))
-      
       if (.not. (lsswr .or. lslwr)) return
 
       !--- set commonly used integers

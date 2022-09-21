@@ -1393,7 +1393,7 @@
   units = flag
   dimensions = ()
   type = logical
-  intent = out
+  intent = in
 [si]
   standard_name = sigma_pressure_hybrid_vertical_coordinate
   long_name = vertical sigma coordinate for radiation initialization

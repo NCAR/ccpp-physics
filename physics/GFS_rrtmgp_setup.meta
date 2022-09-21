@@ -2,7 +2,7 @@
   name = GFS_rrtmgp_setup
   type = scheme
   dependencies = iounitdef.f,machine.F,module_bfmicrophysics.f,radiation_aerosols.f,radiation_astronomy.f
-  dependencies = module_mp_thompson.F90,radiation_clouds.f,radiation_gases.f
+  dependencies = module_mp_thompson.F90,radiation_gases.f
 
 ########################################################################
 [ccpp-arg-table]
@@ -146,13 +146,6 @@
   dimensions = ()
   type = integer
   intent = in
-[num_p3d]
-  standard_name = number_of_microphysics_variables_in_xyz_dimensioned_restart_array
-  long_name = number of 3D arrays needed for microphysics
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
 [ntoz]
   standard_name = index_of_ozone_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for ozone mixing ratio
@@ -181,34 +174,6 @@
   dimensions = ()
   type = integer
   intent = in
-[icliq_sw]
-  standard_name = control_for_shortwave_radiation_liquid_clouds
-  long_name = sw optical property for liquid clouds
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-[crick_proof]
-  standard_name = flag_for_CRICK_proof_cloud_water
-  long_name = flag for CRICK-Proof cloud water
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[ccnorm]
-  standard_name = flag_for_in_cloud_condensate
-  long_name = flag for cloud condensate normalized by cloud cover
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[norad_precip]
-  standard_name = flag_for_turning_off_precipitation_radiative_effect
-  long_name = radiation precip flag for Ferrier/Moorthi
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
 [lalw1bd]
   standard_name = flag_for_longwave_aerosol_band_properties
   long_name = flag for band or multiband longwave aerosol properties
@@ -221,13 +186,6 @@
   long_name = initialization date and time
   units = none
   dimensions = (4)
-  type = integer
-  intent = in
-[iflip]
-  standard_name = control_for_vertical_index_direction
-  long_name = flag for vertical index direction control
-  units = flag
-  dimensions = ()
   type = integer
   intent = in
 [me]
@@ -301,6 +259,13 @@
   type = character
   kind = len=26
   intent = in
+[ipsd0]
+  standard_name = initial_seed_for_mcica
+  long_name = initial permutaion seed for mcica radiation
+  units = none
+  dimensions =  ()
+  type = integer
+  intent = inout
 [iaermdl]
   standard_name = flag_for_aerosol_radiation_scheme
   long_name = flag for aerosol scheme to use in radiation
