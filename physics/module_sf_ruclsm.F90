@@ -521,6 +521,15 @@ CONTAINS
 
       DO i=its,ite
 
+         IF(ABS(SNOWH(I,J))<1e-20) THEN
+           ! Workaround needed for subnormal numbers (gfortran issue)
+           SNOWH(I,J)=0
+         ENDIF
+         IF(ABS(SNOW(I,J))<1e-20) THEN
+           ! Workaround needed for subnormal numbers (gfortran issue)
+           SNOW(I,J)=0
+         ENDIF
+
     IF (debug_print ) THEN
 !     if(j==10) then
       print *,' IN LSMRUC ','ims,ime,jms,jme,its,ite,jts,jte,nzs', &
