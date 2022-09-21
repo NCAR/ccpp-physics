@@ -328,6 +328,20 @@
   dimensions = ()
   type = logical
   intent = in
+[ltp]
+  standard_name = extra_top_layer
+  long_name = extra top layer for radiation
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[lextop]
+  standard_name = do_extra_top_layer_for_radiation
+  long_name = use an extra top layer for radiation
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [ipsd0]
   standard_name = initial_seed_for_mcica
   long_name = initial permutaion seed for mcica radiation

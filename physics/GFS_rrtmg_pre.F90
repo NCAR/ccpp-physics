@@ -17,9 +17,9 @@
 !! \htmlinclude GFS_rrtmg_pre_run.html
 !!    
 !>\section rrtmg_pre_gen General Algorithm
-      subroutine GFS_rrtmg_pre_run (im, levs, lm, lmk, lmp, n_var_lndp,        &
-        imfdeepcnv, imfdeepcnv_gf, me, ncnd, ntrac, num_p3d, npdf3d, ncnvcld3d,&
-        ntqv, ntcw,ntiw, ntlnc, ntinc, ntrnc, ntsnc, ntccn, top_at_1,          &
+      subroutine GFS_rrtmg_pre_run (im, levs, lm, lmk, lmp, n_var_lndp, lextop,&
+        ltp, imfdeepcnv, imfdeepcnv_gf, me, ncnd, ntrac, num_p3d, npdf3d,      &
+        ncnvcld3d,ntqv, ntcw,ntiw, ntlnc, ntinc, ntrnc, ntsnc, ntccn, top_at_1,&
         ntrw, ntsw, ntgl, nthl, ntwa, ntoz,                                    &
         ntclamt, nleffr, nieffr, nseffr, lndp_type, kdt,                       &
         ntdu1, ntdu2, ntdu3, ntdu4, ntdu5, ntss1, ntss2,                       &
@@ -49,8 +49,7 @@
 
       use machine,                   only: kind_phys
 
-      use radcons,                   only: itsfc,ltp, lextop, qmin,  &
-                                           qme5, qme6, epsq, prsmin
+      use radcons,                   only: itsfc, qmin, qme5, qme6, epsq, prsmin
       use funcphys,                  only: fpvs
 
       use module_radiation_astronomy,only: coszmn                      ! sol_init, sol_update
@@ -82,8 +81,8 @@
                                            make_RainNumber
       implicit none
 
-      integer,              intent(in)  :: im, levs, lm, lmk, lmp, n_var_lndp, &
-                                           imfdeepcnv,                         &
+      integer,              intent(in)  :: im, levs, lm, lmk, lmp, ltp,        &
+                                           n_var_lndp, imfdeepcnv,             &
                                            imfdeepcnv_gf, me, ncnd, ntrac,     &
                                            num_p3d, npdf3d, ncnvcld3d, ntqv,   &
                                            ntcw, ntiw, ntlnc, ntinc,           &
@@ -124,7 +123,7 @@
       logical,              intent(in) :: lsswr, lslwr, ltaerosol, lgfdlmprad, &
                                           uni_cld, effr_in, do_mynnedmf,       &
                                           lmfshal, lmfdeep2, pert_clds, lcrick,&
-                                          lcnorm, top_at_1
+                                          lcnorm, top_at_1, lextop
       logical,              intent(in) :: aero_dir_fdb
       real(kind=kind_phys), dimension(:,:), intent(in) :: smoke_ext, dust_ext
 
@@ -347,7 +346,9 @@
           plyr(i,k1)    = prsl(i,k2)    * 0.01   ! pa to mb (hpa)
           tlyr(i,k1)    = tgrs(i,k2)
           prslk1(i,k1)  = prslk(i,k2)
-
+          rho(i,k1)     = prsl(i,k2)/(con_rd*tlyr(i,k1))
+          orho(i,k1)    = 1.0/rho(i,k1)
+          
 !> - Compute relative humidity.
           es  = min( prsl(i,k2),  fpvs( tgrs(i,k2) ) )  ! fpvs and prsl in pa
           qs  = max( QMIN, con_eps * es / (prsl(i,k2) + epsm1*es) )
@@ -403,6 +404,8 @@
           plyr(i,lyb)   = 0.5 * plvl(i,lla)
           tlyr(i,lyb)   = tlyr(i,lya)
           prslk1(i,lyb) = (plyr(i,lyb)*0.001) ** rocp ! plyr in hPa
+          rho(i,lyb)    = plyr(i,lyb) *100.0/(con_rd*tlyr(i,lyb))
+          orho(i,lyb)   = 1.0/rho(i,lyb)
           rhly(i,lyb)   = rhly(i,lya)
           qstl(i,lyb)   = qstl(i,lya)
         enddo

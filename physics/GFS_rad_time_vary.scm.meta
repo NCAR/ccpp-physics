@@ -7,6 +7,20 @@
 [ccpp-arg-table]
   name = GFS_rad_time_vary_timestep_init
   type = scheme
+[lrseeds]
+  standard_name = do_host_provided_random_seeds
+  long_name = flag to use host-provided random seeds
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[rseeds]
+  standard_name = random_number_seeds_from_host
+  long_name = random number seeds from host
+  units = none
+  dimensions = (horizontal_dimension, number_of_host_provided_random_number_streams)
+  type = integer
+  intent = in
 [lslwr]
   standard_name = flag_for_calling_longwave_radiation
   long_name = logical flags for lw radiation calls
