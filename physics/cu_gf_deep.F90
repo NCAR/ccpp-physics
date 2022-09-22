@@ -2908,12 +2908,12 @@ contains
 !$acc declare copyin(p,t,q)
      real(kind=kind_phys),    dimension (its:ite,kts:kte)                &
         ,intent (out  )                   ::             &
-        he,hes,qes
-!$acc declare copyout(he,hes,qes)
+        hes,qes
+!$acc declare copyout(hes,qes)
      real(kind=kind_phys),    dimension (its:ite,kts:kte)                &
         ,intent (inout)                   ::             &
-        z
-!$acc declare copy(z)
+        he,z
+!$acc declare copy(he,z)
      real(kind=kind_phys),    dimension (its:ite)                        &
         ,intent (in   )                   ::             &
         psur,z1
