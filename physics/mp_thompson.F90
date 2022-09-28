@@ -879,6 +879,14 @@ module mp_thompson
       end subroutine mp_thompson_finalize
 
       subroutine get_niwfa(aerfld, nifa, nwfa, ncol, nlev)
+         ! To calculate nifa and nwfa from bins of aerosols.
+         ! In GOCART and MERRA2, aerosols are given as mixing ratio (kg/kg). To
+         ! convert from kg/kg to #/kg, the "unit mass" (mass of one particle)
+         ! within the mass bins is calculated. A lognormal size distribution
+         ! within aerosol bins is used to find the size based upon the median
+         ! mass. NIFA is mainly summarized over five dust bins and NWFA over the
+         ! other 10 bins. The parameters besides each bins are carefully tuned
+         ! for a good performance of the scheme.
          implicit none
          integer, intent(in)::ncol, nlev
          real (kind=kind_phys), dimension(:,:,:), intent(in)  :: aerfld

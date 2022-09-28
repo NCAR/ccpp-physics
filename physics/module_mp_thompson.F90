@@ -1142,15 +1142,12 @@ MODULE module_mp_thompson
    
          if ( (present(tt) .and. (present(th) .or. present(pii))) .or. &
               (.not.present(tt) .and. .not.(present(th) .and. present(pii))) ) then
-            if (present(errmsg)) then
+            if (present(errmsg) .and. present(errflg)) then
                write(errmsg, '(a)') 'Logic error in mp_gt_driver: provide either tt or th+pii'
-            else
-               write(*,'(a)') 'Logic error in mp_gt_driver: provide either tt or th+pii'
-            end if
-            if (present(errflg)) then
                errflg = 1
                return
             else
+               write(*,'(a)') 'Logic error in mp_gt_driver: provide either tt or th+pii'
                stop
             end if
          end if
@@ -1160,33 +1157,27 @@ MODULE module_mp_thompson
                                      .not.present(nifa)   .or. &
                                      .not.present(nwfa2d) .or. &
                                      .not.present(nifa2d)      )) then
-            if (present(errmsg)) then
+            if (present(errmsg) .and. present(errflg)) then
                write(errmsg, '(*(a))') 'Logic error in mp_gt_driver: provide nc, nwfa, nifa, nwfa2d', &
                                        ' and nifa2d for aerosol-aware version of Thompson microphysics'
-            else
-               write(*, '(*(a))') 'Logic error in mp_gt_driver: provide nc, nwfa, nifa, nwfa2d', &
-                                  ' and nifa2d for aerosol-aware version of Thompson microphysics'
-            end if
-            if (present(errflg)) then
                errflg = 1
                return
             else
+               write(*, '(*(a))') 'Logic error in mp_gt_driver: provide nc, nwfa, nifa, nwfa2d', &
+                                  ' and nifa2d for aerosol-aware version of Thompson microphysics'
                stop
             end if
          else if (merra2_aerosol_aware .and. (.not.present(nc)   .or. &
                                               .not.present(nwfa) .or. &
                                               .not.present(nifa)      )) then
-            if (present(errmsg)) then
+            if (present(errmsg) .and. present(errflg)) then
                write(errmsg, '(*(a))') 'Logic error in mp_gt_driver: provide nc, nwfa, and nifa', &
                                        ' for merra2 aerosol-aware version of Thompson microphysics'
-            else
-               write(*, '(*(a))') 'Logic error in mp_gt_driver: provide nc, nwfa, and nifa', &
-                                  ' for merra2 aerosol-aware version of Thompson microphysics'
-            end if
-            if (present(errflg)) then
                errflg = 1
                return
             else
+               write(*, '(*(a))') 'Logic error in mp_gt_driver: provide nc, nwfa, and nifa', &
+                                  ' for merra2 aerosol-aware version of Thompson microphysics'
                stop
             end if
          else if (.not.is_aerosol_aware .and. .not.merra2_aerosol_aware .and. &
