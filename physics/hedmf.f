@@ -837,7 +837,11 @@ c
               dku(i,k) = max(dku(i,k),xkzmo(i,k))
               dkt(i,k) = min(dkt(i,k),dkmax)
               dkt(i,k) = max(dkt(i,k),xkzo(i,k))
+              if(k .eq. 1) then
+              dktx(i,k)= dkt(i,k)*0.5
+              else
               dktx(i,k)= dkt(i,k)
+              endif
             endif
           enddo !i
         enddo !k
