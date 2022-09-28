@@ -365,27 +365,18 @@
         end if
       end if
 
-      if (cplaqm .and. .not.cplflx) then
-        do i=1,im
-          if (oceanfrac(i) > zero) then      ! Ocean only, NO LAKES
-            if ( .not. wet(i)) then ! no open water
-              if (kdt > 1) then              !use results from CICE
-                dtsfci_cpl(i) = dtsfc_cice(i)
-                dqsfci_cpl(i) = dqsfc_cice(i)
-              else                           !use PBL fluxes when CICE fluxes is unavailable
-                dtsfci_cpl(i) = dtsfc1(i)*hffac(i)
-                dqsfci_cpl(i) = dqsfc1(i)
-              end if
-            elseif (icy(i) .or. dry(i)) then ! use stress_ocean from sfc_diff for opw component at mixed point
-              rho = prsl(i,1) / (rd*t1(i)*(one+fvirt*max(q1(i), qmin)))
-              dtsfci_cpl(i) = cp   * rho * hflx_wat(i) ! sensible heat flux over open ocean
-              dqsfci_cpl(i) = hvap * rho * evap_wat(i) ! latent heat flux over open ocean
-            else                                       ! use results from PBL scheme for 100% open ocean
+      if (cplaqm) then
+        do i = 1, im
+          if (oceanfrac(i) > zero) then
+            if (.not.cplflx) then
               dtsfci_cpl(i) = dtsfc1(i)*hffac(i)
               dqsfci_cpl(i) = dqsfc1(i)
-            endif
-          endif ! Ocean only, NO LAKES
-        enddo
+            end if
+          else  ! heat fluxes are required over land
+            dtsfci_cpl(i) = dtsfc1(i)*hffac(i)
+            dqsfci_cpl(i) = dqsfc1(i)
+          end if
+        end do
       end if
 
 !-------------------------------------------------------lssav if loop ----------

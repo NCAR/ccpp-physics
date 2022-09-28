@@ -2,11 +2,13 @@
 !! This file is ozone sources and sinks.
 
 
-!> This module contains the CCPP-compliant Ozone 2015 photochemistry scheme.
       module ozphys_2015
 
       contains
 
+!>\defgroup GFS_ozphys_2015 GFS Ozone Photochemistry (2015) Module
+!! This module contains the CCPP-compliant Ozone 2015 photochemistry scheme.
+!> @{
 !> \section arg_table_ozphys_2015_init Argument Table
 !! \htmlinclude ozphys_2015_init.html
 !!
@@ -29,11 +31,7 @@
 
       end subroutine ozphys_2015_init
 
-      subroutine ozphys_2015_finalize()
-      end subroutine ozphys_2015_finalize
-
-!>\defgroup GFS_ozphys_2015 GFS Ozone Photochemistry (2015) Scheme Module
-!! \brief The operational GFS currently parameterizes ozone production and
+!> The operational GFS currently parameterizes ozone production and
 !! destruction based on monthly mean coefficients (
 !! \c ozprdlos_2015_new_sbuvO3_tclm15_nuchem.f77) provided by Naval
 !! Research Laboratory through CHEM2D chemistry model
@@ -42,7 +40,6 @@
 !! \htmlinclude ozphys_2015_run.html
 !!
 !> \section genal_ozphys_2015 GFS ozphys_2015_run General Algorithm
-!> @{
 !> -  This code assumes that both prsl and po3 are from bottom to top
 !!     as are all other variables.
 !> -  This code is specifically for NRL parameterization and

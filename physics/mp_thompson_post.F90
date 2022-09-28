@@ -49,7 +49,7 @@ contains
 
    end subroutine mp_thompson_post_init
 
-!! \section arg_table_mp_thompson_post_run Argument Table
+!> \section arg_table_mp_thompson_post_run Argument Table
 !! \htmlinclude mp_thompson_post_run.html
 !!
    subroutine mp_thompson_post_run(ncol, nlev, tgrs_save, tgrs, prslk, dtp, ttendlim, &

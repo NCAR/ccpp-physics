@@ -29,9 +29,6 @@
       end if
       end subroutine shinhongvdif_init
 
-      subroutine shinhongvdif_finalize ()
-      end subroutine shinhongvdif_finalize
-
 !> \defgroup SHINHONG FV3GFS shinhongvdif_run Main
 !! \brief This subroutine contains all of the logic for the
 !! scale-aware Shinhong scheme.

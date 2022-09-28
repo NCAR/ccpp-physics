@@ -1,3 +1,6 @@
+!>\file maximum_hourly_diagnostics.F90
+!!
+
 module maximum_hourly_diagnostics
 
    use machine, only: kind_phys
@@ -6,19 +9,13 @@ module maximum_hourly_diagnostics
 
    private
 
-   public maximum_hourly_diagnostics_init, maximum_hourly_diagnostics_run, maximum_hourly_diagnostics_finalize
+   public  maximum_hourly_diagnostics_run
 
    ! DH* TODO - cleanup use of constants
    real(kind=kind_phys), parameter ::PQ0=379.90516E0, A2A=17.2693882, A3=273.16, A4=35.86, RHmin=1.0E-6
    ! *DH
 
 contains
-
-   subroutine maximum_hourly_diagnostics_init()
-   end subroutine maximum_hourly_diagnostics_init
-
-   subroutine maximum_hourly_diagnostics_finalize()
-   end subroutine maximum_hourly_diagnostics_finalize
 
 #if 0
 !> \section arg_table_maximum_hourly_diagnostics_run Argument Table

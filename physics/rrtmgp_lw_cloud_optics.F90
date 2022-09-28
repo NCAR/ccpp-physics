@@ -1,3 +1,13 @@
+!> \file rrtmgp_lw_cloud_optics.F90
+!!
+!> \defgroup rrtmgp_lw_cloud_optics rrtmgp_lw_cloud_optics.F90
+!!
+!! \brief This module contains two routines: The first initializes data and functions
+!! needed to compute the longwave cloud radiative properteis in RRTMGP. The second routine
+!! is a ccpp scheme within the "radiation loop", where the shortwave optical prperties
+!! (optical-depth, single-scattering albedo, asymmetry parameter) are computed for ALL
+!! cloud types visible to RRTMGP.
+!!
 module rrtmgp_lw_cloud_optics
   use machine,                  only: kind_phys
   use mo_rte_kind,              only: wl
@@ -64,12 +74,18 @@ module rrtmgp_lw_cloud_optics
 
 contains
 
-  ! ######################################################################################
-  ! SUBROUTINE rrtmgp_lw_cloud_optics_init()
-  ! ######################################################################################
-!! \section arg_table_rrtmgp_lw_cloud_optics_init
+!>\defgroup rrtmgp_lw_cloud_optics_mod GFS RRTMGP-LW Cloud Optics Module
+!> \section arg_table_rrtmgp_lw_cloud_optics_init
 !! \htmlinclude rrtmgp_lw_cloud_optics.html
 !!
+!> \ingroup rrtmgp_lw_cloud_optics
+!!
+!! RRTMGP relies heavily on derived-data-types, which contain type-bound procedures
+!! that are referenced frequently throughout the RRTMGP longwave scheme. The data needed
+!! to compute the shortwave cloud optical properties are initialized here and loaded into
+!! the RRTMGP DDT, ty_cloud_optics.
+!!
+!! \section rrtmgp_sw_cloud_optics_init
   subroutine rrtmgp_lw_cloud_optics_init(nrghice, mpicomm, mpirank, mpiroot,             &
        doG_cldoptics, doGP_cldoptics_PADE, doGP_cldoptics_LUT, rrtmgp_root_dir,          &
        rrtmgp_lw_file_clouds, errmsg, errflg)
@@ -376,13 +392,15 @@ contains
     call check_error_msg('lw_cloud_optics_init',lw_cloud_props%set_ice_roughness(nrghice))
  
   end subroutine rrtmgp_lw_cloud_optics_init
-
   ! ######################################################################################
-  ! SUBROUTINE rrtmgp_lw_cloud_optics_run()
-  ! ######################################################################################
-!! \section arg_table_rrtmgp_lw_cloud_optics_run
+!> \section arg_table_rrtmgp_lw_cloud_optics_run
 !! \htmlinclude rrtmgp_lw_cloud_optics.html
 !!
+!> \ingroup rrtmgp_lw_cloud_optics
+!!
+!! Compute longwave optical prperties (optical-depth) for ALL cloud types visible to RRTMGP.                                                                                                                                   
+!!
+!! \section rrtmgp_lw_gas_optics_run
   subroutine rrtmgp_lw_cloud_optics_run(doLWrad, doG_cldoptics, icliq_lw, icice_lw,      &
        doGP_cldoptics_PADE, doGP_cldoptics_LUT, doGP_lwscat, do_mynnedmf, imfdeepcnv,    &
        imfdeepcnv_gf, imfdeepcnv_samf, nCol, nLev, nbndsGPlw , p_lay, cld_frac, cld_lwp, &
@@ -541,13 +559,4 @@ contains
         
   end subroutine rrtmgp_lw_cloud_optics_run
   
-  ! #########################################################################################
-  ! SUBROUTINE rrtmgp_lw_cloud_optics_finalize()
-  ! #########################################################################################
-!! \section arg_table_rrtmgp_lw_cloud_optics_finalize
-!! \htmlinclude rrtmgp_lw_cloud_optics.html
-!!
-  subroutine rrtmgp_lw_cloud_optics_finalize()
-  end subroutine rrtmgp_lw_cloud_optics_finalize
-
 end module rrtmgp_lw_cloud_optics

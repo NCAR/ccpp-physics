@@ -1,3 +1,6 @@
+!>\file rrtmgp_aerosol_optics.F90
+!!
+
 module rrtmgp_aerosol_optics
   use machine,                   only: kind_phys
   use mo_gas_optics_rrtmgp,      only: ty_gas_optics_rrtmgp
@@ -21,6 +24,9 @@ contains
   ! #########################################################################################
   ! SUBROUTINE rrtmgp_aerosol_optics_run()
   ! #########################################################################################
+
+!>\defgroup rrtmgp_aerosol_optics_mod GFS RRTMGP Aerosol Optics Module
+!> @{
 !! \section arg_table_rrtmgp_aerosol_optics_run
 !! \htmlinclude rrtmgp_aerosol_optics_run.html
 !!
@@ -119,5 +125,5 @@ contains
     end do
 
   end subroutine rrtmgp_aerosol_optics_run
-  
+!> @}  
 end module rrtmgp_aerosol_optics

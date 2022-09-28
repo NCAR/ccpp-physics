@@ -307,7 +307,7 @@
 
       private
 
-      public GFS_diagtoscreen_init, GFS_diagtoscreen_timestep_init, GFS_diagtoscreen_run, GFS_diagtoscreen_finalize
+      public GFS_diagtoscreen_init, GFS_diagtoscreen_timestep_init, GFS_diagtoscreen_run
 
       contains
 
@@ -376,9 +376,6 @@
          end do
 
       end subroutine GFS_diagtoscreen_timestep_init
-
-      subroutine GFS_diagtoscreen_finalize ()
-      end subroutine GFS_diagtoscreen_finalize
 
 !> \section arg_table_GFS_diagtoscreen_run Argument Table
 !! \htmlinclude GFS_diagtoscreen_run.html
@@ -968,7 +965,7 @@
 
       private
 
-      public GFS_interstitialtoscreen_init, GFS_interstitialtoscreen_timestep_init, GFS_interstitialtoscreen_run, GFS_interstitialtoscreen_finalize
+      public GFS_interstitialtoscreen_init, GFS_interstitialtoscreen_timestep_init, GFS_interstitialtoscreen_run
 
       contains
 
@@ -1039,9 +1036,6 @@
          end do
 
       end subroutine GFS_interstitialtoscreen_timestep_init
-
-      subroutine GFS_interstitialtoscreen_finalize ()
-      end subroutine GFS_interstitialtoscreen_finalize
 
 !> \section arg_table_GFS_interstitialtoscreen_run Argument Table
 !! \htmlinclude GFS_interstitialtoscreen_run.html
@@ -1484,15 +1478,9 @@
 
       private
 
-      public GFS_abort_init, GFS_abort_run, GFS_abort_finalize
+      public GFS_abort_run
 
       contains
-
-      subroutine GFS_abort_init ()
-      end subroutine GFS_abort_init
-
-      subroutine GFS_abort_finalize ()
-      end subroutine GFS_abort_finalize
 
 !> \section arg_table_GFS_abort_run Argument Table
 !! \htmlinclude GFS_abort_run.html
@@ -1528,15 +1516,9 @@
 
       private
 
-      public GFS_checkland_init, GFS_checkland_run, GFS_checkland_finalize
+      public  GFS_checkland_run
 
       contains
-
-      subroutine GFS_checkland_init ()
-      end subroutine GFS_checkland_init
-
-      subroutine GFS_checkland_finalize ()
-      end subroutine GFS_checkland_finalize
 
 !> \section arg_table_GFS_checkland_run Argument Table
 !! \htmlinclude GFS_checkland_run.html

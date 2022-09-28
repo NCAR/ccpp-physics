@@ -10,13 +10,13 @@
  transformations.
 
  The schematic radiation module structure is shown in Figure 1.
- \image html schematic_Rad_mod.png "Figure 1: Schematic Radiation Module Structure" width=10cm
+ \image html schematic_Rad_mod.png "Figure 1: Schematic Radiation Module Structure"
 
  GFS radiation package is intended to provide a fast and accurate
  method of determining the total radiative flux at any given
  location. These calculations provide both the total radiative flux
  at the ground surface, which is needed to establish the surface
- energy budget, and the vertical radiative flux divergence, which is
+ energy budget, and the vertical radiative net flux divergence, which is
  used to calculate the radiative heating and cooling rates of a given
  atmospheric layer. The magnitude of the terms in the surface energy
  budget can set the stage for moist deep convection and are crucial
@@ -28,7 +28,7 @@
  Since 2007, the longwave (LW) and the shortwave (SW) radiation
  parameterizations in NCEP's operational GFS are both modified and
  optimized versions of the Rapid Radiative Transfer Model for GCMs
- (RRTMG_LW v2.3 and RRTMG_SW v2.3, respectively) developed at AER \a inc.
+ (RRTMG_LW and RRTMG_SW, respectively) developed at AER \a inc.
  (Atmospheric and Environmental Research)
  (Iacono et al.(2008) \cite iacono_et_al_2008; Mlawer et al.(1997) \cite mlawer_et_al_1997; 
   Iacono et al.(2000) \cite iacono_et_al_2000; Clough et al. 2005 \cite clough_et_al_2005). The LW algorithm
@@ -41,7 +41,8 @@
  To represent statistically the unresolved subgrid cloud variability
  when dealing multi layered clouds, a Monte-Carlo Independent Column
  Approximation (\b McICA) method is used in the RRTMG radiative transfer.
- A maximum-random cloud overlap method is used in both LW and SW
+ Several cloud overlap methods, including maximum-random, exponential,
+ and exponential-random are available in both LW and SW
  radiation calculations. 
 
  Radiative fields from model outputs (\f$W m^{-2}\f$) include:
@@ -70,9 +71,53 @@
  - CSULFtoa: Upward LW
  - CSUSFtoa: Upward SW
 
+\section rrtmg_enh CCPP Physics Updates
+\version CCPP v6.0.0
+
+Requests have been made by many physics developers and users to rewrite
+the cloud routines (routines progcld) for radiation computation in the program
+radiation_clouds.f. Those cloud subroutines are very similar, and
+have many lines of common code. We modified the radiation_clouds.f module,
+and includes all the calculations of the cloud properties to a new subroutine
+radiation_clouds_prop. We also moved the common code from subroutines
+progcld to this new subroutine. Subroutine radiation_clouds_prop can be
+called by RRTMG and RRTMGP. A single call to the subroutine
+radiation_clouds_prop can connect to the calculations of the cloud
+radiation properties for all the microphysics schemes.
+
+Summary of the major changes:
+- radiation_clouds.f
+
+  A new subroutine “radiation_clouds_prop” was added to radiation_clouds.f. This new subroutine calculates all cloud radiation properties for all the microphysics schemes. Subroutines "progcld*" were renamed based on the input variables \p imp_physics, and the inactive subroutines were removed from file radiation_clouds.f
+ -       'progcld1'        --- > progcld_zhao_carr
+ -       'progcld3'        --- > progcld_zhao_carr_pdf
+ -       'progcld4'        --- > progcld_gfdl_lin
+ -       'progcld5'        --- > progcld_fer_hires
+ -       'progcld6'        --- > progcld_thompson_wsm6
+ -       'progclduni'      --- > progclduni
+ -       'progcld_thompson'--- > progcld_thompson
+
+- GFS_rrtmg_pre.F90
+
+  Removed the “progcld” subroutine calls, and replaced them with a single subroutine call to “radiation_clouds_prop”.
+
+- radiation_cloud_overlap.F90
+
+  Replaced subroutine “get_alpha_exp” with “get_alpha_exper”. The new subroutine revises alpha for exponential random cloud overlap option. This new subroutine is used in programs GFS_rrtmgp_cloud_overlap_pre.F90 and GFS_rrtmgp_gfdlmp_pre.F90.
+
+- Subroutine getml() has been modified. The subroutine computes low, mid, high, total and boundary clouds, and is used in GFS_cloud_diagnostics.F90.
+
 \section  intraphysics_rrtmg Intraphysics Communication
- + For RRTMG-Longwave radiation parameterization (\ref arg_table_rrtmg_lw_run)
- + For RRTMG-Shortwave radiation parameterization (\ref arg_table_rrtmg_sw_run) 
++ \b GFS_suite_interstitial_rad_reset: \ref arg_table_GFS_suite_interstitial_rad_reset_run
++ \b gfs_rrtmg_pre: \ref arg_table_GFS_rrtmg_pre_run
++ \b GFS_radiation_surface:  \ref arg_table_GFS_radiation_surface_run
++ \b rad_sw_pre: \ref arg_table_rad_sw_pre_run
++ \b rrtmg_sw: \ref arg_table_rrtmg_sw_run
++ \b rrtmg_sw_post: \ref arg_table_rrtmg_sw_post_run
++ \b rrtmg_lw_pre: \ref arg_table_rrtmg_lw_pre_run
++ \b rrtmg_lw: \ref arg_table_rrtmg_lw_run
++ \b rrtmg_lw_post: \ref arg_table_rrtmg_lw_post_run
++ \b GFS_rrtmg_post: \ref arg_table_GFS_rrtmg_post_run
 
 \section  gen_al_rrtmg General Algorithm
  + \ref gen_lwrad
