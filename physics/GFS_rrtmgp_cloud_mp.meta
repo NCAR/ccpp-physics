@@ -455,6 +455,13 @@
   dimensions = ()
   type = logical
   intent = in
+[doGP_smearclds]
+  standard_name = flag_for_implicit_sgs_cloud_in_RRTMGP
+  long_name = logical flag to impicit SGS cloud in RRTMGP
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [cld_frac]
   standard_name = total_cloud_fraction
   long_name = layer total cloud fraction
