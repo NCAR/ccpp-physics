@@ -2212,8 +2212,8 @@
           enddo
         enddo
 
-!> - Compute cloud liquid/ice condensate path in \f$ g/m^2 \f$ .
-
+!> - Compute total-cloud liquid/ice condensate path in \f$ g/m^2 \f$.
+!>   The total condensate includes convective condensate.
         do k = 1, NLAY-1
           do i = 1, IX
             cwp(i,k) = max(0.0, (clw(i,k,ntcw)+cnvw(i,k)*
