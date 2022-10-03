@@ -110,8 +110,8 @@ contains
          iovr_dcorr,          & ! Flag for decorrelation-length cloud overlap method
          iovr_exp,            & ! Flag for exponential cloud overlap method
          iovr_exprand,        & ! Flag for exponential-random cloud overlap method
-         isubc_sw,            & ! Flag for sw clouds sub-grid approximation
-         iSFC                   ! Surface layer index
+         isubc_sw,            & !
+         iSFC
     integer,intent(in),dimension(:) :: &
          idx,                 & ! Index array for daytime points
          icseed_sw              ! Seed for random number generation for shortwave radiation
@@ -150,7 +150,7 @@ contains
          cld_pbl_reliq,       & ! Effective radius for PBL          liquid cloud-particles
          cld_pbl_iwp,         & ! Water path for       PBL          ice    cloud-particles
          cld_pbl_reice,       & ! Effective radius for PBL          ice    cloud-particles
-         cloud_overlap_param    ! Cloud overlap parameter
+         cloud_overlap_param    !
     real(kind_phys), dimension(:,:,:), intent(in) :: &
           aersw_tau,          & ! Aerosol optical depth
           aersw_ssa,          & ! Aerosol single scattering albedo
@@ -182,6 +182,7 @@ contains
                                ! visdf - downward uv+vis diffused flux (W/m2)
 
     ! Local variables
+    type(cmpfsw_type), dimension(rrtmgp_phys_blksz) :: scmpsw_clrsky, scmpsw_allsky
     type(ty_gas_concs)          :: gas_concs
     type(ty_optical_props_2str) :: sw_optical_props_accum, sw_optical_props_aerosol_local,    &
          sw_optical_props_cloudsByBand, sw_optical_props_cnvcloudsByBand,  &
@@ -190,24 +191,24 @@ contains
     type(ty_fluxes_byband)      :: flux_allsky, flux_clrsky
     real(kind_phys) :: tau_rain, tau_snow, ssa_rain, ssa_snow, asy_rain, asy_snow, &
          tau_prec, asy_prec, ssa_prec, asyw, ssaw, za1, za2, flux_dir, flux_dif
+    real(kind_phys), dimension(rrtmgp_phys_blksz) :: zcf0, zcf1
     real(kind_phys), dimension(sw_gas_props%get_ngpt()) :: rng1D
+    real(kind_phys), dimension(sw_gas_props%get_ngpt(),nLay,rrtmgp_phys_blksz) :: rng3D,rng3D2
     real(kind_phys), dimension(sw_gas_props%get_ngpt()*nLay) :: rng2D
-    integer :: iBand, ibd, ibd_uv, iCol, iGas, iLay, ix, ix2, iblck, blksz
+    logical, dimension(rrtmgp_phys_blksz,nLay,sw_gas_props%get_ngpt()) :: maskMCICA
+    real(kind_phys), dimension(sw_gas_props%get_nband(),rrtmgp_phys_blksz) :: &
+         sfc_alb_dir, sfc_alb_dif
+    real(kind_phys), dimension(rrtmgp_phys_blksz,nLay+1,sw_gas_props%get_nband()),target :: &
+         fluxSW_up_allsky, fluxSW_up_clrsky, fluxSW_dn_dir_clrsky, fluxSW_dn_allsky, &
+         fluxSW_dn_clrsky, fluxSW_dn_dir_allsky
+    integer :: iBand, ibd, ibd_uv, iCol, iGas, iLay, ix, ix2, iblck
+    integer, dimension(rrtmgp_phys_blksz) :: ipseed_sw
     type(random_stat) :: rng_stat
     real(kind_phys), dimension(2,sw_gas_props%get_nband()) :: bandlimits
     real(kind_phys), dimension(2), parameter :: &
          nIR_uvvis_bnd = (/12850,16000/), &
          uvb_bnd       = (/29000,38000/)
-
-    type(cmpfsw_type), dimension(:),     allocatable :: scmpsw_clrsky, scmpsw_allsky
-    integer,           dimension(:),     allocatable :: ipseed_sw
-    real(kind_phys),   dimension(:),     allocatable :: zcf0, zcf1
-    real(kind_phys),   dimension(:,:),   allocatable :: toa_src_sw, sfc_alb_dir, sfc_alb_dif
-    real(kind_phys),   dimension(:,:,:), allocatable :: rng3D,rng3D2
-    logical,           dimension(:,:,:), allocatable :: maskMCICA
-    real(kind_phys),   dimension(:,:,:), allocatable, target :: &
-         fluxSW_up_allsky, fluxSW_up_clrsky, fluxSW_dn_dir_clrsky, fluxSW_dn_allsky, &
-         fluxSW_dn_clrsky, fluxSW_dn_dir_allsky
+    real(kind_phys), dimension(rrtmgp_phys_blksz,sw_gas_props%get_ngpt()) :: toa_src_sw
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -217,51 +218,34 @@ contains
 
     if (nDay .gt. 0) then
 
-       !
        bandlimits = sw_gas_props%get_band_lims_wavenumber()
-
        ! ######################################################################################
        !
        ! Allocate/initialize RRTMGP DDT's
        !
        ! ######################################################################################
-       blksz = minval((/nDay,rrtmgp_phys_blksz/))
-
-       allocate(scmpsw_clrsky(blksz), scmpsw_allsky(blksz), zcf0(blksz), zcf1(blksz),         &
-            rng3D(sw_gas_props%get_ngpt(),nLay,blksz),                                        &
-            rng3D2(sw_gas_props%get_ngpt(),nLay,blksz),                                       &
-            maskMCICA(blksz,nLay,sw_gas_props%get_ngpt()),                                    &
-            sfc_alb_dir(sw_gas_props%get_nband(),blksz),                                      &
-            sfc_alb_dif(sw_gas_props%get_nband(),blksz),                                      &
-            fluxSW_up_allsky(blksz,nLay+1,sw_gas_props%get_nband()),                          &
-            fluxSW_up_clrsky(blksz,nLay+1,sw_gas_props%get_nband()),                          &
-            fluxSW_dn_dir_clrsky(blksz,nLay+1,sw_gas_props%get_nband()),                      &
-            fluxSW_dn_allsky(blksz,nLay+1,sw_gas_props%get_nband()),                          &
-            fluxSW_dn_clrsky(blksz,nLay+1,sw_gas_props%get_nband()),                          &
-            fluxSW_dn_dir_allsky(blksz,nLay+1,sw_gas_props%get_nband()),                      &
-            ipseed_sw(blksz), toa_src_sw(blksz,sw_gas_props%get_ngpt()))
 
        ! ty_gas_concs
        call check_error_msg('rrtmgp_sw_main_gas_concs_init',gas_concs%init(active_gases_array))
 
        ! ty_optical_props
        call check_error_msg('rrtmgp_sw_main_accumulated_optics_init',&
-            sw_optical_props_accum%alloc_2str(blksz, nLay, sw_gas_props))
+            sw_optical_props_accum%alloc_2str(rrtmgp_phys_blksz, nLay, sw_gas_props))
        call check_error_msg('rrtmgp_sw_main_cloud_optics_init',&
-            sw_optical_props_cloudsByBand%alloc_2str(blksz, nLay, sw_gas_props%get_band_lims_wavenumber()))
+            sw_optical_props_cloudsByBand%alloc_2str(rrtmgp_phys_blksz, nLay, sw_gas_props%get_band_lims_wavenumber()))
        call check_error_msg('rrtmgp_sw_main_precip_optics_init',&
-            sw_optical_props_precipByBand%alloc_2str(blksz, nLay, sw_gas_props%get_band_lims_wavenumber()))
+            sw_optical_props_precipByBand%alloc_2str(rrtmgp_phys_blksz, nLay, sw_gas_props%get_band_lims_wavenumber()))
        call check_error_msg('rrtmgp_sw_mian_cloud_sampling_init', & 
-            sw_optical_props_clouds%alloc_2str(blksz, nLay, sw_gas_props))
+            sw_optical_props_clouds%alloc_2str(rrtmgp_phys_blksz, nLay, sw_gas_props))
        call check_error_msg('rrtmgp_sw_main_aerosol_optics_init',&
-            sw_optical_props_aerosol_local%alloc_2str(blksz, nLay, sw_gas_props%get_band_lims_wavenumber()))
+            sw_optical_props_aerosol_local%alloc_2str(rrtmgp_phys_blksz, nLay, sw_gas_props%get_band_lims_wavenumber()))
        if (doGP_sgs_cnv) then
           call check_error_msg('rrtmgp_sw_main_cnv_cloud_optics_init',&
-               sw_optical_props_cnvcloudsByBand%alloc_2str(blksz, nLay, sw_gas_props%get_band_lims_wavenumber()))
+               sw_optical_props_cnvcloudsByBand%alloc_2str(rrtmgp_phys_blksz, nLay, sw_gas_props%get_band_lims_wavenumber()))
        endif
        if (doGP_sgs_pbl) then
           call check_error_msg('rrtmgp_sw_main_pbl_cloud_optics_init',&
-               sw_optical_props_pblcloudsByBand%alloc_2str(blksz, nLay, sw_gas_props%get_band_lims_wavenumber()))
+               sw_optical_props_pblcloudsByBand%alloc_2str(rrtmgp_phys_blksz, nLay, sw_gas_props%get_band_lims_wavenumber()))
        endif
 
        ! ty_fluxes_byband
@@ -276,18 +260,14 @@ contains
        ! Loop over all (daylit) columns...
        !
        ! ######################################################################################
-       do iCol=1,nDay,blksz
+       do iCol=1,nDay,rrtmgp_phys_blksz
           ix  = idx(iCol)
-          ix2 = idx(iCol) + blksz - 1
-          if (ix2 > nDay) then
-             ix  = nDay - blksz + 1
-             ix2 = nDay
-          endif
+          ix2 = idx(iCol + rrtmgp_phys_blksz - 1)
 
           ! Create clear/cloudy indicator
           zcf0(:) = 1._kind_phys
           zcf1(:) = 1._kind_phys
-          do iblck = 1, blksz
+          do iblck = 1, rrtmgp_phys_blksz
              do iLay=1,nLay
                 zcf0(iblck) = min(zcf0(iblck), 1._kind_phys - cld_frac(ix+iblck-1,iLay))
              enddo
@@ -364,7 +344,7 @@ contains
                                           !                   spectral point (tau,ssa,g)
                toa_src_sw))               ! OUT - TOA incident shortwave radiation (spectral)
           ! Scale incident flux
-          do iblck = 1, blksz
+          do iblck = 1, rrtmgp_phys_blksz
              toa_src_sw(iblck,:) = toa_src_sw(iblck,:)*solcon / sum(toa_src_sw(iblck,:))
           enddo
 
@@ -377,7 +357,7 @@ contains
           ! For overlapping band, average near-IR and us-vis albedos.
           !
           ! ###################################################################################
-          do iblck = 1, blksz
+          do iblck = 1, rrtmgp_phys_blksz
              do iBand=1,sw_gas_props%get_nband()
                 if (bandlimits(1,iBand) .lt. nIR_uvvis_bnd(1)) then
                    sfc_alb_dir(iBand,iblck) = sfc_alb_nir_dir(ix+iblck-1)
@@ -445,7 +425,7 @@ contains
              endif
           
              ! Cloud precipitation optics: rain and snow(+groupel)
-             do iblck = 1, blksz
+             do iblck = 1, rrtmgp_phys_blksz
                 do iLay=1,nLay
                    if (cld_frac(ix+iblck-1,iLay) .gt. ftiny) then
                       ! Rain/Snow optical depth (No band dependence)
@@ -489,17 +469,17 @@ contains
              ! ###################################################################################
              ! Change random number seed value for each radiation invocation (isubc_sw =1 or 2).
              if(isubc_sw == 1) then      ! advance prescribed permutation seed
-                do iblck = 1, blksz
+                do iblck = 1, rrtmgp_phys_blksz
                    ipseed_sw(iblck) = sw_gas_props%get_ngpt() + iCol + iblck - 1
                 enddo
              elseif (isubc_sw == 2) then ! use input array of permutaion seeds
-                do iblck = 1, blksz
+                do iblck = 1, rrtmgp_phys_blksz
                    ipseed_sw(iblck) = icseed_sw(ix+iblck-1)
                 enddo
              endif
 
              ! Call RNG
-             do iblck = 1, blksz
+             do iblck = 1, rrtmgp_phys_blksz
                 call random_setseed(ipseed_sw(iblck),rng_stat)
                 ! Use same rng for each layer
                 if (iovr == iovr_max) then
@@ -522,7 +502,7 @@ contains
              endif
              ! Exponential decorrelation length overlap
              if (iovr == iovr_dcorr) then
-                do iblck = 1, blksz
+                do iblck = 1, rrtmgp_phys_blksz
                    ! Generate second RNG
                    call random_setseed(ipseed_sw(iblck),rng_stat)
                    call random_number(rng2D,rng_stat)
@@ -549,9 +529,9 @@ contains
           !
           ! ###################################################################################
           ! Increment
-          sw_optical_props_aerosol_local%tau = aersw_tau(iCol:iCol+blksz-1,:,:)
-          sw_optical_props_aerosol_local%ssa = aersw_ssa(iCol:iCol+blksz-1,:,:)
-          sw_optical_props_aerosol_local%g   = aersw_g(iCol:iCol+blksz-1,:,:)
+          sw_optical_props_aerosol_local%tau = aersw_tau(iCol:iCol+rrtmgp_phys_blksz-1,:,:)
+          sw_optical_props_aerosol_local%ssa = aersw_ssa(iCol:iCol+rrtmgp_phys_blksz-1,:,:)
+          sw_optical_props_aerosol_local%g   = aersw_g(iCol:iCol+rrtmgp_phys_blksz-1,:,:)
           call check_error_msg('rrtmgp_sw_main_increment_aerosol_to_clrsky', & 
                sw_optical_props_aerosol_local%increment(sw_optical_props_accum))
 
@@ -573,7 +553,7 @@ contains
           fluxswDOWN_clrsky(ix:ix2,:) = sum(flux_clrsky%bnd_flux_dn, dim=3)
 
           ! Compute surface downward beam/diffused flux components
-          do iblck = 1, blksz
+          do iblck = 1, rrtmgp_phys_blksz
              do iBand=1,sw_gas_props%get_nband()
                 flux_dir = flux_clrsky%bnd_flux_dn(iblck,iSFC,iBand)
                 flux_dif = 0._kind_phys
@@ -627,7 +607,7 @@ contains
              fluxswDOWN_allsky(ix:ix2,:) = sum(flux_allsky%bnd_flux_dn, dim=3)
              
              ! Compute and store downward beam/diffused flux components
-             do iblck = 1, blksz
+             do iblck = 1, rrtmgp_phys_blksz
                 ! Loop over bands, sum fluxes...
                 do iBand=1,sw_gas_props%get_nband()
                    flux_dir = flux_allsky%bnd_flux_dn_dir(iblck,iSFC,iBand) 
@@ -671,7 +651,7 @@ contains
           else ! No clouds
              fluxswUP_allsky(ix:ix2,:)   = sum(flux_clrsky%bnd_flux_up, dim=3)
              fluxswDOWN_allsky(ix:ix2,:) = sum(flux_clrsky%bnd_flux_dn, dim=3)
-             do iblck = 1, blksz
+             do iblck = 1, rrtmgp_phys_blksz
                 scmpsw(ix+iblck-1)%nirbm = scmpsw_clrsky(iblck)%nirbm
                 scmpsw(ix+iblck-1)%nirdf = scmpsw_clrsky(iblck)%nirdf
                 scmpsw(ix+iblck-1)%visbm = scmpsw_clrsky(iblck)%visbm
