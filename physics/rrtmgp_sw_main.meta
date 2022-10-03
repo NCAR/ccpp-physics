@@ -57,6 +57,34 @@
   dimensions =  ()
   type = integer
   intent = inout
+[doGP_sgs_cnv]
+  standard_name = flag_to_include_sgs_convective_cloud_in_RRTMGP
+  long_name = logical flag to control sgs convective cloud in RRTMGP
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[doGP_sgs_pbl]
+  standard_name = flag_to_include_sgs_MYNN_EDMF_cloud_in_RRTMGP
+  long_name = logical flag to control MYNN-EDMF PBL cloud in RRTMGP
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[rrtmgp_phys_blksz]
+  standard_name = number_of_columns_per_RRTMGP_SW_block
+  long_name = number of columns to process at a time by RRTMGP SW scheme
+  units = count
+  dimensions =  ()
+  type = integer
+  intent = in
+[nLay]
+  standard_name = vertical_layer_dimension
+  long_name = number of vertical levels
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
 [mpirank]
   standard_name = mpi_rank
   long_name = current MPI rank
@@ -163,8 +191,8 @@
   type = integer
   intent = in
 [rrtmgp_phys_blksz]
-  standard_name = number_of_columns_per_RRTMGP_block
-  long_name = number of columns to process ata time by RRTMGP
+  standard_name = number_of_columns_per_RRTMGP_SW_block
+  long_name = number of columns to process at a time by RRTMGP SW scheme
   units = count
   dimensions =  ()
   type = integer

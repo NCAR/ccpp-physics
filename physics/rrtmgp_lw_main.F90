@@ -27,6 +27,13 @@ module rrtmgp_lw_main
   use rrtmgp_sampling,        only: sampled_mask, draw_samples
   implicit none
 
+  type(ty_gas_concs)          :: gas_concs
+  type(ty_optical_props_1scl) :: lw_optical_props_clrsky, lw_optical_props_aerosol_local
+  type(ty_optical_props_2str) :: lw_optical_props_clouds, lw_optical_props_cloudsByBand,    &
+       lw_optical_props_cnvcloudsByBand, lw_optical_props_pblcloudsByBand,                  &
+       lw_optical_props_precipByBand
+  type(ty_source_func_lw)     :: sources 
+
   public rrtmgp_lw_main_init, rrtmgp_lw_main_run
 contains
   ! #########################################################################################
@@ -41,8 +48,9 @@ contains
 !> @{
   ! #########################################################################################
   subroutine rrtmgp_lw_main_init(rrtmgp_root_dir, rrtmgp_lw_file_gas, rrtmgp_lw_file_clouds,&
-       active_gases_array, doGP_cldoptics_PADE, doGP_cldoptics_LUT, nrghice, mpicomm,       &
-       mpirank, mpiroot, errmsg, errflg)
+       active_gases_array, doGP_cldoptics_PADE, doGP_cldoptics_LUT, doGP_sgs_pbl,           &
+       doGP_sgs_cnv, nrghice, mpicomm, mpirank, mpiroot, nLay, rrtmgp_phys_blksz,           &
+       errmsg, errflg)
 
     ! Inputs
     character(len=128),intent(in) :: &
@@ -55,13 +63,17 @@ contains
          active_gases_array ! List of active gases from namelist as array)
     logical, intent(in) :: &
          doGP_cldoptics_PADE,   & ! Use RRTMGP cloud-optics: PADE approximation?
-         doGP_cldoptics_LUT       ! Use RRTMGP cloud-optics: LUTs?
+         doGP_cldoptics_LUT,    & ! Use RRTMGP cloud-optics: LUTs?
+         doGP_sgs_pbl,          & ! Flag to include sgs PBL clouds
+         doGP_sgs_cnv             ! Flag to include sgs convective clouds 
     integer, intent(inout) :: &
          nrghice                  ! Number of ice-roughness categories
     integer,intent(in) :: &
          mpicomm,               & ! MPI communicator
          mpirank,               & ! Current MPI rank
-         mpiroot                  ! Master MPI rank
+         mpiroot,               & ! Master MPI rank
+         rrtmgp_phys_blksz,     & ! Number of horizontal points to process at once.
+         nLay
 
     ! Outputs
     character(len=*), intent(out) :: &
@@ -81,6 +93,33 @@ contains
     call rrtmgp_lw_cloud_optics_init(rrtmgp_root_dir, rrtmgp_lw_file_clouds,             &
          doGP_cldoptics_PADE, doGP_cldoptics_LUT, nrghice, mpicomm, mpirank, mpiroot,    &
          errmsg, errflg)
+
+    ! DDTs
+    
+    ! ty_gas_concs
+    call check_error_msg('rrtmgp_lw_main_gas_concs_init',gas_concs%init(active_gases_array))
+
+    ! ty_optical_props
+    call check_error_msg('rrtmgp_lw_main_gas_optics_init',&
+         lw_optical_props_clrsky%alloc_1scl(rrtmgp_phys_blksz, nLay, lw_gas_props))
+    call check_error_msg('rrtmgp_lw_main_sources_init',&
+         sources%alloc(rrtmgp_phys_blksz, nLay, lw_gas_props))
+    call check_error_msg('rrtmgp_lw_main_cloud_optics_init',&
+         lw_optical_props_cloudsByBand%alloc_2str(rrtmgp_phys_blksz, nLay, lw_gas_props%get_band_lims_wavenumber()))
+    call check_error_msg('rrtmgp_lw_main_precip_optics_init',&
+         lw_optical_props_precipByBand%alloc_2str(rrtmgp_phys_blksz, nLay, lw_gas_props%get_band_lims_wavenumber()))
+    call check_error_msg('rrtmgp_lw_mian_cloud_sampling_init', &
+         lw_optical_props_clouds%alloc_2str(rrtmgp_phys_blksz, nLay, lw_gas_props))
+    call check_error_msg('rrtmgp_lw_main_aerosol_optics_init',&
+         lw_optical_props_aerosol_local%alloc_1scl(rrtmgp_phys_blksz, nLay, lw_gas_props%get_band_lims_wavenumber()))
+    if (doGP_sgs_cnv) then
+       call check_error_msg('rrtmgp_lw_main_cnv_cloud_optics_init',&
+            lw_optical_props_cnvcloudsByBand%alloc_2str(rrtmgp_phys_blksz, nLay, lw_gas_props%get_band_lims_wavenumber()))
+    endif
+    if (doGP_sgs_pbl) then
+       call check_error_msg('rrtmgp_lw_main_pbl_cloud_optics_init',&
+            lw_optical_props_pblcloudsByBand%alloc_2str(rrtmgp_phys_blksz, nLay, lw_gas_props%get_band_lims_wavenumber()))
+    endif
 
   end subroutine rrtmgp_lw_main_init
 !> @}
@@ -188,13 +227,7 @@ contains
          errflg                 ! CCPP error flag
 
     ! Local variables
-    type(ty_gas_concs)          :: gas_concs
-    type(ty_optical_props_1scl) :: lw_optical_props_clrsky, lw_optical_props_aerosol_local
-    type(ty_optical_props_2str) :: lw_optical_props_clouds, lw_optical_props_cloudsByBand,&
-         lw_optical_props_cnvcloudsByBand, lw_optical_props_pblcloudsByBand,              &
-         lw_optical_props_precipByBand
-    type(ty_source_func_lw)     :: sources 
-    type(ty_fluxes_byband)      :: flux_allsky, flux_clrsky
+    type(ty_fluxes_byband) :: flux_allsky, flux_clrsky
     integer :: iCol, iLay, iGas, iBand, iCol2, ix, iblck
     integer, dimension(rrtmgp_phys_blksz) :: ipseed_lw
     type(random_stat) :: rng_stat
@@ -217,60 +250,14 @@ contains
 
     ! ######################################################################################
     !
-    ! Allocate/initialize RRTMGP DDT's
-    !
-    ! ######################################################################################
-
-    ! ty_gas_concs
-    call check_error_msg('rrtmgp_lw_main_gas_concs_init',gas_concs%init(active_gases_array))
-
-    ! ty_optical_props
-    call check_error_msg('rrtmgp_lw_main_gas_optics_init',&
-         lw_optical_props_clrsky%alloc_1scl(rrtmgp_phys_blksz, nLay, lw_gas_props))
-    call check_error_msg('rrtmgp_lw_main_sources_init',&
-         sources%alloc(rrtmgp_phys_blksz, nLay, lw_gas_props))
-    call check_error_msg('rrtmgp_lw_main_cloud_optics_init',&
-         lw_optical_props_cloudsByBand%alloc_2str(rrtmgp_phys_blksz, nLay, lw_gas_props%get_band_lims_wavenumber()))
-    call check_error_msg('rrtmgp_lw_main_precip_optics_init',&
-         lw_optical_props_precipByBand%alloc_2str(rrtmgp_phys_blksz, nLay, lw_gas_props%get_band_lims_wavenumber()))
-    call check_error_msg('rrtmgp_lw_mian_cloud_sampling_init', & 
-         lw_optical_props_clouds%alloc_2str(rrtmgp_phys_blksz, nLay, lw_gas_props))
-    call check_error_msg('rrtmgp_lw_main_aerosol_optics_init',&
-         lw_optical_props_aerosol_local%alloc_1scl(rrtmgp_phys_blksz, nLay, lw_gas_props%get_band_lims_wavenumber()))
-    if (doGP_sgs_cnv) then
-       call check_error_msg('rrtmgp_lw_main_cnv_cloud_optics_init',&
-            lw_optical_props_cnvcloudsByBand%alloc_2str(rrtmgp_phys_blksz, nLay, lw_gas_props%get_band_lims_wavenumber()))
-    endif
-    if (doGP_sgs_pbl) then
-       call check_error_msg('rrtmgp_lw_main_pbl_cloud_optics_init',&
-            lw_optical_props_pblcloudsByBand%alloc_2str(rrtmgp_phys_blksz, nLay, lw_gas_props%get_band_lims_wavenumber()))
-    endif
-
-    ! ######################################################################################
-    !
     ! Loop over all columns...
     !
     ! ###################################################################################### 
     do iCol=1,nCol,rrtmgp_phys_blksz
        iCol2 = iCol + rrtmgp_phys_blksz - 1
 
-       ! Create clear/cloudy indicator
-       zcf0(:) = 1._kind_phys
-       zcf1(:) = 1._kind_phys
-       do iblck = 1, rrtmgp_phys_blksz
-          do iLay=1,nLay
-             zcf0(iblck) = min(zcf0(iblck), 1._kind_phys - cld_frac(iCol+iblck-1,iLay))
-          enddo
-          if (zcf0(iblck) <= ftiny)   zcf0(iblck) = 0._kind_phys
-          if (zcf0(iblck) > oneminus) zcf0(iblck) = 1._kind_phys
-          zcf1(iblck) = 1._kind_phys - zcf0(iblck)
-       enddo
-
-       ! ###################################################################################
-       !
        ! Initialize/reset
-       !
-       ! ###################################################################################
+
        ! ty_optical_props
        lw_optical_props_clrsky%tau       = 0._kind_phys
        lw_optical_props_precipByBand%tau = 0._kind_phys
@@ -293,7 +280,12 @@ contains
        fluxLW_dn_clrsky                  = 0._kind_phys
        if (doGP_sgs_cnv) lw_optical_props_cnvcloudsByBand%tau = 0._kind_phys
        if (doGP_sgs_pbl) lw_optical_props_pblcloudsByBand%tau = 0._kind_phys
+
        ! ty_fluxes_byband
+       fluxLW_up_allsky        = 0._kind_phys
+       fluxLW_dn_allsky        = 0._kind_phys
+       fluxLW_up_clrsky        = 0._kind_phys
+       fluxLW_dn_clrsky        = 0._kind_phys
        flux_allsky%bnd_flux_up => fluxLW_up_allsky
        flux_allsky%bnd_flux_dn => fluxLW_dn_allsky
        flux_clrsky%bnd_flux_up => fluxLW_up_clrsky
@@ -353,6 +345,18 @@ contains
        ! Compute cloud-optics...
        !
        ! ###################################################################################
+       ! Create clear/cloudy indicator
+       zcf0(:) = 1._kind_phys
+       zcf1(:) = 1._kind_phys
+       do iblck = 1, rrtmgp_phys_blksz
+          do iLay=1,nLay
+             zcf0(iblck) = min(zcf0(iblck), 1._kind_phys - cld_frac(iCol+iblck-1,iLay))
+          enddo
+          if (zcf0(iblck) <= ftiny)   zcf0(iblck) = 0._kind_phys
+          if (zcf0(iblck) > oneminus) zcf0(iblck) = 1._kind_phys
+          zcf1(iblck) = 1._kind_phys - zcf0(iblck)
+       enddo
+
        if (any(zcf1 .gt. eps)) then
           ! Microphysical (gridmean) cloud optics
           call check_error_msg('rrtmgp_lw_main_cloud_optics',lw_cloud_props%cloud_optics(&
