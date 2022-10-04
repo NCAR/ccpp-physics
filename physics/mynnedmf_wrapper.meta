@@ -1401,6 +1401,13 @@
   dimensions = ()
   type = logical
   intent = in
+[mraerosol]
+  standard_name = do_merra2_aerosol_awareness
+  long_name = flag for merra2 aerosol-aware physics for example the thompson microphysics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [spp_wts_pbl]
   standard_name = spp_weights_for_pbl_scheme
   long_name = spp weights for pbl scheme
