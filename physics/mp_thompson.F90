@@ -887,6 +887,29 @@ module mp_thompson
          ! mass. NIFA is mainly summarized over five dust bins and NWFA over the
          ! other 10 bins. The parameters besides each bins are carefully tuned
          ! for a good performance of the scheme.
+         !
+         ! The fields for the last index of the aerfld array
+         ! are specified as below.
+         ! 1: dust bin 1,                     0.1 to 1.0  micrometers
+         ! 2: dust bin 2,                     1.0 to 1.8  micrometers
+         ! 3: dust bin 3,                     1.8 to 3.0  micrometers
+         ! 4: dust bin 4,                     3.0 to 6.0  micrometers
+         ! 5: dust bin 5,                     6.0 to 10.0 micrometers
+         ! 6: sea salt bin 1,                 0.03 to 0.1 micrometers
+         ! 7: sea salt bin 2,                 0.1 to 0.5  micrometers
+         ! 8: sea salt bin 3,                 0.5 to 1.5  micrometers 
+         ! 9: sea salt bin 4,                 1.5 to 5.0  micrometers
+         ! 10: sea salt bin 5,                5.0 to 10.0 micrometers
+         ! 11: Sulfate,                       0.35 (mean) micrometers
+         ! 15: water-friendly organic carbon, 0.35 (mean) micrometers
+         !
+         ! Bin densities are as follows:
+         ! 1:    dust bin 1:         2500 kg/m2
+         ! 2-5:  dust bin 2-5:       2650 kg/m2
+         ! 6-10: sea salt bins 6-10: 2200 kg/m2
+         ! 11:   sulfate:            1700 kg/m2
+         ! 15:   organic carbon:     1800 kg/m2
+         
          implicit none
          integer, intent(in)::ncol, nlev
          real (kind=kind_phys), dimension(:,:,:), intent(in)  :: aerfld
