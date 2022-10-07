@@ -55,7 +55,7 @@ contains
        cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain, precip_frac,        &
        cld_cnv_lwp, cld_cnv_reliq, cld_cnv_iwp, cld_cnv_reice, cld_pbl_lwp,              &
        cld_pbl_reliq, cld_pbl_iwp, cld_pbl_reice, lwp_ex, iwp_ex, lwp_fc, iwp_fc,        &
-       errmsg, errflg)
+       cldfra2d, errmsg, errflg)
     implicit none
 
     ! Inputs   
@@ -136,6 +136,8 @@ contains
          iwp_ex,                    & ! Total ice    water path from explicit microphysics
          lwp_fc,                    & ! Total liquid water path from cloud fraction scheme
          iwp_fc                       ! Total ice    water path from cloud fraction scheme
+    real(kind_phys), dimension(:), intent(out) :: &
+         cldfra2d                     ! Instantaneous 2D (max-in-column) cloud fraction
     real(kind_phys), dimension(:,:),intent(inout) :: &
          cld_frac,                  & ! Cloud-fraction for   stratiform   clouds
          cld_lwp,                   & ! Water path for       stratiform   liquid cloud-particles
@@ -294,6 +296,14 @@ contains
           where(cld_pbl_reice .gt. radice_upr) cld_pbl_reice = radice_upr
        endif
     endif
+
+    ! Instantaneous 2D (max-in-column) cloud fraction
+    do iCol = 1, nCol
+       cldfra2d(iCol) = 0._kind_phys
+       do iLay = 1, nLev-1
+          cldfra2d(iCol) = max(cldfra2d(iCol), cld_frac(iCol,iLay))
+       enddo
+    enddo
 
     precip_frac(1:nCol,1:nLev) = cld_frac(1:nCol,1:nLev)
 
