@@ -85,15 +85,9 @@ module cs_conv
 
 !  PUBLIC: interfaces
 !
-   public cs_conv_init, cs_conv_run, cs_conv_finalize         ! CS scheme main driver
+   public  cs_conv_run         ! CS scheme main driver
   
    contains
-
-   subroutine cs_conv_init()
-   end subroutine cs_conv_init
-
-   subroutine cs_conv_finalize()
-   end subroutine cs_conv_finalize
 
 !>\defgroup cs_scheme Chikira-Sugiyama Cumulus Scheme Module
 !> \brief The subroutine contains the main driver for Chikira-Sugiyama convective scheme.

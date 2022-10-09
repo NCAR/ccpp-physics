@@ -1,0 +1,48 @@
+UGWPv1_gsldrag scheme.
+
+The "ugwpv1_gsldrag" combines the orographic gravity wave drag (GWD) parameterizations of the GSL drag suite with the version 1 UGWP non-stationary gravity wave drag (NGW) scheme of \cite yudin_et_al_2020.
+
+For information on the GSL drag suite, click here.
+
+The NGW physics scheme parameterizes the effects of non-stationary  waves 
+unresolved by dynamical cores. These non-stationary oscillations with periods 
+bounded by Coriolis and Brunt-Väisälä frequencies and typical horizontal 
+scales from tens to several hundreds of kilometers,  are forced by the 
+imbalance of convective and frontal/jet dynamics in the troposphere and 
+lower stratosphere (Fritts 1984 \cite fritts_1984; Alexander et al. 
+2010 \cite alexander_et_al_2010; Plougonven and Zhang 2014 \cite plougonven_and_zhang_2014). 
+The NGWs propagate upwards and the amplitudes exponentially grow with 
+altitude until instability and breaking of waves occur. Convective and 
+dynamical instability induced by GWs with large amplitudes can trigger 
+production of small-scale turbulence and self-destruction of waves. 
+The latter process in the theory of atmospheric GWs is frequently referred
+as the wave saturation (Lindzen 1981 \cite lindzen_1981; Weinstock 
+1984 \cite weinstock_1984; Fritts 1984 \cite fritts_1984). Herein, 
+“saturation” or "breaking" refers to any processes that act to reduce 
+wave amplitudes due to instabilities and/or interactions arising from 
+large-amplitude perturbations limiting the exponential growth of GWs 
+with height. Background dissipation processes such as molecular diffusion 
+and radiative cooling, in contrast, act independently of GW amplitudes. 
+In the middle atmosphere, impacts of NGW saturation (or breaking) and 
+dissipation on the large-scale circulation, mixing, and transport have 
+been acknowledged in the physics of global weather and climate models 
+after pioneering studies by Lindzen 1981 \cite lindzen_1981 and Holton 
+1983 \cite holton_1983. Comprehensive reviews on the physics of NGWs 
+and OGWs in climate and weather models have been discussted in Alexander 
+et al. 2010 \cite alexander_et_al_2010, Geller et al. 
+2013 \cite geller_et_al_2013, and Garcia et al. 2017 \cite garcia_et_al_2017. 
+They are formulated using different aspects of the nonlinear and linear 
+propagation, instability, breaking and dissipation of waves along with 
+different specifications of GW sources (Garcia et al. 2007 \cite garcia_et_al_2007;
+Richter et al 2010 \cite richter_et_al_2010; Eckermann et al. 
+2009 \cite eckermann_et_al_2009; Eckermann 2011 \cite eckermann_2011; 
+Lott et al. 2012 \cite lott_et_al_2012).
+
+Several studies have demonstrated the importance of NGW physics to improve
+model predictions in the stratosphere and upper atmosphere (Alexander et al.
+ 2010 \cite alexander_et_al_2010; Geller et al. 2013). In order to describe 
+the effects of unresolved GWs in global forecast models, the representation of
+subgrid OGWs and NGWs has been implemented in the self-consistent manner using the 
+UGWP framework.
+
+

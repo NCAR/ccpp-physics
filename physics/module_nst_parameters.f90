@@ -3,14 +3,13 @@
 !! near surface sea temperature scheme.
 
 !>\defgroup nst_parameters GFS NSST Parameter Module
-!! \ingroup gfs_nst_main
+!! \ingroup gfs_nst_main_mod
 !! This module contains constants and parameters used in GFS
 !! near surface sea temperature scheme.
 !! history:
 !!  20210305: X.Li, reduce z_w_max from 30 m to 20 m
 module module_nst_parameters
-  use machine, only :  kind_phys &
-       ,kind_rad ! for astronomy (date) calculations
+  use machine, only :  kind_phys
   !
   ! air constants and coefficients from the atmospehric model
   use physcons, only: &

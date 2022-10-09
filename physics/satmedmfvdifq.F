@@ -9,8 +9,11 @@
       use mfscuq_mod
       contains
 
-!> \defgroup satmedmfvdifq GFS Scale-aware TKE-based Moist Eddy-Diffusivity Mass-flux (TKE-EDMF, updated version) Scheme Module
-!! @{
+!> \defgroup module_satmedmfvdifq GFS TKE-EDMF PBL Module
+!! This file contains the CCPP-compliant SATMEDMF scheme (updated version) which
+!! computes subgrid vertical turbulence mixing using scale-aware TKE-based moist
+!! eddy-diffusion mass-flux (TKE-EDMF) parameterization (by Jongil Han).
+!> @{
 !! \brief This subroutine contains all of the logic for the
 !! scale-aware TKE-based moist eddy-diffusion mass-flux (TKE-EDMF, updated version) scheme.
 !! For local turbulence mixing, a TKE closure model is used.
@@ -26,8 +29,8 @@
 !> \section arg_table_satmedmfvdifq_init Argument Table
 !! \htmlinclude satmedmfvdifq_init.html
 !!
-      subroutine satmedmfvdifq_init (satmedmf,
-     &                               isatmedmf,isatmedmf_vdifq,
+      subroutine satmedmfvdifq_init (satmedmf,                          &
+     &                               isatmedmf,isatmedmf_vdifq,         &
      &                               errmsg,errflg)
 
       logical, intent(in   ) :: satmedmf
@@ -56,9 +59,6 @@
 
       end subroutine satmedmfvdifq_init
 
-      subroutine satmedmfvdifq_finalize ()
-      end subroutine satmedmfvdifq_finalize
-
 !> \section arg_table_satmedmfvdifq_run Argument Table
 !! \htmlinclude satmedmfvdifq_run.html
 !!
@@ -73,10 +73,9 @@
 !! -# A mass-flux approach is also used to represent the stratocumulus-top-induced turbulence
 !! (mfscuq.f).
 !! \section detail_satmedmfvidfq GFS satmedmfvdifq Detailed Algorithm 
-!! @{
-      subroutine satmedmfvdifq_run(im,km,ntrac,ntcw,ntrw,ntiw,ntke,     &
-     &     grav,rd,cp,rv,hvap,hfus,fv,eps,epsm1,                        &
-     &     dv,du,tdt,rtg,u1,v1,t1,q1,swh,hlw,xmu,garea,zvfun,           &
+      subroutine satmedmfvdifq_run(im,km,progsigma,ntrac,ntcw,ntrw,     &
+     &     ntiw,ntke,grav,rd,cp,rv,hvap,hfus,fv,eps,epsm1,              &
+     &     dv,du,tdt,rtg,tmf,u1,v1,t1,q1,swh,hlw,xmu,garea,zvfun,       &
      &     psk,rbsoil,zorl,u10m,v10m,fm,fh,                             &
      &     tsea,heat,evap,stress,spd1,kpbl,                             &
      &     prsi,del,prsl,prslk,phii,phil,delt,                          &
@@ -99,7 +98,7 @@
       integer, intent(in)  :: tc_pbl
       integer, intent(in)  :: kinver(:)
       integer, intent(out) :: kpbl(:)
-      logical, intent(in)  :: gen_tend,ldiag3d
+      logical, intent(in)  :: gen_tend,ldiag3d,progsigma
 !
       real(kind=kind_phys), intent(in) :: grav,rd,cp,rv,hvap,hfus,fv,   &
      &                                    eps,epsm1
@@ -107,7 +106,7 @@
       real(kind=kind_phys), intent(in) :: dspfac, bl_upfr, bl_dnfr
       real(kind=kind_phys), intent(in) :: rlmx, elmx
       real(kind=kind_phys), intent(inout) :: dv(:,:),     du(:,:),      &
-     &                     tdt(:,:),    rtg(:,:,:)
+     &                     tdt(:,:),    rtg(:,:,:), tmf(:,:)
       real(kind=kind_phys), intent(in) ::                               &
      &                     u1(:,:),     v1(:,:),                        &
      &                     t1(:,:),     q1(:,:,:),                      &
@@ -331,6 +330,14 @@
           zm(i,k) = zi(i,k+1)
         enddo
       enddo
+!>  - Initialize variables needed for prognostic cumulus closure
+      if(progsigma)then
+         do k=1,km
+            do i=1,im
+               tmf(i,k) = 0.
+            enddo
+         enddo
+      endif
 !>  - Compute horizontal grid size (\p gdx)
       do i=1,im
         gdx(i) = sqrt(garea(i))
@@ -2206,6 +2213,15 @@ c
 !           dqsfc(i)   = dqsfc(i)+conq*del(i,k)*qtend
          enddo
       enddo
+
+      if(progsigma)then
+         do  k = 1,km
+            do i = 1,im
+               tmf(i,k)=(f2(i,k)-q1(i,k,1))*rdt
+            enddo
+         enddo
+      endif
+
       do i = 1,im
         dtsfc(i) = rho_a(i) * cp * heat(i)
         dqsfc(i) = rho_a(i) * hvap * evap(i)
@@ -2399,5 +2415,4 @@ c
       return
       end subroutine satmedmfvdifq_run
 !> @}
-!! @}
       end module satmedmfvdifq

@@ -17,7 +17,7 @@
 
       private
 
-      public :: shalcnv_init, shalcnv_run, shalcnv_finalize
+      public :: shalcnv_init, shalcnv_run
 
       contains
 
@@ -46,9 +46,6 @@
       endif
 !
       end subroutine shalcnv_init
-
-      subroutine shalcnv_finalize()
-      end subroutine shalcnv_finalize
 
 !>  \brief This subroutine contains the entirety of the SAS shallow convection scheme.
 !!

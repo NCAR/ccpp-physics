@@ -2,6 +2,8 @@
 \page surf_pert GFS Surface Parameter Perturbation
 \section des_sfcpert Description
 
+\todo land surface prt
+
 Land surface perturbation (Gehne et al. (2019) \cite Gehne_2019) has been recently introduced 
 into FV3GFS. This treatment is based on the hypothesis that one of the major
 causes of the insufficient spread in current global NWP model,especially near the surface, is a lack of treatment of 

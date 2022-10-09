@@ -91,9 +91,6 @@
 
       end subroutine mynnedmf_wrapper_init
 
-      subroutine mynnedmf_wrapper_finalize ()
-      end subroutine mynnedmf_wrapper_finalize
-
 ! \brief This scheme (1) performs pre-mynnedmf work, (2) runs the mynnedmf, and (3) performs post-mynnedmf work
 !> \section arg_table_mynnedmf_wrapper_run Argument Table
 !! \htmlinclude mynnedmf_wrapper_run.html
@@ -163,7 +160,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  imp_physics_thompson, imp_physics_wsm6,            &
      &  chem3d, frp, mix_chem, rrfs_smoke, fire_turb, nchem, ndvel, &
      &  imp_physics_nssl, nssl_ccn_on,                     &
-     &  ltaerosol, spp_wts_pbl, spp_pbl, lprnt, huge, errmsg, errflg  )
+     &  ltaerosol, mraerosol, spp_wts_pbl, spp_pbl, lprnt, huge, errmsg, errflg  )
 
 ! should be moved to inside the mynn:
      use machine,        only: kind_phys
@@ -190,7 +187,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      logical, intent(in) ::                                 &
      &       bl_mynn_tkeadvect,                             &
      &       bl_mynn_tkebudget,                             &
-     &       ltaerosol,                                     &
+     &       ltaerosol, mraerosol,                          &
      &       lprnt,                                         &
      &       do_mynnsfclay,                                 &
      &       flag_for_pbl_generic_tend,                     &
@@ -476,6 +473,32 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                 ozone(i,k) = qgrs_ozone(i,k)
                 qnwfa(i,k) = qgrs_water_aer_num_conc(i,k)
                 qnifa(i,k) = qgrs_ice_aer_num_conc(i,k)
+              enddo
+            enddo
+          else if(mraerosol) then
+            FLAG_QI = .true.
+            FLAG_QNI= .true.
+            FLAG_QC = .true.
+            FLAG_QNC= .true.
+            FLAG_QNWFA= .false.
+            FLAG_QNIFA= .false.
+            p_qc = 2
+            p_qr = 0
+            p_qi = 2
+            p_qs = 0
+            p_qg = 0
+            p_qnc= 0
+            p_qni= 0
+            do k=1,levs
+              do i=1,im
+                sqv(i,k)   = qgrs_water_vapor(i,k)
+                sqc(i,k)   = qgrs_liquid_cloud(i,k)
+                sqi(i,k)   = qgrs_ice_cloud(i,k)
+                qnc(i,k)   = qgrs_cloud_droplet_num_conc(i,k)
+                qni(i,k)   = qgrs_cloud_ice_num_conc(i,k)
+                ozone(i,k) = qgrs_ozone(i,k)
+                qnwfa(i,k) = 0.
+                qnifa(i,k) = 0.
               enddo
             enddo
           else
@@ -863,6 +886,23 @@ SUBROUTINE mynnedmf_wrapper_run(        &
              !    !qgrs_ice_aer_num_conc(i,k)       = qgrs_ice_aer_num_conc(i,k)       + RQNIFABLTEN(i,k)*delt
              !  enddo
              !enddo
+           else if(mraerosol) then
+             do k=1,levs
+               do i=1,im
+                 dqdt_water_vapor(i,k)             = RQVBLTEN(i,k) !/(1.0 + qv(i,k))
+                 dqdt_liquid_cloud(i,k)            = RQCBLTEN(i,k) !/(1.0 + qv(i,k))
+                 dqdt_cloud_droplet_num_conc(i,k)  = RQNCBLTEN(i,k)
+                 dqdt_ice_cloud(i,k)               = RQIBLTEN(i,k) !/(1.0 + qv(i,k))
+                 dqdt_ice_num_conc(i,k)            = RQNIBLTEN(i,k)
+               enddo
+             enddo
+             if(ldiag3d .and. .not. flag_for_pbl_generic_tend) then
+               call dtend_helper(100+ntqv,RQVBLTEN)
+               call dtend_helper(100+ntcw,RQCBLTEN)
+               call dtend_helper(100+ntlnc,RQNCBLTEN)
+               call dtend_helper(100+ntiw,RQIBLTEN)
+               call dtend_helper(100+ntinc,RQNIBLTEN)
+             endif
            else
              !Thompson (2008)
              do k=1,levs

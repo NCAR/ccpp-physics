@@ -62,6 +62,13 @@
   dimensions = ()
   type = integer
   intent = in
+[progsigma]
+  standard_name = do_prognostic_updraft_area_fraction
+  long_name = flag for prognostic sigma in cumuls scheme
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [ntrac]
   standard_name = number_of_vertical_diffusion_tracers
   long_name = number of tracers to diffuse vertically
@@ -198,6 +205,14 @@
   long_name = updated tendency of the tracers due to vertical diffusion in PBL scheme
   units = kg kg-1 s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_vertical_diffusion_tracers)
+  type = real
+  kind = kind_phys
+  intent = inout
+[tmf]
+  standard_name = instantaneous_tendency_of_specific_humidity_due_to_PBL
+  long_name = instantaneous_tendency_of_specific_humidity_due_to_PBL
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout

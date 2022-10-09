@@ -274,6 +274,13 @@
   dimensions = ()
   type = logical
   intent = in
+[mraerosol]
+  standard_name = do_merra2_aerosol_awareness
+  long_name = flag for merra2 aerosol-aware physics for example the thompson microphysics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [nssl_ccn_on]
   standard_name = nssl_ccn_on
   long_name = CCN activation flag in NSSL micro
@@ -762,6 +769,45 @@
   standard_name = surface_upward_latent_heat_flux_from_coupled_process
   long_name = sfc latent heat flux for coupling
   units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[use_med_flux]
+  standard_name = do_mediator_atmosphere_ocean_fluxes
+  long_name = flag for using atmosphere-ocean fluxes from mediator
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[dqsfc_med]
+  standard_name = surface_upward_latent_heat_flux_over_ocean_from_mediator
+  long_name = sfc latent heat flux input over ocean for coupling
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[dtsfc_med]
+  standard_name = surface_upward_sensible_heat_flux_over_ocean_from_mediator
+  long_name = sfc sensible heat flux input over ocean for coupling
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[dusfc_med]
+  standard_name = surface_x_momentum_flux_over_ocean_from_mediator
+  long_name = sfc x momentum flux over ocean for coupling
+  units = Pa
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[dvsfc_med]
+  standard_name = surface_y_momentum_flux_over_ocean_from_mediator
+  long_name = sfc y momentum flux over ocean for coupling
+  units = Pa
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys

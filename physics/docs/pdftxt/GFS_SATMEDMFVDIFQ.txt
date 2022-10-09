@@ -2,9 +2,9 @@
 \page GFS_SATMEDMFVDIFQ GFS Scale-aware TKE-based Moist Eddy-Diffusion Mass-Flux (EDMF) PBL and Free Atmospheric Turbulence Scheme
 \section des_satmedmfvdifq Description
 
-The current operational \ref GFS_HEDMF uses a hybrid EDMF parameterization for the convective PBL (Han et al. 2016 \cite Han_2016;
-Han et al. 2017 \cite han_et_al_2017), where the EDMF scheme is applied only for the strongly unstable PBL, while the eddy-diffusivity
-counter-gradient(EDCG) scheme is used for the weakly unstable PBL. The new TKE-EDMF is an extended version of \ref GFS_HEDMF  with below enhancement:
+The current operational GFS scale-aware TKE-EDMF PBL scheme
+ is an extended version of GFS Hybrid Eddy-Diffusivity Mass-Flux PBL and Free Atmospheric Turbulence
+scheme (Han et al. 2016 \cite Han_2016; Han et al. 2017 \cite han_et_al_2017)  with below enhancement:
 
 -# Eddy diffusivity (K) is now a function of TKE which is prognostically predicted
 
@@ -26,10 +26,30 @@ to take into account nonlocal transport by large eddies(mfpbltq.f)
 it was an eddy diffusion form)
 - For local turbulence mixing, a TKE closure model is used.
 
+
+\section v6_pbl_enh CCPP Physics Updates
+\version CCPP v6.0.0
+
+- Wind shear effect in characteristic mixing length calculation is included, which 
+reduces the mixing length in a strong shear environment such as a hurricane.
+- To better predict surface inversion as well as capping inversion near the PBL top, 
+background diffusivity in the inversion layers is reduced as a function of surface 
+roughness and green vegetation fraction.
+- To reduce the PBL overgrowth, the PBL updraft overshoot is not only limited by 
+bulk Richardson number-based-PBL depth, but the virtual potential temperature at 
+top of the surface layer rather than that at the model first layer is also used as 
+the near-surface virtual potential temperature in the bulk-Richardson number 
+computation. This helps to largely suppress the unrealistic widespread popcorn-like precipitation.
+- Updraft entrainment rates for moisture, hydrometeors, and tracers are increased by about 30%.
+- A positive definite total variation diminishing (TVD) mass-flux transport scheme for moisture, hydrometeors, 
+and tracers and a method for removing negative tracer mixing ratio values have been implemented.
+
+\sa NCEP Office Note 505 \cite https://doi.org/10.25923/cybh-w893 and 506 \cite https://doi.org/10.25923/5051-3r70
+
 \section intra_satmedmfvdifq Intraphysics Communication
-\ref arg_table_satmedmfvdifq_run
+- \ref arg_table_satmedmfvdifq_run
 
 \section gen_pbl_satmedmfvdifq  General Algorithm
-\ref gen_satmedmfvdifq
+- \ref gen_satmedmfvdifq
 
 */

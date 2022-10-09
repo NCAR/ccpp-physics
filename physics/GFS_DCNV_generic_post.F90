@@ -15,7 +15,7 @@
       index_of_temperature, index_of_x_wind, index_of_y_wind, ntqv, gq0, save_q,  &
       cnvw, cnvc, cnvw_phy_f3d, cnvc_phy_f3d, flag_for_dcnv_generic_tend,         &
       ntcw,ntiw,ntclamt,ntrw,ntsw,ntrnc,ntsnc,ntgl,                               &
-      ntgnc, nthl, nthnc, nthv, ntgv, ntrac,clw,                                  &
+      ntgnc, nthl, nthnc, nthv, ntgv, ntsigma, ntrac,clw,                         &
       satmedmf, trans_trac, errmsg, errflg)
 
 
@@ -45,7 +45,7 @@
       integer, intent(in) :: dtidx(:,:), index_of_process_dcnv, index_of_temperature, &
            index_of_x_wind, index_of_y_wind, ntqv
       integer, intent(in) :: ntcw,ntiw,ntclamt,ntrw,ntsw,ntrnc,ntsnc,ntgl,   &
-                             ntgnc, nthl, nthnc, nthv, ntgv, ntrac
+                             ntgnc, nthl, nthnc, nthv, ntgv, ntsigma, ntrac
       real(kind=kind_phys), dimension(:,:,:), intent(in) :: clw
 
 
@@ -112,7 +112,7 @@
                      n /= ntrw  .and. n /= ntsw  .and. n /= ntrnc   .and. &
                      n /= ntsnc .and. n /= ntgl  .and. n /= ntgnc   .and. &
                      n /= nthl  .and. n /= nthnc .and. n /= nthv    .and. &
-                     n /= ntgv ) then
+                     n /= ntgv  .and. n /= ntsigma) then
                    tracers = tracers + 1
                    idtend = dtidx(100+n,index_of_process_dcnv)
                    if(idtend>0) then
@@ -148,5 +148,4 @@
       endif ! if (lssav)
 
     end subroutine GFS_DCNV_generic_post_run
-
     end module GFS_DCNV_generic_post

@@ -12,15 +12,15 @@
         ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev,nqrimef,          &
         trans_aero, ntchs, ntchm, ntccn, nthl, nthnc, ntgv, nthv,                                                              &
         imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, imp_physics_zhao_carr, imp_physics_mg,          &
-        imp_physics_fer_hires, imp_physics_nssl, nssl_ccn_on, ltaerosol, nssl_hail_on,                                         &
+        imp_physics_fer_hires, imp_physics_nssl, nssl_ccn_on, ltaerosol,   mraerosol, nssl_hail_on,                            &
         cplflx, cplaqm, cplchm, lssav, flag_for_pbl_generic_tend, ldiag3d, lsidea, hybedmf, do_shoc, satmedmf,                 &
         shinhong, do_ysu, dvdftra, dusfc1, dvsfc1, dtsfc1, dqsfc1, dtf, dudt, dvdt, dtdt, htrsw, htrlw, xmu,                   &
         dqdt, dusfc_cpl, dvsfc_cpl, dtsfc_cpl, dtend, dtidx, index_of_temperature, index_of_x_wind, index_of_y_wind,           &
         index_of_process_pbl, dqsfc_cpl, dusfci_cpl, dvsfci_cpl, dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag,   &
         dqsfc_diag, dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag,                                                        &
         rd, cp, fvirt, hvap, t1, q1, prsl, hflx, ushfsfci, oceanfrac, kdt, dusfc_cice, dvsfc_cice,                             &
-        dtsfc_cice, dqsfc_cice, wet, dry, icy, wind, stress_wat, hflx_wat, evap_wat, ugrs1, vgrs1, hffac, &
-        ugrs, vgrs, tgrs, qgrs, save_u, save_v, save_t, save_q, huge, errmsg, errflg)
+        dtsfc_cice, dqsfc_cice, use_med_flux, dtsfc_med, dqsfc_med, dusfc_med, dvsfc_med, wet, dry, icy, wind, stress_wat,     &
+        hflx_wat, evap_wat, ugrs1, vgrs1, hffac, ugrs, vgrs, tgrs, qgrs, save_u, save_v, save_t, save_q, huge, errmsg, errflg)
 
       use machine,                only : kind_phys
       use GFS_PBL_generic_common, only : set_aerosol_tracer_index
@@ -36,7 +36,7 @@
       integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires
       integer, intent(in) :: imp_physics_nssl
       logical, intent(in) :: nssl_ccn_on, nssl_hail_on
-      logical, intent(in) :: ltaerosol, cplflx, cplaqm, cplchm, lssav, ldiag3d, lsidea
+      logical, intent(in) :: ltaerosol, cplflx, cplaqm, cplchm, lssav, ldiag3d, lsidea, use_med_flux, mraerosol
       logical, intent(in) :: hybedmf, do_shoc, satmedmf, shinhong, do_ysu
 
       logical, intent(in) :: flag_for_pbl_generic_tend      
@@ -48,7 +48,7 @@
       real(kind=kind_phys), dimension(:), intent(in) :: t1, q1, hflx, oceanfrac
       real(kind=kind_phys), dimension(:,:), intent(in) :: prsl
       real(kind=kind_phys), dimension(:), intent(in) :: dusfc_cice, dvsfc_cice, dtsfc_cice, dqsfc_cice, &
-          wind, stress_wat, hflx_wat, evap_wat, ugrs1, vgrs1
+          dtsfc_med, dqsfc_med, dusfc_med, dvsfc_med, wind, stress_wat, hflx_wat, evap_wat, ugrs1, vgrs1
 
       real(kind=kind_phys), dimension(:,:, :), intent(in) :: qgrs
       real(kind=kind_phys), dimension(:,:), intent(in) :: ugrs, vgrs, tgrs
@@ -104,7 +104,7 @@
         if (trans_aero) then
           ! Set kk if chemistry-aerosol tracers are diffused
           call set_aerosol_tracer_index(imp_physics, imp_physics_wsm6,          &
-                                        imp_physics_thompson, ltaerosol,        &
+                                        imp_physics_thompson, ltaerosol,mraerosol,   &
                                         imp_physics_mg, ntgl, imp_physics_gfdl, &
                                         imp_physics_zhao_carr, imp_physics_nssl,&
                                         nssl_hail_on, nssl_ccn_on, kk,          &
@@ -163,6 +163,21 @@
                 dqdt(i,k,ntoz)  = dvdftra(i,k,10)
                 dqdt(i,k,ntwa)  = dvdftra(i,k,11)
                 dqdt(i,k,ntia)  = dvdftra(i,k,12)
+              enddo
+            enddo
+          else if(mraerosol) then
+            do k=1,levs
+              do i=1,im
+                dqdt(i,k,ntqv)  = dvdftra(i,k,1)
+                dqdt(i,k,ntcw)  = dvdftra(i,k,2)
+                dqdt(i,k,ntiw)  = dvdftra(i,k,3)
+                dqdt(i,k,ntrw)  = dvdftra(i,k,4)
+                dqdt(i,k,ntsw)  = dvdftra(i,k,5)
+                dqdt(i,k,ntgl)  = dvdftra(i,k,6)
+                dqdt(i,k,ntlnc) = dvdftra(i,k,7)
+                dqdt(i,k,ntinc) = dvdftra(i,k,8)
+                dqdt(i,k,ntrnc) = dvdftra(i,k,9)
+                dqdt(i,k,ntoz)  = dvdftra(i,k,10)
               enddo
             enddo
           else
@@ -318,11 +333,18 @@
               endif
               dtsfci_cpl(i) = cp   * rho * hflx_wat(i) ! sensible heat flux over open ocean
               dqsfci_cpl(i) = hvap * rho * evap_wat(i) ! latent heat flux over open ocean
-            else                                       ! use results from PBL scheme for 100% open ocean
-              dusfci_cpl(i) = dusfc1(i)
-              dvsfci_cpl(i) = dvsfc1(i)
-              dtsfci_cpl(i) = dtsfc1(i)*hffac(i)
-              dqsfci_cpl(i) = dqsfc1(i)
+            else                                       ! 100% open ocean
+              if (use_med_flux .and. kdt > 1) then ! use results from CMEPS mediator
+                dusfci_cpl(i) = dusfc_med(i)
+                dvsfci_cpl(i) = dvsfc_med(i)
+                dtsfci_cpl(i) = dtsfc_med(i)
+                dqsfci_cpl(i) = dqsfc_med(i)
+              else                                 ! use results from PBL scheme
+                dusfci_cpl(i) = dusfc1(i)
+                dvsfci_cpl(i) = dvsfc1(i)
+                dtsfci_cpl(i) = dtsfc1(i)*hffac(i)
+                dqsfci_cpl(i) = dqsfc1(i)
+              end if
             endif
 !
             dusfc_cpl (i) = dusfc_cpl(i) + dusfci_cpl(i) * dtf
@@ -358,27 +380,18 @@
         end if
       end if
 
-      if (cplaqm .and. .not.cplflx) then
-        do i=1,im
-          if (oceanfrac(i) > zero) then      ! Ocean only, NO LAKES
-            if ( .not. wet(i)) then ! no open water
-              if (kdt > 1) then              !use results from CICE
-                dtsfci_cpl(i) = dtsfc_cice(i)
-                dqsfci_cpl(i) = dqsfc_cice(i)
-              else                           !use PBL fluxes when CICE fluxes is unavailable
-                dtsfci_cpl(i) = dtsfc1(i)*hffac(i)
-                dqsfci_cpl(i) = dqsfc1(i)
-              end if
-            elseif (icy(i) .or. dry(i)) then ! use stress_ocean from sfc_diff for opw component at mixed point
-              rho = prsl(i,1) / (rd*t1(i)*(one+fvirt*max(q1(i), qmin)))
-              dtsfci_cpl(i) = cp   * rho * hflx_wat(i) ! sensible heat flux over open ocean
-              dqsfci_cpl(i) = hvap * rho * evap_wat(i) ! latent heat flux over open ocean
-            else                                       ! use results from PBL scheme for 100% open ocean
+      if (cplaqm) then
+        do i = 1, im
+          if (oceanfrac(i) > zero) then
+            if (.not.cplflx) then
               dtsfci_cpl(i) = dtsfc1(i)*hffac(i)
               dqsfci_cpl(i) = dqsfc1(i)
-            endif
-          endif ! Ocean only, NO LAKES
-        enddo
+            end if
+          else  ! heat fluxes are required over land
+            dtsfci_cpl(i) = dtsfc1(i)*hffac(i)
+            dqsfci_cpl(i) = dqsfc1(i)
+          end if
+        end do
       end if
 
 !-------------------------------------------------------lssav if loop ----------
