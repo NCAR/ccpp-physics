@@ -42,6 +42,13 @@
   dimensions = ()
   type = logical
   intent = in
+[progsigma]
+  standard_name = do_prognostic_updraft_area_fraction
+  long_name = flag for prognostic area fraction in cumulus convection
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [ntcw]
   standard_name = index_of_cloud_liquid_water_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for cloud condensate (or liquid water)
