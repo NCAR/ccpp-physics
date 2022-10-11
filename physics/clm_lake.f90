@@ -123,9 +123,11 @@ MODULE clm_lake
     real(kind_phys) :: dzsoi(1:nlevsoil)    !soil dz (thickness)
     real(kind_phys) :: zisoi(0:nlevsoil)    !soil zi (interfaces)  
 
-    real, parameter :: SaltLk_T(1:25) = (/0.5, 0.,-0.5, 3., 4., 7., 8., 12., 13., 16., 19., 21., &
-                                          23.5, 25.,26.,24.,23.,20.5,18.,15., 11.5, 8.,  4.,  1., 0.5/)
+    real, parameter :: SaltLk_T(1:25) = (/ 0.5,  0.,-0.5, 3., 4.,  7., 8., 12.,  13., 16., 19., 21., &
+                                          23.5, 25., 26.,24.,23.,20.5,18., 15., 11.5,  8.,  4.,  1., 0.5/)
+    real, parameter :: month_length(12) = (/ 31, 29, 31, 30, 31, 30, 31, 30, 30, 31, 30, 31 /)
     real, parameter :: julm(1:13) = (/0,31,59,90,120,151,181,212,243,273,304,334,365/)
+    logical, parameter :: include_all_salty_locations = .false.
 
     CONTAINS
 
@@ -226,6 +228,7 @@ MODULE clm_lake
 
       is_salty=limit_temperature_by_climatology(xlat_d,xlon_d)
 
+     if(include_all_salty_locations) then
       ! --- The Mono Lake in California, salinity is 75 ppt with freezing point at
       ! --- -4.2 C (Stan). The Mono Lake lat/long (37.9-38.2, -119.3 - 118.8)
       if (xlon_d.gt.-119.3.and. xlon_d.lt.-118.8) then  
@@ -250,7 +253,7 @@ MODULE clm_lake
          endif
          is_salty = .true.
       endif
-      
+     endif
      !tgs --- end of special treatment for salty lakes
     end function is_salty
  
@@ -263,9 +266,9 @@ MODULE clm_lake
                      gt0          ,prsi           ,con_rd,con_g ,qvcurr          ,&  !i
                      gu0          ,gv0            ,dlwsfci      ,emiss           ,&
                      rain         ,dtp            ,dswsfci      ,albedo          ,&
-                     xlat_d       ,z_lake3d       ,dz_lake3d    ,lakedepth2d     ,&
+                     xlat_d       ,z_lake3d       ,dz_lake3d    ,oro_lakedepth   ,&
                      watsat3d     ,csol3d         ,tkmg3d       ,tkdry3d         ,&
-                     tksatu3d                     ,phii                          ,& 
+                     tksatu3d     ,wet            ,phii         ,clm_lakedepth   ,& 
                      fice         ,min_lakeice                  ,im,km           ,&
                      h2osno2d     ,snowdp2d       ,snl2d        ,z3d             ,&  !h
                      dz3d         ,zi3d           ,h2osoi_vol3d ,h2osoi_liq3d    ,&
@@ -276,7 +279,7 @@ MODULE clm_lake
                      hflx         ,evap           ,grdflx       ,tsfc            ,&  !o
                      lake_t2m     ,lake_q2m       ,clm_lake_initialized          ,&
                      weasd        ,isltyp         ,snowd        ,use_lakedepth   ,&
-                     restart      ,lakedepth_default                             ,&
+                     restart      ,lakedepth_default            ,pgr             ,&
                      zorlw        ,zorli          ,sand3d       ,clay3d          ,&
 ! Flake output variables
                      weasdi       ,snodi          ,hice         ,tsurf           ,&
@@ -304,10 +307,10 @@ MODULE clm_lake
     LOGICAL, INTENT(IN) :: restart,use_lakedepth,first_time_step
     REAL(KIND_PHYS), INTENT(INOUT) :: clm_lake_initialized(:)
     REAL(KIND_PHYS),     INTENT(IN)  :: min_lakeice, con_rd,con_g,con_cp,lakedepth_default, fhour
-    logical, intent(inout) :: icy(:)
+    logical, intent(inout) :: icy(:), wet(:)
     REAL(KIND_PHYS), DIMENSION( : ), INTENT(INOUT)::   fice
-    REAL(KIND_PHYS), DIMENSION( : ), INTENT(IN) :: weasd, snowd
-    REAL(KIND_PHYS), DIMENSION( : ), INTENT(IN):: tg3
+    REAL(KIND_PHYS), DIMENSION( : ), INTENT(INOUT) :: weasd, snowd
+    REAL(KIND_PHYS), DIMENSION( : ), INTENT(IN):: tg3, pgr
     REAL(KIND_PHYS),    DIMENSION( : ), INTENT(IN)    :: ZLVL
 
     INTEGER, DIMENSION(:), INTENT(IN) :: use_lake_model
@@ -343,7 +346,8 @@ MODULE clm_lake
     REAL(KIND_PHYS),           DIMENSION( :,: ),INTENT(INOUT)  :: tkmg3d
     REAL(KIND_PHYS),           DIMENSION( :,: ),INTENT(INOUT)  :: tkdry3d
     REAL(KIND_PHYS),           DIMENSION( :,: ),INTENT(INOUT)  :: tksatu3d
-    REAL(KIND_PHYS),           DIMENSION( : )         ,INTENT(INOUT)  :: lakedepth2d    
+    REAL(KIND_PHYS),           DIMENSION( : )  ,INTENT(INOUT)  :: clm_lakedepth
+    REAL(KIND_PHYS),           DIMENSION( : )  ,INTENT(IN   )  :: oro_lakedepth
 
     !feedback to atmosphere:
     REAL(KIND_PHYS),           DIMENSION( : )         ,INTENT(OUT) :: hflx
@@ -464,6 +468,9 @@ MODULE clm_lake
       ! The latitude and longitude of unhappy points.
       real(kind_phys), allocatable, save :: unhappy_lat(:),unhappy_lon(:)
 
+      integer :: month,num1,num2,day_of_month
+      real(kind_phys) :: wght1,wght2,Tclim
+
       errmsg = ' '
       errflg = 0
 
@@ -498,18 +505,18 @@ MODULE clm_lake
       endif
 
         ! Still have some points to initialize
-        call lakeini(kdt,            ISLTYP,          gt0,             snowd,          & !i
+        call lakeini(kdt,            ISLTYP,          gt0,             snowd,          &
                      weasd,          restart,         lakedepth_default,  fhour,       &
-                     lakedepth2d,    savedtke12d,     snowdp2d,        h2osno2d,       & !o
+                     oro_lakedepth,  savedtke12d,     snowdp2d,        h2osno2d,       &
                      snl2d,          t_grnd2d,        t_lake3d,        lake_icefrac3d, &
                      z_lake3d,       dz_lake3d,       t_soisno3d,      h2osoi_ice3d,   &
                      h2osoi_liq3d,   h2osoi_vol3d,    z3d,             dz3d,           &
                      zi3d,           watsat3d,        csol3d,          tkmg3d,         &
-                     IDATE,          fice,            min_lakeice,     tsfc,           &
+                                     fice,            min_lakeice,     tsfc,           &
                      use_lake_model, use_lakedepth,   con_g,           con_rd,         &
                      tkdry3d,        tksatu3d,        im,              prsi,           &
                      xlat_d,         xlon_d,          clm_lake_initialized,            &
-                     sand3d,         clay3d,          tg3,                             &
+                     sand3d,         clay3d,          tg3,             clm_lakedepth,  &
                      km, me,         master,          errmsg,          errflg)
         if(errflg/=0) then
           return
@@ -531,6 +538,28 @@ MODULE clm_lake
       snow_points=0
       ice_points=0
 
+      month = IDATE(2)
+      day_of_month = IDATE(3)
+
+        num1 = month*2-1
+        if(day_of_month>15) then
+          num1 = num1 + 1
+        endif
+        num2 = num1+1
+
+        wght2 = day_of_month/month_length(month)
+        if(wght2<0 .or. wght2>1) then
+          if(lakedebug) then
+            write(0,*) 'Warning: wght2 is not 0..1: ',wght2
+          endif
+          wght2 = max(0.0_kind_phys,min(1.0_kind_phys,wght2))
+        endif
+        wght1 = 1.0_kind_phys - wght2
+  
+        if(LAKEDEBUG .and. me==0) then
+          print *,'month,num1,num2,wght1,wght2',month,num1,num2,wght1,wght2
+        endif
+      
         lake_top_loop: DO I = 1,im
 
         if_lake_is_here: if (flag_iter(i) .and. use_lake_model(i)/=0) THEN
@@ -541,9 +570,21 @@ MODULE clm_lake
               salty(i) = 0
            endif
 
+           if(salty(i)/=0) then
+             Tclim = tfrz + wght1*saltlk_T(num1)  &
+                          + wght2*saltlk_T(num2)
+             if(lakedebug) print *,'Tclim,tsfc,t_lake3d',i,Tclim,tsfc(i),t_lake3d(i,:),t_soisno3d(i,:)
+             t_grnd2d(i) = min(Tclim+3.0_kind_phys,(max(tsfc(i),Tclim-3.0_kind_phys)))
+             do k = 1,nlevlake
+               t_lake3d(i,k) = min(Tclim+3.0_kind_phys,(max(t_lake3d(i,k),Tclim-3.0_kind_phys)))
+             enddo
+             t_soisno3d(i,1) = min(Tclim+3.0_kind_phys,(max(t_soisno3d(i,1),Tclim-3.0_kind_phys)))
+             if(lakedebug) print *,'After Tclim,tsfc,t_lake3d',i,Tclim,tsfc(i),t_lake3d(i,:),t_soisno3d(i,:)
+           endif
+
            SFCTMP  = gt0(i,1)
-           PBOT    = prsi(i,2)
-           PSFC    = prsi(i,1) 
+           PBOT    = prsi(i,1)
+           PSFC    = pgr(i)
            Q2K     = qvcurr(i)
            LWDN    = DLWSFCI(I)*EMISS(I)
            PRCP    = RAIN(i)/dtime                     ! [mm/s] use physics timestep since PRCP comes from non-surface schemes
@@ -571,7 +612,7 @@ MODULE clm_lake
             lat(c)             = XLAT_D(I)*pi/180  ! [radian] 
             do_capsnow(c)      = .false.
 
-            lakedepth(c)           = lakedepth2d(i)
+            lakedepth(c)           = clm_lakedepth(i)
             savedtke1(c)           = savedtke12d(i)
             snowdp(c)              = snowdp2d(i)
             h2osno(c)              = h2osno2d(i)
@@ -691,7 +732,7 @@ MODULE clm_lake
                 ! No equivalent in CCPP:
                 ! LH(I)           = eflx_lh_tot(c)/rho1(i)    ![kg*m/(kg*s)]
 
-
+                !-- The CLM output is combined for fractional ice and water
                 if( t_grnd(c) >= tfrz ) then
                   qfx         = eflx_lh_tot(c)/hvap
                 else
@@ -709,12 +750,19 @@ MODULE clm_lake
                 albedo(i)       = ( 0.6 * lake_icefrac3d(i,1) ) + ( (1.0-lake_icefrac3d(i,1)) * 0.08)  
                 fice(i)         = lake_icefrac3d(i,1)
 
+                zorlw(i) = z0mg(c)
+
                 if(fice(i)>=min_lakeice) then
                   weasdi(i)     = h2osno(c) ! water_equivalent_accumulated_snow_depth_over_ice
                   snodi(i)      = snowdp(c) ! surface_snow_thickness_water_equivalent_over_ice
                   tisfc(i)      = t_grnd(c) ! surface_skin_temperature_over_ice
                   tsurf_ice(i)  = t_grnd(c) ! surface_skin_temperature_after_iteration_over_ice
                   icy(i)=.true.
+                  if(fice(i)==1.) then
+                    wet(i) = .false.
+                  else
+                    wet(i) = .true.
+                  endif
                   ice_points = ice_points+1
 
                   zorli(i) = z0mg(c)
@@ -727,12 +775,14 @@ MODULE clm_lake
                     endif
                   end do
                 else
-                  zorlw(i) = z0mg(c)
+                  icy(i)=.false.
+                  wet(i)=.true.
                   weasdi(i) = 0
                   snodi(i) = 0
                   tisfc(i) = tsurf(i)
                   tsurf_ice(i) = tisfc(i)
                   hice(i) = 0
+                  fice(i) = 0
                 endif
 
                 if(snl2d(i)<0) then
@@ -752,7 +802,7 @@ MODULE clm_lake
                 discard3 = -9999
                 call QSat(t_grnd(c),psfc,discard1,discard2,qsfc(i),discard3)
 
-                ! From flake driver:
+                ! From flake driver - combined ice/water:
                 chh(i)=ch(i)*wind(i)*1.225 ! surface_drag_mass_flux_for_heat_and_moisture_in_air_over_water
                 cmm(i)=cm(i)*wind(i)       ! surface_drag_wind_speed_for_momentum_in_air_over_water
                 
@@ -5293,16 +5343,16 @@ if_pergro: if (PERGRO) then
 ! Some fields in lakeini are not available until runtime, so this cannot be in a CCPP init routine.
  SUBROUTINE lakeini(kdt,            ISLTYP,          gt0,             snowd,          & !i
                     weasd,          restart,         lakedepth_default,  fhour,       &
-                    lakedepth2d,    savedtke12d,     snowdp2d,        h2osno2d,       & !o
+                    oro_lakedepth,  savedtke12d,     snowdp2d,        h2osno2d,       & !o
                     snl2d,          t_grnd2d,        t_lake3d,        lake_icefrac3d, &
                     z_lake3d,       dz_lake3d,       t_soisno3d,      h2osoi_ice3d,   &
                     h2osoi_liq3d,   h2osoi_vol3d,    z3d,             dz3d,           &
                     zi3d,           watsat3d,        csol3d,          tkmg3d,         &
-                    IDATE,          fice,            min_lakeice,              tsfc,  &
+                                    fice,            min_lakeice,              tsfc,  &
                     use_lake_model, use_lakedepth,   con_g,           con_rd,         &
                     tkdry3d,        tksatu3d,        im,              prsi,           &
                     xlat_d,         xlon_d,          clm_lake_initialized,            &
-                    sand3d,         clay3d,          tg3,                             &
+                    sand3d,         clay3d,          tg3,             clm_lakedepth,  &
                     km,   me,       master,          errmsg,          errflg)
 
    !==============================================================================
@@ -5316,9 +5366,10 @@ if_pergro: if (PERGRO) then
   INTEGER, INTENT(OUT) :: errflg
   CHARACTER(*), INTENT(OUT) :: errmsg
 
-  INTEGER , INTENT (IN)    :: im, me, master, km, kdt, IDATE(4)
+  INTEGER , INTENT (IN)    :: im, me, master, km, kdt
   REAL(KIND_PHYS),     INTENT(IN)  :: min_lakeice, con_g, con_rd, fhour
-  REAL(KIND_PHYS), DIMENSION(IM), INTENT(IN)::   FICE,TG3, xlat_d, xlon_d
+  REAL(KIND_PHYS), DIMENSION(IM), INTENT(INOUT)::   FICE
+  REAL(KIND_PHYS), DIMENSION(IM), INTENT(IN)::   TG3, xlat_d, xlon_d
   REAL(KIND_PHYS), DIMENSION(IM), INTENT(IN)::     tsfc
   REAL(KIND_PHYS), DIMENSION(IM)  ,INTENT(INOUT)  :: clm_lake_initialized
   integer, dimension(IM), intent(in) :: use_lake_model
@@ -5328,11 +5379,12 @@ if_pergro: if (PERGRO) then
 
   LOGICAL , INTENT(IN)      ::     restart
   INTEGER, DIMENSION(IM), INTENT(IN)       :: ISLTYP
-  REAL(KIND_PHYS),    DIMENSION(IM), INTENT(IN)    :: snowd,weasd
+  REAL(KIND_PHYS),    DIMENSION(IM), INTENT(INOUT)    :: snowd,weasd
   REAL(kind_phys),    DIMENSION(IM,KM), INTENT(IN)       :: gt0, prsi
   real(kind_phys),    intent(in)                                      :: lakedepth_default
 
-  real(kind_phys),    dimension(IM),intent(inout)                      :: lakedepth2d
+  real(kind_phys),    dimension(IM),intent(inout)                      :: clm_lakedepth
+  real(kind_phys),    dimension(IM),intent(in)                         :: oro_lakedepth
   real(kind_phys),    dimension(IM),intent(out)                        :: savedtke12d
   real(kind_phys),    dimension(IM),intent(out)                        :: snowdp2d,       &
                                                                              h2osno2d,       &
@@ -5393,65 +5445,37 @@ if_pergro: if (PERGRO) then
   integer :: used_lakedepth_default, init_points, month, julday
   integer :: mon, iday, num2, num1, juld, day2, day1, wght1, wght2
   real(kind_phys) :: Tclim
-  logical :: have_date
 
   used_lakedepth_default=0
-  have_date=.false.
 
   errmsg = ''
   errflg = 0
 
-  if(LAKEDEBUG .and. me==0) then
-     print *,'month,num1,num2,day1,day2,wght1,wght2',month,num1,num2,day1,day2,wght1,wght2
-  endif
+  !!!!!!!!!!!!!!!!!!begin to initialize lake variables!!!!!!!!!!!!!!!!!!
 
-  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-  do_init_part1: DO i=1,im
-    if(use_lake_model(i)==0) then
+  init_points=0
+  do_init: DO i=1,im
+    if(use_lake_model(i)==0 .or. clm_lake_initialized(i)>0) then
       cycle
     endif
 
-    if(kdt<2) then
       ! To handle restarts with bad lakedepth2d
       if ( use_lakedepth ) then
-        if (lakedepth2d(i) <= 0.0) then 
-          lakedepth2d(i)   = lakedepth_default
+        if (oro_lakedepth(i) == 10.0 .or. oro_lakedepth(i) <= 0.) then 
+          !- 10.0 is the fill value for lake depth, in this case set to default value
+          clm_lakedepth(i)   = lakedepth_default
           used_lakedepth_default = used_lakedepth_default+1
+        else
+          clm_lakedepth(i) = oro_lakedepth(i)
         endif
       else
-        lakedepth2d(i)   = lakedepth_default
+        !- all lakes are initialized with the default lake depth
+        clm_lakedepth(i)   = lakedepth_default
         used_lakedepth_default = used_lakedepth_default+1
       endif
-    endif
     
     if(clm_lake_initialized(i)>0) then
       cycle
-    endif
-
-    if(.not.have_date) then
-      !$OMP CRITICAL
-      call get_month_and_day(IDATE,month,iday,julday,fhour)
-      !$OMP END CRITICAL
-      
-      have_date = .true.
-  
-      !-- Compute weight for the current day
-      mon = month
-      if(iday > 15) mon=mon+1
-      if(mon == 1) mon=13
-      
-      num2 = month * 2
-      if(iday > 15) num2=num2+1
-      if(num2 == 1) num2=25
-      num1 = num2 - 1
-      
-      juld = julday
-      if (juld < 7) juld = juld + 365
-      day2 = julm(mon)+15
-      day1 = julm(mon)
-      wght1=(day2-julday)/float(day2-day1)
-      wght2=(julday-day1)/float(day2-day1)
     endif
 
     snowdp2d(i)         = snowd(i)*1e-3   ! SNOW in kg/m^2 and snowdp in m
@@ -5474,20 +5498,14 @@ if_pergro: if (PERGRO) then
     
     if(fice(i)>min_lakeice) then
       lake_icefrac3d(i,1) = fice(i)
-    endif
-
-    !-- Check on the Great Salt Lake (GSL) when the model is cycled
-    !-- Bound the GSL temperature with +/- 3 C from climatology
-    if(limit_temperature_by_climatology(xlat_d(i),xlon_d(i))) then
-       Tclim = tfrz + wght1*saltlk_t(num1)  &
-                    + wght2*saltlk_t(num2)
-       if(lakedebug) print *,'Tclim,tsfc,t_lake3d',i,Tclim,tsfc(i),t_lake3d(i,:),t_soisno3d(i,:)
-       t_grnd2d(i) = min(Tclim+3.0_kind_phys,(max(tsfc(i),Tclim-3.0_kind_phys)))
-       do k = 1,nlevlake
-          t_lake3d(i,k) = min(Tclim+3.0_kind_phys,(max(t_lake3d(i,k),Tclim-3.0_kind_phys)))
-       enddo
-       t_soisno3d(i,1) = min(Tclim+3.0_kind_phys,(max(t_soisno3d(i,1),Tclim-3.0_kind_phys)))
-       if(lakedebug) print *,'After Tclim,tsfc,t_lake3d',i,Tclim,tsfc(i),t_lake3d(i,:),t_soisno3d(i,:)
+      snowdp2d(i)         = snowd(i)*1e-3   ! SNOW in kg/m^2 and snowdp in m
+      h2osno2d(i)         = weasd(i)   ! mm 
+    else
+      fice(i)             = 0.
+      snowd(i)            = 0.
+      weasd(i)            = 0.
+      snowdp2d(i)         = 0.
+      h2osno2d(i)         = 0.
     endif
     
     z3d(i,:)             = 0.0
@@ -5498,23 +5516,6 @@ if_pergro: if (PERGRO) then
     lake_icefrac3d(i,:)  = 0.0
     h2osoi_vol3d(i,:)    = 0.0
     snl2d(i)             = 0.0
-
-  ENDDO do_init_part1
-
-  if(used_lakedepth_default>0) then
-    print *,'used lakedepth_default: ',used_lakedepth_default
-  endif
-
-  !!!!!!!!!!!!!!!!!!begin to initialize lake variables!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-  init_points=0
-  do_init_part2: DO i = 1,im
- 
-    if(use_lake_model(i)==0 .or. clm_lake_initialized(i)>0) then
-      cycle
-    endif
-
-    init_points = init_points+1
 
     ! Soil hydraulic and thermal properties
     isl = ISLTYP(i)   
@@ -5563,37 +5564,17 @@ if_pergro: if (PERGRO) then
       watdry3d(i,k) = watsat3d(i,k) * (316230._kind_phys/sucsat3d(i,k)) ** (-1._kind_phys/bsw3d(i,k))
       watopt3d(i,k) = watsat3d(i,k) * (158490._kind_phys/sucsat3d(i,k)) ** (-1._kind_phys/bsw3d(i,k))
     end do
-    if (lakedepth2d(i) == spval) then
-      lakedepth2d(i) = zlak(nlevlake) + 0.5_kind_phys*dzlak(nlevlake)
+    if (clm_lakedepth(i) == spval) then
+      clm_lakedepth(i) = zlak(nlevlake) + 0.5_kind_phys*dzlak(nlevlake)
       z_lake3d(i,1:nlevlake) = zlak(1:nlevlake)
       dz_lake3d(i,1:nlevlake) = dzlak(1:nlevlake)
     else
-      depthratio2d(i) = lakedepth2d(i) / (zlak(nlevlake) + 0.5_kind_phys*dzlak(nlevlake)) 
+      depthratio2d(i) = clm_lakedepth(i) / (zlak(nlevlake) + 0.5_kind_phys*dzlak(nlevlake)) 
       z_lake3d(i,1) = zlak(1)
       dz_lake3d(i,1) = dzlak(1)
       dz_lake3d(i,2:nlevlake) = dzlak(2:nlevlake)*depthratio2d(i)
       z_lake3d(i,2:nlevlake) = zlak(2:nlevlake)*depthratio2d(i) + dz_lake3d(i,1)*(1._kind_phys - depthratio2d(i))
     end if
-    ! initial t_lake3d here
-    if(tsfc(i)<160) then
-       write(errmsg,'(A,F20.12,A)') 'Invalid tsfc value ',tsfc(i),' found. Was tsfc not initialized?'
-       write(0,'(A)') trim(errmsg)
-       errflg=1
-       return
-    endif
-    t_soisno3d(i,1)      = tsfc(i)
-    t_lake3d(i,1)        = tsfc(i)
-    t_grnd2d(i)          = tsfc(i)
-    do k = 2, nlevlake
-      if(z_lake3d(i,k).le.depth_c) then 
-        t_soisno3d(i,k)=tsfc(i)+(277.0-tsfc(i))/depth_c*z_lake3d(i,k)
-        t_lake3d(i,k)=tsfc(i)+(277.0-tsfc(i))/depth_c*z_lake3d(i,k)
-      else
-	t_soisno3d(i,k)      = tsfc(i)
-        t_lake3d(i,k)        = tsfc(i)
-      end if
-    enddo
-    !end initial t_lake3d here
     z3d(i,1:nlevsoil) = zsoi(1:nlevsoil)
     zi3d(i,0:nlevsoil) = zisoi(0:nlevsoil)
     dz3d(i,1:nlevsoil) = dzsoi(1:nlevsoil)
@@ -5663,15 +5644,15 @@ if_pergro: if (PERGRO) then
 
     ! 3:subroutine makearbinit
 
-    if (snl2d(i) < 0) then
-      do k = snl2d(i)+1, 0
-        ! Be careful because there may be new snow layers with bad temperatures like 0 even if
-        ! coming from init. con. file.
-        if(t_soisno3d(i,k) > 300 .or. t_soisno3d(i,k) < 200) t_soisno3d(i,k) = tsfc(i)
-      enddo
-    end if
-
      ! initial t_lake3d here
+     if(tsfc(i)<160) then
+       write(errmsg,'(A,F20.12,A)') 'Invalid tsfc value ',tsfc(i),' found. Was tsfc not initialized?'
+       write(0,'(A)') trim(errmsg)
+       errflg=1
+       return
+     endif
+
+
      t_lake3d(i,1)        = tsfc(i)
      t_grnd2d(i)          = tsfc(i)
      do k = 2, nlevlake
@@ -5688,6 +5669,14 @@ if_pergro: if (PERGRO) then
      do k = 2, nlevsoil-1
         t_soisno3d(i,k)=t_soisno3d(i,1)+(t_soisno3d(i,nlevsoil)-t_soisno3d(i,1))*dzsoi(k)
      enddo
+
+    if (snl2d(i) < 0) then
+      do k = snl2d(i)+1, 0
+        ! Be careful because there may be new snow layers with bad temperatures like 0 even if
+        ! coming from init. con. file.
+        if(t_soisno3d(i,k) > 300 .or. t_soisno3d(i,k) < 200) t_soisno3d(i,k) = min(tfrz,tsfc(i))
+      enddo
+    end if
 
     do k = 1,nlevsoil
        h2osoi_vol3d(i,k) = 1.0_kind_phys
@@ -5711,7 +5700,7 @@ if_pergro: if (PERGRO) then
     end do
 
     clm_lake_initialized(i) = 1
-  ENDDO do_init_part2
+  ENDDO do_init
 
 
   if(LAKEDEBUG .and. init_points>0) then

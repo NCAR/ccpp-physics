@@ -7,6 +7,14 @@
 [ccpp-arg-table]
   name = clm_lake_run
   type = scheme
+[pgr]
+  standard_name = surface_air_pressure
+  long_name = surface pressure
+  units = Pa
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
 [zorlw]
   standard_name = surface_roughness_length_over_water
   long_name = surface roughness length over water
@@ -218,7 +226,15 @@
   type = real
   kind = kind_phys
   intent = inout
-[lakedepth2d]
+[clm_lakedepth]
+  standard_name = clm_lake_depth
+  long_name = clm internal copy of lake depth with 10.0 replaced by default lake depth
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[oro_lakedepth]
   standard_name = lake_depth
   long_name = lake depth
   units = m
@@ -551,7 +567,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
 [snowd]
   standard_name = lwe_surface_snow
   long_name = water equivalent snow depth
@@ -559,7 +575,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
 [weasdi]
   standard_name = water_equivalent_accumulated_snow_depth_over_ice
   long_name = water equiv of acc snow depth over land
@@ -710,6 +726,13 @@
   dimensions = ()
   type = integer
   intent = in
+[wet]
+  standard_name = flag_nonzero_wet_surface_fraction
+  long_name = flag indicating presence of some ocean or lake surface area fraction
+  units = flag
+  dimensions = (horizontal_loop_extent)
+  type = logical
+  intent = inout
 [icy]
   standard_name = flag_nonzero_sea_ice_surface_fraction
   long_name = flag indicating presence of some sea ice surface area fraction
