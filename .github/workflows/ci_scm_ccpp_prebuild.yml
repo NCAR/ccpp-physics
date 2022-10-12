@@ -14,6 +14,8 @@ jobs:
 
     - name: Checkout current ccpp-physics code
       uses: actions/checkout@v2
+
+    - name: Update checkout
       run: |
         pwd
         ls
