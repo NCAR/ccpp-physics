@@ -1,4 +1,4 @@
-name: CI test to run SCM ccpp_prebuild script
+B1;95;0cname: CI test to run SCM ccpp_prebuild script
 
 on: [push, pull_request]
 
@@ -15,13 +15,11 @@ jobs:
     - name: Checkout current ccpp-physics code
       uses: actions/checkout@v2
 
-    - name: Update checkout
+    - name: Get repository information from current ccpp-physics code
       run: |
-        pwd
-        ls
-        git status
-        git remote -v
         GIT_REMOTE=`git remote get-url origin` && export GIT_REMOTE
+        GIT_REMOTE_HASH=`git rev-parse HEAD` && export GIT_REMOTE_HASH
+        GIT_REMOTE_BRANCH=`git rev-parse --abbrev-ref HEAD` && export GIT_REMOTE_BRANCH
 
     - name: Checkout latest ccpp-scm code
       run: |
@@ -29,7 +27,7 @@ jobs:
         cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-scm/ccpp/physics
         pwd
         ls
-        git status
+        git remote 
         git remote -v
         $GIT_REMOTE
 
