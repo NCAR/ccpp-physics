@@ -31,7 +31,7 @@ jobs:
         ls
         git status
         git remote -v
-        echo $GIT_REMOTE
+        $GIT_REMOTE
 
     - name: Initialize submodules
       run: |
