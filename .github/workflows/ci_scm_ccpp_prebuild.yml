@@ -40,15 +40,19 @@ jobs:
     - name: Test GIT_REMOTE_HASH
       run: echo	$GIT_REMOTE_HASH
 
-    - name: Initialize submodules
+    - name: Update ccpp-physics hash in ccpp-scm
       run: |
         cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-scm/ccpp/physics
         git remote add remote_local $GIT_REMOTE_URL
-        git fetch remote_local
+        git fetch remote_local $GIT_REMOTE_BRANCH
         git checkout remote_local/$GIT_REMOTE_BRANCH
+
+    - name: Initialize submodules
+      run: |
         cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-scm
         git submodule update --init --recursive
         git remote -v
+        git log
     
     - name: Set up Python 3.8.5
       uses: actions/setup-python@v3
