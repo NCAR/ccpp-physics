@@ -22,7 +22,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Get remote-URL for current ccpp-physics code
-      run: echo "GIT_REMOTE_URL=`git remote get-url origin` >> $GITHUB_ENV
+      run: echo "GIT_REMOTE_URL=`git remote get-url origin`" >> $GITHUB_ENV
 
     - name: Checkout latest ccpp-scm code
       run: git clone https://github.com/NCAR/ccpp-scm.git
