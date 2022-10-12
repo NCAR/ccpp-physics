@@ -16,7 +16,7 @@ jobs:
       run: |
         pwd
         git clone https://github.com/NCAR/ccpp-scm.git
-        cd /home/runner/work/ccpp-scm/ccpp-scm/
+        cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-scm/
 
     - name: Initialize submodules
       run: git submodule update --init --recursive
