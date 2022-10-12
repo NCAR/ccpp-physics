@@ -26,6 +26,12 @@ jobs:
     - name: Checkout latest ccpp-scm code
       run: |
         git clone https://github.com/NCAR/ccpp-scm.git
+        cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-scm/ccpp/physics
+        pwd
+        ls
+        git status
+        git remote -v
+        echo $GIT_REMOTE
 
     - name: Initialize submodules
       run: |
