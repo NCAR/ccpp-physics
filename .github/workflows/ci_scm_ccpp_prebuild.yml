@@ -15,11 +15,9 @@ jobs:
     - name: Checkout current ccpp-physics code
       uses: actions/checkout@v2
 
-    - name: Get repository information from current ccpp-physics code
-      run: |
-        GIT_REMOTE=`git remote get-url origin` && export GIT_REMOTE
-        GIT_REMOTE_HASH=`git rev-parse HEAD` && export GIT_REMOTE_HASH
-        GIT_REMOTE_BRANCH=`git rev-parse --abbrev-ref HEAD` && export GIT_REMOTE_BRANCH
+    - run: GIT_REMOTE=`git remote get-url origin` && export GIT_REMOTE
+    - run: GIT_REMOTE_HASH=`git rev-parse HEAD` && export GIT_REMOTE_HASH
+    - run: GIT_REMOTE_BRANCH=`git rev-parse --abbrev-ref HEAD` && export GIT_REMOTE_BRANCH
 
     - name: Checkout latest ccpp-scm code
       run: |
