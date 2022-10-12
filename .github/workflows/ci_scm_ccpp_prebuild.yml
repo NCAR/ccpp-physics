@@ -33,9 +33,11 @@ jobs:
     - name: Checkout latest ccpp-scm code
       run: git clone https://github.com/NCAR/ccpp-scm.git
 
-    - name: Test
+    - name: Test GIT_REMOTE_URL
       run: echo $GIT_REMOTE_URL
+    - name: Test GIT_REMOTE_BRANCH
       run: echo $GIT_REMOTE_BRANCH
+    - name: Test GIT_REMOTE_HASH
       run: echo	$GIT_REMOTE_HASH
 
     - name: Initialize submodules
