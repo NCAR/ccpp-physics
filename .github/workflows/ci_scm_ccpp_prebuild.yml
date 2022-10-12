@@ -15,7 +15,7 @@ jobs:
     - name: Checkout code
       run: |
         git clone https://github.com/NCAR/ccpp-scm.git
-        cd ccpp-scm/
+        cd /home/runner/work/ccpp-scm/ccpp-scm/
 
     - name: Initialize submodules
       run: git submodule update --init --recursive
