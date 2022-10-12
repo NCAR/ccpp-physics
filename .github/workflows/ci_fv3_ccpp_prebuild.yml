@@ -34,6 +34,6 @@ jobs:
 
     - name: Run ccpp_prebuild.py
       run: |
-        cd /home/runner/work/ccpp-physics/ccpp-physics/fv3atm
+        cd /home/runner/work/ccpp-physics/ccpp-physics/fv3atm/ccpp/
         mkdir -p /home/runner/work/ccpp-physics/ccpp-physics/fv3atm/bin/ccpp/physics/physics/
-        ./ccpp/framework/scripts/ccpp_prebuild.py --config ccpp/config/ccpp_prebuild_config.py
+        ./framework/scripts/ccpp_prebuild.py --config config/ccpp_prebuild_config.py
