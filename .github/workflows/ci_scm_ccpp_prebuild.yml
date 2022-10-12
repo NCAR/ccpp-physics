@@ -2,6 +2,12 @@ name: CI test to run SCM ccpp_prebuild script
 
 on: [push, pull_request]
 
+env:
+  GIT_REMOTE_URL: https://github.com/NCAR/ccpp-physics.git
+  GIT_REMOTE_HASH: 255035269760c1a6560317c400727d962cdc57f0
+  GIT_REMOTE_NAME: origin
+  GIT_REMOTE_BRANCH: main
+
 jobs:
   build-linux:
 
@@ -15,25 +21,16 @@ jobs:
     - name: Checkout current ccpp-physics code
       uses: actions/checkout@v2
 
-    - run: GIT_REMOTE=`git remote get-url origin` && export GIT_REMOTE
-    - run: GIT_REMOTE_HASH=`git rev-parse HEAD` && export GIT_REMOTE_HASH
-    - run: GIT_REMOTE_BRANCH=`git rev-parse --abbrev-ref HEAD` && export GIT_REMOTE_BRANCH
-
     - name: Checkout latest ccpp-scm code
       run: |
         git clone https://github.com/NCAR/ccpp-scm.git
-        cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-scm/ccpp/physics
-        pwd
-        ls
-        git remote 
-        git remote -v
 
     - name: Initialize submodules
       run: |
         cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-scm/ccpp/physics
-        git remote add remote_local $GIT_REMOTE
-        git fetch $GIT_REMOTE
-        git checkout $GIT_REMOTE/$GIT_BRANCH
+        git remote add remote_local $GIT_REMOTE_NAME
+        git fetch $GIT_REMOTE_NAME
+        git checkout $GIT_REMOTE_NAME/$GIT_REMOTE_BRANCH
         cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-scm
         git submodule update --init --recursive
         git remote -v
