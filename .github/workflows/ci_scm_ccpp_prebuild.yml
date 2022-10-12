@@ -2,12 +2,6 @@ name: CI test to run SCM ccpp_prebuild script
 
 on: [push, pull_request]
 
-env:
-  GIT_REMOTE_URL: https://github.com/NCAR/ccpp-physics.git
-  GIT_REMOTE_HASH: 255035269760c1a6560317c400727d962cdc57f0
-  GIT_REMOTE_NAME: origin
-  GIT_REMOTE_BRANCH: main
-
 jobs:
   build-linux:
 
