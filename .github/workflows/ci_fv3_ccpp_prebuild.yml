@@ -19,7 +19,7 @@ jobs:
 
     - name: Initialize submodules
       run: |
-        cd /home/runner/work/NOAA-EMC/NOAA-EMC/fv3atm
+        cd /home/runner/work/ccpp-physics/ccpp-physics/fv3atm
         git submodule update --init --recursive
     
     - name: Set up Python 3.8.5
@@ -35,5 +35,5 @@ jobs:
     - name: Run ccpp_prebuild.py
       run: |
         cd /home/runner/work/NOAA-EMC/NOAA-EMC/fv3atm/
-        mkdir -p /home/runner/work/NOAA-EMC/NOAA-EMC/fv3atm/bin/ccpp/physics/physics/
+        mkdir -p /home/runner/work/ccpp-physics/ccpp-physics/fv3atm/bin/ccpp/physics/physics/
         ./ccpp/framework/scripts/ccpp_prebuild.py --config ccpp/config/ccpp_prebuild_config.py
