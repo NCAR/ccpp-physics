@@ -30,7 +30,9 @@ jobs:
       run: |
         # $CONDA is an environment variable pointing to the root of the miniconda directory
         echo $CONDA/bin >> $GITHUB_PATH
+
     - name: Run ccpp_prebuild.py
       run: |
-        mkdir -p /home/runner/work/ccpp-scm/ccpp-scm/scm/bin/ccpp/physics/physics/
+        cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-scm/
+        mkdir -p /home/runner/work/ccpp-physics/ccpp-physics/ccpp-scm/scm/bin/ccpp/physics/physics/
         ./ccpp/framework/scripts/ccpp_prebuild.py --config ccpp/config/ccpp_prebuild_config.py
