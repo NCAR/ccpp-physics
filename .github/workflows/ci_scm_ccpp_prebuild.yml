@@ -24,11 +24,19 @@ jobs:
     - name: Get remote-URL for current ccpp-physics code
       run: echo "GIT_REMOTE_URL=`git remote get-url origin`" >> $GITHUB_ENV
 
+    - name: Get branch name for current ccpp-physics code
+      run: echo "GIT_REMOTE_BRANCH=`git rev-parse --abbrev-ref HEAD`" >> $GITHUB_ENV
+
+    - name: Get hash for HEAD of current ccpp-physics code
+      run: echo	"GIT_REMOTE_HASH=`git rev-parse HEAD`" >> $GITHUB_ENV
+
     - name: Checkout latest ccpp-scm code
       run: git clone https://github.com/NCAR/ccpp-scm.git
 
     - name: Test
       run: echo $GIT_REMOTE_URL
+      run: echo $GIT_REMOTE_BRANCH
+      run: echo	$GIT_REMOTE_HASH
 
     - name: Initialize submodules
       run: |
