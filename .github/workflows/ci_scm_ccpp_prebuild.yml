@@ -31,7 +31,9 @@ jobs:
       run: echo	"GIT_REMOTE_HASH=`git rev-parse HEAD`" >> $GITHUB_ENV
 
     - name: Checkout latest ccpp-scm code
-      run: git clone https://github.com/NCAR/ccpp-scm.git
+      run: |
+        git clone https://github.com/NCAR/ccpp-scm.git
+        pwd
 
     - name: Test GIT_REMOTE_URL
       run: echo $GIT_REMOTE_URL
@@ -51,8 +53,6 @@ jobs:
       run: |
         cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-scm
         git submodule update --init --recursive
-        git remote -v
-        git log
     
     - name: Set up Python 3.8.5
       uses: actions/setup-python@v3
@@ -67,5 +67,6 @@ jobs:
     - name: Run ccpp_prebuild.py
       run: |
         cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-scm/
+        git status
         mkdir -p /home/runner/work/ccpp-physics/ccpp-physics/ccpp-scm/scm/bin/ccpp/physics/physics/
         ./ccpp/framework/scripts/ccpp_prebuild.py --config ccpp/config/ccpp_prebuild_config.py
