@@ -15,26 +15,17 @@ jobs:
     - name: Checkout current ccpp-physics code
       uses: actions/checkout@v2
 
-    - name: Get remote-URL for current ccpp-physics code
+    - name: Store remote-URL for current ccpp-physics code
       run: echo "GIT_REMOTE_URL=`git remote get-url origin`" >> $GITHUB_ENV
 
-    - name: Get branch name for current ccpp-physics code
+    - name: Store branch name for current ccpp-physics code
       run: echo "GIT_REMOTE_BRANCH=`git rev-parse --abbrev-ref HEAD`" >> $GITHUB_ENV
 
-    - name: Get hash for HEAD of current ccpp-physics code
+    - name: Store hash for HEAD of current ccpp-physics code
       run: echo	"GIT_REMOTE_HASH=`git rev-parse HEAD`" >> $GITHUB_ENV
 
     - name: Checkout latest ccpp-scm code
-      run: |
-        git clone https://github.com/NCAR/ccpp-scm.git
-        pwd
-
-    - name: Test GIT_REMOTE_URL
-      run: echo $GIT_REMOTE_URL
-    - name: Test GIT_REMOTE_BRANCH
-      run: echo $GIT_REMOTE_BRANCH
-    - name: Test GIT_REMOTE_HASH
-      run: echo	$GIT_REMOTE_HASH
+      run: git clone https://github.com/NCAR/ccpp-scm.git
 
     - name: Initialize submodules
       run: |
@@ -62,6 +53,5 @@ jobs:
       run: |
         cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-scm/
         git status
-        ls
         mkdir -p /home/runner/work/ccpp-physics/ccpp-physics/ccpp-scm/scm/bin/ccpp/physics/physics/
         ./ccpp/framework/scripts/ccpp_prebuild.py --config ccpp/config/ccpp_prebuild_config.py

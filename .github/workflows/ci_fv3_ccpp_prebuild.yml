@@ -11,16 +11,32 @@ jobs:
       max-parallel: 5
 
     steps:
+    - name: Checkout current ccpp-physics code
+      uses: actions/checkout@v2
 
-    - name: Checkout code
-      run: |
-        pwd
-        git clone https://github.com/NOAA-EMC/fv3atm.git
+    - name: Store remote-URL for current ccpp-physics code
+      run: echo "GIT_REMOTE_URL=`git remote get-url origin`" >> $GITHUB_ENV
+
+    - name: Store branch name for current ccpp-physics code
+      run: echo "GIT_REMOTE_BRANCH=`git rev-parse --abbrev-ref HEAD`" >> $GITHUB_ENV
+
+    - name: Store hash for HEAD of current ccpp-physics code
+      run: echo "GIT_REMOTE_HASH=`git rev-parse HEAD`" >> $GITHUB_ENV
+
+    - name: Checkout latest fv3atm
+      run: git clone https://github.com/NOAA-EMC/fv3atm.git
 
     - name: Initialize submodules
       run: |
         cd /home/runner/work/ccpp-physics/ccpp-physics/fv3atm
         git submodule update --init --recursive
+
+    - name: Update ccpp-physics hash in fv3atm
+      run: |
+        cd /home/runner/work/ccpp-physics/ccpp-physics/fv3atm/ccpp/physics
+        git remote add remote_local $GIT_REMOTE_URL
+        git fetch remote_local $GIT_REMOTE_BRANCH
+        git checkout remote_local/$GIT_REMOTE_BRANCH
     
     - name: Set up Python 3.8.5
       uses: actions/setup-python@v3
