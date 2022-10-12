@@ -21,6 +21,7 @@ jobs:
         ls
         git status
         git remote -v
+        GIT_REMOTE=`git remote get-url origin` && export GIT_REMOTE
 
     - name: Checkout latest ccpp-scm code
       run: |
