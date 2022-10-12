@@ -19,9 +19,6 @@ jobs:
       run: |
         pwd
         ls
-        cd ccpp-physics
-        pwd
-        ls
         git status
         git remote -v
 
