@@ -32,12 +32,12 @@ jobs:
 
     - name: Initialize submodules
       run: |
-        cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-scm/
-        git submodule update --init --recursive
-        cd ccpp/physics
+        cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-scm/ccpp/physics
         git remote add remote_local $GIT_REMOTE
         git fetch $GIT_REMOTE
         git checkout $GIT_REMOTE/$GIT_BRANCH
+        cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-scm
+        git submodule update --init --recursive
         git remote -v
     
     - name: Set up Python 3.8.5
