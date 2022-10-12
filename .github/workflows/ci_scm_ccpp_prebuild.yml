@@ -68,5 +68,6 @@ jobs:
       run: |
         cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-scm/
         git status
+        ls
         mkdir -p /home/runner/work/ccpp-physics/ccpp-physics/ccpp-scm/scm/bin/ccpp/physics/physics/
         ./ccpp/framework/scripts/ccpp_prebuild.py --config ccpp/config/ccpp_prebuild_config.py
