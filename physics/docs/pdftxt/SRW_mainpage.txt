@@ -1,0 +1,34 @@
+/**
+\mainpage Introduction 
+
+Welcome to the scientific documentation for the physical parameterizations available in the  
+<a href="https://ufscommunity.org/about/what-is-ufs/">Unified Forecast System (UFS)</a> 
+Short-Range Weather (SRW) Application version 2.1.0 (available through https://github.com/ufs-community/ufs-srweather-app/) and the suites that can be configured using them. The SRW app targets predictions of atmospheric behavior on a 
+limited spatial domain and on time scales from less than an hour out to several days. 
+
+
+The CCPP parameterizations are aggregated in suites by the host models. In this release, the UFS Short-Range Weather Application 2.1.0 
+supports suites:
+- \ref GFS_v16_page
+- \ref HRRR_suite_page
+- \ref RRFS_v1beta_page 
+- \ref WoFS_v0_page
+
+## Acknowledgements
+
+CCPP team would like to express our deepest gratitude for UFS physics developers' contribution to the
+development of CCPP-Physics. 
+\n We would also like to give special thanks to:    
+
+- \b NOAA \b Global \b Systems \b Laboratory: Hannah Barnes, Jeff Beck, Georg Grell, Joseph Olson, Tanya Smirnova, Michael Toy
+- \b NOAA \b National \b Severe \b Storms \b Laboratory: Ted Mansell
+- \b NOAA \b Environmental \b Modeling \b Center: Jongil Han, Qingfu Liu, Ruiyu Sun
+- \b Joint \b Center \b for \b Satellite \b Data \b Assimilation: Greg Thompson
+
+as a whole for their support and contribution for this CCPP scientific documentation (SciDoc).
+
+
+\b CCPP \b SciDoc \b Team: Man Zhang, Ligia Bernardet, Dustin Swales, Grant Firl
+\n Developmental Testbed Center
+
+*/

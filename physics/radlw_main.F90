@@ -1518,7 +1518,6 @@
 !> \brief This subroutine computes the cloud optical depth(s) for each cloudy
 !! layer and g-point interval.
 !!\param cfrac           layer cloud fraction
-!!\n     ---  for  ilwcliq > 0 (prognostic cloud scheme)  - - -
 !!\param cliqp           layer in-cloud liq water path (\f$g/m^2\f$)
 !!\param reliq           mean eff radius for liq cloud (micron)
 !!\param cicep           layer in-cloud ice water path (\f$g/m^2\f$)
@@ -1527,15 +1526,6 @@
 !!\param cdat2           effective radius for rain drop (micron)
 !!\param cdat3           layer snow flake water path(\f$g/m^2\f$)
 !!\param cdat4           mean effective radius for snow flake(micron)
-!!\n     ---  for ilwcliq = 0  (diagnostic cloud scheme)  - - -
-!!\param cliqp           not used
-!!\param cicep           not used
-!!\param reliq           not used
-!!\param reice           not used
-!!\param cdat1           layer cloud optical depth
-!!\param cdat2           layer cloud single scattering albedo
-!!\param cdat3           layer cloud asymmetry factor
-!!\param cdat4           optional use
 !!\param nlay            number of layer number
 !!\param nlp1            number of veritcal levels
 !!\param ipseed          permutation seed for generating random numbers (isubclw>0)

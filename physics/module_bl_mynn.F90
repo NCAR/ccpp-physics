@@ -5162,6 +5162,8 @@ ENDIF
   END SUBROUTINE mynn_tendencies
 
 ! ==================================================================
+!>\ingroup gsd_mynn_edmf
+!!ensure non-negative moist species.
   SUBROUTINE moisture_check(kte, delt, dp, exner, &
                             qv, qc, qi, th,       &
                             dqv, dqc, dqi, dth )
@@ -5249,6 +5251,8 @@ ENDIF
 
 ! ==================================================================
 
+!>\ingroup gsd_mynn_edmf
+!!
   SUBROUTINE mynn_mix_chem(kts,kte,i,     &
        delt,dz,pblh,                      &
        nchem, kdvel, ndvel,               &
@@ -7614,7 +7618,8 @@ SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
 
 END FUNCTION phih
 ! ==================================================================
-!>
+!>\ingroup gsd_mynn_edmf
+!!
  SUBROUTINE topdown_cloudrad(kts,kte,dz1,zw,xland,kpbl,PBLH,  &
                &sqc,sqi,sqw,thl,th1,ex1,p1,rho1,thetav,       &
                &cldfra_bl1D,rthraten,                         &

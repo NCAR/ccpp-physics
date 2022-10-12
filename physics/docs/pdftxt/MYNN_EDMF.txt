@@ -28,35 +28,46 @@ model components (i.e., radiation). A description of the changes to the MYNN sch
 \cite https://doi.org/10.25923/n9wm-be49.
 
 \section intra_mynnpbl Intraphysics Communication
-- Cloud-Radiation Interaction
-\sa \ref SGSCLOUD_page
+- \ref SGSCLOUD_page
 
 The SGS clouds produced by the MYNN-EDMF scheme are coupled to the longwave and shortwave radiation schemes
 if the namelist parameter \p icloud_bl is set to 1. In this case, the SGS cloud fraction, \p CLDFRA_BL, and the SGS
-cloud-mixing ratio, \b QC_BL, are added to the microphysics arrays within the radiation driver (mynnrad_pre_run()). 
+cloud-mixing ratio, \p QC_BL, are added to the microphysics arrays within the radiation driver (mynnrad_pre_run()). 
 The following two steps are performed: 
 
-(1) the cloud fraction of the resolved-scale clouds are computed, using Xu and Randal (1996) \cite xu_and_randall_1996
-by default;
+(1) Use either Xu and Randall (1996) \cite xu_and_randall_1996 or Chaboureau and Bechtold (2005) cloud fraction for 
+the convection scheme subgrid clouds, chosen by the switch \p conv_cf_opt = 0: CB2005, 1: XR1996. 
+Note that the MYNN-EDMF PBL scheme subgrid clouds input into this scheme are 
+already partitioned into qc and qi and already have assigned cloud fractions, but now qi is further partitioned into
+qi and qsnow.
 
-(2) if the resolved-scale cloud liquid (\f$q_c\f$) or ice ( \f$q_i\f$), is less than \f$10^{-6}kg kg^{-1}\f$ and
-\f$10^{-8}kg kg^{-1}\f$, respectively, and there exists a nonzero SGS cloud fraction, then the SGS components are
+
+(2) if the resolved-scale cloud liquid (\f$q_c\f$) is less than \f$10^{-6}kg kg^{-1}\f$ 
+, and there exists a nonzero SGS cloud fraction, then the SGS components are
 added to their respective resolved-scale components by a temperature weighting, according to linear approximation
-of Hobbs et al.(1974) \cite HOBBS_1974 :
+of Hobbs et al.(1974) \cite HOBBS_1974 . Then the frozen species are crudely split into 50% ice and 50% snow below 
+~700 mb and decrease snow to zero by ~300mb.:
 \f[
- W_{ice}=1-min(1,max(0,(T-254)/15))
- W_{h2o}=1-W_{ice}
+ W_{snow}=min(0.5,max((P-30000,0.0)/140000.0)
 \f]
 
-Then we sort the SGS cloud water and liquid as :
+\f[
+ W_{ice}=1.0-W_{snow}
+\f]
 
-\f$q_c\f$=QC_BL*\f$W_{h2o}\f$*CLDFRA_BL
+Then we sort the SGS cloud water, liquid, and snow as :
 
-\f$q_i\f$=QC_BL*\f$W_{ice}\f$*CLDFRA_BL
+\f$q_c\f$=QC_BL*CLDFRA_BL
 
-This allows us to only use one 3-D array for both SGS cloud water and ice. The updated \f$q_{c}\f$,\f$q_{i}\f$, and
+\f$q_i\f$=QI_BL*\f$W_{ice}\f$*CLDFRA_BL
+
+\f$q_s\f$=QI_BL*\f$W_{snow}\f$*CLDFRA_BL
+
+if Grell-Freitas scheme is used, convective clouds will be also added into SGS cloud water, liquid and snow.
+
+This allows us to only use one 3-D array for both SGS cloud water,ice and snow. The updated \f$q_{c}\f$,\f$q_{i}\f$, \f$q_{s}\f$and
 \p CLDFRA are then used as input into the radiation schemes. After exiting the radiation schemes, the original 
-values of \f$q_c, q_i\f$  and \p CLDFRA are restored, so the SGS clouds do not impact the resolved-scale moisture budget.
+values of \f$q_c, q_i, q_s\f$  and \p CLDFRA are restored, so the SGS clouds do not impact the resolved-scale moisture budget.
 
 
 The MYNN-EDMF CCPP-compliant interface:
