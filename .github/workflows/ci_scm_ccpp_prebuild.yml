@@ -18,12 +18,6 @@ jobs:
 
     steps:
 
-      env:
-        GIT_REMOTE_URL_local: https://github.com/NCAR/ccpp-physics.git
-        GIT_REMOTE_HASH_local: 255035269760c1a6560317c400727d962cdc57f0
-        GIT_REMOTE_NAME_local: origin
-        GIT_REMOTE_BRANCH_local: main
-
     - name: Checkout current ccpp-physics code
       uses: actions/checkout@v2
 
