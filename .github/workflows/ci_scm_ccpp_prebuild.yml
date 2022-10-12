@@ -12,7 +12,18 @@ jobs:
 
     steps:
 
-    - name: Checkout code
+    - name: Checkout current ccpp-physics code
+      uses: actions/checkout@v2
+      run: |
+        pwd
+        ls
+        cd ccpp-physics
+        pwd
+        ls
+        git status
+        git remote -v
+
+    - name: Checkout latest ccpp-scm code
       run: |
         git clone https://github.com/NCAR/ccpp-scm.git
 
