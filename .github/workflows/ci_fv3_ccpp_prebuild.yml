@@ -1,0 +1,38 @@
+name: CI test to run FV3 ccpp_prebuild script
+
+on: [push, pull_request]
+
+jobs:
+  build-linux:
+
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 5
+
+    steps:
+
+    - name: Checkout code
+      run: |
+        git clone https://github.com/NOAA-EMC/fv3atm.git
+
+    - name: Initialize submodules
+      run: |
+        cd /home/runner/work/NOAA-EMC/NOAA-EMC/fv3atm
+        git submodule update --init --recursive
+    
+    - name: Set up Python 3.8.5
+      uses: actions/setup-python@v3
+      with:
+        python-version: 3.8.5
+
+    - name: Add conda to system path
+      run: |
+        # $CONDA is an environment variable pointing to the root of the miniconda directory
+        echo $CONDA/bin >> $GITHUB_PATH
+
+    - name: Run ccpp_prebuild.py
+      run: |
+        cd /home/runner/work/NOAA-EMC/NOAA-EMC/fv3atm/
+        mkdir -p /home/runner/work/NOAA-EMC/NOAA-EMC/fv3atm/bin/ccpp/physics/physics/
+        ./ccpp/framework/scripts/ccpp_prebuild.py --config ccpp/config/ccpp_prebuild_config.py
