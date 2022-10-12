@@ -43,9 +43,9 @@ jobs:
     - name: Initialize submodules
       run: |
         cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-scm/ccpp/physics
-        git remote add remote_local $GIT_REMOTE_NAME
+        git remote add remote_local $GIT_REMOTE_URL
         git fetch remote_local
-        git checkout $GIT_REMOTE_NAME $GIT_REMOTE_BRANCH
+        git checkout remote_local/$GIT_REMOTE_BRANCH
         cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-scm
         git submodule update --init --recursive
         git remote -v
