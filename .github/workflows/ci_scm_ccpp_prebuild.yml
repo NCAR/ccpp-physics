@@ -20,6 +20,7 @@ jobs:
 
     - name: Checkout current ccpp-physics code
       uses: actions/checkout@v2
+      run: echo "GIT_REMOTE=`git remote get-url origin` >> $GIT_REMOTE_URL
 
     - name: Checkout latest ccpp-scm code
       run: |
