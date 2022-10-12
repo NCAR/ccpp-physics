@@ -1,4 +1,4 @@
-B1;95;0cname: CI test to run SCM ccpp_prebuild script
+name: CI test to run SCM ccpp_prebuild script
 
 on: [push, pull_request]
 
