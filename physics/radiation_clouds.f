@@ -144,8 +144,7 @@
 !> \defgroup module_radiation_clouds Radiation Clouds Module
 !! This module computes cloud related quantities for radiation
 !! computations.
-!>@{
-!!
+!> @{
 !! Knowledge of cloud properties and their vertical structure is
 !! important for meteorological studies due to their impact on both the
 !! Earth's radiation budget and adiabatic heating within the atmosphere.
@@ -166,9 +165,6 @@
 !!\n ISUBC=0: grid averaged quantities, without sub-grid cloud approximation
 !!\n ISUBC=1: with McICA sub-grid approximation (use prescribed permutation seeds)
 !!\n ISUBC=2: with McICA sub-grid approximation (use random permutation seeds)
-!!
-!!\version NCEP-Radiation_clouds    v5.1  Nov 2012
-!!
 
 !> This module computes cloud related quantities for radiation computations.
       module module_radiation_clouds
@@ -2319,19 +2315,17 @@
 !............................................
       end subroutine progcld_thompson_wsm6
 !............................................
-!mz
 
 
-
-! This subroutine added by G. Thompson specifically to account for
-! explicit (microphysics-produced) cloud liquid water, cloud ice, and
-! snow with 100% cloud fraction.  Also, a parameterization for cloud
-! fraction less than 1.0 but greater than 0.0 follows Mocko and Cotton
-! (1996) from Sundqvist et al. (1989) with cloud fraction increasing
-! as RH increases above a critical value.  In locations with non-zero
-! (but less than 1.0) cloud fraction, there MUST be a value assigned
-! to cloud liquid water and ice or else there is zero impact in the
-! RRTMG radiation scheme.
+!> This subroutine added by G. Thompson specifically to account for
+!! explicit (microphysics-produced) cloud liquid water, cloud ice, and
+!! snow with 100% cloud fraction.  Also, a parameterization for cloud
+!! fraction less than 1.0 but greater than 0.0 follows Mocko and Cotton
+!! (1996) from Sundqvist et al. (1989) with cloud fraction increasing
+!! as RH increases above a critical value.  In locations with non-zero
+!! (but less than 1.0) cloud fraction, there MUST be a value assigned
+!! to cloud liquid water and ice or else there is zero impact in the
+!! RRTMG radiation scheme.
       subroutine progcld_thompson                                       &
      &     ( plyr,plvl,tlyr,qlyr,qstl,rhly,clw,                         &    !  ---  inputs:
      &       xlat,xlon,slmsk,dz,delp,                                   &
@@ -3350,21 +3344,16 @@
       end subroutine gethml
 !-----------------------------------
 
-!+---+-----------------------------------------------------------------+
-!..Cloud fraction scheme by G. Thompson (NCAR-RAL), not intended for
-!.. combining with any cumulus or shallow cumulus parameterization
-!.. scheme cloud fractions.  This is intended as a stand-alone for
-!.. cloud fraction and is relatively good at getting widespread stratus
-!.. and stratoCu without caring whether any deep/shallow Cu param schemes
-!.. is making sub-grid-spacing clouds/precip.  Under the hood, this
-!.. scheme follows Mocko and Cotton (1995) in application of the
-!.. Sundqvist et al (1989) scheme but using a grid-scale dependent
-!.. RH threshold, one each for land v. ocean points based on
-!.. experiences with HWRF testing.
-!+---+-----------------------------------------------------------------+
-!
-!+---+-----------------------------------------------------------------+
-
+!> Cloud fraction scheme by G. Thompson (NCAR-RAL), not intended for
+!! combining with any cumulus or shallow cumulus parameterization
+!! scheme cloud fractions.  This is intended as a stand-alone for
+!! cloud fraction and is relatively good at getting widespread stratus
+!! and stratoCu without caring whether any deep/shallow Cu param schemes
+!! is making sub-grid-spacing clouds/precip.  Under the hood, this
+!! scheme follows Mocko and Cotton (1995) in application of the
+!! Sundqvist et al (1989) scheme but using a grid-scale dependent
+!! RH threshold, one each for land v. ocean points based on
+!! experiences with HWRF testing.
       SUBROUTINE cal_cldfra3(CLDFRA, qv, qc, qi, qs, dz,                &
      &                 p, t, XLAND, gridkm,                             &
      &                 modify_qvapor, max_relh,                         &
@@ -3503,11 +3492,9 @@
 
       END SUBROUTINE cal_cldfra3
 
-!+---+-----------------------------------------------------------------+
-!..From cloud fraction array, find clouds of multi-level depth and compute
-!.. a reasonable value of LWP or IWP that might be contained in that depth,
-!.. unless existing LWC/IWC is already there.
-
+!>From cloud fraction array, find clouds of multi-level depth and compute
+!! a reasonable value of LWP or IWP that might be contained in that depth,
+!! unless existing LWC/IWC is already there.
       SUBROUTINE find_cloudLayers(qvs1d, cfr1d, T1d, P1d, Dz1d, entrmnt,&
      &                            debugfl, qc1d, qi1d, qs1d, kts,kte)
 !
@@ -3665,6 +3652,7 @@
 
 !+---+-----------------------------------------------------------------+
 
+!>
       SUBROUTINE adjust_cloudIce(cfr,qi,qs,qvs,T,dz,entr, k1,k2,kts,kte)
 !
       IMPLICIT NONE
@@ -3706,6 +3694,7 @@
 
 !+---+-----------------------------------------------------------------+
 
+!>
       SUBROUTINE adjust_cloudH2O(cfr, qc, qvs,T,dz,entr, k1,k2,kts,kte)
 !
       IMPLICIT NONE
@@ -3748,9 +3737,8 @@
 
 !+---+-----------------------------------------------------------------+
 
-!..Do not alter any grid-explicitly resolved hydrometeors, rather only
-!.. the supposed amounts due to the cloud fraction scheme.
-
+!> Do not alter any grid-explicitly resolved hydrometeors, rather only
+!! the supposed amounts due to the cloud fraction scheme.
       SUBROUTINE adjust_cloudFinal(cfr, qc, qi, Rho,dz, kts,kte)
 !
       IMPLICIT NONE
@@ -3790,6 +3778,7 @@
 
       END SUBROUTINE adjust_cloudFinal
 
+!> This subroutine computes the Xu-Randall cloud fraction scheme.
       subroutine cloud_fraction_XuRandall                               &
      &     ( IX, NLAY, plyr, clwf, rhly, qstl,                          & !  ---  inputs
      &       cldtot )                                                   & !  ---  outputs
@@ -3836,6 +3825,7 @@
 
       end subroutine cloud_fraction_XuRandall
  
+!>
       subroutine cloud_fraction_mass_flx_1                              &
      &     ( IX, NLAY, lmfdeep2, xrc3, plyr, clwf, rhly, qstl,          & !  ---  inputs
      &       cldtot )                                                   & !  ---  outputs
@@ -3885,6 +3875,7 @@
 
       end subroutine cloud_fraction_mass_flx_1
  
+!>
       subroutine cloud_fraction_mass_flx_2                              &
      &     ( IX, NLAY, lmfdeep2, xrc3, plyr, clwf, rhly, qstl,          & !  ---  inputs
      &       cldtot )                                                   & !  ---  outputs
@@ -3940,5 +3931,4 @@
       end subroutine cloud_fraction_mass_flx_2 
 !........................................!
       end module module_radiation_clouds
-!> @}
-!========================================!
+!>@}

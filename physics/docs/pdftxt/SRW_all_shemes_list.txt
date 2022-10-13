@@ -3,9 +3,7 @@
 
 \section allscheme_overview Physical Parameterizations 
 
-In the CCPP, each parameterization is in its own modern Fortran module (see rules for a scheme to be considered CCPP-compliant at 
-<a href="https://ccpp-techdoc.readthedocs.io/en/v6.0.0/CompliantPhysicsParams.html"> CCPP-Compliant Physics Parameterizations </a>),
-which facilitates model development and code maintenance. While some individual parameterization can be invoked for the SCM, most host models will assemble the parameterizations in suites. 
+The UFS SRW App. assembles the parameterizations in suites. 
 
 
 \b Radiation
@@ -73,11 +71,7 @@ to the parameterization.
 
 \section allsuite_overview Physics Suites
 
-There are two publicly supported host models that use CCPP v6: the UFS Weather Model and the CCPP Single Column Model (SCM). 
-The UFS Weather Model is included in the UFS Short Range Weather Application (SRW App) v2.
-The forcing datasets included in the CCPP SCM v6.0.0 public release were created by averaging observations and large-eddy simulations over areas that are
-too coarse to resolve convection. Therefore, best results will be obtained with the CCPP SCM v6.0 when using suites that include parameterized
-convection.
+The UFS Short Range Weather Application (SRW App) v2.1.0 supports four physicsphysics suites.
 
 Table 1.  Physics suites and primary schemes supported in SRW v2.1.0  
 \tableofcontents

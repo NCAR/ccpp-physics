@@ -712,7 +712,6 @@
 !-----------------------------------
 
 !> This subroutine computes surface emissivity for LW radiation.
-!!\todo  document all augu.
 !!\param lsm              flag for land surface model
 !!\param lsm_noahmp       flag for NOAH MP land surface model
 !!\param lsm_ruc          flag for RUC land surface model

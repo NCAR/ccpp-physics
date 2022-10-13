@@ -17,12 +17,9 @@ supports suites:
 ## Acknowledgements
 
 CCPP team would like to express our deepest gratitude for UFS physics developers' contribution to the
-development of CCPP-Physics. 
-\n We would also like to give special thanks to:    
+development of CCPP-Physics. In this release, we would also like to give special thanks to:    
 
 - \b NOAA \b Global \b Systems \b Laboratory: Hannah Barnes, Jeff Beck, Georg Grell, Joseph Olson, Tanya Smirnova, Michael Toy
-- \b NOAA \b National \b Severe \b Storms \b Laboratory: Ted Mansell
-- \b NOAA \b Environmental \b Modeling \b Center: Jongil Han, Qingfu Liu, Ruiyu Sun
 - \b Joint \b Center \b for \b Satellite \b Data \b Assimilation: Greg Thompson
 
 as a whole for their support and contribution for this CCPP scientific documentation (SciDoc).
