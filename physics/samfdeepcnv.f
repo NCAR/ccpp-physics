@@ -1809,7 +1809,7 @@ c
             endif
          enddo
 
-!> - For progsigma = T, calculate the xi term in Bengtsson et al. 2022 \cite bengtsson_etal_2022 (equation 8)
+!> - For progsigma = T, calculate the xi term in Bengtsson et al. 2022 \cite Bengtsson_2022 (equation 8)
          do k = 2, km1
             do i = 1, im
                if (cnvflg(i)) then
@@ -2881,7 +2881,7 @@ c
         endif
       enddo
 
-!> - From Bengtsson et al. (2022) \cite bengtsson_etal_2022 prognostic closure scheme, equation 8, call progsigma_calc() to compute updraft area fraction based on a moisture budget
+!> - From Bengtsson et al. (2022) \cite Bengtsson_2022 prognostic closure scheme, equation 8, call progsigma_calc() to compute updraft area fraction based on a moisture budget
       if(progsigma)then
          flag_shallow = .false.
          call progsigma_calc(im,km,first_time_step,restart,flag_shallow,

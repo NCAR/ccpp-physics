@@ -1,8 +1,8 @@
 # Doxyfile 1.9.3
 
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = "UFSLAM CCPP SciDoc"
-PROJECT_NUMBER         = "UFS-SRW v2.1.0"
+PROJECT_NAME           = "UFS-SRW CCPP SciDoc"
+PROJECT_NUMBER         = "v2.1.0"
 PROJECT_BRIEF          = "Common Community Physics Package Developed at DTC"
 PROJECT_LOGO           = img/dtc_logo.png
 OUTPUT_DIRECTORY       = doc
@@ -132,6 +132,7 @@ INPUT                  =  pdftxt/SRW_mainpage.txt              \
                           pdftxt/GFS_SATMEDMFVDIFQ.txt    \
                           pdftxt/GFS_NOAHMP.txt    \
                           pdftxt/GFS_UGWPv0.txt   \
+                          pdftxt/GFS_unified_ugwp.txt  \
                           pdftxt/GFS_drag_suite.txt    \
                           pdftxt/GFS_GWDPS.txt      \
                           pdftxt/GFS_OZPHYS.txt   \

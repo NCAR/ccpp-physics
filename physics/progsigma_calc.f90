@@ -2,9 +2,10 @@
 !! This file contains the subroutine that calculates the prognostic
 !! updraft area fraction that is used for closure computations in 
 !! saSAS deep and shallow convection, based on a moisture budget
-!! as described in Bengtsson et al. 2022.
+!! as described in Bengtsson et al. 2022 \cite Bengtsson_2022.
 
-!>\ingroup SAMFdeep SAMF_shal
+!>\ingroup SAMFdeep
+!>\ingroup SAMF_shal
 !! This subroutine computes a prognostic updraft area fraction
 !! used in the closure computations in the samfdeepcnv.f scheme
 !! This subroutine computes a prognostic updraft area fracftion

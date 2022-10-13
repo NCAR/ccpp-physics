@@ -2911,19 +2911,25 @@
 !! output. The three cloud domain boundaries are defined by ptopc. The
 !! cloud overlapping method is defined by control flag 'iovr', which is
 !! also used by LW and SW radiation programs.
-!> \param plyr    (IX,NLAY), model layer mean pressure in mb (100Pa)
-!> \param ptop1   (IX,4), pressure limits of cloud domain interfaces
+!! \param plyr    (IX,NLAY), model layer mean pressure in mb (100Pa)
+!! \param ptop1   (IX,4), pressure limits of cloud domain interfaces
 !!                    (sfc,low,mid,high) in mb (100Pa)
-!> \param cldtot  (IX,NLAY), total or stratiform cloud profile in fraction
-!> \param cldcnv  (IX,NLAY), convective cloud (for diagnostic scheme only)
-!> \param dz      (IX,NLAY), layer thickness (km)
-!> \param de_lgth (IX),  clouds decorrelation length (km)
-!> \param alpha   (IX,NLAY), alpha decorrelation parameter
-!> \param IX      horizontal dimension
-!> \param NLAY    vertical layer dimensions
-!> \param clds   (IX,5), fraction of clouds for low, mid, hi, tot, bl
-!> \param mtop   (IX,3),vertical indices for low, mid, hi cloud tops
-!> \param mbot   (IX,3),vertical indices for low, mid, hi cloud bases
+!! \param cldtot  (IX,NLAY), total or stratiform cloud profile in fraction
+!! \param cldcnv  (IX,NLAY), convective cloud (for diagnostic scheme only)
+!! \param dz      (IX,NLAY), layer thickness (km)
+!! \param de_lgth (IX),  clouds decorrelation length (km)
+!! \param alpha   (IX,NLAY), alpha decorrelation parameter
+!! \param IX      horizontal dimension
+!! \param NLAY    vertical layer dimensions
+!! \param iovr_rand     flag for random cloud overlap method
+!! \param iovr_maxrand  flag for maximum-random cloud overlap method
+!! \param iovr_max      flag for maximum cloud overlap method
+!! \param iovr_dcorr    flag for decorrelation-length cloud overlap method
+!! \param iovr_exp      flag for exponential cloud overlap method
+!! \param iovr_exprand  flag for exponential-random cloud overlap method
+!! \param clds   (IX,5), fraction of clouds for low, mid, hi, tot, bl
+!! \param mtop   (IX,3),vertical indices for low, mid, hi cloud tops
+!! \param mbot   (IX,3),vertical indices for low, mid, hi cloud bases
 !!
 !>\section detail Detailed Algorithm
       subroutine gethml                                                 &

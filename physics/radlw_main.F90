@@ -1531,6 +1531,7 @@
 !!\param ipseed          permutation seed for generating random numbers (isubclw>0)
 !!\param dz              layer thickness (km) 
 !!\param de_lgth         layer cloud decorrelation length (km)  
+!!\param iovr            cloud overlapping control flag
 !!\param alpha           EXP/ER cloud overlap decorrelation parameter
 !!\param cldfmc          cloud fraction for each sub-column
 !!\param taucld          cloud optical depth for bands (non-mcica)
