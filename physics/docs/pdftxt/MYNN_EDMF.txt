@@ -35,7 +35,7 @@ if the namelist parameter \p icloud_bl is set to 1. In this case, the SGS cloud 
 cloud-mixing ratio, \p QC_BL, are added to the microphysics arrays within the radiation driver (mynnrad_pre_run()). 
 The following two steps are performed: 
 
-(1) Use either Xu and Randall (1996) \cite xu_and_randall_1996 or Chaboureau and Bechtold (2005) cloud fraction for 
+(1) Use either Xu and Randall (1996) \cite xu_and_randall_1996 or Chaboureau and Bechtold (2005) \cite Chaboureau_2005 cloud fraction for 
 the convection scheme subgrid clouds, chosen by the switch \p conv_cf_opt = 0: CB2005, 1: XR1996. 
 Note that the MYNN-EDMF PBL scheme subgrid clouds input into this scheme are 
 already partitioned into qc and qi and already have assigned cloud fractions, but now qi is further partitioned into

@@ -132,7 +132,6 @@ INPUT                  =  pdftxt/SRW_mainpage.txt              \
                           pdftxt/GFS_SATMEDMFVDIFQ.txt    \
                           pdftxt/GFS_NOAHMP.txt    \
                           pdftxt/GFS_UGWPv0.txt   \
-                          pdftxt/GFS_unified_ugwp.txt  \
                           pdftxt/GFS_drag_suite.txt    \
                           pdftxt/GFS_GWDPS.txt      \
                           pdftxt/GFS_OZPHYS.txt   \
@@ -268,6 +267,7 @@ INPUT                  =  pdftxt/SRW_mainpage.txt              \
                         ../cu_gf_driver_post.F90 \
                         ../mynnedmf_wrapper.F90 \
                         ../module_bl_mynn.F90   \
+                        ../bl_mynn_common.f90   \
                         ../mynnsfc_wrapper.F90 \
                         ../module_sf_mynn.F90  \
                         ../lsm_ruc.F90   \

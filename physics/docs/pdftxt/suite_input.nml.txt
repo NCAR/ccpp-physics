@@ -206,6 +206,7 @@ show some variables in the namelist that must match the SDF.
 <tr><td>trans_trac      <td>gfs_suite_interstitial          <td>flag for convective transport of tracers       <td>.false.
 <tr><td>cal_pre         <td>gfs_phys_time_vary or gfs_MP_generic          <td>flag for calling precipitation type algorithm  <td>.false.
 <tr><td>shcnvcw         <td>\ref samfshalcnv               <td>flag for shallow convective cloud           <td>.false.
+<tr><td>progsigma         <td>\ref samfshalcnv, \ref samfdeepcnv              <td>flag for prognostic updraft area fraction closure in saSAS   <td>.false.
 <tr><td colspan="4"  align= center>\b Parameters \b related \b to \b PBL \b scheme \b options
 <tr><td>do_mynnedmf     <td>mynnedmf_wrapper         <td>flag to activate MYNN-EDMF scheme                      <td>.false. 
 <tr><td>dspheat         <td> \ref satmedmfvdifq          <td>flag for using TKE dissipative heating to temperature tendency in hybrid EDMF and TKE-EDMF schemes <td>.false.
