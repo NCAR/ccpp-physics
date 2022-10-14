@@ -11,18 +11,5 @@ supports suites:
 - \ref RRFS_v1beta_page 
 - \ref WoFS_v0_page
 
-## Acknowledgements
-
-CCPP team would like to express our deepest gratitude for UFS physics developers' contribution to the
-development of CCPP-Physics. In this release, we would also like to give special thanks to:    
-
-- \b NOAA \b Global \b Systems \b Laboratory: Hannah Barnes, Jeff Beck, Georg Grell, Joseph Olson, Tanya Smirnova, Michael Toy
-- \b Joint \b Center \b for \b Satellite \b Data \b Assimilation: Greg Thompson
-
-as a whole for their support and contribution for this CCPP scientific documentation (SciDoc).
-
-
-\b CCPP \b SciDoc \b Team: Man Zhang, Ligia Bernardet, Dustin Swales, Grant Firl
-\n Developmental Testbed Center
 
 */
