@@ -7619,7 +7619,7 @@ SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
 END FUNCTION phih
 ! ==================================================================
 !>\ingroup gsd_mynn_edmf
-!!
+!! Calculate the buoyancy production of TKE from cloud-top cooling.
  SUBROUTINE topdown_cloudrad(kts,kte,dz1,zw,xland,kpbl,PBLH,  &
                &sqc,sqi,sqw,thl,th1,ex1,p1,rho1,thetav,       &
                &cldfra_bl1D,rthraten,                         &

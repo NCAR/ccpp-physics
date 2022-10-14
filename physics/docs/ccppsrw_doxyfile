@@ -1,7 +1,7 @@
 # Doxyfile 1.9.3
 
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = "SRW v2.1.0"
+PROJECT_NAME           = "CCPP Scidoc for SRW v2.1.0"
 PROJECT_NUMBER         = "SRW v2.1.0"
 PROJECT_BRIEF          = "Common Community Physics Package Developed at DTC"
 PROJECT_LOGO           = img/dtc_logo.png
