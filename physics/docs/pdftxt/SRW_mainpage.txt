@@ -1,11 +1,8 @@
 /**
 \mainpage Introduction 
 
-Welcome to the scientific documentation for the physical parameterizations available in the  
-<a href="https://ufscommunity.org/about/what-is-ufs/">Unified Forecast System (UFS)</a> 
-Short-Range Weather (SRW) Application version 2.1.0 (available through https://github.com/ufs-community/ufs-srweather-app/) and the suites that can be configured using them. The SRW app targets predictions of atmospheric behavior on a 
+Welcome to the scientific documentation for the physical parameterizations available in the  <a href="https://ufscommunity.org/about/what-is-ufs/">Unified Forecast System (UFS)</a> Short-Range Weather (SRW) Application version 2.1.0 (available through https://github.com/ufs-community/ufs-srweather-app/) and the suites that can be configured using them. The SRW app targets predictions of atmospheric behavior on a 
 limited spatial domain and on time scales from less than an hour out to several days. 
-
 
 The CCPP parameterizations are aggregated in suites by the host models. In this release, the UFS Short-Range Weather Application 2.1.0 
 supports suites:

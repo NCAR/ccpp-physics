@@ -1,8 +1,8 @@
 # Doxyfile 1.9.3
 
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = "UFS-SRW CCPP SciDoc"
-PROJECT_NUMBER         = "v2.1.0"
+PROJECT_NAME           = "CCPP SciDoc for UFS-SRW v2.1.0"
+PROJECT_NUMBER         = "CCPP SciDoc for UFS-SRW v2.1.0"
 PROJECT_BRIEF          = "Common Community Physics Package Developed at DTC"
 PROJECT_LOGO           = img/dtc_logo.png
 OUTPUT_DIRECTORY       = doc

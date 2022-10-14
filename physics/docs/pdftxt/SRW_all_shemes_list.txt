@@ -1,10 +1,9 @@
 /**
 \page allscheme_page Overview of Schemes and Suites
 
-\section allscheme_overview Physical Parameterizations 
+\section allscheme_overview Physical Parameterizations and Suites 
 
-The UFS SRW App. assembles the parameterizations in suites. 
-
+The UFS-SRW App. assembles the parameterizations in suites. 
 
 \b Radiation
  - \subpage GFS_RRTMG 
@@ -49,7 +48,6 @@ The UFS SRW App. assembles the parameterizations in suites.
  - \subpage GFS_SFCSICE 
 
 \b Others
- - \ref ca_page
  - \subpage GFS_SPP
 
 The input information for the parameterizations includes the values of the gridbox mean prognostic variables (wind components, temperature,
@@ -69,7 +67,6 @@ produce the tendencies.
 to the parameterization.
 - If the in-core saturation adjustment is used (\p do_sat_adj=.true.), it is invoked at shorter timesteps along with the dynamical solver.
 
-\section allsuite_overview Physics Suites
 
 The UFS Short Range Weather Application (SRW App) v2.1.0 supports four physicsphysics suites.
 
@@ -77,7 +74,6 @@ Table 1.  Physics suites and primary schemes supported in SRW v2.1.0
 \tableofcontents
 | Physics suites   |     GFS_v16        |       HRRR                     |   RRFS_v1beta      |   WoFS_v0     |         
 |------------------|--------------------|--------------------------------|--------------------|---------------|
-|\b Host           | SCM \n SRWv2       |     SCM \n SRWv2               |  SCM \n SRWv2      |  SCM \n SRWv2 |
 |\b Deep \b Cu     | \ref GFS_SAMFdeep  |   \a  off                      |   \a off           |   \a off      |
 |\b Shallow \b Cu  | \ref GFS_SAMFshal  |   \ref MYNNEDMF                | \ref MYNNEDMF      |  \ref MYNNEDMF |
 |\b Microphysics   | \ref GFDL_cloud    |   \ref THOMPSON    | \ref THOMPSON      | \ref NSSLMICRO_page     |

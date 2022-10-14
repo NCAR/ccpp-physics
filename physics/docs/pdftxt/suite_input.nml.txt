@@ -1,7 +1,7 @@
 /**
 \page CCPPsuite_nml_desp Supported Namelist Options
 
-The SCM and the UFS Atmosphere, the atmospheric component of the UFS Weather Model,
+The UFS Atmosphere, the atmospheric component of the UFS Weather Model,
  access runtime configurations from file \c input.nml. This file contains
 various namelists records that control aspects of the I/O, dynamics, physics etc. Most physics-related options are in
 records \b &gfs_physics_nml. Some schemes have their own namelist records as described below. 
@@ -133,8 +133,8 @@ show some variables in the namelist that must match the SDF.
                                                       <ul>
                                                       <li> d:tropospheric aerosol model scheme flag \n
                                                              =0 or none, opac-climatology aerosol scheme \n 
-                                                             =1 use gocart climatology aerosol scheme \n
-                                                             =2 use gocart prognostic aerosol scheme \n
+                                                             =1 use NASA GOCART climatology aerosol scheme \n
+                                                             =2 use NASA GOCART prognostic aerosol scheme \n
                                                              =5 opac-clim new spectral mapping
                                                       <li> a:=0 use background stratospheric aerosol  \n
                                                              =1 include stratospheric volcanic aerosol

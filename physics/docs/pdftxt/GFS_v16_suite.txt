@@ -4,10 +4,7 @@
 \section gfsv16_suite_overview Overview
 
 Version 16 of the Global Forecast System (GFS) was implemented operationally by the NOAA
-National Centers for Environmental Prediction (NCEP) in 2021. This suite is available for 
-use with the UFS SRW App and with the CCPP SCM.
-
-The GFS_v16 suite uses the parameterizations in the following order:
+National Centers for Environmental Prediction (NCEP) in 2021. The GFS_v16 suite uses the parameterizations in the following order:
  - \ref GFS_RRTMG
  - \ref GFS_SFCLYR
  - \ref GFS_NSST
