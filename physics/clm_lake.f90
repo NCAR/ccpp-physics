@@ -42,7 +42,7 @@ MODULE clm_lake
     logical, parameter :: USE_ETALAKE = .false.
     real, parameter :: ETALAKE = 1.1925*50**(-0.424) ! Set this to your desired value if USE_ETALAKE=.true.
 
-    ! Level counts must be consistent with model (GFS_Typedefs.F90)
+    ! Level counts must be consistent with model (GFS_typedefs.F90)
     integer, parameter :: nlevsoil     =  10   ! number of soil layers
     integer, parameter :: nlevlake     =  10   ! number of lake layers
     integer, parameter :: nlevsnow     =   5   ! maximum number of snow layers
@@ -126,47 +126,9 @@ MODULE clm_lake
     real, parameter :: SaltLk_T(1:25) = (/ 0.5,  0.,-0.5, 3., 4.,  7., 8., 12.,  13., 16., 19., 21., &
                                           23.5, 25., 26.,24.,23.,20.5,18., 15., 11.5,  8.,  4.,  1., 0.5/)
     real, parameter :: month_length(12) = (/ 31, 29, 31, 30, 31, 30, 31, 30, 30, 31, 30, 31 /)
-    real, parameter :: julm(1:13) = (/0,31,59,90,120,151,181,212,243,273,304,334,365/)
     logical, parameter :: include_all_salty_locations = .false.
 
     CONTAINS
-
-    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-    subroutine get_month_and_day(IDATE,month,day_of_month,day_of_year,fhour)
-      implicit none
-      integer, intent(in) :: IDATE(4)
-      integer, intent(out) :: month,day_of_month,day_of_year
-      real(kind_phys), intent(in) :: fhour
-
-      integer :: idat(8),jdat(8), w3kindreal, w3kindint, jdow, jdoy, jday
-      real(8) :: rinc(5)
-      real(4) :: rinc4(5)
-
-      idat    = 0
-      idat(1) = idate(4)
-      idat(2) = idate(2)
-      idat(3) = idate(3)
-      idat(5) = idate(1)
-      rinc    = 0.
-      rinc(2) = fhour
-      call w3kind(w3kindreal,w3kindint)
-      if(w3kindreal==4) then
-        rinc4 = rinc
-        CALL W3MOVDAT(RINC4,IDAT,JDAT)
-      else
-        CALL W3MOVDAT(RINC,IDAT,JDAT)
-      endif
-!
-      jdow = 0
-      jdoy = 0
-      jday = 0
-      call w3doxdat(jdat,jdow,jdoy,jday)
-
-      day_of_year = jday
-      day_of_month = IDATE(3)
-      month = IDATE(2)
-    end subroutine get_month_and_day
 
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -228,7 +190,7 @@ MODULE clm_lake
 
       is_salty=limit_temperature_by_climatology(xlat_d,xlon_d)
 
-     if(include_all_salty_locations) then
+     other_locations: if(include_all_salty_locations) then
       ! --- The Mono Lake in California, salinity is 75 ppt with freezing point at
       ! --- -4.2 C (Stan). The Mono Lake lat/long (37.9-38.2, -119.3 - 118.8)
       if (xlon_d.gt.-119.3.and. xlon_d.lt.-118.8) then  
@@ -253,7 +215,7 @@ MODULE clm_lake
          endif
          is_salty = .true.
       endif
-     endif
+     endif other_locations
      !tgs --- end of special treatment for salty lakes
     end function is_salty
  
@@ -268,7 +230,7 @@ MODULE clm_lake
                      rain         ,dtp            ,dswsfci      ,albedo          ,&
                      xlat_d       ,z_lake3d       ,dz_lake3d    ,oro_lakedepth   ,&
                      watsat3d     ,csol3d         ,tkmg3d       ,tkdry3d         ,&
-                     tksatu3d     ,wet            ,phii         ,clm_lakedepth   ,& 
+                     tksatu3d     ,                phii         ,clm_lakedepth   ,& 
                      fice         ,min_lakeice                  ,im,km           ,&
                      h2osno2d     ,snowdp2d       ,snl2d        ,z3d             ,&  !h
                      dz3d         ,zi3d           ,h2osoi_vol3d ,h2osoi_liq3d    ,&
@@ -307,7 +269,7 @@ MODULE clm_lake
     LOGICAL, INTENT(IN) :: restart,use_lakedepth,first_time_step
     REAL(KIND_PHYS), INTENT(INOUT) :: clm_lake_initialized(:)
     REAL(KIND_PHYS),     INTENT(IN)  :: min_lakeice, con_rd,con_g,con_cp,lakedepth_default, fhour
-    logical, intent(inout) :: icy(:), wet(:)
+    logical, intent(inout) :: icy(:)
     REAL(KIND_PHYS), DIMENSION( : ), INTENT(INOUT)::   fice
     REAL(KIND_PHYS), DIMENSION( : ), INTENT(INOUT) :: weasd, snowd
     REAL(KIND_PHYS), DIMENSION( : ), INTENT(IN):: tg3, pgr
@@ -758,11 +720,6 @@ MODULE clm_lake
                   tisfc(i)      = t_grnd(c) ! surface_skin_temperature_over_ice
                   tsurf_ice(i)  = t_grnd(c) ! surface_skin_temperature_after_iteration_over_ice
                   icy(i)=.true.
-                  if(fice(i)==1.) then
-                    wet(i) = .false.
-                  else
-                    wet(i) = .true.
-                  endif
                   ice_points = ice_points+1
 
                   zorli(i) = z0mg(c)
@@ -776,7 +733,6 @@ MODULE clm_lake
                   end do
                 else
                   icy(i)=.false.
-                  wet(i)=.true.
                   weasdi(i) = 0
                   snodi(i) = 0
                   tisfc(i) = tsurf(i)

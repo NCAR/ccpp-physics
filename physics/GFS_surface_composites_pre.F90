@@ -21,7 +21,7 @@ contains
 !> \section arg_table_GFS_surface_composites_pre_run Argument Table
 !! \htmlinclude GFS_surface_composites_pre_run.html
 !!
-   subroutine GFS_surface_composites_pre_run (im, lkm, frac_grid,                                                         &
+   subroutine GFS_surface_composites_pre_run (im, lkm, frac_grid, iopt_lake, iopt_lake_clm,                               &
                                  flag_cice, cplflx, cplice, cplwav2atm, lsm, lsm_ruc,                                     &
                                  landfrac, lakefrac, lakedepth, oceanfrac, frland,                                        &
                                  dry, icy, lake, use_lake_model, wet, hice, cice, zorlo, zorll, zorli,                    &
@@ -35,11 +35,11 @@ contains
       implicit none
 
       ! Interface variables
-      integer,                             intent(in   ) :: im, lkm, kdt, lsm, lsm_ruc
+      integer,                             intent(in   ) :: im, lkm, kdt, lsm, lsm_ruc, iopt_lake, iopt_lake_clm
       logical,                             intent(in   ) :: cplflx, cplice, cplwav2atm, frac_grid
       logical, dimension(:),              intent(inout)  :: flag_cice
       logical,              dimension(:), intent(inout)  :: dry, icy, lake, wet
-      integer, dimension(:),              intent(inout)  :: use_lake_model
+      integer, dimension(:),              intent(in   )  :: use_lake_model
       real(kind=kind_phys), dimension(:), intent(in   )  :: landfrac, lakefrac, lakedepth, oceanfrac
       real(kind=kind_phys), dimension(:), intent(inout)  :: cice, hice
       real(kind=kind_phys), dimension(:), intent(  out)  :: frland
@@ -67,16 +67,17 @@ contains
 
       ! Local variables
       integer :: i
+      logical :: is_clm
 
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
 
-      do i=1,im
+       do i=1,im
          if(use_lake_model(i) > 0.0) then
              wet(i) = .true.
          endif
-      enddo
+       enddo
 
       if (frac_grid) then  ! cice is ice fraction wrt water area
         do i=1,im
@@ -183,10 +184,13 @@ contains
                   if (icy(i)) tsfco(i) = max(tisfc(i), tgice)
                 endif
               endif
-            else
+            else ! Not ocean and not land
+              is_clm = lkm>0 .and. iopt_lake==iopt_lake_clm .and. use_lake_model(i)>0
               if (cice(i) >= min_lakeice) then
                 icy(i) = .true.
-                tisfc(i) = max(timin, min(tisfc(i), tgice))
+                if(.not.is_clm) then
+                  tisfc(i) = max(timin, min(tisfc(i), tgice))
+                endif
                 islmsk(i) = 2
               else
                 cice(i)   = zero
@@ -198,7 +202,9 @@ contains
               flag_cice(i)   = .false.
               if (cice(i) < one) then
                 wet(i) = .true. ! some open lake
-                if (icy(i)) tsfco(i) = max(tisfc(i), tgice)
+                if (icy(i) .and. .not.is_clm) then
+                  tsfco(i) = max(tisfc(i), tgice)
+                endif
               endif
             endif
           endif
@@ -233,7 +239,10 @@ contains
         endif
         if (icy(i)) then                   ! Ice
           uustar_ice(i) = uustar(i)
-           if(lsm /= lsm_ruc) weasd_ice(i) = weasd(i)
+          is_clm = lkm>0 .and. iopt_lake==iopt_lake_clm .and. use_lake_model(i)>0
+          if(lsm /= lsm_ruc .and. .not.is_clm) then
+            weasd_ice(i) = weasd(i)
+          endif
            tsurf_ice(i) = tisfc(i)
             ep1d_ice(i) = zero
             gflx_ice(i) = zero
