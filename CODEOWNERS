@@ -19,7 +19,7 @@ physics/bl_mynn_common.f90                     @joeolson42                      
 physics/calpreciptype.f90                                                           @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/cires_orowam2017.f                                                          @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/cires_tauamf_data.F90                                                       @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/cires_ugwp*                            @mdtoyNOAA @ValeryYudin-NOAA         @grantfirl @ChunxiZhang-NOAA @dustinswales
+physics/cires_ugwp*                            @ValeryYudin-NOAA @mdtoyNOAA         @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/cldmacro.F                             @AnningCheng-NOAA @andrewgettelman   @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/cldwat2m_micro.F                       @AnningCheng-NOAA @andrewgettelman   @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/cnvc90.*                                                                    @grantfirl @ChunxiZhang-NOAA @dustinswales
@@ -38,7 +38,7 @@ physics/get_phi_fv3.*                                                           
 physics/get_prs_fv3.*                                                               @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/gfdl_cloud_microphys.*                 @RuiyuSun                            @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/GFDL_parse_tracers.F90                                                      @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/gfdl_sfc_layer.*                                                            @grantfirl @ChunxiZhang-NOAA @dustinswales
+physics/gfdl_sfc_layer.*                       @ZhanZhang-NOAA                      @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/GFS_cloud_diagnostics.*                @dustinswales                        @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/GFS_DCNV_generic_post.*                                                     @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/GFS_DCNV_generic_pre.*                                                      @grantfirl @ChunxiZhang-NOAA @dustinswales
@@ -92,7 +92,7 @@ physics/gwdc.*                                 @Songyou184                      
 physics/gwdps.*                                @Songyou184                          @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/h2o_def.*                                                                   @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/h2ointerp.f90                                                               @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/h2ophys.*                              @AlexBelochitski-NOAA                @grantfirl @ChunxiZhang-NOAA @dustinswales
+physics/h2ophys.*                              @SMoorthi-emc                        @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/hedmf.*                                @JongilHan66 @WeiguoWang-NOAA        @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/iccn_def.F                                                                  @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/iccninterp.F90                                                              @grantfirl @ChunxiZhang-NOAA @dustinswales
@@ -103,7 +103,7 @@ physics/machine.*                                                               
 physics/maximum_hourly_diagnostics.*                                                @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/mersenne_twister.f                                                          @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/mfpbl.f                                @JongilHan66                         @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/mfpblt.f                                                                    @grantfirl @ChunxiZhang-NOAA @dustinswales
+physics/mfpblt.f                               @JongilHan66                         @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/mfpbltq.f                              @JongilHan66                         @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/mfscu.f                                @JongilHan66                         @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/mfscuq.f                               @JongilHan66                         @grantfirl @ChunxiZhang-NOAA @dustinswales
@@ -119,11 +119,11 @@ physics/module_mp_radar.*                      @gthompsnWRF @RuiyuSun           
 physics/module_mp_thompson*                    @gthompsnWRF @RuiyuSun               @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/module_nst*                            @XuLi-NOAA                           @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/module_sf_exchcoef.f90                                                      @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/module_SF_JSFC.F90                                                          @grantfirl @ChunxiZhang-NOAA @dustinswales
+physics/module_SF_JSFC.F90                     @Qingfu-Liu                          @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/module_sf_mynn.F90                     @joeolson42                          @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/module_sf_ruclsm.*                     @tanyasmirnova                       @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/module_soil_pre.*                      @tanyasmirnova                       @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/moninshoc.*                            @AlexBelochitski-NOAA                @grantfirl @ChunxiZhang-NOAA @dustinswales
+physics/moninshoc.*                            @SMoorthi-emc                        @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/mp_fer_hires.*                         @ericaligo-NOAA                      @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/mp_nssl.*                                                                   @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/mp_thompson*                           @gthompsnWRF @RuiyuSun               @grantfirl @ChunxiZhang-NOAA @dustinswales
@@ -137,13 +137,12 @@ physics/namelist_soilveg_ruc.*                 @tanyasmirnova                   
 physics/*noahmp*                               @barlage @cenlinhe                   @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/ozinterp.f90                                                                @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/ozne_def.*                                                                  @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/ozphys*                                @AlexBelochitski-NOAA                @grantfirl @ChunxiZhang-NOAA @dustinswales
+physics/ozphys*                                @SMoorthi-emc                        @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/physcons.F90                                                                @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/physparam.f                                                                 @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/phys_tend.*                                                                 @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/progsigma_calc.f90                     @lisa-bengtsson                      @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/radcons.f90                            @Qingfu-Liu @dustinswales            @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/radiation_aerosols.f                   @Qingfu-Liu @dustinswales            @grantfirl @ChunxiZhang-NOAA @dustinswales
+physics/radiation_aerosols.f                   @Qingfu-Liu @dustinswales @AnningCheng-NOAA           @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/radiation_astronomy.f                  @Qingfu-Liu @dustinswales            @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/radiation_cloud_overlap.F90            @dustinswales @mjiacono              @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/radiation_clouds.f                     @Qingfu-Liu @dustinswales            @grantfirl @ChunxiZhang-NOAA @dustinswales
@@ -186,11 +185,11 @@ physics/sgscloud_radpost.*                                                      
 physics/sgscloud_radpre.*                                                           @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/shalcnv.*                              @JongilHan66                         @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/shinhongvdif.*                         @ChunxiZhang-NOAA                    @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/shoc.*                                 @AlexBelochitski-NOAA                @grantfirl @ChunxiZhang-NOAA @dustinswales
+physics/shoc.*                                 @SMoorthi-emc                        @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/surface_perturbation.*                 @HelinWei-NOAA                       @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/tridi.f                                @JongilHan66 @ChunxiZhang-NOAA @WeiguoWang-NOAA @AlexBelochitski-NOAA       @grantfirl @ChunxiZhang-NOAA @dustinswales
+physics/tridi.f                                @JongilHan66 @ChunxiZhang-NOAA @WeiguoWang-NOAA       @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/ugwp_driver_v0.F                       @mdtoyNOAA                           @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/ugwpv1_gsldrag.*                                                            @grantfirl @ChunxiZhang-NOAA @dustinswales
+physics/ugwpv1_gsldrag.*                       @mdtoyNOAA                           @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/ugwpv1_gsldrag_post.*                                                       @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/unified_ugwp*                          @mdtoyNOAA                           @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/wv_saturation.F                        @AnningCheng-NOAA @andrewgettelman   @grantfirl @ChunxiZhang-NOAA @dustinswales
