@@ -1043,6 +1043,20 @@ module lsm_ruc
         z0_lnd(i,j)  = z0rl_lnd(i)/100.
         znt_lnd(i,j) = z0rl_lnd(i)/100.
 
+        ! Workaround needed for subnormal numbers.  This should be
+        ! done after all other sanity checks, in case a sanity check
+        ! results in subnormal numbers.
+        !
+        ! This bug was caught by the UFS gfortran debug-mode
+        ! regression tests, and the fix is necessary to pass those
+        ! tests.
+        if(abs(snowh_lnd(i,j))<1e-20) then
+          snowh_lnd(i,j)=0
+        endif
+        if(abs(sneqv_lnd(i,j))<1e-20) then
+          sneqv_lnd(i,j)=0
+        endif
+
         if(debug_print) then
           if(me==0 ) then
             write (0,*)'before LSMRUC for land'
@@ -1359,6 +1373,19 @@ module lsm_ruc
 
         z0_ice(i,j)  = z0rl_ice(i)/100.
         znt_ice(i,j) = z0rl_ice(i)/100.
+
+        ! Workaround needed for subnormal numbers.  This should be
+        ! done after all other sanity checks, in case a sanity check
+        ! results in subnormal numbers.
+        !
+        ! Although this bug has not been triggered yet, it is expected
+        ! to be, like the _lnd variants many lines up from here.
+        if(abs(snowh_ice(i,j))<1e-20) then
+          snowh_ice(i,j)=0
+        endif
+        if(abs(sneqv_ice(i,j))<1e-20) then
+          sneqv_ice(i,j)=0
+        endif
 
 !> - Call RUC LSM lsmruc() for ice.
       call lsmruc(                                                           &
