@@ -33,6 +33,7 @@ jobs:
         git submodule update --init --recursive
 
     - name: Update ccpp-physics hash in ccpp-scm
+      if: github.event.pull_request == false
       run: |
         cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-scm/ccpp/physics
         echo $GIT_REMOTE_URL
