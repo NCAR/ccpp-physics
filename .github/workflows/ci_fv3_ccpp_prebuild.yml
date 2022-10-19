@@ -12,7 +12,9 @@ jobs:
 
     steps:
     - name: Checkout current ccpp-physics code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
 
     - name: Store remote-URL for current ccpp-physics code
       run: echo "GIT_REMOTE_URL=`git remote get-url origin`" >> $GITHUB_ENV
