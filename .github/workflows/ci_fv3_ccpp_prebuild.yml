@@ -1,6 +1,6 @@
 name: CI test to run FV3 ccpp_prebuild step
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   build-linux:
@@ -34,6 +34,7 @@ jobs:
         git submodule update --init --recursive
 
     - name: Update ccpp-physics hash in fv3atm
+      if: github.event.pull_request == false
       run: |
         cd /home/runner/work/ccpp-physics/ccpp-physics/fv3atm/ccpp/physics
         git remote add remote_local $GIT_REMOTE_URL
