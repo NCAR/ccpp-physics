@@ -35,6 +35,8 @@ jobs:
     - name: Update ccpp-physics hash in ccpp-scm
       run: |
         cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-scm/ccpp/physics
+        echo $GIT_REMOTE_URL
+        echo $GIT_REMOTE_BRANCH
         git remote add remote_local $GIT_REMOTE_URL
         git fetch remote_local $GIT_REMOTE_BRANCH
         git checkout remote_local/$GIT_REMOTE_BRANCH
