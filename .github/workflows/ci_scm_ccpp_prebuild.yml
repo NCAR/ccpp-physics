@@ -37,6 +37,7 @@ jobs:
         cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-scm/ccpp/physics
         echo $GIT_REMOTE_URL
         echo $GIT_REMOTE_BRANCH
+        echo ${{github.repository}}
         git remote add remote_local $GIT_REMOTE_URL
         git fetch remote_local $GIT_REMOTE_BRANCH
         git checkout remote_local/$GIT_REMOTE_BRANCH
