@@ -1,6 +1,6 @@
 name: CI test to run SCM ccpp_prebuild step
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   build-linux:
@@ -13,7 +13,7 @@ jobs:
     steps:
 
     - name: Checkout current ccpp-physics code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v2
       with:
         ref: "refs/pull/${{ github.event.number }}/merge"
 
