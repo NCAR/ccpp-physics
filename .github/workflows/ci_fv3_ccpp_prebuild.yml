@@ -1,6 +1,6 @@
 name: CI test to run FV3 ccpp_prebuild step
 
-on: [push, pull_request]
+on: [push]
 
 jobs:
   build-linux:
