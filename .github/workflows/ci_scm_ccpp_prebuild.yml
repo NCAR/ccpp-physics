@@ -40,6 +40,8 @@ jobs:
         echo $GIT_REMOTE_URL
         echo $GIT_REMOTE_BRANCH
         echo ${{github.repository}}
+        echo ${{ github.event.pull_request.head.sha }}
+        echo $GITHUB_SHA
         git remote add remote_local $GIT_REMOTE_URL
         git fetch remote_local $GIT_REMOTE_BRANCH
         git checkout remote_local/$GIT_REMOTE_BRANCH
