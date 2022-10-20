@@ -200,9 +200,14 @@ contains
               endif
               islmsk_cice(i) = islmsk(i)
               flag_cice(i)   = .false.
-              if (cice(i) < one) then
+              if(is_clm) then
+                wet(i) = .true.
+                if (icy(i)) then
+                  tsfco(i) = max(tisfc(i), tgice)
+                endif
+              else if(cice(i) < one) then
                 wet(i) = .true. ! some open lake
-                if (icy(i) .and. .not.is_clm) then
+                if (icy(i)) then
                   tsfco(i) = max(tisfc(i), tgice)
                 endif
               endif

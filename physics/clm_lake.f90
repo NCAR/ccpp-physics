@@ -715,7 +715,7 @@ MODULE clm_lake
                 albedo(i)       = ( 0.6 * lake_icefrac3d(i,1) ) + &  ! mid_day_surface_albedo_over_lake
                                   ( (1.0-lake_icefrac3d(i,1)) * 0.08)
                 fice(i)         = lake_icefrac3d(i,1)       ! sea_ice_area_fraction_of_sea_area_fraction
-                uustar_water(i) = ustar_out(c)              ! surface_friction_velocity_over_water
+                !uustar_water(i) = ustar_out(c)              ! surface_friction_velocity_over_water
                 zorlw(i) = z0mg(c)                          ! surface_roughness_length_over_water
 
                 ! WRF variables with no equivalent in CCPP:
@@ -743,7 +743,7 @@ MODULE clm_lake
                     chh_ice(i)    = chh_water(i)              ! surface_drag_mass_flux_for_heat_and_moisture_in_air_over_ice
                     cmm_ice(i)    = cmm_water(i)              ! surface_drag_wind_speed_for_momentum_in_air_over_ice
                     qss_ice(i)    = qss_water(i)              ! surface_specific_humidity_over_ice
-                    uustar_ice(i) = uustar_water(c)           ! surface_friction_velocity_over_ice
+!                    uustar_ice(i) = uustar_water(i)           ! surface_friction_velocity_over_ice
                   endif
 
                   tsurf_ice(i)  = tsurf_water(i)            ! surface_skin_temperature_after_iteration_over_ice
