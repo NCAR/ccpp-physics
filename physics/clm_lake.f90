@@ -224,33 +224,37 @@ MODULE clm_lake
     !> \section arg_table_clm_lake_run Argument Table
     !! \htmlinclude clm_lake_run.html
     !!
-    SUBROUTINE clm_lake_run( flag_iter    ,zlvl   ,rho0         ,first_time_step ,&
-                     gt0          ,prsi           ,con_rd,con_g ,qvcurr          ,&  !i
-                     gu0          ,gv0            ,dlwsfci      ,emiss           ,&
-                     rain         ,dtp            ,dswsfci      ,albedo          ,&
-                     xlat_d       ,z_lake3d       ,dz_lake3d    ,oro_lakedepth   ,&
-                     watsat3d     ,csol3d         ,tkmg3d       ,tkdry3d         ,&
-                     tksatu3d     ,                phii         ,clm_lakedepth   ,& 
-                     fice         ,min_lakeice                  ,im,km           ,&
-                     h2osno2d     ,snowdp2d       ,snl2d        ,z3d             ,&  !h
-                     dz3d         ,zi3d           ,h2osoi_vol3d ,h2osoi_liq3d    ,&
-                     h2osoi_ice3d ,t_grnd2d       ,t_soisno3d   ,t_lake3d        ,&
-                     savedtke12d  ,lake_icefrac3d               ,use_lake_model  ,& 
-                     iopt_lake    ,iopt_lake_clm  ,fhour                         ,&
-                     con_cp       ,icy            ,IDATE                         ,&
-                     hflx         ,evap           ,grdflx       ,tsfc            ,&  !o
-                     lake_t2m     ,lake_q2m       ,clm_lake_initialized          ,&
-                     weasd        ,isltyp         ,snowd        ,use_lakedepth   ,&
-                     restart      ,lakedepth_default            ,pgr             ,&
-                     zorlw        ,zorli          ,sand3d       ,clay3d          ,&
-! Flake output variables
-                     weasdi       ,snodi          ,hice         ,tsurf           ,&
-                     t_sfc        ,lflx           ,ustar        ,qsfc            ,&
-                     ch           ,cm             ,chh          ,cmm             ,&
-                     lake_t_snow  ,tisfc          ,tsurf_ice    ,wind            ,&
-!
-                     xlon_d       ,kdt            ,tg3          ,salty          ,&
-                     me           ,master         ,errmsg       ,errflg )
+    SUBROUTINE clm_lake_run( &
+         ! Model time and metadata:
+         im, km, me, master, restart, first_time_step, fhour, IDATE, kdt,         &
+
+         ! Configuration and initialization:
+         iopt_lake, iopt_lake_clm, min_lakeice, lakedepth_default, use_lakedepth, &
+         dtp, use_lake_model, clm_lake_initialized, frac_grid, frac_ice,          &
+
+         ! Atmospheric model state inputs:
+         tg3, pgr, zlvl, gt0, prsi, phii, qvcurr, gu0, gv0, xlat_d, xlon_d,       &
+         ch, cm, dlwsfci, dswsfci, emiss, rain, oro_lakedepth, wind, rho0, tsfc,  &
+         flag_iter, ISLTYP,                                                       &
+
+         ! Feedback to atmosphere:
+         evap_wat,     evap_ice,   hflx_wat,    hflx_ice,  gflx_wat, gflx_ice,    &
+         ep1d_water,   ep1d_ice,   tsurf_water, tsurf_ice, tsfc_wat, tisfc,       &
+         weasdi,       snodi,      hice,        qss_water, qss_ice,               &
+         cmm_water,    cmm_ice,    chh_water,   chh_ice,                          &
+         uustar_water, uustar_ice, lake_t_snow, albedo,    zorlw,                 &
+         zorli,        lake_t2m,   lake_q2m,    weasd,     snowd,    fice,        &
+         icy,                                                                     &
+
+         ! Lake model internal state stored by caller:
+
+         salty, savedtke12d, snowdp2d, h2osno2d, snl2d, t_grnd2d, t_lake3d,       &
+         lake_icefrac3d, t_soisno3d, h2osoi_ice3d, h2osoi_liq3d, h2osoi_vol3d,    &
+         z3d, dz3d, zi3d, z_lake3d, dz_lake3d, watsat3d, csol3d, sand3d, clay3d,  &
+         tkmg3d, tkdry3d, tksatu3d, clm_lakedepth,                                &
+
+         ! Error reporting:
+         errflg, errmsg)
 
       !==============================================================================
       ! This subroutine was first edited by Hongping Gu and Jiming Jin for coupling
@@ -260,72 +264,56 @@ MODULE clm_lake
 
     IMPLICIT NONE
     
-    !in:
-    
-    INTEGER, INTENT(IN) :: iopt_lake, iopt_lake_clm, kdt, IDATE(4)
-    INTEGER, INTENT(OUT) :: errflg
-    CHARACTER(*), INTENT(OUT) :: errmsg
+    !
+    ! Model time and metadata:
+    !
     INTEGER , INTENT (IN) :: im,km,me,master
-    LOGICAL, INTENT(IN) :: restart,use_lakedepth,first_time_step
-    REAL(KIND_PHYS), INTENT(INOUT) :: clm_lake_initialized(:)
-    REAL(KIND_PHYS),     INTENT(IN)  :: min_lakeice, con_rd,con_g,con_cp,lakedepth_default, fhour
-    logical, intent(inout) :: icy(:)
-    REAL(KIND_PHYS), DIMENSION( : ), INTENT(INOUT)::   fice
-    REAL(KIND_PHYS), DIMENSION( : ), INTENT(INOUT) :: weasd, snowd
-    REAL(KIND_PHYS), DIMENSION( : ), INTENT(IN):: tg3, pgr
-    REAL(KIND_PHYS),    DIMENSION( : ), INTENT(IN)    :: ZLVL
+    LOGICAL, INTENT(IN) :: restart,first_time_step
+    INTEGER, INTENT(IN) :: IDATE(4), kdt
+    REAL, INTENT(IN) :: fhour
 
+    !
+    ! Configuration and initialization:
+    !
+    INTEGER, INTENT(IN) :: iopt_lake, iopt_lake_clm
+    REAL(KIND_PHYS), INTENT(IN)  :: min_lakeice, lakedepth_default, dtp
+    LOGICAL, INTENT(IN) :: use_lakedepth
     INTEGER, DIMENSION(:), INTENT(IN) :: use_lake_model
-    real(kind_phys), dimension(:), intent(in)  :: rho0               ! air density at surface
+    REAL(KIND_PHYS), INTENT(INOUT) :: clm_lake_initialized(:)
+    LOGICAL, INTENT(IN) :: frac_grid, frac_ice
 
-    REAL(KIND_PHYS),           DIMENSION( : ), INTENT(INOUT) :: &
-                     weasdi       ,snodi          ,hice         ,tsurf           ,&
-                     t_sfc        ,lflx           ,ustar        ,qsfc            ,&
-                     chh          ,cmm            ,lake_t_snow  ,tisfc           ,&
-                     tsurf_ice    ,wind
-    LOGICAL,                   DIMENSION(:),     INTENT(IN)  :: flag_iter
-    REAL(KIND_PHYS),           DIMENSION( :, : ),INTENT(IN)  :: gt0
-    REAL(KIND_PHYS),           DIMENSION( :, : ),INTENT(IN)  :: prsi   
-    REAL(KIND_PHYS),           DIMENSION( :, : ),INTENT(IN)  :: phii
-    REAL(KIND_PHYS),           DIMENSION( : )   ,INTENT(IN)  :: qvcurr
-    REAL(KIND_PHYS),           DIMENSION( :, : ),INTENT(IN)  :: gu0
-    REAL(KIND_PHYS),           DIMENSION( :, : ),INTENT(IN)  :: gv0
-    REAL(KIND_PHYS),           DIMENSION( : ),   INTENT(IN)  :: xlat_d, xlon_d
-    REAL(KIND_PHYS),           DIMENSION( : ),   INTENT(IN)  :: ch
-    REAL(KIND_PHYS),           DIMENSION( : ),   INTENT(IN)  :: cm
-    REAL(KIND_PHYS),           DIMENSION( : )         ,INTENT(IN)  :: dlwsfci
-    REAL(KIND_PHYS),           DIMENSION( : )         ,INTENT(IN)  :: dswsfci
-    REAL(KIND_PHYS),           DIMENSION( : )         ,INTENT(IN)  :: emiss
-    REAL(KIND_PHYS),           DIMENSION( : )         ,INTENT(IN)  :: rain
-    REAL(KIND_PHYS),           DIMENSION( : )         ,INTENT(INOUT)  :: albedo, zorlw, zorli
-    INTEGER, DIMENSION( : ), INTENT(IN)       :: ISLTYP
+    !
+    ! Atmospheric model state inputs:
+    !
+    REAL(KIND_PHYS), DIMENSION(:), INTENT(IN):: &
+         tg3, pgr, zlvl, qvcurr, xlat_d, xlon_d, ch, cm, &
+         dlwsfci, dswsfci, emiss, rain, oro_lakedepth, wind, rho0, tsfc
+    REAL(KIND_PHYS), DIMENSION(:,:), INTENT(in) :: gu0, gv0, prsi, gt0, phii
+    LOGICAL, DIMENSION(:), INTENT(IN) :: flag_iter
+    INTEGER, DIMENSION(:), INTENT(IN) :: ISLTYP
+
+    !
+    ! Feedback to atmosphere:
+    !
+    REAL(KIND_PHYS), DIMENSION(:), INTENT(INOUT) :: &
+         evap_wat,     evap_ice,   hflx_wat,    hflx_ice,  gflx_wat, gflx_ice,    &
+         ep1d_water,   ep1d_ice,   tsurf_water, tsurf_ice, tsfc_wat, tisfc,       &
+         weasdi,       snodi,      hice,        qss_water, qss_ice,               &
+         cmm_water,    cmm_ice,    chh_water,   chh_ice,                          &
+         uustar_water, uustar_ice, lake_t_snow, albedo,    zorlw,                 &
+         zorli,        lake_t2m,   lake_q2m,    weasd,     snowd,    fice
+    LOGICAL, INTENT(INOUT) :: icy(:)
+
+    !
+    ! Lake model internal state stored by caller:
+    !
     INTEGER, DIMENSION( : ), INTENT(INOUT)    :: salty
-    REAL(KIND_PHYS),                                                  INTENT(IN)  :: dtp
-    REAL(KIND_PHYS),           DIMENSION( :,: ),INTENT(INOUT)  :: z_lake3d
-    REAL(KIND_PHYS),           DIMENSION( :,: ),INTENT(INOUT)  :: dz_lake3d
-    REAL(KIND_PHYS),           DIMENSION( :,: ),INTENT(INOUT)  :: watsat3d
-    REAL(KIND_PHYS),           DIMENSION( :,: ),INTENT(INOUT)  :: csol3d, sand3d, clay3d
-    REAL(KIND_PHYS),           DIMENSION( :,: ),INTENT(INOUT)  :: tkmg3d
-    REAL(KIND_PHYS),           DIMENSION( :,: ),INTENT(INOUT)  :: tkdry3d
-    REAL(KIND_PHYS),           DIMENSION( :,: ),INTENT(INOUT)  :: tksatu3d
-    REAL(KIND_PHYS),           DIMENSION( : )  ,INTENT(INOUT)  :: clm_lakedepth
-    REAL(KIND_PHYS),           DIMENSION( : )  ,INTENT(IN   )  :: oro_lakedepth
 
-    !feedback to atmosphere:
-    REAL(KIND_PHYS),           DIMENSION( : )         ,INTENT(OUT) :: hflx
-    REAL(KIND_PHYS),           DIMENSION( : )         ,INTENT(OUT) :: evap
-    REAL(KIND_PHYS),           DIMENSION( : )         ,INTENT(OUT) :: GRDFLX
-    REAL(KIND_PHYS),           DIMENSION( : )         ,INTENT(IN ) :: tsfc
-    REAL(KIND_PHYS),           DIMENSION( : )         ,INTENT(OUT) :: lake_t2m
-    REAL(KIND_PHYS),           DIMENSION( : )         ,INTENT(OUT) :: lake_q2m
-
-    !in&out:
-
-    real(kind_phys),           dimension(: )                ,intent(inout)  :: savedtke12d 
-    real(kind_phys),           dimension(: )                ,intent(inout)  :: snowdp2d,       &    
-                                                                                  h2osno2d,       &    
-                                                                                  snl2d,          &    
-                                                                                  t_grnd2d
+    real(kind_phys),           dimension(: )                ,intent(inout)  :: savedtke12d,    &
+                                                                               snowdp2d,       &    
+                                                                               h2osno2d,       &    
+                                                                               snl2d,          &    
+                                                                               t_grnd2d
     
     real(kind_phys),    dimension( :,: )           ,INTENT(inout)  :: t_lake3d,       &    
                                                                                   lake_icefrac3d
@@ -336,15 +324,33 @@ MODULE clm_lake
                                                                                   z3d,            &    
                                                                                   dz3d 
     real(kind_phys),    dimension( :,-nlevsnow+0: )  ,INTENT(inout)  :: zi3d    
+
+    REAL(KIND_PHYS),           DIMENSION( :,: ),INTENT(INOUT)  :: z_lake3d
+    REAL(KIND_PHYS),           DIMENSION( :,: ),INTENT(INOUT)  :: dz_lake3d
+    REAL(KIND_PHYS),           DIMENSION( :,: ),INTENT(INOUT)  :: watsat3d
+    REAL(KIND_PHYS),           DIMENSION( :,: ),INTENT(INOUT)  :: csol3d, sand3d, clay3d
+    REAL(KIND_PHYS),           DIMENSION( :,: ),INTENT(INOUT)  :: tkmg3d
+    REAL(KIND_PHYS),           DIMENSION( :,: ),INTENT(INOUT)  :: tkdry3d
+    REAL(KIND_PHYS),           DIMENSION( :,: ),INTENT(INOUT)  :: tksatu3d
+    REAL(KIND_PHYS),           DIMENSION( : )  ,INTENT(INOUT)  :: clm_lakedepth
+
+    !
+    ! Error reporting:
+    !
+    INTEGER, INTENT(OUT) :: errflg
+    CHARACTER(*), INTENT(OUT) :: errmsg
+
        
 
-    !local variable:
+    !
+    !local variables:
+    !
 
     REAL(kind_phys)     :: SFCTMP,PBOT,PSFC,Q2K,LWDN,PRCP,SOLDN,SOLNET,dtime
     INTEGER  :: C,i,j,k
 
 
-      !tempory varibles in:
+      !temporary varibles in:
       real(kind_phys)  :: forc_t(1)          ! atmospheric temperature (Kelvin)
       real(kind_phys)  :: forc_pbot(1)       ! atm bottom level pressure (Pa) 
       real(kind_phys)  :: forc_psrf(1)       ! atmospheric surface pressure (Pa)
@@ -466,20 +472,21 @@ MODULE clm_lake
          endif
       endif
 
-        ! Still have some points to initialize
-        call lakeini(kdt,            ISLTYP,          gt0,             snowd,          &
-                     weasd,          restart,         lakedepth_default,  fhour,       &
-                     oro_lakedepth,  savedtke12d,     snowdp2d,        h2osno2d,       &
-                     snl2d,          t_grnd2d,        t_lake3d,        lake_icefrac3d, &
-                     z_lake3d,       dz_lake3d,       t_soisno3d,      h2osoi_ice3d,   &
-                     h2osoi_liq3d,   h2osoi_vol3d,    z3d,             dz3d,           &
-                     zi3d,           watsat3d,        csol3d,          tkmg3d,         &
-                                     fice,            min_lakeice,     tsfc,           &
-                     use_lake_model, use_lakedepth,   con_g,           con_rd,         &
-                     tkdry3d,        tksatu3d,        im,              prsi,           &
-                     xlat_d,         xlon_d,          clm_lake_initialized,            &
-                     sand3d,         clay3d,          tg3,             clm_lakedepth,  &
-                     km, me,         master,          errmsg,          errflg)
+        ! Initialize any uninitialized lake points.
+        call lakeini(kdt=kdt, ISLTYP=ISLTYP, gt0=gt0, snowd=snowd, weasd=weasd,           &
+             restart=restart, lakedepth_default=lakedepth_default, fhour=fhour,           &
+             oro_lakedepth=oro_lakedepth, savedtke12d=savedtke12d, snowdp2d=snowdp2d,     &
+             h2osno2d=h2osno2d, snl2d=snl2d, t_grnd2d=t_grnd2d, t_lake3d=t_lake3d,        &
+             lake_icefrac3d=lake_icefrac3d, z_lake3d=z_lake3d, dz_lake3d=dz_lake3d,       &
+             t_soisno3d=t_soisno3d, h2osoi_ice3d=h2osoi_ice3d, h2osoi_liq3d=h2osoi_liq3d, &
+             h2osoi_vol3d=h2osoi_vol3d, z3d=z3d, dz3d=dz3d, zi3d=zi3d, watsat3d=watsat3d, &
+             csol3d=csol3d, tkmg3d=tkmg3d, fice=fice, min_lakeice=min_lakeice,            &
+             tsfc=tsfc,                                                                   &
+             use_lake_model=use_lake_model, use_lakedepth=use_lakedepth, tkdry3d=tkdry3d, &
+             tksatu3d=tksatu3d, im=im, prsi=prsi, xlat_d=xlat_d, xlon_d=xlon_d,           &
+             clm_lake_initialized=clm_lake_initialized, sand3d=sand3d, clay3d=clay3d,     &
+             tg3=tg3, clm_lakedepth=clm_lakedepth, km=km, me=me, master=master,           &
+             errmsg=errmsg, errflg=errflg)
         if(errflg/=0) then
           return
         endif
@@ -535,13 +542,13 @@ MODULE clm_lake
            if(salty(i)/=0) then
              Tclim = tfrz + wght1*saltlk_T(num1)  &
                           + wght2*saltlk_T(num2)
-             if(lakedebug) print *,'Tclim,tsfc,t_lake3d',i,Tclim,tsfc(i),t_lake3d(i,:),t_soisno3d(i,:)
-             t_grnd2d(i) = min(Tclim+3.0_kind_phys,(max(tsfc(i),Tclim-3.0_kind_phys)))
+             if(lakedebug) print *,'Tclim,tsfc,t_lake3d',i,Tclim,tsfc_wat(i),t_lake3d(i,:),t_soisno3d(i,:)
+             t_grnd2d(i) = min(Tclim+3.0_kind_phys,(max(tsfc_wat(i),Tclim-3.0_kind_phys)))
              do k = 1,nlevlake
                t_lake3d(i,k) = min(Tclim+3.0_kind_phys,(max(t_lake3d(i,k),Tclim-3.0_kind_phys)))
              enddo
              t_soisno3d(i,1) = min(Tclim+3.0_kind_phys,(max(t_soisno3d(i,1),Tclim-3.0_kind_phys)))
-             if(lakedebug) print *,'After Tclim,tsfc,t_lake3d',i,Tclim,tsfc(i),t_lake3d(i,:),t_soisno3d(i,:)
+             if(lakedebug) print *,'After Tclim,tsfc,t_lake3d',i,Tclim,tsfc_wat(i),t_lake3d(i,:),t_soisno3d(i,:)
            endif
 
            SFCTMP  = gt0(i,1)
@@ -688,81 +695,99 @@ MODULE clm_lake
             
          enddo
 
-            if(feedback_to_atmosphere) then
+            feedback: if(feedback_to_atmosphere) then
                 c = 1
-
-                ! No equivalent in CCPP:
-                ! LH(I)           = eflx_lh_tot(c)/rho1(i)    ![kg*m/(kg*s)]
 
                 !-- The CLM output is combined for fractional ice and water
                 if( t_grnd(c) >= tfrz ) then
                   qfx         = eflx_lh_tot(c)/hvap
                 else
-                  qfx         = eflx_lh_tot(c)/hsub       ! heat flux (W/m^2)=>mass flux(kg/(sm^2))
+                  qfx         = eflx_lh_tot(c)/hsub         ! heat flux (W/m^2)=>mass flux(kg/(sm^2))
                 endif
-                evap(i) = qfx/rho0(i)  ! kinematic_surface_upward_latent_heat_flux_over_water
-                HFLX(i)=eflx_sh_tot(c)/(rho0(i)*con_cp) ! kinematic_surface_upward_sensible_heat_flux_over_water
-                GRDFLX(I)       = eflx_gnet(c)              ![W/m/m]   upward_heat_flux_in_soil_over_water
-                lflx(i)         = eflx_lh_tot(c)            ![W/m/m]   surface_upward_potential_latent_heat_flux_over_water
-                tsurf(I)        = t_grnd(c)                 ![K]       surface skin temperature after iteration over water
-                t_sfc(I)        = t_grnd(c)                 ![K]       surface skin temperature over water
-                lake_t2m(I)     = t_ref2m(c)
-                !TH2(I)          = T2(I)*(1.E5/PSFC)**RCP   ! potential temperature (CCPP doesn't want this)
-                lake_q2m(I)     = q_ref2m(c)               ! [frac] specific humidity
-                albedo(i)       = ( 0.6 * lake_icefrac3d(i,1) ) + ( (1.0-lake_icefrac3d(i,1)) * 0.08)  
-                fice(i)         = lake_icefrac3d(i,1)
+                evap_wat(i) = qfx/rho0(i)                   ! kinematic_surface_upward_latent_heat_flux_over_water
+                hflx_wat(i)=eflx_sh_tot(c)/(rho0(i)*cpair)  ! kinematic_surface_upward_sensible_heat_flux_over_water
+                gflx_wat(I)     = eflx_gnet(c)              ![W/m/m]   upward_heat_flux_in_soil_over_water
+                ep1d_water(i)   = eflx_lh_tot(c)            ![W/m/m]   surface_upward_potential_latent_heat_flux_over_water
+                tsurf_water(I)  = t_grnd(c)                 ![K]       surface skin temperature after iteration over water
+                tsfc_wat(i)     = t_grnd(c)                 ![K]       surface skin temperature over water
+                lake_t2m(I)     = t_ref2m(c)                ![K]       temperature_at_2m_from_clm_lake
+                lake_q2m(I)     = q_ref2m(c)                ! [frac] specific_humidity_at_2m_from_clm_lake
+                albedo(i)       = ( 0.6 * lake_icefrac3d(i,1) ) + &  ! mid_day_surface_albedo_over_lake
+                                  ( (1.0-lake_icefrac3d(i,1)) * 0.08)
+                fice(i)         = lake_icefrac3d(i,1)       ! sea_ice_area_fraction_of_sea_area_fraction
+                uustar_water(i) = ustar_out(c)              ! surface_friction_velocity_over_water
+                zorlw(i) = z0mg(c)                          ! surface_roughness_length_over_water
 
-                zorlw(i) = z0mg(c)
+                ! WRF variables with no equivalent in CCPP:
+                ! LH(I)         = eflx_lh_tot(c)/rho1(i)    ![kg*m/(kg*s)]
+                !TH2(I)         = T2(I)*(1.E5/PSFC)**RCP    ! potential temperature
 
-                if(fice(i)>=min_lakeice) then
-                  weasdi(i)     = h2osno(c) ! water_equivalent_accumulated_snow_depth_over_ice
-                  snodi(i)      = snowdp(c) ! surface_snow_thickness_water_equivalent_over_ice
-                  tisfc(i)      = t_grnd(c) ! surface_skin_temperature_over_ice
-                  tsurf_ice(i)  = t_grnd(c) ! surface_skin_temperature_after_iteration_over_ice
-                  icy(i)=.true.
+                ! Calculate qsfc from t_grnd:               ! surface_specific_humidity_over_water
+                PSFC = prsi(i,1) 
+                discard1 = -9999
+                discard2 = -9999
+                discard3 = -9999
+                call QSat(t_grnd(c),psfc,discard1,discard2,qss_water(i),discard3)
+
+                ! Combined water-ice chh and cmm calculations come from Flake model:
+                chh_water(i)    = ch(i)*wind(i)*1.225       ! surface_drag_mass_flux_for_heat_and_moisture_in_air_over_water
+                cmm_water(i)    = cm(i)*wind(i)             ! surface_drag_wind_speed_for_momentum_in_air_over_water
+
+                ice_point: if(fice(i)>=min_lakeice) then
+                  ! Most ice variables are identical to water variables.
+                  if(frac_ice .or. frac_grid) then
+                    evap_ice(i)   = evap_wat(i)               ! kinematic_surface_upward_latent_heat_flux_over_ice
+                    hflx_ice(i)   = hflx_wat(i)               ! kinematic_surface_upward_sensible_heat_flux_over_ice
+                    gflx_ice(i)   = gflx_wat(i)               ! upward_heat_flux_in_soil_over_ice
+                    ep1d_ice(i)   = ep1d_water(i)             ! surface_upward_potential_latent_heat_flux_over_ice
+                    chh_ice(i)    = chh_water(i)              ! surface_drag_mass_flux_for_heat_and_moisture_in_air_over_ice
+                    cmm_ice(i)    = cmm_water(i)              ! surface_drag_wind_speed_for_momentum_in_air_over_ice
+                    qss_ice(i)    = qss_water(i)              ! surface_specific_humidity_over_ice
+                    uustar_ice(i) = uustar_water(c)           ! surface_friction_velocity_over_ice
+                  endif
+
+                  tsurf_ice(i)  = tsurf_water(i)            ! surface_skin_temperature_after_iteration_over_ice
+                  tisfc(i)      = t_grnd(c)                 ! surface_skin_temperature_over_ice
+                  weasdi(i)     = h2osno(c)                 ! water_equivalent_accumulated_snow_depth_over_ice
+                  snodi(i)      = snowdp(c)                 ! surface_snow_thickness_water_equivalent_over_ice
+                  tsurf_ice(i)  = t_grnd(c)                 ! surface_skin_temperature_after_iteration_over_ice
+
+                  ! Ice points are icy:
+                  icy(i)=.true.                             ! flag_nonzero_sea_ice_surface_fraction
                   ice_points = ice_points+1
 
-                  zorli(i) = z0mg(c)
+                  zorli(i) = z0mg(c)                        ! surface_roughness_length_over_ice
 
                   ! Assume that, if a layer has ice, the entire layer thickness is ice.
-                  hice(I) = 0
+                  hice(I) = 0                               ! sea_ice_thickness
                   do k=1,nlevlake
                     if(lake_icefrac3d(i,k)>0) then
                       hice(i) = hice(i) + dz_lake3d(i,k)
                     endif
                   end do
-                else
+                else ! Not an ice point
+                  ! On non-icy lake points, set variables relevant to
+                  ! lake ice to reasonable defaults.  Let LSM fill in
+                  ! other variables.
                   icy(i)=.false.
                   weasdi(i) = 0
                   snodi(i) = 0
-                  tisfc(i) = tsurf(i)
+                  tisfc(i) = t_grnd(c)
                   tsurf_ice(i) = tisfc(i)
                   hice(i) = 0
                   fice(i) = 0
-                endif
+                endif ice_point
 
                 if(snl2d(i)<0) then
-                  lake_t_snow(i) = t_grnd(c)
-                  tisfc(i) = lake_t_snow(i)
+                  ! If there is snow, ice surface temperature should be snow temperature.
+                  lake_t_snow(i) = t_grnd(c)                ! surface_skin_temperature_over_ice
+                  tisfc(i) = lake_t_snow(i)                 ! temperature_of_snow_on_lake
                   snow_points = snow_points+1
                 else
                   lake_t_snow(i) = -9999
                 endif
 
-                ustar = ustar_out(1) ! surface_friction_velocity_over_water
-
-                ! Calculate qsfc from t_grnd:        (surface_specific_humidity_over_water)
-                PSFC = prsi(i,1) 
-                discard1 = -9999
-                discard2 = -9999
-                discard3 = -9999
-                call QSat(t_grnd(c),psfc,discard1,discard2,qsfc(i),discard3)
-
-                ! From flake driver - combined ice/water:
-                chh(i)=ch(i)*wind(i)*1.225 ! surface_drag_mass_flux_for_heat_and_moisture_in_air_over_water
-                cmm(i)=cm(i)*wind(i)       ! surface_drag_wind_speed_for_momentum_in_air_over_water
-                
-            endif
+            endif feedback
         
         endif if_lake_is_here
         ENDDO lake_top_loop
@@ -775,27 +800,61 @@ MODULE clm_lake
       CONTAINS
 
         logical function point_is_unhappy(xlat_d,xlon_d)
+          ! Is this point near one of the points read in from the unhappy_txt file?
+          ! If lakedebug is false, then it will return false immediately.
           implicit none
           integer :: j
           real, intent(in) :: xlat_d,xlon_d
 
-          do j=1,unhappy_count
-            if(abs(xlat_d-unhappy_lat(j))<.015 .and. abs(xlon_d-unhappy_lon(j))<.015) then
-              point_is_unhappy=.true.
-1444          format('Now processing unhappy point ',I0,' location xlat_d=',F20.12,' xlon_d=',F20.12,' close to xlat_d=',F20.12,' xlon_d=',F20.12)
-              print 1444,j,xlat_d,xlon_d,unhappy_lat(j),unhappy_lon(j)
-              return
-            endif
-          enddo
+          if(lakedebug) then
+            do j=1,unhappy_count
+              if(abs(xlat_d-unhappy_lat(j))<.015 .and. abs(xlon_d-unhappy_lon(j))<.015) then
+                point_is_unhappy=.true.
+1444            format('Now processing unhappy point ',I0,' location xlat_d=',F20.12,' xlon_d=',F20.12,' close to xlat_d=',F20.12,' xlon_d=',F20.12)
+                print 1444,j,xlat_d,xlon_d,unhappy_lat(j),unhappy_lon(j)
+                return
+              endif
+            enddo
+          endif
 
-          ! No points matched
+          ! No points matched or lakedebug is disabled.
           point_is_unhappy=.false.
         end function point_is_unhappy
 
         subroutine read_unhappy_points
+          ! Reads points from unhappy_txt file into unhappy_lat and unhappy lon.
+          ! Sets unhappy_count to the number of points read in.
+          ! On error, sets unhappy_count to FAILED_TO_READ_UNHAPPY_POINTS
+          !
+          ! Also allocates unhappy_lat and unhappy_lon. Their size may
+          ! be larger than the number of unhappy points if the header
+          ! line with the point count has a higher count than the
+          ! number of data lines.
+          ! 
+          ! File format is:
+          ! ------------------------------------------
+          ! |5                                        |   number of points to read in.
+          ! |12.34567890000000000 12.34567890000000000|   Lat and lon, exactly 20 characters each, with one space between
+          ! |            18.70411 134.4567890000000000|   Lat and lon, exactly 20 characters each, with one space between
+          ! |-19.8567890000000000              -134.05|   Lat and lon, exactly 20 characters each, with one space between
+          ! |36.34567890000000000 28.34567890000000000|   Lat and lon, exactly 20 characters each, with one space between
+          ! |-85.4567890000000000 -41.4567890000000000|   Lat and lon, exactly 20 characters each, with one space between
+          ! -------------------------------------------
+          !
+          ! Longitudes must be between -180 and +180 degrees.
+          !
+          ! If the lat and lon fields are not exactly 20 characters,
+          ! with one space between them, the code will not work.  You
+          ! can space-pad them before the number or put lots of zeros
+          ! after the decimal point.
           use ISO_FORTRAN_ENV, only: iostat_end, iostat_eor
           implicit none
           integer :: i,unhappy_iostat,unhappy_unit,expect_count,actual_count
+
+          ! This uses GOTOs to mimics a try-catch construct.  Do not
+          ! remove the GOTOs. They are the cleanest and most
+          ! maintainable way to implement error handlers in Fortran
+          ! when a long cleanup block is required in multiple places.
 
           ! Number of points actually read in is 0 since we haven't read yet.
           actual_count=0
@@ -844,13 +903,17 @@ MODULE clm_lake
 
           return ! Success!
 
+          ! Error handlers.
+
+          ! Theses do not set errmsg or error flag because this is
+          ! just an error in setting up a diagnostic, not in the model
+          ! itself.
+
 1000      continue ! Error handler, after file is opened
           close(unhappy_iostat)
           
 1001      continue ! Error handler, whether file was opened or not
           write(0,'(A)') message
-          ! errmsg=message
-          ! errflg=1
           if(allocated(unhappy_lat)) deallocate(unhappy_lat)
           if(allocated(unhappy_lon)) deallocate(unhappy_lon)
           unhappy_count=FAILED_TO_READ_UNHAPPY_POINTS
@@ -5296,7 +5359,6 @@ if_pergro: if (PERGRO) then
 
   end subroutine clm_lake_init
 
-! Some fields in lakeini are not available until runtime, so this cannot be in a CCPP init routine.
  SUBROUTINE lakeini(kdt,            ISLTYP,          gt0,             snowd,          & !i
                     weasd,          restart,         lakedepth_default,  fhour,       &
                     oro_lakedepth,  savedtke12d,     snowdp2d,        h2osno2d,       & !o
@@ -5304,12 +5366,19 @@ if_pergro: if (PERGRO) then
                     z_lake3d,       dz_lake3d,       t_soisno3d,      h2osoi_ice3d,   &
                     h2osoi_liq3d,   h2osoi_vol3d,    z3d,             dz3d,           &
                     zi3d,           watsat3d,        csol3d,          tkmg3d,         &
-                                    fice,            min_lakeice,              tsfc,  &
-                    use_lake_model, use_lakedepth,   con_g,           con_rd,         &
+                                    fice,            min_lakeice,     tsfc,           &
+                    use_lake_model, use_lakedepth,                                    &
                     tkdry3d,        tksatu3d,        im,              prsi,           &
                     xlat_d,         xlon_d,          clm_lake_initialized,            &
                     sand3d,         clay3d,          tg3,             clm_lakedepth,  &
                     km,   me,       master,          errmsg,          errflg)
+
+   ! Some fields in lakeini are not available during initialization,
+   ! so clm_lake_init cannot complete the initialization. What is not
+   ! in clm_lake_init, is initialized in lakeini on points where
+   ! use_lake_model(i)>0. The clm_lake_initialized(i) guards against
+   ! initializing a point twice.  For that to work,
+   ! clm_lake_initialized must be a restart variable.
 
    !==============================================================================
    ! This subroutine was first edited by Hongping Gu for coupling
@@ -5323,7 +5392,7 @@ if_pergro: if (PERGRO) then
   CHARACTER(*), INTENT(OUT) :: errmsg
 
   INTEGER , INTENT (IN)    :: im, me, master, km, kdt
-  REAL(KIND_PHYS),     INTENT(IN)  :: min_lakeice, con_g, con_rd, fhour
+  REAL(KIND_PHYS),     INTENT(IN)  :: min_lakeice, fhour
   REAL(KIND_PHYS), DIMENSION(IM), INTENT(INOUT)::   FICE
   REAL(KIND_PHYS), DIMENSION(IM), INTENT(IN)::   TG3, xlat_d, xlon_d
   REAL(KIND_PHYS), DIMENSION(IM), INTENT(IN)::     tsfc
