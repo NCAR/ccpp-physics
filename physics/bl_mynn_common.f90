@@ -5,6 +5,8 @@
 !! memory. This module is then used again in the MYNN-EDMF. All
 !! MYNN-specific constants are declared globally in the main 
 !! module (module_bl_mynn) further below:
+
+!>\ingroup gp_mynnedmf
  module bl_mynn_common
 
 !------------------------------------------

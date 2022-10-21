@@ -118,7 +118,6 @@ INPUT                  =  pdftxt/SRW_mainpage.txt              \
                           pdftxt/SRW_all_shemes_list.txt     \
                           pdftxt/GFS_v16_suite.txt       \
                           pdftxt/HRRR_suite.txt          \
-                          pdftxt/RE6/FV3_HRRR_input.nml  \
                           pdftxt/RRFS_v1beta_suite.txt   \
                           pdftxt/WoFS_v0_suite.txt   \
                           pdftxt/RRFS_SGSCLOUD.txt       \
@@ -303,7 +302,7 @@ EXCLUDE                =
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       =
 EXCLUDE_SYMBOLS        =
-EXAMPLE_PATH           = pdftxt/RE6 \
+EXAMPLE_PATH           = pdftxt/RE210 \
                          doc/html
 EXAMPLE_PATTERNS       = 
 EXAMPLE_RECURSIVE      = NO

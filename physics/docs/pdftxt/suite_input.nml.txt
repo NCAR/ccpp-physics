@@ -605,7 +605,7 @@ show some variables in the namelist that must match the SDF.
 <tr><td>iopt_trs    <td>\ref noahmpdrv                   <td>options for thermal roughness scheme:\n 
                                                       <ul>
                                                       <li>1: z0h=z0m  
-                                                      <li>2: czil
+                                                      <li>2: canopy based czil
                                                       <li>3: ec 
                                                       <li>4: kb inversed 
                                                       </ul>

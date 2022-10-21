@@ -28,6 +28,6 @@ The HRRR suite uses the parameterizations in the following order:
 \include suite_FV3_HRRR.xml
 
 \section hrrr_nml_option Namelist 
-\snippet RE6/FV3_HRRR_input.nml GFS_PHYSICS_NML
+\snippet RE210/FV3_HRRR_input.nml GFS_PHYSICS_NML
 
 */
