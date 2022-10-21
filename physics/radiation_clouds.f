@@ -2481,7 +2481,7 @@
         do i = 1, IX
           cwp(i,k) = max(0.0, clw(i,k,ntcw) * dz(i,k)*1.E6)
           crp(i,k) = 0.0
-          snow_mass_factor = 0.99
+          snow_mass_factor = 0.90
           cip(i,k) = max(0.0, (clw(i,k,ntiw)                            &
      &             + (1.0-snow_mass_factor)*clw(i,k,ntsw))*dz(i,k)*1.E6)
           if (re_snow(i,k) .gt. snow_max_radius)then
@@ -3373,7 +3373,7 @@
       REAL:: RH_00L, RH_00O, RH_00
       REAL:: entrmnt=0.5
       INTEGER:: k
-      REAL:: TC, qvsi, qvsw, RHUM, delz
+      REAL:: TC, qvsi, qvsw, RHUM, delz, var_temp
       REAL, DIMENSION(kts:kte):: qvs, rh, rhoa
       integer:: ndebug = 0
 
@@ -3433,7 +3433,8 @@
             CLDFRA(K) = 1.0
          elseif (((qc(k)+qi(k)).gt.1.E-10) .and.                        &
      &                                    ((qc(k)+qi(k)).lt.1.E-6)) then
-            CLDFRA(K) = MIN(0.99, 0.1*(11.0 + log10(qc(k)+qi(k))))
+            var_temp = MIN(0.99, 0.1*(11.0 + log10(qc(k)+qi(k))))
+            CLDFRA(K) = var_temp*var_temp
          else
 
             IF ((XLAND-1.5).GT.0.) THEN                                  !--- Ocean
@@ -3443,24 +3444,27 @@
             ENDIF
 
             tc = MAX(-80.0, t(k) - 273.15)
-            if (tc .lt. -12.0) RH_00 = RH_00L
+            if (tc .lt. -24.0) RH_00 = RH_00L
 
             if (tc .gt. 20.0) then
                CLDFRA(K) = 0.0
-            elseif (tc .ge. -12.0) then
+            elseif (tc .ge. -24.0) then
                RHUM = MIN(rh(k), 1.0)
-               CLDFRA(K) = MAX(0., 1.0-SQRT((1.001-RHUM)/(1.001-RH_00)))
+               var_temp = SQRT(SQRT((1.001-RHUM)/(1.001-RH_00)))
+               CLDFRA(K) = MAX(0., 1.0-var_temp)
             else
                if (max_relh.gt.1.12 .or. (.NOT.(modify_qvapor)) ) then
 !..For HRRR model, the following look OK.
                   RHUM = MIN(rh(k), 1.45)
-                  RH_00 = RH_00 + (1.45-RH_00)*(-12.0-tc)/(-12.0+85.)
-                  CLDFRA(K) = MAX(0.,1.0-SQRT((1.46-RHUM)/(1.46-RH_00)))
+                  RH_00 = RH_00 + (1.45-RH_00)*(-24.0-tc)/(-24.0+85.)
+                  var_temp = SQRT(SQRT((1.46-RHUM)/(1.46-RH_00)))
+                  CLDFRA(K) = MAX(0., 1.0-var_temp)
                else
 !..but for the GFS model, RH is way lower.
                   RHUM = MIN(rh(k), 1.05)
-                  RH_00 = RH_00 + (1.05-RH_00)*(-12.0-tc)/(-12.0+85.)
-                  CLDFRA(K) = MAX(0.,1.0-SQRT((1.06-RHUM)/(1.06-RH_00)))
+                  RH_00 = RH_00 + (1.05-RH_00)*(-24.0-tc)/(-24.0+85.)
+                  var_temp = SQRT(SQRT((1.06-RHUM)/(1.06-RH_00)))
+                  CLDFRA(K) = MAX(0., 1.0-var_temp)
                endif
             endif
             if (CLDFRA(K).gt.0.) CLDFRA(K)=MAX(0.01,MIN(CLDFRA(K),0.99))
@@ -3803,7 +3807,6 @@
         do k = 1, NLAY
         do i = 1, IX
           clwt = 1.0e-6 * (plyr(i,k)*0.001)
-!         clwt = 2.0e-6 * (plyr(i,k)*0.001)
 
           if (clwf(i,k) > clwt) then
 
@@ -3812,8 +3815,6 @@
 
             tem1  = min(max(sqrt(sqrt(onemrh*qstl(i,k))),0.0001),1.0)
             tem1  = 2000.0 / tem1
-
-!           tem1  = 1000.0 / tem1
 
             value = max( min( tem1*(clwf(i,k)-clwm), 50.0 ), 0.0 )
             tem2  = sqrt( sqrt(rhly(i,k)) )
