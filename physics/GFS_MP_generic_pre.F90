@@ -9,14 +9,14 @@
 !> \section arg_table_GFS_MP_generic_pre_run Argument Table
 !! \htmlinclude GFS_MP_generic_pre_run.html
 !!
-      subroutine GFS_MP_generic_pre_run(im, levs, ldiag3d, qdiag3d, do_aw, ntcw, nncl, &
+      subroutine GFS_MP_generic_pre_run(im, levs, ldiag3d, qdiag3d, do_aw, progsigma, ntcw, nncl, &
                                         ntrac, gt0, gq0, save_t, save_q, num_dfi_radar, errmsg, errflg)
 !
       use machine,               only: kind_phys
 
       implicit none
       integer,                                intent(in) :: im, levs, ntcw, nncl, ntrac, num_dfi_radar
-      logical,                                intent(in) :: ldiag3d, qdiag3d, do_aw
+      logical,                                intent(in) :: ldiag3d, qdiag3d, do_aw, progsigma
       real(kind=kind_phys), dimension(:,:),   intent(in) :: gt0
       real(kind=kind_phys), dimension(:,:,:), intent(in) :: gq0
 
@@ -39,7 +39,7 @@
           enddo
         enddo
       endif
-      if (ldiag3d .or. do_aw) then
+      if (ldiag3d .or. do_aw .or. progsigma) then
         if(qdiag3d) then
            do n=1,ntrac
               do k=1,levs
@@ -48,7 +48,7 @@
                  enddo
               enddo
            enddo
-        else if(do_aw) then
+        else if(do_aw .or. progsigma) then
            ! if qdiag3d, all q are saved already
            save_q(1:im,:,1) = gq0(1:im,:,1)
            do n=ntcw,ntcw+nncl-1
