@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <suite name="FV3_HRRR" version="1">
   <!-- <init></init> -->
   <group name="time_vary">
@@ -41,10 +42,8 @@
     <subcycle loop="2">
       <scheme>mynnsfc_wrapper</scheme>
       <scheme>GFS_surface_loop_control_part1</scheme>
-      <scheme>sfc_nst_pre</scheme>
-      <scheme>sfc_nst</scheme>
-      <scheme>sfc_nst_post</scheme>
       <scheme>lsm_ruc</scheme>
+      <scheme>flake_driver</scheme>
       <scheme>GFS_surface_loop_control_part2</scheme>
     </subcycle>
     <!-- End of surface iteration loop -->
