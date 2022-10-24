@@ -10637,7 +10637,7 @@ end subroutine psn_crop
 
    end subroutine zilitinkevich_1995
 
->\ingroup NoahMP_LSM
+!>\ingroup NoahMP_LSM
 !!data. the formula for land uses a constant ratio (z_0/7.4) taken
 !!from garratt (1992).
    subroutine garratt_1992(zt,zq,z_0,ren,landsea)

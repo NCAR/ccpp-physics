@@ -10,6 +10,6 @@
 [nf_albd]
   standard_name = number_of_components_for_surface_albedo
   long_name = number of IR/VIS/UV compinents for surface albedo
-  units = none
+  units = count
   dimensions = ()
   type = integer
