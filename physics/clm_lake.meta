@@ -35,20 +35,6 @@
   dimensions = ()
   type = integer
   intent = in
-[restart]
-  standard_name = flag_for_restart
-  long_name = flag for restart (warmstart) or coldstart
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[first_time_step]
-  standard_name = flag_for_first_timestep
-  long_name = flag for first time step for time integration loop (cold/warmstart)
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
 [fhour]
   standard_name = forecast_time
   long_name = current forecast time
@@ -273,9 +259,17 @@
   type = real
   kind = kind_phys
   intent = in
-[rain]
-  standard_name = lwe_thickness_of_precipitation_amount_on_dynamics_timestep
-  long_name = total rain at this time step
+[raincprv]
+  standard_name = lwe_thickness_of_convective_precipitation_amount_on_previous_timestep
+  long_name = convective_precipitation_amount from previous timestep
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[rainncprv]
+  standard_name = lwe_thickness_of_explicit_precipitation_amount_on_previous_timestep
+  long_name = explicit rainfall from previous timestep
   units = m
   dimensions = (horizontal_loop_extent)
   type = real

@@ -226,7 +226,7 @@ MODULE clm_lake
     !!
     SUBROUTINE clm_lake_run( &
          ! Model time and metadata:
-         im, km, me, master, restart, first_time_step, fhour, IDATE, kdt,         &
+         im, km, me, master, fhour, IDATE, kdt,                                   &
 
          ! Configuration and initialization:
          iopt_lake, iopt_lake_clm, min_lakeice, lakedepth_default, use_lakedepth, &
@@ -234,8 +234,8 @@ MODULE clm_lake
 
          ! Atmospheric model state inputs:
          tg3, pgr, zlvl, gt0, prsi, phii, qvcurr, gu0, gv0, xlat_d, xlon_d,       &
-         ch, cm, dlwsfci, dswsfci, emiss, rain, oro_lakedepth, wind, rho0, tsfc,  &
-         flag_iter, ISLTYP,                                                       &
+         ch, cm, dlwsfci, dswsfci, emiss, oro_lakedepth, wind, rho0, tsfc,        &
+         flag_iter, ISLTYP, rainncprv, raincprv,                                  &
 
          ! Feedback to atmosphere:
          evap_wat,     evap_ice,   hflx_wat,    hflx_ice,  gflx_wat, gflx_ice,    &
@@ -268,7 +268,6 @@ MODULE clm_lake
     ! Model time and metadata:
     !
     INTEGER , INTENT (IN) :: im,km,me,master
-    LOGICAL, INTENT(IN) :: restart,first_time_step
     INTEGER, INTENT(IN) :: IDATE(4), kdt
     REAL, INTENT(IN) :: fhour
 
@@ -287,7 +286,8 @@ MODULE clm_lake
     !
     REAL(KIND_PHYS), DIMENSION(:), INTENT(IN):: &
          tg3, pgr, zlvl, qvcurr, xlat_d, xlon_d, ch, cm, &
-         dlwsfci, dswsfci, emiss, rain, oro_lakedepth, wind, rho0, tsfc
+         dlwsfci, dswsfci, emiss, oro_lakedepth, wind, rho0, tsfc, &
+         rainncprv, raincprv
     REAL(KIND_PHYS), DIMENSION(:,:), INTENT(in) :: gu0, gv0, prsi, gt0, phii
     LOGICAL, DIMENSION(:), INTENT(IN) :: flag_iter
     INTEGER, DIMENSION(:), INTENT(IN) :: ISLTYP
@@ -362,7 +362,7 @@ MODULE clm_lake
       real(kind_phys)  :: forc_u(1)          ! atmospheric wind speed in east direction (m/s)
       real(kind_phys)  :: forc_v(1)          ! atmospheric wind speed in north direction (m/s)
       real(kind_phys)  :: forc_lwrad(1)      ! downward infrared (longwave) radiation (W/m**2)
-      real(kind_phys)  :: prec(1)               ! snow or rain rate [mm/s]
+      real(kind_phys)  :: prec(1)            ! snow or rain rate [mm/s]
       real(kind_phys)  :: sabg(1)            ! solar radiation absorbed by ground (W/m**2)
       real(kind_phys)  :: lat(1)             ! latitude (radians)
       real(kind_phys)  :: z_lake(1,nlevlake)  ! layer depth for lake (m)
@@ -474,7 +474,7 @@ MODULE clm_lake
 
         ! Initialize any uninitialized lake points.
         call lakeini(kdt=kdt, ISLTYP=ISLTYP, gt0=gt0, snowd=snowd, weasd=weasd,           &
-             restart=restart, lakedepth_default=lakedepth_default, fhour=fhour,           &
+                              lakedepth_default=lakedepth_default, fhour=fhour,           &
              oro_lakedepth=oro_lakedepth, savedtke12d=savedtke12d, snowdp2d=snowdp2d,     &
              h2osno2d=h2osno2d, snl2d=snl2d, t_grnd2d=t_grnd2d, t_lake3d=t_lake3d,        &
              lake_icefrac3d=lake_icefrac3d, z_lake3d=z_lake3d, dz_lake3d=dz_lake3d,       &
@@ -556,7 +556,8 @@ MODULE clm_lake
            PSFC    = pgr(i)
            Q2K     = qvcurr(i)
            LWDN    = DLWSFCI(I)*EMISS(I)
-           PRCP    = RAIN(i)/dtime                     ! [mm/s] use physics timestep since PRCP comes from non-surface schemes
+           ! FIXME: Should multiply PRCP by 1000
+           PRCP    = (raincprv(i)+rainncprv(i))/dtime  ! [mm/s] use physics timestep since PRCP comes from non-surface schemes
            SOLDN   = DSWSFCI(I)                        ! SOLDN is total incoming solar
            SOLNET  = SOLDN*(1.-ALBEDO(I))              ! use mid-day albedo to determine net downward solar
                                                        ! (no solar zenith angle correction) 
@@ -5360,7 +5361,7 @@ if_pergro: if (PERGRO) then
   end subroutine clm_lake_init
 
  SUBROUTINE lakeini(kdt,            ISLTYP,          gt0,             snowd,          & !i
-                    weasd,          restart,         lakedepth_default,  fhour,       &
+                    weasd,                           lakedepth_default,  fhour,       &
                     oro_lakedepth,  savedtke12d,     snowdp2d,        h2osno2d,       & !o
                     snl2d,          t_grnd2d,        t_lake3d,        lake_icefrac3d, &
                     z_lake3d,       dz_lake3d,       t_soisno3d,      h2osoi_ice3d,   &
@@ -5402,7 +5403,6 @@ if_pergro: if (PERGRO) then
   !INTEGER , INTENT (INOUT) :: lake_depth_flag
   LOGICAL, INTENT (IN) ::   use_lakedepth
 
-  LOGICAL , INTENT(IN)      ::     restart
   INTEGER, DIMENSION(IM), INTENT(IN)       :: ISLTYP
   REAL(KIND_PHYS),    DIMENSION(IM), INTENT(INOUT)    :: snowd,weasd
   REAL(kind_phys),    DIMENSION(IM,KM), INTENT(IN)       :: gt0, prsi
