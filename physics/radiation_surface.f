@@ -120,7 +120,6 @@
 !    &   VTAGSFC='NCEP-Radiation_surface   v5.0  Aug 2012 '
 
 !  ---  constant parameters
-      integer, parameter, public :: NF_ALBD = 4     ! number of surface albedo components
       integer, parameter, public :: IMXEMS  = 360   ! number of longtitude points in global emis-type map
       integer, parameter, public :: JMXEMS  = 180   ! number of latitude points in global emis-type map
       real (kind=kind_phys), parameter :: f_zero = 0.0
@@ -344,7 +343,7 @@
      &       alvsf,alnsf,alvwf,alnwf,facsf,facwf,fice,tisfc,            &
      &       lsmalbdvis, lsmalbdnir, lsmalbivis, lsmalbinir,            &
      &       icealbdvis, icealbdnir, icealbivis, icealbinir,            &
-     &       IMAX, albPpert, pertalb, fracl, fraco, fraci, icy,         &
+     &       IMAX, NF_ALBD, albPpert, pertalb, fracl, fraco, fraci, icy,&
      &       sfcalb                                                     & !  ---  outputs:
      &     )
 
@@ -410,7 +409,7 @@
       implicit none
 
 !  ---  inputs
-      integer, intent(in) :: IMAX
+      integer, intent(in) :: IMAX, NF_ALBD
       integer, intent(in) :: lsm, lsm_noahmp, lsm_ruc
       logical, intent(in) :: use_cice_alb, frac_grid
 
