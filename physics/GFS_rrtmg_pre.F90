@@ -30,7 +30,7 @@
         imp_physics_fer_hires, iovr_rand, iovr_maxrand, iovr_max, iovr_dcorr,  &
         iovr_exp, iovr_exprand, idcor_con, idcor_hogan, idcor_oreopoulos,      & 
         julian, yearlen, lndp_var_list, lsswr, lslwr,                          &
-        ltaerosol, lgfdlmprad, uni_cld, effr_in, do_mynnedmf, lmfshal,         &
+        ltaerosol, mraerosol, lgfdlmprad, uni_cld, effr_in, do_mynnedmf, lmfshal, &
         lmfdeep2, fhswr, fhlwr, solhr, sup, con_eps, epsm1, fvirt,             &
         rog, rocp, con_rd, xlat_d, xlat, xlon, coslat, sinlat, tsfc, slmsk,    &
         prsi, prsl, prslk, tgrs, sfc_wts, mg_cld, effrr_in, pert_clds,         &
@@ -121,8 +121,8 @@
       character(len=3), dimension(:), intent(in) :: lndp_var_list
 
       logical,              intent(in) :: lextop, lsswr, lslwr, ltaerosol, lgfdlmprad, &
-                                          uni_cld, effr_in, do_mynnedmf,               &
-                                          lmfshal, lmfdeep2, pert_clds
+                                          uni_cld, effr_in, do_mynnedmf,       &
+                                          lmfshal, lmfdeep2, pert_clds, mraerosol
       logical,              intent(in) :: aero_dir_fdb
       real(kind=kind_phys), dimension(:,:), intent(in) :: smoke_ext, dust_ext
 
@@ -722,7 +722,7 @@
             enddo
           enddo
           ! for Thompson MP - prepare variables for calc_effr
-          if_thompson: if (imp_physics == imp_physics_thompson .and. ltaerosol) then
+          if_thompson: if (imp_physics == imp_physics_thompson .and. (ltaerosol .or. mraerosol)) then
             do k=1,LMK
               do i=1,IM
                 qvs = qlyr(i,k)
@@ -866,7 +866,7 @@
           ! Update number concentration, consistent with sub-grid clouds (GF, MYNN) or without (all others)
           do k=1,lm
             do i=1,im
-              if (ltaerosol .and. qc_mp(i,k)>1.e-12 .and. nc_mp(i,k)<100.) then
+              if ((ltaerosol .or. mraerosol) .and. qc_mp(i,k)>1.e-12 .and. nc_mp(i,k)<100.) then
                 nc_mp(i,k) = make_DropletNumber(qc_mp(i,k)*rho(i,k), nwfa(i,k)*rho(i,k)) * orho(i,k)
               endif
               if (qi_mp(i,k)>1.e-12 .and. ni_mp(i,k)<100.) then
