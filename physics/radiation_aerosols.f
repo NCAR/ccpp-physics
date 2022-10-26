@@ -405,7 +405,7 @@
 !    ssarhi_grt(KCM1,NSWLWBD) - single scattering albedo for sw+lw band
 !    asyrhi_grt(KCM1,NSWLWBD) - asymmetry parameter for sw+lw band
       real (kind=kind_phys),allocatable,save,dimension(:,:) ::          &
-     &           extrhi_grt, scarhi_grt, ssarhi_grt, asyrhi_grt
+     &   extrhi_grt, extrhi_grt_550, scarhi_grt, ssarhi_grt, asyrhi_grt
 !
 !> \name relative humidity dependent aerosol optical properties:
 !! species : ss001, ss002, ss003, ss004, ss005, so4,
@@ -417,7 +417,7 @@
 
 !> extinction coefficient
       real (kind=kind_phys),allocatable,save,dimension(:,:,:) ::        &
-     &           extrhd_grt, scarhd_grt, ssarhd_grt, asyrhd_grt
+     &   extrhd_grt, extrhd_grt_550, scarhd_grt, ssarhd_grt, asyrhd_grt
 
 !> gocart species
       integer, parameter         :: num_gc = 5
@@ -453,6 +453,7 @@
       real (kind=kind_phys), parameter :: wvn550 = 1.0e4/0.55
 !> the sw spectral band covering wvn550 (comp in aer_init)
       integer, save      :: nv_aod = 1
+      integer            :: i550,id550
 
 !  ---  public interfaces
 
@@ -3488,10 +3489,12 @@
 
       if ( .not. allocated( extrhi_grt ) ) then
         allocate ( extrhi_grt (       kcm1,nswlwbd) )
+        allocate ( extrhi_grt_550 (       kcm1,1) )
         allocate ( scarhi_grt (       kcm1,nswlwbd) )
         allocate ( ssarhi_grt (       kcm1,nswlwbd) )
         allocate ( asyrhi_grt (       kcm1,nswlwbd) )
         allocate ( extrhd_grt (krhlev,kcm2,nswlwbd) )
+        allocate ( extrhd_grt_550 (krhlev,kcm2,1) )
         allocate ( scarhd_grt (krhlev,kcm2,nswlwbd) )
         allocate ( ssarhd_grt (krhlev,kcm2,nswlwbd) )
         allocate ( asyrhd_grt (krhlev,kcm2,nswlwbd) )
@@ -3834,6 +3837,9 @@
        do i = 1, kaerbndi         ! convert from m to micron
           j = kaerbndi -i + 1     ! flip i-index
           wavelength_du(j) = 1.e6 * lambda_du(i)
+           if (int(wavelength_du(j)*100) == 55) then
+              id550=j
+           endif
        enddo
        do k = 1, iradius
           do i = 1, kaerbndi
@@ -3898,6 +3904,9 @@
         do i = 1, kaerbndd         ! convert from m to micron
            j = kaerbndd -i + 1     ! flip i-index
            wavelength(j) = 1.e6 * lambda(i)
+           if (int(wavelength(j)*100) == 55) then
+              i550=j
+           endif
         enddo
         do k = 1, iradius
           ik = ibeg + k - 1
@@ -4016,6 +4025,9 @@
             refb = sumreft * rsolbd
 
             extrhi_grt(nc,nb) = sumk   * rsolbd
+            if (nb==nv_aod) then
+            extrhi_grt_550(nc,1) = rhidext0_grt(id550,nc)
+            endif
             scarhi_grt(nc,nb) = sums   * rsolbd
             asyrhi_grt(nc,nb) = sumokg / (sumok + 1.0e-10)
             ssarhi_grt(nc,nb) = 4.0*refb                                &
@@ -4048,6 +4060,9 @@
               refb = sumreft * rsolbd
 
               extrhd_grt(nh,nc,nb) = sumk   * rsolbd
+              if (nb==nv_aod) then
+              extrhd_grt_550(nh,nc,1) = rhdpext0_grt(i550,nh,nc)
+              endif
               scarhd_grt(nh,nc,nb) = sums   * rsolbd
               asyrhd_grt(nh,nc,nb) = sumokg / (sumok + 1.0e-10)
               ssarhd_grt(nh,nc,nb) = 4.0*refb                           &
@@ -4253,7 +4268,8 @@
 
 !  ---  locals:
       real (kind=kind_phys), dimension(nlay,nswlwbd):: tauae,ssaae,asyae
-      real (kind=kind_phys), dimension(nspc)        :: spcodp
+      real (kind=kind_phys), dimension(nlay,1):: tauae_550
+      real (kind=kind_phys), dimension(nlay,nspc)        :: spcodp
 
       real (kind=kind_phys),dimension(nlay,kcm) ::  aerms
       real (kind=kind_phys),dimension(nlay) :: dz1, rh1
@@ -4269,6 +4285,9 @@
         do m = 1, NSWLWBD
           do k = 1, NLAY
            tauae(k,m) = f_zero
+           if (m==nv_aod) then
+           tauae_550(k,1) = f_zero
+           endif
            ssaae(k,m) = f_one
            asyae(k,m) = f_zero
           enddo
@@ -4281,8 +4300,10 @@
         enddo
         enddo
 
+        do k = 1, NLAY
         do m = 1, nspc
-           spcodp(m) = f_zero
+           spcodp(k,m) = f_zero
+        enddo
         enddo
 
         do k = 1, NLAY
@@ -4320,11 +4341,13 @@
 
 ! --- update diagnostic aod arrays
           do k = 1, NLAY
-           aerodp(i,1) = aerodp(i,1) + tauae(k,nv_aod)
-          enddo
+           !aerodp(i,1) = aerodp(i,1) + tauae(k,nv_aod)
+           aerodp(i,1) = aerodp(i,1) + tauae_550(k,1)
 
           do m = 1, NSPC
-           aerodp(i,m+1) = spcodp(m)
+           !aerodp(i,m+1) = spcodp(m)
+           aerodp(i,m+1) = aerodp(i,m+1)+spcodp(k,m)
+          enddo
           enddo
 
         endif     ! end if_larsw_block
@@ -4390,9 +4413,10 @@
 
 !  ---  locals:
       real (kind=kind_phys) :: drh0, drh1, rdrh
-      real (kind=kind_phys) :: cm, ext01, sca01, asy01, ssa01
-      real (kind=kind_phys) :: ext1, asy1, ssa1, sca1
+      real (kind=kind_phys) :: cm, ext01, ext01_550, sca01,asy01,ssa01
+      real (kind=kind_phys) :: ext1, ext1_550, asy1, ssa1,sca1,tau_550
       real (kind=kind_phys) :: sum_tau,sum_asy,sum_ssa,tau,asy,ssa
+      real (kind=kind_phys) :: sum_tau_550
       integer               :: ih1, ih2, nbin, ib, ntrc, ktrc
 
 ! --- linear interp coeffs for rh-dep species
@@ -4416,6 +4440,10 @@
         do ib = 1, nswlwbd
 
            sum_tau = f_zero
+           if (ib == nv_aod ) then
+           sum_tau_550 = f_zero
+           ext1_550 = f_zero
+           endif
            sum_ssa = f_zero
            sum_asy = f_zero
 
@@ -4429,6 +4457,9 @@
            do m = 1, kcm1
             cm =  max(aerms(k,m),0.0) * dz1(k)
             ext1 = ext1 + cm*extrhi_grt(m,ib)
+            if (ib == nv_aod) then
+            ext1_550 = ext1_550 + cm*extrhi_grt_550(m,1)
+            endif
             sca1 = sca1 + cm*scarhi_grt(m,ib)
             ssa1 = ssa1 + cm*extrhi_grt(m,ib) * ssarhi_grt(m,ib)
             asy1 = asy1 + cm*scarhi_grt(m,ib) * asyrhi_grt(m,ib)
@@ -4439,7 +4470,10 @@
 
 ! --- update aod from individual species
            if ( ib==nv_aod ) then
-             spcodp(1) = spcodp(1) + tau
+             tau_550 = ext1_550
+!            ! spcodp(1) = spcodp(1) + tau
+             spcodp(k,1) =  tau_550
+           sum_tau_550 = sum_tau_550 + tau_550
            endif
 ! --- update sum_tau, sum_ssa, sum_asy
            sum_tau = sum_tau + tau
@@ -4449,6 +4483,9 @@
 ! --- determine tau, ssa, asy for non-dust aerosols
            do ntrc = 2, nspc
             ext1 = f_zero
+            if ( ib==nv_aod ) then
+            ext1_550 = f_zero
+            endif
             asy1 = f_zero
             sca1 = f_zero
             ssa1 = f_zero
@@ -4459,6 +4496,10 @@
              cm =  max(aerms(k,m1),0.0) * dz1(k)
              ext01 = extrhd_grt(ih1,m,ib) +                             &
      &              rdrh * (extrhd_grt(ih2,m,ib)-extrhd_grt(ih1,m,ib))
+             if ( ib==nv_aod ) then
+             ext01_550 = extrhd_grt_550(ih1,m,1) +                      &
+     &          rdrh * (extrhd_grt_550(ih2,m,1)-extrhd_grt_550(ih1,m,1))
+             endif
              sca01 = scarhd_grt(ih1,m,ib) +                             &
      &              rdrh * (scarhd_grt(ih2,m,ib)-scarhd_grt(ih1,m,ib))
              ssa01 = ssarhd_grt(ih1,m,ib) +                             &
@@ -4466,6 +4507,9 @@
              asy01 = asyrhd_grt(ih1,m,ib) +                             &
      &              rdrh * (asyrhd_grt(ih2,m,ib)-asyrhd_grt(ih1,m,ib))
              ext1 = ext1 + cm*ext01
+             if ( ib==nv_aod ) then
+             ext1_550 = ext1_550 + cm*ext01_550
+             endif
              sca1 = sca1 + cm*sca01
              ssa1 = ssa1 + cm*ext01 * ssa01
              asy1 = asy1 + cm*sca01 * asy01
@@ -4475,7 +4519,10 @@
             if (sca1 > f_zero) asy=min(f_one, asy1/sca1)
 ! --- update aod from individual species
             if ( ib==nv_aod ) then
-             spcodp(ktrc) = spcodp(ktrc) + tau
+            tau_550 = ext1_550
+            ! spcodp(ktrc) = spcodp(ktrc) + tau
+            spcodp(k,ktrc) = tau_550
+            sum_tau_550 = sum_tau_550 + tau_550
             endif
 ! --- update sum_tau, sum_ssa, sum_asy
             sum_tau = sum_tau + tau
@@ -4485,6 +4532,9 @@
 
 ! --- determine total tau, ssa, asy for aerosol mixture
            tauae(k,ib) = sum_tau
+           if ( ib==nv_aod ) then
+           tauae_550(k,1) = sum_tau_550
+           endif
            if (sum_tau > f_zero) ssaae(k,ib) = sum_ssa / sum_tau
            if (sum_ssa > f_zero) asyae(k,ib) = sum_asy / sum_ssa
 
