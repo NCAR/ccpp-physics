@@ -171,10 +171,11 @@
   use sfc_diff,   only : stability
 ! use module_sf_noahmplsm
   use module_sf_noahmp_glacier
-  use noahmp_tables, only : isice_table, co2_table, o2_table,            &
-                            isurban_table, smcref_table, smcdry_table,   &
-                            smcmax_table, co2_table, o2_table,           &
-                            saim_table, laim_table
+! use noahmp_tables, only : isice_table, co2_table, o2_table,            &
+!                           isurban_table, smcref_table, smcdry_table,   &
+!                           smcmax_table, co2_table, o2_table,           &
+!                           saim_table, laim_table
+  use noahmp_tables
 
   implicit none
       
@@ -563,6 +564,7 @@
   integer :: soil_category(nsoil)
   integer :: slope_category
   integer :: soil_color_category
+  character(len=256)                     :: dataset_identifier
 
   real (kind=kind_phys) :: spec_humidity_sat      ! saturation specific humidity
   real (kind=kind_phys) :: vapor_pressure_sat     ! saturation vapor pressure
@@ -619,6 +621,7 @@ do i = 1, im
 !
 !  --- noah-mp input variables (except snow_ice_frac_old done later)
 !
+      dataset_identifier    = "modified_igbp_modis_noah"
 
       i_location            = i
       j_location            = -9999
@@ -755,6 +758,8 @@ do i = 1, im
       soil_category       = soiltyp(i)
       slope_category      = slopetyp(i)
       soil_color_category = 4
+
+      call read_mp_table_parameters(dataset_identifier)
 
       call transfer_mp_parameters(vegetation_category, soil_category, &
                         slope_category, soil_color_category, crop_type,parameters)
