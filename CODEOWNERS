@@ -163,8 +163,8 @@ physics/rrtmgp_sw_*                            @dustinswales                    
 physics/rrtmg_sw_cloud_optics.F90              @dustinswales                        @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/rrtmg_sw_post.*                        @Qingfu-Liu @dustinswales            @grantfirl @ChunxiZhang-NOAA @dustinswales 
 physics/rte-rrtmgp                             @RobertPincus @dustinswales          @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/samfdeepcnv.*                          @JongilHan66                         @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/samfshalcnv.*                          @JongilHan66                         @grantfirl @ChunxiZhang-NOAA @dustinswales
+physics/samfdeepcnv.*                          @JongilHan66 @lisa-bengtsson         @grantfirl @ChunxiZhang-NOAA @dustinswales
+physics/samfshalcnv.*                          @JongilHan66 @lisa-bengtsson         @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/samfaerosols.*                         @JongilHan66                         @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/sascnvn.*                              @JongilHan66                         @grantfirl @ChunxiZhang-NOAA @dustinswales
 physics/satmedmfvdif.*                         @JongilHan66                         @grantfirl @ChunxiZhang-NOAA @dustinswales
