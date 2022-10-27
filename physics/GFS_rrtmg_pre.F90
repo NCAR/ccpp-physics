@@ -30,12 +30,12 @@
         imp_physics_fer_hires, iovr, iovr_rand, iovr_maxrand, iovr_max,        &
         iovr_dcorr, iovr_exp, iovr_exprand, idcor, idcor_con, idcor_hogan,     &
         idcor_oreopoulos, dcorr_con, julian, yearlen, lndp_var_list, lsswr,    &
-        lslwr, ltaerosol, lgfdlmprad, uni_cld, effr_in, do_mynnedmf, lmfshal,  &
-        lcnorm, lmfdeep2, lcrick, fhswr, fhlwr, solhr, sup, con_eps, epsm1,    &
-        fvirt, rog, rocp, con_rd, xlat_d, xlat, xlon, coslat, sinlat, tsfc,    &
-        slmsk, prsi, prsl, prslk, tgrs, sfc_wts, mg_cld, effrr_in, pert_clds,  &
-        sppt_wts, sppt_amp, cnvw_in, cnvc_in, qgrs, aer_nm, dx, icloud,        & 
-        iaermdl, iaerflg, con_pi, con_g, con_ttp, con_thgni, si,               & !inputs from here and above
+        lslwr, ltaerosol, mraerosol, lgfdlmprad, uni_cld, effr_in, do_mynnedmf,&
+        lmfshal, lcnorm, lmfdeep2, lcrick, fhswr, fhlwr, solhr, sup, con_eps,  &
+        epsm1, fvirt, rog, rocp, con_rd, xlat_d, xlat, xlon, coslat, sinlat,   &
+        tsfc, slmsk, prsi, prsl, prslk, tgrs, sfc_wts, mg_cld, effrr_in,       &
+        pert_clds, sppt_wts, sppt_amp, cnvw_in, cnvc_in, qgrs, aer_nm, dx,     &
+        icloud, iaermdl, iaerflg, con_pi, con_g, con_ttp, con_thgni, si,       & !inputs from here and above
         coszen, coszdg, effrl_inout, effri_inout, effrs_inout,                 &
         clouds1, clouds2, clouds3, clouds4, clouds5, qci_conv,                 & !in/out from here and above
         kd, kt, kb, mtopa, mbota, raddt, tsfg, tsfa, de_lgth, alb1d, delp, dz, & !output from here and below
@@ -123,7 +123,7 @@
       logical,              intent(in) :: lsswr, lslwr, ltaerosol, lgfdlmprad, &
                                           uni_cld, effr_in, do_mynnedmf,       &
                                           lmfshal, lmfdeep2, pert_clds, lcrick,&
-                                          lcnorm, top_at_1, lextop
+                                          lcnorm, top_at_1, lextop, mraerosol
       logical,              intent(in) :: aero_dir_fdb
       real(kind=kind_phys), dimension(:,:), intent(in) :: smoke_ext, dust_ext
 
@@ -722,7 +722,7 @@
             enddo
           enddo
           ! for Thompson MP - prepare variables for calc_effr
-          if_thompson: if (imp_physics == imp_physics_thompson .and. ltaerosol) then
+          if_thompson: if (imp_physics == imp_physics_thompson .and. (ltaerosol .or. mraerosol)) then
             do k=1,LMK
               do i=1,IM
                 qvs = qlyr(i,k)
@@ -866,7 +866,7 @@
           ! Update number concentration, consistent with sub-grid clouds (GF, MYNN) or without (all others)
           do k=1,lm
             do i=1,im
-              if (ltaerosol .and. qc_mp(i,k)>1.e-12 .and. nc_mp(i,k)<100.) then
+              if ((ltaerosol .or. mraerosol) .and. qc_mp(i,k)>1.e-12 .and. nc_mp(i,k)<100.) then
                 nc_mp(i,k) = make_DropletNumber(qc_mp(i,k)*rho(i,k), nwfa(i,k)*rho(i,k)) * orho(i,k)
               endif
               if (qi_mp(i,k)>1.e-12 .and. ni_mp(i,k)<100.) then
