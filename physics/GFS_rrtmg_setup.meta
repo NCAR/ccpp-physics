@@ -167,9 +167,9 @@
   type = integer
   intent = in
 [iswmode]
-  standard_name = flag_for_sw_scattering_choice
-  long_name = flag for rrtmg shortwave scattering choice
-  units = flag
+  standard_name = control_for_sw_scattering_choice
+  long_name = control of rrtmg shortwave scattering choice
+  units = 1
   dimensions = ()
   type = integer
   intent = in
@@ -261,9 +261,9 @@
   kind = len=26
   intent = in
 [rad_hr_units]
-  standard_name = flag_for_radiation_heating_rate_units
-  long_name = flag to control heating rate units
-  units = count
+  standard_name = control_for_radiation_heating_rate_units
+  long_name = control of heating rate units
+  units = 1
   dimensions =  ()
   type = integer
   intent = in
@@ -322,9 +322,9 @@
   kind = kind_phys
   intent = in
 [lalw1bd]
-  standard_name = flag_for_longwave_aerosol_band_properties
-  long_name = flag for band or multiband longwave aerosol properties
-  units = flag
+  standard_name = do_longwave_aerosol_band_properties
+  long_name = control of band or multiband longwave aerosol properties
+  units = 1
   dimensions = ()
   type = logical
   intent = in
@@ -345,21 +345,21 @@
 [ipsd0]
   standard_name = initial_seed_for_mcica
   long_name = initial permutaion seed for mcica radiation
-  units = none
+  units = 1
   dimensions =  ()
   type = integer
   intent = inout
 [iaermdl]
-  standard_name = flag_for_aerosol_radiation_scheme
-  long_name = flag for aerosol scheme to use in radiation
-  units = flag
+  standard_name = control_for_aerosol_radiation_scheme
+  long_name = control of aerosol scheme in radiation
+  units = 1
   dimensions = ()
   type = integer
   intent = out
 [iaerflg]
-  standard_name = flag_for_aerosol_effects_in_radiation
-  long_name = flag for aerosol effects to include in radiation
-  units = flag
+  standard_name = control_for_aerosol_effects_in_radiation
+  long_name = control of aerosol effects in radiation
+  units = 1
   dimensions = ()
   type = integer
   intent = out
@@ -428,9 +428,9 @@
   type = integer
   intent = in
 [iaermdl]
-  standard_name = flag_for_aerosol_radiation_scheme
-  long_name = flag for aerosol scheme to use in radiation
-  units = flag
+  standard_name = control_for_aerosol_radiation_scheme
+  long_name = control of aerosol scheme in radiation
+  units = 1
   dimensions = ()
   type = integer
   intent = in

@@ -365,9 +365,9 @@
   type = integer
   intent = in
 [iswmode]
-  standard_name = flag_for_sw_scattering_choice
-  long_name = flag for rrtmg shortwave scattering choice
-  units = flag
+  standard_name = control_for_sw_scattering_choice
+  long_name = control of rrtmg shortwave scattering choice
+  units = 1
   dimensions = ()
   type = integer
   intent = in

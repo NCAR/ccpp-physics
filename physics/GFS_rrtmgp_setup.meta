@@ -175,9 +175,9 @@
   type = integer
   intent = in
 [lalw1bd]
-  standard_name = flag_for_longwave_aerosol_band_properties
-  long_name = flag for band or multiband longwave aerosol properties
-  units = flag
+  standard_name = do_longwave_aerosol_band_properties
+  long_name = control of band or multiband longwave aerosol properties
+  units = 1
   dimensions = ()
   type = logical
   intent = in
@@ -267,16 +267,16 @@
   type = integer
   intent = inout
 [iaermdl]
-  standard_name = flag_for_aerosol_radiation_scheme
-  long_name = flag for aerosol scheme to use in radiation
-  units = flag
+  standard_name = control_for_aerosol_radiation_scheme
+  long_name = control of aerosol scheme in radiation
+  units = 1
   dimensions = ()
   type = integer
   intent = out
 [iaerflg]
-  standard_name = flag_for_aerosol_effects_in_radiation
-  long_name = flag for aerosol effects to include in radiation
-  units = flag
+  standard_name = control_for_aerosol_effects_in_radiation
+  long_name = control of aerosol effects in radiation
+  units = 1
   dimensions = ()
   type = integer
   intent = out
@@ -390,9 +390,9 @@
   type = integer
   intent = in
 [iaermdl]
-  standard_name = flag_for_aerosol_radiation_scheme
-  long_name = flag for aerosol scheme to use in radiation
-  units = flag
+  standard_name = control_for_aerosol_radiation_scheme
+  long_name = control of aerosol scheme in radiation
+  units = 1
   dimensions = ()
   type = integer
   intent = in

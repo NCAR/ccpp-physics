@@ -45,9 +45,9 @@
   type = logical
   intent = in
 [iaermdl]
-  standard_name = flag_for_aerosol_radiation_scheme
-  long_name = flag for aerosol scheme to use in	radiation
-  units = flag
+  standard_name = control_for_aerosol_radiation_scheme
+  long_name = control of aerosol scheme in radiation
+  units = 1
   dimensions = ()
   type = integer
   intent = in
