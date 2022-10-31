@@ -128,6 +128,13 @@
   dimensions = ()
   type = logical
   intent = in
+[cpllnd]
+  standard_name = flag_for_land_coupling
+  long_name = flag controlling cpllnd collection (default off)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [progsigma]
   standard_name = do_prognostic_updraft_area_fraction
   long_name = flag for prognostic sigma in cumulus scheme
