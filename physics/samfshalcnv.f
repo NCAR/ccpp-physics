@@ -2449,9 +2449,13 @@ c
             if(k > kb(i) .and. k < ktop(i)) then
               tem = 0.5 * (eta(i,k-1) + eta(i,k)) * xmb(i)
               tem1 = pfld(i,k) * 100. / (rd * t1(i,k))
-              sigmagfm(i) = max(sigmagfm(i), betaw)
-              ptem = tem / (sigmagfm(i) * tem1)
-              qtr(i,k,ntk)=qtr(i,k,ntk)+0.5*sigmagfm(i)*ptem*ptem
+              if(progsigma)then
+                tem2 = sigmab(i)
+              else
+                tem2 = max(sigmagfm(i), betaw)
+              endif
+              ptem = tem / (tem2 * tem1)
+              qtr(i,k,ntk)=qtr(i,k,ntk)+0.5*tem2*ptem*ptem
             endif
           endif
         enddo
