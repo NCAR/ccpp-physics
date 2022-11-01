@@ -92,7 +92,9 @@ MODULE module_mp_thompson
 !.. scheme.  In 2-moment cloud water, Nt_c represents a maximum of
 !.. droplet concentration and nu_c is also variable depending on local
 !.. droplet number concentration.
-      REAL, PARAMETER :: Nt_c = 100.E6
+      !REAL, PARAMETER :: Nt_c = 100.E6
+      REAL, PARAMETER :: Nt_c_o = 50.E6
+      REAL, PARAMETER :: Nt_c_l = 100.E6
       REAL, PARAMETER, PRIVATE:: Nt_c_max = 1999.E6
 
 !..Declaration of constants for assumed CCN/IN aerosols when none in
@@ -108,7 +110,8 @@ MODULE module_mp_thompson
       REAL, PARAMETER, PRIVATE:: mu_r = 0.0
       REAL, PARAMETER, PRIVATE:: mu_g = 0.0
       REAL, PARAMETER, PRIVATE:: mu_i = 0.0
-      REAL, PRIVATE:: mu_c
+      !REAL, PRIVATE:: mu_c
+      REAL, PRIVATE::  mu_c_o, mu_c_l
 
 !..Sum of two gamma distrib for snow (Field et al. 2005).
 !.. N(D) = M2**4/M3**3 * [Kap0*exp(-M2*Lam0*D/M3)
@@ -150,7 +153,7 @@ MODULE module_mp_thompson
       REAL, PARAMETER, PRIVATE:: fv_s = 100.0
       REAL, PARAMETER, PRIVATE:: av_g = 442.0
       REAL, PARAMETER, PRIVATE:: bv_g = 0.89
-      REAL, PARAMETER, PRIVATE:: av_i = 1493.9
+     !REAL, PARAMETER, PRIVATE:: av_i = 1493.9
       REAL, PARAMETER, PRIVATE:: bv_i = 1.0
       REAL, PARAMETER, PRIVATE:: av_c = 0.316946E8
       REAL, PARAMETER, PRIVATE:: bv_c = 2.0
@@ -534,7 +537,9 @@ MODULE module_mp_thompson
 !.. disp=SQRT((mu+2)/(mu+1) - 1) so mu varies from 15 for Maritime
 !.. to 2 for really dirty air.  This not used in 2-moment cloud water
 !.. scheme and nu_c used instead and varies from 2 to 15 (integer-only).
-      mu_c = MIN(15., (1000.E6/Nt_c + 2.))
+      !mu_c = MIN(15., (1000.E6/Nt_c + 2.))
+      mu_c_l = MIN(15., (1000.E6/Nt_c_l + 2.))
+      mu_c_o = MIN(15., (1000.E6/Nt_c_o + 2.))
 
 !> - Compute Schmidt number to one-third used numerous times
       Sc3 = Sc**(1./3.)
@@ -889,7 +894,7 @@ MODULE module_mp_thompson
 
       if (mpirank==mpiroot) write (*,*)'creating microphysics lookup tables ... '
       if (mpirank==mpiroot) write (*,'(a, f5.2, a, f5.2, a, f5.2, a, f5.2)') &
-          ' using: mu_c=',mu_c,' mu_i=',mu_i,' mu_r=',mu_r,' mu_g=',mu_g
+          ' using: mu_c_o=',mu_c_o,' mu_i=',mu_i,' mu_r=',mu_r,' mu_g=',mu_g
 
 !>  - Call table_ccnact() to read a static file containing CCN activation of aerosols. The
 !! data were created from a parcel model by Feingold & Heymsfield with
@@ -982,7 +987,7 @@ MODULE module_mp_thompson
                               nwfa, nifa, nwfa2d, nifa2d,             &
                               tt, th, pii,                            &
                               p, w, dz, dt_in, dt_inner,              &
-                              sedi_semi, decfl,                       &
+                              sedi_semi, decfl, lsm,                  &
                               RAINNC, RAINNCV,                        &
                               SNOWNC, SNOWNCV,                        &
                               ICENC, ICENCV,                          &
@@ -1037,6 +1042,7 @@ MODULE module_mp_thompson
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(INOUT):: &
                           nc, nwfa, nifa
       REAL, DIMENSION(ims:ime, jms:jme), OPTIONAL, INTENT(IN):: nwfa2d, nifa2d
+      INTEGER, DIMENSION(ims:ime, jms:jme), INTENT(IN):: lsm
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(INOUT):: &
                           re_cloud, re_ice, re_snow
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT):: pfils, pflls
@@ -1117,6 +1123,7 @@ MODULE module_mp_thompson
       REAL, DIMENSION(its:ite, jts:jte):: pcp_ra, pcp_sn, pcp_gr, pcp_ic
       REAL:: dt, pptrain, pptsnow, pptgraul, pptice
       REAL:: qc_max, qr_max, qs_max, qi_max, qg_max, ni_max, nr_max
+      INTEGER:: lsml
       REAL:: rand1, rand2, rand3, rand_pert_max
       INTEGER:: i, j, k, m
       INTEGER:: imax_qc,imax_qr,imax_qi,imax_qs,imax_qg,imax_ni,imax_nr
@@ -1419,8 +1426,14 @@ MODULE module_mp_thompson
                nifa1d(k) = nifa(i,k,j)
             enddo
          else
+            lsml = lsm(i,j)
             do k = kts, kte
-               nc1d(k) = Nt_c/rho(k)
+               !nc1d(k) = Nt_c/rho(k)
+               if(lsml == 0) then
+                 nc1d(k) = Nt_c_o/rho(k)
+               else
+                 nc1d(k) = Nt_c_l/rho(k)
+               endif
                nwfa1d(k) = 11.1E6
                nifa1d(k) = naIN1*0.01
             enddo
@@ -1429,7 +1442,7 @@ MODULE module_mp_thompson
 !> - Call mp_thompson()
          call mp_thompson(qv1d, qc1d, qi1d, qr1d, qs1d, qg1d, ni1d,     &
                       nr1d, nc1d, nwfa1d, nifa1d, t1d, p1d, w1d, dz1d,  &
-                      pptrain, pptsnow, pptgraul, pptice, &
+                      lsml, pptrain, pptsnow, pptgraul, pptice, &
 #if ( WRF_CHEM == 1 )
                       rainprod1d, evapprod1d, &
 #endif
@@ -1698,7 +1711,7 @@ MODULE module_mp_thompson
              enddo
 !> - Call calc_effectrad()
              call calc_effectRad (t1d, p1d, qv1d, qc1d, nc1d, qi1d, ni1d, qs1d,  &
-                                  re_qc1d, re_qi1d, re_qs1d, kts, kte)
+                                  re_qc1d, re_qi1d, re_qs1d, lsml, kts, kte)
              do k = kts, kte
                re_cloud(i,k,j) = MAX(re_qc_min, MIN(re_qc1d(k), re_qc_max))
                re_ice(i,k,j)   = MAX(re_qi_min, MIN(re_qi1d(k), re_qi_max))
@@ -1841,7 +1854,7 @@ MODULE module_mp_thompson
 !> @{
       subroutine mp_thompson (qv1d, qc1d, qi1d, qr1d, qs1d, qg1d, ni1d,    &
                           nr1d, nc1d, nwfa1d, nifa1d, t1d, p1d, w1d, dzq,  &
-                          pptrain, pptsnow, pptgraul, pptice,              &
+                          lsml, pptrain, pptsnow, pptgraul, pptice,        &
 #if ( WRF_CHEM == 1 )
                           rainprod, evapprod,                              &
 #endif
@@ -1879,6 +1892,7 @@ MODULE module_mp_thompson
       REAL, DIMENSION(kts:kte), INTENT(IN):: p1d, w1d, dzq
       REAL, INTENT(INOUT):: pptrain, pptsnow, pptgraul, pptice
       REAL, INTENT(IN):: dt
+      INTEGER, INTENT(IN):: lsml
       REAL, INTENT(IN):: rand1, rand2, rand3
       ! Extended diagnostics, most arrays only allocated if ext_diag is true
       LOGICAL, INTENT(IN) :: ext_diag
@@ -1982,6 +1996,7 @@ MODULE module_mp_thompson
       REAL:: Ef_ra, Ef_sa, Ef_ga
       REAL:: dtsave, odts, odt, odzq, hgt_agl, SR
       REAL:: xslw1, ygra1, zans1, eva_factor
+      REAL:: av_i
       INTEGER:: i, k, k2, n, nn, nstep, k_0, kbot, IT, iexfrq
       INTEGER, DIMENSION(5):: ksed1
       INTEGER:: nir, nis, nig, nii, nic, niin
@@ -2006,6 +2021,7 @@ MODULE module_mp_thompson
       odt = 1./dt
       odts = 1./dtsave
       iexfrq = 1
+      av_i = av_s * D0s ** (bv_s - bv_i)
 
 !+---+-----------------------------------------------------------------+
 !> - Initialize Source/sink terms.  First 2 chars: "pr" represents source/sink of
@@ -2210,7 +2226,14 @@ MODULE module_mp_thompson
             endif
             nc(k) = MIN( DBLE(Nt_c_max), ccg(1,nu_c)*ocg2(nu_c)*rc(k)   &
                   / am_r*lamc**bm_r)
-            if (.NOT. (is_aerosol_aware .or. merra2_aerosol_aware)) nc(k) = Nt_c
+            !if (.NOT. (is_aerosol_aware .or. merra2_aerosol_aware)) nc(k) = Nt_c
+            if (.NOT. (is_aerosol_aware .or. merra2_aerosol_aware)) then
+               if (lsml == 0) then
+                 nc(k) = Nt_c_o
+               else
+                 nc(k) = Nt_c_l
+               endif
+            endif
          else
             qc1d(k) = 0.0
             nc1d(k) = 0.0
@@ -2234,7 +2257,7 @@ MODULE module_mp_thompson
             if (xDi.lt. 5.E-6) then
              lami = cie(2)/5.E-6
              ni(k) = MIN(4999.D3, cig(1)*oig2*ri(k)/am_i*lami**bm_i)
-            elseif (xDi.gt. 300.E-6) then
+            elseif (xDi.gt. D0s + 100.E-6) then
              lami = cie(2)/300.E-6
              ni(k) = cig(1)*oig2*ri(k)/am_i*lami**bm_i
             endif
@@ -2919,13 +2942,13 @@ MODULE module_mp_thompson
 
 !>  - Deposition nucleation of dust/mineral from DeMott et al (2010)
 !! we may need to relax the temperature and ssati constraints.
-          if ( (ssati(k).ge. 0.25) .or. (ssatw(k).gt. eps &
+          if ( (ssati(k).ge. 0.15) .or. (ssatw(k).gt. eps &
                                 .and. temp(k).lt.253.15) ) then
            if (dustyIce .AND. (is_aerosol_aware .or. merra2_aerosol_aware)) then
             xnc = iceDeMott(tempc,qv(k),qvs(k),qvsi(k),rho(k),nifa(k))
             xnc = xnc*(1.0 + 50.*rand3)
            else
-            xnc = MIN(250.E3, TNO*EXP(ATO*(T_0-temp(k))))
+            xnc = MIN(1000.E3, TNO*EXP(ATO*(T_0-temp(k))))
            endif
            xni = ni(k) + (pni_rfz(k)+pni_wfz(k))*dtsave
            pni_inu(k) = 0.5*(xnc-xni + abs(xnc-xni))*odts
@@ -3273,7 +3296,7 @@ MODULE module_mp_thompson
             lami = cie(2)/5.E-6
             xni = MIN(4999.D3, cig(1)*oig2*xri/am_i*lami**bm_i)
             niten(k) = (xni-ni1d(k)*rho(k))*odts*orho
-           elseif (xDi.gt. 300.E-6) then
+           elseif (xDi.gt. D0s + 100.E-6) then 
             lami = cie(2)/300.E-6
             xni = cig(1)*oig2*xri/am_i*lami**bm_i
             niten(k) = (xni-ni1d(k)*rho(k))*odts*orho
@@ -3389,7 +3412,13 @@ MODULE module_mp_thompson
          if ((qc1d(k) + qcten(k)*DT) .gt. R1) then
             rc(k) = (qc1d(k) + qcten(k)*DT)*rho(k)
             nc(k) = MAX(2., MIN((nc1d(k)+ncten(k)*DT)*rho(k), Nt_c_max))
-            if (.NOT. (is_aerosol_aware .or. merra2_aerosol_aware)) nc(k) = Nt_c
+            if (.NOT. (is_aerosol_aware .or. merra2_aerosol_aware)) then 
+              if(lsml == 0) then
+                nc(k) = Nt_c_o
+              else
+                nc(k) = Nt_c_l
+              endif
+            endif
             L_qc(k) = .true.
          else
             rc(k) = R1
@@ -3560,7 +3589,11 @@ MODULE module_mp_thompson
             if (is_aerosol_aware .or. merra2_aerosol_aware) then
                xnc = MAX(2., activ_ncloud(temp(k), w1d(k)+rand3, nwfa(k)))
             else
-               xnc = Nt_c
+               if(lsml == 0) then
+                 xnc = Nt_c_o
+               else
+                 xnc = Nt_c_l
+               endif
             endif
             pnc_wcd(k) = 0.5*(xnc-nc(k) + abs(xnc-nc(k)))*odts*orho
 
@@ -3630,7 +3663,13 @@ MODULE module_mp_thompson
           rc(k) = MAX(R1, (qc1d(k) + DT*qcten(k))*rho(k))
           if (rc(k).eq.R1) L_qc(k) = .false.
           nc(k) = MAX(2., MIN((nc1d(k)+ncten(k)*DT)*rho(k), Nt_c_max))
-          if (.NOT. (is_aerosol_aware .or. merra2_aerosol_aware)) nc(k) = Nt_c
+          if (.NOT. (is_aerosol_aware .or. merra2_aerosol_aware)) then 
+            if(lsml == 0) then
+              nc(k) = Nt_c_o
+            else
+              nc(k) = Nt_c_l
+            endif
+          endif
           qv(k) = MAX(1.E-10, qv1d(k) + DT*qvten(k))
           temp(k) = t1d(k) + DT*tten(k)
           rho(k) = 0.622*pres(k)/(R*temp(k)*(qv(k)+0.622))
@@ -4235,7 +4274,7 @@ MODULE module_mp_thompson
            xDi = (bm_i + mu_i + 1.) * ilami
            if (xDi.lt. 5.E-6) then
             lami = cie(2)/5.E-6
-           elseif (xDi.gt. 300.E-6) then
+           elseif (xDi.gt. D0s + 100.E-6) then 
             lami = cie(2)/300.E-6
            endif
            ni1d(k) = MIN(cig(1)*oig2*qi1d(k)/am_i*lami**bm_i,           &
@@ -5749,7 +5788,7 @@ MODULE module_mp_thompson
 !! distribution, not the second part, which is the larger sizes.
 
       subroutine calc_effectRad (t1d, p1d, qv1d, qc1d, nc1d, qi1d, ni1d, qs1d,   &
-     &                re_qc1d, re_qi1d, re_qs1d, kts, kte)
+     &                re_qc1d, re_qi1d, re_qs1d, lsml, kts, kte)
 
       IMPLICIT NONE
 
@@ -5766,6 +5805,7 @@ MODULE module_mp_thompson
       DOUBLE PRECISION:: lamc, lami
       LOGICAL:: has_qc, has_qi, has_qs
       INTEGER:: inu_c
+      INTEGER:: lsml
       real, dimension(15), parameter:: g_ratio = (/24,60,120,210,336,   &
      &                504,720,990,1320,1716,2184,2730,3360,4080,4896/)
 
@@ -5781,7 +5821,13 @@ MODULE module_mp_thompson
          rho(k) = 0.622*p1d(k)/(R*t1d(k)*(qv1d(k)+0.622))
          rc(k) = MAX(R1, qc1d(k)*rho(k))
          nc(k) = MAX(2., MIN(nc1d(k)*rho(k), Nt_c_max))
-         if (.NOT. (is_aerosol_aware .or. merra2_aerosol_aware)) nc(k) = Nt_c
+         if (.NOT. (is_aerosol_aware .or. merra2_aerosol_aware)) then 
+             if( lsml == 0) then
+                nc(k) = Nt_c_o
+             else
+                nc(k) = Nt_c_l
+             endif
+         endif 
          if (rc(k).gt.R1 .and. nc(k).gt.R2) has_qc = .true.
          ri(k) = MAX(R1, qi1d(k)*rho(k))
          ni(k) = MAX(R2, ni1d(k)*rho(k))

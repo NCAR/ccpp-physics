@@ -73,7 +73,8 @@
       use surface_perturbation,      only: cdfnor,ppfbet
 
       ! For Thompson MP
-      use module_mp_thompson,        only: calc_effectRad, Nt_c,     &
+      use module_mp_thompson,        only: calc_effectRad,           &
+                                           Nt_c_l, Nt_c_o,           &
                                            re_qc_min, re_qc_max,     &
                                            re_qi_min, re_qi_max,     &
                                            re_qs_min, re_qs_max
@@ -245,6 +246,7 @@
       real (kind=kind_phys) :: alpha0,beta0,m,s,cldtmp,tmp_wt,cdfz
       real (kind=kind_phys) :: max_relh
       integer  :: iflag
+      integer  :: islmsk
 
       integer :: ids, ide, jds, jde, kds, kde, &
                  ims, ime, jms, jme, kms, kme, &
@@ -748,7 +750,12 @@
                 qc_mp (i,k) = tracer1(i,k,ntcw)/(1.-qvs)
                 qi_mp (i,k) = tracer1(i,k,ntiw)/(1.-qvs)
                 qs_mp (i,k) = tracer1(i,k,ntsw)/(1.-qvs)
-                nc_mp (i,k) = nt_c*orho(i,k)
+                !nc_mp (i,k) = nt_c*orho(i,k)
+                if(slmsk(i) == 0.) then
+                  nc_mp (i,k) = Nt_c_o*orho(i,k)
+                else
+                  nc_mp (i,k) = Nt_c_l*orho(i,k)
+                endif
                 ni_mp (i,k) = tracer1(i,k,ntinc)/(1.-qvs)
               enddo
             enddo
@@ -877,13 +884,14 @@
           end do
           !> - Call Thompson's subroutine calc_effectRad() to compute effective radii
           do i=1,im
+            islmsk = nint(slmsk(i))
             ! Effective radii [m] are now intent(out), bounds applied in calc_effectRad
             !tgs: progclduni has different limits for ice radii (10.0-150.0) than
             !     calc_effectRad (4.99-125.0 for WRFv3.8.1; 2.49-125.0 for WRFv4+)
             !     it will raise the low limit from 5 to 10, but the high limit will remain 125.
             call calc_effectRad (tlyr(i,:), plyr(i,:)*100., qv_mp(i,:), qc_mp(i,:),   &
                                  nc_mp(i,:), qi_mp(i,:), ni_mp(i,:), qs_mp(i,:), &
-                                 effrl(i,:), effri(i,:), effrs(i,:), 1, lm )
+                                 effrl(i,:), effri(i,:), effrs(i,:), islmsk, 1, lm )
             ! Scale Thompson's effective radii from meter to micron
             do k=1,lm
               effrl(i,k) = MAX(re_qc_min, MIN(effrl(i,k), re_qc_max))*1.e6
