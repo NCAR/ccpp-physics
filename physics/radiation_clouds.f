@@ -3906,7 +3906,7 @@
         clwmin = 0.0
         do k = 1, NLAY-1
         do i = 1, IX
-          clwt = 1.0e-10 * (plyr(i,k)*0.001)
+          clwt = 1.0e-6 * (plyr(i,k)*0.001)
 
           if (clwf(i,k) > clwt) then
             if(rhly(i,k) > 0.99) then
