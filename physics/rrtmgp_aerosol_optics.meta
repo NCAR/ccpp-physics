@@ -175,16 +175,16 @@
   kind = kind_phys
   intent = in
 [iaermdl]
-  standard_name = flag_for_aerosol_radiation_scheme
-  long_name = flag for aerosol scheme to use in radiation
-  units = flag
+  standard_name = control_for_aerosol_radiation_scheme
+  long_name = control of aerosol scheme in radiation
+  units = 1
   dimensions = ()
   type = integer
   intent = in
 [iaerflg]
-  standard_name = flag_for_aerosol_effects_in_radiation
-  long_name = flag for aerosol effects to include in radiation
-  units = flag
+  standard_name = control_for_aerosol_effects_in_radiation
+  long_name = control of aerosol effects in radiation
+  units = 1
   dimensions = ()
   type = integer
   intent = in
