@@ -4026,7 +4026,7 @@
 
             extrhi_grt(nc,nb) = sumk   * rsolbd
             if (nb==nv_aod) then
-            extrhi_grt_550(nc,1) = rhidext0_grt(id550,nc)
+              extrhi_grt_550(nc,1) = rhidext0_grt(id550,nc)
             endif
             scarhi_grt(nc,nb) = sums   * rsolbd
             asyrhi_grt(nc,nb) = sumokg / (sumok + 1.0e-10)
@@ -4061,7 +4061,7 @@
 
               extrhd_grt(nh,nc,nb) = sumk   * rsolbd
               if (nb==nv_aod) then
-              extrhd_grt_550(nh,nc,1) = rhdpext0_grt(i550,nh,nc)
+                extrhd_grt_550(nh,nc,1) = rhdpext0_grt(i550,nh,nc)
               endif
               scarhd_grt(nh,nc,nb) = sums   * rsolbd
               asyrhd_grt(nh,nc,nb) = sumokg / (sumok + 1.0e-10)
@@ -4286,7 +4286,7 @@
           do k = 1, NLAY
            tauae(k,m) = f_zero
            if (m==nv_aod) then
-           tauae_550(k,1) = f_zero
+             tauae_550(k,1) = f_zero
            endif
            ssaae(k,m) = f_one
            asyae(k,m) = f_zero
@@ -4295,15 +4295,15 @@
 
 ! --- set floor value for aerms (kg/m3)
         do k = 1, NLAY
-        do m = 1, kcm
-           aerms(k,m) = 1.e-15
-        enddo
+          do m = 1, kcm
+            aerms(k,m) = 1.e-15
+          enddo
         enddo
 
         do k = 1, NLAY
-        do m = 1, nspc
-           spcodp(k,m) = f_zero
-        enddo
+          do m = 1, nspc
+            spcodp(k,m) = f_zero
+          enddo
         enddo
 
         do k = 1, NLAY
@@ -4341,13 +4341,10 @@
 
 ! --- update diagnostic aod arrays
           do k = 1, NLAY
-           !aerodp(i,1) = aerodp(i,1) + tauae(k,nv_aod)
-           aerodp(i,1) = aerodp(i,1) + tauae_550(k,1)
-
-          do m = 1, NSPC
-           !aerodp(i,m+1) = spcodp(m)
-           aerodp(i,m+1) = aerodp(i,m+1)+spcodp(k,m)
-          enddo
+            aerodp(i,1) = aerodp(i,1) + tauae_550(k,1)
+            do m = 1, NSPC
+              aerodp(i,m+1) = aerodp(i,m+1)+spcodp(k,m)
+            enddo
           enddo
 
         endif     ! end if_larsw_block
@@ -4441,8 +4438,8 @@
 
            sum_tau = f_zero
            if (ib == nv_aod ) then
-           sum_tau_550 = f_zero
-           ext1_550 = f_zero
+             sum_tau_550 = f_zero
+             ext1_550 = f_zero
            endif
            sum_ssa = f_zero
            sum_asy = f_zero
@@ -4458,7 +4455,7 @@
             cm =  max(aerms(k,m),0.0) * dz1(k)
             ext1 = ext1 + cm*extrhi_grt(m,ib)
             if (ib == nv_aod) then
-            ext1_550 = ext1_550 + cm*extrhi_grt_550(m,1)
+              ext1_550 = ext1_550 + cm*extrhi_grt_550(m,1)
             endif
             sca1 = sca1 + cm*scarhi_grt(m,ib)
             ssa1 = ssa1 + cm*extrhi_grt(m,ib) * ssarhi_grt(m,ib)
@@ -4471,9 +4468,8 @@
 ! --- update aod from individual species
            if ( ib==nv_aod ) then
              tau_550 = ext1_550
-!            ! spcodp(1) = spcodp(1) + tau
              spcodp(k,1) =  tau_550
-           sum_tau_550 = sum_tau_550 + tau_550
+             sum_tau_550 = sum_tau_550 + tau_550
            endif
 ! --- update sum_tau, sum_ssa, sum_asy
            sum_tau = sum_tau + tau
@@ -4484,7 +4480,7 @@
            do ntrc = 2, nspc
             ext1 = f_zero
             if ( ib==nv_aod ) then
-            ext1_550 = f_zero
+              ext1_550 = f_zero
             endif
             asy1 = f_zero
             sca1 = f_zero
@@ -4497,8 +4493,8 @@
              ext01 = extrhd_grt(ih1,m,ib) +                             &
      &              rdrh * (extrhd_grt(ih2,m,ib)-extrhd_grt(ih1,m,ib))
              if ( ib==nv_aod ) then
-             ext01_550 = extrhd_grt_550(ih1,m,1) +                      &
-     &          rdrh * (extrhd_grt_550(ih2,m,1)-extrhd_grt_550(ih1,m,1))
+               ext01_550 = extrhd_grt_550(ih1,m,1) +                    &
+     &         rdrh * (extrhd_grt_550(ih2,m,1)-extrhd_grt_550(ih1,m,1))
              endif
              sca01 = scarhd_grt(ih1,m,ib) +                             &
      &              rdrh * (scarhd_grt(ih2,m,ib)-scarhd_grt(ih1,m,ib))
@@ -4508,7 +4504,7 @@
      &              rdrh * (asyrhd_grt(ih2,m,ib)-asyrhd_grt(ih1,m,ib))
              ext1 = ext1 + cm*ext01
              if ( ib==nv_aod ) then
-             ext1_550 = ext1_550 + cm*ext01_550
+               ext1_550 = ext1_550 + cm*ext01_550
              endif
              sca1 = sca1 + cm*sca01
              ssa1 = ssa1 + cm*ext01 * ssa01
@@ -4519,10 +4515,9 @@
             if (sca1 > f_zero) asy=min(f_one, asy1/sca1)
 ! --- update aod from individual species
             if ( ib==nv_aod ) then
-            tau_550 = ext1_550
-            ! spcodp(ktrc) = spcodp(ktrc) + tau
-            spcodp(k,ktrc) = tau_550
-            sum_tau_550 = sum_tau_550 + tau_550
+              tau_550 = ext1_550
+              spcodp(k,ktrc) = tau_550
+              sum_tau_550 = sum_tau_550 + tau_550
             endif
 ! --- update sum_tau, sum_ssa, sum_asy
             sum_tau = sum_tau + tau
@@ -4533,7 +4528,7 @@
 ! --- determine total tau, ssa, asy for aerosol mixture
            tauae(k,ib) = sum_tau
            if ( ib==nv_aod ) then
-           tauae_550(k,1) = sum_tau_550
+             tauae_550(k,1) = sum_tau_550
            endif
            if (sum_tau > f_zero) ssaae(k,ib) = sum_ssa / sum_tau
            if (sum_ssa > f_zero) asyae(k,ib) = sum_asy / sum_ssa
