@@ -92,7 +92,6 @@ MODULE module_mp_thompson
 !.. scheme.  In 2-moment cloud water, Nt_c represents a maximum of
 !.. droplet concentration and nu_c is also variable depending on local
 !.. droplet number concentration.
-      !REAL, PARAMETER :: Nt_c = 100.E6
       REAL, PARAMETER :: Nt_c_o = 50.E6
       REAL, PARAMETER :: Nt_c_l = 100.E6
       REAL, PARAMETER, PRIVATE:: Nt_c_max = 1999.E6
@@ -110,7 +109,6 @@ MODULE module_mp_thompson
       REAL, PARAMETER, PRIVATE:: mu_r = 0.0
       REAL, PARAMETER, PRIVATE:: mu_g = 0.0
       REAL, PARAMETER, PRIVATE:: mu_i = 0.0
-      !REAL, PRIVATE:: mu_c
       REAL, PRIVATE::  mu_c_o, mu_c_l
 
 !..Sum of two gamma distrib for snow (Field et al. 2005).
@@ -153,7 +151,6 @@ MODULE module_mp_thompson
       REAL, PARAMETER, PRIVATE:: fv_s = 100.0
       REAL, PARAMETER, PRIVATE:: av_g = 442.0
       REAL, PARAMETER, PRIVATE:: bv_g = 0.89
-     !REAL, PARAMETER, PRIVATE:: av_i = 1493.9
       REAL, PARAMETER, PRIVATE:: bv_i = 1.0
       REAL, PARAMETER, PRIVATE:: av_c = 0.316946E8
       REAL, PARAMETER, PRIVATE:: bv_c = 2.0
@@ -537,7 +534,6 @@ MODULE module_mp_thompson
 !.. disp=SQRT((mu+2)/(mu+1) - 1) so mu varies from 15 for Maritime
 !.. to 2 for really dirty air.  This not used in 2-moment cloud water
 !.. scheme and nu_c used instead and varies from 2 to 15 (integer-only).
-      !mu_c = MIN(15., (1000.E6/Nt_c + 2.))
       mu_c_l = MIN(15., (1000.E6/Nt_c_l + 2.))
       mu_c_o = MIN(15., (1000.E6/Nt_c_o + 2.))
 
@@ -1428,7 +1424,6 @@ MODULE module_mp_thompson
          else
             lsml = lsm(i,j)
             do k = kts, kte
-               !nc1d(k) = Nt_c/rho(k)
                if(lsml == 0) then
                  nc1d(k) = Nt_c_o/rho(k)
                else
@@ -2021,6 +2016,7 @@ MODULE module_mp_thompson
       odt = 1./dt
       odts = 1./dtsave
       iexfrq = 1
+! transition of terminal velocity from cloud ice to snow
       av_i = av_s * D0s ** (bv_s - bv_i)
 
 !+---+-----------------------------------------------------------------+
@@ -2226,7 +2222,6 @@ MODULE module_mp_thompson
             endif
             nc(k) = MIN( DBLE(Nt_c_max), ccg(1,nu_c)*ocg2(nu_c)*rc(k)   &
                   / am_r*lamc**bm_r)
-            !if (.NOT. (is_aerosol_aware .or. merra2_aerosol_aware)) nc(k) = Nt_c
             if (.NOT. (is_aerosol_aware .or. merra2_aerosol_aware)) then
                if (lsml == 0) then
                  nc(k) = Nt_c_o
