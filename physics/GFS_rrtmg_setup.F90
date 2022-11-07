@@ -325,7 +325,7 @@ module GFS_rrtmg_setup
 
 ! Private functions
 
-
+!>Initialization of radiation calculations.
    subroutine radinit( si, NLAY, imp_physics, me, ltp, lextop )
 !...................................
 
