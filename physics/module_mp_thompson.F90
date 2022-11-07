@@ -92,6 +92,7 @@ MODULE module_mp_thompson
 !.. scheme.  In 2-moment cloud water, Nt_c represents a maximum of
 !.. droplet concentration and nu_c is also variable depending on local
 !.. droplet number concentration.
+      !REAL, PARAMETER :: Nt_c = 100.E6
       REAL, PARAMETER :: Nt_c_o = 50.E6
       REAL, PARAMETER :: Nt_c_l = 100.E6
       REAL, PARAMETER, PRIVATE:: Nt_c_max = 1999.E6
@@ -1424,10 +1425,10 @@ MODULE module_mp_thompson
          else
             lsml = lsm(i,j)
             do k = kts, kte
-               if(lsml == 0) then
-                 nc1d(k) = Nt_c_o/rho(k)
-               else
+               if(lsml == 1) then
                  nc1d(k) = Nt_c_l/rho(k)
+               else
+                 nc1d(k) = Nt_c_o/rho(k)
                endif
                nwfa1d(k) = 11.1E6
                nifa1d(k) = naIN1*0.01
@@ -2016,7 +2017,7 @@ MODULE module_mp_thompson
       odt = 1./dt
       odts = 1./dtsave
       iexfrq = 1
-! transition of terminal velocity from cloud ice to snow
+! Transition value of coefficient matching at crossover from cloud ice to snow
       av_i = av_s * D0s ** (bv_s - bv_i)
 
 !+---+-----------------------------------------------------------------+
@@ -2223,10 +2224,10 @@ MODULE module_mp_thompson
             nc(k) = MIN( DBLE(Nt_c_max), ccg(1,nu_c)*ocg2(nu_c)*rc(k)   &
                   / am_r*lamc**bm_r)
             if (.NOT. (is_aerosol_aware .or. merra2_aerosol_aware)) then
-               if (lsml == 0) then
-                 nc(k) = Nt_c_o
-               else
+               if (lsml == 1) then
                  nc(k) = Nt_c_l
+               else
+                 nc(k) = Nt_c_o
                endif
             endif
          else
@@ -2252,7 +2253,7 @@ MODULE module_mp_thompson
             if (xDi.lt. 5.E-6) then
              lami = cie(2)/5.E-6
              ni(k) = MIN(4999.D3, cig(1)*oig2*ri(k)/am_i*lami**bm_i)
-            elseif (xDi.gt. D0s + 100.E-6) then
+            elseif (xDi.gt. 300.E-6) then
              lami = cie(2)/300.E-6
              ni(k) = cig(1)*oig2*ri(k)/am_i*lami**bm_i
             endif
@@ -3291,7 +3292,7 @@ MODULE module_mp_thompson
             lami = cie(2)/5.E-6
             xni = MIN(4999.D3, cig(1)*oig2*xri/am_i*lami**bm_i)
             niten(k) = (xni-ni1d(k)*rho(k))*odts*orho
-           elseif (xDi.gt. D0s + 100.E-6) then 
+           elseif (xDi.gt. 300.E-6) then 
             lami = cie(2)/300.E-6
             xni = cig(1)*oig2*xri/am_i*lami**bm_i
             niten(k) = (xni-ni1d(k)*rho(k))*odts*orho
@@ -3408,10 +3409,10 @@ MODULE module_mp_thompson
             rc(k) = (qc1d(k) + qcten(k)*DT)*rho(k)
             nc(k) = MAX(2., MIN((nc1d(k)+ncten(k)*DT)*rho(k), Nt_c_max))
             if (.NOT. (is_aerosol_aware .or. merra2_aerosol_aware)) then 
-              if(lsml == 0) then
-                nc(k) = Nt_c_o
-              else
+              if(lsml == 1) then
                 nc(k) = Nt_c_l
+              else
+                nc(k) = Nt_c_o
               endif
             endif
             L_qc(k) = .true.
@@ -3584,10 +3585,10 @@ MODULE module_mp_thompson
             if (is_aerosol_aware .or. merra2_aerosol_aware) then
                xnc = MAX(2., activ_ncloud(temp(k), w1d(k)+rand3, nwfa(k)))
             else
-               if(lsml == 0) then
-                 xnc = Nt_c_o
-               else
+               if(lsml == 1) then
                  xnc = Nt_c_l
+               else
+                 xnc = Nt_c_o
                endif
             endif
             pnc_wcd(k) = 0.5*(xnc-nc(k) + abs(xnc-nc(k)))*odts*orho
@@ -3659,10 +3660,10 @@ MODULE module_mp_thompson
           if (rc(k).eq.R1) L_qc(k) = .false.
           nc(k) = MAX(2., MIN((nc1d(k)+ncten(k)*DT)*rho(k), Nt_c_max))
           if (.NOT. (is_aerosol_aware .or. merra2_aerosol_aware)) then 
-            if(lsml == 0) then
-              nc(k) = Nt_c_o
-            else
+            if(lsml == 1) then
               nc(k) = Nt_c_l
+            else
+              nc(k) = Nt_c_o
             endif
           endif
           qv(k) = MAX(1.E-10, qv1d(k) + DT*qvten(k))
@@ -4269,7 +4270,7 @@ MODULE module_mp_thompson
            xDi = (bm_i + mu_i + 1.) * ilami
            if (xDi.lt. 5.E-6) then
             lami = cie(2)/5.E-6
-           elseif (xDi.gt. D0s + 100.E-6) then 
+           elseif (xDi.gt. 300.E-6) then 
             lami = cie(2)/300.E-6
            endif
            ni1d(k) = MIN(cig(1)*oig2*qi1d(k)/am_i*lami**bm_i,           &
@@ -5817,10 +5818,10 @@ MODULE module_mp_thompson
          rc(k) = MAX(R1, qc1d(k)*rho(k))
          nc(k) = MAX(2., MIN(nc1d(k)*rho(k), Nt_c_max))
          if (.NOT. (is_aerosol_aware .or. merra2_aerosol_aware)) then 
-             if( lsml == 0) then
-                nc(k) = Nt_c_o
-             else
+             if( lsml == 1) then
                 nc(k) = Nt_c_l
+             else
+                nc(k) = Nt_c_o
              endif
          endif 
          if (rc(k).gt.R1 .and. nc(k).gt.R2) has_qc = .true.

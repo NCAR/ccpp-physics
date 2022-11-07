@@ -750,10 +750,10 @@
                 qc_mp (i,k) = tracer1(i,k,ntcw)/(1.-qvs)
                 qi_mp (i,k) = tracer1(i,k,ntiw)/(1.-qvs)
                 qs_mp (i,k) = tracer1(i,k,ntsw)/(1.-qvs)
-                if(nint(slmsk(i)) == 0) then
-                  nc_mp (i,k) = Nt_c_o*orho(i,k)
-                else
+                if(nint(slmsk(i)) == 1) then
                   nc_mp (i,k) = Nt_c_l*orho(i,k)
+                else
+                  nc_mp (i,k) = Nt_c_o*orho(i,k)
                 endif
                 ni_mp (i,k) = tracer1(i,k,ntinc)/(1.-qvs)
               enddo

@@ -865,10 +865,10 @@ contains
                nc_mp(iCol,iLay) = make_DropletNumber(qc_mp(iCol,iLay)*rho, nwfa(iCol,iLay)*rho) * orho
              endif
           else
-             if (nint(lsmask(iCol)) == 0) then !land
-                nc_mp(iCol,iLay) = nt_c_o*orho
-             else 
+             if (nint(lsmask(iCol)) == 1) then !land
                 nc_mp(iCol,iLay) = nt_c_l*orho
+             else 
+                nc_mp(iCol,iLay) = nt_c_o*orho
              endif 
           endif
           if (qi_mp(iCol,iLay) > 1.e-12 .and. ni_mp(iCol,iLay) < 100.) then
