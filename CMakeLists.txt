@@ -9,6 +9,12 @@ set(PACKAGE "ccpp-physics")
 set(AUTHORS "Grant Firl" "Dom Heinzeller" "Man Zhang" "Mike Kavulich" "Chunxi Zhang")
 
 #------------------------------------------------------------------------------
+# Set MPI flags for C/C++/Fortran
+if (MPI)
+  find_package(MPI REQUIRED C Fortran)
+endif (OPENMP)
+
+#------------------------------------------------------------------------------
 # Set OpenMP flags for C/C++/Fortran
 if (OPENMP)
   find_package(OpenMP REQUIRED)
