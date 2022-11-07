@@ -2,17 +2,15 @@
 !! This file contains the subroutine that calculates the prognostic
 !! updraft area fraction that is used for closure computations in 
 !! saSAS deep and shallow convection, based on a moisture budget
-!! as described in Bengtsson et al. 2022.
+!! as described in Bengtsson et al. 2022 \cite Bengtsson_2022.
 
-!>\ingroup samfdeepcnv
-!! This subroutine computes a prognostic updraft area fraction
+!>\ingroup SAMFdeep
+!>\ingroup SAMF_shal
+!> This subroutine computes a prognostic updraft area fraction
 !! used in the closure computations in the samfdeepcnv.f scheme
-!>\ingroup samfshalcnv
 !! This subroutine computes a prognostic updraft area fracftion
 !! used in the closure computations in the samfshalcnv. scheme
-!!\section progsigma General Algorithm 
-!> @{ 
-
+!!\section gen_progsigma progsigma_calc General Algorithm 
       subroutine progsigma_calc (im,km,flag_init,flag_restart,           &
            flag_shallow,del,tmf,qmicro,dbyo1,zdqca,omega_u,zeta,hvap,    &
            delt,prevsq,q,kbcon1,ktcon,cnvflg,sigmain,sigmaout,           &
@@ -229,10 +227,4 @@
          enddo
       endif
 
-
      end subroutine progsigma_calc
-!> @}                            
-!! @} 
-
-
-

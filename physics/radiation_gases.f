@@ -905,7 +905,8 @@
 !!                  or -pi -> +pi arrangements
 !!\param xlat       (IMAX), grid latitude in radians, default range to
 !!                  pi/2 -> -pi/2, otherwise see in-line comment
-!!\param IMAX, LMAX      horizontal/vertical dimensions for output data
+!!\param IMAX       horizontal dimension for output data
+!!\param LMAX       vertical dimension for output data
 !!\param gasdat     (IMAX,LMAX,NF_VGAS) - gases volume mixing ratioes
 !!\n                    (:,:,1)           - co2
 !!\n                    (:,:,2)           - n2o

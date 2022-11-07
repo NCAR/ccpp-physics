@@ -609,11 +609,10 @@
 
       endif                              ! end_if_ivflip
 
-!> - Call module_radiation_aerosols::setaer(),to setup aerosols
-!! property profile for radiation.
 
 !check  print *,' in grrad : calling setaer '
 
+!> - Initialize mass mixing ratio of aerosols from NASA GOCART or NASA MERRA-2
        if (ntchm>0 .and. iaermdl==2) then
           do k=1,levs
             do i=1,im
@@ -637,6 +636,8 @@
         endif
 
 
+!> - Call module_radiation_aerosols::setaer() to setup aerosols
+!! property profile for radiation.
       call setaer (plvl, plyr, prslk1, tvly, rhly, slmsk,    & !  ---  inputs
                    tracer1, aer_nm, xlon, xlat, IM, LMK, LMP,&
                    lsswr,lslwr,                              &
@@ -654,7 +655,7 @@
         enddo
        enddo
 
-      !> Aerosol direct feedback effect by smoke and dust
+      !> - Add aerosol direct feedback effect by smoke and dust
       if(aero_dir_fdb) then ! add smoke/dust extinctions
         do k = 1, LMK
           do i = 1, IM
