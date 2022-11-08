@@ -249,7 +249,7 @@
       ! Conversion factor from mm per day to m per physics timestep 
       tem = dtp * con_p001 / con_day
 
-!> - For GFDL and Thompson MP scheme, determine convective snow by surface temperature;
+!> - For GFDL, Thompson and NSSL MP schemes, determine convective snow by surface temperature;
 !! and determine explicit rain/snow by snow/ice/graupel coming out directly from MP
 !! and convective rainfall from the cumulus scheme if the surface temperature is below
 !! \f$0^oC\f$.

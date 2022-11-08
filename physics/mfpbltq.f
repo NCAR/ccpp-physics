@@ -4,7 +4,7 @@
 !! for use in the TKE-EDMF PBL scheme (updated version).
       module mfpbltq_mod
       contains
-!>\ingroup satmedmfvdifq
+!>\ingroup module_satmedmfvdifq
 !! This subroutine computes mass flux and updraft parcel properties for
 !! thermals driven by surface heating. 
 !!\section mfpbltq_gen GFS mfpblt General Algorithm 

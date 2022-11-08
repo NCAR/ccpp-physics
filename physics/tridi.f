@@ -2,7 +2,8 @@
 !! These subroutines are originally internal subroutines in moninedmf.f
       module tridi_mod
       contains
-!>\ingroup HEDMF
+
+!>\ingroup module_satmedmfvdifq
 !!\brief Routine to solve the tridiagonal system to calculate
 !!temperature and moisture at \f$ t + \Delta t \f$; part of two-part
 !!process to calculate time tendencies due to vertical diffusion.
@@ -43,8 +44,7 @@
       end subroutine tridi1
 
 !-----------------------------------------------------------------------
-!>\ingroup satmedmf
-!>\ingroup satmedmfvdifq
+!>\ingroup module_satmedmfvdifq
 !> This subroutine ..
       subroutine tridi2(l,n,cl,cm,cu,r1,r2,au,a1,a2)
 !
@@ -87,8 +87,7 @@
       end subroutine tridi2
 
 !-----------------------------------------------------------------------
-!>\ingroup satmedmf
-!>\ingroup satmedmfvdifq
+!>\ingroup module_satmedmfvdifq
 !>  Routine to solve the tridiagonal system to calculate u- and
 !!  v-momentum at \f$ t + \Delta t \f$; part of two-part process to
 !!  calculate time tendencies due to vertical diffusion.
@@ -159,8 +158,7 @@
       end subroutine tridin
 
 !-----------------------------------------------------------------------
-!>\ingroup satmedmf
-!>\ingroup satmedmfvdifq
+!>\ingroup module_satmedmfvdifq
 !! This subroutine solves tridiagonal problem for TKE.
       subroutine tridit(l,n,nt,cl,cm,cu,rt,au,at)
 !-----------------------------------------------------------------------
