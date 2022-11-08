@@ -20,7 +20,7 @@
 !> @{
       subroutine GFS_MP_generic_post_run(                                                                                 &
         im, levs, kdt, nrcm, nncl, ntcw, ntrac, imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_nssl,    &
-        imp_physics_mg, imp_physics_fer_hires, cal_pre, cplflx, cplchm, progsigma, con_g, rainmin, dtf, frain, rainc,     &
+        imp_physics_mg, imp_physics_fer_hires, cal_pre, cplflx, cplchm, cpllnd, progsigma, con_g, rainmin, dtf, frain, rainc, &
         rain1, rann, xlat, xlon, gt0, gq0, prsl, prsi, phii, tsfc, ice, snow, graupel, save_t, save_q, rain0, ice0, snow0,&
         graupel0, del, rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp, srflag, sr, cnvprcp, totprcp, totice,   &
         totsnw, totgrp, cnvprcpb, totprcpb, toticeb, totsnwb, totgrpb, rain_cpl, rainc_cpl, snow_cpl, pwat,               &
@@ -37,7 +37,7 @@
       integer, intent(in) :: im, levs, kdt, nrcm, nncl, ntcw, ntrac, num_dfi_radar, index_of_process_dfi_radar
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_mg, imp_physics_fer_hires
       integer, intent(in) :: imp_physics_nssl
-      logical, intent(in) :: cal_pre, lssav, ldiag3d, qdiag3d, cplflx, cplchm, progsigma
+      logical, intent(in) :: cal_pre, lssav, ldiag3d, qdiag3d, cplflx, cplchm, cpllnd, progsigma
       integer, intent(in) :: index_of_temperature,index_of_process_mp
 
       integer                                                :: dfi_radar_max_intervals
@@ -363,7 +363,7 @@
          enddo
       endif
 
-      if (cplflx .or. cplchm) then
+      if (cplflx .or. cplchm .or. cpllnd) then
         do i = 1, im
           dsnow_cpl(i)= max(zero, rain(i) * srflag(i))
           drain_cpl(i)= max(zero, rain(i) - dsnow_cpl(i))
@@ -372,7 +372,7 @@
         enddo
       endif
 
-      if (cplchm) then
+      if (cplchm .or. cpllnd) then
         do i = 1, im
           rainc_cpl(i) = rainc_cpl(i) + rainc(i)
         enddo
