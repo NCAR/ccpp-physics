@@ -60,22 +60,6 @@
   type = real
   kind = kind_phys
   intent = in
-[du_ofdcol]
-  standard_name = vertically_integrated_x_momentum_flux_due_to_form_drag
-  long_name = integrated x momentum flux from form drag
-  units = Pa
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-[du_oblcol]
-  standard_name = vertically_integrated_x_momentum_flux_due_to_blocking_drag
-  long_name = integrated x momentum flux from blocking drag
-  units = Pa
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
 [tau_ogw]
   standard_name = instantaneous_momentum_flux_due_to_orographic_gravity_wave_drag
   long_name = momentum flux or stress due to orographic gravity wave drag
@@ -124,6 +108,14 @@
   type = real
   kind = kind_phys
   intent = in
+[dvdt_obl]
+  standard_name = tendency_of_y_momentum_due_to_blocking_drag
+  long_name = y momentum tendency from blocking drag
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
 [dudt_ofd]
   standard_name = tendency_of_x_momentum_due_to_form_drag
   long_name = x momentum tendency from form drag
@@ -132,9 +124,41 @@
   type = real
   kind = kind_phys
   intent = in
+[dvdt_ofd]
+  standard_name = tendency_of_y_momentum_due_to_form_drag
+  long_name = y momentum tendency from form drag
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
 [dudt_ogw]
   standard_name = tendency_of_x_wind_due_to_mesoscale_orographic_gravity_wave_drag
   long_name = x momentum tendency from meso scale ogw
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[dvdt_ogw]
+  standard_name = tendency_of_y_wind_due_to_mesoscale_orographic_gravity_wave_drag
+  long_name = y momentum tendency from meso scale ogw
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[dudt_oss]
+  standard_name = tendency_of_x_momentum_due_to_small_scale_gravity_wave_drag
+  long_name = x momentum tendency from small scale gwd
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[dvdt_oss]
+  standard_name = tendency_of_y_momentum_due_to_small_scale_gravity_wave_drag
+  long_name = y momentum tendency from small scale gwd
   units = m s-2
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -233,6 +257,246 @@
   long_name = time integral of change in y wind due to NGW
   units = m s-2
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[dudt_ngw]
+  standard_name = tendency_of_x_wind_due_to_nonorographic_gravity_wave_drag
+  long_name = zonal wind tendency due to non-stationary GWs
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[dvdt_ngw]
+  standard_name = tendency_of_y_wind_due_to_nonorographic_gravity_wave_drag
+  long_name = meridional wind tendency due to non-stationary GWs
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[dtdt_ngw]
+  standard_name = tendency_of_air_temperature_due_to_nonorographic_gravity_wave_drag
+  long_name = air temperature tendency due to non-stationary GWs
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[ldu3dt_ngw]
+  standard_name = cumulative_change_in_x_wind_due_to_convective_gravity_wave_drag
+  long_name = cumulative change in x wind due to convective gravity wave drag
+  units = m s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[ldv3dt_ngw]
+  standard_name = cumulative_change_in_y_wind_due_to_convective_gravity_wave_drag
+  long_name = cumulative change in y wind due to convective gravity wave drag
+  units = m s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[ldt3dt_ngw]
+  standard_name = cumulative_change_in_temperature_due_to_convective_gravity_wave_drag
+  long_name = cumulative change in temperature due to convective gravity wave drag
+  units = K
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[dws3dt_ogw]
+  standard_name = cumulative_change_in_wind_speed_due_to_mesoscale_orographic_gravity_wave_drag
+  long_name = cumulative change in wind speed due to mesoscale orographic gravity wave drag
+  units = m s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[dws3dt_obl]
+  standard_name = cumulative_change_in_wind_speed_due_to_blocking_drag
+  long_name = cumulative change in wind speed due to blocking drag
+  units = m s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[dws3dt_oss]
+  standard_name = cumulative_change_in_wind_speed_due_to_small_scale_orographic_gravity_wave_drag
+  long_name = cumulative change in wind speed due to small scale orographic gravity wave drag
+  units = m s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[dws3dt_ofd]
+  standard_name = cumulative_change_in_wind_speed_due_to_turbulent_orographic_form_drag
+  long_name = cumulative change in wind speed due to turbulent orographic form drag
+  units = m s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[ldu3dt_ogw]
+  standard_name = cumulative_change_in_x_wind_due_to_mesoscale_orographic_gravity_wave_drag
+  long_name = cumulative change in x wind due to mesoscale orographic gravity wave drag
+  units = m s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[ldu3dt_obl]
+  standard_name = cumulative_change_in_x_wind_due_to_blocking_drag
+  long_name = cumulative change in x wind due to blocking drag
+  units = m s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[ldu3dt_oss]
+  standard_name = cumulative_change_in_x_wind_due_to_small_scale_gravity_wave_drag
+  long_name = cumulative change in x wind due to small scale gravity wave drag
+  units = m s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[ldu3dt_ofd]
+  standard_name = cumulative_change_in_x_wind_due_to_form_drag
+  long_name = cumulative change in x wind due to form drag
+  units = m s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[du_ogwcol]
+  standard_name = vertically_integrated_x_momentum_flux_due_to_mesoscale_orographic_gravity_wave_drag
+  long_name = integrated x momentum flux from meso scale ogw
+  units = Pa
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[dv_ogwcol]
+  standard_name = vertically_integrated_y_momentum_flux_due_to_mesoscale_orographic_gravity_wave_drag
+  long_name = integrated y momentum flux from meso scale ogw
+  units = Pa
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[du_oblcol]
+  standard_name = vertically_integrated_x_momentum_flux_due_to_blocking_drag
+  long_name = integrated x momentum flux from blocking drag
+  units = Pa
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[dv_oblcol]
+  standard_name = vertically_integrated_y_momentum_flux_due_to_blocking_drag
+  long_name = integrated y momentum flux from blocking drag
+  units = Pa
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[du_osscol]
+  standard_name = vertically_integrated_x_momentum_flux_due_to_small_scale_gravity_wave_drag
+  long_name = integrated x momentum flux from small scale gwd
+  units = Pa
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[dv_osscol]
+  standard_name = vertically_integrated_y_momentum_flux_due_to_small_scale_gravity_wave_drag
+  long_name = integrated y momentum flux from small scale gwd
+  units = Pa
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[du_ofdcol]
+  standard_name = vertically_integrated_x_momentum_flux_due_to_form_drag
+  long_name = integrated x momentum flux from form drag
+  units = Pa
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[dv_ofdcol]
+  standard_name = vertically_integrated_y_momentum_flux_due_to_form_drag
+  long_name = integrated y momentum flux from form drag
+  units = Pa
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[du3_ogwcol]
+  standard_name = cumulative_vertically_integrated_x_momentum_flux_due_to_mesoscale_orographic_gravity_wave_drag
+  long_name = cumulative integrated x momentum flux from mesoscale orographic gravity wave drag
+  units = Pa s
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[dv3_ogwcol]
+  standard_name = cumulative_vertically_integrated_y_momentum_flux_due_to_mesoscale_orographic_gravity_wave_drag
+  long_name = cumulative integrated y momentum flux from mesoscale orographic gravity wave drag
+  units = Pa s
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[du3_oblcol]
+  standard_name = cumulative_vertically_integrated_x_momentum_flux_due_to_blocking_drag
+  long_name = cumulative integrated x momentum flux from blocking drag
+  units = Pa s
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[dv3_oblcol]
+  standard_name = cumulative_vertically_integrated_y_momentum_flux_due_to_blocking_drag
+  long_name = cumulative integrated y momentum flux from blocking drag
+  units = Pa s
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[du3_osscol]
+  standard_name = cumulative_vertically_integrated_x_momentum_flux_due_to_small_scale_gravity_wave_drag
+  long_name = cumulative integrated x momentum flux from small scale gravity wave drag
+  units = Pa s
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[dv3_osscol]
+  standard_name = cumulative_vertically_integrated_y_momentum_flux_due_small_scale_gravity_wave_drag
+  long_name = cumulative integrated y momentum flux from small scale gravity wave drag
+  units = Pa s
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[du3_ofdcol]
+  standard_name = cumulative_vertically_integrated_x_momentum_flux_due_to_form_drag
+  long_name = cumulative integrated x momentum flux from form drag
+  units = Pa s
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[dv3_ofdcol]
+  standard_name = cumulative_vertically_integrated_y_momentum_flux_due_to_form_drag
+  long_name = cumulative integrated y momentum flux from form drag
+  units = Pa s
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout

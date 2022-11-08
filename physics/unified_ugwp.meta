@@ -191,8 +191,8 @@
   type = logical
   intent = in
 [do_gsl_drag_ls_bl]
-  standard_name = flag_for_gsl_drag_suite_large_scale_orographic_and_blocking_drag
-  long_name = flag to activate GSL drag suite - large-scale GWD and blocking
+  standard_name = flag_for_gsl_drag_suite_mesoscale_orographic_and_blocking_drag
+  long_name = flag to activate GSL drag suite - mesoscale GWD and blocking
   units = flag
   dimensions = ()
   type = logical
@@ -299,6 +299,22 @@
   units = count
   dimensions = ()
   type = integer
+  intent = in
+[ak]
+  standard_name = sigma_pressure_hybrid_coordinate_a_coefficient
+  long_name = a parameter for sigma pressure level calculations
+  units = Pa
+  dimensions = (vertical_interface_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[bk]
+  standard_name = sigma_pressure_hybrid_coordinate_b_coefficient
+  long_name = b parameter for sigma pressure level calculations
+  units = none
+  dimensions = (vertical_interface_dimension)
+  type = real
+  kind = kind_phys
   intent = in
 [ntrac]
   standard_name = number_of_tracers
@@ -464,17 +480,17 @@
   type = real
   kind = kind_phys
   intent = in
-[dusfc_ls]
+[dusfc_ms]
   standard_name = vertically_integrated_x_momentum_flux_due_to_mesoscale_orographic_gravity_wave_drag
-  long_name = integrated x momentum flux from large scale gwd
+  long_name = integrated x momentum flux from mesoscale gwd
   units = Pa
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
-[dvsfc_ls]
+[dvsfc_ms]
   standard_name = vertically_integrated_y_momentum_flux_due_to_mesoscale_orographic_gravity_wave_drag
-  long_name = integrated y momentum flux from large scale gwd
+  long_name = integrated y momentum flux from mesoscale gwd
   units = Pa
   dimensions = (horizontal_loop_extent)
   type = real
@@ -528,7 +544,7 @@
   type = real
   kind = kind_phys
   intent = out
-[dtaux2d_ls]
+[dtaux2d_ms]
   standard_name = tendency_of_x_wind_due_to_mesoscale_orographic_gravity_wave_drag
   long_name = instantaneous change in x wind due to orographic gw drag
   units = m s-2
@@ -536,7 +552,7 @@
   type = real
   kind = kind_phys
   intent = out
-[dtauy2d_ls]
+[dtauy2d_ms]
   standard_name = tendency_of_y_wind_due_to_mesoscale_orographic_gravity_wave_drag
   long_name = instantaneous change in y wind due to orographic gw drag
   units = m s-2
@@ -592,6 +608,30 @@
   type = real
   kind = kind_phys
   intent = out
+[dudt_ngw]
+  standard_name = tendency_of_x_wind_due_to_nonorographic_gravity_wave_drag
+  long_name = zonal wind tendency due to non-stationary GWs
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[dvdt_ngw]
+  standard_name = tendency_of_y_wind_due_to_nonorographic_gravity_wave_drag
+  long_name = meridional wind tendency due to non-stationary GWs
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[dtdt_ngw]
+  standard_name = tendency_of_air_temperature_due_to_nonorographic_gravity_wave_drag
+  long_name = air temperature tendency due to non-stationary GWs
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
 [br1]
   standard_name = bulk_richardson_number_at_lowest_model_level
   long_name = bulk Richardson number at the surface
@@ -628,6 +668,13 @@
   long_name = flag for CIRES UGWP Diagnostics
   units = flag
   dimensions = ()
+  type = logical
+  intent = in
+[ugwp_seq_update]
+  standard_name = ugwp_sequential_update_flag
+  long_name = flag for ugwp sequential update
+  units = flag 
+  dimensions = () 
   type = logical
   intent = in
 [cdmbgwd]
@@ -1151,8 +1198,8 @@
   type = logical
   intent = in
 [do_gsl_drag_ls_bl]
-  standard_name = flag_for_gsl_drag_suite_large_scale_orographic_and_blocking_drag
-  long_name = flag to activate GSL drag suite - large-scale GWD and blocking
+  standard_name = flag_for_gsl_drag_suite_mesoscale_orographic_and_blocking_drag
+  long_name = flag to activate GSL drag suite - mesoscale GWD and blocking
   units = flag
   dimensions = ()
   type = logical

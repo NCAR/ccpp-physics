@@ -198,8 +198,8 @@
   type = logical
   intent = in
 [do_gsl_drag_ls_bl]
-  standard_name = flag_for_gsl_drag_suite_large_scale_orographic_and_blocking_drag
-  long_name = flag to activate GSL drag suite - large-scale GWD and blocking
+  standard_name = flag_for_gsl_drag_suite_mesoscale_orographic_and_blocking_drag
+  long_name = flag to activate GSL drag suite - mesoscale GWD and blocking
   units = flag
   dimensions = ()
   type = logical
@@ -307,6 +307,22 @@
   dimensions = ()
   type = integer
   intent = in
+[ak]
+  standard_name = sigma_pressure_hybrid_coordinate_a_coefficient
+  long_name = a parameter for sigma pressure level calculations
+  units = Pa
+  dimensions = (vertical_interface_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[bk]
+  standard_name = sigma_pressure_hybrid_coordinate_b_coefficient
+  long_name = b parameter for sigma pressure level calculations
+  units = none
+  dimensions = (vertical_interface_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
 [ntrac]
   standard_name = number_of_tracers
   long_name = number of tracers
@@ -366,8 +382,8 @@
   type = logical
   intent = in
 [do_gsl_drag_ls_bl]
-  standard_name = flag_for_gsl_drag_suite_large_scale_orographic_and_blocking_drag
-  long_name = flag to activate GSL drag suite - large-scale GWD and blocking
+  standard_name = flag_for_gsl_drag_suite_mesoscale_orographic_and_blocking_drag
+  long_name = flag to activate GSL drag suite - mesoscale GWD and blocking
   units = flag
   dimensions = ()
   type = logical
@@ -424,6 +440,13 @@
 [ldiag_ugwp]
   standard_name = flag_for_unified_gravity_wave_physics_diagnostics
   long_name = flag for CIRES UGWP Diagnostics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[ugwp_seq_update]
+  standard_name = ugwp_sequential_update_flag
+  long_name = flag for ugwp sequential update
   units = flag
   dimensions = ()
   type = logical

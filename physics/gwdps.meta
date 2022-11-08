@@ -218,10 +218,74 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [dvsfc]
   standard_name = instantaneous_y_stress_due_to_gravity_wave_drag
   long_name = meridional surface stress due to orographic gravity wave drag
+  units = Pa
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[dtaux2d_ms]
+  standard_name = tendency_of_x_wind_due_to_mesoscale_orographic_gravity_wave_drag
+  long_name = instantaneous change in x wind due to orographic gw drag
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[dtauy2d_ms]
+  standard_name = tendency_of_y_wind_due_to_mesoscale_orographic_gravity_wave_drag
+  long_name = instantaneous change in y wind due to orographic gw drag
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[dtaux2d_bl]
+  standard_name = tendency_of_x_momentum_due_to_blocking_drag
+  long_name = x momentum tendency from blocking drag
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[dtauy2d_bl]
+  standard_name = tendency_of_y_momentum_due_to_blocking_drag
+  long_name = y momentum tendency from blocking drag
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[dusfc_ms]
+  standard_name = vertically_integrated_x_momentum_flux_due_to_mesoscale_orographic_gravity_wave_drag
+  long_name = integrated x momentum flux from mesoscale gwd
+  units = Pa
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[dvsfc_ms]
+  standard_name = vertically_integrated_y_momentum_flux_due_to_mesoscale_orographic_gravity_wave_drag
+  long_name = integrated y momentum flux from mesoscale gwd
+  units = Pa
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[dusfc_bl]
+  standard_name = vertically_integrated_x_momentum_flux_due_to_blocking_drag
+  long_name = integrated x momentum flux from blocking drag
+  units = Pa
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[dvsfc_bl]
+  standard_name = vertically_integrated_y_momentum_flux_due_to_blocking_drag
+  long_name = integrated y momentum flux from blocking drag
   units = Pa
   dimensions = (horizontal_loop_extent)
   type = real
@@ -310,6 +374,13 @@
   type = real
   kind = kind_phys
   intent = out
+[ldiag_ugwp]
+  standard_name = flag_for_unified_gravity_wave_physics_diagnostics
+  long_name = flag for CIRES UGWP Diagnostics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

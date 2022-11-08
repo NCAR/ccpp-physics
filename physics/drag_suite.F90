@@ -7,7 +7,7 @@
       contains
 
 !> \defgroup gfs_drag_suite_mod GSL drag_suite Module
-!> This module contains the CCPP-compliant GSL orographic gravity wave dray scheme.
+!> This module contains the CCPP-compliant GSL orographic gravity wave drag scheme.
 !> @{
       subroutine drag_suite_init(gwd_opt, errmsg, errflg)
 
@@ -29,7 +29,7 @@
       end if        
       end subroutine drag_suite_init
 
-!> \brief This subroutine includes orographic gravity wave drag,  mountain
+!> \brief This subroutine includes orographic gravity wave drag, mountain
 !! blocking, and form drag.
 !!
 !> The time tendencies of zonal and meridional wind are altered to
@@ -200,16 +200,17 @@
 !!  an independent process.  The next step is to test
 !!
 !> \section det_drag_suite GFS Orographic GWD Scheme Detailed Algorithm
+!> @{
    subroutine drag_suite_run(                                           &
-     &           IM,KM,dvdt,dudt,dtdt,U1,V1,T1,Q1,KPBL,                 &
+     &           IM,KM,ak,bk,dvdt,dudt,dtdt,U1,V1,T1,Q1,KPBL,           &
      &           PRSI,DEL,PRSL,PRSLK,PHII,PHIL,DELTIM,KDT,              &
      &           var,oc1,oa4,ol4,                                       &
      &           varss,oc1ss,oa4ss,ol4ss,                               &
      &           THETA,SIGMA,GAMMA,ELVMAX,                              &
-     &           dtaux2d_ls,dtauy2d_ls,dtaux2d_bl,dtauy2d_bl,           &
+     &           dtaux2d_ms,dtauy2d_ms,dtaux2d_bl,dtauy2d_bl,           &
      &           dtaux2d_ss,dtauy2d_ss,dtaux2d_fd,dtauy2d_fd,           &
      &           dusfc,dvsfc,                                           &
-     &           dusfc_ls,dvsfc_ls,dusfc_bl,dvsfc_bl,                   &
+     &           dusfc_ms,dvsfc_ms,dusfc_bl,dvsfc_bl,                   &
      &           dusfc_ss,dvsfc_ss,dusfc_fd,dvsfc_fd,                   &
      &           slmsk,br1,hpbl,                                        &
      &           g, cp, rd, rv, fv, pi, imx, cdmbgwd, me, master,       &
@@ -217,7 +218,7 @@
      &           do_gsl_drag_ls_bl, do_gsl_drag_ss, do_gsl_drag_tofd,   &
      &           dtend, dtidx, index_of_process_orographic_gwd,         &
      &           index_of_temperature, index_of_x_wind,                 &
-     &           index_of_y_wind, ldiag3d,                              &
+     &           index_of_y_wind, ldiag3d, ldiag_ugwp, ugwp_seq_update, & 
      &           spp_wts_gwd, spp_gwd, errmsg, errflg)
 
 !   ********************************************************************
@@ -248,7 +249,7 @@
 !                    topographic form drag of Beljaars et al. (2004, QJRMS)
 !           Activation of each component is done by specifying the integer-parameters
 !           (defined below) to 0: inactive or 1: active
-!                    gwd_opt_ls = 0 or 1: large-scale  
+!                    gwd_opt_ms = 0 or 1: mesoscale  
 !                    gwd_opt_bl = 0 or 1: blocking drag
 !                    gwd_opt_ss = 0 or 1: small-scale gravity wave drag
 !                    gwd_opt_fd = 0 or 1: topographic form drag
@@ -258,11 +259,11 @@
 !    2020-08-25  Michael Toy changed logic control for drag component selection
 !                    for CCPP.
 !                    Namelist options:
-!                    do_gsl_drag_ls_bl - logical flag for large-scale GWD + blocking
+!                    do_gsl_drag_ls_bl - logical flag for mesoscale GWD + blocking
 !                    do_gsl_drag_ss - logical flag for small-scale GWD
 !                    do_gsl_drag_tofd - logical flag for turbulent form drag
 !                    Compile-time options (same as before):
-!                    gwd_opt_ls = 0 or 1: large-scale GWD
+!                    gwd_opt_ms = 0 or 1: mesoscale GWD
 !                    gwd_opt_bl = 0 or 1: blocking drag
 !
 !  References:
@@ -320,6 +321,7 @@
    integer, intent(in) :: gwd_opt
    logical, intent(in) :: lprnt
    integer, intent(in) :: KPBL(:)
+   real(kind=kind_phys), intent(in) :: ak(:), bk(:)
    real(kind=kind_phys), intent(in) :: deltim, G, CP, RD, RV, cdmbgwd(:)
    real(kind=kind_phys), intent(inout) :: dtend(:,:,:)
    logical, intent(in) :: ldiag3d
@@ -366,23 +368,23 @@
 
 !SPP
    real(kind=kind_phys), dimension(im) :: var_stoch, varss_stoch, &
-                                       varmax_ss_stoch, varmax_fd_stoch
+                                       varmax_fd_stoch
    real(kind=kind_phys), intent(in) :: spp_wts_gwd(:,:)
    integer, intent(in) :: spp_gwd
 
    real(kind=kind_phys), dimension(im)              :: rstoch
 
 !Output:
-   real(kind=kind_phys), intent(out) ::                          &
+   real(kind=kind_phys), intent(inout) ::                        &
      &                      dusfc(:),   dvsfc(:)
 !Output (optional):
    real(kind=kind_phys), intent(out) ::                          &
-     &                      dusfc_ls(:),dvsfc_ls(:),             &
+     &                      dusfc_ms(:),dvsfc_ms(:),             &
      &                      dusfc_bl(:),dvsfc_bl(:),             &
      &                      dusfc_ss(:),dvsfc_ss(:),             &
      &                      dusfc_fd(:),dvsfc_fd(:)
    real(kind=kind_phys), intent(out) ::                          &
-     &         dtaux2d_ls(:,:),dtauy2d_ls(:,:),                  &
+     &         dtaux2d_ms(:,:),dtauy2d_ms(:,:),                  &
      &         dtaux2d_bl(:,:),dtauy2d_bl(:,:),                  &
      &         dtaux2d_ss(:,:),dtauy2d_ss(:,:),                  &
      &         dtaux2d_fd(:,:),dtauy2d_fd(:,:)
@@ -395,13 +397,25 @@
 ! Each component is tapered off automatically as a function of dx, so best to
 ! keep them activated (.true.).
       logical, intent(in) ::   &
-      do_gsl_drag_ls_bl,       & ! large-scale gravity wave drag and blocking
+      do_gsl_drag_ls_bl,       & ! mesoscale gravity wave drag and blocking
       do_gsl_drag_ss,          & ! small-scale gravity wave drag (Steeneveld et al. 2008)
       do_gsl_drag_tofd           ! form drag (Beljaars et al. 2004, QJRMS)
 
+! Flag for diagnostic outputs
+      logical, intent(in) :: ldiag_ugwp
+
+! Flag for sequential update of u and v between
+! LSGWD + BLOCKING and SSGWD + TOFD calculations
+      logical, intent(in) :: ugwp_seq_update
+
+! More variables for sequential updating of winds
+      ! Updated winds
+      real(kind=kind_phys), dimension(im,km) :: uwnd1, vwnd1
+      real(kind=kind_phys) :: tmp1, tmp2   ! temporary variables
+
 ! Additional flags
       integer, parameter ::    &
-      gwd_opt_ls      = 1,     & ! large-scale gravity wave drag
+      gwd_opt_ms      = 1,     & ! mesoscale gravity wave drag
       gwd_opt_bl      = 1,     & ! blocking drag
       gsd_diss_ht_opt = 0
 
@@ -409,15 +423,14 @@
 ! Small-scale GWD + turbulent form drag
    real(kind=kind_phys), parameter      :: dxmin_ss = 1000.,                     &
      &                     dxmax_ss = 12000.  ! min,max range of tapering (m)
-! Large-scale GWD + blocking
-   real(kind=kind_phys), parameter      :: dxmin_ls = 3000.,                     &
-     &                     dxmax_ls = 13000.  ! min,max range of tapering (m)
-   real(kind=kind_phys), dimension(im)  :: ss_taper, ls_taper ! small- and large-scale tapering factors (-)
+! Mesoscale GWD + blocking
+   real(kind=kind_phys), parameter      :: dxmin_ms = 3000.,                     &
+     &                     dxmax_ms = 13000.  ! min,max range of tapering (m)
+   real(kind=kind_phys), dimension(im)  :: ss_taper, ls_taper ! small- and meso-scale tapering factors (-)
 !
 ! Variables for limiting topographic standard deviation (var)
-   real(kind=kind_phys), parameter      :: varmax_ss = 50.,                      &
-                           varmax_fd = 150.,                     &
-                           beta_ss = 0.1,                        &
+   real(kind=kind_phys), parameter      :: varmax_ss = 50.,      &  ! varmax_ss not used
+                           varmax_fd = 500.,                     &
                            beta_fd = 0.2
    real(kind=kind_phys)                 :: var_temp, var_temp2
 
@@ -441,6 +454,8 @@
    real(kind=kind_phys), parameter       ::  frc     = 1.0
    real(kind=kind_phys), parameter       ::  ce      = 0.8
    real(kind=kind_phys), parameter       ::  cg      = 0.5
+   real(kind=kind_phys), parameter       ::  pref    = 1000.0e+2 ! ref. press. for sigma press. calc.
+   real(kind=kind_phys), parameter       ::  rlolev  = 500.0e+2  ! max press lvl for dtfac
    integer,parameter    ::  kpblmin = 2
 
 !
@@ -457,6 +472,9 @@
 !
    logical              ::  ldrag(im),icrilv(im),                 &
                             flag(im),kloop1(im)
+   logical              ::  prop_test
+!
+   real(kind=kind_phys) ::  onebgrcs
 !
    real(kind=kind_phys) ::  taub(im),taup(im,km+1),               &
                             xn(im),yn(im),                        &
@@ -469,7 +487,7 @@
                             brvf(im),xlinv(im),                   &
                             delks(im),delks1(im),                 &
                             bnv2(im,km),usqj(im,km),              &
-                            taud_ls(im,km),taud_bl(im,km),        &
+                            taud_ms(im,km),taud_bl(im,km),        &
                             ro(im,km),                            &
                             vtk(im,km),vtj(im,km),                &
                             zlowtop(im),velco(im,km-1),           &
@@ -523,6 +541,12 @@
       Tdtend = dtidx(index_of_temperature,index_of_process_orographic_gwd)
    endif
 
+
+   ! Initialize winds for sequential updating
+   ! NOTE: These will only be updated if ugwp_seq_update == .true.
+   uwnd1(:,:) = u1(:,:)
+   vwnd1(:,:) = v1(:,:)
+
 !--------------------------------------------------------------------
 ! SCALE-ADPTIVE PARAMETER FROM GFS GWD SCHEME
 !--------------------------------------------------------------------
@@ -565,6 +589,7 @@
    lcap   = km
    lcapp1 = lcap + 1
    fdir   = mdir / (2.0*pi)
+   onebgrcs = 1./g*rcs
 
    do i=1,im
       if (slmsk(i)==1. .or. slmsk(i)==2.) then !sea/land/ice mask (=0/1/2) in FV3
@@ -577,14 +602,14 @@
 
 !--- calculate scale-aware tapering factors
 do i=1,im
-   if ( dx(i) .ge. dxmax_ls ) then
+   if ( dx(i) .ge. dxmax_ms ) then
       ls_taper(i) = 1.
    else
-      if ( dx(i) .le. dxmin_ls) then
+      if ( dx(i) .le. dxmin_ms) then
          ls_taper(i) = 0.
       else
-         ls_taper(i) = 0.5 * ( SIN(pi*(dx(i)-0.5*(dxmax_ls+dxmin_ls))/  &
-                                  (dxmax_ls-dxmin_ls)) + 1. )
+         ls_taper(i) = 0.5 * ( SIN(pi*(dx(i)-0.5*(dxmax_ms+dxmin_ms))/  &
+                                  (dxmax_ms-dxmin_ms)) + 1. )
       endif
    endif
 enddo
@@ -597,14 +622,12 @@ if ( spp_gwd==1 ) then
   do i = its,im
     var_stoch(i)   = var(i)   + var(i)*0.75*spp_wts_gwd(i,1)
     varss_stoch(i) = varss(i) + varss(i)*0.75*spp_wts_gwd(i,1)
-    varmax_ss_stoch(i) = varmax_ss + varmax_ss*0.75*spp_wts_gwd(i,1)
     varmax_fd_stoch(i) = varmax_fd + varmax_fd*0.75*spp_wts_gwd(i,1)
   enddo
 else
   do i = its,im
     var_stoch(i)   = var(i)
     varss_stoch(i) = varss(i)
-    varmax_ss_stoch(i) = varmax_ss
     varmax_fd_stoch(i) = varmax_fd
   enddo
 endif
@@ -659,43 +682,15 @@ enddo
        vtj(i,k)  = 0.0
        vtk(i,k)  = 0.0
        taup(i,k) = 0.0
-       taud_ls(i,k) = 0.0
+       taud_ms(i,k) = 0.0
        taud_bl(i,k) = 0.0
        dtaux2d(i,k) = 0.0
        dtauy2d(i,k) = 0.0
      enddo
    enddo
 !
-   if ( (gwd_opt == 33).or.(gwd_opt == 22) ) then
-     do i = its,im
-       dusfc_ls(i) = 0.0
-       dvsfc_ls(i) = 0.0
-       dusfc_bl(i) = 0.0
-       dvsfc_bl(i) = 0.0
-       dusfc_ss(i) = 0.0
-       dvsfc_ss(i) = 0.0
-       dusfc_fd(i) = 0.0
-       dvsfc_fd(i) = 0.0
-     enddo
-     do k = kts,km
-       do i = its,im
-         dtaux2d_ls(i,k)= 0.0
-         dtauy2d_ls(i,k)= 0.0
-         dtaux2d_bl(i,k)= 0.0
-         dtauy2d_bl(i,k)= 0.0
-         dtaux2d_ss(i,k)= 0.0
-         dtauy2d_ss(i,k)= 0.0
-         dtaux2d_fd(i,k)= 0.0
-         dtauy2d_fd(i,k)= 0.0
-       enddo
-     enddo
-   endif
-
    do i = its,im
-     taup(i,km+1) = 0.0
      xlinv(i)     = 1.0/xl
-     dusfc(i) = 0.0
-     dvsfc(i) = 0.0
    enddo
 !
 !  initialize array for flow-blocking drag
@@ -809,8 +804,9 @@ enddo
 !
 ! END INITIALIZATION; BEGIN GWD CALCULATIONS:
 !
+
 IF ( (do_gsl_drag_ls_bl).and.                            &
-     ((gwd_opt_ls .EQ. 1).or.(gwd_opt_bl .EQ. 1)) ) then
+     ((gwd_opt_ms .EQ. 1).or.(gwd_opt_bl .EQ. 1)) ) then
 
    do i=its,im
 
@@ -914,7 +910,7 @@ IF ( (do_gsl_drag_ls_bl).and.                            &
             xlinv(i) = coefm(i) * cleff
             tem      = fr(i) * fr(i) * oc1(i)
             gfobnv   = gmax * tem / ((tem + cg)*bnv(i))
-            if ( gwd_opt_ls .NE. 0 ) then
+            if ( gwd_opt_ms .NE. 0 ) then
                taub(i)  = xlinv(i) * roll(i) * ulow(i) * ulow(i)           &
                            * ulow(i) * gfobnv * efact
             else     ! We've gotten what we need for the blocking scheme
@@ -930,200 +926,15 @@ IF ( (do_gsl_drag_ls_bl).and.                            &
 
    enddo  ! do i=its,im
 
-ENDIF   ! (do_gsl_drag_ls_bl).and.((gwd_opt_ls .EQ. 1).or.(gwd_opt_bl .EQ. 1))
+ENDIF   ! (do_gsl_drag_ls_bl).and.((gwd_opt_ms .EQ. 1).or.(gwd_opt_bl .EQ. 1))
 
-!=========================================================
-! add small-scale wavedrag for stable boundary layer
-!=========================================================
-  XNBV=0.
-  tauwavex0=0.
-  tauwavey0=0.
-  density=1.2
-  utendwave=0.
-  vtendwave=0.
-!
-IF ( do_gsl_drag_ss ) THEN
 
-   do i=its,im
 
-      if ( ss_taper(i).GT.1.E-02 ) then
-   !
-   ! calculating potential temperature
-   !
-         do k = kts,km
-            thx(i,k) = t1(i,k)/prslk(i,k)
-         enddo
-   !
-         do k = kts,km
-            tvcon = (1.+fv*q1(i,k))
-            thvx(i,k) = thx(i,k)*tvcon
-         enddo
 
-         hpbl2 = hpbl(i)+10.
-         kpbl2 = kpbl(i)
-         !kvar = MIN(kpbl, k-level of var)
-         kvar = 1
-         do k=kts+1,MAX(kpbl(i),kts+1)
-!            IF (zl(i,k)>2.*var(i) .or. zl(i,k)>2*varmax) then
-            IF (zl(i,k)>300.) then
-               kpbl2 = k
-               IF (k == kpbl(i)) then
-                  hpbl2 = hpbl(i)+10.
-               ELSE
-                  hpbl2 = zl(i,k)+10.
-               ENDIF
-               exit
-            ENDIF
-         enddo
-         if((xland(i)-1.5).le.0. .and. 2.*varss_stoch(i).le.hpbl(i))then
-            if(br1(i).gt.0. .and. thvx(i,kpbl2)-thvx(i,kts) > 0.)then
-              ! Modify xlinv to represent wave number of "typical" small-scale topography 
-!              cleff_ss    = 3. * max(dx(i),cleff_ss)
-!              cleff_ss    = 10. * max(dxmax_ss,cleff_ss)
-!               cleff_ss    = 0.1 * 12000.
-              xlinv(i) = 0.001*pi   ! 2km horizontal wavelength
-              !govrth(i)=g/(0.5*(thvx(i,kpbl(i))+thvx(i,kts)))
-              govrth(i)=g/(0.5*(thvx(i,kpbl2)+thvx(i,kts)))
-              !XNBV=sqrt(govrth(i)*(thvx(i,kpbl(i))-thvx(i,kts))/hpbl(i))
-              XNBV=sqrt(govrth(i)*(thvx(i,kpbl2)-thvx(i,kts))/hpbl2)
-!
-              !if(abs(XNBV/u1(i,kpbl(i))).gt.xlinv(i))then
-              if(abs(XNBV/u1(i,kpbl2)).gt.xlinv(i))then
-                !tauwavex0=0.5*XNBV*xlinv(i)*(2*MIN(varss(i),75.))**2*ro(i,kts)*u1(i,kpbl(i))
-                !tauwavex0=0.5*XNBV*xlinv(i)*(2.*MIN(varss(i),40.))**2*ro(i,kts)*u1(i,kpbl2)
-                !tauwavex0=0.5*XNBV*xlinv(i)*(2.*MIN(varss(i),40.))**2*ro(i,kts)*u1(i,3)
-                ! Remove limit on varss_stoch
-                var_temp = varss_stoch(i)
-                ! Note:  This is a semi-implicit treatment of the time differencing
-                var_temp2 = 0.5*XNBV*xlinv(i)*(2.*var_temp)**2*ro(i,kvar)  ! this is greater than zero
-                tauwavex0=var_temp2*u1(i,kvar)/(1.+var_temp2*deltim)
-                tauwavex0=tauwavex0*ss_taper(i)
-              else
-                tauwavex0=0.
-              endif
-!
-              !if(abs(XNBV/v1(i,kpbl(i))).gt.xlinv(i))then
-              if(abs(XNBV/v1(i,kpbl2)).gt.xlinv(i))then
-                !tauwavey0=0.5*XNBV*xlinv(i)*(2*MIN(varss(i),75.))**2*ro(i,kts)*v1(i,kpbl(i))
-                !tauwavey0=0.5*XNBV*xlinv(i)*(2.*MIN(varss(i),40.))**2*ro(i,kts)*v1(i,kpbl2)
-                !tauwavey0=0.5*XNBV*xlinv(i)*(2.*MIN(varss(i),40.))**2*ro(i,kts)*v1(i,3)
-                ! Remove limit on varss_stoch
-                var_temp = varss_stoch(i)
-                ! Note:  This is a semi-implicit treatment of the time differencing
-                var_temp2 = 0.5*XNBV*xlinv(i)*(2.*var_temp)**2*ro(i,kvar)  ! this is greater than zero
-                tauwavey0=var_temp2*v1(i,kvar)/(1.+var_temp2*deltim)
-                tauwavey0=tauwavey0*ss_taper(i)
-              else
-                tauwavey0=0.
-              endif
-
-              do k=kts,kpbl(i) !MIN(kpbl2+1,km-1)
-!original
-                !utendwave(i,k)=-1.*tauwavex0*2.*max((1.-zl(i,k)/hpbl(i)),0.)/hpbl(i)
-                !vtendwave(i,k)=-1.*tauwavey0*2.*max((1.-zl(i,k)/hpbl(i)),0.)/hpbl(i)
-!new
-                utendwave(i,k)=-1.*tauwavex0*2.*max((1.-zl(i,k)/hpbl2),0.)/hpbl2
-                vtendwave(i,k)=-1.*tauwavey0*2.*max((1.-zl(i,k)/hpbl2),0.)/hpbl2
-!mod-to be used in HRRRv3/RAPv4
-                !utendwave(i,k)=-1.*tauwavex0 * max((1.-zl(i,k)/hpbl2),0.)**2
-                !vtendwave(i,k)=-1.*tauwavey0 * max((1.-zl(i,k)/hpbl2),0.)**2
-              enddo
-            endif
-         endif
-
-         do k = kts,km
-            dudt(i,k)  = dudt(i,k) + utendwave(i,k)
-            dvdt(i,k)  = dvdt(i,k) + vtendwave(i,k)
-            dusfc(i)   = dusfc(i) + utendwave(i,k) * del(i,k)
-            dvsfc(i)   = dvsfc(i) + vtendwave(i,k) * del(i,k)
-         enddo
-         if(udtend>0) then
-            dtend(i,kts:km,udtend) = dtend(i,kts:km,udtend) + utendwave(i,kts:km)*deltim
-         endif
-         if(vdtend>0) then
-            dtend(i,kts:km,vdtend) = dtend(i,kts:km,vdtend) + vtendwave(i,kts:km)*deltim
-         endif
-         if ( (gwd_opt == 33).or.(gwd_opt == 22) ) then
-            do k = kts,km
-               dusfc_ss(i) = dusfc_ss(i) + utendwave(i,k) * del(i,k)
-               dvsfc_ss(i) = dvsfc_ss(i) + vtendwave(i,k) * del(i,k)
-               dtaux2d_ss(i,k) = utendwave(i,k)
-               dtauy2d_ss(i,k) = vtendwave(i,k)
-            enddo
-         endif
-
-      endif  ! if (ss_taper(i).GT.1.E-02)
-
-   enddo  ! i=its,im
-
-ENDIF  ! if (do_gsl_drag_ss)
-
-!================================================================
-! Topographic Form Drag from Beljaars et al. (2004, QJRMS, equ. 16):
-!================================================================
-IF ( do_gsl_drag_tofd ) THEN
-
-   do i=its,im
-
-      if ( ss_taper(i).GT.1.E-02 ) then
-
-         utendform=0.
-         vtendform=0.
-
-         IF ((xland(i)-1.5) .le. 0.) then
-            !(IH*kflt**n1)**-1 = (0.00102*0.00035**-1.9)**-1 = 0.00026615161
-            ! Remove limit on varss_stoch
-            var_temp = varss_stoch(i)
-            !var_temp = MIN(var_temp, 250.)
-            a1=0.00026615161*var_temp**2
-!           a1=0.00026615161*MIN(varss(i),varmax)**2
-!           a1=0.00026615161*(0.5*varss(i))**2
-           ! k1**(n1-n2) = 0.003**(-1.9 - -2.8) = 0.003**0.9 = 0.005363
-            a2=a1*0.005363
-            ! Beljaars H_efold
-            H_efold = 1500.
-            DO k=kts,km
-               wsp=SQRT(u1(i,k)**2 + v1(i,k)**2)
-               ! alpha*beta*Cmd*Ccorr*2.109 = 12.*1.*0.005*0.6*2.109 = 0.0759
-               var_temp = 0.0759*EXP(-(zl(i,k)/H_efold)**1.5)*a2*          &
-                                 zl(i,k)**(-1.2)*ss_taper(i) ! this is greater than zero
-               !  Note:  This is a semi-implicit treatment of the time differencing
-               !  per Beljaars et al. (2004, QJRMS)
-               utendform(i,k) = - var_temp*wsp*u1(i,k)/(1. + var_temp*deltim*wsp)
-               vtendform(i,k) = - var_temp*wsp*v1(i,k)/(1. + var_temp*deltim*wsp)
-               !IF(zl(i,k) > 4000.) exit
-            ENDDO
-         ENDIF
-
-         do k = kts,km
-            dudt(i,k)  = dudt(i,k) + utendform(i,k)
-            dvdt(i,k)  = dvdt(i,k) + vtendform(i,k)
-            dusfc(i)   = dusfc(i) + utendform(i,k) * del(i,k)
-            dvsfc(i)   = dvsfc(i) + vtendform(i,k) * del(i,k)
-         enddo
-         if(udtend>0) then
-            dtend(i,kts:km,udtend) = dtend(i,kts:km,udtend) + utendform(i,kts:km)*deltim
-         endif
-         if(vdtend>0) then
-            dtend(i,kts:km,vdtend) = dtend(i,kts:km,vdtend) + vtendform(i,kts:km)*deltim
-         endif
-         if ( (gwd_opt == 33).or.(gwd_opt == 22) ) then
-            do k = kts,km
-               dtaux2d_fd(i,k) = utendform(i,k)
-               dtauy2d_fd(i,k) = vtendform(i,k)
-               dusfc_fd(i) = dusfc_fd(i) + utendform(i,k) * del(i,k)
-               dvsfc_fd(i) = dvsfc_fd(i) + vtendform(i,k) * del(i,k)
-            enddo
-         endif
-
-      endif   ! if (ss_taper(i).GT.1.E-02)
-
-   enddo  ! i=its,im
-
-ENDIF  ! if (do_gsl_drag_tofd)
 !=======================================================
-! More for the large-scale gwd component
-IF ( (do_gsl_drag_ls_bl).and.(gwd_opt_ls .EQ. 1) ) THEN
+! Mesoscale GWD + blocking
+!=======================================================
+IF ( (do_gsl_drag_ls_bl).and.(gwd_opt_ms .EQ. 1) ) THEN
 
    do i=its,im
 
@@ -1188,7 +999,7 @@ IF ( (do_gsl_drag_ls_bl).and.(gwd_opt_ls .EQ. 1) ) THEN
 
    enddo  ! do i=its,im
 
-ENDIF  ! (do_gsl_drag_ls_bl).and.(gwd_opt_ls .EQ. 1)
+ENDIF  ! (do_gsl_drag_ls_bl).and.(gwd_opt_ms .EQ. 1)
 !===============================================================
 !COMPUTE BLOCKING COMPONENT                                     
 !===============================================================
@@ -1227,7 +1038,7 @@ IF ( (do_gsl_drag_ls_bl) .and. (gwd_opt_bl .EQ. 1) ) THEN
                cd = max(2.0-1.0/od(i),0.0)
                ! New cdmbgwd addition for GSL blocking drag
                taufb(i,kts) = cdmb * 0.5 * roll(i) * coefm(i) /            &
-                                 max(dxmax_ls,dxy(i))**2 * cd * dxyp(i) *  &
+                                 max(dxmax_ms,dxy(i))**2 * cd * dxyp(i) *  &
                                  olp(i) * zblk * ulow(i)**2
                tautem = taufb(i,kts)/float(kblk-kts)
                do k = kts+1, kblk
@@ -1248,7 +1059,7 @@ IF ( (do_gsl_drag_ls_bl) .and. (gwd_opt_bl .EQ. 1) ) THEN
 ENDIF   ! IF ( (do_gsl_drag_ls_bl) .and. (gwd_opt_bl .EQ. 1) )
 !===========================================================
 IF ( (do_gsl_drag_ls_bl) .and.                                       &
-     (gwd_opt_ls .EQ. 1 .OR. gwd_opt_bl .EQ. 1) ) THEN 
+     (gwd_opt_ms .EQ. 1 .OR. gwd_opt_bl .EQ. 1) ) THEN 
 
    do i=its,im
 
@@ -1257,42 +1068,55 @@ IF ( (do_gsl_drag_ls_bl) .and.                                       &
 !
 !  calculate - (g)*d(tau)/d(pressure) and deceleration terms dtaux, dtauy
 !
+!  First, set taup (momentum flux) at model top equal to that of the layer
+!  interface just below the top, i.e., taup(km)
+!  The idea is to allow the momentum flux to go out the 'top'.  This
+!  ensures there is no GWD force at the top layer.
+!
+         taup(i,km+1) = taup(i,km)
          do k = kts,km
-            taud_ls(i,k) = 1. * (taup(i,k+1) - taup(i,k)) * csg / del(i,k)
+            taud_ms(i,k) = 1. * (taup(i,k+1) - taup(i,k)) * csg / del(i,k)
             taud_bl(i,k) = 1. * (taufb(i,k+1) - taufb(i,k)) * csg / del(i,k)
          enddo
 !
-!  limit de-acceleration (momentum deposition ) at top to 1/2 value
-!  the idea is some stuff must go out the 'top'
-         do klcap = lcap,km
-            taud_ls(i,klcap) = taud_ls(i,klcap) * factop
-            taud_bl(i,klcap) = taud_bl(i,klcap) * factop
-         enddo
 !
-!  if the gravity wave drag would force a critical line
-!  in the lower ksmm1 layers during the next deltim timestep,
-!  then only apply drag until that critical line is reached.
+!  if the gravity wave drag + blocking would force a critical line
+!  in the layers below 'sigma' pressure level = rlolev during the next deltim
+!  timestep, then only apply drag until that critical line is reached, i.e.,
+!  reduce drag to limit resulting wind components to zero
+!  Note: 'sigma' pressure = ak + pref*bk in units of Pa
 !
          do k = kts,kpblmax-1
-            if (k .le. kbl(i)) then
-               if ((taud_ls(i,k)+taud_bl(i,k)).ne.0.)                   &
+            if (ak(k)+pref*bk(k).ge.rlolev) then
+               if ((taud_ms(i,k)+taud_bl(i,k)).ne.0.)                   &
                   dtfac(i) = min(dtfac(i),abs(velco(i,k)                &
-                       /(deltim*rcs*(taud_ls(i,k)+taud_bl(i,k)))))
+                       /(deltim*rcs*(taud_ms(i,k)+taud_bl(i,k)))))
             endif
          enddo
 !
          do k = kts,km
-            taud_ls(i,k)  = taud_ls(i,k)*dtfac(i)* ls_taper(i) *(1.-rstoch(i))
+            taud_ms(i,k)  = taud_ms(i,k)*dtfac(i)* ls_taper(i) *(1.-rstoch(i))
             taud_bl(i,k)  = taud_bl(i,k)*dtfac(i)* ls_taper(i) *(1.-rstoch(i))
 
-            dtaux  = taud_ls(i,k) * xn(i)
-            dtauy  = taud_ls(i,k) * yn(i)
+            dtaux  = taud_ms(i,k) * xn(i)
+            dtauy  = taud_ms(i,k) * yn(i)
             dtauxb = taud_bl(i,k) * xn(i)
             dtauyb = taud_bl(i,k) * yn(i)
 
-            !add blocking and large-scale contributions to tendencies 
-            dudt(i,k)  = dtaux + dtauxb + dudt(i,k)
-            dvdt(i,k)  = dtauy + dtauyb + dvdt(i,k)
+            !add blocking and mesoscale contributions to tendencies 
+            tmp1 = dtaux + dtauxb
+            tmp2 = dtauy + dtauyb
+            dudt(i,k)  = tmp1 + dudt(i,k)
+            dvdt(i,k)  = tmp2 + dvdt(i,k)
+
+            ! Update winds if sequential updating is selected
+            ! and SSGWD and TOFD will be calculated
+            ! Note:  uwnd1 and vwnd1 replace u1 and u2,respectively,
+            ! for the SSGWD and TOFD calculations
+            if ( ugwp_seq_update .and. (do_gsl_drag_ss.or.do_gsl_drag_tofd) ) then
+               uwnd1(i,k) = uwnd1(i,k) + tmp1*deltim
+               vwnd1(i,k) = vwnd1(i,k) + tmp2*deltim
+            endif
 
             if ( gsd_diss_ht_opt .EQ. 1 ) then
                ! Calculate dissipation heating
@@ -1308,35 +1132,31 @@ IF ( (do_gsl_drag_ls_bl) .and.                                       &
                endif
             endif
 
-            dusfc(i)   = dusfc(i) + taud_ls(i,k)*xn(i)*del(i,k) +       &
-                                    taud_bl(i,k)*xn(i)*del(i,k)
-            dvsfc(i)   = dvsfc(i) + taud_ls(i,k)*yn(i)*del(i,k) +       &
-                                    taud_bl(i,k)*yn(i)*del(i,k)
+            dusfc(i) = dusfc(i) - onebgrcs * ( taud_ms(i,k)*xn(i)*del(i,k) + &
+                                    taud_bl(i,k)*xn(i)*del(i,k) )
+            dvsfc(i) = dvsfc(i) - onebgrcs * ( taud_ms(i,k)*yn(i)*del(i,k) + &
+                                    taud_bl(i,k)*yn(i)*del(i,k) )
             if(udtend>0) then
-               dtend(i,k,udtend) = dtend(i,k,udtend) + (taud_ls(i,k) *  &
+               dtend(i,k,udtend) = dtend(i,k,udtend) + (taud_ms(i,k) *  &
                     xn(i) + taud_bl(i,k) * xn(i)) * deltim
             endif
             if(vdtend>0) then
-               dtend(i,k,vdtend) = dtend(i,k,vdtend) + (taud_ls(i,k) *  &
+               dtend(i,k,vdtend) = dtend(i,k,vdtend) + (taud_ms(i,k) *  &
                     yn(i) + taud_bl(i,k) * yn(i)) * deltim
             endif
 
          enddo
 
-         !  Finalize dusfc and dvsfc diagnostics
-         dusfc(i) = (-1./g*rcs) * dusfc(i)
-         dvsfc(i) = (-1./g*rcs) * dvsfc(i)
-
-         if ( (gwd_opt == 33).or.(gwd_opt == 22) ) then
+         if ( ldiag_ugwp ) then
             do k = kts,km
-               dtaux2d_ls(i,k) = taud_ls(i,k) * xn(i)
-               dtauy2d_ls(i,k) = taud_ls(i,k) * yn(i)
+               dtaux2d_ms(i,k) = taud_ms(i,k) * xn(i)
+               dtauy2d_ms(i,k) = taud_ms(i,k) * yn(i)
                dtaux2d_bl(i,k) = taud_bl(i,k) * xn(i)
                dtauy2d_bl(i,k) = taud_bl(i,k) * yn(i)
-               dusfc_ls(i)  = dusfc_ls(i) + dtaux2d_ls(i,k) * del(i,k)
-               dvsfc_ls(i)  = dvsfc_ls(i) + dtauy2d_ls(i,k) * del(i,k)
-               dusfc_bl(i)  = dusfc_bl(i) + dtaux2d_bl(i,k) * del(i,k)
-               dvsfc_bl(i)  = dvsfc_bl(i) + dtauy2d_bl(i,k) * del(i,k)
+               dusfc_ms(i)  = dusfc_ms(i) - onebgrcs * dtaux2d_ms(i,k) * del(i,k)
+               dvsfc_ms(i)  = dvsfc_ms(i) - onebgrcs * dtauy2d_ms(i,k) * del(i,k)
+               dusfc_bl(i)  = dusfc_bl(i) - onebgrcs * dtaux2d_bl(i,k) * del(i,k)
+               dvsfc_bl(i)  = dvsfc_bl(i) - onebgrcs * dtauy2d_bl(i,k) * del(i,k)
             enddo
          endif
 
@@ -1344,20 +1164,217 @@ IF ( (do_gsl_drag_ls_bl) .and.                                       &
 
    enddo   ! do i=its,im
 
-ENDIF  ! (do_gsl_drag_ls_bl).and.(gwd_opt_ls.EQ.1 .OR. gwd_opt_bl.EQ.1)
+ENDIF  ! (do_gsl_drag_ls_bl).and.(gwd_opt_ms.EQ.1 .OR. gwd_opt_bl.EQ.1)
 
-if ( (gwd_opt == 33).or.(gwd_opt == 22) ) then
-  !  Finalize dusfc and dvsfc diagnostics
-  do i = its,im
-    dusfc_ls(i) = (-1./g*rcs) * dusfc_ls(i)
-    dvsfc_ls(i) = (-1./g*rcs) * dvsfc_ls(i)
-    dusfc_bl(i) = (-1./g*rcs) * dusfc_bl(i)
-    dvsfc_bl(i) = (-1./g*rcs) * dvsfc_bl(i)
-    dusfc_ss(i) = (-1./g*rcs) * dusfc_ss(i)
-    dvsfc_ss(i) = (-1./g*rcs) * dvsfc_ss(i)
-    dusfc_fd(i) = (-1./g*rcs) * dusfc_fd(i)
-    dvsfc_fd(i) = (-1./g*rcs) * dvsfc_fd(i)
-  enddo
+
+!====================================================================
+! Calculate small-scale gravity wave drag for stable boundary layer
+!====================================================================
+  XNBV=0.
+  tauwavex0=0.
+  tauwavey0=0.
+  density=1.2
+  utendwave=0.
+  vtendwave=0.
+!
+IF ( do_gsl_drag_ss ) THEN
+
+   do i=its,im
+
+      if ( ss_taper(i).GT.1.E-02 ) then
+   !
+   ! calculating potential temperature
+   !
+         do k = kts,km
+            thx(i,k) = t1(i,k)/prslk(i,k)
+         enddo
+   !
+         do k = kts,km
+            tvcon = (1.+fv*q1(i,k))
+            thvx(i,k) = thx(i,k)*tvcon
+         enddo
+
+         hpbl2 = hpbl(i)+10.
+         kpbl2 = kpbl(i)
+         !kvar = MIN(kpbl, k-level of var)
+         kvar = 1
+         do k=kts+1,MAX(kpbl(i),kts+1)
+!            IF (zl(i,k)>2.*var(i) .or. zl(i,k)>2*varmax) then
+            IF (zl(i,k)>300.) then
+               kpbl2 = k
+               IF (k == kpbl(i)) then
+                  hpbl2 = hpbl(i)+10.
+               ELSE
+                  hpbl2 = zl(i,k)+10.
+               ENDIF
+               exit
+            ENDIF
+         enddo
+         if((xland(i)-1.5).le.0. .and. 2.*varss_stoch(i).le.hpbl(i))then
+            if(br1(i).gt.0. .and. thvx(i,kpbl2)-thvx(i,kts) > 0.)then
+              ! Modify xlinv to represent wave number of "typical" small-scale topography 
+!              cleff_ss    = 3. * max(dx(i),cleff_ss)
+!              cleff_ss    = 10. * max(dxmax_ss,cleff_ss)
+!               cleff_ss    = 0.1 * 12000.
+              xlinv(i) = 0.001*pi   ! 2km horizontal wavelength
+              !govrth(i)=g/(0.5*(thvx(i,kpbl(i))+thvx(i,kts)))
+              govrth(i)=g/(0.5*(thvx(i,kpbl2)+thvx(i,kts)))
+              !XNBV=sqrt(govrth(i)*(thvx(i,kpbl(i))-thvx(i,kts))/hpbl(i))
+              XNBV=sqrt(govrth(i)*(thvx(i,kpbl2)-thvx(i,kts))/hpbl2)
+!
+              ! check for possibility of vertical wave propagation
+              ! (avoids division by zero if uwnd1(i,kpbl2).eq.0.)
+              if (uwnd1(i,kpbl2).eq.0.) then
+                 prop_test = .true.
+              elseif (abs(XNBV/uwnd1(i,kpbl2)).gt.xlinv(i)) then
+                 prop_test = .true.
+              else
+                 prop_test = .false.
+              endif
+              if (prop_test) then
+                ! Remove limit on varss_stoch
+                var_temp = varss_stoch(i)
+                ! Note:  This is a semi-implicit treatment of the time differencing
+                var_temp2 = 0.5*XNBV*xlinv(i)*(2.*var_temp)**2*ro(i,kvar)  ! this is greater than zero
+                tauwavex0=var_temp2*uwnd1(i,kvar)/(1.+var_temp2*deltim)
+                tauwavex0=tauwavex0*ss_taper(i)
+              else
+                tauwavex0=0.
+              endif
+!
+              ! check for possibility of vertical wave propagation
+              ! (avoids division by zero if vwnd1(i,kpbl2).eq.0.)
+              if (vwnd1(i,kpbl2).eq.0.) then
+                 prop_test = .true.
+              elseif (abs(XNBV/vwnd1(i,kpbl2)).gt.xlinv(i)) then
+                 prop_test = .true.
+              else
+                 prop_test = .false.
+              endif
+              if (prop_test) then
+                ! Remove limit on varss_stoch
+                var_temp = varss_stoch(i)
+                ! Note:  This is a semi-implicit treatment of the time differencing
+                var_temp2 = 0.5*XNBV*xlinv(i)*(2.*var_temp)**2*ro(i,kvar)  ! this is greater than zero
+                tauwavey0=var_temp2*vwnd1(i,kvar)/(1.+var_temp2*deltim)
+                tauwavey0=tauwavey0*ss_taper(i)
+              else
+                tauwavey0=0.
+              endif
+
+              do k=kts,kpbl(i) !MIN(kpbl2+1,km-1)
+!original
+                !utendwave(i,k)=-1.*tauwavex0*2.*max((1.-zl(i,k)/hpbl(i)),0.)/hpbl(i)
+                !vtendwave(i,k)=-1.*tauwavey0*2.*max((1.-zl(i,k)/hpbl(i)),0.)/hpbl(i)
+!new
+                utendwave(i,k)=-1.*tauwavex0*2.*max((1.-zl(i,k)/hpbl2),0.)/hpbl2
+                vtendwave(i,k)=-1.*tauwavey0*2.*max((1.-zl(i,k)/hpbl2),0.)/hpbl2
+!mod-to be used in HRRRv3/RAPv4
+                !utendwave(i,k)=-1.*tauwavex0 * max((1.-zl(i,k)/hpbl2),0.)**2
+                !vtendwave(i,k)=-1.*tauwavey0 * max((1.-zl(i,k)/hpbl2),0.)**2
+              enddo
+            endif
+         endif
+
+         do k = kts,km
+            dudt(i,k)  = dudt(i,k) + utendwave(i,k)
+            dvdt(i,k)  = dvdt(i,k) + vtendwave(i,k)
+            dusfc(i)   = dusfc(i) - onebgrcs * utendwave(i,k) * del(i,k)
+            dvsfc(i)   = dvsfc(i) - onebgrcs * vtendwave(i,k) * del(i,k)
+         enddo
+         if(udtend>0) then
+            dtend(i,kts:km,udtend) = dtend(i,kts:km,udtend) + utendwave(i,kts:km)*deltim
+         endif
+         if(vdtend>0) then
+            dtend(i,kts:km,vdtend) = dtend(i,kts:km,vdtend) + vtendwave(i,kts:km)*deltim
+         endif
+         if ( ldiag_ugwp ) then
+            do k = kts,km
+               dusfc_ss(i) = dusfc_ss(i) + utendwave(i,k) * del(i,k)
+               dvsfc_ss(i) = dvsfc_ss(i) + vtendwave(i,k) * del(i,k)
+               dtaux2d_ss(i,k) = utendwave(i,k)
+               dtauy2d_ss(i,k) = vtendwave(i,k)
+            enddo
+         endif
+
+      endif  ! if (ss_taper(i).GT.1.E-02)
+
+   enddo  ! i=its,im
+
+ENDIF  ! if (do_gsl_drag_ss)
+
+
+!===================================================================
+! Topographic Form Drag from Beljaars et al. (2004, QJRMS, equ. 16):
+!===================================================================
+IF ( do_gsl_drag_tofd ) THEN
+
+   do i=its,im
+
+      if ( ss_taper(i).GT.1.E-02 ) then
+
+         utendform=0.
+         vtendform=0.
+
+         IF ((xland(i)-1.5) .le. 0.) then
+            !(IH*kflt**n1)**-1 = (0.00102*0.00035**-1.9)**-1 = 0.00026615161
+            var_temp = MIN(varss_stoch(i),varmax_fd_stoch(i)) +                &
+                       MAX(0.,beta_fd*(varss_stoch(i)-varmax_fd_stoch(i)))
+            a1=0.00026615161*var_temp**2
+!           a1=0.00026615161*MIN(varss(i),varmax)**2
+!           a1=0.00026615161*(0.5*varss(i))**2
+           ! k1**(n1-n2) = 0.003**(-1.9 - -2.8) = 0.003**0.9 = 0.005363
+            a2=a1*0.005363
+            ! Beljaars H_efold
+            H_efold = 1500.
+            DO k=kts,km
+               wsp=SQRT(uwnd1(i,k)**2 + vwnd1(i,k)**2)
+               ! alpha*beta*Cmd*Ccorr*2.109 = 12.*1.*0.005*0.6*2.109 = 0.0759
+               var_temp = 0.0759*EXP(-(zl(i,k)/H_efold)**1.5)*a2*          &
+                                 zl(i,k)**(-1.2)*ss_taper(i) ! this is greater than zero
+               !  Note:  This is a semi-implicit treatment of the time differencing
+               !  per Beljaars et al. (2004, QJRMS)
+               utendform(i,k) = - var_temp*wsp*uwnd1(i,k)/(1. + var_temp*deltim*wsp)
+               vtendform(i,k) = - var_temp*wsp*vwnd1(i,k)/(1. + var_temp*deltim*wsp)
+               !IF(zl(i,k) > 4000.) exit
+            ENDDO
+         ENDIF
+
+         do k = kts,km
+            dudt(i,k)  = dudt(i,k) + utendform(i,k)
+            dvdt(i,k)  = dvdt(i,k) + vtendform(i,k)
+            dusfc(i)   = dusfc(i) - onebgrcs * utendform(i,k) * del(i,k)
+            dvsfc(i)   = dvsfc(i) - onebgrcs * vtendform(i,k) * del(i,k)
+         enddo
+         if(udtend>0) then
+            dtend(i,kts:km,udtend) = dtend(i,kts:km,udtend) + utendform(i,kts:km)*deltim
+         endif
+         if(vdtend>0) then
+            dtend(i,kts:km,vdtend) = dtend(i,kts:km,vdtend) + vtendform(i,kts:km)*deltim
+         endif
+         if ( ldiag_ugwp ) then
+            do k = kts,km
+               dtaux2d_fd(i,k) = utendform(i,k)
+               dtauy2d_fd(i,k) = vtendform(i,k)
+               dusfc_fd(i) = dusfc_fd(i) + utendform(i,k) * del(i,k)
+               dvsfc_fd(i) = dvsfc_fd(i) + vtendform(i,k) * del(i,k)
+            enddo
+         endif
+
+      endif   ! if (ss_taper(i).GT.1.E-02)
+
+   enddo  ! i=its,im
+
+ENDIF  ! if (do_gsl_drag_tofd)
+
+
+
+if ( ldiag_ugwp ) then
+   !  Finalize dusfc and dvsfc diagnostics for gsl small-scale drag components
+   dusfc_ss(:) = -onebgrcs * dusfc_ss(:)
+   dvsfc_ss(:) = -onebgrcs * dvsfc_ss(:)
+   dusfc_fd(:) = -onebgrcs * dusfc_fd(:)
+   dvsfc_fd(:) = -onebgrcs * dvsfc_fd(:)
 endif
 !
    return
