@@ -131,7 +131,7 @@
   subroutine noahmpdrv_run                                       &
 !...................................
 !  ---  inputs:
-    ( im, km, lsnowl, itime, ps, u1, v1, t1, q1, soiltyp,        &
+    ( im, km, lsnowl, itime, ps, u1, v1, t1, q1, soiltyp,soilcol,&
       vegtype, sigmaf, dlwflx, dswsfc, snet, delt, tg3, cm, ch,  &
       prsl1, prslk1, prslki, prsik1, zf,pblh, dry, wind, slopetyp,    &
       shdmin, shdmax, snoalb, sfalb, flag_iter,con_g,            &
@@ -206,6 +206,7 @@
   real(kind=kind_phys), dimension(:)     , intent(in)    :: t1         ! layer 1 temperature [K]
   real(kind=kind_phys), dimension(:)     , intent(in)    :: q1         ! layer 1 specific humidity [kg/kg]
   integer             , dimension(:)     , intent(in)    :: soiltyp    ! soil type (integer index)
+  integer             , dimension(:)     , intent(in)    :: soilcol    ! soil color (integer index)
   integer             , dimension(:)     , intent(in)    :: vegtype    ! vegetation type (integer index)
   real(kind=kind_phys), dimension(:)     , intent(in)    :: sigmaf     ! areal fractional cover of green vegetation
   real(kind=kind_phys), dimension(:)     , intent(in)    :: dlwflx     ! downward longwave radiation [W/m2]
@@ -753,7 +754,8 @@ do i = 1, im
 
       soil_category       = soiltyp(i)
       slope_category      = slopetyp(i)
-      soil_color_category = 4
+      soil_color_category = soilcol(i)
+!     soil_color_category = 4
 
       call transfer_mp_parameters(vegetation_category, soil_category, &
                         slope_category, soil_color_category, crop_type,parameters)

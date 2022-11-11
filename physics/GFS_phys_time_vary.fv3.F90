@@ -160,6 +160,7 @@
          real(kind_phys),      intent(inout) :: tsnoxy (:,lsnow_lsm_lbound:)
          real(kind_phys),      intent(inout) :: smoiseq(:,:)
          real(kind_phys),      intent(inout) :: zsnsoxy(:,lsnow_lsm_lbound:)
+
          real(kind_phys),      intent(inout) :: slc(:,:)
          real(kind_phys),      intent(inout) :: smc(:,:)
          real(kind_phys),      intent(inout) :: stc(:,:)
@@ -168,6 +169,7 @@
          real(kind_phys),      intent(in)    :: canopy(:)
          real(kind_phys),      intent(in)    :: tg3(:)
          integer,              intent(in)    :: stype(:)
+
          real(kind_phys),      intent(in)    :: con_t0c
 
          integer,              intent(in)    :: nthrds
@@ -465,8 +467,8 @@
 !$OMP          shared(isbarren_table,isice_table,isurban_table)         &
 !$omp          shared(iswater_table,laim_table,sla_table,bexp_table)    &
 !$omp          shared(stc,smc,slc,tg3,snowxy,tsnoxy,snicexy,snliqxy)    &
-!$omp          shared(zsnsoxy,STYPE,SMCMAX_TABLE,SMCWLT_TABLE,zs,dzs)   &
-!$omp          shared(DWSAT_TABLE,DKSAT_TABLE,PSISAT_TABLE,smoiseq)     &
+!$omp          shared(zsnsoxy,stype,smcmax_table,smcwlt_table,zs,dzs)   & 
+!$omp          shared(dwsat_table,dksat_table,psisat_table,smoiseq)     &
 !$OMP          shared(smcwtdxy,deeprechxy,rechxy,errmsg,errflg)         &
 !$OMP          private(vegtyp,masslai,masssai,snd,dzsno,dzsnso,isnow)   &
 !$OMP          private(soiltyp,bexp,smcmax,smcwlt,dwsat,dksat,psisat,ddz)
@@ -717,7 +719,7 @@
             kice, ialb, isot, ivegsrc, input_nml_file, use_ufo, nst_anl, frac_grid, fhcyc, phour,   &
             lakefrac, min_seaice, min_lakeice, smc, slc, stc, smois, sh2o, tslb, tiice, tg3, tref,  &
             tsfc, tsfco, tisfc, hice, fice, facsf, facwf, alvsf, alvwf, alnsf, alnwf, zorli, zorll, &
-            zorlo, weasd, slope, snoalb, canopy, vfrac, vtype, stype, shdmin, shdmax, snowd,        &
+            zorlo, weasd, slope, snoalb, canopy, vfrac, vtype, stype,scolor, shdmin, shdmax, snowd, & !soil color
             cv, cvb, cvt, oro, oro_uf, xlat_d, xlon_d, slmsk, landfrac,                             &
             do_ugwp_v1, jindx1_tau, jindx2_tau, ddy_j1tau, ddy_j2tau, tau_amf, errmsg, errflg)
 
@@ -763,7 +765,7 @@
                                       zorli(:), zorll(:), zorlo(:), weasd(:), snoalb(:),             &
                                       canopy(:), vfrac(:), shdmin(:), shdmax(:),                     &
                                       snowd(:), cv(:), cvb(:), cvt(:), oro(:), oro_uf(:), slmsk(:)
-         integer,              intent(inout) :: vtype(:), stype(:), slope(:)
+         integer,              intent(inout) :: vtype(:), stype(:),scolor(:), slope(:) !soil color
 
          character(len=*),     intent(out)   :: errmsg
          integer,              intent(out)   :: errflg
@@ -899,7 +901,7 @@
                  frac_grid, smc, slc, stc, smois, sh2o, tslb, tiice, tg3, tref, tsfc,        &
                  tsfco, tisfc, hice, fice, facsf, facwf, alvsf, alvwf, alnsf, alnwf,         &
                  zorli, zorll, zorlo, weasd, slope, snoalb, canopy, vfrac, vtype,            &
-                 stype, shdmin, shdmax, snowd, cv, cvb, cvt, oro, oro_uf,                    &
+                 stype,scolor, shdmin, shdmax, snowd, cv, cvb, cvt, oro, oro_uf,             & !soil color
                  xlat_d, xlon_d, slmsk, imap, jmap)
            endif
          endif
