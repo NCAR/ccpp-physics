@@ -30,7 +30,7 @@
         imp_physics_fer_hires, iovr_rand, iovr_maxrand, iovr_max, iovr_dcorr,  &
         iovr_exp, iovr_exprand, idcor_con, idcor_hogan, idcor_oreopoulos,      & 
         julian, yearlen, lndp_var_list, lsswr, lslwr,                          &
-        ltaerosol, lgfdlmprad, uni_cld, effr_in, do_mynnedmf, lmfshal,         &
+        ltaerosol, mraerosol, lgfdlmprad, uni_cld, effr_in, do_mynnedmf, lmfshal, &
         lmfdeep2, fhswr, fhlwr, solhr, sup, con_eps, epsm1, fvirt,             &
         rog, rocp, con_rd, xlat_d, xlat, xlon, coslat, sinlat, tsfc, slmsk,    &
         prsi, prsl, prslk, tgrs, sfc_wts, mg_cld, effrr_in, pert_clds,         &
@@ -73,7 +73,8 @@
       use surface_perturbation,      only: cdfnor,ppfbet
 
       ! For Thompson MP
-      use module_mp_thompson,        only: calc_effectRad, Nt_c,     &
+      use module_mp_thompson,        only: calc_effectRad,           &
+                                           Nt_c_l, Nt_c_o,           &
                                            re_qc_min, re_qc_max,     &
                                            re_qi_min, re_qi_max,     &
                                            re_qs_min, re_qs_max
@@ -121,8 +122,8 @@
       character(len=3), dimension(:), intent(in) :: lndp_var_list
 
       logical,              intent(in) :: lextop, lsswr, lslwr, ltaerosol, lgfdlmprad, &
-                                          uni_cld, effr_in, do_mynnedmf,               &
-                                          lmfshal, lmfdeep2, pert_clds
+                                          uni_cld, effr_in, do_mynnedmf,       &
+                                          lmfshal, lmfdeep2, pert_clds, mraerosol
       logical,              intent(in) :: aero_dir_fdb
       real(kind=kind_phys), dimension(:,:), intent(in) :: smoke_ext, dust_ext
 
@@ -245,6 +246,7 @@
       real (kind=kind_phys) :: alpha0,beta0,m,s,cldtmp,tmp_wt,cdfz
       real (kind=kind_phys) :: max_relh
       integer  :: iflag
+      integer  :: islmsk
 
       integer :: ids, ide, jds, jde, kds, kde, &
                  ims, ime, jms, jme, kms, kme, &
@@ -609,11 +611,10 @@
 
       endif                              ! end_if_ivflip
 
-!> - Call module_radiation_aerosols::setaer(),to setup aerosols
-!! property profile for radiation.
 
 !check  print *,' in grrad : calling setaer '
 
+!> - Initialize mass mixing ratio of aerosols from NASA GOCART or NASA MERRA-2
        if (ntchm>0 .and. iaermdl==2) then
           do k=1,levs
             do i=1,im
@@ -637,6 +638,8 @@
         endif
 
 
+!> - Call module_radiation_aerosols::setaer() to setup aerosols
+!! property profile for radiation.
       call setaer (plvl, plyr, prslk1, tvly, rhly, slmsk,    & !  ---  inputs
                    tracer1, aer_nm, xlon, xlat, IM, LMK, LMP,&
                    lsswr,lslwr,                              &
@@ -654,7 +657,7 @@
         enddo
        enddo
 
-      !> Aerosol direct feedback effect by smoke and dust
+      !> - Add aerosol direct feedback effect by smoke and dust
       if(aero_dir_fdb) then ! add smoke/dust extinctions
         do k = 1, LMK
           do i = 1, IM
@@ -722,7 +725,7 @@
             enddo
           enddo
           ! for Thompson MP - prepare variables for calc_effr
-          if_thompson: if (imp_physics == imp_physics_thompson .and. ltaerosol) then
+          if_thompson: if (imp_physics == imp_physics_thompson .and. (ltaerosol .or. mraerosol)) then
             do k=1,LMK
               do i=1,IM
                 qvs = qlyr(i,k)
@@ -747,7 +750,11 @@
                 qc_mp (i,k) = tracer1(i,k,ntcw)/(1.-qvs)
                 qi_mp (i,k) = tracer1(i,k,ntiw)/(1.-qvs)
                 qs_mp (i,k) = tracer1(i,k,ntsw)/(1.-qvs)
-                nc_mp (i,k) = nt_c*orho(i,k)
+                if(nint(slmsk(i)) == 1) then
+                  nc_mp (i,k) = Nt_c_l*orho(i,k)
+                else
+                  nc_mp (i,k) = Nt_c_o*orho(i,k)
+                endif
                 ni_mp (i,k) = tracer1(i,k,ntinc)/(1.-qvs)
               enddo
             enddo
@@ -866,7 +873,7 @@
           ! Update number concentration, consistent with sub-grid clouds (GF, MYNN) or without (all others)
           do k=1,lm
             do i=1,im
-              if (ltaerosol .and. qc_mp(i,k)>1.e-12 .and. nc_mp(i,k)<100.) then
+              if ((ltaerosol .or. mraerosol) .and. qc_mp(i,k)>1.e-12 .and. nc_mp(i,k)<100.) then
                 nc_mp(i,k) = make_DropletNumber(qc_mp(i,k)*rho(i,k), nwfa(i,k)*rho(i,k)) * orho(i,k)
               endif
               if (qi_mp(i,k)>1.e-12 .and. ni_mp(i,k)<100.) then
@@ -876,13 +883,14 @@
           end do
           !> - Call Thompson's subroutine calc_effectRad() to compute effective radii
           do i=1,im
+            islmsk = nint(slmsk(i))
             ! Effective radii [m] are now intent(out), bounds applied in calc_effectRad
             !tgs: progclduni has different limits for ice radii (10.0-150.0) than
             !     calc_effectRad (4.99-125.0 for WRFv3.8.1; 2.49-125.0 for WRFv4+)
             !     it will raise the low limit from 5 to 10, but the high limit will remain 125.
             call calc_effectRad (tlyr(i,:), plyr(i,:)*100., qv_mp(i,:), qc_mp(i,:),   &
                                  nc_mp(i,:), qi_mp(i,:), ni_mp(i,:), qs_mp(i,:), &
-                                 effrl(i,:), effri(i,:), effrs(i,:), 1, lm )
+                                 effrl(i,:), effri(i,:), effrs(i,:), islmsk, 1, lm )
             ! Scale Thompson's effective radii from meter to micron
             do k=1,lm
               effrl(i,k) = MAX(re_qc_min, MIN(effrl(i,k), re_qc_max))*1.e6

@@ -3,7 +3,8 @@
 !! parameterization for stratocumulus-top-driven turbulence (updated version).
       module mfscuq_mod
       contains
-!>\ingroup satmedmfvdifq
+
+!>\ingroup module_satmedmfvdifq
 !! This subroutine computes mass flux and downdraft parcel properties
 !! for stratocumulus-top-driven turbulence.
 !! \section mfscuq GFS mfscu General Algorithm

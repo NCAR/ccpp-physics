@@ -144,6 +144,13 @@
   dimensions = ()
   type = logical
   intent = in
+[merra2_aerosol_aware]
+  standard_name = do_merra2_aerosol_awareness
+  long_name = flag for merra2 aerosol-aware physics for example the thompson microphysics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [nc]
   standard_name = mass_number_concentration_of_cloud_liquid_water_particles_in_air
   long_name = cloud droplet number concentration
@@ -213,6 +220,14 @@
   long_name = area of the grid cell
   units = m2
   dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[aerfld]
+  standard_name = mass_mixing_ratio_of_aerosol_from_gocart_or_merra2
+  long_name = mass mixing ratio of aerosol from gocart or merra2
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_layer_dimension,number_of_aerosol_tracers_MG)
   type = real
   kind = kind_phys
   intent = in
@@ -395,6 +410,13 @@
   dimensions = ()
   type = logical
   intent = in
+[merra2_aerosol_aware]
+  standard_name = do_merra2_aerosol_awareness
+  long_name = flag for merra2 aerosol-aware physics for example the thompson microphysics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [nc]
   standard_name = mass_number_concentration_of_cloud_liquid_water_particles_in_air_of_new_state
   long_name = cloud droplet number concentration
@@ -486,6 +508,13 @@
   long_name = deformed CFL factor
   units = count 
   dimensions = ()
+  type = integer
+  intent = in
+[islmsk]
+  standard_name = sea_land_ice_mask
+  long_name = sea/land/ice mask (=0/1/2)
+  units = flag
+  dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
 [dtp]
@@ -594,6 +623,14 @@
   units = flag
   dimensions = ()
   type = logical
+  intent = in
+[aerfld]
+  standard_name = mass_mixing_ratio_of_aerosol_from_gocart_or_merra2
+  long_name = mass mixing ratio of aerosol from gocart or merra2
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_aerosol_tracers_MG)
+  type = real
+  kind = kind_phys
   intent = in
 [mpicomm]
   standard_name = mpi_communicator

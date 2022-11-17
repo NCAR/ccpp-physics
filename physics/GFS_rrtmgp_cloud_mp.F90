@@ -12,8 +12,8 @@ module GFS_rrtmgp_cloud_mp
   use rrtmgp_lw_cloud_optics, only: &
        radliq_lwr => radliq_lwrLW, radliq_upr => radliq_uprLW,&
        radice_lwr => radice_lwrLW, radice_upr => radice_uprLW  
-  use module_mp_thompson, only: calc_effectRad, Nt_c, re_qc_min, re_qc_max, re_qi_min, &
-       re_qi_max, re_qs_min, re_qs_max
+  use module_mp_thompson, only: calc_effectRad, Nt_c_l, Nt_c_o, re_qc_min, re_qc_max,  &
+       re_qi_min, re_qi_max, re_qs_min, re_qs_max
   use module_mp_thompson_make_number_concentrations, only: make_IceNumber,             &
        make_DropletNumber, make_RainNumber
   
@@ -45,7 +45,7 @@ contains
   subroutine GFS_rrtmgp_cloud_mp_run(nCol, nLev, nTracers, ncnd, i_cldliq, i_cldice,     &
        i_cldrain, i_cldsnow, i_cldgrpl, i_cldtot, i_cldliq_nc, i_cldice_nc, i_twa, kdt,  &
        imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_samf, doSWrad, doLWrad, effr_in, lmfshal,   &
-       ltaerosol, icloud, imp_physics, imp_physics_thompson, imp_physics_gfdl,           &
+       ltaerosol,mraerosol, icloud, imp_physics, imp_physics_thompson, imp_physics_gfdl,           &
        lgfdlmprad, do_mynnedmf, uni_cld, lmfdeep2, p_lev, p_lay, t_lay, qs_lay, q_lay,   &
        relhum, lsmask, xlon, xlat, dx, tv_lay, effrin_cldliq, effrin_cldice,             &
        effrin_cldrain, effrin_cldsnow, tracer, cnv_mixratio, cld_cnv_frac, qci_conv,     &
@@ -87,6 +87,7 @@ contains
          effr_in,                   & ! Provide hydrometeor radii from macrophysics?
          lmfshal,                   & ! Flag for mass-flux shallow convection scheme used by Xu-Randall
          ltaerosol,                 & ! Flag for aerosol option
+         mraerosol,                 & ! Flag for aerosol option
          lgfdlmprad,                & ! Flag for GFDLMP radiation interaction
          do_mynnedmf,               & ! Flag to activate MYNN-EDMF 
          uni_cld,                   & ! Flag for unified cloud scheme
@@ -257,7 +258,7 @@ contains
        ! Update particle size using modified mixing-ratios from Thompson.
        call cmp_reff_Thompson(nLev, nCol, i_cldliq, i_cldice, i_cldsnow, i_cldice_nc,   &
             i_cldliq_nc, i_twa, q_lay, p_lay, t_lay, tracer, con_eps, con_rd, ltaerosol,&
-            effrin_cldliq, effrin_cldice, effrin_cldsnow)
+            mraerosol, lsmask,  effrin_cldliq, effrin_cldice, effrin_cldsnow)
        cld_reliq  = effrin_cldliq
        cld_reice  = effrin_cldice
        cld_resnow = effrin_cldsnow
@@ -840,16 +841,17 @@ contains
 !! \section cmp_reff_Thompson_gen General Algorithm
   subroutine cmp_reff_Thompson(nLev, nCol, i_cldliq, i_cldice, i_cldsnow, i_cldice_nc,   &
        i_cldliq_nc, i_twa, q_lay, p_lay, t_lay, tracer, con_eps, con_rd, ltaerosol,      &
-       effrin_cldliq, effrin_cldice, effrin_cldsnow)
+       mraerosol, lsmask, effrin_cldliq, effrin_cldice, effrin_cldsnow)
     implicit none
 
     ! Inputs
     integer, intent(in) :: nLev, nCol, i_cldliq, i_cldice, i_cldsnow, i_cldice_nc,       &
          i_cldliq_nc, i_twa
-    logical, intent(in) :: ltaerosol
+    logical, intent(in) :: ltaerosol, mraerosol
     real(kind_phys), intent(in) :: con_eps,con_rd
     real(kind_phys), dimension(:,:),intent(in) :: q_lay, p_lay, t_lay
     real(kind_phys), dimension(:,:,:),intent(in) :: tracer
+    real(kind_phys), dimension(:), intent(in) :: lsmask
 
     ! Outputs
     real(kind_phys), dimension(:,:), intent(inout) :: effrin_cldliq, effrin_cldice,      &
@@ -860,6 +862,7 @@ contains
     real(kind_phys) :: rho, orho
     real(kind_phys),dimension(nCol,nLev) :: qv_mp, qc_mp, qi_mp, qs_mp, ni_mp, nc_mp,    &
          nwfa, re_cloud, re_ice, re_snow
+    integer :: ilsmask 
 
     ! Prepare cloud mixing-ratios and number concentrations for calc_effectRa
     do iLay = 1, nLev
@@ -877,8 +880,17 @@ contains
              if (qc_mp(iCol,iLay) > 1.e-12 .and. nc_mp(iCol,iLay) < 100.) then
                nc_mp(iCol,iLay) = make_DropletNumber(qc_mp(iCol,iLay)*rho, nwfa(iCol,iLay)*rho) * orho
              endif
+          elseif (mraerosol) then
+             nc_mp(iCol,iLay) = tracer(iCol,iLay,i_cldliq_nc) / (1.-q_lay(iCol,iLay))
+             if (qc_mp(iCol,iLay) > 1.e-12 .and. nc_mp(iCol,iLay) < 100.) then
+               nc_mp(iCol,iLay) = make_DropletNumber(qc_mp(iCol,iLay)*rho, nwfa(iCol,iLay)*rho) * orho
+             endif
           else
-             nc_mp(iCol,iLay) = nt_c*orho
+             if (nint(lsmask(iCol)) == 1) then !land
+                nc_mp(iCol,iLay) = nt_c_l*orho
+             else 
+                nc_mp(iCol,iLay) = nt_c_o*orho
+             endif 
           endif
           if (qi_mp(iCol,iLay) > 1.e-12 .and. ni_mp(iCol,iLay) < 100.) then
              ni_mp(iCol,iLay) = make_IceNumber(qi_mp(iCol,iLay)*rho, t_lay(iCol,iLay)) * orho
@@ -888,9 +900,11 @@ contains
 
     ! Compute effective radii for liquid/ice/snow.
     do iCol=1,nCol
+       ilsmask = nint(lsmask(iCol))
        call calc_effectRad (t_lay(iCol,:), p_lay(iCol,:), qv_mp(iCol,:), qc_mp(iCol,:),  &
                             nc_mp(iCol,:), qi_mp(iCol,:), ni_mp(iCol,:), qs_mp(iCol,:),  &
-                            re_cloud(iCol,:), re_ice(iCol,:), re_snow(iCol,:), 1, nLev )
+                            re_cloud(iCol,:), re_ice(iCol,:), re_snow(iCol,:), ilsmask,  & 
+                            1, nLev )
        do iLay = 1, nLev
           re_cloud(iCol,iLay) = MAX(re_qc_min, MIN(re_cloud(iCol,iLay), re_qc_max))
           re_ice(iCol,iLay)   = MAX(re_qi_min, MIN(re_ice(iCol,iLay),   re_qi_max))
