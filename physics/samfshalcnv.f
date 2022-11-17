@@ -258,7 +258,7 @@ c-----------------------------------------------------------------------
              cinacrmn=-80.
       endif
 
-      if (progisigma) then
+      if (progsigma) then
          dxcrt=10.e3
       else
          dxcrt=15.e3
