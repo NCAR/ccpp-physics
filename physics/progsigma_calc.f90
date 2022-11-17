@@ -53,8 +53,8 @@
       rmulacvg=10.
       epsilon=1.E-11
       km1=km-1
-      betadcu = 1.5
-      betascu = 5.2
+      betadcu = 2.0
+      betascu = 8.0
       invdelt = 1./delt
 
      !Initialization 2D
@@ -210,12 +210,11 @@
       enddo
 
       !Reduce area fraction before coupling back to mass-flux computation. 
-      !This tuning could be addressed in updraft velocity equation instead.
       if(flag_shallow)then
          do i= 1, im
             if(cnvflg(i)) then
                sigmab(i)=sigmab(i)/betascu
-               sigmab(i)=MAX(0.01,sigmab(i))
+               sigmab(i)=MAX(0.03,sigmab(i))
             endif
          enddo
       else

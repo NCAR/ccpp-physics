@@ -238,7 +238,7 @@ c  physical parameters
 !     parameter(cinacrmx=-120.,cinacrmn=-120.)
       parameter(cinacrmx=-120.,cinacrmn=-80.)
       parameter(bet1=1.875,cd1=.506,f1=2.0,gam1=.5)
-      parameter(betaw=.03,dxcrtuf=15.e3)
+      parameter(betaw=.03)
 
 !
 !  local variables and arrays
@@ -2468,8 +2468,10 @@ c
 !
       if(progsigma)then
          dxcrtas=30.e3
+         dxcrtuf=10.e3
       else
          dxcrtas=8.e3
+         dxcrtuf=15.e3
       endif
 
 
