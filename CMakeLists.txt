@@ -12,7 +12,7 @@ set(AUTHORS "Grant Firl" "Dom Heinzeller" "Man Zhang" "Mike Kavulich" "Chunxi Zh
 # Set MPI flags for C/C++/Fortran
 if (MPI)
   find_package(MPI REQUIRED C Fortran)
-endif (OPENMP)
+endif()
 
 #------------------------------------------------------------------------------
 # Set OpenMP flags for C/C++/Fortran
