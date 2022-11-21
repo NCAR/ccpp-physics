@@ -191,21 +191,21 @@
   type = logical
   intent = in
 [do_gsl_drag_ls_bl]
-  standard_name = flag_for_gsl_drag_suite_mesoscale_orographic_and_blocking_drag
+  standard_name = do_gsl_drag_suite_mesoscale_orographic_and_blocking_drag
   long_name = flag to activate GSL drag suite - mesoscale GWD and blocking
   units = flag
   dimensions = ()
   type = logical
   intent = in
 [do_gsl_drag_ss]
-  standard_name = flag_for_gsl_drag_suite_small_scale_orographic_drag
+  standard_name = do_gsl_drag_suite_small_scale_orographic_drag
   long_name = flag to activate GSL drag suite - small-scale GWD
   units = flag
   dimensions = ()
   type = logical
   intent = in
 [do_gsl_drag_tofd]
-  standard_name = flag_for_gsl_drag_suite_turbulent_orographic_form_drag
+  standard_name = do_gsl_drag_suite_turbulent_orographic_form_drag
   long_name = flag to activate GSL drag suite - turb orog form drag
   units = flag
   dimensions = ()
@@ -671,7 +671,7 @@
   type = logical
   intent = in
 [ugwp_seq_update]
-  standard_name = ugwp_sequential_update_flag
+  standard_name = do_ugwp_sequential_update
   long_name = flag for ugwp sequential update
   units = flag 
   dimensions = () 
@@ -1198,21 +1198,21 @@
   type = logical
   intent = in
 [do_gsl_drag_ls_bl]
-  standard_name = flag_for_gsl_drag_suite_mesoscale_orographic_and_blocking_drag
+  standard_name = do_gsl_drag_suite_mesoscale_orographic_and_blocking_drag
   long_name = flag to activate GSL drag suite - mesoscale GWD and blocking
   units = flag
   dimensions = ()
   type = logical
   intent = in
 [do_gsl_drag_ss]
-  standard_name = flag_for_gsl_drag_suite_small_scale_orographic_drag
+  standard_name = do_gsl_drag_suite_small_scale_orographic_drag
   long_name = flag to activate GSL drag suite - small-scale GWD
   units = flag
   dimensions = ()
   type = logical
   intent = in
 [do_gsl_drag_tofd]
-  standard_name = flag_for_gsl_drag_suite_turbulent_orographic_form_drag
+  standard_name = do_gsl_drag_suite_turbulent_orographic_form_drag
   long_name = flag to activate GSL drag suite - turb orog form drag
   units = flag
   dimensions = ()
