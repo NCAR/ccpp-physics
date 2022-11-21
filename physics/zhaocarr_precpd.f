@@ -6,8 +6,7 @@
       module zhaocarr_precpd
 
         implicit none
-        public :: zhaocarr_precpd_init, zhaocarr_precpd_run,            &
-     &            zhaocarr_precpd_finalize
+        public :: zhaocarr_precpd_init, zhaocarr_precpd_run
         private
         logical :: is_initialized = .False.
       contains
@@ -738,8 +737,5 @@
       return
       end subroutine zhaocarr_precpd_run
 !> @}
-
-      subroutine zhaocarr_precpd_finalize
-      end subroutine zhaocarr_precpd_finalize
 
       end module zhaocarr_precpd

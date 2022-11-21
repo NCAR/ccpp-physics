@@ -1,18 +1,13 @@
 !>  \file unified_ugwp_post.F90
-!! This file contains
+!! This file saves CIRES UGWP diagnostics.
 module unified_ugwp_post
 
 contains
 
 !>\defgroup unified_ugwp_post unified_UGWP Scheme Post
-!! @{
-
-    subroutine unified_ugwp_post_init ()
-    end subroutine unified_ugwp_post_init
-
-!>@brief The subroutine initializes the unified UGWP
-
-!> \section arg_table_unified_ugwp_post_run Argument Table
+!> @{
+!! The subroutine saves CIRES UGWP diagnostics.
+!! \section arg_table_unified_ugwp_post_run Argument Table
 !! \htmlinclude unified_ugwp_post_run.html
 !!
      subroutine unified_ugwp_post_run (ldiag_ugwp, dtf, im, levs,     &
@@ -70,8 +65,5 @@ contains
 
       end subroutine unified_ugwp_post_run
 
-      subroutine unified_ugwp_post_finalize ()
-      end subroutine unified_ugwp_post_finalize
-
-!! @}
+!> @}
 end module unified_ugwp_post

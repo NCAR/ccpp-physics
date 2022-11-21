@@ -1,0 +1,33 @@
+/**
+\page HRRR_suite_page HRRR Suite 
+
+\section HRRR_suite_overview Overview
+
+The HRRR suite contains the parameterizations used in the NOAA operational 
+High-Resolution Rapid Refresh (HRRR) model, which runs at 3-km resolution.
+This suite is most applicable for runs at 3-km resolution since it does not 
+parameterize deep convection.
+
+For additional information about the HRRR model, visit: 
+https://rapidrefresh.noaa.gov/hrrr/.
+
+The HRRR suite uses the parameterizations in the following order:
+ - \ref SGSCLOUD_page
+ - \ref GFS_RRTMG
+ - \ref SFC_MYNNSFL
+ - \ref GFS_NSST
+ - \ref RUCLSM
+ - \ref MYNNEDMF
+ - \ref GFS_drag_suite
+ - \ref GFS_OZPHYS
+ - \ref GFS_H2OPHYS
+ - \ref THOMPSON
+
+
+\section sdf_hrrrsuite Suite Definition File 
+\include suite_FV3_HRRR.xml
+
+\section hrrr_nml_option Namelist 
+\snippet RE210/FV3_HRRR_input.nml GFS_PHYSICS_NML
+
+*/

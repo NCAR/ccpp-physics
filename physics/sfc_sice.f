@@ -6,15 +6,9 @@
 
       contains
 
-      subroutine sfc_sice_init()
-      end subroutine sfc_sice_init
-!
-      subroutine sfc_sice_finalize()
-      end subroutine sfc_sice_finalize
-
-!>\defgroup gfs_sice_main GFS Three-layer Thermodynomics Sea-Ice Scheme Module
-!!  \brief  This is three-layer thermodynomics sea-ice model based on Winton (2000) \cite winton_2000.
-!>  \section general_sice_run GFS Sea Ice Driver General Algorithm
+!>\defgroup gfs_sice_main GFS sfc_sice Module
+!!  This is three-layer thermodynomics sea-ice model based on Winton (2000) \cite winton_2000.
+!>  \section general_sice_run General Algorithm
 !!The model has four prognostic variables: the snow layer thickness \f$h_s\f$, the ice layer thickness
 !! \f$h_i\f$, the upper and lower ice layer temperatures located at the midpoints of the layers
 !! \f$h_i/4\f$ and \f$3h_i/4\f$ below the ice surface, respectively \f$T_1\f$ and \f$T_2\f$. The temperature of
@@ -22,7 +16,7 @@
 !! the top of the ice or snow, \f$T_s\f$, is determined from the surface energy balance.
 !! The model consists of a zero-heat-capacity snow layer overlying two equally thick sea ice layers (Figure 1).
 !! The upper ice layer has a variable heat capacity to represent brine pockets.
-!! \image html GFS_sice_wonton2000_fig1.png "Fig.1  Schematic representation of the three-layer model" width=5cm
+!! \image html GFS_sice_wonton2000_fig1.png "Fig.1  Schematic representation of the three-layer model" width=900
 !!  The ice model main program ice3lay() performs two functions:
 !!  - \b Calculation \b of \b ice \b temperature
 !!\n The surface temperature is determined from the diagnostic balance between
@@ -34,7 +28,7 @@
 !! mass fluxes at the upper and lower surfaces, 2) to convert snow below
 !! the water line to ice, and 3) to equalize the thickness of the two
 !! ice layers.
-!>  \section detailed_sice_run GFS Sea Ice Driver Detailed Algorithm
+!>  \section detailed_sice_run Detailed Algorithm
 !!
 !! \section arg_table_sfc_sice_run Argument Table
 !! \htmlinclude sfc_sice_run.html

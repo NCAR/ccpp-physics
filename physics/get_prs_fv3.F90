@@ -15,7 +15,7 @@ module get_prs_fv3
 
 contains
 
-!! \section arg_table_get_prs_fv3_run Argument Table
+!> \section arg_table_get_prs_fv3_run Argument Table
 !! \htmlinclude get_prs_fv3_run.html
 !!
    subroutine get_prs_fv3_run(ix, levs, con_fvirt, phii, prsi, tgrs, qgrs1, del, del_gz, errmsg, errflg)

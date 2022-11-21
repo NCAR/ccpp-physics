@@ -1602,7 +1602,7 @@
 ! *********    *********    end description    *********    ********* !
 
 !> \ingroup module_radlw_main
-!> This module sets up absorption coefficients for band 01: 10-250
+!> This module sets up absorption coefficients for band 01: 10-350
 !! cm-1 (low - h2o; high - h2o)
       module module_radlw_kgb01          !
 !........................................!
@@ -2416,7 +2416,7 @@
 !========================================!
 
 !> \ingroup module_radlw_main
-!> This module sets up absorption coefficients for band 02: 250-500
+!> This module sets up absorption coefficients for band 02: 350-500
 !! cm-1 (low - h2o; high - h2o)
       module module_radlw_kgb02          !
 !........................................!

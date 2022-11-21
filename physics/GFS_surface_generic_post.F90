@@ -15,6 +15,9 @@
 
       contains
 
+!>\defgroup gfs_sfc_gen_post_mode GFS surface_generic_post Module
+!! This module contains code related to all GFS surface schemes to be run afterward.
+!> @{
 !> \section arg_table_GFS_surface_generic_post_init Argument Table
 !! \htmlinclude GFS_surface_generic_post_init.html
 !!
@@ -41,7 +44,7 @@
 !> \section arg_table_GFS_surface_generic_post_run Argument Table
 !! \htmlinclude GFS_surface_generic_post_run.html
 !!
-      subroutine GFS_surface_generic_post_run (im, cplflx, cplaqm, cplchm, cplwav, lssav, dry, icy, wet,                            &
+      subroutine GFS_surface_generic_post_run (im, cplflx, cplaqm, cplchm, cplwav, cpllnd, lssav, dry, icy, wet,                    &
         lsm, lsm_noahmp, dtf, ep1d, gflx, tgrs_1, qgrs_1, ugrs_1, vgrs_1,                                                           &
         adjsfcdlw, adjsfcdsw, adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd, adjsfculw, adjsfculw_wat, adjnirbmu, adjnirdfu,           &
         adjvisbmu, adjvisdfu, t2m, q2m, u10m, v10m, tsfc, tsfc_wat, pgr, xcosz, evbs, evcw, trans, sbsno, snowc, snohf, pah, pahi,  &
@@ -55,7 +58,7 @@
         implicit none
 
         integer,                                intent(in) :: im
-        logical,                                intent(in) :: cplflx, cplaqm, cplchm, cplwav, lssav
+        logical,                                intent(in) :: cplflx, cplaqm, cplchm, cplwav, cpllnd, lssav
         logical, dimension(:),                  intent(in) :: dry, icy, wet
         integer,                                intent(in) :: lsm, lsm_noahmp
         real(kind=kind_phys),                   intent(in) :: dtf
@@ -118,9 +121,17 @@
           enddo
         endif
 
-        if (cplflx .or. cplchm) then
+        if (cplflx .or. cplchm .or. cpllnd) then
           do i=1,im
             tsfci_cpl(i) = tsfc(i)
+          enddo
+        endif
+
+        if (cplflx .or. cpllnd) then
+          do i=1,im
+            dlwsfc_cpl  (i) = dlwsfc_cpl(i) + adjsfcdlw(i)*dtf
+            dswsfc_cpl  (i) = dswsfc_cpl(i) + adjsfcdsw(i)*dtf
+            psurfi_cpl  (i) = pgr(i)
           enddo
         endif
 
@@ -128,8 +139,6 @@
           do i=1,im
             dlwsfci_cpl (i) = adjsfcdlw(i)
             dswsfci_cpl (i) = adjsfcdsw(i)
-            dlwsfc_cpl  (i) = dlwsfc_cpl(i) + adjsfcdlw(i)*dtf
-            dswsfc_cpl  (i) = dswsfc_cpl(i) + adjsfcdsw(i)*dtf
             dnirbmi_cpl (i) = adjnirbmd(i)
             dnirdfi_cpl (i) = adjnirdfd(i)
             dvisbmi_cpl (i) = adjvisbmd(i)
@@ -145,12 +154,13 @@
             nlwsfc_cpl  (i) = nlwsfc_cpl(i) + nlwsfci_cpl(i)*dtf
             t2mi_cpl    (i) = t2m(i)
             q2mi_cpl    (i) = q2m(i)
-            psurfi_cpl  (i) = pgr(i)
           enddo
+        endif
 
 !  ---  estimate mean albedo for ocean point without ice cover and apply
 !       them to net SW heat fluxes
 
+        if (cplflx .or. cpllnd) then
           do i=1,im
 !           if (Sfcprop%landfrac(i) < one) then ! Not 100% land
             if (wet(i)) then                    ! some open water
@@ -267,5 +277,5 @@
         slope(:) = slope_save(:)
 
       end subroutine GFS_surface_generic_post_run
-
+!> @}
       end module GFS_surface_generic_post

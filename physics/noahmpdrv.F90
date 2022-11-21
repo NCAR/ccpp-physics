@@ -19,7 +19,7 @@
 
       private
 
-      public :: noahmpdrv_init, noahmpdrv_run, noahmpdrv_finalize
+      public :: noahmpdrv_init, noahmpdrv_run
 
       contains
 
@@ -107,9 +107,6 @@
 
       end subroutine noahmpdrv_init
 
-      subroutine noahmpdrv_finalize
-      end subroutine noahmpdrv_finalize
-
 !> \ingroup NoahMP_LSM
 !! \brief This subroutine is the main CCPP entry point for the NoahMP LSM.
 !! \section arg_table_noahmpdrv_run Argument Table
@@ -131,8 +128,6 @@
 !!    - Call penman() to calculate potential evaporation.
 !!    - Calculate the surface specific humidity and convert surface sensible and latent heat fluxes in W m-2 from their kinematic values.
 !!    - If a "guess" run, restore the land-related prognostic fields.
-!                                                                       !
-!-----------------------------------
   subroutine noahmpdrv_run                                       &
 !...................................
 !  ---  inputs:

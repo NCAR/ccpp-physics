@@ -27,9 +27,6 @@
         end if
       end subroutine myjsfc_wrapper_init
 
-      subroutine myjsfc_wrapper_finalize ()
-      end subroutine myjsfc_wrapper_finalize
-
 !!
 !> \brief This scheme (1) performs pre-myjsfc work, (20 runs the myj sfc layer scheme, and (3) performs post-myjsfc work
 !! \section arg_table_myjsfc_wrapper_run Argument Table

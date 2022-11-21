@@ -7,22 +7,19 @@
       module sfc_ocean
       implicit none
       private
-      public :: sfc_ocean_init, sfc_ocean_run, sfc_ocean_finalize
+      public :: sfc_ocean_run
 
       contains
 
-      subroutine sfc_ocean_init()
-      end subroutine sfc_ocean_init
 
-      subroutine sfc_ocean_finalize()
-      end subroutine sfc_ocean_finalize
-
-!>\defgroup gfs_ocean_main GFS Simple Ocean Scheme Module
+!>\defgroup gfs_ocean_main GFS Simple Ocean Module
 !! This subroutine calculates thermodynamical properties over
 !! open water.
+!>@{
 !! \section arg_table_sfc_ocean_run Argument Table
 !! \htmlinclude sfc_ocean_run.html
 !!
+!!>\section gen_sfc_ocean GFS Simple Ocean scheme General Algorithm
       subroutine sfc_ocean_run                                          &
 !...................................
 !  ---  inputs:
@@ -165,10 +162,10 @@
       hvapi = one/hvap
       elocp = hvap/cp
 !
-!  --- ...  flag for open water
+!> - Flag for open water
       do i = 1, im
         flag(i) = (wet(i) .and. flag_iter(i) .and. use_lake_model(i)/=1)
-!  --- ...  initialize variables. all units are supposedly m.k.s. unless specified
+!> - Initialize variables. all units are supposedly m.k.s. unless specified
 !           ps is in pascals, wind is wind speed,
 !           rho is density, qss is sat. hum. at surface
 
@@ -200,7 +197,7 @@
             cmm(i)   = cm(i) * wind(i)
             chh(i)   = rho(i) * tem
 
-!  --- ...  sensible and latent heat flux over open water
+!> - Calcualte sensible and latent heat flux over open water
 
             hflx(i)  = rch * (tskin(i) - t1(i) * prslki(i))
 
@@ -212,7 +209,7 @@
         endif
       enddo
 !
-!  include sea spray effects
+!> - Include sea spray effects
 !
       do i=1,im
         if(lseaspray .and. flag(i)) then
@@ -252,4 +249,5 @@
 !...................................
       end subroutine sfc_ocean_run
 !-----------------------------------
+!>@}
       end module sfc_ocean

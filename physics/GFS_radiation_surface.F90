@@ -1,15 +1,19 @@
-!>\file GFS_radiation_surface.f90
+!>\file GFS_radiation_surface.F90
 !! This file contains calls to module_radiation_surface::setemis() to set up
 !! surface emissivity for LW radiation and to module_radiation_surface::setalb()
 !! to set up surface albedo for SW radiation.
+
       module GFS_radiation_surface
 
       use machine,                   only: kind_phys
 
       contains
 
-!>\defgroup GFS_radiation_surface GFS radiation surface
-!! @{
+!>\defgroup GFS_radiation_surface_mod GFS Radiation Surface Module
+!! This module contains calls to module_radiation_surface::setemis() to set up
+!! surface emissivity for LW radiation and to module_radiation_surface::setalb()
+!! to set up surface albedo for SW radiation.
+!> @{
 !> \section arg_table_GFS_radiation_surface_init Argument Table
 !! \htmlinclude GFS_radiation_surface_init.html
 !!
@@ -46,7 +50,7 @@
 !! \htmlinclude GFS_radiation_surface_run.html
 !!
       subroutine GFS_radiation_surface_run (                            &
-        im, frac_grid, lslwr, lsswr, lsm, lsm_noahmp, lsm_ruc,          &
+        im, nf_albd, frac_grid, lslwr, lsswr, lsm, lsm_noahmp, lsm_ruc, &
         xlat, xlon, slmsk, lndp_type, n_var_lndp, sfc_alb_pert,         &
         lndp_var_list, lndp_prt_list, landfrac, snodl, snodi, sncovr,   &
         sncovr_ice, fice, zorl, hprime, tsfg, tsfa, tisfc, coszen,      &
@@ -58,12 +62,12 @@
         semisbase, semis, sfcalb, sfc_alb_dif, errmsg, errflg)
 
       use module_radiation_surface,  only: f_zero, f_one,  &
-                                           epsln, NF_ALBD, &
+                                           epsln,          &
                                            setemis, setalb
 
       implicit none
 
-      integer,               intent(in) :: im
+      integer,               intent(in) :: im, nf_albd
       logical,               intent(in) :: frac_grid, lslwr, lsswr, use_cice_alb, cplice
       integer,               intent(in) :: lsm, lsm_noahmp, lsm_ruc, lndp_type, n_var_lndp
       real(kind=kind_phys),  intent(in) :: min_seaice, min_lakeice
@@ -181,7 +185,7 @@
                      alvsf, alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc,                    &
                      albdvis_lnd, albdnir_lnd, albivis_lnd, albinir_lnd,                       &
                      albdvis_ice, albdnir_ice, albivis_ice, albinir_ice,                       &
-                     IM, sfc_alb_pert, lndp_alb, fracl, fraco, fraci, icy,                     & !  ---  inputs
+                     im, nf_albd, sfc_alb_pert, lndp_alb, fracl, fraco, fraci, icy,            & !  ---  inputs
                      sfcalb )                                                                    !  ---  outputs
 
 !> -# Approximate mean surface albedo from vis- and nir- diffuse values.
@@ -190,7 +194,5 @@
 
       end subroutine GFS_radiation_surface_run
 
-       subroutine GFS_radiation_surface_finalize ()
-       end subroutine GFS_radiation_surface_finalize
-!! @}
+!> @}
        end module GFS_radiation_surface

@@ -44,6 +44,20 @@
   dimensions = ()
   type = integer
   intent = in
+[lextop]
+  standard_name = do_extra_top_layer_for_radiation
+  long_name = use an extra top layer for radiation
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[ltp]
+  standard_name = extra_top_layer
+  long_name = extra top layer for radiation
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
 [n_var_lndp]
   standard_name = number_of_perturbed_land_surface_variables
   long_name = number of land surface variables perturbed
@@ -539,6 +553,13 @@
 [ltaerosol]
   standard_name = flag_for_aerosol_physics
   long_name = flag for aerosol physics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[mraerosol]
+  standard_name = do_merra2_aerosol_awareness
+  long_name = flag for merra2 aerosol-aware physics for example the thompson microphysics
   units = flag
   dimensions = ()
   type = logical

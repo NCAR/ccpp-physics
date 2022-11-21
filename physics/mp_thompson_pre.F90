@@ -9,16 +9,13 @@ module mp_thompson_pre
 
       implicit none
 
-      public :: mp_thompson_pre_init, mp_thompson_pre_run, mp_thompson_pre_finalize
+      public :: mp_thompson_pre_run
 
       private
 
    contains
 
-      subroutine mp_thompson_pre_init()
-      end subroutine mp_thompson_pre_init
-
-!! \section arg_table_mp_thompson_pre_run Argument Table
+!> \section arg_table_mp_thompson_pre_run Argument Table
 !! \htmlinclude mp_thompson_pre_run.html
 !!
       subroutine mp_thompson_pre_run(ncol, nlev, tgrs, tgrs_save, errmsg, errflg)
@@ -43,8 +40,5 @@ module mp_thompson_pre
          tgrs_save = tgrs
 
       end subroutine mp_thompson_pre_run
-
-      subroutine mp_thompson_pre_finalize()
-      end subroutine mp_thompson_pre_finalize
 
 end module mp_thompson_pre

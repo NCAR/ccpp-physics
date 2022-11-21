@@ -231,7 +231,7 @@ module lsm_ruc
 
       end subroutine lsm_ruc_init
 
-!! \section arg_table_lsm_ruc_finalize Argument Table
+!> \section arg_table_lsm_ruc_finalize Argument Table
 !! \htmlinclude lsm_ruc_finalize.html
 !!
       subroutine lsm_ruc_finalize (errmsg, errflg)
@@ -313,13 +313,13 @@ module lsm_ruc
 !                                                                       !
 !  ====================    end of description    =====================  !
 
-!> \defgroup lsm_ruc_group GSD RUC LSM Model
-!! This module contains the RUC Land Surface Model developed by NOAA/GSD
+!> \defgroup lsm_ruc_group RUC LSM Model
+!! This module contains the RUC Land Surface Model developed by NOAA/GSL
 !! (Smirnova et al. 2016 \cite Smirnova_2016).
 !> \section arg_table_lsm_ruc_run Argument Table
 !! \htmlinclude lsm_ruc_run.html
 !!
-!>\section gen_lsmruc GSD RUC LSM General Algorithm
+!>\section gen_lsmruc RUC LSM General Algorithm
       subroutine lsm_ruc_run                                            & ! inputs
      &     ( iter, me, master, delt, kdt, im, nlev, lsm_ruc, lsm,       &
      &       imp_physics, imp_physics_gfdl, imp_physics_thompson,       &
@@ -1044,6 +1044,20 @@ module lsm_ruc
         z0_lnd(i,j)  = z0rl_lnd(i)/100.
         znt_lnd(i,j) = z0rl_lnd(i)/100.
 
+        ! Workaround needed for subnormal numbers.  This should be
+        ! done after all other sanity checks, in case a sanity check
+        ! results in subnormal numbers.
+        !
+        ! This bug was caught by the UFS gfortran debug-mode
+        ! regression tests, and the fix is necessary to pass those
+        ! tests.
+        if(abs(snowh_lnd(i,j))<1e-20) then
+          snowh_lnd(i,j)=0
+        endif
+        if(abs(sneqv_lnd(i,j))<1e-20) then
+          sneqv_lnd(i,j)=0
+        endif
+
         if(debug_print) then
           if(me==0 ) then
             write (0,*)'before LSMRUC for land'
@@ -1360,6 +1374,19 @@ module lsm_ruc
 
         z0_ice(i,j)  = z0rl_ice(i)/100.
         znt_ice(i,j) = z0rl_ice(i)/100.
+
+        ! Workaround needed for subnormal numbers.  This should be
+        ! done after all other sanity checks, in case a sanity check
+        ! results in subnormal numbers.
+        !
+        ! Although this bug has not been triggered yet, it is expected
+        ! to be, like the _lnd variants many lines up from here.
+        if(abs(snowh_ice(i,j))<1e-20) then
+          snowh_ice(i,j)=0
+        endif
+        if(abs(sneqv_ice(i,j))<1e-20) then
+          sneqv_ice(i,j)=0
+        endif
 
 !> - Call RUC LSM lsmruc() for ice.
       call lsmruc(                                                           &

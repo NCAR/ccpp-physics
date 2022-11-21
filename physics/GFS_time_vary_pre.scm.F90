@@ -122,7 +122,7 @@
         else if (w3kindreal == 4) then
            rinc4(1:5) = 0
            call w3difdat(jdat,idat,4,rinc4)
-           sec = rina4c(4)
+           sec = rinc4(4)
         else
            write(0,*)' FATAL ERROR: Invalid w3kindreal'
            call abort

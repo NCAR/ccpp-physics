@@ -1,24 +1,25 @@
-!> \file GFS_rrtmg_pre.f90
-!! This file contains
+!> \file GFS_rrtmg_pre.F90
+!! This file contains cloud properties calcualtion for RRTMG.
+
       module GFS_rrtmg_pre
 
       public GFS_rrtmg_pre_run
 
       contains
 
-!> \defgroup GFS_rrtmg_pre GFS RRTMG Scheme Pre
-!! @{
-      subroutine GFS_rrtmg_pre_init ()
-      end subroutine GFS_rrtmg_pre_init
+!> \defgroup GFS_rrtmg_pre_mod GFS RRTMG Scheme Pre
+!! This module contains cloud properties calculation for RRTMG.
+!> @{
 
-!> \section arg_table_GFS_rrtmg_pre_run Argument Table
-!! \htmlinclude GFS_rrtmg_pre_run.html
-!!
       ! Attention - the output arguments lm, im, lmk, lmp must not be set
       ! in the CCPP version - they are defined in the interstitial_create routine
-      subroutine GFS_rrtmg_pre_run (im, levs, lm, lmk, lmp, n_var_lndp,        &
-        imfdeepcnv, imfdeepcnv_gf, me, ncnd, ntrac, num_p3d, npdf3d, ncnvcld3d,&
-        ntqv, ntcw,ntiw, ntlnc, ntinc, ntrnc, ntsnc, ntccn,                    &
+!> \section arg_table_GFS_rrtmg_pre_run Argument Table
+!! \htmlinclude GFS_rrtmg_pre_run.html
+!!    
+!>\section rrtmg_pre_gen General Algorithm
+      subroutine GFS_rrtmg_pre_run (im, levs, lm, lmk, lmp, lextop, ltp,       &
+        n_var_lndp, imfdeepcnv, imfdeepcnv_gf, me, ncnd, ntrac, num_p3d,       &
+        npdf3d, ncnvcld3d, ntqv, ntcw,ntiw, ntlnc, ntinc, ntrnc, ntsnc, ntccn, &
         ntrw, ntsw, ntgl, nthl, ntwa, ntoz,                                    &
         ntclamt, nleffr, nieffr, nseffr, lndp_type, kdt,                       &
         ntdu1, ntdu2, ntdu3, ntdu4, ntdu5, ntss1, ntss2,                       &
@@ -29,7 +30,7 @@
         imp_physics_fer_hires, iovr_rand, iovr_maxrand, iovr_max, iovr_dcorr,  &
         iovr_exp, iovr_exprand, idcor_con, idcor_hogan, idcor_oreopoulos,      & 
         julian, yearlen, lndp_var_list, lsswr, lslwr,                          &
-        ltaerosol, lgfdlmprad, uni_cld, effr_in, do_mynnedmf, lmfshal,         &
+        ltaerosol, mraerosol, lgfdlmprad, uni_cld, effr_in, do_mynnedmf, lmfshal, &
         lmfdeep2, fhswr, fhlwr, solhr, sup, con_eps, epsm1, fvirt,             &
         rog, rocp, con_rd, xlat_d, xlat, xlon, coslat, sinlat, tsfc, slmsk,    &
         prsi, prsl, prslk, tgrs, sfc_wts, mg_cld, effrr_in, pert_clds,         &
@@ -49,7 +50,7 @@
 
       use physparam
 
-      use radcons,                   only: itsfc,ltp, lextop, qmin,  &
+      use radcons,                   only: itsfc, qmin,  &
                                            qme5, qme6, epsq, prsmin
       use funcphys,                  only: fpvs
 
@@ -72,7 +73,8 @@
       use surface_perturbation,      only: cdfnor,ppfbet
 
       ! For Thompson MP
-      use module_mp_thompson,        only: calc_effectRad, Nt_c,     &
+      use module_mp_thompson,        only: calc_effectRad,           &
+                                           Nt_c_l, Nt_c_o,           &
                                            re_qc_min, re_qc_max,     &
                                            re_qi_min, re_qi_max,     &
                                            re_qs_min, re_qs_max
@@ -83,8 +85,8 @@
       use physparam,              only : iaermdl
       implicit none
 
-      integer,              intent(in)  :: im, levs, lm, lmk, lmp, n_var_lndp, &
-                                           imfdeepcnv,                         &
+      integer,              intent(in)  :: im, levs, lm, lmk, lmp, ltp,        &
+                                           n_var_lndp, imfdeepcnv,             &
                                            imfdeepcnv_gf, me, ncnd, ntrac,     &
                                            num_p3d, npdf3d, ncnvcld3d, ntqv,   &
                                            ntcw, ntiw, ntlnc, ntinc,           &
@@ -119,9 +121,9 @@
 
       character(len=3), dimension(:), intent(in) :: lndp_var_list
 
-      logical,              intent(in) :: lsswr, lslwr, ltaerosol, lgfdlmprad, &
+      logical,              intent(in) :: lextop, lsswr, lslwr, ltaerosol, lgfdlmprad, &
                                           uni_cld, effr_in, do_mynnedmf,       &
-                                          lmfshal, lmfdeep2, pert_clds
+                                          lmfshal, lmfdeep2, pert_clds, mraerosol
       logical,              intent(in) :: aero_dir_fdb
       real(kind=kind_phys), dimension(:,:), intent(in) :: smoke_ext, dust_ext
 
@@ -244,6 +246,7 @@
       real (kind=kind_phys) :: alpha0,beta0,m,s,cldtmp,tmp_wt,cdfz
       real (kind=kind_phys) :: max_relh
       integer  :: iflag
+      integer  :: islmsk
 
       integer :: ids, ide, jds, jde, kds, kde, &
                  ims, ime, jms, jme, kms, kme, &
@@ -314,7 +317,7 @@
 !     print *,' in grrad : raddt=',raddt
 
 
-!> -# Setup surface ground temperature and ground/air skin temperature
+!> - Setup surface ground temperature and ground/air skin temperature
 !! if required.
 
       if ( itsfc == 0 ) then            ! use same sfc skin-air/ground temp
@@ -330,7 +333,7 @@
       endif
 
 
-!> -# Prepare atmospheric profiles for radiation input.
+!> - Prepare atmospheric profiles for radiation input.
 !
 
       lsk = 0
@@ -345,8 +348,10 @@
           plyr(i,k1)    = prsl(i,k2)    * 0.01   ! pa to mb (hpa)
           tlyr(i,k1)    = tgrs(i,k2)
           prslk1(i,k1)  = prslk(i,k2)
-
-!>  - Compute relative humidity.
+          rho(i,k1)     = prsl(i,k2)/(con_rd*tlyr(i,k1))
+          orho(i,k1)    = 1.0/rho(i,k1)
+          
+!> - Compute relative humidity.
           es  = min( prsl(i,k2),  fpvs( tgrs(i,k2) ) )  ! fpvs and prsl in pa
           qs  = max( QMIN, con_eps * es / (prsl(i,k2) + epsm1*es) )
           rhly(i,k1) = max( 0.0, min( 1.0, max(QMIN, qgrs(i,k2,ntqv))/qs ) )
@@ -354,7 +359,7 @@
         enddo
       enddo
 
-      !--- recast remaining all tracers (except sphum) forcing them all to be positive
+!> - Recast remaining all tracers (except sphum) forcing them all to be positive.
       do j = 2, ntrac
         do k = 1, LM
           k1 = k + kd
@@ -401,6 +406,8 @@
           plyr(i,lyb)   = 0.5 * plvl(i,lla)
           tlyr(i,lyb)   = tlyr(i,lya)
           prslk1(i,lyb) = (plyr(i,lyb)*0.001) ** rocp ! plyr in hPa
+          rho(i,lyb)    = plyr(i,lyb) *100.0/(con_rd*tlyr(i,lyb))
+          orho(i,lyb)   = 1.0/rho(i,lyb)
           rhly(i,lyb)   = rhly(i,lya)
           qstl(i,lyb)   = qstl(i,lya)
         enddo
@@ -410,7 +417,7 @@
       endif
 
 
-!>  - Get layer ozone mass mixing ratio (if use ozone climatology data,
+!> - Get layer ozone mass mixing ratio (if use ozone climatology data,
 !!    call getozn()).
 
       if (ntoz > 0) then            ! interactive ozone generation
@@ -424,13 +431,13 @@
                      olyr)                           !  ---  outputs
       endif                               ! end_if_ntoz
 
-!>  - Call coszmn(), to compute cosine of zenith angle (only when SW is called)
+!> - Call coszmn(), to compute cosine of zenith angle (only when SW is called)
       if (lsswr) then
         call coszmn (xlon,sinlat,coslat,solhr,im,me, &     !  ---  inputs
                      coszen, coszdg)                       !  ---  outputs
       endif
 
-!>  - Call getgases(), to set up non-prognostic gas volume mixing
+!> - Call getgases(), to set up non-prognostic gas volume mixing
 !!    ratioes (gasvmr).
 !  - gasvmr(:,:,1)  -  co2 volume mixing ratio
 !  - gasvmr(:,:,2)  -  n2o volume mixing ratio
@@ -464,7 +471,7 @@
          enddo
       enddo
 
-!>  - Get temperature at layer interface, and layer moisture.
+!> - Get temperature at layer interface, and layer moisture.
       do k = 2, LMK
         do i = 1, IM
           tem2da(i,k) = log( plyr(i,k) )
@@ -604,11 +611,10 @@
 
       endif                              ! end_if_ivflip
 
-!>  - Call module_radiation_aerosols::setaer(),to setup aerosols
-!! property profile for radiation.
 
 !check  print *,' in grrad : calling setaer '
 
+!> - Initialize mass mixing ratio of aerosols from NASA GOCART or NASA MERRA-2
        if (ntchm>0 .and. iaermdl==2) then
           do k=1,levs
             do i=1,im
@@ -632,6 +638,8 @@
         endif
 
 
+!> - Call module_radiation_aerosols::setaer() to setup aerosols
+!! property profile for radiation.
       call setaer (plvl, plyr, prslk1, tvly, rhly, slmsk,    & !  ---  inputs
                    tracer1, aer_nm, xlon, xlat, IM, LMK, LMP,&
                    lsswr,lslwr,                              &
@@ -649,7 +657,7 @@
         enddo
        enddo
 
-      !> Aerosol direct feedback effect by smoke and dust
+      !> - Add aerosol direct feedback effect by smoke and dust
       if(aero_dir_fdb) then ! add smoke/dust extinctions
         do k = 1, LMK
           do i = 1, IM
@@ -670,14 +678,8 @@
         enddo
        enddo
 
-!>  - Obtain cloud information for radiation calculations
+!> - Obtain cloud information for radiation calculations
 !!    (clouds,cldsa,mtopa,mbota)
-!!\n   for  prognostic cloud:
-!!    - For Zhao/Moorthi's prognostic cloud scheme,
-!!      call module_radiation_clouds::progcld_zhao_carr()
-!!    - For Zhao/Moorthi's prognostic cloud+pdfcld,
-!!      call module_radiation_clouds::progcld_zhao_carr_pdf()
-!!      call module_radiation_clouds::progclduni() for unified cloud and ncnd>=2
 
 !  --- ...  obtain cloud information for radiation calculations
 
@@ -723,7 +725,7 @@
             enddo
           enddo
           ! for Thompson MP - prepare variables for calc_effr
-          if_thompson: if (imp_physics == imp_physics_thompson .and. ltaerosol) then
+          if_thompson: if (imp_physics == imp_physics_thompson .and. (ltaerosol .or. mraerosol)) then
             do k=1,LMK
               do i=1,IM
                 qvs = qlyr(i,k)
@@ -748,7 +750,11 @@
                 qc_mp (i,k) = tracer1(i,k,ntcw)/(1.-qvs)
                 qi_mp (i,k) = tracer1(i,k,ntiw)/(1.-qvs)
                 qs_mp (i,k) = tracer1(i,k,ntsw)/(1.-qvs)
-                nc_mp (i,k) = nt_c*orho(i,k)
+                if(nint(slmsk(i)) == 1) then
+                  nc_mp (i,k) = Nt_c_l*orho(i,k)
+                else
+                  nc_mp (i,k) = Nt_c_o*orho(i,k)
+                endif
                 ni_mp (i,k) = tracer1(i,k,ntinc)/(1.-qvs)
               enddo
             enddo
@@ -867,7 +873,7 @@
           ! Update number concentration, consistent with sub-grid clouds (GF, MYNN) or without (all others)
           do k=1,lm
             do i=1,im
-              if (ltaerosol .and. qc_mp(i,k)>1.e-12 .and. nc_mp(i,k)<100.) then
+              if ((ltaerosol .or. mraerosol) .and. qc_mp(i,k)>1.e-12 .and. nc_mp(i,k)<100.) then
                 nc_mp(i,k) = make_DropletNumber(qc_mp(i,k)*rho(i,k), nwfa(i,k)*rho(i,k)) * orho(i,k)
               endif
               if (qi_mp(i,k)>1.e-12 .and. ni_mp(i,k)<100.) then
@@ -875,15 +881,16 @@
               endif
             end do
           end do
-          ! Call Thompson's subroutine to compute effective radii
+          !> - Call Thompson's subroutine calc_effectRad() to compute effective radii
           do i=1,im
+            islmsk = nint(slmsk(i))
             ! Effective radii [m] are now intent(out), bounds applied in calc_effectRad
             !tgs: progclduni has different limits for ice radii (10.0-150.0) than
             !     calc_effectRad (4.99-125.0 for WRFv3.8.1; 2.49-125.0 for WRFv4+)
             !     it will raise the low limit from 5 to 10, but the high limit will remain 125.
             call calc_effectRad (tlyr(i,:), plyr(i,:)*100., qv_mp(i,:), qc_mp(i,:),   &
                                  nc_mp(i,:), qi_mp(i,:), ni_mp(i,:), qs_mp(i,:), &
-                                 effrl(i,:), effri(i,:), effrs(i,:), 1, lm )
+                                 effrl(i,:), effri(i,:), effrs(i,:), islmsk, 1, lm )
             ! Scale Thompson's effective radii from meter to micron
             do k=1,lm
               effrl(i,k) = MAX(re_qc_min, MIN(effrl(i,k), re_qc_max))*1.e6
@@ -949,6 +956,7 @@
           ccnd(1:IM,1:LMK,1) = ccnd(1:IM,1:LMK,1) + cnvw(1:IM,1:LMK)
         endif
 
+!> - Call radiation_clouds_prop() to calculate cloud properties.
         call radiation_clouds_prop                                      &
      &     ( plyr, plvl, tlyr, tvly, qlyr, qstl, rhly,                  &    !  ---  inputs:
      &       ccnd, ncndl, cnvw, cnvc, tracer1,                          &
@@ -974,7 +982,7 @@
 
 !      endif                             ! end_if_ntcw
 
-! perturb cld cover
+!> - Call ppfbet() to perturb cld cover.
        if (pert_clds) then
           do i=1,im
              tmp_wt= -1*log( ( 2.0 / ( sppt_wts(i,38) ) ) - 1 )
@@ -1042,6 +1050,7 @@
 !  ---  scale random patterns for surface perturbations with
 !  perturbation size
 !  ---  turn vegetation fraction pattern into percentile pattern
+!> - Call cdfnor() to pert surface albedo.
       alb1d(:) = 0.
       if (lndp_type==1) then
           do k =1,n_var_lndp
@@ -1056,9 +1065,5 @@
 ! mg, sfc-perts
 
       end subroutine GFS_rrtmg_pre_run
-
-      subroutine GFS_rrtmg_pre_finalize ()
-      end subroutine GFS_rrtmg_pre_finalize
-
-!! @}
+!> @}
       end module GFS_rrtmg_pre

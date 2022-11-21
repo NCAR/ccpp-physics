@@ -9,7 +9,7 @@ module mp_thompson
       use machine, only : kind_phys
 
       use module_mp_thompson, only : thompson_init, mp_gt_driver, thompson_finalize, calc_effectRad
-      use module_mp_thompson, only : naIN0, naIN1, naCCN0, naCCN1, eps, Nt_c
+      use module_mp_thompson, only : naIN0, naIN1, naCCN0, naCCN1, eps, Nt_c_l, Nt_c_o
       use module_mp_thompson, only : re_qc_min, re_qc_max, re_qi_min, re_qi_max, re_qs_min, re_qs_max
 
       use module_mp_thompson_make_number_concentrations, only: make_IceNumber, make_DropletNumber, make_RainNumber
@@ -30,14 +30,15 @@ module mp_thompson
 !! \section arg_table_mp_thompson_init Argument Table
 !! \htmlinclude mp_thompson_init.html
 !!
-      subroutine mp_thompson_init(ncol, nlev, con_g, con_rd, con_eps,   &
-                                  restart, imp_physics,                 &
-                                  imp_physics_thompson, convert_dry_rho,&
-                                  spechum, qc, qr, qi, qs, qg, ni, nr,  &
-                                  is_aerosol_aware, nc, nwfa2d, nifa2d, &
-                                  nwfa, nifa, tgrs, prsl, phil, area,   &
-                                  mpicomm, mpirank, mpiroot,            &
-                                  threads, ext_diag, diag3d,            &
+      subroutine mp_thompson_init(ncol, nlev, con_g, con_rd, con_eps,      &
+                                  restart, imp_physics,                    &
+                                  imp_physics_thompson, convert_dry_rho,   &
+                                  spechum, qc, qr, qi, qs, qg, ni, nr,     &
+                                  is_aerosol_aware,  merra2_aerosol_aware, &
+                                  nc, nwfa2d, nifa2d,                      &
+                                  nwfa, nifa, tgrs, prsl, phil, area,      &
+                                  aerfld, mpicomm, mpirank, mpiroot,       &
+                                  threads, ext_diag, diag3d,               &
                                   errmsg, errflg)
 
          implicit none
@@ -61,11 +62,13 @@ module mp_thompson
          real(kind_phys),           intent(inout) :: nr(:,:)
          ! Aerosols
          logical,                   intent(in   ) :: is_aerosol_aware
+         logical,                   intent(in   ) :: merra2_aerosol_aware
          real(kind_phys),           intent(inout) :: nc(:,:)
          real(kind_phys),           intent(inout) :: nwfa(:,:)
          real(kind_phys),           intent(inout) :: nifa(:,:)
          real(kind_phys),           intent(inout) :: nwfa2d(:)
          real(kind_phys),           intent(inout) :: nifa2d(:)
+         real(kind_phys),           intent(in)    :: aerfld(:,:,:)
          ! State variables
          real(kind_phys),           intent(in   ) :: tgrs(:,:)
          real(kind_phys),           intent(in   ) :: prsl(:,:)
@@ -115,10 +118,17 @@ module mp_thompson
             end if
          end if
 
+         if (is_aerosol_aware .and. merra2_aerosol_aware) then
+            write(errmsg,'(*(a))') "Logic error: Only one Thompson aerosol option can be true, either is_aerosol_aware or merra2_aerosol_aware)"
+            errflg = 1
+            return
+         end if
+
          ! Call Thompson init
-         call thompson_init(is_aerosol_aware_in=is_aerosol_aware, mpicomm=mpicomm, &
-                            mpirank=mpirank, mpiroot=mpiroot, threads=threads,     &
-                            errmsg=errmsg, errflg=errflg)
+         call thompson_init(is_aerosol_aware_in=is_aerosol_aware,              &
+                            merra2_aerosol_aware_in=merra2_aerosol_aware,      &
+                            mpicomm=mpicomm, mpirank=mpirank, mpiroot=mpiroot, &
+                            threads=threads, errmsg=errmsg, errflg=errflg)
          if (errflg /= 0) return
 
          ! For restart runs, the init is done here
@@ -198,6 +208,8 @@ module mp_thompson
                  nwfa(i,k) = naCCN1+naCCN0*exp(-((hgt(i,k)-hgt(i,1))/1000.)*niCCN3)
                enddo
              enddo
+           else if (merra2_aerosol_aware) then
+             call get_niwfa(aerfld, nifa, nwfa, ncol, nlev)
            else
              if (mpirank==mpiroot) write(*,*) ' Apparently initial CCN aerosols are present.'
              if (MAXVAL(nwfa2d) .lt. eps) then
@@ -260,12 +272,19 @@ module mp_thompson
 
            ! Copy to local array for calculating cloud effective radii below
            nc_local = nc
+ 
+        else if (merra2_aerosol_aware) then
+
+           ! Ensure we have 1st guess cloud droplet number where mass non-zero but no number.
+           where(qc .LE. 0.0) nc=0.0
+           where(qc .GT. 0 .and. nc .LE. 0.0) nc = make_DropletNumber(qc*rho, nwfa*rho) * orho
+           where(qc .EQ. 0.0 .and. nc .GT. 0.0) nc = 0.0
 
          else
 
            ! Constant droplet concentration for single moment cloud water as in
            ! module_mp_thompson.F90, only needed for effective radii calculation
-           nc_local = Nt_c/rho
+           nc_local = Nt_c_l/rho
 
          end if
 
@@ -278,7 +297,7 @@ module mp_thompson
 
            ni = ni/(1.0_kind_phys+qv)
            nr = nr/(1.0_kind_phys+qv)
-           if (is_aerosol_aware) then
+           if (is_aerosol_aware .or. merra2_aerosol_aware) then
               nc = nc/(1.0_kind_phys+qv)
               nwfa = nwfa/(1.0_kind_phys+qv)
               nifa = nifa/(1.0_kind_phys+qv)
@@ -299,13 +318,16 @@ module mp_thompson
       subroutine mp_thompson_run(ncol, nlev, con_g, con_rd,        &
                               con_eps, convert_dry_rho,            &
                               spechum, qc, qr, qi, qs, qg, ni, nr, &
-                              is_aerosol_aware, nc, nwfa, nifa,    &
+                              is_aerosol_aware,                    &
+                              merra2_aerosol_aware, nc, nwfa, nifa,&
                               nwfa2d, nifa2d, aero_ind_fdb,        &
                               tgrs, prsl, phii, omega,             &
-                              sedi_semi, decfl, dtp, dt_inner,     & 
+                              sedi_semi, decfl, islmsk, dtp,       &
+                              dt_inner,                            &
                               first_time_step, istep, nsteps,      &
                               prcp, rain, graupel, ice, snow, sr,  &
                               refl_10cm, reset_dBZ, do_radar_ref,  &
+                              aerfld,                              &
                               mpicomm, mpirank, mpiroot, blkno,    &
                               ext_diag, diag3d, reset_diag3d,      &
                               spp_wts_mp, spp_mp, n_var_spp,       &
@@ -336,18 +358,20 @@ module mp_thompson
          real(kind_phys),           intent(inout) :: nr(:,:)
          ! Aerosols
          logical,                   intent(in)    :: is_aerosol_aware, reset_dBZ
-         ! The following arrays are not allocated if is_aerosol_aware is false
+         logical,                   intent(in)    :: merra2_aerosol_aware
          real(kind_phys), optional, intent(inout) :: nc(:,:)
          real(kind_phys), optional, intent(inout) :: nwfa(:,:)
          real(kind_phys), optional, intent(inout) :: nifa(:,:)
          real(kind_phys), optional, intent(in   ) :: nwfa2d(:)
          real(kind_phys), optional, intent(in   ) :: nifa2d(:)
+         real(kind_phys),           intent(in)    :: aerfld(:,:,:)
          logical,         optional, intent(in   ) :: aero_ind_fdb
          ! State variables and timestep information
          real(kind_phys),           intent(inout) :: tgrs(:,:)
          real(kind_phys),           intent(in   ) :: prsl(:,:)
          real(kind_phys),           intent(in   ) :: phii(:,:)
          real(kind_phys),           intent(in   ) :: omega(:,:)
+         integer,                   intent(in   ) :: islmsk(:)
          real(kind_phys),           intent(in   ) :: dtp
          logical,                   intent(in   ) :: first_time_step
          integer,                   intent(in   ) :: istep, nsteps
@@ -494,6 +518,14 @@ module mp_thompson
                                           ' nc, nwfa, nifa, nwfa2d, nifa2d'
                errflg = 1
                return
+            else if (merra2_aerosol_aware .and. .not. (present(nc)     .and. &
+                                                       present(nwfa)   .and. &
+                                                       present(nifa)         )) then
+              write(errmsg,fmt='(*(a))') 'Logic error in mp_thompson_run:', &
+                                         ' merra2 aerosol-aware microphysics require the', &
+                                         ' following optional arguments: nc, nwfa, nifa'
+              errflg = 1
+              return
             end if
             ! Consistency cheecks - subcycling and inner loop at the same time are not supported
             if (nsteps>1 .and. dt_inner < dtp) then
@@ -649,14 +681,15 @@ module mp_thompson
             ncten3     => diag3d(:,:,36:36)
             qcten3     => diag3d(:,:,37:37)
          end if set_extended_diagnostic_pointers
-
-         !> - Call mp_gt_driver() with or without aerosols
-         if (is_aerosol_aware) then
+         if (merra2_aerosol_aware) then
+           call get_niwfa(aerfld, nifa, nwfa, ncol, nlev)
+         end if
+         !> - Call mp_gt_driver() with or without aerosols, with or without effective radii, ...
+         if (is_aerosol_aware .or. merra2_aerosol_aware) then
             call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
                               nc=nc, nwfa=nwfa, nifa=nifa, nwfa2d=nwfa2d, nifa2d=nifa2d,     &
-                              aero_ind_fdb=aero_ind_fdb,                                     &
                               tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtstep, dt_inner=dt_inner,  &
-                              sedi_semi=sedi_semi, decfl=decfl,                              &
+                              sedi_semi=sedi_semi, decfl=decfl, lsm=islmsk,                  &
                               rainnc=rain_mp, rainncv=delta_rain_mp,                         &
                               snownc=snow_mp, snowncv=delta_snow_mp,                         &
                               icenc=ice_mp, icencv=delta_ice_mp,                             &
@@ -664,7 +697,8 @@ module mp_thompson
                               refl_10cm=refl_10cm,                                           &
                               diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
                               has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
-                              rand_perturb_on=spp_mp_opt, kme_stoch=kme_stoch,               &
+                              aero_ind_fdb=aero_ind_fdb, rand_perturb_on=spp_mp_opt,         &
+                              kme_stoch=kme_stoch,                                           &
                               rand_pert=spp_wts_mp, spp_var_list=spp_var_list,               &
                               spp_prt_list=spp_prt_list, n_var_spp=n_var_spp,                &
                               spp_stddev_cutoff=spp_stddev_cutoff,                           &
@@ -695,7 +729,7 @@ module mp_thompson
          else
             call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
                               tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtstep, dt_inner=dt_inner,  &
-                              sedi_semi=sedi_semi, decfl=decfl,                              &
+                              sedi_semi=sedi_semi, decfl=decfl, lsm=islmsk,                  &
                               rainnc=rain_mp, rainncv=delta_rain_mp,                         &
                               snownc=snow_mp, snowncv=delta_snow_mp,                         &
                               icenc=ice_mp, icencv=delta_ice_mp,                             &
@@ -750,7 +784,7 @@ module mp_thompson
 
            ni = ni/(1.0_kind_phys+qv)
            nr = nr/(1.0_kind_phys+qv)
-           if (is_aerosol_aware) then
+           if (is_aerosol_aware .or. merra2_aerosol_aware) then
               nc = nc/(1.0_kind_phys+qv)
               nwfa = nwfa/(1.0_kind_phys+qv)
               nifa = nifa/(1.0_kind_phys+qv)
@@ -824,7 +858,7 @@ module mp_thompson
       end subroutine mp_thompson_run
 !>@}
 
-!! \section arg_table_mp_thompson_finalize Argument Table
+!> \section arg_table_mp_thompson_finalize Argument Table
 !! \htmlinclude mp_thompson_finalize.html
 !!
       subroutine mp_thompson_finalize(errmsg, errflg)
@@ -845,5 +879,50 @@ module mp_thompson
          is_initialized = .false.
 
       end subroutine mp_thompson_finalize
+
+      subroutine get_niwfa(aerfld, nifa, nwfa, ncol, nlev)
+         ! To calculate nifa and nwfa from bins of aerosols.
+         ! In GOCART and MERRA2, aerosols are given as mixing ratio (kg/kg). To
+         ! convert from kg/kg to #/kg, the "unit mass" (mass of one particle)
+         ! within the mass bins is calculated. A lognormal size distribution
+         ! within aerosol bins is used to find the size based upon the median
+         ! mass. NIFA is mainly summarized over five dust bins and NWFA over the
+         ! other 10 bins. The parameters besides each bins are carefully tuned
+         ! for a good performance of the scheme.
+         !
+         ! The fields for the last index of the aerfld array
+         ! are specified as below.
+         ! 1: dust bin 1,                     0.1 to 1.0  micrometers
+         ! 2: dust bin 2,                     1.0 to 1.8  micrometers
+         ! 3: dust bin 3,                     1.8 to 3.0  micrometers
+         ! 4: dust bin 4,                     3.0 to 6.0  micrometers
+         ! 5: dust bin 5,                     6.0 to 10.0 micrometers
+         ! 6: sea salt bin 1,                 0.03 to 0.1 micrometers
+         ! 7: sea salt bin 2,                 0.1 to 0.5  micrometers
+         ! 8: sea salt bin 3,                 0.5 to 1.5  micrometers 
+         ! 9: sea salt bin 4,                 1.5 to 5.0  micrometers
+         ! 10: sea salt bin 5,                5.0 to 10.0 micrometers
+         ! 11: Sulfate,                       0.35 (mean) micrometers
+         ! 15: water-friendly organic carbon, 0.35 (mean) micrometers
+         !
+         ! Bin densities are as follows:
+         ! 1:    dust bin 1:         2500 kg/m2
+         ! 2-5:  dust bin 2-5:       2650 kg/m2
+         ! 6-10: sea salt bins 6-10: 2200 kg/m2
+         ! 11:   sulfate:            1700 kg/m2
+         ! 15:   organic carbon:     1800 kg/m2
+         
+         implicit none
+         integer, intent(in)::ncol, nlev
+         real (kind=kind_phys), dimension(:,:,:), intent(in)  :: aerfld
+         real (kind=kind_phys), dimension(:,:),   intent(out ):: nifa, nwfa
+
+         nifa=(aerfld(:,:,1)/4.0737762+aerfld(:,:,2)/30.459203+aerfld(:,:,3)/153.45048+ &
+              aerfld(:,:,4)/1011.5142+ aerfld(:,:,5)/5683.3501)*1.e15
+
+         nwfa=((aerfld(:,:,6)/0.0045435214+aerfld(:,:,7)/0.2907854+aerfld(:,:,8)/12.91224+ &
+              aerfld(:,:,9)/206.2216+ aerfld(:,:,10)/4326.23)*1.+aerfld(:,:,11)/0.3053104*5+ &
+              aerfld(:,:,15)/0.3232698*1)*1.e15
+      end subroutine get_niwfa
 
 end module mp_thompson

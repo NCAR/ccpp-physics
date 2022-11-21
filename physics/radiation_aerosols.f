@@ -124,35 +124,6 @@
 !!!!!  ==========================================================  !!!!!
 
 
-
-!> \ingroup rad
-!! \defgroup module_radiation_aerosols module_radiation_aerosols
-!!  This module contains climatological atmospheric aerosol schemes for
-!!  radiation computations.
-!!
-!!\version NCEP-Radiation_aerosols  v5.2  Jan 2013
-!!
-!!\n This module has three externally callable subroutines:
-!! - aer_init() -- initialization; called at the start of run to set up
-!!                 module parameters
-!! - aer_update() -- updating aerosol data; called within the time loop
-!!                   to check and update data sets
-!! - setaer() -- mapping aeros profile, compute aeros opticals
-!!
-!!\n References:
-!! - OPAC climatological aerosols:
-!! Hou et al. 2002 \cite hou_et_al_2002; Hess et al. 1998
-!! \cite hess_et_al_1998
-!! - GOCART interactive aerosols:
-!! Chin et al., 2000 \cite chin_et_al_2000
-!! Colarco et al., 2010 - jgr, v115, D14207\cite colarco_et_al_2010
-!!
-!! - MERRA2 aerosol reanalysis:
-!! Randles et al., 2017 - jclim, v30, 6823-6850\cite randles_et_al_2017
-!! Buchard et al., 2017 - jclim, v30, 6851-6871\cite buchard_et_al_2017
-!!
-!! - Stratospheric volcanical aerosols:
-!! Sato et al. 1993 \cite sato_et_al_1993
 !========================================!
       module module_radiation_aerosols   !
 !........................................!
@@ -434,7 +405,7 @@
 !    ssarhi_grt(KCM1,NSWLWBD) - single scattering albedo for sw+lw band
 !    asyrhi_grt(KCM1,NSWLWBD) - asymmetry parameter for sw+lw band
       real (kind=kind_phys),allocatable,save,dimension(:,:) ::          &
-     &           extrhi_grt, scarhi_grt, ssarhi_grt, asyrhi_grt
+     &   extrhi_grt, extrhi_grt_550, scarhi_grt, ssarhi_grt, asyrhi_grt
 !
 !> \name relative humidity dependent aerosol optical properties:
 !! species : ss001, ss002, ss003, ss004, ss005, so4,
@@ -446,7 +417,7 @@
 
 !> extinction coefficient
       real (kind=kind_phys),allocatable,save,dimension(:,:,:) ::        &
-     &           extrhd_grt, scarhd_grt, ssarhd_grt, asyrhd_grt
+     &   extrhd_grt, extrhd_grt_550, scarhd_grt, ssarhd_grt, asyrhd_grt
 
 !> gocart species
       integer, parameter         :: num_gc = 5
@@ -482,6 +453,7 @@
       real (kind=kind_phys), parameter :: wvn550 = 1.0e4/0.55
 !> the sw spectral band covering wvn550 (comp in aer_init)
       integer, save      :: nv_aod = 1
+      integer            :: i550,id550
 
 !  ---  public interfaces
 
@@ -491,13 +463,40 @@
       contains
 ! =================
 
+!> \defgroup mod_radiation_aerosols Radiation Aerosols Module
+!>  This module contains climatological atmospheric aerosol schemes for
+!!  radiation computations.
+!!
+!!\version NCEP-Radiation_aerosols  v5.2  Jan 2013
+!!
+!!\n This module has three externally callable subroutines:
+!! - aer_init() -- initialization; called at the start of run to set up
+!!                 module parameters
+!! - aer_update() -- updating aerosol data; called within the time loop
+!!                   to check and update data sets
+!! - setaer() -- mapping aeros profile, compute aeros opticals
+!!
+!!\n References:
+!! - OPAC climatological aerosols:
+!! Hou et al. 2002 \cite hou_et_al_2002; Hess et al. 1998
+!! \cite hess_et_al_1998
+!! - GOCART interactive aerosols:
+!! Chin et al., 2000 \cite chin_et_al_2000
+!! Colarco et al., 2010 - jgr, v115, D14207\cite colarco_et_al_2010
+!!
+!! - MERRA2 aerosol reanalysis:
+!! Randles et al., 2017 - jclim, v30, 6823-6850\cite randles_et_al_2017
+!! Buchard et al., 2017 - jclim, v30, 6851-6871\cite buchard_et_al_2017
+!!
+!! - Stratospheric volcanical aerosols:
+!! Sato et al. 1993 \cite sato_et_al_1993
+!!
 !> The initialization program is to set up necessary parameters and
 !! working arrays.
 !!
 !>\param NLAY    number of model vertical layers (not used)
 !>\param me      print message control flag
 !>\section gen_al General Algorithm
-!! @{
 !-----------------------------------
       subroutine aer_init                                               &
      &     ( NLAY, me ) !  ---  inputs
@@ -562,7 +561,7 @@
       lalwflg= (mod(iaerflg/10,10) > 0) ! control flag for lw tropospheric aerosol
       lavoflg= (mod(iaerflg/100,10) >0) ! control flag for stratospheric volcanic aeros
 
-!> -# Call wrt_aerlog() to write aerosol parameter configuration to output logs.
+!> -# Call wrt_aerlog to write aerosol parameter configuration to output logs.
 
       if ( me == 0 ) then
 
@@ -615,7 +614,7 @@
 
       if ( iaerflg /= 100 ) then
 
-!> -# Call set_spectrum() to set up spectral one wavenumber solar/IR
+!> -# Call set_spectrum to set up spectral one wavenumber solar/IR
 !! fluxes.
 
         call set_spectrum
@@ -650,7 +649,7 @@
 
       endif    ! end if_iaerflg_block
 
-!> -# Call set_volcaer() to invoke stratospheric volcanic aerosol
+!> -# Call set_volcaer to invoke stratospheric volcanic aerosol
 !! initialization.
 
       if ( lavoflg ) then
@@ -899,7 +898,6 @@
 !...................................
       end subroutine aer_init
 !-----------------------------------
-!!@}
 
 
 !> This subroutine is the opac-climatology aerosol initialization
@@ -911,7 +909,6 @@
 !!\param me         print message control flag
 !!
 !!\section gen_clim_aerinit General Algorithm
-!!@{
       subroutine clim_aerinit                                           &
      &     ( solfwv, eirfwv, me                                         &          ! ---  inputs
      &     )                                                           !  ---  outputs
@@ -1001,7 +998,6 @@
 !! reads and maps the pre-tabulated aerosol optical spectral data onto
 !! corresponding SW radiation spectral bands.
 !!\section det_set_aercoef General Algorithm
-!! @{
 !--------------------------------
       subroutine set_aercoef
 !................................
@@ -1436,7 +1432,6 @@
 !................................
       end subroutine set_aercoef
 !--------------------------------
-!! @}
 
 !> This subroutine computes mean aerosols optical properties over each
 !! SW radiation spectral band for each of the species components. This
@@ -1699,7 +1694,6 @@
 !...................................
       end subroutine clim_aerinit
 !-----------------------------------
-!!@}
 
 
 !> This subroutine checks and updates time varying climatology aerosol
@@ -1709,7 +1703,6 @@
 !!\param imon     month of the year
 !!\param me       print message control flag
 !>\section gen_aer_upd General Algorithm
-!! @{
 !-----------------------------------
       subroutine aer_update                                             &
      &     ( iyear, imon, me ) !  ---  inputs:
@@ -2061,8 +2054,6 @@
 !...................................
       end subroutine aer_update
 !-----------------------------------
-!! @}
-
 
 !> This subroutine computes aerosols optical properties.
 !>\param prsi    (IMAX,NLP1), pressure at interface in mb
@@ -2089,7 +2080,6 @@
 !!\n                    (:,:,:,3): asymmetry parameter
 !!\param aerodp    (IMAX,NSPC1), vertically integrated optical depth
 !>\section general_setaer General Algorithm
-!> @{
 !-----------------------------------
       subroutine setaer                                                 &
      &     ( prsi,prsl,prslk,tvly,rhlay,slmsk,tracer,aerfld,xlon,xlat,  &   !  ---  inputs
@@ -2645,8 +2635,6 @@
 !...................................
       end subroutine setaer
 !-----------------------------------
-!> @}
-
 
 !> This subroutine maps the 5 degree global climatological aerosol data
 !! set onto model grids, and compute aerosol optical properties for SW
@@ -2675,7 +2663,6 @@
 !!\n                              (:,:,:,3): asymmetry parameter
 !!\param aerodp        (IMAX,NSPC+1), vertically integrated aer-opt-depth
 !!\section gel_aer_pro General Algorithm
-!> @{
 !-----------------------------------
       subroutine aer_property                                           &
      &     ( prsi,prsl,prslk,tvly,rhlay,dz,hz,tracer,                   &     !  ---  inputs:
@@ -3406,7 +3393,6 @@
       end subroutine aer_property
 !-----------------------------------
 
-!> @}
 !> This subroutine is the gocart aerosol initialization
 !! program to set up necessary parameters and working arrays.
 !>\param solfwv     (NWVTOT), solar flux for each individual wavenumber
@@ -3416,7 +3402,6 @@
 !!\param me         print message control flag
 !!
 !>\section gel_go_ini General Algorithm
-!! @{
 !-----------------------------------
       subroutine gocart_aerinit                                         &
      &     ( solfwv, eirfwv, me                                         &
@@ -3504,10 +3489,12 @@
 
       if ( .not. allocated( extrhi_grt ) ) then
         allocate ( extrhi_grt (       kcm1,nswlwbd) )
+        allocate ( extrhi_grt_550 (       kcm1,1) )
         allocate ( scarhi_grt (       kcm1,nswlwbd) )
         allocate ( ssarhi_grt (       kcm1,nswlwbd) )
         allocate ( asyrhi_grt (       kcm1,nswlwbd) )
         allocate ( extrhd_grt (krhlev,kcm2,nswlwbd) )
+        allocate ( extrhd_grt_550 (krhlev,kcm2,1) )
         allocate ( scarhd_grt (krhlev,kcm2,nswlwbd) )
         allocate ( ssarhd_grt (krhlev,kcm2,nswlwbd) )
         allocate ( asyrhd_grt (krhlev,kcm2,nswlwbd) )
@@ -3850,6 +3837,9 @@
        do i = 1, kaerbndi         ! convert from m to micron
           j = kaerbndi -i + 1     ! flip i-index
           wavelength_du(j) = 1.e6 * lambda_du(i)
+           if (int(wavelength_du(j)*100) == 55) then
+              id550=j
+           endif
        enddo
        do k = 1, iradius
           do i = 1, kaerbndi
@@ -3914,6 +3904,9 @@
         do i = 1, kaerbndd         ! convert from m to micron
            j = kaerbndd -i + 1     ! flip i-index
            wavelength(j) = 1.e6 * lambda(i)
+           if (int(wavelength(j)*100) == 55) then
+              i550=j
+           endif
         enddo
         do k = 1, iradius
           ik = ibeg + k - 1
@@ -4032,6 +4025,9 @@
             refb = sumreft * rsolbd
 
             extrhi_grt(nc,nb) = sumk   * rsolbd
+            if (nb==nv_aod) then
+              extrhi_grt_550(nc,1) = rhidext0_grt(id550,nc)
+            endif
             scarhi_grt(nc,nb) = sums   * rsolbd
             asyrhi_grt(nc,nb) = sumokg / (sumok + 1.0e-10)
             ssarhi_grt(nc,nb) = 4.0*refb                                &
@@ -4064,6 +4060,9 @@
               refb = sumreft * rsolbd
 
               extrhd_grt(nh,nc,nb) = sumk   * rsolbd
+              if (nb==nv_aod) then
+                extrhd_grt_550(nh,nc,1) = rhdpext0_grt(i550,nh,nc)
+              endif
               scarhd_grt(nh,nc,nb) = sums   * rsolbd
               asyrhd_grt(nh,nc,nb) = sumokg / (sumok + 1.0e-10)
               ssarhd_grt(nh,nc,nb) = 4.0*refb                           &
@@ -4160,7 +4159,6 @@
 !...................................
       end subroutine gocart_aerinit
 !-----------------------------------
-!! @}
 
 !> This subroutine compute aerosol optical properties for SW
 !! and LW radiations.
@@ -4189,7 +4187,6 @@
 !!\n                              (:,:,:,3): asymmetry parameter
 !!\param aerodp        (IMAX,NSPC+1), vertically integrated aer-opt-depth
 !!\section gel_go_aer_pro General Algorithm
-!! @{
 !-----------------------------------
       subroutine aer_property_gocart                                    &
 !...................................
@@ -4271,7 +4268,8 @@
 
 !  ---  locals:
       real (kind=kind_phys), dimension(nlay,nswlwbd):: tauae,ssaae,asyae
-      real (kind=kind_phys), dimension(nspc)        :: spcodp
+      real (kind=kind_phys), dimension(nlay,1):: tauae_550
+      real (kind=kind_phys), dimension(nlay,nspc)        :: spcodp
 
       real (kind=kind_phys),dimension(nlay,kcm) ::  aerms
       real (kind=kind_phys),dimension(nlay) :: dz1, rh1
@@ -4287,6 +4285,9 @@
         do m = 1, NSWLWBD
           do k = 1, NLAY
            tauae(k,m) = f_zero
+           if (m==nv_aod) then
+             tauae_550(k,1) = f_zero
+           endif
            ssaae(k,m) = f_one
            asyae(k,m) = f_zero
           enddo
@@ -4294,13 +4295,15 @@
 
 ! --- set floor value for aerms (kg/m3)
         do k = 1, NLAY
-        do m = 1, kcm
-           aerms(k,m) = 1.e-15
-        enddo
+          do m = 1, kcm
+            aerms(k,m) = 1.e-15
+          enddo
         enddo
 
-        do m = 1, nspc
-           spcodp(m) = f_zero
+        do k = 1, NLAY
+          do m = 1, nspc
+            spcodp(k,m) = f_zero
+          enddo
         enddo
 
         do k = 1, NLAY
@@ -4338,11 +4341,10 @@
 
 ! --- update diagnostic aod arrays
           do k = 1, NLAY
-           aerodp(i,1) = aerodp(i,1) + tauae(k,nv_aod)
-          enddo
-
-          do m = 1, NSPC
-           aerodp(i,m+1) = spcodp(m)
+            aerodp(i,1) = aerodp(i,1) + tauae_550(k,1)
+            do m = 1, NSPC
+              aerodp(i,m+1) = aerodp(i,m+1)+spcodp(k,m)
+            enddo
           enddo
 
         endif     ! end if_larsw_block
@@ -4408,9 +4410,10 @@
 
 !  ---  locals:
       real (kind=kind_phys) :: drh0, drh1, rdrh
-      real (kind=kind_phys) :: cm, ext01, sca01, asy01, ssa01
-      real (kind=kind_phys) :: ext1, asy1, ssa1, sca1
+      real (kind=kind_phys) :: cm, ext01, ext01_550, sca01,asy01,ssa01
+      real (kind=kind_phys) :: ext1, ext1_550, asy1, ssa1,sca1,tau_550
       real (kind=kind_phys) :: sum_tau,sum_asy,sum_ssa,tau,asy,ssa
+      real (kind=kind_phys) :: sum_tau_550
       integer               :: ih1, ih2, nbin, ib, ntrc, ktrc
 
 ! --- linear interp coeffs for rh-dep species
@@ -4434,6 +4437,10 @@
         do ib = 1, nswlwbd
 
            sum_tau = f_zero
+           if (ib == nv_aod ) then
+             sum_tau_550 = f_zero
+             ext1_550 = f_zero
+           endif
            sum_ssa = f_zero
            sum_asy = f_zero
 
@@ -4447,6 +4454,9 @@
            do m = 1, kcm1
             cm =  max(aerms(k,m),0.0) * dz1(k)
             ext1 = ext1 + cm*extrhi_grt(m,ib)
+            if (ib == nv_aod) then
+              ext1_550 = ext1_550 + cm*extrhi_grt_550(m,1)
+            endif
             sca1 = sca1 + cm*scarhi_grt(m,ib)
             ssa1 = ssa1 + cm*extrhi_grt(m,ib) * ssarhi_grt(m,ib)
             asy1 = asy1 + cm*scarhi_grt(m,ib) * asyrhi_grt(m,ib)
@@ -4457,7 +4467,9 @@
 
 ! --- update aod from individual species
            if ( ib==nv_aod ) then
-             spcodp(1) = spcodp(1) + tau
+             tau_550 = ext1_550
+             spcodp(k,1) =  tau_550
+             sum_tau_550 = sum_tau_550 + tau_550
            endif
 ! --- update sum_tau, sum_ssa, sum_asy
            sum_tau = sum_tau + tau
@@ -4467,6 +4479,9 @@
 ! --- determine tau, ssa, asy for non-dust aerosols
            do ntrc = 2, nspc
             ext1 = f_zero
+            if ( ib==nv_aod ) then
+              ext1_550 = f_zero
+            endif
             asy1 = f_zero
             sca1 = f_zero
             ssa1 = f_zero
@@ -4477,6 +4492,10 @@
              cm =  max(aerms(k,m1),0.0) * dz1(k)
              ext01 = extrhd_grt(ih1,m,ib) +                             &
      &              rdrh * (extrhd_grt(ih2,m,ib)-extrhd_grt(ih1,m,ib))
+             if ( ib==nv_aod ) then
+               ext01_550 = extrhd_grt_550(ih1,m,1) +                    &
+     &         rdrh * (extrhd_grt_550(ih2,m,1)-extrhd_grt_550(ih1,m,1))
+             endif
              sca01 = scarhd_grt(ih1,m,ib) +                             &
      &              rdrh * (scarhd_grt(ih2,m,ib)-scarhd_grt(ih1,m,ib))
              ssa01 = ssarhd_grt(ih1,m,ib) +                             &
@@ -4484,6 +4503,9 @@
              asy01 = asyrhd_grt(ih1,m,ib) +                             &
      &              rdrh * (asyrhd_grt(ih2,m,ib)-asyrhd_grt(ih1,m,ib))
              ext1 = ext1 + cm*ext01
+             if ( ib==nv_aod ) then
+               ext1_550 = ext1_550 + cm*ext01_550
+             endif
              sca1 = sca1 + cm*sca01
              ssa1 = ssa1 + cm*ext01 * ssa01
              asy1 = asy1 + cm*sca01 * asy01
@@ -4493,7 +4515,9 @@
             if (sca1 > f_zero) asy=min(f_one, asy1/sca1)
 ! --- update aod from individual species
             if ( ib==nv_aod ) then
-             spcodp(ktrc) = spcodp(ktrc) + tau
+              tau_550 = ext1_550
+              spcodp(k,ktrc) = tau_550
+              sum_tau_550 = sum_tau_550 + tau_550
             endif
 ! --- update sum_tau, sum_ssa, sum_asy
             sum_tau = sum_tau + tau
@@ -4503,6 +4527,9 @@
 
 ! --- determine total tau, ssa, asy for aerosol mixture
            tauae(k,ib) = sum_tau
+           if ( ib==nv_aod ) then
+             tauae_550(k,1) = sum_tau_550
+           endif
            if (sum_tau > f_zero) ssaae(k,ib) = sum_ssa / sum_tau
            if (sum_ssa > f_zero) asyae(k,ib) = sum_asy / sum_ssa
 
@@ -4516,10 +4543,8 @@
 !...................................
       end subroutine aer_property_gocart
 !-----------------------------------
-!! @}
 !
 ! =======================================================================
-
 !..........................................!
       end module module_radiation_aerosols !
 !==========================================!

@@ -26,10 +26,6 @@
       end if
       end subroutine myjpbl_wrapper_init
 
-      subroutine myjpbl_wrapper_finalize ()
-      end subroutine myjpbl_wrapper_finalize
-
-!!
 !> \brief This scheme (1) performs pre-myjpbl work, (2) runs the myjpbl, and (3) performs post-myjpbl work
 !! \section arg_table_myjpbl_wrapper_run Argument Table
 !! \htmlinclude myjpbl_wrapper_run.html

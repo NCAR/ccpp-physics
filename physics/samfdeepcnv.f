@@ -29,13 +29,10 @@
 
       end subroutine samfdeepcnv_init
 
-      subroutine samfdeepcnv_finalize()
-      end subroutine samfdeepcnv_finalize
-
-!> \defgroup SAMFdeep GFS Scale-Aware Mass-Flux Deep Convection Scheme Module
-!! @{
-!>  \brief This subroutine contains the entirety of the SAMF deep convection
+!> \defgroup SAMFdeep GFS saSAS Deep Convection Module
+!> This subroutine contains the entirety of the SAMF deep convection
 !! scheme.
+!> @{
 !!
 !! For grid sizes larger than threshold value, as in Grell (1993) \cite grell_1993 , the SAMF
 !! deep convection scheme can be described in terms of three types of
@@ -74,7 +71,6 @@
 !!  -# For the "feedback control", calculate updated values of the state variables by multiplying the cloud base mass flux and the tendencies calculated per unit cloud base mass flux from the static control.
 !!
 !!  \section samfdeep_detailed GFS samfdeepcnv Detailed Algorithm
-!!  @{
       subroutine samfdeepcnv_run (im,km,first_time_step,restart,        &
      &    tmf,qmicro,itc,ntc,cliq,cp,cvap,                              &
      &    eps,epsm1,fv,grav,hvap,rd,rv,                                 &
@@ -216,6 +212,7 @@ cj
       real(kind=kind_phys) omega_u(im,km),zdqca(im,km),qlks(im,km),
      &     omegac(im),zeta(im,km),dbyo1(im,km),sigmab(im)
       real(kind=kind_phys) gravinv
+      logical flag_shallow
 c  physical parameters
 !     parameter(grav=grav,asolfac=0.958)
 !     parameter(elocp=hvap/cp,el2orc=hvap*hvap/(rv*cp))
@@ -1622,7 +1619,7 @@ c
 c
       do i = 1, im
         flg(i) = cnvflg(i)
-        ktcon1(i) = kmax(i)
+        ktcon1(i) = ktcon(i)
       enddo
       do k = 2, km1
         do i = 1, im
@@ -1641,8 +1638,11 @@ c
 !             aa2(i) = aa2(i) +
 !!   &                 dz1 * eta(i,k) * grav * fv *
 !    &                 dz1 * grav * fv *
-!    &                 max(val,(qeso(i,k) - qo(i,k)))
-              if(aa2(i) < 0.) then
+!    &                 max(val,(qeso(i,k) - qo(i,k)))        
+!NRL MNM: Limit overshooting not to be deeper than half the actual cloud              
+              tem  = 0.5 * (zi(i,ktcon(i))-zi(i,kbcon(i)))
+              tem1 = zi(i,k)-zi(i,ktcon(i))
+              if(aa2(i) < 0. .or. tem1 >= tem) then
                 ktcon1(i) = k
                 flg(i) = .false.
               endif
@@ -1779,7 +1779,7 @@ c
       enddo
 c
 
-!> - Calculate the mean updraft velocity within the cloud (wc),cast in pressure coordinates.                                                                                                                                  
+!> - For progsigma = T, calculate the mean updraft velocity within the cloud (omegac),cast in pressure coordinates.                                                                                                                                  
       if(progsigma)then                                                                                                                                                            
          do i = 1, im
             omegac(i) = 0.
@@ -1809,7 +1809,7 @@ c
             endif
          enddo
 
-!> - Calculate the xi term in Bengtsson et al. 2022 (equation 8)
+!> - For progsigma = T, calculate the xi term in Bengtsson et al. 2022 \cite Bengtsson_2022 (equation 8)
          do k = 2, km1
             do i = 1, im
                if (cnvflg(i)) then
@@ -2881,9 +2881,10 @@ c
         endif
       enddo
 
-!> - From Bengtsson et al. (2022) Prognostic closure scheme, equation 8, compute updraft area fraction based on a moisture budget
+!> - From Bengtsson et al. (2022) \cite Bengtsson_2022 prognostic closure scheme, equation 8, call progsigma_calc() to compute updraft area fraction based on a moisture budget
       if(progsigma)then
-         call progsigma_calc(im,km,first_time_step,restart,
+         flag_shallow = .false.
+         call progsigma_calc(im,km,first_time_step,restart,flag_shallow,
      &        del,tmf,qmicro,dbyo1,zdqca,omega_u,zeta,hvap,delt,
      &        prevsq,q,kbcon1,ktcon,cnvflg,
      &        sigmain,sigmaout,sigmab,errmsg,errflg)
@@ -3562,6 +3563,5 @@ c
       end subroutine samfdeepcnv_run
 
 !> @}
-!! @}
 
       end module samfdeepcnv
