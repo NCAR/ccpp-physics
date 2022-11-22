@@ -262,7 +262,7 @@
 [ipsd0]
   standard_name = initial_seed_for_mcica
   long_name = initial permutaion seed for mcica radiation
-  units = none
+  units = 1
   dimensions =  ()
   type = integer
   intent = inout
