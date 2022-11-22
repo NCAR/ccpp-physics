@@ -252,7 +252,7 @@
 !!\param me              print control flag
 !>\section cld_init General Algorithm
       subroutine cld_init                                               &
-     &     ( si, NLAY, imp_physics, me, errflg, errmsg )
+     &     ( si, NLAY, imp_physics, me, con_g, con_rd, errflg, errmsg )
 !  ===================================================================  !
 !                                                                       !
 ! abstract: cld_init is an initialization program for cloud-radiation   !
@@ -281,7 +281,7 @@
 !  ---  inputs:
       integer, intent(in) :: NLAY, me, imp_physics
 
-      real (kind=kind_phys), intent(in) :: si(:)
+      real (kind=kind_phys), intent(in) :: si(:), con_g, con_rd
 
 !  ---  outputs:
       integer,          intent(out) :: errflg
@@ -293,6 +293,10 @@
 ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+
+      ! Initialze module parameters
+      gfac = 1.0e5/con_g
+      gord = con_g/con_rd
 
       if (me == 0) then
          print *, VTAGCLD       !print out version tag
@@ -588,10 +592,6 @@
           print*, 'in radiation_clouds_prop=', imp_physics, uni_cld,     &
      &           ncndl, lgfdlmprad, do_mynnedmf, imfdeepcnv, kdt
       end if
-      
-      !
-      gfac = 1.0e5/con_g 
-      gord = con_g/con_rd
 
       do k = 1, NLAY
         do i = 1, IX

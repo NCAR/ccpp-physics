@@ -42,9 +42,9 @@ module GFS_rrtmg_setup
         iovr_max, iovr_dcorr, iovr_exp, iovr_exprand, icliq_sw, lcrick,      &
         lcnorm, imp_physics, lnoprec, idate, iflip, do_RRTMGP, me, lalw1bd,  &
         iaermdl, iaerflg, aeros_file, con_pi, con_t0c, con_c, con_boltz,     &
-        con_plnk, con_solr_2008, con_solr_2002, co2usr_file, co2cyc_file,    &
-        rad_hr_units, inc_minor_gas, icliq_lw, isubcsw, isubclw, iswmode,    &
-        ipsd0, ltp, lextop, errmsg, errflg)
+        con_plnk, con_solr_2008, con_solr_2002, con_g, con_rd, co2usr_file,  &
+        co2cyc_file, rad_hr_units, inc_minor_gas, icliq_lw, isubcsw, isubclw,&
+        iswmode, ipsd0, ltp, lextop, errmsg, errflg)
 ! =================   subprogram documentation block   ================ !
 !                                                                       !
 ! subprogram:   GFS_rrtmg_setup_init - a subprogram to initialize radiation !
@@ -162,7 +162,7 @@ module GFS_rrtmg_setup
       character(len=26),intent(in)  :: aeros_file, solar_file, co2usr_file,&
            co2cyc_file
       real(kind_phys),  intent(in)  :: con_pi, con_t0c, con_c, con_boltz,  &
-           con_plnk, con_solr_2008, con_solr_2002
+           con_plnk, con_solr_2008, con_solr_2002, con_g, con_rd
       integer,          intent(inout) :: ipsd0
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -220,7 +220,7 @@ module GFS_rrtmg_setup
            con_pi, con_t0c, con_c, con_boltz, con_plnk, errflg, errmsg)
       call gas_init ( me, co2usr_file, co2cyc_file, ico2, ictm, ntoz,   &
            con_pi, errflg, errmsg)
-      call cld_init ( si, levr, imp_physics, me, errflg, errmsg)
+      call cld_init ( si, levr, imp_physics, me, con_g, con_rd, errflg, errmsg)
       call rlwinit ( me, rad_hr_units, inc_minor_gas, icliq_lw, isubcsw, &
            iovr, iovr_rand, iovr_maxrand, iovr_max, iovr_dcorr,         &
            iovr_exp, iovr_exprand, errflg, errmsg )
