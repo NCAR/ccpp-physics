@@ -50,11 +50,12 @@ contains
        relhum, lsmask, xlon, xlat, dx, tv_lay, effrin_cldliq, effrin_cldice,             &
        effrin_cldrain, effrin_cldsnow, tracer, cnv_mixratio, cld_cnv_frac, qci_conv,     &
        deltaZ, deltaZc, deltaP, qc_mynn, qi_mynn, cld_pbl_frac, con_g, con_rd, con_eps,  &
-       con_ttp, doGP_cldoptics_PADE, doGP_cldoptics_LUT, cld_frac, cld_lwp, cld_reliq,   &
+       con_ttp, doGP_cldoptics_PADE, doGP_cldoptics_LUT, doGP_smearclds,                 &
+       cld_frac, cld_lwp, cld_reliq,                                                     &
        cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain, precip_frac,        &
        cld_cnv_lwp, cld_cnv_reliq, cld_cnv_iwp, cld_cnv_reice, cld_pbl_lwp,              &
        cld_pbl_reliq, cld_pbl_iwp, cld_pbl_reice, lwp_ex, iwp_ex, lwp_fc, iwp_fc,        &
-       errmsg, errflg)
+       cldfra2d, errmsg, errflg)
     implicit none
 
     ! Inputs   
@@ -92,7 +93,8 @@ contains
          uni_cld,                   & ! Flag for unified cloud scheme
          lmfdeep2,                  & ! Flag for mass flux deep convection 
          doGP_cldoptics_LUT,        & ! Flag to do GP cloud-optics (LUTs)
-         doGP_cldoptics_PADE          !                            (PADE approximation)
+         doGP_cldoptics_PADE,       & !                            (PADE approximation)
+         doGP_smearclds               ! If true, add sgs clouds to gridmean clouds
     real(kind_phys), intent(in) :: &
          con_g,                     & ! Physical constant: gravitational constant
          con_rd,                    & ! Physical constant: gas-constant for dry air
@@ -135,6 +137,8 @@ contains
          iwp_ex,                    & ! Total ice    water path from explicit microphysics
          lwp_fc,                    & ! Total liquid water path from cloud fraction scheme
          iwp_fc                       ! Total ice    water path from cloud fraction scheme
+    real(kind_phys), dimension(:), intent(out) :: &
+         cldfra2d                     ! Instantaneous 2D (max-in-column) cloud fraction
     real(kind_phys), dimension(:,:),intent(inout) :: &
          cld_frac,                  & ! Cloud-fraction for   stratiform   clouds
          cld_lwp,                   & ! Water path for       stratiform   liquid cloud-particles
@@ -267,8 +271,9 @@ contains
        endif
        call cloud_mp_thompson(nCol, nLev, nTracers, ncnd, i_cldliq, i_cldice, i_cldrain,&
             i_cldsnow, i_cldgrpl, p_lev, p_lay, tv_lay, t_lay, tracer, qs_lay, q_lay,   &
-            relhum, con_g, con_rd, con_eps, alpha0, lwp_ex, iwp_ex, lwp_fc, iwp_fc,     &
-            cld_frac, cld_lwp, cld_iwp, cld_swp, cld_rwp, cond_cfrac_onRH = .true.)
+            relhum, con_ttp, con_g, con_rd, con_eps, alpha0, cnv_mixratio, lwp_ex,      &
+            iwp_ex, lwp_fc, iwp_fc, cld_frac, cld_lwp, cld_iwp, cld_swp, cld_rwp,       &
+            cond_cfrac_onRH = .true., doGP_smearclds = doGP_smearclds)
     endif
 
     ! Bound effective radii for RRTMGP, LUT's for cloud-optics go from
@@ -292,6 +297,14 @@ contains
           where(cld_pbl_reice .gt. radice_upr) cld_pbl_reice = radice_upr
        endif
     endif
+
+    ! Instantaneous 2D (max-in-column) cloud fraction
+    do iCol = 1, nCol
+       cldfra2d(iCol) = 0._kind_phys
+       do iLay = 1, nLev-1
+          cldfra2d(iCol) = max(cldfra2d(iCol), cld_frac(iCol,iLay))
+       enddo
+    enddo
 
     precip_frac(1:nCol,1:nLev) = cld_frac(1:nCol,1:nLev)
 
@@ -659,13 +672,14 @@ contains
 !! \section cloud_mp_thompson_gen General Algorithm
   subroutine cloud_mp_thompson(nCol, nLev, nTracers, ncnd, i_cldliq, i_cldice, i_cldrain,&
        i_cldsnow, i_cldgrpl, p_lev, p_lay, tv_lay, t_lay, tracer, qs_lay, q_lay, relhum, &
-       con_g, con_rd, con_eps, alpha0, lwp_ex, iwp_ex, lwp_fc, iwp_fc, cld_frac, cld_lwp,&
-       cld_iwp, cld_swp, cld_rwp, cond_cfrac_onRH)
+       con_ttp, con_g, con_rd, con_eps, alpha0, cnv_mixratio, lwp_ex, iwp_ex, lwp_fc,    &
+       iwp_fc, cld_frac, cld_lwp, cld_iwp, cld_swp, cld_rwp, cond_cfrac_onRH, doGP_smearclds)
     implicit none
 
     ! Inputs
     logical, intent(in), optional :: &
-         cond_cfrac_onRH
+         cond_cfrac_onRH,   & ! If true, cloud-fracion set to unity when rh>99%
+         doGP_smearclds       ! If true, add sgs clouds to gridmean clouds
     integer, intent(in)    :: &
          nCol,              & ! Number of horizontal grid points
          nLev,              & ! Number of vertical layers
@@ -677,6 +691,7 @@ contains
          i_cldsnow,         & !                             cloud snow amount.
          i_cldgrpl            !                             cloud groupel amount.
     real(kind_phys), intent(in) :: &
+         con_ttp,           & ! Triple point temperature of water (K)  
          con_g,             & ! Physical constant: gravitational constant
          con_rd,            & ! Physical constant: gas-constant for dry air
          con_eps,           & ! Physical constant: gas constant air / gas constant H2O
@@ -687,7 +702,8 @@ contains
          qs_lay,            & ! Saturation vapor pressure (Pa)
          q_lay,             & ! water-vapor mixing ratio (kg/kg)
          relhum,            & ! Relative humidity
-         p_lay                ! Pressure at model-layers (Pa)
+         p_lay,             & ! Pressure at model-layers (Pa)
+         cnv_mixratio         ! Convective cloud mixing-ratio (kg/kg) 
     real(kind_phys), dimension(:,:), intent(in) :: &
          p_lev                ! Pressure at model-level interfaces (Pa)
     real(kind_phys), dimension(:,:,:),intent(in) :: &
@@ -707,16 +723,15 @@ contains
          cld_rwp              ! Cloud rain water path
 
     ! Local variables
-    real(kind_phys) :: tem1, pfac, cld_mr, deltaP
+    real(kind_phys) :: tem1, pfac, cld_mr, deltaP, tem2
     real(kind_phys), dimension(nCol, nLev, min(4,ncnd)) :: cld_condensate
     integer :: iCol,iLay,l
 
     ! Cloud condensate
     cld_condensate(1:nCol,1:nLev,1) = tracer(1:nCol,1:nLev,i_cldliq)     ! -liquid water
     cld_condensate(1:nCol,1:nLev,2) = tracer(1:nCol,1:nLev,i_cldice)     ! -ice water
-    cld_condensate(1:nCol,1:nLev,3) = tracer(1:nCol,1:nLev,i_cldrain)    ! -rain water
-    cld_condensate(1:nCol,1:nLev,4) = tracer(1:nCol,1:nLev,i_cldsnow) + &! -snow + grapuel
-                                      tracer(1:nCol,1:nLev,i_cldgrpl)
+    cld_condensate(1:nCol,1:nLev,3) = tracer(1:nCol,1:nLev,i_cldrain)    ! -rain hydrometeors
+    cld_condensate(1:nCol,1:nLev,4) = tracer(1:nCol,1:nLev,i_cldsnow)    ! -snow hydrometeors
 
     cld_lwp(:,:) = 0.0
     cld_iwp(:,:) = 0.0
@@ -726,6 +741,12 @@ contains
     tem1 = 1.0e5/con_g
     do iLay = 1, nLev-1
        do iCol = 1, nCol
+          ! Add convective cloud to gridmean cloud?
+          if (doGP_smearclds) then
+             tem2 = min(1.0, max(0.0, (con_ttp-t_lay(iCol,iLay))*0.05))
+             cld_condensate(iCol,iLay,1) = cld_condensate(iCol,iLay,1) + cnv_mixratio(iCol,iLay)*(1._kind_phys - tem2)
+             cld_condensate(iCol,iLay,2) = cld_condensate(iCol,iLay,2) + cnv_mixratio(iCol,iLay)*tem2
+          endif
           ! Compute liquid/ice condensate path from mixing ratios (kg/kg)->(g/m2)
           deltaP              = abs(p_lev(iCol,iLay+1)-p_lev(iCol,iLay))*0.01
           cld_lwp(iCol,iLay)  = max(0., cld_condensate(iCol,iLay,1) * tem1 * deltaP)
@@ -738,7 +759,7 @@ contains
              cld_frac(iCol,iLay) = 1._kind_phys
           else
              cld_mr = cld_condensate(iCol,iLay,1) + cld_condensate(iCol,iLay,2) +  &
-                  cld_condensate(iCol,iLay,4)
+                  cld_condensate(iCol,iLay,3) + cld_condensate(iCol,iLay,4)
              cld_frac(iCol,iLay) = cld_frac_XuRandall(p_lay(iCol,iLay),            &
                   qs_lay(iCol,iLay), relhum(iCol,iLay), cld_mr, alpha0)
           endif
