@@ -566,7 +566,7 @@
       lalwflg= (mod(iaerflg/10,10) > 0) ! control flag for lw tropospheric aerosol
       lavoflg= (mod(iaerflg/100,10) >0) ! control flag for stratospheric volcanic aeros
 
-!> -# Call wrt_aerlog() to write aerosol parameter configuration to output logs.
+!> -# Call wrt_aerlog to write aerosol parameter configuration to output logs.
 
       if ( me == 0 ) then
 
@@ -619,7 +619,7 @@
 
       if ( iaerflg /= 100 ) then
 
-!> -# Call set_spectrum() to set up spectral one wavenumber solar/IR
+!> -# Call set_spectrum to set up spectral one wavenumber solar/IR
 !! fluxes.
 
         call set_spectrum(con_pi, con_t0c, con_c, con_boltz, con_plnk,  &
@@ -657,7 +657,7 @@
 
       endif    ! end if_iaerflg_block
 
-!> -# Call set_volcaer() to invoke stratospheric volcanic aerosol
+!> -# Call set_volcaer to invoke stratospheric volcanic aerosol
 !! initialization.
 
       if ( lavoflg ) then

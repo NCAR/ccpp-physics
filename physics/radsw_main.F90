@@ -1540,7 +1540,6 @@
 !> This subroutine computes the cloud optical properties for each
 !! cloudy layer and g-point interval.
 !!\param cfrac          layer cloud fraction
-!!\n for  GFS_typedefs::iswcliq > 0 (prognostic cloud scheme)  - - -
 !!\param cliqp          layer in-cloud liq water path (\f$g/m^2\f$)
 !!\param reliq          mean eff radius for liq cloud (micron)
 !!\param cicep          layer in-cloud ice water path (\f$g/m^2\f$)
@@ -1549,15 +1548,6 @@
 !!\param cdat2          effective radius for rain drop (micron)
 !!\param cdat3          layer snow flake water path(\f$g/m^2\f$)
 !!\param cdat4          mean eff radius for snow flake(micron)
-!!\n for GFS_typedefs::iswcliq = 0  (diagnostic cloud scheme)  - - -
-!!\param cliqp          not used
-!!\param cicep          not used
-!!\param reliq          not used
-!!\param reice          not used
-!!\param cdat1          layer cloud optical depth
-!!\param cdat2          layer cloud single scattering albedo
-!!\param cdat3          layer cloud asymmetry factor
-!!\param cdat4          optional use
 !!\param cf1            effective total cloud cover at surface
 !!\param nlay           vertical layer number
 !!\param ipseed         permutation seed for generating random numbers
@@ -1573,7 +1563,6 @@
 !!\param cldfrc         cloud fraction of grid mean value
 !!\param cldfmc         cloud fraction for each sub-column
 !!\section General_cldprop cldprop General Algorithm
-!-----------------------------------
       subroutine cldprop                                                &
      &     ( cfrac,cliqp,reliq,cicep,reice,cdat1,cdat2,cdat3,cdat4,     &   !  ---  inputs
      &       cf1, nlay, ipseed, dz, delgth, alpha, iswcliq, iswcice,    &

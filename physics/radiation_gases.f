@@ -946,7 +946,8 @@
 !!                  or -pi -> +pi arrangements
 !!\param xlat       (IMAX), grid latitude in radians, default range to
 !!                  pi/2 -> -pi/2, otherwise see in-line comment
-!!\param IMAX, LMAX      horizontal/vertical dimensions for output data
+!!\param IMAX       horizontal dimension for output data
+!!\param LMAX       vertical dimension for output data
 !!\param ico2flg    (1), co2 data source control flag
 !!\param top_at_1   (1), vertical ordering flag
 !!\param con_pi     (1), physical constant Pi

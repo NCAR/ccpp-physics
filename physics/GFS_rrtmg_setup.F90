@@ -303,6 +303,7 @@ module GFS_rrtmg_setup
       is_initialized = .false.
 
    end subroutine GFS_rrtmg_setup_finalize
+
 !> This subroutine checks and updates time sensitive data used by
 !! radiation computations. This subroutine needs to be placed inside
 !! the time advancement loop but outside of the horizontal grid loop.

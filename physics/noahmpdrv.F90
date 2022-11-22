@@ -128,8 +128,6 @@
 !!    - Call penman() to calculate potential evaporation.
 !!    - Calculate the surface specific humidity and convert surface sensible and latent heat fluxes in W m-2 from their kinematic values.
 !!    - If a "guess" run, restore the land-related prognostic fields.
-!                                                                       !
-!-----------------------------------
   subroutine noahmpdrv_run                                       &
 !...................................
 !  ---  inputs:

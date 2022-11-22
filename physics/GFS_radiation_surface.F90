@@ -48,8 +48,8 @@
 !! \htmlinclude GFS_radiation_surface_run.html
 !!
       subroutine GFS_radiation_surface_run (                            &
-        ialb, im, frac_grid, lslwr, lsswr, lsm, lsm_noahmp, lsm_ruc,    &
-        xlat, xlon, slmsk, lndp_type, n_var_lndp, sfc_alb_pert,         &
+        ialb, im, nf_albd, frac_grid, lslwr, lsswr, lsm, lsm_noahmp,    &
+        lsm_ruc, xlat, xlon, slmsk, lndp_type, n_var_lndp, sfc_alb_pert,&
         lndp_var_list, lndp_prt_list, landfrac, snodl, snodi, sncovr,   &
         sncovr_ice, fice, zorl, hprime, tsfg, tsfa, tisfc, coszen,      &
         cplice, min_seaice, min_lakeice, lakefrac, use_flake,           &
@@ -60,12 +60,12 @@
         semisbase, semis, sfcalb, sfc_alb_dif, errmsg, errflg)
 
       use module_radiation_surface,  only: f_zero, f_one,  &
-                                           epsln, NF_ALBD, &
+                                           epsln,          &
                                            setemis, setalb
 
       implicit none
 
-      integer,               intent(in) :: im, ialb
+      integer,               intent(in) :: im, nf_albd, ialb
       logical,               intent(in) :: frac_grid, lslwr, lsswr, use_cice_alb, cplice
       integer,               intent(in) :: lsm, lsm_noahmp, lsm_ruc, lndp_type, n_var_lndp
       real(kind=kind_phys),  intent(in) :: min_seaice, min_lakeice, con_ttp
@@ -182,7 +182,8 @@
                      alvsf, alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc,                    &
                      albdvis_lnd, albdnir_lnd, albivis_lnd, albinir_lnd,                       &
                      albdvis_ice, albdnir_ice, albivis_ice, albinir_ice,                       &
-                     IM, sfc_alb_pert, lndp_alb, fracl, fraco, fraci, icy, ialb, con_ttp,      & !  ---  inputs
+                     im, nf_albd, sfc_alb_pert, lndp_alb, fracl, fraco, fraci, icy, ialb,      &
+                     con_ttp,                                                                  & !  ---  inputs
                      sfcalb )                                                                    !  ---  outputs
 
 !> -# Approximate mean surface albedo from vis- and nir- diffuse values.

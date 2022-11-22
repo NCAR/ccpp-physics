@@ -78,6 +78,13 @@
   dimensions = ()
   type = integer
   intent = in
+[nf_albd]
+  standard_name = number_of_components_for_surface_albedo
+  long_name = number of IR/VIS/UV compinents for surface albedo
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
 [frac_grid]
   standard_name = flag_for_fractional_landmask
   long_name = flag for fractional grid
