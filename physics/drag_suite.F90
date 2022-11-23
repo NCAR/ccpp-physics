@@ -249,22 +249,22 @@
 !                    topographic form drag of Beljaars et al. (2004, QJRMS)
 !           Activation of each component is done by specifying the integer-parameters
 !           (defined below) to 0: inactive or 1: active
-!                    gwd_opt_ms = 0 or 1: mesoscale  
-!                    gwd_opt_bl = 0 or 1: blocking drag
-!                    gwd_opt_ss = 0 or 1: small-scale gravity wave drag
-!                    gwd_opt_fd = 0 or 1: topographic form drag
-!    2017-09-25  Michael Toy (from NCEP GFS model) added dissipation heating
-!                    gsd_diss_ht_opt = 0: dissipation heating off
-!                    gsd_diss_ht_opt = 1: dissipation heating on
+!                    gwd_opt_ms = 0 or 1: mesoscale    (changed to logical flag)
+!                    gwd_opt_bl = 0 or 1: blocking drag  (changed to logical flag)
+!                    gwd_opt_ss = 0 or 1: small-scale gravity wave drag   (removed)
+!                    gwd_opt_fd = 0 or 1: topographic form drag      (removed)
+!    2017-09-25  Michael Toy (from NCEP GFS model) added dissipation heating (logical flags)
+!                    gsd_diss_ht_opt = .false. : dissipation heating off
+!                    gsd_diss_ht_opt = .true.  : dissipation heating on
 !    2020-08-25  Michael Toy changed logic control for drag component selection
 !                    for CCPP.
 !                    Namelist options:
 !                    do_gsl_drag_ls_bl - logical flag for mesoscale GWD + blocking
 !                    do_gsl_drag_ss - logical flag for small-scale GWD
 !                    do_gsl_drag_tofd - logical flag for turbulent form drag
-!                    Compile-time options (same as before):
-!                    gwd_opt_ms = 0 or 1: mesoscale GWD
-!                    gwd_opt_bl = 0 or 1: blocking drag
+!                    Compile-time options (changed from integer switches to logical flags):
+!                    gwd_opt_ms = : mesoscale GWD (active if == .true.)
+!                    gwd_opt_bl = : blocking drag (active if == .true.)
 !
 !  References:
 !        Hong et al. (2008), wea. and forecasting
@@ -414,10 +414,10 @@
       real(kind=kind_phys) :: tmp1, tmp2   ! temporary variables
 
 ! Additional flags
-      integer, parameter ::    &
-      gwd_opt_ms      = 1,     & ! mesoscale gravity wave drag
-      gwd_opt_bl      = 1,     & ! blocking drag
-      gsd_diss_ht_opt = 0
+      logical, parameter ::    &
+      gwd_opt_ms      = .true.,     & ! mesoscale gravity wave drag
+      gwd_opt_bl      = .true.,     & ! blocking drag
+      gsd_diss_ht_opt = .false.       ! dissipation heating
 
 ! Parameters for bounding the scale-adaptive variability:
 ! Small-scale GWD + turbulent form drag
@@ -589,7 +589,7 @@
    lcap   = km
    lcapp1 = lcap + 1
    fdir   = mdir / (2.0*pi)
-   onebgrcs = 1./g*rcs
+   onebgrcs = 1._kind_phys/g*rcs
 
    do i=1,im
       if (slmsk(i)==1. .or. slmsk(i)==2.) then !sea/land/ice mask (=0/1/2) in FV3
@@ -806,7 +806,7 @@ enddo
 !
 
 IF ( (do_gsl_drag_ls_bl).and.                            &
-     ((gwd_opt_ms .EQ. 1).or.(gwd_opt_bl .EQ. 1)) ) then
+     (gwd_opt_ms.or.gwd_opt_bl) ) then
 
    do i=its,im
 
@@ -910,7 +910,7 @@ IF ( (do_gsl_drag_ls_bl).and.                            &
             xlinv(i) = coefm(i) * cleff
             tem      = fr(i) * fr(i) * oc1(i)
             gfobnv   = gmax * tem / ((tem + cg)*bnv(i))
-            if ( gwd_opt_ms .NE. 0 ) then
+            if ( gwd_opt_ms ) then
                taub(i)  = xlinv(i) * roll(i) * ulow(i) * ulow(i)           &
                            * ulow(i) * gfobnv * efact
             else     ! We've gotten what we need for the blocking scheme
@@ -926,7 +926,7 @@ IF ( (do_gsl_drag_ls_bl).and.                            &
 
    enddo  ! do i=its,im
 
-ENDIF   ! (do_gsl_drag_ls_bl).and.((gwd_opt_ms .EQ. 1).or.(gwd_opt_bl .EQ. 1))
+ENDIF   ! (do_gsl_drag_ls_bl).and.(gwd_opt_ms.or.gwd_opt_bl)
 
 
 
@@ -934,7 +934,7 @@ ENDIF   ! (do_gsl_drag_ls_bl).and.((gwd_opt_ms .EQ. 1).or.(gwd_opt_bl .EQ. 1))
 !=======================================================
 ! Mesoscale GWD + blocking
 !=======================================================
-IF ( (do_gsl_drag_ls_bl).and.(gwd_opt_ms .EQ. 1) ) THEN
+IF ( (do_gsl_drag_ls_bl).and.(gwd_opt_ms) ) THEN
 
    do i=its,im
 
@@ -999,11 +999,11 @@ IF ( (do_gsl_drag_ls_bl).and.(gwd_opt_ms .EQ. 1) ) THEN
 
    enddo  ! do i=its,im
 
-ENDIF  ! (do_gsl_drag_ls_bl).and.(gwd_opt_ms .EQ. 1)
+ENDIF  ! (do_gsl_drag_ls_bl).and.(gwd_opt_ms)
 !===============================================================
 !COMPUTE BLOCKING COMPONENT                                     
 !===============================================================
-IF ( (do_gsl_drag_ls_bl) .and. (gwd_opt_bl .EQ. 1) ) THEN
+IF ( do_gsl_drag_ls_bl .and. gwd_opt_bl ) THEN
 
    do i=its,im
 
@@ -1056,10 +1056,10 @@ IF ( (do_gsl_drag_ls_bl) .and. (gwd_opt_bl .EQ. 1) ) THEN
 
    enddo   ! do i=its,im
 
-ENDIF   ! IF ( (do_gsl_drag_ls_bl) .and. (gwd_opt_bl .EQ. 1) )
+ENDIF   ! IF ( do_gsl_drag_ls_bl .and. gwd_opt_bl )
 !===========================================================
 IF ( (do_gsl_drag_ls_bl) .and.                                       &
-     (gwd_opt_ms .EQ. 1 .OR. gwd_opt_bl .EQ. 1) ) THEN 
+     (gwd_opt_ms .OR. gwd_opt_bl) ) THEN 
 
    do i=its,im
 
@@ -1075,8 +1075,8 @@ IF ( (do_gsl_drag_ls_bl) .and.                                       &
 !
          taup(i,km+1) = taup(i,km)
          do k = kts,km
-            taud_ms(i,k) = 1. * (taup(i,k+1) - taup(i,k)) * csg / del(i,k)
-            taud_bl(i,k) = 1. * (taufb(i,k+1) - taufb(i,k)) * csg / del(i,k)
+            taud_ms(i,k) = (taup(i,k+1) - taup(i,k)) * csg / del(i,k)
+            taud_bl(i,k) = (taufb(i,k+1) - taufb(i,k)) * csg / del(i,k)
          enddo
 !
 !
@@ -1118,7 +1118,7 @@ IF ( (do_gsl_drag_ls_bl) .and.                                       &
                vwnd1(i,k) = vwnd1(i,k) + tmp2*deltim
             endif
 
-            if ( gsd_diss_ht_opt .EQ. 1 ) then
+            if ( gsd_diss_ht_opt ) then
                ! Calculate dissipation heating
                ! Initial kinetic energy (at t0-dt)
                eng0 = 0.5*( (rcs*u1(i,k))**2. + (rcs*v1(i,k))**2. )
@@ -1164,7 +1164,7 @@ IF ( (do_gsl_drag_ls_bl) .and.                                       &
 
    enddo   ! do i=its,im
 
-ENDIF  ! (do_gsl_drag_ls_bl).and.(gwd_opt_ms.EQ.1 .OR. gwd_opt_bl.EQ.1)
+ENDIF  ! (do_gsl_drag_ls_bl).and.(gwd_opt_ms .OR. gwd_opt_bl)
 
 
 !====================================================================
