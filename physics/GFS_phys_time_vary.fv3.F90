@@ -677,7 +677,7 @@
          endif lsm_init
 
 !Lake model
-         if((lkm==1 .or. lkm==2) .and. (iopt_lake==iopt_lake_flake .or. iopt_lake==iopt_lake_clm)) then
+         if(lkm>0 .and. iopt_lake>0) then
            ! A lake model is enabled.
            do i = 1, im
              !if (lakefrac(i) > 0.0 .and. lakedepth(i) > 1.0 ) then
