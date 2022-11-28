@@ -5265,10 +5265,10 @@ if_pergro: if (PERGRO) then
   !! \htmlinclude clm_lake_init.html
   !!
   subroutine clm_lake_init(con_pi,karman,con_g,con_sbc,con_t0c,rhowater,con_csol,con_cliq, &
-                           con_hfus,con_hvap,con_rd,con_cp,rhoice,clm_lake_debug,errmsg,errflg)
+                           con_hfus,con_hvap,con_rd,con_cp,rholakeice,clm_lake_debug,errmsg,errflg)
     implicit none
     real(kind_phys), intent(in) :: con_pi,karman,con_g,con_sbc,con_t0c, &
-         rhowater,con_csol,con_cliq, con_hfus,con_hvap,con_rd,con_cp,rhoice
+         rhowater,con_csol,con_cliq, con_hfus,con_hvap,con_rd,con_cp,rholakeice
     INTEGER, INTENT(OUT) :: errflg
     CHARACTER(*), INTENT(OUT) :: errmsg
     logical, intent(in) :: clm_lake_debug
@@ -5288,7 +5288,7 @@ if_pergro: if (PERGRO) then
     sb = con_sbc
     tfrz = con_t0c
     denh2o = rhowater
-    denice = rhoice
+    denice = rholakeice
     cpice = con_csol
     cpliq = con_cliq
     hfus = con_hfus

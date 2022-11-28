@@ -269,160 +269,115 @@ contains
       else ! not fractional grid
 
         do i=1,im
-
-          ! This code assumes points are always 100% lake or 0% lake,
-          ! and lake points must have wet(i)=true, even if they have
-          ! 100% ice cover.  The only fractional coverage allowed is
-          ! fractional ice on lake points that ran the CLM Lake
-          ! Model (frac_ice). For more general fractional grid support, use
-          ! frac_grid.
-
-          if (dry(i)) then
-            ! This is a land point.
-            call composite_land
-          elseif(frac_ice .and. use_lake_model(i)>0 .and. iopt_lake==iopt_lake_clm) then
-            ! This is a lake point where the CLM Lake Model was run with frac_ice.
-            if(icy(i)) then
-              ! Lake point has more than min_lakeice ice.
-              call composite_icy(.true.)
-              call composite_wet_and_icy
-            else
-              ! Lake point has less than min_lakeice ice.
-              call composite_wet
-            endif
-          else if (wet(i)) then
-            ! Wet point that is not a lake, or lake point with frac_ice disabled.
-            call composite_wet
+          if (islmsk(i) == 1) then
+          !-- land
+            zorl(i)   = zorll(i)
+            cd(i)     = cd_lnd(i)
+            cdq(i)    = cdq_lnd(i)
+            rb(i)     = rb_lnd(i)
+            stress(i) = stress_lnd(i)
+            ffmm(i)   = ffmm_lnd(i)
+            ffhh(i)   = ffhh_lnd(i)
+            uustar(i) = uustar_lnd(i)
+            fm10(i)   = fm10_lnd(i)
+            fh2(i)    = fh2_lnd(i)
+            tsfc(i)   = tsfcl(i)
+            tsfco(i)  = tsfc(i)
+            tisfc(i)  = tsfc(i)
+            cmm(i)    = cmm_lnd(i)
+            chh(i)    = chh_lnd(i)
+            gflx(i)   = gflx_lnd(i)
+            ep1d(i)   = ep1d_lnd(i)
+            weasd(i)  = weasd_lnd(i)
+            snowd(i)  = snowd_lnd(i)
+            evap(i)   = evap_lnd(i)
+            hflx(i)   = hflx_lnd(i)
+            qss(i)    = qss_lnd(i)
+            hice(i)   = zero
+            cice(i)   = zero
+          elseif (islmsk(i) == 0) then
+          !-- water
+            zorl(i)   = zorlo(i)
+            cd(i)     = cd_wat(i)
+            cdq(i)    = cdq_wat(i)
+            rb(i)     = rb_wat(i)
+            stress(i) = stress_wat(i)
+            ffmm(i)   = ffmm_wat(i)
+            ffhh(i)   = ffhh_wat(i)
+            uustar(i) = uustar_wat(i)
+            fm10(i)   = fm10_wat(i)
+            fh2(i)    = fh2_wat(i)
+            tsfco(i)  = tsfc_wat(i) ! over lake (and ocean when uncoupled)
+            tsfc(i)   = tsfco(i)
+            tsfcl(i)  = tsfc(i)
+            tisfc(i)  = tsfc(i)
+            cmm(i)    = cmm_wat(i)
+            chh(i)    = chh_wat(i)
+            gflx(i)   = gflx_wat(i)
+            ep1d(i)   = ep1d_wat(i)
+            weasd(i)  = zero
+            snowd(i)  = zero
+            evap(i)   = evap_wat(i)
+            hflx(i)   = hflx_wat(i)
+            qss(i)    = qss_wat(i)
+            hice(i)   = zero
+            cice(i)   = zero
           else ! islmsk(i) == 2
-            ! This is not a lake point, and it is icy.
-            call composite_icy(.false.)
-            call composite_wet_and_icy
+          !-- ice
+            zorl(i)   = zorli(i)
+            cd(i)     = cd_ice(i)
+            cdq(i)    = cdq_ice(i)
+            rb(i)     = rb_ice(i)
+            ffmm(i)   = ffmm_ice(i)
+            ffhh(i)   = ffhh_ice(i)
+            uustar(i) = uustar_ice(i)
+            fm10(i)   = fm10_ice(i)
+            fh2(i)    = fh2_ice(i)
+            stress(i) = stress_ice(i)
+            cmm(i)    = cmm_ice(i)
+            chh(i)    = chh_ice(i)
+            gflx(i)   = gflx_ice(i)
+            ep1d(i)   = ep1d_ice(i)
+            weasd(i)  = weasd_ice(i) * cice(i)
+            snowd(i)  = snowd_ice(i) * cice(i)
+            qss(i)    = qss_ice(i)
+            evap(i)   = evap_ice(i)
+            hflx(i)   = hflx_ice(i)
+!
+            txi = cice(i)
+            txo = one - txi
+            evap(i)   = txi * evap_ice(i)   + txo * evap_wat(i)
+            hflx(i)   = txi * hflx_ice(i)   + txo * hflx_wat(i)
+            tsfc(i)   = txi * tisfc(i)      + txo * tsfc_wat(i)
+            stress(i) = txi * stress_ice(i) + txo * stress_wat(i)
+            qss(i)    = txi * qss_ice(i)    + txo * qss_wat(i)
+            ep1d(i)   = txi * ep1d_ice(i)   + txo * ep1d_wat(i)
+
+            lnzorli = zero ; lnzorlo = zero
+            if (zorli(i) /= huge) then
+              lnzorli = log(zorli(i))
+            endif
+            if (zorlo(i) /= huge) then
+              lnzorlo = log(zorlo(i))
+            endif
+            zorl(i) = exp(txi*lnzorli + txo*lnzorlo)
+!           zorl(i)   = exp(txi*log(zorli(i)) + txo*log(zorlo(i)))
+!
+            if (wet(i)) then
+              tsfco(i) = tsfc_wat(i)
+            else
+              tsfco(i) = tsfc(i)
+            endif
+            tsfcl(i)  = tsfc(i)
+            do k=1,min(kice,km) ! store tiice in stc to reduce output in the nonfrac grid case
+              stc(i,k) = tiice(i,k)
+            enddo
           endif
         enddo
 
       endif fractional_grid
 
       ! --- compositing done
-
-    contains
-
-      subroutine composite_land
-        implicit none
-        zorl(i)   = zorll(i)
-        cd(i)     = cd_lnd(i)
-        cdq(i)    = cdq_lnd(i)
-        rb(i)     = rb_lnd(i)
-        stress(i) = stress_lnd(i)
-        ffmm(i)   = ffmm_lnd(i)
-        ffhh(i)   = ffhh_lnd(i)
-        uustar(i) = uustar_lnd(i)
-        fm10(i)   = fm10_lnd(i)
-        fh2(i)    = fh2_lnd(i)
-        tsfc(i)   = tsfcl(i)
-        tsfco(i)  = tsfc(i)
-        tisfc(i)  = tsfc(i)
-        cmm(i)    = cmm_lnd(i)
-        chh(i)    = chh_lnd(i)
-        gflx(i)   = gflx_lnd(i)
-        ep1d(i)   = ep1d_lnd(i)
-        weasd(i)  = weasd_lnd(i)
-        snowd(i)  = snowd_lnd(i)
-        evap(i)   = evap_lnd(i)
-        hflx(i)   = hflx_lnd(i)
-        qss(i)    = qss_lnd(i)
-        hice(i)   = zero
-        cice(i)   = zero
-      end subroutine composite_land
-      
-      subroutine composite_wet
-        implicit none
-        zorl(i)   = zorlo(i)
-        cd(i)     = cd_wat(i)
-        cdq(i)    = cdq_wat(i)
-        rb(i)     = rb_wat(i)
-        stress(i) = stress_wat(i)
-        ffmm(i)   = ffmm_wat(i)
-        ffhh(i)   = ffhh_wat(i)
-        uustar(i) = uustar_wat(i)
-        fm10(i)   = fm10_wat(i)
-        fh2(i)    = fh2_wat(i)
-        tsfco(i)  = tsfc_wat(i) ! over lake (and ocean when uncoupled)
-        tsfc(i)   = tsfco(i)
-        tsfcl(i)  = tsfc(i)
-        tisfc(i)  = tsfc(i)
-        cmm(i)    = cmm_wat(i)
-        chh(i)    = chh_wat(i)
-        gflx(i)   = gflx_wat(i)
-        ep1d(i)   = ep1d_wat(i)
-        weasd(i)  = zero
-        snowd(i)  = zero
-        evap(i)   = evap_wat(i)
-        hflx(i)   = hflx_wat(i)
-        qss(i)    = qss_wat(i)
-        hice(i)   = zero
-        cice(i)   = zero
-      end subroutine composite_wet
-
-      subroutine composite_icy(is_clm)
-        implicit none
-        logical, intent(in) :: is_clm
-        zorl(i)   = zorli(i)
-        cd(i)     = cd_ice(i)
-        cdq(i)    = cdq_ice(i)
-        rb(i)     = rb_ice(i)
-        ffmm(i)   = ffmm_ice(i)
-        ffhh(i)   = ffhh_ice(i)
-        uustar(i) = uustar_ice(i)
-        fm10(i)   = fm10_ice(i)
-        fh2(i)    = fh2_ice(i)
-        stress(i) = stress_ice(i)
-        cmm(i)    = cmm_ice(i)
-        chh(i)    = chh_ice(i)
-        gflx(i)   = gflx_ice(i)
-        ep1d(i)   = ep1d_ice(i)
-        if(is_clm) then
-          weasd(i)  = weasd_ice(i)
-          snowd(i)  = snowd_ice(i)
-        else
-          weasd(i)  = weasd_ice(i) * cice(i)
-          snowd(i)  = snowd_ice(i) * cice(i)
-        endif
-        qss(i)    = qss_ice(i)
-        evap(i)   = evap_ice(i)
-        hflx(i)   = hflx_ice(i)
-      end subroutine composite_icy
-      
-      subroutine composite_wet_and_icy
-        implicit none
-        txi = cice(i)
-        txo = one - txi
-        evap(i)   = txi * evap_ice(i)   + txo * evap_wat(i)
-        hflx(i)   = txi * hflx_ice(i)   + txo * hflx_wat(i)
-        tsfc(i)   = txi * tisfc(i)      + txo * tsfc_wat(i)
-        stress(i) = txi * stress_ice(i) + txo * stress_wat(i)
-        qss(i)    = txi * qss_ice(i)    + txo * qss_wat(i)
-        ep1d(i)   = txi * ep1d_ice(i)   + txo * ep1d_wat(i)
-
-        lnzorli = zero ; lnzorlo = zero
-        if (zorli(i) /= huge) then
-          lnzorli = log(zorli(i))
-        endif
-        if (zorlo(i) /= huge) then
-          lnzorlo = log(zorlo(i))
-        endif
-        zorl(i) = exp(txi*lnzorli + txo*lnzorlo)
-        !           zorl(i)   = exp(txi*log(zorli(i)) + txo*log(zorlo(i)))
-        !
-        if (wet(i)) then
-          tsfco(i) = tsfc_wat(i)
-        else
-          tsfco(i) = tsfc(i)
-        endif
-        tsfcl(i)  = tsfc(i)
-        do k=1,min(kice,km) ! store tiice in stc to reduce output in the nonfrac grid case
-          stc(i,k) = tiice(i,k)
-        enddo
-      end subroutine composite_wet_and_icy
 
    end subroutine GFS_surface_composites_post_run
 

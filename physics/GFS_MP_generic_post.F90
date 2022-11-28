@@ -28,7 +28,7 @@
         graupelprv, draincprv, drainncprv, diceprv, dsnowprv, dgraupelprv, dtp, dfi_radar_max_intervals,                  &
         dtend, dtidx, index_of_temperature, index_of_process_mp,ldiag3d, qdiag3d,dqdt_qmicro, lssav, num_dfi_radar,       &
         fh_dfi_radar,index_of_process_dfi_radar, ix_dfi_radar, dfi_radar_tten, radar_tten_limits, fhour, prevsq,      &
-        iopt_lake, iopt_lake_clm, lkm, errmsg, errflg)
+        iopt_lake, iopt_lake_clm, lkm, use_lake_model, errmsg, errflg)
 !
       use machine, only: kind_phys
       use calpreciptype_mod, only: calpreciptype
@@ -38,7 +38,7 @@
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_mg, imp_physics_fer_hires
       integer, intent(in) :: imp_physics_nssl, iopt_lake_clm, iopt_lake, lkm
       logical, intent(in) :: cal_pre, lssav, ldiag3d, qdiag3d, cplflx, cplchm, cpllnd, progsigma
-      integer, intent(in) :: index_of_temperature,index_of_process_mp
+      integer, intent(in) :: index_of_temperature,index_of_process_mp,use_lake_model(:)
 
       integer                                                :: dfi_radar_max_intervals
       real(kind=kind_phys),                    intent(in)    :: fh_dfi_radar(:), fhour
@@ -138,10 +138,9 @@
         ice     = frain*rain1*sr                  ! time-step ice
       end if
       
-      if (lsm==lsm_ruc .or. lsm==lsm_noahmp .or. (lkm>0 .and. iopt_lake==iopt_lake_clm)) then
-       raincprv(:)   = rainc(:)
-       rainncprv(:)  = frain * rain1(:)
-       if(lsm==lsm_ruc .or. lsm==lsm_noahmp) then
+      if (lsm==lsm_ruc .or. lsm==lsm_noahmp) then
+        raincprv(:)   = rainc(:)
+        rainncprv(:)  = frain * rain1(:)
         iceprv(:)     = ice(:)
         snowprv(:)    = snow(:)
         graupelprv(:) = graupel(:)
@@ -156,7 +155,13 @@
           dgraupelprv(:) = tem * graupelprv(:)
           diceprv(:)     = tem * iceprv(:)
         end if
-       end if
+      else if(lkm>0 .and. iopt_lake==iopt_lake_clm) then
+        do i=1,im
+          if(use_lake_model(i)>0) then
+            raincprv(i)   = rainc(i)
+            rainncprv(i)  = frain * rain1(i)
+          end if
+        end do
       end if
 
       if (cal_pre) then       ! hchuang: add dominant precipitation type algorithm

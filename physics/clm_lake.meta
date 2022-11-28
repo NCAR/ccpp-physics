@@ -897,7 +897,7 @@
   type = real
   kind = kind_phys
   intent = in
-[rhoice]
+[rholakeice]
   standard_name = density_of_ice_on_lake
   long_name = density of ice on a lake
   units = kg m-3
