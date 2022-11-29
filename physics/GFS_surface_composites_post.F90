@@ -269,8 +269,37 @@ contains
       else ! not fractional grid
 
         do i=1,im
-          if (islmsk(i) == 1) then
+
+          if(frac_ice .and. use_lake_model(i)>0 .and. iopt_lake==iopt_lake_clm) then
+            if(dry(i)) then
+              call composite_land
+            else if(icy(i)) then
+              call composite_icy(.true.)
+              call composite_wet_and_icy
+            else
+              call composite_wet
+            endif
+          else if (islmsk(i) == 1) then
           !-- land
+            call composite_land
+          elseif (islmsk(i) == 0) then
+          !-- water
+            call composite_wet
+          else ! islmsk(i) == 2
+          !-- ice
+            call composite_icy(use_lake_model(i)>0 .and. iopt_lake==iopt_lake_clm)
+            call composite_wet_and_icy
+          endif
+        enddo
+
+      endif fractional_grid
+
+      ! --- compositing done
+
+   contains
+
+     subroutine composite_land
+            implicit none
             zorl(i)   = zorll(i)
             cd(i)     = cd_lnd(i)
             cdq(i)    = cdq_lnd(i)
@@ -295,8 +324,10 @@ contains
             qss(i)    = qss_lnd(i)
             hice(i)   = zero
             cice(i)   = zero
-          elseif (islmsk(i) == 0) then
-          !-- water
+     end subroutine composite_land
+
+     subroutine composite_wet
+            implicit none
             zorl(i)   = zorlo(i)
             cd(i)     = cd_wat(i)
             cdq(i)    = cdq_wat(i)
@@ -322,8 +353,11 @@ contains
             qss(i)    = qss_wat(i)
             hice(i)   = zero
             cice(i)   = zero
-          else ! islmsk(i) == 2
-          !-- ice
+     end subroutine composite_wet
+
+     subroutine composite_icy(is_clm)
+            implicit none
+            logical, intent(in) :: is_clm
             zorl(i)   = zorli(i)
             cd(i)     = cd_ice(i)
             cdq(i)    = cdq_ice(i)
@@ -338,12 +372,20 @@ contains
             chh(i)    = chh_ice(i)
             gflx(i)   = gflx_ice(i)
             ep1d(i)   = ep1d_ice(i)
-            weasd(i)  = weasd_ice(i) * cice(i)
-            snowd(i)  = snowd_ice(i) * cice(i)
+            if(is_clm) then
+              weasd(i)  = weasd_ice(i)
+              snowd(i)  = snowd_ice(i)
+            else
+              weasd(i)  = weasd_ice(i) * cice(i)
+              snowd(i)  = snowd_ice(i) * cice(i)
+            endif
             qss(i)    = qss_ice(i)
             evap(i)   = evap_ice(i)
             hflx(i)   = hflx_ice(i)
-!
+     end subroutine composite_icy
+
+     subroutine composite_wet_and_icy
+            implicit none
             txi = cice(i)
             txo = one - txi
             evap(i)   = txi * evap_ice(i)   + txo * evap_wat(i)
@@ -372,12 +414,7 @@ contains
             do k=1,min(kice,km) ! store tiice in stc to reduce output in the nonfrac grid case
               stc(i,k) = tiice(i,k)
             enddo
-          endif
-        enddo
-
-      endif fractional_grid
-
-      ! --- compositing done
+     end subroutine composite_wet_and_icy
 
    end subroutine GFS_surface_composites_post_run
 
