@@ -2,7 +2,6 @@
 !!  This file contains all of the code related to running the MYNN 
 !! eddy-diffusivity mass-flux scheme. 
 
-!>\ingroup gsd_mynn_edmf
 !> The following references best describe the code within
 !!    Olson et al. (2019, NOAA Technical Memorandum)
 !!    Nakanishi and Niino (2009) \cite NAKANISHI_2009
@@ -91,7 +90,8 @@
 
       end subroutine mynnedmf_wrapper_init
 
-! \brief This scheme (1) performs pre-mynnedmf work, (2) runs the mynnedmf, and (3) performs post-mynnedmf work
+!>\defgroup gp_mynnedmf MYNN-EDMF PBL and Shallow Convection Module  
+!> This scheme (1) performs pre-mynnedmf work, (2) runs the mynnedmf, and (3) performs post-mynnedmf work
 !> \section arg_table_mynnedmf_wrapper_run Argument Table
 !! \htmlinclude mynnedmf_wrapper_run.html
 !!
