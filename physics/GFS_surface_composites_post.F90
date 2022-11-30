@@ -270,11 +270,9 @@ contains
 
         do i=1,im
 
-          if(frac_ice .and. use_lake_model(i)>0 .and. iopt_lake==iopt_lake_clm) then
-            if(dry(i)) then
-              call composite_land
-            else if(icy(i)) then
-              call composite_icy(.true.)
+          if (use_lake_model(i)>0) then
+            if(frac_ice .and. icy(i)) then
+              call composite_icy(iopt_lake==iopt_lake_clm)
               call composite_wet_and_icy
             else
               call composite_wet
@@ -287,7 +285,7 @@ contains
             call composite_wet
           else ! islmsk(i) == 2
           !-- ice
-            call composite_icy(use_lake_model(i)>0 .and. iopt_lake==iopt_lake_clm)
+            call composite_icy(.false.)
             call composite_wet_and_icy
           endif
         enddo
