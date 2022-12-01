@@ -624,8 +624,8 @@
   kind = kind_phys
   intent = inout
 [t_grnd2d]
-  standard_name = skin_temperature_from_clm_lake_model
-  long_name = skin_temperature_from_clm_lake_model
+  standard_name = skin_temperature_from_lake_model
+  long_name = skin_temperature_from_lake_model
   units = K
   dimensions = (horizontal_loop_extent)
   type = real
