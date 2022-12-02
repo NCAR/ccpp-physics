@@ -315,11 +315,11 @@
      &                     THETA(:), SIGMA(:), GAMMA(:)
       real(kind=kind_phys), intent(inout) :: DUSFC(:), DVSFC(:),        &
      &                     RDXZB(:)
-      real(kind=kind_phys), intent(inout) :: dtaux2d_ms(IM,KM),         &
-     &                     dtauy2d_ms(IM,KM),dtaux2d_bl(IM,KM),         &
-     &                     dtauy2d_bl(IM,KM)
-      real(kind=kind_phys), intent(inout) :: dusfc_ms(IM), dvsfc_ms(IM), &
-     &                     dusfc_bl(IM), dvsfc_bl(IM)
+      real(kind=kind_phys), intent(inout) :: dtaux2d_ms(:,:),           &
+     &                     dtauy2d_ms(:,:), dtaux2d_bl(:,:),            &
+     &                     dtauy2d_bl(:,:)
+      real(kind=kind_phys), intent(inout) :: dusfc_ms(:), dvsfc_ms(:),  &
+     &                     dusfc_bl(:), dvsfc_bl(:)
       integer, intent(in) :: nmtvr
       logical, intent(in) :: lprnt
       logical, intent(in) :: ldiag_ugwp
