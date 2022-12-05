@@ -160,7 +160,7 @@ cc
      &                     omegac(im),zeta(im,km),dbyo1(im,km),
      &                     sigmab(im)
       real(kind=kind_phys) gravinv,dxcrtas
-
+      logical flag_shallow
 c  physical parameters
 !     parameter(g=grav,asolfac=0.89)
 !     parameter(g=grav)
@@ -188,7 +188,7 @@ c  physical parameters
       parameter(cinacrmx=-120.,shevf=2.0)
       parameter(dtmax=10800.,dtmin=600.)
       parameter(bet1=1.875,cd1=.506,f1=2.0,gam1=.5)
-      parameter(betaw=.03,dxcrt=15.e3,dxcrtc0=9.e3)
+      parameter(betaw=.03,dxcrtc0=9.e3)
       parameter(h1=0.33333333)
 !  progsigma
       parameter(dxcrtas=30.e3)
@@ -256,6 +256,12 @@ c-----------------------------------------------------------------------
 
       if (.not.hwrf_samfshal) then
              cinacrmn=-80.
+      endif
+
+      if (progsigma) then
+         dxcrt=10.e3
+      else
+         dxcrt=15.e3
       endif
 
 c-----------------------------------------------------------------------
@@ -1517,7 +1523,7 @@ c
         endif
       enddo
 c
-!> - Calculate the mean updraft velocity in pressure coordinates within the cloud (wc).                                                                                        
+!> - For progsigma =T, calculate the mean updraft velocity in pressure coordinates within the cloud (wc).                                                                                        
       if(progsigma)then                                                                                                                               
          do i = 1, im
             omegac(i) = 0.
@@ -1546,8 +1552,8 @@ c
                if (omegac(i) > val) cnvflg(i)=.false.
             endif
          enddo
-c     
-c Compute zeta for prog closure
+
+!> - For progsigma = T, calculate the xi term in Bengtsson et al. 2022 \cite Bengtsson_2022 (equation 8)
          do k = 2, km1
             do i = 1, im
                if (cnvflg(i)) then
@@ -1927,9 +1933,10 @@ c
 c  compute cloud base mass flux as a function of the mean
 c     updraft velcoity
 c
-c Prognostic closure
+!> - From Bengtsson et al. (2022) \cite Bengtsson_2022 prognostic closure scheme, equation 8, call progsigma_calc() to compute updraft area fraction based on a moisture budget
       if(progsigma)then
-         call progsigma_calc(im,km,first_time_step,restart,
+         flag_shallow = .true.
+         call progsigma_calc(im,km,first_time_step,restart,flag_shallow,
      &        del,tmf,qmicro,dbyo1,zdqca,omega_u,zeta,hvap,delt,
      &        prevsq,q,kbcon1,ktcon,cnvflg,
      &        sigmain,sigmaout,sigmab,errmsg,errflg)
@@ -2448,9 +2455,13 @@ c
             if(k > kb(i) .and. k < ktop(i)) then
               tem = 0.5 * (eta(i,k-1) + eta(i,k)) * xmb(i)
               tem1 = pfld(i,k) * 100. / (rd * t1(i,k))
-              sigmagfm(i) = max(sigmagfm(i), betaw)
-              ptem = tem / (sigmagfm(i) * tem1)
-              qtr(i,k,ntk)=qtr(i,k,ntk)+0.5*sigmagfm(i)*ptem*ptem
+              if(progsigma)then
+                tem2 = sigmab(i)
+              else
+                tem2 = max(sigmagfm(i), betaw)
+              endif
+              ptem = tem / (tem2 * tem1)
+              qtr(i,k,ntk)=qtr(i,k,ntk)+0.5*tem2*ptem*ptem
             endif
           endif
         enddo

@@ -2,20 +2,18 @@
 !! This file contains the subroutine that calculates the prognostic
 !! updraft area fraction that is used for closure computations in 
 !! saSAS deep and shallow convection, based on a moisture budget
-!! as described in Bengtsson et al. 2022.
+!! as described in Bengtsson et al. 2022 \cite Bengtsson_2022.
 
-!>\ingroup samfdeepcnv
-!! This subroutine computes a prognostic updraft area fraction
+!>\ingroup SAMFdeep
+!>\ingroup SAMF_shal
+!> This subroutine computes a prognostic updraft area fraction
 !! used in the closure computations in the samfdeepcnv.f scheme
-!>\ingroup samfshalcnv
 !! This subroutine computes a prognostic updraft area fracftion
 !! used in the closure computations in the samfshalcnv. scheme
-!!\section progsigma General Algorithm 
-!> @{ 
-
+!!\section gen_progsigma progsigma_calc General Algorithm 
       subroutine progsigma_calc (im,km,flag_init,flag_restart,           &
-           del,tmf,qmicro,dbyo1,zdqca,omega_u,zeta,hvap,                 &
-           delt,prevsq,q,kbcon1,ktcon,cnvflg,sigmain,sigmaout,       &
+           flag_shallow,del,tmf,qmicro,dbyo1,zdqca,omega_u,zeta,hvap,    &
+           delt,prevsq,q,kbcon1,ktcon,cnvflg,sigmain,sigmaout,           &
            sigmab,errmsg,errflg)
 !                                                           
 !                                                                                                                                             
@@ -30,7 +28,7 @@
       real(kind=kind_phys), intent(in)  :: prevsq(im,km), q(im,km),del(im,km),    &
            qmicro(im,km),tmf(im,km),dbyo1(im,km),zdqca(im,km),           &
            omega_u(im,km),zeta(im,km)
-      logical, intent(in)  :: flag_init,flag_restart,cnvflg(im)
+      logical, intent(in)  :: flag_init,flag_restart,cnvflg(im),flag_shallow
       real(kind=kind_phys), intent(in) :: sigmain(im,km)
 
 !     intent out
@@ -48,14 +46,15 @@
 
       real(kind=kind_phys) :: gcvalmx,epsilon,ZZ,cvg,mcon,buy2,   &
                           fdqb,dtdyn,dxlim,rmulacvg,tem,     &
-                          DEN,betascu,dp1,invdelt
+                          DEN,betascu,betadcu,dp1,invdelt
 
      !Parameters
       gcvalmx = 0.1
       rmulacvg=10.
       epsilon=1.E-11
       km1=km-1
-      betascu = 3.0
+      betadcu = 2.0
+      betascu = 8.0
       invdelt = 1./delt
 
      !Initialization 2D
@@ -211,18 +210,20 @@
       enddo
 
       !Reduce area fraction before coupling back to mass-flux computation. 
-      !This tuning could be addressed in updraft velocity equation instead.
-      do i= 1, im
-         if(cnvflg(i)) then
-            sigmab(i)=sigmab(i)/betascu
-         endif
-      enddo
-      
-
+      if(flag_shallow)then
+         do i= 1, im
+            if(cnvflg(i)) then
+               sigmab(i)=sigmab(i)/betascu
+               sigmab(i)=MAX(0.03,sigmab(i))
+            endif
+         enddo
+      else
+         do i= 1, im
+            if(cnvflg(i)) then
+               sigmab(i)=sigmab(i)/betadcu
+               sigmab(i)=MAX(0.01,sigmab(i))
+            endif
+         enddo
+      endif
 
      end subroutine progsigma_calc
-!> @}                            
-!! @} 
-
-
-

@@ -189,6 +189,13 @@
   dimensions = ()
   type = logical
   intent = in
+[mraerosol]
+  standard_name = do_merra2_aerosol_awareness
+  long_name = flag for merra2 aerosol-aware physics for example the thompson microphysics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [imfdeepcnv]
   standard_name = control_for_deep_convection_scheme
   long_name = flag for mass-flux deep convection scheme
@@ -455,6 +462,13 @@
   dimensions = ()
   type = logical
   intent = in
+[doGP_smearclds]
+  standard_name = flag_for_implicit_sgs_cloud_in_RRTMGP
+  long_name = logical flag to impicit SGS cloud in RRTMGP
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [cld_frac]
   standard_name = total_cloud_fraction
   long_name = layer total cloud fraction
@@ -639,6 +653,14 @@
   type = real
   kind = kind_phys
   intent = inout
+[cldfra2d]
+  standard_name = max_in_column_cloud_fraction
+  long_name = instantaneous 2D (max-in-column) cloud fraction
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
