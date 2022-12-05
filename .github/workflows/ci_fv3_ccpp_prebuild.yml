@@ -3,12 +3,10 @@ name: CI test to run FV3 ccpp_prebuild step
 on: [push, pull_request]
 
 jobs:
-  build-linux:
+  ccpp-prebuild-FV3:
 
     # The type of runner that the job will run on
-    runs-on: ubuntu-latest
-    strategy:
-      max-parallel: 5
+    runs-on: ubuntu-20.04
 
     steps:
     - name: Checkout current ccpp-physics code
