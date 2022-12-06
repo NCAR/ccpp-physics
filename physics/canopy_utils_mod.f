@@ -14,7 +14,7 @@
            !have to be uniform.
            real, intent(in)  :: x(:)                !! Variable x
            real, intent(in)  :: y(size(x))          !! Function y(x)
-           real              :: IntegrateTrapezoid  !! Integral of y(x)·dx
+           real              :: IntegrateTrapezoid  !! Integral of y(x)dx
        ! Integrate using the trapezoidal rule
            associate(n => size(x))
              IntegrateTrapezoid = sum((y(1+1:n-0) + y(1+0:n-1))*
