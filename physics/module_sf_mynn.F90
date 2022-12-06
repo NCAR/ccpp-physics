@@ -112,7 +112,7 @@ MODULE module_sf_mynn
   REAL(kind=kind_phys), PARAMETER :: SNOWZ0=0.011
   REAL(kind=kind_phys), PARAMETER :: COARE_OPT=3.0  ! 3.0 or 3.5
   !For debugging purposes:
-  INTEGER, PARAMETER :: debug_code = 1  !0: no extra ouput
+  INTEGER, PARAMETER :: debug_code = 0  !0: no extra ouput
                                         !1: check input
                                         !2: everything - heavy I/O
 
