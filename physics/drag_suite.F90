@@ -454,8 +454,7 @@
    real(kind=kind_phys), parameter       ::  frc     = 1.0
    real(kind=kind_phys), parameter       ::  ce      = 0.8
    real(kind=kind_phys), parameter       ::  cg      = 0.5
-   real(kind=kind_phys), parameter       ::  pref    = 1000.0e+2 ! ref. press. for sigma press. calc.
-   real(kind=kind_phys), parameter       ::  rlolev  = 500.0e+2  ! max press lvl for dtfac
+   real(kind=kind_phys), parameter       ::  sgmalolev  = 0.5  ! max sigma lvl for dtfac
    integer,parameter    ::  kpblmin = 2
 
 !
@@ -1081,16 +1080,18 @@ IF ( (do_gsl_drag_ls_bl) .and.                                       &
 !
 !
 !  if the gravity wave drag + blocking would force a critical line
-!  in the layers below 'sigma' pressure level = rlolev during the next deltim
+!  in the layers below pressure-based 'sigma' level = sgmalolev during the next deltim
 !  timestep, then only apply drag until that critical line is reached, i.e.,
 !  reduce drag to limit resulting wind components to zero
-!  Note: 'sigma' pressure = ak + pref*bk in units of Pa
+!  Note: 'sigma' = prsi(k)/prsi(k=1), where prsi(k=1) is the surface pressure
 !
          do k = kts,kpblmax-1
-            if (ak(k)+pref*bk(k).ge.rlolev) then
+            if (prsi(i,k).ge.sgmalolev*prsi(i,1)) then
                if ((taud_ms(i,k)+taud_bl(i,k)).ne.0.)                   &
                   dtfac(i) = min(dtfac(i),abs(velco(i,k)                &
                        /(deltim*rcs*(taud_ms(i,k)+taud_bl(i,k)))))
+            else
+               exit
             endif
          enddo
 !

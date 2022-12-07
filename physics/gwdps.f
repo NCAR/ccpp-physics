@@ -1281,7 +1281,7 @@
 !     endif
 
       if (ldiag_ugwp) then
-         !  Finalize dusfc and dvsfc diagnostics for gsl drag components
+         !  Finalize dusfc and dvsfc diagnostics
          DO i = 1,npt
             j = ipt(i)
             dusfc_ms(j) = - onebg * dusfc_ms(j)
