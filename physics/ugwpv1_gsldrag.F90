@@ -544,7 +544,7 @@ contains
 ! dusfcg,  dvsfcg
 !
 !
-       call drag_suite_run(im, levs, ak, bk, Pdvdt, Pdudt, Pdtdt,    &
+       call drag_suite_run(im, levs, Pdvdt, Pdudt, Pdtdt,            &
                  ugrs,vgrs,tgrs,q1,                                  &
                  kpbl,prsi,del,prsl,prslk,phii,phil,dtp,             &
                  kdt,hprime,oc,oa4,clx,varss,oc1ss,oa4ss,            &

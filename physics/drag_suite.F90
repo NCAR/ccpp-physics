@@ -202,7 +202,7 @@
 !> \section det_drag_suite GFS Orographic GWD Scheme Detailed Algorithm
 !> @{
    subroutine drag_suite_run(                                           &
-     &           IM,KM,ak,bk,dvdt,dudt,dtdt,U1,V1,T1,Q1,KPBL,           &
+     &           IM,KM,dvdt,dudt,dtdt,U1,V1,T1,Q1,KPBL,                 &
      &           PRSI,DEL,PRSL,PRSLK,PHII,PHIL,DELTIM,KDT,              &
      &           var,oc1,oa4,ol4,                                       &
      &           varss,oc1ss,oa4ss,ol4ss,                               &
@@ -321,7 +321,6 @@
    integer, intent(in) :: gwd_opt
    logical, intent(in) :: lprnt
    integer, intent(in) :: KPBL(:)
-   real(kind=kind_phys), intent(in) :: ak(:), bk(:)
    real(kind=kind_phys), intent(in) :: deltim, G, CP, RD, RV, cdmbgwd(:)
    real(kind=kind_phys), intent(inout) :: dtend(:,:,:)
    logical, intent(in) :: ldiag3d

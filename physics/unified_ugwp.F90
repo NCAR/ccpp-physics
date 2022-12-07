@@ -485,7 +485,7 @@ contains
 
     if ( do_gsl_drag_ls_bl.or.do_gsl_drag_ss.or.do_gsl_drag_tofd ) then
 
-       call drag_suite_run(im,levs,ak,bk,dvdt,dudt,dtdt,uwnd1,vwnd1, &
+       call drag_suite_run(im,levs,dvdt,dudt,dtdt,uwnd1,vwnd1,       &
                  tgrs,q1,kpbl,prsi,del,prsl,prslk,phii,phil,dtp,     &
                  kdt,hprime,oc,oa4,clx,varss,oc1ss,oa4ss,            &
                  ol4ss,theta,sigma,gamma,elvmax,dtaux2d_ms,          &
