@@ -273,13 +273,13 @@
       parameter(rchck=1.5,ndt=20)
 
       if (tc_pbl == 0) then
-        ck0=0.4
-        ch0=0.4
-        ce0=0.4
+        ck0 = 0.4
+        ch0 = 0.4
+        ce0 = 0.4
       else if (tc_pbl == 1) then
-        ck0=0.55
-        ch0=0.55
-        ce0=0.12
+        ck0 = 0.55
+        ch0 = 0.55
+        ce0 = 0.12
       endif
       gravi = 1.0 / grav
       g = grav
@@ -973,28 +973,23 @@
      &    tcdo,qcdo,ucdo,vcdo,xlamde,bl_dnfr)
 
       if (tc_pbl == 1) then
-!
 !>  - unify mass fluxes with Cu
-!
-      do i=1,im
-        if(zol(i) > -0.5) then
-          do k = 1, km
-            xmf(i,k)=0.0
-          end do
-        end if
-      end do
-!
+        do i=1,im
+          if(zol(i) > -0.5) then
+            do k = 1, km
+              xmf(i,k) = 0.0
+            end do
+          end if
+        end do
 !>  - taper off MF in high-wind conditions
-!
-      do i = 1,im
-        tem = sqrt(u10m(i)**2+v10m(i)**2)
-        mffac=(1. - MIN(MAX(tem - 20.0, 0.0), 10.0)/10.)
-        do k = 1, km
-          xmf(i,k)=xmf(i,k)*mffac
-          xmfd(i,k)=xmfd(i,k)*mffac
+        do i = 1,im
+          tem = sqrt(u10m(i)**2+v10m(i)**2)
+          mffac = (1. - MIN(MAX(tem - 20.0, 0.0), 10.0)/10.)
+          do k = 1, km
+            xmf(i,k) = xmf(i,k)*mffac
+            xmfd(i,k) = xmfd(i,k)*mffac
+          enddo
         enddo
-      enddo
-
       endif
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1197,17 +1192,16 @@
 
           if (tc_pbl == 0) then
             elm(i,k) = zk*rlam(i,k)/(rlam(i,k)+zk)
+!>  - If sfc_rlm=1, use zk for elm within surface layer
+            if ( sfc_rlm == 1 ) then
+              if ( sfcflg(i) .and.
+     &             zl(i,k) < min(100.0,hpbl(i)*0.05) ) elm(i,k)=zk
+            endif
           else if (tc_pbl == 1) then
             ! new blending method for mixing length
             elm(i,k) = sqrt( 1.0/( 1.0/(zk**2)+1.0/(rlam(i,k)**2) ) )
           endif
 
-!>  - If sfc_rlm=1, use zk for elm within surface layer
-          if ( sfc_rlm == 1 ) then
-            if ( sfcflg(i) .and.
-     &           zl(i,k) < min(100.0,hpbl(i)*0.05) ) elm(i,k)=zk
-          endif
-!
           dz = zi(i,k+1) - zi(i,k)
           tem = max(gdx(i),dz)
           elm(i,k) = min(elm(i,k), tem)
