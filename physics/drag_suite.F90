@@ -540,8 +540,12 @@
    endif
 
 
-   ! Initialize winds for sequential updating
-   ! NOTE: These will only be updated if ugwp_seq_update == .true.
+   ! Initialize winds for sequential updating.
+   ! These are for optional sequential updating of the wind between the
+   ! LSGWD+BLOCKING and SSGWD+TOFD steps.  They are placeholders
+   ! for the u1,v1 winds that are updated within the scheme if
+   ! ugwp_seq_update == T, otherwise, they retain the values
+   ! passed in to the subroutine.
    uwnd1(:,:) = u1(:,:)
    vwnd1(:,:) = v1(:,:)
 

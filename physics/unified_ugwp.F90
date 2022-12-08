@@ -354,8 +354,11 @@ contains
     real(kind=kind_phys), dimension(im, levs) :: Pdvdt, Pdudt
     real(kind=kind_phys), dimension(im, levs) :: Pdtdt, Pkdis
 
-    ! Variables for sequential updating of winds
-    ! LSGWD+BLOCKING and SSGWD+TOFD steps
+    ! Variables for optional sequential updating of winds between the
+    ! LSGWD+BLOCKING and SSGWD+TOFD steps.  They are placeholders
+    ! for the u,v winds that are updated within the scheme if
+    ! ugwp_seq_update == T, otherwise, they retain the values
+    ! passed to the scheme.
     real(kind=kind_phys), dimension(im, levs) :: uwnd1, vwnd1
  
     real(kind=kind_phys), parameter :: tamp_mpa=30.e-3
