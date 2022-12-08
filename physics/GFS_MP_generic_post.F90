@@ -20,10 +20,11 @@
 !> @{
       subroutine GFS_MP_generic_post_run(                                                                                 &
         im, levs, kdt, nrcm, nncl, ntcw, ntrac, imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_nssl,    &
-        imp_physics_mg, imp_physics_fer_hires, cal_pre, cplflx, cplchm, cpllnd, progsigma, con_g, rainmin, dtf, frain, rainc, &
+        imp_physics_mg, imp_physics_fer_hires, cal_pre, cplflx, cplchm, cpllnd, progsigma, con_g, rainmin, dtf, frain, rainc,     &
         rain1, rann, xlat, xlon, gt0, gq0, prsl, prsi, phii, tsfc, ice, snow, graupel, save_t, save_q, rain0, ice0, snow0,&
         graupel0, del, rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp, srflag, sr, cnvprcp, totprcp, totice,   &
         totsnw, totgrp, cnvprcpb, totprcpb, toticeb, totsnwb, totgrpb, rain_cpl, rainc_cpl, snow_cpl, pwat,               &
+        acfrzrn, acfrzrnb, acgraup, acgraupb, acsnow, acsnowb, rhonewsn1, vrbliceden_noah, iopt_snf,                      & 
         drain_cpl, dsnow_cpl, lsm, lsm_ruc, lsm_noahmp, raincprv, rainncprv, iceprv, snowprv,                             &
         graupelprv, draincprv, drainncprv, diceprv, dsnowprv, dgraupelprv, dtp, dfi_radar_max_intervals,                  &
         dtend, dtidx, index_of_temperature, index_of_process_mp,ldiag3d, qdiag3d,dqdt_qmicro, lssav, num_dfi_radar,       &
@@ -37,7 +38,7 @@
       integer, intent(in) :: im, levs, kdt, nrcm, nncl, ntcw, ntrac, num_dfi_radar, index_of_process_dfi_radar
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_mg, imp_physics_fer_hires
       integer, intent(in) :: imp_physics_nssl
-      logical, intent(in) :: cal_pre, lssav, ldiag3d, qdiag3d, cplflx, cplchm, cpllnd, progsigma
+      logical, intent(in) :: cal_pre, lssav, ldiag3d, qdiag3d, cplflx, cplchm, cpllnd, progsigma, vrbliceden_noah
       integer, intent(in) :: index_of_temperature,index_of_process_mp
 
       integer                                                :: dfi_radar_max_intervals
@@ -70,7 +71,7 @@
       real(kind=kind_phys), dimension(:),      intent(inout) :: drain_cpl, dsnow_cpl
 
       ! Rainfall variables previous time step
-      integer, intent(in) :: lsm, lsm_ruc, lsm_noahmp
+      integer, intent(in) :: lsm, lsm_ruc, lsm_noahmp, iopt_snf
       real(kind=kind_phys), dimension(:),      intent(inout) :: raincprv
       real(kind=kind_phys), dimension(:),      intent(inout) :: rainncprv
       real(kind=kind_phys), dimension(:),      intent(inout) :: iceprv
@@ -81,6 +82,13 @@
       real(kind=kind_phys), dimension(:),      intent(inout) :: diceprv
       real(kind=kind_phys), dimension(:),      intent(inout) :: dsnowprv
       real(kind=kind_phys), dimension(:),      intent(inout) :: dgraupelprv
+      real(kind=kind_phys), dimension(:),      intent(inout) :: acfrzrn
+      real(kind=kind_phys), dimension(:),      intent(inout) :: acfrzrnb
+      real(kind=kind_phys), dimension(:),      intent(inout) :: acgraup
+      real(kind=kind_phys), dimension(:),      intent(inout) :: acgraupb
+      real(kind=kind_phys), dimension(:),      intent(inout) :: acsnow
+      real(kind=kind_phys), dimension(:),      intent(inout) :: acsnowb
+      real(kind=kind_phys), dimension(:),      intent(inout) :: rhonewsn1
       real(kind=kind_phys), dimension(:,:),    intent(inout) :: dqdt_qmicro
       real(kind=kind_phys), dimension(:,:),    intent(inout) :: prevsq
       real(kind=kind_phys),                    intent(in)    :: dtp
@@ -101,6 +109,10 @@
       real(kind=kind_phys) :: crain, csnow, onebg, tem, total_precip, tem1, tem2, ttend
       real(kind=kind_phys), dimension(im) :: domr, domzr, domip, doms, t850, work1
 
+      real ::  snowrat,grauprat,icerat,curat,prcpncfr,prcpcufr
+      real :: rhonewsnow,rhoprcpice,rhonewgr,rhonewice
+      real(kind=kind_phys), parameter :: rhowater = 1000.0_kind_phys
+
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
@@ -110,6 +122,75 @@
       do i = 1, im
         rain(i) = rainc(i) + frain * rain1(i) ! time-step convective plus explicit
       enddo
+
+!aligo compute surface snowfall, graupel/sleet, freezing rain and precip ice density
+      if (imp_physics == imp_physics_gfdl .or. imp_physics == imp_physics_thompson .or. imp_physics == imp_physics_nssl ) then
+         do i = 1, im
+!           write(0,*)'freezing rain gt0(1),gt0(levs):',gt0(1,1),gt0(1,levs)
+            if (gt0(i,1) .le. 273) then
+               acfrzrn(i) = acfrzrn(i) + rain0(i)
+               acfrzrnb(i) = acfrzrnb(i) + rain0(i)
+            endif
+            acsnow(i)  = acsnow(i)  + snow0(i)
+            acsnowb(i)  = acsnowb(i)  + snow0(i)
+            acgraup(i) = acgraup(i) + graupel0(i)
+            acgraupb(i) = acgraupb(i) + graupel0(i)
+         enddo
+!Compute the variable precip ice density for specific LSM schemes and options
+!         if ( lsm .ne. 2 .or. iopt_snf .ne. 5) then
+!            write(0,*)'aligo,lsm,iopt_snf :',lsm,iopt_snf
+!         endif
+         if ( lsm == lsm_ruc .or. lsm == lsm_noahmp .and. iopt_snf == 5 .or. vrbliceden_noah == .true.) then
+!            write(0,*)'lsm,iopt_snf,vrbliceden_noah: ',lsm,iopt_snf,vrbliceden_noah
+            snowrat = 0.
+            grauprat = 0.
+            icerat = 0.
+            prcpncfr = 0.
+            prcpcufr = 0.
+            curat = 0.
+            prcpncfr = 0.
+            prcpcufr = 0.
+            rhonewsnow = 0.
+            rhonewgr = 0.
+            rhonewice = 0.
+            rhoprcpice = 0.
+            do i = 1, im
+               rhonewsn1(i)= 200.
+               prcpncfr = rain1(i)*sr(i)
+               if(sr(i) > 0..and. gt0(i,1) < 273.) then
+                  prcpcufr = max(0.,rainc(i)*sr(i))
+               else
+                  if(gt0(i,1) < 273.) then
+                     prcpcufr = max(0.,rainc(i))
+                  else
+                     prcpcufr = 0.
+                  endif  ! gt0(i,1) < 273.
+               endif ! frzfrac > 0.
+!
+               if((prcpncfr + prcpcufr) > 0.) then
+! -- calculate snow, graupel and ice fractions in falling frozen precip
+                  snowrat=min(1.,max(0.,snow0(i)/(prcpncfr + prcpcufr)))
+                  grauprat=min(1.,max(0.,graupel0(i)/(prcpncfr + prcpcufr)))
+                  icerat=min(1.,max(0.,(prcpncfr-snow0(i)-graupel0(i)) &
+                     /(prcpncfr + prcpcufr)))
+                  curat=min(1.,max(0.,(prcpcufr/(prcpncfr + prcpcufr))))
+
+                  rhonewsnow=min(125.,1000.0/max(8.,(17.*tanh((276.65-gt0(i,1))*0.15))))
+                  rhonewgr=min(500.,rhowater/max(2.,(3.5*tanh((274.15-gt0(i,1))*0.3333))))
+                  rhonewice=rhonewsnow
+
+!--- compute density of "precip ice" from weighted contribution
+!                 of snow, graupel and ice fractions
+
+                  rhoprcpice = min(500.,max(58.8,(rhonewsnow*snowrat +  &
+                      rhonewgr*grauprat + rhonewice*icerat + rhonewgr*curat)))
+
+! from now on rhonewsn1 is the density of falling frozen precipitation
+                  rhonewsn1(i)=rhoprcpice
+               endif
+            enddo
+         endif
+      endif
 
 !> - If requested (e.g. Zhao-Carr MP scheme), call calpreciptype() to calculate dominant 
 !! precipitation type.

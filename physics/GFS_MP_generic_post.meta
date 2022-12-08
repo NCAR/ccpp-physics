@@ -278,6 +278,76 @@
   type = real
   kind = kind_phys
   intent = inout
+[acfrzrn]
+  standard_name = lwe_thickness_of_sfc_freezing_rain_amount
+  long_name = accumulated surface freezing rain
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[acfrzrnb]
+  standard_name = lwe_thickness_of_sfc_freezing_rain_amount_in_bucket
+  long_name = accumulated surface freezing rain in bucket
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[acgraup]
+  standard_name = lwe_thickness_of_sfc_graupel_amount
+  long_name = accumulated surface graupel
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[acgraupb]
+  standard_name = lwe_thickness_of_sfc_graupel_amount_in_bucket
+  long_name = accumulated surface graupel in bucket
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[acsnow]
+  standard_name = lwe_thickness_of_sfc_snow_amount
+  long_name = accumulated surface snow
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[acsnowb]
+  standard_name = lwe_thickness_of_sfc_snow_amount_in_bucket
+  long_name = accumulated surface snow in bucket
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[rhonewsn1]
+  standard_name = lwe_density_of_precip_ice
+  long_name = density of precipitation ice
+  units = kg m-3
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[vrbliceden_noah]
+  standard_name = flag_for_vrbl_prcp_ice_den
+  long_name = flag for variable precip ice density
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[iopt_snf]
+  standard_name = control_for_land_surface_scheme_precipitation_type_partition
+  long_name = choice for precipitation partition option (see noahmp module for definition)
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
 [save_t]
   standard_name = air_temperature_save
   long_name = air temperature before entering a physics scheme

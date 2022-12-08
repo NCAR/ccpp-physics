@@ -952,6 +952,14 @@
   type = real
   kind = kind_phys
   intent = in
+[rhonewsn1]
+  standard_name = lwe_density_of_precip_ice
+  long_name = density of precipitation ice
+  units = kg m-3
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
 [con_cp]
   standard_name = specific_heat_of_dry_air_at_constant_pressure
   long_name = specific heat !of dry air at constant pressure

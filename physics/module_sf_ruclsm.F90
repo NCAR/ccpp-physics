@@ -57,8 +57,8 @@ CONTAINS
                    rhosnf,precipfr,                              &
                    Z3D,P8W,T3D,QV3D,QC3D,RHO3D,EMISBCK,          &
                    GLW,GSWdn,GSW,EMISS,CHKLOWQ, CHS,             &
-                   FLQC,FLHC,MAVAIL,CANWAT,VEGFRA,ALB,ZNT,       &
-                   Z0,SNOALB,ALBBCK,LAI,                         & 
+                   FLQC,FLHC,rhonewsn,MAVAIL,CANWAT,VEGFRA,ALB,  &
+                   ZNT,Z0,SNOALB,ALBBCK,LAI,                     & 
                    landusef, nlcat,                              & ! mosaic_lu, mosaic_soil, &
                    soilctop, nscat,                              &
                    QSFC,QSG,QVG,QCG,DEW,SOILT1,TSNAV,            &
@@ -191,7 +191,8 @@ CONTAINS
                INTENT(IN   )    ::                   GRAUPELNCV, &
                                                         SNOWNCV, &
                                                          RAINCV, &
-                                                        RAINNCV
+                                                        RAINNCV, &
+                                                        RHONEWSN
 !   REAL,       DIMENSION( ims:ime , jms:jme ),                   &
 !               INTENT(IN   )    ::                     lakemask
 !   INTEGER,    INTENT(IN   )    ::                    LakeModel
@@ -301,7 +302,6 @@ CONTAINS
 !--- soil/snow properties
    REAL                                                          &
                              ::                           RHOCS, &
-                                                       RHONEWSN, &
                                                           RHOSN, &
                                                       RHOSNFALL, &
                                                            BCLH, &
@@ -684,7 +684,6 @@ CONTAINS
         NROOT= 4
 !           ! rooting depth
 
-        RHONEWSN = 200.
        if(SNOW(i,j).gt.0. .and. SNOWH(i,j).gt.0.) then
         RHOSN = SNOW(i,j)/SNOWH(i,j)
        else
@@ -895,7 +894,7 @@ CONTAINS
                 nzs,nddzs,nroot,meltfactor,                      &   !added meltfactor
                 iland,isoil,ivgtyp(i,j),isltyp(i,j),             &
                 PRCPMS, NEWSNMS,SNWE,SNHEI,SNOWFRAC,             &
-                RHOSN,RHONEWSN,RHOSNFALL,                        &
+                RHOSN,RHONEWSN(I,J),RHOSNFALL,                   &
                 snowrat,grauprat,icerat,curat,                   &
                 PATM,TABS,QVATM,QCATM,RHO,                       &
                 GLW(I,J),GSWdn(i,j),GSW(I,J),                    &
@@ -1190,7 +1189,7 @@ endif
                                  nddzs                             !nddzs=2*(nzs-2)
 
    REAL,     INTENT(IN   )   ::  DELT,CONFLX,meltfactor
-   REAL,     INTENT(IN   )   ::  C1SN,C2SN
+   REAL,     INTENT(IN   )   ::  C1SN,C2SN,RHONEWSN
    LOGICAL,    INTENT(IN   )    ::     myj, debug_print
 !--- 3-D Atmospheric variables
    REAL                                                        , &
@@ -1282,7 +1281,6 @@ endif
                                                           EVAPL, &
                                                         INFILTR, &
                                                           RHOSN, & 
-                                                       RHONEWSN, &
                                                       rhosnfall, &
                                                         snowrat, &
                                                        grauprat, &
@@ -1494,19 +1492,19 @@ endif
 !--- 27 Feb 2014 - empirical formulations from John M. Brown
 !        rhonewsn=min(250.,rhowater/max(4.179,(13.*tanh((274.15-Tabs)*0.3333))))
 !--- 13 Mar 2018 - formulation from Trevor Elcott
-        rhonewsn=min(125.,1000.0/max(8.,(17.*tanh((276.65-Tabs)*0.15))))
-        rhonewgr=min(500.,rhowater/max(2.,(3.5*tanh((274.15-Tabs)*0.3333))))
-        rhonewice=rhonewsn
+!aligo        rhonewsn=min(125.,1000.0/max(8.,(17.*tanh((276.65-Tabs)*0.15))))
+!aligo        rhonewgr=min(500.,rhowater/max(2.,(3.5*tanh((274.15-Tabs)*0.3333))))
+!aligo        rhonewice=rhonewsn
 
 !--- compute density of "snowfall" from weighted contribution
 !                 of snow, graupel and ice fractions
 
-         rhosnfall = min(500.,max(58.8,(rhonewsn*snowrat +  &
+!aligo         rhosnfall = min(500.,max(58.8,(rhonewsn*snowrat +  &
 !13mar18         rhosnfall = min(500.,max(76.9,(rhonewsn*snowrat +  &
-                     rhonewgr*grauprat + rhonewice*icerat + rhonewgr*curat)))
+!aligo                     rhonewgr*grauprat + rhonewice*icerat + rhonewgr*curat)))
 
 ! from now on rhonewsn is the density of falling frozen precipitation
-         rhonewsn=rhosnfall
+!aligo         rhonewsn=rhosnfall
 
 !*** Define average snow density of the snow pack considering
 !*** the amount of fresh snow (eq. 9 in Koren et al.(1999) 
