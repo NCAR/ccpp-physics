@@ -589,8 +589,8 @@
   type = integer
   intent = in
 [tc_pbl]
-  standard_name = option_of_tc_application_in_boundary_layer_mass_flux_scheme
-  long_name = option of tc application in boundary layer mass flux scheme
+  standard_name = control_for_TC_applications_in_the_PBL_scheme
+  long_name = control for TC applications in the PBL scheme
   units = none
   dimensions = ()
   type = integer
