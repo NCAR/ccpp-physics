@@ -252,6 +252,7 @@
 
       real(kind=kind_phys) bfac, mffac
 !!
+      parameter(bfac=100.)
       parameter(wfac=7.0,cfac=4.5)
       parameter(gamcrt=3.,gamcrq=0.,sfcfrac=0.1)
       parameter(vk=0.4,rimin=-100.,slfac=0.1)
@@ -625,7 +626,6 @@
             rbup(i) = (thlvx(i,k)-thermal(i))*
      &                (g*zl(i,k)/thlvx(i,1))/spdk2
           else if (tc_pbl == 1) then
-            bfac = 100.0
             spdk2   = max((u1(i,k)-u1(i,1))**2+(v1(i,k)-v1(i,1))**2,1.)
      &                + bfac*ustar(i)**2
             rbup(i) = (thlvx(i,k)-thermal(i))*
@@ -707,7 +707,6 @@
             rbup(i) = (thlvx(i,k)-thermal(i))*
      &                (g*zl(i,k)/thlvx(i,1))/spdk2
           else if (tc_pbl == 1) then
-            bfac = 100.0
             spdk2   = max((u1(i,k)-u1(i,1))**2+(v1(i,k)-v1(i,1))**2,1.)
      &                + bfac*ustar(i)**2
             rbup(i) = (thlvx(i,k)-thermal(i))*
@@ -835,7 +834,6 @@
             rbup(i) = (thlvx(i,k)-thermal(i))*
      &                (g*zl(i,k)/thlvx(i,1))/spdk2
           else if (tc_pbl == 1) then
-            bfac = 100.
             spdk2   = max((u1(i,k)-u1(i,1))**2+(v1(i,k)-v1(i,1))**2,1.)
      &                + bfac*ustar(i)**2
             rbup(i) = (thlvx(i,k)-thermal(i))*
