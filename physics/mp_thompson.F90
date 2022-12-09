@@ -705,7 +705,7 @@ module mp_thompson
                               ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
                               ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                               its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
-                              fullradar_diag=fullradar_diag, astep=istep, nsteps=nsteps,     &
+                              fullradar_diag=fullradar_diag, istep=istep, nsteps=nsteps,     &
                               first_time_step=first_time_step, errmsg=errmsg, errflg=errflg, &
                               ! Extended diagnostics
                               ext_diag=ext_diag,                                             &
