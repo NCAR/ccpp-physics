@@ -238,7 +238,7 @@ c  physical parameters
 !     parameter(cinacrmx=-120.,cinacrmn=-120.)
       parameter(cinacrmx=-120.,cinacrmn=-80.)
       parameter(bet1=1.875,cd1=.506,f1=2.0,gam1=.5)
-      parameter(betaw=.03,dxcrtuf=15.e3)
+      parameter(betaw=.03)
 
 !
 !  local variables and arrays
@@ -2468,8 +2468,10 @@ c
 !
       if(progsigma)then
          dxcrtas=30.e3
+         dxcrtuf=10.e3
       else
          dxcrtas=8.e3
+         dxcrtuf=15.e3
       endif
 
 
@@ -3519,9 +3521,13 @@ c
             if(k > kb(i) .and. k < ktop(i)) then
               tem = 0.5 * (eta(i,k-1) + eta(i,k)) * xmb(i)
               tem1 = pfld(i,k) * 100. / (rd * t1(i,k))
-              sigmagfm(i) = max(sigmagfm(i), betaw)
-              ptem = tem / (sigmagfm(i) * tem1)
-              qtr(i,k,ntk)=qtr(i,k,ntk)+0.5*sigmagfm(i)*ptem*ptem
+              if(progsigma)then
+                tem2 = sigmab(i)
+              else
+                tem2 = max(sigmagfm(i), betaw)
+              endif
+              ptem = tem / (tem2 * tem1)
+              qtr(i,k,ntk)=qtr(i,k,ntk)+0.5*tem2*ptem*ptem
             endif
           endif
         enddo
@@ -3533,9 +3539,13 @@ c
             if(k > 1 .and. k <= jmin(i)) then
               tem = 0.5*edto(i)*(etad(i,k-1)+etad(i,k))*xmb(i)
               tem1 = pfld(i,k) * 100. / (rd * t1(i,k))
-              sigmagfm(i) = max(sigmagfm(i), betaw)
-              ptem = tem / (sigmagfm(i) * tem1)
-              qtr(i,k,ntk)=qtr(i,k,ntk)+0.5*sigmagfm(i)*ptem*ptem
+              if(progsigma)then
+                tem2 = sigmab(i)
+              else
+                tem2 = max(sigmagfm(i), betaw)
+              endif
+              ptem = tem / (tem2 * tem1)
+              qtr(i,k,ntk)=qtr(i,k,ntk)+0.5*tem2*ptem*ptem
             endif
           endif
         enddo
