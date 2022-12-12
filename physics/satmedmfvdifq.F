@@ -1215,8 +1215,10 @@
       !PCC_CANOPY------------------------------------
         do k = 1, 1km1
           do i=1,im
+                      FCH  = canheight(i)    !Input canopy height for grid cell i
                       IF (k .EQ. 1) THEN !first model layer
 !                       Check for Contiguous Canopy Grid Cells
+                        IF ( FCH .LT. 10.0
 !                       IF ( LAI .LT. 0.1
 !     &                   .OR. FCH .LT. 0.5
 !     &                   .OR. FCH .LT. 10.0
@@ -1224,15 +1226,14 @@
 !     &                   .OR. POPU .GT. 10000.0
 !     &                   .OR. EXP(-0.5*LAI*CLU).GT. 0.45
 !     &                      .AND. FCH .LT. 18.0 ) THEN !not a contigous canopy cell
-!                              dkt(i,k)= dkt(i,k)
-!                              dkq(i,k)= dkq(i,k)
-!                       ELSE ! There is a contiguous forest canopy,
+                              dkt(i,k)= dkt(i,k)
+                              dkq(i,k)= dkq(i,k)
+                       ELSE ! There is a contiguous forest canopy,
 !                              apply correction over canopy layers
 !Raupauch M. R. A Practical Lagrangian method for relating scalar
 !concentrations to
 ! source distributions in vegetation canopies. Q. J. R. Meteor. Soc.
 ! (1989), 115, pp 609-632
-              FCH  = canheight(i)    !Input canopy height for grid cell i
               MOL  = zol(i)/zl(i,k)  !Monin-Obukhov Length
               HOL = FCH/MOL  !local canopy stability parameter (hc/MOL)
               ZCAN = zl(i,k) ! Initialize canopy top (m) = First model layer height above canopy
@@ -1296,7 +1297,7 @@
               EDDYVEST_INT = IntegrateTrapezoid((ZCANX(COUNTCAN:1:-1)/FCH),EDDYVESTX(COUNTCAN:1:-1))
               dkt(i,k)= (dkt(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dkt to resolved eddy diffusivity
               dkq(i,k)= (dkq(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dku to resolved eddy diffusivity
-!                        END IF !contigous canopy conditions
+                        END IF !contigous canopy conditions
                       END IF  ! first model layer scaled canopy
           enddo !i
         enddo !k
