@@ -24,7 +24,7 @@
         rain1, rann, xlat, xlon, gt0, gq0, prsl, prsi, phii, tsfc, ice, snow, graupel, save_t, save_q, rain0, ice0, snow0,&
         graupel0, del, rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp, srflag, sr, cnvprcp, totprcp, totice,   &
         totsnw, totgrp, cnvprcpb, totprcpb, toticeb, totsnwb, totgrpb, rain_cpl, rainc_cpl, snow_cpl, pwat,               &
-        acfrzrn, acfrzrnb, acgraup, acgraupb, acsnow, acsnowb, rhonewsn1, vrbliceden_noah, iopt_snf,                      & 
+        frzr, frzrb, frozr, frozrb, tsnowp, tsnowpb, rhonewsn1, vrbliceden_noah, iopt_snf,                      & 
         drain_cpl, dsnow_cpl, lsm, lsm_ruc, lsm_noahmp, raincprv, rainncprv, iceprv, snowprv,                             &
         graupelprv, draincprv, drainncprv, diceprv, dsnowprv, dgraupelprv, dtp, dfi_radar_max_intervals,                  &
         dtend, dtidx, index_of_temperature, index_of_process_mp,ldiag3d, qdiag3d,dqdt_qmicro, lssav, num_dfi_radar,       &
@@ -82,12 +82,12 @@
       real(kind=kind_phys), dimension(:),      intent(inout) :: diceprv
       real(kind=kind_phys), dimension(:),      intent(inout) :: dsnowprv
       real(kind=kind_phys), dimension(:),      intent(inout) :: dgraupelprv
-      real(kind=kind_phys), dimension(:),      intent(inout) :: acfrzrn
-      real(kind=kind_phys), dimension(:),      intent(inout) :: acfrzrnb
-      real(kind=kind_phys), dimension(:),      intent(inout) :: acgraup
-      real(kind=kind_phys), dimension(:),      intent(inout) :: acgraupb
-      real(kind=kind_phys), dimension(:),      intent(inout) :: acsnow
-      real(kind=kind_phys), dimension(:),      intent(inout) :: acsnowb
+      real(kind=kind_phys), dimension(:),      intent(inout) :: frzr
+      real(kind=kind_phys), dimension(:),      intent(inout) :: frzrb
+      real(kind=kind_phys), dimension(:),      intent(inout) :: frozr
+      real(kind=kind_phys), dimension(:),      intent(inout) :: frozrb
+      real(kind=kind_phys), dimension(:),      intent(inout) :: tsnowp
+      real(kind=kind_phys), dimension(:),      intent(inout) :: tsnowpb
       real(kind=kind_phys), dimension(:),      intent(inout) :: rhonewsn1
       real(kind=kind_phys), dimension(:,:),    intent(inout) :: dqdt_qmicro
       real(kind=kind_phys), dimension(:,:),    intent(inout) :: prevsq
@@ -128,13 +128,13 @@
          do i = 1, im
 !           write(0,*)'freezing rain gt0(1),gt0(levs):',gt0(1,1),gt0(1,levs)
             if (gt0(i,1) .le. 273) then
-               acfrzrn(i) = acfrzrn(i) + rain0(i)
-               acfrzrnb(i) = acfrzrnb(i) + rain0(i)
+               frzr(i) = frzr(i) + rain0(i)
+               frzrb(i) = frzrb(i) + rain0(i)
             endif
-            acsnow(i)  = acsnow(i)  + snow0(i)
-            acsnowb(i)  = acsnowb(i)  + snow0(i)
-            acgraup(i) = acgraup(i) + graupel0(i)
-            acgraupb(i) = acgraupb(i) + graupel0(i)
+            tsnowp(i)  = tsnowp(i)  + snow0(i)
+            tsnowpb(i)  = tsnowpb(i)  + snow0(i)
+            frozr(i) = frozr(i) + graupel0(i)
+            frozrb(i) = frozrb(i) + graupel0(i)
          enddo
 !Compute the variable precip ice density for specific LSM schemes and options
 !         if ( lsm .ne. 2 .or. iopt_snf .ne. 5) then
