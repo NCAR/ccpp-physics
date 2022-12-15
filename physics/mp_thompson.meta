@@ -510,6 +510,13 @@
   dimensions = ()
   type = integer
   intent = in
+[islmsk]
+  standard_name = sea_land_ice_mask
+  long_name = sea/land/ice mask (=0/1/2)
+  units = flag
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = in
 [dtp]
   standard_name = timestep_for_physics
   long_name = physics timestep
