@@ -2075,7 +2075,7 @@
       integer :: i, k, id, nf
 
 !  ---  constant values
-      real (kind=kind_phys), parameter :: xrc3 = 200.
+      real (kind=kind_phys), parameter :: xrc3 = 100.
 
 !
 !===> ... begin here
@@ -2092,7 +2092,7 @@
           rei   (i,k) = re_ice(i,k)
           rer   (i,k) = rrain_def            ! default rain radius to 1000 micron
           res   (i,k) = re_snow(i,K)
-!         tem2d (i,k) = min( 1.0, max( 0.0, (con_ttp-tlyr(i,k))*0.05 ) )
+          tem2d (i,k) = min( 1.0, max( 0.0, (con_ttp-tlyr(i,k))*0.05 ) )
           clwf(i,k)   = 0.0
         enddo
       enddo
@@ -2123,12 +2123,14 @@
           enddo
         enddo
 
-!> - Compute cloud liquid/ice condensate path in \f$ g/m^2 \f$ .
-
+!> - Compute total-cloud liquid/ice condensate path in \f$ g/m^2 \f$.
+!>   The total condensate includes convective condensate.
         do k = 1, NLAY-1
           do i = 1, IX
-            cwp(i,k) = max(0.0, clw(i,k,ntcw) * gfac * delp(i,k))
-            cip(i,k) = max(0.0, clw(i,k,ntiw) * gfac * delp(i,k))
+            cwp(i,k) = max(0.0, (clw(i,k,ntcw)+cnvw(i,k)*
+     &                  (1.-tem2d(i,k))) * gfac * delp(i,k))
+            cip(i,k) = max(0.0, (clw(i,k,ntiw) + cnvw(i,k)*
+     &                  tem2d(i,k)) *gfac * delp(i,k))
             crp(i,k) = max(0.0, clw(i,k,ntrw) * gfac * delp(i,k))
             csp(i,k) = max(0.0, clw(i,k,ntsw) * gfac * delp(i,k))
           enddo
@@ -3820,7 +3822,7 @@
         clwmin = 0.0
         do k = 1, NLAY-1
         do i = 1, IX
-          clwt = 1.0e-10 * (plyr(i,k)*0.001)
+          clwt = 1.0e-6 * (plyr(i,k)*0.001)
 
           if (clwf(i,k) > clwt) then
             if(rhly(i,k) > 0.99) then
