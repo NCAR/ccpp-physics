@@ -588,6 +588,13 @@
   dimensions = ()
   type = integer
   intent = in
+[tc_pbl]
+  standard_name = control_for_TC_applications_in_the_PBL_scheme
+  long_name = control for TC applications in the PBL scheme
+  units = none
+  dimensions = ()
+  type = integer
+  intent = in
 [ntqv]
   standard_name = index_of_specific_humidity_in_tracer_concentration_array
   long_name = tracer index for water vapor (specific humidity)
