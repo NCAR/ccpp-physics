@@ -723,7 +723,7 @@
               call progcld_thompson_wsm6 (plyr,plvl,tlyr,qlyr,qstl,     & !  --- inputs
      &                   rhly,tracer1,xlat,xlon,slmsk,dz,delp,          &
      &                   ntrac-1, ntcw-1,ntiw-1,ntrw-1,                 &
-     &                   ntsw-1,ntgl-1,                                 &
+     &                   ntsw-1,ntgl-1,con_ttp,                         &
      &                   IX, NLAY, NLP1, uni_cld, lmfshal, lmfdeep2,    &
      &                   cldcov(:,1:NLAY), cnvw, effrl_inout,           &
      &                   effri_inout, effrs_inout,                      &
@@ -796,7 +796,7 @@
               call progcld_thompson_wsm6 (plyr,plvl,tlyr,qlyr,qstl,     & !  --- inputs
      &                   rhly,tracer1,xlat,xlon,slmsk,dz,delp,          &
      &                   ntrac-1, ntcw-1,ntiw-1,ntrw-1,                 &
-     &                   ntsw-1,ntgl-1,                                 &
+     &                   ntsw-1,ntgl-1,con_ttp,                         &
      &                   IX, NLAY, NLP1, uni_cld, lmfshal, lmfdeep2,    &
      &                   cldcov(:,1:NLAY), cnvw, effrl, effri, effrs,   &
      &                   lwp_ex, iwp_ex, lwp_fc, iwp_fc,                &
@@ -1958,7 +1958,7 @@
       subroutine progcld_thompson_wsm6                                  &
      &     ( plyr,plvl,tlyr,qlyr,qstl,rhly,clw,                         &    !  ---  inputs:
      &       xlat,xlon,slmsk,dz,delp,                                   &
-     &       ntrac,ntcw,ntiw,ntrw,ntsw,ntgl,                            &
+     &       ntrac,ntcw,ntiw,ntrw,ntsw,ntgl,con_ttp,                    &
      &       IX, NLAY, NLP1,                                            &
      &       uni_cld, lmfshal, lmfdeep2, cldcov, cnvw,                  &
      &       re_cloud,re_ice,re_snow,                                   &
@@ -2058,7 +2058,7 @@
 
       real (kind=kind_phys), dimension(:),   intent(in) :: xlat, xlon,  &
      &       slmsk
-
+      real (kind=kind_phys), intent(in) :: con_ttp
 !  --- inputs/outputs
 
       real (kind=kind_phys), dimension(:,:), intent(inout) ::            &
