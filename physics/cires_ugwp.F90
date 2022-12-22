@@ -195,11 +195,13 @@ contains
 ! \section det_cires_ugwp CIRES UGWP V0 Scheme Detailed Algorithm
      subroutine cires_ugwp_run(do_ugwp, me,  master, im,  levs, ntrac, dtp, kdt, lonr, &
          oro, oro_uf, hprime, nmtvr, oc, theta, sigma, gamma, elvmax, clx, oa4,        &
-         do_tofd, ldiag_ugwp, cdmbgwd, xlat, xlat_d, sinlat, coslat, area,             &
-         ugrs, vgrs, tgrs, qgrs, prsi, prsl, prslk, phii, phil,                        &
+         do_tofd, ldiag_ugwp, cdmbgwd, xlat, xlat_d, sinlat, coslat,                   &
+         area, ugrs, vgrs, tgrs, qgrs, prsi, prsl, prslk, phii, phil,                  &
          del, kpbl, dusfcg, dvsfcg, gw_dudt, gw_dvdt, gw_dtdt, gw_kdis,                &
          tau_tofd, tau_mtb, tau_ogw, tau_ngw, zmtb, zlwb, zogw,                        &
-         dudt_mtb,dudt_ogw, dudt_tms, du3dt_mtb, du3dt_ogw, du3dt_tms,                 &
+         dusfc_ms, dvsfc_ms, dusfc_bl, dvsfc_bl,                                       &
+         dudt_ogw, dtauy2d_ms, dtaux2d_bl, dtauy2d_bl,                                 &
+         dudt_mtb, dudt_tms, du3dt_mtb, du3dt_ogw, du3dt_tms,                          &
          dudt, dvdt, dtdt, rdxzb, con_g, con_pi, con_cp, con_rd, con_rv, con_fvirt,    &
          con_omega, rain, ntke, q_tke, dqdt_tke, lprnt, ipr,                           &
          dtend, dtidx, index_of_x_wind, index_of_y_wind, index_of_temperature,         &
@@ -228,6 +230,9 @@ contains
     real(kind=kind_phys),    intent(out), dimension(:)      :: tau_mtb, tau_ogw, tau_tofd, tau_ngw
     real(kind=kind_phys),    intent(out), dimension(:, :):: gw_dudt, gw_dvdt, gw_dtdt, gw_kdis
     real(kind=kind_phys),    intent(out), dimension(:, :):: dudt_mtb, dudt_ogw, dudt_tms
+    real(kind=kind_phys),    intent(out), dimension(:)    :: dusfc_ms, dvsfc_ms, dusfc_bl, dvsfc_bl
+    real(kind=kind_phys),    intent(out), dimension(:, :) :: dtauy2d_ms
+    real(kind=kind_phys),    intent(out), dimension(:, :) :: dtaux2d_bl, dtauy2d_bl
 
     ! dtend is only allocated if ldiag=.true.
     real(kind=kind_phys), optional, intent(inout)            :: dtend(:,:,:)
@@ -314,9 +319,11 @@ contains
                     ugrs, vgrs, tgrs, qgrs(:,:,1),                      &
                     kpbl, prsi, del, prsl, prslk, phii, phil, dtp, kdt, &
                     hprime, oc, oa4, clx, theta, sigma, gamma,          &
-                    elvmax, dusfcg, dvsfcg,                             &
+                    elvmax, dusfcg, dvsfcg, dudt_ogw, dtauy2d_ms,       &
+                    dtaux2d_bl, dtauy2d_bl, dusfc_ms, dvsfc_ms,         &
+                    dusfc_bl, dvsfc_bl,                                 &
                     con_g,  con_cp, con_rd, con_rv, lonr,               &
-                    nmtvr, cdmbgwd, me, lprnt, ipr, rdxzb,              &
+                    nmtvr, cdmbgwd, me, lprnt, ipr, rdxzb, ldiag_ugwp,  &
                     errmsg, errflg)
          if (errflg/=0) return
        endif
