@@ -3,6 +3,7 @@
 !! drag and mountain blocking.
 
 !> This module contains the CCPP-compliant orographic gravity wave dray scheme.
+!> This version of gwdps is called from the unified_ugwp CCPP scheme
       module gwdps
 
       contains
@@ -194,8 +195,12 @@
      &           IM,KM,A,B,C,U1,V1,T1,Q1,KPBL,                          &
      &           PRSI,DEL,PRSL,PRSLK,PHII, PHIL,DELTIM,KDT,             &
      &           HPRIME,OC,OA4,CLX4,THETA,SIGMA,GAMMA,ELVMAX,           &
-     &           DUSFC,DVSFC,G, CP, RD, RV, IMX,                        &
-     &           nmtvr, cdmbgwd, me, lprnt, ipr, rdxzb, errmsg, errflg)
+     &           DUSFC,DVSFC,dtaux2d_ms,dtauy2d_ms,dtaux2d_bl,          &
+     &           dtauy2d_bl,dusfc_ms,dvsfc_ms,dusfc_bl,dvsfc_bl,        &
+     &           G, CP, RD, RV, IMX,                                    &
+     &           nmtvr, cdmbgwd, me, lprnt, ipr, rdxzb, ldiag_ugwp,     &
+     &           errmsg, errflg)
+
 !
 !   ********************************************************************
 ! ----->  I M P L E M E N T A T I O N    V E R S I O N   <----------
@@ -308,10 +313,16 @@
       real(kind=kind_phys), intent(inout) :: ELVMAX(:)
       real(kind=kind_phys), intent(in) ::                               &
      &                     THETA(:), SIGMA(:), GAMMA(:)
-      real(kind=kind_phys), intent(out) :: DUSFC(:), DVSFC(:),          &
+      real(kind=kind_phys), intent(inout) :: DUSFC(:), DVSFC(:),        &
      &                     RDXZB(:)
+      real(kind=kind_phys), intent(inout) :: dtaux2d_ms(:,:),           &
+     &                     dtauy2d_ms(:,:), dtaux2d_bl(:,:),            &
+     &                     dtauy2d_bl(:,:)
+      real(kind=kind_phys), intent(inout) :: dusfc_ms(:), dvsfc_ms(:),  &
+     &                     dusfc_bl(:), dvsfc_bl(:)
       integer, intent(in) :: nmtvr
       logical, intent(in) :: lprnt
+      logical, intent(in) :: ldiag_ugwp
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 !
@@ -413,10 +424,6 @@
       cdmbo4 = 0.25 * cdmb
 !
       npr = 0
-      DO I = 1, IM
-        DUSFC(I) = 0.
-        DVSFC(I) = 0.
-      ENDDO
 !
       DO K = 1, KM
         DO I = 1, IM
@@ -1237,8 +1244,15 @@
 !    &                      dbim,idxzb(I),U1(J,K),V1(J,K),me
 
             tem1     = DBIM * DEL(J,K)
-            DUSFC(J) = DUSFC(J) - tem1 * U1(J,K)
-            DVSFC(J) = DVSFC(J) - tem1 * V1(J,K)
+            DUSFC(J) = DUSFC(J) + onebg * tem1 * U1(J,K)
+            DVSFC(J) = DVSFC(J) + onebg * tem1 * V1(J,K)
+            ! Output blocking tendencies if ldiag_ugwp=.true.
+            if (ldiag_ugwp) then
+               dtaux2d_bl(j,k) = - DBIM * U1(J,K)
+               dtauy2d_bl(j,k) = - DBIM * V1(J,K)
+               dusfc_bl(j) = dusfc_bl(j) + dtaux2d_bl(j,k) * del(j,k)
+               dvsfc_bl(j) = dvsfc_bl(j) + dtauy2d_bl(j,k) * del(j,k)
+            end if
           else                                         ! orographic GWD applied
                                                        ! ----------------------
             A(J,K)   = DTAUY + A(J,K)
@@ -1246,8 +1260,15 @@
             tem1     = U1(J,K) + DTAUX*DELTIM
             tem2     = V1(J,K) + DTAUY*DELTIM
             ENG1     = 0.5 * (tem1*tem1+tem2*tem2)
-            DUSFC(J) = DUSFC(J) + DTAUX * DEL(J,K)
-            DVSFC(J) = DVSFC(J) + DTAUY * DEL(J,K)
+            DUSFC(J) = DUSFC(J) - onebg * DTAUX * DEL(J,K)
+            DVSFC(J) = DVSFC(J) - onebg * DTAUY * DEL(J,K)
+            ! Output mesoscale GWD tendencies if ldiag_ugwp=.ture.
+            if (ldiag_ugwp) then
+               dtaux2d_ms(j,k) = DTAUX
+               dtauy2d_ms(j,k) = DTAUY
+               dusfc_ms(j) = dusfc_ms(j) + DTAUX * del(j,k)
+               dvsfc_ms(j) = dvsfc_ms(j) + DTAUY * del(j,k)
+            end if
           endif
           C(J,K) = C(J,K) + max(ENG0-ENG1,0.) * oneocpdt
         ENDDO
@@ -1259,12 +1280,16 @@
 !       print *,' DB=',DB(ipr,:)
 !     endif
 
-      DO I = 1,npt
-        J        = ipt(i)
-!       TEM      = (-1.E3/G)
-        DUSFC(J) = - onebg * DUSFC(J)
-        DVSFC(J) = - onebg * DVSFC(J)
-      ENDDO
+      if (ldiag_ugwp) then
+         !  Finalize dusfc and dvsfc diagnostics
+         DO i = 1,npt
+            j = ipt(i)
+            dusfc_ms(j) = - onebg * dusfc_ms(j)
+            dvsfc_ms(j) = - onebg * dvsfc_ms(j)
+            dusfc_bl(j) = - onebg * dusfc_bl(j)
+            dvsfc_bl(j) = - onebg * dvsfc_bl(j)
+         ENDDO
+      end if
 !
 !    MONITOR FOR EXCESSIVE GRAVITY WAVE DRAG TENDENCIES IF NCNT>0
 !
