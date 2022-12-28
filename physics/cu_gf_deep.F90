@@ -3887,6 +3887,7 @@ endif
 !! conversing way by adjusting the cloud base mass-flux.
    subroutine neg_check(name,j,dt,q,outq,outt,outu,outv,                      &
                         outqc,pret,its,ite,kts,kte,itf,ktf,ktop)
+   implicit none
 
    integer,      intent(in   ) ::            j,its,ite,kts,kte,itf,ktf
    integer, dimension (its:ite  ),   intent(in   ) ::  ktop
@@ -3908,6 +3909,8 @@ endif
         dt
      real(kind=kind_phys) :: names,scalef,thresh,qmem,qmemf,qmem2,qtest,qmem1
      integer :: icheck
+! P. Bennett  11/7/2022 
+     integer :: i, k
 !
 ! first do check on vertical heating rate
 !
