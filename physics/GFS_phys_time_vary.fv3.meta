@@ -1718,7 +1718,7 @@
   units = index
   dimensions = (horizontal_dimension)
   type = integer
-  intent = in
+  intent = inout
 [shdmin]
   standard_name = min_vegetation_area_fraction
   long_name = min fractional coverage of green vegetation
