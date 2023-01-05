@@ -2905,13 +2905,13 @@
 !           snowcovered and glacierized basin', 6th nordic hydrological
 !           conference, vemadolen, sweden, 1980, 172-177pp.
 
-      if(vrbliceden_noah == .false.) then
+      if(.not. vrbliceden_noah) then
          if (tempc <= -15.0) then
             dsnew = 0.05
          else
             dsnew = 0.05 + 0.0017*(tempc + 15.0)**1.5
          endif
-      elseif(vrbliceden_noah == .true.) then
+      else
          dsnew = rhonewsn*0.001
       endif
 

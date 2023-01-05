@@ -327,7 +327,6 @@
       errflg = 0
 
 !> - Save land-related prognostic fields for guess run.
-!aligo
       do i = 1, im
         if (land(i) .and. flag_guess(i)) then
           weasd_old(i)  = weasd(i)
