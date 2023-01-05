@@ -1492,19 +1492,13 @@ endif
 !--- 27 Feb 2014 - empirical formulations from John M. Brown
 !        rhonewsn=min(250.,rhowater/max(4.179,(13.*tanh((274.15-Tabs)*0.3333))))
 !--- 13 Mar 2018 - formulation from Trevor Elcott
-!        rhonewsn=min(125.,1000.0/max(8.,(17.*tanh((276.65-Tabs)*0.15))))
-!        rhonewgr=min(500.,rhowater/max(2.,(3.5*tanh((274.15-Tabs)*0.3333))))
-!        rhonewice=rhonewsn
 
 !--- compute density of "snowfall" from weighted contribution
 !                 of snow, graupel and ice fractions
 
-!         rhosnfall = min(500.,max(58.8,(rhonewsn*snowrat +  &
 !13mar18         rhosnfall = min(500.,max(76.9,(rhonewsn*snowrat +  &
-!                     rhonewgr*grauprat + rhonewice*icerat + rhonewgr*curat)))
 
 ! from now on rhonewsn is the density of falling frozen precipitation
-!         rhonewsn=rhosnfall
 
 !*** Define average snow density of the snow pack considering
 !*** the amount of fresh snow (eq. 9 in Koren et al.(1999) 
