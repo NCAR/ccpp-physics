@@ -1,5 +1,5 @@
 !>\file module_sf_mynn.F90
-!! This file contains 
+!! This file contains
 !WRF:MODEL_LAYER:PHYSICS
 !
 !>\ingroup mynn_sfc
@@ -17,10 +17,10 @@ MODULE module_sf_mynn
 !2) Fixed isflux=0 option to turn off scalar fluxes, but keep momentum
 !   fluxes for idealized studies (credit: Anna Fitch).
 !3) Kinematic viscosity varies with temperature according to Andreas (1989).
-!4) Uses the blended Monin-Obukhov flux-profile relationships COARE (Fairall 
+!4) Uses the blended Monin-Obukhov flux-profile relationships COARE (Fairall
 !   et al 2003) for the unstable regime (a blended mix of Dyer-Hicks 1974 and
 !   Grachev et al (2000). Uses Cheng and Brutsaert (2005) for stable conditions.
-!5) The following overviews the namelist variables that control the 
+!5) The following overviews the namelist variables that control the
 !   aerodynamic roughness lengths (over water) and the thermal and moisture
 !   roughness lengths (defaults are recommended):
 !
@@ -36,7 +36,7 @@ MODULE module_sf_mynn
 !   "isftcflx" namelist option is used to select the following scalar options:
 !   (default) =0: z0, zt, and zq from the COARE algorithm. Set COARE_OPT (below) to
 !                 3.0 (Fairall et al. 2003, default)
-!                 3.5 (Edson et al 2013) 
+!                 3.5 (Edson et al 2013)
 !             =1: z0 from Davis et al (2008), zt & zq from COARE 3.0/3.5
 !             =2: z0 from Davis et al (2008), zt & zq from Garratt (1992)
 !             =3: z0 from Taylor and Yelland (2004), zt and zq from COARE 3.0/3.5
@@ -45,7 +45,7 @@ MODULE module_sf_mynn
 !   SNOW/ICE only:
 !   Andreas (2002) snow/ice parameterization for thermal and
 !   moisture roughness is used over all gridpoints with snow deeper than
-!   0.1 m. This algorithm calculates a z0 for snow (Andreas et al. 2005, BLM), 
+!   0.1 m. This algorithm calculates a z0 for snow (Andreas et al. 2005, BLM),
 !   which is only used as part of the thermal and moisture roughness
 !   length calculation, not to directly impact the surface winds.
 !
@@ -56,7 +56,7 @@ MODULE module_sf_mynn
 !
 !2) Option to activate stochastic parameter perturbations (SPP), which
 !   perturb z0, zt, and zq, along with many other parameters in the MYNN-
-!   EDMF scheme. 
+!   EDMF scheme.
 !
 !NOTE: This code was primarily tested in combination with the RUC LSM.
 !      Performance with the Noah (or other) LSM is relatively unknown.
@@ -82,36 +82,41 @@ MODULE module_sf_mynn
 !use subroutines from sfc_diff:
 !  USE sfc_diff, only: znot_t_v6, znot_t_v7, znot_m_v6, znot_m_v7
 
+!use kind=kind_phys for real-types
+    use machine , only : kind_phys
+
 !-------------------------------------------------------------------
   IMPLICIT NONE
 !-------------------------------------------------------------------
 !For non-WRF
-!   REAL    , PARAMETER :: g            = 9.81
-!   REAL    , PARAMETER :: r_d          = 287.
-!   REAL    , PARAMETER :: cp           = 7.*r_d/2.
-!   REAL    , PARAMETER :: r_v          = 461.6
-!   REAL    , PARAMETER :: cpv          = 4.*r_v
-!   REAL    , PARAMETER :: rcp          = r_d/cp
-!   REAL    , PARAMETER :: XLV          = 2.5E6
-!   REAL    , PARAMETER :: XLF          = 3.50E5
-   REAL    , PARAMETER :: p1000mb      = 100000.
-!   REAL    , PARAMETER :: EP_2         = r_d/r_v
+!   REAL(kind=kind_phys), PARAMETER :: g            = 9.81
+!   REAL(kind=kind_phys), PARAMETER :: r_d          = 287.
+!   REAL(kind=kind_phys), PARAMETER :: cp           = 7.*r_d/2.
+!   REAL(kind=kind_phys), PARAMETER :: r_v          = 461.6
+!   REAL(kind=kind_phys), PARAMETER :: cpv          = 4.*r_v
+!   REAL(kind=kind_phys), PARAMETER :: rcp          = r_d/cp
+!   REAL(kind=kind_phys), PARAMETER :: XLV          = 2.5E6
+!   REAL(kind=kind_phys), PARAMETER :: XLF          = 3.50E5
+   REAL(kind=kind_phys), PARAMETER :: p1000mb      = 100000.
+!   REAL(kind=kind_phys), PARAMETER :: EP_2         = r_d/r_v
 
-  REAL, PARAMETER :: xlvcp=xlv/cp, ep_3=1.-ep_2 
-  REAL, PARAMETER :: wmin=0.1    ! Minimum wind speed
-  REAL, PARAMETER :: VCONVC=1.25
-  REAL, PARAMETER :: onethird = 1./3.
-  REAL, PARAMETER :: sqrt3 = 1.7320508075688773
-  REAL, PARAMETER :: atan1 = 0.785398163397     !in radians
-  REAL, PARAMETER :: log01=log(0.01), log05=log(0.05), log07=log(0.07)
-  REAL, PARAMETER :: SNOWZ0=0.011
-  REAL, PARAMETER :: COARE_OPT=3.0  ! 3.0 or 3.5
+  REAL(kind=kind_phys), PARAMETER :: xlvcp=xlv/cp, ep_3=1.-ep_2
+  REAL(kind=kind_phys), PARAMETER :: wmin=0.1    ! Minimum wind speed
+  REAL(kind=kind_phys), PARAMETER :: VCONVC=1.25
+  REAL(kind=kind_phys), PARAMETER :: onethird = 1./3.
+  REAL(kind=kind_phys), PARAMETER :: sqrt3 = 1.7320508075688773
+  REAL(kind=kind_phys), PARAMETER :: atan1 = 0.785398163397     !in radians
+  REAL(kind=kind_phys), PARAMETER :: log01=log(0.01)
+  REAL(kind=kind_phys), PARAMETER :: log05=log(0.05)
+  REAL(kind=kind_phys), PARAMETER :: log07=log(0.07)
+  REAL(kind=kind_phys), PARAMETER :: SNOWZ0=0.011
+  REAL(kind=kind_phys), PARAMETER :: COARE_OPT=3.0  ! 3.0 or 3.5
   !For debugging purposes:
   INTEGER, PARAMETER :: debug_code = 0  !0: no extra ouput
                                         !1: check input
                                         !2: everything - heavy I/O
 
-  REAL,   DIMENSION(0:1000 ),SAVE :: psim_stab,psim_unstab, &
+  REAL(kind=kind_phys), DIMENSION(0:1000 ),SAVE :: psim_stab,psim_unstab, &
                                      psih_stab,psih_unstab
 
 CONTAINS
@@ -193,7 +198,7 @@ CONTAINS
 !-- XLAND       land mask (1 for land, 2 for water)
 !-- HFX         upward heat flux at the surface (W/m^2)
 !                  HFX = HFLX * rho * cp
-!-- HFLX        upward temperature flux at the surface (K m s^-1) 
+!-- HFLX        upward temperature flux at the surface (K m s^-1)
 !-- QFX         upward moisture flux at the surface (kg/m^2/s)
 !                  QFX = QFLX * rho
 !-- QFLX        upward moisture flux at the surface (kg kg-1 m s-1)
@@ -211,7 +216,7 @@ CONTAINS
 !-- T2          diagnostic 2m temperature (K)
 !-- Q2          diagnostic 2m mixing ratio (kg/kg)
 !-- SNOWH       Snow height (m)
-!-- GZ1OZ0      log((z1+ZNT)/ZNT) where ZNT is roughness length 
+!-- GZ1OZ0      log((z1+ZNT)/ZNT) where ZNT is roughness length
 !-- WSPD        wind speed at lowest model level (m/s)
 !-- BR          bulk Richardson number in surface layer
 !-- ISFFLX      isfflx=1 for surface heat and moisture fluxes
@@ -232,7 +237,7 @@ CONTAINS
 !   (water      =1: z0 from Davis et al (2008), zt & zq from COARE3.0/3.5
 !    only)      =2: z0 from Davis et al (2008), zt & zq from Garratt (1992)
 !               =3: z0 from Taylor and Yelland (2004), zt and zq from COARE 3.0/3.5
-!-- iz0tlnd     =0: Zilitinkevich (1995) with Czil=0.085, 
+!-- iz0tlnd     =0: Zilitinkevich (1995) with Czil=0.085,
 !   (land       =1: Czil_new (modified according to Chen & Zhang 2008)
 !    only)      =2: Modified Yang et al (2002, 2008) - generalized for all landuse
 !               =3: constant zt = z0/7.4 (Garratt 1992)
@@ -264,9 +269,9 @@ CONTAINS
                                        ims,ime, jms,jme, kms,kme, &
                                        its,ite, jts,jte, kts,kte
       INTEGER,  INTENT(IN)   ::        itimestep,iter
-      REAL,     INTENT(IN)   ::        SVP1,SVP2,SVP3,SVPT0
-      REAL,     INTENT(IN)   ::        EP1,EP2,KARMAN
-      REAL,     INTENT(IN)   ::        CP,G,ROVCP,R,XLV !,DX
+      REAL(kind=kind_phys), INTENT(IN) :: SVP1,SVP2,SVP3,SVPT0
+      REAL(kind=kind_phys), INTENT(IN) :: EP1,EP2,KARMAN
+      REAL(kind=kind_phys), INTENT(IN) :: CP,G,ROVCP,R,XLV !,DX
 !NAMELIST/CONFIGURATION OPTIONS:
       INTEGER,  INTENT(IN)   ::        ISFFLX, LSM, LSM_RUC
       INTEGER,  OPTIONAL, INTENT(IN) :: ISFTCFLX, IZ0TLND
@@ -278,13 +283,13 @@ CONTAINS
 
 !Input data
       integer, dimension(ims:ime), intent(in) :: vegtype
-      real,    dimension(ims:ime), intent(in) ::       &
+      real(kind=kind_phys), dimension(ims:ime), intent(in) ::      &
      &                    sigmaf,shdmax,z0pert,ztpert
 !===================================
 ! 3D VARIABLES
 !===================================
-      REAL,     DIMENSION( ims:ime, kms:kme )                    , &
-                INTENT(IN   )   ::                           dz8w, &
+      REAL(kind=kind_phys), DIMENSION( ims:ime, kms:kme )        , &
+                            INTENT(IN   )   ::               dz8w, &
                                                              QV3D, &
                                                               P3D, &
                                                               T3D, &
@@ -293,25 +298,25 @@ CONTAINS
                                                         th3d,pi3d
 
       !GJF: This array must be assumed-shape since it is conditionally-allocated
-      REAL, DIMENSION( :,: ),                                      &
-                INTENT(IN) ::                      pattern_spp_sfc
+      REAL(kind=kind_phys), DIMENSION( :,: ),                      &
+                            INTENT(IN) ::         pattern_spp_sfc
 !===================================
 ! 2D VARIABLES
 !===================================
-      REAL,     DIMENSION( ims:ime )                             , &
-                INTENT(IN   )               ::             MAVAIL, &
+      REAL(kind=kind_phys), DIMENSION( ims:ime )                 , &
+                            INTENT(IN   )          ::      MAVAIL, &
                                                              PBLH, &
                                                             XLAND, &
                                                            PSFCPA, &
                                                                DX
 
-      REAL,     DIMENSION( ims:ime )                             , &
-                INTENT(OUT  )               ::            U10,V10, &
+      REAL(kind=kind_phys), DIMENSION( ims:ime )                 , &
+                            INTENT(OUT  )          ::     U10,V10, &
                                                         TH2,T2,Q2
 
 
-      REAL,     DIMENSION( ims:ime )                             , &
-                INTENT(INOUT)               ::           HFLX,HFX, &
+      REAL(kind=kind_phys), DIMENSION( ims:ime )                 , &
+                            INTENT(INOUT)          ::    HFLX,HFX, &
                                                          QFLX,QFX, &
                                                                LH, &
                                                          MOL,RMOL, &
@@ -333,12 +338,12 @@ CONTAINS
       LOGICAL, DIMENSION( ims:ime ), INTENT(IN)    ::              &
 &                             wet,  dry,  icy,  flag_iter
 
-      REAL, DIMENSION( ims:ime ), INTENT(IN)    ::                 &
+      REAL(kind=kind_phys), DIMENSION( ims:ime ), INTENT(IN) ::    &
      &                    tskin_wat, tskin_lnd, tskin_ice,         &
      &                    tsurf_wat, tsurf_lnd, tsurf_ice,         &
      &                    snowh_wat, snowh_lnd, snowh_ice
 
-      REAL, DIMENSION( ims:ime), INTENT(INOUT) ::                  &
+      REAL(kind=kind_phys), DIMENSION( ims:ime), INTENT(INOUT) ::  &
      &                      ZNT_wat,   ZNT_lnd,   ZNT_ice,         &
      &                      UST_wat,   UST_lnd,   UST_ice,         &
      &                       cm_wat,    cm_lnd,    cm_ice,         &
@@ -359,12 +364,12 @@ CONTAINS
 
 !ADDITIONAL OUTPUT
 !JOE-begin
-      REAL,     DIMENSION( ims:ime ) :: qstar
+      REAL(kind=kind_phys), DIMENSION( ims:ime ) :: qstar
 !JOE-end
 !===================================
 ! 1D LOCAL ARRAYS
 !===================================
-      REAL,     DIMENSION( its:ite ) ::                   U1D,V1D, & !level1 winds
+      REAL(kind=kind_phys), DIMENSION( its:ite ) ::       U1D,V1D, & !level1 winds
                                                         U1D2,V1D2, & !level2 winds
                                                              QV1D, &
                                                               P1D, &
@@ -372,18 +377,18 @@ CONTAINS
                                                            dz8w1d, & !level 1 height
                                                            dz2w1d    !level 2 height
 
-      REAL,     DIMENSION( its:ite ) ::                  rstoch1D
+      REAL(kind=kind_phys), DIMENSION( its:ite ) ::      rstoch1D
 
       INTEGER ::  I,J,K,itf,ktf
 !-----------------------------------------------------------
 
       IF (debug_code >= 1) THEN
         write(*,*)"======= printing of constants:"
-        write(*,*)"cp=", cp," g=",     g    
-        write(*,*)"Rd=",    r_d," Rv=",    r_v, " cpc=",   cpv  
-        write(*,*)"cliq=",  cliq," cice=",  Cice," rcp=",   rcp  
-        write(*,*)"xlv=",   XLV," xlf=",   XLF  
-        write(*,*)"ep1=",   EP_1, " ep2=",   EP_2 
+        write(*,*)"cp=", cp," g=",     g
+        write(*,*)"Rd=",    r_d," Rv=",    r_v, " cpc=",   cpv
+        write(*,*)"cliq=",  cliq," cice=",  Cice," rcp=",   rcp
+        write(*,*)"xlv=",   XLV," xlf=",   XLF
+        write(*,*)"ep1=",   EP_1, " ep2=",   EP_2
       ENDIF
 
       itf=ite !MIN0(ite,ide-1)
@@ -412,9 +417,9 @@ CONTAINS
       IF (itimestep==1 .AND. iter==1) THEN
          DO i=its,ite
             !Everything here is used before calculated
-            UST_WAT(i)=MAX(0.04*SQRT(U1D(i)*U1D(i) + V1D(i)*V1D(i)),0.001)
-            UST_LND(i)=MAX(0.04*SQRT(U1D(i)*U1D(i) + V1D(i)*V1D(i)),0.001)
-            UST_ICE(i)=MAX(0.04*SQRT(U1D(i)*U1D(i) + V1D(i)*V1D(i)),0.001)
+            UST_WAT(i)=MAX(0.04*SQRT(U1D(i)*U1D(i) + V1D(i)*V1D(i)),0.001_kind_phys)
+            UST_LND(i)=MAX(0.04*SQRT(U1D(i)*U1D(i) + V1D(i)*V1D(i)),0.001_kind_phys)
+            UST_ICE(i)=MAX(0.04*SQRT(U1D(i)*U1D(i) + V1D(i)*V1D(i)),0.001_kind_phys)
             MOL(i)=0.0
             QFLX(i)=0.
             HFLX(i)=0.
@@ -531,11 +536,11 @@ CONTAINS
                                      its,ite, jts,jte, kts,kte, &
                                      J, itimestep, iter, lsm, lsm_ruc
 
-      REAL,     PARAMETER  :: XKA=2.4E-5   !molecular diffusivity
-      REAL,     PARAMETER  :: PRT=1.       !prandlt number
-      REAL,     PARAMETER  :: snowh_thresh = 50. !mm
-      REAL,     INTENT(IN) :: SVP1,SVP2,SVP3,SVPT0,EP1,EP2
-      REAL,     INTENT(IN) :: KARMAN,CP,G,ROVCP,R,XLV !,DX
+      REAL(kind=kind_phys), PARAMETER  :: XKA=2.4E-5   !molecular diffusivity
+      REAL(kind=kind_phys), PARAMETER  :: PRT=1.       !prandlt number
+      REAL(kind=kind_phys), PARAMETER  :: snowh_thresh = 50. !mm
+      REAL(kind=kind_phys), INTENT(IN) :: SVP1,SVP2,SVP3,SVPT0,EP1,EP2
+      REAL(kind=kind_phys), INTENT(IN) :: KARMAN,CP,G,ROVCP,R,XLV !,DX
 
 !-----------------------------
 ! NAMELIST OPTIONS
@@ -550,28 +555,32 @@ CONTAINS
 
 !Input data
       integer, dimension(ims:ime), intent(in) :: vegtype
-      real,    dimension(ims:ime), intent(in) ::       &
+      real(kind=kind_phys), dimension(ims:ime), intent(in) ::      &
      &                    sigmaf,shdmax,z0pert,ztpert
 
 !-----------------------------
 ! 1D ARRAYS
 !-----------------------------
-      REAL,     DIMENSION( ims:ime ), INTENT(IN)    ::     MAVAIL, &
+      REAL(kind=kind_phys), DIMENSION( ims:ime ),                  &
+                            INTENT(IN)             ::      MAVAIL, &
                                                              PBLH, &
                                                             XLAND, &
                                                            PSFCPA, &
                                                                DX
 
-      REAL,     DIMENSION( its:ite ), INTENT(IN)   ::     U1D,V1D, &
+      REAL(kind=kind_phys), DIMENSION( its:ite ),                  &
+                            INTENT(IN)             ::     U1D,V1D, &
                                                         U1D2,V1D2, &
                                                          QV1D,P1D, &
                                                               T1D, &
                                                            dz8w1d, &
                                                            dz2w1d
 
-      REAL,     DIMENSION( ims:ime ), INTENT(OUT)   ::    QFX,HFX, &
+      REAL(kind=kind_phys), DIMENSION( ims:ime ),                  &
+                            INTENT(OUT)             ::    QFX,HFX, &
                                                              RMOL
-      REAL,     DIMENSION( ims:ime ), INTENT(INOUT) ::  HFLX,QFLX, &
+      REAL(kind=kind_phys), DIMENSION( ims:ime ),                  &
+                            INTENT(INOUT)           ::  HFLX,QFLX, &
                                                            LH,MOL, &
                                                          QGH,QSFC, &
                                                               ZNT, &
@@ -589,12 +598,12 @@ CONTAINS
       LOGICAL, DIMENSION( ims:ime ), INTENT(IN)    ::              &
      &                wet,     dry,     icy,    flag_iter
 
-      REAL,     DIMENSION( ims:ime ), INTENT(in)    ::             &
+      REAL(kind=kind_phys), DIMENSION( ims:ime ), INTENT(in) ::    &
      &                    tskin_wat, tskin_lnd, tskin_ice,         &
      &                    tsurf_wat, tsurf_lnd, tsurf_ice,         &
      &                    snowh_wat, snowh_lnd, snowh_ice
 
-      REAL,     DIMENSION( ims:ime ), INTENT(inout) ::             &
+      REAL(kind=kind_phys), DIMENSION( ims:ime ), INTENT(inout) :: &
      &                      ZNT_wat,   ZNT_lnd,   ZNT_ice,         &
      &                      UST_wat,   UST_lnd,   UST_ice,         &
      &                       cm_wat,    cm_lnd,    cm_ice,         &
@@ -609,15 +618,20 @@ CONTAINS
      &                     QFLX_wat,  QFLX_lnd,  QFLX_ice,         &
      &                     qsfc_wat,  qsfc_lnd,  qsfc_ice
 
-      REAL,     DIMENSION( its:ite ), INTENT(IN)   ::     rstoch1D
+      REAL(kind=kind_phys), DIMENSION( its:ite ),                  &
+     &                      INTENT(IN)             ::    rstoch1D
 
       ! DIAGNOSTIC OUTPUT
-      REAL,     DIMENSION( ims:ime ), INTENT(OUT)   ::    U10,V10, &
-                                                        TH2,T2,Q2
+      REAL(kind=kind_phys), DIMENSION( ims:ime ),                  &
+     &                      INTENT(OUT)            ::    U10, V10, &
+     &                                                    TH2, T2, &
+     &                                                         Q2
 
 !--------------------------------------------
 !JOE-additinal output
-      REAL,     DIMENSION( ims:ime ), INTENT(OUT)   :: wstar,qstar
+      REAL(kind=kind_phys), DIMENSION( ims:ime ),                  &
+     &                      INTENT(OUT)            ::       wstar, &
+     &                                                      qstar
 !JOE-end
 
 ! CCPP error handling
@@ -627,7 +641,7 @@ CONTAINS
 !----------------------------------------------------------------
 ! LOCAL VARS
 !----------------------------------------------------------------
-      REAL, DIMENSION(its:ite) :: &
+      REAL(kind=kind_phys), DIMENSION(its:ite) :: &
                  ZA, &    !Height of lowest 1/2 sigma level(m)
                 ZA2, &    !Height of 2nd lowest 1/2 sigma level(m)
               THV1D, &    !Theta-v at lowest 1/2 sigma (K)
@@ -663,12 +677,12 @@ CONTAINS
 
       INTEGER ::  N,I,K,L,yesno
 
-      REAL    ::  PL,E1,TABS
-      REAL    ::  WSPD_lnd, WSPD_ice, WSPD_wat
-      REAL    ::  DTHVDZ,DTHVM,VCONV,ZOL2,ZOL10,ZOLZA,ZOLZ0,ZOLZT
-      REAL    ::  DTG,DTTHX,PSIQ,PSIQ2,PSIQ10,PSIT10
-      REAL    ::  FLUXC,VSGD
-      REAL    ::  restar,VISC,DQG,OLDUST,OLDTST
+      REAL(kind=kind_phys) :: PL,E1,TABS
+      REAL(kind=kind_phys) :: WSPD_lnd, WSPD_ice, WSPD_wat
+      REAL(kind=kind_phys) :: DTHVDZ,DTHVM,VCONV,ZOL2,ZOL10,ZOLZA,ZOLZ0,ZOLZT
+      REAL(kind=kind_phys) :: DTG,DTTHX,PSIQ,PSIQ2,PSIQ10,PSIT10
+      REAL(kind=kind_phys) :: FLUXC,VSGD
+      REAL(kind=kind_phys) :: restar,VISC,DQG,OLDUST,OLDTST
 
 !-------------------------------------------------------------------
       DO I=its,ite
@@ -690,14 +704,14 @@ CONTAINS
                   !SATURATION VAPOR PRESSURE WRT WATER (Bolton 1980)
                   E1=SVP1*EXP(SVP2*(TSK_wat(I)-SVPT0)/(TSK_wat(i)-SVP3))
                ENDIF
-               QSFC_wat(I)=EP2*E1/(PSFC(I)-ep_3*E1)             !specific humidity    
-               QSFCMR_wat(I)=EP2*E1/(PSFC(I)-E1)                !mixing ratio 
+               QSFC_wat(I)=EP2*E1/(PSFC(I)-ep_3*E1)             !specific humidity
+               QSFCMR_wat(I)=EP2*E1/(PSFC(I)-E1)                !mixing ratio
                IF(QSFC_wat(I)>1..or.QSFC_wat(I)<0.) print *,' QSFC_wat(I)',itimestep,i,QSFC_wat(I),TSK_wat(i)
             ENDIF
             IF (dry(i)) THEN
               TSK_lnd(I) = tskin_lnd(i)
               if( lsm == lsm_ruc) then
-                QSFCMR_lnd(I)=QSFC_lnd(I)/(1.-QSFC_lnd(I))       !mixing ratio 
+                QSFCMR_lnd(I)=QSFC_lnd(I)/(1.-QSFC_lnd(I))       !mixing ratio
               else
                TABS = 0.5*(TSK_lnd(I) + T1D(I))
                IF (TABS .LT. 273.15) THEN
@@ -717,7 +731,7 @@ CONTAINS
             IF (icy(i)) THEN
               TSK_ice(I) = tskin_ice(i)
               if( lsm == lsm_ruc) then
-                QSFCMR_ice(I)=QSFC_ice(I)/(1.-QSFC_ice(I))       !mixing ratio 
+                QSFCMR_ice(I)=QSFC_ice(I)/(1.-QSFC_ice(I))       !mixing ratio
               else
                IF (TSK_ice(I) .LT. 273.15) THEN
                   !SATURATION VAPOR PRESSURE WRT ICE (SVP1=.6112; 10*mb)
@@ -746,7 +760,7 @@ CONTAINS
                   !SATURATION VAPOR PRESSURE WRT WATER (Bolton 1980)
                   E1=SVP1*EXP(SVP2*(TSK_wat(I)-SVPT0)/(TSK_wat(i)-SVP3))
                ENDIF
-               QSFC_wat(I)=EP2*E1/(PSFC(I)-ep_3*E1)             !specific humidity    
+               QSFC_wat(I)=EP2*E1/(PSFC(I)-ep_3*E1)             !specific humidity
             ENDIF
             IF (dry(i).and.(QSFC_lnd(I)>1..or.QSFC_lnd(I)<0.)) then
                !print *,'bad QSFC_lnd(I)',itimestep,iter,i,QSFC_lnd(I),TSKin_lnd(I)
@@ -818,7 +832,7 @@ CONTAINS
          if(dry(i)) then
            TSK_lnd(I) = tskin_lnd(i)
            !TSK_lnd(I) = 0.5 * (tsurf_lnd(i)+tskin_lnd(i))
-           ! CONVERT SKIN TEMPERATURES TO POTENTIAL TEMPERATURE: 
+           ! CONVERT SKIN TEMPERATURES TO POTENTIAL TEMPERATURE:
            THSK_lnd(I) = TSK_lnd(I)*THCON(I)   !(K)
            THVSK_lnd(I) = THSK_lnd(I)*(1.+EP1*qsfc_lnd(I))
            if(THVSK_lnd(I) < 170. .or. THVSK_lnd(I) > 360.) &
@@ -827,7 +841,7 @@ CONTAINS
          if(icy(i)) then
            TSK_ice(I) = tskin_ice(i)
            !TSK_ice(I) = 0.5 * (tsurf_ice(i)+tskin_ice(i))
-           ! CONVERT SKIN TEMPERATURES TO POTENTIAL TEMPERATURE: 
+           ! CONVERT SKIN TEMPERATURES TO POTENTIAL TEMPERATURE:
            THSK_ice(I) = TSK_ice(I)*THCON(I)   !(K)
            THVSK_ice(I) = THSK_ice(I)*(1.+EP1*qsfc_ice(I))   !(K)
            if(THVSK_ice(I) < 170. .or. THVSK_ice(I) > 360.) &
@@ -836,7 +850,7 @@ CONTAINS
          if(wet(i)) then
            TSK_wat(I) = tskin_wat(i)
            !TSK_wat(I) = 0.5 * (tsurf_wat(i)+tskin_wat(i))
-           ! CONVERT SKIN TEMPERATURES TO POTENTIAL TEMPERATURE: 
+           ! CONVERT SKIN TEMPERATURES TO POTENTIAL TEMPERATURE:
            THSK_wat(I) = TSK_wat(I)*THCON(I)   !(K)
            THVSK_wat(I) = THSK_wat(I)*(1.+EP1*QVSH(I))   !(K)
            if(THVSK_wat(I) < 170. .or. THVSK_wat(I) > 360.) &
@@ -846,7 +860,7 @@ CONTAINS
       ENDDO
 
       DO I=its,ite
-         ! CONVERT LOWEST LAYER TEMPERATURE TO POTENTIAL TEMPERATURE:     
+         ! CONVERT LOWEST LAYER TEMPERATURE TO POTENTIAL TEMPERATURE:
          TH1D(I)=T1D(I)*(100000./P1D(I))**ROVCP  !(Theta, K)
          TC1D(I)=T1D(I)-273.15                   !(T, Celsius)
       ENDDO
@@ -859,7 +873,7 @@ CONTAINS
 
       DO I=its,ite
          RHO1D(I)=P1D(I)/(R*TV1D(I))     !now using value calculated in sfc driver
-         ZA(I)=0.5*dz8w1d(I)             !height of first half-sigma level 
+         ZA(I)=0.5*dz8w1d(I)             !height of first half-sigma level
          ZA2(I)=dz8w1d(I) + 0.5*dz2w1d(I)    !height of 2nd half-sigma level
          GOVRTH(I)=G/TH1D(I)
       ENDDO
@@ -932,35 +946,35 @@ CONTAINS
          IF (wet(i)) THEN
             DTHVDZ=(THV1D(I)-THVSK_wat(I))
             !--------------------------------------------------------
-            ! Calculate the convective velocity scale (WSTAR) and 
-            ! subgrid-scale velocity (VSGD) following Beljaars (1995, QJRMS) 
+            ! Calculate the convective velocity scale (WSTAR) and
+            ! subgrid-scale velocity (VSGD) following Beljaars (1995, QJRMS)
             ! and Mahrt and Sun (1995, MWR), respectively
             !-------------------------------------------------------
             !tgs - the line below could be used when hflx_wat,qflx_wat are moved from
             !      Interstitial to Sfcprop
             !fluxc = max(hflx_wat(i) + ep1*THVSK_wat(I)*qflx_wat(i),0.)
             fluxc = max(hfx(i)/RHO1D(i)/cp                    &
-            &    + ep1*THVSK_wat(I)*qfx(i)/RHO1D(i),0.)
+            &    + ep1*THVSK_wat(I)*qfx(i)/RHO1D(i),0._kind_phys)
             !WSTAR(I) = vconvc*(g/TSK(i)*pblh(i)*fluxc)**onethird
             WSTAR(I) = vconvc*(g/TSK_wat(i)*pblh(i)*fluxc)**onethird
             !--------------------------------------------------------
             ! Mahrt and Sun low-res correction - modified for water points (halved)
             ! (for 13 km ~ 0.18 m/s; for 3 km == 0 m/s)
             !--------------------------------------------------------
-            VSGD = MIN( 0.25 * (max(dx(i)/5000.-1.,0.))**onethird , 0.5)
+            VSGD = MIN( 0.25 * (max(dx(i)/5000.-1.,0._kind_phys))**onethird , 0.5_kind_phys)
             WSPD_wat=SQRT(WSPD(I)*WSPD(I)+WSTAR(I)*WSTAR(I)+vsgd*vsgd)
             WSPD_wat=MAX(WSPD_wat,wmin)
             !--------------------------------------------------------
-            ! CALCULATE THE BULK RICHARDSON NUMBER OF SURFACE LAYER, 
-            ! ACCORDING TO AKB(1976), EQ(12). 
+            ! CALCULATE THE BULK RICHARDSON NUMBER OF SURFACE LAYER,
+            ! ACCORDING TO AKB(1976), EQ(12).
             !--------------------------------------------------------
             rb_wat(I)=GOVRTH(I)*ZA(I)*DTHVDZ/(WSPD_wat*WSPD_wat)
             IF (ITIMESTEP == 1) THEN
-              rb_wat(I)=MAX(rb_wat(I),-2.0)
-              rb_wat(I)=MIN(rb_wat(I), 2.0)
+              rb_wat(I)=MAX(rb_wat(I),-2.0_kind_phys)
+              rb_wat(I)=MIN(rb_wat(I), 2.0_kind_phys)
             ELSE
-              rb_wat(I)=MAX(rb_wat(I),-4.0)
-              rb_wat(I)=MIN(rb_wat(I), 4.0)
+              rb_wat(I)=MAX(rb_wat(I),-4.0_kind_phys)
+              rb_wat(I)=MIN(rb_wat(I), 4.0_kind_phys)
             ENDIF
          ENDIF ! end water point
 
@@ -975,16 +989,16 @@ CONTAINS
             !      Interstitial to Sfcprop
             !fluxc = max(hflx_lnd(i) + ep1*THVSK_lnd(I)*qflx_lnd(i),0.)
             fluxc = max(hfx(i)/RHO1D(i)/cp                    &
-            &    + ep1*THVSK_lnd(I)*qfx(i)/RHO1D(i),0.)
+            &    + ep1*THVSK_lnd(I)*qfx(i)/RHO1D(i),0._kind_phys)
             ! WSTAR(I) = vconvc*(g/TSK(i)*pblh(i)*fluxc)**onethird
             ! increase height scale, assuming that the non-local transoport
             ! from the mass-flux (plume) mixing exceedsd the PBLH.
-            WSTAR(I) = vconvc*(g/TSK_lnd(i)*MIN(1.5*pblh(i),4000.)*fluxc)**onethird
+            WSTAR(I) = vconvc*(g/TSK_lnd(i)*MIN(1.5*pblh(i),4000._kind_phys)*fluxc)**onethird
             !--------------------------------------------------------
             ! Mahrt and Sun low-res correction
             ! (for 13 km ~ 0.37 m/s; for 3 km == 0 m/s)
             !--------------------------------------------------------
-            VSGD = MIN( 0.32 * (max(dx(i)/5000.-1.,0.))**onethird , 0.5)
+            VSGD = MIN( 0.32 * (max(dx(i)/5000.-1.,0._kind_phys))**onethird , 0.5_kind_phys)
             WSPD_lnd=SQRT(WSPD(I)*WSPD(I)+WSTAR(I)*WSTAR(I)+vsgd*vsgd)
             WSPD_lnd=MAX(WSPD_lnd,wmin)
             !--------------------------------------------------------
@@ -999,11 +1013,11 @@ CONTAINS
             !   ust_lnd(i)=WSPD_lnd*0.1*(1.0 - 10.0*rb_lnd(I))**onethird
             !ENDIF
             IF (ITIMESTEP == 1) THEN
-              rb_lnd(I)=MAX(rb_lnd(I),-2.0)
-              rb_lnd(I)=MIN(rb_lnd(I), 2.0)
+              rb_lnd(I)=MAX(rb_lnd(I),-2.0_kind_phys)
+              rb_lnd(I)=MIN(rb_lnd(I), 2.0_kind_phys)
             ELSE
-              rb_lnd(I)=MAX(rb_lnd(I),-4.0)
-              rb_lnd(I)=MIN(rb_lnd(I), 4.0)
+              rb_lnd(I)=MAX(rb_lnd(I),-4.0_kind_phys)
+              rb_lnd(I)=MIN(rb_lnd(I), 4.0_kind_phys)
             ENDIF
          ENDIF ! end land point
 
@@ -1018,16 +1032,16 @@ CONTAINS
             !      Interstitial to Sfcprop
             !fluxc = max(hflx_ice(i) + ep1*THVSK_ice(I)*qflx_ice(i)/RHO1D(i),0.)
             fluxc = max(hfx(i)/RHO1D(i)/cp                    &
-            &    + ep1*THVSK_ice(I)*qfx(i)/RHO1D(i),0.)
+            &    + ep1*THVSK_ice(I)*qfx(i)/RHO1D(i),0._kind_phys)
             ! WSTAR(I) = vconvc*(g/TSK(i)*pblh(i)*fluxc)**onethird
             ! increase height scale, assuming that the non-local transport
             ! from the mass-flux (plume) mixing exceedsd the PBLH.
-            WSTAR(I) = vconvc*(g/TSK_ice(i)*MIN(1.5*pblh(i),4000.)*fluxc)**onethird
+            WSTAR(I) = vconvc*(g/TSK_ice(i)*MIN(1.5*pblh(i),4000._kind_phys)*fluxc)**onethird
             !--------------------------------------------------------
             ! Mahrt and Sun low-res correction
             ! (for 13 km ~ 0.37 m/s; for 3 km == 0 m/s)
             !--------------------------------------------------------
-            VSGD = MIN( 0.32 * (max(dx(i)/5000.-1.,0.))**onethird , 0.5)
+            VSGD = MIN( 0.32 * (max(dx(i)/5000.-1.,0._kind_phys))**onethird , 0.5_kind_phys)
             WSPD_ice=SQRT(WSPD(I)*WSPD(I)+WSTAR(I)*WSTAR(I)+vsgd*vsgd)
             WSPD_ice=MAX(WSPD_ice,wmin)
             !--------------------------------------------------------
@@ -1036,11 +1050,11 @@ CONTAINS
             !--------------------------------------------------------
             rb_ice(I)=GOVRTH(I)*ZA(I)*DTHVDZ/(WSPD_ice*WSPD_ice)
             IF (ITIMESTEP == 1) THEN
-              rb_ice(I)=MAX(rb_ice(I),-2.0)
-              rb_ice(I)=MIN(rb_ice(I), 2.0)
+              rb_ice(I)=MAX(rb_ice(I),-2.0_kind_phys)
+              rb_ice(I)=MIN(rb_ice(I), 2.0_kind_phys)
             ELSE
-              rb_ice(I)=MAX(rb_ice(I),-4.0)
-              rb_ice(I)=MIN(rb_ice(I), 4.0)
+              rb_ice(I)=MAX(rb_ice(I),-4.0_kind_phys)
+              rb_ice(I)=MIN(rb_ice(I), 4.0_kind_phys)
             ENDIF
          ENDIF ! end ice point
 
@@ -1061,15 +1075,15 @@ CONTAINS
          !if (itimestep .GT. 1) THEN
          !    IF(MOL(I).LT.0.)BR(I)=MIN(BR(I),0.0)
          !ENDIF
-     
+
         endif ! flag_iter
       ENDDO
 
  1006   format(A,F7.3,A,f9.4,A,f9.5,A,f9.4)
  1007   format(A,F2.0,A,f6.2,A,f7.3,A,f7.2)
 
-!--------------------------------------------------------------------      
-!--------------------------------------------------------------------      
+!--------------------------------------------------------------------
+!--------------------------------------------------------------------
 !--- BEGIN I-LOOP
 !--------------------------------------------------------------------
 !--------------------------------------------------------------------
@@ -1124,7 +1138,7 @@ CONTAINS
 
        ! add stochastic perturbation of ZNT
        if (spp_sfc==1) then
-          ZNTstoch_wat(I)  = MAX(ZNT_wat(I) + ZNT_wat(I)*1.0*rstoch1D(i), 1e-6)
+          ZNTstoch_wat(I)  = MAX(ZNT_wat(I) + ZNT_wat(I)*1.0*rstoch1D(i), 1e-6_kind_phys)
        else
           ZNTstoch_wat(I)  = ZNT_wat(I)
        endif
@@ -1138,7 +1152,7 @@ CONTAINS
        ! AHW: Garrattt formula: Calculate roughness Reynolds number
        !      Kinematic viscosity of air (linear approx to
        !      temp dependence at sea level)
-       restar=MAX(ust_wat(i)*ZNTstoch_wat(i)/visc, 0.1)
+       restar=MAX(ust_wat(i)*ZNTstoch_wat(i)/visc, 0.1_kind_phys)
 
        !--------------------------------------
        !CALCULATE z_t and z_q
@@ -1167,7 +1181,7 @@ CONTAINS
                                        rstoch1D(i),spp_sfc)
              ENDIF
           ELSEIF ( ISFTCFLX .EQ. 2 ) THEN
-             CALL garratt_1992(ZT_wat(i),ZQ_wat(i),ZNTstoch_wat(i),restar,2.0)
+             CALL garratt_1992(ZT_wat(i),ZQ_wat(i),ZNTstoch_wat(i),restar,2.0_kind_phys)
           ELSEIF ( ISFTCFLX .EQ. 3 ) THEN
              IF (COARE_OPT .EQ. 3.0) THEN
                 CALL fairall_etal_2003(ZT_wat(i),ZQ_wat(i),restar,UST_wat(i),visc,&
@@ -1202,7 +1216,7 @@ CONTAINS
        GZ2OZt_wat(I)= LOG((2.0+ZNTstoch_wat(i))/ZT_wat(i))
        GZ10OZ0_wat(I)=LOG((10.+ZNTstoch_wat(I))/ZNTstoch_wat(I))
        GZ10OZt_wat(I)=LOG((10.+ZNTstoch_wat(i))/ZT_wat(i))
-       zratio_wat(i)=ZNTstoch_wat(I)/ZT_wat(I)   !need estimate for Li et al. 
+       zratio_wat(i)=ZNTstoch_wat(I)/ZT_wat(I)   !need estimate for Li et al.
 
     ENDIF !end water point
 
@@ -1214,7 +1228,7 @@ CONTAINS
 
        ! add stochastic perturbaction of ZNT
        if (spp_sfc==1) then
-          ZNTstoch_lnd(I)  = MAX(ZNT_lnd(I) + ZNT_lnd(I)*1.0*rstoch1D(i), 1e-6)
+          ZNTstoch_lnd(I)  = MAX(ZNT_lnd(I) + ZNT_lnd(I)*1.0*rstoch1D(i), 1e-6_kind_phys)
        else
           ZNTstoch_lnd(I)  = ZNT_lnd(I)
        endif
@@ -1223,7 +1237,7 @@ CONTAINS
        ! LAND
        !--------------------------------------
        !COMPUTE ROUGHNESS REYNOLDS NUMBER (restar) USING DEFAULT ZNT
-       restar=MAX(ust_lnd(i)*ZNTstoch_lnd(i)/visc, 0.1)
+       restar=MAX(ust_lnd(i)*ZNTstoch_lnd(i)/visc, 0.1_kind_phys)
 
        !--------------------------------------
        !GET z_t and z_q
@@ -1234,7 +1248,7 @@ CONTAINS
           IF ( PRESENT(IZ0TLND) ) THEN
              IF ( IZ0TLND .LE. 1 ) THEN
                 CALL zilitinkevich_1995(ZNTstoch_lnd(i),ZT_lnd(i),ZQ_lnd(i),restar,&
-                      UST_lnd(I),KARMAN,1.0,IZ0TLND,spp_sfc,rstoch1D(i))
+                      UST_lnd(I),KARMAN,1.0_kind_phys,IZ0TLND,spp_sfc,rstoch1D(i))
              ELSEIF ( IZ0TLND .EQ. 2 ) THEN
                 ! DH note - at this point, qstar is either not initialized
                 ! or initialized to zero, but certainly not set correctly
@@ -1245,7 +1259,7 @@ CONTAINS
                               qstar(I),restar,visc)
              ELSEIF ( IZ0TLND .EQ. 3 ) THEN
                 !Original MYNN in WRF-ARW used this form:
-                CALL garratt_1992(ZT_lnd(i),ZQ_lnd(i),ZNTSTOCH_lnd(i),restar,1.0)
+                CALL garratt_1992(ZT_lnd(i),ZQ_lnd(i),ZNTSTOCH_lnd(i),restar,1.0_kind_phys)
              ELSEIF ( IZ0TLND .EQ. 4 ) THEN
                 !GFS:
                 CALL GFS_zt_lnd(ZT_lnd(i),ZNTSTOCH_lnd(i),sigmaf(i),ztpert(i),UST_lnd(i))
@@ -1254,12 +1268,12 @@ CONTAINS
           ELSE
              !DEFAULT TO ZILITINKEVICH
              CALL zilitinkevich_1995(ZNTSTOCH_lnd(i),ZT_lnd(i),ZQ_lnd(i),restar,&
-                         UST_lnd(I),KARMAN,1.0,0,spp_sfc,rstoch1D(i))
+                         UST_lnd(I),KARMAN,1.0_kind_phys,0,spp_sfc,rstoch1D(i))
           ENDIF
        ENDIF
-       IF (ZNTstoch_lnd(i) < 1E-8 .OR. Zt_lnd(i) < 1E-10) THEN 
+       IF (ZNTstoch_lnd(i) < 1E-8 .OR. Zt_lnd(i) < 1E-10) THEN
          write(0,*)"===(land) capture bad input in mynn sfc layer, i=:",i
-         write(0,*)" ZNT=", ZNTstoch_lnd(i)," ZT=",Zt_lnd(i) 
+         write(0,*)" ZNT=", ZNTstoch_lnd(i)," ZT=",Zt_lnd(i)
          write(0,*)" tsk=", tskin_lnd(i)," restar=",restar,&
          " tsurf=", tsurf_lnd(i)," qsfc=", qsfc_lnd(i)," znt=", znt_lnd(i),&
          " ust=", ust_lnd(i)," snowh=", snowh_lnd(i),"psfcpa=",PSFCPA(i), &
@@ -1281,7 +1295,7 @@ CONTAINS
 
        ! add stochastic perturbaction of ZNT
        if (spp_sfc==1) then
-          ZNTstoch_ice(I)  = MAX(ZNT_ice(I) + ZNT_ice(I)*1.0*rstoch1D(i), 1e-6)
+          ZNTstoch_ice(I)  = MAX(ZNT_ice(I) + ZNT_ice(I)*1.0*rstoch1D(i), 1e-6_kind_phys)
        else
           ZNTstoch_ice(I)  = ZNT_ice(I)
        endif
@@ -1290,7 +1304,7 @@ CONTAINS
        ! ICE
        !--------------------------------------
        !COMPUTE ROUGHNESS REYNOLDS NUMBER (restar) USING DEFAULT ZNT
-       restar=MAX(ust_ice(i)*ZNTstoch_ice(i)/visc, 0.1)
+       restar=MAX(ust_ice(i)*ZNTstoch_ice(i)/visc, 0.1_kind_phys)
        !--------------------------------------
        !GET z_t and z_q
        !--------------------------------------
@@ -1327,8 +1341,8 @@ CONTAINS
           !COMPUTE z/L first guess:
           CALL Li_etal_2010(ZOL(I),rb_wat(I),ZA(I)/ZNTstoch_wat(I),zratio_wat(I))
           !ZOL(I)=ZA(I)*KARMAN*G*MOL(I)/(TH1D(I)*MAX(UST_wat(I)*UST_wat(I),0.0001))
-          ZOL(I)=MAX(ZOL(I),0.0)
-          ZOL(I)=MIN(ZOL(I),20.)
+          ZOL(I)=MAX(ZOL(I),0.0_kind_phys)
+          ZOL(I)=MIN(ZOL(I),20._kind_phys)
 
           IF (debug_code >= 1) THEN
             IF (ZNTstoch_wat(i) < 1E-8 .OR. Zt_wat(i) < 1E-10) THEN
@@ -1345,14 +1359,14 @@ CONTAINS
           !zol(I)=zolri(rb_wat(I),ZA(I),ZNTstoch_wat(I),ZT_wat(I),ZOL(I),psi_opt)
           !Use brute-force method
           zol(I)=zolrib(rb_wat(I),ZA(I),ZNTstoch_wat(I),zt_wat(I),GZ1OZ0_wat(I),GZ1OZt_wat(I),ZOL(I),psi_opt)
-          ZOL(I)=MAX(ZOL(I),0.0)
-          ZOL(I)=MIN(ZOL(I),20.)
+          ZOL(I)=MAX(ZOL(I),0.0_kind_phys)
+          ZOL(I)=MIN(ZOL(I),20._kind_phys)
 
           zolzt = zol(I)*zt_wat(I)/ZA(I)                ! zt/L
           zolz0 = zol(I)*ZNTstoch_wat(I)/ZA(I)          ! z0/L
           zolza = zol(I)*(za(I)+ZNTstoch_wat(I))/za(I)  ! (z+z0/L
           zol10 = zol(I)*(10.+ZNTstoch_wat(I))/za(I)    ! (10+z0)/L
-          zol2  = zol(I)*(2.+ZNTstoch_wat(I))/za(I)     ! (2+z0)/L 
+          zol2  = zol(I)*(2.+ZNTstoch_wat(I))/za(I)     ! (2+z0)/L
 
           !COMPUTE PSIM and PSIH
           !CALL PSI_Suselj_Sood_2010(PSIM(I),PSIH(I),ZOL(I))
@@ -1370,9 +1384,9 @@ CONTAINS
           ! 1.0 over Monin-Obukhov length
           RMOL(I)= ZOL(I)/ZA(I)
 
-       ELSEIF(rb_wat(I) .EQ. 0.) THEN                  
-          !=========================================================  
-          !-----CLASS 3; FORCED CONVECTION/NEUTRAL:                                                
+       ELSEIF(rb_wat(I) .EQ. 0.) THEN
+          !=========================================================
+          !-----CLASS 3; FORCED CONVECTION/NEUTRAL:
           !=========================================================
 
           PSIM(I)=0.0
@@ -1386,14 +1400,14 @@ CONTAINS
 
        ELSEIF(rb_wat(I) .LT. 0.)THEN
           !==========================================================
-          !-----CLASS 4; FREE CONVECTION:                                                  
+          !-----CLASS 4; FREE CONVECTION:
           !==========================================================
 
           !COMPUTE z/L first guess:
           CALL Li_etal_2010(ZOL(I),rb_wat(I),ZA(I)/ZNTstoch_wat(I),zratio_wat(I))
           !ZOL(I)=ZA(I)*KARMAN*G*MOL(I)/(TH1D(I)*MAX(UST_wat(I)*UST_wat(I),0.001))
-          ZOL(I)=MAX(ZOL(I),-20.0)
-          ZOL(I)=MIN(ZOL(I),0.0)
+          ZOL(I)=MAX(ZOL(I),-20.0_kind_phys)
+          ZOL(I)=MIN(ZOL(I),0.0_kind_phys)
 
           IF (debug_code >= 1) THEN
             IF (ZNTstoch_wat(i) < 1E-8 .OR. Zt_wat(i) < 1E-10) THEN
@@ -1410,8 +1424,8 @@ CONTAINS
           !zol(I)=zolri(rb_wat(I),ZA(I),ZNTstoch_wat(I),ZT_wat(I),ZOL(I),psi_opt)
           !Use brute-force method
           zol(I)=zolrib(rb_wat(I),ZA(I),ZNTstoch_wat(I),zt_wat(I),GZ1OZ0_wat(I),GZ1OZt_wat(I),ZOL(I),psi_opt)
-          ZOL(I)=MAX(ZOL(I),-20.0)
-          ZOL(I)=MIN(ZOL(I),0.0)
+          ZOL(I)=MAX(ZOL(I),-20.0_kind_phys)
+          ZOL(I)=MIN(ZOL(I),0.0_kind_phys)
 
           zolzt = zol(I)*zt_wat(I)/ZA(I)                 ! zt/L
           zolz0 = zol(I)*ZNTstoch_wat(I)/ZA(I)           ! z0/L
@@ -1440,17 +1454,17 @@ CONTAINS
           PSIM10(I)=MIN(PSIM10(I),0.9*GZ10OZ0_wat(I))
           PSIH10(I)=MIN(PSIH10(I),0.9*GZ10OZt_wat(I))
 
-          RMOL(I) = ZOL(I)/ZA(I)  
+          RMOL(I) = ZOL(I)/ZA(I)
 
        ENDIF
 
        ! CALCULATE THE RESISTANCE:
-       PSIX_wat(I)  =MAX(GZ1OZ0_wat(I)-PSIM(I)   , 1.0)    ! = fm
-       PSIX10_wat(I)=MAX(GZ10OZ0_wat(I)-PSIM10(I), 1.0)    ! = fm10
-       PSIT_wat(I)  =MAX(GZ1OZt_wat(I)-PSIH(I)   , 1.0)    ! = fh
-       PSIT2_wat(I) =MAX(GZ2OZt_wat(I)-PSIH2(I)  , 1.0)    ! = fh2
-       PSIQ_wat(I)  =MAX(LOG((ZA(I)+ZQ_wat(i))/ZQ_wat(I))-PSIH(I) ,1.0)
-       PSIQ2_wat(I) =MAX(LOG((2.0+ZQ_wat(i))/ZQ_wat(I))-PSIH2(I) ,1.0)
+       PSIX_wat(I)  =MAX(GZ1OZ0_wat(I)-PSIM(I)   , 1.0_kind_phys)    ! = fm
+       PSIX10_wat(I)=MAX(GZ10OZ0_wat(I)-PSIM10(I), 1.0_kind_phys)    ! = fm10
+       PSIT_wat(I)  =MAX(GZ1OZt_wat(I)-PSIH(I)   , 1.0_kind_phys)    ! = fh
+       PSIT2_wat(I) =MAX(GZ2OZt_wat(I)-PSIH2(I)  , 1.0_kind_phys)    ! = fh2
+       PSIQ_wat(I)  =MAX(LOG((ZA(I)+ZQ_wat(i))/ZQ_wat(I))-PSIH(I) ,1.0_kind_phys)
+       PSIQ2_wat(I) =MAX(LOG((2.0+ZQ_wat(i))/ZQ_wat(I))-PSIH2(I) ,1.0_kind_phys)
 
     ENDIF ! end water points
 
@@ -1460,8 +1474,8 @@ CONTAINS
           !COMPUTE z/L first guess:
           CALL Li_etal_2010(ZOL(I),rb_lnd(I),ZA(I)/ZNTstoch_lnd(I),zratio_lnd(I))
           !ZOL(I)=ZA(I)*KARMAN*G*MOL(I)/(TH1D(I)*MAX(UST_lnd(I)*UST_lnd(I),0.0001))
-          ZOL(I)=MAX(ZOL(I),0.0)
-          ZOL(I)=MIN(ZOL(I),20.)
+          ZOL(I)=MAX(ZOL(I),0.0_kind_phys)
+          ZOL(I)=MIN(ZOL(I),20._kind_phys)
 
           IF (debug_code >= 1) THEN
             IF (ZNTstoch_lnd(i) < 1E-8 .OR. Zt_lnd(i) < 1E-10) THEN
@@ -1478,14 +1492,14 @@ CONTAINS
           !zol(I)=zolri(rb_lnd(I),ZA(I),ZNTstoch_lnd(I),ZT_lnd(I),ZOL(I),psi_opt)
           !Use brute-force method
           zol(I)=zolrib(rb_lnd(I),ZA(I),ZNTstoch_lnd(I),zt_lnd(I),GZ1OZ0_lnd(I),GZ1OZt_lnd(I),ZOL(I),psi_opt)
-          ZOL(I)=MAX(ZOL(I),0.0)
-          ZOL(I)=MIN(ZOL(I),20.)
+          ZOL(I)=MAX(ZOL(I),0.0_kind_phys)
+          ZOL(I)=MIN(ZOL(I),20._kind_phys)
 
           zolzt = zol(I)*zt_lnd(I)/ZA(I)                ! zt/L
           zolz0 = zol(I)*ZNTstoch_lnd(I)/ZA(I)          ! z0/L
           zolza = zol(I)*(za(I)+ZNTstoch_lnd(I))/za(I)  ! (z+z0/L
           zol10 = zol(I)*(10.+ZNTstoch_lnd(I))/za(I)    ! (10+z0)/L
-          zol2  = zol(I)*(2.+ZNTstoch_lnd(I))/za(I)     ! (2+z0)/L 
+          zol2  = zol(I)*(2.+ZNTstoch_lnd(I))/za(I)     ! (2+z0)/L
 
           !COMPUTE PSIM and PSIH
           !CALL PSI_Beljaars_Holtslag_1991(PSIM(I),PSIH(I),ZOL(I))
@@ -1502,9 +1516,9 @@ CONTAINS
           ! 1.0 over Monin-Obukhov length
           RMOL(I)= ZOL(I)/ZA(I)
 
-       ELSEIF(rb_lnd(I) .EQ. 0.) THEN                  
-          !=========================================================  
-          !-----CLASS 3; FORCED CONVECTION/NEUTRAL:                                                
+       ELSEIF(rb_lnd(I) .EQ. 0.) THEN
+          !=========================================================
+          !-----CLASS 3; FORCED CONVECTION/NEUTRAL:
           !=========================================================
 
           PSIM(I)=0.0
@@ -1518,14 +1532,14 @@ CONTAINS
 
        ELSEIF(rb_lnd(I) .LT. 0.)THEN
           !==========================================================
-          !-----CLASS 4; FREE CONVECTION:                                                  
+          !-----CLASS 4; FREE CONVECTION:
           !==========================================================
 
           !COMPUTE z/L first guess:
           CALL Li_etal_2010(ZOL(I),rb_lnd(I),ZA(I)/ZNTstoch_lnd(I),zratio_lnd(I))
           !ZOL(I)=ZA(I)*KARMAN*G*MOL(I)/(TH1D(I)*MAX(UST_lnd(I)*UST_lnd(I),0.001))
-          ZOL(I)=MAX(ZOL(I),-20.0)
-          ZOL(I)=MIN(ZOL(I),0.0)
+          ZOL(I)=MAX(ZOL(I),-20.0_kind_phys)
+          ZOL(I)=MIN(ZOL(I),0.0_kind_phys)
 
           IF (debug_code >= 1) THEN
             IF (ZNTstoch_lnd(i) < 1E-8 .OR. Zt_lnd(i) < 1E-10) THEN
@@ -1542,8 +1556,8 @@ CONTAINS
           !zol(I)=zolri(rb_lnd(I),ZA(I),ZNTstoch_lnd(I),ZT_lnd(I),ZOL(I),psi_opt)
           !Use brute-force method
           zol(I)=zolrib(rb_lnd(I),ZA(I),ZNTstoch_lnd(I),zt_lnd(I),GZ1OZ0_lnd(I),GZ1OZt_lnd(I),ZOL(I),psi_opt)
-          ZOL(I)=MAX(ZOL(I),-20.0)
-          ZOL(I)=MIN(ZOL(I),0.0)
+          ZOL(I)=MAX(ZOL(I),-20.0_kind_phys)
+          ZOL(I)=MIN(ZOL(I),0.0_kind_phys)
 
           zolzt = zol(I)*zt_lnd(I)/ZA(I)                 ! zt/L
           zolz0 = zol(I)*ZNTstoch_lnd(I)/ZA(I)           ! z0/L
@@ -1571,17 +1585,17 @@ CONTAINS
           PSIM10(I)=MIN(PSIM10(I),0.9*GZ10OZ0_lnd(I))
           PSIH10(I)=MIN(PSIH10(I),0.9*GZ10OZt_lnd(I))
 
-          RMOL(I) = ZOL(I)/ZA(I)  
+          RMOL(I) = ZOL(I)/ZA(I)
 
        ENDIF
 
        ! CALCULATE THE RESISTANCE:
-       PSIX_lnd(I)  =MAX(GZ1OZ0_lnd(I)-PSIM(I), 1.0)
-       PSIX10_lnd(I)=MAX(GZ10OZ0_lnd(I)-PSIM10(I), 1.0)
-       PSIT_lnd(I)  =MAX(GZ1OZt_lnd(I)-PSIH(I) , 1.0)
-       PSIT2_lnd(I) =MAX(GZ2OZt_lnd(I)-PSIH2(I), 1.0)
-       PSIQ_lnd(I)  =MAX(LOG((ZA(I)+ZQ_lnd(i))/ZQ_lnd(I))-PSIH(I) ,1.0)
-       PSIQ2_lnd(I) =MAX(LOG((2.0+ZQ_lnd(i))/ZQ_lnd(I))-PSIH2(I) ,1.0)
+       PSIX_lnd(I)  =MAX(GZ1OZ0_lnd(I)-PSIM(I), 1.0_kind_phys)
+       PSIX10_lnd(I)=MAX(GZ10OZ0_lnd(I)-PSIM10(I), 1.0_kind_phys)
+       PSIT_lnd(I)  =MAX(GZ1OZt_lnd(I)-PSIH(I) , 1.0_kind_phys)
+       PSIT2_lnd(I) =MAX(GZ2OZt_lnd(I)-PSIH2(I), 1.0_kind_phys)
+       PSIQ_lnd(I)  =MAX(LOG((ZA(I)+ZQ_lnd(i))/ZQ_lnd(I))-PSIH(I) ,1.0_kind_phys)
+       PSIQ2_lnd(I) =MAX(LOG((2.0+ZQ_lnd(i))/ZQ_lnd(I))-PSIH2(I) ,1.0_kind_phys)
 
     ENDIF ! end land points
 
@@ -1591,8 +1605,8 @@ CONTAINS
           !COMPUTE z/L first guess:
           CALL Li_etal_2010(ZOL(I),rb_ice(I),ZA(I)/ZNTstoch_ice(I),zratio_ice(I))
           !ZOL(I)=ZA(I)*KARMAN*G*MOL(I)/(TH1D(I)*MAX(UST_ice(I)*UST_ice(I),0.0001))
-          ZOL(I)=MAX(ZOL(I),0.0)
-          ZOL(I)=MIN(ZOL(I),20.)
+          ZOL(I)=MAX(ZOL(I),0.0_kind_phys)
+          ZOL(I)=MIN(ZOL(I),20._kind_phys)
 
           IF (debug_code >= 1) THEN
             IF (ZNTstoch_ice(i) < 1E-8 .OR. Zt_ice(i) < 1E-10) THEN
@@ -1609,14 +1623,14 @@ CONTAINS
           !zol(I)=zolri(rb_ice(I),ZA(I),ZNTstoch_ice(I),ZT_ice(I),ZOL(I),psi_opt)
           !Use brute-force method
           zol(I)=zolrib(rb_ice(I),ZA(I),ZNTstoch_ice(I),zt_ice(I),GZ1OZ0_ice(I),GZ1OZt_ice(I),ZOL(I),psi_opt)
-          ZOL(I)=MAX(ZOL(I),0.0)
-          ZOL(I)=MIN(ZOL(I),20.)
+          ZOL(I)=MAX(ZOL(I),0.0_kind_phys)
+          ZOL(I)=MIN(ZOL(I),20._kind_phys)
 
           zolzt = zol(I)*zt_ice(I)/ZA(I)                ! zt/L
           zolz0 = zol(I)*ZNTstoch_ice(I)/ZA(I)          ! z0/L
           zolza = zol(I)*(za(I)+ZNTstoch_ice(I))/za(I)  ! (z+z0/L
           zol10 = zol(I)*(10.+ZNTstoch_ice(I))/za(I)    ! (10+z0)/L
-          zol2  = zol(I)*(2.+ZNTstoch_ice(I))/za(I)     ! (2+z0)/L 
+          zol2  = zol(I)*(2.+ZNTstoch_ice(I))/za(I)     ! (2+z0)/L
 
           !COMPUTE PSIM and PSIH
           !CALL PSI_Beljaars_Holtslag_1991(PSIM(I),PSIH(I),ZOL(I))
@@ -1633,9 +1647,9 @@ CONTAINS
           ! 1.0 over Monin-Obukhov length
           RMOL(I)= ZOL(I)/ZA(I)
 
-       ELSEIF(rb_ice(I) .EQ. 0.) THEN                  
-          !=========================================================  
-          !-----CLASS 3; FORCED CONVECTION/NEUTRAL:                                                
+       ELSEIF(rb_ice(I) .EQ. 0.) THEN
+          !=========================================================
+          !-----CLASS 3; FORCED CONVECTION/NEUTRAL:
           !=========================================================
 
           PSIM(I)=0.0
@@ -1649,14 +1663,14 @@ CONTAINS
 
        ELSEIF(rb_ice(I) .LT. 0.)THEN
           !==========================================================
-          !-----CLASS 4; FREE CONVECTION:                                                  
+          !-----CLASS 4; FREE CONVECTION:
           !==========================================================
 
           !COMPUTE z/L first guess:
           CALL Li_etal_2010(ZOL(I),rb_ice(I),ZA(I)/ZNTstoch_ice(I),zratio_ice(I))
           !ZOL(I)=ZA(I)*KARMAN*G*MOL(I)/(TH1D(I)*MAX(UST_ice(I)*UST_ice(I),0.001))
-          ZOL(I)=MAX(ZOL(I),-20.0)
-          ZOL(I)=MIN(ZOL(I),0.0)
+          ZOL(I)=MAX(ZOL(I),-20.0_kind_phys)
+          ZOL(I)=MIN(ZOL(I),0.0_kind_phys)
 
           IF (debug_code >= 1) THEN
             IF (ZNTstoch_ice(i) < 1E-8 .OR. Zt_ice(i) < 1E-10) THEN
@@ -1673,8 +1687,8 @@ CONTAINS
           !zol(I)=zolri(rb_ice(I),ZA(I),ZNTstoch_ice(I),ZT_ice(I),ZOL(I),psi_opt)
           !Use brute-force method
           zol(I)=zolrib(rb_ice(I),ZA(I),ZNTstoch_ice(I),zt_ice(I),GZ1OZ0_ice(I),GZ1OZt_ice(I),ZOL(I),psi_opt)
-          ZOL(I)=MAX(ZOL(I),-20.0)
-          ZOL(I)=MIN(ZOL(I),0.0)
+          ZOL(I)=MAX(ZOL(I),-20.0_kind_phys)
+          ZOL(I)=MIN(ZOL(I),0.0_kind_phys)
 
           zolzt = zol(I)*zt_ice(I)/ZA(I)                 ! zt/L
           zolz0 = zol(I)*ZNTstoch_ice(I)/ZA(I)           ! z0/L
@@ -1702,33 +1716,33 @@ CONTAINS
           PSIM10(I)=MIN(PSIM10(I),0.9*GZ10OZ0_ice(I))
           PSIH10(I)=MIN(PSIH10(I),0.9*GZ10OZt_ice(I))
 
-          RMOL(I) = ZOL(I)/ZA(I)  
+          RMOL(I) = ZOL(I)/ZA(I)
 
        ENDIF
 
        ! CALCULATE THE RESISTANCE:
-       PSIX_ice(I)  =MAX(GZ1OZ0_ice(I)-PSIM(I)   , 1.0)
-       PSIX10_ice(I)=MAX(GZ10OZ0_ice(I)-PSIM10(I), 1.0)
-       PSIT_ice(I)  =MAX(GZ1OZt_ice(I)-PSIH(I)   , 1.0)
-       PSIT2_ice(I) =MAX(GZ2OZt_ice(I)-PSIH2(I)  , 1.0)
-       PSIQ_ice(I)  =MAX(LOG((ZA(I)+ZQ_ice(i))/ZQ_ice(I))-PSIH(I) ,1.0)
-       PSIQ2_ice(I) =MAX(LOG((2.0+ZQ_ice(i))/ZQ_ice(I))-PSIH2(I)  ,1.0)
+       PSIX_ice(I)  =MAX(GZ1OZ0_ice(I)-PSIM(I)   , 1.0_kind_phys)
+       PSIX10_ice(I)=MAX(GZ10OZ0_ice(I)-PSIM10(I), 1.0_kind_phys)
+       PSIT_ice(I)  =MAX(GZ1OZt_ice(I)-PSIH(I)   , 1.0_kind_phys)
+       PSIT2_ice(I) =MAX(GZ2OZt_ice(I)-PSIH2(I)  , 1.0_kind_phys)
+       PSIQ_ice(I)  =MAX(LOG((ZA(I)+ZQ_ice(i))/ZQ_ice(I))-PSIH(I) ,1.0_kind_phys)
+       PSIQ2_ice(I) =MAX(LOG((2.0+ZQ_ice(i))/ZQ_ice(I))-PSIH2(I)  ,1.0_kind_phys)
 
     ENDIF ! end ice points
 
     !------------------------------------------------------------
-    !-----COMPUTE THE FRICTIONAL VELOCITY:                                           
+    !-----COMPUTE THE FRICTIONAL VELOCITY:
     !------------------------------------------------------------
 
     IF (wet(I)) THEN
-       ! TO PREVENT OSCILLATIONS AVERAGE WITH OLD VALUE 
+       ! TO PREVENT OSCILLATIONS AVERAGE WITH OLD VALUE
        OLDUST = UST_wat(I)
        !UST_wat(I)=0.5*UST_wat(I)+0.5*KARMAN*WSPD(I)/PSIX_wat(I)
-       !NON-AVERAGED: 
+       !NON-AVERAGED:
        UST_wat(I)=KARMAN*WSPD(I)/PSIX_wat(I)
        stress_wat(i)=ust_wat(i)**2
 
-       ! Compute u* without vconv for use in HFX calc when isftcflx > 0           
+       ! Compute u* without vconv for use in HFX calc when isftcflx > 0
        WSPDI(I)=MAX(SQRT(U1D(I)*U1D(I)+V1D(I)*V1D(I)), wmin)
        !tgs - should USTM be separater for dry, icy, wet?
        USTM(I)=0.5*USTM(I)+0.5*KARMAN*WSPDI(I)/PSIX_wat(I)
@@ -1741,7 +1755,7 @@ CONTAINS
        ! TO PREVENT OSCILLATIONS AVERAGE WITH OLD VALUE
        OLDUST = UST_lnd(I)
        UST_lnd(I)=0.5*UST_lnd(I)+0.5*KARMAN*WSPD(I)/PSIX_lnd(I)
-       !NON-AVERAGED: 
+       !NON-AVERAGED:
        !UST_lnd(I)=KARMAN*WSPD(I)/PSIX_lnd(I)
        !From Tilden Meyers:
        !IF (rb_lnd(I) .GE. 0.0) THEN
@@ -1749,7 +1763,7 @@ CONTAINS
        !ELSE
        !   ust_lnd(i)=WSPD_lnd*0.1*(1.0 - 10.0*rb_lnd(I))**onethird
        !ENDIF
-       UST_lnd(I)=MAX(UST_lnd(I),0.005)
+       UST_lnd(I)=MAX(UST_lnd(I),0.005_kind_phys)
        stress_lnd(i)=ust_lnd(i)**2
 
        !set ustm = ust over land.
@@ -1761,9 +1775,9 @@ CONTAINS
        ! TO PREVENT OSCILLATIONS AVERAGE WITH OLD VALUE
        OLDUST = UST_ice(I)
        UST_ice(I)=0.5*UST_ice(I)+0.5*KARMAN*WSPD(I)/PSIX_ice(I)
-       !NON-AVERAGED: 
+       !NON-AVERAGED:
        !UST_ice(I)=KARMAN*WSPD(I)/PSIX_ice(I)
-       UST_ice(I)=MAX(UST_ice(I),0.005)
+       UST_ice(I)=MAX(UST_ice(I),0.005_kind_phys)
        stress_ice(i)=ust_ice(i)**2
 
        !Set ustm = ust over ice.
@@ -1844,17 +1858,17 @@ CONTAINS
  DO I=its,ite
   if( flag_iter(i) ) then
 
-    IF (ISFFLX .LT. 1) THEN                            
+    IF (ISFFLX .LT. 1) THEN
 
-       QFX(i)  = 0.                                                              
+       QFX(i)  = 0.
        HFX(i)  = 0.
        HFLX(i) = 0.
-       FLHC(I) = 0.                                                             
-       FLQC(I) = 0.                                                             
-       LH(I)   = 0.                                                             
-       CHS(I)  = 0.                                                             
-       CH(I)   = 0.                                                             
-       CHS2(i) = 0.                                                              
+       FLHC(I) = 0.
+       FLQC(I) = 0.
+       LH(I)   = 0.
+       CHS(I)  = 0.
+       CH(I)   = 0.
+       CHS2(i) = 0.
        CQS2(i) = 0.
        ch_wat(I)= 0.
        cm_wat(I)= 0.
@@ -1881,7 +1895,7 @@ CONTAINS
             !----------------------------------
             QFX(I)=FLQC(I)*(QSFCMR_lnd(I)-QV1D(I))
             !QFX(I)=FLQC(I)*(QSFC_lnd(I)-QV1D(I))
-            QFX(I)=MAX(QFX(I),-0.02)      !allows small neg QFX
+            QFX(I)=MAX(QFX(I),-0.02_kind_phys)      !allows small neg QFX
             LH(i)=XLV*QFX(i)
             ! BWG, 2020-06-17: Mod next 2 lines for fractional
             QFLX_lnd(i)=QFX(i)/RHO1D(i)
@@ -1892,7 +1906,7 @@ CONTAINS
             !----------------------------------
             !HFX(I)=FLHC(I)*(THSK_lnd(I)-TH1D(I))
             HFX(I)=RHO1D(I)*CPM(I)*KARMAN*WSPD(i)/PSIX_lnd(I)*KARMAN/PSIT_lnd(I)*(THSK_lnd(I)-TH1D(i))
-            HFX(I)=MAX(HFX(I),-250.)
+            HFX(I)=MAX(HFX(I),-250._kind_phys)
             ! BWG, 2020-06-17: Mod next 2 lines for fractional
             HFLX_lnd(I)=HFX(I)/(RHO1D(I)*cpm(I))
             HFLX(I)=HFLX_lnd(I)
@@ -1926,14 +1940,14 @@ CONTAINS
             !----------------------------------
             QFX(I)=FLQC(I)*(QSFCMR_wat(I)-QV1D(I))
             !QFX(I)=FLQC(I)*(QSFC_wat(I)-QV1D(I))
-            QFX(I)=MAX(QFX(I),-0.02)      !allows small neg QFX
+            QFX(I)=MAX(QFX(I),-0.02_kind_phys)      !allows small neg QFX
             LH(I)=XLV*QFX(I)
             ! BWG, 2020-06-17: Mod next 2 lines for fractional
             QFLX_wat(i)=QFX(i)/RHO1D(i)
             QFLX(i)=QFLX_wat(i)
 
             !----------------------------------
-            ! COMPUTE SURFACE HEAT FLUX:       
+            ! COMPUTE SURFACE HEAT FLUX:
             !----------------------------------
             !HFX(I)=FLHC(I)*(THSK_wat(I)-TH1D(I))
             HFX(I)=RHO1D(I)*CPM(I)*KARMAN*WSPD(i)/PSIX_wat(I)*KARMAN/PSIT_wat(I)*(THSK_wat(I)-TH1D(i))
@@ -1970,11 +1984,11 @@ CONTAINS
 
          IF (compute_flux) THEN
             !----------------------------------
-            ! COMPUTE SURFACE MOISTURE FLUX:   
+            ! COMPUTE SURFACE MOISTURE FLUX:
             !----------------------------------
             QFX(I)=FLQC(I)*(QSFCMR_ice(I)-QV1D(I))
             !QFX(I)=FLQC(I)*(QSFC_ice(I)-QV1D(I))
-            QFX(I)=MAX(QFX(I),-0.02)      !allows small neg QFX
+            QFX(I)=MAX(QFX(I),-0.02_kind_phys)      !allows small neg QFX
             LH(I)=XLF*QFX(I)
             ! BWG, 2020-06-17: Mod next 2 lines for fractional
             QFLX_ice(i)=QFX(i)/RHO1D(i)
@@ -1985,7 +1999,7 @@ CONTAINS
             !----------------------------------
             !HFX(I)=FLHC(I)*(THSK_ice(I)-TH1D(I))
             HFX(I)=RHO1D(I)*CPM(I)*KARMAN*WSPD(i)/PSIX_ice(I)*KARMAN/PSIT_ice(I)*(THSK_ice(I)-TH1D(i))
-            HFX(I)=MAX(HFX(I),-250.)
+            HFX(I)=MAX(HFX(I),-250._kind_phys)
             ! BWG, 2020-06-17: Mod next 2 lines for fractional
             HFLX_ice(I)=HFX(I)/(RHO1D(I)*cpm(I))
             HFLX(I)=HFLX_ice(I)
@@ -2255,28 +2269,28 @@ IF ( debug_code == 2) THEN
  ENDIF ! end debug option
 
 END SUBROUTINE SFCLAY1D_mynn
-!-------------------------------------------------------------------          
+!-------------------------------------------------------------------
 !>\ingroup mynn_sfc
 !> This subroutine returns the thermal and moisture roughness lengths
 !! from Zilitinkevich (1995) and Zilitinkevich et al. (2001) over
-!! land and water, respectively. 
+!! land and water, respectively.
 !!
 !! MODS:
 !! 20120705 : added IZ0TLND option. Note: This option was designed
 !!            to work with the Noah LSM and may be specific for that
-!!            LSM only. Tests with RUC LSM showed no improvements. 
+!!            LSM only. Tests with RUC LSM showed no improvements.
   SUBROUTINE zilitinkevich_1995(Z_0,Zt,Zq,restar,ustar,KARMAN,&
         & landsea,IZ0TLND2,spp_sfc,rstoch)
 
        IMPLICIT NONE
-       REAL, INTENT(IN) :: Z_0,restar,ustar,KARMAN,landsea
-       INTEGER, OPTIONAL, INTENT(IN)::  IZ0TLND2
-       REAL, INTENT(OUT) :: Zt,Zq
-       REAL :: CZIL  !=0.100 in Chen et al. (1997)
-                     !=0.075 in Zilitinkevich (1995)
-                     !=0.500 in Lemone et al. (2008)
+       REAL(kind=kind_phys), INTENT(IN)  :: Z_0,restar,ustar,KARMAN,landsea
+       INTEGER,  OPTIONAL,   INTENT(IN)  :: IZ0TLND2
+       REAL(kind=kind_phys), INTENT(OUT) :: Zt,Zq
+       REAL(kind=kind_phys) :: CZIL  !=0.100 in Chen et al. (1997)
+                                     !=0.075 in Zilitinkevich (1995)
+                                     !=0.500 in Lemone et al. (2008)
        INTEGER,  INTENT(IN)  ::    spp_sfc
-       REAL,     INTENT(IN)  ::    rstoch
+       REAL(kind=kind_phys), INTENT(IN)  :: rstoch
 
 
        IF (landsea-1.5 .GT. 0) THEN    !WATER
@@ -2285,18 +2299,18 @@ END SUBROUTINE SFCLAY1D_mynn
           !Their equations 15 and 16).
           IF (restar .LT. 0.1) THEN
              Zt = Z_0*EXP(KARMAN*2.0)
-             Zt = MIN( Zt, 6.0e-5)
-             Zt = MAX( Zt, 2.0e-9)
+             Zt = MIN( Zt, 6.0e-5_kind_phys)
+             Zt = MAX( Zt, 2.0e-9_kind_phys)
              Zq = Z_0*EXP(KARMAN*3.0)
-             Zq = MIN( Zq, 6.0e-5)
-             Zq = MAX( Zq, 2.0e-9)
+             Zq = MIN( Zq, 6.0e-5_kind_phys)
+             Zq = MAX( Zq, 2.0e-9_kind_phys)
           ELSE
              Zt = Z_0*EXP(-KARMAN*(4.0*SQRT(restar)-3.2))
-             Zt = MIN( Zt, 6.0e-5)
-             Zt = MAX( Zt, 2.0e-9)
+             Zt = MIN( Zt, 6.0e-5_kind_phys)
+             Zt = MAX( Zt, 2.0e-9_kind_phys)
              Zq = Z_0*EXP(-KARMAN*(4.0*SQRT(restar)-4.2))
-             Zq = MIN( Zt, 6.0e-5)
-             Zq = MAX( Zt, 2.0e-9)
+             Zq = MIN( Zt, 6.0e-5_kind_phys)
+             Zq = MAX( Zt, 2.0e-9_kind_phys)
           ENDIF
 
        ELSE                             !LAND
@@ -2315,15 +2329,15 @@ END SUBROUTINE SFCLAY1D_mynn
           Zq = MIN( Zq, 0.75*Z_0)
 
 ! stochastically perturb thermal and moisture roughness length.
-! currently set to half the amplitude: 
+! currently set to half the amplitude:
           if (spp_sfc==1) then
              Zt = Zt + Zt * 0.5 * rstoch
-             Zt = MAX(Zt, 0.0001)
+             Zt = MAX(Zt, 0.0001_kind_phys)
              Zq = Zt
           endif
 
        ENDIF
-                   
+
        return
 
    END SUBROUTINE zilitinkevich_1995
@@ -2332,29 +2346,30 @@ END SUBROUTINE SFCLAY1D_mynn
    SUBROUTINE davis_etal_2008(Z_0,ustar)
 
     !a.k.a. : Donelan et al. (2004)
-    !This formulation for roughness length was designed to match 
+    !This formulation for roughness length was designed to match
     !the labratory experiments of Donelan et al. (2004).
     !This is an update version from Davis et al. 2008, which
     !corrects a small-bias in Z_0 (AHW real-time 2012).
 
        IMPLICIT NONE
-       REAL, INTENT(IN)  :: ustar
-       REAL, INTENT(OUT)  :: Z_0
-       REAL :: ZW, ZN1, ZN2
-       REAL, PARAMETER :: G=9.81, OZO=1.59E-5
+       REAL(kind=kind_phys), INTENT(IN)  :: ustar
+       REAL(kind=kind_phys), INTENT(OUT) :: Z_0
+       REAL(kind=kind_phys) :: ZW, ZN1, ZN2
+       REAL(kind=kind_phys), PARAMETER :: G=9.81, OZO=1.59E-5
 
        !OLD FORM: Z_0 = 10.*EXP(-10./(ustar**onethird))
        !NEW FORM:
 
-       ZW  = MIN((ustar/1.06)**(0.3),1.0)
+       ZW  = MIN((ustar/1.06)**(0.3),1.0_kind_phys)
        ZN1 = 0.011*ustar*ustar/G + OZO
        ZN2 = 10.*exp(-9.5*ustar**(-onethird)) + &
-             0.11*1.5E-5/AMAX1(ustar,0.01)
+             0.11*1.5E-5/MAX(ustar,0.01_kind_phys)
+             !0.11*1.5E-5/AMAX1(ustar,0.01)
        Z_0 = (1.0-ZW) * ZN1 + ZW * ZN2
 
-       Z_0 = MAX( Z_0, 1.27e-7)  !These max/mins were suggested by
-       Z_0 = MIN( Z_0, 2.85e-3)  !Davis et al. (2008)
-                   
+       Z_0 = MAX( Z_0, 1.27e-7_kind_phys)  !These max/mins were suggested by
+       Z_0 = MIN( Z_0, 2.85e-3_kind_phys)  !Davis et al. (2008)
+
        return
 
    END SUBROUTINE davis_etal_2008
@@ -2365,22 +2380,22 @@ END SUBROUTINE SFCLAY1D_mynn
    SUBROUTINE Taylor_Yelland_2001(Z_0,ustar,wsp10)
 
        IMPLICIT NONE
-       REAL, INTENT(IN)  :: ustar,wsp10
-       REAL, INTENT(OUT) :: Z_0
-       REAL, parameter  :: g=9.81, pi=3.14159265
-       REAL :: hs, Tp, Lp
+       REAL(kind=kind_phys), INTENT(IN)  :: ustar,wsp10
+       REAL(kind=kind_phys), INTENT(OUT) :: Z_0
+       REAL(kind=kind_phys), parameter   :: g=9.81, pi=3.14159265
+       REAL(kind=kind_phys) :: hs, Tp, Lp
 
        !hs is the significant wave height
         hs = 0.0248*(wsp10**2.)
        !Tp dominant wave period
-        Tp = 0.729*MAX(wsp10,0.1)
+        Tp = 0.729*MAX(wsp10,0.1_kind_phys)
        !Lp is the wavelength of the dominant wave
         Lp = g*Tp**2/(2*pi)
 
        Z_0 = 1200.*hs*(hs/Lp)**4.5
-       Z_0 = MAX( Z_0, 1.27e-7)  !These max/mins were suggested by
-       Z_0 = MIN( Z_0, 2.85e-3)  !Davis et al. (2008)
-                   
+       Z_0 = MAX( Z_0, 1.27e-7_kind_phys)  !These max/mins were suggested by
+       Z_0 = MIN( Z_0, 2.85e-3_kind_phys)  !Davis et al. (2008)
+
        return
 
    END SUBROUTINE Taylor_Yelland_2001
@@ -2393,18 +2408,18 @@ END SUBROUTINE SFCLAY1D_mynn
    SUBROUTINE charnock_1955(Z_0,ustar,wsp10,visc,zu)
 
        IMPLICIT NONE
-       REAL, INTENT(IN)  :: ustar, visc, wsp10, zu
-       REAL, INTENT(OUT) :: Z_0
-       REAL, PARAMETER   :: G=9.81, CZO2=0.011
-       REAL              :: CZC    !variable charnock "constant"   
-       REAL              :: wsp10m ! logarithmically calculated 10 m
+       REAL(kind=kind_phys), INTENT(IN)  :: ustar, visc, wsp10, zu
+       REAL(kind=kind_phys), INTENT(OUT) :: Z_0
+       REAL(kind=kind_phys), PARAMETER   :: G=9.81, CZO2=0.011
+       REAL(kind=kind_phys)              :: CZC    ! variable charnock "constant"
+       REAL(kind=kind_phys)              :: wsp10m ! logarithmically calculated 10 m
 
        wsp10m = wsp10*log(10./1e-4)/log(zu/1e-4)
-       CZC = CZO2 + 0.007*MIN(MAX((wsp10m-10.)/8., 0.), 1.0)
+       CZC = CZO2 + 0.007*MIN(MAX((wsp10m-10.)/8., 0._kind_phys), 1.0_kind_phys)
 
-       Z_0 = CZC*ustar*ustar/G + (0.11*visc/MAX(ustar,0.05))
-       Z_0 = MAX( Z_0, 1.27e-7)  !These max/mins were suggested by
-       Z_0 = MIN( Z_0, 2.85e-3)  !Davis et al. (2008)
+       Z_0 = CZC*ustar*ustar/G + (0.11*visc/MAX(ustar,0.05_kind_phys))
+       Z_0 = MAX( Z_0, 1.27e-7_kind_phys)  !These max/mins were suggested by
+       Z_0 = MIN( Z_0, 2.85e-3_kind_phys)  !Davis et al. (2008)
 
        return
 
@@ -2418,21 +2433,21 @@ END SUBROUTINE SFCLAY1D_mynn
    SUBROUTINE edson_etal_2013(Z_0,ustar,wsp10,visc,zu)
 
        IMPLICIT NONE
-       REAL, INTENT(IN)  :: ustar, visc, wsp10, zu
-       REAL, INTENT(OUT) :: Z_0
-       REAL, PARAMETER   :: G=9.81
-       REAL, PARAMETER   :: m=0.0017, b=-0.005
-       REAL              :: CZC    ! variable charnock "constant"
-       REAL              :: wsp10m ! logarithmically calculated 10 m
+       REAL(kind=kind_phys), INTENT(IN)  :: ustar, visc, wsp10, zu
+       REAL(kind=kind_phys), INTENT(OUT) :: Z_0
+       REAL(kind=kind_phys), PARAMETER   :: G=9.81
+       REAL(kind=kind_phys), PARAMETER   :: m=0.0017, b=-0.005
+       REAL(kind=kind_phys)              :: CZC    ! variable charnock "constant"
+       REAL(kind=kind_phys)              :: wsp10m ! logarithmically calculated 10 m
 
        wsp10m = wsp10*log(10/1e-4)/log(zu/1e-4)
-       wsp10m = MIN(19., wsp10m)
+       wsp10m = MIN(19._kind_phys, wsp10m)
        CZC    = m*wsp10m + b
-       CZC    = MAX(CZC, 0.0)
+       CZC    = MAX(CZC, 0.0_kind_phys)
 
-       Z_0 = CZC*ustar*ustar/G + (0.11*visc/MAX(ustar,0.07))
-       Z_0 = MAX( Z_0, 1.27e-7)  !These max/mins were suggested by
-       Z_0 = MIN( Z_0, 2.85e-3)  !Davis et al. (2008)
+       Z_0 = CZC*ustar*ustar/G + (0.11*visc/MAX(ustar,0.07_kind_phys))
+       Z_0 = MAX( Z_0, 1.27e-7_kind_phys)  !These max/mins were suggested by
+       Z_0 = MIN( Z_0, 2.85e-3_kind_phys)  !Davis et al. (2008)
 
        return
 
@@ -2448,25 +2463,25 @@ END SUBROUTINE SFCLAY1D_mynn
    SUBROUTINE garratt_1992(Zt,Zq,Z_0,Ren,landsea)
 
        IMPLICIT NONE
-       REAL, INTENT(IN)  :: Ren, Z_0,landsea
-       REAL, INTENT(OUT) :: Zt,Zq
-       REAL :: Rq
-       REAL, PARAMETER  :: e=2.71828183
+       REAL(kind=kind_phys), INTENT(IN)  :: Ren, Z_0,landsea
+       REAL(kind=kind_phys), INTENT(OUT) :: Zt,Zq
+       REAL(kind=kind_phys) :: Rq
+       REAL(kind=kind_phys), PARAMETER  :: e=2.71828183
 
        IF (landsea-1.5 .GT. 0) THEN    !WATER
 
           Zt = Z_0*EXP(2.0 - (2.48*(Ren**0.25)))
           Zq = Z_0*EXP(2.0 - (2.28*(Ren**0.25)))
 
-          Zq = MIN( Zq, 5.5e-5)
-          Zq = MAX( Zq, 2.0e-9)
-          Zt = MIN( Zt, 5.5e-5)
-          Zt = MAX( Zt, 2.0e-9) !same lower limit as ECMWF
+          Zq = MIN( Zq, 5.5e-5_kind_phys)
+          Zq = MAX( Zq, 2.0e-9_kind_phys)
+          Zt = MIN( Zt, 5.5e-5_kind_phys)
+          Zt = MAX( Zt, 2.0e-9_kind_phys) !same lower limit as ECMWF
        ELSE                            !LAND
           Zq = Z_0/(e**2.)      !taken from Garratt (1980,1992)
           Zt = Zq
        ENDIF
-                   
+
        return
 
     END SUBROUTINE garratt_1992
@@ -2484,9 +2499,9 @@ END SUBROUTINE SFCLAY1D_mynn
     SUBROUTINE fairall_etal_2003(Zt,Zq,Ren,ustar,visc,rstoch,spp_sfc)
 
        IMPLICIT NONE
-       REAL, INTENT(IN)   :: Ren,ustar,visc,rstoch
+       REAL(kind=kind_phys), INTENT(IN)   :: Ren,ustar,visc,rstoch
        INTEGER, INTENT(IN):: spp_sfc
-       REAL, INTENT(OUT)  :: Zt,Zq
+       REAL(kind=kind_phys), INTENT(OUT)  :: Zt,Zq
 
        IF (Ren .le. 2.) then
 
@@ -2509,11 +2524,11 @@ END SUBROUTINE SFCLAY1D_mynn
           Zq = Zt
        endif
 
-       Zt = MIN(Zt,1.0e-4)
-       Zt = MAX(Zt,2.0e-9)
+       Zt = MIN(Zt,1.0e-4_kind_phys)
+       Zt = MAX(Zt,2.0e-9_kind_phys)
 
-       Zq = MIN(Zt,1.0e-4)
-       Zq = MAX(Zt,2.0e-9)
+       Zq = MIN(Zt,1.0e-4_kind_phys)
+       Zq = MAX(Zt,2.0e-9_kind_phys)
 
        return
 
@@ -2528,20 +2543,20 @@ END SUBROUTINE SFCLAY1D_mynn
     SUBROUTINE fairall_etal_2014(Zt,Zq,Ren,ustar,visc,rstoch,spp_sfc)
 
        IMPLICIT NONE
-       REAL, INTENT(IN)  :: Ren,ustar,visc,rstoch
+       REAL(kind=kind_phys), INTENT(IN)  :: Ren,ustar,visc,rstoch
        INTEGER, INTENT(IN):: spp_sfc
-       REAL, INTENT(OUT) :: Zt,Zq
+       REAL(kind=kind_phys), INTENT(OUT) :: Zt,Zq
 
        !Zt = (5.5e-5)*(Ren**(-0.60))
-       Zt = MIN(1.6E-4, 5.8E-5/(Ren**0.72))
+       Zt = MIN(1.6E-4_kind_phys, 5.8E-5/(Ren**0.72))
        Zq = Zt
 
        IF (spp_sfc ==1) THEN
-          Zt = MAX(Zt + Zt*0.5*rstoch,2.0e-9)
-          Zq = MAX(Zt + Zt*0.5*rstoch,2.0e-9)
+          Zt = MAX(Zt + Zt*0.5*rstoch,2.0e-9_kind_phys)
+          Zq = MAX(Zt + Zt*0.5*rstoch,2.0e-9_kind_phys)
        ELSE
-          Zt = MAX(Zt,2.0e-9)
-          Zq = MAX(Zt,2.0e-9)
+          Zt = MAX(Zt,2.0e-9_kind_phys)
+          Zq = MAX(Zt,2.0e-9_kind_phys)
        ENDIF
 
        return
@@ -2549,18 +2564,18 @@ END SUBROUTINE SFCLAY1D_mynn
     END SUBROUTINE fairall_etal_2014
 !--------------------------------------------------------------------
 !>\ingroup mynn_sfc
-!> This is a modified version of Yang et al (2002 QJRMS, 2008 JAMC) 
-!! and Chen et al (2010, J of Hydromet). Although it was originally 
-!! designed for arid regions with bare soil, it is modified 
+!> This is a modified version of Yang et al (2002 QJRMS, 2008 JAMC)
+!! and Chen et al (2010, J of Hydromet). Although it was originally
+!! designed for arid regions with bare soil, it is modified
 !! here to perform over a broader spectrum of vegetation.
 !!
-!!The original formulation relates the thermal roughness length (Zt) 
+!!The original formulation relates the thermal roughness length (Zt)
 !!to u* and T*:
-!!  
+!!
 !! Zt = ht * EXP(-beta*(ustar**0.5)*(ABS(tstar)**0.25))
 !!
-!!where ht = Renc*visc/ustar and the critical Reynolds number 
-!!(Renc) = 70. Beta was originally = 10 (2002 paper) but was revised 
+!!where ht = Renc*visc/ustar and the critical Reynolds number
+!!(Renc) = 70. Beta was originally = 10 (2002 paper) but was revised
 !!to 7.2 (in 2008 paper). Their form typically varies the
 !!ratio Z0/Zt by a few orders of magnitude (1-1E4).
 !!
@@ -2575,24 +2590,24 @@ END SUBROUTINE SFCLAY1D_mynn
        SUBROUTINE Yang_2008(Z_0,Zt,Zq,ustar,tstar,qst,Ren,visc)
 
        IMPLICIT NONE
-       REAL, INTENT(IN)  :: Z_0, Ren, ustar, tstar, qst, visc
-       REAL              :: ht,     &! roughness height at critical Reynolds number
-                            tstar2, &! bounded T*, forced to be non-positive
-                            qstar2, &! bounded q*, forced to be non-positive
-                            Z_02,   &! bounded Z_0 for variable Renc2 calc
-                            Renc2    ! variable Renc, function of Z_0
-       REAL, INTENT(OUT) :: Zt,Zq
-       REAL, PARAMETER  :: Renc=300., & !old constant Renc
-                           beta=1.5,  & !important for diurnal variation
-                           m=170.,    & !slope for Renc2 function
-                           b=691.       !y-intercept for Renc2 function
+       REAL(kind=kind_phys), INTENT(IN)  :: Z_0, Ren, ustar, tstar, qst, visc
+       REAL(kind=kind_phys) :: ht,     &! roughness height at critical Reynolds number
+                               tstar2, &! bounded T*, forced to be non-positive
+                               qstar2, &! bounded q*, forced to be non-positive
+                               Z_02,   &! bounded Z_0 for variable Renc2 calc
+                               Renc2    ! variable Renc, function of Z_0
+       REAL(kind=kind_phys), INTENT(OUT) :: Zt,Zq
+       REAL(kind=kind_phys), PARAMETER   :: Renc=300., & !old constant Renc
+                                            beta=1.5,  & !important for diurnal variation
+                                            m=170.,    & !slope for Renc2 function
+                                            b=691.       !y-intercept for Renc2 function
 
-       Z_02 = MIN(Z_0,0.5)
-       Z_02 = MAX(Z_02,0.04)
+       Z_02 = MIN(Z_0,0.5_kind_phys)
+       Z_02 = MAX(Z_02,0.04_kind_phys)
        Renc2= b + m*log(Z_02)
-       ht     = Renc2*visc/MAX(ustar,0.01)
-       tstar2 = MIN(tstar, 0.0)
-       qstar2 = MIN(qst,0.0)
+       ht     = Renc2*visc/MAX(ustar,0.01_kind_phys)
+       tstar2 = MIN(tstar, 0.0_kind_phys)
+       qstar2 = MIN(qst,0.0_kind_phys)
 
        Zt     = ht * EXP(-beta*(ustar**0.5)*(ABS(tstar2)**1.0))
        Zq     = ht * EXP(-beta*(ustar**0.5)*(ABS(qstar2)**1.0))
@@ -2609,14 +2624,14 @@ END SUBROUTINE SFCLAY1D_mynn
 !>\ingroup mynn_sfc
     SUBROUTINE GFS_z0_lnd(z0max,shdmax,z1,vegtype,ivegsrc,z0pert)
 
-        REAL, INTENT(OUT)  :: z0max
-        REAL, INTENT(IN)   :: shdmax,z1,z0pert
-        INTEGER, INTENT(IN):: vegtype,ivegsrc
-        REAL :: tem1, tem2
+        REAL(kind=kind_phys), INTENT(OUT)  :: z0max
+        REAL(kind=kind_phys), INTENT(IN)   :: shdmax,z1,z0pert
+        INTEGER, INTENT(IN)  :: vegtype,ivegsrc
+        REAL(kind=kind_phys) :: tem1, tem2
 
 !            z0max = max(1.0e-6, min(0.01 * z0max, z1))
 !already converted into meters in the wrapper
-            z0max = max(1.0e-6, min(z0max, z1))
+            z0max = max(1.0e-6_kind_phys, min(z0max, z1))
 !** xubin's new z0  over land
             tem1  = 1.0 - shdmax
             tem2  = tem1 * tem1
@@ -2629,10 +2644,10 @@ END SUBROUTINE SFCLAY1D_mynn
               elseif (vegtype == 6) then
                 z0max = exp( tem2*log01 + tem1*log05 )
               elseif (vegtype == 7) then
-!               z0max = exp( tem2*log01 + tem1*log01 )                                                                   
+!               z0max = exp( tem2*log01 + tem1*log01 )
                 z0max = 0.01
               elseif (vegtype == 16) then
-!               z0max = exp( tem2*log01 + tem1*log01 )                                                                   
+!               z0max = exp( tem2*log01 + tem1*log01 )
                 z0max = 0.01
               else
                 z0max = exp( tem2*log01 + tem1*log(z0max) )
@@ -2645,10 +2660,10 @@ END SUBROUTINE SFCLAY1D_mynn
               elseif (vegtype == 8) then
                 z0max = exp( tem2*log01 + tem1*log05 )
               elseif (vegtype == 9) then
-!               z0max = exp( tem2*log01 + tem1*log01 )                                                                   
+!               z0max = exp( tem2*log01 + tem1*log01 )
                 z0max = 0.01
               elseif (vegtype == 11) then
-!               z0max = exp( tem2*log01 + tem1*log01 )                                                                   
+!               z0max = exp( tem2*log01 + tem1*log01 )
                 z0max = 0.01
               else
                 z0max = exp( tem2*log01 + tem1*log(z0max) )
@@ -2656,12 +2671,12 @@ END SUBROUTINE SFCLAY1D_mynn
 
             endif
 
-! mg, sfc-perts: add surface perturbations to z0max over land                                                            
+! mg, sfc-perts: add surface perturbations to z0max over land
             if (z0pert /= 0.0 ) then
               z0max = z0max * (10.**z0pert)
             endif
 
-            z0max = max(z0max, 1.0e-6)
+            z0max = max(z0max, 1.0e-6_kind_phys)
 
     END SUBROUTINE GFS_z0_lnd
 !--------------------------------------------------------------------
@@ -2669,10 +2684,10 @@ END SUBROUTINE SFCLAY1D_mynn
 !>\ingroup mynn_sfc
     SUBROUTINE GFS_zt_lnd(ztmax,z0max,sigmaf,ztpert,ustar_lnd)
 
-        REAL, INTENT(OUT)  :: ztmax
-        REAL, INTENT(IN)   :: z0max,sigmaf,ztpert,ustar_lnd
-        REAL :: czilc, tem1, tem2
-        REAL, PARAMETER    :: ca = 0.4
+        REAL(kind=kind_phys), INTENT(OUT)  :: ztmax
+        REAL(kind=kind_phys), INTENT(IN)   :: z0max,sigmaf,ztpert,ustar_lnd
+        REAL(kind=kind_phys) :: czilc, tem1, tem2
+        REAL(kind=kind_phys), PARAMETER    :: ca = 0.4
 
 !           czilc = 10.0 ** (- (0.40/0.07) * z0) ! fei's canopy height dependance of czil
            czilc = 0.8
@@ -2690,25 +2705,25 @@ END SUBROUTINE SFCLAY1D_mynn
             if (ztpert /= 0.0) then
               ztmax = ztmax * (10.**ztpert)
             endif
-            ztmax = max(ztmax, 1.0e-6)
+            ztmax = max(ztmax, 1.0e-6_kind_phys)
 
     END SUBROUTINE GFS_zt_lnd
 !--------------------------------------------------------------------
 !>\ingroup mynn_sfc
     SUBROUTINE GFS_z0_wat(z0rl_wat,ustar_wat,WSPD,z1,sfc_z0_type,redrag)
 
-        REAL, INTENT(OUT)  :: z0rl_wat
-        REAL, INTENT(INOUT):: ustar_wat
-        REAL, INTENT(IN)   :: wspd,z1
+        REAL(kind=kind_phys), INTENT(OUT)  :: z0rl_wat
+        REAL(kind=kind_phys), INTENT(INOUT):: ustar_wat
+        REAL(kind=kind_phys), INTENT(IN)   :: wspd,z1
         LOGICAL, INTENT(IN):: redrag
         INTEGER, INTENT(IN):: sfc_z0_type
-        REAL :: z0,z0max,wind10m
-        REAL, PARAMETER    :: charnock = 0.014, z0s_max=.317e-2 
+        REAL(kind=kind_phys) :: z0,z0max,wind10m
+        REAL(kind=kind_phys), PARAMETER :: charnock = 0.014, z0s_max=.317e-2
 
 !            z0           = 0.01 * z0rl_wat
 !Already converted to meters in the wrapper
             z0           = z0rl_wat
-            z0max        = max(1.0e-6, min(z0,z1))
+            z0max        = max(1.0e-6_kind_phys, min(z0,z1))
             ustar_wat    = sqrt(g * z0 / charnock)
             wind10m      = wspd*log(10./1e-4)/log(z1/1e-4)
             !wind10m      = sqrt(u10m(i)*u10m(i)+v10m(i)*v10m(i))
@@ -2727,10 +2742,10 @@ END SUBROUTINE SFCLAY1D_mynn
 
                 if (redrag) then
                   !z0rl_wat = 100.0 * max(min(z0, z0s_max), 1.e-7)
-                  z0rl_wat = max(min(z0, z0s_max), 1.e-7)
+                  z0rl_wat = max(min(z0, z0s_max), 1.e-7_kind_phys)
                 else
                   !z0rl_wat = 100.0 * max(min(z0,.1), 1.e-7)
-                  z0rl_wat = max(min(z0,.1), 1.e-7)
+                  z0rl_wat = max(min(z0,.1_kind_phys), 1.e-7_kind_phys)
                 endif
 
               elseif (sfc_z0_type == 6) then   ! wang
@@ -2750,16 +2765,16 @@ END SUBROUTINE SFCLAY1D_mynn
 !>\ingroup mynn_sfc
     SUBROUTINE GFS_zt_wat(ztmax,z0rl_wat,restar,WSPD,z1,sfc_z0_type)
 
-        REAL, INTENT(OUT)  :: ztmax
-        REAL, INTENT(IN)   :: wspd,z1,z0rl_wat,restar
+        REAL(kind=kind_phys), INTENT(OUT) :: ztmax
+        REAL(kind=kind_phys), INTENT(IN)  :: wspd,z1,z0rl_wat,restar
         INTEGER, INTENT(IN):: sfc_z0_type
-        REAL :: z0,z0max,wind10m,rat,ustar_wat
-        REAL, PARAMETER    :: charnock = 0.014, z0s_max=.317e-2
+        REAL(kind=kind_phys) :: z0,z0max,wind10m,rat,ustar_wat
+        REAL(kind=kind_phys), PARAMETER   :: charnock = 0.014, z0s_max=.317e-2
 
 !            z0           = 0.01 * z0rl_wat
 !Already converted to meters in the wrapper
             z0           = z0rl_wat
-            z0max        = max(1.0e-6, min(z0,z1))
+            z0max        = max(1.0e-6_kind_phys, min(z0,z1))
             ustar_wat    = sqrt(g * z0 / charnock)
             wind10m      = wspd*log(10./1e-4)/log(z1/1e-4)
 
@@ -2776,8 +2791,8 @@ END SUBROUTINE SFCLAY1D_mynn
 !           rat    = rat    / (1. + (bb2 + cc2*restar) * restar))
 !  rat taken from zeng, zhao and dickinson 1997
 
-            rat   = min(7.0, 2.67 * sqrt(sqrt(restar)) - 2.57)
-            ztmax = max(z0max * exp(-rat), 1.0e-6)
+            rat   = min(7.0_kind_phys, 2.67 * sqrt(sqrt(restar)) - 2.57)
+            ztmax = max(z0max * exp(-rat), 1.0e-6_kind_phys)
 !
             if (sfc_z0_type == 6) then
               call znot_t_v6(wind10m, ztmax)   ! 10-m wind,m/s, ztmax(m)
@@ -2809,7 +2824,7 @@ END SUBROUTINE SFCLAY1D_mynn
 
       REAL(kind=kind_phys), INTENT(IN) :: uref
       REAL(kind=kind_phys), INTENT(OUT):: znotm
-      real(kind=kind_phys), parameter  :: p13 = -1.296521881682694e-02,&
+      REAL(kind=kind_phys), PARAMETER  :: p13 = -1.296521881682694e-02,&
      &      p12 =  2.855780863283819e-01, p11 = -1.597898515251717e+00,&
      &      p10 = -8.396975715683501e+00,                              &
 
@@ -2848,15 +2863,15 @@ END SUBROUTINE SFCLAY1D_mynn
 !> Calculate scalar roughness over water with input 10-m wind
 !! For low-to-moderate winds, try to match the Ck-U10 relationship from COARE algorithm
 !! For high winds, try to retain the Ck-U10 relationship of FY2015 HWRF
-!!                                                  
-!!\author Bin Liu, NOAA/NCEP/EMC 2017                      
-!                                                  
-! uref(m/s)   :   wind speed at 10-m height        
+!!
+!!\author Bin Liu, NOAA/NCEP/EMC 2017
+!
+! uref(m/s)   :   wind speed at 10-m height
 ! znott(meter):   scalar roughness scale over water
 !
-      REAL, INTENT(IN) :: uref
-      REAL, INTENT(OUT):: znott
-      real, parameter  :: p00 =  1.100000000000000e-04,&
+      REAL(kind=kind_phys), INTENT(IN) :: uref
+      REAL(kind=kind_phys), INTENT(OUT):: znott
+      REAL(kind=kind_phys), PARAMETER  :: p00 =  1.100000000000000e-04,&
      &      p15 = -9.144581627678278e-10, p14 =  7.020346616456421e-08,&
      &      p13 = -2.155602086883837e-06, p12 =  3.333848806567684e-05,&
      &      p11 = -2.628501274963990e-04, p10 =  8.634221567969181e-04,&
@@ -2915,17 +2930,17 @@ END SUBROUTINE SFCLAY1D_mynn
 !! For low-to-moderate winds, try to match the Cd-U10 relationship from COARE V3.5 (Edson et al. 2013)
 !! For high winds, try to fit available observational data
 !! Comparing to znot_t_v6, slightly decrease Cd for higher wind speed
-!!                                          
-!!\author Bin Liu, NOAA/NCEP/EMC 2018              
-!                                          
+!!
+!!\author Bin Liu, NOAA/NCEP/EMC 2018
+!
 ! uref(m/s)   :   wind speed at 10-m height
 ! znotm(meter):   areodynamical roughness scale over water
 !
 
-      REAL, INTENT(IN) :: uref
-      REAL, INTENT(OUT):: znotm
+      REAL(kind=kind_phys), INTENT(IN) :: uref
+      REAL(kind=kind_phys), INTENT(OUT):: znotm
 
-      real, parameter  :: p13 = -1.296521881682694e-02,&
+      REAL(kind=kind_phys), PARAMETER  :: p13 = -1.296521881682694e-02,&
      &      p12 =  2.855780863283819e-01, p11 = -1.597898515251717e+00,&
      &      p10 = -8.396975715683501e+00,&
 
@@ -2962,19 +2977,19 @@ END SUBROUTINE SFCLAY1D_mynn
       IMPLICIT NONE
 !> Calculate scalar roughness over water with input 10-m wind
 !! For low-to-moderate winds, try to match the Ck-U10 relationship from COARE algorithm
-!! For high winds, try to retain the Ck-U10 relationship of FY2015 HWRF 
+!! For high winds, try to retain the Ck-U10 relationship of FY2015 HWRF
 !! To be compatible with the slightly decreased Cd for higher wind speed
-!!                            
+!!
 !!\author Bin Liu, NOAA/NCEP/EMC 2018
 !
-! uref(m/s)   :   wind speed at 10-m height        
+! uref(m/s)   :   wind speed at 10-m height
 ! znott(meter):   scalar roughness scale over water
 !
 
-      REAL, INTENT(IN) :: uref
-      REAL, INTENT(OUT):: znott
+      REAL(kind=kind_phys), INTENT(IN) :: uref
+      REAL(kind=kind_phys), INTENT(OUT):: znott
 
-      real, parameter  :: p00 =  1.100000000000000e-04,                &
+      REAL(kind=kind_phys), PARAMETER  :: p00 =  1.100000000000000e-04,&
 
      &      p15 = -9.193764479895316e-10, p14 =  7.052217518653943e-08,&
      &      p13 = -2.163419217747114e-06, p12 =  3.342963077911962e-05,&
@@ -3024,34 +3039,36 @@ END SUBROUTINE SFCLAY1D_mynn
 
 !--------------------------------------------------------------------
 !>\ingroup mynn_sfc
-!> This is taken from Andreas (2002; J. of Hydromet) and 
+!> This is taken from Andreas (2002; J. of Hydromet) and
 !! Andreas et al. (2005; BLM).
 !!
 !! This should only be used over snow/ice!
     SUBROUTINE Andreas_2002(Z_0,bvisc,ustar,Zt,Zq)
 
        IMPLICIT NONE
-       REAL, INTENT(IN)  :: Z_0, bvisc, ustar
-       REAL, INTENT(OUT) :: Zt, Zq
-       REAL :: Ren2, zntsno
+       REAL(kind=kind_phys), INTENT(IN)  :: Z_0, bvisc, ustar
+       REAL(kind=kind_phys), INTENT(OUT) :: Zt, Zq
+       REAL(kind=kind_phys) :: Ren2, zntsno
 
-       REAL, PARAMETER  :: bt0_s=1.25,  bt0_t=0.149,  bt0_r=0.317,  &
+       REAL(kind=kind_phys), PARAMETER  ::                          &
+                           bt0_s=1.25,  bt0_t=0.149,  bt0_r=0.317,  &
                            bt1_s=0.0,   bt1_t=-0.55,  bt1_r=-0.565, &
                            bt2_s=0.0,   bt2_t=0.0,    bt2_r=-0.183
 
-       REAL, PARAMETER  :: bq0_s=1.61,  bq0_t=0.351,  bq0_r=0.396,  &
+       REAL(kind=kind_phys), PARAMETER  ::                          &
+                           bq0_s=1.61,  bq0_t=0.351,  bq0_r=0.396,  &
                            bq1_s=0.0,   bq1_t=-0.628, bq1_r=-0.512, &
                            bq2_s=0.0,   bq2_t=0.0,    bq2_r=-0.180
 
-      !Calculate zo for snow (Andreas et al. 2005, BLM)                                                                     
+      !Calculate zo for snow (Andreas et al. 2005, BLM)
        zntsno = 0.135*bvisc/ustar + &
                (0.035*(ustar*ustar)/9.8) * &
-               (5.*exp(-1.*(((ustar - 0.18)/0.1)*((ustar - 0.18)/0.1))) + 1.)                                                
+               (5.*exp(-1.*(((ustar - 0.18)/0.1)*((ustar - 0.18)/0.1))) + 1.)
        Ren2 = ustar*zntsno/bvisc
 
        ! Make sure that Re is not outside of the range of validity
        ! for using their equations
-       IF (Ren2 .gt. 1000.) Ren2 = 1000. 
+       IF (Ren2 .gt. 1000.) Ren2 = 1000.
 
        IF (Ren2 .le. 0.135) then
 
@@ -3080,18 +3097,18 @@ END SUBROUTINE SFCLAY1D_mynn
     SUBROUTINE PSI_Hogstrom_1996(psi_m, psi_h, zL, Zt, Z_0, Za)
 
        IMPLICIT NONE
-       REAL, INTENT(IN)  :: zL, Zt, Z_0, Za
-       REAL, INTENT(OUT) :: psi_m, psi_h
-       REAL  :: x, x0, y, y0, zmL, zhL
+       REAL(kind=kind_phys), INTENT(IN)  :: zL, Zt, Z_0, Za
+       REAL(kind=kind_phys), INTENT(OUT) :: psi_m, psi_h
+       REAL(kind=kind_phys)  :: x, x0, y, y0, zmL, zhL
 
-       zmL = Z_0*zL/Za  
+       zmL = Z_0*zL/Za
        zhL = Zt*zL/Za
 
        IF (zL .gt. 0.) THEN  !STABLE (not well tested - seem large)
 
           psi_m = -5.3*(zL - zmL)
           psi_h = -8.0*(zL - zhL)
- 
+
        ELSE                 !UNSTABLE
 
           x = (1.-19.0*zL)**0.25
@@ -3105,7 +3122,7 @@ END SUBROUTINE SFCLAY1D_mynn
           psi_h = 2.*LOG((1.+y)/(1.+y0))
 
        ENDIF
-                   
+
        return
 
     END SUBROUTINE PSI_Hogstrom_1996
@@ -3118,9 +3135,9 @@ END SUBROUTINE SFCLAY1D_mynn
     SUBROUTINE PSI_DyerHicks(psi_m, psi_h, zL, Zt, Z_0, Za)
 
        IMPLICIT NONE
-       REAL, INTENT(IN)  :: zL, Zt, Z_0, Za
-       REAL, INTENT(OUT) :: psi_m, psi_h
-       REAL  :: x, x0, y, y0, zmL, zhL
+       REAL(kind=kind_phys), INTENT(IN)  :: zL, Zt, Z_0, Za
+       REAL(kind=kind_phys), INTENT(OUT) :: psi_m, psi_h
+       REAL(kind=kind_phys)  :: x, x0, y, y0, zmL, zhL
 
        zmL = Z_0*zL/Za  !Zo/L
        zhL = Zt*zL/Za   !Zt/L
@@ -3129,7 +3146,7 @@ END SUBROUTINE SFCLAY1D_mynn
 
           psi_m = -5.0*(zL - zmL)
           psi_h = -5.0*(zL - zhL)
- 
+
        ELSE                 !UNSTABLE
 
           x = (1.-16.*zL)**0.25
@@ -3139,12 +3156,12 @@ END SUBROUTINE SFCLAY1D_mynn
           y0= (1.-16.*zhL)**0.5
 
           psi_m = 2.*LOG((1.+x)/(1.+x0)) + &
-                    &LOG((1.+x**2.)/(1.+x0**2.)) - & 
+                    &LOG((1.+x**2.)/(1.+x0**2.)) - &
                     &2.0*ATAN(x) + 2.0*ATAN(x0)
           psi_h = 2.*LOG((1.+y)/(1.+y0))
 
        ENDIF
-                   
+
        return
 
     END SUBROUTINE PSI_DyerHicks
@@ -3156,9 +3173,9 @@ END SUBROUTINE SFCLAY1D_mynn
     SUBROUTINE PSI_Beljaars_Holtslag_1991(psi_m, psi_h, zL)
 
        IMPLICIT NONE
-       REAL, INTENT(IN)  :: zL
-       REAL, INTENT(OUT) :: psi_m, psi_h
-       REAL, PARAMETER  :: a=1., b=0.666, c=5., d=0.35
+       REAL(kind=kind_phys), INTENT(IN)  :: zL
+       REAL(kind=kind_phys), INTENT(OUT) :: psi_m, psi_h
+       REAL(kind=kind_phys), PARAMETER  :: a=1., b=0.666, c=5., d=0.35
 
        IF (zL .lt. 0.) THEN  !UNSTABLE
 
@@ -3167,7 +3184,7 @@ END SUBROUTINE SFCLAY1D_mynn
           WRITE(*,*)"        be used in the stable regime!"
           psi_m = 0.
           psi_h = 0.
- 
+
        ELSE                 !STABLE
 
           psi_m = -(a*zL + b*(zL -(c/d))*exp(-d*zL) + (b*c/d))
@@ -3175,7 +3192,7 @@ END SUBROUTINE SFCLAY1D_mynn
                   b*(zL - (c/d))*exp(-d*zL) + (b*c/d) -1.)
 
        ENDIF
-                   
+
        return
 
     END SUBROUTINE PSI_Beljaars_Holtslag_1991
@@ -3188,9 +3205,9 @@ END SUBROUTINE SFCLAY1D_mynn
     SUBROUTINE PSI_Zilitinkevich_Esau_2007(psi_m, psi_h, zL)
 
        IMPLICIT NONE
-       REAL, INTENT(IN)  :: zL
-       REAL, INTENT(OUT) :: psi_m, psi_h
-       REAL, PARAMETER  :: Cm=3.0, Ct=2.5
+       REAL(kind=kind_phys), INTENT(IN)  :: zL
+       REAL(kind=kind_phys), INTENT(OUT) :: psi_m, psi_h
+       REAL(kind=kind_phys), PARAMETER  :: Cm=3.0, Ct=2.5
 
        IF (zL .lt. 0.) THEN  !UNSTABLE
 
@@ -3199,14 +3216,14 @@ END SUBROUTINE SFCLAY1D_mynn
           WRITE(*,*)"        be used in the stable regime!"
           psi_m = 0.
           psi_h = 0.
- 
+
        ELSE                 !STABLE
 
           psi_m = -Cm*(zL**(5./6.))
           psi_h = -Ct*(zL**(4./5.))
 
        ENDIF
-                   
+
        return
 
     END SUBROUTINE PSI_Zilitinkevich_Esau_2007
@@ -3217,10 +3234,10 @@ END SUBROUTINE SFCLAY1D_mynn
     SUBROUTINE PSI_Businger_1971(psi_m, psi_h, zL)
 
        IMPLICIT NONE
-       REAL, INTENT(IN)  :: zL
-       REAL, INTENT(OUT) :: psi_m, psi_h
-       REAL  :: x, y
-       REAL, PARAMETER  ::  Pi180 = 3.14159265/180.
+       REAL(kind=kind_phys), INTENT(IN)  :: zL
+       REAL(kind=kind_phys), INTENT(OUT) :: psi_m, psi_h
+       REAL(kind=kind_phys)  :: x, y
+       REAL(kind=kind_phys), PARAMETER  ::  Pi180 = 3.14159265/180.
 
        IF (zL .lt. 0.) THEN  !UNSTABLE
 
@@ -3238,7 +3255,7 @@ END SUBROUTINE SFCLAY1D_mynn
           psi_h = -(4.7/0.74)*zL
 
        ENDIF
-                   
+
        return
 
     END SUBROUTINE PSI_Businger_1971
@@ -3253,9 +3270,9 @@ END SUBROUTINE SFCLAY1D_mynn
     SUBROUTINE PSI_Suselj_Sood_2010(psi_m, psi_h, zL)
 
        IMPLICIT NONE
-       REAL, INTENT(IN)  :: zL
-       REAL, INTENT(OUT) :: psi_m, psi_h
-       REAL, PARAMETER  :: Rfc=0.19, Ric=0.183, PHIT=0.8
+       REAL(kind=kind_phys), INTENT(IN)  :: zL
+       REAL(kind=kind_phys), INTENT(OUT) :: psi_m, psi_h
+       REAL(kind=kind_phys), PARAMETER   :: Rfc=0.19, Ric=0.183, PHIT=0.8
 
        IF (zL .gt. 0.) THEN  !STABLE
 
@@ -3264,14 +3281,14 @@ END SUBROUTINE SFCLAY1D_mynn
           !THEIR EQ FOR PSI_H CRASHES THE MODEL AND DOES NOT MATCH
           !THEIR FIG 1. THIS EQ (BELOW) MATCHES THEIR FIG 1 BETTER:
           psi_h = -(zL*Ric/((Rfc**2.)*5.) + 7.09*(zL**1.1091))
- 
+
        ELSE                 !UNSTABLE
 
           psi_m = 0.9904*LOG(1. - 14.264*zL)
           psi_h = 1.0103*LOG(1. - 16.3066*zL)
 
        ENDIF
-                   
+
        return
 
     END SUBROUTINE PSI_Suselj_Sood_2010
@@ -3283,8 +3300,8 @@ END SUBROUTINE SFCLAY1D_mynn
     SUBROUTINE PSI_CB2005(psim1,psih1,zL,z0L)
 
        IMPLICIT NONE
-       REAL, INTENT(IN)  :: zL,z0L
-       REAL, INTENT(OUT) :: psim1,psih1
+       REAL(kind=kind_phys), INTENT(IN)  :: zL,z0L
+       REAL(kind=kind_phys), INTENT(OUT) :: psim1,psih1
 
        psim1 = -6.1*LOG(zL + (1.+ zL**2.5)**0.4)  &
                -6.1*LOG(z0L + (1.+ z0L**2.5)**0.4)
@@ -3302,18 +3319,21 @@ END SUBROUTINE SFCLAY1D_mynn
     SUBROUTINE Li_etal_2010(zL, Rib, zaz0, z0zt)
 
        IMPLICIT NONE
-       REAL, INTENT(OUT)  :: zL
-       REAL, INTENT(IN) :: Rib, zaz0, z0zt
-       REAL :: alfa, beta, zaz02, z0zt2
-       REAL, PARAMETER  :: au11=0.045, bu11=0.003, bu12=0.0059, &
-                          &bu21=-0.0828, bu22=0.8845, bu31=0.1739, &
-                          &bu32=-0.9213, bu33=-0.1057
-       REAL, PARAMETER  :: aw11=0.5738, aw12=-0.4399, aw21=-4.901,&
-                          &aw22=52.50, bw11=-0.0539, bw12=1.540, &
-                          &bw21=-0.669, bw22=-3.282
-       REAL, PARAMETER  :: as11=0.7529, as21=14.94, bs11=0.1569,&
-                          &bs21=-0.3091, bs22=-1.303
-          
+       REAL(kind=kind_phys), INTENT(OUT)  :: zL
+       REAL(kind=kind_phys), INTENT(IN) :: Rib, zaz0, z0zt
+       REAL(kind=kind_phys) :: alfa, beta, zaz02, z0zt2
+       REAL(kind=kind_phys), PARAMETER  ::                           &
+                          & au11=0.045,   bu11=0.003,   bu12=0.0059, &
+                          & bu21=-0.0828, bu22=0.8845,  bu31=0.1739, &
+                          & bu32=-0.9213, bu33=-0.1057
+       REAL(kind=kind_phys), PARAMETER  ::                           &
+                          & aw11=0.5738,  aw12=-0.4399, aw21=-4.901, &
+                          & aw22=52.50,   bw11=-0.0539, bw12=1.540,  &
+                          & bw21=-0.669,  bw22=-3.282
+       REAL(kind=kind_phys), PARAMETER  ::                           &
+                          & as11=0.7529,  as21=14.94,   bs11=0.1569, &
+                          & bs21=-0.3091, bs22=-1.303
+
        !set limits according to Li et al (2010), p 157.
        zaz02=zaz0
        IF (zaz0 .lt. 100.0) zaz02=100.
@@ -3333,23 +3353,23 @@ END SUBROUTINE SFCLAY1D_mynn
                &  (bu21*beta + bu22)*alfa    +        &
                &  (bu31*beta**2 + bu32*beta + bu33))*Rib
           !if(zL .LT. -15 .OR. zl .GT. 0.)print*,"VIOLATION Rib<0:",zL
-          zL = MAX(zL,-15.) !LIMITS SET ACCORDING TO Li et al (2010)
-          zL = MIN(zL,0.)   !Figure 1.
+          zL = MAX(zL,-15._kind_phys) !LIMITS SET ACCORDING TO Li et al (2010)
+          zL = MIN(zL,0._kind_phys)   !Figure 1.
        ELSEIF (Rib .gt. 0.0 .AND. Rib .le. 0.2) THEN
           zL = ((aw11*beta + aw12)*alfa +             &
              &  (aw21*beta + aw22))*Rib**2 +          &
              & ((bw11*beta + bw12)*alfa +             &
              &  (bw21*beta + bw22))*Rib
           !if(zL .LT. 0 .OR. zl .GT. 4)print*,"VIOLATION 0<Rib<0.2:",zL
-          zL = MIN(zL,4.) !LIMITS APPROX SET ACCORDING TO Li et al (2010)
-          zL = MAX(zL,0.) !THEIR FIGURE 1B.
+          zL = MIN(zL,4._kind_phys) !LIMITS APPROX SET ACCORDING TO Li et al (2010)
+          zL = MAX(zL,0._kind_phys) !THEIR FIGURE 1B.
        ELSE
           zL = (as11*alfa + as21)*Rib + bs11*alfa +   &
              &  bs21*beta + bs22
           !if(zL .LE. 1 .OR. zl .GT. 23)print*,"VIOLATION Rib>0.2:",zL
-          zL = MIN(zL,20.) !LIMITS ACCORDING TO Li et al (2010), THIER
+          zL = MIN(zL,20._kind_phys) !LIMITS ACCORDING TO Li et al (2010), THIER
                            !FIGUE 1C.
-          zL = MAX(zL,1.)
+          zL = MAX(zL,1._kind_phys)
        ENDIF
 
        return
@@ -3357,21 +3377,21 @@ END SUBROUTINE SFCLAY1D_mynn
     END SUBROUTINE Li_etal_2010
 !-------------------------------------------------------------------
 !>\ingroup mynn_sfc
-      REAL function zolri(ri,za,z0,zt,zol1,psi_opt)
+      REAL(kind=kind_phys) function zolri(ri,za,z0,zt,zol1,psi_opt)
 
-      !> This iterative algorithm was taken from the revised surface layer 
-      !! scheme in WRF-ARW, written by Pedro Jimenez and Jimy Dudhia and 
+      !> This iterative algorithm was taken from the revised surface layer
+      !! scheme in WRF-ARW, written by Pedro Jimenez and Jimy Dudhia and
       !! summarized in Jimenez et al. (2012, MWR). This function was adapted
       !! to input the thermal roughness length, zt, (as well as z0) and use initial
       !! estimate of z/L.
 
       IMPLICIT NONE
-      REAL, INTENT(IN) :: ri,za,z0,zt,zol1
+      REAL(kind=kind_phys), INTENT(IN) :: ri,za,z0,zt,zol1
       INTEGER, INTENT(IN) :: psi_opt
-      REAL :: x1,x2,fx1,fx2
+      REAL(kind=kind_phys) :: x1,x2,fx1,fx2
       INTEGER :: n
       INTEGER, PARAMETER :: nmax = 20
-      !REAL, DIMENSION(nmax):: zLhux
+      !REAL(kind=kind_phys), DIMENSION(nmax):: zLhux
 
       if (ri.lt.0.)then
          x1=zol1 - 0.02  !-5.
@@ -3412,7 +3432,7 @@ END SUBROUTINE SFCLAY1D_mynn
       return
       end function
 !-------------------------------------------------------------------
-      REAL function zolri2(zol2,ri2,za,z0,zt,psi_opt)
+      REAL(kind=kind_phys) function zolri2(zol2,ri2,za,z0,zt,psi_opt)
 
       ! INPUT: =================================
       ! zol2 - estimated z/L
@@ -3425,9 +3445,9 @@ END SUBROUTINE SFCLAY1D_mynn
 
       IMPLICIT NONE
       INTEGER, INTENT(IN) :: psi_opt
-      REAL, INTENT(IN) :: ri2,za,z0,zt
-      REAL, INTENT(INOUT) :: zol2
-      REAL :: zol20,zol3,psim1,psih1,psix2,psit2,zolt
+      REAL(kind=kind_phys), INTENT(IN)    :: ri2,za,z0,zt
+      REAL(kind=kind_phys), INTENT(INOUT) :: zol2
+      REAL(kind=kind_phys) :: zol20,zol3,psim1,psih1,psix2,psit2,zolt
 
       if(zol2*ri2 .lt. 0.)zol2=0.  ! limit zol2 - must be same sign as ri2
 
@@ -3438,13 +3458,13 @@ END SUBROUTINE SFCLAY1D_mynn
       if (ri2.lt.0) then
          !psix2=log((za+z0)/z0)-(psim_unstable(zol3)-psim_unstable(zol20))
          !psit2=log((za+zt)/zt)-(psih_unstable(zol3)-psih_unstable(zol20))
-         psit2=MAX(log((za+z0)/zt)-(psih_unstable(zol3,psi_opt)-psih_unstable(zolt,psi_opt)), 1.0)
-         psix2=MAX(log((za+z0)/z0)-(psim_unstable(zol3,psi_opt)-psim_unstable(zol20,psi_opt)),1.0)
+         psit2=MAX(log((za+z0)/zt)-(psih_unstable(zol3,psi_opt)-psih_unstable(zolt,psi_opt)), 1.0_kind_phys)
+         psix2=MAX(log((za+z0)/z0)-(psim_unstable(zol3,psi_opt)-psim_unstable(zol20,psi_opt)), 1.0_kind_phys)
       else
          !psix2=log((za+z0)/z0)-(psim_stable(zol3)-psim_stable(zol20))
          !psit2=log((za+zt)/zt)-(psih_stable(zol3)-psih_stable(zol20))
-         psit2=MAX(log((za+z0)/zt)-(psih_stable(zol3,psi_opt)-psih_stable(zolt,psi_opt)), 1.0)
-         psix2=MAX(log((za+z0)/z0)-(psim_stable(zol3,psi_opt)-psim_stable(zol20,psi_opt)),1.0)
+         psit2=MAX(log((za+z0)/zt)-(psih_stable(zol3,psi_opt)-psih_stable(zolt,psi_opt)), 1.0_kind_phys)
+         psix2=MAX(log((za+z0)/z0)-(psim_stable(zol3,psi_opt)-psim_stable(zol20,psi_opt)),1.0_kind_phys)
       endif
 
       zolri2=zol2*psit2/psix2**2 - ri2
@@ -3454,19 +3474,19 @@ END SUBROUTINE SFCLAY1D_mynn
       end function
 !====================================================================
 
-      REAL function zolrib(ri,za,z0,zt,logz0,logzt,zol1,psi_opt)
+      REAL(kind=kind_phys) function zolrib(ri,za,z0,zt,logz0,logzt,zol1,psi_opt)
 
       ! This iterative algorithm to compute z/L from bulk-Ri
 
       IMPLICIT NONE
-      REAL, INTENT(IN) :: ri,za,z0,zt,logz0,logzt
+      REAL(kind=kind_phys), INTENT(IN) :: ri,za,z0,zt,logz0,logzt
       INTEGER, INTENT(IN) :: psi_opt
-      REAL, INTENT(INOUT) :: zol1
-      REAL :: zol20,zol3,zolt,zolold
+      REAL(kind=kind_phys), INTENT(INOUT) :: zol1
+      REAL(kind=kind_phys) :: zol20,zol3,zolt,zolold
       INTEGER :: n
       INTEGER, PARAMETER :: nmax = 20
-      REAL, DIMENSION(nmax):: zLhux
-      REAL :: psit2,psix2
+      REAL(kind=kind_phys), DIMENSION(nmax):: zLhux
+      REAL(kind=kind_phys) :: psit2,psix2
 
       !print*,"+++++++INCOMING: z/L=",zol1," ri=",ri
       if (zol1*ri .lt. 0.) THEN
@@ -3497,13 +3517,13 @@ END SUBROUTINE SFCLAY1D_mynn
         if (ri.lt.0) then
            !psit2=log((za+zt)/zt)-(psih_unstable(zol3)-psih_unstable(zol20))
            !psit2=log((za+z0)/zt)-(psih_unstable(zol3)-psih_unstable(zol20))
-           psit2=MAX(logzt-(psih_unstable(zol3,psi_opt)-psih_unstable(zolt,psi_opt)), 1.0)
-           psix2=MAX(logz0-(psim_unstable(zol3,psi_opt)-psim_unstable(zol20,psi_opt)), 1.0)
+           psit2=MAX(logzt-(psih_unstable(zol3,psi_opt)-psih_unstable(zolt,psi_opt)), 1.0_kind_phys)
+           psix2=MAX(logz0-(psim_unstable(zol3,psi_opt)-psim_unstable(zol20,psi_opt)), 1.0_kind_phys)
         else
            !psit2=log((za+zt)/zt)-(psih_stable(zol3)-psih_stable(zol20))
            !psit2=log((za+z0)/zt)-(psih_stable(zol3)-psih_stable(zol20))
-           psit2=MAX(logzt-(psih_stable(zol3,psi_opt)-psih_stable(zolt,psi_opt)), 1.0)
-           psix2=MAX(logz0-(psim_stable(zol3,psi_opt)-psim_stable(zol20,psi_opt)), 1.0)
+           psit2=MAX(logzt-(psih_stable(zol3,psi_opt)-psih_stable(zolt,psi_opt)), 1.0_kind_phys)
+           psix2=MAX(logz0-(psim_stable(zol3,psi_opt)-psim_stable(zol20,psi_opt)), 1.0_kind_phys)
         endif
         !print*,"n=",n," psit2=",psit2," psix2=",psix2
         zolrib=ri*psix2**2/psit2
@@ -3534,7 +3554,7 @@ END SUBROUTINE SFCLAY1D_mynn
    SUBROUTINE psi_init(psi_opt,errmsg,errflg)
 
     integer                       :: N,psi_opt
-    real                          :: zolf
+    real(kind=kind_phys)          :: zolf
     character(len=*), intent(out) :: errmsg
     integer, intent(out)          :: errflg
 
@@ -3565,7 +3585,7 @@ END SUBROUTINE SFCLAY1D_mynn
     endif
 
     !Simple test to see if initialization worked:
-    if (psim_stab(1) < 0. .AND. psih_stab(1) < 0. .AND. & 
+    if (psim_stab(1) < 0. .AND. psih_stab(1) < 0. .AND. &
         psim_unstab(1) > 0. .AND. psih_unstab(1) > 0.) then
        errmsg = 'In MYNN SFC, Psi tables have been initialized'
        errflg = 0
@@ -3579,18 +3599,18 @@ END SUBROUTINE SFCLAY1D_mynn
 ! ... integrated similarity functions from MYNN...
 !
 !>\ingroup mynn_sfc
-   REAL function psim_stable_full(zolf)
-        REAL :: zolf   
+   REAL(kind=kind_phys) function psim_stable_full(zolf)
+        REAL(kind=kind_phys) :: zolf
 
         !psim_stable_full=-6.1*log(zolf+(1+zolf**2.5)**(1./2.5))
-        psim_stable_full=-6.1*log(zolf+(1+zolf**2.5)**0.4) 
+        psim_stable_full=-6.1*log(zolf+(1+zolf**2.5)**0.4)
 
         return
    end function
 
 !>\ingroup mynn_sfc
-   REAL function psih_stable_full(zolf)
-        REAL :: zolf
+   REAL(kind=kind_phys) function psih_stable_full(zolf)
+        REAL(kind=kind_phys) :: zolf
 
         !psih_stable_full=-5.3*log(zolf+(1+zolf**1.1)**(1./1.1))
         psih_stable_full=-5.3*log(zolf+(1+zolf**1.1)**0.9090909090909090909)
@@ -3599,12 +3619,13 @@ END SUBROUTINE SFCLAY1D_mynn
    end function
 
 !>\ingroup mynn_sfc
-   REAL function psim_unstable_full(zolf)
-        REAL :: zolf,x,ym,psimc,psimk
+   REAL(kind=kind_phys) function psim_unstable_full(zolf)
+        REAL(kind=kind_phys) :: zolf,x,ym,psimc,psimk
 
         x=(1.-16.*zolf)**.25
         !psimk=2*ALOG(0.5*(1+X))+ALOG(0.5*(1+X*X))-2.*ATAN(X)+2.*ATAN(1.)
-        psimk=2.*ALOG(0.5*(1+X))+ALOG(0.5*(1+X*X))-2.*ATAN(X)+2.*atan1
+        !psimk=2.*ALOG(0.5*(1+X))+ALOG(0.5*(1+X*X))-2.*ATAN(X)+2.*atan1
+        psimk=2.*LOG(0.5*(1+X))+LOG(0.5*(1+X*X))-2.*ATAN(X)+2.*atan1
 
         ym=(1.-10.*zolf)**onethird
         !psimc=(3./2.)*log((ym**2.+ym+1.)/3.)-sqrt(3.)*ATAN((2.*ym+1)/sqrt(3.))+4.*ATAN(1.)/sqrt(3.)
@@ -3616,8 +3637,8 @@ END SUBROUTINE SFCLAY1D_mynn
    end function
 
 !>\ingroup mynn_sfc
-   REAL function psih_unstable_full(zolf)
-        REAL :: zolf,y,yh,psihc,psihk
+   REAL(kind=kind_phys) function psih_unstable_full(zolf)
+        REAL(kind=kind_phys) :: zolf,y,yh,psihc,psihk
 
         y=(1.-16.*zolf)**.5
         !psihk=2.*log((1+y)/2.)
@@ -3637,10 +3658,10 @@ END SUBROUTINE SFCLAY1D_mynn
 !
 !>\ingroup mynn_sfc
 !!
-   REAL function psim_stable_full_gfs(zolf)
-        REAL :: zolf
-        REAL, PARAMETER :: alpha4 = 20.
-        REAL :: aa
+   REAL(kind=kind_phys) function psim_stable_full_gfs(zolf)
+        REAL(kind=kind_phys) :: zolf
+        REAL(kind=kind_phys), PARAMETER :: alpha4 = 20.
+        REAL(kind=kind_phys) :: aa
 
         aa     = sqrt(1. + alpha4 * zolf)
         psim_stable_full_gfs  = -1.*aa + log(aa + 1.)
@@ -3650,10 +3671,10 @@ END SUBROUTINE SFCLAY1D_mynn
 
 !>\ingroup mynn_sfc
 !!
-   REAL function psih_stable_full_gfs(zolf)
-        REAL :: zolf
-        REAL, PARAMETER :: alpha4 = 20.
-        REAL :: bb
+   REAL(kind=kind_phys) function psih_stable_full_gfs(zolf)
+        REAL(kind=kind_phys) :: zolf
+        REAL(kind=kind_phys), PARAMETER :: alpha4 = 20.
+        REAL(kind=kind_phys) :: bb
 
         bb     = sqrt(1. + alpha4 * zolf)
         psih_stable_full_gfs  = -1.*bb + log(bb + 1.)
@@ -3663,10 +3684,10 @@ END SUBROUTINE SFCLAY1D_mynn
 
 !>\ingroup mynn_sfc
 !!
-   REAL function psim_unstable_full_gfs(zolf)
-        REAL :: zolf
-        REAL :: hl1,tem1
-        REAL, PARAMETER :: a0=-3.975,  a1=12.32,  &
+   REAL(kind=kind_phys) function psim_unstable_full_gfs(zolf)
+        REAL(kind=kind_phys) :: zolf
+        REAL(kind=kind_phys) :: hl1,tem1
+        REAL(kind=kind_phys), PARAMETER :: a0=-3.975,  a1=12.32,  &
                            b1=-7.755,  b2=6.041
 
         if (zolf .ge. -0.5) then
@@ -3683,10 +3704,10 @@ END SUBROUTINE SFCLAY1D_mynn
 
 !>\ingroup mynn_sfc
 !!
-   REAL function psih_unstable_full_gfs(zolf)
-        REAL :: zolf
-        REAL :: hl1,tem1
-        REAL, PARAMETER :: a0p=-7.941, a1p=24.75, &
+   REAL(kind=kind_phys) function psih_unstable_full_gfs(zolf)
+        REAL(kind=kind_phys) :: zolf
+        REAL(kind=kind_phys) :: hl1,tem1
+        REAL(kind=kind_phys), PARAMETER :: a0p=-7.941, a1p=24.75, &
                            b1p=-8.705, b2p=7.899
 
         if (zolf .ge. -0.5) then
@@ -3703,9 +3724,9 @@ END SUBROUTINE SFCLAY1D_mynn
 
 !>\ingroup mynn_sfc
 !! look-up table functions - or, if beyond -10 < z/L < 10, recalculate
-   REAL function psim_stable(zolf,psi_opt)
+   REAL(kind=kind_phys) function psim_stable(zolf,psi_opt)
         integer :: nzol,psi_opt
-        real    :: rzol,zolf
+        real(kind=kind_phys) :: rzol,zolf
 
         nzol = int(zolf*100.)
         rzol = zolf*100. - nzol
@@ -3723,9 +3744,9 @@ END SUBROUTINE SFCLAY1D_mynn
    end function
 
 !>\ingroup mynn_sfc
-   REAL function psih_stable(zolf,psi_opt)
+   REAL(kind=kind_phys) function psih_stable(zolf,psi_opt)
         integer :: nzol,psi_opt
-        real    :: rzol,zolf
+        real(kind=kind_phys) :: rzol,zolf
 
         nzol = int(zolf*100.)
         rzol = zolf*100. - nzol
@@ -3743,9 +3764,9 @@ END SUBROUTINE SFCLAY1D_mynn
    end function
 
 !>\ingroup mynn_sfc
-   REAL function psim_unstable(zolf,psi_opt)
+   REAL(kind=kind_phys) function psim_unstable(zolf,psi_opt)
         integer :: nzol,psi_opt
-        real    :: rzol,zolf
+        real(kind=kind_phys) :: rzol,zolf
 
         nzol = int(-zolf*100.)
         rzol = -zolf*100. - nzol
@@ -3763,9 +3784,9 @@ END SUBROUTINE SFCLAY1D_mynn
    end function
 
 !>\ingroup mynn_sfc
-   REAL function psih_unstable(zolf,psi_opt)
+   REAL(kind=kind_phys) function psih_unstable(zolf,psi_opt)
         integer :: nzol,psi_opt
-        real    :: rzol,zolf
+        real(kind=kind_phys) :: rzol,zolf
 
         nzol = int(-zolf*100.)
         rzol = -zolf*100. - nzol

@@ -1,5 +1,5 @@
 !> \file mynnsfc_wrapper.F90
-!!  Contains all of the code related to running the MYNN surface layer scheme 
+!!  Contains all of the code related to running the MYNN surface layer scheme
 
       MODULE mynnsfc_wrapper
 
@@ -97,8 +97,8 @@ SUBROUTINE mynnsfc_wrapper_run(            &
 ! should be moved to inside the mynn:
       use machine , only : kind_phys
 
-!      USE module_sf_mynn, only : SFCLAY_mynn 
-!tgs - info on iterations: 
+!      USE module_sf_mynn, only : SFCLAY_mynn
+!tgs - info on iterations:
 !     flag_iter- logical, execution or not (im)
 !                when iter = 1, flag_iter = .true. for all grids   im   !
 !                when iter = 2, flag_iter = .true. when wind < 2   im   !
@@ -108,9 +108,9 @@ SUBROUTINE mynnsfc_wrapper_run(            &
 !                when iter = 2, flag_guess = .false. for all grids im   !
 
 
-!------------------------------------------------------------------- 
+!-------------------------------------------------------------------
       implicit none
-!------------------------------------------------------------------- 
+!-------------------------------------------------------------------
 !  ---  constant parameters:
 !      real(kind=kind_phys), parameter :: rvovrd  = r_v/r_d
       real(kind=kind_phys), parameter :: karman  = 0.4
@@ -121,8 +121,8 @@ SUBROUTINE mynnsfc_wrapper_run(            &
       real(kind=kind_phys), parameter :: SVP3    = 29.65
       real(kind=kind_phys), parameter :: SVPT0   = 273.15
 
-  REAL, PARAMETER :: xlvcp=xlv/cp, xlscp=(xlv+xlf)/cp, ev=xlv, rd=r_d, &
-       &rk=cp/rd, svp11=svp1*1.e3, p608=ep_1, ep_3=1.-ep_2, g_inv=1./g
+  REAL(kind=kind_phys), PARAMETER :: xlvcp=xlv/cp, xlscp=(xlv+xlf)/cp, ev=xlv,&
+       &rd=r_d, rk=cp/rd, svp11=svp1*1.e3, p608=ep_1, ep_3=1.-ep_2, g_inv=1./g
 
 
   character(len=*), intent(out) :: errmsg
@@ -145,9 +145,10 @@ SUBROUTINE mynnsfc_wrapper_run(            &
 
 !Input data
       integer, dimension(:), intent(in) :: vegtype
-      real(kind=kind_phys), dimension(:), intent(in)    ::  &
+      real(kind=kind_phys), dimension(:), intent(in) ::     &
      &                    sigmaf,shdmax,z0pert,ztpert
-      real(kind_phys), dimension(:,:),    intent(in) :: spp_wts_sfc
+      real(kind=kind_phys), dimension(:,:), intent(in) ::   &
+     &                    spp_wts_sfc
 
       real(kind=kind_phys), dimension(:,:),                 &
      &      intent(in)  ::                  phii
@@ -278,8 +279,8 @@ SUBROUTINE mynnsfc_wrapper_run(            &
 !          write(0,*)"qsfc:",qsfc(1)," ps:",ps(1)
 !          write(0,*)"wspd:",wspd(1),"rb=",rb_wat(1)
 !          write(0,*)"delt=",delt," im=",im," levs=",levs
-!          write(0,*)"flag_init=",flag_init 
-!          write(0,*)"flag_restart=",flag_restart 
+!          write(0,*)"flag_init=",flag_init
+!          write(0,*)"flag_restart=",flag_restart
 !          write(0,*)"iter=",iter
 !          write(0,*)"zlvl(1)=",dz(1,1)*0.5
 !          write(0,*)"PBLH=",pblh(1)," xland=",xland(1)
@@ -368,7 +369,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
 !         write(0,*)"cm:",cm_lnd(1),cm_wat(1),cm_ice(1)
 !         write(0,*)"ch:",ch_lnd(1),ch_wat(1),ch_ice(1)
 !         write(0,*)"fm:",fm_lnd(1),fm_wat(1),fm_ice(1)
-!         write(0,*)"fh:",fh_lnd(1),fh_wat(1),fh_ice(1) 
+!         write(0,*)"fh:",fh_lnd(1),fh_wat(1),fh_ice(1)
 !         write(0,*)"rb:",rb_lnd(1),rb_wat(1),rb_ice(1)
 !         write(0,*)"xland=",xland(1)," wstar:",wstar(1)
 !         write(0,*)"HFX:",hfx(1)," qfx:",qfx(1)
