@@ -126,6 +126,8 @@ physics/h2ophys.*                              @AlexBelochitski-NOAA            
 physics/sfc_sice.*                             @wd20xw                              @climbfuji @SamuelTrahanNOAA @grantfirl @mzhangw @panll @mkavulich @ChunxiZhang-NOAA
 physics/sfc_cice.*                             @wd20xw                              @climbfuji @SamuelTrahanNOAA @grantfirl @mzhangw @panll @mkavulich @ChunxiZhang-NOAA
 
+physics/sfc_land.*                             @uturuncoglu @barlage
+
 ########################################################################
 
 # Lines starting with '#' are comments.
