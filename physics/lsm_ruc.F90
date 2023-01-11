@@ -355,7 +355,7 @@ module lsm_ruc
      &       cm_ice, ch_ice, snowfallac_ice,                            &
      &       albdvis_ice, albdnir_ice,  albivis_ice,  albinir_ice,      &
      ! --- out
-     &       rhosnf, sbsno,                                             &
+     &       sbsno,                                                     &
      &       cmm_lnd, chh_lnd, cmm_ice, chh_ice,                        &
      !
      &       flag_iter, flag_guess, flag_init, lsm_cold_start,          &
@@ -426,7 +426,7 @@ module lsm_ruc
 
 !  ---  output:
       real (kind=kind_phys), dimension(:), intent(inout) ::              &
-     &       rhosnf, runof, drain, runoff, srunoff, evbs, evcw,          &
+     &       runof, drain, runoff, srunoff, evbs, evcw,                  &
      &       stm, wetness, semisbase, semis_lnd, semis_ice,              &
      &       sfalb_lnd, sfalb_ice,                                       &
      ! for land
@@ -492,7 +492,7 @@ module lsm_ruc
      &     sneqv_lnd, snoalb1d_lnd, snowh_lnd, snoh_lnd, tsnav_lnd,     &
      &     snomlt_lnd, sncovr_lnd, soilw, soilm, ssoil_lnd,             &
      &     soilt_lnd, tbot,                                             &
-     &     xlai, swdn, z0_lnd, znt_lnd, rhosnfr, infiltr,               &
+     &     xlai, swdn, z0_lnd, znt_lnd, infiltr,                        &
      &     precipfr, snfallac_lnd, acsn,                                &
      &     qsfc_lnd, qsg_lnd, qvg_lnd, qcg_lnd, soilt1_lnd, chklowq,    &
      &     rhonewsn
@@ -747,7 +747,6 @@ module lsm_ruc
           acrunoff(i,j)     = 0.0
           snfallac_lnd(i,j) = 0.0
           snfallac_ice(i,j) = 0.0
-          rhosnfr(i,j)      = 0.0
           precipfr(i,j)     = 0.0
 
         endif
@@ -1122,7 +1121,7 @@ module lsm_ruc
      &          zs, prcp(i,j), sneqv_lnd(i,j), snowh_lnd(i,j),               &
      &          sncovr_lnd(i,j),                                             &
      &          ffrozp(i,j), frpcpn,                                         &
-     &          rhosnfr(i,j), precipfr(i,j),                                 &
+     &          precipfr(i,j),                                               &
 !  ---  inputs:
      &          conflx2(i,1,j), sfcprs(i,1,j), sfctmp(i,1,j), q2(i,1,j),     &
      &          qcatm(i,1,j), rho2(i,1,j), semis_bck(i,j), lwdn(i,j),        &
@@ -1246,7 +1245,6 @@ module lsm_ruc
         sfcqv_lnd(i)  = qvg_lnd(i,j)
         sfcqc_lnd(i)  = qcg_lnd(i,j)
         !  --- ...  units [m/s] = [g m-2 s-1]
-        rhosnf(i) = rhosnfr(i,j)
         !acsnow(i) = acsn(i,j)     ! kg m-2
 
         ! --- ... accumulated total runoff and surface runoff
@@ -1396,7 +1394,7 @@ module lsm_ruc
      &          zs, prcp(i,j), sneqv_ice(i,j), snowh_ice(i,j),               &
      &          sncovr_ice(i,j),                                             &
      &          ffrozp(i,j), frpcpn,                                         &
-     &          rhosnfr(i,j), precipfr(i,j),                                 &
+     &          precipfr(i,j),                                               &
 !  ---  inputs:
      &          conflx2(i,1,j), sfcprs(i,1,j), sfctmp(i,1,j), q2(i,1,j),     &
      &          qcatm(i,1,j), rho2(i,1,j), semis_bck(i,j), lwdn(i,j),        &

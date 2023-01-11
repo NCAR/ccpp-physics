@@ -54,7 +54,7 @@ CONTAINS
                    DT,init,lsm_cold_start,KTAU,iter,NSL,         &
                    graupelncv,snowncv,rainncv,raincv,            &
                    ZS,RAINBL,SNOW,SNOWH,SNOWC,FRZFRAC,frpcpn,    &
-                   rhosnf,precipfr,                              &
+                   precipfr,                                     &
                    Z3D,P8W,T3D,QV3D,QC3D,RHO3D,EMISBCK,          &
                    GLW,GSWdn,GSW,EMISS,CHKLOWQ, CHS,             &
                    FLQC,FLHC,rhonewsn,MAVAIL,CANWAT,VEGFRA,ALB,  &
@@ -296,14 +296,12 @@ CONTAINS
                                                          SMFR3D
 
    REAL,       DIMENSION( ims:ime, jms:jme ), INTENT(OUT)     :: &
-                                                         RHOSNF, & !RHO of snowfall
                                                        PRECIPFR, & ! time-step frozen precip
                                                      SNOWFALLAC
 !--- soil/snow properties
    REAL                                                          &
                              ::                           RHOCS, &
                                                           RHOSN, &
-                                                      RHOSNFALL, &
                                                            BCLH, &
                                                             DQM, &
                                                            KSAT, &
@@ -457,7 +455,6 @@ CONTAINS
            ACSNOW(i,j) = 0.
            SNOWFALLAC(i,j) = 0.
            PRECIPFR(i,j) = 0.
-           RHOSNF(i,j) = -1.e3 ! non-zero flag
            SNFLX(i,j) = 0.
            DEW  (i,j) = 0.
            PC   (i,j) = 0.
@@ -622,7 +619,6 @@ CONTAINS
          CANWATR=CANWAT(I,J)*1.E-3
 
          SNOWFRAC=SNOWC(I,J)
-         RHOSNFALL=RHOSNF(I,J)
 
          snowold(i,j)=snwe
 !-----
@@ -894,7 +890,7 @@ CONTAINS
                 nzs,nddzs,nroot,meltfactor,                      &   !added meltfactor
                 iland,isoil,ivgtyp(i,j),isltyp(i,j),             &
                 PRCPMS, NEWSNMS,SNWE,SNHEI,SNOWFRAC,             &
-                RHOSN,RHONEWSN(I,J),RHOSNFALL,                   &
+                RHOSN,RHONEWSN(I,J),                             &
                 snowrat,grauprat,icerat,curat,                   &
                 PATM,TABS,QVATM,QCATM,RHO,                       &
                 GLW(I,J),GSWdn(i,j),GSW(I,J),                    &
@@ -1073,9 +1069,6 @@ endif
 
        SNOWC(I,J)=SNOWFRAC
 
-!--- RHOSNF - density of snowfall
-       RHOSNF(I,J)=RHOSNFALL
-
 ! Accumulated moisture flux [kg/m^2]
        SFCEVP (I,J) = SFCEVP (I,J) + QFX (I,J) * DT
 
@@ -1161,7 +1154,7 @@ endif
                 nzs,nddzs,nroot,meltfactor,                      &
                 ILAND,ISOIL,IVGTYP,ISLTYP,PRCPMS,                &
                 NEWSNMS,SNWE,SNHEI,SNOWFRAC,                     &
-                RHOSN,RHONEWSN,RHOSNFALL,                        &
+                RHOSN,RHONEWSN,                                  &
                 snowrat,grauprat,icerat,curat,                   &
                 PATM,TABS,QVATM,QCATM,rho,                       &
                 GLW,GSWdn,GSW,EMISS,EMISBCK,QKMS,TKMS,PC,        &
@@ -1281,7 +1274,6 @@ endif
                                                           EVAPL, &
                                                         INFILTR, &
                                                           RHOSN, & 
-                                                      rhosnfall, &
                                                         snowrat, &
                                                        grauprat, &
                                                          icerat, &

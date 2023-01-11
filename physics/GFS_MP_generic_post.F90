@@ -20,11 +20,11 @@
 !> @{
       subroutine GFS_MP_generic_post_run(                                                                                 &
         im, levs, kdt, nrcm, nncl, ntcw, ntrac, imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_nssl,    &
-        imp_physics_mg, imp_physics_fer_hires, cal_pre, cplflx, cplchm, cpllnd, progsigma, con_g, rainmin, dtf, frain, rainc,    &
-        rain1, rann, xlat, xlon, gt0, gq0, prsl, prsi, phii, tsfc, ice, snow, graupel, save_t, save_q, rain0, ice0, snow0,&
-        graupel0, del, rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp, srflag, sr, cnvprcp, totprcp, totice,   &
-        totsnw, totgrp, cnvprcpb, totprcpb, toticeb, totsnwb, totgrpb, rain_cpl, rainc_cpl, snow_cpl, pwat,               &
-        frzr, frzrb, frozr, frozrb, tsnowp, tsnowpb, rhonewsn1, vrbliceden_noah, iopt_snf,                                & 
+        imp_physics_mg, imp_physics_fer_hires, cal_pre, cplflx, cplchm, cpllnd, progsigma, con_g, rhowater, rainmin, dtf, &
+        frain, rainc, rain1, rann, xlat, xlon, gt0, gq0, prsl, prsi, phii, tsfc, ice, snow, graupel, save_t, save_q,      &
+        rain0, ice0, snow0, graupel0, del, rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp, srflag, sr, cnvprcp,&
+        totprcp, totice, totsnw, totgrp, cnvprcpb, totprcpb, toticeb, totsnwb, totgrpb, rain_cpl, rainc_cpl, snow_cpl,    &
+        pwat, frzr, frzrb, frozr, frozrb, tsnowp, tsnowpb, rhonewsn1, vrbliceden_noah, iopt_snf,                          & 
         drain_cpl, dsnow_cpl, lsm, lsm_ruc, lsm_noahmp, raincprv, rainncprv, iceprv, snowprv,                             &
         graupelprv, draincprv, drainncprv, diceprv, dsnowprv, dgraupelprv, dtp, dfi_radar_max_intervals,                  &
         dtend, dtidx, index_of_temperature, index_of_process_mp,ldiag3d, qdiag3d,dqdt_qmicro, lssav, num_dfi_radar,       &
@@ -47,7 +47,7 @@
       integer                                                :: ix_dfi_radar(:)
       real(kind=kind_phys), dimension(:,:),    intent(inout) :: gt0
 
-      real(kind=kind_phys),                    intent(in)    :: dtf, frain, con_g, rainmin
+      real(kind=kind_phys),                    intent(in)    :: dtf, frain, con_g, rainmin, rhowater
       real(kind=kind_phys), dimension(:),      intent(in)    :: rain1, xlat, xlon, tsfc
       real(kind=kind_phys), dimension(:),      intent(inout) :: ice, snow, graupel, rainc
       real(kind=kind_phys), dimension(:),      intent(in)    :: rain0, ice0, snow0, graupel0
@@ -111,7 +111,6 @@
 
       real :: snowrat,grauprat,icerat,curat,prcpncfr,prcpcufr
       real :: rhonewsnow,rhoprcpice,rhonewgr,rhonewice
-      real(kind=kind_phys), parameter :: rhowater = 1000.0_kind_phys
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -136,7 +135,7 @@
             frozrb(i) = frozrb(i) + graupel0(i)
          enddo
 !Compute the variable precip ice density for specific LSM schemes and options
-         if ( lsm == lsm_ruc .or. lsm == lsm_noahmp .and. iopt_snf == 5 .or. vrbliceden_noah == .true.) then
+         if ( lsm == lsm_ruc .or. (lsm == lsm_noahmp .and. iopt_snf == 5) .or. vrbliceden_noah == .true.) then
             snowrat = 0.
             grauprat = 0.
             icerat = 0.
