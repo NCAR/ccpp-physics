@@ -287,7 +287,7 @@
   kind = kind_phys
   intent = inout
 [frzr]
-  standard_name = lwe_thickness_of_surface_freezing_rain_amount
+  standard_name = cumulative_lwe_thickness_of_surface_freezing_rain_amount
   long_name = accumulated surface freezing rain
   units = m
   dimensions = (horizontal_loop_extent)
@@ -295,7 +295,7 @@
   kind = kind_phys
   intent = inout
 [frzrb]
-  standard_name = lwe_thickness_of_surface_freezing_rain_amount_in_bucket
+  standard_name = cumulative_lwe_thickness_of_surface_freezing_rain_amount_in_bucket
   long_name = accumulated surface freezing rain in bucket
   units = m
   dimensions = (horizontal_loop_extent)
@@ -303,7 +303,7 @@
   kind = kind_phys
   intent = inout
 [frozr]
-  standard_name = lwe_thickness_of_surface_graupel_amount
+  standard_name = cumulative_lwe_thickness_of_surface_graupel_amount
   long_name = accumulated surface graupel
   units = m
   dimensions = (horizontal_loop_extent)
@@ -311,7 +311,7 @@
   kind = kind_phys
   intent = inout
 [frozrb]
-  standard_name = lwe_thickness_of_surface_graupel_amount_in_bucket
+  standard_name = cumulative_lwe_thickness_of_surface_graupel_amount_in_bucket
   long_name = accumulated surface graupel in bucket
   units = m
   dimensions = (horizontal_loop_extent)
@@ -319,7 +319,7 @@
   kind = kind_phys
   intent = inout
 [tsnowp]
-  standard_name = lwe_thickness_of_surface_snow_amount
+  standard_name = cumulative_lwe_thickness_of_surface_snow_amount
   long_name = accumulated surface snow
   units = m
   dimensions = (horizontal_loop_extent)
@@ -327,7 +327,7 @@
   kind = kind_phys
   intent = inout
 [tsnowpb]
-  standard_name = lwe_thickness_of_surface_snow_amount_in_bucket
+  standard_name = cumulative_lwe_thickness_of_surface_snow_amount_in_bucket
   long_name = accumulated surface snow in bucket
   units = m
   dimensions = (horizontal_loop_extent)
