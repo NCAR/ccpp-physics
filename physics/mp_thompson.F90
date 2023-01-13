@@ -9,7 +9,7 @@ module mp_thompson
       use machine, only : kind_phys
 
       use module_mp_thompson, only : thompson_init, mp_gt_driver, thompson_finalize, calc_effectRad
-      use module_mp_thompson, only : naIN0, naIN1, naCCN0, naCCN1, eps, Nt_c
+      use module_mp_thompson, only : naIN0, naIN1, naCCN0, naCCN1, eps, Nt_c_l, Nt_c_o
       use module_mp_thompson, only : re_qc_min, re_qc_max, re_qi_min, re_qi_max, re_qs_min, re_qs_max
 
       use module_mp_thompson_make_number_concentrations, only: make_IceNumber, make_DropletNumber, make_RainNumber
@@ -284,7 +284,7 @@ module mp_thompson
 
            ! Constant droplet concentration for single moment cloud water as in
            ! module_mp_thompson.F90, only needed for effective radii calculation
-           nc_local = Nt_c/rho
+           nc_local = Nt_c_l/rho
 
          end if
 
@@ -322,7 +322,8 @@ module mp_thompson
                               merra2_aerosol_aware, nc, nwfa, nifa,&
                               nwfa2d, nifa2d, aero_ind_fdb,        &
                               tgrs, prsl, phii, omega,             &
-                              sedi_semi, decfl, dtp, dt_inner,     & 
+                              sedi_semi, decfl, islmsk, dtp,       &
+                              dt_inner,                            &
                               first_time_step, istep, nsteps,      &
                               prcp, rain, graupel, ice, snow, sr,  &
                               refl_10cm, reset_dBZ, do_radar_ref,  &
@@ -370,6 +371,7 @@ module mp_thompson
          real(kind_phys),           intent(in   ) :: prsl(:,:)
          real(kind_phys),           intent(in   ) :: phii(:,:)
          real(kind_phys),           intent(in   ) :: omega(:,:)
+         integer,                   intent(in   ) :: islmsk(:)
          real(kind_phys),           intent(in   ) :: dtp
          logical,                   intent(in   ) :: first_time_step
          integer,                   intent(in   ) :: istep, nsteps
@@ -686,9 +688,8 @@ module mp_thompson
          if (is_aerosol_aware .or. merra2_aerosol_aware) then
             call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
                               nc=nc, nwfa=nwfa, nifa=nifa, nwfa2d=nwfa2d, nifa2d=nifa2d,     &
-                              aero_ind_fdb=aero_ind_fdb,                                     &
                               tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtstep, dt_inner=dt_inner,  &
-                              sedi_semi=sedi_semi, decfl=decfl,                              &
+                              sedi_semi=sedi_semi, decfl=decfl, lsm=islmsk,                  &
                               rainnc=rain_mp, rainncv=delta_rain_mp,                         &
                               snownc=snow_mp, snowncv=delta_snow_mp,                         &
                               icenc=ice_mp, icencv=delta_ice_mp,                             &
@@ -696,7 +697,8 @@ module mp_thompson
                               refl_10cm=refl_10cm,                                           &
                               diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
                               has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
-                              rand_perturb_on=spp_mp_opt, kme_stoch=kme_stoch,               &
+                              aero_ind_fdb=aero_ind_fdb, rand_perturb_on=spp_mp_opt,         &
+                              kme_stoch=kme_stoch,                                           &
                               rand_pert=spp_wts_mp, spp_var_list=spp_var_list,               &
                               spp_prt_list=spp_prt_list, n_var_spp=n_var_spp,                &
                               spp_stddev_cutoff=spp_stddev_cutoff,                           &
@@ -727,7 +729,7 @@ module mp_thompson
          else
             call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
                               tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtstep, dt_inner=dt_inner,  &
-                              sedi_semi=sedi_semi, decfl=decfl,                              &
+                              sedi_semi=sedi_semi, decfl=decfl, lsm=islmsk,                  &
                               rainnc=rain_mp, rainncv=delta_rain_mp,                         &
                               snownc=snow_mp, snowncv=delta_snow_mp,                         &
                               icenc=ice_mp, icencv=delta_ice_mp,                             &
@@ -887,6 +889,29 @@ module mp_thompson
          ! mass. NIFA is mainly summarized over five dust bins and NWFA over the
          ! other 10 bins. The parameters besides each bins are carefully tuned
          ! for a good performance of the scheme.
+         !
+         ! The fields for the last index of the aerfld array
+         ! are specified as below.
+         ! 1: dust bin 1,                     0.1 to 1.0  micrometers
+         ! 2: dust bin 2,                     1.0 to 1.8  micrometers
+         ! 3: dust bin 3,                     1.8 to 3.0  micrometers
+         ! 4: dust bin 4,                     3.0 to 6.0  micrometers
+         ! 5: dust bin 5,                     6.0 to 10.0 micrometers
+         ! 6: sea salt bin 1,                 0.03 to 0.1 micrometers
+         ! 7: sea salt bin 2,                 0.1 to 0.5  micrometers
+         ! 8: sea salt bin 3,                 0.5 to 1.5  micrometers 
+         ! 9: sea salt bin 4,                 1.5 to 5.0  micrometers
+         ! 10: sea salt bin 5,                5.0 to 10.0 micrometers
+         ! 11: Sulfate,                       0.35 (mean) micrometers
+         ! 15: water-friendly organic carbon, 0.35 (mean) micrometers
+         !
+         ! Bin densities are as follows:
+         ! 1:    dust bin 1:         2500 kg/m2
+         ! 2-5:  dust bin 2-5:       2650 kg/m2
+         ! 6-10: sea salt bins 6-10: 2200 kg/m2
+         ! 11:   sulfate:            1700 kg/m2
+         ! 15:   organic carbon:     1800 kg/m2
+         
          implicit none
          integer, intent(in)::ncol, nlev
          real (kind=kind_phys), dimension(:,:,:), intent(in)  :: aerfld
