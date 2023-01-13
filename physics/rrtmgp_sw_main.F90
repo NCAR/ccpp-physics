@@ -226,6 +226,7 @@ contains
     real(kind_phys), dimension(sw_gas_props%get_ngpt(),nLay,rrtmgp_phys_blksz) :: rng3D,rng3D2
     real(kind_phys), dimension(sw_gas_props%get_ngpt()*nLay) :: rng2D
     logical, dimension(rrtmgp_phys_blksz,nLay,sw_gas_props%get_ngpt()) :: maskMCICA
+    logical :: cloudy_column, clear_column
     real(kind_phys), dimension(sw_gas_props%get_nband(),rrtmgp_phys_blksz) :: &
          sfc_alb_dir, sfc_alb_dif
     real(kind_phys), dimension(rrtmgp_phys_blksz,nLay+1,sw_gas_props%get_nband()),target :: &
@@ -270,6 +271,9 @@ contains
              if (zcf0(iblck) > oneminus) zcf0(iblck) = 1._kind_phys
              zcf1(iblck) = 1._kind_phys - zcf0(iblck)
           enddo
+          cloudy_column = any(zcf1 .gt. eps)
+          clear_column  = .true.
+          if (cloudy_column) clear_column = .false.
 
           ! ###################################################################################
           !
@@ -385,7 +389,7 @@ contains
           ! Compute optics for cloud(s) and precipitation, sample clouds...
           !
           ! ###################################################################################
-          if (any(zcf1 .gt. eps)) then
+          if (cloudy_column) then
              ! Gridmean/mp-clouds
              call check_error_msg('rrtmgp_sw_main_cloud_optics',sw_cloud_props%cloud_optics(&
                   cld_lwp(iCols,:),                     & ! IN  - Cloud liquid water path
@@ -523,70 +527,73 @@ contains
              call check_error_msg('rrtmgp_sw_main_cloud_sampling',&
                   draw_samples(maskMCICA, .true., &
                   sw_optical_props_cloudsByBand, sw_optical_props_clouds))
-          endif
+          endif ! cloudy_column
 
           ! ###################################################################################
           !
           ! Compute clear-sky fluxes (gaseous+aerosol)
           !
           ! ###################################################################################
-          ! Increment
+          ! Increment optics (always)
           sw_optical_props_aerosol_local%tau = aersw_tau(iCols,:,:)
           sw_optical_props_aerosol_local%ssa = aersw_ssa(iCols,:,:)
           sw_optical_props_aerosol_local%g   = aersw_g(iCols,:,:)
           call check_error_msg('rrtmgp_sw_main_increment_aerosol_to_clrsky', & 
                sw_optical_props_aerosol_local%increment(sw_optical_props_accum))
 
-          ! Delta-scale
-          !call check_error_msg('rrtmgp_sw_main_delta_scale',sw_optical_props_accum%delta_scale())
+          ! Compute clear-sky fluxes (Yes for no-clouds. Optional for cloudy scenes)
+          if (clear_column .or. doSWclrsky) then
+             call check_error_msg('rrtmgp_sw_main_rte_sw_clrsky',rte_sw(     &
+                  sw_optical_props_accum,    & ! IN  - optical-properties
+                  top_at_1,                  & ! IN  - veritcal ordering flag
+                  coszen(iCols),             & ! IN  - Cosine of solar zenith angle
+                  toa_src_sw,                & ! IN  - incident solar flux at TOA
+                  sfc_alb_dir,               & ! IN  - Shortwave surface albedo (direct)
+                  sfc_alb_dif,               & ! IN  - Shortwave surface albedo (diffuse)
+                  flux_clrsky))                ! OUT - Fluxes, clear-sky, 3D (1,nLay,nBand) 
+             
+             ! Store fluxes
+             fluxswUP_clrsky(iCols,:)   = sum(flux_clrsky%bnd_flux_up, dim=3)
+             fluxswDOWN_clrsky(iCols,:) = sum(flux_clrsky%bnd_flux_dn, dim=3)
 
-          ! Compute fluxes
-          call check_error_msg('rrtmgp_sw_main_rte_sw_clrsky',rte_sw(     &
-               sw_optical_props_accum,    & ! IN  - optical-properties
-               top_at_1,                  & ! IN  - veritcal ordering flag
-               coszen(iCols),             & ! IN  - Cosine of solar zenith angle
-               toa_src_sw,                & ! IN  - incident solar flux at TOA
-               sfc_alb_dir,               & ! IN  - Shortwave surface albedo (direct)
-               sfc_alb_dif,               & ! IN  - Shortwave surface albedo (diffuse)
-               flux_clrsky))                ! OUT - Fluxes, clear-sky, 3D (1,nLay,nBand) 
-
-          ! Store fluxes
-          fluxswUP_clrsky(iCols,:)   = sum(flux_clrsky%bnd_flux_up, dim=3)
-          fluxswDOWN_clrsky(iCols,:) = sum(flux_clrsky%bnd_flux_dn, dim=3)
-
-          ! Compute surface downward beam/diffused flux components
-          do iblck = 1, rrtmgp_phys_blksz
-             do iBand=1,sw_gas_props%get_nband()
-                flux_dir = flux_clrsky%bnd_flux_dn(iblck,iSFC,iBand)
-                flux_dif = 0._kind_phys
-                ! Near-IR bands
-                if (iBand < ibd) then
-                   scmpsw_clrsky(iblck)%nirbm = scmpsw_clrsky(iblck)%nirbm + flux_dir
-                   scmpsw_clrsky(iblck)%nirdf = scmpsw_clrsky(iblck)%nirdf + flux_dif
-                endif
-                ! Transition band
-                if (iBand == ibd) then
-                   scmpsw_clrsky(iblck)%nirbm = scmpsw_clrsky(iblck)%nirbm + flux_dir*0.5_kind_phys
-                   scmpsw_clrsky(iblck)%nirdf = scmpsw_clrsky(iblck)%nirdf + flux_dif*0.5_kind_phys
-                   scmpsw_clrsky(iblck)%visbm = scmpsw_clrsky(iblck)%visbm + flux_dir*0.5_kind_phys
-                   scmpsw_clrsky(iblck)%visdf = scmpsw_clrsky(iblck)%visdf + flux_dif*0.5_kind_phys
-                endif
-                ! UV-VIS bands
-                if (iBand > ibd) then
-                   scmpsw_clrsky(iblck)%visbm = scmpsw_clrsky(iblck)%visbm + flux_dir
-                   scmpsw_clrsky(iblck)%visdf = scmpsw_clrsky(iblck)%visdf + flux_dif
-                endif
-                ! uv-b surface downward flux
-                scmpsw_clrsky(iblck)%uvbfc    = flux_clrsky%bnd_flux_dn(iblck,iSFC,ibd_uv)
+             ! Compute surface downward beam/diffused flux components
+             do iblck = 1, rrtmgp_phys_blksz
+                do iBand=1,sw_gas_props%get_nband()
+                   flux_dir = flux_clrsky%bnd_flux_dn(iblck,iSFC,iBand)
+                   flux_dif = 0._kind_phys
+                   ! Near-IR bands
+                   if (iBand < ibd) then
+                      scmpsw_clrsky(iblck)%nirbm = scmpsw_clrsky(iblck)%nirbm + flux_dir
+                      scmpsw_clrsky(iblck)%nirdf = scmpsw_clrsky(iblck)%nirdf + flux_dif
+                   endif
+                   ! Transition band
+                   if (iBand == ibd) then
+                      scmpsw_clrsky(iblck)%nirbm = scmpsw_clrsky(iblck)%nirbm + flux_dir*0.5_kind_phys
+                      scmpsw_clrsky(iblck)%nirdf = scmpsw_clrsky(iblck)%nirdf + flux_dif*0.5_kind_phys
+                      scmpsw_clrsky(iblck)%visbm = scmpsw_clrsky(iblck)%visbm + flux_dir*0.5_kind_phys
+                      scmpsw_clrsky(iblck)%visdf = scmpsw_clrsky(iblck)%visdf + flux_dif*0.5_kind_phys
+                   endif
+                   ! UV-VIS bands
+                   if (iBand > ibd) then
+                      scmpsw_clrsky(iblck)%visbm = scmpsw_clrsky(iblck)%visbm + flux_dir
+                      scmpsw_clrsky(iblck)%visdf = scmpsw_clrsky(iblck)%visdf + flux_dif
+                   endif
+                   ! uv-b surface downward flux
+                   scmpsw_clrsky(iblck)%uvbfc    = flux_clrsky%bnd_flux_dn(iblck,iSFC,ibd_uv)
+                enddo
              enddo
-          enddo
+          else
+             fluxswUP_clrsky(iCols,:)   = 0._kind_phys
+             fluxswDOWN_clrsky(iCols,:) = 0._kind_phys
+             scmpsw                     = cmpfsw_type( 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 )
+          endif
 
           ! ###################################################################################
           !
           ! All-sky fluxes (clear-sky + clouds + precipitation)
           !
           ! ###################################################################################
-          if (any(zcf1 .gt. eps)) then
+          if (cloudy_column) then
              ! Delta scale
              !call check_error_msg('rrtmgp_sw_main_delta_scale',sw_optical_props_clouds%delta_scale())
 
