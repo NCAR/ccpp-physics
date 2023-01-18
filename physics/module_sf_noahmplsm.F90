@@ -4289,12 +4289,18 @@ endif   ! croptype == 0
 !     qfx = (qsfc-qair)*rhoair*caw !*cpair/gammag
 
 ! 2m temperature over vegetation ( corrected for low cq2v values )
-   if (opt_sfc == 1 .or. opt_sfc == 2 .or. opt_sfc ==3 ) then
+   if (opt_sfc == 1 .or. opt_sfc == 2 ) then
 !      cah2 = fv*1./vkc*log((2.+z0h)/z0h)
       cah2 = fv*vkc/log((2.+z0h)/z0h)
       cah2 = fv*vkc/(log((2.+z0h)/z0h)-fh2)
       cq2v = cah2
    endif
+
+! opt_sfc 3: fh2 is the stability
+    if (opt_sfc ==3) then
+        cah2 = fv*vkc/fh2
+        cq2v = cah2
+    endif
 
     if (opt_sfc == 4 ) then
        rahc2 = max(1.,1./(ch2v*wspdv))
@@ -4742,9 +4748,23 @@ endif   ! croptype == 0
 !jref:start; errors in original equation corrected.
 ! 2m air temperature
 
-     if(opt_sfc == 1 .or. opt_sfc ==2 .or. opt_sfc == 3) then
+     if(opt_sfc == 1 .or. opt_sfc ==2 ) then
        ehb2  = fv*vkc/log((2.+z0h)/z0h)
        ehb2  = fv*vkc/(log((2.+z0h)/z0h)-fh2)
+       cq2b  = ehb2
+       if (ehb2.lt.1.e-5 ) then
+         t2mb  = tgb
+         q2b   = qsfc
+       else
+         t2mb  = tgb - shb/(rhoair*cpair) * 1./ehb2
+         q2b   = qsfc - evb/(lathea*rhoair)*(1./cq2b + rsurf)
+       endif
+       if (parameters%urban_flag) q2b = qsfc
+     end if
+
+! opt_sfc 3: fh2 is the stability
+     if(opt_sfc == 3 ) then
+       ehb2  = fv*vkc/fh2
        cq2b  = ehb2
        if (ehb2.lt.1.e-5 ) then
          t2mb  = tgb

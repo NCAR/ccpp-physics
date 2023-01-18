@@ -1464,6 +1464,11 @@ contains
 ! 2m air temperature
      ehb2  = fv*vkc/(log((2.+z0h)/z0h)-fh2)
      cq2b  = ehb2
+! for opt_sfc 3
+     if (opt_sfc ==3) then
+       ehb2  = fv*vkc/fh2
+       cq2b  = ehb2
+     endif
 
      if (opt_sfc == 4) then
        ehb2 = ch2 * wspd1i ! need conductance,z0h from sfcdif4 
