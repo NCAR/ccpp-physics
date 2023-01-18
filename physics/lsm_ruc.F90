@@ -323,8 +323,8 @@ module lsm_ruc
       subroutine lsm_ruc_run                                            & ! inputs
      &     ( iter, me, master, delt, kdt, im, nlev, lsm_ruc, lsm,       &
      &       imp_physics, imp_physics_gfdl, imp_physics_thompson,       &
-     &       imp_physics_nssl,                                          &
-     &       do_mynnsfclay, lsoil_ruc, lsoil, rdlai, xlat_d, xlon_d, zs,&
+     &       imp_physics_nssl, do_mynnsfclay, vrbliceden,               &
+     &       lsoil_ruc, lsoil, rdlai, xlat_d, xlon_d, zs,               &
      &       t1, q1, qc, stype, vtype, sigmaf, laixy,                   &
      &       dlwflx, dswsfc, tg3, coszen, land, icy, use_lake,          &
      &       rainnc, rainc, ice, snow, graupel,                         &
@@ -355,7 +355,7 @@ module lsm_ruc
      &       cm_ice, ch_ice, snowfallac_ice,                            &
      &       albdvis_ice, albdnir_ice,  albivis_ice,  albinir_ice,      &
      ! --- out
-     &       sbsno,                                                     &
+     &       rhosnf, sbsno,                                             &
      &       cmm_lnd, chh_lnd, cmm_ice, chh_ice,                        &
      !
      &       flag_iter, flag_guess, flag_init, lsm_cold_start,          &
@@ -397,6 +397,7 @@ module lsm_ruc
       logical, dimension(:),  intent(in) :: flag_cice
       logical,                intent(in) :: frac_grid
       logical,                intent(in) :: do_mynnsfclay
+      logical,                intent(in) :: vrbliceden
 
       logical,                intent(in) :: rdlai
 
@@ -426,7 +427,7 @@ module lsm_ruc
 
 !  ---  output:
       real (kind=kind_phys), dimension(:), intent(inout) ::              &
-     &       runof, drain, runoff, srunoff, evbs, evcw,                  &
+     &       rhosnf, runof, drain, runoff, srunoff, evbs, evcw,          &
      &       stm, wetness, semisbase, semis_lnd, semis_ice,              &
      &       sfalb_lnd, sfalb_ice,                                       &
      ! for land
@@ -492,7 +493,7 @@ module lsm_ruc
      &     sneqv_lnd, snoalb1d_lnd, snowh_lnd, snoh_lnd, tsnav_lnd,     &
      &     snomlt_lnd, sncovr_lnd, soilw, soilm, ssoil_lnd,             &
      &     soilt_lnd, tbot,                                             &
-     &     xlai, swdn, z0_lnd, znt_lnd, infiltr,                        &
+     &     xlai, swdn, z0_lnd, znt_lnd, rhosnfr, infiltr,               &
      &     precipfr, snfallac_lnd, acsn,                                &
      &     qsfc_lnd, qsg_lnd, qvg_lnd, qcg_lnd, soilt1_lnd, chklowq,    &
      &     rhonewsn
@@ -747,6 +748,7 @@ module lsm_ruc
           acrunoff(i,j)     = 0.0
           snfallac_lnd(i,j) = 0.0
           snfallac_ice(i,j) = 0.0
+          rhosnfr(i,j)      = 0.0
           precipfr(i,j)     = 0.0
 
         endif
@@ -1121,7 +1123,7 @@ module lsm_ruc
      &          zs, prcp(i,j), sneqv_lnd(i,j), snowh_lnd(i,j),               &
      &          sncovr_lnd(i,j),                                             &
      &          ffrozp(i,j), frpcpn,                                         &
-     &          precipfr(i,j),                                               &
+     &          rhosnfr(i,j), precipfr(i,j), vrbliceden,                     &
 !  ---  inputs:
      &          conflx2(i,1,j), sfcprs(i,1,j), sfctmp(i,1,j), q2(i,1,j),     &
      &          qcatm(i,1,j), rho2(i,1,j), semis_bck(i,j), lwdn(i,j),        &
@@ -1245,6 +1247,7 @@ module lsm_ruc
         sfcqv_lnd(i)  = qvg_lnd(i,j)
         sfcqc_lnd(i)  = qcg_lnd(i,j)
         !  --- ...  units [m/s] = [g m-2 s-1]
+        rhosnf(i) = rhosnfr(i,j)
         !acsnow(i) = acsn(i,j)     ! kg m-2
 
         ! --- ... accumulated total runoff and surface runoff
@@ -1394,7 +1397,7 @@ module lsm_ruc
      &          zs, prcp(i,j), sneqv_ice(i,j), snowh_ice(i,j),               &
      &          sncovr_ice(i,j),                                             &
      &          ffrozp(i,j), frpcpn,                                         &
-     &          precipfr(i,j),                                               &
+     &          rhosnfr(i,j), precipfr(i,j), vrbliceden,                     &
 !  ---  inputs:
      &          conflx2(i,1,j), sfcprs(i,1,j), sfctmp(i,1,j), q2(i,1,j),     &
      &          qcatm(i,1,j), rho2(i,1,j), semis_bck(i,j), lwdn(i,j),        &

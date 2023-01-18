@@ -634,6 +634,13 @@
   dimensions = ()
   type = logical
   intent = in
+[vrbliceden]
+  standard_name = do_variable_surface_frozen_precipitation_density
+  long_name = flag for variable precip ice density
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [lsoil_ruc]
   standard_name = vertical_dimension_of_soil_internal_to_land_surface_scheme
   long_name = number of soil layers internal to land surface model
@@ -1512,6 +1519,14 @@
   type = real
   kind = kind_phys
   intent = out
+[rhosnf]
+  standard_name = lsm_internal_surface_frozen_precipitation_density
+  long_name = density of frozen precipitation
+  units = kg m-3
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
 [sbsno]
   standard_name = snow_deposition_sublimation_upward_latent_heat_flux
   long_name = latent heat flux from snow depo/subl
