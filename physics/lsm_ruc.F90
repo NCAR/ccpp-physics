@@ -748,7 +748,7 @@ module lsm_ruc
           acrunoff(i,j)     = 0.0
           snfallac_lnd(i,j) = 0.0
           snfallac_ice(i,j) = 0.0
-          rhosnfr(i,j)      = 0.0
+          rhosnfr(i,j)      = -1.e3
           precipfr(i,j)     = 0.0
 
         endif
