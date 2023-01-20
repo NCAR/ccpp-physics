@@ -342,19 +342,12 @@
   type = real
   kind = kind_phys
   intent = inout
-[vrbliceden_noah]
-  standard_name = do_variable_surface_frozen_precipitation_density
-  long_name = flag for variable precip ice density
+[exticeden]
+  standard_name = do_external_surface_frozen_precipitation_density
+  long_name = flag for calculating frozen precip ice density outside of the LSM
   units = flag
   dimensions = ()
   type = logical
-  intent = in
-[iopt_snf]
-  standard_name = control_for_land_surface_scheme_precipitation_type_partition
-  long_name = choice for precipitation partition option (see noahmp module for definition)
-  units = index
-  dimensions = ()
-  type = integer
   intent = in
 [save_t]
   standard_name = air_temperature_save

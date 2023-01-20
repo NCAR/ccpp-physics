@@ -634,9 +634,9 @@
   dimensions = ()
   type = logical
   intent = in
-[vrbliceden]
-  standard_name = do_variable_surface_frozen_precipitation_density
-  long_name = flag for variable precip ice density
+[exticeden]
+  standard_name = do_external_surface_frozen_precipitation_density
+  long_name = flag for calculating frozen precip ice density outside of the LSM
   units = flag
   dimensions = ()
   type = logical
