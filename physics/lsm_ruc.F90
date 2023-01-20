@@ -323,8 +323,8 @@ module lsm_ruc
       subroutine lsm_ruc_run                                            & ! inputs
      &     ( iter, me, master, delt, kdt, im, nlev, lsm_ruc, lsm,       &
      &       imp_physics, imp_physics_gfdl, imp_physics_thompson,       &
-     &       imp_physics_nssl,                                          &
-     &       do_mynnsfclay, lsoil_ruc, lsoil, rdlai, xlat_d, xlon_d, zs,&
+     &       imp_physics_nssl, do_mynnsfclay, exticeden,                &
+     &       lsoil_ruc, lsoil, rdlai, xlat_d, xlon_d, zs,               &
      &       t1, q1, qc, stype, vtype, sigmaf, laixy,                   &
      &       dlwflx, dswsfc, tg3, coszen, land, icy, use_lake,          &
      &       rainnc, rainc, ice, snow, graupel,                         &
@@ -397,6 +397,7 @@ module lsm_ruc
       logical, dimension(:),  intent(in) :: flag_cice
       logical,                intent(in) :: frac_grid
       logical,                intent(in) :: do_mynnsfclay
+      logical,                intent(in) :: exticeden
 
       logical,                intent(in) :: rdlai
 
@@ -747,7 +748,7 @@ module lsm_ruc
           acrunoff(i,j)     = 0.0
           snfallac_lnd(i,j) = 0.0
           snfallac_ice(i,j) = 0.0
-          rhosnfr(i,j)      = 0.0
+          rhosnfr(i,j)      = -1.e3
           precipfr(i,j)     = 0.0
 
         endif
@@ -1122,7 +1123,7 @@ module lsm_ruc
      &          zs, prcp(i,j), sneqv_lnd(i,j), snowh_lnd(i,j),               &
      &          sncovr_lnd(i,j),                                             &
      &          ffrozp(i,j), frpcpn,                                         &
-     &          rhosnfr(i,j), precipfr(i,j),                                 &
+     &          rhosnfr(i,j), precipfr(i,j), exticeden,                      &
 !  ---  inputs:
      &          conflx2(i,1,j), sfcprs(i,1,j), sfctmp(i,1,j), q2(i,1,j),     &
      &          qcatm(i,1,j), rho2(i,1,j), semis_bck(i,j), lwdn(i,j),        &
@@ -1396,7 +1397,7 @@ module lsm_ruc
      &          zs, prcp(i,j), sneqv_ice(i,j), snowh_ice(i,j),               &
      &          sncovr_ice(i,j),                                             &
      &          ffrozp(i,j), frpcpn,                                         &
-     &          rhosnfr(i,j), precipfr(i,j),                                 &
+     &          rhosnfr(i,j), precipfr(i,j), exticeden,                      &
 !  ---  inputs:
      &          conflx2(i,1,j), sfcprs(i,1,j), sfctmp(i,1,j), q2(i,1,j),     &
      &          qcatm(i,1,j), rho2(i,1,j), semis_bck(i,j), lwdn(i,j),        &

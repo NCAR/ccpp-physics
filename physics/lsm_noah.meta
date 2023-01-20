@@ -487,16 +487,16 @@
   kind = kind_phys
   intent = in
 [rhonewsn1]
-  standard_name = lwe_density_of_precip_ice
+  standard_name = surface_frozen_precipitation_density
   long_name = density of precipitation ice
   units = kg m-3
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
-[vrbliceden_noah]
-  standard_name = flag_for_vrbl_prcp_ice_den
-  long_name = flag for variable precip ice density
+[exticeden]
+  standard_name = do_external_surface_frozen_precipitation_density
+  long_name = flag for calculating frozen precip ice density outside of the LSM
   units = flag
   dimensions = ()
   type = logical

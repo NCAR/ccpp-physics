@@ -116,7 +116,7 @@
      &       swdn, swnet, lwdn, sfcems, sfcprs, sfctmp,                 &
      &       sfcspd, prcp, q2, q2sat, dqsdt2, th2, ivegsrc,             &
      &       vegtyp, soiltyp, slopetyp, shdmin, alb, snoalb,            &
-     &       rhonewsn, vrbliceden_noah,                                 &
+     &       rhonewsn, exticeden,                                       &
      &       bexpp, xlaip,                                              & !  sfc-perts, mgehne
      &       lheatstrg,                                                 &!  ---  input/outputs:
      &       tbot, cmc, t1, stc, smc, sh2o, sneqv, ch, cm,z0,           &!  ---  outputs:
@@ -313,7 +313,7 @@
      &       sfcspd, prcp, q2, q2sat, dqsdt2, th2, shdmin, alb, snoalb, &
      &       bexpp, xlaip, rhonewsn                                     & !sfc-perts, mgehne
 
-      logical, intent(in) :: lheatstrg, vrbliceden_noah
+      logical, intent(in) :: lheatstrg, exticeden
 
 !  ---  input/outputs:
       real (kind=kind_phys), intent(inout) :: tbot, cmc, t1, sneqv,     &
@@ -565,7 +565,7 @@
 !! using old and new snow.
         call snow_new
 !  ---  inputs:                                                         !
-!          ( sfctmp, sn_new, rhonewsn, vrbliceden_noah,                 !
+!          ( sfctmp, sn_new, rhonewsn, exticeden,                       !
 !  ---  input/outputs:                                                  !
 !            snowh, sndens )                                            !
 
@@ -2856,7 +2856,7 @@
       subroutine snow_new
 !...................................
 !  ---  inputs:
-!    &     ( sfctmp, sn_new, rhonewsn, vrbliceden_noah,                 &
+!    &     ( sfctmp, sn_new, rhonewsn, exticeden,                       &
 !  ---  input/outputs:
 !    &       snowh, sndens                                              &
 !    &     )
@@ -2905,7 +2905,7 @@
 !           snowcovered and glacierized basin', 6th nordic hydrological
 !           conference, vemadolen, sweden, 1980, 172-177pp.
 
-      if(.not. vrbliceden_noah) then
+      if(.not. exticeden) then
          if (tempc <= -15.0) then
             dsnew = 0.05
          else
