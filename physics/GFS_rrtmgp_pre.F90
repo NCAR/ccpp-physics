@@ -165,10 +165,11 @@ contains
          errmsg               ! Error message
     integer, intent(out) :: &  
          errflg,            & ! Error flag
-         iSFC,              & ! Vertical index for surface
-         iTOA,              & ! Vertical index for TOA
          nDay
-    logical, intent(out) :: &
+    integer, intent(inout) :: &
+         iSFC,              & ! Vertical index for surface
+         iTOA                 ! Vertical index for TOA
+    logical, intent(inout) :: &
          top_at_1             ! Vertical ordering flag
     real(kind_phys), intent(inout) :: &
          raddt                ! Radiation time-step
@@ -208,6 +209,8 @@ contains
     errmsg = ''
     errflg = 0
     
+    nday   = 0
+    idxday = 0
     if (.not. (doSWrad .or. doLWrad)) return
         
     ! #######################################################################################

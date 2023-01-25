@@ -358,7 +358,7 @@
   units = W m-2
   dimensions = (horizontal_loop_extent)
   type = topflw_type
-  intent = out  
+  intent = inout
 [nirbmdi]
   standard_name = surface_downwelling_direct_nir_shortwave_flux_on_radiation_timestep
   long_name = sfc nir beam sw downward flux
@@ -460,7 +460,7 @@
   units = W m-2
   dimensions = (horizontal_loop_extent)
   type = topfsw_type
-  intent = out
+  intent = inout
 [htrswc]
   standard_name = tendency_of_air_temperature_due_to_shortwave_heating_assuming_clear_sky_on_radiation_timestep
   long_name = clear sky sw heating rates

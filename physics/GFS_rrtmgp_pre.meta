@@ -315,21 +315,21 @@
   units = flag
   dimensions = ()
   type = logical
-  intent = out
+  intent = inout
 [iSFC]
   standard_name = vertical_index_for_surface_in_RRTMGP
   long_name = index for	surface	layer in RRTMGP
   units = flag
   dimensions = ()
   type = integer
-  intent = out
+  intent = inout
 [iTOA]
   standard_name = vertical_index_for_TOA_in_RRTMGP
   long_name = index for TOA layer in RRTMGP
   units = flag
   dimensions = ()
   type = integer
-  intent = out
+  intent = inout
 [tsfc_radtime]
   standard_name = surface_skin_temperature_on_radiation_timestep
   long_name = surface skin temperature on radiation timestep

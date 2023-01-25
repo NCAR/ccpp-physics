@@ -124,9 +124,9 @@ contains
          sfcflw               ! LW radiation fluxes at sfc
     type(sfcfsw_type), dimension(:), intent(inout) :: &
          sfcfsw               ! SW radiation fluxes at sfc
-    type(topfsw_type), dimension(:), intent(out) :: &
+    type(topfsw_type), dimension(:), intent(inout) :: &
          topfsw               ! SW fluxes at top atmosphere
-    type(topflw_type), dimension(:), intent(out) :: &
+    type(topflw_type), dimension(:), intent(inout) :: &
          topflw               ! LW  fluxes at top atmosphere
     character(len=*), intent(out) :: &
          errmsg               ! CCPP error message
