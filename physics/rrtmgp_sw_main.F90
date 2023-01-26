@@ -200,7 +200,7 @@ contains
          errmsg                ! CCPP error message
     integer, intent(out) :: &
          errflg                ! CCPP error flag
-    real(kind_phys), dimension(:,:), intent(out) :: &
+    real(kind_phys), dimension(:,:), intent(inout) :: &
          cldtausw              ! Approx 10.mu band layer cloud optical depth  
     real(kind_phys), dimension(:,:), intent(inout) :: &
          fluxswUP_allsky,    & ! RRTMGP upward all-sky flux profiles (W/m2)
@@ -304,6 +304,7 @@ contains
           endif
           scmpsw_clrsky= cmpfsw_type( 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 )
           scmpsw_allsky= cmpfsw_type( 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 )
+          cldtausw = 0._kind_phys
 
           ! ty_fluxes_byband
           fluxSW_up_allsky            = 0._kind_phys
