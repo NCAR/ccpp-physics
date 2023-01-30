@@ -3,7 +3,7 @@
 ! CCPP scheme to replace physics schemes with simulated data tendencies.
 !
 ! ########################################################################################
-module ccpp_scheme_simultator
+module ccpp_scheme_ccpp_scheme_simulator
   use machine, only: kind_phys
   use netcdf
   implicit none
@@ -52,18 +52,18 @@ module ccpp_scheme_simultator
   ! Host-model initial time information
   integer :: init_year, init_month, init_day, init_hour, init_min, init_sec
 
-  public ccpp_scheme_simultator_init, ccpp_scheme_simultator_run
+  public ccpp_scheme_ccpp_scheme_simulator_init, ccpp_scheme_ccpp_scheme_simulator_run
 contains
 
   ! ######################################################################################
   !
-  ! SUBROUTINE ccpp_scheme_simultator_init
+  ! SUBROUTINE ccpp_scheme_ccpp_scheme_simulator_init
   !
   ! ######################################################################################
-!! \section arg_table_ccpp_scheme_simultator_init
-!! \htmlinclude ccpp_scheme_simultator_init.html
+!! \section arg_table_ccpp_scheme_ccpp_scheme_simulator_init
+!! \htmlinclude ccpp_scheme_ccpp_scheme_simulator_init.html
 !!
-  subroutine ccpp_scheme_simultator_init(me, master, nlunit, nml_file, idat, errmsg, errflg)
+  subroutine ccpp_scheme_ccpp_scheme_simulator_init(me, master, nlunit, nml_file, idat, errmsg, errflg)
 
     ! Inputs
     integer,          intent (in) :: me, master, nlunit
@@ -331,17 +331,17 @@ contains
        print*, "---------------------------------"
     endif
 
-  end subroutine ccpp_scheme_simultator_init
+  end subroutine ccpp_scheme_ccpp_scheme_simulator_init
 
   ! ######################################################################################
   !
-  ! SUBROUTINE ccpp_scheme_simultator_run
+  ! SUBROUTINE ccpp_scheme_ccpp_scheme_simulator_run
   !
   ! ######################################################################################
-!! \section arg_table_ccpp_scheme_simultator_run
-!! \htmlinclude ccpp_scheme_simultator_run.html
+!! \section arg_table_ccpp_scheme_ccpp_scheme_simulator_run
+!! \htmlinclude ccpp_scheme_ccpp_scheme_simulator_run.html
 !!
-  subroutine ccpp_scheme_simultator_run(solhr, kdt, dtp, jdat, tgrs, ugrs, vgrs, qgrs, dtidx, &
+  subroutine ccpp_scheme_ccpp_scheme_simulator_run(solhr, kdt, dtp, jdat, tgrs, ugrs, vgrs, qgrs, dtidx, &
        dtend, index_of_process_dcnv, index_of_process_longwave,                          &
        index_of_process_shortwave, index_of_process_scnv,                                &
        index_of_process_orographic_gwd, index_of_process_pbl, index_of_process_mp,       &
@@ -588,6 +588,6 @@ contains
 
     enddo ! columns
     !
-  end subroutine ccpp_scheme_simultator_run
+  end subroutine ccpp_scheme_ccpp_scheme_simulator_run
 
-end module ccpp_scheme_simultator
+end module ccpp_scheme_ccpp_scheme_simulator

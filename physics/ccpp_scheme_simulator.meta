@@ -1,11 +1,11 @@
 [ccpp-table-properties]
-  name = ccpp_scheme_simultator
+  name = ccpp_scheme_ccpp_scheme_simulator
   type = scheme
   dependencies = machine.F
 
 ########################################################################
 [ccpp-arg-table]
-  name = ccpp_scheme_simultator_init
+  name = ccpp_scheme_ccpp_scheme_simulator_init
   type = scheme
 [me]
   standard_name = mpi_rank
@@ -61,7 +61,7 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = ccpp_scheme_simultator_run
+  name = ccpp_scheme_ccpp_scheme_simulator_run
   type = scheme
 [solhr]
   standard_name = forecast_utc_hour
