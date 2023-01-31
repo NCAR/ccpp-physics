@@ -3,9 +3,13 @@
 ! CCPP scheme to replace physics schemes with simulated data tendencies.
 !
 ! ########################################################################################
-module ccpp_scheme_ccpp_scheme_simulator
+module ccpp_scheme_simulator
   use machine, only: kind_phys
   use netcdf
+#ifdef MPI
+  use mpi
+#endif
+
   implicit none
 
   !
@@ -52,21 +56,21 @@ module ccpp_scheme_ccpp_scheme_simulator
   ! Host-model initial time information
   integer :: init_year, init_month, init_day, init_hour, init_min, init_sec
 
-  public ccpp_scheme_ccpp_scheme_simulator_init, ccpp_scheme_ccpp_scheme_simulator_run
+  public ccpp_scheme_simulator_init, ccpp_scheme_simulator_run
 contains
 
   ! ######################################################################################
   !
-  ! SUBROUTINE ccpp_scheme_ccpp_scheme_simulator_init
+  ! SUBROUTINE ccpp_scheme_simulator_init
   !
   ! ######################################################################################
-!! \section arg_table_ccpp_scheme_ccpp_scheme_simulator_init
-!! \htmlinclude ccpp_scheme_ccpp_scheme_simulator_init.html
+!! \section arg_table_ccpp_scheme_simulator_init
+!! \htmlinclude ccpp_scheme_simulator_init.html
 !!
-  subroutine ccpp_scheme_ccpp_scheme_simulator_init(me, master, nlunit, nml_file, idat, errmsg, errflg)
+  subroutine ccpp_scheme_simulator_init(mpirank, mpiroot, mpicomm, nlunit, nml_file, idat, errmsg, errflg)
 
     ! Inputs
-    integer,          intent (in) :: me, master, nlunit
+    integer,          intent (in) :: mpirank, mpiroot, mpicomm, nlunit
     character(len=*), intent (in) :: nml_file
     integer,          intent (in), dimension(8) :: idat
 
@@ -75,7 +79,7 @@ contains
     integer,          intent(out) :: errflg
 
     ! Local variables
-    integer :: ncid, dimID, varID, status, nlon, nlat, nlev, ntime, ios
+    integer :: ncid, dimID, varID, status, nlon, nlat, nlev_data, ntime_data, ios
     character(len=256) :: fileIN
     logical :: exists
     integer,parameter :: nTrc = 1 ! Only specific humodty for now, but preserve 3 dimensionality
@@ -97,7 +101,11 @@ contains
     init_min   = idat(6)
     init_sec   = idat(7)
 
+    ! ######################################################################################
+    !
     ! Read in namelist
+    !
+    ! ######################################################################################
     inquire (file = trim (nml_file), exist = exists)
     if (.not. exists) then
         errmsg = 'SCM data tendency :: namelist file: '//trim(nml_file)//' does not exist'
@@ -110,6 +118,12 @@ contains
     read (nlunit, nml = scm_data_nml)
     close (nlunit)
 
+
+    ! ######################################################################################
+    ! 
+    ! Error checking
+    !
+    ! ######################################################################################
     ! Only proceed if scheme simulator requested.
     if (use_RAD_scheme_sim   .or. use_PBL_scheme_sim   .or. use_GWD_scheme_sim .or. &
          use_SCNV_scheme_sim  .or. use_DCNV_scheme_sim  .or. use_cldMP_scheme_sim) then
@@ -126,180 +140,372 @@ contains
         return
      endif
 
-    ! Open file (required)
-    status = nf90_open(trim(fileIN), NF90_NOWRITE, ncid)
-    if (status /= nf90_noerr) then
-       errmsg = 'Error reading in SCM data tendency file: '//trim(fileIN)
-       errflg = 1
-       return
+    ! #######################################################################################
+    !
+    ! Read mandatory information from data file...
+    ! (ONLY master processor(0), if MPI enabled)
+    !
+    ! #######################################################################################
+#ifdef MPI
+    if (mpirank .eq. mpiroot) then
+#endif
+
+       ! Open file (required)
+       status = nf90_open(trim(fileIN), NF90_NOWRITE, ncid)
+       if (status /= nf90_noerr) then
+          errmsg = 'Error reading in SCM data tendency file: '//trim(fileIN)
+          errflg = 1
+          return
+       endif
+       
+       ! Get dimensions (required)
+       status = nf90_inq_dimid(ncid, 'time', dimid)
+       if (status == nf90_noerr) then
+          status = nf90_inquire_dimension(ncid, dimid, len = ntime_data)
+       else
+          errmsg = 'SCM data tendency file: '//trim(fileIN)//' does not contain [time] dimension'
+          errflg = 1
+          return
+       endif
+       !
+       status = nf90_inq_dimid(ncid, 'lev', dimid)
+       if (status == nf90_noerr) then
+          status = nf90_inquire_dimension(ncid, dimid, len = nlev_data)
+       else
+          errmsg = 'SCM data tendency file: '//trim(fileIN)//' does not contain [lev] dimension'
+          errflg = 1
+          return
+       endif
+#ifdef MPI
+    endif ! On master processor
+
+    ! Other processors waiting...
+    call mpi_barrier(mpicomm, mpierr)
+
+    ! #######################################################################################
+    !
+    ! Broadcast dimensions...
+    ! (ALL processors)
+    !
+    ! #######################################################################################
+    call mpi_bcast(ntime_data, 1, MPI_INTEGER, mpiroot, mpicomm, mpierr)
+    call mpi_bcast(nlev_data,  1, MPI_INTEGER, mpiroot, mpicomm, mpierr)
+    call mpi_barrier(mpicomm, mpierr)
+
+    if (mpirank .eq. mpiroot) then
+#endif
+
+       ! ####################################################################################
+       !
+       ! What data fields do we have?
+       !
+       ! ####################################################################################
+
+       ! Temporal info (required)
+       status = nf90_inq_varid(ncid, 'times', varID)
+       if (status /= nf90_noerr) then
+          errmsg = 'SCM data tendency file: '//trim(fileIN)//' does not contain times variable'
+          errflg = 1
+          return
+       endif
+
+       ! Physics tendencies
+       status = nf90_inq_varid(ncid, 'dT_dt_lwrad', varID)
+       if (status == nf90_noerr) then
+          have_dTdt_LWRAD_data = .true.
+       endif
+       status = nf90_inq_varid(ncid, 'dT_dt_swrad', varID)
+       if (status == nf90_noerr) then
+          have_dTdt_SWRAD_data = .true.
+       endif
+       status = nf90_inq_varid(ncid, 'dT_dt_pbl', varID)
+       if (status == nf90_noerr) then
+          have_dTdt_PBL_data = .true.
+       endif
+       status = nf90_inq_varid(ncid, 'dq_dt_pbl', varID)
+       if (status == nf90_noerr) then
+          have_dqdt_PBL_data = .true.
+       endif
+       status = nf90_inq_varid(ncid, 'du_dt_pbl', varID)
+       if (status == nf90_noerr) then
+          have_dudt_PBL_data = .true.
+       endif
+       status = nf90_inq_varid(ncid, 'dv_dt_pbl', varID)
+       if (status == nf90_noerr) then
+          have_dvdt_PBL_data = .true.
+       endif
+       status = nf90_inq_varid(ncid, 'dT_dt_cgwd', varID)
+       if (status == nf90_noerr) then
+          have_dTdt_GWD_data = .true.
+       endif
+       status = nf90_inq_varid(ncid, 'du_dt_cgwd', varID)
+       if (status == nf90_noerr) then
+          have_dudt_GWD_data = .true.
+       endif
+       status = nf90_inq_varid(ncid, 'dv_dt_cgwd', varID)
+       if (status == nf90_noerr) then
+          have_dvdt_GWD_data = .true.
+       endif
+       status = nf90_inq_varid(ncid, 'dT_dt_shalconv', varID)
+       if (status == nf90_noerr) then
+          have_dTdt_SCNV_data = .true.
+       endif
+       status = nf90_inq_varid(ncid, 'du_dt_shalconv', varID)
+       if (status == nf90_noerr) then
+          have_dudt_SCNV_data = .true.
+       endif
+       status = nf90_inq_varid(ncid, 'dv_dt_shalconv', varID)
+       if (status == nf90_noerr) then
+          have_dvdt_SCNV_data = .true.
+       endif
+       status = nf90_inq_varid(ncid, 'dq_dt_shalconv', varID)
+       if (status == nf90_noerr) then
+          have_dqdt_SCNV_data = .true.
+       endif
+       status = nf90_inq_varid(ncid, 'dT_dt_deepconv', varID)
+       if (status == nf90_noerr) then
+          have_dTdt_DCNV_data = .true.
+       endif
+       status = nf90_inq_varid(ncid, 'du_dt_deepconv', varID)
+       if (status == nf90_noerr) then
+          have_dudt_DCNV_data = .true.
+       endif
+       status = nf90_inq_varid(ncid, 'dv_dt_deepconv', varID)
+       if (status == nf90_noerr) then
+          have_dvdt_DCNV_data = .true.
+       endif
+       status = nf90_inq_varid(ncid, 'dq_dt_deepconv', varID)
+       if (status == nf90_noerr) then
+          have_dqdt_DCNV_data = .true.
+       endif
+       status = nf90_inq_varid(ncid, 'dT_dt_micro', varID)
+       if (status == nf90_noerr) then
+          have_dTdt_cldMP_data = .true.
+       endif
+       status = nf90_inq_varid(ncid, 'dq_dt_micro', varID)
+       if (status == nf90_noerr) then
+          have_dqdt_cldMP_data = .true.
+       endif
+
+#ifdef MPI
+    endif ! Master process
+#endif
+
+    ! Allocate space for data
+    allocate(time_data(ntime_data))
+    if (have_dTdt_LWRAD_data) allocate(dTdt_LWRAD_data(nlev_data, ntime_data))
+    if (have_dTdt_SWRAD_data) allocate(dTdt_SWRAD_data(nlev_data, ntime_data))
+    if (have_dTdt_PBL_data)   allocate(dTdt_PBL_data(  nlev_data, ntime_data))
+    if (have_dqdt_PBL_data)   allocate(dqdt_PBL_data(  nlev_data, ntime_data, nTrc))
+    if (have_dudt_PBL_data)   allocate(dudt_PBL_data(  nlev_data, ntime_data))
+    if (have_dvdt_PBL_data)   allocate(dvdt_PBL_data(  nlev_data, ntime_data))
+    if (have_dTdt_GWD_data)   allocate(dTdt_GWD_data(  nlev_data, ntime_data))
+    if (have_dudt_GWD_data)   allocate(dudt_GWD_data(  nlev_data, ntime_data))
+    if (have_dvdt_GWD_data)   allocate(dvdt_GWD_data(  nlev_data, ntime_data))
+    if (have_dTdt_SCNV_data)  allocate(dTdt_SCNV_data( nlev_data, ntime_data))
+    if (have_dudt_SCNV_data)  allocate(dudt_SCNV_data( nlev_data, ntime_data))
+    if (have_dvdt_SCNV_data)  allocate(dvdt_SCNV_data( nlev_data, ntime_data))
+    if (have_dqdt_SCNV_data)  allocate(dqdt_SCNV_data( nlev_data, ntime_data, nTrc))
+    if (have_dTdt_DCNV_data)  allocate(dTdt_DCNV_data( nlev_data, ntime_data))
+    if (have_dudt_DCNV_data)  allocate(dudt_DCNV_data( nlev_data, ntime_data))
+    if (have_dvdt_DCNV_data)  allocate(dvdt_DCNV_data( nlev_data, ntime_data))
+    if (have_dqdt_DCNV_data)  allocate(dqdt_DCNV_data( nlev_data, ntime_data, nTrc))
+    if (have_dTdt_cldMP_data) allocate(dTdt_cldMP_data(nlev_data, ntime_data))
+    if (have_dqdt_cldMP_data) allocate(dqdt_cldMP_data(nlev_data, ntime_data, nTrc))
+
+    ! #######################################################################################
+    !
+    ! Read in data ...
+    ! (ONLY master processor(0), if MPI enabled) 
+    !
+    ! #######################################################################################
+#ifdef MPI
+    if (mpirank .eq. mpiroot) then
+#endif
+
+       ! Temporal info (required)
+       status = nf90_inq_varid(ncid, 'times', varID)
+       if (status == nf90_noerr) then
+          status = nf90_get_var(  ncid, varID, time_data)
+       else
+          errmsg = 'SCM data tendency file: '//trim(fileIN)//' does not contain times variable'
+          errflg = 1
+          return
+       endif
+       
+       ! Read in physics data tendencies (optional)
+       status = nf90_inq_varid(ncid, 'dT_dt_lwrad', varID)
+       if (status == nf90_noerr) then
+          status = nf90_get_var(  ncid, varID, dTdt_LWRAD_data)
+       endif
+       !
+       status = nf90_inq_varid(ncid, 'dT_dt_swrad', varID)
+       if (status == nf90_noerr) then
+          status = nf90_get_var(  ncid, varID, dTdt_SWRAD_data)
+       endif
+       !
+       status = nf90_inq_varid(ncid, 'dT_dt_pbl', varID)
+       if (status == nf90_noerr) then
+          status = nf90_get_var(  ncid, varID, dTdt_PBL_data)
+       endif
+       !
+       status = nf90_inq_varid(ncid, 'dq_dt_pbl', varID)
+       if (status == nf90_noerr) then
+          status = nf90_get_var(  ncid, varID, dqdt_PBL_data)
+       endif
+       !
+       status = nf90_inq_varid(ncid, 'du_dt_pbl', varID)
+       if (status == nf90_noerr) then
+          status = nf90_get_var(  ncid, varID, dudt_PBL_data)
+       endif
+       !
+       status = nf90_inq_varid(ncid, 'dv_dt_pbl', varID)
+       if (status == nf90_noerr) then
+          status = nf90_get_var(  ncid, varID, dvdt_PBL_data)
+       endif
+       !
+       status = nf90_inq_varid(ncid, 'dT_dt_cgwd', varID)
+       if (status == nf90_noerr) then
+          status = nf90_get_var(  ncid, varID, dTdt_GWD_data)
+       endif
+       !
+       status = nf90_inq_varid(ncid, 'du_dt_cgwd', varID)
+       if (status == nf90_noerr) then
+          status = nf90_get_var(  ncid, varID, dudt_GWD_data)
+       endif
+       !
+       status = nf90_inq_varid(ncid, 'dv_dt_cgwd', varID)
+       if (status == nf90_noerr) then
+          status = nf90_get_var(  ncid, varID, dvdt_GWD_data)
+       endif
+       !
+       status = nf90_inq_varid(ncid, 'dT_dt_shalconv', varID)
+       if (status == nf90_noerr) then
+          status = nf90_get_var(  ncid, varID, dTdt_SCNV_data)
+       endif
+       !
+       status = nf90_inq_varid(ncid, 'du_dt_shalconv', varID)
+       if (status == nf90_noerr) then
+          status = nf90_get_var(  ncid, varID, dudt_SCNV_data)
+       endif
+       !
+       status = nf90_inq_varid(ncid, 'dv_dt_shalconv', varID)
+       if (status == nf90_noerr) then
+          status = nf90_get_var(  ncid, varID, dvdt_SCNV_data)
+       endif
+       !
+       status = nf90_inq_varid(ncid, 'dq_dt_shalconv', varID)
+       if (status == nf90_noerr) then
+          status = nf90_get_var(  ncid, varID, dqdt_SCNV_data)
+       endif
+       !
+       status = nf90_inq_varid(ncid, 'dT_dt_deepconv', varID)
+       if (status == nf90_noerr) then
+          status = nf90_get_var(  ncid, varID, dTdt_DCNV_data)
+       endif
+       !
+       status = nf90_inq_varid(ncid, 'du_dt_deepconv', varID)
+       if (status == nf90_noerr) then
+          status = nf90_get_var(  ncid, varID, dudt_DCNV_data)
+       endif
+       !
+       status = nf90_inq_varid(ncid, 'dv_dt_deepconv', varID)
+       if (status == nf90_noerr) then
+          status = nf90_get_var(  ncid, varID, dvdt_DCNV_data)
+       endif
+       !
+       status = nf90_inq_varid(ncid, 'dq_dt_deepconv', varID)
+       if (status == nf90_noerr) then
+          status = nf90_get_var(  ncid, varID, dqdt_DCNV_data)
+       endif
+       !
+       status = nf90_inq_varid(ncid, 'dT_dt_micro', varID)
+       if (status == nf90_noerr) then
+          status = nf90_get_var(  ncid, varID, dTdt_cldMP_data)
+       endif
+       !
+       status = nf90_inq_varid(ncid, 'dq_dt_micro', varID)
+       if (status == nf90_noerr) then
+          status = nf90_get_var(  ncid, varID, dqdt_cldMP_data)
+       endif
+       !
+       status = nf90_close(ncid)
+#ifdef MPI
+    endif ! Master process
+
+    ! Other processors waiting...
+    call mpi_barrier(mpicomm, mpierr)
+    ! #######################################################################################
+    !
+    ! Broadcast data... 
+    ! (ALL processors)
+    !
+    ! #######################################################################################
+
+    if (have_dTdt_LWRAD_data) then
+       call mpi_bcast(dTdt_LWRAD_data, size(dTdt_LWRAD_data), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+    endif
+    if (have_dTdt_SWRAD_data) then
+       call mpi_bcast(dTdt_SWRAD_data, size(dTdt_SWRAD_data), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+    endif
+    if (have_dTdt_PBL_data) then
+       call mpi_bcast(dTdt_PBL_data, size(dTdt_PBL_data), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+    endif
+    if (have_dqdt_PBL_data) then
+       call mpi_bcast(dqdt_PBL_data, size(dqdt_PBL_data), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+    endif
+    if (have_dudt_PBL_data) then
+       call mpi_bcast(dudt_PBL_data, size(dudt_PBL_data), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+    endif
+    if (have_dvdt_PBL_data) then
+       call mpi_bcast(dvdt_PBL_data, size(dvdt_PBL_data), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+    endif
+    if (have_dTdt_GWD_data) then
+       call mpi_bcast(dTdt_GWD_data, size(dTdt_GWD_data), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+    endif
+    if (have_dudt_GWD_data) then
+       call mpi_bcast(dudt_GWD_data, size(dudt_GWD_data), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+    endif
+    if (have_dvdt_GWD_data) then
+       call mpi_bcast(dvdt_GWD_data, size(dvdt_GWD_data), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+    endif
+    if (have_dTdt_SCNV_data) then
+       call mpi_bcast(dTdt_SCNV_data, size(dTdt_SCNV_data), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+    endif
+    if (have_dudt_SCNV_data) then
+       call mpi_bcast(dudt_SCNV_data, size(dudt_SCNV_data), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+    endif
+    if (have_dvdt_SCNV_data) then
+       call mpi_bcast(dvdt_SCNV_data, size(dvdt_SCNV_data), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+    endif
+    if (have_dqdt_SCNV_data) then
+       call mpi_bcast(dqdt_SCNV_data, size(dqdt_SCNV_data), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+    endif
+    if (have_dTdt_DCNV_data) then
+       call mpi_bcast(dTdt_DCNV_data, size(dTdt_DCNV_data), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+    endif
+    if (have_dudt_DCNV_data) then
+       call mpi_bcast(dudt_DCNV_data, size(dudt_DCNV_data), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+    endif
+    if (have_dvdt_DCNV_data) then
+       call mpi_bcast(dvdt_DCNV_data, size(dvdt_DCNV_data), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+    endif
+    if (have_dqdt_DCNV_data) then
+       call mpi_bcast(dqdt_DCNV_data, size(dqdt_DCNV_data), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+    endif
+    if (have_dTdt_cldMP_data) then
+       call mpi_bcast(dTdt_cldMP_data, size(dTdt_cldMP_data), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+    endif
+    if (have_dqdt_cldMP_data) then
+       call mpi_bcast(dqdt_cldMP_data, size(dqdt_cldMP_data), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
     endif
 
-    ! Get dimensions (required)
-    status = nf90_inq_dimid(ncid, 'time', dimid)
-    if (status == nf90_noerr) then
-       status = nf90_inquire_dimension(ncid, dimid, len = ntime)
-    else
-       errmsg = 'SCM data tendency file: '//trim(fileIN)//' does not contain time dimension'
-       errflg = 1
-       return
-    endif
     !
-    status = nf90_inq_dimid(ncid, 'lev', dimid)
-    if (status == nf90_noerr) then
-       status = nf90_inquire_dimension(ncid, dimid, len = nlev)
-    else
-       errmsg = 'SCM data tendency file: '//trim(fileIN)//' does not contain lev dimension'
-       errflg = 1
-       return
-    endif
-
-    ! Temporal info (required)
-    status = nf90_inq_varid(ncid, 'times', varID)
-    if (status == nf90_noerr) then
-       allocate(time_data(ntime))
-       status = nf90_get_var(  ncid, varID, time_data)
-    else
-       errmsg = 'SCM data tendency file: '//trim(fileIN)//' does not contain times variable'
-       errflg = 1
-       return
-    endif
-
-    ! Read in physics data tendencies (optional)
-    status = nf90_inq_varid(ncid, 'dT_dt_lwrad', varID)
-    if (status == nf90_noerr) then
-       allocate(dTdt_LWRAD_data(nlev, ntime))
-       status = nf90_get_var(  ncid, varID, dTdt_LWRAD_data)
-       have_dTdt_LWRAD_data = .true.
-    endif
-    !
-    status = nf90_inq_varid(ncid, 'dT_dt_swrad', varID)
-    if (status == nf90_noerr) then
-       allocate(dTdt_SWRAD_data(nlev, ntime))
-       status = nf90_get_var(  ncid, varID, dTdt_SWRAD_data)
-       have_dTdt_SWRAD_data = .true.
-    endif
-    !
-    status = nf90_inq_varid(ncid, 'dT_dt_pbl', varID)
-    if (status == nf90_noerr) then
-       allocate(dTdt_PBL_data(nlev, ntime))
-       status = nf90_get_var(  ncid, varID, dTdt_PBL_data)
-       have_dTdt_PBL_data = .true.
-    endif
-    !
-    status = nf90_inq_varid(ncid, 'dq_dt_pbl', varID)
-    if (status == nf90_noerr) then
-       allocate(dqdt_PBL_data(nlev, ntime, nTrc))
-       status = nf90_get_var(  ncid, varID, dqdt_PBL_data)
-       have_dqdt_PBL_data = .true.
-    endif
-    !
-    status = nf90_inq_varid(ncid, 'du_dt_pbl', varID)
-    if (status == nf90_noerr) then
-       allocate(dudt_PBL_data(nlev, ntime))
-       status = nf90_get_var(  ncid, varID, dudt_PBL_data)
-       have_dudt_PBL_data = .true.
-    endif
-    !
-    status = nf90_inq_varid(ncid, 'dv_dt_pbl', varID)
-    if (status == nf90_noerr) then
-       allocate(dvdt_PBL_data(nlev, ntime))
-       status = nf90_get_var(  ncid, varID, dvdt_PBL_data)
-       have_dvdt_PBL_data = .true.
-    endif
-    !
-    status = nf90_inq_varid(ncid, 'dT_dt_cgwd', varID)
-    if (status == nf90_noerr) then
-       allocate(dTdt_GWD_data(nlev, ntime))
-       status = nf90_get_var(  ncid, varID, dTdt_GWD_data)
-       have_dTdt_GWD_data = .true.
-    endif
-    !
-    status = nf90_inq_varid(ncid, 'du_dt_cgwd', varID)
-    if (status == nf90_noerr) then
-       allocate(dudt_GWD_data(nlev, ntime))
-       status = nf90_get_var(  ncid, varID, dudt_GWD_data)
-       have_dudt_GWD_data = .true.
-    endif
-    !
-    status = nf90_inq_varid(ncid, 'dv_dt_cgwd', varID)
-    if (status == nf90_noerr) then
-       allocate(dvdt_GWD_data(nlev, ntime))
-       status = nf90_get_var(  ncid, varID, dvdt_GWD_data)
-       have_dvdt_GWD_data = .true.
-    endif
-    !
-    status = nf90_inq_varid(ncid, 'dT_dt_shalconv', varID)
-    if (status == nf90_noerr) then
-       allocate(dTdt_SCNV_data(nlev, ntime))
-       status = nf90_get_var(  ncid, varID, dTdt_SCNV_data)
-       have_dTdt_SCNV_data = .true.
-    endif
-    !
-    status = nf90_inq_varid(ncid, 'du_dt_shalconv', varID)
-    if (status == nf90_noerr) then
-       allocate(dudt_SCNV_data(nlev, ntime))
-       status = nf90_get_var(  ncid, varID, dudt_SCNV_data)
-       have_dudt_SCNV_data = .true.
-    endif
-    !
-    status = nf90_inq_varid(ncid, 'dv_dt_shalconv', varID)
-    if (status == nf90_noerr) then
-       allocate(dvdt_SCNV_data(nlev, ntime))
-       status = nf90_get_var(  ncid, varID, dvdt_SCNV_data)
-       have_dvdt_SCNV_data = .true.
-    endif
-    !
-    status = nf90_inq_varid(ncid, 'dq_dt_shalconv', varID)
-    if (status == nf90_noerr) then
-       allocate(dqdt_SCNV_data(nlev, ntime, nTrc))
-       status = nf90_get_var(  ncid, varID, dqdt_SCNV_data)
-       have_dqdt_SCNV_data = .true.
-    endif
-    !
-    status = nf90_inq_varid(ncid, 'dT_dt_deepconv', varID)
-    if (status == nf90_noerr) then
-       allocate(dTdt_DCNV_data(nlev, ntime))
-       status = nf90_get_var(  ncid, varID, dTdt_DCNV_data)
-       have_dTdt_DCNV_data = .true.
-    endif
-    !
-    status = nf90_inq_varid(ncid, 'du_dt_deepconv', varID)
-    if (status == nf90_noerr) then
-       allocate(dudt_DCNV_data(nlev, ntime))
-       status = nf90_get_var(  ncid, varID, dudt_DCNV_data)
-       have_dudt_DCNV_data = .true.
-    endif
-    !
-    status = nf90_inq_varid(ncid, 'dv_dt_deepconv', varID)
-    if (status == nf90_noerr) then
-       allocate(dvdt_DCNV_data(nlev, ntime))
-       status = nf90_get_var(  ncid, varID, dvdt_DCNV_data)
-       have_dvdt_DCNV_data = .true.
-    endif
-    !
-    status = nf90_inq_varid(ncid, 'dq_dt_deepconv', varID)
-    if (status == nf90_noerr) then
-       allocate(dqdt_DCNV_data(nlev, ntime, nTrc))
-       status = nf90_get_var(  ncid, varID, dqdt_DCNV_data)
-       have_dqdt_DCNV_data = .true.
-    endif
-    !
-    status = nf90_inq_varid(ncid, 'dT_dt_micro', varID)
-    if (status == nf90_noerr) then
-       allocate(dTdt_cldMP_data(nlev, ntime))
-       status = nf90_get_var(  ncid, varID, dTdt_cldMP_data)
-       have_dTdt_cldMP_data = .true.
-    endif
-    !
-    status = nf90_inq_varid(ncid, 'dq_dt_micro', varID)
-    if (status == nf90_noerr) then
-       allocate(dqdt_cldMP_data(nlev, ntime, nTrc))
-       status = nf90_get_var(  ncid, varID, dqdt_cldMP_data)
-       have_dqdt_cldMP_data = .true.
-    endif
+    call mpi_barrier(mpicomm, mpierr)
+#endif
 
     !
-    if (me == 0) then
+    if (mpirank .eq. mpiroot) then
        print*, "--- Using SCM data tendencies ---"
        print*, "---------------------------------"
        print*, "                 "
@@ -331,17 +537,17 @@ contains
        print*, "---------------------------------"
     endif
 
-  end subroutine ccpp_scheme_ccpp_scheme_simulator_init
+  end subroutine ccpp_scheme_simulator_init
 
   ! ######################################################################################
   !
-  ! SUBROUTINE ccpp_scheme_ccpp_scheme_simulator_run
+  ! SUBROUTINE ccpp_scheme_simulator_run
   !
   ! ######################################################################################
-!! \section arg_table_ccpp_scheme_ccpp_scheme_simulator_run
-!! \htmlinclude ccpp_scheme_ccpp_scheme_simulator_run.html
+!! \section arg_table_ccpp_scheme_simulator_run
+!! \htmlinclude ccpp_scheme_simulator_run.html
 !!
-  subroutine ccpp_scheme_ccpp_scheme_simulator_run(solhr, kdt, dtp, jdat, tgrs, ugrs, vgrs, qgrs, dtidx, &
+  subroutine ccpp_scheme_simulator_run(solhr, kdt, dtp, jdat, tgrs, ugrs, vgrs, qgrs, dtidx, &
        dtend, index_of_process_dcnv, index_of_process_longwave,                          &
        index_of_process_shortwave, index_of_process_scnv,                                &
        index_of_process_orographic_gwd, index_of_process_pbl, index_of_process_mp,       &
@@ -588,6 +794,6 @@ contains
 
     enddo ! columns
     !
-  end subroutine ccpp_scheme_ccpp_scheme_simulator_run
+  end subroutine ccpp_scheme_simulator_run
 
-end module ccpp_scheme_ccpp_scheme_simulator
+end module ccpp_scheme_simulator

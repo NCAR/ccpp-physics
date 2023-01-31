@@ -1,22 +1,29 @@
 [ccpp-table-properties]
-  name = ccpp_scheme_ccpp_scheme_simulator
+  name = ccpp_scheme_simulator
   type = scheme
   dependencies = machine.F
 
 ########################################################################
 [ccpp-arg-table]
-  name = ccpp_scheme_ccpp_scheme_simulator_init
+  name = ccpp_scheme_simulator_init
   type = scheme
-[me]
+[mpirank]
   standard_name = mpi_rank
   long_name = MPI rank of current process
   units = index
   dimensions = ()
   type = integer
   intent = in
-[master]
+[mpiroot]
   standard_name = mpi_root
   long_name = MPI rank of master process
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[mpicomm]
+  standard_name = mpi_communicator
+  long_name = MPI communicator
   units = index
   dimensions = ()
   type = integer
@@ -61,7 +68,7 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = ccpp_scheme_ccpp_scheme_simulator_run
+  name = ccpp_scheme_simulator_run
   type = scheme
 [solhr]
   standard_name = forecast_utc_hour
