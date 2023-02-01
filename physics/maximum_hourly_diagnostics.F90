@@ -30,11 +30,11 @@ contains
                                              u10max, v10max, spd10max, pgr, t2m, q2m, t02max,      &
                                              t02min, rh02max, rh02min, dtp, rain, pratemax,        &
                                              lightning_threat, ltg1_max,ltg2_max,ltg3_max,         &
-                                             vvl, phii, qgraupel, qsnowwat, qicewat,               &
-                                             errmsg, errflg)
+                                             wgrs, phii, qgraupel, qsnowwat, qicewat,              &
+                                             kdt, errmsg, errflg)
 
        ! Interface variables
-       integer, intent(in) :: im, levs
+       integer, intent(in) :: im, levs, kdt
        logical, intent(in) :: reset, lradar, lightning_threat
        integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_fer_hires, &
                               imp_physics_nssl
@@ -60,7 +60,7 @@ contains
        real(kind_phys), intent(in   ) :: rain(:)
        real(kind_phys), intent(inout) :: pratemax(:)
 
-       real(kind_phys), intent(in), dimension(:,:) :: phii, qgraupel, qsnowwat, qicewat, vvl
+       real(kind_phys), intent(in), dimension(:,:) :: phii, qgraupel, qsnowwat, qicewat, wgrs
        real(kind_phys), intent(inout), dimension(:) :: ltg1_max, ltg2_max, ltg3_max
        character(len=*), intent(out)  :: errmsg
        integer, intent(out)           :: errflg
@@ -76,6 +76,7 @@ contains
 
 !Lightning threat indices
        if (lightning_threat) then
+          print *,'call lightning_threat_indices'
           call lightning_threat_indices
        endif
 
@@ -160,27 +161,38 @@ contains
          REAL(kind_phys), PARAMETER    :: coef1=0.042*1000.*1.22
          REAL(kind_phys), PARAMETER    :: coef2=0.20*1.22
          
-         REAL(kind_phys) :: totice_colint(im), msft(im), ltg1, ltg2
+         REAL(kind_phys) :: totice_colint(im), msft(im), ltg1, ltg2, high_ltg1, high_wgrs, high_graupel
          LOGICAL :: ltg1_calc(im)
-         integer :: k, i
+         integer :: k, i, count
+
+         count = 0
+         high_ltg1 = 0
+         high_wgrs = 0
+         high_graupel = 0
 
           totice_colint = 0
           ltg1_calc = .false.
           msft = 1.
           ! get area (m^2) in units of km^2
           ! msft = 1.E-6*area
-          do k=levs,2,-1
+          do k=2,levs
              do i=1,im
-                dP = phii(i,k) - phii(i,k+1)
+                dP = phii(i,k+1) - phii(i,k)
                 Q = qgraupel(i,k) + qsnowwat(i,k) + qicewat(i,k)
                 totice_colint(i) = totice_colint(i) + Q * dP / con_g
 
                 IF ( .not.ltg1_calc(i) ) THEN
                    IF ( 0.5*(phii(i,k-1) - phii(i,k+1)) < 258.15 ) THEN
+                      count = count + 1
                       ltg1_calc(i) = .true.
                       
-                      ltg1 = coef1*vvl(i,k)* &
+                      ltg1 = coef1*wgrs(i,k)* &
                            (( qgraupel(i,k-1) + qgraupel(i,k) )*0.5 )/msft(i)
+                      high_ltg1 = max(high_ltg1, ltg1)
+                      high_graupel = max(high_graupel, qgraupel(i,k))
+                      if(abs(wgrs(i,k)) > high_wgrs) then
+                         high_wgrs = wgrs(i,k)
+                      endif
                       
                       IF ( ltg1 .LT. clim1 ) ltg1 = 0.
                       
@@ -191,6 +203,15 @@ contains
                 ENDIF
              enddo
           enddo
+
+          if(count > 0) then
+             if(high_ltg1 == 0 .and. high_wgrs == 0 .and. high_graupel == 0) then
+                print *, 'high ltg1, wgrs, and graupel are all 0'
+             else
+183             format('high_ltg1 = ',F30.23,' high_wgrs = ',F30.23,' high_graupel = ',F30.23)
+                print 183, high_ltg1, high_wgrs, high_graupel
+             endif
+          endif
 
           do i=1,im
              ltg2 = coef2 * totice_colint(i) / msft(i)

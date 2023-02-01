@@ -238,10 +238,10 @@
   type = real
   kind = kind_phys
   intent = inout
-[vvl]
-  standard_name = lagrangian_tendency_of_air_pressure
-  long_name = layer mean vertical velocity
-  units = Pa s-1
+[wgrs]
+  standard_name = z_wind
+  long_name = vertical wind
+  units = m s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
@@ -308,6 +308,13 @@
   dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
+  intent = in
+[kdt]
+  standard_name = index_of_timestep
+  long_name = current forecast iteration
+  units = index
+  dimensions = ()
+  type = integer
   intent = in
 [errmsg]
   standard_name = ccpp_error_message
