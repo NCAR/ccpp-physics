@@ -205,8 +205,8 @@ contains
           enddo
 
           if(count > 0) then
-             if(high_ltg1 == 0 .and. high_wgrs == 0 .and. high_graupel == 0) then
-                print *, 'high ltg1, wgrs, and graupel are all 0'
+             if(abs(high_wgrs) < 0.1 .or. high_graupel < 1e-4) then
+                !print *, 'low wgrs or graupel'
              else
 183             format('high_ltg1 = ',F30.23,' high_wgrs = ',F30.23,' high_graupel = ',F30.23)
                 print 183, high_ltg1, high_wgrs, high_graupel
