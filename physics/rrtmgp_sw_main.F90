@@ -1,7 +1,7 @@
 ! ###########################################################################################
 ! ###########################################################################################
 module rrtmgp_sw_main
-  use machine,                only: kind_phys
+  use machine,                only: kind_phys, kind_dbl_prec
   use mo_optical_props,       only: ty_optical_props_2str
   use mo_cloud_optics,        only: ty_cloud_optics
   use module_radsw_parameters, only: cmpfsw_type
@@ -222,9 +222,9 @@ contains
     real(kind_phys) :: tau_rain, tau_snow, ssa_rain, ssa_snow, asy_rain, asy_snow, &
          tau_prec, asy_prec, ssa_prec, asyw, ssaw, za1, za2, flux_dir, flux_dif
     real(kind_phys), dimension(rrtmgp_phys_blksz) :: zcf0, zcf1
-    real(kind_phys), dimension(sw_gas_props%get_ngpt()) :: rng1D
-    real(kind_phys), dimension(sw_gas_props%get_ngpt(),nLay,rrtmgp_phys_blksz) :: rng3D,rng3D2
-    real(kind_phys), dimension(sw_gas_props%get_ngpt()*nLay) :: rng2D
+    real(kind_dbl_prec), dimension(sw_gas_props%get_ngpt()) :: rng1D
+    real(kind_dbl_prec), dimension(sw_gas_props%get_ngpt(),nLay,rrtmgp_phys_blksz) :: rng3D,rng3D2
+    real(kind_dbl_prec), dimension(sw_gas_props%get_ngpt()*nLay) :: rng2D
     logical, dimension(rrtmgp_phys_blksz,nLay,sw_gas_props%get_ngpt()) :: maskMCICA
     logical :: cloudy_column, clear_column
     real(kind_phys), dimension(sw_gas_props%get_nband(),rrtmgp_phys_blksz) :: &
@@ -505,7 +505,7 @@ contains
              ! Cloud-overlap.
              ! Maximum-random, random or maximum.
              if (iovr == iovr_maxrand .or. iovr == iovr_rand .or. iovr == iovr_max) then
-                call sampled_mask(rng3D, cld_frac(iCols,:), maskMCICA) 
+                call sampled_mask(real(rng3D, kind=kind_phys), cld_frac(iCols,:), maskMCICA)
              endif
              ! Exponential decorrelation length overlap
              if (iovr == iovr_dcorr) then
@@ -516,12 +516,12 @@ contains
                    rng3D2(:,:,iblck) = reshape(source = rng2D,shape=[sw_gas_props%get_ngpt(),nLay])
                 enddo
                 !
-                call sampled_mask(rng3D, cld_frac(iCols,:), maskMCICA,                    &
-                     overlap_param = cloud_overlap_param(iCols,1:nLay-1), randoms2 = rng3D2)
+                call sampled_mask(real(rng3D, kind=kind_phys), cld_frac(iCols,:), maskMCICA,                    &
+                     overlap_param = cloud_overlap_param(iCols,1:nLay-1), randoms2 = real(rng3D2, kind=kind_phys))
              endif
              ! Exponential or Exponential-random
              if (iovr == iovr_exp .or. iovr == iovr_exprand) then
-                call sampled_mask(rng3D, cld_frac(iCols,:), maskMCICA,  &
+                call sampled_mask(real(rng3D, kind=kind_phys), cld_frac(iCols,:), maskMCICA,  &
                      overlap_param = cloud_overlap_param(iCols,1:nLay-1))
              endif
              ! Sampling. Map band optical depth to each g-point using McICA
