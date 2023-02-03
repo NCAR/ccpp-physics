@@ -70,14 +70,6 @@
 [ccpp-arg-table]
   name = ccpp_scheme_simulator_run
   type = scheme
-[solhr]
-  standard_name = forecast_utc_hour
-  long_name = time in hours after 00z at the current timestep
-  units = h
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
 [kdt]
   standard_name = index_of_timestep
   long_name = current forecast iteration
