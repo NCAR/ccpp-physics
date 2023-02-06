@@ -666,20 +666,6 @@ contains
     allocate(dTdt(nCol,nLay), dudt(nCol,nLay), dvdt(nCol,nLay), dqdt(nCol,nLay,1))
     allocate(dT(nLay), du(nLay), dv(nLay), dq(nLay))
 
-    ! Determine temporal interpolation weights for data-tendecies.
-    ! DJS: The data tendencies have a temporal dimension, to capture the diurnal cycle, 
-    ! which is needed for reasonable solar forcing.
-    hrofday = fcst_hour*3600. + fcst_min*60. + fcst_sec
-    ti = findloc(abs(time_data-hrofday),minval(abs(time_data-hrofday)))
-    if (hrofday - time_data(ti(1)) .le. 0) ti = ti-1
-    tf = ti + 1
-    w1 = (time_data(tf(1))-hrofday) / (time_data(tf(1)) - time_data(ti(1)))
-    w2 = 1 - w1
-
-    !
-    ! DJS BEGIN: This section will, eventually, replace the icol loop below, using the physics_process type.
-    !
-
     ! Set state
     gt1(:,:)   = tgrs(:,:)
     gu1(:,:)   = ugrs(:,:)
@@ -689,8 +675,13 @@ contains
     dudt(:,:)  = 0.
     dvdt(:,:)  = 0.
     dqdt(:,:,1)= 0.
-    do iCol = 1,nCol    
-       do iprc = 1,nPhysProcess
+    do iprc = 1,nPhysProcess
+       do iCol = 1,nCol
+          !
+          dT = 0.
+          du = 0.
+          dv = 0.
+          dq = 0.
 
           ! Using scheme simulator
           if (physics_process(iprc)%use_sim) then
@@ -728,18 +719,18 @@ contains
              if (physics_process(iprc)%name == "cldMP") index_of_process = index_of_process_mp
              !
              idtend = dtidx(index_of_temperature,index_of_process)
-             if (idtend >= 1) dT = dtend(iCol,:,idtend)
+             if (idtend >= 1) dT = dtend(iCol,:,idtend)/dtp
              !
              idtend = dtidx(index_of_x_wind,index_of_process)
-             if (idtend >= 1) du = dtend(iCol,:,idtend)
+             if (idtend >= 1) du = dtend(iCol,:,idtend)/dtp
              !
              idtend = dtidx(index_of_y_wind,index_of_process)
-             if (idtend >= 1) dv = dtend(iCol,:,idtend)
+             if (idtend >= 1) dv = dtend(iCol,:,idtend)/dtp
              !
              idtend = dtidx(100+ntqv,index_of_process)
-             if (idtend >= 1) dq = dtend(iCol,:,idtend)
+             if (idtend >= 1) dq = dtend(iCol,:,idtend)/dtp
           endif
-       
+         
           ! Update state now?
           if (physics_process(iprc)%time_split) then
              gt1(iCol,:)    = gt1(iCol,:)   + (dTdt(iCol,:)   + dT)*dtp
@@ -750,7 +741,7 @@ contains
              dudt(iCol,:)   = 0.
              dvdt(iCol,:)   = 0.
              dqdt(iCol,:,1) = 0.
-             ! Accumulate tendencies, update later?
+          ! Accumulate tendencies, update later?
           else
              dTdt(iCol,:)   = dTdt(iCol,:)   + dT
              dudt(iCol,:)   = dudt(iCol,:)   + du
@@ -765,6 +756,13 @@ contains
        gq0(iCol,:,1)  = gq1(iCol,:,1) + dqdt(iCol,:,1)*dtp
     enddo
     !
+
+    do iCol=1,size(gq0(:,1,1))
+       do iLay=1,size(gq0(1,:,1))
+          write(*,'(i5,4f8.3)') iLay,tgrs(iCol,iLay),gt0(iCol,iLay),gt1(iCol,iLay),gt0(iCol,iLay)-gt1(iCol,iLay)
+       enddo
+    enddo
+
   end subroutine ccpp_scheme_simulator_run
 
   ! ####################################################################################
