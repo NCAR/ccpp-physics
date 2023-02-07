@@ -98,6 +98,14 @@
   type = real
   kind = kind_phys
   intent = in
+[gflux_lnd]
+  standard_name = upward_heat_flux_in_soil_over_land_from_land
+  long_name = soil heat flux over land for coupling
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
 [sncovr1]
   standard_name = surface_snow_area_fraction_over_land
   long_name = surface snow area fraction
@@ -150,6 +158,14 @@
   standard_name = specific_humidity_at_2m_from_noahmp
   long_name = 2 meter specific humidity from noahmp
   units = kg kg-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[gflux]
+  standard_name = upward_heat_flux_in_soil_over_land
+  long_name = soil heat flux over land
+  units = W m-2
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys

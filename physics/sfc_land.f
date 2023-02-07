@@ -36,9 +36,10 @@
 !  ---  inputs:
      &     ( im, cpllnd, cpllnd2atm, flag_iter, dry,                    &
      &       sncovr1_lnd, qsurf_lnd, evap_lnd, hflx_lnd,                &
-     &       ep_lnd, t2mmp_lnd, q2mp_lnd,                               &
+     &       ep_lnd, t2mmp_lnd, q2mp_lnd, gflux_lnd,                    &
 !  ---  outputs:
      &       sncovr1, qsurf, evap, hflx, ep, t2mmp, q2mp,               &
+     &       gflux,                                                     &
      &       errmsg, errflg, naux2d, aux2d
      &     )
 
@@ -52,9 +53,10 @@
 !       inputs:                                                         !
 !          ( im, cpllnd, cpllnd2atm, flag_iter, dry,                    !
 !            sncovr1_lnd, qsurf_lnd, evap_lnd, hflx_lnd,                !
-!            ep_lnd, t2mmp_lnd, q2mp_lnd,                               !
+!            ep_lnd, t2mmp_lnd, q2mp_lnd, gflux_lnd,                    !
 !       outputs:                                                        !
 !            sncovr1, qsurf, evap, hflx, ep, t2mmp, q2mp,               !
+!            gflux,                                                     !
 !            errmsg, errflg)                                            !
 !                                                                       !
 !  ====================  defination of variables  ====================  !
@@ -71,7 +73,8 @@
 !     hflx_lnd    - real   , sensible heat
 !     ep_lnd      - real   , surface upward potential latent heat flux 
 !     t2mmp_lnd   - real   , 2m temperature 
-!     q2mp_lnd    - real   , 2m specific humidity 
+!     q2mp_lnd    - real   , 2m specific humidity
+!     gflux_lnd   - real   , soil heat flux over land
 !  outputs:
 !     sncovr1     - real   , snow cover over land
 !     qsurf       - real   , specific humidity at sfc
@@ -79,7 +82,8 @@
 !     hflx        - real   , sensible heat
 !     ep          - real   , potential evaporation 
 !     t2mmp       - real   , temperature at 2m 
-!     q2mp        - real   , specific humidity at 2m 
+!     q2mp        - real   , specific humidity at 2m
+!     gflux       - real   , soil heat flux over land
 !  ====================    end of description    =====================  !
 !
 !
@@ -94,11 +98,11 @@
 
       real (kind=kind_phys), dimension(:), intent(in) ::                &
      &       sncovr1_lnd, qsurf_lnd, evap_lnd, hflx_lnd, ep_lnd,        &
-     &       t2mmp_lnd, q2mp_lnd
+     &       t2mmp_lnd, q2mp_lnd, gflux_lnd
 
 !  ---  outputs:
       real (kind=kind_phys), dimension(:), intent(out) ::               &
-     &       sncovr1, qsurf, evap, hflx, ep, t2mmp, q2mp
+     &       sncovr1, qsurf, evap, hflx, ep, t2mmp, q2mp, gflux
 !
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -117,25 +121,24 @@
       if (.not. cpllnd2atm) return
 !
       do i = 1, im
-        !if (flag_iter(i) .and. dry(i)) then
-        !if (dry(i)) then
-           sncovr1(i) = sncovr1_lnd(i)
-           qsurf(i)   = qsurf_lnd(i)
-           hflx(i)    = hflx_lnd(i)
-           evap(i)    = evap_lnd(i)
-           ep(i)      = ep_lnd(i)
-           t2mmp(i)   = t2mmp_lnd(i)
-           q2mp(i)    = q2mp_lnd(i)
-        !end if
+         sncovr1(i) = sncovr1_lnd(i)
+         qsurf(i)   = qsurf_lnd(i)
+         hflx(i)    = hflx_lnd(i)
+         evap(i)    = evap_lnd(i)
+         ep(i)      = ep_lnd(i)
+         t2mmp(i)   = t2mmp_lnd(i)
+         q2mp(i)    = q2mp_lnd(i)
+         gflux(i)   = gflux_lnd(i)
       enddo
 
-      aux2d(:,1) = dry(:) !sncovr1(:)
+      aux2d(:,1) = sncovr1(:)
       aux2d(:,2) = qsurf(:)
       aux2d(:,3) = hflx(:)
       aux2d(:,4) = evap(:)
       aux2d(:,5) = ep(:)
-      aux2d(:,6) = qsurf_lnd(:) !t2mmp(:)
+      aux2d(:,6) = t2mmp(:)
       aux2d(:,7) = q2mp(:)
+      aux2d(:,8) = gflux(:)
  
       return
 !-----------------------------------
