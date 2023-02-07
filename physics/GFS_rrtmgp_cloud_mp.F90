@@ -27,7 +27,7 @@ module GFS_rrtmgp_cloud_mp
        reice_min  = 10.0,       & ! Minimum ice size allowed by GFDL MP scheme
        reice_max  = 150.0         ! Maximum ice size allowed by GFDL MP scheme  
   
-  public GFS_rrtmgp_cloud_mp_run
+  public GFS_rrtmgp_cloud_mp_init, GFS_rrtmgp_cloud_mp_run, GFS_rrtmgp_cloud_mp_finalize
 
 contains  
 
@@ -45,7 +45,7 @@ contains
   subroutine GFS_rrtmgp_cloud_mp_run(nCol, nLev, nTracers, ncnd, i_cldliq, i_cldice,     &
        i_cldrain, i_cldsnow, i_cldgrpl, i_cldtot, i_cldliq_nc, i_cldice_nc, i_twa, kdt,  &
        imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_samf, doSWrad, doLWrad, effr_in, lmfshal,   &
-       ltaerosol,mraerosol, icloud, imp_physics, imp_physics_thompson, imp_physics_gfdl,           &
+       ltaerosol,mraerosol, icloud, imp_physics, imp_physics_thompson, imp_physics_gfdl, &
        lgfdlmprad, do_mynnedmf, uni_cld, lmfdeep2, p_lev, p_lay, t_lay, qs_lay, q_lay,   &
        relhum, lsmask, xlon, xlat, dx, tv_lay, effrin_cldliq, effrin_cldice,             &
        effrin_cldrain, effrin_cldsnow, tracer, cnv_mixratio, cld_cnv_frac, qci_conv,     &
@@ -462,6 +462,7 @@ contains
     enddo
   end subroutine cloud_mp_MYNN
 
+
 !> \ingroup GFS_rrtmgp_cloud_mp 
 !! Compute cloud radiative properties for SAMF convective cloud scheme.
 !!
@@ -484,47 +485,48 @@ contains
          nCol,          & ! Number of horizontal grid points
          nLev             ! Number of vertical layers
     real(kind_phys), intent(in) :: &
-         con_g,         & ! Physical constant: gravitational constant 
-         con_ttp,       & ! Triple point temperature of water (K)
+         con_g,         & ! Physical constant: gravity         (m s-2)
+         con_ttp,       & ! Triple point temperature of water  (K)
          alpha0           !
     real(kind_phys), dimension(:,:),intent(in) :: &
-         t_lay,         & ! Temperature at layer centers (K)
-         p_lev,         & ! Pressure at layer interfaces (Pa)
-         p_lay,         & !
-         qs_lay,        & !
-         relhum,        & !
-         cnv_mixratio     ! Convective cloud mixing-ratio (kg/kg)
+         t_lay,         & ! Temperature at layer-centers       (K)
+         p_lev,         & ! Pressure at layer-interfaces       (Pa)
+         p_lay,         & ! Presure at layer-centers           (Pa)
+         qs_lay,        & ! Specific-humidity at layer-centers (kg/kg)
+         relhum,        & ! Relative-humidity                  (1)
+         cnv_mixratio     ! Convective cloud mixing-ratio      (kg/kg)
     ! Outputs
     real(kind_phys), dimension(:,:),intent(inout) :: &
          cld_cnv_lwp,   & ! Convective cloud liquid water path
          cld_cnv_reliq, & ! Convective cloud liquid effective radius
          cld_cnv_iwp,   & ! Convective cloud ice water path
          cld_cnv_reice, & ! Convective cloud ice effecive radius
-         cld_cnv_frac     ! Convective cloud-fraction (1)
+         cld_cnv_frac     ! Convective cloud-fraction
     ! Local
     integer :: iCol, iLay
-    real(kind_phys) :: tem1, deltaP, clwc
+    real(kind_phys) :: tem0, tem1, deltaP, clwc
 
+    tem0 = 1.0e5/con_g
     do iLay = 1, nLev
        do iCol = 1, nCol
           if (cnv_mixratio(iCol,iLay) > 0._kind_phys) then
              tem1   = min(1.0, max(0.0, (con_ttp-t_lay(iCol,iLay))*0.05))
              deltaP = abs(p_lev(iCol,iLay+1)-p_lev(iCol,iLay))*0.01
-             clwc   = max(0.0, cnv_mixratio(iCol,iLay)) * con_g * deltaP
-             cld_cnv_iwp(iCol,iLay) = clwc * tem1
-             cld_cnv_lwp(iCol,iLay) = clwc - cld_cnv_iwp(iCol,iLay)
+             clwc   = max(0.0, cnv_mixratio(iCol,iLay)) * tem0 * deltaP
+             cld_cnv_iwp(iCol,iLay)   = clwc * tem1
+             cld_cnv_lwp(iCol,iLay)   = clwc - cld_cnv_iwp(iCol,iLay)
              cld_cnv_reliq(iCol,iLay) = reliq_def
              cld_cnv_reice(iCol,iLay) = reice_def
 
              ! Xu-Randall (1996) cloud-fraction.
-             cld_cnv_frac(iCol,iLay) = cld_frac_XuRandall(p_lay(iCol,iLay),            &
+             cld_cnv_frac(iCol,iLay) = cld_frac_XuRandall(p_lay(iCol,iLay),              &
                qs_lay(iCol,iLay), relhum(iCol,iLay), cnv_mixratio(iCol,iLay), alpha0)
           endif
        enddo
     enddo
 
   end subroutine cloud_mp_SAMF
- 
+
 !> \ingroup GFS_rrtmgp_cloud_mp 
 !! This routine computes the cloud radiative properties for a "unified cloud".
 !! - "unified cloud" implies that the cloud-fraction is PROVIDED.
@@ -656,7 +658,6 @@ contains
     enddo       ! nLev
 
   end subroutine cloud_mp_uni
-
 !> \ingroup GFS_rrtmgp_cloud_mp 
 !! This routine computes the cloud radiative properties for the Thompson cloud micro-
 !! physics scheme.
@@ -834,11 +835,11 @@ contains
     return
   end function
 
-!> \ingroup GFS_rrtmgp_cloud_mp 
-!! This routine is a wrapper to update the Thompson effective particle sizes used by the
-!! RRTMGP radiation scheme.
-!!
-!! \section cmp_reff_Thompson_gen General Algorithm
+  ! ######################################################################################
+  ! This routine is a wrapper to update the Thompson effective particle sizes used by the
+  ! RRTMGP radiation scheme.
+  !
+  ! ######################################################################################
   subroutine cmp_reff_Thompson(nLev, nCol, i_cldliq, i_cldice, i_cldsnow, i_cldice_nc,   &
        i_cldliq_nc, i_twa, q_lay, p_lay, t_lay, tracer, con_eps, con_rd, ltaerosol,      &
        mraerosol, lsmask, effrin_cldliq, effrin_cldice, effrin_cldsnow)
@@ -922,4 +923,5 @@ contains
     enddo
 
   end subroutine cmp_reff_Thompson
+
 end module GFS_rrtmgp_cloud_mp
