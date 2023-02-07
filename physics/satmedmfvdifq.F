@@ -1212,97 +1212,97 @@
 !
         enddo
       enddo
-!      !PCC_CANOPY------------------------------------
-!        do k = 1, 1km1
-!          do i=1,im
-!                      FCH  = canheight(i)    !Input canopy height for grid cell i
-!                      IF (k .EQ. 1) THEN !first model layer
-!!                       Check for Contiguous Canopy Grid Cells
-!                        IF ( FCH .LT. 0.5
-!!                       IF ( LAI .LT. 0.1
-!!     &                   .OR. FCH .LT. 0.5
-!!     &                   .OR. FCH .LT. 10.0
-!!     &                   .OR. MAX(0.0, 1.0 - FRT) .GT. 0.5
-!!     &                   .OR. POPU .GT. 10000.0
-!!     &                   .OR. EXP(-0.5*LAI*CLU).GT. 0.45
-!!     &                      .AND. FCH .LT. 18.0 ) THEN !not a contigous canopy cell
-!                              dkt(i,k)= dkt(i,k)
-!                              dkq(i,k)= dkq(i,k)
-!                              dku(i,k)= dku(i,k)
-!                       ELSE ! There is a contiguous forest canopy,
-!!                              apply correction over canopy layers
-!!Raupauch M. R. A Practical Lagrangian method for relating scalar
-!!concentrations to
-!! source distributions in vegetation canopies. Q. J. R. Meteor. Soc.
-!! (1989), 115, pp 609-632
-!              MOL  = zol(i)/zl(i,k)  !Monin-Obukhov Length
-!              HOL = FCH/MOL  !local canopy stability parameter (hc/MOL)
-!              ZCAN = zl(i,k) ! Initialize canopy top (m) = First model layer height above canopy
-!              COUNTCAN = 0   ! Initialize canopy layers
-!              DO WHILE (ZCAN.GE.0.5)  !canopy threshold >= 0.5 m
-!                 ! TLCAN = Lagrangian timescale
-!                 TLCAN = (FCH/ustar(i)) * (
-!     &                   (0.256 * (ZCAN-(0.75*FCH))/FCH ) +
-!     &                   (0.492*EXP((-0.256*ZCAN/FCH)/0.492)) )
-!                 IF ( HOL .LT. -0.1 )  THEN  !STRONG UNSTABLE
-!                  IF ( ZCAN/FCH .GT. 1.25 ) THEN !SIGMACAN = Eulerian vertical velocity variance
-!                    SIGMACAN = 1.25*ustar(i)
-!                  END IF
-!                  IF ( ZCAN/FCH .GE. 0.175  .AND. ZCAN/FCH .LE. 1.25 ) THEN
-!                    SIGMACAN = ustar(i) * ( 0.75 + (0.5 * COS((PICAN/1.06818) *
-!     &                                                 (1.25 - (ZCAN/FCH)))) )
-!                  END IF
-!                  IF ( ZCAN/FCH .LT. 0.175 )  THEN
-!                    SIGMACAN = 0.25*ustar(i)
-!                  END IF
-!                 END IF
-!                 IF ( HOL .GE. -0.1  .AND. HOL .LT. 0.1 )   THEN !WEAKLY UNSTABLE to NEUTRAL
-!                  IF ( ZCAN/FCH .GT. 1.25 ) THEN
-!                    SIGMACAN = 1.0*ustar(i)
-!                  END IF
-!                  IF ( ZCAN/FCH .GE. 0.175  .AND. ZCAN/FCH .LE. 1.25 ) THEN
-!                    SIGMACAN = ustar(i) * ( 0.625 + (0.375* COS((PICAN/1.06818) *
-!     &                                                 (1.25 - (ZCAN/FCH)))) )
-!                  END IF
-!                  IF ( ZCAN/FCH .LT. 0.175 )  THEN
-!                    SIGMACAN = 0.25*ustar(i)
-!                  END IF
-!                 END IF
-!                 IF ( HOL .GE.  0.1  .AND.  HOL .LT. 0.9 )   THEN !STABLE
-!                  IF ( ZCAN/FCH .GT. 1.25 ) THEN
-!                    SIGMACAN = 0.25*(4.375 - (3.75*HOL))*ustar(i)
-!                  END IF
-!                  IF ( ZCAN/FCH .GE. 0.175  .AND. ZCAN/FCH .LE. 1.25 ) THEN
-!                    RRCAN=4.375-(3.75*HOL)
-!                    AACAN=(0.125*RRCAN) + 0.125
-!                    BBCAN=(0.125*RRCAN) - 0.125
-!                    SIGMACAN = ustar(i) * ( AACAN + (BBCAN * COS((PICAN/1.06818) *
-!     &                                                 (1.25 - (ZCAN/FCH)))) )
-!                  END IF
-!                  IF ( ZCAN/FCH .LT. 0.175 )  THEN
-!                    SIGMACAN = 0.25*ustar(i)
-!                  END IF
-!                 END IF
-!                 IF ( HOL .GE.  0.9 ) THEN  !VERY STABLE
-!                    SIGMACAN = 0.25*ustar(i)
-!                 END IF
-!                 IF ( ZCAN .EQ. ZFL )  THEN ! First model layer above canopy
-!                  EDDYVEST1 = (SIGMACAN*SIGMACAN)*TLCAN
-!                 ELSE IF ( ZCAN .LE. FCH )  THEN !in-canopy layers and set arrays
-!                  COUNTCAN = COUNTCAN + 1
-!                  ZCANX (COUNTCAN)     = ZCAN
-!                  EDDYVESTX (COUNTCAN) = (SIGMACAN*SIGMACAN)*TLCAN
-!                 END IF
-!                 ZCAN = ZCAN-0.5  !step down in-canopy resolution of 0.5m
-!              END DO !end loop on canopy layers
-!              EDDYVEST_INT = IntegrateTrapezoid((ZCANX(COUNTCAN:1:-1)/FCH),EDDYVESTX(COUNTCAN:1:-1))
-!              dkt(i,k)= (dkt(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dkt to resolved eddy diffusivity
-!              dkq(i,k)= (dkq(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dkq to resolved eddy diffusivity
-!              dku(i,k)= (dkq(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dku to resolved eddy diffusivity
-!                        END IF !contigous canopy conditions
-!                      END IF  ! first model layer scaled canopy
-!          enddo !i
-!        enddo !k
+      !PCC_CANOPY------------------------------------
+        do k = 1, 1km1
+          do i=1,im
+                      FCH  = canheight(i)    !Input canopy height for grid cell i
+                      IF (k .EQ. 1) THEN !first model layer
+!                       Check for Contiguous Canopy Grid Cells
+                        IF ( FCH .LT. 0.5
+!                       IF ( LAI .LT. 0.1
+!     &                   .OR. FCH .LT. 0.5
+!     &                   .OR. FCH .LT. 10.0
+!     &                   .OR. MAX(0.0, 1.0 - FRT) .GT. 0.5
+!     &                   .OR. POPU .GT. 10000.0
+!     &                   .OR. EXP(-0.5*LAI*CLU).GT. 0.45
+!     &                      .AND. FCH .LT. 18.0 ) THEN !not a contigous canopy cell
+                              dkt(i,k)= dkt(i,k)
+                              dkq(i,k)= dkq(i,k)
+                              dku(i,k)= dku(i,k)
+                       ELSE ! There is a contiguous forest canopy,
+!                              apply correction over canopy layers
+!Raupauch M. R. A Practical Lagrangian method for relating scalar
+!concentrations to
+! source distributions in vegetation canopies. Q. J. R. Meteor. Soc.
+! (1989), 115, pp 609-632
+              MOL  = zol(i)/zl(i,k)  !Monin-Obukhov Length
+              HOL = FCH/MOL  !local canopy stability parameter (hc/MOL)
+              ZCAN = zl(i,k) ! Initialize canopy top (m) = First model layer height above canopy
+              COUNTCAN = 0   ! Initialize canopy layers
+              DO WHILE (ZCAN.GE.0.5)  !canopy threshold >= 0.5 m
+                 ! TLCAN = Lagrangian timescale
+                 TLCAN = (FCH/ustar(i)) * (
+     &                   (0.256 * (ZCAN-(0.75*FCH))/FCH ) +
+     &                   (0.492*EXP((-0.256*ZCAN/FCH)/0.492)) )
+                 IF ( HOL .LT. -0.1 )  THEN  !STRONG UNSTABLE
+                  IF ( ZCAN/FCH .GT. 1.25 ) THEN !SIGMACAN = Eulerian vertical velocity variance
+                    SIGMACAN = 1.25*ustar(i)
+                  END IF
+                  IF ( ZCAN/FCH .GE. 0.175  .AND. ZCAN/FCH .LE. 1.25 ) THEN
+                    SIGMACAN = ustar(i) * ( 0.75 + (0.5 * COS((PICAN/1.06818) *
+     &                                                 (1.25 - (ZCAN/FCH)))) )
+                  END IF
+                  IF ( ZCAN/FCH .LT. 0.175 )  THEN
+                    SIGMACAN = 0.25*ustar(i)
+                  END IF
+                 END IF
+                 IF ( HOL .GE. -0.1  .AND. HOL .LT. 0.1 )   THEN !WEAKLY UNSTABLE to NEUTRAL
+                  IF ( ZCAN/FCH .GT. 1.25 ) THEN
+                    SIGMACAN = 1.0*ustar(i)
+                  END IF
+                  IF ( ZCAN/FCH .GE. 0.175  .AND. ZCAN/FCH .LE. 1.25 ) THEN
+                    SIGMACAN = ustar(i) * ( 0.625 + (0.375* COS((PICAN/1.06818) *
+     &                                                 (1.25 - (ZCAN/FCH)))) )
+                  END IF
+                  IF ( ZCAN/FCH .LT. 0.175 )  THEN
+                    SIGMACAN = 0.25*ustar(i)
+                  END IF
+                 END IF
+                 IF ( HOL .GE.  0.1  .AND.  HOL .LT. 0.9 )   THEN !STABLE
+                  IF ( ZCAN/FCH .GT. 1.25 ) THEN
+                    SIGMACAN = 0.25*(4.375 - (3.75*HOL))*ustar(i)
+                  END IF
+                  IF ( ZCAN/FCH .GE. 0.175  .AND. ZCAN/FCH .LE. 1.25 ) THEN
+                    RRCAN=4.375-(3.75*HOL)
+                    AACAN=(0.125*RRCAN) + 0.125
+                    BBCAN=(0.125*RRCAN) - 0.125
+                    SIGMACAN = ustar(i) * ( AACAN + (BBCAN * COS((PICAN/1.06818) *
+     &                                                 (1.25 - (ZCAN/FCH)))) )
+                  END IF
+                  IF ( ZCAN/FCH .LT. 0.175 )  THEN
+                    SIGMACAN = 0.25*ustar(i)
+                  END IF
+                 END IF
+                 IF ( HOL .GE.  0.9 ) THEN  !VERY STABLE
+                    SIGMACAN = 0.25*ustar(i)
+                 END IF
+                 IF ( ZCAN .EQ. ZFL )  THEN ! First model layer above canopy
+                  EDDYVEST1 = (SIGMACAN*SIGMACAN)*TLCAN
+                 ELSE IF ( ZCAN .LE. FCH )  THEN !in-canopy layers and set arrays
+                  COUNTCAN = COUNTCAN + 1
+                  ZCANX (COUNTCAN)     = ZCAN
+                  EDDYVESTX (COUNTCAN) = (SIGMACAN*SIGMACAN)*TLCAN
+                 END IF
+                 ZCAN = ZCAN-0.5  !step down in-canopy resolution of 0.5m
+              END DO !end loop on canopy layers
+              EDDYVEST_INT = IntegrateTrapezoid((ZCANX(COUNTCAN:1:-1)/FCH),EDDYVESTX(COUNTCAN:1:-1))
+              dkt(i,k)= (dkt(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dkt to resolved eddy diffusivity
+              dkq(i,k)= (dkq(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dkq to resolved eddy diffusivity
+              dku(i,k)= (dkq(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dku to resolved eddy diffusivity
+                        END IF !contigous canopy conditions
+                      END IF  ! first model layer scaled canopy
+          enddo !i
+        enddo !k
 !> ## Compute TKE.
 !!  - Compute a minimum TKE deduced from background diffusivity for momentum.
 !
@@ -1573,90 +1573,6 @@
       do k=1,kps
         do i=1,im
           tkeh(i,k) = 0.5 * (tke(i,k)+tke(i,k+1))
-          !PCC_CANOPY
-                      FCH  = canheight(i)    !Input canopy height for grid cell i
-                      IF (k .EQ. 1) THEN !first model layer
-!                       Check for Contiguous Canopy Grid Cells
-                        IF ( FCH .LT. 0.5
-!                       IF ( LAI .LT. 0.1
-!     &                   .OR. FCH .LT. 0.5
-!     &                   .OR. FCH .LT. 10.0
-!     &                   .OR. MAX(0.0, 1.0 - FRT) .GT. 0.5
-!     &                   .OR. POPU .GT. 10000.0
-!     &                   .OR. EXP(-0.5*LAI*CLU).GT. 0.45
-!     &                      .AND. FCH .LT. 18.0 ) THEN !not a contigous canopy cell
-                        tkeh(i,k) = tkeh(i,k)
-                       ELSE ! There is a contiguous forest canopy,
-!                              apply correction over canopy layers
-!Raupauch M. R. A Practical Lagrangian method for relating scalar
-!concentrations to
-! source distributions in vegetation canopies. Q. J. R. Meteor. Soc.
-! (1989), 115, pp 609-632
-              MOL  = zol(i)/zl(i,k)  !Monin-Obukhov Length
-              HOL = FCH/MOL  !local canopy stability parameter (hc/MOL)
-              ZCAN = zl(i,k) ! Initialize canopy top (m) = First model layer height above canopy
-              COUNTCAN = 0   ! Initialize canopy layers
-              DO WHILE (ZCAN.GE.0.5)  !canopy threshold >= 0.5 m
-                 ! TLCAN = Lagrangian timescale
-                 TLCAN = (FCH/ustar(i)) * (
-     &                   (0.256 * (ZCAN-(0.75*FCH))/FCH ) +
-     &                   (0.492*EXP((-0.256*ZCAN/FCH)/0.492)) )
-                 IF ( HOL .LT. -0.1 )  THEN  !STRONG UNSTABLE
-                  IF ( ZCAN/FCH .GT. 1.25 ) THEN !SIGMACAN = Eulerian vertical velocity variance
-                    SIGMACAN = 1.25*ustar(i)
-                  END IF
-                  IF ( ZCAN/FCH .GE. 0.175  .AND. ZCAN/FCH .LE. 1.25 ) THEN
-                    SIGMACAN = ustar(i) * ( 0.75 + (0.5 * COS((PICAN/1.06818) *
-     &                                                 (1.25 - (ZCAN/FCH)))) )
-                  END IF
-                  IF ( ZCAN/FCH .LT. 0.175 )  THEN
-                    SIGMACAN = 0.25*ustar(i)
-                  END IF
-                 END IF
-                 IF ( HOL .GE. -0.1  .AND. HOL .LT. 0.1 )   THEN !WEAKLY UNSTABLE to NEUTRAL
-                  IF ( ZCAN/FCH .GT. 1.25 ) THEN
-                    SIGMACAN = 1.0*ustar(i)
-                  END IF
-                  IF ( ZCAN/FCH .GE. 0.175  .AND. ZCAN/FCH .LE. 1.25 ) THEN
-                    SIGMACAN = ustar(i) * ( 0.625 + (0.375* COS((PICAN/1.06818) *
-     &                                                 (1.25 - (ZCAN/FCH)))) )
-                  END IF
-                  IF ( ZCAN/FCH .LT. 0.175 )  THEN
-                    SIGMACAN = 0.25*ustar(i)
-                  END IF
-                 END IF
-                 IF ( HOL .GE.  0.1  .AND.  HOL .LT. 0.9 )   THEN !STABLE
-                  IF ( ZCAN/FCH .GT. 1.25 ) THEN
-                    SIGMACAN = 0.25*(4.375 - (3.75*HOL))*ustar(i)
-                  END IF
-                  IF ( ZCAN/FCH .GE. 0.175  .AND. ZCAN/FCH .LE. 1.25 ) THEN
-                    RRCAN=4.375-(3.75*HOL)
-                    AACAN=(0.125*RRCAN) + 0.125
-                    BBCAN=(0.125*RRCAN) - 0.125
-                    SIGMACAN = ustar(i) * ( AACAN + (BBCAN * COS((PICAN/1.06818) *
-     &                                                 (1.25 - (ZCAN/FCH)))) )
-                  END IF
-                  IF ( ZCAN/FCH .LT. 0.175 )  THEN
-                    SIGMACAN = 0.25*ustar(i)
-                  END IF
-                 END IF
-                 IF ( HOL .GE.  0.9 ) THEN  !VERY STABLE
-                    SIGMACAN = 0.25*ustar(i)
-                 END IF
-                 IF ( ZCAN .EQ. ZFL )  THEN ! First model layer above canopy
-                  EDDYVEST1 = (SIGMACAN*SIGMACAN)*TLCAN
-                 ELSE IF ( ZCAN .LE. FCH )  THEN !in-canopy layers and set arrays
-                  COUNTCAN = COUNTCAN + 1
-                  ZCANX (COUNTCAN)     = ZCAN
-                  EDDYVESTX (COUNTCAN) = (SIGMACAN*SIGMACAN)*TLCAN
-                 END IF
-                 ZCAN = ZCAN-0.5  !step down in-canopy resolution of 0.5m
-              END DO !end loop on canopy layers
-              EDDYVEST_INT = IntegrateTrapezoid((ZCANX(COUNTCAN:1:-1)/FCH),EDDYVESTX(COUNTCAN:1:-1))
-              tkeh(i,k)= (tkeh(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale tke to fractional K profile 
-                                                              !at layer centers, tkeh
-                        END IF !contigous canopy conditions
-                      END IF  ! first model layer scaled canopy
         enddo
       enddo
 
