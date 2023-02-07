@@ -581,6 +581,14 @@
   type = real
   kind = kind_phys
   intent = in
+[canheight]
+  standard_name = forest_canopy_height
+  long_name = forest canopy height above ground
+  units = m
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
 [sfc_rlm]
   standard_name = choice_of_near_surface_mixing_length_in_boundary_layer_mass_flux_scheme
   long_name = choice of near surface mixing length in boundary layer mass flux scheme
