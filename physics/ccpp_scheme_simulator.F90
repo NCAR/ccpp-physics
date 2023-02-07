@@ -116,15 +116,12 @@ module ccpp_scheme_simulator
   ! Data driven physics tendencies
   integer :: nlev_data, ntime_data
   real(kind_phys), allocatable, dimension(:)   :: time_data
-  real(kind_phys), allocatable, dimension(:,:),target :: dTdt_LWRAD_data, dTdt_SWRAD_data,      &
-       dTdt_PBL_data, dudt_PBL_data, dvdt_PBL_data, dTdt_GWD_data, dudt_GWD_data,        &
-       dvdt_GWD_data, dTdt_SCNV_data, dudt_SCNV_data, dvdt_SCNV_data, dTdt_DCNV_data,    &
-       dudt_DCNV_data, dvdt_DCNV_data, dTdt_cldMP_data
-  real(kind_phys), allocatable, dimension(:,:,:),target :: dqdt_PBL_data, dqdt_SCNV_data,       &
-       dqdt_DCNV_data, dqdt_cldMP_data
-
-  ! Host-model initial time information
-  integer :: init_year, init_month, init_day, init_hour, init_min, init_sec
+  real(kind_phys), allocatable, dimension(:,:), target :: dTdt_LWRAD_data,               &
+       dTdt_SWRAD_data, dTdt_PBL_data, dudt_PBL_data, dvdt_PBL_data, dTdt_GWD_data,      &
+       dudt_GWD_data, dvdt_GWD_data, dTdt_SCNV_data, dudt_SCNV_data, dvdt_SCNV_data,     &
+       dTdt_DCNV_data, dudt_DCNV_data, dvdt_DCNV_data, dTdt_cldMP_data
+  real(kind_phys), allocatable, dimension(:,:,:), target :: dqdt_PBL_data,               &
+       dqdt_SCNV_data, dqdt_DCNV_data, dqdt_cldMP_data
 
   public ccpp_scheme_simulator_init, ccpp_scheme_simulator_run
 contains
@@ -138,12 +135,11 @@ contains
 !! \htmlinclude ccpp_scheme_simulator_init.html
 !!
   subroutine ccpp_scheme_simulator_init(mpirank, mpiroot, mpicomm, nlunit, nml_file,     &
-       idat, errmsg, errflg)
+       errmsg, errflg)
 
     ! Inputs
     integer,          intent (in) :: mpirank, mpiroot, mpicomm, nlunit
     character(len=*), intent (in) :: nml_file
-    integer,          intent (in), dimension(8) :: idat
 
     ! Outputs
     character(len=*), intent(out) :: errmsg
@@ -167,14 +163,6 @@ contains
     ! Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0
-
-    ! Store model initialization time.
-    init_year  = idat(1)
-    init_month = idat(2)
-    init_day   = idat(3)
-    init_hour  = idat(5)
-    init_min   = idat(6)
-    init_sec   = idat(7)
 
     ! ######################################################################################
     !
@@ -592,10 +580,12 @@ contains
        print*, "---------------------------------"
        print*, "                 "
        do iprc = 1,nPhysProcess
-          print*,"Process          : ", trim(physics_process(iprc)%name)
-          print*,"      order      : ", physics_process(iprc)%order
-          print*,"      use_sim    : ", physics_process(iprc)%use_sim
-          print*,"      time_split : ", physics_process(iprc)%time_split
+          if (physics_process(iprc)%use_sim) then
+             print*,"Process          : ", trim(physics_process(iprc)%name)
+             print*,"      order      : ", physics_process(iprc)%order
+             print*,"      use_sim    : ", physics_process(iprc)%use_sim
+             print*,"      time_split : ", physics_process(iprc)%time_split
+          endif
        enddo
        print*, "---------------------------------"
     endif
@@ -662,7 +652,7 @@ contains
     nTrc = size(gq0(1,1,:))
 
     ! Allocate temporaries
-    allocate(gt1(nCol,nLay), gu1(nCol,nLay), gv1(nCol,nLay), gq1(nCol,nLay,1)) ! *only specific humidity to start (ntrc=1).
+    allocate(gt1(nCol,nLay), gu1(nCol,nLay), gv1(nCol,nLay), gq1(nCol,nLay,1))
     allocate(dTdt(nCol,nLay), dudt(nCol,nLay), dvdt(nCol,nLay), dqdt(nCol,nLay,1))
     allocate(dT(nLay), du(nLay), dv(nLay), dq(nLay))
 
@@ -675,6 +665,8 @@ contains
     dudt(:,:)  = 0.
     dvdt(:,:)  = 0.
     dqdt(:,:,1)= 0.
+
+    ! Model internal physics timestep evolution of "state".
     do iprc = 1,nPhysProcess
        do iCol = 1,nCol
           !
@@ -685,31 +677,21 @@ contains
 
           ! Using scheme simulator
           if (physics_process(iprc)%use_sim) then
-             print*,"Using CCPP scheme simulator for ",trim(physics_process(iprc)%name)
-    
-             ! Temperature
              if (associated(physics_process(iprc)%tend%T)) then
-                call interp_data_tend("T", physics_process(iprc)%name, iprc, fcst_year, fcst_month, fcst_day, fcst_hour, fcst_min, fcst_sec, dT)
+                call linterp_data_tend("T", physics_process(iprc)%name, iprc, fcst_year, fcst_month, fcst_day, fcst_hour, fcst_min, fcst_sec, dT)
              endif
-
-             ! Zonal-wind
              if (associated(physics_process(iprc)%tend%u)) then
-                call interp_data_tend("u", physics_process(iprc)%name, iprc, fcst_year, fcst_month, fcst_day, fcst_hour, fcst_min, fcst_sec, du)
+                call linterp_data_tend("u", physics_process(iprc)%name, iprc, fcst_year, fcst_month, fcst_day, fcst_hour, fcst_min, fcst_sec, du)
              endif
-             
-             ! Meridional-wind
              if (associated(physics_process(iprc)%tend%v)) then
-                call interp_data_tend("v", physics_process(iprc)%name, iprc, fcst_year, fcst_month, fcst_day, fcst_hour, fcst_min, fcst_sec, dv)
+                call linterp_data_tend("v", physics_process(iprc)%name, iprc, fcst_year, fcst_month, fcst_day, fcst_hour, fcst_min, fcst_sec, dv)
              endif
-             
-             ! Specific-humidity
              if (associated(physics_process(iprc)%tend%q)) then
-                call interp_data_tend("q", physics_process(iprc)%name, iprc, fcst_year, fcst_month, fcst_day, fcst_hour, fcst_min, fcst_sec, dq)
+                call linterp_data_tend("q", physics_process(iprc)%name, iprc, fcst_year, fcst_month, fcst_day, fcst_hour, fcst_min, fcst_sec, dq)
              endif
 
           ! Using data tendency from "active" scheme(s).
           else
-             print*,"ACTIVE PHYSICS SCHEME: ",trim(physics_process(iprc)%name)
              if (physics_process(iprc)%name == "LWRAD") index_of_process = index_of_process_longwave
              if (physics_process(iprc)%name == "SWRAD") index_of_process = index_of_process_shortwave
              if (physics_process(iprc)%name == "PBL")   index_of_process = index_of_process_pbl
@@ -730,7 +712,7 @@ contains
              idtend = dtidx(100+ntqv,index_of_process)
              if (idtend >= 1) dq = dtend(iCol,:,idtend)/dtp
           endif
-         
+
           ! Update state now?
           if (physics_process(iprc)%time_split) then
              gt1(iCol,:)    = gt1(iCol,:)   + (dTdt(iCol,:)   + dT)*dtp
@@ -754,22 +736,17 @@ contains
        gu0(iCol,:)    = gu1(iCol,:)   + dudt(iCol,:)*dtp
        gv0(iCol,:)    = gv1(iCol,:)   + dvdt(iCol,:)*dtp
        gq0(iCol,:,1)  = gq1(iCol,:,1) + dqdt(iCol,:,1)*dtp
+
     enddo
     !
-
-    do iCol=1,size(gq0(:,1,1))
-       do iLay=1,size(gq0(1,:,1))
-          write(*,'(i5,4f8.3)') iLay,tgrs(iCol,iLay),gt0(iCol,iLay),gt1(iCol,iLay),gt0(iCol,iLay)-gt1(iCol,iLay)
-       enddo
-    enddo
-
   end subroutine ccpp_scheme_simulator_run
 
   ! ####################################################################################
   ! Utility functions/routines
   ! ####################################################################################
-  subroutine interp_data_tend(var_name, process_name, iprc, year, month, day, hour, minute,  &
-       second, var_out)
+  ! The routine interpolates the data-tendencies
+  subroutine linterp_data_tend(var_name, process_name, iprc, year, month, day, hour,    &
+       minute, second, var_out)
     ! Inputs
     character(len=*), intent(in) :: var_name, process_name
     integer, intent(in) :: year, month, day, hour, minute, second, iprc
@@ -781,6 +758,7 @@ contains
     integer :: ti(1), tf(1)
     real(kind_phys) :: w1, w2, hrofday
 
+    ! Linear interpolation weights
     hrofday = hour*3600. + minute*60. + second
     ti = findloc(abs(time_data-hrofday),minval(abs(time_data-hrofday)))
     if (hrofday - time_data(ti(1)) .le. 0) ti = ti-1
@@ -788,21 +766,18 @@ contains
     w1 = (time_data(tf(1))-hrofday) / (time_data(tf(1)) - time_data(ti(1)))
     w2 = 1 - w1
 
-    if (var_name == "T") then
-       var_out = w1*physics_process(iprc)%tend%T(:,ti(1)) + w2*physics_process(iprc)%tend%T(:,tf(1))
-    endif
+    !
+    select case(var_name)
+       case("T")
+          var_out = w1*physics_process(iprc)%tend%T(:,ti(1)) + w2*physics_process(iprc)%tend%T(:,tf(1))
+       case("u")
+          var_out = w1*physics_process(iprc)%tend%u(:,ti(1)) + w2*physics_process(iprc)%tend%u(:,tf(1))
+       case("v")
+          var_out = w1*physics_process(iprc)%tend%v(:,ti(1)) + w2*physics_process(iprc)%tend%v(:,tf(1))
+       case("q")
+          var_out = w1*physics_process(iprc)%tend%q(:,ti(1),1) + w2*physics_process(iprc)%tend%q(:,tf(1),1)
+    end select
 
-   if (var_name == "u") then
-       var_out = w1*physics_process(iprc)%tend%u(:,ti(1)) + w2*physics_process(iprc)%tend%u(:,tf(1))
-    endif
-
-   if (var_name == "v") then
-       var_out = w1*physics_process(iprc)%tend%v(:,ti(1)) + w2*physics_process(iprc)%tend%v(:,tf(1))
-    endif
-
-   if (var_name == "q") then
-       var_out = w1*physics_process(iprc)%tend%q(:,ti(1),1) + w2*physics_process(iprc)%tend%q(:,tf(1),1)
-    endif
-  end subroutine interp_data_tend
+  end subroutine linterp_data_tend
 
 end module ccpp_scheme_simulator
