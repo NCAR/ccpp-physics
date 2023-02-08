@@ -2,7 +2,7 @@
   name = GFS_rrtmgp_pre
   type = scheme
   dependencies = funcphys.f90,iounitdef.f,machine.F,module_bfmicrophysics.f,physcons.F90,radcons.f90,radiation_aerosols.f
-  dependencies = radiation_astronomy.f,radiation_clouds.f,radiation_gases.f,radiation_tools.F90,rrtmg_lw_cloud_optics.F90
+  dependencies = radiation_astronomy.f,radiation_gases.f,radiation_tools.F90,rrtmg_lw_cloud_optics.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -252,6 +252,14 @@
   type = real
   kind = kind_phys
   intent = in
+[con_pi]
+  standard_name = pi
+  long_name = ratio of a circle's circumference to its diameter
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
 [minGPpres]
   standard_name = minimum_pressure_in_RRTMGP
   long_name = minimum pressure allowed in RRTMGP
@@ -283,6 +291,13 @@
   dimensions = ()
   type = real
   kind = kind_phys
+  intent = in
+[ico2]
+  standard_name = control_for_co2
+  long_name = prescribed global mean value (old opernl)
+  units = flag
+  dimensions = ()
+  type = integer
   intent = in
 [raddt]
   standard_name = time_step_for_radiation
@@ -349,26 +364,26 @@
   kind = kind_phys
   intent = inout
 [top_at_1]
-  standard_name = flag_for_vertical_ordering_in_RRTMGP
-  long_name = flag for vertical ordering in RRTMGP
+  standard_name = flag_for_vertical_ordering_in_radiation
+  long_name = flag for vertical ordering in radiation
   units = flag
   dimensions = ()
   type = logical
-  intent = out
+  intent = in
 [iSFC]
   standard_name = vertical_index_for_surface_in_RRTMGP
   long_name = index for	surface	layer in RRTMGP
   units = flag
   dimensions = ()
   type = integer
-  intent = out
+  intent = in
 [iTOA]
   standard_name = vertical_index_for_TOA_in_RRTMGP
   long_name = index for TOA layer in RRTMGP
   units = flag
   dimensions = ()
   type = integer
-  intent = out
+  intent = in
 [tsfc_radtime]
   standard_name = surface_skin_temperature_on_radiation_timestep
   long_name = surface skin temperature on radiation timestep

@@ -5,19 +5,14 @@
 !! \brief This module contains code to prepare model fields for use by the RRTMGP 
 !! radiation scheme.  
 module GFS_rrtmgp_pre
-  use machine, only: &
-       kind_phys                   !< Working type
-  use funcphys, only:            &
-       fpvs                        !< Function ot compute sat. vapor pressure over liq.
-  use module_radiation_astronomy, only: &
-       coszmn 
-  use module_radiation_gases,    only: &
-       NF_VGAS,                  & !< Number of active gas species
-       getgases,                 & !< Routine to setup trace gases
-       getozn                      !< Routine to setup ozone
-  ! RRTMGP types
-  use mo_gas_concentrations, only: ty_gas_concs
-  use radiation_tools,       only: check_error_msg,cmp_tlev
+  use machine,                    only: kind_phys
+  use funcphys,                   only: fpvs
+  use module_radiation_astronomy, only: coszmn 
+  use module_radiation_gases,     only: NF_VGAS, getgases, getozn
+  use mo_gas_concentrations,      only: ty_gas_concs
+  use radiation_tools,            only: check_error_msg,cmp_tlev
+
+  implicit none
 
   real(kind_phys), parameter :: &
        amd   = 28.9644_kind_phys,  & !< Molecular weight of dry-air     (g/mol)
@@ -116,15 +111,20 @@ contains
        con_eps, con_epsm1, con_fvirt, con_epsqs, solhr, minGPpres, maxGPpres, minGPtemp,    &
        maxGPtemp, raddt, p_lay, t_lay, p_lev, t_lev, tsfg, tsfa, qs_lay, q_lay, tv_lay,     &
        relhum, tracer, deltaZ, deltaZc, deltaP, active_gases_array, gas_concentrations,     &
-       tsfc_radtime, coszen, coszdg, top_at_1, iSFC, iTOA, errmsg, errflg)
+       tsfc_radtime, coszen, coszdg, top_at_1, iSFC, iTOA, ico2, con_pi, errmsg, errflg)
     
     ! Inputs   
     integer, intent(in)    :: &
+         me,                & ! Current MPI rank
          nCol,              & ! Number of horizontal grid points
          nLev,              & ! Number of vertical layers
          nTracers,          & ! Number of tracers from model. 
-         i_o3                 ! Index into tracer array for ozone
+         i_o3,              & ! Index into tracer array for ozone
+         ico2,              & ! Flag for co2 radiation scheme
+         iSFC,              & ! Vertical index for surface
+         iTOA                 ! Vertical index for TOA
     logical, intent(in) :: &
+         top_at_1,          & ! Vertical ordering flag 
     	 lsswr,             & ! Call SW radiation?
     	 lslwr                ! Call LW radiation
     real(kind_phys), intent(in) :: &
@@ -141,6 +141,7 @@ contains
          con_epsm1,         & ! Physical constant: Epsilon (Rd/Rv) minus one
          con_fvirt,         & ! Physical constant: Inverse of epsilon minus one
          con_epsqs,         & ! Physical constant: Minimum saturation mixing-ratio (kg/kg)
+         con_pi,            & ! Physical constant: Pi
          solhr                ! Time in hours after 00z at the current timestep 
     real(kind_phys), dimension(:), intent(in) :: & 
     	 xlon,              & ! Longitude
@@ -162,11 +163,7 @@ contains
     character(len=*), intent(out) :: &
          errmsg               ! Error message
     integer, intent(out) :: &  
-         errflg,            & ! Error flag
-         iSFC,              & ! Vertical index for surface
-         iTOA                 ! Vertical index for TOA
-    logical, intent(out) :: &
-         top_at_1             ! Vertical ordering flag
+         errflg               ! Error flag
     real(kind_phys), intent(inout) :: &
          raddt                ! Radiation time-step
     real(kind_phys), dimension(:), intent(inout) :: &
@@ -207,20 +204,6 @@ contains
     errflg = 0
     
     if (.not. (lsswr .or. lslwr)) return
-        
-    ! #######################################################################################
-    ! What is vertical ordering?
-    ! #######################################################################################
-    top_at_1 = (prsi(1,1) .lt.  prsi(1, nLev))
-    if (top_at_1) then 
-       iSFC = nLev
-       iTOA = 1
-       iSFC_ilev = iSFC + 1
-    else
-       iSFC = 1
-       iTOA = nLev
-       iSFC_ilev = 1
-    endif
 
     ! #######################################################################################
     ! Compute some fields needed by RRTMGP
@@ -350,14 +333,14 @@ contains
        enddo
     ! OR Use climatological ozone data
     else                               
-       call getozn (prslk(1:NCOL,:), xlat, nCol, nLev, o3_lay)
+       call getozn (prslk(1:NCOL,:), xlat, nCol, nLev, top_at_1, o3_lay)
     endif
 
     ! #######################################################################################
     ! Set gas concentrations for RRTMGP
     ! #######################################################################################
     ! Call getgases(), to set up non-prognostic gas volume mixing ratios (gas_vmr).
-    call getgases (p_lev/100., xlon, xlat, nCol, nLev, gas_vmr)
+    call getgases (p_lev/100., xlon, xlat, nCol, nLev, ico2, top_at_1, con_pi, gas_vmr)
 
     ! Compute volume mixing-ratios for ozone (mmr) and specific-humidity.
     vmr_h2o = merge((q_lay/(1-q_lay))*amdw, 0., q_lay  .ne. 1.)
@@ -382,6 +365,9 @@ contains
     ! #######################################################################################
     ! Setup surface ground temperature and ground/air skin temperature if required.
     ! #######################################################################################
+    iSFC_ilev = 1
+    if (top_at_1) iSFC_ilev = iSFC + 1
+    
     tsfg(1:NCOL) = t_lev(1:NCOL,iSFC_ilev)
     tsfa(1:NCOL) = t_lay(1:NCOL,iSFC)
 

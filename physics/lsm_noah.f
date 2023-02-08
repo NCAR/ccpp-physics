@@ -61,7 +61,7 @@
       end if
       
       !--- initialize soil vegetation
-      call set_soilveg(me, isot, ivegsrc, nlunit)
+      call set_soilveg(me, isot, ivegsrc, nlunit, errmsg, errflg)
 
       pores (:) = maxsmc (:)
       resid (:) = drysmc (:)
@@ -543,7 +543,8 @@
      &       edir, et, ett, esnow, drip, dew, beta, etp, ssoil,         &
      &       flx1, flx2, flx3, runoff1, runoff2, runoff3,               &
      &       snomlt, sncovr, rc, pc, rsmin, xlai, rcs, rct, rcq,        &
-     &       rcsoil, soilw, soilm, smcwlt, smcdry, smcref, smcmax)
+     &       rcsoil, soilw, soilm, smcwlt, smcdry, smcref, smcmax,      &
+     &       errmsg, errflg )
 
 !> - Noah LSM: prepare variables for return to parent model and unit conversion.
 !  -   6. output (o):

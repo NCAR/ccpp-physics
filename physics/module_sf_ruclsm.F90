@@ -72,7 +72,8 @@ CONTAINS
                    SMFR3D,KEEPFR3DFLAG,                          &
                    myj,shdmin,shdmax,rdlai2d,                    &
                    ims,ime, jms,jme, kms,kme,                    &
-                   its,ite, jts,jte, kts,kte                     )
+                   its,ite, jts,jte, kts,kte,                    &
+                   errmsg, errflg)
 !-----------------------------------------------------------------
    IMPLICIT NONE
 !-----------------------------------------------------------------
@@ -325,7 +326,6 @@ CONTAINS
                                                            KICE, &
                                                             KWT
 
-
    REAL,     DIMENSION(1:NSL)                ::          ZSMAIN, &
                                                          ZSHALF, &
                                                          DTDZS2
@@ -381,9 +381,14 @@ CONTAINS
    INTEGER   ::  I,J,K,NZS,NZS1,NDDZS
    INTEGER   ::  k1,k2
    logical :: debug_print
-
+   character(len=*), intent(out) :: errmsg
+   integer,          intent(out) :: errflg
 !-----------------------------------------------------------------
 !   
+     ! Initialize error-handling
+     errflg = 0
+     errmsg = ''
+
      debug_print = .false.
 !
          rovcp = rd/cp
@@ -704,7 +709,7 @@ CONTAINS
                        soilfrac,nscat,shdmin(i,j),shdmax(i,j),mosaic_lu, mosaic_soil,&
                        NLCAT,ILAND,ISOIL,iswater,MYJ,IFOREST,lufrac,VEGFRA(I,J),     &
                        EMISSL(I,J),PC(I,J),ZNT(I,J),LAI(I,J),RDLAI2D,                &
-                       QWRTZ,RHOCS,BCLH,DQM,KSAT,PSIS,QMIN,REF,WILT,i,j )
+                       QWRTZ,RHOCS,BCLH,DQM,KSAT,PSIS,QMIN,REF,WILT,i,j,errmsg, errflg)
 
        !-- update background emissivity for land points, can have vegetation mosaic effect
        EMISBCK(I,J) = EMISSL(I,J)
@@ -6547,7 +6552,8 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
                              mosaic_lu, mosaic_soil,                 &
                      NLCAT,IVGTYP,ISLTYP,iswater,MYJ,                &
                      IFOREST,lufrac,vegfrac,EMISS,PC,ZNT,LAI,RDLAI2D,&
-                     QWRTZ,RHOCS,BCLH,DQM,KSAT,PSIS,QMIN,REF,WILT,I,J)
+                     QWRTZ,RHOCS,BCLH,DQM,KSAT,PSIS,QMIN,REF,WILT,I,J,&
+                     errmsg, errflg)
 
 !************************************************************************
 !  Set-up soil and vegetation Parameters in the case when
@@ -6809,7 +6815,8 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
                                                             REF, &
                                                            WILT
    INTEGER, INTENT (  OUT)   ::                         iforest
-
+   character(len=*),intent(out) :: errmsg
+   integer,         intent(out) :: errflg
 !   INTEGER, DIMENSION( 1:(lucats) )                          , &
 !            INTENT (  OUT)            ::                iforest
 
@@ -6830,7 +6837,11 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 !             iforest(k)=if1(k)
 !          enddo
 
-        iforest = IFORTBL(IVGTYP)
+   ! Initialize error-handling
+   errflg = 0
+   errmsg = ''
+
+   iforest = IFORTBL(IVGTYP)
 
     IF (debug_print ) THEN
         print *,'ifortbl(ivgtyp),ivgtyp,laitbl(ivgtyp),z0tbl(ivgtyp)', &
@@ -6904,7 +6915,9 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
        if (area.gt.1.) area=1.
        if (area <= 0.) then
           print *,'Bad area of grid box', area
-          stop
+          errflg = 1
+          errmsg = 'ERROR(SOILVEGIN): Bad area of grid box'
+          return
        endif
 
     IF (debug_print ) THEN
