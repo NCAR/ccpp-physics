@@ -123,7 +123,8 @@
      &       edir, et, ett, esnow, drip, dew, beta, etp, ssoil,         &
      &       flx1, flx2, flx3, runoff1, runoff2, runoff3,               &
      &       snomlt, sncovr, rc, pc, rsmin, xlai, rcs, rct, rcq,        &
-     &       rcsoil, soilw, soilm, smcwlt, smcdry, smcref, smcmax)
+     &       rcsoil, soilw, soilm, smcwlt, smcdry, smcref, smcmax,      &
+     &       errmsg, errflg )
 
 ! ===================================================================== !
 !  description:                                                         !
@@ -327,6 +328,8 @@
      &       runoff1, runoff2, runoff3, rc, pc, rsmin, xlai, rcs,       &
      &       rct, rcq, rcsoil, soilw, soilm, smcwlt, smcdry, smcref,    &
      &       smcmax
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
 
 !  ---  locals:
 !     real (kind=kind_phys) ::  df1h,
@@ -346,6 +349,10 @@
 !
 !===> ...  begin here
 !
+! Initialize CCPP error-handling
+      errflg = 0
+      errmsg = ''
+
 !  --- ...  initialization
 
       runoff1 = 0.0
@@ -411,7 +418,7 @@
 
 !> - Call redprm() to set the land-surface paramters,
 !! including soil-type and veg-type dependent parameters.
-      call redprm
+      call redprm(errmsg, errflg)
         if(ivegsrc == 1) then
 !only igbp type has urban
 !urban
@@ -1668,7 +1675,7 @@
 !> This subroutine internally sets default values or optionally read-in
 !! via namelist i/o, all soil and vegetation parateters requied for the execusion
 !! of the Noah LSM.
-      subroutine redprm
+      subroutine redprm(errmsg, errflg)
 !...................................
 !  ---  inputs:
 !    &     ( nsoil, vegtyp, soiltyp, slopetyp, sldpth, zsoil,              &
@@ -1855,7 +1862,8 @@
 !    &       frzx, psisat, slope, snup, salp, bexp, dksat, dwsat,       &
 !    &       smcmax, smcwlt, smcref, smcdry, f1, quartz, fxexp, z0,     &
 !    &       czil, xlai, csoil, rtdis(nsoil)
-
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
 !     integer, intent(out) :: nroot
 
 !  ---  locals:
@@ -1866,20 +1874,30 @@
 !
 !===> ...  begin here
 !
+! Initialize CCPP error-handling
+      errflg = 0
+      errmsg = ''
+
       if (soiltyp > defined_soil) then
         write(*,*) 'warning: too many soil types,soiltyp=',soiltyp,     &
      &   'defined_soil=',defined_soil
-        stop 333
+        errflg = 1
+        errmsg = 'ERROR(sflx.f): too many soil types'
+        return
       endif
 
       if (vegtyp > defined_veg) then
         write(*,*) 'warning: too many veg types'
-        stop 333
+        errflg = 1
+        errmsg = 'ERROR(sflx.f): too many veg types'
+        return
       endif
 
       if (slopetyp > defined_slope) then
         write(*,*) 'warning: too many slope types'
-        stop 333
+        errflg = 1
+        errmsg = 'ERROR(sflx.f): too many slope types'
+        return
       endif
 
 !  --- ...  set-up universal parameters (not dependent on soiltyp, vegtyp
@@ -1936,7 +1954,9 @@
 
       if (nroot > nsoil) then
         write(*,*) 'warning: too many root layers'
-        stop 333
+        errflg = 1
+        errmsg = 'ERROR(sflx.f): too many root layers'
+        return
       endif
 
 !  --- ...  calculate root distribution.  present version assumes uniform

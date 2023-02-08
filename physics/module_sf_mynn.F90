@@ -382,6 +382,10 @@ CONTAINS
       INTEGER ::  I,J,K,itf,ktf
 !-----------------------------------------------------------
 
+      ! Initialize error-handling
+      errflg = 0
+      errmsg = ''
+
       IF (debug_code >= 1) THEN
         write(*,*)"======= printing of constants:"
         write(*,*)"cp=", cp," g=",     g
@@ -684,6 +688,9 @@ CONTAINS
       REAL(kind=kind_phys) :: FLUXC,VSGD
       REAL(kind=kind_phys) :: restar,VISC,DQG,OLDUST,OLDTST
 
+      ! Initialize error-handling
+      errflg = 0
+      errmsg = ''
 !-------------------------------------------------------------------
       DO I=its,ite
 
@@ -1192,7 +1199,7 @@ CONTAINS
              ENDIF
           ELSEIF ( ISFTCFLX .EQ. 4 ) THEN
              !GFS zt formulation
-             CALL GFS_zt_wat(ZT_wat(i),ZNTstoch_wat(i),restar,WSPD(i),ZA(i),sfc_z0_type)
+             CALL GFS_zt_wat(ZT_wat(i),ZNTstoch_wat(i),restar,WSPD(i),ZA(i),sfc_z0_type,errmsg,errflg)
              ZQ_wat(i)=ZT_wat(i)
           ENDIF
        ELSE
@@ -2763,13 +2770,19 @@ END SUBROUTINE SFCLAY1D_mynn
     END SUBROUTINE GFS_z0_wat
 !--------------------------------------------------------------------
 !>\ingroup mynn_sfc
-    SUBROUTINE GFS_zt_wat(ztmax,z0rl_wat,restar,WSPD,z1,sfc_z0_type)
+    SUBROUTINE GFS_zt_wat(ztmax,z0rl_wat,restar,WSPD,z1,sfc_z0_type,errmsg,errflg)
 
         REAL(kind=kind_phys), INTENT(OUT) :: ztmax
         REAL(kind=kind_phys), INTENT(IN)  :: wspd,z1,z0rl_wat,restar
         INTEGER, INTENT(IN):: sfc_z0_type
+        character(len=*), intent(out) :: errmsg
+        integer,          intent(out) :: errflg
         REAL(kind=kind_phys) :: z0,z0max,wind10m,rat,ustar_wat
         REAL(kind=kind_phys), PARAMETER   :: charnock = 0.014, z0s_max=.317e-2
+
+        ! Initialize error-handling
+        errflg = 0
+        errmsg = ''
 
 !            z0           = 0.01 * z0rl_wat
 !Already converted to meters in the wrapper
@@ -2800,7 +2813,9 @@ END SUBROUTINE SFCLAY1D_mynn
               call znot_t_v7(wind10m, ztmax)   ! 10-m wind,m/s, ztmax(m)
             else if (sfc_z0_type > 0) then
               write(0,*)'no option for sfc_z0_type=',sfc_z0_type
-              stop
+              errflg = 1
+              errmsg = 'ERROR(GFS_zt_wat): sfc_z0_type not valid.'
+              return
             endif
 
     END SUBROUTINE GFS_zt_wat

@@ -5,18 +5,14 @@
 !! \brief This module contains code to prepare model fields for use by the RRTMGP 
 !! radiation scheme.  
 module GFS_rrtmgp_pre
-  use machine, only: &
-       kind_phys                   !< Working type
-  use funcphys, only:            &
-       fpvs                        !< Function ot compute sat. vapor pressure over liq.
-  use module_radiation_astronomy, only: &
-       coszmn 
-  use module_radiation_gases,    only: &
-       NF_VGAS,                  & !< Number of active gas species
-       getgases,                 & !< Routine to setup trace gases
-       getozn                      !< Routine to setup ozone
-  use radiation_tools,       only: check_error_msg,cmp_tlev
-  use rrtmgp_lw_gas_optics,  only: lw_gas_props  
+  use machine,                    only: kind_phys
+  use funcphys,                   only: fpvs
+  use module_radiation_astronomy, only: coszmn 
+  use module_radiation_gases,     only: NF_VGAS, getgases, getozn
+  use mo_gas_concentrations,      only: ty_gas_concs
+  use radiation_tools,            only: check_error_msg,cmp_tlev
+  use rrtmgp_lw_gas_optics,       only: lw_gas_props
+
   implicit none
 
   real(kind_phys), parameter :: &
@@ -121,13 +117,15 @@ contains
        vmr_n2o, vmr_co2, tsfg, tsfa, qs_lay, q_lay, tv_lay,                                 &
        relhum, deltaZ, deltaZc, deltaP, active_gases_array,                                 &
        tsfc_radtime, coszen, coszdg, top_at_1, iSFC, iTOA, nDay, idxday, semis,             &
-       sfc_emiss_byband, errmsg, errflg)
+       sfc_emiss_byband, ico2, con_pi, errmsg, errflg)
     
     ! Inputs   
     integer, intent(in)    :: &
          me,                & ! MPI rank
          nCol,              & ! Number of horizontal grid points
          nLev,              & ! Number of vertical layers
+         nTracers,          & ! Number of tracers from model.
+         ico2,              & ! Flag for co2 radiation scheme 
          i_o3                 ! Index into tracer array for ozone
     logical, intent(in) :: &
     	 doSWrad,           & ! Call SW radiation?
@@ -142,6 +140,7 @@ contains
          con_epsm1,         & ! Physical constant: Epsilon (Rd/Rv) minus one
          con_fvirt,         & ! Physical constant: Inverse of epsilon minus one
          con_epsqs,         & ! Physical constant: Minimum saturation mixing-ratio (kg/kg)
+         con_pi,            & ! Physical constant: Pi
          solhr                ! Time in hours after 00z at the current timestep 
     real(kind_phys), dimension(:), intent(in) :: & 
     	 xlon,              & ! Longitude
@@ -208,7 +207,7 @@ contains
     ! Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0
-    
+
     nday   = 0
     idxday = 0
     if (.not. (doSWrad .or. doLWrad)) return
@@ -352,14 +351,14 @@ contains
        enddo
     ! OR Use climatological ozone data
     else                               
-       call getozn (prslk(1:NCOL,:), xlat, nCol, nLev, o3_lay)
+       call getozn (prslk(1:NCOL,:), xlat, nCol, nLev, top_at_1, o3_lay)
     endif
 
     ! #######################################################################################
     ! Set gas concentrations for RRTMGP
     ! #######################################################################################
     ! Call getgases(), to set up non-prognostic gas volume mixing ratios (gas_vmr).
-    call getgases (p_lev/100., xlon, xlat, nCol, nLev, gas_vmr)
+    call getgases (p_lev/100., xlon, xlat, nCol, nLev, ico2, top_at_1, con_pi, gas_vmr)
     vmr_o2  = gas_vmr(:,:,4)
     vmr_ch4 = gas_vmr(:,:,3)
     vmr_n2o = gas_vmr(:,:,2)
@@ -377,6 +376,9 @@ contains
     ! #######################################################################################
     ! Setup surface ground temperature and ground/air skin temperature if required.
     ! #######################################################################################
+    iSFC_ilev = 1
+    if (top_at_1) iSFC_ilev = iSFC + 1
+    
     tsfg(1:NCOL) = t_lev(1:NCOL,iSFC_ilev)
     tsfa(1:NCOL) = t_lay(1:NCOL,iSFC)
 

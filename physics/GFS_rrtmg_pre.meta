@@ -2,7 +2,7 @@
   name = GFS_rrtmg_pre
   type = scheme
   dependencies = funcphys.f90,iounitdef.f,machine.F,module_bfmicrophysics.f,module_mp_radar.F90,module_mp_thompson.F90
-  dependencies = module_mp_thompson_make_number_concentrations.F90,physcons.F90,physparam.f,radcons.f90,radiation_aerosols.f
+  dependencies = module_mp_thompson_make_number_concentrations.F90,radcons.f90,radiation_aerosols.f
   dependencies = radiation_astronomy.f,radiation_clouds.f,radiation_gases.f,radlw_param.f,radsw_param.f,surface_perturbation.F90,radiation_cloud_overlap.F90
 
 ########################################################################
@@ -216,6 +216,20 @@
   standard_name = index_of_ozone_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for ozone mixing ratio
   units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[iaermdl]
+  standard_name = control_for_aerosol_radiation_scheme
+  long_name = control of aerosol scheme in radiation
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = in
+[iaerflg]
+  standard_name = control_for_aerosol_effects_in_radiation
+  long_name = control of aerosol effects in radiation
+  units = 1
   dimensions = ()
   type = integer
   intent = in
@@ -450,6 +464,13 @@
   dimensions = ()
   type = integer
   intent = in
+[iovr]
+  standard_name = flag_for_cloud_overlap_method_for_radiation
+  long_name = max-random overlap clouds
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
 [iovr_rand]
   standard_name = flag_for_random_cloud_overlap_method
   long_name = choice of random cloud overlap method
@@ -489,6 +510,20 @@
   standard_name = flag_for_exponential_random_cloud_overlap_method
   long_name = choice of exponential-random cloud overlap method
   units     = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[dcorr_con]
+  standard_name = decorrelation_length_used_by_overlap_method
+  long_name = decorrelation length (default) used by cloud overlap method (iovr)
+  units = km
+  dimensions = ()
+  type = real
+  intent = in
+[idcor]
+  standard_name = flag_for_decorrelation_length_method
+  long_name = flag for decorrelation length method used in cloud overlap method (iovr)
+  units = flag
   dimensions = ()
   type = integer
   intent = in
@@ -606,6 +641,20 @@
   dimensions = ()
   type = logical
   intent = in
+[lcrick]
+  standard_name = flag_for_CRICK_proof_cloud_water
+  long_name = flag for CRICK-Proof cloud water
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[lcnorm]
+  standard_name = flag_for_in_cloud_condensate
+  long_name = flag for cloud condensate normalized by cloud cover
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [fhswr]
   standard_name = period_of_shortwave_radiation_calls
   long_name = frequency for shortwave radiation
@@ -646,6 +695,46 @@
   type = real
   kind = kind_phys
   intent = in
+[con_pi]
+  standard_name = pi
+  long_name = ratio of a circle's circumference to its diameter
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_rd]
+  standard_name = gas_constant_of_dry_air
+  long_name = ideal gas constant for dry air
+  units = J kg-1 K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_g]
+  standard_name = gravitational_acceleration
+  long_name = gravitational acceleration
+  units = m s-2
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_ttp]
+  standard_name = triple_point_temperature_of_water
+  long_name = triple point temperature of water
+  units = K
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_thgni]
+  standard_name	= temperature_ice_nucleation_starts
+  long_name = temperature the H.G.Nuc. ice starts
+  units = K
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
 [epsm1]
   standard_name = ratio_of_dry_air_to_water_vapor_gas_constants_minus_one
   long_name = (rd/rv) - 1
@@ -674,14 +763,6 @@
   standard_name = ratio_of_gas_constant_dry_air_to_specific_heat_of_dry_air_at_constant_pressure
   long_name = (rd/cp)
   units = none
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[con_rd]
-  standard_name = gas_constant_of_dry_air
-  long_name = ideal gas constant for dry air
-  units = J kg-1 K-1
   dimensions = ()
   type = real
   kind = kind_phys
@@ -1327,6 +1408,28 @@
   type = real
   kind = kind_phys
   intent = out
+[top_at_1]
+  standard_name = flag_for_vertical_ordering_in_radiation
+  long_name = flag for vertical ordering in radiation
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[si]
+  standard_name = sigma_pressure_hybrid_vertical_coordinate
+  long_name = vertical sigma coordinate for radiation initialization
+  units = none
+  dimensions = (vertical_interface_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[ico2]
+  standard_name = control_for_co2
+  long_name = prescribed global mean value (old opernl)
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
 [aero_dir_fdb]
   standard_name = do_smoke_aerosol_direct_feedback
   long_name = flag for smoke and dust radiation feedback

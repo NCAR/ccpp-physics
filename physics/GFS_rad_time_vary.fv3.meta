@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = GFS_rad_time_vary
   type = scheme
-  dependencies = machine.F,mersenne_twister.f,physparam.f,radcons.f90
+  dependencies = machine.F,mersenne_twister.f,radcons.f90
 
 ########################################################################
 [ccpp-arg-table]
@@ -132,6 +132,20 @@
   long_name = choice of Zhao-Carr microphysics scheme
   units = flag
   dimensions = ()
+  type = integer
+  intent = in
+[ipsd0]
+  standard_name = initial_seed_for_mcica
+  long_name = initial permutaion seed for mcica radiation
+  units = 1
+  dimensions =  ()
+  type = integer
+  intent = in
+[ipsdlim]
+  standard_name = limit_for_initial_seed_for_mcica
+  long_name = limit for initial permutaion seed for mcica radiation
+  units = 1
+  dimensions =  ()
   type = integer
   intent = in
 [ps_2delt]
