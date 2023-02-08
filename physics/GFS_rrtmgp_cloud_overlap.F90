@@ -100,6 +100,7 @@ contains
     !
     ! Cloud decorrelation length
     !
+    de_lgth(:) = 0.
     if (idcor == idcor_hogan) then
        call cmp_dcorr_lgth(nCol, lat, con_pi, de_lgth)
     endif
@@ -116,7 +117,6 @@ contains
     if (iovr == iovr_dcorr .or. iovr == iovr_exp .or. iovr == iovr_exprand) then
        call get_alpha_exper(nCol, nLev, iovr, iovr_exprand, deltaZc*0.001, de_lgth, cld_frac, cloud_overlap_param)
     else
-       de_lgth(:)               = 0.
        cloud_overlap_param(:,:) = 0.
     endif
 
@@ -127,7 +127,6 @@ contains
        if (iovr_convcld == iovr_dcorr .or. iovr_convcld == iovr_exp .or. iovr_convcld == iovr_exprand) then
           call get_alpha_exper(nCol, nLev, iovr_convcld, iovr_exprand, deltaZc*0.001, de_lgth, cld_cnv_frac, cnv_cloud_overlap_param)
        else
-          de_lgth(:)                   = 0.
           cnv_cloud_overlap_param(:,:) = 0.
        endif
     endif

@@ -159,7 +159,7 @@ module lsm_ruc
       endif
 
       !--- initialize soil vegetation
-      call set_soilveg_ruc(me, isot, ivegsrc, nlunit)
+      call set_soilveg_ruc(me, isot, ivegsrc, nlunit, errmsg, errflg)
 
       pores (:) = maxsmc (:)
       resid (:) = drysmc (:)
@@ -1149,7 +1149,8 @@ module lsm_ruc
      &          smfrsoil(i,:,j),keepfrsoil(i,:,j), .false.,                  &
      &          shdmin1d(i,j), shdmax1d(i,j), rdlai2d,                       &
      &          ims,ime, jms,jme, kms,kme,                                   &
-     &          its,ite, jts,jte, kts,kte                                    )
+     &          its,ite, jts,jte, kts,kte,                                   &
+     &          errmsg, errflg)
         if(debug_print) then
           write (0,*)'after LSMRUC for land'
           write (0,*)'after sneqv(i,j) =',i,j,sneqv_lnd(i,j)
@@ -1423,7 +1424,8 @@ module lsm_ruc
      &          smfrice(i,:,j),keepfrice(i,:,j), .false.,                    &
      &          shdmin1d(i,j), shdmax1d(i,j), rdlai2d,                       &
      &          ims,ime, jms,jme, kms,kme,                                   &
-     &          its,ite, jts,jte, kts,kte                                    )
+     &          its,ite, jts,jte, kts,kte,                                   &
+     &          errmsg, errflg)
 
         ! Interstitial
         evap_ice(i)   = qfx_ice(i,j) / rho(i)           ! kinematic
