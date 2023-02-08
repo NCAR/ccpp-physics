@@ -124,7 +124,6 @@ contains
          me,                & ! MPI rank
          nCol,              & ! Number of horizontal grid points
          nLev,              & ! Number of vertical layers
-         nTracers,          & ! Number of tracers from model.
          ico2,              & ! Flag for co2 radiation scheme 
          i_o3                 ! Index into tracer array for ozone
     logical, intent(in) :: &
