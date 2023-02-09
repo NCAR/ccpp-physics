@@ -9,6 +9,7 @@
       use mfscuq_mod
       !PCC_CANOPY
       use canopy_utils_mod
+      use noahmp_tables, only : hvt_table
 
       contains
 
@@ -80,7 +81,7 @@
      &     kinver,xkzm_m,xkzm_h,xkzm_s,dspfac,bl_upfr,bl_dnfr,          &
      &     rlmx,elmx,sfc_rlm,                                           &
      !PCC_CANOPY------------------------------------                 
-     &     canheight,                                                   &                      
+     &     vegtype, lai                                                &                      
      !----------------------------------------------
      &     ntqv,dtend,dtidx,index_of_temperature,index_of_x_wind,       &
      &     index_of_y_wind,index_of_process_pbl,gen_tend,ldiag3d,       &
@@ -105,7 +106,7 @@
       real(kind=kind_phys), intent(in) :: dspfac, bl_upfr, bl_dnfr
       real(kind=kind_phys), intent(in) :: rlmx, elmx
       !PCC_CANOPY------------------------------------
-      real(kind=kind_phys), intent(in) :: canheight(:)
+      real(kind=kind_phys), intent(in) :: vegtype(:), lai(:)
       !----------------------------------------------
       real(kind=kind_phys), intent(inout) :: dv(:,:),     du(:,:),      &
      &                     tdt(:,:),    rtg(:,:,:), tmf(:,:)
@@ -1215,13 +1216,11 @@
       !PCC_CANOPY------------------------------------
         do k = 1, 1km1
           do i=1,im
-                      FCH  = canheight(i)    !Input canopy height for grid cell i
+                      FCH    =    hvt_table(vegtype)       !top of canopy (m)
                       IF (k .EQ. 1) THEN !first model layer
 !                       Check for Contiguous Canopy Grid Cells
-                        IF ( FCH .LT. 0.5
-!                       IF ( LAI .LT. 0.1
-!     &                   .OR. FCH .LT. 0.5
-!     &                   .OR. FCH .LT. 10.0
+                        IF ( lai(i) .LT. 0.1
+     &                   .OR. FCH .LT. 0.5 )
 !     &                   .OR. MAX(0.0, 1.0 - FRT) .GT. 0.5
 !     &                   .OR. POPU .GT. 10000.0
 !     &                   .OR. EXP(-0.5*LAI*CLU).GT. 0.45
