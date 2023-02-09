@@ -12,8 +12,6 @@ module rrtmgp_lw_gas_optics
   use mo_rte_kind,           only: wl
   use mo_gas_optics_rrtmgp,  only: ty_gas_optics_rrtmgp
   use mo_gas_concentrations, only: ty_gas_concs  
-  use mo_source_functions,   only: ty_source_func_lw
-  use mo_optical_props,      only: ty_optical_props_1scl
   use radiation_tools,       only: check_error_msg
   use netcdf
 #ifdef MPI
@@ -77,28 +75,18 @@ module rrtmgp_lw_gas_optics
 
 contains
 
-!>\defgroup rrtmgp_lw_gas_optics_mod GFS RRTMGP-LW Gas Optics Module
-!! \section arg_table_rrtmgp_lw_gas_optics_init
-!! \htmlinclude rrtmgp_lw_gas_optics.html
-!!
-!> \ingroup rrtmgp_lw_gas_optics
-!!
-!! RRTMGP relies heavility on derived-data-types, which contain type-bound procedures
-!! that are referenced frequently throughout the RRTMGP longwave scheme. The data needed
-!! for the correlated k-distribution is also contained within this type. Within this module,
-!! the full k-distribution data is read in, reduced by the "active gases" provided, and
-!! loaded into the RRTMGP DDT, ty_gas_optics_rrtmgp.
-!!
-!! \section rrtmgp_lw_gas_optics_init
-  ! ######################################################################################
-  subroutine rrtmgp_lw_gas_optics_init(rrtmgp_root_dir, rrtmgp_lw_file_gas, mpicomm,        &
-       mpirank, mpiroot, minGPpres, maxGPpres, minGPtemp, maxGPtemp, active_gases_array,    &
-       errmsg, errflg)
+  ! #########################################################################################
+  ! SUBROUTINE rrtmgp_lw_gas_optics_init
+  ! #########################################################################################
+  subroutine rrtmgp_lw_gas_optics_init(rrtmgp_root_dir, rrtmgp_lw_file_gas,                 &
+       active_gases_array, mpicomm, mpirank, mpiroot, errmsg, errflg)
 
     ! Inputs
     character(len=128),intent(in) :: &
          rrtmgp_root_dir,  & ! RTE-RRTMGP root directory
-         rrtmgp_lw_file_gas  ! RRTMGP file containing coefficients used to compute gaseous optical properties
+         rrtmgp_lw_file_gas  ! RRTMGP file containing K-distribution data
+    character(len=*), dimension(:), intent(in) :: &
+         active_gases_array  ! List of active gases from namelist as array   
     integer,intent(in) :: &
          mpicomm,          & ! MPI communicator
          mpirank,          & ! Current MPI rank
@@ -109,20 +97,12 @@ contains
          errmsg              ! CCPP error message
     integer,          intent(out) :: &
          errflg              ! CCPP error code
-    real(kind_phys), intent(out) :: &
-         minGPtemp,        & ! Minimum temperature allowed by RRTMGP.
-         maxGPtemp,        & ! Maximum ...
-         minGPpres,        & ! Minimum pressure allowed by RRTMGP. 
-         maxGPpres           ! Maximum pressure allowed by RRTMGP. 
-    character(len=*), dimension(:), intent(in) :: &
-         active_gases_array ! List of active gases from namelist as array
 
     ! Local variables
-    integer :: ncid, dimID, varID, status, iGas, ierr, ii, mpierr, iChar
-    integer,dimension(:),allocatable :: temp1, temp2, temp3, temp4, &
-         temp_log_array1, temp_log_array2, temp_log_array3, temp_log_array4
+    integer :: ncid, dimID, varID, status, ii, mpierr, iChar
+    integer,dimension(:),allocatable :: temp1, temp2, temp3, temp4
     character(len=264) :: lw_gas_props_file
-    type(ty_gas_concs) :: gas_concentrations  ! RRTMGP DDT: trace gas concentrations (vmr)
+    type(ty_gas_concs) :: gas_concs  ! RRTMGP DDT: trace gas concentrations (vmr)
 
     ! Initialize
     errmsg = ''
@@ -455,9 +435,8 @@ contains
     ! Initialize RRTMGP DDT's...
     !
     ! #######################################################################################
-    allocate(gas_concentrations%gas_name(1:size(active_gases_array)))
-    gas_concentrations%gas_name(:) = active_gases_array(:)
-    call check_error_msg('rrtmgp_lw_gas_optics_init',lw_gas_props%load(gas_concentrations,  &
+    call check_error_msg('rrtmgp_lw_gas_optics_init_gas_concs',gas_concs%init(active_gases_array))
+    call check_error_msg('rrtmgp_lw_gas_optics_init_load',lw_gas_props%load(gas_concs,      &
          gas_namesLW, key_speciesLW, band2gptLW, band_limsLW, press_refLW, press_ref_tropLW,&
          temp_refLW,  temp_ref_pLW, temp_ref_tLW, vmr_refLW, kmajorLW, kminor_lowerLW,      &
          kminor_upperLW, gas_minorLW, identifier_minorLW, minor_gases_lowerLW,              &
@@ -467,80 +446,6 @@ contains
          scale_by_complement_upperLW, kminor_start_lowerLW, kminor_start_upperLW, totplnkLW,&
          planck_fracLW, rayl_lowerLW, rayl_upperLW, optimal_angle_fitLW))
     
-    ! The minimum pressure allowed in GP RTE calculations. Used to bound uppermost layer
-    ! temperature (GFS_rrtmgp_pre.F90)
-    minGPpres = lw_gas_props%get_press_min()
-    maxGPpres = lw_gas_props%get_press_max()
-    minGPtemp = lw_gas_props%get_temp_min() 
-    maxGPtemp = lw_gas_props%get_temp_max()
-
   end subroutine rrtmgp_lw_gas_optics_init
-
-!> \section arg_table_rrtmgp_lw_gas_optics_run
-!! \htmlinclude rrtmgp_lw_gas_optics_run.html
-!! 
-!! Compute longwave optical prperties (optical-depth) for clear-sky conditions.
-!! \section rrtmgp_lw_gas_optics_run
-  subroutine rrtmgp_lw_gas_optics_run(doLWrad, nCol, nLev, p_lay, p_lev, t_lay, t_lev, tsfg, &
-       gas_concentrations, lw_optical_props_clrsky, sources, errmsg, errflg)
-
-    ! Inputs
-    logical, intent(in) :: &
-         doLWrad                 ! Flag to calculate LW irradiances
-    integer,intent(in) :: &
-         ncol,                &  ! Number of horizontal points
-         nLev                    ! Number of vertical levels
-    real(kind_phys), dimension(ncol,nLev), intent(in) :: &
-         p_lay,                & ! Pressure @ model layer-centers (Pa)
-         t_lay                   ! Temperature (K)
-    real(kind_phys), dimension(ncol,nLev+1), intent(in) :: &
-         p_lev,                & ! Pressure @ model layer-interfaces (Pa)
-         t_lev                   ! Temperature @ model levels
-    real(kind_phys), dimension(ncol), intent(in) :: &
-         tsfg                    ! Surface ground temperature (K)
-    type(ty_gas_concs),intent(in) :: &
-         gas_concentrations      ! RRTMGP DDT: trace gas concentrations (vmr)
-
-    ! Output
-    character(len=*), intent(out) :: &
-         errmsg                  ! CCPP error message
-    integer,          intent(out) :: &
-         errflg                  ! CCPP error code
-    type(ty_optical_props_1scl),intent(inout) :: &
-         lw_optical_props_clrsky ! RRTMGP DDT: longwave clear-sky radiative properties
-    type(ty_source_func_lw),intent(inout) :: &
-         sources                 ! RRTMGP DDT: longwave source functions
-    
-    ! Local
-    integer :: ii
-
-    ! Initialize CCPP error handling variables
-    errmsg = ''
-    errflg = 0
-
-    if (.not. doLWrad) return
-
-    ! Copy spectral information into GP DDTs.
-    lw_optical_props_clrsky%band2gpt      = lw_gas_props%get_band_lims_gpoint()
-    sources%band2gpt                      = lw_gas_props%get_band_lims_gpoint()
-    sources%band_lims_wvn                 = lw_gas_props%get_band_lims_wavenumber()
-    lw_optical_props_clrsky%band_lims_wvn = lw_gas_props%get_band_lims_wavenumber()
-    do ii=1,nbndsLW
-       lw_optical_props_clrsky%gpt2band(band2gptLW(1,ii):band2gptLW(2,ii)) = ii
-       sources%gpt2band(band2gptLW(1,ii):band2gptLW(2,ii))                 = ii
-    end do
-
-    ! Gas-optics 
-    call check_error_msg('rrtmgp_lw_gas_optics_run',lw_gas_props%gas_optics(&
-         p_lay,                   & ! IN  - Pressure @ layer-centers (Pa)
-         p_lev,                   & ! IN  - Pressure @ layer-interfaces (Pa)
-         t_lay,                   & ! IN  - Temperature @ layer-centers (K)
-         tsfg,                    & ! IN  - Skin-temperature (K)
-         gas_concentrations,      & ! IN  - RRTMGP DDT: trace gas volumne mixing-ratios
-         lw_optical_props_clrsky, & ! OUT - RRTMGP DDT: longwave optical properties
-         sources,                 & ! OUT - RRTMGP DDT: source functions
-         tlev=t_lev))               ! IN  - Temperature @ layer-interfaces (K) (optional)
-
-  end subroutine rrtmgp_lw_gas_optics_run
 
 end module rrtmgp_lw_gas_optics
