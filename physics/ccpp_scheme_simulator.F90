@@ -13,10 +13,6 @@ module ccpp_scheme_simulator
 #endif
   implicit none
 
-  ! Avaialble physics processes to simulate.
-  integer,parameter :: &
-       nPhysProcess = 7
-
   ! Type containing physics tendencies for a physics process.
   type phys_tend
      real(kind_phys), dimension(:,:),   pointer :: T
@@ -28,15 +24,17 @@ module ccpp_scheme_simulator
   ! This type contains the meta information and data for each physics process.
   type base_physics_process
      character(len=16) :: name
-     logical           :: time_split
-     logical           :: use_sim
+     logical           :: time_split = .false.
+     logical           :: use_sim    = .false.
      integer           :: order
      type(phys_tend)   :: tend
   end type base_physics_process
 
   ! This array contains the governing information on how to advance the physics timestep.
-  type(base_physics_process),dimension(nPhysProcess) :: &
+  type(base_physics_process),dimension(:), allocatable :: &
        physics_process
+
+  integer :: nPhysProcess
 
   ! ########################################################################################
   !
@@ -45,74 +43,20 @@ module ccpp_scheme_simulator
   !
   ! ########################################################################################
 
-  ! Set which schemes to be replaced with simulated tendencies.
-  logical :: use_LWRAD_scheme_sim     = .false., & !< If true,  use LongWave RADiation scheme simulator.
-                                                   !< If false, use tendencies from radiation scheme.
-             use_SWRAD_scheme_sim     = .false., & !< If true,  use ShortWave RADiation scheme simulator.
-                                                   !< If false, use tendencies from radiation scheme. 
-             use_PBL_scheme_sim       = .false., & !< If true,  use Planetary Boubdary Layer scheme simulator.
-                                                   !< If false, use tendencies from PBL scheme.
-             use_GWD_scheme_sim       = .false., & !< If true,  use Gravity Wave Drag scheme simulator.
-                                                   !< If false, use tendencies from GWD scheme.
-             use_SCNV_scheme_sim      = .false., & !< If true,  use Shallow CoNVection scheme simulator.
-                                                   !< If false, use tendencies from SCNV scheme.
-             use_DCNV_scheme_sim      = .false., & !< If true,  use Deep CoNVection scheme simulator.
-                                                   !< If false, use tendencies from DCNV scheme.
-             use_cldMP_scheme_sim     = .false.    !< If true,  use cloud MicroPhysics scheme simulator.
-                                                   !< If false, use tendencies from cldMP acheme.
-
-  ! Are the processes time-split or process-split?
-  logical :: time_split_LWRAD         = .false., & !< If true,  time-split process. Update internal physics state prior to scheme.
-                                                   !< If false, process-split process. Accumulate tendencies.
-             time_split_SWRAD         = .false., & !< If true,  time-split process. Update internal physics state prior to scheme.
-                                                   !< If false, process-split process. Accumulate tendencies.
-             time_split_PBL           = .false., & !< If true,  time-split process. Update internal physics state prior to scheme.
-                                                   !< If false, process-split process. Accumulate tendencies.
-             time_split_GWD           = .false., & !< If true,  time-split process. Update internal physics state prior to scheme.
-                                                   !< If false, process-split process. Accumulate tendencies.
-             time_split_SCNV          = .true.,  & !< If true,  time-split process. Update internal physics state prior to scheme.
-                                                   !< If false, process-split process. Accumulate tendencies.
-             time_split_DCNV          = .true.,  & !< If true,  time-split process. Update internal physics state prior to scheme.
-                                                   !< If false, process-split process. Accumulate tendencies.
-             time_split_cldMP         = .true.     !< If true,  time-split process. Update internal physics state prior to scheme.
-                                                   !< If false, process-split process. Accumulate tendencies.
-
-  ! What is physics process ordering? (Important if their are time-split processes in the physics scheme)
-  integer :: scheme_order_SWRAD       = 1,       & !< Order of Radiation scheme (shortwave).
-             scheme_order_LWRAD       = 2,       & !< Order of Radiation scheme (longwave).
-             scheme_order_PBL         = 3,       & !< Order of Planetary Boubdary Layer scheme. 
-             scheme_order_GWD         = 4,       & !< Order of Gravity Wave Drag scheme. 
-             scheme_order_SCNV        = 5,       & !< Order of Shallow CoNVection scheme. 
-             scheme_order_DCNV        = 6,       & !< Order of Deep CoNVection scheme. 
-             scheme_order_cldMP       = 7          !< Order of cloud MicroPhysics scheme.
-  !
-  ! Locals
-  !
+  ! For each process there is a corresponding namelist entry, which is constructed as follows:
+  ! {use_scheme_sim[0(no)/1(yes)], time_split[0(no)/1(yes)], order[1:nPhysProcess]}
+  integer, dimension(3) ::    &
+       proc_LWRAD_config = (/0,0,0/), &
+       proc_SWRAD_config = (/0,0,0/), &
+       proc_PBL_config   = (/0,0,0/), &
+       proc_GWD_config   = (/0,0,0/), &
+       proc_SCNV_config  = (/0,0,0/), &
+       proc_DCNV_config  = (/0,0,0/), &
+       proc_cldMP_config = (/0,0,0/)
 
   ! Activation flag for scheme.
   logical :: do_ccpp_scheme_simulator = .false.
 
-  ! Switches for input data
-  logical :: have_dTdt_LWRAD_data     = .false., & !< If true, input file contains LongWave RADiation temperature tendencies.
-             have_dTdt_SWRAD_data     = .false., & !< If true, input file contains ShortWave RADiation temperature tendencies.
-             have_dTdt_PBL_data       = .false., & !< If true, input file contains Planetary Boubdary Layer temperature tendencies.
-             have_dqdt_PBL_data       = .false., & !< If true, input file contains Planetary Boubdary Layer specific-humidity tendencies.
-             have_dudt_PBL_data       = .false., & !< If true, input file contains Planetary Boubdary Layer zonal-wind tendencies.
-             have_dvdt_PBL_data       = .false., & !< If true, input file contains Planetary Boubdary Layer meridional-wind tendencies.
-             have_dTdt_GWD_data       = .false., & !< If true, input file contains Gravity Wave Drag temperature tendencies.
-             have_dudt_GWD_data       = .false., & !< If true, input file contains Gravity Wave Drag zonal-wind tendencies.
-             have_dvdt_GWD_data       = .false., & !< If true, input file contains Gravity Wave Drag meridional-wind tendencies.
-             have_dTdt_SCNV_data      = .false., & !< If true, input file contains Shallow CoNVection temperature tendencies.
-             have_dudt_SCNV_data      = .false., & !< If true, input file contains Shallow CoNVection zonal-wind tendencies.
-             have_dvdt_SCNV_data      = .false., & !< If true, input file contains Shallow CoNVection meridional-wind tendencies.
-             have_dqdt_SCNV_data      = .false., & !< If true, input file contains Shallow CoNVection specific-humidity tendencies.
-             have_dTdt_DCNV_data      = .false., & !< If true, input file contains Deep CoNVection temperature tendencies.
-             have_dudt_DCNV_data      = .false., & !< If true, input file contains Deep CoNVection zonal-wind tendencies.
-             have_dvdt_DCNV_data      = .false., & !< If true, input file contains Deep CoNVection meridional-wind tendencies.
-             have_dqdt_DCNV_data      = .false., & !< If true, input file contains Deep CoNVection specific-humidity tendencies.
-             have_dTdt_cldMP_data     = .false., & !< If true, input file contains cloud MicroPhysics temperature tendencies.
-             have_dqdt_cldMP_data     = .false.    !< If true, input file contains cloud MicroPhysics specific-humidity tendencies.
-  
   ! Data driven physics tendencies
   integer :: nlev_data, ntime_data
   real(kind_phys), allocatable, dimension(:)   :: time_data
@@ -122,6 +66,12 @@ module ccpp_scheme_simulator
        dTdt_DCNV_data, dudt_DCNV_data, dvdt_DCNV_data, dTdt_cldMP_data
   real(kind_phys), allocatable, dimension(:,:,:), target :: dqdt_PBL_data,               &
        dqdt_SCNV_data, dqdt_DCNV_data, dqdt_cldMP_data
+
+  ! Scheme initialization flag.
+  logical :: module_initialized = .false.
+
+  ! Order in process loop for "active" physics process.
+  integer :: iactive_scheme
 
   public ccpp_scheme_simulator_init, ccpp_scheme_simulator_run
 contains
@@ -151,18 +101,38 @@ contains
     logical :: exists
     integer,parameter :: nTrc = 1 ! Only specific humodty for now, but preserve 3 dimensionality
 
+    ! Switches for input data
+    logical :: have_dTdt_LWRAD_data     = .false., &
+               have_dTdt_SWRAD_data     = .false., &
+               have_dTdt_PBL_data       = .false., &
+               have_dqdt_PBL_data       = .false., &
+               have_dudt_PBL_data       = .false., &
+               have_dvdt_PBL_data       = .false., &
+               have_dTdt_GWD_data       = .false., &
+               have_dudt_GWD_data       = .false., &
+               have_dvdt_GWD_data       = .false., &
+               have_dTdt_SCNV_data      = .false., &
+               have_dudt_SCNV_data      = .false., &
+               have_dvdt_SCNV_data      = .false., &
+               have_dqdt_SCNV_data      = .false., &
+               have_dTdt_DCNV_data      = .false., &
+               have_dudt_DCNV_data      = .false., &
+               have_dvdt_DCNV_data      = .false., &
+               have_dqdt_DCNV_data      = .false., &
+               have_dTdt_cldMP_data     = .false., &
+               have_dqdt_cldMP_data     = .false.
+
     ! Namelist
-    namelist / scm_data_nml / fileIN, &
-         use_SWRAD_scheme_sim, use_LWRAD_scheme_sim, use_PBL_scheme_sim,                 &
-         use_GWD_scheme_sim, use_SCNV_scheme_sim, use_DCNV_scheme_sim,                   &
-         use_cldMP_scheme_sim, scheme_order_SWRAD, scheme_order_LWRAD, scheme_order_PBL, &
-         scheme_order_GWD, scheme_order_SCNV, scheme_order_DCNV, scheme_order_cldMP,     &
-         time_split_SWRAD, time_split_LWRAD, time_split_PBL, time_split_GWD,             &
-         time_split_SCNV, time_split_DCNV, time_split_cldMP
+    namelist / scm_data_nml / fileIN, nPhysProcess, proc_LWRAD_config, proc_SWRAD_config,  &
+         proc_PBL_config, proc_GWD_config, proc_SCNV_config, proc_DCNV_config,             &
+         proc_cldMP_config
 
     ! Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0
+
+    if (module_initialized) return
+    module_initialized = .true.
 
     ! ######################################################################################
     !
@@ -187,9 +157,9 @@ contains
     !
     ! ######################################################################################
     ! Only proceed if scheme simulator requested.
-    if (use_SWRAD_scheme_sim .or. use_LWRAD_scheme_sim .or. use_PBL_scheme_sim   .or.      &
-         use_GWD_scheme_sim  .or. use_SCNV_scheme_sim  .or. use_DCNV_scheme_sim  .or.      &
-         use_cldMP_scheme_sim) then
+    if (proc_SWRAD_config(1) .or. proc_LWRAD_config(1) .or. proc_PBL_config(1)  .or.       &
+         proc_GWD_config(1)  .or. proc_SCNV_config(1)  .or. proc_DCNV_config(1) .or.       &
+         proc_cldMP_config(1)) then
        do_ccpp_scheme_simulator = .true.
     else
        return
@@ -507,87 +477,128 @@ contains
     !
     ! #######################################################################################
 
+    ! Allocate
+    allocate(physics_process(nPhysProcess))
+
     ! Metadata
     do iprc = 1,nPhysProcess
-       if (iprc == scheme_order_SWRAD) then
+       if (iprc == proc_SWRAD_config(3)) then
           physics_process(iprc)%order      = iprc
           physics_process(iprc)%name       = "SWRAD"
-          physics_process(iprc)%use_sim    = use_SWRAD_scheme_sim
-          physics_process(iprc)%time_split = time_split_SWRAD
+          if (proc_SWRAD_config(1) == 1) then
+             physics_process(iprc)%use_sim = .true.
+          endif
+          if (proc_SWRAD_config(2) == 1) then
+             physics_process(iprc)%time_split = .true.
+          endif
        endif
-       if (iprc == scheme_order_LWRAD) then
+       if (iprc == proc_LWRAD_config(3)) then
           physics_process(iprc)%order      = iprc
           physics_process(iprc)%name       = "LWRAD"
-          physics_process(iprc)%use_sim    = use_LWRAD_scheme_sim
-          physics_process(iprc)%time_split = time_split_LWRAD
+          if (proc_LWRAD_config(1) == 1) then
+             physics_process(iprc)%use_sim = .true.
+          endif
+          if (proc_LWRAD_config(2) == 1) then
+             physics_process(iprc)%time_split = .true.
+          endif
        endif
-       if (iprc == scheme_order_GWD) then
+       if (iprc == proc_GWD_config(3)) then
           physics_process(iprc)%order      = iprc
           physics_process(iprc)%name       = "GWD"
-          physics_process(iprc)%use_sim    = use_GWD_scheme_sim
-          physics_process(iprc)%time_split = time_split_GWD
+          if (proc_GWD_config(1) == 1) then
+             physics_process(iprc)%use_sim = .true.
+          endif
+          if (proc_GWD_config(2) == 1) then
+             physics_process(iprc)%time_split = .true.
+          endif
        endif
-       if (iprc == scheme_order_PBL) then
+       if (iprc == proc_PBL_config(3)) then
           physics_process(iprc)%order      = iprc
           physics_process(iprc)%name       = "PBL"
-          physics_process(iprc)%use_sim    = use_PBL_scheme_sim
-          physics_process(iprc)%time_split = time_split_PBL
+          if (proc_PBL_config(1) == 1) then
+             physics_process(iprc)%use_sim = .true.
+          endif
+          if (proc_PBL_config(2) == 1) then
+             physics_process(iprc)%time_split = .true.
+          endif
        endif
-       if (iprc == scheme_order_SCNV) then
+       if (iprc == proc_SCNV_config(3)) then
           physics_process(iprc)%order      = iprc
           physics_process(iprc)%name       = "SCNV"
-          physics_process(iprc)%use_sim    = use_SCNV_scheme_sim
-          physics_process(iprc)%time_split = time_split_SCNV
+          if (proc_SCNV_config(1) == 1) then
+             physics_process(iprc)%use_sim = .true.
+          endif
+          if (proc_SCNV_config(2) == 1) then
+             physics_process(iprc)%time_split = .true.
+          endif
        endif
-       if (iprc == scheme_order_DCNV) then
+       if (iprc == proc_DCNV_config(3)) then
           physics_process(iprc)%order      = iprc
           physics_process(iprc)%name       = "DCNV"
-          physics_process(iprc)%use_sim    = use_DCNV_scheme_sim
-          physics_process(iprc)%time_split = time_split_DCNV
+          if (proc_DCNV_config(1) == 1) then
+             physics_process(iprc)%use_sim = .true.
+          endif
+          if (proc_DCNV_config(2) == 1) then
+             physics_process(iprc)%time_split = .true.
+          endif
        endif
-       if (iprc == scheme_order_cldMP) then
+       if (iprc == proc_cldMP_config(3)) then
           physics_process(iprc)%order      = iprc
           physics_process(iprc)%name       = "cldMP"
-          physics_process(iprc)%use_sim    = use_cldMP_scheme_sim
-          physics_process(iprc)%time_split = time_split_cldMP
+          if (proc_cldMP_config(1) == 1) then
+             physics_process(iprc)%use_sim = .true.
+          endif
+          if (proc_cldMP_config(2) == 1) then
+             physics_process(iprc)%time_split = .true.
+          endif
        endif
     enddo
 
-    ! Data
-    if (have_dTdt_LWRAD_data) physics_process(scheme_order_LWRAD)%tend%T => dTdt_LWRAD_data
-    if (have_dTdt_SWRAD_data) physics_process(scheme_order_SWRAD)%tend%T => dTdt_SWRAD_data
-    if (have_dTdt_PBL_data)   physics_process(scheme_order_PBL)%tend%T   => dTdt_PBL_data
-    if (have_dudt_PBL_data)   physics_process(scheme_order_PBL)%tend%u   => dudt_PBL_data
-    if (have_dvdt_PBL_data)   physics_process(scheme_order_PBL)%tend%v   => dvdt_PBL_data
-    if (have_dqdt_PBL_data)   physics_process(scheme_order_PBL)%tend%q   => dqdt_PBL_data
-    if (have_dTdt_GWD_data)   physics_process(scheme_order_GWD)%tend%T   => dTdt_GWD_data
-    if (have_dudt_GWD_data)   physics_process(scheme_order_GWD)%tend%u   => dudt_GWD_data
-    if (have_dvdt_GWD_data)   physics_process(scheme_order_GWD)%tend%v   => dvdt_GWD_data
-    if (have_dTdt_SCNV_data)  physics_process(scheme_order_SCNV)%tend%T  => dTdt_SCNV_data
-    if (have_dudt_SCNV_data)  physics_process(scheme_order_SCNV)%tend%u  => dudt_SCNV_data
-    if (have_dvdt_SCNV_data)  physics_process(scheme_order_SCNV)%tend%v  => dvdt_SCNV_data
-    if (have_dqdt_SCNV_data)  physics_process(scheme_order_SCNV)%tend%q  => dqdt_SCNV_data
-    if (have_dTdt_DCNV_data)  physics_process(scheme_order_DCNV)%tend%T  => dTdt_DCNV_data
-    if (have_dudt_DCNV_data)  physics_process(scheme_order_DCNV)%tend%u  => dudt_DCNV_data
-    if (have_dvdt_DCNV_data)  physics_process(scheme_order_DCNV)%tend%v  => dvdt_DCNV_data
-    if (have_dqdt_DCNV_data)  physics_process(scheme_order_DCNV)%tend%q  => dqdt_DCNV_data
-    if (have_dTdt_cldMP_data) physics_process(scheme_order_cldMP)%tend%T => dTdt_cldMP_data
-    if (have_dqdt_cldMP_data) physics_process(scheme_order_cldMP)%tend%q => dqdt_cldMP_data
+    ! Load data
+    if (have_dTdt_LWRAD_data) physics_process(proc_SWRAD_config(3))%tend%T => dTdt_LWRAD_data
+    if (have_dTdt_SWRAD_data) physics_process(proc_LWRAD_config(3))%tend%T => dTdt_SWRAD_data
+    if (have_dTdt_PBL_data)   physics_process(proc_PBL_config(3))%tend%T   => dTdt_PBL_data
+    if (have_dudt_PBL_data)   physics_process(proc_PBL_config(3))%tend%u   => dudt_PBL_data
+    if (have_dvdt_PBL_data)   physics_process(proc_PBL_config(3))%tend%v   => dvdt_PBL_data
+    if (have_dqdt_PBL_data)   physics_process(proc_PBL_config(3))%tend%q   => dqdt_PBL_data
+    if (have_dTdt_GWD_data)   physics_process(proc_GWD_config(3))%tend%T   => dTdt_GWD_data
+    if (have_dudt_GWD_data)   physics_process(proc_GWD_config(3))%tend%u   => dudt_GWD_data
+    if (have_dvdt_GWD_data)   physics_process(proc_GWD_config(3))%tend%v   => dvdt_GWD_data
+    if (have_dTdt_SCNV_data)  physics_process(proc_SCNV_config(3))%tend%T  => dTdt_SCNV_data
+    if (have_dudt_SCNV_data)  physics_process(proc_SCNV_config(3))%tend%u  => dudt_SCNV_data
+    if (have_dvdt_SCNV_data)  physics_process(proc_SCNV_config(3))%tend%v  => dvdt_SCNV_data
+    if (have_dqdt_SCNV_data)  physics_process(proc_SCNV_config(3))%tend%q  => dqdt_SCNV_data
+    if (have_dTdt_DCNV_data)  physics_process(proc_DCNV_config(3))%tend%T  => dTdt_DCNV_data
+    if (have_dudt_DCNV_data)  physics_process(proc_DCNV_config(3))%tend%u  => dudt_DCNV_data
+    if (have_dvdt_DCNV_data)  physics_process(proc_DCNV_config(3))%tend%v  => dvdt_DCNV_data
+    if (have_dqdt_DCNV_data)  physics_process(proc_DCNV_config(3))%tend%q  => dqdt_DCNV_data
+    if (have_dTdt_cldMP_data) physics_process(proc_cldMP_config(3))%tend%T => dTdt_cldMP_data
+    if (have_dqdt_cldMP_data) physics_process(proc_cldMP_config(3))%tend%q => dqdt_cldMP_data
+
+    ! Which process-scheme is "Active"?
+    do iprc = 1,nPhysProcess
+       if (.not. physics_process(iprc)%use_sim) then
+          iactive_scheme = iprc
+       endif
+    enddo
 
     !
     if (mpirank .eq. mpiroot) then
+       print*, "----------------------------------"
        print*, "--- Using CCPP data tendencies ---"
-       print*, "---------------------------------"
-       print*, "                 "
+       print*, "----------------------------------" 
        do iprc = 1,nPhysProcess
           if (physics_process(iprc)%use_sim) then
-             print*,"Process          : ", trim(physics_process(iprc)%name)
-             print*,"      order      : ", physics_process(iprc)%order
-             print*,"      use_sim    : ", physics_process(iprc)%use_sim
-             print*,"      time_split : ", physics_process(iprc)%time_split
+             print*,"  simulate_scheme: ", trim(physics_process(iprc)%name)
+             print*,"      order:       ", physics_process(iprc)%order
+             print*,"      time_split:  ", physics_process(iprc)%time_split
           endif
        enddo
-       print*, "---------------------------------"
+       print*, "  active_scheme:   ", trim(physics_process(iactive_scheme)%name)
+       print*, "      order:       ", physics_process(iactive_scheme)%order
+       print*, "      time_split : ", physics_process(iactive_scheme)%time_split
+       print*, "----------------------------------"
+       print*, "----------------------------------"
     endif
 
   end subroutine ccpp_scheme_simulator_init
@@ -675,7 +686,7 @@ contains
           dv = 0.
           dq = 0.
 
-          ! Using scheme simulator
+          ! Using scheme simulator (very simple, interpolate data tendency to local time)
           if (physics_process(iprc)%use_sim) then
              if (associated(physics_process(iprc)%tend%T)) then
                 call linterp_data_tend("T", physics_process(iprc)%name, iprc, fcst_year, fcst_month, fcst_day, fcst_hour, fcst_min, fcst_sec, dT)
@@ -691,6 +702,7 @@ contains
              endif
 
           ! Using data tendency from "active" scheme(s).
+          ! DJS2023: This block is very ufs specific. Need to tidy this up.
           else
              if (physics_process(iprc)%name == "LWRAD") index_of_process = index_of_process_longwave
              if (physics_process(iprc)%name == "SWRAD") index_of_process = index_of_process_shortwave
@@ -745,7 +757,7 @@ contains
   ! Utility functions/routines
   ! ####################################################################################
   ! The routine interpolates the data-tendencies
-  subroutine linterp_data_tend(var_name, process_name, iprc, year, month, day, hour,    &
+  subroutine linterp_data_tend(var_name, process_name, iprc, year, month, day, hour,   &
        minute, second, var_out)
     ! Inputs
     character(len=*), intent(in) :: var_name, process_name
