@@ -1216,7 +1216,7 @@
       !PCC_CANOPY------------------------------------
         do k = 1, 1km1
           do i=1,im
-                      FCH    =    hvt_table(vegtype)       !top of canopy (m)
+                      FCH    =    hvt_table(vegtype(i))       !top of canopy (m)
                       IF (k .EQ. 1) THEN !first model layer
 !                       Check for Contiguous Canopy Grid Cells
                         IF ( lai(i) .LT. 0.1
@@ -1297,7 +1297,7 @@
               EDDYVEST_INT = IntegrateTrapezoid((ZCANX(COUNTCAN:1:-1)/FCH),EDDYVESTX(COUNTCAN:1:-1))
               dkt(i,k)= (dkt(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dkt to resolved eddy diffusivity
               dkq(i,k)= (dkq(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dkq to resolved eddy diffusivity
-              dku(i,k)= (dkq(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dku to resolved eddy diffusivity
+              dku(i,k)= (dku(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dku to resolved eddy diffusivity
                         END IF !contigous canopy conditions
                       END IF  ! first model layer scaled canopy
           enddo !i
