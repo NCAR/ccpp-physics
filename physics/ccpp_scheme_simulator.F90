@@ -13,27 +13,41 @@ module ccpp_scheme_simulator
 #endif
   implicit none
 
-  ! Type containing physics tendencies for a physics process.
-  type phys_tend
+  ! Type containing 1D (instantaneous) physics tendencies
+  type tend_inst
+     real(kind_phys), dimension(:), pointer :: dT
+     real(kind_phys), dimension(:), pointer :: du
+     real(kind_phys), dimension(:), pointer :: dv
+     real(kind_phys), dimension(:), pointer :: dq
+  end type tend_inst
+
+  ! Type containing 2D data physics tendencies.
+  type phys_tend_2d
+     real(kind_phys), dimension(:),     pointer :: time
      real(kind_phys), dimension(:,:),   pointer :: T
      real(kind_phys), dimension(:,:),   pointer :: u
      real(kind_phys), dimension(:,:),   pointer :: v
      real(kind_phys), dimension(:,:,:), pointer :: q
-  end type phys_tend
+  end type phys_tend_2d
 
   ! This type contains the meta information and data for each physics process.
   type base_physics_process
-     character(len=16) :: name
-     logical           :: time_split = .false.
-     logical           :: use_sim    = .false.
-     integer           :: order
-     type(phys_tend)   :: tend
+     character(len=16)  :: name
+     logical            :: time_split = .false.
+     logical            :: use_sim    = .false.
+     integer            :: order
+     type(phys_tend_2d) :: tend
+     type(tend_inst)    :: itend
+   contains
+     generic,   public  :: linterp => linterp_1D
+     procedure, private :: linterp_1D
   end type base_physics_process
 
   ! This array contains the governing information on how to advance the physics timestep.
   type(base_physics_process),dimension(:), allocatable :: &
        physics_process
 
+  ! Number of physics process (set in namelist)
   integer :: nPhysProcess
 
   ! ########################################################################################
@@ -59,7 +73,7 @@ module ccpp_scheme_simulator
 
   ! Data driven physics tendencies
   integer :: nlev_data, ntime_data
-  real(kind_phys), allocatable, dimension(:)   :: time_data
+  real(kind_phys), allocatable, dimension(:), target   :: time_data
   real(kind_phys), allocatable, dimension(:,:), target :: dTdt_LWRAD_data,               &
        dTdt_SWRAD_data, dTdt_PBL_data, dudt_PBL_data, dvdt_PBL_data, dTdt_GWD_data,      &
        dudt_GWD_data, dvdt_GWD_data, dTdt_SCNV_data, dudt_SCNV_data, dvdt_SCNV_data,     &
@@ -482,6 +496,10 @@ contains
 
     ! Metadata
     do iprc = 1,nPhysProcess
+       allocate(physics_process(iprc)%itend%dT(nlev_data))
+       allocate(physics_process(iprc)%itend%du(nlev_data))
+       allocate(physics_process(iprc)%itend%dv(nlev_data))
+       allocate(physics_process(iprc)%itend%dq(nlev_data))
        if (iprc == proc_SWRAD_config(3)) then
           physics_process(iprc)%order      = iprc
           physics_process(iprc)%name       = "SWRAD"
@@ -555,6 +573,13 @@ contains
     enddo
 
     ! Load data
+    physics_process(proc_LWRAD_config(3))%tend%time => time_data
+    physics_process(proc_SWRAD_config(3))%tend%time => time_data
+    physics_process(proc_PBL_config(3))%tend%time   => time_data
+    physics_process(proc_GWD_config(3))%tend%time   => time_data
+    physics_process(proc_DCNV_config(3))%tend%time  => time_data
+    physics_process(proc_SCNV_config(3))%tend%time  => time_data
+    physics_process(proc_cldMP_config(3))%tend%time => time_data
     if (have_dTdt_LWRAD_data) physics_process(proc_SWRAD_config(3))%tend%T => dTdt_LWRAD_data
     if (have_dTdt_SWRAD_data) physics_process(proc_LWRAD_config(3))%tend%T => dTdt_SWRAD_data
     if (have_dTdt_PBL_data)   physics_process(proc_PBL_config(3))%tend%T   => dTdt_PBL_data
@@ -639,7 +664,6 @@ contains
     integer :: iCol, iLay, iTrc, nCol, nLay,  nTrc, ti(1), tf(1), idtend, fcst_year,     &
          fcst_month, fcst_day, fcst_hour, fcst_min, fcst_sec, iprc, index_of_process
     real(kind_phys) :: w1, w2,hrofday
-    real(kind_phys), dimension(:),     allocatable :: dT, du, dv, dq
     real(kind_phys), dimension(:,:),   allocatable :: gt1, gu1, gv1, dTdt, dudt, dvdt
     real(kind_phys), dimension(:,:,:), allocatable :: gq1, dqdt
 
@@ -649,7 +673,7 @@ contains
 
     if (.not. do_ccpp_scheme_simulator) return
 
-    ! Current forecast time
+    ! Current forecast time (Data-format specific)
     fcst_year  = jdat(1)
     fcst_month = jdat(2)
     fcst_day   = jdat(3)
@@ -665,7 +689,6 @@ contains
     ! Allocate temporaries
     allocate(gt1(nCol,nLay), gu1(nCol,nLay), gv1(nCol,nLay), gq1(nCol,nLay,1))
     allocate(dTdt(nCol,nLay), dudt(nCol,nLay), dvdt(nCol,nLay), dqdt(nCol,nLay,1))
-    allocate(dT(nLay), du(nLay), dv(nLay), dq(nLay))
 
     ! Set state
     gt1(:,:)   = tgrs(:,:)
@@ -680,25 +703,25 @@ contains
     ! Model internal physics timestep evolution of "state".
     do iprc = 1,nPhysProcess
        do iCol = 1,nCol
-          !
-          dT = 0.
-          du = 0.
-          dv = 0.
-          dq = 0.
+          ! Reset locals
+          physics_process(iprc)%itend%dT(:) = 0.
+          physics_process(iprc)%itend%du(:) = 0.
+          physics_process(iprc)%itend%dv(:) = 0.
+          physics_process(iprc)%itend%dq(:) = 0.
 
           ! Using scheme simulator (very simple, interpolate data tendency to local time)
           if (physics_process(iprc)%use_sim) then
              if (associated(physics_process(iprc)%tend%T)) then
-                call linterp_data_tend("T", physics_process(iprc)%name, iprc, fcst_year, fcst_month, fcst_day, fcst_hour, fcst_min, fcst_sec, dT)
+                errmsg = physics_process(iprc)%linterp("T", fcst_year, fcst_month, fcst_day, fcst_hour, fcst_min, fcst_sec)
              endif
              if (associated(physics_process(iprc)%tend%u)) then
-                call linterp_data_tend("u", physics_process(iprc)%name, iprc, fcst_year, fcst_month, fcst_day, fcst_hour, fcst_min, fcst_sec, du)
+                errmsg = physics_process(iprc)%linterp("u", fcst_year, fcst_month, fcst_day, fcst_hour, fcst_min, fcst_sec)
              endif
              if (associated(physics_process(iprc)%tend%v)) then
-                call linterp_data_tend("v", physics_process(iprc)%name, iprc, fcst_year, fcst_month, fcst_day, fcst_hour, fcst_min, fcst_sec, dv)
+                errmsg = physics_process(iprc)%linterp("v", fcst_year, fcst_month, fcst_day, fcst_hour, fcst_min, fcst_sec)
              endif
              if (associated(physics_process(iprc)%tend%q)) then
-                call linterp_data_tend("q", physics_process(iprc)%name, iprc, fcst_year, fcst_month, fcst_day, fcst_hour, fcst_min, fcst_sec, dq)
+                errmsg = physics_process(iprc)%linterp("q", fcst_year, fcst_month, fcst_day, fcst_hour, fcst_min, fcst_sec)
              endif
 
           ! Using data tendency from "active" scheme(s).
@@ -713,34 +736,34 @@ contains
              if (physics_process(iprc)%name == "cldMP") index_of_process = index_of_process_mp
              !
              idtend = dtidx(index_of_temperature,index_of_process)
-             if (idtend >= 1) dT = dtend(iCol,:,idtend)/dtp
+             if (idtend >= 1) physics_process(iprc)%itend%dT = dtend(iCol,:,idtend)/dtp
              !
              idtend = dtidx(index_of_x_wind,index_of_process)
-             if (idtend >= 1) du = dtend(iCol,:,idtend)/dtp
+             if (idtend >= 1) physics_process(iprc)%itend%du = dtend(iCol,:,idtend)/dtp
              !
              idtend = dtidx(index_of_y_wind,index_of_process)
-             if (idtend >= 1) dv = dtend(iCol,:,idtend)/dtp
+             if (idtend >= 1) physics_process(iprc)%itend%dv = dtend(iCol,:,idtend)/dtp
              !
              idtend = dtidx(100+ntqv,index_of_process)
-             if (idtend >= 1) dq = dtend(iCol,:,idtend)/dtp
+             if (idtend >= 1) physics_process(iprc)%itend%dq = dtend(iCol,:,idtend)/dtp
           endif
 
           ! Update state now?
           if (physics_process(iprc)%time_split) then
-             gt1(iCol,:)    = gt1(iCol,:)   + (dTdt(iCol,:)   + dT)*dtp
-             gu1(iCol,:)    = gu1(iCol,:)   + (dudt(iCol,:)   + du)*dtp
-             gv1(iCol,:)    = gv1(iCol,:)   + (dvdt(iCol,:)   + dv)*dtp
-             gq1(iCol,:,1)  = gq1(iCol,:,1) + (dqdt(iCol,:,1) + dq)*dtp
+             gt1(iCol,:)    = gt1(iCol,:)   + (dTdt(iCol,:)   + physics_process(iprc)%itend%dT)*dtp
+             gu1(iCol,:)    = gu1(iCol,:)   + (dudt(iCol,:)   + physics_process(iprc)%itend%du)*dtp
+             gv1(iCol,:)    = gv1(iCol,:)   + (dvdt(iCol,:)   + physics_process(iprc)%itend%dv)*dtp
+             gq1(iCol,:,1)  = gq1(iCol,:,1) + (dqdt(iCol,:,1) + physics_process(iprc)%itend%dq)*dtp
              dTdt(iCol,:)   = 0.
              dudt(iCol,:)   = 0.
              dvdt(iCol,:)   = 0.
              dqdt(iCol,:,1) = 0.
           ! Accumulate tendencies, update later?
           else
-             dTdt(iCol,:)   = dTdt(iCol,:)   + dT
-             dudt(iCol,:)   = dudt(iCol,:)   + du
-             dvdt(iCol,:)   = dvdt(iCol,:)   + dv
-             dqdt(iCol,:,1) = dqdt(iCol,:,1) + dq
+             dTdt(iCol,:)   = dTdt(iCol,:)   + physics_process(iprc)%itend%dT
+             dudt(iCol,:)   = dudt(iCol,:)   + physics_process(iprc)%itend%du
+             dvdt(iCol,:)   = dvdt(iCol,:)   + physics_process(iprc)%itend%dv
+             dqdt(iCol,:,1) = dqdt(iCol,:,1) + physics_process(iprc)%itend%dq
           endif
        enddo
        !
@@ -756,40 +779,33 @@ contains
   ! ####################################################################################
   ! Utility functions/routines
   ! ####################################################################################
-  ! The routine interpolates the data-tendencies
-  subroutine linterp_data_tend(var_name, process_name, iprc, year, month, day, hour,   &
-       minute, second, var_out)
-    ! Inputs
-    character(len=*), intent(in) :: var_name, process_name
-    integer, intent(in) :: year, month, day, hour, minute, second, iprc
-    
-    ! Outputs
-    real(kind_phys),dimension(:),intent(out) :: var_out
-
-    ! Locals
+  function linterp_1D(this, var_name, year, month, day, hour, minute, second) result(err_message)
+    class(base_physics_process), intent(inout) :: this
+    character(len=*), intent(in) :: var_name
+    integer, intent(in) :: year, month, day, hour, minute, second
+    character(len=128) :: err_message
     integer :: ti(1), tf(1)
     real(kind_phys) :: w1, w2, hrofday
 
-    ! Linear interpolation weights
+    ! Interpolation weights
     hrofday = hour*3600. + minute*60. + second
-    ti = findloc(abs(time_data-hrofday),minval(abs(time_data-hrofday)))
-    if (hrofday - time_data(ti(1)) .le. 0) ti = ti-1
+    ti = findloc(abs(this%tend%time-hrofday),minval(abs(this%tend%time-hrofday)))
+    if (hrofday - this%tend%time(ti(1)) .le. 0) ti = ti-1
     tf = ti + 1
-    w1 = (time_data(tf(1))-hrofday) / (time_data(tf(1)) - time_data(ti(1)))
+    w1 = (this%tend%time(tf(1))-hrofday) / (this%tend%time(tf(1)) - this%tend%time(ti(1)))
     w2 = 1 - w1
 
-    !
     select case(var_name)
-       case("T")
-          var_out = w1*physics_process(iprc)%tend%T(:,ti(1)) + w2*physics_process(iprc)%tend%T(:,tf(1))
-       case("u")
-          var_out = w1*physics_process(iprc)%tend%u(:,ti(1)) + w2*physics_process(iprc)%tend%u(:,tf(1))
-       case("v")
-          var_out = w1*physics_process(iprc)%tend%v(:,ti(1)) + w2*physics_process(iprc)%tend%v(:,tf(1))
-       case("q")
-          var_out = w1*physics_process(iprc)%tend%q(:,ti(1),1) + w2*physics_process(iprc)%tend%q(:,tf(1),1)
+    case("T")
+       this%itend%dT = w1*this%tend%T(:,ti(1)) + w2*this%tend%T(:,tf(1))
+    case("u")
+       this%itend%du = w1*this%tend%u(:,ti(1)) + w2*this%tend%u(:,tf(1))
+    case("v")
+       this%itend%dv = w1*this%tend%v(:,ti(1)) + w2*this%tend%v(:,tf(1))
+    case("q")
+       this%itend%dq = w1*this%tend%q(:,ti(1),1) + w2*this%tend%q(:,tf(1),1)
     end select
 
-  end subroutine linterp_data_tend
-
+  end function linterp_1D
+ 
 end module ccpp_scheme_simulator
