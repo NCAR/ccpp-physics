@@ -1216,10 +1216,12 @@
       !PCC_CANOPY------------------------------------
         do k = 1, 1km1
           do i=1,im
-                      FCH    =    hvt_table(vegtype(i))       !top of canopy (m)
+                      FCH    =    hvt_table(vegtype(i)) !top of canopy
+                                                        !(m) from
+                                                        !Noah-MP LSM tables
                       IF (k .EQ. 1) THEN !first model layer
 !                       Check for Contiguous Canopy Grid Cells
-                        IF ( lai(i) .LT. 0.1
+                        IF ( lai(i) .LT. 0.1  !from LSM
      &                   .OR. FCH .LT. 0.5 )
 !     &                   .OR. MAX(0.0, 1.0 - FRT) .GT. 0.5
 !     &                   .OR. POPU .GT. 10000.0
