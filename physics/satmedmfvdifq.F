@@ -81,7 +81,7 @@
      &     kinver,xkzm_m,xkzm_h,xkzm_s,dspfac,bl_upfr,bl_dnfr,          &
      &     rlmx,elmx,sfc_rlm,                                           &
      !PCC_CANOPY------------------------------------                 
-     &     vegtype, lai                                                &                      
+     &     vegtype, lai,                                                &                      
      !----------------------------------------------
      &     ntqv,dtend,dtidx,index_of_temperature,index_of_x_wind,       &
      &     index_of_y_wind,index_of_process_pbl,gen_tend,ldiag3d,       &
