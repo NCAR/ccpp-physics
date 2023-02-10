@@ -164,7 +164,7 @@ contains
          REAL(kind_phys), PARAMETER    :: coef1=0.042*1000.*1.22
          REAL(kind_phys), PARAMETER    :: coef2=0.20*1.22
          
-         REAL(kind_phys) :: totice_colint(im), msft(im), ltg1, ltg2, high_ltg1, high_wgrs, high_graupel, rho
+         REAL(kind_phys) :: totice_colint(im), ltg1, ltg2, high_ltg1, high_wgrs, high_graupel, rho
          LOGICAL :: ltg1_calc(im)
          integer :: k, i, count
 
@@ -175,9 +175,6 @@ contains
 
           totice_colint = 0
           ltg1_calc = .false.
-          msft = 1.
-          ! get area (m^2) in units of km^2
-          ! msft = 1.E-6*area
           do k=1,levs-1
              do i=1,im
                 dP = prsi(i,k) - prsi(i,k+1)
@@ -191,11 +188,15 @@ contains
                       ltg1_calc(i) = .true.
                       
                       ltg1 = coef1*wgrs(i,k)* &
-                           (( qgraupel(i,k+1) + qgraupel(i,k) )*0.5 )/msft(i)
-                      high_ltg1 = max(high_ltg1, ltg1)
-                      high_graupel = max(high_graupel, qgraupel(i,k))
-                      if(abs(wgrs(i,k)) > high_wgrs) then
-                         high_wgrs = wgrs(i,k)
+                           (( qgraupel(i,k+1) + qgraupel(i,k) )*0.5 )
+                      if(ltg1 > 0.01) then
+184                     format('Found ltg1=',F20.13,' with w=',F20.13,' Qg=',F20.13)
+                        print 184, ltg1, wgrs(i,k), ( qgraupel(i,k+1) + qgraupel(i,k) )*0.5
+                      endif
+                      if(ltg1 > high_ltg1) then
+                        high_ltg1 = ltg1
+                        high_graupel = qgraupel(i,k)
+                        high_wgrs = wgrs(i,k)
                       endif
                       
                       IF ( ltg1 .LT. clim1 ) ltg1 = 0.
@@ -212,13 +213,13 @@ contains
              if(high_ltg1 < .01 .and. (abs(high_wgrs) < 0.1 .or. high_graupel < 1e-4)) then
                 ! Nothing to look at
              else
-183             format('high_ltg1 = ',F30.23,' high_wgrs = ',F30.23,' high_graupel = ',F30.23)
+183             format('Max ltg1=',F20.13,' has w=',F20.13,' Qg=',F20.13)
                 print 183, high_ltg1, high_wgrs, high_graupel
              endif
           endif
 
           do i=1,im
-             ltg2 = coef2 * totice_colint(i) / msft(i)
+             ltg2 = coef2 * totice_colint(i)
 
              IF ( ltg2 .LT. clim2 ) ltg2 = 0.
              
