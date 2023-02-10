@@ -270,6 +270,22 @@
   type = real
   kind = kind_phys
   intent = in
+[con_rd]
+  standard_name = gas_constant_of_dry_air
+  long_name = ideal gas constant for dry air
+  units = J kg-1 K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[tgrs]
+  standard_name = air_temperature
+  long_name = model layer mean temperature
+  units = K
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
 [lightning_threat]
   standard_name = lightning_threat_indices_enabled
   long_name = lightning threat indices enabled
@@ -301,11 +317,19 @@
   type = real
   kind = kind_phys
   intent = inout
-[phii]
-  standard_name = geopotential_at_interface
-  long_name = geopotential at model layer interfaces
-  units = m2 s-2
+[prsi]
+  standard_name = air_pressure_at_interface
+  long_name = air pressure at model layer interfaces
+  units = Pa
   dimensions = (horizontal_loop_extent,vertical_interface_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[prsl]
+  standard_name = air_pressure
+  long_name = mean layer pressure
+  units = Pa
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in

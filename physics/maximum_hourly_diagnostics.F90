@@ -30,8 +30,8 @@ contains
                                              u10max, v10max, spd10max, pgr, t2m, q2m, t02max,      &
                                              t02min, rh02max, rh02min, dtp, rain, pratemax,        &
                                              lightning_threat, ltg1_max,ltg2_max,ltg3_max,         &
-                                             wgrs, phii, qgraupel, qsnowwat, qicewat,              &
-                                             kdt, errmsg, errflg)
+                                             wgrs, prsi, qgraupel, qsnowwat, qicewat, tgrs, con_rd,&
+                                             prsl, kdt, errmsg, errflg)
 
        ! Interface variables
        integer, intent(in) :: im, levs, kdt
@@ -39,6 +39,7 @@ contains
        integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_fer_hires, &
                               imp_physics_nssl
        real(kind_phys), intent(in   ) :: con_g
+       real(kind_phys), intent(in   ) :: con_rd
        real(kind_phys), intent(in   ) :: phil(:,:)
        real(kind_phys), intent(in   ) :: gt0(:,:)
        real(kind_phys), intent(in   ) :: refl_10cm(:,:)
@@ -58,9 +59,11 @@ contains
        real(kind_phys), intent(inout) :: rh02min(:)
        real(kind_phys), intent(in   ) :: dtp
        real(kind_phys), intent(in   ) :: rain(:)
+       real(kind_phys), intent(in   ) :: tgrs(:,:)
+       real(kind_phys), intent(in   ) :: prsl(:,:)
        real(kind_phys), intent(inout) :: pratemax(:)
 
-       real(kind_phys), intent(in), dimension(:,:) :: phii, qgraupel, qsnowwat, qicewat, wgrs
+       real(kind_phys), intent(in), dimension(:,:) :: prsi, qgraupel, qsnowwat, qicewat, wgrs
        real(kind_phys), intent(inout), dimension(:) :: ltg1_max, ltg2_max, ltg3_max
        character(len=*), intent(out)  :: errmsg
        integer, intent(out)           :: errflg
@@ -161,7 +164,7 @@ contains
          REAL(kind_phys), PARAMETER    :: coef1=0.042*1000.*1.22
          REAL(kind_phys), PARAMETER    :: coef2=0.20*1.22
          
-         REAL(kind_phys) :: totice_colint(im), msft(im), ltg1, ltg2, high_ltg1, high_wgrs, high_graupel
+         REAL(kind_phys) :: totice_colint(im), msft(im), ltg1, ltg2, high_ltg1, high_wgrs, high_graupel, rho
          LOGICAL :: ltg1_calc(im)
          integer :: k, i, count
 
@@ -175,19 +178,20 @@ contains
           msft = 1.
           ! get area (m^2) in units of km^2
           ! msft = 1.E-6*area
-          do k=2,levs
+          do k=1,levs-1
              do i=1,im
-                dP = phii(i,k+1) - phii(i,k)
+                dP = prsi(i,k) - prsi(i,k+1)
                 Q = qgraupel(i,k) + qsnowwat(i,k) + qicewat(i,k)
-                totice_colint(i) = totice_colint(i) + Q * dP / con_g
+                rho = prsl(i,k) / (con_rd * tgrs(i,k))
+                totice_colint(i) = totice_colint(i) + Q * rho * dP / con_g
 
                 IF ( .not.ltg1_calc(i) ) THEN
-                   IF ( 0.5*(phii(i,k-1) - phii(i,k+1)) < 258.15 ) THEN
+                   IF ( 0.5*(tgrs(i,k+1) + tgrs(i,k)) < 258.15 ) THEN
                       count = count + 1
                       ltg1_calc(i) = .true.
                       
                       ltg1 = coef1*wgrs(i,k)* &
-                           (( qgraupel(i,k-1) + qgraupel(i,k) )*0.5 )/msft(i)
+                           (( qgraupel(i,k+1) + qgraupel(i,k) )*0.5 )/msft(i)
                       high_ltg1 = max(high_ltg1, ltg1)
                       high_graupel = max(high_graupel, qgraupel(i,k))
                       if(abs(wgrs(i,k)) > high_wgrs) then
@@ -205,8 +209,8 @@ contains
           enddo
 
           if(count > 0) then
-             if(abs(high_wgrs) < 0.1 .or. high_graupel < 1e-4) then
-                !print *, 'low wgrs or graupel'
+             if(high_ltg1 < .01 .and. (abs(high_wgrs) < 0.1 .or. high_graupel < 1e-4)) then
+                ! Nothing to look at
              else
 183             format('high_ltg1 = ',F30.23,' high_wgrs = ',F30.23,' high_graupel = ',F30.23)
                 print 183, high_ltg1, high_wgrs, high_graupel
