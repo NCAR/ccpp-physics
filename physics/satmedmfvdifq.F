@@ -86,9 +86,7 @@
      &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,dkt,dku,                &
      &     kinver,xkzm_m,xkzm_h,xkzm_s,dspfac,bl_upfr,bl_dnfr,          &
      &     rlmx,elmx,sfc_rlm,tc_pbl,                                    &
-     !PCC_CANOPY------------------------------------                 
      &     vegtype, lai,                                                &                      
-     !----------------------------------------------
      &     ntqv,dtend,dtidx,index_of_temperature,index_of_x_wind,       &
      &     index_of_y_wind,index_of_process_pbl,gen_tend,ldiag3d,       &
      &     errmsg,errflg)
@@ -262,14 +260,14 @@
 
       real(kind=kind_phys) bfac, mffac
 
-      !PCC_CANOPY------------------------------------
+!PCC_CANOPY------------------------------------
       integer COUNTCAN
       real(kind=kind_phys) FCH,       MOL,   HOL,
      &                     SIGMACAN,  RRCAN, BBCAN 
      &                     AACAN,     ZCAN,  EDDYVEST1,
      &                     ZCANX,     EDDVESTX, 
      &                     EDDYVEST_INT
-      !----------------------------------------------
+!----------------------------------------------
 !!
       parameter(bfac=100.)
       parameter(wfac=7.0,cfac=4.5)
@@ -291,9 +289,9 @@
       parameter(ck1=0.15,ch1=0.15)
       parameter(cs0=0.2)
       parameter(rchck=1.5,ndt=20)
-      !PCC_CANOPY------------------------------------
+!PCC_CANOPY------------------------------------
       parameter (PICAN = 3.1415927)
-      !----------------------------------------------
+!----------------------------------------------
 
       if (tc_pbl == 0) then
         ck0 = 0.4
@@ -304,7 +302,6 @@
         ch0 = 0.55
         ce0 = 0.12
       endif
->>>>>>> origin/develop
       gravi = 1.0 / grav
       g = grav
       gocp = g / cp
@@ -1296,10 +1293,9 @@
       enddo
       !PCC_CANOPY------------------------------------
         do k = 1, 1km1
-          do i=1,im
-                      FCH    =    hvt_table(vegtype(i)) !top of canopy
-                                                        !(m) from
-                                                        !Noah-MP LSM tables
+          do i = 1, im
+                      FCH = hvt_table(vegtype(i)) !top of canopy
+                                               
                       IF (k .EQ. 1) THEN !first model layer
 !                       Check for Contiguous Canopy Grid Cells
                         IF ( lai(i) .LT. 0.1  !from LSM
@@ -1307,7 +1303,8 @@
 !     &                   .OR. MAX(0.0, 1.0 - FRT) .GT. 0.5
 !     &                   .OR. POPU .GT. 10000.0
 !     &                   .OR. EXP(-0.5*LAI*CLU).GT. 0.45
-!     &                      .AND. FCH .LT. 18.0 ) THEN !not a contigous canopy cell
+!     &                      .AND. FCH .LT. 18.0 ) THEN 
+!                         not a contigous canopy cell
                               dkt(i,k)= dkt(i,k)
                               dkq(i,k)= dkq(i,k)
                               dku(i,k)= dku(i,k)
@@ -1330,9 +1327,11 @@
                   IF ( ZCAN/FCH .GT. 1.25 ) THEN !SIGMACAN = Eulerian vertical velocity variance
                     SIGMACAN = 1.25*ustar(i)
                   END IF
-                  IF ( ZCAN/FCH .GE. 0.175  .AND. ZCAN/FCH .LE. 1.25 ) THEN
-                    SIGMACAN = ustar(i) * ( 0.75 + (0.5 * COS((PICAN/1.06818) *
-     &                                                 (1.25 - (ZCAN/FCH)))) )
+                  IF ( ZCAN/FCH .GE. 0.175  
+     &               .AND. ZCAN/FCH .LE. 1.25 ) THEN
+                      SIGMACAN = ustar(i) * ( 0.75 + 
+     &                         (0.5 * COS((PICAN/1.06818) *
+     &                         (1.25 - (ZCAN/FCH)))) )
                   END IF
                   IF ( ZCAN/FCH .LT. 0.175 )  THEN
                     SIGMACAN = 0.25*ustar(i)
@@ -1342,9 +1341,11 @@
                   IF ( ZCAN/FCH .GT. 1.25 ) THEN
                     SIGMACAN = 1.0*ustar(i)
                   END IF
-                  IF ( ZCAN/FCH .GE. 0.175  .AND. ZCAN/FCH .LE. 1.25 ) THEN
-                    SIGMACAN = ustar(i) * ( 0.625 + (0.375* COS((PICAN/1.06818) *
-     &                                                 (1.25 - (ZCAN/FCH)))) )
+                  IF ( ZCAN/FCH .GE. 0.175  
+     &               .AND. ZCAN/FCH .LE. 1.25 ) THEN
+                    SIGMACAN = ustar(i) * ( 0.625 + 
+     &                       (0.375* COS((PICAN/1.06818) *
+     &                       (1.25 - (ZCAN/FCH)))) )
                   END IF
                   IF ( ZCAN/FCH .LT. 0.175 )  THEN
                     SIGMACAN = 0.25*ustar(i)
@@ -1354,12 +1355,14 @@
                   IF ( ZCAN/FCH .GT. 1.25 ) THEN
                     SIGMACAN = 0.25*(4.375 - (3.75*HOL))*ustar(i)
                   END IF
-                  IF ( ZCAN/FCH .GE. 0.175  .AND. ZCAN/FCH .LE. 1.25 ) THEN
+                  IF ( ZCAN/FCH .GE. 0.175  i
+     &                 .AND. ZCAN/FCH .LE. 1.25 ) THEN
                     RRCAN=4.375-(3.75*HOL)
                     AACAN=(0.125*RRCAN) + 0.125
                     BBCAN=(0.125*RRCAN) - 0.125
-                    SIGMACAN = ustar(i) * ( AACAN + (BBCAN * COS((PICAN/1.06818) *
-     &                                                 (1.25 - (ZCAN/FCH)))) )
+                    SIGMACAN = ustar(i) * ( AACAN + 
+     &                             (BBCAN * COS((PICAN/1.06818) *
+     &                             (1.25 - (ZCAN/FCH)))) )
                   END IF
                   IF ( ZCAN/FCH .LT. 0.175 )  THEN
                     SIGMACAN = 0.25*ustar(i)
@@ -1377,7 +1380,8 @@
                  END IF
                  ZCAN = ZCAN-0.5  !step down in-canopy resolution of 0.5m
               END DO !end loop on canopy layers
-              EDDYVEST_INT = IntegrateTrapezoid((ZCANX(COUNTCAN:1:-1)/FCH),EDDYVESTX(COUNTCAN:1:-1))
+              EDDYVEST_INT = IntegrateTrapezoid((ZCANX(COUNTCAN:1:-1)
+     &                                /FCH),EDDYVESTX(COUNTCAN:1:-1))
               dkt(i,k)= (dkt(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dkt to resolved eddy diffusivity
               dkq(i,k)= (dkq(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dkq to resolved eddy diffusivity
               dku(i,k)= (dku(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dku to resolved eddy diffusivity
