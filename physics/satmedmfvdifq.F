@@ -111,7 +111,8 @@
       real(kind=kind_phys), intent(in) :: dspfac, bl_upfr, bl_dnfr
       real(kind=kind_phys), intent(in) :: rlmx, elmx
       !PCC_CANOPY------------------------------------
-      real(kind=kind_phys), intent(in) :: vegtype(:), lai(:)
+      integer, intent(in)  :: vegtype(:)
+      real(kind=kind_phys), intent(in) :: lai(:)
       !----------------------------------------------
       real(kind=kind_phys), intent(inout) :: dv(:,:),     du(:,:),      &
      &                     tdt(:,:),    rtg(:,:,:), tmf(:,:)
@@ -254,6 +255,10 @@
 !
       real(kind=kind_phys) ck0, ck1, ch0, ch1, ce0, rchck
 !
+!PCC_CANOPY------------------------------------
+      real(kind=kind_phys) PICAN
+!----------------------------------------------
+
       real(kind=kind_phys) qlcr, zstblmax, hcrinv
 !
       real(kind=kind_phys) h1
@@ -262,12 +267,20 @@
 
 !PCC_CANOPY------------------------------------
       integer COUNTCAN
-      real(kind=kind_phys) FCH,       MOL,   HOL,
-     &                     SIGMACAN,  RRCAN, BBCAN 
-     &                     AACAN,     ZCAN,  EDDYVEST1,
-     &                     ZCANX,     EDDVESTX, 
-     &                     EDDYVEST_INT
+      real(kind=kind_phys) FCH,       MOL,   HOL, TLCAN,
+     &                     SIGMACAN,  RRCAN, BBCAN,
+     &                     AACAN,     ZCAN,  ZFL,
+     &                     EDDYVEST1, EDDYVEST_INT
+
+      ! in canopy eddy diffusivity [ m**2/s ]
+      real(kind=kind_phys), allocatable  :: EDDYVESTX ( : )
+      ! in canopy layer [m]
+      real(kind=kind_phys), allocatable  :: ZCANX     ( : )
+      ! Declare local maximum canopy layers
+      integer, parameter :: MAXCAN = 1000
+
 !----------------------------------------------
+
 !!
       parameter(bfac=100.)
       parameter(wfac=7.0,cfac=4.5)
@@ -291,6 +304,13 @@
       parameter(rchck=1.5,ndt=20)
 !PCC_CANOPY------------------------------------
       parameter (PICAN = 3.1415927)
+!----------------------------------------------
+
+!PCC_CANOPY------------------------------------
+      if(.not.allocated(EDDYVESTX))
+     & allocate( EDDYVESTX    ( MAXCAN ) )
+      if(.not.allocated(ZCANX))
+     & allocate( ZCANX    ( MAXCAN ) )
 !----------------------------------------------
 
       if (tc_pbl == 0) then
@@ -1292,7 +1312,7 @@
         enddo
       enddo
       !PCC_CANOPY------------------------------------
-        do k = 1, 1km1
+        do k = 1, km1
           do i = 1, im
                       FCH = hvt_table(vegtype(i)) !top of canopy
                                                
@@ -1317,6 +1337,7 @@
               MOL  = zol(i)/zl(i,k)  !Monin-Obukhov Length
               HOL = FCH/MOL  !local canopy stability parameter (hc/MOL)
               ZCAN = zl(i,k) ! Initialize canopy top (m) = First model layer height above canopy
+              ZFL = ZCAN     ! Set ZFL = ZCAN
               COUNTCAN = 0   ! Initialize canopy layers
               DO WHILE (ZCAN.GE.0.5)  !canopy threshold >= 0.5 m
                  ! TLCAN = Lagrangian timescale
@@ -1355,7 +1376,7 @@
                   IF ( ZCAN/FCH .GT. 1.25 ) THEN
                     SIGMACAN = 0.25*(4.375 - (3.75*HOL))*ustar(i)
                   END IF
-                  IF ( ZCAN/FCH .GE. 0.175  i
+                  IF ( ZCAN/FCH .GE. 0.175  
      &                 .AND. ZCAN/FCH .LE. 1.25 ) THEN
                     RRCAN=4.375-(3.75*HOL)
                     AACAN=(0.125*RRCAN) + 0.125
