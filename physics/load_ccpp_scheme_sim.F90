@@ -44,7 +44,7 @@ module load_ccpp_scheme_sim
        dTdt_SWRAD_data, dTdt_PBL_data, dudt_PBL_data, dvdt_PBL_data, dTdt_GWD_data,      &
        dudt_GWD_data, dvdt_GWD_data, dTdt_SCNV_data, dudt_SCNV_data, dvdt_SCNV_data,     &
        dTdt_DCNV_data, dudt_DCNV_data, dvdt_DCNV_data, dTdt_cldMP_data
-  real(kind_phys), allocatable, dimension(:,:,:), target :: dqdt_PBL_data,               &
+  real(kind_phys), allocatable, dimension(:,:), target :: dqdt_PBL_data,               &
        dqdt_SCNV_data, dqdt_DCNV_data, dqdt_cldMP_data
 
   ! Scheme initialization flag.
@@ -262,7 +262,7 @@ contains
     if (have_dTdt_LWRAD_data) allocate(dTdt_LWRAD_data(nlev_data, ntime_data))
     if (have_dTdt_SWRAD_data) allocate(dTdt_SWRAD_data(nlev_data, ntime_data))
     if (have_dTdt_PBL_data)   allocate(dTdt_PBL_data(  nlev_data, ntime_data))
-    if (have_dqdt_PBL_data)   allocate(dqdt_PBL_data(  nlev_data, ntime_data, nTrc))
+    if (have_dqdt_PBL_data)   allocate(dqdt_PBL_data(  nlev_data, ntime_data))
     if (have_dudt_PBL_data)   allocate(dudt_PBL_data(  nlev_data, ntime_data))
     if (have_dvdt_PBL_data)   allocate(dvdt_PBL_data(  nlev_data, ntime_data))
     if (have_dTdt_GWD_data)   allocate(dTdt_GWD_data(  nlev_data, ntime_data))
@@ -271,13 +271,13 @@ contains
     if (have_dTdt_SCNV_data)  allocate(dTdt_SCNV_data( nlev_data, ntime_data))
     if (have_dudt_SCNV_data)  allocate(dudt_SCNV_data( nlev_data, ntime_data))
     if (have_dvdt_SCNV_data)  allocate(dvdt_SCNV_data( nlev_data, ntime_data))
-    if (have_dqdt_SCNV_data)  allocate(dqdt_SCNV_data( nlev_data, ntime_data, nTrc))
+    if (have_dqdt_SCNV_data)  allocate(dqdt_SCNV_data( nlev_data, ntime_data))
     if (have_dTdt_DCNV_data)  allocate(dTdt_DCNV_data( nlev_data, ntime_data))
     if (have_dudt_DCNV_data)  allocate(dudt_DCNV_data( nlev_data, ntime_data))
     if (have_dvdt_DCNV_data)  allocate(dvdt_DCNV_data( nlev_data, ntime_data))
-    if (have_dqdt_DCNV_data)  allocate(dqdt_DCNV_data( nlev_data, ntime_data, nTrc))
+    if (have_dqdt_DCNV_data)  allocate(dqdt_DCNV_data( nlev_data, ntime_data))
     if (have_dTdt_cldMP_data) allocate(dTdt_cldMP_data(nlev_data, ntime_data))
-    if (have_dqdt_cldMP_data) allocate(dqdt_cldMP_data(nlev_data, ntime_data, nTrc))
+    if (have_dqdt_cldMP_data) allocate(dqdt_cldMP_data(nlev_data, ntime_data))
 
     ! Read in data ...
     ! (ONLY master processor(0), if MPI enabled) 
@@ -301,6 +301,7 @@ contains
        !
        status = nf90_inq_varid(ncid, 'dT_dt_swrad', varID)
        if (status == nf90_noerr) status = nf90_get_var(  ncid, varID, dTdt_SWRAD_data)
+       print*,'dTdt_SWRAD_data: ',dTdt_SWRAD_data
        !
        status = nf90_inq_varid(ncid, 'dT_dt_pbl', varID)
        if (status == nf90_noerr) status = nf90_get_var(  ncid, varID, dTdt_PBL_data)
@@ -441,7 +442,7 @@ contains
        allocate(physics_process(iprc)%tend1d%T(nlev_data))
        allocate(physics_process(iprc)%tend1d%u(nlev_data))
        allocate(physics_process(iprc)%tend1d%v(nlev_data))
-       allocate(physics_process(iprc)%tend1d%q(nlev_data,1))
+       allocate(physics_process(iprc)%tend1d%q(nlev_data))
        if (iprc == proc_SWRAD_config(3)) then
           physics_process(iprc)%order      = iprc
           physics_process(iprc)%name       = "SWRAD"

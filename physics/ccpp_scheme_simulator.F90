@@ -15,41 +15,41 @@ module ccpp_scheme_simulator
   ! ########################################################################################
   ! Type containing 1D (time) physics tendencies.
   type phys_tend_1d
-     real(kind_phys), dimension(:),   pointer :: T
-     real(kind_phys), dimension(:),   pointer :: u
-     real(kind_phys), dimension(:),   pointer :: v
-     real(kind_phys), dimension(:,:), pointer :: q
+     real(kind_phys), dimension(:), pointer :: T
+     real(kind_phys), dimension(:), pointer :: u
+     real(kind_phys), dimension(:), pointer :: v
+     real(kind_phys), dimension(:), pointer :: q
   end type phys_tend_1d
 
   ! Type containing 2D (lev,time) physics tendencies.
   type phys_tend_2d
-     real(kind_phys), dimension(:),     pointer :: time
-     real(kind_phys), dimension(:,:),   pointer :: T
-     real(kind_phys), dimension(:,:),   pointer :: u
-     real(kind_phys), dimension(:,:),   pointer :: v
-     real(kind_phys), dimension(:,:,:), pointer :: q
+     real(kind_phys), dimension(:),   pointer :: time
+     real(kind_phys), dimension(:,:), pointer :: T
+     real(kind_phys), dimension(:,:), pointer :: u
+     real(kind_phys), dimension(:,:), pointer :: v
+     real(kind_phys), dimension(:,:), pointer :: q
   end type phys_tend_2d
 
   ! Type containing 3D (loc,lev,time) physics tendencies.
   type phys_tend_3d
-     real(kind_phys), dimension(:),       pointer :: time
-     real(kind_phys), dimension(:),       pointer :: lon
-     real(kind_phys), dimension(:),       pointer :: lat
-     real(kind_phys), dimension(:,:,:),   pointer :: T
-     real(kind_phys), dimension(:,:,:),   pointer :: u
-     real(kind_phys), dimension(:,:,:),   pointer :: v
-     real(kind_phys), dimension(:,:,:,:), pointer :: q
+     real(kind_phys), dimension(:),     pointer :: time
+     real(kind_phys), dimension(:),     pointer :: lon
+     real(kind_phys), dimension(:),     pointer :: lat
+     real(kind_phys), dimension(:,:,:), pointer :: T
+     real(kind_phys), dimension(:,:,:), pointer :: u
+     real(kind_phys), dimension(:,:,:), pointer :: v
+     real(kind_phys), dimension(:,:,:), pointer :: q
   end type phys_tend_3d
 
   ! Type containing 4D (lon, lat,lev,time) physics tendencies.
   type phys_tend_4d
-     real(kind_phys), dimension(:),         pointer :: time
-     real(kind_phys), dimension(:,:),       pointer :: lon
-     real(kind_phys), dimension(:,:),       pointer :: lat
-     real(kind_phys), dimension(:,:,:,:),   pointer :: T
-     real(kind_phys), dimension(:,:,:,:),   pointer :: u
-     real(kind_phys), dimension(:,:,:,:),   pointer :: v
-     real(kind_phys), dimension(:,:,:,:,:), pointer :: q
+     real(kind_phys), dimension(:),       pointer :: time
+     real(kind_phys), dimension(:,:),     pointer :: lon
+     real(kind_phys), dimension(:,:),     pointer :: lat
+     real(kind_phys), dimension(:,:,:,:), pointer :: T
+     real(kind_phys), dimension(:,:,:,:), pointer :: u
+     real(kind_phys), dimension(:,:,:,:), pointer :: v
+     real(kind_phys), dimension(:,:,:,:), pointer :: q
   end type phys_tend_4d
 
   ! This type contains the meta information and data for each physics process.
@@ -118,16 +118,16 @@ contains
 
     ! Outputs
     real(kind_phys), intent(inout), dimension(:,:) :: gt0, gu0, gv0
-    real(kind_phys), intent(inout), dimension(:,:,:) :: gq0
+    real(kind_phys), intent(inout), dimension(:,:) :: gq0
     character(len=*),intent(out) :: errmsg
     integer,         intent(out) :: errflg
 
     ! Locals
-    integer :: iCol, iLay, iTrc, nCol, nLay,  nTrc, ti(1), tf(1), idtend, fcst_year,     &
-         fcst_month, fcst_day, fcst_hour, fcst_min, fcst_sec, iprc, index_of_active_process
+    integer :: iCol, iLay, nCol, nLay, idtend, fcst_year, fcst_month, fcst_day,          &
+         fcst_hour, fcst_min, fcst_sec, iprc, index_of_active_process
     real(kind_phys) :: w1, w2,hrofday
-    real(kind_phys), dimension(:,:),   allocatable :: gt1, gu1, gv1, dTdt, dudt, dvdt
-    real(kind_phys), dimension(:,:,:), allocatable :: gq1, dqdt
+    real(kind_phys), dimension(:,:), allocatable :: gt1, gu1, gv1, dTdt, dudt, dvdt
+    real(kind_phys), dimension(:,:), allocatable :: gq1, dqdt
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -144,13 +144,12 @@ contains
     fcst_sec   = jdat(7)
 
     ! Dimensions
-    nCol = size(gq0(:,1,1))
-    nLay = size(gq0(1,:,1))
-    nTrc = size(gq0(1,1,:))
+    nCol = size(gq0(:,1))
+    nLay = size(gq0(1,:))
 
     ! Allocate temporaries
-    allocate(gt1(nCol,nLay), gu1(nCol,nLay), gv1(nCol,nLay), gq1(nCol,nLay,1))
-    allocate(dTdt(nCol,nLay), dudt(nCol,nLay), dvdt(nCol,nLay), dqdt(nCol,nLay,1))
+    allocate(gt1(nCol,nLay), gu1(nCol,nLay), gv1(nCol,nLay), gq1(nCol,nLay))
+    allocate(dTdt(nCol,nLay), dudt(nCol,nLay), dvdt(nCol,nLay), dqdt(nCol,nLay))
 
     ! Get tendency for "active" process.
     ! DJS2023: For the UFS and SCM, the physics tendencies are stored in a multi-dimensional
@@ -173,14 +172,14 @@ contains
     if (active_name == "cldMP") index_of_active_process = index_of_process_mp
 
     ! Set state at beginning of the physics timestep.
-    gt1(:,:)   = tgrs(:,:)
-    gu1(:,:)   = ugrs(:,:)
-    gv1(:,:)   = vgrs(:,:)
-    gq1(:,:,1) = qgrs(:,:,1)
-    dTdt(:,:)  = 0.
-    dudt(:,:)  = 0.
-    dvdt(:,:)  = 0.
-    dqdt(:,:,1)= 0.
+    gt1(:,:)  = tgrs(:,:)
+    gu1(:,:)  = ugrs(:,:)
+    gv1(:,:)  = vgrs(:,:)
+    gq1(:,:)  = qgrs(:,:,1)
+    dTdt(:,:) = 0.
+    dudt(:,:) = 0.
+    dvdt(:,:) = 0.
+    dqdt(:,:) = 0.
 
     ! Internal physics timestep evolution.
     do iprc = proc_start,proc_end
@@ -188,13 +187,14 @@ contains
           proc_start = iactive_scheme
           exit
        endif
+       print*,'Simulating ',iprc,' of ',proc_end
 
        do iCol = 1,nCol
           ! Reset locals
           physics_process(iprc)%tend1d%T(:) = 0.
           physics_process(iprc)%tend1d%u(:) = 0.
           physics_process(iprc)%tend1d%v(:) = 0.
-          physics_process(iprc)%tend1d%q(:,1) = 0.
+          physics_process(iprc)%tend1d%q(:) = 0.
 
           ! Using scheme simulator (very simple, interpolate data tendency to local time)
           if (physics_process(iprc)%use_sim) then
@@ -224,32 +224,35 @@ contains
              if (idtend >= 1) physics_process(iprc)%tend1d%v = dtend(iCol,:,idtend)/dtp
              !
              idtend = dtidx(100+ntqv,index_of_active_process)
-             if (idtend >= 1) physics_process(iprc)%tend1d%q(:,1) = dtend(iCol,:,idtend)/dtp
+             if (idtend >= 1) physics_process(iprc)%tend1d%q = dtend(iCol,:,idtend)/dtp
           endif
 
           ! Update state now?
           if (physics_process(iprc)%time_split) then
-             gt1(iCol,:)    = gt1(iCol,:)   + (dTdt(iCol,:)   + physics_process(iprc)%tend1d%T)*dtp
-             gu1(iCol,:)    = gu1(iCol,:)   + (dudt(iCol,:)   + physics_process(iprc)%tend1d%u)*dtp
-             gv1(iCol,:)    = gv1(iCol,:)   + (dvdt(iCol,:)   + physics_process(iprc)%tend1d%v)*dtp
-             gq1(iCol,:,1)  = gq1(iCol,:,1) + (dqdt(iCol,:,1) + physics_process(iprc)%tend1d%q(:,1))*dtp
-             dTdt(iCol,:)   = 0.
-             dudt(iCol,:)   = 0.
-             dvdt(iCol,:)   = 0.
-             dqdt(iCol,:,1) = 0.
+             gt1(iCol,:) = gt1(iCol,:) + (dTdt(iCol,:) + physics_process(iprc)%tend1d%T)*dtp
+             gu1(iCol,:) = gu1(iCol,:) + (dudt(iCol,:) + physics_process(iprc)%tend1d%u)*dtp
+             gv1(iCol,:) = gv1(iCol,:) + (dvdt(iCol,:) + physics_process(iprc)%tend1d%v)*dtp
+             gq1(iCol,:) = gq1(iCol,:) + (dqdt(iCol,:) + physics_process(iprc)%tend1d%q)*dtp
+             dTdt(iCol,:) = 0.
+             dudt(iCol,:) = 0.
+             dvdt(iCol,:) = 0.
+             dqdt(iCol,:) = 0.
           ! Accumulate tendencies, update later?
           else
-             dTdt(iCol,:)   = dTdt(iCol,:)   + physics_process(iprc)%tend1d%T
-             dudt(iCol,:)   = dudt(iCol,:)   + physics_process(iprc)%tend1d%u
-             dvdt(iCol,:)   = dvdt(iCol,:)   + physics_process(iprc)%tend1d%v
-             dqdt(iCol,:,1) = dqdt(iCol,:,1) + physics_process(iprc)%tend1d%q(:,1)
+             dTdt(iCol,:) = dTdt(iCol,:) + physics_process(iprc)%tend1d%T
+             dudt(iCol,:) = dudt(iCol,:) + physics_process(iprc)%tend1d%u
+             dvdt(iCol,:) = dvdt(iCol,:) + physics_process(iprc)%tend1d%v
+             dqdt(iCol,:) = dqdt(iCol,:) + physics_process(iprc)%tend1d%q
           endif
        enddo
        !
-       gt0(iCol,:)    = gt1(iCol,:)   + dTdt(iCol,:)*dtp
-       gu0(iCol,:)    = gu1(iCol,:)   + dudt(iCol,:)*dtp
-       gv0(iCol,:)    = gv1(iCol,:)   + dvdt(iCol,:)*dtp
-       gq0(iCol,:,1)  = gq1(iCol,:,1) + dqdt(iCol,:,1)*dtp
+       do iLay=1,nLay
+          write(*,'(i3,6f13.6)') ilay, gt0(iCol,iLay) , gt1(iCol,iLay) , dTdt(iCol,iLay)*dtp,physics_process(iprc)%tend1d%T(iLay),physics_process(iprc)%tend2d%T(iLay,3),physics_process(iprc)%tend2d%T(iLay,4)
+       enddo
+       gt0(iCol,:) = gt1(iCol,:) + dTdt(iCol,:)*dtp
+       gu0(iCol,:) = gu1(iCol,:) + dudt(iCol,:)*dtp
+       gv0(iCol,:) = gv1(iCol,:) + dvdt(iCol,:)*dtp
+       gq0(iCol,:) = gq1(iCol,:) + dqdt(iCol,:)*dtp
     enddo
 
     if (iprc == proc_end) then
@@ -273,6 +276,7 @@ contains
 
     ! Interpolation weights
     call this%cmp_time_wts(year, month, day, hour, minute, second, w1, w2, ti, tf)
+    print*,w1,w2,ti,tf
 
     select case(var_name)
     case("T")
@@ -282,7 +286,7 @@ contains
     case("v")
        this%tend1d%v = w1*this%tend2d%v(:,ti(1)) + w2*this%tend2d%v(:,tf(1))
     case("q")
-       this%tend1d%q(:,1) = w1*this%tend2d%q(:,ti(1),1) + w2*this%tend2d%q(:,tf(1),1)
+       this%tend1d%q = w1*this%tend2d%q(:,ti(1)) + w2*this%tend2d%q(:,tf(1))
     end select
 
   end function linterp_1D
@@ -317,7 +321,7 @@ contains
     case("v")
        this%tend1d%v = w1*this%tend3d%v(iNearest,:,ti(1)) + w2*this%tend3d%v(iNearest,:,tf(1))
     case("q")
-       this%tend1d%q(:,1) = w1*this%tend3d%q(iNearest,:,ti(1),1) + w2*this%tend3d%q(iNearest,:,tf(1),1)
+       this%tend1d%q = w1*this%tend3d%q(iNearest,:,ti(1)) + w2*this%tend3d%q(iNearest,:,tf(1))
     end select
   end function linterp_2D
 

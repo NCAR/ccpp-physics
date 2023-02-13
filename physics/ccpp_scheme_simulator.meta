@@ -178,10 +178,10 @@
   kind = kind_phys
   intent = inout
 [gq0]
-  standard_name = tracer_concentration_of_new_state
+  standard_name = specific_humidity_of_new_state
   long_name = tracer concentration updated by physics
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
