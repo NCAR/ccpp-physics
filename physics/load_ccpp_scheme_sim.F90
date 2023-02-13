@@ -127,7 +127,7 @@ contains
         open (unit = nlunit, file = nml_file, action = 'read', status = 'old', iostat = ios)
     endif
     rewind (nlunit)
-    read (nlunit, nml = scm_data_nml)
+    read (nlunit, nml = scm_data_nml, iostat=status)
     close (nlunit)
 
     ! Only proceed if scheme simulator requested.
