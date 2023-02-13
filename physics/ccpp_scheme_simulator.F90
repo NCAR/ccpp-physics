@@ -7,21 +7,21 @@
 ! ########################################################################################
 module ccpp_scheme_simulator
   use machine, only: kind_phys
-  use netcdf
-#ifdef MPI
-  use mpi
-#endif
+
   implicit none
 
-  ! Type containing 1D (instantaneous) physics tendencies
-  type tend_inst
-     real(kind_phys), dimension(:), pointer :: dT
-     real(kind_phys), dimension(:), pointer :: du
-     real(kind_phys), dimension(:), pointer :: dv
-     real(kind_phys), dimension(:), pointer :: dq
-  end type tend_inst
+  ! ########################################################################################
+  ! Types used by the scheme simulator
+  ! ########################################################################################
+  ! Type containing 1D (time) physics tendencies.
+  type phys_tend_1d
+     real(kind_phys), dimension(:),   pointer :: T
+     real(kind_phys), dimension(:),   pointer :: u
+     real(kind_phys), dimension(:),   pointer :: v
+     real(kind_phys), dimension(:,:), pointer :: q
+  end type phys_tend_1d
 
-  ! Type containing 2D data physics tendencies.
+  ! Type containing 2D (lev,time) physics tendencies.
   type phys_tend_2d
      real(kind_phys), dimension(:),     pointer :: time
      real(kind_phys), dimension(:,:),   pointer :: T
@@ -30,603 +30,65 @@ module ccpp_scheme_simulator
      real(kind_phys), dimension(:,:,:), pointer :: q
   end type phys_tend_2d
 
+  ! Type containing 3D (loc,lev,time) physics tendencies.
+  type phys_tend_3d
+     real(kind_phys), dimension(:),       pointer :: time
+     real(kind_phys), dimension(:),       pointer :: lon
+     real(kind_phys), dimension(:),       pointer :: lat
+     real(kind_phys), dimension(:,:,:),   pointer :: T
+     real(kind_phys), dimension(:,:,:),   pointer :: u
+     real(kind_phys), dimension(:,:,:),   pointer :: v
+     real(kind_phys), dimension(:,:,:,:), pointer :: q
+  end type phys_tend_3d
+
+  ! Type containing 4D (lon, lat,lev,time) physics tendencies.
+  type phys_tend_4d
+     real(kind_phys), dimension(:),         pointer :: time
+     real(kind_phys), dimension(:,:),       pointer :: lon
+     real(kind_phys), dimension(:,:),       pointer :: lat
+     real(kind_phys), dimension(:,:,:,:),   pointer :: T
+     real(kind_phys), dimension(:,:,:,:),   pointer :: u
+     real(kind_phys), dimension(:,:,:,:),   pointer :: v
+     real(kind_phys), dimension(:,:,:,:,:), pointer :: q
+  end type phys_tend_4d
+
   ! This type contains the meta information and data for each physics process.
   type base_physics_process
      character(len=16)  :: name
      logical            :: time_split = .false.
      logical            :: use_sim    = .false.
      integer            :: order
-     type(phys_tend_2d) :: tend
-     type(tend_inst)    :: itend
+     type(phys_tend_1d) :: tend1d
+     type(phys_tend_2d) :: tend2d
+     type(phys_tend_3d) :: tend3d
+     type(phys_tend_4d) :: tend4d
    contains
-     generic,   public  :: linterp => linterp_1D
+     generic,   public  :: linterp => linterp_1D, linterp_2D
      procedure, private :: linterp_1D
+     procedure, private :: linterp_2D
+     procedure, public  :: find_nearest_loc_2d_1d
+     procedure, public  :: cmp_time_wts
   end type base_physics_process
 
   ! This array contains the governing information on how to advance the physics timestep.
-  type(base_physics_process),dimension(:), allocatable :: &
+  type(base_physics_process), dimension(:), allocatable :: &
        physics_process
 
-  ! Number of physics process (set in namelist)
-  integer :: nPhysProcess
-
-  ! ########################################################################################
-  !
-  ! Configuration for CCPP scheme simulator. Set in namelist. Used during initialization to 
-  ! populate "physics_processes" type array.
-  !
-  ! ########################################################################################
-
-  ! For each process there is a corresponding namelist entry, which is constructed as follows:
-  ! {use_scheme_sim[0(no)/1(yes)], time_split[0(no)/1(yes)], order[1:nPhysProcess]}
-  integer, dimension(3) ::    &
-       proc_LWRAD_config = (/0,0,0/), &
-       proc_SWRAD_config = (/0,0,0/), &
-       proc_PBL_config   = (/0,0,0/), &
-       proc_GWD_config   = (/0,0,0/), &
-       proc_SCNV_config  = (/0,0,0/), &
-       proc_DCNV_config  = (/0,0,0/), &
-       proc_cldMP_config = (/0,0,0/)
-
-  ! Activation flag for scheme.
-  logical :: do_ccpp_scheme_simulator = .false.
-
-  ! Data driven physics tendencies
-  integer :: nlev_data, ntime_data
-  real(kind_phys), allocatable, dimension(:), target   :: time_data
-  real(kind_phys), allocatable, dimension(:,:), target :: dTdt_LWRAD_data,               &
-       dTdt_SWRAD_data, dTdt_PBL_data, dudt_PBL_data, dvdt_PBL_data, dTdt_GWD_data,      &
-       dudt_GWD_data, dvdt_GWD_data, dTdt_SCNV_data, dudt_SCNV_data, dvdt_SCNV_data,     &
-       dTdt_DCNV_data, dudt_DCNV_data, dvdt_DCNV_data, dTdt_cldMP_data
-  real(kind_phys), allocatable, dimension(:,:,:), target :: dqdt_PBL_data,               &
-       dqdt_SCNV_data, dqdt_DCNV_data, dqdt_cldMP_data
-
-  ! Scheme initialization flag.
-  logical :: module_initialized = .false.
-
-  ! Order in process loop for "active" physics process.
+  ! For time-split physics process we need to call this scheme twice in the SDF, once
+  ! before the "active" scheme is called, and once after. This is because the active
+  ! scheme uses an internal physics state that has been advanced forward by a subsequent
+  ! physics process(es).
+  character(len=16) :: active_name
   integer :: iactive_scheme
+  integer :: proc_start, proc_end
+  logical :: active_time_split_process=.false.
 
-  public ccpp_scheme_simulator_init, ccpp_scheme_simulator_run
+  ! Set to true in data was loaded into "physics_process"
+  logical :: do_ccpp_scheme_simulator=.false.
+
+  public ccpp_scheme_simulator_run
+
 contains
-
-  ! ######################################################################################
-  !
-  ! SUBROUTINE ccpp_scheme_simulator_init
-  !
-  ! ######################################################################################
-!! \section arg_table_ccpp_scheme_simulator_init
-!! \htmlinclude ccpp_scheme_simulator_init.html
-!!
-  subroutine ccpp_scheme_simulator_init(mpirank, mpiroot, mpicomm, nlunit, nml_file,     &
-       errmsg, errflg)
-
-    ! Inputs
-    integer,          intent (in) :: mpirank, mpiroot, mpicomm, nlunit
-    character(len=*), intent (in) :: nml_file
-
-    ! Outputs
-    character(len=*), intent(out) :: errmsg
-    integer,          intent(out) :: errflg
-
-    ! Local variables
-    integer :: ncid, dimID, varID, status, nlon, nlat, ios, iprc
-    character(len=256) :: fileIN
-    logical :: exists
-    integer,parameter :: nTrc = 1 ! Only specific humodty for now, but preserve 3 dimensionality
-
-    ! Switches for input data
-    logical :: have_dTdt_LWRAD_data     = .false., &
-               have_dTdt_SWRAD_data     = .false., &
-               have_dTdt_PBL_data       = .false., &
-               have_dqdt_PBL_data       = .false., &
-               have_dudt_PBL_data       = .false., &
-               have_dvdt_PBL_data       = .false., &
-               have_dTdt_GWD_data       = .false., &
-               have_dudt_GWD_data       = .false., &
-               have_dvdt_GWD_data       = .false., &
-               have_dTdt_SCNV_data      = .false., &
-               have_dudt_SCNV_data      = .false., &
-               have_dvdt_SCNV_data      = .false., &
-               have_dqdt_SCNV_data      = .false., &
-               have_dTdt_DCNV_data      = .false., &
-               have_dudt_DCNV_data      = .false., &
-               have_dvdt_DCNV_data      = .false., &
-               have_dqdt_DCNV_data      = .false., &
-               have_dTdt_cldMP_data     = .false., &
-               have_dqdt_cldMP_data     = .false.
-
-    ! Namelist
-    namelist / scm_data_nml / fileIN, nPhysProcess, proc_LWRAD_config, proc_SWRAD_config,  &
-         proc_PBL_config, proc_GWD_config, proc_SCNV_config, proc_DCNV_config,             &
-         proc_cldMP_config
-
-    ! Initialize CCPP error handling variables
-    errmsg = ''
-    errflg = 0
-
-    if (module_initialized) return
-    module_initialized = .true.
-
-    ! ######################################################################################
-    !
-    ! Read in namelist
-    !
-    ! ######################################################################################
-    inquire (file = trim (nml_file), exist = exists)
-    if (.not. exists) then
-        errmsg = 'SCM data tendency :: namelist file: '//trim(nml_file)//' does not exist'
-        errflg = 1
-        return
-    else
-        open (unit = nlunit, file = nml_file, action = 'read', status = 'old', iostat = ios)
-    endif
-    rewind (nlunit)
-    read (nlunit, nml = scm_data_nml)
-    close (nlunit)
-
-    ! ######################################################################################
-    ! 
-    ! Error checking
-    !
-    ! ######################################################################################
-    ! Only proceed if scheme simulator requested.
-    if (proc_SWRAD_config(1) .or. proc_LWRAD_config(1) .or. proc_PBL_config(1)  .or.       &
-         proc_GWD_config(1)  .or. proc_SCNV_config(1)  .or. proc_DCNV_config(1) .or.       &
-         proc_cldMP_config(1)) then
-       do_ccpp_scheme_simulator = .true.
-    else
-       return
-    endif
-    
-    ! Check that input data file exists
-    inquire (file = trim (fileIN), exist = exists)
-    if (.not. exists) then
-       errmsg = 'SCM data tendency file: '//trim(fileIN)//' does not exist'
-       errflg = 1
-       return
-    endif
-
-    ! #######################################################################################
-    !
-    ! Read mandatory information from data file...
-    ! (ONLY master processor(0), if MPI enabled)
-    !
-    ! #######################################################################################
-#ifdef MPI
-    if (mpirank .eq. mpiroot) then
-#endif
-
-       ! Open file (required)
-       status = nf90_open(trim(fileIN), NF90_NOWRITE, ncid)
-       if (status /= nf90_noerr) then
-          errmsg = 'Error reading in SCM data tendency file: '//trim(fileIN)
-          errflg = 1
-          return
-       endif
-       
-       ! Get dimensions (required)
-       status = nf90_inq_dimid(ncid, 'time', dimid)
-       if (status == nf90_noerr) then
-          status = nf90_inquire_dimension(ncid, dimid, len = ntime_data)
-       else
-          errmsg = 'SCM data tendency file: '//trim(fileIN)//' does not contain [time] dimension'
-          errflg = 1
-          return
-       endif
-       !
-       status = nf90_inq_dimid(ncid, 'lev', dimid)
-       if (status == nf90_noerr) then
-          status = nf90_inquire_dimension(ncid, dimid, len = nlev_data)
-       else
-          errmsg = 'SCM data tendency file: '//trim(fileIN)//' does not contain [lev] dimension'
-          errflg = 1
-          return
-       endif
-#ifdef MPI
-    endif ! On master processor
-
-    ! Other processors waiting...
-    call mpi_barrier(mpicomm, mpierr)
-
-    ! #######################################################################################
-    !
-    ! Broadcast dimensions...
-    ! (ALL processors)
-    !
-    ! #######################################################################################
-    call mpi_bcast(ntime_data, 1, MPI_INTEGER, mpiroot, mpicomm, mpierr)
-    call mpi_bcast(nlev_data,  1, MPI_INTEGER, mpiroot, mpicomm, mpierr)
-    call mpi_barrier(mpicomm, mpierr)
-
-    if (mpirank .eq. mpiroot) then
-#endif
-
-       ! ####################################################################################
-       !
-       ! What data fields do we have?
-       !
-       ! ####################################################################################
-
-       !
-       status = nf90_inq_varid(ncid, 'dT_dt_lwrad', varID)
-       if (status == nf90_noerr) have_dTdt_LWRAD_data = .true.
-       !
-       status = nf90_inq_varid(ncid, 'dT_dt_swrad', varID)
-       if (status == nf90_noerr) have_dTdt_SWRAD_data = .true.
-       !
-       status = nf90_inq_varid(ncid, 'dT_dt_pbl', varID)
-       if (status == nf90_noerr) have_dTdt_PBL_data = .true.
-       !
-       status = nf90_inq_varid(ncid, 'dq_dt_pbl', varID)
-       if (status == nf90_noerr) have_dqdt_PBL_data = .true.
-       !
-       status = nf90_inq_varid(ncid, 'du_dt_pbl', varID)
-       if (status == nf90_noerr) have_dudt_PBL_data = .true.
-       !
-       status = nf90_inq_varid(ncid, 'dv_dt_pbl', varID)
-       if (status == nf90_noerr) have_dvdt_PBL_data = .true.
-       !
-       status = nf90_inq_varid(ncid, 'dT_dt_cgwd', varID)
-       if (status == nf90_noerr) have_dTdt_GWD_data = .true.
-       !
-       status = nf90_inq_varid(ncid, 'du_dt_cgwd', varID)
-       if (status == nf90_noerr) have_dudt_GWD_data = .true.
-       !
-       status = nf90_inq_varid(ncid, 'dv_dt_cgwd', varID)
-       if (status == nf90_noerr) have_dvdt_GWD_data = .true.
-       !
-       status = nf90_inq_varid(ncid, 'dT_dt_shalconv', varID)
-       if (status == nf90_noerr) have_dTdt_SCNV_data = .true.
-       !
-       status = nf90_inq_varid(ncid, 'du_dt_shalconv', varID)
-       if (status == nf90_noerr) have_dudt_SCNV_data = .true.
-       !
-       status = nf90_inq_varid(ncid, 'dv_dt_shalconv', varID)
-       if (status == nf90_noerr) have_dvdt_SCNV_data = .true.
-       !
-       status = nf90_inq_varid(ncid, 'dq_dt_shalconv', varID)
-       if (status == nf90_noerr) have_dqdt_SCNV_data = .true.
-       !
-       status = nf90_inq_varid(ncid, 'dT_dt_deepconv', varID)
-       if (status == nf90_noerr) have_dTdt_DCNV_data = .true.
-       !
-       status = nf90_inq_varid(ncid, 'du_dt_deepconv', varID)
-       if (status == nf90_noerr) have_dudt_DCNV_data = .true.
-       !
-       status = nf90_inq_varid(ncid, 'dv_dt_deepconv', varID)
-       if (status == nf90_noerr) have_dvdt_DCNV_data = .true.
-       !
-       status = nf90_inq_varid(ncid, 'dq_dt_deepconv', varID)
-       if (status == nf90_noerr) have_dqdt_DCNV_data = .true.
-       !
-       status = nf90_inq_varid(ncid, 'dT_dt_micro', varID)
-       if (status == nf90_noerr) have_dTdt_cldMP_data = .true.
-       !
-       status = nf90_inq_varid(ncid, 'dq_dt_micro', varID)
-       if (status == nf90_noerr) have_dqdt_cldMP_data = .true.
-
-#ifdef MPI
-    endif ! Master process
-#endif
-
-    ! Allocate space for data
-    allocate(time_data(ntime_data))
-    if (have_dTdt_LWRAD_data) allocate(dTdt_LWRAD_data(nlev_data, ntime_data))
-    if (have_dTdt_SWRAD_data) allocate(dTdt_SWRAD_data(nlev_data, ntime_data))
-    if (have_dTdt_PBL_data)   allocate(dTdt_PBL_data(  nlev_data, ntime_data))
-    if (have_dqdt_PBL_data)   allocate(dqdt_PBL_data(  nlev_data, ntime_data, nTrc))
-    if (have_dudt_PBL_data)   allocate(dudt_PBL_data(  nlev_data, ntime_data))
-    if (have_dvdt_PBL_data)   allocate(dvdt_PBL_data(  nlev_data, ntime_data))
-    if (have_dTdt_GWD_data)   allocate(dTdt_GWD_data(  nlev_data, ntime_data))
-    if (have_dudt_GWD_data)   allocate(dudt_GWD_data(  nlev_data, ntime_data))
-    if (have_dvdt_GWD_data)   allocate(dvdt_GWD_data(  nlev_data, ntime_data))
-    if (have_dTdt_SCNV_data)  allocate(dTdt_SCNV_data( nlev_data, ntime_data))
-    if (have_dudt_SCNV_data)  allocate(dudt_SCNV_data( nlev_data, ntime_data))
-    if (have_dvdt_SCNV_data)  allocate(dvdt_SCNV_data( nlev_data, ntime_data))
-    if (have_dqdt_SCNV_data)  allocate(dqdt_SCNV_data( nlev_data, ntime_data, nTrc))
-    if (have_dTdt_DCNV_data)  allocate(dTdt_DCNV_data( nlev_data, ntime_data))
-    if (have_dudt_DCNV_data)  allocate(dudt_DCNV_data( nlev_data, ntime_data))
-    if (have_dvdt_DCNV_data)  allocate(dvdt_DCNV_data( nlev_data, ntime_data))
-    if (have_dqdt_DCNV_data)  allocate(dqdt_DCNV_data( nlev_data, ntime_data, nTrc))
-    if (have_dTdt_cldMP_data) allocate(dTdt_cldMP_data(nlev_data, ntime_data))
-    if (have_dqdt_cldMP_data) allocate(dqdt_cldMP_data(nlev_data, ntime_data, nTrc))
-
-    ! #######################################################################################
-    !
-    ! Read in data ...
-    ! (ONLY master processor(0), if MPI enabled) 
-    !
-    ! #######################################################################################
-#ifdef MPI
-    if (mpirank .eq. mpiroot) then
-#endif
-
-       ! Temporal info (required)
-       status = nf90_inq_varid(ncid, 'times', varID)
-       if (status == nf90_noerr) then
-          status = nf90_get_var(  ncid, varID, time_data)
-       else
-          errmsg = 'SCM data tendency file: '//trim(fileIN)//' does not contain times variable'
-          errflg = 1
-          return
-       endif
-       
-       ! Read in physics data tendencies (optional)
-       status = nf90_inq_varid(ncid, 'dT_dt_lwrad', varID)
-       if (status == nf90_noerr) status = nf90_get_var(  ncid, varID, dTdt_LWRAD_data)
-       !
-       status = nf90_inq_varid(ncid, 'dT_dt_swrad', varID)
-       if (status == nf90_noerr) status = nf90_get_var(  ncid, varID, dTdt_SWRAD_data)
-       !
-       status = nf90_inq_varid(ncid, 'dT_dt_pbl', varID)
-       if (status == nf90_noerr) status = nf90_get_var(  ncid, varID, dTdt_PBL_data)
-       !
-       status = nf90_inq_varid(ncid, 'dq_dt_pbl', varID)
-       if (status == nf90_noerr) status = nf90_get_var(  ncid, varID, dqdt_PBL_data)
-       !
-       status = nf90_inq_varid(ncid, 'du_dt_pbl', varID)
-       if (status == nf90_noerr) status = nf90_get_var(  ncid, varID, dudt_PBL_data)
-       !
-       status = nf90_inq_varid(ncid, 'dv_dt_pbl', varID)
-       if (status == nf90_noerr) status = nf90_get_var(  ncid, varID, dvdt_PBL_data)
-       !
-       status = nf90_inq_varid(ncid, 'dT_dt_cgwd', varID)
-       if (status == nf90_noerr) status = nf90_get_var(  ncid, varID, dTdt_GWD_data)
-       !
-       status = nf90_inq_varid(ncid, 'du_dt_cgwd', varID)
-       if (status == nf90_noerr) status = nf90_get_var(  ncid, varID, dudt_GWD_data)
-       !
-       status = nf90_inq_varid(ncid, 'dv_dt_cgwd', varID)
-       if (status == nf90_noerr) status = nf90_get_var(  ncid, varID, dvdt_GWD_data)
-       !
-       status = nf90_inq_varid(ncid, 'dT_dt_shalconv', varID)
-       if (status == nf90_noerr) status = nf90_get_var(  ncid, varID, dTdt_SCNV_data)
-       !
-       status = nf90_inq_varid(ncid, 'du_dt_shalconv', varID)
-       if (status == nf90_noerr) status = nf90_get_var(  ncid, varID, dudt_SCNV_data)
-       !
-       status = nf90_inq_varid(ncid, 'dv_dt_shalconv', varID)
-       if (status == nf90_noerr) status = nf90_get_var(  ncid, varID, dvdt_SCNV_data)
-       !
-       status = nf90_inq_varid(ncid, 'dq_dt_shalconv', varID)
-       if (status == nf90_noerr) status = nf90_get_var(  ncid, varID, dqdt_SCNV_data)
-       !
-       status = nf90_inq_varid(ncid, 'dT_dt_deepconv', varID)
-       if (status == nf90_noerr) status = nf90_get_var(  ncid, varID, dTdt_DCNV_data)
-       !
-       status = nf90_inq_varid(ncid, 'du_dt_deepconv', varID)
-       if (status == nf90_noerr) status = nf90_get_var(  ncid, varID, dudt_DCNV_data)
-       !
-       status = nf90_inq_varid(ncid, 'dv_dt_deepconv', varID)
-       if (status == nf90_noerr) status = nf90_get_var(  ncid, varID, dvdt_DCNV_data)
-       !
-       status = nf90_inq_varid(ncid, 'dq_dt_deepconv', varID)
-       if (status == nf90_noerr) status = nf90_get_var(  ncid, varID, dqdt_DCNV_data)
-       !
-       status = nf90_inq_varid(ncid, 'dT_dt_micro', varID)
-       if (status == nf90_noerr) status = nf90_get_var(  ncid, varID, dTdt_cldMP_data)
-       !
-       status = nf90_inq_varid(ncid, 'dq_dt_micro', varID)
-       if (status == nf90_noerr) status = nf90_get_var(  ncid, varID, dqdt_cldMP_data)
-       !
-       status = nf90_close(ncid)
-
-#ifdef MPI
-    endif ! Master process
-
-    ! Other processors waiting...
-    call mpi_barrier(mpicomm, mpierr)
-    ! #######################################################################################
-    !
-    ! Broadcast data... 
-    ! (ALL processors)
-    !
-    ! #######################################################################################
-
-    if (have_dTdt_LWRAD_data) then
-       call mpi_bcast(dTdt_LWRAD_data, size(dTdt_LWRAD_data), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-    endif
-    if (have_dTdt_SWRAD_data) then
-       call mpi_bcast(dTdt_SWRAD_data, size(dTdt_SWRAD_data), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-    endif
-    if (have_dTdt_PBL_data) then
-       call mpi_bcast(dTdt_PBL_data,   size(dTdt_PBL_data),   MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-    endif
-    if (have_dqdt_PBL_data) then
-       call mpi_bcast(dqdt_PBL_data,   size(dqdt_PBL_data),   MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-    endif
-    if (have_dudt_PBL_data) then
-       call mpi_bcast(dudt_PBL_data,   size(dudt_PBL_data),   MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-    endif
-    if (have_dvdt_PBL_data) then
-       call mpi_bcast(dvdt_PBL_data,   size(dvdt_PBL_data),   MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-    endif
-    if (have_dTdt_GWD_data) then
-       call mpi_bcast(dTdt_GWD_data,   size(dTdt_GWD_data),   MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-    endif
-    if (have_dudt_GWD_data) then
-       call mpi_bcast(dudt_GWD_data,   size(dudt_GWD_data),   MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-    endif
-    if (have_dvdt_GWD_data) then
-       call mpi_bcast(dvdt_GWD_data,   size(dvdt_GWD_data),   MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-    endif
-    if (have_dTdt_SCNV_data) then
-       call mpi_bcast(dTdt_SCNV_data,  size(dTdt_SCNV_data),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-    endif
-    if (have_dudt_SCNV_data) then
-       call mpi_bcast(dudt_SCNV_data,  size(dudt_SCNV_data),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-    endif
-    if (have_dvdt_SCNV_data) then
-       call mpi_bcast(dvdt_SCNV_data,  size(dvdt_SCNV_data),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-    endif
-    if (have_dqdt_SCNV_data) then
-       call mpi_bcast(dqdt_SCNV_data,  size(dqdt_SCNV_data),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-    endif
-    if (have_dTdt_DCNV_data) then
-       call mpi_bcast(dTdt_DCNV_data,  size(dTdt_DCNV_data),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-    endif
-    if (have_dudt_DCNV_data) then
-       call mpi_bcast(dudt_DCNV_data,  size(dudt_DCNV_data),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-    endif
-    if (have_dvdt_DCNV_data) then
-       call mpi_bcast(dvdt_DCNV_data,  size(dvdt_DCNV_data),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-    endif
-    if (have_dqdt_DCNV_data) then
-       call mpi_bcast(dqdt_DCNV_data,  size(dqdt_DCNV_data),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-    endif
-    if (have_dTdt_cldMP_data) then
-       call mpi_bcast(dTdt_cldMP_data, size(dTdt_cldMP_data), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-    endif
-    if (have_dqdt_cldMP_data) then
-       call mpi_bcast(dqdt_cldMP_data, size(dqdt_cldMP_data), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-    endif
-    !
-    call mpi_barrier(mpicomm, mpierr)
-#endif
-
-    ! #######################################################################################
-    !
-    ! Populate physics_process type.
-    !
-    ! #######################################################################################
-
-    ! Allocate
-    allocate(physics_process(nPhysProcess))
-
-    ! Metadata
-    do iprc = 1,nPhysProcess
-       allocate(physics_process(iprc)%itend%dT(nlev_data))
-       allocate(physics_process(iprc)%itend%du(nlev_data))
-       allocate(physics_process(iprc)%itend%dv(nlev_data))
-       allocate(physics_process(iprc)%itend%dq(nlev_data))
-       if (iprc == proc_SWRAD_config(3)) then
-          physics_process(iprc)%order      = iprc
-          physics_process(iprc)%name       = "SWRAD"
-          if (proc_SWRAD_config(1) == 1) then
-             physics_process(iprc)%use_sim = .true.
-          endif
-          if (proc_SWRAD_config(2) == 1) then
-             physics_process(iprc)%time_split = .true.
-          endif
-       endif
-       if (iprc == proc_LWRAD_config(3)) then
-          physics_process(iprc)%order      = iprc
-          physics_process(iprc)%name       = "LWRAD"
-          if (proc_LWRAD_config(1) == 1) then
-             physics_process(iprc)%use_sim = .true.
-          endif
-          if (proc_LWRAD_config(2) == 1) then
-             physics_process(iprc)%time_split = .true.
-          endif
-       endif
-       if (iprc == proc_GWD_config(3)) then
-          physics_process(iprc)%order      = iprc
-          physics_process(iprc)%name       = "GWD"
-          if (proc_GWD_config(1) == 1) then
-             physics_process(iprc)%use_sim = .true.
-          endif
-          if (proc_GWD_config(2) == 1) then
-             physics_process(iprc)%time_split = .true.
-          endif
-       endif
-       if (iprc == proc_PBL_config(3)) then
-          physics_process(iprc)%order      = iprc
-          physics_process(iprc)%name       = "PBL"
-          if (proc_PBL_config(1) == 1) then
-             physics_process(iprc)%use_sim = .true.
-          endif
-          if (proc_PBL_config(2) == 1) then
-             physics_process(iprc)%time_split = .true.
-          endif
-       endif
-       if (iprc == proc_SCNV_config(3)) then
-          physics_process(iprc)%order      = iprc
-          physics_process(iprc)%name       = "SCNV"
-          if (proc_SCNV_config(1) == 1) then
-             physics_process(iprc)%use_sim = .true.
-          endif
-          if (proc_SCNV_config(2) == 1) then
-             physics_process(iprc)%time_split = .true.
-          endif
-       endif
-       if (iprc == proc_DCNV_config(3)) then
-          physics_process(iprc)%order      = iprc
-          physics_process(iprc)%name       = "DCNV"
-          if (proc_DCNV_config(1) == 1) then
-             physics_process(iprc)%use_sim = .true.
-          endif
-          if (proc_DCNV_config(2) == 1) then
-             physics_process(iprc)%time_split = .true.
-          endif
-       endif
-       if (iprc == proc_cldMP_config(3)) then
-          physics_process(iprc)%order      = iprc
-          physics_process(iprc)%name       = "cldMP"
-          if (proc_cldMP_config(1) == 1) then
-             physics_process(iprc)%use_sim = .true.
-          endif
-          if (proc_cldMP_config(2) == 1) then
-             physics_process(iprc)%time_split = .true.
-          endif
-       endif
-    enddo
-
-    ! Load data
-    physics_process(proc_LWRAD_config(3))%tend%time => time_data
-    physics_process(proc_SWRAD_config(3))%tend%time => time_data
-    physics_process(proc_PBL_config(3))%tend%time   => time_data
-    physics_process(proc_GWD_config(3))%tend%time   => time_data
-    physics_process(proc_DCNV_config(3))%tend%time  => time_data
-    physics_process(proc_SCNV_config(3))%tend%time  => time_data
-    physics_process(proc_cldMP_config(3))%tend%time => time_data
-    if (have_dTdt_LWRAD_data) physics_process(proc_SWRAD_config(3))%tend%T => dTdt_LWRAD_data
-    if (have_dTdt_SWRAD_data) physics_process(proc_LWRAD_config(3))%tend%T => dTdt_SWRAD_data
-    if (have_dTdt_PBL_data)   physics_process(proc_PBL_config(3))%tend%T   => dTdt_PBL_data
-    if (have_dudt_PBL_data)   physics_process(proc_PBL_config(3))%tend%u   => dudt_PBL_data
-    if (have_dvdt_PBL_data)   physics_process(proc_PBL_config(3))%tend%v   => dvdt_PBL_data
-    if (have_dqdt_PBL_data)   physics_process(proc_PBL_config(3))%tend%q   => dqdt_PBL_data
-    if (have_dTdt_GWD_data)   physics_process(proc_GWD_config(3))%tend%T   => dTdt_GWD_data
-    if (have_dudt_GWD_data)   physics_process(proc_GWD_config(3))%tend%u   => dudt_GWD_data
-    if (have_dvdt_GWD_data)   physics_process(proc_GWD_config(3))%tend%v   => dvdt_GWD_data
-    if (have_dTdt_SCNV_data)  physics_process(proc_SCNV_config(3))%tend%T  => dTdt_SCNV_data
-    if (have_dudt_SCNV_data)  physics_process(proc_SCNV_config(3))%tend%u  => dudt_SCNV_data
-    if (have_dvdt_SCNV_data)  physics_process(proc_SCNV_config(3))%tend%v  => dvdt_SCNV_data
-    if (have_dqdt_SCNV_data)  physics_process(proc_SCNV_config(3))%tend%q  => dqdt_SCNV_data
-    if (have_dTdt_DCNV_data)  physics_process(proc_DCNV_config(3))%tend%T  => dTdt_DCNV_data
-    if (have_dudt_DCNV_data)  physics_process(proc_DCNV_config(3))%tend%u  => dudt_DCNV_data
-    if (have_dvdt_DCNV_data)  physics_process(proc_DCNV_config(3))%tend%v  => dvdt_DCNV_data
-    if (have_dqdt_DCNV_data)  physics_process(proc_DCNV_config(3))%tend%q  => dqdt_DCNV_data
-    if (have_dTdt_cldMP_data) physics_process(proc_cldMP_config(3))%tend%T => dTdt_cldMP_data
-    if (have_dqdt_cldMP_data) physics_process(proc_cldMP_config(3))%tend%q => dqdt_cldMP_data
-
-    ! Which process-scheme is "Active"?
-    do iprc = 1,nPhysProcess
-       if (.not. physics_process(iprc)%use_sim) then
-          iactive_scheme = iprc
-       endif
-    enddo
-
-    !
-    if (mpirank .eq. mpiroot) then
-       print*, "----------------------------------"
-       print*, "--- Using CCPP data tendencies ---"
-       print*, "----------------------------------" 
-       do iprc = 1,nPhysProcess
-          if (physics_process(iprc)%use_sim) then
-             print*,"  simulate_scheme: ", trim(physics_process(iprc)%name)
-             print*,"      order:       ", physics_process(iprc)%order
-             print*,"      time_split:  ", physics_process(iprc)%time_split
-          endif
-       enddo
-       print*, "  active_scheme:   ", trim(physics_process(iactive_scheme)%name)
-       print*, "      order:       ", physics_process(iactive_scheme)%order
-       print*, "      time_split : ", physics_process(iactive_scheme)%time_split
-       print*, "----------------------------------"
-       print*, "----------------------------------"
-    endif
-
-  end subroutine ccpp_scheme_simulator_init
 
   ! ######################################################################################
   !
@@ -662,7 +124,7 @@ contains
 
     ! Locals
     integer :: iCol, iLay, iTrc, nCol, nLay,  nTrc, ti(1), tf(1), idtend, fcst_year,     &
-         fcst_month, fcst_day, fcst_hour, fcst_min, fcst_sec, iprc, index_of_process
+         fcst_month, fcst_day, fcst_hour, fcst_min, fcst_sec, iprc, index_of_active_process
     real(kind_phys) :: w1, w2,hrofday
     real(kind_phys), dimension(:,:),   allocatable :: gt1, gu1, gv1, dTdt, dudt, dvdt
     real(kind_phys), dimension(:,:,:), allocatable :: gq1, dqdt
@@ -690,7 +152,27 @@ contains
     allocate(gt1(nCol,nLay), gu1(nCol,nLay), gv1(nCol,nLay), gq1(nCol,nLay,1))
     allocate(dTdt(nCol,nLay), dudt(nCol,nLay), dvdt(nCol,nLay), dqdt(nCol,nLay,1))
 
-    ! Set state
+    ! Get tendency for "active" process.
+    ! DJS2023: For the UFS and SCM, the physics tendencies are stored in a multi-dimensional
+    ! array, CCPP standard_name = cumulative_change_of_state_variables.
+    ! These are not the instantaneous physics tendencies that are applied to the state by the 
+    ! physics schemes. Not all schemes output physics tendencies...
+    ! Rather these are intended for diagnostic puposes and are accumulated over some interval.
+    ! In the UFS/SCM this is controlled by the diagnostic bucket interval, namelist option "fhzero".
+    ! For this to work, you need to clear the diagnostic buckets after each physics timestep when
+    ! running in the UFS/SCM.
+    ! In the SCM this is done by adding the following runtime options:
+    ! --n_itt_out 1 --n_itt_diag 1
+    !
+    if (active_name == "LWRAD") index_of_active_process = index_of_process_longwave
+    if (active_name == "SWRAD") index_of_active_process = index_of_process_shortwave
+    if (active_name == "PBL")   index_of_active_process = index_of_process_pbl
+    if (active_name == "GWD")   index_of_active_process = index_of_process_orographic_gwd
+    if (active_name == "SCNV")  index_of_active_process = index_of_process_scnv
+    if (active_name == "DCNV")  index_of_active_process = index_of_process_dcnv
+    if (active_name == "cldMP") index_of_active_process = index_of_process_mp
+
+    ! Set state at beginning of the physics timestep.
     gt1(:,:)   = tgrs(:,:)
     gu1(:,:)   = ugrs(:,:)
     gv1(:,:)   = vgrs(:,:)
@@ -700,70 +182,67 @@ contains
     dvdt(:,:)  = 0.
     dqdt(:,:,1)= 0.
 
-    ! Model internal physics timestep evolution of "state".
-    do iprc = 1,nPhysProcess
+    ! Internal physics timestep evolution.
+    do iprc = proc_start,proc_end
+       if (iprc == iactive_scheme .and. active_time_split_process) then
+          proc_start = iactive_scheme
+          exit
+       endif
+
        do iCol = 1,nCol
           ! Reset locals
-          physics_process(iprc)%itend%dT(:) = 0.
-          physics_process(iprc)%itend%du(:) = 0.
-          physics_process(iprc)%itend%dv(:) = 0.
-          physics_process(iprc)%itend%dq(:) = 0.
+          physics_process(iprc)%tend1d%T(:) = 0.
+          physics_process(iprc)%tend1d%u(:) = 0.
+          physics_process(iprc)%tend1d%v(:) = 0.
+          physics_process(iprc)%tend1d%q(:,1) = 0.
 
           ! Using scheme simulator (very simple, interpolate data tendency to local time)
           if (physics_process(iprc)%use_sim) then
-             if (associated(physics_process(iprc)%tend%T)) then
+             if (associated(physics_process(iprc)%tend2d%T)) then
                 errmsg = physics_process(iprc)%linterp("T", fcst_year, fcst_month, fcst_day, fcst_hour, fcst_min, fcst_sec)
              endif
-             if (associated(physics_process(iprc)%tend%u)) then
+             if (associated(physics_process(iprc)%tend2d%u)) then
                 errmsg = physics_process(iprc)%linterp("u", fcst_year, fcst_month, fcst_day, fcst_hour, fcst_min, fcst_sec)
              endif
-             if (associated(physics_process(iprc)%tend%v)) then
+             if (associated(physics_process(iprc)%tend2d%v)) then
                 errmsg = physics_process(iprc)%linterp("v", fcst_year, fcst_month, fcst_day, fcst_hour, fcst_min, fcst_sec)
              endif
-             if (associated(physics_process(iprc)%tend%q)) then
+             if (associated(physics_process(iprc)%tend2d%q)) then
                 errmsg = physics_process(iprc)%linterp("q", fcst_year, fcst_month, fcst_day, fcst_hour, fcst_min, fcst_sec)
              endif
 
           ! Using data tendency from "active" scheme(s).
-          ! DJS2023: This block is very ufs specific. Need to tidy this up.
+          ! DJS2023: This block is very ufs specific. See Note Above.
           else
-             if (physics_process(iprc)%name == "LWRAD") index_of_process = index_of_process_longwave
-             if (physics_process(iprc)%name == "SWRAD") index_of_process = index_of_process_shortwave
-             if (physics_process(iprc)%name == "PBL")   index_of_process = index_of_process_pbl
-             if (physics_process(iprc)%name == "GWD")   index_of_process = index_of_process_orographic_gwd
-             if (physics_process(iprc)%name == "SCNV")  index_of_process = index_of_process_scnv
-             if (physics_process(iprc)%name == "DCNV")  index_of_process = index_of_process_dcnv
-             if (physics_process(iprc)%name == "cldMP") index_of_process = index_of_process_mp
+             idtend = dtidx(index_of_temperature,index_of_active_process)
+             if (idtend >= 1) physics_process(iprc)%tend1d%T = dtend(iCol,:,idtend)/dtp
              !
-             idtend = dtidx(index_of_temperature,index_of_process)
-             if (idtend >= 1) physics_process(iprc)%itend%dT = dtend(iCol,:,idtend)/dtp
+             idtend = dtidx(index_of_x_wind,index_of_active_process)
+             if (idtend >= 1) physics_process(iprc)%tend1d%u = dtend(iCol,:,idtend)/dtp
              !
-             idtend = dtidx(index_of_x_wind,index_of_process)
-             if (idtend >= 1) physics_process(iprc)%itend%du = dtend(iCol,:,idtend)/dtp
+             idtend = dtidx(index_of_y_wind,index_of_active_process)
+             if (idtend >= 1) physics_process(iprc)%tend1d%v = dtend(iCol,:,idtend)/dtp
              !
-             idtend = dtidx(index_of_y_wind,index_of_process)
-             if (idtend >= 1) physics_process(iprc)%itend%dv = dtend(iCol,:,idtend)/dtp
-             !
-             idtend = dtidx(100+ntqv,index_of_process)
-             if (idtend >= 1) physics_process(iprc)%itend%dq = dtend(iCol,:,idtend)/dtp
+             idtend = dtidx(100+ntqv,index_of_active_process)
+             if (idtend >= 1) physics_process(iprc)%tend1d%q(:,1) = dtend(iCol,:,idtend)/dtp
           endif
 
           ! Update state now?
           if (physics_process(iprc)%time_split) then
-             gt1(iCol,:)    = gt1(iCol,:)   + (dTdt(iCol,:)   + physics_process(iprc)%itend%dT)*dtp
-             gu1(iCol,:)    = gu1(iCol,:)   + (dudt(iCol,:)   + physics_process(iprc)%itend%du)*dtp
-             gv1(iCol,:)    = gv1(iCol,:)   + (dvdt(iCol,:)   + physics_process(iprc)%itend%dv)*dtp
-             gq1(iCol,:,1)  = gq1(iCol,:,1) + (dqdt(iCol,:,1) + physics_process(iprc)%itend%dq)*dtp
+             gt1(iCol,:)    = gt1(iCol,:)   + (dTdt(iCol,:)   + physics_process(iprc)%tend1d%T)*dtp
+             gu1(iCol,:)    = gu1(iCol,:)   + (dudt(iCol,:)   + physics_process(iprc)%tend1d%u)*dtp
+             gv1(iCol,:)    = gv1(iCol,:)   + (dvdt(iCol,:)   + physics_process(iprc)%tend1d%v)*dtp
+             gq1(iCol,:,1)  = gq1(iCol,:,1) + (dqdt(iCol,:,1) + physics_process(iprc)%tend1d%q(:,1))*dtp
              dTdt(iCol,:)   = 0.
              dudt(iCol,:)   = 0.
              dvdt(iCol,:)   = 0.
              dqdt(iCol,:,1) = 0.
           ! Accumulate tendencies, update later?
           else
-             dTdt(iCol,:)   = dTdt(iCol,:)   + physics_process(iprc)%itend%dT
-             dudt(iCol,:)   = dudt(iCol,:)   + physics_process(iprc)%itend%du
-             dvdt(iCol,:)   = dvdt(iCol,:)   + physics_process(iprc)%itend%dv
-             dqdt(iCol,:,1) = dqdt(iCol,:,1) + physics_process(iprc)%itend%dq
+             dTdt(iCol,:)   = dTdt(iCol,:)   + physics_process(iprc)%tend1d%T
+             dudt(iCol,:)   = dudt(iCol,:)   + physics_process(iprc)%tend1d%u
+             dvdt(iCol,:)   = dvdt(iCol,:)   + physics_process(iprc)%tend1d%v
+             dqdt(iCol,:,1) = dqdt(iCol,:,1) + physics_process(iprc)%tend1d%q(:,1)
           endif
        enddo
        !
@@ -771,13 +250,18 @@ contains
        gu0(iCol,:)    = gu1(iCol,:)   + dudt(iCol,:)*dtp
        gv0(iCol,:)    = gv1(iCol,:)   + dvdt(iCol,:)*dtp
        gq0(iCol,:,1)  = gq1(iCol,:,1) + dqdt(iCol,:,1)*dtp
-
     enddo
+
+    if (iprc == proc_end) then
+       proc_start = 1
+    endif
     !
   end subroutine ccpp_scheme_simulator_run
 
   ! ####################################################################################
-  ! Utility functions/routines
+  ! Type-bound procedure to compute tendency profile for time-of-day. 
+  !
+  ! For use with 1D data (level, time) tendencies with diurnal (24-hr) forcing.
   ! ####################################################################################
   function linterp_1D(this, var_name, year, month, day, hour, minute, second) result(err_message)
     class(base_physics_process), intent(inout) :: this
@@ -785,27 +269,92 @@ contains
     integer, intent(in) :: year, month, day, hour, minute, second
     character(len=128) :: err_message
     integer :: ti(1), tf(1)
-    real(kind_phys) :: w1, w2, hrofday
+    real(kind_phys) :: w1, w2
 
     ! Interpolation weights
-    hrofday = hour*3600. + minute*60. + second
-    ti = findloc(abs(this%tend%time-hrofday),minval(abs(this%tend%time-hrofday)))
-    if (hrofday - this%tend%time(ti(1)) .le. 0) ti = ti-1
-    tf = ti + 1
-    w1 = (this%tend%time(tf(1))-hrofday) / (this%tend%time(tf(1)) - this%tend%time(ti(1)))
-    w2 = 1 - w1
+    call this%cmp_time_wts(year, month, day, hour, minute, second, w1, w2, ti, tf)
 
     select case(var_name)
     case("T")
-       this%itend%dT = w1*this%tend%T(:,ti(1)) + w2*this%tend%T(:,tf(1))
+       this%tend1d%T = w1*this%tend2d%T(:,ti(1)) + w2*this%tend2d%T(:,tf(1))
     case("u")
-       this%itend%du = w1*this%tend%u(:,ti(1)) + w2*this%tend%u(:,tf(1))
+       this%tend1d%u = w1*this%tend2d%u(:,ti(1)) + w2*this%tend2d%u(:,tf(1))
     case("v")
-       this%itend%dv = w1*this%tend%v(:,ti(1)) + w2*this%tend%v(:,tf(1))
+       this%tend1d%v = w1*this%tend2d%v(:,ti(1)) + w2*this%tend2d%v(:,tf(1))
     case("q")
-       this%itend%dq = w1*this%tend%q(:,ti(1),1) + w2*this%tend%q(:,tf(1),1)
+       this%tend1d%q(:,1) = w1*this%tend2d%q(:,ti(1),1) + w2*this%tend2d%q(:,tf(1),1)
     end select
 
   end function linterp_1D
- 
+
+  ! ####################################################################################
+  ! Type-bound procedure to compute tendency profile for time-of-day.
+  !
+  ! For use with 2D data (location, level, time) tendencies with diurnal (24-hr) forcing.
+  ! This assumes that the location dimension has a [longitude, latitude] associated with
+  ! each location.
+  ! ####################################################################################
+  function linterp_2D(this, var_name, lon, lat, year, month, day, hour, minute, second) result(err_message)
+    class(base_physics_process), intent(inout) :: this
+    character(len=*), intent(in) :: var_name
+    integer, intent(in) :: year, month, day, hour, minute, second
+    real(kind_phys), intent(in) :: lon, lat
+    character(len=128) :: err_message
+    integer :: ti(1), tf(1), iNearest
+    real(kind_phys) :: w1, w2
+
+    ! Interpolation weights (temporal)
+    call this%cmp_time_wts(year, month, day, hour, minute, second, w1, w2, ti, tf)
+
+    ! Grab data tendency closest to column [lon,lat]
+    iNearest = this%find_nearest_loc_2d_1d(lon,lat)
+    
+    select case(var_name)
+    case("T")
+       this%tend1d%T = w1*this%tend3d%T(iNearest,:,ti(1)) + w2*this%tend3d%T(iNearest,:,tf(1))
+    case("u")
+       this%tend1d%u = w1*this%tend3d%u(iNearest,:,ti(1)) + w2*this%tend3d%u(iNearest,:,tf(1))
+    case("v")
+       this%tend1d%v = w1*this%tend3d%v(iNearest,:,ti(1)) + w2*this%tend3d%v(iNearest,:,tf(1))
+    case("q")
+       this%tend1d%q(:,1) = w1*this%tend3d%q(iNearest,:,ti(1),1) + w2*this%tend3d%q(iNearest,:,tf(1),1)
+    end select
+  end function linterp_2D
+
+  ! ####################################################################################
+  ! Type-bound procedure to find nearest location.
+  !
+  ! For use with linterp_2D, NOT YET IMPLEMENTED.
+  ! ####################################################################################
+  pure function find_nearest_loc_2d_1d(this, lon, lat)
+    class(base_physics_process), intent(in) :: this
+    real(kind_phys), intent(in) :: lon, lat
+    integer :: find_nearest_loc_2d_1d
+
+    find_nearest_loc_2d_1d = 1 
+  end function find_nearest_loc_2d_1d
+
+  ! ####################################################################################
+  ! Type-bound procedure to compute linear interpolation weights for a diurnal (24-hour)
+  ! forcing.
+  ! ####################################################################################
+  subroutine cmp_time_wts(this, year, month, day, hour, minute, second, w1, w2, ti, tf)
+    ! Inputs
+    class(base_physics_process), intent(in) :: this
+    integer, intent(in) :: year, month, day, hour, minute, second
+    ! Outputs
+    integer,intent(out) :: ti(1), tf(1)
+    real(kind_phys),intent(out) :: w1, w2
+    ! Locals
+    real(kind_phys) :: hrofday
+
+    hrofday = hour*3600. + minute*60. + second
+    ti = findloc(abs(this%tend2d%time-hrofday),minval(abs(this%tend2d%time-hrofday)))
+    if (hrofday - this%tend2d%time(ti(1)) .le. 0) ti = ti-1
+    tf = ti + 1
+    w1 = (this%tend2d%time(tf(1))-hrofday) / (this%tend2d%time(tf(1)) - this%tend2d%time(ti(1)))
+    w2 = 1 - w1
+
+  end subroutine cmp_time_wts
+
 end module ccpp_scheme_simulator

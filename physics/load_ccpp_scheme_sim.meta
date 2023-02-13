@@ -1,0 +1,60 @@
+[ccpp-table-properties]
+  name = load_ccpp_scheme_sim
+  type = scheme
+  dependencies = machine.F,ccpp_scheme_simulator.F90
+
+########################################################################
+[ccpp-arg-table]
+  name = load_ccpp_scheme_sim_init
+  type = scheme
+[mpirank]
+  standard_name = mpi_rank
+  long_name = MPI rank of current process
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[mpiroot]
+  standard_name = mpi_root
+  long_name = MPI rank of master process
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[mpicomm]
+  standard_name = mpi_communicator
+  long_name = MPI communicator
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[nlunit]
+  standard_name = iounit_of_namelist
+  long_name = fortran unit number for opening nameliust file
+  units = none
+  dimensions = ()
+  type = integer
+  intent = in
+[nml_file]
+  standard_name = filename_of_namelist
+  long_name = namelist filename
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = in
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+[errflg]
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = out
