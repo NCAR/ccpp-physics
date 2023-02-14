@@ -7,7 +7,7 @@ module load_ccpp_scheme_sim
   use machine, only: kind_phys
   use netcdf
   use ccpp_scheme_simulator, only: do_ccpp_scheme_simulator, physics_process, active_name,&
-       iactive_scheme, proc_start, proc_end, active_time_split_process
+       iactive_scheme,  active_time_split_process
 #ifdef MPI
   use mpi
 #endif
@@ -430,9 +430,6 @@ contains
     ! Part B) Populate physics_process type.
     !
     ! #######################################################################################
-    ! Default process extent (no time-split physics processes)
-    proc_start = 1
-    proc_end   = nPhysProcess
 
     ! Allocate
     allocate(physics_process(nPhysProcess))

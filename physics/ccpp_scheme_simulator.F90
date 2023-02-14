@@ -82,6 +82,8 @@ module ccpp_scheme_simulator
   integer :: iactive_scheme
   integer :: proc_start, proc_end
   logical :: active_time_split_process=.false.
+  logical :: in_pre_active = .true.
+  logical :: in_post_active = .false.
 
   ! Set to true in data was loaded into "physics_process"
   logical :: do_ccpp_scheme_simulator=.false.
@@ -103,7 +105,7 @@ contains
        index_of_process_shortwave, index_of_process_scnv,                                &
        index_of_process_orographic_gwd, index_of_process_pbl, index_of_process_mp,       &
        index_of_temperature, index_of_x_wind, index_of_y_wind, ntqv, gt0, gu0, gv0, gq0, &
-       errmsg, errflg)
+       dtdq_pbl, dtdq_mp, errmsg, errflg)
 
     ! Inputs
     integer,         intent(in) :: kdt, ntqv, index_of_process_dcnv,                     &
@@ -118,7 +120,7 @@ contains
 
     ! Outputs
     real(kind_phys), intent(inout), dimension(:,:) :: gt0, gu0, gv0
-    real(kind_phys), intent(inout), dimension(:,:) :: gq0
+    real(kind_phys), intent(inout), dimension(:,:) :: gq0, dtdq_pbl, dtdq_mp
     character(len=*),intent(out) :: errmsg
     integer,         intent(out) :: errflg
 
@@ -181,13 +183,22 @@ contains
     dvdt(:,:) = 0.
     dqdt(:,:) = 0.
 
+    if (in_pre_active) then
+       proc_start = 1
+       proc_end   = iactive_scheme-1
+    endif
+    if (in_post_active) then
+       proc_start = iactive_scheme
+       proc_end   = size(physics_process)
+    endif
+
     ! Internal physics timestep evolution.
     do iprc = proc_start,proc_end
        if (iprc == iactive_scheme .and. active_time_split_process) then
-          proc_start = iactive_scheme
-          exit
+          print*,'Reached active process. ', iprc
+       else
+          print*,'Simulating ',iprc,' of ',proc_end
        endif
-       print*,'Simulating ',iprc,' of ',proc_end
 
        do iCol = 1,nCol
           ! Reset locals
@@ -233,10 +244,10 @@ contains
              gu1(iCol,:) = gu1(iCol,:) + (dudt(iCol,:) + physics_process(iprc)%tend1d%u)*dtp
              gv1(iCol,:) = gv1(iCol,:) + (dvdt(iCol,:) + physics_process(iprc)%tend1d%v)*dtp
              gq1(iCol,:) = gq1(iCol,:) + (dqdt(iCol,:) + physics_process(iprc)%tend1d%q)*dtp
-             dTdt(iCol,:) = 0.
-             dudt(iCol,:) = 0.
-             dvdt(iCol,:) = 0.
-             dqdt(iCol,:) = 0.
+             !dTdt(iCol,:) = 0.
+             !dudt(iCol,:) = 0.
+             !dvdt(iCol,:) = 0.
+             !dqdt(iCol,:) = 0.
           ! Accumulate tendencies, update later?
           else
              dTdt(iCol,:) = dTdt(iCol,:) + physics_process(iprc)%tend1d%T
@@ -244,10 +255,17 @@ contains
              dvdt(iCol,:) = dvdt(iCol,:) + physics_process(iprc)%tend1d%v
              dqdt(iCol,:) = dqdt(iCol,:) + physics_process(iprc)%tend1d%q
           endif
+          ! These are needed by samfshalcnv
+          if (trim(physics_process(iprc)%name) == "PBL") then
+             dtdq_pbl(iCol,:) = physics_process(iprc)%tend1d%q
+          endif
+          if (trim(physics_process(iprc)%name) == "cldMP") then
+             dtdq_mp(iCol,:) = physics_process(iprc)%tend1d%q
+          endif
        enddo
        !
        do iLay=1,nLay
-          write(*,'(i3,6f13.6)') ilay, gt0(iCol,iLay) , gt1(iCol,iLay) , dTdt(iCol,iLay)*dtp,physics_process(iprc)%tend1d%T(iLay),physics_process(iprc)%tend2d%T(iLay,3),physics_process(iprc)%tend2d%T(iLay,4)
+          !write(*,'(i3,4f13.6)') ilay, gq0(iCol,iLay) , gq1(iCol,iLay) , dqdt(iCol,iLay)*dtp, physics_process(iprc)%tend1d%q(iLay)*dtp
        enddo
        gt0(iCol,:) = gt1(iCol,:) + dTdt(iCol,:)*dtp
        gu0(iCol,:) = gu1(iCol,:) + dudt(iCol,:)*dtp
@@ -255,9 +273,16 @@ contains
        gq0(iCol,:) = gq1(iCol,:) + dqdt(iCol,:)*dtp
     enddo
 
-    if (iprc == proc_end) then
-       proc_start = 1
+    if (in_pre_active) then
+       in_pre_active  = .false.
+       in_post_active = .true.
     endif
+
+    if (size(physics_process)+1 == iprc) then
+       in_pre_active  = .true.
+       in_post_active = .false.
+    endif
+
     !
   end subroutine ccpp_scheme_simulator_run
 
@@ -276,7 +301,6 @@ contains
 
     ! Interpolation weights
     call this%cmp_time_wts(year, month, day, hour, minute, second, w1, w2, ti, tf)
-    print*,w1,w2,ti,tf
 
     select case(var_name)
     case("T")
@@ -353,10 +377,9 @@ contains
     real(kind_phys) :: hrofday
 
     hrofday = hour*3600. + minute*60. + second
-    ti = findloc(abs(this%tend2d%time-hrofday),minval(abs(this%tend2d%time-hrofday)))
-    if (hrofday - this%tend2d%time(ti(1)) .le. 0) ti = ti-1
-    tf = ti + 1
-    w1 = (this%tend2d%time(tf(1))-hrofday) / (this%tend2d%time(tf(1)) - this%tend2d%time(ti(1)))
+    ti = max(hour,1)
+    tf = min(ti + 1,24)
+    w1 = ((hour+1)*3600 - hrofday)/3600
     w2 = 1 - w1
 
   end subroutine cmp_time_wts
