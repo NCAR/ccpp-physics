@@ -79,7 +79,6 @@ contains
 
 !Lightning threat indices
        if (lightning_threat) then
-          print *,'call lightning_threat_indices'
           call lightning_threat_indices
        endif
 
@@ -189,7 +188,7 @@ contains
                       
                       ltg1 = coef1*wgrs(i,k)* &
                            (( qgraupel(i,k+1) + qgraupel(i,k) )*0.5 )
-                      if(ltg1 > 0.01) then
+                      if(.false.) then ! ltg1 > 0.01) then
 184                     format('Found ltg1=',F20.13,' with w=',F20.13,' Qg=',F20.13)
                         print 184, ltg1, wgrs(i,k), ( qgraupel(i,k+1) + qgraupel(i,k) )*0.5
                       endif
@@ -199,7 +198,7 @@ contains
                         high_wgrs = wgrs(i,k)
                       endif
                       
-                      IF ( ltg1 .LT. clim1 ) ltg1 = 0.
+                      !IF ( ltg1 .LT. clim1 ) ltg1 = 0.
                       
                       IF ( ltg1 .GT. ltg1_max(i) ) THEN
                          ltg1_max(i) = ltg1
@@ -209,7 +208,7 @@ contains
              enddo
           enddo
 
-          if(count > 0) then
+          if(.false.) then ! count > 0) then
              if(high_ltg1 < .01 .and. (abs(high_wgrs) < 0.1 .or. high_graupel < 1e-4)) then
                 ! Nothing to look at
              else
@@ -221,7 +220,7 @@ contains
           do i=1,im
              ltg2 = coef2 * totice_colint(i)
 
-             IF ( ltg2 .LT. clim2 ) ltg2 = 0.
+             !IF ( ltg2 .LT. clim2 ) ltg2 = 0.
              
              IF ( ltg2 .GT. ltg2_max(i) ) THEN
                 ltg2_max(i) = ltg2
@@ -229,7 +228,7 @@ contains
 
              ltg3_max(i) = 0.95 * ltg1_max(i) + 0.05 * ltg2_max(i)
 
-             IF ( ltg3_max(i) .LT. clim3 ) ltg3_max(i) = 0.
+             !IF ( ltg3_max(i) .LT. clim3 ) ltg3_max(i) = 0.
           enddo
 
        end subroutine lightning_threat_indices
