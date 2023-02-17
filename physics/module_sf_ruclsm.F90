@@ -54,11 +54,11 @@ CONTAINS
                    DT,init,lsm_cold_start,KTAU,iter,NSL,         &
                    graupelncv,snowncv,rainncv,raincv,            &
                    ZS,RAINBL,SNOW,SNOWH,SNOWC,FRZFRAC,frpcpn,    &
-                   rhosnf,precipfr,                              &
+                   rhosnf,precipfr,exticeden,                    &
                    Z3D,P8W,T3D,QV3D,QC3D,RHO3D,EMISBCK,          &
                    GLW,GSWdn,GSW,EMISS,CHKLOWQ, CHS,             &
-                   FLQC,FLHC,MAVAIL,CANWAT,VEGFRA,ALB,ZNT,       &
-                   Z0,SNOALB,ALBBCK,LAI,                         & 
+                   FLQC,FLHC,rhonewsn_ex,MAVAIL,CANWAT,VEGFRA,   &
+                   ALB, ZNT,Z0,SNOALB,ALBBCK,LAI,                & 
                    landusef, nlcat,                              & ! mosaic_lu, mosaic_soil, &
                    soilctop, nscat,                              &
                    QSFC,QSG,QVG,QCG,DEW,SOILT1,TSNAV,            &
@@ -157,7 +157,7 @@ CONTAINS
 !   INTEGER,     PARAMETER            ::     nddzs=2*(nzss-2)
 
    REAL,       INTENT(IN   )    ::     DT
-   LOGICAL,    INTENT(IN   )    ::     myj,frpcpn,init,lsm_cold_start
+   LOGICAL,    INTENT(IN   )    ::     myj,frpcpn,init,lsm_cold_start,exticeden
    INTEGER,    INTENT(IN   )    ::     NLCAT, NSCAT ! , mosaic_lu, mosaic_soil
    INTEGER,    INTENT(IN   )    ::     ktau, iter, nsl, isice, iswater, &
                                        ims,ime, jms,jme, kms,kme, &
@@ -191,7 +191,8 @@ CONTAINS
                INTENT(IN   )    ::                   GRAUPELNCV, &
                                                         SNOWNCV, &
                                                          RAINCV, &
-                                                        RAINNCV
+                                                        RAINNCV, &
+                                                    RHONEWSN_ex     !externally-calculated srf frz precip density
 !   REAL,       DIMENSION( ims:ime , jms:jme ),                   &
 !               INTENT(IN   )    ::                     lakemask
 !   INTEGER,    INTENT(IN   )    ::                    LakeModel
@@ -895,8 +896,8 @@ CONTAINS
                 nzs,nddzs,nroot,meltfactor,                      &   !added meltfactor
                 iland,isoil,ivgtyp(i,j),isltyp(i,j),             &
                 PRCPMS, NEWSNMS,SNWE,SNHEI,SNOWFRAC,             &
-                RHOSN,RHONEWSN,RHOSNFALL,                        &
-                snowrat,grauprat,icerat,curat,                   &
+                exticeden,RHOSN,RHONEWSN_ex(I,J),RHONEWSN,       &
+                RHOSNFALL,snowrat,grauprat,icerat,curat,         &
                 PATM,TABS,QVATM,QCATM,RHO,                       &
                 GLW(I,J),GSWdn(i,j),GSW(I,J),                    &
                 EMISSL(I,J),EMISBCK(I,J),                        &
@@ -1162,7 +1163,7 @@ endif
                 nzs,nddzs,nroot,meltfactor,                      &
                 ILAND,ISOIL,IVGTYP,ISLTYP,PRCPMS,                &
                 NEWSNMS,SNWE,SNHEI,SNOWFRAC,                     &
-                RHOSN,RHONEWSN,RHOSNFALL,                        &
+                exticeden,RHOSN,RHONEWSN_ex,RHONEWSN,RHOSNFALL,  &
                 snowrat,grauprat,icerat,curat,                   &
                 PATM,TABS,QVATM,QCATM,rho,                       &
                 GLW,GSWdn,GSW,EMISS,EMISBCK,QKMS,TKMS,PC,        &
@@ -1190,8 +1191,8 @@ endif
                                  nddzs                             !nddzs=2*(nzs-2)
 
    REAL,     INTENT(IN   )   ::  DELT,CONFLX,meltfactor
-   REAL,     INTENT(IN   )   ::  C1SN,C2SN
-   LOGICAL,    INTENT(IN   )    ::     myj, debug_print
+   REAL,     INTENT(IN   )   ::  C1SN,C2SN,RHONEWSN_ex
+   LOGICAL,    INTENT(IN   )    ::     myj, debug_print, exticeden
 !--- 3-D Atmospheric variables
    REAL                                                        , &
             INTENT(IN   )    ::                            PATM, &
@@ -1281,9 +1282,9 @@ endif
                                                            EETA, &
                                                           EVAPL, &
                                                         INFILTR, &
-                                                          RHOSN, & 
+                                                          RHOSN, &
                                                        RHONEWSN, &
-                                                      rhosnfall, &
+                                                      rhosnfall, & 
                                                         snowrat, &
                                                        grauprat, &
                                                          icerat, &
@@ -1494,19 +1495,22 @@ endif
 !--- 27 Feb 2014 - empirical formulations from John M. Brown
 !        rhonewsn=min(250.,rhowater/max(4.179,(13.*tanh((274.15-Tabs)*0.3333))))
 !--- 13 Mar 2018 - formulation from Trevor Elcott
+      if (exticeden) then
+        rhonewsn = rhonewsn_ex
+      else
         rhonewsn=min(125.,1000.0/max(8.,(17.*tanh((276.65-Tabs)*0.15))))
         rhonewgr=min(500.,rhowater/max(2.,(3.5*tanh((274.15-Tabs)*0.3333))))
         rhonewice=rhonewsn
-
 !--- compute density of "snowfall" from weighted contribution
 !                 of snow, graupel and ice fractions
 
-         rhosnfall = min(500.,max(58.8,(rhonewsn*snowrat +  &
+        rhosnfall = min(500.,max(58.8,(rhonewsn*snowrat +  &
 !13mar18         rhosnfall = min(500.,max(76.9,(rhonewsn*snowrat +  &
                      rhonewgr*grauprat + rhonewice*icerat + rhonewgr*curat)))
 
 ! from now on rhonewsn is the density of falling frozen precipitation
-         rhonewsn=rhosnfall
+        rhonewsn=rhosnfall
+      end if
 
 !*** Define average snow density of the snow pack considering
 !*** the amount of fresh snow (eq. 9 in Koren et al.(1999) 
