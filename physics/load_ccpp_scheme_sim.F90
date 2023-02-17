@@ -7,7 +7,7 @@ module load_ccpp_scheme_sim
   use machine, only: kind_phys
   use netcdf
   use ccpp_scheme_simulator, only: do_ccpp_scheme_simulator, physics_process, active_name,&
-       iactive_scheme,  active_time_split_process
+       iactive_scheme,  active_time_split_process, nactive_proc
 #ifdef MPI
   use mpi
 #endif
@@ -73,7 +73,7 @@ contains
     integer,          intent(out) :: errflg
 
     ! Local variables
-    integer :: ncid, dimID, varID, status, nlon, nlat, ios, iprc
+    integer :: ncid, dimID, varID, status, nlon, nlat, ios, iprc, iactive
     character(len=256) :: fileIN
     logical :: exists
     integer,parameter :: nTrc = 1 ! Only specific humodty for now, but preserve 3 dimensionality
@@ -540,13 +540,23 @@ contains
     if (have_dTdt_cldMP_data) physics_process(proc_cldMP_config(3))%tend2d%T => dTdt_cldMP_data
     if (have_dqdt_cldMP_data) physics_process(proc_cldMP_config(3))%tend2d%q => dqdt_cldMP_data
 
-    ! Which process-scheme is "Active"? Is it a time-split process?
+    ! How many active schemes are there?
+    nactive_proc = 0
+    iactive      = 0
+    do iprc = 1,nPhysProcess
+       if (.not. physics_process(iprc)%use_sim) nactive_proc = nactive_proc + 1
+    enddo
+    allocate(iactive_scheme(nactive_proc),active_name(nactive_proc),active_time_split_process(nactive_proc))
+
+    ! Which process-scheme(s) is(are) "Active"? Are they time-split process?
+    active_time_split_process(:) = .false.
     do iprc = 1,nPhysProcess
        if (.not. physics_process(iprc)%use_sim) then
-          iactive_scheme = iprc
-          active_name    = physics_process(iprc)%name
+          iactive = iactive + 1
+          iactive_scheme(iactive) = iprc
+          active_name(iactive)    = physics_process(iprc)%name
           if (physics_process(iprc)%time_split) then
-             active_time_split_process = .true.
+             active_time_split_process(iactive) = .true.
           endif
        endif
     enddo
@@ -556,16 +566,19 @@ contains
        print*, "-----------------------------------"
        print*, "--- Using CCPP scheme simulator ---"
        print*, "-----------------------------------" 
+       iactive = 1
        do iprc = 1,nPhysProcess
           if (physics_process(iprc)%use_sim) then
              print*,"  simulate_scheme: ", trim(physics_process(iprc)%name)
              print*,"      order:       ", physics_process(iprc)%order
              print*,"      time_split:  ", physics_process(iprc)%time_split
+          else
+             print*, "  active_scheme:   ", trim(active_name(iactive))
+             print*, "      order:       ", physics_process(iactive_scheme(iactive))%order
+             print*, "      time_split : ", active_time_split_process(iactive)
+             iactive = iactive + 1
           endif
        enddo
-       print*, "  active_scheme:   ", trim(active_name)
-       print*, "      order:       ", physics_process(iactive_scheme)%order
-       print*, "      time_split : ", active_time_split_process
        print*, "-----------------------------------"
        print*, "-----------------------------------"
     endif

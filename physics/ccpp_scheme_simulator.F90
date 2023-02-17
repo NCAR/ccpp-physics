@@ -74,14 +74,18 @@ module ccpp_scheme_simulator
   type(base_physics_process), dimension(:), allocatable :: &
        physics_process
 
+  ! Do not change these!
   ! For time-split physics process we need to call this scheme twice in the SDF, once
   ! before the "active" scheme is called, and once after. This is because the active
   ! scheme uses an internal physics state that has been advanced forward by a subsequent
   ! physics process(es).
-  character(len=16) :: active_name
-  integer :: iactive_scheme
+  integer :: nactive_proc
+  character(len=16),allocatable,dimension(:) :: active_name
+  integer,allocatable,dimension(:) :: iactive_scheme
+  logical,allocatable,dimension(:) :: active_time_split_process
+  integer :: iactive_scheme_inloop = 1
+
   integer :: proc_start, proc_end
-  logical :: active_time_split_process=.false.
   logical :: in_pre_active = .true.
   logical :: in_post_active = .false.
 
@@ -125,8 +129,8 @@ contains
     integer,         intent(out) :: errflg
 
     ! Locals
-    integer :: iCol, iLay, nCol, nLay, idtend, fcst_year, fcst_month, fcst_day,          &
-         fcst_hour, fcst_min, fcst_sec, iprc, index_of_active_process
+    integer :: iCol, iLay, nCol, nLay, idtend, year, month, day, hour, min, sec, iprc,   &
+         index_of_active_process
     real(kind_phys) :: w1, w2,hrofday
     real(kind_phys), dimension(:,:), allocatable :: gt1, gu1, gv1, dTdt, dudt, dvdt
     real(kind_phys), dimension(:,:), allocatable :: gq1, dqdt
@@ -138,12 +142,12 @@ contains
     if (.not. do_ccpp_scheme_simulator) return
 
     ! Current forecast time (Data-format specific)
-    fcst_year  = jdat(1)
-    fcst_month = jdat(2)
-    fcst_day   = jdat(3)
-    fcst_hour  = jdat(5)
-    fcst_min   = jdat(6)
-    fcst_sec   = jdat(7)
+    year  = jdat(1)
+    month = jdat(2)
+    day   = jdat(3)
+    hour  = jdat(5)
+    min   = jdat(6)
+    sec   = jdat(7)
 
     ! Dimensions
     nCol = size(gq0(:,1))
@@ -165,13 +169,13 @@ contains
     ! In the SCM this is done by adding the following runtime options:
     ! --n_itt_out 1 --n_itt_diag 1
     !
-    if (active_name == "LWRAD") index_of_active_process = index_of_process_longwave
-    if (active_name == "SWRAD") index_of_active_process = index_of_process_shortwave
-    if (active_name == "PBL")   index_of_active_process = index_of_process_pbl
-    if (active_name == "GWD")   index_of_active_process = index_of_process_orographic_gwd
-    if (active_name == "SCNV")  index_of_active_process = index_of_process_scnv
-    if (active_name == "DCNV")  index_of_active_process = index_of_process_dcnv
-    if (active_name == "cldMP") index_of_active_process = index_of_process_mp
+    if (active_name(iactive_scheme_inloop) == "LWRAD") index_of_active_process = index_of_process_longwave
+    if (active_name(iactive_scheme_inloop) == "SWRAD") index_of_active_process = index_of_process_shortwave
+    if (active_name(iactive_scheme_inloop) == "PBL")   index_of_active_process = index_of_process_pbl
+    if (active_name(iactive_scheme_inloop) == "GWD")   index_of_active_process = index_of_process_orographic_gwd
+    if (active_name(iactive_scheme_inloop) == "SCNV")  index_of_active_process = index_of_process_scnv
+    if (active_name(iactive_scheme_inloop) == "DCNV")  index_of_active_process = index_of_process_dcnv
+    if (active_name(iactive_scheme_inloop) == "cldMP") index_of_active_process = index_of_process_mp
 
     ! Set state at beginning of the physics timestep.
     gt1(:,:)  = tgrs(:,:)
@@ -185,16 +189,16 @@ contains
 
     if (in_pre_active) then
        proc_start = 1
-       proc_end   = iactive_scheme-1
+       proc_end   = max(1,iactive_scheme(iactive_scheme_inloop)-1)
     endif
     if (in_post_active) then
-       proc_start = iactive_scheme
+       proc_start = iactive_scheme(iactive_scheme_inloop)
        proc_end   = size(physics_process)
     endif
 
     ! Internal physics timestep evolution.
     do iprc = proc_start,proc_end
-       if (iprc == iactive_scheme .and. active_time_split_process) then
+       if (iprc == iactive_scheme(iactive_scheme_inloop)) then
           print*,'Reached active process. ', iprc
        else
           print*,'Simulating ',iprc,' of ',proc_end
@@ -209,17 +213,26 @@ contains
 
           ! Using scheme simulator (very simple, interpolate data tendency to local time)
           if (physics_process(iprc)%use_sim) then
-             if (associated(physics_process(iprc)%tend2d%T)) then
-                errmsg = physics_process(iprc)%linterp("T", fcst_year, fcst_month, fcst_day, fcst_hour, fcst_min, fcst_sec)
+             if (physics_process(iprc)%name == "LWRAD") then
+                call sim_LWRAD(year, month, day, hour, min, sec, physics_process(iprc))
              endif
-             if (associated(physics_process(iprc)%tend2d%u)) then
-                errmsg = physics_process(iprc)%linterp("u", fcst_year, fcst_month, fcst_day, fcst_hour, fcst_min, fcst_sec)
+             if (physics_process(iprc)%name == "SWRAD")then
+                call sim_SWRAD(year, month, day, hour, min, sec, physics_process(iprc))
              endif
-             if (associated(physics_process(iprc)%tend2d%v)) then
-                errmsg = physics_process(iprc)%linterp("v", fcst_year, fcst_month, fcst_day, fcst_hour, fcst_min, fcst_sec)
+             if (physics_process(iprc)%name == "GWD")then
+                call sim_GWD(year, month, day, hour, min, sec, physics_process(iprc))
              endif
-             if (associated(physics_process(iprc)%tend2d%q)) then
-                errmsg = physics_process(iprc)%linterp("q", fcst_year, fcst_month, fcst_day, fcst_hour, fcst_min, fcst_sec)
+             if (physics_process(iprc)%name == "PBL")then
+                call sim_PBL(year, month, day, hour, min, sec, physics_process(iprc))
+             endif
+             if (physics_process(iprc)%name == "SCNV")then
+                call sim_SCNV(year, month, day, hour, min, sec, physics_process(iprc))
+             endif
+             if (physics_process(iprc)%name == "DCNV")then
+                call sim_DCNV(year, month, day, hour, min, sec, physics_process(iprc))
+             endif
+             if (physics_process(iprc)%name == "cldMP")then
+                call sim_cldMP(year, month, day, hour, min, sec, physics_process(iprc))
              endif
 
           ! Using data tendency from "active" scheme(s).
@@ -240,27 +253,22 @@ contains
 
           ! Update state now?
           if (physics_process(iprc)%time_split) then
+             print*,'   time-split scheme...'
              gt1(iCol,:) = gt1(iCol,:) + (dTdt(iCol,:) + physics_process(iprc)%tend1d%T)*dtp
              gu1(iCol,:) = gu1(iCol,:) + (dudt(iCol,:) + physics_process(iprc)%tend1d%u)*dtp
              gv1(iCol,:) = gv1(iCol,:) + (dvdt(iCol,:) + physics_process(iprc)%tend1d%v)*dtp
              gq1(iCol,:) = gq1(iCol,:) + (dqdt(iCol,:) + physics_process(iprc)%tend1d%q)*dtp
-             !dTdt(iCol,:) = 0.
-             !dudt(iCol,:) = 0.
-             !dvdt(iCol,:) = 0.
-             !dqdt(iCol,:) = 0.
+             dTdt(iCol,:) = 0.
+             dudt(iCol,:) = 0.
+             dvdt(iCol,:) = 0.
+             dqdt(iCol,:) = 0.
           ! Accumulate tendencies, update later?
           else
+             print*,'   process-split scheme...'
              dTdt(iCol,:) = dTdt(iCol,:) + physics_process(iprc)%tend1d%T
              dudt(iCol,:) = dudt(iCol,:) + physics_process(iprc)%tend1d%u
              dvdt(iCol,:) = dvdt(iCol,:) + physics_process(iprc)%tend1d%v
              dqdt(iCol,:) = dqdt(iCol,:) + physics_process(iprc)%tend1d%q
-          endif
-          ! These are needed by samfshalcnv
-          if (trim(physics_process(iprc)%name) == "PBL") then
-             dtdq_pbl(iCol,:) = physics_process(iprc)%tend1d%q
-          endif
-          if (trim(physics_process(iprc)%name) == "cldMP") then
-             dtdq_mp(iCol,:) = physics_process(iprc)%tend1d%q
           endif
        enddo
        !
@@ -281,6 +289,11 @@ contains
     if (size(physics_process)+1 == iprc) then
        in_pre_active  = .true.
        in_post_active = .false.
+       iactive_scheme_inloop = 1
+    endif
+
+    if (iactive_scheme_inloop < nactive_proc) then
+       iactive_scheme_inloop = iactive_scheme_inloop + 1
     endif
 
     !
@@ -291,16 +304,16 @@ contains
   !
   ! For use with 1D data (level, time) tendencies with diurnal (24-hr) forcing.
   ! ####################################################################################
-  function linterp_1D(this, var_name, year, month, day, hour, minute, second) result(err_message)
+  function linterp_1D(this, var_name, year, month, day, hour, min, sec) result(err_message)
     class(base_physics_process), intent(inout) :: this
     character(len=*), intent(in) :: var_name
-    integer, intent(in) :: year, month, day, hour, minute, second
+    integer, intent(in) :: year, month, day, hour, min, sec
     character(len=128) :: err_message
     integer :: ti(1), tf(1)
     real(kind_phys) :: w1, w2
 
     ! Interpolation weights
-    call this%cmp_time_wts(year, month, day, hour, minute, second, w1, w2, ti, tf)
+    call this%cmp_time_wts(year, month, day, hour, min, sec, w1, w2, ti, tf)
 
     select case(var_name)
     case("T")
@@ -322,17 +335,17 @@ contains
   ! This assumes that the location dimension has a [longitude, latitude] associated with
   ! each location.
   ! ####################################################################################
-  function linterp_2D(this, var_name, lon, lat, year, month, day, hour, minute, second) result(err_message)
+  function linterp_2D(this, var_name, lon, lat, year, month, day, hour, min, sec) result(err_message)
     class(base_physics_process), intent(inout) :: this
     character(len=*), intent(in) :: var_name
-    integer, intent(in) :: year, month, day, hour, minute, second
+    integer, intent(in) :: year, month, day, hour, min, sec
     real(kind_phys), intent(in) :: lon, lat
     character(len=128) :: err_message
     integer :: ti(1), tf(1), iNearest
     real(kind_phys) :: w1, w2
 
     ! Interpolation weights (temporal)
-    call this%cmp_time_wts(year, month, day, hour, minute, second, w1, w2, ti, tf)
+    call this%cmp_time_wts(year, month, day, hour, min, sec, w1, w2, ti, tf)
 
     ! Grab data tendency closest to column [lon,lat]
     iNearest = this%find_nearest_loc_2d_1d(lon,lat)
@@ -366,22 +379,141 @@ contains
   ! Type-bound procedure to compute linear interpolation weights for a diurnal (24-hour)
   ! forcing.
   ! ####################################################################################
-  subroutine cmp_time_wts(this, year, month, day, hour, minute, second, w1, w2, ti, tf)
+  subroutine cmp_time_wts(this, year, month, day, hour, minute, sec, w1, w2, ti, tf)
     ! Inputs
     class(base_physics_process), intent(in) :: this
-    integer, intent(in) :: year, month, day, hour, minute, second
+    integer, intent(in) :: year, month, day, hour, minute, sec
     ! Outputs
     integer,intent(out) :: ti(1), tf(1)
     real(kind_phys),intent(out) :: w1, w2
     ! Locals
     real(kind_phys) :: hrofday
 
-    hrofday = hour*3600. + minute*60. + second
+    hrofday = hour*3600. + minute*60. + sec
     ti = max(hour,1)
     tf = min(ti + 1,24)
     w1 = ((hour+1)*3600 - hrofday)/3600
     w2 = 1 - w1
 
   end subroutine cmp_time_wts
+
+  ! ####################################################################################
+  subroutine sim_LWRAD( year, month, day, hour, min, sec, process)
+    type(base_physics_process), intent(inout) :: process
+    integer, intent(in) :: year, month, day, hour, min, sec
+    character(len=128) :: errmsg
+
+    if (associated(process%tend2d%T)) then
+       errmsg = process%linterp("T", year,month,day,hour,min,sec)
+    endif
+
+  end subroutine sim_LWRAD
+
+  ! ####################################################################################
+  subroutine sim_SWRAD( year, month, day, hour, min, sec, process)
+    type(base_physics_process), intent(inout) :: process
+    integer, intent(in) :: year, month, day, hour, min, sec
+    character(len=128) :: errmsg
+
+    if (associated(process%tend2d%T)) then
+       errmsg = process%linterp("T", year,month,day,hour,min,sec)
+    endif
+
+  end subroutine sim_SWRAD
+
+  ! ####################################################################################
+  subroutine sim_GWD( year, month, day, hour, min, sec, process)
+    type(base_physics_process), intent(inout) :: process
+    integer, intent(in) :: year, month, day, hour, min, sec
+    character(len=128) :: errmsg
+
+    if (associated(process%tend2d%T)) then
+       errmsg = process%linterp("T", year,month,day,hour,min,sec)
+    endif
+    if (associated(process%tend2d%u)) then
+       errmsg = process%linterp("u", year,month,day,hour,min,sec)
+    endif
+    if (associated(process%tend2d%v)) then
+       errmsg = process%linterp("v", year,month,day,hour,min,sec)
+    endif
+
+  end subroutine sim_GWD
+
+  ! ####################################################################################
+  subroutine sim_PBL( year, month, day, hour, min, sec, process)
+    type(base_physics_process), intent(inout) :: process
+    integer, intent(in) :: year, month, day, hour, min, sec
+    character(len=128) :: errmsg
+
+    if (associated(process%tend2d%T)) then
+       errmsg = process%linterp("T", year,month,day,hour,min,sec)
+    endif
+    if (associated(process%tend2d%u)) then
+       errmsg = process%linterp("u", year,month,day,hour,min,sec)
+    endif
+    if (associated(process%tend2d%v)) then
+       errmsg = process%linterp("v", year,month,day,hour,min,sec)
+    endif
+    if (associated(process%tend2d%q)) then
+       errmsg = process%linterp("q", year,month,day,hour,min,sec)
+    endif
+
+  end subroutine sim_PBL
+
+  ! ####################################################################################
+  subroutine sim_DCNV( year, month, day, hour, min, sec, process)
+    type(base_physics_process), intent(inout) :: process
+    integer, intent(in) :: year, month, day, hour, min, sec
+    character(len=128) :: errmsg
+
+    if (associated(process%tend2d%T)) then
+       errmsg = process%linterp("T", year,month,day,hour,min,sec)
+    endif
+    if (associated(process%tend2d%u)) then
+       errmsg = process%linterp("u", year,month,day,hour,min,sec)
+    endif
+    if (associated(process%tend2d%v)) then
+       errmsg = process%linterp("v", year,month,day,hour,min,sec)
+    endif
+    if (associated(process%tend2d%q)) then
+       errmsg = process%linterp("q", year,month,day,hour,min,sec)
+    endif
+
+  end subroutine sim_DCNV
+
+  ! ####################################################################################
+  subroutine sim_SCNV( year, month, day, hour, min, sec, process)
+    type(base_physics_process), intent(inout) :: process
+    integer, intent(in) :: year, month, day, hour, min, sec
+    character(len=128) :: errmsg
+  
+    if (associated(process%tend2d%T)) then
+       errmsg = process%linterp("T", year,month,day,hour,min,sec)
+    endif
+    if (associated(process%tend2d%u)) then
+       errmsg = process%linterp("u", year,month,day,hour,min,sec)
+    endif
+    if (associated(process%tend2d%v)) then
+       errmsg = process%linterp("v", year,month,day,hour,min,sec)
+    endif
+    if (associated(process%tend2d%q)) then
+       errmsg = process%linterp("q", year,month,day,hour,min,sec)
+    endif
+
+  end subroutine sim_SCNV
+  
+  ! ####################################################################################
+  subroutine sim_cldMP( year, month, day, hour, min, sec, process)
+    type(base_physics_process), intent(inout) :: process
+    integer, intent(in) :: year, month, day, hour, min, sec
+    character(len=128) :: errmsg
+
+    if (associated(process%tend2d%T)) then
+       errmsg = process%linterp("T", year,month,day,hour,min,sec)
+    endif
+    if (associated(process%tend2d%q)) then
+       errmsg = process%linterp("q", year,month,day,hour,min,sec)
+    endif
+  end subroutine sim_cldMP
 
 end module ccpp_scheme_simulator
