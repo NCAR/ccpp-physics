@@ -37,9 +37,10 @@
      &     ( im, cpllnd, cpllnd2atm, flag_iter, dry,                    &
      &       sncovr1_lnd, qsurf_lnd, evap_lnd, hflx_lnd,                &
      &       ep_lnd, t2mmp_lnd, q2mp_lnd, gflux_lnd,                    &
+     &       runoff_lnd, drain_lnd,
 !  ---  outputs:
      &       sncovr1, qsurf, evap, hflx, ep, t2mmp, q2mp,               &
-     &       gflux,                                                     &
+     &       gflux, runoff, drain,                                      &
      &       errmsg, errflg, naux2d, aux2d
      &     )
 
@@ -54,9 +55,10 @@
 !          ( im, cpllnd, cpllnd2atm, flag_iter, dry,                    !
 !            sncovr1_lnd, qsurf_lnd, evap_lnd, hflx_lnd,                !
 !            ep_lnd, t2mmp_lnd, q2mp_lnd, gflux_lnd,                    !
+!            runoff_lnd, drain_lnd,                                     !
 !       outputs:                                                        !
 !            sncovr1, qsurf, evap, hflx, ep, t2mmp, q2mp,               !
-!            gflux,                                                     !
+!            gflux, runoff, drain,                                      !
 !            errmsg, errflg)                                            !
 !                                                                       !
 !  ====================  defination of variables  ====================  !
@@ -75,6 +77,8 @@
 !     t2mmp_lnd   - real   , 2m temperature 
 !     q2mp_lnd    - real   , 2m specific humidity
 !     gflux_lnd   - real   , soil heat flux over land
+!     runoff_lnd  - real   , surface runoff
+!     drain_lnd   - real   , subsurface runoff  
 !  outputs:
 !     sncovr1     - real   , snow cover over land
 !     qsurf       - real   , specific humidity at sfc
@@ -84,6 +88,8 @@
 !     t2mmp       - real   , temperature at 2m 
 !     q2mp        - real   , specific humidity at 2m
 !     gflux       - real   , soil heat flux over land
+!     runoff      - real   , surface runoff
+!     drain       - real   , subsurface runoff 
 !  ====================    end of description    =====================  !
 !
 !
@@ -98,11 +104,12 @@
 
       real (kind=kind_phys), dimension(:), intent(in) ::                &
      &       sncovr1_lnd, qsurf_lnd, evap_lnd, hflx_lnd, ep_lnd,        &
-     &       t2mmp_lnd, q2mp_lnd, gflux_lnd
+     &       t2mmp_lnd, q2mp_lnd, gflux_lnd, runoff_lnd, drain_lnd
 
 !  ---  outputs:
       real (kind=kind_phys), dimension(:), intent(out) ::               &
-     &       sncovr1, qsurf, evap, hflx, ep, t2mmp, q2mp, gflux
+     &       sncovr1, qsurf, evap, hflx, ep, t2mmp, q2mp, gflux,        &
+     &       runoff, drain
 !
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -129,6 +136,8 @@
          t2mmp(i)   = t2mmp_lnd(i)
          q2mp(i)    = q2mp_lnd(i)
          gflux(i)   = gflux_lnd(i)
+         drain(i)   = drain_lnd(i)
+         runoff(i)  = runoff_lnd(i)
       enddo
 
       aux2d(:,1) = sncovr1(:)
@@ -139,6 +148,8 @@
       aux2d(:,6) = t2mmp(:)
       aux2d(:,7) = q2mp(:)
       aux2d(:,8) = gflux(:)
+      aux2d(:,9) = drain(:) 
+      aux2d(:,10) = runoff(:)
  
       return
 !-----------------------------------

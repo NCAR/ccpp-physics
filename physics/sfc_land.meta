@@ -106,6 +106,22 @@
   type = real
   kind = kind_phys
   intent = in
+[runoff_lnd]
+  standard_name = surface_runoff_flux_from_land
+  long_name = surface runoff flux over land for coupling
+  units = kg m-2 s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[drain_lnd]
+  standard_name = subsurface_runoff_flux_from_land
+  long_name = subsurface runoff flux over land for coupling
+  units = kg m-2 s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
 [sncovr1]
   standard_name = surface_snow_area_fraction_over_land
   long_name = surface snow area fraction
@@ -166,6 +182,22 @@
   standard_name = upward_heat_flux_in_soil_over_land
   long_name = soil heat flux over land
   units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[runoff]
+  standard_name = surface_runoff_flux
+  long_name = surface runoff flux
+  units = kg m-2 s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[drain]
+  standard_name = subsurface_runoff_flux
+  long_name = subsurface runoff flux
+  units = kg m-2 s-1
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
