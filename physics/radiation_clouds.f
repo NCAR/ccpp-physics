@@ -2127,10 +2127,16 @@
 !>   The total condensate includes convective condensate.
         do k = 1, NLAY-1
           do i = 1, IX
-            cwp(i,k) = max(0.0, (clw(i,k,ntcw)+cnvw(i,k)*
-     &                  (1.-tem2d(i,k))) * gfac * delp(i,k))
-            cip(i,k) = max(0.0, (clw(i,k,ntiw) + cnvw(i,k)*
-     &                  tem2d(i,k)) *gfac * delp(i,k))
+            tem1 = cnvw(i,k)*(1.-tem2d(i,k))
+            cwp(i,k) = max(0.0, (clw(i,k,ntcw)+tem1) *
+     &                 gfac * delp(i,k))
+            if(tem1 > 1.e-12 .and.  clw(i,k,ntcw) < 1.e-12)
+     &                 rew(i,k)=reliq_def
+            tem2 = cnvw(i,k)*tem2d(i,k)
+            cip(i,k) = max(0.0, (clw(i,k,ntiw) + tem2 )
+     &             *gfac * delp(i,k))
+            if(tem2 > 1.e-12 .and.  clw(i,k,ntiw) < 1.e-12)
+     &             rei(i,k)=reice_def
             crp(i,k) = max(0.0, clw(i,k,ntrw) * gfac * delp(i,k))
             csp(i,k) = max(0.0, clw(i,k,ntsw) * gfac * delp(i,k))
           enddo
