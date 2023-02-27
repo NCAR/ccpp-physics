@@ -220,7 +220,7 @@ contains
           do i=1,im
              ltg2 = coef2 * totice_colint(i)
 
-             !IF ( ltg2 .LT. clim2 ) ltg2 = 0.
+             IF ( ltg2 .LT. clim2 ) ltg2 = 0.
              
              IF ( ltg2 .GT. ltg2_max(i) ) THEN
                 ltg2_max(i) = ltg2
@@ -228,7 +228,7 @@ contains
 
              ltg3_max(i) = 0.95 * ltg1_max(i) + 0.05 * ltg2_max(i)
 
-             !IF ( ltg3_max(i) .LT. clim3 ) ltg3_max(i) = 0.
+             IF ( ltg3_max(i) .LT. clim3 ) ltg3_max(i) = 0.
           enddo
 
        end subroutine lightning_threat_indices
