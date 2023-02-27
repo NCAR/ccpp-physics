@@ -188,17 +188,13 @@ contains
                       
                       ltg1 = coef1*wgrs(i,k)* &
                            (( qgraupel(i,k+1) + qgraupel(i,k) )*0.5 )
-                      if(.false.) then ! ltg1 > 0.01) then
-184                     format('Found ltg1=',F20.13,' with w=',F20.13,' Qg=',F20.13)
-                        print 184, ltg1, wgrs(i,k), ( qgraupel(i,k+1) + qgraupel(i,k) )*0.5
-                      endif
                       if(ltg1 > high_ltg1) then
                         high_ltg1 = ltg1
                         high_graupel = qgraupel(i,k)
                         high_wgrs = wgrs(i,k)
                       endif
                       
-                      !IF ( ltg1 .LT. clim1 ) ltg1 = 0.
+                      IF ( ltg1 .LT. clim1 ) ltg1 = 0.
                       
                       IF ( ltg1 .GT. ltg1_max(i) ) THEN
                          ltg1_max(i) = ltg1
@@ -207,15 +203,6 @@ contains
                 ENDIF
              enddo
           enddo
-
-          if(.false.) then ! count > 0) then
-             if(high_ltg1 < .01 .and. (abs(high_wgrs) < 0.1 .or. high_graupel < 1e-4)) then
-                ! Nothing to look at
-             else
-183             format('Max ltg1=',F20.13,' has w=',F20.13,' Qg=',F20.13)
-                print 183, high_ltg1, high_wgrs, high_graupel
-             endif
-          endif
 
           do i=1,im
              ltg2 = coef2 * totice_colint(i)
