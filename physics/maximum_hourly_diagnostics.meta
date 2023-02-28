@@ -340,6 +340,13 @@
   dimensions = ()
   type = integer
   intent = in
+[hydrostatic]
+  standard_name = flag_for_hydrostatic_solver
+  long_name = flag for hydrostatic solver from dynamics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
