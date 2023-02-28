@@ -63,7 +63,12 @@ contains
 !---   oz_pres  -  vertical pressure level (mb)
 !---   oz_time  -  time coordinate         (days)
 !---
-      allocate (oz_lat(latsozp), oz_pres(levozp),oz_time(timeoz+1))
+! NOTE: If there are multiple instances of CCPP physics, only the first instance 
+! allocates these. All instances must use the same number of identical ozone values
+! jm 20230228
+      if ( .not. allocated(oz_lat)  ) allocate(oz_lat(latsozp))
+      if ( .not. allocated(oz_pres) ) allocate(oz_pres(levozp))
+      if ( .not. allocated(oz_time) ) allocate(oz_time(timeoz+1))
       allocate (oz_lat4(latsozp), oz_pres4(levozp),oz_time4(timeoz+1))
       rewind (kozpl)
       read (kozpl) oz_coeff, latsozp, levozp, timeoz, oz_lat4, oz_pres4, oz_time4
@@ -78,7 +83,7 @@ contains
 !--- assume latitudes is on a uniform gaussian grid
 !---
       allocate (tempin(latsozp))
-      allocate (ozplin(latsozp,levozp,oz_coeff,timeoz))
+      if ( .not. allocated(ozplin) ) allocate (ozplin(latsozp,levozp,oz_coeff,timeoz))
       DO i=1,timeoz
         DO n=1,oz_coeff
           DO k=1,levozp

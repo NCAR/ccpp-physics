@@ -48,7 +48,7 @@
 
       public GFS_phys_time_vary_init, GFS_phys_time_vary_timestep_init, GFS_phys_time_vary_timestep_finalize, GFS_phys_time_vary_finalize
 
-      logical :: is_initialized = .false.
+      logical, dimension(200) :: is_initialized = .false.   ! why 200?
 
       real(kind=kind_phys), parameter :: con_hr        =  3600.0_kind_phys
       real(kind=kind_phys), parameter :: con_99        =    99.0_kind_phys
@@ -80,7 +80,7 @@
               zwtxy, xlaixy, xsaixy, lfmassxy, stmassxy, rtmassxy, woodxy, stblcpxy, fastcpxy,     &
               smcwtdxy, deeprechxy, rechxy, snowxy, snicexy, snliqxy, tsnoxy , smoiseq, zsnsoxy,   &
               slc, smc, stc, tsfcl, snowd, canopy, tg3, stype, con_t0c, lsm_cold_start, nthrds,    &
-              errmsg, errflg)
+              instance, errmsg, errflg)
 
          implicit none
 
@@ -170,6 +170,7 @@
          real(kind_phys),      intent(in)    :: con_t0c
 
          integer,              intent(in)    :: nthrds
+         integer,              intent(in)    :: instance
          character(len=*),     intent(out)   :: errmsg
          integer,              intent(out)   :: errflg
 
@@ -189,7 +190,7 @@
          errmsg = ''
          errflg = 0
 
-         if (is_initialized) return
+         if (is_initialized(instance)) return
          iamin=999
          iamax=-999
          jamin=999
@@ -197,7 +198,7 @@
 
 !$OMP parallel num_threads(nthrds) default(none)                                    &
 !$OMP          shared (me,master,ntoz,h2o_phys,im,nx,ny,levs,idate)                 &
-!$OMP          shared (xlat_d,xlon_d,imap,jmap,errmsg,errflg)                       &
+!$OMP          shared (xlat_d,xlon_d,imap,jmap,instance,errmsg,errflg)              &
 !$OMP          shared (levozp,oz_coeff,oz_pres,ozpl)                                &
 !$OMP          shared (levh2o,h2o_coeff,h2o_pres,h2opl)                             &
 !$OMP          shared (iamin, iamax, jamin, jamax)                                  &
@@ -670,7 +671,7 @@
            endif noahmp_init
          endif lsm_init
 
-         is_initialized = .true.
+         is_initialized(instance) = .true.
 
       contains
 
@@ -718,7 +719,8 @@
             tsfc, tsfco, tisfc, hice, fice, facsf, facwf, alvsf, alvwf, alnsf, alnwf, zorli, zorll, &
             zorlo, weasd, slope, snoalb, canopy, vfrac, vtype, stype, shdmin, shdmax, snowd,        &
             cv, cvb, cvt, oro, oro_uf, xlat_d, xlon_d, slmsk, landfrac,                             &
-            do_ugwp_v1, jindx1_tau, jindx2_tau, ddy_j1tau, ddy_j2tau, tau_amf, errmsg, errflg)
+            do_ugwp_v1, jindx1_tau, jindx2_tau, ddy_j1tau, ddy_j2tau, tau_amf,                      &
+            instance, errmsg, errflg)
 
          implicit none
 
@@ -765,6 +767,7 @@
                                       snowd(:), cv(:), cvb(:), cvt(:), oro(:), oro_uf(:), slmsk(:)
          integer,              intent(inout) :: vtype(:), stype(:), slope(:)
 
+         integer,              intent(in)    :: instance
          character(len=*),     intent(out)   :: errmsg
          integer,              intent(out)   :: errflg
 
@@ -779,7 +782,7 @@
          errflg = 0
 
          ! Check initialization status
-         if (.not.is_initialized) then
+         if (.not.is_initialized(instance)) then
             write(errmsg,'(*(a))') "Logic error: GFS_phys_time_vary_timestep_init called before GFS_phys_time_vary_init"
             errflg = 1
             return
@@ -912,13 +915,14 @@
 !!
 !>\section gen_GFS_phys_time_vary_timestep_finalize GFS_phys_time_vary_timestep_finalize General Algorithm
 !> @{
-      subroutine GFS_phys_time_vary_timestep_finalize (errmsg, errflg)
+      subroutine GFS_phys_time_vary_timestep_finalize (instance, errmsg, errflg)
 
          implicit none
 
          ! Interface variables
          character(len=*),                 intent(out)   :: errmsg
          integer,                          intent(out)   :: errflg
+         integer,                          intent(in)    :: instance
 
          ! Initialize CCPP error handling variables
          errmsg = ''
@@ -930,19 +934,20 @@
 !> \section arg_table_GFS_phys_time_vary_finalize Argument Table
 !! \htmlinclude GFS_phys_time_vary_finalize.html
 !!
-      subroutine GFS_phys_time_vary_finalize(errmsg, errflg)
+      subroutine GFS_phys_time_vary_finalize(instance, errmsg, errflg)
 
          implicit none
 
          ! Interface variables
          character(len=*),                 intent(out)   :: errmsg
          integer,                          intent(out)   :: errflg
+         integer,                          intent(in)    :: instance
 
          ! Initialize CCPP error handling variables
          errmsg = ''
          errflg = 0
 
-         if (.not.is_initialized) return
+         if (.not.is_initialized(instance)) return
 
          ! Deallocate ozone arrays
          if (allocated(oz_lat)  ) deallocate(oz_lat)
@@ -970,7 +975,7 @@
          if (allocated(tau_limb   )) deallocate(tau_limb)
          if (allocated(days_limb  )) deallocate(days_limb)
 
-         is_initialized = .false.
+         is_initialized(instance) = .false.
 
       end subroutine GFS_phys_time_vary_finalize
 

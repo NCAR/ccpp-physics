@@ -902,6 +902,13 @@
   dimensions = ()
   type = integer
   intent = in
+[instance]
+  standard_name = ccpp_instance
+  long_name = argument so package knows which instance it is
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -922,6 +929,13 @@
 [ccpp-arg-table]
   name = GFS_phys_time_vary_finalize
   type = scheme
+[instance]
+  standard_name = ccpp_instance
+  long_name = argument so package knows which instance it is
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -1868,6 +1882,13 @@
   type = real
   kind = kind_phys
   intent = inout
+[instance]
+  standard_name = ccpp_instance
+  long_name = argument so package knows which instance it is
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -1888,6 +1909,13 @@
 [ccpp-arg-table]
   name = GFS_phys_time_vary_timestep_finalize
   type = scheme
+[instance]
+  standard_name = ccpp_instance
+  long_name = argument so package knows which instance it is
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
