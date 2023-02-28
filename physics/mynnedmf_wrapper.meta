@@ -311,6 +311,14 @@
   type = real
   kind = kind_phys
   intent = inout
+[qgrs_snow_cloud]
+  standard_name = snow_mixing_ratio
+  long_name = ratio of mass of snow water to mass of dry air plus vapor (without condensates)
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
 [qgrs_cloud_droplet_num_conc]
   standard_name = mass_number_concentration_of_cloud_liquid_water_particles_in_air
   long_name = number concentration of cloud droplets (liquid)
@@ -364,6 +372,14 @@
   long_name = mean layer pressure
   units = Pa
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[prsi]
+  standard_name = air_pressure_at_interface
+  long_name = air pressure at model layer interfaces
+  units = Pa
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -1025,6 +1041,14 @@
   type = real
   kind = kind_phys
   intent = inout
+[dqdt_snow_cloud]
+  standard_name = process_split_cumulative_tendency_of_snow_mixing_ratio
+  long_name = ratio of mass of snow water tendency to mass of dry air plus vapor (without condensates) due to model physics
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
 [dqdt_ozone]
   standard_name = process_split_cumulative_tendency_of_ozone_mixing_ratio
   long_name = ozone mixing ratio tendency due to model physics
@@ -1151,6 +1175,13 @@
   dimensions = ()
   type = integer
   intent = in
+[ntsw]
+  standard_name = index_of_snow_mixing_ratio_in_tracer_concentration_array
+  long_name = tracer index for snow water
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
 [ntlnc]
   standard_name = index_of_mass_number_concentration_of_cloud_droplets_in_tracer_concentration_array
   long_name = tracer index for liquid number concentration
@@ -1210,12 +1241,12 @@
   type = real
   kind = kind_phys
   intent = in
-[bl_mynn_tkebudget]
+[tke_budget]
   standard_name = control_for_tke_budget_output
   long_name = flag for activating TKE budget
   units = flag
   dimensions = ()
-  type = logical
+  type = integer
   intent = in
 [bl_mynn_tkeadvect]
   standard_name = flag_for_tke_advection
@@ -1329,6 +1360,13 @@
   dimensions = ()
   type = integer
   intent = in
+[imp_physics_fa]
+  standard_name = identifier_for_fer_hires_microphysics_scheme
+  long_name = choice of Ferrier-Aligo microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
 [imp_physics_nssl]
   standard_name = identifier_for_nssl_microphysics_scheme
   long_name = choice of NSSL 2-moment microphysics scheme
@@ -1359,7 +1397,7 @@
   type = real
   kind = kind_phys
   intent = inout
-[rrfs_smoke]
+[rrfs_sd]
   standard_name = do_smoke_coupling
   long_name = flag controlling rrfs_smoke collection (default off)
   units = flag
@@ -1373,7 +1411,7 @@
   dimensions = ()
   type = logical
   intent = in
-[fire_turb]
+[enh_mix]
   standard_name = do_planetary_boundary_layer_fire_enhancement
   long_name = flag for rrfs smoke mynn enh vermix
   units = flag
