@@ -5484,7 +5484,7 @@ if_pergro: if (PERGRO) then
       cycle
     endif
 
-      ! To handle restarts with bad lakedepth2d
+      ! To handle cold-start with bad lakedepth2d
       if ( use_lakedepth ) then
         if (oro_lakedepth(i) == 10.0 .or. oro_lakedepth(i) <= 0.) then 
           !- 10.0 is the fill value for lake depth, in this case set to default value
