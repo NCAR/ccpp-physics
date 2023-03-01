@@ -20,7 +20,7 @@ module mp_thompson
 
       private
 
-      logical, dimension(100) :: is_initialized = .False.
+      logical, dimension(200) :: is_initialized = .False.    ! why 200?
 
       integer, parameter :: ext_ndiag3d = 37
 
