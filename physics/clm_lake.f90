@@ -2682,8 +2682,8 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
        p = filter_shlakep(fp)
        c = pcolumn(p)
        errsoi(c) = (ncvts(c)-ocvts(c)) / dtime - fin(c)
-       if( (LAKEDEBUG .and. abs(errsoi(c)) < 1._kind_phys) &
-            .or. (.not.LAKEDEBUG .and. abs(errsoi(c)) < 10._kind_phys)) then
+       if( (LAKEDEBUG .and. abs(errsoi(c)) < 1._kind_phys) ) then
+!            .or. (.not.LAKEDEBUG .and. abs(errsoi(c)) < 10._kind_phys)) then
           eflx_sh_tot(p) = eflx_sh_tot(p) - errsoi(c)
           eflx_sh_grnd(p) = eflx_sh_grnd(p) - errsoi(c)
           eflx_soil_grnd(p) = eflx_soil_grnd(p) + errsoi(c)
