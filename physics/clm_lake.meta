@@ -251,14 +251,6 @@
   type = real
   kind = kind_phys
   intent = in
-[emiss]
-  standard_name = surface_longwave_emissivity
-  long_name = surface lw emissivity in fraction
-  units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
 [raincprv]
   standard_name = lwe_thickness_of_convective_precipitation_amount_on_previous_timestep
   long_name = convective_precipitation_amount from previous timestep

@@ -238,7 +238,7 @@ MODULE clm_lake
 
          ! Atmospheric model state inputs:
          tg3, pgr, zlvl, gt0, prsi, phii, qvcurr, gu0, gv0, xlat_d, xlon_d,       &
-         ch, cm, dlwsfci, dswsfci, emiss, oro_lakedepth, wind, rho0, tsfc,        &
+         ch, cm, dlwsfci, dswsfci, oro_lakedepth, wind, rho0, tsfc,               &
          flag_iter, ISLTYP, rainncprv, raincprv,                                  &
 
          ! Feedback to atmosphere:
@@ -290,7 +290,7 @@ MODULE clm_lake
     !
     REAL(KIND_PHYS), DIMENSION(:), INTENT(IN):: &
          tg3, pgr, zlvl, qvcurr, xlat_d, xlon_d, ch, cm, &
-         dlwsfci, dswsfci, emiss, oro_lakedepth, wind, rho0, tsfc, &
+         dlwsfci, dswsfci, oro_lakedepth, wind, rho0, tsfc, &
          rainncprv, raincprv
     REAL(KIND_PHYS), DIMENSION(:,:), INTENT(in) :: gu0, gv0, prsi, gt0, phii
     LOGICAL, DIMENSION(:), INTENT(IN) :: flag_iter
@@ -434,6 +434,8 @@ MODULE clm_lake
       real(kind_phys) :: tkdry(1,nlevsoil)       ! thermal conductivity, dry soil (W/m/Kelvin)
       real(kind_phys) :: csol(1,nlevsoil)        ! heat capacity, soil solids (J/m**3/Kelvin)
 
+!      real(kind_phys)  :: emiss             ! surface emissivity
+
       integer :: lake_points, snow_points, ice_points
       character*255 :: message
       logical, parameter :: feedback_to_atmosphere = .true. ! FIXME: REMOVE
@@ -573,23 +575,13 @@ MODULE clm_lake
               cannot_freeze(i) = 0
            endif
 
-           if(salty(i)/=0) then
-             Tclim = tfrz + wght1*saltlk_T(num1)  &
-                          + wght2*saltlk_T(num2)
-             if(lakedebug) print *,'Tclim,tsfc,t_lake3d',i,Tclim,tsfc_wat(i),t_lake3d(i,:),t_soisno3d(i,:)
-             t_grnd2d(i) = min(Tclim+3.0_kind_phys,(max(tsfc_wat(i),Tclim-3.0_kind_phys)))
-             do k = 1,nlevlake
-               t_lake3d(i,k) = min(Tclim+3.0_kind_phys,(max(t_lake3d(i,k),Tclim-3.0_kind_phys)))
-             enddo
-             t_soisno3d(i,1) = min(Tclim+3.0_kind_phys,(max(t_soisno3d(i,1),Tclim-3.0_kind_phys)))
-             if(lakedebug) print *,'After Tclim,tsfc,t_lake3d',i,Tclim,tsfc_wat(i),t_lake3d(i,:),t_soisno3d(i,:)
-           endif
-
            SFCTMP  = gt0(i,1)
            PBOT    = prsi(i,1)
            PSFC    = pgr(i)
            Q2K     = qvcurr(i)
-           LWDN    = DLWSFCI(I)*EMISS(I)
+!           EMISS   = 0.99 * lake_icefrac3d(i,1) +  emg * (1.0-lake_icefrac3d(i,1)) ! emg=0.97, parameter, needs to be moved to the top
+           LWDN    = DLWSFCI(I) ! LWDN is downward LW flux, do not use EMISS here.
+!           LWDN    = DLWSFCI(I)*EMISS(I)
            ! FIXME: Should multiply PRCP by 1000
            PRCP    = (raincprv(i)+rainncprv(i))/dtime  ! [mm/s] use physics timestep since PRCP comes from non-surface schemes
            SOLDN   = DSWSFCI(I)                        ! SOLDN is total incoming solar
@@ -709,13 +701,25 @@ MODULE clm_lake
            do c = 1,column
 
             if(cannot_freeze(i) == 1) then
-              t_grnd(c) = max(274.5,t_grnd(c))
+              t_grnd(c) = max(274.5_kind_phys,t_grnd(c))
               do k = 1,nlevlake
-                t_lake(c,k) = max(274.5,t_lake(c,k))
+                t_lake(c,k) = max(274.5_kind_phys,t_lake(c,k))
                 lake_icefrac(c,k) = 0.
               enddo
             endif
-            
+
+            if(salty(i)/=0) then
+             Tclim = tfrz + wght1*saltlk_T(num1)  &
+                          + wght2*saltlk_T(num2)
+             if(lakedebug) print *,'Tclim,tsfc,t_lake3d',i,Tclim,t_grnd(c),t_lake(c,:),t_soisno(c,:)
+             t_grnd(c) = min(Tclim+3.0_kind_phys,(max(t_grnd(c),Tclim-3.0_kind_phys)))
+             do k = 1,nlevlake
+               t_lake(c,k) = min(Tclim+3.0_kind_phys,(max(t_lake(c,k),Tclim-3.0_kind_phys)))
+             enddo
+             t_soisno(c,1) = min(Tclim+3.0_kind_phys,(max(t_soisno(c,1),Tclim-3.0_kind_phys)))
+             if(lakedebug) print *,'After Tclim,tsfc,t_lake3d',i,Tclim,t_grnd(c),t_lake(c,:),t_soisno(c,:)
+            endif 
+           
             savedtke12d(i)         = savedtke1(c)
             snowdp2d(i)            = snowdp(c)
             h2osno2d(i)            = h2osno(c)
@@ -1272,7 +1276,7 @@ SUBROUTINE ShalLakeFluxes(forc_t,forc_pbot,forc_psrf,forc_hgt,forc_hgt_q,       
     integer , parameter :: islak  = 2       ! index of lake, 1 = deep lake, 2 = shallow lake
     integer , parameter :: niters = 3       ! maximum number of iterations for surface temperature
     real(kind_phys), parameter :: beta1  = 1._kind_phys   ! coefficient of convective velocity (in computing W_*) [-]
-    real(kind_phys), parameter :: emg    = 0.97_kind_phys ! ground emissivity (0.97 for snow)
+    real(kind_phys), parameter :: emg    = 0.97_kind_phys ! ground emissivity (0.97 for water)
     real(kind_phys), parameter :: zii    = 1000._kind_phys! convective boundary height [m]
     real(kind_phys), parameter :: tdmax  = 277._kind_phys ! temperature of maximum water density
     real(kind_phys) :: forc_th(1)         ! atmospheric potential temperature (Kelvin)
@@ -1333,6 +1337,9 @@ SUBROUTINE ShalLakeFluxes(forc_t,forc_pbot,forc_psrf,forc_hgt,forc_hgt_q,       
     real(kind_phys) :: t_grnd_temp              ! Used in surface flux correction over frozen ground
     real(kind_phys) :: betaprime(lbc:ubc)       ! Effective beta: 1 for snow layers, beta(islak) otherwise
     character*256 :: message 
+    ! tgs COARE
+    real(kind_phys) :: tc, visc, ren
+
       ! This assumes all radiation is absorbed in the top snow layer and will need
       ! to be changed for CLM 4.
     !
@@ -1428,12 +1435,25 @@ SUBROUTINE ShalLakeFluxes(forc_t,forc_pbot,forc_psrf,forc_hgt,forc_hgt_q,       
        else                          ! for frozen lake with snow   
           z0mg(p) = 0.0024_kind_phys
        end if
- 
- 
 
+       !- tgs - use COARE formulation for z0hg and z0qg.
+       !-- suggestion from Ayumi Manome (GLERL), Aug. 2018
+       !-- Charusombat et al., 2018, https://doi.org/10.5194/hess-2017-725
+        tc=forc_t(g)-273.15_kind_phys
+        visc=1.326e-5_kind_phys*(1._kind_phys + 6.542e-3_kind_phys*tc + 8.301e-6_kind_phys*tc*tc &
+                        - 4.84e-9_kind_phys*tc*tc*tc)
+ 
+        Ren = MAX(ustar(p)*z0mg(p)/visc, 0.1_kind_phys)
+        z0hg(p) = (5.5e-5_kind_phys)*(Ren**(-0.60_kind_phys))
 
-       z0hg(p) = z0mg(p)
-       z0qg(p) = z0mg(p)
+        z0hg(p) = MIN(z0hg(p),1.0e-4_kind_phys)
+        z0hg(p) = MAX(z0hg(p),2.0e-9_kind_phys)
+ 
+        z0qg(p) = z0hg(p)
+ 
+       ! end COARE 
+       !z0hg(p) = z0mg(p)
+       !z0qg(p) = z0mg(p)
 
        ! Latent heat
 
@@ -2598,15 +2618,19 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
                 !layer will actually be.
                 if (i == 1) zsum(c) = 0._kind_phys
                 if ((zsum(c)+dz_lake(c,i))/nav(c) <= iceav(c)) then
-                   lake_icefrac(c,i) = 1._kind_phys
                    t_lake(c,i) = tav_froz(c) + tfrz
+                   !tgs - 30jul19 - the next line is a bug and should be commented
+                   !out. This bug prevents lake ice form completely melting.
+                   !  lake_icefrac(c,i) = 1._kind_phys
                 else if (zsum(c)/nav(c) < iceav(c)) then
+                   !tgs - change ice fraction
                    lake_icefrac(c,i) = (iceav(c)*nav(c) - zsum(c)) / dz_lake(c,i)
                    ! Find average value that preserves correct heat content.
                    t_lake(c,i) = ( lake_icefrac(c,i)*tav_froz(c)*cice_eff &
                                + (1._kind_phys - lake_icefrac(c,i))*tav_unfr(c)*cwat ) &
                                / ( lake_icefrac(c,i)*cice_eff + (1-lake_icefrac(c,i))*cwat ) + tfrz
                 else
+                   !tgs - remove ice
                    lake_icefrac(c,i) = 0._kind_phys
                    t_lake(c,i) = tav_unfr(c) + tfrz
                 end if
