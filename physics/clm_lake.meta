@@ -591,6 +591,13 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = inout
+[cannot_freeze]
+  standard_name = clm_lake_cannot_freeze
+  long_name = lake at this point is so salty it cannot freeze
+  units = 1
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = inout
 [savedtke12d]
   standard_name = top_level_eddy_conductivity_from_previous_timestep_in_clm_lake_model
   long_name = top level eddy conductivity from previous timestep in clm lake model

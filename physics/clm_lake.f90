@@ -180,22 +180,24 @@ MODULE clm_lake
 
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    logical function is_salty(xlat_d,xlon_positive)
+    subroutine is_salty(xlat_d,xlon_positive, cannot_freeze, salty)
       implicit none
       real(kind_phys), intent(in) :: xlat_d, xlon_positive
+      logical, intent(inout) :: cannot_freeze, salty
       real(kind_phys) :: xlon_d
 
       xlon_d = xlon_positive
       if(xlon_d>180) xlon_d = xlon_d - 360
 
-      is_salty=limit_temperature_by_climatology(xlat_d,xlon_d)
+      cannot_freeze = limit_temperature_by_climatology(xlat_d,xlon_d)
+      salty = cannot_freeze
 
      other_locations: if(include_all_salty_locations) then
       ! --- The Mono Lake in California, salinity is 75 ppt with freezing point at
       ! --- -4.2 C (Stan). The Mono Lake lat/long (37.9-38.2, -119.3 - 118.8)
       if (xlon_d.gt.-119.3.and. xlon_d.lt.-118.8) then  
          if(xlat_d.gt.37.9 .and. xlat_d.lt.38.2) then
-            is_salty = .true.
+            salty = .true.
             if(lakedebug) then
                print *,'Salty Mono Lake, i,j',xlat_d,xlon_d
             endif
@@ -207,17 +209,17 @@ MODULE clm_lake
          if(lakedebug) then
             print *,'Salty Caspian Sea ',xlat_d,xlon_d
          endif
-         is_salty = .true.
+         salty = .true.
       end if 
       if ( xlon_d>35.3 .and. xlon_d<35.6 .and. xlat_d>31.3 .and. xlat_d<31.8) then
          if(lakedebug) then
             print *,'Salty Dead Sea ',xlat_d,xlon_d
          endif
-         is_salty = .true.
+         salty = .true.
       endif
      endif other_locations
      !tgs --- end of special treatment for salty lakes
-    end function is_salty
+    end subroutine is_salty
  
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -251,7 +253,7 @@ MODULE clm_lake
          salty, savedtke12d, snowdp2d, h2osno2d, snl2d, t_grnd2d, t_lake3d,       &
          lake_icefrac3d, t_soisno3d, h2osoi_ice3d, h2osoi_liq3d, h2osoi_vol3d,    &
          z3d, dz3d, zi3d, z_lake3d, dz_lake3d, watsat3d, csol3d, sand3d, clay3d,  &
-         tkmg3d, tkdry3d, tksatu3d, clm_lakedepth,                                &
+         tkmg3d, tkdry3d, tksatu3d, clm_lakedepth, cannot_freeze,                 &
 
          ! Error reporting:
          errflg, errmsg)
@@ -308,6 +310,7 @@ MODULE clm_lake
     ! Lake model internal state stored by caller:
     !
     INTEGER, DIMENSION( : ), INTENT(INOUT)    :: salty
+    INTEGER, DIMENSION( : ), INTENT(INOUT)    :: cannot_freeze
 
     real(kind_phys),           dimension(: )                ,intent(inout)  :: savedtke12d,    &
                                                                                snowdp2d,       &    
@@ -439,6 +442,8 @@ MODULE clm_lake
       integer :: month,num1,num2,day_of_month
       real(kind_phys) :: wght1,wght2,Tclim
 
+      logical salty_flag, cannot_freeze_flag
+
       errmsg = ' '
       errflg = 0
 
@@ -533,10 +538,18 @@ MODULE clm_lake
 
         if_lake_is_here: if (flag_iter(i) .and. use_lake_model(i)/=0) THEN
 
-           if(is_salty(xlat_d(i),xlon_d(i))) then
+          call is_salty(xlat_d(i),xlon_d(i),salty_flag,cannot_freeze_flag)
+
+           if(salty_flag) then
               salty(i) = 1
            else
               salty(i) = 0
+           endif
+
+           if(cannot_freeze_flag) then
+              cannot_freeze(i) = 1
+           else
+              cannot_freeze(i) = 0
            endif
 
            if(salty(i)/=0) then
@@ -674,6 +687,14 @@ MODULE clm_lake
            ! Renew Lake State Variables:(14)
            do c = 1,column
 
+            if(cannot_freeze(i) == 1) then
+              t_grnd(c) = max(274.5,t_grnd(c))
+              do k = 1,nlevlake
+                t_lake(c,k) = max(274.5,t_lake(c,k))
+                lake_icefrac(c,k) = 0.
+              enddo
+            endif
+            
             savedtke12d(i)         = savedtke1(c)
             snowdp2d(i)            = snowdp(c)
             h2osno2d(i)            = h2osno(c)
@@ -694,10 +715,9 @@ MODULE clm_lake
            do k = -nlevsnow+0,nlevsoil
                zi3d(i,k)           = zi(c,k)
            enddo
-
             
          enddo
-
+         
             feedback: if(feedback_to_atmosphere) then
                 c = 1
 
