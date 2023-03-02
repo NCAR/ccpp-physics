@@ -17,14 +17,15 @@
 !> \section arg_table_GFS_radiation_surface_init Argument Table
 !! \htmlinclude GFS_radiation_surface_init.html
 !!
-      subroutine GFS_radiation_surface_init (me, ialb, iems, errmsg, errflg)
+      subroutine GFS_radiation_surface_init (me, ialb, iems, semis_file, con_pi, errmsg, errflg)
 
-      use physparam,                only: ialbflg, iemsflg
       use module_radiation_surface, only: sfc_init
 
       implicit none
 
       integer,                              intent(in)  :: me, ialb, iems
+      character(len=26),                    intent(in)  :: semis_file
+      real(kind_phys),                      intent(in)  :: con_pi
       character(len=*),                     intent(out) :: errmsg
       integer,                              intent(out) :: errflg
 
@@ -32,16 +33,13 @@
       errmsg = ''
       errflg = 0
 
-      ialbflg= ialb                     ! surface albedo control flag
-      iemsflg= iems                     ! surface emissivity control flag
-
       if ( me == 0 ) then
         print *,'In GFS_radiation_surface_init, before calling sfc_init'
         print *,'ialb=',ialb,' iems=',iems
       end if
 
       ! Call surface initialization routine
-      call sfc_init ( me, errmsg, errflg )
+      call sfc_init ( me, ialb, iems, semis_file, con_pi, errmsg, errflg )
 
       end subroutine GFS_radiation_surface_init
 
@@ -50,13 +48,13 @@
 !! \htmlinclude GFS_radiation_surface_run.html
 !!
       subroutine GFS_radiation_surface_run (                            &
-        im, nf_albd, frac_grid, lslwr, lsswr, lsm, lsm_noahmp, lsm_ruc, &
-        xlat, xlon, slmsk, lndp_type, n_var_lndp, sfc_alb_pert,         &
+        ialb, im, nf_albd, frac_grid, lslwr, lsswr, lsm, lsm_noahmp,    &
+        lsm_ruc, xlat, xlon, slmsk, lndp_type, n_var_lndp, sfc_alb_pert,&
         lndp_var_list, lndp_prt_list, landfrac, snodl, snodi, sncovr,   &
         sncovr_ice, fice, zorl, hprime, tsfg, tsfa, tisfc, coszen,      &
         cplice, min_seaice, min_lakeice, lakefrac, use_flake,           &
         alvsf, alnsf, alvwf, alnwf, facsf, facwf,                       &
-        semis_lnd, semis_ice, semis_wat, snoalb, use_cice_alb,          &
+        semis_lnd, semis_ice, semis_wat, snoalb, use_cice_alb, con_ttp, &
         albdvis_lnd, albdnir_lnd, albivis_lnd, albinir_lnd,             &
         albdvis_ice, albdnir_ice, albivis_ice, albinir_ice,             &
         semisbase, semis, sfcalb, sfc_alb_dif, errmsg, errflg)
@@ -67,10 +65,10 @@
 
       implicit none
 
-      integer,               intent(in) :: im, nf_albd
+      integer,               intent(in) :: im, nf_albd, ialb
       logical,               intent(in) :: frac_grid, lslwr, lsswr, use_cice_alb, cplice
       integer,               intent(in) :: lsm, lsm_noahmp, lsm_ruc, lndp_type, n_var_lndp
-      real(kind=kind_phys),  intent(in) :: min_seaice, min_lakeice
+      real(kind=kind_phys),  intent(in) :: min_seaice, min_lakeice, con_ttp
       logical, dimension(:), intent(in) :: use_flake
 
       real(kind=kind_phys), dimension(:),   intent(in)  :: xlat, xlon, slmsk,           &
@@ -184,7 +182,8 @@
                      alvsf, alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc,                    &
                      albdvis_lnd, albdnir_lnd, albivis_lnd, albinir_lnd,                       &
                      albdvis_ice, albdnir_ice, albivis_ice, albinir_ice,                       &
-                     im, nf_albd, sfc_alb_pert, lndp_alb, fracl, fraco, fraci, icy,            & !  ---  inputs
+                     im, nf_albd, sfc_alb_pert, lndp_alb, fracl, fraco, fraci, icy, ialb,      &
+                     con_ttp,                                                                  & !  ---  inputs
                      sfcalb )                                                                    !  ---  outputs
 
 !> -# Approximate mean surface albedo from vis- and nir- diffuse values.

@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = rrtmg_lw
   type = scheme
-  dependencies = machine.F,mersenne_twister.f,physcons.F90,physparam.f,radlw_datatb.f,radlw_param.f
+  dependencies = machine.F,mersenne_twister.f,physcons.F90,radlw_datatb.f,radlw_param.f
 
 ########################################################################
 [ccpp-arg-table]
@@ -240,6 +240,90 @@
   units = flag
   dimensions = ()
   type = logical
+  intent = in
+[top_at_1]
+  standard_name = flag_for_vertical_ordering_in_radiation
+  long_name = flag for vertical ordering in radiation
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[iovr]
+  standard_name = flag_for_cloud_overlap_method_for_radiation
+  long_name = flag for cloud overlap method
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[iovr_exp]
+  standard_name = flag_for_exponential_cloud_overlap_method
+  long_name = choice of exponential cloud overlap method
+  units         = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[iovr_exprand]
+  standard_name = flag_for_exponential_random_cloud_overlap_method
+  long_name = choice of exponential-random cloud overlap method
+  units     = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[iovr_max]
+  standard_name = flag_for_maximum_cloud_overlap_method
+  long_name = choice of maximum cloud overlap method
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[iovr_rand]
+  standard_name = flag_for_random_cloud_overlap_method
+  long_name = choice of random cloud overlap method
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[iovr_maxrand]
+  standard_name = flag_for_maximum_random_cloud_overlap_method
+  long_name = choice of maximum-random cloud overlap method
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[iovr_dcorr]
+  standard_name = flag_for_decorrelation_length_cloud_overlap_method
+  long_name = choice of decorrelation-length cloud overlap method
+  units         = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[inc_minor_gas]
+  standard_name = flag_to_include_minor_gases_in_rrtmg
+  long_name = flag to include minor trace gases	in rrtmg
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[ilwcliq]
+  standard_name = flag_for_optical_property_for_liquid_clouds_for_longwave_radiation
+  long_name = lw optical property for liquid clouds
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[ilwcice]
+  standard_name = flag_for_optical_property_for_ice_clouds_for_longwave_radiation
+  long_name = lw optical property for ice clouds
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[isubclw]
+  standard_name = flag_for_lw_clouds_sub_grid_approximation
+  long_name = flag for lw clouds sub-grid approximation
+  units = flag
+  dimensions = ()
+  type = integer
   intent = in
 [hlwc]
   standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step_and_radiation_levels

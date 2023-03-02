@@ -1002,7 +1002,9 @@ contains
 !    
           enddo
           print *
-          stop
+          errflg = 1
+          errmsg = 'ERROR(orogw_v1): '
+          return
         endif
        endif
        

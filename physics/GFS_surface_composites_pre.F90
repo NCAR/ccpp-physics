@@ -4,7 +4,6 @@
 module GFS_surface_composites_pre
 
    use machine, only: kind_phys
-   use physparam, only : iemsflg
 
    implicit none
 
