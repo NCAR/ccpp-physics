@@ -575,18 +575,6 @@ MODULE clm_lake
               cannot_freeze(i) = 0
            endif
 
-           if(salty(i)/=0) then
-             Tclim = tfrz + wght1*saltlk_T(num1)  &
-                          + wght2*saltlk_T(num2)
-             if(lakedebug) print *,'Tclim,tsfc,t_lake3d',i,Tclim,tsfc_wat(i),t_lake3d(i,:),t_soisno3d(i,:)
-             t_grnd2d(i) = min(Tclim+3.0_kind_phys,(max(tsfc_wat(i),Tclim-3.0_kind_phys)))
-             do k = 1,nlevlake
-               t_lake3d(i,k) = min(Tclim+3.0_kind_phys,(max(t_lake3d(i,k),Tclim-3.0_kind_phys)))
-             enddo
-             t_soisno3d(i,1) = min(Tclim+3.0_kind_phys,(max(t_soisno3d(i,1),Tclim-3.0_kind_phys)))
-             if(lakedebug) print *,'After Tclim,tsfc,t_lake3d',i,Tclim,tsfc_wat(i),t_lake3d(i,:),t_soisno3d(i,:)
-           endif
-
            SFCTMP  = gt0(i,1)
            PBOT    = prsi(i,1)
            PSFC    = pgr(i)
@@ -713,13 +701,25 @@ MODULE clm_lake
            do c = 1,column
 
             if(cannot_freeze(i) == 1) then
-              t_grnd(c) = max(274.5,t_grnd(c))
+              t_grnd(c) = max(274.5_kind_phys,t_grnd(c))
               do k = 1,nlevlake
-                t_lake(c,k) = max(274.5,t_lake(c,k))
+                t_lake(c,k) = max(274.5_kind_phys,t_lake(c,k))
                 lake_icefrac(c,k) = 0.
               enddo
             endif
-            
+
+            if(salty(i)/=0) then
+             Tclim = tfrz + wght1*saltlk_T(num1)  &
+                          + wght2*saltlk_T(num2)
+             if(lakedebug) print *,'Tclim,tsfc,t_lake3d',i,Tclim,t_grnd(c),t_lake(c,:),t_soisno(c,:)
+             t_grnd(c) = min(Tclim+3.0_kind_phys,(max(t_grnd(c),Tclim-3.0_kind_phys)))
+             do k = 1,nlevlake
+               t_lake(c,k) = min(Tclim+3.0_kind_phys,(max(t_lake(c,k),Tclim-3.0_kind_phys)))
+             enddo
+             t_soisno(c,1) = min(Tclim+3.0_kind_phys,(max(t_soisno(c,1),Tclim-3.0_kind_phys)))
+             if(lakedebug) print *,'After Tclim,tsfc,t_lake3d',i,Tclim,t_grnd(c),t_lake(c,:),t_soisno(c,:)
+            endif 
+           
             savedtke12d(i)         = savedtke1(c)
             snowdp2d(i)            = snowdp(c)
             h2osno2d(i)            = h2osno(c)
@@ -2706,8 +2706,8 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
        p = filter_shlakep(fp)
        c = pcolumn(p)
        errsoi(c) = (ncvts(c)-ocvts(c)) / dtime - fin(c)
-       if( (LAKEDEBUG .and. abs(errsoi(c)) < 1._kind_phys) &
-            .or. (.not.LAKEDEBUG .and. abs(errsoi(c)) < 10._kind_phys)) then
+       if( (LAKEDEBUG .and. abs(errsoi(c)) < 1._kind_phys) ) then
+!            .or. (.not.LAKEDEBUG .and. abs(errsoi(c)) < 10._kind_phys)) then
           eflx_sh_tot(p) = eflx_sh_tot(p) - errsoi(c)
           eflx_sh_grnd(p) = eflx_sh_grnd(p) - errsoi(c)
           eflx_soil_grnd(p) = eflx_soil_grnd(p) + errsoi(c)
