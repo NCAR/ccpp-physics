@@ -40,7 +40,7 @@ MODULE clm_lake
     logical, parameter :: PERGRO = .false.
 
     logical, parameter :: USE_ETALAKE = .false.
-    real, parameter :: ETALAKE = 1.1925*50**(-0.424) ! Set this to your desired value if USE_ETALAKE=.true.
+    real(kind_phys), parameter :: ETALAKE = 1.1925*50**(-0.424) ! Set this to your desired value if USE_ETALAKE=.true.
 
     ! Level counts must be consistent with model (GFS_typedefs.F90)
     integer, parameter :: nlevsoil     =  10   ! number of soil layers
@@ -93,6 +93,8 @@ MODULE clm_lake
     real(kind_phys) :: hfus                 !Latent heat of fusion for ice [J/kg]
     real(kind_phys) :: hvap                 !Latent heat of evap for water [J/kg]
     real(kind_phys) :: hsub                 !Latent heat of sublimation    [J/kg]
+    real(kind_phys) :: invhvap              !1/hvap [kg/J]
+    real(kind_phys) :: invhsub              !1/hsub [kg/J]
     real(kind_phys) :: rair                 !gas constant for dry air [J/kg/K]
     real(kind_phys) :: cpair                !specific heat of dry air [J/kg/K]
     
@@ -271,7 +273,7 @@ MODULE clm_lake
     !
     INTEGER , INTENT (IN) :: im,km,me,master
     INTEGER, INTENT(IN) :: IDATE(4), kdt
-    REAL, INTENT(IN) :: fhour
+    REAL(kind_phys), INTENT(IN) :: fhour
 
     !
     ! Configuration and initialization:
@@ -439,6 +441,8 @@ MODULE clm_lake
       ! The latitude and longitude of unhappy points.
       real(kind_phys), allocatable, save :: unhappy_lat(:),unhappy_lon(:)
 
+      real(kind_phys) :: to_radians
+
       integer :: month,num1,num2,day_of_month
       real(kind_phys) :: wght1,wght2,Tclim
 
@@ -446,7 +450,6 @@ MODULE clm_lake
 
       errmsg = ' '
       errflg = 0
-
       dtime=dtp
 
       if(LAKEDEBUG) then
@@ -511,6 +514,8 @@ MODULE clm_lake
       lake_points=0
       snow_points=0
       ice_points=0
+
+      to_radians = pi/180
 
       month = IDATE(2)
       day_of_month = IDATE(3)
@@ -594,7 +599,7 @@ MODULE clm_lake
             forc_lwrad(c)      = LWDN             ! [W/m/m]
             prec(c)            = PRCP             ! [mm/s]
             sabg(c)            = SOLNET
-            lat(c)             = XLAT_D(I)*pi/180  ! [radian] 
+            lat(c)             = XLAT_D(I)*to_radians  ! [radian] 
             do_capsnow(c)      = .false.
 
             lakedepth(c)           = clm_lakedepth(i)
@@ -723,9 +728,9 @@ MODULE clm_lake
 
                 !-- The CLM output is combined for fractional ice and water
                 if( t_grnd(c) >= tfrz ) then
-                  qfx         = eflx_lh_tot(c)/hvap
+                  qfx         = eflx_lh_tot(c)*invhvap
                 else
-                  qfx         = eflx_lh_tot(c)/hsub         ! heat flux (W/m^2)=>mass flux(kg/(sm^2))
+                  qfx         = eflx_lh_tot(c)*invhsub      ! heat flux (W/m^2)=>mass flux(kg/(sm^2))
                 endif
                 evap_wat(i) = qfx/rho0(i)                   ! kinematic_surface_upward_latent_heat_flux_over_water
                 hflx_wat(i)=eflx_sh_tot(c)/(rho0(i)*cpair)  ! kinematic_surface_upward_sensible_heat_flux_over_water
@@ -827,7 +832,7 @@ MODULE clm_lake
           ! If lakedebug is false, then it will return false immediately.
           implicit none
           integer :: j
-          real, intent(in) :: xlat_d,xlon_d
+          real(kind_phys), intent(in) :: xlat_d,xlon_d
 
           if(lakedebug) then
             do j=1,unhappy_count
@@ -1356,10 +1361,10 @@ SUBROUTINE ShalLakeFluxes(forc_t,forc_pbot,forc_psrf,forc_hgt,forc_hgt_q,       
 
        if (snl(c) < 0) then
            betaprime(c) = 1._kind_phys  !Assume all solar rad. absorbed at the surface of the top snow layer. 
-           dzsur(c) = dz(c,jtop(c))/2._kind_phys
+           dzsur(c) = dz(c,jtop(c))*0.5_kind_phys
        else
            betaprime(c) = beta(islak)
-           dzsur(c) = dz_lake(c,1)/2._kind_phys
+           dzsur(c) = dz_lake(c,1)*0.5_kind_phys
        end if
        ! Originally this was 1*dz, but shouldn't it be 1/2?
 
@@ -2224,7 +2229,7 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
                 phix(c,j) = phi(c,j)
                 tx(c,j) = t_lake(c,j)
              else !soil layer
-                zx(c,j) = zx(c,nlevlake) + dz_lake(c,nlevlake)/2._kind_phys + z(c,jprime)
+                zx(c,j) = zx(c,nlevlake) + dz_lake(c,nlevlake)*0.5_kind_phys + z(c,jprime)
                 cvx(c,j) = cv(c,jprime)
                 if (j == nlevlake + 1) then !top soil layer
                    phix(c,j) = phi_soil(c)
@@ -2263,7 +2268,7 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
              else if (j == nlevlake) then !bottom lake layer
                 dzp = zx(c,j+1) - zx(c,j)
                 tkix(c,j) = (tktopsoillay(c)*tk_lake(c,j)*dzp / &
-                    (tktopsoillay(c)*dz_lake(c,j)/2._kind_phys + tk_lake(c,j)*z(c,1) ) )
+                    (tktopsoillay(c)*dz_lake(c,j)*0.5_kind_phys + tk_lake(c,j)*z(c,1) ) )
                     ! tktopsoillay is the conductivity at the middle of that layer, as defined in SoilThermProp_Lake
              else !soil layer
                 tkix(c,j) = tk(c,jprime)
@@ -4592,9 +4597,9 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
           ! Specify a new snow layer
           if (dzsno(c,1) > 0.03) then
              msno = 2
-             dzsno(c,1) = dzsno(c,1)/2.
-             swice(c,1) = swice(c,1)/2.
-             swliq(c,1) = swliq(c,1)/2.
+             dzsno(c,1) = dzsno(c,1)*0.5
+             swice(c,1) = swice(c,1)*0.5
+             swliq(c,1) = swliq(c,1)*0.5
              dzsno(c,2) = dzsno(c,1)
              swice(c,2) = swice(c,1)
              swliq(c,2) = swliq(c,1)
@@ -4619,9 +4624,9 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
              ! Subdivide a new layer
              if (msno <= 2 .and. dzsno(c,2) > 0.07) then
                 msno = 3
-                dzsno(c,2) = dzsno(c,2)/2.
-                swice(c,2) = swice(c,2)/2.
-                swliq(c,2) = swliq(c,2)/2.
+                dzsno(c,2) = dzsno(c,2)*0.5
+                swice(c,2) = swice(c,2)*0.5
+                swliq(c,2) = swliq(c,2)*0.5
                 dzsno(c,3) = dzsno(c,2)
                 swice(c,3) = swice(c,2)
                 swliq(c,3) = swliq(c,2)
@@ -4647,9 +4652,9 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
              ! Subdivided a new layer
              if (msno <= 3 .and. dzsno(c,3) > 0.18) then
                 msno =  4
-                dzsno(c,3) = dzsno(c,3)/2.
-                swice(c,3) = swice(c,3)/2.
-                swliq(c,3) = swliq(c,3)/2.
+                dzsno(c,3) = dzsno(c,3)*0.5
+                swice(c,3) = swice(c,3)*0.5
+                swliq(c,3) = swliq(c,3)*0.5
                 dzsno(c,4) = dzsno(c,3)
                 swice(c,4) = swice(c,3)
                 swliq(c,4) = swliq(c,3)
@@ -4675,9 +4680,9 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
              ! Subdivided a new layer
              if (msno <= 4 .and. dzsno(c,4) > 0.41) then
                 msno = 5
-                dzsno(c,4) = dzsno(c,4)/2.
-                swice(c,4) = swice(c,4)/2.
-                swliq(c,4) = swliq(c,4)/2.
+                dzsno(c,4) = dzsno(c,4)*0.5
+                swice(c,4) = swice(c,4)*0.5
+                swliq(c,4) = swliq(c,4)*0.5
                 dzsno(c,5) = dzsno(c,4)
                 swice(c,5) = swice(c,4)
                 swliq(c,5) = swliq(c,4)
@@ -5316,6 +5321,8 @@ if_pergro: if (PERGRO) then
     hfus = con_hfus
     hvap = con_hvap
     hsub = con_hfus+con_hvap
+    invhvap = 1._kind_phys/hvap
+    invhsub = 1._kind_phys/hsub
     rair = con_rd
     cpair = con_cp
 
@@ -5461,7 +5468,7 @@ if_pergro: if (PERGRO) then
   !LOGICAL, DIMENSION( : ),intent(out)                      :: lake
   !REAL(KIND_PHYS), OPTIONAL,    DIMENSION( : ), INTENT(IN)    ::  lake_depth ! no separate variable for this in CCPP
 
-  real,   dimension( 1:im,1:nlevsoil )               :: bsw3d,    &
+  real(kind_phys),   dimension( 1:im,1:nlevsoil )     :: bsw3d,    &
                                                         bsw23d,   &
                                                         psisat3d, &
                                                         vwcsat3d, &
@@ -5639,7 +5646,7 @@ if_pergro: if (PERGRO) then
         dz3d(i,0)  = snowdp2d(i)
       else if ((snowdp2d(i) > 0.03_kind_phys) .and. (snowdp2d(i) <= 0.04_kind_phys)) then
         snl2d(i) = -2
-        dz3d(i,-1) = snowdp2d(i)/2._kind_phys
+        dz3d(i,-1) = snowdp2d(i)*0.5_kind_phys
         dz3d(i, 0) = dz3d(i,-1)
       else if ((snowdp2d(i) > 0.04_kind_phys) .and. (snowdp2d(i) <= 0.07_kind_phys)) then
         snl2d(i) = -2
@@ -5648,7 +5655,7 @@ if_pergro: if (PERGRO) then
       else if ((snowdp2d(i) > 0.07_kind_phys) .and. (snowdp2d(i) <= 0.12_kind_phys)) then
         snl2d(i) = -3
         dz3d(i,-2) = 0.02_kind_phys
-        dz3d(i,-1) = (snowdp2d(i) - 0.02_kind_phys)/2._kind_phys
+        dz3d(i,-1) = (snowdp2d(i) - 0.02_kind_phys)*0.5_kind_phys
         dz3d(i, 0) = dz3d(i,-1)
       else if ((snowdp2d(i) > 0.12_kind_phys) .and. (snowdp2d(i) <= 0.18_kind_phys)) then
         snl2d(i) = -3
@@ -5659,7 +5666,7 @@ if_pergro: if (PERGRO) then
         snl2d(i) = -4
         dz3d(i,-3) = 0.02_kind_phys
         dz3d(i,-2) = 0.05_kind_phys
-        dz3d(i,-1) = (snowdp2d(i) - dz3d(i,-3) - dz3d(i,-2))/2._kind_phys
+        dz3d(i,-1) = (snowdp2d(i) - dz3d(i,-3) - dz3d(i,-2))*0.5_kind_phys
         dz3d(i, 0) = dz3d(i,-1)
       else if ((snowdp2d(i) > 0.29_kind_phys) .and. (snowdp2d(i) <= 0.41_kind_phys)) then
         snl2d(i) = -4
@@ -5672,7 +5679,7 @@ if_pergro: if (PERGRO) then
         dz3d(i,-4) = 0.02_kind_phys
         dz3d(i,-3) = 0.05_kind_phys
         dz3d(i,-2) = 0.11_kind_phys
-        dz3d(i,-1) = (snowdp2d(i) - dz3d(i,-4) - dz3d(i,-3) - dz3d(i,-2))/2._kind_phys
+        dz3d(i,-1) = (snowdp2d(i) - dz3d(i,-4) - dz3d(i,-3) - dz3d(i,-2))*0.5_kind_phys
         dz3d(i, 0) = dz3d(i,-1)
       else if (snowdp2d(i) > 0.64_kind_phys) then
         snl2d(i) = -5
