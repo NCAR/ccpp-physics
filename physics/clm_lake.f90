@@ -322,6 +322,22 @@ MODULE clm_lake
     
     real(kind_phys),    dimension( :,: )           ,INTENT(inout)  :: t_lake3d,       &    
                                                                                   lake_icefrac3d
+! Quick education on CCPP and deferred shape arrays.
+
+! CCPP requires deferred shape arrays as a workaround for its design
+! flaw: it needs an argument that can receive either a null pointer,
+! or an automatic storage array (which is not guaranteed to exist in
+! memory at all). Such a thing doesn't exist in Fortran, so the design
+! of CCPP assumes a compiler will accept either as an argument to a
+! deferred shape array.
+
+! Apparently there is a misunderstanding among developers of how a
+! deferred shape array is declared. If the array dimensions do not
+! have an UPPER bound, then it is deferred shape. A LOWER bound is
+! acceptable; it does not cease to be a deferred shape array.
+
+! That is why these seven arrays fit the CCPP design.
+
     real(kind_phys),    dimension( :,-nlevsnow+1: )  ,INTENT(inout)  :: t_soisno3d,     &    
                                                                                   h2osoi_ice3d,   &    
                                                                                   h2osoi_liq3d,   &    
