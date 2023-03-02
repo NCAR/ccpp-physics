@@ -150,6 +150,14 @@
   type = real
   kind = kind_phys
   intent = in
+[rhowater]
+  standard_name = fresh_liquid_water_density_at_0c
+  long_name = density of liquid water
+  units = kg m-3
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
 [dtf]
   standard_name = timestep_for_dynamics
   long_name = dynamics timestep
@@ -278,6 +286,69 @@
   type = real
   kind = kind_phys
   intent = inout
+[frzr]
+  standard_name = cumulative_lwe_thickness_of_surface_freezing_rain_amount
+  long_name = accumulated surface freezing rain
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[frzrb]
+  standard_name = cumulative_lwe_thickness_of_surface_freezing_rain_amount_in_bucket
+  long_name = accumulated surface freezing rain in bucket
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[frozr]
+  standard_name = cumulative_lwe_thickness_of_surface_graupel_amount
+  long_name = accumulated surface graupel
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[frozrb]
+  standard_name = cumulative_lwe_thickness_of_surface_graupel_amount_in_bucket
+  long_name = accumulated surface graupel in bucket
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[tsnowp]
+  standard_name = cumulative_lwe_thickness_of_surface_snow_amount
+  long_name = accumulated surface snow
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[tsnowpb]
+  standard_name = cumulative_lwe_thickness_of_surface_snow_amount_in_bucket
+  long_name = accumulated surface snow in bucket
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[rhonewsn1]
+  standard_name = surface_frozen_precipitation_density
+  long_name = density of precipitation ice
+  units = kg m-3
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[exticeden]
+  standard_name = do_external_surface_frozen_precipitation_density
+  long_name = flag for calculating frozen precip ice density outside of the LSM
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [save_t]
   standard_name = air_temperature_save
   long_name = air temperature before entering a physics scheme

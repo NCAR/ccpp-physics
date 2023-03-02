@@ -156,7 +156,7 @@ contains
 !> \section arg_table_GFS_rrtmgp_setup_timestep_init
 !! \htmlinclude GFS_rrtmgp_setup_timestep_init.html
 !!
-  subroutine GFS_rrtmgp_setup_timestep_init (idate, jdate, deltsw, deltim, lsswr, me, &
+  subroutine GFS_rrtmgp_setup_timestep_init (idate, jdate, deltsw, deltim, doSWrad, me, &
                                              slag, sdec, cdec, solcon, errmsg, errflg)
      
     ! Inputs
@@ -164,7 +164,7 @@ contains
     integer,         intent(in)  :: jdate(:)
     real(kind_phys), intent(in)  :: deltsw
     real(kind_phys), intent(in)  :: deltim
-    logical,         intent(in)  :: lsswr
+    logical,         intent(in)  :: doSWrad
     integer,         intent(in)  :: me
 
     ! Outputs
@@ -222,7 +222,7 @@ contains
     endif
 
     ! Update solar forcing...
-    if (lsswr) then
+    if (doSWrad) then
        if ( isolar == 0 .or. isolar == 10 ) then
           lsol_chg = .false.
        elseif ( iyear0 /= iyear ) then

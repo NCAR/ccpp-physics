@@ -116,6 +116,7 @@
      &       swdn, swnet, lwdn, sfcems, sfcprs, sfctmp,                 &
      &       sfcspd, prcp, q2, q2sat, dqsdt2, th2, ivegsrc,             &
      &       vegtyp, soiltyp, slopetyp, shdmin, alb, snoalb,            &
+     &       rhonewsn, exticeden,                                       &
      &       bexpp, xlaip,                                              & !  sfc-perts, mgehne
      &       lheatstrg,                                                 &!  ---  input/outputs:
      &       tbot, cmc, t1, stc, smc, sh2o, sneqv, ch, cm,z0,           &!  ---  outputs:
@@ -310,9 +311,9 @@
       real (kind=kind_phys), intent(in) :: ffrozp, dt, zlvl, lwdn,      &
      &       sldpth(nsoil), swdn, swnet, sfcems, sfcprs, sfctmp,        &
      &       sfcspd, prcp, q2, q2sat, dqsdt2, th2, shdmin, alb, snoalb, &
-     &       bexpp, xlaip                                               & !sfc-perts, mgehne
+     &       bexpp, xlaip, rhonewsn                                     & !sfc-perts, mgehne
 
-      logical, intent(in) :: lheatstrg
+      logical, intent(in) :: lheatstrg, exticeden
 
 !  ---  input/outputs:
       real (kind=kind_phys), intent(inout) :: tbot, cmc, t1, sneqv,     &
@@ -564,7 +565,7 @@
 !! using old and new snow.
         call snow_new
 !  ---  inputs:                                                         !
-!          ( sfctmp, sn_new,                                            !
+!          ( sfctmp, sn_new, rhonewsn, exticeden,                       !
 !  ---  input/outputs:                                                  !
 !            snowh, sndens )                                            !
 
@@ -877,7 +878,11 @@
 !            smc, ssoil, runoff1, runoff2, runoff3, edir, ec, et,       !
 !            ett, snomlt, drip, dew, flx1, flx3, esnow )                !
 
+!  run-total accumulated snow based on snowfall and snowmelt in [m]
+
       endif
+
+
 !> - Noah LSM post-processing:
 !>  - Calculate sensible heat (h) for return to parent model.
 
@@ -2851,7 +2856,7 @@
       subroutine snow_new
 !...................................
 !  ---  inputs:
-!    &     ( sfctmp, sn_new,                                            &
+!    &     ( sfctmp, sn_new, rhonewsn, exticeden,                       &
 !  ---  input/outputs:
 !    &       snowh, sndens                                              &
 !    &     )
@@ -2900,10 +2905,14 @@
 !           snowcovered and glacierized basin', 6th nordic hydrological
 !           conference, vemadolen, sweden, 1980, 172-177pp.
 
-      if (tempc <= -15.0) then
-        dsnew = 0.05
+      if(.not. exticeden) then
+         if (tempc <= -15.0) then
+            dsnew = 0.05
+         else
+            dsnew = 0.05 + 0.0017*(tempc + 15.0)**1.5
+         endif
       else
-        dsnew = 0.05 + 0.0017*(tempc + 15.0)**1.5
+         dsnew = rhonewsn*0.001
       endif
 
 !  --- ...  adjustment of snow density depending on new snowfall
