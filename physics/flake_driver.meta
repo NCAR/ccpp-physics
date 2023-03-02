@@ -5,46 +5,6 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = flake_driver_init
-  type = scheme
-[errmsg]
-  standard_name = ccpp_error_message
-  long_name = error message for error handling in CCPP
-  units = none
-  dimensions = ()
-  type = character
-  kind = len=*
-  intent = out
-[errflg]
-  standard_name = ccpp_error_code
-  long_name = error code for error handling in CCPP
-  units = 1
-  dimensions = ()
-  type = integer
-  intent = out
-
-########################################################################
-[ccpp-arg-table]
-  name = flake_driver_finalize
-  type = scheme
-[errmsg]
-  standard_name = ccpp_error_message
-  long_name = error message for error handling in CCPP
-  units = none
-  dimensions = ()
-  type = character
-  kind = len=*
-  intent = out
-[errflg]
-  standard_name = ccpp_error_code
-  long_name = error code for error handling in CCPP
-  units = 1
-  dimensions = ()
-  type = integer
-  intent = out
-
-########################################################################
-[ccpp-arg-table]
   name = flake_driver_run
   type = scheme
 [im]

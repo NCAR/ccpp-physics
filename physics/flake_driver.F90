@@ -8,41 +8,9 @@
 
       private
 
-      public :: flake_driver_init, flake_driver_run, flake_driver_finalize
+      public :: flake_driver_run
 
       contains
-
-!> \section arg_table_flake_driver_init Argument Table
-!! \htmlinclude flake_driver_init.html
-!!
-      subroutine flake_driver_init (errmsg, errflg)
-
-      implicit none
-      character(len=*), intent(out) :: errmsg
-      integer,          intent(out) :: errflg
-
-
-      ! Initialize CCPP error handling variables
-      errmsg = ''
-      errflg = 0
-
-      end subroutine flake_driver_init
-
-!> \section arg_table_flake_driver_finalize Argument Table
-!! \htmlinclude flake_driver_finalize.html
-!!
-      subroutine flake_driver_finalize (errmsg, errflg)
-
-      implicit none
-
-      character(len=*), intent(out) :: errmsg
-      integer,          intent(out) :: errflg
-
-      ! Initialize CCPP error handling variables
-      errmsg = ''
-      errflg = 0
-
-      end subroutine flake_driver_finalize
 
 !> \section arg_table_flake_driver_run Argument Table
 !! \htmlinclude flake_driver_run.html
