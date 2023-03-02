@@ -559,6 +559,8 @@ MODULE clm_lake
            ! FIXME: Should multiply PRCP by 1000
            PRCP    = (raincprv(i)+rainncprv(i))/dtime  ! [mm/s] use physics timestep since PRCP comes from non-surface schemes
            SOLDN   = DSWSFCI(I)                        ! SOLDN is total incoming solar
+           albedo(i) = ( 0.6 * lake_icefrac3d(i,1) ) +  &
+                       ( (1.0-lake_icefrac3d(i,1)) * 0.08)
            SOLNET  = SOLDN*(1.-ALBEDO(I))              ! use mid-day albedo to determine net downward solar
                                                        ! (no solar zenith angle correction) 
 
