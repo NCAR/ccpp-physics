@@ -18,10 +18,10 @@
 !!
       subroutine GFS_rad_time_vary_timestep_init (lrseeds, rseeds,                     &
               lslwr, lsswr, isubc_lw, isubc_sw, icsdsw, icsdlw, cnx, cny, isc, jsc,    &
-              imap, jmap, sec, kdt, imp_physics, imp_physics_zhao_carr, ps_2delt,      &
-              ps_1delt, t_2delt, t_1delt, qv_2delt, qv_1delt, t, qv, ps, errmsg, errflg)
+              imap, jmap, sec, kdt, imp_physics, imp_physics_zhao_carr, ipsd0, ipsdlim,&
+              ps_2delt, ps_1delt, t_2delt, t_1delt, qv_2delt, qv_1delt, t, qv, ps,     &
+              errmsg, errflg)
 
-         use physparam,                 only: ipsd0, ipsdlim, iaerflg
          use mersenne_twister,          only: random_setseed, random_index, random_stat
          use machine,                   only: kind_phys
          use radcons,                   only: qmin, con_100
@@ -32,7 +32,7 @@
          logical,                intent(in)    :: lrseeds
          integer,                intent(in)    :: rseeds(:,:)
          integer,                intent(in)    :: isubc_lw, isubc_sw, cnx, cny, isc, jsc, kdt
-         integer,                intent(in)    :: imp_physics, imp_physics_zhao_carr
+         integer,                intent(in)    :: imp_physics, imp_physics_zhao_carr, ipsd0, ipsdlim
          logical,                intent(in)    :: lslwr, lsswr
          integer,                intent(inout) :: icsdsw(:), icsdlw(:)
          integer,                intent(in)    :: imap(:), jmap(:)

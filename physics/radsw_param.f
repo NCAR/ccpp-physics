@@ -66,7 +66,7 @@
 !! \htmlinclude module_radsw_parameters.html
 !!
 
-      use physparam,                only : kind_phys
+      use machine,                only : kind_phys
 
       implicit   none
 !
