@@ -634,6 +634,13 @@
   dimensions = ()
   type = logical
   intent = in
+[exticeden]
+  standard_name = do_external_surface_frozen_precipitation_density
+  long_name = flag for calculating frozen precip ice density outside of the LSM
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [lsoil_ruc]
   standard_name = vertical_dimension_of_soil_internal_to_land_surface_scheme
   long_name = number of soil layers internal to land surface model
@@ -948,6 +955,14 @@
   standard_name = sea_area_fraction
   long_name = fraction of horizontal grid area occupied by ocean
   units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[rhonewsn1]
+  standard_name = surface_frozen_precipitation_density
+  long_name = density of precipitation ice
+  units = kg m-3
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
@@ -1505,7 +1520,7 @@
   kind = kind_phys
   intent = out
 [rhosnf]
-  standard_name = frozen_precipitation_density
+  standard_name = lsm_internal_surface_frozen_precipitation_density
   long_name = density of frozen precipitation
   units = kg m-3
   dimensions = (horizontal_loop_extent)
