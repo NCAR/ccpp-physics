@@ -93,7 +93,7 @@
 
 
         !--- initialize soil vegetation
-        call set_soilveg(me, isot, ivegsrc, nlunit)
+        call set_soilveg(me, isot, ivegsrc, nlunit, errmsg, errflg)
 
 
         ! initialize psih and psim 

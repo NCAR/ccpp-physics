@@ -79,7 +79,6 @@
 !                                                                          !
 !    external modules referenced:                                          !
 !                                                                          !
-!       'module physparam'                                                 !
 !       'module physcons'                                                  !
 !       'mersenne_twister'                                                 !
 !                                                                          !
@@ -278,8 +277,6 @@
 !! rrtmg-lw radiation code from aer inc.
       module rrtmg_lw 
 !
-      use physparam,        only : ilwrate, ilwrgas, ilwcliq, ilwcice,  &
-     &                             isubclw, icldflg, iovr,  ivflip
       use physcons,         only : con_g, con_cp, con_avgd, con_amd,    &
      &                             con_amw, con_amo3
       use mersenne_twister, only : random_setseed, random_number,       &
@@ -425,7 +422,10 @@
      &       gasvmr_cfc12, gasvmr_cfc22, gasvmr_ccl4,                   &
      &       icseed,aeraod,aerssa,sfemis,sfgtmp,                        &
      &       dzlyr,delpin,de_lgth,alpha,                                &
-     &       npts, nlay, nlp1, lprnt, cld_cf, lslwr,                    &
+     &       npts, nlay, nlp1, lprnt, cld_cf, lslwr, top_at_1, iovr,    &
+     &       iovr_rand, iovr_maxrand, iovr_max, iovr_dcorr, iovr_exp,   &
+     &       iovr_exprand,                                              &
+     &       inc_minor_gas, ilwcliq, ilwcice, isubclw,                  &
      &       hlwc,topflx,sfcflx,cldtau,                                 &   !  ---  outputs
      &       HLW0,HLWB,FLXPRF,                                          &   !  ---  optional
      &       cld_lwp, cld_ref_liq, cld_iwp, cld_ref_ice,                &
@@ -483,6 +483,33 @@
 !     npts           : total number of horizontal points                !
 !     nlay, nlp1     : total number of vertical layers, levels          !
 !     lprnt          : cntl flag for diagnostic print out               !
+!   inc_minor_gas - control flag for rare gases (ch4,n2o,o2,cfcs, etc.) !
+!           =0: do not include rare gases                               !
+!           >0: include all rare gases                                  !
+!   ilwcliq - control flag for liq-cloud optical properties             !
+!           =1: input cld liqp & reliq, hu & stamnes (1993)             !
+!           =2: not used                                                !
+!   ilwcice - control flag for ice-cloud optical properties             !
+!           =1: input cld icep & reice, ebert & curry (1997)            !
+!           =2: input cld icep & reice, streamer (1996)                 !
+!           =3: input cld icep & reice, fu (1998)                       !
+!   isubclw - sub-column cloud approximation control flag               !
+!           =0: no sub-col cld treatment, use grid-mean cld quantities  !
+!           =1: mcica sub-col, prescribed seeds to get random numbers   !
+!           =2: mcica sub-col, providing array icseed for random numbers!
+!   iovr  - clouds vertical overlapping control flag                    !
+!           =iovr_rand                                                  !
+!           =iovr_maxrand                                               !
+!           =iovr_max                                                   !
+!           =iovr_dcorr                                                 !
+!           =iovr_exp                                                   !
+!           =iovr_exprand                                               !
+!   iovr_rand    - choice of cloud-overlap: random                      !
+!   iovr_maxrand - choice of cloud-overlap: maximum random              !
+!   iovr_max     - choice of cloud-overlap: maximum                     !
+!   iovr_dcorr   - choice of cloud-overlap: decorrelation length        !
+!   iovr_exp     - choice of cloud-overlap: exponential                 !
+!   iovr_exprand - choice of cloud-overlap: exponential random          !
 !                                                                       !
 !  output variables:                                                    !
 !     hlwc  (npts,nlay): total sky heating rate (k/day or k/sec)        !
@@ -507,32 +534,6 @@
 !        dnfxc           - total sky dnward flux                        !
 !        upfx0           - clear sky upward flux                        !
 !        dnfx0           - clear sky dnward flux                        !
-!                                                                       !
-!  external module variables:  (in physparam)                           !
-!   ilwrgas - control flag for rare gases (ch4,n2o,o2,cfcs, etc.)       !
-!           =0: do not include rare gases                               !
-!           >0: include all rare gases                                  !
-!   ilwcliq - control flag for liq-cloud optical properties             !
-!           =1: input cld liqp & reliq, hu & stamnes (1993)             !
-!           =2: not used                                                !
-!   ilwcice - control flag for ice-cloud optical properties             !
-!           =1: input cld icep & reice, ebert & curry (1997)            !
-!           =2: input cld icep & reice, streamer (1996)                 !
-!           =3: input cld icep & reice, fu (1998)                       !
-!   isubclw - sub-column cloud approximation control flag               !
-!           =0: no sub-col cld treatment, use grid-mean cld quantities  !
-!           =1: mcica sub-col, prescribed seeds to get random numbers   !
-!           =2: mcica sub-col, providing array icseed for random numbers!
-!   iovr  - cloud overlapping control flag                              !
-!           =0: random overlapping clouds                               !
-!           =1: maximum/random overlapping clouds                       !
-!           =2: maximum overlap cloud (used for isubclw>0 only)         !
-!           =3: decorrelation-length overlap (for isubclw>0 only)       !
-!           =4: exponential cloud overlap (AER)                         !
-!           =5: exponential-random cloud overlap (AER)                  !
-!   ivflip  - control flag for vertical index direction                 !
-!           =0: vertical index from toa to surface                      !
-!           =1: vertical index from surface to toa                      !
 !                                                                       !
 !  module parameters, control variables:                                !
 !     nbands           - number of longwave spectral bands              !
@@ -605,10 +606,12 @@
 !  ======================    end of definitions    ===================  !
 
 !  ---  inputs:
-      integer, intent(in) :: npts, nlay, nlp1
+      integer, intent(in) :: npts, nlay, nlp1, ilwcliq, ilwcice,        &
+           isubclw, iovr, iovr_dcorr, iovr_exp, iovr_exprand, iovr_rand,&
+           iovr_maxrand, iovr_max
       integer, intent(in) :: icseed(npts)
 
-      logical,  intent(in) :: lprnt
+      logical,  intent(in) :: lprnt, inc_minor_gas
 
       real (kind=kind_phys), dimension(:,:), intent(in) :: plvl,        &
      &       tlvl
@@ -631,6 +634,7 @@
 
       real (kind=kind_phys), dimension(:,:,:),intent(in)::              &
      &       aeraod, aerssa
+      logical, intent(in) :: lslwr, top_at_1
 
 !  ---  outputs:
       real (kind=kind_phys), dimension(:,:), intent(inout) :: hlwc
@@ -650,7 +654,6 @@
      &       intent(inout) :: hlw0
       type (proflw_type),    dimension(:,:),       optional,            &
      &       intent(inout) :: flxprf
-      logical, intent(in) :: lslwr
 
 !  ---  locals:
       real (kind=kind_phys), dimension(0:nlp1) :: cldfrc
@@ -790,7 +793,7 @@
         endif
 
         stemp = sfgtmp(iplon)          ! surface ground temp
-        if (iovr == 3) delgth= de_lgth(iplon)    ! clouds decorr-length
+        if (iovr == iovr_dcorr) delgth= de_lgth(iplon)    ! clouds decorr-length
 
 !> -# Prepare atmospheric profile for use in rrtm.
 !           the vertical index of internal array is from surface to top
@@ -801,7 +804,7 @@
 !           layer pressure thickness (in mb), based on the hydrostatic equation
 !  --- ...  and includes a correction to account for h2o in the layer.
 
-        if (ivflip == 0) then       ! input from toa to sfc
+        if (top_at_1) then       ! input from toa to sfc
 
           tem1 = 100.0 * con_g
           tem2 = 1.0e-20 * 1.0e3 * con_avgd
@@ -814,7 +817,7 @@
             tavel(k)= tlyr(iplon,k1)
             tz(k)   = tlvl(iplon,k1)
             dz(k)   = dzlyr(iplon,k1)
-            if (iovr == 4 .or. iovr == 5) alph(k) = alpha(iplon,k) ! alpha decorrelation
+            if (iovr == iovr_exp .or. iovr == iovr_exprand) alph(k) = alpha(iplon,k) ! alpha decorrelation
 
 !> -# Set absorber amount for h2o, co2, and o3.
 
@@ -841,7 +844,7 @@
 !!    cf22, convert from volume mixing ratio to molec/cm2 based on
 !!    coldry (scaled to 1.0e-20).
 
-          if (ilwrgas > 0) then
+          if (inc_minor_gas) then
             do k = 1, nlay
               k1 = nlp1 - k
               colamt(k,4)=max(temcol(k), coldry(k)*gasvmr_n2o(iplon,k1))  ! n2o
@@ -927,7 +930,7 @@
             tavel(k)= tlyr(iplon,k)
             tz(k)   = tlvl(iplon,k+1)
             dz(k)   = dzlyr(iplon,k)
-            if (iovr == 4 .or. iovr == 5) alph(k) = alpha(iplon,k) ! alpha decorrelation
+            if (iovr == iovr_exp .or. iovr == iovr_exprand) alph(k) = alpha(iplon,k) ! alpha decorrelation
 
 !  --- ...  set absorber amount
 !test use
@@ -952,7 +955,7 @@
 !  --- ...  set up col amount for rare gases, convert from volume mixing ratio
 !           to molec/cm2 based on coldry (scaled to 1.0e-20)
 
-          if (ilwrgas > 0) then
+          if (inc_minor_gas) then
             do k = 1, nlay
               colamt(k,4)=max(temcol(k), coldry(k)*gasvmr_n2o(iplon,k))  ! n2o
               colamt(k,5)=max(temcol(k), coldry(k)*gasvmr_ch4(iplon,k))  ! ch4
@@ -1021,7 +1024,7 @@
           tem0 = 10.0 * tem2 / (amdw * tem1 * con_g)
           pwvcm = tem0 * plvl(iplon,1)
 
-        endif                       ! if_ivflip
+        endif                       ! top_at_1
 
 !> -# Compute column amount for broadening gases.
 
@@ -1078,6 +1081,7 @@
 !  ---  inputs:
      &     ( cldfrc,clwp,relw,ciwp,reiw,cda1,cda2,cda3,cda4,            &
      &       nlay, nlp1, ipseed(iplon), dz, delgth, iovr, alph,         &
+     &       ilwcliq, ilwcice, isubclw,                                 &
 !  ---  outputs:
      &       cldfmc, taucld                                             &
      &     )
@@ -1085,7 +1089,7 @@
 !  --- ...  save computed layer cloud optical depth for output
 !           rrtm band-7 is apprx 10mu channel (or use spectral mean of bands 6-8)
 
-          if (ivflip == 0) then       ! input from toa to sfc
+          if (top_at_1) then       ! input from toa to sfc
             do k = 1, nlay
               k1 = nlp1 - k
               cldtau(iplon,k1) = taucld( 7,k)
@@ -1094,7 +1098,7 @@
             do k = 1, nlay
               cldtau(iplon,k) = taucld( 7,k)
             enddo
-          endif                       ! end if_ivflip_block
+          endif                       ! end if_top_at_1_block
 
         else
           cldfmc = f_zero
@@ -1229,7 +1233,7 @@
         sfcflx(iplon)%dnfxc = totdflux(0)
         sfcflx(iplon)%dnfx0 = totdclfl(0)
 
-        if (ivflip == 0) then       ! output from toa to sfc
+        if (top_at_1) then       ! output from toa to sfc
 
 !! --- ...  optional fluxes
           if ( lflxprf ) then
@@ -1297,7 +1301,7 @@
             enddo
           endif
 
-        endif                       ! if_ivflip
+        endif                       ! if_top_at_1
 
       enddo  lab_do_iplon
 
@@ -1315,9 +1319,9 @@
 !! spectral band are reduced from 256 g-point intervals to 140.
 !!\param me        print control for parallel process
 !!\section rlwinit_gen rlwinit General Algorithm
-      subroutine rlwinit                                                &
-     &     ( me ) !  ---  inputs
-!  ---  outputs: (none)
+      subroutine rlwinit( me, rad_hr_units, inc_minor_gas, ilwcliq,     &
+           isubclw, iovr, iovr_rand, iovr_maxrand, iovr_max, iovr_dcorr,&
+           iovr_exp, iovr_exprand, errflg, errmsg )
 
 !  ===================  program usage description  ===================  !
 !                                                                       !
@@ -1329,17 +1333,9 @@
 !  ====================  defination of variables  ====================  !
 !                                                                       !
 !  inputs:                                                              !
-!    me       - print control for parallel process                      !
-!                                                                       !
-!  outputs: (none)                                                      !
-!                                                                       !
-!  external module variables:  (in physparam)                            !
-!   ilwrate - heating rate unit selections                              !
-!           =1: output in k/day                                         !
-!           =2: output in k/second                                      !
-!   ilwrgas - control flag for rare gases (ch4,n2o,o2,cfcs, etc.)       !
-!           =0: do not include rare gases                               !
-!           >0: include all rare gases                                  !
+!   me            - print control for parallel process                  !
+!   rad_hr_units  - 1 for heating rates in units K/day. 2 for K/s       !
+!   inc_minor_gas - flag to turn on/off minor gases in rrtmg            !
 !   ilwcliq - liquid cloud optical properties contrl flag               !
 !           =0: input cloud opt depth from diagnostic scheme            !
 !           >0: input cwp,rew, and other cloud content parameters       !
@@ -1347,16 +1343,23 @@
 !           =0: no sub-col cld treatment, use grid-mean cld quantities  !
 !           =1: mcica sub-col, prescribed seeds to get random numbers   !
 !           =2: mcica sub-col, providing array icseed for random numbers!
-!   icldflg - cloud scheme control flag                                 !
-!           =0: diagnostic scheme gives cloud tau, omiga, and g.        !
-!           =1: prognostic scheme gives cloud liq/ice path, etc.        !
 !   iovr  - clouds vertical overlapping control flag                    !
-!           =0: random overlapping clouds                               !
-!           =1: maximum/random overlapping clouds                       !
-!           =2: maximum overlap cloud (isubcol>0 only)                  !
-!           =3: decorrelation-length overlap (for isubclw>0 only)       !
-!           =4: exponential cloud overlap (AER)                         !
-!           =5: exponential-random cloud overlap (AER)                  !
+!           =iovr_rand                                                  !
+!           =iovr_maxrand                                               !
+!           =iovr_max                                                   !
+!           =iovr_dcorr                                                 !
+!           =iovr_exp                                                   !
+!           =iovr_exprand                                               !
+!   iovr_rand    - choice of cloud-overlap: random                      !
+!   iovr_maxrand - choice of cloud-overlap: maximum random              !
+!   iovr_max     - choice of cloud-overlap: maximum                     !
+!   iovr_dcorr   - choice of cloud-overlap: decorrelation length        !
+!   iovr_exp     - choice of cloud-overlap: exponential                 !
+!   iovr_exprand - choice of cloud-overlap: exponential random          !
+!                                                                       !
+!  outputs:                                                             !
+!   errflg  - error flag                                                !
+!   errmsg  - error message                                             !
 !                                                                       !
 !  *******************************************************************  !
 !  original code description                                            !
@@ -1386,9 +1389,14 @@
 !  ======================  end of description block  =================  !
 
 !  ---  inputs:
-      integer, intent(in) :: me
+      integer, intent(in) :: me, rad_hr_units, ilwcliq, isubclw, iovr,  &
+           iovr_rand, iovr_maxrand, iovr_max, iovr_dcorr, iovr_exp,     &
+           iovr_exprand
+      logical, intent(in) :: inc_minor_gas
 
-!  ---  outputs: none
+!  ---  outputs:
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
 
 !  ---  locals:
       real (kind=kind_phys), parameter :: expeps = 1.e-20
@@ -1400,25 +1408,21 @@
 !
 !===> ... begin here
 !
-      if ( iovr<0 .or. iovr>5 ) then
-        print *,'  *** Error in specification of cloud overlap flag',   &
-     &          ' IOVR=',iovr,' in RLWINIT !!'
-        stop
-      elseif ( (iovr==2 .or. iovr==3) .and. isubclw==0 ) then
-        if (me == 0) then
-          print *,'  *** IOVR=',iovr,' is not available for',           &
-     &          ' ISUBCLW=0 setting!!'
-          print *,'      The program uses maximum/random overlap',      &
-     &          ' instead.'
-        endif
+      ! Initialize error-handling
+      errflg = 0
+      errmsg = ''
 
-        iovr = 1
+      if ((iovr .ne. iovr_rand) .and. (iovr .ne. iovr_maxrand) .and.    &
+          (iovr .ne. iovr_max)  .and. (iovr .ne. iovr_dcorr)   .and.    &
+          (iovr .ne. iovr_exp)  .and. (iovr .ne. iovr_exprand)) then
+         errflg = 1
+         errmsg = 'ERROR(rlwinit): Error in specification of cloud overlap flag'
       endif
 
       if (me == 0) then
         print *,' - Using AER Longwave Radiation, Version: ', VTAGLW
 
-        if (ilwrgas > 0) then
+        if (inc_minor_gas) then
           print *,'   --- Include rare gases N2O, CH4, O2, CFCs ',      &
      &            'absorptions in LW'
         else
@@ -1434,20 +1438,7 @@
         elseif ( isubclw == 2 ) then
           print *,'   --- Using MCICA sub-colum clouds approximation ', &
      &            'with provided input array of permutation seeds'
-        else
-          print *,'  *** Error in specification of sub-column cloud ',  &
-     &            ' control flag isubclw =',isubclw,' !!'
-          stop
         endif
-      endif
-
-!> -# Check cloud flags for consistency.
-
-      if ((icldflg == 0 .and. ilwcliq /= 0) .or.                        &
-     &    (icldflg == 1 .and. ilwcliq == 0)) then
-        print *,'  *** Model cloud scheme inconsistent with LW',        &
-     &          ' radiation cloud radiative property setup !!'
-        stop
       endif
 
 !> -# Setup default surface emissivity for each band.
@@ -1461,7 +1452,7 @@
       fluxfac = pival * 2.0d4
 !     fluxfac = 62831.85307179586                   ! = 2 * pi * 1.0e4
 
-      if (ilwrate == 1) then
+      if (rad_hr_units == 1) then
 !       heatfac = 8.4391
 !       heatfac = con_g * 86400. * 1.0e-2 / con_cp  !   (in k/day)
         heatfac = con_g * 864.0 / con_cp            !   (in k/day)
@@ -1538,8 +1529,8 @@
 !!\section gen_cldprop cldprop General Algorithm
       subroutine cldprop                                                &
      &     ( cfrac,cliqp,reliq,cicep,reice,cdat1,cdat2,cdat3,cdat4,     & !  ---  inputs
-     &       nlay, nlp1, ipseed, dz, de_lgth, iovr, alpha,              &
-     &       cldfmc, taucld                                             & !  ---  outputs
+     &       nlay, nlp1, ipseed, dz, de_lgth, iovr, alpha, ilwcliq,     &
+     &       ilwcice, isubclw, cldfmc, taucld                           & !  ---  outputs
      &     )
 
 !  ===================  program usage description  ===================  !
@@ -1639,7 +1630,8 @@
       use module_radlw_cldprlw
 
 !  ---  inputs:
-      integer, intent(in) :: nlay, nlp1, ipseed, iovr
+      integer, intent(in) :: nlay, nlp1, ipseed, iovr, ilwcliq, ilwcice,&
+           isubclw
 
       real (kind=kind_phys), dimension(0:nlp1), intent(in) :: cfrac
       real (kind=kind_phys), dimension(nlay),   intent(in) :: cliqp,    &
@@ -1804,7 +1796,7 @@
 
       endif  lab_if_ilwcliq
 
-!> -# if physparam::isubclw > 0, call mcica_subcol() to distribute
+!> -# if GFS_typedefs::isubclw > 0, call mcica_subcol() to distribute
 !!    cloud properties to each g-point.
 
       if ( isubclw > 0 ) then      ! mcica sub-col clouds approx
@@ -1820,7 +1812,7 @@
 
         call mcica_subcol                                               &
 !  ---  inputs:
-     &     ( cldf, nlay, ipseed, dz, de_lgth, alpha,                    &
+     &     ( cldf, nlay, ipseed, dz, de_lgth, alpha, iovr,              &
 !  ---  output:
      &       lcloudy                                                    &
      &     )
@@ -1853,7 +1845,7 @@
 !!\param lcloudy     sub-colum cloud profile flag array
 !!\section mcica_subcol_gen mcica_subcol General Algorithm
       subroutine mcica_subcol                                           &
-     &    ( cldf, nlay, ipseed, dz, de_lgth, alpha,                     & !  ---  inputs
+     &    ( cldf, nlay, ipseed, dz, de_lgth, alpha, iovr,               & !  ---  inputs
      &      lcloudy                                                     & !  ---  outputs
      &    )
 
@@ -1868,22 +1860,20 @@
 !              for lw and sw, use values differ by the number of g-pts. !
 !   dz      - real, layer thickness (km)                           nlay !
 !   de_lgth - real, layer cloud decorrelation length (km)            1  !
-!    alpha  - real, EXP/ER decorrelation parameter                 nlay !
+!   alpha   - real, EXP/ER decorrelation parameter                 nlay !
+!   iovr    - control flag for cloud overlapping method              1  !
+!                 =0:random; =1:maximum/random: =2:maximum; =3:decorr   !
+!                 =4:exponential; =5:exponential-random                 !
 !                                                                       !
 !  output variables:                                                    !
 !   lcloudy - logical, sub-colum cloud profile flag array    ngptlw*nlay!
-!                                                                       !
-!  other control flags from module variables:                           !
-!     iovr    : control flag for cloud overlapping method               !
-!                 =0:random; =1:maximum/random: =2:maximum; =3:decorr   !
-!                 =4:exponential; =5:exponential-random                 !
 !                                                                       !
 !  =====================    end of definitions    ====================  !
 
       implicit none
 
 !  ---  inputs:
-      integer, intent(in) :: nlay, ipseed
+      integer, intent(in) :: nlay, ipseed, iovr
 
       real (kind=kind_phys), dimension(nlay), intent(in) :: cldf, dz
       real (kind=kind_phys),                  intent(in) :: de_lgth
@@ -7635,7 +7625,9 @@
                return
 
             elseif(inflag .eq. 1) then
-                stop 'INFLAG = 1 OPTION NOT AVAILABLE WITH MCICA'
+                errflg = 1
+                errmsg = 'ERROR(rlwinit): INFLAG = 1 OPTION NOT AVAILABLE WITH MCICA'
+                return
 !               cwp = ciwpmc(ig,lay) + clwpmc(ig,lay)
 !               taucmc(ig,lay) = abscld1 * cwp
 
