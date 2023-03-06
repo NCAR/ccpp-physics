@@ -25,25 +25,25 @@
 
         implicit none
         
-        logical,             intent(in)  :: do_mynnedmf
-        logical,             intent(in)  :: lheatstrg
-        character(len=*),    intent(out) :: errmsg
-        integer,             intent(out) :: errflg
+        logical,        intent(in)  :: do_mynnedmf
+        logical,        intent(in)  :: lheatstrg
+        character(len=*),intent(out):: errmsg
+        integer,        intent(out) :: errflg
 
-        real(kind=kind_phys),intent(in)  :: con_xlv
-        real(kind=kind_phys),intent(in)  :: con_xlf
-        real(kind=kind_phys),intent(in)  :: con_rv
-        real(kind=kind_phys),intent(in)  :: con_rd
-        real(kind=kind_phys),intent(in)  :: con_ep2
-        real(kind=kind_phys),intent(in)  :: con_grav
-        real(kind=kind_phys),intent(in)  :: con_cp
-        real(kind=kind_phys),intent(in)  :: con_cpv
-        real(kind=kind_phys),intent(in)  :: con_rcp
-        real(kind=kind_phys),intent(in)  :: con_p608
-        real(kind=kind_phys),intent(in)  :: con_cliq
-        real(kind=kind_phys),intent(in)  :: con_cice
-        real(kind=kind_phys),intent(in)  :: con_karman
-        real(kind=kind_phys),intent(in)  :: con_t0c
+        real(kind_phys),intent(in)  :: con_xlv
+        real(kind_phys),intent(in)  :: con_xlf
+        real(kind_phys),intent(in)  :: con_rv
+        real(kind_phys),intent(in)  :: con_rd
+        real(kind_phys),intent(in)  :: con_ep2
+        real(kind_phys),intent(in)  :: con_grav
+        real(kind_phys),intent(in)  :: con_cp
+        real(kind_phys),intent(in)  :: con_cpv
+        real(kind_phys),intent(in)  :: con_rcp
+        real(kind_phys),intent(in)  :: con_p608
+        real(kind_phys),intent(in)  :: con_cliq
+        real(kind_phys),intent(in)  :: con_cice
+        real(kind_phys),intent(in)  :: con_karman
+        real(kind_phys),intent(in)  :: con_t0c
 
         ! Initialize CCPP error handling variables
         errmsg = ''
@@ -172,7 +172,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      implicit none
 !------------------------------------------------------------------- 
 
-     real(kind=kind_phys)          :: huge
+     real(kind_phys)               :: huge
      character(len=*), intent(out) :: errmsg
      integer, intent(out)          :: errflg
 
@@ -207,11 +207,11 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &       imp_physics_nssl, imp_physics_fa,              &
      &       spp_pbl,                                       &
      &       tke_budget
-      real(kind=kind_phys), intent(in) ::                   &
+      real(kind_phys), intent(in) ::                        &
      &       bl_mynn_closure
 
 !TENDENCY DIAGNOSTICS
-      real(kind=kind_phys), intent(inout), optional :: dtend(:,:,:)
+      real(kind_phys), intent(inout), optional :: dtend(:,:,:)
       integer, intent(in) :: dtidx(:,:)
       integer, intent(in) :: index_of_temperature, index_of_x_wind
       integer, intent(in) :: index_of_y_wind, index_of_process_pbl
@@ -228,7 +228,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
       LOGICAL, PARAMETER :: cycling = .false.
 
 !MYNN-1D
-      REAL(kind=kind_phys), intent(in) :: delt, dtf
+      REAL(kind_phys), intent(in) :: delt, dtf
       INTEGER, intent(in) :: im, levs
       LOGICAL, intent(in) :: flag_init, flag_restart
       INTEGER :: initflag, k, i
@@ -236,31 +236,31 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &           IMS,IME,JMS,JME,KMS,KME,                                &
      &           ITS,ITE,JTS,JTE,KTS,KTE
 
-      REAL(kind=kind_phys) :: tem
+      REAL(kind_phys) :: tem
 
 !MYNN-3D
-      real(kind=kind_phys), dimension(:,:), intent(in)    :: phii
-      real(kind=kind_phys), dimension(:,:), intent(inout) ::             &
+      real(kind_phys), dimension(:,:), intent(in)    :: phii
+      real(kind_phys), dimension(:,:), intent(inout) ::                  &
      &        dtdt, dudt, dvdt,                                          &
      &        dqdt_water_vapor, dqdt_liquid_cloud, dqdt_ice_cloud,       &
      &        dqdt_snow_cloud,                                           &
      &        dqdt_cloud_droplet_num_conc, dqdt_ice_num_conc,            &
      &        dqdt_ozone, dqdt_water_aer_num_conc, dqdt_ice_aer_num_conc
-      real(kind=kind_phys), dimension(:,:), intent(inout) ::dqdt_cccn
-      real(kind=kind_phys), dimension(:,:), intent(inout) ::             &
+      real(kind_phys), dimension(:,:), intent(inout) ::dqdt_cccn
+      real(kind_phys), dimension(:,:), intent(inout) ::                  &
      &        qke, qke_adv, EL_PBL, Sh3D, Sm3D,                          &
      &        qc_bl, qi_bl, cldfra_bl
      !These 10 arrays are only allocated when bl_mynn_output > 0
-      real(kind=kind_phys), dimension(:,:), intent(inout) ::             &
+      real(kind_phys), dimension(:,:), intent(inout) ::                  &
      &        edmf_a,edmf_w,edmf_qt,                                     &
      &        edmf_thl,edmf_ent,edmf_qc,                                 &
      &        sub_thl,sub_sqv,det_thl,det_sqv
-      real(kind=kind_phys), dimension(:,:), intent(inout) ::             &
+      real(kind_phys), dimension(:,:), intent(inout) ::                  &
      &        dqke,qWT,qSHEAR,qBUOY,qDISS
-      real(kind=kind_phys), dimension(:,:), intent(inout) ::             &
+      real(kind_phys), dimension(:,:), intent(inout) ::                  &
      &        t3d,qgrs_water_vapor,qgrs_liquid_cloud,qgrs_ice_cloud,     &
      &        qgrs_snow_cloud
-      real(kind=kind_phys), dimension(:,:), intent(in) ::                &
+      real(kind_phys), dimension(:,:), intent(in) ::                     &
      &        u,v,omega,                                                 &
      &        exner,prsl,prsi,                                           &
      &        qgrs_cloud_droplet_num_conc,                               &
@@ -268,37 +268,37 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &        qgrs_ozone,                                                &
      &        qgrs_water_aer_num_conc,                                   &
      &        qgrs_ice_aer_num_conc
-      real(kind=kind_phys), dimension(:,:), intent(in) ::qgrs_cccn
-      real(kind=kind_phys), dimension(:,:), intent(out) ::               &
+      real(kind_phys), dimension(:,:), intent(in)  ::qgrs_cccn
+      real(kind_phys), dimension(:,:), intent(out) ::                    &
      &        Tsq, Qsq, Cov, exch_h, exch_m
-      real(kind=kind_phys), dimension(:), intent(in) :: xmu
-      real(kind=kind_phys), dimension(:,:), intent(in) :: htrsw, htrlw
+      real(kind_phys), dimension(:), intent(in) :: xmu
+      real(kind_phys), dimension(:,:), intent(in) :: htrsw, htrlw
       ! spp_wts_pbl only allocated if spp_pbl == 1
-      real(kind=kind_phys), dimension(:,:),       intent(in) :: spp_wts_pbl
+      real(kind_phys), dimension(:,:),       intent(in) :: spp_wts_pbl
 
      !LOCAL
-      real(kind=kind_phys), dimension(im,levs) ::                        &
+      real(kind_phys), dimension(im,levs) ::                             &
      &        sqv,sqc,sqi,sqs,qnc,qni,ozone,qnwfa,qnifa,qnbca,           &
      &        dz, w, p, rho, th, qv, delp,                               &
      &        RUBLTEN, RVBLTEN, RTHBLTEN, RQVBLTEN,                      &
      &        RQCBLTEN, RQNCBLTEN, RQIBLTEN, RQNIBLTEN, RQSBLTEN,        &
      &        RQNWFABLTEN, RQNIFABLTEN, RQNBCABLTEN
-      real(kind=kind_phys), allocatable :: old_ozone(:,:)
+      real(kind_phys), allocatable :: old_ozone(:,:)
 
 !smoke/chem arrays
-      real(kind=kind_phys), dimension(:), intent(inout) :: frp
+      real(kind_phys), dimension(:), intent(inout) :: frp
       logical, intent(in) :: mix_chem, enh_mix, rrfs_sd
       logical, parameter  :: smoke_dbg = .false. !set temporarily
-      real(kind=kind_phys), dimension(:,:,:), intent(inout) :: chem3d
-      real(kind=kind_phys), dimension(im)   :: emis_ant_no
-      real(kind=kind_phys), dimension(im,ndvel) :: vdep
+      real(kind_phys), dimension(:,:,:), intent(inout) :: chem3d
+      real(kind_phys), dimension(im)   :: emis_ant_no
+      real(kind_phys), dimension(im,ndvel) :: vdep
 
 !MYNN-2D
-      real(kind=kind_phys), dimension(:), intent(in) ::                  &
+      real(kind_phys), dimension(:), intent(in) ::                       &
      &        dx,zorl,slmsk,tsurf,qsfc,ps,                               &
      &        hflx,qflx,ust,wspd,rb,recmol
 
-      real(kind=kind_phys), dimension(:), intent(in) ::                  &
+      real(kind_phys), dimension(:), intent(in) ::                       &
      &        dusfc_cice,dvsfc_cice,dtsfc_cice,dqsfc_cice,               &
      &        stress_wat,hflx_wat,qflx_wat,                              &
      &        oceanfrac,fice
@@ -306,26 +306,26 @@ SUBROUTINE mynnedmf_wrapper_run(        &
       logical, dimension(:), intent(in) ::                               &
      &        wet, dry, icy
 
-      real(kind=kind_phys), dimension(:), intent(inout) ::               &
+      real(kind_phys), dimension(:), intent(inout) ::                    &
      &        pblh,dusfc_diag,dvsfc_diag,dtsfc_diag,dqsfc_diag
-      real(kind=kind_phys), dimension(:), intent(out) ::                 &
+      real(kind_phys), dimension(:), intent(out) ::                      &
      &        ch,dtsfc1,dqsfc1,dusfc1,dvsfc1,                            &
      &        dtsfci_diag,dqsfci_diag,dusfci_diag,dvsfci_diag,           &
      &        maxMF
       integer, dimension(:), intent(inout) ::                            &
      &        kpbl,nupdraft,ktop_plume
 
-      real(kind=kind_phys), dimension(:), intent(inout) ::               &
+      real(kind_phys), dimension(:), intent(inout) ::                    &
      &        dusfc_cpl,dvsfc_cpl,dtsfc_cpl,dqsfc_cpl
-      real(kind=kind_phys), dimension(:), intent(inout) ::               &
+      real(kind_phys), dimension(:), intent(inout) ::                    &
      &        dusfci_cpl,dvsfci_cpl,dtsfci_cpl,dqsfci_cpl
 
      !LOCAL
-      real, dimension(im) ::                                             &
+      real(kind_phys), dimension(im) ::                                  &
      &        hfx,qfx,rmol,xland,uoce,voce,znt,ts
       integer :: idtend
-      real, dimension(im) :: dusfci1,dvsfci1,dtsfci1,dqsfci1
-      real(kind=kind_phys), allocatable :: save_qke_adv(:,:)
+      real(kind_phys), dimension(im) :: dusfci1,dvsfci1,dtsfci1,dqsfci1
+      real(kind_phys), allocatable :: save_qke_adv(:,:)
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -1024,8 +1024,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
   CONTAINS
 
     SUBROUTINE dtend_helper(itracer,field,mult)
-      real(kind=kind_phys), intent(in) :: field(im,levs)
-      real(kind=kind_phys), intent(in), optional :: mult(im,levs)
+      real(kind_phys), intent(in) :: field(im,levs)
+      real(kind_phys), intent(in), optional :: mult(im,levs)
       integer, intent(in) :: itracer
       integer :: idtend
       
@@ -1055,9 +1055,9 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 
     implicit none
     integer,  intent(in)     :: kte
-    real(kind=kind_phys), intent(in)     :: delt
-    real(kind=kind_phys), dimension(kte), intent(in)     :: dp, exner
-    real(kind=kind_phys), dimension(kte), intent(inout)  :: qv, qc, qi, qs, th
+    real(kind_phys), intent(in)     :: delt
+    real(kind_phys), dimension(kte), intent(in)     :: dp, exner
+    real(kind_phys), dimension(kte), intent(inout)  :: qv, qc, qi, qs, th
     integer   k
     real ::  dqc2, dqi2, dqs2, dqv2, sum, aa, dum
     real, parameter :: qvmin1= 1e-8,    & !min at k=1
