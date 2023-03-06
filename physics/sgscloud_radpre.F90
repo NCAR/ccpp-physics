@@ -45,6 +45,7 @@
            qr, qs, qg,                   &
            qci_conv,ud_mf,               &
            imfdeepcnv, imfdeepcnv_gf,    &
+           imfdeepcnv_unified,           &
            qc_save, qi_save, qs_save,    &
            qc_bl,qi_bl,cldfra_bl,        &
            delp,clouds1,clouds2,clouds3, &
@@ -71,7 +72,7 @@
       real :: xls, xlvcp, xlscp !derived below
       real(kind=kind_phys)             :: gfac
       integer,             intent(in)  :: im, levs, imfdeepcnv, imfdeepcnv_gf, &
-           &               nlay, imp_physics, imp_physics_gfdl
+           &               imfdeepcnv_unified, nlay, imp_physics, imp_physics_gfdl
       logical,             intent(in)  :: flag_init, flag_restart, do_mynnedmf
 
       real(kind=kind_phys), dimension(:,:), intent(inout) :: qc, qi
@@ -267,7 +268,7 @@
         ! At this point, we have cloud properties for all non-deep convective clouds.
         ! So now we add the convective clouds:
 
-        if (imfdeepcnv == imfdeepcnv_gf) then
+        if (imfdeepcnv == imfdeepcnv_gf .or. imfdeepcnv == imfdeepcnv_unified) then
           do k = 1, levs
             do i = 1, im
               !if ( qci_conv(i,k) > 0. .AND. (qi(i,k) < 1E-7 .AND. qc(i,k) < 1E-7 ) ) then
@@ -354,7 +355,7 @@
               endif ! qci_conv
             enddo
           enddo
-        endif ! imfdeepcnv_gf
+        endif ! imfdeepcnv
 
       endif ! timestep > 1
 

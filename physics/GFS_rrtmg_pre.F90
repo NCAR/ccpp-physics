@@ -18,7 +18,7 @@
 !!    
 !>\section rrtmg_pre_gen General Algorithm
       subroutine GFS_rrtmg_pre_run (im, levs, lm, lmk, lmp, lextop, ltp,       &
-        n_var_lndp, imfdeepcnv, imfdeepcnv_gf, me, ncnd, ntrac, num_p3d,       &
+        n_var_lndp, imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_unified, me, ncnd, ntrac, num_p3d,  &
         npdf3d, ncnvcld3d, ntqv, ntcw,ntiw, ntlnc, ntinc, ntrnc, ntsnc, ntccn, &
         ntrw, ntsw, ntgl, nthl, ntwa, ntoz,                                    &
         ntclamt, nleffr, nieffr, nseffr, lndp_type, kdt,                       &
@@ -87,7 +87,7 @@
 
       integer,              intent(in)  :: im, levs, lm, lmk, lmp, ltp,        &
                                            n_var_lndp, imfdeepcnv,             &
-                                           imfdeepcnv_gf, me, ncnd, ntrac,     &
+                                           imfdeepcnv_gf, imfdeepcnv_unified, me, ncnd, ntrac,     &
                                            num_p3d, npdf3d, ncnvcld3d, ntqv,   &
                                            ntcw, ntiw, ntlnc, ntinc,           &
                                            ntrnc, ntsnc,ntccn,                 &
@@ -812,7 +812,7 @@
             enddo
           endif
         elseif (imp_physics == imp_physics_gfdl) then            ! GFDL MP
-          if ((imfdeepcnv==imfdeepcnv_gf) .and. kdt>1) then
+          if ((imfdeepcnv==imfdeepcnv_gf .or. imfdeepcnv==imfdeepcnv_unified) .and. kdt>1) then
               do k=1,lm
                 k1 = k + kd
                 do i=1,im
@@ -969,7 +969,7 @@
      &       imp_physics_mg, iovr_rand, iovr_maxrand, iovr_max,         &
      &       iovr_dcorr, iovr_exp, iovr_exprand, idcor_con,             &
      &       idcor_hogan, idcor_oreopoulos,                             &
-     &       imfdeepcnv, imfdeepcnv_gf, do_mynnedmf, lgfdlmprad,        &
+     &       imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_unified, do_mynnedmf, lgfdlmprad,        &
      &       uni_cld, lmfshal, lmfdeep2, cldcov, clouds1,               &
      &       effrl, effri, effrr, effrs, effr_in,                       &
      &       effrl_inout, effri_inout, effrs_inout,                     &

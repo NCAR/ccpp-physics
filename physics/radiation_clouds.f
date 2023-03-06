@@ -32,7 +32,7 @@
 !            imp_physics_mg, iovr_rand, iovr_maxrand, iovr_max,        !
 !            iovr_dcorr, iovr_exp, iovr_exprand, idcor_con,            !
 !            idcor_hogan, idcor_oreopoulos,                            !
-!            imfdeepcnv, imfdeepcnv_gf, do_mynnedmf, lgfdlmprad,       !
+!            imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_unified, do_mynnedmf, lgfdlmprad,       !
 !            uni_cld, lmfshal, lmfdeep2, cldcov, clouds1,              !
 !            effrl, effri, effrr, effrs, effr_in,                      !
 !            effrl_inout, effri_inout, effrs_inout,                    !
@@ -402,7 +402,8 @@
      &       imp_physics_mg, iovr_rand, iovr_maxrand, iovr_max,         &
      &       iovr_dcorr, iovr_exp, iovr_exprand, idcor_con,             &
      &       idcor_hogan, idcor_oreopoulos,                             &
-     &       imfdeepcnv, imfdeepcnv_gf, do_mynnedmf, lgfdlmprad,        &
+     &       imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_unified, do_mynnedmf,&
+     &        lgfdlmprad,                                               &
      &       uni_cld, lmfshal, lmfdeep2, cldcov, clouds1,               &
      &       effrl, effri, effrr, effrs, effr_in,                       &
      &       effrl_inout, effri_inout, effrs_inout,                     &
@@ -501,6 +502,7 @@
 !   idcor_oreopoulos:  choice for decorrelation-length: (=2)
 !   imfdeepcnv      :  flag for mass-flux deep convection scheme        !
 !   imfdeepcnv_gf   :  flag for scale- & aerosol-aware Grell-Freitas scheme (GSD)
+!   imfdeepcnv_unified   :  flag for unified convection scheme
 !   do_mynnedmf     :  flag for MYNN-EDMF                               !
 !   lgfdlmprad      :  flag for GFDLMP radiation interaction            !
 !   uni_cld         : logical - true for cloud fraction from shoc       !
@@ -751,7 +753,8 @@
 
         elseif ( imp_physics == imp_physics_nssl ) then                              ! NSSL MP
 
-          if(do_mynnedmf .or. imfdeepcnv == imfdeepcnv_gf ) then ! MYNN PBL or GF conv
+          if(do_mynnedmf .or. imfdeepcnv == imfdeepcnv_gf .or.          &
+             imfdeepcnv == imfdeepcnv_unified) then ! MYNN PBL or GF or unified conv
               !-- MYNN PBL or convective GF
               !-- use cloud fractions with SGS clouds
               do k=1,NLAY
@@ -790,7 +793,8 @@
 
         elseif(imp_physics == imp_physics_thompson) then                              ! Thompson MP
 
-          if(do_mynnedmf .or. imfdeepcnv == imfdeepcnv_gf ) then ! MYNN PBL or GF conv
+          if(do_mynnedmf .or. imfdeepcnv == imfdeepcnv_gf               &
+          .or. imfdeepcnv == imfdeepcnv_unified) then                ! MYNN PBL or GF conv
 
             if (icloud == 3) then
               call progcld_thompson (plyr,plvl,tlyr,qlyr,qstl,rhly,     & !  --- inputs
