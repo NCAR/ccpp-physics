@@ -17,10 +17,10 @@
 !! \htmlinclude GFS_rrtmg_pre_run.html
 !!    
 !>\section rrtmg_pre_gen General Algorithm
-
-      subroutine GFS_rrtmg_pre_run (im, levs, lm, lmk, lmp, lextop, ltp,       &
-        n_var_lndp, imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_unified, me, ncnd, ntrac, num_p3d,  &
-        npdf3d, ncnvcld3d, ntqv, ntcw,ntiw, ntlnc, ntinc, ntrnc, ntsnc, ntccn, &
+      subroutine GFS_rrtmg_pre_run (im, levs, lm, lmk, lmp, n_var_lndp, lextop,&
+        ltp, imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_unified, me, ncnd, ntrac,   &
+        num_p3d, npdf3d,                                                       &
+        ncnvcld3d,ntqv, ntcw,ntiw, ntlnc, ntinc, ntrnc, ntsnc, ntccn, top_at_1,&
         ntrw, ntsw, ntgl, nthl, ntwa, ntoz,                                    &
         ntclamt, nleffr, nieffr, nseffr, lndp_type, kdt,                       &
         ntdu1, ntdu2, ntdu3, ntdu4, ntdu5, ntss1, ntss2,                       &
@@ -85,7 +85,8 @@
 
       integer,              intent(in)  :: im, levs, lm, lmk, lmp, ltp,        &
                                            n_var_lndp, imfdeepcnv,             &
-                                           imfdeepcnv_gf, imfdeepcnv_unified, me, ncnd, ntrac,     &
+                                           imfdeepcnv_gf, imfdeepcnv_unified,  & 
+                                           me, ncnd, ntrac,                    &
                                            num_p3d, npdf3d, ncnvcld3d, ntqv,   &
                                            ntcw, ntiw, ntlnc, ntinc,           &
                                            ntrnc, ntsnc,ntccn,                 &
@@ -967,10 +968,11 @@
      &       imp_physics, imp_physics_nssl, imp_physics_fer_hires,      &
      &       imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,  &
      &       imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,          &
-     &       imp_physics_mg, iovr_rand, iovr_maxrand, iovr_max,         &
-     &       iovr_dcorr, iovr_exp, iovr_exprand, idcor_con,             &
-     &       idcor_hogan, idcor_oreopoulos,                             &
-     &       imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_unified, do_mynnedmf, lgfdlmprad,        &
+     &       imp_physics_mg, iovr, iovr_rand, iovr_maxrand, iovr_max,   &
+     &       iovr_dcorr, iovr_exp, iovr_exprand, idcor, idcor_con,      &
+     &       idcor_hogan, idcor_oreopoulos, lcrick, lcnorm,             &
+     &       imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_gf, do_mynnedmf,     &
+     &       lgfdlmprad,                                                &
      &       uni_cld, lmfshal, lmfdeep2, cldcov, clouds1,               &
      &       effrl, effri, effrr, effrs, effr_in,                       &
      &       effrl_inout, effri_inout, effrs_inout,                     &

@@ -98,6 +98,7 @@ contains
               ,hfx           &  ! w/m2, positive upward
               ,qfx           &  ! w/m2, positive upward
               ,dx            &  ! dx is grid point dependent here
+              ,do_ca         &  ! Flag to turn on cellular automata
               ,ca_deep       &  ! cellular automaton for deep convection
               ,mconv         &  ! integrated vertical advection of moisture
               ,omeg          &  ! omega (pa/s)
@@ -368,6 +369,7 @@ contains
 
      integer :: jprnt,jmini,start_k22
      logical :: keep_going,flg(its:ite)
+     logical :: do_ca
 !$acc declare create(flg)
      
      character*50 :: ierrc(its:ite)

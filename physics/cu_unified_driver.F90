@@ -57,9 +57,9 @@ contains
 !!
 !>\section gen_unified_driver Grell-Freitas Cumulus Scheme Driver General Algorithm
       subroutine cu_unified_driver_run(ntracer,garea,im,km,dt,flag_init,flag_restart,&
-               cactiv,cactiv_m,g,cp,xlv,r_v,forcet,forceqv_spechum,phil,raincv, &
+               do_ca,cactiv,cactiv_m,g,cp,xlv,r_v,forcet,forceqv_spechum,phil,raincv, &
                qv_spechum,t,cld1d,us,vs,t2di,w,qv2di_spechum,p2di,psuri,        &
-               hbot,htop,kcnv,xland,hfx2,qfx2,aod_gf,cliw,clcw,                 &
+               hbot,htop,kcnv,xland,hfx2,qfx2,aod_gf,cliw,clcw,ca_deep,rainevap,&
                pbl,ud_mf,dd_mf,dt_mf,cnvw_moist,cnvc,imfshalcnv,                &
                flag_for_scnv_generic_tend,flag_for_dcnv_generic_tend,           &
                dtend,dtidx,ntqv,ntiw,ntcw,index_of_temperature,index_of_x_wind, &
@@ -92,7 +92,7 @@ contains
    integer      :: its,ite, jts,jte, kts,kte
    integer, intent(in   ) :: im,km,ntracer
    logical, intent(in   ) :: flag_init, flag_restart
-   logical, intent(in   ) :: flag_for_scnv_generic_tend,flag_for_dcnv_generic_tend
+   logical, intent(in   ) :: flag_for_scnv_generic_tend,flag_for_dcnv_generic_tend,do_ca
    real (kind=kind_phys), intent(in) :: g,cp,xlv,r_v
    logical, intent(in   ) :: ldiag3d
 
@@ -127,9 +127,9 @@ contains
    integer, dimension (im) :: tropics
 !$acc declare create(tropics)
 !  ruc variable
-   real(kind=kind_phys), dimension (:),   intent(in)  :: hfx2,qfx2,psuri
+   real(kind=kind_phys), dimension (:),   intent(in)  :: hfx2,qfx2,psuri,ca_deep
    real(kind=kind_phys), dimension (:,:), intent(out) :: ud_mf,dd_mf,dt_mf
-   real(kind=kind_phys), dimension (:),   intent(out) :: raincv,cld1d
+   real(kind=kind_phys), dimension (:),   intent(out) :: raincv,cld1d,rainevap
    real(kind=kind_phys), dimension (:,:), intent(in)  :: t2di,p2di
 !$acc declare copyin(hfx2,qfx2,psuri,t2di,p2di)
 !$acc declare copyout(ud_mf,dd_mf,dt_mf,raincv,cld1d)
@@ -680,9 +680,10 @@ contains
               ,hfx           &
               ,qfx           &
               ,dx            & !hj dx(im)
+              ,do_ca         &  
+              ,ca_deep       &  
               ,mconv         &
               ,omeg          &
-
               ,cactiv_m      &
               ,cnvwtm        &
               ,zum           &
@@ -703,6 +704,7 @@ contains
               ,ktopm         &
               ,cupclwm       &
               ,frhm          &
+              ,rainevap      &
               ,ierrm         &
               ,ierrcm        &
 !    the following should be set to zero if not available
@@ -762,6 +764,8 @@ contains
               ,hfx           &
               ,qfx           &
               ,dx            & !hj replace dx(im)
+              ,do_ca         &
+              ,ca_deep       &
               ,mconv         &
               ,omeg          &
 
@@ -785,6 +789,7 @@ contains
               ,ktop         &
               ,cupclw       &
               ,frhd         &
+              ,rainevap     &
               ,ierr         &
               ,ierrc        &
 !    the following should be set to zero if not available

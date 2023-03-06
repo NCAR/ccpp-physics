@@ -120,6 +120,13 @@
   dimensions = ()
   type = logical
   intent = in
+[do_ca]
+  standard_name = flag_for_cellular_automata
+  long_name = cellular automata main switch
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in	
 [cactiv]
   standard_name = counter_for_grell_freitas_convection
   long_name = convective activity memory
