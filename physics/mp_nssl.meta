@@ -174,7 +174,7 @@
   kind = kind_phys
   intent = in
 [nssl_ehw0_in]
-  standard_name = nssl_hw_collec_eff
+  standard_name = nssl_graupel_collection_efficiency 
   long_name = graupel droplet collection efficiency in NSSL micro
   units = none
   dimensions = ()
@@ -182,8 +182,8 @@
   kind = kind_phys
   intent = in
 [nssl_ehlw0_in]
-  standard_name = nssl_hlw_collec_eff
-  long_name = graupel droplet collection efficiency in NSSL micro
+  standard_name = nssl_hail_collection_efficiency 
+  long_name = hail droplet collection efficiency in NSSL micro
   units = none
   dimensions = ()
   type = real
