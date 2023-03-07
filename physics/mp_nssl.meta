@@ -151,7 +151,7 @@
   intent = in
 [nssl_alphah]
   standard_name = nssl_alpha_graupel
-  long_name = graupel PSD shape parameter in NSSL micro
+  long_name = graupel particle size distribution(PSD) shape parameter in NSSL microphysics scheme
   units = none
   dimensions = ()
   type = real
@@ -159,7 +159,7 @@
   intent = in
 [nssl_alphahl]
   standard_name = nssl_alpha_hail
-  long_name = hail PSD shape parameter in NSSL micro
+  long_name = hail particle size distribution(PSD) shape parameter in NSSL microphysics scheme
   units = none
   dimensions = ()
   type = real
@@ -167,7 +167,7 @@
   intent = in
 [nssl_alphar]
   standard_name = nssl_alpha_rain
-  long_name = rain PSD shape parameter in NSSL micro
+  long_name = rain particle size distribution(PSD) shape parameter in NSSL microphysics scheme
   units = none
   dimensions = ()
   type = real
@@ -175,7 +175,7 @@
   intent = in
 [nssl_ehw0_in]
   standard_name = nssl_graupel_collection_efficiency 
-  long_name = graupel droplet collection efficiency in NSSL micro
+  long_name = graupel droplet collection efficiency in NSSL microphysics scheme
   units = none
   dimensions = ()
   type = real
@@ -183,7 +183,7 @@
   intent = in
 [nssl_ehlw0_in]
   standard_name = nssl_hail_collection_efficiency 
-  long_name = hail droplet collection efficiency in NSSL micro
+  long_name = hail droplet collection efficiency in NSSL microphysics scheme
   units = none
   dimensions = ()
   type = real
@@ -191,21 +191,21 @@
   intent = in
 [nssl_ccn_on]
   standard_name = nssl_ccn_on
-  long_name = CCN activation flag in NSSL micro
+  long_name = CCN activation flag in NSSL microphysics scheme
   units = flag
   dimensions = ()
   type = logical
   intent = in
 [nssl_hail_on]
   standard_name = nssl_hail_on
-  long_name = hail activation flag in NSSL micro
+  long_name = hail activation flag in NSSL microphysics scheme
   units = flag
   dimensions = ()
   type = logical
   intent = in
 [nssl_invertccn]
   standard_name = nssl_invertccn
-  long_name = flag to invert CCN in NSSL micro
+  long_name = flag to invert CCN in NSSL microphysics scheme
   units = flag
   dimensions = ()
   type = logical
@@ -595,21 +595,21 @@
   intent = in
 [nssl_ccn_on]
   standard_name = nssl_ccn_on
-  long_name = CCN activation flag in NSSL micro
+  long_name = CCN activation flag in NSSL microphysics scheme
   units = flag
   dimensions = ()
   type = logical
   intent = in
 [nssl_hail_on]
   standard_name = nssl_hail_on
-  long_name = hail activation flag in NSSL micro
+  long_name = hail activation flag in NSSL microphysics scheme
   units = flag
   dimensions = ()
   type = logical
   intent = in
 [nssl_invertccn]
   standard_name = nssl_invertccn
-  long_name = flag to invert CCN in NSSL micro
+  long_name = flag to invert CCN in NSSL microphysics scheme
   units = flag
   dimensions = ()
   type = logical
