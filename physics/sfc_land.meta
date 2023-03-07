@@ -122,6 +122,22 @@
   type = real
   kind = kind_phys
   intent = in
+[cmm_lnd]
+  standard_name = surface_drag_wind_speed_for_momentum_in_air_over_land_from_land
+  long_name = momentum exchange coefficient over land for coupling
+  units = m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[chh_lnd]
+  standard_name = surface_drag_mass_flux_for_heat_and_moisture_in_air_over_land_from_land
+  long_name = thermal exchange coefficient over land for coupling
+  units = kg m-2 s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
 [sncovr1]
   standard_name = surface_snow_area_fraction_over_land
   long_name = surface snow area fraction
@@ -197,6 +213,22 @@
 [drain]
   standard_name = subsurface_runoff_flux
   long_name = subsurface runoff flux
+  units = kg m-2 s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[cmm]
+  standard_name = surface_drag_wind_speed_for_momentum_in_air_over_land
+  long_name = momentum exchange coefficient over land
+  units = m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[chh]
+  standard_name = surface_drag_mass_flux_for_heat_and_moisture_in_air_over_land
+  long_name = thermal exchange coefficient over land
   units = kg m-2 s-1
   dimensions = (horizontal_loop_extent)
   type = real
