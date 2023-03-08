@@ -30,8 +30,9 @@
       NAMELIST /SOIL_VEG_RUC/ SLOPE_DATA, ALBTBL, Z0TBL, LEMITBL,       &
      &  PCTBL, SHDTBL,                                                  &
      &  IFORTBL, RSTBL, RGLTBL, HSTBL, SNUPTBL, LAITBL, MAXALB,         &
+     &  MFSNO, SNCOVFAC,                                                &
      &  LPARAM, TOPT_DATA, CMCMAX_DATA, CFACTR_DATA,                    &
-     &  RSMAX_DATA, BARE, NATURAL, CROP, URBAN,                         &
+     &  RSMAX_DATA, BARE, GLACIER, NATURAL, CROP, URBAN,                &
      &  DEFINED_VEG, DEFINED_SOIL, DEFINED_SLOPE,                       &
      &  BB, DRYSMC, HC, MAXSMC, REFSMC, SATPSI, SATDK, SATDW,           &
      &  WLTSMC, QTZ, mosaic_soil, mosaic_lu,                            &
@@ -200,15 +201,41 @@
      &               70., 55., 60., 75., 70.,  0.,  0.,  0.,    &
      &                0.,  0.,  0.,  0.,  0.,  0./) 
 
+       mfsno =        &  !< modified for RRFS Noah_MP snowmelt curve parameter ()
+     &                  (/  1.00, 1.00, 1.00, 1.00, 2.00, 2.00, &
+     &                      2.00, 2.00, 2.00, 2.00, 2.00, 2.00, &
+     &                      3.00, 3.00, 2.00, 2.00, 2.00, 2.00, &
+     &                      2.00, 2.00, 0.00, 0.00, 0.00, 0.00, &
+!     &                      3.00, 3.00, 2.00, 3.00, 3.00, 3.00, &
+!     &                      3.00, 3.00, 0.00, 0.00, 0.00, 0.00, &
+     &                      0.00, 0.00, 0.00, 0.00, 0.00, 0.00 /)
+
+!-- Noah MP snowmelt curve values
+!     &                  (/  1.00, 1.00, 1.00, 1.00, 1.00, 2.00, &
+!     &                      2.00, 2.00, 2.00, 2.00, 3.00, 3.00, &
+!     &                      4.00, 4.00, 2.50, 3.00, 3.00, 3.50, &
+!     &                      3.50, 3.50, 0.00, 0.00, 0.00, 0.00, &
+!     &                      0.00, 0.00, 0.00, 0.00, 0.00, 0.00 /)
+
+       sncovfac =      &  !< Noah_MP snow cover factor (m), first 5 categories are modified for RRFS
+     &                    (/ 0.030, 0.030, 0.030, 0.030, 0.030, &
+     !&                    (/ 0.008, 0.008, 0.008, 0.008, 0.008, &
+     &                       0.016, 0.016, 0.020, 0.020, 0.020, &
+     &                       0.020, 0.014, 0.042, 0.026, 0.030, &
+     &                       0.016, 0.030, 0.030, 0.030, 0.030, &
+     &                       0.000, 0.000, 0.000, 0.000, 0.000, &
+     &                       0.000, 0.000, 0.000, 0.000, 0.000 /)
+
       natural = 10
-      bare = 16
       crop = 12
       urban = 13
+      glacier = 15
+      bare = 16
       endif
 !  end if veg table
 
 ! - set mosaic_lu=1 when info for fractional landuse is available
-      mosaic_lu = 0
+      mosaic_lu = 1
 
       topt_data =298.0
       cmcmax_data =0.2e-3
@@ -338,12 +365,14 @@
      &            0.000, 0.000, 0.000, 0.000, 0.000, 0.000/)
  
       REFSMC   =(/0.174, 0.179, 0.249, 0.369, 0.369, 0.314,       &
+      !-- test to reduce moist bias
+      !REFSMC   =(/0.220, 0.205, 0.312, 0.375, 0.369, 0.339,       &
      &            0.299, 0.357, 0.391, 0.316, 0.409, 0.400,       &
      &            0.314, 1.000, 0.100, 0.249, 0.454, 0.170,       &
      &            0.236, 0.000, 0.000, 0.000, 0.000, 0.000,       &
      &            0.000, 0.000, 0.000, 0.000, 0.000, 0.000/)
 
-      SATPSI   =(/0.121, 0.090, 0.218, 0.786, 0.786, 0.478,       &
+      SATPSI   =(/0.121, 0.150, 0.218, 0.786, 0.786, 0.478,       &
      &            0.299, 0.356, 0.630, 0.153, 0.490, 0.405,       &
      &            0.478, 0.000, 0.121, 0.218, 0.468, 0.069,       &
      &            0.069, 0.00,  0.00,  0.00,  0.00,  0.00,        &
@@ -413,7 +442,7 @@
          END DO
 
 ! - set mosaic_soil=1 when info for fractional landuse is available
-      mosaic_soil = 0
+      mosaic_soil = 1
 
 ! PT 5/18/2015 - changed to FALSE to match atm_namelist setting
 ! PT LPARAM is not used anywhere
