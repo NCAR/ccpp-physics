@@ -138,6 +138,14 @@
   type = real
   kind = kind_phys
   intent = in
+[zvfun_lnd]
+  standard_name = function_of_surface_roughness_length_and_green_vegetation_fraction_from_land
+  long_name = function of surface roughness length and green vegetation fraction
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
 [sncovr1]
   standard_name = surface_snow_area_fraction_over_land
   long_name = surface snow area fraction
@@ -230,6 +238,14 @@
   standard_name = surface_drag_mass_flux_for_heat_and_moisture_in_air_over_land
   long_name = thermal exchange coefficient over land
   units = kg m-2 s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[zvfun]
+  standard_name = function_of_surface_roughness_length_and_green_vegetation_fraction
+  long_name = function of surface roughness length and green vegetation fraction
+  units = none
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys

@@ -37,10 +37,10 @@
      &     ( im, cpllnd, cpllnd2atm, flag_iter, dry,                    &
      &       sncovr1_lnd, qsurf_lnd, evap_lnd, hflx_lnd,                &
      &       ep_lnd, t2mmp_lnd, q2mp_lnd, gflux_lnd,                    &
-     &       runoff_lnd, drain_lnd, cmm_lnd, chh_lnd,
+     &       runoff_lnd, drain_lnd, cmm_lnd, chh_lnd, zvfun_lnd,        &
 !  ---  outputs:
      &       sncovr1, qsurf, evap, hflx, ep, t2mmp, q2mp,               &
-     &       gflux, runoff, drain, cmm, chh,                            &
+     &       gflux, runoff, drain, cmm, chh, zvfun,                     &
      &       errmsg, errflg, naux2d, aux2d
      &     )
 
@@ -56,9 +56,10 @@
 !            sncovr1_lnd, qsurf_lnd, evap_lnd, hflx_lnd,                !
 !            ep_lnd, t2mmp_lnd, q2mp_lnd, gflux_lnd,                    !
 !            runoff_lnd, drain_lnd, cmm_lnd, chh_lnd,                   !
+!            zvfun_lnd,                                                 !
 !       outputs:                                                        !
 !            sncovr1, qsurf, evap, hflx, ep, t2mmp, q2mp,               !
-!            gflux, runoff, drain, cmm, chh,                            !
+!            gflux, runoff, drain, cmm, chh, zvfun,                     !
 !            errmsg, errflg)                                            !
 !                                                                       !
 !  ====================  defination of variables  ====================  !
@@ -81,6 +82,7 @@
 !     drain_lnd   - real   , subsurface runoff  
 !     cmm_lnd     - real   , surface drag wind speed for momentum
 !     chh_lnd     - real   , surface drag mass flux for heat and moisture
+!     zvfun_lnd   - real   , function of surface roughness length and green vegetation fraction
 !  outputs:
 !     sncovr1     - real   , snow cover over land
 !     qsurf       - real   , specific humidity at sfc
@@ -94,6 +96,7 @@
 !     drain       - real   , subsurface runoff
 !     cmm         - real   , surface drag wind speed for momentum
 !     chh         - real   , surface drag mass flux for heat and moisture
+!     zvfun       - real   , function of surface roughness length and green vegetation fraction
 !  ====================    end of description    =====================  !
 !
 !
@@ -109,12 +112,12 @@
       real (kind=kind_phys), dimension(:), intent(in) ::                &
      &       sncovr1_lnd, qsurf_lnd, evap_lnd, hflx_lnd, ep_lnd,        &
      &       t2mmp_lnd, q2mp_lnd, gflux_lnd, runoff_lnd, drain_lnd,     &
-     &       cmm_lnd, chh_lnd
+     &       cmm_lnd, chh_lnd, zvfun_lnd
 
 !  ---  outputs:
       real (kind=kind_phys), dimension(:), intent(out) ::               &
      &       sncovr1, qsurf, evap, hflx, ep, t2mmp, q2mp, gflux,        &
-     &       runoff, drain, cmm, chh
+     &       runoff, drain, cmm, chh, zvfun
 !
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -145,6 +148,7 @@
          runoff(i)  = runoff_lnd(i)
          cmm(i)     = cmm_lnd(i)
          chh(i)     = chh_lnd(i)
+         zvfun(i)   = zvfun_lnd(i)
       enddo
 
       aux2d(:,1) = sncovr1(:)
@@ -159,6 +163,7 @@
       aux2d(:,10) = runoff(:)
       aux2d(:,11) = cmm(:)
       aux2d(:,12) = chh(:)
+      aux2d(:,13) = zvfun(:)
  
       return
 !-----------------------------------
