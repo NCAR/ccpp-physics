@@ -86,7 +86,7 @@
      &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,dkt,dku,                &
      &     kinver,xkzm_m,xkzm_h,xkzm_s,dspfac,bl_upfr,bl_dnfr,          &
      &     rlmx,elmx,sfc_rlm,tc_pbl,                                    &
-     &     vegtype, lai,                                                &                      
+     &     do_canopy, vegtype, lai,                                     &                      
      &     ntqv,dtend,dtidx,index_of_temperature,index_of_x_wind,       &
      &     index_of_y_wind,index_of_process_pbl,gen_tend,ldiag3d,       &
      &     errmsg,errflg)
@@ -111,6 +111,7 @@
       real(kind=kind_phys), intent(in) :: dspfac, bl_upfr, bl_dnfr
       real(kind=kind_phys), intent(in) :: rlmx, elmx
       !PCC_CANOPY------------------------------------
+      logical, intent(in)  :: do_canopy
       integer, intent(in)  :: vegtype(:)
       real(kind=kind_phys), intent(in) :: lai(:)
       !----------------------------------------------
@@ -307,10 +308,12 @@
 !----------------------------------------------
 
 !PCC_CANOPY------------------------------------
-      if(.not.allocated(EDDYVESTX))
-     & allocate( EDDYVESTX    ( MAXCAN ) )
-      if(.not.allocated(ZCANX))
-     & allocate( ZCANX    ( MAXCAN ) )
+      if (do_canopy) then
+        if(.not.allocated(EDDYVESTX))
+        & allocate( EDDYVESTX    ( MAXCAN ) )
+        if(.not.allocated(ZCANX))
+        & allocate( ZCANX    ( MAXCAN ) )
+      endif
 !----------------------------------------------
 
       if (tc_pbl == 0) then
@@ -1312,6 +1315,7 @@
         enddo
       enddo
       !PCC_CANOPY------------------------------------
+      if (do_canopy) then  
         do k = 1, km1
           do i = 1, im
                       FCH = hvt_table(vegtype(i)) !top of canopy
@@ -1410,6 +1414,7 @@
                       END IF  ! first model layer scaled canopy
           enddo !i
         enddo !k
+      endif !do_canopy
 !> ## Compute TKE.
 !!  - Compute a minimum TKE deduced from background diffusivity for momentum.
 !
