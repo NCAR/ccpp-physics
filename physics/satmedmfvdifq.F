@@ -310,9 +310,9 @@
 !PCC_CANOPY------------------------------------
       if (do_canopy) then
         if(.not.allocated(EDDYVESTX))
-        & allocate( EDDYVESTX    ( MAXCAN ) )
+     &    allocate( EDDYVESTX    ( MAXCAN ) )
         if(.not.allocated(ZCANX))
-        & allocate( ZCANX    ( MAXCAN ) )
+     &    allocate( ZCANX    ( MAXCAN ) )
       endif
 !----------------------------------------------
 
