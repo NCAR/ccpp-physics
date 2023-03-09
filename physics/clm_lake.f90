@@ -236,7 +236,7 @@ MODULE clm_lake
 
          ! Configuration and initialization:
          iopt_lake, iopt_lake_clm, min_lakeice, lakedepth_default, use_lakedepth, &
-         dtp, use_lake_model, clm_lake_initialized, frac_grid, frac_ice,          &
+         dtp, use_lake_model, clm_lake_initialized, frac_grid, frac_ice, lkm,     &
 
          ! Atmospheric model state inputs:
          tg3, pgr, zlvl, gt0, prsi, phii, qvcurr, gu0, gv0, xlat_d, xlon_d,       &
@@ -276,6 +276,7 @@ MODULE clm_lake
     INTEGER , INTENT (IN) :: im,km,me,master
     INTEGER, INTENT(IN) :: IDATE(4), kdt
     REAL(KIND_PHYS), INTENT(IN) :: fhour
+    INTEGER, INTENT(IN) :: lkm
 
     !
     ! Configuration and initialization:
@@ -470,6 +471,11 @@ MODULE clm_lake
 
       errmsg = ' '
       errflg = 0
+
+      if(iopt_lake/=iopt_lake_clm .or. lkm==0) then
+        return ! nothing to do
+      endif
+
       dtime=dtp
 
       if(LAKEDEBUG) then
@@ -5741,7 +5747,7 @@ if_pergro: if (PERGRO) then
       endif
     end if
 
-    do k = 0, snl2d(i)+1, -1
+    do k = 0, nint(snl2d(i)+1), -1
       z3d(i,k)    = zi3d(i,k) - 0.5_kind_lake*dz3d(i,k)
       zi3d(i,k-1) = zi3d(i,k) - dz3d(i,k)
     end do
@@ -5775,7 +5781,7 @@ if_pergro: if (PERGRO) then
      enddo
 
     if (snl2d(i) < 0) then
-      do k = snl2d(i)+1, 0
+      do k = nint(snl2d(i)+1), 0
         ! Be careful because there may be new snow layers with bad temperatures like 0 even if
         ! coming from init. con. file.
         if(t_soisno3d(i,k) > 300 .or. t_soisno3d(i,k) < 200) t_soisno3d(i,k) = min(tfrz,tsfc(i))
