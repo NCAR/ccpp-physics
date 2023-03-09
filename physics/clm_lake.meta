@@ -131,6 +131,13 @@
   dimensions = ()
   type = logical
   intent = in
+[lkm]
+  standard_name = control_for_lake_model_execution_method
+  long_name = control for lake model execution: 0=no lake, 1=lake, 2=lake+nsst
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
 [tg3]
   standard_name = deep_soil_temperature
   long_name = deep soil temperature
