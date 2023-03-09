@@ -125,13 +125,6 @@
   dimensions = ()
   type = logical
   intent = in
-[lheatstrg]
-  standard_name = flag_for_canopy_heat_storage_in_land_surface_scheme
-  long_name = flag for canopy heat storage parameterization
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -303,7 +296,7 @@
   type = real
   kind = kind_phys
   intent = inout
-[qgrs_ice_cloud]
+[qgrs_ice]
   standard_name = cloud_ice_mixing_ratio
   long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates)
   units = kg kg-1
@@ -311,7 +304,7 @@
   type = real
   kind = kind_phys
   intent = inout
-[qgrs_snow_cloud]
+[qgrs_snow]
   standard_name = snow_mixing_ratio
   long_name = ratio of mass of snow water to mass of dry air plus vapor (without condensates)
   units = kg kg-1
@@ -1033,7 +1026,7 @@
   type = real
   kind = kind_phys
   intent = inout
-[dqdt_ice_cloud]
+[dqdt_ice]
   standard_name = process_split_cumulative_tendency_of_cloud_ice_mixing_ratio
   long_name = cloud condensed water mixing ratio tendency due to model physics
   units = kg kg-1 s-1
@@ -1041,7 +1034,7 @@
   type = real
   kind = kind_phys
   intent = inout
-[dqdt_snow_cloud]
+[dqdt_snow]
   standard_name = process_split_cumulative_tendency_of_snow_mixing_ratio
   long_name = ratio of mass of snow water tendency to mass of dry air plus vapor (without condensates) due to model physics
   units = kg kg-1 s-1

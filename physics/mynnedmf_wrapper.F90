@@ -17,16 +17,15 @@
         &  con_cpv, con_cliq, con_cice, con_rcp,  &
         &  con_XLV, con_XLF, con_p608, con_ep2,   &
         &  con_karman, con_t0c,                   &
-        &  do_mynnedmf, lheatstrg,                &
+        &  do_mynnedmf,                           &
         &  errmsg, errflg                         )
 
         use machine,  only : kind_phys
         use bl_mynn_common
 
         implicit none
-        
+
         logical,        intent(in)  :: do_mynnedmf
-        logical,        intent(in)  :: lheatstrg
         character(len=*),intent(out):: errmsg
         integer,        intent(out) :: errflg
 
@@ -98,8 +97,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  phii,u,v,omega,t3d,             &
      &  qgrs_water_vapor,               &
      &  qgrs_liquid_cloud,              &
-     &  qgrs_ice_cloud,                 &
-     &  qgrs_snow_cloud,                &
+     &  qgrs_ice,                       &
+     &  qgrs_snow,                      &
      &  qgrs_cloud_droplet_num_conc,    &
      &  qgrs_cloud_ice_num_conc,        &
      &  qgrs_ozone,                     &
@@ -135,7 +134,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  nupdraft,maxMF,ktop_plume,      &
      &  dudt, dvdt, dtdt,                                  &
      &  dqdt_water_vapor,            dqdt_liquid_cloud,    & ! <=== ntqv, ntcw
-     &  dqdt_ice_cloud,              dqdt_snow_cloud,      & ! <=== ntiw, ntsw
+     &  dqdt_ice,                    dqdt_snow,            & ! <=== ntiw, ntsw
      &  dqdt_ozone,                                        & ! <=== ntoz
      &  dqdt_cloud_droplet_num_conc, dqdt_ice_num_conc,    & ! <=== ntlnc, ntinc
      &  dqdt_water_aer_num_conc,     dqdt_ice_aer_num_conc,& ! <=== ntwa, ntia
@@ -242,8 +241,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
       real(kind_phys), dimension(:,:), intent(in)    :: phii
       real(kind_phys), dimension(:,:), intent(inout) ::                  &
      &        dtdt, dudt, dvdt,                                          &
-     &        dqdt_water_vapor, dqdt_liquid_cloud, dqdt_ice_cloud,       &
-     &        dqdt_snow_cloud,                                           &
+     &        dqdt_water_vapor, dqdt_liquid_cloud, dqdt_ice,             &
+     &        dqdt_snow,                                                 &
      &        dqdt_cloud_droplet_num_conc, dqdt_ice_num_conc,            &
      &        dqdt_ozone, dqdt_water_aer_num_conc, dqdt_ice_aer_num_conc
       real(kind_phys), dimension(:,:), intent(inout) ::dqdt_cccn
@@ -258,8 +257,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
       real(kind_phys), dimension(:,:), intent(inout) ::                  &
      &        dqke,qWT,qSHEAR,qBUOY,qDISS
       real(kind_phys), dimension(:,:), intent(inout) ::                  &
-     &        t3d,qgrs_water_vapor,qgrs_liquid_cloud,qgrs_ice_cloud,     &
-     &        qgrs_snow_cloud
+     &        t3d,qgrs_water_vapor,qgrs_liquid_cloud,qgrs_ice,           &
+     &        qgrs_snow
       real(kind_phys), dimension(:,:), intent(in) ::                     &
      &        u,v,omega,                                                 &
      &        exner,prsl,prsi,                                           &
@@ -377,7 +376,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
             do i=1,im
               sqv(i,k)   = qgrs_water_vapor(i,k)
               sqc(i,k)   = qgrs_liquid_cloud(i,k)
-              sqi(i,k)   = qgrs_ice_cloud(i,k)
+              sqi(i,k)   = qgrs_ice(i,k)
               sqs(i,k)   = 0.
               ozone(i,k) = qgrs_ozone(i,k)
               qnc(i,k)   = 0.
@@ -401,7 +400,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
             do i=1,im
               sqv(i,k)  = qgrs_water_vapor(i,k)
               sqc(i,k)    = qgrs_liquid_cloud(i,k)
-              sqi(i,k)    = qgrs_ice_cloud(i,k)
+              sqi(i,k)    = qgrs_ice(i,k)
               sqs(i,k)   = 0.
               ozone(i,k) = qgrs_ozone(i,k)
               qnc(i,k)   = qgrs_cloud_droplet_num_conc(i,k)
@@ -429,8 +428,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
               do i=1,im
                 sqv(i,k)   = qgrs_water_vapor(i,k)
                 sqc(i,k)   = qgrs_liquid_cloud(i,k)
-                sqi(i,k)   = qgrs_ice_cloud(i,k)
-                sqs(i,k)   = qgrs_snow_cloud(i,k)
+                sqi(i,k)   = qgrs_ice(i,k)
+                sqs(i,k)   = qgrs_snow(i,k)
                 qnc(i,k)   = qgrs_cloud_droplet_num_conc(i,k)
                 qni(i,k)   = qgrs_cloud_ice_num_conc(i,k)
                 ozone(i,k) = qgrs_ozone(i,k)
@@ -452,8 +451,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
               do i=1,im
                 sqv(i,k)   = qgrs_water_vapor(i,k)
                 sqc(i,k)   = qgrs_liquid_cloud(i,k)
-                sqi(i,k)   = qgrs_ice_cloud(i,k)
-                sqs(i,k)   = qgrs_snow_cloud(i,k)
+                sqi(i,k)   = qgrs_ice(i,k)
+                sqs(i,k)   = qgrs_snow(i,k)
                 qnc(i,k)   = qgrs_cloud_droplet_num_conc(i,k)
                 qni(i,k)   = qgrs_cloud_ice_num_conc(i,k)
                 ozone(i,k) = qgrs_ozone(i,k)
@@ -475,8 +474,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
               do i=1,im
                 sqv(i,k)   = qgrs_water_vapor(i,k)
                 sqc(i,k)   = qgrs_liquid_cloud(i,k)
-                sqi(i,k)   = qgrs_ice_cloud(i,k)
-                sqs(i,k)   = qgrs_snow_cloud(i,k)
+                sqi(i,k)   = qgrs_ice(i,k)
+                sqs(i,k)   = qgrs_snow(i,k)
                 qnc(i,k)   = 0.
                 qni(i,k)   = qgrs_cloud_ice_num_conc(i,k)
                 ozone(i,k) = qgrs_ozone(i,k)
@@ -500,7 +499,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
             do i=1,im
                 sqv(i,k)   = qgrs_water_vapor(i,k)
                 sqc(i,k)   = qgrs_liquid_cloud(i,k)
-                sqi(i,k)   = qgrs_ice_cloud(i,k)
+                sqi(i,k)   = qgrs_ice(i,k)
                 qnc(i,k)   = 0.
                 qni(i,k)   = 0.
                 sqs(i,k)   = 0.
@@ -807,8 +806,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
              do i=1,im
                dqdt_water_vapor(i,k)  = RQVBLTEN(i,k) !/(1.0 + qv(i,k))
                dqdt_liquid_cloud(i,k) = RQCBLTEN(i,k) !/(1.0 + qv(i,k))
-               dqdt_ice_cloud(i,k)    = RQIBLTEN(i,k) !/(1.0 + qv(i,k))
-               dqdt_snow_cloud(i,k)   = RQSBLTEN(i,k) !/(1.0 + qv(i,k))
+               dqdt_ice(i,k)          = RQIBLTEN(i,k) !/(1.0 + qv(i,k))
+               dqdt_snow(i,k)         = RQSBLTEN(i,k) !/(1.0 + qv(i,k))
                !dqdt_ozone(i,k)        = 0.0
              enddo
            enddo
@@ -822,7 +821,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
            !  do i=1,im
            !    qgrs_water_vapor(i,k)  = qgrs_water_vapor(i,k)  + (RQVBLTEN(i,k)/(1.0+RQVBLTEN(i,k)))*delt
            !    qgrs_liquid_cloud(i,k) = qgrs_liquid_cloud(i,k) + RQCBLTEN(i,k)*delt
-           !    qgrs_ice_cloud(i,k)    = qgrs_ice_cloud(i,k)    + RQIBLTEN(i,k)*delt
+           !    qgrs_ice(i,k)          = qgrs_ice(i,k)          + RQIBLTEN(i,k)*delt
            !    !dqdt_ozone(i,k)        = 0.0
            !  enddo
            !enddo
@@ -834,9 +833,9 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                  dqdt_water_vapor(i,k)             = RQVBLTEN(i,k) !/(1.0 + qv(i,k))
                  dqdt_liquid_cloud(i,k)            = RQCBLTEN(i,k) !/(1.0 + qv(i,k))
                  dqdt_cloud_droplet_num_conc(i,k)  = RQNCBLTEN(i,k)
-                 dqdt_ice_cloud(i,k)               = RQIBLTEN(i,k) !/(1.0 + qv(i,k))
+                 dqdt_ice(i,k)                     = RQIBLTEN(i,k) !/(1.0 + qv(i,k))
                  dqdt_ice_num_conc(i,k)            = RQNIBLTEN(i,k)
-                 dqdt_snow_cloud(i,k)              = RQSBLTEN(i,k) !/(1.0 + qv(i,k))
+                 dqdt_snow(i,k)                    = RQSBLTEN(i,k) !/(1.0 + qv(i,k))
                  !dqdt_ozone(i,k)                   = 0.0
                  dqdt_water_aer_num_conc(i,k)      = RQNWFABLTEN(i,k)
                  dqdt_ice_aer_num_conc(i,k)        = RQNIFABLTEN(i,k)
@@ -855,7 +854,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
              !  do i=1,im
              !    qgrs_water_vapor(i,k)            = qgrs_water_vapor(i,k)    + (RQVBLTEN(i,k)/(1.0+RQVBLTEN(i,k)))*delt
              !    qgrs_liquid_cloud(i,k)           = qgrs_liquid_cloud(i,k)   + RQCBLTEN(i,k)*delt
-             !    qgrs_ice_cloud(i,k)              = qgrs_ice_cloud(i,k)      + RQIBLTEN(i,k)*delt
+             !    qgrs_ice(i,k)                    = qgrs_ice(i,k)            + RQIBLTEN(i,k)*delt
              !    qgrs_cloud_droplet_num_conc(i,k) = qgrs_cloud_droplet_num_conc(i,k) + RQNCBLTEN(i,k)*delt
              !    qgrs_cloud_ice_num_conc(i,k)     = qgrs_cloud_ice_num_conc(i,k)     + RQNIBLTEN(i,k)*delt
              !    !dqdt_ozone(i,k)        = 0.0
@@ -869,9 +868,9 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                  dqdt_water_vapor(i,k)             = RQVBLTEN(i,k) !/(1.0 + qv(i,k))
                  dqdt_liquid_cloud(i,k)            = RQCBLTEN(i,k) !/(1.0 + qv(i,k))
                  dqdt_cloud_droplet_num_conc(i,k)  = RQNCBLTEN(i,k)
-                 dqdt_ice_cloud(i,k)               = RQIBLTEN(i,k) !/(1.0 + qv(i,k))
+                 dqdt_ice(i,k)                     = RQIBLTEN(i,k) !/(1.0 + qv(i,k))
                  dqdt_ice_num_conc(i,k)            = RQNIBLTEN(i,k)
-                 dqdt_snow_cloud(i,k)              = RQSBLTEN(i,k) !/(1.0 + qv(i,k))
+                 dqdt_snow(i,k)                    = RQSBLTEN(i,k) !/(1.0 + qv(i,k))
                enddo
              enddo
              if(ldiag3d .and. .not. flag_for_pbl_generic_tend) then
@@ -887,8 +886,9 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                do i=1,im
                  dqdt_water_vapor(i,k)   = RQVBLTEN(i,k) !/(1.0 + qv(i,k))
                  dqdt_liquid_cloud(i,k)  = RQCBLTEN(i,k) !/(1.0 + qv(i,k))
-                 dqdt_ice_cloud(i,k)     = RQIBLTEN(i,k) !/(1.0 + qv(i,k))
+                 dqdt_ice(i,k)           = RQIBLTEN(i,k) !/(1.0 + qv(i,k))
                  dqdt_ice_num_conc(i,k)  = RQNIBLTEN(i,k)
+                 dqdt_snow(i,k)          = RQSBLTEN(i,k) !/(1.0 + qv(i,k))
                  !dqdt_ozone(i,k)         = 0.0
                enddo
              enddo
@@ -896,14 +896,14 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                call dtend_helper(100+ntqv,RQVBLTEN)
                call dtend_helper(100+ntcw,RQCBLTEN)
                call dtend_helper(100+ntiw,RQIBLTEN)
-               call dtend_helper(100+ntsw,RQSBLTEN)
                call dtend_helper(100+ntinc,RQNIBLTEN)
+               call dtend_helper(100+ntsw,RQSBLTEN)
              endif
              !do k=1,levs
              !  do i=1,im
              !    qgrs_water_vapor(i,k)            = qgrs_water_vapor(i,k)    + (RQVBLTEN(i,k)/(1.0+RQVBLTEN(i,k)))*delt
              !    qgrs_liquid_cloud(i,k)           = qgrs_liquid_cloud(i,k)   + RQCBLTEN(i,k)*delt
-             !    qgrs_ice_cloud(i,k)              = qgrs_ice_cloud(i,k)      + RQIBLTEN(i,k)*delt
+             !    qgrs_ice(i,k)                    = qgrs_ice(i,k)            + RQIBLTEN(i,k)*delt
              !    qgrs_cloud_ice_num_conc(i,k)     = qgrs_cloud_ice_num_conc(i,k)     + RQNIBLTEN(i,k)*delt
              !    !dqdt_ozone(i,k)        = 0.0
              !  enddo
@@ -916,9 +916,9 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                  dqdt_water_vapor(i,k)             = RQVBLTEN(i,k) !/(1.0 + qv(i,k))
                  dqdt_liquid_cloud(i,k)            = RQCBLTEN(i,k) !/(1.0 + qv(i,k))
                  dqdt_cloud_droplet_num_conc(i,k)  = RQNCBLTEN(i,k)
-                 dqdt_ice_cloud(i,k)               = RQIBLTEN(i,k) !/(1.0 + qv(i,k))
+                 dqdt_ice(i,k)                     = RQIBLTEN(i,k) !/(1.0 + qv(i,k))
                  dqdt_ice_num_conc(i,k)            = RQNIBLTEN(i,k)
-                 dqdt_snow_cloud(i,k)              = RQSBLTEN(i,k) !/(1.0 + qv(i,k))
+                 dqdt_snow(i,k)                    = RQSBLTEN(i,k) !/(1.0 + qv(i,k))
                  IF ( nssl_ccn_on ) THEN ! 
                    dqdt_cccn(i,k)      = RQNWFABLTEN(i,k)
                  ENDIF
@@ -931,7 +931,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
              do i=1,im
                dqdt_water_vapor(i,k)   = RQVBLTEN(i,k) !/(1.0 + qv(i,k))
                dqdt_liquid_cloud(i,k)  = RQCBLTEN(i,k) !/(1.0 + qv(i,k))
-               dqdt_ice_cloud(i,k)     = RQIBLTEN(i,k) !/(1.0 + qv(i,k))
+               dqdt_ice(i,k)           = RQIBLTEN(i,k) !/(1.0 + qv(i,k))
                !dqdt_rain(i,k)          = 0.0
                !dqdt_snow(i,k)          = 0.0
                !dqdt_graupel(i,k)       = 0.0
@@ -947,7 +947,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
            !  do i=1,im
            !    qgrs_water_vapor(i,k)            = qgrs_water_vapor(i,k)    + (RQVBLTEN(i,k)/(1.0+RQVBLTEN(i,k)))*delt
            !    qgrs_liquid_cloud(i,k)           = qgrs_liquid_cloud(i,k)   + RQCBLTEN(i,k)*delt
-           !    qgrs_ice_cloud(i,k)              = qgrs_ice_cloud(i,k)      + RQIBLTEN(i,k)*delt
+           !    qgrs_ice(i,k)                    = qgrs_ice(i,k)            + RQIBLTEN(i,k)*delt
            !    !dqdt_ozone(i,k)        = 0.0
            !  enddo
            !enddo
@@ -957,7 +957,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
              do i=1,im
                dqdt_water_vapor(i,k)   = RQVBLTEN(i,k) !/(1.0 + qv(i,k))
                dqdt_liquid_cloud(i,k)  = RQCBLTEN(i,k) !/(1.0 + qv(i,k))
-               dqdt_ice_cloud(i,k)     = 0.0
+               dqdt_ice(i,k)           = 0.0
                !dqdt_rain(i,k)          = 0.0
                !dqdt_snow(i,k)          = 0.0
                !dqdt_graupel(i,k)       = 0.0

@@ -486,7 +486,7 @@ CONTAINS
 
     real(kind_phys), DIMENSION(:,:), INTENT(inout) :: el_pbl
 
-    real(kind_phys), DIMENSION(:,:), INTENT(out) ::          &
+    real(kind_phys), DIMENSION(:,:), INTENT(inout) ::        &
          &qWT,qSHEAR,qBUOY,qDISS,dqke
     ! 3D budget arrays are not allocated when tke_budget == 0
     ! 1D (local) budget arrays are used for passing between subroutines.
@@ -736,7 +736,7 @@ CONTAINS
                 rho1(k)=rho(i,k)
                 sqc(k)=sqc3D(i,k) !/(1.+qv(i,k))
                 sqv(k)=sqv3D(i,k) !/(1.+qv(i,k))
-                thetav(k)=th(i,k)*(1.+0.608*sqv(k))
+                thetav(k)=th(i,k)*(1.+p608*sqv(k))
                 !keep snow out for now - increases ceiling bias
                 sqw(k)=sqv(k)+sqc(k)+sqi(k)!+sqs(k)
                 thl(k)=th1(k) - xlvcp/ex1(k)*sqc(k) &
@@ -995,7 +995,7 @@ CONTAINS
           !suggested min temperature to improve accuracy.
           !thl(k)=th(i,k)*(1.- xlvcp/MAX(tk1(k),TKmin)*sqc(k) &
           !    &               - xlscp/MAX(tk1(k),TKmin)*sqi(k))
-          thetav(k)=th1(k)*(1.+0.608*sqv(k))
+          thetav(k)=th1(k)*(1.+p608*sqv(k))
        enddo ! end k
        zw(kte+1)=zw(kte)+dz(i,kte)
 
@@ -3867,7 +3867,11 @@ CONTAINS
            ! JAYMES- this option added 8 May 2015
            ! The cloud water formulations are taken from CB02, Eq. 8.
            IF (q1k < 0.) THEN        !unsaturated
+#ifdef SINGLE_PREC
               ql_water = sgm(k)*EXP(1.2*q1k-1.)
+#else
+              ql_water = sgm(k)*EXP(1.2*q1k-1.)
+#endif
               ql_ice   = sgm(k)*EXP(1.2*q1k-1.)
            ELSE IF (q1k > 2.) THEN   !supersaturated
               ql_water = sgm(k)*q1k
@@ -6861,7 +6865,7 @@ real(kind_phys):: diff,exn,t,th,qs,qcold
 
   !THIS BASICALLY GIVE THE SAME RESULT AS THE PREVIOUS LINE
   !TH = THL + xlv/cp/EXN*QC
-  !THV= TH*(1. + 0.608*QT)
+  !THV= TH*(1. + p608*QT)
 
   !print *,'t,p,qt,qs,qc'
   !print *,t,p,qt,qs,qc 

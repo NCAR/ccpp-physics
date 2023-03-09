@@ -44,8 +44,6 @@
            qc, qi, qv, T3D, P3D, exner,  &
            qr, qs, qg,                   &
            qci_conv,qlc,qli,ud_mf,       &
-!           qci_conv_timeave,             &
-!           ud_mf_timeave,                &
            imfdeepcnv, imfdeepcnv_gf,    &
            imfdeepcnv_sas,               &
            qc_save, qi_save, qs_save,    &
@@ -84,7 +82,6 @@
       real(kind=kind_phys), dimension(:,:), intent(inout) :: qci_conv
       real(kind=kind_phys), dimension(:,:), intent(inout) :: qlc, qli !for SAS
       real(kind=kind_phys), dimension(:,:), intent(in)    :: ud_mf
-      !real(kind=kind_phys), dimension(:,:), intent(in)    :: ud_mf_timeave, qci_conv_timeave
       real(kind=kind_phys), dimension(:,:), intent(in)    :: T3D,delp
       real(kind=kind_phys), dimension(:,:), intent(in)    :: qv,P3D,exner
       real(kind=kind_phys), dimension(:,:), intent(inout) ::  &
