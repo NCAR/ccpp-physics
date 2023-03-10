@@ -1347,7 +1347,7 @@
   standard_name = chem3d_mynn_pbl_transport
   long_name = mynn pbl transport of smoke and dust
   units = various
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension,2)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_chemical_species_vertically_mixed)
   type = real
   kind = kind_phys
   intent = inout
@@ -1359,9 +1359,9 @@
   type = real
   kind = kind_phys
   intent = inout
-[rrfs_smoke]
+[rrfs_sd]
   standard_name = do_smoke_coupling
-  long_name = flag controlling rrfs_smoke collection (default off)
+  long_name = flag controlling rrfs_sd collection (default off)
   units = flag
   dimensions = ()
   type = logical
@@ -1373,7 +1373,7 @@
   dimensions = ()
   type = logical
   intent = in
-[fire_turb]
+[enh_mix]
   standard_name = do_planetary_boundary_layer_fire_enhancement
   long_name = flag for rrfs smoke mynn enh vermix
   units = flag
@@ -1394,16 +1394,24 @@
   dimensions = ()
   type = integer
   intent = in
-[ltaerosol]
-  standard_name = flag_for_aerosol_physics
-  long_name = flag for aerosol physics
+[vdep]
+  standard_name = dry_deposition_velocity_mynn_pbl_transport
+  long_name = dry deposition velocity by mynn pbl transport
+  units = m s-1
+  dimensions = (horizontal_loop_extent,number_of_chemical_species_deposited)
+  type = real
+  kind = kind_phys
+  intent = in
+[smoke_dbg]
+  standard_name = do_smoke_debug
+  long_name = flag for rrfs smoke plumerise debug
   units = flag
   dimensions = ()
   type = logical
   intent = in
-[mraerosol]
-  standard_name = do_merra2_aerosol_awareness
-  long_name = flag for merra2 aerosol-aware physics for example the thompson microphysics
+[ltaerosol]
+  standard_name = flag_for_aerosol_physics
+  long_name = flag for aerosol physics
   units = flag
   dimensions = ()
   type = logical

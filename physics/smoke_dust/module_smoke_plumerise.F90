@@ -14,8 +14,6 @@
 module module_smoke_plumerise
 
   use machine , only : kind_phys
-  use rrfs_smoke_data
-  use rrfs_smoke_config, only : FIRE_OPT_GBBEPx, FIRE_OPT_MODIS
   use plume_data_mod,  only : num_frp_plume, p_frp_hr, p_frp_std,                  &
                               !tropical_forest, boreal_forest, savannah, grassland,   &
                               wind_eff
@@ -26,15 +24,14 @@ module module_smoke_plumerise
 CONTAINS
 
 ! RAR:
-    subroutine plumerise(data,m1,m2,m3,ia,iz,ja,jz,             &
+    subroutine plumerise(m1,m2,m3,ia,iz,ja,jz,             &
 !                         firesize,mean_fct,                         &
                         ! nspecies,eburn_in,eburn_out,               &
                          up,vp,wp,theta,pp,dn0,rv,zt_rams,zm_rams,  &
-                         frp_inst,k1,k2, ktau, dbg_opt, g, cp, rgas, &
+                         frp_inst,k1,k2, dbg_opt, g, cp, rgas,      &
                          cpor,  errmsg, errflg   )
 
   implicit none
-  type(smoke_data), intent(inout) :: data
 
   LOGICAL, INTENT (IN) :: dbg_opt
 
@@ -46,7 +43,6 @@ CONTAINS
 
   integer :: ng,m1,m2,m3,ia,iz,ja,jz,ibcon,mynum,i,j,k,imm,ixx,ispc !,nspecies
 
-  INTEGER, INTENT (IN)  :: ktau
   INTEGER, INTENT (OUT) :: k1,k2
   character(*), intent(inout) :: errmsg
   integer, intent(inout) :: errflg
@@ -106,9 +102,6 @@ CONTAINS
   !----------------------------------------------------------------------
 ! print *,' Plumerise_scalar 1',ncall
   coms => get_thread_coms()
-  if (ktau==2) then
-    call coms%set_to_zero()
-  endif
 
 IF (frp_inst<frp_threshold) THEN
    k1=1
@@ -145,7 +138,7 @@ END IF
 !  enddo
 
          !- get envinronmental state (temp, water vapor mix ratio, ...)
-         call get_env_condition(coms,1,m1,kmt,wind_eff,ktau,g,cp,rgas,cpor,errmsg,errflg)
+         call get_env_condition(coms,1,m1,kmt,wind_eff,g,cp,rgas,cpor,errmsg,errflg)
          if(errflg/=0) return
 
          !- loop over the four types of aggregate biomes with fires for plumerise version 1
@@ -159,21 +152,21 @@ END IF
     !- loop over the minimum and maximum heat fluxes/FRP
     lp_minmax: do imm=1,2
         if(imm==1 ) then
-          burnt_area = 0.7* 0.00021* FRP          ! - 0.5*plume_fre(istd_fsize))
+          burnt_area = 0.7* 0.0006* FRP   !    0.00021* FRP          ! - 0.5*plume_fre(istd_fsize))
         elseif(imm==2 ) then
-          burnt_area = 1.3* 0.00021* FRP
+          burnt_area = 1.3* 0.0006* FRP   ! RAR: Based on Laura's paper I increased the fire size *3. This should depend on the fuel type and meteorology/HWP
         endif
         burnt_area= max(1.0e4,burnt_area)
         
-        IF (dbg_opt .AND. ktau<2000) THEN
-            WRITE(*,*) 'plumerise: m1,ktau ', m1,ktau
+        IF (dbg_opt) THEN
+            WRITE(*,*) 'plumerise: m1 ', m1
             WRITE(*,*) 'plumerise: imm, FRP,burnt_area ', imm, FRP,burnt_area
          !   WRITE(*,*) 'convert_smold_to_flam ',convert_smold_to_flam
             WRITE(*,*) 'plumerise:  zcon ',  coms%zcon
             WRITE(*,*) 'plumerise: zzcon ', coms%zzcon
          END IF
 
-         IF (dbg_opt .AND. ktau<2000) then
+         IF (dbg_opt) then
              WRITE(*,*) 'plumerise: imm ', imm
              WRITE(*,*) 'plumerise: burnt_area ',burnt_area
          END IF
@@ -185,7 +178,7 @@ END IF
        !------  generates the plume rise    ------
        call makeplume (coms,kmt,ztopmax(imm),ixx,imm)
 
-       IF (dbg_opt .AND. ktau<2000) then
+       IF (dbg_opt) then
             WRITE(*,*) 'plumerise after makeplume: imm,kmt,ztopmax(imm) ',imm,kmt,ztopmax(imm)
        END IF
 
@@ -194,9 +187,7 @@ END IF
         !- define o dominio vertical onde a emissao flaming ira ser colocada
         call set_flam_vert(ztopmax,k1,k2,nkp,coms%zzcon)     !,W_VMD,VMD)
 
-        ! IF (ktau<2000) then
         !     WRITE(6,*) 'module_chem_plumerise_scalar: eburn_out(:,3) ', eburn_out(:,3)
-        ! END IF
 
         !- thickness of the vertical layer between k1 and k2 eta levels (lower and upper bounds for the injection height )
         !dzi= 1./(coms%zzcon(k2)-coms%zzcon(k1))   ! RAR: k2>=k1+1  
@@ -208,7 +199,7 @@ END IF
         !   enddo
         !enddo
 
-    IF (dbg_opt .AND. ktau<2000) then
+    IF (dbg_opt) then
         WRITE(*,*) 'plumerise after set_flam_vert: nkp,k1,k2, ', nkp,k1,k2
         WRITE(*,*) 'plumerise after set_flam_vert: dzi ', dzi
        !WRITE(*,*) 'plumerise after set_flam_vert: eburn_in(2) ', eburn_in(2)
@@ -220,7 +211,7 @@ END IF
 end subroutine plumerise
 !-------------------------------------------------------------------------
 
-subroutine get_env_condition(coms,k1,k2,kmt,wind_eff,ktau,g,cp,rgas,cpor,errmsg,errflg)
+subroutine get_env_condition(coms,k1,k2,kmt,wind_eff,g,cp,rgas,cpor,errmsg,errflg)
 
 !se module_zero_plumegen_coms
 !use rconstants
@@ -232,11 +223,11 @@ real(kind=kind_phys),parameter :: p1000mb = 100000.  ! p at 1000mb (pascals)
 real(kind=kind_phys),parameter :: p00=p1000mb
 real(kind=kind_phys) :: znz,themax,tlll,plll,rlll,zlll,dzdd,dzlll,tlcl,plcl,dzlcl,dummy
 !integer :: n_setgrid = 0 
-integer :: wind_eff,ktau
+integer :: wind_eff
 character(*), intent(inout) :: errmsg
 integer, intent(inout) :: errflg
 
-if(ktau==2) then
+if(.not.coms%initialized) then
  ! n_setgrid = 1
   call set_grid(coms) ! define vertical grid of plume model
                 ! coms%zt(k) =  thermo and water levels
@@ -348,6 +339,8 @@ do k = 2,mzp
    coms%dzt(k) = 1. / (coms%zm(k) - coms%zm(k-1))
 enddo
 coms%dzt(1) = coms%dzt(2) * coms%dzt(2) / coms%dzt(3)
+
+coms%initialized = .true.
    
 !   coms%dzm(1) = 0.5/coms%dz
 !   coms%dzm(2:mzp) = 1./coms%dz
@@ -447,23 +440,24 @@ implicit none
 type(plumegen_coms), pointer :: coms
 integer ::  moist,  i,  icount,imm,iveg_ag  !,plumerise_flag
 real(kind=kind_phys)::   bfract,  effload,  heat,  hinc ,burnt_area,heat_fluxW,FRP
-real(kind=kind_phys),    dimension(2,4) :: heat_flux
+!real(kind=kind_phys),    dimension(2,4) :: heat_flux
 integer, intent(inout) :: errflg
 character(*), intent(inout) :: errmsg
-INTEGER, parameter :: use_last = 0
+INTEGER, parameter :: use_last = 1    ! RAR 10/31/2022: I set to one, checking with Saulo
+
 !real(kind=kind_phys), parameter :: beta = 5.0   !ref.: Wooster et al., 2005
 REAL(kind=kind_phys), parameter :: beta = 0.88  !ref.: Paugam et al., 2015
 
-data heat_flux/  &
+!data heat_flux/  &  RAR: not used
 !---------------------------------------------------------------------
 !  heat flux      !IGBP Land Cover	    !
 ! min  ! max      !Legend and		    ! reference
 !    kW/m^2       !description  	    !
 !--------------------------------------------------------------------
-30.0, 80.0,   &! Tropical Forest         ! igbp 2 & 4
-30.0, 80.0,   &! Boreal(kind=kind_phys) forest           ! igbp 1 & 3
-4.4,  23.0,   &! cerrado/woody savanna   | igbp  5 thru 9
-3.3,  3.3     /! Grassland/cropland      ! igbp 10 thru 17
+!30.0, 80.0,   &! Tropical Forest         ! igbp 2 & 4
+!30.0, 80.0,   &! Boreal(kind=kind_phys) forest           ! igbp 1 & 3
+!4.4,  23.0,   &! cerrado/woody savanna   | igbp  5 thru 9
+!3.3,  3.3     /! Grassland/cropland      ! igbp 10 thru 17
 !--------------------------------------------------------------------
 !-- fire at surface
 !
@@ -556,7 +550,7 @@ COMS%FMOIST   = MOIST / 100.       !- fuel moisture fraction
    COMS%HEATING (ICOUNT) = heat_fluxW  * 0.55     ! W/m**2 (0.55 converte para energia convectiva)
    ICOUNT = ICOUNT + 1  
   ENDDO  
-!     ramp for 5 minutes
+!     ramp for 5 minutes, RAR: in the current version this is inactive
  IF(use_last /= 1) THEN
 
     HINC = COMS%HEATING (1) / 4.  
@@ -565,15 +559,17 @@ COMS%FMOIST   = MOIST / 100.       !- fuel moisture fraction
     COMS%HEATING (3) = 2. * HINC  
     COMS%HEATING (4) = 3. * HINC  
  ELSE
+    HINC = COMS%HEATING (1) / 4.   ! RAR: this needs to be revised later
     IF(imm==1) THEN
-       HINC = COMS%HEATING (1) / 4.  
+       !HINC = COMS%HEATING (1) / 4.
        COMS%HEATING (1) = 0.1  
        COMS%HEATING (2) = HINC  
        COMS%HEATING (3) = 2. * HINC  
        COMS%HEATING (4) = 3. * HINC 
     ELSE 
-       HINC = (COMS%HEATING (1) - heat_flux(imm-1,iveg_ag) * 1000. *0.55)/ 4.
-       COMS%HEATING (1) = heat_flux(imm-1,iveg_ag) * 1000. *0.55 + 0.1  
+    ! RAR: I've commented out so we don't use the look-up table for heat flux
+    !   HINC = (COMS%HEATING (1) - heat_flux(imm-1,iveg_ag) * 1000. *0.55)/ 4.
+    !   COMS%HEATING (1) = heat_flux(imm-1,iveg_ag) * 1000. *0.55 + 0.1
        COMS%HEATING (2) = COMS%HEATING (1)+ HINC  
        COMS%HEATING (3) = COMS%HEATING (2)+ HINC  
        COMS%HEATING (4) = COMS%HEATING (3)+ HINC 
