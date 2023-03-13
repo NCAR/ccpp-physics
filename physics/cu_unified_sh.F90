@@ -65,19 +65,24 @@ contains
                          us,vs,zo,t,q,z1,tn,qo,po,psur,dhdt,kpbl,rho,     & ! input variables, must be supplied
                          hfx,qfx,xland,ichoice,tcrit,dtime,         &
                          zuo,xmb_out,kbcon,ktop,k22,ierr,ierrc,     &
+                         flag_init, flag_restart,fv,r_d,delp,tmf,qmicro, & 
+                         forceqv_spechum,sigmain,sigmaout,progsigma,    &
                          outt,outq,outqc,outu,outv,cnvwt,pre,cupclw,     & ! output tendencies
                          itf,ktf,its,ite, kts,kte,ipr,tropics)  ! dimesnional variables
 !
 ! this module needs some subroutines from gf_deep
 !
   use cu_unified_deep,only:cup_env,cup_env_clev,get_cloud_bc,cup_minimi,  &
-                      get_inversion_layers,rates_up_pdf,get_cloud_bc,       &
-                      cup_up_aa0,cup_kbcon,get_lateral_massflux
+                      get_inversion_layers,rates_up_pdf,get_cloud_bc,     &
+                      cup_up_aa0,cup_kbcon,get_lateral_massflux,          &
+                      calculate_updraft_velocity
+
      implicit none
      integer                                                                &
         ,intent (in   )                   ::                                &
         itf,ktf,                                                            &
         its,ite, kts,kte,ipr
+     logical, intent(in) :: flag_init, flag_restart, progsigma
      logical :: make_calc_for_xk = .true.
      integer, intent (in   )              ::                                &
         ichoice
@@ -92,6 +97,9 @@ contains
         ,intent (inout  )                 ::                           &
         cnvwt,outt,outq,outqc,cupclw,zuo,outu,outv
 !$acc declare copy(cnvwt,outt,outq,outqc,cupclw,zuo,outu,outv)
+     real(kind=kind_phys),    dimension (its:ite,kts:kte)                              &
+        ,intent (in  )                      ::                         &
+        tmf, qmicro, sigmain, forceqv_spechum
      real(kind=kind_phys),    dimension (its:ite)                                      &
         ,intent (out  )                   ::                           &
         xmb_out
@@ -111,7 +119,7 @@ contains
   !
      real(kind=kind_phys),    dimension (its:ite,kts:kte)                              &
         ,intent (in   )                   ::                           &
-        t,po,tn,dhdt,rho,us,vs
+        t,po,tn,dhdt,rho,us,vs,delp
      real(kind=kind_phys),    dimension (its:ite,kts:kte)                              &
         ,intent (inout)                   ::                           &
          q,qo
@@ -121,7 +129,13 @@ contains
        
      real(kind=kind_phys)                                                              &
         ,intent (in   )                   ::                           &
-        dtime,tcrit
+        dtime,tcrit,fv,r_d
+!$acc declare sigmaout                                                                                                                                                                                                                      
+     real(kind=kind_phys),    dimension (its:ite,kts:kte)                              &
+        ,intent (out)                     ::                           &
+        sigmaout
+
+
 !$acc declare copyin(t,po,tn,dhdt,rho,us,vs) copy(q,qo) copyin(xland,z1,psur,hfx,qfx) copyin(dtime,tcrit)
   !
   !***************** the following are your basic environmental
@@ -180,7 +194,8 @@ contains
   ! dellaq = change of q per unit mass flux of cloud ensemble
   ! dellaqc = change of qc per unit mass flux of cloud ensemble
 
-        cd,dellah,dellaq,dellat,dellaqc,uc,vc,dellu,dellv,u_cup,v_cup
+        cd,dellah,dellaq,dellat,dellaqc,uc,vc,dellu,dellv,u_cup,v_cup, &
+        wu2,omega_u,zeta,zdqca,del,clw_all
 
 !$acc declare create( &
 !$acc        entr_rate_2d,he,hes,qes,z,                                     &
@@ -205,7 +220,7 @@ contains
        flux_tun,hkbo,xhkb,                                             &
        rand_vmas,xmbmax,xmb,                                           &
        cap_max,entr_rate,                                              &
-       cap_max_increment,lambau
+       cap_max_increment,lambau,wc,omegac,sigmab
      integer,    dimension (its:ite)      ::                           &
        kstabi,xland1,kbmax,ktopx
 !$acc declare create( &
@@ -216,11 +231,13 @@ contains
 !$acc       cap_max_increment,lambau,                                       &
 !$acc       kstabi,xland1,kbmax,ktopx)
 
+     logical :: flag_shallow
+     logical, dimension(its:ite) :: cnvflg
      integer                              ::                           &
        kstart,i,k,ki
      real(kind=kind_phys)                                 ::                           &
       dz,mbdt,zkbmax,                                                  &
-      cap_maxs,trash,trash2,frh
+      cap_maxs,trash,trash2,frh,el2orc,gravinv
       
       real(kind=kind_phys) buo_flux,pgeoh,dp,entup,detup,totmas
 
@@ -244,6 +261,8 @@ contains
      lambau(:)=2.
      c1d(:,:)=0.
 !$acc end kernels
+
+     el2orc=xlv*xlv/(r_v*cp)
 
 !$acc kernels
       do i=its,itf
@@ -434,6 +453,7 @@ contains
       do i=its,itf
       do k=kts,ktf
           dbyo(i,k)= 0. !hkbo(i)-heso_cup(i,k)
+          clw_all(i,k)=0.
       enddo
       enddo
 !$acc end kernels
@@ -652,6 +672,7 @@ contains
                  c1d(i,k)=0.
               endif
               pwo(i,k)=c0_shal*dz*qrco(i,k)*zuo(i,k)
+              clw_all(i,k)=qco(i,k)-trash !LB total cloud before rain and detrain
               ! cloud water vapor 
               qco (i,k)= trash+qrco(i,k)
         
@@ -715,6 +736,13 @@ contains
        enddo
 !$acc end kernels
       endif
+
+!LB: insert calls to updraft vertical veloicity and prognostic area fraction here:                                                                                                                                                          
+      call calculate_updraft_velocity(its,itf,ktf,ite,kts,kte,ierr,progsigma,    &
+           k22,kbcon,ktop,zo,entr_rate_2d,cd,fv,r_d,el2orc,qeso,tn,qo,po,dbyo,    &
+           clw_all,qrco,delp,zu,wu2,omega_u,zeta,wc,omegac,zdqca)
+
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -921,7 +949,31 @@ contains
       enddo
 !$acc end kernels
 
-!
+
+!> - From Bengtsson et al. (2022) \cite Bengtsson_2022 prognostic closure scheme,                                                                                                                                                           
+! equation 8, call progsigma_calc() to compute updraft area fraction based on a moisture budget
+      if(progsigma)then
+         flag_shallow = .true.
+         do k=kts,ktf
+            do i=its,itf
+               del(i,k) = delp(i,k)*0.001
+            enddo
+         enddo
+         do i=its,itf
+            cnvflg(i)=.false.
+         enddo
+         do i=its,itf
+            if(ierr(i)==0)then
+               cnvflg(i)=.true.
+            endif
+         enddo
+         call progsigma_calc(itf,ktf,flag_init,flag_restart,flag_shallow,  &
+              del,tmf,qmicro,dbyo,zdqca,omega_u,zeta,xlv,dtime,            &
+              forceqv_spechum,kbcon,ktop,cnvflg,                           &
+              sigmain,sigmaout,sigmab)
+
+      endif
+
 !--- workfunctions for updraft
 !
       call cup_up_aa0(xaa0,xz,xzu,xdby,gamma_cup,xt_cup, &
@@ -936,8 +988,18 @@ contains
 !
 !$acc kernels
 !$acc loop private(xff_shal)
-       do i=its,itf
-        xmb(i)=0.
+     do i=its,itf
+       xmb(i)=0.
+  
+      if(progsigma)then
+         gravinv = 1./g
+         if(ierr(i)==0)then
+            xmb(i) = sigmab(i)*((-1.0*omegac(i))*gravinv)
+            write(*,*)'in shallow xmb=',xmb(i)
+         endif
+
+      else
+
         xff_shal(1:3)=0.
         if(ierr(i).eq.0)then
           xmbmax(i)=1.0  
@@ -974,6 +1036,9 @@ contains
 #endif
           endif
         endif
+       
+       endif !progsigma
+
         if(ierr(i).ne.0)then
            k22  (i)=0
            kbcon(i)=0
@@ -1008,7 +1073,8 @@ contains
           enddo
 
         endif
-       enddo
+
+     enddo
 !
 ! since kinetic energy is being dissipated, add heating accordingly (from ecmwf)
 !

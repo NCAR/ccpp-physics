@@ -57,7 +57,8 @@ contains
 !!
 !>\section gen_unified_driver Grell-Freitas Cumulus Scheme Driver General Algorithm
       subroutine cu_unified_driver_run(ntracer,garea,im,km,dt,flag_init,flag_restart,&
-               do_ca,cactiv,cactiv_m,g,cp,xlv,r_v,forcet,forceqv_spechum,phil,raincv, &
+               do_ca,progsigma,cactiv,cactiv_m,g,cp,fv,r_d,xlv,r_v,forcet,      &
+               forceqv_spechum,phil,delp,raincv,tmf,qmicro,sigmain,             &
                qv_spechum,t,cld1d,us,vs,t2di,w,qv2di_spechum,p2di,psuri,        &
                hbot,htop,kcnv,xland,hfx2,qfx2,aod_gf,cliw,clcw,ca_deep,rainevap,&
                pbl,ud_mf,dd_mf,dt_mf,cnvw_moist,cnvc,imfshalcnv,                &
@@ -66,7 +67,7 @@ contains
                index_of_y_wind,index_of_process_scnv,index_of_process_dcnv,     &
                fhour,fh_dfi_radar,ix_dfi_radar,num_dfi_radar,cap_suppress,      &
                dfi_radar_max_intervals,ldiag3d,qci_conv,do_cap_suppress,        &
-               errmsg,errflg)
+               sigmaout,errmsg,errflg)
 !-------------------------------------------------------------
       implicit none
       integer, parameter :: maxiens=1
@@ -92,8 +93,9 @@ contains
    integer      :: its,ite, jts,jte, kts,kte
    integer, intent(in   ) :: im,km,ntracer
    logical, intent(in   ) :: flag_init, flag_restart
-   logical, intent(in   ) :: flag_for_scnv_generic_tend,flag_for_dcnv_generic_tend,do_ca
-   real (kind=kind_phys), intent(in) :: g,cp,xlv,r_v
+   logical, intent(in   ) :: flag_for_scnv_generic_tend,flag_for_dcnv_generic_tend, &
+        do_ca,progsigma
+   real (kind=kind_phys), intent(in) :: g,cp,fv,r_d,xlv,r_v
    logical, intent(in   ) :: ldiag3d
 
    real(kind=kind_phys), intent(inout)                      :: dtend(:,:,:)
@@ -102,10 +104,12 @@ contains
         index_of_x_wind, index_of_y_wind, index_of_temperature,            &
         index_of_process_scnv, index_of_process_dcnv, ntqv, ntcw, ntiw
 !$acc declare copyin(dtidx)
-   real(kind=kind_phys),  dimension( : , : ), intent(in    ) :: forcet,forceqv_spechum,w,phil
+   real(kind=kind_phys),  dimension( : , : ), intent(in    ) :: forcet,forceqv_spechum,w,phil,delp
+   real(kind=kind_phys), dimension ( : , : ), intent(in    ) :: sigmain,qmicro,tmf
    real(kind=kind_phys),  dimension( : , : ), intent(inout ) :: t,us,vs
    real(kind=kind_phys),  dimension( : , : ), intent(inout ) :: qci_conv
    real(kind=kind_phys),  dimension( : , : ), intent(out   ) :: cnvw_moist,cnvc
+   real(kind=kind_phys), dimension ( : , : ), intent(out   ) :: sigmaout
    real(kind=kind_phys),  dimension( : , : ), intent(inout ) :: cliw, clcw
 !$acc declare copyin(forcet,forceqv_spechum,w,phil)
 !$acc declare copy(t,us,vs,qci_conv,cliw, clcw)
@@ -343,7 +347,7 @@ contains
 !    tscl_kf=dx/25000.
 !$acc end kernels
 
-     if (imfshalcnv == 3) then
+     if (imfshalcnv == 5) then
       ishallow_g3 = 1
      else
       ishallow_g3 = 0
@@ -633,6 +637,9 @@ contains
 ! input variables. ierr should be initialized to zero or larger than zero for
 ! turning off shallow convection for grid points
                          zus,xmbs,kbcons,ktops,k22s,ierrs,ierrcs,                &
+!Prog closure
+                         flag_init, flag_restart,fv,r_d,delp,tmf,qmicro,         &
+                         forceqv_spechum,sigmain,sigmaout,progsigma,            &
 ! output tendencies
                          outts,outqs,outqcs,outus,outvs,cnvwt,prets,cupclws,     &
 ! dimesnional variables
@@ -653,9 +660,12 @@ contains
 !> - Call cu_unified_deep_run() for middle GF convection
       if(imid_gf == 1)then
        call cu_unified_deep_run(        &
-               itf,ktf,its,ite, kts,kte  &
-              ,dicycle_m       &
-              ,ichoicem       &
+               itf,ktf,its,ite, kts,kte &
+              ,flag_init     &
+              ,flag_restart  &
+              ,fv,r_d        &
+              ,dicycle_m     &
+              ,ichoicem      &
               ,ipr           &
               ,ccn_m         &
               ,ccnclean      &
@@ -664,11 +674,16 @@ contains
               ,kpbli         &
               ,dhdt          &
               ,xlandi        &
-
+              ,delp          &
               ,zo            &
               ,forcing2      &
               ,t2d           &
               ,q2d           &
+              ,tmf           &
+              ,qmicro        &
+              ,forceqv_spechum &
+              ,sigmain       &
+              ,sigmaout      &
               ,ter11         &
               ,tshall        &
               ,qshall        &
@@ -680,7 +695,8 @@ contains
               ,hfx           &
               ,qfx           &
               ,dx            & !hj dx(im)
-              ,do_ca         &  
+              ,do_ca         &
+              ,progsigma     &
               ,ca_deep       &  
               ,mconv         &
               ,omeg          &
@@ -736,7 +752,9 @@ contains
      if(ideep.eq.1)then
       call cu_unified_deep_run(        &
                itf,ktf,its,ite, kts,kte  &
-
+              ,flag_init     &
+              ,flag_restart  &
+              ,fv,r_d        &
               ,dicycle       &
               ,ichoice       &
               ,ipr           &
@@ -744,15 +762,19 @@ contains
               ,ccnclean      &
               ,dt            &
               ,0             &
-
               ,kpbli         &
               ,dhdt          &
               ,xlandi        &
-
+              ,delp          &
               ,zo            &
               ,forcing       &
               ,t2d           &
               ,q2d           &
+              ,tmf           &
+              ,qmicro        &
+              ,forceqv_spechum &
+              ,sigmain       &
+              ,sigmaout      &
               ,ter11         &
               ,tn            &
               ,qo            &
@@ -765,6 +787,7 @@ contains
               ,qfx           &
               ,dx            & !hj replace dx(im)
               ,do_ca         &
+              ,progsigma     &
               ,ca_deep       &
               ,mconv         &
               ,omeg          &
