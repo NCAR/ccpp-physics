@@ -159,7 +159,7 @@ module lsm_ruc
       endif
 
       !--- initialize soil vegetation
-      call set_soilveg_ruc(me, isot, ivegsrc, nlunit)
+      call set_soilveg_ruc(me, isot, ivegsrc, nlunit, errmsg, errflg)
 
       pores (:) = maxsmc (:)
       resid (:) = drysmc (:)
@@ -323,15 +323,15 @@ module lsm_ruc
       subroutine lsm_ruc_run                                            & ! inputs
      &     ( iter, me, master, delt, kdt, im, nlev, lsm_ruc, lsm,       &
      &       imp_physics, imp_physics_gfdl, imp_physics_thompson,       &
-     &       imp_physics_nssl,                                          &
-     &       do_mynnsfclay, lsoil_ruc, lsoil, rdlai, xlat_d, xlon_d, zs,&
+     &       imp_physics_nssl, do_mynnsfclay, exticeden,                &
+     &       lsoil_ruc, lsoil, rdlai, xlat_d, xlon_d, zs,               &
      &       t1, q1, qc, stype, vtype, sigmaf, laixy,                   &
      &       dlwflx, dswsfc, tg3, coszen, land, icy, use_lake,          &
      &       rainnc, rainc, ice, snow, graupel,                         &
      &       prsl1, zf, wind, shdmin, shdmax,                           &
      &       srflag, sfalb_lnd_bck, snoalb,                             &
      &       isot, ivegsrc, fice, smcwlt2, smcref2,                     &
-     &       min_lakeice, min_seaice, oceanfrac,                        &
+     &       min_lakeice, min_seaice, oceanfrac, rhonewsn1,             &
      ! --- constants
      &       con_cp, con_rd, con_rv, con_g, con_pi, con_hvap,           &
      &       con_fvirt,                                                 &
@@ -397,6 +397,7 @@ module lsm_ruc
       logical, dimension(:),  intent(in) :: flag_cice
       logical,                intent(in) :: frac_grid
       logical,                intent(in) :: do_mynnsfclay
+      logical,                intent(in) :: exticeden
 
       logical,                intent(in) :: rdlai
 
@@ -418,7 +419,7 @@ module lsm_ruc
 
 !  ---  in
       real (kind=kind_phys), dimension(:), intent(in) ::                 &
-     &       rainnc, rainc, ice, snow, graupel
+     &       rainnc, rainc, ice, snow, graupel, rhonewsn1
 !  ---  in/out:
 !  --- on RUC levels
       real (kind=kind_phys), dimension(:,:), intent(inout) ::            &
@@ -494,7 +495,8 @@ module lsm_ruc
      &     soilt_lnd, tbot,                                             &
      &     xlai, swdn, z0_lnd, znt_lnd, rhosnfr, infiltr,               &
      &     precipfr, snfallac_lnd, acsn,                                &
-     &     qsfc_lnd, qsg_lnd, qvg_lnd, qcg_lnd, soilt1_lnd, chklowq
+     &     qsfc_lnd, qsg_lnd, qvg_lnd, qcg_lnd, soilt1_lnd, chklowq,    &
+     &     rhonewsn
      ! ice
       real (kind=kind_phys),dimension (im,1)        ::                  &
      &     albbck_ice, alb_ice, chs_ice, flhc_ice, flqc_ice,            &
@@ -746,7 +748,7 @@ module lsm_ruc
           acrunoff(i,j)     = 0.0
           snfallac_lnd(i,j) = 0.0
           snfallac_ice(i,j) = 0.0
-          rhosnfr(i,j)      = 0.0
+          rhosnfr(i,j)      = -1.e3
           precipfr(i,j)     = 0.0
 
         endif
@@ -845,6 +847,7 @@ module lsm_ruc
         rainncv(i,j)    = rhoh2o * rainnc(i)                   ! total time-step explicit precip 
         graupelncv(i,j) = rhoh2o * graupel(i)
         snowncv(i,j)    = rhoh2o * snow(i)
+        rhonewsn(i,j) = rhonewsn1(i)
         if (debug_print) then
         !-- diagnostics for a test point with known lat/lon
         if (abs(xlat_d(i)-testptlat).lt.2.5 .and.   &
@@ -1120,12 +1123,12 @@ module lsm_ruc
      &          zs, prcp(i,j), sneqv_lnd(i,j), snowh_lnd(i,j),               &
      &          sncovr_lnd(i,j),                                             &
      &          ffrozp(i,j), frpcpn,                                         &
-     &          rhosnfr(i,j), precipfr(i,j),                                 &
+     &          rhosnfr(i,j), precipfr(i,j), exticeden,                      &
 !  ---  inputs:
      &          conflx2(i,1,j), sfcprs(i,1,j), sfctmp(i,1,j), q2(i,1,j),     &
      &          qcatm(i,1,j), rho2(i,1,j), semis_bck(i,j), lwdn(i,j),        &
      &          swdn(i,j), solnet_lnd(i,j), sfcems_lnd(i,j), chklowq(i,j),   &
-     &          chs_lnd(i,j), flqc_lnd(i,j), flhc_lnd(i,j),                  &
+     &          chs_lnd(i,j), flqc_lnd(i,j), flhc_lnd(i,j), rhonewsn(i,j),   &
 !  ---  input/outputs:
      &          wet(i,j), cmc(i,j), shdfac(i,j), alb_lnd(i,j), znt_lnd(i,j), &
      &          z0_lnd(i,j), snoalb1d_lnd(i,j), albbck_lnd(i,j),             &
@@ -1149,7 +1152,8 @@ module lsm_ruc
      &          smfrsoil(i,:,j),keepfrsoil(i,:,j), .false.,                  &
      &          shdmin1d(i,j), shdmax1d(i,j), rdlai2d,                       &
      &          ims,ime, jms,jme, kms,kme,                                   &
-     &          its,ite, jts,jte, kts,kte                                    )
+     &          its,ite, jts,jte, kts,kte,                                   &
+     &          errmsg, errflg)
         if(debug_print) then
           write (0,*)'after LSMRUC for land'
           write (0,*)'after sneqv(i,j) =',i,j,sneqv_lnd(i,j)
@@ -1394,12 +1398,12 @@ module lsm_ruc
      &          zs, prcp(i,j), sneqv_ice(i,j), snowh_ice(i,j),               &
      &          sncovr_ice(i,j),                                             &
      &          ffrozp(i,j), frpcpn,                                         &
-     &          rhosnfr(i,j), precipfr(i,j),                                 &
+     &          rhosnfr(i,j), precipfr(i,j), exticeden,                      &
 !  ---  inputs:
      &          conflx2(i,1,j), sfcprs(i,1,j), sfctmp(i,1,j), q2(i,1,j),     &
      &          qcatm(i,1,j), rho2(i,1,j), semis_bck(i,j), lwdn(i,j),        &
      &          swdn(i,j), solnet_ice(i,j), sfcems_ice(i,j), chklowq(i,j),   &
-     &          chs_ice(i,j), flqc_ice(i,j), flhc_ice(i,j),                  &
+     &          chs_ice(i,j), flqc_ice(i,j), flhc_ice(i,j), rhonewsn(i,j),   &
 !  ---  input/outputs:
      &          wet_ice(i,j), cmc(i,j), shdfac(i,j), alb_ice(i,j),           &
      &          znt_ice(i,j), z0_ice(i,j), snoalb1d_ice(i,j),                &
@@ -1423,7 +1427,8 @@ module lsm_ruc
      &          smfrice(i,:,j),keepfrice(i,:,j), .false.,                    &
      &          shdmin1d(i,j), shdmax1d(i,j), rdlai2d,                       &
      &          ims,ime, jms,jme, kms,kme,                                   &
-     &          its,ite, jts,jte, kts,kte                                    )
+     &          its,ite, jts,jte, kts,kte,                                   &
+     &          errmsg, errflg)
 
         ! Interstitial
         evap_ice(i)   = qfx_ice(i,j) / rho(i)           ! kinematic

@@ -334,7 +334,7 @@
      &         ,phy_f2d_myj(1:im,13)                         &
      &         ,1,im,1,1,1,levs                              &
      &         ,1,im,1,1,1,levs                              &
-     &         ,1,im,1,1,1,levs)
+     &         ,1,im,1,1,1,levs, errmsg, errflg)
 
       do i = 1, im
          if(flag_iter(i))then

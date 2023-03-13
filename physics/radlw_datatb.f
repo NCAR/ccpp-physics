@@ -66,7 +66,7 @@
       module module_radlw_avplank        !
 !........................................!
 !
-      use physparam,               only : kind_phys
+      use machine,                 only : kind_phys
       use module_radlw_parameters, only : NPLNK, NBANDS
 !
       implicit none
@@ -747,7 +747,7 @@
       module module_radlw_ref            !
 !........................................!
 !
-      use physparam,               only : kind_phys
+      use machine,               only : kind_phys
 !
       implicit none
 !
@@ -924,7 +924,7 @@
       module module_radlw_cldprlw        !
 !........................................!
 !
-      use physparam,               only : kind_phys
+      use machine,                 only : kind_phys
       use module_radlw_parameters, only : NBANDS
 !
       implicit none
@@ -1607,7 +1607,7 @@
       module module_radlw_kgb01          !
 !........................................!
 !
-      use physparam,               only : kind_phys
+      use machine,                 only : kind_phys
       use module_radlw_parameters, only : NG01
 !
       implicit none
@@ -2421,7 +2421,7 @@
       module module_radlw_kgb02          !
 !........................................!
 !
-      use physparam,               only : kind_phys
+      use machine,                 only : kind_phys
       use module_radlw_parameters, only : NG02
 !
       implicit none
@@ -3278,7 +3278,7 @@
       module module_radlw_kgb03          !
 !........................................!
 !
-      use physparam,               only : kind_phys
+      use machine,                 only : kind_phys
       use module_radlw_parameters, only : NG03
 !
       implicit none
@@ -10152,7 +10152,7 @@
       module module_radlw_kgb04          !
 !........................................!
 !
-      use physparam,               only : kind_phys
+      use machine,                 only : kind_phys
       use module_radlw_parameters, only : NG04
 !
       implicit none
@@ -15352,7 +15352,7 @@
       module module_radlw_kgb05          !
 !........................................!
 !
-      use physparam,               only : kind_phys
+      use machine,                 only : kind_phys
       use module_radlw_parameters, only : NG05
 !
       implicit none
@@ -21849,7 +21849,7 @@
       module module_radlw_kgb06          !
 !........................................!
 !
-      use physparam,               only : kind_phys
+      use machine,                 only : kind_phys
       use module_radlw_parameters, only : NG06
 !
       implicit none
@@ -22109,7 +22109,7 @@
       module module_radlw_kgb07          !
 !........................................!
 !
-      use physparam,               only : kind_phys
+      use machine,                 only : kind_phys
       use module_radlw_parameters, only : NG07
 !
       implicit none
@@ -24756,7 +24756,7 @@
       module module_radlw_kgb08          !
 !........................................!
 !
-      use physparam,               only : kind_phys
+      use machine,                 only : kind_phys
       use module_radlw_parameters, only : NG08
 !
       implicit none
@@ -25553,7 +25553,7 @@
       module module_radlw_kgb09          !
 !........................................!
 !
-      use physparam,               only : kind_phys
+      use machine,                 only : kind_phys
       use module_radlw_parameters, only : NG09
 !
       implicit none
@@ -28231,7 +28231,7 @@
       module module_radlw_kgb10          !
 !........................................!
 !
-      use physparam,               only : kind_phys
+      use machine,                 only : kind_phys
       use module_radlw_parameters, only : NG10
 !
       implicit none
@@ -28705,7 +28705,7 @@
       module module_radlw_kgb11          !
 !........................................!
 !
-      use physparam,               only : kind_phys
+      use machine,                 only : kind_phys
       use module_radlw_parameters, only : NG11
 !
       implicit none
@@ -29404,7 +29404,7 @@
       module module_radlw_kgb12          !
 !........................................!
 !
-      use physparam,               only : kind_phys
+      use machine,                 only : kind_phys
       use module_radlw_parameters, only : NG12
 !
       implicit none
@@ -30475,7 +30475,7 @@
       module module_radlw_kgb13          !
 !........................................!
 !
-      use physparam,               only : kind_phys
+      use machine,                 only : kind_phys
       use module_radlw_parameters, only : NG13
 !
       implicit none
@@ -31381,7 +31381,7 @@
       module module_radlw_kgb14          !
 !........................................!
 !
-      use physparam,               only : kind_phys
+      use machine,                 only : kind_phys
       use module_radlw_parameters, only : NG14
 !
       implicit none
@@ -31605,7 +31605,7 @@
       module module_radlw_kgb15          !
 !........................................!
 !
-      use physparam,               only : kind_phys
+      use machine,                 only : kind_phys
       use module_radlw_parameters, only : NG15
 !
       implicit none
@@ -32010,7 +32010,7 @@
       module module_radlw_kgb16          !
 !........................................!
 !
-      use physparam,               only : kind_phys
+      use machine,                 only : kind_phys
       use module_radlw_parameters, only : NG16
 !
       implicit none
