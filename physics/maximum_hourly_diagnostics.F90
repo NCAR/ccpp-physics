@@ -31,11 +31,11 @@ contains
                                              t02min, rh02max, rh02min, dtp, rain, pratemax,        &
                                              lightning_threat, ltg1_max,ltg2_max,ltg3_max,         &
                                              wgrs, prsi, qgraupel, qsnowwat, qicewat, tgrs, con_rd,&
-                                             prsl, kdt, hydrostatic, errmsg, errflg)
+                                             prsl, kdt, errmsg, errflg)
 
        ! Interface variables
        integer, intent(in) :: im, levs, kdt
-       logical, intent(in) :: reset, lradar, lightning_threat, hydrostatic
+       logical, intent(in) :: reset, lradar, lightning_threat
        integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_fer_hires, &
                               imp_physics_nssl
        real(kind_phys), intent(in   ) :: con_g
@@ -79,13 +79,7 @@ contains
 
 !Lightning threat indices
        if (lightning_threat) then
-         if(hydrostatic) then
-           ltg1_max = 0
-           ltg2_max = 0
-           ltg3_max = 0
-         else
-           call lightning_threat_indices
-         endif
+         call lightning_threat_indices
        endif
 
 !Calculate hourly max 1-km agl and -10C reflectivity
