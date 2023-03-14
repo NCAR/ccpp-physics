@@ -230,6 +230,14 @@
   type = real
   kind = kind_phys
   intent = out
+[ext550]
+  standard_name = atmosphere_optical_thickness_3d
+  long_name = 3d optical extinction for total aerosol species
+  units = none
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
