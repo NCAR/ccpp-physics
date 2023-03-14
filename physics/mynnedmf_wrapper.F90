@@ -290,7 +290,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
       logical, intent(in) :: mix_chem, enh_mix, rrfs_sd
       real(kind_phys), dimension(:,:,:), intent(inout) :: chem3d
       real(kind_phys), dimension(:,:  ), intent(inout) :: vdep
-      real(kind_phys), dimension(im)   :: emis_ant_no
+      real(kind_phys), dimension(:)   :: emis_ant_no
 
 !MYNN-2D
       real(kind_phys), dimension(:), intent(in) ::                       &
@@ -357,9 +357,6 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 
       !initialize arrays for test
       EMIS_ANT_NO = 0.
-      if(rrfs_sd) then
-        vdep        = 0.
-      endif
 
       FLAG_OZONE = ntoz>0
 
