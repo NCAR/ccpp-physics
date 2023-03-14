@@ -357,7 +357,6 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 
       !initialize arrays for test
       EMIS_ANT_NO = 0.
-      vdep        = 0.
 
       FLAG_OZONE = ntoz>0
 
