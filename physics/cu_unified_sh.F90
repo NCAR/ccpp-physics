@@ -995,7 +995,6 @@ contains
          gravinv = 1./g
          if(ierr(i)==0)then
             xmb(i) = sigmab(i)*((-1.0*omegac(i))*gravinv)
-            write(*,*)'in shallow xmb=',xmb(i)
          endif
 
       else

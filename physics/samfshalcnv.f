@@ -1954,8 +1954,6 @@ c
           rho = po(i,k)*100. / (rd*to(i,k))
           if(progsigma .and. gdx(i) < dxcrtas)then
              xmb(i) = advfac(i)*sigmab(i)*((-1.0*omegac(i))*gravinv)
-             write(*,*)'in samfsal xmb=',sigmab(i)*
-     &            ((-1.0*omegac(i))*gravinv)
           else
              xmb(i) = advfac(i)*betaw*rho*wc(i)
           endif

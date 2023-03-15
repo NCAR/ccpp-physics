@@ -26,8 +26,8 @@ module cu_unified_deep
      real(kind=kind_phys), parameter :: pgcd = 0.1
 !
 !> aerosol awareness, do not use yet!
-     integer, parameter :: autoconv=2
-     integer, parameter :: aeroevap=3
+     integer, parameter :: autoconv=1
+     integer, parameter :: aeroevap=1
      real(kind=kind_phys), parameter :: scav_factor = 0.5
 !> still 16 ensembles for clousres
      integer, parameter:: maxens3=16
@@ -1539,6 +1539,7 @@ contains
 
 !$acc end kernels
 
+
 !LB: insert calls to updraft vertical veloicity and prognostic area fraction here:
       call calculate_updraft_velocity(its,itf,ktf,ite,kts,kte,ierr,progsigma,    &
            k22,kbcon,ktop,zo,entr_rate_2d,cd,fv,r_d,el2orc,qeso,tn,qo,po,dbyo,    &
@@ -1687,6 +1688,7 @@ contains
                enddo
             endif
           enddo
+
 !$acc end kernels
           !> - Call cup_ip_aa0() to calculate workfunctions for updrafts
           call cup_up_aa0(aa1_bl,zo,zuo,dbyo_bl,gammao_cup_bl,tn_cup_bl,        &
@@ -1859,7 +1861,6 @@ contains
        enddo   ! k
 
     enddo
-
 
     do i=its,itf
         !trash  = 0.0
@@ -2187,6 +2188,7 @@ contains
            its,ite, kts,kte,                                                &
            dicycle,tau_ecmwf,aa1_bl,xf_dicycle,xf_progsigma)
 !
+
 !$acc kernels
       do k=kts,ktf
       do i=its,itf
@@ -2231,6 +2233,7 @@ contains
          enddo
 !$acc end kernels
        endif
+
        call cup_output_ens_3d(xff_mid,xf_ens,ierr,dellat_ens,dellaq_ens, &
             dellaqc_ens,outt,                                            &
             outq,outqc,zuo,pre,pwo_ens,xmb,ktop,progsigma,               &
@@ -3603,7 +3606,7 @@ if(progsigma)then
 !$acc kernels
    gravinv=1./g
    do i=its,itf
-      xf_progsigma(i)=0
+      xf_progsigma(i)=0.
    enddo
    do i=its,itf
       if(ierr(i)==0)then
@@ -3612,7 +3615,7 @@ if(progsigma)then
    enddo
 else
    do i=its,itf
-      xf_progsigma(i)=0
+      xf_progsigma(i)=0.
    enddo
 endif
 
@@ -4219,7 +4222,6 @@ endif
       do i=its,itf
         if(ierr(i).eq.0)then
            xmb(i)=xf_progsigma(i)
-           write(*,*)'in deep xmb=',xmb(i)
         endif
       enddo
 
@@ -5865,7 +5867,6 @@ endif
     !LB: This routine outputs updraft velocity square (m/s), updraft omega_u (Pa/s), and cloud average updraft 
     !velocity (m/s) and omega_u (Pa/s) in the case progsima is true.
     
-
     do k = 1, ktf
        do i = 1,itf
           wu2(i,k)=0.
@@ -5973,7 +5974,7 @@ endif
       enddo
 
   !> - For progsigma = T, calculate the mean updraft velocity within the cloud (omegac),cast in pressure coordinates.
-
+      
       if(progsigma)then                                                                                                                                                                                                       
          do i = 1, itf
             omegac(i) = 0.
@@ -6004,6 +6005,7 @@ endif
          enddo
          
          !> - For progsigma = T, calculate the xi term in Bengtsson et al. 2022 \cite Bengtsson_2022 (equation 8)                                                              
+
          do k = 2, ktf-1
             do i = 1, itf
                if (ierr(i)==0) then
@@ -6034,7 +6036,6 @@ endif
             enddo
          enddo
       endif
-
 
   end subroutine calculate_updraft_velocity
 

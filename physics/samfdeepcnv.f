@@ -2902,8 +2902,6 @@ c
           rho = po(i,k)*100. / (rd*to(i,k))
           if(progsigma)then
              xmb(i) = advfac(i)*sigmab(i)*((-1.0*omegac(i))*gravinv)
-             write(*,*)'in samfdeep xmb=',sigmab(i)*
-     &            ((-1.0*omegac(i))*gravinv)
           else
              xmb(i) = advfac(i)*betaw*rho*wc(i)
           endif

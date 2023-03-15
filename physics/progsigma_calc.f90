@@ -200,7 +200,6 @@
             if(cnvflg(i)) then
                sigmab(i)=sigmab(i)/betascu
                sigmab(i)=MAX(0.03,sigmab(i))
-               write(*,*)'sigmab shallow=',sigmab(i)
             endif
          enddo
       else
@@ -208,7 +207,6 @@
             if(cnvflg(i)) then
                sigmab(i)=sigmab(i)/betadcu
                sigmab(i)=MAX(0.01,sigmab(i))
-               write(*,*)'sigmab deep=',sigmab(i)
             endif
          enddo
       endif
