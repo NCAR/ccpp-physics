@@ -391,16 +391,16 @@ SUBROUTINE mynnedmf_wrapper_run(        &
          FLAG_QNI= .true.
          FLAG_QC = .true.
          FLAG_QNC= .true.
-         FLAG_QS = .false.
+         FLAG_QS = .false. !.true.
          FLAG_QNWFA= nssl_ccn_on ! ERM: Perhaps could use this field for CCN field?
          FLAG_QNIFA= .false.
          FLAG_QNBCA= .false.
          do k=1,levs
             do i=1,im
-              sqv(i,k)  = qgrs_water_vapor(i,k)
-              sqc(i,k)    = qgrs_liquid_cloud(i,k)
-              sqi(i,k)    = qgrs_ice(i,k)
-              sqs(i,k)   = 0.
+              sqv(i,k)   = qgrs_water_vapor(i,k)
+              sqc(i,k)   = qgrs_liquid_cloud(i,k)
+              sqi(i,k)   = qgrs_ice(i,k)
+              sqs(i,k)   = 0.0 !qgrs_snow(i,k)
               ozone(i,k) = qgrs_ozone(i,k)
               qnc(i,k)   = qgrs_cloud_droplet_num_conc(i,k)
               qni(i,k)   = qgrs_cloud_ice_num_conc(i,k)
@@ -917,7 +917,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                  dqdt_cloud_droplet_num_conc(i,k)  = RQNCBLTEN(i,k)
                  dqdt_ice(i,k)                     = RQIBLTEN(i,k) !/(1.0 + qv(i,k))
                  dqdt_ice_num_conc(i,k)            = RQNIBLTEN(i,k)
-                 dqdt_snow(i,k)                    = RQSBLTEN(i,k) !/(1.0 + qv(i,k))
+                 !dqdt_snow(i,k)                    = RQSBLTEN(i,k) !/(1.0 + qv(i,k))
                  IF ( nssl_ccn_on ) THEN ! 
                    dqdt_cccn(i,k)      = RQNWFABLTEN(i,k)
                  ENDIF
