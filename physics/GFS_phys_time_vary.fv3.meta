@@ -44,6 +44,13 @@
   dimensions = ()
   type = logical
   intent = in
+[iaermdl]
+  standard_name = control_for_aerosol_radiation_scheme
+  long_name = control of aerosol scheme in radiation
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = in
 [iccn]
   standard_name = control_for_ice_cloud_condensation_nuclei_forcing
   long_name = flag for IN and CCN forcing for morrison gettelman microphysics
@@ -1285,6 +1292,14 @@
   type = real
   kind = kind_phys
   intent = inout
+[fn_nml]
+  standard_name = filename_of_namelist
+  long_name = namelist filename
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = in
 [imap]
   standard_name = map_of_block_column_number_to_global_i_index
   long_name = map of local index ix to global index i for this block
