@@ -90,7 +90,7 @@
   long_name = MPI communicator
   units = index
   dimensions = ()
-  type = integer
+  type = MPI_Comm
   intent = in
 [rrtmgp_phys_blksz]
   standard_name = number_of_columns_per_RRTMGP_LW_block

@@ -7,6 +7,7 @@
 !!
 ! ###########################################################################################
 module rrtmgp_lw_main
+  use mpi_f08
   use machine,                only: kind_phys, kind_dbl_prec
   use mo_optical_props,       only: ty_optical_props_1scl, ty_optical_props_2str
   use mo_cloud_optics,        only: ty_cloud_optics
@@ -68,8 +69,9 @@ contains
          doGP_sgs_cnv             ! Flag to include sgs convective clouds 
     integer, intent(inout) :: &
          nrghice                  ! Number of ice-roughness categories
+    type(MPI_Comm),intent(in) :: &
+         mpicomm                  ! MPI communicator
     integer,intent(in) :: &
-         mpicomm,               & ! MPI communicator
          mpirank,               & ! Current MPI rank
          mpiroot,               & ! Master MPI rank
          rrtmgp_phys_blksz,     & ! Number of horizontal points to process at once.
