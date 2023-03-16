@@ -34,7 +34,6 @@
       !--- variables needed for calculating 'sncovr'
       use namelist_soilveg, only: salp_data, snupx
       use set_soilveg_mod, only: set_soilveg
-      use physparam,              only : iaermdl
 
       ! --- needed for Noah MP init
       use noahmp_tables, only: laim_table,saim_table,sla_table,      &
@@ -67,7 +66,7 @@
 !>\section gen_GFS_phys_time_vary_init GFS_phys_time_vary_init General Algorithm
 !> @{
       subroutine GFS_phys_time_vary_init (                                                         &
-              me, master, ntoz, h2o_phys, iaerclm, iccn, iflip, im, levs,                          &
+              me, master, ntoz, h2o_phys, iaerclm, iccn, iaermdl, iflip, im, levs,                 &
               nx, ny, idate, xlat_d, xlon_d,                                                       &
               jindx1_o3, jindx2_o3, ddy_o3, ozpl, jindx1_h, jindx2_h, ddy_h, h2opl,fhour,          &
               jindx1_aer, jindx2_aer, ddy_aer, iindx1_aer, iindx2_aer, ddx_aer, aer_nm,            &
@@ -86,7 +85,7 @@
          implicit none
 
          ! Interface variables
-         integer,              intent(in)    :: me, master, ntoz, iccn, iflip, im, nx, ny, levs
+         integer,              intent(in)    :: me, master, ntoz, iccn, iflip, im, nx, ny, levs, iaermdl
          logical,              intent(in)    :: h2o_phys, iaerclm, lsm_cold_start
          integer,              intent(in)    :: idate(:)
          real(kind_phys),      intent(in)    :: fhour
@@ -288,7 +287,7 @@
 
 !$OMP section
 !> - Initialize soil vegetation (needed for sncovr calculation further down)
-         call set_soilveg(me, isot, ivegsrc, nlunit)
+         call set_soilveg(me, isot, ivegsrc, nlunit, errmsg, errflg)
 
 !$OMP end sections
 
@@ -712,7 +711,7 @@
             imfdeepcnv, cal_pre, random_clds, nscyc, ntoz, h2o_phys, iaerclm, iccn, clstp,          &
             jindx1_o3, jindx2_o3, ddy_o3, ozpl, jindx1_h, jindx2_h, ddy_h, h2opl, iflip,            &
             jindx1_aer, jindx2_aer, ddy_aer, iindx1_aer, iindx2_aer, ddx_aer, aer_nm,               &
-            jindx1_ci, jindx2_ci, ddy_ci, iindx1_ci, iindx2_ci, ddx_ci, in_nm, ccn_nm,              &
+            jindx1_ci, jindx2_ci, ddy_ci, iindx1_ci, iindx2_ci, ddx_ci, in_nm, ccn_nm, fn_nml,      &
             imap, jmap, prsl, seed0, rann, nthrds, nx, ny, nsst, tile_num, nlunit, lsoil, lsoil_lsm,&
             kice, ialb, isot, ivegsrc, input_nml_file, use_ufo, nst_anl, frac_grid, fhcyc, phour,   &
             lakefrac, min_seaice, min_lakeice, smc, slc, stc, smois, sh2o, tslb, tiice, tg3, tref,  &
@@ -753,6 +752,7 @@
          integer,              intent(in)    :: nthrds, nx, ny, nsst, tile_num, nlunit, lsoil
          integer,              intent(in)    :: lsoil_lsm, kice, ialb, isot, ivegsrc
          character(len=*),     intent(in)    :: input_nml_file(:)
+         character(len=*),     intent(in)    :: fn_nml
          logical,              intent(in)    :: use_ufo, nst_anl, frac_grid
          real(kind_phys),      intent(in)    :: fhcyc, phour, lakefrac(:), min_seaice, min_lakeice,  &
                                                 xlat_d(:), xlon_d(:), landfrac(:)
@@ -893,14 +893,14 @@
 !> - Call gcycle() to repopulate specific time-varying surface properties for AMIP/forecast runs
          if (nscyc >  0) then
            if (mod(kdt,nscyc) == 1) THEN
-             call gcycle (me, nthrds, nx, ny, isc, jsc, nsst, tile_num, nlunit,              &
+             call gcycle (me, nthrds, nx, ny, isc, jsc, nsst, tile_num, nlunit, fn_nml,      &
                  input_nml_file, lsoil, lsoil_lsm, kice, idate, ialb, isot, ivegsrc,         &
                  use_ufo, nst_anl, fhcyc, phour, landfrac, lakefrac, min_seaice, min_lakeice,&
                  frac_grid, smc, slc, stc, smois, sh2o, tslb, tiice, tg3, tref, tsfc,        &
                  tsfco, tisfc, hice, fice, facsf, facwf, alvsf, alvwf, alnsf, alnwf,         &
                  zorli, zorll, zorlo, weasd, slope, snoalb, canopy, vfrac, vtype,            &
                  stype, shdmin, shdmax, snowd, cv, cvb, cvt, oro, oro_uf,                    &
-                 xlat_d, xlon_d, slmsk, imap, jmap)
+                 xlat_d, xlon_d, slmsk, imap, jmap, errmsg, errflg)
            endif
          endif
 

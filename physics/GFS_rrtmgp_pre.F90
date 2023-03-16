@@ -5,19 +5,15 @@
 !! \brief This module contains code to prepare model fields for use by the RRTMGP 
 !! radiation scheme.  
 module GFS_rrtmgp_pre
-  use machine, only: &
-       kind_phys                   !< Working type
-  use funcphys, only:            &
-       fpvs                        !< Function ot compute sat. vapor pressure over liq.
-  use module_radiation_astronomy, only: &
-       coszmn 
-  use module_radiation_gases,    only: &
-       NF_VGAS,                  & !< Number of active gas species
-       getgases,                 & !< Routine to setup trace gases
-       getozn                      !< Routine to setup ozone
-  ! RRTMGP types
-  use mo_gas_concentrations, only: ty_gas_concs
-  use radiation_tools,       only: check_error_msg,cmp_tlev
+  use machine,                    only: kind_phys
+  use funcphys,                   only: fpvs
+  use module_radiation_astronomy, only: coszmn 
+  use module_radiation_gases,     only: NF_VGAS, getgases, getozn
+  use mo_gas_concentrations,      only: ty_gas_concs
+  use radiation_tools,            only: check_error_msg,cmp_tlev
+  use rrtmgp_lw_gas_optics,       only: lw_gas_props
+
+  implicit none
 
   real(kind_phys), parameter :: &
        amd   = 28.9644_kind_phys,  & !< Molecular weight of dry-air     (g/mol)
@@ -25,6 +21,9 @@ module GFS_rrtmgp_pre
        amo3  = 47.9982_kind_phys,  & !< Modelular weight of ozone       (g/mol)
        amdw  = amd/amw,            & !< Molecular weight of dry air / water vapor
        amdo3 = amd/amo3              !< Molecular weight of dry air / ozone
+  real(kind_phys), parameter :: eps      = 1.0e-6_kind_phys
+  real(kind_phys), parameter :: oneminus = 1.0_kind_phys - eps
+  real(kind_phys), parameter :: ftiny    = 1.0e-12_kind_phys
 
   ! Save trace gas indices.
   integer :: iStr_h2o, iStr_co2, iStr_o3, iStr_n2o, iStr_ch4, iStr_o2, iStr_ccl4, &
@@ -111,27 +110,26 @@ contains
 !!
 !! \section GFS_rrtmgp_pre_run
   ! ######################################################################################### 
-  subroutine GFS_rrtmgp_pre_run(me, nCol, nLev, nTracers, i_o3, lsswr, lslwr, fhswr, fhlwr, &
+  subroutine GFS_rrtmgp_pre_run(me, nCol, nLev, i_o3, doSWrad, doLWrad, fhswr, fhlwr,       &
        xlat, xlon,  prsl, tgrs, prslk, prsi, qgrs, tsfc, coslat, sinlat, con_g, con_rd,     &
-       con_eps, con_epsm1, con_fvirt, con_epsqs, solhr, minGPpres, maxGPpres, minGPtemp,    &
-       maxGPtemp, raddt, p_lay, t_lay, p_lev, t_lev, tsfg, tsfa, qs_lay, q_lay, tv_lay,     &
-       relhum, tracer, deltaZ, deltaZc, deltaP, active_gases_array, gas_concentrations,     &
-       tsfc_radtime, coszen, coszdg, top_at_1, iSFC, iTOA, errmsg, errflg)
+       con_eps, con_epsm1, con_fvirt, con_epsqs, solhr, raddt, p_lay, t_lay, p_lev, t_lev,  &
+       vmr_o2, vmr_h2o, vmr_o3, vmr_ch4,                                                    &
+       vmr_n2o, vmr_co2, tsfg, tsfa, qs_lay, q_lay, tv_lay,                                 &
+       relhum, deltaZ, deltaZc, deltaP, active_gases_array,                                 &
+       tsfc_radtime, coszen, coszdg, top_at_1, iSFC, iTOA, nDay, idxday, semis,             &
+       sfc_emiss_byband, ico2, con_pi, errmsg, errflg)
     
     ! Inputs   
     integer, intent(in)    :: &
+         me,                & ! MPI rank
          nCol,              & ! Number of horizontal grid points
          nLev,              & ! Number of vertical layers
-         nTracers,          & ! Number of tracers from model. 
+         ico2,              & ! Flag for co2 radiation scheme 
          i_o3                 ! Index into tracer array for ozone
     logical, intent(in) :: &
-    	 lsswr,             & ! Call SW radiation?
-    	 lslwr                ! Call LW radiation
+    	 doSWrad,           & ! Call SW radiation?
+    	 doLWrad              ! Call LW radiation
     real(kind_phys), intent(in) :: &
-         minGPtemp,         & ! Minimum temperature allowed in RRTMGP.
-         maxGPtemp,         & ! Maximum ...
-         minGPpres,         & ! Minimum pressure allowed in RRTMGP.
-         maxGPpres,         & ! Maximum pressure allowed in RRTMGP. 
          fhswr,             & ! Frequency of SW radiation call.
          fhlwr                ! Frequency of LW radiation call.
     real(kind_phys), intent(in) :: &
@@ -141,13 +139,15 @@ contains
          con_epsm1,         & ! Physical constant: Epsilon (Rd/Rv) minus one
          con_fvirt,         & ! Physical constant: Inverse of epsilon minus one
          con_epsqs,         & ! Physical constant: Minimum saturation mixing-ratio (kg/kg)
+         con_pi,            & ! Physical constant: Pi
          solhr                ! Time in hours after 00z at the current timestep 
     real(kind_phys), dimension(:), intent(in) :: & 
     	 xlon,              & ! Longitude
     	 xlat,              & ! Latitude
     	 tsfc,              & ! Surface skin temperature (K)
          coslat,            & ! Cosine(latitude)
-         sinlat               ! Sine(latitude) 
+         sinlat,            & ! Sine(latitude) 
+         semis
     real(kind_phys), dimension(:,:), intent(in) :: & 
          prsl,              & ! Pressure at model-layer centers (Pa)
          tgrs,              & ! Temperature at model-layer centers (K)
@@ -163,9 +163,11 @@ contains
          errmsg               ! Error message
     integer, intent(out) :: &  
          errflg,            & ! Error flag
+         nDay
+    integer, intent(inout) :: &
          iSFC,              & ! Vertical index for surface
          iTOA                 ! Vertical index for TOA
-    logical, intent(out) :: &
+    logical, intent(inout) :: &
          top_at_1             ! Vertical ordering flag
     real(kind_phys), intent(inout) :: &
          raddt                ! Radiation time-step
@@ -175,6 +177,8 @@ contains
          tsfc_radtime,      & ! Surface temperature at radiation timestep
          coszen,            & ! Cosine of SZA
          coszdg               ! Cosine of SZA, daytime
+    integer, dimension(:), intent(inout) ::  &
+         idxday               ! Indices for daylit points 
     real(kind_phys), dimension(:,:), intent(inout) :: &
          p_lay,             & ! Pressure at model-layer
          t_lay,             & ! Temperature at model layer
@@ -186,15 +190,12 @@ contains
          deltaZc,           & ! Layer thickness (m) (between layer centers)
          deltaP,            & ! Layer thickness (Pa)
          p_lev,             & ! Pressure at model-interface
-         t_lev                ! Temperature at model-interface
-    real(kind_phys), dimension(:,:,:),intent(inout) :: &
-         tracer               ! Array containing trace gases
-    type(ty_gas_concs), intent(inout) :: &
-         gas_concentrations   ! RRTMGP DDT: gas volumne mixing ratios
+         sfc_emiss_byband,  & !
+         t_lev,             & ! Temperature at model-interface
+         vmr_o2, vmr_h2o, vmr_o3, vmr_ch4, vmr_n2o, vmr_co2
 
     ! Local variables
     integer :: i, j, iCol, iBand, iLay, iLev, iSFC_ilev
-    real(kind_phys),dimension(nCol,nLev) :: vmr_o3, vmr_h2o
     real(kind_phys) :: es, tem1, tem2, pfac
     real(kind_phys), dimension(nLev+1) :: hgtb
     real(kind_phys), dimension(nLev)   :: hgtc
@@ -205,8 +206,10 @@ contains
     ! Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0
-    
-    if (.not. (lsswr .or. lslwr)) return
+
+    nday   = 0
+    idxday = 0
+    if (.not. (doSWrad .or. doLWrad)) return
         
     ! #######################################################################################
     ! What is vertical ordering?
@@ -242,27 +245,29 @@ contains
     ! Bound temperature/pressure at layer centers.
     do iLay=1,nLev
        do iCol=1,NCOL
-          if (t_lay(iCol,iLay) .le. minGPtemp) then
-             t_lay(iCol,iLay) = minGPtemp + epsilon(minGPtemp)
+          if (t_lay(iCol,iLay) .le. lw_gas_props%get_temp_min()) then
+             t_lay(iCol,iLay) = lw_gas_props%get_temp_min() + epsilon(lw_gas_props%get_temp_min())
           endif
-          if (p_lay(iCol,iLay) .le. minGPpres) then
-             p_lay(iCol,iLay) = minGPpres + epsilon(minGPpres)
+          if (p_lay(iCol,iLay) .le. lw_gas_props%get_press_min()) then
+             p_lay(iCol,iLay) = lw_gas_props%get_press_min() + epsilon(lw_gas_props%get_press_min())
           endif
-          if (t_lay(iCol,iLay) .ge. maxGPtemp) then
-             t_lay(iCol,iLay) = maxGPtemp - epsilon(maxGPtemp)
+          if (t_lay(iCol,iLay) .ge. lw_gas_props%get_temp_max()) then
+             t_lay(iCol,iLay) = lw_gas_props%get_temp_max() - epsilon(lw_gas_props%get_temp_max())
           endif
-          if (p_lay(iCol,iLay) .ge. maxGPpres) then
-             p_lay(iCol,iLay) = maxGPpres - epsilon(maxGPpres)
+          if (p_lay(iCol,iLay) .ge. lw_gas_props%get_press_max()) then
+             p_lay(iCol,iLay) = lw_gas_props%get_press_max() - epsilon(lw_gas_props%get_press_max())
           endif
        enddo
     enddo
 
     ! Temperature at layer-interfaces          
-    call cmp_tlev(nCol,nLev,minGPpres,p_lay,t_lay,p_lev,tsfc,t_lev)
+    call cmp_tlev(nCol,nLev,lw_gas_props%get_press_min(),p_lay,t_lay,p_lev,tsfc,t_lev)
     do iLev=1,nLev+1
        do iCol=1,nCol
-          if (t_lev(iCol,iLev) .le. minGPtemp) t_lev(iCol,iLev) = minGPtemp + epsilon(minGPtemp)
-          if (t_lev(iCol,iLev) .ge. maxGPtemp) t_lev(iCol,iLev) = maxGPtemp - epsilon(maxGPtemp)
+          if (t_lev(iCol,iLev) .le. lw_gas_props%get_temp_min()) t_lev(iCol,iLev) = &
+               lw_gas_props%get_temp_min() + epsilon(lw_gas_props%get_temp_min())
+          if (t_lev(iCol,iLev) .ge. lw_gas_props%get_temp_max()) t_lev(iCol,iLev) = &
+               lw_gas_props%get_temp_max() - epsilon(lw_gas_props%get_temp_max())
        enddo
     enddo
 
@@ -336,43 +341,31 @@ contains
     ! #######################################################################################
     ! Get layer ozone mass mixing ratio 
     ! #######################################################################################
-    ! First recast remaining all tracers (except sphum) forcing them all to be positive
-    do j = 2, nTracers
-       tracer(1:NCOL,:,j) = qgrs(1:NCOL,:,j)
-       where(tracer(:,:,j) .lt. 0.0) tracer(:,:,j) = 0._kind_phys
-    enddo
 
     if (i_o3 > 0) then 
        do iLay=1,nlev
           do iCol=1,NCOL
-             o3_lay(iCol,iLay) = max( con_epsqs, tracer(iCol,iLay,i_o3) )
+             o3_lay(iCol,iLay) = max( con_epsqs, qgrs(iCol,iLay,i_o3) )
           enddo
        enddo
     ! OR Use climatological ozone data
     else                               
-       call getozn (prslk(1:NCOL,:), xlat, nCol, nLev, o3_lay)
+       call getozn (prslk(1:NCOL,:), xlat, nCol, nLev, top_at_1, o3_lay)
     endif
 
     ! #######################################################################################
     ! Set gas concentrations for RRTMGP
     ! #######################################################################################
     ! Call getgases(), to set up non-prognostic gas volume mixing ratios (gas_vmr).
-    call getgases (p_lev/100., xlon, xlat, nCol, nLev, gas_vmr)
+    call getgases (p_lev/100., xlon, xlat, nCol, nLev, ico2, top_at_1, con_pi, gas_vmr)
+    vmr_o2  = gas_vmr(:,:,4)
+    vmr_ch4 = gas_vmr(:,:,3)
+    vmr_n2o = gas_vmr(:,:,2)
+    vmr_co2 = gas_vmr(:,:,1)
 
     ! Compute volume mixing-ratios for ozone (mmr) and specific-humidity.
     vmr_h2o = merge((q_lay/(1-q_lay))*amdw, 0., q_lay  .ne. 1.)
     vmr_o3  = merge(o3_lay*amdo3,           0., o3_lay .gt. 0.)
-    
-    ! Populate RRTMGP DDT w/ gas-concentrations
-    gas_concentrations%ncol                       = nCol
-    gas_concentrations%nlay                       = nLev
-    gas_concentrations%gas_name(:)                = active_gases_array(:)
-    gas_concentrations%concs(istr_o2)%conc(:,:)   = gas_vmr(:,:,4)
-    gas_concentrations%concs(istr_co2)%conc(:,:)  = gas_vmr(:,:,1)
-    gas_concentrations%concs(istr_ch4)%conc(:,:)  = gas_vmr(:,:,3)
-    gas_concentrations%concs(istr_n2o)%conc(:,:)  = gas_vmr(:,:,2)
-    gas_concentrations%concs(istr_h2o)%conc(:,:)  = vmr_h2o(:,:)
-    gas_concentrations%concs(istr_o3)%conc(:,:)   = vmr_o3(:,:)
 
     ! #######################################################################################
     ! Radiation time step (output) (Is this really needed?) (Used by some diagnostics)
@@ -382,15 +375,37 @@ contains
     ! #######################################################################################
     ! Setup surface ground temperature and ground/air skin temperature if required.
     ! #######################################################################################
+    iSFC_ilev = 1
+    if (top_at_1) iSFC_ilev = iSFC + 1
+    
     tsfg(1:NCOL) = t_lev(1:NCOL,iSFC_ilev)
     tsfa(1:NCOL) = t_lay(1:NCOL,iSFC)
 
     ! #######################################################################################
     ! Compute cosine of zenith angle (only when SW is called)
     ! #######################################################################################
-    if (lsswr) then
+    if (doSWrad) then
        call coszmn (xlon, sinlat, coslat, solhr, nCol, me, coszen, coszdg)
+       ! For SW gather daylit points
+       nday   = 0
+       idxday = 0
+       do iCol = 1, nCol
+          if (coszen(iCol) >= 0.0001) then
+             nday = nday + 1
+             idxday(nday) = iCol
+          endif
+       enddo
+    else
+       nday   = 0
+       idxday = 0
     endif
+
+    ! #######################################################################################
+    ! Surface emissivity
+    ! #######################################################################################
+    do iBand=1,lw_gas_props%get_nband()
+       sfc_emiss_byband(iBand,:) = semis
+    enddo
 
   end subroutine GFS_rrtmgp_pre_run
   

@@ -73,7 +73,7 @@
       module module_radsw_ref            !
 !........................................!
 !
-      use physparam,               only : kind_phys
+      use machine,               only : kind_phys
 !
       implicit none
 !
@@ -217,7 +217,7 @@
 !                                                                      !
 ! *************************  end description  ************************ !
 
-      use physparam,               only : kind_phys
+      use machine,                 only : kind_phys
       use module_radsw_parameters, only : nblow, nbhgh
 !
       implicit none
@@ -2503,7 +2503,7 @@
 !                                                                      !
 ! *************************  end description  ************************ !
 !
-      use physparam,               only : kind_phys
+      use machine,                 only : kind_phys
       use module_radsw_parameters, only : NGMAX, NG16, NG17, NG18, NG19,&
      &                                    NG20, NG21, NG22, NG23, NG24, &
      &                                    NG25, NG26, NG27, NG28, NG29, &
@@ -2838,7 +2838,7 @@
 !                                                                     !
 ! ************************  end description  ************************ !
 !
-      use physparam,               only : kind_phys
+      use machine,                 only : kind_phys
       use module_radsw_parameters, only : NG16
 
 !
@@ -4031,7 +4031,7 @@
 !                                                                     !
 ! *********    *********    end description    *********    ********* !
 !
-      use physparam,               only : kind_phys
+      use machine,                 only : kind_phys
       use module_radsw_parameters, only : NG17
 
 !
@@ -8640,7 +8640,7 @@
 !                                                                     !
 ! *********    *********    end description    *********    ********* !
 !
-      use physparam,               only : kind_phys
+      use machine,                 only : kind_phys
       use module_radsw_parameters, only : NG18
 
 !
@@ -10158,7 +10158,7 @@
 !                                                                     !
 ! *********    *********    end description    *********    ********* !
 !
-      use physparam,               only : kind_phys
+      use machine,                 only : kind_phys
       use module_radsw_parameters, only : NG19
 
 !
@@ -11677,7 +11677,7 @@
 !                                                                     !
 ! *********    *********    end description    *********    ********* !
 !
-      use physparam,               only : kind_phys
+      use machine,                 only : kind_phys
       use module_radsw_parameters, only : NG20
 
 !
@@ -12461,7 +12461,7 @@
 !                                                                     !
 ! *********    *********    end description    *********    ********* !
 !
-      use physparam,               only : kind_phys
+      use machine,                 only : kind_phys
       use module_radsw_parameters, only : NG21
 
 !
@@ -16319,7 +16319,7 @@
 !                                                                     !
 ! *********    *********    end description    *********    ********* !
 !
-      use physparam,               only : kind_phys
+      use machine,                 only : kind_phys
       use module_radsw_parameters, only : NG22
 
 !
@@ -16766,7 +16766,7 @@
 !                                                                     !
 ! *********    *********    end description    *********    ********* !
 !
-      use physparam,               only : kind_phys
+      use machine,                 only : kind_phys
       use module_radsw_parameters, only : NG23
 
 !
@@ -17023,7 +17023,7 @@
 !                                                                     !
 ! *********    *********    end description    *********    ********* !
 !
-      use physparam,               only : kind_phys
+      use machine,                 only : kind_phys
       use module_radsw_parameters, only : NG24
 
 !
@@ -18588,7 +18588,7 @@
 !                                                                     !
 ! *********    *********    end description    *********    ********* !
 !
-      use physparam,               only : kind_phys
+      use machine,                 only : kind_phys
       use module_radsw_parameters, only : NG25
 
 !
@@ -18748,7 +18748,7 @@
 !                                                                     !
 ! *********    *********    end description    *********    ********* !
 !
-      use physparam,               only : kind_phys
+      use machine,                 only : kind_phys
       use module_radsw_parameters, only : NG26
 
 !
@@ -18784,7 +18784,7 @@
 !                                                                     !
 ! *********    *********    end description    *********    ********* !
 !
-      use physparam,               only : kind_phys
+      use machine,                 only : kind_phys
       use module_radsw_parameters, only : NG27
 
 !
@@ -19387,7 +19387,7 @@
 !                                                                     !
 ! *********    *********    end description    *********    ********* !
 !
-      use physparam,               only : kind_phys
+      use machine,                 only : kind_phys
       use module_radsw_parameters, only : NG28
 
 !
@@ -21701,7 +21701,7 @@
 !                                                                     !
 ! *********    *********    end description    *********    ********* !
 !
-      use physparam,               only : kind_phys
+      use machine,                 only : kind_phys
       use module_radsw_parameters, only : NG29
 
 !

@@ -1137,7 +1137,7 @@
           land(i) = 0.0
           windmks=wind10p(i)*.01
           if ( iwavecpl .eq. 1 ) then
-            call znot_wind10m(windmks,znott,znotm,icoef_sf)
+            call znot_wind10m(windmks,znott,znotm,icoef_sf,errmsg,errflg)
             !Check if Charnock parameter ratio is received in a proper range.
             if ( alpha(i) .ge. 0.2 .and. alpha(i) .le. 5. ) then
               znotm = znotm*alpha(i)
@@ -1145,7 +1145,7 @@
             zoc(i)  = -100.*znotm
             zot(i) =  -100* znott
           else
-            call znot_wind10m(windmks,znott,znotm,icoef_sf)
+            call znot_wind10m(windmks,znott,znotm,icoef_sf,errmsg,errflg)
             zoc(i)  = -100.*znotm
             zot(i) =  -100* znott
           endif
@@ -1782,7 +1782,7 @@
 !!!
         if ( iwavecpl .eq. 1 .and. zoc(i) .le. 0.0 ) then
           windmks = wind10(i) * 0.01
-          call znot_wind10m(windmks,znott,znotm,icoef_sf)
+          call znot_wind10m(windmks,znott,znotm,icoef_sf,errmsg,errflg)
           !Check if Charnock parameter ratio is received in a proper range.
           if ( alpha(i) .ge. 0.2 .and. alpha(i) .le. 5. ) then
             znotm = znotm*alpha(i)

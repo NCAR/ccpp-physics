@@ -19,13 +19,13 @@
 !         input:                                                       !
 !           ( me )                                                     !
 !         output:                                                      !
-!           ( none )                                                   !
+!           ( errflg, errmsg )                                         !
 !                                                                      !
 !      'gas_update' -- read in data and update with time               !
 !         input:                                                       !
 !           ( iyear, imon, iday, ihour, loz1st, ldoco2, me )           !
 !         output:                                                      !
-!           ( none )                                                   !
+!           ( errflg, errmsg )                                         !
 !                                                                      !
 !      'getozn'     -- setup climatological ozone profile              !
 !         input:                                                       !
@@ -44,7 +44,6 @@
 !   external modules referenced:                                       !
 !       'module machine'                    in 'machine.f'             !
 !       'module funcphys'                   in 'funcphys.f'            !
-!       'module physcons'                   in 'physcons.f             !
 !       'module module_iounitdef'           in 'iounitdef.f'           !
 !                                                                      !
 !   unit used for radiative active gases:                              !
@@ -81,7 +80,7 @@
 !     nov 2008 - y-t hou     fix bugs in superimposing climatology     !
 !                  seasonal cycle calculations                         !
 !     aug 2011 - y-t hou     fix a bug in subr getgases doing vertical !
-!                  co2 mapping. (for iflip=0 case, not affact opr).    !
+!                  co2 mapping. (for top_at_1 case, not affact opr).   !
 !     aug 2012 - y-t hou     modified subr getozn.  moved the if-first !
 !                  block to subr gas_init to ensure threading safe in  !
 !                  climatology ozone applications. (not affect gfs)    !
@@ -141,13 +140,8 @@
 !> This module sets up ozone climatological profiles and other constant gas
 !! profiles, such as co2, ch4, n2o, o2, and those of cfc gases.
       module module_radiation_gases      
-!
-      use physparam,         only : ico2flg, ictmflg, ioznflg, ivflip,  &
-     &                              co2dat_file, co2gbl_file,           &
-     &                              co2usr_file, co2cyc_file,           &
-     &                              kind_phys, kind_io4
+      use machine,           only : kind_phys, kind_io4
       use funcphys,          only : fpkapx
-      use physcons,          only : con_pi
       use ozne_def,          only : JMR => latsozc, LOZ => levozc,      &
      &                              blte => blatc, dlte=> dphiozc,      &
      &                              timeozc => timeozc
@@ -168,9 +162,9 @@
       integer, parameter         :: MINYEAR = 1957 ! earlist year 2D CO2 data available
 
       real (kind=kind_phys), parameter :: resco2=15.0            ! horizontal resolution in degree
-      real (kind=kind_phys), parameter :: raddeg=180.0/con_pi    ! rad->deg conversion
       real (kind=kind_phys), parameter :: prsco2=788.0           ! pressure limitation for 2D CO2 (mb)
-      real (kind=kind_phys), parameter :: hfpi  =0.5*con_pi      ! half of pi
+      real (kind=kind_phys)  :: raddeg                           ! rad->deg conversion
+      real (kind=kind_phys)  :: hfpi                             ! half of pi
 
       real (kind=kind_phys), parameter :: co2vmr_def = 350.0e-6  ! parameter constant for CO2 volume mixing ratio
       real (kind=kind_phys), parameter :: n2ovmr_def = 0.31e-6   ! parameter constant for N2O volume mixing ratio
@@ -227,48 +221,54 @@
 
 !> This subroutine sets up ozone, co2, etc. parameters. If climatology
 !! ozone then read in monthly ozone data.
-!!\param me         print message control flag
+!!\param me           print message control flag
+!!\param co2usr_file  co2 user defined data table
+!!\param co2cyc_file  co2 climotology monthly cycle data table
+!!\param ictmflg      data ic time/date control flag
+!!\param ico2flg      co2 data source control flag
+!!\param ioznflg      ozone data control flag
+!!\param con_pi       physical constant Pi
+!!\param errflg       error flag
+!!\param errmsg       error message
 !>\section gas_init_gen gas_init General Algorithm
 !-----------------------------------
-      subroutine gas_init                                               &
-     &     ( me )!  ---  inputs:
-!  ---  outputs: ( none )
+      subroutine gas_init( me, co2usr_file, co2cyc_file, ico2flg,       &
+     &     ictmflg, ioznflg, con_pi, errflg, errmsg)
 
 !  ===================================================================  !
 !                                                                       !
 !  gas_init sets up ozone, co2, etc. parameters.  if climatology ozone  !
 !  then read in monthly ozone data.                                     !
 !                                                                       !
-!  inputs:                                               dimemsion      !
-!     me      - print message control flag                  1           !
-!                                                                       !
-!  outputs: (to the module variables)                                   !
-!    ( none )                                                           !
-!                                                                       !
-!  external module variables:  (in physparam)                           !
-!     ico2flg    - co2 data source control flag                         !
+!  inputs:                                                              !
+!     me          - print message control flag                          !
+!     ico2flg     - co2 data source control flag                        !
 !                   =0: use prescribed co2 global mean value            !
 !                   =1: use input global mean co2 value (co2_glb)       !
 !                   =2: use input 2-d monthly co2 value (co2vmr_sav)    !
-!     ictmflg    - =yyyy#, data ic time/date control flag               !
-!                  =   -2: same as 0, but superimpose seasonal cycle    !
-!                          from climatology data set.                   !
-!                  =   -1: use user provided external data for the fcst !
-!                          time, no extrapolation.                      !
-!                  =    0: use data at initial cond time, if not existed!
-!                          then use latest, without extrapolation.      !
-!                  =    1: use data at the forecast time, if not existed!
-!                          then use latest and extrapolate to fcst time.!
-!                  =yyyy0: use yyyy data for the forecast time, no      !
-!                          further data extrapolation.                  !
-!                  =yyyy1: use yyyy data for the fcst. if needed, do    !
-!                          extrapolation to match the fcst time.        !
-!     ioznflg    - ozone data control flag                              !
+!     ictmflg     - =yyyy#, data ic time/date control flag              !
+!                   =-2: same as 0, but superimpose seasonal cycle      !
+!                        from climatology data set.                     !
+!                   =-1: use user provided external data for the fcst   !
+!                        time, no extrapolation.                        !
+!                   =0: use data at initial cond time, if not existed   !
+!                       then use latest, without extrapolation.         !
+!                   =1: use data at the forecast time, if not existed   !
+!                       then use latest and extrapolate to fcst time.   !
+!                   =yyyy0: use yyyy data for the forecast time, no     !
+!                           further data extrapolation.                 !
+!                   =yyyy1: use yyyy data for the fcst. if needed, do   !
+!                           extrapolation to match the fcst time.       !
+!     ioznflg     - ozone data control flag                             !
 !                   =0: use climatological ozone profile                !
-!                   >0: use interactive ozone profile                   !
-!     ivflip     - vertical profile indexing flag                       !
-!     co2usr_file- external co2 user defined data table                 !
-!     co2cyc_file- external co2 climotology monthly cycle data table    !
+!                   >0: use interactive ozone profile                   ! 
+!     co2usr_file - external co2 user defined data table                !
+!     co2cyc_file - external co2 climotology monthly cycle data table   ! 
+!     con_pi      - physical constant Pi                                !
+!                                                                       !
+!  outputs: (CCPP error handling)                                       !
+!     errflg      - error flag                                          !
+!     errmsg      - error message                                       !
 !                                                                       !
 !  internal module variables:                                           !
 !     pkstr, o3r - arrays for climatology ozone data                    !
@@ -282,9 +282,12 @@
       implicit none
 
 !  ---  inputs:
-      integer, intent(in) :: me
-
-!  ---  output: ( none )
+      integer, intent(in) :: me, ictmflg, ioznflg, ico2flg
+      character(len=26),intent(in) :: co2usr_file,co2cyc_file
+      real(kind=kind_phys), intent(in) :: con_pi
+!  ---  output:
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
 
 !  ---  locals:
       real (kind=kind_phys), dimension(IMXCO2,JMXCO2) :: co2dat
@@ -300,6 +303,15 @@
 !
 !===>  ...  begin here
 !
+
+! Initialize the CCPP error handling variables
+      errmsg = ''
+      errflg = 0
+
+! Initiailize module parameters
+      raddeg = 180.0/con_pi
+      hfpi   = 0.5*con_pi
+
       if ( me == 0 ) print *, VTAGGAS    ! print out version tag
 
       kyrsav  = 0
@@ -316,7 +328,10 @@
           print *,' - Using climatology ozone distribution'
           print *,' timeozc=',timeozc, ' is not monthly mean',          &
      &            ' - job aborting in subroutin gas_init!!!'
-          stop
+          errflg = 1
+          errmsg = 'ERROR(gas_init): Climatological o3 distribution '// &
+     &         'is not monthly mean'
+          return
         endif
 
         allocate (pkstr(LOZ), o3r(JMR,LOZ,12))
@@ -391,9 +406,10 @@
 
           inquire (file=co2usr_file, exist=file_exist)
           if ( .not. file_exist ) then
-            print *,'   Can not find user CO2 data file: ',co2usr_file, &
-     &              ' - Stopped in subroutine gas_init !!'
-            stop
+            print *,'   Can not find user CO2 data file: ',co2usr_file
+            errflg = 1
+            errmsg = 'ERROR(gas_init): Can not find user CO2 data file'
+            return
           else
             close (NICO2CN)
             open(NICO2CN,file=co2usr_file,form='formatted',status='old')
@@ -434,9 +450,10 @@
                 enddo
               endif
             else
-              print *,' ICO2=',ico2flg,' is not a valid selection',     &
-     &                ' - Stoped in subroutine gas_init!!!'
-              stop
+              print *,' ICO2=',ico2flg,' is not a valid selection'
+              errflg = 1
+              errmsg = 'ERROR(gas_init): ICO2 is not valid'
+              return
             endif    ! endif_ico2flg_block
 
             close (NICO2CN)
@@ -455,9 +472,10 @@
               print *,' - Using observed co2 monthly 2-d data'
             endif
           else
-            print *,' ICO2=',ico2flg,' is not a valid selection',       &
-     &              ' - Stoped in subroutine gas_init!!!'
-            stop
+            print *,' ICO2=',ico2flg,' is not a valid selection'
+            errflg = 1
+            errmsg = 'ERROR(gas_init): ICO2 is not valid'
+            return
           endif
 
           if ( ictmflg == -2 ) then
@@ -465,9 +483,12 @@
             if ( .not. file_exist ) then
               if ( me == 0 ) then
                 print *,'   Can not find seasonal cycle CO2 data: ',    &
-     &               co2cyc_file,' - Stopped in subroutine gas_init !!'
+     &               co2cyc_file
               endif
-              stop
+              errflg = 1
+              errmsg = 'ERROR(gas_init): Can not find seasonal cycle '//&
+     &             'CO2 data'
+              return
             else
               allocate( co2cyc_sav(IMXCO2,JMXCO2,12) )
 
@@ -517,18 +538,25 @@
 
 !> This subroutine reads in 2-d monthly co2 data set for a specified
 !! year. Data are in a 15 degree lat/lon horizontal resolution.
-!!\param iyear      year of the requested data for fcst
-!!\param imon       month of the year
-!!\param iday       day of the month
-!!\param ihour      hour of the day
-!!\param loz1st     clim ozone 1st time update control flag
-!!\param ldoco2     co2 update control flag
-!!\param me         print message control flag
+!!\param iyear       year of the requested data for fcst
+!!\param imon        month of the year
+!!\param iday        day of the month
+!!\param ihour       hour of the day
+!!\param loz1st      clim ozone 1st time update control flag
+!!\param ldoco2      co2 update control flag
+!!\param me          print message control flag
+!!\param co2dat_file co2 2d monthly obsv data table
+!!\param co2gbl_file co2 global annual mean data table 
+!!\param ictmflg     data ic time/date control flag
+!!\param ico2flg     co2 data source control flag
+!!\param ioznflg     ozone data control flag
+!!\param errflg      error flag
+!!\param errmsg      error message
 !>\section gen_gas_update gas_update General Algorithm
 !-----------------------------------
-      subroutine gas_update                                             &
-     &     ( iyear, imon, iday, ihour, loz1st, ldoco2, me )!  ---  inputs
-!  ---  outputs: ( none )
+      subroutine gas_update(iyear, imon, iday, ihour, loz1st, ldoco2,   &
+     &     me, co2dat_file, co2gbl_file, ictmflg, ico2flg, ioznflg,     &
+     &     errflg, errmsg )
 
 !  ===================================================================  !
 !                                                                       !
@@ -536,41 +564,40 @@
 !  data are in a 15 degree lat/lon horizontal resolution.               !
 !                                                                       !
 !  inputs:                                               dimemsion      !
-!     iyear   - year of the requested data for fcst         1           !
-!     imon    - month of the year                           1           !
-!     iday    - day of the month                            1           !
-!     ihour   - hour of the day                             1           !
-!     loz1st  - clim ozone 1st time update control flag     1           !
-!     ldoco2  - co2 update control flag                     1           !
-!     me      - print message control flag                  1           !
-!                                                                       !
-!  outputs: (to the module variables)                                   !
-!    ( none )                                                           !
-!                                                                       !
-!  external module variables:  (in physparam)                           !
-!     ico2flg    - co2 data source control flag                         !
+!     iyear       - year of the requested data for fcst     1           !
+!     imon        - month of the year                       1           !
+!     iday        - day of the month                        1           !
+!     ihour       - hour of the day                         1           !
+!     loz1st      - clim ozone 1st time update control flag 1           !
+!     ldoco2      - co2 update control flag                 1           !
+!     me          - print message control flag              1           !
+!     ico2flg     - co2 data source control flag                        !
 !                   =0: use prescribed co2 global mean value            !
 !                   =1: use input global mean co2 value (co2_glb)       !
 !                   =2: use input 2-d monthly co2 value (co2vmr_sav)    !
-!     ictmflg    - =yyyy#, data ic time/date control flag               !
-!                  =   -2: same as 0, but superimpose seasonal cycle    !
-!                          from climatology data set.                   !
-!                  =   -1: use user provided external data for the fcst !
-!                          time, no extrapolation.                      !
-!                  =    0: use data at initial cond time, if not existed!
-!                          then use latest, without extrapolation.      !
-!                  =    1: use data at the forecast time, if not existed!
-!                          then use latest and extrapolate to fcst time.!
-!                  =yyyy0: use yyyy data for the forecast time, no      !
-!                          further data extrapolation.                  !
-!                  =yyyy1: use yyyy data for the fcst. if needed, do    !
-!                          extrapolation to match the fcst time.        !
-!     ioznflg    - ozone data control flag                              !
+!     ictmflg     - =yyyy#, data ic time/date control flag              !
+!                   =-2: same as 0, but superimpose seasonal cycle      !
+!                        from climatology data set.                     !
+!                   =-1: use user provided external data for the fcst   !
+!                        time, no extrapolation.                        !
+!                   =0: use data at initial cond time, if not existed   !
+!                       then use latest, without extrapolation.         !
+!                   =1: use data at the forecast time, if not existed   !
+!                       then use latest and extrapolate to fcst time.   !
+!                   =yyyy0: use yyyy data for the forecast time, no     !
+!                           further data extrapolation.                 !
+!                   =yyyy1: use yyyy data for the fcst. if needed, do   !
+!                           extrapolation to match the fcst time.       !
+!     ioznflg     - ozone data control flag                             !
 !                   =0: use climatological ozone profile                !
 !                   >0: use interactive ozone profile                   !
-!     ivflip     - vertical profile indexing flag                       !
-!     co2dat_file- external co2 2d monthly obsv data table              !
-!     co2gbl_file- external co2 global annual mean data table           !
+!     ivflip      - vertical profile indexing flag                      !
+!     co2dat_file - external co2 2d monthly obsv data table             !
+!     co2gbl_file - external co2 global annual mean data table          !
+!                                                                       !
+!  outputs: (CCPP error handling)                                       ! 
+!     errflg      - error flag                                          !
+!     errmsg      - error message                                       !
 !                                                                       !
 !  internal module variables:                                           !
 !     co2vmr_sav - monthly co2 volume mixing ratio     IMXCO2*JMXCO2*12 !
@@ -589,11 +616,14 @@
       implicit none
 
 !  ---  inputs:
-      integer, intent(in) :: iyear, imon, iday, ihour, me
-
+      integer, intent(in) :: iyear,imon,iday,ihour,me,ictmflg,ico2flg
+      integer, intent(in) :: ioznflg
+      character(len=26),intent(in) :: co2dat_file, co2gbl_file
       logical, intent(in) :: loz1st, ldoco2
 
-!  ---  output: ( none )
+!  ---  output:
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
 
 !  ---  locals:
       real (kind=kind_phys), dimension(IMXCO2,JMXCO2) :: co2dat, co2ann
@@ -610,6 +640,10 @@
 !
 !===>  ...  begin here
 !
+! Initialize the CCPP error handling variables
+      errmsg = ''
+      errflg = 0
+
 !> - Ozone data section
 
       if ( ioznflg == 0 ) then
@@ -680,8 +714,11 @@
         inquire (file=co2gbl_file, exist=file_exist)
         if ( .not. file_exist ) then
           print *,'   Requested co2 data file "',co2gbl_file,           &
-     &            '" not found - Stopped in subroutine gas_update!!'
-          stop
+     &            '" not found'
+          errflg = 1
+          errmsg = 'ERROR(gas_update): Requested co2 data file not '//  &
+     &         'found'
+          return
         else
           close(NICO2CN)
           open (NICO2CN,file=co2gbl_file,form='formatted',status='old')
@@ -748,9 +785,11 @@
             if ( me == 0 ) then
               print *,'   Specified co2 data for year',idyr,            &
      &               ' not found !!  Need to change namelist ICTM !!'
-              print *,'   *** Stopped in subroutine gas_update !!'
             endif
-            stop
+            errflg = 1
+            errmsg = 'ERROR(gas_update): Specified co2 data for year '//&
+     &           'not found'
+            return
           else Lab_if_ictm                        ! looking for latest available data
             if ( me == 0 ) then
               print *,'   Requested co2 data for year',idyr,            &
@@ -774,9 +813,11 @@
             if ( .not. file_exist ) then
               if ( me == 0 ) then
                 print *,'   Can not find co2 data source file'
-                print *,'   *** Stopped in subroutine gas_update !!'
               endif
-              stop
+              errflg = 1
+              errmsg = 'ERROR(gas_update): Can not find co2 data '//    &
+     &             'source file'
+              return
             endif
           endif  Lab_if_ictm
         endif   ! end if_file_exist_block
@@ -907,6 +948,9 @@
 !!                  pi/2 -> -pi/2, otherwise see in-line comment
 !!\param IMAX       horizontal dimension for output data
 !!\param LMAX       vertical dimension for output data
+!!\param ico2flg    (1), co2 data source control flag
+!!\param top_at_1   (1), vertical ordering flag
+!!\param con_pi     (1), physical constant Pi
 !!\param gasdat     (IMAX,LMAX,NF_VGAS) - gases volume mixing ratioes
 !!\n                    (:,:,1)           - co2
 !!\n                    (:,:,2)           - n2o
@@ -918,13 +962,16 @@
 !!\n                    (:,:,8)           - cfc22
 !!\n                    (:,:,9)           - ccl4
 !!\n                    (:,:,10)          - cfc113
+!!\n
+!> - Internal module variables :
+!!\n     co2vmr_sav - saved monthly co2 concentration from sub gas_update
+!!\n     co2_glb    - saved global annual mean co2 value from  gas_update
+!!\n     gco2cyc    - saved global seasonal variation of co2 climatology
+!!                    in 12-month form
 !>\section gen_getgases getgases General Algorithm
 !-----------------------------------
-      subroutine getgases                                               &
-     &     ( plvl, xlon, xlat,                                          & ! ---  inputs
-     &       IMAX, LMAX,                                                &
-     &       gasdat                                                     & ! ---  outputs
-     &      )
+      subroutine getgases( plvl, xlon, xlat, IMAX, LMAX, ico2flg,       &
+     &     top_at_1, con_pi, gasdat)
 !  ===================================================================  !
 !                                                                       !
 !  getgases set up global distribution of radiation absorbing  gases    !
@@ -939,6 +986,12 @@
 !     xlat(IMAX)       - grid latitude in radians, default range to     !
 !                        pi/2 -> -pi/2, otherwise see in-line comment   !
 !     IMAX, LMAX       - horiz, vert dimensions for output data         !
+!     ico2flg          - co2 data source control flag                   !
+!                       =0: use prescribed co2 global mean value        !
+!                       =1: use input global mean co2 value (co2_glb)   !
+!                       =2: use input 2-d monthly co2 value (co2vmr_sav)!
+!     top_at_1         - vertical profile indexing flag                 !
+!     con_pi           - physical constant Pi                           !
 !                                                                       !
 !  outputs:                                                             !
 !     gasdat(IMAX,LMAX,NF_VGAS) - gases volume mixing ratioes           !
@@ -953,19 +1006,7 @@
 !               (:,:,9)           - ccl4                                !
 !               (:,:,10)          - cfc113                              !
 !                                                                       !
-!> - External module variables:  (in physparam)
-!!\n     ico2flg    - co2 data source control flag
-!!\n                   =0: use prescribed co2 global mean value
-!!\n                   =1: use input global mean co2 value (co2_glb)
-!!\n                   =2: use input 2-d monthly co2 value (co2vmr_sav)
-!!\n     ivflip     - vertical profile indexing flag
-!!
-!> - Internal module variables :
-!!\n     co2vmr_sav - saved monthly co2 concentration from sub gas_update
-!!\n     co2_glb    - saved global annual mean co2 value from  gas_update
-!!\n     gco2cyc    - saved global seasonal variation of co2 climatology
-!!                  in 12-month form
-!note: for lower atmos co2vmr_sav may have clim monthly deviations !
+!     note: for lower atmos co2vmr_sav may have clim monthly deviations !
 !           superimposed on init-cond co2 value, while co2_glb only     !
 !           contains the global mean value, thus needs to add the       !
 !           monthly dglobal mean deviation gco2cyc at upper atmos. for  !
@@ -980,8 +1021,10 @@
       implicit none
 
 !  ---  input:
-      integer,  intent(in)  :: IMAX, LMAX
+      integer,  intent(in)  :: IMAX, LMAX, ico2flg
       real (kind=kind_phys), intent(in) :: plvl(:,:), xlon(:), xlat(:)
+      logical, intent(in) :: top_at_1
+      real(kind=kind_phys), intent(in) :: con_pi
 
 !  ---  output:
       real (kind=kind_phys), intent(out) :: gasdat(:,:,:)
@@ -1035,7 +1078,7 @@
           ilon = min( IMXCO2, int( xlon1*tmp + 1 ))
           ilat = min( JMXCO2, int( xlat1*tmp + 1 ))
 
-          if ( ivflip == 0 ) then         ! index from toa to sfc
+          if (top_at_1) then         ! index from toa to sfc
             do k = 1, LMAX
               if ( plvl(i,k) >= prsco2 ) then
                 gasdat(i,k,1) = co2vmr_sav(ilon,ilat,kmonsav)
@@ -1066,16 +1109,13 @@
 !!\param prslk       (IMAX,LM), exner function = \f$(p/p0)^{rocp}\f$
 !!\param xlat        (IMAX), latitude in radians, default to pi/2 ->
 !!                    -pi/2 range, otherwise see in-line comment
-!!\param IMAX, LM    horizontal and vertical dimensions
+!!\param IMAX, LM    (1), horizontal and vertical dimensions
+!!\param top_at_1    (1), vertical profile indexing flag
 !!\param o3mmr       (IMAX,LM), output ozone profile in mass mixing
 !!                   ratio (g/g)
 !>\section getozn_gen getozn General Algorithm
 !-----------------------------------
-      subroutine getozn                                                 &
-     &     ( prslk,xlat,                                                &                    !  ---  inputs
-     &       IMAX, LM,                                                  &
-     &       o3mmr                                                      &                    !  ---  outputs
-     &     )
+      subroutine getozn( prslk,xlat, IMAX, LM, top_at_1, o3mmr)
 
 !  ===================================================================  !
 !                                                                       !
@@ -1088,6 +1128,7 @@
 !     xlat  (IMAX)     - latitude in radians, default to pi/2 -> -pi/2  !
 !                        range, otherwise see in-line comment           !
 !     IMAX, LM         - horizontal and vertical dimensions             !
+!     top_at_1         - vertical profile indexing flag                 !
 !                                                                       !
 !  outputs:                                                             !
 !     o3mmr (IMAX,LM)  - output ozone profile in mass mixing ratio (g/g)!
@@ -1095,7 +1136,6 @@
 !  module variables:                                                    !
 !     k1oz, k2oz       - ozone data interpolation indices               !
 !     facoz            - ozone data interpolation factor                !
-!     ivflip           - control flag for direction of vertical index   !
 !                                                                       !
 !  usage:    call getozn                                                !
 !                                                                       !
@@ -1105,7 +1145,7 @@
 
 !  ---  inputs:
       integer,  intent(in) :: IMAX, LM
-
+      logical,  intent(in) :: top_at_1
       real (kind=kind_phys), intent(in) :: prslk(:,:), xlat(:)
 
 !  ---  outputs:
@@ -1149,7 +1189,7 @@
 
       do l = 1, LM
         ll = l
-        if (ivflip == 1) ll = LM -l + 1
+        if (.not. top_at_1) ll = LM -l + 1
 
         do i = 1, IMAX
           wk1(i) = prslk(i,ll)

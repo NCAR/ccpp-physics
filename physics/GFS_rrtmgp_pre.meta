@@ -2,7 +2,7 @@
   name = GFS_rrtmgp_pre
   type = scheme
   dependencies = funcphys.f90,iounitdef.f,machine.F,module_bfmicrophysics.f,physcons.F90,radcons.f90,radiation_aerosols.f
-  dependencies = radiation_astronomy.f,radiation_clouds.f,radiation_gases.f,radiation_tools.F90,rrtmg_lw_cloud_optics.F90
+  dependencies = radiation_astronomy.f,radiation_gases.f,radiation_tools.F90,rrtmg_lw_cloud_optics.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -72,21 +72,14 @@
   dimensions = ()
   type = integer
   intent = in
-[nTracers]
-  standard_name = number_of_tracers
-  long_name = number of tracers
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-[lsswr]
+[doSWrad]
   standard_name = flag_for_calling_shortwave_radiation
   long_name = logical flags for sw radiation calls
   units = flag
   dimensions = ()
   type = logical
   intent = in
-[lslwr]
+[doLWrad]
   standard_name = flag_for_calling_longwave_radiation
   long_name = logical flags for lw radiation calls
   units = flag
@@ -252,37 +245,20 @@
   type = real
   kind = kind_phys
   intent = in
-[minGPpres]
-  standard_name = minimum_pressure_in_RRTMGP
-  long_name = minimum pressure allowed in RRTMGP
-  units = Pa
+[con_pi]
+  standard_name = pi
+  long_name = ratio of a circle's circumference to its diameter
+  units = none
   dimensions = ()
   type = real
   kind = kind_phys
   intent = in
-[maxGPpres]
-  standard_name = maximum_pressure_in_RRTMGP
-  long_name = maximum pressure allowed in RRTMGP
-  units = Pa
+[ico2]
+  standard_name = control_for_co2
+  long_name = prescribed global mean value (old opernl)
+  units = flag
   dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[minGPtemp]
-  standard_name = minimum_temperature_in_RRTMGP
-  long_name = minimum temperature allowed in RRTMGP
-  units = K
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[maxGPtemp]
-  standard_name = maximum_temperature_in_RRTMGP
-  long_name = maximum temperature allowed in RRTMGP
-  units = K
-  dimensions = ()
-  type = real
-  kind = kind_phys
+  type = integer
   intent = in
 [raddt]
   standard_name = time_step_for_radiation
@@ -349,26 +325,26 @@
   kind = kind_phys
   intent = inout
 [top_at_1]
-  standard_name = flag_for_vertical_ordering_in_RRTMGP
-  long_name = flag for vertical ordering in RRTMGP
+  standard_name = flag_for_vertical_ordering_in_radiation
+  long_name = flag for vertical ordering in radiation
   units = flag
   dimensions = ()
   type = logical
-  intent = out
+  intent = inout
 [iSFC]
   standard_name = vertical_index_for_surface_in_RRTMGP
   long_name = index for	surface	layer in RRTMGP
   units = flag
   dimensions = ()
   type = integer
-  intent = out
+  intent = inout
 [iTOA]
   standard_name = vertical_index_for_TOA_in_RRTMGP
   long_name = index for TOA layer in RRTMGP
   units = flag
   dimensions = ()
   type = integer
-  intent = out
+  intent = inout
 [tsfc_radtime]
   standard_name = surface_skin_temperature_on_radiation_timestep
   long_name = surface skin temperature on radiation timestep
@@ -425,11 +401,51 @@
   type = real
   kind = kind_phys
   intent = inout
-[tracer]
-  standard_name = chemical_tracers
-  long_name = chemical tracers
-  units = g g-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
+[vmr_o2]
+  standard_name = volume_mixing_ratio_for_o2
+  long_name = molar mixing ratio of o2 in with respect to dry air
+  units = 1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[vmr_h2o]
+  standard_name = volume_mixing_ratio_for_h2o
+  long_name = molar mixing ratio of h2o in with respect to dry air
+  units = 1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[vmr_o3]
+  standard_name = volume_mixing_ratio_for_o3
+  long_name = molar mixing ratio of o3 in with respect to dry air
+  units = 1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[vmr_ch4]
+  standard_name = volume_mixing_ratio_for_ch4
+  long_name = molar mixing ratio of ch4 in with respect to dry air
+  units = 1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[vmr_n2o]
+  standard_name = volume_mixing_ratio_for_n2o
+  long_name = molar mixing ratio of n2o in with respect to dry air
+  units = 1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[vmr_co2]
+  standard_name = volume_mixing_ratio_for_co2
+  long_name = molar mixing ratio of co2 in with respect to dry air
+  units = 1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -441,13 +457,6 @@
   type = character
   kind = len=*
   intent = in
-[gas_concentrations]
-  standard_name = Gas_concentrations_for_RRTMGP_suite
-  long_name = DDT containing gas concentrations for RRTMGP radiation scheme
-  units = DDT
-  dimensions = ()
-  type = ty_gas_concs
-  intent = inout
 [coszdg]
   standard_name = cosine_of_solar_zenith_angle_on_radiation_timestep
   long_name = daytime mean cosz over rad call period
@@ -463,6 +472,36 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
+  intent = inout
+[semis]
+  standard_name = surface_longwave_emissivity
+  long_name = surface lw emissivity in fraction
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[sfc_emiss_byband]
+  standard_name = surface_emissivity_in_each_RRTMGP_LW_band
+  long_name = surface emissivity in each RRTMGP LW band
+  units = none
+  dimensions = (number_of_longwave_bands,horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[nday]
+  standard_name = daytime_points_dimension
+  long_name = daytime points dimension
+  units = count
+  dimensions = ()
+  type = integer
+  intent = inout
+[idxday]
+  standard_name = daytime_points
+  long_name = daytime points
+  units = index
+  dimensions = (horizontal_loop_extent)
+  type = integer
   intent = inout
 [errmsg]
   standard_name = ccpp_error_message
