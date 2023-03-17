@@ -1,6 +1,10 @@
 !>\file namelist_soilveg_ruc.F90
 !>\ingroup RUC_lsm
+
       module namelist_soilveg_ruc
+
+      use machine ,   only : kind_phys
+
       implicit none
       save
 
@@ -12,27 +16,27 @@
       PARAMETER(MAX_SOILTYP = 30)
       PARAMETER(MAX_VEGTYP = 30)
 
-      REAL SLOPE_DATA(MAX_SLOPETYP)
+      real(kind_phys) SLOPE_DATA(MAX_SLOPETYP)
 !> vegetation
-      REAL ALBTBL(MAX_VEGTYP)
-      REAL Z0TBL(MAX_VEGTYP)
-      REAL LEMITBL(MAX_VEGTYP)
-      REAL PCTBL(MAX_VEGTYP)
-      REAL SHDTBL(MAX_VEGTYP)
+      real(kind_phys) ALBTBL(MAX_VEGTYP)
+      real(kind_phys) Z0TBL(MAX_VEGTYP)
+      real(kind_phys) LEMITBL(MAX_VEGTYP)
+      real(kind_phys) PCTBL(MAX_VEGTYP)
+      real(kind_phys) SHDTBL(MAX_VEGTYP)
       INTEGER IFORTBL(MAX_VEGTYP)
-      REAL RSTBL(MAX_VEGTYP)
-      REAL RGLTBL(MAX_VEGTYP)
-      REAL HSTBL(MAX_VEGTYP)
-      REAL SNUPTBL(MAX_VEGTYP)
-      REAL LAITBL(MAX_VEGTYP)
-      REAL MAXALB(MAX_VEGTYP)
-      REAL MFSNO(MAX_VEGTYP)
-      REAL SNCOVFAC(MAX_VEGTYP)
+      real(kind_phys) RSTBL(MAX_VEGTYP)
+      real(kind_phys) RGLTBL(MAX_VEGTYP)
+      real(kind_phys) HSTBL(MAX_VEGTYP)
+      real(kind_phys) SNUPTBL(MAX_VEGTYP)
+      real(kind_phys) LAITBL(MAX_VEGTYP)
+      real(kind_phys) MAXALB(MAX_VEGTYP)
+      real(kind_phys) MFSNO(MAX_VEGTYP)
+      real(kind_phys) SNCOVFAC(MAX_VEGTYP)
       LOGICAL LPARAM
-      REAL TOPT_DATA
-      REAL CMCMAX_DATA
-      REAL CFACTR_DATA
-      REAL RSMAX_DATA
+      real(kind_phys) TOPT_DATA
+      real(kind_phys) CMCMAX_DATA
+      real(kind_phys) CFACTR_DATA
+      real(kind_phys) RSMAX_DATA
       INTEGER BARE
       INTEGER GLACIER
       INTEGER NATURAL
@@ -43,21 +47,21 @@
       INTEGER DEFINED_SLOPE
       INTEGER MOSAIC_LU
 !> -- soils
-      REAL BB(MAX_SOILTYP)
-      REAL DRYSMC(MAX_SOILTYP)
-      REAL HC(MAX_SOILTYP)
-      REAL MAXSMC(MAX_SOILTYP)
-      REAL REFSMC(MAX_SOILTYP)
-      REAL SATPSI(MAX_SOILTYP)
-      REAL SATDK(MAX_SOILTYP)
-      REAL SATDW(MAX_SOILTYP)
-      REAL WLTSMC(MAX_SOILTYP)
-      REAL QTZ(MAX_SOILTYP)
-      REAL REFSMCnoah(MAX_SOILTYP)
-      REAL WLTSMCnoah(MAX_SOILTYP)
-      REAL BBnoah(MAX_SOILTYP)
-      REAL SATDKnoah(MAX_SOILTYP)
-      REAL SATPSInoah(MAX_SOILTYP)
-      REAL MAXSMCnoah(MAX_SOILTYP)
+      real(kind_phys) BB(MAX_SOILTYP)
+      real(kind_phys) DRYSMC(MAX_SOILTYP)
+      real(kind_phys) HC(MAX_SOILTYP)
+      real(kind_phys) MAXSMC(MAX_SOILTYP)
+      real(kind_phys) REFSMC(MAX_SOILTYP)
+      real(kind_phys) SATPSI(MAX_SOILTYP)
+      real(kind_phys) SATDK(MAX_SOILTYP)
+      real(kind_phys) SATDW(MAX_SOILTYP)
+      real(kind_phys) WLTSMC(MAX_SOILTYP)
+      real(kind_phys) QTZ(MAX_SOILTYP)
+      real(kind_phys) REFSMCnoah(MAX_SOILTYP)
+      real(kind_phys) WLTSMCnoah(MAX_SOILTYP)
+      real(kind_phys) BBnoah(MAX_SOILTYP)
+      real(kind_phys) SATDKnoah(MAX_SOILTYP)
+      real(kind_phys) SATPSInoah(MAX_SOILTYP)
+      real(kind_phys) MAXSMCnoah(MAX_SOILTYP)
       INTEGER MOSAIC_SOIL
       end module namelist_soilveg_ruc

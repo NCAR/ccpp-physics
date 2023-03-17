@@ -4,6 +4,7 @@
 
       module set_soilveg_ruc_mod
 
+      use machine ,   only : kind_phys
       use namelist_soilveg_ruc
 
       implicit none
@@ -25,7 +26,7 @@
       integer me
 
       integer i
-      real refsmc1, wltsmc1
+      real(kind_phys) refsmc1, wltsmc1
 
       NAMELIST /SOIL_VEG_RUC/ SLOPE_DATA, ALBTBL, Z0TBL, LEMITBL,       &
      &  PCTBL, SHDTBL,                                                  &
