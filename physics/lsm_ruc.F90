@@ -3,7 +3,7 @@
 
 module lsm_ruc
 
-        use machine,           only: kind_phys
+        use machine,           only: kind_phys, kind_dbl_prec
 
         use namelist_soilveg_ruc
         use set_soilveg_ruc_mod,  only: set_soilveg_ruc
@@ -16,8 +16,8 @@ module lsm_ruc
 
         public :: lsm_ruc_init, lsm_ruc_run, lsm_ruc_finalize
 
-        real(kind=kind_phys), parameter :: zero = 0.0_kind_phys, one = 1.0_kind_phys, epsln = 1.0e-10_kind_phys
-        real(kind=kind_phys), dimension (2), parameter, private :: d = (/0.1,0.25/)
+        real(kind_phys), parameter :: zero = 0.0_kind_phys, one = 1.0_kind_phys, epsln = 1.0e-10_kind_phys
+        real(kind_phys), dimension (2), parameter, private :: d = (/0.1,0.25/)
         integer, dimension(20), parameter, private:: &
         istwe = (/1,1,1,1,1,2,2,1,1,2,2,2,2,2,1,2,2,1,2,2/) ! IGBP 20 classes
 
@@ -57,60 +57,60 @@ module lsm_ruc
       integer,              intent(in)  :: kice
       integer,              intent(in)  :: nlev
       integer,              intent(in)  :: lsm_ruc, lsm
-      real (kind=kind_phys),intent(in)  :: con_fvirt
-      real (kind=kind_phys),intent(in)  :: con_rd
+      real (kind_phys),intent(in)  :: con_fvirt
+      real (kind_phys),intent(in)  :: con_rd
 
 
-      real (kind=kind_phys), dimension(:), intent(in) :: slmsk
+      real (kind_phys), dimension(:), intent(in) :: slmsk
       integer,               dimension(:), intent(in) :: stype
       integer,               dimension(:), intent(in) :: vtype
-      real (kind=kind_phys), dimension(:), intent(in) :: landfrac
-      real (kind=kind_phys), dimension(:), intent(in) :: q1
-      real (kind=kind_phys), dimension(:), intent(in) :: prsl1
-      real (kind=kind_phys), dimension(:), intent(in) :: tsfc_lnd
-      real (kind=kind_phys), dimension(:), intent(in) :: tsfc_ice
-      real (kind=kind_phys), dimension(:), intent(in) :: tsfc_wat
-      real (kind=kind_phys), dimension(:), intent(in) :: tg3
-      real (kind=kind_phys), dimension(:), intent(in) :: sncovr_lnd
-      real (kind=kind_phys), dimension(:), intent(in) :: sncovr_ice
-      real (kind=kind_phys), dimension(:), intent(in) :: snoalb
-      real (kind=kind_phys), dimension(:), intent(in) :: fice
-      real (kind=kind_phys), dimension(:), intent(in) :: facsf
-      real (kind=kind_phys), dimension(:), intent(in) :: facwf
-      real (kind=kind_phys), dimension(:), intent(in) :: alvsf
-      real (kind=kind_phys), dimension(:), intent(in) :: alvwf
-      real (kind=kind_phys), dimension(:), intent(in) :: alnsf
-      real (kind=kind_phys), dimension(:), intent(in) :: alnwf
+      real (kind_phys), dimension(:), intent(in) :: landfrac
+      real (kind_phys), dimension(:), intent(in) :: q1
+      real (kind_phys), dimension(:), intent(in) :: prsl1
+      real (kind_phys), dimension(:), intent(in) :: tsfc_lnd
+      real (kind_phys), dimension(:), intent(in) :: tsfc_ice
+      real (kind_phys), dimension(:), intent(in) :: tsfc_wat
+      real (kind_phys), dimension(:), intent(in) :: tg3
+      real (kind_phys), dimension(:), intent(in) :: sncovr_lnd
+      real (kind_phys), dimension(:), intent(in) :: sncovr_ice
+      real (kind_phys), dimension(:), intent(in) :: snoalb
+      real (kind_phys), dimension(:), intent(in) :: fice
+      real (kind_phys), dimension(:), intent(in) :: facsf
+      real (kind_phys), dimension(:), intent(in) :: facwf
+      real (kind_phys), dimension(:), intent(in) :: alvsf
+      real (kind_phys), dimension(:), intent(in) :: alvwf
+      real (kind_phys), dimension(:), intent(in) :: alnsf
+      real (kind_phys), dimension(:), intent(in) :: alnwf
 
-      real (kind=kind_phys), dimension(:,:), intent(in) :: smc,slc,stc
-      real (kind=kind_phys), intent(in) :: min_seaice
+      real (kind_phys), dimension(:,:), intent(in) :: smc,slc,stc
+      real (kind_phys), intent(in) :: min_seaice
 !  ---  in/out:
-      real (kind=kind_phys), dimension(:), intent(inout) :: wetness
+      real (kind_phys), dimension(:), intent(inout) :: wetness
 
 !  ---  inout
-      real (kind=kind_phys), dimension(:,:), intent(inout) :: sh2o, smfrkeep
-      real (kind=kind_phys), dimension(:,:), intent(inout) :: tslb, smois
-      real (kind=kind_phys), dimension(:),   intent(inout) :: semis_lnd
-      real (kind=kind_phys), dimension(:),   intent(inout) :: semis_ice
-      real (kind=kind_phys), dimension(:),   intent(inout) ::                      &
-                             albdvis_lnd, albdnir_lnd,  albivis_lnd,  albinir_lnd, &
-                             albdvis_ice, albdnir_ice,  albivis_ice,  albinir_ice, &
-                             sfcqv_lnd, sfcqv_ice
+      real (kind_phys), dimension(:,:), intent(inout) :: sh2o, smfrkeep
+      real (kind_phys), dimension(:,:), intent(inout) :: tslb, smois
+      real (kind_phys), dimension(:),   intent(inout) :: semis_lnd
+      real (kind_phys), dimension(:),   intent(inout) :: semis_ice
+      real (kind_phys), dimension(:),   intent(inout) ::                      &
+                        albdvis_lnd, albdnir_lnd,  albivis_lnd,  albinir_lnd, &
+                        albdvis_ice, albdnir_ice,  albivis_ice,  albinir_ice, &
+                        sfcqv_lnd, sfcqv_ice
 
 !  ---  out
-      real (kind=kind_phys), dimension(:),   intent(out) :: zs
-      real (kind=kind_phys), dimension(:),   intent(inout) :: sfalb_lnd_bck
-      real (kind=kind_phys), dimension(:,:), intent(inout) :: tsice
-      real (kind=kind_phys), dimension(:),   intent(out) :: semisbase
-      real (kind=kind_phys), dimension(:),   intent(out) :: pores, resid
+      real (kind_phys), dimension(:),   intent(out) :: zs
+      real (kind_phys), dimension(:),   intent(inout) :: sfalb_lnd_bck
+      real (kind_phys), dimension(:,:), intent(inout) :: tsice
+      real (kind_phys), dimension(:),   intent(out) :: semisbase
+      real (kind_phys), dimension(:),   intent(out) :: pores, resid
 
       character(len=*),     intent(out) :: errmsg
       integer,              intent(out) :: errflg
 
 ! --- local
-      real (kind=kind_phys), dimension(lsoil_ruc) :: dzs
-      real (kind=kind_phys) :: alb_lnd, alb_ice
-      real (kind=kind_phys) :: q0, qs1
+      real (kind_phys), dimension(lsoil_ruc) :: dzs
+      real (kind_phys) :: alb_lnd, alb_ice
+      real (kind_phys) :: q0, qs1
       integer  :: ipr, i, k
       logical  :: debug_print
 
@@ -367,8 +367,8 @@ module lsm_ruc
       implicit none
 
 !  ---  constant parameters:
-      real(kind=kind_phys), parameter :: rhoh2o  = 1000.0
-      real(kind=kind_phys), parameter :: stbolt  = 5.670400e-8
+      real(kind_phys), parameter :: rhoh2o  = 1000.0
+      real(kind_phys), parameter :: stbolt  = 5.670400e-8
 
 !  ---  input:
       integer, intent(in) :: me, master
@@ -377,10 +377,10 @@ module lsm_ruc
       integer, intent(in) :: lsm_ruc, lsm
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, &
                              imp_physics_nssl
-      real (kind=kind_phys), dimension(:), intent(in) :: xlat_d, xlon_d
-      real (kind=kind_phys), dimension(:), intent(in) :: oro, sigma
+      real (kind_phys), dimension(:), intent(in) :: xlat_d, xlon_d
+      real (kind_phys), dimension(:), intent(in) :: oro, sigma
 
-      real (kind=kind_phys), dimension(:), intent(in) ::          &
+      real (kind_phys), dimension(:), intent(in) ::          &
      &       t1, sigmaf, laixy, dlwflx, dswsfc, tg3,              &
      &       coszen, prsl1, wind, shdmin, shdmax,                 &
      &       sfalb_lnd_bck, snoalb, zf, qc, q1,                   &
@@ -391,8 +391,8 @@ module lsm_ruc
      ! for ice
      &       cm_ice, ch_ice
 
-      real (kind=kind_phys),  intent(in) :: delt, min_seaice, min_lakeice
-      real (kind=kind_phys),  intent(in) :: con_cp, con_rv, con_g,       &
+      real (kind_phys),  intent(in) :: delt, min_seaice, min_lakeice
+      real (kind_phys),  intent(in) :: con_cp, con_rv, con_g,       &
                                             con_pi, con_rd,              &
                                             con_hvap, con_hfus, con_fvirt
 
@@ -409,12 +409,12 @@ module lsm_ruc
       integer, dimension(:),  intent(inout) :: stype
       integer, dimension(:),  intent(in) :: vtype
 
-      real (kind=kind_phys), dimension(:,:),  intent(in) :: vegtype_frac
-      real (kind=kind_phys), dimension(:,:),  intent(in) :: soiltype_frac
+      real (kind_phys), dimension(:,:),  intent(in) :: vegtype_frac
+      real (kind_phys), dimension(:,:),  intent(in) :: soiltype_frac
 
-      real (kind=kind_phys), dimension(:), intent(in)    :: zs
-      real (kind=kind_phys), dimension(:), intent(in)    :: srflag
-      real (kind=kind_phys), dimension(:), intent(inout) ::              &
+      real (kind_phys), dimension(:), intent(in)    :: zs
+      real (kind_phys), dimension(:), intent(in)    :: srflag
+      real (kind_phys), dimension(:), intent(inout) ::                   &
      &       canopy, trans, smcwlt2, smcref2,                            & 
      ! for land
      &       weasd_lnd, snwdph_lnd, tskin_lnd,                           &
@@ -426,15 +426,15 @@ module lsm_ruc
      &       sfcqc_ice, sfcqv_ice, fice
 
 !  ---  in
-      real (kind=kind_phys), dimension(:), intent(in) ::                 &
+      real (kind_phys), dimension(:), intent(in) ::                      &
      &       rainnc, rainc, ice, snow, graupel, rhonewsn1
 !  ---  in/out:
 !  --- on RUC levels
-      real (kind=kind_phys), dimension(:,:), intent(inout) ::            &
+      real (kind_phys), dimension(:,:), intent(inout) ::                 &
      &       smois, tsice, tslb, sh2o, keepfr, smfrkeep
 
 !  ---  output:
-      real (kind=kind_phys), dimension(:), intent(inout) ::              &
+      real (kind_phys), dimension(:), intent(inout) ::                   &
      &       rhosnf, runof, drain, runoff, srunoff, evbs, evcw,          &
      &       stm, wetness, semisbase, semis_lnd, semis_ice,              &
      &       sfalb_lnd, sfalb_ice,                                       &
@@ -447,7 +447,7 @@ module lsm_ruc
      &       cmm_ice, chh_ice, hflx_ice,                                 &
      &       snowfallac_ice, acsnow_ice, snowmt_ice
 
-      real (kind=kind_phys), dimension(:), intent(  out) ::              &
+      real (kind_phys), dimension(:), intent(  out) ::                   &
      &       albdvis_lnd, albdnir_lnd,  albivis_lnd,  albinir_lnd,       &
      &       albdvis_ice, albdnir_ice,  albivis_ice,  albinir_ice
 
@@ -457,10 +457,10 @@ module lsm_ruc
 
 !  --- SPP - should be INTENT(IN)
       integer :: spp_lsm
-      real(kind=kind_phys), dimension(im,nlev) :: pattern_spp
+      real(kind_phys), dimension(im,nlev) :: pattern_spp
 
 !  ---  locals:
-      real (kind=kind_phys), dimension(im) :: rho, rhonewsn_ex,          &
+      real (kind_phys), dimension(im) :: rho, rhonewsn_ex,              &
      &       q0, qs1, albbcksol, srunoff_old, runoff_old,               &
      &       tprcp_old, srflag_old, sr_old, canopy_old, wetness_old,    &
      ! for land
@@ -475,26 +475,26 @@ module lsm_ruc
      &       sncovr1_ice_old,snowmt_ice_old
 
       !-- local spp pattern array
-      real (kind=kind_phys), dimension(im,lsoil_ruc,1) :: pattern_spp_lsm
+      real (kind_phys), dimension(im,lsoil_ruc,1) :: pattern_spp_lsm
 
-      real (kind=kind_phys), dimension(lsoil_ruc) :: et
+      real (kind_phys), dimension(lsoil_ruc) :: et
 
-      real (kind=kind_phys), dimension(im,lsoil_ruc,1) :: smsoil,       &
+      real (kind_phys), dimension(im,lsoil_ruc,1) :: smsoil,       &
            slsoil, stsoil, smfrsoil, keepfrsoil, stsice
-      real (kind=kind_phys), dimension(im,lsoil_ruc,1) :: smice,        &
+      real (kind_phys), dimension(im,lsoil_ruc,1) :: smice,        &
            slice, stice, smfrice, keepfrice
 
-      real (kind=kind_phys), dimension(im,lsoil_ruc) :: smois_old,      &
-     &       tsice_old, tslb_old, sh2o_old,                             &
+      real (kind_phys), dimension(im,lsoil_ruc) :: smois_old,      &
+     &       tsice_old, tslb_old, sh2o_old,                        &
      &       keepfr_old, smfrkeep_old
 
-      real (kind=kind_phys), dimension(im,nlcat,1)  :: landusef
-      real (kind=kind_phys), dimension(im,nscat,1)  :: soilctop
+      real (kind_phys), dimension(im,nlcat,1)  :: landusef
+      real (kind_phys), dimension(im,nscat,1)  :: soilctop
 
-      real (kind=kind_phys),dimension (im,1,1)      ::                  &
+      real (kind_phys),dimension (im,1,1)      ::                       &
      &     conflx2, sfcprs, sfctmp, q2, qcatm, rho2
-      real (kind=kind_phys),dimension (im,1)        ::   orog, stdev
-      real (kind=kind_phys),dimension (im,1)        ::                  &
+      real (kind_phys),dimension (im,1)        ::   orog, stdev
+      real (kind_phys),dimension (im,1)        ::                       &
      &     albbck_lnd, alb_lnd, chs_lnd, flhc_lnd, flqc_lnd,            &
      &     wet, wet_ice, smmax, cmc, drip,  ec, edir, ett,              &
      &     dew_lnd, lh_lnd, esnow_lnd, etp, qfx_lnd, acceta,            &
@@ -510,7 +510,7 @@ module lsm_ruc
      &     precipfr, snfallac_lnd, acsn_lnd,                            &
      &     qsfc_lnd, qsg_lnd, qvg_lnd, qcg_lnd, soilt1_lnd, chklowq
      ! ice
-      real (kind=kind_phys),dimension (im,1)        ::                  &
+      real (kind_phys),dimension (im,1)        ::                       &
      &     albbck_ice, alb_ice, chs_ice, flhc_ice, flqc_ice,            &
      &     dew_ice, lh_ice, esnow_ice, qfx_ice,                         &
      &     solnet_ice, sfcems_ice, hfx_ice,                             &
@@ -520,8 +520,8 @@ module lsm_ruc
      &     qsfc_ice, qsg_ice, qvg_ice, qcg_ice, soilt1_ice
 
 
-      real (kind=kind_phys) :: xice_threshold
-      real (kind=kind_phys) :: fwat, qsw, evapw, hfxw
+      real (kind_phys) :: xice_threshold
+      real (kind_phys) :: fwat, qsw, evapw, hfxw
 
       character(len=256) :: llanduse  !< Land-use dataset.  Valid values are :
                                       !! "USGS" (USGS 24/27 category dataset) and
@@ -536,13 +536,13 @@ module lsm_ruc
       ! local
       integer :: ims,ime, its,ite, jms,jme, jts,jte, kms,kme, kts,kte
       integer :: l, k, i, j,  fractional_seaice, ilst
-      real (kind=kind_phys) :: dm, cimin(im)
+      real (kind_phys) :: dm, cimin(im)
       logical :: flag(im), flag_ice(im), flag_ice_uncoupled(im)
       logical :: rdlai2d, myj, frpcpn
       logical :: debug_print
 
       !-- diagnostic point
-      real (kind=kind_phys) :: testptlat, testptlon
+      real (kind_phys) :: testptlat, testptlon
 !
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -637,8 +637,7 @@ module lsm_ruc
       if ( fractional_seaice == 0 ) then
         xice_threshold = 0.5
       else if ( fractional_seaice == 1 ) then
-         xice_threshold = 0.02 ! HRRR value
-        !xice_threshold = 0.15 ! consistent with GFS physics
+        xice_threshold = 0.15 ! consistent with GFS physics, 0.02 in HRRR
       endif
 
       nsoil = lsoil_ruc
@@ -659,10 +658,8 @@ module lsm_ruc
       do i  = 1, im ! i - horizontal loop
         if (flag(i) .and. flag_guess(i)) then
           !> - Save land-related prognostic fields for guess run.
-          !if(me==0 .and. i==ipr) write (0,*)'before call to RUC guess run', i
           wetness_old(i)         = wetness(i)
           canopy_old(i)          = canopy(i)
-          !srflag_old(i)          = srflag(i)
           ! for land
           weasd_lnd_old(i)       = weasd_lnd(i)
           snwdph_lnd_old(i)      = snwdph_lnd(i)
@@ -704,7 +701,7 @@ module lsm_ruc
 
 !  --- ...  initialization block
 
-      do j  = 1, 1
+      do j  = jms, jme
       do i  = 1, im ! i - horizontal loop
         if (flag_iter(i) .and. flag(i)) then
           evap_lnd(i)  = 0.0
@@ -790,7 +787,7 @@ module lsm_ruc
         frpcpn = .false.
       endif
 
-      do j  = 1, 1    ! 1:1
+      do j  = jms, jme 
       do i  = 1, im   ! i - horizontal loop
         orog(i,j) = oro(i)    !topography
         stdev(i,j) = sigma(i) ! st. deviation (m)
@@ -803,7 +800,7 @@ module lsm_ruc
       enddo
       enddo
 
-      do j  = 1, 1    ! 1:1
+      do j  = jms, jme
       do i  = 1, im   ! i - horizontal loop
         xice(i,j)  = 0.
         if (flag_iter(i) .and. flag(i)) then
@@ -866,9 +863,9 @@ module lsm_ruc
         rhonewsn_ex(i)  = rhonewsn1(i)
         if (debug_print) then
         !-- diagnostics for a test point with known lat/lon
-        if (abs(xlat_d(i)-testptlat).lt.0.2 .and.   &
+        if (abs(xlat_d(i)-testptlat).lt.0.2 .and.     &
             abs(xlon_d(i)-testptlon).lt.0.2)then
-          !if(weasd_lnd(i) > 0.) &
+            !if(weasd_lnd(i) > 0.) &
             print 100,'(ruc_lsm_drv)  i=',i,          &
             '  lat,lon=',xlat_d(i),xlon_d(i),         &
             'rainc',rainc(i),'rainnc',rainnc(i),      &
@@ -876,7 +873,6 @@ module lsm_ruc
             'dlwflx',dlwflx(i),'dswsfc',dswsfc(i),    &
             'sncovr1_lnd',sncovr1_lnd(i),'sfalb_lnd_bck',sfalb_lnd_bck(i),&
             'prsl1',prsl1(i),'t1',t1(i),              &
-            !'snow',snow(i), 'snowncv',snowncv(i,j),   &
             'srflag',srflag(i),'weasd mm ',weasd_lnd(i), &
             'tsnow_lnd',tsnow_lnd(i),'snwdph mm',snwdph_lnd(i), &
             'tsurf_lnd',tsurf_lnd(i),'tslb(i,1)',tslb(i,1)
@@ -884,12 +880,6 @@ module lsm_ruc
         endif
  100      format (";;; ",a,i4,a,2f14.7/(4(a10,'='es9.2)))
         !--
-
-        ! ice precipitation is not used
-        ! precipfr(i,j)   = rainncv(i,j) * ffrozp(i,j)
-
-        ! ice not used
-        ! precipfr(i,j)   = rainncv(i,j) * ffrozp(i,j)
 
         tbot(i,j) = tg3(i)
 
@@ -913,9 +903,7 @@ module lsm_ruc
               stype_ice(i,j) = 16 ! STASGO
             endif
         !> - Prepare land/ice/water masks for RUC LSM
-        !SLMSK0   - SEA(0),LAND(1),ICE(2) MASK
-          !if(islmsk(i) == 0.) then
-          !elseif(islmsk(i) == 1.) then ! land
+        !    SLMSK0   - SEA(0),LAND(1),ICE(2) MASK
 
           if(land(i)) then ! some land
             xland(i,j) = 1.
@@ -1051,56 +1039,56 @@ module lsm_ruc
         endif
 
         !> -- sanity checks on sneqv and snowh
-        if (sneqv_lnd(i,j) /= 0.0d0 .and. snowh_lnd(i,j) == 0.0d0) then
+        if (sneqv_lnd(i,j) /= 0.0_kind_dbl_prec .and. snowh_lnd(i,j) == 0.0_kind_dbl_prec) then
           if (debug_print) print *,'bad sneqv_lnd',kdt,i,j,sneqv_lnd(i,j),snowh_lnd(i,j),xlat_d(i),xlon_d(i)
-          if(sneqv_lnd(i,j) < 1.e-7.or.soilt_lnd(i,j)>273.15d0) then
-            sneqv_lnd(i,j) = 0.d0
-            snowh_lnd(i,j) = 0.d0
+          if(sneqv_lnd(i,j) < 1.e-7_kind_dbl_prec.or.soilt_lnd(i,j)>273.15_kind_dbl_prec) then
+            sneqv_lnd(i,j) = 0._kind_dbl_prec
+            snowh_lnd(i,j) = 0._kind_dbl_prec
           else
-            sneqv_lnd(i,j) = 300.d0 * snowh_lnd(i,j) ! snow density ~300 kg m-3
+            sneqv_lnd(i,j) = 300._kind_dbl_prec * snowh_lnd(i,j) ! snow density ~300 kg m-3
           endif
           if (debug_print) print *,'fixed sneqv_lnd',kdt,i,j,sneqv_lnd(i,j),snowh_lnd(i,j)
-        elseif (snowh_lnd(i,j) /= 0.0d0 .and. sneqv_lnd(i,j) == 0.0d0) then
+        elseif (snowh_lnd(i,j) /= 0.0_kind_dbl_prec .and. sneqv_lnd(i,j) == 0.0_kind_dbl_prec) then
           if (debug_print) print *,'bad snowh_lnd',kdt,i,j,sneqv_lnd(i,j),snowh_lnd(i,j),xlat_d(i),xlon_d(i)
-          if(snowh_lnd(i,j) < 3.d-10.or.soilt_lnd(i,j)>273.15d0) then
-            snowh_lnd(i,j) = 0.d0
-            sneqv_lnd(i,j) = 0.d0
+          if(snowh_lnd(i,j) < 3.e-10_kind_dbl_prec.or.soilt_lnd(i,j)>273.15_kind_dbl_prec) then
+            snowh_lnd(i,j) = 0._kind_dbl_prec
+            sneqv_lnd(i,j) = 0._kind_dbl_prec
           else
-            snowh_lnd(i,j) = 0.003d0 * sneqv_lnd(i,j) ! snow density ~300 kg m-3
+            snowh_lnd(i,j) = 0.003_kind_dbl_prec * sneqv_lnd(i,j) ! snow density ~300 kg m-3
           endif
           if (debug_print) print *,'fixed snowh_lnd',kdt,i,j,sneqv_lnd(i,j),snowh_lnd(i,j)
-        elseif (sneqv_lnd(i,j) > 0.d0 .and. snowh_lnd(i,j) > 0.d0) then
-          if (debug_print .and. abs(xlat_d(i)-testptlat).lt.2.5 .and.     &
-              abs(xlon_d(i)-testptlon).lt.2.5)then
+        elseif (sneqv_lnd(i,j) > 0._kind_dbl_prec .and. snowh_lnd(i,j) > 0._kind_dbl_prec) then
+          if (debug_print .and. abs(xlat_d(i)-testptlat).lt.0.5 .and.     &
+              abs(xlon_d(i)-testptlon).lt.0.5)then
             print *,'sneqv_lnd(i,j)/snowh_lnd(i,j)',kdt,i,j,sneqv_lnd(i,j)/snowh_lnd(i,j),sneqv_lnd(i,j),snowh_lnd(i,j)
           endif
-          if(sneqv_lnd(i,j)/snowh_lnd(i,j) > 500.d0) then
+          if(sneqv_lnd(i,j)/snowh_lnd(i,j) > 500._kind_dbl_prec) then
             if (debug_print .and. abs(xlat_d(i)-testptlat).lt.0.5 .and.   &
               abs(xlon_d(i)-testptlon).lt.0.5)then
               print *,'large snow density',kdt,i,j,sneqv_lnd(i,j)/snowh_lnd(i,j),sneqv_lnd(i,j),snowh_lnd(i,j)
               print *,'large snow density lat/lon',kdt,i,j,xlat_d(i),xlon_d(i)
             endif
-            if(soilt_lnd(i,j)>273.15d0) then
-              snowh_lnd(i,j) = 0.d0
-              sneqv_lnd(i,j) = 0.d0
+            if(soilt_lnd(i,j)>273.15_kind_dbl_prec) then
+              snowh_lnd(i,j) = 0._kind_dbl_prec
+              sneqv_lnd(i,j) = 0._kind_dbl_prec
             else
-              snowh_lnd(i,j) = 0.002d0 * sneqv_lnd(i,j)
+              snowh_lnd(i,j) = 0.002_kind_dbl_prec * sneqv_lnd(i,j)
             endif
             if (debug_print .and. abs(xlat_d(i)-testptlat).lt.0.5 .and.   &
               abs(xlon_d(i)-testptlon).lt.0.5)then
               print *,'fixed large snow density',kdt,i,j,sneqv_lnd(i,j)/snowh_lnd(i,j),sneqv_lnd(i,j),snowh_lnd(i,j)
             endif
-          elseif(sneqv_lnd(i,j)/snowh_lnd(i,j) < 58.d0) then
+          elseif(sneqv_lnd(i,j)/snowh_lnd(i,j) < 58._kind_dbl_prec) then
             if (debug_print .and. abs(xlat_d(i)-testptlat).lt.0.5 .and.   &
               abs(xlon_d(i)-testptlon).lt.0.5)then
               print *,'small snow density',kdt,i,j,sneqv_lnd(i,j)/snowh_lnd(i,j),sneqv_lnd(i,j),snowh_lnd(i,j)
               print *,'small snow density lat/lon',kdt,i,j,xlat_d(i),xlon_d(i)
             endif
-            if(soilt_lnd(i,j)>273.15d0) then
-              snowh_lnd(i,j) = 0.d0
-              sneqv_lnd(i,j) = 0.d0
+            if(soilt_lnd(i,j)>273.15_kind_dbl_prec) then
+              snowh_lnd(i,j) = 0._kind_dbl_prec
+              sneqv_lnd(i,j) = 0._kind_dbl_prec
             else
-              sneqv_lnd(i,j) = 58.d0 * snowh_lnd(i,j)
+              sneqv_lnd(i,j) = 58._kind_dbl_prec * snowh_lnd(i,j)
             endif
             if (debug_print .and. abs(xlat_d(i)-testptlat).lt.0.5 .and.   &
               abs(xlon_d(i)-testptlon).lt.0.5)then
@@ -1132,12 +1120,11 @@ module lsm_ruc
         if (kdt < 10) then
         if (abs(xlat_d(i)-testptlat).lt.0.5 .and.   &
             abs(xlon_d(i)-testptlon).lt.0.5)then
-          !if(weasd_lnd(i) > 0.) &
+            !if(weasd_lnd(i) > 0.) &
             print 100,'(ruc_lsm_drv before RUC land call)  i=',i,  &
             '  lat,lon=',xlat_d(i),xlon_d(i),                      &
             'rainc',rainc(i),'rainnc',rainnc(i),'prcp',prcp(i,j),  &
             'graupel',graupel(i),'qc',qc(i),'sfcqv_lnd',sfcqv_lnd(i),&
-            !'snow',snow(i), 'snowncv',snowncv(i,j),                &
             'dlwflx',dlwflx(i),'dswsfc',dswsfc(i),                 &
             'sncovr1_lnd',sncovr1_lnd(i),'sfalb_lnd_bck',sfalb_lnd_bck(i),&
             'albbcksol',albbcksol(i),'alb_lnd',alb_lnd(i,j),       &
@@ -1336,12 +1323,10 @@ module lsm_ruc
       if (debug_print) then
         if (abs(xlat_d(i)-testptlat).lt.0.1 .and.   &
             abs(xlon_d(i)-testptlon).lt.0.1)then
-          !if(weasd_ice(i) > 0.) &
-            print 101,'(ruc_lsm_drv_ice)  i=',i,      &
-            '  lat,lon=',xlat_d(i),xlon_d(i),         &
-            !'rainc',rainc(i),'rainnc',rainnc(i),      &
-            'sfcqv_ice',sfcqv_ice(i),&
-            !'dlwflx',dlwflx(i),'dswsfc',dswsfc(i),    &
+            !if(weasd_ice(i) > 0.) &
+            print 101,'(ruc_lsm_drv_ice)  i=',i, &
+            '  lat,lon=',xlat_d(i),xlon_d(i), &
+            'sfcqv_ice',sfcqv_ice(i), &
             'sncovr1_ice',sncovr1_ice(i),'sfalb_ice',sfalb_ice(i),&
             'sfcqc_ice',sfcqc_ice(i),'tsnow_ice',tsnow_ice(i), &
             'prsl1',prsl1(i),'t1',t1(i),'snwdph_ice ',snwdph_ice(i), &
@@ -1536,7 +1521,7 @@ module lsm_ruc
       enddo   ! i
 
 !> - Restore land-related prognostic fields for guess run.
-      do j  = 1, 1
+      do j  = jms, jme
       do i  = 1, im
         if (flag(i)) then
           if(debug_print) write (0,*)'end ',i,flag_guess(i),flag_iter(i)
@@ -1547,7 +1532,6 @@ module lsm_ruc
             snwdph_lnd(i)      = snwdph_lnd_old(i)
             tskin_lnd(i)       = tskin_lnd_old(i)
             canopy(i)          = canopy_old(i)
-            !srflag(i)          = srflag_old(i)
             tsnow_lnd(i)       = tsnow_lnd_old(i)
             snowfallac_lnd(i)  = snowfallac_lnd_old(i)
             acsnow_lnd(i)      = acsnow_lnd_old(i)
@@ -1612,24 +1596,24 @@ module lsm_ruc
       integer,                                        intent(in   ) :: im, nlev
       integer,                                        intent(in   ) :: lsoil_ruc
       integer,                                        intent(in   ) :: lsoil
-      real (kind=kind_phys),                          intent(in   ) :: min_seaice
-      real (kind=kind_phys), dimension(im),           intent(in   ) :: slmsk
-      real (kind=kind_phys), dimension(im),           intent(in   ) :: landfrac
-      real (kind=kind_phys), dimension(im),           intent(in   ) :: fice
-      real (kind=kind_phys), dimension(im),           intent(in   ) :: tskin_lnd, tskin_wat
-      real (kind=kind_phys), dimension(im),           intent(in   ) :: tg3
-      real (kind=kind_phys), dimension(1:lsoil_ruc),  intent(in   ) :: zs
-      real (kind=kind_phys), dimension(1:lsoil_ruc),  intent(in   ) :: dzs
-      real (kind=kind_phys), dimension(im,lsoil),     intent(in   ) :: smc !  Noah
-      real (kind=kind_phys), dimension(im,lsoil),     intent(in   ) :: stc !  Noah
-      real (kind=kind_phys), dimension(im,lsoil),     intent(in   ) :: slc !  Noah
+      real (kind_phys),                          intent(in   ) :: min_seaice
+      real (kind_phys), dimension(im),           intent(in   ) :: slmsk
+      real (kind_phys), dimension(im),           intent(in   ) :: landfrac
+      real (kind_phys), dimension(im),           intent(in   ) :: fice
+      real (kind_phys), dimension(im),           intent(in   ) :: tskin_lnd, tskin_wat
+      real (kind_phys), dimension(im),           intent(in   ) :: tg3
+      real (kind_phys), dimension(1:lsoil_ruc),  intent(in   ) :: zs
+      real (kind_phys), dimension(1:lsoil_ruc),  intent(in   ) :: dzs
+      real (kind_phys), dimension(im,lsoil),     intent(in   ) :: smc !  Noah
+      real (kind_phys), dimension(im,lsoil),     intent(in   ) :: stc !  Noah
+      real (kind_phys), dimension(im,lsoil),     intent(in   ) :: slc !  Noah
 
       integer,               dimension(im),    intent(in) :: stype, vtype
-      real (kind=kind_phys), dimension(im),    intent(inout) :: wetness
-      real (kind=kind_phys), dimension(im,lsoil_ruc), intent(inout) :: smois! ruc
-      real (kind=kind_phys), dimension(im,lsoil_ruc), intent(inout) :: tslb ! ruc
-      real (kind=kind_phys), dimension(im,lsoil_ruc), intent(inout) :: sh2o ! ruc
-      real (kind=kind_phys), dimension(im,lsoil_ruc), intent(inout) :: smfrkeep ! ruc
+      real (kind_phys), dimension(im),    intent(inout) :: wetness
+      real (kind_phys), dimension(im,lsoil_ruc), intent(inout) :: smois! ruc
+      real (kind_phys), dimension(im,lsoil_ruc), intent(inout) :: tslb ! ruc
+      real (kind_phys), dimension(im,lsoil_ruc), intent(inout) :: sh2o ! ruc
+      real (kind_phys), dimension(im,lsoil_ruc), intent(inout) :: smfrkeep ! ruc
 
       integer,          intent(in ) :: me
       integer,          intent(in ) :: master
@@ -1642,28 +1626,28 @@ module lsm_ruc
       logical :: swi_init ! for initialization in terms of SWI (soil wetness index)
 
       integer :: flag_soil_layers, flag_soil_levels, flag_sst
-      real (kind=kind_phys),    dimension(1:lsoil_ruc)  :: factorsm
-      real (kind=kind_phys),    dimension(im)           :: smcref2
-      real (kind=kind_phys),    dimension(im)           :: smcwlt2
+      real (kind_phys),    dimension(1:lsoil_ruc)  :: factorsm
+      real (kind_phys),    dimension(im)           :: smcref2
+      real (kind_phys),    dimension(im)           :: smcwlt2
 
       integer , dimension( 1:im , 1:1 )      :: ivgtyp
       integer , dimension( 1:im , 1:1)       :: isltyp
-      real (kind=kind_phys),    dimension( 1:im , 1:1 )       :: mavail
-      real (kind=kind_phys),    dimension( 1:im , 1:1 )       :: sst
-      real (kind=kind_phys),    dimension( 1:im , 1:1 )       :: landmask
-      real (kind=kind_phys),    dimension( 1:im , 1:1 )       :: tsk
-      real (kind=kind_phys),    dimension( 1:im , 1:1 )       :: tbot
-      real (kind=kind_phys),    dimension( 1:im , 1:1 )       :: smtotn
-      real (kind=kind_phys),    dimension( 1:im , 1:1 )       :: smtotr
-      real (kind=kind_phys),    dimension( 1:im , 1:lsoil_ruc, 1:1 ) :: dumsm 
-      real (kind=kind_phys),    dimension( 1:im , 1:lsoil_ruc, 1:1 ) :: dumt
-      real (kind=kind_phys),    dimension( 1:im , 1:lsoil_ruc, 1:1 ) :: smfr
-      real (kind=kind_phys),    dimension( 1:im , 1:lsoil_ruc, 1:1 ) :: soilm
-      real (kind=kind_phys),    dimension( 1:im , 1:lsoil_ruc, 1:1 ) :: soiltemp
-      real (kind=kind_phys),    dimension( 1:im , 1:lsoil_ruc, 1:1 ) :: soilh2o
+      real (kind_phys),    dimension( 1:im , 1:1 )       :: mavail
+      real (kind_phys),    dimension( 1:im , 1:1 )       :: sst
+      real (kind_phys),    dimension( 1:im , 1:1 )       :: landmask
+      real (kind_phys),    dimension( 1:im , 1:1 )       :: tsk
+      real (kind_phys),    dimension( 1:im , 1:1 )       :: tbot
+      real (kind_phys),    dimension( 1:im , 1:1 )       :: smtotn
+      real (kind_phys),    dimension( 1:im , 1:1 )       :: smtotr
+      real (kind_phys),    dimension( 1:im , 1:lsoil_ruc, 1:1 ) :: dumsm 
+      real (kind_phys),    dimension( 1:im , 1:lsoil_ruc, 1:1 ) :: dumt
+      real (kind_phys),    dimension( 1:im , 1:lsoil_ruc, 1:1 ) :: smfr
+      real (kind_phys),    dimension( 1:im , 1:lsoil_ruc, 1:1 ) :: soilm
+      real (kind_phys),    dimension( 1:im , 1:lsoil_ruc, 1:1 ) :: soiltemp
+      real (kind_phys),    dimension( 1:im , 1:lsoil_ruc, 1:1 ) :: soilh2o
 
-      real (kind=kind_phys) :: st_input(1:im,1:lsoil_ruc*3,1:1)
-      real (kind=kind_phys) :: sm_input(1:im,1:lsoil_ruc*3,1:1)
+      real (kind_phys) :: st_input(1:im,1:lsoil_ruc*3,1:1)
+      real (kind_phys) :: sm_input(1:im,1:lsoil_ruc*3,1:1)
 
       integer               :: ids,ide, jds,jde, kds,kde, &
                                ims,ime, jms,jme, kms,kme, &
@@ -1975,15 +1959,6 @@ module lsm_ruc
         enddo 
       enddo
       enddo
-
-        !do i=1,im
-        !    wetness (i) = 1.
-        !    do k=1,min(lsoil,lsoil_ruc)
-        !      smois(i,k) = smc(i,k)
-        !      tslb(i,k)  = stc(i,k)
-        !      sh2o(i,k)  = slc(i,k)
-        !    enddo
-        !enddo
 
       if(debug_print) then
         do i=1,im
