@@ -8,7 +8,7 @@
 !! and all terms of the surface energy balance and surface water balance.
 MODULE module_sf_ruclsm
 
-   use machine ,   only : kind_phys, kind_dbl_prec
+   use machine ,   only : kind_phys
    use namelist_soilveg_ruc
 
    implicit none
@@ -970,6 +970,7 @@ CONTAINS
 
 !tgs - turn off "irrigation" while there is no fractional landuse and LAI
 !climatology.
+    if(1==2) then
     IF (lufrac(crop) > 0 .and. lai(i,j) > 1.1) THEN
     ! cropland
         do k=1,nroot
@@ -1004,6 +1005,7 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
           endif
         enddo
     ENDIF
+    endif ! 1==2
 
 !***  DIAGNOSTICS
 !--- available and maximum soil moisture content in the soil
@@ -1091,11 +1093,9 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
         SFCEVP (I,J) = SFCEVP (I,J) + QFX (I,J) * DT
         GRDFLX (I,J) = -1. * sflx(I,J)
 
-!       if(smf(i,j) .ne.0.) then
 !tgs - SMF.NE.0. when there is phase change in the top soil layer
 ! The heat of soil water freezing/thawing is not computed explicitly
 ! and is responsible for the residual in the energy budget.
-!  print *,'Budget',budget(i,j),i,j,smf(i,j)
 !       endif
 
 !--- SNOWC snow cover flag
@@ -1136,18 +1136,8 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
             'smelt ',smelt(i,j)*dt*1.e3_kind_phys,'smc change ',wb,                &
             'snwe change ',as,'canw change ',ac,'runoff2 ',runoff2(i,j),           &
             'qfx*dt ',qfx(i,j)*dt,'smavail ',smavail(i,j),'smcold',smtotold(i,j)
-        !--
-       waterbudget(i,j)=rainbl(i,j)-qfx(i,j)*dt-(smavail(i,j)-smtotold(i,j)) &
-
+       !--
        print *,'Smf=',smf(i,j),i,j
-       print *,'Budget',budget(i,j),i,j
-       print *,'RUNOFF2= ', i,j,runoff2(i,j)
-       print *,'Water budget ', i,j,waterbudget(i,j),'wb=',wb
-       print *,'rainbl,qfx*dt,runoff1,smelt*dt*1.e3,smchange', &
-             i,j,rainbl(i,j),qfx(i,j)*dt,runoff1(i,j)*dt*1.e3, &
-             smelt(i,j)*dt*1.e3_kind_phys, &
-             (smavail(i,j)-smtotold(i,j))
-!
        print *,'SNOW,SNOWold',i,j,snwe,snowold(i,j)
        print *,'SNOW-SNOWold',i,j,max(0._kind_phys,snwe-snowold(i,j))
        print *,'CANWATold, canwat ',i,j,canwatold(i,j),canwat(i,j)
