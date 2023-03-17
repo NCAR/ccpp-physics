@@ -167,10 +167,6 @@
 !  ps is in pascals, wind is wind speed,
 !  surface roughness length is converted to m from cm
 !
-      do i=1,im
-        if(use_lake_model(i) > 0) wet(i) = .true.
-      enddo
-
 !       write(0,*)'in sfc_diff, sfc_z0_type=',sfc_z0_type
 
       do i=1,im

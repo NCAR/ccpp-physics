@@ -62,7 +62,6 @@ contains
 
       !  --- ...  define the downward lw flux absorbed by ground
       do i=1,im
-        if(use_lake_model(i)>0.0) wet(i)=.true.
         if (dry(i)) gabsbdlw_lnd(i) = semis_lnd(i) * adjsfcdlw(i)
         if (icy(i)) gabsbdlw_ice(i) = semis_ice(i) * adjsfcdlw(i)
         if (wet(i)) gabsbdlw_wat(i) = semis_wat(i) * adjsfcdlw(i)

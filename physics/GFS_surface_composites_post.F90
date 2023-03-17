@@ -88,11 +88,6 @@ contains
       errflg = 0
 
       ! --- generate ocean/land/ice composites
-       do i=1, im
-         if(use_lake_model(i) > 0.0) then
-            wet(i) = .true.
-         endif
-       enddo
 
        fractional_grid: if (frac_grid) then
 
