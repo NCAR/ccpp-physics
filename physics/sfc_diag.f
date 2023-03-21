@@ -22,10 +22,10 @@
 !!  \section detailed Detailed Algorithm
 !!  @{
       subroutine sfc_diag_run (im,xlat_d,xlon_d,                        &
-     &                    lsm,lsm_ruc,grav,cp,eps,epsm1,rocp,           &
-     &                    wet,shflx,chs2,cqs2,cdq,wind,                 &
+     &                    lsm,lsm_ruc,grav,cp,eps,epsm1,rocp,con_karman,&
+     &                    wet,shflx,cdq,wind,                           &
      &                    zf,ps,u1,v1,t1,q1,prslki,evap,fm,fh,fm10,fh2, &
-     &                    tskin,qsurf,thsfc_loc,diag_flux,diag_log,     &
+     &                    ust,tskin,qsurf,thsfc_loc,diag_flux,diag_log, &
      &                    f10m,u10m,v10m,t2m,q2m,dpt2m,errmsg,errflg    &
      &                   )
 !
@@ -38,10 +38,11 @@
       logical, intent(in) :: diag_flux  ! Flag for flux method in 2-m diagnostics
       logical, intent(in) :: diag_log   ! Flag for 2-m log diagnostics under stable conditions
       real(kind=kind_phys), intent(in) :: grav,cp,eps,epsm1,rocp
+      real(kind=kind_phys), intent(in) :: con_karman
       real(kind=kind_phys), dimension(:), intent( in) ::                &
-     &                      zf, ps, u1, v1, t1, q1, tskin, wet,         &
+     &                      zf, ps, u1, v1, t1, q1, ust, tskin, wet,    &
      &                      qsurf, prslki, evap, fm, fh, fm10, fh2,     &
-     &                      shflx, chs2, cqs2, cdq, wind, xlat_d, xlon_d
+     &                      shflx, cdq, wind, xlat_d, xlon_d
       real(kind=kind_phys), dimension(:), intent(out) ::                &
      &                       f10m, u10m, v10m, t2m, q2m, dpt2m
       character(len=*), intent(out) :: errmsg
@@ -54,7 +55,7 @@
       real(kind=kind_phys) :: q1c, qv, tem, qv1, th2m, x2m, rho
       real(kind=kind_phys) :: dT, dQ, qsfcmr, qsfcprox, ff, fac, dz1
       real(kind=kind_phys) :: t2_alt, q2_alt
-      real(kind=kind_phys) :: thcon, cqs, chs
+      real(kind=kind_phys) :: thcon, cqs, chs, chs2, cqs2
       real(kind=kind_phys) :: testptlat, testptlon
       integer :: k,i
 !
@@ -104,6 +105,8 @@
         qsfcmr   = qsurf(i)/(1. - qsurf(i)) ! surface mixing ratio
         chs = cdq(i) * wind(i)
         cqs = chs
+        chs2 = ust(i)*con_karman/fh2(i)
+        cqs2 = chs2
         qsfcprox = max(qmin,qv1 + evap(i)/cqs) ! surface mix. ratio computed from the flux
 
         if(.not. diag_flux) then
@@ -128,10 +131,10 @@
 
         else
         !-- flux method
-            th2m = tskin(i)*thcon - shflx(i)/chs2(i)
+            th2m = tskin(i)*thcon - shflx(i)/chs2
             t2m(i) = th2m/thcon
 
-            x2m = max(qmin,qsfcprox - evap(i)/cqs2(i)) ! mix. ratio
+            x2m = max(qmin,qsfcprox - evap(i)/cqs2) ! mix. ratio
             q2m(i) = x2m/(1. + x2m) ! spec. humidity
         endif ! flux method
 
@@ -206,7 +209,7 @@
      &      'tskin ',tskin(i),'t2m ',t2m(i),'t1',t1(i),'shflx',shflx(i),&
      &      'qsurf ',qsurf(i),'qsfcprox ',qsfcprox,'q2m ',q2m(i),       &
      &      'q1 ',q1(i),'evap ',evap(i),'dpt2m ',dpt2m(i),              &
-     &      'chs2 ',chs2(i),'cqs2 ',cqs2(i),'cqs ',cqs,'cdq',cdq(i)
+     &      'chs2 ',chs2,'cqs2 ',cqs2,'cqs ',cqs,'cdq',cdq(i)
           endif
         endif
  100    format (";;; ",a,i4,a,2f14.7/(4(a10,'='es11.4)))

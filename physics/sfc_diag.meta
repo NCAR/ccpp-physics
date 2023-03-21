@@ -84,6 +84,13 @@
   type = real
   kind = kind_phys
   intent = in
+[con_karman]
+  standard_name = von_karman_constant
+  long_name = von karman constant
+  units = none
+  dimensions = ()
+  type = real
+  intent = in
 [wet]
   standard_name = normalized_soil_wetness_for_land_surface_model
   long_name = normalized soil wetness
@@ -188,6 +195,14 @@
   type = real
   kind = kind_phys
   intent = in
+[ust]
+  standard_name = surface_friction_velocity
+  long_name = boundary layer parameter
+  units = m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
 [tskin]
   standard_name = surface_skin_temperature
   long_name = surface skin temperature
@@ -229,22 +244,6 @@
   standard_name = surface_upward_temperature_flux
   long_name = kinematic surface upward sensible heat flux
   units = K m s-1
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-[chs2]
-  standard_name = surface_exchange_coefficient_for_heat_at_2m
-  long_name = exchange coefficient for heat at 2 meters
-  units = m s-1
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-[cqs2]
-  standard_name = surface_exchange_coefficient_for_moisture_at_2m
-  long_name = exchange coefficient for moisture at 2 meters
-  units = m s-1
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
