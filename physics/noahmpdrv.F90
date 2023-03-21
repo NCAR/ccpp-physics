@@ -77,13 +77,6 @@
           return
         end if
 
-        if (.not. do_mynnsfclay .and. do_mynnedmf) then
-          errmsg = 'Problem : do_mynnsfclay = .false.' // &
-                   'but mynnpbl is .true.. Exiting ...'
-          errflg = 1
-          return
-        end if
-
         if ( do_mynnsfclay .and. .not. do_mynnedmf) then
           errmsg = 'Problem : do_mynnsfclay = .true.' // &
                    'but mynnpbl is .false.. Exiting ...'
